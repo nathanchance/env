@@ -317,6 +317,42 @@ function trnsfr() {
 }
 
 function haste() {
-    a=$(cat)
-    curl -X POST -s -d "$a" https://hastebin.com/documents | awk -F '"' '{print "https://hastebin.com/"$4}';
+    local OUTPUT CONTENTS
+
+    if (( $# == 0 )) && [[ $( printf "%s" "$0" | wc -c ) > 0 ]]; then
+        CONTENTS=${0}
+
+    elif (( $# != 1 )) || [[ $1 =~ ^(-h|--help)$ ]]; then
+        echo "Usage: ${0} FILE"
+        echo "Upload contents of plaintext document to hastebin."
+        echo "\nInvocation with no arguments takes input from stdin or pipe."
+        echo "Terminate stdin by EOF (Ctrl-D)."
+        return 1
+
+    elif [[ -e ${1} && ! -f ${1} ]]; then
+        echo "Error: Not a regular file."
+        return 1
+
+    elif [[ ! -e ${1} ]]; then
+        echo "Error: No such file."
+        return 1
+
+    elif (( $(stat -c %s ${1}) > (512*1024**1) )); then
+        echo "Error: File must be smaller than 512 KiB."
+        return 1
+    fi
+
+    if [[ -n "${CONTENTS}" ]] || [[ $(printf "%s" "${CONTENTS}" | wc -c) < 1 ]]; then
+        CONTENTS=$(cat ${1})
+    fi
+
+    OUTPUT=$(curl -X POST -s -d "${CONTENTS}" https://hastebin.com/documents |\
+             awk -F '"' '{print "https://hastebin.com/"$4}')
+
+    if [[ -n ${OUTPUT} ]]; then
+        echo "${OUTPUT}"
+        return 0
+    fi
+    echo "Upload failed."
+    return 1
 }
