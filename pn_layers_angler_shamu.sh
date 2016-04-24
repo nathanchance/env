@@ -4,6 +4,8 @@ OUTDIR=~/PN-Layers/out/target/product
 UPLOADDIR=~/shared/PN/Layers
 DEVICE1=angler
 DEVICE2=shamu
+# Start tracking time
+START=$(date +%s)
 # Change to the source directory
 cd ${SOURCEDIR}
 # Sync source
@@ -38,7 +40,9 @@ mv ${OUTDIR}/${DEVICE2}/pure_nexus_${DEVICE2}-*.zip.md5sum ${UPLOADDIR}
 make clobber
 # Go back home
 cd ~/
-# Success!
-echo "==================================="
+# Success! Stop tracking time
+END=$(date +%s)
+echo "====================================="
 echo "Compilation and upload successful!"
-echo "==================================="
+echo "Total time elapsed: $(echo $(($END-$START)) | awk '{print int($1/60)"mins "int($1%60)"secs"}')"
+echo "====================================="
