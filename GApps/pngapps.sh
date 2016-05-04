@@ -1,5 +1,5 @@
 cd ~/GApps/purenexus_dynamic_gapps
-git fetch
+git pull
 . mkgapps.sh
 rm ~/shared/GApps/PureNexus_*.zip
 mv ~/GApps/purenexus_dynamic_gapps/out/PureNexus_*.zip ~/shared/GApps
