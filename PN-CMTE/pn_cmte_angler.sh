@@ -12,6 +12,7 @@ repo sync
 # Initialize build environment
 . build/envsetup.sh
 # Clean out directory
+make clean
 make clobber
 # Make angler
 brunch ${DEVICE}
@@ -24,6 +25,7 @@ mv ${OUTDIR}/${DEVICE}/pure_nexus_${DEVICE}-*.zip.md5sum ${UPLOADDIR}
 # Upload files
 . ~/upload.sh
 # Clean out directory
+make clean
 make clobber
 # Go back home
 cd ~/

@@ -18,6 +18,7 @@ repo sync
 # Initialize build environment
 . build/envsetup.sh
 # Clean out directory
+make clean
 make clobber
 # Make angler
 brunch ${DEVICE1}
@@ -30,6 +31,7 @@ mv ${OUTDIR}/${DEVICE1}/pure_nexus_${DEVICE1}-*.zip.md5sum ${UPLOADDIR}
 # Upload files
 . ~/upload.sh
 # Clean out directory
+make clean
 make clobber
 # Make bullhead
 brunch ${DEVICE2}
@@ -42,6 +44,7 @@ mv ${OUTDIR}/${DEVICE2}/pure_nexus_${DEVICE2}-*.zip.md5sum ${UPLOADDIR}
 # Upload files
 . ~/upload.sh
 # Clean out directory
+make clean
 make clobber
 # Make deb
 brunch ${DEVICE3}
@@ -54,6 +57,7 @@ mv ${OUTDIR}/${DEVICE3}/pure_nexus_${DEVICE3}-*.zip.md5sum ${UPLOADDIR}
 # Upload files
 . ~/upload.sh
 # Clean out directory
+make clean
 make clobber
 # Make flo
 brunch ${DEVICE4}
@@ -66,6 +70,7 @@ mv ${OUTDIR}/${DEVICE4}/pure_nexus_${DEVICE4}-*.zip.md5sum ${UPLOADDIR}
 # Upload files
 . ~/upload.sh
 # Clean out directory
+make clean
 make clobber
 # Make flounder
 brunch ${DEVICE5}
@@ -78,6 +83,7 @@ mv ${OUTDIR}/${DEVICE5}/pure_nexus_${DEVICE5}-*.zip.md5sum ${UPLOADDIR}
 # Upload files
 . ~/upload.sh
 # Clean out directory
+make clean
 make clobber
 # Make hammerhead
 brunch ${DEVICE6}
@@ -90,6 +96,7 @@ mv ${OUTDIR}/${DEVICE6}/pure_nexus_${DEVICE6}-*.zip.md5sum ${UPLOADDIR}
 # Upload files
 . ~/upload.sh
 # Clean out directory
+make clean
 make clobber
 # Make shamu
 brunch ${DEVICE7}
@@ -102,6 +109,7 @@ mv ${OUTDIR}/${DEVICE7}/pure_nexus_${DEVICE7}-*.zip.md5sum ${UPLOADDIR}
 # Upload files
 . ~/upload.sh
 # Clean out directory
+make clean
 make clobber
 # Go back home
 cd ~/

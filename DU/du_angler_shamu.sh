@@ -13,6 +13,7 @@ repo sync
 # Initialize build environment
 . build/envsetup.sh
 # Clean out directory
+make clean
 make clobber
 # Make angler
 brunch ${DEVICE1}
@@ -25,6 +26,7 @@ mv ${OUTDIR}/${DEVICE1}/DU_${DEVICE1}_*.zip.md5sum ${UPLOADDIR}
 # Upload files
 . ~/upload.sh
 # Clean out directory
+make clean
 make clobber
 # Make shamu
 brunch ${DEVICE2}
@@ -37,6 +39,7 @@ mv ${OUTDIR}/${DEVICE2}/DU_${DEVICE2}_*.zip.md5sum ${UPLOADDIR}
 # Upload files
 . ~/upload.sh
 # Clean out directory
+make clean
 make clobber
 # Go back home
 cd ~/
