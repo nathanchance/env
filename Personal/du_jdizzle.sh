@@ -29,6 +29,8 @@ mv ${OUTDIR}/${DEVICE}/DU_${DEVICE}_*.zip.md5sum ${UPLOADDIR}
 make clobber
 # Go back home
 cd ~/
+# Set build type back to what it was
+export DU_BUILD_TYPE=CHANCELLOR
 # Success! Stop tracking time
 END=$(date +%s)
 echo "====================================="
