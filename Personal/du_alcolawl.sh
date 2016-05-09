@@ -1,10 +1,10 @@
 # Variables
 SOURCEDIR=~/DU
 OUTDIR=~/DU/out/target/product
-UPLOADDIR=~/shared/.special/.jdizzle
-DEVICE=shamu
+UPLOADDIR=~/shared/.special/.alcolawl
+DEVICE=bullhead
 # Special build type
-export DU_BUILD_TYPE=NINJA
+export DU_BUILD_TYPE=ALCOLAWL
 # Start tracking time
 START=$(date +%s)
 # Change to the source directory
@@ -16,7 +16,7 @@ repo sync
 # Clean out directory
 make clean
 make clobber
-# Make shamu
+# Make bullhead
 brunch ${DEVICE}
 # Remove exisiting files
 rm ${UPLOADDIR}/*_${DEVICE}_*.zip

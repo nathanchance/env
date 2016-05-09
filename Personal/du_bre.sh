@@ -1,7 +1,7 @@
 # Variables
 SOURCEDIR=~/DU
 OUTDIR=~/DU/out/target/product
-UPLOADDIR=~/shared/.bre
+UPLOADDIR=~/shared/.special/.bre
 DEVICE=angler
 # Special build type
 export DU_BUILD_TYPE=BREYANA
