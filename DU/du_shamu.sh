@@ -3,6 +3,9 @@ SOURCEDIR=~/DU
 OUTDIR=~/DU/out/target/product
 UPLOADDIR=~/shared/DU
 DEVICE=shamu
+# Make it show nathan@chancellor in the kernel version
+export KBUILD_BUILD_USER=nathan
+export KBUILD_BUILD_HOST=chancellor
 # Start tracking time
 START=$(date +%s)
 # Change to the source directory

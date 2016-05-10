@@ -3,6 +3,9 @@ SOURCEDIR=~/PN-CMTE
 OUTDIR=~/PN-CMTE/out/target/product
 UPLOADDIR=~/shared/PN/CMTE
 DEVICE=angler
+# Make it show nathan@chancellor in the kernel version
+export KBUILD_BUILD_USER=nathan
+export KBUILD_BUILD_HOST=chancellor
 # Start tracking time
 START=$(date +%s)
 # Change to the source directory

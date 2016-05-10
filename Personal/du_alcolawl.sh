@@ -3,6 +3,9 @@ SOURCEDIR=~/DU
 OUTDIR=~/DU/out/target/product
 UPLOADDIR=~/shared/.special/.alcolawl
 DEVICE=bullhead
+# Make it show nathan@chancellor in the kernel version
+export KBUILD_BUILD_USER=nathan
+export KBUILD_BUILD_HOST=chancellor
 # Special build type
 export DU_BUILD_TYPE=ALCOLAWL
 # Start tracking time
