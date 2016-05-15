@@ -6,10 +6,6 @@ SOURCEDIR=~/Kernels/elite_angler
 # Directory for the AnyKernel updater
 AKDIR=${SOURCEDIR}/packagesm
 
-# Make it show nathan@chancellor in the kernel version
-export KBUILD_BUILD_USER=nathan
-export KBUILD_BUILD_HOST=chancellor
-
 # Upload directory
 UPLOADDIR=~/shared/Elite
 
