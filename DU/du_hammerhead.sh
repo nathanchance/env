@@ -1,6 +1,6 @@
 # Variables
-SOURCEDIR=~/DU
-OUTDIR=~/DU/out/target/product
+SOURCEDIR=~/ROMs/DU
+OUTDIR=${SOURCEDIR}/out/target/product
 UPLOADDIR=~/shared/DU
 DEVICE=hammerhead
 # Make it show nathan@chancellor in the kernel version

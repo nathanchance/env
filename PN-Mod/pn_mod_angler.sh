@@ -1,6 +1,6 @@
 # Variables
-SOURCEDIR=~/PN-Mod
-OUTDIR=~/PN-Mod/out/target/product
+SOURCEDIR=~/ROMs/PN-Mod
+OUTDIR=${SOURCEDIR}/out/target/product
 UPLOADDIR=~/shared/PN/Mod
 DEVICE=angler
 # Make it show nathan@chancellor in the kernel version

@@ -1,6 +1,6 @@
 # Variables
-SOURCEDIR=~/DU
-OUTDIR=~/DU/out/target/product
+SOURCEDIR=~/ROMs/DU
+OUTDIR=${SOURCEDIR}/out/target/product
 UPLOADDIR=~/shared/.special/.jdizzle
 DEVICE=shamu
 # Make it show nathan@chancellor in the kernel version

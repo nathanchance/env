@@ -1,6 +1,6 @@
 # Variables
-SOURCEDIR=~/PN-CMTE
-OUTDIR=~/PN-CMTE/out/target/product
+SOURCEDIR=~/ROMs/PN-CMTE
+OUTDIR=${SOURCEDIR}/out/target/product
 UPLOADDIR=~/shared/.special/.pn-release
 DEVICE1=angler
 DEVICE2=bullhead

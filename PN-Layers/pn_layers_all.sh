@@ -1,6 +1,6 @@
 # Variables
-SOURCEDIR=~/PN-Layers
-OUTDIR=~/PN-Layers/out/target/product
+SOURCEDIR=~/ROMs/PN-Layers
+OUTDIR=${SOURCEDIR}/out/target/product
 UPLOADDIR=~/shared/.special/.pn-release
 DEVICE1=angler
 DEVICE2=bullhead

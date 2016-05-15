@@ -1,6 +1,6 @@
 # Variables
-SOURCEDIR=~/PN-CMTE
-OUTDIR=~/PN-CMTE/out/target/product
+SOURCEDIR=~/ROMs/PN-CMTE
+OUTDIR=~${SOURCEDIR}/out/target/product
 UPLOADDIR=~/shared/PN/CMTE
 DEVICE=shamu
 # Make it show nathan@chancellor in the kernel version

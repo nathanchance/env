@@ -1,6 +1,6 @@
 # Variables
-SOURCEDIR=~/PN-Layers
-OUTDIR=~/PN-Layers/out/target/product
+SOURCEDIR=~/ROMs/PN-Layers
+OUTDIR=${SOURCEDIR}/out/target/product
 UPLOADDIR=~/shared/PN/Layers
 DEVICE=shamu
 # Make it show nathan@chancellor in the kernel version
