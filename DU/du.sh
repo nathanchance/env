@@ -9,18 +9,18 @@
 # . du.sh angler sync
 # . du.sh angler nosync
 
-# Colors
-BLDRED="\033[1m""\033[31m"
-RST="\033[0m"
-
-# Variables
-SOURCEDIR=~/ROMs/DU
-OUTDIR=${SOURCEDIR}/out/target/product
-UPLOADDIR=~/shared/DU
-
 # Parameters
 DEVICE=$1
 SYNC=$2
+
+# Variables
+SOURCEDIR=~/ROMs/DU
+OUTDIR=${SOURCEDIR}/out/target/product/${DEVICE}
+UPLOADDIR=~/shared/DU
+
+# Colors
+BLDRED="\033[1m""\033[31m"
+RST="\033[0m"
 
 # Start tracking time
 echo -e ""
@@ -73,8 +73,8 @@ rm ${UPLOADDIR}/*_${DEVICE}_*.zip.md5sum
 # Copy new files to UPLOADDIR
 echo -e ${BLDRED}"MOVING FILES FROM ${OUTDIR} TO ${UPLOADDIR}"${RST}
 echo -e ""
-mv ${OUTDIR}/${DEVICE}/DU_${DEVICE}_*.zip ${UPLOADDIR}
-mv ${OUTDIR}/${DEVICE}/DU_${DEVICE}_*.zip.md5sum ${UPLOADDIR}
+mv ${OUTDIR}/DU_${DEVICE}_*.zip ${UPLOADDIR}
+mv ${OUTDIR}/DU_${DEVICE}_*.zip.md5sum ${UPLOADDIR}
 
 # Upload the files
 echo -e ${BLDRED}"UPLOADING FILES"${RST}

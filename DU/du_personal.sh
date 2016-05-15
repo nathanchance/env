@@ -9,10 +9,6 @@
 # . du_personal.sh shamu sync jdizzle
 # . du_personal.sh angler nosync bre
 
-# Colors
-BLDRED="\033[1m""\033[31m"
-RST="\033[0m"
-
 # Parameters
 DEVICE=$1
 SYNC=$2
@@ -20,8 +16,12 @@ PERSON=$3
 
 # Variables
 SOURCEDIR=~/ROMs/DU
-OUTDIR=${SOURCEDIR}/out/target/product
+OUTDIR=${SOURCEDIR}/out/target/product/${DEVICE}
 UPLOADDIR=~/shared/.special/.${PERSON}
+
+# Colors
+BLDRED="\033[1m""\033[31m"
+RST="\033[0m"
 
 # Add custom build tag
 if [ "${PERSON}" == "bre" ]
@@ -91,8 +91,8 @@ rm ${UPLOADDIR}/*_${DEVICE}_*.zip.md5sum
 # Copy new files to UPLOADDIR
 echo -e ${BLDRED}"MOVING FILES FROM ${OUTDIR} TO ${UPLOADDIR}"${RST}
 echo -e ""
-mv ${OUTDIR}/${DEVICE}/DU_${DEVICE}_*.zip ${UPLOADDIR}
-mv ${OUTDIR}/${DEVICE}/DU_${DEVICE}_*.zip.md5sum ${UPLOADDIR}
+mv ${OUTDIR}/DU_${DEVICE}_*.zip ${UPLOADDIR}
+mv ${OUTDIR}/DU_${DEVICE}_*.zip.md5sum ${UPLOADDIR}
 
 # Upload the files
 echo -e ${BLDRED}"UPLOADING FILES"${RST}

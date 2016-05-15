@@ -9,18 +9,18 @@
 # . pn_cmte.sh angler sync
 # . pn_cmte.sh angler nosync
 
-# Colors
-BLDBLUE="\033[1m""\033[36m"
-RST="\033[0m"
-
-# Variables
-SOURCEDIR=~/ROMs/PN-CMTE
-OUTDIR=${SOURCEDIR}/out/target/product
-UPLOADDIR=~/shared/PN/CMTE
-
 # Parameters
 DEVICE=$1
 SYNC=$2
+
+# Variables
+SOURCEDIR=~/ROMs/PN-CMTE
+OUTDIR=${SOURCEDIR}/out/target/product/${DEVICE}
+UPLOADDIR=~/shared/PN/CMTE
+
+# Colors
+BLDBLUE="\033[1m""\033[36m"
+RST="\033[0m"
 
 # Start tracking time
 echo -e ""
@@ -73,8 +73,8 @@ rm ${UPLOADDIR}/*_${DEVICE}_*.zip.md5sum
 # Copy new files to UPLOADDIR
 echo -e ${BLDBLUE}"MOVING FILES FROM ${OUTDIR} TO ${UPLOADDIR}"${RST}
 echo -e ""
-mv ${OUTDIR}/${DEVICE}/pure_nexus_${DEVICE}-*.zip ${UPLOADDIR}
-mv ${OUTDIR}/${DEVICE}/pure_nexus_${DEVICE}-*.zip.md5sum ${UPLOADDIR}
+mv ${OUTDIR}/pure_nexus_${DEVICE}-*.zip ${UPLOADDIR}
+mv ${OUTDIR}/pure_nexus_${DEVICE}-*.zip.md5sum ${UPLOADDIR}
 
 # Upload the files
 echo -e ${BLDBLUE}"UPLOADING FILES"${RST}
