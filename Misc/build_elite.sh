@@ -22,6 +22,20 @@ START=$(date +%s)
 # Change to source directory to start
 cd ${SOURCEDIR}
 
+echo "    ____   _      _   _____   ____    "
+echo "   |  __| | |    | | |_   _| |  __|   "
+echo "   | |__  | |    | |   | |   | |__    "
+echo "   |  __| | |    | |   | |   |  __|   "
+echo "   | |__  | |__  | |   | |   | |__    "
+echo "   |____| |____| |_|   |_|   |____|   "
+echo "      __       ________       __      "
+echo "      \ ~~~___|   __   |___~~~ /      "
+echo "       _----__|__|  |__|__----_       "
+echo "       \~~~~~~|__    __|~~~~~~/       "
+echo "        ------\  |  |  /------        "
+echo "         \_____\ |__| /_____/         "
+echo "                \____/                "
+
 # Clean out everything
 git reset --hard
 git clean -f -d
