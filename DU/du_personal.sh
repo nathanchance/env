@@ -36,6 +36,9 @@ then
 elif [ "${PERSON}" == "kuba" ]
 then
   export DU_BUILD_TYPE=KUCKFUBA
+elif [ "${PERSON}" == "hmhb" ]
+then
+  export DU_BUILD_TYPE=DIRTY-DEEDS
 else
   export DU_BUILD_TYPE=CHANCELLOR
 fi
