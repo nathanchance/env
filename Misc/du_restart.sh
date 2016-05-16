@@ -8,3 +8,4 @@ breakfast angler
 breakfast bullhead
 breakfast hammerhead
 breakfast shamu
+echo -e "\a"

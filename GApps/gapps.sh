@@ -40,3 +40,4 @@ cd ~/
 echo "==================================="
 echo "Compilation and upload successful!"
 echo "==================================="
+echo -e "\a"
