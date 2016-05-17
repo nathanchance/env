@@ -1,19 +1,23 @@
 #!/bin/bash
 
 # Usage:
-# $ . du.sh <device> <sync|nosync> <remove|noremove>
+# $ . du.sh <device> <sync|nosync> <remove|noremove> <DU_BUILD_TYPE>
 # Parameter 1: device (eg. angler, bullhead, shamu)
 # Parameter 2: sync or nosync (decides whether or not to run repo sync)
 # Parameter 3: remove or noremove (decides whether or not to remove the already existing zips)
+# Parameter 4: the custom DU_BUILD_TYPE
 
 # Examples:
-# . du.sh angler sync noremove
-# . du.sh angler nosync remove
+# . du.sh angler sync noremove NICK
+# . du.sh angler nosync remove NINJA
 
 # Parameters
 DEVICE=$1
 SYNC=$2
 DELPREVZIPS=$3
+
+# Special DU build type
+export DU_BUILD_TYPE=$4
 
 # Variables
 SOURCEDIR=~/ROMs/DU
@@ -23,9 +27,6 @@ UPLOADDIR=~/shared/.special/.tests
 # Colors
 BLDRED="\033[1m""\033[31m"
 RST="\033[0m"
-
-# Special DU build type
-export DU_BUILD_TYPE=BATTERY
 
 # Start tracking time
 echo -e ""
