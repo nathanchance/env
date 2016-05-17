@@ -1,22 +1,24 @@
 #!/bin/bash
 
 # Usage:
-# $ . du.sh <device> <sync|nosync>
+# $ . du.sh <device> <sync|nosync> <remove|noremove>
 # Parameter 1: device (eg. angler, bullhead, shamu)
 # Parameter 2: sync or nosync (decides whether or not to run repo sync)
+# Parameter 3: remove or noremove (decides whether or not to remove the already existing zips)
 
 # Examples:
-# . du.sh angler sync
-# . du.sh angler nosync
+# . du.sh angler sync noremove
+# . du.sh angler nosync remove
 
 # Parameters
 DEVICE=$1
 SYNC=$2
+DELPREVZIPS=$3
 
 # Variables
 SOURCEDIR=~/ROMs/DU
 OUTDIR=${SOURCEDIR}/out/target/product/${DEVICE}
-UPLOADDIR=~/shared/.special/.misc
+UPLOADDIR=~/shared/.special/.tests
 
 # Colors
 BLDRED="\033[1m""\033[31m"
@@ -68,10 +70,13 @@ mka bacon
 echo -e ""
 
 # Remove exisiting files in UPLOADDIR
-echo -e ${BLDRED}"REMOVING FILES IN ${UPLOADDIR}"${RST}
-echo -e ""
-rm ${UPLOADDIR}/*_${DEVICE}_*.zip
-rm ${UPLOADDIR}/*_${DEVICE}_*.zip.md5sum
+if [ "${DELPREVZIPS}" == "remove" ]
+then
+   echo -e ${BLDRED}"REMOVING FILES IN ${UPLOADDIR}"${RST}
+   echo -e ""
+   rm ${UPLOADDIR}/*_${DEVICE}_*${DU_BUILD_TYPE}.zip
+   rm ${UPLOADDIR}/*_${DEVICE}_*${DU_BUILD_TYPE}.zip.md5sum
+fi
 
 # Copy new files to UPLOADDIR
 echo -e ${BLDRED}"MOVING FILES FROM ${OUTDIR} TO ${UPLOADDIR}"${RST}
