@@ -1,3 +1,7 @@
+#!/bin/bash
+
+# Usage: $ . source_setup.sh <existing|new>
+
 # Parameters
 STARTOVER=$1
 
@@ -7,7 +11,7 @@ ROMDIR=${ANDROIDDIR}/ROMs
 GAPPSDIR=${ANDROIDDIR}/GApps
 KERNELSDIR=${ANDROIDDIR}/Kernels
 
-if [ "${STARTOVER}" == "restart" ]
+if [ "${STARTOVER}" == "existing" ]
 then
    rm -rf ${ANDROIDDIR}
 else

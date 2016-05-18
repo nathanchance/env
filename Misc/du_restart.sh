@@ -1,3 +1,5 @@
+#!/bin/bash
+
 # Remove the DU folder
 rm -rf ~/ROMs/DU
 

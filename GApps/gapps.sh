@@ -1,3 +1,5 @@
+#!/bin/bash
+
 # Usage: . gapps.sh <banks|pn>
 
 # Parameters

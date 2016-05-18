@@ -1,3 +1,5 @@
+#!/bin/bash
+
 # du (disk usage)
 # -c: report a grand total at the end
 # -h: list as human readable
