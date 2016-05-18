@@ -1,13 +1,19 @@
 #!/bin/bash
 
-# Path to build your kernel
+# Usage: $ .  build_elite.sh <update|noupdate>
+
+# Parameters
+# FETCHUPSTREAM: merge in new changes
+FETCHUPSTREAM=$1
+
+# Variables
+# SOURCEDIR: Path to build your kernel
+# AKDIR: Directory for the AnyKernel updater
+# UPLOADDIR: Upload directory
 SOURCEDIR=~/Kernels/elite_angler
-
-# Directory for the AnyKernel updater
 AKDIR=${SOURCEDIR}/packagesm
-
-# Upload directory
 UPLOADDIR=~/shared/Elite
+BRANCH=Elite-merged
 
 # Date to add to zip
 today=$(date +"%m_%d_%Y")
@@ -17,6 +23,13 @@ START=$(date +%s)
 
 # Change to source directory to start
 cd ${SOURCEDIR}
+
+if [ "${FETCHUPSTREAM}" == "update" ]
+then
+   git checkout ${BRANCH}
+   git fetch upstream
+   git merge upstream/${BRANCH}
+fi
 
 echo "    ____   _      _   _____   ____    "
 echo "   |  __| | |    | | |_   _| |  __|   "
