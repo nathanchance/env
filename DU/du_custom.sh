@@ -1,13 +1,13 @@
 #!/bin/bash
 
 # Usage:
-# $ . du_personal.sh <device> <sync|nosync> <person>
+# $ . du_custom.sh <device> <sync|nosync> <person>
 # Parameter 1: device (eg. angler, bullhead, shamu)
 # Parameter 2: sync or nosync (decides whether or not to run repo sync)
 
 # Examples:
-# . du_personal.sh shamu sync jdizzle
-# . du_personal.sh angler nosync bre
+# . du_custom.sh shamu sync jdizzle
+# . du_custom.sh angler nosync bre
 
 # Parameters
 DEVICE=$1
