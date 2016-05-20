@@ -4,9 +4,9 @@
 # $ . build_ak.sh <update|noupdate>
 
 # Bash Color
-red='\033[01;31m'
-blink_red='\033[05;31m'
-restore='\033[0m'
+RED="\033[01;31m"
+BLINK_RED="\033[05;31m"
+RESTORE="\033[0m"
 
 # Clear the terminal
 clear
@@ -107,7 +107,7 @@ function make_zip {
 
 DATE_START=$(date +"%s")
 
-echo -e "${red}"
+echo -e "${RED}"
 echo "AK KERNEL CREATION SCRIPT:"
 echo -e ""
 echo -e ""
@@ -117,29 +117,27 @@ echo "  / /| | / ,<     / ,<  / __/ / /_/ /  |/ / __/ / /  ";
 echo " / ___ |/ /| |   / /| |/ /___/ _, _/ /|  / /___/ /___";
 echo "/_/  |_/_/ |_|  /_/ |_/_____/_/ |_/_/ |_/_____/_____/";
 echo -e ""
+echo -e ""
 echo "---------------"
 echo "KERNEL VERSION:"
 echo "---------------"
 
-echo -e "${red}"; echo -e "${blink_red}"; echo "$AK_VER"; echo -e "${restore}";
-
-echo -e "${red}"
-echo "-----------------"
-echo "MAKING AK KERNEL:"
-echo "-----------------"
-echo -e "${restore}"
-
 echo -e ""
-echo -e ${red}"---------------------------------------"${restore}
-echo -e ${red}"SCRIPT STARTING AT $(date +%D\ %r)"${restore}
-echo -e ${red}"---------------------------------------"${restore}
+echo -e ""
+echo -e ${BLINK_RED}"${AK_VER}"${RESTORE}
+echo -e ""
+echo -e ""
+
+echo -e ${RED}"---------------------------------------"${RESTORE}
+echo -e ${RED}"SCRIPT STARTING AT $(date +%D\ %r)"${RESTORE}
+echo -e ${RED}"---------------------------------------"${RESTORE}
 echo -e ""
 
 # Clean up
 echo -e ""
-echo -e ${red}"-----------"${restore}
-echo -e ${red}"CLEANING UP"${restore}
-echo -e ${red}"-----------"${restore}
+echo -e ${RED}"-----------"${RESTORE}
+echo -e ${RED}"CLEANING UP"${RESTORE}
+echo -e ${RED}"-----------"${RESTORE}
 echo -e ""
 echo -e ""
 clean_all
@@ -150,18 +148,18 @@ echo -e ""
 if [ "${FETCHUPSTREAM}" == "update" ]
 then
    echo -e ""
-   echo -e ${red}"----------------"${restore}
-   echo -e ${red}"UPDATING SOURCES"${restore}
-   echo -e ${red}"----------------"${restore}
+   echo -e ${RED}"----------------"${RESTORE}
+   echo -e ${RED}"UPDATING SOURCES"${RESTORE}
+   echo -e ${RED}"----------------"${RESTORE}
    echo -e ""
    update_git
 fi
 
 # Make the kernel
 echo -e ""
-echo -e ${red}"-------------"${restore}
-echo -e ${red}"MAKING KERNEL"${restore}
-echo -e ${red}"-------------"${restore}
+echo -e ${RED}"-------------"${RESTORE}
+echo -e ${RED}"MAKING KERNEL"${RESTORE}
+echo -e ${RED}"-------------"${RESTORE}
 echo -e ""
 make_kernel
 make_dtb
@@ -171,14 +169,14 @@ make_zip
 # Upload
 echo -e ""
 echo -e ""
-echo -e ${red}"------------------"${restore}
-echo -e ${red}"UPLOADING ZIP FILE"${restore}
-echo -e ${red}"------------------"${restore}
+echo -e ${RED}"------------------"${RESTORE}
+echo -e ${RED}"UPLOADING ZIP FILE"${RESTORE}
+echo -e ${RED}"------------------"${RESTORE}
 echo -e ""
 echo -e ""
 . ~/upload.sh
 
-echo -e "${red}"
+echo -e "${RED}"
 echo -e ""
 echo "--------------------"
 echo "SCRIPT COMPLETED IN:"
@@ -187,5 +185,5 @@ echo "--------------------"
 DATE_END=$(date +"%s")
 DIFF=$((${DATE_END} - ${DATE_START}))
 echo "TIME: $((${DIFF} / 60)) minute(s) and $((${DIFF} % 60)) seconds."
-echo -e "${restore}"
+echo -e "${RESTORE}"
 echo -e ""
