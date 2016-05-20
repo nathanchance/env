@@ -12,7 +12,7 @@ FETCHUPSTREAM=$1
 # UPLOADDIR: Upload directory
 SOURCEDIR=~/Kernels/elite_angler
 AKDIR=${SOURCEDIR}/packagesm
-UPLOADDIR=~/shared/Elite
+UPLOADDIR=~/shared/Kernels
 BRANCH=Elite-merged
 
 # Date to add to zip
