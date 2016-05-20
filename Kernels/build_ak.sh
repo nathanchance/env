@@ -135,7 +135,7 @@ clean_all
 echo
 
 # Update the git
-if [ ${UPDATE} == "update" ]
+if [ "${UPDATE}" == "update" ]
 then
    update_git
 fi
