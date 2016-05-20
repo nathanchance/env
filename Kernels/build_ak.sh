@@ -109,12 +109,14 @@ DATE_START=$(date +"%s")
 
 echo -e "${red}"
 echo "AK KERNEL CREATION SCRIPT:"
+echo -e ""
+echo -e ""
 echo "    ___    __ __    __ __ __________  _   __________ ";
 echo "   /   |  / //_/   / //_// ____/ __ \/ | / / ____/ / ";
 echo "  / /| | / ,<     / ,<  / __/ / /_/ /  |/ / __/ / /  ";
 echo " / ___ |/ /| |   / /| |/ /___/ _, _/ /|  / /___/ /___";
 echo "/_/  |_/_/ |_|  /_/ |_/_____/_/ |_/_/ |_/_____/_____/";
-
+echo -e ""
 echo "---------------"
 echo "KERNEL VERSION:"
 echo "---------------"
@@ -128,12 +130,16 @@ echo "-----------------"
 echo -e "${restore}"
 
 echo -e ""
+echo -e ${red}"---------------------------------------"${restore}
 echo -e ${red}"SCRIPT STARTING AT $(date +%D\ %r)"${restore}
+echo -e ${red}"---------------------------------------"${restore}
 echo -e ""
 
 # Clean up
 echo -e ""
+echo -e ${red}"-----------"${restore}
 echo -e ${red}"CLEANING UP"${restore}
+echo -e ${red}"-----------"${restore}
 echo -e ""
 echo -e ""
 clean_all
@@ -144,14 +150,18 @@ echo -e ""
 if [ "${FETCHUPSTREAM}" == "update" ]
 then
    echo -e ""
+   echo -e ${red}"----------------"${restore}
    echo -e ${red}"UPDATING SOURCES"${restore}
+   echo -e ${red}"----------------"${restore}
    echo -e ""
    update_git
 fi
 
 # Make the kernel
 echo -e ""
+echo -e ${red}"-------------"${restore}
 echo -e ${red}"MAKING KERNEL"${restore}
+echo -e ${red}"-------------"${restore}
 echo -e ""
 make_kernel
 make_dtb
@@ -161,16 +171,18 @@ make_zip
 # Upload
 echo -e ""
 echo -e ""
+echo -e ${red}"------------------"${restore}
 echo -e ${red}"UPLOADING ZIP FILE"${restore}
+echo -e ${red}"------------------"${restore}
 echo -e ""
 echo -e ""
 . ~/upload.sh
 
 echo -e "${red}"
 echo -e ""
-echo "-------------------"
+echo "--------------------"
 echo "SCRIPT COMPLETED IN:"
-echo "-------------------"
+echo "--------------------"
 
 DATE_END=$(date +"%s")
 DIFF=$((${DATE_END} - ${DATE_START}))
