@@ -22,6 +22,8 @@ KERNEL_DIR=~/Kernels/AK-Angler
 ANYKERNEL_DIR=${RESOURCE_DIR}/AK-Angler-AnyKernel2
 UPLOAD_DIR=~/shared/Kernels
 UPDATE=$1
+KER_BRANCH=ak-mm-staging
+AK_BRANCH=ak-angler-anykernel
 
 # Kernel Details
 BASE_AK_VER="AK"
@@ -52,8 +54,10 @@ function clean_all {
    cd ${REPACK_DIR}
    rm -rf ${KERNEL}
    rm -rf ${DTBIMAGE}
+   git checkout ${AK_BRANCH}
    git reset --hard > /dev/null 2>&1
    git clean -f -d > /dev/null 2>&1
+   git pull
    cd ${KERNEL_DIR}
    echo
    make clean && make mrproper
@@ -63,9 +67,9 @@ function clean_all {
 function update_git {
    echo
    cd ${KERNEL_DIR}
-   git checkout ak-mm-staging
+   git checkout ${KER_BRANCH}
    git fetch upstream
-   git merge upstream/ak-mm-staging
+   git merge upstream/${KER_BRANCH}
    echo
 }
 
