@@ -109,13 +109,11 @@ DATE_START=$(date +"%s")
 
 echo -e "${red}"
 echo "AK KERNEL CREATION SCRIPT:"
-echo "    _____                         "
-echo "   (, /  |              /)   ,    "
-echo "     /---| __   _   __ (/_     __ "
-echo "  ) /    |_/ (_(_(_/ (_/(___(_(_(_"
-echo " ( /                              "
-echo " _/                               "
-echo
+echo "    ___    __ __    __ __ __________  _   __________ ";
+echo "   /   |  / //_/   / //_// ____/ __ \/ | / / ____/ / ";
+echo "  / /| | / ,<     / ,<  / __/ / /_/ /  |/ / __/ / /  ";
+echo " / ___ |/ /| |   / /| |/ /___/ _, _/ /|  / /___/ /___";
+echo "/_/  |_/_/ |_|  /_/ |_/_____/_/ |_/_/ |_/_____/_____/";
 
 echo "---------------"
 echo "KERNEL VERSION:"
@@ -137,9 +135,10 @@ echo -e ""
 echo -e ""
 echo -e ${red}"CLEANING UP"${restore}
 echo -e ""
+echo -e ""
 clean_all
 
-echo
+echo -e ""
 
 # Update the git
 if [ "${FETCHUPSTREAM}" == "update" ]
@@ -161,11 +160,14 @@ make_zip
 
 # Upload
 echo -e ""
+echo -e ""
 echo -e ${red}"UPLOADING ZIP FILE"${restore}
+echo -e ""
 echo -e ""
 . ~/upload.sh
 
 echo -e "${red}"
+echo -e ""
 echo "-------------------"
 echo "SCRIPT COMPLETED IN:"
 echo "-------------------"
@@ -174,4 +176,4 @@ DATE_END=$(date +"%s")
 DIFF=$((${DATE_END} - ${DATE_START}))
 echo "TIME: $((${DIFF} / 60)) minute(s) and $((${DIFF} % 60)) seconds."
 echo -e "${restore}"
-echo
+echo -e ""
