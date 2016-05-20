@@ -108,14 +108,17 @@ function make_zip {
 DATE_START=$(date +"%s")
 
 echo -e "${RED}"
-echo "AK KERNEL CREATION SCRIPT:"
 echo -e ""
 echo -e ""
-echo "    ___    __ __    __ __ __________  _   __________ ";
-echo "   /   |  / //_/   / //_// ____/ __ \/ | / / ____/ / ";
-echo "  / /| | / ,<     / ,<  / __/ / /_/ /  |/ / __/ / /  ";
-echo " / ___ |/ /| |   / /| |/ /___/ _, _/ /|  / /___/ /___";
-echo "/_/  |_/_/ |_|  /_/ |_/_____/_/ |_/_/ |_/_____/_____/";
+echo -e ""
+echo -e ""
+echo "     ___    __ __    __ __ __________  _   __________ ";
+echo "    /   |  / //_/   / //_// ____/ __ \/ | / / ____/ / ";
+echo "   / /| | / ,<     / ,<  / __/ / /_/ /  |/ / __/ / /  ";
+echo "  / ___ |/ /| |   / /| |/ /___/ _, _/ /|  / /___/ /___";
+echo " /_/  |_/_/ |_|  /_/ |_/_____/_/ |_/_/ |_/_____/_____/";
+echo -e ""
+echo -e ""
 echo -e ""
 echo -e ""
 echo "---------------"
@@ -128,9 +131,9 @@ echo -e ${BLINK_RED}"${AK_VER}"${RESTORE}
 echo -e ""
 echo -e ""
 
-echo -e ${RED}"---------------------------------------"${RESTORE}
-echo -e ${RED}"SCRIPT STARTING AT $(date +%D\ %r)"${RESTORE}
-echo -e ${RED}"---------------------------------------"${RESTORE}
+echo -e ${RED}"---------------------------------------------"${RESTORE}
+echo -e ${RED}"BUILD SCRIPT STARTING AT $(date +%D\ %r)"${RESTORE}
+echo -e ${RED}"---------------------------------------------"${RESTORE}
 echo -e ""
 
 # Clean up
