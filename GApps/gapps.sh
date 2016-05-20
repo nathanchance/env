@@ -17,6 +17,9 @@ then
 fi
 UPLOADDIR=~/shared/GApps
 
+# Clear the terminal
+clear
+
 # Go into repo folder
 cd ${SOURCEDIR}
 

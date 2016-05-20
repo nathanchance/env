@@ -28,6 +28,9 @@ UPLOADDIR=~/shared/.special/.tests
 BLDRED="\033[1m""\033[31m"
 RST="\033[0m"
 
+# Clear the terminal
+clear
+
 # Start tracking time
 echo -e ""
 echo -e ${BLDRED}"SCRIPT STARTING AT $(date +%D\ %r)"${RST}

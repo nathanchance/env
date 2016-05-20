@@ -11,6 +11,9 @@ ROMDIR=${ANDROIDDIR}/ROMs
 GAPPSDIR=${ANDROIDDIR}/GApps
 KERNELSDIR=${ANDROIDDIR}/Kernels
 
+# Clear the terminal
+clear
+
 if [ "${STARTOVER}" == "existing" ]
 then
    rm -rf ${ANDROIDDIR}

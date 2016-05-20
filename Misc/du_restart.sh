@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# Clear the terminal
+clear
+
 # Remove the DU folder
 rm -rf ~/ROMs/DU
 

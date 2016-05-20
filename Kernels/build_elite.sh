@@ -15,6 +15,9 @@ AKDIR=${SOURCEDIR}/packagesm
 UPLOADDIR=~/shared/Kernels
 BRANCH=Elite-merged
 
+# Clear the terminal
+clear
+
 # Date to add to zip
 today=$(date +"%m_%d_%Y")
 

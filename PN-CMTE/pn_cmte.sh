@@ -22,6 +22,9 @@ UPLOADDIR=~/shared/PN/CMTE
 BLDBLUE="\033[1m""\033[36m"
 RST="\033[0m"
 
+# Clear the terminal
+clear
+
 # Start tracking time
 echo -e ""
 echo -e ${BLDBLUE}"SCRIPT STARTING AT $(date +%D\ %r)"${RST}

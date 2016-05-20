@@ -9,6 +9,7 @@ red='\033[01;31m'
 blink_red='\033[05;31m'
 restore='\033[0m'
 
+# Clear the terminal
 clear
 
 # Resources
@@ -21,7 +22,7 @@ TOOLCHAIN_DIR=${RESOURCE_DIR}
 KERNEL_DIR=~/Kernels/AK-Angler
 ANYKERNEL_DIR=${RESOURCE_DIR}/AK-Angler-AnyKernel2
 UPLOAD_DIR=~/shared/Kernels
-UPDATE=$1
+FETCHUPSTREAM=$1
 KER_BRANCH=ak-mm-staging
 AK_BRANCH=ak-angler-anykernel
 
@@ -107,7 +108,7 @@ function make_zip {
 
 DATE_START=$(date +"%s")
 
-echo -e "${green}"
+echo -e "${red}"
 echo "AK Kernel Creation Script:"
 echo "    _____                         "
 echo "   (, /  |              /)   ,    "
@@ -123,7 +124,7 @@ echo "---------------"
 
 echo -e "${red}"; echo -e "${blink_red}"; echo "$AK_VER"; echo -e "${restore}";
 
-echo -e "${green}"
+echo -e "${red}"
 echo "-----------------"
 echo "Making AK Kernel:"
 echo "-----------------"
@@ -135,7 +136,7 @@ clean_all
 echo
 
 # Update the git
-if [ "${UPDATE}" == "update" ]
+if [ "${FETCHUPSTREAM}" == "update" ]
 then
    update_git
 fi
@@ -149,13 +150,13 @@ make_zip
 # Upload
 . ~/upload.sh
 
-echo -e "${green}"
+echo -e "${red}"
 echo "-------------------"
 echo "Build Completed in:"
 echo "-------------------"
-echo -e "${restore}"
 
 DATE_END=$(date +"%s")
 DIFF=$((${DATE_END} - ${DATE_START}))
 echo "Time: $((${DIFF} / 60)) minute(s) and $((${DIFF} % 60)) seconds."
+echo -e "${restore}"
 echo

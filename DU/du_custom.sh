@@ -43,6 +43,9 @@ else
   export DU_BUILD_TYPE=CHANCELLOR
 fi
 
+# Clear the terminal
+clear
+
 # Start tracking time
 echo -e ""
 echo -e ${BLDRED}"SCRIPT STARTING AT $(date +%D\ %r)"${RST}

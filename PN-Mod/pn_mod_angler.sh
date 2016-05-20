@@ -6,6 +6,8 @@ DEVICE=angler
 # Make it show nathan@chancellor in the kernel version
 export KBUILD_BUILD_USER=nathan
 export KBUILD_BUILD_HOST=chancellor
+# Clear the terminal
+clear
 # Start tracking time
 START=$(date +%s)
 # Change to the source directory
