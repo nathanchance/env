@@ -4,7 +4,6 @@
 # $ . build_ak.sh <update|noupdate>
 
 # Bash Color
-green='\033[01;32m'
 red='\033[01;31m'
 blink_red='\033[05;31m'
 restore='\033[0m'
@@ -109,7 +108,7 @@ function make_zip {
 DATE_START=$(date +"%s")
 
 echo -e "${red}"
-echo "AK Kernel Creation Script:"
+echo "AK KERNEL CREATION SCRIPT:"
 echo "    _____                         "
 echo "   (, /  |              /)   ,    "
 echo "     /---| __   _   __ (/_     __ "
@@ -119,18 +118,25 @@ echo " _/                               "
 echo
 
 echo "---------------"
-echo "Kernel Version:"
+echo "KERNEL VERSION:"
 echo "---------------"
 
 echo -e "${red}"; echo -e "${blink_red}"; echo "$AK_VER"; echo -e "${restore}";
 
 echo -e "${red}"
 echo "-----------------"
-echo "Making AK Kernel:"
+echo "MAKING AK KERNEL:"
 echo "-----------------"
 echo -e "${restore}"
 
+echo -e ""
+echo -e ${red}"SCRIPT STARTING AT $(date +%D\ %r)"${restore}
+echo -e ""
+
 # Clean up
+echo -e ""
+echo -e ${red}"CLEANING UP"${restore}
+echo -e ""
 clean_all
 
 echo
@@ -138,25 +144,34 @@ echo
 # Update the git
 if [ "${FETCHUPSTREAM}" == "update" ]
 then
+   echo -e ""
+   echo -e ${red}"UPDATING SOURCES"${restore}
+   echo -e ""
    update_git
 fi
 
 # Make the kernel
+echo -e ""
+echo -e ${red}"MAKING KERNEL"${restore}
+echo -e ""
 make_kernel
 make_dtb
 make_modules
 make_zip
 
 # Upload
+echo -e ""
+echo -e ${red}"UPLOADING ZIP FILE"${restore}
+echo -e ""
 . ~/upload.sh
 
 echo -e "${red}"
 echo "-------------------"
-echo "Build Completed in:"
+echo "SCRIPT COMPLETED IN:"
 echo "-------------------"
 
 DATE_END=$(date +"%s")
 DIFF=$((${DATE_END} - ${DATE_START}))
-echo "Time: $((${DIFF} / 60)) minute(s) and $((${DIFF} % 60)) seconds."
+echo "TIME: $((${DIFF} / 60)) minute(s) and $((${DIFF} % 60)) seconds."
 echo -e "${restore}"
 echo
