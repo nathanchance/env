@@ -27,7 +27,7 @@ AK_BRANCH=ak-angler-anykernel
 
 # Kernel Details
 BASE_AK_VER="AK"
-VER=".666.ANGLER"
+VER=".066.ANGLER"
 AK_VER="${BASE_AK_VER}${VER}"
 
 # Variables
