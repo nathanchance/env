@@ -45,7 +45,6 @@ fi
 
 # Find the directories to log
 echo ""
-echo ""
 echo "${KERNEL_NAME} CHANGELOG" | tr [a-z] [A-Z]
 echo ""
 find ${KERNEL_DIR} -name .git | sed 's/\/.git//g' | sed 'N;$!P;$!D;$d' | while read LINE
