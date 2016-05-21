@@ -68,7 +68,6 @@ do
 done
 
 echo ""
-echo ""
 
 # Upload the new changelog if requested
 if [ "${UPLOAD}" == "upload" ]
