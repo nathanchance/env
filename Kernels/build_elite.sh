@@ -1,10 +1,12 @@
 #!/bin/bash
 
-# Usage: $ .  build_elite.sh <update|noupdate>
+# Usage:
+# $ . build_elite.sh <update|noupdate> <changelog|nochangelog>
 
 # Parameters
 # FETCHUPSTREAM: merge in new changes
-FETCHUPSTREAM=$1
+FETCHUPSTREAM=${1}
+CHANGELOG=${2}
 
 # Variables
 # SOURCEDIR: Path to build your kernel
@@ -14,6 +16,15 @@ SOURCEDIR=~/Kernels/elite_angler
 AKDIR=${SOURCEDIR}/packagesm
 UPLOADDIR=~/shared/Kernels
 BRANCH=Elite-merged
+
+# Toolchain location and info
+TOOLCHAIN=~/Kernels/Linaro-4.9_aarch64/bin/aarch64-linux-android-
+export ARCH=arm64
+export SUBARCH=arm64
+
+# Bash Color
+BLUE="\033[01;36m"
+RESTORE="\033[0m"
 
 # Clear the terminal
 clear
@@ -27,32 +38,56 @@ START=$(date +%s)
 # Change to source directory to start
 cd ${SOURCEDIR}
 
+echo -e ${BLUE}
+echo -e ""
+echo -e "    ____   _      _   _____   ____    "
+echo -e "   |  __| | |    | | |_   _| |  __|   "
+echo -e "   | |__  | |    | |   | |   | |__    "
+echo -e "   |  __| | |    | |   | |   |  __|   "
+echo -e "   | |__  | |__  | |   | |   | |__    "
+echo -e "   |____| |____| |_|   |_|   |____|   "
+echo -e "      __       ________       __      "
+echo -e "      \ ~~~___|   __   |___~~~ /      "
+echo -e "       _----__|__|  |__|__----_       "
+echo -e "       \~~~~~~|__    __|~~~~~~/       "
+echo -e "        ------\  |  |  /------        "
+echo -e "         \_____\ |__| /_____/         "
+echo -e "                \____/                "
+echo -e ""
+echo -e ""
+echo -e ""
+echo -e "---------------------------------------------"
+echo -e "BUILD SCRIPT STARTING AT $(date +%D\ %r)"
+echo -e "---------------------------------------------"
+echo -e ${RESTORE}
+
+# Clean up
+echo -e ${BLUE}
+echo -e "-----------"
+echo -e "CLEANING UP"
+echo -e "-----------"
+echo -e ${RESTORE}
+echo -e ""
+git reset --hard
+git clean -f -d
+git pull
+make clean
+make mrproper
+
+# Update kernel if requested
 if [ "${FETCHUPSTREAM}" == "update" ]
 then
+   echo -e ""
+   echo -e ${BLUE}
+   echo -e "----------------"
+   echo -e "UPDATING SOURCES"
+   echo -e "----------------"
+   echo -e ${RESTORE}
+   echo -e ""
    git checkout ${BRANCH}
    git fetch upstream
    git merge upstream/${BRANCH}
 fi
-
-echo "    ____   _      _   _____   ____    "
-echo "   |  __| | |    | | |_   _| |  __|   "
-echo "   | |__  | |    | |   | |   | |__    "
-echo "   |  __| | |    | |   | |   |  __|   "
-echo "   | |__  | |__  | |   | |   | |__    "
-echo "   |____| |____| |_|   |_|   |____|   "
-echo "      __       ________       __      "
-echo "      \ ~~~___|   __   |___~~~ /      "
-echo "       _----__|__|  |__|__----_       "
-echo "       \~~~~~~|__    __|~~~~~~/       "
-echo "        ------\  |  |  /------        "
-echo "         \_____\ |__| /_____/         "
-echo "                \____/                "
-
-# Clean out everything
-git reset --hard
-git clean -f -d
-make clean
-make mrproper
 
 # Setup the build
 cd ${SOURCEDIR}/arch/arm64/configs/BBKconfigsM
@@ -72,37 +107,69 @@ cp -R "${AKDIR}/anykernel.sh" out/${KERNELNAME}
 # Flashable zip name
 ZIPNAME=${KERNELNAME}-${today}
 
-# Toolchain location and info
-TOOLCHAIN=~/Kernels/Linaro-4.9_aarch64/bin/aarch64-linux-android-
-export ARCH=arm64
-export SUBARCH=arm64
-
 # remove backup files
 find ./ -name '*~' | xargs rm
 
 # make kernel
+echo -e ""
+echo -e ${BLUE}
+echo -e "-------------"
+echo -e "MAKING KERNEL"
+echo -e "-------------"
+echo -e ${RESTORE}
+echo -e ""
 make 'angler_defconfig'
 make -j`grep 'processor' /proc/cpuinfo | wc -l` CROSS_COMPILE=${TOOLCHAIN}
 
 # Grab zImage-dtb
-echo ""
-echo "<<>><<>>  Collecting Image.gz-dtb <<>><<>>"
-echo ""
+echo -e ${BLUE}
+echo -e ""
+echo -e "-----------------------"
+echo -e "Collecting Image.gz-dtb"
+echo -e "-----------------------"
+echo -e ${RESTORE}
 cp ${SOURCEDIR}/arch/arm64/boot/Image.gz-dtb out/${KERNELNAME}/Image.gz-dtb
 done
 
 # Build Zip
-echo "Creating ${ZIPNAME}.zip"
+echo -e ${BLUE}
+echo -e "------------------------------------"
+echo -e "MAKING ${ZIPNAME}.ZIP" | tr [a-z] [A-Z]
+echo -e "------------------------------------"
+echo -e ${RESTORE}
+
 cd ${SOURCEDIR}/out/${KERNELNAME}/
 7z a -tzip -mx5 "${ZIPNAME}.zip"
 
-# Remove previous kernel zip in the upload directory
-rm ${UPLOADDIR}/*.zip
+# Remove the previous zip and move the new zip into the upload directory
+echo -e ${BLUE}
+echo -e ""
+echo -e "------------------------------------"
+echo -e "MOVING ${ZIPNAME}.ZIP" | tr [a-z] [A-Z]
+echo -e "------------------------------------"
+echo -e ${RESTORE}
 
-# Move the new one into the upload directory
+rm ${UPLOADDIR}/Elite_*.zip
 mv ${ZIPNAME}.zip ${UPLOADDIR}
 
+# Make the changelog if requested
+if [ ${CHANGELOG} == "changelog" ]
+then
+   echo -e ${BLUE}
+   echo -e "----------------"
+   echo -e "MAKING CHANGELOG"
+   echo -e "----------------"
+   echo -e ${RESTORE}
+   . kernel_changelog.sh elite `date +"%m/%d/%y"` noupload
+fi
+
 # Upload it
+echo -e ${BLUE}
+echo -e "---------------------------------------"
+echo -e "UPLOADING ${ZIPNAME}.ZIP" | tr [a-z] [A-Z]
+echo -e "---------------------------------------"
+echo -e ${RESTORE}
+echo -e ""
 . ~/upload.sh
 
 # Remove the out directory
@@ -113,8 +180,17 @@ cd ~/
 
 # Success! Stop tracking time
 END=$(date +%s)
-echo "====================================="
-echo "Compilation and upload successful!"
-echo "Total time elapsed: $(echo $(($END-$START)) | awk '{print int($1/60)"mins "int($1%60)"secs"}')"
-echo "====================================="
+
+echo -e ""
+echo -e ${BLUE}
+echo "--------------------"
+echo "SCRIPT COMPLETED IN:"
+echo "--------------------"
+
+DATE_END=$(date +"%s")
+
+DIFF=$((${END} - ${START}))
+echo "TIME: $((${DIFF} / 60)) minute(s) and $((${DIFF} % 60)) seconds"
+
+echo -e ${RESTORE}
 echo -e "\a"

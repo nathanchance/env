@@ -1,7 +1,7 @@
 #!/bin/bash
 
-# Usage
-# $ . build_ak.sh <update|noupdate>
+# Usage:
+# $ . build_ak.sh <update|noupdate> <changelog|nochangelog>
 
 # Bash Color
 RED="\033[01;31m"
@@ -10,6 +10,12 @@ RESTORE="\033[0m"
 
 # Clear the terminal
 clear
+
+# Parameters
+# FETCHUPSTREAM: Whether or not to fetch new AK updates
+# CHANGELOG: Whether or not to build a changelog
+FETCHUPSTREAM=${1}
+CHANGELOG=${2}
 
 # Resources
 THREAD="-j$(grep -c ^processor /proc/cpuinfo)"
@@ -21,7 +27,6 @@ TOOLCHAIN_DIR=${RESOURCE_DIR}
 KERNEL_DIR=~/Kernels/AK-Angler
 ANYKERNEL_DIR=${RESOURCE_DIR}/AK-Angler-AnyKernel2
 UPLOAD_DIR=~/shared/Kernels
-FETCHUPSTREAM=$1
 KER_BRANCH=ak-mm-staging
 AK_BRANCH=ak-angler-anykernel
 
@@ -107,7 +112,7 @@ function make_zip {
 
 DATE_START=$(date +"%s")
 
-echo -e "${RED}"
+echo -e ${RED}
 echo -e "-------------------------------------------------------"
 echo -e ""
 echo -e "      ___    __ __    __ __ __________  _   __________ ";
@@ -124,24 +129,24 @@ echo -e ""
 echo "---------------"
 echo "KERNEL VERSION:"
 echo "---------------"
-
-echo -e ""
-echo -e ""
-echo -e ${BLINK_RED}"${AK_VER}"${RESTORE}
-echo -e ""
 echo -e ""
 
-echo -e ${RED}"---------------------------------------------"${RESTORE}
-echo -e ${RED}"BUILD SCRIPT STARTING AT $(date +%D\ %r)"${RESTORE}
-echo -e ${RED}"---------------------------------------------"${RESTORE}
-echo -e ""
+echo -e ${BLINK_RED}
+echo -e ${AK_VER}
+echo -e ${RESTORE}
+
+echo -e ${RED}
+echo -e "---------------------------------------------"
+echo -e "BUILD SCRIPT STARTING AT $(date +%D\ %r)"
+echo -e "---------------------------------------------"
+echo -e ${RESTORE}
 
 # Clean up
-echo -e ""
-echo -e ${RED}"-----------"${RESTORE}
-echo -e ${RED}"CLEANING UP"${RESTORE}
-echo -e ${RED}"-----------"${RESTORE}
-echo -e ""
+echo -e ${RED}
+echo -e "-----------"
+echo -e "CLEANING UP"
+echo -e "-----------"
+echo -e ${RESTORE}
 echo -e ""
 clean_all
 
@@ -150,43 +155,57 @@ echo -e ""
 # Update the git
 if [ "${FETCHUPSTREAM}" == "update" ]
 then
-   echo -e ""
-   echo -e ${RED}"----------------"${RESTORE}
-   echo -e ${RED}"UPDATING SOURCES"${RESTORE}
-   echo -e ${RED}"----------------"${RESTORE}
-   echo -e ""
+   echo -e ${RED}
+   echo -e "----------------"
+   echo -e "UPDATING SOURCES"
+   echo -e "----------------"
+   echo -e ${RESTORE}
    update_git
 fi
 
 # Make the kernel
-echo -e ""
-echo -e ${RED}"-------------"${RESTORE}
-echo -e ${RED}"MAKING KERNEL"${RESTORE}
-echo -e ${RED}"-------------"${RESTORE}
-echo -e ""
+echo -e ${RED}
+echo -e "-------------"
+echo -e "MAKING KERNEL"
+echo -e "-------------"
+echo -e ${RESTORE}
 make_kernel
 make_dtb
 make_modules
 make_zip
 
+# Make the changelog if requested
+if [ ${CHANGELOG} == "changelog" ]
+then
+   echo -e ""
+   echo -e ${RED}
+   echo -e "----------------"
+   echo -e "MAKING CHANGELOG"
+   echo -e "----------------"
+   echo -e ${RESTORE}
+   . kernel_changelog.sh ak `date +"%m/%d/%y"` noupload
+   echo -e ""
+fi
+
 # Upload
-echo -e ""
-echo -e ""
-echo -e ${RED}"------------------"${RESTORE}
-echo -e ${RED}"UPLOADING ZIP FILE"${RESTORE}
-echo -e ${RED}"------------------"${RESTORE}
-echo -e ""
+echo -e ${RED}
+echo -e "------------------"
+echo -e "UPLOADING ZIP FILE"
+echo -e "------------------"
+echo -e ${RESTORE}
 echo -e ""
 . ~/upload.sh
 
-echo -e "${RED}"
 echo -e ""
+echo -e ${RED}
 echo "--------------------"
 echo "SCRIPT COMPLETED IN:"
 echo "--------------------"
 
 DATE_END=$(date +"%s")
+
 DIFF=$((${DATE_END} - ${DATE_START}))
-echo "TIME: $((${DIFF} / 60)) minute(s) and $((${DIFF} % 60)) seconds."
-echo -e "${RESTORE}"
+echo "TIME: $((${DIFF} / 60)) minute(s) and $((${DIFF} % 60)) seconds"
+
+echo -e ${RESTORE}
 echo -e ""
