@@ -36,19 +36,17 @@ rm -rf ${UPLOAD_DIR}/${KERNEL_NAME}_Changelog_*
 # Check the date start range is set
 if [ -z "$START_DATE" ]; then
    echo ""
-   echo "ATTENTION: Start date not defined ------------------------------------------------"
+   echo "ATTENTION: Start date not defined"
    echo ""
    echo " >>> Please define a start date in mm/dd/yyyy format ..."
    echo ""
-   echo "----------------------------------------------------------------------------------"
    read START_DATE
 fi
 
 # Find the directories to log
 echo ""
 echo ""
-echo ""
-echo "${KERNEL_NAME} CHANGELOG ------------------------------------------------------------" | tr [a-z] [A-Z]
+echo "${KERNEL_NAME} CHANGELOG" | tr [a-z] [A-Z]
 echo ""
 find ${KERNEL_DIR} -name .git | sed 's/\/.git//g' | sed 'N;$!P;$!D;$d' | while read LINE
 do
@@ -70,9 +68,6 @@ do
    fi
 done
 
-echo ""
-echo "-------------------------------------------------------------------------------------"
-echo ""
 echo ""
 echo ""
 
