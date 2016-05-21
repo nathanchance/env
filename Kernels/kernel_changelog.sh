@@ -31,7 +31,7 @@ then
 fi
 
 # Remove previous changelog
-rm -rf ${UPLOAD_DIR}/${KERNEL_NAME}_changelog_*
+rm -rf ${UPLOAD_DIR}/${KERNEL_NAME}_Changelog_*
 
 # Check the date start range is set
 if [ -z "$START_DATE" ]; then
@@ -56,17 +56,17 @@ do
    # Test to see if the repo needs to have a changelog written.
    LOG=$(git log --pretty="%an - %s" --no-merges --since=${START_DATE} --date-order)
    if [ -z "${LOG}" ]; then
-      echo " >>> Nothing updated on ${KERNEL_NAME} Kernel changelog, skipping ..."
+      echo " >>> Nothing updated on ${KERNEL_NAME} Kernel changelog since ${START_DATE}, skipping ..."
    else
       # Write the changelog
-      echo " >>> Changelog is updated and written for ${KERNEL_NAME} Kernel ..."
-      echo "Project name: ${KERNEL_NAME} Kernel" >> "${UPLOAD_DIR}"/${KERNEL_NAME}_changelog_${FILE_DATE}.txt
-      echo "Dates: ${START_DATE} to ${CURRENT_DATE}" >> "${UPLOAD_DIR}"/${KERNEL_NAME}_changelog_${FILE_DATE}.txt
+      echo " >>> Changelog is updated and written for ${KERNEL_NAME} Kernel since ${START_DATE}..."
+      echo "Project name: ${KERNEL_NAME} Kernel" >> "${UPLOAD_DIR}"/${KERNEL_NAME}_Changelog_${FILE_DATE}.txt
+      echo "Dates: ${START_DATE} to ${CURRENT_DATE}" >> "${UPLOAD_DIR}"/${KERNEL_NAME}_Changelog_${FILE_DATE}.txt
       echo "${LOG}" | while read LINE
       do
-         echo "   ${LINE}" >> "${UPLOAD_DIR}"/${KERNEL_NAME}_changelog_${FILE_DATE}.txt
+         echo "   ${LINE}" >> "${UPLOAD_DIR}"/${KERNEL_NAME}_Changelog_${FILE_DATE}.txt
       done
-      echo "" >> "${UPLOAD_DIR}"/${KERNEL_NAME}_changelog_${FILE_DATE}.txt
+      echo "" >> "${UPLOAD_DIR}"/${KERNEL_NAME}_Changelog_${FILE_DATE}.txt
    fi
 done
 
