@@ -72,10 +72,10 @@ then
    echo -e ${RST}
 
    # run the repo command
+   cd ${SOURCE_DIR}
    repo init -u ${REPO_URL} -b ${REPO_BRANCH} && repo sync --force-sync
 
    # Sync dependencies
-   cd ${SOURCE_DIR}
    . build/envsetup.sh
    echo -e ${BLDRED}
    echo -e "SYNCING DEPENDENCIES"
