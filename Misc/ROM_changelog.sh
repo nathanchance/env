@@ -24,7 +24,7 @@ elif [ "${ROM}" == "dutest" ]
 then
    SOURCE_DIR=${ROM_DIR}/DU
    UPLOAD_DIR=~/shared/.special/.tests/${DEVICE}
-   ROM_NAME="Dirty Unicorns Test | ${DEVICE}"
+   ROM_NAME="Dirty Unicorns Test | ${DEVICE} - ${DU_BUILD_TYPE_CL}"
    CHANGELOG=${DU_BUILD_TYPE_CL}_Changelog.txt
 elif [ "${ROM}" == "ducustom" ]
 then
