@@ -16,7 +16,7 @@ SYNC=$2
 # Variables
 SOURCEDIR=~/ROMs/PN-Layers
 OUTDIR=${SOURCEDIR}/out/target/product/${DEVICE}
-UPLOADDIR=~/shared/PN/Layers
+UPLOADDIR=~/shared/PN/Layers/${DEVICE}
 
 # Colors
 BLDBLUE="\033[1m""\033[36m"
@@ -26,84 +26,117 @@ RST="\033[0m"
 clear
 
 # Start tracking time
-echo -e ""
-echo -e ${BLDBLUE}"SCRIPT STARTING AT $(date +%D\ %r)"${RST}
-echo -e ""
+echo -e ${BLDBLUE}
+echo -e "---------------------------------------"
+echo -e "SCRIPT STARTING AT $(date +%D\ %r)"
+echo -e "---------------------------------------"
+echo -e ${RST}
 START=$(date +%s)
 
 # Change to the source directory
-echo -e ${BLDBLUE}"MOVING TO ${SOURCEDIR}"${RST}
-echo -e ""
+echo -e ${BLDBLUE}
+echo -e "-----------------------------------------"
+echo -e "MOVING TO ${SOURCEDIR}"
+echo -e "-----------------------------------------"
+echo -e ${RST}
 cd ${SOURCEDIR}
 
 # Sync the repo if requested
 if [ "${SYNC}" == "sync" ]
 then
-   echo -e ${BLDBLUE}"SYNCING LATEST SOURCES"${RST}
-   echo -e ""
+   echo -e ${BLDBLUE}
+   echo -e "----------------------"
+   echo -e "SYNCING LATEST SOURCES"
+   echo -e "----------------------"
+   echo -e ${RST}
    repo sync
 fi
 
 # Setup the build environment
-echo -e ${BLDBLUE}"SETTING UP BUILD ENVIRONMENT"${RST}
-echo -e ""
+echo -e ${BLDBLUE}
+echo -e "----------------------------"
+echo -e "SETTING UP BUILD ENVIRONMENT"
+echo -e "----------------------------"
+echo -e ${RST}
 . build/envsetup.sh
 echo -e ""
 
 # Prepare device
-echo -e ${BLDBLUE}"PREPARING ${DEVICE}"${RST}
-echo -e ""
+echo -e ${BLDBLUE}
+echo -e "----------------"
+echo -e "PREPARING DEVICE"
+echo -e "----------------"
+echo -e ${RST}
 breakfast ${DEVICE}
 
 # Clean up
-echo -e ${BLDBLUE}"CLEANING UP ${SOURCEDIR}/out"${RST}
-echo -e ""
+echo -e ${BLDBLUE}
+echo -e "------------------------------------------------"
+echo -e "CLEANING UP ${SOURCEDIR}/out"
+echo -e "------------------------------------------------"
+echo -e ${RST}
 make clean
 make clobber
 
 # Start building
-echo -e ${BLDBLUE}"MAKING ZIP FILE"${RST}
-echo -e ""
+echo -e ${BLDBLUE}
+echo -e "---------------"
+echo -e "MAKING ZIP FILE"
+echo -e "---------------"
+echo -e ${RST}
 mka bacon
 echo -e ""
 
 # Remove exisiting files in UPLOADDIR
-echo -e ${BLDBLUE}"REMOVING FILES IN ${UPLOADDIR}"${RST}
-echo -e ""
+echo -e ${BLDBLUE}
+echo -e "-------------------------"
+echo -e "CLEANING UPLOAD DIRECTORY"
+echo -e "-------------------------"
+echo -e ${RST}
 rm ${UPLOADDIR}/*_${DEVICE}_*.zip
 rm ${UPLOADDIR}/*_${DEVICE}_*.zip.md5sum
 
 # Copy new files to UPLOADDIR
-echo -e ${BLDBLUE}"MOVING FILES FROM ${OUTDIR} TO ${UPLOADDIR}"${RST}
-echo -e ""
+echo -e ${BLDBLUE}
+echo -e "--------------------------------"
+echo -e "MOVING FILES TO UPLOAD DIRECTORY"
+echo -e "--------------------------------"
+echo -e ${RST}
 mv ${OUTDIR}/pure_nexus_${DEVICE}-*.zip ${UPLOADDIR}
 mv ${OUTDIR}/pure_nexus_${DEVICE}-*.zip.md5sum ${UPLOADDIR}
 
 # Upload the files
-echo -e ${BLDBLUE}"UPLOADING FILES"${RST}
-echo -e ""
+echo -e ${BLDBLUE}
+echo -e "---------------"
+echo -e "UPLOADING FILES"
+echo -e "---------------"
+echo -e ${RST}
 . ~/upload.sh
 echo -e ""
 
 # Clean up out directory to free up space
-echo -e ${BLDBLUE}"CLEANING UP ${SOURCEDIR}/out"${RST}
-echo -e ""
+echo -e ${BLDBLUE}
+echo -e "------------------------------------------------"
+echo -e "CLEANING UP ${SOURCEDIR}/out"
+echo -e "------------------------------------------------"
+echo -e ${RST}
 make clean
 make clobber
 
 # Go back home
-echo -e ${BLDBLUE}"GOING HOME"${RST}
-echo -e ""
+echo -e ${BLDBLUE}
+echo -e "----------"
+echo -e "GOING HOME"
+echo -e "----------"
+echo -e ${RST}
 cd ~/
 
 # Stop tracking time
-echo -e ${BLDBLUE}"SCRIPT ENDING AT $(date +%D\ %r)"${RST}
-echo -e ""
 END=$(date +%s)
-
-# Successfully completed compilation
-echo -e ${BLDBLUE}"====================================="${RST}
-echo -e ${BLDBLUE}"Compilation and upload successful!"${RST}
-echo -e ${BLDBLUE}"Total time elapsed: $(echo $(($END-$START)) | awk '{print int($1/60)"mins "int($1%60)"secs"}')"${RST}
-echo -e ${BLDBLUE}"====================================="${RST}
+echo -e ${BLDRED}
+echo -e "-------------------------------------"
+echo -e "SCRIPT ENDING AT $(date +%D\ %r)"
+echo -e "TIME: $(echo $(($END-$START)) | awk '{print int($1/60)"mins "int($1%60)"secs"}')"
+echo -e "-------------------------------------"
+echo -e ${RST}
 echo -e "\a"
