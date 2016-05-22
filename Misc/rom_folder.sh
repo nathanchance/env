@@ -1,7 +1,9 @@
 #!/bin/bash
 
+
 # Usage: this is a source start over script; will remove the previous folder, create a new one, and, if requested, it will sync the source again
 # . rom_folder.sh <rom> <sync|nosync>
+
 
 # Parameters:
 # Parameter 1: the ROM, possible values include aicp|aosip|du|pncmte|pnlayers|screwd|temasek
@@ -9,12 +11,16 @@
 ROM=${1}
 SYNC=${2}
 
+
 # Colors
 BLDRED="\033[1m""\033[31m"
+BLDBLUE="\033[1m""\033[36m"
 RST="\033[0m"
+
 
 # Parent directory of source
 ROM_DIR=~/ROMs
+
 
 # Define the name of the source directory as well as the repo URL and the repo branch to sync
 if [ "${ROM}" == "aicp" ]
@@ -54,19 +60,39 @@ then
    REPO_BRANCH=cm-13.0
 fi
 
+
+# Start tracking time
+echo -e ${BLDRED}
+echo -e "---------------------------------------"
+echo -e "SCRIPT STARTING AT $(date +%D\ %r)"
+echo -e "---------------------------------------"
+echo -e ${RST}
+START=$(date +%s)
+
+
 # Remove the previous directory and create a new one
 echo -e ${BLDRED}
+echo -e "----------------------------"
+echo -e "REMOVING AND CREATING FOLDER"
+echo -e "----------------------------"
+
 rm -rf ${SOURCE_DIR}
-echo -e "REMOVED: ${SOURCE_DIR}"
 mkdir ${SOURCE_DIR}
+
+echo -e ${BLDBLUE}
+echo -e "REMOVED: ${SOURCE_DIR}"
 echo -e "CREATED: ${SOURCE_DIR}"
 echo -e ${RST}
+
 
 # Sync the source if requested
 if [ "$SYNC" == "sync" ]
 then
    echo -e ${BLDRED}
+   echo -e "------------"
    echo -e "SYNCING REPO"
+   echo -e "------------"
+   echo -e ${BLDBLUE}
    echo -e "URL: ${REPO_URL}"
    echo -e "BRANCH: ${REPO_BRANCH}"
    echo -e ${RST}
@@ -78,10 +104,26 @@ then
    # Sync dependencies
    . build/envsetup.sh
    echo -e ${BLDRED}
+   echo -e "--------------------"
    echo -e "SYNCING DEPENDENCIES"
+   echo -e "--------------------"
    echo -e ${RST}
    breakfast angler
    breakfast bullhead
    breakfast hammerhead
    breakfast shamu
 fi
+
+
+# Stop tracking time
+END=$(date +%s)
+
+
+echo -e ${BLDRED}
+echo -e "-------------------------------------"
+echo -e "SCRIPT ENDING AT $(date +%D\ %r)"
+echo -e ""
+echo -e "TIME: $(echo $(($END-$START)) | awk '{print int($1/60)"mins "int($1%60)"secs"}')"
+echo -e "-------------------------------------"
+echo -e ${RST}
+echo -e "\a"
