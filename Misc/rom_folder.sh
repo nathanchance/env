@@ -4,7 +4,7 @@
 # . rom_folder.sh <rom> <sync|nosync>
 
 # Parameters:
-# Parameter 1: the ROM, possible values include du|pnlayers|pncmte|aicp|temasek|aosip|screwd
+# Parameter 1: the ROM, possible values include aicp|aosip|du|pncmte|pnlayers|screwd|temasek
 # Parameter 2: whether or not to sync the repo right away
 ROM=${1}
 SYNC=${2}
@@ -17,41 +17,41 @@ RST="\033[0m"
 ROM_DIR=~/ROMs
 
 # Define the name of the source directory as well as the repo URL and the repo branch to sync
-if [ "${ROM}" == "du" ]
-then
-   SOURCE_DIR=${ROM_DIR}/DU
-   REPO_URL=http://github.com/DirtyUnicorns/android_manifest.git
-   REPO_BRANCH=m
-elif [ "${ROM}" == "pnlayers" ]
-then
-   SOURCE_DIR=${ROM_DIR}/PN-Layers
-   REPO_URL=https://github.com/PureNexusProject/manifest.git
-   REPO_BRANCH=mm
-elif [ "${ROM}" == "pncmte" ]
-then
-   SOURCE_DIR=${ROM_DIR}/PN-CMTE
-   REPO_URL=https://github.com/PureNexusProject/manifest.git
-   REPO_BRANCH=mm-cmte
-elif [ "${ROM}" == "aicp" ]
+if [ "${ROM}" == "aicp" ]
 then
    SOURCE_DIR=${ROM_DIR}/AICP
    REPO_URL=https://github.com/AICP/platform_manifest.git
    REPO_BRANCH=mm6.0
-elif [ "${ROM}" == "temasek" ]
-then
-   SOURCE_DIR=${ROM_DIR}/Temasek
-   REPO_URL=https://github.com/temasek/android.git
-   REPO_BRANCH=cm-13.0
 elif [ "${ROM}" == "aosip" ]
 then
    SOURCE_DIR=${ROM_DIR}/AOSiP
    REPO_URL=https://github.com/AOSIP/platform_manifest.git
    REPO_BRANCH=mm6.0
+elif [ "${ROM}" == "du" ]
+then
+   SOURCE_DIR=${ROM_DIR}/DU
+   REPO_URL=http://github.com/DirtyUnicorns/android_manifest.git
+   REPO_BRANCH=m
+elif [ "${ROM}" == "pncmte" ]
+then
+   SOURCE_DIR=${ROM_DIR}/PN-CMTE
+   REPO_URL=https://github.com/PureNexusProject/manifest.git
+   REPO_BRANCH=mm-cmte
+elif [ "${ROM}" == "pnlayers" ]
+then
+   SOURCE_DIR=${ROM_DIR}/PN-Layers
+   REPO_URL=https://github.com/PureNexusProject/manifest.git
+   REPO_BRANCH=mm
 elif [ "${ROM}" == "screwd" ]
 then
    SOURCE_DIR=${ROM_DIR}/Screwd
    REPO_URL=https://github.com/ScrewdAOSP/platform_manifest.git
    REPO_BRANCH=m
+elif [ "${ROM}" == "temasek" ]
+then
+   SOURCE_DIR=${ROM_DIR}/Temasek
+   REPO_URL=https://github.com/temasek/android.git
+   REPO_BRANCH=cm-13.0
 fi
 
 # Remove the previous directory and create a new one
