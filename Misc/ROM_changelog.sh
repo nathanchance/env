@@ -1,13 +1,13 @@
 #!/bin/sh
 
 # Usage:
-# $ . ROM_changelog.sh <du|pnlayers|pncmte> <device> <date> <upload|noupload>
+# $ . ROM_changelog.sh <du|pnlayers|pncmte> <device> <upload|noupload> <mm/dd/yyyy>
 
 # Parameters
 ROM=${1}
 DEVICE=${2}
-START_DATE=${3}
-UPLOAD=${4}
+UPLOAD=${3}
+START_DATE=${4}
 
 # Variables
 START_DATE_S=`date --date="${START_DATE}" +%s`
