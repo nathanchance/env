@@ -9,6 +9,10 @@
 ROM=${1}
 SYNC=${2}
 
+# Colors
+BLDRED="\033[1m""\033[31m"
+RST="\033[0m"
+
 # Parent directory of source
 ROM_DIR=~/ROMs
 
@@ -51,13 +55,21 @@ then
 fi
 
 # Remove the previous directory and create a new one
-rm -rf ${SOURCE_DIR} && mkdir ${SOURCE_DIR}
-echo -e "Removed previous direcotry and created a new one" | tr [a-z] [A-Z]
+echo -e ${BLDRED}
+rm -rf ${SOURCE_DIR}
+echo -e "REMOVED: ${SOURCE_DIR}"
+mkdir ${SOURCE_DIR}
+echo -e "CREATED: ${SOURCE_DIR}"
+echo -e ${RST}
 
 # Sync the source if requested
 if [ "$SYNC" == "sync" ]
 then
-   echo -e "Syncing repo" | tr [a-z] [A-Z]
+   echo -e ${BLDRED}
+   echo -e "SYNCING REPO"
+   echo -e "URL: ${REPO_URL}"
+   echo -e "BRANCH: ${REPO_BRANCH}"
+   echo -e ${RST}
 
    # run the repo command
    repo init -u ${REPO_URL} -b ${REPO_BRANCH} && repo sync --force-sync
@@ -65,6 +77,9 @@ then
    # Sync dependencies
    cd ${SOURCE_DIR}
    . build/envsetup.sh
+   echo -e ${BLDRED}
+   echo -e "SYNCING DEPENDENCIES"
+   echo -e ${RST}
    breakfast angler
    breakfast bullhead
    breakfast hammerhead
