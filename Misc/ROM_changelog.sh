@@ -1,7 +1,7 @@
 #!/bin/sh
 
 # Usage:
-# $ . ROM_changelog.sh <du|pnlayers|pncmte> <device> <upload|noupload> <mm/dd/yyyy>
+# $ . ROM_changelog.sh <du|dutest|ducustom|pnlayers|pncmte> <device> <upload|noupload> <mm/dd/yyyy>
 
 # Parameters
 ROM=${1}
@@ -18,25 +18,37 @@ if [ "${ROM}" == "du" ]
 then
    SOURCE_DIR=${ROM_DIR}/DU
    UPLOAD_DIR=~/shared/DU/${DEVICE}
-   ROM_NAME="Dirty Unicorns"
+   ROM_NAME="Dirty Unicorns | ${DEVICE}"
+   CHANGELOG=Changelog.txt
+elif [ "${ROM}" == "dutest" ]
+then
+   SOURCE_DIR=${ROM_DIR}/DU
+   UPLOAD_DIR=~/shared/.special/.tests/${DEVICE}
+   ROM_NAME="Dirty Unicorns Test | ${DEVICE}"
+   CHANGELOG=${DU_BUILD_TYPE_CL}_Changelog.txt
+elif [ "${ROM}" == "ducustom" ]
+then
+   SOURCE_DIR=${ROM_DIR}/DU
+   UPLOAD_DIR=~/shared/.special/.${PERSON}
+   ROM_NAME="Dirty Unicorns | ${DU_BUILD_TYPE_CL}"
+   CHANGELOG=${DU_BUILD_TYPE_CL}_Changelog.txt
 elif [ "${ROM}" == "pnlayers" ]
 then
    SOURCE_DIR=${ROM_DIR}/PN-Layers
    UPLOAD_DIR=~/shared/PN/Layers/${DEVICE}
-   ROM_NAME="Pure Nexus Layers"
+   ROM_NAME="Pure Nexus Layers | ${DEVICE}"
+   CHANGELOG=Changelog.txt
 elif [ "${ROM}" == "pncmte" ]
 then
    SOURCE_DIR=${ROM_DIR}/PN-CMTE
    UPLOAD_DIR=~/shared/PN/CMTE/${DEVICE}
-   ROM_NAME="Pure Nexus CMTE"
+   ROM_NAME="Pure Nexus CMTE | ${DEVICE}"
+   CHANGELOG=Changelog.txt
 fi
 
 # Terminal colors
 BLDRED="\033[1m""\033[31m"
 RST="\033[0m"
-
-# Changelog file format
-CHANGELOG=Changelog.txt
 
 # Setup changelog
 cd ${SOURCE_DIR}
