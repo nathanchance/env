@@ -59,7 +59,7 @@ then
    echo -e "----------------------"
    echo -e ${RST}
    echo -e ""
-   repo sync
+   repo sync --force-sync
 fi
 
 # Setup the build environment

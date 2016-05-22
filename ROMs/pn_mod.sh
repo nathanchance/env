@@ -18,7 +18,7 @@ START=$(date +%s)
 cd ${SOURCEDIR}
 
 # Sync source
-repo sync
+repo sync --force-sync
 
 # Initialize build environment
 . build/envsetup.sh
