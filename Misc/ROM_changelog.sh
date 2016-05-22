@@ -64,7 +64,7 @@ do
 	echo  "     "${UNTIL_DATE}    >> ${CHANGELOG};
 	echo '====================' >> ${CHANGELOG};
 	# Cycle through every repo to find commits between 2 dates
-	repo forall -pc 'git log --pretty=format:"%h  %s  [%cn]" --decorate --after=${AFTER_DATE} --until=${UNTIL_DATE}' >> ${CHANGELOG}
+	repo forall -pc 'git log --pretty=format:"%h  %s  [%an]" --decorate --after=${AFTER_DATE} --until=${UNTIL_DATE}' >> ${CHANGELOG}
 	echo >> ${CHANGELOG};
   echo >> ${CHANGELOG};
 done
