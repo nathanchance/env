@@ -30,7 +30,6 @@ echo -e ${BLDRED}
 echo -e "---------------------------------------"
 echo -e "SCRIPT STARTING AT $(date +%D\ %r)"
 echo -e "---------------------------------------"
-echo -e ""
 echo -e ${RST}
 START=$(date +%s)
 
@@ -50,6 +49,7 @@ then
    echo -e "SYNCING LATEST SOURCES"
    echo -e "----------------------"
    echo -e ${RST}
+   echo -e ""
    repo sync
 fi
 
@@ -59,8 +59,8 @@ echo -e "----------------------------"
 echo -e "SETTING UP BUILD ENVIRONMENT"
 echo -e "----------------------------"
 echo -e ${RST}
-. build/envsetup.sh
 echo -e ""
+. build/envsetup.sh
 
 # Prepare device
 echo -e ${BLDRED}
@@ -68,6 +68,7 @@ echo -e "----------------"
 echo -e "PREPARING DEVICE"
 echo -e "----------------"
 echo -e ${RST}
+echo -e ""
 breakfast ${DEVICE}
 
 # Clean up
@@ -76,6 +77,7 @@ echo -e "------------------------------------------"
 echo -e "CLEANING UP ${SOURCEDIR}/out"
 echo -e "------------------------------------------"
 echo -e ${RST}
+echo -e ""
 make clean
 make clobber
 
@@ -85,8 +87,8 @@ echo -e "---------------"
 echo -e "MAKING ZIP FILE"
 echo -e "---------------"
 echo -e ${RST}
-mka bacon
 echo -e ""
+mka bacon
 
 # Remove exisiting files in UPLOADDIR
 echo -e ${BLDRED}
@@ -112,6 +114,7 @@ echo -e "---------------"
 echo -e "UPLOADING FILES"
 echo -e "---------------"
 echo -e ${RST}
+echo -e ""
 . ~/upload.sh
 echo -e ""
 
@@ -121,6 +124,7 @@ echo -e "------------------------------------------"
 echo -e "CLEANING UP ${SOURCEDIR}/out"
 echo -e "------------------------------------------"
 echo -e ${RST}
+echo -e ""
 make clean
 make clobber
 
@@ -137,6 +141,7 @@ END=$(date +%s)
 echo -e ${BLDRED}
 echo -e "-------------------------------------"
 echo -e "SCRIPT ENDING AT $(date +%D\ %r)"
+echo -e ""
 echo -e "TIME: $(echo $(($END-$START)) | awk '{print int($1/60)"mins "int($1%60)"secs"}')"
 echo -e "-------------------------------------"
 echo -e ${RST}
