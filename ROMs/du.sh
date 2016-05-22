@@ -1,53 +1,26 @@
 #!/bin/bash
 
 # Usage:
-# $ . du_custom.sh <device> <sync|nosync> <person>
+# $ . du.sh <device> <sync|nosync>
 # Parameter 1: device (eg. angler, bullhead, shamu)
 # Parameter 2: sync or nosync (decides whether or not to run repo sync)
 
 # Examples:
-# . du_custom.sh shamu sync jdizzle
-# . du_custom.sh angler nosync bre
+# . du.sh angler sync
+# . du.sh angler nosync
 
 # Parameters
 DEVICE=$1
 SYNC=$2
-PERSON=$3
 
 # Variables
 SOURCEDIR=~/ROMs/DU
 OUTDIR=${SOURCEDIR}/out/target/product/${DEVICE}
-UPLOADDIR=~/shared/.special/.${PERSON}
+UPLOADDIR=~/shared/DU/${DEVICE}
 
 # Colors
 BLDRED="\033[1m""\033[31m"
 RST="\033[0m"
-
-# Export the person for changelog option
-export ${PERSON}
-
-# Add custom build tag
-if [ "${PERSON}" == "bre" ]
-then
-   export DU_BUILD_TYPE=BREYANA
-elif [ "${PERSON}" == "jdizzle" ]
-then
-   export DU_BUILD_TYPE=NINJA
-elif [ "${PERSON}" == "alcolawl" ]
-then
-  export DU_BUILD_TYPE=ALCOLAWL
-elif [ "${PERSON}" == "kuba" ]
-then
-  export DU_BUILD_TYPE=KUCKFUBA
-elif [ "${PERSON}" == "hmhb" ]
-then
-  export DU_BUILD_TYPE=DIRTY-DEEDS
-else
-  export DU_BUILD_TYPE=CHANCELLOR
-fi
-
-# Set a bash variable for the changelog script
-export DU_BUILD_TYPE_CL=${DU_BUILD_TYPE}
 
 # Clear the terminal
 clear
@@ -115,9 +88,10 @@ echo -e "MAKING ZIP FILE"
 echo -e "---------------"
 echo -e ${RST}
 echo -e ""
-mka bacon
+time mka bacon
 
 # Remove exisiting files in UPLOADDIR
+echo -e ""
 echo -e ${BLDRED}
 echo -e "-------------------------"
 echo -e "CLEANING UPLOAD DIRECTORY"
@@ -162,9 +136,6 @@ echo -e "GOING HOME"
 echo -e "----------"
 echo -e ${RST}
 cd ~/
-
-# Set DU_BUILD_TYPE back to its standard
-export DU_BUILD_TYPE=CHANCELLOR
 
 # Stop tracking time
 END=$(date +%s)
