@@ -28,7 +28,7 @@ SYNC=$2
 # ---------
 # Variables
 # ---------
-SOURCEDIR=~/ROMs/Screw\'d
+SOURCEDIR=~/ROMs/Screwd
 OUTDIR=${SOURCEDIR}/out/target/product/${DEVICE}
 UPLOADDIR=~/shared/Screw\'d/${DEVICE}
 
