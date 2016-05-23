@@ -30,7 +30,7 @@ SYNC=$2
 # ---------
 SOURCEDIR=~/ROMs/PN-CMTE
 OUTDIR=${SOURCEDIR}/out/target/product/${DEVICE}
-UPLOADDIR=~/shared/PN/CMTE/${DEVICE}
+UPLOADDIR=~/shared/ROMs/Pure\ Nexus/CMTE/${DEVICE}
 
 
 

@@ -32,7 +32,7 @@ PERSON=$3
 # ---------
 SOURCEDIR=~/ROMs/DU
 OUTDIR=${SOURCEDIR}/out/target/product/${DEVICE}
-UPLOADDIR=~/shared/.special/.${PERSON}
+UPLOADDIR=~/shared/ROMs/.special/.${PERSON}
 
 
 

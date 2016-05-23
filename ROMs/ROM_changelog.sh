@@ -27,31 +27,31 @@ ROM_DIR=~/ROMs
 if [ "${ROM}" == "du" ]
 then
    SOURCE_DIR=${ROM_DIR}/DU
-   UPLOAD_DIR=~/shared/DU/${DEVICE}
+   UPLOAD_DIR=~/shared/ROMs/Dirty\ Unicorns/${DEVICE}
    ROM_NAME="Dirty Unicorns | ${DEVICE}"
    CHANGELOG=Changelog.txt
 elif [ "${ROM}" == "dutest" ]
 then
    SOURCE_DIR=${ROM_DIR}/DU
-   UPLOAD_DIR=~/shared/.special/.tests/${DEVICE}
+   UPLOAD_DIR=~/shared/ROMs/.special/.tests/${DEVICE}
    ROM_NAME="Dirty Unicorns Test | ${DEVICE} - ${DU_BUILD_TYPE_CL}"
    CHANGELOG=${DU_BUILD_TYPE_CL}_Changelog.txt
 elif [ "${ROM}" == "ducustom" ]
 then
    SOURCE_DIR=${ROM_DIR}/DU
-   UPLOAD_DIR=~/shared/.special/.${PERSON}
+   UPLOAD_DIR=~/shared/ROMs/.special/.${PERSON}
    ROM_NAME="Dirty Unicorns | ${DU_BUILD_TYPE_CL}"
    CHANGELOG=${DU_BUILD_TYPE_CL}_Changelog.txt
 elif [ "${ROM}" == "pnlayers" ]
 then
    SOURCE_DIR=${ROM_DIR}/PN-Layers
-   UPLOAD_DIR=~/shared/PN/Layers/${DEVICE}
+   UPLOAD_DIR=~/shared/ROMs/Pure\ Nexus/Layers/${DEVICE}
    ROM_NAME="Pure Nexus Layers | ${DEVICE}"
    CHANGELOG=Changelog.txt
 elif [ "${ROM}" == "pncmte" ]
 then
    SOURCE_DIR=${ROM_DIR}/PN-CMTE
-   UPLOAD_DIR=~/shared/PN/CMTE/${DEVICE}
+   UPLOAD_DIR=~/shared/ROMs/Pure\ Nexus/CMTE/${DEVICE}
    ROM_NAME="Pure Nexus CMTE | ${DEVICE}"
    CHANGELOG=Changelog.txt
 fi

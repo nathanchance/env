@@ -30,7 +30,7 @@ SYNC=$2
 # ---------
 SOURCEDIR=~/ROMs/DU
 OUTDIR=${SOURCEDIR}/out/target/product/${DEVICE}
-UPLOADDIR=~/shared/DU/${DEVICE}
+UPLOADDIR=~/shared/ROMs/Dirty\ Unicorns/${DEVICE}
 
 
 

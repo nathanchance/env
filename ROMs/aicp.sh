@@ -30,7 +30,7 @@ SYNC=$2
 # ---------
 SOURCEDIR=~/ROMs/AICP
 OUTDIR=${SOURCEDIR}/out/target/product/${DEVICE}
-UPLOADDIR=~/shared/AICP/${DEVICE}
+UPLOADDIR=~/shared/ROMs/AICP/${DEVICE}
 
 
 

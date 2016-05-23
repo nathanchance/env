@@ -34,7 +34,7 @@ DUBT=${4}
 # ---------
 SOURCEDIR=~/ROMs/DU
 OUTDIR=${SOURCEDIR}/out/target/product/${DEVICE}
-UPLOADDIR=~/shared/.special/.tests
+UPLOADDIR=~/shared/ROMs/.special/.tests
 
 
 

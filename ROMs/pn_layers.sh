@@ -30,7 +30,7 @@ SYNC=$2
 # ---------
 SOURCEDIR=~/ROMs/PN-Layers
 OUTDIR=${SOURCEDIR}/out/target/product/${DEVICE}
-UPLOADDIR=~/shared/PN/Layers/${DEVICE}
+UPLOADDIR=~/shared/ROMs/Pure\ Nexus/Layers/${DEVICE}
 
 
 

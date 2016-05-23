@@ -1,7 +1,7 @@
 # Variables
 SOURCEDIR=~/ROMs/PN-Mod
 OUTDIR=${SOURCEDIR}/out/target/product
-UPLOADDIR=~/shared/PN/Mod
+UPLOADDIR=~/shared/ROMs/Pure\ Nexus/Mod
 DEVICE=angler
 
 # Make it show nathan@chancellor in the kernel version
