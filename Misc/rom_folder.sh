@@ -121,10 +121,19 @@ then
    echo -e "SYNCING DEPENDENCIES"
    echo -e "--------------------"
    echo -e ${RST}
-   breakfast angler
-   breakfast bullhead
-   breakfast hammerhead
-   breakfast shamu
+
+   if [ ${ROM} == "screwd" ]
+   then
+      lunch screwd_angler-userdebug
+      lunch screwd_bullhead-userdebug
+      lunch screwd_hammerhead-userdebug
+      lunch screwd_shamu-userdebug
+   else
+      breakfast angler
+      breakfast bullhead
+      breakfast hammerhead
+      breakfast shamu
+    fi
 fi
 
 
