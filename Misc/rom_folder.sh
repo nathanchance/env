@@ -59,7 +59,7 @@ then
    REPO_BRANCH=mm
 elif [ "${ROM}" == "screwd" ]
 then
-   SOURCE_DIR=${ROM_DIR}/Screwd
+   SOURCE_DIR=${ROM_DIR}/Screw\'d
    REPO_URL=https://github.com/ScrewdAOSP/platform_manifest.git
    REPO_BRANCH=m
 elif [ "${ROM}" == "temasek" ]
