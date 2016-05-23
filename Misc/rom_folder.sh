@@ -1,25 +1,34 @@
 #!/bin/bash
 
+# -----
+# Usage
+# -----
+# $ . rom_folder.sh <rom> <sync|nosync>
 
-# Usage: this is a source start over script; will remove the previous folder, create a new one, and, if requested, it will sync the source again
-# . rom_folder.sh <rom> <sync|nosync>
 
 
-# Parameters:
+# ----------
+# Parameters
+# ----------
 # Parameter 1: the ROM, possible values include aicp|aosip|du|pncmte|pnlayers|screwd|temasek
 # Parameter 2: whether or not to sync the repo right away
 ROM=${1}
 SYNC=${2}
 
 
+
+# ------
 # Colors
+# ------
 BLDRED="\033[1m""\033[31m"
 BLDBLUE="\033[1m""\033[36m"
 RST="\033[0m"
 
 
+
 # Parent directory of source
 ROM_DIR=~/ROMs
+
 
 
 # Define the name of the source directory as well as the repo URL and the repo branch to sync
@@ -61,13 +70,16 @@ then
 fi
 
 
+
 # Start tracking time
 echo -e ${BLDRED}
 echo -e "---------------------------------------"
 echo -e "SCRIPT STARTING AT $(date +%D\ %r)"
 echo -e "---------------------------------------"
 echo -e ${RST}
+
 START=$(date +%s)
+
 
 
 # Remove the previous directory and create a new one
@@ -83,6 +95,7 @@ echo -e ${BLDBLUE}
 echo -e "REMOVED: ${SOURCE_DIR}"
 echo -e "CREATED: ${SOURCE_DIR}"
 echo -e ${RST}
+
 
 
 # Sync the source if requested
@@ -115,8 +128,10 @@ then
 fi
 
 
+
 # Stop tracking time
 END=$(date +%s)
+
 
 
 echo -e ${BLDRED}

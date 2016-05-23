@@ -1,22 +1,32 @@
 #!/bin/sh
 
-# Usage:
-# $ . kernel_changelog.sh <ak|elite> <date> <upload|noupload>
-# date is in mm/dd/yyyy format
+# -----
+# Usage
+# -----
+# $ . kernel_changelog.sh <ak|elite> <mm/dd/yyyy> <upload|noupload>
 
-# Variables:
+
+
+# ----------
+# Parameters
+# ----------
 # KERNEL: Kernel name
 # START_DATE: The start date of the changelog
 # UPLOAD: Whether or not to upload
+KERNEL=${1}
+START_DATE=${2}
+UPLOAD=${3}
+
+
+
+# ---------
+# Variables
+# ---------
 # CURRENT_DATE: The end date of the changelog
 # FILE_DATE: Same as the CURRENT_DATE but formatted with _ instead of /
 # UPLOAD_DIR: The upload directory for the changelog
 # KERNEL_DIR: The directory of the source
 # KERNEL_NAME: The name of the kernel
-
-KERNEL=${1}
-START_DATE=${2}
-UPLOAD=${3}
 CURRENT_DATE=`date +"%m/%d/%Y"`
 FILE_DATE=`date +"%m_%d_%Y"`
 UPLOAD_DIR=~/shared/Kernels
@@ -30,8 +40,12 @@ then
    KERNEL_NAME=Elite
 fi
 
+
+
 # Remove previous changelog
 rm -rf ${UPLOAD_DIR}/${KERNEL_NAME}_Changelog_*
+
+
 
 # Check the date start range is set
 if [ -z "$START_DATE" ]; then
@@ -43,6 +57,8 @@ if [ -z "$START_DATE" ]; then
    read START_DATE
 fi
 
+
+
 # Find the directories to log
 echo ""
 echo "${KERNEL_NAME} CHANGELOG" | tr [a-z] [A-Z]
@@ -50,8 +66,10 @@ echo ""
 find ${KERNEL_DIR} -name .git | sed 's/\/.git//g' | sed 'N;$!P;$!D;$d' | while read LINE
 do
    cd ${LINE}
+
    # Test to see if the repo needs to have a changelog written.
    LOG=$(git log --pretty="%an - %s" --no-merges --since=${START_DATE} --date-order)
+
    if [ -z "${LOG}" ]; then
       echo " >>> Nothing updated on ${KERNEL_NAME} Kernel changelog since ${START_DATE}, skipping ..."
    else
@@ -67,12 +85,11 @@ do
    fi
 done
 
-echo ""
+
 
 # Upload the new changelog if requested
 if [ "${UPLOAD}" == "upload" ]
 then
-   . ~/upload.sh
-   # Go home
    cd ~/
+   . upload.sh
 fi

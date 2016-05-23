@@ -1,18 +1,33 @@
 #!/bin/bash
 
-# Usage: $ . source_setup.sh <existing|new>
+# -----
+# Usage
+# -----
+# $ . source_setup.sh <existing|new>
 
+
+
+# ----------
 # Parameters
+# ----------
 STARTOVER=$1
 
+
+
+# ---------
 # Variables
+# ---------
 ANDROIDDIR=~/
 ROMDIR=${ANDROIDDIR}/ROMs
 GAPPSDIR=${ANDROIDDIR}/GApps
 KERNELSDIR=${ANDROIDDIR}/Kernels
 
+
+
 # Clear the terminal
 clear
+
+
 
 if [ "${STARTOVER}" == "existing" ]
 then
@@ -28,63 +43,77 @@ else
    git config --global user.email "natechancellor@gmail.com"
 fi
 
+
+
 # Make head directories
 mkdir ${ANDROIDDIR}
 mkdir ${ROMDIR}
 mkdir ${GAPPSDIR}
 mkdir ${KERNELSDIR}
 
+
+
 # Sync in scripts
 cd ${ANDROIDDIR}
 git clone https://github.com/nathanchance/scripts.git
 
+
+
+# Sync AICP
+. ${ANDROIDDIR}/scripts/rom_folder.sh aicp nosync
+
+
+
+# Sync AOSIP
+. ${ANDROIDDIR}/scripts/rom_folder.sh aosip nosync
+
+
+
 # Sync DU
-mkdir ${ROMDIR}/DU
-cd ${ROMDIR}/DU
-repo init -u https://github.com/DirtyUnicorns/android_manifest.git -b m
-repo sync --force-sync
-. build/envsetup.sh
-breakfast angler
-breakfast bullhead
-breakfast hammerhead
-breakfast shamu
+. ${ANDROIDDIR}/scripts/rom_folder.sh du sync
+
+
 
 # Sync PN-CMTE
-mkdir ${ROMDIR}/PN-CMTE
-cd ${ROMDIR}/PN-CMTE
-repo init -u https://github.com/PureNexusProject/manifest.git -b mm
-repo sync --force-sync
-. build/envsetup.sh
-breakfast angler
-breakfast bullhead
-breakfast hammerhead
-breakfast shamu
+. ${ANDROIDDIR}/scripts/rom_folder.sh pncmte nosync
+
+
 
 # Sync PN-Layers
-mkdir ${ROMDIR}/PN-Layers
-cd ${ROMDIR}/PN-Layers
-repo init -u https://github.com/PureNexusProject/manifest.git -b mm-cmte
-repo sync --force-sync
-. build/envsetup.sh
-breakfast angler
-breakfast bullhead
-breakfast hammerhead
-breakfast shamu
+. ${ANDROIDDIR}/scripts/rom_folder.sh pnlayers nosync
 
-# Sync PN-Mod
-mkdir ${ROMDIR}/PN-Mod
-cd ${ROMDIR}/PN-Mod
-repo init -u https://github.com/ezio84/pnmod-manifest.git -b mm
-repo sync --force-sync
-. build/envsetup.sh
-breakfast angler
+
+
+# Sync Screwd
+. ${ANDROIDDIR}/scripts/rom_folder.sh screwd nosync
+
+
+
+# Sync Temasek
+. ${ANDROIDDIR}/scripts/rom_folder.sh temasek nosync
+
+
 
 # Sync GApps
 cd ${GAPPSDIR}
 git clone https://github.com/DirtyUnicorns/banks_dynamic_gapps.git Banks
 git clone https://github.com/PureNexusProject/purenexus_dynamic_gapps.git PN
 
+
+
 # Sync Elite
 cd ${KERNELSDIR}
 git clone https://github.com/nathanchance/elite_angler.git
 git clone https://github.com/Elite-Kernels/Linaro-4.9_aarch64.git
+
+
+
+# Sync AK
+cd ${KERNELSDIR}
+git clone https://github.com/nathanchance/AK-Angler.git
+git clone https://github.com/anarkia1976/AK-Angler-AnyKernel2.git
+git clone https://bitbucket.org/UBERTC/aarch64-linux-android-5.3-kernel.git
+cd AK-Angler-AnyKernel2
+git checkout ak-angler-anykernel
+cd ../AK-Angler
+git checkout ak-mm-staging

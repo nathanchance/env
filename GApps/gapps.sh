@@ -1,11 +1,22 @@
 #!/bin/bash
 
-# Usage: . gapps.sh <banks|pn>
+# -----
+# Usage
+# -----
+# $ . gapps.sh <banks|pn>
 
+
+
+# ----------
 # Parameters
-TYPE=$1
+# ----------
+TYPE=${1}
 
+
+
+# ---------
 # Variables
+# ---------
 if [ "${TYPE}" == "banks" ]
 then
     SOURCEDIR=~/GApps/Banks
@@ -17,28 +28,40 @@ then
 fi
 UPLOADDIR=~/shared/GApps
 
+
+
 # Clear the terminal
 clear
+
+
 
 # Go into repo folder
 cd ${SOURCEDIR}
 
-# Clean unsaved changed
+
+
+# Clean unsaved changes and get new changes
 git reset --hard
 git clean -f -d
-
-# Get new changes
 git pull
+
+
 
 # Make GApps
 . mkgapps.sh
+
+
 
 # Remove current GApps and move the new ones in their place
 rm ${UPLOADDIR}/${ZIPBEG}*.zip
 mv ${SOURCEDIR}/out/${ZIPBEG}*.zip ${UPLOADDIR}
 
+
+
 # Upload them
 . ~/upload.sh
+
+
 
 # Go home and we're done!
 cd ~/

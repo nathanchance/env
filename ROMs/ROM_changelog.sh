@@ -1,15 +1,25 @@
 #!/bin/sh
 
-# Usage:
+# -----
+# Usage
+# -----
 # $ . ROM_changelog.sh <du|dutest|ducustom|pnlayers|pncmte> <device> <upload|noupload> <mm/dd/yyyy>
 
+
+
+# ----------
 # Parameters
+# ----------
 ROM=${1}
 DEVICE=${2}
 UPLOAD=${3}
 START_DATE=${4}
 
+
+
+# ---------
 # Variables
+# ---------
 START_DATE_S=`date --date="${START_DATE}" +%s`
 CURRENT_DATE=`date +%m/%d/%y`
 CURRENT_DATE_S=`date +%s`
@@ -46,13 +56,21 @@ then
    CHANGELOG=Changelog.txt
 fi
 
-# Terminal colors
+
+
+# ------
+# Colors
+# ------
 BLDRED="\033[1m""\033[31m"
 RST="\033[0m"
+
+
 
 # Setup changelog
 cd ${SOURCE_DIR}
 touch ${CHANGELOG}
+
+
 
 # Print something to build output
 echo -e ${BLDRED}
@@ -61,8 +79,12 @@ echo -e "Generating changelog for ${ROM_NAME}..." | tr [a-z] [A-Z]
 echo -e ""
 echo -e ${RST}
 
+
+
 # Calculate number of days between start and end date
 DATE_DIFF=$(( (${CURRENT_DATE_S} - ${START_DATE_S}) / 86400 + 1))
+
+
 
 # Make the changelog
 for i in `seq ${DATE_DIFF}`;
@@ -83,15 +105,21 @@ done
 
 sed -i 's/project/   */g' ${CHANGELOG}
 
+
+
 # Move the changelog
 rm -rf ${UPLOAD_DIR}/${CHANGELOG}
 mv ${CHANGELOG} ${UPLOAD_DIR}/${CHANGELOG}
+
+
 
 # Upload the changelog if requested
 if [ "${UPLOAD}" == "upload" ]
 then
    . ~/upload.sh
 fi
+
+
 
 # Go home
 cd ~/
