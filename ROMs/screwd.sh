@@ -60,9 +60,9 @@ START=$(date +%s)
 
 # Change to the source directory
 echo -e ${BLDMAG}
-echo -e "------------------------------------"
+echo -e "----------------------------------------"
 echo -e "MOVING TO ${SOURCEDIR}"
-echo -e "------------------------------------"
+echo -e "----------------------------------------"
 echo -e ${RST}
 
 cd ${SOURCEDIR}
@@ -110,9 +110,9 @@ lunch screwd_${DEVICE}-userdebug
 
 # Clean up
 echo -e ${BLDMAG}
-echo -e "------------------------------------------"
+echo -e "----------------------------------------------"
 echo -e "CLEANING UP ${SOURCEDIR}/out"
-echo -e "------------------------------------------"
+echo -e "----------------------------------------------"
 echo -e ${RST}
 echo -e ""
 
@@ -141,8 +141,8 @@ echo -e "CLEANING UPLOAD DIRECTORY"
 echo -e "-------------------------"
 echo -e ${RST}
 
-rm ${UPLOADDIR}/*_${DEVICE}_*.zip
-rm ${UPLOADDIR}/*_${DEVICE}_*.zip.md5sum
+rm ${UPLOADDIR}/*-${DEVICE}-*.zip
+rm ${UPLOADDIR}/*-${DEVICE}-*.zip.md5sum
 
 
 
@@ -153,8 +153,8 @@ echo -e "MOVING FILES TO UPLOAD DIRECTORY"
 echo -e "--------------------------------"
 echo -e ${RST}
 
-mv ${OUTDIR}/DU_${DEVICE}_*.zip ${UPLOADDIR}
-mv ${OUTDIR}/DU_${DEVICE}_*.zip.md5sum ${UPLOADDIR}
+mv ${OUTDIR}/screwd-*${SCREWD_BUILD_TYPE}*.zip ${UPLOADDIR}
+mv ${OUTDIR}/screwd-*${SCREWD_BUILD_TYPE}*.zip.md5sum ${UPLOADDIR}
 
 
 
@@ -173,9 +173,9 @@ echo -e ""
 # Clean up out directory to free up space
 echo -e ""
 echo -e ${BLDMAG}
-echo -e "------------------------------------------"
+echo -e "----------------------------------------------"
 echo -e "CLEANING UP ${SOURCEDIR}/out"
-echo -e "------------------------------------------"
+echo -e "----------------------------------------------"
 echo -e ${RST}
 echo -e ""
 
