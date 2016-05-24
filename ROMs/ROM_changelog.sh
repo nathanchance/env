@@ -111,10 +111,15 @@ sed -i 's/project/   */g' ${CHANGELOG}
 # Upload the changelog if requested
 if [ "${UPLOAD}" == "upload" ]
 then
+   # Remove the previous changelog
+   cd "${UPLOAD_DIR}"
+   rm -rf ${CHANGELOG}
+
    # Move the changelog
-   rm -rf "${UPLOAD_DIR}"/${CHANGELOG}
-   mv ${CHANGELOG} "${UPLOAD_DIR}"
+   cd ${SOURCEDIR}
+   cp ${CHANGELOG} "${UPLOAD_DIR}"
    . ~/upload.sh
+   rm -rf ${CHANGELOG}
 fi
 
 
