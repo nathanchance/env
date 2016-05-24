@@ -30,7 +30,7 @@ SYNC=$2
 # ---------
 SOURCEDIR=~/ROMs/Screwd
 OUTDIR=${SOURCEDIR}/out/target/product/${DEVICE}
-UPLOADDIR=~/shared/ROMs/Screw\'d/${DEVICE}
+UPLOADDIR=~/shared/ROMs/"Screw'd"/${DEVICE}
 
 
 
@@ -141,8 +141,8 @@ echo -e "CLEANING UPLOAD DIRECTORY"
 echo -e "-------------------------"
 echo -e ${RST}
 
-rm ${UPLOADDIR}/*-${DEVICE}-*.zip
-rm ${UPLOADDIR}/*-${DEVICE}-*.zip.md5sum
+rm "${UPLOADDIR}"/*-${DEVICE}-*.zip
+rm "${UPLOADDIR}"/*-${DEVICE}-*.zip.md5sum
 
 
 
@@ -153,8 +153,8 @@ echo -e "MOVING FILES TO UPLOAD DIRECTORY"
 echo -e "--------------------------------"
 echo -e ${RST}
 
-mv ${OUTDIR}/screwd-*${SCREWD_BUILD_TYPE}*.zip ${UPLOADDIR}
-mv ${OUTDIR}/screwd-*${SCREWD_BUILD_TYPE}*.zip.md5sum ${UPLOADDIR}
+mv ${OUTDIR}/screwd-*${SCREWD_BUILD_TYPE}*.zip "${UPLOADDIR}"
+mv ${OUTDIR}/screwd-*${SCREWD_BUILD_TYPE}*.zip.md5sum "${UPLOADDIR}"
 
 
 

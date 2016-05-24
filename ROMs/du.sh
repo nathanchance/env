@@ -141,8 +141,8 @@ echo -e "CLEANING UPLOAD DIRECTORY"
 echo -e "-------------------------"
 echo -e ${RST}
 
-rm ${UPLOADDIR}/*_${DEVICE}_*.zip
-rm ${UPLOADDIR}/*_${DEVICE}_*.zip.md5sum
+rm "${UPLOADDIR}"/*_${DEVICE}_*.zip
+rm "${UPLOADDIR}"/*_${DEVICE}_*.zip.md5sum
 
 
 
@@ -153,8 +153,8 @@ echo -e "MOVING FILES TO UPLOAD DIRECTORY"
 echo -e "--------------------------------"
 echo -e ${RST}
 
-mv ${OUTDIR}/DU_${DEVICE}_*.zip ${UPLOADDIR}
-mv ${OUTDIR}/DU_${DEVICE}_*.zip.md5sum ${UPLOADDIR}
+mv ${OUTDIR}/DU_${DEVICE}_*.zip "${UPLOADDIR}"
+mv ${OUTDIR}/DU_${DEVICE}_*.zip.md5sum "${UPLOADDIR}"
 
 
 
