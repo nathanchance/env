@@ -108,7 +108,7 @@ sed -i 's/project/   */g' ${CHANGELOG}
 
 
 # Move the changelog
-rm -rf ${UPLOAD_DIR}/${CHANGELOG}
+rm -rf "${UPLOAD_DIR}"/${CHANGELOG}
 mv ${CHANGELOG} "${UPLOAD_DIR}"
 
 
