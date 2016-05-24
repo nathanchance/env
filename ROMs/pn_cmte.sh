@@ -30,7 +30,7 @@ SYNC=$2
 # ---------
 SOURCEDIR=~/ROMs/PN-CMTE
 OUTDIR=${SOURCEDIR}/out/target/product/${DEVICE}
-UPLOADDIR=~/shared/ROMs/Pure\ Nexus/CMTE/${DEVICE}
+UPLOADDIR=~/shared/ROMs/"Pure Nexus"/CMTE/${DEVICE}
 
 
 
@@ -141,8 +141,8 @@ echo -e "CLEANING UPLOAD DIRECTORY"
 echo -e "-------------------------"
 echo -e ${RST}
 
-rm ${UPLOADDIR}/*_${DEVICE}_*.zip
-rm ${UPLOADDIR}/*_${DEVICE}_*.zip.md5sum
+rm "${UPLOADDIR}"/*_${DEVICE}_*.zip
+rm "${UPLOADDIR}"/*_${DEVICE}_*.zip.md5sum
 
 
 
@@ -153,8 +153,8 @@ echo -e "MOVING FILES TO UPLOAD DIRECTORY"
 echo -e "--------------------------------"
 echo -e ${RST}
 
-mv ${OUTDIR}/pure_nexus_${DEVICE}-*.zip ${UPLOADDIR}
-mv ${OUTDIR}/pure_nexus_${DEVICE}-*.zip.md5sum ${UPLOADDIR}
+mv ${OUTDIR}/pure_nexus_${DEVICE}-*.zip "${UPLOADDIR}"
+mv ${OUTDIR}/pure_nexus_${DEVICE}-*.zip.md5sum "${UPLOADDIR}"
 
 
 

@@ -1,7 +1,7 @@
 # Variables
 SOURCEDIR=~/ROMs/PN-Mod
 OUTDIR=${SOURCEDIR}/out/target/product
-UPLOADDIR=~/shared/ROMs/Pure\ Nexus/Mod
+UPLOADDIR=~/shared/ROMs/"Pure Nexus"/Mod
 DEVICE=angler
 
 # Make it show nathan@chancellor in the kernel version
@@ -31,12 +31,12 @@ make clobber
 brunch ${DEVICE}
 
 # Remove exisiting files
-rm ${UPLOADDIR}/*_${DEVICE}-*.zip
-rm ${UPLOADDIR}/*_${DEVICE}-*.zip.md5sum
+rm "${UPLOADDIR}"/*_${DEVICE}-*.zip
+rm "${UPLOADDIR}"/*_${DEVICE}-*.zip.md5sum
 
 # Copy new files
-mv ${OUTDIR}/${DEVICE}/pure_nexus_${DEVICE}-*.zip ${UPLOADDIR}
-mv ${OUTDIR}/${DEVICE}/pure_nexus_${DEVICE}-*.zip.md5sum ${UPLOADDIR}
+mv ${OUTDIR}/${DEVICE}/pure_nexus_${DEVICE}-*.zip "${UPLOADDIR}"
+mv ${OUTDIR}/${DEVICE}/pure_nexus_${DEVICE}-*.zip.md5sum "${UPLOADDIR}"
 
 # Upload files
 . ~/upload.sh

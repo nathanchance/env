@@ -27,7 +27,7 @@ ROM_DIR=~/ROMs
 if [ "${ROM}" == "du" ]
 then
    SOURCE_DIR=${ROM_DIR}/DU
-   UPLOAD_DIR=~/shared/ROMs/Dirty\ Unicorns/${DEVICE}
+   UPLOAD_DIR=~/shared/ROMs/"Dirty Unicorns"/${DEVICE}
    ROM_NAME="Dirty Unicorns | ${DEVICE}"
    CHANGELOG=Changelog.txt
 elif [ "${ROM}" == "dutest" ]
@@ -45,13 +45,13 @@ then
 elif [ "${ROM}" == "pnlayers" ]
 then
    SOURCE_DIR=${ROM_DIR}/PN-Layers
-   UPLOAD_DIR=~/shared/ROMs/Pure\ Nexus/Layers/${DEVICE}
+   UPLOAD_DIR=~/shared/ROMs/"Pure Nexus"/Layers/${DEVICE}
    ROM_NAME="Pure Nexus Layers | ${DEVICE}"
    CHANGELOG=Changelog.txt
 elif [ "${ROM}" == "pncmte" ]
 then
    SOURCE_DIR=${ROM_DIR}/PN-CMTE
-   UPLOAD_DIR=~/shared/ROMs/Pure\ Nexus/CMTE/${DEVICE}
+   UPLOAD_DIR=~/shared/ROMs/"Pure Nexus"/CMTE/${DEVICE}
    ROM_NAME="Pure Nexus CMTE | ${DEVICE}"
    CHANGELOG=Changelog.txt
 fi
@@ -109,7 +109,7 @@ sed -i 's/project/   */g' ${CHANGELOG}
 
 # Move the changelog
 rm -rf ${UPLOAD_DIR}/${CHANGELOG}
-mv ${CHANGELOG} ${UPLOAD_DIR}/${CHANGELOG}
+mv ${CHANGELOG} "${UPLOAD_DIR}"
 
 
 
