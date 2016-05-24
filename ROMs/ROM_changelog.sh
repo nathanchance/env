@@ -68,6 +68,7 @@ RST="\033[0m"
 
 # Setup changelog
 cd ${SOURCE_DIR}
+rm -rf ${CHANGELOG}
 touch ${CHANGELOG}
 
 
@@ -107,15 +108,12 @@ sed -i 's/project/   */g' ${CHANGELOG}
 
 
 
-# Move the changelog
-rm -rf "${UPLOAD_DIR}"/${CHANGELOG}
-mv ${CHANGELOG} "${UPLOAD_DIR}"
-
-
-
 # Upload the changelog if requested
 if [ "${UPLOAD}" == "upload" ]
 then
+   # Move the changelog
+   rm -rf "${UPLOAD_DIR}"/${CHANGELOG}
+   mv ${CHANGELOG} "${UPLOAD_DIR}"
    . ~/upload.sh
 fi
 
