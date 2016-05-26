@@ -49,7 +49,7 @@ AK_VER="${BASE_AK_VER}${VER}"
 # -------
 # Exports
 # -------
-export LOCALVERSION=~`echo ${AK_VER}`
+export LOCALVERSION=-`echo ${AK_VER}`
 export CROSS_COMPILE="${TOOLCHAIN_DIR}/aarch64-linux-android-5.3-kernel/bin/aarch64-linux-android-"
 export ARCH=arm64
 export SUBARCH=arm64
