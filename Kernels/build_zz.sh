@@ -28,12 +28,20 @@ FETCHUPSTREAM=${1}
 # ---------
 # Variables
 # ---------
-SOURCEDIR=~/Kernels/ZZ_angler
-AKDIR=~/Kernels/ZZ-AnyKernel2
+SOURCEDIR=~/Kernels/ZZ
+AKDIR=~/Kernels/ZZ-AK2
 UPLOADDIR=~/shared/Kernels
 ZIPNAME=ZZ_angler-R5
 THREAD="-j$(grep -c ^processor /proc/cpuinfo)"
 DEFCONFIG=zz_defconfig
+
+
+
+# Toolchain and arch information
+export CROSS_COMPILE=~/Kernels/AOSP-4.9/bin/aarch64-linux-android-
+export ARCH=arm64
+export SUBARCH=arm64
+
 
 
 # Clear the terminal
@@ -78,7 +86,9 @@ then
    echo -e ${RESTORE}
    echo -e ""
 
-   git pull
+   git checkout marshmallow
+   git fetch upstream
+   git merge upstream/marshmallow
 fi
 
 

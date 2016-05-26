@@ -30,7 +30,7 @@ CHANGELOG=${2}
 # SOURCEDIR: Path to build your kernel
 # AKDIR: Directory for the AnyKernel updater
 # UPLOADDIR: Upload directory
-SOURCEDIR=~/Kernels/elite_angler
+SOURCEDIR=~/Kernels/Elite
 AKDIR=${SOURCEDIR}/packagesm
 UPLOADDIR=~/shared/Kernels
 BRANCH=Elite-merged
@@ -38,7 +38,7 @@ BRANCH=Elite-merged
 
 
 # Toolchain location and info
-TOOLCHAIN=~/Kernels/Linaro-4.9_aarch64/bin/aarch64-linux-android-
+TOOLCHAIN=~/Kernels/Linaro-4.9/bin/aarch64-linux-android-
 export ARCH=arm64
 export SUBARCH=arm64
 

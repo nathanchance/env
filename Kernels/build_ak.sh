@@ -34,9 +34,8 @@ KERNEL="Image.gz"
 DTBIMAGE="dtb"
 DEFCONFIG="ak_angler_defconfig"
 RESOURCE_DIR=~/Kernels
-TOOLCHAIN_DIR=${RESOURCE_DIR}
-KERNEL_DIR=~/Kernels/AK-Angler
-ANYKERNEL_DIR=${RESOURCE_DIR}/AK-Angler-AnyKernel2
+KERNEL_DIR=${RESOURE_DIR}/AK
+ANYKERNEL_DIR=${RESOURCE_DIR}/AK-AK2
 UPLOAD_DIR=~/shared/Kernels
 KER_BRANCH=ak-mm-staging
 AK_BRANCH=ak-angler-anykernel
@@ -50,7 +49,7 @@ AK_VER="${BASE_AK_VER}${VER}"
 # Exports
 # -------
 export LOCALVERSION=-`echo ${AK_VER}`
-export CROSS_COMPILE="${TOOLCHAIN_DIR}/aarch64-linux-android-5.3-kernel/bin/aarch64-linux-android-"
+export CROSS_COMPILE="${RESOURCE_DIR}/UBER-5.3/bin/aarch64-linux-android-"
 export ARCH=arm64
 export SUBARCH=arm64
 export KBUILD_BUILD_USER=nathan
@@ -64,7 +63,6 @@ export KBUILD_BUILD_HOST=chancellor
 REPACK_DIR="${ANYKERNEL_DIR}"
 PATCH_DIR="${ANYKERNEL_DIR}/patch"
 MODULES_DIR="${ANYKERNEL_DIR}/modules"
-ZIP_MOVE="${UPLOAD_DIR}"
 ZIMAGE_DIR="${KERNEL_DIR}/arch/arm64/boot"
 
 
@@ -127,7 +125,7 @@ function make_zip {
    cd ${REPACK_DIR}
    zip -x@zipexclude -r9 `echo ${AK_VER}`.zip *
    rm  ${UPLOAD_DIR}/${BASE_AK_VER}*.zip
-   mv  `echo ${AK_VER}`.zip ${ZIP_MOVE}
+   mv  `echo ${AK_VER}`.zip ${UPLOAD_DIR}
    cd ${KERNEL_DIR}
 }
 
