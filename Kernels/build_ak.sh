@@ -94,6 +94,7 @@ function update_git {
    git checkout ${KER_BRANCH}
    git fetch upstream
    git merge upstream/${KER_BRANCH}
+   git push
    echo
 }
 

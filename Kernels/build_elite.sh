@@ -116,6 +116,7 @@ then
    git checkout ${BRANCH}
    git fetch upstream
    git merge upstream/${BRANCH}
+   git push
 fi
 
 

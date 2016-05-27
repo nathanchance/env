@@ -89,6 +89,7 @@ then
    git checkout marshmallow
    git fetch upstream
    git merge upstream/marshmallow
+   git push
 fi
 
 
