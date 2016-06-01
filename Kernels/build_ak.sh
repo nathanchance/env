@@ -3,7 +3,7 @@
 # -----
 # Usage
 # -----
-# $ . build_ak.sh <update|noupdate> <changelog|nochangelog>
+# $ . build_ak.sh <update|noupdate>
 
 
 
@@ -20,9 +20,7 @@ RESTORE="\033[0m"
 # Parameters
 # ----------
 # FETCHUPSTREAM: Whether or not to fetch new AK updates
-# CHANGELOG: Whether or not to build a changelog
 FETCHUPSTREAM=${1}
-CHANGELOG=${2}
 
 
 
@@ -212,23 +210,6 @@ make_kernel
 make_dtb
 make_modules
 make_zip
-
-
-
-# Make the changelog if requested
-if [ ${CHANGELOG} == "changelog" ]
-then
-   echo -e ""
-   echo -e ${RED}
-   echo -e "----------------"
-   echo -e "MAKING CHANGELOG"
-   echo -e "----------------"
-   echo -e ${RESTORE}
-
-   . kernel_changelog.sh ak `date +"%m/%d/%y"` noupload
-
-   echo -e ""
-fi
 
 
 

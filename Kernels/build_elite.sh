@@ -3,7 +3,7 @@
 # -----
 # Usage
 # -----
-# $ . build_elite.sh <update|noupdate> <changelog|nochangelog>
+# $ . build_elite.sh <update|noupdate>
 
 
 
@@ -20,7 +20,6 @@ RESTORE="\033[0m"
 # ----------
 # FETCHUPSTREAM: merge in new changes
 FETCHUPSTREAM=${1}
-CHANGELOG=${2}
 
 
 
@@ -200,20 +199,6 @@ echo -e ${RESTORE}
 
 rm ${UPLOADDIR}/Elite_*.zip
 mv ${ZIPNAME}.zip ${UPLOADDIR}
-
-
-
-# Make the changelog if requested
-if [ ${CHANGELOG} == "changelog" ]
-then
-   echo -e ${BLUE}
-   echo -e "----------------"
-   echo -e "MAKING CHANGELOG"
-   echo -e "----------------"
-   echo -e ${RESTORE}
-
-   . kernel_changelog.sh elite `date +"%m/%d/%y"` noupload
-fi
 
 
 
