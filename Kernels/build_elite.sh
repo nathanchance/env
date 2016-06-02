@@ -3,7 +3,7 @@
 # -----
 # Usage
 # -----
-# $ . build_elite.sh <update|noupdate>
+# $ . build_elite.sh <update|noupdate> <toolchain>
 
 
 
@@ -19,8 +19,9 @@ RESTORE="\033[0m"
 # Parameters
 # ----------
 # FETCHUPSTREAM: merge in new changes
+# TOOLCHAIN: Toolchain to compile with
 FETCHUPSTREAM=${1}
-
+TOOLCHAIN=${2}
 
 
 # ---------
@@ -63,7 +64,7 @@ then
    TOOLCHAIN_DIR=Toolchains/UBER/out/aarch64-linux-android-7.0-kernel
 fi
 
-export CROSS_COMPILE=~/Kernels/${TOOLCHAIN_DIR}/bin/aarch64-linux-android-
+export CROSS_COMPILE="~/Kernels/${TOOLCHAIN_DIR}/bin/aarch64-linux-android-"
 export ARCH=arm64
 export SUBARCH=arm64
 
