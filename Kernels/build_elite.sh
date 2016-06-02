@@ -37,7 +37,33 @@ BRANCH=Elite-merged
 
 
 # Toolchain location and info
-TOOLCHAIN=~/Kernels/Linaro-4.9/bin/aarch64-linux-android-
+if [ "${TOOLCHAIN}" == "linaro4.9" ]
+then
+   TOOLCHAIN_VER="LINARO4.9"
+   TOOLCHAIN_DIR=Linaro-4.9
+elif [ "${TOOLCHAIN}" == "aosp4.9" ]
+then
+   TOOLCHAIN_VER="AOSP4.9"
+   TOOLCHAIN_DIR=AOSP-4.9
+elif [ "${TOOLCHAIN}" == "uber4.9" ]
+then
+   TOOLCHAIN_VER="UBER4.9"
+   TOOLCHAIN_DIR=UBER-4.9
+elif [ "${TOOLCHAIN}" == "uber5.3" ]
+then
+   TOOLCHAIN_VER="UBER5.3"
+   TOOLCHAIN_DIR=UBER-5.3
+elif [ "${TOOLCHAIN}" == "uber6.0" ]
+then
+   TOOLCHAIN_VER="UBER6.0"
+   TOOLCHAIN_DIR=UBER-6.0
+elif [ "${TOOLCHAIN}" == "uber7.0" ]
+then
+   TOOLCHAIN_VER="UBER7.0"
+   TOOLCHAIN_DIR=UBER-7.0
+fi
+
+TOOLCHAIN=~/Kernels/${TOOLCHAIN_DIR}/bin/aarch64-linux-android-
 export ARCH=arm64
 export SUBARCH=arm64
 
@@ -123,8 +149,11 @@ fi
 # Setup the build
 cd ${SOURCEDIR}/arch/arm64/configs/BBKconfigsM
 for KERNELNAME in *
- do
-  cd ${SOURCEDIR}
+do
+
+
+
+cd ${SOURCEDIR}
 
 
 
@@ -140,7 +169,7 @@ cp -R "${AKDIR}/anykernel.sh" out/${KERNELNAME}
 
 
 # Flashable zip name
-ZIPNAME=${KERNELNAME}-${today}
+ZIPNAME=${KERNELNAME}-${today}-${TOOLCHAIN_VER}
 
 
 
@@ -197,7 +226,7 @@ echo -e "MOVING ${ZIPNAME}.ZIP" | tr [a-z] [A-Z]
 echo -e "------------------------------------"
 echo -e ${RESTORE}
 
-rm ${UPLOADDIR}/Elite_*.zip
+rm ${UPLOADDIR}/Elite_*${TOOLCHAIN_VER}.zip
 mv ${ZIPNAME}.zip ${UPLOADDIR}
 
 
