@@ -20,7 +20,20 @@ RESTORE="\033[0m"
 # Parameters
 # ----------
 # FETCHUPSTREAM: Whether or not to fetch new AK updates
+# TOOLCHAIN: Toolchain to compile with
+PROGRAM=${0}
 FETCHUPSTREAM=${1}
+TOOLCHAIN=${2}
+
+
+
+# ----------
+# Directories
+# ----------
+RESOURCE_DIR=~/Kernels
+KERNEL_DIR=${RESOURCE_DIR}/AK
+ANYKERNEL_DIR=${RESOURCE_DIR}/AK-AK2
+UPLOAD_DIR=~/shared/Kernels
 
 
 
@@ -35,6 +48,35 @@ KER_BRANCH=ak-mm-staging
 AK_BRANCH=ak-angler-anykernel
 BASE_AK_VER="AK"
 VER=".066.ANGLER"
+if [ "${TOOLCHAIN}" == "all" ]
+then
+   source PROGRAM FETCHUPSTREAM aosp4.9
+   source PROGRAM FETCHUPSTREAM uber4.9
+   source PROGRAM FETCHUPSTREAM uber5.3
+   source PROGRAM FETCHUPSTREAM uber6.0
+   source PROGRAM FETCHUPSTREAM uber7.0
+elif [ "${TOOLCHAIN}" == "aosp4.9" ]
+then
+   TOOLCHAIN_VER=".AOSP4.9"
+   TOOLCHAIN_DIR=AOSP-4.9
+elif [ "${TOOLCHAIN}" == "uber4.9" ]
+then
+   TOOLCHAIN_VER=".UBER4.9"
+   TOOLCHAIN_DIR=UBER-4.9
+elif [ "${TOOLCHAIN}" == "uber5.3" ]
+then
+   TOOLCHAIN_VER=".UBER5.3"
+   TOOLCHAIN_DIR=UBER-5.3
+elif [ "${TOOLCHAIN}" == "uber6.0" ]
+then
+   TOOLCHAIN_VER=".UBER6.0"
+   TOOLCHAIN_DIR=UBER-6.0
+elif [ "${TOOLCHAIN}" == "uber7.0" ]
+then
+   TOOLCHAIN_VER=".UBER7.0"
+   TOOLCHAIN_DIR=UBER-7.0
+fi
+AK_VER="${BASE_AK_VER}${VER}${TOOLCHAIN_VER}"
 
 
 
@@ -42,7 +84,7 @@ VER=".066.ANGLER"
 # Exports
 # -------
 export LOCALVERSION=-`echo ${AK_VER}`
-export CROSS_COMPILE="${RESOURCE_DIR}/UBER-5.3/bin/aarch64-linux-android-"
+export CROSS_COMPILE="${RESOURCE_DIR}/${TOOLCHAIN_DIR}/bin/aarch64-linux-android-"
 export ARCH=arm64
 export SUBARCH=arm64
 export KBUILD_BUILD_USER=nathan
@@ -118,7 +160,7 @@ function make_dtb {
 function make_zip {
    cd ${REPACK_DIR}
    zip -x@zipexclude -r9 `echo ${AK_VER}`.zip *
-   rm  ${UPLOAD_DIR}/${BASE_AK_VER}*.zip
+   rm  ${UPLOAD_DIR}/${BASE_AK_VER}*${TOOLCHAIN_VER}.zip
    mv  `echo ${AK_VER}`.zip ${UPLOAD_DIR}
    cd ${KERNEL_DIR}
 }
