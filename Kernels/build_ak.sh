@@ -21,7 +21,6 @@ RESTORE="\033[0m"
 # ----------
 # FETCHUPSTREAM: Whether or not to fetch new AK updates
 # TOOLCHAIN: Toolchain to compile with
-PROGRAM=${0}
 FETCHUPSTREAM=${1}
 TOOLCHAIN=${2}
 
@@ -48,14 +47,7 @@ KER_BRANCH=ak-mm-staging
 AK_BRANCH=ak-angler-anykernel
 BASE_AK_VER="AK"
 VER=".066.ANGLER"
-if [ "${TOOLCHAIN}" == "all" ]
-then
-   source PROGRAM FETCHUPSTREAM aosp4.9
-   source PROGRAM FETCHUPSTREAM uber4.9
-   source PROGRAM FETCHUPSTREAM uber5.3
-   source PROGRAM FETCHUPSTREAM uber6.0
-   source PROGRAM FETCHUPSTREAM uber7.0
-elif [ "${TOOLCHAIN}" == "aosp4.9" ]
+if [ "${TOOLCHAIN}" == "aosp4.9" ]
 then
    TOOLCHAIN_VER=".AOSP4.9"
    TOOLCHAIN_DIR=AOSP-4.9
