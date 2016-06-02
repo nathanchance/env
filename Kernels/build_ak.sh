@@ -3,7 +3,7 @@
 # -----
 # Usage
 # -----
-# $ . build_ak.sh <update|noupdate>
+# $ . build_ak.sh <update|noupdate> <toolchain>
 
 
 
@@ -31,15 +31,10 @@ THREAD="-j$(grep -c ^processor /proc/cpuinfo)"
 KERNEL="Image.gz"
 DTBIMAGE="dtb"
 DEFCONFIG="ak_angler_defconfig"
-RESOURCE_DIR=~/Kernels
-KERNEL_DIR=${RESOURCE_DIR}/AK
-ANYKERNEL_DIR=${RESOURCE_DIR}/AK-AK2
-UPLOAD_DIR=~/shared/Kernels
 KER_BRANCH=ak-mm-staging
 AK_BRANCH=ak-angler-anykernel
 BASE_AK_VER="AK"
 VER=".066.ANGLER"
-AK_VER="${BASE_AK_VER}${VER}"
 
 
 
