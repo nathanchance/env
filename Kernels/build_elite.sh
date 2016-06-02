@@ -189,7 +189,7 @@ echo -e ${RESTORE}
 echo -e ""
 
 make 'angler_defconfig'
-make -j`grep 'processor' /proc/cpuinfo`
+make -j$(grep -c ^processor /proc/cpuinfo)
 
 
 
