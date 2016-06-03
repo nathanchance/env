@@ -3,7 +3,7 @@
 # -----
 # Usage
 # -----
-# $ . pn_layers.sh <device> <sync|nosync>
+# $ . pn.sh <device> <sync|nosync>
 # Parameter 1: device (eg. angler, bullhead, shamu)
 # Parameter 2: sync or nosync (decides whether or not to run repo sync)
 
@@ -12,8 +12,8 @@
 # --------
 # Examples
 # --------
-# $ . pn_layers.sh angler sync
-# $ . pn_layers.sh angler nosync
+# $ . pn.sh angler sync
+# $ . pn.sh angler nosync
 
 
 
@@ -28,9 +28,9 @@ SYNC=$2
 # ---------
 # Variables
 # ---------
-SOURCEDIR=~/ROMs/PN-Layers
+SOURCEDIR=~/ROMs/PN
 OUTDIR=${SOURCEDIR}/out/target/product/${DEVICE}
-UPLOADDIR=~/shared/ROMs/"Pure Nexus"/Layers/${DEVICE}
+UPLOADDIR=~/shared/ROMs/"Pure Nexus"/${DEVICE}
 
 
 
