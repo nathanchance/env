@@ -58,11 +58,11 @@ then
 elif [ "${TOOLCHAIN}" == "uber5.3" ]
 then
    TOOLCHAIN_VER=".UBER5.3"
-   TOOLCHAIN_DIR=Toolchains/UBER/out/aarch64-linux-android-5.3-kernel
+   TOOLCHAIN_DIR=Toolchains/UBER/out/aarch64-linux-android-5.x-kernel
 elif [ "${TOOLCHAIN}" == "uber6.0" ]
 then
    TOOLCHAIN_VER=".UBER6.0"
-   TOOLCHAIN_DIR=Toolchains/UBER/out/aarch64-linux-android-6.0-kernel
+   TOOLCHAIN_DIR=Toolchains/UBER/out/aarch64-linux-android-6.x-kernel
 elif [ "${TOOLCHAIN}" == "uber7.0" ]
 then
    TOOLCHAIN_VER=".UBER7.0"
