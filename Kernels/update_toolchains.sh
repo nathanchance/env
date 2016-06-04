@@ -9,10 +9,10 @@ cd scripts
 source aarch64-linux-android-4.9-kernel
 
 cd ../scripts
-source aarch64-linux-android-5.3-kernel
+source aarch64-linux-android-5.x-kernel
 
 cd ../scripts
-source aarch64-linux-android-6.0-kernel
+source aarch64-linux-android-6.x-kernel
 
 cd ../scripts
 source aarch64-linux-android-7.0-kernel
