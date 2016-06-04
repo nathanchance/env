@@ -55,13 +55,13 @@ elif [ "${TOOLCHAIN}" == "uber4.9" ]
 then
    TOOLCHAIN_VER=".UBER4.9"
    TOOLCHAIN_DIR=Toolchains/UBER/out/aarch64-linux-android-4.9-kernel
-elif [ "${TOOLCHAIN}" == "uber5.3" ]
+elif [ "${TOOLCHAIN}" == "uber5.x" ]
 then
-   TOOLCHAIN_VER=".UBER5.3"
+   TOOLCHAIN_VER=".UBER5.4"
    TOOLCHAIN_DIR=Toolchains/UBER/out/aarch64-linux-android-5.x-kernel
-elif [ "${TOOLCHAIN}" == "uber6.0" ]
+elif [ "${TOOLCHAIN}" == "uber6.x" ]
 then
-   TOOLCHAIN_VER=".UBER6.0"
+   TOOLCHAIN_VER=".UBER6.1"
    TOOLCHAIN_DIR=Toolchains/UBER/out/aarch64-linux-android-6.x-kernel
 elif [ "${TOOLCHAIN}" == "uber7.0" ]
 then
