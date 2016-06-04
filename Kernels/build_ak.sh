@@ -33,7 +33,9 @@ RESOURCE_DIR=~/Kernels
 KERNEL_DIR=${RESOURCE_DIR}/AK
 ANYKERNEL_DIR=${RESOURCE_DIR}/AK-AK2
 UPLOAD_DIR=~/shared/Kernels
-
+PATCH_DIR="${ANYKERNEL_DIR}/patch"
+MODULES_DIR="${ANYKERNEL_DIR}/modules"
+ZIMAGE_DIR="${KERNEL_DIR}/arch/arm64/boot"
 
 
 # ---------
@@ -84,16 +86,6 @@ export KBUILD_BUILD_HOST=chancellor
 
 
 
-# -----
-# Paths
-# -----
-REPACK_DIR="${ANYKERNEL_DIR}"
-PATCH_DIR="${ANYKERNEL_DIR}/patch"
-MODULES_DIR="${ANYKERNEL_DIR}/modules"
-ZIMAGE_DIR="${KERNEL_DIR}/arch/arm64/boot"
-
-
-
 # ---------
 # Functions
 # ---------
@@ -102,7 +94,7 @@ function clean_all {
    if [ -f "${MODULES_DIR}/*.ko" ]; then
      rm `echo ${MODULES_DIR}"/*.ko"`
    fi
-   cd ${REPACK_DIR}
+   cd ${ANYKERNEL_DIR}
    rm -rf ${KERNEL}
    rm -rf ${DTBIMAGE}
    git checkout ${AK_BRANCH}
@@ -131,7 +123,7 @@ function make_kernel {
    cd ${KERNEL_DIR}
    make ${DEFCONFIG}
    make ${THREAD}
-   cp -vr ${ZIMAGE_DIR}/${KERNEL} ${REPACK_DIR}/zImage
+   cp -vr ${ZIMAGE_DIR}/${KERNEL} ${ANYKERNEL_DIR}/zImage
 }
 
 # Make the modules
@@ -145,12 +137,12 @@ function make_modules {
 
 # Make the DTB file
 function make_dtb {
-   ${REPACK_DIR}/tools/dtbToolCM -v2 -o ${REPACK_DIR}/${DTBIMAGE} -s 2048 -p scripts/dtc/ arch/arm64/boot/dts/
+   ${ANYKERNEL_DIR}/tools/dtbToolCM -v2 -o ${ANYKERNEL_DIR}/${DTBIMAGE} -s 2048 -p scripts/dtc/ arch/arm64/boot/dts/
 }
 
 # Make the zip file, remove the previous version and upload it
 function make_zip {
-   cd ${REPACK_DIR}
+   cd ${ANYKERNEL_DIR}
    zip -x@zipexclude -r9 `echo ${AK_VER}`.zip *
    rm  ${UPLOAD_DIR}/${BASE_AK_VER}*${TOOLCHAIN_VER}.zip
    mv  `echo ${AK_VER}`.zip ${UPLOAD_DIR}
