@@ -1,18 +1,21 @@
 #!/bin/bash
 
-TOOLCHAIN_DIR=~/Kernels/Toolchains/UBER
+cd ~/Kernels/Toolchains/UBER4
+git clean -f -d
+git reset --hard
+git pull
 
-cd ${TOOLCHAIN_DIR}
-repo sync --force-sync
+cd ../UBER5
+git clean -f -d
+git reset --hard
+git pull
 
-cd scripts
-source aarch64-linux-android-4.9-kernel
+cd ../UBER6
+git clean -f -d
+git reset --hard
+git pull
 
-cd ../scripts
-source aarch64-linux-android-5.x-kernel
-
-cd ../scripts
-source aarch64-linux-android-6.x-kernel
-
-cd ../scripts
-source aarch64-linux-android-7.0-kernel
+cd ../UBER7
+git clean -f -d
+git reset --hard
+git pull
