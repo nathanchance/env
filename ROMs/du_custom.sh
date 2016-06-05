@@ -253,7 +253,7 @@ echo -e "-------------------------------------"
 echo -e ${RST}
 
 # Add line to compile log
-echo -e "`date +%H:%M:%S`: \n${BASH_SOURCE} ${BUILD_SUCCESS_STRING}\n" >> ${LOGDIR}/${COMPILE_LOG}
+echo -e "`date +%H:%M:%S`: \n${BASH_SOURCE} ${BUILD_SUCCESS_STRING}" >> ${LOGDIR}/${COMPILE_LOG}
 echo -e "$(echo $((${END}-${START})) | awk '{print int($1/60)"mins "int($1%60)"secs"}')\n" >> ${LOGDIR}/${COMPILE_LOG}
 
 echo -e "\a"
