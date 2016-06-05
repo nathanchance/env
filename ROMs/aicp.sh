@@ -28,9 +28,9 @@ SYNC=$2
 # ---------
 # Variables
 # ---------
-SOURCEDIR=~/ROMs/AICP
+SOURCEDIR=${HOME}/ROMs/AICP
 OUTDIR=${SOURCEDIR}/out/target/product/${DEVICE}
-UPLOADDIR=~/shared/ROMs/AICP/${DEVICE}
+UPLOADDIR=${HOME}/shared/ROMs/AICP/${DEVICE}
 
 
 
@@ -166,7 +166,7 @@ echo -e "---------------"
 echo -e ${RST}
 echo -e ""
 
-. ~/upload.sh
+. ${HOME}/upload.sh
 
 
 
@@ -191,7 +191,7 @@ echo -e "GOING HOME"
 echo -e "----------"
 echo -e ${RST}
 
-cd ~/
+cd ${HOME}
 
 
 

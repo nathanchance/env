@@ -29,10 +29,10 @@ TOOLCHAIN=${2}
 # ----------
 # Directories
 # ----------
-RESOURCE_DIR=~/Kernels
+RESOURCE_DIR=${HOME}/Kernels
 KERNEL_DIR=${RESOURCE_DIR}/AK
 ANYKERNEL_DIR=${RESOURCE_DIR}/AK-AK2
-UPLOAD_DIR=~/shared/Kernels
+UPLOAD_DIR=${HOME}/shared/Kernels
 PATCH_DIR="${ANYKERNEL_DIR}/patch"
 MODULES_DIR="${ANYKERNEL_DIR}/modules"
 ZIMAGE_DIR="${KERNEL_DIR}/arch/arm64/boot"
@@ -242,7 +242,7 @@ echo -e "------------------"
 echo -e ${RESTORE}
 echo -e ""
 
-. ~/upload.sh
+. ${HOME}/upload.sh
 
 
 

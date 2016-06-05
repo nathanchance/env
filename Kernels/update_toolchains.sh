@@ -1,6 +1,6 @@
 #!/bin/bash
 
-cd ~/Kernels/Toolchains/UBER4
+cd ${HOME}/Kernels/Toolchains/UBER4
 git clean -f -d
 git reset --hard
 git pull

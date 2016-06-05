@@ -30,9 +30,9 @@ PERSON=$3
 # ---------
 # Variables
 # ---------
-SOURCEDIR=~/ROMs/DU
+SOURCEDIR=${HOME}/ROMs/DU
 OUTDIR=${SOURCEDIR}/out/target/product/${DEVICE}
-UPLOADDIR=~/shared/ROMs/.special/.${PERSON}
+UPLOADDIR=${HOME}/shared/ROMs/.special/.${PERSON}
 
 
 
@@ -196,7 +196,7 @@ echo -e "---------------"
 echo -e ${RST}
 echo -e ""
 
-. ~/upload.sh
+. ${HOME}/upload.sh
 
 # Clean up out directory to free up space
 echo -e ""
@@ -219,7 +219,7 @@ echo -e "GOING HOME"
 echo -e "----------"
 echo -e ${RST}
 
-cd ~/
+cd ${HOME}
 
 
 

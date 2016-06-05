@@ -17,7 +17,7 @@ STARTOVER=$1
 # ---------
 # Variables
 # ---------
-ANDROIDDIR=~/
+ANDROIDDIR=${HOME}/
 ROMDIR=${ANDROIDDIR}/ROMs
 GAPPSDIR=${ANDROIDDIR}/GApps
 KERNELSDIR=${ANDROIDDIR}/Kernels
@@ -35,10 +35,10 @@ then
 else
    sudo apt-get install curl
    curl https://raw.githubusercontent.com/akhilnarang/scripts/master/build-environment-setup.sh | bash
-   mkdir ~/bin
-   PATH=~/bin:$PATH
-   curl https://storage.googleapis.com/git-repo-downloads/repo > ~/bin/repo
-   chmod a+x ~/bin/repo
+   mkdir ${HOME}/bin
+   PATH=${HOME}/bin:$PATH
+   curl https://storage.googleapis.com/git-repo-downloads/repo > ${HOME}/bin/repo
+   chmod a+x ${HOME}/bin/repo
    git config --global user.name "Nathan Chancellor"
    git config --global user.email "natechancellor@gmail.com"
 fi

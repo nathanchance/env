@@ -27,7 +27,7 @@ RST="\033[0m"
 
 
 # Parent directory of source
-ROM_DIR=~/ROMs
+ROM_DIR=${HOME}/ROMs
 
 
 

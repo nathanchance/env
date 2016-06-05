@@ -30,9 +30,9 @@ TOOLCHAIN=${2}
 # SOURCEDIR: Path to build your kernel
 # AKDIR: Directory for the AnyKernel updater
 # UPLOADDIR: Upload directory
-SOURCEDIR=~/Kernels/Elite
+SOURCEDIR=${HOME}/Kernels/Elite
 AKDIR=${SOURCEDIR}/packagesm
-UPLOADDIR=~/shared/Kernels
+UPLOADDIR=${HOME}/shared/Kernels
 BRANCH=Elite-merged
 
 
@@ -64,7 +64,7 @@ then
    TOOLCHAIN_DIR=Toolchains/UBER7
 fi
 
-export CROSS_COMPILE="~/Kernels/${TOOLCHAIN_DIR}/bin/aarch64-linux-android-"
+export CROSS_COMPILE="${HOME}/Kernels/${TOOLCHAIN_DIR}/bin/aarch64-linux-android-"
 export ARCH=arm64
 export SUBARCH=arm64
 
@@ -240,7 +240,7 @@ echo -e "---------------------------------------"
 echo -e ${RESTORE}
 echo -e ""
 
-. ~/upload.sh
+. ${HOME}/upload.sh
 
 
 
@@ -250,7 +250,7 @@ rm -rf ${SOURCEDIR}/out
 
 
 # Go to the home directory
-cd ~/
+cd ${HOME}
 
 
 

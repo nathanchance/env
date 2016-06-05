@@ -28,9 +28,9 @@ SYNC=$2
 # ---------
 # Variables
 # ---------
-SOURCEDIR=~/ROMs/Screwd
+SOURCEDIR=${HOME}/ROMs/Screwd
 OUTDIR=${SOURCEDIR}/out/target/product/${DEVICE}
-UPLOADDIR=~/shared/ROMs/"Screw'd"/${DEVICE}
+UPLOADDIR=${HOME}/shared/ROMs/"Screw'd"/${DEVICE}
 
 
 
@@ -166,7 +166,7 @@ echo -e "---------------"
 echo -e ${RST}
 echo -e ""
 
-. ~/upload.sh
+. ${HOME}/upload.sh
 
 
 
@@ -191,7 +191,7 @@ echo -e "GOING HOME"
 echo -e "----------"
 echo -e ${RST}
 
-cd ~/
+cd ${HOME}
 
 
 

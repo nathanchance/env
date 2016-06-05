@@ -28,9 +28,9 @@ SYNC=$2
 # ---------
 # Variables
 # ---------
-SOURCEDIR=~/ROMs/RR
+SOURCEDIR=${HOME}/ROMs/RR
 OUTDIR=${SOURCEDIR}/out/target/product/${DEVICE}
-UPLOADDIR=~/shared/ROMs/ResurrectionRemix/${DEVICE}
+UPLOADDIR=${HOME}/shared/ROMs/ResurrectionRemix/${DEVICE}
 
 
 
@@ -166,7 +166,7 @@ echo -e "---------------"
 echo -e ${RST}
 echo -e ""
 
-. ~/upload.sh
+. ${HOME}/upload.sh
 
 
 
@@ -191,7 +191,7 @@ echo -e "GOING HOME"
 echo -e "----------"
 echo -e ${RST}
 
-cd ~/
+cd ${HOME}
 
 
 

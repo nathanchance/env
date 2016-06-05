@@ -28,9 +28,9 @@ SYNC=$2
 # ---------
 # Variables
 # ---------
-SOURCEDIR=~/ROMs/PN
+SOURCEDIR=${HOME}/ROMs/PN
 OUTDIR=${SOURCEDIR}/out/target/product/${DEVICE}
-UPLOADDIR=~/shared/ROMs/"Pure Nexus"/${DEVICE}
+UPLOADDIR=${HOME}/shared/ROMs/"Pure Nexus"/${DEVICE}
 
 
 
@@ -166,7 +166,7 @@ echo -e "---------------"
 echo -e ${RST}
 echo -e ""
 
-. ~/upload.sh
+. ${HOME}/upload.sh
 
 
 
@@ -191,7 +191,7 @@ echo -e "GOING HOME"
 echo -e "----------"
 echo -e ${RST}
 
-cd ~/
+cd ${HOME}
 
 
 
