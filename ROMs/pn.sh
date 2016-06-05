@@ -216,7 +216,7 @@ fi
 
 # Stop tracking time
 END=$(date +%s)
-echo -e ${BLDRED}
+echo -e ${BLDBLUE}
 echo -e "-------------------------------------"
 echo -e "SCRIPT ENDING AT $(date +%D\ %r)"
 echo -e ""
