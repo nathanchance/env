@@ -213,10 +213,6 @@ else
 fi
 
 
-# Add line to compile log
-echo -e "`date +%H:%M:%S`: \n${BASH_SOURCE} ${BUILD_SUCCESS_STRING}\n" >> ${LOGDIR}/${COMPILE_LOG}
-
-
 
 # Stop tracking time
 END=$(date +%s)
@@ -225,7 +221,12 @@ echo -e "-------------------------------------"
 echo -e "SCRIPT ENDING AT $(date +%D\ %r)"
 echo -e ""
 echo -e "${BUILD_SUCCESS_STRING}"
-echo -e "TIME: $(echo $(($END-$START)) | awk '{print int($1/60)"mins "int($1%60)"secs"}')"
+echo -e "TIME: $(echo $((${END}-${START})) | awk '{print int($1/60)"mins "int($1%60)"secs"}')"
 echo -e "-------------------------------------"
 echo -e ${RST}
+
+# Add line to compile log
+echo -e "`date +%H:%M:%S`: \n${BASH_SOURCE} ${BUILD_SUCCESS_STRING}\n" >> ${LOGDIR}/${COMPILE_LOG}
+echo -e "$(echo $((${END}-${START})) | awk '{print int($1/60)"mins "int($1%60)"secs"}')\n" >> ${LOGDIR}/${COMPILE_LOG}
+
 echo -e "\a"

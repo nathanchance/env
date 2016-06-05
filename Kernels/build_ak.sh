@@ -259,11 +259,6 @@ fi
 
 
 
-# Add line to compile log
-echo -e "`date +%H:%M:%S`: \n${BASH_SOURCE} ${BUILD_SUCCESS_STRING}\n" >> ${LOGDIR}/${COMPILE_LOG}
-
-
-
 # End the script
 echo -e ""
 echo -e ${RED}
@@ -275,7 +270,12 @@ DATE_END=$(date +"%s")
 DIFF=$((${DATE_END} - ${DATE_START}))
 
 echo -e "${BUILD_SUCCESS_STRING}"
-echo "TIME: $((${DIFF} / 60)) minute(s) and $((${DIFF} % 60)) seconds"
+echo -e "TIME: $((${DIFF} / 60)) minute(s) and $((${DIFF} % 60)) seconds"
 
 echo -e ${RESTORE}
+
+# Add line to compile log
+echo -e "`date +%H:%M:%S`: \n${BASH_SOURCE} ${BUILD_SUCCESS_STRING}\n" >> ${LOGDIR}/${COMPILE_LOG}
+echo -e "$((${DIFF} / 60)) minute(s) and $((${DIFF} % 60)) seconds\n" >> ${LOGDIR}/${COMPILE_LOG}
+
 echo -e "\a"
