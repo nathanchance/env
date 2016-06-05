@@ -19,3 +19,5 @@ cd ../UBER7
 git clean -f -d
 git reset --hard
 git pull
+
+cd ${HOME}
