@@ -151,7 +151,7 @@ time mka bacon
 # If the above was successful
 if [ `ls ${OUTDIR}/DU_${DEVICE}_*.zip 2>/dev/null | wc -l` != "0" ]
 then
-   BUILD_SUCCESS_STRING="BUILD SUCCESSFUL!"
+   BUILD_SUCCESS_STRING="BUILD SUCCESSFUL"
 
 
 
@@ -220,7 +220,7 @@ then
 
 # If the build failed, add a variable
 else
-   BUILD_SUCCESS_STRING="BUILD FAILED!"
+   BUILD_SUCCESS_STRING="BUILD FAILED"
 
 fi
 
@@ -237,13 +237,13 @@ echo -e ${BLDRED}
 echo -e "-------------------------------------"
 echo -e "SCRIPT ENDING AT $(date +%D\ %r)"
 echo -e ""
-echo -e "${BUILD_SUCCESS_STRING}"
-echo -e "TIME: $(echo $((${END}-${START})) | awk '{print int($1/60)"mins "int($1%60)"secs"}')"
+echo -e "${BUILD_SUCCESS_STRING}!"
+echo -e "TIME: $(echo $((${END}-${START})) | awk '{print int($1/60)" MINUTES AND "int($1%60)" SECONDS"}')"
 echo -e "-------------------------------------"
 echo -e ${RST}
 
 # Add line to compile log
-echo -e "`date +%H:%M:%S`: \n${BASH_SOURCE} ${BUILD_SUCCESS_STRING}" >> ${LOGDIR}/${COMPILE_LOG}
-echo -e "$(echo $((${END}-${START})) | awk '{print int($1/60)"mins "int($1%60)"secs"}')\n" >> ${LOGDIR}/${COMPILE_LOG}
+echo -e "`date +%H:%M:%S`: ${BASH_SOURCE} ${DEVICE}" >> ${LOGDIR}/${COMPILE_LOG}
+echo -e "${BUILD_SUCCESS_STRING} IN $(echo $((${END}-${START})) | awk '{print int($1/60)" MINUTES AND "int($1%60)" SECONDS"}')\n" >> ${LOGDIR}/${COMPILE_LOG}
 
 echo -e "\a"

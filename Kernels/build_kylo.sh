@@ -190,7 +190,7 @@ make_kernel
 # If the above was successful
 if [ `ls ${ANYKERNEL_DIR}/kernel/zImage 2>/dev/null | wc -l` != "0" ]
 then
-   BUILD_SUCCESS_STRING="BUILD SUCCESSFUL!"
+   BUILD_SUCCESS_STRING="BUILD SUCCESSFUL"
 
    make_zip
 
@@ -204,7 +204,7 @@ then
 
    . ${HOME}/upload.sh
 else
-   BUILD_SUCCESS_STRING="BUILD FAILED!"
+   BUILD_SUCCESS_STRING="BUILD FAILED"
 fi
 
 
@@ -219,13 +219,13 @@ echo "--------------------"
 DATE_END=$(date +"%s")
 DIFF=$((${DATE_END} - ${DATE_START}))
 
-echo -e "${BUILD_SUCCESS_STRING}"
-echo -e "TIME: $((${DIFF} / 60)) minute(s) and $((${DIFF} % 60)) seconds"
+echo -e "${BUILD_SUCCESS_STRING}!"
+echo -e "TIME: $((${DIFF} / 60)) MINUTES AND $((${DIFF} % 60)) SECONDS"
 
 echo -e ${RESTORE}
 
 # Add line to compile log
-echo -e "`date +%H:%M:%S`: \n${BASH_SOURCE} ${BUILD_SUCCESS_STRING}" >> ${LOGDIR}/${COMPILE_LOG}
-echo -e "$((${DIFF} / 60)) minute(s) and $((${DIFF} % 60)) seconds\n" >> ${LOGDIR}/${COMPILE_LOG}
+echo -e "`date +%H:%M:%S`: ${BASH_SOURCE} ${TOOLCHAIN}" >> ${LOGDIR}/${COMPILE_LOG}
+echo -e "${BUILD_SUCCESS_STRING} IN $((${DIFF} / 60)) MINUTES AND $((${DIFF} % 60)) SECONDS\n" >> ${LOGDIR}/${COMPILE_LOG}
 
 echo -e "\a"
