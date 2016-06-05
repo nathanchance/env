@@ -36,6 +36,8 @@ UPLOAD_DIR=${HOME}/shared/Kernels
 PATCH_DIR="${ANYKERNEL_DIR}/patch"
 MODULES_DIR="${ANYKERNEL_DIR}/modules"
 ZIMAGE_DIR="${KERNEL_DIR}/arch/arm64/boot"
+LOGDIR=${HOME}/Logs
+
 
 
 # ---------
@@ -83,7 +85,7 @@ export ARCH=arm64
 export SUBARCH=arm64
 export KBUILD_BUILD_USER=nathan
 export KBUILD_BUILD_HOST=chancellor
-
+export COMPILE_LOG=compile_log_`date +%m_%d_%y`.log
 
 
 # ---------
@@ -230,19 +232,35 @@ echo -e ${RESTORE}
 make_kernel
 make_dtb
 make_modules
-make_zip
 
 
 
-# Upload
-echo -e ${RED}
-echo -e "------------------"
-echo -e "UPLOADING ZIP FILE"
-echo -e "------------------"
-echo -e ${RESTORE}
-echo -e ""
+# If the above was successful
+if [ `ls ${ANYKERNEL_DIR}/zImage 2>/dev/null | wc -l` != "0" ]
+then
+   BUILD_SUCCESS_STRING="BUILD SUCCESSFUL!"
 
-. ${HOME}/upload.sh
+
+   make_zip
+
+
+   # Upload
+   echo -e ${RED}
+   echo -e "------------------"
+   echo -e "UPLOADING ZIP FILE"
+   echo -e "------------------"
+   echo -e ${RESTORE}
+   echo -e ""
+
+   . ${HOME}/upload.sh
+else
+   BUILD_SUCCESS_STRING="BUILD FAILED!"
+fi
+
+
+
+# Add line to compile log
+echo -e "`date +%H:%M:%S`: \n${BASH_SOURCE} ${BUILD_SUCCESS_STRING}\n" >> ${LOGDIR}/${COMPILE_LOG}
 
 
 
@@ -256,6 +274,7 @@ echo "--------------------"
 DATE_END=$(date +"%s")
 DIFF=$((${DATE_END} - ${DATE_START}))
 
+echo -e "${BUILD_SUCCESS_STRING}"
 echo "TIME: $((${DIFF} / 60)) minute(s) and $((${DIFF} % 60)) seconds"
 
 echo -e ${RESTORE}

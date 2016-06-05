@@ -33,6 +33,7 @@ PERSON=$3
 SOURCEDIR=${HOME}/ROMs/DU
 OUTDIR=${SOURCEDIR}/out/target/product/${DEVICE}
 UPLOADDIR=${HOME}/shared/ROMs/.special/.${PERSON}
+LOGDIR=${HOME}/Logs
 
 
 
@@ -44,8 +45,10 @@ RST="\033[0m"
 
 
 
-# Export the person for changelog option
-export ${PERSON}
+# Export the COMPILE_LOG variable for other files to use
+export COMPILE_LOG=compile_log_`date +%m_%d_%y`.log
+
+
 
 # Add custom build tag
 if [ "${PERSON}" == "bre" ]
@@ -67,8 +70,6 @@ else
   export DU_BUILD_TYPE=CHANCELLOR
 fi
 
-# Set a bash variable for the changelog script
-export DU_BUILD_TYPE_CL=${DU_BUILD_TYPE}
 
 
 
@@ -162,64 +163,80 @@ echo -e ""
 time mka bacon
 
 
-
-# Remove exisiting files in UPLOADDIR
-echo -e ""
-echo -e ${BLDRED}
-echo -e "-------------------------"
-echo -e "CLEANING UPLOAD DIRECTORY"
-echo -e "-------------------------"
-echo -e ${RST}
-
-rm ${UPLOADDIR}/*_${DEVICE}_*.zip
-rm ${UPLOADDIR}/*_${DEVICE}_*.zip.md5sum
+# If the above was successful
+if [ `ls ${OUTDIR}/DU_${DEVICE}_*.zip 2>/dev/null | wc -l` != "0" ]
+then
+   BUILD_SUCCESS_STRING="BUILD SUCCESSFUL!"
 
 
 
-# Copy new files to UPLOADDIR
-echo -e ${BLDRED}
-echo -e "--------------------------------"
-echo -e "MOVING FILES TO UPLOAD DIRECTORY"
-echo -e "--------------------------------"
-echo -e ${RST}
+   # Remove exisiting files in UPLOADDIR
+   echo -e ""
+   echo -e ${BLDRED}
+   echo -e "-------------------------"
+   echo -e "CLEANING UPLOAD DIRECTORY"
+   echo -e "-------------------------"
+   echo -e ${RST}
 
-mv ${OUTDIR}/DU_${DEVICE}_*.zip ${UPLOADDIR}
-mv ${OUTDIR}/DU_${DEVICE}_*.zip.md5sum ${UPLOADDIR}
-
-
-
-# Upload the files
-echo -e ${BLDRED}
-echo -e "---------------"
-echo -e "UPLOADING FILES"
-echo -e "---------------"
-echo -e ${RST}
-echo -e ""
-
-. ${HOME}/upload.sh
-
-# Clean up out directory to free up space
-echo -e ""
-echo -e ${BLDRED}
-echo -e "------------------------------------------"
-echo -e "CLEANING UP ${SOURCEDIR}/out"
-echo -e "------------------------------------------"
-echo -e ${RST}
-echo -e ""
-
-make clean
-make clobber
+   rm ${UPLOADDIR}/*_${DEVICE}_*.zip
+   rm ${UPLOADDIR}/*_${DEVICE}_*.zip.md5sum
 
 
 
-# Go back home
-echo -e ${BLDRED}
-echo -e "----------"
-echo -e "GOING HOME"
-echo -e "----------"
-echo -e ${RST}
+   # Copy new files to UPLOADDIR
+   echo -e ${BLDRED}
+   echo -e "--------------------------------"
+   echo -e "MOVING FILES TO UPLOAD DIRECTORY"
+   echo -e "--------------------------------"
+   echo -e ${RST}
 
-cd ${HOME}
+   mv ${OUTDIR}/DU_${DEVICE}_*.zip ${UPLOADDIR}
+   mv ${OUTDIR}/DU_${DEVICE}_*.zip.md5sum ${UPLOADDIR}
+
+
+
+   # Upload the files
+   echo -e ${BLDRED}
+   echo -e "---------------"
+   echo -e "UPLOADING FILES"
+   echo -e "---------------"
+   echo -e ${RST}
+   echo -e ""
+
+   . ${HOME}/upload.sh
+
+   # Clean up out directory to free up space
+   echo -e ""
+   echo -e ${BLDRED}
+   echo -e "------------------------------------------"
+   echo -e "CLEANING UP ${SOURCEDIR}/out"
+   echo -e "------------------------------------------"
+   echo -e ${RST}
+   echo -e ""
+
+   make clean
+   make clobber
+
+
+
+   # Go back home
+   echo -e ${BLDRED}
+   echo -e "----------"
+   echo -e "GOING HOME"
+   echo -e "----------"
+   echo -e ${RST}
+
+   cd ${HOME}
+
+# If the build failed, add a variable
+else
+   BUILD_SUCCESS_STRING="BUILD FAILED!"
+
+fi
+
+
+# Add line to compile log
+echo -e "`date +%H:%M:%S`: \n${BASH_SOURCE} ${BUILD_SUCCESS_STRING}\n" >> ${LOGDIR}/${COMPILE_LOG}
 
 
 
@@ -234,6 +251,7 @@ echo -e ${BLDRED}
 echo -e "-------------------------------------"
 echo -e "SCRIPT ENDING AT $(date +%D\ %r)"
 echo -e ""
+echo -e "${BUILD_SUCCESS_STRING}"
 echo -e "TIME: $(echo $(($END-$START)) | awk '{print int($1/60)"mins "int($1%60)"secs"}')"
 echo -e "-------------------------------------"
 echo -e ${RST}
