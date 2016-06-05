@@ -225,7 +225,7 @@ echo -e "TIME: $((${DIFF} / 60)) MINUTES AND $((${DIFF} % 60)) SECONDS"
 echo -e ${RESTORE}
 
 # Add line to compile log
-echo -e "`date +%H:%M:%S`: ${BASH_SOURCE} ${TOOLCHAIN}" >> ${LOGDIR}/${COMPILE_LOG}
+echo -e "`date +%H:%M:%S`: ${BASH_SOURCE} ${TOOLCHAIN_VER}" >> ${LOGDIR}/${COMPILE_LOG}
 echo -e "${BUILD_SUCCESS_STRING} IN $((${DIFF} / 60)) MINUTES AND $((${DIFF} % 60)) SECONDS\n" >> ${LOGDIR}/${COMPILE_LOG}
 
 echo -e "\a"

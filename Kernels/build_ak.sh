@@ -50,26 +50,26 @@ DEFCONFIG="ak_angler_defconfig"
 KER_BRANCH=ak-mm-staging
 AK_BRANCH=ak-angler-anykernel
 BASE_AK_VER="AK"
-VER=".066.ANGLER"
+VER=".066.ANGLER."
 if [ "${TOOLCHAIN}" == "aosp4.9" ]
 then
-   TOOLCHAIN_VER=".AOSP4.9"
+   TOOLCHAIN_VER="AOSP4.9"
    TOOLCHAIN_DIR=Toolchains/AOSP-4.9
 elif [ "${TOOLCHAIN}" == "uber4" ]
 then
-   TOOLCHAIN_VER=".UBER4.9"
+   TOOLCHAIN_VER="UBER4.9"
    TOOLCHAIN_DIR=Toolchains/UBER4
 elif [ "${TOOLCHAIN}" == "uber5" ]
 then
-   TOOLCHAIN_VER=".UBER5.4"
+   TOOLCHAIN_VER="UBER5.4"
    TOOLCHAIN_DIR=Toolchains/UBER5
 elif [ "${TOOLCHAIN}" == "uber6" ]
 then
-   TOOLCHAIN_VER=".UBER6.1"
+   TOOLCHAIN_VER="UBER6.1"
    TOOLCHAIN_DIR=Toolchains/UBER6
 elif [ "${TOOLCHAIN}" == "uber7" ]
 then
-   TOOLCHAIN_VER=".UBER7.0"
+   TOOLCHAIN_VER="UBER7.0"
    TOOLCHAIN_DIR=Toolchains/UBER7
 fi
 AK_VER="${BASE_AK_VER}${VER}${TOOLCHAIN_VER}"
@@ -275,7 +275,7 @@ echo -e "TIME: $((${DIFF} / 60)) MINUTES AND $((${DIFF} % 60)) SECONDS"
 echo -e ${RESTORE}
 
 # Add line to compile log
-echo -e "`date +%H:%M:%S`: ${BASH_SOURCE} ${TOOLCHAIN}" >> ${LOGDIR}/${COMPILE_LOG}
+echo -e "`date +%H:%M:%S`: ${BASH_SOURCE} ${TOOLCHAIN_VER}" >> ${LOGDIR}/${COMPILE_LOG}
 echo -e "${BUILD_SUCCESS_STRING} IN $((${DIFF} / 60)) MINUTES AND $((${DIFF} % 60)) SECONDS\n" >> ${LOGDIR}/${COMPILE_LOG}
 
 echo -e "\a"
