@@ -128,7 +128,7 @@ then
       lunch screwd_bullhead-userdebug
       lunch screwd_hammerhead-userdebug
       lunch screwd_shamu-userdebug
-   elif [ ${ROM} == "screwd" ]
+   elif [ ${ROM} == "krexus" ]
    then
       lunch krexus_angler-userdebug
       lunch krexus_bullhead-userdebug
