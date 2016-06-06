@@ -47,11 +47,6 @@ then
    SOURCE_DIR=${ROM_DIR}/DU
    REPO_URL=http://github.com/DirtyUnicorns/android_manifest.git
    REPO_BRANCH=m
-elif [ "${ROM}" == "krexus" ]
-then
-   SOURCE_DIR=${ROM_DIR}/Krexus
-   REPO_URL=https://github.com/krexus/manifest.git
-   REPO_BRANCH=mr2
 elif [ "${ROM}" == "pn" ]
 then
    SOURCE_DIR=${ROM_DIR}/PN
@@ -128,12 +123,6 @@ then
       lunch screwd_bullhead-userdebug
       lunch screwd_hammerhead-userdebug
       lunch screwd_shamu-userdebug
-   elif [ ${ROM} == "krexus" ]
-   then
-      lunch krexus_angler-userdebug
-      lunch krexus_bullhead-userdebug
-      lunch krexus_hammerhead-userdebug
-      lunch krexus_shamu-userdebug
    else
       breakfast angler
       breakfast bullhead
