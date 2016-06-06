@@ -154,8 +154,8 @@ then
    echo -e "-------------------------"
    echo -e ${RST}
 
-   rm "${UPLOADDIR}"/*_${DEVICE}_*.zip
-   rm "${UPLOADDIR}"/*_${DEVICE}_*.zip.md5sum
+   rm "${UPLOADDIR}"/*${DEVICE}*.zip
+   rm "${UPLOADDIR}"/*${DEVICE}*.zip.md5sum
 
 
 
