@@ -3,7 +3,7 @@
 # -----
 # Usage
 # -----
-# $ . pn.sh <device> <sync|nosync>
+# $ . aosip.sh <device> <sync|nosync>
 # Parameter 1: device (eg. angler, bullhead, shamu)
 # Parameter 2: sync or nosync (decides whether or not to run repo sync)
 
@@ -12,8 +12,8 @@
 # --------
 # Examples
 # --------
-# $ . pn.sh angler sync
-# $ . pn.sh angler nosync
+# $ . aosip.sh angler sync
+# $ . aosip.sh angler nosync
 
 
 
@@ -28,9 +28,9 @@ SYNC=$2
 # ---------
 # Variables
 # ---------
-SOURCEDIR=${HOME}/ROMs/PN
+SOURCEDIR=${HOME}/ROMs/AOSiP
 OUTDIR=${SOURCEDIR}/out/target/product/${DEVICE}
-UPLOADDIR=${HOME}/shared/ROMs/"Pure Nexus"/${DEVICE}
+UPLOADDIR=${HOME}/shared/ROMs/AOSiP/${DEVICE}
 
 
 
@@ -140,7 +140,7 @@ time mka bacon
 
 
 # If the above was successful
-if [ `ls ${OUTDIR}/pure_nexus_${DEVICE}-*.zip 2>/dev/null | wc -l` != "0" ]
+if [ `ls ${OUTDIR}/AOSiP-*-${DEVICE}-*.zip 2>/dev/null | wc -l` != "0" ]
 then
    BUILD_SUCCESS_STRING="BUILD SUCCESSFUL"
 
@@ -166,8 +166,8 @@ then
    echo -e "--------------------------------"
    echo -e ${RST}
 
-   mv ${OUTDIR}/pure_nexus_${DEVICE}-*.zip "${UPLOADDIR}"
-   mv ${OUTDIR}/pure_nexus_${DEVICE}-*.zip.md5sum "${UPLOADDIR}"
+   mv ${OUTDIR}/AOSiP-*-${DEVICE}-*.zip "${UPLOADDIR}"
+   mv ${OUTDIR}/AOSiP-*-${DEVICE}-*.zip.md5sum "${UPLOADDIR}"
 
 
 

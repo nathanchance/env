@@ -31,7 +31,6 @@ SYNC=$2
 SOURCEDIR=${HOME}/ROMs/DU
 OUTDIR=${SOURCEDIR}/out/target/product/${DEVICE}
 UPLOADDIR=${HOME}/shared/ROMs/"Dirty Unicorns"/${DEVICE}
-LOGDIR=${HOME}/Logs
 
 
 
@@ -43,8 +42,9 @@ RST="\033[0m"
 
 
 
-# Export the COMPILE_LOG variable for other files to use
-export COMPILE_LOG=compile_log_`date +%m_%d_%y`.log
+# Export the COMPILE_LOG variable for other files to use (I currently handle this via .bashrc)
+# export LOGDIR=${HOME}/Logs
+# export COMPILE_LOG=${LOGDIR}/compile_log_`date +%m_%d_%y`.log
 
 
 
@@ -226,7 +226,7 @@ echo -e "-------------------------------------"
 echo -e ${RST}
 
 # Add line to compile log
-echo -e "`date +%H:%M:%S`: ${BASH_SOURCE} ${DEVICE}" >> ${LOGDIR}/${COMPILE_LOG}
-echo -e "${BUILD_SUCCESS_STRING} IN $(echo $((${END}-${START})) | awk '{print int($1/60)" MINUTES AND "int($1%60)" SECONDS"}')\n" >> ${LOGDIR}/${COMPILE_LOG}
+echo -e "`date +%H:%M:%S`: ${BASH_SOURCE} ${DEVICE}" >> ${COMPILE_LOG}
+echo -e "${BUILD_SUCCESS_STRING} IN $(echo $((${END}-${START})) | awk '{print int($1/60)" MINUTES AND "int($1%60)" SECONDS"}')\n" >> ${COMPILE_LOG}
 
 echo -e "\a"

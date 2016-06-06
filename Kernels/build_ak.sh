@@ -36,7 +36,6 @@ UPLOAD_DIR=${HOME}/shared/Kernels
 PATCH_DIR="${ANYKERNEL_DIR}/patch"
 MODULES_DIR="${ANYKERNEL_DIR}/modules"
 ZIMAGE_DIR="${KERNEL_DIR}/arch/arm64/boot"
-LOGDIR=${HOME}/Logs
 
 
 
@@ -85,7 +84,9 @@ export ARCH=arm64
 export SUBARCH=arm64
 export KBUILD_BUILD_USER=nathan
 export KBUILD_BUILD_HOST=chancellor
-export COMPILE_LOG=compile_log_`date +%m_%d_%y`.log
+# Export the COMPILE_LOG variable for other files to use (I currently handle this via .bashrc)
+# export LOGDIR=${HOME}/Logs
+# export COMPILE_LOG=${LOGDIR}/compile_log_`date +%m_%d_%y`.log
 
 
 # ---------
@@ -275,7 +276,7 @@ echo -e "TIME: $((${DIFF} / 60)) MINUTES AND $((${DIFF} % 60)) SECONDS"
 echo -e ${RESTORE}
 
 # Add line to compile log
-echo -e "`date +%H:%M:%S`: ${BASH_SOURCE} ${TOOLCHAIN_VER}" >> ${LOGDIR}/${COMPILE_LOG}
-echo -e "${BUILD_SUCCESS_STRING} IN $((${DIFF} / 60)) MINUTES AND $((${DIFF} % 60)) SECONDS\n" >> ${LOGDIR}/${COMPILE_LOG}
+echo -e "`date +%H:%M:%S`: ${BASH_SOURCE} ${TOOLCHAIN_VER}" >> ${COMPILE_LOG}
+echo -e "${BUILD_SUCCESS_STRING} IN $((${DIFF} / 60)) MINUTES AND $((${DIFF} % 60)) SECONDS\n" >> ${COMPILE_LOG}
 
 echo -e "\a"

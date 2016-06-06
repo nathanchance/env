@@ -10,7 +10,7 @@
 # ----------
 # Parameters
 # ----------
-# Parameter 1: the ROM, possible values include aicp|aosip|du|pn|rr|screwd|temasek
+# Parameter 1: the ROM, possible values include aicp|aosip|du|pn|screwd|temasek
 # Parameter 2: whether or not to sync the repo right away
 ROM=${1}
 SYNC=${2}
@@ -47,16 +47,16 @@ then
    SOURCE_DIR=${ROM_DIR}/DU
    REPO_URL=http://github.com/DirtyUnicorns/android_manifest.git
    REPO_BRANCH=m
+elif [ "${ROM}" == "krexus" ]
+then
+   SOURCE_DIR=${ROM_DIR}/Krexus
+   REPO_URL=https://github.com/krexus/manifest.git
+   REPO_BRANCH=mr2
 elif [ "${ROM}" == "pn" ]
 then
    SOURCE_DIR=${ROM_DIR}/PN
    REPO_URL=https://github.com/PureNexusProject/manifest.git
    REPO_BRANCH=mm2
-elif [ "${ROM}" == "rr" ]
-then
-   SOURCE_DIR=${ROM_DIR}/RR
-   REPO_URL=https://github.com/ResurrectionRemix/platform_manifest.git
-   REPO_BRANCH=marshmallow
 elif [ "${ROM}" == "screwd" ]
 then
    SOURCE_DIR=${ROM_DIR}/Screwd
@@ -128,6 +128,12 @@ then
       lunch screwd_bullhead-userdebug
       lunch screwd_hammerhead-userdebug
       lunch screwd_shamu-userdebug
+   elif [ ${ROM} == "screwd" ]
+   then
+      lunch krexus_angler-userdebug
+      lunch krexus_bullhead-userdebug
+      lunch krexus_hammerhead-userdebug
+      lunch krexus_shamu-userdebug
    else
       breakfast angler
       breakfast bullhead

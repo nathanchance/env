@@ -3,23 +3,23 @@
 # -----
 # Usage
 # -----
-# $ . rr.sh <device> <sync|nosync>
+# $ . krexus.sh <device> <sync|nosync>
+# Parameter 1: device (eg. angler, bullhead, shamu)
+# Parameter 2: sync or nosync (decides whether or not to run repo sync)
 
 
 
 # --------
 # Examples
 # --------
-# $ . rr.sh angler sync
-# $ . rr.sh angler nosync
+# $ . krexus.sh angler sync
+# $ . krexus.sh angler nosync
 
 
 
 # ----------
 # Parameters
 # ----------
-# Parameter 1: device (eg. angler, bullhead, shamu)
-# Parameter 2: sync or nosync (decides whether or not to run repo sync)
 DEVICE=$1
 SYNC=$2
 
@@ -28,23 +28,23 @@ SYNC=$2
 # ---------
 # Variables
 # ---------
-SOURCEDIR=${HOME}/ROMs/RR
+SOURCEDIR=${HOME}/ROMs/Krexus
 OUTDIR=${SOURCEDIR}/out/target/product/${DEVICE}
-UPLOADDIR=${HOME}/shared/ROMs/ResurrectionRemix/${DEVICE}
-LOGDIR=${HOME}/Logs
+UPLOADDIR=${HOME}/shared/ROMs/Krexus/${DEVICE}
 
 
 
 # ------
 # Colors
 # ------
-BLDRED="\033[1m""\033[31m"
+BLDBLUE="\033[1m""\033[36m"
 RST="\033[0m"
 
 
 
-# Export the COMPILE_LOG variable for other files to use
-export COMPILE_LOG=compile_log_`date +%m_%d_%y`.log
+# Export the COMPILE_LOG variable for other files to use (I currently handle this via .bashrc)
+# export LOGDIR=${HOME}/Logs
+# export COMPILE_LOG=${LOGDIR}/compile_log_`date +%m_%d_%y`.log
 
 
 
@@ -54,7 +54,7 @@ clear
 
 
 # Start tracking time
-echo -e ${BLDRED}
+echo -e ${BLDBLUE}
 echo -e "---------------------------------------"
 echo -e "SCRIPT STARTING AT $(date +%D\ %r)"
 echo -e "---------------------------------------"
@@ -65,10 +65,10 @@ START=$(date +%s)
 
 
 # Change to the source directory
-echo -e ${BLDRED}
-echo -e "------------------------------------"
+echo -e ${BLDBLUE}
+echo -e "-----------------------------------------"
 echo -e "MOVING TO ${SOURCEDIR}"
-echo -e "------------------------------------"
+echo -e "-----------------------------------------"
 echo -e ${RST}
 
 cd ${SOURCEDIR}
@@ -78,7 +78,7 @@ cd ${SOURCEDIR}
 # Sync the repo if requested
 if [ "${SYNC}" == "sync" ]
 then
-   echo -e ${BLDRED}
+   echo -e ${BLDBLUE}
    echo -e "----------------------"
    echo -e "SYNCING LATEST SOURCES"
    echo -e "----------------------"
@@ -91,7 +91,7 @@ fi
 
 
 # Setup the build environment
-echo -e ${BLDRED}
+echo -e ${BLDBLUE}
 echo -e "----------------------------"
 echo -e "SETTING UP BUILD ENVIRONMENT"
 echo -e "----------------------------"
@@ -103,44 +103,43 @@ echo -e ""
 
 
 # Prepare device
-echo -e ${BLDRED}
+echo -e ${BLDBLUE}
 echo -e "----------------"
 echo -e "PREPARING DEVICE"
 echo -e "----------------"
 echo -e ${RST}
 echo -e ""
 
-lunch cm_${DEVICE}-userdebug
+lunch krexus_${DEVICE}-userdebug
 
 
 
 # Clean up
-echo -e ${BLDRED}
-echo -e "------------------------------------------"
+echo -e ${BLDBLUE}
+echo -e "------------------------------------------------"
 echo -e "CLEANING UP ${SOURCEDIR}/out"
-echo -e "------------------------------------------"
+echo -e "------------------------------------------------"
 echo -e ${RST}
 echo -e ""
 
-make clean
 make clobber
 
 
 
 # Start building
-echo -e ${BLDRED}
+echo -e ${BLDBLUE}
 echo -e "---------------"
 echo -e "MAKING ZIP FILE"
 echo -e "---------------"
 echo -e ${RST}
 echo -e ""
 
-time mka bacon
+time mka otapackage
 
 
 
 # If the above was successful
-if [ `ls ${OUTDIR}/ResurrectionRemix*-${DEVICE}.zip 2>/dev/null | wc -l` != "0" ]
+if [ `ls ${OUTDIR}/krexus_mm-*${DEVICE}.zip 2>/dev/null | wc -l` != "0" ]
 then
    BUILD_SUCCESS_STRING="BUILD SUCCESSFUL"
 
@@ -148,31 +147,31 @@ then
 
    # Remove exisiting files in UPLOADDIR
    echo -e ""
-   echo -e ${BLDRED}
+   echo -e ${BLDBLUE}
    echo -e "-------------------------"
    echo -e "CLEANING UPLOAD DIRECTORY"
    echo -e "-------------------------"
    echo -e ${RST}
 
-   rm "${UPLOADDIR}"/*-${DEVICE}.zip
-   rm "${UPLOADDIR}"/*-${DEVICE}.zip.md5sum
+   rm "${UPLOADDIR}"/*${DEVICE}*.zip
+   rm "${UPLOADDIR}"/*${DEVICE}*.zip.md5sum
 
 
 
    # Copy new files to UPLOADDIR
-   echo -e ${BLDRED}
+   echo -e ${BLDBLUE}
    echo -e "--------------------------------"
    echo -e "MOVING FILES TO UPLOAD DIRECTORY"
    echo -e "--------------------------------"
    echo -e ${RST}
 
-   mv ${OUTDIR}/ResurrectionRemix*-${DEVICE}.zip "${UPLOADDIR}"
-   mv ${OUTDIR}/ResurrectionRemix*-${DEVICE}.zip.md5sum "${UPLOADDIR}"
+   mv ${OUTDIR}/krexus_mm-*${DEVICE}.zip "${UPLOADDIR}"
+   mv ${OUTDIR}/krexus_mm-*${DEVICE}.zip.md5sum "${UPLOADDIR}"
 
 
 
    # Upload the files
-   echo -e ${BLDRED}
+   echo -e ${BLDBLUE}
    echo -e "---------------"
    echo -e "UPLOADING FILES"
    echo -e "---------------"
@@ -185,20 +184,19 @@ then
 
    # Clean up out directory to free up space
    echo -e ""
-   echo -e ${BLDRED}
-   echo -e "------------------------------------------"
+   echo -e ${BLDBLUE}
+   echo -e "------------------------------------------------"
    echo -e "CLEANING UP ${SOURCEDIR}/out"
-   echo -e "------------------------------------------"
+   echo -e "------------------------------------------------"
    echo -e ${RST}
    echo -e ""
 
-   make clean
    make clobber
 
 
 
    # Go back home
-   echo -e ${BLDRED}
+   echo -e ${BLDBLUE}
    echo -e "----------"
    echo -e "GOING HOME"
    echo -e "----------"
@@ -216,7 +214,7 @@ fi
 
 # Stop tracking time
 END=$(date +%s)
-echo -e ${BLDRED}
+echo -e ${BLDBLUE}
 echo -e "-------------------------------------"
 echo -e "SCRIPT ENDING AT $(date +%D\ %r)"
 echo -e ""
@@ -226,7 +224,7 @@ echo -e "-------------------------------------"
 echo -e ${RST}
 
 # Add line to compile log
-echo -e "`date +%H:%M:%S`: ${BASH_SOURCE} ${DEVICE}" >> ${LOGDIR}/${COMPILE_LOG}
-echo -e "${BUILD_SUCCESS_STRING} IN $(echo $((${END}-${START})) | awk '{print int($1/60)" MINUTES AND "int($1%60)" SECONDS"}')\n" >> ${LOGDIR}/${COMPILE_LOG}
+echo -e "`date +%H:%M:%S`: ${BASH_SOURCE} ${DEVICE}" >> ${COMPILE_LOG}
+echo -e "${BUILD_SUCCESS_STRING} IN $(echo $((${END}-${START})) | awk '{print int($1/60)" MINUTES AND "int($1%60)" SECONDS"}')\n" >> ${COMPILE_LOG}
 
 echo -e "\a"
