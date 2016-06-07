@@ -1,23 +1,20 @@
 #!/bin/bash
 
-cd ${HOME}/Kernels/Toolchains/UBER4
-git clean -f -d
-git reset --hard
-git pull
 
-cd ../UBER5
-git clean -f -d
-git reset --hard
-git pull
+cd ${HOME}/Kernels/Toolchains
 
-cd ../UBER6
-git clean -f -d
-git reset --hard
-git pull
 
-cd ../UBER7
-git clean -f -d
-git reset --hard
-git pull
+rm -rf UBER4
+git clone https://bitbucket.org/DespairFactor/aarch64-linux-android-4.9-kernel.git UBER4
+
+rm -rf UBER5
+git clone https://bitbucket.org/DespairFactor/aarch64-linux-android-5.x-kernel.git UBER5
+
+rm -rf UBER6
+git clone https://bitbucket.org/DespairFactor/aarch64-linux-android-6.x-kernel.git UBER6
+
+rm -rf UBER7
+git clone https://bitbucket.org/DespairFactor/aarch64-linux-android-7.0-kernel.git UBER7
+
 
 cd ${HOME}
