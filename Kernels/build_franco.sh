@@ -44,7 +44,7 @@ THREAD="-j$(grep -c ^processor /proc/cpuinfo)"
 KERNEL="Image.gz"
 DEFCONFIG="angler_defconfig"
 BASE_FRANCO_VER="franco.Kernel"
-VER=".r20"
+VER=".r20."
 if [ "${TOOLCHAIN}" == "aosp4.9" ]
 then
    TOOLCHAIN_VER="AOSP4.9"
