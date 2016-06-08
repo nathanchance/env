@@ -175,10 +175,9 @@ then
    echo -e "----------------"
    echo -e ${RESTORE}
 
-   git pull
-   # git fetch upstream
-   # git checkout marshmallow
-   # git merge upstream/marshmallow
+   git fetch upstream
+   git checkout marshmallow
+   git merge upstream/marshmallow
    echo -e ""
 fi
 
