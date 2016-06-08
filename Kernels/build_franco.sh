@@ -32,7 +32,7 @@ TOOLCHAIN=${2}
 RESOURCE_DIR=${HOME}/Kernels
 KERNEL_DIR=${RESOURCE_DIR}/Franco
 ZIMAGE_DIR="${KERNEL_DIR}/arch/arm64/boot"
-ANYKERNEL_DIR=${KERNEL_DIR}/out
+ANYKERNEL_DIR=${RESOURCE_DIR}/FK-AK2
 UPLOAD_DIR=${HOME}/shared/Kernels
 
 
@@ -76,7 +76,6 @@ FRANCO_VER="${BASE_FRANCO_VER}${VER}${TOOLCHAIN_VER}"
 export LOCALVERSION=-`echo ${FRANCO_VER}`
 export CROSS_COMPILE="${RESOURCE_DIR}/${TOOLCHAIN_DIR}/bin/aarch64-linux-android-"
 export ARCH=arm64
-export SUBARCH=arm64
 export KBUILD_BUILD_USER=nathan
 export KBUILD_BUILD_HOST=chancellor
 # Export the COMPILE_LOG variable for other files to use (I currently handle this via .bashrc)
@@ -89,11 +88,16 @@ export KBUILD_BUILD_HOST=chancellor
 # ---------
 # Clean the out and AnyKernel dirs, reset the AnyKernel dir, and make clean
 function clean_all {
+   cd ${ANYKERNEL_DIR}
+   rm -rf zImage
+   git clean -f -d
+   git reset --hard
+   git pull
+
    cd ${KERNEL_DIR}
    echo
    make clean
    make mrproper
-   rm -rf ${KERNEL_DIR}/out/kernel/zImage
    git clean -f -d
    git reset --hard
 }
@@ -104,11 +108,11 @@ function make_kernel {
    cd ${KERNEL_DIR}
    make ${DEFCONFIG}
    make ${THREAD}
-   cp -vr ${ZIMAGE_DIR}/${KERNEL} ${ANYKERNEL_DIR}/kernel/zImage
 }
 
 # Make the zip file, remove the previous version and upload it
 function make_zip {
+   cp -vr ${ZIMAGE_DIR}/${KERNEL} ${ANYKERNEL_DIR}/zImage
    cd ${ANYKERNEL_DIR}
    zip -r9 `echo ${FRANCO_VER}`.zip *
    rm  ${UPLOAD_DIR}/${BASE_FRANCO_VER}*${TOOLCHAIN_VER}.zip
@@ -171,9 +175,10 @@ then
    echo -e "----------------"
    echo -e ${RESTORE}
 
-   git fetch upstream
-   git checkout marshmallow
-   git merge upstream/marshmallow
+   git pull
+   # git fetch upstream
+   # git checkout marshmallow
+   # git merge upstream/marshmallow
    echo -e ""
 fi
 
