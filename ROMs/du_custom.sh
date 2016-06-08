@@ -51,21 +51,24 @@ RST="\033[0m"
 
 
 # Add custom build tag
-if [ "${PERSON}" == "bre" ]
+if [ "${PERSON}" == "alcolawl" ]
+then
+  export DU_BUILD_TYPE=ALCOLAWL
+elif [ "${PERSON}" == "bre" ]
 then
    export DU_BUILD_TYPE=BREYANA
+elif [ "${PERSON}" == "drew" ]
+then
+   export DU_BUILD_TYPE=DREW
+elif [ "${PERSON}" == "hmhb" ]
+then
+   export DU_BUILD_TYPE=DIRTY-DEEDS
 elif [ "${PERSON}" == "jdizzle" ]
 then
    export DU_BUILD_TYPE=NINJA
-elif [ "${PERSON}" == "alcolawl" ]
-then
-  export DU_BUILD_TYPE=ALCOLAWL
-elif [ "${PERSON}" == "kuba" ]
-then
-  export DU_BUILD_TYPE=KUCKFUBA
-elif [ "${PERSON}" == "hmhb" ]
-then
-  export DU_BUILD_TYPE=DIRTY-DEEDS
+# elif [ "${PERSON}" == "kuba" ]
+# then
+#   export DU_BUILD_TYPE=KUCKFUBA
 else
   export DU_BUILD_TYPE=CHANCELLOR
 fi
