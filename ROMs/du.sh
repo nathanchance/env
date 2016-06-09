@@ -40,6 +40,7 @@ OUTDIR=${SOURCEDIR}/out/target/product/${DEVICE}
 # If PERSON does not exist
 if [[ -z ${PERSON} ]]
 then
+   export DU_BUILD_TYPE=CHANCELLOR
    UPLOADDIR=${HOME}/shared/ROMs/"Dirty Unicorns"/${DEVICE}
 # If PERSON does exist
 else
