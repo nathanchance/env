@@ -3,15 +3,15 @@
 # -----
 # Usage
 # -----
-# $ . du.sh <device> <sync|nosync>
+# $ . du.sh <device> <sync|nosync> <person>
 
 
 
 # --------
 # Examples
 # --------
-# $ . du.sh angler sync
-# $ . du.sh angler nosync
+# $ . du.sh angler sync me
+# $ . du.sh angler nosync bre
 
 
 
@@ -20,8 +20,14 @@
 # ----------
 # Parameter 1: device (eg. angler, bullhead, shamu)
 # Parameter 2: sync or nosync (decides whether or not to run repo sync)
-DEVICE=$1
-SYNC=$2
+# Parameter 3: person (if custom build tag and location are needed)
+DEVICE=${1}
+SYNC=${2}
+# If the third parameter exists
+if [[ -n ${3} ]]
+then
+   PERSON=${3}
+fi
 
 
 
@@ -30,7 +36,33 @@ SYNC=$2
 # ---------
 SOURCEDIR=${HOME}/ROMs/DU
 OUTDIR=${SOURCEDIR}/out/target/product/${DEVICE}
-UPLOADDIR=${HOME}/shared/ROMs/"Dirty Unicorns"/${DEVICE}
+
+# If PERSON does not exist
+if [[ -z ${PERSON} ]]
+then
+   UPLOADDIR=${HOME}/shared/ROMs/"Dirty Unicorns"/${DEVICE}
+# If PERSON does exist
+else
+   UPLOADDIR=${HOME}/shared/ROMs/.special/.${PERSON}
+
+   # Add custom build tag
+   if [ "${PERSON}" == "alcolawl" ]
+   then
+     export DU_BUILD_TYPE=ALCOLAWL
+   elif [ "${PERSON}" == "bre" ]
+   then
+      export DU_BUILD_TYPE=BREYANA
+   elif [ "${PERSON}" == "drew" ]
+   then
+      export DU_BUILD_TYPE=DREW
+   elif [ "${PERSON}" == "hmhb" ]
+   then
+      export DU_BUILD_TYPE=DIRTY-DEEDS
+   elif [ "${PERSON}" == "jdizzle" ]
+   then
+      export DU_BUILD_TYPE=NINJA
+   fi
+fi
 
 
 
@@ -226,7 +258,13 @@ echo -e "-------------------------------------"
 echo -e ${RST}
 
 # Add line to compile log
-echo -e "`date +%H:%M:%S`: ${BASH_SOURCE} ${DEVICE}" >> ${COMPILE_LOG}
+if [[ -n ${PERSON} ]]
+then
+   export DU_BUILD_TYPE=CHANCELLOR
+   echo -e "`date +%H:%M:%S`: ${BASH_SOURCE} ${PERSON}" >> ${COMPILE_LOG}
+else
+   echo -e "`date +%H:%M:%S`: ${BASH_SOURCE} ${DEVICE}" >> ${COMPILE_LOG}
+fi
 echo -e "${BUILD_SUCCESS_STRING} IN $(echo $((${END}-${START})) | awk '{print int($1/60)" MINUTES AND "int($1%60)" SECONDS"}')\n" >> ${COMPILE_LOG}
 
 echo -e "\a"
