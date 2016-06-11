@@ -1,16 +1,23 @@
 #!/bin/bash
 
 
+TYPE=${1}
+SYNC=${2}
 
-. du.sh angler sync
-. du.sh shamu sync
-. du.sh bullhead sync
-. du.sh hammerhead sync
-. du.sh angler sync drew
-. du.sh bullhead sync alcolawl
-. du.sh angler sync hmhb
-. du.sh shamu sync jdizzle
 
+if [ "${TYPE}" == "normal" ]
+then
+   . du.sh angler ${SYNC}
+   . du.sh shamu ${SYNC}
+   . du.sh bullhead ${SYNC}
+   . du.sh hammerhead ${SYNC}
+elif [ "${TYPE}" == "custom" ]
+then
+   . du.sh angler ${SYNC} drew
+   . du.sh bullhead ${SYNC} alcolawl
+   . du.sh angler ${SYNC} hmhb
+   . du.sh shamu ${SYNC} jdizzle
+fi
 
 
 cd ${LOGDIR}
