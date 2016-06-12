@@ -10,7 +10,7 @@
 # --------
 # Examples
 # --------
-# $ . du.sh angler sync me
+# $ . du.sh angler sync
 # $ . du.sh angler nosync bre
 
 
@@ -175,7 +175,7 @@ time mka bacon
 # If the above was successful
 if [ `ls ${OUTDIR}/DU_${DEVICE}_*.zip 2>/dev/null | wc -l` != "0" ]
 then
-   BUILD_SUCCESS_STRING="BUILD SUCCESSFUL"
+   BUILD_RESULT_STRING="BUILD SUCCESSFUL"
 
 
 
@@ -241,7 +241,7 @@ then
 
 # If the build failed, add a variable
 else
-   BUILD_SUCCESS_STRING="BUILD FAILED"
+   BUILD_RESULT_STRING="BUILD FAILED"
 
 fi
 
@@ -253,7 +253,7 @@ echo -e ${BLDRED}
 echo -e "-------------------------------------"
 echo -e "SCRIPT ENDING AT $(date +%D\ %r)"
 echo -e ""
-echo -e "${BUILD_SUCCESS_STRING}!"
+echo -e "${BUILD_RESULT_STRING}!"
 echo -e "TIME: $(echo $((${END}-${START})) | awk '{print int($1/60)" MINUTES AND "int($1%60)" SECONDS"}')"
 echo -e "-------------------------------------"
 echo -e ${RST}
@@ -266,6 +266,6 @@ then
 else
    echo -e "`date +%H:%M:%S`: ${BASH_SOURCE} ${DEVICE}" >> ${COMPILE_LOG}
 fi
-echo -e "${BUILD_SUCCESS_STRING} IN $(echo $((${END}-${START})) | awk '{print int($1/60)" MINUTES AND "int($1%60)" SECONDS"}')\n" >> ${COMPILE_LOG}
+echo -e "${BUILD_RESULT_STRING} IN $(echo $((${END}-${START})) | awk '{print int($1/60)" MINUTES AND "int($1%60)" SECONDS"}')\n" >> ${COMPILE_LOG}
 
 echo -e "\a"
