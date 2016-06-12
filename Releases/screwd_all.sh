@@ -1,6 +1,12 @@
 #!/bin/bash
 
 
+# -----
+# Usage
+# -----
+# $ . screwd_all.sh
+
+
 . rom_folder.sh screwd sync
 . screwd.sh angler sync
 . screwd.sh shamu sync
@@ -9,6 +15,5 @@
 . rom_folder.sh screwd nosync
 
 
-cd ${LOGDIR}
 cat ${COMPILE_LOG}
 cd ${HOME}

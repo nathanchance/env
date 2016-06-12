@@ -1,6 +1,11 @@
 #!/bin/bash
 
 
+# -----
+# Usage
+# -----
+# $ . aosip_all.sh
+
 
 . rom_folder.sh aosip sync
 . aosip.sh angler sync

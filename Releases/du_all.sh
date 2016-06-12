@@ -1,6 +1,12 @@
 #!/bin/bash
 
 
+# -----
+# Usage
+# -----
+# $ . du_all.sh <custom|normal> <sync|nosync>
+
+
 TYPE=${1}
 SYNC=${2}
 
@@ -20,6 +26,5 @@ then
 fi
 
 
-cd ${LOGDIR}
 cat ${COMPILE_LOG}
 cd ${HOME}
