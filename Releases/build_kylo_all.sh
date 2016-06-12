@@ -3,17 +3,18 @@
 # -----
 # Usage
 # -----
-# $ . build_kylo_all.sh <update|noupdate>
+# $ . build_kylo_all.sh <tcupdate|notcupdate> <update|noupdate>
 
 
-
-. update_toolchains.sh
-. build_kylo.sh ${1} aosp4.9
-. build_kylo.sh ${1} uber4
-. build_kylo.sh ${1} uber5
-. build_kylo.sh ${1} uber6
-. build_kylo.sh ${1} uber7
-
+if [ "${1}" == "tcupdate" ]
+then
+   . update_toolchains.sh
+fi
+. build_kylo.sh ${2} aosp4.9
+. build_kylo.sh ${2} uber4
+. build_kylo.sh ${2} uber5
+. build_kylo.sh ${2} uber6
+. build_kylo.sh ${2} uber7
 
 
 cd ${LOGDIR}

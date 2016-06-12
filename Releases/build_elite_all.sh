@@ -3,14 +3,16 @@
 # -----
 # Usage
 # -----
-# $ . build_elite_all.sh <update|noupdate>
+# $ . build_elite_all.sh <tcupdate|notcupdate> <update|noupdate>
 
 
-
-. build_elite.sh ${1} linaro
-. build_elite.sh ${1} aosp
-. build_elite.sh ${1} uber4
-
+if [ "${1}" == "tcupdate" ]
+then
+   . update_toolchains.sh
+fi
+. build_elite.sh ${2} linaro
+. build_elite.sh ${2} aosp
+. build_elite.sh ${2} uber4
 
 
 cd ${LOGDIR}
