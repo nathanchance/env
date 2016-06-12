@@ -17,7 +17,7 @@ STARTOVER=$1
 # ---------
 # Variables
 # ---------
-ANDROIDDIR=${HOME}/
+ANDROIDDIR=${HOME}/Android
 ROMDIR=${ANDROIDDIR}/ROMs
 GAPPSDIR=${ANDROIDDIR}/GApps
 KERNELSDIR=${ANDROIDDIR}/Kernels
@@ -29,6 +29,7 @@ clear
 
 
 
+# If the startover flag says existing, it means the build environment has been established already and the resources directory needs to be cleaned
 if [ "${STARTOVER}" == "existing" ]
 then
    rm -rf ${ANDROIDDIR}
@@ -74,13 +75,8 @@ git clone https://github.com/nathanchance/scripts.git
 
 
 
-# Sync PN-CMTE
-. ${ANDROIDDIR}/scripts/rom_folder.sh pncmte nosync
-
-
-
-# Sync PN-Layers
-. ${ANDROIDDIR}/scripts/rom_folder.sh pnlayers nosync
+# Sync PN
+. ${ANDROIDDIR}/scripts/rom_folder.sh pn sync
 
 
 
@@ -103,17 +99,34 @@ git clone https://github.com/PureNexusProject/purenexus_dynamic_gapps.git PN
 
 # Sync Elite
 cd ${KERNELSDIR}
-git clone https://github.com/nathanchance/elite_angler.git
+git clone https://github.com/nathanchance/elite_angler.git Elite
 git clone https://github.com/Elite-Kernels/Linaro-4.9_aarch64.git
 
 
 
 # Sync AK
 cd ${KERNELSDIR}
-git clone https://github.com/nathanchance/AK-Angler.git
-git clone https://github.com/anarkia1976/AK-Angler-AnyKernel2.git
-git clone https://bitbucket.org/UBERTC/aarch64-linux-android-5.3-kernel.git
-cd AK-Angler-AnyKernel2
+git clone https://github.com/nathanchance/AK-Angler.git AK
+git clone https://github.com/anarkia1976/AK-Angler-AnyKernel2.git AK-AK2
+cd AK-AK2
 git checkout ak-angler-anykernel
-cd ../AK-Angler
+cd ../AK
 git checkout ak-mm-staging
+
+
+
+# Sync Kylo
+cd ${KERNELSDIR}
+git clone https://github.com/DespairFactor/angler.git Kylo
+
+
+
+# Sync toolchains
+mkdir ${KERNELSDIR}/Toolchains
+cd ${KERNELSDIR}/Toolchains
+https://github.com/Elite-Kernels/Linaro-4.9_aarch64.git Linaro-4.9
+git clone https://android.googlesource.com/platform/prebuilts/gcc/linux-x86/aarch64/aarch64-linux-android-4.9 AOSP
+git clone https://bitbucket.org/DespairFactor/aarch64-linux-android-4.9-kernel.git UBER4
+git clone https://bitbucket.org/DespairFactor/aarch64-linux-android-5.x-kernel.git UBER5
+git clone https://bitbucket.org/DespairFactor/aarch64-linux-android-6.x-kernel.git UBER6
+git clone https://bitbucket.org/DespairFactor/aarch64-linux-android-7.0-kernel.git UBER7
