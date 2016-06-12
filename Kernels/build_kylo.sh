@@ -104,11 +104,11 @@ function make_kernel {
    cd ${KERNEL_DIR}
    make ${DEFCONFIG}
    make ${THREAD}
-   cp -vr ${ZIMAGE_DIR}/${KERNEL} ${ANYKERNEL_DIR}/kernel/zImage
 }
 
 # Make the zip file, remove the previous version and upload it
 function make_zip {
+   cp -vr ${ZIMAGE_DIR}/${KERNEL} ${ANYKERNEL_DIR}/kernel/zImage
    cd ${ANYKERNEL_DIR}
    zip -r9 `echo ${KYLO_VER}`.zip *
    rm  ${UPLOAD_DIR}/${BASE_KYLO_VER}*${TOOLCHAIN_VER}.zip
