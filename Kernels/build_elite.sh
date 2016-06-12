@@ -40,7 +40,7 @@ BRANCH=Elite-merged
 # Toolchain location and info
 if [ "${TOOLCHAIN}" == "linaro4.9" ]
 then
-   TOOLCHAIN_VER="LINARO4.9"
+   TOOLCHAIN_VER="Linaro4.9"
    TOOLCHAIN_DIR=Toolchains/Linaro-4.9
 elif [ "${TOOLCHAIN}" == "aosp4.9" ]
 then
@@ -50,24 +50,12 @@ elif [ "${TOOLCHAIN}" == "uber4" ]
 then
    TOOLCHAIN_VER="UBER4.9"
    TOOLCHAIN_DIR=Toolchains/UBER4
-elif [ "${TOOLCHAIN}" == "uber5" ]
-then
-   TOOLCHAIN_VER="UBER5.4"
-   TOOLCHAIN_DIR=Toolchains/UBER5
-elif [ "${TOOLCHAIN}" == "uber6" ]
-then
-   TOOLCHAIN_VER="UBER6.1"
-   TOOLCHAIN_DIR=Toolchains/UBER6
-elif [ "${TOOLCHAIN}" == "uber7" ]
-then
-   TOOLCHAIN_VER="UBER7.0"
-   TOOLCHAIN_DIR=Toolchains/UBER7
 fi
 
 export CROSS_COMPILE="${HOME}/Kernels/${TOOLCHAIN_DIR}/bin/aarch64-linux-android-"
 export ARCH=arm64
 export SUBARCH=arm64
-
+export LOCALVERSION="-Elite-Angler-${TOOLCHAIN_VER}"
 
 
 # Clear the terminal
