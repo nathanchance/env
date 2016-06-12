@@ -24,6 +24,7 @@ FETCHUPSTREAM=${1}
 TOOLCHAIN=${2}
 
 
+
 # ---------
 # Variables
 # ---------
@@ -31,6 +32,7 @@ TOOLCHAIN=${2}
 # AKDIR: Directory for the AnyKernel updater
 # UPLOADDIR: Upload directory
 SOURCEDIR=${HOME}/Kernels/Elite
+ZIMAGEDIR=${SOURCEDIR}/arch/arm64/boot
 AKDIR=${SOURCEDIR}/packagesm
 UPLOADDIR=${HOME}/shared/Kernels/angler/Elite
 BRANCH=Elite-merged
@@ -56,6 +58,10 @@ export CROSS_COMPILE="${HOME}/Kernels/${TOOLCHAIN_DIR}/bin/aarch64-linux-android
 export ARCH=arm64
 export SUBARCH=arm64
 export LOCALVERSION="-Elite-Angler-${TOOLCHAIN_VER}"
+# Export the COMPILE_LOG variable for other files to use (I currently handle this via .bashrc)
+# export LOGDIR=${HOME}/Logs
+# export COMPILE_LOG=${LOGDIR}/compile_log_`date +%m_%d_%y`.log
+
 
 
 # Clear the terminal
@@ -179,57 +185,66 @@ echo -e ""
 make 'angler_defconfig'
 make -j$(grep -c ^processor /proc/cpuinfo)
 
-
-
-# Grab zImage-dtb
-echo -e ${BLUE}
-echo -e ""
-echo -e "-----------------------"
-echo -e "Collecting Image.gz-dtb"
-echo -e "-----------------------"
-echo -e ${RESTORE}
-
-cp ${SOURCEDIR}/arch/arm64/boot/Image.gz-dtb out/${KERNELNAME}/Image.gz-dtb
-
 done
 
 
 
-# Build Zip
-echo -e ${BLUE}
-echo -e "------------------------------------"
-echo -e "MAKING ${ZIPNAME}.ZIP" | tr [a-z] [A-Z]
-echo -e "------------------------------------"
-echo -e ${RESTORE}
-
-cd ${SOURCEDIR}/out/${KERNELNAME}/
-7z a -tzip -mx5 "${ZIPNAME}.zip"
+if [ `ls ${ZIMAGEDIR}/Image.gz-dtb 2>/dev/null | wc -l` != "0" ]
+then
+   BUILD_SUCCESS_STRING="BUILD SUCCESSFUL"
 
 
+   # Grab zImage-dtb
+   echo -e ${BLUE}
+   echo -e ""
+   echo -e "-----------------------"
+   echo -e "Collecting Image.gz-dtb"
+   echo -e "-----------------------"
+   echo -e ${RESTORE}
 
-# Remove the previous zip and move the new zip into the upload directory
-echo -e ""
-echo -e ${BLUE}
-echo -e "------------------------------------"
-echo -e "MOVING ${ZIPNAME}.ZIP" | tr [a-z] [A-Z]
-echo -e "------------------------------------"
-echo -e ${RESTORE}
-
-rm ${UPLOADDIR}/Elite_*${TOOLCHAIN_VER}.zip
-mv ${ZIPNAME}.zip ${UPLOADDIR}
+   cp ${ZIMAGEDIR}/Image.gz-dtb out/${KERNELNAME}/Image.gz-dtb
 
 
 
-# Upload it
-echo -e ${BLUE}
-echo -e "---------------------------------------"
-echo -e "UPLOADING ${ZIPNAME}.ZIP" | tr [a-z] [A-Z]
-echo -e "---------------------------------------"
-echo -e ${RESTORE}
-echo -e ""
+   # Build Zip
+   echo -e ${BLUE}
+   echo -e "----------"
+   echo -e "MAKING ZIP" | tr [a-z] [A-Z]
+   echo -e "----------"
+   echo -e ${RESTORE}
 
-. ${HOME}/upload.sh
+   cd ${SOURCEDIR}/out/${KERNELNAME}/
+   7z a -tzip -mx5 "${ZIPNAME}.zip"
 
+
+
+   # Remove the previous zip and move the new zip into the upload directory
+   echo -e ""
+   echo -e ${BLUE}
+   echo -e "----------"
+   echo -e "MOVING ZIP" | tr [a-z] [A-Z]
+   echo -e "----------"
+   echo -e ${RESTORE}
+
+   rm ${UPLOADDIR}/Elite_*${TOOLCHAIN_VER}.zip
+   mv ${ZIPNAME}.zip ${UPLOADDIR}
+
+
+
+   # Upload it
+   echo -e ${BLUE}
+   echo -e "-------------"
+   echo -e "UPLOADING ZIP" | tr [a-z] [A-Z]
+   echo -e "-------------"
+   echo -e ${RESTORE}
+   echo -e ""
+
+   . ${HOME}/upload.sh
+
+else
+   BUILD_SUCCESS_STRING="BUILD FAILED"
+
+fi
 
 
 # Remove the out directory
@@ -252,7 +267,13 @@ echo "--------------------"
 END=$(date +%s)
 DIFF=$((${END} - ${START}))
 
-echo "TIME: $((${DIFF} / 60)) minute(s) and $((${DIFF} % 60)) seconds"
+echo -e "${BUILD_SUCCESS_STRING}!"
+echo -e "TIME: $((${DIFF} / 60)) MINUTES AND $((${DIFF} % 60)) SECONDS"
 
 echo -e ${RESTORE}
+
+# Add line to compile log
+echo -e "`date +%H:%M:%S`: ${BASH_SOURCE} ${TOOLCHAIN_VER}" >> ${COMPILE_LOG}
+echo -e "${BUILD_SUCCESS_STRING} IN $((${DIFF} / 60)) MINUTES AND $((${DIFF} % 60)) SECONDS\n" >> ${COMPILE_LOG}
+
 echo -e "\a"
