@@ -45,10 +45,10 @@ KERNEL="Image.gz-dtb"
 DEFCONFIG="kylo_defconfig"
 BASE_KYLO_VER="Kylo"
 VER=".R30.M.angler."
-if [ "${TOOLCHAIN}" == "aosp4.9" ]
+if [ "${TOOLCHAIN}" == "aosp" ]
 then
    TOOLCHAIN_VER="AOSP4.9"
-   TOOLCHAIN_DIR=Toolchains/AOSP-4.9
+   TOOLCHAIN_DIR=Toolchains/AOSP
 elif [ "${TOOLCHAIN}" == "uber4" ]
 then
    TOOLCHAIN_VER="UBER4.9"

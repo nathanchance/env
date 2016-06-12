@@ -38,14 +38,14 @@ BRANCH=Elite-merged
 
 
 # Toolchain location and info
-if [ "${TOOLCHAIN}" == "linaro4.9" ]
+if [ "${TOOLCHAIN}" == "linaro" ]
 then
    TOOLCHAIN_VER="Linaro4.9"
    TOOLCHAIN_DIR=Toolchains/Linaro-4.9
-elif [ "${TOOLCHAIN}" == "aosp4.9" ]
+elif [ "${TOOLCHAIN}" == "aosp" ]
 then
    TOOLCHAIN_VER="AOSP4.9"
-   TOOLCHAIN_DIR=Toolchains/AOSP-4.9
+   TOOLCHAIN_DIR=Toolchains/AOSP
 elif [ "${TOOLCHAIN}" == "uber4" ]
 then
    TOOLCHAIN_VER="UBER4.9"
