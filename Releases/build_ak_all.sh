@@ -10,7 +10,7 @@ if [ "${1}" == "tcupdate" ]
 then
    . update_toolchains.sh
 fi
-. build_ak.sh ${2} aosp4.9
+. build_ak.sh ${2} aosp
 . build_ak.sh ${2} uber4
 . build_ak.sh ${2} uber5
 . build_ak.sh ${2} uber6
