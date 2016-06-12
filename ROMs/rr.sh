@@ -89,6 +89,26 @@ fi
 
 
 
+# 1. Change DESOLATED to KBUILD_BUILD_HOST
+# 2. Allow kernel to be compiled with UBER 6.1
+# 3. Change from shamu_defconfig to B14CKB1RD_defconfig
+echo -e ${BLDBLUE}
+echo -e "---------------------------------"
+echo -e "PICKING KERNEL AND DEVICE COMMITS"
+echo -e "---------------------------------"
+echo -e ${RST}
+echo -e ""
+
+cd ${SOURCEDIR}/kernel/moto/shamu
+git fetch https://github.com/nathanchance/B14CKB1RD_Kernel_N6.git
+git cherry-pick 20f83cadace94da9b711ebb53661b1682885888a
+cd ${SOURCEDIR}/device/moto/shamu
+git fetch https://github.com/nathanchance/android_device_moto_shamu.git
+git cherry-pick 0d2c6f3bdfe6e78b9b8036471dd3dcb6945fbb51
+cd ${SOURCEDIR}
+
+
+
 # Add @Yoinx's Kernel Adiutor-Mod instead of the regular Kernel Adiutor (to complement Unicornblood or Blackbird)
 echo -e ${BLDBLUE}
 echo -e "-------------------------"
