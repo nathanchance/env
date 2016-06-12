@@ -7,9 +7,18 @@
 
 
 
+# ------
+# Colors
+# ------
+BLDBLUE="\033[1m""\033[36m"
+RST="\033[0m"
+
+
+
 # ----------
 # Parameters
 # ----------
+# Parameter 1: Which GApps to compile? (currently Banks or Pure Nexus Dynamic GApps)
 TYPE=${1}
 
 
@@ -64,8 +73,12 @@ mv ${SOURCEDIR}/out/${ZIPBEG}*.zip ${UPLOADDIR}
 
 
 # Go home and we're done!
-cd ~/
-echo "==================================="
-echo "Compilation and upload successful!"
-echo "==================================="
+cd ${HOME}
+
+echo -e ${BLDBLUE}
+echo -e "---------------------------------"
+echo -e "COMPILATION AND UPLOAD SUCCESSFUL"
+echo -e "---------------------------------"
+echo -e ${RST}
+
 echo -e "\a"
