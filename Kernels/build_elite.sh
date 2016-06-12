@@ -32,7 +32,7 @@ TOOLCHAIN=${2}
 # UPLOADDIR: Upload directory
 SOURCEDIR=${HOME}/Kernels/Elite
 AKDIR=${SOURCEDIR}/packagesm
-UPLOADDIR=${HOME}/shared/Kernels
+UPLOADDIR=${HOME}/shared/Kernels/angler/Elite
 BRANCH=Elite-merged
 
 

@@ -33,7 +33,7 @@ RESOURCE_DIR=${HOME}/Kernels
 KERNEL_DIR=${RESOURCE_DIR}/Kylo
 ZIMAGE_DIR="${KERNEL_DIR}/arch/arm64/boot"
 ANYKERNEL_DIR=${KERNEL_DIR}/out
-UPLOAD_DIR=${HOME}/shared/Kernels
+UPLOAD_DIR=${HOME}/shared/Kernels/angler/Kylo
 
 
 
