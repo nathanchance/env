@@ -10,7 +10,7 @@
 # ------
 # Colors
 # ------
-BLDBLUE="\033[1m""\033[36m"
+BLDGREEN="\033[1m""\033[32m"
 RST="\033[0m"
 
 
@@ -75,7 +75,7 @@ mv ${SOURCEDIR}/out/${ZIPBEG}*.zip ${UPLOADDIR}
 # Go home and we're done!
 cd ${HOME}
 
-echo -e ${BLDBLUE}
+echo -e ${BLDGREEN}
 echo -e "---------------------------------"
 echo -e "COMPILATION AND UPLOAD SUCCESSFUL"
 echo -e "---------------------------------"
