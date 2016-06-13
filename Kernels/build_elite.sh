@@ -3,7 +3,7 @@
 # -----
 # Usage
 # -----
-# $ . build_elite.sh <update|noupdate> <toolchain>
+# $ . build_elite.sh <update|noupdate> <toolchain> <exp>
 
 
 
@@ -18,10 +18,16 @@ RESTORE="\033[0m"
 # ----------
 # Parameters
 # ----------
-# FETCHUPSTREAM: merge in new changes
-# TOOLCHAIN: Toolchain to compile with
+# Parameter 1: Merge in new changes or not
+# Parameter 2: Toolchain to compile with
+# Parameter 3: Experimental build (leave off if you want a release build)
 FETCHUPSTREAM=${1}
 TOOLCHAIN=${2}
+# Define EXPERIMENTAL if the third parameter exists
+if [[ -n ${3} ]]
+then
+   EXPERIMENTAL=${3}
+fi
 
 
 
@@ -34,10 +40,15 @@ TOOLCHAIN=${2}
 SOURCEDIR=${HOME}/Kernels/Elite
 ZIMAGEDIR=${SOURCEDIR}/arch/arm64/boot
 AKDIR=${SOURCEDIR}/packagesm
-UPLOADDIR=${HOME}/shared/Kernels/angler/Elite
-BRANCH=Elite-merged
-
-
+# If EXPERIMENTAL exists, we are doing an experimental build; change branch and upload location
+if [[ -n ${EXPERIMENTAL} ]]
+then
+   UPLOADDIR=${HOME}/shared/Kernels/angler/Elite/Experimental
+   BRANCH=Elite-exp
+else
+   UPLOADDIR=${HOME}/shared/Kernels/angler/Elite
+   BRANCH=Elite-merged
+fi
 
 # Toolchain location and info
 if [ "${TOOLCHAIN}" == "linaro" ]
@@ -52,6 +63,18 @@ elif [ "${TOOLCHAIN}" == "uber4" ]
 then
    TOOLCHAIN_VER="UBER4.9"
    TOOLCHAIN_DIR=Toolchains/UBER4
+elif [ "${TOOLCHAIN}" == "uber5" ]
+then
+   TOOLCHAIN_VER="UBER5.4"
+   TOOLCHAIN_DIR=Toolchains/UBER5
+elif [ "${TOOLCHAIN}" == "uber6" ]
+then
+   TOOLCHAIN_VER="UBER6.1"
+   TOOLCHAIN_DIR=Toolchains/UBER6
+elif [ "${TOOLCHAIN}" == "uber7" ]
+then
+   TOOLCHAIN_VER="UBER7.0"
+   TOOLCHAIN_DIR=Toolchains/UBER7
 fi
 
 export CROSS_COMPILE="${HOME}/Kernels/${TOOLCHAIN_DIR}/bin/aarch64-linux-android-"
