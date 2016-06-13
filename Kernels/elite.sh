@@ -3,7 +3,7 @@
 # -----
 # Usage
 # -----
-# $ . build_elite.sh <update|noupdate> <toolchain> <exp>
+# $ . elite.sh <update|noupdate> <toolchain> <exp>
 
 
 
