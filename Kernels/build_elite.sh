@@ -192,7 +192,7 @@ ZIPNAME=${KERNELNAME}-${today}-${TOOLCHAIN_VER}
 
 
 # remove backup files
-find ./ -name '*~' | xargs rm
+find ./ -name '*~' | xargs -r rm
 
 
 
