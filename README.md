@@ -5,7 +5,7 @@ These help with building various Android ROMs, kernels, and GApps. I use these o
 ## Usage
 To add all these sub folders to your PATH (allowing you to run them in any folder), add this to your .bashrc:
 
-`export PATH="${PATH}$(find <directory_to_script> -name '.*' -prune -o -type d -printf ':%p')"`
+`export PATH="${PATH}$(find <path_to_main_scripts_directory> -name '.*' -prune -o -type d -printf ':%p')"`
 
 Then you will be able to run commands by calling source like so:
 `source du.sh angler sync` or  `. du.sh angler sync`
