@@ -66,9 +66,9 @@ START=$(date +%s)
 
 # Change to the source directory
 echo -e ${BLDGREEN}
-echo -e "-----------------------------------------"
+echo -e "------------------------------------"
 echo -e "MOVING TO ${SOURCEDIR}"
-echo -e "-----------------------------------------"
+echo -e "------------------------------------"
 echo -e ${RST}
 
 cd ${SOURCEDIR}
@@ -90,39 +90,34 @@ fi
 
 
 
-# 1. Change DESOLATED to KBUILD_BUILD_HOST
-# 2. Allow kernel to be compiled with UBER 6.1
-# 3. Change from shamu_defconfig to B14CKB1RD_defconfig
+# I could fork these repos and do the changes in there permanently but I don't want to have to maintains anything extra
 echo -e ${BLDGREEN}
-echo -e "---------------------------------"
-echo -e "PICKING KERNEL AND DEVICE COMMITS"
-echo -e "---------------------------------"
+echo -e "---------------------------------------"
+echo -e "PICKING EXTRA COMMITS AND ADDING KA-MOD"
+echo -e "---------------------------------------"
 echo -e ${RST}
 echo -e ""
 
+# 1. Change DESOLATED to KBUILD_BUILD_HOST and allow kernel to be compiled with UBER 6.1
 cd ${SOURCEDIR}/kernel/moto/shamu
 git fetch https://github.com/nathanchance/B14CKB1RD_Kernel_N6.git
 git cherry-pick 20f83cadace94da9b711ebb53661b1682885888a
+# 2. Change from shamu_defconfig to B14CKB1RD_defconfig
 cd ${SOURCEDIR}/device/moto/shamu
 git fetch https://github.com/nathanchance/android_device_moto_shamu.git
 git cherry-pick 0d2c6f3bdfe6e78b9b8036471dd3dcb6945fbb51
-cd ${SOURCEDIR}
-
-
-
-# Add @Yoinx's Kernel Adiutor-Mod instead of the regular Kernel Adiutor (to complement Unicornblood or Blackbird)
-echo -e ${BLDGREEN}
-echo -e "-------------------------"
-echo -e "ADDING KERNEL ADIUTOR MOD"
-echo -e "-------------------------"
-echo -e ${RST}
-echo -e ""
-
+# 3. Stop per app overlays from being reset (thanks @bigrushdog)
+cd ${SOURCEDIR}/packages/apps/ThemeChooser
+git fetch https://github.com/nathanchance/android_packages_apps_ThemeChooser.git
+git cherry-pick 1cefd98f7ac5db31754a8f7ee1fd62f3ac897b71
+# 4. Add @Yoinx's Kernel Adiutor-Mod instead of the regular Kernel Adiutor (to complement Blackbird)
 cd ${SOURCEDIR}/vendor/cm/prebuilt/KernelAdiutor
 rm -rf KernelAdiutor.apk
 wget https://github.com/yoinx/kernel_adiutor/raw/master/download/app/app-release.apk
 mv app-release.apk KernelAdiutor.apk
 cd ${SOURCEDIR}
+# I want to make sure the picks went through okay
+sleep 10
 
 
 
@@ -152,9 +147,9 @@ breakfast ${DEVICE}
 
 # Clean up
 echo -e ${BLDGREEN}
-echo -e "------------------------------------------------"
+echo -e "------------------------------------------"
 echo -e "CLEANING UP ${SOURCEDIR}/out"
-echo -e "------------------------------------------------"
+echo -e "------------------------------------------"
 echo -e ${RST}
 echo -e ""
 
@@ -222,9 +217,9 @@ then
    # Clean up out directory to free up space
    echo -e ""
    echo -e ${BLDGREEN}
-   echo -e "------------------------------------------------"
+   echo -e "------------------------------------------"
    echo -e "CLEANING UP ${SOURCEDIR}/out"
-   echo -e "------------------------------------------------"
+   echo -e "------------------------------------------"
    echo -e ${RST}
    echo -e ""
 
