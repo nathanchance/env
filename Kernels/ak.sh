@@ -49,7 +49,7 @@ DEFCONFIG="ak_angler_defconfig"
 KER_BRANCH=ak-mm-staging
 AK_BRANCH=ak-angler-anykernel
 BASE_AK_VER="AK"
-VER=".066.ANGLER."
+VER=".066-1.ANGLER."
 if [ "${TOOLCHAIN}" == "aosp" ]
 then
    TOOLCHAIN_VER="AOSP4.9"
