@@ -57,19 +57,31 @@ then
 elif [ "${TOOLCHAIN}" == "uber4" ]
 then
    TOOLCHAIN_VER="UBER4.9"
-   TOOLCHAIN_DIR=Toolchains/UBER4
+   TOOLCHAIN_DIR=Toolchains/UBER/4.9
 elif [ "${TOOLCHAIN}" == "uber5" ]
 then
    TOOLCHAIN_VER="UBER5.4"
-   TOOLCHAIN_DIR=Toolchains/UBER5
+   TOOLCHAIN_DIR=Toolchains/UBER/5.4
 elif [ "${TOOLCHAIN}" == "uber6" ]
 then
    TOOLCHAIN_VER="UBER6.1"
-   TOOLCHAIN_DIR=Toolchains/UBER6
+   TOOLCHAIN_DIR=Toolchains/UBER/6.1
 elif [ "${TOOLCHAIN}" == "uber7" ]
 then
    TOOLCHAIN_VER="UBER7.0"
-   TOOLCHAIN_DIR=Toolchains/UBER7
+   TOOLCHAIN_DIR=Toolchains/UBER/7.0
+elif [ "${TOOLCHAIN}" == "linaro4.9" ]
+then
+   TOOLCHAIN_VER="LINARO4.9"
+   TOOLCHAIN_DIR=Toolchains/Linaro/4.9
+elif [ "${TOOLCHAIN}" == "linaro5.3" ]
+then
+   TOOLCHAIN_VER="LINARO5.3"
+   TOOLCHAIN_DIR=Toolchains/Linaro/5.3
+elif [ "${TOOLCHAIN}" == "linaro6.1" ]
+then
+   TOOLCHAIN_VER="LINARO6.1"
+   TOOLCHAIN_DIR=Toolchains/Linaro/6.1
 fi
 AK_VER="${BASE_AK_VER}${VER}${TOOLCHAIN_VER}"
 

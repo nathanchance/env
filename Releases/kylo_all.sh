@@ -18,6 +18,9 @@ fi
 . kylo.sh ${2} uber5
 . kylo.sh ${2} uber6
 . kylo.sh ${2} uber7
+. kylo.sh ${2} linaro4.9
+. kylo.sh ${2} linaro5.3
+. kylo.sh ${2} linaro6.1
 
 
 cat ${COMPILE_LOG}

@@ -18,6 +18,9 @@ fi
 . ak.sh ${2} uber5
 . ak.sh ${2} uber6
 . ak.sh ${2} uber7
+. ak.sh ${2} linaro4.9
+. ak.sh ${2} linaro5.3
+. ak.sh ${2} linaro6.1
 
 
 cat ${COMPILE_LOG}

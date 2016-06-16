@@ -17,14 +17,16 @@ fi
 # If the third parameter exists
 if [[ -n ${3} ]]
 then
-   . elite.sh ${2} linaro ${3}
    . elite.sh ${2} aosp ${3}
    . elite.sh ${2} uber4 ${3}
    . elite.sh ${2} uber5 ${3}
    . elite.sh ${2} uber6 ${3}
    . elite.sh ${2} uber7 ${3}
+   . elite.sh ${2} linaro4.9 ${3}
+   . elite.sh ${2} linaro5.3 ${3}
+   . elite.sh ${2} linaro6.1 ${3}
 else
-   . elite.sh ${2} linaro
+   . elite.sh ${2} linaro4.9
    . elite.sh ${2} aosp
    . elite.sh ${2} uber4
 fi
