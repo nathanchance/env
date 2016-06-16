@@ -138,7 +138,6 @@ function make_kernel {
    cd ${KERNEL_DIR}
    make ${DEFCONFIG}
    make ${THREAD}
-   cp -vr ${ZIMAGE_DIR}/${KERNEL} ${ANYKERNEL_DIR}/zImage
 }
 
 # Make the modules
@@ -157,6 +156,7 @@ function make_dtb {
 
 # Make the zip file, remove the previous version and upload it
 function make_zip {
+   cp -vr ${ZIMAGE_DIR}/${KERNEL} ${ANYKERNEL_DIR}/zImage
    cd ${ANYKERNEL_DIR}
    zip -x@zipexclude -r9 `echo ${AK_VER}`.zip *
    rm  ${UPLOAD_DIR}/${BASE_AK_VER}*${TOOLCHAIN_VER}.zip
@@ -249,7 +249,7 @@ make_modules
 
 
 # If the above was successful
-if [ `ls ${ANYKERNEL_DIR}/zImage 2>/dev/null | wc -l` != "0" ]
+if [ `ls ${ZIMAGE_DIR}/${KERNEL} 2>/dev/null | wc -l` != "0" ]
 then
    BUILD_SUCCESS_STRING="BUILD SUCCESSFUL"
 

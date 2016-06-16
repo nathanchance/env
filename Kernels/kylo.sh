@@ -201,7 +201,7 @@ make_kernel
 
 
 # If the above was successful
-if [ `ls ${ANYKERNEL_DIR}/kernel/zImage 2>/dev/null | wc -l` != "0" ]
+if [ `ls ${ZIMAGE_DIR}/${KERNEL} 2>/dev/null | wc -l` != "0" ]
 then
    BUILD_SUCCESS_STRING="BUILD SUCCESSFUL"
 
