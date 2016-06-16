@@ -155,7 +155,6 @@ echo -e "------------------------------------------"
 echo -e ${RST}
 echo -e ""
 
-make clean
 make clobber
 
 
@@ -225,7 +224,6 @@ then
    echo -e ${RST}
    echo -e ""
 
-   make clean
    make clobber
 
 
