@@ -44,7 +44,7 @@ THREAD="-j$(grep -c ^processor /proc/cpuinfo)"
 KERNEL="Image.gz-dtb"
 DEFCONFIG="phasma_defconfig"
 BASE_PHASMA_VER="Phasma"
-VER=".R19.M.bullhead."
+VER=".R20.M.bullhead."
 if [ "${TOOLCHAIN}" == "aosp" ]
 then
    TOOLCHAIN_VER="AOSP4.9"
