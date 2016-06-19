@@ -44,7 +44,7 @@ THREAD="-j$(grep -c ^processor /proc/cpuinfo)"
 KERNEL="Image.gz-dtb"
 DEFCONFIG="kylo_defconfig"
 BASE_KYLO_VER="Kylo"
-VER=".R30.M.angler."
+VER=".R31.M.angler."
 if [ "${TOOLCHAIN}" == "aosp" ]
 then
    TOOLCHAIN_VER="AOSP4.9"
