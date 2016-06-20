@@ -147,8 +147,8 @@ echo -e "-----------"
 echo -e ${RESTORE}
 echo -e ""
 
-git reset --hard
-git clean -f -d
+git reset --hard origin/${BRANCH}
+git clean -f -d -x
 git pull
 make clean
 make mrproper

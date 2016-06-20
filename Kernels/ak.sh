@@ -114,8 +114,8 @@ function clean_all {
    rm -rf ${KERNEL}
    rm -rf ${DTBIMAGE}
    git checkout ${AK_BRANCH}
-   git reset --hard > /dev/null 2>&1
-   git clean -f -d > /dev/null 2>&1
+   git reset --hard origin/${AK_BRANCH}
+   git clean -f -d -x
    git pull
    cd ${KERNEL_DIR}
    echo

@@ -107,8 +107,8 @@ function clean_all {
    make clean
    make mrproper
    rm -rf ${KERNEL_DIR}/out/kernel/zImage
-   git clean -f -d
-   git reset --hard
+   git reset --hard origin/maul
+   git clean -f -d -x
 }
 
 # Make the kernel
