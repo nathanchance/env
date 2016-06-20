@@ -34,17 +34,18 @@ fi
 # ---------
 # Variables
 # ---------
-SOURCEDIR=${HOME}/ROMs/DU
+ANDROIDDIR=${HOME}
+SOURCEDIR=${ANDROIDDIR}/ROMs/DU
 OUTDIR=${SOURCEDIR}/out/target/product/${DEVICE}
 
 # If PERSON does not exist
 if [[ -z ${PERSON} ]]
 then
    export DU_BUILD_TYPE=CHANCELLOR
-   UPLOADDIR=${HOME}/shared/ROMs/"Dirty Unicorns"/${DEVICE}
+   ZIPMOVE=${HOME}/shared/ROMs/"Dirty Unicorns"/${DEVICE}
 # If PERSON does exist
 else
-   UPLOADDIR=${HOME}/shared/ROMs/.special/.${PERSON}
+   ZIPMOVE=${HOME}/shared/ROMs/.special/.${PERSON}
 
    # Add custom build tag
    if [ "${PERSON}" == "alcolawl" ]
@@ -178,28 +179,28 @@ then
 
 
 
-   # Remove exisiting files in UPLOADDIR
+   # Remove exisiting files in ZIPMOVE
    echo -e ""
    echo -e ${BLDRED}
-   echo -e "-------------------------"
-   echo -e "CLEANING UPLOAD DIRECTORY"
-   echo -e "-------------------------"
+   echo -e "--------------------------"
+   echo -e "CLEANING ZIPMOVE DIRECTORY"
+   echo -e "--------------------------"
    echo -e ${RST}
 
-   rm "${UPLOADDIR}"/*_${DEVICE}_*.zip
-   rm "${UPLOADDIR}"/*_${DEVICE}_*.zip.md5sum
+   rm "${ZIPMOVE}"/*_${DEVICE}_*.zip
+   rm "${ZIPMOVE}"/*_${DEVICE}_*.zip.md5sum
 
 
 
-   # Copy new files to UPLOADDIR
+   # Copy new files to ZIPMOVE
    echo -e ${BLDRED}
-   echo -e "--------------------------------"
-   echo -e "MOVING FILES TO UPLOAD DIRECTORY"
-   echo -e "--------------------------------"
+   echo -e "---------------------------------"
+   echo -e "MOVING FILES TO ZIPMOVE DIRECTORY"
+   echo -e "---------------------------------"
    echo -e ${RST}
 
-   mv ${OUTDIR}/DU_${DEVICE}_*.zip "${UPLOADDIR}"
-   mv ${OUTDIR}/DU_${DEVICE}_*.zip.md5sum "${UPLOADDIR}"
+   mv ${OUTDIR}/DU_${DEVICE}_*.zip "${ZIPMOVE}"
+   mv ${OUTDIR}/DU_${DEVICE}_*.zip.md5sum "${ZIPMOVE}"
 
 
 

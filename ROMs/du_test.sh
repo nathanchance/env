@@ -32,9 +32,10 @@ DUBT=${4}
 # ---------
 # Variables
 # ---------
-SOURCEDIR=${HOME}/ROMs/DU
+ANDROIDDIR=${HOME}
+SOURCEDIR=${ANDROIDDIR}/ROMs/DU
 OUTDIR=${SOURCEDIR}/out/target/product/${DEVICE}
-UPLOADDIR=${HOME}/shared/ROMs/.special/.tests/${DEVICE}
+ZIPMOVE=${HOME}/shared/ROMs/.special/.tests/${DEVICE}
 
 
 
@@ -155,30 +156,30 @@ then
 
 
    echo -e ""
-   # Remove exisiting files in UPLOADDIR
+   # Remove exisiting files in ZIPMOVE
    if [ "${DELPREVZIPS}" == "remove" ]
    then
       echo -e ${BLDRED}
-      echo -e "-------------------------"
-      echo -e "CLEANING UPLOAD DIRECTORY"
-      echo -e "-------------------------"
+      echo -e "--------------------------"
+      echo -e "CLEANING ZIPMOVE DIRECTORY"
+      echo -e "--------------------------"
       echo -e ${RST}
 
-      rm ${UPLOADDIR}/*_${DEVICE}_*${DU_BUILD_TYPE}.zip
-      rm ${UPLOADDIR}/*_${DEVICE}_*${DU_BUILD_TYPE}.zip.md5sum
+      rm ${ZIPMOVE}/*_${DEVICE}_*${DU_BUILD_TYPE}.zip
+      rm ${ZIPMOVE}/*_${DEVICE}_*${DU_BUILD_TYPE}.zip.md5sum
    fi
 
 
 
-   # Copy new files to UPLOADDIR
+   # Copy new files to ZIPMOVE
    echo -e ${BLDRED}
-   echo -e "--------------------------------"
-   echo -e "MOVING FILES TO UPLOAD DIRECTORY"
-   echo -e "--------------------------------"
+   echo -e "---------------------------------"
+   echo -e "MOVING FILES TO ZIPMOVE DIRECTORY"
+   echo -e "---------------------------------"
    echo -e ${RST}
 
-   mv ${OUTDIR}/DU_${DEVICE}_*.zip ${UPLOADDIR}
-   mv ${OUTDIR}/DU_${DEVICE}_*.zip.md5sum ${UPLOADDIR}
+   mv ${OUTDIR}/DU_${DEVICE}_*.zip ${ZIPMOVE}
+   mv ${OUTDIR}/DU_${DEVICE}_*.zip.md5sum ${ZIPMOVE}
 
 
 

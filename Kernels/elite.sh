@@ -34,19 +34,21 @@ fi
 # ---------
 # Variables
 # ---------
+# ANDROIDDIR: Directory that holds all of the Android folders
 # SOURCEDIR: Path to build your kernel
 # AKDIR: Directory for the AnyKernel updater
-# UPLOADDIR: Upload directory
-SOURCEDIR=${HOME}/Kernels/Elite
+# ZIPMOVE: Directory to hold completed zips
+ANDROIDDIR=${HOME}
+SOURCEDIR=${ANDROIDDIR}/Kernels/Elite
 ZIMAGEDIR=${SOURCEDIR}/arch/arm64/boot
 AKDIR=${SOURCEDIR}/packagesm
 # If EXPERIMENTAL exists, we are doing an experimental build; change branch and upload location
 if [[ -n ${EXPERIMENTAL} ]]
 then
-   UPLOADDIR=${HOME}/shared/Kernels/angler/Elite/Experimental
+   ZIPMOVE=${HOME}/shared/Kernels/angler/Elite/Experimental
    BRANCH=Elite-exp
 else
-   UPLOADDIR=${HOME}/shared/Kernels/angler/Elite
+   ZIPMOVE=${HOME}/shared/Kernels/angler/Elite
    BRANCH=Elite-merged
 fi
 
@@ -257,8 +259,8 @@ then
    echo -e "----------"
    echo -e ${RESTORE}
 
-   rm ${UPLOADDIR}/Elite_*${TOOLCHAIN_VER}.zip
-   mv ${ZIPNAME}.zip ${UPLOADDIR}
+   rm ${ZIPMOVE}/Elite_*${TOOLCHAIN_VER}.zip
+   mv ${ZIPNAME}.zip ${ZIPMOVE}
 
 
 

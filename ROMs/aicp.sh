@@ -28,9 +28,10 @@ SYNC=${2}
 # ---------
 # Variables
 # ---------
-SOURCEDIR=${HOME}/ROMs/AICP
+ANDROIDDIR=${HOME}
+SOURCEDIR=${ANDROIDDIR}/ROMs/AICP
 OUTDIR=${SOURCEDIR}/out/target/product/${DEVICE}
-UPLOADDIR=${HOME}/shared/ROMs/AICP/${DEVICE}
+ZIPMOVE=${HOME}/shared/ROMs/AICP/${DEVICE}
 
 
 
@@ -145,28 +146,28 @@ then
 
 
 
-   # Remove exisiting files in UPLOADDIR
+   # Remove exisiting files in ZIPMOVE
    echo -e ""
    echo -e ${BLDGREEN}
-   echo -e "-------------------------"
-   echo -e "CLEANING UPLOAD DIRECTORY"
-   echo -e "-------------------------"
+   echo -e "--------------------------"
+   echo -e "CLEANING ZIPMOVE DIRECTORY"
+   echo -e "--------------------------"
    echo -e ${RST}
 
-   rm ${UPLOADDIR}/*_${DEVICE}_*.zip
-   rm ${UPLOADDIR}/*_${DEVICE}_*.zip.md5sum
+   rm ${ZIPMOVE}/*_${DEVICE}_*.zip
+   rm ${ZIPMOVE}/*_${DEVICE}_*.zip.md5sum
 
 
 
-   # Copy new files to UPLOADDIR
+   # Copy new files to ZIPMOVE
    echo -e ${BLDGREEN}
-   echo -e "--------------------------------"
-   echo -e "MOVING FILES TO UPLOAD DIRECTORY"
-   echo -e "--------------------------------"
+   echo -e "---------------------------------"
+   echo -e "MOVING FILES TO ZIPMOVE DIRECTORY"
+   echo -e "---------------------------------"
    echo -e ${RST}
 
-   mv ${OUTDIR}/aicp_${DEVICE}_mm*.zip ${UPLOADDIR}
-   mv ${OUTDIR}/aicp_${DEVICE}_mm*.zip.md5sum ${UPLOADDIR}
+   mv ${OUTDIR}/aicp_${DEVICE}_mm*.zip ${ZIPMOVE}
+   mv ${OUTDIR}/aicp_${DEVICE}_mm*.zip.md5sum ${ZIPMOVE}
 
 
 

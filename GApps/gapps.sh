@@ -26,16 +26,17 @@ TYPE=${1}
 # ---------
 # Variables
 # ---------
+ANDROIDDIR=${HOME}
 if [ "${TYPE}" == "banks" ]
 then
-    SOURCEDIR=~/GApps/Banks
+    SOURCEDIR=${ANDROIDDIR}/GApps/Banks
     ZIPBEG=BaNkS
 elif [ "${TYPE}" == "pn" ]
 then
-    SOURCEDIR=~/GApps/PN
+    SOURCEDIR=${ANDROIDDIR}/GApps/PN
     ZIPBEG=PureNexus
 fi
-UPLOADDIR=~/shared/GApps
+ZIPMOVE=~/shared/GApps
 
 
 
@@ -62,8 +63,8 @@ git pull
 
 
 # Remove current GApps and move the new ones in their place
-rm ${UPLOADDIR}/${ZIPBEG}*.zip
-mv ${SOURCEDIR}/out/${ZIPBEG}*.zip ${UPLOADDIR}
+rm ${ZIPMOVE}/${ZIPBEG}*.zip
+mv ${SOURCEDIR}/out/${ZIPBEG}*.zip ${ZIPMOVE}
 
 
 

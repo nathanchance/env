@@ -28,9 +28,10 @@ SYNC=${1}
 # ---------
 # Variables
 # ---------
-SOURCEDIR=${HOME}/ROMs/RR
+ANDROIDDIR=${HOME}
+SOURCEDIR=${ANDROIDDIR}/ROMs/RR
 OUTDIR=${SOURCEDIR}/out/target/product/${DEVICE}
-UPLOADDIR=${HOME}/shared/ROMs/ResurrectionRemix/${DEVICE}
+ZIPMOVE=${HOME}/shared/ROMs/ResurrectionRemix/${DEVICE}
 
 
 
@@ -176,28 +177,28 @@ then
 
 
 
-   # Remove exisiting files in UPLOADDIR
+   # Remove exisiting files in ZIPMOVE
    echo -e ""
    echo -e ${BLDGREEN}
-   echo -e "-------------------------"
-   echo -e "CLEANING UPLOAD DIRECTORY"
-   echo -e "-------------------------"
+   echo -e "--------------------------"
+   echo -e "CLEANING ZIPMOVE DIRECTORY"
+   echo -e "--------------------------"
    echo -e ${RST}
 
-   rm "${UPLOADDIR}"/*${DEVICE}*.zip
-   rm "${UPLOADDIR}"/*${DEVICE}*.zip.md5sum
+   rm "${ZIPMOVE}"/*${DEVICE}*.zip
+   rm "${ZIPMOVE}"/*${DEVICE}*.zip.md5sum
 
 
 
-   # Copy new files to UPLOADDIR
+   # Copy new files to ZIPMOVE
    echo -e ${BLDGREEN}
-   echo -e "--------------------------------"
-   echo -e "MOVING FILES TO UPLOAD DIRECTORY"
-   echo -e "--------------------------------"
+   echo -e "---------------------------------"
+   echo -e "MOVING FILES TO ZIPMOVE DIRECTORY"
+   echo -e "---------------------------------"
    echo -e ${RST}
 
-   mv ${OUTDIR}/ResurrectionRemix*-${DEVICE}.zip "${UPLOADDIR}"
-   mv ${OUTDIR}/ResurrectionRemix*-${DEVICE}.zip.md5sum "${UPLOADDIR}"
+   mv ${OUTDIR}/ResurrectionRemix*-${DEVICE}.zip "${ZIPMOVE}"
+   mv ${OUTDIR}/ResurrectionRemix*-${DEVICE}.zip.md5sum "${ZIPMOVE}"
 
 
 

@@ -29,11 +29,12 @@ TOOLCHAIN=${2}
 # ----------
 # Directories
 # ----------
-RESOURCE_DIR=${HOME}/Kernels
+ANDROID_DIR=${HOME}
+RESOURCE_DIR=${ANDROID_DIR}/Kernels
 KERNEL_DIR=${RESOURCE_DIR}/Kylo
 ZIMAGE_DIR="${KERNEL_DIR}/arch/arm64/boot"
 ANYKERNEL_DIR=${KERNEL_DIR}/out
-UPLOAD_DIR=${HOME}/shared/Kernels/angler/Kylo
+ZIP_MOVE=${HOME}/shared/Kernels/angler/Kylo
 
 
 
@@ -123,8 +124,8 @@ function make_zip {
    cp -vr ${ZIMAGE_DIR}/${KERNEL} ${ANYKERNEL_DIR}/kernel/zImage
    cd ${ANYKERNEL_DIR}
    zip -r9 `echo ${KYLO_VER}`.zip *
-   rm  ${UPLOAD_DIR}/${BASE_KYLO_VER}*${TOOLCHAIN_VER}.zip
-   mv  `echo ${KYLO_VER}`.zip ${UPLOAD_DIR}
+   rm  ${ZIP_MOVE}/${BASE_KYLO_VER}*${TOOLCHAIN_VER}.zip
+   mv  `echo ${KYLO_VER}`.zip ${ZIP_MOVE}
    cd ${KERNEL_DIR}
 }
 

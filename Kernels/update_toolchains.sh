@@ -1,6 +1,7 @@
 #!/bin/bash
 
-TOOLCHAINS_DIR=${HOME}/Kernels/Toolchains
+ANDROID_DIR=${HOME}
+TOOLCHAINS_DIR=${ANDROID_DIR}/Kernels/Toolchains
 
 
 cd ${TOOLCHAINS_DIR}

@@ -29,10 +29,11 @@ TOOLCHAIN=${2}
 # ----------
 # Directories
 # ----------
-RESOURCE_DIR=${HOME}/Kernels
+ANDROID_DIR=${HOME}
+RESOURCE_DIR=${ANDROID_DIR}/Kernels
 KERNEL_DIR=${RESOURCE_DIR}/AK
 ANYKERNEL_DIR=${RESOURCE_DIR}/AK-AK2
-UPLOAD_DIR=${HOME}/shared/Kernels/angler/AK
+ZIP_MOVE=${HOME}/shared/Kernels/angler/AK
 PATCH_DIR="${ANYKERNEL_DIR}/patch"
 MODULES_DIR="${ANYKERNEL_DIR}/modules"
 ZIMAGE_DIR="${KERNEL_DIR}/arch/arm64/boot"
@@ -159,8 +160,8 @@ function make_zip {
    cp -vr ${ZIMAGE_DIR}/${KERNEL} ${ANYKERNEL_DIR}/zImage
    cd ${ANYKERNEL_DIR}
    zip -x@zipexclude -r9 `echo ${AK_VER}`.zip *
-   rm  ${UPLOAD_DIR}/${BASE_AK_VER}*${TOOLCHAIN_VER}.zip
-   mv  `echo ${AK_VER}`.zip ${UPLOAD_DIR}
+   rm  ${ZIP_MOVE}/${BASE_AK_VER}*${TOOLCHAIN_VER}.zip
+   mv  `echo ${AK_VER}`.zip ${ZIP_MOVE}
    cd ${KERNEL_DIR}
 }
 
