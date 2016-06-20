@@ -98,7 +98,7 @@ export SUBARCH=arm64
 export KBUILD_BUILD_USER=nathan
 export KBUILD_BUILD_HOST=chancellor
 # Export the COMPILE_LOG variable for other files to use (I currently handle this via .bashrc)
-# export LOGDIR=${HOME}/Logs
+# export LOGDIR=${ANDROID_DIR}/Logs
 # export COMPILE_LOG=${LOGDIR}/compile_log_`date +%m_%d_%y`.log
 
 

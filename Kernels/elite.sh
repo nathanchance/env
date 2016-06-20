@@ -92,7 +92,7 @@ export ARCH=arm64
 export SUBARCH=arm64
 export LOCALVERSION="-Elite-Angler-${TOOLCHAIN_VER}"
 # Export the COMPILE_LOG variable for other files to use (I currently handle this via .bashrc)
-# export LOGDIR=${HOME}/Logs
+# export LOGDIR=${ANDROIDDIR}/Logs
 # export COMPILE_LOG=${LOGDIR}/compile_log_`date +%m_%d_%y`.log
 
 
