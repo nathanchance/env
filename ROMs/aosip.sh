@@ -38,7 +38,7 @@ ZIPMOVE=${HOME}/shared/ROMs/AOSiP/${DEVICE}
 # ------
 # Colors
 # ------
-BLDGREEN="\033[1m""\033[32m"
+RED="\033[01;31m"
 RST="\033[0m"
 
 
@@ -55,7 +55,7 @@ clear
 
 
 # Start tracking time
-echo -e ${BLDGREEN}
+echo -e ${RED}
 echo -e "---------------------------------------"
 echo -e "SCRIPT STARTING AT $(date +%D\ %r)"
 echo -e "---------------------------------------"
@@ -66,7 +66,7 @@ START=$(date +%s)
 
 
 # Change to the source directory
-echo -e ${BLDGREEN}
+echo -e ${RED}
 echo -e "-----------------------------------------"
 echo -e "MOVING TO ${SOURCEDIR}"
 echo -e "-----------------------------------------"
@@ -79,7 +79,7 @@ cd ${SOURCEDIR}
 # Sync the repo if requested
 if [ "${SYNC}" == "sync" ]
 then
-   echo -e ${BLDGREEN}
+   echo -e ${RED}
    echo -e "----------------------"
    echo -e "SYNCING LATEST SOURCES"
    echo -e "----------------------"
@@ -92,7 +92,7 @@ fi
 
 
 # Setup the build environment
-echo -e ${BLDGREEN}
+echo -e ${RED}
 echo -e "----------------------------"
 echo -e "SETTING UP BUILD ENVIRONMENT"
 echo -e "----------------------------"
@@ -104,7 +104,7 @@ echo -e ""
 
 
 # Prepare device
-echo -e ${BLDGREEN}
+echo -e ${RED}
 echo -e "----------------"
 echo -e "PREPARING DEVICE"
 echo -e "----------------"
@@ -116,7 +116,7 @@ breakfast ${DEVICE}
 
 
 # Clean up
-echo -e ${BLDGREEN}
+echo -e ${RED}
 echo -e "------------------------------------------------"
 echo -e "CLEANING UP ${SOURCEDIR}/out"
 echo -e "------------------------------------------------"
@@ -128,7 +128,7 @@ make clobber
 
 
 # Start building
-echo -e ${BLDGREEN}
+echo -e ${RED}
 echo -e "---------------"
 echo -e "MAKING ZIP FILE"
 echo -e "---------------"
@@ -148,7 +148,7 @@ then
 
    # Remove exisiting files in ZIPMOVE
    echo -e ""
-   echo -e ${BLDGREEN}
+   echo -e ${RED}
    echo -e "--------------------------"
    echo -e "CLEANING ZIPMOVE DIRECTORY"
    echo -e "--------------------------"
@@ -160,7 +160,7 @@ then
 
 
    # Copy new files to ZIPMOVE
-   echo -e ${BLDGREEN}
+   echo -e ${RED}
    echo -e "---------------------------------"
    echo -e "MOVING FILES TO ZIPMOVE DIRECTORY"
    echo -e "---------------------------------"
@@ -172,7 +172,7 @@ then
 
 
    # Upload the files
-   echo -e ${BLDGREEN}
+   echo -e ${RED}
    echo -e "---------------"
    echo -e "UPLOADING FILES"
    echo -e "---------------"
@@ -185,7 +185,7 @@ then
 
    # Clean up out directory to free up space
    echo -e ""
-   echo -e ${BLDGREEN}
+   echo -e ${RED}
    echo -e "------------------------------------------------"
    echo -e "CLEANING UP ${SOURCEDIR}/out"
    echo -e "------------------------------------------------"
@@ -197,7 +197,7 @@ then
 
 
    # Go back home
-   echo -e ${BLDGREEN}
+   echo -e ${RED}
    echo -e "----------"
    echo -e "GOING HOME"
    echo -e "----------"
@@ -215,7 +215,7 @@ fi
 
 # Stop tracking time
 END=$(date +%s)
-echo -e ${BLDGREEN}
+echo -e ${RED}
 echo -e "-------------------------------------"
 echo -e "SCRIPT ENDING AT $(date +%D\ %r)"
 echo -e ""

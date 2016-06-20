@@ -10,7 +10,7 @@
 # ------
 # Colors
 # ------
-GREEN="\033[01;32m"
+RED="\033[01;31m"
 RESTORE="\033[0m"
 
 
@@ -114,7 +114,7 @@ cd ${SOURCEDIR}
 
 
 # Show Elite logo to start
-echo -e ${GREEN}
+echo -e ${RED}
 echo -e ""
 echo -e "    ____   _      _   _____   ____    "
 echo -e "   |  __| | |    | | |_   _| |  __|   "
@@ -140,7 +140,7 @@ echo -e ${RESTORE}
 
 
 # Clean up
-echo -e ${GREEN}
+echo -e ${RED}
 echo -e "-----------"
 echo -e "CLEANING UP"
 echo -e "-----------"
@@ -159,7 +159,7 @@ make mrproper
 if [ "${FETCHUPSTREAM}" == "update" ]
 then
    echo -e ""
-   echo -e ${GREEN}
+   echo -e ${RED}
    echo -e "----------------"
    echo -e "UPDATING SOURCES"
    echo -e "----------------"
@@ -208,7 +208,7 @@ find ./ -name '*~' | xargs -r rm
 
 # make kernel
 echo -e ""
-echo -e ${GREEN}
+echo -e ${RED}
 echo -e "-------------"
 echo -e "MAKING KERNEL"
 echo -e "-------------"
@@ -228,7 +228,7 @@ then
 
 
    # Grab zImage-dtb
-   echo -e ${GREEN}
+   echo -e ${RED}
    echo -e ""
    echo -e "-----------------------"
    echo -e "Collecting Image.gz-dtb"
@@ -240,7 +240,7 @@ then
 
 
    # Build Zip
-   echo -e ${GREEN}
+   echo -e ${RED}
    echo -e "----------"
    echo -e "MAKING ZIP" | tr [a-z] [A-Z]
    echo -e "----------"
@@ -253,7 +253,7 @@ then
 
    # Remove the previous zip and move the new zip into the upload directory
    echo -e ""
-   echo -e ${GREEN}
+   echo -e ${RED}
    echo -e "----------"
    echo -e "MOVING ZIP" | tr [a-z] [A-Z]
    echo -e "----------"
@@ -265,7 +265,7 @@ then
 
 
    # Upload it
-   echo -e ${GREEN}
+   echo -e ${RED}
    echo -e "-------------"
    echo -e "UPLOADING ZIP" | tr [a-z] [A-Z]
    echo -e "-------------"
@@ -292,7 +292,7 @@ cd ${HOME}
 
 # Success! Stop tracking time
 echo -e ""
-echo -e ${GREEN}
+echo -e ${RED}
 echo "--------------------"
 echo "SCRIPT COMPLETED IN:"
 echo "--------------------"
