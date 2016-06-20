@@ -4,25 +4,24 @@
 # -----
 # Usage
 # -----
-# $ . du_all.sh <custom|normal> <sync|nosync>
+# $ . du_all.sh <custom|normal>
 
 
 TYPE=${1}
-SYNC=${2}
 
 
 if [ "${TYPE}" == "normal" ]
 then
-   . du.sh angler ${SYNC}
-   . du.sh shamu ${SYNC}
-   . du.sh bullhead ${SYNC}
-   . du.sh hammerhead ${SYNC}
+   . du.sh angler sync
+   . du.sh shamu sync
+   . du.sh bullhead sync
+   . du.sh hammerhead sync
 elif [ "${TYPE}" == "custom" ]
 then
-   . du.sh angler ${SYNC} drew
-   . du.sh bullhead ${SYNC} alcolawl
-   . du.sh angler ${SYNC} hmhb
-   . du.sh shamu ${SYNC} jdizzle
+   . du.sh angler sync drew
+   . du.sh bullhead sync alcolawl
+   . du.sh angler sync hmhb
+   . du.sh shamu sync jdizzle
 fi
 
 
