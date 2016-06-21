@@ -39,11 +39,12 @@ ANDROIDDIR=${HOME}
 if [ ${MOD} = true ]
 then
    SOURCEDIR=${ANDROIDDIR}/ROMs/PN-Mod
+   ZIPMOVE=${HOME}/shared/ROMs/"Pure Nexus Mod"/${DEVICE}
 else
    SOURCEDIR=${ANDROIDDIR}/ROMs/PN
+   ZIPMOVE=${HOME}/shared/ROMs/"Pure Nexus"/${DEVICE}
 fi
 OUTDIR=${SOURCEDIR}/out/target/product/${DEVICE}
-ZIPMOVE=${HOME}/shared/ROMs/"Pure Nexus"/${DEVICE}
 
 
 
@@ -166,14 +167,8 @@ then
    echo -e "--------------------------"
    echo -e ${RST}
 
-   if [ ${MOD} = true ]
-   then
-      rm "${ZIPMOVE}"/*${DEVICE}-mod*.zip
-      rm "${ZIPMOVE}"/*${DEVICE}-mod*.zip.md5sum
-   else
-      rm "${ZIPMOVE}"/*${DEVICE}-6.0.1*.zip
-      rm "${ZIPMOVE}"/*${DEVICE}-6.0.1*.zip.md5sum
-   fi
+   rm "${ZIPMOVE}"/*${DEVICE}*.zip
+   rm "${ZIPMOVE}"/*${DEVICE}*.zip.md5sum
 
 
 
