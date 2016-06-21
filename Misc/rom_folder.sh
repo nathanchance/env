@@ -53,6 +53,11 @@ then
    SOURCE_DIR=${ROM_DIR}/PN
    REPO_URL=https://github.com/PureNexusProject/manifest.git
    REPO_BRANCH=mm2
+elif [ "${ROM}" == "pnmod" ]
+then
+   SOURCE_DIR=${ROM_DIR}/PN-Mod
+   REPO_URL=https://github.com/ezio84/pnmod-manifest.git
+   REPO_BRANCH=mm2
 elif [ "${ROM}" == "screwd" ]
 then
    SOURCE_DIR=${ROM_DIR}/Screwd
@@ -108,17 +113,31 @@ then
 
    # run the repo command
    cd ${SOURCE_DIR}
-   repo init -u ${REPO_URL} -b ${REPO_BRANCH} && repo sync --force-sync
+   repo init -u ${REPO_URL} -b ${REPO_BRANCH}
 
-   # Sync dependencies
-   . build/envsetup.sh
+   if [ "${ROM}" == "rr" ]
+   then
+      mkdir ${SOURCE_DIR}/.repo/local_manifests
+      cp -v ${ROM_DIR}/Manifests/rr_shamu.xml ${SOURCE_DIR}/.repo/local_manifests
+   elif [ "${ROM}" == "pnmod" ]
+      mkdir ${SOURCE_DIR}/.repo/local_manifests
+      cp -v ${ROM_DIR}/Manifests/pn-mod.xml ${SOURCE_DIR}/.repo/local_manifests
+   fi
+
+  repo sync --force-sync
+
+
+
    echo -e ${BLDRED}
    echo -e "--------------------"
    echo -e "SYNCING DEPENDENCIES"
    echo -e "--------------------"
    echo -e ${RST}
 
-   if [ ${ROM} == "screwd" ]
+   # Sync dependencies
+   . build/envsetup.sh
+
+   if [ "${ROM}" == "screwd" ]
    then
       lunch screwd_angler-userdebug
       lunch screwd_bullhead-userdebug
