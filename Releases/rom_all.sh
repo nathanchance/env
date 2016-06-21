@@ -23,7 +23,6 @@ then
       do
          . rom.sh ${ROM} ${DEVICE} sync ${2}
       done
-      fi
    fi
 else
    for DEVICE in ${DEVICES}
