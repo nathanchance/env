@@ -100,9 +100,9 @@ START=$(date +%s)
 
 # Change to the source directory
 echo -e ${RED}
-echo -e "------------------------------------"
-echo -e "MOVING TO ${SOURCEDIR}"
-echo -e "------------------------------------"
+echo -e "--------------------------"
+echo -e "MOVING TO SOURCE DIRECTORY"
+echo -e "--------------------------"
 echo -e ${RST}
 
 cd ${SOURCEDIR}
@@ -150,9 +150,9 @@ breakfast ${DEVICE}
 
 # Clean up
 echo -e ${RED}
-echo -e "------------------------------------------"
-echo -e "CLEANING UP ${SOURCEDIR}/out"
-echo -e "------------------------------------------"
+echo -e "-------------------------"
+echo -e "CLEANING UP OUT DIRECTORY"
+echo -e "-------------------------"
 echo -e ${RST}
 echo -e ""
 
@@ -219,9 +219,9 @@ then
    # Clean up out directory to free up space
    echo -e ""
    echo -e ${RED}
-   echo -e "------------------------------------------"
-   echo -e "CLEANING UP ${SOURCEDIR}/out"
-   echo -e "------------------------------------------"
+   echo -e "-------------------------"
+   echo -e "CLEANING UP OUT DIRECTORY"
+   echo -e "-------------------------"
    echo -e ${RST}
    echo -e ""
 

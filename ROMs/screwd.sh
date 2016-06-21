@@ -67,9 +67,9 @@ START=$(date +%s)
 
 # Change to the source directory
 echo -e ${MAG}
-echo -e "----------------------------------------"
-echo -e "MOVING TO ${SOURCEDIR}"
-echo -e "----------------------------------------"
+echo -e "--------------------------"
+echo -e "MOVING TO SOURCE DIRECTORY"
+echo -e "--------------------------"
 echo -e ${RST}
 
 cd ${SOURCEDIR}
@@ -117,9 +117,9 @@ lunch screwd_${DEVICE}-userdebug
 
 # Clean up
 echo -e ${MAG}
-echo -e "----------------------------------------------"
-echo -e "CLEANING UP ${SOURCEDIR}/out"
-echo -e "----------------------------------------------"
+echo -e "-------------------------"
+echo -e "CLEANING UP OUT DIRECTORY"
+echo -e "-------------------------"
 echo -e ${RST}
 echo -e ""
 
@@ -186,9 +186,9 @@ then
    # Clean up out directory to free up space
    echo -e ""
    echo -e ${MAG}
-   echo -e "----------------------------------------------"
-   echo -e "CLEANING UP ${SOURCEDIR}/out"
-   echo -e "----------------------------------------------"
+   echo -e "-------------------------"
+   echo -e "CLEANING UP OUT DIRECTORY"
+   echo -e "-------------------------"
    echo -e ${RST}
    echo -e ""
 
