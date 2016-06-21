@@ -6,12 +6,12 @@
 # -----
 # $ . pn_all.sh <mod>
 
-if [[ -n ${3} ]]
+if [[ -n ${1} ]]
 then
-   . pn.sh angler sync ${3}
-   . pn.sh shamu sync ${3}
-   . pn.sh bullhead sync ${3}
-   . pn.sh hammerhead sync ${3}
+   . pn.sh angler sync ${1}
+   . pn.sh shamu sync ${1}
+   . pn.sh bullhead sync ${1}
+   . pn.sh hammerhead sync ${1}
 else
    . pn.sh angler sync
    . pn.sh shamu sync
