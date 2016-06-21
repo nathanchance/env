@@ -3,14 +3,14 @@
 # -----
 # Usage
 # -----
-# $ . pn.sh <device> <sync|nosync>
+# $ . pn.sh <device> <sync|nosync> <mod>
 
 
 
 # --------
 # Examples
 # --------
-# $ . pn.sh angler sync
+# $ . pn.sh angler sync mod
 # $ . pn.sh angler nosync
 
 
@@ -20,8 +20,15 @@
 # ----------
 # Parameter 1: device (eg. angler, bullhead, shamu)
 # Parameter 2: sync or nosync (decides whether or not to run repo sync)
+# Parameter 3: Pure Nexus Mod (omit if you want regular Pure Nexus)
 DEVICE=${1}
 SYNC=${2}
+if [[ -n ${3} ]]
+then
+   MOD=true
+else
+   MOD=false
+fi
 
 
 
@@ -29,7 +36,12 @@ SYNC=${2}
 # Variables
 # ---------
 ANDROIDDIR=${HOME}
-SOURCEDIR=${ANDROIDDIR}/ROMs/PN
+if [ ${MOD} = true ]
+then
+   SOURCEDIR=${ANDROIDDIR}/ROMs/PN-Mod
+else
+   SOURCEDIR=${ANDROIDDIR}/ROMs/PN
+fi
 OUTDIR=${SOURCEDIR}/out/target/product/${DEVICE}
 ZIPMOVE=${HOME}/shared/ROMs/"Pure Nexus"/${DEVICE}
 
@@ -67,9 +79,9 @@ START=$(date +%s)
 
 # Change to the source directory
 echo -e ${RED}
-echo -e "-----------------------------------------"
-echo -e "MOVING TO ${SOURCEDIR}"
-echo -e "-----------------------------------------"
+echo -e "--------------------------"
+echo -e "MOVING TO SOURCE DIRECTORY"
+echo -e "--------------------------"
 echo -e ${RST}
 
 cd ${SOURCEDIR}
@@ -117,9 +129,9 @@ breakfast ${DEVICE}
 
 # Clean up
 echo -e ${RED}
-echo -e "------------------------------------------------"
-echo -e "CLEANING UP ${SOURCEDIR}/out"
-echo -e "------------------------------------------------"
+echo -e "-------------------------"
+echo -e "CLEANING UP OUT DIRECTORY"
+echo -e "-------------------------"
 echo -e ${RST}
 echo -e ""
 
@@ -154,8 +166,14 @@ then
    echo -e "--------------------------"
    echo -e ${RST}
 
-   rm "${ZIPMOVE}"/*${DEVICE}*.zip
-   rm "${ZIPMOVE}"/*${DEVICE}*.zip.md5sum
+   if [ ${MOD} = true ]
+   then
+      rm "${ZIPMOVE}"/*${DEVICE}-mod*.zip
+      rm "${ZIPMOVE}"/*${DEVICE}-mod*.zip.md5sum
+   else
+      rm "${ZIPMOVE}"/*${DEVICE}-6.0.1*.zip
+      rm "${ZIPMOVE}"/*${DEVICE}-6.0.1*.zip.md5sum
+   fi
 
 
 
@@ -186,9 +204,9 @@ then
    # Clean up out directory to free up space
    echo -e ""
    echo -e ${RED}
-   echo -e "------------------------------------------------"
-   echo -e "CLEANING UP ${SOURCEDIR}/out"
-   echo -e "------------------------------------------------"
+   echo -e "-------------------------"
+   echo -e "CLEANING UP OUT DIRECTORY"
+   echo -e "-------------------------"
    echo -e ${RST}
    echo -e ""
 
@@ -225,7 +243,12 @@ echo -e "-------------------------------------"
 echo -e ${RST}
 
 # Add line to compile log
-echo -e "`date +%H:%M:%S`: ${BASH_SOURCE} ${DEVICE}" >> ${COMPILE_LOG}
+if [ ${MOD} =  true ]
+then
+   echo -e "`date +%H:%M:%S`: ${BASH_SOURCE} ${DEVICE} mod" >> ${COMPILE_LOG}
+else
+   echo -e "`date +%H:%M:%S`: ${BASH_SOURCE} ${DEVICE}" >> ${COMPILE_LOG}
+fi
 echo -e "${BUILD_RESULT_STRING} IN $(echo $((${END}-${START})) | awk '{print int($1/60)" MINUTES AND "int($1%60)" SECONDS"}')\n" >> ${COMPILE_LOG}
 
 echo -e "\a"
