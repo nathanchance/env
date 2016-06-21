@@ -19,6 +19,7 @@ then
       . rom.sh ${ROM} angler sync hmhb
       . rom.sh ${ROM} shamu sync jdizzle
    elif [ "${ROM}" == "pn" ]
+   then
       for DEVICE in ${DEVICES}
       do
          . rom.sh ${ROM} ${DEVICE} sync ${2}
