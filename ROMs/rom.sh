@@ -293,8 +293,8 @@ then
    echo -e "--------------------------"
    echo -e ${RST}
 
-   rm ${ZIPMOVE}/*${DEVICE}*.zip
-   rm ${ZIPMOVE}/*${DEVICE}*.zip.md5sum
+   rm "${ZIPMOVE}"/*${DEVICE}*.zip
+   rm "${ZIPMOVE}"/*${DEVICE}*.zip.md5sum
 
 
 
@@ -305,8 +305,8 @@ then
    echo -e "---------------------------------"
    echo -e ${RST}
 
-   mv ${OUTDIR}/${ZIPFORMAT} ${ZIPMOVE}
-   mv ${OUTDIR}/${ZIPFORMAT}.md5sum ${ZIPMOVE}
+   mv ${OUTDIR}/${ZIPFORMAT} "${ZIPMOVE}"
+   mv ${OUTDIR}/${ZIPFORMAT}.md5sum "${ZIPMOVE}"
 
 
 

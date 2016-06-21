@@ -28,7 +28,7 @@ then
 else
    for DEVICE in ${DEVICES}
    do
-      . rom.sh ${ROM} ${DEVICES} sync
+      . rom.sh ${ROM} ${DEVICE} sync
    done
 fi
 
