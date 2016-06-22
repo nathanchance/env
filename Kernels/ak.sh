@@ -3,7 +3,7 @@
 # -----
 # Usage
 # -----
-# $ . ak.sh <update|noupdate> <toolchain>
+# $ . ak.sh <update|noupdate> <toolchain> <per>
 
 
 
@@ -21,8 +21,13 @@ RESTORE="\033[0m"
 # ----------
 # FETCHUPSTREAM: Whether or not to fetch new AK updates
 # TOOLCHAIN: Toolchain to compile with
+# PERMISSIVE: Force kernel to be permissive
 FETCHUPSTREAM=${1}
 TOOLCHAIN=${2}
+if [[ -n ${3} ]]
+then
+   PERMISSIVE=true
+fi
 
 
 
@@ -137,6 +142,12 @@ function update_git {
 function make_kernel {
    echo
    cd ${KERNEL_DIR}
+   if [ ${PERMISSIVE} = true ]
+   then
+      git fetch https://github.com/nathanchance/elite_angler.git
+      git cherry-pick dec83f85e94af847184895fd7553e1b720a99a11
+      ZIP_MOVE=${HOME}/shared/Kernels/angler/AK/Permissive
+   fi
    make ${DEFCONFIG}
    make ${THREAD}
 }
