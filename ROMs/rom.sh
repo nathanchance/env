@@ -68,6 +68,7 @@ else
 
    # If there is no fourth parameter, unassign the MOD and PERSON flags
    else
+      export DU_BUILD_TYPE=CHANCELLOR
       MOD=
       PERSON=
    fi
