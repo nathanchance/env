@@ -77,10 +77,10 @@ elif [ "${TOOLCHAIN}" == "linaro4.9" ]
 then
    TOOLCHAIN_VER="LINARO4.9"
    TOOLCHAIN_DIR=Toolchains/Linaro/4.9
-elif [ "${TOOLCHAIN}" == "linaro5.3" ]
+elif [ "${TOOLCHAIN}" == "linaro5.4" ]
 then
-   TOOLCHAIN_VER="LINARO5.3"
-   TOOLCHAIN_DIR=Toolchains/Linaro/5.3
+   TOOLCHAIN_VER="LINARO5.4"
+   TOOLCHAIN_DIR=Toolchains/Linaro/5.4
 elif [ "${TOOLCHAIN}" == "linaro6.1" ]
 then
    TOOLCHAIN_VER="LINARO6.1"

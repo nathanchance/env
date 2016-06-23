@@ -22,7 +22,7 @@ then
    . elite.sh update uber6 ${3}
    . elite.sh update uber7 ${3}
    . elite.sh update linaro4.9 ${3}
-   . elite.sh update linaro5.3 ${3}
+   . elite.sh update linaro5.4 ${3}
    . elite.sh update linaro6.1 ${3}
 else
    . elite.sh update linaro4.9

@@ -18,7 +18,7 @@ fi
 . kylo.sh update uber6
 . kylo.sh update uber7
 . kylo.sh update linaro4.9
-. kylo.sh update linaro5.3
+. kylo.sh update linaro5.4
 . kylo.sh update linaro6.1
 
 
