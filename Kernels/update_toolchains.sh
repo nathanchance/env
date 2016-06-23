@@ -33,7 +33,7 @@ git clone https://bitbucket.org/DespairFactor/aarch64-linux-android-4.9-kernel-l
 # git clone	https://android-git.linaro.org/git/platform/prebuilts/gcc/linux-x86/aarch64/aarch64-linux-android-4.9-linaro.git 4.9
 
 rm -rf 5.3
-git clone https://bitbucket.org/DespairFactor/aarch64-linux-android-5.x-kernel-linaro.git
+git clone https://bitbucket.org/DespairFactor/aarch64-linux-android-5.x-kernel-linaro.git 5.3
 # git clone	https://android-git.linaro.org/git/platform/prebuilts/gcc/linux-x86/aarch64/aarch64-linux-android-5.3-linaro.git 5.3
 
 rm -rf 6.1
