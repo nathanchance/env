@@ -78,6 +78,18 @@ elif [ "${TOOLCHAIN}" == "linaro6.1" ]
 then
    TOOLCHAIN_VER="LINARO6.1"
    TOOLCHAIN_DIR=Toolchains/Linaro/6.1
+elif [ "${TOOLCHAIN}" == "df-linaro4.9" ]
+then
+   TOOLCHAIN_VER="DF-LINARO4.9"
+   TOOLCHAIN_DIR=Toolchains/Linaro/DF-4.9
+elif [ "${TOOLCHAIN}" == "df-linaro5.4" ]
+then
+   TOOLCHAIN_VER="DF-LINARO5.4"
+   TOOLCHAIN_DIR=Toolchains/Linaro/DF-5.4
+elif [ "${TOOLCHAIN}" == "df-linaro6.1" ]
+then
+   TOOLCHAIN_VER="DF-LINARO6.1"
+   TOOLCHAIN_DIR=Toolchains/Linaro/DF-6.1
 fi
 PHASMA_VER="${BASE_PHASMA_VER}${VER}${TOOLCHAIN_VER}"
 

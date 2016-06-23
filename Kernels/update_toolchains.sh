@@ -37,4 +37,13 @@ git clone	https://android-git.linaro.org/git/platform/prebuilts/gcc/linux-x86/aa
 rm -rf 6.1
 git clone https://android-git.linaro.org/git/platform/prebuilts/gcc/linux-x86/aarch64/aarch64-linux-android-6.1-linaro.git 6.1
 
+rm -rf DF-4.9
+git clone https://bitbucket.org/DespairFactor/aarch64-linux-android-4.9-kernel-linaro.git DF-4.9
+
+rm -rf DF-5.4
+git clone https://bitbucket.org/DespairFactor/aarch64-linux-android-5.x-kernel-linaro.git DF-5.4
+
+rm -rf DF-6.1
+git clone https://bitbucket.org/DespairFactor/aarch64-linux-android-6.x-kernel-linaro.git DF-6.1
+
 cd ${HOME}

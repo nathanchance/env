@@ -20,6 +20,9 @@ fi
 . kylo.sh update linaro4.9
 . kylo.sh update linaro5.4
 . kylo.sh update linaro6.1
+. kylo.sh update df-linaro4.9
+. kylo.sh update df-linaro5.4
+. kylo.sh update df-linaro6.1
 
 
 cat ${COMPILE_LOG}

@@ -21,6 +21,10 @@ fi
 . ak.sh ${2} linaro4.9
 . ak.sh ${2} linaro5.4
 . ak.sh ${2} linaro6.1
+. ak.sh ${2} df-linaro4.9
+. ak.sh ${2} df-linaro5.4
+. ak.sh ${2} df-linaro6.1
+
 
 
 cat ${COMPILE_LOG}
