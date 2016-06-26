@@ -63,14 +63,14 @@ else
       # And it's PN, we are running a Mod build
       if [ "${ROM}" == "pn" ]
       then
-         MOD=true
+         if [ "${4}" == "mod" ]
+         then
+            MOD=true
+         elif [ "${4}" == "test" ]
+         then
+            TEST=true
+         fi
       fi
-
-   # If there is no fourth parameter, unassign the MOD and PERSON flags
-   else
-      export DU_BUILD_TYPE=CHANCELLOR
-      MOD=
-      PERSON=
    fi
 fi
 
@@ -110,7 +110,7 @@ then
    ZIPMOVE=${HOME}/shared/ROMs/.special/.${PERSON}
    ZIPFORMAT=DU_${DEVICE}_*.zip
 
-elif [[ "${ROM}" == "pn" && -z ${MOD} ]]
+elif [[ "${ROM}" == "pn" && -z ${MOD} && -z ${TEST} ]]
 then
    SOURCEDIR=${ANDROIDDIR}/ROMs/PN
    ZIPMOVE=${HOME}/shared/ROMs/"Pure Nexus"/${DEVICE}
@@ -120,6 +120,12 @@ elif [[ "${ROM}" == "pn" && -n ${MOD} ]]
 then
    SOURCEDIR=${ANDROIDDIR}/ROMs/PN-Mod
    ZIPMOVE=${HOME}/shared/ROMs/"Pure Nexus Mod"/${DEVICE}
+   ZIPFORMAT=pure_nexus_${DEVICE}-*.zip
+
+elif [[ "${ROM}" == "pn" && -n ${TEST} ]]
+then
+   SOURCEDIR=${ANDROIDDIR}/ROMs/PN
+   ZIPMOVE=${HOME}/shared/ROMs/"Pure Nexus"/.tests/${DEVICE}
    ZIPFORMAT=pure_nexus_${DEVICE}-*.zip
 
 elif [ "${ROM}" == "rr" ]
@@ -369,6 +375,9 @@ echo -e ${RST}
 if [[ -n ${MOD} ]]
 then
    echo -e "`date +%H:%M:%S`: ${BASH_SOURCE} ${ROM} mod ${DEVICE}" >> ${COMPILE_LOG}
+elif [[ -n ${TEST} ]]
+then
+   echo -e "`date +%H:%M:%S`: ${BASH_SOURCE} ${ROM} test ${DEVICE}" >> ${COMPILE_LOG}
 # If it was a personalized Dirty Unicorns build
 elif [[ -n ${PERSON} ]]
 then
@@ -378,5 +387,11 @@ else
    echo -e "`date +%H:%M:%S`: ${BASH_SOURCE} ${ROM} ${DEVICE}" >> ${COMPILE_LOG}
 fi
 echo -e "${BUILD_RESULT_STRING} IN $(echo $((${END}-${START})) | awk '{print int($1/60)" MINUTES AND "int($1%60)" SECONDS"}')\n" >> ${COMPILE_LOG}
+
+# Unassign flags and reset DU_BUILD_TYPE
+export DU_BUILD_TYPE=CHANCELLOR
+MOD=
+PERSON=
+TEST=
 
 echo -e "\a"

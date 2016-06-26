@@ -7,7 +7,7 @@
 # $ . rom_all.sh <rom> <mod|custom>
 
 
-DEVICES="angler bullhead shamu hammerhead"
+DEVICES="angler shamu bullhead hammerhead"
 
 ROM=${1}
 if [[ -n ${2} ]]
