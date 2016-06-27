@@ -30,7 +30,7 @@ ANDROIDDIR=${HOME}
 if [ "${TYPE}" == "banks" ]
 then
     SOURCEDIR=${ANDROIDDIR}/GApps/Banks
-    ZIPBEG=BaNkS
+    ZIPBEG=banks
     BRANCH=m
 elif [ "${TYPE}" == "pn" ]
 then
