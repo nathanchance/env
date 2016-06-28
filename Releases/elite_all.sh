@@ -11,7 +11,7 @@
 
 if [ "${1}" == "tcupdate" ]
 then
-   . update_toolchains.sh
+   . sync_toolchains.sh
 fi
 # If the third parameter exists
 if [[ -n ${3} ]]

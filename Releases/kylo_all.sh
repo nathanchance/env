@@ -10,7 +10,7 @@
 
 if [ "${1}" == "tcupdate" ]
 then
-   . update_toolchains.sh
+   . sync_toolchains.sh
 fi
 . kylo.sh update aosp
 . kylo.sh update uber4
