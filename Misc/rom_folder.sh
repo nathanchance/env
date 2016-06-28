@@ -10,8 +10,8 @@
 # ----------
 # Parameters
 # ----------
-# Parameter 1: the ROM, possible values include aicp|aosip|du|pn|screwd|temasek
-# Parameter 2: whether or not to sync the repo right away
+# Parameter 1: the ROM, possible values include aicp|aosip|du|pn|pnmod|screwd|temasek
+# Parameter 2: whether or not to sync the repo right away or leave an empty folder
 ROM=${1}
 SYNC=${2}
 
@@ -58,6 +58,11 @@ then
    SOURCE_DIR=${ROM_DIR}/PN-Mod
    REPO_URL=https://github.com/ezio84/pnmod-manifest.git
    REPO_BRANCH=mm2
+elif [ "${ROM}" == "rr" ]
+then
+   SOURCE_DIR=${ROM_DIR}/RR
+   REPO_URL=https://github.com/ResurrectionRemix/platform_manifest.git
+   REPO_BRANCH=marshmallow
 elif [ "${ROM}" == "screwd" ]
 then
    SOURCE_DIR=${ROM_DIR}/Screwd
@@ -115,6 +120,7 @@ then
    cd ${SOURCE_DIR}
    repo init -u ${REPO_URL} -b ${REPO_BRANCH}
 
+   # I use local manifests with both PN Mod (for Shamu and Bullhead support) and RR (for Shamu support)
    if [ "${ROM}" == "rr" ]
    then
       mkdir ${SOURCE_DIR}/.repo/local_manifests
@@ -143,6 +149,9 @@ then
       lunch screwd_bullhead-userdebug
       lunch screwd_hammerhead-userdebug
       lunch screwd_shamu-userdebug
+   elif [ "${ROM}" == "rr" ]
+   then
+      breakfast shamu
    else
       breakfast angler
       breakfast bullhead
