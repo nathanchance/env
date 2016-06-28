@@ -17,10 +17,12 @@ STARTOVER=${1}
 # ---------
 # Variables
 # ---------
-ANDROIDDIR=${HOME}/Android
+ANDROIDDIR=${HOME}
 ROMDIR=${ANDROIDDIR}/ROMs
 GAPPSDIR=${ANDROIDDIR}/GApps
 KERNELSDIR=${ANDROIDDIR}/Kernels
+SCRIPTSDIR=${ANDROIDDIR}/Scripts
+LOGSDIR=${ANDROIDDIR}/Logs
 
 
 
@@ -32,7 +34,11 @@ clear
 # If the startover flag says existing, it means the build environment has been established already and the resources directory needs to be cleaned
 if [ "${STARTOVER}" == "existing" ]
 then
-   rm -rf ${ANDROIDDIR}
+   rm -rf ${ROMDIR}
+   rm -rf ${GAPPSDIR}
+   rm -rf ${KERNELSDIR}
+   rm -rf ${SCRIPTSDIR}
+   rm -rf ${LOGSDIR}
 else
    sudo apt-get install curl
    curl https://raw.githubusercontent.com/akhilnarang/scripts/master/build-environment-setup.sh | bash
@@ -51,6 +57,7 @@ mkdir ${ANDROIDDIR}
 mkdir ${ROMDIR}
 mkdir ${GAPPSDIR}
 mkdir ${KERNELSDIR}
+mkdir ${LOGSDIR}
 
 
 
