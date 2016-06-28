@@ -10,7 +10,7 @@
 # ----------
 # Parameters
 # ----------
-STARTOVER=$1
+STARTOVER=${1}
 
 
 
@@ -56,35 +56,30 @@ mkdir ${KERNELSDIR}
 
 # Sync in scripts
 cd ${ANDROIDDIR}
-git clone https://github.com/nathanchance/scripts.git
+git clone https://github.com/nathanchance/scripts.git Scripts
+
+
+
+# Sync local Manifests
+cd ${ROMDIR}
+git clone https://github.com/nathanchance/local_manifests.git Manifests
 
 
 
 # Sync AICP
-. ${ANDROIDDIR}/scripts/rom_folder.sh aicp nosync
-
-
-
+. ${ANDROIDDIR}/Scripts/rom_folder.sh aicp nosync
 # Sync AOSIP
-. ${ANDROIDDIR}/scripts/rom_folder.sh aosip nosync
-
-
-
+. ${ANDROIDDIR}/Scripts/rom_folder.sh aosip nosync
 # Sync DU
-. ${ANDROIDDIR}/scripts/rom_folder.sh du sync
-
-
-
+. ${ANDROIDDIR}/Scripts/rom_folder.sh du sync
 # Sync PN
-. ${ANDROIDDIR}/scripts/rom_folder.sh pn sync
-
-
-
+. ${ANDROIDDIR}/Scripts/rom_folder.sh pn sync
+# Sync PN Mod
+. ${ANDROIDDIR}/Scripts/rom_folder.sh pnmod sync
+# Sync RR
+. ${ANDROIDDIR}/Scripts/rom_folder.sh rr sync
 # Sync Screwd
 . ${ANDROIDDIR}/scripts/rom_folder.sh screwd nosync
-
-
-
 # Sync Temasek
 . ${ANDROIDDIR}/scripts/rom_folder.sh temasek nosync
 
@@ -100,14 +95,13 @@ git clone https://github.com/PureNexusProject/purenexus_dynamic_gapps.git PN
 # Sync Elite
 cd ${KERNELSDIR}
 git clone https://github.com/nathanchance/elite_angler.git Elite
-git clone https://github.com/Elite-Kernels/Linaro-4.9_aarch64.git
 
 
 
 # Sync AK
 cd ${KERNELSDIR}
 git clone https://github.com/nathanchance/AK-Angler.git AK
-git clone https://github.com/anarkia1976/AK-Angler-AnyKernel2.git AK-AK2
+git clone https://github.com/nathanchance/AK-Angler-AnyKernel2.git AK-AK2
 cd AK-AK2
 git checkout ak-angler-anykernel
 cd ../AK
@@ -123,10 +117,5 @@ git clone https://github.com/DespairFactor/angler.git Kylo
 
 # Sync toolchains
 mkdir ${KERNELSDIR}/Toolchains
-cd ${KERNELSDIR}/Toolchains
-https://github.com/Elite-Kernels/Linaro-4.9_aarch64.git Linaro-4.9
-git clone https://android.googlesource.com/platform/prebuilts/gcc/linux-x86/aarch64/aarch64-linux-android-4.9 AOSP
-git clone https://bitbucket.org/DespairFactor/aarch64-linux-android-4.9-kernel.git UBER4
-git clone https://bitbucket.org/DespairFactor/aarch64-linux-android-5.x-kernel.git UBER5
-git clone https://bitbucket.org/DespairFactor/aarch64-linux-android-6.x-kernel.git UBER6
-git clone https://bitbucket.org/DespairFactor/aarch64-linux-android-7.0-kernel.git UBER7
+
+. sync_toolchains.sh
