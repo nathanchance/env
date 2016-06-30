@@ -14,7 +14,6 @@ if [[ -n ${2} ]]
 then
    if [ "${ROM}" == "du" ]
    then
-      . rom.sh ${ROM} angler sync drew
       . rom.sh ${ROM} bullhead sync alcolawl
       . rom.sh ${ROM} angler sync hmhb
       . rom.sh ${ROM} shamu sync jdizzle
