@@ -19,8 +19,14 @@ RST="\033[0m"
 # Parameters
 # ----------
 # Parameter 1: Which GApps to compile? (currently Banks or Pure Nexus Dynamic GApps)
-TYPE=${1}
-
+if [ "${1}" == "me" ]
+then
+   TYPE=banks
+   ZIPMOVE=${HOME}/shared/.me
+else
+   TYPE=${1}
+   ZIPMOVE=${HOME}/shared/GApps
+fi
 
 
 # ---------
@@ -38,7 +44,6 @@ then
     ZIPBEG=PureNexus
     BRANCH=mm2
 fi
-ZIPMOVE=${HOME}/shared/GApps
 # Export the COMPILE_LOG variable for other files to use (I currently handle this via .bashrc)
 # export LOGDIR=${ANDROID_DIR}/Logs
 # export COMPILE_LOG=${LOGDIR}/compile_log_`date +%m_%d_%y`.log

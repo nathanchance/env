@@ -23,7 +23,12 @@ RESTORE="\033[0m"
 # TOOLCHAIN: Toolchain to compile with
 # PERMISSIVE: Force kernel to be permissive
 FETCHUPSTREAM=${1}
-TOOLCHAIN=${2}
+if [ "${2}" == "me" ]
+then
+   PERSONAL=true
+else
+   TOOLCHAIN=${2}
+fi
 if [[ -n ${3} ]]
 then
    PERMISSIVE=true
@@ -54,55 +59,62 @@ DTBIMAGE="dtb"
 DEFCONFIG="ak_angler_defconfig"
 KER_BRANCH=ak-mm-staging
 AK_BRANCH=ak-angler-anykernel
-BASE_AK_VER="AK"
-VER=".066-2.ANGLER."
-if [ "${TOOLCHAIN}" == "aosp" ]
+if [[ ${PERSONAL} = true ]]
 then
-   TOOLCHAIN_VER="AOSP4.9"
-   TOOLCHAIN_DIR=Toolchains/AOSP
-elif [ "${TOOLCHAIN}" == "uber4" ]
-then
-   TOOLCHAIN_VER="UBER4.9"
-   TOOLCHAIN_DIR=Toolchains/UBER/4.9
-elif [ "${TOOLCHAIN}" == "uber5" ]
-then
-   TOOLCHAIN_VER="UBER5.4"
-   TOOLCHAIN_DIR=Toolchains/UBER/5.4
-elif [ "${TOOLCHAIN}" == "uber6" ]
-then
-   TOOLCHAIN_VER="UBER6.1"
-   TOOLCHAIN_DIR=Toolchains/UBER/6.1
-elif [ "${TOOLCHAIN}" == "uber7" ]
-then
-   TOOLCHAIN_VER="UBER7.0"
-   TOOLCHAIN_DIR=Toolchains/UBER/7.0
-elif [ "${TOOLCHAIN}" == "linaro4.9" ]
-then
-   TOOLCHAIN_VER="LINARO4.9"
-   TOOLCHAIN_DIR=Toolchains/Linaro/4.9
-elif [ "${TOOLCHAIN}" == "linaro5.4" ]
-then
-   TOOLCHAIN_VER="LINARO5.4"
-   TOOLCHAIN_DIR=Toolchains/Linaro/5.4
-elif [ "${TOOLCHAIN}" == "linaro6.1" ]
-then
-   TOOLCHAIN_VER="LINARO6.1"
-   TOOLCHAIN_DIR=Toolchains/Linaro/6.1
-elif [ "${TOOLCHAIN}" == "df-linaro4.9" ]
-then
-   TOOLCHAIN_VER="DF-LINARO4.9"
-   TOOLCHAIN_DIR=Toolchains/Linaro/DF-4.9
-elif [ "${TOOLCHAIN}" == "df-linaro5.4" ]
-then
-   TOOLCHAIN_VER="DF-LINARO5.4"
-   TOOLCHAIN_DIR=Toolchains/Linaro/DF-5.4
-elif [ "${TOOLCHAIN}" == "df-linaro6.1" ]
-then
-   TOOLCHAIN_VER="DF-LINARO6.1"
    TOOLCHAIN_DIR=Toolchains/Linaro/DF-6.1
-fi
-AK_VER="${BASE_AK_VER}${VER}${TOOLCHAIN_VER}"
+   AK_VER="AK.DFL6.1"
+   ZIP_MOVE=${HOME}/shared/.me
+else
+   BASE_AK_VER="AK"
+   VER=".066-2.ANGLER."
+   if [ "${TOOLCHAIN}" == "aosp" ]
+   then
+      TOOLCHAIN_VER="AOSP4.9"
+      TOOLCHAIN_DIR=Toolchains/AOSP
+   elif [ "${TOOLCHAIN}" == "uber4" ]
+   then
+      TOOLCHAIN_VER="UBER4.9"
+      TOOLCHAIN_DIR=Toolchains/UBER/4.9
+   elif [ "${TOOLCHAIN}" == "uber5" ]
+   then
+      TOOLCHAIN_VER="UBER5.4"
+      TOOLCHAIN_DIR=Toolchains/UBER/5.4
+   elif [ "${TOOLCHAIN}" == "uber6" ]
+   then
+      TOOLCHAIN_VER="UBER6.1"
+      TOOLCHAIN_DIR=Toolchains/UBER/6.1
+   elif [ "${TOOLCHAIN}" == "uber7" ]
+   then
+      TOOLCHAIN_VER="UBER7.0"
+      TOOLCHAIN_DIR=Toolchains/UBER/7.0
+   elif [ "${TOOLCHAIN}" == "linaro4.9" ]
+   then
+      TOOLCHAIN_VER="LINARO4.9"
+      TOOLCHAIN_DIR=Toolchains/Linaro/4.9
+   elif [ "${TOOLCHAIN}" == "linaro5.4" ]
+   then
+      TOOLCHAIN_VER="LINARO5.4"
+      TOOLCHAIN_DIR=Toolchains/Linaro/5.4
+   elif [ "${TOOLCHAIN}" == "linaro6.1" ]
+   then
+      TOOLCHAIN_VER="LINARO6.1"
+      TOOLCHAIN_DIR=Toolchains/Linaro/6.1
+   elif [ "${TOOLCHAIN}" == "df-linaro4.9" ]
+   then
+      TOOLCHAIN_VER="DF-LINARO4.9"
+      TOOLCHAIN_DIR=Toolchains/Linaro/DF-4.9
+   elif [ "${TOOLCHAIN}" == "df-linaro5.4" ]
+   then
+      TOOLCHAIN_VER="DF-LINARO5.4"
+      TOOLCHAIN_DIR=Toolchains/Linaro/DF-5.4
+   elif [ "${TOOLCHAIN}" == "df-linaro6.1" ]
+   then
+      TOOLCHAIN_VER="DF-LINARO6.1"
+      TOOLCHAIN_DIR=Toolchains/Linaro/DF-6.1
+   fi
 
+   AK_VER="${BASE_AK_VER}${VER}${TOOLCHAIN_VER}"
+fi
 
 
 # -------
@@ -132,8 +144,12 @@ function clean_all {
    git reset --hard origin/${AK_BRANCH}
    git clean -f -d -x
    git pull
-   cd ${KERNEL_DIR}
    echo
+   cd ${KERNEL_DIR}
+   git checkout ${KER_BRANCH}
+   git reset --hard origin/${KER_BRANCH}
+   git clean -f -d -x
+   git pull
    make clean && make mrproper
 }
 
@@ -141,7 +157,6 @@ function clean_all {
 function update_git {
    echo
    cd ${KERNEL_DIR}
-   git checkout ${KER_BRANCH}
    git fetch upstream
    git merge upstream/${KER_BRANCH}
    git push
@@ -312,5 +327,9 @@ echo -e ${RESTORE}
 # Add line to compile log
 echo -e "`date +%H:%M:%S`: ${BASH_SOURCE} ${TOOLCHAIN_VER}" >> ${COMPILE_LOG}
 echo -e "${BUILD_SUCCESS_STRING} IN $((${DIFF} / 60)) MINUTES AND $((${DIFF} % 60)) SECONDS\n" >> ${COMPILE_LOG}
+
+# Free flags
+PERSONAL=
+PERMISSIVE=
 
 echo -e "\a"

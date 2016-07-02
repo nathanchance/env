@@ -3,7 +3,7 @@
 # -----
 # Usage
 # -----
-# $ . rom.sh <rom> <device> <sync|nosync> <mod|person>
+# $ . rom.sh <me|rom> <device> <sync|nosync> <mod|person>
 
 
 
@@ -12,6 +12,7 @@
 # --------
 # $ . rom.sh pn angler sync
 # $ . rom.sh du shamu nosync
+# $ . rom.sh me
 
 
 
@@ -22,7 +23,14 @@
 # Parameter 2: Device (eg. angler, bullhead, shamu)
 # Parameter 3: Whether or not to run repo sync
 # Parameter 4: Pure Nexus Mod or a personalized Dirty Unicorns build (omit if neither applies)
-ROM=${1}
+if [ "${1}" == "me" ]
+then
+   ME=true
+   DEVICE=angler
+   SYNC=sync
+else
+   ROM=${1}
+fi
 
 # If the ROM is RR, it only needs a sync parameter since I only build Shamu
 if [ "${ROM}" == "rr" ]
@@ -86,7 +94,13 @@ fi
 # OUTDIR: Output directory of completed ROM zip after compilation
 ANDROIDDIR=${HOME}
 
-if [ "${ROM}" == "aicp" ]
+if [[ ${ME} = true ]]
+then
+   SOURCEDIR=${ANDROIDDIR}/ROMs/PN-Mod
+   ZIPMOVE=${HOME}/shared/.me
+   ZIPFORMAT=pure_nexus_${DEVICE}-*.zip
+
+elif [ "${ROM}" == "aicp" ]
 then
    SOURCEDIR=${ANDROIDDIR}/ROMs/AICP
    ZIPMOVE=${HOME}/shared/ROMs/AICP/${DEVICE}
@@ -372,7 +386,10 @@ echo -e ${RST}
 
 # Add line to compile log
 # If it was a Pure Nexus Mod build
-if [[ -n ${MOD} ]]
+if [[ ${ME} = true ]]
+then
+   echo -e "`date +%H:%M:%S`: ${BASH_SOURCE} me" >> ${COMPILE_LOG}
+elif [[ -n ${MOD} ]]
 then
    echo -e "`date +%H:%M:%S`: ${BASH_SOURCE} ${ROM} mod ${DEVICE}" >> ${COMPILE_LOG}
 elif [[ -n ${TEST} ]]
@@ -393,5 +410,6 @@ export DU_BUILD_TYPE=CHANCELLOR
 MOD=
 PERSON=
 TEST=
+ME=
 
 echo -e "\a"
