@@ -202,7 +202,12 @@ function make_zip {
    cp -vr ${ZIMAGE_DIR}/${KERNEL} ${ANYKERNEL_DIR}/zImage
    cd ${ANYKERNEL_DIR}
    zip -x@zipexclude -r9 `echo ${AK_VER}`.zip *
-   rm  ${ZIP_MOVE}/${BASE_AK_VER}*${TOOLCHAIN_VER}.zip
+   if [[ ${PERSONAL} = true ]]
+   then
+      rm -rf ${ZIP_MOVE}/AK*.zip
+   else
+      rm  ${ZIP_MOVE}/${BASE_AK_VER}*${TOOLCHAIN_VER}.zip
+   fi
    mv  `echo ${AK_VER}`.zip ${ZIP_MOVE}
    cd ${KERNEL_DIR}
 }
