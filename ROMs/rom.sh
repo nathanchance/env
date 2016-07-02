@@ -25,58 +25,58 @@
 # Parameter 4: Pure Nexus Mod or a personalized Dirty Unicorns build (omit if neither applies)
 if [ "${1}" == "me" ]
 then
-   ME=true
+   PERSONAL=true
    DEVICE=angler
    SYNC=sync
 else
    ROM=${1}
-fi
 
-# If the ROM is RR, it only needs a sync parameter since I only build Shamu
-if [ "${ROM}" == "rr" ]
-then
-   SYNC=${2}
-   DEVICE=shamu
-else
-   DEVICE=${2}
-   SYNC=${3}
-
-   # If there is a fourth parameter
-   if [[ -n ${4} ]]
+   # If the ROM is RR, it only needs a sync parameter since I only build Shamu
+   if [ "${ROM}" == "rr" ]
    then
-      # And it's DU, we are running a personalized build
-      if [ "${ROM}" == "du" ]
-      then
-         PERSON=${4}
+      SYNC=${2}
+      DEVICE=shamu
+   else
+      DEVICE=${2}
+      SYNC=${3}
 
-         # Add custom build tag
-         if [ "${PERSON}" == "alcolawl" ]
+      # If there is a fourth parameter
+      if [[ -n ${4} ]]
+      then
+         # And it's DU, we are running a personalized build
+         if [ "${ROM}" == "du" ]
          then
-            export DU_BUILD_TYPE=ALCOLAWL
-         elif [ "${PERSON}" == "bre" ]
-         then
-            export DU_BUILD_TYPE=BREYANA
-         elif [ "${PERSON}" == "drew" ]
-         then
-            export DU_BUILD_TYPE=DREW
-         elif [ "${PERSON}" == "hmhb" ]
-         then
-            export DU_BUILD_TYPE=DIRTY-DEEDS
-         elif [ "${PERSON}" == "jdizzle" ]
-         then
-            export DU_BUILD_TYPE=NINJA
+            PERSON=${4}
+
+            # Add custom build tag
+            if [ "${PERSON}" == "alcolawl" ]
+            then
+               export DU_BUILD_TYPE=ALCOLAWL
+            elif [ "${PERSON}" == "bre" ]
+            then
+               export DU_BUILD_TYPE=BREYANA
+            elif [ "${PERSON}" == "drew" ]
+            then
+               export DU_BUILD_TYPE=DREW
+            elif [ "${PERSON}" == "hmhb" ]
+            then
+               export DU_BUILD_TYPE=DIRTY-DEEDS
+            elif [ "${PERSON}" == "jdizzle" ]
+            then
+               export DU_BUILD_TYPE=NINJA
+            fi
          fi
-      fi
 
-      # And it's PN, we are running a Mod build
-      if [ "${ROM}" == "pn" ]
-      then
-         if [ "${4}" == "mod" ]
+         # And it's PN, we are running a Mod build
+         if [ "${ROM}" == "pn" ]
          then
-            MOD=true
-         elif [ "${4}" == "test" ]
-         then
-            TEST=true
+            if [ "${4}" == "mod" ]
+            then
+               MOD=true
+            elif [ "${4}" == "test" ]
+            then
+               TEST=true
+            fi
          fi
       fi
    fi
@@ -94,65 +94,66 @@ fi
 # OUTDIR: Output directory of completed ROM zip after compilation
 ANDROIDDIR=${HOME}
 
-if [[ ${ME} = true ]]
+if [[ ${PERSONAL} = true ]]
 then
    SOURCEDIR=${ANDROIDDIR}/ROMs/PN-Mod
    ZIPMOVE=${HOME}/shared/.me
    ZIPFORMAT=pure_nexus_${DEVICE}-*.zip
+else
+   if [ "${ROM}" == "aicp" ]
+   then
+      SOURCEDIR=${ANDROIDDIR}/ROMs/AICP
+      ZIPMOVE=${HOME}/shared/ROMs/AICP/${DEVICE}
+      ZIPFORMAT=aicp_${DEVICE}_mm*.zip
 
-elif [ "${ROM}" == "aicp" ]
-then
-   SOURCEDIR=${ANDROIDDIR}/ROMs/AICP
-   ZIPMOVE=${HOME}/shared/ROMs/AICP/${DEVICE}
-   ZIPFORMAT=aicp_${DEVICE}_mm*.zip
+   elif [ "${ROM}" == "aosip" ]
+   then
+      SOURCEDIR=${ANDROIDDIR}/ROMs/AOSiP
+      ZIPMOVE=${HOME}/shared/ROMs/AOSiP/${DEVICE}
+      ZIPFORMAT=AOSiP-*-${DEVICE}-*.zip
 
-elif [ "${ROM}" == "aosip" ]
-then
-   SOURCEDIR=${ANDROIDDIR}/ROMs/AOSiP
-   ZIPMOVE=${HOME}/shared/ROMs/AOSiP/${DEVICE}
-   ZIPFORMAT=AOSiP-*-${DEVICE}-*.zip
+   elif [[ "${ROM}" == "du" && -z ${PERSON} ]]
+   then
+      SOURCEDIR=${ANDROIDDIR}/ROMs/DU
+      ZIPMOVE=${HOME}/shared/ROMs/"Dirty Unicorns"/${DEVICE}
+      ZIPFORMAT=DU_${DEVICE}_*.zip
 
-elif [[ "${ROM}" == "du" && -z ${PERSON} ]]
-then
-   SOURCEDIR=${ANDROIDDIR}/ROMs/DU
-   ZIPMOVE=${HOME}/shared/ROMs/"Dirty Unicorns"/${DEVICE}
-   ZIPFORMAT=DU_${DEVICE}_*.zip
+   elif [[ "${ROM}" == "du" && -n ${PERSON} ]]
+   then
+      SOURCEDIR=${ANDROIDDIR}/ROMs/DU
+      ZIPMOVE=${HOME}/shared/ROMs/.special/.${PERSON}
+      ZIPFORMAT=DU_${DEVICE}_*.zip
 
-elif [[ "${ROM}" == "du" && -n ${PERSON} ]]
-then
-   SOURCEDIR=${ANDROIDDIR}/ROMs/DU
-   ZIPMOVE=${HOME}/shared/ROMs/.special/.${PERSON}
-   ZIPFORMAT=DU_${DEVICE}_*.zip
+   elif [[ "${ROM}" == "pn" && -z ${MOD} && -z ${TEST} ]]
+   then
+      SOURCEDIR=${ANDROIDDIR}/ROMs/PN
+      ZIPMOVE=${HOME}/shared/ROMs/"Pure Nexus"/${DEVICE}
+      ZIPFORMAT=pure_nexus_${DEVICE}-*.zip
 
-elif [[ "${ROM}" == "pn" && -z ${MOD} && -z ${TEST} ]]
-then
-   SOURCEDIR=${ANDROIDDIR}/ROMs/PN
-   ZIPMOVE=${HOME}/shared/ROMs/"Pure Nexus"/${DEVICE}
-   ZIPFORMAT=pure_nexus_${DEVICE}-*.zip
+   elif [[ "${ROM}" == "pn" && -n ${MOD} ]]
+   then
+      SOURCEDIR=${ANDROIDDIR}/ROMs/PN-Mod
+      ZIPMOVE=${HOME}/shared/ROMs/"Pure Nexus Mod"/${DEVICE}
+      ZIPFORMAT=pure_nexus_${DEVICE}-*.zip
 
-elif [[ "${ROM}" == "pn" && -n ${MOD} ]]
-then
-   SOURCEDIR=${ANDROIDDIR}/ROMs/PN-Mod
-   ZIPMOVE=${HOME}/shared/ROMs/"Pure Nexus Mod"/${DEVICE}
-   ZIPFORMAT=pure_nexus_${DEVICE}-*.zip
+   elif [[ "${ROM}" == "pn" && -n ${TEST} ]]
+   then
+      SOURCEDIR=${ANDROIDDIR}/ROMs/PN
+      ZIPMOVE=${HOME}/shared/ROMs/"Pure Nexus"/.tests/${DEVICE}
+      ZIPFORMAT=pure_nexus_${DEVICE}-*.zip
 
-elif [[ "${ROM}" == "pn" && -n ${TEST} ]]
-then
-   SOURCEDIR=${ANDROIDDIR}/ROMs/PN
-   ZIPMOVE=${HOME}/shared/ROMs/"Pure Nexus"/.tests/${DEVICE}
-   ZIPFORMAT=pure_nexus_${DEVICE}-*.zip
+   elif [ "${ROM}" == "rr" ]
+   then
+      SOURCEDIR=${ANDROIDDIR}/ROMs/RR
+      ZIPMOVE=${HOME}/shared/ROMs/ResurrectionRemix/${DEVICE}
+      ZIPFORMAT=ResurrectionRemix*-${DEVICE}.zip
 
-elif [ "${ROM}" == "rr" ]
-then
-   SOURCEDIR=${ANDROIDDIR}/ROMs/RR
-   ZIPMOVE=${HOME}/shared/ROMs/ResurrectionRemix/${DEVICE}
-   ZIPFORMAT=ResurrectionRemix*-${DEVICE}.zip
-
-elif [ "${ROM}" == "screwd" ]
-then
-   SOURCEDIR=${ANDROIDDIR}/ROMs/Screwd
-   ZIPMOVE=${HOME}/shared/ROMs/"Screw'd"/${DEVICE}
-   ZIPFORMAT=screwd-*${SCREWD_BUILD_TYPE}*.zip
+   elif [ "${ROM}" == "screwd" ]
+   then
+      SOURCEDIR=${ANDROIDDIR}/ROMs/Screwd
+      ZIPMOVE=${HOME}/shared/ROMs/"Screw'd"/${DEVICE}
+      ZIPFORMAT=screwd-*${SCREWD_BUILD_TYPE}*.zip
+   fi
 fi
 
 OUTDIR=${SOURCEDIR}/out/target/product/${DEVICE}
@@ -386,7 +387,7 @@ echo -e ${RST}
 
 # Add line to compile log
 # If it was a Pure Nexus Mod build
-if [[ ${ME} = true ]]
+if [[ ${PERSONAL} = true ]]
 then
    echo -e "`date +%H:%M:%S`: ${BASH_SOURCE} me" >> ${COMPILE_LOG}
 elif [[ -n ${MOD} ]]
@@ -410,6 +411,6 @@ export DU_BUILD_TYPE=CHANCELLOR
 MOD=
 PERSON=
 TEST=
-ME=
+PERSONAL=
 
 echo -e "\a"

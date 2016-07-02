@@ -28,10 +28,11 @@ then
    PERSONAL=true
 else
    TOOLCHAIN=${2}
-fi
-if [[ -n ${3} ]]
-then
-   PERMISSIVE=true
+
+   if [[ -n ${3} ]]
+   then
+      PERMISSIVE=true
+   fi
 fi
 
 
@@ -59,11 +60,12 @@ DTBIMAGE="dtb"
 DEFCONFIG="ak_angler_defconfig"
 KER_BRANCH=ak-mm-staging
 AK_BRANCH=ak-angler-anykernel
-if [[ ${PERSONAL} = true ]]
+if [[ -n ${PERSONAL} ]]
 then
    TOOLCHAIN_DIR=Toolchains/Linaro/DF-6.1
    AK_VER="AK.DFL6.1"
    ZIP_MOVE=${HOME}/shared/.me
+
 else
    BASE_AK_VER="AK"
    VER=".066-2.ANGLER."
@@ -134,9 +136,11 @@ export SUBARCH=arm64
 # ---------
 # Clean the out and AnyKernel dirs, reset the AnyKernel dir, and make clean
 function clean_all {
-   if [ -f "${MODULES_DIR}/*.ko" ]; then
+   if [[ -f "${MODULES_DIR}/*.ko" ]]
+   then
      rm `echo ${MODULES_DIR}"/*.ko"`
    fi
+
    cd ${ANYKERNEL_DIR}
    rm -rf ${KERNEL}
    rm -rf ${DTBIMAGE}
@@ -144,7 +148,9 @@ function clean_all {
    git reset --hard origin/${AK_BRANCH}
    git clean -f -d -x
    git pull
+
    echo
+
    cd ${KERNEL_DIR}
    git checkout ${KER_BRANCH}
    git reset --hard origin/${KER_BRANCH}
@@ -167,7 +173,7 @@ function update_git {
 function make_kernel {
    echo
    cd ${KERNEL_DIR}
-   if [ ${PERMISSIVE} = true ]
+   if [[ ${PERMISSIVE} = true ]]
    then
       git fetch https://github.com/nathanchance/elite_angler.git
       git cherry-pick dec83f85e94af847184895fd7553e1b720a99a11
