@@ -63,7 +63,7 @@ AK_BRANCH=ak-angler-anykernel
 if [[ -n ${PERSONAL} ]]
 then
    TOOLCHAIN_DIR=Toolchains/Linaro/DF-6.1
-   AK_VER="AK.DFL6.1"
+   AK_VER="AK.066-2.DL6.1"
    ZIP_MOVE=${HOME}/shared/.me
 
 else
@@ -156,7 +156,8 @@ function clean_all {
    git reset --hard origin/${KER_BRANCH}
    git clean -f -d -x
    git pull
-   make clean && make mrproper
+   make clean
+   make mrproper
 }
 
 # Fetch the latest updates
@@ -173,12 +174,21 @@ function update_git {
 function make_kernel {
    echo
    cd ${KERNEL_DIR}
+
    if [[ ${PERMISSIVE} = true ]]
    then
       git fetch https://github.com/nathanchance/elite_angler.git
       git cherry-pick dec83f85e94af847184895fd7553e1b720a99a11
       ZIP_MOVE=${HOME}/shared/Kernels/angler/AK/Permissive
    fi
+
+   if [[ ${PERSONAL} = true ]]
+   then
+      rm -rf .version
+      touch .version
+      echo 20 >> .version
+   fi
+
    make ${DEFCONFIG}
    make ${THREAD}
 }
@@ -209,7 +219,7 @@ function make_zip {
       rm  ${ZIP_MOVE}/${BASE_AK_VER}*${TOOLCHAIN_VER}.zip
    fi
    mv  `echo ${AK_VER}`.zip ${ZIP_MOVE}
-   cd ${KERNEL_DIR}
+   cd ${HOME}
 }
 
 
