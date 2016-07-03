@@ -130,13 +130,13 @@ else
       ZIPMOVE=${HOME}/shared/ROMs/"Pure Nexus"/${DEVICE}
       ZIPFORMAT=pure_nexus_${DEVICE}-*.zip
 
-   elif [[ "${ROM}" == "pn" && -n ${MOD} ]]
+   elif [[ "${ROM}" == "pn" && ${MOD} = true ]]
    then
       SOURCEDIR=${ANDROIDDIR}/ROMs/PN-Mod
       ZIPMOVE=${HOME}/shared/ROMs/"Pure Nexus Mod"/${DEVICE}
       ZIPFORMAT=pure_nexus_${DEVICE}-*.zip
 
-   elif [[ "${ROM}" == "pn" && -n ${TEST} ]]
+   elif [[ "${ROM}" == "pn" && ${TEST} = true ]]
    then
       SOURCEDIR=${ANDROIDDIR}/ROMs/PN
       ZIPMOVE=${HOME}/shared/ROMs/"Pure Nexus"/.tests/${DEVICE}
@@ -315,8 +315,12 @@ then
    echo -e "--------------------------"
    echo -e ${RST}
 
-   rm "${ZIPMOVE}"/*${DEVICE}*.zip
-   rm "${ZIPMOVE}"/*${DEVICE}*.zip.md5sum
+   if [[ ${ROM} == "pn" && ${MOD} = true && ${DEVICE} == "angler" ]]
+   then
+      rm -rf ${HOME}/shared/.me/*${ZIPFORMAT}*
+   fi
+
+   rm -rf "${ZIPMOVE}"/*${ZIPFORMAT}*
 
 
 
@@ -327,9 +331,12 @@ then
    echo -e "---------------------------------"
    echo -e ${RST}
 
-   mv ${OUTDIR}/${ZIPFORMAT} "${ZIPMOVE}"
-   mv ${OUTDIR}/${ZIPFORMAT}.md5sum "${ZIPMOVE}"
+   if [[ ${ROM} == "pn" && ${MOD} = true && ${DEVICE} == "angler" ]]
+   then
+      cp -v ${OUTDIR}/*${ZIPFORMAT}* ${HOME}/shared/.me
+   fi
 
+   mv -v ${OUTDIR}/*${ZIPFORMAT}* "${ZIPMOVE}"
 
 
    # Upload the files
@@ -390,10 +397,10 @@ echo -e ${RST}
 if [[ ${PERSONAL} = true ]]
 then
    echo -e "`date +%H:%M:%S`: ${BASH_SOURCE} me" >> ${COMPILE_LOG}
-elif [[ -n ${MOD} ]]
+elif [[ ${MOD} = true ]]
 then
    echo -e "`date +%H:%M:%S`: ${BASH_SOURCE} ${ROM} mod ${DEVICE}" >> ${COMPILE_LOG}
-elif [[ -n ${TEST} ]]
+elif [[ ${TEST} = true ]]
 then
    echo -e "`date +%H:%M:%S`: ${BASH_SOURCE} ${ROM} test ${DEVICE}" >> ${COMPILE_LOG}
 # If it was a personalized Dirty Unicorns build
