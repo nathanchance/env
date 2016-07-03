@@ -331,12 +331,14 @@ then
    echo -e "---------------------------------"
    echo -e ${RST}
 
+   echo -e ""
    if [[ ${ROM} == "pn" && ${MOD} = true && ${DEVICE} == "angler" ]]
    then
       cp -v ${OUTDIR}/*${ZIPFORMAT}* ${HOME}/shared/.me
    fi
-
    mv -v ${OUTDIR}/*${ZIPFORMAT}* "${ZIPMOVE}"
+   echo -e ""
+
 
 
    # Upload the files
