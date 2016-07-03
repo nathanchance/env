@@ -18,15 +18,13 @@ RESTORE="\033[0m"
 # ----------
 # Parameters
 # ----------
-# Parameter 1: Merge in new changes or not
-# Parameter 2: Toolchain to compile with
-# Parameter 3: Experimental build (leave off if you want a release build)
-FETCHUPSTREAM=${1}
-TOOLCHAIN=${2}
+# Parameter 1: Toolchain to compile with
+# Parameter 2: Experimental build (leave off if you want a release build)
+TOOLCHAIN=${1}
 # Define EXPERIMENTAL if the third parameter exists
-if [[ -n ${3} ]]
+if [[ -n ${2} ]]
 then
-   EXPERIMENTAL=${3}
+   EXPERIMENTAL=${2}
 fi
 
 
@@ -164,25 +162,6 @@ git clean -f -d -x
 git pull
 make clean
 make mrproper
-
-
-
-# Update kernel if requested
-if [ "${FETCHUPSTREAM}" == "update" ]
-then
-   echo -e ""
-   echo -e ${RED}
-   echo -e "----------------"
-   echo -e "UPDATING SOURCES"
-   echo -e "----------------"
-   echo -e ${RESTORE}
-   echo -e ""
-
-   git checkout ${BRANCH}
-   git fetch upstream
-   git merge upstream/${BRANCH}
-   git push
-fi
 
 
 

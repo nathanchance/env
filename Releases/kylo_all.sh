@@ -12,17 +12,17 @@ if [ "${1}" == "tcupdate" ]
 then
    . sync_toolchains.sh
 fi
-. kylo.sh update aosp
-. kylo.sh update uber4
-. kylo.sh update uber5
-. kylo.sh update uber6
-. kylo.sh update uber7
-. kylo.sh update linaro4.9
-. kylo.sh update linaro5.4
-. kylo.sh update linaro6.1
-. kylo.sh update df-linaro4.9
-. kylo.sh update df-linaro5.4
-. kylo.sh update df-linaro6.1
+. kylo.sh aosp
+. kylo.sh uber4
+. kylo.sh uber5
+. kylo.sh uber6
+. kylo.sh uber7
+. kylo.sh linaro4.9
+. kylo.sh linaro5.4
+. kylo.sh linaro6.1
+. kylo.sh df-linaro4.9
+. kylo.sh df-linaro5.4
+. kylo.sh df-linaro6.1
 
 
 cat ${COMPILE_LOG}

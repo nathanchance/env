@@ -3,7 +3,7 @@
 # -----
 # Usage
 # -----
-# $ . ak.sh <update|noupdate> <toolchain> <per>
+# $ . ak.sh <toolchain> <per>
 
 
 
@@ -19,17 +19,15 @@ RESTORE="\033[0m"
 # ----------
 # Parameters
 # ----------
-# FETCHUPSTREAM: Whether or not to fetch new AK updates
 # TOOLCHAIN: Toolchain to compile with
 # PERMISSIVE: Force kernel to be permissive
-FETCHUPSTREAM=${1}
-if [ "${2}" == "me" ]
+if [ "${1}" == "me" ]
 then
    PERSONAL=true
 else
-   TOOLCHAIN=${2}
+   TOOLCHAIN=${1}
 
-   if [[ -n ${3} ]]
+   if [[ -n ${2} ]]
    then
       PERMISSIVE=true
    fi
@@ -158,16 +156,6 @@ function clean_all {
    git pull
    make clean
    make mrproper
-}
-
-# Fetch the latest updates
-function update_git {
-   echo
-   cd ${KERNEL_DIR}
-   git fetch upstream
-   git merge upstream/${KER_BRANCH}
-   git push
-   echo
 }
 
 # Make the kernel

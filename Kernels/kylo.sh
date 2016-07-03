@@ -3,7 +3,7 @@
 # -----
 # Usage
 # -----
-# $ . kylo.sh <update|noupdate> <toolchain>
+# $ . kylo.sh <toolchain>
 
 
 
@@ -19,14 +19,12 @@ RESTORE="\033[0m"
 # ----------
 # Parameters
 # ----------
-# FETCHUPSTREAM: Whether or not to fetch new Kylo updates
 # TOOLCHAIN: Toolchain to compile with
-FETCHUPSTREAM=${1}
-if [ "${2}" == "me" ]
+if [ "${1}" == "me" ]
 then
    PERSONAL=true
 else
-   TOOLCHAIN=${2}
+   TOOLCHAIN=${1}
 fi
 
 
@@ -197,21 +195,18 @@ clean_all
 
 # Update the git
 echo -e ""
-if [ "${FETCHUPSTREAM}" == "update" ]
-then
-   echo -e ${RED}
-   echo -e "----------------"
-   echo -e "UPDATING SOURCES"
-   echo -e "----------------"
-   echo -e ${RESTORE}
+echo -e ${RED}
+echo -e "----------------"
+echo -e "UPDATING SOURCES"
+echo -e "----------------"
+echo -e ${RESTORE}
 
-   git pull
-   echo -e ""
-fi
+git pull
 
 
 
 # Make the kernel
+echo -e ""
 echo -e ${RED}
 echo -e "-------------"
 echo -e "MAKING KERNEL"
@@ -238,8 +233,10 @@ then
    echo -e ""
 
    . ${HOME}/upload.sh
+
 else
    BUILD_SUCCESS_STRING="BUILD FAILED"
+   
 fi
 
 
