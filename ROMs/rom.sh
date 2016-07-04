@@ -315,7 +315,7 @@ then
    echo -e "--------------------------"
    echo -e ${RST}
 
-   if [[ ${ROM} == "pn" && ${MOD} = true && ${DEVICE} == "angler" ]]
+   if [[ ${ROM} == "pn" && ${MOD} = true && ${DEVICE} == "angler" && -z ${PERSONAL} ]]
    then
       rm -rf ${HOME}/shared/.me/*${ZIPFORMAT}*
    fi
@@ -330,18 +330,20 @@ then
    echo -e "MOVING FILES TO ZIPMOVE DIRECTORY"
    echo -e "---------------------------------"
    echo -e ${RST}
-
    echo -e ""
-   if [[ ${ROM} == "pn" && ${MOD} = true && ${DEVICE} == "angler" ]]
+   
+   if [[ ${ROM} == "pn" && ${MOD} = true && ${DEVICE} == "angler" && -z ${PERSONAL} ]]
    then
       cp -v ${OUTDIR}/*${ZIPFORMAT}* ${HOME}/shared/.me
    fi
+
    mv -v ${OUTDIR}/*${ZIPFORMAT}* "${ZIPMOVE}"
-   echo -e ""
+
 
 
 
    # Upload the files
+   echo -e ""
    echo -e ${RED}
    echo -e "---------------"
    echo -e "UPLOADING FILES"

@@ -95,7 +95,7 @@ then
    fi
    rm -rf ${ZIPMOVE}/${ZIPBEG}*.zip
 
-   if [ "${TYPE}" == "banks" ]
+   if [ "${TYPE}" == "banks" && -z ${PERSONAL} ]
    then
       cp -v ${SOURCEDIR}/out/${ZIPBEG}*.zip ${HOME}/shared/.me
    fi
