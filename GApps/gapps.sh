@@ -89,13 +89,13 @@ then
 
 
    # Remove current GApps and move the new ones in their place
-   if [ "${TYPE}" == "banks" && -z ${PERSONAL} ]
+   if [[ "${TYPE}" == "banks" && -z ${PERSONAL} ]]
    then
       rm -rf ${HOME}/shared/.me/${ZIPBEG}*.zip
    fi
    rm -rf ${ZIPMOVE}/${ZIPBEG}*.zip
 
-   if [ "${TYPE}" == "banks" && -z ${PERSONAL} ]
+   if [[ "${TYPE}" == "banks" && -z ${PERSONAL} ]]
    then
       cp -v ${SOURCEDIR}/out/${ZIPBEG}*.zip ${HOME}/shared/.me
    fi
