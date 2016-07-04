@@ -21,6 +21,7 @@ RST="\033[0m"
 # Parameter 1: Which GApps to compile? (currently Banks or Pure Nexus Dynamic GApps)
 if [ "${1}" == "me" ]
 then
+   PERSONAL=true
    TYPE=banks
    ZIPMOVE=${HOME}/shared/.me
 else
@@ -88,8 +89,17 @@ then
 
 
    # Remove current GApps and move the new ones in their place
-   rm ${ZIPMOVE}/${ZIPBEG}*.zip
-   mv ${SOURCEDIR}/out/${ZIPBEG}*.zip ${ZIPMOVE}
+   if [ "${TYPE}" == "banks" && -z ${PERSONAL} ]
+   then
+      rm -rf ${HOME}/shared/.me/${ZIPBEG}*.zip
+   fi
+   rm -rf ${ZIPMOVE}/${ZIPBEG}*.zip
+
+   if [ "${TYPE}" == "banks" ]
+   then
+      cp -v ${SOURCEDIR}/out/${ZIPBEG}*.zip ${HOME}/shared/.me
+   fi
+   mv -v ${SOURCEDIR}/out/${ZIPBEG}*.zip ${ZIPMOVE}
 
 
 
@@ -128,5 +138,8 @@ echo -e ${RST}
 # Add line to compile log
 echo -e "`date +%H:%M:%S`: ${BASH_SOURCE} ${TYPE}" >> ${COMPILE_LOG}
 echo -e "${BUILD_RESULT_STRING} IN $(echo $((${END}-${START})) | awk '{print int($1/60)" MINUTES AND "int($1%60)" SECONDS"}')\n" >> ${COMPILE_LOG}
+
+# Unassign personal flag
+PERSONAL=
 
 echo -e "\a"
