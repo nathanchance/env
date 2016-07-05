@@ -138,7 +138,7 @@ else
 
    elif [[ "${ROM}" == "pn" && ${TEST} = true ]]
    then
-      SOURCEDIR=${ANDROIDDIR}/ROMs/PN
+      SOURCEDIR=${ANDROIDDIR}/ROMs/PN-OMS
       ZIPMOVE=${HOME}/shared/ROMs/"Pure Nexus"/.tests/${DEVICE}
       ZIPFORMAT=pure_nexus_${DEVICE}-*.zip
 
@@ -331,7 +331,7 @@ then
    echo -e "---------------------------------"
    echo -e ${RST}
    echo -e ""
-   
+
    if [[ ${ROM} == "pn" && ${MOD} = true && ${DEVICE} == "angler" && -z ${PERSONAL} ]]
    then
       cp -v ${OUTDIR}/*${ZIPFORMAT}* ${HOME}/shared/.me
