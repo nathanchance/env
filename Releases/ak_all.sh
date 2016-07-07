@@ -12,6 +12,7 @@ if [ "${1}" == "tcupdate" ]
 then
    . sync_toolchains.sh
 fi
+. ak.sh me
 . ak.sh aosp
 . ak.sh uber4
 . ak.sh uber5
