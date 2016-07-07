@@ -60,8 +60,8 @@ KER_BRANCH=ak-mm-staging
 AK_BRANCH=ak-angler-anykernel
 if [[ -n ${PERSONAL} ]]
 then
-   TOOLCHAIN_DIR=Toolchains/Linaro/DF-6.1
-   AK_VER="AK.066-4.DL6.1"
+   TOOLCHAIN_DIR=Toolchains/Linaro/6.1
+   AK_VER="AK.066-4.L6.1"
    ZIP_MOVE=${HOME}/shared/.me
    export KBUILD_BUILD_USER=nathan
    export KBUILD_BUILD_HOST=phoenix
