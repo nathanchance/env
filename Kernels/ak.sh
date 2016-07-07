@@ -63,6 +63,8 @@ then
    TOOLCHAIN_DIR=Toolchains/Linaro/DF-6.1
    AK_VER="AK.066-4.DL6.1"
    ZIP_MOVE=${HOME}/shared/.me
+   export KBUILD_BUILD_USER=nathan
+   export KBUILD_BUILD_HOST=phoenix
 
 else
    BASE_AK_VER="AK"
@@ -340,5 +342,9 @@ echo -e "${BUILD_SUCCESS_STRING} IN $((${DIFF} / 60)) MINUTES AND $((${DIFF} % 6
 # Free flags
 PERSONAL=
 PERMISSIVE=
+
+# Set USER and HOST variables back to what they are in .bashrc
+export KBUILD_BUILD_USER=nathan
+export KBUILD_BUILD_HOST=phoenix
 
 echo -e "\a"
