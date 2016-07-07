@@ -61,12 +61,12 @@ AK_BRANCH=ak-angler-anykernel
 if [[ -n ${PERSONAL} ]]
 then
    TOOLCHAIN_DIR=Toolchains/Linaro/DF-6.1
-   AK_VER="AK.066-3.DL6.1"
+   AK_VER="AK.066-4.DL6.1"
    ZIP_MOVE=${HOME}/shared/.me
 
 else
    BASE_AK_VER="AK"
-   VER=".066-3.ANGLER."
+   VER=".066-4.ANGLER."
    if [ "${TOOLCHAIN}" == "aosp" ]
    then
       TOOLCHAIN_VER="AOSP4.9"
