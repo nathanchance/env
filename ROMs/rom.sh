@@ -76,7 +76,19 @@ else
             elif [ "${4}" == "test" ]
             then
                TEST=true
+            elif [ "${4}" == "oms" ]
+            then
+               OMS=true
             fi
+         fi
+      fi
+
+      # If there is a fifth parameter
+      if [[ -n ${5} ]]
+      then
+         if [[ "${ROM}" == "pn" && MOD = true ]]
+         then
+            OMS=true
          fi
       fi
    fi
@@ -124,22 +136,34 @@ else
       ZIPMOVE=${HOME}/shared/ROMs/.special/.${PERSON}
       ZIPFORMAT=DU_${DEVICE}_*.zip
 
-   elif [[ "${ROM}" == "pn" && -z ${MOD} && -z ${TEST} ]]
+   elif [[ "${ROM}" == "pn" ]]
    then
-      SOURCEDIR=${ANDROIDDIR}/ROMs/PN
-      ZIPMOVE=${HOME}/shared/ROMs/"Pure Nexus"/${DEVICE}
-      ZIPFORMAT=pure_nexus_${DEVICE}-*.zip
+      if [[ ${MOD} = true ]]
+      then
+         SOURCEDIR=${ANDROIDDIR}/ROMs/PN-Mod
+      elif [[ ${OMS} = true && ${MOD} = false ]]
+      then
+         SOURCEDIR=${ANDROIDDIR}/ROMs/PN-OMS
+      else
+         SOURCEDIR=${ANDROIDDIR}/ROMs/PN
+      fi
 
-   elif [[ "${ROM}" == "pn" && ${MOD} = true ]]
-   then
-      SOURCEDIR=${ANDROIDDIR}/ROMs/PN-Mod
-      ZIPMOVE=${HOME}/shared/ROMs/"Pure Nexus Mod"/${DEVICE}
-      ZIPFORMAT=pure_nexus_${DEVICE}-*.zip
+      if [[ ${MOD} = true && ${OMS} = false ]]
+      then
+         ZIPMOVE=${HOME}/shared/ROMs/"Pure Nexus Mod"/${DEVICE}
+      elif [[ ${MOD} = true && ${OMS} = true ]]
+      then
+         ZIPMOVE=${HOME}/shared/ROMs/"Pure Nexus Mod"/.oms/${DEVICE}
+      elif [[ ${OMS} = true && ${MOD} = false ]]
+      then
+         ZIPMOVE=${HOME}/shared/ROMs/"Pure Nexus"/.oms/${DEVICE}
+      elif [[ ${TEST} = true ]]
+      then
+         ZIPMOVE=${HOME}/shared/ROMs/"Pure Nexus"/.tests/${DEVICE}
+      else
+         ZIPMOVE=${HOME}/shared/ROMs/"Pure Nexus"/${DEVICE}
+      fi
 
-   elif [[ "${ROM}" == "pn" && ${TEST} = true ]]
-   then
-      SOURCEDIR=${ANDROIDDIR}/ROMs/PN-OMS
-      ZIPMOVE=${HOME}/shared/ROMs/"Pure Nexus"/.tests/${DEVICE}
       ZIPFORMAT=pure_nexus_${DEVICE}-*.zip
 
    elif [ "${ROM}" == "rr" ]
@@ -198,6 +222,15 @@ echo -e "--------------------------"
 echo -e ${RST}
 
 cd ${SOURCEDIR}
+
+
+
+# If we are running a PN Mod build with OMS, copy over our local manifest
+if [[ ${MOD} = true && ${OMS} = true ]]
+then
+  rm -rf ${SOURCEDIR}/.repo/local_manifests/*.xml
+  cp ${ANDROIDDIR}/ROMs/Manifests/pn-mod-oms.xml ${SOURCEDIR}/.repo/local_manifests
+fi
 
 
 
@@ -397,31 +430,41 @@ echo -e "-------------------------------------"
 echo -e ${RST}
 
 # Add line to compile log
-# If it was a Pure Nexus Mod build
 if [[ ${PERSONAL} = true ]]
 then
    echo -e "`date +%H:%M:%S`: ${BASH_SOURCE} me" >> ${COMPILE_LOG}
-elif [[ ${MOD} = true ]]
+elif [[ ${MOD} = true && ${OMS} = false ]]
 then
    echo -e "`date +%H:%M:%S`: ${BASH_SOURCE} ${ROM} mod ${DEVICE}" >> ${COMPILE_LOG}
+elif [[ ${MOD} = true && ${OMS} = true ]]
+then
+   echo -e "`date +%H:%M:%S`: ${BASH_SOURCE} ${ROM} mod oms ${DEVICE}" >> ${COMPILE_LOG}
+elif [[ ${MOD} = false && ${OMS} = true ]]
+then
+   echo -e "`date +%H:%M:%S`: ${BASH_SOURCE} ${ROM} oms ${DEVICE}" >> ${COMPILE_LOG}
 elif [[ ${TEST} = true ]]
 then
    echo -e "`date +%H:%M:%S`: ${BASH_SOURCE} ${ROM} test ${DEVICE}" >> ${COMPILE_LOG}
-# If it was a personalized Dirty Unicorns build
 elif [[ -n ${PERSON} ]]
 then
    echo -e "`date +%H:%M:%S`: ${BASH_SOURCE} ${ROM} ${PERSON}" >> ${COMPILE_LOG}
-# Any other build
 else
    echo -e "`date +%H:%M:%S`: ${BASH_SOURCE} ${ROM} ${DEVICE}" >> ${COMPILE_LOG}
 fi
 echo -e "${BUILD_RESULT_STRING} IN $(echo $((${END}-${START})) | awk '{print int($1/60)" MINUTES AND "int($1%60)" SECONDS"}')\n" >> ${COMPILE_LOG}
 
+if [[ ${MOD} = true && ${OMS} = true ]]
+then
+   rm -rf ${SOURCEDIR}/.repo/local_manifests/*.xml
+   cp ${ANDROIDDIR}/ROMs/Manifests/pn-mod.xml ${SOURCEDIR}/.repo/local_manifests
+fi
+
 # Unassign flags and reset DU_BUILD_TYPE
 export DU_BUILD_TYPE=CHANCELLOR
-MOD=
 PERSON=
-TEST=
-PERSONAL=
+MOD=false
+TEST=false
+PERSONAL=false
+OMS=false
 
 echo -e "\a"
