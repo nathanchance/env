@@ -4,7 +4,7 @@
 # -----
 # Usage
 # -----
-# $ . rom_all.sh <rom> <mod|custom>
+# $ . rom_all.sh <rom> <mod|custom|oms> <oms>
 
 
 DEVICES="angler shamu bullhead hammerhead"
@@ -21,7 +21,12 @@ then
    then
       for DEVICE in ${DEVICES}
       do
-         . rom.sh ${ROM} ${DEVICE} sync ${2}
+         if [[ -n ${3} ]]
+         then
+            . rom.sh ${ROM} ${DEVICE} sync ${2} ${3}
+         else
+            . rom.sh ${ROM} ${DEVICE} sync ${2}
+         fi
       done
    fi
 else
