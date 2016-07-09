@@ -344,7 +344,7 @@ then
    echo -e "--------------------------"
    echo -e ${RST}
 
-   if [[ ${ROM} == "pn" && ${MOD} = true && ${DEVICE} == "angler" && -z ${PERSONAL} ]]
+   if [[ ${ROM} == "pn" && ${MOD} = true && ${OMS} = false && ${DEVICE} == "angler" && -z ${PERSONAL} ]]
    then
       rm -rf ${HOME}/shared/.me/*${ZIPFORMAT}*
    fi
@@ -361,7 +361,7 @@ then
    echo -e ${RST}
    echo -e ""
 
-   if [[ ${ROM} == "pn" && ${MOD} = true && ${DEVICE} == "angler" && -z ${PERSONAL} ]]
+   if [[ ${ROM} == "pn" && ${MOD} = true && ${OMS} = false && ${DEVICE} == "angler" && -z ${PERSONAL} ]]
    then
       cp -v ${OUTDIR}/*${ZIPFORMAT}* ${HOME}/shared/.me
    fi
