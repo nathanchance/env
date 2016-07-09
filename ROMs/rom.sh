@@ -73,6 +73,11 @@ else
             if [ "${4}" == "mod" ]
             then
                MOD=true
+               # If there is a fifth parameter
+               if [[ -n ${5} ]]
+               then
+                  OMS=true
+               fi
             elif [ "${4}" == "test" ]
             then
                TEST=true
@@ -80,15 +85,6 @@ else
             then
                OMS=true
             fi
-         fi
-      fi
-
-      # If there is a fifth parameter
-      if [[ -n ${5} ]]
-      then
-         if [[ "${ROM}" == "pn" && MOD = true ]]
-         then
-            OMS=true
          fi
       fi
    fi
