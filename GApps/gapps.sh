@@ -89,13 +89,13 @@ then
 
 
    # Remove current GApps and move the new ones in their place
-   if [[ "${TYPE}" == "banks" && -z ${PERSONAL} ]]
+   if [[ "${TYPE}" == "banks" && ${PERSONAL} = false ]]
    then
       rm -rf ${HOME}/shared/.me/${ZIPBEG}*.zip
    fi
    rm -rf ${ZIPMOVE}/${ZIPBEG}*.zip
 
-   if [[ "${TYPE}" == "banks" && -z ${PERSONAL} ]]
+   if [[ "${TYPE}" == "banks" && ${PERSONAL} = false ]]
    then
       cp -v ${SOURCEDIR}/out/${ZIPBEG}*.zip ${HOME}/shared/.me
    fi
@@ -140,6 +140,6 @@ echo -e "`date +%H:%M:%S`: ${BASH_SOURCE} ${TYPE}" >> ${COMPILE_LOG}
 echo -e "${BUILD_RESULT_STRING} IN $(echo $((${END}-${START})) | awk '{print int($1/60)" MINUTES AND "int($1%60)" SECONDS"}')\n" >> ${COMPILE_LOG}
 
 # Unassign personal flag
-PERSONAL=
+PERSONAL=false
 
 echo -e "\a"
