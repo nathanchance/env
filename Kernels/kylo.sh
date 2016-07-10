@@ -50,11 +50,11 @@ DEFCONFIG="kylo_defconfig"
 if [[ ${PERSONAL} = true ]]
 then
    TOOLCHAIN_DIR=Toolchains/Linaro/DF-6.1
-   AK_VER="Kylo.DFL6.1"
+   AK_VER="Kylo.R33"
    ZIP_MOVE=${HOME}/shared/.me
 else
    BASE_KYLO_VER="Kylo"
-   VER=".R32.M.angler."
+   VER=".R33.M.angler."
    if [ "${TOOLCHAIN}" == "aosp" ]
    then
       TOOLCHAIN_VER="AOSP4.9"
@@ -236,7 +236,7 @@ then
 
 else
    BUILD_SUCCESS_STRING="BUILD FAILED"
-   
+
 fi
 
 
