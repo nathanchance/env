@@ -3,7 +3,7 @@
 # -----
 # Usage
 # -----
-# $ . rom.sh <me|rom> <device> <sync|nosync> <mod|person>
+# $ . rom.sh <me|rom> <device> <mod|person>
 
 
 
@@ -21,68 +21,53 @@
 # ----------
 # Parameter 1: ROM to build (currently AICP, AOSiP, Dirty Unicorns, Pure Nexus [Mod], ResurrectionRemix, and Screw'd)
 # Parameter 2: Device (eg. angler, bullhead, shamu)
-# Parameter 3: Whether or not to run repo sync
-# Parameter 4: Pure Nexus Mod or a personalized Dirty Unicorns build (omit if neither applies)
-if [ "${1}" == "me" ]
-then
+# Parameter 3: Pure Nexus Mod/OMS or a personalized Dirty Unicorns build (omit if neither applies)
+if [[ "${1}" == "me" ]]; then
    PERSONAL=true
    DEVICE=angler
-   SYNC=sync
+   OMS=false
+
 else
    ROM=${1}
 
-   # If the ROM is RR, it only needs a sync parameter since I only build Shamu
-   if [ "${ROM}" == "rr" ]
-   then
-      SYNC=${2}
+   # If the ROM is RR, its device is only Shamu
+   if [[ "${ROM}" == "rr" ]]; then
       DEVICE=shamu
+
    else
       DEVICE=${2}
-      SYNC=${3}
 
-      # If there is a fourth parameter
-      if [[ -n ${4} ]]
-      then
+      # If there is a third parameter
+      if [[ -n ${3} ]]; then
          # And it's DU, we are running a personalized build
-         if [ "${ROM}" == "du" ]
-         then
-            PERSON=${4}
+         if [[ "${ROM}" == "du" ]]; then
+
+            PERSON=${3}
 
             # Add custom build tag
-            if [ "${PERSON}" == "alcolawl" ]
-            then
+            if [[ "${PERSON}" == "alcolawl" ]]; then
                export DU_BUILD_TYPE=ALCOLAWL
-            elif [ "${PERSON}" == "bre" ]
-            then
+            elif [[ "${PERSON}" == "bre" ]]; then
                export DU_BUILD_TYPE=BREYANA
-            elif [ "${PERSON}" == "drew" ]
-            then
+            elif [[ "${PERSON}" == "drew" ]]; then
                export DU_BUILD_TYPE=DREW
-            elif [ "${PERSON}" == "hmhb" ]
-            then
+            elif [[ "${PERSON}" == "hmhb" ]]; then
                export DU_BUILD_TYPE=DIRTY-DEEDS
-            elif [ "${PERSON}" == "jdizzle" ]
-            then
+            elif [[ "${PERSON}" == "jdizzle" ]]; then
                export DU_BUILD_TYPE=NINJA
             fi
          fi
 
-         # And it's PN, we are running a Mod build
-         if [ "${ROM}" == "pn" ]
-         then
-            if [ "${4}" == "mod" ]
-            then
+         # And it's PN, we are running either a Mod, test, or OMS build; if there is a 4th parameter, it is a Mod OMS build
+         if [[ "${ROM}" == "pn" ]]; then
+            if [[ "${3}" == "mod" ]]; then
                MOD=true
-               # If there is a fifth parameter
-               if [[ -n ${5} ]]
-               then
+               if [[ -n ${4} && "${4}" == "oms" ]]; then
                   OMS=true
                fi
-            elif [ "${4}" == "test" ]
-            then
+            elif [[ "${3}" == "test" ]]; then
                TEST=true
-            elif [ "${4}" == "oms" ]
-            then
+            elif [[ "${3}" == "oms" ]]; then
                OMS=true
             fi
          fi
@@ -96,87 +81,71 @@ fi
 # Variables
 # ---------
 # ANDROIDDIR: Directory that holds all of the Android files (currently my home directory)
+# OUTDIR: Output directory of completed ROM zip after compilation
 # SOURCEDIR: Directory that holds the ROM source
 # ZIPMOVE: Directory to hold completed ROM zips
 # ZIPFORMAT: The format of the zip file in the out directory for moving to ZIPMOVE
-# OUTDIR: Output directory of completed ROM zip after compilation
 ANDROIDDIR=${HOME}
+OUTDIR=${SOURCEDIR}/out/target/product/${DEVICE}
 
-if [[ ${PERSONAL} = true ]]
-then
+if [[ ${PERSONAL} = true ]]; then
    SOURCEDIR=${ANDROIDDIR}/ROMs/PN-Mod
    ZIPMOVE=${HOME}/shared/.me
    ZIPFORMAT=pure_nexus_${DEVICE}-*.zip
+
 else
-   if [ "${ROM}" == "aicp" ]
-   then
+   if [[ "${ROM}" == "aicp" ]]; then
       SOURCEDIR=${ANDROIDDIR}/ROMs/AICP
       ZIPMOVE=${HOME}/shared/ROMs/AICP/${DEVICE}
       ZIPFORMAT=aicp_${DEVICE}_mm*.zip
 
-   elif [ "${ROM}" == "aosip" ]
-   then
+   elif [[ "${ROM}" == "aosip" ]]; then
       SOURCEDIR=${ANDROIDDIR}/ROMs/AOSiP
       ZIPMOVE=${HOME}/shared/ROMs/AOSiP/${DEVICE}
       ZIPFORMAT=AOSiP-*-${DEVICE}-*.zip
 
-   elif [[ "${ROM}" == "du" && -z ${PERSON} ]]
-   then
+   elif [[ "${ROM}" == "du" && -z ${PERSON} ]]; then
       SOURCEDIR=${ANDROIDDIR}/ROMs/DU
       ZIPMOVE=${HOME}/shared/ROMs/"Dirty Unicorns"/${DEVICE}
       ZIPFORMAT=DU_${DEVICE}_*.zip
 
-   elif [[ "${ROM}" == "du" && -n ${PERSON} ]]
-   then
+   elif [[ "${ROM}" == "du" && -n ${PERSON} ]]; then
       SOURCEDIR=${ANDROIDDIR}/ROMs/DU
       ZIPMOVE=${HOME}/shared/ROMs/.special/.${PERSON}
       ZIPFORMAT=DU_${DEVICE}_*.zip
 
-   elif [[ "${ROM}" == "pn" ]]
-   then
-      if [[ ${MOD} = true ]]
-      then
+   elif [[ "${ROM}" == "pn" ]]; then
+      ZIPFORMAT=pure_nexus_${DEVICE}-*.zip
+
+      if [[ ${MOD} = true ]]; then
          SOURCEDIR=${ANDROIDDIR}/ROMs/PN-Mod
-      elif [[ ${OMS} = true && ${MOD} = false ]]
-      then
-         SOURCEDIR=${ANDROIDDIR}/ROMs/PN-OMS
       else
          SOURCEDIR=${ANDROIDDIR}/ROMs/PN
       fi
 
-      if [[ ${MOD} = true && ${OMS} = false ]]
-      then
+      if [[ ${MOD} = true && ${OMS} = false ]]; then
          ZIPMOVE=${HOME}/shared/ROMs/"Pure Nexus Mod"/${DEVICE}
-      elif [[ ${MOD} = true && ${OMS} = true ]]
-      then
+      elif [[ ${MOD} = true && ${OMS} = true ]]; then
          ZIPMOVE=${HOME}/shared/ROMs/"Pure Nexus Mod"/.oms/${DEVICE}
-      elif [[ ${OMS} = true && ${MOD} = false ]]
-      then
+      elif [[ ${OMS} = true && ${MOD} = false ]]; then
          ZIPMOVE=${HOME}/shared/ROMs/"Pure Nexus"/.oms/${DEVICE}
-      elif [[ ${TEST} = true ]]
-      then
+      elif [[ ${TEST} = true ]]; then
          ZIPMOVE=${HOME}/shared/ROMs/"Pure Nexus"/.tests/${DEVICE}
       else
          ZIPMOVE=${HOME}/shared/ROMs/"Pure Nexus"/${DEVICE}
       fi
 
-      ZIPFORMAT=pure_nexus_${DEVICE}-*.zip
-
-   elif [ "${ROM}" == "rr" ]
-   then
+   elif [[ "${ROM}" == "rr" ]]; then
       SOURCEDIR=${ANDROIDDIR}/ROMs/RR
       ZIPMOVE=${HOME}/shared/ROMs/ResurrectionRemix/${DEVICE}
       ZIPFORMAT=ResurrectionRemix*-${DEVICE}.zip
 
-   elif [ "${ROM}" == "screwd" ]
-   then
+   elif [[ "${ROM}" == "screwd" ]]; then
       SOURCEDIR=${ANDROIDDIR}/ROMs/Screwd
       ZIPMOVE=${HOME}/shared/ROMs/"Screw'd"/${DEVICE}
       ZIPFORMAT=screwd-*${SCREWD_BUILD_TYPE}*.zip
    fi
 fi
-
-OUTDIR=${SOURCEDIR}/out/target/product/${DEVICE}
 
 
 
@@ -221,31 +190,28 @@ cd ${SOURCEDIR}
 
 
 
-# If we are running a PN Mod build with OMS, copy over our local manifest
-if [[ ${MOD} = true && ${OMS} = true ]]
-then
-  rm -rf ${SOURCEDIR}/.repo/local_manifests/*.xml
-  cp ${ANDROIDDIR}/ROMs/Manifests/pn-mod-oms.xml ${SOURCEDIR}/.repo/local_manifests
+echo -e ${RED}
+echo -e "----------------------"
+echo -e "SYNCING LATEST SOURCES"
+echo -e "----------------------"
+echo -e ${RST}
+echo -e ""
+
+if [[ "${ROM}" == "pn" && ${MOD} = true && ${OMS} = false ]]; then
+   repo init -u https://github.com/ezio84/pnmod-manifest.git -b mm2
+elif [[ "${ROM}" == "pn" && ${MOD} = true && ${OMS} = true ]]; then
+   repo init -u https://github.com/ezio84/pnmod-manifest.git -b mm2oms
+elif [[ "${ROM}" == "pn" && ${MOD} = false && ${OMS} = true ]]; then
+   repo init -u https://github.com/PureNexusProject/manifest.git -b oms
+elif [[ "${ROM}" == "pn" && ${MOD} = false && ${OMS} = false ]]; then
+   repo init -u https://github.com/PureNexusProject/manifest.git -b mm2
 fi
 
+repo sync --force-sync
 
 
-# Sync the repo if requested
-if [ "${SYNC}" == "sync" ]
-then
-   echo -e ${RED}
-   echo -e "----------------------"
-   echo -e "SYNCING LATEST SOURCES"
-   echo -e "----------------------"
-   echo -e ${RST}
-   echo -e ""
 
-   repo sync --force-sync
-fi
-
-
-if [ "${ROM}" ==  "rr" ]
-then
+if [[ "${ROM}" ==  "rr" ]]; then
    # I could fork these repos and do the changes in there permanently but I don't want to have to maintains anything extra
    echo -e ${RED}
    echo -e "---------------------------------------"
@@ -297,8 +263,7 @@ echo -e "----------------"
 echo -e ${RST}
 echo -e ""
 
-if [ "${ROM}" == "screwd" ]
-then
+if [[ "${ROM}" == "screwd" ]]; then
    lunch screwd_${DEVICE}-userdebug
 else
    breakfast ${DEVICE}
@@ -330,8 +295,7 @@ time mka bacon
 
 
 # If the compilation was successful
-if [ `ls ${OUTDIR}/${ZIPFORMAT} 2>/dev/null | wc -l` != "0" ]
-then
+if [[ `ls ${OUTDIR}/${ZIPFORMAT} 2>/dev/null | wc -l` != "0" ]]; then
    BUILD_RESULT_STRING="BUILD SUCCESSFUL"
 
 
@@ -344,12 +308,11 @@ then
    echo -e "--------------------------"
    echo -e ${RST}
 
-   if [[ ${ROM} == "pn" && ${MOD} = true && ${OMS} = false && ${DEVICE} == "angler" && ${PERSONAL} = false ]]
-   then
-      rm -rf ${HOME}/shared/.me/*${ZIPFORMAT}*
+   if [[ ${ROM} == "pn" && ${MOD} = true && ${OMS} = false && ${DEVICE} == "angler" && ${PERSONAL} = false ]]; then
+      rm -vrf ${HOME}/shared/.me/*${ZIPFORMAT}*
    fi
 
-   rm -rf "${ZIPMOVE}"/*${ZIPFORMAT}*
+   rm -vrf "${ZIPMOVE}"/*${ZIPFORMAT}*
 
 
 
@@ -361,8 +324,7 @@ then
    echo -e ${RST}
    echo -e ""
 
-   if [[ ${ROM} == "pn" && ${MOD} = true && ${OMS} = false && ${DEVICE} == "angler" && ${PERSONAL} = false ]]
-   then
+   if [[ ${ROM} == "pn" && ${MOD} = true && ${OMS} = false && ${DEVICE} == "angler" && ${PERSONAL} = false ]]; then
       cp -v ${OUTDIR}/*${ZIPFORMAT}* ${HOME}/shared/.me
    fi
 
@@ -409,7 +371,6 @@ then
 # If the build failed, add a variable
 else
    BUILD_RESULT_STRING="BUILD FAILED"
-
 fi
 
 
@@ -426,34 +387,25 @@ echo -e "-------------------------------------"
 echo -e ${RST}
 
 # Add line to compile log
-if [[ ${PERSONAL} = true ]]
-then
+if [[ ${PERSONAL} = true ]]; then
    echo -e "`date +%H:%M:%S`: ${BASH_SOURCE} me" >> ${COMPILE_LOG}
-elif [[ ${MOD} = true && ${OMS} = false ]]
-then
+elif [[ ${MOD} = true && ${OMS} = false ]]; then
    echo -e "`date +%H:%M:%S`: ${BASH_SOURCE} ${ROM} mod ${DEVICE}" >> ${COMPILE_LOG}
-elif [[ ${MOD} = true && ${OMS} = true ]]
-then
+elif [[ ${MOD} = true && ${OMS} = true ]]; then
    echo -e "`date +%H:%M:%S`: ${BASH_SOURCE} ${ROM} mod oms ${DEVICE}" >> ${COMPILE_LOG}
-elif [[ ${MOD} = false && ${OMS} = true ]]
-then
+elif [[ ${MOD} = false && ${OMS} = true ]]; then
    echo -e "`date +%H:%M:%S`: ${BASH_SOURCE} ${ROM} oms ${DEVICE}" >> ${COMPILE_LOG}
-elif [[ ${TEST} = true ]]
-then
+elif [[ ${TEST} = true ]]; then
    echo -e "`date +%H:%M:%S`: ${BASH_SOURCE} ${ROM} test ${DEVICE}" >> ${COMPILE_LOG}
-elif [[ -n ${PERSON} ]]
-then
+elif [[ -n ${PERSON} ]]; then
    echo -e "`date +%H:%M:%S`: ${BASH_SOURCE} ${ROM} ${PERSON}" >> ${COMPILE_LOG}
 else
    echo -e "`date +%H:%M:%S`: ${BASH_SOURCE} ${ROM} ${DEVICE}" >> ${COMPILE_LOG}
 fi
+
 echo -e "${BUILD_RESULT_STRING} IN $(echo $((${END}-${START})) | awk '{print int($1/60)" MINUTES AND "int($1%60)" SECONDS"}')\n" >> ${COMPILE_LOG}
 
-if [[ ${MOD} = true && ${OMS} = true ]]
-then
-   rm -rf ${SOURCEDIR}/.repo/local_manifests/*.xml
-   cp ${ANDROIDDIR}/ROMs/Manifests/pn-mod.xml ${SOURCEDIR}/.repo/local_manifests
-fi
+
 
 # Unassign flags and reset DU_BUILD_TYPE
 export DU_BUILD_TYPE=CHANCELLOR
