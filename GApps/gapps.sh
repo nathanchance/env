@@ -19,8 +19,7 @@ RST="\033[0m"
 # Parameters
 # ----------
 # Parameter 1: Which GApps to compile? (currently Banks or Pure Nexus Dynamic GApps)
-if [ "${1}" == "me" ]
-then
+if [[ "${1}" == "me" ]]; then
    PERSONAL=true
    TYPE=banks
    ZIPMOVE=${HOME}/shared/.me
@@ -34,13 +33,11 @@ fi
 # Variables
 # ---------
 ANDROIDDIR=${HOME}
-if [ "${TYPE}" == "banks" ]
-then
+if [[ "${TYPE}" == "banks" ]]; then
     SOURCEDIR=${ANDROIDDIR}/GApps/Banks
     ZIPBEG=banks
     BRANCH=m
-elif [ "${TYPE}" == "pn" ]
-then
+elif [[ "${TYPE}" == "pn" ]]; then
     SOURCEDIR=${ANDROIDDIR}/GApps/PN
     ZIPBEG=PureNexus
     BRANCH=mm2
@@ -83,20 +80,18 @@ git pull
 
 
 # If the above was successful
-if [ `ls ${SOURCEDIR}/out/${ZIPBEG}*.zip 2>/dev/null | wc -l` != "0" ]
-then
+if [[ `ls ${SOURCEDIR}/out/${ZIPBEG}*.zip 2>/dev/null | wc -l` != "0" ]]; then
    BUILD_RESULT_STRING="BUILD SUCCESSFUL"
 
 
+
    # Remove current GApps and move the new ones in their place
-   if [[ "${TYPE}" == "banks" && ${PERSONAL} = false ]]
-   then
+   if [[ "${TYPE}" == "banks" && ${PERSONAL} = false ]]; then
       rm -rf ${HOME}/shared/.me/${ZIPBEG}*.zip
    fi
    rm -rf ${ZIPMOVE}/${ZIPBEG}*.zip
 
-   if [[ "${TYPE}" == "banks" && ${PERSONAL} = false ]]
-   then
+   if [[ "${TYPE}" == "banks" && ${PERSONAL} = false ]]; then
       cp -v ${SOURCEDIR}/out/${ZIPBEG}*.zip ${HOME}/shared/.me
    fi
    mv -v ${SOURCEDIR}/out/${ZIPBEG}*.zip ${ZIPMOVE}
