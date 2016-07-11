@@ -86,7 +86,6 @@ fi
 # ZIPMOVE: Directory to hold completed ROM zips
 # ZIPFORMAT: The format of the zip file in the out directory for moving to ZIPMOVE
 ANDROIDDIR=${HOME}
-OUTDIR=${SOURCEDIR}/out/target/product/${DEVICE}
 
 if [[ ${PERSONAL} = true ]]; then
    SOURCEDIR=${ANDROIDDIR}/ROMs/PN-Mod
@@ -146,6 +145,8 @@ else
       ZIPFORMAT=screwd-*${SCREWD_BUILD_TYPE}*.zip
    fi
 fi
+
+OUTDIR=${SOURCEDIR}/out/target/product/${DEVICE}
 
 
 
