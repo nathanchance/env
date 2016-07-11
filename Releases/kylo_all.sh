@@ -8,10 +8,10 @@
 # Parameter 1: Update the toolchains used to compile by running the update_toolchains script
 
 
-if [ "${1}" == "tcupdate" ]
-then
+if [ "${1}" == "tcupdate" ]; then
    . sync_toolchains.sh
 fi
+
 . kylo.sh aosp
 . kylo.sh uber4
 . kylo.sh uber5

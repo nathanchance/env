@@ -8,10 +8,10 @@
 # Parameter 1: Update the toolchains used to compile by running the update_toolchains script
 
 
-if [ "${1}" == "tcupdate" ]
-then
+if [[ "${1}" == "tcupdate" ]]; then
    . sync_toolchains.sh
 fi
+
 . ak.sh me
 . ak.sh aosp
 . ak.sh uber4

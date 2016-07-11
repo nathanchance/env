@@ -21,14 +21,12 @@ RESTORE="\033[0m"
 # ----------
 # TOOLCHAIN: Toolchain to compile with
 # PERMISSIVE: Force kernel to be permissive
-if [ "${1}" == "me" ]
-then
+if [[ "${1}" == "me" ]]; then
    PERSONAL=true
 else
    TOOLCHAIN=${1}
 
-   if [[ -n ${2} ]]
-   then
+   if [[ -n ${2} ]]; then
       PERMISSIVE=true
    fi
 fi
@@ -58,65 +56,53 @@ DTBIMAGE="dtb"
 DEFCONFIG="ak_angler_defconfig"
 KER_BRANCH=ak-mm-staging
 AK_BRANCH=ak-angler-anykernel
-if [[ -n ${PERSONAL} ]]
-then
+if [[ -n ${PERSONAL} ]]; then
    TOOLCHAIN_DIR=Toolchains/Linaro/DF-6.1
    AK_VER="AK.066-4"
    ZIP_MOVE=${HOME}/shared/.me
    export KBUILD_BUILD_USER=nathan
    export KBUILD_BUILD_HOST=phoenix
-
 else
    BASE_AK_VER="AK"
    VER=".066-4.ANGLER."
-   if [ "${TOOLCHAIN}" == "aosp" ]
-   then
+   if [[ "${TOOLCHAIN}" == "aosp" ]]; then
       TOOLCHAIN_VER="AOSP4.9"
       TOOLCHAIN_DIR=Toolchains/AOSP
-   elif [ "${TOOLCHAIN}" == "uber4" ]
-   then
+   elif [[ "${TOOLCHAIN}" == "uber4" ]]; then
       TOOLCHAIN_VER="UBER4.9"
       TOOLCHAIN_DIR=Toolchains/UBER/4.9
-   elif [ "${TOOLCHAIN}" == "uber5" ]
-   then
+   elif [[ "${TOOLCHAIN}" == "uber5" ]]; then
       TOOLCHAIN_VER="UBER5.4"
       TOOLCHAIN_DIR=Toolchains/UBER/5.4
-   elif [ "${TOOLCHAIN}" == "uber6" ]
-   then
+   elif [[ "${TOOLCHAIN}" == "uber6" ]]; then
       TOOLCHAIN_VER="UBER6.1"
       TOOLCHAIN_DIR=Toolchains/UBER/6.1
-   elif [ "${TOOLCHAIN}" == "uber7" ]
-   then
+   elif [[ "${TOOLCHAIN}" == "uber7" ]]; then
       TOOLCHAIN_VER="UBER7.0"
       TOOLCHAIN_DIR=Toolchains/UBER/7.0
-   elif [ "${TOOLCHAIN}" == "linaro4.9" ]
-   then
+   elif [[ "${TOOLCHAIN}" == "linaro4.9" ]]; then
       TOOLCHAIN_VER="LINARO4.9"
       TOOLCHAIN_DIR=Toolchains/Linaro/4.9
-   elif [ "${TOOLCHAIN}" == "linaro5.4" ]
-   then
+   elif [[ "${TOOLCHAIN}" == "linaro5.4" ]]; then
       TOOLCHAIN_VER="LINARO5.4"
       TOOLCHAIN_DIR=Toolchains/Linaro/5.4
-   elif [ "${TOOLCHAIN}" == "linaro6.1" ]
-   then
+   elif [[ "${TOOLCHAIN}" == "linaro6.1" ]]; then
       TOOLCHAIN_VER="LINARO6.1"
       TOOLCHAIN_DIR=Toolchains/Linaro/6.1
-   elif [ "${TOOLCHAIN}" == "df-linaro4.9" ]
-   then
+   elif [[ "${TOOLCHAIN}" == "df-linaro4.9" ]]; then
       TOOLCHAIN_VER="DF-LINARO4.9"
       TOOLCHAIN_DIR=Toolchains/Linaro/DF-4.9
-   elif [ "${TOOLCHAIN}" == "df-linaro5.4" ]
-   then
+   elif [[ "${TOOLCHAIN}" == "df-linaro5.4" ]]; then
       TOOLCHAIN_VER="DF-LINARO5.4"
       TOOLCHAIN_DIR=Toolchains/Linaro/DF-5.4
-   elif [ "${TOOLCHAIN}" == "df-linaro6.1" ]
-   then
+   elif [[ "${TOOLCHAIN}" == "df-linaro6.1" ]]; then
       TOOLCHAIN_VER="DF-LINARO6.1"
       TOOLCHAIN_DIR=Toolchains/Linaro/DF-6.1
    fi
 
    AK_VER="${BASE_AK_VER}${VER}${TOOLCHAIN_VER}"
 fi
+
 
 
 # -------
@@ -131,13 +117,13 @@ export SUBARCH=arm64
 # export COMPILE_LOG=${LOGDIR}/compile_log_`date +%m_%d_%y`.log
 
 
+
 # ---------
 # Functions
 # ---------
 # Clean the out and AnyKernel dirs, reset the AnyKernel dir, and make clean
 function clean_all {
-   if [[ -f "${MODULES_DIR}/*.ko" ]]
-   then
+   if [[ -f "${MODULES_DIR}/*.ko" ]]; then
      rm `echo ${MODULES_DIR}"/*.ko"`
    fi
 
@@ -165,15 +151,13 @@ function make_kernel {
    echo
    cd ${KERNEL_DIR}
 
-   if [[ ${PERMISSIVE} = true ]]
-   then
+   if [[ ${PERMISSIVE} = true ]]; then
       git fetch https://github.com/nathanchance/elite_angler.git
       git cherry-pick dec83f85e94af847184895fd7553e1b720a99a11
       ZIP_MOVE=${HOME}/shared/Kernels/angler/AK/Permissive
    fi
 
-   if [[ ${PERSONAL} = true ]]
-   then
+   if [[ ${PERSONAL} = true ]]; then
       rm -rf .version
       touch .version
       echo 20 >> .version
@@ -185,7 +169,7 @@ function make_kernel {
 
 # Make the modules
 function make_modules {
-   if [ -f "${MODULES_DIR}/*.ko" ]; then
+   if [[ -f "${MODULES_DIR}/*.ko" ]]; then
       rm `echo ${MODULES_DIR}"/*.ko"`
    fi
    #find $MODULES_DIR/proprietary -name '*.ko' -exec cp -v {} $MODULES_DIR \;
@@ -297,8 +281,7 @@ make_modules
 
 
 # If the above was successful
-if [ `ls ${ZIMAGE_DIR}/${KERNEL} 2>/dev/null | wc -l` != "0" ]
-then
+if [[ `ls ${ZIMAGE_DIR}/${KERNEL} 2>/dev/null | wc -l` != "0" ]]; then
    BUILD_SUCCESS_STRING="BUILD SUCCESSFUL"
 
 

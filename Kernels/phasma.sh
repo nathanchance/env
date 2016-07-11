@@ -46,48 +46,37 @@ KERNEL="Image.gz-dtb"
 DEFCONFIG="phasma_defconfig"
 BASE_PHASMA_VER="Phasma"
 VER=".R20.M.bullhead."
-if [ "${TOOLCHAIN}" == "aosp" ]
-then
+if [[ "${TOOLCHAIN}" == "aosp" ]]; then
    TOOLCHAIN_VER="AOSP4.9"
    TOOLCHAIN_DIR=Toolchains/AOSP
-elif [ "${TOOLCHAIN}" == "uber4" ]
-then
+elif [[ "${TOOLCHAIN}" == "uber4" ]]; then
    TOOLCHAIN_VER="UBER4.9"
    TOOLCHAIN_DIR=Toolchains/UBER/4.9
-elif [ "${TOOLCHAIN}" == "uber5" ]
-then
+elif [[ "${TOOLCHAIN}" == "uber5" ]]; then
    TOOLCHAIN_VER="UBER5.4"
    TOOLCHAIN_DIR=Toolchains/UBER/5.4
-elif [ "${TOOLCHAIN}" == "uber6" ]
-then
+elif [[ "${TOOLCHAIN}" == "uber6" ]]; then
    TOOLCHAIN_VER="UBER6.1"
    TOOLCHAIN_DIR=Toolchains/UBER/6.1
-elif [ "${TOOLCHAIN}" == "uber7" ]
-then
+elif [[ "${TOOLCHAIN}" == "uber7" ]]; then
    TOOLCHAIN_VER="UBER7.0"
    TOOLCHAIN_DIR=Toolchains/UBER/7.0
-elif [ "${TOOLCHAIN}" == "linaro4.9" ]
-then
+elif [[ "${TOOLCHAIN}" == "linaro4.9" ]]; then
    TOOLCHAIN_VER="LINARO4.9"
    TOOLCHAIN_DIR=Toolchains/Linaro/4.9
-elif [ "${TOOLCHAIN}" == "linaro5.4" ]
-then
+elif [[ "${TOOLCHAIN}" == "linaro5.4" ]]; then
    TOOLCHAIN_VER="LINARO5.4"
    TOOLCHAIN_DIR=Toolchains/Linaro/5.4
-elif [ "${TOOLCHAIN}" == "linaro6.1" ]
-then
+elif [[ "${TOOLCHAIN}" == "linaro6.1" ]]; then
    TOOLCHAIN_VER="LINARO6.1"
    TOOLCHAIN_DIR=Toolchains/Linaro/6.1
-elif [ "${TOOLCHAIN}" == "df-linaro4.9" ]
-then
+elif [[ "${TOOLCHAIN}" == "df-linaro4.9" ]]; then
    TOOLCHAIN_VER="DF-LINARO4.9"
    TOOLCHAIN_DIR=Toolchains/Linaro/DF-4.9
-elif [ "${TOOLCHAIN}" == "df-linaro5.4" ]
-then
+elif [[ "${TOOLCHAIN}" == "df-linaro5.4" ]]; then
    TOOLCHAIN_VER="DF-LINARO5.4"
    TOOLCHAIN_DIR=Toolchains/Linaro/DF-5.4
-elif [ "${TOOLCHAIN}" == "df-linaro6.1" ]
-then
+elif [[ "${TOOLCHAIN}" == "df-linaro6.1" ]]; then
    TOOLCHAIN_VER="DF-LINARO6.1"
    TOOLCHAIN_DIR=Toolchains/Linaro/DF-6.1
 fi

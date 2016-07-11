@@ -9,13 +9,12 @@
 # Parameter 2: Experimental build (leave off if you want a release build)
 
 
-if [ "${1}" == "tcupdate" ]
-then
+if [ "${1}" == "tcupdate" ]; then
    . sync_toolchains.sh
 fi
+
 # If the third parameter exists
-if [[ -n ${2} ]]
-then
+if [[ -n ${2} ]]; then
    . elite.sh aosp ${3}
    . elite.sh uber4 ${3}
    . elite.sh uber5 ${3}

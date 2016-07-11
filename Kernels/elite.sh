@@ -22,8 +22,7 @@ RESTORE="\033[0m"
 # Parameter 2: Experimental build (leave off if you want a release build)
 TOOLCHAIN=${1}
 # Define EXPERIMENTAL if the third parameter exists
-if [[ -n ${2} ]]
-then
+if [[ -n ${2} ]]; then
    EXPERIMENTAL=${2}
 fi
 
@@ -41,8 +40,7 @@ SOURCEDIR=${ANDROIDDIR}/Kernels/Elite
 ZIMAGEDIR=${SOURCEDIR}/arch/arm64/boot
 AKDIR=${SOURCEDIR}/packagesm
 # If EXPERIMENTAL exists, we are doing an experimental build; change branch and upload location
-if [[ -n ${EXPERIMENTAL} ]]
-then
+if [[ -n ${EXPERIMENTAL} ]]; then
    ZIPMOVE=${HOME}/shared/Kernels/angler/Elite/Experimental
    BRANCH=Elite-exp
 else
@@ -51,48 +49,37 @@ else
 fi
 
 # Toolchain location and info
-if [ "${TOOLCHAIN}" == "aosp" ]
-then
+if [[ "${TOOLCHAIN}" == "aosp" ]]; then
    TOOLCHAIN_VER="AOSP4.9"
    TOOLCHAIN_DIR=Toolchains/AOSP
-elif [ "${TOOLCHAIN}" == "uber4" ]
-then
+elif [[ "${TOOLCHAIN}" == "uber4" ]]; then
    TOOLCHAIN_VER="UBER4.9"
    TOOLCHAIN_DIR=Toolchains/UBER/4.9
-elif [ "${TOOLCHAIN}" == "uber5" ]
-then
+elif [[ "${TOOLCHAIN}" == "uber5" ]]; then
    TOOLCHAIN_VER="UBER5.4"
    TOOLCHAIN_DIR=Toolchains/UBER/5.4
-elif [ "${TOOLCHAIN}" == "uber6" ]
-then
+elif [[ "${TOOLCHAIN}" == "uber6" ]]; then
    TOOLCHAIN_VER="UBER6.1"
    TOOLCHAIN_DIR=Toolchains/UBER/6.1
-elif [ "${TOOLCHAIN}" == "uber7" ]
-then
+elif [[ "${TOOLCHAIN}" == "uber7" ]]; then
    TOOLCHAIN_VER="UBER7.0"
    TOOLCHAIN_DIR=Toolchains/UBER/7.0
-elif [ "${TOOLCHAIN}" == "linaro4.9" ]
-then
+elif [[ "${TOOLCHAIN}" == "linaro4.9" ]]; then
    TOOLCHAIN_VER="LINARO4.9"
    TOOLCHAIN_DIR=Toolchains/Linaro/4.9
-elif [ "${TOOLCHAIN}" == "linaro5.4" ]
-then
+elif [[ "${TOOLCHAIN}" == "linaro5.4" ]]; then
    TOOLCHAIN_VER="LINARO5.4"
    TOOLCHAIN_DIR=Toolchains/Linaro/5.4
-elif [ "${TOOLCHAIN}" == "linaro6.1" ]
-then
+elif [[ "${TOOLCHAIN}" == "linaro6.1" ]]; then
    TOOLCHAIN_VER="LINARO6.1"
    TOOLCHAIN_DIR=Toolchains/Linaro/6.1
-elif [ "${TOOLCHAIN}" == "df-linaro4.9" ]
-then
+elif [[ "${TOOLCHAIN}" == "df-linaro4.9" ]]; then
    TOOLCHAIN_VER="DF-LINARO4.9"
    TOOLCHAIN_DIR=Toolchains/Linaro/DF-4.9
-elif [ "${TOOLCHAIN}" == "df-linaro5.4" ]
-then
+elif [[ "${TOOLCHAIN}" == "df-linaro5.4" ]]; then
    TOOLCHAIN_VER="DF-LINARO5.4"
    TOOLCHAIN_DIR=Toolchains/Linaro/DF-5.4
-elif [ "${TOOLCHAIN}" == "df-linaro6.1" ]
-then
+elif [[ "${TOOLCHAIN}" == "df-linaro6.1" ]]; then
    TOOLCHAIN_VER="DF-LINARO6.1"
    TOOLCHAIN_DIR=Toolchains/Linaro/DF-6.1
 fi
@@ -167,8 +154,7 @@ make mrproper
 
 # Setup the build
 cd ${SOURCEDIR}/arch/arm64/configs/BBKconfigsM
-for KERNELNAME in *
-do
+for KERNELNAME in *; do
 
 
 
@@ -213,8 +199,7 @@ done
 
 
 
-if [ `ls ${ZIMAGEDIR}/Image.gz-dtb 2>/dev/null | wc -l` != "0" ]
-then
+if [[ `ls ${ZIMAGEDIR}/Image.gz-dtb 2>/dev/null | wc -l` != "0" ]]; then
    BUILD_SUCCESS_STRING="BUILD SUCCESSFUL"
 
 
