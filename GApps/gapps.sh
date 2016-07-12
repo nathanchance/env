@@ -19,6 +19,10 @@ RST="\033[0m"
 # Parameters
 # ----------
 # Parameter 1: Which GApps to compile? (currently Banks or Pure Nexus Dynamic GApps)
+
+# Unassign personal flag
+PERSONAL=false
+
 if [[ "${1}" == "me" ]]; then
    PERSONAL=true
    TYPE=banks
@@ -133,8 +137,5 @@ echo -e ${RST}
 # Add line to compile log
 echo -e "`date +%H:%M:%S`: ${BASH_SOURCE} ${TYPE}" >> ${COMPILE_LOG}
 echo -e "${BUILD_RESULT_STRING} IN $(echo $((${END}-${START})) | awk '{print int($1/60)" MINUTES AND "int($1%60)" SECONDS"}')\n" >> ${COMPILE_LOG}
-
-# Unassign personal flag
-PERSONAL=false
 
 echo -e "\a"
