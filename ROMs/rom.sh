@@ -198,7 +198,9 @@ echo -e "----------------------"
 echo -e ${RST}
 echo -e ""
 
-if [[ "${ROM}" == "pn" && ${MOD} = true && ${OMS} = false ]]; then
+if [[ ${PERSONAL} = true ]]; then
+   repo init -u https://github.com/ezio84/pnmod-manifest.git -b mm2
+elif [[ "${ROM}" == "pn" && ${MOD} = true && ${OMS} = false ]]; then
    repo init -u https://github.com/ezio84/pnmod-manifest.git -b mm2
 elif [[ "${ROM}" == "pn" && ${MOD} = true && ${OMS} = true ]]; then
    repo init -u https://github.com/ezio84/pnmod-manifest.git -b mm2oms
