@@ -22,6 +22,15 @@
 # Parameter 1: ROM to build (currently AICP, AOSiP, Dirty Unicorns, Pure Nexus [Mod], ResurrectionRemix, and Screw'd)
 # Parameter 2: Device (eg. angler, bullhead, shamu)
 # Parameter 3: Pure Nexus Mod/OMS or a personalized Dirty Unicorns build (omit if neither applies)
+
+# Unassign flags and reset DU_BUILD_TYPE
+export DU_BUILD_TYPE=CHANCELLOR
+PERSON=
+MOD=false
+TEST=false
+PERSONAL=false
+OMS=false
+
 if [[ "${1}" == "me" ]]; then
    PERSONAL=true
    DEVICE=angler
@@ -407,15 +416,5 @@ else
 fi
 
 echo -e "${BUILD_RESULT_STRING} IN $(echo $((${END}-${START})) | awk '{print int($1/60)" MINUTES AND "int($1%60)" SECONDS"}')\n" >> ${COMPILE_LOG}
-
-
-
-# Unassign flags and reset DU_BUILD_TYPE
-export DU_BUILD_TYPE=CHANCELLOR
-PERSON=
-MOD=false
-TEST=false
-PERSONAL=false
-OMS=false
 
 echo -e "\a"
