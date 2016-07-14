@@ -144,20 +144,20 @@ function compile {
       fi
 
       cd ${ANYKERNEL_DIR}
-      rm -rf ${KERNEL}
-      rm -rf ${DTBIMAGE}
+      rm -rf ${KERNEL} > /dev/null 2>&1
+      rm -rf ${DTBIMAGE} > /dev/null 2>&1
       git checkout ${AK_BRANCH}
       git reset --hard origin/${AK_BRANCH}
-      git clean -f -d -x
-      git pull
+      git clean -f -d -x > /dev/null 2>&1
+      git pull > /dev/null 2>&1
 
       echo
 
       cd ${KERNEL_DIR}
-      git checkout ${KER_BRANCH}
-      git reset --hard origin/${KER_BRANCH}
-      git clean -f -d -x
-      git pull
+      git checkout ${KER_BRANCH} > /dev/null 2>&1
+      git reset --hard origin/${KER_BRANCH} > /dev/null 2>&1
+      git clean -f -d -x > /dev/null 2>&1
+      git pull > /dev/null 2>&1
       make clean
       make mrproper
    }
