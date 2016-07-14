@@ -168,8 +168,7 @@ function compile {
       cd ${KERNEL_DIR}
 
       if [[ ${PERMISSIVE} = true ]]; then
-         git fetch https://github.com/nathanchance/elite_angler.git
-         git cherry-pick dec83f85e94af847184895fd7553e1b720a99a11
+         git cherry-pick ba804bd138aa89dbe2f2fc73fd751af60a831097
          if [[ PERSONAL = false ]]; then
             ZIP_MOVE=${HOME}/shared/Kernels/angler/AK/Permissive
          fi
