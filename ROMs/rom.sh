@@ -324,7 +324,7 @@ function compile() {
 
 
       # Go back home
-      echoTest "GOING HOME"
+      echoText "GOING HOME"
 
       cd ${HOME}
 
