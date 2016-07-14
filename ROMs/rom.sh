@@ -54,7 +54,6 @@ function compile() {
    if [[ "${1}" == "me" ]]; then
       PERSONAL=true
       DEVICE=angler
-      OMS=false
 
    else
       ROM=${1}
@@ -213,7 +212,7 @@ function compile() {
    echoText "SYNCING LATEST SOURCES"; newLine
 
    if [[ ${PERSONAL} = true ]]; then
-      repo init -u https://github.com/ezio84/pnmod-manifest.git -b mm2
+      repo init -u https://github.com/ezio84/pnmod-manifest.git -b mm2oms
    elif [[ "${ROM}" == "pn" ]]; then
       repo init -u ${REPO_URL} -b ${REPO_BRANCH}
    fi
@@ -289,7 +288,7 @@ function compile() {
       # Remove existing files in ZIPMOVE
       newLine; echoText "CLEANING ZIPMOVE DIRECTORY"
 
-      if [[ ${ROM} == "pn" && ${MOD} = true && ${OMS} = false && ${DEVICE} == "angler" && ${PERSONAL} = false ]]; then
+      if [[ ${ROM} == "pn" && ${MOD} = true && ${OMS} = true && ${DEVICE} == "angler" && ${PERSONAL} = false ]]; then
          rm -vrf ${HOME}/shared/.me/*${ZIPFORMAT}*
       fi
 
@@ -300,7 +299,7 @@ function compile() {
       # Copy new files to ZIPMOVE
       echoText "MOVING FILES TO ZIPMOVE DIRECTORY"; newLine
 
-      if [[ ${ROM} == "pn" && ${MOD} = true && ${OMS} = false && ${DEVICE} == "angler" && ${PERSONAL} = false ]]; then
+      if [[ ${ROM} == "pn" && ${MOD} = true && ${OMS} = true && ${DEVICE} == "angler" && ${PERSONAL} = false ]]; then
          cp -v ${OUTDIR}/*${ZIPFORMAT}* ${HOME}/shared/.me
       fi
 
