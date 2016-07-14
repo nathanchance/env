@@ -13,16 +13,13 @@ if [ "${1}" == "tcupdate" ]; then
    . sync_toolchains.sh
 fi
 
+TOOLCHAINS="aosp uber4 uber5 uber6 uber7 linaro4.9 linaro5.4 linaro6.1 df-linaro4.9 df-linaro5.4 df-linaro6.1"
+
 # If the third parameter exists
 if [[ -n ${2} ]]; then
-   . elite.sh aosp ${3}
-   . elite.sh uber4 ${3}
-   . elite.sh uber5 ${3}
-   . elite.sh uber6 ${3}
-   . elite.sh uber7 ${3}
-   . elite.sh linaro4.9 ${3}
-   . elite.sh linaro5.4 ${3}
-   . elite.sh linaro6.1 ${3}
+   for TOOLCHAIN in ${TOOLCHAINS}; do
+      . elite.sh ${TOOLCHAIN} ${2}
+   done
 else
    . elite.sh linaro4.9
    . elite.sh aosp
