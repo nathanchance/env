@@ -3,7 +3,7 @@
 # -----
 # Usage
 # -----
-# $ . kylo.sh <toolchain>
+# $ . kylo.sh <toolchain> <tcupdate>
 
 
 
@@ -256,10 +256,13 @@ function compile() {
 }
 
 if [[ "${1}" == "all" ]]; then
-   TOOLCHAINS="aosp uber4 uber5 uber6 uber7 linaro4.9 linaro5.4 linaro6.1 df-linaro4.9 df-linaro5.4 df-linaro6.1"
+   if [[ "${2}" == "tcupdate" ]]; then
+      . sync_toolchains.sh
+   fi
 
    compile me
 
+   TOOLCHAINS="aosp uber4 uber5 uber6 uber7 linaro4.9 linaro5.4 linaro6.1 df-linaro4.9 df-linaro5.4 df-linaro6.1"
    for TOOLCHAIN in ${TOOLCHAINS}; do
       compile ${TOOLCHAIN}
    done
