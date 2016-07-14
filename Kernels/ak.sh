@@ -23,8 +23,8 @@ function compile {
    # TOOLCHAIN: Toolchain to compile with
    # PERMISSIVE: Force kernel to be permissive
    # Free flags
-   PERSONAL=
-   PERMISSIVE=
+   PERSONAL=false
+   PERMISSIVE=false
 
    # Set USER and HOST variables back to what they are in .bashrc
    export KBUILD_BUILD_USER=nathan
@@ -68,10 +68,11 @@ function compile {
       fi
    fi
 
-   if [[ -n ${PERSONAL} ]]; then
+   if [[ ${PERSONAL} = true ]]; then
       TOOLCHAIN_DIR=Toolchains/Linaro/DF-6.1
       AK_VER="AK.066-5"
       ZIP_MOVE=${HOME}/shared/.me
+      PERMISSIVE=true
       export KBUILD_BUILD_USER=nathan
       export KBUILD_BUILD_HOST=phoenix
 
@@ -169,7 +170,9 @@ function compile {
       if [[ ${PERMISSIVE} = true ]]; then
          git fetch https://github.com/nathanchance/elite_angler.git
          git cherry-pick dec83f85e94af847184895fd7553e1b720a99a11
-         ZIP_MOVE=${HOME}/shared/Kernels/angler/AK/Permissive
+         if [[ PERSONAL = false ]]; then
+            ZIP_MOVE=${HOME}/shared/Kernels/angler/AK/Permissive
+         fi
       fi
 
       if [[ ${PERSONAL} = true ]]; then
