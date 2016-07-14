@@ -3,7 +3,7 @@
 # -----
 # Usage
 # -----
-# $ . phasma.sh <update|noupdate> <toolchain>
+# $ . phasma.sh <toolchain>
 
 
 
@@ -21,8 +21,7 @@ RESTORE="\033[0m"
 # ----------
 # FETCHUPSTREAM: Whether or not to fetch new Phasma updates
 # TOOLCHAIN: Toolchain to compile with
-FETCHUPSTREAM=${1}
-TOOLCHAIN=${2}
+TOOLCHAIN=${1}
 
 
 
@@ -46,40 +45,43 @@ KERNEL="Image.gz-dtb"
 DEFCONFIG="phasma_defconfig"
 BASE_PHASMA_VER="Phasma"
 VER=".R20.M.bullhead."
-if [[ "${TOOLCHAIN}" == "aosp" ]]; then
-   TOOLCHAIN_VER="AOSP4.9"
-   TOOLCHAIN_DIR=Toolchains/AOSP
-elif [[ "${TOOLCHAIN}" == "uber4" ]]; then
-   TOOLCHAIN_VER="UBER4.9"
-   TOOLCHAIN_DIR=Toolchains/UBER/4.9
-elif [[ "${TOOLCHAIN}" == "uber5" ]]; then
-   TOOLCHAIN_VER="UBER5.4"
-   TOOLCHAIN_DIR=Toolchains/UBER/5.4
-elif [[ "${TOOLCHAIN}" == "uber6" ]]; then
-   TOOLCHAIN_VER="UBER6.1"
-   TOOLCHAIN_DIR=Toolchains/UBER/6.1
-elif [[ "${TOOLCHAIN}" == "uber7" ]]; then
-   TOOLCHAIN_VER="UBER7.0"
-   TOOLCHAIN_DIR=Toolchains/UBER/7.0
-elif [[ "${TOOLCHAIN}" == "linaro4.9" ]]; then
-   TOOLCHAIN_VER="LINARO4.9"
-   TOOLCHAIN_DIR=Toolchains/Linaro/4.9
-elif [[ "${TOOLCHAIN}" == "linaro5.4" ]]; then
-   TOOLCHAIN_VER="LINARO5.4"
-   TOOLCHAIN_DIR=Toolchains/Linaro/5.4
-elif [[ "${TOOLCHAIN}" == "linaro6.1" ]]; then
-   TOOLCHAIN_VER="LINARO6.1"
-   TOOLCHAIN_DIR=Toolchains/Linaro/6.1
-elif [[ "${TOOLCHAIN}" == "df-linaro4.9" ]]; then
-   TOOLCHAIN_VER="DF-LINARO4.9"
-   TOOLCHAIN_DIR=Toolchains/Linaro/DF-4.9
-elif [[ "${TOOLCHAIN}" == "df-linaro5.4" ]]; then
-   TOOLCHAIN_VER="DF-LINARO5.4"
-   TOOLCHAIN_DIR=Toolchains/Linaro/DF-5.4
-elif [[ "${TOOLCHAIN}" == "df-linaro6.1" ]]; then
-   TOOLCHAIN_VER="DF-LINARO6.1"
-   TOOLCHAIN_DIR=Toolchains/Linaro/DF-6.1
-fi
+
+case "${TOOLCHAIN}" in
+   "aosp")
+      TOOLCHAIN_VER="AOSP4.9"
+      TOOLCHAIN_DIR=Toolchains/AOSP ;;
+   "uber4")
+      TOOLCHAIN_VER="UBER4.9"
+      TOOLCHAIN_DIR=Toolchains/UBER/4.9 ;;
+   "uber5")
+      TOOLCHAIN_VER="UBER5.4"
+      TOOLCHAIN_DIR=Toolchains/UBER/5.4 ;;
+   "uber6")
+      TOOLCHAIN_VER="UBER6.1"
+      TOOLCHAIN_DIR=Toolchains/UBER/6.1 ;;
+   "uber7")
+      TOOLCHAIN_VER="UBER7.0"
+      TOOLCHAIN_DIR=Toolchains/UBER/7.0 ;;
+   "linaro4.9")
+      TOOLCHAIN_VER="LINARO4.9"
+      TOOLCHAIN_DIR=Toolchains/Linaro/4.9 ;;
+   "linaro5.4")
+      TOOLCHAIN_VER="LINARO5.4"
+      TOOLCHAIN_DIR=Toolchains/Linaro/5.4 ;;
+   "linaro6.1")
+      TOOLCHAIN_VER="LINARO6.1"
+      TOOLCHAIN_DIR=Toolchains/Linaro/6.1 ;;
+   "df-linaro4.9")
+      TOOLCHAIN_VER="DF-LINARO4.9"
+      TOOLCHAIN_DIR=Toolchains/Linaro/DF-4.9 ;;
+   "df-linaro5.4")
+      TOOLCHAIN_VER="DF-LINARO5.4"
+      TOOLCHAIN_DIR=Toolchains/Linaro/DF-5.4 ;;
+   "df-linaro6.1")
+      TOOLCHAIN_VER="DF-LINARO6.1"
+      TOOLCHAIN_DIR=Toolchains/Linaro/DF-6.1 ;;
+esac
+
 PHASMA_VER="${BASE_PHASMA_VER}${VER}${TOOLCHAIN_VER}"
 
 
@@ -175,17 +177,15 @@ clean_all
 
 # Update the git
 echo -e ""
-if [ "${FETCHUPSTREAM}" == "update" ]
-then
-   echo -e ${RED}
-   echo -e "----------------"
-   echo -e "UPDATING SOURCES"
-   echo -e "----------------"
-   echo -e ${RESTORE}
+echo -e ${RED}
+echo -e "----------------"
+echo -e "UPDATING SOURCES"
+echo -e "----------------"
+echo -e ${RESTORE}
 
-   git pull
-   echo -e ""
-fi
+git pull
+echo -e ""
+
 
 
 
