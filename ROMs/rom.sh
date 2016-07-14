@@ -245,6 +245,11 @@ function compile() {
       cd ${SOURCEDIR}
       # I want to make sure the picks went through okay
       sleep 10
+   elif [[ ${PERSONAL} = true ]] || [[ "${ROM}" == "pn" && ${MOD} = true && ${OMS} = true ]]; then
+      # Inline Masquerade until Ezio adds it to the default manifest
+      cd ${SOURCEDIR}/vendor/nexus
+      git fetch https://github.com/nathanchance/purenexus_vendor_nexus.git mm2oms
+      git cherry-pick b1cd72b1cf845d8a51840450aad330183174ad9d
    fi
 
 
