@@ -169,7 +169,7 @@ function compile {
 
       if [[ ${PERMISSIVE} = true ]]; then
          git cherry-pick ba804bd138aa89dbe2f2fc73fd751af60a831097
-         if [[ PERSONAL = false ]]; then
+         if [[ ${PERSONAL} = false ]]; then
             ZIP_MOVE=${HOME}/shared/Kernels/angler/AK/Permissive
          fi
       fi
