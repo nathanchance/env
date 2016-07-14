@@ -3,7 +3,7 @@
 # -----
 # Usage
 # -----
-# $ . rom.sh <me|rom> <device> <mod|person>
+# $ . rom.sh <me|rom> <device> <oms|mod|person> <oms>
 
 
 
@@ -16,405 +16,367 @@
 
 
 
-# ----------
-# Parameters
-# ----------
-# Parameter 1: ROM to build (currently AICP, AOSiP, Dirty Unicorns, Pure Nexus [Mod], ResurrectionRemix, and Screw'd)
-# Parameter 2: Device (eg. angler, bullhead, shamu)
-# Parameter 3: Pure Nexus Mod/OMS or a personalized Dirty Unicorns build (omit if neither applies)
+# ---------
+# Functions
+# ---------
 
-# Unassign flags and reset DU_BUILD_TYPE
-export DU_BUILD_TYPE=CHANCELLOR
-PERSON=
-MOD=false
-TEST=false
-PERSONAL=false
-OMS=false
+function echoText() {
+   RED="\033[01;31m"
+   RST="\033[0m"
 
-if [[ "${1}" == "me" ]]; then
-   PERSONAL=true
-   DEVICE=angler
+   echo -e ${RED}
+   echo -e "$( for i in `seq ${#1}`; do echo -e "-\c"; done )"
+   echo -e "${1}"
+   echo -e "$( for i in `seq ${#1}`; do echo -e "-\c"; done )"
+   echo -e ${RST}
+}
+
+function newLine() {
+   echo -e ""
+}
+
+function compile() {
+   # ----------
+   # Parameters
+   # ----------
+   # Parameter 1: ROM to build (currently AICP, AOSiP, Dirty Unicorns, Pure Nexus [Mod], ResurrectionRemix, and Screw'd)
+   # Parameter 2: Device (eg. angler, bullhead, shamu)
+   # Parameter 3: Pure Nexus Mod/OMS or a personalized Dirty Unicorns build (omit if neither applies)
+
+   # Unassign flags and reset DU_BUILD_TYPE
+   export DU_BUILD_TYPE=CHANCELLOR
+   PERSON=
+   MOD=false
+   TEST=false
+   PERSONAL=false
    OMS=false
 
-else
-   ROM=${1}
-
-   # If the ROM is RR, its device is only Shamu
-   if [[ "${ROM}" == "rr" ]]; then
-      DEVICE=shamu
+   if [[ "${1}" == "me" ]]; then
+      PERSONAL=true
+      DEVICE=angler
+      OMS=false
 
    else
-      DEVICE=${2}
+      ROM=${1}
 
-      # If there is a third parameter
-      if [[ -n ${3} ]]; then
-         # And it's DU, we are running a personalized build
-         if [[ "${ROM}" == "du" ]]; then
+      # If the ROM is RR, its device is only Shamu
+      if [[ "${ROM}" == "rr" ]]; then
+         DEVICE=shamu
 
-            PERSON=${3}
+      else
+         DEVICE=${2}
 
-            # Add custom build tag
-            if [[ "${PERSON}" == "alcolawl" ]]; then
-               export DU_BUILD_TYPE=ALCOLAWL
-            elif [[ "${PERSON}" == "bre" ]]; then
-               export DU_BUILD_TYPE=BREYANA
-            elif [[ "${PERSON}" == "drew" ]]; then
-               export DU_BUILD_TYPE=DREW
-            elif [[ "${PERSON}" == "hmhb" ]]; then
-               export DU_BUILD_TYPE=DIRTY-DEEDS
-            elif [[ "${PERSON}" == "jdizzle" ]]; then
-               export DU_BUILD_TYPE=NINJA
-            fi
-         fi
+         # If there is a third parameter
+         if [[ -n ${3} ]]; then
+            # And it's DU, we are running a personalized build
+            case "${ROM}" in
+               "du")
+                  case "${3}" in
+                     "alcolawl")
+                        export DU_BUILD_TYPE=ALCOLAWL ;;
+                     "bre")
+                        export DU_BUILD_TYPE=BREYANA ;;
+                     "drew")
+                        export DU_BUILD_TYPE=DREW ;;
+                     "hmhb")
+                        export DU_BUILD_TYPE=DIRTY-DEEDS ;;
+                     "jdizzle")
+                        export DU_BUILD_TYPE=NINJA ;;
+                  esac ;;
 
-         # And it's PN, we are running either a Mod, test, or OMS build; if there is a 4th parameter, it is a Mod OMS build
-         if [[ "${ROM}" == "pn" ]]; then
-            if [[ "${3}" == "mod" ]]; then
-               MOD=true
-               if [[ -n ${4} && "${4}" == "oms" ]]; then
-                  OMS=true
-               fi
-            elif [[ "${3}" == "test" ]]; then
-               TEST=true
-            elif [[ "${3}" == "oms" ]]; then
-               OMS=true
-            fi
+               # And it's PN, we are running either a Mod, test, or OMS build; if there is a 4th parameter, it is a Mod OMS build
+               "pn")
+                  case "${3}" in
+                     "mod")
+                        MOD=true
+                        if [[ -n ${4} && "${4}" == "oms" ]]; then
+                           OMS=true
+                        fi ;;
+                     "test")
+                        TEST=true ;;
+                     "oms")
+                        OMS=true ;;
+                  esac ;;
+            esac
          fi
       fi
    fi
-fi
 
 
 
-# ---------
-# Variables
-# ---------
-# ANDROIDDIR: Directory that holds all of the Android files (currently my home directory)
-# OUTDIR: Output directory of completed ROM zip after compilation
-# SOURCEDIR: Directory that holds the ROM source
-# ZIPMOVE: Directory to hold completed ROM zips
-# ZIPFORMAT: The format of the zip file in the out directory for moving to ZIPMOVE
-ANDROIDDIR=${HOME}
+   # ---------
+   # Variables
+   # ---------
+   # ANDROIDDIR: Directory that holds all of the Android files (currently my home directory)
+   # OUTDIR: Output directory of completed ROM zip after compilation
+   # SOURCEDIR: Directory that holds the ROM source
+   # ZIPMOVE: Directory to hold completed ROM zips
+   # ZIPFORMAT: The format of the zip file in the out directory for moving to ZIPMOVE
+   ANDROIDDIR=${HOME}
 
-if [[ ${PERSONAL} = true ]]; then
-   SOURCEDIR=${ANDROIDDIR}/ROMs/PN-Mod
-   ZIPMOVE=${HOME}/shared/.me
-   ZIPFORMAT=pure_nexus_${DEVICE}-*.zip
-
-else
-   if [[ "${ROM}" == "aicp" ]]; then
-      SOURCEDIR=${ANDROIDDIR}/ROMs/AICP
-      ZIPMOVE=${HOME}/shared/ROMs/AICP/${DEVICE}
-      ZIPFORMAT=aicp_${DEVICE}_mm*.zip
-
-   elif [[ "${ROM}" == "aosip" ]]; then
-      SOURCEDIR=${ANDROIDDIR}/ROMs/AOSiP
-      ZIPMOVE=${HOME}/shared/ROMs/AOSiP/${DEVICE}
-      ZIPFORMAT=AOSiP-*-${DEVICE}-*.zip
-
-   elif [[ "${ROM}" == "du" && -z ${PERSON} ]]; then
-      SOURCEDIR=${ANDROIDDIR}/ROMs/DU
-      ZIPMOVE=${HOME}/shared/ROMs/"Dirty Unicorns"/${DEVICE}
-      ZIPFORMAT=DU_${DEVICE}_*.zip
-
-   elif [[ "${ROM}" == "du" && -n ${PERSON} ]]; then
-      SOURCEDIR=${ANDROIDDIR}/ROMs/DU
-      ZIPMOVE=${HOME}/shared/ROMs/.special/.${PERSON}
-      ZIPFORMAT=DU_${DEVICE}_*.zip
-
-   elif [[ "${ROM}" == "pn" ]]; then
+   if [[ ${PERSONAL} = true ]]; then
+      SOURCEDIR=${ANDROIDDIR}/ROMs/PN-Mod
+      ZIPMOVE=${HOME}/shared/.me
       ZIPFORMAT=pure_nexus_${DEVICE}-*.zip
 
-      if [[ ${MOD} = true ]]; then
-         SOURCEDIR=${ANDROIDDIR}/ROMs/PN-Mod
-      else
-         SOURCEDIR=${ANDROIDDIR}/ROMs/PN
-      fi
+   else
+      case "${ROM}" in
+         "aicp")
+            SOURCEDIR=${ANDROIDDIR}/ROMs/AICP
+            ZIPMOVE=${HOME}/shared/ROMs/AICP/${DEVICE}
+            ZIPFORMAT=aicp_${DEVICE}_mm*.zip ;;
+         "aosip")
+            SOURCEDIR=${ANDROIDDIR}/ROMs/AOSiP
+            ZIPMOVE=${HOME}/shared/ROMs/AOSiP/${DEVICE}
+            ZIPFORMAT=AOSiP-*-${DEVICE}-*.zip ;;
+         "du")
+            if [[ -n ${PERSON} ]]; then
+               SOURCEDIR=${ANDROIDDIR}/ROMs/DU
+               ZIPMOVE=${HOME}/shared/ROMs/.special/.${PERSON}
+               ZIPFORMAT=DU_${DEVICE}_*.zip
+            else
+               SOURCEDIR=${ANDROIDDIR}/ROMs/DU
+               ZIPMOVE=${HOME}/shared/ROMs/"Dirty Unicorns"/${DEVICE}
+               ZIPFORMAT=DU_${DEVICE}_*.zip
+            fi ;;
+         "pn")
+            ZIPFORMAT=pure_nexus_${DEVICE}-*.zip
 
-      if [[ ${MOD} = true && ${OMS} = false ]]; then
-         ZIPMOVE=${HOME}/shared/ROMs/"Pure Nexus Mod"/${DEVICE}
-      elif [[ ${MOD} = true && ${OMS} = true ]]; then
-         ZIPMOVE=${HOME}/shared/ROMs/"Pure Nexus Mod"/.oms/${DEVICE}
-      elif [[ ${OMS} = true && ${MOD} = false ]]; then
-         ZIPMOVE=${HOME}/shared/ROMs/"Pure Nexus"/.oms/${DEVICE}
-      elif [[ ${TEST} = true ]]; then
-         ZIPMOVE=${HOME}/shared/ROMs/"Pure Nexus"/.tests/${DEVICE}
-      else
-         ZIPMOVE=${HOME}/shared/ROMs/"Pure Nexus"/${DEVICE}
-      fi
+            if [[ ${MOD} = true ]]; then
+               SOURCEDIR=${ANDROIDDIR}/ROMs/PN-Mod
+            else
+               SOURCEDIR=${ANDROIDDIR}/ROMs/PN
+            fi
 
-   elif [[ "${ROM}" == "rr" ]]; then
-      SOURCEDIR=${ANDROIDDIR}/ROMs/RR
-      ZIPMOVE=${HOME}/shared/ROMs/ResurrectionRemix/${DEVICE}
-      ZIPFORMAT=ResurrectionRemix*-${DEVICE}.zip
-
-   elif [[ "${ROM}" == "screwd" ]]; then
-      SOURCEDIR=${ANDROIDDIR}/ROMs/Screwd
-      ZIPMOVE=${HOME}/shared/ROMs/"Screw'd"/${DEVICE}
-      ZIPFORMAT=screwd-*${SCREWD_BUILD_TYPE}*.zip
+            case "${MOD}:${OMS}" in
+               "true:true")
+                  ZIPMOVE=${HOME}/shared/ROMs/"Pure Nexus Mod"/.oms/${DEVICE}
+                  REPO_URL=https://github.com/ezio84/pnmod-manifest.git
+                  REPO_BRANCH=mm2oms ;;
+               "true:false")
+                  ZIPMOVE=${HOME}/shared/ROMs/"Pure Nexus Mod"/${DEVICE}
+                  REPO_URL=https://github.com/ezio84/pnmod-manifest.git
+                  REPO_BRANCH=mm2 ;;
+               "false:true")
+                  ZIPMOVE=${HOME}/shared/ROMs/"Pure Nexus"/.oms/${DEVICE}
+                  REPO_URL=https://github.com/PureNexusProject/manifest.git
+                  REPO_BRANCH=oms ;;
+               "false:false")
+                  REPO_URL=https://github.com/PureNexusProject/manifest.git
+                  REPO_BRANCH=mm2
+                  if [[ ${TEST} = true ]]; then
+                     ZIPMOVE=${HOME}/shared/ROMs/"Pure Nexus"/.tests/${DEVICE}
+                  else
+                     ZIPMOVE=${HOME}/shared/ROMs/"Pure Nexus"/${DEVICE}
+                  fi ;;
+            esac ;;
+         "rr")
+            SOURCEDIR=${ANDROIDDIR}/ROMs/RR
+            ZIPMOVE=${HOME}/shared/ROMs/ResurrectionRemix/${DEVICE}
+            ZIPFORMAT=ResurrectionRemix*-${DEVICE}.zip ;;
+         "screwd")
+            SOURCEDIR=${ANDROIDDIR}/ROMs/Screwd
+            ZIPMOVE=${HOME}/shared/ROMs/"Screw'd"/${DEVICE}
+            ZIPFORMAT=screwd-*${SCREWD_BUILD_TYPE}*.zip ;;
+      esac
    fi
-fi
 
-OUTDIR=${SOURCEDIR}/out/target/product/${DEVICE}
-
-
-
-# ------
-# Colors
-# ------
-RED="\033[01;31m"
-RST="\033[0m"
+   OUTDIR=${SOURCEDIR}/out/target/product/${DEVICE}
 
 
 
-# Export the COMPILE_LOG variable for other files to use (I currently handle this via .bashrc)
-# export LOGDIR=${ANDROIDDIR}/Logs
-# export COMPILE_LOG=${LOGDIR}/compile_log_`date +%m_%d_%y`.log
+   # Export the COMPILE_LOG variable for other files to use (I currently handle this via .bashrc)
+   # export LOGDIR=${ANDROIDDIR}/Logs
+   # export COMPILE_LOG=${LOGDIR}/compile_log_`date +%m_%d_%y`.log
 
 
 
-# Clear the terminal
-clear
+   # Clear the terminal
+   clear
 
 
 
-# Start tracking time
-echo -e ${RED}
-echo -e "---------------------------------------"
-echo -e "SCRIPT STARTING AT $(date +%D\ %r)"
-echo -e "---------------------------------------"
-echo -e ${RST}
+   # Start tracking time
+   echoText "SCRIPT STARTING AT $(date +%D\ %r)"
 
-START=$(date +%s)
+   START=$(date +%s)
 
 
 
-# Change to the source directory
-echo -e ${RED}
-echo -e "--------------------------"
-echo -e "MOVING TO SOURCE DIRECTORY"
-echo -e "--------------------------"
-echo -e ${RST}
+   # Change to the source directory
+   echoText "MOVING TO SOURCE DIRECTORY"
 
-cd ${SOURCEDIR}
-
-
-
-echo -e ${RED}
-echo -e "----------------------"
-echo -e "SYNCING LATEST SOURCES"
-echo -e "----------------------"
-echo -e ${RST}
-echo -e ""
-
-if [[ ${PERSONAL} = true ]]; then
-   repo init -u https://github.com/ezio84/pnmod-manifest.git -b mm2
-elif [[ "${ROM}" == "pn" && ${MOD} = true && ${OMS} = false ]]; then
-   repo init -u https://github.com/ezio84/pnmod-manifest.git -b mm2
-elif [[ "${ROM}" == "pn" && ${MOD} = true && ${OMS} = true ]]; then
-   repo init -u https://github.com/ezio84/pnmod-manifest.git -b mm2oms
-elif [[ "${ROM}" == "pn" && ${MOD} = false && ${OMS} = true ]]; then
-   repo init -u https://github.com/PureNexusProject/manifest.git -b oms
-elif [[ "${ROM}" == "pn" && ${MOD} = false && ${OMS} = false ]]; then
-   repo init -u https://github.com/PureNexusProject/manifest.git -b mm2
-fi
-
-repo sync --force-sync
-
-
-
-if [[ "${ROM}" ==  "rr" ]]; then
-   # I could fork these repos and do the changes in there permanently but I don't want to have to maintains anything extra
-   echo -e ${RED}
-   echo -e "---------------------------------------"
-   echo -e "PICKING EXTRA COMMITS AND ADDING KA-MOD"
-   echo -e "---------------------------------------"
-   echo -e ${RST}
-   echo -e ""
-
-   # 1. Change DESOLATED to KBUILD_BUILD_HOST and allow kernel to be compiled with UBER 6.1
-   cd ${SOURCEDIR}/kernel/moto/shamu
-   git fetch https://github.com/nathanchance/B14CKB1RD_Kernel_N6.git
-   git cherry-pick 20f83cadace94da9b711ebb53661b1682885888a
-   # 2. Change from shamu_defconfig to B14CKB1RD_defconfig
-   cd ${SOURCEDIR}/device/moto/shamu
-   git fetch https://github.com/nathanchance/android_device_moto_shamu.git
-   git cherry-pick 0d2c6f3bdfe6e78b9b8036471dd3dcb6945fbb51
-   # 3. Stop per app overlays from being reset (thanks @bigrushdog)
-   cd ${SOURCEDIR}/packages/apps/ThemeChooser
-   git fetch https://github.com/nathanchance/android_packages_apps_ThemeChooser.git
-   git cherry-pick 1cefd98f7ac5db31754a8f7ee1fd62f3ac897b71
-   # 4. Add @Yoinx's Kernel Adiutor-Mod instead of the regular Kernel Adiutor (to complement Blackbird)
-   cd ${SOURCEDIR}/vendor/cm/prebuilt/KernelAdiutor
-   rm -rf KernelAdiutor.apk
-   wget https://github.com/yoinx/kernel_adiutor/raw/master/download/app/app-release.apk
-   mv app-release.apk KernelAdiutor.apk
    cd ${SOURCEDIR}
-   # I want to make sure the picks went through okay
-   sleep 10
-fi
-
-
-# Setup the build environment
-echo -e ${RED}
-echo -e "----------------------------"
-echo -e "SETTING UP BUILD ENVIRONMENT"
-echo -e "----------------------------"
-echo -e ${RST}
-echo -e ""
-
-. build/envsetup.sh
 
 
 
-# Prepare device
-echo -e ${RED}
-echo -e "----------------"
-echo -e "PREPARING DEVICE"
-echo -e "----------------"
-echo -e ${RST}
-echo -e ""
+   echoText "SYNCING LATEST SOURCES"; newLine
 
-if [[ "${ROM}" == "screwd" ]]; then
-   lunch screwd_${DEVICE}-userdebug
-else
-   breakfast ${DEVICE}
-fi
-
-
-# Clean up
-echo -e ${RED}
-echo -e "-------------------------"
-echo -e "CLEANING UP OUT DIRECTORY"
-echo -e "-------------------------"
-echo -e ${RST}
-echo -e ""
-
-mka clobber
-
-
-
-# Start building
-echo -e ${RED}
-echo -e "---------------"
-echo -e "MAKING ZIP FILE"
-echo -e "---------------"
-echo -e ${RST}
-echo -e ""
-
-time mka bacon
-
-
-
-# If the compilation was successful
-if [[ `ls ${OUTDIR}/${ZIPFORMAT} 2>/dev/null | wc -l` != "0" ]]; then
-   BUILD_RESULT_STRING="BUILD SUCCESSFUL"
-
-
-
-   # Remove existing files in ZIPMOVE
-   echo -e ""
-   echo -e ${RED}
-   echo -e "--------------------------"
-   echo -e "CLEANING ZIPMOVE DIRECTORY"
-   echo -e "--------------------------"
-   echo -e ${RST}
-
-   if [[ ${ROM} == "pn" && ${MOD} = true && ${OMS} = false && ${DEVICE} == "angler" && ${PERSONAL} = false ]]; then
-      rm -vrf ${HOME}/shared/.me/*${ZIPFORMAT}*
+   if [[ ${PERSONAL} = true ]]; then
+      repo init -u https://github.com/ezio84/pnmod-manifest.git -b mm2
+   elif [[ "${ROM}" == "pn" ]]; then
+      repo init -u ${REPO_URL} -b ${REPO_BRANCH}
    fi
 
-   rm -vrf "${ZIPMOVE}"/*${ZIPFORMAT}*
+   repo sync --force-sync
 
 
+   if [[ "${ROM}" ==  "rr" ]]; then
+      # I could fork these repos and do the changes in there permanently but I don't want to have to maintains anything extra
 
-   # Copy new files to ZIPMOVE
-   echo -e ${RED}
-   echo -e "---------------------------------"
-   echo -e "MOVING FILES TO ZIPMOVE DIRECTORY"
-   echo -e "---------------------------------"
-   echo -e ${RST}
-   echo -e ""
+      echo -e ""
 
-   if [[ ${ROM} == "pn" && ${MOD} = true && ${OMS} = false && ${DEVICE} == "angler" && ${PERSONAL} = false ]]; then
-      cp -v ${OUTDIR}/*${ZIPFORMAT}* ${HOME}/shared/.me
+      # 1. Change DESOLATED to KBUILD_BUILD_HOST and allow kernel to be compiled with UBER 6.1
+      cd ${SOURCEDIR}/kernel/moto/shamu
+      git fetch https://github.com/nathanchance/B14CKB1RD_Kernel_N6.git
+      git cherry-pick 20f83cadace94da9b711ebb53661b1682885888a
+      # 2. Change from shamu_defconfig to B14CKB1RD_defconfig
+      cd ${SOURCEDIR}/device/moto/shamu
+      git fetch https://github.com/nathanchance/android_device_moto_shamu.git
+      git cherry-pick 0d2c6f3bdfe6e78b9b8036471dd3dcb6945fbb51
+      # 3. Stop per app overlays from being reset (thanks @bigrushdog)
+      cd ${SOURCEDIR}/packages/apps/ThemeChooser
+      git fetch https://github.com/nathanchance/android_packages_apps_ThemeChooser.git
+      git cherry-pick 1cefd98f7ac5db31754a8f7ee1fd62f3ac897b71
+      # 4. Add @Yoinx's Kernel Adiutor-Mod instead of the regular Kernel Adiutor (to complement Blackbird)
+      cd ${SOURCEDIR}/vendor/cm/prebuilt/KernelAdiutor
+      rm -rf KernelAdiutor.apk
+      wget https://github.com/yoinx/kernel_adiutor/raw/master/download/app/app-release.apk
+      mv app-release.apk KernelAdiutor.apk
+      cd ${SOURCEDIR}
+      # I want to make sure the picks went through okay
+      sleep 10
    fi
 
-   mv -v ${OUTDIR}/*${ZIPFORMAT}* "${ZIPMOVE}"
+
+   # Setup the build environment
+   echoText "SETTING UP BUILD ENVIRONMENT"; newLine
+
+   . build/envsetup.sh
 
 
 
+   # Prepare device
+   echoText "PREPARING DEVICE"; newLine
 
-   # Upload the files
-   echo -e ""
-   echo -e ${RED}
-   echo -e "---------------"
-   echo -e "UPLOADING FILES"
-   echo -e "---------------"
-   echo -e ${RST}
-   echo -e ""
-
-   . ${HOME}/upload.sh
+   if [[ "${ROM}" == "screwd" ]]; then
+      lunch screwd_${DEVICE}-userdebug
+   else
+      breakfast ${DEVICE}
+   fi
 
 
-
-   # Clean up out directory to free up space
-   echo -e ""
-   echo -e ${RED}
-   echo -e "-------------------------"
-   echo -e "CLEANING UP OUT DIRECTORY"
-   echo -e "-------------------------"
-   echo -e ${RST}
-   echo -e ""
+   # Clean up
+   echoText "CLEANING UP OUT DIRECTORY"; newLine
 
    mka clobber
 
 
 
-   # Go back home
+   # Start building
+   echoText "MAKING ZIP FILE"; newLine
+
+   time mka bacon
+
+
+
+   # If the compilation was successful
+   if [[ `ls ${OUTDIR}/${ZIPFORMAT} 2>/dev/null | wc -l` != "0" ]]; then
+      BUILD_RESULT_STRING="BUILD SUCCESSFUL"
+
+
+
+      # Remove existing files in ZIPMOVE
+      newLine; echoText "CLEANING ZIPMOVE DIRECTORY"
+
+      if [[ ${ROM} == "pn" && ${MOD} = true && ${OMS} = false && ${DEVICE} == "angler" && ${PERSONAL} = false ]]; then
+         rm -vrf ${HOME}/shared/.me/*${ZIPFORMAT}*
+      fi
+
+      rm -vrf "${ZIPMOVE}"/*${ZIPFORMAT}*
+
+
+
+      # Copy new files to ZIPMOVE
+      echoText "MOVING FILES TO ZIPMOVE DIRECTORY"; newLine
+
+      if [[ ${ROM} == "pn" && ${MOD} = true && ${OMS} = false && ${DEVICE} == "angler" && ${PERSONAL} = false ]]; then
+         cp -v ${OUTDIR}/*${ZIPFORMAT}* ${HOME}/shared/.me
+      fi
+
+      mv -v ${OUTDIR}/*${ZIPFORMAT}* "${ZIPMOVE}"
+
+
+
+
+      # Upload the files
+      newLine; echoText "UPLOADING FILES"; newLine
+
+      . ${HOME}/upload.sh
+
+
+
+      # Clean up out directory to free up space
+      newLine; echoText "CLEANING UP OUT DIRECTORY"; newLine
+
+      mka clobber
+
+
+
+      # Go back home
+      echoTest "GOING HOME"
+
+      cd ${HOME}
+
+   # If the build failed, add a variable
+   else
+      BUILD_RESULT_STRING="BUILD FAILED"
+   fi
+
+
+
+   # Stop tracking time
+   END=$(date +%s)
    echo -e ${RED}
-   echo -e "----------"
-   echo -e "GOING HOME"
-   echo -e "----------"
+   echo -e "-------------------------------------"
+   echo -e "SCRIPT ENDING AT $(date +%D\ %r)"
+   echo -e ""
+   echo -e "${BUILD_RESULT_STRING}!"
+   echo -e "TIME: $(echo $((${END}-${START})) | awk '{print int($1/60)" MINUTES AND "int($1%60)" SECONDS"}')"
+   echo -e "-------------------------------------"
    echo -e ${RST}
 
+   # Add line to compile log
+   if [[ ${PERSONAL} = true ]]; then
+      echo -e "`date +%H:%M:%S`: ${BASH_SOURCE} me" >> ${COMPILE_LOG}
+   elif [[ ${MOD} = true && ${OMS} = false ]]; then
+      echo -e "`date +%H:%M:%S`: ${BASH_SOURCE} ${ROM} mod ${DEVICE}" >> ${COMPILE_LOG}
+   elif [[ ${MOD} = true && ${OMS} = true ]]; then
+      echo -e "`date +%H:%M:%S`: ${BASH_SOURCE} ${ROM} mod oms ${DEVICE}" >> ${COMPILE_LOG}
+   elif [[ ${MOD} = false && ${OMS} = true ]]; then
+      echo -e "`date +%H:%M:%S`: ${BASH_SOURCE} ${ROM} oms ${DEVICE}" >> ${COMPILE_LOG}
+   elif [[ ${TEST} = true ]]; then
+      echo -e "`date +%H:%M:%S`: ${BASH_SOURCE} ${ROM} test ${DEVICE}" >> ${COMPILE_LOG}
+   elif [[ -n ${PERSON} ]]; then
+      echo -e "`date +%H:%M:%S`: ${BASH_SOURCE} ${ROM} ${PERSON}" >> ${COMPILE_LOG}
+   else
+      echo -e "`date +%H:%M:%S`: ${BASH_SOURCE} ${ROM} ${DEVICE}" >> ${COMPILE_LOG}
+   fi
+
+   echo -e "${BUILD_RESULT_STRING} IN $(echo $((${END}-${START})) | awk '{print int($1/60)" MINUTES AND "int($1%60)" SECONDS"}')\n" >> ${COMPILE_LOG}
+
+   echo -e "\a"
+}
+
+if [[ "${1}" == "all" ]]; then
+   DEVICES="angler shamu bullhead hammerhead"
+
+   for DEVICE in ${DEVICES}; do
+      compile ${2} ${DEVICE} ${3} ${4}
+   done
+
    cd ${HOME}
-
-# If the build failed, add a variable
+   cat ${COMPILE_LOG}
 else
-   BUILD_RESULT_STRING="BUILD FAILED"
+   compile ${1} ${2} ${3} ${4}
 fi
-
-
-
-# Stop tracking time
-END=$(date +%s)
-echo -e ${RED}
-echo -e "-------------------------------------"
-echo -e "SCRIPT ENDING AT $(date +%D\ %r)"
-echo -e ""
-echo -e "${BUILD_RESULT_STRING}!"
-echo -e "TIME: $(echo $((${END}-${START})) | awk '{print int($1/60)" MINUTES AND "int($1%60)" SECONDS"}')"
-echo -e "-------------------------------------"
-echo -e ${RST}
-
-# Add line to compile log
-if [[ ${PERSONAL} = true ]]; then
-   echo -e "`date +%H:%M:%S`: ${BASH_SOURCE} me" >> ${COMPILE_LOG}
-elif [[ ${MOD} = true && ${OMS} = false ]]; then
-   echo -e "`date +%H:%M:%S`: ${BASH_SOURCE} ${ROM} mod ${DEVICE}" >> ${COMPILE_LOG}
-elif [[ ${MOD} = true && ${OMS} = true ]]; then
-   echo -e "`date +%H:%M:%S`: ${BASH_SOURCE} ${ROM} mod oms ${DEVICE}" >> ${COMPILE_LOG}
-elif [[ ${MOD} = false && ${OMS} = true ]]; then
-   echo -e "`date +%H:%M:%S`: ${BASH_SOURCE} ${ROM} oms ${DEVICE}" >> ${COMPILE_LOG}
-elif [[ ${TEST} = true ]]; then
-   echo -e "`date +%H:%M:%S`: ${BASH_SOURCE} ${ROM} test ${DEVICE}" >> ${COMPILE_LOG}
-elif [[ -n ${PERSON} ]]; then
-   echo -e "`date +%H:%M:%S`: ${BASH_SOURCE} ${ROM} ${PERSON}" >> ${COMPILE_LOG}
-else
-   echo -e "`date +%H:%M:%S`: ${BASH_SOURCE} ${ROM} ${DEVICE}" >> ${COMPILE_LOG}
-fi
-
-echo -e "${BUILD_RESULT_STRING} IN $(echo $((${END}-${START})) | awk '{print int($1/60)" MINUTES AND "int($1%60)" SECONDS"}')\n" >> ${COMPILE_LOG}
-
-echo -e "\a"
