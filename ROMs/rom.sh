@@ -144,7 +144,7 @@ function compile() {
             case "${MOD}:${OMS}" in
                "true:true")
                   SOURCEDIR=${ANDROIDDIR}/ROMs/PN-Mod-OMS
-                  ZIPMOVE=${HOME}/shared/ROMs/"Pure Nexus Mod"/.oms/${DEVICE} ;;
+                  ZIPMOVE=${HOME}/shared/ROMs/"Pure Nexus Mod OMS"/${DEVICE} ;;
                "true:false")
                   SOURCEDIR=${ANDROIDDIR}/ROMs/PN-Mod
                   ZIPMOVE=${HOME}/shared/ROMs/"Pure Nexus Mod"/${DEVICE} ;;
