@@ -114,7 +114,7 @@ function compile() {
    ANDROIDDIR=${HOME}
 
    if [[ ${PERSONAL} = true ]]; then
-      SOURCEDIR=${ANDROIDDIR}/ROMs/PN-Mod
+      SOURCEDIR=${ANDROIDDIR}/ROMs/PN-Mod-OMS
       ZIPMOVE=${HOME}/shared/.me
       ZIPFORMAT=pure_nexus_${DEVICE}-*.zip
 
@@ -141,28 +141,18 @@ function compile() {
          "pn")
             ZIPFORMAT=pure_nexus_${DEVICE}-*.zip
 
-            if [[ ${MOD} = true ]]; then
-               SOURCEDIR=${ANDROIDDIR}/ROMs/PN-Mod
-            else
-               SOURCEDIR=${ANDROIDDIR}/ROMs/PN
-            fi
-
             case "${MOD}:${OMS}" in
                "true:true")
-                  ZIPMOVE=${HOME}/shared/ROMs/"Pure Nexus Mod"/.oms/${DEVICE}
-                  REPO_URL=https://github.com/ezio84/pnmod-manifest.git
-                  REPO_BRANCH=mm2oms ;;
+                  SOURCEDIR=${ANDROIDDIR}/ROMs/PN-Mod-OMS
+                  ZIPMOVE=${HOME}/shared/ROMs/"Pure Nexus Mod"/.oms/${DEVICE} ;;
                "true:false")
-                  ZIPMOVE=${HOME}/shared/ROMs/"Pure Nexus Mod"/${DEVICE}
-                  REPO_URL=https://github.com/ezio84/pnmod-manifest.git
-                  REPO_BRANCH=mm2 ;;
+                  SOURCEDIR=${ANDROIDDIR}/ROMs/PN-Mod
+                  ZIPMOVE=${HOME}/shared/ROMs/"Pure Nexus Mod"/${DEVICE} ;;
                "false:true")
-                  ZIPMOVE=${HOME}/shared/ROMs/"Pure Nexus"/.oms/${DEVICE}
-                  REPO_URL=https://github.com/PureNexusProject/manifest.git
-                  REPO_BRANCH=oms ;;
+                  SOURCEDIR=${ANDROIDDIR}/ROMs/PN-OMS
+                  ZIPMOVE=${HOME}/shared/ROMs/"Pure Nexus"/.oms/${DEVICE} ;;
                "false:false")
-                  REPO_URL=https://github.com/PureNexusProject/manifest.git
-                  REPO_BRANCH=mm2
+                  SOURCEDIR=${ANDROIDDIR}/ROMs/PN
                   if [[ ${TEST} = true ]]; then
                      ZIPMOVE=${HOME}/shared/ROMs/"Pure Nexus"/.tests/${DEVICE}
                   else
@@ -211,12 +201,6 @@ function compile() {
 
    echoText "SYNCING LATEST SOURCES"; newLine
 
-   if [[ ${PERSONAL} = true ]]; then
-      repo init -u https://github.com/ezio84/pnmod-manifest.git -b mm2oms
-   elif [[ "${ROM}" == "pn" ]]; then
-      repo init -u ${REPO_URL} -b ${REPO_BRANCH}
-   fi
-
    repo sync --force-sync
 
 
@@ -242,14 +226,6 @@ function compile() {
       rm -rf KernelAdiutor.apk
       wget https://github.com/yoinx/kernel_adiutor/raw/master/download/app/app-release.apk
       mv app-release.apk KernelAdiutor.apk
-      cd ${SOURCEDIR}
-      # I want to make sure the picks went through okay
-      sleep 10
-   elif [[ ${PERSONAL} = true ]] || [[ "${ROM}" == "pn" && ${MOD} = true && ${OMS} = true ]]; then
-      # Inline Masquerade until Ezio adds it to the default manifest
-      cd ${SOURCEDIR}/vendor/nexus
-      git fetch https://github.com/nathanchance/purenexus_vendor_nexus.git mm2oms
-      git cherry-pick b1cd72b1cf845d8a51840450aad330183174ad9d
       cd ${SOURCEDIR}
       # I want to make sure the picks went through okay
       sleep 10
