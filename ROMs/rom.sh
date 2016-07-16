@@ -35,6 +35,41 @@ function newLine() {
    echo -e ""
 }
 
+function changelog() {
+   SOURCEDIR=${1}
+   FILEMOVE=${2}
+
+   export CHANGELOG=${FILEMOVE}/changelog.txt
+
+   if [[ -f ${CHANGELOG} ]]; then
+   	rm -rf ${CHANGELOG}
+   fi
+
+   touch ${CHANGELOG}
+
+   echoText "GENERATING CHANGELOG"
+
+   cd ${SOURCEDIR}
+
+   for i in $(seq 7); do
+      export AFTER_DATE=`date --date="$i days ago" +%m-%d-%Y`
+      k=$(expr $i - 1)
+   	export UNTIL_DATE=`date --date="$k days ago" +%m-%d-%Y`
+
+   	# Line with after --- until was too long for a small ListView
+   	echo '=======================' >> ${CHANGELOG};
+   	echo  "     "${UNTIL_DATE}     >> ${CHANGELOG};
+   	echo '=======================' >> ${CHANGELOG};
+   	echo >> ${CHANGELOG};
+
+   	# Cycle through every repo to find commits between 2 dates
+   	repo forall -pc 'git log --oneline --after=${START_DATE} --until=${UNTIL_DATE}' >> ${CHANGELOG}
+   	echo >> ${CHANGELOG};
+   done
+
+   sed -i 's/project/   */g' ${CHANGELOG}
+}
+
 function compile() {
    # ----------
    # Parameters
@@ -289,6 +324,11 @@ function compile() {
 
       mv -v ${OUTDIR}/*${ZIPFORMAT}* "${ZIPMOVE}"
 
+
+
+      if [[ ${PERSONAL} = false ]]; then
+         newLine; changelog ${SOURCEDIR} ${ZIPMOVE}
+      fi
 
 
 
