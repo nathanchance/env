@@ -36,7 +36,7 @@ function newLine() {
 }
 
 function changelog() {
-   SOURCEDIR=${1}
+   REPODIR=${1}
    FILEMOVE=${2}
 
    export CHANGELOG=${FILEMOVE}/changelog.txt
@@ -49,7 +49,7 @@ function changelog() {
 
    echoText "GENERATING CHANGELOG"
 
-   cd ${SOURCEDIR}
+   cd ${REPODIR}
 
    for i in $(seq 7); do
       export AFTER_DATE=`date --date="$i days ago" +%m-%d-%Y`
@@ -63,7 +63,7 @@ function changelog() {
    	echo >> ${CHANGELOG};
 
    	# Cycle through every repo to find commits between 2 dates
-   	repo forall -pc 'git log --oneline --after=${START_DATE} --until=${UNTIL_DATE}' >> ${CHANGELOG}
+   	repo forall -pc 'git log --oneline --after=${AFTER_DATE} --until=${UNTIL_DATE}' >> ${CHANGELOG}
    	echo >> ${CHANGELOG};
    done
 
