@@ -3,7 +3,10 @@
 # -----
 # Usage
 # -----
-# $ . rom.sh <me|rom> <device> <oms|mod|person> <oms>
+# For one device build:
+# $ . rom.sh <me|rom> <device> (oms|mod|person) (oms)
+# For all device builds:
+# $ . rom.sh all <rom> (oms|mod) (oms)
 
 
 
@@ -13,6 +16,8 @@
 # $ . rom.sh pn angler sync
 # $ . rom.sh du shamu nosync
 # $ . rom.sh me
+# $ . rom.sh all du
+# $ . rom.sh all pn mod
 
 
 
@@ -20,6 +25,7 @@
 # Functions
 # ---------
 
+# Prints a formatted header; used for outlining what the script is doing to the user
 function echoText() {
    RED="\033[01;31m"
    RST="\033[0m"
@@ -31,16 +37,24 @@ function echoText() {
    echo -e ${RST}
 }
 
+# Creates a new line
 function newLine() {
    echo -e ""
 }
 
+# Creates a changelog in the upload directory
 function changelog() {
+   # ----------
+   # Parameters
+   # ----------
+   # Parameter 1: The source directory
+   # Parameter 2: The upload directory
    REPODIR=${1}
    FILEMOVE=${2}
 
    export CHANGELOG="${FILEMOVE}"/changelog.txt
 
+   # If a changelog exists, remove it
    if [[ -f ${CHANGELOG} ]]; then
    	rm -rf ${CHANGELOG}
    fi
@@ -51,6 +65,7 @@ function changelog() {
 
    cd ${REPODIR}
 
+   # Echos the git log to the changelog file for the past 7 days
    for i in $(seq 7); do
       export AFTER_DATE=`date --date="$i days ago" +%m-%d-%Y`
       k=$(expr $i - 1)
@@ -70,13 +85,14 @@ function changelog() {
    sed -i 's/project/   */g' "${CHANGELOG}"
 }
 
+# Compilation function
 function compile() {
    # ----------
    # Parameters
    # ----------
-   # Parameter 1: ROM to build (currently AICP, AOSiP, Dirty Unicorns, Pure Nexus [Mod], ResurrectionRemix, and Screw'd)
-   # Parameter 2: Device (eg. angler, bullhead, shamu)
-   # Parameter 3: Pure Nexus Mod/OMS or a personalized Dirty Unicorns build (omit if neither applies)
+   # Parameter 1:   ROM to build (currently AICP, AOSiP, Dirty Unicorns, Pure Nexus [Mod], ResurrectionRemix, and Screw'd)
+   # Parameter 2:   Device (eg. angler, bullhead, shamu); not necessary for RR
+   # Parameter 3/4: Pure Nexus Mod/OMS or a personalized Dirty Unicorns build (omit if neither applies)
 
    # Unassign flags and reset DU_BUILD_TYPE
    export DU_BUILD_TYPE=CHANCELLOR
@@ -86,6 +102,7 @@ function compile() {
    PERSONAL=false
    OMS=false
 
+   # If the first parameter is "me", I'm running a personal build; otherwise, it's a public build
    if [[ "${1}" == "me" ]]; then
       PERSONAL=true
       DEVICE=angler
@@ -154,6 +171,7 @@ function compile() {
       ZIPFORMAT=pure_nexus_${DEVICE}-*.zip
 
    else
+      # Currently, we support AICP, AOSiP, Dirty Unicorns, Pure Nexus (Mod), ResurrectionRemix, and Screw'd
       case "${ROM}" in
          "aicp")
             SOURCEDIR=${ANDROIDDIR}/ROMs/AICP
@@ -234,15 +252,18 @@ function compile() {
 
 
 
+   # Start syncing the latest sources
    echoText "SYNCING LATEST SOURCES"; newLine
 
    repo sync --force-sync
 
 
-   if [[ "${ROM}" ==  "rr" ]]; then
-      # I could fork these repos and do the changes in there permanently but I don't want to have to maintains anything extra
 
-      echo -e ""
+   # If we are running a ResurrectionRemix build, let's cherry pick some commits first
+   if [[ "${ROM}" ==  "rr" ]]; then
+      # I could fork these repos and do the changes in there permanently but I don't want to have to maintain any extra repos
+
+      newLine
 
       # 1. Change DESOLATED to KBUILD_BUILD_HOST and allow kernel to be compiled with UBER 6.1
       cd ${SOURCEDIR}/kernel/moto/shamu
@@ -284,6 +305,7 @@ function compile() {
    fi
 
 
+
    # Clean up
    echoText "CLEANING UP OUT DIRECTORY"; newLine
 
@@ -298,8 +320,9 @@ function compile() {
 
 
 
-   # If the compilation was successful
+   # If the compilation was successful, there will be a zip in the format above in the out directory
    if [[ `ls ${OUTDIR}/${ZIPFORMAT} 2>/dev/null | wc -l` != "0" ]]; then
+      # Make the build result string show success
       BUILD_RESULT_STRING="BUILD SUCCESSFUL"
 
 
@@ -326,6 +349,7 @@ function compile() {
 
 
 
+      # If we are not running a personal build, make a changelog
       if [[ ${PERSONAL} = false ]]; then
          newLine; changelog ${SOURCEDIR} "${ZIPMOVE}"
       fi
@@ -391,6 +415,7 @@ function compile() {
    echo -e "\a"
 }
 
+# If the first parameter to the rom.sh script is "all" followed by the rom type, we are running four builds for the devices we support; otherwise, it is just one build with the parameters given
 if [[ "${1}" == "all" ]]; then
    DEVICES="angler shamu bullhead hammerhead"
 
