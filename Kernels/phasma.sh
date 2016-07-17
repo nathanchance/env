@@ -93,9 +93,9 @@ export LOCALVERSION=-`echo ${PHASMA_VER}`
 export CROSS_COMPILE="${RESOURCE_DIR}/${TOOLCHAIN_DIR}/bin/aarch64-linux-android-"
 export ARCH=arm64
 export SUBARCH=arm64
-# Export the COMPILE_LOG variable for other files to use (I currently handle this via .bashrc)
+# Export the LOG variable for other files to use (I currently handle this via .bashrc)
 # export LOGDIR=${ANDROID_DIR}/Logs
-# export COMPILE_LOG=${LOGDIR}/compile_log_`date +%m_%d_%y`.log
+# export LOG=${LOGDIR}/compile_log_`date +%m_%d_%y`.log
 
 
 # ---------
@@ -238,7 +238,7 @@ echo -e "TIME: $((${DIFF} / 60)) MINUTES AND $((${DIFF} % 60)) SECONDS"
 echo -e ${RESTORE}
 
 # Add line to compile log
-echo -e "`date +%H:%M:%S`: ${BASH_SOURCE} ${TOOLCHAIN_VER}" >> ${COMPILE_LOG}
-echo -e "${BUILD_SUCCESS_STRING} IN $((${DIFF} / 60)) MINUTES AND $((${DIFF} % 60)) SECONDS\n" >> ${COMPILE_LOG}
+echo -e "`date +%H:%M:%S`: ${BASH_SOURCE} ${TOOLCHAIN_VER}" >> ${LOG}
+echo -e "${BUILD_SUCCESS_STRING} IN $((${DIFF} / 60)) MINUTES AND $((${DIFF} % 60)) SECONDS\n" >> ${LOG}
 
 echo -e "\a"

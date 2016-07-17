@@ -227,9 +227,9 @@ function compile() {
 
 
 
-   # Export the COMPILE_LOG variable for other files to use (I currently handle this via .bashrc)
+   # Export the LOG variable for other files to use (I currently handle this via .bashrc)
    # export LOGDIR=${ANDROIDDIR}/Logs
-   # export COMPILE_LOG=${LOGDIR}/compile_log_`date +%m_%d_%y`.log
+   # export LOG=${LOGDIR}/compile_log_`date +%m_%d_%y`.log
 
 
 
@@ -395,22 +395,22 @@ function compile() {
 
    # Add line to compile log
    if [[ ${PERSONAL} = true ]]; then
-      echo -e "`date +%H:%M:%S`: ${BASH_SOURCE} me" >> ${COMPILE_LOG}
+      echo -e "`date +%H:%M:%S`: ${BASH_SOURCE} me" >> ${LOG}
    elif [[ ${MOD} = true && ${OMS} = false ]]; then
-      echo -e "`date +%H:%M:%S`: ${BASH_SOURCE} ${ROM} mod ${DEVICE}" >> ${COMPILE_LOG}
+      echo -e "`date +%H:%M:%S`: ${BASH_SOURCE} ${ROM} mod ${DEVICE}" >> ${LOG}
    elif [[ ${MOD} = true && ${OMS} = true ]]; then
-      echo -e "`date +%H:%M:%S`: ${BASH_SOURCE} ${ROM} mod oms ${DEVICE}" >> ${COMPILE_LOG}
+      echo -e "`date +%H:%M:%S`: ${BASH_SOURCE} ${ROM} mod oms ${DEVICE}" >> ${LOG}
    elif [[ ${MOD} = false && ${OMS} = true ]]; then
-      echo -e "`date +%H:%M:%S`: ${BASH_SOURCE} ${ROM} oms ${DEVICE}" >> ${COMPILE_LOG}
+      echo -e "`date +%H:%M:%S`: ${BASH_SOURCE} ${ROM} oms ${DEVICE}" >> ${LOG}
    elif [[ ${TEST} = true ]]; then
-      echo -e "`date +%H:%M:%S`: ${BASH_SOURCE} ${ROM} test ${DEVICE}" >> ${COMPILE_LOG}
+      echo -e "`date +%H:%M:%S`: ${BASH_SOURCE} ${ROM} test ${DEVICE}" >> ${LOG}
    elif [[ -n ${PERSON} ]]; then
-      echo -e "`date +%H:%M:%S`: ${BASH_SOURCE} ${ROM} ${PERSON}" >> ${COMPILE_LOG}
+      echo -e "`date +%H:%M:%S`: ${BASH_SOURCE} ${ROM} ${PERSON}" >> ${LOG}
    else
-      echo -e "`date +%H:%M:%S`: ${BASH_SOURCE} ${ROM} ${DEVICE}" >> ${COMPILE_LOG}
+      echo -e "`date +%H:%M:%S`: ${BASH_SOURCE} ${ROM} ${DEVICE}" >> ${LOG}
    fi
 
-   echo -e "${BUILD_RESULT_STRING} IN $(echo $((${END}-${START})) | awk '{print int($1/60)" MINUTES AND "int($1%60)" SECONDS"}')\n" >> ${COMPILE_LOG}
+   echo -e "${BUILD_RESULT_STRING} IN $(echo $((${END}-${START})) | awk '{print int($1/60)" MINUTES AND "int($1%60)" SECONDS"}')\n" >> ${LOG}
 
    echo -e "\a"
 }
@@ -424,7 +424,7 @@ if [[ "${1}" == "all" ]]; then
    done
 
    cd ${HOME}
-   cat ${COMPILE_LOG}
+   cat ${LOG}
 else
    compile ${1} ${2} ${3} ${4}
 fi

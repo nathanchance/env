@@ -46,9 +46,9 @@ elif [[ "${TYPE}" == "pn" ]]; then
     ZIPBEG=PureNexus
     BRANCH=mm2
 fi
-# Export the COMPILE_LOG variable for other files to use (I currently handle this via .bashrc)
+# Export the LOG variable for other files to use (I currently handle this via .bashrc)
 # export LOGDIR=${ANDROID_DIR}/Logs
-# export COMPILE_LOG=${LOGDIR}/compile_log_`date +%m_%d_%y`.log
+# export LOG=${LOGDIR}/compile_log_`date +%m_%d_%y`.log
 
 
 
@@ -135,7 +135,7 @@ echo -e "-------------------------------------"
 echo -e ${RST}
 
 # Add line to compile log
-echo -e "`date +%H:%M:%S`: ${BASH_SOURCE} ${TYPE}" >> ${COMPILE_LOG}
-echo -e "${BUILD_RESULT_STRING} IN $(echo $((${END}-${START})) | awk '{print int($1/60)" MINUTES AND "int($1%60)" SECONDS"}')\n" >> ${COMPILE_LOG}
+echo -e "`date +%H:%M:%S`: ${BASH_SOURCE} ${TYPE}" >> ${LOG}
+echo -e "${BUILD_RESULT_STRING} IN $(echo $((${END}-${START})) | awk '{print int($1/60)" MINUTES AND "int($1%60)" SECONDS"}')\n" >> ${LOG}
 
 echo -e "\a"
