@@ -356,7 +356,7 @@ function compile {
    echo -e ${RESTORE}
 
    # Add line to compile log
-   echo -e "`date +%H:%M:%S`: ${BASH_SOURCE} ${TOOLCHAIN_VER}" >> ${LOG}
+   echo -e "`date +%H:%M:%S`: ${BASH_SOURCE} ${VERSION} ${TOOLCHAIN_VER}" >> ${LOG}
    echo -e "${BUILD_SUCCESS_STRING} IN $((${DIFF} / 60)) MINUTES AND $((${DIFF} % 60)) SECONDS\n" >> ${LOG}
 
    echo -e "\a"
