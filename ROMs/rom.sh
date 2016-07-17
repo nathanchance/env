@@ -4,9 +4,9 @@
 # Usage
 # -----
 # For one device build:
-# $ . rom.sh <me|rom> <device> (oms|mod|person) (oms)
+# $ . rom.sh <me|rom> <device> (mod|person)
 # For all device builds:
-# $ . rom.sh all <rom> (oms|mod) (oms)
+# $ . rom.sh all <rom> (mod)
 
 
 
@@ -100,7 +100,6 @@ function compile() {
    MOD=false
    TEST=false
    PERSONAL=false
-   OMS=false
 
    # If the first parameter is "me", I'm running a personal build; otherwise, it's a public build
    if [[ "${1}" == "me" ]]; then
@@ -135,18 +134,13 @@ function compile() {
                         export DU_BUILD_TYPE=NINJA ;;
                   esac ;;
 
-               # And it's PN, we are running either a Mod, test, or OMS build; if there is a 4th parameter, it is a Mod OMS build
+               # And it's PN, we are running either a Mod or test build
                "pn")
                   case "${3}" in
                      "mod")
                         MOD=true
-                        if [[ -n ${4} && "${4}" == "oms" ]]; then
-                           OMS=true
-                        fi ;;
                      "test")
                         TEST=true ;;
-                     "oms")
-                        OMS=true ;;
                   esac ;;
             esac
          fi
@@ -166,7 +160,7 @@ function compile() {
    ANDROIDDIR=${HOME}
 
    if [[ ${PERSONAL} = true ]]; then
-      SOURCEDIR=${ANDROIDDIR}/ROMs/PN-Mod-OMS
+      SOURCEDIR=${ANDROIDDIR}/ROMs/PN-Mod
       ZIPMOVE=${HOME}/shared/.me
       ZIPFORMAT=pure_nexus_${DEVICE}-*.zip
 
@@ -194,22 +188,16 @@ function compile() {
          "pn")
             ZIPFORMAT=pure_nexus_${DEVICE}-*.zip
 
-            case "${MOD}:${OMS}" in
-               "true:true")
-                  SOURCEDIR=${ANDROIDDIR}/ROMs/PN-Mod-OMS
-                  ZIPMOVE=${HOME}/shared/ROMs/"Pure Nexus Mod OMS"/${DEVICE} ;;
-               "true:false")
+            case "${MOD}" in
+               "true")
                   SOURCEDIR=${ANDROIDDIR}/ROMs/PN-Mod
-                  ZIPMOVE=${HOME}/shared/ROMs/"Pure Nexus Mod"/${DEVICE} ;;
-               "false:true")
-                  SOURCEDIR=${ANDROIDDIR}/ROMs/PN-OMS
-                  ZIPMOVE=${HOME}/shared/ROMs/"Pure Nexus"/.oms/${DEVICE} ;;
-               "false:false")
+                  ZIPMOVE=${HOME}/shared/ROMs/"Pure Nexus Mod"/OMS/${DEVICE} ;;
+               "false")
                   SOURCEDIR=${ANDROIDDIR}/ROMs/PN
                   if [[ ${TEST} = true ]]; then
                      ZIPMOVE=${HOME}/shared/ROMs/"Pure Nexus"/.tests/${DEVICE}
                   else
-                     ZIPMOVE=${HOME}/shared/ROMs/"Pure Nexus"/${DEVICE}
+                     ZIPMOVE=${HOME}/shared/ROMs/"Pure Nexus"/OMS/${DEVICE}
                   fi ;;
             esac ;;
          "rr")
