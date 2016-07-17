@@ -3,11 +3,42 @@
 # -----
 # Usage
 # -----
-# $ . ak.sh <toolchain> <per|tcupdate> <per>
+# For one build:
+# $ . ak.sh <toolchain> <norm|eas|nh> (per)
+# For all builds:
+# $ . ak.sh all <tcupdate|notcupdate> (norm|eas|nh) (per)
 
 
 
 function compile {
+   # ----------
+   # Parameters
+   # ----------
+   # TOOLCHAIN: Toolchain to compile with
+   # VERSION: Normal, EAS, or NetHunter
+   # PERMISSIVE: Force kernel to be permissive
+
+   # Free flags
+   PERSONAL=false
+   PERMISSIVE=false
+
+   # Set USER and HOST variables back to what they are in .bashrc
+   export KBUILD_BUILD_USER=nathan
+   export KBUILD_BUILD_HOST=phoenix
+
+   # If the first parameter is "me", set the personal flag to true
+   if [[ "${1}" == "me" ]]; then
+      PERSONAL=true
+   # Otherwise, parameters are as above.
+   else
+      TOOLCHAIN=${1}
+      VERSION=${2}
+
+      if [[ -n ${3} && "${3}" == "per" ]]; then
+         PERMISSIVE=true
+      fi
+   fi
+
    # ------
    # Colors
    # ------
@@ -18,28 +49,12 @@ function compile {
 
 
    # ----------
-   # Parameters
-   # ----------
-   # TOOLCHAIN: Toolchain to compile with
-   # PERMISSIVE: Force kernel to be permissive
-   # Free flags
-   PERSONAL=false
-   PERMISSIVE=false
-
-   # Set USER and HOST variables back to what they are in .bashrc
-   export KBUILD_BUILD_USER=nathan
-   export KBUILD_BUILD_HOST=phoenix
-
-
-
-   # ----------
    # Directories
    # ----------
    ANDROID_DIR=${HOME}
    RESOURCE_DIR=${ANDROID_DIR}/Kernels
    KERNEL_DIR=${RESOURCE_DIR}/AK
    ANYKERNEL_DIR=${RESOURCE_DIR}/AK-AK2
-   ZIP_MOVE=${HOME}/shared/Kernels/angler/AK
    PATCH_DIR="${ANYKERNEL_DIR}/patch"
    MODULES_DIR="${ANYKERNEL_DIR}/modules"
    ZIMAGE_DIR="${KERNEL_DIR}/arch/arm64/boot"
@@ -53,32 +68,34 @@ function compile {
    KERNEL="Image.gz"
    DTBIMAGE="dtb"
    DEFCONFIG="ak_angler_defconfig"
-   KER_BRANCH=ak-mm-staging
    AK_BRANCH=ak-angler-anykernel
 
-
-
-   if [[ "${1}" == "me" ]]; then
-      PERSONAL=true
-   else
-      TOOLCHAIN=${1}
-
-      if [[ -n ${2} && "${2}" == "per" ]]; then
-         PERMISSIVE=true
-      fi
-   fi
-
    if [[ ${PERSONAL} = true ]]; then
-      TOOLCHAIN_DIR=Toolchains/Linaro/DF-6.1
       AK_VER="AK.066-5"
-      ZIP_MOVE=${HOME}/shared/.me
+      KER_BRANCH=ak-mm-staging
+      TOOLCHAIN_DIR=Toolchains/Linaro/DF-6.1
       PERMISSIVE=true
+      ZIP_MOVE=${HOME}/shared/.me
       export KBUILD_BUILD_USER=nathan
       export KBUILD_BUILD_HOST=phoenix
 
    else
       BASE_AK_VER="AK"
-      VER=".066-5.ANGLER."
+
+      case "${VERSION}" in
+         "norm")
+            KER_BRANCH=ak-mm-staging
+            VER=".066-5.ANGLER."
+            ZIP_MOVE=${HOME}/shared/Kernels/angler/AK/Normal ;;
+         "eas")
+            KER_BRANCH=ak-mm-staging-eas
+            VER=".066-5.ANGLER.EAS."
+            ZIP_MOVE=${HOME}/shared/Kernels/angler/AK/EAS ;;
+         "nh")
+            KER_BRANCH=ak-mm-staging-nh
+            VER=".066-5.ANGLER.NH."
+            ZIP_MOVE=${HOME}/shared/Kernels/angler/AK/NH ;;
+      esac
 
       case "${TOOLCHAIN}" in
          "aosp")
@@ -167,19 +184,22 @@ function compile {
       echo
       cd ${KERNEL_DIR}
 
+      # If the permissive flag is true, cherry pick the permissive commit and set a new ZIPMOVE directory if the build is not personal
       if [[ ${PERMISSIVE} = true ]]; then
          git cherry-pick ba804bd138aa89dbe2f2fc73fd751af60a831097
          if [[ ${PERSONAL} = false ]]; then
-            ZIP_MOVE=${HOME}/shared/Kernels/angler/AK/Permissive
+            ZIP_MOVE=${ZIP_MOVE}/Permissive
          fi
       fi
 
+      # If this is a personal build, set the version to 21
       if [[ ${PERSONAL} = true ]]; then
          rm -rf .version
          touch .version
          echo 20 >> .version
       fi
 
+      # Make the DEFCONFIG and the kernel with the right number of threads
       make ${DEFCONFIG}
       make ${THREAD}
    }
@@ -343,19 +363,33 @@ function compile {
 }
 
 if [[ "${1}" == "all" ]]; then
+   TOOLCHAINS="aosp uber4 uber5 uber6 uber7 linaro4.9 linaro5.4 linaro6.1 df-linaro4.9 df-linaro5.4 df-linaro6.1"
+   VERSIONS="norm eas nh"
+
+   # Update toolchains if requested
    if [[ "${2}" == "tcupdate" ]]; then
       . sync_toolchains.sh
    fi
 
+   # Run my build after syncing toolchains
    compile me
 
-   TOOLCHAINS="aosp uber4 uber5 uber6 uber7 linaro4.9 linaro5.4 linaro6.1 df-linaro4.9 df-linaro5.4 df-linaro6.1"
-   for TOOLCHAIN in ${TOOLCHAINS}; do
-      compile ${TOOLCHAIN} ${3}
-   done
+   # If there is a third parameter and it is not per, we are running all the builds of one particular version
+   if [[ -n ${3} && "${3}" != "per" ]]; then
+      for TOOLCHAIN in ${TOOLCHAINS}; do
+         compile ${TOOLCHAIN} ${3} ${4}
+      done
+   # Otherwise, we're running all three versions and their toolchain options
+   else
+      for VERSION in ${VERSIONS}; do
+         for TOOLCHAIN in ${TOOLCHAINS}; do
+            compile ${TOOLCHAIN} ${VERSION} ${3}
+         done
+      done
+   fi
 
    cd ${HOME}
    cat ${LOG}
 else
-   compile ${1} ${2}
+   compile ${1} ${2} ${3}
 fi
