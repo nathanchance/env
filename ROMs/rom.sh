@@ -66,7 +66,7 @@ function changelog() {
    cd ${REPODIR}
 
    # Echos the git log to the changelog file for the past 7 days
-   for i in $(seq 7); do
+   for i in $(seq 10); do
       export AFTER_DATE=`date --date="$i days ago" +%m-%d-%Y`
       k=$(expr $i - 1)
    	export UNTIL_DATE=`date --date="$k days ago" +%m-%d-%Y`
