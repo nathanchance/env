@@ -92,7 +92,7 @@ function compile() {
    # ----------
    # Parameter 1:   ROM to build (currently AICP, AOSiP, Dirty Unicorns, Pure Nexus [Mod], ResurrectionRemix, and Screw'd)
    # Parameter 2:   Device (eg. angler, bullhead, shamu); not necessary for RR
-   # Parameter 3/4: Pure Nexus Mod/OMS or a personalized Dirty Unicorns build (omit if neither applies)
+   # Parameter 3: Pure Nexus Mod/test build or a personalized Dirty Unicorns build (omit if neither applies)
 
    # Unassign flags and reset DU_BUILD_TYPE
    export DU_BUILD_TYPE=CHANCELLOR
@@ -318,7 +318,7 @@ function compile() {
       # Remove existing files in ZIPMOVE
       newLine; echoText "CLEANING ZIPMOVE DIRECTORY"
 
-      if [[ ${ROM} == "pn" && ${MOD} = true && ${OMS} = true && ${DEVICE} == "angler" && ${PERSONAL} = false ]]; then
+      if [[ ${ROM} == "pn" && ${MOD} = true && ${DEVICE} == "angler" && ${PERSONAL} = false ]]; then
          rm -vrf ${HOME}/shared/.me/*${ZIPFORMAT}*
       fi
 
@@ -329,7 +329,7 @@ function compile() {
       # Copy new files to ZIPMOVE
       echoText "MOVING FILES TO ZIPMOVE DIRECTORY"; newLine
 
-      if [[ ${ROM} == "pn" && ${MOD} = true && ${OMS} = true && ${DEVICE} == "angler" && ${PERSONAL} = false ]]; then
+      if [[ ${ROM} == "pn" && ${MOD} = true && ${DEVICE} == "angler" && ${PERSONAL} = false ]]; then
          cp -v ${OUTDIR}/*${ZIPFORMAT}* ${HOME}/shared/.me
       fi
 
@@ -384,12 +384,8 @@ function compile() {
    # Add line to compile log
    if [[ ${PERSONAL} = true ]]; then
       echo -e "`date +%H:%M:%S`: ${BASH_SOURCE} me" >> ${LOG}
-   elif [[ ${MOD} = true && ${OMS} = false ]]; then
+   elif [[ ${MOD} = true ]]; then
       echo -e "`date +%H:%M:%S`: ${BASH_SOURCE} ${ROM} mod ${DEVICE}" >> ${LOG}
-   elif [[ ${MOD} = true && ${OMS} = true ]]; then
-      echo -e "`date +%H:%M:%S`: ${BASH_SOURCE} ${ROM} mod oms ${DEVICE}" >> ${LOG}
-   elif [[ ${MOD} = false && ${OMS} = true ]]; then
-      echo -e "`date +%H:%M:%S`: ${BASH_SOURCE} ${ROM} oms ${DEVICE}" >> ${LOG}
    elif [[ ${TEST} = true ]]; then
       echo -e "`date +%H:%M:%S`: ${BASH_SOURCE} ${ROM} test ${DEVICE}" >> ${LOG}
    elif [[ -n ${PERSON} ]]; then
