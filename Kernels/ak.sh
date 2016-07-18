@@ -95,6 +95,14 @@ function compile {
             KER_BRANCH=ak-mm-staging-nh
             VER=".066-5.ANGLER.NH."
             ZIP_MOVE=${HOME}/shared/Kernels/angler/AK/NH ;;
+         "test")
+            KER_BRANCH=testing
+            VER=".N.ANGLER."
+            ZIP_MOVE=${HOME}/shared/Kernels/angler/AK/.tests
+         "n")
+            KER_BRANCH=nougat
+            VER=".N.001.ANGLER."
+            ZIP_MOVE=${HOME}/shared/Kernels/angler/AK/.tests ;;
       esac
 
       case "${TOOLCHAIN}" in
