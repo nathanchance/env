@@ -98,7 +98,7 @@ function compile {
          "test")
             KER_BRANCH=testing
             VER=".N.ANGLER."
-            ZIP_MOVE=${HOME}/shared/Kernels/angler/AK/.tests
+            ZIP_MOVE=${HOME}/shared/Kernels/angler/AK/.tests ;;
          "n")
             KER_BRANCH=nougat
             VER=".N.001.ANGLER."
