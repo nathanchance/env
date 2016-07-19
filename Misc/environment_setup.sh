@@ -22,7 +22,6 @@ ANDROIDDIR=${HOME}
 ROMDIR=${ANDROIDDIR}/ROMs
 GAPPSDIR=${ANDROIDDIR}/GApps
 KERNELSDIR=${ANDROIDDIR}/Kernels
-SCRIPTSDIR=${ANDROIDDIR}/Scripts
 LOGSDIR=${ANDROIDDIR}/Logs
 
 
@@ -58,7 +57,6 @@ then
    rm -rf ${ROMDIR}
    rm -rf ${GAPPSDIR}
    rm -rf ${KERNELSDIR}
-   rm -rf ${SCRIPTSDIR}
    rm -rf ${LOGSDIR}
 else
    sudo apt-get install git-core
@@ -80,12 +78,6 @@ mkdir -p ${ROMDIR}
 mkdir -p ${GAPPSDIR}
 mkdir -p ${KERNELSDIR}
 mkdir -p ${LOGSDIR}
-
-
-
-# Sync in scripts
-cd ${ANDROIDDIR}
-git clone https://github.com/nathanchance/scripts.git Scripts
 
 
 
