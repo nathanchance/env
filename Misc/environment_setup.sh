@@ -96,15 +96,15 @@ git clone https://github.com/nathanchance/local_manifests.git Manifests
 
 
 # Sync PN (will serve as our reference)
-. ${ANDROIDDIR}/Scripts/rom_folder.sh pn sync
+. ${ANDROIDDIR}/Scripts/Misc/rom_folder.sh pn sync
 # Sync PN Mod
-. ${ANDROIDDIR}/Scripts/rom_folder.sh pnmod sync
+. ${ANDROIDDIR}/Scripts/Misc/rom_folder.sh pnmod sync
 # Sync DU
-. ${ANDROIDDIR}/Scripts/rom_folder.sh du sync
+. ${ANDROIDDIR}/Scripts/Misc/rom_folder.sh du sync
 # Sync RR
-. ${ANDROIDDIR}/Scripts/rom_folder.sh rr sync
+. ${ANDROIDDIR}/Scripts/Misc/rom_folder.sh rr sync
 # Sync AOSIP
-. ${ANDROIDDIR}/Scripts/rom_folder.sh aosip sync
+. ${ANDROIDDIR}/Scripts/Misc/rom_folder.sh aosip sync
 
 
 
@@ -139,7 +139,7 @@ git clone https://github.com/DespairFactor/angler.git Kylo
 
 
 # Sync toolchains
-mkdir ${KERNELSDIR}/Toolchains
+mkdir -p ${KERNELSDIR}/Toolchains
 
 . sync_toolchains.sh
 
