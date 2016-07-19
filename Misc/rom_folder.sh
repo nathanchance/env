@@ -106,11 +106,10 @@ then
    fi
 
    # I use local manifests with both PN Mod (for Shamu and Bullhead support) and RR (for Shamu support)
-   if [ "${ROM}" == "rr" ]
-   then
+   if [ "${ROM}" == "rr" ]; then
       mkdir ${SOURCE_DIR}/.repo/local_manifests
       cp -v ${ROM_DIR}/Manifests/rr_shamu.xml ${SOURCE_DIR}/.repo/local_manifests
-   elif [ "${ROM}" == "pnmod" ]
+   elif [ "${ROM}" == "pnmod" ]; then
       mkdir ${SOURCE_DIR}/.repo/local_manifests
       cp -v ${ROM_DIR}/Manifests/pn-mod.xml ${SOURCE_DIR}/.repo/local_manifests
    fi
@@ -128,14 +127,12 @@ then
    # Sync dependencies
    . build/envsetup.sh
 
-   if [ "${ROM}" == "screwd" ]
-   then
+   if [ "${ROM}" == "screwd" ]; then
       lunch screwd_angler-userdebug
       lunch screwd_bullhead-userdebug
       lunch screwd_hammerhead-userdebug
       lunch screwd_shamu-userdebug
-   elif [ "${ROM}" == "rr" ]
-   then
+   elif [ "${ROM}" == "rr" ]; then
       breakfast shamu
    else
       breakfast angler
