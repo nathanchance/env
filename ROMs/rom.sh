@@ -138,7 +138,7 @@ function compile() {
                "pn")
                   case "${3}" in
                      "mod")
-                        MOD=true
+                        MOD=true ;;
                      "test")
                         TEST=true ;;
                   esac ;;
