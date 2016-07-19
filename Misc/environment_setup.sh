@@ -70,6 +70,7 @@ else
    git config --global user.email "natechancellor@gmail.com"
    echo "Don't forget to add ccache and the Scripts info to .bashrc"
    nano ${HOME}/.bashrc
+   source ${HOME}/.bashrc
 fi
 
 
