@@ -4,6 +4,7 @@
 # Usage
 # -----
 # $ . source_setup.sh <existing|new>
+# Must be run as sudo
 
 
 
@@ -26,8 +27,28 @@ LOGSDIR=${ANDROIDDIR}/Logs
 
 
 
+# ------
+# Colors
+# ------
+BLDRED="\033[1m""\033[31m"
+BLDBLUE="\033[1m""\033[36m"
+RST="\033[0m"
+
+
+
 # Clear the terminal
 clear
+
+
+
+# Start tracking time
+echo -e ${BLDRED}
+echo -e "---------------------------------------"
+echo -e "SCRIPT STARTING AT $(date +%D\ %r)"
+echo -e "---------------------------------------"
+echo -e ${RST}
+
+START=$(date +%s)
 
 
 
@@ -40,24 +61,24 @@ then
    rm -rf ${SCRIPTSDIR}
    rm -rf ${LOGSDIR}
 else
-   sudo apt-get install curl
-   curl https://raw.githubusercontent.com/akhilnarang/scripts/master/build-environment-setup.sh | bash
-   mkdir ${HOME}/bin
-   PATH=${HOME}/bin:$PATH
-   curl https://storage.googleapis.com/git-repo-downloads/repo > ${HOME}/bin/repo
-   chmod a+x ${HOME}/bin/repo
+   sudo apt-get install git-core
+   git clone git://github.com/akhilnarang/scripts setup-scripts
+   cd setup-scripts
+   . ubuntu1404-linuxmint17x.sh
+   cd .. && rm -rf setup-scripts
    git config --global user.name "Nathan Chancellor"
    git config --global user.email "natechancellor@gmail.com"
+   echo "Don't forget to add ccache and the Scripts info to .bashrc"
+   nano .bashrc
 fi
 
 
 
 # Make head directories
-mkdir ${ANDROIDDIR}
-mkdir ${ROMDIR}
-mkdir ${GAPPSDIR}
-mkdir ${KERNELSDIR}
-mkdir ${LOGSDIR}
+mkdir -p ${ROMDIR}
+mkdir -p ${GAPPSDIR}
+mkdir -p ${KERNELSDIR}
+mkdir -p ${LOGSDIR}
 
 
 
@@ -73,22 +94,16 @@ git clone https://github.com/nathanchance/local_manifests.git Manifests
 
 
 
-# Sync AICP
-. ${ANDROIDDIR}/Scripts/rom_folder.sh aicp nosync
-# Sync AOSIP
-. ${ANDROIDDIR}/Scripts/rom_folder.sh aosip nosync
-# Sync DU
-. ${ANDROIDDIR}/Scripts/rom_folder.sh du sync
-# Sync PN
+# Sync PN (will serve as our reference)
 . ${ANDROIDDIR}/Scripts/rom_folder.sh pn sync
 # Sync PN Mod
 . ${ANDROIDDIR}/Scripts/rom_folder.sh pnmod sync
+# Sync DU
+. ${ANDROIDDIR}/Scripts/rom_folder.sh du sync
 # Sync RR
 . ${ANDROIDDIR}/Scripts/rom_folder.sh rr sync
-# Sync Screwd
-. ${ANDROIDDIR}/scripts/rom_folder.sh screwd nosync
-# Sync Temasek
-. ${ANDROIDDIR}/scripts/rom_folder.sh temasek nosync
+# Sync AOSIP
+. ${ANDROIDDIR}/Scripts/rom_folder.sh aosip sync
 
 
 
@@ -126,3 +141,14 @@ git clone https://github.com/DespairFactor/angler.git Kylo
 mkdir ${KERNELSDIR}/Toolchains
 
 . sync_toolchains.sh
+
+
+
+echo -e ${BLDRED}
+echo -e "-------------------------------------"
+echo -e "SCRIPT ENDING AT $(date +%D\ %r)"
+echo -e ""
+echo -e "TIME: $(echo $(($END-$START)) | awk '{print int($1/60)"mins "int($1%60)"secs"}')"
+echo -e "-------------------------------------"
+echo -e ${RST}
+echo -e "\a"

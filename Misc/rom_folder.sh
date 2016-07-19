@@ -33,47 +33,28 @@ ROM_DIR=${ANDROID_DIR}/ROMs
 
 
 # Define the name of the source directory as well as the repo URL and the repo branch to sync
-if [ "${ROM}" == "aicp" ]
-then
-   SOURCE_DIR=${ROM_DIR}/AICP
-   REPO_URL=https://github.com/AICP/platform_manifest.git
-   REPO_BRANCH=mm6.0
-elif [ "${ROM}" == "aosip" ]
-then
-   SOURCE_DIR=${ROM_DIR}/AOSiP
-   REPO_URL=https://github.com/AOSIP/platform_manifest.git
-   REPO_BRANCH=mm6.0
-elif [ "${ROM}" == "du" ]
-then
-   SOURCE_DIR=${ROM_DIR}/DU
-   REPO_URL=http://github.com/DirtyUnicorns/android_manifest.git
-   REPO_BRANCH=m
-elif [ "${ROM}" == "pn" ]
-then
-   SOURCE_DIR=${ROM_DIR}/PN
-   REPO_URL=https://github.com/PureNexusProject/manifest.git
-   REPO_BRANCH=mm2
-elif [ "${ROM}" == "pnmod" ]
-then
-   SOURCE_DIR=${ROM_DIR}/PN-Mod
-   REPO_URL=https://github.com/ezio84/pnmod-manifest.git
-   REPO_BRANCH=mm2
-elif [ "${ROM}" == "rr" ]
-then
-   SOURCE_DIR=${ROM_DIR}/RR
-   REPO_URL=https://github.com/ResurrectionRemix/platform_manifest.git
-   REPO_BRANCH=marshmallow
-elif [ "${ROM}" == "screwd" ]
-then
-   SOURCE_DIR=${ROM_DIR}/Screwd
-   REPO_URL=https://github.com/ScrewdAOSP/platform_manifest.git
-   REPO_BRANCH=m
-elif [ "${ROM}" == "temasek" ]
-then
-   SOURCE_DIR=${ROM_DIR}/Temasek
-   REPO_URL=https://github.com/temasek/android.git
-   REPO_BRANCH=cm-13.0
-fi
+case "${ROM}" in
+   "aosip")
+      SOURCE_DIR=${ROM_DIR}/AOSiP
+      REPO_URL=https://github.com/AOSIP/platform_manifest.git
+      REPO_BRANCH=mm6.0 ;;
+   "du")
+      SOURCE_DIR=${ROM_DIR}/DU
+      REPO_URL=http://github.com/DirtyUnicorns/android_manifest.git
+      REPO_BRANCH=m ;;
+   "pn")
+      SOURCE_DIR=${ROM_DIR}/PN
+      REPO_URL=https://github.com/PureNexusProject/manifest.git
+      REPO_BRANCH=oms ;;
+   "pnmod")
+      SOURCE_DIR=${ROM_DIR}/PN-Mod
+      REPO_URL=https://github.com/ezio84/pnmod-manifest.git
+      REPO_BRANCH=mm2 ;;
+   "rr")
+      SOURCE_DIR=${ROM_DIR}/RR
+      REPO_URL=https://github.com/ResurrectionRemix/platform_manifest.git
+      REPO_BRANCH=marshmallow ;;
+esac
 
 
 
@@ -118,7 +99,11 @@ then
 
    # run the repo command
    cd ${SOURCE_DIR}
-   repo init -u ${REPO_URL} -b ${REPO_BRANCH}
+   if [[ "${ROM}" == "pn" ]]; then
+      repo init -u ${REPO_URL} -b ${REPO_BRANCH}
+   else
+      repo init --reference="${ROM_DIR}/PN" -u ${REPO_URL} -b ${REPO_BRANCH}
+   fi
 
    # I use local manifests with both PN Mod (for Shamu and Bullhead support) and RR (for Shamu support)
    if [ "${ROM}" == "rr" ]
