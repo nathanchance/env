@@ -69,7 +69,7 @@ else
    git config --global user.name "Nathan Chancellor"
    git config --global user.email "natechancellor@gmail.com"
    echo "Don't forget to add ccache and the Scripts info to .bashrc"
-   nano .bashrc
+   nano ${HOME}/.bashrc
 fi
 
 
