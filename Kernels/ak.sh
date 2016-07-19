@@ -181,10 +181,10 @@ function compile {
       echo
 
       cd ${KERNEL_DIR}
-      git checkout ${KER_BRANCH} > /dev/null 2>&1
-      git reset --hard origin/${KER_BRANCH} > /dev/null 2>&1
+      git checkout ${KER_BRANCH}
+      git reset --hard origin/${KER_BRANCH}
       git clean -f -d -x > /dev/null 2>&1
-      git pull > /dev/null 2>&1
+      git pull
       make clean
       make mrproper
    }
