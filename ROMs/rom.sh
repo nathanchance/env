@@ -253,19 +253,23 @@ function compile() {
 
       newLine
 
-      # 1. Change DESOLATED to KBUILD_BUILD_HOST and allow kernel to be compiled with UBER 6.1
+      # 1. Do not block HOME if background incoming call (marshmallow)
+      cd ${SOURCEDIR}/frameworks/base
+      git fetch https://github.com/nathanchance/android_frameworks_base.git
+      git cherry-pick d073e3efe7328558528cf50f40f4152af439e71a
+      # 2. Change DESOLATED to KBUILD_BUILD_HOST and allow kernel to be compiled with UBER 6.1
       cd ${SOURCEDIR}/kernel/moto/shamu
       git fetch https://github.com/nathanchance/B14CKB1RD_Kernel_N6.git
       git cherry-pick 20f83cadace94da9b711ebb53661b1682885888a
-      # 2. Change from shamu_defconfig to B14CKB1RD_defconfig
+      # 3. Change from shamu_defconfig to B14CKB1RD_defconfig
       cd ${SOURCEDIR}/device/moto/shamu
       git fetch https://github.com/nathanchance/android_device_moto_shamu.git
       git cherry-pick 0d2c6f3bdfe6e78b9b8036471dd3dcb6945fbb51
-      # 3. Stop per app overlays from being reset (thanks @bigrushdog)
+      # 4. Stop per app overlays from being reset (thanks @bigrushdog)
       cd ${SOURCEDIR}/packages/apps/ThemeChooser
       git fetch https://github.com/nathanchance/android_packages_apps_ThemeChooser.git
       git cherry-pick 1cefd98f7ac5db31754a8f7ee1fd62f3ac897b71
-      # 4. Add @Yoinx's Kernel Adiutor-Mod instead of the regular Kernel Adiutor (to complement Blackbird)
+      # 5. Add @Yoinx's Kernel Adiutor-Mod instead of the regular Kernel Adiutor (to complement Blackbird)
       cd ${SOURCEDIR}/vendor/cm/prebuilt/KernelAdiutor
       rm -rf KernelAdiutor.apk
       wget https://github.com/yoinx/kernel_adiutor/raw/master/download/app/app-release.apk
