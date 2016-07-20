@@ -96,7 +96,7 @@ function compile {
             VER=".066-5.ANGLER.NH."
             ZIP_MOVE=${HOME}/shared/Kernels/angler/AK/NH ;;
          "test")
-            KER_BRANCH=n-testing-1
+            KER_BRANCH=n-testing-2
             AK_BRANCH=master
             DEFCONFIG=angler_defconfig
             VER=".N.ANGLER."
@@ -182,9 +182,11 @@ function compile {
 
       cd ${KERNEL_DIR}
       git checkout ${KER_BRANCH}
-      git reset --hard origin/${KER_BRANCH}
-      git clean -f -d -x > /dev/null 2>&1
-      git pull
+      if [[ "${VERSION}" != "test" ]]; then
+         git reset --hard origin/${KER_BRANCH}
+         git clean -f -d -x > /dev/null 2>&1
+         git pull
+      fi
       make clean
       make mrproper
    }
