@@ -71,10 +71,10 @@ function compile {
    AK_BRANCH=ak-angler-anykernel
 
    if [[ ${PERSONAL} = true ]]; then
-      AK_VER="AK.N"
-      KER_BRANCH=nougat
+      AK_VER="AK.M"
+      KER_BRANCH=ak-mm-staging
       TOOLCHAIN_DIR=Toolchains/Linaro/DF-6.1
-      # PERMISSIVE=true
+      PERMISSIVE=true
       ZIP_MOVE=${HOME}/shared/.me
       export KBUILD_BUILD_USER=nathan
       export KBUILD_BUILD_HOST=phoenix
