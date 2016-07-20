@@ -242,7 +242,9 @@ function compile {
          rm  ${ZIP_MOVE}/${BASE_AK_VER}*${TOOLCHAIN_VER}.zip
       fi
       mv  `echo ${AK_VER}`.zip ${ZIP_MOVE}
-      cd ${HOME}
+      if [[ "${VERSION}" != "test" ]]; then
+         cd ${HOME}
+      fi
    }
 
 
