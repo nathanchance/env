@@ -71,10 +71,10 @@ function compile {
    AK_BRANCH=ak-angler-anykernel
 
    if [[ ${PERSONAL} = true ]]; then
-      AK_VER="AK.066-5"
-      KER_BRANCH=ak-mm-staging
+      AK_VER="AK.N"
+      KER_BRANCH=nougat
       TOOLCHAIN_DIR=Toolchains/Linaro/DF-6.1
-      PERMISSIVE=true
+      # PERMISSIVE=true
       ZIP_MOVE=${HOME}/shared/.me
       export KBUILD_BUILD_USER=nathan
       export KBUILD_BUILD_HOST=phoenix
@@ -85,22 +85,16 @@ function compile {
       case "${VERSION}" in
          "norm")
             KER_BRANCH=ak-mm-staging
-            VER=".066-5.ANGLER."
+            VER=".M.066-5.ANGLER."
             ZIP_MOVE=${HOME}/shared/Kernels/angler/AK/Normal ;;
          "eas")
             KER_BRANCH=ak-mm-staging-eas
-            VER=".066-5.ANGLER.EAS."
+            VER=".M.066-5.ANGLER.EAS."
             ZIP_MOVE=${HOME}/shared/Kernels/angler/AK/EAS ;;
          "nh")
             KER_BRANCH=ak-mm-staging-nh
-            VER=".066-5.ANGLER.NH."
+            VER=".M.066-5.ANGLER.NH."
             ZIP_MOVE=${HOME}/shared/Kernels/angler/AK/NH ;;
-         "test")
-            KER_BRANCH=n-testing-2
-            # AK_BRANCH=master
-            # DEFCONFIG=angler_defconfig
-            VER=".N.ANGLER."
-            ZIP_MOVE=${HOME}/shared/Kernels/angler/AK/.tests ;;
          "n")
             KER_BRANCH=nougat
             VER=".N.001.ANGLER."
