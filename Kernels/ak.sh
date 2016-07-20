@@ -96,7 +96,7 @@ function compile {
             VER=".066-5.ANGLER.NH."
             ZIP_MOVE=${HOME}/shared/Kernels/angler/AK/NH ;;
          "test")
-            KER_BRANCH=testing
+            KER_BRANCH=n-testing-1
             AK_BRANCH=master
             DEFCONFIG=angler_defconfig
             VER=".N.ANGLER."
