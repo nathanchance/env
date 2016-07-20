@@ -85,19 +85,19 @@ function compile {
       case "${VERSION}" in
          "norm")
             KER_BRANCH=ak-mm-staging
-            VER=".M.066-5.ANGLER."
+            VER=".M.066-5."
             ZIP_MOVE=${HOME}/shared/Kernels/angler/AK/Normal ;;
          "eas")
             KER_BRANCH=ak-mm-staging-eas
-            VER=".M.066-5.ANGLER.EAS."
+            VER=".M.066-5.EAS."
             ZIP_MOVE=${HOME}/shared/Kernels/angler/AK/EAS ;;
          "nh")
             KER_BRANCH=ak-mm-staging-nh
-            VER=".M.066-5.ANGLER.NH."
+            VER=".M.066-5.NH."
             ZIP_MOVE=${HOME}/shared/Kernels/angler/AK/NH ;;
          "n")
             KER_BRANCH=nougat
-            VER=".N.001.ANGLER."
+            VER=".N.001."
             ZIP_MOVE=${HOME}/shared/Kernels/angler/AK/.tests ;;
       esac
 
