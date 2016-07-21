@@ -75,7 +75,7 @@ function compile {
 
    if [[ ${PERSONAL} = true ]]; then
       AK_VER="AK.M"
-      KER_BRANCH=ak-mm-staging
+      KER_BRANCH=m-full-upstream
       TOOLCHAIN_DIR=Toolchains/Linaro/DF-6.1
       PERMISSIVE=true
       ZIP_MOVE=${HOME}/shared/.me
