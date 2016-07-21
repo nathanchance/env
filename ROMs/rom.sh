@@ -96,6 +96,7 @@ function compile() {
 
    # Unassign flags and reset DU_BUILD_TYPE
    export DU_BUILD_TYPE=CHANCELLOR
+   export LOCALVERSION=
    PERSON=
    MOD=false
    TEST=false
