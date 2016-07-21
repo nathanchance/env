@@ -79,6 +79,14 @@ function compile {
       export KBUILD_BUILD_USER=nathan
       export KBUILD_BUILD_HOST=phoenix
 
+   elif [[ ${VERSION} == "test" ]]; then
+      AK_VER="AK.M"
+      KER_BRANCH=upstream-m
+      AK_BRANCH=master
+      DEFCONFIG=angler_defconfig
+      TOOLCHAIN_DIR=Toolchains/Linaro/DF-6.1
+      ZIP_MOVE=${HOME}/shared/.me/.hidden
+
    else
       BASE_AK_VER="AK"
 
@@ -98,7 +106,7 @@ function compile {
          "n")
             KER_BRANCH=nougat
             VER=".N.001."
-            ZIP_MOVE=${HOME}/shared/Kernels/angler/AK/.tests ;;
+            ZIP_MOVE=${HOME}/shared/Kernels/angler/AK/N ;;
       esac
 
       case "${TOOLCHAIN}" in
