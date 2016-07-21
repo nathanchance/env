@@ -85,8 +85,8 @@ function compile {
    elif [[ ${TEST} = true ]]; then
       AK_VER="AK.M"
       KER_BRANCH=upstream-m
-      AK_BRANCH=master
-      DEFCONFIG=angler_defconfig
+      AK_BRANCH=ak-angler-anykernel
+      DEFCONFIG=ak_angler_defconfig
       TOOLCHAIN_DIR=Toolchains/Linaro/DF-6.1
       ZIP_MOVE=${HOME}/shared/.me/.hidden
 
