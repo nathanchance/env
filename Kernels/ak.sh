@@ -20,6 +20,7 @@ function compile {
 
    # Free flags
    PERSONAL=false
+   TEST=false
    PERMISSIVE=false
 
    # Set USER and HOST variables back to what they are in .bashrc
@@ -29,6 +30,8 @@ function compile {
    # If the first parameter is "me", set the personal flag to true
    if [[ "${1}" == "me" ]]; then
       PERSONAL=true
+   elif [[ "${1}" == "test" ]]; then
+      TEST=true
    # Otherwise, parameters are as above.
    else
       TOOLCHAIN=${1}
@@ -79,7 +82,7 @@ function compile {
       export KBUILD_BUILD_USER=nathan
       export KBUILD_BUILD_HOST=phoenix
 
-   elif [[ ${VERSION} == "test" ]]; then
+   elif [[ ${TEST} = true ]]; then
       AK_VER="AK.M"
       KER_BRANCH=upstream-m
       AK_BRANCH=master
@@ -184,7 +187,7 @@ function compile {
 
       cd ${KERNEL_DIR}
       git checkout ${KER_BRANCH}
-      if [[ "${VERSION}" != "test" ]]; then
+      if [[ ${TEST} = false ]]; then
          git reset --hard origin/${KER_BRANCH}
          git clean -f -d -x > /dev/null 2>&1
          git pull
@@ -244,7 +247,7 @@ function compile {
          rm  ${ZIP_MOVE}/${BASE_AK_VER}*${TOOLCHAIN_VER}.zip
       fi
       mv  `echo ${AK_VER}`.zip ${ZIP_MOVE}
-      if [[ "${VERSION}" == "test" ]]; then
+      if [[ ${TEST} = true ]]; then
          cd ${KERNEL_DIR}
       else
          cd ${HOME}
