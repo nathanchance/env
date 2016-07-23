@@ -205,7 +205,7 @@ function compile {
       if [[ ${PERMISSIVE} = true ]]; then
          git cherry-pick ba804bd138aa89dbe2f2fc73fd751af60a831097
          if [[ ${PERSONAL} = false ]]; then
-            ZIP_MOVE=${ZIP_MOVE}/Permissive
+            ZIP_MOVE=${ZIP_MOVE}/.per
          fi
       fi
 
@@ -407,6 +407,13 @@ if [[ "${1}" == "all" ]]; then
             compile ${TOOLCHAIN} ${VERSION} ${3}
          done
       done
+
+      # Zip up all releases into a release.zip and move it to the release folder in order to upload to AFH easily
+      cd ${HOME}/shared/Kernels/angler/AK
+      zip -r release.zip Normal EAS NH
+      rm -vrf .releases/release.zip
+      mv -v release.zip .releases
+      . ${HOME}/upload.sh
    fi
 
    cd ${HOME}
