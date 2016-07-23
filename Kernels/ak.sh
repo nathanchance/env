@@ -75,7 +75,7 @@ function compile {
 
    if [[ ${PERSONAL} = true ]]; then
       AK_VER="AK.M"
-      KER_BRANCH=m-full-upstream
+      KER_BRANCH=m-standard
       TOOLCHAIN_DIR=Toolchains/Linaro/DF-6.1
       PERMISSIVE=true
       ZIP_MOVE=${HOME}/shared/.me
@@ -84,7 +84,7 @@ function compile {
 
    elif [[ ${TEST} = true ]]; then
       AK_VER="AK.M"
-      KER_BRANCH=upstream-m
+      KER_BRANCH=m-standard
       AK_BRANCH=ak-angler-anykernel
       DEFCONFIG=ak_angler_defconfig
       TOOLCHAIN_DIR=Toolchains/Linaro/DF-6.1
@@ -95,19 +95,19 @@ function compile {
 
       case "${VERSION}" in
          "norm")
-            KER_BRANCH=ak-mm-staging
-            VER=".M.066-5."
+            KER_BRANCH=m-standard
+            VER=".M.066-6."
             ZIP_MOVE=${HOME}/shared/Kernels/angler/AK/Normal ;;
          "eas")
-            KER_BRANCH=ak-mm-staging-eas
-            VER=".M.066-5.EAS."
+            KER_BRANCH=m-eas
+            VER=".M.066-6.EAS."
             ZIP_MOVE=${HOME}/shared/Kernels/angler/AK/EAS ;;
          "nh")
-            KER_BRANCH=ak-mm-staging-nh
-            VER=".M.066-5.NH."
+            KER_BRANCH=m-nethunter
+            VER=".M.066-6.NH."
             ZIP_MOVE=${HOME}/shared/Kernels/angler/AK/NH ;;
          "n")
-            KER_BRANCH=nougat
+            KER_BRANCH=n-standard
             VER=".N.001."
             ZIP_MOVE=${HOME}/shared/Kernels/angler/AK/N ;;
       esac
