@@ -85,8 +85,6 @@ function compile {
    elif [[ ${TEST} = true ]]; then
       AK_VER="AK.N"
       KER_BRANCH=n-testing
-      #AK_BRANCH=ak-angler-anykernel
-      #DEFCONFIG=ak_angler_defconfig
       TOOLCHAIN_DIR=Toolchains/Linaro/DF-6.1
       ZIP_MOVE=${HOME}/shared/.me/.hidden
 
@@ -107,7 +105,7 @@ function compile {
             VER=".M.066-6.NH."
             ZIP_MOVE=${HOME}/shared/Kernels/angler/AK/NH ;;
          "n")
-            KER_BRANCH=n-standard
+            KER_BRANCH=n-testing
             VER=".N.001."
             ZIP_MOVE=${HOME}/shared/Kernels/angler/AK/N ;;
       esac
