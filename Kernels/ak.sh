@@ -83,11 +83,14 @@ function compile {
       export KBUILD_BUILD_HOST=phoenix
 
    elif [[ ${TEST} = true ]]; then
-      AK_VER="AK.M"
-      KER_BRANCH=m-standard
+      AK_VER="AK.N"
+      #KER_BRANCH=n-linux
+      #AK_BRANCH=master
+      #DEFCONFIG=angler_defconfig
+      KER_BRANCH=n-standard
       AK_BRANCH=ak-angler-anykernel
       DEFCONFIG=ak_angler_defconfig
-      TOOLCHAIN_DIR=Toolchains/Linaro/DF-6.1
+      TOOLCHAIN_DIR=Toolchains/AOSP
       ZIP_MOVE=${HOME}/shared/.me/.hidden
 
    else
