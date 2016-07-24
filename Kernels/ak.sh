@@ -106,7 +106,7 @@ function compile {
             ZIP_MOVE=${HOME}/shared/Kernels/angler/AK/NH ;;
          "n")
             KER_BRANCH=n-testing
-            VER=".N.001."
+            VER=".N.002."
             ZIP_MOVE=${HOME}/shared/Kernels/angler/AK/N ;;
       esac
 
