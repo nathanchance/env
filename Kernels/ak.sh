@@ -68,8 +68,8 @@ function compile {
    # Variables
    # ---------
    THREAD="-j$(grep -c ^processor /proc/cpuinfo)"
-   KERNEL="Image.gz-dtb"
-   #DTBIMAGE="dtb"
+   KERNEL="Image.gz"
+   DTBIMAGE="dtb"
    DEFCONFIG="ak_angler_defconfig"
    AK_BRANCH=ak-angler-anykernel
 
@@ -331,7 +331,7 @@ function compile {
    echo -e ${RESTORE}
 
    make_kernel
-   #make_dtb
+   make_dtb
    make_modules
 
 
