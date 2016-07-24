@@ -87,7 +87,7 @@ function compile {
       KER_BRANCH=n-testing
       #AK_BRANCH=ak-angler-anykernel
       #DEFCONFIG=ak_angler_defconfig
-      TOOLCHAIN_DIR=Toolchains/AOSP
+      TOOLCHAIN_DIR=Toolchains/Linaro/DF-6.1
       ZIP_MOVE=${HOME}/shared/.me/.hidden
 
    else
