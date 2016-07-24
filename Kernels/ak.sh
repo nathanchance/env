@@ -85,8 +85,8 @@ function compile {
    elif [[ ${TEST} = true ]]; then
       AK_VER="AK.N"
       KER_BRANCH=n-testing
-      AK_BRANCH=master
-      DEFCONFIG=ak_angler_defconfig
+      #AK_BRANCH=ak-angler-anykernel
+      #DEFCONFIG=ak_angler_defconfig
       TOOLCHAIN_DIR=Toolchains/AOSP
       ZIP_MOVE=${HOME}/shared/.me/.hidden
 
