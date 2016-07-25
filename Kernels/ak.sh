@@ -94,19 +94,19 @@ function compile {
       case "${VERSION}" in
          "norm")
             KER_BRANCH=m-standard
-            VER=".M.066-6."
+            VER=".M.066-7."
             ZIP_MOVE=${HOME}/shared/Kernels/angler/AK/Normal ;;
          "eas")
             KER_BRANCH=m-eas
-            VER=".M.066-6.EAS."
+            VER=".M.066-7.EAS."
             ZIP_MOVE=${HOME}/shared/Kernels/angler/AK/EAS ;;
          "nh")
             KER_BRANCH=m-nethunter
-            VER=".M.066-6.NH."
+            VER=".M.066-7.NH."
             ZIP_MOVE=${HOME}/shared/Kernels/angler/AK/NH ;;
          "n")
             KER_BRANCH=n-testing
-            VER=".N.002."
+            VER=".N.003."
             ZIP_MOVE=${HOME}/shared/Kernels/angler/AK/N ;;
       esac
 
@@ -408,7 +408,7 @@ if [[ "${1}" == "all" ]]; then
 
       # Zip up all releases into a release.zip and move it to the release folder in order to upload to AFH easily
       cd ${HOME}/shared/Kernels/angler/AK
-      zip -r release.zip Normal EAS NH
+      zip -r release.zip Normal EAS NH N
       rm -vrf .releases/release.zip
       mv -v release.zip .releases
       . ${HOME}/upload.sh
