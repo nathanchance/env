@@ -125,14 +125,10 @@ function compile() {
                   case "${3}" in
                      "alcolawl")
                         export DU_BUILD_TYPE=ALCOLAWL ;;
-                     "bre")
-                        export DU_BUILD_TYPE=BREYANA ;;
-                     "drew")
-                        export DU_BUILD_TYPE=DREW ;;
                      "hmhb")
                         export DU_BUILD_TYPE=DIRTY-DEEDS ;;
                      "jdizzle")
-                        export DU_BUILD_TYPE=NINJA ;;
+                        export DU_BUILD_TYPE=ASYLUM ;;
                   esac ;;
 
                # And it's PN, we are running either a Mod or test PN build
