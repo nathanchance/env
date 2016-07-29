@@ -135,7 +135,7 @@ function compile() {
                         export DU_BUILD_TYPE=NINJA ;;
                   esac ;;
 
-               # And it's PN, we are running either a Mod or test build
+               # And it's PN, we are running either a Mod or test PN build
                "pn")
                   case "${3}" in
                      "mod")
@@ -192,13 +192,13 @@ function compile() {
             case "${MOD}" in
                "true")
                   SOURCEDIR=${ANDROIDDIR}/ROMs/PN-Mod
-                  ZIPMOVE=${HOME}/shared/ROMs/"Pure Nexus Mod"/OMS/${DEVICE} ;;
+                  ZIPMOVE=${HOME}/shared/ROMs/"Pure Nexus Mod"/${DEVICE} ;;
                "false")
                   SOURCEDIR=${ANDROIDDIR}/ROMs/PN
                   if [[ ${TEST} = true ]]; then
                      ZIPMOVE=${HOME}/shared/ROMs/"Pure Nexus"/.tests/${DEVICE}
                   else
-                     ZIPMOVE=${HOME}/shared/ROMs/"Pure Nexus"/OMS/${DEVICE}
+                     ZIPMOVE=${HOME}/shared/ROMs/"Pure Nexus"/${DEVICE}
                   fi ;;
             esac ;;
          "rr")
@@ -320,21 +320,24 @@ function compile() {
 
 
 
-      # Remove existing files in ZIPMOVE
-      newLine; echoText "CLEANING ZIPMOVE DIRECTORY"
+      # If the upload directory doesn't exist, make it; otherwise, remove existing files in ZIPMOVE
+      if [[ ! -d "${ZIPMOVE}" ]]; then
+         newLine; echoText "MAKING ZIPMOVE DIRECTORY"
 
-      if [[ ${ROM} == "pn" && ${MOD} = true && ${DEVICE} == "angler" && ${PERSONAL} = false ]]; then
-         rm -vrf ${HOME}/shared/.me/*${ZIPFORMAT}*
+         mkdir -p "${ZIPMOVE}"
+      else
+         newLine; echoText "CLEANING ZIPMOVE DIRECTORY"
+
+         rm -vrf "${ZIPMOVE}"/*${ZIPFORMAT}*
       fi
-
-      rm -vrf "${ZIPMOVE}"/*${ZIPFORMAT}*
-
+      
 
 
       # Copy new files to ZIPMOVE
       echoText "MOVING FILES TO ZIPMOVE DIRECTORY"; newLine
 
       if [[ ${ROM} == "pn" && ${MOD} = true && ${DEVICE} == "angler" && ${PERSONAL} = false ]]; then
+         rm -vrf ${HOME}/shared/.me/*${ZIPFORMAT}*
          cp -v ${OUTDIR}/*${ZIPFORMAT}* ${HOME}/shared/.me
       fi
 
@@ -404,9 +407,14 @@ function compile() {
    echo -e "\a"
 }
 
-# If the first parameter to the rom.sh script is "all" followed by the rom type, we are running four builds for the devices we support; otherwise, it is just one build with the parameters given
-if [[ "${1}" == "all" ]]; then
-   DEVICES="angler shamu bullhead hammerhead"
+# If the first parameter to the rom.sh script is "normal" or "release" followed by the rom type, we are running four or seven builds for the devices we support; otherwise, it is just one build with the parameters given
+if [[ "${1}" == "normal" || "${1}" == "release" ]]; then
+   case "${1}" in
+      "normal")
+         DEVICES="angler shamu bullhead hammerhead" ;;
+      "release")
+         DEVICES="angler shamu bullhead hammerhead flo deb flounder" ;;
+   esac
 
    for DEVICE in ${DEVICES}; do
       compile ${2} ${DEVICE} ${3} ${4}
