@@ -55,8 +55,8 @@ function changelog() {
    export CHANGELOG="${FILEMOVE}"/changelog.txt
 
    # If a changelog exists, remove it
-   if [[ -f ${CHANGELOG} ]]; then
-   	rm -rf ${CHANGELOG}
+   if [[ -f "${CHANGELOG}" ]]; then
+   	rm -rf "${CHANGELOG}"
    fi
 
    touch "${CHANGELOG}"
@@ -95,7 +95,7 @@ function compile() {
    # Parameter 3: Pure Nexus Mod/test build or a personalized Dirty Unicorns build (omit if neither applies)
 
    # Unassign flags and reset DU_BUILD_TYPE
-   export DU_BUILD_TYPE=CHANCELLOR
+   export DU_BUILD_TYPE=
    export LOCALVERSION=
    PERSON=
    MOD=false
@@ -183,7 +183,7 @@ function compile() {
                ZIPFORMAT=DU_${DEVICE}_*.zip
             else
                SOURCEDIR=${ANDROIDDIR}/ROMs/DU
-               ZIPMOVE=${HOME}/shared/ROMs/"Dirty Unicorns"/${DEVICE}
+               ZIPMOVE=${HOME}/shared/ROMs/DirtyUnicorns/${DEVICE}
                ZIPFORMAT=DU_${DEVICE}_*.zip
             fi ;;
          "pn")
@@ -192,23 +192,19 @@ function compile() {
             case "${MOD}" in
                "true")
                   SOURCEDIR=${ANDROIDDIR}/ROMs/PN-Mod
-                  ZIPMOVE=${HOME}/shared/ROMs/"Pure Nexus Mod"/${DEVICE} ;;
+                  ZIPMOVE=${HOME}/shared/ROMs/PureNexusMod/${DEVICE} ;;
                "false")
                   SOURCEDIR=${ANDROIDDIR}/ROMs/PN
                   if [[ ${TEST} = true ]]; then
-                     ZIPMOVE=${HOME}/shared/ROMs/"Pure Nexus"/.tests/${DEVICE}
+                     ZIPMOVE=${HOME}/shared/ROMs/PureNexus/.tests/${DEVICE}
                   else
-                     ZIPMOVE=${HOME}/shared/ROMs/"Pure Nexus"/${DEVICE}
+                     ZIPMOVE=${HOME}/shared/ROMs/PureNexus/${DEVICE}
                   fi ;;
             esac ;;
          "rr")
             SOURCEDIR=${ANDROIDDIR}/ROMs/RR
             ZIPMOVE=${HOME}/shared/ROMs/ResurrectionRemix/${DEVICE}
             ZIPFORMAT=ResurrectionRemix*-${DEVICE}.zip ;;
-         "screwd")
-            SOURCEDIR=${ANDROIDDIR}/ROMs/Screwd
-            ZIPMOVE=${HOME}/shared/ROMs/"Screw'd"/${DEVICE}
-            ZIPFORMAT=screwd-*${SCREWD_BUILD_TYPE}*.zip ;;
       esac
    fi
 
@@ -330,7 +326,7 @@ function compile() {
 
          rm -vrf "${ZIPMOVE}"/*${ZIPFORMAT}*
       fi
-      
+
 
 
       # Copy new files to ZIPMOVE
