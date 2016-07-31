@@ -122,7 +122,8 @@ function compile() {
             # And it's DU, we are running a personalized build
             case "${ROM}" in
                "du")
-                  case "${3}" in
+                  PERSON=${3}
+                  case "${PERSON}" in
                      "alcolawl")
                         export DU_BUILD_TYPE=ALCOLAWL ;;
                      "hmhb")
