@@ -245,9 +245,10 @@ function compile {
          rm  ${ZIP_MOVE}/${BASE_AK_VER}*${TOOLCHAIN_VER}.zip
       fi
       mv  `echo ${AK_VER}`.zip ${ZIP_MOVE}
-      if [[ ${TEST} = true ]]; then
-         cd ${KERNEL_DIR}
-      else
+      cd ${KERNEL_DIR}
+      if [[ ${TEST} = false ]]; then
+         git reset --hard origin/${KER_BRANCH}
+         git clean -f -d -x > /dev/null 2>&1
          cd ${HOME}
       fi
    }
