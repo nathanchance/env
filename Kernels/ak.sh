@@ -94,15 +94,15 @@ function compile {
       case "${VERSION}" in
          "norm")
             KER_BRANCH=m-standard
-            VER=".M.066-7."
+            VER=".M.066-8."
             ZIP_MOVE=${HOME}/shared/Kernels/angler/AK/Normal ;;
          "eas")
             KER_BRANCH=m-eas
-            VER=".M.066-7.EAS."
+            VER=".M.066-8.EAS."
             ZIP_MOVE=${HOME}/shared/Kernels/angler/AK/EAS ;;
          "nh")
             KER_BRANCH=m-nethunter
-            VER=".M.066-7.NH."
+            VER=".M.066-8.NH."
             ZIP_MOVE=${HOME}/shared/Kernels/angler/AK/NH ;;
          "n")
             KER_BRANCH=n-testing
