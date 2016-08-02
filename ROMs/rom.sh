@@ -94,8 +94,9 @@ function compile() {
    # Parameter 2:   Device (eg. angler, bullhead, shamu); not necessary for RR
    # Parameter 3: Pure Nexus Mod/test build or a personalized Dirty Unicorns build (omit if neither applies)
 
-   # Unassign flags and reset DU_BUILD_TYPE
+   # Unassign flags and reset DU_BUILD_TYPE, PURENEXUS_BUILD_TYPE, and LOCALVERSION
    export DU_BUILD_TYPE=
+   export PURENEXUS_BUILD_TYPE=
    export LOCALVERSION=
    PERSON=
    MOD=false
@@ -158,7 +159,8 @@ function compile() {
    ANDROIDDIR=${HOME}
 
    if [[ ${PERSONAL} = true ]]; then
-      SOURCEDIR=${ANDROIDDIR}/ROMs/PN-Mod
+      export PURENEXUS_BUILD_TYPE=CHANCELLOR
+      SOURCEDIR=${ANDROIDDIR}/ROMs/PN
       ZIPMOVE=${HOME}/shared/.me
       ZIPFORMAT=pure_nexus_${DEVICE}-*.zip
 
@@ -328,11 +330,6 @@ function compile() {
 
       # Copy new files to ZIPMOVE
       echoText "MOVING FILES TO ZIPMOVE DIRECTORY"; newLine
-
-      if [[ ${ROM} == "pn" && ${MOD} = true && ${DEVICE} == "angler" && ${PERSONAL} = false ]]; then
-         rm -vrf ${HOME}/shared/.me/*${ZIPFORMAT}*
-         cp -v ${OUTDIR}/*${ZIPFORMAT}* ${HOME}/shared/.me
-      fi
 
       mv -v ${OUTDIR}/*${ZIPFORMAT}* "${ZIPMOVE}"
 
