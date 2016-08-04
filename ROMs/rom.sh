@@ -31,9 +31,9 @@ function echoText() {
    RST="\033[0m"
 
    echo -e ${RED}
-   echo -e "$( for i in `seq ${#1}`; do echo -e "-\c"; done )"
+   echo -e "$( for i in $( seq ${#1} ); do echo -e "-\c"; done )"
    echo -e "${1}"
-   echo -e "$( for i in `seq ${#1}`; do echo -e "-\c"; done )"
+   echo -e "$( for i in $( seq ${#1} ); do echo -e "-\c"; done )"
    echo -e ${RST}
 }
 
@@ -65,11 +65,11 @@ function changelog() {
 
    cd ${REPODIR}
 
-   # Echos the git log to the changelog file for the past 7 days
-   for i in $(seq 10); do
-      export AFTER_DATE=`date --date="$i days ago" +%m-%d-%Y`
-      k=$(expr $i - 1)
-   	export UNTIL_DATE=`date --date="$k days ago" +%m-%d-%Y`
+   # Echos the git log to the changelog file for the past 10 days
+   for i in $( seq 10 ); do
+      export AFTER_DATE=$( date --date="$i days ago" +%m-%d-%Y )
+      k=$( expr $i - 1 )
+   	export UNTIL_DATE=$( date --date="$k days ago" +%m-%d-%Y )
 
    	# Line with after --- until was too long for a small ListView
    	echo '=======================' >> "${CHANGELOG}";
@@ -213,7 +213,7 @@ function compile() {
 
    # Export the LOG variable for other files to use (I currently handle this via .bashrc)
    # export LOGDIR=${ANDROIDDIR}/Logs
-   # export LOG=${LOGDIR}/compile_log_`date +%m_%d_%y`.log
+   # export LOG=${LOGDIR}/compile_log_$( date +%m_%d_%y ).log
 
 
 
@@ -223,9 +223,9 @@ function compile() {
 
 
    # Start tracking time
-   echoText "SCRIPT STARTING AT $(date +%D\ %r)"
+   echoText "SCRIPT STARTING AT $( date +%D\ %r )"
 
-   START=$(date +%s)
+   START=$( date +%s )
 
 
 
@@ -284,7 +284,7 @@ function compile() {
 
 
    # Prepare device
-   echoText "PREPARING DEVICE"; newLine
+   echoText "PREPARING $( echo ${DEVICE} | awk '{print toupper($0)}' )"; newLine
 
    if [[ "${ROM}" == "screwd" ]]; then
       lunch screwd_${DEVICE}-userdebug
@@ -309,7 +309,7 @@ function compile() {
 
 
    # If the compilation was successful, there will be a zip in the format above in the out directory
-   if [[ `ls ${OUTDIR}/${ZIPFORMAT} 2>/dev/null | wc -l` != "0" ]]; then
+   if [[ $( ls ${OUTDIR}/${ZIPFORMAT} 2>/dev/null | wc -l ) != "0" ]]; then
       # Make the build result string show success
       BUILD_RESULT_STRING="BUILD SUCCESSFUL"
 
@@ -369,30 +369,30 @@ function compile() {
 
 
    # Stop tracking time
-   END=$(date +%s)
+   END=$( date +%s )
    echo -e ${RED}
    echo -e "-------------------------------------"
-   echo -e "SCRIPT ENDING AT $(date +%D\ %r)"
+   echo -e "SCRIPT ENDING AT $( date +%D\ %r )"
    echo -e ""
    echo -e "${BUILD_RESULT_STRING}!"
-   echo -e "TIME: $(echo $((${END}-${START})) | awk '{print int($1/60)" MINUTES AND "int($1%60)" SECONDS"}')"
+   echo -e "TIME: $( echo $( (${END}-${START}) ) | awk '{print int($1/60)" MINUTES AND "int($1%60)" SECONDS"}' )"
    echo -e "-------------------------------------"
    echo -e ${RST}
 
    # Add line to compile log
    if [[ ${PERSONAL} = true ]]; then
-      echo -e "`date +%H:%M:%S`: ${BASH_SOURCE} me" >> ${LOG}
+      echo -e "$( date +%H:%M:%S ): ${BASH_SOURCE} me" >> ${LOG}
    elif [[ ${MOD} = true ]]; then
-      echo -e "`date +%H:%M:%S`: ${BASH_SOURCE} ${ROM} mod ${DEVICE}" >> ${LOG}
+      echo -e "$( date +%H:%M:%S ): ${BASH_SOURCE} ${ROM} mod ${DEVICE}" >> ${LOG}
    elif [[ ${TEST} = true ]]; then
-      echo -e "`date +%H:%M:%S`: ${BASH_SOURCE} ${ROM} test ${DEVICE}" >> ${LOG}
+      echo -e "$( date +%H:%M:%S ): ${BASH_SOURCE} ${ROM} test ${DEVICE}" >> ${LOG}
    elif [[ -n ${PERSON} ]]; then
-      echo -e "`date +%H:%M:%S`: ${BASH_SOURCE} ${ROM} ${PERSON}" >> ${LOG}
+      echo -e "$( date +%H:%M:%S ): ${BASH_SOURCE} ${ROM} ${PERSON}" >> ${LOG}
    else
-      echo -e "`date +%H:%M:%S`: ${BASH_SOURCE} ${ROM} ${DEVICE}" >> ${LOG}
+      echo -e "$( date +%H:%M:%S ): ${BASH_SOURCE} ${ROM} ${DEVICE}" >> ${LOG}
    fi
 
-   echo -e "${BUILD_RESULT_STRING} IN $(echo $((${END}-${START})) | awk '{print int($1/60)" MINUTES AND "int($1%60)" SECONDS"}')\n" >> ${LOG}
+   echo -e "${BUILD_RESULT_STRING} IN $( echo $( (${END}-${START}) ) | awk '{print int($1/60)" MINUTES AND "int($1%60)" SECONDS"}' )\n" >> ${LOG}
 
    echo -e "\a"
 }
