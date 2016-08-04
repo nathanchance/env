@@ -4,9 +4,9 @@
 # Usage
 # -----
 # For one device build:
-# $ . rom.sh <me|rom> <device> (mod|person)
+# $ . rom.sh <me|rom> <device> (person)
 # For all device builds:
-# $ . rom.sh all <rom> (mod)
+# $ . rom.sh all <rom>
 
 
 
@@ -16,8 +16,8 @@
 # $ . rom.sh pn angler sync
 # $ . rom.sh du shamu nosync
 # $ . rom.sh me
-# $ . rom.sh all du
-# $ . rom.sh all pn mod
+# $ . rom.sh all du jdizzle
+# $ . rom.sh all pn-mod
 
 
 
@@ -99,7 +99,6 @@ function compile() {
    export PURENEXUS_BUILD_TYPE=
    export LOCALVERSION=
    PERSON=
-   MOD=false
    TEST=false
    PERSONAL=false
 
@@ -133,14 +132,9 @@ function compile() {
                         export DU_BUILD_TYPE=ASYLUM ;;
                   esac ;;
 
-               # And it's PN, we are running either a Mod or test PN build
+               # And it's PN, we are running a test build
                "pn")
-                  case "${3}" in
-                     "mod")
-                        MOD=true ;;
-                     "test")
-                        TEST=true ;;
-                  esac ;;
+                  TEST=true ;;
             esac
          fi
       fi
@@ -186,20 +180,17 @@ function compile() {
                ZIPFORMAT=DU_${DEVICE}_*.zip
             fi ;;
          "pn")
-            ZIPFORMAT=pure_nexus_${DEVICE}-*.zip
-
-            case "${MOD}" in
-               "true")
-                  SOURCEDIR=${ANDROIDDIR}/ROMs/PN-Mod
-                  ZIPMOVE=${HOME}/shared/ROMs/PureNexusMod/${DEVICE} ;;
-               "false")
-                  SOURCEDIR=${ANDROIDDIR}/ROMs/PN
-                  if [[ ${TEST} = true ]]; then
-                     ZIPMOVE=${HOME}/shared/ROMs/PureNexus/.tests/${DEVICE}
-                  else
-                     ZIPMOVE=${HOME}/shared/ROMs/PureNexus/${DEVICE}
-                  fi ;;
-            esac ;;
+            SOURCEDIR=${ANDROIDDIR}/ROMs/PN
+            if [[ ${TEST} = true ]]; then
+               ZIPMOVE=${HOME}/shared/ROMs/PureNexus/.tests/${DEVICE}
+            else
+               ZIPMOVE=${HOME}/shared/ROMs/PureNexus/${DEVICE}
+            fi
+            ZIPFORMAT=pure_nexus_${DEVICE}-*.zip ;;
+         "pn-mod")
+            SOURCEDIR=${ANDROIDDIR}/ROMs/PN-Mod
+            ZIPMOVE=${HOME}/shared/ROMs/PureNexusMod/${DEVICE}
+            ZIPFORMAT=pure_nexus_${DEVICE}-*.zip ;;
          "rr")
             SOURCEDIR=${ANDROIDDIR}/ROMs/RR
             ZIPMOVE=${HOME}/shared/ROMs/ResurrectionRemix/${DEVICE}
@@ -212,8 +203,8 @@ function compile() {
 
 
    # Export the LOG variable for other files to use (I currently handle this via .bashrc)
-   # export LOGDIR=${ANDROIDDIR}/Logs
-   # export LOG=${LOGDIR}/compile_log_$( date +%m_%d_%y ).log
+   # export LOGDIR=${HOME}/shared/.logs
+   # export LOG=${LOGDIR}/Results/compile_log_$( date +%m_%d_%y ).log
 
 
 
@@ -286,11 +277,7 @@ function compile() {
    # Prepare device
    echoText "PREPARING $( echo ${DEVICE} | awk '{print toupper($0)}' )"; newLine
 
-   if [[ "${ROM}" == "screwd" ]]; then
-      lunch screwd_${DEVICE}-userdebug
-   else
-      breakfast ${DEVICE}
-   fi
+   breakfast ${DEVICE}
 
 
 
@@ -304,7 +291,7 @@ function compile() {
    # Start building
    echoText "MAKING ZIP FILE"; newLine
 
-   time mka bacon
+   time mka bacon 2>&1 | tee ${LOGDIR}/Compilation/${ROM}_${DEVICE}-${NOW}.log
 
 
 
@@ -382,8 +369,6 @@ function compile() {
    # Add line to compile log
    if [[ ${PERSONAL} = true ]]; then
       echo -e "$( date +%H:%M:%S ): ${BASH_SOURCE} me" >> ${LOG}
-   elif [[ ${MOD} = true ]]; then
-      echo -e "$( date +%H:%M:%S ): ${BASH_SOURCE} ${ROM} mod ${DEVICE}" >> ${LOG}
    elif [[ ${TEST} = true ]]; then
       echo -e "$( date +%H:%M:%S ): ${BASH_SOURCE} ${ROM} test ${DEVICE}" >> ${LOG}
    elif [[ -n ${PERSON} ]]; then
