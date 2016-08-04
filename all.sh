@@ -24,6 +24,7 @@
 . rom.sh aosip angler
 . rom.sh aosip shamu
 . rom.sh aosip bullhead
+. rom.sh aosip mako
 
 # Exit the session
 exit
