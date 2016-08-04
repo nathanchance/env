@@ -308,7 +308,7 @@ function compile() {
 
          mkdir -p "${ZIPMOVE}"
       else
-         newLine; echoText "CLEANING ZIPMOVE DIRECTORY"
+         newLine; echoText "CLEANING ZIPMOVE DIRECTORY"; newLine
 
          rm -vrf "${ZIPMOVE}"/*${ZIPFORMAT}*
       fi
@@ -316,21 +316,18 @@ function compile() {
 
 
       # Copy new files to ZIPMOVE
-      echoText "MOVING FILES TO ZIPMOVE DIRECTORY"; newLine
+      newLine; echoText "MOVING FILES TO ZIPMOVE DIRECTORY"; newLine
 
       mv -v ${OUTDIR}/*${ZIPFORMAT}* "${ZIPMOVE}"
 
 
 
-      # If we are not running a personal build, make a changelog
-      if [[ ${PERSONAL} = false ]]; then
-         newLine; changelog ${SOURCEDIR} "${ZIPMOVE}"
-      fi
+      newLine; changelog ${SOURCEDIR} "${ZIPMOVE}"
 
 
 
       # Upload the files
-      newLine; echoText "UPLOADING FILES"; newLine
+      echoText "UPLOADING FILES"; newLine
 
       . ${HOME}/upload.sh
 
@@ -362,9 +359,9 @@ function compile() {
    echo -e "SCRIPT ENDING AT $( date +%D\ %r )"
    echo -e ""
    echo -e "${BUILD_RESULT_STRING}!"
-   echo -e "TIME: $( echo $( (${END}-${START}) ) | awk '{print int($1/60)" MINUTES AND "int($1%60)" SECONDS"}' )"
+   echo -e "TIME: $( echo $((${END}-${START})) | awk '{print int($1/60)" MINUTES AND "int($1%60)" SECONDS"}' )"
    echo -e "-------------------------------------"
-   echo -e ${RST}
+   echo -e ${RST}; newLine
 
    # Add line to compile log
    if [[ ${PERSONAL} = true ]]; then
@@ -377,7 +374,7 @@ function compile() {
       echo -e "$( date +%H:%M:%S ): ${BASH_SOURCE} ${ROM} ${DEVICE}" >> ${LOG}
    fi
 
-   echo -e "${BUILD_RESULT_STRING} IN $( echo $( (${END}-${START}) ) | awk '{print int($1/60)" MINUTES AND "int($1%60)" SECONDS"}' )\n" >> ${LOG}
+   echo -e "${BUILD_RESULT_STRING} IN $( echo $((${END}-${START})) | awk '{print int($1/60)" MINUTES AND "int($1%60)" SECONDS"}' )\n" >> ${LOG}
 
    echo -e "\a"
 }
