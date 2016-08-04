@@ -420,3 +420,5 @@ if [[ "${1}" == "all" ]]; then
 else
    compile ${1} ${2} ${3}
 fi
+
+export LOCALVERSION=
