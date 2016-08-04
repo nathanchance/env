@@ -51,7 +51,7 @@ function compile() {
    DEFCONFIG="kylo_defconfig"
    if [[ ${PERSONAL} = true ]]; then
       TOOLCHAIN_DIR=Toolchains/Linaro/DF-6.1
-      AK_VER="Kylo.R34"
+      KYLO_VER="Kylo.R34"
       ZIP_MOVE=${HOME}/shared/.me
    else
       BASE_KYLO_VER="Kylo"
