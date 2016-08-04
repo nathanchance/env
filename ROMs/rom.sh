@@ -291,6 +291,7 @@ function compile() {
    # Start building
    echoText "MAKING ZIP FILE"; newLine
 
+   NOW=$( date +"%Y-%m-%d-%S" )
    time mka bacon 2>&1 | tee ${LOGDIR}/Compilation/${ROM}_${DEVICE}-${NOW}.log
 
 
