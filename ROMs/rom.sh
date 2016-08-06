@@ -161,14 +161,14 @@ function compile() {
    else
       # Currently, we support AICP, AOSiP, Dirty Unicorns, Pure Nexus (Mod), ResurrectionRemix, and Screw'd
       case "${ROM}" in
-         "aicp")
-            SOURCEDIR=${ANDROIDDIR}/ROMs/AICP
-            ZIPMOVE=${HOME}/shared/ROMs/AICP/${DEVICE}
-            ZIPFORMAT=aicp_${DEVICE}_mm*.zip ;;
          "aosip")
             SOURCEDIR=${ANDROIDDIR}/ROMs/AOSiP
             ZIPMOVE=${HOME}/shared/ROMs/AOSiP/${DEVICE}
             ZIPFORMAT=AOSiP-*-${DEVICE}-*.zip ;;
+         "beltz")
+            SOURCEDIR=${ANDROIDDIR}/ROMs/Beltz
+            ZIPMOVE=${HOME}/shared/ROMs/Beltz/${DEVICE}
+            ZIPFORMAT=beltz_mm*${DEVICE}.zip ;;
          "du")
             if [[ -n ${PERSON} ]]; then
                SOURCEDIR=${ANDROIDDIR}/ROMs/DU
@@ -277,7 +277,11 @@ function compile() {
    # Prepare device
    echoText "PREPARING $( echo ${DEVICE} | awk '{print toupper($0)}' )"; newLine
 
-   breakfast ${DEVICE}
+   if [[ "${ROM}" == "beltz" ]]; then
+      lunch androidx_${DEVICE}-userdebug
+   else
+      breakfast ${DEVICE}
+   fi
 
 
 
