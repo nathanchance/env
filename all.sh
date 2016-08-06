@@ -23,6 +23,8 @@
 # AOSiP (Angler, Shamu, Bullhead, Hammerhead, and Mako)
 . rom.sh normal aosip
 . rom.sh aosip mako
+# Beltz (Angler, Shamu, Bullhead, and Hammerhead)
+. rom.sh normal beltz
 
 # Upload all of the log files
 . upload.sh
