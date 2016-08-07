@@ -74,8 +74,9 @@ function compile {
    AK_BRANCH=ak-angler-anykernel
 
    if [[ ${PERSONAL} = true ]]; then
-      AK_VER="AK.M"
+      AK_VER="NC-v1.0"
       KER_BRANCH=m-standard
+      AK_BRANCH=personal
       TOOLCHAIN_DIR=Toolchains/Linaro/DF-6.1
       PERMISSIVE=true
       ZIP_MOVE=${HOME}/shared/.me
@@ -267,13 +268,23 @@ function compile {
 
    # Show the version of the kernel compiling
    echo -e ${RED}
+   echo -e ""
    echo -e "-----------------------------------------------------"
    echo -e ""
-   echo -e "    ___    __ __    __ __ __________  _   __________ ";
-   echo -e "   /   |  / //_/   / //_// ____/ __ \/ | / / ____/ / ";
-   echo -e "  / /| | / ,<     / ,<  / __/ / /_/ /  |/ / __/ / /  ";
-   echo -e " / ___ |/ /| |   / /| |/ /___/ _, _/ /|  / /___/ /___";
-   echo -e "/_/  |_/_/ |_|  /_/ |_/_____/_/ |_/_/ |_/_____/_____/";
+   echo -e ""
+   if [[ ${PERSONAL} = true ]]; then
+      echo -e "    _   ________   __ __ __________  _   __________ ";
+      echo -e "   / | / / ____/  / //_// ____/ __ \/ | / / ____/ / ";
+      echo -e "  /  |/ / /      / ,<  / __/ / /_/ /  |/ / __/ / /  ";
+      echo -e " / /|  / /___   / /| |/ /___/ _, _/ /|  / /___/ /___";
+      echo -e "/_/ |_/\____/  /_/ |_/_____/_/ |_/_/ |_/_____/_____/";
+   else
+      echo -e "    ___    __ __    __ __ __________  _   __________ ";
+      echo -e "   /   |  / //_/   / //_// ____/ __ \/ | / / ____/ / ";
+      echo -e "  / /| | / ,<     / ,<  / __/ / /_/ /  |/ / __/ / /  ";
+      echo -e " / ___ |/ /| |   / /| |/ /___/ _, _/ /|  / /___/ /___";
+      echo -e "/_/  |_/_/ |_|  /_/ |_/_____/_/ |_/_/ |_/_____/_____/";
+   fi
    echo -e ""
    echo -e ""
    echo -e "-----------------------------------------------------"
