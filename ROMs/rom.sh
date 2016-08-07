@@ -56,9 +56,10 @@ function changelog() {
 
    # If a changelog exists, remove it
    if [[ -f "${CHANGELOG}" ]]; then
-   	rm -rf "${CHANGELOG}"
+   	rm -vrf "${CHANGELOG}"
    fi
 
+   echo "Making ${CHANGELOG}"
    touch "${CHANGELOG}"
 
    echoText "GENERATING CHANGELOG"
