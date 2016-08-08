@@ -26,8 +26,17 @@
 # Beltz (Angler, Shamu, Bullhead, and Hammerhead)
 . rom.sh normal beltz
 
-# Upload all of the log files
+
+########
+# TWRP #
+########
+# for Angler, Shamu, Bullhead, Hammerhead, and Mako
+. twrp.sh all
+
+
+# Upload all of the log files and show the results logs
 . upload.sh
+cat ${LOG}
 
 # Exit the session
 exit
