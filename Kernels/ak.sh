@@ -74,7 +74,7 @@ function compile {
    AK_BRANCH=ak-angler-anykernel
 
    if [[ ${PERSONAL} = true ]]; then
-      AK_VER="NC-v1.0"
+      AK_VER="NC-v1.1"
       KER_BRANCH=m-standard
       AK_BRANCH=personal
       TOOLCHAIN_DIR=Toolchains/Linaro/DF-6.1
