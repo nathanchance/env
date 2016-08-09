@@ -74,11 +74,10 @@ function compile {
    AK_BRANCH=ak-angler-anykernel
 
    if [[ ${PERSONAL} = true ]]; then
-      AK_VER="NC-v1.1"
-      KER_BRANCH=m-standard
+      AK_VER="NC-v1.2"
+      KER_BRANCH=personal
       AK_BRANCH=personal
       TOOLCHAIN_DIR=Toolchains/Linaro/DF-6.1
-      PERMISSIVE=true
       ZIP_MOVE=${HOME}/shared/.me
       export KBUILD_BUILD_USER=nathan
       export KBUILD_BUILD_HOST=phoenix
@@ -200,12 +199,10 @@ function compile {
       echo
       cd ${KERNEL_DIR}
 
-      # If the permissive flag is true, cherry pick the permissive commit and set a new ZIPMOVE directory if the build is not personal
+      # If the permissive flag is true, cherry pick the permissive commit and set a new ZIPMOVE directory
       if [[ ${PERMISSIVE} = true ]]; then
          git cherry-pick ba804bd138aa89dbe2f2fc73fd751af60a831097
-         if [[ ${PERSONAL} = false ]]; then
-            ZIP_MOVE=${ZIP_MOVE}/.per
-         fi
+         ZIP_MOVE=${ZIP_MOVE}/.per
       fi
 
       # If this is a personal build, set the version to 21
