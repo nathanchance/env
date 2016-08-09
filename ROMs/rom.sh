@@ -265,6 +265,16 @@ function compile() {
       cd ${SOURCEDIR}
       # I want to make sure the picks went through okay
       sleep 10
+
+   # If we are running a personal build, pick Substratum's om-refresh commit until Nate merges it into PN source
+   elif [[ ${PERSONAL} = true ]]; then
+
+      cd ${SOURCEDIR}/frameworks/base
+      git fetch http://review.projektsubstratum.com:8080/TeamSubstratumResources/platform_frameworks_base refs/changes/27/27/1 && git cherry-pick FETCH_HEAD
+
+      cd ${SOURCEDIR}
+
+      sleep 10
    fi
 
 
