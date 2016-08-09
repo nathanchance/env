@@ -239,10 +239,9 @@ function compile {
       cp -vr ${ZIMAGE_DIR}/${KERNEL} ${ANYKERNEL_DIR}/zImage
       cd ${ANYKERNEL_DIR}
       zip -x@zipexclude -r9 `echo ${AK_VER}`.zip *
-      if [[ ${TEST} = true ]]
-      then
+      if [[ ${TEST} = true ]]; then
          rm -rf ${ZIP_MOVE}/AK*.zip
-      elif [[ ${PERSONAL} = true ]]
+      elif [[ ${PERSONAL} = true ]]; then
          rm -rf ${ZIP_MOVE}/NC*.zip
       else
          rm  ${ZIP_MOVE}/${BASE_AK_VER}*${TOOLCHAIN_VER}.zip
