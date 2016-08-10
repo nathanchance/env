@@ -74,7 +74,6 @@ function compile {
    AK_BRANCH=ak-angler-anykernel
 
    if [[ ${PERSONAL} = true ]]; then
-      AK_VER="NINJA-v1.3"
       KER_BRANCH=personal
       AK_BRANCH=personal
       TOOLCHAIN_DIR=Toolchains/Linaro/DF-6.1
@@ -154,7 +153,9 @@ function compile {
    # -------
    # Exports
    # -------
-   export LOCALVERSION=-`echo ${AK_VER}`
+   if [[ ${PERSONAL} = false ]]; then
+      export LOCALVERSION=-`echo ${AK_VER}`
+   fi
    export CROSS_COMPILE="${RESOURCE_DIR}/${TOOLCHAIN_DIR}/bin/aarch64-linux-android-"
    export ARCH=arm64
    export SUBARCH=arm64
@@ -233,18 +234,41 @@ function compile {
 
    # Make the zip file, remove the previous version and upload it
    function make_zip {
+      # Copy Image.gz
       cp -vr ${ZIMAGE_DIR}/${KERNEL} ${ANYKERNEL_DIR}/zImage
+
+      # Move to AnyKernel directory
       cd ${ANYKERNEL_DIR}
-      zip -x@zipexclude -r9 `echo ${AK_VER}`.zip *
-      if [[ ${TEST} = true ]]; then
-         rm -rf ${ZIP_MOVE}/AK*.zip
-      elif [[ ${PERSONAL} = true ]]; then
-         rm -rf ${ZIP_MOVE}/NC*.zip
+
+      # Name zip special if personal build
+      if [[ ${PERSONAL} = true ]]; then
+         ZIP_NAME=$( grep -r "EXTRAVERSION = -" ${SOURCEDIR}/Makefile | sed 's/EXTRAVERSION = -//' )
       else
-         rm  ${ZIP_MOVE}/${BASE_AK_VER}*${TOOLCHAIN_VER}.zip
+         ZIP_NAME=${AK_VER}
       fi
-      mv  `echo ${AK_VER}`.zip ${ZIP_MOVE}
+
+      # Make zip file
+      zip -x@zipexclude -r9 ${ZIP_NAME}.zip *
+
+      # Make zip format variable
+      if [[ ${TEST} = true ]]; then
+         ZIP_FORMAT=AK*.zip
+      elif [[ ${PERSONAL} = true ]]; then
+         ZIP_FORMAT=N*.zip
+      else
+         ZIP_FORMAT=${BASE_AK_VER}*${TOOLCHAIN_VER}.zip
+      fi
+
+      # Remove the zip format in ZIP_MOVE
+      rm -rf ${ZIP_MOVE}/${ZIP_FORMAT}
+
+      # Move the new zip to ZIP_MOVE
+      mv ${ZIP_NAME}.zip ${ZIP_MOVE}
+
+      # Go to the kernel directory
       cd ${KERNEL_DIR}
+
+      # If it isn't a test build, clean it
       if [[ ${TEST} = false ]]; then
          git reset --hard origin/${KER_BRANCH}
          git clean -f -d -x > /dev/null 2>&1
@@ -261,10 +285,6 @@ function compile {
 
    # Time the start of the script
    DATE_START=$(date +"%s")
-
-
-
-
 
 
 
