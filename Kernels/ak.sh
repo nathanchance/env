@@ -242,7 +242,7 @@ function compile {
 
       # Name zip special if personal build
       if [[ ${PERSONAL} = true ]]; then
-         ZIP_NAME=$( grep -r "EXTRAVERSION = -" ${SOURCEDIR}/Makefile | sed 's/EXTRAVERSION = -//' )
+         ZIP_NAME=$( grep -r "EXTRAVERSION = -" ${KERNEL_DIR}/Makefile | sed 's/EXTRAVERSION = -//' )
       else
          ZIP_NAME=${AK_VER}
       fi
@@ -328,7 +328,7 @@ function compile {
 
    echo -e ${BLINK_RED}
    if [[ ${PERSONAL} = true ]]; then
-      echo $( grep -r "EXTRAVERSION = -" ${SOURCEDIR}/Makefile | sed 's/EXTRAVERSION = -//' )
+      echo $( grep -r "EXTRAVERSION = -" ${KERNEL_DIR}/Makefile | sed 's/EXTRAVERSION = -//' )
    else
       echo -e ${AK_VER}
    fi
