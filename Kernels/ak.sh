@@ -327,7 +327,11 @@ function compile {
    echo -e ""
 
    echo -e ${BLINK_RED}
-   echo -e ${AK_VER}
+   if [[ ${PERSONAL} = true ]]; then
+      echo $( grep -r "EXTRAVERSION = -" ${SOURCEDIR}/Makefile | sed 's/EXTRAVERSION = -//' )
+   else
+      echo -e ${AK_VER}
+   fi
    echo -e ${RESTORE}
 
    echo -e ${RED}
