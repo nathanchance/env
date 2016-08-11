@@ -3,7 +3,7 @@
 # -----
 # Usage
 # -----
-# $ . ninja.sh <m|n|me>
+# $ . ninja.sh <m|n|me> <tcupdate|notcupdate>
 
 
 
@@ -12,10 +12,12 @@ function compile {
    # Parameters
    # ----------
    # PERSONAL: Whether or not it is a build just for me
+   # TEST: Whether or not we are running a test build
 
    # Free flags
    PERSONAL=false
    TEST=false
+   VERSION=
 
    # Set USER and HOST variables back to what they are in .bashrc
    export KBUILD_BUILD_USER=nathan
@@ -30,6 +32,8 @@ function compile {
       *)
          VERSION=${1} ;;
    esac
+
+
 
    # ------
    # Colors
@@ -61,12 +65,10 @@ function compile {
    DTBIMAGE="dtb"
    DEFCONFIG="ninja_defconfig"
    AK_BRANCH=ninja
-   KERNEL_VERSION=$( grep -r "EXTRAVERSION = -" ${KERNEL_DIR}/Makefile | sed 's/EXTRAVERSION = -//' )
 
    if [[ ${PERSONAL} = true || ${TEST} = true ]]; then
       KER_BRANCH=personal
       AK_BRANCH=personal
-      TOOLCHAIN_DIR=Toolchains/Linaro/DF-6.1
       ZIP_MOVE=${HOME}/shared/.me
       export KBUILD_BUILD_USER=nathan
       export KBUILD_BUILD_HOST=phoenix
@@ -77,7 +79,6 @@ function compile {
             ZIP_MOVE=${HOME}/shared/Kernels/angler/Ninja/M ;;
          "n")
             KER_BRANCH=n
-            VER=".N.005."
             ZIP_MOVE=${HOME}/shared/Kernels/angler/Ninja/N ;;
       esac
    fi
@@ -108,7 +109,6 @@ function compile {
       cd ${ANYKERNEL_DIR}
       rm -rf ${KERNEL} > /dev/null 2>&1
       rm -rf ${DTBIMAGE} > /dev/null 2>&1
-      git checkout ${AK_BRANCH}
       git reset --hard origin/${AK_BRANCH}
       git clean -f -d -x > /dev/null 2>&1
       git pull > /dev/null 2>&1
@@ -116,7 +116,6 @@ function compile {
       echo
 
       cd ${KERNEL_DIR}
-      git checkout ${KER_BRANCH}
       if [[ ${TEST} = false ]]; then
          git reset --hard origin/${KER_BRANCH}
          git clean -f -d -x > /dev/null 2>&1
@@ -125,6 +124,13 @@ function compile {
 
       make clean
       make mrproper
+   }
+
+   # Update toolchain
+   function update_tc {
+      rm -vrf ${TOOLCHAIN_DIR}
+      cd $( dirname ${TOOLCHAIN_DIR} )
+      git clone https://bitbucket.org/DespairFactor/aarch64-linux-android-6.x-kernel-linaro.git DF-6.1
    }
 
    # Make the kernel
@@ -173,14 +179,14 @@ function compile {
       ZIP_FORMAT=N*.zip
 
       # If ZIPMOVE doesn't exist, make it; otherwise, clean it
-      if [[ ! -d "${ZIPMOVE}" ]]; then
-         mkdir -p  "${ZIPMOVE}"
+      if [[ ! -d "${ZIP_MOVE}" ]]; then
+         mkdir -p "${ZIP_MOVE}"
       else
-         rm -rf ${ZIP_MOVE}/${ZIP_FORMAT}
+         rm -rf "${ZIP_MOVE}"/${ZIP_FORMAT}
       fi
 
       # Move the new zip to ZIP_MOVE
-      mv ${KERNEL_VERSION}.zip ${ZIP_MOVE}
+      mv ${KERNEL_VERSION}.zip "${ZIP_MOVE}"
 
       # Go to the kernel directory
       cd ${KERNEL_DIR}
@@ -203,6 +209,16 @@ function compile {
    # Time the start of the script
    DATE_START=$(date +"%s")
 
+
+
+   # Silently shift to correct branches
+   cd ${ANYKERNEL_DIR} && git checkout ${AK_BRANCH} > /dev/null 2>&1
+   cd ${KERNEL_DIR} && git checkout ${KER_BRANCH} > /dev/null 2>&1
+
+
+
+   # Set the kernel version
+   KERNEL_VERSION=$( grep -r "EXTRAVERSION = -" ${KERNEL_DIR}/Makefile | sed 's/EXTRAVERSION = -//' )
 
 
 
@@ -237,6 +253,20 @@ function compile {
    echo -e "BUILD SCRIPT STARTING AT $(date +%D\ %r)"
    echo -e "---------------------------------------------"
    echo -e ${RESTORE}
+
+
+
+   if [[ "${2}" == "tcupdate" ]]; then
+      # Clean up
+      echo -e ${RED}
+      echo -e "------------------"
+      echo -e "UPDATING TOOLCHAIN"
+      echo -e "------------------"
+      echo -e ${RESTORE}
+      echo -e ""
+
+      update_tc
+   fi
 
 
 
@@ -304,27 +334,19 @@ function compile {
    echo -e ${RESTORE}
 
    # Add line to compile log
-   echo -e "`date +%H:%M:%S`: ${BASH_SOURCE} ${VERSION} ${TOOLCHAIN_VER}" >> ${LOG}
+   echo -e "`date +%H:%M:%S`: ${BASH_SOURCE} ${1}" >> ${LOG}
    echo -e "${BUILD_SUCCESS_STRING} IN $((${DIFF} / 60)) MINUTES AND $((${DIFF} % 60)) SECONDS\n" >> ${LOG}
 
    echo -e "\a"
 }
 
 if [[ "${1}" == "both" ]]; then
-   # Update toolchains if requested
-   if [[ "${2}" == "tcupdate" ]]; then
-      . sync_toolchains.sh
-   fi
-
-   # Run my build after syncing toolchains
-   compile me
-
    # Run the two kernel builds
-   compile m
+   compile m ${2}
    compile n
 
    cd ${HOME}
    cat ${LOG}
 else
-   compile ${1}
+   compile ${1} ${2}
 fi
