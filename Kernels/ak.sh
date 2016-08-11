@@ -28,7 +28,7 @@ AKBRANCH=ak-mm-staging
 # KERNERLVER: The name you want the kernel to show in About Phone > Kernel VERSION
 # Cannot use spaces
 # e.g. KERNELVER=awesomekernel.v1
-KERNELVER=$( grep -r "EXTRAVERSION = -" ${KERNEL_DIR}/Makefile | sed 's/EXTRAVERSION = -//' )
+KERNELVER=$( grep -r "EXTRAVERSION = -" ${SOURCEDIR}/Makefile | sed 's/EXTRAVERSION = -//' )
 
 # Other variables
 # DO NOT EDIT
