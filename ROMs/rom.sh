@@ -49,10 +49,10 @@ function changelog() {
    # ----------
    # Parameter 1: The source directory
    # Parameter 2: The upload directory
-   REPODIR=${1}
-   FILEMOVE=${2}
+   REPO_DIR=${1}
+   FILE_MOVE=${2}
 
-   export CHANGELOG="${FILEMOVE}"/changelog.txt
+   export CHANGELOG="${FILE_MOVE}"/changelog.txt
 
    # If a changelog exists, remove it
    if [[ -f "${CHANGELOG}" ]]; then
@@ -64,7 +64,7 @@ function changelog() {
 
    echoText "GENERATING CHANGELOG"
 
-   cd ${REPODIR}
+   cd ${REPO_DIR}
 
    # Echos the git log to the changelog file for the past 10 days
    for i in $( seq 10 ); do
@@ -91,8 +91,8 @@ function compile() {
    # ----------
    # Parameters
    # ----------
-   # Parameter 1:   ROM to build (currently AICP, AOSiP, Dirty Unicorns, Pure Nexus [Mod], ResurrectionRemix, and Screw'd)
-   # Parameter 2:   Device (eg. angler, bullhead, shamu); not necessary for RR
+   # Parameter 1: ROM to build (currently AICP, AOSiP, Dirty Unicorns, Pure Nexus [Mod], ResurrectionRemix, and Screw'd)
+   # Parameter 2: Device (eg. angler, bullhead, shamu); not necessary for RR
    # Parameter 3: Pure Nexus Mod/test build or a personalized Dirty Unicorns build (omit if neither applies)
 
    # Unassign flags and reset DU_BUILD_TYPE, PURENEXUS_BUILD_TYPE, and LOCALVERSION
@@ -146,66 +146,66 @@ function compile() {
    # ---------
    # Variables
    # ---------
-   # ANDROIDDIR: Directory that holds all of the Android files (currently my home directory)
-   # OUTDIR: Output directory of completed ROM zip after compilation
-   # SOURCEDIR: Directory that holds the ROM source
-   # ZIPMOVE: Directory to hold completed ROM zips
-   # ZIPFORMAT: The format of the zip file in the out directory for moving to ZIPMOVE
-   ANDROIDDIR=${HOME}
+   # ANDROID_DIR: Directory that holds all of the Android files (currently my home directory)
+   # OUT_DIR: Output directory of completed ROM zip after compilation
+   # SOURCE_DIR: Directory that holds the ROM source
+   # ZIP_MOVE: Directory to hold completed ROM zips
+   # ZIP_FORMAT: The format of the zip file in the out directory for moving to ZIP_MOVE
+   ANDROID_DIR=${HOME}
 
    if [[ ${PERSONAL} = true ]]; then
       export PURENEXUS_BUILD_TYPE=CHANCELLOR
-      SOURCEDIR=${ANDROIDDIR}/ROMs/PN
-      ZIPMOVE=${HOME}/shared/.me
-      ZIPFORMAT=pure_nexus_${DEVICE}-*.zip
+      SOURCE_DIR=${ANDROID_DIR}/ROMs/PN
+      ZIP_MOVE=${HOME}/shared/.me
+      ZIP_FORMAT=pure_nexus_${DEVICE}-*.zip
 
    else
       # Currently, we support AICP, AOSiP, Dirty Unicorns, Pure Nexus (Mod), ResurrectionRemix, and Screw'd
       case "${ROM}" in
          "aosip")
-            SOURCEDIR=${ANDROIDDIR}/ROMs/AOSiP
-            ZIPMOVE=${HOME}/shared/ROMs/AOSiP/${DEVICE}
-            ZIPFORMAT=AOSiP-*-${DEVICE}-*.zip ;;
+            SOURCE_DIR=${ANDROID_DIR}/ROMs/AOSiP
+            ZIP_MOVE=${HOME}/shared/ROMs/AOSiP/${DEVICE}
+            ZIP_FORMAT=AOSiP-*-${DEVICE}-*.zip ;;
          "beltz")
-            SOURCEDIR=${ANDROIDDIR}/ROMs/Beltz
-            ZIPMOVE=${HOME}/shared/ROMs/Beltz/${DEVICE}
-            ZIPFORMAT=beltz_mm*${DEVICE}.zip ;;
+            SOURCE_DIR=${ANDROID_DIR}/ROMs/Beltz
+            ZIP_MOVE=${HOME}/shared/ROMs/Beltz/${DEVICE}
+            ZIP_FORMAT=beltz_mm*${DEVICE}.zip ;;
          "du")
             if [[ -n ${PERSON} ]]; then
-               SOURCEDIR=${ANDROIDDIR}/ROMs/DU
-               ZIPMOVE=${HOME}/shared/ROMs/.special/.${PERSON}
-               ZIPFORMAT=DU_${DEVICE}_*.zip
+               SOURCE_DIR=${ANDROID_DIR}/ROMs/DU
+               ZIP_MOVE=${HOME}/shared/ROMs/.special/.${PERSON}
+               ZIP_FORMAT=DU_${DEVICE}_*.zip
             else
-               SOURCEDIR=${ANDROIDDIR}/ROMs/DU
-               ZIPMOVE=${HOME}/shared/ROMs/DirtyUnicorns/${DEVICE}
-               ZIPFORMAT=DU_${DEVICE}_*.zip
+               SOURCE_DIR=${ANDROID_DIR}/ROMs/DU
+               ZIP_MOVE=${HOME}/shared/ROMs/DirtyUnicorns/${DEVICE}
+               ZIP_FORMAT=DU_${DEVICE}_*.zip
             fi ;;
          "pn")
-            SOURCEDIR=${ANDROIDDIR}/ROMs/PN
+            SOURCE_DIR=${ANDROID_DIR}/ROMs/PN
             if [[ ${TEST} = true ]]; then
-               ZIPMOVE=${HOME}/shared/ROMs/PureNexus/.tests/${DEVICE}
+               ZIP_MOVE=${HOME}/shared/ROMs/PureNexus/.tests/${DEVICE}
             else
-               ZIPMOVE=${HOME}/shared/ROMs/PureNexus/${DEVICE}
+               ZIP_MOVE=${HOME}/shared/ROMs/PureNexus/${DEVICE}
             fi
-            ZIPFORMAT=pure_nexus_${DEVICE}-*.zip ;;
+            ZIP_FORMAT=pure_nexus_${DEVICE}-*.zip ;;
          "pn-mod")
-            SOURCEDIR=${ANDROIDDIR}/ROMs/PN-Mod
-            ZIPMOVE=${HOME}/shared/ROMs/PureNexusMod/${DEVICE}
-            ZIPFORMAT=pure_nexus_${DEVICE}-*.zip ;;
+            SOURCE_DIR=${ANDROID_DIR}/ROMs/PN-Mod
+            ZIP_MOVE=${HOME}/shared/ROMs/PureNexusMod/${DEVICE}
+            ZIP_FORMAT=pure_nexus_${DEVICE}-*.zip ;;
          "rr")
-            SOURCEDIR=${ANDROIDDIR}/ROMs/RR
-            ZIPMOVE=${HOME}/shared/ROMs/ResurrectionRemix/${DEVICE}
-            ZIPFORMAT=ResurrectionRemix*-${DEVICE}.zip ;;
+            SOURCE_DIR=${ANDROID_DIR}/ROMs/RR
+            ZIP_MOVE=${HOME}/shared/ROMs/ResurrectionRemix/${DEVICE}
+            ZIP_FORMAT=ResurrectionRemix*-${DEVICE}.zip ;;
       esac
    fi
 
-   OUTDIR=${SOURCEDIR}/out/target/product/${DEVICE}
+   OUT_DIR=${SOURCE_DIR}/out/target/product/${DEVICE}
 
 
 
    # Export the LOG variable for other files to use (I currently handle this via .bashrc)
-   # export LOGDIR=${HOME}/shared/.logs
-   # export LOG=${LOGDIR}/Results/compile_log_$( date +%m_%d_%y ).log
+   # export LOG_DIR=${HOME}/shared/.logs
+   # export LOG=${LOG_DIR}/Results/compile_log_$( date +%m_%d_%y ).log
 
 
 
@@ -224,7 +224,7 @@ function compile() {
    # Change to the source directory
    echoText "MOVING TO SOURCE DIRECTORY"
 
-   cd ${SOURCEDIR}
+   cd ${SOURCE_DIR}
 
 
 
@@ -242,40 +242,40 @@ function compile() {
       newLine
 
       # 1. Do not block HOME if background incoming call (marshmallow)
-      cd ${SOURCEDIR}/frameworks/base
+      cd ${SOURCE_DIR}/frameworks/base
       git fetch https://github.com/nathanchance/android_frameworks_base.git
       git cherry-pick d073e3efe7328558528cf50f40f4152af439e71a
       # 2. Change DESOLATED to KBUILD_BUILD_HOST and allow kernel to be compiled with UBER 6.1
-      cd ${SOURCEDIR}/kernel/moto/shamu
+      cd ${SOURCE_DIR}/kernel/moto/shamu
       git fetch https://github.com/nathanchance/B14CKB1RD_Kernel_N6.git
       git cherry-pick 20f83cadace94da9b711ebb53661b1682885888a
       # 3. Change from shamu_defconfig to B14CKB1RD_defconfig
-      cd ${SOURCEDIR}/device/moto/shamu
+      cd ${SOURCE_DIR}/device/moto/shamu
       git fetch https://github.com/nathanchance/android_device_moto_shamu.git
       git cherry-pick 0d2c6f3bdfe6e78b9b8036471dd3dcb6945fbb51
       # 4. Remove the unnecessary decreased sound delays from notifications (thanks @IAmTheOneTheyCallNeo)
       git fetch https://github.com/IAmTheOneTheyCallNeo/android_device_moto_shamu neo
       git cherry-pick c35490134644d9f4ab2cded14a0910169fd46391
       # 5. Stop per app overlays from being reset (thanks @bigrushdog)
-      cd ${SOURCEDIR}/packages/apps/ThemeChooser
+      cd ${SOURCE_DIR}/packages/apps/ThemeChooser
       git fetch https://github.com/nathanchance/android_packages_apps_ThemeChooser.git
       git cherry-pick 1cefd98f7ac5db31754a8f7ee1fd62f3ac897b71
       # 6. Add @Yoinx's Kernel Adiutor-Mod instead of the regular Kernel Adiutor (to complement Blackbird)
-      cd ${SOURCEDIR}/vendor/cm/prebuilt/KernelAdiutor
+      cd ${SOURCE_DIR}/vendor/cm/prebuilt/KernelAdiutor
       rm -rf KernelAdiutor.apk
       wget https://github.com/yoinx/kernel_adiutor/raw/master/download/app/app-release.apk
       mv app-release.apk KernelAdiutor.apk
-      cd ${SOURCEDIR}
+      cd ${SOURCE_DIR}
       # I want to make sure the picks went through okay
       sleep 10
 
    # If we are running a personal build, pick Substratum's om-refresh commit until Nate merges it into PN source
    elif [[ ${PERSONAL} = true ]]; then
 
-      cd ${SOURCEDIR}/frameworks/base
+      cd ${SOURCE_DIR}/frameworks/base
       git fetch http://review.projektsubstratum.com:8080/TeamSubstratumResources/platform_frameworks_base refs/changes/27/27/1 && git cherry-pick FETCH_HEAD
 
-      cd ${SOURCEDIR}
+      cd ${SOURCE_DIR}
 
       sleep 10
    fi
@@ -315,33 +315,33 @@ function compile() {
 
 
    # If the compilation was successful, there will be a zip in the format above in the out directory
-   if [[ $( ls ${OUTDIR}/${ZIPFORMAT} 2>/dev/null | wc -l ) != "0" ]]; then
+   if [[ $( ls ${OUT_DIR}/${ZIP_FORMAT} 2>/dev/null | wc -l ) != "0" ]]; then
       # Make the build result string show success
       BUILD_RESULT_STRING="BUILD SUCCESSFUL"
 
 
 
-      # If the upload directory doesn't exist, make it; otherwise, remove existing files in ZIPMOVE
-      if [[ ! -d "${ZIPMOVE}" ]]; then
-         newLine; echoText "MAKING ZIPMOVE DIRECTORY"
+      # If the upload directory doesn't exist, make it; otherwise, remove existing files in ZIP_MOVE
+      if [[ ! -d "${ZIP_MOVE}" ]]; then
+         newLine; echoText "MAKING ZIP_MOVE DIRECTORY"
 
-         mkdir -p "${ZIPMOVE}"
+         mkdir -p "${ZIP_MOVE}"
       else
-         newLine; echoText "CLEANING ZIPMOVE DIRECTORY"; newLine
+         newLine; echoText "CLEANING ZIP_MOVE DIRECTORY"; newLine
 
-         rm -vrf "${ZIPMOVE}"/*${ZIPFORMAT}*
+         rm -vrf "${ZIP_MOVE}"/*${ZIP_FORMAT}*
       fi
 
 
 
-      # Copy new files to ZIPMOVE
-      newLine; echoText "MOVING FILES TO ZIPMOVE DIRECTORY"; newLine
+      # Copy new files to ZIP_MOVE
+      newLine; echoText "MOVING FILES TO ZIP_MOVE DIRECTORY"; newLine
 
-      mv -v ${OUTDIR}/*${ZIPFORMAT}* "${ZIPMOVE}"
+      mv -v ${OUT_DIR}/*${ZIP_FORMAT}* "${ZIP_MOVE}"
 
 
 
-      newLine; changelog ${SOURCEDIR} "${ZIPMOVE}"
+      newLine; changelog ${SOURCE_DIR} "${ZIP_MOVE}"
 
 
 

@@ -5,30 +5,30 @@
 #############
 # These MUST be edited for the script to work
 
-# SOURCEDIR: Directory that holds your AK source
-# e.g. SOURCEDIR=${HOME}/Android/AK
-SOURCEDIR=${HOME}/Kernels/AK/Kernel
+# SOURCE_DIR: Directory that holds your AK source
+# e.g. SOURCE_DIR=${HOME}/Android/AK
+SOURCE_DIR=${HOME}/Kernels/AK/Kernel
 
-# ANYKERNELDIR: Directory that holds the AnyKernel repo
-# e.g. ANYKERNELDIR=${HOME}/Android/AK-AK2
-ANYKERNELDIR=${HOME}/Kernels/AK/AK2
+# ANYKERNEL_DIR: Directory that holds the AnyKernel repo
+# e.g. ANYKERNEL_DIR=${HOME}/Android/AK-AK2
+ANYKERNEL_DIR=${HOME}/Kernels/AK/AK2
 
-# TOOLCHAINDIR: Directory that holds the toolchain repo
-# e.g. TOOLCHAINDIR=${HOME}/Android/aarch64-linux-android-6.x-kernel-linaro
-TOOLCHAINDIR=${HOME}/Kernels/Toolchains/UBER/5.4
+# TOOLCHAIN_DIR: Directory that holds the toolchain repo
+# e.g. TOOLCHAIN_DIR=${HOME}/Android/aarch64-linux-android-6.x-kernel-linaro
+TOOLCHAIN_DIR=${HOME}/Kernels/Toolchains/UBER/5.4
 
-# ZIPMOVE: Directory that holds the completed
-# e.g. ZIPMOVE=${HOME}/zips
-ZIPMOVE=${HOME}/shared/Kernels/angler/AK
+# ZIP_MOVE: Directory that holds the completed
+# e.g. ZIP_MOVE=${HOME}/zips
+ZIP_MOVE=${HOME}/shared/Kernels/angler/AK
 
-# AKBRANCH: The branch that you want to compile on
-# e.g. AKBRANCH=ak-mm-staging
-AKBRANCH=ak-mm-staging
+# AK_BRANCH: The branch that you want to compile on
+# e.g. AK_BRANCH=ak-mm-staging
+AK_BRANCH=ak-mm-staging
 
-# KERNERLVER: The name you want the kernel to show in About Phone > Kernel VERSION
+# KERNEL_VER: The name you want the kernel to show in About Phone > Kernel VERSION
 # Cannot use spaces
-# e.g. KERNELVER=awesomekernel.v1
-KERNELVER=$( grep -r "EXTRAVERSION = -" ${SOURCEDIR}/Makefile | sed 's/EXTRAVERSION = -//' )
+# e.g. KERNEL_VER=awesomekernel.v1
+KERNEL_VER=$( grep -r "EXTRAVERSION = -" ${SOURCE_DIR}/Makefile | sed 's/EXTRAVERSION = -//' )
 
 # Other variables
 # DO NOT EDIT
@@ -39,11 +39,11 @@ THREAD="-j$(grep -c ^processor /proc/cpuinfo)"
 KERNEL="Image.gz"
 DTBIMAGE="dtb"
 DEFCONFIG="ak_angler_defconfig"
-ZIMAGE_DIR="${SOURCEDIR}/arch/arm64/boot"
+ZIMAGE_DIR="${SOURCE_DIR}/arch/arm64/boot"
 
 
 # Configure build
-export CROSS_COMPILE="${TOOLCHAINDIR}/bin/aarch64-linux-android-"
+export CROSS_COMPILE="${TOOLCHAIN_DIR}/bin/aarch64-linux-android-"
 export ARCH=arm64
 export SUBARCH=arm64
 
@@ -75,7 +75,7 @@ echo "---------------"
 echo -e ""
 
 echo -e ${BLINK_RED}
-echo -e ${KERNELVER}
+echo -e ${KERNEL_VER}
 echo -e ${RESTORE}
 
 
@@ -97,7 +97,7 @@ echo -e "------------------------"
 echo -e ${RESTORE}
 echo -e ""
 
-cd ${ANYKERNELDIR}
+cd ${ANYKERNEL_DIR}
 rm -rf ${KERNEL} > /dev/null 2>&1
 rm -rf ${DTBIMAGE} > /dev/null 2>&1
 git checkout ak-angler-anykernel
@@ -105,9 +105,9 @@ git reset --hard origin/ak-angler-anykernel
 git clean -f -d -x > /dev/null 2>&1
 git pull > /dev/null 2>&1
 
-cd ${SOURCEDIR}
-git checkout ${AKBRANCH}
-git reset --hard origin/${AKBRANCH}
+cd ${SOURCE_DIR}
+git checkout ${AK_BRANCH}
+git reset --hard origin/${AK_BRANCH}
 git clean -f -d -x > /dev/null 2>&1
 git pull
 make clean
@@ -143,10 +143,10 @@ if [[ `ls ${ZIMAGE_DIR}/${KERNEL} 2>/dev/null | wc -l` != "0" ]]; then
    echo -e ${RESTORE}
    echo -e ""
 
-   ${ANYKERNELDIR}/tools/dtbToolCM -v2 -o ${ANYKERNELDIR}/${DTBIMAGE} -s 2048 -p scripts/dtc/ arch/arm64/boot/dts/
-   cp -vr ${ZIMAGE_DIR}/${KERNEL} ${ANYKERNELDIR}/zImage
-   cd ${ANYKERNELDIR}
-   zip -x@zipexclude -r9 ${KERNELVER}.zip *
+   ${ANYKERNEL_DIR}/tools/dtbToolCM -v2 -o ${ANYKERNEL_DIR}/${DTBIMAGE} -s 2048 -p scripts/dtc/ arch/arm64/boot/dts/
+   cp -vr ${ZIMAGE_DIR}/${KERNEL} ${ANYKERNEL_DIR}/zImage
+   cd ${ANYKERNEL_DIR}
+   zip -x@zipexclude -r9 ${KERNEL_VER}.zip *
 
 
    # Upload
@@ -157,8 +157,8 @@ if [[ `ls ${ZIMAGE_DIR}/${KERNEL} 2>/dev/null | wc -l` != "0" ]]; then
    echo -e ${RESTORE}
    echo -e ""
 
-   rm -rf ${ZIPMOVE}/AK*
-   mv -v ${KERNELVER}.zip ${ZIPMOVE}
+   rm -rf ${ZIP_MOVE}/AK*
+   mv -v ${KERNEL_VER}.zip ${ZIP_MOVE}
    . ${HOME}/upload.sh
 
 else
@@ -186,6 +186,6 @@ echo -e ""
 echo -e "TIME: $((${DIFF} / 60)) MINUTES AND $((${DIFF} % 60)) SECONDS"
 if [[ "${BUILD_SUCCESS_STRING}" == "BUILD SUCCESSFUL" ]]; then
    echo -e ""
-   echo -e "COMPLETED ZIP: ${ZIPMOVE}/${KERNELVER}.zip"
+   echo -e "COMPLETED ZIP: ${ZIP_MOVE}/${KERNEL_VER}.zip"
 fi
 echo -e ${RESTORE}

@@ -6,13 +6,33 @@
 # $ . ninja.sh <m|n|me> <tcupdate|notcupdate>
 
 
+# Prints a formatted header; used for outlining what the script is doing to the user
+function echoText() {
+   RED="\033[01;31m"
+   RST="\033[0m"
 
+   echo -e ${RED}
+   echo -e "$( for i in $( seq ${#1} ); do echo -e "-\c"; done )"
+   echo -e "${1}"
+   echo -e "$( for i in $( seq ${#1} ); do echo -e "-\c"; done )"
+   echo -e ${RST}
+}
+
+
+# Creates a new line
+function newLine() {
+   echo -e ""
+}
+
+
+# Compilation function
 function compile {
    # ----------
    # Parameters
    # ----------
    # PERSONAL: Whether or not it is a build just for me
    # TEST: Whether or not we are running a test build
+   # VERSION: m or n
 
    # Free flags
    PERSONAL=false
@@ -44,41 +64,63 @@ function compile {
 
 
 
-   # ----------
+   # -----------
    # Directories
-   # ----------
+   # -----------
+   # ANDROID_DIR: Directory that holds all Android related files
    ANDROID_DIR=${HOME}
+   # RESOURCE_DIR: Directory that holds all kernel related files
    RESOURCE_DIR=${ANDROID_DIR}/Kernels
-   KERNEL_DIR=${RESOURCE_DIR}/Ninja/Kernel
+   # SOURCE_DIR: Directory that holds kernel source
+   SOURCE_DIR=${RESOURCE_DIR}/Ninja/Kernel
+   # ANYKERNEL_DIR: Directory that holds AnyKernel source
    ANYKERNEL_DIR=${RESOURCE_DIR}/Ninja/AK2
+   # TOOLCHAIN_DIR: Directory that holds toolchain
    TOOLCHAIN_DIR=${RESOURCE_DIR}/Toolchains/Linaro/DF-6.1
+   # PATCH_DIR: Directory that holds patch files
    PATCH_DIR="${ANYKERNEL_DIR}/patch"
+   # PATCH_DIR: Directory that holds module files
    MODULES_DIR="${ANYKERNEL_DIR}/modules"
-   ZIMAGE_DIR="${KERNEL_DIR}/arch/arm64/boot"
+   # ZIMAGE_DIR: Directory that holds completed Image.gz
+   ZIMAGE_DIR="${SOURCE_DIR}/arch/arm64/boot"
 
 
    # ---------
    # Variables
    # ---------
+   # THREAD: Number of available threads on computer
    THREAD="-j$(grep -c ^processor /proc/cpuinfo)"
+   # KERNEL: File name of completed image
    KERNEL="Image.gz"
+   # DTBIMAGE: File name of generated DTB image
    DTBIMAGE="dtb"
+   # DEFCONFIG: Name of defconfig file
    DEFCONFIG="ninja_defconfig"
+   # AK_BRANCH: AnyKernel branch
    AK_BRANCH=ninja
 
+   # If we are running a personal or test build, use different branches
    if [[ ${PERSONAL} = true || ${TEST} = true ]]; then
+      # KER_BRANCH: Branch of kernel to compile
       KER_BRANCH=personal
+      # AK_BRANCH: AnyKernel branch
       AK_BRANCH=personal
+      # ZIP_MOVE: Folder that holds completed zips
       ZIP_MOVE=${HOME}/shared/.me
+      # Custom user@host if desired
       export KBUILD_BUILD_USER=nathan
       export KBUILD_BUILD_HOST=phoenix
    else
       case "${VERSION}" in
          "m")
+            # KER_BRANCH: Branch of kernel to compile
             KER_BRANCH=m
+            # ZIP_MOVE: Folder that holds completed zips
             ZIP_MOVE=${HOME}/shared/Kernels/angler/Ninja/M ;;
          "n")
+            # KER_BRANCH: Branch of kernel to compile
             KER_BRANCH=n
+            # ZIP_MOVE: Folder that holds completed zips
             ZIP_MOVE=${HOME}/shared/Kernels/angler/Ninja/N ;;
       esac
    fi
@@ -88,12 +130,15 @@ function compile {
    # -------
    # Exports
    # -------
+   # CROSS_COMPILE: Location of toolchain
    export CROSS_COMPILE="${TOOLCHAIN_DIR}/bin/aarch64-linux-android-"
+   # ARCH and SUBARCH: Architecture we want to compile for
    export ARCH=arm64
    export SUBARCH=arm64
+
    # Export the LOG variable for other files to use (I currently handle this via .bashrc)
-   # export LOGDIR=${ANDROID_DIR}/Logs
-   # export LOG=${LOGDIR}/compile_log_`date +%m_%d_%y`.log
+   # export LOG_DIR=${ANDROID_DIR}/Logs
+   # export LOG=${LOG_DIR}/compile_log_`date +%m_%d_%y`.log
 
 
 
@@ -102,10 +147,12 @@ function compile {
    # ---------
    # Clean the out and AnyKernel dirs, reset the AnyKernel dir, and make clean
    function clean_all {
+      # Clean modules
       if [[ -f "${MODULES_DIR}/*.ko" ]]; then
         rm `echo ${MODULES_DIR}"/*.ko"`
       fi
 
+      # Cleaning of AnyKernel directory
       cd ${ANYKERNEL_DIR}
       rm -rf ${KERNEL} > /dev/null 2>&1
       rm -rf ${DTBIMAGE} > /dev/null 2>&1
@@ -115,28 +162,35 @@ function compile {
 
       echo
 
-      cd ${KERNEL_DIR}
+      # Cleaning of kernel directory
+      cd ${SOURCE_DIR}
       if [[ ${TEST} = false ]]; then
          git reset --hard origin/${KER_BRANCH}
          git clean -f -d -x > /dev/null 2>&1
          git pull
       fi
 
+      # Clean .config
       make clean
       make mrproper
    }
 
+
    # Update toolchain
    function update_tc {
+      # Remove the toolchain directory
       rm -vrf ${TOOLCHAIN_DIR}
+      # Change to the parent directory of the toolchain directory
       cd $( dirname ${TOOLCHAIN_DIR} )
+      # Clone the new repo
       git clone https://bitbucket.org/DespairFactor/aarch64-linux-android-6.x-kernel-linaro.git DF-6.1
    }
+
 
    # Make the kernel
    function make_kernel {
       echo
-      cd ${KERNEL_DIR}
+      cd ${SOURCE_DIR}
 
       # If this is a personal build, set the version to 21
       if [[ ${PERSONAL} = true ]]; then
@@ -150,19 +204,22 @@ function compile {
       make ${THREAD}
    }
 
+
    # Make the modules
    function make_modules {
       if [[ -f "${MODULES_DIR}/*.ko" ]]; then
          rm `echo ${MODULES_DIR}"/*.ko"`
       fi
       #find $MODULES_DIR/proprietary -name '*.ko' -exec cp -v {} $MODULES_DIR \;
-      find ${KERNEL_DIR} -name '*.ko' -exec cp -v {} ${MODULES_DIR} \;
+      find ${SOURCE_DIR} -name '*.ko' -exec cp -v {} ${MODULES_DIR} \;
    }
+
 
    # Make the DTB file
    function make_dtb {
       ${ANYKERNEL_DIR}/tools/dtbToolCM -v2 -o ${ANYKERNEL_DIR}/${DTBIMAGE} -s 2048 -p scripts/dtc/ arch/arm64/boot/dts/
    }
+
 
    # Make the zip file, remove the previous version and upload it
    function make_zip {
@@ -189,7 +246,7 @@ function compile {
       mv ${KERNEL_VERSION}.zip "${ZIP_MOVE}"
 
       # Go to the kernel directory
-      cd ${KERNEL_DIR}
+      cd ${SOURCE_DIR}
 
       # If it isn't a test build, clean it
       if [[ ${TEST} = false ]]; then
@@ -213,81 +270,50 @@ function compile {
 
    # Silently shift to correct branches
    cd ${ANYKERNEL_DIR} && git checkout ${AK_BRANCH} > /dev/null 2>&1
-   cd ${KERNEL_DIR} && git checkout ${KER_BRANCH} > /dev/null 2>&1
+   cd ${SOURCE_DIR} && git checkout ${KER_BRANCH} > /dev/null 2>&1
 
 
 
    # Set the kernel version
-   KERNEL_VERSION=$( grep -r "EXTRAVERSION = -" ${KERNEL_DIR}/Makefile | sed 's/EXTRAVERSION = -//' )
+   KERNEL_VERSION=$( grep -r "EXTRAVERSION = -" ${SOURCE_DIR}/Makefile | sed 's/EXTRAVERSION = -//' )
 
 
 
    # Show the version of the kernel compiling
-   echo -e ${RED}
-   echo -e ""
-   echo -e "---------------------------------------------------------------------"
-   echo -e ""
-   echo -e ""
+   echo -e ${RED}; newLine
+   echo -e "---------------------------------------------------------------------"; newLine; newLine
    echo -e "    _   _______   __    _____       __ __ __________  _   __________ ";
    echo -e "   / | / /  _/ | / /   / /   |     / //_// ____/ __ \/ | / / ____/ / ";
    echo -e "  /  |/ // //  |/ /_  / / /| |    / ,<  / __/ / /_/ /  |/ / __/ / /  ";
    echo -e " / /|  // // /|  / /_/ / ___ |   / /| |/ /___/ _, _/ /|  / /___/ /___";
-   echo -e "/_/ |_/___/_/ |_/\____/_/  |_|  /_/ |_/_____/_/ |_/_/ |_/_____/_____/";
-   echo -e ""
-   echo -e ""
-   echo -e "---------------------------------------------------------------------"
-   echo -e ""
-   echo -e ""
-   echo -e ""
-   echo "---------------"
-   echo "KERNEL VERSION:"
-   echo "---------------"
-   echo -e ""
+   echo -e "/_/ |_/___/_/ |_/\____/_/  |_|  /_/ |_/_____/_/ |_/_/ |_/_____/_____/"; newLine; newLine
+   echo -e "---------------------------------------------------------------------"; newLine; newLine
 
-   echo -e ${BLINK_RED}
-   echo -e ${KERNEL_VERSION}
-   echo -e ${RESTORE}
+   echoText "KERNEL VERSION"; newLine
 
-   echo -e ${RED}
-   echo -e "---------------------------------------------"
-   echo -e "BUILD SCRIPT STARTING AT $(date +%D\ %r)"
-   echo -e "---------------------------------------------"
-   echo -e ${RESTORE}
+   newLine; echo -e ${BLINK_RED}${KERNEL_VERSION}${RESTORE}; newLine
 
 
+   echoText "BUILD SCRIPT STARTING AT $(date +%D\ %r)"
 
+
+   # Update toolchain if requested
    if [[ "${2}" == "tcupdate" ]]; then
-      # Clean up
-      echo -e ${RED}
-      echo -e "------------------"
-      echo -e "UPDATING TOOLCHAIN"
-      echo -e "------------------"
-      echo -e ${RESTORE}
-      echo -e ""
+      echoText "UPDATING TOOLCHAIN"; newLine
 
       update_tc
    fi
 
 
-
    # Clean up
-   echo -e ${RED}
-   echo -e "-----------"
-   echo -e "CLEANING UP"
-   echo -e "-----------"
-   echo -e ${RESTORE}
-   echo -e ""
+   echoText "CLEANING UP"; newLine
 
    clean_all
 
 
 
    # Make the kernel
-   echo -e ${RED}
-   echo -e "-------------"
-   echo -e "MAKING KERNEL"
-   echo -e "-------------"
-   echo -e ${RESTORE}
+   echoText "MAKING KERNEL"; newLine
 
    make_kernel
    make_dtb
@@ -304,14 +330,10 @@ function compile {
 
 
       # Upload
-      echo -e ${RED}
-      echo -e "------------------"
-      echo -e "UPLOADING ZIP FILE"
-      echo -e "------------------"
-      echo -e ${RESTORE}
-      echo -e ""
+      echoText "UPLOADING ZIP FILE"; newLine
 
       . ${HOME}/upload.sh
+
    else
       BUILD_SUCCESS_STRING="BUILD FAILED"
    fi
@@ -319,19 +341,13 @@ function compile {
 
 
    # End the script
-   echo -e ""
-   echo -e ${RED}
-   echo "--------------------"
-   echo "SCRIPT COMPLETED IN:"
-   echo "--------------------"
+   newLine; echoText "SCRIPT COMPLETED"
 
    DATE_END=$(date +"%s")
    DIFF=$((${DATE_END} - ${DATE_START}))
 
-   echo -e "${BUILD_SUCCESS_STRING}!"
-   echo -e "TIME: $((${DIFF} / 60)) MINUTES AND $((${DIFF} % 60)) SECONDS"
-
-   echo -e ${RESTORE}
+   echo -e ${RED}"${BUILD_SUCCESS_STRING}!"
+   echo -e "TIME: $((${DIFF} / 60)) MINUTES AND $((${DIFF} % 60)) SECONDS"${RESTORE}; newLine
 
    # Add line to compile log
    echo -e "`date +%H:%M:%S`: ${BASH_SOURCE} ${1}" >> ${LOG}
@@ -340,6 +356,7 @@ function compile {
    echo -e "\a"
 }
 
+# If the first parameter is both
 if [[ "${1}" == "both" ]]; then
    # Run the two kernel builds
    compile m ${2}
@@ -347,6 +364,8 @@ if [[ "${1}" == "both" ]]; then
 
    cd ${HOME}
    cat ${LOG}
+
+# Otherwise, pass parameters to compile function
 else
    compile ${1} ${2}
 fi

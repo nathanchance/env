@@ -27,15 +27,15 @@ function compile() {
 
 
    # Directories
-   SOURCEDIR=${HOME}/TWRP
-   OUTDIR=${SOURCEDIR}/out/target/product/${DEVICE}
-   UPLOADDIR=${HOME}/shared/TWRP
+   SOURCE_DIR=${HOME}/TWRP
+   OUT_DIR=${SOURCE_DIR}/out/target/product/${DEVICE}
+   UPLOAD_DIR=${HOME}/shared/TWRP
 
 
    # File names
-   COMPFILE=recovery.img
-   UPLDFILE=twrp-${DEVICE}-$( date +%m%d%Y ).img
-   FILEFORMAT=twrp-${DEVICE}*
+   COMP_FILE=recovery.img
+   UPLD_FILE=twrp-${DEVICE}-$( date +%m%d%Y ).img
+   FILE_FORMAT=twrp-${DEVICE}*
 
 
    # Clear the terminal
@@ -51,7 +51,7 @@ function compile() {
    # Change to the source directory
    echoText "MOVING TO SOURCE DIRECTORY"
 
-   cd ${SOURCEDIR}
+   cd ${SOURCE_DIR}
 
 
    # Start syncing the latest sources
@@ -85,28 +85,28 @@ function compile() {
 
 
    # If the compilation was successful, there will be a file in the format above in the out directory
-   if [[ $( ls ${OUTDIR}/${COMPFILE} 2>/dev/null | wc -l ) != "0" ]]; then
+   if [[ $( ls ${OUT_DIR}/${COMP_FILE} 2>/dev/null | wc -l ) != "0" ]]; then
       # Make the build result string show success
       BUILD_RESULT_STRING="BUILD SUCCESSFUL"
 
 
 
-      # If the upload directory doesn't exist, make it; otherwise, remove existing files in UPLOADDIR
-      if [[ ! -d "${UPLOADDIR}" ]]; then
+      # If the upload directory doesn't exist, make it; otherwise, remove existing files in UPLOAD_DIR
+      if [[ ! -d "${UPLOAD_DIR}" ]]; then
          newLine; echoText "MAKING UPLOAD DIRECTORY"
 
-         mkdir -p "${UPLOADDIR}"
+         mkdir -p "${UPLOAD_DIR}"
       else
          newLine; echoText "CLEANING UPLOAD DIRECTORY"; newLine
 
-         rm -vrf "${UPLOADDIR}"/*${FILEFORMAT}*
+         rm -vrf "${UPLOAD_DIR}"/*${FILE_FORMAT}*
       fi
 
 
-      # Copy new files to UPLOADDIR
+      # Copy new files to UPLOAD_DIR
       newLine; echoText "MOVING FILE TO UPLOAD DIRECTORY"; newLine
 
-      mv -v ${OUTDIR}/${COMPFILE} "${UPLOADDIR}"/${UPLDFILE}
+      mv -v ${OUT_DIR}/${COMP_FILE} "${UPLOAD_DIR}"/${UPLD_FILE}
 
 
       # Upload the files
