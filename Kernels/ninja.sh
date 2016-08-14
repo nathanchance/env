@@ -26,7 +26,7 @@ function newLine() {
 
 
 # Compilation function
-function compile {
+function compile() {
    # ----------
    # Parameters
    # ----------
@@ -145,6 +145,27 @@ function compile {
    # ---------
    # Functions
    # ---------
+   # Changelog function
+   function changelog() {
+      # Directory that will hold changelog (same as ZIP_MOVE)
+      CHANGELOG_DIR=${1}
+
+      # Make a changelog first
+      CHANGELOG=${ZIP_MOVE}/ninja_changelog.txt
+      rm -rf ${CHANGELOG}
+
+      # Figure out the old version and its commit hash
+      OLD_VERSION=$( ls ${CHANGELOG_DIR} | sed 's/^.*NINJA-\([^&]*\)\.zip.*/\1/' )
+      OLD_VERSION_HASH=$(git log --grep="^NINJA: ${OLD_VERSION}$" --pretty=format:'%H')
+
+      # Figure out the old version and its commit hash
+      NEW_VERION=$( grep -r "EXTRAVERSION = -NINJA-" ${SOURCE_DIR}/Makefile | sed 's/EXTRAVERSION = -NINJA-//' )
+      NEW_VERSION_HASH=$(git log --grep="^NINJA: ${NEW_VERSION}$" --pretty=format:'%H')
+
+      # Generate changelog
+      git log ${OLD_VERSION_HASH}..${NEW_VERSION_HASH} --oneline  > ${CHANGELOG}
+   }
+
    # Clean the out and AnyKernel dirs, reset the AnyKernel dir, and make clean
    function clean_all {
       # Clean modules
@@ -239,6 +260,11 @@ function compile {
       if [[ ! -d "${ZIP_MOVE}" ]]; then
          mkdir -p "${ZIP_MOVE}"
       else
+         # If there is a previous zip in the zip move directory in the same format AND it is not the same as the zip we are uploading, generate a changelog
+         if [[ $( ls ${ZIP_MOVE}/${ZIP_FORMAT} 2>/dev/null | wc -l ) != "0" && $( ls ${ZIP_MOVE}/${ZIP_FORMAT} ) != "${ZIP_MOVE}/${KERNEL_VERSION}.zip" ]]; then
+            changelog ${ZIP_MOVE}
+         fi
+
          rm -rf "${ZIP_MOVE}"/${ZIP_FORMAT}
       fi
 
