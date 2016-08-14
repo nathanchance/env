@@ -78,24 +78,24 @@ function compile() {
    # TOOLCHAIN_DIR: Directory that holds toolchain
    TOOLCHAIN_DIR=${RESOURCE_DIR}/Toolchains/Linaro/DF-6.1
    # PATCH_DIR: Directory that holds patch files
-   PATCH_DIR="${ANYKERNEL_DIR}/patch"
+   PATCH_DIR=${ANYKERNEL_DIR}/patch
    # PATCH_DIR: Directory that holds module files
-   MODULES_DIR="${ANYKERNEL_DIR}/modules"
+   MODULES_DIR=${ANYKERNEL_DIR}/modules
    # ZIMAGE_DIR: Directory that holds completed Image.gz
-   ZIMAGE_DIR="${SOURCE_DIR}/arch/arm64/boot"
+   ZIMAGE_DIR=${SOURCE_DIR}/arch/arm64/boot
 
 
    # ---------
    # Variables
    # ---------
    # THREAD: Number of available threads on computer
-   THREAD="-j$(grep -c ^processor /proc/cpuinfo)"
+   THREAD=-j$(grep -c ^processor /proc/cpuinfo)
    # KERNEL: File name of completed image
-   KERNEL="Image.gz"
+   KERNEL=Image.gz
    # DTBIMAGE: File name of generated DTB image
-   DTBIMAGE="dtb"
+   DTBIMAGE=dtb
    # DEFCONFIG: Name of defconfig file
-   DEFCONFIG="ninja_defconfig"
+   DEFCONFIG=ninja_defconfig
    # AK_BRANCH: AnyKernel branch
    AK_BRANCH=ninja
 
@@ -163,7 +163,7 @@ function compile() {
       NEW_VERSION_HASH=$(git log --grep="^NINJA: ${NEW_VERSION}$" --pretty=format:'%H')
 
       # Generate changelog
-      git log ${OLD_VERSION_HASH}..${NEW_VERSION_HASH} --oneline  > ${CHANGELOG}
+      git log --oneline ${OLD_VERSION_HASH}..${NEW_VERSION_HASH} > ${CHANGELOG}
    }
 
    # Clean the out and AnyKernel dirs, reset the AnyKernel dir, and make clean
@@ -174,7 +174,7 @@ function compile() {
       fi
 
       # Cleaning of AnyKernel directory
-      cd ${ANYKERNEL_DIR}
+      cd "${ANYKERNEL_DIR}"
       rm -rf ${KERNEL} > /dev/null 2>&1
       rm -rf ${DTBIMAGE} > /dev/null 2>&1
       git reset --hard origin/${AK_BRANCH}
@@ -184,7 +184,7 @@ function compile() {
       echo
 
       # Cleaning of kernel directory
-      cd ${SOURCE_DIR}
+      cd "${SOURCE_DIR}"
       if [[ ${TEST} = false ]]; then
          git reset --hard origin/${KER_BRANCH}
          git clean -f -d -x > /dev/null 2>&1
@@ -200,9 +200,9 @@ function compile() {
    # Update toolchain
    function update_tc {
       # Remove the toolchain directory
-      rm -vrf ${TOOLCHAIN_DIR}
+      rm -rf "${TOOLCHAIN_DIR}"
       # Change to the parent directory of the toolchain directory
-      cd $( dirname ${TOOLCHAIN_DIR} )
+      cd $( dirname "${TOOLCHAIN_DIR}" )
       # Clone the new repo
       git clone https://bitbucket.org/DespairFactor/aarch64-linux-android-6.x-kernel-linaro.git DF-6.1
    }
@@ -211,7 +211,7 @@ function compile() {
    # Make the kernel
    function make_kernel {
       echo
-      cd ${SOURCE_DIR}
+      cd "${SOURCE_DIR}"
 
       # If this is a personal build, set the version to 21
       if [[ ${PERSONAL} = true ]]; then
@@ -229,7 +229,7 @@ function compile() {
    # Make the modules
    function make_modules {
       if [[ -f "${MODULES_DIR}/*.ko" ]]; then
-         rm `echo ${MODULES_DIR}"/*.ko"`
+         rm `echo "${MODULES_DIR}"/*.ko"`
       fi
       #find $MODULES_DIR/proprietary -name '*.ko' -exec cp -v {} $MODULES_DIR \;
       find ${SOURCE_DIR} -name '*.ko' -exec cp -v {} ${MODULES_DIR} \;
@@ -245,10 +245,22 @@ function compile() {
    # Make the zip file, remove the previous version and upload it
    function make_zip {
       # Copy Image.gz
-      cp -vr ${ZIMAGE_DIR}/${KERNEL} ${ANYKERNEL_DIR}/zImage
+      cp -vr "${ZIMAGE_DIR}"/${KERNEL} "${ANYKERNEL_DIR}"/zImage
+
+      # If ZIPMOVE doesn't exist, make it; otherwise, clean it
+      if [[ ! -d "${ZIP_MOVE}" ]]; then
+         mkdir -p "${ZIP_MOVE}"
+      else
+         # If there is a previous zip in the zip move directory in the same format AND it is not the same as the zip we are uploading, generate a changelog
+         if [[ $( ls "${ZIP_MOVE}"/${ZIP_FORMAT} 2>/dev/null | wc -l ) != "0" && $( ls "${ZIP_MOVE}"/${ZIP_FORMAT} ) != "${ZIP_MOVE}/${KERNEL_VERSION}.zip" ]]; then
+            changelog "${ZIP_MOVE}"
+         fi
+
+         rm -rf "${ZIP_MOVE}"/${ZIP_FORMAT}
+      fi
 
       # Move to AnyKernel directory
-      cd ${ANYKERNEL_DIR}
+      cd "${ANYKERNEL_DIR}"
 
       # Make zip file
       zip -x@zipexclude -r9 ${KERNEL_VERSION}.zip *
@@ -256,23 +268,11 @@ function compile() {
       # Make zip format variable
       ZIP_FORMAT=N*.zip
 
-      # If ZIPMOVE doesn't exist, make it; otherwise, clean it
-      if [[ ! -d "${ZIP_MOVE}" ]]; then
-         mkdir -p "${ZIP_MOVE}"
-      else
-         # If there is a previous zip in the zip move directory in the same format AND it is not the same as the zip we are uploading, generate a changelog
-         if [[ $( ls ${ZIP_MOVE}/${ZIP_FORMAT} 2>/dev/null | wc -l ) != "0" && $( ls ${ZIP_MOVE}/${ZIP_FORMAT} ) != "${ZIP_MOVE}/${KERNEL_VERSION}.zip" ]]; then
-            changelog ${ZIP_MOVE}
-         fi
-
-         rm -rf "${ZIP_MOVE}"/${ZIP_FORMAT}
-      fi
-
       # Move the new zip to ZIP_MOVE
       mv ${KERNEL_VERSION}.zip "${ZIP_MOVE}"
 
       # Go to the kernel directory
-      cd ${SOURCE_DIR}
+      cd "${SOURCE_DIR}"
 
       # If it isn't a test build, clean it
       if [[ ${TEST} = false ]]; then
@@ -295,8 +295,8 @@ function compile() {
 
 
    # Silently shift to correct branches
-   cd ${ANYKERNEL_DIR} && git checkout ${AK_BRANCH} > /dev/null 2>&1
-   cd ${SOURCE_DIR} && git checkout ${KER_BRANCH} > /dev/null 2>&1
+   cd "${ANYKERNEL_DIR}" && git checkout ${AK_BRANCH} > /dev/null 2>&1
+   cd "${SOURCE_DIR}" && git checkout ${KER_BRANCH} > /dev/null 2>&1
 
 
 
@@ -317,7 +317,7 @@ function compile() {
 
    echoText "KERNEL VERSION"; newLine
 
-   newLine; echo -e ${BLINK_RED}${KERNEL_VERSION}${RESTORE}; newLine
+   newLine; echo -e ${RED}${BLINK_RED}${KERNEL_VERSION}${RESTORE}; newLine
 
 
    echoText "BUILD SCRIPT STARTING AT $(date +%D\ %r)"
