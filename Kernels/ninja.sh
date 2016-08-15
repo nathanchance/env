@@ -229,7 +229,7 @@ function compile() {
    # Make the modules
    function make_modules {
       if [[ -f "${MODULES_DIR}/*.ko" ]]; then
-         rm `echo "${MODULES_DIR}"/*.ko"`
+         rm `echo "${MODULES_DIR}/*.ko"`
       fi
       #find $MODULES_DIR/proprietary -name '*.ko' -exec cp -v {} $MODULES_DIR \;
       find ${SOURCE_DIR} -name '*.ko' -exec cp -v {} ${MODULES_DIR} \;
