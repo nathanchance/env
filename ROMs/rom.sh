@@ -256,11 +256,13 @@ function compile() {
       # 4. Remove the unnecessary decreased sound delays from notifications (thanks @IAmTheOneTheyCallNeo)
       git fetch https://github.com/IAmTheOneTheyCallNeo/android_device_moto_shamu neo
       git cherry-pick c35490134644d9f4ab2cded14a0910169fd46391
-      # 5. Stop per app overlays from being reset (thanks @bigrushdog)
+      # 5. Revert "shamu: correct naming of blob makefile in aosp_shamu.mk", as we use DU's vendor files
+      git revert --no-edit 4a7970b9bba25f8c1b071756d389bfb54c856cde
+      # 6. Stop per app overlays from being reset (thanks @bigrushdog)
       cd ${SOURCE_DIR}/packages/apps/ThemeChooser
       git fetch https://github.com/nathanchance/android_packages_apps_ThemeChooser.git
       git cherry-pick 1cefd98f7ac5db31754a8f7ee1fd62f3ac897b71
-      # 6. Add @Yoinx's Kernel Adiutor-Mod instead of the regular Kernel Adiutor (to complement Blackbird)
+      # 7. Add @Yoinx's Kernel Adiutor-Mod instead of the regular Kernel Adiutor (to complement Blackbird)
       cd ${SOURCE_DIR}/vendor/cm/prebuilt/KernelAdiutor
       rm -rf KernelAdiutor.apk
       wget https://github.com/yoinx/kernel_adiutor/raw/master/download/app/app-release.apk
