@@ -31,11 +31,12 @@ function echoText() {
    RST="\033[0m"
 
    echo -e ${RED}
-   echo -e "$( for i in $( seq ${#1} ); do echo -e "-\c"; done )"
-   echo -e "${1}"
-   echo -e "$( for i in $( seq ${#1} ); do echo -e "-\c"; done )"
+   echo -e "====$( for i in $( seq ${#1} ); do echo -e "=\c"; done )===="
+   echo -e "==  ${1}  =="
+   echo -e "====$( for i in $( seq ${#1} ); do echo -e "=\c"; done )===="
    echo -e ${RST}
 }
+
 
 # Creates a new line
 function newLine() {
@@ -68,9 +69,9 @@ function changelog() {
 
    # Echos the git log to the changelog file for the past 10 days
    for i in $( seq 10 ); do
-      export AFTER_DATE=$( date --date="$i days ago" +%m-%d-%Y )
+      export AFTER_DATE=$( TZ=MST date --date="$i days ago" +%m-%d-%Y )
       k=$( expr $i - 1 )
-   	export UNTIL_DATE=$( date --date="$k days ago" +%m-%d-%Y )
+   	export UNTIL_DATE=$( TZ=MST date --date="$k days ago" +%m-%d-%Y )
 
    	# Line with after --- until was too long for a small ListView
    	echo '=======================' >> "${CHANGELOG}";
@@ -102,6 +103,7 @@ function compile() {
    PERSON=
    TEST=false
    PERSONAL=false
+   SUCCESS=false
 
    # If the first parameter is "me", I'm running a personal build; otherwise, it's a public build
    if [[ "${1}" == "me" ]]; then
@@ -205,7 +207,7 @@ function compile() {
 
    # Export the LOG variable for other files to use (I currently handle this via .bashrc)
    # export LOG_DIR=${HOME}/shared/.logs
-   # export LOG=${LOG_DIR}/Results/compile_log_$( date +%m_%d_%y ).log
+   # export LOG=${LOG_DIR}/Results/compile_log_$( TZ=MST date +%m_%d_%y ).log
 
 
 
@@ -215,9 +217,9 @@ function compile() {
 
 
    # Start tracking time
-   echoText "SCRIPT STARTING AT $( date +%D\ %r )"
+   echoText "SCRIPT STARTING AT $( TZ=MST date +%D\ %r )"
 
-   START=$( date +%s )
+   START=$( TZ=MST date +%s )
 
 
 
@@ -311,7 +313,7 @@ function compile() {
    # Start building
    echoText "MAKING ZIP FILE"; newLine
 
-   NOW=$( date +"%Y-%m-%d-%S" )
+   NOW=$( TZ=MST date +"%Y-%m-%d-%S" )
    time mka bacon 2>&1 | tee ${LOGDIR}/Compilation/${ROM}_${DEVICE}-${NOW}.log
 
 
@@ -320,6 +322,7 @@ function compile() {
    if [[ $( ls ${OUT_DIR}/${ZIP_FORMAT} 2>/dev/null | wc -l ) != "0" ]]; then
       # Make the build result string show success
       BUILD_RESULT_STRING="BUILD SUCCESSFUL"
+      SUCCESS=true
 
 
 
@@ -369,30 +372,33 @@ function compile() {
    # If the build failed, add a variable
    else
       BUILD_RESULT_STRING="BUILD FAILED"
+      SUCCESS=false
    fi
 
 
 
    # Stop tracking time
-   END=$( date +%s )
-   echo -e ${RED}
-   echo -e "-------------------------------------"
-   echo -e "SCRIPT ENDING AT $( date +%D\ %r )"
-   echo -e ""
-   echo -e "${BUILD_RESULT_STRING}!"
-   echo -e "TIME: $( echo $((${END}-${START})) | awk '{print int($1/60)" MINUTES AND "int($1%60)" SECONDS"}' )"
-   echo -e "-------------------------------------"
-   echo -e ${RST}; newLine
+   END=$( TZ=MST date +%s )
+   newLine; echoText "${BUILD_RESULT_STRING}!"
+
+   # Print the zip location and its size if the script was successful
+   if [[ ${SUCCESS} = true ]]; then
+      echo -e ${RED}"ZIP: $( ls ${ZIP_MOVE}/*.zip )"
+      echo -e "SIZE: $( du -h ${ZIP_MOVE}/*.zip | awk '{print $1}' )"${RESTORE}
+   fi
+   # Print the time the script finished and how long the script ran for regardless of success
+   echo -e ${RED}"TIME FINISHED: $( TZ=MST date +%D\ %r | awk '{print toupper($0)}' )"
+   echo -e ${RED}"DURATION: $( echo $((${END}-${START})) | awk '{print int($1/60)" MINUTES AND "int($1%60)" SECONDS"}' )"${RESTORE}; newLine
 
    # Add line to compile log
    if [[ ${PERSONAL} = true ]]; then
-      echo -e "$( date +%H:%M:%S ): ${BASH_SOURCE} me" >> ${LOG}
+      echo -e "$( TZ=MST date +%H:%M:%S ): ${BASH_SOURCE} me" >> ${LOG}
    elif [[ ${TEST} = true ]]; then
-      echo -e "$( date +%H:%M:%S ): ${BASH_SOURCE} ${ROM} test ${DEVICE}" >> ${LOG}
+      echo -e "$( TZ=MST date +%H:%M:%S ): ${BASH_SOURCE} ${ROM} test ${DEVICE}" >> ${LOG}
    elif [[ -n ${PERSON} ]]; then
-      echo -e "$( date +%H:%M:%S ): ${BASH_SOURCE} ${ROM} ${PERSON}" >> ${LOG}
+      echo -e "$( TZ=MST date +%H:%M:%S ): ${BASH_SOURCE} ${ROM} ${PERSON}" >> ${LOG}
    else
-      echo -e "$( date +%H:%M:%S ): ${BASH_SOURCE} ${ROM} ${DEVICE}" >> ${LOG}
+      echo -e "$( TZ=MST date +%H:%M:%S ): ${BASH_SOURCE} ${ROM} ${DEVICE}" >> ${LOG}
    fi
 
    echo -e "${BUILD_RESULT_STRING} IN $( echo $((${END}-${START})) | awk '{print int($1/60)" MINUTES AND "int($1%60)" SECONDS"}' )\n" >> ${LOG}

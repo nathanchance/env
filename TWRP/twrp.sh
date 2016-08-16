@@ -7,9 +7,9 @@ function echoText() {
    RST="\033[0m"
 
    echo -e ${RED}
-   echo -e "$( for i in $( seq ${#1} ); do echo -e "-\c"; done )"
-   echo -e "${1}"
-   echo -e "$( for i in $( seq ${#1} ); do echo -e "-\c"; done )"
+   echo -e "====$( for i in $( seq ${#1} ); do echo -e "=\c"; done )===="
+   echo -e "==  ${1}  =="
+   echo -e "====$( for i in $( seq ${#1} ); do echo -e "=\c"; done )===="
    echo -e ${RST}
 }
 
@@ -25,6 +25,8 @@ function compile() {
    # Parameters
    DEVICE=${1}
 
+   # Flags
+   SUCCESS=false
 
    # Directories
    SOURCE_DIR=${HOME}/TWRP
@@ -34,7 +36,7 @@ function compile() {
 
    # File names
    COMP_FILE=recovery.img
-   UPLD_FILE=twrp-${DEVICE}-$( date +%m%d%Y ).img
+   UPLD_FILE=twrp-${DEVICE}-$( TZ=MST date +%m%d%Y ).img
    FILE_FORMAT=twrp-${DEVICE}*
 
 
@@ -43,9 +45,9 @@ function compile() {
 
 
    # Start tracking time
-   echoText "SCRIPT STARTING AT $( date +%D\ %r )"
+   echoText "SCRIPT STARTING AT $( TZ=MST date +%D\ %r )"
 
-   START=$( date +%s )
+   START=$( TZ=MST date +%s )
 
 
    # Change to the source directory
@@ -80,7 +82,7 @@ function compile() {
 
    # Start building
    newLine; echoText "MAKING TWRP"; newLine
-   NOW=$( date +"%Y-%m-%d-%S" )
+   NOW=$( TZ=MST date +"%Y-%m-%d-%S" )
    time mka recoveryimage 2>&1 | tee ${LOGDIR}/Compilation/twrp_${DEVICE}-${NOW}.log
 
 
@@ -88,6 +90,7 @@ function compile() {
    if [[ $( ls ${OUT_DIR}/${COMP_FILE} 2>/dev/null | wc -l ) != "0" ]]; then
       # Make the build result string show success
       BUILD_RESULT_STRING="BUILD SUCCESSFUL"
+      SUCCESS=true
 
 
 
@@ -129,23 +132,28 @@ function compile() {
    # If the build failed, add a variable
    else
       BUILD_RESULT_STRING="BUILD FAILED"
+      SUCCESS=false
    fi
 
 
 
    # Stop tracking time
-   END=$( date +%s )
-   echo -e ${RED}
-   echo -e "-------------------------------------"
-   echo -e "SCRIPT ENDING AT $( date +%D\ %r )"
-   echo -e ""
-   echo -e "${BUILD_RESULT_STRING}!"
-   echo -e "TIME: $( echo $((${END}-${START})) | awk '{print int($1/60)" MINUTES AND "int($1%60)" SECONDS"}' )"
-   echo -e "-------------------------------------"
-   echo -e ${RST}; newLine
+   END=$( TZ=MST date +%s )
+   newLine; echoText "${BUILD_RESULT_STRING}!"
+
+   # Print the image location and its size if the script was successful
+   if [[ ${SUCCESS} = true ]]; then
+      echo -e ${RED}"IMAGE: $( ls "${UPLOAD_DIR}"/${UPLD_FILE} )"
+      echo -e "SIZE: $( du -h "${UPLOAD_DIR}"/${UPLD_FILE} | awk '{print $1}' )"${RESTORE}
+   fi
+   # Print the time the script finished and how long the script ran for regardless of success
+   echo -e ${RED}"TIME FINISHED: $( TZ=MST date +%D\ %r | awk '{print toupper($0)}' )"
+   echo -e ${RED}"DURATION: $( echo $((${END}-${START})) | awk '{print int($1/60)" MINUTES AND "int($1%60)" SECONDS"}' )"${RESTORE}; newLine
+
+
 
    # Add line to compilation log
-   echo -e "$( date +%H:%M:%S ): ${BASH_SOURCE} ${DEVICE}" >> ${LOG}
+   echo -e "$( TZ=MST date +%H:%M:%S ): ${BASH_SOURCE} ${DEVICE}" >> ${LOG}
    echo -e "${BUILD_RESULT_STRING} IN $( echo $((${END}-${START})) | awk '{print int($1/60)" MINUTES AND "int($1%60)" SECONDS"}' )\n" >> ${LOG}
 
    echo -e "\a"

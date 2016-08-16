@@ -137,7 +137,7 @@ function compile() {
 
    # Export the LOG variable for other files to use (I currently handle this via .bashrc)
    # export LOG_DIR=${ANDROID_DIR}/Logs
-   # export LOG=${LOG_DIR}/compile_log_`date +%m_%d_%y`.log
+   # export LOG=${LOG_DIR}/compile_log_$( TZ=MST  date +%m_%d_%y ).log
 
 
 
@@ -293,7 +293,7 @@ function compile() {
 
 
    # Time the start of the script
-   DATE_START=$(date +"%s")
+   DATE_START=$( TZ=MST date +"%s" )
 
 
 
@@ -320,7 +320,7 @@ function compile() {
    echo -e ${RED}${BLINK_RED}${KERNEL_VERSION}${RESTORE}; newLine
 
 
-   echoText "BUILD SCRIPT STARTING AT $(date +%D\ %r)"
+   echoText "BUILD SCRIPT STARTING AT $( TZ=MST date +%D\ %r )"
 
 
    # Update toolchain if requested
@@ -366,19 +366,22 @@ function compile() {
 
 
    # End the script
-   newLine; echoText "${BUILD_RESULT_STRING}"
+   newLine; echoText "${BUILD_RESULT_STRING}!"
 
-   DATE_END=$(date +"%s")
+   DATE_END=$( TZ=MST  date +"%s" )
    DIFF=$((${DATE_END} - ${DATE_START}))
 
+   # Print the zip location and its size if the script was successful
    if [[ ${SUCCESS} = true ]]; then
       echo -e ${RED}"ZIP: ${ZIP_MOVE}/${KERNEL_VERSION}.zip"
       echo -e "SIZE: $( du -h ${ZIP_MOVE}/${KERNEL_VERSION}.zip | awk '{print $1}' )"${RESTORE}
    fi
-   echo -e ${RED}"TIME: $((${DIFF} / 60)) MINUTES AND $((${DIFF} % 60)) SECONDS"${RESTORE}; newLine
+   # Print the time the script finished and how long the script ran for regardless of success
+   echo -e ${RED}"TIME FINISHED: $( TZ=MST date +%D\ %r | awk '{print toupper($0)}' )"
+   echo -e "DURATION: $((${DIFF} / 60)) MINUTES AND $((${DIFF} % 60)) SECONDS"${RESTORE}; newLine
 
    # Add line to compile log
-   echo -e "`date +%H:%M:%S`: ${BASH_SOURCE} ${1}" >> ${LOG}
+   echo -e "$( TZ=MST date +%H:%M:%S ): ${BASH_SOURCE} ${1}" >> ${LOG}
    echo -e "${BUILD_RESULT_STRING} IN $((${DIFF} / 60)) MINUTES AND $((${DIFF} % 60)) SECONDS\n" >> ${LOG}
 
    echo -e "\a"

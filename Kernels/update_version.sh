@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Move to source directory
-cd ${HOME}/Kernels/Ninja/Kernel
+cd ${HOME}/Kernels/Ninja
 
 # Checkout proper branch
 git checkout ${1}

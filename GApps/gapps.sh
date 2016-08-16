@@ -7,11 +7,25 @@
 
 
 
-# ------
-# Colors
-# ------
-BLDGREEN="\033[1m""\033[32m"
-RST="\033[0m"
+# ---------
+# Functions
+# ---------
+# Prints a formatted header; used for outlining what the script is doing to the user
+function echoText() {
+   RED="\033[01;31m"
+   RST="\033[0m"
+
+   echo -e ${RED}
+   echo -e "====$( for i in $( seq ${#1} ); do echo -e "=\c"; done )===="
+   echo -e "==  ${1}  =="
+   echo -e "====$( for i in $( seq ${#1} ); do echo -e "=\c"; done )===="
+   echo -e ${RST}
+}
+
+# Creates a new line
+function newLine() {
+   echo -e ""
+}
 
 
 
@@ -20,8 +34,9 @@ RST="\033[0m"
 # ----------
 # Parameter 1: Which GApps to compile? (currently Banks or Pure Nexus Dynamic GApps)
 
-# Unassign personal flag
+# Unassign personal and success flags
 PERSONAL=false
+SUCCESS=false
 
 if [[ "${1}" == "me" ]]; then
    PERSONAL=true
@@ -48,7 +63,7 @@ elif [[ "${TYPE}" == "pn" ]]; then
 fi
 # Export the LOG variable for other files to use (I currently handle this via .bashrc)
 # export LOG_DIR=${ANDROID_DIR}/Logs
-# export LOG=${LOG_DIR}/compile_log_`date +%m_%d_%y`.log
+# export LOG=${LOG_DIR}/compile_log_$( TZ=MST date +%m_%d_%y ).log
 
 
 
@@ -58,7 +73,7 @@ clear
 
 
 # Start tracking time
-START=$(date +%s)
+START=$( TZ=MST date +%s )
 
 
 
@@ -116,7 +131,7 @@ fi
 
 
 # Stop tracking time
-END=$(date +%s)
+END=$( TZ=MST date +%s )
 
 
 
@@ -125,17 +140,21 @@ cd ${HOME}
 
 
 
-echo -e ${BLDGREEN}
-echo -e "-------------------------------------"
-echo -e "SCRIPT ENDING AT $(date +%D\ %r)"
-echo -e ""
-echo -e "${BUILD_RESULT_STRING}!"
-echo -e "TIME: $(echo $((${END}-${START})) | awk '{print int($1/60)" MINUTES AND "int($1%60)" SECONDS"}')"
-echo -e "-------------------------------------"
-echo -e ${RST}
+# Stop tracking time
+END=$( TZ=MST date +%s )
+newLine; echoText "${BUILD_RESULT_STRING}!"
+
+# Print the zip location and its size if the script was successful
+if [[ ${SUCCESS} = true ]]; then
+   echo -e ${RED}"ZIP: $( ls ${ZIP_MOVE}/${ZIP_BEG}*.zip )"
+   echo -e "SIZE: $( du -h ${ZIP_MOVE}/${ZIP_BEG}*.zip | awk '{print $1}' )"${RESTORE}
+fi
+# Print the time the script finished and how long the script ran for regardless of success
+echo -e ${RED}"TIME FINISHED: $( TZ=MST date +%D\ %r | awk '{print toupper($0)}' )"
+echo -e ${RED}"DURATION: $( echo $((${END}-${START})) | awk '{print int($1/60)" MINUTES AND "int($1%60)" SECONDS"}' )"${RESTORE}; newLine
 
 # Add line to compile log
-echo -e "`date +%H:%M:%S`: ${BASH_SOURCE} ${TYPE}" >> ${LOG}
+echo -e "$( TZ=MST date +%H:%M:%S`: ${BASH_SOURCE} ${TYPE}" >> ${LOG}
 echo -e "${BUILD_RESULT_STRING} IN $(echo $((${END}-${START})) | awk '{print int($1/60)" MINUTES AND "int($1%60)" SECONDS"}')\n" >> ${LOG}
 
 echo -e "\a"
