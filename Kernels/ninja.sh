@@ -312,7 +312,7 @@ function compile() {
    echo -e "   / | / /  _/ | / /   / /   |     / //_// ____/ __ \/ | / / ____/ / ";
    echo -e "  /  |/ // //  |/ /_  / / /| |    / ,<  / __/ / /_/ /  |/ / __/ / /  ";
    echo -e " / /|  // // /|  / /_/ / ___ |   / /| |/ /___/ _, _/ /|  / /___/ /___";
-   echo -e "/_/ |_/___/_/ |_/\____/_/  |_|  /_/ |_/_____/_/ |_/_/ |_/_____/_____/"; newLine; newLine
+   echo -e "/_/ |_/___/_/ |_/\____/_/  |_|  /_/ |_/_____/_/ |_/_/ |_/_____/_____/"; newLine; newLine; newLine
    echo -e "====================================================================="; newLine; newLine
 
    echoText "KERNEL VERSION"; newLine
@@ -332,7 +332,7 @@ function compile() {
 
 
    # Clean up
-   echoText "CLEANING UP"; newLine
+   echoText "CLEANING UP"
 
    clean_all
 
