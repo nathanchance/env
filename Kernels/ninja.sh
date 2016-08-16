@@ -246,6 +246,9 @@ function compile() {
       echoText "MOVING $( echo ${KERNEL} | awk '{print toupper($0)}' ) ($( du -h "${ZIMAGE_DIR}"/${KERNEL} | awk '{print $1}' ))"
       cp -vr "${ZIMAGE_DIR}"/${KERNEL} "${ANYKERNEL_DIR}"/zImage > /dev/null 2>&1
 
+      # Make zip format variable
+      ZIP_FORMAT=N*.zip
+
       # If ZIPMOVE doesn't exist, make it; otherwise, clean it
       if [[ ! -d "${ZIP_MOVE}" ]]; then
          mkdir -p "${ZIP_MOVE}"
@@ -266,9 +269,6 @@ function compile() {
       # Make zip file
       echoText "MAKING FLASHABLE ZIP"
       zip -x@zipexclude -r9 ${KERNEL_VERSION}.zip * > /dev/null 2>&1
-
-      # Make zip format variable
-      ZIP_FORMAT=N*.zip
 
       # Move the new zip to ZIP_MOVE
       echoText "MOVING FLASHABLE ZIP"
