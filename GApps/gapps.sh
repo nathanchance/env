@@ -101,7 +101,7 @@ git pull
 # If the above was successful
 if [[ `ls ${SOURCE_DIR}/out/${ZIP_BEG}*.zip 2>/dev/null | wc -l` != "0" ]]; then
    BUILD_RESULT_STRING="BUILD SUCCESSFUL"
-
+   SUCCESS=true
 
 
    # Remove current GApps and move the new ones in their place
@@ -120,6 +120,7 @@ if [[ `ls ${SOURCE_DIR}/out/${ZIP_BEG}*.zip 2>/dev/null | wc -l` != "0" ]]; then
 # If the build failed, add a variable
 else
    BUILD_RESULT_STRING="BUILD FAILED"
+   SUCCESS=false
 
 fi
 
@@ -154,7 +155,7 @@ echo -e ${RED}"TIME FINISHED: $( TZ=MST date +%D\ %r | awk '{print toupper($0)}'
 echo -e ${RED}"DURATION: $( echo $((${END}-${START})) | awk '{print int($1/60)" MINUTES AND "int($1%60)" SECONDS"}' )"${RESTORE}; newLine
 
 # Add line to compile log
-echo -e "$( TZ=MST date +%H:%M:%S`: ${BASH_SOURCE} ${TYPE}" >> ${LOG}
+echo -e "$( TZ=MST date +%H:%M:%S ): ${BASH_SOURCE} ${TYPE}" >> ${LOG}
 echo -e "${BUILD_RESULT_STRING} IN $(echo $((${END}-${START})) | awk '{print int($1/60)" MINUTES AND "int($1%60)" SECONDS"}')\n" >> ${LOG}
 
 echo -e "\a"
