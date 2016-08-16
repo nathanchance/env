@@ -374,12 +374,11 @@ function compile() {
    DATE_END=$(date +"%s")
    DIFF=$((${DATE_END} - ${DATE_START}))
 
-   echo -e ${RED}
    if [[ ${SUCCESS} = true ]]; then
-      echo -e "ZIP: ${ZIP_MOVE}/${KERNEL_VERSION}.zip"
-      echo -e "SIZE: $( du -h ${ZIP_MOVE}/${KERNEL_VERSION}.zip | awk '{print $1}' )"
+      echo -e ${RED}"ZIP: ${ZIP_MOVE}/${KERNEL_VERSION}.zip"
+      echo -e "SIZE: $( du -h ${ZIP_MOVE}/${KERNEL_VERSION}.zip | awk '{print $1}' )"${RESTORE}
    fi
-   echo -e "TIME: $((${DIFF} / 60)) MINUTES AND $((${DIFF} % 60)) SECONDS"${RESTORE}; newLine
+   echo -e ${RED}"TIME: $((${DIFF} / 60)) MINUTES AND $((${DIFF} % 60)) SECONDS"${RESTORE}; newLine
 
    # Add line to compile log
    echo -e "`date +%H:%M:%S`: ${BASH_SOURCE} ${1}" >> ${LOG}
