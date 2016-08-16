@@ -241,15 +241,15 @@ function compile() {
 
    # Make the DTB file
    function make_dtb {
-      ${ANYKERNEL_DIR}/tools/dtbToolCM -v2 -o ${ANYKERNEL_DIR}/${DTBIMAGE} -s 2048 -p scripts/dtc/ arch/arm64/boot/dts/
+      ${ANYKERNEL_DIR}/tools/dtbToolCM -v2 -o ${ANYKERNEL_DIR}/${DTBIMAGE} -s 2048 -p scripts/dtc/ arch/arm64/boot/dts/ > /dev/null 2>&1
    }
 
 
    # Make the zip file, remove the previous version and upload it
    function make_zip {
       # Copy Image.gz
-      echo -e "Copying ${KERNEL} ($( du -h "${ZIMAGE_DIR}"/${KERNEL} | awk '{print $1}' ))"
-      cp -vr "${ZIMAGE_DIR}"/${KERNEL} "${ANYKERNEL_DIR}"/zImage
+      echoText "MOVING $( echo ${KERNEL} | awk '{print toupper($0)}' ) ($( du -h "${ZIMAGE_DIR}"/${KERNEL} | awk '{print $1}' ))"
+      cp -vr "${ZIMAGE_DIR}"/${KERNEL} "${ANYKERNEL_DIR}"/zImage > /dev/null 2>&1
 
       # If ZIPMOVE doesn't exist, make it; otherwise, clean it
       if [[ ! -d "${ZIP_MOVE}" ]]; then
@@ -257,6 +257,7 @@ function compile() {
       else
          # If there is a previous zip in the zip move directory in the same format AND it is not the same as the zip we are uploading, generate a changelog
          if [[ $( ls "${ZIP_MOVE}"/${ZIP_FORMAT} 2>/dev/null | wc -l ) != "0" && $( ls "${ZIP_MOVE}"/${ZIP_FORMAT} ) != "${ZIP_MOVE}/${KERNEL_VERSION}.zip" ]]; then
+            echoText "GENERATING CHANGELOG"
             changelog "${ZIP_MOVE}"
          fi
 
@@ -268,12 +269,14 @@ function compile() {
       cd "${ANYKERNEL_DIR}"
 
       # Make zip file
-      zip -x@zipexclude -r9 ${KERNEL_VERSION}.zip *
+      echoText "MAKING FLASHABLE ZIP"
+      zip -x@zipexclude -r9 ${KERNEL_VERSION}.zip * > /dev/null 2>&1
 
       # Make zip format variable
       ZIP_FORMAT=N*.zip
 
       # Move the new zip to ZIP_MOVE
+      echoText "MOVING FLASHABLE ZIP"
       mv ${KERNEL_VERSION}.zip "${ZIP_MOVE}"
 
       # Go to the kernel directory
@@ -310,13 +313,13 @@ function compile() {
 
    # Show the version of the kernel compiling
    echo -e ${RED}; newLine
-   echo -e "---------------------------------------------------------------------"; newLine; newLine
+   echo -e "====================================================================="; newLine; newLine
    echo -e "    _   _______   __    _____       __ __ __________  _   __________ ";
    echo -e "   / | / /  _/ | / /   / /   |     / //_// ____/ __ \/ | / / ____/ / ";
    echo -e "  /  |/ // //  |/ /_  / / /| |    / ,<  / __/ / /_/ /  |/ / __/ / /  ";
    echo -e " / /|  // // /|  / /_/ / ___ |   / /| |/ /___/ _, _/ /|  / /___/ /___";
    echo -e "/_/ |_/___/_/ |_/\____/_/  |_|  /_/ |_/_____/_/ |_/_/ |_/_____/_____/"; newLine; newLine
-   echo -e "---------------------------------------------------------------------"; newLine; newLine
+   echo -e "====================================================================="; newLine; newLine
 
    echoText "KERNEL VERSION"; newLine
 
