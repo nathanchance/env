@@ -188,7 +188,7 @@ function compile() {
       cd "${SOURCE_DIR}"
       if [[ ${TEST} = false ]]; then
          git reset --hard origin/${KER_BRANCH}
-         git clean -f -d -x > /dev/null 2>&1
+         git clean -f -d -x > /dev/null 2>&1; newLine
          git pull
       else
          git clean -f -d -x > /dev/null 2>&1
@@ -284,7 +284,7 @@ function compile() {
 
       # If it isn't a test build, clean it
       if [[ ${TEST} = false ]]; then
-         git reset --hard origin/${KER_BRANCH}
+         git reset --hard origin/${KER_BRANCH} > /dev/null 2>&1
          git clean -f -d -x > /dev/null 2>&1
          cd ${HOME}
       fi
@@ -323,7 +323,7 @@ function compile() {
 
    echoText "KERNEL VERSION"; newLine
 
-   newLine; echo -e ${RED}${BLINK_RED}${KERNEL_VERSION}${RESTORE}; newLine
+   echo -e ${RED}${BLINK_RED}${KERNEL_VERSION}${RESTORE}; newLine
 
 
    echoText "BUILD SCRIPT STARTING AT $(date +%D\ %r)"
@@ -344,7 +344,7 @@ function compile() {
 
 
    # Make the kernel
-   echoText "MAKING KERNEL"; newLine
+   echoText "MAKING KERNEL"
 
    make_kernel
 
