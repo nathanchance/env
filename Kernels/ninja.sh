@@ -95,17 +95,21 @@ function compile() {
    DTBIMAGE=dtb
    # DEFCONFIG: Name of defconfig file
    DEFCONFIG=ninja_defconfig
-   # AK_BRANCH: AnyKernel branch
-   AK_BRANCH=ninja
 
    # If we are running a personal or test build, use different branches
-   if [[ ${PERSONAL} = true || ${TEST} = true ]]; then
+   if [[ ${PERSONAL} = true ]]; then
       # KER_BRANCH: Branch of kernel to compile
       KER_BRANCH=personal
-      # AK_BRANCH: AnyKernel branch
-      AK_BRANCH=personal
       # ZIP_MOVE: Folder that holds completed zips
       ZIP_MOVE=${HOME}/shared/.me
+      # Custom user@host if desired
+      export KBUILD_BUILD_USER=nathan
+      export KBUILD_BUILD_HOST=phoenix
+   elif [[ ${TEST} = true ]]; then
+      # KER_BRANCH: Branch of kernel to compile
+      KER_BRANCH=net-fix
+      # ZIP_MOVE: Folder that holds completed zips
+      ZIP_MOVE=${HOME}/shared/Kernels/angler/Ninja/.tests
       # Custom user@host if desired
       export KBUILD_BUILD_USER=nathan
       export KBUILD_BUILD_HOST=phoenix
