@@ -75,12 +75,10 @@ function compile() {
    # SOURCE_DIR: Directory that holds kernel source
    SOURCE_DIR=${RESOURCE_DIR}/Ninja/Kernel
    # ANYKERNEL_DIR: Directory that holds AnyKernel source
-   ANYKERNEL_DIR=${RESOURCE_DIR}/Ninja/AK2
+   ANYKERNEL_DIR=${SOURCE_DIR}/anykernel
    # TOOLCHAIN_DIR: Directory that holds toolchain
    TOOLCHAIN_DIR=${RESOURCE_DIR}/Toolchains/Linaro/DF-6.1
-   # PATCH_DIR: Directory that holds patch files
-   PATCH_DIR=${ANYKERNEL_DIR}/patch
-   # PATCH_DIR: Directory that holds module files
+   # MODULES_DIR: Directory that holds module files
    MODULES_DIR=${ANYKERNEL_DIR}/modules
    # ZIMAGE_DIR: Directory that holds completed Image.gz
    ZIMAGE_DIR=${SOURCE_DIR}/arch/arm64/boot
@@ -167,7 +165,7 @@ function compile() {
       git log --oneline ${OLD_VERSION_HASH}..${NEW_VERSION_HASH} > ${CHANGELOG}
    }
 
-   # Clean the out and AnyKernel dirs, reset the AnyKernel dir, and make clean
+   # Clean the out and AnyKernel dirs and make clean
    function clean_all {
       # Clean modules
       if [[ -f "${MODULES_DIR}/*.ko" ]]; then
@@ -178,9 +176,6 @@ function compile() {
       cd "${ANYKERNEL_DIR}"
       rm -rf ${KERNEL} > /dev/null 2>&1
       rm -rf ${DTBIMAGE} > /dev/null 2>&1
-      git reset --hard origin/${AK_BRANCH}
-      git clean -f -d -x > /dev/null 2>&1
-      git pull > /dev/null 2>&1
 
       echo
 
@@ -303,7 +298,6 @@ function compile() {
 
 
    # Silently shift to correct branches
-   cd "${ANYKERNEL_DIR}" && git checkout ${AK_BRANCH} > /dev/null 2>&1
    cd "${SOURCE_DIR}" && git checkout ${KER_BRANCH} > /dev/null 2>&1
 
 
