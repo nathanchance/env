@@ -12,9 +12,9 @@ function echoText() {
    RST="\033[0m"
 
    echo -e ${RED}
-   echo -e "$( for i in $( seq ${#1} ); do echo -e "-\c"; done )"
-   echo -e "${1}"
-   echo -e "$( for i in $( seq ${#1} ); do echo -e "-\c"; done )"
+   echo -e "====$( for i in $( seq ${#1} ); do echo -e "=\c"; done )===="
+   echo -e "==  ${1}  =="
+   echo -e "====$( for i in $( seq ${#1} ); do echo -e "=\c"; done )===="
    echo -e ${RST}
 }
 
@@ -248,7 +248,7 @@ function compile() {
    # Make the zip file, remove the previous version and upload it
    function make_zip {
       # Copy Image.gz
-      echo -e "Copying ${KERNEL} ($( du -h "${ZIMAGE_DIR}"/${KERNEL} ))"
+      echo -e "Copying ${KERNEL} ($( du -h "${ZIMAGE_DIR}"/${KERNEL} | awk '{print $1}' ))"
       cp -vr "${ZIMAGE_DIR}"/${KERNEL} "${ANYKERNEL_DIR}"/zImage
 
       # If ZIPMOVE doesn't exist, make it; otherwise, clean it
@@ -377,7 +377,7 @@ function compile() {
    echo -e ${RED}
    if [[ ${SUCCESS} = true ]]; then
       echo -e "ZIP: ${ZIP_MOVE}/${KERNEL_VERSION}.zip"
-      echo -e "SIZE: $( du -h ${ZIP_MOVE}/${KERNEL_VERSION}.zip )"
+      echo -e "SIZE: $( du -h ${ZIP_MOVE}/${KERNEL_VERSION}.zip | awk '{print $1}' )"
    fi
    echo -e "TIME: $((${DIFF} / 60)) MINUTES AND $((${DIFF} % 60)) SECONDS"${RESTORE}; newLine
 
