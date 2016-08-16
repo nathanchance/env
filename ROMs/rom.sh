@@ -384,11 +384,11 @@ function compile() {
    # Print the zip location and its size if the script was successful
    if [[ ${SUCCESS} = true ]]; then
       echo -e ${RED}"ZIP: $( ls ${ZIP_MOVE}/*.zip )"
-      echo -e "SIZE: $( du -h ${ZIP_MOVE}/*.zip | awk '{print $1}' )"${RESTORE}
+      echo -e "SIZE: $( du -h ${ZIP_MOVE}/*.zip | awk '{print $1}' )"${RST}
    fi
    # Print the time the script finished and how long the script ran for regardless of success
    echo -e ${RED}"TIME FINISHED: $( TZ=MST date +%D\ %r | awk '{print toupper($0)}' )"
-   echo -e ${RED}"DURATION: $( echo $((${END}-${START})) | awk '{print int($1/60)" MINUTES AND "int($1%60)" SECONDS"}' )"${RESTORE}; newLine
+   echo -e ${RED}"DURATION: $( echo $((${END}-${START})) | awk '{print int($1/60)" MINUTES AND "int($1%60)" SECONDS"}' )"${RST}; newLine
 
    # Add line to compile log
    if [[ ${PERSONAL} = true ]]; then
