@@ -37,6 +37,7 @@ function compile() {
    # Free flags
    PERSONAL=false
    TEST=false
+   SUCCESS=false
    VERSION=
 
    # Set USER and HOST variables back to what they are in .bashrc
@@ -189,6 +190,8 @@ function compile() {
          git reset --hard origin/${KER_BRANCH}
          git clean -f -d -x > /dev/null 2>&1
          git pull
+      else
+         git clean -f -d -x > /dev/null 2>&1
       fi
 
       # Clean .config
@@ -245,6 +248,7 @@ function compile() {
    # Make the zip file, remove the previous version and upload it
    function make_zip {
       # Copy Image.gz
+      echo -e "Copying ${KERNEL} ($( du -h "${ZIMAGE_DIR}"/${KERNEL} ))"
       cp -vr "${ZIMAGE_DIR}"/${KERNEL} "${ANYKERNEL_DIR}"/zImage
 
       # If ZIPMOVE doesn't exist, make it; otherwise, clean it
@@ -256,6 +260,7 @@ function compile() {
             changelog "${ZIP_MOVE}"
          fi
 
+         # Remove the old zip file
          rm -rf "${ZIP_MOVE}"/${ZIP_FORMAT}
       fi
 
@@ -299,10 +304,8 @@ function compile() {
    cd "${SOURCE_DIR}" && git checkout ${KER_BRANCH} > /dev/null 2>&1
 
 
-
    # Set the kernel version
    KERNEL_VERSION=$( grep -r "EXTRAVERSION = -" ${SOURCE_DIR}/Makefile | sed 's/EXTRAVERSION = -//' )
-
 
 
    # Show the version of the kernel compiling
@@ -337,21 +340,19 @@ function compile() {
    clean_all
 
 
-
    # Make the kernel
    echoText "MAKING KERNEL"; newLine
 
    make_kernel
-   make_dtb
-   make_modules
-
 
 
    # If the above was successful
    if [[ `ls ${ZIMAGE_DIR}/${KERNEL} 2>/dev/null | wc -l` != "0" ]]; then
-      BUILD_SUCCESS_STRING="BUILD SUCCESSFUL"
+      BUILD_RESULT_STRING="BUILD SUCCESSFUL!"
+      SUCCESS=true
 
-
+      make_dtb
+      make_modules
       make_zip
 
 
@@ -361,23 +362,28 @@ function compile() {
       . ${HOME}/upload.sh
 
    else
-      BUILD_SUCCESS_STRING="BUILD FAILED"
+      BUILD_RESULT_STRING="BUILD FAILED!"
+      SUCCESS=false
    fi
 
 
 
    # End the script
-   newLine; echoText "SCRIPT COMPLETED"
+   newLine; echoText "${BUILD_RESULT_STRING}"
 
    DATE_END=$(date +"%s")
    DIFF=$((${DATE_END} - ${DATE_START}))
 
-   echo -e ${RED}"${BUILD_SUCCESS_STRING}!"
+   echo -e ${RED}
+   if [[ ${SUCCESS} = true ]]; then
+      echo -e "ZIP: ${ZIP_MOVE}/${KERNEL_VERSION}.zip"
+      echo -e "SIZE: $( du -h ${ZIP_MOVE}/${KERNEL_VERSION}.zip )"
+   fi
    echo -e "TIME: $((${DIFF} / 60)) MINUTES AND $((${DIFF} % 60)) SECONDS"${RESTORE}; newLine
 
    # Add line to compile log
    echo -e "`date +%H:%M:%S`: ${BASH_SOURCE} ${1}" >> ${LOG}
-   echo -e "${BUILD_SUCCESS_STRING} IN $((${DIFF} / 60)) MINUTES AND $((${DIFF} % 60)) SECONDS\n" >> ${LOG}
+   echo -e "${BUILD_RESULT_STRING} IN $((${DIFF} / 60)) MINUTES AND $((${DIFF} % 60)) SECONDS\n" >> ${LOG}
 
    echo -e "\a"
 }
