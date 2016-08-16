@@ -29,10 +29,10 @@ git clone https://bitbucket.org/DespairFactor/aarch64-linux-android-7.0-kernel.g
 cd ${TOOLCHAINS_DIR}/Linaro
 
 rm -rf 4.9
-git clone	https://android-git.linaro.org/git/platform/prebuilts/gcc/linux-x86/aarch64/aarch64-linux-android-4.9-linaro.git 4.9
+git clone https://android-git.linaro.org/git/platform/prebuilts/gcc/linux-x86/aarch64/aarch64-linux-android-4.9-linaro.git 4.9
 
 rm -rf 5.4
-git clone	https://android-git.linaro.org/git/platform/prebuilts/gcc/linux-x86/aarch64/aarch64-linux-android-5.4-linaro.git 5.4
+git clone https://android-git.linaro.org/git/platform/prebuilts/gcc/linux-x86/aarch64/aarch64-linux-android-5.4-linaro.git 5.4
 
 rm -rf 6.1
 git clone https://android-git.linaro.org/git/platform/prebuilts/gcc/linux-x86/aarch64/aarch64-linux-android-6.1-linaro.git 6.1
