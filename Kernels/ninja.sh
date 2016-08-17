@@ -272,7 +272,7 @@ function compile() {
 
       # Make zip file
       echoText "MAKING FLASHABLE ZIP"
-      zip -x@zipexclude -r9 ${KERNEL_VERSION}.zip * > /dev/null 2>&1
+      zip -r9 ${KERNEL_VERSION}.zip * -x README ${KERNEL_VERSION}.zip > /dev/null 2>&1
 
       # Move the new zip to ZIP_MOVE
       echoText "MOVING FLASHABLE ZIP"
