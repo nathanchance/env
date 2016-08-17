@@ -256,8 +256,7 @@ function compile() {
       git fetch https://github.com/nathanchance/android_device_moto_shamu.git
       git cherry-pick 0d2c6f3bdfe6e78b9b8036471dd3dcb6945fbb51
       # 4. Remove the unnecessary decreased sound delays from notifications (thanks @IAmTheOneTheyCallNeo)
-      git fetch https://github.com/IAmTheOneTheyCallNeo/android_device_moto_shamu neo
-      git cherry-pick c35490134644d9f4ab2cded14a0910169fd46391
+      git cherry-pick e2ad7f39bb2da832d1175fac3494cb1565741755
       # 5. Revert "shamu: correct naming of blob makefile in aosp_shamu.mk", as we use DU's vendor files
       git revert --no-edit 4a7970b9bba25f8c1b071756d389bfb54c856cde
       # 6. Stop per app overlays from being reset (thanks @bigrushdog)
