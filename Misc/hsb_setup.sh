@@ -15,7 +15,7 @@ function init_sync() {
 
 # Repo init with reference and repo sync function
 function init_sync_ref() {
-   repo init -u ${1} -b ${2} --reference=${HOME}/ROMs/PN
+   repo init -u ${2} -b ${3} --reference=${HOME}/ROMs/PN
    if [[ "${1}" == "rr" ]]; then
       rm_mk_cd .repo/local_manifests
       wget https://raw.githubusercontent.com/nathanchance/local_manifests/master/rr_shamu.xml
