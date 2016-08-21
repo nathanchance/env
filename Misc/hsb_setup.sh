@@ -33,7 +33,7 @@ function dependencies() {
          DEVICES="angler shamu bullhead hammerhead mako" ;;
       "no-mako")
          DEVICES="angler shamu bullhead hammerhead" ;;
-      "shamu"
+      "shamu")
          DEVICES="shamu" ;;
    esac
 
