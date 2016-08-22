@@ -79,9 +79,11 @@ function compile() {
    # TOOLCHAIN_DIR: Directory that holds toolchain
    case ${PERSONAL} in
       "true")
-         TOOLCHAIN_DIR=${RESOURCE_DIR}/Toolchains/Linaro/DF-4.9 ;;
+         TOOLCHAIN_DIR=${RESOURCE_DIR}/Toolchains/Linaro/DF-4.9
+         TOOLCHAIN_URL=https://bitbucket.org/DespairFactor/aarch64-linux-android-4.9-kernel-linaro.git ;;
       "false")
-         TOOLCHAIN_DIR=${RESOURCE_DIR}/Toolchains/Linaro/DF-6.1 ;;
+         TOOLCHAIN_DIR=${RESOURCE_DIR}/Toolchains/Linaro/DF-6.1
+         TOOLCHAIN_URL=https://bitbucket.org/DespairFactor/aarch64-linux-android-6.x-kernel-linaro.git ;;
    esac
    # MODULES_DIR: Directory that holds module files
    MODULES_DIR=${ANYKERNEL_DIR}/modules
@@ -200,12 +202,12 @@ function compile() {
 
    # Update toolchain
    function update_tc {
-      # Remove the toolchain directory
-      rm -rf "${TOOLCHAIN_DIR}"
-      # Change to the parent directory of the toolchain directory
+      # Move into the parent of the toolchain directory
       cd $( dirname "${TOOLCHAIN_DIR}" )
+      # Remove the toolchain directory
+      rm -rf $( basename "${TOOLCHAIN_DIR}" )
       # Clone the new repo
-      git clone https://bitbucket.org/DespairFactor/aarch64-linux-android-6.x-kernel-linaro.git DF-6.1
+      git clone ${TOOLCHAIN_URL} $( basename "${TOOLCHAIN_DIR}" )
    }
 
 
