@@ -233,7 +233,7 @@ function compile() {
    # Start syncing the latest sources
    echoText "SYNCING LATEST SOURCES"; newLine
 
-   repo sync --force-sync
+   repo sync --force-sync -j$(grep -c ^processor /proc/cpuinfo)
 
 
 
