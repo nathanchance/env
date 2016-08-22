@@ -271,6 +271,10 @@ function compile() {
       cd ${SOURCE_DIR}
       # I want to make sure the picks went through okay
       sleep 10
+   elif [[ "${ROM}" == "du" ]]; then
+      cd ${SOURCE_DIR}/build
+      git fetch http://gerrit.dirtyunicorns.com/android_build refs/changes/94/1494/1 && git cherry-pick FETCH_HEAD
+      cd ${SOURCE_DIR}
    fi
 
 
