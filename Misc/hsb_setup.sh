@@ -54,6 +54,7 @@ function dependencies() {
          *)
             breakfast ${DEVICE} ;;
       esac
+   done
 }
 
 
