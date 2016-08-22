@@ -59,7 +59,7 @@ if [[ "${TYPE}" == "banks" ]]; then
 elif [[ "${TYPE}" == "pn" ]]; then
     SOURCE_DIR=${ANDROID_DIR}/GApps/PN
     ZIP_BEG=PureNexus
-    BRANCH=mm2
+    BRANCH=m
 fi
 # Export the LOG variable for other files to use (I currently handle this via .bashrc)
 # export LOG_DIR=${ANDROID_DIR}/Logs
