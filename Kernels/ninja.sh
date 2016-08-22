@@ -77,7 +77,12 @@ function compile() {
    # ANYKERNEL_DIR: Directory that holds AnyKernel source
    ANYKERNEL_DIR=${SOURCE_DIR}/anykernel
    # TOOLCHAIN_DIR: Directory that holds toolchain
-   TOOLCHAIN_DIR=${RESOURCE_DIR}/Toolchains/Linaro/DF-6.1
+   case ${PERSONAL} in
+      "true")
+         TOOLCHAIN_DIR=${RESOURCE_DIR}/Toolchains/Linaro/DF-4.9 ;;
+      "false")
+         TOOLCHAIN_DIR=${RESOURCE_DIR}/Toolchains/Linaro/DF-6.1 ;;
+   esac
    # MODULES_DIR: Directory that holds module files
    MODULES_DIR=${ANYKERNEL_DIR}/modules
    # ZIMAGE_DIR: Directory that holds completed Image.gz
@@ -102,17 +107,11 @@ function compile() {
       KER_BRANCH=personal
       # ZIP_MOVE: Folder that holds completed zips
       ZIP_MOVE=${HOME}/shared/.me
-      # Custom user@host if desired
-      export KBUILD_BUILD_USER=nathan
-      export KBUILD_BUILD_HOST=phoenix
    elif [[ ${TEST} = true ]]; then
       # KER_BRANCH: Branch of kernel to compile
       KER_BRANCH=net-fix
       # ZIP_MOVE: Folder that holds completed zips
       ZIP_MOVE=${HOME}/shared/Kernels/angler/Ninja/.tests
-      # Custom user@host if desired
-      export KBUILD_BUILD_USER=nathan
-      export KBUILD_BUILD_HOST=phoenix
    else
       case "${VERSION}" in
          "m")
