@@ -106,7 +106,7 @@ function compile() {
    # If we are running a personal or test build, use different branches
    if [[ ${PERSONAL} = true ]]; then
       # KER_BRANCH: Branch of kernel to compile
-      KER_BRANCH=personal
+      KER_BRANCH=n-personal
       # ZIP_MOVE: Folder that holds completed zips
       ZIP_MOVE=${HOME}/shared/.me
    elif [[ ${TEST} = true ]]; then
