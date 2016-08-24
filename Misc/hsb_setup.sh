@@ -26,7 +26,7 @@ function init_sync() {
 # Parameter 2: URL of the manifest
 # Parameter 3: Branch of the manifest
 function init_sync_ref() {
-   repo init -u ${2} -b ${3} --reference=${HOME}/ROMs/PN
+   repo init -u ${2} -b ${3} --reference=${HOME}/ROMs/DU
 
    if [[ "${1}" == "rr" || "${1}" == "pn-mod" ]]; then
       case "${1}" in
@@ -120,9 +120,9 @@ dependencies du mako
 # init_sync_ref aosip git://github.com/AOSIP/platform_manifest.git oms
 # dependencies aosip mako
 # Beltz - reference sync - angler, shamu, bullhead, and hammmerhead
-# rm_mk_cd ${HOME}/ROMs/Beltz
-# init_sync_ref beltz git://github.com/beltz/platform_manifest.git beltz
-# dependencies beltz no-mako
+rm_mk_cd ${HOME}/ROMs/Beltz
+init_sync_ref beltz git://github.com/beltz/platform_manifest.git beltz
+dependencies beltz no-mako
 # ResurrectionRemix - reference sync - shamu
 # rm_mk_cd ${HOME}/ROMs/RR
 # init_sync_ref rr https://github.com/ResurrectionRemix/platform_manifest.git marshmallow
