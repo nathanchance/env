@@ -79,6 +79,8 @@ function dependencies() {
 rm_mk_cd ${HOME}/GApps
 # Banks
 git clone https://github.com/MrBaNkS/banks_dynamic_gapps.git Banks
+# OpenGApps
+git clone git@github.com:opengapps/opengapps.git Open
 
 
 ###############
@@ -102,29 +104,29 @@ source sync_toolchains.sh
 # Remove all previous ROMs
 rm_mk_cd ${HOME}/ROMs
 # PureNexus - full sync - angler, shamu, bullhead, and hammmerhead
-rm_mk_cd ${HOME}/ROMs/PN
-init_sync https://github.com/PureNexusProject-Legacy/manifest.git mm2
-dependencies pn no-mako
+# rm_mk_cd ${HOME}/ROMs/PN
+# init_sync https://github.com/PureNexusProject-Legacy/manifest.git mm2
+# dependencies pn no-mako
 # PureNexus Mod - reference sync - angler, shamu, bullhead, and hammmerhead
-rm_mk_cd ${HOME}/ROMs/PN-Mod
-init_sync_ref pn-mod https://github.com/ezio84/pnmod-manifest.git mm2oms
-dependencies pn-mod no-mako
+# rm_mk_cd ${HOME}/ROMs/PN-Mod
+# init_sync_ref pn-mod https://github.com/ezio84/pnmod-manifest.git mm2oms
+# dependencies pn-mod no-mako
 # Dirty Unicorns - reference sync - angler, shamu, bullhead, hammmerhead, and mako
 rm_mk_cd ${HOME}/ROMs/DU
-init_sync_ref du https://github.com/DirtyUnicorns/android_manifest.git m
+init_sync du https://github.com/DirtyUnicorns/android_manifest.git m
 dependencies du mako
 # AOSiP - reference sync - angler, shamu, bullhead, hammmerhead, and mako
-rm_mk_cd ${HOME}/ROMs/AOSiP
-init_sync_ref aosip git://github.com/AOSIP/platform_manifest.git oms
-dependencies aosip mako
+# rm_mk_cd ${HOME}/ROMs/AOSiP
+# init_sync_ref aosip git://github.com/AOSIP/platform_manifest.git oms
+# dependencies aosip mako
 # Beltz - reference sync - angler, shamu, bullhead, and hammmerhead
-rm_mk_cd ${HOME}/ROMs/Beltz
-init_sync_ref beltz git://github.com/beltz/platform_manifest.git beltz
-dependencies beltz no-mako
+# rm_mk_cd ${HOME}/ROMs/Beltz
+# init_sync_ref beltz git://github.com/beltz/platform_manifest.git beltz
+# dependencies beltz no-mako
 # ResurrectionRemix - reference sync - shamu
-rm_mk_cd ${HOME}/ROMs/RR
-init_sync_ref rr https://github.com/ResurrectionRemix/platform_manifest.git marshmallow
-dependencies rr shamu
+# rm_mk_cd ${HOME}/ROMs/RR
+# init_sync_ref rr https://github.com/ResurrectionRemix/platform_manifest.git marshmallow
+# dependencies rr shamu
 
 
 ############
@@ -132,5 +134,5 @@ dependencies rr shamu
 ############
 # reference sync - angler, shamu, bullhead, hammmerhead, and mako
 rm_mk_cd ${HOME}/TWRP
-init_sync_ref twrp git://github.com/lj50036/platform_manifest_twrp_omni.git twrp-6.0
+init_sync twrp git://github.com/lj50036/platform_manifest_twrp_omni.git twrp-6.0
 dependencies twrp mako
