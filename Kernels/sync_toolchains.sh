@@ -36,7 +36,7 @@ git clone https://bitbucket.org/DespairFactor/aarch64-linux-android-6.x-kernel.g
 git clone https://bitbucket.org/DespairFactor/aarch64-linux-android-7.0-kernel.git 7.0
 
 
-rm_mk_cd Linaro
+rm_mk_cd ../Linaro
 
 git clone https://android-git.linaro.org/git/platform/prebuilts/gcc/linux-x86/aarch64/aarch64-linux-android-4.9-linaro.git 4.9
 
