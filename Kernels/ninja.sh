@@ -85,8 +85,6 @@ function compile() {
          TOOLCHAIN_DIR=${RESOURCE_DIR}/Toolchains/Linaro/DF-6.1
          TOOLCHAIN_URL=https://bitbucket.org/DespairFactor/aarch64-linux-android-6.x-kernel-linaro.git ;;
    esac
-   # MODULES_DIR: Directory that holds module files
-   MODULES_DIR=${ANYKERNEL_DIR}/modules
    # ZIMAGE_DIR: Directory that holds completed Image.gz
    ZIMAGE_DIR=${SOURCE_DIR}/arch/arm64/boot
 
@@ -120,12 +118,12 @@ function compile() {
             # KER_BRANCH: Branch of kernel to compile
             KER_BRANCH=m
             # ZIP_MOVE: Folder that holds completed zips
-            ZIP_MOVE=${HOME}/shared/Kernels/angler/Ninja/M ;;
+            ZIP_MOVE=${HOME}/shared/.hidden/Kernels/M ;;
          "n")
             # KER_BRANCH: Branch of kernel to compile
             KER_BRANCH=n
             # ZIP_MOVE: Folder that holds completed zips
-            ZIP_MOVE=${HOME}/shared/Kernels/angler/Ninja/N ;;
+            ZIP_MOVE=${HOME}/shared/.hidden/Kernels/N ;;
       esac
    fi
 
@@ -172,11 +170,6 @@ function compile() {
 
    # Clean the out and AnyKernel dirs and make clean
    function clean_all {
-      # Clean modules
-      if [[ -f "${MODULES_DIR}/*.ko" ]]; then
-        rm `echo ${MODULES_DIR}"/*.ko"`
-      fi
-
       # Cleaning of AnyKernel directory
       cd "${ANYKERNEL_DIR}"
       rm -rf ${KERNEL} > /dev/null 2>&1
@@ -227,17 +220,6 @@ function compile() {
       make ${DEFCONFIG}
       make ${THREAD}
    }
-
-
-   # Make the modules
-   function make_modules {
-      if [[ -f "${MODULES_DIR}/*.ko" ]]; then
-         rm `echo "${MODULES_DIR}/*.ko"`
-      fi
-      #find $MODULES_DIR/proprietary -name '*.ko' -exec cp -v {} $MODULES_DIR \;
-      find ${SOURCE_DIR} -name '*.ko' -exec cp -v {} ${MODULES_DIR} \;
-   }
-
 
    # Make the DTB file
    function make_dtb {
@@ -354,7 +336,6 @@ function compile() {
       SUCCESS=true
 
       make_dtb
-      make_modules
       make_zip
 
 
