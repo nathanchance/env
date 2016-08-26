@@ -82,8 +82,8 @@ function compile() {
          TOOLCHAIN_DIR=${RESOURCE_DIR}/Toolchains/Linaro/DF-4.9
          TOOLCHAIN_URL=https://bitbucket.org/DespairFactor/aarch64-linux-android-4.9-kernel-linaro.git ;;
       "false")
-         TOOLCHAIN_DIR=${RESOURCE_DIR}/Toolchains/Linaro/DF-6.1
-         TOOLCHAIN_URL=https://bitbucket.org/DespairFactor/aarch64-linux-android-6.x-kernel-linaro.git ;;
+         TOOLCHAIN_DIR=${RESOURCE_DIR}/Toolchains/Linaro/DF-4.9
+         TOOLCHAIN_URL=https://bitbucket.org/DespairFactor/aarch64-linux-android-4.9-kernel-linaro.git ;;
    esac
    # ZIMAGE_DIR: Directory that holds completed Image.gz
    ZIMAGE_DIR=${SOURCE_DIR}/arch/arm64/boot
