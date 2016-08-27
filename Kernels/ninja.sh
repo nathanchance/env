@@ -195,6 +195,10 @@ function compile() {
 
    # Update toolchain
    function update_tc {
+      # Create the toolchain directory if it isn't found
+      if [[ ! -d $( dirname "${TOOLCHAIN_DIR}" ) ]]; then
+         mkdir -p $( dirname "${TOOLCHAIN_DIR}" )
+      fi
       # Move into the parent of the toolchain directory
       cd $( dirname "${TOOLCHAIN_DIR}" )
       # Remove the toolchain directory
