@@ -101,25 +101,17 @@ function compile() {
    # DEFCONFIG: Name of defconfig file
    DEFCONFIG=ninja_defconfig
 
-   # If we are running a personal or test build, use different branches
+   # If we are running a personal build, use different branches
    if [[ ${PERSONAL} = true ]]; then
       # KER_BRANCH: Branch of kernel to compile
-      KER_BRANCH=personal-rebase
+      KER_BRANCH=personal
       # ZIP_MOVE: Folder that holds completed zips
       ZIP_MOVE=${HOME}/shared/.me
    else
-      case "${VERSION}" in
-         "m")
-            # KER_BRANCH: Branch of kernel to compile
-            KER_BRANCH=m
-            # ZIP_MOVE: Folder that holds completed zips
-            ZIP_MOVE=${HOME}/shared/.hidden/Kernels/M ;;
-         "n")
-            # KER_BRANCH: Branch of kernel to compile
-            KER_BRANCH=n
-            # ZIP_MOVE: Folder that holds completed zips
-            ZIP_MOVE=${HOME}/shared/.hidden/Kernels/N ;;
-      esac
+      # KER_BRANCH: Branch of kernel to compile
+      KER_BRANCH=n
+      # ZIP_MOVE: Folder that holds completed zips
+      ZIP_MOVE=${HOME}/shared/.hidden/Kernels/N
    fi
 
 
