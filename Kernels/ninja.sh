@@ -79,8 +79,8 @@ function compile() {
    # TOOLCHAIN_DIR: Directory that holds toolchain
    case ${PERSONAL} in
       "true")
-         TOOLCHAIN_DIR=${RESOURCE_DIR}/Toolchains/Linaro/DF-4.9
-         TOOLCHAIN_URL=https://bitbucket.org/DespairFactor/aarch64-linux-android-4.9-kernel-linaro.git ;;
+         TOOLCHAIN_DIR=${RESOURCE_DIR}/Toolchains/UBER/4.9
+         TOOLCHAIN_URL=https://bitbucket.org/DespairFactor/aarch64-linux-android-4.9-kernel.git ;;
       "false")
          TOOLCHAIN_DIR=${RESOURCE_DIR}/Toolchains/Linaro/DF-4.9
          TOOLCHAIN_URL=https://bitbucket.org/DespairFactor/aarch64-linux-android-4.9-kernel-linaro.git ;;
