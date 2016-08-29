@@ -108,10 +108,18 @@ function compile() {
       # ZIP_MOVE: Folder that holds completed zips
       ZIP_MOVE=${HOME}/shared/.me
    else
-      # KER_BRANCH: Branch of kernel to compile
-      KER_BRANCH=n
-      # ZIP_MOVE: Folder that holds completed zips
-      ZIP_MOVE=${HOME}/shared/.hidden/Kernels/N
+      case "${VERSION}" in
+         "m")
+            # KER_BRANCH: Branch of kernel to compile
+            KER_BRANCH=m
+            # ZIP_MOVE: Folder that holds completed zips
+            ZIP_MOVE=${HOME}/shared/.hidden/Kernels/M ;;
+         "n")
+            # KER_BRANCH: Branch of kernel to compile
+            KER_BRANCH=n
+            # ZIP_MOVE: Folder that holds completed zips
+            ZIP_MOVE=${HOME}/shared/.hidden/Kernels/N ;;
+      esac
    fi
 
 
