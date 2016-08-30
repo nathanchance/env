@@ -22,6 +22,9 @@ CHANGELOG=${ZIP_MOVE}/ninja_changelog.txt
 # Remove the previous changelog
 rm -rf ${CHANGELOG}
 
+# Move to directory and change out right branch
+cd ${HOME}/Kernels/Ninja && git checkout ${VERSION}
+
 # Generate changelog
 git log ${OLD_VERSION_HASH}^..${NEW_VERION_HASH} --format="Title: %s%nAuthor: %an%nHash: %H%n" > ${CHANGELOG}
 
