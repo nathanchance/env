@@ -160,7 +160,7 @@ function compile() {
       NEW_VERSION_HASH=$(git log --grep="^NINJA: ${NEW_VERSION}$" --pretty=format:'%H')
 
       # Generate changelog
-      git log --oneline ${OLD_VERSION_HASH}..${NEW_VERSION_HASH} > ${CHANGELOG}
+      git log ${OLD_VERSION_HASH}^..${NEW_VERION_HASH} --format="Title: %s%nAuthor: %an%nHash: %H%n" > ${CHANGELOG}
    }
 
    # Clean the out and AnyKernel dirs and make clean
