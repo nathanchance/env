@@ -9,9 +9,9 @@ NEW_VERION_HASH=${3}
 
 case "${VERSION}" in
    "m")
-      ZIP_MOVE=${HOME}/shared/Kernels/angler/Ninja/M ;;
+      ZIP_MOVE=${HOME}/shared/.hidden/Kernels/M ;;
    "n")
-      ZIP_MOVE=${HOME}/shared/Kernels/angler/Ninja/N ;;
+      ZIP_MOVE=${HOME}/shared/.hidden/Kernels/N ;;
    "personal")
       ZIP_MOVE=${HOME}/shared/.me ;;
 esac
