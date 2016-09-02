@@ -76,14 +76,16 @@ function compile() {
    SOURCE_DIR=${RESOURCE_DIR}/Ninja
    # ANYKERNEL_DIR: Directory that holds AnyKernel source
    ANYKERNEL_DIR=${SOURCE_DIR}/anykernel
-   # TOOLCHAIN_DIR: Directory that holds toolchain
+   # TOOLCHAIN_SOURCE_DIR: Directory that holds toolchain
    case ${PERSONAL} in
       "true")
-         TOOLCHAIN_DIR=${RESOURCE_DIR}/Toolchains/Linaro/DF-4.9
-         TOOLCHAIN_URL=https://bitbucket.org/DespairFactor/aarch64-linux-android-4.9-kernel-linaro.git ;;
+         TOOLCHAIN_SOURCE_DIR=${RESOURCE_DIR}/Toolchains/Linaro
+         TOOLCHAIN_NAME=aarch64-linux-android-4.9-kernel
+         TOOCHAIN_COMPILED_DIR=${TOOLCHAIN_SOURCE_DIR}/out/${TOOLCHAIN_NAME}
       "false")
-         TOOLCHAIN_DIR=${RESOURCE_DIR}/Toolchains/Linaro/DF-4.9
-         TOOLCHAIN_URL=https://bitbucket.org/DespairFactor/aarch64-linux-android-4.9-kernel-linaro.git ;;
+         TOOLCHAIN_SOURCE_DIR=${RESOURCE_DIR}/Toolchains/Linaro
+         TOOLCHAIN_NAME=aarch64-linux-android-4.9-kernel
+         TOOCHAIN_COMPILED_DIR=${TOOLCHAIN_SOURCE_DIR}/out/${TOOLCHAIN_NAME}
    esac
    # ZIMAGE_DIR: Directory that holds completed Image.gz
    ZIMAGE_DIR=${SOURCE_DIR}/arch/arm64/boot
@@ -128,7 +130,7 @@ function compile() {
    # Exports
    # -------
    # CROSS_COMPILE: Location of toolchain
-   export CROSS_COMPILE="${TOOLCHAIN_DIR}/bin/aarch64-linux-android-"
+   export CROSS_COMPILE="${TOOCHAIN_COMPILED_DIR}/bin/aarch64-linux-android-"
    # ARCH and SUBARCH: Architecture we want to compile for
    export ARCH=arm64
    export SUBARCH=arm64
@@ -190,16 +192,12 @@ function compile() {
 
    # Update toolchain
    function update_tc {
-      # Create the toolchain directory if it isn't found
-      if [[ ! -d $( dirname "${TOOLCHAIN_DIR}" ) ]]; then
-         mkdir -p $( dirname "${TOOLCHAIN_DIR}" )
-      fi
-      # Move into the parent of the toolchain directory
-      cd $( dirname "${TOOLCHAIN_DIR}" )
-      # Remove the toolchain directory
-      rm -rf $( basename "${TOOLCHAIN_DIR}" )
-      # Clone the new repo
-      git clone ${TOOLCHAIN_URL} $( basename "${TOOLCHAIN_DIR}" )
+      # Move into the toolchain directory
+      cd "${TOOLCHAIN_SOURCE_DIR}"
+      # Repo sync
+      time repo sync --force-sync -j$(grep -c ^processor /proc/cpuinfo)
+      # Run the toolchain script
+      source scripts/${TOOLCHAIN_NAME}
    }
 
 
