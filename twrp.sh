@@ -31,7 +31,7 @@ function compile() {
    # Directories
    SOURCE_DIR=${HOME}/TWRP
    OUT_DIR=${SOURCE_DIR}/out/target/product/${DEVICE}
-   UPLOAD_DIR=${HOME}/shared/TWRP
+   ZIP_MOVE=${HOME}/Zips/TWRP
 
 
    # File names
@@ -94,28 +94,27 @@ function compile() {
 
 
 
-      # If the upload directory doesn't exist, make it; otherwise, remove existing files in UPLOAD_DIR
-      if [[ ! -d "${UPLOAD_DIR}" ]]; then
+      # If the upload directory doesn't exist, make it; otherwise, remove existing files in ZIP_MOVE
+      if [[ ! -d "${ZIP_MOVE}" ]]; then
          newLine; echoText "MAKING UPLOAD DIRECTORY"
 
-         mkdir -p "${UPLOAD_DIR}"
+         mkdir -p "${ZIP_MOVE}"
       else
          newLine; echoText "CLEANING UPLOAD DIRECTORY"; newLine
 
-         rm -vrf "${UPLOAD_DIR}"/*${FILE_FORMAT}*
+         rm -vrf "${ZIP_MOVE}"/*${FILE_FORMAT}*
       fi
 
 
-      # Copy new files to UPLOAD_DIR
+      # Copy new files to ZIP_MOVE
       newLine; echoText "MOVING FILE TO UPLOAD DIRECTORY"; newLine
 
-      mv -v ${OUT_DIR}/${COMP_FILE} "${UPLOAD_DIR}"/${UPLD_FILE}
+      mv -v ${OUT_DIR}/${COMP_FILE} "${ZIP_MOVE}"/${UPLD_FILE}
 
 
       # Upload the files
-      newLine; echoText "UPLOADING FILE"; newLine
+      # newLine; echoText "UPLOADING FILE"; newLine
 
-      . ${HOME}/upload.sh
 
 
       # Clean up out directory to free up space
@@ -143,8 +142,8 @@ function compile() {
 
    # Print the image location and its size if the script was successful
    if [[ ${SUCCESS} = true ]]; then
-      echo -e ${RED}"IMAGE: $( ls "${UPLOAD_DIR}"/${UPLD_FILE} )"
-      echo -e "SIZE: $( du -h "${UPLOAD_DIR}"/${UPLD_FILE} | awk '{print $1}' )"${RST}
+      echo -e ${RED}"IMAGE: $( ls "${ZIP_MOVE}"/${UPLD_FILE} )"
+      echo -e "SIZE: $( du -h "${ZIP_MOVE}"/${UPLD_FILE} | awk '{print $1}' )"${RST}
    fi
    # Print the time the script finished and how long the script ran for regardless of success
    echo -e ${RED}"TIME FINISHED: $( TZ=MST date +%D\ %r | awk '{print toupper($0)}' )"

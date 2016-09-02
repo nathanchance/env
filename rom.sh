@@ -158,7 +158,7 @@ function compile() {
    if [[ ${PERSONAL} = true ]]; then
       export PURENEXUS_BUILD_TYPE=CHANCELLOR
       SOURCE_DIR=${ANDROID_DIR}/ROMs/PN
-      ZIP_MOVE=${HOME}/shared/.me
+      ZIP_MOVE=${HOME}/Zips/Me
       ZIP_FORMAT=pure_nexus_${DEVICE}-*.zip
 
    else
@@ -166,38 +166,34 @@ function compile() {
       case "${ROM}" in
          "aosip")
             SOURCE_DIR=${ANDROID_DIR}/ROMs/AOSiP
-            ZIP_MOVE=${HOME}/shared/ROMs/AOSiP/${DEVICE}
+            ZIP_MOVE=${HOME}/Zips/ROMs/AOSiP/${DEVICE}
             ZIP_FORMAT=AOSiP-*-${DEVICE}-*.zip ;;
          "beltz")
             SOURCE_DIR=${ANDROID_DIR}/ROMs/Beltz
-            ZIP_MOVE=${HOME}/shared/ROMs/Beltz/${DEVICE}
+            ZIP_MOVE=${HOME}/Zips/ROMs/Beltz/${DEVICE}
             ZIP_FORMAT=beltz_mm*${DEVICE}.zip ;;
          "du")
             if [[ -n ${PERSON} ]]; then
                SOURCE_DIR=${ANDROID_DIR}/ROMs/DU
-               ZIP_MOVE=${HOME}/shared/ROMs/.special/.${PERSON}
+               ZIP_MOVE=${HOME}/Zips/ROMs/.special/.${PERSON}
                ZIP_FORMAT=DU_${DEVICE}_*.zip
             else
                SOURCE_DIR=${ANDROID_DIR}/ROMs/DU
-               ZIP_MOVE=${HOME}/shared/ROMs/DirtyUnicorns/${DEVICE}
+               ZIP_MOVE=${HOME}/Zips/ROMs/DirtyUnicorns/${DEVICE}
                ZIP_FORMAT=DU_${DEVICE}_*.zip
             fi ;;
          "pn")
             SOURCE_DIR=${ANDROID_DIR}/ROMs/PN
             if [[ ${TEST} = true ]]; then
-               ZIP_MOVE=${HOME}/shared/ROMs/PureNexus/.tests/${DEVICE}
+               ZIP_MOVE=${HOME}/Zips/ROMs/PureNexus/.tests/${DEVICE}
             else
-               ZIP_MOVE=${HOME}/shared/ROMs/PureNexus/${DEVICE}
+               ZIP_MOVE=${HOME}/Zips/ROMs/PureNexus/${DEVICE}
             fi
             ZIP_FORMAT=pure_nexus_${DEVICE}-*.zip ;;
          "pn-mod")
             SOURCE_DIR=${ANDROID_DIR}/ROMs/PN-Mod
-            ZIP_MOVE=${HOME}/shared/ROMs/PureNexusMod/${DEVICE}
+            ZIP_MOVE=${HOME}/Zips/ROMs/PureNexusMod/${DEVICE}
             ZIP_FORMAT=pure_nexus_${DEVICE}-*.zip ;;
-         "rr")
-            SOURCE_DIR=${ANDROID_DIR}/ROMs/RR
-            ZIP_MOVE=${HOME}/shared/ROMs/ResurrectionRemix/${DEVICE}
-            ZIP_FORMAT=ResurrectionRemix*-${DEVICE}.zip ;;
       esac
    fi
 
@@ -235,47 +231,6 @@ function compile() {
 
    repo sync --force-sync -j$(grep -c ^processor /proc/cpuinfo)
 
-
-
-   # If we are running a ResurrectionRemix build, let's cherry pick some commits first
-   if [[ "${ROM}" ==  "rr" ]]; then
-      # I could fork these repos and do the changes in there permanently but I don't want to have to maintain any extra repos
-
-      newLine
-
-      # 1. Do not block HOME if background incoming call (marshmallow)
-      cd ${SOURCE_DIR}/frameworks/base
-      git fetch https://github.com/nathanchance/android_frameworks_base.git
-      git cherry-pick d073e3efe7328558528cf50f40f4152af439e71a
-      # 2. Change DESOLATED to KBUILD_BUILD_HOST and allow kernel to be compiled with UBER 6.1
-      cd ${SOURCE_DIR}/kernel/moto/shamu
-      git fetch https://github.com/nathanchance/B14CKB1RD_Kernel_N6.git
-      git cherry-pick 20f83cadace94da9b711ebb53661b1682885888a
-      # 3. Change from shamu_defconfig to B14CKB1RD_defconfig
-      cd ${SOURCE_DIR}/device/moto/shamu
-      git fetch https://github.com/nathanchance/android_device_moto_shamu.git
-      git cherry-pick 0d2c6f3bdfe6e78b9b8036471dd3dcb6945fbb51
-      # 4. Remove the unnecessary decreased sound delays from notifications (thanks @IAmTheOneTheyCallNeo)
-      git cherry-pick e2ad7f39bb2da832d1175fac3494cb1565741755
-      # 5. Revert "shamu: correct naming of blob makefile in aosp_shamu.mk", as we use DU's vendor files
-      git revert --no-edit 4a7970b9bba25f8c1b071756d389bfb54c856cde
-      # 6. Stop per app overlays from being reset (thanks @bigrushdog)
-      cd ${SOURCE_DIR}/packages/apps/ThemeChooser
-      git fetch https://github.com/nathanchance/android_packages_apps_ThemeChooser.git
-      git cherry-pick 1cefd98f7ac5db31754a8f7ee1fd62f3ac897b71
-      # 7. Add @Yoinx's Kernel Adiutor-Mod instead of the regular Kernel Adiutor (to complement Blackbird)
-      cd ${SOURCE_DIR}/vendor/cm/prebuilt/KernelAdiutor
-      rm -rf KernelAdiutor.apk
-      wget https://github.com/yoinx/kernel_adiutor/raw/master/download/app/app-release.apk
-      mv app-release.apk KernelAdiutor.apk
-      cd ${SOURCE_DIR}
-      # I want to make sure the picks went through okay
-      sleep 10
-   elif [[ "${ROM}" == "du" ]]; then
-      cd ${SOURCE_DIR}/build
-      git fetch http://gerrit.dirtyunicorns.com/android_build refs/changes/94/1494/1 && git cherry-pick FETCH_HEAD
-      cd ${SOURCE_DIR}
-   fi
 
 
    # Setup the build environment
@@ -344,9 +299,7 @@ function compile() {
 
 
       # Upload the files
-      echoText "UPLOADING FILES"; newLine
-
-      . ${HOME}/upload.sh
+      # echoText "UPLOADING FILES"; newLine
 
 
 

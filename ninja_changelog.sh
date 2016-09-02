@@ -9,11 +9,11 @@ NEW_VERION_HASH=${3}
 
 case "${VERSION}" in
    "m")
-      ZIP_MOVE=${HOME}/shared/.hidden/Kernels/M ;;
+      ZIP_MOVE=${HOME}/Zips/Kernels/M ;;
    "n")
-      ZIP_MOVE=${HOME}/shared/.hidden/Kernels/N ;;
+      ZIP_MOVE=${HOME}/Zips/Kernels/N ;;
    "personal")
-      ZIP_MOVE=${HOME}/shared/.me ;;
+      ZIP_MOVE=${HOME}/Zips/Me ;;
 esac
 
 # Changelog name and location
@@ -27,6 +27,3 @@ cd ${HOME}/Kernels/Ninja && git checkout ${VERSION}
 
 # Generate changelog
 git log ${OLD_VERSION_HASH}^..${NEW_VERION_HASH} --format="Title: %s%nAuthor: %an%nHash: %H%n" > ${CHANGELOG}
-
-# Upload changelog
-source ${HOME}/upload.sh

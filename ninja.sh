@@ -106,19 +106,19 @@ function compile() {
       # KER_BRANCH: Branch of kernel to compile
       KER_BRANCH=personal
       # ZIP_MOVE: Folder that holds completed zips
-      ZIP_MOVE=${HOME}/shared/.me
+      ZIP_MOVE=${HOME}/Zips/Me
    else
       case "${VERSION}" in
          "m")
             # KER_BRANCH: Branch of kernel to compile
             KER_BRANCH=m
             # ZIP_MOVE: Folder that holds completed zips
-            ZIP_MOVE=${HOME}/shared/.hidden/Kernels/M ;;
+            ZIP_MOVE=${HOME}/Zips/Kernels/M ;;
          "n")
             # KER_BRANCH: Branch of kernel to compile
             KER_BRANCH=n
             # ZIP_MOVE: Folder that holds completed zips
-            ZIP_MOVE=${HOME}/shared/.hidden/Kernels/N ;;
+            ZIP_MOVE=${HOME}/Zips/Kernels/N ;;
       esac
    fi
 
@@ -339,9 +339,7 @@ function compile() {
 
 
       # Upload
-      echoText "UPLOADING ZIP FILE"; newLine
-
-      . ${HOME}/upload.sh
+      # echoText "UPLOADING ZIP FILE"; newLine
 
    else
       BUILD_RESULT_STRING="BUILD FAILED!"
