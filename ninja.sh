@@ -215,7 +215,7 @@ function compile() {
 
       # Make the DEFCONFIG and the kernel with the right number of threads
       make ${DEFCONFIG}
-      make ${THREAD}
+      time make ${THREAD}
    }
 
    # Make the DTB file
