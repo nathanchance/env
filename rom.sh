@@ -158,7 +158,7 @@ function compile() {
    if [[ ${PERSONAL} = true ]]; then
       export PURENEXUS_BUILD_TYPE=CHANCELLOR
       SOURCE_DIR=${ANDROID_DIR}/ROMs/PN
-      ZIP_MOVE=${HOME}/Zips/Me
+      ZIP_MOVE=${HOME}/Completed/Zips/Me
       ZIP_FORMAT=pure_nexus_${DEVICE}-*.zip
 
    else
@@ -166,33 +166,33 @@ function compile() {
       case "${ROM}" in
          "aosip")
             SOURCE_DIR=${ANDROID_DIR}/ROMs/AOSiP
-            ZIP_MOVE=${HOME}/Zips/ROMs/AOSiP/${DEVICE}
+            ZIP_MOVE=${HOME}/Completed/Zips/ROMs/AOSiP/${DEVICE}
             ZIP_FORMAT=AOSiP-*-${DEVICE}-*.zip ;;
          "beltz")
             SOURCE_DIR=${ANDROID_DIR}/ROMs/Beltz
-            ZIP_MOVE=${HOME}/Zips/ROMs/Beltz/${DEVICE}
+            ZIP_MOVE=${HOME}/Completed/Zips/ROMs/Beltz/${DEVICE}
             ZIP_FORMAT=beltz_mm*${DEVICE}.zip ;;
          "du")
             if [[ -n ${PERSON} ]]; then
                SOURCE_DIR=${ANDROID_DIR}/ROMs/DU
-               ZIP_MOVE=${HOME}/Zips/ROMs/.special/.${PERSON}
+               ZIP_MOVE=${HOME}/Completed/Zips/ROMs/.special/.${PERSON}
                ZIP_FORMAT=DU_${DEVICE}_*.zip
             else
                SOURCE_DIR=${ANDROID_DIR}/ROMs/DU
-               ZIP_MOVE=${HOME}/Zips/ROMs/DirtyUnicorns/${DEVICE}
+               ZIP_MOVE=${HOME}/Completed/Zips/ROMs/DirtyUnicorns/${DEVICE}
                ZIP_FORMAT=DU_${DEVICE}_*.zip
             fi ;;
          "pn")
             SOURCE_DIR=${ANDROID_DIR}/ROMs/PN
             if [[ ${TEST} = true ]]; then
-               ZIP_MOVE=${HOME}/Zips/ROMs/PureNexus/.tests/${DEVICE}
+               ZIP_MOVE=${HOME}/Completed/Zips/ROMs/PureNexus/.tests/${DEVICE}
             else
-               ZIP_MOVE=${HOME}/Zips/ROMs/PureNexus/${DEVICE}
+               ZIP_MOVE=${HOME}/Completed/Zips/ROMs/PureNexus/${DEVICE}
             fi
             ZIP_FORMAT=pure_nexus_${DEVICE}-*.zip ;;
          "pn-mod")
             SOURCE_DIR=${ANDROID_DIR}/ROMs/PN-Mod
-            ZIP_MOVE=${HOME}/Zips/ROMs/PureNexusMod/${DEVICE}
+            ZIP_MOVE=${HOME}/Completed/Zips/ROMs/PureNexusMod/${DEVICE}
             ZIP_FORMAT=pure_nexus_${DEVICE}-*.zip ;;
       esac
    fi

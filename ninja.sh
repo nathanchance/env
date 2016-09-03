@@ -108,19 +108,29 @@ function compile() {
       # KER_BRANCH: Branch of kernel to compile
       KER_BRANCH=personal
       # ZIP_MOVE: Folder that holds completed zips
-      ZIP_MOVE=${HOME}/Zips/Me
+      ZIP_MOVE=${HOME}/Completed/Zips/Me
    else
       case "${VERSION}" in
          "m")
             # KER_BRANCH: Branch of kernel to compile
             KER_BRANCH=m
             # ZIP_MOVE: Folder that holds completed zips
-            ZIP_MOVE=${HOME}/Zips/Kernels/M ;;
+            ZIP_MOVE=${HOME}/Completed/Zips/Kernels/M ;;
          "n")
             # KER_BRANCH: Branch of kernel to compile
             KER_BRANCH=n
             # ZIP_MOVE: Folder that holds completed zips
-            ZIP_MOVE=${HOME}/Zips/Kernels/N ;;
+            ZIP_MOVE=${HOME}/Completed/Zips/Kernels/N ;;
+         "m-beta")
+            # KER_BRANCH: Branch of kernel to compile
+            KER_BRANCH=m-beta
+            # ZIP_MOVE: Folder that holds completed zips
+            ZIP_MOVE=${HOME}/Completed/Zips/Kernels/M-Beta ;;
+         "n-beta")
+            # KER_BRANCH: Branch of kernel to compile
+            KER_BRANCH=n-beta
+            # ZIP_MOVE: Folder that holds completed zips
+            ZIP_MOVE=${HOME}/Completed/Zips/Kernels/N-Beta ;;
       esac
    fi
 

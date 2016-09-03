@@ -9,11 +9,15 @@ NEW_VERION_HASH=${3}
 
 case "${VERSION}" in
    "m")
-      ZIP_MOVE=${HOME}/Zips/Kernels/M ;;
+      ZIP_MOVE=${HOME}/Completed/Zips/Kernels/M ;;
    "n")
-      ZIP_MOVE=${HOME}/Zips/Kernels/N ;;
+      ZIP_MOVE=${HOME}/Completed/Zips/Kernels/N ;;
+   "m-beta")
+      ZIP_MOVE=${HOME}/Completed/Zips/Kernels/M-Beta ;;
+   "n-beta")
+      ZIP_MOVE=${HOME}/Completed/Zips/Kernels/N-Beta ;;
    "personal")
-      ZIP_MOVE=${HOME}/Zips/Me ;;
+      ZIP_MOVE=${HOME}/Completed/Zips/Me ;;
 esac
 
 # Changelog name and location

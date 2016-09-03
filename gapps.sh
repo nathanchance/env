@@ -41,10 +41,10 @@ SUCCESS=false
 if [[ "${1}" == "me" ]]; then
    PERSONAL=true
    TYPE=banks
-   ZIP_MOVE=${HOME}/Zips/Me
+   ZIP_MOVE=${HOME}/Completed/Zips/Me
 else
    TYPE=${1}
-   ZIP_MOVE=${HOME}/Zips/GApps
+   ZIP_MOVE=${HOME}/Completed/Zips/GApps
 fi
 
 
