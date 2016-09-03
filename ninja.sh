@@ -387,6 +387,15 @@ if [[ "${1}" == "both" ]]; then
    cd ${HOME}
    cat ${LOG}
 
+# If the first parameter is both-beta
+elif [[ "${1}" == "both-beta" ]]; then
+   # Run the two beta kernel builds
+   compile m-beta ${2}
+   compile n-beta
+
+   cd ${HOME}
+   cat ${LOG}
+
 # Otherwise, pass parameters to compile function
 else
    compile ${1} ${2}
