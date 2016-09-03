@@ -339,7 +339,7 @@ function compile() {
 
    # If the above was successful
    if [[ `ls ${ZIMAGE_DIR}/${KERNEL} 2>/dev/null | wc -l` != "0" ]]; then
-      BUILD_RESULT_STRING="BUILD SUCCESSFUL!"
+      BUILD_RESULT_STRING="BUILD SUCCESSFUL"
       SUCCESS=true
 
       make_dtb
@@ -350,7 +350,7 @@ function compile() {
       # echoText "UPLOADING ZIP FILE"; newLine
 
    else
-      BUILD_RESULT_STRING="BUILD FAILED!"
+      BUILD_RESULT_STRING="BUILD FAILED"
       SUCCESS=false
    fi
 
