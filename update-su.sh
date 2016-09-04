@@ -90,10 +90,12 @@ git fetch https://github.com/nathanchance/system_core_su n
 git cherry-pick 5b22c30457c4723c7203a4c30072e051867d9762
 
 
+# Move back into our source directory
+cd ${PN_SOURCE}
+
+
 # If the script is being called to build a boot image, do so
 if [[ "${1}" == "build-img" ]]; then
-   # Move into our source directory
-   cd ${PN_SOURCE}
 
    # Setup the environment
    echoText "PREPARING ENVIRONMENT"
