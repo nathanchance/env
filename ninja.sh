@@ -207,7 +207,8 @@ function compile() {
       # Repo sync
       time repo sync --force-sync -j$(grep -c ^processor /proc/cpuinfo)
       # Run the toolchain script
-      source scripts/${TOOLCHAIN_NAME}
+      cd scripts
+      source ${TOOLCHAIN_NAME}
    }
 
 
