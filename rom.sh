@@ -158,7 +158,7 @@ function compile() {
    if [[ ${PERSONAL} = true ]]; then
       export PURENEXUS_BUILD_TYPE=CHANCELLOR
       SOURCE_DIR=${ANDROID_DIR}/ROMs/PN
-      ZIP_MOVE=${HOME}/Completed/Zips/Me
+      ZIP_MOVE=${HOME}/Completed/Me
       ZIP_FORMAT=pure_nexus_${DEVICE}-*.zip
 
    else
