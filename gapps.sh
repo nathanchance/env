@@ -105,13 +105,13 @@ if [[ `ls ${SOURCE_DIR}/out/${ZIP_BEG}*.zip 2>/dev/null | wc -l` != "0" ]]; then
    else
       # Remove current GApps and move the new ones in their place
       if [[ "${TYPE}" == "banks" && ${PERSONAL} = false ]]; then
-         rm -rf ${HOME}/Zips/Me/${ZIP_BEG}*.zip
+         rm -rf ${HOME}/Zips/Completed/Me/${ZIP_BEG}*.zip
       fi
       rm -rf ${ZIP_MOVE}/${ZIP_BEG}*.zip
    fi
 
    if [[ "${TYPE}" == "banks" && ${PERSONAL} = false ]]; then
-      cp -v ${SOURCE_DIR}/out/${ZIP_BEG}*.zip ${HOME}/Zips/Me
+      cp -v ${SOURCE_DIR}/out/${ZIP_BEG}*.zip ${HOME}/Zips/Completed/Me
    fi
    mv -v ${SOURCE_DIR}/out/${ZIP_BEG}*.zip ${ZIP_MOVE}
 
