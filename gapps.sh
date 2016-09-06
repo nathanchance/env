@@ -3,7 +3,7 @@
 # -----
 # Usage
 # -----
-# $ . gapps.sh <banks|pn>
+# $ . gapps.sh <banks|pn|open>
 
 
 
@@ -40,7 +40,7 @@ SUCCESS=false
 
 if [[ "${1}" == "me" ]]; then
    PERSONAL=true
-   TYPE=banks
+   TYPE=open
    ZIP_MOVE=${HOME}/Completed/Me
 else
    TYPE=${1}
@@ -52,11 +52,16 @@ fi
 # Variables
 # ---------
 ANDROID_DIR=${HOME}
-if [[ "${TYPE}" == "banks" ]]; then
-    SOURCE_DIR=${ANDROID_DIR}/GApps/Banks
-    ZIP_BEG=banks
-    BRANCH=n
-fi
+case "${TYPE}" in
+   "banks")
+      SOURCE_DIR=${ANDROID_DIR}/GApps/Banks
+      ZIP_BEG=banks
+      BRANCH=n ;;
+   "open")
+      SOURCE_DIR=${ANDROID_DIR}/GApps/Open
+      ZIP_BEG=open
+      BRANCH=master ;;
+esac
 # Export the LOG variable for other files to use (I currently handle this via .bashrc)
 # export LOG_DIR=${ANDROID_DIR}/Logs
 # export LOG=${LOG_DIR}/compile_log_$( TZ=MST date +%m_%d_%y ).log
@@ -86,11 +91,19 @@ git clean -f -d -x
 
 # Get new changes
 git pull
+if [[ "${TYPE}" == "open" ]]; then
+   ./download_sources.sh --shallow arm64
+fi
 
 
 
 # Make GApps
-. mkgapps.sh
+case "${TYPE}" in
+   "banks")
+      . mkgapps.sh ;;
+   "open")
+      make arm64-24-nano ;;
+esac
 
 
 
@@ -104,13 +117,13 @@ if [[ `ls ${SOURCE_DIR}/out/${ZIP_BEG}*.zip 2>/dev/null | wc -l` != "0" ]]; then
       mkdir -p ${ZIP_MOVE}
    else
       # Remove current GApps and move the new ones in their place
-      if [[ "${TYPE}" == "banks" && ${PERSONAL} = false ]]; then
+      if [[ "${TYPE}" == "open" && ${PERSONAL} = false ]]; then
          rm -rf ${HOME}/Completed/Me/${ZIP_BEG}*.zip
       fi
       rm -rf ${ZIP_MOVE}/${ZIP_BEG}*.zip
    fi
 
-   if [[ "${TYPE}" == "banks" && ${PERSONAL} = false ]]; then
+   if [[ "${TYPE}" == "open" && ${PERSONAL} = false ]]; then
       cp -v ${SOURCE_DIR}/out/${ZIP_BEG}*.zip ${HOME}/Completed/Me
    fi
    mv -v ${SOURCE_DIR}/out/${ZIP_BEG}*.zip ${ZIP_MOVE}
