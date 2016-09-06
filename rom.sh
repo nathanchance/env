@@ -234,9 +234,9 @@ function compile() {
 
 
    # If we are running a personal build, make sure to include su
-   if [[ ${PERSONAL} = true ]]; then
-      . update-su.sh
-   fi
+   # if [[ ${PERSONAL} = true ]]; then
+   #    . update-su.sh
+   # fi
 
 
 
@@ -314,9 +314,9 @@ function compile() {
       newLine; echoText "CLEANING UP OUT DIRECTORY"; newLine
 
       mka clobber
-      if [[ ${PERSONAL} = true ]]; then
-         rm -rf ${SOURCE_DIR}/device/huawei/angler/su
-      fi
+      # if [[ ${PERSONAL} = true ]]; then
+      #    rm -rf ${SOURCE_DIR}/device/huawei/angler/su
+      # fi
 
 
       # Go back home
