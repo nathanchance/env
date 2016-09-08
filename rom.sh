@@ -111,14 +111,24 @@ function compile() {
       DEVICE=angler
 
    else
-      ROM=${1}
+      if [[ -n ${1} ]]; then
+         ROM=${1}
+      else
+         echo "Please specify which ROM you want to compile:"
+         read ROM
+      fi
 
       # If the ROM is RR, its device is only Shamu
       if [[ "${ROM}" == "rr" ]]; then
          DEVICE=shamu
 
       else
-         DEVICE=${2}
+         if [[ -n ${2} ]]; then
+            DEVICE=${2}
+         else
+            echo "Please specify which device you want to compile:"
+            read DEVICE
+         fi
 
          # If there is a third parameter
          if [[ -n ${3} ]]; then
@@ -158,7 +168,7 @@ function compile() {
    if [[ ${PERSONAL} = true ]]; then
       export PURENEXUS_BUILD_TYPE=CHANCELLOR
       SOURCE_DIR=${ANDROID_DIR}/ROMs/PN
-      ZIP_MOVE=${HOME}/Completed/Me
+      ZIP_MOVE=${HOME}/Completed/Zips/ROMs/Me
       ZIP_FORMAT=pure_nexus_${DEVICE}-*.zip
 
    else

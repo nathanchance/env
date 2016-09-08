@@ -108,7 +108,7 @@ function compile() {
       # KER_BRANCH: Branch of kernel to compile
       KER_BRANCH=personal
       # ZIP_MOVE: Folder that holds completed zips
-      ZIP_MOVE=${HOME}/Completed/Me
+      ZIP_MOVE=${HOME}/Completed/Zips/Kernels/Me
    else
       case "${VERSION}" in
          "n")

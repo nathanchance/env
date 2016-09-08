@@ -3,7 +3,8 @@
 # -----
 # Usage
 # -----
-# $ . gapps.sh <banks|pn|open>
+# $ . gapps.sh banks
+# $ . gapps.sh open <super|stock|full|mini|micro|nano|pico>
 
 
 
@@ -29,34 +30,34 @@ function newLine() {
 
 
 
-# ----------
-# Parameters
-# ----------
+# ------------------------
+# Parameters and variables
+# ------------------------
 # Parameter 1: Which GApps to compile? (currently Banks or Open GApps)
+
 
 # Unassign personal and success flags
 PERSONAL=false
 SUCCESS=false
 
-if [[ "${1}" == "me" ]]; then
-   PERSONAL=true
-   TYPE=open
-   ZIP_MOVE=${HOME}/Completed/Me
+
+# Head Android directory
+ANDROID_DIR=${HOME}
+# GApps completed zip directory
+ZIP_MOVE=${HOME}/Completed/Zips/GApps
+
+
+# If there is no first paramter, get it from the user
+if [[ -z ${1} ]]; then
+   echo "Which GApps do you want to compile:"
+   read TYPE
 else
    TYPE=${1}
-   ZIP_MOVE=${HOME}/Completed/Zips/GApps
-   if [[ "${TYPE}" == "open" && -z ${2} ]]; then
-      echo "Please specify which type of Open GApps you want"
-      read VERSION
-   fi
 fi
 
 
-# ---------
-# Variables
-# ---------
-ANDROID_DIR=${HOME}
-case "${TYPE}" in
+# Type logic
+case ${TYPE} in
    "banks")
       SOURCE_DIR=${ANDROID_DIR}/GApps/Banks
       ZIP_BEG=banks
@@ -64,8 +65,20 @@ case "${TYPE}" in
    "open")
       SOURCE_DIR=${ANDROID_DIR}/GApps/Open
       ZIP_BEG=open
-      BRANCH=master ;;
+      BRANCH=master
+      if [[ -z ${2} ]]; then
+         echo "Please specify which type of Open GApps you want"
+         read VERSION
+      fi ;;
 esac
+
+
+
+# ---------
+# Variables
+# ---------
+
+
 # Export the LOG variable for other files to use (I currently handle this via .bashrc)
 # export LOG_DIR=${ANDROID_DIR}/Logs
 # export LOG=${LOG_DIR}/compile_log_$( TZ=MST date +%m_%d_%y ).log
@@ -127,18 +140,10 @@ if [[ `ls ${SOURCE_DIR}/out/${ZIP_BEG}*.zip 2>/dev/null | wc -l` != "0" ]]; then
       mkdir -p ${ZIP_MOVE}
    else
       # Remove current GApps and move the new ones in their place
-      if [[ "${TYPE}" == "open" && ${PERSONAL} = false ]]; then
-         rm -rf ${HOME}/Completed/Me/${ZIP_BEG}*.zip
-      fi
       rm -rf ${ZIP_MOVE}/${ZIP_BEG}*.zip
    fi
 
-   if [[ "${TYPE}" == "open" && ${PERSONAL} = false ]]; then
-      cp -v ${SOURCE_DIR}/out/${ZIP_BEG}*.zip ${HOME}/Completed/Me
-   fi
    mv -v ${SOURCE_DIR}/out/${ZIP_BEG}*.zip ${ZIP_MOVE}
-
-
 
 # If the build failed, add a variable
 else
