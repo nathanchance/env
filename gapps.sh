@@ -69,6 +69,8 @@ case ${TYPE} in
       if [[ -z ${2} ]]; then
          echo "Please specify which type of Open GApps you want"
          read VERSION
+      else
+         VERSION=${2}
       fi ;;
 esac
 
