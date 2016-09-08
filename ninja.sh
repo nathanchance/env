@@ -111,21 +111,11 @@ function compile() {
       ZIP_MOVE=${HOME}/Completed/Me
    else
       case "${VERSION}" in
-         "m")
-            # KER_BRANCH: Branch of kernel to compile
-            KER_BRANCH=m
-            # ZIP_MOVE: Folder that holds completed zips
-            ZIP_MOVE=${HOME}/Completed/Zips/Kernels/M ;;
          "n")
             # KER_BRANCH: Branch of kernel to compile
             KER_BRANCH=n
             # ZIP_MOVE: Folder that holds completed zips
             ZIP_MOVE=${HOME}/Completed/Zips/Kernels/N ;;
-         "m-beta")
-            # KER_BRANCH: Branch of kernel to compile
-            KER_BRANCH=m-beta
-            # ZIP_MOVE: Folder that holds completed zips
-            ZIP_MOVE=${HOME}/Completed/Zips/Kernels/M-Beta ;;
          "n-beta")
             # KER_BRANCH: Branch of kernel to compile
             KER_BRANCH=n-beta
@@ -172,7 +162,9 @@ function compile() {
       NEW_VERSION_HASH=$(git log --grep="^NINJA: ${NEW_VERSION}$" --pretty=format:'%H')
 
       # Generate changelog
-      git log ${OLD_VERSION_HASH}^..${NEW_VERION_HASH} --format="Title: %s%nAuthor: %an%nHash: %H%n" > ${CHANGELOG}
+      if [[ "${OLD_VERSION_HASH}" != "" || -n ${OLD_VERSION_HASH} ]]; then
+         git log ${OLD_VERSION_HASH}^..${NEW_VERION_HASH} --format="Title: %s%nAuthor: %an%nHash: %H%n" > ${CHANGELOG}
+      fi
    }
 
    # Clean the out and AnyKernel dirs and make clean
@@ -382,16 +374,7 @@ function compile() {
 # If the first parameter is both
 if [[ "${1}" == "both" ]]; then
    # Run the two kernel builds
-   compile m ${2}
-   compile n
-
-   cd ${HOME}
-   cat ${LOG}
-
-# If the first parameter is both-beta
-elif [[ "${1}" == "both-beta" ]]; then
-   # Run the two beta kernel builds
-   compile m-beta ${2}
+   compile n ${2}
    compile n-beta
 
    cd ${HOME}
