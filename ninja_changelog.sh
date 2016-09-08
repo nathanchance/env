@@ -8,12 +8,8 @@ OLD_VERSION_HASH=${2}
 NEW_VERION_HASH=${3}
 
 case "${VERSION}" in
-   "m")
-      ZIP_MOVE=${HOME}/Completed/Zips/Kernels/M ;;
    "n")
       ZIP_MOVE=${HOME}/Completed/Zips/Kernels/N ;;
-   "m-beta")
-      ZIP_MOVE=${HOME}/Completed/Zips/Kernels/M-Beta ;;
    "n-beta")
       ZIP_MOVE=${HOME}/Completed/Zips/Kernels/N-Beta ;;
    "personal")
