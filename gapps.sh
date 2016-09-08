@@ -32,7 +32,7 @@ function newLine() {
 # ----------
 # Parameters
 # ----------
-# Parameter 1: Which GApps to compile? (currently Banks or Pure Nexus Dynamic GApps)
+# Parameter 1: Which GApps to compile? (currently Banks or Open GApps)
 
 # Unassign personal and success flags
 PERSONAL=false
@@ -45,6 +45,10 @@ if [[ "${1}" == "me" ]]; then
 else
    TYPE=${1}
    ZIP_MOVE=${HOME}/Completed/Zips/GApps
+   if [[ "${TYPE}" == "open" && -z ${2} ]]; then
+      echo "Please specify which type of Open GApps you want"
+      read VERSION
+   fi
 fi
 
 
@@ -84,12 +88,16 @@ cd ${SOURCE_DIR}
 
 
 # Clean up repo
+echoText "CLEANING UP REPO"
+
 git reset --hard origin/${BRANCH}
 git clean -f -d -x
 
 
 
 # Get new changes
+echoText "UPDATING REPO"
+
 git pull
 if [[ "${TYPE}" == "open" ]]; then
    ./download_sources.sh --shallow arm64
@@ -98,11 +106,13 @@ fi
 
 
 # Make GApps
+echoText "BUILDING $( echo ${TYPE} | awk '{print toupper($0)}' ) GAPPS"
+
 case "${TYPE}" in
    "banks")
       . mkgapps.sh ;;
    "open")
-      make arm64-24-nano ;;
+      make arm64-24-${VERSION} ;;
 esac
 
 
