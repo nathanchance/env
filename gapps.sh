@@ -40,9 +40,9 @@ function newLine() {
 PERSONAL=false
 SUCCESS=false
 
-
 # Head Android directory
 ANDROID_DIR=${HOME}
+
 # GApps completed zip directory
 ZIP_MOVE=${HOME}/Completed/Zips/GApps
 
@@ -50,7 +50,19 @@ ZIP_MOVE=${HOME}/Completed/Zips/GApps
 # If there is no first paramter, get it from the user
 if [[ -z ${1} ]]; then
    echo "Which GApps do you want to compile:"
-   read TYPE
+   echo "   1. Banks"
+   echo "   2. Open"
+   read TYPE_NUM
+
+   case ${TYPE_NUM} in
+      "1")
+         TYPE=banks ;;
+      "2")
+         TYPE=open ;;
+      *)
+         echo "Invalid selection, please run the script again" && return
+   esac
+
 else
    TYPE=${1}
 fi
@@ -66,9 +78,39 @@ case ${TYPE} in
       SOURCE_DIR=${ANDROID_DIR}/GApps/Open
       ZIP_BEG=open
       BRANCH=master
+
       if [[ -z ${2} ]]; then
          echo "Please specify which type of Open GApps you want"
-         read VERSION
+
+         VERSIONS="Super Stock Full Mini Micro Nano Pico"
+         COUNTER=1
+
+         for CURRENT in ${VERSIONS}; do
+            echo "   ${COUNTER}. ${CURRENT}"
+            (( COUNTER++ ))
+         done
+
+         read VERSION_NUM
+
+         case ${VERSION_NUM} in
+            "1")
+               VERSION=super ;;
+            "2")
+               VERSION=stock ;;
+            "3")
+               VERSION=full ;;
+            "4")
+               VERSION=mini ;;
+            "5")
+               VERSION=micro ;;
+            "6")
+               VERSION=nano ;;
+            "7")
+               VERSION=pico ;;
+            *)
+               echo "Invalid selection, please run the script again" && return
+         esac
+
       else
          VERSION=${2}
       fi ;;

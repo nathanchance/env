@@ -115,7 +115,22 @@ function compile() {
          ROM=${1}
       else
          echo "Please specify which ROM you want to compile:"
-         read ROM
+         echo "   1. PureNexus"
+         echo "   2. Dirty Unicorns"
+         echo "   3. AOSiP"
+
+         read ROM_NUM
+
+         case ${ROM_NUM} in
+            "1")
+               ROM=pn ;;
+            "2")
+               ROM=du ;;
+            "3")
+               ROM=aosip ;;
+            *)
+               echo "Invalid selection, please run the script again" && return
+         esac
       fi
 
       # If the ROM is RR, its device is only Shamu
@@ -127,6 +142,23 @@ function compile() {
             DEVICE=${2}
          else
             echo "Please specify which device you want to compile:"
+            echo "   1. Angler"
+            echo "   2. Bullhead"
+            echo "   3. Shamu"
+            
+            read DEVICE_NUM
+
+            case ${DEVICE_NUM} in
+               "1")
+                  DEVICE=angler ;;
+               "2")
+                  DEVICE=bullhead ;;
+               "3")
+                  DEVICE=shamu ;;
+               *)
+                  echo "Invalid selection, please run the script again" && return
+            esac
+
             read DEVICE
          fi
 
@@ -172,16 +204,15 @@ function compile() {
       ZIP_FORMAT=pure_nexus_${DEVICE}-*.zip
 
    else
-      # Currently, we support AICP, AOSiP, Dirty Unicorns, Pure Nexus (Mod), ResurrectionRemix, and Screw'd
       case "${ROM}" in
          "aosip")
             SOURCE_DIR=${ANDROID_DIR}/ROMs/AOSiP
             ZIP_MOVE=${HOME}/Completed/Zips/ROMs/AOSiP/${DEVICE}
             ZIP_FORMAT=AOSiP-*-${DEVICE}-*.zip ;;
-         "beltz")
-            SOURCE_DIR=${ANDROID_DIR}/ROMs/Beltz
-            ZIP_MOVE=${HOME}/Completed/Zips/ROMs/Beltz/${DEVICE}
-            ZIP_FORMAT=beltz_mm*${DEVICE}.zip ;;
+         # "beltz")
+         #    SOURCE_DIR=${ANDROID_DIR}/ROMs/Beltz
+         #    ZIP_MOVE=${HOME}/Completed/Zips/ROMs/Beltz/${DEVICE}
+         #    ZIP_FORMAT=beltz_mm*${DEVICE}.zip ;;
          "du")
             if [[ -n ${PERSON} ]]; then
                SOURCE_DIR=${ANDROID_DIR}/ROMs/DU
@@ -200,10 +231,10 @@ function compile() {
                ZIP_MOVE=${HOME}/Completed/Zips/ROMs/PureNexus/${DEVICE}
             fi
             ZIP_FORMAT=pure_nexus_${DEVICE}-*.zip ;;
-         "pn-mod")
-            SOURCE_DIR=${ANDROID_DIR}/ROMs/PN-Mod
-            ZIP_MOVE=${HOME}/Completed/Zips/ROMs/PureNexusMod/${DEVICE}
-            ZIP_FORMAT=pure_nexus_${DEVICE}-*.zip ;;
+         # "pn-mod")
+         #    SOURCE_DIR=${ANDROID_DIR}/ROMs/PN-Mod
+         #    ZIP_MOVE=${HOME}/Completed/Zips/ROMs/PureNexusMod/${DEVICE}
+         #    ZIP_FORMAT=pure_nexus_${DEVICE}-*.zip ;;
       esac
    fi
 
