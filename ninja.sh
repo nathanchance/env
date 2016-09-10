@@ -98,7 +98,7 @@ function compile() {
                TOOCHAIN_COMPILED_DIR=${TOOLCHAIN_SOURCE_DIR}/out/${TOOLCHAIN_NAME} ;;
             "bullhead")
                TOOLCHAIN_SOURCE_DIR=${RESOURCE_DIR}/Toolchains/Linaro
-               TOOLCHAIN_NAME=aarch64-linux-android-6.x-kernel
+               TOOLCHAIN_NAME=aarch64-linux-android-4.9-kernel
                TOOCHAIN_COMPILED_DIR=${TOOLCHAIN_SOURCE_DIR}/out/${TOOLCHAIN_NAME} ;;
          esac
    esac
