@@ -47,7 +47,8 @@ function compile() {
    # Set flags/variables based on parameter
    case "${1}" in
       "me")
-         PERSONAL=true ;;
+         PERSONAL=true
+         SOURCE_DIR=${RESOURCE_DIR}/Ninja-Angler ;;
       "test")
          TEST=true ;;
       *)
@@ -73,7 +74,14 @@ function compile() {
    # RESOURCE_DIR: Directory that holds all kernel related files
    RESOURCE_DIR=${ANDROID_DIR}/Kernels
    # SOURCE_DIR: Directory that holds kernel source
-   SOURCE_DIR=${RESOURCE_DIR}/Ninja-Angler
+   case ${2} in
+      "angler")
+         DEVICE=${2}
+         SOURCE_DIR=${RESOURCE_DIR}/Ninja-Angler ;;
+      "bullhead")
+         DEVICE=${2}
+         SOURCE_DIR=${RESOURCE_DIR}/Ninja-Bullhead ;;
+   esac
    # ANYKERNEL_DIR: Directory that holds AnyKernel source
    ANYKERNEL_DIR=${SOURCE_DIR}/anykernel
    # TOOLCHAIN_SOURCE_DIR: Directory that holds toolchain
@@ -113,12 +121,12 @@ function compile() {
             # KER_BRANCH: Branch of kernel to compile
             KER_BRANCH=n
             # ZIP_MOVE: Folder that holds completed zips
-            ZIP_MOVE=${HOME}/Completed/Zips/Kernels/N ;;
+            ZIP_MOVE=${HOME}/Completed/Zips/Kernels/${DEVICE}/Normal ;;
          "n-beta")
             # KER_BRANCH: Branch of kernel to compile
             KER_BRANCH=n-beta
             # ZIP_MOVE: Folder that holds completed zips
-            ZIP_MOVE=${HOME}/Completed/Zips/Kernels/N-Beta ;;
+            ZIP_MOVE=${HOME}/Completed/Zips/Kernels/${DEVICE}/Beta ;;
       esac
    fi
 
@@ -227,6 +235,7 @@ function compile() {
 
       # Make zip format variable
       ZIP_FORMAT=N*.zip
+      ZIP_NAME=${KERNEL_VERSION}-${DEVICE}
 
       # If ZIPMOVE doesn't exist, make it; otherwise, clean it
       if [[ ! -d "${ZIP_MOVE}" ]]; then
@@ -247,7 +256,7 @@ function compile() {
 
       # Make zip file
       echoText "MAKING FLASHABLE ZIP"
-      zip -r9 ${KERNEL_VERSION}.zip * -x README ${KERNEL_VERSION}.zip > /dev/null 2>&1
+      zip -r9 ${ZIP_NAME}.zip * -x README ${ZIP_NAME}.zip > /dev/null 2>&1
 
       # Move the new zip to ZIP_MOVE
       echoText "MOVING FLASHABLE ZIP"
@@ -348,8 +357,8 @@ function compile() {
 
    # Print the zip location and its size if the script was successful
    if [[ ${SUCCESS} = true ]]; then
-      echo -e ${RED}"ZIP: ${ZIP_MOVE}/${KERNEL_VERSION}.zip"
-      echo -e "SIZE: $( du -h ${ZIP_MOVE}/${KERNEL_VERSION}.zip | awk '{print $1}' )"${RESTORE}
+      echo -e ${RED}"ZIP: ${ZIP_MOVE}/${ZIP_NAME}.zip"
+      echo -e "SIZE: $( du -h ${ZIP_MOVE}/${ZIP_NAME}.zip | awk '{print $1}' )"${RESTORE}
    fi
    # Print the time the script finished and how long the script ran for regardless of success
    echo -e ${RED}"TIME FINISHED: $( TZ=MST date +%D\ %r | awk '{print toupper($0)}' )"
