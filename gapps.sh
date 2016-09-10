@@ -11,6 +11,7 @@
 # ---------
 # Functions
 # ---------
+
 # Prints a formatted header; used for outlining what the script is doing to the user
 function echoText() {
    RED="\033[01;31m"
@@ -33,11 +34,8 @@ function newLine() {
 # ------------------------
 # Parameters and variables
 # ------------------------
-# Parameter 1: Which GApps to compile? (currently Banks or Open GApps)
 
-
-# Unassign personal and success flags
-PERSONAL=false
+# Unassign success flags
 SUCCESS=false
 
 # Head Android directory
@@ -49,10 +47,10 @@ ZIP_MOVE=${HOME}/Completed/Zips/GApps
 
 # If there is no first paramter, get it from the user
 if [[ -z ${1} ]]; then
-   echo "Which GApps do you want to compile:"
+   echo "GApps selection"
    echo "   1. Banks"
    echo "   2. Open"
-   read TYPE_NUM
+   read -p "Which GApps would you like to build?" TYPE_NUM
 
    case ${TYPE_NUM} in
       "1")
@@ -80,7 +78,7 @@ case ${TYPE} in
       BRANCH=master
 
       if [[ -z ${2} ]]; then
-         echo "Please specify which type of Open GApps you want"
+         echo "You have chosen Open GApps!"
 
          VERSIONS="Super Stock Full Mini Micro Nano Pico"
          COUNTER=1
@@ -90,7 +88,7 @@ case ${TYPE} in
             (( COUNTER++ ))
          done
 
-         read VERSION_NUM
+         read -p "Which version of Open GApps would you like to build? " VERSION_NUM
 
          case ${VERSION_NUM} in
             "1")

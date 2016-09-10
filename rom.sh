@@ -114,12 +114,12 @@ function compile() {
       if [[ -n ${1} ]]; then
          ROM=${1}
       else
-         echo "Please specify which ROM you want to compile:"
+         echo "ROM selection"
          echo "   1. PureNexus"
          echo "   2. Dirty Unicorns"
          echo "   3. AOSiP"
 
-         read ROM_NUM
+         read -p "Which ROM would you like to build? " ROM_NUM
 
          case ${ROM_NUM} in
             "1")
@@ -141,12 +141,12 @@ function compile() {
          if [[ -n ${2} ]]; then
             DEVICE=${2}
          else
-            echo "Please specify which device you want to compile:"
+            echo "Device selection"
             echo "   1. Angler"
             echo "   2. Bullhead"
             echo "   3. Shamu"
-            
-            read DEVICE_NUM
+
+            read -p "Which device would you like to build for? " DEVICE_NUM
 
             case ${DEVICE_NUM} in
                "1")
