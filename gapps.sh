@@ -50,7 +50,7 @@ if [[ -z ${1} ]]; then
    echo "GApps selection"
    echo "   1. Banks"
    echo "   2. Open"
-   read -p "Which GApps would you like to build?" TYPE_NUM
+   read -p "Which GApps would you like to build? " TYPE_NUM
 
    case ${TYPE_NUM} in
       "1")
