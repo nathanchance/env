@@ -73,7 +73,7 @@ function compile() {
    # RESOURCE_DIR: Directory that holds all kernel related files
    RESOURCE_DIR=${ANDROID_DIR}/Kernels
    # SOURCE_DIR: Directory that holds kernel source
-   SOURCE_DIR=${RESOURCE_DIR}/Ninja
+   SOURCE_DIR=${RESOURCE_DIR}/Ninja-Angler
    # ANYKERNEL_DIR: Directory that holds AnyKernel source
    ANYKERNEL_DIR=${SOURCE_DIR}/anykernel
    # TOOLCHAIN_SOURCE_DIR: Directory that holds toolchain
