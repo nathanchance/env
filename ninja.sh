@@ -97,9 +97,7 @@ function compile() {
    # THREAD: Number of available threads on computer
    THREAD=-j$(grep -c ^processor /proc/cpuinfo)
    # KERNEL: File name of completed image
-   KERNEL=Image.gz
-   # DTBIMAGE: File name of generated DTB image
-   DTBIMAGE=dtb
+   KERNEL=Image.gz-dtb
    # DEFCONFIG: Name of defconfig file
    DEFCONFIG=ninja_defconfig
 
@@ -172,7 +170,6 @@ function compile() {
       # Cleaning of AnyKernel directory
       cd "${ANYKERNEL_DIR}"
       rm -rf ${KERNEL} > /dev/null 2>&1
-      rm -rf ${DTBIMAGE} > /dev/null 2>&1
 
       echo
 
@@ -219,11 +216,6 @@ function compile() {
       # Make the DEFCONFIG and the kernel with the right number of threads
       make ${DEFCONFIG}
       time make ${THREAD}
-   }
-
-   # Make the DTB file
-   function make_dtb {
-      ${ANYKERNEL_DIR}/tools/dtbToolCM -v2 -o ${ANYKERNEL_DIR}/${DTBIMAGE} -s 2048 -p scripts/dtc/ arch/arm64/boot/dts/ > /dev/null 2>&1
    }
 
 
@@ -335,7 +327,6 @@ function compile() {
       BUILD_RESULT_STRING="BUILD SUCCESSFUL"
       SUCCESS=true
 
-      make_dtb
       make_zip
 
 
