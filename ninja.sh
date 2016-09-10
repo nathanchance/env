@@ -319,7 +319,7 @@ function compile() {
 
 
    # Update toolchain if requested
-   if [[ "${2}" == "tcupdate" ]]; then
+   if [[ "${3}" == "tcupdate" ]]; then
       echoText "UPDATING TOOLCHAIN"; newLine
 
       update_tc
