@@ -91,9 +91,16 @@ function compile() {
          TOOLCHAIN_NAME=aarch64-linux-android-6.x-kernel
          TOOCHAIN_COMPILED_DIR=${TOOLCHAIN_SOURCE_DIR}/out/${TOOLCHAIN_NAME} ;;
       "false")
-         TOOLCHAIN_SOURCE_DIR=${RESOURCE_DIR}/Toolchains/Linaro
-         TOOLCHAIN_NAME=aarch64-linux-android-6.x-kernel
-         TOOCHAIN_COMPILED_DIR=${TOOLCHAIN_SOURCE_DIR}/out/${TOOLCHAIN_NAME} ;;
+         case ${DEVICE} in
+            "angler")
+               TOOLCHAIN_SOURCE_DIR=${RESOURCE_DIR}/Toolchains/Linaro
+               TOOLCHAIN_NAME=aarch64-linux-android-6.x-kernel
+               TOOCHAIN_COMPILED_DIR=${TOOLCHAIN_SOURCE_DIR}/out/${TOOLCHAIN_NAME} ;;
+            "bullhead")
+               TOOLCHAIN_SOURCE_DIR=${RESOURCE_DIR}/Toolchains/Linaro
+               TOOLCHAIN_NAME=aarch64-linux-android-4.9-kernel
+               TOOCHAIN_COMPILED_DIR=${TOOLCHAIN_SOURCE_DIR}/out/${TOOLCHAIN_NAME} ;;
+         esac
    esac
    # ZIMAGE_DIR: Directory that holds completed Image.gz
    ZIMAGE_DIR=${SOURCE_DIR}/arch/arm64/boot
