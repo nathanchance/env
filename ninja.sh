@@ -242,14 +242,13 @@ function compile() {
 
       # Make zip format variable
       ZIP_FORMAT=N*.zip
-      ZIP_NAME=${KERNEL_VERSION}-${DEVICE}
 
       # If ZIPMOVE doesn't exist, make it; otherwise, clean it
       if [[ ! -d "${ZIP_MOVE}" ]]; then
          mkdir -p "${ZIP_MOVE}"
       else
          # If there is a previous zip in the zip move directory in the same format AND it is not the same as the zip we are uploading, generate a changelog
-         if [[ $( ls "${ZIP_MOVE}"/${ZIP_FORMAT} 2>/dev/null | wc -l ) != "0" && $( ls "${ZIP_MOVE}"/${ZIP_FORMAT} ) != "${ZIP_MOVE}/${KERNEL_VERSION}.zip" ]]; then
+         if [[ $( ls "${ZIP_MOVE}"/${ZIP_FORMAT} 2>/dev/null | wc -l ) != "0" && $( ls "${ZIP_MOVE}"/${ZIP_FORMAT} ) != "${ZIP_MOVE}/${ZIP_NAME}.zip" ]]; then
             echoText "GENERATING CHANGELOG"
             changelog "${ZIP_MOVE}"
          fi
@@ -267,7 +266,7 @@ function compile() {
 
       # Move the new zip to ZIP_MOVE
       echoText "MOVING FLASHABLE ZIP"
-      mv ${KERNEL_VERSION}.zip "${ZIP_MOVE}"
+      mv ${ZIP_NAME}.zip "${ZIP_MOVE}"
 
       # Go to the kernel directory
       cd "${SOURCE_DIR}"
@@ -298,6 +297,7 @@ function compile() {
 
    # Set the kernel version
    KERNEL_VERSION=$( grep -r "EXTRAVERSION = -" ${SOURCE_DIR}/Makefile | sed 's/EXTRAVERSION = -//' )
+   ZIP_NAME=${KERNEL_VERSION}-${DEVICE}
 
 
    # Show the version of the kernel compiling
@@ -312,7 +312,7 @@ function compile() {
 
    echoText "KERNEL VERSION"; newLine
 
-   echo -e ${RED}${BLINK_RED}${KERNEL_VERSION}${RESTORE}; newLine
+   echo -e ${RED}${BLINK_RED}${ZIP_NAME}${RESTORE}; newLine
 
 
    echoText "BUILD SCRIPT STARTING AT $( TZ=MST date +%D\ %r )"
