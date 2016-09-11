@@ -48,6 +48,7 @@ function compile() {
    case "${1}" in
       "me")
          PERSONAL=true
+         DEVICE=angler
          SOURCE_DIR=${RESOURCE_DIR}/Ninja-Angler ;;
       "test")
          TEST=true ;;
