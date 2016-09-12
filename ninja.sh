@@ -48,9 +48,7 @@ function compile() {
    # Set flags/variables based on parameter
    case "${1}" in
       "me")
-         PERSONAL=true
-         DEVICE=angler
-         SOURCE_DIR=${RESOURCE_DIR}/Ninja-Angler ;;
+         PERSONAL=true ;;
       "test")
          TEST=true ;;
       *)
@@ -89,6 +87,8 @@ function compile() {
    # TOOLCHAIN_SOURCE_DIR: Directory that holds toolchain
    case ${PERSONAL} in
       "true")
+         DEVICE=angler
+         SOURCE_DIR=${RESOURCE_DIR}/Ninja-Angler
          TOOLCHAIN_SOURCE_DIR=${RESOURCE_DIR}/Toolchains/Linaro
          TOOLCHAIN_NAME=aarch64-linux-android-6.x-kernel
          TOOCHAIN_COMPILED_DIR=${TOOLCHAIN_SOURCE_DIR}/out/${TOOLCHAIN_NAME} ;;
