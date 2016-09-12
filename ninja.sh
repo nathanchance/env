@@ -38,6 +38,7 @@ function compile() {
    PERSONAL=false
    TEST=false
    SUCCESS=false
+   UPDATE_TC=false
    VERSION=
 
    # Set USER and HOST variables back to what they are in .bashrc
@@ -123,6 +124,7 @@ function compile() {
       KER_BRANCH=personal
       # ZIP_MOVE: Folder that holds completed zips
       ZIP_MOVE=${HOME}/Completed/Zips/Kernels/Me
+
    else
       case "${VERSION}" in
          "norm")
@@ -320,7 +322,7 @@ function compile() {
 
 
    # Update toolchain if requested
-   if [[ "${3}" == "tcupdate" ]]; then
+   if [[ "${2}" == "tcupdate" || "${3}" == "tcupdate" ]]; then
       echoText "UPDATING TOOLCHAIN"; newLine
 
       update_tc
