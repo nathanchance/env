@@ -82,8 +82,6 @@ function compile() {
          DEVICE=${2}
          SOURCE_DIR=${RESOURCE_DIR}/Ninja-Bullhead ;;
    esac
-   # ANYKERNEL_DIR: Directory that holds AnyKernel source
-   ANYKERNEL_DIR=${SOURCE_DIR}/anykernel
    # TOOLCHAIN_SOURCE_DIR: Directory that holds toolchain
    case ${PERSONAL} in
       "true")
@@ -106,6 +104,8 @@ function compile() {
    esac
    # ZIMAGE_DIR: Directory that holds completed Image.gz
    ZIMAGE_DIR=${SOURCE_DIR}/arch/arm64/boot
+   # ANYKERNEL_DIR: Directory that holds AnyKernel source
+   ANYKERNEL_DIR=${SOURCE_DIR}/anykernel
 
 
    # ---------
