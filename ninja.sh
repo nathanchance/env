@@ -129,14 +129,14 @@ function compile() {
       case "${VERSION}" in
          "norm")
             # KER_BRANCH: Branch of kernel to compile
-            KER_BRANCH=n
+            KER_BRANCH=release
             # ZIP_MOVE: Folder that holds completed zips
-            ZIP_MOVE=${HOME}/Completed/Zips/Kernels/${DEVICE}/Normal ;;
+            ZIP_MOVE=${HOME}/Completed/Zips/Kernels/${DEVICE}/Release ;;
          "beta")
             # KER_BRANCH: Branch of kernel to compile
-            KER_BRANCH=n-beta
+            KER_BRANCH=staging
             # ZIP_MOVE: Folder that holds completed zips
-            ZIP_MOVE=${HOME}/Completed/Zips/Kernels/${DEVICE}/Beta ;;
+            ZIP_MOVE=${HOME}/Completed/Zips/Kernels/${DEVICE}/Staging ;;
       esac
    fi
 
