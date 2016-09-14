@@ -127,12 +127,12 @@ function compile() {
 
    else
       case "${VERSION}" in
-         "norm")
+         "release")
             # KER_BRANCH: Branch of kernel to compile
             KER_BRANCH=release
             # ZIP_MOVE: Folder that holds completed zips
             ZIP_MOVE=${HOME}/Completed/Zips/Kernels/${DEVICE}/Release ;;
-         "beta")
+         "staging")
             # KER_BRANCH: Branch of kernel to compile
             KER_BRANCH=staging
             # ZIP_MOVE: Folder that holds completed zips
@@ -384,8 +384,8 @@ function compile() {
 # If the first parameter is both
 if [[ "${1}" == "both" ]]; then
    # Run the two kernel builds
-   compile norm ${2} ${3}
-   compile beta ${2}
+   compile release ${2} ${3}
+   compile staging ${2}
 
    cd ${HOME}
    cat ${LOG}
