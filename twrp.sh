@@ -40,6 +40,10 @@ function compile() {
    FILE_FORMAT=twrp-${DEVICE}*
 
 
+   # Export Java 8
+   export EXPERIMENTAL_USE_JAVA8=true
+
+
    # Clear the terminal
    clear
 
