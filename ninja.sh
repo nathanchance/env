@@ -3,7 +3,9 @@
 # -----
 # Usage
 # -----
-# $ . ninja.sh <m|n|me> <tcupdate|notcupdate>
+# $ . ninja.sh <release|staging> <angler|bullhead <tcupdate|notcupdate>
+# $ . ninja.sh me <tcupdate|notcupdate>
+# $ . ninja.sh both <tcupdate|notcupdate>
 
 
 # Prints a formatted header; used for outlining what the script is doing to the user
