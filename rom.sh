@@ -116,8 +116,9 @@ function compile() {
       else
          echo "ROM selection"
          echo "   1. PureNexus"
-         echo "   2. Dirty Unicorns"
-         echo "   3. AOSiP"
+         echo "   2. PureNexus Mod"
+         echo "   3. Dirty Unicorns"
+         echo "   4. AOSiP"
 
          read -p "Which ROM would you like to build? " ROM_NUM
 
@@ -125,8 +126,10 @@ function compile() {
             "1")
                ROM=pn ;;
             "2")
-               ROM=du ;;
+               ROM=pn-mod ;;
             "3")
+               ROM=du ;;
+            "4")
                ROM=aosip ;;
             *)
                echo "Invalid selection, please run the script again" && return
@@ -231,10 +234,10 @@ function compile() {
                ZIP_MOVE=${HOME}/Completed/Zips/ROMs/PureNexus/${DEVICE}
             fi
             ZIP_FORMAT=pure_nexus_${DEVICE}-*.zip ;;
-         # "pn-mod")
-         #    SOURCE_DIR=${ANDROID_DIR}/ROMs/PN-Mod
-         #    ZIP_MOVE=${HOME}/Completed/Zips/ROMs/PureNexusMod/${DEVICE}
-         #    ZIP_FORMAT=pure_nexus_${DEVICE}-*.zip ;;
+         "pn-mod")
+            SOURCE_DIR=${ANDROID_DIR}/ROMs/PN-Mod
+            ZIP_MOVE=${HOME}/Completed/Zips/ROMs/PureNexusMod/${DEVICE}
+            ZIP_FORMAT=pnmod_nexus_${DEVICE}-*.zip ;;
       esac
    fi
 
