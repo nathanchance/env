@@ -13,7 +13,7 @@
 # --------
 # Examples
 # --------
-# $ . rom.sh px angler sync
+# $ . rom.sh pure angler sync
 # $ . rom.sh du shamu nosync
 # $ . rom.sh me
 # $ . rom.sh all du jdizzle
@@ -92,9 +92,9 @@ function compile() {
    # ----------
    # Parameters
    # ----------
-   # Parameter 1: ROM to build (currently AICP, AOSiP, Dirty Unicorns, Pure Experience, PureNexus Mod ResurrectionRemix, and Screw'd)
-   # Parameter 2: Device (eg. angler, bullhead, shamu); not necessary for RR
-   # Parameter 3: Pure Experience test or PureNexus Mod build or a personalized Dirty Unicorns build (omit if neither applies)
+   # Parameter 1: ROM to build (currently AOSiP, Dirty Unicorns, Pure, and PureNexus Mod)
+   # Parameter 2: Device (eg. angler, bullhead, shamu)
+   # Parameter 3: Pure test or PureNexus Mod build or a personalized Dirty Unicorns build (omit if neither applies)
 
    # Unassign flags and reset DU_BUILD_TYPE, PURE_BUILD_TYPE, and LOCALVERSION
    export DU_BUILD_TYPE=
@@ -115,7 +115,7 @@ function compile() {
          ROM=${1}
       else
          echo "ROM selection"
-         echo "   1. Pure Experience"
+         echo "   1. Pure"
          echo "   2. PureNexus Mod"
          echo "   3. Dirty Unicorns"
          echo "   4. AOSiP"
@@ -124,7 +124,7 @@ function compile() {
 
          case ${ROM_NUM} in
             "1")
-               ROM=px ;;
+               ROM=pure ;;
             "2")
                ROM=pn-mod ;;
             "3")
@@ -180,8 +180,8 @@ function compile() {
                         export DU_BUILD_TYPE=ASYLUM ;;
                   esac ;;
 
-               # And it's PX, we are running a test build
-               "px")
+               # And it's Pure, we are running a test build
+               "pure")
                   TEST=true ;;
             esac
          fi
@@ -202,7 +202,7 @@ function compile() {
 
    if [[ ${PERSONAL} = true ]]; then
       export PURE_BUILD_TYPE=CHANCELLOR
-      SOURCE_DIR=${ANDROID_DIR}/ROMs/PX
+      SOURCE_DIR=${ANDROID_DIR}/ROMs/Pure
       ZIP_MOVE=${HOME}/Completed/Zips/ROMs/Me
       ZIP_FORMAT=pure_${DEVICE}-7*.zip
 
@@ -222,12 +222,12 @@ function compile() {
                ZIP_MOVE=${HOME}/Completed/Zips/ROMs/DirtyUnicorns/${DEVICE}
                ZIP_FORMAT=DU_${DEVICE}_*.zip
             fi ;;
-         "px")
-            SOURCE_DIR=${ANDROID_DIR}/ROMs/PX
+         "pure")
+            SOURCE_DIR=${ANDROID_DIR}/ROMs/Pure
             if [[ ${TEST} = true ]]; then
-               ZIP_MOVE=${HOME}/Completed/Zips/ROMs/PureExperience/.tests/${DEVICE}
+               ZIP_MOVE=${HOME}/Completed/Zips/ROMs/Pure/.tests/${DEVICE}
             else
-               ZIP_MOVE=${HOME}/Completed/Zips/ROMs/PureExperience/${DEVICE}
+               ZIP_MOVE=${HOME}/Completed/Zips/ROMs/Pure/${DEVICE}
             fi
             ZIP_FORMAT=pure_${DEVICE}-7*.zip ;;
          "pn-mod")
