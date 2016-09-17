@@ -129,16 +129,30 @@ function compile() {
 
    else
       case "${VERSION}" in
-         "release")
+         "n-release")
             # KER_BRANCH: Branch of kernel to compile
             KER_BRANCH=release
             # ZIP_MOVE: Folder that holds completed zips
-            ZIP_MOVE=${HOME}/Completed/Zips/Kernels/${DEVICE}/Release ;;
-         "staging")
+            ZIP_MOVE=${HOME}/Completed/Zips/Kernels/${DEVICE}/N-Release ;;
+         "n-staging")
             # KER_BRANCH: Branch of kernel to compile
             KER_BRANCH=staging
             # ZIP_MOVE: Folder that holds completed zips
-            ZIP_MOVE=${HOME}/Completed/Zips/Kernels/${DEVICE}/Staging ;;
+            ZIP_MOVE=${HOME}/Completed/Zips/Kernels/${DEVICE}/N-Staging ;;
+         "m-release")
+            # Different source directory
+            SOURCE_DIR=${RESOURCE_DIR}/Ninja-Legacy
+            # KER_BRANCH: Branch of kernel to compile
+            KER_BRANCH=m-release
+            # ZIP_MOVE: Folder that holds completed zips
+            ZIP_MOVE=${HOME}/Completed/Zips/Kernels/${DEVICE}/M-Release ;;
+         "m-staging")
+            # Different source directory
+            SOURCE_DIR=${RESOURCE_DIR}/Ninja-Legacy
+            # KER_BRANCH: Branch of kernel to compile
+            KER_BRANCH=m-staging
+            # ZIP_MOVE: Folder that holds completed zips
+            ZIP_MOVE=${HOME}/Completed/Zips/Kernels/${DEVICE}/M-Staging ;;
       esac
    fi
 
@@ -383,16 +397,31 @@ function compile() {
    echo -e "\a"
 }
 
-# If the first parameter is both
-if [[ "${1}" == "both" ]]; then
-   # Run the two kernel builds
-   compile release ${2} ${3}
-   compile staging ${2}
+case ${1} in
+   "both-beta")
+      # Run the two kernel builds
+      compile n-staging ${2} ${3}
+      compile m-staging ${2} ;;
+   "both-stable")
+      # Run the two kernel builds
+      compile n-release ${2} ${3}
+      compile m-release ${2} ;;
+   "both-n")
+      # Run the two kernel builds
+      compile n-release ${2} ${3}
+      compile n-staging ${2} ;;
+   "both-m")
+      # Run the two kernel builds
+      compile m-release ${2} ${3}
+      compile m-staging ${2} ;;
+   "all")
+      # Run all four kernel builds
+      compile n-release ${2} ${3}
+      compile m-release ${2}
+      compile n-staging ${2}
+      compile m-staging ${2} ;;
+   *)
+      compile ${1} ${2} ${3} ;;
+esac
 
-   cd ${HOME}
-   cat ${LOG}
-
-# Otherwise, pass parameters to compile function
-else
-   compile ${1} ${2} ${3}
-fi
+cd ${HOME}
