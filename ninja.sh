@@ -75,15 +75,55 @@ function compile() {
    ANDROID_DIR=${HOME}
    # RESOURCE_DIR: Directory that holds all kernel related files
    RESOURCE_DIR=${ANDROID_DIR}/Kernels
+   # If we are running a personal build, use different branches
+   if [[ ${PERSONAL} = true ]]; then
+      # SOURCE_DIR: Folder that holds the source
+      SOURCE_DIR=${RESOURCE_DIR}/Ninja-Angler
+      # KER_BRANCH: Branch of kernel to compile
+      KER_BRANCH=personal
+      # ZIP_MOVE: Folder that holds completed zips
+      ZIP_MOVE=${HOME}/Completed/Zips/Kernels/Me
+   else
+      case "${VERSION}" in
+         "n-release")
+            # SOURCE_DIR: Folder that holds the source
+            SOURCE_DIR=${RESOURCE_DIR}/Ninja-Angler
+            # KER_BRANCH: Branch of kernel to compile
+            KER_BRANCH=release
+            # ZIP_MOVE: Folder that holds completed zips
+            ZIP_MOVE=${HOME}/Completed/Zips/Kernels/${DEVICE}/N-Release ;;
+         "n-staging")
+            # SOURCE_DIR: Folder that holds the source
+            SOURCE_DIR=${RESOURCE_DIR}/Ninja-Angler
+            # KER_BRANCH: Branch of kernel to compile
+            KER_BRANCH=staging
+            # ZIP_MOVE: Folder that holds completed zips
+            ZIP_MOVE=${HOME}/Completed/Zips/Kernels/${DEVICE}/N-Staging ;;
+         "m-release")
+            # SOURCE_DIR: Folder that holds the source
+            SOURCE_DIR=${RESOURCE_DIR}/Ninja-Legacy
+            # KER_BRANCH: Branch of kernel to compile
+            KER_BRANCH=m-release
+            # ZIP_MOVE: Folder that holds completed zips
+            ZIP_MOVE=${HOME}/Completed/Zips/Kernels/${DEVICE}/M-Release ;;
+         "m-staging")
+            # Different source directory
+            SOURCE_DIR=${RESOURCE_DIR}/Ninja-Legacy
+            # KER_BRANCH: Branch of kernel to compile
+            KER_BRANCH=m-staging
+            # ZIP_MOVE: Folder that holds completed zips
+            ZIP_MOVE=${HOME}/Completed/Zips/Kernels/${DEVICE}/M-Staging ;;
+      esac
+   fi
    # SOURCE_DIR: Directory that holds kernel source
-   case ${2} in
-      "angler")
-         DEVICE=${2}
-         SOURCE_DIR=${RESOURCE_DIR}/Ninja-Angler ;;
-      "bullhead")
-         DEVICE=${2}
-         SOURCE_DIR=${RESOURCE_DIR}/Ninja-Bullhead ;;
-   esac
+   # case ${2} in
+   #    "angler")
+   #       DEVICE=${2}
+   #       SOURCE_DIR=${RESOURCE_DIR}/Ninja-Angler ;;
+   #    "bullhead")
+   #       DEVICE=${2}
+   #       SOURCE_DIR=${RESOURCE_DIR}/Ninja-Bullhead ;;
+   # esac
    # TOOLCHAIN_SOURCE_DIR: Directory that holds toolchain
    case ${PERSONAL} in
       "true")
@@ -119,42 +159,6 @@ function compile() {
    KERNEL=Image.gz-dtb
    # DEFCONFIG: Name of defconfig file
    DEFCONFIG=ninja_defconfig
-
-   # If we are running a personal build, use different branches
-   if [[ ${PERSONAL} = true ]]; then
-      # KER_BRANCH: Branch of kernel to compile
-      KER_BRANCH=personal
-      # ZIP_MOVE: Folder that holds completed zips
-      ZIP_MOVE=${HOME}/Completed/Zips/Kernels/Me
-
-   else
-      case "${VERSION}" in
-         "n-release")
-            # KER_BRANCH: Branch of kernel to compile
-            KER_BRANCH=release
-            # ZIP_MOVE: Folder that holds completed zips
-            ZIP_MOVE=${HOME}/Completed/Zips/Kernels/${DEVICE}/N-Release ;;
-         "n-staging")
-            # KER_BRANCH: Branch of kernel to compile
-            KER_BRANCH=staging
-            # ZIP_MOVE: Folder that holds completed zips
-            ZIP_MOVE=${HOME}/Completed/Zips/Kernels/${DEVICE}/N-Staging ;;
-         "m-release")
-            # Different source directory
-            SOURCE_DIR=${RESOURCE_DIR}/Ninja-Legacy
-            # KER_BRANCH: Branch of kernel to compile
-            KER_BRANCH=m-release
-            # ZIP_MOVE: Folder that holds completed zips
-            ZIP_MOVE=${HOME}/Completed/Zips/Kernels/${DEVICE}/M-Release ;;
-         "m-staging")
-            # Different source directory
-            SOURCE_DIR=${RESOURCE_DIR}/Ninja-Legacy
-            # KER_BRANCH: Branch of kernel to compile
-            KER_BRANCH=m-staging
-            # ZIP_MOVE: Folder that holds completed zips
-            ZIP_MOVE=${HOME}/Completed/Zips/Kernels/${DEVICE}/M-Staging ;;
-      esac
-   fi
 
 
 
