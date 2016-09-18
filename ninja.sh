@@ -68,6 +68,20 @@ function compile() {
 
 
 
+   # ---------
+   # Variables
+   # ---------
+   # THREAD: Number of available threads on computer
+   THREAD=-j$(grep -c ^processor /proc/cpuinfo)
+   # KERNEL: File name of completed image
+   KERNEL=Image.gz-dtb
+   # DEFCONFIG: Name of defconfig file
+   DEFCONFIG=ninja_defconfig
+   # DEVICE: device we are compiling for
+   DEVICE=angler
+
+
+
    # -----------
    # Directories
    # -----------
@@ -124,8 +138,6 @@ function compile() {
    #       DEVICE=${2}
    #       SOURCE_DIR=${RESOURCE_DIR}/Ninja-Bullhead ;;
    # esac
-   # DEVICE: device we are compiling for
-   DEVICE=angler
    # TOOLCHAIN_SOURCE_DIR: Directory that holds toolchain
    case ${PERSONAL} in
       "true")
@@ -150,17 +162,6 @@ function compile() {
    ZIMAGE_DIR=${SOURCE_DIR}/arch/arm64/boot
    # ANYKERNEL_DIR: Directory that holds AnyKernel source
    ANYKERNEL_DIR=${SOURCE_DIR}/anykernel
-
-
-   # ---------
-   # Variables
-   # ---------
-   # THREAD: Number of available threads on computer
-   THREAD=-j$(grep -c ^processor /proc/cpuinfo)
-   # KERNEL: File name of completed image
-   KERNEL=Image.gz-dtb
-   # DEFCONFIG: Name of defconfig file
-   DEFCONFIG=ninja_defconfig
 
 
 
