@@ -124,6 +124,8 @@ function compile() {
    #       DEVICE=${2}
    #       SOURCE_DIR=${RESOURCE_DIR}/Ninja-Bullhead ;;
    # esac
+   # DEVICE: device we are compiling for
+   DEVICE=angler
    # TOOLCHAIN_SOURCE_DIR: Directory that holds toolchain
    case ${PERSONAL} in
       "true")
@@ -404,28 +406,28 @@ function compile() {
 case ${1} in
    "both-beta")
       # Run the two kernel builds
-      compile n-staging ${2} ${3}
-      compile m-staging ${2} ;;
+      compile n-staging ${2}
+      compile m-staging ;;
    "both-stable")
       # Run the two kernel builds
-      compile n-release ${2} ${3}
-      compile m-release ${2} ;;
+      compile n-release ${2}
+      compile m-release ;;
    "both-n")
       # Run the two kernel builds
-      compile n-release ${2} ${3}
-      compile n-staging ${2} ;;
+      compile n-release ${2}
+      compile n-staging ;;
    "both-m")
       # Run the two kernel builds
-      compile m-release ${2} ${3}
-      compile m-staging ${2} ;;
+      compile m-release ${2}
+      compile m-staging ;;
    "all")
       # Run all four kernel builds
-      compile n-release ${2} ${3}
-      compile m-release ${2}
-      compile n-staging ${2}
-      compile m-staging ${2} ;;
+      compile n-release ${2}
+      compile m-release
+      compile n-staging
+      compile m-staging ;;
    *)
-      compile ${1} ${2} ${3} ;;
+      compile ${1} ${2} ;;
 esac
 
 cd ${HOME}
