@@ -157,7 +157,8 @@ function compile() {
 
    # Add line to compilation log
    echo -e "$( TZ=MST date +%H:%M:%S ): ${BASH_SOURCE} ${DEVICE}" >> ${LOG}
-   echo -e "${BUILD_RESULT_STRING} IN $( echo $((${END}-${START})) | awk '{print int($1/60)" MINUTES AND "int($1%60)" SECONDS"}' )\n" >> ${LOG}
+   echo -e "${BUILD_RESULT_STRING} IN $( echo $((${END}-${START})) | awk '{print int($1/60)" MINUTES AND "int($1%60)" SECONDS"}' )" >> ${LOG}
+   echo -e "FILE LOCATION: $( ls "${ZIP_MOVE}"/${UPLD_FILE} )\n" >> ${LOG}
 
    echo -e "\a"
 }

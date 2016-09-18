@@ -233,7 +233,7 @@ function compile() {
          "pn-mod")
             SOURCE_DIR=${ANDROID_DIR}/ROMs/PN-Mod
             ZIP_MOVE=${HOME}/Completed/Zips/ROMs/PureNexusMod/${DEVICE}
-            ZIP_FORMAT=pnmod_nexus_${DEVICE}-*.zip ;;
+            ZIP_FORMAT=puremod_nexus_${DEVICE}-*.zip ;;
       esac
    fi
 
@@ -396,7 +396,8 @@ function compile() {
       echo -e "$( TZ=MST date +%H:%M:%S ): ${BASH_SOURCE} ${ROM} ${DEVICE}" >> ${LOG}
    fi
 
-   echo -e "${BUILD_RESULT_STRING} IN $( echo $((${END}-${START})) | awk '{print int($1/60)" MINUTES AND "int($1%60)" SECONDS"}' )\n" >> ${LOG}
+   echo -e "${BUILD_RESULT_STRING} IN $( echo $((${END}-${START})) | awk '{print int($1/60)" MINUTES AND "int($1%60)" SECONDS"}' )" >> ${LOG}
+   echo -e "FILE LOCATION: $( ls ${ZIP_MOVE}/${ZIP_FORMAT} )\n" >> ${LOG}
 
    echo -e "\a"
 }

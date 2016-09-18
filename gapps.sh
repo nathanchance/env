@@ -221,6 +221,7 @@ echo -e ${RED}"DURATION: $( echo $((${END}-${START})) | awk '{print int($1/60)" 
 
 # Add line to compile log
 echo -e "$( TZ=MST date +%H:%M:%S ): ${BASH_SOURCE} ${TYPE}" >> ${LOG}
-echo -e "${BUILD_RESULT_STRING} IN $(echo $((${END}-${START})) | awk '{print int($1/60)" MINUTES AND "int($1%60)" SECONDS"}')\n" >> ${LOG}
+echo -e "${BUILD_RESULT_STRING} IN $(echo $((${END}-${START})) | awk '{print int($1/60)" MINUTES AND "int($1%60)" SECONDS"}')" >> ${LOG}
+echo -e "FILE LOCATION: $( ls ${ZIP_MOVE}/${ZIP_BEG}*.zip )\n" >> ${LOG}
 
 echo -e "\a"
