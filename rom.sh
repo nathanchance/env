@@ -13,7 +13,7 @@
 # --------
 # Examples
 # --------
-# $ . rom.sh pure angler sync
+# $ . rom.sh pn angler sync
 # $ . rom.sh du shamu nosync
 # $ . rom.sh me
 # $ . rom.sh all du jdizzle
@@ -43,62 +43,19 @@ function newLine() {
    echo -e ""
 }
 
-# Creates a changelog in the upload directory
-function changelog() {
-   # ----------
-   # Parameters
-   # ----------
-   # Parameter 1: The source directory
-   # Parameter 2: The upload directory
-   REPO_DIR=${1}
-   FILE_MOVE=${2}
-
-   export CHANGELOG="${FILE_MOVE}"/changelog.txt
-
-   # If a changelog exists, remove it
-   if [[ -f "${CHANGELOG}" ]]; then
-   	rm -vrf "${CHANGELOG}"
-   fi
-
-   echo "Making ${CHANGELOG}"
-   touch "${CHANGELOG}"
-
-   echoText "GENERATING CHANGELOG"
-
-   cd ${REPO_DIR}
-
-   # Echos the git log to the changelog file for the past 10 days
-   for i in $( seq 10 ); do
-      export AFTER_DATE=$( TZ=MST date --date="$i days ago" +%m-%d-%Y )
-      k=$( expr $i - 1 )
-   	export UNTIL_DATE=$( TZ=MST date --date="$k days ago" +%m-%d-%Y )
-
-   	# Line with after --- until was too long for a small ListView
-   	echo '=======================' >> "${CHANGELOG}";
-   	echo  "     "${UNTIL_DATE}     >> "${CHANGELOG}";
-   	echo '=======================' >> "${CHANGELOG}";
-   	echo >> "${CHANGELOG}";
-
-   	# Cycle through every repo to find commits between 2 dates
-   	repo forall -pc 'git log --oneline --after=${AFTER_DATE} --until=${UNTIL_DATE}' >> "${CHANGELOG}"
-   	echo >> "${CHANGELOG}";
-   done
-
-   sed -i 's/project/   */g' "${CHANGELOG}"
-}
 
 # Compilation function
 function compile() {
    # ----------
    # Parameters
    # ----------
-   # Parameter 1: ROM to build (currently AOSiP, Dirty Unicorns, Pure, and PureNexus Mod)
+   # Parameter 1: ROM to build (currently AOSiP, Dirty Unicorns, Pure Nexus, and Pure Nexus Mod)
    # Parameter 2: Device (eg. angler, bullhead, shamu)
-   # Parameter 3: Pure test or PureNexus Mod build or a personalized Dirty Unicorns build (omit if neither applies)
+   # Parameter 3: Pure Nexus test or Pure Nexus Mod build or a personalized Dirty Unicorns build (omit if neither applies)
 
-   # Unassign flags and reset DU_BUILD_TYPE, PURE_BUILD_TYPE, and LOCALVERSION
+   # Unassign flags and reset DU_BUILD_TYPE, ROM_BUILD_TYPE, and LOCALVERSION
    export DU_BUILD_TYPE=
-   export PURE_BUILD_TYPE=
+   export ROM_BUILD_TYPE=
    export LOCALVERSION=
    PERSON=
    TEST=false
@@ -111,28 +68,36 @@ function compile() {
       DEVICE=angler
 
    else
+      # If there is a first parameter defined, this is the ROM variable
       if [[ -n ${1} ]]; then
          ROM=${1}
+      # Otherwise, prompt for it
       else
          echo "ROM selection"
-         echo "   1. Pure"
-         echo "   2. PureNexus Mod"
+         echo "   1. Pure Nexus"
+         echo "   2. Pure Nexus Mod"
          echo "   3. Dirty Unicorns"
          echo "   4. AOSiP"
+         echo "   5. MapleAOSP"
+         echo "   6. SimpleAOSP"
 
          read -p "Which ROM would you like to build? " ROM_NUM
 
          case ${ROM_NUM} in
             "1")
-               ROM=pure ;;
+               ROM=pn ;;
             "2")
                ROM=pn-mod ;;
             "3")
                ROM=du ;;
             "4")
                ROM=aosip ;;
+            "5")
+               ROM=maple ;;
+            "6")
+               ROM=saosp ;;
             *)
-               echo "Invalid selection, please run the script again" && return
+               echo "Invalid selection, please run the script again" && exit
          esac
       fi
 
@@ -141,8 +106,10 @@ function compile() {
          DEVICE=shamu
 
       else
+         # If there is a second parameter defined, this is the device variable
          if [[ -n ${2} ]]; then
             DEVICE=${2}
+         # Otherwise, prompt for it
          else
             echo "Device selection"
             echo "   1. Angler"
@@ -159,13 +126,11 @@ function compile() {
                "3")
                   DEVICE=shamu ;;
                *)
-                  echo "Invalid selection, please run the script again" && return
+                  echo "Invalid selection, please run the script again" && exit
             esac
-
-            read DEVICE
          fi
 
-         # If there is a third parameter
+         # If there is a third parameter defined, we are doing something extra with a ROM
          if [[ -n ${3} ]]; then
             # And it's DU, we are running a personalized build
             case "${ROM}" in
@@ -180,8 +145,8 @@ function compile() {
                         export DU_BUILD_TYPE=ASYLUM ;;
                   esac ;;
 
-               # And it's Pure, we are running a test build
-               "pure")
+               # And it's Pure Nexus, we are running a test build
+               "pn")
                   TEST=true ;;
             esac
          fi
@@ -200,13 +165,15 @@ function compile() {
    # ZIP_FORMAT: The format of the zip file in the out directory for moving to ZIP_MOVE
    ANDROID_DIR=${HOME}
 
+   # If we are running a personal build, define the above variable specially
    if [[ ${PERSONAL} = true ]]; then
-      export PURE_BUILD_TYPE=CHANCELLOR
-      SOURCE_DIR=${ANDROID_DIR}/ROMs/Pure
+      export ROM_BUILD_TYPE=CHANCELLOR
+      SOURCE_DIR=${ANDROID_DIR}/ROMs/PN
       ZIP_MOVE=${HOME}/Completed/Zips/ROMs/Me
-      ZIP_FORMAT=pure_${DEVICE}-7*.zip
+      ZIP_FORMAT=pure_nexus_${DEVICE}-7*.zip
 
    else
+      # Otherwise, define them for our various ROMs
       case "${ROM}" in
          "aosip")
             SOURCE_DIR=${ANDROID_DIR}/ROMs/AOSiP
@@ -222,23 +189,31 @@ function compile() {
                ZIP_MOVE=${HOME}/Completed/Zips/ROMs/DirtyUnicorns/${DEVICE}
                ZIP_FORMAT=DU_${DEVICE}_*.zip
             fi ;;
-         "pure")
-            SOURCE_DIR=${ANDROID_DIR}/ROMs/Pure
+         "maple")
+            SOURCE_DIR=${ANDROID_DIR}/ROMs/MapleAOSP
+            ZIP_MOVE=${HOME}/Completed/Zips/ROMs/MapleAOSP/${DEVICE}
+            ZIP_FORMAT=MapleAOSP*.zip ;;
+         "pn")
+            SOURCE_DIR=${ANDROID_DIR}/ROMs/PN
             if [[ ${TEST} = true ]]; then
-               ZIP_MOVE=${HOME}/Completed/Zips/ROMs/Pure/.tests/${DEVICE}
+               ZIP_MOVE=${HOME}/Completed/Zips/ROMs/PureNexus/.tests/${DEVICE}
             else
-               ZIP_MOVE=${HOME}/Completed/Zips/ROMs/Pure/${DEVICE}
+               ZIP_MOVE=${HOME}/Completed/Zips/ROMs/PureNexus/${DEVICE}
             fi
-            ZIP_FORMAT=pure_${DEVICE}-7*.zip ;;
+            ZIP_FORMAT=pure_nexus_${DEVICE}-7*.zip ;;
          "pn-mod")
             SOURCE_DIR=${ANDROID_DIR}/ROMs/PN-Mod
             ZIP_MOVE=${HOME}/Completed/Zips/ROMs/PureNexusMod/${DEVICE}
             ZIP_FORMAT=puremod_nexus_${DEVICE}-*.zip ;;
+         "saosp")
+            SOURCE_DIR=${ANDROID_DIR}/ROMs/SAOSP
+            ZIP_MOVE=${HOME}/Completed/Zips/ROMs/SAOSP/${DEVICE}
+            ZIP_FORMAT=saosp_${DEVICE}*.zip ;;
       esac
    fi
 
    OUT_DIR=${SOURCE_DIR}/out/target/product/${DEVICE}
-
+   THREADS_FLAG=-j$( grep -c ^processor /proc/cpuinfo )
 
 
    # Export the LOG variable for other files to use (I currently handle this via .bashrc)
@@ -269,14 +244,7 @@ function compile() {
    # Start syncing the latest sources
    echoText "SYNCING LATEST SOURCES"; newLine
 
-   repo sync --force-sync -j$(grep -c ^processor /proc/cpuinfo)
-
-
-
-   # If we are running a personal build, make sure to include su
-   # if [[ ${PERSONAL} = true ]]; then
-   #    . update-su.sh
-   # fi
+   repo sync --force-sync ${THREADS_FLAG}
 
 
 
@@ -290,18 +258,21 @@ function compile() {
    # Prepare device
    echoText "PREPARING $( echo ${DEVICE} | awk '{print toupper($0)}' )"; newLine
 
-   if [[ "${ROM}" == "beltz" ]]; then
-      lunch androidx_${DEVICE}-userdebug
-   else
-      breakfast ${DEVICE}
-   fi
+   case "${ROM}" in
+      "maple")
+         lunch maple_${DEVICE}-userdebug ;;
+      "saosp")
+         lunch saosp_${DEVICE}-user ;;
+      *)
+         breakfast ${DEVICE} ;;
+   esac
 
 
 
    # Clean up
    echoText "CLEANING UP OUT DIRECTORY"; newLine
 
-   mka clobber
+   make clobber
 
 
 
@@ -309,7 +280,13 @@ function compile() {
    echoText "MAKING ZIP FILE"; newLine
 
    NOW=$( TZ=MST date +"%Y-%m-%d-%S" )
-   time mka bacon 2>&1 | tee ${LOGDIR}/Compilation/${ROM}_${DEVICE}-${NOW}.log
+
+   case "${ROM}" in
+      "saosp")
+         time make otapackage ${THREADS_FLAG} 2>&1 | tee ${LOGDIR}/Compilation/${ROM}_${DEVICE}-${NOW}.log ;;
+      *)
+         time mka bacon 2>&1 | tee ${LOGDIR}/Compilation/${ROM}_${DEVICE}-${NOW}.log ;;
+   esac
 
 
 
@@ -341,10 +318,6 @@ function compile() {
 
 
 
-      newLine; changelog ${SOURCE_DIR} "${ZIP_MOVE}"
-
-
-
       # Upload the files
       # echoText "UPLOADING FILES"; newLine
 
@@ -354,9 +327,7 @@ function compile() {
       newLine; echoText "CLEANING UP OUT DIRECTORY"; newLine
 
       mka clobber
-      # if [[ ${PERSONAL} = true ]]; then
-      #    rm -rf ${SOURCE_DIR}/device/huawei/angler/su
-      # fi
+
 
 
       # Go back home
@@ -385,7 +356,12 @@ function compile() {
    echo -e ${RED}"TIME FINISHED: $( TZ=MST date +%D\ %r | awk '{print toupper($0)}' )"
    echo -e ${RED}"DURATION: $( echo $((${END}-${START})) | awk '{print int($1/60)" MINUTES AND "int($1%60)" SECONDS"}' )"${RST}; newLine
 
-   # Add line to compile log
+
+
+   # Add line to compile log in the following format:
+   # DATE: BASH_SOURCE (EXTRA STUFF)
+   # BUILD RESULT IN X MINUTES AND Y SECONDS
+   # FILE LOCATION: PATH
    if [[ ${PERSONAL} = true ]]; then
       echo -e "$( TZ=MST date +%H:%M:%S ): ${BASH_SOURCE} me" >> ${LOG}
    elif [[ ${TEST} = true ]]; then
@@ -402,7 +378,7 @@ function compile() {
    echo -e "\a"
 }
 
-# If the first parameter to the rom.sh script is "normal" or "release" followed by the rom type, we are running four or seven builds for the devices we support; otherwise, it is just one build with the parameters given
+# If the first parameter to the rom.sh script is "normal" or "release" followed by the rom type, we are running four or seven builds for the devices we support
 if [[ "${1}" == "normal" || "${1}" == "release" ]]; then
    case "${1}" in
       "normal")
@@ -417,6 +393,7 @@ if [[ "${1}" == "normal" || "${1}" == "release" ]]; then
 
    cd ${HOME}
    cat ${LOG}
+# Otherwise, it is just one build with the parameters given
 else
    compile ${1} ${2} ${3} ${4}
 fi
