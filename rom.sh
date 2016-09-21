@@ -53,12 +53,8 @@ function compile() {
    # Parameter 2: Device (eg. angler, bullhead, shamu)
    # Parameter 3: Pure Nexus test or Pure Nexus Mod build or a personalized Dirty Unicorns build (omit if neither applies)
 
-   # Unassign flags and reset DU_BUILD_TYPE, ROM_BUILD_TYPE, and LOCALVERSION
-   export DU_BUILD_TYPE=
+   # Unassign flags and reset ROM_BUILD_TYPE
    export ROM_BUILD_TYPE=
-   export LOCALVERSION=
-   PERSON=
-   TEST=false
    PERSONAL=false
    SUCCESS=false
 
@@ -101,55 +97,28 @@ function compile() {
          esac
       fi
 
-      # If the ROM is RR, its device is only Shamu
-      if [[ "${ROM}" == "rr" ]]; then
-         DEVICE=shamu
-
-      else
          # If there is a second parameter defined, this is the device variable
-         if [[ -n ${2} ]]; then
-            DEVICE=${2}
-         # Otherwise, prompt for it
-         else
-            echo "Device selection"
-            echo "   1. Angler"
-            echo "   2. Bullhead"
-            echo "   3. Shamu"
+      if [[ -n ${2} ]]; then
+         DEVICE=${2}
+      # Otherwise, prompt for it
+      else
+         echo "Device selection"
+         echo "   1. Angler"
+         echo "   2. Bullhead"
+         echo "   3. Shamu"
 
-            read -p "Which device would you like to build for? " DEVICE_NUM
+         read -p "Which device would you like to build for? " DEVICE_NUM
 
-            case ${DEVICE_NUM} in
-               "1")
-                  DEVICE=angler ;;
-               "2")
-                  DEVICE=bullhead ;;
-               "3")
-                  DEVICE=shamu ;;
-               *)
-                  echo "Invalid selection, please run the script again" && exit
-            esac
-         fi
-
-         # If there is a third parameter defined, we are doing something extra with a ROM
-         if [[ -n ${3} ]]; then
-            # And it's DU, we are running a personalized build
-            case "${ROM}" in
-               "du")
-                  PERSON=${3}
-                  case "${PERSON}" in
-                     "alcolawl")
-                        export DU_BUILD_TYPE=ALCOLAWL ;;
-                     "hmhb")
-                        export DU_BUILD_TYPE=DIRTY-DEEDS ;;
-                     "jdizzle")
-                        export DU_BUILD_TYPE=ASYLUM ;;
-                  esac ;;
-
-               # And it's Pure Nexus, we are running a test build
-               "pn")
-                  TEST=true ;;
-            esac
-         fi
+         case ${DEVICE_NUM} in
+            "1")
+               DEVICE=angler ;;
+            "2")
+               DEVICE=bullhead ;;
+            "3")
+               DEVICE=shamu ;;
+            *)
+               echo "Invalid selection, please run the script again" && exit
+         esac
       fi
    fi
 
@@ -180,26 +149,16 @@ function compile() {
             ZIP_MOVE=${HOME}/Completed/Zips/ROMs/AOSiP/${DEVICE}
             ZIP_FORMAT=AOSiP-*-${DEVICE}-*.zip ;;
          "du")
-            if [[ -n ${PERSON} ]]; then
-               SOURCE_DIR=${ANDROID_DIR}/ROMs/DU
-               ZIP_MOVE=${HOME}/Completed/Zips/ROMs/.special/.${PERSON}
-               ZIP_FORMAT=DU_${DEVICE}_*.zip
-            else
-               SOURCE_DIR=${ANDROID_DIR}/ROMs/DU
-               ZIP_MOVE=${HOME}/Completed/Zips/ROMs/DirtyUnicorns/${DEVICE}
-               ZIP_FORMAT=DU_${DEVICE}_*.zip
-            fi ;;
+            SOURCE_DIR=${ANDROID_DIR}/ROMs/DU
+            ZIP_MOVE=${HOME}/Completed/Zips/ROMs/DirtyUnicorns/${DEVICE}
+            ZIP_FORMAT=DU_${DEVICE}_*.zip ;;
          "maple")
             SOURCE_DIR=${ANDROID_DIR}/ROMs/MapleAOSP
             ZIP_MOVE=${HOME}/Completed/Zips/ROMs/MapleAOSP/${DEVICE}
             ZIP_FORMAT=MapleAOSP*.zip ;;
          "pn")
             SOURCE_DIR=${ANDROID_DIR}/ROMs/PN
-            if [[ ${TEST} = true ]]; then
-               ZIP_MOVE=${HOME}/Completed/Zips/ROMs/PureNexus/.tests/${DEVICE}
-            else
-               ZIP_MOVE=${HOME}/Completed/Zips/ROMs/PureNexus/${DEVICE}
-            fi
+            ZIP_MOVE=${HOME}/Completed/Zips/ROMs/PureNexus/${DEVICE}
             ZIP_FORMAT=pure_nexus_${DEVICE}-7*.zip ;;
          "pn-mod")
             SOURCE_DIR=${ANDROID_DIR}/ROMs/PN-Mod
@@ -263,6 +222,8 @@ function compile() {
          lunch maple_${DEVICE}-userdebug ;;
       "saosp")
          lunch saosp_${DEVICE}-user ;;
+      "aosip")
+         lunch aosip_${DEVICE}-userdebug ;;
       *)
          breakfast ${DEVICE} ;;
    esac
@@ -284,6 +245,8 @@ function compile() {
    case "${ROM}" in
       "saosp")
          time make otapackage ${THREADS_FLAG} 2>&1 | tee ${LOGDIR}/Compilation/${ROM}_${DEVICE}-${NOW}.log ;;
+      "aosip")
+         time make kronic ${THREADS_FLAG} 2>&1 | tee ${LOGDIR}/Compilation/${ROM}_${DEVICE}-${NOW}.log ;;
       *)
          time mka bacon 2>&1 | tee ${LOGDIR}/Compilation/${ROM}_${DEVICE}-${NOW}.log ;;
    esac
@@ -364,10 +327,6 @@ function compile() {
    # FILE LOCATION: PATH
    if [[ ${PERSONAL} = true ]]; then
       echo -e "$( TZ=MST date +%H:%M:%S ): ${BASH_SOURCE} me" >> ${LOG}
-   elif [[ ${TEST} = true ]]; then
-      echo -e "$( TZ=MST date +%H:%M:%S ): ${BASH_SOURCE} ${ROM} test ${DEVICE}" >> ${LOG}
-   elif [[ -n ${PERSON} ]]; then
-      echo -e "$( TZ=MST date +%H:%M:%S ): ${BASH_SOURCE} ${ROM} ${PERSON}" >> ${LOG}
    else
       echo -e "$( TZ=MST date +%H:%M:%S ): ${BASH_SOURCE} ${ROM} ${DEVICE}" >> ${LOG}
    fi
@@ -388,12 +347,12 @@ if [[ "${1}" == "normal" || "${1}" == "release" ]]; then
    esac
 
    for DEVICE in ${DEVICES}; do
-      compile ${2} ${DEVICE} ${3} ${4}
+      compile ${2} ${DEVICE}
    done
 
    cd ${HOME}
    cat ${LOG}
 # Otherwise, it is just one build with the parameters given
 else
-   compile ${1} ${2} ${3} ${4}
+   compile ${1} ${2}
 fi
