@@ -51,10 +51,9 @@ function compile() {
    # ----------
    # Parameter 1: ROM to build (currently AOSiP, Dirty Unicorns, Pure Nexus, and Pure Nexus Mod)
    # Parameter 2: Device (eg. angler, bullhead, shamu)
-   # Parameter 3: Pure Nexus test or Pure Nexus Mod build or a personalized Dirty Unicorns build (omit if neither applies)
 
    # Unassign flags and reset ROM_BUILD_TYPE
-   export ROM_BUILD_TYPE=
+   unset ROM_BUILD_TYPE
    PERSONAL=false
    SUCCESS=false
 
@@ -97,7 +96,7 @@ function compile() {
          esac
       fi
 
-         # If there is a second parameter defined, this is the device variable
+      # If there is a second parameter defined, this is the device variable
       if [[ -n ${2} ]]; then
          DEVICE=${2}
       # Otherwise, prompt for it
@@ -128,7 +127,7 @@ function compile() {
    # Variables
    # ---------
    # ANDROID_DIR: Directory that holds all of the Android files (currently my home directory)
-   # OUT_DIR: Output directory of completed ROM zip after compilation
+   # OUT_DIR: Directory that holds the compiled ROM files
    # SOURCE_DIR: Directory that holds the ROM source
    # ZIP_MOVE: Directory to hold completed ROM zips
    # ZIP_FORMAT: The format of the zip file in the out directory for moving to ZIP_MOVE
@@ -210,13 +209,14 @@ function compile() {
    # Setup the build environment
    echoText "SETTING UP BUILD ENVIRONMENT"; newLine
 
-   . build/envsetup.sh
+   source build/envsetup.sh
 
 
 
    # Prepare device
    echoText "PREPARING $( echo ${DEVICE} | awk '{print toupper($0)}' )"; newLine
 
+   # We have different options for different ROMs (not all use breakfast)
    case "${ROM}" in
       "maple")
          lunch maple_${DEVICE}-userdebug ;;
@@ -230,7 +230,7 @@ function compile() {
 
 
 
-   # Clean up
+   # Clean up from previous compilation
    echoText "CLEANING UP OUT DIRECTORY"; newLine
 
    make clobber
@@ -242,6 +242,7 @@ function compile() {
 
    NOW=$( TZ=MST date +"%Y-%m-%d-%S" )
 
+   # We have different options for different ROMs (not all use mka or bacon)
    case "${ROM}" in
       "saosp")
          time make otapackage ${THREADS_FLAG} 2>&1 | tee ${LOGDIR}/Compilation/${ROM}_${DEVICE}-${NOW}.log ;;
@@ -278,18 +279,6 @@ function compile() {
       newLine; echoText "MOVING FILES TO ZIP_MOVE DIRECTORY"; newLine
 
       mv -v ${OUT_DIR}/*${ZIP_FORMAT}* "${ZIP_MOVE}"
-
-
-
-      # Upload the files
-      # echoText "UPLOADING FILES"; newLine
-
-
-
-      # Clean up out directory to free up space
-      # newLine; echoText "CLEANING UP OUT DIRECTORY"; newLine
-
-      # make clobber
 
 
 
