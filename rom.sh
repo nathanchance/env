@@ -287,9 +287,9 @@ function compile() {
 
 
       # Clean up out directory to free up space
-      newLine; echoText "CLEANING UP OUT DIRECTORY"; newLine
+      # newLine; echoText "CLEANING UP OUT DIRECTORY"; newLine
 
-      mka clobber
+      # make clobber
 
 
 
@@ -323,16 +323,20 @@ function compile() {
 
    # Add line to compile log in the following format:
    # DATE: BASH_SOURCE (EXTRA STUFF)
-   # BUILD RESULT IN X MINUTES AND Y SECONDS
-   # FILE LOCATION: PATH
-   if [[ ${PERSONAL} = true ]]; then
-      echo -e "$( TZ=MST date +%H:%M:%S ): ${BASH_SOURCE} me" >> ${LOG}
-   else
-      echo -e "$( TZ=MST date +%H:%M:%S ): ${BASH_SOURCE} ${ROM} ${DEVICE}" >> ${LOG}
-   fi
+   case ${PERSONAL} in
+      "true")
+         echo -e "$( TZ=MST date +%H:%M:%S ): ${BASH_SOURCE} me" >> ${LOG} ;;
+      *)
+         echo -e "$( TZ=MST date +%H:%M:%S ): ${BASH_SOURCE} ${ROM} ${DEVICE}" >> ${LOG} ;;
+   esac
 
+   # BUILD RESULT IN X MINUTES AND Y SECONDS
    echo -e "${BUILD_RESULT_STRING} IN $( echo $((${END}-${START})) | awk '{print int($1/60)" MINUTES AND "int($1%60)" SECONDS"}' )" >> ${LOG}
-   echo -e "FILE LOCATION: $( ls ${ZIP_MOVE}/${ZIP_FORMAT} )\n" >> ${LOG}
+
+   # FILE LOCATION: PATH (only done if there was a file compiled succesfully)
+   if [[ ${SUCCESS} = true ]]; then
+      echo -e "FILE LOCATION: $( ls ${ZIP_MOVE}/${ZIP_FORMAT} )\n" >> ${LOG}
+   fi
 
    echo -e "\a"
 }
