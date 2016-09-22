@@ -314,9 +314,9 @@ function compile() {
    # DATE: BASH_SOURCE (EXTRA STUFF)
    case ${PERSONAL} in
       "true")
-         echo -e "$( TZ=MST date +%H:%M:%S ): ${BASH_SOURCE} me" >> ${LOG} ;;
+         echo -e "\n$( TZ=MST date +%H:%M:%S ): ${BASH_SOURCE} me" >> ${LOG} ;;
       *)
-         echo -e "$( TZ=MST date +%H:%M:%S ): ${BASH_SOURCE} ${ROM} ${DEVICE}" >> ${LOG} ;;
+         echo -e "\n$( TZ=MST date +%H:%M:%S ): ${BASH_SOURCE} ${ROM} ${DEVICE}" >> ${LOG} ;;
    esac
 
    # BUILD RESULT IN X MINUTES AND Y SECONDS
@@ -324,7 +324,7 @@ function compile() {
 
    # FILE LOCATION: PATH (only done if there was a file compiled succesfully)
    if [[ ${SUCCESS} = true ]]; then
-      echo -e "FILE LOCATION: $( ls ${ZIP_MOVE}/${ZIP_FORMAT} )\n" >> ${LOG}
+      echo -e "FILE LOCATION: $( ls ${ZIP_MOVE}/${ZIP_FORMAT} )" >> ${LOG}
    fi
 
    echo -e "\a"

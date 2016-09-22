@@ -398,10 +398,11 @@ function compile() {
    echo -e "DURATION: $((${DIFF} / 60)) MINUTES AND $((${DIFF} % 60)) SECONDS"${RESTORE}; newLine
 
    # Add line to compile log
-   echo -e "$( TZ=MST date +%H:%M:%S ): ${BASH_SOURCE} ${1}" >> ${LOG}
+   echo -e "\n$( TZ=MST date +%H:%M:%S ): ${BASH_SOURCE} ${1}" >> ${LOG}
    echo -e "${BUILD_RESULT_STRING} IN $((${DIFF} / 60)) MINUTES AND $((${DIFF} % 60)) SECONDS" >> ${LOG}
-   echo -e "FILE LOCATION: ${ZIP_MOVE}/${ZIP_NAME}.zip\n" >> ${LOG}
-
+   if [[ ${SUCCESS} = true ]]; then
+      echo -e "FILE LOCATION: ${ZIP_MOVE}/${ZIP_NAME}.zip" >> ${LOG}
+   fi
    echo -e "\a"
 }
 
