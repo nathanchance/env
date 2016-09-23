@@ -162,7 +162,7 @@ function compile() {
          "pn-mod")
             SOURCE_DIR=${ANDROID_DIR}/ROMs/PN-Mod
             ZIP_MOVE=${HOME}/Completed/Zips/ROMs/PureNexusMod/${DEVICE}
-            ZIP_FORMAT=puremod_nexus_${DEVICE}-*.zip ;;
+            ZIP_FORMAT=pnmod_nexus_${DEVICE}-*.zip ;;
          "saosp")
             SOURCE_DIR=${ANDROID_DIR}/ROMs/SAOSP
             ZIP_MOVE=${HOME}/Completed/Zips/ROMs/SAOSP/${DEVICE}
