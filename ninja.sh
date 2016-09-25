@@ -92,7 +92,7 @@ function compile() {
    # If we are running a personal build, use different branches
    if [[ ${PERSONAL} = true ]]; then
       # SOURCE_DIR: Folder that holds the source
-      SOURCE_DIR=${RESOURCE_DIR}/Ninja-Angler
+      SOURCE_DIR=${RESOURCE_DIR}/Ninja
       # KER_BRANCH: Branch of kernel to compile
       KER_BRANCH=personal
       # ZIP_MOVE: Folder that holds completed zips
@@ -101,14 +101,14 @@ function compile() {
       case "${VERSION}" in
          "n-release")
             # SOURCE_DIR: Folder that holds the source
-            SOURCE_DIR=${RESOURCE_DIR}/Ninja-Angler
+            SOURCE_DIR=${RESOURCE_DIR}/Ninja
             # KER_BRANCH: Branch of kernel to compile
             KER_BRANCH=release
             # ZIP_MOVE: Folder that holds completed zips
             ZIP_MOVE=${HOME}/Completed/Zips/Kernels/${DEVICE}/N-Release ;;
          "n-staging")
             # SOURCE_DIR: Folder that holds the source
-            SOURCE_DIR=${RESOURCE_DIR}/Ninja-Angler
+            SOURCE_DIR=${RESOURCE_DIR}/Ninja
             # KER_BRANCH: Branch of kernel to compile
             KER_BRANCH=staging
             # ZIP_MOVE: Folder that holds completed zips
@@ -142,7 +142,7 @@ function compile() {
    case ${PERSONAL} in
       "true")
          DEVICE=angler
-         SOURCE_DIR=${RESOURCE_DIR}/Ninja-Angler
+         SOURCE_DIR=${RESOURCE_DIR}/Ninja
          TOOLCHAIN_SOURCE_DIR=${RESOURCE_DIR}/Toolchains/Linaro
          TOOLCHAIN_NAME=aarch64-linux-android-6.x-kernel
          TOOCHAIN_COMPILED_DIR=${TOOLCHAIN_SOURCE_DIR}/out/${TOOLCHAIN_NAME} ;;
