@@ -43,10 +43,6 @@ function compile() {
    UPDATE_TC=false
    VERSION=
 
-   # Set USER and HOST variables back to what they are in .bashrc
-   export KBUILD_BUILD_USER=nathan
-   export KBUILD_BUILD_HOST=phoenix
-
    # Set flags/variables based on parameter
    case "${1}" in
       "me")
