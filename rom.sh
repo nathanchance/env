@@ -17,7 +17,7 @@
 # $ . rom.sh du shamu nosync
 # $ . rom.sh me
 # $ . rom.sh all du jdizzle
-# $ . rom.sh all pn-mod
+# $ . rom.sh all abc
 
 
 
@@ -49,7 +49,7 @@ function compile() {
    # ----------
    # Parameters
    # ----------
-   # Parameter 1: ROM to build (currently AOSiP, Dirty Unicorns, Pure Nexus, and Pure Nexus Mod)
+   # Parameter 1: ROM to build (currently AOSiP, Dirty Unicorns, Pure Nexus, and ABC ROM)
    # Parameter 2: Device (eg. angler, bullhead, shamu)
 
    # Unassign flags and reset ROM_BUILD_TYPE
@@ -70,7 +70,7 @@ function compile() {
       else
          echo "ROM selection"
          echo "   1. Pure Nexus"
-         echo "   2. Pure Nexus Mod"
+         echo "   2. ABC ROM"
          echo "   3. Dirty Unicorns"
          echo "   4. AOSiP"
          echo "   5. MapleAOSP"
@@ -82,7 +82,7 @@ function compile() {
             "1")
                ROM=pn ;;
             "2")
-               ROM=pn-mod ;;
+               ROM=abc ;;
             "3")
                ROM=du ;;
             "4")
@@ -143,6 +143,10 @@ function compile() {
    else
       # Otherwise, define them for our various ROMs
       case "${ROM}" in
+         "abc")
+            SOURCE_DIR=${ANDROID_DIR}/ROMs/ABC
+            ZIP_MOVE=${HOME}/Completed/Zips/ROMs/ABC/${DEVICE}
+            ZIP_FORMAT=ABCrom_nexus_${DEVICE}-*.zip ;;
          "aosip")
             SOURCE_DIR=${ANDROID_DIR}/ROMs/AOSiP
             ZIP_MOVE=${HOME}/Completed/Zips/ROMs/AOSiP/${DEVICE}
@@ -159,10 +163,6 @@ function compile() {
             SOURCE_DIR=${ANDROID_DIR}/ROMs/PN
             ZIP_MOVE=${HOME}/Completed/Zips/ROMs/PureNexus/${DEVICE}
             ZIP_FORMAT=pure_nexus_${DEVICE}-7*.zip ;;
-         "pn-mod")
-            SOURCE_DIR=${ANDROID_DIR}/ROMs/PN-Mod
-            ZIP_MOVE=${HOME}/Completed/Zips/ROMs/PureNexusMod/${DEVICE}
-            ZIP_FORMAT=pnmod_nexus_${DEVICE}-*.zip ;;
          "saosp")
             SOURCE_DIR=${ANDROID_DIR}/ROMs/SAOSP
             ZIP_MOVE=${HOME}/Completed/Zips/ROMs/SAOSP/${DEVICE}
