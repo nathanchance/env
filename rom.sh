@@ -207,16 +207,14 @@ function compile() {
 
 
 
+   # Setup the build environment
+   echoText "SETTING UP BUILD ENVIRONMENT"; newLine
+
    # Check and see if we are on Arch; if so, activate a virtual environment for proper Python support
    if [[ -f /etc/arch-release ]]; then
       virtualenv2 venv
       source venv/bin/activate
    fi
-
-
-
-   # Setup the build environment
-   echoText "SETTING UP BUILD ENVIRONMENT"; newLine
 
    source build/envsetup.sh
 
@@ -304,8 +302,9 @@ function compile() {
 
 
 
-   # Check and see if we are on Arch; if so, activate a virtual environment for proper Python support
+   # Check and see if we are on Arch; if so, deactivate the virtual environment
    if [[ -f /etc/arch-release ]]; then
+      echoText "EXITING VIRTUAL ENV"
       deactivate
    fi
 
