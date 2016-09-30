@@ -85,6 +85,8 @@ function compile() {
    ANDROID_DIR=${HOME}
    # RESOURCE_DIR: Directory that holds all kernel related files
    RESOURCE_DIR=${ANDROID_DIR}/Kernels
+   # ZIP_MOVE_PARENT: The parent to the directory that holds all of the completed kernel files
+   ZIP_MOVE_PARENT=${HOME}/Web
    # If we are running a personal build, use different branches
    if [[ ${PERSONAL} = true ]]; then
       # SOURCE_DIR: Folder that holds the source
@@ -92,7 +94,7 @@ function compile() {
       # KER_BRANCH: Branch of kernel to compile
       KER_BRANCH=personal
       # ZIP_MOVE: Folder that holds completed zips
-      ZIP_MOVE=${HOME}/Completed/Zips/Kernels/Me
+      ZIP_MOVE=${ZIP_MOVE_PARENT}/.hidden/Kernels
    else
       case "${VERSION}" in
          "n-release")
@@ -101,28 +103,28 @@ function compile() {
             # KER_BRANCH: Branch of kernel to compile
             KER_BRANCH=release
             # ZIP_MOVE: Folder that holds completed zips
-            ZIP_MOVE=${HOME}/Completed/Zips/Kernels/${DEVICE}/N-Release ;;
+            ZIP_MOVE=${ZIP_MOVE_PARENT}/Kernels/${DEVICE}/N-Release ;;
          "n-staging")
             # SOURCE_DIR: Folder that holds the source
             SOURCE_DIR=${RESOURCE_DIR}/Ninja
             # KER_BRANCH: Branch of kernel to compile
             KER_BRANCH=staging
             # ZIP_MOVE: Folder that holds completed zips
-            ZIP_MOVE=${HOME}/Completed/Zips/Kernels/${DEVICE}/N-Staging ;;
+            ZIP_MOVE=${ZIP_MOVE_PARENT}/Kernels/${DEVICE}/N-Staging ;;
          "m-release")
             # SOURCE_DIR: Folder that holds the source
             SOURCE_DIR=${RESOURCE_DIR}/Ninja-Legacy
             # KER_BRANCH: Branch of kernel to compile
             KER_BRANCH=m-release
             # ZIP_MOVE: Folder that holds completed zips
-            ZIP_MOVE=${HOME}/Completed/Zips/Kernels/${DEVICE}/M-Release ;;
+            ZIP_MOVE=${ZIP_MOVE_PARENT}/Kernels/${DEVICE}/M-Release ;;
          "m-staging")
             # Different source directory
             SOURCE_DIR=${RESOURCE_DIR}/Ninja-Legacy
             # KER_BRANCH: Branch of kernel to compile
             KER_BRANCH=m-staging
             # ZIP_MOVE: Folder that holds completed zips
-            ZIP_MOVE=${HOME}/Completed/Zips/Kernels/${DEVICE}/M-Staging ;;
+            ZIP_MOVE=${ZIP_MOVE_PARENT}/Kernels/${DEVICE}/M-Staging ;;
       esac
    fi
    # SOURCE_DIR: Directory that holds kernel source

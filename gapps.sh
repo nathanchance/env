@@ -42,7 +42,7 @@ SUCCESS=false
 ANDROID_DIR=${HOME}
 
 # GApps completed zip directory
-ZIP_MOVE=${HOME}/Completed/Zips/GApps
+ZIP_MOVE=${HOME}/Web/.hidden/GApps
 
 
 # If there is no first paramter, get it from the user

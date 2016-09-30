@@ -132,6 +132,7 @@ function compile() {
    # ZIP_MOVE: Directory to hold completed ROM zips
    # ZIP_FORMAT: The format of the zip file in the out directory for moving to ZIP_MOVE
    ANDROID_DIR=${HOME}
+   ZIP_MOVE_PARENT=${HOME}/Web/.hidden/ROMs
 
    # If we are running a personal build, define the above variable specially
    if [[ ${PERSONAL} = true ]]; then
@@ -145,27 +146,27 @@ function compile() {
       case "${ROM}" in
          "abc")
             SOURCE_DIR=${ANDROID_DIR}/ROMs/ABC
-            ZIP_MOVE=${HOME}/Completed/Zips/ROMs/ABC/${DEVICE}
+            ZIP_MOVE=${ZIP_MOVE_PARENT}/ABC/${DEVICE}
             ZIP_FORMAT=ABCrom_nexus_${DEVICE}-*.zip ;;
          "aosip")
             SOURCE_DIR=${ANDROID_DIR}/ROMs/AOSiP
-            ZIP_MOVE=${HOME}/Completed/Zips/ROMs/AOSiP/${DEVICE}
+            ZIP_MOVE=${ZIP_MOVE_PARENT}/AOSiP/${DEVICE}
             ZIP_FORMAT=AOSiP-*-${DEVICE}-*.zip ;;
          "du")
             SOURCE_DIR=${ANDROID_DIR}/ROMs/DU
-            ZIP_MOVE=${HOME}/Completed/Zips/ROMs/DirtyUnicorns/${DEVICE}
+            ZIP_MOVE=${ZIP_MOVE_PARENT}/DirtyUnicorns/${DEVICE}
             ZIP_FORMAT=DU_${DEVICE}_*.zip ;;
          "maple")
             SOURCE_DIR=${ANDROID_DIR}/ROMs/MapleAOSP
-            ZIP_MOVE=${HOME}/Completed/Zips/ROMs/MapleAOSP/${DEVICE}
+            ZIP_MOVE=${ZIP_MOVE_PARENT}/MapleAOSP/${DEVICE}
             ZIP_FORMAT=MapleAOSP*.zip ;;
          "pn")
             SOURCE_DIR=${ANDROID_DIR}/ROMs/PN
-            ZIP_MOVE=${HOME}/Completed/Zips/ROMs/PureNexus/${DEVICE}
+            ZIP_MOVE=${ZIP_MOVE_PARENT}/PureNexus/${DEVICE}
             ZIP_FORMAT=pure_nexus_${DEVICE}-7*.zip ;;
          "saosp")
             SOURCE_DIR=${ANDROID_DIR}/ROMs/SAOSP
-            ZIP_MOVE=${HOME}/Completed/Zips/ROMs/SAOSP/${DEVICE}
+            ZIP_MOVE=${ZIP_MOVE_PARENT}/SAOSP/${DEVICE}
             ZIP_FORMAT=saosp_${DEVICE}*.zip ;;
       esac
    fi
@@ -203,6 +204,14 @@ function compile() {
    echoText "SYNCING LATEST SOURCES"; newLine
 
    repo sync --force-sync ${THREADS_FLAG}
+
+
+
+   # Check and see if we are on Arch; if so, activate a virtual environment for proper Python support
+   if [[ -f /etc/arch-release ]]; then
+      virtualenv2 venv
+      source venv/bin/activate
+   fi
 
 
 
@@ -291,6 +300,13 @@ function compile() {
    else
       BUILD_RESULT_STRING="BUILD FAILED"
       SUCCESS=false
+   fi
+
+
+
+   # Check and see if we are on Arch; if so, activate a virtual environment for proper Python support
+   if [[ -f /etc/arch-release ]]; then
+      deactivate
    fi
 
 

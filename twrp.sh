@@ -31,7 +31,7 @@ function compile() {
    # Directories
    SOURCE_DIR=${HOME}/TWRP
    OUT_DIR=${SOURCE_DIR}/out/target/product/${DEVICE}
-   ZIP_MOVE=${HOME}/Completed/Images/TWRP
+   ZIP_MOVE=${HOME}/Web/.hidden/TWRP
 
 
    # File names
