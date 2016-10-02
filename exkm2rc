@@ -1,4 +1,0 @@
-#!/bin/bash
-# Scripts that converts EXKM Profiles to Ramdisk settings
-
-sed -e 's/^/   write /' $1 > $2
