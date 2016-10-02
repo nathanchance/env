@@ -421,15 +421,17 @@ function compile() {
    if [[ ${SUCCESS} = true ]]; then
       echo -e "FILE LOCATION: ${ZIP_MOVE}/${ZIP_NAME}.zip" >> ${LOG}
    fi
+
+   # Alert the user that the script is done
    echo -e "\a"
 }
 
 case ${1} in
-   "both-beta")
+   "both-staging")
       # Run the two kernel builds
       compile n-staging ${2}
       compile m-staging ;;
-   "both-stable")
+   "both-release")
       # Run the two kernel builds
       compile n-release ${2}
       compile m-release ;;
