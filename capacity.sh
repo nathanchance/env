@@ -24,5 +24,8 @@
 # -c: report a grand total at the end
 # -h: list as human readable
 # -s: reports a sum for the usage of each directory
+
 du -c -h -s .[!.]* *
+
+# Alert the user their query is done
 echo -e "\a"
