@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# Copyright (C) 2015-2016, Akhil Narang "akhilnarang" <akhilnarang.1999@gmail.com>, Nathan Chancellor
+# Copyright (C) 2015-2016, Akhil Narang, Nathan Chancellor
 #
 # This software is licensed under the terms of the GNU General Public
 # License version 2, as published by the Free Software Foundation, and
@@ -24,11 +24,15 @@ echo Installing Dependencies!
 sudo pacman -Syu
 
 
-# Install needed packages
-sudo pacman -S gcc git gnupg flex bison gperf sdl wxgtk bash-completion subversion \
-squashfs-tools curl ncurses zlib schedtool perl-switch zip autoconf gawk \
-unzip libxslt maven tmux screen w3m python2-virtualenv bc rsync ncftp \
-ca-certificates-mozilla fakeroot make pkg-config texinfo patch automake libtool
+# Install additional packages
+sudo pacman -S git gnupg gperf sdl wxgtk bash-completion subversion \
+squashfs-tools curl ncurses zlib schedtool perl-switch ca-certificates-mozilla \
+zip unzip libxslt maven tmux screen w3m python2-virtualenv bc rsync ncftp
+
+
+# Comment out the next section if you installed base-devel from pacstrap
+sudo pacman -S autoconf automake binutils bison fakeroot findutils flex gcc \
+groff libtool m4 make patch pkg-config
 
 
 # Enable multilib section in /etc/pacman.conf
