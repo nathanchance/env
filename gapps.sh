@@ -245,4 +245,6 @@ echo -e "${BUILD_RESULT_STRING} IN $(echo $((${END}-${START})) | awk '{print int
 if [[ ${SUCCESS} = true ]]; then
    echo -e "FILE LOCATION: $( ls ${ZIP_MOVE}/${ZIP_BEG}*.zip )" >> ${LOG}
 fi
+
+# Notify the user that their script is done
 echo -e "\a"
