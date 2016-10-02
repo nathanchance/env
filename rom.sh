@@ -361,6 +361,7 @@ function compile() {
       echo -e "FILE LOCATION: $( ls ${ZIP_MOVE}/${ZIP_FORMAT} )" >> ${LOG}
    fi
 
+   # Notify the user that their script is done
    echo -e "\a"
 }
 
