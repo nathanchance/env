@@ -411,14 +411,23 @@ function compile() {
       echo -e ${RED}"ZIP: ${ZIP_MOVE}/${ZIP_NAME}.zip"
       echo -e "SIZE: $( du -h ${ZIP_MOVE}/${ZIP_NAME}.zip | awk '{print $1}' )"${RESTORE}
    fi
+
    # Print the time the script finished and how long the script ran for regardless of success
    echo -e ${RED}"TIME FINISHED: $( TZ=MST date +%D\ %r | awk '{print toupper($0)}' )"
    echo -e "DURATION: $((${DIFF} / 60)) MINUTES AND $((${DIFF} % 60)) SECONDS"${RESTORE}; newLine
 
-   # Add line to compile log
+
+
+   # Add line to compile log in the following format:
+   # DATE: BASH_SOURCE (PARAMETERS)
    echo -e "\n$( TZ=MST date +%H:%M:%S ): ${BASH_SOURCE} ${1}" >> ${LOG}
+
+   # BUILD <SUCCESSFUL|FAILED> IN # MINUTES AND # SECONDS
    echo -e "${BUILD_RESULT_STRING} IN $((${DIFF} / 60)) MINUTES AND $((${DIFF} % 60)) SECONDS" >> ${LOG}
+
+   # Only add a line about file location if script completed succesfully
    if [[ ${SUCCESS} = true ]]; then
+      # FILE LOCATION: PATH
       echo -e "FILE LOCATION: ${ZIP_MOVE}/${ZIP_NAME}.zip" >> ${LOG}
    fi
 

@@ -235,14 +235,23 @@ if [[ ${SUCCESS} = true ]]; then
    echo -e ${RED}"ZIP: $( ls ${ZIP_MOVE}/${ZIP_BEG}*.zip )"
    echo -e "SIZE: $( du -h ${ZIP_MOVE}/${ZIP_BEG}*.zip | awk '{print $1}' )"${RST}
 fi
+
 # Print the time the script finished and how long the script ran for regardless of success
 echo -e ${RED}"TIME FINISHED: $( TZ=MST date +%D\ %r | awk '{print toupper($0)}' )"
 echo -e ${RED}"DURATION: $( echo $((${END}-${START})) | awk '{print int($1/60)" MINUTES AND "int($1%60)" SECONDS"}' )"${RST}; newLine
 
-# Add line to compile log
+
+
+# Add line to compile log in the following format:
+# DATE: BASH_SOURCE (PARAMETERS)
 echo -e "\n$( TZ=MST date +%H:%M:%S ): ${BASH_SOURCE} ${TYPE}" >> ${LOG}
+
+# BUILD <SUCCESSFUL|FAILED> IN # MINUTES AND # SECONDS
 echo -e "${BUILD_RESULT_STRING} IN $(echo $((${END}-${START})) | awk '{print int($1/60)" MINUTES AND "int($1%60)" SECONDS"}')" >> ${LOG}
+
+# Only add a line about file location if script completed succesfully
 if [[ ${SUCCESS} = true ]]; then
+   # FILE LOCATION: <PATH>
    echo -e "FILE LOCATION: $( ls ${ZIP_MOVE}/${ZIP_BEG}*.zip )" >> ${LOG}
 fi
 

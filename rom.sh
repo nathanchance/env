@@ -345,7 +345,7 @@ function compile() {
 
 
    # Add line to compile log in the following format:
-   # DATE: BASH_SOURCE (EXTRA STUFF)
+   # DATE: BASH_SOURCE (PARAMETERS)
    case ${PERSONAL} in
       "true")
          echo -e "\n$( TZ=MST date +%H:%M:%S ): ${BASH_SOURCE} me" >> ${LOG} ;;
@@ -353,11 +353,12 @@ function compile() {
          echo -e "\n$( TZ=MST date +%H:%M:%S ): ${BASH_SOURCE} ${ROM} ${DEVICE}" >> ${LOG} ;;
    esac
 
-   # BUILD RESULT IN X MINUTES AND Y SECONDS
+   # BUILD <SUCCESSFUL|FAILED> IN # MINUTES AND # SECONDS
    echo -e "${BUILD_RESULT_STRING} IN $( echo $((${END}-${START})) | awk '{print int($1/60)" MINUTES AND "int($1%60)" SECONDS"}' )" >> ${LOG}
 
-   # FILE LOCATION: PATH (only done if there was a file compiled succesfully)
+   # Only add a line about file location if script completed succesfully
    if [[ ${SUCCESS} = true ]]; then
+      # FILE LOCATION: <PATH>
       echo -e "FILE LOCATION: $( ls ${ZIP_MOVE}/${ZIP_FORMAT} )" >> ${LOG}
    fi
 
