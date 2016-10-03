@@ -23,9 +23,9 @@
 # -----
 # Usage
 # -----
-# $ . ninja.sh <release|staging> <angler|bullhead <tcupdate|notcupdate>
-# $ . ninja.sh me <tcupdate|notcupdate>
-# $ . ninja.sh both <tcupdate|notcupdate>
+# $ . kernel.sh <release|staging> <angler|bullhead <tcupdate|notcupdate>
+# $ . kernel.sh me <tcupdate|notcupdate>
+# $ . kernel.sh both <tcupdate|notcupdate>
 
 
 # Prints a formatted header; used for outlining what the script is doing to the user
@@ -201,29 +201,6 @@ function compile() {
    # ---------
    # Functions
    # ---------
-   # Changelog function
-   function changelog() {
-      # Directory that will hold changelog (same as ZIP_MOVE)
-      CHANGELOG_DIR=${1}
-
-      # Make a changelog first
-      CHANGELOG=${ZIP_MOVE}/ninja_changelog.txt
-      rm -rf ${CHANGELOG}
-
-      # Figure out the old version and its commit hash
-      OLD_VERSION=$( ls ${CHANGELOG_DIR} | sed 's/^.*NINJA-\([^&]*\)\.zip.*/\1/' )
-      OLD_VERSION_HASH=$(git log --grep="^NINJA: ${OLD_VERSION}$" --pretty=format:'%H')
-
-      # Figure out the old version and its commit hash
-      NEW_VERION=$( grep -r "EXTRAVERSION = -NINJA-" ${SOURCE_DIR}/Makefile | sed 's/EXTRAVERSION = -NINJA-//' )
-      NEW_VERSION_HASH=$(git log --grep="^NINJA: ${NEW_VERSION}$" --pretty=format:'%H')
-
-      # Generate changelog
-      if [[ "${OLD_VERSION_HASH}" != "" || -n ${OLD_VERSION_HASH} ]]; then
-         git log ${OLD_VERSION_HASH}^..${NEW_VERION_HASH} --format="Title: %s%nAuthor: %an%nHash: %H%n" > ${CHANGELOG}
-      fi
-   }
-
    # Clean the out and AnyKernel dirs and make clean
    function clean_all {
       # Cleaning of AnyKernel directory
@@ -253,7 +230,7 @@ function compile() {
       # Move into the toolchain directory
       cd "${TOOLCHAIN_SOURCE_DIR}"
       # Repo sync
-      time repo sync --force-sync -j$(grep -c ^processor /proc/cpuinfo)
+      time repo sync --force-sync ${THREAD}
       # Run the toolchain script
       cd scripts
       source ${TOOLCHAIN_NAME}
@@ -291,12 +268,6 @@ function compile() {
       if [[ ! -d "${ZIP_MOVE}" ]]; then
          mkdir -p "${ZIP_MOVE}"
       else
-         # If there is a previous zip in the zip move directory in the same format AND it is not the same as the zip we are uploading, generate a changelog
-         if [[ $( ls "${ZIP_MOVE}"/${ZIP_FORMAT} 2>/dev/null | wc -l ) != "0" && $( ls "${ZIP_MOVE}"/${ZIP_FORMAT} ) != "${ZIP_MOVE}/${ZIP_NAME}.zip" ]]; then
-            echoText "GENERATING CHANGELOG"
-            changelog "${ZIP_MOVE}"
-         fi
-
          # Remove the old zip file
          rm -rf "${ZIP_MOVE}"/${ZIP_FORMAT}
       fi
@@ -346,13 +317,28 @@ function compile() {
 
    # Show the version of the kernel compiling
    echo -e ${RED}; newLine
-   echo -e "====================================================================="; newLine; newLine
-   echo -e "    _   _______   __    _____       __ __ __________  _   __________ ";
-   echo -e "   / | / /  _/ | / /   / /   |     / //_// ____/ __ \/ | / / ____/ / ";
-   echo -e "  /  |/ // //  |/ /_  / / /| |    / ,<  / __/ / /_/ /  |/ / __/ / /  ";
-   echo -e " / /|  // // /|  / /_/ / ___ |   / /| |/ /___/ _, _/ /|  / /___/ /___";
-   echo -e "/_/ |_/___/_/ |_/\____/_/  |_|  /_/ |_/_____/_/ |_/_/ |_/_____/_____/"; newLine; newLine; newLine
-   echo -e "====================================================================="; newLine; newLine
+   echo -e "======================================================================="; newLine; newLine
+   case ${PERSONAL} in
+      "true")
+         echo -e "    ________    ___   _____ __  __    __ __ __________  _   __________ "
+         echo -e "   / ____/ /   /   | / ___// / / /   / //_// ____/ __ \/ | / / ____/ / "
+         echo -e "  / /_  / /   / /| | \__ \/ /_/ /   / ,<  / __/ / /_/ /  |/ / __/ / /  "
+         echo -e " / __/ / /___/ ___ |___/ / __  /   / /| |/ /___/ _, _/ /|  / /___/ /___"
+         echo -e "/_/   /_____/_/  |_/____/_/ /_/   /_/ |_/_____/_/ |_/_/ |_/_____/_____/"; newLine; newLine; newLine ;;
+      "false")
+         echo -e "    _   _______   __    _____       __ __ __________  _   __________ "
+         echo -e "   / | / /  _/ | / /   / /   |     / //_// ____/ __ \/ | / / ____/ / "
+         echo -e "  /  |/ // //  |/ /_  / / /| |    / ,<  / __/ / /_/ /  |/ / __/ / /  "
+         echo -e " / /|  // // /|  / /_/ / ___ |   / /| |/ /___/ _, _/ /|  / /___/ /___"
+         echo -e "/_/ |_/___/_/ |_/\____/_/  |_|  /_/ |_/_____/_/ |_/_/ |_/_____/_____/"; newLine; newLine; newLine ;;
+   esac
+   echo -e "======================================================================="; newLine; newLine
+
+
+
+
+
+
 
    echoText "KERNEL VERSION"; newLine
 
