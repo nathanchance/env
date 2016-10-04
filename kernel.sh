@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# Ninja compilation script for the Nexus 6P
+# Flash compilation script for the Nexus 6P
 #
 # Copyright (C) 2016 Nathan Chancellor
 #
@@ -92,12 +92,7 @@ function compile() {
    # KERNEL: File name of completed image
    KERNEL=Image.gz-dtb
    # DEFCONFIG: Name of defconfig file
-   case ${PERSONAL} in
-      "true")
-         DEFCONFIG=flash_defconfig ;;
-      "false")
-         DEFCONFIG=ninja_defconfig ;;
-   esac
+   DEFCONFIG=flash_defconfig
    # DEVICE: device we are compiling for
    DEVICE=angler
 
@@ -166,10 +161,6 @@ function compile() {
                TOOLCHAIN_SOURCE_DIR=${RESOURCE_DIR}/Toolchains/Linaro
                TOOLCHAIN_NAME=aarch64-linux-android-6.x-kernel
                TOOCHAIN_COMPILED_DIR=${TOOLCHAIN_SOURCE_DIR}/out/${TOOLCHAIN_NAME} ;;
-            "bullhead")
-               TOOLCHAIN_SOURCE_DIR=${RESOURCE_DIR}/Toolchains/Linaro
-               TOOLCHAIN_NAME=aarch64-linux-android-4.9-kernel
-               TOOCHAIN_COMPILED_DIR=${TOOLCHAIN_SOURCE_DIR}/out/${TOOLCHAIN_NAME} ;;
          esac
    esac
    # ZIMAGE_DIR: Directory that holds completed Image.gz
@@ -187,10 +178,6 @@ function compile() {
    # ARCH and SUBARCH: Architecture we want to compile for
    export ARCH=arm64
    export SUBARCH=arm64
-
-   # Export the LOG variable for other files to use (I currently handle this via .bashrc)
-   # export LOG_DIR=${ANDROID_DIR}/Logs
-   # export LOG=${LOG_DIR}/compile_log_$( TZ=MST  date +%m_%d_%y ).log
 
 
 
@@ -314,25 +301,12 @@ function compile() {
    # Show the version of the kernel compiling
    echo -e ${RED}; newLine
    echo -e "======================================================================="; newLine; newLine
-   case ${PERSONAL} in
-      "true")
-         echo -e "    ________    ___   _____ __  __    __ __ __________  _   __________ "
-         echo -e "   / ____/ /   /   | / ___// / / /   / //_// ____/ __ \/ | / / ____/ / "
-         echo -e "  / /_  / /   / /| | \__ \/ /_/ /   / ,<  / __/ / /_/ /  |/ / __/ / /  "
-         echo -e " / __/ / /___/ ___ |___/ / __  /   / /| |/ /___/ _, _/ /|  / /___/ /___"
-         echo -e "/_/   /_____/_/  |_/____/_/ /_/   /_/ |_/_____/_/ |_/_/ |_/_____/_____/"; newLine; newLine; newLine ;;
-      "false")
-         echo -e "    _   _______   __    _____       __ __ __________  _   __________ "
-         echo -e "   / | / /  _/ | / /   / /   |     / //_// ____/ __ \/ | / / ____/ / "
-         echo -e "  /  |/ // //  |/ /_  / / /| |    / ,<  / __/ / /_/ /  |/ / __/ / /  "
-         echo -e " / /|  // // /|  / /_/ / ___ |   / /| |/ /___/ _, _/ /|  / /___/ /___"
-         echo -e "/_/ |_/___/_/ |_/\____/_/  |_|  /_/ |_/_____/_/ |_/_/ |_/_____/_____/"; newLine; newLine; newLine ;;
-   esac
+   echo -e "    ________    ___   _____ __  __    __ __ __________  _   __________ "
+   echo -e "   / ____/ /   /   | / ___// / / /   / //_// ____/ __ \/ | / / ____/ / "
+   echo -e "  / /_  / /   / /| | \__ \/ /_/ /   / ,<  / __/ / /_/ /  |/ / __/ / /  "
+   echo -e " / __/ / /___/ ___ |___/ / __  /   / /| |/ /___/ _, _/ /|  / /___/ /___"
+   echo -e "/_/   /_____/_/  |_/____/_/ /_/   /_/ |_/_____/_/ |_/_/ |_/_____/_____/"; newLine; newLine; newLine
    echo -e "======================================================================="; newLine; newLine
-
-
-
-
 
 
 
@@ -390,7 +364,7 @@ function compile() {
 
    # Print the zip location and its size if the script was successful
    if [[ ${SUCCESS} = true ]]; then
-      echo -e ${RED}"ZIP: ${ZIP_MOVE}/${ZIP_NAME}.zip"
+      echo -e ${RED}"FILE LOCATION: ${ZIP_MOVE}/${ZIP_NAME}.zip"
       echo -e "SIZE: $( du -h ${ZIP_MOVE}/${ZIP_NAME}.zip | awk '{print $1}' )"${RESTORE}
    fi
 
