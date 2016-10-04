@@ -136,17 +136,6 @@ esac
 
 
 
-# ---------
-# Variables
-# ---------
-
-
-# Export the LOG variable for other files to use (I currently handle this via .bashrc)
-# export LOG_DIR=${ANDROID_DIR}/Logs
-# export LOG=${LOG_DIR}/compile_log_$( TZ=MST date +%m_%d_%y ).log
-
-
-
 # Clear the terminal
 clear
 
@@ -232,7 +221,7 @@ newLine; echoText "${BUILD_RESULT_STRING}!"
 
 # Print the zip location and its size if the script was successful
 if [[ ${SUCCESS} = true ]]; then
-   echo -e ${RED}"ZIP: $( ls ${ZIP_MOVE}/${ZIP_BEG}*.zip )"
+   echo -e ${RED}"FILE LOCATION: $( ls ${ZIP_MOVE}/${ZIP_BEG}*.zip )"
    echo -e "SIZE: $( du -h ${ZIP_MOVE}/${ZIP_BEG}*.zip | awk '{print $1}' )"${RST}
 fi
 
