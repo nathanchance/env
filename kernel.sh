@@ -123,28 +123,28 @@ function compile() {
             # KER_BRANCH: Branch of kernel to compile
             KER_BRANCH=release
             # ZIP_MOVE: Folder that holds completed zips
-            ZIP_MOVE=${ZIP_MOVE_PARENT}/Kernels/${DEVICE}/N-Release ;;
+            ZIP_MOVE=${ZIP_MOVE_PARENT}/Kernels/${DEVICE}/7.0/Stable ;;
          "n-staging")
             # SOURCE_DIR: Folder that holds the source
             SOURCE_DIR=${RESOURCE_DIR}/Ninja
             # KER_BRANCH: Branch of kernel to compile
             KER_BRANCH=staging
             # ZIP_MOVE: Folder that holds completed zips
-            ZIP_MOVE=${ZIP_MOVE_PARENT}/Kernels/${DEVICE}/N-Staging ;;
+            ZIP_MOVE=${ZIP_MOVE_PARENT}/Kernels/${DEVICE}/7.0/Beta ;;
          "m-release")
             # SOURCE_DIR: Folder that holds the source
             SOURCE_DIR=${RESOURCE_DIR}/Ninja-Legacy
             # KER_BRANCH: Branch of kernel to compile
             KER_BRANCH=m-release
             # ZIP_MOVE: Folder that holds completed zips
-            ZIP_MOVE=${ZIP_MOVE_PARENT}/Kernels/${DEVICE}/M-Release ;;
+            ZIP_MOVE=${ZIP_MOVE_PARENT}/Kernels/${DEVICE}/6.0.1/Stable ;;
          "m-staging")
             # Different source directory
             SOURCE_DIR=${RESOURCE_DIR}/Ninja-Legacy
             # KER_BRANCH: Branch of kernel to compile
             KER_BRANCH=m-staging
             # ZIP_MOVE: Folder that holds completed zips
-            ZIP_MOVE=${ZIP_MOVE_PARENT}/Kernels/${DEVICE}/M-Staging ;;
+            ZIP_MOVE=${ZIP_MOVE_PARENT}/Kernels/${DEVICE}/6.0.1/Beta ;;
       esac
    fi
    # SOURCE_DIR: Directory that holds kernel source
