@@ -92,7 +92,12 @@ function compile() {
    # KERNEL: File name of completed image
    KERNEL=Image.gz-dtb
    # DEFCONFIG: Name of defconfig file
-   DEFCONFIG=ninja_defconfig
+   case ${PERSONAL} in
+      "true")
+         DEFCONFIG=flash_defconfig ;;
+      "false")
+         DEFCONFIG=ninja_defconfig ;;
+   esac
    # DEVICE: device we are compiling for
    DEVICE=angler
 
@@ -110,7 +115,7 @@ function compile() {
    # If we are running a personal build, use different branches
    if [[ ${PERSONAL} = true ]]; then
       # SOURCE_DIR: Folder that holds the source
-      SOURCE_DIR=${RESOURCE_DIR}/Ninja
+      SOURCE_DIR=${RESOURCE_DIR}/angler
       # KER_BRANCH: Branch of kernel to compile
       KER_BRANCH=personal
       # ZIP_MOVE: Folder that holds completed zips
@@ -119,48 +124,39 @@ function compile() {
       case "${VERSION}" in
          "n-release")
             # SOURCE_DIR: Folder that holds the source
-            SOURCE_DIR=${RESOURCE_DIR}/Ninja
+            SOURCE_DIR=${RESOURCE_DIR}/angler
             # KER_BRANCH: Branch of kernel to compile
             KER_BRANCH=release
             # ZIP_MOVE: Folder that holds completed zips
             ZIP_MOVE=${ZIP_MOVE_PARENT}/Kernels/${DEVICE}/7.0/Stable ;;
          "n-staging")
             # SOURCE_DIR: Folder that holds the source
-            SOURCE_DIR=${RESOURCE_DIR}/Ninja
+            SOURCE_DIR=${RESOURCE_DIR}/angler
             # KER_BRANCH: Branch of kernel to compile
             KER_BRANCH=staging
             # ZIP_MOVE: Folder that holds completed zips
             ZIP_MOVE=${ZIP_MOVE_PARENT}/Kernels/${DEVICE}/7.0/Beta ;;
          "m-release")
             # SOURCE_DIR: Folder that holds the source
-            SOURCE_DIR=${RESOURCE_DIR}/Ninja-Legacy
+            SOURCE_DIR=${RESOURCE_DIR}/angler-legacy
             # KER_BRANCH: Branch of kernel to compile
             KER_BRANCH=m-release
             # ZIP_MOVE: Folder that holds completed zips
             ZIP_MOVE=${ZIP_MOVE_PARENT}/Kernels/${DEVICE}/6.0.1/Stable ;;
          "m-staging")
             # Different source directory
-            SOURCE_DIR=${RESOURCE_DIR}/Ninja-Legacy
+            SOURCE_DIR=${RESOURCE_DIR}/angler-legacy
             # KER_BRANCH: Branch of kernel to compile
             KER_BRANCH=m-staging
             # ZIP_MOVE: Folder that holds completed zips
             ZIP_MOVE=${ZIP_MOVE_PARENT}/Kernels/${DEVICE}/6.0.1/Beta ;;
       esac
    fi
-   # SOURCE_DIR: Directory that holds kernel source
-   # case ${2} in
-   #    "angler")
-   #       DEVICE=${2}
-   #       SOURCE_DIR=${RESOURCE_DIR}/Ninja-Angler ;;
-   #    "bullhead")
-   #       DEVICE=${2}
-   #       SOURCE_DIR=${RESOURCE_DIR}/Ninja-Bullhead ;;
-   # esac
    # TOOLCHAIN_SOURCE_DIR: Directory that holds toolchain
    case ${PERSONAL} in
       "true")
          DEVICE=angler
-         SOURCE_DIR=${RESOURCE_DIR}/Ninja
+         SOURCE_DIR=${RESOURCE_DIR}/angler
          TOOLCHAIN_SOURCE_DIR=${RESOURCE_DIR}/Toolchains/Linaro
          TOOLCHAIN_NAME=aarch64-linux-android-6.x-kernel
          TOOCHAIN_COMPILED_DIR=${TOOLCHAIN_SOURCE_DIR}/out/${TOOLCHAIN_NAME} ;;
