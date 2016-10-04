@@ -194,11 +194,6 @@ function compile() {
    THREADS_FLAG=-j$( grep -c ^processor /proc/cpuinfo )
 
 
-   # Export the LOG variable for other files to use (I currently handle this via .bashrc)
-   # export LOG_DIR=${HOME}/shared/.logs
-   # export LOG=${LOG_DIR}/Results/compile_log_$( TZ=MST date +%m_%d_%y ).log
-
-
 
    # Clear the terminal
    clear
@@ -335,7 +330,7 @@ function compile() {
 
    # Print the zip location and its size if the script was successful
    if [[ ${SUCCESS} = true ]]; then
-      echo -e ${RED}"ZIP: $( ls ${ZIP_MOVE}/${ZIP_FORMAT} )"
+      echo -e ${RED}"FILE LOCATION: $( ls ${ZIP_MOVE}/${ZIP_FORMAT} )"
       echo -e "SIZE: $( du -h ${ZIP_MOVE}/${ZIP_FORMAT} | awk '{print $1}'  )"${RST}
    fi
    # Print the time the script finished and how long the script ran for regardless of success
