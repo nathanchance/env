@@ -164,7 +164,7 @@ function compile() {
 
    # Print the image location and its size if the script was successful
    if [[ ${SUCCESS} = true ]]; then
-      echo -e ${RED}"IMAGE: $( ls "${ZIP_MOVE}"/${UPLD_FILE} )"
+      echo -e ${RED}"FILE LOCATION: $( ls "${ZIP_MOVE}"/${UPLD_FILE} )"
       echo -e "SIZE: $( du -h "${ZIP_MOVE}"/${UPLD_FILE} | awk '{print $1}' )"${RST}
    fi
 
