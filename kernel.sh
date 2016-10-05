@@ -245,7 +245,7 @@ function compile() {
       cp -vr "${ZIMAGE_DIR}"/${KERNEL} "${ANYKERNEL_DIR}"/zImage > /dev/null 2>&1
 
       # Make zip format variable
-      ZIP_FORMAT=N*.zip
+      ZIP_FORMAT=F*.zip
 
       # If ZIPMOVE doesn't exist, make it; otherwise, clean it
       if [[ ! -d "${ZIP_MOVE}" ]]; then
