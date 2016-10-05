@@ -107,67 +107,70 @@ function compile() {
    RESOURCE_DIR=${ANDROID_DIR}/Kernels
    # ZIP_MOVE_PARENT: The parent to the directory that holds all of the completed kernel files
    ZIP_MOVE_PARENT=${HOME}/Web
-   # If we are running a personal build, use different branches
-   if [[ ${PERSONAL} = true ]]; then
-      # SOURCE_DIR: Folder that holds the source
-      SOURCE_DIR=${RESOURCE_DIR}/angler
-      # KER_BRANCH: Branch of kernel to compile
-      KER_BRANCH=personal
-      # ZIP_MOVE: Folder that holds completed zips
-      ZIP_MOVE=${ZIP_MOVE_PARENT}/.hidden/Kernels
-   else
-      case "${VERSION}" in
-         "n-release")
-            # SOURCE_DIR: Folder that holds the source
-            SOURCE_DIR=${RESOURCE_DIR}/angler
-            # KER_BRANCH: Branch of kernel to compile
-            KER_BRANCH=release
-            # ZIP_MOVE: Folder that holds completed zips
-            ZIP_MOVE=${ZIP_MOVE_PARENT}/Kernels/${DEVICE}/7.0/Stable ;;
-         "n-staging")
-            # SOURCE_DIR: Folder that holds the source
-            SOURCE_DIR=${RESOURCE_DIR}/angler
-            # KER_BRANCH: Branch of kernel to compile
-            KER_BRANCH=staging
-            # ZIP_MOVE: Folder that holds completed zips
-            ZIP_MOVE=${ZIP_MOVE_PARENT}/Kernels/${DEVICE}/7.0/Beta ;;
-         "m-release")
-            # SOURCE_DIR: Folder that holds the source
-            SOURCE_DIR=${RESOURCE_DIR}/angler-legacy
-            # KER_BRANCH: Branch of kernel to compile
-            KER_BRANCH=m-release
-            # ZIP_MOVE: Folder that holds completed zips
-            ZIP_MOVE=${ZIP_MOVE_PARENT}/Kernels/${DEVICE}/6.0.1/Stable ;;
-         "m-staging")
-            # Different source directory
-            SOURCE_DIR=${RESOURCE_DIR}/angler-legacy
-            # KER_BRANCH: Branch of kernel to compile
-            KER_BRANCH=m-staging
-            # ZIP_MOVE: Folder that holds completed zips
-            ZIP_MOVE=${ZIP_MOVE_PARENT}/Kernels/${DEVICE}/6.0.1/Beta ;;
-      esac
-   fi
-   # TOOLCHAIN_SOURCE_DIR: Directory that holds toolchain
+   # If we are running a personal build, use different branches (and toolchains if requested)
    case ${PERSONAL} in
       "true")
-         DEVICE=angler
+         # SOURCE_DIR: Folder that holds the source
          SOURCE_DIR=${RESOURCE_DIR}/angler
+         # KER_BRANCH: Branch of kernel to compile
+         KER_BRANCH=personal
+         # ZIP_MOVE: Folder that holds completed zips
+         ZIP_MOVE=${ZIP_MOVE_PARENT}/.hidden/Kernels
+         # TOOLCHAIN_SOURCE_DIR: Folder that holds the toolchain source that is compiled before building
          TOOLCHAIN_SOURCE_DIR=${RESOURCE_DIR}/Toolchains/Linaro
+         # TOOLCHAIN_NAME: Name of the toolchain wwe are building
          TOOLCHAIN_NAME=aarch64-linux-android-6.x-kernel
+         # TOOCHAIN_COMPILED_DIR: Location of the compiled toolchain
          TOOCHAIN_COMPILED_DIR=${TOOLCHAIN_SOURCE_DIR}/out/${TOOLCHAIN_NAME} ;;
       "false")
-         case ${DEVICE} in
-            "angler")
-               TOOLCHAIN_SOURCE_DIR=${RESOURCE_DIR}/Toolchains/Linaro
-               TOOLCHAIN_NAME=aarch64-linux-android-6.x-kernel
-               TOOCHAIN_COMPILED_DIR=${TOOLCHAIN_SOURCE_DIR}/out/${TOOLCHAIN_NAME} ;;
+         case "${VERSION}" in
+            "n-release")
+               # SOURCE_DIR: Folder that holds the source
+               SOURCE_DIR=${RESOURCE_DIR}/angler
+               # KER_BRANCH: Branch of kernel to compile
+               KER_BRANCH=release
+               # ZIP_MOVE: Folder that holds completed zips
+               ZIP_MOVE=${ZIP_MOVE_PARENT}/Kernels/${DEVICE}/7.0/Stable ;;
+            "n-staging")
+               # SOURCE_DIR: Folder that holds the source
+               SOURCE_DIR=${RESOURCE_DIR}/angler
+               # KER_BRANCH: Branch of kernel to compile
+               KER_BRANCH=staging
+               # ZIP_MOVE: Folder that holds completed zips
+               ZIP_MOVE=${ZIP_MOVE_PARENT}/Kernels/${DEVICE}/7.0/Beta ;;
+            "m-release")
+               # SOURCE_DIR: Folder that holds the source
+               SOURCE_DIR=${RESOURCE_DIR}/angler-legacy
+               # KER_BRANCH: Branch of kernel to compile
+               KER_BRANCH=m-release
+               # ZIP_MOVE: Folder that holds completed zips
+               ZIP_MOVE=${ZIP_MOVE_PARENT}/Kernels/${DEVICE}/6.0.1/Stable ;;
+            "m-staging")
+               # Different source directory
+               SOURCE_DIR=${RESOURCE_DIR}/angler-legacy
+               # KER_BRANCH: Branch of kernel to compile
+               KER_BRANCH=m-staging
+               # ZIP_MOVE: Folder that holds completed zips
+               ZIP_MOVE=${ZIP_MOVE_PARENT}/Kernels/${DEVICE}/6.0.1/Beta ;;
          esac
+         # TOOLCHAIN_SOURCE_DIR: Folder that holds the toolchain source that is compiled before building
+         TOOLCHAIN_SOURCE_DIR=${RESOURCE_DIR}/Toolchains/Linaro
+         # TOOLCHAIN_NAME: Name of the toolchain wwe are building
+         TOOLCHAIN_NAME=aarch64-linux-android-6.x-kernel
+         # TOOCHAIN_COMPILED_DIR: Location of the compiled toolchain
+         TOOCHAIN_COMPILED_DIR=${TOOLCHAIN_SOURCE_DIR}/out/${TOOLCHAIN_NAME} ;;
    esac
    # ZIMAGE_DIR: Directory that holds completed Image.gz
    ZIMAGE_DIR=${SOURCE_DIR}/arch/arm64/boot
    # ANYKERNEL_DIR: Directory that holds AnyKernel source
-   ANYKERNEL_DIR=${SOURCE_DIR}/anykernel
-
+   ANYKERNEL_DIR=${RESOURCE_DIR}/anykernel
+   # ANYKERNEL_BRANCH: Branch that we are using for AnyKernel
+   case ${PERSONAL} in
+      "true")
+         ANYKERNEL_BRANCH=angler-flash-personal ;;
+      "false")
+         ANYKERNEL_BRANCH=angler-flash-release ;;
+   esac
 
 
    # -------
@@ -188,6 +191,9 @@ function compile() {
    function clean_all {
       # Cleaning of AnyKernel directory
       cd "${ANYKERNEL_DIR}"
+      git checkout ${ANYKERNEL_BRANCH}
+      git reset --hard origin/${ANYKERNEL_BRANCH}
+      git clean -f -d -x > /dev/null 2>&1
       rm -rf ${KERNEL} > /dev/null 2>&1
 
       echo
@@ -240,9 +246,9 @@ function compile() {
 
    # Make the zip file, remove the previous version and upload it
    function make_zip {
-      # Copy Image.gz
+      # Copy Image.gz-dtb
       echoText "MOVING $( echo ${KERNEL} | awk '{print toupper($0)}' ) ($( du -h "${ZIMAGE_DIR}"/${KERNEL} | awk '{print $1}' ))"
-      cp -vr "${ZIMAGE_DIR}"/${KERNEL} "${ANYKERNEL_DIR}"/zImage > /dev/null 2>&1
+      cp "${ZIMAGE_DIR}"/${KERNEL} "${ANYKERNEL_DIR}"/zImage-dtb
 
       # Make zip format variable
       ZIP_FORMAT=F*.zip
@@ -344,10 +350,6 @@ function compile() {
       SUCCESS=true
 
       make_zip
-
-
-      # Upload
-      # echoText "UPLOADING ZIP FILE"; newLine
 
    else
       BUILD_RESULT_STRING="BUILD FAILED"
