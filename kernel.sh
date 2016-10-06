@@ -112,7 +112,7 @@ function compile() {
          # SOURCE_DIR: Folder that holds the source
          SOURCE_DIR=${RESOURCE_DIR}/angler
          # KER_BRANCH: Branch of kernel to compile
-         KER_BRANCH=personal-dcache
+         KER_BRANCH=personal
          # ZIP_MOVE: Folder that holds completed zips
          ZIP_MOVE=${ZIP_MOVE_PARENT}/.hidden/Kernels
          # TOOLCHAIN_SOURCE_DIR: Folder that holds the toolchain source that is compiled before building
