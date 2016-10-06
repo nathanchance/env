@@ -23,7 +23,6 @@
 # -----
 # Usage
 # -----
-# $ . kernel.sh <release|staging> <angler|bullhead <tcupdate|notcupdate>
 # $ . kernel.sh me <tcupdate|notcupdate>
 # $ . kernel.sh both <tcupdate|notcupdate>
 
@@ -113,7 +112,7 @@ function compile() {
          # SOURCE_DIR: Folder that holds the source
          SOURCE_DIR=${RESOURCE_DIR}/angler
          # KER_BRANCH: Branch of kernel to compile
-         KER_BRANCH=personal
+         KER_BRANCH=personal-dcache
          # ZIP_MOVE: Folder that holds completed zips
          ZIP_MOVE=${ZIP_MOVE_PARENT}/.hidden/Kernels
          # TOOLCHAIN_SOURCE_DIR: Folder that holds the toolchain source that is compiled before building
