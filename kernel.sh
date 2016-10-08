@@ -70,7 +70,7 @@ function newLine() {
 #              #
 ################
 # DEVICE (STRING): which device we are compiling for
-# BRANCH (STRING): the branch that we are compiling the kernel from
+# KERNEL_BRANCH (STRING): the branch that we are compiling the kernel from
 # TCUPDATE (T/F): whether or not we are updating the toolchain before compiling
 
 TCUPDATE=false
@@ -103,7 +103,22 @@ done
 ###############
 # ANDROID_HEAD: head folder of all Android folders
 # KERNEL_HEAD: head folder to all kernel folders
-# ANYKERNEL_DIR: Directory that holds AnyKernel source
+# ZIP_MOVE_HEAD: head folder to all the folders that hold completed zips
+# TOOLCHAIN_HEAD: head folder for toolchains (also holds the source)
+# ANYKERNEL_FOLDER: folder that holds AnyKernel source
+# SOURCE_FOLDER: folder that holds kernel source
+# ARCHITECTURE: architecture of the device we are compiling for
+# KERNEL_IMAGE: name of the completed kernel image
+# TOOLCHAIN_PREFIX: end of the toolchain name
+# TOOLCHAIN_NAME: name of the toolchain we want to compile and use
+# TOOLCHAIN_FOLDER: final location of the toolchain after compilation
+# ZIP_MOVE: final location of the completed zip files
+# ANYKERNEL_BRANCH: branch that we are using for our AnyKernel source (based on device and kernel branch)
+# THREADS: -j flag for make with the number of threads available
+# DEFCONFIG: name of the defconfig we are using
+# KERNEL: location of the kernel image after compilation
+
+
 
 ANDROID_HEAD=${HOME}
 KERNEL_HEAD=${ANDROID_HEAD}/Kernels
