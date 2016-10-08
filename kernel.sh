@@ -221,7 +221,6 @@ cd "${ANYKERNEL_FOLDER}"
 git checkout ${ANYKERNEL_BRANCH}
 git reset --hard origin/${ANYKERNEL_BRANCH}
 git clean -f -d -x > /dev/null 2>&1
-rm -rf zImage-dtb > /dev/null 2>&1
 
 # Cleaning of kernel directory
 cd "${SOURCE_FOLDER}"
@@ -254,7 +253,7 @@ make ${THREADS}
 # IF KERNEL COMPILED #
 ######################
 
-if [[ `ls ${KERNEL} 2>/dev/null | wc -l` != "0" ]]; then
+if [[ $( ls ${KERNEL} 2>/dev/null | wc -l ) != "0" ]]; then
    # SET BUILD SUCCESS STRING AND SUCCESS VARIABLE
    BUILD_RESULT_STRING="BUILD SUCCESSFUL" && SUCCESS=true
 
@@ -294,6 +293,10 @@ if [[ `ls ${KERNEL} 2>/dev/null | wc -l` != "0" ]]; then
 
    echoText "MOVING FLASHABLE ZIP"
    mv ${ZIP_NAME}.zip "${ZIP_MOVE}"
+
+
+   # CLEAN ZIMAGE-DTB FROM ANYKERNEL FOLDER AFTER ZIPPING AND MOVING
+   rm -rf "${ANYKERNEL_FOLDER}"/zImage-dtb
 
 
 ###################
