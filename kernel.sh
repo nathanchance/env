@@ -19,404 +19,338 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 
+###########
+#         #
+#  USAGE  #
+#         #
+###########
 
-# -----
-# Usage
-# -----
-# $ . kernel.sh me <tcupdate|notcupdate>
-# $ . kernel.sh both <tcupdate|notcupdate>
+# $ kernel.sh <angler|shamu> <release|staging> <tcupdate>
+# $ kernel.sh me <tcupdate>
 
 
-# Prints a formatted header; used for outlining what the script is doing to the user
+
+############
+#          #
+#  COLORS  #
+#          #
+############
+
+RED="\033[01;31m"
+BLINK_RED="\033[05;31m"
+RESTORE="\033[0m"
+
+
+
+###############
+#             #
+#  FUNCTIONS  #
+#             #
+###############
+
+# PRINTS A FORMATTED HEADER TO POINT OUT WHAT IS BEING DONE TO THE USER
 function echoText() {
-   RED="\033[01;31m"
-   RST="\033[0m"
-
    echo -e ${RED}
    echo -e "====$( for i in $( seq ${#1} ); do echo -e "=\c"; done )===="
    echo -e "==  ${1}  =="
    echo -e "====$( for i in $( seq ${#1} ); do echo -e "=\c"; done )===="
-   echo -e ${RST}
+   echo -e ${RESTORE}
 }
 
 
-# Creates a new line
+# CREATES A NEW LINE IN TERMINAL
 function newLine() {
    echo -e ""
 }
 
 
-# Compilation function
-function compile() {
-   # ----------
-   # Parameters
-   # ----------
-   # PERSONAL: Whether or not it is a build just for me
-   # TEST: Whether or not we are running a test build
-   # VERSION: m or n
+################
+#              #
+#  PARAMETERS  #
+#              #
+################
+# DEVICE (STRING): which device we are compiling for
+# BRANCH (STRING): the branch that we are compiling the kernel from
+# TCUPDATE (T/F): whether or not we are updating the toolchain before compiling
 
-   # Free flags
-   PERSONAL=false
-   TEST=false
-   SUCCESS=false
-   UPDATE_TC=false
-   VERSION=
+TCUPDATE=false
+SUCCESS=false
 
-   # Set flags/variables based on parameter
+while [[ $# -ge 1 ]]; do
    case "${1}" in
       "me")
-         PERSONAL=true ;;
-      "test")
-         TEST=true ;;
+         DEVICE=angler
+         KERNEL_BRANCH=personal ;;
+      "shamu"|"angler")
+         DEVICE=${1} ;;
+      "staging"|"release")
+         KERNEL_BRANCH=${1} ;;
+      "tcupdate")
+         TCUPDATE=true ;;
       *)
-         VERSION=${1} ;;
+         echo "Invalid parameter" && exit ;;
    esac
 
-
-
-   # ------
-   # Colors
-   # ------
-   RED="\033[01;31m"
-   BLINK_RED="\033[05;31m"
-   RESTORE="\033[0m"
-
-
-
-   # ---------
-   # Variables
-   # ---------
-   # THREAD: Number of available threads on computer
-   THREAD=-j$(grep -c ^processor /proc/cpuinfo)
-   # KERNEL: File name of completed image
-   KERNEL=Image.gz-dtb
-   # DEFCONFIG: Name of defconfig file
-   DEFCONFIG=flash_defconfig
-   # DEVICE: device we are compiling for
-   DEVICE=angler
-
-
-
-   # -----------
-   # Directories
-   # -----------
-   # ANDROID_DIR: Directory that holds all Android related files
-   ANDROID_DIR=${HOME}
-   # RESOURCE_DIR: Directory that holds all kernel related files
-   RESOURCE_DIR=${ANDROID_DIR}/Kernels
-   # ZIP_MOVE_PARENT: The parent to the directory that holds all of the completed kernel files
-   ZIP_MOVE_PARENT=${HOME}/Web
-   # If we are running a personal build, use different branches (and toolchains if requested)
-   case ${PERSONAL} in
-      "true")
-         # SOURCE_DIR: Folder that holds the source
-         SOURCE_DIR=${RESOURCE_DIR}/angler
-         # KER_BRANCH: Branch of kernel to compile
-         KER_BRANCH=personal
-         # ZIP_MOVE: Folder that holds completed zips
-         ZIP_MOVE=${ZIP_MOVE_PARENT}/.hidden/Kernels
-         # TOOLCHAIN_SOURCE_DIR: Folder that holds the toolchain source that is compiled before building
-         TOOLCHAIN_SOURCE_DIR=${RESOURCE_DIR}/Toolchains/Linaro
-         # TOOLCHAIN_NAME: Name of the toolchain wwe are building
-         TOOLCHAIN_NAME=aarch64-linux-android-6.x-kernel
-         # TOOCHAIN_COMPILED_DIR: Location of the compiled toolchain
-         TOOCHAIN_COMPILED_DIR=${TOOLCHAIN_SOURCE_DIR}/out/${TOOLCHAIN_NAME} ;;
-      "false")
-         case "${VERSION}" in
-            "n-release")
-               # SOURCE_DIR: Folder that holds the source
-               SOURCE_DIR=${RESOURCE_DIR}/angler
-               # KER_BRANCH: Branch of kernel to compile
-               KER_BRANCH=release
-               # ZIP_MOVE: Folder that holds completed zips
-               ZIP_MOVE=${ZIP_MOVE_PARENT}/Kernels/${DEVICE}/7.0/Stable ;;
-            "n-staging")
-               # SOURCE_DIR: Folder that holds the source
-               SOURCE_DIR=${RESOURCE_DIR}/angler
-               # KER_BRANCH: Branch of kernel to compile
-               KER_BRANCH=staging
-               # ZIP_MOVE: Folder that holds completed zips
-               ZIP_MOVE=${ZIP_MOVE_PARENT}/Kernels/${DEVICE}/7.0/Beta ;;
-            "m-release")
-               # SOURCE_DIR: Folder that holds the source
-               SOURCE_DIR=${RESOURCE_DIR}/angler-legacy
-               # KER_BRANCH: Branch of kernel to compile
-               KER_BRANCH=m-release
-               # ZIP_MOVE: Folder that holds completed zips
-               ZIP_MOVE=${ZIP_MOVE_PARENT}/Kernels/${DEVICE}/6.0.1/Stable ;;
-            "m-staging")
-               # Different source directory
-               SOURCE_DIR=${RESOURCE_DIR}/angler-legacy
-               # KER_BRANCH: Branch of kernel to compile
-               KER_BRANCH=m-staging
-               # ZIP_MOVE: Folder that holds completed zips
-               ZIP_MOVE=${ZIP_MOVE_PARENT}/Kernels/${DEVICE}/6.0.1/Beta ;;
-         esac
-         # TOOLCHAIN_SOURCE_DIR: Folder that holds the toolchain source that is compiled before building
-         TOOLCHAIN_SOURCE_DIR=${RESOURCE_DIR}/Toolchains/Linaro
-         # TOOLCHAIN_NAME: Name of the toolchain wwe are building
-         TOOLCHAIN_NAME=aarch64-linux-android-6.x-kernel
-         # TOOCHAIN_COMPILED_DIR: Location of the compiled toolchain
-         TOOCHAIN_COMPILED_DIR=${TOOLCHAIN_SOURCE_DIR}/out/${TOOLCHAIN_NAME} ;;
-   esac
-   # ZIMAGE_DIR: Directory that holds completed Image.gz
-   ZIMAGE_DIR=${SOURCE_DIR}/arch/arm64/boot
-   # ANYKERNEL_DIR: Directory that holds AnyKernel source
-   ANYKERNEL_DIR=${RESOURCE_DIR}/anykernel
-   # ANYKERNEL_BRANCH: Branch that we are using for AnyKernel
-   case ${PERSONAL} in
-      "true")
-         ANYKERNEL_BRANCH=angler-flash-personal ;;
-      "false")
-         ANYKERNEL_BRANCH=angler-flash-release ;;
-   esac
-
-
-   # -------
-   # Exports
-   # -------
-   # CROSS_COMPILE: Location of toolchain
-   export CROSS_COMPILE="${TOOCHAIN_COMPILED_DIR}/bin/aarch64-linux-android-"
-   # ARCH and SUBARCH: Architecture we want to compile for
-   export ARCH=arm64
-   export SUBARCH=arm64
-
-
-
-   # ---------
-   # Functions
-   # ---------
-   # Clean the out and AnyKernel dirs and make clean
-   function clean_all {
-      # Cleaning of AnyKernel directory
-      cd "${ANYKERNEL_DIR}"
-      git checkout ${ANYKERNEL_BRANCH}
-      git reset --hard origin/${ANYKERNEL_BRANCH}
-      git clean -f -d -x > /dev/null 2>&1
-      rm -rf ${KERNEL} > /dev/null 2>&1
-
-      echo
-
-      # Cleaning of kernel directory
-      cd "${SOURCE_DIR}"
-      if [[ ${TEST} = false ]]; then
-         git reset --hard origin/${KER_BRANCH}
-         git clean -f -d -x > /dev/null 2>&1; newLine
-         git pull
-      else
-         git clean -f -d -x > /dev/null 2>&1
-      fi
-
-      # Clean .config
-      make clean
-      make mrproper
-   }
-
-
-   # Update toolchain
-   function update_tc {
-      # Move into the toolchain directory
-      cd "${TOOLCHAIN_SOURCE_DIR}"
-      # Repo sync
-      time repo sync --force-sync ${THREAD}
-      # Run the toolchain script
-      cd scripts
-      source ${TOOLCHAIN_NAME}
-   }
-
-
-   # Make the kernel
-   function make_kernel {
-      echo
-      cd "${SOURCE_DIR}"
-
-      # If this is a personal build, set the version to 21
-      if [[ ${PERSONAL} = true ]]; then
-         rm -rf .version
-         touch .version
-         echo 20 >> .version
-      fi
-
-      # Make the DEFCONFIG and the kernel with the right number of threads
-      make ${DEFCONFIG}
-      time make ${THREAD}
-   }
-
-
-   # Make the zip file, remove the previous version and upload it
-   function make_zip {
-      # Copy Image.gz-dtb
-      echoText "MOVING $( echo ${KERNEL} | awk '{print toupper($0)}' ) ($( du -h "${ZIMAGE_DIR}"/${KERNEL} | awk '{print $1}' ))"
-      cp "${ZIMAGE_DIR}"/${KERNEL} "${ANYKERNEL_DIR}"/zImage-dtb
-
-      # Make zip format variable
-      ZIP_FORMAT=F*.zip
-
-      # If ZIPMOVE doesn't exist, make it; otherwise, clean it
-      if [[ ! -d "${ZIP_MOVE}" ]]; then
-         mkdir -p "${ZIP_MOVE}"
-      else
-         # Remove the old zip file
-         rm -rf "${ZIP_MOVE}"/${ZIP_FORMAT}
-      fi
-
-      # Move to AnyKernel directory
-      cd "${ANYKERNEL_DIR}"
-
-      # Make zip file
-      echoText "MAKING FLASHABLE ZIP"
-      zip -r9 ${ZIP_NAME}.zip * -x README ${ZIP_NAME}.zip > /dev/null 2>&1
-
-      # Move the new zip to ZIP_MOVE
-      echoText "MOVING FLASHABLE ZIP"
-      mv ${ZIP_NAME}.zip "${ZIP_MOVE}"
-
-      # Go to the kernel directory
-      cd "${SOURCE_DIR}"
-
-      # If it isn't a test build, clean it
-      if [[ ${TEST} = false ]]; then
-         git reset --hard origin/${KER_BRANCH} > /dev/null 2>&1
-         git clean -f -d -x > /dev/null 2>&1
-         cd ${HOME}
-      fi
-   }
-
-
-
-   # Clear the terminal
-   clear
-
-
-
-   # Time the start of the script
-   DATE_START=$( TZ=MST date +"%s" )
-
-
-
-   # Silently shift to correct branches
-   cd "${SOURCE_DIR}" && git checkout ${KER_BRANCH} > /dev/null 2>&1
-
-
-   # Set the kernel version
-   KERNEL_VERSION=$( grep -r "EXTRAVERSION = -" ${SOURCE_DIR}/Makefile | sed 's/EXTRAVERSION = -//' )
-   ZIP_NAME=${KERNEL_VERSION}-${DEVICE}
-
-
-   # Show the version of the kernel compiling
-   echo -e ${RED}; newLine
-   echo -e "======================================================================="; newLine; newLine
-   echo -e "    ________    ___   _____ __  __    __ __ __________  _   __________ "
-   echo -e "   / ____/ /   /   | / ___// / / /   / //_// ____/ __ \/ | / / ____/ / "
-   echo -e "  / /_  / /   / /| | \__ \/ /_/ /   / ,<  / __/ / /_/ /  |/ / __/ / /  "
-   echo -e " / __/ / /___/ ___ |___/ / __  /   / /| |/ /___/ _, _/ /|  / /___/ /___"
-   echo -e "/_/   /_____/_/  |_/____/_/ /_/   /_/ |_/_____/_/ |_/_/ |_/_____/_____/"; newLine; newLine; newLine
-   echo -e "======================================================================="; newLine; newLine
-
-
-
-   echoText "KERNEL VERSION"; newLine
-
-   echo -e ${RED}${BLINK_RED}${ZIP_NAME}${RESTORE}; newLine
-
-
-   echoText "BUILD SCRIPT STARTING AT $( TZ=MST date +%D\ %r )"
-
-
-   # Update toolchain if requested
-   if [[ "${2}" == "tcupdate" || "${3}" == "tcupdate" ]]; then
-      echoText "UPDATING TOOLCHAIN"; newLine
-
-      update_tc
-   fi
-
-
-   # Clean up
-   echoText "CLEANING UP"
-
-   clean_all
-
-
-   # Make the kernel
-   echoText "MAKING KERNEL"
-
-   make_kernel
-
-
-   # If the above was successful
-   if [[ `ls ${ZIMAGE_DIR}/${KERNEL} 2>/dev/null | wc -l` != "0" ]]; then
-      BUILD_RESULT_STRING="BUILD SUCCESSFUL"
-      SUCCESS=true
-
-      make_zip
-
-   else
-      BUILD_RESULT_STRING="BUILD FAILED"
-      SUCCESS=false
-   fi
-
-
-
-   # End the script
-   newLine; echoText "${BUILD_RESULT_STRING}!"
-
-   DATE_END=$( TZ=MST  date +"%s" )
-   DIFF=$((${DATE_END} - ${DATE_START}))
-
-   # Print the zip location and its size if the script was successful
-   if [[ ${SUCCESS} = true ]]; then
-      echo -e ${RED}"FILE LOCATION: ${ZIP_MOVE}/${ZIP_NAME}.zip"
-      echo -e "SIZE: $( du -h ${ZIP_MOVE}/${ZIP_NAME}.zip | awk '{print $1}' )"${RESTORE}
-   fi
-
-   # Print the time the script finished and how long the script ran for regardless of success
-   echo -e ${RED}"TIME FINISHED: $( TZ=MST date +%D\ %r | awk '{print toupper($0)}' )"
-   echo -e "DURATION: $((${DIFF} / 60)) MINUTES AND $((${DIFF} % 60)) SECONDS"${RESTORE}; newLine
-
-
-
-   # Add line to compile log in the following format:
-   # DATE: BASH_SOURCE (PARAMETERS)
-   echo -e "\n$( TZ=MST date +%H:%M:%S ): ${BASH_SOURCE} ${1}" >> ${LOG}
-
-   # BUILD <SUCCESSFUL|FAILED> IN # MINUTES AND # SECONDS
-   echo -e "${BUILD_RESULT_STRING} IN $((${DIFF} / 60)) MINUTES AND $((${DIFF} % 60)) SECONDS" >> ${LOG}
-
-   # Only add a line about file location if script completed succesfully
-   if [[ ${SUCCESS} = true ]]; then
-      # FILE LOCATION: PATH
-      echo -e "FILE LOCATION: ${ZIP_MOVE}/${ZIP_NAME}.zip" >> ${LOG}
-   fi
-
-   # Alert the user that the script is done
-   echo -e "\a"
-}
-
-case ${1} in
-   "both-staging")
-      # Run the two kernel builds
-      compile n-staging ${2}
-      compile m-staging ;;
-   "both-release")
-      # Run the two kernel builds
-      compile n-release ${2}
-      compile m-release ;;
-   "both-n")
-      # Run the two kernel builds
-      compile n-release ${2}
-      compile n-staging ;;
-   "both-m")
-      # Run the two kernel builds
-      compile m-release ${2}
-      compile m-staging ;;
-   "all")
-      # Run all four kernel builds
-      compile n-release ${2}
-      compile m-release
-      compile n-staging
-      compile m-staging ;;
-   *)
-      compile ${1} ${2} ;;
+   shift
+done
+
+
+
+###############
+#             #
+#  VARIABLES  #
+#             #
+###############
+# ANDROID_HEAD: head folder of all Android folders
+# KERNEL_HEAD: head folder to all kernel folders
+# ANYKERNEL_DIR: Directory that holds AnyKernel source
+
+ANDROID_HEAD=${HOME}
+KERNEL_HEAD=${ANDROID_HEAD}/Kernels
+ZIP_MOVE_HEAD=${HOME}/Web
+TOOLCHAIN_HEAD=${KERNEL_HEAD}/Toolchains/Linaro
+ANYKERNEL_FOLDER=${KERNEL_HEAD}/anykernel
+
+case "${DEVICE}" in
+   "angler")
+      SOURCE_FOLDER=${KERNEL_HEAD}/${DEVICE}
+      ARCHITECTURE=arm64
+      KERNEL_IMAGE=Image.gz-dtb
+      TOOLCHAIN_PREFIX=aarch64-linux-android-
+      TOOLCHAIN_NAME=${TOOLCHAIN_PREFIX}6.x-kernel
+      TOOLCHAIN_FOLDER=${TOOLCHAIN_HEAD}/out/${TOOLCHAIN_NAME} ;;
+   "shamu")
+      SOURCE_FOLDER=${KERNEL_HEAD}/${DEVICE}
+      ARCHITECTURE=arm
+      KERNEL_IMAGE=zImage-dtb
+      TOOLCHAIN_PREFIX=arm-eabi-
+      TOOLCHAIN_NAME=linaro-${TOOLCHAIN_PREFIX}6.x
+      TOOLCHAIN_FOLDER=${TOOLCHAIN_HEAD}/out/${TOOLCHAIN_NAME} ;;
 esac
 
-cd ${HOME}
+case "${KERNEL_BRANCH}" in
+   "staging")
+      ZIP_MOVE=${ZIP_MOVE_HEAD}/Kernels/${DEVICE}/7.0/Beta
+      ANYKERNEL_BRANCH=${DEVICE}-flash-release ;;
+   "release")
+      ZIP_MOVE=${ZIP_MOVE_HEAD}/Kernels/${DEVICE}/7.0/Stable
+      ANYKERNEL_BRANCH=${DEVICE}-flash-release ;;
+   "personal")
+      ZIP_MOVE=${ZIP_MOVE_HEAD}/.hidden/Kernels
+      ANYKERNEL_BRANCH=${DEVICE}-flash-personal ;;
+esac
+
+THREADS=-j$(grep -c ^processor /proc/cpuinfo)
+DEFCONFIG=flash_defconfig
+KERNEL=${SOURCE_FOLDER}/arch/${ARCHITECTURE}/boot/${KERNEL_IMAGE}
+
+
+
+################
+#              #
+# SCRIPT START #
+#              #
+################
+
+# CLEAR THE TERMINAL
+clear
+
+
+# SET THE START OF THE SCRIPT
+DATE_START=$( TZ=MST date +"%s" )
+
+
+# SILENTLY SHIFT KERNEL BRANCHES
+cd "${SOURCE_FOLDER}" && git checkout ${KERNEL_BRANCH} > /dev/null 2>&1
+
+
+# SET KERNEL VERSION FROM MAKEFILE
+KERNEL_VERSION=$( grep -r "EXTRAVERSION = -" ${SOURCE_FOLDER}/Makefile | sed 's/EXTRAVERSION = -//' )
+ZIP_NAME=${KERNEL_VERSION}-${DEVICE}
+
+
+###################
+# SHOW ASCII TEXT #
+###################
+
+echo -e ${RED}; newLine
+echo -e "======================================================================="; newLine; newLine
+echo -e "    ________    ___   _____ __  __    __ __ __________  _   __________ "
+echo -e "   / ____/ /   /   | / ___// / / /   / //_// ____/ __ \/ | / / ____/ / "
+echo -e "  / /_  / /   / /| | \__ \/ /_/ /   / ,<  / __/ / /_/ /  |/ / __/ / /  "
+echo -e " / __/ / /___/ ___ |___/ / __  /   / /| |/ /___/ _, _/ /|  / /___/ /___"
+echo -e "/_/   /_____/_/  |_/____/_/ /_/   /_/ |_/_____/_/ |_/_/ |_/_____/_____/"; newLine; newLine; newLine
+echo -e "======================================================================="; newLine; newLine
+
+
+#########################
+#  SHOW KERNEL VERSION  #
+# AND SCRIPT START TIME #
+#########################
+
+echoText "KERNEL VERSION"; newLine
+
+echo -e ${RED}${BLINK_RED}${ZIP_NAME}${RESTORE}; newLine
+
+echoText "BUILD SCRIPT STARTING AT $( TZ=MST date +%D\ %r )"
+
+
+######################
+# UPDATING TOOLCHAIN #
+######################
+
+if [[ ${TCUPDATE} = true ]]; then
+   echoText "UPDATING TOOLCHAIN"; newLine
+   # Move into the toolchain directory
+   cd "${TOOLCHAIN_HEAD}"
+   # Repo sync
+   time repo sync --force-sync ${THREADS}
+   # Run the toolchain script
+   cd scripts && source ${TOOLCHAIN_NAME}
+fi
+
+
+####################
+# CLEANING FOLDERS #
+####################
+
+echoText "CLEANING UP"
+
+# Cleaning of AnyKernel directory
+cd "${ANYKERNEL_FOLDER}"
+git checkout ${ANYKERNEL_BRANCH}
+git reset --hard origin/${ANYKERNEL_BRANCH}
+git clean -f -d -x > /dev/null 2>&1
+rm -rf zImage-dtb > /dev/null 2>&1
+
+# Cleaning of kernel directory
+cd "${SOURCE_FOLDER}"
+git reset --hard origin/${KERNEL_BRANCH}
+git clean -f -d -x > /dev/null 2>&1; newLine
+
+
+#################
+# MAKING KERNEL #
+#################
+
+echoText "MAKING KERNEL"
+
+# PROPERLY POINT COMPILER TO TOOLCHAIN AND ARCHITECTURE
+export CROSS_COMPILE=${TOOLCHAIN_FOLDER}/bin/${TOOLCHAIN_PREFIX}
+export ARCH=${ARCHITECTURE}
+export SUBARCH=${ARCHITECTURE}
+
+# CLEAN PREVIOUSLY COMPILED FILES AND DEFCONFIG
+make clean && make mrproper
+
+# POINT TO PROPER DEFCONFIG
+make ${DEFCONFIG}
+
+# MAKE THE KERNEL
+make ${THREADS}
+
+
+######################
+# IF KERNEL COMPILED #
+######################
+
+if [[ `ls ${KERNEL} 2>/dev/null | wc -l` != "0" ]]; then
+   # SET BUILD SUCCESS STRING AND SUCCESS VARIABLE
+   BUILD_RESULT_STRING="BUILD SUCCESSFUL" && SUCCESS=true
+
+
+   #####################
+   # COPY KERNEL IMAGE #
+   #####################
+
+   newLine; echoText "MOVING $( echo ${KERNEL_IMAGE} | awk '{print toupper($0)}' ) ($( du -h "${KERNEL}" | awk '{print $1}' ))"
+   cp "${KERNEL}" "${ANYKERNEL_FOLDER}"/zImage-dtb
+
+   # MAKE ZIP_FORMAT VARIABLE
+   ZIP_FORMAT=F*.zip
+
+   # IF ZIPMOVE DOESN'T EXIST, MAKE IT; OTHERWISE, CLEAN IT
+   if [[ ! -d "${ZIP_MOVE}" ]]; then
+      mkdir -p "${ZIP_MOVE}"
+   else
+      rm -rf "${ZIP_MOVE}"/${ZIP_FORMAT}
+   fi
+
+   # MOVE TO ANYKERNEL FOLDER
+   cd "${ANYKERNEL_FOLDER}"
+
+
+   #################
+   # MAKE ZIP FILE #
+   #################
+
+   echoText "MAKING FLASHABLE ZIP"
+   zip -r9 ${ZIP_NAME}.zip * -x README ${ZIP_NAME}.zip > /dev/null 2>&1
+
+
+   #################
+   # MOVE ZIP FILE #
+   #################
+
+   echoText "MOVING FLASHABLE ZIP"
+   mv ${ZIP_NAME}.zip "${ZIP_MOVE}"
+
+
+###################
+# IF BUILD FAILED #
+###################
+
+else
+   BUILD_RESULT_STRING="BUILD FAILED"
+   SUCCESS=false
+fi
+
+
+##############
+# SCRIPT END #
+##############
+
+echoText "${BUILD_RESULT_STRING}!"
+
+DATE_END=$( TZ=MST  date +"%s" )
+DIFF=$((${DATE_END} - ${DATE_START}))
+
+
+######################
+# ENDING INFORMATION #
+######################
+
+# IF THE BUILD WAS SUCCESSFUL, PRINT FILE LOCATION, AND SIZE
+if [[ ${SUCCESS} = true ]]; then
+   echo -e ${RED}"FILE LOCATION: ${ZIP_MOVE}/${ZIP_NAME}.zip"
+   echo -e "SIZE: $( du -h ${ZIP_MOVE}/${ZIP_NAME}.zip | awk '{print $1}' )"${RESTORE}
+fi
+
+# PRINT THE TIME THE SCRIPT FINISHED
+# AND HOW LONG IT TOOK REGARDLESS OF SUCCESS
+echo -e ${RED}"TIME FINISHED: $( TZ=MST date +%D\ %r | awk '{print toupper($0)}' )"
+echo -e "DURATION: $((${DIFF} / 60)) MINUTES AND $((${DIFF} % 60)) SECONDS"${RESTORE}; newLine
+
+
+##################
+# LOG GENERATION #
+##################
+
+# DATE: BASH_SOURCE (PARAMETERS)
+echo -e "\n$( TZ=MST date +%H:%M:%S ): ${BASH_SOURCE} ${1}" >> ${LOG}
+
+# BUILD <SUCCESSFUL|FAILED> IN # MINUTES AND # SECONDS
+echo -e "${BUILD_RESULT_STRING} IN $((${DIFF} / 60)) MINUTES AND $((${DIFF} % 60)) SECONDS" >> ${LOG}
+
+# Only add a line about file location if script completed succesfully
+if [[ ${SUCCESS} = true ]]; then
+   # FILE LOCATION: PATH
+   echo -e "FILE LOCATION: ${ZIP_MOVE}/${ZIP_NAME}.zip" >> ${LOG}
+fi
+
+
+########################
+# ALERT FOR SCRIPT END #
+########################
+
+echo -e "\a" && cd ${HOME}
