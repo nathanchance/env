@@ -19,72 +19,83 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 
+###########
+#         #
+#  USAGE  #
+#         #
+###########
 
-# -----
-# Usage
-# -----
-# $ . gapps.sh banks
-# $ . gapps.sh open <super|stock|full|mini|micro|nano|pico>
+# $ gapps.sh banks
+# $ gapps.sh open <super|stock|full|mini|micro|nano|pico>
 
 
+############
+#          #
+#  COLORS  #
+#          #
+############
 
-# ---------
-# Functions
-# ---------
+RED="\033[01;31m"
+BLINK_RED="\033[05;31m"
+RESTORE="\033[0m"
 
-# Prints a formatted header; used for outlining what the script is doing to the user
+
+###############
+#             #
+#  FUNCTIONS  #
+#             #
+###############
+
+# PRINTS A FORMATTED HEADER TO POINT OUT WHAT IS BEING DONE TO THE USER
 function echoText() {
-   RED="\033[01;31m"
-   RST="\033[0m"
-
    echo -e ${RED}
    echo -e "====$( for i in $( seq ${#1} ); do echo -e "=\c"; done )===="
    echo -e "==  ${1}  =="
    echo -e "====$( for i in $( seq ${#1} ); do echo -e "=\c"; done )===="
-   echo -e ${RST}
+   echo -e ${RESTORE}
 }
 
-# Creates a new line
+
+# CREATES A NEW LINE IN TERMINAL
 function newLine() {
    echo -e ""
 }
 
 
+################
+#              #
+#  PARAMETERS  #
+#              #
+################
 
-# ------------------------
-# Parameters and variables
-# ------------------------
-
-# Unassign success flags
+# RESET SUCCESS FLAG
 SUCCESS=false
 
-# Head Android directory
-ANDROID_DIR=${HOME}
-
-# GApps completed zip directory
-ZIP_MOVE=${HOME}/Web/.hidden/GApps
-
-
-# If there is no first paramter, get it from the user
-if [[ -z ${1} ]]; then
-   echo "GApps selection"
-   echo "   1. Banks"
-   echo "   2. Open"
-   read -p "Which GApps would you like to build? " TYPE_NUM
-
-   case ${TYPE_NUM} in
-      "1")
-         TYPE=banks ;;
-      "2")
-         TYPE=open ;;
+while [[ $# -ge 1 ]]; do
+   case "${1}" in
+      "open"|"banks")
+         TYPE=${1} ;;
+      "super"|"stock"|"full"|"mini"|"micro"|"nano"|"pico")
+         VERSION=${1} ;;
       *)
-         echo "Invalid selection, please run the script again" && return
+         echo "Invalid parameter" && exit ;;
    esac
 
-else
-   TYPE=${1}
+   shift
+done
+
+if [[ -z ${TYPE} ]] || [[ ${TYPE} == "open" && -z ${VERION} ]]; then
+   echo "You did not specify a necessary parameter (either type of GApps or type of Open GApps). Please re-run the script with the necessary parameters!" && exit
 fi
 
+###############
+#             #
+#  VARIABLES  #
+#             #
+###############
+
+ANDROID_DIR=${HOME}
+ZIP_MOVE=${HOME}/Web/.hidden/GApps
 
 # Type logic
 case ${TYPE} in
@@ -95,71 +106,40 @@ case ${TYPE} in
    "open")
       SOURCE_DIR=${ANDROID_DIR}/GApps/Open
       ZIP_BEG=open
-      BRANCH=master
-
-      if [[ -z ${2} ]]; then
-         echo "You have chosen Open GApps!"
-
-         VERSIONS="Super Stock Full Mini Micro Nano Pico"
-         COUNTER=1
-
-         for CURRENT in ${VERSIONS}; do
-            echo "   ${COUNTER}. ${CURRENT}"
-            (( COUNTER++ ))
-         done
-
-         read -p "Which version of Open GApps would you like to build? " VERSION_NUM
-
-         case ${VERSION_NUM} in
-            "1")
-               VERSION=super ;;
-            "2")
-               VERSION=stock ;;
-            "3")
-               VERSION=full ;;
-            "4")
-               VERSION=mini ;;
-            "5")
-               VERSION=micro ;;
-            "6")
-               VERSION=nano ;;
-            "7")
-               VERSION=pico ;;
-            *)
-               echo "Invalid selection, please run the script again" && return
-         esac
-
-      else
-         VERSION=${2}
-      fi ;;
+      BRANCH=master ;;
 esac
 
+################
+# SCRIPT START #
+################
 
-
-# Clear the terminal
 clear
 
 
 
-# Start tracking time
+# SET THE START OF THE SCRIPT
 START=$( TZ=MST date +%s )
 
 
-
-# Go into repo folder
+# MOVE INTO SOURCE FOLDER
 cd ${SOURCE_DIR}
 
 
 
-# Clean up repo
+############
+# CLEAN UP #
+############
+
 echoText "CLEANING UP REPO"
 
 git reset --hard origin/${BRANCH}
 git clean -f -d -x
 
 
+#####################
+# FETCH NEW CHANGES #
+#####################
 
-# Get new changes
 echoText "UPDATING REPO"
 
 git pull
@@ -168,35 +148,56 @@ if [[ "${TYPE}" == "open" ]]; then
 fi
 
 
+##############
+# MAKE GAPPS #
+##############
 
-# Make GApps
 echoText "BUILDING $( echo ${TYPE} | awk '{print toupper($0)}' ) GAPPS"
 
 case "${TYPE}" in
    "banks")
-      . mkgapps.sh ;;
+      source mkgapps.sh ;;
    "open")
       make arm64-24-${VERSION} ;;
 esac
 
 
+#####################
+# IF GAPPS COMPILED #
+#####################
 
-# If the above was successful
-if [[ `ls ${SOURCE_DIR}/out/${ZIP_BEG}*.zip 2>/dev/null | wc -l` != "0" ]]; then
+# THERE WILL BE A ZIP IN THE OUT FOLDER IN THE ZIP FORMAT
+if [[ $( ls ${SOURCE_DIR}/out/${ZIP_BEG}*.zip 2>/dev/null | wc -l ) != "0" ]]; then
+   # MAKE BUILD RESULT STRING REFLECT SUCCESSFUL COMPILATION
    BUILD_RESULT_STRING="BUILD SUCCESSFUL"
    SUCCESS=true
 
-   # If ZIP_MOVE doesn't exist, make it; otherwise, clean it
+
+   ##################
+   # ZIP_MOVE LOGIC #
+   ##################
+
+   # MAKE ZIP_MOVE IF IT DOESN'T EXIST OR CLEAN IT IF IT DOES
    if [[ ! -d ${ZIP_MOVE} ]]; then
       mkdir -p ${ZIP_MOVE}
    else
-      # Remove current GApps and move the new ones in their place
       rm -rf ${ZIP_MOVE}/${ZIP_BEG}*.zip
    fi
 
+
+   ######################
+   # MOVING GAPPS FILES #
+   ######################
+
+   newLine; echoText "MOVING FILES TO ZIP_MOVE DIRECTORY"; newLine
+
    mv -v ${SOURCE_DIR}/out/${ZIP_BEG}*.zip ${ZIP_MOVE}
 
-# If the build failed, add a variable
+
+###################
+# IF BUILD FAILED #
+###################
+
 else
    BUILD_RESULT_STRING="BUILD FAILED"
    SUCCESS=false
@@ -204,45 +205,49 @@ else
 fi
 
 
+##############
+# SCRIPT END #
+##############
 
-# Stop tracking time
-END=$( TZ=MST date +%s )
-
-
-
-# Go home and we're done!
-cd ${HOME}
-
-
-
-# Stop tracking time
 END=$( TZ=MST date +%s )
 newLine; echoText "${BUILD_RESULT_STRING}!"
 
-# Print the zip location and its size if the script was successful
+
+######################
+# ENDING INFORMATION #
+######################
+
+# IF THE BUILD WAS SUCCESSFUL, PRINT FILE LOCATION AND SIZE
 if [[ ${SUCCESS} = true ]]; then
    echo -e ${RED}"FILE LOCATION: $( ls ${ZIP_MOVE}/${ZIP_BEG}*.zip )"
-   echo -e "SIZE: $( du -h ${ZIP_MOVE}/${ZIP_BEG}*.zip | awk '{print $1}' )"${RST}
+   echo -e "SIZE: $( du -h ${ZIP_MOVE}/${ZIP_BEG}*.zip | awk '{print $1}' )"${RESTORE}
 fi
 
-# Print the time the script finished and how long the script ran for regardless of success
+# PRINT THE TIME THE SCRIPT FINISHED
+# AND HOW LONG IT TOOK REGARDLESS OF SUCCESS
 echo -e ${RED}"TIME FINISHED: $( TZ=MST date +%D\ %r | awk '{print toupper($0)}' )"
-echo -e ${RED}"DURATION: $( echo $((${END}-${START})) | awk '{print int($1/60)" MINUTES AND "int($1%60)" SECONDS"}' )"${RST}; newLine
+echo -e ${RED}"DURATION: $( echo $((${END}-${START})) | awk '{print int($1/60)" MINUTES AND "int($1%60)" SECONDS"}' )"${RESTORE}; newLine
 
 
+##################
+# LOG GENERATION #
+##################
 
-# Add line to compile log in the following format:
 # DATE: BASH_SOURCE (PARAMETERS)
 echo -e "\n$( TZ=MST date +%H:%M:%S ): ${BASH_SOURCE} ${TYPE}" >> ${LOG}
 
 # BUILD <SUCCESSFUL|FAILED> IN # MINUTES AND # SECONDS
 echo -e "${BUILD_RESULT_STRING} IN $(echo $((${END}-${START})) | awk '{print int($1/60)" MINUTES AND "int($1%60)" SECONDS"}')" >> ${LOG}
 
-# Only add a line about file location if script completed succesfully
+# ONLY ADD A LINE ABOUT FILE LOCATION IF SCRIPT COMPLETED SUCCESSFULLY
 if [[ ${SUCCESS} = true ]]; then
    # FILE LOCATION: <PATH>
    echo -e "FILE LOCATION: $( ls ${ZIP_MOVE}/${ZIP_BEG}*.zip )" >> ${LOG}
 fi
 
-# Notify the user that their script is done
-echo -e "\a"
+
+########################
+# ALERT FOR SCRIPT END #
+########################
+
+echo -e "\a" && cd ${HOME}
