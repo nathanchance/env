@@ -264,7 +264,7 @@ make clean && make mrproper
 make ${DEFCONFIG}
 
 # MAKE THE KERNEL
-make ${THREADS}
+time make ${THREADS}
 
 
 ######################
