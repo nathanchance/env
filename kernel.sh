@@ -94,6 +94,9 @@ while [[ $# -ge 1 ]]; do
    shift
 done
 
+if [[ -z ${DEVICE} || -z ${KERNEL_BRANCH} ]]; then
+   echo "You did not specify a necessary parameter (either device, branch, or both). Please re-run the script with the necessary parameters!" && exit
+fi
 
 
 ###############
@@ -360,7 +363,7 @@ echo -e "\n$( TZ=MST date +%H:%M:%S ): ${BASH_SOURCE} ${1}" >> ${LOG}
 # BUILD <SUCCESSFUL|FAILED> IN # MINUTES AND # SECONDS
 echo -e "${BUILD_RESULT_STRING} IN $((${DIFF} / 60)) MINUTES AND $((${DIFF} % 60)) SECONDS" >> ${LOG}
 
-# Only add a line about file location if script completed succesfully
+# ONLY ADD A LINE ABOUT FILE LOCATION IF SCRIPT COMPLETED SUCCESSFULLY
 if [[ ${SUCCESS} = true ]]; then
    # FILE LOCATION: PATH
    echo -e "FILE LOCATION: ${ZIP_MOVE}/${ZIP_NAME}.zip" >> ${LOG}
