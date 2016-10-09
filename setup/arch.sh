@@ -15,9 +15,21 @@
 #
 
 
+# [archlinuxfr]
+# SigLevel = Never
+# Server = http://repo.archlinux.fr/\$arch
+
+# Uncomment multilib
+
+
+# ECHO PREREQUISITES TO USER
+echo "Before proceeding, you must have enabled the multilib and archlinuxfr repos in /etc/pacman.conf! If you have not done so, please cancel the script and do this now!"
+sleep 10
+
+
 # Start the script!
 clear
-echo Installing Dependencies!
+echo "Installing Dependencies!"
 
 
 # Update pacman lists
@@ -27,7 +39,7 @@ sudo pacman -Syu
 # Install additional packages
 sudo pacman -S git gnupg gperf sdl wxgtk bash-completion subversion \
 squashfs-tools curl ncurses zlib schedtool perl-switch ca-certificates-mozilla \
-zip unzip libxslt maven tmux screen w3m python2-virtualenv bc rsync ncftp
+zip unzip libxslt maven tmux screen w3m python2-virtualenv bc rsync ncftp expac yajl
 
 
 # Comment out the next section if you installed base-devel from pacstrap
@@ -35,33 +47,14 @@ sudo pacman -S autoconf automake binutils bison fakeroot findutils flex gcc \
 groff libtool m4 make patch pkg-config
 
 
-# Enable multilib section in /etc/pacman.conf
-echo "Enabling multilib if not already enabled!"
-if [ $(grep "\#\[multilib\]" /etc/pacman.conf) ]; then
-   if [ ! $(grep "\#AkhilsScriptWasHere" /etc/pacman.conf) ]; then
-      sudo echo "
-      [multilib]
-      Include = /etc/pacman.d/mirrorlist
-      " >> /etc/pacman.conf
-   fi
-fi
-# Update pacman list
-sudo pacman -Syu
-
-
 # Installing 64 bit needed packages
 sudo pacman -S gcc-multilib lib32-zlib lib32-ncurses lib32-readline
 
 
-# yaourt for easy installing from AUR
-echo "Installing yaourt!"
-if [ ! $(grep "\#AkhilsScriptWasHere" /etc/pacman.conf) ]; then
-   sudo echo "# Added for yaourt
-   [archlinuxfr]
-   SigLevel = Never
-   Server = http://repo.archlinux.fr/\$arch" >> /etc/pacman.conf
-fi
-sudo pacman -Sy yaourt
+# Install pacaur
+echo "Installing pacaur"
+curl -o PKGBUILD https://aur.archlinux.org/cgit/aur.git/plain/PKGBUILD?h=cower && makepkg PKGBUILD --skippgpcheck && sudo pacman -U cower*.tar.xz --noconfirm && rm -rf *.tar.xz PKGBUILD
+curl -o PKGBUILD https://aur.archlinux.org/cgit/aur.git/plain/PKGBUILD?h=pacaur && makepkg PKGBUILD && sudo pacman -U pacaur*.tar.xz --noconfirm &&  && rm -rf *.tar.xz PKGBUILD
 
 
 # Disable pgp checking when installing stuff from AUR
@@ -69,11 +62,11 @@ export MAKEPKG="makepkg --skippgpcheck"
 
 
 # Install AUR packages
-yaourt -S libtinfo
-yaourt -S lib32-ncurses5-compat-libs
-yaourt -S ncurses5-compat-libs
-yaourt -S phablet-tools
-yaourt -S make-3.81
+pacaur -S libtinfo
+pacaur -S lib32-ncurses5-compat-libs
+pacaur -S ncurses5-compat-libs
+pacaur -S phablet-tools
+pacaur -S make-3.81
 
 
 # Print commands that user needs to run before building
