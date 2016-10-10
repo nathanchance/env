@@ -130,9 +130,9 @@ case "${ROM}" in
       SOURCE_DIR=${ANDROID_DIR}/ROMs/PN
       case "${PERSONAL}" in
          "true")
-            ZIP_MOVE=${ZIP_MOVE_PARENT}/PureNexus/${DEVICE} ;;
-         "false")
             ZIP_MOVE=${ZIP_MOVE_PARENT}/PureNexus/Personal ;;
+         "false")
+            ZIP_MOVE=${ZIP_MOVE_PARENT}/PureNexus/${DEVICE} ;;
       esac
       ZIP_FORMAT=pure_nexus_${DEVICE}-7*.zip ;;
    "saosp")
