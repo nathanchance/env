@@ -84,7 +84,7 @@ while [[ $# -ge 1 ]]; do
    shift
 done
 
-if [[ -z ${TYPE} ]] || [[ ${TYPE} == "open" && -z ${VERION} ]]; then
+if [[ -z ${TYPE} ]] || [[ ${TYPE} == "open" && -z ${VERSION} ]]; then
    echo "You did not specify a necessary parameter (either type of GApps or type of Open GApps). Please re-run the script with the necessary parameters!" && exit
 fi
 
