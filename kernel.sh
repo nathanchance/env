@@ -184,7 +184,12 @@ cd "${SOURCE_FOLDER}" && git checkout ${KERNEL_BRANCH} > /dev/null 2>&1
 
 # SET KERNEL VERSION FROM MAKEFILE
 KERNEL_VERSION=$( grep -r "EXTRAVERSION = -" ${SOURCE_FOLDER}/Makefile | sed 's/EXTRAVERSION = -//' )
-ZIP_NAME=${KERNEL_VERSION}-${DEVICE}
+case ${KERNEL_BRANCH} in
+   "personal")
+      ZIP_NAME=${KERNEL_VERSION}-$( TZ=MST date +%m_%d_%Y ) ;;
+   *)
+      ZIP_NAME=${KERNEL_VERSION}-${DEVICE} ;;
+esac
 
 
 ###################
