@@ -83,7 +83,7 @@ while [[ $# -ge 1 ]]; do
          KERNEL_BRANCH=personal ;;
       "shamu"|"angler"|"bullhead")
          DEVICE=${1} ;;
-      "staging"|"release")
+      "staging"|"release"|"testing")
          KERNEL_BRANCH=${1} ;;
       "tcupdate")
          TCUPDATE=true ;;
@@ -152,6 +152,9 @@ case "${KERNEL_BRANCH}" in
       ANYKERNEL_BRANCH=${DEVICE}-flash-release ;;
    "release")
       ZIP_MOVE=${ZIP_MOVE_HEAD}/Kernels/${DEVICE}/7.0/Stable
+      ANYKERNEL_BRANCH=${DEVICE}-flash-release ;;
+   "testing")
+      ZIP_MOVE=${ZIP_MOVE_HEAD}/Kernels/${DEVICE}/7.0/Testing
       ANYKERNEL_BRANCH=${DEVICE}-flash-release ;;
    "personal")
       ZIP_MOVE=${ZIP_MOVE_HEAD}/.hidden/Kernels
