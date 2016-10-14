@@ -81,7 +81,7 @@ while [[ $# -ge 1 ]]; do
       "me")
          DEVICE=angler
          KERNEL_BRANCH=personal ;;
-      "shamu"|"angler")
+      "shamu"|"angler"|"bullhead")
          DEVICE=${1} ;;
       "staging"|"release")
          KERNEL_BRANCH=${1} ;;
@@ -130,7 +130,7 @@ TOOLCHAIN_HEAD=${KERNEL_HEAD}/Toolchains/Linaro
 ANYKERNEL_FOLDER=${KERNEL_HEAD}/anykernel
 
 case "${DEVICE}" in
-   "angler")
+   "angler"|"bullhead")
       SOURCE_FOLDER=${KERNEL_HEAD}/${DEVICE}
       ARCHITECTURE=arm64
       KERNEL_IMAGE=Image.gz-dtb
