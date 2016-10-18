@@ -101,11 +101,11 @@ ZIP_MOVE=${HOME}/Web/.hidden/GApps
 case ${TYPE} in
    "banks")
       SOURCE_DIR=${ANDROID_DIR}/GApps/Banks
-      ZIP_BEG=banks
+      ZIP_FORMAT=banks*.zip
       BRANCH=n ;;
    "open")
       SOURCE_DIR=${ANDROID_DIR}/GApps/Open
-      ZIP_BEG=open
+      ZIP_FORMAT=open*${VERSION}*.zip
       BRANCH=master ;;
 esac
 
@@ -168,7 +168,7 @@ esac
 #####################
 
 # THERE WILL BE A ZIP IN THE OUT FOLDER IN THE ZIP FORMAT
-if [[ $( ls ${SOURCE_DIR}/out/${ZIP_BEG}*.zip 2>/dev/null | wc -l ) != "0" ]]; then
+if [[ $( ls ${SOURCE_DIR}/out/${ZIP_FORMAT} 2>/dev/null | wc -l ) != "0" ]]; then
    # MAKE BUILD RESULT STRING REFLECT SUCCESSFUL COMPILATION
    BUILD_RESULT_STRING="BUILD SUCCESSFUL"
    SUCCESS=true
@@ -182,7 +182,7 @@ if [[ $( ls ${SOURCE_DIR}/out/${ZIP_BEG}*.zip 2>/dev/null | wc -l ) != "0" ]]; t
    if [[ ! -d ${ZIP_MOVE} ]]; then
       mkdir -p ${ZIP_MOVE}
    else
-      rm -rf ${ZIP_MOVE}/${ZIP_BEG}*.zip
+      rm -rf ${ZIP_MOVE}/${ZIP_FORMAT}
    fi
 
 
@@ -192,7 +192,7 @@ if [[ $( ls ${SOURCE_DIR}/out/${ZIP_BEG}*.zip 2>/dev/null | wc -l ) != "0" ]]; t
 
    newLine; echoText "MOVING FILES TO ZIP_MOVE DIRECTORY"; newLine
 
-   mv -v ${SOURCE_DIR}/out/${ZIP_BEG}*.zip ${ZIP_MOVE}
+   mv -v ${SOURCE_DIR}/out/${ZIP_FORMAT} ${ZIP_MOVE}
 
 
 ###################
@@ -220,8 +220,8 @@ newLine; echoText "${BUILD_RESULT_STRING}!"
 
 # IF THE BUILD WAS SUCCESSFUL, PRINT FILE LOCATION AND SIZE
 if [[ ${SUCCESS} = true ]]; then
-   echo -e ${RED}"FILE LOCATION: $( ls ${ZIP_MOVE}/${ZIP_BEG}*.zip )"
-   echo -e "SIZE: $( du -h ${ZIP_MOVE}/${ZIP_BEG}*.zip | awk '{print $1}' )"${RESTORE}
+   echo -e ${RED}"FILE LOCATION: $( ls ${ZIP_MOVE}/${ZIP_FORMAT} )"
+   echo -e "SIZE: $( du -h ${ZIP_MOVE}/${ZIP_FORMAT} | awk '{print $1}' )"${RESTORE}
 fi
 
 # PRINT THE TIME THE SCRIPT FINISHED
@@ -243,7 +243,7 @@ echo -e "${BUILD_RESULT_STRING} IN $(echo $((${END}-${START})) | awk '{print int
 # ONLY ADD A LINE ABOUT FILE LOCATION IF SCRIPT COMPLETED SUCCESSFULLY
 if [[ ${SUCCESS} = true ]]; then
    # FILE LOCATION: <PATH>
-   echo -e "FILE LOCATION: $( ls ${ZIP_MOVE}/${ZIP_BEG}*.zip )" >> ${LOG}
+   echo -e "FILE LOCATION: $( ls ${ZIP_MOVE}/${ZIP_FORMAT} )" >> ${LOG}
 fi
 
 
