@@ -125,15 +125,16 @@ START=$( TZ=MST date +%s )
 cd ${SOURCE_DIR}
 
 
+if [[ "${TYPE}" == "banks" ]]; then
+   ############
+   # CLEAN UP #
+   ############
 
-############
-# CLEAN UP #
-############
+   echoText "CLEANING UP REPO"
 
-echoText "CLEANING UP REPO"
-
-git reset --hard origin/${BRANCH}
-git clean -f -d -x
+   git reset --hard origin/${BRANCH}
+   git clean -f -d -x
+fi
 
 
 #####################
