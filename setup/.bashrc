@@ -30,6 +30,9 @@ export PATH=${PATH}:${HOME}/Misc/android-sdk-linux/build-tools/24.0.3
 
 alias gf='git fetch'
 alias gcp='git cherry-pick'
+alias gcpa='git cherry-pick --abort'
+alias gcpc='git cherry-pick --continue'
+alias gcpq='git cherry-pick --quit'
 
 alias gph='git push'
 alias gpo='git push origin'
@@ -57,6 +60,9 @@ alias gcb='git checkout -b'
 alias gch='git checkout'
 
 alias grb='git rebase'
+
+alias gd='git diff'
+alias gdc='git diff --cached'
 
 
 #############
