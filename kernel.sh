@@ -186,10 +186,11 @@ cd "${SOURCE_FOLDER}" && git checkout ${KERNEL_BRANCH} > /dev/null 2>&1
 
 
 # SET KERNEL VERSION FROM MAKEFILE
-KERNEL_VERSION=$( grep -r "EXTRAVERSION = -" ${SOURCE_FOLDER}/Makefile | sed 's/EXTRAVERSION = -//' )
+KERNEL_VERSION=$( grep -r "EXTRAVERSION = -" ${SOURCE_FOLDER}/Makefile | sed 's/^.*F/F/' )
 case ${KERNEL_BRANCH} in
    "personal")
-      ZIP_NAME=${KERNEL_VERSION}-$( TZ=MST date +%m%d-%H%M ) ;;
+      REVISION=$( git log --committer="Nathan Chancellor" --format="%H" | wc -l )
+      ZIP_NAME=${KERNEL_VERSION}-${REVISION}-$( TZ=MST date +%m%d%Y%H%M ) ;;
    *)
       ZIP_NAME=${KERNEL_VERSION}-${DEVICE} ;;
 esac
@@ -276,7 +277,7 @@ make ${DEFCONFIG}
 if [[ "${KERNEL_BRANCH}" == "personal" ]]; then
    rm -rf .version
    touch .version
-   echo $(( $( git log --committer="Nathan Chancellor" --format="%H" | wc -l ) - 1 )) >> .version
+   echo $(( ${REVISION} - 1 )) >> .version
 fi
 
 # MAKE THE KERNEL
