@@ -272,13 +272,11 @@ make clean && make mrproper
 make ${DEFCONFIG}
 
 # IF THIS IS A PERSONAL BUILD, SHOW THE NUMBER OF COMMITS
-# I ADDED TO THE KERNEL SINCE UPSTREAM LINUX
+# I ADDED TO THE KERNEL (INCLUDING UPSTREAM LINUX)
 if [[ "${KERNEL_BRANCH}" == "personal" ]]; then
-   FIRST_COMMIT=$( git log --grep="Linux 3.10.1" --format="%H" -n 1 )
-   LAST_COMMIT=$( git log --format="%H" -n 1 )
    rm -rf .version
    touch .version
-   echo $(( $(git rev-list ${FIRST_COMMIT}..${LAST_COMMIT} --count) - 1 )) >> .version
+   echo $(( $( git log --committer="Nathan Chancellor" --format="%H" | wc -l ) - 1 )) >> .version
 fi
 
 # MAKE THE KERNEL
