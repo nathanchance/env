@@ -189,7 +189,7 @@ cd "${SOURCE_FOLDER}" && git checkout ${KERNEL_BRANCH} > /dev/null 2>&1
 KERNEL_VERSION=$( grep -r "EXTRAVERSION = -" ${SOURCE_FOLDER}/Makefile | sed 's/^.*F/F/' )
 case ${KERNEL_BRANCH} in
    "personal")
-      REVISION=$( git log --committer="Nathan Chancellor" --format="%H" | wc -l )
+      REVISION=$( git rev-list HEAD --committer="Nathan Chancellor" --count )
       ZIP_NAME=${KERNEL_VERSION}-${REVISION}-$( TZ=MST date +%m%d%Y%H%M ) ;;
    *)
       ZIP_NAME=${KERNEL_VERSION}-${DEVICE} ;;
