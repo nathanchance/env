@@ -75,8 +75,7 @@ SUCCESS=false
 while [[ $# -ge 1 ]]; do
    case "${1}" in
       "me")
-         PERSONAL=true
-         ROM=pn
+         ROM=pn-oms-dui
          DEVICE=angler ;;
       "shamu"|"angler"|"bullhead"|"hammerhead")
          DEVICE=${1} ;;
@@ -128,12 +127,12 @@ case "${ROM}" in
       ZIP_FORMAT=MapleAOSP*.zip ;;
    "pn")
       SOURCE_DIR=${ANDROID_DIR}/ROMs/PN
-      case "${PERSONAL}" in
-         "true")
-            ZIP_MOVE=${ZIP_MOVE_PARENT}/PureNexus/Personal ;;
-         "false")
-            ZIP_MOVE=${ZIP_MOVE_PARENT}/PureNexus/${DEVICE} ;;
-      esac
+      ZIP_MOVE=${ZIP_MOVE_PARENT}/PureNexus/${DEVICE}
+      ZIP_FORMAT=pure_nexus_${DEVICE}-7*.zip ;;
+   "pn-oms-dui")
+      export ROM_BUILD_TYPE=OMS-DUI
+      SOURCE_DIR=${ANDROID_DIR}/ROMs/PN-OMS-DUI
+      ZIP_MOVE=${ZIP_MOVE_PARENT}/Personal
       ZIP_FORMAT=pure_nexus_${DEVICE}-7*.zip ;;
    "saosp")
       SOURCE_DIR=${ANDROID_DIR}/ROMs/SAOSP
