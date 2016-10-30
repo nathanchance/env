@@ -130,7 +130,6 @@ case "${ROM}" in
       ZIP_MOVE=${ZIP_MOVE_PARENT}/PureNexus/${DEVICE}
       ZIP_FORMAT=pure_nexus_${DEVICE}-7*.zip ;;
    "pn-oms-dui")
-      export ROM_BUILD_TYPE=OMS-DUI
       SOURCE_DIR=${ANDROID_DIR}/ROMs/PN-OMS-DUI
       ZIP_MOVE=${ZIP_MOVE_PARENT}/Personal
       ZIP_FORMAT=pure_nexus_${DEVICE}-7*.zip ;;
