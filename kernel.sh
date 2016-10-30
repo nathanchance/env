@@ -192,7 +192,7 @@ case ${KERNEL_BRANCH} in
       REVISION=$( git rev-list HEAD --committer="Nathan Chancellor" --count )
       ZIP_NAME=${KERNEL_VERSION}-${REVISION}-$( TZ=MST date +%m%d%Y%H%M ) ;;
    *)
-      ZIP_NAME=${KERNEL_VERSION}-${DEVICE} ;;
+      ZIP_NAME=${KERNEL_VERSION} ;;
 esac
 
 
