@@ -75,7 +75,7 @@ SUCCESS=false
 while [[ $# -ge 1 ]]; do
    case "${1}" in
       "me")
-         ROM=pn-oms-dui
+         ROM=flash
          DEVICE=angler ;;
       "shamu"|"angler"|"bullhead"|"hammerhead")
          DEVICE=${1} ;;
@@ -105,7 +105,7 @@ fi
 # ZIP_MOVE: Directory to hold completed ROM zips
 # ZIP_FORMAT: The format of the zip file in the out directory for moving to ZIP_MOVE
 ANDROID_DIR=${HOME}
-ZIP_MOVE_PARENT=${HOME}/Web/.hidden/ROMs
+ZIP_MOVE_PARENT=${HOME}/Web/.superhidden/ROMs
 
 # Otherwise, define them for our various ROMs
 case "${ROM}" in
@@ -121,6 +121,10 @@ case "${ROM}" in
       SOURCE_DIR=${ANDROID_DIR}/ROMs/DU
       ZIP_MOVE=${ZIP_MOVE_PARENT}/DirtyUnicorns/${DEVICE}
       ZIP_FORMAT=DU_${DEVICE}_*.zip ;;
+   "flash")
+      SOURCE_DIR=${ANDROID_DIR}/ROMs/Flash
+      ZIP_MOVE=${ZIP_MOVE_PARENT}/Personal
+      ZIP_FORMAT=flash_${DEVICE}-7*.zip ;;
    "maple")
       SOURCE_DIR=${ANDROID_DIR}/ROMs/MapleAOSP
       ZIP_MOVE=${ZIP_MOVE_PARENT}/MapleAOSP/${DEVICE}
@@ -129,9 +133,9 @@ case "${ROM}" in
       SOURCE_DIR=${ANDROID_DIR}/ROMs/PN
       ZIP_MOVE=${ZIP_MOVE_PARENT}/PureNexus/${DEVICE}
       ZIP_FORMAT=pure_nexus_${DEVICE}-7*.zip ;;
-   "pn-oms-dui")
+   "pn-dui")
       SOURCE_DIR=${ANDROID_DIR}/ROMs/PN-OMS-DUI
-      ZIP_MOVE=${ZIP_MOVE_PARENT}/Personal
+      ZIP_MOVE=${ZIP_MOVE_PARENT}/PN-DUI
       ZIP_FORMAT=pure_nexus_${DEVICE}-7*.zip ;;
    "saosp")
       SOURCE_DIR=${ANDROID_DIR}/ROMs/SAOSP

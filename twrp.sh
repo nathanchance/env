@@ -96,7 +96,7 @@ fi
 # DIRECTORIES
 SOURCE_DIR=${HOME}/ROMs/Omni
 OUT_DIR=${SOURCE_DIR}/out/target/product/${DEVICE}
-IMG_MOVE=${HOME}/Web/.hidden/TWRP
+IMG_MOVE=${HOME}/Web/.superhidden/TWRP
 
 # FILE NAMES
 COMP_FILE=recovery.img

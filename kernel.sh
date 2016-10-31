@@ -157,7 +157,7 @@ case "${KERNEL_BRANCH}" in
       ZIP_MOVE=${ZIP_MOVE_HEAD}/Kernels/${DEVICE}/7.0/Testing
       ANYKERNEL_BRANCH=${DEVICE}-flash-release ;;
    "personal")
-      ZIP_MOVE=${ZIP_MOVE_HEAD}/.hidden/Kernels
+      ZIP_MOVE=${ZIP_MOVE_HEAD}/.superhidden/Kernels
       ANYKERNEL_BRANCH=${DEVICE}-flash-personal ;;
 esac
 
