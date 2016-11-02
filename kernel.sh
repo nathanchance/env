@@ -190,7 +190,7 @@ KERNEL_VERSION=$( grep -r "EXTRAVERSION = -" ${SOURCE_FOLDER}/Makefile | sed 's/
 case ${KERNEL_BRANCH} in
    "personal")
       REVISION=$( git rev-list HEAD --committer="Nathan Chancellor" --count )
-      ZIP_NAME=${KERNEL_VERSION}-${REVISION}-$( TZ=MST date +%m%d%Y%H%M ) ;;
+      ZIP_NAME=${KERNEL_VERSION}-${REVISION}-$( TZ=MST date +%Y%m%d-%H%M ) ;;
    *)
       ZIP_NAME=${KERNEL_VERSION} ;;
 esac
