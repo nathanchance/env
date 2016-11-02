@@ -79,7 +79,7 @@ while [[ $# -ge 1 ]]; do
          DEVICE=angler ;;
       "shamu"|"angler"|"bullhead"|"hammerhead")
          DEVICE=${1} ;;
-      "pn"|"du"|"abc"|"maple"|"aosip"|"saosp")
+      "pn"|"pn-dui"|"du"|"abc"|"maple"|"aosip"|"saosp")
          ROM=${1} ;;
       *)
          echo "Invalid parameter detected!" && exit ;;
@@ -134,7 +134,7 @@ case "${ROM}" in
       ZIP_MOVE=${ZIP_MOVE_PARENT}/PureNexus/${DEVICE}
       ZIP_FORMAT=pure_nexus_${DEVICE}-7*.zip ;;
    "pn-dui")
-      SOURCE_DIR=${ANDROID_DIR}/ROMs/PN-OMS-DUI
+      SOURCE_DIR=${ANDROID_DIR}/ROMs/PN-DUI
       ZIP_MOVE=${ZIP_MOVE_PARENT}/PN-DUI
       ZIP_FORMAT=pure_nexus_${DEVICE}-7*.zip ;;
    "saosp")
