@@ -251,8 +251,10 @@ git clean -f -d -x > /dev/null 2>&1
 
 # Cleaning of kernel directory
 cd "${SOURCE_FOLDER}"
-git reset --hard origin/${KERNEL_BRANCH}
-git clean -f -d -x > /dev/null 2>&1; newLine
+if [[ "${KERNEL_BRANCH}" != "personal" ]]; then
+   git reset --hard origin/${KERNEL_BRANCH}
+   git clean -f -d -x > /dev/null 2>&1; newLine
+fi
 
 
 #################
