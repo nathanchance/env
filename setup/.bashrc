@@ -36,7 +36,7 @@ alias gcpq='git cherry-pick --quit'
 
 alias gph='git push'
 alias gpo='git push origin'
-alias gpf='git push origin --force'
+alias gpf='git push --force'
 alias gpsu='git push --set-upstream origin'
 
 alias ga='git add'
@@ -63,11 +63,24 @@ alias grb='git rebase'
 
 alias gd='git diff'
 alias gdc='git diff --cached'
+alias gdh='git diff HEAD'
 
+function gcpa {
+   git cherry-pick ${1} && git commit --amend
+}
 
 #############
 # FUNCTIONS #
 #############
+
+# Updating Arch function
+function update {
+   sudo pacman -Syu && pacaur -Syu
+
+   if [[ "${1}" == "reboot "]]; then
+      sudo reboot
+   fi
+}
 
 # Flash build function
 function flash_build {
@@ -76,8 +89,8 @@ function flash_build {
          export CROSS_COMPILE=/home/nathan/Kernels/Toolchains/Linaro/out/linaro-arm-eabi-6.x/bin/arm-eabi-
          export ARCH=arm
          export SUBARCH=arm ;;
-      "angler")
-         export CROSS_COMPILE="/home/nathan/Kernels/Toolchains/Linaro/out/aarch64-linux-android-6.x-kernel/bin/aarch64-linux-android-"
+      "angler"|"bullhead")
+         export CROSS_COMPILE=/home/nathan/Kernels/Toolchains/Linaro/out/aarch64-linux-android-6.x-kernel/bin/aarch64-linux-android-
          export ARCH=arm64
          export SUBARCH=arm64 ;;
    esac
@@ -85,30 +98,50 @@ function flash_build {
    make clean
    make mrproper
    make flash_defconfig
-   make -j8
+   make -j$( grep -c ^processor /proc/cpuinfo )
 }
 
 # Update Linux mirror function
-function update_linux {
-   cd ${HOME}/Kernels/linux
+function update_mirrors {
+   cd ${HOME}/Kernels/linux-stable
    git fetch -p origin
    git push --mirror
-}
 
-# Updating Arch function
-function update {
-   sudo pacman -Syu && pacaur -Syu
+   cd ${HOME}/Kernels/android-kernel-msm
+   git fetch -p origin
+   git push --mirror
+
+   cd ${HOME}
 }
 
 # Add remote function for kernel repos
 function kernel_remotes {
    git remote add aosp https://android.googlesource.com/kernel/msm/ && git fetch aosp
    git remote add caf https://source.codeaurora.org/quic/la/kernel/msm-3.10 && git fetch caf
-   git remote add linux https://github.com/nathanchance/linux && git fetch linux
-   git remote add android-linux https://github.com/nathanchance/android-linux-upstream && git fetch android-linux
+   git remote add ls https://github.com/Flash-Kernel/linux-stable && git fetch ls
 }
 
 # EXKM to RC converter
 function exkm2rc {
    sed -e 's/^/   write /' ${1} > ${2}
+}
+
+# Set up a virtual environment for Python
+function mkavenv {
+   virtualenv2 venv && source venv/bin/activate
+}
+
+function update_linaro {
+   cd ${HOME}/Kernels/Toolchains/Linaro
+   repo sync --force-sync -j$( grep -c ^processor /proc/cpuinfo )
+   cd scripts
+
+   case ${1} in
+      "arm")
+      bash arm-eabi-6.x ;;
+      "arm64")
+      bash aarch64-linux-android-6.x-kernel ;;
+   esac
+
+   cd ${HOME}
 }
