@@ -71,6 +71,7 @@ function newLine() {
 unset ROM_BUILD_TYPE
 PERSONAL=false
 SUCCESS=false
+SYNC=true
 
 while [[ $# -ge 1 ]]; do
    case "${1}" in
@@ -81,6 +82,8 @@ while [[ $# -ge 1 ]]; do
          DEVICE=${1} ;;
       "pn"|"pn-dui"|"du"|"abc"|"maple"|"aosip"|"saosp")
          ROM=${1} ;;
+      "nosync")
+         SYNC=false ;;
       *)
          echo "Invalid parameter detected!" && exit ;;
    esac
@@ -177,9 +180,11 @@ cd ${SOURCE_DIR}
 # REPO SYNC #
 #############
 
-echoText "SYNCING LATEST SOURCES"; newLine
+if [[ ${SYNC} = true ]]; then
+   echoText "SYNCING LATEST SOURCES"; newLine
 
-repo sync --force-sync ${THREADS_FLAG}
+   repo sync --force-sync ${THREADS_FLAG}
+fi
 
 
 ###########################
@@ -229,7 +234,19 @@ make clobber
 # START BUILDING #
 ##################
 
-echoText "MAKING ZIP FILE"; newLine
+if [[ ${ROM} == "flash" ]]; then
+   echo -e ${RED}
+   echo -e "======================================================================"; newLine
+   echo -e "  ___________________________________  __   _____________________  ___"
+   echo -e "  ___  ____/__  /___    |_  ___/__  / / /   ___  __ \_  __ \__   |/  /"
+   echo -e "  __  /_   __  / __  /| |____ \__  /_/ /    __  /_/ /  / / /_  /|_/ / "
+   echo -e "  _  __/   _  /___  ___ |___/ /_  __  /     _  _, _// /_/ /_  /  / /  "
+   echo -e "  /_/      /_____/_/  |_/____/ /_/ /_/      /_/ |_| \____/ /_/  /_/   "; newLine
+   echo -e "======================================================================"; newLine
+   echo -e ${RESTORE}
+else
+   echoText "MAKING ZIP FILE"; newLine
+fi
 
 NOW=$( TZ=MST date +"%Y-%m-%d-%S" )
 
