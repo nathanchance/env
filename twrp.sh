@@ -118,16 +118,12 @@ export EXPERIMENTAL_USE_JAVA8=true
 # START TRACKING TIME #
 #######################
 
-echoText "SCRIPT STARTING AT $( TZ=MST date +%D\ %r )"
-
 START=$( TZ=MST date +%s )
 
 
 ###########################
 # MOVE INTO SOURCE FOLDER #
 ###########################
-
-echoText "MOVING TO SOURCE DIRECTORY"
 
 cd ${SOURCE_DIR}
 

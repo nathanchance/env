@@ -162,16 +162,12 @@ clear
 # START TRACKING TIME #
 #######################
 
-echoText "SCRIPT STARTING AT $( TZ=MST date +%D\ %r )"
-
 START=$( TZ=MST date +%s )
 
 
 ###########################
 # MOVE INTO SOURCE FOLDER #
 ###########################
-
-echoText "MOVING TO SOURCE DIRECTORY"
 
 cd ${SOURCE_DIR}
 
@@ -244,6 +240,7 @@ if [[ ${ROM} == "flash" ]]; then
    echo -e "  /_/      /_____/_/  |_/____/ /_/ /_/      /_/ |_| \____/ /_/  /_/   "; newLine
    echo -e "======================================================================"; newLine
    echo -e ${RESTORE}
+   sleep 5
 else
    echoText "MAKING ZIP FILE"; newLine
 fi

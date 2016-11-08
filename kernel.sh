@@ -216,9 +216,7 @@ echo -e "=======================================================================
 
 echoText "KERNEL VERSION"; newLine
 
-echo -e ${RED}${BLINK_RED}${ZIP_NAME}${RESTORE}; newLine
-
-echoText "BUILD SCRIPT STARTING AT $( TZ=MST date +%D\ %r )"
+echo -e ${RED}${ZIP_NAME}${RESTORE}; newLine
 
 
 ######################
@@ -328,7 +326,6 @@ if [[ $( ls ${KERNEL} 2>/dev/null | wc -l ) != "0" ]]; then
    # MOVE ZIP FILE #
    #################
 
-   echoText "MOVING FLASHABLE ZIP"
    mv ${ZIP_NAME}.zip "${ZIP_MOVE}"
 
 
