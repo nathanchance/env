@@ -250,11 +250,11 @@ NOW=$( TZ=MST date +"%Y-%m-%d-%S" )
 # NOT ALL ROMS USE MKA OR BACON
 case "${ROM}" in
    "saosp")
-      time make otapackage ${THREADS_FLAG} 2>&1 | tee ${LOGDIR}/Compilation/${ROM}_${DEVICE}-${NOW}.log ;;
+      time make otapackage ${THREADS_FLAG} ;;
    "aosip")
-      time make kronic ${THREADS_FLAG} 2>&1 | tee ${LOGDIR}/Compilation/${ROM}_${DEVICE}-${NOW}.log ;;
+      time make kronic ${THREADS_FLAG} ;;
    *)
-      time mka bacon 2>&1 | tee ${LOGDIR}/Compilation/${ROM}_${DEVICE}-${NOW}.log ;;
+      time mka bacon ;;
 esac
 
 
