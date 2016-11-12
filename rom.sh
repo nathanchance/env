@@ -127,7 +127,7 @@ case "${ROM}" in
    "flash")
       SOURCE_DIR=${ANDROID_DIR}/ROMs/Flash
       ZIP_MOVE=${ZIP_MOVE_PARENT}/Personal
-      ZIP_FORMAT=flash_${DEVICE}-7*.zip ;;
+      ZIP_FORMAT=flash_rom_${DEVICE}-7*.zip ;;
    "maple")
       SOURCE_DIR=${ANDROID_DIR}/ROMs/MapleAOSP
       ZIP_MOVE=${ZIP_MOVE_PARENT}/MapleAOSP/${DEVICE}
