@@ -80,7 +80,7 @@ while [[ $# -ge 1 ]]; do
          DEVICE=angler ;;
       "shamu"|"angler"|"bullhead"|"hammerhead")
          DEVICE=${1} ;;
-      "pn"|"pn-dui"|"du"|"abc"|"maple"|"aosip"|"saosp")
+      "flash"|"pn"|"pn-dui"|"du"|"abc"|"maple"|"aosip"|"saosp")
          ROM=${1} ;;
       "nosync")
          SYNC=false ;;
