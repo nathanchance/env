@@ -159,7 +159,7 @@ case "${TYPE}" in
    "banks")
       source mkgapps.sh ;;
    "open")
-      make arm64-24-${VERSION} ;;
+      make arm64-25-${VERSION} ;;
 esac
 
 
