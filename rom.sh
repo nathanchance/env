@@ -76,7 +76,7 @@ SYNC=true
 while [[ $# -ge 1 ]]; do
    case "${1}" in
       "me")
-         ROM=flash7.0
+         ROM=flash7.1
          DEVICE=angler ;;
       "shamu"|"angler"|"bullhead"|"hammerhead")
          DEVICE=${1} ;;
