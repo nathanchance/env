@@ -80,13 +80,16 @@ while [[ $# -ge 1 ]]; do
    case "${1}" in
       "me")
          DEVICE=angler
-         KERNEL_BRANCH=personal ;;
+         KERNEL_BRANCH=personal
+         VERSION=7.0 ;;
       "shamu"|"angler"|"bullhead")
          DEVICE=${1} ;;
       "staging"|"release"|"testing")
          KERNEL_BRANCH=${1} ;;
       "tcupdate")
          TCUPDATE=true ;;
+      "7.0"|"7.1.1")
+         VERSION=${1} ;;
       *)
          echo "Invalid parameter" && exit ;;
    esac
@@ -148,17 +151,17 @@ esac
 
 case "${KERNEL_BRANCH}" in
    "staging")
-      ZIP_MOVE=${ZIP_MOVE_HEAD}/Kernels/${DEVICE}/7.0/Beta
-      ANYKERNEL_BRANCH=${DEVICE}-flash-release ;;
+      ZIP_MOVE=${ZIP_MOVE_HEAD}/Kernels/${DEVICE}/${VERSION}/Beta
+      ANYKERNEL_BRANCH=${DEVICE}-flash-release-${VERSION} ;;
    "release")
-      ZIP_MOVE=${ZIP_MOVE_HEAD}/Kernels/${DEVICE}/7.0/Stable
-      ANYKERNEL_BRANCH=${DEVICE}-flash-release ;;
+      ZIP_MOVE=${ZIP_MOVE_HEAD}/Kernels/${DEVICE}/${VERSION}/Stable
+      ANYKERNEL_BRANCH=${DEVICE}-flash-release-${VERSION} ;;
    "testing")
-      ZIP_MOVE=${ZIP_MOVE_HEAD}/Kernels/${DEVICE}/7.0/Testing
-      ANYKERNEL_BRANCH=${DEVICE}-flash-release ;;
+      ZIP_MOVE=${ZIP_MOVE_HEAD}/Kernels/${DEVICE}/${VERSION}/Testing
+      ANYKERNEL_BRANCH=${DEVICE}-flash-release-${VERSION} ;;
    "personal")
       ZIP_MOVE=${ZIP_MOVE_HEAD}/.superhidden/Kernels
-      ANYKERNEL_BRANCH=${DEVICE}-flash-personal ;;
+      ANYKERNEL_BRANCH=${DEVICE}-flash-personal-${VERSION} ;;
 esac
 
 THREADS=-j$(grep -c ^processor /proc/cpuinfo)
@@ -182,7 +185,7 @@ DATE_START=$( TZ=MST date +"%s" )
 
 
 # SILENTLY SHIFT KERNEL BRANCHES
-cd "${SOURCE_FOLDER}" && git checkout ${KERNEL_BRANCH} > /dev/null 2>&1
+cd "${SOURCE_FOLDER}" && git checkout ${KERNEL_BRANCH}-${VERSION} > /dev/null 2>&1
 
 
 # SET KERNEL VERSION FROM MAKEFILE
@@ -249,7 +252,7 @@ git clean -f -d -x > /dev/null 2>&1
 # Cleaning of kernel directory
 cd "${SOURCE_FOLDER}"
 if [[ "${KERNEL_BRANCH}" != "personal" ]]; then
-   git reset --hard origin/${KERNEL_BRANCH}
+   git reset --hard origin/${KERNEL_BRANCH}-${VERSION}
    git clean -f -d -x > /dev/null 2>&1; newLine
 fi
 
