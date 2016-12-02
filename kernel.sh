@@ -129,7 +129,7 @@ fi
 ANDROID_HEAD=${HOME}
 KERNEL_HEAD=${ANDROID_HEAD}/Kernels
 ZIP_MOVE_HEAD=${HOME}/Web
-TOOLCHAIN_HEAD=${HOME}/Toolchains/Linaro
+TOOLCHAIN_HEAD=${HOME}/Toolchains/Prebuilts
 ANYKERNEL_FOLDER=${KERNEL_HEAD}/anykernel
 
 case "${DEVICE}" in
@@ -138,14 +138,14 @@ case "${DEVICE}" in
       ARCHITECTURE=arm64
       KERNEL_IMAGE=Image.gz-dtb
       TOOLCHAIN_PREFIX=aarch64-linux-android-
-      TOOLCHAIN_NAME=${TOOLCHAIN_PREFIX}6.x-kernel
-      TOOLCHAIN_FOLDER=${TOOLCHAIN_HEAD}/out/${TOOLCHAIN_NAME} ;;
+      TOOLCHAIN_NAME=${TOOLCHAIN_PREFIX}6.x
+      TOOLCHAIN_FOLDER=${TOOLCHAIN_HEAD}/${TOOLCHAIN_NAME} ;;
    "shamu")
       SOURCE_FOLDER=${KERNEL_HEAD}/${DEVICE}
       ARCHITECTURE=arm
       KERNEL_IMAGE=zImage-dtb
       TOOLCHAIN_PREFIX=arm-eabi-
-      TOOLCHAIN_NAME=linaro-${TOOLCHAIN_PREFIX}6.x
+      TOOLCHAIN_NAME=${TOOLCHAIN_PREFIX}6.x
       TOOLCHAIN_FOLDER=${TOOLCHAIN_HEAD}/out/${TOOLCHAIN_NAME} ;;
 esac
 
@@ -229,11 +229,13 @@ echo -e ${RED}${ZIP_NAME}${RESTORE}; newLine
 if [[ ${TCUPDATE} = true ]]; then
    echoText "UPDATING TOOLCHAIN"; newLine
    # Move into the toolchain directory
-   cd "${TOOLCHAIN_HEAD}"
-   # Repo sync
-   time repo sync --force-sync ${THREADS}
-   # Run the toolchain script
-   cd scripts && source ${TOOLCHAIN_NAME}
+   cd "${TOOLCHAIN_FOLDER}"
+   # Reset history
+   git update-ref -d HEAD
+   # Remove all files and add that to git
+   rm -rf * && git add .
+   # Pull new commit
+   git pull
 fi
 
 
