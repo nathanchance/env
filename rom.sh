@@ -76,11 +76,11 @@ SYNC=true
 while [[ $# -ge 1 ]]; do
    case "${1}" in
       "me")
-         ROM=flash7.1
+         ROM=flash7.1.1
          DEVICE=angler ;;
       "shamu"|"angler"|"bullhead"|"hammerhead")
          DEVICE=${1} ;;
-      "flash7.0"|"flash7.1"|"pn"|"pn-dui"|"du"|"abc"|"maple"|"aosip"|"saosp")
+      "flash7.0"|"flash7.1"|"flash7.1.1"|"pn"|"pn-dui"|"du"|"abc"|"maple"|"aosip"|"saosp")
          ROM=${1} ;;
       "nosync")
          SYNC=false ;;
@@ -132,6 +132,10 @@ case "${ROM}" in
       SOURCE_DIR=${ANDROID_DIR}/ROMs/Flash7.1
       ZIP_MOVE=${ZIP_MOVE_PARENT}/Flash7.1
       ZIP_FORMAT=flash_rom_${DEVICE}-7.1*.zip ;;
+   "flash7.1.1")
+      SOURCE_DIR=${ANDROID_DIR}/ROMs/Flash7.1.1
+      ZIP_MOVE=${ZIP_MOVE_PARENT}/Flash7.1.1/${DEVICE}
+      ZIP_FORMAT=flash_rom_${DEVICE}-7.1.1*.zip ;;
    "maple")
       SOURCE_DIR=${ANDROID_DIR}/ROMs/MapleAOSP
       ZIP_MOVE=${ZIP_MOVE_PARENT}/MapleAOSP/${DEVICE}
