@@ -80,11 +80,11 @@ while [[ $# -ge 1 ]]; do
    case "${1}" in
       "me")
          DEVICE=angler
-         KERNEL_BRANCH=personal
-         VERSION=7.0 ;;
+         KERNEL_BRANCH=eas
+         VERSION=7.1.1 ;;
       "shamu"|"angler"|"bullhead")
          DEVICE=${1} ;;
-      "staging"|"release"|"testing")
+      "staging"|"release"|"testing"|"eas")
          KERNEL_BRANCH=${1} ;;
       "tcupdate")
          TCUPDATE=true ;;
@@ -159,7 +159,7 @@ case "${KERNEL_BRANCH}" in
    "testing")
       ZIP_MOVE=${ZIP_MOVE_HEAD}/Kernels/${DEVICE}/${VERSION}/Testing
       ANYKERNEL_BRANCH=${DEVICE}-flash-release-${VERSION} ;;
-   "personal")
+   "personal"|"eas")
       ZIP_MOVE=${ZIP_MOVE_HEAD}/.superhidden/Kernels
       ANYKERNEL_BRANCH=${DEVICE}-flash-personal-${VERSION} ;;
 esac
