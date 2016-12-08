@@ -208,3 +208,27 @@ function notify() {
 
     curl -s -X POST https://api.telegram.org/bot"${TOKEN}"/sendMessage -d chat_id="${CHAT_ID}" -d parse_mode="Markdown" -d text="$*" 1>/dev/null
 }
+
+# Upload a file to transfer.sh
+function transfer {
+    if [[ $# -eq 0 ]]; then
+        echo "No arguments specified. Usage:"
+        echo "  transfer /tmp/test.md"
+        echo "  cat /tmp/test.md | transfer test.md"
+        return 1
+    fi
+
+    TMPFILE=$(mktemp -t transferXXX)
+
+    if tty -s; then
+        BASEFILE=$(basename "${1}" | sed -e 's/[^a-zA-Z0-9._-]/-/g')
+        curl --progress-bar --upload-file "${1}" "https://transfer.sh/${BASEFILE}" >> "${TMPFILE}"
+    else
+        curl --progress-bar --upload-file "-" "https://transfer.sh/${1}" >> "${TMPFILE}"
+    fi
+
+    cat "${TMPFILE}"
+    rm -f "${TMPFILE}"
+
+    echo ""
+}
