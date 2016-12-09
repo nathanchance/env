@@ -80,7 +80,7 @@ while [[ $# -ge 1 ]]; do
    case "${1}" in
       "me")
          DEVICE=angler
-         KERNEL_BRANCH=eas
+         KERNEL_BRANCH=personal
          VERSION=7.1.1 ;;
       "shamu"|"angler"|"bullhead")
          DEVICE=${1} ;;
