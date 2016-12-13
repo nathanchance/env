@@ -99,7 +99,7 @@ cmake -DLINK_POLLY_INTO_TOOLS:BOOL=ON -DCMAKE_CXX_FLAGS:STRING="${COMMON_CXX_FLA
 START_TIME=$( date +%s );
 
 # BUILD LLVM
-if [[ ! time cmake --build . -- -j$JOBS ]]; then
+if ! time cmake --build . -- -j$JOBS; then
    # PRINT FAILURE
    echo "";
    echo -e ${RED} "**************************************" ${TXTRST};
