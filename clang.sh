@@ -118,12 +118,12 @@ else
 
    # COMMIT TOOLCHAIN
    cd ${INSTALL_DIR}
-   git add -A && git commit --signoff "Clang 3.9.1: ${DATE}" && git push
+   git add -A && git commit --signoff -m "Clang 3.9.1: ${DATE}" && git push
 
    # ECHO TIME TAKEN
-   END_TIME=$($DATE +%s);
-   TMIN=$(( (END_TIME-START_TIME)/60 ));
-   TSEC=$(( (END_TIME-START_TIME)%60 ));
+   END_TIME=$( date +%s );
+   TMIN=$(( (END_TIME-START_TIME) / 60 ));
+   TSEC=$(( (END_TIME-START_TIME) % 60 ));
 
    # PRINT SUCCESS
    echo -e "";
