@@ -142,7 +142,7 @@ case "${ROM}" in
    "pn")
       SOURCE_DIR=${ANDROID_DIR}/ROMs/PN
       ZIP_MOVE=${ZIP_MOVE_PARENT}/PureNexus/${DEVICE}
-      ZIP_FORMAT=pure_nexus_${DEVICE}-7*.zip ;;
+      ZIP_FORMAT=purenexus_${DEVICE}-7*.zip ;;
    "pn-dui")
       SOURCE_DIR=${ANDROID_DIR}/ROMs/PN-DUI
       ZIP_MOVE=${ZIP_MOVE_PARENT}/PN-DUI
