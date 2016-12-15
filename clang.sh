@@ -60,7 +60,7 @@ INSTALL_DIR=${HOME}/Toolchains/Prebuilts/clang-3.9.1
 
 # CLEAN INSTALL DIR IF IT EXISTS; OTHERWISE MAKE IT
 if [[ -d ${INSTALL_DIR} ]]; then
-   cd ${INSTALL_DIR} && rm -rf *
+   cd ${INSTALL_DIR} && rm -vrf *
 else
    mkdir -p ${INSTALL_DIR}
 fi
