@@ -73,7 +73,7 @@ if [[ ${MODE} == "build" || ${MODE} == "both" ]]; then
 
 fi
 
-if [[ ${MODE} == "build" || ${MODE} == "both" ]]; then
+if [[ ${MODE} == "install" || ${MODE} == "both" ]]; then
 
    # MOVE INTO THE FOLDER (IN CASE THIS SCRIPT IS RAN SOME TIME AFTER BUILD)
    cd ${HOME}/Misc/Liquorix/linux-lqx
