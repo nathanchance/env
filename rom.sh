@@ -114,7 +114,7 @@ case "${ROM}" in
    "abc")
       SOURCE_DIR=${ANDROID_DIR}/ROMs/ABC
       ZIP_MOVE=${ZIP_MOVE_PARENT}/ABC/${DEVICE}
-      ZIP_FORMAT=ABCrom_nexus_${DEVICE}-*.zip ;;
+      ZIP_FORMAT=ABCrom_${DEVICE}-*.zip ;;
    "aosip")
       SOURCE_DIR=${ANDROID_DIR}/ROMs/AOSiP
       ZIP_MOVE=${ZIP_MOVE_PARENT}/AOSiP/${DEVICE}
@@ -135,18 +135,10 @@ case "${ROM}" in
       SOURCE_DIR=${ANDROID_DIR}/ROMs/Flash7.1.1
       ZIP_MOVE=${ZIP_MOVE_PARENT}/Flash7.1.1/${DEVICE}
       ZIP_FORMAT=flash_rom_${DEVICE}-7.1.1*.zip ;;
-   "maple")
-      SOURCE_DIR=${ANDROID_DIR}/ROMs/MapleAOSP
-      ZIP_MOVE=${ZIP_MOVE_PARENT}/MapleAOSP/${DEVICE}
-      ZIP_FORMAT=MapleAOSP*.zip ;;
    "pn")
       SOURCE_DIR=${ANDROID_DIR}/ROMs/PN
       ZIP_MOVE=${ZIP_MOVE_PARENT}/PureNexus/${DEVICE}
       ZIP_FORMAT=purenexus_${DEVICE}-7*.zip ;;
-   "pn-dui")
-      SOURCE_DIR=${ANDROID_DIR}/ROMs/PN-DUI
-      ZIP_MOVE=${ZIP_MOVE_PARENT}/PN-DUI
-      ZIP_FORMAT=pure_nexus_${DEVICE}-7*.zip ;;
    "saosp")
       SOURCE_DIR=${ANDROID_DIR}/ROMs/SAOSP
       ZIP_MOVE=${ZIP_MOVE_PARENT}/SAOSP/${DEVICE}
