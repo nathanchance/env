@@ -53,7 +53,7 @@ CURRENT_DIR=$( pwd )
 
 # UPDATE REPO
 cd ${SOURCE_DIR}
-git pull upstream dev --rebase && git push
+git pull upstream dev --rebase && git push --force
 
 # CLEAN PREVIOUS BUILD
 ./gradlew clean
