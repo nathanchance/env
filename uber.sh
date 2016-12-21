@@ -96,7 +96,9 @@ function build() {
    # RUN THE BUILD SCRIPT
    echoText "BUILDING TOOLCHAIN"
 
+   virtualenv2 venv && source venv/bin/activate
    bash ${1}
+   deactivate
 
 
    # MOVE THE COMPLETED TOOLCHAIN
