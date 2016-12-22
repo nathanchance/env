@@ -32,6 +32,29 @@ BLDCYA=${TXTBLD}$(tput setaf 6) # CYAN
 TXTRST=$(tput sgr0) # RESET
 
 
+################
+#              #
+#  PARAMETERS  #
+#              #
+################
+
+while [[ $# -ge 1 ]]; do
+   case "${1}" in
+      "3.9.1"|"4.0.0")
+         VERSION_PARAM=${1} ;;
+      *)
+         echo "Invalid parameter" && exit ;;
+   esac
+
+   shift
+done
+
+if [[ -z ${MODE} ]]; then
+   echo "You did not specify a necessary parameter. Falling back to 4.0.0"
+   VERSION_PARAM=4.0.0
+fi
+
+
 ###############
 #             #
 #  VARIABLES  #
@@ -45,11 +68,11 @@ JOBS=$(bc <<< "$CPUS+2");
 # SET DATE FOR COMMIT
 DATE=$( date +%Y%m%d )
 # SET SOURCE DIRECTORY
-SOURCE_DIR=${HOME}/Toolchains/Clang
+SOURCE_DIR=${HOME}/Toolchains/Clang-${VERSION_PARAM}
 # SET BUILD DIRECTORY
 BUILD_DIR=${SOURCE_DIR}/build
 # SET INSTALL DIRECTORY
-INSTALL_DIR=${HOME}/Toolchains/Prebuilts/clang-3.9.1
+INSTALL_DIR=${HOME}/Toolchains/Prebuilts/clang-${VERSION_PARAM}
 
 
 ################
@@ -63,7 +86,7 @@ if [[ -d ${INSTALL_DIR} ]]; then
    cd ${INSTALL_DIR} && rm -vrf *
 else
    cd $( dirname ${INSTALL_DIR} )
-   git clone https://github.com/Flash-ROM/clang_linux-x86_3.9.1 clang-3.9.1
+   git clone https://github.com/Flash-ROM/clang_linux-x86_${VERSION_PARAM} clang-${VERSION_PARAM}
 fi
 
 
@@ -74,7 +97,7 @@ if [[ -d ${SOURCE_DIR} ]]; then
 else
    mkdir -p ${SOURCE_DIR}
    cd ${SOURCE_DIR}
-   repo init -u https://github.com/Flash-ROM/manifest -b llvm
+   repo init -u https://github.com/Flash-ROM/manifest -b llvm-${VERSION_PARAM}
    repo sync --force-sync -j${CPUS}
 fi
 
@@ -101,7 +124,7 @@ cmake -DLINK_POLLY_INTO_TOOLS:BOOL=ON -DCMAKE_CXX_FLAGS:STRING="${COMMON_CXX_FLA
 START_TIME=$( date +%s );
 
 # BUILD LLVM
-if ! time cmake --build . -- -j$JOBS; then
+if ! time cmake --build . -- -j${JOBS}; then
    # PRINT FAILURE
    echo "";
    echo -e ${RED} "**************************************" ${TXTRST};
@@ -116,7 +139,7 @@ if ! time cmake --build . -- -j$JOBS; then
    exit 1;
 else
    # INSTALL TOOLCHAIN
-   cmake --build . --target install -- -j$JOBS;
+   cmake --build . --target install -- -j${JOBS};
 
    # COMMIT TOOLCHAIN
    cd ${INSTALL_DIR}/bin
@@ -130,7 +153,7 @@ Kernel version: $( uname -rv )
 gcc version: $( gcc --version | grep gcc | cut -d ' ' -f 3,4 )
 Make version: $( make --version  | grep Make | cut -d ' ' -f 3 )
 
-Manifest: https://github.com/Flash-ROM/manifest/tree/llvm
+Manifest: https://github.com/Flash-ROM/manifest/tree/llvm-${VERSION_PARAM}
 binutils source: https://github.com/Flash-ROM/binutils" && git push --force
 
    # ECHO TIME TAKEN
