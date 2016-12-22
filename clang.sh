@@ -62,7 +62,8 @@ INSTALL_DIR=${HOME}/Toolchains/Prebuilts/clang-3.9.1
 if [[ -d ${INSTALL_DIR} ]]; then
    cd ${INSTALL_DIR} && rm -vrf *
 else
-   mkdir -p ${INSTALL_DIR}
+   cd $( dirname ${INSTALL_DIR} )
+   git clone https://github.com/Flash-ROM/clang_linux-x86_3.9.1 clang-3.9.1
 fi
 
 
@@ -72,7 +73,8 @@ if [[ -d ${SOURCE_DIR} ]]; then
    repo sync --force-sync -j${CPUS}
 else
    mkdir -p ${SOURCE_DIR}
-   repo init -u https://github.com/Flash-ROM/llvm_manifest -b master
+   cd ${SOURCE_DIR}
+   repo init -u https://github.com/Flash-ROM/manifest -b llvm
    repo sync --force-sync -j${CPUS}
 fi
 
@@ -109,7 +111,7 @@ if ! time cmake --build . -- -j$JOBS; then
    echo -e ${RED} "    / __/ / /_/ / / /  __/ /_/ /_/    " ${TXTRST};
    echo -e ${RED} "   /_/    \__,_/_/_/\___/\__,_/_/     " ${TXTRST};
    echo -e ${RED} "                                      " ${TXTRST};
-   echo -e ${RED} "  Clang 3.9.1 has failed to compile!  " ${TXTRST};
+   echo -e ${RED} "     Clang has failed to compile!     " ${TXTRST};
    echo -e ${RED} "**************************************" ${TXTRST};
    exit 1;
 else
@@ -117,8 +119,16 @@ else
    cmake --build . --target install -- -j$JOBS;
 
    # COMMIT TOOLCHAIN
-   cd ${INSTALL_DIR}
-   git add -A && git commit --signoff -m "Clang 3.9.1: ${DATE}" && git push
+   cd ${INSTALL_DIR}/bin
+   VERSION=$( ./clang --version | grep version | cut -d ' ' -f 3 )
+   cd ..
+   git add -A && git commit --signoff -m "Clang ${VERSION}: ${DATE}
+
+Compiled on $( source /etc/os-release; echo ${PRETTY_NAME} ) ($( uname -m ))
+
+Kernel version: $( uname -a )
+Host gcc version: $( gcc --version | grep gcc )
+Make version: $( make --version  | grep Make )" && git push --force
 
    # ECHO TIME TAKEN
    END_TIME=$( date +%s );
@@ -135,7 +145,7 @@ else
    echo -e ${GRN} "  \____/\____/_/ /_/ /_/ .___/_/\___/\__/\___(_)     " ${TXTRST};
    echo -e ${GRN} "                      /_/                            " ${TXTRST};
    echo -e ${GRN} "                                                     " ${TXTRST};
-   echo -e ${GRN} "       Clang 3.9.1 has compiled successfully!        " ${TXTRST};
+   echo -e ${GRN} "       Clang ${VERSION} has compiled successfully!   " ${TXTRST};
    echo -e ${GRN} "*****************************************************" ${TXTRST};
    echo -e  "";
    echo -e ${BLDGRN}"Total time elapsed:${TXTRST} ${GRN}${TMIN} minutes ${TSEC} seconds"${TXTRST};
