@@ -134,11 +134,11 @@ if [[ "${MODE}" == "install" || "${MODE}" == "both" ]]; then
    cp -v ${NINJA_SOURCE}/ninja .
    git add -A && git commit --signoff -m "Ninja $( ./ninja --version ): $( date +%Y%m%d )
 
-Compiled on $( source /etc/os-release; echo ${PRETTY_NAME} ) ($( uname -m ))
+Compiled on $( source /etc/os-release; echo ${PRETTY_NAME} ) $( uname -m )
 
-Kernel version: $( uname -a )
+Kernel version: $( uname -rv )
 Clang version: $( ${CLANG_LOCATION}/bin/clang++ --version | grep version | cut -d ' ' -f 3 )
-Make version: $( make --version  | grep Make )
+Make version: $( make --version  | grep Make | cut -d ' ' -f 3 )
 
 Source: https://github.com/Flash-ROM/ninja" && git push --force
 
@@ -152,11 +152,11 @@ Source: https://github.com/Flash-ROM/ninja" && git push --force
    cp -v ${NINJA_SOURCE}/ninja linux-x86/bin/ninja
    git add -A && git commit --signoff -m "Ninja $( ./linux-x86/bin/ninja --version ): $( date +%Y%m%d )
 
-Compiled on $( source /etc/os-release; echo ${PRETTY_NAME} ) ($( uname -m ))
+Compiled on $( source /etc/os-release; echo ${PRETTY_NAME} ) $( uname -m )
 
-Kernel version: $( uname -a )
+Kernel version: $( uname -rv )
 Clang version: $( ${CLANG_LOCATION}/bin/clang++ --version | grep version | cut -d ' ' -f 3 )
-Make version: $( make --version  | grep Make )
+Make version: $( make --version  | grep Make | cut -d ' ' -f 3 )
 
 Source: https://github.com/Flash-ROM/ninja" && git push --force
 

@@ -124,11 +124,11 @@ else
    cd ..
    git add -A && git commit --signoff -m "Clang ${VERSION}: ${DATE}
 
-Compiled on $( source /etc/os-release; echo ${PRETTY_NAME} ) ($( uname -m ))
+Compiled on $( source /etc/os-release; echo ${PRETTY_NAME} ) $( uname -m )
 
-Kernel version: $( uname -a )
-Host gcc version: $( gcc --version | grep gcc )
-Make version: $( make --version  | grep Make )
+Kernel version: $( uname -rv )
+gcc version: $( gcc --version | grep gcc | cut -d ' ' -f 3,4 )
+Make version: $( make --version  | grep Make | cut -d ' ' -f 3 )
 
 Manifest: https://github.com/Flash-ROM/manifest/tree/llvm
 binutils source: https://github.com/Flash-ROM/binutils" && git push --force
