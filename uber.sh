@@ -120,7 +120,11 @@ Compiled on $( source /etc/os-release; echo ${PRETTY_NAME} ) ($( uname -m ))
 
 Kernel version: $( uname -a )
 Host gcc version: $( gcc --version | grep gcc )
-Make version: $( make --version  | grep Make )"
+Make version: $( make --version  | grep Make )
+
+Manifest: https://github.com/Flash-ROM/manifest/tree/uber
+gcc source: https://github.com/Flash-ROM/gcc
+binutils source: https://github.com/Flash-ROM/binutils"
 
    git push --force
 }
