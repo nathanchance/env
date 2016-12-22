@@ -63,8 +63,8 @@ function newLine() {
 # BUILD FUNCTION
 function build() {
    # DIRECTORIES
-   OUT_DIR=${TOOLCHAIN_HEAD}/Uber/out/${1}
-   REPO=${TOOLCHAIN_HEAD}/Prebuilts/${1}
+   OUT_DIR=${TOOLCHAIN_HEAD}/Uber/out/${1}-6.x
+   REPO=${TOOLCHAIN_HEAD}/Prebuilts/${1}-6.x
 
 
    # IF THE REPO DIRECTORY EXISTS
@@ -79,7 +79,7 @@ function build() {
       echoText "CLONING REPO"
 
       cd ${TOOLCHAIN_HEAD}/Prebuilts
-      git clone https://bitbucket.org/Flash-ROM/${1}
+      git clone https://bitbucket.org/Flash-ROM/${1}-6.x
    fi
 
 
@@ -97,8 +97,8 @@ function build() {
    echoText "BUILDING TOOLCHAIN"
 
    virtualenv2 venv && source venv/bin/activate
-   bash ${1}
-   deactivate
+   bash ${1}-6.x
+   deactivate && rm -rf venv
 
 
    # MOVE THE COMPLETED TOOLCHAIN
@@ -110,9 +110,18 @@ function build() {
    # COMMIT AND PUSH THE RESULT
    echoText "PUSHING NEW TOOLCHAIN"
 
-   cd ${REPO}
+   cd ${REPO}/bin
+   VERSION=$( ./${1}-gcc --version | grep ${1} | cut -d ' ' -f 3 )
+   cd ..
    git add .
-   git commit --signoff -m "Uber 6.x: $( date +%Y%m%d )"
+   git commit --signoff -m "${1} ${VERSION}: $( date +%Y%m%d )
+
+Compiled on $( source /etc/os-release; echo ${PRETTY_NAME} ) ($( uname -m ))
+
+Kernel version: $( uname -a )
+Host gcc version: $( gcc --version | grep gcc )
+Make version: $( make --version  | grep Make )"
+
    git push --force
 }
 
@@ -172,6 +181,6 @@ git push --force
 # BUILD THE TOOLCHAINS
 echoText "RUNNING BUILD SCRIPTS"
 
-build "aarch64-linux-android-6.x"
-build "arm-eabi-6.x"
-build "arm-linux-androideabi-6.x"
+build "aarch64-linux-android"
+build "arm-eabi"
+build "arm-linux-androideabi"
