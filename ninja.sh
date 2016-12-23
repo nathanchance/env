@@ -102,8 +102,12 @@ if [[ "${MODE}" == "build" || "${MODE}" == "both" ]]; then
    # UPDATE WITH UPSTREAM
    echoText "UPDATING NINJA SOURCE"
    cd ninja
+   git checkout n7.1.1
    git remote add upstream https://github.com/ninja-build/ninja
-   git pull upstream release --rebase
+   git fetch upstream
+   git remote add aosp https://android.googlesource.com/platform/external/ninja
+   git fetch aosp
+   git merge upstream/master --no-edit && git merge aosp/master --no-edit
    git push --force
 
 
