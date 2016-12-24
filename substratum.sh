@@ -65,7 +65,7 @@ git pull upstream dev --rebase && git push --force
 if [[ $( ls ${OUT_DIR}/${APK_FORMAT} 2>/dev/null | wc -l ) != "0" ]]; then
    RESULT_STRING="BUILD SUCCESSFUL"
    if [[ -d ${APK_MOVE} ]]; then
-      rm -rf ${APK_MOVE}/${APK_FORMAT}
+      rm -vrf ${APK_MOVE}/${APK_FORMAT}
    else
       mkdir -p ${APK_MOVE}
    fi
