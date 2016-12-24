@@ -177,13 +177,3 @@ binutils source: https://github.com/Flash-ROM/binutils" && git push --force
    echo -e ${BLDGRN}"Total time elapsed:${TXTRST} ${GRN}${TMIN} minutes ${TSEC} seconds"${TXTRST};
    echo -e ${BLDGRN}"Toolchain located at:${TXTRST} ${GRN}${INSTALL_DIR}"${TXTRST};
 fi;
-
-# UNSET VARIABLES USED
-unset TOOLCHAIN_ROOT;
-unset PREFIX_PATH;
-unset OPT;
-unset LOCAL_CXX_FLAGS;
-unset LOCAL_C_FLAGS;
-unset CC;
-unset CXX;
-unset LD;
