@@ -79,7 +79,7 @@ function build() {
       echoText "CLONING REPO"
 
       cd ${TOOLCHAIN_HEAD}/Prebuilts
-      git clone https://bitbucket.org/Flash-ROM/${1}-6.x
+      git clone https://gitlab.com/Flash-ROM/${1}-6.x
    fi
 
 

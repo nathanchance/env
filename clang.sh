@@ -86,7 +86,7 @@ if [[ -d ${INSTALL_DIR} ]]; then
    cd ${INSTALL_DIR} && rm -vrf *
 else
    cd $( dirname ${INSTALL_DIR} )
-   git clone https://github.com/Flash-ROM/clang_linux-x86_${VERSION_PARAM} clang-${VERSION_PARAM}
+   git clone https://gitlab.com/Flash-ROM/clang_linux-x86_${VERSION_PARAM} clang-${VERSION_PARAM}
 fi
 
 
