@@ -76,7 +76,8 @@ while [[ $# -ge 1 ]]; do
    case "${1}" in
       "me")
          ROM=flash7.1.1
-         DEVICE=angler ;;
+         DEVICE=angler
+         SYNC=false ;;
       "shamu"|"angler"|"bullhead"|"hammerhead")
          DEVICE=${1} ;;
       "flash7.0"|"flash7.1"|"flash7.1.1"|"pn"|"pn-dui"|"du"|"abc"|"maple"|"aosip"|"saosp")
@@ -229,7 +230,7 @@ make clobber
 # START BUILDING #
 ##################
 
-if [[ ${ROM} == "flash" ]]; then
+if [[ ${ROM} == "flash7.1.1" ]]; then
    echo -e ${RED}
    echo -e "======================================================================"; newLine
    echo -e "  ___________________________________  __   _____________________  ___"
