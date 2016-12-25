@@ -149,6 +149,8 @@ repo sync --force-sync -j$(grep -c ^processor /proc/cpuinfo)
 
 
 # ADD THE GCC UPSTREAM REPO IF IT DOESN'T EXIST
+echoText "CHECKING OUT CORRECT GCC BRANCH"
+
 cd gcc/gcc-UBER && git checkout uber-6.x
 
 if [[ ! $( git ls-remote --exit-code gcc 2>/dev/null ) ]]; then
@@ -166,6 +168,8 @@ git push --force
 
 
 # ADD THE BINUTILS UPSTREAM REPO IF IT DOESN'T EXIST
+echoText "CHECKING OUT CORRECT BINUTILS BRANCH"
+
 cd ../../binutils/binutils-uber && git checkout binutils-2_27-branch
 
 if [[ ! $( git ls-remote --exit-code upstream 2>/dev/null ) ]]; then
