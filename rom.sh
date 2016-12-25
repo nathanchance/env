@@ -76,8 +76,7 @@ while [[ $# -ge 1 ]]; do
    case "${1}" in
       "me")
          ROM=flash7.1.1
-         DEVICE=angler
-         SYNC=false ;;
+         DEVICE=angler ;;
       "shamu"|"angler"|"bullhead"|"hammerhead")
          DEVICE=${1} ;;
       "flash7.0"|"flash7.1"|"flash7.1.1"|"pn"|"pn-dui"|"du"|"abc"|"maple"|"aosip"|"saosp")
