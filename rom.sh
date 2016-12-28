@@ -68,6 +68,7 @@ function newLine() {
 
 # UNASSIGN FLAGS AND RESET ROM_BUILD_TYPE
 unset ROM_BUILD_TYPE
+unset SUBSTRATUM
 PERSONAL=false
 SUCCESS=false
 SYNC=true
@@ -83,6 +84,8 @@ while [[ $# -ge 1 ]]; do
          ROM=${1} ;;
       "nosync")
          SYNC=false ;;
+      "nosubs")
+         export SUBSTRATUM=false ;;
       *)
          echo "Invalid parameter detected!" && exit ;;
    esac
