@@ -72,6 +72,7 @@ function newLine() {
 # KERNEL_BRANCH (STRING): the branch that we are compiling the kernel from
 # TCUPDATE (T/F): whether or not we are updating the toolchain before compiling
 
+unset LOCALVERSION
 TCUPDATE=false
 SUCCESS=false
 
@@ -80,7 +81,8 @@ while [[ $# -ge 1 ]]; do
       "me")
          DEVICE=angler
          KERNEL_BRANCH=personal
-         VERSION=7.1.1 ;;
+         VERSION=7.1.1
+         export LOCALVERSION=-$( TZ=MST date +%Y%m%d );;
       "shamu"|"angler"|"bullhead")
          DEVICE=${1} ;;
       "staging"|"release"|"testing"|"eas")
@@ -158,8 +160,8 @@ case "${KERNEL_BRANCH}" in
    "testing")
       ZIP_MOVE=${ZIP_MOVE_HEAD}/Kernels/${DEVICE}/${VERSION}/Testing
       ANYKERNEL_BRANCH=${DEVICE}-flash-release-${VERSION} ;;
-   "personal"|"eas")
-      ZIP_MOVE=${ZIP_MOVE_HEAD}/.superhidden/Kernels
+   "personal")
+      ZIP_MOVE=${ZIP_MOVE_HEAD}/Kernels/${DEVICE}/${VERSION}/Personal
       ANYKERNEL_BRANCH=${DEVICE}-flash-personal-${VERSION} ;;
 esac
 
@@ -191,7 +193,7 @@ cd "${SOURCE_FOLDER}" && git checkout ${KERNEL_BRANCH}-${VERSION} > /dev/null 2>
 KERNEL_VERSION=$( grep -r "EXTRAVERSION = -" ${SOURCE_FOLDER}/Makefile | sed 's/^.*F/F/' )
 case ${KERNEL_BRANCH} in
    "personal")
-      ZIP_NAME=${KERNEL_VERSION}-$( TZ=MST date +%Y%m%d-%H%M ) ;;
+      ZIP_NAME=${KERNEL_VERSION}${LOCALVERSION} ;;
    *)
       ZIP_NAME=${KERNEL_VERSION} ;;
 esac
@@ -395,3 +397,4 @@ fi
 ########################
 
 echo -e "\a" && cd ${HOME}
+unset LOCALVERSION
