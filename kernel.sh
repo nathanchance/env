@@ -82,7 +82,7 @@ while [[ $# -ge 1 ]]; do
          DEVICE=angler
          KERNEL_BRANCH=personal
          VERSION=7.1.1
-         export LOCALVERSION=-$( TZ=MST date +%Y%m%d );;
+         export LOCALVERSION=-$( TZ=MST date +%Y%m%d ) ;;
       "shamu"|"angler"|"bullhead")
          DEVICE=${1} ;;
       "staging"|"release"|"testing"|"eas")
@@ -325,7 +325,7 @@ if [[ $( ls ${KERNEL} 2>/dev/null | wc -l ) != "0" ]]; then
    #################
 
    echoText "MAKING FLASHABLE ZIP"
-   zip -r9 ${ZIP_NAME}.zip * -x README ${ZIP_NAME}.zip > /dev/null 2>&1
+   zip -r9 ${ZIP_NAME}.zip * -x README.md ${ZIP_NAME}.zip > /dev/null 2>&1
 
 
    #################
