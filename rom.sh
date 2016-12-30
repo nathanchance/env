@@ -69,6 +69,7 @@ function newLine() {
 # UNASSIGN FLAGS AND RESET ROM_BUILD_TYPE
 unset ROM_BUILD_TYPE
 unset SUBSTRATUM
+unset LOCALVERSION
 PERSONAL=false
 SUCCESS=false
 SYNC=true
@@ -77,7 +78,8 @@ while [[ $# -ge 1 ]]; do
    case "${1}" in
       "me")
          ROM=flash7.1.1
-         DEVICE=angler ;;
+         DEVICE=angler
+         export LOCALVERSION=-$( TZ=MST date +%Y%m%d ) ;;
       "shamu"|"angler"|"bullhead"|"hammerhead")
          DEVICE=${1} ;;
       "flash7.0"|"flash7.1"|"flash7.1.1"|"pn"|"pn-dui"|"du"|"abc"|"maple"|"aosip"|"saosp")
@@ -367,3 +369,4 @@ fi
 ########################
 
 echo -e "\a" && cd ${HOME}
+unset LOCALVERSION
