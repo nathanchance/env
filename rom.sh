@@ -82,7 +82,7 @@ while [[ $# -ge 1 ]]; do
          export LOCALVERSION=-$( TZ=MST date +%Y%m%d ) ;;
       "shamu"|"angler"|"bullhead"|"hammerhead")
          DEVICE=${1} ;;
-      "flash7.0"|"flash7.1"|"flash7.1.1"|"pn"|"pn-dui"|"du"|"abc"|"maple"|"aosip"|"saosp")
+      "flash7.0"|"flash7.1"|"flash7.1.1"|"pn"|"pn-dui"|"du"|"abc"|"aosip"|"saosp"|"krexus")
          ROM=${1} ;;
       "nosync")
          SYNC=false ;;
@@ -140,6 +140,10 @@ case "${ROM}" in
       SOURCE_DIR=${ANDROID_DIR}/ROMs/Flash7.1.1
       ZIP_MOVE=${ZIP_MOVE_PARENT}/Flash7.1.1/${DEVICE}
       ZIP_FORMAT=flash_rom_${DEVICE}-7.1.1*.zip ;;
+   "krexus")
+      SOURCE_DIR=${ANDROID_DIR}/ROMs/Krexus
+      ZIP_MOVE=${ZIP_MOVE_PARENT}/Krexus/${DEVICE}
+      ZIP_FORMAT=krexus*${DEVICE}.zip ;;
    "pn")
       SOURCE_DIR=${ANDROID_DIR}/ROMs/PN
       ZIP_MOVE=${ZIP_MOVE_PARENT}/PureNexus/${DEVICE}
@@ -210,12 +214,12 @@ echoText "PREPARING $( echo ${DEVICE} | awk '{print toupper($0)}' )"; newLine
 
 # NOT ALL ROMS USE BREAKFAST
 case "${ROM}" in
-   "maple")
-      lunch maple_${DEVICE}-userdebug ;;
    "saosp")
       lunch saosp_${DEVICE}-user ;;
    "aosip")
       lunch aosip_${DEVICE}-userdebug ;;
+   "krexus")
+      lunch krexus_${DEVICE}-user ;;
    *)
       breakfast ${DEVICE} ;;
 esac
@@ -257,6 +261,8 @@ case "${ROM}" in
       time make otapackage ${THREADS_FLAG} ;;
    "aosip")
       time make kronic ${THREADS_FLAG} ;;
+   "krexus")
+      time mka otapackage ;;
    *)
       time mka bacon ;;
 esac
