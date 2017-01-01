@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# Uber toolchains compilation script
+# gcc toolchains compilation script
 #
 # Copyright (C) 2016 Nathan Chancellor
 #
@@ -36,7 +36,7 @@ RESTORE="\033[0m"
 ###############
 
 TOOLCHAIN_HEAD=${HOME}/Toolchains
-SCRIPTS_DIR=${TOOLCHAIN_HEAD}/Uber/scripts
+SCRIPTS_DIR=${TOOLCHAIN_HEAD}/Flash-TC/scripts
 
 
 ###############
@@ -63,7 +63,7 @@ function newLine() {
 # BUILD FUNCTION
 function build() {
    # DIRECTORIES
-   OUT_DIR=${TOOLCHAIN_HEAD}/Uber/out/${1}-6.x
+   OUT_DIR=${TOOLCHAIN_HEAD}/Flash-TC/out/${1}-6.x
    REPO=${TOOLCHAIN_HEAD}/Prebuilts/${1}-6.x
 
 
@@ -122,23 +122,23 @@ Kernel version: $( uname -rv )
 gcc version: $( gcc --version | grep gcc | cut -d ' ' -f 3,4 )
 Make version: $( make --version  | grep Make | cut -d ' ' -f 3 )
 
-Manifest: https://github.com/Flash-ROM/manifest/tree/uber
-gcc source: https://github.com/Flash-ROM/gcc
-binutils source: https://github.com/Flash-ROM/binutils"
+Manifest: https://github.com/Flash-TC/manifest/tree/gcc
+gcc source: https://github.com/Flash-TC/gcc
+binutils source: https://github.com/Flash-TC/binutils"
 
    git push --force
 }
 
 
 # INIT THE REPOS IF IT DOESN'T EXISTS
-if [[ ! -d ${TOOLCHAIN_HEAD}/Uber ]]; then
+if [[ ! -d ${TOOLCHAIN_HEAD}/Flash-TC ]]; then
    echoText "RUNNING REPO INIT"
 
-   mkdir -p ${TOOLCHAIN_HEAD}/Uber
-   cd ${TOOLCHAIN_HEAD}/Uber
-   repo init -u https://github.com/Flash-ROM/manifest -b uber
+   mkdir -p ${TOOLCHAIN_HEAD}/Flash-TC
+   cd ${TOOLCHAIN_HEAD}/Flash-TC
+   repo init -u https://github.com/Flash-TC/manifest -b gcc
 else
-   cd ${TOOLCHAIN_HEAD}/Uber
+   cd ${TOOLCHAIN_HEAD}/Flash-TC
 fi
 
 
@@ -151,7 +151,7 @@ repo sync --force-sync -j$(grep -c ^processor /proc/cpuinfo)
 # ADD THE GCC UPSTREAM REPO IF IT DOESN'T EXIST
 echoText "CHECKING OUT CORRECT GCC BRANCH"
 
-cd gcc/gcc-UBER && git checkout uber-6.x
+cd gcc/gcc-flash && git checkout 6.x && git reset --hard HEAD
 
 if [[ ! $( git ls-remote --exit-code gcc 2>/dev/null ) ]]; then
    echoText "ADDING GCC REMOTE"
@@ -170,7 +170,7 @@ git push --force
 # ADD THE BINUTILS UPSTREAM REPO IF IT DOESN'T EXIST
 echoText "CHECKING OUT CORRECT BINUTILS BRANCH"
 
-cd ../../binutils/binutils-uber && git checkout binutils-2_27-branch
+cd ../../binutils/binutils-flash && git checkout 2.27
 
 if [[ ! $( git ls-remote --exit-code upstream 2>/dev/null ) ]]; then
    echoText "ADDING BINUTILS REMOTE"

@@ -97,7 +97,7 @@ if [[ -d ${SOURCE_DIR} ]]; then
 else
    mkdir -p ${SOURCE_DIR}
    cd ${SOURCE_DIR}
-   repo init -u https://github.com/Flash-ROM/manifest -b llvm-${VERSION_PARAM}
+   repo init -u https://github.com/Flash-TC/manifest -b clang-${VERSION_PARAM}
    repo sync --force-sync -j${CPUS}
 fi
 
@@ -153,8 +153,8 @@ Kernel version: $( uname -rv )
 gcc version: $( gcc --version | grep gcc | cut -d ' ' -f 3,4 )
 Make version: $( make --version  | grep Make | cut -d ' ' -f 3 )
 
-Manifest: https://github.com/Flash-ROM/manifest/tree/llvm-${VERSION_PARAM}
-binutils source: https://github.com/Flash-ROM/binutils" && git push --force
+Manifest: https://github.com/Flash-TC/manifest/tree/clang-${VERSION_PARAM}
+binutils source: https://github.com/Flash-TC/binutils" && git push --force
 
    # ECHO TIME TAKEN
    END_TIME=$( date +%s );
