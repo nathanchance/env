@@ -143,7 +143,7 @@ case "${ROM}" in
    "krexus")
       SOURCE_DIR=${ANDROID_DIR}/ROMs/Krexus
       ZIP_MOVE=${ZIP_MOVE_PARENT}/Krexus/${DEVICE}
-      ZIP_FORMAT=krexus*${DEVICE}.zip ;;
+      ZIP_FORMAT=*krexus*${DEVICE}.zip ;;
    "pn")
       SOURCE_DIR=${ANDROID_DIR}/ROMs/PN
       ZIP_MOVE=${ZIP_MOVE_PARENT}/PureNexus/${DEVICE}
