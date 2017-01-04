@@ -69,28 +69,32 @@ function newLine() {
 #              #
 ################
 # DEVICE (STRING): which device we are compiling for
-# KERNEL_BRANCH (STRING): the branch that we are compiling the kernel from
+# KERNEL_TYPE (STRING): the type of build we are compiling
+# ANDROID_VERSION (STRING): Android version we are compiling for
 # TCUPDATE (T/F): whether or not we are updating the toolchain before compiling
 
 unset LOCALVERSION
-TCUPDATE=false
 SUCCESS=false
 
 while [[ $# -ge 1 ]]; do
    case "${1}" in
       "me")
          DEVICE=angler
-         KERNEL_BRANCH=personal
-         VERSION=7.1.1
+         KERNEL_TYPE=personal
+         ANDROID_VERSION=7.1.1
          export LOCALVERSION=-$( TZ=MST date +%Y%m%d ) ;;
       "shamu"|"angler"|"bullhead")
          DEVICE=${1} ;;
       "staging"|"release"|"testing"|"eas")
-         KERNEL_BRANCH=${1} ;;
-      "tcupdate")
-         TCUPDATE=true ;;
-      "7.0"|"7.1.1")
-         VERSION=${1} ;;
+         KERNEL_TYPE=${1} ;;
+      "7.1.1")
+         ANDROID_VERSION=${1}
+         case "${ANDROID_VERSION}" in
+            7*)
+               KERNEL_BRANCH=n${ANDROID_VERSION} ;;
+            *)
+               echo "Invalid version!" && exit ;;
+         esac ;;
       *)
          echo "Invalid parameter" && exit ;;
    esac
@@ -98,8 +102,8 @@ while [[ $# -ge 1 ]]; do
    shift
 done
 
-if [[ -z ${DEVICE} || -z ${KERNEL_BRANCH} ]]; then
-   echo "You did not specify a necessary parameter (either device, branch, or both). Please re-run the script with the necessary parameters!" && exit
+if [[ -z ${DEVICE} || -z ${KERNEL_TYPE} || -z ${ANDROID_VERSION} ]]; then
+   echo "You did not specify a necessary parameter (either device, version, branch, or both). Please re-run the script with the necessary parameters!" && exit
 fi
 
 
@@ -126,7 +130,6 @@ fi
 # KERNEL: location of the kernel image after compilation
 
 
-
 ANDROID_HEAD=${HOME}
 KERNEL_HEAD=${ANDROID_HEAD}/Kernels
 ZIP_MOVE_HEAD=${HOME}/Web
@@ -150,19 +153,19 @@ case "${DEVICE}" in
       TOOLCHAIN_FOLDER=${TOOLCHAIN_HEAD}/${TOOLCHAIN_NAME} ;;
 esac
 
-case "${KERNEL_BRANCH}" in
+case "${KERNEL_TYPE}" in
    "staging")
-      ZIP_MOVE=${ZIP_MOVE_HEAD}/Kernels/${DEVICE}/${VERSION}/Beta
-      ANYKERNEL_BRANCH=${DEVICE}-flash-release-${VERSION} ;;
+      ZIP_MOVE=${ZIP_MOVE_HEAD}/Kernels/${DEVICE}/${ANDROID_VERSION}/Beta
+      ANYKERNEL_BRANCH=${DEVICE}-flash-release-${ANDROID_VERSION} ;;
    "release")
-      ZIP_MOVE=${ZIP_MOVE_HEAD}/Kernels/${DEVICE}/${VERSION}/Stable
-      ANYKERNEL_BRANCH=${DEVICE}-flash-release-${VERSION} ;;
+      ZIP_MOVE=${ZIP_MOVE_HEAD}/Kernels/${DEVICE}/${ANDROID_VERSION}/Stable
+      ANYKERNEL_BRANCH=${DEVICE}-flash-release-${ANDROID_VERSION} ;;
    "testing")
-      ZIP_MOVE=${ZIP_MOVE_HEAD}/Kernels/${DEVICE}/${VERSION}/Testing
-      ANYKERNEL_BRANCH=${DEVICE}-flash-release-${VERSION} ;;
+      ZIP_MOVE=${ZIP_MOVE_HEAD}/Kernels/${DEVICE}/${ANDROID_VERSION}/Testing
+      ANYKERNEL_BRANCH=${DEVICE}-flash-release-${ANDROID_VERSION} ;;
    "personal")
-      ZIP_MOVE=${ZIP_MOVE_HEAD}/Kernels/${DEVICE}/${VERSION}/Personal
-      ANYKERNEL_BRANCH=${DEVICE}-flash-personal-${VERSION} ;;
+      ZIP_MOVE=${ZIP_MOVE_HEAD}/Kernels/${DEVICE}/${ANDROID_VERSION}/Personal
+      ANYKERNEL_BRANCH=${DEVICE}-flash-personal-${ANDROID_VERSION} ;;
 esac
 
 THREADS=-j$(grep -c ^processor /proc/cpuinfo)
@@ -186,12 +189,12 @@ DATE_START=$( TZ=MST date +"%s" )
 
 
 # SILENTLY SHIFT KERNEL BRANCHES
-cd "${SOURCE_FOLDER}" && git checkout ${KERNEL_BRANCH}-${VERSION} > /dev/null 2>&1
+cd "${SOURCE_FOLDER}" && git checkout ${KERNEL_BRANCH} > /dev/null 2>&1
 
 
 # SET KERNEL VERSION FROM MAKEFILE
 KERNEL_VERSION=$( grep -r "EXTRAVERSION = -" ${SOURCE_FOLDER}/Makefile | sed 's/^.*F/F/' )
-case ${KERNEL_BRANCH} in
+case ${KERNEL_TYPE} in
    "personal")
       ZIP_NAME=${KERNEL_VERSION}${LOCALVERSION} ;;
    *)
@@ -223,23 +226,6 @@ echoText "KERNEL VERSION"; newLine
 echo -e ${RED}${ZIP_NAME}${RESTORE}; newLine
 
 
-######################
-# UPDATING TOOLCHAIN #
-######################
-
-if [[ ${TCUPDATE} = true ]]; then
-   echoText "UPDATING TOOLCHAIN"; newLine
-   # Move into the toolchain directory
-   cd "${TOOLCHAIN_FOLDER}"
-   # Reset history
-   git update-ref -d HEAD
-   # Remove all files and add that to git
-   rm -rf * && git add .
-   # Pull new commit
-   git pull
-fi
-
-
 ####################
 # CLEANING FOLDERS #
 ####################
@@ -254,8 +240,8 @@ git clean -f -d -x > /dev/null 2>&1
 
 # Cleaning of kernel directory
 cd "${SOURCE_FOLDER}"
-if [[ "${KERNEL_BRANCH}" != "personal" ]]; then
-   git reset --hard origin/${KERNEL_BRANCH}-${VERSION}
+if [[ "${KERNEL_TYPE}" != "personal" ]]; then
+   git reset --hard origin/${KERNEL_BRANCH}
    git clean -f -d -x > /dev/null 2>&1; newLine
 fi
 
@@ -276,15 +262,6 @@ make clean && make mrproper
 
 # POINT TO PROPER DEFCONFIG
 make ${DEFCONFIG}
-
-# IF THIS IS A PERSONAL BUILD, SHOW THE NUMBER OF COMMITS
-# I ADDED TO THE KERNEL (INCLUDING UPSTREAM LINUX)
-if [[ "${KERNEL_BRANCH}" == "personal" ]]; then
-   rm -rf .version
-   touch .version
-   REVISION=$( git rev-list HEAD --committer="Nathan Chancellor" --count )
-   echo $(( ${REVISION} - 1 )) >> .version
-fi
 
 # MAKE THE KERNEL
 time make ${THREADS}
