@@ -88,6 +88,13 @@ while [[ $# -ge 1 ]]; do
          SYNC=false ;;
       "nosubs")
          export SUBSTRATUM=false ;;
+      "type")
+         shift
+         if [[ $# -ge 1 ]]; then
+            export BUILD_TAG=${1}
+         else
+            echo "Please specify a build type!" && exit
+         fi ;;
       *)
          echo "Invalid parameter detected!" && exit ;;
    esac
