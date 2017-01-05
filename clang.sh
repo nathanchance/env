@@ -50,8 +50,8 @@ while [[ $# -ge 1 ]]; do
 done
 
 if [[ -z ${VERSION_PARAM} ]]; then
-   echo "You did not specify a necessary parameter. Falling back to 4.0.0"
-   VERSION_PARAM=4.0.0
+   echo "You did not specify a necessary parameter. Falling back to 3.9.1"
+   VERSION_PARAM=3.9.1
 fi
 
 
