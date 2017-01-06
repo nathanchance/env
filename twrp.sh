@@ -68,7 +68,7 @@ function newLine() {
 ###############
 
 # DIRECTORIES
-SOURCE_DIR=${HOME}/TWRP
+SOURCE_DIR=${HOME}/ROMs/Omni
 OUT_DIR=${SOURCE_DIR}/out/target/product/${DEVICE}
 IMG_MOVE=${HOME}/Web/TWRP
 
