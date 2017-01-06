@@ -75,10 +75,13 @@ SOURCE_DIR=${HOME}/ROMs/Omni
 OUT_DIR=${SOURCE_DIR}/out/target/product/${DEVICE}
 IMG_MOVE=${HOME}/Web/TWRP
 
+# TWRP version
+VERSION=$( grep "TW_VERSION_STR" ${SOURCE_DIR}/bootable/recovery/variables.h | cut -d \" -f2 )
+
 # FILE NAMES
 COMP_FILE=recovery.img
-UPLD_FILE=twrp-${DEVICE}-$( TZ=MST date +%Y%m%d ).img
-FILE_FORMAT=twrp-${DEVICE}*
+UPLD_FILE=twrp-${VERSION}-${DEVICE}-$( TZ=MST date +%Y%m%d ).img
+FILE_FORMAT=twrp-*-${DEVICE}*
 
 ################
 # START SCRIPT #
