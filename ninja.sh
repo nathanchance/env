@@ -91,8 +91,8 @@ fi
 ###############
 
 NINJA_SOURCE=${HOME}/Repos/ninja
-CLANG_LOCATION=${HOME}/Toolchains/Prebuilts/clang-3.9.1
-ROM_SOURCE=${HOME}/ROMs/Flash7.1.1
+CLANG_LOCATION=${HOME}/Toolchains/Prebuilts/clang-4.0.0
+ROM_SOURCE=${HOME}/ROMs/Flash
 
 
 ################
