@@ -1,10 +1,21 @@
+#
+# ~/.bashrc
+#
+
+# If not running interactively, don't do anything
+[[ $- != *i* ]] && return
+
+alias ls='ls --color=auto'
+PS1='[\u@\h \W]\$ '
+
 ###########
 # EXPORTS #
 ###########
 
 # ccache setup
-export USE_CCACHE=1
+echo "ccache location: $(which ccache)"
 ccache -M 200G
+export USE_CCACHE=1
 
 # Add Scripts directory and its subdirectories to $PATH
 export PATH="${PATH}$(find ${HOME}/Scripts -name '.*' -prune -o -type d -printf ':%p')"
@@ -23,6 +34,11 @@ export LC_ALL=C
 # Build tools into PATH for Open GApps
 export PATH=${PATH}:${HOME}/Misc/android-sdk-linux/build-tools/24.0.3
 
+# Set ANDROID_HOME for Gradle
+export ANDROID_HOME=${HOME}/Misc/android-sdk-linux
+
+# Set NDK in path
+export PATH=${PATH}:${HOME}/Misc/android-ndk-r13b-linux-x86_64
 
 ###############
 # GIT ALIASES #
@@ -77,7 +93,7 @@ function gcpa {
 function update {
    sudo pacman -Syu && pacaur -Syu
 
-   if [[ "${1}" == "reboot "]]; then
+   if [[ "${1}" == "reboot" ]]; then
       sudo reboot
    fi
 }
@@ -86,11 +102,11 @@ function update {
 function flash_build {
    case ${1} in
       "shamu")
-         export CROSS_COMPILE=/home/nathan/Kernels/Toolchains/Linaro/out/linaro-arm-eabi-6.x/bin/arm-eabi-
+         export CROSS_COMPILE=/home/nathan/Toolchains/Prebuilts/arm-eabi-6.x/bin/arm-eabi-
          export ARCH=arm
          export SUBARCH=arm ;;
       "angler"|"bullhead")
-         export CROSS_COMPILE=/home/nathan/Kernels/Toolchains/Linaro/out/aarch64-linux-android-6.x-kernel/bin/aarch64-linux-android-
+         export CROSS_COMPILE=/home/nathan/Toolchains/Prebuilts/aarch64-linux-android-6.x/bin/aarch64-linux-android-
          export ARCH=arm64
          export SUBARCH=arm64 ;;
    esac
@@ -103,6 +119,8 @@ function flash_build {
 
 # Update Linux mirror function
 function update_mirrors {
+   CUR_DIR=$( pwd )
+
    cd ${HOME}/Kernels/linux-stable
    git fetch -p origin
    git push --mirror
@@ -111,7 +129,7 @@ function update_mirrors {
    git fetch -p origin
    git push --mirror
 
-   cd ${HOME}
+   cd ${CUR_DIR}
 }
 
 # Add remote function for kernel repos
