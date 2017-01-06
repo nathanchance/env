@@ -67,6 +67,9 @@ function newLine() {
 #             #
 ###############
 
+# DEVICE
+DEVICE=angler
+
 # DIRECTORIES
 SOURCE_DIR=${HOME}/ROMs/Omni
 OUT_DIR=${SOURCE_DIR}/out/target/product/${DEVICE}
@@ -76,9 +79,6 @@ IMG_MOVE=${HOME}/Web/TWRP
 COMP_FILE=recovery.img
 UPLD_FILE=twrp-${DEVICE}-$( TZ=MST date +%Y%m%d ).img
 FILE_FORMAT=twrp-${DEVICE}*
-
-# DEVICE
-DEVICE=angler
 
 ################
 # START SCRIPT #
