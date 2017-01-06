@@ -7,7 +7,7 @@ To add all these sub folders to your PATH (allowing you to run them in any folde
 
 `export PATH="${PATH}$(find <path_to_main_scripts_directory> -name '.*' -prune -o -type d -printf ':%p')"`
 
-Then you will be able to run commands by calling source like so:
+Then you will be able to run commands by calling source like so (most scripts will have usage statements at the top):
 `bash <script_name>.sh <parameters>`
 For example:
 `bash rom.sh pn angler`
@@ -16,7 +16,7 @@ You may need certain packages installed. Feel free to checkout my [Android-Tools
 
 ## Thanks
 - @ezio84 and @fusionjack for the initial parameter idea
-- @Mazda (and the whole DU team), @BeansTown106, and @xlxfoxxlx for the great ROMs
+- @Mazda (and the whole DU team) and @BeansTown106 for their great ROMs.
 - @anarkia1976 for the initial kernel script
 - @Surge1223 for praising scripts so much I decided to give it a shot
 - Google for providing the answers during countless hours of research

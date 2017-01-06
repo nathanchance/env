@@ -18,6 +18,16 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 
+###########
+#         #
+#  USAGE  #
+#         #
+###########
+
+# PURPOSE: Builds the ninja binary from source
+# USAGE: $ bash ninja.sh <build|install|both>
+
+
 ############
 #          #
 #  COLORS  #

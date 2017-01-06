@@ -24,9 +24,10 @@
 #         #
 ###########
 
+# PURPOSE: Build Flash Kernel and package it into a flashable zip
+# USAGE:
 # $ kernel.sh <angler|shamu> <release|staging> <tcupdate>
 # $ kernel.sh me <tcupdate>
-
 
 
 ############
@@ -38,7 +39,6 @@
 RED="\033[01;31m"
 BLINK_RED="\033[05;31m"
 RESTORE="\033[0m"
-
 
 
 ###############
@@ -68,6 +68,7 @@ function newLine() {
 #  PARAMETERS  #
 #              #
 ################
+
 # DEVICE (STRING): which device we are compiling for
 # KERNEL_TYPE (STRING): the type of build we are compiling
 # ANDROID_VERSION (STRING): Android version we are compiling for
@@ -112,6 +113,7 @@ fi
 #  VARIABLES  #
 #             #
 ###############
+
 # ANDROID_HEAD: head folder of all Android folders
 # KERNEL_HEAD: head folder to all kernel folders
 # ZIP_MOVE_HEAD: head folder to all the folders that hold completed zips
@@ -173,23 +175,18 @@ DEFCONFIG=flash_defconfig
 KERNEL=${SOURCE_FOLDER}/arch/${ARCHITECTURE}/boot/${KERNEL_IMAGE}
 
 
-
 ################
 #              #
 # SCRIPT START #
 #              #
 ################
 
-# CLEAR THE TERMINAL
-clear
-
-
 # SET THE START OF THE SCRIPT
 DATE_START=$( TZ=MST date +"%s" )
 
 
 # SILENTLY SHIFT KERNEL BRANCHES
-cd "${SOURCE_FOLDER}" && git checkout ${KERNEL_BRANCH} > /dev/null 2>&1
+clear && cd "${SOURCE_FOLDER}" && git checkout ${KERNEL_BRANCH} > /dev/null 2>&1
 
 
 # SET KERNEL VERSION FROM MAKEFILE

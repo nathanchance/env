@@ -18,6 +18,16 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 
+###########
+#         #
+#  USAGE  #
+#         #
+###########
+
+# PURPOSE: Builds arm-eabi, aarch64-linux-android, and arm-linux-androideabi toolchains from source
+# USAGE: $ bash gcc.sh
+
+
 ############
 #          #
 #  COLORS  #
@@ -93,12 +103,22 @@ function build() {
    cd ${SCRIPTS_DIR}
 
 
+   # CHECK AND SEE IF WE ARE ON ARCH; IF SO, ACTIVARE A VIRTUAL ENVIRONMENT FOR PROPER PYTHON SUPPORT
+   if [[ -f /etc/arch-release ]]; then
+      virtualenv2 venv && source venv/bin/activate
+   fi
+
+
    # RUN THE BUILD SCRIPT
    echoText "BUILDING TOOLCHAIN"
 
-   virtualenv2 venv && source venv/bin/activate
    bash ${1}-6.x
-   deactivate && rm -rf venv
+
+
+   # DEACTIVATE VENV IF ON ARCH
+   if [[ -f /etc/arch-release ]]; then
+      deactivate && rm -rf venv
+   fi
 
 
    # MOVE THE COMPLETED TOOLCHAIN
@@ -129,6 +149,14 @@ binutils source: https://github.com/Flash-TC/binutils"
    git push --force
 }
 
+
+##################
+#                #
+#  SCRIPT START  #
+#                #
+##################
+
+clear
 
 # INIT THE REPOS IF IT DOESN'T EXISTS
 if [[ ! -d ${TOOLCHAIN_HEAD}/Flash-TC ]]; then

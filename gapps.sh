@@ -24,7 +24,9 @@
 #         #
 ###########
 
-# $ gapps.sh banks
+# PURPOSE: Build GApps zip (either Open or Dynamic GApps)
+# USAGE:
+# $ gapps.sh dynamic
 # $ gapps.sh open <super|stock|full|mini|micro|nano|pico>
 
 
@@ -72,7 +74,7 @@ SUCCESS=false
 
 while [[ $# -ge 1 ]]; do
    case "${1}" in
-      "open"|"banks")
+      "open"|"dynamic")
          TYPE=${1} ;;
       "super"|"stock"|"full"|"mini"|"micro"|"nano"|"pico")
          VERSION=${1} ;;
@@ -84,7 +86,7 @@ while [[ $# -ge 1 ]]; do
 done
 
 if [[ -z ${TYPE} ]] || [[ ${TYPE} == "open" && -z ${VERSION} ]]; then
-   echo "You did not specify a necessary parameter (either type of GApps or type of Open GApps). Please re-run the script with the necessary parameters!" && exit
+   echo "You did not specify a necessary parameter (either type of GApps or variant of GApps). Please re-run the script with the necessary parameters!" && exit
 fi
 
 ###############
@@ -98,37 +100,36 @@ ZIP_MOVE=${HOME}/Web/.superhidden/GApps
 
 # Type logic
 case ${TYPE} in
-   "banks")
-      SOURCE_DIR=${ANDROID_DIR}/GApps/Banks
-      ZIP_FORMAT=banks*.zip
-      BRANCH=n ;;
+   "dynamic")
+      SOURCE_DIR=${ANDROID_DIR}/GApps/Dynamic
+      ZIP_FORMAT=*Dynamic*.zip
+      BRANCH=n-mr1 ;;
    "open")
       SOURCE_DIR=${ANDROID_DIR}/GApps/Open
       ZIP_FORMAT=open*${VERSION}*.zip
       BRANCH=master ;;
 esac
 
-################
-# SCRIPT START #
-################
 
-clear
-
-
+##################
+#                #
+#  SCRIPT START  #
+#                #
+##################
 
 # SET THE START OF THE SCRIPT
 START=$( TZ=MST date +%s )
 
 
 # MOVE INTO SOURCE FOLDER
-cd ${SOURCE_DIR}
+clear && cd ${SOURCE_DIR}
 
 
-if [[ "${TYPE}" == "banks" ]]; then
-   ############
-   # CLEAN UP #
-   ############
+############
+# CLEAN UP #
+############
 
+if [[ "${TYPE}" == "dynamic" ]]; then
    echoText "CLEANING UP REPO"
 
    git reset --hard origin/${BRANCH}
@@ -155,8 +156,8 @@ fi
 echoText "BUILDING $( echo ${TYPE} | awk '{print toupper($0)}' ) GAPPS"
 
 case "${TYPE}" in
-   "banks")
-      source mkgapps.sh ;;
+   "dynamic")
+      source mkgapps.sh both ;;
    "open")
       make arm64-25-${VERSION} ;;
 esac
@@ -201,7 +202,6 @@ if [[ $( ls ${SOURCE_DIR}/out/${ZIP_FORMAT} 2>/dev/null | wc -l ) != "0" ]]; the
 else
    BUILD_RESULT_STRING="BUILD FAILED"
    SUCCESS=false
-
 fi
 
 

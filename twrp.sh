@@ -24,7 +24,8 @@
 #         #
 ###########
 
-# $ twrp.sh <device>
+# PURPOSE: Build F2FS TWRP for Angler
+# USAGE: $ bash twrp.sh
 
 
 ############
@@ -60,32 +61,6 @@ function newLine() {
 }
 
 
-################
-#              #
-#  PARAMETERS  #
-#              #
-################
-
-# UNASSIGN FLAGS AND RESET ROM_BUILD_TYPE
-SUCCESS=false
-
-while [[ $# -ge 1 ]]; do
-   case "${1}" in
-      "shamu"|"angler"|"bullhead"|"hammerhead")
-         DEVICE=${1} ;;
-      *)
-         echo "Invalid parameter detected!" && exit ;;
-   esac
-
-   shift
-done
-
-# PARAMETER VERIFICATION
-if [[ -z ${DEVICE} ]]; then
-   echo "You did not specify a necessary parameter (the device to compile for). Please re-run the script with the necessary parameters!" && exit
-fi
-
-
 ###############
 #             #
 #  VARIABLES  #
@@ -93,15 +68,17 @@ fi
 ###############
 
 # DIRECTORIES
-SOURCE_DIR=${HOME}/ROMs/Omni
+SOURCE_DIR=${HOME}/TWRP
 OUT_DIR=${SOURCE_DIR}/out/target/product/${DEVICE}
-IMG_MOVE=${HOME}/Web/.superhidden/TWRP
+IMG_MOVE=${HOME}/Web/TWRP
 
 # FILE NAMES
 COMP_FILE=recovery.img
-UPLD_FILE=twrp-${DEVICE}-$( TZ=MST date +%m%d%Y ).img
+UPLD_FILE=twrp-${DEVICE}-$( TZ=MST date +%Y%m%d ).img
 FILE_FORMAT=twrp-${DEVICE}*
 
+# DEVICE
+DEVICE=angler
 
 ################
 # START SCRIPT #
@@ -175,7 +152,7 @@ mka clobber
 
 newLine; echoText "MAKING TWRP"; newLine
 NOW=$( TZ=MST date +"%Y-%m-%d-%S" )
-time mka recoveryimage 2>&1 | tee ${LOGDIR}/Compilation/twrp_${DEVICE}-${NOW}.log
+time mka recoveryimage
 
 
 ####################

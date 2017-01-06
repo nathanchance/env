@@ -24,7 +24,10 @@
 #         #
 ###########
 
-# $ rom.sh <me|rom> <device> (person)
+# PURPOSE: Build an Android ROM from source
+# USAGE:
+# $ rom.sh me
+# $ rom.sh <flash|pn|du|abc|krexus|aosip> <shamu|angler|bullhead|hammerhead>
 
 
 ############
@@ -53,12 +56,40 @@ function echoText() {
    echo -e ${RESTORE}
 }
 
-
 # CREATES A NEW LINE IN TERMINAL
 function newLine() {
    echo -e ""
 }
 
+# UNSETS VARIABLES POTENTIALLY USED IN SCRIPT
+function unsetvars() {
+   unset ROM_BUILD_TYPE
+   unset SUBSTRATUM
+   unset LOCALVERSION
+   unset BUILD_TAG
+   unset SYNC
+   unset PERSONAL
+   unset SUCCESS
+}
+
+# CHECKS IF MKA EXISTS
+function make_command() {
+   while [[ $# -ge 1 ]]; do
+      PARAMS+="${1} "
+
+      shift
+   done
+
+   MKA=$( command -v mka )
+   if [[ -n ${MKA} ]]; then
+      mka ${PARAMS}
+   else
+      make -j$( grep -c ^processor /proc/cpuinfo ) ${PARAMS}
+   fi
+
+   unset PARAMS
+   unset MKA
+}
 
 ################
 #              #
@@ -66,23 +97,17 @@ function newLine() {
 #              #
 ################
 
-# UNASSIGN FLAGS AND RESET ROM_BUILD_TYPE
-unset ROM_BUILD_TYPE
-unset SUBSTRATUM
-unset LOCALVERSION
-PERSONAL=false
-SUCCESS=false
-SYNC=true
+unsetvars
 
 while [[ $# -ge 1 ]]; do
    case "${1}" in
       "me")
-         ROM=flash7.1.1
+         ROM=flash
          DEVICE=angler
          export LOCALVERSION=-$( TZ=MST date +%Y%m%d ) ;;
       "shamu"|"angler"|"bullhead"|"hammerhead")
          DEVICE=${1} ;;
-      "flash7.0"|"flash7.1"|"flash7.1.1"|"pn"|"pn-dui"|"du"|"abc"|"aosip"|"saosp"|"krexus")
+      "abc"|"aosip"|"du"|"flash"|"krexus"|"pn")
          ROM=${1} ;;
       "nosync")
          SYNC=false ;;
@@ -135,18 +160,10 @@ case "${ROM}" in
       SOURCE_DIR=${ANDROID_DIR}/ROMs/DU
       ZIP_MOVE=${ZIP_MOVE_PARENT}/DirtyUnicorns/${DEVICE}
       ZIP_FORMAT=DU_${DEVICE}_*.zip ;;
-   "flash7.0")
-      SOURCE_DIR=${ANDROID_DIR}/ROMs/Flash7.0
-      ZIP_MOVE=${ZIP_MOVE_PARENT}/Flash7.0
-      ZIP_FORMAT=flash_rom_${DEVICE}-7.0*.zip ;;
-   "flash7.1")
-      SOURCE_DIR=${ANDROID_DIR}/ROMs/Flash7.1
-      ZIP_MOVE=${ZIP_MOVE_PARENT}/Flash7.1
-      ZIP_FORMAT=flash_rom_${DEVICE}-7.1*.zip ;;
-   "flash7.1.1")
-      SOURCE_DIR=${ANDROID_DIR}/ROMs/Flash7.1.1
-      ZIP_MOVE=${ZIP_MOVE_PARENT}/Flash7.1.1/${DEVICE}
-      ZIP_FORMAT=flash_rom_${DEVICE}-7.1.1*.zip ;;
+   "flash")
+      SOURCE_DIR=${ANDROID_DIR}/ROMs/Flash
+      ZIP_MOVE=${ZIP_MOVE_PARENT}/Flash/${DEVICE}
+      ZIP_FORMAT=flash_rom_${DEVICE}-*.zip ;;
    "krexus")
       SOURCE_DIR=${ANDROID_DIR}/ROMs/Krexus
       ZIP_MOVE=${ZIP_MOVE_PARENT}/Krexus/${DEVICE}
@@ -155,28 +172,16 @@ case "${ROM}" in
       SOURCE_DIR=${ANDROID_DIR}/ROMs/PN
       ZIP_MOVE=${ZIP_MOVE_PARENT}/PureNexus/${DEVICE}
       ZIP_FORMAT=purenexus_${DEVICE}-7*.zip ;;
-   "saosp")
-      SOURCE_DIR=${ANDROID_DIR}/ROMs/SAOSP
-      ZIP_MOVE=${ZIP_MOVE_PARENT}/SAOSP/${DEVICE}
-      ZIP_FORMAT=saosp_${DEVICE}*.zip ;;
 esac
 
 OUT_DIR=${SOURCE_DIR}/out/target/product/${DEVICE}
-THREADS_FLAG=-j$( grep -c ^processor /proc/cpuinfo )
-
-
-
-################
-# SCRIPT START #
-################
-
-clear
 
 
 #######################
 # START TRACKING TIME #
 #######################
 
+clear
 START=$( TZ=MST date +%s )
 
 
@@ -191,7 +196,7 @@ cd ${SOURCE_DIR}
 # REPO SYNC #
 #############
 
-if [[ ${SYNC} = true ]]; then
+if [[ ${SYNC} != false ]]; then
    echoText "SYNCING LATEST SOURCES"; newLine
 
    repo sync --force-sync ${THREADS_FLAG}
@@ -221,8 +226,6 @@ echoText "PREPARING $( echo ${DEVICE} | awk '{print toupper($0)}' )"; newLine
 
 # NOT ALL ROMS USE BREAKFAST
 case "${ROM}" in
-   "saosp")
-      lunch saosp_${DEVICE}-user ;;
    "aosip")
       lunch aosip_${DEVICE}-userdebug ;;
    "krexus")
@@ -238,14 +241,13 @@ esac
 
 echoText "CLEANING UP OUT DIRECTORY"; newLine
 
-make clobber
-
+make_command clobber
 
 ##################
 # START BUILDING #
 ##################
 
-if [[ ${ROM} == "flash7.1.1" ]]; then
+if [[ ${ROM} == "flash" ]]; then
    echo -e ${RED}
    echo -e "========================================================================"; newLine
    echo -e "  ___________________________________  __   _____________________  ___  "
@@ -262,16 +264,14 @@ fi
 
 NOW=$( TZ=MST date +"%Y-%m-%d-%S" )
 
-# NOT ALL ROMS USE MKA OR BACON
+# NOT ALL ROMS USE BACON
 case "${ROM}" in
-   "saosp")
-      time make otapackage ${THREADS_FLAG} ;;
    "aosip")
-      time make kronic ${THREADS_FLAG} ;;
+      time make_command kronic ;;
    "krexus")
-      time mka otapackage ;;
+      time make_command otapackage ;;
    *)
-      time mka bacon ;;
+      time make_command bacon ;;
 esac
 
 
@@ -382,4 +382,6 @@ fi
 ########################
 
 echo -e "\a" && cd ${HOME}
-unset LOCALVERSION
+
+# UNSET EXPORTS
+unsetvars

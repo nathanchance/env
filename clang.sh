@@ -14,6 +14,16 @@
 #   limitations under the License.
 
 
+###########
+#         #
+#  USAGE  #
+#         #
+###########
+
+# PURPOSE: Builds Clang from source
+# USAGE: $ bash clang.sh <3.9.1|4.0.0>
+
+
 ############
 #          #
 #  COLORS  #
@@ -80,6 +90,8 @@ INSTALL_DIR=${HOME}/Toolchains/Prebuilts/clang-${VERSION_PARAM}
 # SCRIPT START #
 #              #
 ################
+
+clear
 
 # CLEAN INSTALL DIR IF IT EXISTS; OTHERWISE MAKE IT
 if [[ -d ${INSTALL_DIR} ]]; then

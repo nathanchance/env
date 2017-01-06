@@ -17,9 +17,32 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>
 
-# COLORS
+
+###########
+#         #
+#  USAGE  #
+#         #
+###########
+
+# PURPOSE: Build a Substratum APK
+# USAGE: $ bash substratum.sh <update|build|both>
+
+
+############
+#          #
+#  COLORS  #
+#          #
+############
+
 RED="\033[01;31m"
 RESTORE="\033[0m"
+
+
+###############
+#             #
+#  FUNCTIONS  #
+#             #
+###############
 
 # PRINTS A FORMATTED HEADER TO POINT OUT WHAT IS BEING DONE TO THE USER
 function echoText() {
@@ -36,6 +59,36 @@ function newLine() {
    echo -e ""
 }
 
+
+################
+#              #
+#  PARAMETERS  #
+#              #
+################
+
+while [[ $# -ge 1 ]]; do
+   case "${1}" in
+      "build"|"both"|"update")
+         PARAM=${1} ;;
+      *)
+         echo "Invalid parameter" && exit ;;
+   esac
+
+   shift
+done
+
+if [[ -z ${PARAM} ]]; then
+   echo "You did not specify a necessary parameter. Falling back to building only"
+   MODE=build
+fi
+
+
+##################
+#                #
+#  SCRIPT START  #
+#                #
+##################
+
 # START TIME TRACKING
 START=$( TZ=MST date +%s )
 
@@ -51,44 +104,48 @@ unset JAVA_HOME
 # GET CURRENT DIR FOR later
 CURRENT_DIR=$( pwd )
 
-# UPDATE REPO
-cd ${SOURCE_DIR}
-git pull upstream dev --rebase && git push --force
+# UPDATE REPO IF REQUESTED
+if [[ "${PARAM}" == "update" || "${PARAM}" == "both" ]]; then
+   cd ${SOURCE_DIR}
+   git pull upstream dev --rebase && git push --force
+fi
 
-# CLEAN PREVIOUS BUILD
-./gradlew clean
+if [[ "${PARAM}" == "build" || "${PARAM}" == "both" ]]; then
+   # CLEAN PREVIOUS BUILD
+   ./gradlew clean
 
-# MAKE NEW APK
-./gradlew assembleDebug
+   # MAKE NEW APK
+   ./gradlew assembleDebug
 
-# IF THE APK WAS FOUND, MOVE IT
-if [[ $( ls ${OUT_DIR}/${APK_FORMAT} 2>/dev/null | wc -l ) != "0" ]]; then
-   RESULT_STRING="BUILD SUCCESSFUL"
-   if [[ -d ${APK_MOVE} ]]; then
-      rm -vrf ${APK_MOVE}/${APK_FORMAT}
+   # IF THE APK WAS FOUND, MOVE IT
+   if [[ $( ls ${OUT_DIR}/${APK_FORMAT} 2>/dev/null | wc -l ) != "0" ]]; then
+      RESULT_STRING="BUILD SUCCESSFUL"
+      if [[ -d ${APK_MOVE} ]]; then
+         rm -vrf ${APK_MOVE}/${APK_FORMAT}
+      else
+         mkdir -p ${APK_MOVE}
+      fi
+      cp -v ${OUT_DIR}/${APK_FORMAT} ${APK_MOVE}
+
+   # OTHERWISE, REPORT IT!
    else
-      mkdir -p ${APK_MOVE}
+      RESULT_STRING="BUILD FAILED"
    fi
-   cp -v ${OUT_DIR}/${APK_FORMAT} ${APK_MOVE}
 
-# OTHERWISE, REPORT IT!
-else
-   RESULT_STRING="BUILD FAILED"
+   # END TIME TRACKING
+   END=$( TZ=MST date +%s )
+
+   # PRINT RESULT
+   # IF THE BUILD WAS SUCCESSFUL, PRINT FILE LOCATION AND SIZE
+   newLine; echoText "${RESULT_STRING}!"
+   if [[ ${RESULT_STRING} == "BUILD SUCCESSFUL" ]]; then
+     echo -e ${RED}"FILE LOCATION: $( ls "${APK_MOVE}"/${APK_FORMAT} )"
+     echo -e "SIZE: $( du -h "${APK_MOVE}"/${APK_FORMAT} | awk '{print $1}' )"${RESTORE}
+   fi
+
+   # PRINT HOW LONG IT TOOK REGARDLESS OF SUCCESS
+   echo -e ${RED}"DURATION: $( echo $((${END}-${START})) | awk '{print int($1/60)" MINUTES AND "int($1%60)" SECONDS"}' )"${RESTORE}; newLine
 fi
-
-# END TIME TRACKING
-END=$( TZ=MST date +%s )
-
-# PRINT RESULT
-# IF THE BUILD WAS SUCCESSFUL, PRINT FILE LOCATION AND SIZE
-newLine; echoText "${RESULT_STRING}!"
-if [[ ${RESULT_STRING} == "BUILD SUCCESSFUL" ]]; then
-  echo -e ${RED}"FILE LOCATION: $( ls "${APK_MOVE}"/${APK_FORMAT} )"
-  echo -e "SIZE: $( du -h "${APK_MOVE}"/${APK_FORMAT} | awk '{print $1}' )"${RESTORE}
-fi
-
-# PRINT HOW LONG IT TOOK REGARDLESS OF SUCCESS
-echo -e ${RED}"DURATION: $( echo $((${END}-${START})) | awk '{print int($1/60)" MINUTES AND "int($1%60)" SECONDS"}' )"${RESTORE}; newLine
 
 # MOVE BACK TO ORIGINAL DIRECTORY
 cd ${CURRENT_DIR}
