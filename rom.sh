@@ -70,6 +70,7 @@ function unsetvars() {
    unset SYNC
    unset PERSONAL
    unset SUCCESS
+   unset NOVO
 }
 
 # CHECKS IF MKA EXISTS
@@ -120,6 +121,8 @@ while [[ $# -ge 1 ]]; do
          else
             echo "Please specify a build type!" && exit
          fi ;;
+      "novo")
+         NOVO=true ;;
       *)
          echo "Invalid parameter detected!" && exit ;;
    esac
@@ -241,7 +244,12 @@ esac
 
 echoText "CLEANING UP OUT DIRECTORY"; newLine
 
-make_command clobber
+if [[ ${NOVO} = true ]]; then
+   make_command novo
+else
+   make_command clobber
+fi
+
 
 ##################
 # START BUILDING #
