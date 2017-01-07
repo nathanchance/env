@@ -71,6 +71,7 @@ function unsetvars() {
    unset PERSONAL
    unset SUCCESS
    unset NOVO
+   unset NOCLEAN
 }
 
 # CHECKS IF MKA EXISTS
@@ -123,6 +124,8 @@ while [[ $# -ge 1 ]]; do
          fi ;;
       "novo")
          NOVO=true ;;
+      "noclean")
+         CLEAN=false ;;
       *)
          echo "Invalid parameter detected!" && exit ;;
    esac
@@ -184,7 +187,6 @@ OUT_DIR=${SOURCE_DIR}/out/target/product/${DEVICE}
 # START TRACKING TIME #
 #######################
 
-clear
 START=$( TZ=MST date +%s )
 
 
@@ -192,7 +194,7 @@ START=$( TZ=MST date +%s )
 # MOVE INTO SOURCE FOLDER #
 ###########################
 
-cd ${SOURCE_DIR}
+clear && cd ${SOURCE_DIR}
 
 
 #############
@@ -210,7 +212,7 @@ fi
 # SETUP BUILD ENVIRONMENT #
 ###########################
 
-echoText "SETTING UP BUILD ENVIRONMENT"; newLine
+echoText "SETTING UP BUILD ENVIRONMENT"
 
 # CHECK AND SEE IF WE ARE ON ARCH; IF SO, ACTIVARE A VIRTUAL ENVIRONMENT FOR PROPER PYTHON SUPPORT
 if [[ -f /etc/arch-release ]]; then
@@ -225,7 +227,7 @@ source build/envsetup.sh
 # PREPARE DEVICE #
 ##################
 
-echoText "PREPARING $( echo ${DEVICE} | awk '{print toupper($0)}' )"; newLine
+echoText "PREPARING $( echo ${DEVICE} | awk '{print toupper($0)}' )"
 
 # NOT ALL ROMS USE BREAKFAST
 case "${ROM}" in
@@ -242,12 +244,14 @@ esac
 # CLEAN UP #
 ############
 
-echoText "CLEANING UP OUT DIRECTORY"; newLine
+echoText "CLEANING UP OUT DIRECTORY"
 
-if [[ ${NOVO} = true ]]; then
-   make_command novo
-else
-   make_command clobber
+if [[ ${CLEAN} != false ]]; then
+   if [[ ${NOVO} = true ]]; then
+      make_command novo
+   else
+      make_command clobber
+   fi
 fi
 
 
@@ -304,7 +308,7 @@ if [[ $( ls ${OUT_DIR}/${ZIP_FORMAT} 2>/dev/null | wc -l ) != "0" ]]; then
 
       mkdir -p "${ZIP_MOVE}"
    else
-      newLine; echoText "CLEANING ZIP_MOVE DIRECTORY"; newLine
+      newLine; echoText "CLEANING ZIP_MOVE DIRECTORY"
 
       rm -vrf "${ZIP_MOVE}"/*${ZIP_FORMAT}*
    fi
@@ -314,7 +318,7 @@ if [[ $( ls ${OUT_DIR}/${ZIP_FORMAT} 2>/dev/null | wc -l ) != "0" ]]; then
    # MOVING ROM FILES #
    ####################
 
-   newLine; echoText "MOVING FILES TO ZIP_MOVE DIRECTORY"; newLine
+   echoText "MOVING FILES TO ZIP_MOVE DIRECTORY"
 
    mv -v ${OUT_DIR}/*${ZIP_FORMAT}* "${ZIP_MOVE}"
 
@@ -332,7 +336,6 @@ fi
 
 # DEACTIVATE VIRTUALENV IF WE ARE ON ARCH
 if [[ -f /etc/arch-release ]]; then
-   echoText "EXITING VIRTUAL ENV"
    deactivate
 fi
 
@@ -343,7 +346,7 @@ fi
 ##############
 
 END=$( TZ=MST date +%s )
-newLine; echoText "${BUILD_RESULT_STRING}!"
+echoText "${BUILD_RESULT_STRING}!"
 
 
 ######################
