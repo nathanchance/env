@@ -70,8 +70,7 @@ function unsetvars() {
    unset SYNC
    unset PERSONAL
    unset SUCCESS
-   unset NOVO
-   unset NOCLEAN
+   unset MAKE_TYPE
 }
 
 # CHECKS IF MKA EXISTS
@@ -122,10 +121,11 @@ while [[ $# -ge 1 ]]; do
          else
             echo "Please specify a build type!" && exit
          fi ;;
-      "novo")
-         NOVO=true ;;
-      "noclean")
-         CLEAN=false ;;
+      "make")
+         shift
+         if [[ $# -ge 1 ]]; then
+            export MAKE_TYPE=${1}
+         fi ;;
       *)
          echo "Invalid parameter detected!" && exit ;;
    esac
@@ -246,12 +246,10 @@ esac
 
 echoText "CLEANING UP OUT DIRECTORY"
 
-if [[ ${CLEAN} != false ]]; then
-   if [[ ${NOVO} = true ]]; then
-      make_command novo
-   else
-      make_command clobber
-   fi
+if [[ -n ${MAKE_TYPE} ]] && [[ "${MAKE_TYPE}" != "noclean" ]]; then
+   make_command ${MAKE_TYPE}
+elif [[ -z ${MAKE_TYPE} ]]; then
+   make_command clobber
 fi
 
 
