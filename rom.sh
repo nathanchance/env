@@ -71,24 +71,25 @@ function unsetvars() {
    unset PERSONAL
    unset SUCCESS
    unset MAKE_TYPE
+   unset PARAMS
 }
 
 # CHECKS IF MKA EXISTS
 function make_command() {
    while [[ $# -ge 1 ]]; do
-      PARAMS+="${1} "
+      MAKE_PARAMS+="${1} "
 
       shift
    done
 
    MKA=$( command -v mka )
    if [[ -n ${MKA} ]]; then
-      mka ${PARAMS}
+      mka ${MAKE_PARAMS}
    else
       make -j$( grep -c ^processor /proc/cpuinfo ) ${PARAMS}
    fi
 
-   unset PARAMS
+   unset MAKE_PARAMS
    unset MKA
 }
 
@@ -101,6 +102,8 @@ function make_command() {
 unsetvars
 
 while [[ $# -ge 1 ]]; do
+   PARAMS+="${1} "
+
    case "${1}" in
       "me")
          ROM=flash
@@ -117,6 +120,7 @@ while [[ $# -ge 1 ]]; do
       "type")
          shift
          if [[ $# -ge 1 ]]; then
+            PARAMS+="${1} "
             export BUILD_TAG=${1}
          else
             echo "Please specify a build type!" && exit
@@ -124,7 +128,10 @@ while [[ $# -ge 1 ]]; do
       "make")
          shift
          if [[ $# -ge 1 ]]; then
+            PARAMS+="${1} "
             export MAKE_TYPE=${1}
+         else
+            echo "Please specify a make type!" && exit
          fi ;;
       *)
          echo "Invalid parameter detected!" && exit ;;
@@ -369,12 +376,7 @@ echo -e ${RED}"DURATION: $( echo $((${END}-${START})) | awk '{print int($1/60)" 
 ##################
 
 # DATE: BASH_SOURCE (PARAMETERS)
-case ${PERSONAL} in
-   "true")
-      echo -e "\n$( TZ=MST date +%H:%M:%S ): ${BASH_SOURCE} me" >> ${LOG} ;;
-   *)
-      echo -e "\n$( TZ=MST date +%H:%M:%S ): ${BASH_SOURCE} ${ROM} ${DEVICE}" >> ${LOG} ;;
-esac
+echo -e "\n$( TZ=MST date +%H:%M:%S ): ${BASH_SOURCE} ${PARAMS}" >> ${LOG}
 
 # BUILD <SUCCESSFUL|FAILED> IN # MINUTES AND # SECONDS
 echo -e "${BUILD_RESULT_STRING} IN $( echo $((${END}-${START})) | awk '{print int($1/60)" MINUTES AND "int($1%60)" SECONDS"}' )" >> ${LOG}
