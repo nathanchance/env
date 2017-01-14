@@ -82,8 +82,7 @@ function make_command() {
       shift
    done
 
-   MKA=$( command -v mka )
-   if [[ -n ${MKA} ]]; then
+   if [[ -n $( command -v mka ) ]]; then
       mka ${MAKE_PARAMS}
    else
       make -j$( grep -c ^processor /proc/cpuinfo ) ${PARAMS}
