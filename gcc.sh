@@ -117,7 +117,7 @@ function build() {
 
    # DEACTIVATE VENV IF ON ARCH
    if [[ -f /etc/arch-release ]]; then
-      deactivate && rm -rf venv
+      deactivate && rm -rf ${SCRIPTS_DIR}/venv
    fi
 
 

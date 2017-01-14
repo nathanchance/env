@@ -212,7 +212,7 @@ fi
 # DEACTIVATE VIRTUALENV IF WE ARE ON ARCH
 if [[ -f /etc/arch-release ]]; then
    echoText "EXITING VIRTUAL ENV"
-   deactivate
+   deactivate && rm -rf ${SOURCE_DIR}/venv
 fi
 
 END=$( TZ=MST date +%s )
