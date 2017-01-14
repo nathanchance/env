@@ -193,7 +193,7 @@ clear && cd "${SOURCE_FOLDER}" && git checkout ${KERNEL_BRANCH} > /dev/null 2>&1
 KERNEL_VERSION=$( grep -r "EXTRAVERSION = -" ${SOURCE_FOLDER}/Makefile | sed 's/^.*F/F/' )
 case ${KERNEL_TYPE} in
    "personal")
-      ZIP_NAME=${KERNEL_VERSION}${LOCALVERSION} ;;
+      ZIP_NAME=${KERNEL_VERSION}${LOCALVERSION}-$( TZ=MST date +%H%M ) ;;
    *)
       ZIP_NAME=${KERNEL_VERSION} ;;
 esac
