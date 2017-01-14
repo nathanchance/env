@@ -309,8 +309,6 @@ if [[ $( ls ${OUT_DIR}/${ZIP_FORMAT} 2>/dev/null | wc -l ) != "0" ]]; then
 
    # MAKE ZIP_MOVE IF IT DOESN'T EXIST OR CLEAN IT IF IT DOES
    if [[ ! -d "${ZIP_MOVE}" ]]; then
-      newLine; echoText "MAKING ZIP_MOVE DIRECTORY"
-
       mkdir -p "${ZIP_MOVE}"
    else
       newLine; echoText "CLEANING ZIP_MOVE DIRECTORY"
