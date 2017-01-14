@@ -33,8 +33,9 @@ function memUsage() {
 	done
 	MEM_USED=$((MEM_USED / 1024))
 	MEM_TOTAL=$((MEM_TOTAL / 1024))
+	PERCENT=$( echo $( echo "scale = 2; (${MEM_USED} / ${MEM_TOTAL})" | bc -l | awk -F '.' '{print $2}') )
 
-	echo "${MEM_USED} MB out of ${MEM_TOTAL} MB"
+	echo "${MEM_USED} MB out of ${MEM_TOTAL} MB (${PERCENT}%)"
 }
 
 function cpu() {
@@ -74,6 +75,32 @@ function cpu() {
 	echo $( sed -r 's/\([tT][mM]\)|\([Rr]\)|[pP]rocessor|CPU//g' <<< "${CPU}" | xargs )
 }
 
+function diskUsage() {
+	USED=$( df -h | grep /home | awk '{print $3}' )
+	ALL=$( df -h | grep /home | awk '{print $2}' )
+	PERCENT=$( df -h | grep /home | awk '{print $5}' )
+
+	echo "${USED} out of ${ALL} (${PERCENT})"
+}
+
+function updates() {
+	DISTRO=$( cat /etc/os-release | grep ID= | sed s/ID=//g )
+
+	case ${DISTRO} in
+		"arch")
+			PACK_NUM=$( pacman -Qu | grep -v ignored | wc -l ) ;;
+		"ubuntu*"|"linuxmint")
+			PACK_NUM=$( apt-get -s dist-upgrade | awk '/^Inst/ { print $2 }' | wc -l ) ;;
+		*)
+			PACK_NUM=-1
+	esac
+
+	if [[ ${PACK_NUM} != -1 ]]; then
+		echo "     Package updates   :  ${PACK_NUM}"
+	fi
+	echo ""
+}
+
 clear
 
 echo ""
@@ -95,8 +122,8 @@ echo "     Operating system  :  $( source /etc/os-release; echo ${PRETTY_NAME} )
 echo "     Kernel version    :  $( uname -rv )"
 echo "     Architecture      :  $( uname -m )"
 echo "     Processor         :  $( cpu )"
+echo "     CPU usage         :  $( grep 'cpu ' /proc/stat | awk '{usage=($2+$4)*100/($2+$4+$5)} END {print usage "%"}' )"
 echo "     Memory usage      :  $( memUsage )"
-echo "     Disk usage        :  $( df -h | grep home | awk '{print $5}' ) ($( df -h | grep home | awk '{print $3}' ) out of $( df -h | grep home | awk '{print $2}' ))"
-echo "     Package updates   :  $( pacman -Qu | grep -v ignored | wc -l )"
-echo ""
+echo "     Disk usage        :  $( diskUsage )"
+           updates
 echo ""
