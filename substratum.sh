@@ -2,7 +2,7 @@
 #
 # Substratum compilation and upload script
 #
-# Copyright (C) 2016 Nathan Chancellor
+# Copyright (C) 2016-2017 Nathan Chancellor
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
