@@ -132,9 +132,10 @@ function build() {
 
    cd ${REPO}/bin
    VERSION=$( ./${1}-gcc --version | grep ${1} | cut -d ' ' -f 3 )
+   GCC_DATE=$( ./${1}-gcc --version | grep ${1} | cut -d ' ' -f 4 )
    cd ..
    git add .
-   git commit --signoff -m "${1} ${VERSION}: $( date +%Y%m%d )
+   git commit --signoff -m "${1} ${VERSION}: ${GCC_DATE}
 
 Compiled on $( source /etc/os-release; echo ${PRETTY_NAME} ) $( uname -m )
 
