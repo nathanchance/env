@@ -75,6 +75,7 @@ function newLine() {
 # TCUPDATE (T/F): whether or not we are updating the toolchain before compiling
 
 unset LOCALVERSION
+unset PRIVATE
 SUCCESS=false
 
 while [[ $# -ge 1 ]]; do
@@ -96,6 +97,8 @@ while [[ $# -ge 1 ]]; do
             *)
                echo "Invalid version!" && exit ;;
          esac ;;
+      "private")
+         PRIVATE=true ;;
       *)
          echo "Invalid parameter" && exit ;;
    esac
@@ -138,6 +141,8 @@ ZIP_MOVE_HEAD=${HOME}/Web
 TOOLCHAIN_HEAD=${HOME}/Toolchains/Prebuilts
 ANYKERNEL_FOLDER=${KERNEL_HEAD}/anykernel
 
+DEFCONFIG=flash_defconfig
+
 case "${DEVICE}" in
    "angler"|"bullhead")
       SOURCE_FOLDER=${KERNEL_HEAD}/${DEVICE}
@@ -166,12 +171,15 @@ case "${KERNEL_TYPE}" in
       ZIP_MOVE=${ZIP_MOVE_HEAD}/Kernels/${DEVICE}/${ANDROID_VERSION}/Testing
       ANYKERNEL_BRANCH=${DEVICE}-flash-release-${ANDROID_VERSION} ;;
    "personal")
-      ZIP_MOVE=${ZIP_MOVE_HEAD}/Kernels/${DEVICE}/${ANDROID_VERSION}/Personal
+      if [[ ${PRIVATE} != true ]]; then
+         ZIP_MOVE=${ZIP_MOVE_HEAD}/Kernels/${DEVICE}/${ANDROID_VERSION}/Personal
+      else
+         ZIP_MOVE=${ZIP_MOVE_HEAD}/.superhidden/Kernels
+      fi
       ANYKERNEL_BRANCH=${DEVICE}-flash-personal-${ANDROID_VERSION} ;;
 esac
 
 THREADS=-j$(grep -c ^processor /proc/cpuinfo)
-DEFCONFIG=flash_defconfig
 KERNEL=${SOURCE_FOLDER}/arch/${ARCHITECTURE}/boot/${KERNEL_IMAGE}
 
 
