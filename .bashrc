@@ -45,13 +45,13 @@ export LOG=${LOGDIR}/Results/compile_log_$( TZ=MST date +%m_%d_%y ).log
 export LC_ALL=C
 
 # Build tools into PATH for Open GApps
-export PATH=${PATH}:${HOME}/Misc/android-sdk-linux/build-tools/24.0.3
+export PATH=${PATH}:${HOME}/SDK/build-tools/25.0.2
 
 # Set ANDROID_HOME for Gradle
-export ANDROID_HOME=${HOME}/Misc/android-sdk-linux
+export ANDROID_HOME=${HOME}/SDK
 
 # Set NDK in path
-export PATH=${PATH}:${HOME}/Misc/android-ndk-r13b-linux-x86_64
+export PATH=${PATH}:${HOME}/NDK
 
 ###############
 # GIT ALIASES #
