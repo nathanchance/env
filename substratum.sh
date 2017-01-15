@@ -79,7 +79,7 @@ done
 
 if [[ -z ${PARAM} ]]; then
    echo "You did not specify a necessary parameter. Falling back to building only"
-   MODE=build
+   PARAM=build
 fi
 
 
