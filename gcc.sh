@@ -83,6 +83,7 @@ function build() {
       echoText "CLEANING REPO"
 
       cd ${REPO}
+      git pull
       rm -vrf *
    else
       # OTHERWISE, CLONE IT

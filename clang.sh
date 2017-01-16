@@ -96,7 +96,7 @@ clear
 
 # CLEAN INSTALL DIR IF IT EXISTS; OTHERWISE MAKE IT
 if [[ -d ${INSTALL_DIR} ]]; then
-   cd ${INSTALL_DIR} && rm -vrf *
+   cd ${INSTALL_DIR} && git pull && rm -vrf *
 else
    cd $( dirname ${INSTALL_DIR} )
    git clone https://gitlab.com/Flash-ROM/clang_linux-x86_${VERSION_PARAM} clang-${VERSION_PARAM}
