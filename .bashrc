@@ -44,15 +44,6 @@ export LOG=${LOGDIR}/Results/compile_log_$( TZ=MST date +%m_%d_%y ).log
 # Export for building on Arch
 export LC_ALL=C
 
-# Build tools into PATH for Open GApps
-export PATH=${PATH}:${HOME}/SDK/build-tools/25.0.2
-
-# Set ANDROID_HOME for Gradle
-export ANDROID_HOME=${HOME}/SDK
-
-# Set NDK in path
-export PATH=${PATH}:${HOME}/NDK
-
 ###############
 # GIT ALIASES #
 ###############
