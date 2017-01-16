@@ -33,7 +33,10 @@ function memUsage() {
 	done
 	MEM_USED=$((MEM_USED / 1024))
 	MEM_TOTAL=$((MEM_TOTAL / 1024))
-	PERCENT=$( echo $( echo "scale = 2; (${MEM_USED} / ${MEM_TOTAL})" | bc -l | awk -F '.' '{print $2}') )
+	PERCENT=$( echo $( echo "scale = 2; (${MEM_USED} / ${MEM_TOTAL})" | bc -l | awk -F '.' '{print $2}' ) | sed s/^0*//g )
+	if [[ -z ${PERCENT} ]]; then
+		PERCENT=0
+	fi
 
 	echo "${MEM_USED} MB out of ${MEM_TOTAL} MB (${PERCENT}%)"
 }
