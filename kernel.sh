@@ -90,13 +90,7 @@ while [[ $# -ge 1 ]]; do
       "staging"|"release"|"testing"|"eas")
          KERNEL_TYPE=${1} ;;
       "7.1.1")
-         ANDROID_VERSION=${1}
-         case "${ANDROID_VERSION}" in
-            7*)
-               KERNEL_BRANCH=n${ANDROID_VERSION} ;;
-            *)
-               echo "Invalid version!" && exit ;;
-         esac ;;
+         ANDROID_VERSION=${1} ;;
       "private")
          PRIVATE=true ;;
       *)
@@ -110,6 +104,12 @@ if [[ -z ${DEVICE} || -z ${KERNEL_TYPE} || -z ${ANDROID_VERSION} ]]; then
    echo "You did not specify a necessary parameter (either device, version, branch, or both). Please re-run the script with the necessary parameters!" && exit
 fi
 
+case "${DEVICE}" in
+   "bullhead"|"shamu")
+      KERNEL_BRANCH=release-${ANDROID_VERSION} ;;
+   "angler")
+      KERNEL_BRANCH=n${ANDROID_VERSION} ;;
+esac
 
 ###############
 #             #
