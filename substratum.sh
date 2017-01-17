@@ -93,38 +93,78 @@ fi
 START=$( TZ=MST date +%s )
 
 # SET VARIABLES
-SOURCE_DIR=${HOME}/Repos/substratum
+if [[ -f /etc/arch-release ]]; then
+   SOURCE_DIR=${HOME}/Repos/substratum
+   APK_MOVE=${HOME}/ROMs/Flash/vendor_flash/prebuilt/app/Substratum
+   SECOND_MOVE=${HOME}/Web/.superhidden/APKs
+else
+   SOURCE_DIR=${HOME}/Documents/Android/"Flash ROM"/substratum
+   APK_MOVE=${HOME}/Documents/Android/"Flash ROM"/vendor_flash/prebuilt/app/Substratum
+fi
 OUT_DIR=${SOURCE_DIR}/app/build/outputs/apk
-APK_FORMAT=substratum*.apk
-APK_MOVE=${HOME}/Web/.superhidden/APKs
+APK_FORMAT=*ubstratum*.apk
+
 
 # UNSET JAVA_HOME SO GRADLE CAN PROPERLY SET IT
 unset JAVA_HOME
 
 # GET CURRENT DIR FOR later
-CURRENT_DIR=$( pwd ) && cd ${SOURCE_DIR}
+CURRENT_DIR=$( pwd )
+
+# MOVE INTO SOURCE_DIR
+cd "${SOURCE_DIR}"
 
 # UPDATE REPO IF REQUESTED
 if [[ "${PARAM}" == "update" || "${PARAM}" == "both" ]]; then
-   git pull upstream dev --rebase && git push --force
+   echoText "UPDATING SOURCE"
+   git pull && git pull upstream dev --rebase && git push --force
 fi
 
 if [[ "${PARAM}" == "build" || "${PARAM}" == "both" ]]; then
+   COMMIT_HASH=$( git log -1 --format=%H )
+   VERSION=$( awk '/versionCode/{i++}i==2{print $2; exit}' "${SOURCE_DIR}"/app/build.gradle )
+
    # CLEAN PREVIOUS BUILD
+   echoText "CLEANING BUILD"
    ./gradlew clean
 
    # MAKE NEW APK
+   echoText "BUILDING APK"
    ./gradlew assembleDebug
 
    # IF THE APK WAS FOUND, MOVE IT
-   if [[ $( ls ${OUT_DIR}/${APK_FORMAT} 2>/dev/null | wc -l ) != "0" ]]; then
+   if [[ $( ls "${OUT_DIR}"/${APK_FORMAT} 2>/dev/null | wc -l ) != "0" ]]; then
       RESULT_STRING="BUILD SUCCESSFUL"
-      if [[ -d ${APK_MOVE} ]]; then
-         rm -vrf ${APK_MOVE}/${APK_FORMAT}
+
+      # CLEAN/MAKE APK_MOVE
+      if [[ -d "${APK_MOVE}" ]]; then
+         rm -vrf "${APK_MOVE}"/${APK_FORMAT}
       else
-         mkdir -p ${APK_MOVE}
+         mkdir -p "${APK_MOVE}"
       fi
-      cp -v ${OUT_DIR}/${APK_FORMAT} ${APK_MOVE}
+
+      # UPDATE APK_MOVE
+      echoText "MOVING APK"
+      cd "${APK_MOVE}" && git pull
+
+      # MOVE NEW APK
+      cp -v "${OUT_DIR}"/${APK_FORMAT} "${APK_MOVE}"/Substratum.apk
+      if [[ -f /etc/arch-release ]]; then
+         cp -v "${OUT_DIR}"/"${APK_FORMAT}" "${SECOND_MOVE}"
+      fi
+
+      # COMMIT IT
+      echoText "PUSHING NEW APK"
+      git add -A
+      git commit --signoff -m "Prebuilt: Substratum: ${VERSION} - $( date +%Y%m%d )
+
+Currently here: https://github.com/Flash-ROM/substratum/commit/${COMMIT_HASH}
+Full source: https://github.com/Flash-ROM/substratum
+
+Please remember this is a debug APK so it is incompatible with the Play Store release. Do not pick this if you have users on your ROM."
+
+      # PUSH IT
+      git push
 
    # OTHERWISE, REPORT IT!
    else
