@@ -102,11 +102,10 @@ APK_MOVE=${HOME}/Web/.superhidden/APKs
 unset JAVA_HOME
 
 # GET CURRENT DIR FOR later
-CURRENT_DIR=$( pwd )
+CURRENT_DIR=$( pwd ) && cd ${SOURCE_DIR}
 
 # UPDATE REPO IF REQUESTED
 if [[ "${PARAM}" == "update" || "${PARAM}" == "both" ]]; then
-   cd ${SOURCE_DIR}
    git pull upstream dev --rebase && git push --force
 fi
 
