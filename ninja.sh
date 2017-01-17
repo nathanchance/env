@@ -153,8 +153,8 @@ if [[ "${MODE}" == "install" || "${MODE}" == "both" ]]; then
 Compiled on $( source /etc/os-release; echo ${PRETTY_NAME} ) $( uname -m )
 
 Kernel version: $( uname -rv )
-Clang version: $( ${CLANG_LOCATION}/bin/clang++ --version | grep version | cut -d ' ' -f 3 )
-Make version: $( make --version  | grep Make | cut -d ' ' -f 3 )
+Clang version: $( ${CLANG_LOCATION}/bin/clang++ --version | awk '/version/ {print $3}' )
+Make version: $( make --version  | awk '/Make/ {print $3}' )
 
 Source: https://github.com/Flash-ROM/ninja" && git push --force
 

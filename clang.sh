@@ -163,8 +163,8 @@ else
 Compiled on $( source /etc/os-release; echo ${PRETTY_NAME} ) $( uname -m )
 
 Kernel version: $( uname -rv )
-gcc version: $( gcc --version | grep gcc | cut -d ' ' -f 3,4 )
-Make version: $( make --version  | grep Make | cut -d ' ' -f 3 )
+gcc version: $( gcc --version | awk '/gcc/ {print $3 $4}' )
+Make version: $( make --version  | awk '/Make/ {print $3}' )
 
 Manifest: https://github.com/Flash-TC/manifest/tree/clang-${VERSION_PARAM}
 binutils source: https://github.com/Flash-TC/binutils" && git push --force
