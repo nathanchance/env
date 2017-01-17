@@ -156,7 +156,7 @@ if [[ "${PARAM}" == "build" || "${PARAM}" == "both" ]]; then
       # COMMIT IT
       echoText "PUSHING NEW APK"
       git add -A
-      git commit --signoff -m "Prebuilt: Substratum: ${VERSION} - $( date +%Y%m%d )
+      git commit --signoff -m "Prebuilt: Substratum: ${VERSION} - $( TZ=MST date +%Y%m%d )
 
 Currently here: https://github.com/Flash-ROM/substratum/commit/${COMMIT_HASH}
 Full source: https://github.com/Flash-ROM/substratum
