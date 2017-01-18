@@ -91,7 +91,7 @@ function updates() {
 
 	case ${DISTRO} in
 		"arch")
-			PACK_NUM=$( pacman -Qu | grep -v ignored | wc -l ) ;;
+			PACK_NUM=$( pacaur -Qu | grep -v ignored | wc -l ) ;;
 		"ubuntu*"|"linuxmint")
 			PACK_NUM=$( apt-get -s dist-upgrade | awk '/^Inst/ { print $2 }' | wc -l ) ;;
 		*)
