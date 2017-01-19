@@ -85,21 +85,14 @@ COMP_FILE=recovery.img
 UPLD_FILE=twrp-${VERSION}-${DEVICE}-$( TZ=MST date +%Y%m%d ).img
 FILE_FORMAT=twrp-*-${DEVICE}*
 
-################
-# START SCRIPT #
-################
 
-clear
+##################
+#                #
+#  START SCRIPT  #
+#                #
+##################
 
-# EXPORT JAVA8
-export EXPERIMENTAL_USE_JAVA8=true
-
-
-#######################
-# START TRACKING TIME #
-#######################
-
-START=$( TZ=MST date +%s )
+clear && export EXPERIMENTAL_USE_JAVA8=true && START=$( TZ=MST date +%s )
 
 
 ###########################
@@ -113,22 +106,16 @@ cd ${SOURCE_DIR}
 # REPO SYNC #
 #############
 
-echoText "SYNCING LATEST SOURCES"; newLine
+echoText "SYNCING LATEST SOURCES"
 
 repo sync --force-sync -j$(grep -c ^processor /proc/cpuinfo)
-
-# PICK CCACHE AND NINJA COMMTIS UNTIL THEY ARE MERGED (IF THEY EVER ARE ;_;)
-cd ${SOURCE_DIR}/build
-git fetch https://gerrit.omnirom.org/android_build refs/changes/78/21378/3 && git cherry-pick FETCH_HEAD
-git fetch https://gerrit.omnirom.org/android_build refs/changes/79/21379/1 && git cherry-pick FETCH_HEAD
-cd ${SOURCE_DIR}
 
 
 ###########################
 # SETUP BUILD ENVIRONMENT #
 ###########################
 
-echoText "SETTING UP BUILD ENVIRONMENT"; newLine
+echoText "SETTING UP BUILD ENVIRONMENT"
 
 # CHECK AND SEE IF WE ARE ON ARCH; IF SO, ACTIVARE A VIRTUAL ENVIRONMENT FOR PROPER PYTHON SUPPORT
 if [[ -f /etc/arch-release ]]; then
@@ -143,7 +130,7 @@ source build/envsetup.sh
 # PREPARE DEVICE #
 ##################
 
-newLine; echoText "PREPARING $( echo ${DEVICE} | awk '{print toupper($0)}' )"
+echoText "PREPARING $( echo ${DEVICE} | awk '{print toupper($0)}' )"
 
 lunch omni_${DEVICE}-eng
 
@@ -152,7 +139,7 @@ lunch omni_${DEVICE}-eng
 # CLEAN UP #
 ############
 
-echoText "CLEANING UP OUT DIRECTORY"; newLine
+echoText "CLEANING UP OUT DIRECTORY"
 
 mka clobber
 
@@ -161,7 +148,7 @@ mka clobber
 # START BUILDING #
 ##################
 
-newLine; echoText "MAKING TWRP"; newLine
+echoText "MAKING TWRP"
 NOW=$( TZ=MST date +"%Y-%m-%d-%S" )
 time mka recoveryimage
 
@@ -183,11 +170,9 @@ if [[ $( ls ${OUT_DIR}/${COMP_FILE} 2>/dev/null | wc -l ) != "0" ]]; then
 
   # MAKE IMG_MOVE IF IT DOESN'T EXIST OR CLEAN IT IF IT DOES
   if [[ ! -d "${IMG_MOVE}" ]]; then
-     newLine; echoText "MAKING UPLOAD DIRECTORY"
-
      mkdir -p "${IMG_MOVE}"
   else
-     newLine; echoText "CLEANING UPLOAD DIRECTORY"; newLine
+     echoText "CLEANING UPLOAD DIRECTORY"
 
      rm -vrf "${IMG_MOVE}"/*${FILE_FORMAT}*
   fi
@@ -219,7 +204,6 @@ fi
 
 # DEACTIVATE VIRTUALENV IF WE ARE ON ARCH
 if [[ -f /etc/arch-release ]]; then
-   echoText "EXITING VIRTUAL ENV"
    deactivate && rm -rf ${SOURCE_DIR}/venv
 fi
 
