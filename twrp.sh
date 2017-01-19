@@ -119,7 +119,7 @@ repo sync --force-sync -j$(grep -c ^processor /proc/cpuinfo)
 
 # PICK CCACHE AND NINJA COMMTIS UNTIL THEY ARE MERGED (IF THEY EVER ARE ;_;)
 cd ${SOURCE_DIR}/build
-git fetch https://gerrit.omnirom.org/android_build refs/changes/78/21378/1 && git cherry-pick FETCH_HEAD
+git fetch https://gerrit.omnirom.org/android_build refs/changes/78/21378/3 && git cherry-pick FETCH_HEAD
 git fetch https://gerrit.omnirom.org/android_build refs/changes/79/21379/1 && git cherry-pick FETCH_HEAD
 cd ${SOURCE_DIR}
 
