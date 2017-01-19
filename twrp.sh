@@ -76,7 +76,8 @@ OUT_DIR=${SOURCE_DIR}/out/target/product/${DEVICE}
 IMG_MOVE=${HOME}/Web/TWRP
 
 # TWRP version
-VERSION=$( grep "TW_VERSION_STR" ${SOURCE_DIR}/bootable/recovery/variables.h | cut -d \" -f2 )
+export TW_DEVICE_VERSION=0
+VERSION=$( grep "TW_MAIN_VERSION_STR" ${SOURCE_DIR}/bootable/recovery/variables.h -m 1 | cut -d \" -f2 )-${TW_DEVICE_VERSION}
 
 # FILE NAMES
 COMP_FILE=recovery.img
@@ -256,4 +257,4 @@ fi
 # ALERT FOR SCRIPT END #
 ########################
 
-echo -e "\a" && cd ${HOME}
+echo -e "\a" && unset TW_DEVICE_VERSION && cd ${HOME}
