@@ -76,7 +76,8 @@ OUT_DIR=${SOURCE_DIR}/out/target/product/${DEVICE}
 IMG_MOVE=${HOME}/Web/TWRP
 
 # TWRP version
-export TW_DEVICE_VERSION=0
+# Version 1: f2fs-tools bumped to 1.7.0, TWRP app removed
+export TW_DEVICE_VERSION=1
 VERSION=$( grep "TW_MAIN_VERSION_STR" ${SOURCE_DIR}/bootable/recovery/variables.h -m 1 | cut -d \" -f2 )-${TW_DEVICE_VERSION}
 
 # FILE NAMES
