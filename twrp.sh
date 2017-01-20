@@ -82,7 +82,7 @@ VERSION=$( grep "TW_MAIN_VERSION_STR" ${SOURCE_DIR}/bootable/recovery/variables.
 
 # FILE NAMES
 COMP_FILE=recovery.img
-UPLD_FILE=twrp-${VERSION}-${DEVICE}-$( TZ=MST date +%Y%m%d ).img
+UPLD_FILE=twrp-${VERSION}-${DEVICE}-f2fs-$( TZ=MST date +%Y%m%d ).img
 FILE_FORMAT=twrp-*-${DEVICE}*
 
 
