@@ -108,7 +108,7 @@ while [[ $# -ge 1 ]]; do
          ROM=flash
          DEVICE=angler
          export LOCALVERSION=-$( TZ=MST date +%Y%m%d ) ;;
-      "shamu"|"angler"|"bullhead"|"hammerhead")
+      "shamu"|"angler"|"bullhead"|"hammerhead"|"marlin"|"sailfish")
          DEVICE=${1} ;;
       "abc"|"aosip"|"du"|"flash"|"krexus"|"pn")
          ROM=${1} ;;
