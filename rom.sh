@@ -63,15 +63,7 @@ function newLine() {
 
 # UNSETS VARIABLES POTENTIALLY USED IN SCRIPT
 function unsetvars() {
-   unset ROM_BUILD_TYPE
-   unset SUBSTRATUM
-   unset LOCALVERSION
-   unset BUILD_TAG
-   unset SYNC
-   unset PERSONAL
-   unset SUCCESS
-   unset MAKE_TYPE
-   unset PARAMS
+   unset ROM_BUILD_TYPE SUBSTRATUM LOCALVERSION BUILD_TAG SYNC PERSONAL SUCCESS CLEAN_TYPE MAKE_TYPE PARAMS
 }
 
 # CHECKS IF MKA EXISTS
@@ -89,7 +81,6 @@ function make_command() {
    fi
 
    unset MAKE_PARAMS
-   unset MKA
 }
 
 ################
@@ -124,13 +115,21 @@ while [[ $# -ge 1 ]]; do
          else
             echo "Please specify a build type!" && exit
          fi ;;
+      "clean")
+         shift
+         if [[ $# -ge 1 ]]; then
+            PARAMS+="${1} "
+            export CLEAN_TYPE=${1}
+         else
+            echo "Please specify a clean type!" && exit
+         fi ;;
       "make")
          shift
          if [[ $# -ge 1 ]]; then
             PARAMS+="${1} "
             export MAKE_TYPE=${1}
          else
-            echo "Please specify a make type!" && exit
+            echo "Please specify a make item!" && exit
          fi ;;
       *)
          echo "Invalid parameter detected!" && exit ;;
@@ -222,8 +221,7 @@ echoText "SETTING UP BUILD ENVIRONMENT"
 
 # CHECK AND SEE IF WE ARE ON ARCH; IF SO, ACTIVARE A VIRTUAL ENVIRONMENT FOR PROPER PYTHON SUPPORT
 if [[ -f /etc/arch-release ]]; then
-   virtualenv2 venv
-   source venv/bin/activate
+   virtualenv2 venv && source venv/bin/activate
 fi
 
 source build/envsetup.sh
@@ -252,9 +250,9 @@ esac
 
 echoText "CLEANING UP OUT DIRECTORY"
 
-if [[ -n ${MAKE_TYPE} ]] && [[ "${MAKE_TYPE}" != "noclean" ]]; then
-   make_command ${MAKE_TYPE}
-elif [[ -z ${MAKE_TYPE} ]]; then
+if [[ -n ${CLEAN_TYPE} ]] && [[ "${CLEAN_TYPE}" != "noclean" ]]; then
+   make_command ${CLEAN_TYPE}
+elif [[ -z ${CLEAN_TYPE} ]]; then
    make_command clobber
 fi
 
@@ -275,72 +273,74 @@ if [[ ${ROM} == "flash" ]]; then
    echo -e ${RESTORE}
    sleep 5
 else
-   echoText "MAKING ZIP FILE"; newLine
+   echoText "MAKING FILES"; newLine
 fi
 
 NOW=$( TZ=MST date +"%Y-%m-%d-%S" )
 
-# NOT ALL ROMS USE BACON
-case "${ROM}" in
-   "aosip")
-      time make_command kronic ;;
-   "krexus")
-      time make_command otapackage ;;
-   *)
-      time make_command bacon ;;
-esac
-
-
-###################
-# IF ROM COMPILED #
-###################
-
-# THERE WILL BE A ZIP IN THE OUT FOLDER IN THE ZIP FORMAT
-if [[ $( ls ${OUT_DIR}/${ZIP_FORMAT} 2>/dev/null | wc -l ) != "0" ]]; then
-   # MAKE BUILD RESULT STRING REFLECT SUCCESSFUL COMPILATION
-   BUILD_RESULT_STRING="BUILD SUCCESSFUL"
-   SUCCESS=true
-
-
-   ##################
-   # ZIP_MOVE LOGIC #
-   ##################
-
-   # MAKE ZIP_MOVE IF IT DOESN'T EXIST OR CLEAN IT IF IT DOES
-   if [[ ! -d "${ZIP_MOVE}" ]]; then
-      mkdir -p "${ZIP_MOVE}"
-   else
-      newLine; echoText "CLEANING ZIP_MOVE DIRECTORY"
-
-      rm -vrf "${ZIP_MOVE}"/*${ZIP_FORMAT}*
-   fi
-
-
-   ####################
-   # MOVING ROM FILES #
-   ####################
-
-   echoText "MOVING FILES TO ZIP_MOVE DIRECTORY"
-
-   mv -v ${OUT_DIR}/*${ZIP_FORMAT}* "${ZIP_MOVE}"
-
-
-###################
-# IF BUILD FAILED #
-###################
-
+# MAKE THE REQUESTED ITEM
+if [[ -n ${MAKE_TYPE} ]]; then
+   time make_command ${MAKE_TYPE}
 else
-   BUILD_RESULT_STRING="BUILD FAILED"
-   SUCCESS=false
-fi
+   # NOT ALL ROMS USE BACON
+   case "${ROM}" in
+      "aosip")
+         time make_command kronic ;;
+      "krexus")
+         time make_command otapackage ;;
+      *)
+         time make_command bacon ;;
+   esac
 
+   ###################
+   # IF ROM COMPILED #
+   ###################
+
+   # THERE WILL BE A ZIP IN THE OUT FOLDER IN THE ZIP FORMAT
+   if [[ $( ls ${OUT_DIR}/${ZIP_FORMAT} 2>/dev/null | wc -l ) != "0" ]]; then
+      # MAKE BUILD RESULT STRING REFLECT SUCCESSFUL COMPILATION
+      BUILD_RESULT_STRING="BUILD SUCCESSFUL"
+      SUCCESS=true
+
+
+      ##################
+      # ZIP_MOVE LOGIC #
+      ##################
+
+      # MAKE ZIP_MOVE IF IT DOESN'T EXIST OR CLEAN IT IF IT DOES
+      if [[ ! -d "${ZIP_MOVE}" ]]; then
+         mkdir -p "${ZIP_MOVE}"
+      else
+         newLine; echoText "CLEANING ZIP_MOVE DIRECTORY"
+
+         rm -vrf "${ZIP_MOVE}"/*${ZIP_FORMAT}*
+      fi
+
+
+      ####################
+      # MOVING ROM FILES #
+      ####################
+
+      echoText "MOVING FILES TO ZIP_MOVE DIRECTORY"
+
+      mv -v ${OUT_DIR}/*${ZIP_FORMAT}* "${ZIP_MOVE}"
+
+
+   ###################
+   # IF BUILD FAILED #
+   ###################
+
+   else
+      BUILD_RESULT_STRING="BUILD FAILED"
+      SUCCESS=false
+   fi
+fi
 
 
 # DEACTIVATE VIRTUALENV IF WE ARE ON ARCH
 if [[ -f /etc/arch-release ]]; then
    deactivate && rm -rf ${SOURCE_DIR}/venv
 fi
-
 
 
 ##############
@@ -358,14 +358,13 @@ echoText "${BUILD_RESULT_STRING}!"
 # IF THE BUILD WAS SUCCESSFUL, PRINT FILE LOCATION, AND SIZE
 if [[ ${SUCCESS} = true ]]; then
    echo -e ${RED}"FILE LOCATION: $( ls ${ZIP_MOVE}/${ZIP_FORMAT} )"
-   echo -e "SIZE: $( du -h ${ZIP_MOVE}/${ZIP_FORMAT} | awk '{print $1}'  )"${RESTORE}
+   echo -e "SIZE: $( du -h ${ZIP_MOVE}/${ZIP_FORMAT} | awk '{print $1}' )"${RESTORE}
 fi
 
 # PRINT THE TIME THE SCRIPT FINISHED
 # AND HOW LONG IT TOOK REGARDLESS OF SUCCESS
 echo -e ${RED}"TIME FINISHED: $( TZ=MST date +%D\ %r | awk '{print toupper($0)}' )"
 echo -e ${RED}"DURATION: $( echo $((${END}-${START})) | awk '{print int($1/60)" MINUTES AND "int($1%60)" SECONDS"}' )"${RESTORE}; newLine
-
 
 
 ##################
