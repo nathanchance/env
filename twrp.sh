@@ -86,6 +86,28 @@ UPLD_FILE=twrp-${VERSION}-${DEVICE}-$( TZ=MST date +%Y%m%d ).img
 FILE_FORMAT=twrp-*-${DEVICE}*
 
 
+################
+#              #
+#  PARAMETERS  #
+#              #
+################
+
+unset SYNC
+
+while [[ $# -ge 1 ]]; do
+   PARAMS+="${1} "
+
+   case "${1}" in
+      "nosync")
+         SYNC=false ;;
+      *)
+         echo "Invalid parameter detected!" && exit ;;
+   esac
+
+   shift
+done
+
+
 ##################
 #                #
 #  START SCRIPT  #
@@ -95,20 +117,17 @@ FILE_FORMAT=twrp-*-${DEVICE}*
 clear && export EXPERIMENTAL_USE_JAVA8=true && START=$( TZ=MST date +%s )
 
 
-###########################
-# MOVE INTO SOURCE FOLDER #
-###########################
-
-cd ${SOURCE_DIR}
-
-
 #############
 # REPO SYNC #
 #############
 
-echoText "SYNCING LATEST SOURCES"
+cd ${SOURCE_DIR}
 
-repo sync --force-sync -j$(grep -c ^processor /proc/cpuinfo)
+if [[ ${SYNC} != false ]]; then
+   echoText "SYNCING LATEST SOURCES"
+
+   repo sync --force-sync -j$(grep -c ^processor /proc/cpuinfo)
+fi
 
 
 ###########################
