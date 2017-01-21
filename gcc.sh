@@ -24,7 +24,7 @@
 #         #
 ###########
 
-# PURPOSE: Builds arm-eabi, aarch64-linux-android, and arm-linux-androideabi toolchains from source
+# PURPOSE: Builds aarch64-linux-android and arm-linux-androideabi toolchains from source
 # USAGE: $ bash gcc.sh
 
 
@@ -152,30 +152,6 @@ binutils source: https://github.com/Flash-TC/binutils"
 }
 
 
-################
-#              #
-#  PARAMETERS  #
-#              #
-################
-
-unset ARCH
-
-while [[ $# -ge 1 ]]; do
-   case "${1}" in
-      "arm"|"arm64")
-         ARCH=${1} ;;
-      *)
-         echo "Invalid parameter" && exit ;;
-   esac
-
-   shift
-done
-
-if [[ -z ${ARCH} ]]; then
-   echo "You did not specify a necessary parameter. Falling back to all"
-fi
-
-
 ##################
 #                #
 #  SCRIPT START  #
@@ -243,11 +219,5 @@ git push --force
 # BUILD THE TOOLCHAINS
 echoText "RUNNING BUILD SCRIPTS"
 
-if [[ "${ARCH}" == "arm64" || -z ${ARCH} ]]; then
-   build "aarch64-linux-android"
-fi
-
-if [[ "${ARCH}" == "arm" || -z ${ARCH} ]]; then
-   build "arm-eabi"
-   build "arm-linux-androideabi"
-fi
+build "aarch64-linux-android"
+build "arm-linux-androideabi"
