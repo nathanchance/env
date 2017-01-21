@@ -98,8 +98,8 @@ if [[ -f /etc/arch-release ]]; then
    APK_MOVE=${HOME}/ROMs/Flash/vendor_flash/prebuilt/app/Substratum
    SECOND_MOVE=${HOME}/Web/.superhidden/APKs
 else
-   SOURCE_DIR=${HOME}/Documents/Android/"Flash ROM"/substratum
-   APK_MOVE=${HOME}/Documents/Android/"Flash ROM"/vendor_flash/prebuilt/app/Substratum
+   SOURCE_DIR=${HOME}/Documents/Repos/substratum
+   APK_MOVE=${HOME}/Documents/Android/FlashROM/vendor_flash/prebuilt/app/Substratum
 fi
 OUT_DIR=${SOURCE_DIR}/app/build/outputs/apk
 APK_FORMAT=*ubstratum*.apk
