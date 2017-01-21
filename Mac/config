@@ -673,7 +673,7 @@ scrot_cmd="auto"
 # Flag:    --scrot_dir
 #
 # Note: Neofetch won't create the directory if it doesn't exist.
-scrot_dir="$HOME/Pictures/Screenshots"
+scrot_dir="${HOME}/Pictures/Screenshots/"
 
 # Screenshot Filename
 # What to name the screenshots
