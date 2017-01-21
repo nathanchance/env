@@ -281,6 +281,12 @@ NOW=$( TZ=MST date +"%Y-%m-%d-%S" )
 # MAKE THE REQUESTED ITEM
 if [[ -n ${MAKE_TYPE} ]]; then
    time make_command ${MAKE_TYPE}
+
+   ################
+   # PRINT RESULT #
+   ################
+
+   echoText "BUILD COMPLETED!"
 else
    # NOT ALL ROMS USE BACON
    case "${ROM}" in
@@ -334,6 +340,12 @@ else
       BUILD_RESULT_STRING="BUILD FAILED"
       SUCCESS=false
    fi
+
+   ################
+   # PRINT RESULT #
+   ################
+
+   echoText "${BUILD_RESULT_STRING}!"
 fi
 
 
@@ -343,17 +355,12 @@ if [[ -f /etc/arch-release ]]; then
 fi
 
 
-##############
-# SCRIPT END #
-##############
-
-END=$( TZ=MST date +%s )
-echoText "${BUILD_RESULT_STRING}!"
-
-
 ######################
 # ENDING INFORMATION #
 ######################
+
+# STOP TRACKING TIME
+END=$( TZ=MST date +%s )
 
 # IF THE BUILD WAS SUCCESSFUL, PRINT FILE LOCATION, AND SIZE
 if [[ ${SUCCESS} = true ]]; then
