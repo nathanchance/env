@@ -91,6 +91,9 @@ function updates() {
 
 	case ${DISTRO} in
 		"arch")
+			# Silently sync up
+			echo "n" | pacaur -Syu | 2>&1
+			# Check for new upgradeable packages
 			PACK_NUM=$( pacaur -Qu | grep -v ignored | wc -l ) ;;
 		"ubuntu*"|"linuxmint")
 			PACK_NUM=$( apt-get -s dist-upgrade | awk '/^Inst/ { print $2 }' | wc -l ) ;;
