@@ -312,9 +312,7 @@ else
         if [[ ! -d "${ZIP_MOVE}" ]]; then
             mkdir -p "${ZIP_MOVE}"
         else
-            newLine; echoText "CLEANING ZIP_MOVE DIRECTORY"
-
-            rm -vrf "${ZIP_MOVE}"/*${ZIP_FORMAT}*
+            rm -rf "${ZIP_MOVE}"/*
         fi
 
 
@@ -322,11 +320,11 @@ else
         # MOVING ROM FILES #
         ####################
 
-        echoText "MOVING FILES TO ZIP_MOVE DIRECTORY"
+        newLine; echoText "MOVING FILES TO ZIP_MOVE DIRECTORY"
         if [[ ${FILES} = 1 ]]; then
-            mv -v "${OUTDIR}"/*.zip* "${ZIP_MOVE}"
+            mv -v "${OUT_DIR}"/*.zip* "${ZIP_MOVE}"
         else
-            for FILE in $( ls ${OUTDIR}/*.zip* | grep -v ota ); do
+            for FILE in $( ls ${OUT_DIR}/*.zip* | grep -v ota ); do
                 mv -v "${FILE}" "${ZIP_MOVE}"
             done
         fi
