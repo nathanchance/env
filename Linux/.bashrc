@@ -37,7 +37,7 @@ export PATH="${PATH}$(find ${HOME}/Scripts -name '.*' -prune -o -type d -printf 
 export LOGDIR=${HOME}/Logs
 # Create LOGDIR if it doesn't exist
 if [[ ! -d ${LOGDIR} ]]; then
-   mkdir -p ${LOGDIR}/Results
+    mkdir -p ${LOGDIR}/Results
 fi
 export LOG=${LOGDIR}/Results/compile_log_$( TZ=MST date +%m_%d_%y ).log
 
@@ -92,72 +92,72 @@ alias gdh='git diff HEAD'
 
 # Updating Arch function
 function update {
-   if [[ -n $( command -v pacaur ) ]]; then
-      pacaur -Syyu
-   else
-      sudo pacman -Syyu
-   fi
+    if [[ -n $( command -v pacaur ) ]]; then
+        pacaur -Syyu
+    else
+        sudo pacman -Syyu
+    fi
 
-   if [[ "${1}" == "reboot" ]]; then
-      sudo reboot
-   fi
+    if [[ "${1}" == "reboot" ]]; then
+        sudo reboot
+    fi
 }
 
 # Flash build function
 function flash_build {
-   case ${1} in
-      "arm")
-         export CROSS_COMPILE=/home/nathan/Toolchains/Prebuilts/arm-eabi-6.x/bin/arm-eabi-
-         export ARCH=arm
-         export SUBARCH=arm ;;
-      "arm64")
-         export CROSS_COMPILE=/home/nathan/Toolchains/Prebuilts/aarch64-linux-android-6.x/bin/aarch64-linux-android-
-         export ARCH=arm64
-         export SUBARCH=arm64 ;;
-   esac
+    case ${1} in
+        "arm")
+            export CROSS_COMPILE=/home/nathan/Toolchains/Prebuilts/arm-eabi-6.x/bin/arm-eabi-
+            export ARCH=arm
+            export SUBARCH=arm ;;
+        "arm64")
+            export CROSS_COMPILE=/home/nathan/Toolchains/Prebuilts/aarch64-linux-android-6.x/bin/aarch64-linux-android-
+            export ARCH=arm64
+            export SUBARCH=arm64 ;;
+    esac
 
-   make clean
-   make mrproper
-   make flash_defconfig
-   make -j$( grep -c ^processor /proc/cpuinfo )
+    make clean
+    make mrproper
+    make flash_defconfig
+    make -j$( grep -c ^processor /proc/cpuinfo )
 }
 
 # Update Linux mirror function
 function update_mirrors {
-   CUR_DIR=$( pwd )
+    CUR_DIR=$( pwd )
 
-   cd ${HOME}/Kernels/linux-stable
-   git fetch -p origin
-   git push --mirror
+    cd ${HOME}/Kernels/linux-stable
+    git fetch -p origin
+    git push --mirror
 
-   cd ${HOME}/Kernels/android-kernel-msm
-   git fetch -p origin
-   git push --mirror
+    cd ${HOME}/Kernels/android-kernel-msm
+    git fetch -p origin
+    git push --mirror
 
-   cd ${CUR_DIR}
+    cd ${CUR_DIR}
 }
 
 # Add remote function for kernel repos
 function kernel_remotes {
-   git remote add aosp https://android.googlesource.com/kernel/msm/ && git fetch aosp
-   git remote add caf https://source.codeaurora.org/quic/la/kernel/msm-3.10 && git fetch caf
-   git remote add ls https://github.com/Flash-Kernel/linux-stable && git fetch ls
+    git remote add aosp https://android.googlesource.com/kernel/msm/ && git fetch aosp
+    git remote add caf https://source.codeaurora.org/quic/la/kernel/msm-3.10 && git fetch caf
+    git remote add ls https://github.com/Flash-Kernel/linux-stable && git fetch ls
 }
 
 # EXKM to RC converter
 function exkm2rc {
-   sed -e 's/^/   write /' ${1} > ${2}
+    sed -e 's/^/   write /' ${1} > ${2}
 }
 
 # Set up a virtual environment for Python
 function mkavenv {
-   virtualenv2 venv && source venv/bin/activate
-   export VENV_LOCATION=$(pwd)/venv
+    virtualenv2 venv && source venv/bin/activate
+    export VENV_LOCATION=$(pwd)/venv
 }
 
 # Deactivate and remove venv
 function rmvenv {
-   deactivate
-   rm -rf ${VENV_LOCATION}
-   unset VENV_LOCATION
+    deactivate
+    rm -rf ${VENV_LOCATION}
+    unset VENV_LOCATION
 }

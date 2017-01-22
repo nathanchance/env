@@ -98,14 +98,14 @@ alias gdh='git diff HEAD'
 ########
 
 function getOS() {
-   prodVers=$( prodVers=$(sw_vers|grep ProductVersion);echo ${prodVers:15} )
-   buildVers=$( buildVers=$(sw_vers|grep BuildVersion);echo ${buildVers:14} )
-   echo "macOS ${prodVers} ${buildVers}"
+    prodVers=$( prodVers=$(sw_vers|grep ProductVersion);echo ${prodVers:15} )
+    buildVers=$( buildVers=$(sw_vers|grep BuildVersion);echo ${buildVers:14} )
+    echo "macOS ${prodVers} ${buildVers}"
 }
 
 function getUptime() {
 	unset uptime
-   boot=$(sysctl -n kern.boottime | cut -d "=" -f 2 | cut -d "," -f 1)
+    boot=$(sysctl -n kern.boottime | cut -d "=" -f 2 | cut -d "," -f 1)
 	now=$(date +%s)
 	uptime=$(($now-$boot))
 
@@ -126,66 +126,66 @@ function getUptime() {
 }
 
 function getCPU() {
-   cpu=$(machine)
-   if [[ $cpu == "ppc750" ]]; then
-      cpu="IBM PowerPC G3"
-   elif [[ $cpu == "ppc7400" || $cpu == "ppc7450" ]]; then
-      cpu="IBM PowerPC G4"
-   elif [[ $cpu == "ppc970" ]]; then
-      cpu="IBM PowerPC G5"
-   else
-      cpu=$(sysctl -n machdep.cpu.brand_string)
-   fi
+    cpu=$(machine)
+    if [[ $cpu == "ppc750" ]]; then
+        cpu="IBM PowerPC G3"
+    elif [[ $cpu == "ppc7400" || $cpu == "ppc7450" ]]; then
+        cpu="IBM PowerPC G4"
+    elif [[ $cpu == "ppc970" ]]; then
+        cpu="IBM PowerPC G5"
+    else
+        cpu=$(sysctl -n machdep.cpu.brand_string)
+    fi
 
-   REGEXP="-E"
+    REGEXP="-E"
 
-   if [[ "${cpun}" -gt "1" ]]; then
-		cpun="${cpun}x "
-	else
-		cpun=""
-	fi
-	if [ -z "$cpufreq" ]; then
-		cpu="${cpun}${cpu}"
-	else
-		cpu="$cpu @ ${cpun}${cpufreq}"
-	fi
-	thermal="/sys/class/hwmon/hwmon0/temp1_input"
-	if [ -e $thermal ]; then
-		temp=$(bc <<< "scale=1; $(cat $thermal)/1000")
-	fi
-	if [ -n "$temp" ]; then
-		cpu="$cpu [${temp}°C]"
-	fi
-	cpu=$(sed $REGEXP 's/\([tT][mM]\)|\([Rr]\)|[pP]rocessor|CPU//g' <<< "${cpu}" | xargs)
+    if [[ "${cpun}" -gt "1" ]]; then
+        cpun="${cpun}x "
+    else
+        cpun=""
+    fi
+    if [ -z "$cpufreq" ]; then
+        cpu="${cpun}${cpu}"
+    else
+        cpu="$cpu @ ${cpun}${cpufreq}"
+    fi
+    thermal="/sys/class/hwmon/hwmon0/temp1_input"
+    if [ -e $thermal ]; then
+        temp=$(bc <<< "scale=1; $(cat $thermal)/1000")
+    fi
+    if [ -n "$temp" ]; then
+        cpu="$cpu [${temp}°C]"
+    fi
+    cpu=$(sed $REGEXP 's/\([tT][mM]\)|\([Rr]\)|[pP]rocessor|CPU//g' <<< "${cpu}" | xargs)
 
-   echo ${cpu}
+    echo ${cpu}
 }
 
 function getDiskUsage() {
 	diskusage="Unknown"
 	if type -p df >/dev/null 2>&1; then
-		totaldisk=$(df -H / 2>/dev/null | tail -1)
-		disktotal=$(awk '{print $2}' <<< "${totaldisk}")
-		diskused=$(awk '{print $3}' <<< "${totaldisk}")
-		diskusedper=$(awk '{print $5}' <<< "${totaldisk}")
+        totaldisk=$(df -H / 2>/dev/null | tail -1)
+        disktotal=$(awk '{print $2}' <<< "${totaldisk}")
+        diskused=$(awk '{print $3}' <<< "${totaldisk}")
+        diskusedper=$(awk '{print $5}' <<< "${totaldisk}")
 	fi
    echo "${diskused} out of ${disktotal} (${diskusedper})"
 }
 
 function getMemUsage() {
-   totalmem=$(echo "$(sysctl -n hw.memsize)" / 1024^2 | bc)
-   wiredmem=$(vm_stat | grep wired | awk '{ print $4 }' | sed 's/\.//')
-   activemem=$(vm_stat | grep ' active' | awk '{ print $3 }' | sed 's/\.//')
-   compressedmem=$(vm_stat | grep occupied | awk '{ print $5 }' | sed 's/\.//')
-   if [[ ! -z "$compressedmem | tr -d" ]]; then
-      compressedmem=0
-   fi
-   usedmem=$(((${wiredmem} + ${activemem} + ${compressedmem}) * 4 / 1024))
-   percent=$( echo $( echo "scale = 2; (${usedmem} / ${totalmem})" | bc -l | awk -F '.' '{print $2}' ) | sed s/^0*//g )
-	if [[ -z ${percent} ]]; then
-		percent=0
-	fi
-   echo "${usedmem} MiB out of ${totalmem} MiB (${percent}%)"
+    totalmem=$(echo "$(sysctl -n hw.memsize)" / 1024^2 | bc)
+    wiredmem=$(vm_stat | grep wired | awk '{ print $4 }' | sed 's/\.//')
+    activemem=$(vm_stat | grep ' active' | awk '{ print $3 }' | sed 's/\.//')
+    compressedmem=$(vm_stat | grep occupied | awk '{ print $5 }' | sed 's/\.//')
+    if [[ ! -z "$compressedmem | tr -d" ]]; then
+        compressedmem=0
+    fi
+    usedmem=$(((${wiredmem} + ${activemem} + ${compressedmem}) * 4 / 1024))
+    percent=$( echo $( echo "scale = 2; (${usedmem} / ${totalmem})" | bc -l | awk -F '.' '{print $2}' ) | sed s/^0*//g )
+    if [[ -z ${percent} ]]; then
+        percent=0
+    fi
+    echo "${usedmem} MiB out of ${totalmem} MiB (${percent}%)"
 }
 
 echo ""
