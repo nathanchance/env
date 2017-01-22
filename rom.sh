@@ -161,28 +161,22 @@ ZIP_MOVE_PARENT=${HOME}/Web/.superhidden/ROMs
 case "${ROM}" in
    "abc")
       SOURCE_DIR=${ANDROID_DIR}/ROMs/ABC
-      ZIP_MOVE=${ZIP_MOVE_PARENT}/ABC/${DEVICE}
-      ZIP_FORMAT=ABCrom_${DEVICE}-*.zip ;;
+      ZIP_MOVE=${ZIP_MOVE_PARENT}/ABC/${DEVICE} ;;
    "aosip")
       SOURCE_DIR=${ANDROID_DIR}/ROMs/AOSiP
-      ZIP_MOVE=${ZIP_MOVE_PARENT}/AOSiP/${DEVICE}
-      ZIP_FORMAT=AOSiP-*-${DEVICE}-*.zip ;;
+      ZIP_MOVE=${ZIP_MOVE_PARENT}/AOSiP/${DEVICE} ;;
    "du")
       SOURCE_DIR=${ANDROID_DIR}/ROMs/DU
-      ZIP_MOVE=${ZIP_MOVE_PARENT}/DirtyUnicorns/${DEVICE}
-      ZIP_FORMAT=DU_${DEVICE}_*.zip ;;
+      ZIP_MOVE=${ZIP_MOVE_PARENT}/DirtyUnicorns/${DEVICE} ;;
    "flash")
       SOURCE_DIR=${ANDROID_DIR}/ROMs/Flash
-      ZIP_MOVE=${ZIP_MOVE_PARENT}/Flash/${DEVICE}
-      ZIP_FORMAT=flash_rom_${DEVICE}-*.zip ;;
+      ZIP_MOVE=${ZIP_MOVE_PARENT}/Flash/${DEVICE} ;;
    "krexus")
       SOURCE_DIR=${ANDROID_DIR}/ROMs/Krexus
-      ZIP_MOVE=${ZIP_MOVE_PARENT}/Krexus/${DEVICE}
-      ZIP_FORMAT=*krexus*${DEVICE}.zip ;;
+      ZIP_MOVE=${ZIP_MOVE_PARENT}/Krexus/${DEVICE} ;;
    "pn")
       SOURCE_DIR=${ANDROID_DIR}/ROMs/PN
-      ZIP_MOVE=${ZIP_MOVE_PARENT}/PureNexus/${DEVICE}
-      ZIP_FORMAT=purenexus_${DEVICE}-7*.zip ;;
+      ZIP_MOVE=${ZIP_MOVE_PARENT}/PureNexus/${DEVICE} ;;
 esac
 
 OUT_DIR=${SOURCE_DIR}/out/target/product/${DEVICE}
@@ -302,8 +296,9 @@ else
    # IF ROM COMPILED #
    ###################
 
-   # THERE WILL BE A ZIP IN THE OUT FOLDER IN THE ZIP FORMAT
-   if [[ $( ls ${OUT_DIR}/${ZIP_FORMAT} 2>/dev/null | wc -l ) != "0" ]]; then
+   # THERE WILL BE A ZIP IN THE OUT FOLDER IF SUCCESSFUL
+   FILES=$( ls ${OUT_DIR}/*.zip 2>/dev/null | wc -l )
+   if [[ ${FILES} != "0" ]]; then
       # MAKE BUILD RESULT STRING REFLECT SUCCESSFUL COMPILATION
       BUILD_RESULT_STRING="BUILD SUCCESSFUL"
       SUCCESS=true
@@ -328,8 +323,13 @@ else
       ####################
 
       echoText "MOVING FILES TO ZIP_MOVE DIRECTORY"
-
-      mv -v ${OUT_DIR}/*${ZIP_FORMAT}* "${ZIP_MOVE}"
+      if [[ ${FILES} = 1 ]]; then
+         mv -v "${OUTDIR}"/*.zip* "${ZIP_MOVE}"
+      else
+         for FILE in $( ls ${OUTDIR}/*.zip* | grep -v ota ); do
+            mv -v "${FILE}" "${ZIP_MOVE}"
+         done
+      fi
 
 
    ###################
@@ -364,8 +364,8 @@ END=$( TZ=MST date +%s )
 
 # IF THE BUILD WAS SUCCESSFUL, PRINT FILE LOCATION, AND SIZE
 if [[ ${SUCCESS} = true ]]; then
-   echo -e ${RED}"FILE LOCATION: $( ls ${ZIP_MOVE}/${ZIP_FORMAT} )"
-   echo -e "SIZE: $( du -h ${ZIP_MOVE}/${ZIP_FORMAT} | awk '{print $1}' )"${RESTORE}
+   echo -e ${RED}"FILE LOCATION: $( ls ${ZIP_MOVE}/*.zip )"
+   echo -e "SIZE: $( du -h ${ZIP_MOVE}/*.zip | awk '{print $1}' )"${RESTORE}
 fi
 
 # PRINT THE TIME THE SCRIPT FINISHED
