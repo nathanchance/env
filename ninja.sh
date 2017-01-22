@@ -47,17 +47,17 @@ RESTORE="\033[0m"
 
 # PRINTS A FORMATTED HEADER TO POINT OUT WHAT IS BEING DONE TO THE USER
 function echoText() {
-   echo -e ${RED}
-   echo -e "====$( for i in $( seq ${#1} ); do echo -e "=\c"; done )===="
-   echo -e "==  ${1}  =="
-   echo -e "====$( for i in $( seq ${#1} ); do echo -e "=\c"; done )===="
-   echo -e ${RESTORE}
+    echo -e ${RED}
+    echo -e "====$( for i in $( seq ${#1} ); do echo -e "=\c"; done )===="
+    echo -e "==  ${1}  =="
+    echo -e "====$( for i in $( seq ${#1} ); do echo -e "=\c"; done )===="
+    echo -e ${RESTORE}
 }
 
 
 # CREATES A NEW LINE IN TERMINAL
 function newLine() {
-   echo -e ""
+    echo -e ""
 }
 
 
@@ -68,19 +68,19 @@ function newLine() {
 ################
 
 while [[ $# -ge 1 ]]; do
-   case "${1}" in
-      "build"|"install"|"both")
-         MODE=${1} ;;
-      *)
-         echo "Invalid parameter" && exit ;;
-   esac
+    case "${1}" in
+        "build"|"install"|"both")
+            MODE=${1} ;;
+        *)
+            echo "Invalid parameter" && exit ;;
+    esac
 
-   shift
+    shift
 done
 
 if [[ -z ${MODE} ]]; then
-   echo "You did not specify a necessary parameter. Falling back to building only"
-   MODE=build
+    echo "You did not specify a necessary parameter. Falling back to building only"
+    MODE=build
 fi
 
 
@@ -102,53 +102,53 @@ ROM_SOURCE=${HOME}/ROMs/Flash
 ################
 
 if [[ "${MODE}" == "build" || "${MODE}" == "both" ]]; then
-   # CLEANING
-   echoText "CLEANING REPO"
-   rm -rf ${NINJA_SOURCE}
-   cd $( dirname ${NINJA_SOURCE} )
-   git clone https://github.com/Flash-ROM/ninja
+    # CLEANING
+    echoText "CLEANING REPO"
+    rm -rf ${NINJA_SOURCE}
+    cd $( dirname ${NINJA_SOURCE} )
+    git clone https://github.com/Flash-ROM/ninja
 
 
-   # UPDATE WITH UPSTREAM
-   echoText "UPDATING NINJA SOURCE"
-   cd ninja
-   git checkout n7.1.1
-   git remote add upstream https://github.com/ninja-build/ninja
-   git fetch upstream
-   git remote add aosp https://android.googlesource.com/platform/external/ninja
-   git fetch aosp
-   git merge upstream/master --no-edit && git merge aosp/master --no-edit
-   git push --force
+    # UPDATE WITH UPSTREAM
+    echoText "UPDATING NINJA SOURCE"
+    cd ninja
+    git checkout n7.1.1
+    git remote add upstream https://github.com/ninja-build/ninja
+    git fetch upstream
+    git remote add aosp https://android.googlesource.com/platform/external/ninja
+    git fetch aosp
+    git merge upstream/master --no-edit && git merge aosp/master --no-edit
+    git push --force
 
 
-   # BUILD A NEW BINARY
-   echoText "BUILDING NINJA"
-   virtualenv2 venv && source venv/bin/activate
-   CXX=${CLANG_LOCATION}/bin/clang++ ./configure.py --bootstrap
-   deactivate && rm -rf ${NINJA_SOURCE}/venv
+    # BUILD A NEW BINARY
+    echoText "BUILDING NINJA"
+    virtualenv2 venv && source venv/bin/activate
+    CXX=${CLANG_LOCATION}/bin/clang++ ./configure.py --bootstrap
+    deactivate && rm -rf ${NINJA_SOURCE}/venv
 fi
 
 if [[ "${MODE}" == "install" || "${MODE}" == "both" ]]; then
-   # COPY NINJA TO /USR/BIN/LOCAL
-   echoText "INSTALLING NINJA LOCALLY"
-   cd ${NINJA_SOURCE}
-   if [[ -f ninja ]]; then
-      sudo mkdir -p /usr/local/bin
-      sudo cp -v ninja /usr/local/bin
-      sudo chmod +x /usr/local/bin/ninja
-   else
-      echo "NINJA BINARY NOT FOUND" && exit
-   fi
+    # COPY NINJA TO /USR/BIN/LOCAL
+    echoText "INSTALLING NINJA LOCALLY"
+    cd ${NINJA_SOURCE}
+    if [[ -f ninja ]]; then
+        sudo mkdir -p /usr/local/bin
+        sudo cp -v ninja /usr/local/bin
+        sudo chmod +x /usr/local/bin/ninja
+    else
+        echo "NINJA BINARY NOT FOUND" && exit
+    fi
 
-   # COPY NINJA TO ROM SOURCE (PREBUILTS/BUILT-TOOLS)
-   echoText "UPDATING NINJA IN PREBUILTS/BUILD-TOOLS"
-   cd ${ROM_SOURCE}/prebuilts/build-tools
-   git checkout n7.1.1
-   rm -rf linux-x86/asan/bin/ninja
-   rm -rf linux-x86/bin/ninja
-   cp -v ${NINJA_SOURCE}/ninja linux-x86/asan/bin/ninja
-   cp -v ${NINJA_SOURCE}/ninja linux-x86/bin/ninja
-   git add -A && git commit --signoff -m "Ninja $( ./linux-x86/bin/ninja --version ): $( date +%Y%m%d )
+    # COPY NINJA TO ROM SOURCE (PREBUILTS/BUILT-TOOLS)
+    echoText "UPDATING NINJA IN PREBUILTS/BUILD-TOOLS"
+    cd ${ROM_SOURCE}/prebuilts/build-tools
+    git checkout n7.1.1
+    rm -rf linux-x86/asan/bin/ninja
+    rm -rf linux-x86/bin/ninja
+    cp -v ${NINJA_SOURCE}/ninja linux-x86/asan/bin/ninja
+    cp -v ${NINJA_SOURCE}/ninja linux-x86/bin/ninja
+    git add -A && git commit --signoff -m "Ninja $( ./linux-x86/bin/ninja --version ): $( date +%Y%m%d )
 
 Compiled on $( source /etc/os-release; echo ${PRETTY_NAME} ) $( uname -m )
 

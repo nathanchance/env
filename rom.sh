@@ -49,38 +49,38 @@ RESTORE="\033[0m"
 
 # PRINTS A FORMATTED HEADER TO POINT OUT WHAT IS BEING DONE TO THE USER
 function echoText() {
-   echo -e ${RED}
-   echo -e "====$( for i in $( seq ${#1} ); do echo -e "=\c"; done )===="
-   echo -e "==  ${1}  =="
-   echo -e "====$( for i in $( seq ${#1} ); do echo -e "=\c"; done )===="
-   echo -e ${RESTORE}
+    echo -e ${RED}
+    echo -e "====$( for i in $( seq ${#1} ); do echo -e "=\c"; done )===="
+    echo -e "==  ${1}  =="
+    echo -e "====$( for i in $( seq ${#1} ); do echo -e "=\c"; done )===="
+    echo -e ${RESTORE}
 }
 
 # CREATES A NEW LINE IN TERMINAL
 function newLine() {
-   echo -e ""
+    echo -e ""
 }
 
 # UNSETS VARIABLES POTENTIALLY USED IN SCRIPT
 function unsetvars() {
-   unset ROM_BUILD_TYPE SUBSTRATUM LOCALVERSION BUILD_TAG SYNC PERSONAL SUCCESS CLEAN_TYPE MAKE_TYPE PARAMS
+    unset ROM_BUILD_TYPE SUBSTRATUM LOCALVERSION BUILD_TAG SYNC PERSONAL SUCCESS CLEAN_TYPE MAKE_TYPE PARAMS
 }
 
 # CHECKS IF MKA EXISTS
 function make_command() {
-   while [[ $# -ge 1 ]]; do
-      MAKE_PARAMS+="${1} "
+    while [[ $# -ge 1 ]]; do
+        MAKE_PARAMS+="${1} "
 
-      shift
-   done
+        shift
+    done
 
-   if [[ -n $( command -v mka ) ]]; then
-      mka ${MAKE_PARAMS}
-   else
-      make -j$( grep -c ^processor /proc/cpuinfo ) ${PARAMS}
-   fi
+    if [[ -n $( command -v mka ) ]]; then
+        mka ${MAKE_PARAMS}
+    else
+        make -j$( grep -c ^processor /proc/cpuinfo ) ${PARAMS}
+    fi
 
-   unset MAKE_PARAMS
+    unset MAKE_PARAMS
 }
 
 ################
@@ -92,55 +92,55 @@ function make_command() {
 unsetvars
 
 while [[ $# -ge 1 ]]; do
-   PARAMS+="${1} "
+    PARAMS+="${1} "
 
-   case "${1}" in
-      "me")
-         ROM=flash
-         DEVICE=angler
-         export LOCALVERSION=-$( TZ=MST date +%Y%m%d ) ;;
-      "shamu"|"angler"|"bullhead"|"hammerhead"|"marlin"|"sailfish")
-         DEVICE=${1} ;;
-      "abc"|"aosip"|"du"|"flash"|"krexus"|"pn")
-         ROM=${1} ;;
-      "nosync")
-         SYNC=false ;;
-      "nosubs")
-         export SUBSTRATUM=false ;;
-      "type")
-         shift
-         if [[ $# -ge 1 ]]; then
-            PARAMS+="${1} "
-            export BUILD_TAG=${1}
-         else
-            echo "Please specify a build type!" && exit
-         fi ;;
-      "clean")
-         shift
-         if [[ $# -ge 1 ]]; then
-            PARAMS+="${1} "
-            export CLEAN_TYPE=${1}
-         else
-            echo "Please specify a clean type!" && exit
-         fi ;;
-      "make")
-         shift
-         if [[ $# -ge 1 ]]; then
-            PARAMS+="${1} "
-            export MAKE_TYPE=${1}
-         else
-            echo "Please specify a make item!" && exit
-         fi ;;
-      *)
-         echo "Invalid parameter detected!" && exit ;;
-   esac
+    case "${1}" in
+        "me")
+            ROM=flash
+            DEVICE=angler
+            export LOCALVERSION=-$( TZ=MST date +%Y%m%d ) ;;
+        "shamu"|"angler"|"bullhead"|"hammerhead"|"marlin"|"sailfish")
+            DEVICE=${1} ;;
+        "abc"|"aosip"|"du"|"flash"|"krexus"|"pn")
+            ROM=${1} ;;
+        "nosync")
+            SYNC=false ;;
+        "nosubs")
+            export SUBSTRATUM=false ;;
+        "type")
+            shift
+            if [[ $# -ge 1 ]]; then
+                PARAMS+="${1} "
+                export BUILD_TAG=${1}
+            else
+                echo "Please specify a build type!" && exit
+            fi ;;
+        "clean")
+            shift
+            if [[ $# -ge 1 ]]; then
+                PARAMS+="${1} "
+                export CLEAN_TYPE=${1}
+            else
+                echo "Please specify a clean type!" && exit
+            fi ;;
+        "make")
+            shift
+            if [[ $# -ge 1 ]]; then
+                PARAMS+="${1} "
+                export MAKE_TYPE=${1}
+            else
+                echo "Please specify a make item!" && exit
+            fi ;;
+        *)
+            echo "Invalid parameter detected!" && exit ;;
+    esac
 
-   shift
+    shift
 done
 
 # PARAMETER VERIFICATION
 if [[ -z ${DEVICE} || -z ${ROM} ]]; then
-   echo "You did not specify a necessary parameter (either ROM, device, or both). Please re-run the script with the necessary parameters!" && exit
+    echo "You did not specify a necessary parameter (either ROM, device, or both). Please re-run the script with the necessary parameters!" && exit
 fi
 
 ###############
@@ -159,24 +159,24 @@ ZIP_MOVE_PARENT=${HOME}/Web/.superhidden/ROMs
 
 # Otherwise, define them for our various ROMs
 case "${ROM}" in
-   "abc")
-      SOURCE_DIR=${ANDROID_DIR}/ROMs/ABC
-      ZIP_MOVE=${ZIP_MOVE_PARENT}/ABC/${DEVICE} ;;
-   "aosip")
-      SOURCE_DIR=${ANDROID_DIR}/ROMs/AOSiP
-      ZIP_MOVE=${ZIP_MOVE_PARENT}/AOSiP/${DEVICE} ;;
-   "du")
-      SOURCE_DIR=${ANDROID_DIR}/ROMs/DU
-      ZIP_MOVE=${ZIP_MOVE_PARENT}/DirtyUnicorns/${DEVICE} ;;
-   "flash")
-      SOURCE_DIR=${ANDROID_DIR}/ROMs/Flash
-      ZIP_MOVE=${ZIP_MOVE_PARENT}/Flash/${DEVICE} ;;
-   "krexus")
-      SOURCE_DIR=${ANDROID_DIR}/ROMs/Krexus
-      ZIP_MOVE=${ZIP_MOVE_PARENT}/Krexus/${DEVICE} ;;
-   "pn")
-      SOURCE_DIR=${ANDROID_DIR}/ROMs/PN
-      ZIP_MOVE=${ZIP_MOVE_PARENT}/PureNexus/${DEVICE} ;;
+    "abc")
+        SOURCE_DIR=${ANDROID_DIR}/ROMs/ABC
+        ZIP_MOVE=${ZIP_MOVE_PARENT}/ABC/${DEVICE} ;;
+    "aosip")
+        SOURCE_DIR=${ANDROID_DIR}/ROMs/AOSiP
+        ZIP_MOVE=${ZIP_MOVE_PARENT}/AOSiP/${DEVICE} ;;
+    "du")
+        SOURCE_DIR=${ANDROID_DIR}/ROMs/DU
+        ZIP_MOVE=${ZIP_MOVE_PARENT}/DirtyUnicorns/${DEVICE} ;;
+    "flash")
+        SOURCE_DIR=${ANDROID_DIR}/ROMs/Flash
+        ZIP_MOVE=${ZIP_MOVE_PARENT}/Flash/${DEVICE} ;;
+    "krexus")
+        SOURCE_DIR=${ANDROID_DIR}/ROMs/Krexus
+        ZIP_MOVE=${ZIP_MOVE_PARENT}/Krexus/${DEVICE} ;;
+    "pn")
+        SOURCE_DIR=${ANDROID_DIR}/ROMs/PN
+        ZIP_MOVE=${ZIP_MOVE_PARENT}/PureNexus/${DEVICE} ;;
 esac
 
 OUT_DIR=${SOURCE_DIR}/out/target/product/${DEVICE}
@@ -201,9 +201,9 @@ clear && cd ${SOURCE_DIR}
 #############
 
 if [[ ${SYNC} != false ]]; then
-   echoText "SYNCING LATEST SOURCES"; newLine
+    echoText "SYNCING LATEST SOURCES"; newLine
 
-   repo sync --force-sync ${THREADS_FLAG}
+    repo sync --force-sync -j$( grep -c ^processor /proc/cpuinfo )
 fi
 
 
@@ -215,7 +215,7 @@ echoText "SETTING UP BUILD ENVIRONMENT"
 
 # CHECK AND SEE IF WE ARE ON ARCH; IF SO, ACTIVARE A VIRTUAL ENVIRONMENT FOR PROPER PYTHON SUPPORT
 if [[ -f /etc/arch-release ]]; then
-   virtualenv2 venv && source venv/bin/activate
+    virtualenv2 venv && source venv/bin/activate
 fi
 
 source build/envsetup.sh
@@ -229,12 +229,12 @@ echoText "PREPARING $( echo ${DEVICE} | awk '{print toupper($0)}' )"
 
 # NOT ALL ROMS USE BREAKFAST
 case "${ROM}" in
-   "aosip")
-      lunch aosip_${DEVICE}-userdebug ;;
-   "krexus")
-      lunch krexus_${DEVICE}-user ;;
-   *)
-      breakfast ${DEVICE} ;;
+    "aosip")
+        lunch aosip_${DEVICE}-userdebug ;;
+    "krexus")
+        lunch krexus_${DEVICE}-user ;;
+    *)
+        breakfast ${DEVICE} ;;
 esac
 
 
@@ -245,9 +245,9 @@ esac
 echoText "CLEANING UP OUT DIRECTORY"
 
 if [[ -n ${CLEAN_TYPE} ]] && [[ "${CLEAN_TYPE}" != "noclean" ]]; then
-   make_command ${CLEAN_TYPE}
+    make_command ${CLEAN_TYPE}
 elif [[ -z ${CLEAN_TYPE} ]]; then
-   make_command clobber
+    make_command clobber
 fi
 
 
@@ -256,102 +256,102 @@ fi
 ##################
 
 if [[ ${ROM} == "flash" ]]; then
-   echo -e ${RED}
-   echo -e "========================================================================"; newLine
-   echo -e "  ___________________________________  __   _____________________  ___  "
-   echo -e "  ___  ____/__  /___    |_  ___/__  / / /   ___  __ \_  __ \__   |/  /  "
-   echo -e "  __  /_   __  / __  /| |____ \__  /_/ /    __  /_/ /  / / /_  /|_/ /   "
-   echo -e "  _  __/   _  /___  ___ |___/ /_  __  /     _  _, _// /_/ /_  /  / /    "
-   echo -e "  /_/      /_____/_/  |_/____/ /_/ /_/      /_/ |_| \____/ /_/  /_/     "; newLine; newLine
-   echo -e "========================================================================"; newLine
-   echo -e ${RESTORE}
-   sleep 5
+    echo -e ${RED}
+    echo -e "========================================================================"; newLine
+    echo -e "  ___________________________________  __   _____________________  ___  "
+    echo -e "  ___  ____/__  /___    |_  ___/__  / / /   ___  __ \_  __ \__   |/  /  "
+    echo -e "  __  /_   __  / __  /| |____ \__  /_/ /    __  /_/ /  / / /_  /|_/ /   "
+    echo -e "  _  __/   _  /___  ___ |___/ /_  __  /     _  _, _// /_/ /_  /  / /    "
+    echo -e "  /_/      /_____/_/  |_/____/ /_/ /_/      /_/ |_| \____/ /_/  /_/     "; newLine; newLine
+    echo -e "========================================================================"; newLine
+    echo -e ${RESTORE}
+    sleep 5
 else
-   echoText "MAKING FILES"; newLine
+    echoText "MAKING FILES"; newLine
 fi
 
 NOW=$( TZ=MST date +"%Y-%m-%d-%S" )
 
 # MAKE THE REQUESTED ITEM
 if [[ -n ${MAKE_TYPE} ]]; then
-   time make_command ${MAKE_TYPE}
+    time make_command ${MAKE_TYPE}
 
-   ################
-   # PRINT RESULT #
-   ################
+    ################
+    # PRINT RESULT #
+    ################
 
-   echoText "BUILD COMPLETED!"
+    echoText "BUILD COMPLETED!"
 else
-   # NOT ALL ROMS USE BACON
-   case "${ROM}" in
-      "aosip")
-         time make_command kronic ;;
-      "krexus")
-         time make_command otapackage ;;
-      *)
-         time make_command bacon ;;
-   esac
+    # NOT ALL ROMS USE BACON
+    case "${ROM}" in
+        "aosip")
+            time make_command kronic ;;
+        "krexus")
+            time make_command otapackage ;;
+        *)
+            time make_command bacon ;;
+    esac
 
-   ###################
-   # IF ROM COMPILED #
-   ###################
+    ###################
+    # IF ROM COMPILED #
+    ###################
 
-   # THERE WILL BE A ZIP IN THE OUT FOLDER IF SUCCESSFUL
-   FILES=$( ls ${OUT_DIR}/*.zip 2>/dev/null | wc -l )
-   if [[ ${FILES} != "0" ]]; then
-      # MAKE BUILD RESULT STRING REFLECT SUCCESSFUL COMPILATION
-      BUILD_RESULT_STRING="BUILD SUCCESSFUL"
-      SUCCESS=true
-
-
-      ##################
-      # ZIP_MOVE LOGIC #
-      ##################
-
-      # MAKE ZIP_MOVE IF IT DOESN'T EXIST OR CLEAN IT IF IT DOES
-      if [[ ! -d "${ZIP_MOVE}" ]]; then
-         mkdir -p "${ZIP_MOVE}"
-      else
-         newLine; echoText "CLEANING ZIP_MOVE DIRECTORY"
-
-         rm -vrf "${ZIP_MOVE}"/*${ZIP_FORMAT}*
-      fi
+    # THERE WILL BE A ZIP IN THE OUT FOLDER IF SUCCESSFUL
+    FILES=$( ls ${OUT_DIR}/*.zip 2>/dev/null | wc -l )
+    if [[ ${FILES} != "0" ]]; then
+        # MAKE BUILD RESULT STRING REFLECT SUCCESSFUL COMPILATION
+        BUILD_RESULT_STRING="BUILD SUCCESSFUL"
+        SUCCESS=true
 
 
-      ####################
-      # MOVING ROM FILES #
-      ####################
+        ##################
+        # ZIP_MOVE LOGIC #
+        ##################
 
-      echoText "MOVING FILES TO ZIP_MOVE DIRECTORY"
-      if [[ ${FILES} = 1 ]]; then
-         mv -v "${OUTDIR}"/*.zip* "${ZIP_MOVE}"
-      else
-         for FILE in $( ls ${OUTDIR}/*.zip* | grep -v ota ); do
-            mv -v "${FILE}" "${ZIP_MOVE}"
-         done
-      fi
+        # MAKE ZIP_MOVE IF IT DOESN'T EXIST OR CLEAN IT IF IT DOES
+        if [[ ! -d "${ZIP_MOVE}" ]]; then
+            mkdir -p "${ZIP_MOVE}"
+        else
+            newLine; echoText "CLEANING ZIP_MOVE DIRECTORY"
+
+            rm -vrf "${ZIP_MOVE}"/*${ZIP_FORMAT}*
+        fi
 
 
-   ###################
-   # IF BUILD FAILED #
-   ###################
+        ####################
+        # MOVING ROM FILES #
+        ####################
 
-   else
-      BUILD_RESULT_STRING="BUILD FAILED"
-      SUCCESS=false
-   fi
+        echoText "MOVING FILES TO ZIP_MOVE DIRECTORY"
+        if [[ ${FILES} = 1 ]]; then
+            mv -v "${OUTDIR}"/*.zip* "${ZIP_MOVE}"
+        else
+            for FILE in $( ls ${OUTDIR}/*.zip* | grep -v ota ); do
+                mv -v "${FILE}" "${ZIP_MOVE}"
+            done
+        fi
 
-   ################
-   # PRINT RESULT #
-   ################
 
-   echoText "${BUILD_RESULT_STRING}!"
+    ###################
+    # IF BUILD FAILED #
+    ###################
+
+    else
+        BUILD_RESULT_STRING="BUILD FAILED"
+        SUCCESS=false
+    fi
+
+    ################
+    # PRINT RESULT #
+    ################
+
+    echoText "${BUILD_RESULT_STRING}!"
 fi
 
 
 # DEACTIVATE VIRTUALENV IF WE ARE ON ARCH
 if [[ -f /etc/arch-release ]]; then
-   deactivate && rm -rf ${SOURCE_DIR}/venv
+    deactivate && rm -rf ${SOURCE_DIR}/venv
 fi
 
 
@@ -364,8 +364,8 @@ END=$( TZ=MST date +%s )
 
 # IF THE BUILD WAS SUCCESSFUL, PRINT FILE LOCATION, AND SIZE
 if [[ ${SUCCESS} = true ]]; then
-   echo -e ${RED}"FILE LOCATION: $( ls ${ZIP_MOVE}/*.zip )"
-   echo -e "SIZE: $( du -h ${ZIP_MOVE}/*.zip | awk '{print $1}' )"${RESTORE}
+    echo -e ${RED}"FILE LOCATION: $( ls ${ZIP_MOVE}/*.zip )"
+    echo -e "SIZE: $( du -h ${ZIP_MOVE}/*.zip | awk '{print $1}' )"${RESTORE}
 fi
 
 # PRINT THE TIME THE SCRIPT FINISHED
@@ -386,8 +386,8 @@ echo -e "${BUILD_RESULT_STRING} IN $( echo $((${END}-${START})) | awk '{print in
 
 # ONLY ADD A LINE ABOUT FILE LOCATION IF SCRIPT COMPLETED SUCCESSFULLY
 if [[ ${SUCCESS} = true ]]; then
-   # FILE LOCATION: <PATH>
-   echo -e "FILE LOCATION: $( ls ${ZIP_MOVE}/${ZIP_FORMAT} )" >> ${LOG}
+    # FILE LOCATION: <PATH>
+    echo -e "FILE LOCATION: $( ls ${ZIP_MOVE}/${ZIP_FORMAT} )" >> ${LOG}
 fi
 
 

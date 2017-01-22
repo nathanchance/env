@@ -57,86 +57,85 @@ SCRIPTS_DIR=${TOOLCHAIN_HEAD}/Flash-TC/scripts
 
 # PRINTS A FORMATTED HEADER TO POINT OUT WHAT IS BEING DONE TO THE USER
 function echoText() {
-   echo -e ${RED}
-   echo -e "====$( for i in $( seq ${#1} ); do echo -e "=\c"; done )===="
-   echo -e "==  ${1}  =="
-   echo -e "====$( for i in $( seq ${#1} ); do echo -e "=\c"; done )===="
-   echo -e ${RESTORE}
+    echo -e ${RED}
+    echo -e "====$( for i in $( seq ${#1} ); do echo -e "=\c"; done )===="
+    echo -e "==  ${1}  =="
+    echo -e "====$( for i in $( seq ${#1} ); do echo -e "=\c"; done )===="
+    echo -e ${RESTORE}
 }
 
 
 # CREATES A NEW LINE IN TERMINAL
 function newLine() {
-   echo -e ""
+    echo -e ""
 }
 
 # BUILD FUNCTION
 function build() {
-   # DIRECTORIES
-   OUT_DIR=${TOOLCHAIN_HEAD}/Flash-TC/out/${1}-6.x
-   REPO=${TOOLCHAIN_HEAD}/Prebuilts/${1}-6.x
+    # DIRECTORIES
+    OUT_DIR=${TOOLCHAIN_HEAD}/Flash-TC/out/${1}-6.x
+    REPO=${TOOLCHAIN_HEAD}/Prebuilts/${1}-6.x
 
 
-   # IF THE REPO DIRECTORY EXISTS
-   if [[ -d ${REPO} ]]; then
-      # CLEAN IT
-      echoText "CLEANING REPO"
+    # IF THE REPO DIRECTORY EXISTS
+    if [[ -d ${REPO} ]]; then
+        # CLEAN IT
+        echoText "CLEANING REPO"
 
-      cd ${REPO}
-      git pull
-      rm -vrf *
-   else
-      # OTHERWISE, CLONE IT
-      echoText "CLONING REPO"
+        cd ${REPO}
+        git pull
+        rm -vrf *
+    else
+        # OTHERWISE, CLONE IT
+        echoText "CLONING REPO"
 
-      cd ${TOOLCHAIN_HEAD}/Prebuilts
-      git clone https://gitlab.com/Flash-ROM/${1}-6.x
-   fi
-
-
-   # REMOVE THE OUR DIRECTORY
-   echoText "CLEANING OUT_DIR"
-
-   rm -vrf ${OUT_DIR}
+        cd ${TOOLCHAIN_HEAD}/Prebuilts
+        git clone https://gitlab.com/Flash-ROM/${1}-6.x
+    fi
 
 
-   # MOVE INTO THE SCRIPTS DIRECTORY
-   cd ${SCRIPTS_DIR}
+    # REMOVE THE OUR DIRECTORY
+    echoText "CLEANING OUT_DIR"
+
+    rm -vrf ${OUT_DIR}
 
 
-   # CHECK AND SEE IF WE ARE ON ARCH; IF SO, ACTIVARE A VIRTUAL ENVIRONMENT FOR PROPER PYTHON SUPPORT
-   if [[ -f /etc/arch-release ]]; then
-      virtualenv2 venv && source venv/bin/activate
-   fi
+    # MOVE INTO THE SCRIPTS DIRECTORY
+    cd ${SCRIPTS_DIR}
 
 
-   # RUN THE BUILD SCRIPT
-   echoText "BUILDING TOOLCHAIN"
+    # CHECK AND SEE IF WE ARE ON ARCH; IF SO, ACTIVARE A VIRTUAL ENVIRONMENT FOR PROPER PYTHON SUPPORT
+    if [[ -f /etc/arch-release ]]; then
+        virtualenv2 venv && source venv/bin/activate
+    fi
 
-   bash ${1}-6.x
+    # RUN THE BUILD SCRIPT
+    echoText "BUILDING TOOLCHAIN"
 
-
-   # DEACTIVATE VENV IF ON ARCH
-   if [[ -f /etc/arch-release ]]; then
-      deactivate && rm -rf ${SCRIPTS_DIR}/venv
-   fi
-
-
-   # MOVE THE COMPLETED TOOLCHAIN
-   echoText "MOVING TOOLCHAIN"
-
-   cp -vr ${OUT_DIR}/* ${REPO}
+    bash ${1}-6.x
 
 
-   # COMMIT AND PUSH THE RESULT
-   echoText "PUSHING NEW TOOLCHAIN"
+    # DEACTIVATE VENV IF ON ARCH
+    if [[ -f /etc/arch-release ]]; then
+        deactivate && rm -rf ${SCRIPTS_DIR}/venv
+    fi
 
-   cd ${REPO}/bin
-   VERSION=$( ./${1}-gcc --version | grep ${1} | cut -d ' ' -f 3 )
-   GCC_DATE=$( ./${1}-gcc --version | grep ${1} | cut -d ' ' -f 4 )
-   cd ..
-   git add .
-   git commit --signoff -m "${1} ${VERSION}: ${GCC_DATE}
+
+    # MOVE THE COMPLETED TOOLCHAIN
+    echoText "MOVING TOOLCHAIN"
+
+    cp -vr ${OUT_DIR}/* ${REPO}
+
+
+    # COMMIT AND PUSH THE RESULT
+    echoText "PUSHING NEW TOOLCHAIN"
+
+    cd ${REPO}/bin
+    VERSION=$( ./${1}-gcc --version | grep ${1} | cut -d ' ' -f 3 )
+    GCC_DATE=$( ./${1}-gcc --version | grep ${1} | cut -d ' ' -f 4 )
+    cd ..
+    git add .
+    git commit --signoff -m "${1} ${VERSION}: ${GCC_DATE}
 
 Compiled on $( source /etc/os-release; echo ${PRETTY_NAME} ) $( uname -m )
 
@@ -146,9 +145,8 @@ Make version: $( make --version  | awk '/Make/ {print $3}' )
 
 Manifest: https://github.com/Flash-TC/manifest/tree/gcc
 gcc source: https://github.com/Flash-TC/gcc
-binutils source: https://github.com/Flash-TC/binutils"
+binutils source: https://github.com/Flash-TC/binutils" && git push --force
 
-   git push --force
 }
 
 
@@ -162,13 +160,13 @@ clear
 
 # INIT THE REPOS IF IT DOESN'T EXISTS
 if [[ ! -d ${TOOLCHAIN_HEAD}/Flash-TC ]]; then
-   echoText "RUNNING REPO INIT"
+    echoText "RUNNING REPO INIT"
 
-   mkdir -p ${TOOLCHAIN_HEAD}/Flash-TC
-   cd ${TOOLCHAIN_HEAD}/Flash-TC
-   repo init -u https://github.com/Flash-TC/manifest -b gcc
+    mkdir -p ${TOOLCHAIN_HEAD}/Flash-TC
+    cd ${TOOLCHAIN_HEAD}/Flash-TC
+    repo init -u https://github.com/Flash-TC/manifest -b gcc
 else
-   cd ${TOOLCHAIN_HEAD}/Flash-TC
+    cd ${TOOLCHAIN_HEAD}/Flash-TC
 fi
 
 
@@ -184,9 +182,9 @@ echoText "CHECKING OUT CORRECT GCC BRANCH"
 cd gcc/gcc-flash && git checkout 6.x && git reset --hard HEAD
 
 if [[ ! $( git ls-remote --exit-code gcc 2>/dev/null ) ]]; then
-   echoText "ADDING GCC REMOTE"
+    echoText "ADDING GCC REMOTE"
 
-   git remote add gcc git://gcc.gnu.org/git/gcc.git
+    git remote add gcc git://gcc.gnu.org/git/gcc.git
 fi
 
 
@@ -203,9 +201,9 @@ echoText "CHECKING OUT CORRECT BINUTILS BRANCH"
 cd ../../binutils/binutils-flash && git checkout 2.27
 
 if [[ ! $( git ls-remote --exit-code upstream 2>/dev/null ) ]]; then
-   echoText "ADDING BINUTILS REMOTE"
+    echoText "ADDING BINUTILS REMOTE"
 
-   git remote add upstream git://sourceware.org/git/binutils-gdb.git
+    git remote add upstream git://sourceware.org/git/binutils-gdb.git
 fi
 
 

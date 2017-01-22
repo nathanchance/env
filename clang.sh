@@ -50,19 +50,19 @@ TXTRST=$(tput sgr0) # RESET
 ################
 
 while [[ $# -ge 1 ]]; do
-   case "${1}" in
-      "3.9.1"|"4.0.0")
-         VERSION_PARAM=${1} ;;
-      *)
-         echo "Invalid parameter" && exit ;;
-   esac
+    case "${1}" in
+        "3.9.1"|"4.0.0")
+            VERSION_PARAM=${1} ;;
+        *)
+            echo "Invalid parameter" && exit ;;
+    esac
 
-   shift
+    shift
 done
 
 if [[ -z ${VERSION_PARAM} ]]; then
-   echo "You did not specify a necessary parameter. Falling back to 3.9.1"
-   VERSION_PARAM=3.9.1
+    echo "You did not specify a necessary parameter. Falling back to 3.9.1"
+    VERSION_PARAM=3.9.1
 fi
 
 
@@ -96,27 +96,27 @@ clear
 
 # CLEAN INSTALL DIR IF IT EXISTS; OTHERWISE MAKE IT
 if [[ -d ${INSTALL_DIR} ]]; then
-   cd ${INSTALL_DIR} && git pull && rm -vrf *
+    cd ${INSTALL_DIR} && git pull && rm -vrf *
 else
-   cd $( dirname ${INSTALL_DIR} )
-   git clone https://gitlab.com/Flash-ROM/clang_linux-x86_${VERSION_PARAM} clang-${VERSION_PARAM}
+    cd $( dirname ${INSTALL_DIR} )
+    git clone https://gitlab.com/Flash-ROM/clang_linux-x86_${VERSION_PARAM} clang-${VERSION_PARAM}
 fi
 
 
 # SYNC DOWN SOURCE; MAKE DIR IF IT DOESN'T EXIST ALREADY
 if [[ -d ${SOURCE_DIR} ]]; then
-   cd ${SOURCE_DIR}
-   repo sync --force-sync -j${CPUS}
+    cd ${SOURCE_DIR}
+    repo sync --force-sync -j${CPUS}
 else
-   mkdir -p ${SOURCE_DIR}
-   cd ${SOURCE_DIR}
-   repo init -u https://github.com/Flash-TC/manifest -b clang-${VERSION_PARAM}
-   repo sync --force-sync -j${CPUS}
+    mkdir -p ${SOURCE_DIR}
+    cd ${SOURCE_DIR}
+    repo init -u https://github.com/Flash-TC/manifest -b clang-${VERSION_PARAM}
+    repo sync --force-sync -j${CPUS}
 fi
 
 # CLEAN BUILD DIR
 if [[ -d ${BUILD_DIR} ]]; then
-   rm -vrf ${BUILD_DIR}
+    rm -vrf ${BUILD_DIR}
 fi
 mkdir -p ${BUILD_DIR} && cd ${BUILD_DIR}
 
@@ -138,27 +138,27 @@ START_TIME=$( date +%s );
 
 # BUILD LLVM
 if ! time cmake --build . -- -j${JOBS}; then
-   # PRINT FAILURE
-   echo "";
-   echo -e ${RED} "**************************************" ${TXTRST};
-   echo -e ${RED} "       ______      _ __         ____  " ${TXTRST};
-   echo -e ${RED} "      / ____/___ _(_) /__  ____/ / /  " ${TXTRST};
-   echo -e ${RED} "     / /_  / __ '/ / / _ \/ __  / /   " ${TXTRST};
-   echo -e ${RED} "    / __/ / /_/ / / /  __/ /_/ /_/    " ${TXTRST};
-   echo -e ${RED} "   /_/    \__,_/_/_/\___/\__,_/_/     " ${TXTRST};
-   echo -e ${RED} "                                      " ${TXTRST};
-   echo -e ${RED} "     Clang has failed to compile!     " ${TXTRST};
-   echo -e ${RED} "**************************************" ${TXTRST};
-   exit 1;
+    # PRINT FAILURE
+    echo "";
+    echo -e ${RED} "**************************************" ${TXTRST};
+    echo -e ${RED} "       ______      _ __         ____  " ${TXTRST};
+    echo -e ${RED} "      / ____/___ _(_) /__  ____/ / /  " ${TXTRST};
+    echo -e ${RED} "     / /_  / __ '/ / / _ \/ __  / /   " ${TXTRST};
+    echo -e ${RED} "    / __/ / /_/ / / /  __/ /_/ /_/    " ${TXTRST};
+    echo -e ${RED} "   /_/    \__,_/_/_/\___/\__,_/_/     " ${TXTRST};
+    echo -e ${RED} "                                      " ${TXTRST};
+    echo -e ${RED} "     Clang has failed to compile!     " ${TXTRST};
+    echo -e ${RED} "**************************************" ${TXTRST};
+    exit 1;
 else
-   # INSTALL TOOLCHAIN
-   cmake --build . --target install -- -j${JOBS};
+    # INSTALL TOOLCHAIN
+    cmake --build . --target install -- -j${JOBS};
 
-   # COMMIT TOOLCHAIN
-   cd ${INSTALL_DIR}/bin
-   VERSION=$( ./clang --version | grep version | cut -d ' ' -f 3 )
-   cd ..
-   git add -A && git commit --signoff -m "Clang ${VERSION}: ${DATE}
+    # COMMIT TOOLCHAIN
+    cd ${INSTALL_DIR}/bin
+    VERSION=$( ./clang --version | grep version | cut -d ' ' -f 3 )
+    cd ..
+    git add -A && git commit --signoff -m "Clang ${VERSION}: ${DATE}
 
 Compiled on $( source /etc/os-release; echo ${PRETTY_NAME} ) $( uname -m )
 
@@ -169,24 +169,24 @@ Make version: $( make --version  | awk '/Make/ {print $3}' )
 Manifest: https://github.com/Flash-TC/manifest/tree/clang-${VERSION_PARAM}
 binutils source: https://github.com/Flash-TC/binutils" && git push --force
 
-   # ECHO TIME TAKEN
-   END_TIME=$( date +%s );
-   TMIN=$(( (END_TIME-START_TIME) / 60 ));
-   TSEC=$(( (END_TIME-START_TIME) % 60 ));
+    # ECHO TIME TAKEN
+    END_TIME=$( date +%s );
+    TMIN=$(( (END_TIME-START_TIME) / 60 ));
+    TSEC=$(( (END_TIME-START_TIME) % 60 ));
 
-   # PRINT SUCCESS
-   echo -e "";
-   echo -e ${GRN} "*****************************************************" ${TXTRST};
-   echo -e ${GRN} "     ______                      __     __       __  " ${TXTRST};
-   echo -e ${GRN} "    / ____/___  ____ ___  ____  / /__  / /____  / /  " ${TXTRST};
-   echo -e ${GRN} "   / /   / __ \/ __ '__ \/ __ \/ / _ \/ __/ _ \/ /   " ${TXTRST};
-   echo -e ${GRN} "  / /___/ /_/ / / / / / / /_/ / /  __/ /_/  __/_/    " ${TXTRST};
-   echo -e ${GRN} "  \____/\____/_/ /_/ /_/ .___/_/\___/\__/\___(_)     " ${TXTRST};
-   echo -e ${GRN} "                      /_/                            " ${TXTRST};
-   echo -e ${GRN} "                                                     " ${TXTRST};
-   echo -e ${GRN} "       Clang ${VERSION} has compiled successfully!   " ${TXTRST};
-   echo -e ${GRN} "*****************************************************" ${TXTRST};
-   echo -e  "";
-   echo -e ${BLDGRN}"Total time elapsed:${TXTRST} ${GRN}${TMIN} minutes ${TSEC} seconds"${TXTRST};
-   echo -e ${BLDGRN}"Toolchain located at:${TXTRST} ${GRN}${INSTALL_DIR}"${TXTRST};
+    # PRINT SUCCESS
+    echo -e "";
+    echo -e ${GRN} "*****************************************************" ${TXTRST};
+    echo -e ${GRN} "     ______                      __     __       __  " ${TXTRST};
+    echo -e ${GRN} "    / ____/___  ____ ___  ____  / /__  / /____  / /  " ${TXTRST};
+    echo -e ${GRN} "   / /   / __ \/ __ '__ \/ __ \/ / _ \/ __/ _ \/ /   " ${TXTRST};
+    echo -e ${GRN} "  / /___/ /_/ / / / / / / /_/ / /  __/ /_/  __/_/    " ${TXTRST};
+    echo -e ${GRN} "  \____/\____/_/ /_/ /_/ .___/_/\___/\__/\___(_)     " ${TXTRST};
+    echo -e ${GRN} "                      /_/                            " ${TXTRST};
+    echo -e ${GRN} "                                                     " ${TXTRST};
+    echo -e ${GRN} "       Clang ${VERSION} has compiled successfully!   " ${TXTRST};
+    echo -e ${GRN} "*****************************************************" ${TXTRST};
+    echo -e  "";
+    echo -e ${BLDGRN}"Total time elapsed:${TXTRST} ${GRN}${TMIN} minutes ${TSEC} seconds"${TXTRST};
+    echo -e ${BLDGRN}"Toolchain located at:${TXTRST} ${GRN}${INSTALL_DIR}"${TXTRST};
 fi;

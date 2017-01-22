@@ -49,17 +49,17 @@ RESTORE="\033[0m"
 
 # PRINTS A FORMATTED HEADER TO POINT OUT WHAT IS BEING DONE TO THE USER
 function echoText() {
-   echo -e ${RED}
-   echo -e "====$( for i in $( seq ${#1} ); do echo -e "=\c"; done )===="
-   echo -e "==  ${1}  =="
-   echo -e "====$( for i in $( seq ${#1} ); do echo -e "=\c"; done )===="
-   echo -e ${RESTORE}
+    echo -e ${RED}
+    echo -e "====$( for i in $( seq ${#1} ); do echo -e "=\c"; done )===="
+    echo -e "==  ${1}  =="
+    echo -e "====$( for i in $( seq ${#1} ); do echo -e "=\c"; done )===="
+    echo -e ${RESTORE}
 }
 
 
 # CREATES A NEW LINE IN TERMINAL
 function newLine() {
-   echo -e ""
+    echo -e ""
 }
 
 
@@ -79,36 +79,36 @@ unset PRIVATE
 SUCCESS=false
 
 while [[ $# -ge 1 ]]; do
-   case "${1}" in
-      "me")
-         DEVICE=angler
-         KERNEL_TYPE=personal
-         ANDROID_VERSION=7.1.1
-         export LOCALVERSION=-$( TZ=MST date +%Y%m%d ) ;;
-      "shamu"|"angler"|"bullhead")
-         DEVICE=${1} ;;
-      "staging"|"release"|"testing"|"eas")
-         KERNEL_TYPE=${1} ;;
-      "7.1.1")
-         ANDROID_VERSION=${1} ;;
-      "private")
-         PRIVATE=true ;;
-      *)
-         echo "Invalid parameter" && exit ;;
-   esac
+    case "${1}" in
+        "me")
+            DEVICE=angler
+            KERNEL_TYPE=personal
+            ANDROID_VERSION=7.1.1
+            export LOCALVERSION=-$( TZ=MST date +%Y%m%d ) ;;
+        "shamu"|"angler"|"bullhead")
+            DEVICE=${1} ;;
+        "staging"|"release"|"testing"|"eas")
+            KERNEL_TYPE=${1} ;;
+        "7.1.1")
+            ANDROID_VERSION=${1} ;;
+        "private")
+            PRIVATE=true ;;
+        *)
+            echo "Invalid parameter" && exit ;;
+    esac
 
-   shift
+    shift
 done
 
 if [[ -z ${DEVICE} || -z ${KERNEL_TYPE} || -z ${ANDROID_VERSION} ]]; then
-   echo "You did not specify a necessary parameter (either device, version, branch, or both). Please re-run the script with the necessary parameters!" && exit
+    echo "You did not specify a necessary parameter (either device, version, branch, or both). Please re-run the script with the necessary parameters!" && exit
 fi
 
 case "${DEVICE}" in
-   "bullhead"|"shamu")
-      KERNEL_BRANCH=release-${ANDROID_VERSION} ;;
-   "angler")
-      KERNEL_BRANCH=n${ANDROID_VERSION} ;;
+    "bullhead"|"shamu")
+        KERNEL_BRANCH=release-${ANDROID_VERSION} ;;
+    "angler")
+        KERNEL_BRANCH=n${ANDROID_VERSION} ;;
 esac
 
 ###############
@@ -144,39 +144,39 @@ ANYKERNEL_FOLDER=${KERNEL_HEAD}/anykernel
 DEFCONFIG=flash_defconfig
 
 case "${DEVICE}" in
-   "angler"|"bullhead")
-      SOURCE_FOLDER=${KERNEL_HEAD}/${DEVICE}
-      ARCHITECTURE=arm64
-      KERNEL_IMAGE=Image.gz-dtb
-      TOOLCHAIN_PREFIX=aarch64-linux-android-
-      TOOLCHAIN_NAME=${TOOLCHAIN_PREFIX}6.x
-      TOOLCHAIN_FOLDER=${TOOLCHAIN_HEAD}/${TOOLCHAIN_NAME} ;;
-   "shamu")
-      SOURCE_FOLDER=${KERNEL_HEAD}/${DEVICE}
-      ARCHITECTURE=arm
-      KERNEL_IMAGE=zImage-dtb
-      TOOLCHAIN_PREFIX=arm-eabi-
-      TOOLCHAIN_NAME=${TOOLCHAIN_PREFIX}6.x
-      TOOLCHAIN_FOLDER=${TOOLCHAIN_HEAD}/${TOOLCHAIN_NAME} ;;
+    "angler"|"bullhead")
+        SOURCE_FOLDER=${KERNEL_HEAD}/${DEVICE}
+        ARCHITECTURE=arm64
+        KERNEL_IMAGE=Image.gz-dtb
+        TOOLCHAIN_PREFIX=aarch64-linux-android-
+        TOOLCHAIN_NAME=${TOOLCHAIN_PREFIX}6.x
+        TOOLCHAIN_FOLDER=${TOOLCHAIN_HEAD}/${TOOLCHAIN_NAME} ;;
+    "shamu")
+        SOURCE_FOLDER=${KERNEL_HEAD}/${DEVICE}
+        ARCHITECTURE=arm
+        KERNEL_IMAGE=zImage-dtb
+        TOOLCHAIN_PREFIX=arm-eabi-
+        TOOLCHAIN_NAME=${TOOLCHAIN_PREFIX}6.x
+        TOOLCHAIN_FOLDER=${TOOLCHAIN_HEAD}/${TOOLCHAIN_NAME} ;;
 esac
 
 case "${KERNEL_TYPE}" in
-   "staging")
-      ZIP_MOVE=${ZIP_MOVE_HEAD}/Kernels/${DEVICE}/${ANDROID_VERSION}/Beta
-      ANYKERNEL_BRANCH=${DEVICE}-flash-release-${ANDROID_VERSION} ;;
-   "release")
-      ZIP_MOVE=${ZIP_MOVE_HEAD}/Kernels/${DEVICE}/${ANDROID_VERSION}/Stable
-      ANYKERNEL_BRANCH=${DEVICE}-flash-release-${ANDROID_VERSION} ;;
-   "testing")
-      ZIP_MOVE=${ZIP_MOVE_HEAD}/Kernels/${DEVICE}/${ANDROID_VERSION}/Testing
-      ANYKERNEL_BRANCH=${DEVICE}-flash-release-${ANDROID_VERSION} ;;
-   "personal")
-      if [[ ${PRIVATE} != true ]]; then
-         ZIP_MOVE=${ZIP_MOVE_HEAD}/Kernels/${DEVICE}/${ANDROID_VERSION}/Personal
-      else
-         ZIP_MOVE=${ZIP_MOVE_HEAD}/.superhidden/Kernels
-      fi
-      ANYKERNEL_BRANCH=${DEVICE}-flash-personal-${ANDROID_VERSION} ;;
+    "staging")
+        ZIP_MOVE=${ZIP_MOVE_HEAD}/Kernels/${DEVICE}/${ANDROID_VERSION}/Beta
+        ANYKERNEL_BRANCH=${DEVICE}-flash-release-${ANDROID_VERSION} ;;
+    "release")
+        ZIP_MOVE=${ZIP_MOVE_HEAD}/Kernels/${DEVICE}/${ANDROID_VERSION}/Stable
+        ANYKERNEL_BRANCH=${DEVICE}-flash-release-${ANDROID_VERSION} ;;
+    "testing")
+        ZIP_MOVE=${ZIP_MOVE_HEAD}/Kernels/${DEVICE}/${ANDROID_VERSION}/Testing
+        ANYKERNEL_BRANCH=${DEVICE}-flash-release-${ANDROID_VERSION} ;;
+    "personal")
+        if [[ ${PRIVATE} != true ]]; then
+            ZIP_MOVE=${ZIP_MOVE_HEAD}/Kernels/${DEVICE}/${ANDROID_VERSION}/Personal
+        else
+            ZIP_MOVE=${ZIP_MOVE_HEAD}/.superhidden/Kernels
+        fi
+        ANYKERNEL_BRANCH=${DEVICE}-flash-personal-${ANDROID_VERSION} ;;
 esac
 
 THREADS=-j$(grep -c ^processor /proc/cpuinfo)
@@ -200,10 +200,10 @@ clear && cd "${SOURCE_FOLDER}" && git checkout ${KERNEL_BRANCH} > /dev/null 2>&1
 # SET KERNEL VERSION FROM MAKEFILE
 KERNEL_VERSION=$( grep -r "EXTRAVERSION = -" ${SOURCE_FOLDER}/Makefile | sed 's/^.*F/F/' )
 case ${KERNEL_TYPE} in
-   "personal")
-      ZIP_NAME=${KERNEL_VERSION}${LOCALVERSION}-$( TZ=MST date +%H%M ) ;;
-   *)
-      ZIP_NAME=${KERNEL_VERSION} ;;
+    "personal")
+        ZIP_NAME=${KERNEL_VERSION}${LOCALVERSION}-$( TZ=MST date +%H%M ) ;;
+    *)
+        ZIP_NAME=${KERNEL_VERSION} ;;
 esac
 
 
@@ -246,8 +246,8 @@ git clean -f -d -x > /dev/null 2>&1
 # Cleaning of kernel directory
 cd "${SOURCE_FOLDER}"
 if [[ "${KERNEL_TYPE}" != "personal" ]]; then
-   git reset --hard origin/${KERNEL_BRANCH}
-   git clean -f -d -x > /dev/null 2>&1; newLine
+    git reset --hard origin/${KERNEL_BRANCH}
+    git clean -f -d -x > /dev/null 2>&1; newLine
 fi
 
 
@@ -277,48 +277,48 @@ time make ${THREADS}
 ######################
 
 if [[ $( ls ${KERNEL} 2>/dev/null | wc -l ) != "0" ]]; then
-   # SET BUILD SUCCESS STRING AND SUCCESS VARIABLE
-   BUILD_RESULT_STRING="BUILD SUCCESSFUL" && SUCCESS=true
+    # SET BUILD SUCCESS STRING AND SUCCESS VARIABLE
+    BUILD_RESULT_STRING="BUILD SUCCESSFUL" && SUCCESS=true
 
 
-   #####################
-   # COPY KERNEL IMAGE #
-   #####################
+    #####################
+    # COPY KERNEL IMAGE #
+    #####################
 
-   newLine; echoText "MOVING $( echo ${KERNEL_IMAGE} | awk '{print toupper($0)}' ) ($( du -h "${KERNEL}" | awk '{print $1}' ))"
-   cp "${KERNEL}" "${ANYKERNEL_FOLDER}"/zImage-dtb
+    newLine; echoText "MOVING $( echo ${KERNEL_IMAGE} | awk '{print toupper($0)}' ) ($( du -h "${KERNEL}" | awk '{print $1}' ))"
+    cp "${KERNEL}" "${ANYKERNEL_FOLDER}"/zImage-dtb
 
-   # MAKE ZIP_FORMAT VARIABLE
-   ZIP_FORMAT=F*.zip
+    # MAKE ZIP_FORMAT VARIABLE
+    ZIP_FORMAT=F*.zip
 
-   # IF ZIPMOVE DOESN'T EXIST, MAKE IT; OTHERWISE, CLEAN IT
-   if [[ ! -d "${ZIP_MOVE}" ]]; then
-      mkdir -p "${ZIP_MOVE}"
-   else
-      rm -rf "${ZIP_MOVE}"/${ZIP_FORMAT}
-   fi
+    # IF ZIPMOVE DOESN'T EXIST, MAKE IT; OTHERWISE, CLEAN IT
+    if [[ ! -d "${ZIP_MOVE}" ]]; then
+        mkdir -p "${ZIP_MOVE}"
+    else
+        rm -rf "${ZIP_MOVE}"/${ZIP_FORMAT}
+    fi
 
-   # MOVE TO ANYKERNEL FOLDER
-   cd "${ANYKERNEL_FOLDER}"
-
-
-   #################
-   # MAKE ZIP FILE #
-   #################
-
-   echoText "MAKING FLASHABLE ZIP"
-   zip -r9 ${ZIP_NAME}.zip * -x README.md ${ZIP_NAME}.zip > /dev/null 2>&1
+    # MOVE TO ANYKERNEL FOLDER
+    cd "${ANYKERNEL_FOLDER}"
 
 
-   #################
-   # MOVE ZIP FILE #
-   #################
+    #################
+    # MAKE ZIP FILE #
+    #################
 
-   mv ${ZIP_NAME}.zip "${ZIP_MOVE}"
+    echoText "MAKING FLASHABLE ZIP"
+    zip -r9 ${ZIP_NAME}.zip * -x README.md ${ZIP_NAME}.zip > /dev/null 2>&1
 
 
-   # CLEAN ZIMAGE-DTB FROM ANYKERNEL FOLDER AFTER ZIPPING AND MOVING
-   rm -rf "${ANYKERNEL_FOLDER}"/zImage-dtb
+    #################
+    # MOVE ZIP FILE #
+    #################
+
+    mv ${ZIP_NAME}.zip "${ZIP_MOVE}"
+
+
+    # CLEAN ZIMAGE-DTB FROM ANYKERNEL FOLDER AFTER ZIPPING AND MOVING
+    rm -rf "${ANYKERNEL_FOLDER}"/zImage-dtb
 
 
 ###################
@@ -326,8 +326,8 @@ if [[ $( ls ${KERNEL} 2>/dev/null | wc -l ) != "0" ]]; then
 ###################
 
 else
-   BUILD_RESULT_STRING="BUILD FAILED"
-   SUCCESS=false
+    BUILD_RESULT_STRING="BUILD FAILED"
+    SUCCESS=false
 fi
 
 
@@ -347,8 +347,8 @@ DIFF=$((${DATE_END} - ${DATE_START}))
 
 # IF THE BUILD WAS SUCCESSFUL, PRINT FILE LOCATION, AND SIZE
 if [[ ${SUCCESS} = true ]]; then
-   echo -e ${RED}"FILE LOCATION: ${ZIP_MOVE}/${ZIP_NAME}.zip"
-   echo -e "SIZE: $( du -h ${ZIP_MOVE}/${ZIP_NAME}.zip | awk '{print $1}' )"${RESTORE}
+    echo -e ${RED}"FILE LOCATION: ${ZIP_MOVE}/${ZIP_NAME}.zip"
+    echo -e "SIZE: $( du -h ${ZIP_MOVE}/${ZIP_NAME}.zip | awk '{print $1}' )"${RESTORE}
 fi
 
 # PRINT THE TIME THE SCRIPT FINISHED
@@ -369,8 +369,8 @@ echo -e "${BUILD_RESULT_STRING} IN $((${DIFF} / 60)) MINUTES AND $((${DIFF} % 60
 
 # ONLY ADD A LINE ABOUT FILE LOCATION IF SCRIPT COMPLETED SUCCESSFULLY
 if [[ ${SUCCESS} = true ]]; then
-   # FILE LOCATION: PATH
-   echo -e "FILE LOCATION: ${ZIP_MOVE}/${ZIP_NAME}.zip" >> ${LOG}
+    # FILE LOCATION: PATH
+    echo -e "FILE LOCATION: ${ZIP_MOVE}/${ZIP_NAME}.zip" >> ${LOG}
 fi
 
 

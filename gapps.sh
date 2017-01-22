@@ -49,17 +49,17 @@ RESTORE="\033[0m"
 
 # PRINTS A FORMATTED HEADER TO POINT OUT WHAT IS BEING DONE TO THE USER
 function echoText() {
-   echo -e ${RED}
-   echo -e "====$( for i in $( seq ${#1} ); do echo -e "=\c"; done )===="
-   echo -e "==  ${1}  =="
-   echo -e "====$( for i in $( seq ${#1} ); do echo -e "=\c"; done )===="
-   echo -e ${RESTORE}
+    echo -e ${RED}
+    echo -e "====$( for i in $( seq ${#1} ); do echo -e "=\c"; done )===="
+    echo -e "==  ${1}  =="
+    echo -e "====$( for i in $( seq ${#1} ); do echo -e "=\c"; done )===="
+    echo -e ${RESTORE}
 }
 
 
 # CREATES A NEW LINE IN TERMINAL
 function newLine() {
-   echo -e ""
+    echo -e ""
 }
 
 
@@ -73,20 +73,20 @@ function newLine() {
 SUCCESS=false
 
 while [[ $# -ge 1 ]]; do
-   case "${1}" in
-      "open"|"dynamic")
-         TYPE=${1} ;;
-      "super"|"stock"|"full"|"mini"|"micro"|"nano"|"pico")
-         VERSION=${1} ;;
-      *)
-         echo "Invalid parameter" && exit ;;
-   esac
+    case "${1}" in
+        "open"|"dynamic")
+            TYPE=${1} ;;
+    "super"|"stock"|"full"|"mini"|"micro"|"nano"|"pico")
+            VERSION=${1} ;;
+    *)
+        echo "Invalid parameter" && exit ;;
+    esac
 
-   shift
+    shift
 done
 
 if [[ -z ${TYPE} ]] || [[ ${TYPE} == "open" && -z ${VERSION} ]]; then
-   echo "You did not specify a necessary parameter (either type of GApps or variant of GApps). Please re-run the script with the necessary parameters!" && exit
+    echo "You did not specify a necessary parameter (either type of GApps or variant of GApps). Please re-run the script with the necessary parameters!" && exit
 fi
 
 ###############
@@ -100,14 +100,14 @@ ZIP_MOVE=${HOME}/Web/.superhidden/GApps
 
 # Type logic
 case ${TYPE} in
-   "dynamic")
-      SOURCE_DIR=${ANDROID_DIR}/GApps/Dynamic
-      ZIP_FORMAT=*Dynamic*.zip
-      BRANCH=n-mr1 ;;
-   "open")
-      SOURCE_DIR=${ANDROID_DIR}/GApps/Open
-      ZIP_FORMAT=open*${VERSION}*.zip
-      BRANCH=master ;;
+    "dynamic")
+        SOURCE_DIR=${ANDROID_DIR}/GApps/Dynamic
+        ZIP_FORMAT=*Dynamic*.zip
+        BRANCH=n-mr1 ;;
+    "open")
+        SOURCE_DIR=${ANDROID_DIR}/GApps/Open
+        ZIP_FORMAT=open*${VERSION}*.zip
+        BRANCH=master ;;
 esac
 
 
@@ -130,10 +130,10 @@ clear && cd ${SOURCE_DIR}
 ############
 
 if [[ "${TYPE}" == "dynamic" ]]; then
-   echoText "CLEANING UP REPO"
+    echoText "CLEANING UP REPO"
 
-   git reset --hard origin/${BRANCH}
-   git clean -f -d -x
+    git reset --hard origin/${BRANCH}
+    git clean -f -d -x
 fi
 
 
@@ -145,7 +145,7 @@ echoText "UPDATING REPO"
 
 git pull
 if [[ "${TYPE}" == "open" ]]; then
-   ./download_sources.sh --shallow arm64
+    ./download_sources.sh --shallow arm64
 fi
 
 
@@ -156,10 +156,10 @@ fi
 echoText "BUILDING $( echo ${TYPE} | awk '{print toupper($0)}' ) GAPPS"
 
 case "${TYPE}" in
-   "dynamic")
-      source mkgapps.sh both ;;
-   "open")
-      make arm64-25-${VERSION} ;;
+    "dynamic")
+        source mkgapps.sh both ;;
+    "open")
+        make arm64-25-${VERSION} ;;
 esac
 
 
@@ -169,30 +169,30 @@ esac
 
 # THERE WILL BE A ZIP IN THE OUT FOLDER IN THE ZIP FORMAT
 if [[ $( ls ${SOURCE_DIR}/out/${ZIP_FORMAT} 2>/dev/null | wc -l ) != "0" ]]; then
-   # MAKE BUILD RESULT STRING REFLECT SUCCESSFUL COMPILATION
-   BUILD_RESULT_STRING="BUILD SUCCESSFUL"
-   SUCCESS=true
+    # MAKE BUILD RESULT STRING REFLECT SUCCESSFUL COMPILATION
+    BUILD_RESULT_STRING="BUILD SUCCESSFUL"
+    SUCCESS=true
 
 
-   ##################
-   # ZIP_MOVE LOGIC #
-   ##################
+    ##################
+    # ZIP_MOVE LOGIC #
+    ##################
 
-   # MAKE ZIP_MOVE IF IT DOESN'T EXIST OR CLEAN IT IF IT DOES
-   if [[ ! -d ${ZIP_MOVE} ]]; then
-      mkdir -p ${ZIP_MOVE}
-   else
-      rm -rf ${ZIP_MOVE}/${ZIP_FORMAT}
-   fi
+    # MAKE ZIP_MOVE IF IT DOESN'T EXIST OR CLEAN IT IF IT DOES
+    if [[ ! -d ${ZIP_MOVE} ]]; then
+        mkdir -p ${ZIP_MOVE}
+    else
+        rm -rf ${ZIP_MOVE}/${ZIP_FORMAT}
+    fi
 
 
-   ######################
-   # MOVING GAPPS FILES #
-   ######################
+    ######################
+    # MOVING GAPPS FILES #
+    ######################
 
-   newLine; echoText "MOVING FILES TO ZIP_MOVE DIRECTORY"; newLine
+    newLine; echoText "MOVING FILES TO ZIP_MOVE DIRECTORY"; newLine
 
-   mv -v ${SOURCE_DIR}/out/${ZIP_FORMAT} ${ZIP_MOVE}
+    mv -v ${SOURCE_DIR}/out/${ZIP_FORMAT} ${ZIP_MOVE}
 
 
 ###################
@@ -200,8 +200,8 @@ if [[ $( ls ${SOURCE_DIR}/out/${ZIP_FORMAT} 2>/dev/null | wc -l ) != "0" ]]; the
 ###################
 
 else
-   BUILD_RESULT_STRING="BUILD FAILED"
-   SUCCESS=false
+    BUILD_RESULT_STRING="BUILD FAILED"
+    SUCCESS=false
 fi
 
 
@@ -219,8 +219,8 @@ newLine; echoText "${BUILD_RESULT_STRING}!"
 
 # IF THE BUILD WAS SUCCESSFUL, PRINT FILE LOCATION AND SIZE
 if [[ ${SUCCESS} = true ]]; then
-   echo -e ${RED}"FILE LOCATION: $( ls ${ZIP_MOVE}/${ZIP_FORMAT} )"
-   echo -e "SIZE: $( du -h ${ZIP_MOVE}/${ZIP_FORMAT} | awk '{print $1}' )"${RESTORE}
+    echo -e ${RED}"FILE LOCATION: $( ls ${ZIP_MOVE}/${ZIP_FORMAT} )"
+    echo -e "SIZE: $( du -h ${ZIP_MOVE}/${ZIP_FORMAT} | awk '{print $1}' )"${RESTORE}
 fi
 
 # PRINT THE TIME THE SCRIPT FINISHED
@@ -241,8 +241,8 @@ echo -e "${BUILD_RESULT_STRING} IN $(echo $((${END}-${START})) | awk '{print int
 
 # ONLY ADD A LINE ABOUT FILE LOCATION IF SCRIPT COMPLETED SUCCESSFULLY
 if [[ ${SUCCESS} = true ]]; then
-   # FILE LOCATION: <PATH>
-   echo -e "FILE LOCATION: $( ls ${ZIP_MOVE}/${ZIP_FORMAT} )" >> ${LOG}
+    # FILE LOCATION: <PATH>
+    echo -e "FILE LOCATION: $( ls ${ZIP_MOVE}/${ZIP_FORMAT} )" >> ${LOG}
 fi
 
 

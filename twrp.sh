@@ -47,17 +47,17 @@ RESTORE="\033[0m"
 
 # PRINTS A FORMATTED HEADER TO POINT OUT WHAT IS BEING DONE TO THE USER
 function echoText() {
-   echo -e ${RED}
-   echo -e "====$( for i in $( seq ${#1} ); do echo -e "=\c"; done )===="
-   echo -e "==  ${1}  =="
-   echo -e "====$( for i in $( seq ${#1} ); do echo -e "=\c"; done )===="
-   echo -e ${RESTORE}
+    echo -e ${RED}
+    echo -e "====$( for i in $( seq ${#1} ); do echo -e "=\c"; done )===="
+    echo -e "==  ${1}  =="
+    echo -e "====$( for i in $( seq ${#1} ); do echo -e "=\c"; done )===="
+    echo -e ${RESTORE}
 }
 
 
 # CREATES A NEW LINE IN TERMINAL
 function newLine() {
-   echo -e ""
+    echo -e ""
 }
 
 
@@ -95,16 +95,16 @@ FILE_FORMAT=twrp-*-${DEVICE}*
 unset SYNC
 
 while [[ $# -ge 1 ]]; do
-   PARAMS+="${1} "
+    PARAMS+="${1} "
 
-   case "${1}" in
-      "nosync")
-         SYNC=false ;;
-      *)
-         echo "Invalid parameter detected!" && exit ;;
-   esac
+    case "${1}" in
+        "nosync")
+            SYNC=false ;;
+        *)
+            echo "Invalid parameter detected!" && exit ;;
+    esac
 
-   shift
+    shift
 done
 
 
@@ -124,9 +124,9 @@ clear && export EXPERIMENTAL_USE_JAVA8=true && START=$( TZ=MST date +%s )
 cd ${SOURCE_DIR}
 
 if [[ ${SYNC} != false ]]; then
-   echoText "SYNCING LATEST SOURCES"
+    echoText "SYNCING LATEST SOURCES"
 
-   repo sync --force-sync -j$(grep -c ^processor /proc/cpuinfo)
+    repo sync --force-sync -j$(grep -c ^processor /proc/cpuinfo)
 fi
 
 
@@ -138,8 +138,8 @@ echoText "SETTING UP BUILD ENVIRONMENT"
 
 # CHECK AND SEE IF WE ARE ON ARCH; IF SO, ACTIVARE A VIRTUAL ENVIRONMENT FOR PROPER PYTHON SUPPORT
 if [[ -f /etc/arch-release ]]; then
-   virtualenv2 venv
-   source venv/bin/activate
+    virtualenv2 venv
+    source venv/bin/activate
 fi
 
 source build/envsetup.sh
@@ -178,32 +178,32 @@ time mka recoveryimage
 
 # THERE WILL BE A FILE IN THE OUT FOLDER IN THE ABOVE FORMAT
 if [[ $( ls ${OUT_DIR}/${COMP_FILE} 2>/dev/null | wc -l ) != "0" ]]; then
-  # MAKE BUILD RESULT STRING REFLECT SUCCESSFUL COMPILATION
-  BUILD_RESULT_STRING="BUILD SUCCESSFUL"
-  SUCCESS=true
+    # MAKE BUILD RESULT STRING REFLECT SUCCESSFUL COMPILATION
+    BUILD_RESULT_STRING="BUILD SUCCESSFUL"
+    SUCCESS=true
 
 
-  ##################
-  # IMG_MOVE LOGIC #
-  ##################
+    ##################
+    # IMG_MOVE LOGIC #
+    ##################
 
-  # MAKE IMG_MOVE IF IT DOESN'T EXIST OR CLEAN IT IF IT DOES
-  if [[ ! -d "${IMG_MOVE}" ]]; then
-     mkdir -p "${IMG_MOVE}"
-  else
-     echoText "CLEANING UPLOAD DIRECTORY"
+    # MAKE IMG_MOVE IF IT DOESN'T EXIST OR CLEAN IT IF IT DOES
+    if [[ ! -d "${IMG_MOVE}" ]]; then
+        mkdir -p "${IMG_MOVE}"
+    else
+        echoText "CLEANING UPLOAD DIRECTORY"
 
-     rm -vrf "${IMG_MOVE}"/*${FILE_FORMAT}*
-  fi
+        rm -vrf "${IMG_MOVE}"/*${FILE_FORMAT}*
+    fi
 
 
-  ####################
-  # MOVING TWRP FILE #
-  ####################
+    ####################
+    # MOVING TWRP FILE #
+    ####################
 
-  newLine; echoText "MOVING FILE TO UPLOAD DIRECTORY"; newLine
+    newLine; echoText "MOVING FILE TO UPLOAD DIRECTORY"; newLine
 
-  mv -v ${OUT_DIR}/${COMP_FILE} "${IMG_MOVE}"/${UPLD_FILE}
+    mv -v ${OUT_DIR}/${COMP_FILE} "${IMG_MOVE}"/${UPLD_FILE}
 
 
 ###################
@@ -211,8 +211,8 @@ if [[ $( ls ${OUT_DIR}/${COMP_FILE} 2>/dev/null | wc -l ) != "0" ]]; then
 ###################
 
 else
-  BUILD_RESULT_STRING="BUILD FAILED"
-  SUCCESS=false
+    BUILD_RESULT_STRING="BUILD FAILED"
+    SUCCESS=false
 fi
 
 
@@ -223,7 +223,7 @@ fi
 
 # DEACTIVATE VIRTUALENV IF WE ARE ON ARCH
 if [[ -f /etc/arch-release ]]; then
-   deactivate && rm -rf ${SOURCE_DIR}/venv
+    deactivate && rm -rf ${SOURCE_DIR}/venv
 fi
 
 END=$( TZ=MST date +%s )
@@ -236,8 +236,8 @@ newLine; echoText "${BUILD_RESULT_STRING}!"
 
 # IF THE BUILD WAS SUCCESSFUL, PRINT FILE LOCATION AND SIZE
 if [[ ${SUCCESS} = true ]]; then
-  echo -e ${RED}"FILE LOCATION: $( ls "${IMG_MOVE}"/${UPLD_FILE} )"
-  echo -e "SIZE: $( du -h "${IMG_MOVE}"/${UPLD_FILE} | awk '{print $1}' )"${RESTORE}
+    echo -e ${RED}"FILE LOCATION: $( ls "${IMG_MOVE}"/${UPLD_FILE} )"
+    echo -e "SIZE: $( du -h "${IMG_MOVE}"/${UPLD_FILE} | awk '{print $1}' )"${RESTORE}
 fi
 
 # PRINT THE TIME THE SCRIPT FINISHED
@@ -258,8 +258,8 @@ echo -e "${BUILD_RESULT_STRING} IN $( echo $((${END}-${START})) | awk '{print in
 
 # ONLY ADD A LINE ABOUT FILE LOCATION IF SCRIPT COMPLETED SUCCESSFULLY
 if [[ ${SUCCESS} = true ]]; then
-  # FILE LOCATION: <PATH>
-  echo -e "FILE LOCATION: $( ls "${IMG_MOVE}"/${UPLD_FILE} )" >> ${LOG}
+    # FILE LOCATION: <PATH>
+    echo -e "FILE LOCATION: $( ls "${IMG_MOVE}"/${UPLD_FILE} )" >> ${LOG}
 fi
 
 
