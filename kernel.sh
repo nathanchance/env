@@ -240,8 +240,12 @@ echoText "CLEANING UP"
 # Cleaning of AnyKernel directory
 cd "${ANYKERNEL_FOLDER}"
 git checkout ${ANYKERNEL_BRANCH}
-git reset --hard origin/${ANYKERNEL_BRANCH}
-git clean -f -d -x > /dev/null 2>&1
+if [[ "${KERNEL_TYPE}" != "personal" ]]; then
+    git reset --hard origin/${ANYKERNEL_BRANCH}
+    git clean -f -d -x > /dev/null 2>&1
+else
+    rm -rf ${KERNEL_IMAGE}
+fi
 
 # Cleaning of kernel directory
 cd "${SOURCE_FOLDER}"
