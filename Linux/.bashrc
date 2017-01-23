@@ -34,7 +34,7 @@ export USE_CCACHE=1
 export PATH="${PATH}$(find ${HOME}/Scripts -name '.*' -prune -o -type d -printf ':%p')"
 
 # Log support so I can see what compiled and at what time
-export LOGDIR=${HOME}/Logs
+export LOGDIR=${HOME}/Web/.superhidden/Logs
 # Create LOGDIR if it doesn't exist
 if [[ ! -d ${LOGDIR} ]]; then
     mkdir -p ${LOGDIR}/Results
