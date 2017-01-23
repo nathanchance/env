@@ -101,7 +101,7 @@ while [[ $# -ge 1 ]]; do
 done
 
 if [[ -z ${DEVICE} || -z ${KERNEL_TYPE} || -z ${ANDROID_VERSION} ]]; then
-    echo "You did not specify a necessary parameter (either device, version, branch, or both). Please re-run the script with the necessary parameters!" && exit
+    echo "You did not specify a necessary parameter!" && exit
 fi
 
 case "${DEVICE}" in
@@ -129,7 +129,7 @@ esac
 # TOOLCHAIN_NAME: name of the toolchain we want to compile and use
 # TOOLCHAIN_FOLDER: final location of the toolchain after compilation
 # ZIP_MOVE: final location of the completed zip files
-# ANYKERNEL_BRANCH: branch that we are using for our AnyKernel source (based on device and kernel branch)
+# ANYKERNEL_BRANCH: branch that we are using for our AnyKernel source
 # THREADS: -j flag for make with the number of threads available
 # DEFCONFIG: name of the defconfig we are using
 # KERNEL: location of the kernel image after compilation

@@ -104,7 +104,8 @@ function build() {
     cd ${SCRIPTS_DIR}
 
 
-    # CHECK AND SEE IF WE ARE ON ARCH; IF SO, ACTIVARE A VIRTUAL ENVIRONMENT FOR PROPER PYTHON SUPPORT
+    # CHECK AND SEE IF WE ARE ON ARCH
+    # IF SO, ACTIVARE A VIRTUAL ENVIRONMENT FOR PROPER PYTHON SUPPORT
     if [[ -f /etc/arch-release ]]; then
         virtualenv2 venv && source venv/bin/activate
     fi

@@ -63,7 +63,8 @@ function newLine() {
 
 # UNSETS VARIABLES POTENTIALLY USED IN SCRIPT
 function unsetvars() {
-    unset ROM_BUILD_TYPE SUBSTRATUM LOCALVERSION BUILD_TAG SYNC PERSONAL SUCCESS CLEAN_TYPE MAKE_TYPE PARAMS
+    unset ROM_BUILD_TYPE SUBSTRATUM LOCALVERSION BUILD_TAG
+    unset SYNC PERSONAL SUCCESS CLEAN_TYPE MAKE_TYPE PARAMS
 }
 
 # CHECKS IF MKA EXISTS
@@ -140,7 +141,7 @@ done
 
 # PARAMETER VERIFICATION
 if [[ -z ${DEVICE} || -z ${ROM} ]]; then
-    echo "You did not specify a necessary parameter (either ROM, device, or both). Please re-run the script with the necessary parameters!" && exit
+    echo "You did not specify a necessary parameter!" && exit
 fi
 
 ###############
@@ -149,11 +150,10 @@ fi
 #             #
 ###############
 
-# ANDROID_DIR: Directory that holds all of the Android files (currently my home directory)
+# ANDROID_DIR: Directory that holds all of the Android files
 # OUT_DIR: Directory that holds the compiled ROM files
 # SOURCE_DIR: Directory that holds the ROM source
 # ZIP_MOVE: Directory to hold completed ROM zips
-# ZIP_FORMAT: The format of the zip file in the out directory for moving to ZIP_MOVE
 ANDROID_DIR=${HOME}
 ZIP_MOVE_PARENT=${HOME}/Web/.superhidden/ROMs
 
@@ -213,7 +213,8 @@ fi
 
 echoText "SETTING UP BUILD ENVIRONMENT"
 
-# CHECK AND SEE IF WE ARE ON ARCH; IF SO, ACTIVARE A VIRTUAL ENVIRONMENT FOR PROPER PYTHON SUPPORT
+# CHECK AND SEE IF WE ARE ON ARCH
+# IF SO, ACTIVARE A VIRTUAL ENVIRONMENT FOR PROPER PYTHON SUPPORT
 if [[ -f /etc/arch-release ]]; then
     virtualenv2 venv && source venv/bin/activate
 fi
@@ -255,20 +256,7 @@ fi
 # START BUILDING #
 ##################
 
-if [[ ${ROM} == "flash" ]]; then
-    echo -e ${RED}
-    echo -e "========================================================================"; newLine
-    echo -e "  ___________________________________  __   _____________________  ___  "
-    echo -e "  ___  ____/__  /___    |_  ___/__  / / /   ___  __ \_  __ \__   |/  /  "
-    echo -e "  __  /_   __  / __  /| |____ \__  /_/ /    __  /_/ /  / / /_  /|_/ /   "
-    echo -e "  _  __/   _  /___  ___ |___/ /_  __  /     _  _, _// /_/ /_  /  / /    "
-    echo -e "  /_/      /_____/_/  |_/____/ /_/ /_/      /_/ |_| \____/ /_/  /_/     "; newLine; newLine
-    echo -e "========================================================================"; newLine
-    echo -e ${RESTORE}
-    sleep 5
-else
-    echoText "MAKING FILES"; newLine
-fi
+echoText "MAKING FILES"; newLine
 
 NOW=$( TZ=MST date +"%Y-%m-%d-%S" )
 
@@ -280,7 +268,7 @@ if [[ -n ${MAKE_TYPE} ]]; then
     # PRINT RESULT #
     ################
 
-    echoText "BUILD COMPLETED!"
+    newLine; echoText "BUILD COMPLETED!"
 else
     # NOT ALL ROMS USE BACON
     case "${ROM}" in
