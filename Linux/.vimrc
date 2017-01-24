@@ -25,4 +25,3 @@ set showcmd         " Show last command
 set cursorline      " Show current selected line
 set wildmenu        " Show auto completion menu when typing commands
 set incsearch       " Show search results in realtime
-set hlsearch        " Show search results with highlights
