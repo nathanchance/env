@@ -151,13 +151,11 @@ function exkm2rc {
 
 # Set up a virtual environment for Python
 function mkavenv {
-    virtualenv2 venv && source venv/bin/activate
-    export VENV_LOCATION=$(pwd)/venv
+    virtualenv2 ${HOME}/venv && source ${HOME}/venv/bin/activate
 }
 
 # Deactivate and remove venv
 function rmvenv {
     deactivate
-    rm -rf ${VENV_LOCATION}
-    unset VENV_LOCATION
+    rm -rf ${HOME}/venv
 }
