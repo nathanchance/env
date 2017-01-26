@@ -123,9 +123,9 @@ if [[ "${MODE}" == "build" || "${MODE}" == "both" ]]; then
 
     # BUILD A NEW BINARY
     echoText "BUILDING NINJA"
-    virtualenv2 venv && source venv/bin/activate
+    virtualenv2 ${HOME}/venv && source ${HOME}/venv/bin/activate
     CXX=${CLANG_LOCATION}/bin/clang++ ./configure.py --bootstrap
-    deactivate && rm -rf ${NINJA_SOURCE}/venv
+    deactivate && rm -rf ${HOME}/venv
 fi
 
 if [[ "${MODE}" == "install" || "${MODE}" == "both" ]]; then

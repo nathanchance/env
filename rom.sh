@@ -216,7 +216,7 @@ echoText "SETTING UP BUILD ENVIRONMENT"
 # CHECK AND SEE IF WE ARE ON ARCH
 # IF SO, ACTIVARE A VIRTUAL ENVIRONMENT FOR PROPER PYTHON SUPPORT
 if [[ -f /etc/arch-release ]]; then
-    virtualenv2 venv && source venv/bin/activate
+    virtualenv2 ${HOME}/venv && source ${HOME}/venv/bin/activate
 fi
 
 source build/envsetup.sh
@@ -337,7 +337,7 @@ fi
 
 # DEACTIVATE VIRTUALENV IF WE ARE ON ARCH
 if [[ -f /etc/arch-release ]]; then
-    deactivate && rm -rf ${SOURCE_DIR}/venv
+    deactivate && rm -rf ${HOME}/venv
 fi
 
 

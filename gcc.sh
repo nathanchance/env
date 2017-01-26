@@ -107,7 +107,7 @@ function build() {
     # CHECK AND SEE IF WE ARE ON ARCH
     # IF SO, ACTIVARE A VIRTUAL ENVIRONMENT FOR PROPER PYTHON SUPPORT
     if [[ -f /etc/arch-release ]]; then
-        virtualenv2 venv && source venv/bin/activate
+        virtualenv2 ${HOME}/venv && source ${HOME}/venv/bin/activate
     fi
 
     # RUN THE BUILD SCRIPT
@@ -118,7 +118,7 @@ function build() {
 
     # DEACTIVATE VENV IF ON ARCH
     if [[ -f /etc/arch-release ]]; then
-        deactivate && rm -rf ${SCRIPTS_DIR}/venv
+        deactivate && rm -rf ${HOME}/venv
     fi
 
 
