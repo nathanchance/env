@@ -159,3 +159,26 @@ function rmvenv {
     deactivate
     rm -rf ${HOME}/venv
 }
+
+# Repo sync shorthand
+function rps {
+    unset ARGS
+
+    if [[ -n ${1} ]]; then
+        case ${1} in
+            "k")
+                ARGS="kernel/huawei/angler" ;;
+            "tc")
+                ARGS="prebuilts/gcc/linux-x86/aarch64/aarch64-linux-android-6.x "
+                ARGS+="prebuilts/gcc/linux-x86/arm/arm-linux-androideabi-6.x "
+                ARGS+="prebuilts/clang/host/linux-x86/3.9.1 "
+                ARGS+="prebuilts/clang/host/linux-x86/4.0.0" ;;
+            *)
+                ARGS=${1} ;;
+        esac
+    fi
+
+    repo sync --force-sync -j8 ${ARGS}
+
+    unset ARGS
+}
