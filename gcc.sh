@@ -74,24 +74,20 @@ function newLine() {
 function build() {
     # DIRECTORIES
     OUT_DIR=${TOOLCHAIN_HEAD}/Flash-TC/out/${1}-6.x
-    REPO=${TOOLCHAIN_HEAD}/Prebuilts/${1}-6.x
+    case "${1}" in
+        "aarch64"*)
+            REPO=${HOME}/ROMs/Flash/prebuilts/gcc/linux-x86/aarch64/${1}-6.x ;;
+        "arm"*)
+            REPO=${HOME}/ROMs/Flash/prebuilts/gcc/linux-x86/arm/${1}-6.x ;;
+    esac
 
+    # CLEAN IT
+    echoText "CLEANING REPO"
 
-    # IF THE REPO DIRECTORY EXISTS
-    if [[ -d ${REPO} ]]; then
-        # CLEAN IT
-        echoText "CLEANING REPO"
-
-        cd ${REPO}
-        git pull
-        rm -vrf *
-    else
-        # OTHERWISE, CLONE IT
-        echoText "CLONING REPO"
-
-        cd ${TOOLCHAIN_HEAD}/Prebuilts
-        git clone https://gitlab.com/Flash-ROM/${1}-6.x
-    fi
+    cd ${REPO}
+    git checkout n7.1.1
+    git pull
+    rm -vrf *
 
 
     # REMOVE THE OUR DIRECTORY

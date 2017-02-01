@@ -83,7 +83,7 @@ SOURCE_DIR=${HOME}/Toolchains/Clang-${VERSION_PARAM}
 # SET BUILD DIRECTORY
 BUILD_DIR=${SOURCE_DIR}/build
 # SET INSTALL DIRECTORY
-INSTALL_DIR=${HOME}/Toolchains/Prebuilts/clang-${VERSION_PARAM}
+INSTALL_DIR=${HOME}/ROMs/Flash/prebuilts/clang/host/linux-x86/${VERSION_PARAM}
 
 
 ################
@@ -94,14 +94,8 @@ INSTALL_DIR=${HOME}/Toolchains/Prebuilts/clang-${VERSION_PARAM}
 
 clear
 
-# CLEAN INSTALL DIR IF IT EXISTS; OTHERWISE MAKE IT
-if [[ -d ${INSTALL_DIR} ]]; then
-    cd ${INSTALL_DIR} && git pull && rm -vrf *
-else
-    cd $( dirname ${INSTALL_DIR} )
-    git clone https://gitlab.com/Flash-ROM/clang_linux-x86_${VERSION_PARAM} clang-${VERSION_PARAM}
-fi
-
+# CLEAN INSTALL DIR
+cd ${INSTALL_DIR} && git checkout n7.1.1 && git pull && rm -vrf *
 
 # SYNC DOWN SOURCE; MAKE DIR IF IT DOESN'T EXIST ALREADY
 if [[ -d ${SOURCE_DIR} ]]; then
