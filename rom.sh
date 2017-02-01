@@ -104,8 +104,8 @@ while [[ $# -ge 1 ]]; do
             DEVICE=${1} ;;
         "abc"|"aosip"|"du"|"flash"|"krexus"|"pn")
             ROM=${1} ;;
-        "nosync")
-            SYNC=false ;;
+        "sync")
+            SYNC=true ;;
         "nosubs")
             export SUBSTRATUM=false ;;
         "type")
@@ -200,7 +200,7 @@ clear && cd ${SOURCE_DIR}
 # REPO SYNC #
 #############
 
-if [[ ${SYNC} != false ]]; then
+if [[ ${SYNC} = true ]]; then
     echoText "SYNCING LATEST SOURCES"; newLine
 
     repo sync --force-sync -j$( grep -c ^processor /proc/cpuinfo )
