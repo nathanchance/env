@@ -285,7 +285,7 @@ if [[ $( ls ${KERNEL} 2>/dev/null | wc -l ) != "0" ]]; then
     # IF ZIPMOVE DOESN'T EXIST, MAKE IT; OTHERWISE, CLEAN IT
     if [[ ! -d "${ZIP_MOVE}" ]]; then
         mkdir -p "${ZIP_MOVE}"
-    else
+    elif [[ ${PRIVATE} = true ]]; then
         rm -rf "${ZIP_MOVE}"/${ZIP_FORMAT}
     fi
 
