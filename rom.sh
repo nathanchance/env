@@ -47,19 +47,8 @@ RESTORE="\033[0m"
 #             #
 ###############
 
-# PRINTS A FORMATTED HEADER TO POINT OUT WHAT IS BEING DONE TO THE USER
-function echoText() {
-    echo -e ${RED}
-    echo -e "====$( for i in $( seq ${#1} ); do echo -e "=\c"; done )===="
-    echo -e "==  ${1}  =="
-    echo -e "====$( for i in $( seq ${#1} ); do echo -e "=\c"; done )===="
-    echo -e ${RESTORE}
-}
-
-# CREATES A NEW LINE IN TERMINAL
-function newLine() {
-    echo -e ""
-}
+# SOURCE OUR UNIVERSAL FUNCTIONS SCRIPT
+source $( dirname ${BASH_SOURCE} )/funcs.sh
 
 # UNSETS VARIABLES POTENTIALLY USED IN SCRIPT
 function unsetvars() {
@@ -83,6 +72,7 @@ function make_command() {
 
     unset MAKE_PARAMS
 }
+
 
 ################
 #              #
@@ -182,17 +172,12 @@ esac
 OUT_DIR=${SOURCE_DIR}/out/target/product/${DEVICE}
 
 
-#######################
-# START TRACKING TIME #
-#######################
-
-START=$( TZ=MST date +%s )
-
-
 ###########################
 # MOVE INTO SOURCE FOLDER #
+# AND START TRACKING TIME #
 ###########################
 
+START=$( TZ=MST date +%s )
 clear && cd ${SOURCE_DIR}
 
 
@@ -356,8 +341,8 @@ fi
 
 # PRINT THE TIME THE SCRIPT FINISHED
 # AND HOW LONG IT TOOK REGARDLESS OF SUCCESS
-echo -e ${RED}"TIME FINISHED: $( TZ=MST date +%D\ %r | awk '{print toupper($0)}' )"
-echo -e ${RED}"DURATION: $( echo $((${END}-${START})) | awk '{print int($1/60)" MINUTES AND "int($1%60)" SECONDS"}' )"${RESTORE}; newLine
+echo -e ${RED}"TIME: $( TZ=MST date +%D\ %r | awk '{print toupper($0)}' )"
+echo -e ${RED}"DURATION: $( format_time ${END} ${START} )"${RESTORE}; newLine
 
 
 ##################
@@ -368,7 +353,7 @@ echo -e ${RED}"DURATION: $( echo $((${END}-${START})) | awk '{print int($1/60)" 
 echo -e "\n$( TZ=MST date +%H:%M:%S ): ${BASH_SOURCE} ${PARAMS}" >> ${LOG}
 
 # BUILD <SUCCESSFUL|FAILED> IN # MINUTES AND # SECONDS
-echo -e "${BUILD_RESULT_STRING} IN $( echo $((${END}-${START})) | awk '{print int($1/60)" MINUTES AND "int($1%60)" SECONDS"}' )" >> ${LOG}
+echo -e "${BUILD_RESULT_STRING} IN $( format_time ${END} ${START} )" >> ${LOG}
 
 # ONLY ADD A LINE ABOUT FILE LOCATION IF SCRIPT COMPLETED SUCCESSFULLY
 if [[ ${SUCCESS} = true ]]; then

@@ -55,20 +55,8 @@ SCRIPTS_DIR=${TOOLCHAIN_HEAD}/Flash-TC/scripts
 #             #
 ###############
 
-# PRINTS A FORMATTED HEADER TO POINT OUT WHAT IS BEING DONE TO THE USER
-function echoText() {
-    echo -e ${RED}
-    echo -e "====$( for i in $( seq ${#1} ); do echo -e "=\c"; done )===="
-    echo -e "==  ${1}  =="
-    echo -e "====$( for i in $( seq ${#1} ); do echo -e "=\c"; done )===="
-    echo -e ${RESTORE}
-}
-
-
-# CREATES A NEW LINE IN TERMINAL
-function newLine() {
-    echo -e ""
-}
+# SOURCE OUR UNIVERSAL FUNCTIONS SCRIPT
+source $( dirname ${BASH_SOURCE} )/funcs.sh
 
 # BUILD FUNCTION
 function build() {
@@ -153,7 +141,7 @@ binutils source: https://github.com/Flash-TC/binutils" && git push --force
 #                #
 ##################
 
-clear
+clear && START=$( TZ=MST date +%s )
 
 # INIT THE REPOS IF IT DOESN'T EXISTS
 if [[ ! -d ${TOOLCHAIN_HEAD}/Flash-TC ]]; then
@@ -216,3 +204,16 @@ echoText "RUNNING BUILD SCRIPTS"
 
 build "aarch64-linux-android"
 build "arm-linux-androideabi"
+
+
+######################
+# ENDING INFORMATION #
+######################
+
+END=$( TZ=MST date +%s )
+
+# PRINT THE TIME THE SCRIPT FINISHED
+# AND HOW LONG IT TOOK REGARDLESS OF SUCCESS
+newLine; echoText "SCRIPT COMPLETED"; newLine
+echo -e ${RED}"TIME: $( TZ=MST date +%D\ %r | awk '{print toupper($0)}' )"
+echo -e "DURATION: $( format_time ${END} ${START} )"${RESTORE}; newLine

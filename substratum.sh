@@ -44,20 +44,8 @@ RESTORE="\033[0m"
 #             #
 ###############
 
-# PRINTS A FORMATTED HEADER TO POINT OUT WHAT IS BEING DONE TO THE USER
-function echoText() {
-    echo -e ${RED}
-    echo -e "====$( for i in $( seq ${#1} ); do echo -e "=\c"; done )===="
-    echo -e "==  ${1}  =="
-    echo -e "====$( for i in $( seq ${#1} ); do echo -e "=\c"; done )===="
-    echo -e ${RESTORE}
-}
-
-
-# CREATES A NEW LINE IN TERMINAL
-function newLine() {
-    echo -e ""
-}
+# SOURCE OUR UNIVERSAL FUNCTIONS SCRIPT
+source $( dirname ${BASH_SOURCE} )/funcs.sh
 
 
 ################
@@ -183,7 +171,7 @@ Please remember this is a debug APK so it is incompatible with the Play Store re
    fi
 
     # PRINT HOW LONG IT TOOK REGARDLESS OF SUCCESS
-    echo -e ${RED}"DURATION: $( echo $((${END}-${START})) | awk '{print int($1/60)" MINUTES AND "int($1%60)" SECONDS"}' )"${RESTORE}; newLine
+    echo -e ${RED}"DURATION: $( time_format ${END} ${START} )"${RESTORE}; newLine
 fi
 
 # MOVE BACK TO ORIGINAL DIRECTORY

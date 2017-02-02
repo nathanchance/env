@@ -45,20 +45,8 @@ RESTORE="\033[0m"
 #             #
 ###############
 
-# PRINTS A FORMATTED HEADER TO POINT OUT WHAT IS BEING DONE TO THE USER
-function echoText() {
-    echo -e ${RED}
-    echo -e "====$( for i in $( seq ${#1} ); do echo -e "=\c"; done )===="
-    echo -e "==  ${1}  =="
-    echo -e "====$( for i in $( seq ${#1} ); do echo -e "=\c"; done )===="
-    echo -e ${RESTORE}
-}
-
-
-# CREATES A NEW LINE IN TERMINAL
-function newLine() {
-    echo -e ""
-}
+# SOURCE OUR UNIVERSAL FUNCTIONS SCRIPT
+source $( dirname ${BASH_SOURCE} )/funcs.sh
 
 
 ################
