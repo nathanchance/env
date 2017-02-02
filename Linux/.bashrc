@@ -173,6 +173,11 @@ function rps {
                 ARGS+="prebuilts/gcc/linux-x86/arm/arm-linux-androideabi-6.x "
                 ARGS+="prebuilts/clang/host/linux-x86/3.9.1 "
                 ARGS+="prebuilts/clang/host/linux-x86/4.0.0" ;;
+            "gapps")
+                ARGS="vendor/google/build "
+                ARGS+="vendor/opengapps/sources/all "
+                ARGS+="vendor/opengapps/sources/arm "
+                ARGS+="vendor/opengapps/sources/arm64" ;;
             *)
                 ARGS=${1} ;;
         esac
