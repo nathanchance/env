@@ -175,13 +175,9 @@ if [[ $( ls ${OUT_DIR}/${COMP_FILE} 2>/dev/null | wc -l ) != "0" ]]; then
     # IMG_MOVE LOGIC #
     ##################
 
-    # MAKE IMG_MOVE IF IT DOESN'T EXIST OR CLEAN IT IF IT DOES
+    # MAKE IMG_MOVE IF IT DOESN'T EXIST
     if [[ ! -d "${IMG_MOVE}" ]]; then
         mkdir -p "${IMG_MOVE}"
-    else
-        echoText "CLEANING UPLOAD DIRECTORY"
-
-        rm -vrf "${IMG_MOVE}"/*${FILE_FORMAT}*
     fi
 
 
