@@ -251,6 +251,7 @@ echoText "MAKING KERNEL"
 # TAG THE HEAD COMMIT WITH THE VERSION FIRST IF IT'S A PUBLIC BUILD
 if [[ ${PRIVATE} != true ]]; then
     git tag -a "${ZIP_NAME}" -m "${ZIP_NAME}"
+    git push origin --tags
 fi
 
 # PROPERLY POINT COMPILER TO TOOLCHAIN AND ARCHITECTURE
