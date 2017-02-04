@@ -365,7 +365,7 @@ echo -e "\n$( TZ=MST date +%H:%M:%S ): ${BASH_SOURCE} ${PARAMS}" >> ${LOG}
 
 # BUILD <SUCCESSFUL|FAILED> IN # MINUTES AND # SECONDS
 if [[ -n ${BUILD_RESULT_STRING} ]]; then
-    echo -e "${BUILD_RESULT_STRING} IN \c"
+    echo -e "${BUILD_RESULT_STRING} IN \c" >> ${LOG}
 fi
 echo -e "$( format_time ${END} ${START} )" >> ${LOG}
 
