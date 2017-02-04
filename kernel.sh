@@ -314,6 +314,13 @@ if [[ $( ls ${KERNEL} 2>/dev/null | wc -l ) != "0" ]]; then
     mv ${ZIP_NAME}.zip "${ZIP_MOVE}"
 
 
+    ###################
+    # GENERATE MD5SUM #
+    ###################
+
+    md5sum "${ZIP_MOVE}"/${ZIP_NAME}.zip > "${ZIP_MOVE}"/${ZIP_NAME}.zip.md5sum
+
+
     # CLEAN ZIMAGE-DTB FROM ANYKERNEL FOLDER AFTER ZIPPING AND MOVING
     rm -rf "${ANYKERNEL_FOLDER}"/Image.gz-dtb
 
