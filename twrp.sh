@@ -190,6 +190,13 @@ if [[ $( ls ${OUT_DIR}/${COMP_FILE} 2>/dev/null | wc -l ) != "0" ]]; then
     mv -v ${OUT_DIR}/${COMP_FILE} "${IMG_MOVE}"/${UPLD_FILE}
 
 
+    ###################
+    # GENERATE MD5SUM #
+    ###################
+
+    md5sum "${IMG_MOVE}"/${UPLD_FILE} > "${IMG_MOVE}"/${UPLD_FILE}.md5sum
+
+
 ###################
 # IF BUILD FAILED #
 ###################
