@@ -248,6 +248,11 @@ fi
 
 echoText "MAKING KERNEL"
 
+# TAG THE HEAD COMMIT WITH THE VERSION FIRST IF IT'S A PUBLIC BUILD
+if [[ ${PRIVATE} != true ]]; then
+    git tag -a "${ZIP_NAME}" -m "${ZIP_NAME}"
+fi
+
 # PROPERLY POINT COMPILER TO TOOLCHAIN AND ARCHITECTURE
 export CROSS_COMPILE=${TOOLCHAIN_FOLDER}/bin/${TOOLCHAIN_PREFIX}
 export ARCH=${ARCHITECTURE}
@@ -277,7 +282,7 @@ if [[ $( ls ${KERNEL} 2>/dev/null | wc -l ) != "0" ]]; then
     #####################
 
     newLine; echoText "MOVING $( echo ${KERNEL_IMAGE} | awk '{print toupper($0)}' ) ($( du -h "${KERNEL}" | awk '{print $1}' ))"
-    cp "${KERNEL}" "${ANYKERNEL_FOLDER}"/zImage-dtb
+    cp "${KERNEL}" "${ANYKERNEL_FOLDER}"
 
     # MAKE ZIP_FORMAT VARIABLE
     ZIP_FORMAT=F*.zip
@@ -309,7 +314,7 @@ if [[ $( ls ${KERNEL} 2>/dev/null | wc -l ) != "0" ]]; then
 
 
     # CLEAN ZIMAGE-DTB FROM ANYKERNEL FOLDER AFTER ZIPPING AND MOVING
-    rm -rf "${ANYKERNEL_FOLDER}"/zImage-dtb
+    rm -rf "${ANYKERNEL_FOLDER}"/Image.gz-dtb
 
 
 ###################
