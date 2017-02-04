@@ -353,7 +353,10 @@ echo -e ${RED}"DURATION: $( format_time ${END} ${START} )"${RESTORE}; newLine
 echo -e "\n$( TZ=MST date +%H:%M:%S ): ${BASH_SOURCE} ${PARAMS}" >> ${LOG}
 
 # BUILD <SUCCESSFUL|FAILED> IN # MINUTES AND # SECONDS
-echo -e "${BUILD_RESULT_STRING} IN $( format_time ${END} ${START} )" >> ${LOG}
+if [[ -n ${BUILD_RESULT_STRING} ]]; then
+    echo -e "${BUILD_RESULT_STRING} IN \c"
+fi
+echo -e "$( format_time ${END} ${START} )" >> ${LOG}
 
 # ONLY ADD A LINE ABOUT FILE LOCATION IF SCRIPT COMPLETED SUCCESSFULLY
 if [[ ${SUCCESS} = true ]]; then
