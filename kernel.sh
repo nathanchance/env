@@ -292,7 +292,7 @@ if [[ $( ls ${KERNEL} 2>/dev/null | wc -l ) != "0" ]]; then
     if [[ ! -d "${ZIP_MOVE}" ]]; then
         mkdir -p "${ZIP_MOVE}"
     elif [[ ${PRIVATE} = true ]]; then
-        rm -rf "${ZIP_MOVE}"/${ZIP_FORMAT}
+        rm -rf "${ZIP_MOVE}"/${ZIP_FORMAT}*
     fi
 
     # MOVE TO ANYKERNEL FOLDER
