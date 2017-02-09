@@ -96,7 +96,7 @@ case "${DEVICE}" in
     "bullhead"|"shamu")
         KERNEL_BRANCH=release-${ANDROID_VERSION} ;;
     "angler")
-        KERNEL_BRANCH=n${ANDROID_VERSION} ;;
+        KERNEL_BRANCH=n${ANDROID_VERSION}-flash ;;
 esac
 
 ###############
@@ -161,10 +161,11 @@ case "${KERNEL_TYPE}" in
     "personal")
         if [[ ${PRIVATE} != true ]]; then
             ZIP_MOVE=${ZIP_MOVE_HEAD}/Kernels/${DEVICE}/${ANDROID_VERSION}/Personal
+            ANYKERNEL_BRANCH=${DEVICE}-flash-personal-${ANDROID_VERSION}
         else
             ZIP_MOVE=${ZIP_MOVE_HEAD}/.superhidden/Kernels
-        fi
-        ANYKERNEL_BRANCH=${DEVICE}-flash-personal-${ANDROID_VERSION} ;;
+            ANYKERNEL_BRANCH=${DEVICE}-flash-personal-${ANDROID_VERSION}-new
+        fi ;;
 esac
 
 THREADS=-j$(grep -c ^processor /proc/cpuinfo)
