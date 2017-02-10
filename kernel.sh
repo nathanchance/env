@@ -183,8 +183,12 @@ START=$( TZ=MST date +"%s" )
 
 
 # SILENTLY SHIFT KERNEL BRANCHES
-clear && cd "${SOURCE_FOLDER}" && git checkout ${KERNEL_BRANCH} > /dev/null 2>&1
+clear && cd "${SOURCE_FOLDER}"
 
+# ONLY CHECKOUT IF WE ARE NOT CURRENTLY BISECTING
+if [[ ! $(git status | grep "bisect") ]]; then
+    git checkout ${KERNEL_BRANCH} > /dev/null 2>&1
+fi
 
 # SET KERNEL VERSION FROM MAKEFILE
 KERNEL_VERSION=$( grep -r "EXTRAVERSION = -" ${SOURCE_FOLDER}/Makefile | sed 's/^.*F/F/' )
