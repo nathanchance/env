@@ -185,8 +185,8 @@ START=$( TZ=MST date +"%s" )
 # SILENTLY SHIFT KERNEL BRANCHES
 clear && cd "${SOURCE_FOLDER}"
 
-# ONLY CHECKOUT IF WE ARE NOT CURRENTLY BISECTING
-if [[ ! $(git status | grep "bisect") ]]; then
+# ONLY CHECKOUT IF WE ARE NOT CURRENTLY BISECTING OR REBASING
+if [[ ! $(git status | grep "bisect\|rebase") ]]; then
     git checkout ${KERNEL_BRANCH} > /dev/null 2>&1
 fi
 
