@@ -26,8 +26,7 @@
 
 # PURPOSE: Build Flash Kernel and package it into a flashable zip
 # USAGE:
-# $ kernel.sh <angler|shamu> <release|staging> <tcupdate>
-# $ kernel.sh me <tcupdate>
+# $ kernel.sh <private> <tc> <tctype>
 
 
 ############
@@ -57,30 +56,33 @@ source $( dirname ${BASH_SOURCE} )/funcs.sh
 #              #
 ################
 
-# DEVICE (STRING): which device we are compiling for
-# KERNEL_TYPE (STRING): the type of build we are compiling
-# ANDROID_VERSION (STRING): Android version we are compiling for
-# TCUPDATE (T/F): whether or not we are updating the toolchain before compiling
-
+# UNSET PREVIOUSLY USED VARIABLES IN CASE SCRIPT WAS SOURCED
 unset LOCALVERSION
 unset PRIVATE
+unset TOOLCHAIN_NAME
 SUCCESS=false
 
+# DEFINE NECESSARY VARIABLES
+DEVICE=angler
+KERNEL_BRANCH=n7.1.1-flash
+
+# GATHER PARAMETERS
 while [[ $# -ge 1 ]]; do
     case "${1}" in
-        "me")
-            DEVICE=angler
-            KERNEL_TYPE=personal
-            ANDROID_VERSION=7.1.1
-            export LOCALVERSION=-$( TZ=MST date +%Y%m%d ) ;;
-        "shamu"|"angler"|"bullhead")
-            DEVICE=${1} ;;
-        "staging"|"release"|"testing"|"eas")
-            KERNEL_TYPE=${1} ;;
-        "7.1.1")
-            ANDROID_VERSION=${1} ;;
         "private")
             PRIVATE=true ;;
+        "tc")
+            shift
+            if [[ $# -ge 1 ]]; then
+                case "${1}" in
+                    "4.9")
+                        TOOLCHAIN_NAME=AOSP-4.9 ;;
+                    *)
+                        echo "Invalid TC type!" ;;
+                esac
+            else
+                echo "Please specify a TC type!" && exit
+            fi ;;
         *)
             echo "Invalid parameter" && exit ;;
     esac
@@ -88,16 +90,10 @@ while [[ $# -ge 1 ]]; do
     shift
 done
 
-if [[ -z ${DEVICE} || -z ${KERNEL_TYPE} || -z ${ANDROID_VERSION} ]]; then
+if [[ -z ${DEVICE} || -z ${KERNEL_BRANCH} ]]; then
     echo "You did not specify a necessary parameter!" && exit
 fi
 
-case "${DEVICE}" in
-    "bullhead"|"shamu")
-        KERNEL_BRANCH=release-${ANDROID_VERSION} ;;
-    "angler")
-        KERNEL_BRANCH=n${ANDROID_VERSION}-flash ;;
-esac
 
 ###############
 #             #
@@ -128,45 +124,22 @@ KERNEL_HEAD=${ANDROID_HEAD}/Kernels
 ZIP_MOVE_HEAD=${HOME}/Web
 TOOLCHAIN_HEAD=${HOME}/Toolchains/Prebuilts
 ANYKERNEL_FOLDER=${KERNEL_HEAD}/anykernel
-
 DEFCONFIG=flash_defconfig
-
-case "${DEVICE}" in
-    "angler"|"bullhead")
-        SOURCE_FOLDER=${KERNEL_HEAD}/${DEVICE}
-        ARCHITECTURE=arm64
-        KERNEL_IMAGE=Image.gz-dtb
-        TOOLCHAIN_PREFIX=aarch64-linux-android-
-        TOOLCHAIN_NAME=${TOOLCHAIN_PREFIX}6.x
-        TOOLCHAIN_FOLDER=${TOOLCHAIN_HEAD}/${TOOLCHAIN_NAME} ;;
-    "shamu")
-        SOURCE_FOLDER=${KERNEL_HEAD}/${DEVICE}
-        ARCHITECTURE=arm
-        KERNEL_IMAGE=zImage-dtb
-        TOOLCHAIN_PREFIX=arm-eabi-
-        TOOLCHAIN_NAME=${TOOLCHAIN_PREFIX}6.x
-        TOOLCHAIN_FOLDER=${TOOLCHAIN_HEAD}/${TOOLCHAIN_NAME} ;;
-esac
-
-case "${KERNEL_TYPE}" in
-    "staging")
-        ZIP_MOVE=${ZIP_MOVE_HEAD}/Kernels/${DEVICE}/${ANDROID_VERSION}/Beta
-        ANYKERNEL_BRANCH=${DEVICE}-flash-release-${ANDROID_VERSION} ;;
-    "release")
-        ZIP_MOVE=${ZIP_MOVE_HEAD}/Kernels/${DEVICE}/${ANDROID_VERSION}/Stable
-        ANYKERNEL_BRANCH=${DEVICE}-flash-release-${ANDROID_VERSION} ;;
-    "testing")
-        ZIP_MOVE=${ZIP_MOVE_HEAD}/Kernels/${DEVICE}/${ANDROID_VERSION}/Testing
-        ANYKERNEL_BRANCH=${DEVICE}-flash-release-${ANDROID_VERSION} ;;
-    "personal")
-        if [[ ${PRIVATE} != true ]]; then
-            ZIP_MOVE=${ZIP_MOVE_HEAD}/Kernels/${DEVICE}/${ANDROID_VERSION}/Personal
-            ANYKERNEL_BRANCH=${DEVICE}-flash-personal-${ANDROID_VERSION}
-        else
-            ZIP_MOVE=${ZIP_MOVE_HEAD}/.superhidden/Kernels
-            ANYKERNEL_BRANCH=${DEVICE}-flash-personal-${ANDROID_VERSION}-new
-        fi ;;
-esac
+SOURCE_FOLDER=${KERNEL_HEAD}/${DEVICE}
+ARCHITECTURE=arm64
+KERNEL_IMAGE=Image.gz-dtb
+TOOLCHAIN_PREFIX=aarch64-linux-android-
+if [[ -z ${TOOLCHAIN_NAME} ]]; then
+    TOOLCHAIN_NAME=${TOOLCHAIN_PREFIX}6.x
+fi
+TOOLCHAIN_FOLDER=${TOOLCHAIN_HEAD}/${TOOLCHAIN_NAME}
+if [[ ${PRIVATE} != true ]]; then
+    ZIP_MOVE=${ZIP_MOVE_HEAD}/Kernels/${DEVICE}/${ANDROID_VERSION}/Personal
+    ANYKERNEL_BRANCH=${DEVICE}-flash-personal-7.1.1
+else
+    ZIP_MOVE=${ZIP_MOVE_HEAD}/.superhidden/Kernels
+    ANYKERNEL_BRANCH=${DEVICE}-flash-personal-7.1.1-new
+fi
 
 THREADS=-j$(grep -c ^processor /proc/cpuinfo)
 KERNEL=${SOURCE_FOLDER}/arch/${ARCHITECTURE}/boot/${KERNEL_IMAGE}
@@ -192,12 +165,14 @@ fi
 
 # SET KERNEL VERSION FROM MAKEFILE
 KERNEL_VERSION=$( grep -r "EXTRAVERSION = -" ${SOURCE_FOLDER}/Makefile | sed 's/^.*F/F/' )
-case ${KERNEL_TYPE} in
-    "personal")
-        ZIP_NAME=${KERNEL_VERSION}${LOCALVERSION}-$( TZ=MST date +%H%M ) ;;
-    *)
-        ZIP_NAME=${KERNEL_VERSION} ;;
-esac
+
+# CONDITIONALLY DEFINE ZIP NAME
+if [[ -n ${KERNEL_VERSION} ]]; then
+    export LOCALVERSION=-$( TZ=MST date +%Y%m%d )
+    ZIP_NAME=${KERNEL_VERSION}${LOCALVERSION}-$( TZ=MST date +%H%M )
+else
+    ZIP_NAME=FLASH-N6P-$( TZ=MST date +%Y%m%d-%H%M )
+fi
 
 
 ###################
@@ -232,19 +207,7 @@ echoText "CLEANING UP"
 # Cleaning of AnyKernel directory
 cd "${ANYKERNEL_FOLDER}"
 git checkout ${ANYKERNEL_BRANCH}
-if [[ "${KERNEL_TYPE}" != "personal" ]]; then
-    git reset --hard origin/${ANYKERNEL_BRANCH}
-    git clean -f -d -x > /dev/null 2>&1
-else
-    rm -rf ${KERNEL_IMAGE}
-fi
-
-# Cleaning of kernel directory
-cd "${SOURCE_FOLDER}"
-if [[ "${KERNEL_TYPE}" != "personal" ]]; then
-    git reset --hard origin/${KERNEL_BRANCH}
-    git clean -f -d -x > /dev/null 2>&1; newLine
-fi
+rm -rf ${KERNEL_IMAGE}
 
 
 #################
@@ -252,6 +215,8 @@ fi
 #################
 
 echoText "MAKING KERNEL"
+
+cd "${SOURCE_FOLDER}"
 
 # TAG THE HEAD COMMIT WITH THE VERSION FIRST IF IT'S A PUBLIC BUILD
 if [[ ${PRIVATE} != true ]]; then
