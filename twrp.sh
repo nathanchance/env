@@ -59,7 +59,7 @@ source $( dirname ${BASH_SOURCE} )/funcs.sh
 DEVICE=angler
 
 # DIRECTORIES
-SOURCE_DIR=${HOME}/ROMs/Omni
+SOURCE_DIR=${HOME}/TWRP
 OUT_DIR=${SOURCE_DIR}/out/target/product/${DEVICE}
 IMG_MOVE=${HOME}/Web/TWRP
 
@@ -67,7 +67,8 @@ IMG_MOVE=${HOME}/Web/TWRP
 # Version 1: f2fs-tools bumped to 1.7.0, TWRP app removed
 # Version 2: f2fs-tools bumped to 1.8.0
 # Version 3: Revert f2fs-tools back to 1.7.0
-export TW_DEVICE_VERSION=3
+# Version 4: Build off of Omni's 6.0 branch so everything works!
+export TW_DEVICE_VERSION=4
 VERSION=$( grep "TW_MAIN_VERSION_STR" ${SOURCE_DIR}/bootable/recovery/variables.h -m 1 | cut -d \" -f2 )-${TW_DEVICE_VERSION}
 
 # FILE NAMES
