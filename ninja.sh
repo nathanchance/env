@@ -132,9 +132,7 @@ if [[ "${MODE}" == "install" || "${MODE}" == "both" ]]; then
     echoText "UPDATING NINJA IN PREBUILTS/BUILD-TOOLS"
     cd ${ROM_SOURCE}/prebuilts/build-tools
     git checkout n7.1.1
-    rm -rf linux-x86/asan/bin/ninja
     rm -rf linux-x86/bin/ninja
-    cp -v ${NINJA_SOURCE}/ninja linux-x86/asan/bin/ninja
     cp -v ${NINJA_SOURCE}/ninja linux-x86/bin/ninja
     git add -A && git commit --signoff -m "Ninja $( ./linux-x86/bin/ninja --version ): $( date +%Y%m%d )
 
