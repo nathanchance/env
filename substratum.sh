@@ -171,7 +171,7 @@ Please remember this is a debug APK so it is incompatible with the Play Store re
    fi
 
     # PRINT HOW LONG IT TOOK REGARDLESS OF SUCCESS
-    echo -e ${RED}"DURATION: $( time_format ${END} ${START} )"${RESTORE}; newLine
+    echo -e ${RED}"DURATION: $( format_time ${END} ${START} )"${RESTORE}; newLine
 fi
 
 # MOVE BACK TO ORIGINAL DIRECTORY
