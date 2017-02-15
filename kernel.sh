@@ -121,7 +121,7 @@ fi
 
 ANDROID_HEAD=${HOME}
 KERNEL_HEAD=${ANDROID_HEAD}/Kernels
-ZIP_MOVE_HEAD=${HOME}/Web/Downloads/
+ZIP_MOVE_HEAD=${HOME}/Web/Downloads
 TOOLCHAIN_HEAD=${HOME}/Toolchains/Prebuilts
 ANYKERNEL_FOLDER=${KERNEL_HEAD}/anykernel
 DEFCONFIG=flash_defconfig
