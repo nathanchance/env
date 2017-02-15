@@ -118,6 +118,8 @@ function build() {
     cd ${REPO}/bin
     VERSION=$( ./${1}-gcc --version | grep ${1} | cut -d ' ' -f 3 )
     GCC_DATE=$( ./${1}-gcc --version | grep ${1} | cut -d ' ' -f 4 )
+    HOST_GCC_VERSION=$( gcc --version | awk '/gcc/ {print $3}' )
+    HOST_GCC_DATE=$( gcc --version | awk '/gcc/ {print $4}' )
     cd ..
     git add .
     git commit --signoff -m "${1} ${VERSION}: ${GCC_DATE}
@@ -125,7 +127,7 @@ function build() {
 Compiled on $( source /etc/os-release; echo ${PRETTY_NAME} ) $( uname -m )
 
 Kernel version: $( uname -rv )
-gcc version: $( gcc --version | awk '/gcc/ {print $3 $4}' )
+gcc version: ${HOST_GCC_VERSION} ${HOST_GCC_DATE}
 Make version: $( make --version  | awk '/Make/ {print $3}' )
 
 Manifest: https://github.com/Flash-TC/manifest/tree/gcc
