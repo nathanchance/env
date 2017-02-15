@@ -56,7 +56,7 @@ source $( dirname ${BASH_SOURCE} )/funcs.sh
 
 while [[ $# -ge 1 ]]; do
     case "${1}" in
-        "build"|"both"|"update")
+        "build"|"push"|"both")
             PARAM=${1} ;;
         *)
             echo "Invalid parameter" && exit ;;
@@ -83,11 +83,8 @@ START=$( TZ=MST date +%s )
 # SET VARIABLES
 if [[ -f /etc/arch-release ]]; then
     SOURCE_DIR=${HOME}/Repos/substratum
-    APK_MOVE=${HOME}/ROMs/Flash/vendor_flash/prebuilt/app/Substratum
-    SECOND_MOVE=${HOME}/Web/.superhidden/APKs
 else
     SOURCE_DIR=${HOME}/Documents/Repos/substratum
-    APK_MOVE=${HOME}/Documents/Android/FlashROM/vendor_flash/prebuilt/app/Substratum
 fi
 OUT_DIR=${SOURCE_DIR}/app/build/outputs/apk
 APK_FORMAT=*ubstratum*.apk
@@ -103,14 +100,9 @@ CURRENT_DIR=$( pwd )
 cd "${SOURCE_DIR}"
 
 # UPDATE REPO IF REQUESTED
-if [[ "${PARAM}" == "update" || "${PARAM}" == "both" ]]; then
+if [[ "${PARAM}" == "build" || "${PARAM}" == "both" ]]; then
     echoText "UPDATING SOURCE"
     git pull && git pull upstream dev --rebase && git push --force
-fi
-
-if [[ "${PARAM}" == "build" || "${PARAM}" == "both" ]]; then
-    COMMIT_HASH=$( git log -1 --format=%H )
-    VERSION=$( awk '/versionCode/{i++}i==2{print $2; exit}' "${SOURCE_DIR}"/app/build.gradle )
 
     # CLEAN PREVIOUS BUILD
     echoText "CLEANING BUILD"
@@ -120,10 +112,29 @@ if [[ "${PARAM}" == "build" || "${PARAM}" == "both" ]]; then
     echoText "BUILDING APK"
     ./gradlew assembleDebug
 
+    APK_MOVE=${OUT_DIR}
+
     # IF THE APK WAS FOUND, MOVE IT
     if [[ $( ls "${OUT_DIR}"/${APK_FORMAT} 2>/dev/null | wc -l ) != "0" ]]; then
         RESULT_STRING="BUILD SUCCESSFUL"
+    else
+        RESULT_STRING="BUILD FAILED"
+    fi
+fi
 
+if [[ "${PARAM}" == "push" || "${PARAM}" == "both" ]]; then
+    COMMIT_HASH=$( git log -1 --format=%H )
+    VERSION=$( awk '/versionCode/{i++}i==2{print $2; exit}' "${SOURCE_DIR}"/app/build.gradle )
+
+    if [[ -f /etc/arch-release ]]; then
+        APK_MOVE=${HOME}/ROMs/Flash/vendor_flash/prebuilt/app/Substratum
+        SECOND_MOVE=${HOME}/Web/.superhidden/APKs
+    else
+        APK_MOVE=${HOME}/Documents/Android/FlashROM/vendor_flash/prebuilt/app/Substratum
+    fi
+
+    # IF THE APK WAS FOUND, MOVE IT
+    if [[ $( ls "${OUT_DIR}"/${APK_FORMAT} 2>/dev/null | wc -l ) != "0" ]]; then
         # CLEAN/MAKE APK_MOVE
         if [[ -d "${APK_MOVE}" ]]; then
             rm -vrf "${APK_MOVE}"/${APK_FORMAT}
@@ -153,26 +164,24 @@ Please remember this is a debug APK so it is incompatible with the Play Store re
 
         # PUSH IT
         git push
-
-   # OTHERWISE, REPORT IT!
-   else
-       RESULT_STRING="BUILD FAILED"
-   fi
-
-   # END TIME TRACKING
-   END=$( TZ=MST date +%s )
-
-   # PRINT RESULT
-   # IF THE BUILD WAS SUCCESSFUL, PRINT FILE LOCATION AND SIZE
-   newLine; echoText "${RESULT_STRING}!"
-   if [[ ${RESULT_STRING} == "BUILD SUCCESSFUL" ]]; then
-        echo -e ${RED}"FILE LOCATION: $( ls "${APK_MOVE}"/${APK_FORMAT} )"
-        echo -e "SIZE: $( du -h "${APK_MOVE}"/${APK_FORMAT} | awk '{print $1}' )"${RESTORE}
-   fi
-
-    # PRINT HOW LONG IT TOOK REGARDLESS OF SUCCESS
-    echo -e ${RED}"DURATION: $( format_time ${END} ${START} )"${RESTORE}; newLine
+    else
+        echo "Substratum APK was not found; please run the script and use the build option!" && exit
+    fi
 fi
+
+# END TIME TRACKING
+END=$( TZ=MST date +%s )
+
+# PRINT RESULT
+# IF THE BUILD WAS SUCCESSFUL, PRINT FILE LOCATION AND SIZE
+newLine; echoText "${RESULT_STRING}!"
+if [[ ${RESULT_STRING} == "BUILD SUCCESSFUL" ]]; then
+     echo -e ${RED}"FILE LOCATION: $( ls "${APK_MOVE}"/${APK_FORMAT} )"
+     echo -e "SIZE: $( du -h "${APK_MOVE}"/${APK_FORMAT} | awk '{print $1}' )"${RESTORE}
+fi
+
+ # PRINT HOW LONG IT TOOK REGARDLESS OF SUCCESS
+ echo -e ${RED}"DURATION: $( format_time ${END} ${START} )"${RESTORE}; newLine
 
 # MOVE BACK TO ORIGINAL DIRECTORY
 cd ${CURRENT_DIR}
