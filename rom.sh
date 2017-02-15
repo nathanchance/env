@@ -372,7 +372,7 @@ echo -e "$( format_time ${END} ${START} )" >> ${LOG}
 # ONLY ADD A LINE ABOUT FILE LOCATION IF SCRIPT COMPLETED SUCCESSFULLY
 if [[ ${SUCCESS} = true ]]; then
     # FILE LOCATION: <PATH>
-    echo -e "FILE LOCATION: $( ls ${ZIP_MOVE}/${ZIP_FORMAT} )" >> ${LOG}
+    echo -e "FILE LOCATION: $( ls ${ZIP_MOVE}/*.zip )" >> ${LOG}
 fi
 
 
