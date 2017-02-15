@@ -145,7 +145,7 @@ fi
 # SOURCE_DIR: Directory that holds the ROM source
 # ZIP_MOVE: Directory to hold completed ROM zips
 ANDROID_DIR=${HOME}
-ZIP_MOVE_PARENT=${HOME}/Web/.superhidden/ROMs
+ZIP_MOVE_PARENT=${HOME}/Web/Downloads/.superhidden/ROMs
 
 # Otherwise, define them for our various ROMs
 case "${ROM}" in

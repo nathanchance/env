@@ -121,7 +121,7 @@ fi
 
 ANDROID_HEAD=${HOME}
 KERNEL_HEAD=${ANDROID_HEAD}/Kernels
-ZIP_MOVE_HEAD=${HOME}/Web
+ZIP_MOVE_HEAD=${HOME}/Web/Downloads/
 TOOLCHAIN_HEAD=${HOME}/Toolchains/Prebuilts
 ANYKERNEL_FOLDER=${KERNEL_HEAD}/anykernel
 DEFCONFIG=flash_defconfig
@@ -134,7 +134,7 @@ if [[ -z ${TOOLCHAIN_NAME} ]]; then
 fi
 TOOLCHAIN_FOLDER=${TOOLCHAIN_HEAD}/${TOOLCHAIN_NAME}
 if [[ ${PRIVATE} != true ]]; then
-    ZIP_MOVE=${ZIP_MOVE_HEAD}/Kernels/${DEVICE}/${ANDROID_VERSION}/Personal
+    ZIP_MOVE=${ZIP_MOVE_HEAD}/Kernels
     ANYKERNEL_BRANCH=${DEVICE}-flash-personal-7.1.1
 else
     ZIP_MOVE=${ZIP_MOVE_HEAD}/.superhidden/Kernels

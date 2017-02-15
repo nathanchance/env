@@ -61,7 +61,7 @@ DEVICE=angler
 # DIRECTORIES
 SOURCE_DIR=${HOME}/TWRP
 OUT_DIR=${SOURCE_DIR}/out/target/product/${DEVICE}
-IMG_MOVE=${HOME}/Web/TWRP
+IMG_MOVE=${HOME}/Web/Downloads/TWRP
 
 # TWRP version
 # Version 1: f2fs-tools bumped to 1.7.0, TWRP app removed

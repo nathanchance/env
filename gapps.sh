@@ -84,7 +84,7 @@ fi
 ###############
 
 ANDROID_DIR=${HOME}
-ZIP_MOVE=${HOME}/Web/.superhidden/GApps
+ZIP_MOVE=${HOME}/Web/Downloads/.superhidden/GApps
 
 # Type logic
 case ${TYPE} in

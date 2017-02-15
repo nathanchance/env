@@ -128,7 +128,7 @@ if [[ "${PARAM}" == "push" || "${PARAM}" == "both" ]]; then
 
     if [[ -f /etc/arch-release ]]; then
         APK_MOVE=${HOME}/ROMs/Flash/vendor_flash/prebuilt/app/Substratum
-        SECOND_MOVE=${HOME}/Web/.superhidden/APKs
+        SECOND_MOVE=${HOME}/Web/Downloads/.superhidden/Substratum
     else
         APK_MOVE=${HOME}/Documents/Android/FlashROM/vendor_flash/prebuilt/app/Substratum
     fi
