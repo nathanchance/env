@@ -53,7 +53,7 @@ source $( dirname ${BASH_SOURCE} )/funcs.sh
 # UNSETS VARIABLES POTENTIALLY USED IN SCRIPT
 function unsetvars() {
     unset ROM_BUILD_TYPE SUBSTRATUM LOCALVERSION BUILD_TAG
-    unset SYNC PERSONAL SUCCESS CLEAN_TYPE MAKE_TYPE PARAMS
+    unset SYNC PERSONAL SUCCESS CLEAN_TYPE MAKE_TYPE PARAMS HAS_ROOT
 }
 
 # CHECKS IF MKA EXISTS
@@ -98,6 +98,8 @@ while [[ $# -ge 1 ]]; do
             SYNC=true ;;
         "nosubs")
             export SUBSTRATUM=false ;;
+        "noroot")
+            export HAS_ROOT=false ;;
         "type")
             shift
             if [[ $# -ge 1 ]]; then
