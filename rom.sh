@@ -52,7 +52,7 @@ source $( dirname ${BASH_SOURCE} )/funcs.sh
 
 # UNSETS VARIABLES POTENTIALLY USED IN SCRIPT
 function unsetvars() {
-    unset ROM_BUILD_TYPE SUBSTRATUM LOCALVERSION BUILD_TAG
+    unset ROM_BUILD_TYPE SUBSTRATUM LOCALVERSION BUILD_TAG PIXELICONS
     unset SYNC PERSONAL SUCCESS CLEAN_TYPE MAKE_TYPE PARAMS HAS_ROOT
 }
 
@@ -86,20 +86,12 @@ while [[ $# -ge 1 ]]; do
     PARAMS+="${1} "
 
     case "${1}" in
-        "me")
-            ROM=flash
-            DEVICE=angler
-            export LOCALVERSION=-$( TZ=MST date +%Y%m%d ) ;;
         "shamu"|"angler"|"bullhead"|"hammerhead"|"marlin"|"sailfish")
             DEVICE=${1} ;;
         "abc"|"aosip"|"du"|"flash"|"krexus"|"pn")
             ROM=${1} ;;
         "sync")
             SYNC=true ;;
-        "nosubs")
-            export SUBSTRATUM=false ;;
-        "noroot")
-            export HAS_ROOT=false ;;
         "type")
             shift
             if [[ $# -ge 1 ]]; then
@@ -124,6 +116,23 @@ while [[ $# -ge 1 ]]; do
             else
                 echo "Please specify a make item!" && exit
             fi ;;
+        "nosubs")
+            export SUBSTRATUM=false ;;
+        "noroot")
+            export HAS_ROOT=false ;;
+        "noicons")
+            export PIXELICONS=false ;;
+        "me")
+            ROM=flash
+            DEVICE=angler
+            export LOCALVERSION=-$( TZ=MST date +%Y%m%d ) ;;
+        "nick")
+            ROM=flash
+            DEVICE=angler
+            export LOCALVERSION=-$( TZ=MST date +%Y%m%d )
+            export SUBSTRATUM=false
+            export HAS_ROOT=false
+            export PIXELICONS=false ;;
         *)
             echo "Invalid parameter detected!" && exit ;;
     esac
