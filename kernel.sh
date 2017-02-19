@@ -60,6 +60,7 @@ source $( dirname ${BASH_SOURCE} )/funcs.sh
 unset LOCALVERSION
 unset PRIVATE
 unset TOOLCHAIN_NAME
+unset DEFCONFIG
 SUCCESS=false
 
 # DEFINE NECESSARY VARIABLES
@@ -82,6 +83,13 @@ while [[ $# -ge 1 ]]; do
                 esac
             else
                 echo "Please specify a TC type!" && exit
+            fi ;;
+        "defconfig")
+            shift
+            if [[ $# -ge 1 ]]; then
+                DEFCONFIG=${1}
+            else
+                echo "Please specify a defconfig!" && exit
             fi ;;
         *)
             echo "Invalid parameter" && exit ;;
@@ -124,7 +132,9 @@ KERNEL_HEAD=${ANDROID_HEAD}/Kernels
 ZIP_MOVE_HEAD=${HOME}/Web/Downloads
 TOOLCHAIN_HEAD=${HOME}/Toolchains/Prebuilts
 ANYKERNEL_FOLDER=${KERNEL_HEAD}/anykernel
-DEFCONFIG=flash_defconfig
+if [[ -z ${DEFCONFIG} ]]; then
+    DEFCONFIG=flash_defconfig
+fi
 SOURCE_FOLDER=${KERNEL_HEAD}/${DEVICE}
 ARCHITECTURE=arm64
 KERNEL_IMAGE=Image.gz-dtb
