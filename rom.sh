@@ -117,22 +117,37 @@ while [[ $# -ge 1 ]]; do
                 echo "Please specify a make item!" && exit
             fi ;;
         "nosubs")
-            export SUBSTRATUM=false ;;
+            export HAS_SUBSTRATUM=false ;;
         "noroot")
             export HAS_ROOT=false ;;
         "noicons")
-            export PIXELICONS=false ;;
+            export HAS_ROUNDICONS=false ;;
+        "nogapps")
+            export HAS_GAPPS=false ;;
         "me")
             ROM=flash
-            DEVICE=angler
+            shift
+            if [[ $# -ge 1 ]]; then
+                PARAMS+="${1} "
+                DEVICE=${1}
+            else
+                DEVICE=angler
+            fi
             export LOCALVERSION=-$( TZ=MST date +%Y%m%d ) ;;
-        "nick")
+        "plain")
             ROM=flash
-            DEVICE=angler
+            shift
+            if [[ $# -ge 1 ]]; then
+                PARAMS+="${1} "
+                DEVICE=${1}
+            else
+                DEVICE=angler
+            fi
             export LOCALVERSION=-$( TZ=MST date +%Y%m%d )
-            export SUBSTRATUM=false
+            export HAS_SUBSTRATUM=false
             export HAS_ROOT=false
-            export PIXELICONS=false ;;
+            export HAS_ROUNDICONS=false
+            export HAS_GAPPS=false ;;
         *)
             echo "Invalid parameter detected!" && exit ;;
     esac
