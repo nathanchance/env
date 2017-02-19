@@ -206,6 +206,7 @@ echoText "RUNNING BUILD SCRIPTS"
 
 build "aarch64-linux-android"
 build "arm-linux-androideabi"
+build "arm-eabi"
 
 
 ######################
