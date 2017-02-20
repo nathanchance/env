@@ -24,8 +24,8 @@
 #         #
 ###########
 
-# PURPOSE: Build F2FS TWRP for Angler
-# USAGE: $ bash twrp.sh
+# PURPOSE: Build F2FS TWRP for Angler/Shamu
+# USAGE: $ bash twrp.sh <device>
 
 
 ############
@@ -49,41 +49,13 @@ RESTORE="\033[0m"
 source $( dirname ${BASH_SOURCE} )/funcs.sh
 
 
-###############
-#             #
-#  VARIABLES  #
-#             #
-###############
-
-# DEVICE
-DEVICE=angler
-
-# DIRECTORIES
-SOURCE_DIR=${HOME}/TWRP
-OUT_DIR=${SOURCE_DIR}/out/target/product/${DEVICE}
-IMG_MOVE=${HOME}/Web/Downloads/TWRP
-
-# TWRP version
-# Version 1: f2fs-tools bumped to 1.7.0, TWRP app removed
-# Version 2: f2fs-tools bumped to 1.8.0
-# Version 3: Revert f2fs-tools back to 1.7.0
-# Version 4: Build off of Omni's 6.0 branch so everything works!
-export TW_DEVICE_VERSION=4
-VERSION=$( grep "TW_MAIN_VERSION_STR" ${SOURCE_DIR}/bootable/recovery/variables.h -m 1 | cut -d \" -f2 )-${TW_DEVICE_VERSION}
-
-# FILE NAMES
-COMP_FILE=recovery.img
-UPLD_FILE=twrp-${VERSION}-${DEVICE}-f2fs-$( TZ=MST date +%Y%m%d ).img
-FILE_FORMAT=twrp-*-${DEVICE}*
-
-
 ################
 #              #
 #  PARAMETERS  #
 #              #
 ################
 
-unset SYNC
+unset SYNC DEVICE
 
 while [[ $# -ge 1 ]]; do
     PARAMS+="${1} "
@@ -91,12 +63,50 @@ while [[ $# -ge 1 ]]; do
     case "${1}" in
         "nosync")
             SYNC=false ;;
+        "angler"|"shamu")
+            DEVICE=${1} ;;
         *)
             echo "Invalid parameter detected!" && exit ;;
     esac
 
     shift
 done
+
+# BUILD ANGLER IF DEVICE IS NOT SET
+if [[ -z ${DEVICE} ]]; then
+    DEVICE=angler
+fi
+
+
+###############
+#             #
+#  VARIABLES  #
+#             #
+###############
+
+# DIRECTORIES
+SOURCE_DIR=${HOME}/TWRP
+OUT_DIR=${SOURCE_DIR}/out/target/product/${DEVICE}
+IMG_MOVE=${HOME}/Web/Downloads/TWRP/${DEVICE}
+
+# TWRP version
+
+if [[ "${DEVICE}" == "angler" ]]; then
+    # Version 1: f2fs-tools bumped to 1.7.0, TWRP app removed
+    # Version 2: f2fs-tools bumped to 1.8.0
+    # Version 3: Revert f2fs-tools back to 1.7.0
+    # Version 4: Build off of Omni's 6.0 branch so everything works!
+    export TW_DEVICE_VERSION=4
+elif [[ "${DEVICE}" == "shamu" ]]; then
+    # Version 1: f2fs-tools bumped to 1.7.0, TWRP app removed
+    export TW_DEVICE_VERSION=1
+fi
+VERSION=$( grep "TW_MAIN_VERSION_STR" ${SOURCE_DIR}/bootable/recovery/variables.h -m 1 | cut -d \" -f2 )-${TW_DEVICE_VERSION}
+
+# FILE NAMES
+COMP_FILE=recovery.img
+UPLD_FILE=twrp-${VERSION}-${DEVICE}-f2fs-$( TZ=MST date +%Y%m%d ).img
+FILE_FORMAT=twrp-*-${DEVICE}*
 
 
 ##################
