@@ -155,7 +155,12 @@ if [[ "${PARAM}" == "push" || "${PARAM}" == "both" ]]; then
         # COMMIT IT
         echoText "PUSHING NEW APK"
         git add -A
-        git commit --signoff -m "Prebuilt: Substratum: ${VERSION} - $( TZ=MST date +%Y%m%d )
+        git commit --signoff -m "Substratum: ${VERSION} ($( TZ=MST date +%Y-%m-%d ))
+
+Compiled by @nathanchance
+Device: MacBook Pro (13-inch, Mid 2012)
+OS: macOS Sierra 10.12.3
+Tools: NDK r13b and Android Studio 2.2.3
 
 Currently here: https://github.com/Flash-ROM/substratum/commit/${COMMIT_HASH}
 Full source: https://github.com/Flash-ROM/substratum
