@@ -217,14 +217,14 @@ if [[ ${SYNC} = true ]]; then
 
     repo sync --force-sync -j$( grep -c ^processor /proc/cpuinfo )
 
-# IF IT'S MY OWN ROM, ALWAYS SYNC KERNEL AND GAPPS REPOS BECAUSE THOSE ARE
-# EXTERNALLY UPDATED. EVERYTHING ELSE WILL BE EITHER LOCALLY TRACKED OR
+# IF IT'S MY OWN ROM, ALWAYS SYNC KERNEL, GAPPS, AND VENDOR REPOS BECAUSE THOSE
+# ARE EXTERNALLY UPDATED. EVERYTHING ELSE WILL BE EITHER LOCALLY TRACKED OR
 # SYNCED WHEN IT MATTERS
 elif [[ "${ROM}" == "flash" ]]; then
     echoText "SYNCING REQUESTED REPOS"; newLine
 
     REPOS="kernel/huawei/angler vendor/google/build vendor/opengapps/sources/all
-    vendor/opengapps/sources/arm vendor/opengapps/sources/arm64"
+    vendor/opengapps/sources/arm vendor/opengapps/sources/arm64 vendor/flash"
     repo sync --force-sync -j$( grep -c ^processor /proc/cpuinfo ) ${REPOS}
 fi
 
