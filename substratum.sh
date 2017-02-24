@@ -155,7 +155,7 @@ if [[ "${PARAM}" == "push" || "${PARAM}" == "both" ]]; then
         # COMMIT IT
         echoText "PUSHING NEW APK"
         git add -A
-        git commit --signoff -m "Substratum: ${VERSION} ($( TZ=MST date +%Y-%m-%d ))
+        git commit --signoff -m "Substratum ${VERSION}: $( TZ=MST date +"%b %d %Y %r %Z" )
 
 Compiled by @nathanchance
 Device: MacBook Pro (13-inch, Mid 2012)
