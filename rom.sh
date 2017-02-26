@@ -296,6 +296,8 @@ else
     case "${ROM}" in
         "aosip")
             time make_command kronic ;;
+        "flash")
+            time make_command flash ;;
         "krexus")
             time make_command otapackage ;;
         *)
