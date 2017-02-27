@@ -51,7 +51,7 @@ TXTRST=$(tput sgr0) # RESET
 
 while [[ $# -ge 1 ]]; do
     case "${1}" in
-        "3.9.1"|"4.0.0")
+        "3.9.1"|"4.0.0"|"5.0.0")
             VERSION_PARAM=${1} ;;
         *)
             echo "Invalid parameter" && exit ;;
@@ -61,8 +61,8 @@ while [[ $# -ge 1 ]]; do
 done
 
 if [[ -z ${VERSION_PARAM} ]]; then
-    echo "You did not specify a necessary parameter. Falling back to 3.9.1"
-    VERSION_PARAM=3.9.1
+    echo "You did not specify a necessary parameter. Falling back to 4.0.0"
+    VERSION_PARAM=4.0.0
 fi
 
 
