@@ -169,13 +169,15 @@ else
     # COMMIT TOOLCHAIN
     cd ${INSTALL_DIR}/bin
     VERSION=$( ./clang --version | grep version | cut -d ' ' -f 3 )
+    HOST_GCC_VERSION=$( gcc --version | awk '/gcc/ {print $3}' )
+    HOST_GCC_DATE=$( gcc --version | awk '/gcc/ {print $4}' )
     cd ..
     git add -A && git commit --signoff -m "Clang ${VERSION}: ${DATE}
 
 Compiled on $( source /etc/os-release; echo ${PRETTY_NAME} ) $( uname -m )
 
 Kernel version: $( uname -rv )
-gcc version: $( gcc --version | awk '/gcc/ {print $3 $4}' )
+gcc version: ${HOST_GCC_VERSION} ${HOST_GCC_DATE}
 Make version: $( make --version  | awk '/Make/ {print $3}' )
 
 Manifest: https://github.com/Flash-TC/manifest/tree/clang-${VERSION_PARAM}
