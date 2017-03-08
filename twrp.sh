@@ -61,8 +61,8 @@ while [[ $# -ge 1 ]]; do
     PARAMS+="${1} "
 
     case "${1}" in
-        "nosync")
-            SYNC=false ;;
+        "sync")
+            SYNC=true ;;
         "angler"|"shamu")
             DEVICE=${1} ;;
         *)
@@ -126,7 +126,7 @@ clear && export EXPERIMENTAL_USE_JAVA8=true && START=$( TZ=MST date +%s )
 
 cd ${SOURCE_DIR}
 
-if [[ ${SYNC} != false ]]; then
+if [[ ${SYNC} = true ]]; then
     echoText "SYNCING LATEST SOURCES"
 
     repo sync --force-sync -j$(grep -c ^processor /proc/cpuinfo)
