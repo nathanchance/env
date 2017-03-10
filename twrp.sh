@@ -97,11 +97,13 @@ if [[ "${DEVICE}" == "angler" ]]; then
     # Version 3: Revert f2fs-tools back to 1.7.0
     # Version 4: Build off of Omni's 6.0 branch so everything works!
     # Version 5: Bump to 3.1.0
-    export TW_DEVICE_VERSION=5
+    # Version 6: Add back TWRP app prompt to fix theme
+    export TW_DEVICE_VERSION=6
 elif [[ "${DEVICE}" == "shamu" ]]; then
     # Version 1: f2fs-tools bumped to 1.7.0, TWRP app removed
     # Version 2: Bump to 3.1.0
-    export TW_DEVICE_VERSION=2
+    # Version 3: Add back TWRP app prompt to fix theme
+    export TW_DEVICE_VERSION=3
 fi
 VERSION=$( grep "TW_MAIN_VERSION_STR" ${SOURCE_DIR}/bootable/recovery/variables.h -m 1 | cut -d \" -f2 )-${TW_DEVICE_VERSION}
 
