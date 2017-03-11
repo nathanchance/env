@@ -27,7 +27,7 @@
 # PURPOSE: Build an Android ROM from source
 # USAGE:
 # $ rom.sh me
-# $ rom.sh <flash|pn|du|abc|krexus|aosip> <shamu|angler|bullhead|hammerhead>
+# $ rom.sh <flash|pn|du|abc|krexus|aosip|vanilla> <shamu|angler|bullhead|hammerhead>
 
 
 ############
@@ -54,6 +54,7 @@ source $( dirname ${BASH_SOURCE} )/funcs.sh
 function unsetvars() {
     unset ROM_BUILD_TYPE HAS_SUBSTRATUM LOCALVERSION BUILD_TAG HAS_ROUNDICONS
     unset SYNC PERSONAL SUCCESS CLEAN_TYPE MAKE_TYPE PARAMS HAS_ROOT HAS_GAPPS
+    unset PIXEL PUBLIC
 }
 
 # CHECKS IF MKA EXISTS
@@ -88,7 +89,7 @@ while [[ $# -ge 1 ]]; do
     case "${1}" in
         "shamu"|"angler"|"bullhead"|"hammerhead"|"marlin"|"sailfish")
             DEVICE=${1} ;;
-        "abc"|"aosip"|"du"|"flash"|"krexus"|"pn")
+        "abc"|"aosip"|"du"|"flash"|"krexus"|"pn"|"vanilla")
             ROM=${1} ;;
         "sync")
             SYNC=true ;;
@@ -124,6 +125,10 @@ while [[ $# -ge 1 ]]; do
             export HAS_ROUNDICONS=false ;;
         "nogapps")
             export HAS_GAPPS=false ;;
+        "pixel")
+            export PIXEL=true ;;
+        "public")
+            export PUBLIC=true ;;
         "me")
             ROM=flash
             shift
@@ -193,6 +198,9 @@ case "${ROM}" in
     "pn")
         SOURCE_DIR=${ANDROID_DIR}/ROMs/PN
         ZIP_MOVE=${ZIP_MOVE_PARENT}/PureNexus/${DEVICE} ;;
+    "vanilla")
+        SOURCE_DIR=${ANDROID_DIR}/ROMs/Vanilla
+        ZIP_MOVE=${ZIP_MOVE_PARENT}/Vanilla/${DEVICE} ;;
 esac
 
 OUT_DIR=${SOURCE_DIR}/out/target/product/${DEVICE}
@@ -256,6 +264,8 @@ case "${ROM}" in
         lunch aosip_${DEVICE}-userdebug ;;
     "krexus")
         lunch krexus_${DEVICE}-user ;;
+    "vanilla")
+        lunch vanilla_${DEVICE}-userdebug ;;
     *)
         breakfast ${DEVICE} ;;
 esac
@@ -300,6 +310,8 @@ else
             time make_command flash ;;
         "krexus")
             time make_command otapackage ;;
+        "vanilla")
+            time make_command vanilla ;;
         *)
             time make_command bacon ;;
     esac
