@@ -84,7 +84,7 @@ START=$( TZ=MST date +%s )
 if [[ -f /etc/arch-release ]]; then
     SOURCE_DIR=${HOME}/Repos/substratum
 else
-    SOURCE_DIR=${HOME}/Documents/Repos/substratum
+    SOURCE_DIR=${HOME}/Documents/Repos/Substratum/flash
 fi
 OUT_DIR=${SOURCE_DIR}/app/build/outputs/apk
 APK_FORMAT=*ubstratum*.apk
@@ -130,7 +130,7 @@ if [[ "${PARAM}" == "push" || "${PARAM}" == "both" ]]; then
         APK_MOVE=${HOME}/ROMs/Flash/vendor_flash/prebuilt/app/Substratum
         SECOND_MOVE=${HOME}/Web/Downloads/.superhidden/Substratum
     else
-        APK_MOVE=${HOME}/Documents/Android/FlashROM/vendor_flash/prebuilt/app/Substratum
+        APK_MOVE=${HOME}/Documents/Repos/FlashVendor/prebuilt/app/Substratum
     fi
 
     # IF THE APK WAS FOUND, MOVE IT
