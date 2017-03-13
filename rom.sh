@@ -54,7 +54,7 @@ source $( dirname ${BASH_SOURCE} )/funcs.sh
 function unsetvars() {
     unset ROM_BUILD_TYPE HAS_SUBSTRATUM LOCALVERSION BUILD_TAG HAS_ROUNDICONS
     unset SYNC PERSONAL SUCCESS CLEAN_TYPE MAKE_TYPE PARAMS HAS_ROOT HAS_GAPPS
-    unset PIXEL PUBLIC
+    unset PIXEL PUBLIC KBUILD_BUILD_USER KBUILD_BUILD_HOST
 }
 
 # CHECKS IF MKA EXISTS
@@ -265,6 +265,8 @@ case "${ROM}" in
     "krexus")
         lunch krexus_${DEVICE}-user ;;
     "vanilla")
+        export KBUILD_BUILD_USER=skye
+        export KBUILD_BUILD_HOST=vanilla
         lunch vanilla_${DEVICE}-userdebug ;;
     *)
         breakfast ${DEVICE} ;;
