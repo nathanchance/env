@@ -26,7 +26,7 @@
 
 # PURPOSE: Build Flash Kernel and package it into a flashable zip
 # USAGE:
-# $ kernel.sh <private> <tc> <tctype>
+# $ kernel.sh <public> <tc> <tctype>
 
 
 ############
@@ -58,7 +58,7 @@ source $( dirname ${BASH_SOURCE} )/funcs.sh
 
 # UNSET PREVIOUSLY USED VARIABLES IN CASE SCRIPT WAS SOURCED
 unset LOCALVERSION
-unset PRIVATE
+unset PUBLIC
 unset TOOLCHAIN_NAME
 unset DEFCONFIG
 SUCCESS=false
@@ -70,8 +70,8 @@ KERNEL_BRANCH=n7.1.1-flash
 # GATHER PARAMETERS
 while [[ $# -ge 1 ]]; do
     case "${1}" in
-        "private")
-            PRIVATE=true ;;
+        "public")
+            PUBLIC=true ;;
         "tc")
             shift
             if [[ $# -ge 1 ]]; then
@@ -143,7 +143,7 @@ if [[ -z ${TOOLCHAIN_NAME} ]]; then
     TOOLCHAIN_NAME=${TOOLCHAIN_PREFIX}6.x
 fi
 TOOLCHAIN_FOLDER=${TOOLCHAIN_HEAD}/${TOOLCHAIN_NAME}
-if [[ ${PRIVATE} != true ]]; then
+if [[ ${PUBLIC} = true ]]; then
     ZIP_MOVE=${ZIP_MOVE_HEAD}/Kernels
     ANYKERNEL_BRANCH=${DEVICE}-flash-public-7.1.1
 else
@@ -229,7 +229,7 @@ echoText "MAKING KERNEL"
 cd "${SOURCE_FOLDER}"
 
 # TAG THE HEAD COMMIT WITH THE VERSION FIRST IF IT'S A PUBLIC BUILD
-if [[ ${PRIVATE} != true ]]; then
+if [[ ${PUBLIC} = true ]]; then
     git tag -a "${ZIP_NAME}" -m "${ZIP_NAME}"
     git push origin --tags
 fi
@@ -271,7 +271,7 @@ if [[ $( ls ${KERNEL} 2>/dev/null | wc -l ) != "0" ]]; then
     # IF ZIPMOVE DOESN'T EXIST, MAKE IT; OTHERWISE, CLEAN IT
     if [[ ! -d "${ZIP_MOVE}" ]]; then
         mkdir -p "${ZIP_MOVE}"
-    elif [[ ${PRIVATE} = true ]]; then
+    elif [[ ${PUBLIC} != true ]]; then
         rm -rf "${ZIP_MOVE}"/*
     fi
 
