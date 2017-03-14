@@ -174,14 +174,14 @@ if [[ ! $(git status | grep "bisect\|rebase") ]]; then
 fi
 
 # SET KERNEL VERSION FROM MAKEFILE
-KERNEL_VERSION=$( grep -r "EXTRAVERSION = -" ${SOURCE_FOLDER}/Makefile | sed 's/^.*F/F/' )
+KERNEL_VERSION=$( grep -r "EXTRAVERSION = -" ${SOURCE_FOLDER}/Makefile | sed 's/^.*f/f/' )
 
 # CONDITIONALLY DEFINE ZIP NAME
 if [[ -n ${KERNEL_VERSION} ]]; then
     export LOCALVERSION=-$( TZ=MST date +%Y%m%d )
     ZIP_NAME=${KERNEL_VERSION}${LOCALVERSION}-$( TZ=MST date +%H%M )
 else
-    ZIP_NAME=FLASH-N6P-$( TZ=MST date +%Y%m%d-%H%M )
+    ZIP_NAME=flash-angler-$( TZ=MST date +%Y%m%d-%H%M )
 fi
 
 
@@ -266,13 +266,13 @@ if [[ $( ls ${KERNEL} 2>/dev/null | wc -l ) != "0" ]]; then
     cp "${KERNEL}" "${ANYKERNEL_FOLDER}"
 
     # MAKE ZIP_FORMAT VARIABLE
-    ZIP_FORMAT=F*.zip
+    ZIP_FORMAT=f*.zip
 
     # IF ZIPMOVE DOESN'T EXIST, MAKE IT; OTHERWISE, CLEAN IT
     if [[ ! -d "${ZIP_MOVE}" ]]; then
         mkdir -p "${ZIP_MOVE}"
     elif [[ ${PRIVATE} = true ]]; then
-        rm -rf "${ZIP_MOVE}"/${ZIP_FORMAT}*
+        rm -rf "${ZIP_MOVE}"/*
     fi
 
     # MOVE TO ANYKERNEL FOLDER
