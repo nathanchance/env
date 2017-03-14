@@ -161,8 +161,13 @@ while [[ $# -ge 1 ]]; do
 done
 
 # PARAMETER VERIFICATION
-if [[ -z ${DEVICE} || -z ${ROM} ]]; then
-    echo "You did not specify a necessary parameter!" && exit
+if [[ -z ${DEVICE} ]]; then
+    DEVICE=angler
+fi
+
+if [[ -z ${ROM} ]]; then
+    ROM=flash
+    export LOCALVERSION=-$( TZ=MST date +%Y%m%d )
 fi
 
 ###############
