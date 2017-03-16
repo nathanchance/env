@@ -148,7 +148,7 @@ if [[ ${PUBLIC} = true ]]; then
     ANYKERNEL_BRANCH=${DEVICE}-flash-public-7.1.1
 else
     ZIP_MOVE=${ZIP_MOVE_HEAD}/.superhidden/Kernels
-    ANYKERNEL_BRANCH=${DEVICE}-flash-public-7.1.1
+    ANYKERNEL_BRANCH=${DEVICE}-flash-personal-7.1.1
 fi
 
 THREADS=-j$(grep -c ^processor /proc/cpuinfo)
