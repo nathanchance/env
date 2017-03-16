@@ -210,6 +210,8 @@ esac
 
 OUT_DIR=${SOURCE_DIR}/out/target/product/${DEVICE}
 
+# LOG NAME
+LOG_NAME=${LOGDIR}/Compilation/ROMs/${ROM}-${DEVICE}-$(TZ=MST date +"%Y%m%d-%H%M").log
 
 ###########################
 # MOVE INTO SOURCE FOLDER #
@@ -301,7 +303,7 @@ NOW=$( TZ=MST date +"%Y-%m-%d-%S" )
 
 # MAKE THE REQUESTED ITEM
 if [[ -n ${MAKE_TYPE} ]]; then
-    time make_command ${MAKE_TYPE}
+    time make_command ${MAKE_TYPE} | tee -a ${LOG_NAME}
 
     ################
     # PRINT RESULT #
@@ -312,15 +314,15 @@ else
     # NOT ALL ROMS USE BACON
     case "${ROM}" in
         "aosip")
-            time make_command kronic ;;
+            time make_command kronic | tee -a ${LOG_NAME} ;;
         "flash")
-            time make_command flash ;;
+            time make_command flash | tee -a ${LOG_NAME} ;;
         "krexus")
-            time make_command otapackage ;;
+            time make_command otapackage | tee -a ${LOG_NAME} ;;
         "vanilla")
-            time make_command vanilla ;;
+            time make_command vanilla | tee -a ${LOG_NAME} ;;
         *)
-            time make_command bacon ;;
+            time make_command bacon | tee -a ${LOG_NAME} ;;
     esac
 
     ###################
@@ -408,7 +410,7 @@ echo -e ${RED}"DURATION: $( format_time ${END} ${START} )"${RESTORE}; newLine
 ##################
 
 # DATE: BASH_SOURCE (PARAMETERS)
-echo -e "\n$( TZ=MST date +%H:%M:%S ): ${BASH_SOURCE} ${PARAMS}" >> ${LOG}
+echo -e "\n$( TZ=MST date +"%m/%d/%Y %H:%M:%S" ): ${BASH_SOURCE} ${PARAMS}" >> ${LOG}
 
 # BUILD <SUCCESSFUL|FAILED> IN # MINUTES AND # SECONDS
 if [[ -n ${BUILD_RESULT_STRING} ]]; then

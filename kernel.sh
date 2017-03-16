@@ -246,7 +246,7 @@ make clean && make mrproper
 make ${DEFCONFIG}
 
 # MAKE THE KERNEL
-time make ${THREADS}
+time make ${THREADS} | tee -a ${LOGDIR}/Compilation/Kernels/${ZIP_NAME}.log
 
 
 ######################
@@ -345,7 +345,7 @@ echo -e "DURATION: $( format_time ${END} ${START} )"${RESTORE}; newLine
 ##################
 
 # DATE: BASH_SOURCE (PARAMETERS)
-echo -e "\n$( TZ=MST date +%H:%M:%S ): ${BASH_SOURCE} ${1}" >> ${LOG}
+echo -e "\n$( TZ=MST date +"%m/%d/%Y %H:%M:%S" ): ${BASH_SOURCE} ${1}" >> ${LOG}
 
 # BUILD <SUCCESSFUL|FAILED> IN # MINUTES AND # SECONDS
 echo -e "${BUILD_RESULT_STRING} IN $( format_time ${END} ${START} )" >> ${LOG}

@@ -49,6 +49,8 @@ TXTRST=$(tput sgr0) # RESET
 #              #
 ################
 
+unset BUILD_RESULT_STRING
+
 while [[ $# -ge 1 ]]; do
     case "${1}" in
         "3.9.1"|"4.0.0"|"5.0.0")
@@ -61,8 +63,8 @@ while [[ $# -ge 1 ]]; do
 done
 
 if [[ -z ${VERSION_PARAM} ]]; then
-    echo "You did not specify a necessary parameter. Falling back to 4.0.0"
-    VERSION_PARAM=4.0.0
+    echo "You did not specify a necessary parameter. Falling back to 5.0.0"
+    VERSION_PARAM=5.0.0
 fi
 
 
@@ -84,6 +86,8 @@ SOURCE_DIR=${HOME}/Toolchains/Clang-${VERSION_PARAM}
 BUILD_DIR=${SOURCE_DIR}/build
 # SET INSTALL DIRECTORY
 INSTALL_DIR=${HOME}/ROMs/Flash/prebuilts/clang/host/linux-x86/${VERSION_PARAM}
+# LOG NAME AND LOCATION
+LOG_NAME=${LOGDIR}/Compilation/Clang/clang-${VERSION_PARAM}-$(TZ=MST date +"%Y%m%d-%H%M").log
 
 
 ################
@@ -149,7 +153,9 @@ ${SOURCE_DIR}/llvm;
 START_TIME=$( date +%s );
 
 # BUILD LLVM
-if ! time cmake --build . -- -j${JOBS}; then
+if ! time cmake --build . -- -j${JOBS} | tee -a ${LOG_NAME}; then
+    BUILD_RESULT_STRING="BUILD FAILED"
+
     # PRINT FAILURE
     echo "";
     echo -e ${RED} "**************************************" ${TXTRST};
@@ -163,8 +169,10 @@ if ! time cmake --build . -- -j${JOBS}; then
     echo -e ${RED} "**************************************" ${TXTRST};
     exit 1;
 else
+    BUILD_RESULT_STRING="BUILD SUCCESSFUL"
+
     # INSTALL TOOLCHAIN
-    cmake --build . --target install -- -j${JOBS};
+    cmake --build . --target install -- -j${JOBS} | tee -a ${LOG_NAME};
 
     # COMMIT TOOLCHAIN
     cd ${INSTALL_DIR}/bin
@@ -204,3 +212,20 @@ binutils source: https://github.com/Flash-TC/binutils" && git push --force
     echo -e ${BLDGRN}"Total time elapsed:${TXTRST} ${GRN}${TMIN} minutes ${TSEC} seconds"${TXTRST};
     echo -e ${BLDGRN}"Toolchain located at:${TXTRST} ${GRN}${INSTALL_DIR}"${TXTRST};
 fi;
+
+
+##################
+# LOG GENERATION #
+##################
+
+# DATE: BASH_SOURCE (PARAMETERS)
+echo -e "\n$( TZ=MST date +"%m/%d/%Y %H:%M:%S" ): ${BASH_SOURCE} ${VERSION_PARAM}" >> ${LOG}
+
+# BUILD <SUCCESSFUL|FAILED> IN # MINUTES AND # SECONDS
+echo -e "${BUILD_RESULT_STRING} IN $( format_time ${END} ${START} )" >> ${LOG}
+
+# ONLY ADD A LINE ABOUT FILE LOCATION IF SCRIPT COMPLETED SUCCESSFULLY
+if [[ "${BUILD_RESULT_STRING}" == "BUILD SUCCESSFUL" ]]; then
+    # FILE LOCATION: <PATH>
+    echo -e "INSTALL LOCATION: ${INSTALL_DIR}" >> ${LOG}
+fi

@@ -222,7 +222,7 @@ echo -e ${RED}"DURATION: $( format_time ${END} ${START} )"${RESTORE}; newLine
 ##################
 
 # DATE: BASH_SOURCE (PARAMETERS)
-echo -e "\n$( TZ=MST date +%H:%M:%S ): ${BASH_SOURCE} ${TYPE}" >> ${LOG}
+echo -e "\n$( TZ=MST date +"%m/%d/%Y %H:%M:%S" ): ${BASH_SOURCE} ${TYPE}" >> ${LOG}
 
 # BUILD <SUCCESSFUL|FAILED> IN # MINUTES AND # SECONDS
 echo -e "${BUILD_RESULT_STRING} IN $( format_time ${END} ${START} )" >> ${LOG}

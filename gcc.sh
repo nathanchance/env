@@ -97,7 +97,7 @@ function build() {
     # RUN THE BUILD SCRIPT
     echoText "BUILDING TOOLCHAIN"
 
-    bash ${1}-6.x
+    bash ${1}-6.x | tee -a ${LOGDIR}/Compilation/GCC/${1}-6.x-$(TZ=MST date +"%Y%m%d-%H%M").log
 
 
     # DEACTIVATE VENV IF ON ARCH
@@ -220,3 +220,7 @@ END=$( TZ=MST date +%s )
 newLine; echoText "SCRIPT COMPLETED"; newLine
 echo -e ${RED}"TIME: $( TZ=MST date +%D\ %r | awk '{print toupper($0)}' )"
 echo -e "DURATION: $( format_time ${END} ${START} )"${RESTORE}; newLine
+
+# LOG INFO
+echo -e "\n$( TZ=MST date +"%m/%d/%Y %H:%M:%S" ): ${BASH_SOURCE}" >> ${LOG}
+echo -e "$( format_time ${END} ${START} )" >> ${LOG}

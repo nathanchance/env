@@ -113,6 +113,7 @@ VERSION=$( grep "TW_MAIN_VERSION_STR" ${SOURCE_DIR}/bootable/recovery/variables.
 COMP_FILE=recovery.img
 UPLD_FILE=twrp-${VERSION}-${DEVICE}-f2fs-$( TZ=MST date +%Y%m%d ).img
 FILE_FORMAT=twrp-*-${DEVICE}*
+LOG_NAME=${LOGDIR}/Compilation/TWRP/twrp-${VERSION}-${DEVICE}-f2fs-$( TZ=MST date +%Y%m%d-%H%M ).log
 
 
 ##################
@@ -176,7 +177,7 @@ mka clobber
 
 echoText "MAKING TWRP"
 NOW=$( TZ=MST date +"%Y-%m-%d-%S" )
-time mka recoveryimage
+time mka recoveryimage | tee -a ${LOG_NAME}
 
 
 ####################
@@ -261,7 +262,7 @@ echo -e ${RED}"DURATION: $( format_time ${END} ${START} )"${RESTORE}; newLine
 ##################
 
 # DATE: BASH_SOURCE (PARAMETERS)
-echo -e "\n$( TZ=MST date +%H:%M:%S ): ${BASH_SOURCE} ${DEVICE}" >> ${LOG}
+echo -e "\n$( TZ=MST date +"%m/%d/%Y %H:%M:%S" ): ${BASH_SOURCE} ${DEVICE}" >> ${LOG}
 
 # BUILD <SUCCESSFUL|FAILED> IN # MINUTES AND # SECONDS
 echo -e "${BUILD_RESULT_STRING} IN $( format_time ${END} ${START} )" >> ${LOG}
