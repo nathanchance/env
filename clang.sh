@@ -225,7 +225,7 @@ fi;
 echo -e "\n$( TZ=MST date +"%m/%d/%Y %H:%M:%S" ): ${BASH_SOURCE} ${VERSION_PARAM}" >> ${LOG}
 
 # BUILD <SUCCESSFUL|FAILED> IN # MINUTES AND # SECONDS
-echo -e "${BUILD_RESULT_STRING} IN $( format_time ${END} ${START} )" >> ${LOG}
+echo -e "${BUILD_RESULT_STRING} IN $( format_time ${END_TIME} ${START_TIME} )" >> ${LOG}
 
 # ONLY ADD A LINE ABOUT FILE LOCATION IF SCRIPT COMPLETED SUCCESSFULLY
 if [[ "${BUILD_RESULT_STRING}" == "BUILD SUCCESSFUL" ]]; then
