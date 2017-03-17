@@ -49,6 +49,9 @@ TXTRST=$(tput sgr0) # RESET
 #              #
 ################
 
+# SOURCE OUR UNIVERSAL FUNCTIONS SCRIPT
+source $( dirname ${BASH_SOURCE} )/funcs.sh
+
 unset BUILD_RESULT_STRING
 
 while [[ $# -ge 1 ]]; do
