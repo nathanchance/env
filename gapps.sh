@@ -30,6 +30,17 @@
 # $ gapps.sh open <super|stock|full|mini|micro|nano|pico>
 
 
+###############
+#             #
+#  MAC CHECK  #
+#             #
+###############
+
+if [[ $( uname -a | grep -i "darwin" ) ]]; then
+    echo "Can't use this on a Mac, idiot! :P" && exit
+fi
+
+
 ############
 #          #
 #  COLORS  #

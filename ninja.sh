@@ -28,6 +28,17 @@
 # USAGE: $ bash ninja.sh <build|install|both>
 
 
+###############
+#             #
+#  MAC CHECK  #
+#             #
+###############
+
+if [[ $( uname -a | grep -i "darwin" ) ]]; then
+    echo "Can't use this on a Mac, idiot! :P" && exit
+fi
+
+
 ############
 #          #
 #  COLORS  #

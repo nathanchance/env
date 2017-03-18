@@ -30,6 +30,17 @@
 # $ rom.sh <flash|pn|du|abc|krexus|aosip|vanilla> <shamu|angler|bullhead|hammerhead>
 
 
+###############
+#             #
+#  MAC CHECK  #
+#             #
+###############
+
+if [[ $( uname -a | grep -i "darwin" ) ]]; then
+    echo "Can't use this on a Mac, idiot! :P" && exit
+fi
+
+
 ############
 #          #
 #  COLORS  #
