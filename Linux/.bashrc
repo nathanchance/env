@@ -27,14 +27,14 @@ PS1='[\u@\h \W]\$ '
 ###########
 
 # ccache setup
-ccache -M 200G &> /dev/null
+ccache -M 500G &> /dev/null
 export USE_CCACHE=1
 
 # Add Scripts directory and its subdirectories to $PATH
 export PATH="${PATH}$(find ${HOME}/Scripts -name '.*' -prune -o -type d -printf ':%p')"
 
 # Log support so I can see what compiled and at what time
-export LOGDIR=${HOME}/Web/.superhidden/Logs
+export LOGDIR=${HOME}/Web/Downloads/.superhidden/Logs
 # Create LOGDIR if it doesn't exist
 if [[ ! -d ${LOGDIR} ]]; then
     mkdir -p ${LOGDIR}/Results
