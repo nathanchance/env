@@ -16,39 +16,11 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>
 
-PATH="/opt/local/bin:/opt/local/sbin:$PATH"
-export PATH
+export PATH=${PATH}:${HOME}/Documents/Repos/scripts
 
-PATH="~/bin:$PATH"
-export PATH
-
-PATH="/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:$PATH"
-export PATH
-
-PATH="/Library/Frameworks/Python.framework/Versions/2.7/bin:${PATH}"
-export PATH
-
-# Setting PATH for Python 3.6
-# The original version is saved in .bash_profile.pysave
-PATH="/Library/Frameworks/Python.framework/Versions/3.6/bin:${PATH}"
-export PATH
-
-PATH="/usr/include:$PATH"
-export PATH
-
-# Nexus Tools
-export PATH=$PATH:~/.nexustools
-
-# iTerm2 Shell Integration
-test -e "${HOME}/.iterm2_shell_integration.bash" && source "${HOME}/.iterm2_shell_integration.bash"
-
-# Add scripts to path
-PATH="${HOME}/Documents/Repos/scripts:${PATH}"
-export PATH
-
-# Android SDK
 export ANDROID_HOME=${HOME}/Library/Android/sdk
 
+export PATH=${PATH}:${HOME}/Library/Android/sdk/ndk-bundle
 
 ###############
 # GIT ALIASES #
