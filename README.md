@@ -13,3 +13,4 @@ This repo includes stuff for my build server, MacBook Pro, and other Linux insta
     + **.bash_profile:** my home .bash_profile file, which holds most of the same things as .bashrc
     + **config:** my neofetch configuration file for my MacBook Pro, placed in ~/.config/neofetch/config
     + **Makefile:** Makefile for testing colors in terminal (run make)
+    + **com.googlecode.iterm2.plist**: My iTerm2 settings
