@@ -283,8 +283,10 @@ case "${ROM}" in
     "krexus")
         lunch krexus_${DEVICE}-user ;;
     "vanilla")
-        export KBUILD_BUILD_USER=skye
-        export KBUILD_BUILD_HOST=vanilla
+        if [[ ${DEVICE} == "angler" ]]; then
+            export KBUILD_BUILD_USER=skye
+            export KBUILD_BUILD_HOST=vanilla
+        fi
         lunch vanilla_${DEVICE}-userdebug ;;
     *)
         breakfast ${DEVICE} ;;
