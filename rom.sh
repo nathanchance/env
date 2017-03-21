@@ -100,7 +100,7 @@ while [[ $# -ge 1 ]]; do
     case "${1}" in
         "shamu"|"angler"|"bullhead"|"hammerhead"|"marlin"|"sailfish")
             DEVICE=${1} ;;
-        "abc"|"aosip"|"du"|"flash"|"krexus"|"pn"|"vanilla")
+        "abc"|"aosip"|"du"|"flash"|"krexus"|"omni"|"pn"|"vanilla")
             ROM=${1} ;;
         "sync")
             SYNC=true ;;
@@ -223,6 +223,9 @@ case "${ROM}" in
     "krexus")
         SOURCE_DIR=${ANDROID_DIR}/ROMs/Krexus
         ZIP_MOVE=${ZIP_MOVE_PARENT}/Krexus/${DEVICE} ;;
+    "omni")
+        SOURCE_DIR=${ANDROID_DIR}/ROMs/Omni
+        ZIP_MOVE=${ZIP_MOVE_PARENT}/Omni/${DEVICE} ;;
     "pn")
         SOURCE_DIR=${ANDROID_DIR}/ROMs/PN
         ZIP_MOVE=${ZIP_MOVE_PARENT}/PureNexus/${DEVICE} ;;
