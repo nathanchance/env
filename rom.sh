@@ -65,7 +65,7 @@ source $( dirname ${BASH_SOURCE} )/funcs.sh
 function unsetvars() {
     unset ROM_BUILD_TYPE HAS_SUBSTRATUM LOCALVERSION BUILD_TAG HAS_ROUNDICONS
     unset SYNC PERSONAL SUCCESS CLEAN_TYPE MAKE_TYPE PARAMS HAS_ROOT HAS_GAPPS
-    unset PIXEL PUBLIC KBUILD_BUILD_USER KBUILD_BUILD_HOST
+    unset PIXEL PUBLIC KBUILD_BUILD_USER KBUILD_BUILD_HOST VARIANT
 }
 
 # CHECKS IF MKA EXISTS
@@ -128,6 +128,14 @@ while [[ $# -ge 1 ]]; do
             else
                 echo "Please specify a make item!" && exit
             fi ;;
+        "variant")
+            shift
+            if [[ $# -ge 1 ]]; then
+                PARAMS+="${1} "
+                export VARIANT=${1}
+            else
+                echo "Please specify a build variant!" && exit
+            fi ;;
         "nosubs")
             export HAS_SUBSTRATUM=false ;;
         "noroot")
@@ -179,6 +187,10 @@ fi
 if [[ -z ${ROM} ]]; then
     ROM=flash
     export LOCALVERSION=-$( TZ=MST date +%Y%m%d )
+fi
+
+if [[ -z ${VARIANT} ]]; then
+    VARIANT=userdebug
 fi
 
 ###############
@@ -279,17 +291,17 @@ echoText "PREPARING $( echo ${DEVICE} | awk '{print toupper($0)}' )"
 # NOT ALL ROMS USE BREAKFAST
 case "${ROM}" in
     "aosip")
-        lunch aosip_${DEVICE}-userdebug ;;
+        lunch aosip_${DEVICE}-${VARIANT} ;;
     "krexus")
-        lunch krexus_${DEVICE}-user ;;
+        lunch krexus_${DEVICE}-${VARIANT} ;;
     "vanilla")
         if [[ ${DEVICE} == "angler" ]]; then
             export KBUILD_BUILD_USER=skye
             export KBUILD_BUILD_HOST=vanilla
         fi
-        lunch vanilla_${DEVICE}-userdebug ;;
+        lunch vanilla_${DEVICE}-${VARIANT} ;;
     *)
-        breakfast ${DEVICE} ;;
+        breakfast ${DEVICE} ${VARIANT} ;;
 esac
 
 
