@@ -48,11 +48,14 @@ export LC_ALL=C
 # GIT ALIASES #
 ###############
 
+# Alias hub to git
+alias git='hub'
+
 alias gf='git fetch'
 alias gcp='git cherry-pick'
 alias gcpa='git cherry-pick --abort'
-alias gcpc='git cherry-pick --continue'
 alias gcpe='git cherry-pick --edit'
+alias gcpc='git cherry-pick --continue'
 alias gcpq='git cherry-pick --quit'
 
 alias gph='git push'
@@ -60,15 +63,25 @@ alias gpo='git push origin'
 alias gpf='git push --force'
 alias gpsu='git push --set-upstream origin'
 
+alias gpl='git pull'
+
 alias ga='git add'
 alias gaa='git add -A'
+
+alias gam='git am'
 
 alias gc='git commit'
 alias gcs='git commit --signoff'
 alias gca='git commit --amend'
+alias gac='git commit --all'
+alias gacs='git commit --all --signoff'
+alias gaca='git commit --all --amend'
 
+alias grhe='git reset HEAD'
 alias grh='git reset --hard'
+alias grs='git reset --soft'
 
+alias glg='git log'
 alias gl='git log --format=oneline'
 alias gb='git branch -v'
 alias gbd='git branch -D'
@@ -77,14 +90,19 @@ alias gs='git status'
 
 alias grm='git remote'
 
-alias gcb='git checkout -b'
 alias gch='git checkout'
+alias gcb='git checkout -b'
 
 alias grb='git rebase'
+alias grbi='git rebase -i'
+alias grba='git rebase --abort'
+alias grbc='git rebase --continue'
 
 alias gd='git diff'
-alias gdc='git diff --cached'
 alias gdh='git diff HEAD'
+alias gdhh='git diff HEAD^..HEAD'
+alias gdss='git diff --shortstat'
+alias gdc='git diff --cached'
 
 #############
 # FUNCTIONS #
