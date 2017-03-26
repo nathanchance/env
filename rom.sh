@@ -98,7 +98,7 @@ while [[ $# -ge 1 ]]; do
     PARAMS+="${1} "
 
     case "${1}" in
-        "shamu"|"angler"|"bullhead"|"hammerhead"|"marlin"|"sailfish")
+        "shamu"|"angler"|"bullhead"|"flo"|"hammerhead"|"marlin"|"sailfish")
             DEVICE=${1} ;;
         "abc"|"aosip"|"du"|"flash"|"krexus"|"omni"|"pn"|"vanilla")
             ROM=${1} ;;
