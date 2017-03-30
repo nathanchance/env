@@ -83,12 +83,12 @@ while [[ $# -ge 1 ]]; do
     case "${1}" in
         "open"|"dynamic")
             TYPE=${1} ;;
-    "super"|"stock"|"full"|"mini"|"micro"|"nano"|"pico")
+        "super"|"stock"|"full"|"mini"|"micro"|"nano"|"pico")
             VERSION=${1} ;;
-    "-h"|"--help")
-        help_menu ;;
-    *)
-        echo "Invalid parameter" && exit ;;
+        "-h"|"--help")
+            help_menu ;;
+        *)
+            echo "Invalid parameter" && exit ;;
     esac
 
     shift
