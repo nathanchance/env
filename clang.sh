@@ -22,7 +22,7 @@
 ###########
 
 # PURPOSE: Builds Clang from source
-# USAGE: $ bash clang.sh <3.9.1|4.0.0>
+# USAGE: $ bash clang.sh -h
 
 
 ###############
@@ -54,14 +54,30 @@ BLDCYA=${TXTBLD}$(tput setaf 6) # CYAN
 TXTRST=$(tput sgr0) # RESET
 
 
+###############
+#             #
+#  FUNCTIONS  #
+#             #
+###############
+
+# SOURCE OUR UNIVERSAL FUNCTIONS SCRIPT
+source $( dirname ${BASH_SOURCE} )/funcs.sh
+
+# PRINT A HELP MENU IF REQUESTED
+function help_menu() {
+    echo -e "\nOVERVIEW: Builds Clang from source\n"
+    echo -e "USAGE: bash ${0} <version>\n"
+    echo -e "EXAMPLE: bash ${0} 3.9.1\n"
+    echo -e "version: 3.9.1 | 4.0.0 | 5.0.0\n"
+    exit
+}
+
+
 ################
 #              #
 #  PARAMETERS  #
 #              #
 ################
-
-# SOURCE OUR UNIVERSAL FUNCTIONS SCRIPT
-source $( dirname ${BASH_SOURCE} )/funcs.sh
 
 unset BUILD_RESULT_STRING
 
@@ -69,6 +85,8 @@ while [[ $# -ge 1 ]]; do
     case "${1}" in
         "3.9.1"|"4.0.0"|"5.0.0")
             VERSION_PARAM=${1} ;;
+        "-h"|"--help")
+            help_menu ;;
         *)
             echo "Invalid parameter" && exit ;;
     esac

@@ -25,8 +25,7 @@
 ###########
 
 # PURPOSE: Build Flash Kernel and package it into a flashable zip
-# USAGE:
-# $ kernel.sh <public> <tc> <tctype>
+# USAGE: $ bash kernel.sh -h
 
 
 ###############
@@ -59,6 +58,19 @@ RESTORE="\033[0m"
 
 # SOURCE OUR UNIVERSAL FUNCTIONS SCRIPT
 source $( dirname ${BASH_SOURCE} )/funcs.sh
+
+# PRINT A HELP MENU IF REQUESTED
+function help_menu() {
+    echo -e "\nOVERVIEW: Builds and packages Flash Kernel\n"
+    echo -e "USAGE: bash ${0} <options>\n"
+    echo -e "EXAMPLE: bash ${0} public tc 4.9 defconfig angler_defconfig\n"
+    echo -e "Possible options:"
+    echo -e "   public:     builds and pushes to the public folder"
+    echo -e "   tc 4.9:     builds with the stock AOSP 4.9 toolchain"
+    echo -e "   defconfig:  builds with the specified defconfig\n"
+    echo -e "No options will build a normal kernel and push to private folder\n"
+    exit
+}
 
 
 ################
@@ -102,6 +114,8 @@ while [[ $# -ge 1 ]]; do
             else
                 echo "Please specify a defconfig!" && exit
             fi ;;
+        "-h"|"--help")
+            help_menu ;;
         *)
             echo "Invalid parameter" && exit ;;
     esac

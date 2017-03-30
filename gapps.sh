@@ -25,9 +25,7 @@
 ###########
 
 # PURPOSE: Build GApps zip (either Open or Dynamic GApps)
-# USAGE:
-# $ gapps.sh dynamic
-# $ gapps.sh open <super|stock|full|mini|micro|nano|pico>
+# USAGE: $ bash gapps.sh -h
 
 
 ###############
@@ -61,6 +59,16 @@ RESTORE="\033[0m"
 # SOURCE OUR UNIVERSAL FUNCTIONS SCRIPT
 source $( dirname ${BASH_SOURCE} )/funcs.sh
 
+# PRINT A HELP MENU IF REQUESTED
+function help_menu() {
+    echo -e "\nOVERVIEW: Builds a GApps zip (either Open or Dynamic)\n"
+    echo -e "USAGE: bash ${0} <gapps> <variant>\n"
+    echo -e "EXAMPLE: bash ${0} open nano\n"
+    echo -e "gapps: open | dynamic"
+    echo -e "variant: (open only) super | stock | full | mini | micro | nano | pico\n"
+    exit
+}
+
 
 ################
 #              #
@@ -77,6 +85,8 @@ while [[ $# -ge 1 ]]; do
             TYPE=${1} ;;
     "super"|"stock"|"full"|"mini"|"micro"|"nano"|"pico")
             VERSION=${1} ;;
+    "-h"|"--help")
+        help_menu ;;
     *)
         echo "Invalid parameter" && exit ;;
     esac

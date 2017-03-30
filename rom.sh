@@ -25,9 +25,7 @@
 ###########
 
 # PURPOSE: Build an Android ROM from source
-# USAGE:
-# $ rom.sh me
-# $ rom.sh <flash|pn|du|abc|krexus|aosip|vanilla> <shamu|angler|bullhead|hammerhead>
+# USAGE: $ bash rom.sh -h
 
 
 ###############
@@ -60,6 +58,33 @@ RESTORE="\033[0m"
 
 # SOURCE OUR UNIVERSAL FUNCTIONS SCRIPT
 source $( dirname ${BASH_SOURCE} )/funcs.sh
+
+# PRINT A HELP MENU IF REQUESTED
+function help_menu() {
+    echo -e "\nOVERVIEW: Build a ROM\n"
+    echo -e "USAGE: bash ${0} <rom> <device> <options>\n"
+    echo -e "Example: bash ${0} flash angler user sync\n"
+    echo -e "Required options:"
+    echo -e "   rom:        abc | aosip | du | flash | krexus | lineage | omni | pn | vanilla"
+    echo -e "   device:     angler | bullhead | flo | hammerhead | marlin| sailfish | shamu\n"
+    echo -e "Standard options:"
+    echo -e "   sync:       performs a repo sync before building"
+    echo -e "   clean:      performs the specified clean (e.g. clean installclean will run make installclean)"
+    echo -e "   make:       performs the specified make (e.g. make SystemUI will run make SystemUI)"
+    echo -e "   variant:    build with the specified variant (e.g. variant userdebug). Possible options: eng, userdebug, and user. Userdebug is the default."
+    echo -e "\nSpecial options:"
+    echo -e "   me:         (Flash only) Builds an Angler (or Shamu if specified) userdebug build"
+    echo -e "   plain:      (Flash only) Builds an Angler (or Shamu if specified) userdebug build without root, Substratum, or GApps"
+    echo -e "   nosubs:     (Flash only) Builds without Substratum"
+    echo -e "   noroot:     (Flash only) Builds without Magisk"
+    echo -e "   icons:      (Flash only) Builds with round icons"
+    echo -e "   nogapps:    (Flash only) Builds without GApps"
+    echo -e "   type:       (Krexus only) sets the specified type as the build tag"
+    echo -e "   pixel:      (Vanilla only) Builds a Pixel variant build"
+    echo -e "   public:     (Vanilla only) Builds with the public tag\n"
+    echo -e "No options will fallback to Flash Angler userdebug\n"
+    exit
+}
 
 # UNSETS VARIABLES POTENTIALLY USED IN SCRIPT
 function unsetvars() {
@@ -98,20 +123,14 @@ while [[ $# -ge 1 ]]; do
     PARAMS+="${1} "
 
     case "${1}" in
-        "shamu"|"angler"|"bullhead"|"flo"|"hammerhead"|"marlin"|"sailfish")
+        # REQUIRED OPTIONS
+        "angler"|"bullhead"|"flo"|"hammerhead"|"marlin"|"sailfish"|"shamu")
             DEVICE=${1} ;;
         "abc"|"aosip"|"du"|"flash"|"krexus"|"lineage"|"omni"|"pn"|"vanilla")
             ROM=${1} ;;
+        # STANDARD OPTIONS
         "sync")
             SYNC=true ;;
-        "type")
-            shift
-            if [[ $# -ge 1 ]]; then
-                PARAMS+="${1} "
-                export BUILD_TAG=${1}
-            else
-                echo "Please specify a build type!" && exit
-            fi ;;
         "clean")
             shift
             if [[ $# -ge 1 ]]; then
@@ -136,18 +155,8 @@ while [[ $# -ge 1 ]]; do
             else
                 echo "Please specify a build variant!" && exit
             fi ;;
-        "nosubs")
-            export HAS_SUBSTRATUM=false ;;
-        "noroot")
-            export HAS_ROOT=false ;;
-        "noicons")
-            export HAS_ROUNDICONS=false ;;
-        "nogapps")
-            export HAS_GAPPS=false ;;
-        "pixel")
-            export PIXEL=true ;;
-        "public")
-            export PUBLIC=true ;;
+        # SPECIAL OPTIONS
+        # FLASH
         "me")
             ROM=flash
             shift
@@ -172,6 +181,31 @@ while [[ $# -ge 1 ]]; do
             export HAS_ROOT=false
             export HAS_ROUNDICONS=false
             export HAS_GAPPS=false ;;
+        "nosubs")
+            export HAS_SUBSTRATUM=false ;;
+        "noroot")
+            export HAS_ROOT=false ;;
+        "icons")
+            export HAS_ROUNDICONS=true ;;
+        "nogapps")
+            export HAS_GAPPS=false ;;
+        # KREXUS
+        "type")
+            shift
+            if [[ $# -ge 1 ]]; then
+                PARAMS+="${1} "
+                export BUILD_TAG=${1}
+            else
+                echo "Please specify a build type!" && exit
+            fi ;;
+        # VANILLA
+        "pixel")
+            export PIXEL=true ;;
+        "public")
+            export PUBLIC=true ;;
+
+        "-h"|"--help")
+            help_menu ;;
         *)
             echo "Invalid parameter detected!" && exit ;;
     esac

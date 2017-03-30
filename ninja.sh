@@ -25,7 +25,7 @@
 ###########
 
 # PURPOSE: Builds the ninja binary from source
-# USAGE: $ bash ninja.sh <build|install|both>
+# USAGE: $ bash ninja.sh -h
 
 
 ###############
@@ -59,6 +59,19 @@ RESTORE="\033[0m"
 # SOURCE OUR UNIVERSAL FUNCTIONS SCRIPT
 source $( dirname ${BASH_SOURCE} )/funcs.sh
 
+# PRINT A HELP MENU IF REQUESTED
+function help_menu() {
+    echo -e "\nOVERVIEW: Builds and pushes the ninja binary\n"
+    echo -e "USAGE: bash ${0} <options>\n"
+    echo -e "EXAMPLE: bash ${0} both\n"
+    echo -e "Possible options (pick one):"
+    echo -e "   build:     update the source and builds the ninja binary"
+    echo -e "   install:   pushes the binary to /usr/local/bin and updates Flash-ROM prebuilt-tools repo"
+    echo -e "   both:      does both build and install\n"
+    echo -e "No options will fallback to build\n"
+    exit
+}
+
 
 ################
 #              #
@@ -70,6 +83,8 @@ while [[ $# -ge 1 ]]; do
     case "${1}" in
         "build"|"install"|"both")
             MODE=${1} ;;
+        "-h"|"--help")
+            help_menu ;;
         *)
             echo "Invalid parameter" && exit ;;
     esac

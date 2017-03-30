@@ -25,7 +25,7 @@
 ###########
 
 # PURPOSE: Build F2FS TWRP for Angler/Shamu
-# USAGE: $ bash twrp.sh <device>
+# USAGE: $ bash twrp.sh -h
 
 
 ###############
@@ -59,6 +59,15 @@ RESTORE="\033[0m"
 # SOURCE OUR UNIVERSAL FUNCTIONS SCRIPT
 source $( dirname ${BASH_SOURCE} )/funcs.sh
 
+function help_menu() {
+    echo -e "\nOVERVIEW: Builds and pushes a Substratum APK\n"
+    echo -e "USAGE: bash ${0} <device> <options>\n"
+    echo -e "EXAMPLE: bash ${0} angler\n"
+    echo -e "device: angler | shamu\n"
+    echo -e "Possible options:"
+    echo -e "   sync:     performs a repo sync before building\n"
+    exit
+}
 
 ################
 #              #
@@ -76,6 +85,8 @@ while [[ $# -ge 1 ]]; do
             SYNC=true ;;
         "angler"|"shamu")
             DEVICE=${1} ;;
+        "-h"|"--help")
+            help_menu ;;
         *)
             echo "Invalid parameter detected!" && exit ;;
     esac

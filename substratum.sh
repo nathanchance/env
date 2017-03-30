@@ -25,7 +25,7 @@
 ###########
 
 # PURPOSE: Build a Substratum APK
-# USAGE: $ bash substratum.sh <update|build|both>
+# USAGE: $ bash substratum.sh -h
 
 
 ############
@@ -47,6 +47,19 @@ RESTORE="\033[0m"
 # SOURCE OUR UNIVERSAL FUNCTIONS SCRIPT
 source $( dirname ${BASH_SOURCE} )/funcs.sh
 
+# PRINT A HELP MENU IF REQUESTED
+function help_menu() {
+    echo -e "\nOVERVIEW: Builds and pushes a Substratum APK\n"
+    echo -e "USAGE: bash ${0} <options>\n"
+    echo -e "EXAMPLE: bash ${0} build\n"
+    echo -e "Possible options (pick one):"
+    echo -e "   build:    update the source and builds the Substratum APK"
+    echo -e "   push:     pull Flash-ROM/vendor_flash and pushes the new APK"
+    echo -e "   both:     does both build and push\n"
+    echo -e "No options will fallback to build\n"
+    exit
+}
+
 
 ################
 #              #
@@ -58,6 +71,8 @@ while [[ $# -ge 1 ]]; do
     case "${1}" in
         "build"|"push"|"both")
             PARAM=${1} ;;
+        "-h"|"--help")
+            help_menu ;;
         *)
             echo "Invalid parameter" && exit ;;
     esac
