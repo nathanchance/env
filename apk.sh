@@ -46,6 +46,7 @@ fi
 #          #
 ############
 
+BOLD="\033[1m"
 RED="\033[01;31m"
 RESTORE="\033[0m"
 
@@ -61,12 +62,13 @@ source $( dirname ${BASH_SOURCE} )/funcs.sh
 
 # PRINT A HELP MENU IF REQUESTED
 function help_menu() {
-    echo -e "\nOVERVIEW: Builds and pushes the specified APK\n"
-    echo -e "USAGE: bash ${0} <apk> <options>\n"
-    echo -e "EXAMPLE: bash ${0} substratum build\n"
-    echo -e "Required options:"
+    echo -e ""
+    echo -e "${BOLD}OVERVIEW:${RESTORE} Builds and pushes the specified APK\n"
+    echo -e "${BOLD}USAGE:${RESTORE} bash ${0} <apk> <options>\n"
+    echo -e "${BOLD}EXAMPLE:${RESTORE} bash ${0} substratum build\n"
+    echo -e "${BOLD}Required options:${RESTORE}"
     echo -e "   apk:       magisk | spectrum | substratum\n"
-    echo -e "Possible options (pick one):"
+    echo -e "${BOLD}Other options (pick one):${RESTORE}"
     echo -e "   build:      update the source and builds the Substratum APK"
     echo -e "   install:    builds and pushes the APK to a local device"
     echo -e "   commit:     (Substratum and Magisk only) pull Flash-ROM/vendor_flash and commits then pushes the new APK"

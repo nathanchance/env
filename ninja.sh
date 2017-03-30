@@ -45,8 +45,8 @@ fi
 #          #
 ############
 
+BOLD="\033[1m"
 RED="\033[01;31m"
-BLINK_RED="\033[05;31m"
 RESTORE="\033[0m"
 
 
@@ -61,10 +61,11 @@ source $( dirname ${BASH_SOURCE} )/funcs.sh
 
 # PRINT A HELP MENU IF REQUESTED
 function help_menu() {
-    echo -e "\nOVERVIEW: Builds and pushes the ninja binary\n"
-    echo -e "USAGE: bash ${0} <options>\n"
-    echo -e "EXAMPLE: bash ${0} both\n"
-    echo -e "Possible options (pick one):"
+    echo -e ""
+    echo -e "${BOLD}OVERVIEW:${RESTORE} Builds and pushes the ninja binary\n"
+    echo -e "${BOLD}USAGE:${RESTORE} bash ${0} <options>\n"
+    echo -e "${BOLD}EXAMPLE:${RESTORE} bash ${0} both\n"
+    echo -e "${BOLD}Options (pick one):${RESTORE}"
     echo -e "   build:     update the source and builds the ninja binary"
     echo -e "   install:   pushes the binary to /usr/local/bin and updates Flash-ROM prebuilt-tools repo"
     echo -e "   both:      does both build and install\n"

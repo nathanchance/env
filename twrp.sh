@@ -45,8 +45,8 @@ fi
 #          #
 ############
 
+BOLD="\033[1m"
 RED="\033[01;31m"
-BLINK_RED="\033[05;31m"
 RESTORE="\033[0m"
 
 
@@ -60,12 +60,14 @@ RESTORE="\033[0m"
 source $( dirname ${BASH_SOURCE} )/funcs.sh
 
 function help_menu() {
-    echo -e "\nOVERVIEW: Builds and pushes a Substratum APK\n"
-    echo -e "USAGE: bash ${0} <device> <options>\n"
-    echo -e "EXAMPLE: bash ${0} angler\n"
-    echo -e "device: angler | shamu\n"
-    echo -e "Possible options:"
-    echo -e "   sync:     performs a repo sync before building\n"
+    echo -e ""
+    echo -e ${BOLD}"OVERVIEW:${RESTORE} Builds and pushes a Substratum APK\n"
+    echo -e ${BOLD}"USAGE:${RESTORE} bash ${0} <device> <options>\n"
+    echo -e ${BOLD}"EXAMPLE:${RESTORE} bash ${0} angler\n"
+    echo -e ${BOLD}"Required options:${RESTORE}"
+    echo -e "   device:    angler | shamu\n"
+    echo -e ${BOLD}"Possible options:${RESTORE}"
+    echo -e "   sync:      performs a repo sync before building\n"
     exit
 }
 

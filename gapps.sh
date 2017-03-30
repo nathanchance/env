@@ -45,8 +45,8 @@ fi
 #          #
 ############
 
+BOLD="\033[1m"
 RED="\033[01;31m"
-BLINK_RED="\033[05;31m"
 RESTORE="\033[0m"
 
 
@@ -61,11 +61,14 @@ source $( dirname ${BASH_SOURCE} )/funcs.sh
 
 # PRINT A HELP MENU IF REQUESTED
 function help_menu() {
-    echo -e "\nOVERVIEW: Builds a GApps zip (either Open or Dynamic)\n"
-    echo -e "USAGE: bash ${0} <gapps> <variant>\n"
-    echo -e "EXAMPLE: bash ${0} open nano\n"
-    echo -e "gapps: open | dynamic"
-    echo -e "variant: (open only) super | stock | full | mini | micro | nano | pico\n"
+    echo -e ""
+    echo -e "${BOLD}OVERVIEW:${RESTORE} Builds a GApps zip (either Open or Dynamic)\n"
+    echo -e "${BOLD}USAGE:${RESTORE} bash ${0} <gapps> <variant>\n"
+    echo -e "${BOLD}EXAMPLE:${RESTORE} bash ${0} open nano\n"
+    echo -e ${BOLD}"Required options:${RESTORE}"
+    echo -e "   gapps:      open | dynamic\n"
+    echo -e ${BOLD}"Other options:${RESTORE}"
+    echo -e "   variant:    (open only) super | stock | full | mini | micro | nano | pico\n"
     exit
 }
 

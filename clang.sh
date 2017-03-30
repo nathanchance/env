@@ -65,10 +65,12 @@ source $( dirname ${BASH_SOURCE} )/funcs.sh
 
 # PRINT A HELP MENU IF REQUESTED
 function help_menu() {
-    echo -e "\nOVERVIEW: Builds Clang from source\n"
-    echo -e "USAGE: bash ${0} <version>\n"
-    echo -e "EXAMPLE: bash ${0} 3.9.1\n"
-    echo -e "version: 3.9.1 | 4.0.0 | 5.0.0\n"
+    echo -e ""
+    echo -e "${TXTBLD}OVERVIEW:${TXTRST} Builds Clang from source\n"
+    echo -e "${TXTBLD}USAGE:${TXTRST} bash ${0} <version>\n"
+    echo -e "${TXTBLD}EXAMPLE:${TXTRST} bash ${0} 3.9.1\n"
+    echo -e "${TXTBLD}Required options:${TXTRST}"
+    echo -e "   version:    3.9.1 | 4.0.0 | 5.0.0\n"
     exit
 }
 

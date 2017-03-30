@@ -45,8 +45,8 @@ fi
 #          #
 ############
 
+BOLD="\033[1m"
 RED="\033[01;31m"
-BLINK_RED="\033[05;31m"
 RESTORE="\033[0m"
 
 
@@ -61,18 +61,19 @@ source $( dirname ${BASH_SOURCE} )/funcs.sh
 
 # PRINT A HELP MENU IF REQUESTED
 function help_menu() {
-    echo -e "\nOVERVIEW: Build a ROM\n"
-    echo -e "USAGE: bash ${0} <rom> <device> <options>\n"
-    echo -e "Example: bash ${0} flash angler user sync\n"
-    echo -e "Required options:"
+    echo -e ""
+    echo -e "${BOLD}OVERVIEW:${RESTORE} Build a ROM\n"
+    echo -e "${BOLD}USAGE:${RESTORE} bash ${0} <rom> <device> <options>\n"
+    echo -e "${BOLD}Example:${RESTORE} bash ${0} flash angler user sync\n"
+    echo -e "${BOLD}Required options:${RESTORE}"
     echo -e "   rom:        abc | aosip | du | flash | krexus | lineage | omni | pn | vanilla"
     echo -e "   device:     angler | bullhead | flo | hammerhead | marlin| sailfish | shamu\n"
-    echo -e "Standard options:"
+    echo -e "${BOLD}Standard options:${RESTORE}"
     echo -e "   sync:       performs a repo sync before building"
     echo -e "   clean:      performs the specified clean (e.g. clean installclean will run make installclean)"
     echo -e "   make:       performs the specified make (e.g. make SystemUI will run make SystemUI)"
-    echo -e "   variant:    build with the specified variant (e.g. variant userdebug). Possible options: eng, userdebug, and user. Userdebug is the default."
-    echo -e "\nSpecial options:"
+    echo -e "   variant:    build with the specified variant (e.g. variant userdebug). Possible options: eng, userdebug, and user. Userdebug is the default.\n"
+    echo -e "${BOLD}Special options:${RESTORE}"
     echo -e "   me:         (Flash only) Builds an Angler (or Shamu if specified) userdebug build"
     echo -e "   plain:      (Flash only) Builds an Angler (or Shamu if specified) userdebug build without root, Substratum, or GApps"
     echo -e "   nosubs:     (Flash only) Builds without Substratum"

@@ -45,8 +45,9 @@ fi
 #          #
 ############
 
-RED="\033[01;31m"
 BLINK_RED="\033[05;31m"
+BOLD="\033[1m"
+RED="\033[01;31m"
 RESTORE="\033[0m"
 
 
@@ -61,10 +62,11 @@ source $( dirname ${BASH_SOURCE} )/funcs.sh
 
 # PRINT A HELP MENU IF REQUESTED
 function help_menu() {
-    echo -e "\nOVERVIEW: Builds and packages Flash Kernel\n"
-    echo -e "USAGE: bash ${0} <options>\n"
-    echo -e "EXAMPLE: bash ${0} public tc 4.9 defconfig angler_defconfig\n"
-    echo -e "Possible options:"
+    echo -e ""
+    echo -e "${BOLD}OVERVIEW:${RESTORE} Builds and packages Flash Kernel\n"
+    echo -e "${BOLD}USAGE:${RESTORE} bash ${0} <options>\n"
+    echo -e "${BOLD}EXAMPLE:${RESTORE} bash ${0} public tc 4.9 defconfig angler_defconfig\n"
+    echo -e "${BOLD}Options:${RESTORE}"
     echo -e "   public:     builds and pushes to the public folder"
     echo -e "   tc 4.9:     builds with the stock AOSP 4.9 toolchain"
     echo -e "   defconfig:  builds with the specified defconfig\n"
