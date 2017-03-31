@@ -36,11 +36,6 @@ function echoText() {
     echo -e ${RESTORE}
 }
 
-# CREATES A NEW LINE IN TERMINAL
-function newLine() {
-    echo -e ""
-}
-
 # FORMATS THE TIME
 function format_time() {
     MINS=$(((${1}-${2})/60))
@@ -73,4 +68,33 @@ function format_time() {
     fi
 
     echo ${TIME_STRING}
+}
+
+# CREATES A NEW LINE IN TERMINAL
+function newLine() {
+    echo -e ""
+}
+
+# PRINTS AN ERROR IN BOLD RED
+function reportError() {
+    RED="\033[01;31m"
+    RESTORE="\033[0m"
+
+    echo -e ""
+    echo -e ${RED}"${1}"${RESTORE}
+    if [[ -z ${2} ]]; then
+        echo -e ""
+    fi
+}
+
+# PRINTS AN WARNING IN BOLD YELLOW
+function reportWarning() {
+    YELLOW="\033[01;33m"
+    RESTORE="\033[0m"
+
+    echo -e ""
+    echo -e ${YELLOW}"${1}"${RESTORE}
+    if [[ -z ${2} ]]; then
+        echo -e ""
+    fi
 }

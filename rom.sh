@@ -28,17 +28,6 @@
 # USAGE: $ bash rom.sh -h
 
 
-###############
-#             #
-#  MAC CHECK  #
-#             #
-###############
-
-if [[ $( uname -a | grep -i "darwin" ) ]]; then
-    echo "Can't use this on a Mac, idiot! :P" && exit
-fi
-
-
 ############
 #          #
 #  COLORS  #
@@ -58,6 +47,11 @@ RESTORE="\033[0m"
 
 # SOURCE OUR UNIVERSAL FUNCTIONS SCRIPT
 source $( dirname ${BASH_SOURCE} )/funcs.sh
+
+# MAC CHECK; THIS SCRIPT SHOULD ONLY BE RUN ON LINUX
+if [[ $( uname -a | grep -i "darwin" ) ]]; then
+    reportError "Wrong window! ;)" && exit
+fi
 
 # PRINT A HELP MENU IF REQUESTED
 function help_menu() {
@@ -138,7 +132,7 @@ while [[ $# -ge 1 ]]; do
                 PARAMS+="${1} "
                 export CLEAN_TYPE=${1}
             else
-                echo "Please specify a clean type!" && exit
+                reportError "Please specify a clean type!" && exit
             fi ;;
         "make")
             shift
@@ -146,7 +140,7 @@ while [[ $# -ge 1 ]]; do
                 PARAMS+="${1} "
                 export MAKE_TYPE=${1}
             else
-                echo "Please specify a make item!" && exit
+                reportError "Please specify a make item!" && exit
             fi ;;
         "variant")
             shift
@@ -154,7 +148,7 @@ while [[ $# -ge 1 ]]; do
                 PARAMS+="${1} "
                 export VARIANT=${1}
             else
-                echo "Please specify a build variant!" && exit
+                reportError "Please specify a build variant!" && exit
             fi ;;
         # SPECIAL OPTIONS
         # FLASH
@@ -197,7 +191,7 @@ while [[ $# -ge 1 ]]; do
                 PARAMS+="${1} "
                 export BUILD_TAG=${1}
             else
-                echo "Please specify a build type!" && exit
+                reportError "Please specify a build type!" && exit
             fi ;;
         # VANILLA
         "pixel")
@@ -208,7 +202,7 @@ while [[ $# -ge 1 ]]; do
         "-h"|"--help")
             help_menu ;;
         *)
-            echo "Invalid parameter detected!" && exit ;;
+            reportError "Invalid parameter detected!" && exit ;;
     esac
 
     shift

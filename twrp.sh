@@ -28,17 +28,6 @@
 # USAGE: $ bash twrp.sh -h
 
 
-###############
-#             #
-#  MAC CHECK  #
-#             #
-###############
-
-if [[ $( uname -a | grep -i "darwin" ) ]]; then
-    echo "Can't use this on a Mac, idiot! :P" && exit
-fi
-
-
 ############
 #          #
 #  COLORS  #
@@ -58,6 +47,11 @@ RESTORE="\033[0m"
 
 # SOURCE OUR UNIVERSAL FUNCTIONS SCRIPT
 source $( dirname ${BASH_SOURCE} )/funcs.sh
+
+# MAC CHECK; THIS SCRIPT SHOULD ONLY BE RUN ON LINUX
+if [[ $( uname -a | grep -i "darwin" ) ]]; then
+    reportError "Wrong window! ;)" -n && exit
+fi
 
 function help_menu() {
     echo -e ""
@@ -90,7 +84,7 @@ while [[ $# -ge 1 ]]; do
         "-h"|"--help")
             help_menu ;;
         *)
-            echo "Invalid parameter detected!" && exit ;;
+            reportError "Invalid parameter detected!" && exit ;;
     esac
 
     shift

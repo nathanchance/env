@@ -1,4 +1,5 @@
 #!/bin/bash
+#
 # Copyright (C) 2015-2016 DragonTC
 # Copyright (C) 2016-2017 Nathan Chancellor
 #
@@ -23,17 +24,6 @@
 
 # PURPOSE: Builds Clang from source
 # USAGE: $ bash clang.sh -h
-
-
-###############
-#             #
-#  MAC CHECK  #
-#             #
-###############
-
-if [[ $( uname -a | grep -i "darwin" ) ]]; then
-    echo "Can't use this on a Mac, idiot! :P" && exit
-fi
 
 
 ############
@@ -63,6 +53,11 @@ TXTRST=$(tput sgr0) # RESET
 # SOURCE OUR UNIVERSAL FUNCTIONS SCRIPT
 source $( dirname ${BASH_SOURCE} )/funcs.sh
 
+# MAC CHECK; THIS SCRIPT SHOULD ONLY BE RUN ON LINUX
+if [[ $( uname -a | grep -i "darwin" ) ]]; then
+    reportError "Wrong window! ;)" && exit
+fi
+
 # PRINT A HELP MENU IF REQUESTED
 function help_menu() {
     echo -e ""
@@ -90,14 +85,14 @@ while [[ $# -ge 1 ]]; do
         "-h"|"--help")
             help_menu ;;
         *)
-            echo "Invalid parameter" && exit ;;
+            reportError "Invalid parameter" && exit ;;
     esac
 
     shift
 done
 
 if [[ -z ${VERSION_PARAM} ]]; then
-    echo "You did not specify a necessary parameter. Falling back to 5.0.0"
+    reportWarning "You did not specify a necessary parameter. Falling back to 5.0.0"
     VERSION_PARAM=5.0.0
 fi
 

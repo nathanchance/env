@@ -28,17 +28,6 @@
 # USAGE: $ bash gapps.sh -h
 
 
-###############
-#             #
-#  MAC CHECK  #
-#             #
-###############
-
-if [[ $( uname -a | grep -i "darwin" ) ]]; then
-    echo "Can't use this on a Mac, idiot! :P" && exit
-fi
-
-
 ############
 #          #
 #  COLORS  #
@@ -58,6 +47,11 @@ RESTORE="\033[0m"
 
 # SOURCE OUR UNIVERSAL FUNCTIONS SCRIPT
 source $( dirname ${BASH_SOURCE} )/funcs.sh
+
+# MAC CHECK; THIS SCRIPT SHOULD ONLY BE RUN ON LINUX
+if [[ $( uname -a | grep -i "darwin" ) ]]; then
+    reportError "Wrong window! ;)" -n && exit
+fi
 
 # PRINT A HELP MENU IF REQUESTED
 function help_menu() {
@@ -91,14 +85,14 @@ while [[ $# -ge 1 ]]; do
         "-h"|"--help")
             help_menu ;;
         *)
-            echo "Invalid parameter" && exit ;;
+            reportError "Invalid parameter" && exit ;;
     esac
 
     shift
 done
 
 if [[ -z ${TYPE} ]] || [[ ${TYPE} == "open" && -z ${VERSION} ]]; then
-    echo "You did not specify a necessary parameter (either type of GApps or variant of GApps). Please re-run the script with the necessary parameters!" && exit
+    reportError "You did not specify a necessary parameter (either type of GApps or variant of GApps). Please re-run the script with the necessary parameters!" && exit
 fi
 
 ###############

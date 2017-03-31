@@ -28,18 +28,6 @@
 # USAGE: $ bash apk.sh -h
 
 
-################
-#              #
-#  ARCH CHECK  #
-#              #
-################
-
-# CURRENTLY I BUILD ALL APKS ON MY PERSONAL MACHINE, NOT MY SERVER
-if [[ -f /etc/arch-release ]]; then
-    echo "Wrong window! ;)" && exit
-fi
-
-
 ############
 #          #
 #  COLORS  #
@@ -59,6 +47,11 @@ RESTORE="\033[0m"
 
 # SOURCE OUR UNIVERSAL FUNCTIONS SCRIPT
 source $( dirname ${BASH_SOURCE} )/funcs.sh
+
+# CURRENTLY I BUILD ALL APKS ON MY PERSONAL MACHINE, NOT MY SERVER
+if [[ -f /etc/arch-release ]]; then
+    reportError "Wrong window! ;)" && exit
+fi
 
 # PRINT A HELP MENU IF REQUESTED
 function help_menu() {
@@ -93,20 +86,20 @@ while [[ $# -ge 1 ]]; do
         "-h"|"--help")
             help_menu ;;
         *)
-            echo "Invalid parameter" && exit ;;
+            reportError "Invalid parameter" && exit ;;
     esac
 
     shift
 done
 
 if [[ -z ${APK} ]]; then
-    echo -e ${RED}"\nNo specified APK!"${RESTORE}
+    reportError "No specified APK!" -c
     help_menu
     exit
 fi
 
 if [[ -z ${ACTION} ]]; then
-    echo -e ${RED}"\nYou did not specify the required action! Falling back to building only"${RESTORE}
+    reportWarning "You did not specify the required action! Falling back to building only" -c
     ACTION=build
 fi
 
@@ -160,7 +153,7 @@ if [[ "${ACTION}" == "build" ]] || [[ "${ACTION}" == "both" ]] || [[ "${ACTION}"
         "install")
             ./gradlew installDebug ;;
         *)
-            echo -e ${RED}"Something serious has happened!"${RESTORE} && exit
+            reportError "Something serious has happened!" && exit
     esac
 
     APK_MOVE=${OUT_DIR}
@@ -183,7 +176,7 @@ if [[ "${ACTION}" == "commit" ]] || [[ "${ACTION}" == "both" ]]; then
             APK_MOVE=${HOME}/Documents/Repos/FlashVendor/prebuilt/app/Substratum
             VERSION=$( awk '/versionCode/{i++}i==2{print $2; exit}' "${SOURCE_DIR}"/app/build.gradle ) ;;
         *)
-            echo -e ${RED}"\nCommitting is not supported by this APK\n"${RESTORE} && exit
+            reportError "Committing is not supported by this APK" && exit
     esac
 
     # IF THE APK WAS FOUND, MOVE IT
@@ -240,7 +233,7 @@ release)." ;;
         # PUSH IT
         git push
     else
-        echo "Requested APK was not found; please run the script and use the build option!" && exit
+        reportError "Requested APK was not found; please run the script and use the build option!" && exit
     fi
 fi
 

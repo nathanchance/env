@@ -28,17 +28,6 @@
 # USAGE: $ bash kernel.sh -h
 
 
-###############
-#             #
-#  MAC CHECK  #
-#             #
-###############
-
-if [[ $( uname -a | grep -i "darwin" ) ]]; then
-    echo "Can't use this on a Mac, idiot! :P" && exit
-fi
-
-
 ############
 #          #
 #  COLORS  #
@@ -59,6 +48,11 @@ RESTORE="\033[0m"
 
 # SOURCE OUR UNIVERSAL FUNCTIONS SCRIPT
 source $( dirname ${BASH_SOURCE} )/funcs.sh
+
+# MAC CHECK; THIS SCRIPT SHOULD ONLY BE RUN ON LINUX
+if [[ $( uname -a | grep -i "darwin" ) ]]; then
+    reportError "Wrong window! ;)" && exit
+fi
 
 # PRINT A HELP MENU IF REQUESTED
 function help_menu() {
@@ -104,29 +98,29 @@ while [[ $# -ge 1 ]]; do
                     "4.9")
                         TOOLCHAIN_NAME=AOSP-4.9 ;;
                     *)
-                        echo "Invalid TC type!" ;;
+                        reportError "Invalid TC type!" && exit ;;
                 esac
             else
-                echo "Please specify a TC type!" && exit
+                reportError "Please specify a TC type!" && exit
             fi ;;
         "defconfig")
             shift
             if [[ $# -ge 1 ]]; then
                 DEFCONFIG=${1}
             else
-                echo "Please specify a defconfig!" && exit
+                reportError "Please specify a defconfig!" && exit
             fi ;;
         "-h"|"--help")
             help_menu ;;
         *)
-            echo "Invalid parameter" && exit ;;
+            reportError "Invalid parameter" && exit ;;
     esac
 
     shift
 done
 
 if [[ -z ${DEVICE} || -z ${KERNEL_BRANCH} ]]; then
-    echo "You did not specify a necessary parameter!" && exit
+    reportError "You did not specify a necessary parameter!" && exit
 fi
 
 
