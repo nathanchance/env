@@ -91,7 +91,7 @@ for FOLDER in ${SUBS_REPOS}; do
     git checkout cm-14.1
 
     # SET PROPER URL
-    if [[ ${FOLDER} == ".repo/manifests" ]]; then
+    if [[ ${FOLDER} = ".repo/manifests" ]]; then
         URL=android
     else
         URL=android_$( echo ${FOLDER} | sed "s/\//_/g" )

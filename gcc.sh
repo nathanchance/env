@@ -160,7 +160,7 @@ fi
 # SYNC THE REPOS
 echoText "SYNCING REPO"
 
-repo sync --force-sync -j$(grep -c ^processor /proc/cpuinfo)
+repo sync --force-sync -j$( nproc --all )
 
 
 # ADD THE GCC UPSTREAM REPO IF IT DOESN'T EXIST

@@ -99,7 +99,7 @@ function make_command() {
     if [[ -n $( command -v mka ) ]]; then
         mka ${MAKE_PARAMS}
     else
-        make -j$( grep -c ^processor /proc/cpuinfo ) ${PARAMS}
+        make -j$( nproc --all ) ${PARAMS}
     fi
 
     unset MAKE_PARAMS
@@ -288,17 +288,17 @@ clear && cd ${SOURCE_DIR}
 if [[ ${SYNC} = true ]]; then
     echoText "SYNCING LATEST SOURCES"; newLine
 
-    repo sync --force-sync -j$( grep -c ^processor /proc/cpuinfo )
+    repo sync --force-sync -j$( nproc --all )
 
 # IF IT'S MY OWN ROM, ALWAYS SYNC KERNEL, GAPPS, AND VENDOR REPOS BECAUSE THOSE
 # ARE EXTERNALLY UPDATED. EVERYTHING ELSE WILL BE EITHER LOCALLY TRACKED OR
 # SYNCED WHEN IT MATTERS
-elif [[ "${ROM}" == "flash" ]]; then
+elif [[ ${ROM} = "flash" ]]; then
     echoText "SYNCING REQUESTED REPOS"; newLine
 
     REPOS="kernel/huawei/angler vendor/google/build vendor/opengapps/sources/all
     vendor/opengapps/sources/arm vendor/opengapps/sources/arm64 vendor/flash"
-    repo sync --force-sync -j$( grep -c ^processor /proc/cpuinfo ) ${REPOS}
+    repo sync --force-sync -j$( nproc --all ) ${REPOS}
 fi
 
 
@@ -346,7 +346,7 @@ esac
 
 echoText "CLEANING UP OUT DIRECTORY"
 
-if [[ -n ${CLEAN_TYPE} ]] && [[ "${CLEAN_TYPE}" != "noclean" ]]; then
+if [[ -n ${CLEAN_TYPE} ]] && [[ ${CLEAN_TYPE} != "noclean" ]]; then
     make_command ${CLEAN_TYPE}
 elif [[ -z ${CLEAN_TYPE} ]]; then
     make_command clobber
@@ -391,7 +391,7 @@ else
 
     # THERE WILL BE A ZIP IN THE OUT FOLDER IF SUCCESSFUL
     FILES=$( ls ${OUT_DIR}/*.zip 2>/dev/null | wc -l )
-    if [[ ${FILES} != "0" ]]; then
+    if [[ ${FILES} != 0 ]]; then
         # MAKE BUILD RESULT STRING REFLECT SUCCESSFUL COMPILATION
         BUILD_RESULT_STRING="BUILD SUCCESSFUL"
         SUCCESS=true

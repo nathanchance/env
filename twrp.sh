@@ -109,7 +109,7 @@ IMG_MOVE=${HOME}/Web/Downloads/TWRP/${DEVICE}
 
 # TWRP version
 
-if [[ "${DEVICE}" == "angler" ]]; then
+if [[ ${DEVICE} = "angler" ]]; then
     # Version 1: f2fs-tools bumped to 1.7.0, TWRP app removed
     # Version 2: f2fs-tools bumped to 1.8.0
     # Version 3: Revert f2fs-tools back to 1.7.0
@@ -118,7 +118,7 @@ if [[ "${DEVICE}" == "angler" ]]; then
     # Version 6: Add back TWRP app prompt to fix theme
     # Version 7: Update F2FS driver in kernel to 4.11-rc1
     export TW_DEVICE_VERSION=7
-elif [[ "${DEVICE}" == "shamu" ]]; then
+elif [[ ${DEVICE} = "shamu" ]]; then
     # Version 1: f2fs-tools bumped to 1.7.0, TWRP app removed
     # Version 2: Bump to 3.1.0
     # Version 3: Add back TWRP app prompt to fix theme
@@ -152,7 +152,7 @@ cd ${SOURCE_DIR}
 if [[ ${SYNC} = true ]]; then
     echoText "SYNCING LATEST SOURCES"
 
-    repo sync --force-sync -j$(grep -c ^processor /proc/cpuinfo)
+    repo sync --force-sync -j$( nproc --all )
 fi
 
 
@@ -203,7 +203,7 @@ time mka recoveryimage | tee -a ${LOG_NAME}
 ####################
 
 # THERE WILL BE A FILE IN THE OUT FOLDER IN THE ABOVE FORMAT
-if [[ $( ls ${OUT_DIR}/${COMP_FILE} 2>/dev/null | wc -l ) != "0" ]]; then
+if [[ $( ls ${OUT_DIR}/${COMP_FILE} 2>/dev/null | wc -l ) != 0 ]]; then
     # MAKE BUILD RESULT STRING REFLECT SUCCESSFUL COMPILATION
     BUILD_RESULT_STRING="BUILD SUCCESSFUL"
     SUCCESS=true

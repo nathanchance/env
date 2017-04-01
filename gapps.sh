@@ -91,7 +91,7 @@ while [[ $# -ge 1 ]]; do
     shift
 done
 
-if [[ -z ${TYPE} ]] || [[ ${TYPE} == "open" && -z ${VERSION} ]]; then
+if [[ -z ${TYPE} ]] || [[ ${TYPE} = "open" && -z ${VERSION} ]]; then
     reportError "You did not specify a necessary parameter (either type of GApps or variant of GApps). Please re-run the script with the necessary parameters!" && exit
 fi
 
@@ -135,7 +135,7 @@ clear && cd ${SOURCE_DIR}
 # CLEAN UP #
 ############
 
-if [[ "${TYPE}" == "dynamic" ]]; then
+if [[ ${TYPE} = "dynamic" ]]; then
     echoText "CLEANING UP REPO"
 
     git reset --hard origin/${BRANCH}
@@ -150,7 +150,7 @@ fi
 echoText "UPDATING REPO"
 
 git pull
-if [[ "${TYPE}" == "open" ]]; then
+if [[ ${TYPE} = "open" ]]; then
     ./download_sources.sh --shallow arm64
 fi
 

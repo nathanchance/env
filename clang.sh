@@ -104,7 +104,7 @@ fi
 ###############
 
 # GET NUMBER OF CPUS
-CPUS=$( grep "^processor" /proc/cpuinfo | wc -l )
+CPUS=$( nproc --all )
 # SET NUMBER OF JOBS
 JOBS=$(bc <<< "$CPUS+2");
 # SET DATE FOR COMMIT

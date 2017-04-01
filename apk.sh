@@ -137,7 +137,7 @@ CURRENT_DIR=$( pwd )
 cd "${SOURCE_DIR}"
 
 # UPDATE REPO IF REQUESTED
-if [[ "${ACTION}" == "build" ]] || [[ "${ACTION}" == "both" ]] || [[ "${ACTION}" == "install" ]]; then
+if [[ ${ACTION} = "build" ]] || [[ ${ACTION} = "both" ]] || [[ ${ACTION} = "install" ]]; then
     echoText "UPDATING SOURCE"
     git reset --hard HEAD && git pull
 
@@ -166,7 +166,7 @@ if [[ "${ACTION}" == "build" ]] || [[ "${ACTION}" == "both" ]] || [[ "${ACTION}"
     fi
 fi
 
-if [[ "${ACTION}" == "commit" ]] || [[ "${ACTION}" == "both" ]]; then
+if [[ ${ACTION} = "commit" ]] || [[ ${ACTION} = "both" ]]; then
     COMMIT_HASH=$( git log -1 --format=%H )
 
     case ${APK} in
@@ -180,7 +180,7 @@ if [[ "${ACTION}" == "commit" ]] || [[ "${ACTION}" == "both" ]]; then
     esac
 
     # IF THE APK WAS FOUND, MOVE IT
-    if [[ $( ls "${OUT_DIR}"/${APK_FORMAT} 2>/dev/null | wc -l ) != "0" ]]; then
+    if [[ $( ls "${OUT_DIR}"/${APK_FORMAT} 2>/dev/null | wc -l ) != 0 ]]; then
         # CLEAN/MAKE APK_MOVE
         if [[ -d "${APK_MOVE}" ]]; then
             rm -vrf "${APK_MOVE}"/${APK_FORMAT}
@@ -243,7 +243,7 @@ END=$( TZ=MST date +%s )
 # PRINT RESULT
 # IF THE BUILD WAS SUCCESSFUL, PRINT FILE LOCATION AND SIZE
 echoText "${RESULT_STRING}!"
-if [[ ${RESULT_STRING} == "BUILD SUCCESSFUL" ]]; then
+if [[ ${RESULT_STRING} = "BUILD SUCCESSFUL" ]]; then
      echo -e ${RED}"FILE LOCATION: $( ls "${APK_MOVE}"/${APK_FORMAT} )"
      echo -e "SIZE: $( du -h "${APK_MOVE}"/${APK_FORMAT} | awk '{print $1}' )"${RESTORE}
 fi

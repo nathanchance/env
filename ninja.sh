@@ -110,7 +110,7 @@ ROM_SOURCE=${HOME}/ROMs/Flash
 #              #
 ################
 
-if [[ "${MODE}" == "build" || "${MODE}" == "both" ]]; then
+if [[ ${MODE} = "build" || ${MODE} = "both" ]]; then
     # CLEANING
     echoText "CLEANING REPO"
     rm -rf ${NINJA_SOURCE}
@@ -137,7 +137,7 @@ if [[ "${MODE}" == "build" || "${MODE}" == "both" ]]; then
     deactivate && rm -rf ${HOME}/venv
 fi
 
-if [[ "${MODE}" == "install" || "${MODE}" == "both" ]]; then
+if [[ ${MODE} = "install" || ${MODE} = "both" ]]; then
     # COPY NINJA TO /USR/BIN/LOCAL
     echoText "INSTALLING NINJA LOCALLY"
     cd ${NINJA_SOURCE}

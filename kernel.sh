@@ -172,7 +172,7 @@ else
     ANYKERNEL_BRANCH=${DEVICE}-flash-personal-7.1.1
 fi
 
-THREADS=-j$(grep -c ^processor /proc/cpuinfo)
+THREADS=-j$( nproc --all )
 KERNEL=${SOURCE_FOLDER}/arch/${ARCHITECTURE}/boot/${KERNEL_IMAGE}
 
 
@@ -274,7 +274,7 @@ time make ${THREADS} | tee -a ${LOGDIR}/Compilation/Kernels/${ZIP_NAME}.log
 # IF KERNEL COMPILED #
 ######################
 
-if [[ $( ls ${KERNEL} 2>/dev/null | wc -l ) != "0" ]]; then
+if [[ $( ls ${KERNEL} 2>/dev/null | wc -l ) != 0 ]]; then
     # SET BUILD SUCCESS STRING AND SUCCESS VARIABLE
     BUILD_RESULT_STRING="BUILD SUCCESSFUL" && SUCCESS=true
 
