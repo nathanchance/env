@@ -77,7 +77,7 @@ function help_menu() {
 
 # UNSET PREVIOUSLY USED VARIABLES IN CASE SCRIPT WAS SOURCED
 unset LOCALVERSION
-unset PUBLIC
+unset MODE
 unset TOOLCHAIN_NAME
 unset DEFCONFIG
 SUCCESS=false
@@ -89,8 +89,8 @@ KERNEL_BRANCH=n7.1.1-flash
 # GATHER PARAMETERS
 while [[ $# -ge 1 ]]; do
     case "${1}" in
-        "public")
-            PUBLIC=true ;;
+        "private"|"public"|"test")
+            MODE=${1} ;;
         "tc")
             shift
             if [[ $# -ge 1 ]]; then
@@ -121,6 +121,10 @@ done
 
 if [[ -z ${DEVICE} || -z ${KERNEL_BRANCH} ]]; then
     reportError "You did not specify a necessary parameter!" && exit
+fi
+
+if [[ -z ${MODE} ]]; then
+    MODE=private
 fi
 
 
@@ -164,14 +168,17 @@ if [[ -z ${TOOLCHAIN_NAME} ]]; then
     TOOLCHAIN_NAME=${TOOLCHAIN_PREFIX}6.x
 fi
 TOOLCHAIN_FOLDER=${TOOLCHAIN_HEAD}/${TOOLCHAIN_NAME}
-if [[ ${PUBLIC} = true ]]; then
-    ZIP_MOVE=${ZIP_MOVE_HEAD}/Kernels
-    ANYKERNEL_BRANCH=${DEVICE}-flash-public-7.1.1
-else
-    ZIP_MOVE=${ZIP_MOVE_HEAD}/.superhidden/Kernels
-    ANYKERNEL_BRANCH=${DEVICE}-flash-personal-7.1.1
-fi
-
+case ${MODE} in
+    "private")
+        ZIP_MOVE=${ZIP_MOVE_HEAD}/.superhidden/Kernels
+        ANYKERNEL_BRANCH=${DEVICE}-flash-personal-7.1.1 ;;
+    "public")
+        ZIP_MOVE=${ZIP_MOVE_HEAD}/Kernels
+        ANYKERNEL_BRANCH=${DEVICE}-flash-public-7.1.1 ;;
+    "test")
+        ZIP_MOVE=${ZIP_MOVE_HEAD}/.tmp
+        ANYKERNEL_BRANCH=${DEVICE}-flash-public-7.1.1 ;;
+esac
 THREADS=-j$( nproc --all )
 KERNEL=${SOURCE_FOLDER}/arch/${ARCHITECTURE}/boot/${KERNEL_IMAGE}
 
@@ -250,7 +257,7 @@ echoText "MAKING KERNEL"
 cd "${SOURCE_FOLDER}"
 
 # TAG THE HEAD COMMIT WITH THE VERSION FIRST IF IT'S A PUBLIC BUILD
-if [[ ${PUBLIC} = true ]]; then
+if [[ ${MODE} = "public" ]]; then
     git tag -a "${ZIP_NAME}" -m "${ZIP_NAME}"
     git push origin --tags
 fi
@@ -292,7 +299,7 @@ if [[ $( ls ${KERNEL} 2>/dev/null | wc -l ) != 0 ]]; then
     # IF ZIPMOVE DOESN'T EXIST, MAKE IT; OTHERWISE, CLEAN IT
     if [[ ! -d "${ZIP_MOVE}" ]]; then
         mkdir -p "${ZIP_MOVE}"
-    elif [[ ${PUBLIC} != true ]]; then
+    elif [[ ${MODE} != "public" ]]; then
         rm -rf "${ZIP_MOVE}"/*
     fi
 
@@ -313,6 +320,11 @@ if [[ $( ls ${KERNEL} 2>/dev/null | wc -l ) != 0 ]]; then
     #################
 
     mv ${ZIP_NAME}.zip "${ZIP_MOVE}"
+
+    # IF IT IS A TEST BUILD, UPLOAD IT
+    if [[ ${MODE} = "test" ]]; then
+        URL=$( curl -s --upload-file "${ZIP_MOVE}/${ZIP_NAME}.zip" "https://transfer.sh/${ZIP_NAME}.zip" )
+    fi
 
 
     ###################
@@ -351,8 +363,13 @@ END=$( TZ=MST date +"%s" )
 
 # IF THE BUILD WAS SUCCESSFUL, PRINT FILE LOCATION, AND SIZE
 if [[ ${SUCCESS} = true ]]; then
-    echo -e ${RED}"FILE LOCATION: ${ZIP_MOVE}/${ZIP_NAME}.zip"
-    echo -e "SIZE: $( du -h ${ZIP_MOVE}/${ZIP_NAME}.zip | awk '{print $1}' )"${RESTORE}
+    case ${MODE} in
+        "private"|"public")
+            echo -e ${RED}"FILE LOCATION: ${ZIP_MOVE}/${ZIP_NAME}.zip"
+            echo -e "SIZE: $( du -h ${ZIP_MOVE}/${ZIP_NAME}.zip | awk '{print $1}' )"${RESTORE} ;;
+        "test")
+            echo -e ${RED}"FILE LOCATION: ${URL}"${RESTORE} ;;
+    esac
 fi
 
 # PRINT THE TIME THE SCRIPT FINISHED
@@ -374,13 +391,23 @@ echo -e "${BUILD_RESULT_STRING} IN $( format_time ${END} ${START} )" >> ${LOG}
 # ONLY ADD A LINE ABOUT FILE LOCATION IF SCRIPT COMPLETED SUCCESSFULLY
 if [[ ${SUCCESS} = true ]]; then
     # FILE LOCATION: PATH
-    echo -e "FILE LOCATION: ${ZIP_MOVE}/${ZIP_NAME}.zip" >> ${LOG}
+    case ${MODE} in
+        "private"|"public")
+            echo -e "FILE LOCATION: ${ZIP_MOVE}/${ZIP_NAME}.zip" >> ${LOG} ;;
+        "test")
+            echo -e "FILE LOCATION: ${URL}" >> ${LOG} ;;
+    esac
 fi
 
 
-########################
-# ALERT FOR SCRIPT END #
-########################
+##############
+# SCRIPT END #
+##############
 
-echo -e "\a" && cd ${HOME}
+# KILL TMP FOLDER
+if [[ ${MODE} = "test" ]]; then
+    rm -rf ${ZIP_MOVE}
+fi
+
+echo -e "\a"
 unset LOCALVERSION
