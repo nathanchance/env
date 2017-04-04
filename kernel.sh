@@ -259,7 +259,7 @@ cd "${SOURCE_FOLDER}"
 # TAG THE HEAD COMMIT WITH THE VERSION FIRST IF IT'S A PUBLIC BUILD
 if [[ ${MODE} = "public" ]]; then
     git tag -a "${ZIP_NAME}" -m "${ZIP_NAME}"
-    git push origin --tags
+    git push origin "${ZIP_NAME}"
 fi
 
 # PROPERLY POINT COMPILER TO TOOLCHAIN AND ARCHITECTURE
