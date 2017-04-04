@@ -84,7 +84,7 @@ SUCCESS=false
 
 # DEFINE NECESSARY VARIABLES
 DEVICE=angler
-KERNEL_BRANCH=n7.1.1-flash
+KERNEL_BRANCH=n7.1.2-flash
 
 # GATHER PARAMETERS
 while [[ $# -ge 1 ]]; do
@@ -171,13 +171,13 @@ TOOLCHAIN_FOLDER=${TOOLCHAIN_HEAD}/${TOOLCHAIN_NAME}
 case ${MODE} in
     "private")
         ZIP_MOVE=${ZIP_MOVE_HEAD}/.superhidden/Kernels
-        ANYKERNEL_BRANCH=${DEVICE}-flash-personal-7.1.1 ;;
+        ANYKERNEL_BRANCH=${DEVICE}-flash-personal-7.1.2 ;;
     "public")
         ZIP_MOVE=${ZIP_MOVE_HEAD}/Kernels
-        ANYKERNEL_BRANCH=${DEVICE}-flash-public-7.1.1 ;;
+        ANYKERNEL_BRANCH=${DEVICE}-flash-public-7.1.2 ;;
     "test")
         ZIP_MOVE=${ZIP_MOVE_HEAD}/.tmp
-        ANYKERNEL_BRANCH=${DEVICE}-flash-public-7.1.1 ;;
+        ANYKERNEL_BRANCH=${DEVICE}-flash-public-7.1.2 ;;
 esac
 THREADS=-j$( nproc --all )
 KERNEL=${SOURCE_FOLDER}/arch/${ARCHITECTURE}/boot/${KERNEL_IMAGE}
