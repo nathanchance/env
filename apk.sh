@@ -190,7 +190,7 @@ if [[ ${ACTION} = "commit" ]] || [[ ${ACTION} = "both" ]]; then
 
         # UPDATE APK_MOVE
         echoText "MOVING APK"
-        cd "${APK_MOVE}" && git pull
+        cd "${APK_MOVE}" && git checkout n7.1.2 && git pull
 
         # MOVE NEW APK
         cp -v "${OUT_DIR}"/${APK_FORMAT} "${APK_MOVE}"/${APK_NAME}.apk

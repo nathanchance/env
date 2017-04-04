@@ -128,7 +128,7 @@ LOG_NAME=${LOGDIR}/Compilation/Clang/clang-${VERSION_PARAM}-$(TZ=MST date +"%Y%m
 clear
 
 # CLEAN INSTALL DIR
-cd ${INSTALL_DIR} && git checkout n7.1.1 && git pull && rm -vrf *
+cd ${INSTALL_DIR} && git checkout n7.1.2 && git pull && rm -vrf *
 
 # SYNC DOWN SOURCE; MAKE DIR IF IT DOESN'T EXIST ALREADY
 if [[ -d ${SOURCE_DIR} ]]; then

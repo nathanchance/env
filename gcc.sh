@@ -73,7 +73,7 @@ function build() {
     echoText "CLEANING REPO"
 
     cd ${REPO}
-    git checkout n7.1.1
+    git checkout n7.1.2
     git pull
     rm -vrf *
 
