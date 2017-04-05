@@ -81,7 +81,7 @@ while [[ $# -ge 1 ]]; do
     case "${1}" in
         "magisk"|"spectrum"|"substratum")
             APK=${1} ;;
-        "build"|"both"|"install"|"push")
+        "build"|"both"|"install"|"commit")
             ACTION=${1} ;;
         "-h"|"--help")
             help_menu ;;
