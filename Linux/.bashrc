@@ -137,29 +137,7 @@ function flash_build {
     make clean
     make mrproper
     make flash_defconfig
-    make -j$( grep -c ^processor /proc/cpuinfo )
-}
-
-# Update Linux mirror function
-function update_mirrors {
-    CUR_DIR=$( pwd )
-
-    cd ${HOME}/Kernels/linux-stable
-    git fetch -p origin
-    git push --mirror
-
-    cd ${HOME}/Kernels/android-kernel-msm
-    git fetch -p origin
-    git push --mirror
-
-    cd ${CUR_DIR}
-}
-
-# Add remote function for kernel repos
-function kernel_remotes {
-    git remote add aosp https://android.googlesource.com/kernel/msm/ && git fetch aosp
-    git remote add caf https://source.codeaurora.org/quic/la/kernel/msm-3.10 && git fetch caf
-    git remote add ls https://github.com/Flash-Kernel/linux-stable && git fetch ls
+    make -j$( nproc --all )
 }
 
 # EXKM to RC converter
@@ -196,12 +174,26 @@ function rps {
                 ARGS+="vendor/opengapps/sources/all "
                 ARGS+="vendor/opengapps/sources/arm "
                 ARGS+="vendor/opengapps/sources/arm64" ;;
+            "s")
+                ARGS="-c --no-clone-bundle --no-tags" ;;
             *)
                 ARGS=${1} ;;
         esac
     fi
 
-    repo sync --force-sync -j8 ${ARGS}
+    repo sync --force-sync -j$( nproc --all ) ${ARGS}
 
     unset ARGS
+}
+
+function ris-sparse {
+    repo init -u ${1} -b ${2} --no-clone-bundle --depth=1
+
+    time repo sync --force-sync -j$( nproc --all ) -c --no-clone-bundle --no-tags
+}
+
+function ris {
+    repo init -u ${1} -b ${2}
+
+    time repo sync --force-sync -j$( nproc --all )
 }
