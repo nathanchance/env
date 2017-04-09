@@ -32,7 +32,7 @@
 #             #
 ###############
 
-SOURCE_DIR=${HOME}/ROMs/Lineage
+SOURCE_DIR=${HOME}/ROMs/LineageOMS
 
 SUBS_REPOS="
 .repo/manifests

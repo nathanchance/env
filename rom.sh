@@ -60,7 +60,7 @@ function help_menu() {
     echo -e "${BOLD}USAGE:${RESTORE} bash ${0} <rom> <device> <options>\n"
     echo -e "${BOLD}Example:${RESTORE} bash ${0} flash angler user sync\n"
     echo -e "${BOLD}Required options:${RESTORE}"
-    echo -e "   rom:        abc | aosip | du | flash | krexus | lineage | omni | pn | vanilla"
+    echo -e "   rom:        abc | du | flash | krexus | lineageos | lineageoms | omni | pn | vanilla"
     echo -e "   device:     angler | bullhead | flo | hammerhead | marlin| sailfish | shamu\n"
     echo -e "${BOLD}Standard options:${RESTORE}"
     echo -e "   sync:       performs a repo sync before building"
@@ -121,7 +121,7 @@ while [[ $# -ge 1 ]]; do
         # REQUIRED OPTIONS
         "angler"|"bullhead"|"flo"|"hammerhead"|"marlin"|"sailfish"|"shamu")
             DEVICE=${1} ;;
-        "abc"|"aosip"|"du"|"flash"|"krexus"|"lineage"|"omni"|"pn"|"vanilla")
+        "abc"|"du"|"flash"|"krexus"|"lineageos"|"lineageoms"|"omni"|"pn"|"vanilla")
             ROM=${1} ;;
         # STANDARD OPTIONS
         "sync")
@@ -240,9 +240,6 @@ case "${ROM}" in
     "abc")
         SOURCE_DIR=${ANDROID_DIR}/ROMs/ABC
         ZIP_MOVE=${ZIP_MOVE_PARENT}/ABC/${DEVICE} ;;
-    "aosip")
-        SOURCE_DIR=${ANDROID_DIR}/ROMs/AOSiP
-        ZIP_MOVE=${ZIP_MOVE_PARENT}/AOSiP/${DEVICE} ;;
     "du")
         SOURCE_DIR=${ANDROID_DIR}/ROMs/DU
         ZIP_MOVE=${ZIP_MOVE_PARENT}/DirtyUnicorns/${DEVICE} ;;
@@ -252,9 +249,12 @@ case "${ROM}" in
     "krexus")
         SOURCE_DIR=${ANDROID_DIR}/ROMs/Krexus
         ZIP_MOVE=${ZIP_MOVE_PARENT}/Krexus/${DEVICE} ;;
-    "lineage")
-        SOURCE_DIR=${ANDROID_DIR}/ROMs/Lineage
-        ZIP_MOVE=${ZIP_MOVE_PARENT}/Lineage/${DEVICE} ;;
+    "lineageos")
+        SOURCE_DIR=${ANDROID_DIR}/ROMs/LineageOS
+        ZIP_MOVE=${ZIP_MOVE_PARENT}/LineageOS/${DEVICE} ;;
+    "lineageoms")
+        SOURCE_DIR=${ANDROID_DIR}/ROMs/LineageOMS
+        ZIP_MOVE=${ZIP_MOVE_PARENT}/LineageOMS/${DEVICE} ;;
     "omni")
         SOURCE_DIR=${ANDROID_DIR}/ROMs/Omni
         ZIP_MOVE=${ZIP_MOVE_PARENT}/Omni/${DEVICE} ;;
@@ -284,11 +284,18 @@ clear && cd ${SOURCE_DIR}
 # REPO SYNC #
 #############
 
+REPO_SYNC="repo sync --force-sync -j$( nproc --all )"
+
 # IF THE SYNC IS REQUESTED, DO SO
 if [[ ${SYNC} = true ]]; then
     echoText "SYNCING LATEST SOURCES"; newLine
 
-    repo sync --force-sync -j$( nproc --all )
+    case ${ROM} in
+        "flash"|"krexus"|"lineageoms"|"vanilla")
+            ${REPO_SYNC} ;;
+        *)
+            ${REPO_SYNC} -c --no-clone-bundle --no-tags ;;
+    esac
 
 # IF IT'S MY OWN ROM, ALWAYS SYNC KERNEL, GAPPS, AND VENDOR REPOS BECAUSE THOSE
 # ARE EXTERNALLY UPDATED. EVERYTHING ELSE WILL BE EITHER LOCALLY TRACKED OR
@@ -298,7 +305,8 @@ elif [[ ${ROM} = "flash" ]]; then
 
     REPOS="kernel/huawei/angler vendor/google/build vendor/opengapps/sources/all
     vendor/opengapps/sources/arm vendor/opengapps/sources/arm64 vendor/flash"
-    repo sync --force-sync -j$( nproc --all ) ${REPOS}
+
+    ${REPO_SYNC} ${REPOS}
 fi
 
 
