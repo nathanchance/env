@@ -63,9 +63,9 @@ function help_menu() {
     echo -e ""
     echo -e "${TXTBLD}OVERVIEW:${TXTRST} Builds Clang from source\n"
     echo -e "${TXTBLD}USAGE:${TXTRST} bash ${0} <version>\n"
-    echo -e "${TXTBLD}EXAMPLE:${TXTRST} bash ${0} 3.9.1\n"
+    echo -e "${TXTBLD}EXAMPLE:${TXTRST} bash ${0} 3.9.x\n"
     echo -e "${TXTBLD}Required options:${TXTRST}"
-    echo -e "   version:    3.9.1 | 4.0.0 | 5.0.0\n"
+    echo -e "   version:    3.9.x | 4.0.x | 5.0.x\n"
     exit
 }
 
@@ -80,7 +80,7 @@ unset BUILD_RESULT_STRING
 
 while [[ $# -ge 1 ]]; do
     case "${1}" in
-        "3.9.1"|"4.0.0"|"5.0.0")
+        "3.9.x"|"4.0.x"|"5.0.x")
             VERSION_PARAM=${1} ;;
         "-h"|"--help")
             help_menu ;;
@@ -92,8 +92,8 @@ while [[ $# -ge 1 ]]; do
 done
 
 if [[ -z ${VERSION_PARAM} ]]; then
-    reportWarning "You did not specify a necessary parameter. Falling back to 5.0.0"
-    VERSION_PARAM=5.0.0
+    reportWarning "You did not specify a necessary parameter. Falling back to 5.0.x"
+    VERSION_PARAM=5.0.x
 fi
 
 
