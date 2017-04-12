@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 #
 # Copyright (C) 2015-2016 DragonTC
 # Copyright (C) 2016-2017 Nathan Chancellor
