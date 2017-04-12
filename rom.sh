@@ -60,7 +60,7 @@ function help_menu() {
     echo -e "${BOLD}USAGE:${RESTORE} bash ${0} <rom> <device> <options>\n"
     echo -e "${BOLD}Example:${RESTORE} bash ${0} flash angler user sync\n"
     echo -e "${BOLD}Required options:${RESTORE}"
-    echo -e "   rom:        abc | du | flash | krexus | lineageos | lineageoms | omni | pn | vanilla"
+    echo -e "   rom:        abc | du | du-caf | flash | krexus | lineageos | lineageoms | omni | pn | vanilla"
     echo -e "   device:     angler | bullhead | flo | hammerhead | marlin| sailfish | shamu\n"
     echo -e "${BOLD}Standard options:${RESTORE}"
     echo -e "   sync:       performs a repo sync before building"
@@ -119,9 +119,9 @@ while [[ $# -ge 1 ]]; do
 
     case "${1}" in
         # REQUIRED OPTIONS
-        "angler"|"bullhead"|"flo"|"hammerhead"|"marlin"|"sailfish"|"shamu")
+        "angler"|"bullhead"|"flo"|"hammerhead"|"marlin"|"oneplus3"|"sailfish"|"shamu")
             DEVICE=${1} ;;
-        "abc"|"du"|"flash"|"krexus"|"lineageos"|"lineageoms"|"omni"|"pn"|"vanilla")
+        "abc"|"du"|"du-caf"|"flash"|"krexus"|"lineageos"|"lineageoms"|"omni"|"pn"|"vanilla")
             ROM=${1} ;;
         # STANDARD OPTIONS
         "sync")
@@ -242,6 +242,9 @@ case "${ROM}" in
         ZIP_MOVE=${ZIP_MOVE_PARENT}/ABC/${DEVICE} ;;
     "du")
         SOURCE_DIR=${ANDROID_DIR}/ROMs/DU
+        ZIP_MOVE=${ZIP_MOVE_PARENT}/DirtyUnicorns/${DEVICE} ;;
+    "du-caf")
+        SOURCE_DIR=${ANDROID_DIR}/ROMs/DU-CAF
         ZIP_MOVE=${ZIP_MOVE_PARENT}/DirtyUnicorns/${DEVICE} ;;
     "flash")
         SOURCE_DIR=${ANDROID_DIR}/ROMs/Flash
