@@ -36425,9 +36425,9 @@
 	<key>NSWindow Frame SharedPreferences</key>
 	<string>1001 610 958 433 0 0 1920 1058 </string>
 	<key>NSWindow Frame iTerm Window 0</key>
-	<string>0 4 1920 1054 0 0 1920 1058 </string>
+	<string>0 46 1280 732 0 0 1280 778 </string>
 	<key>NSWindow Frame iTerm Window 1</key>
-	<string>0 4 1920 1054 0 0 1920 1058 </string>
+	<string>0 46 1280 732 0 0 1280 778 </string>
 	<key>New Bookmarks</key>
 	<array>
 		<dict>
@@ -37129,6 +37129,8 @@
 	<false/>
 	<key>NoSyncTimeOfFirstLaunchOfVersionWithTip</key>
 	<real>511023940.67170602</real>
+	<key>PMPrintingExpandedStateForPrint2</key>
+	<false/>
 	<key>PointerActions</key>
 	<dict>
 		<key>Button,1,1,,</key>
@@ -37164,6 +37166,8 @@
 	</dict>
 	<key>PrefsCustomFolder</key>
 	<string>/Users/nathan/Documents/Repos/os-things/Mac</string>
+	<key>Print In Black And White</key>
+	<true/>
 	<key>QuitWhenAllWindowsClosed</key>
 	<true/>
 	<key>SUEnableAutomaticChecks</key>
@@ -37175,7 +37179,7 @@
 	<key>SUHasLaunchedBefore</key>
 	<true/>
 	<key>SULastCheckTime</key>
-	<date>2017-03-21T20:09:57Z</date>
+	<date>2017-04-05T20:10:10Z</date>
 	<key>SUSendProfileInfo</key>
 	<false/>
 	<key>ShowBookmarkName</key>
@@ -37203,7 +37207,7 @@
 	<key>findRegex_iTerm</key>
 	<false/>
 	<key>iTerm Version</key>
-	<string>3.1.20170314-nightly</string>
+	<string>3.1.20170321-nightly</string>
 	<key>kCPKSelectionViewPreferredModeKey</key>
 	<integer>0</integer>
 	<key>kCPKSelectionViewShowHSBTextFieldsKey</key>
