@@ -86,7 +86,7 @@ function reportError() {
     fi
 }
 
-# PRINTS AN WARNING IN BOLD YELLOW
+# PRINTS A WARNING IN BOLD YELLOW
 function reportWarning() {
     echo -e ""
     echo -e ${YELLOW}"${1}"${RESTORE}
