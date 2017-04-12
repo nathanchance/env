@@ -24,11 +24,13 @@
 #             #
 ###############
 
+# COLORS
+RED="\033[01;31m"
+RESTORE="\033[0m"
+YELLOW="\033[01;33m"
+
 # PRINTS A FORMATTED HEADER TO POINT OUT WHAT IS BEING DONE TO THE USER
 function echoText() {
-    RED="\033[01;31m"
-    RESTORE="\033[0m"
-
     echo -e ${RED}
     echo -e "====$( for i in $( seq ${#1} ); do echo -e "=\c"; done )===="
     echo -e "==  ${1}  =="
@@ -77,9 +79,6 @@ function newLine() {
 
 # PRINTS AN ERROR IN BOLD RED
 function reportError() {
-    RED="\033[01;31m"
-    RESTORE="\033[0m"
-
     echo -e ""
     echo -e ${RED}"${1}"${RESTORE}
     if [[ -z ${2} ]]; then
@@ -89,9 +88,6 @@ function reportError() {
 
 # PRINTS AN WARNING IN BOLD YELLOW
 function reportWarning() {
-    YELLOW="\033[01;33m"
-    RESTORE="\033[0m"
-
     echo -e ""
     echo -e ${YELLOW}"${1}"${RESTORE}
     if [[ -z ${2} ]]; then
