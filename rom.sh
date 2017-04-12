@@ -284,18 +284,14 @@ clear && cd ${SOURCE_DIR}
 # REPO SYNC #
 #############
 
-REPO_SYNC="repo sync --force-sync -j$( nproc --all )"
+REPO_SYNC="repo sync"
+FLAGS="-j$( nproc --all ) --force-sync -c --no-clone-bundle --no-tags --optimized-fetch --prune"
 
 # IF THE SYNC IS REQUESTED, DO SO
 if [[ ${SYNC} = true ]]; then
     echoText "SYNCING LATEST SOURCES"; newLine
 
-    case ${ROM} in
-        "flash"|"krexus"|"lineageoms"|"vanilla")
-            ${REPO_SYNC} ;;
-        *)
-            ${REPO_SYNC} -c --no-clone-bundle --no-tags ;;
-    esac
+    ${REPO_SYNC} ${FLAGS}
 
 # IF IT'S MY OWN ROM, ALWAYS SYNC KERNEL, GAPPS, AND VENDOR REPOS BECAUSE THOSE
 # ARE EXTERNALLY UPDATED. EVERYTHING ELSE WILL BE EITHER LOCALLY TRACKED OR
@@ -306,7 +302,7 @@ elif [[ ${ROM} = "flash" ]]; then
     REPOS="kernel/huawei/angler vendor/google/build vendor/opengapps/sources/all
     vendor/opengapps/sources/arm vendor/opengapps/sources/arm64 vendor/flash"
 
-    ${REPO_SYNC} ${REPOS}
+    ${REPO_SYNC} ${FLAGS} ${REPOS}
 fi
 
 
