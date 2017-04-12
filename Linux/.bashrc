@@ -174,14 +174,12 @@ function rps {
                 ARGS+="vendor/opengapps/sources/all "
                 ARGS+="vendor/opengapps/sources/arm "
                 ARGS+="vendor/opengapps/sources/arm64" ;;
-            "s")
-                ARGS="-c --no-clone-bundle --no-tags" ;;
             *)
                 ARGS=${1} ;;
         esac
     fi
 
-    repo sync --force-sync -j$( nproc --all ) ${ARGS}
+    repo sync -j$( nproc --all ) --force-sync -c --no-clone-bundle --no-tags --optimized-fetch --prune ${ARGS}
 
     unset ARGS
 }
@@ -189,11 +187,11 @@ function rps {
 function ris-sparse {
     repo init -u ${1} -b ${2} --no-clone-bundle --depth=1
 
-    time repo sync --force-sync -j$( nproc --all ) -c --no-clone-bundle --no-tags
+    time repo sync -j$( nproc --all ) --force-sync -c --no-clone-bundle --no-tags --optimized-fetch --prune
 }
 
 function ris {
     repo init -u ${1} -b ${2}
 
-    time repo sync --force-sync -j$( nproc --all )
+    time repo sync -j$( nproc --all ) --force-sync -c --no-clone-bundle --no-tags --optimized-fetch --prune
 }
