@@ -24,7 +24,7 @@
 #         #
 ###########
 
-# PURPOSE: Build GApps zip (either Open or Dynamic GApps)
+# PURPOSE: Build GApps zip (either Open or Beans GApps)
 # USAGE: $ bash gapps.sh -h
 
 
@@ -56,11 +56,11 @@ fi
 # PRINT A HELP MENU IF REQUESTED
 function help_menu() {
     echo -e ""
-    echo -e "${BOLD}OVERVIEW:${RESTORE} Builds a GApps zip (either Open or Dynamic)\n"
+    echo -e "${BOLD}OVERVIEW:${RESTORE} Builds a GApps zip (either Open or Beans)\n"
     echo -e "${BOLD}USAGE:${RESTORE} bash ${0} <gapps> <variant>\n"
     echo -e "${BOLD}EXAMPLE:${RESTORE} bash ${0} open nano\n"
     echo -e ${BOLD}"Required options:${RESTORE}"
-    echo -e "   gapps:      open | dynamic\n"
+    echo -e "   gapps:      open | beans\n"
     echo -e ${BOLD}"Other options:${RESTORE}"
     echo -e "   variant:    (open only) super | stock | full | mini | micro | nano | pico\n"
     exit
@@ -78,7 +78,7 @@ SUCCESS=false
 
 while [[ $# -ge 1 ]]; do
     case "${1}" in
-        "open"|"dynamic")
+        "open"|"beans")
             TYPE=${1} ;;
         "super"|"stock"|"full"|"mini"|"micro"|"nano"|"pico")
             VERSION=${1} ;;
@@ -106,10 +106,10 @@ ZIP_MOVE=${HOME}/Web/Downloads/.superhidden/GApps
 
 # Type logic
 case ${TYPE} in
-    "dynamic")
-        SOURCE_DIR=${ANDROID_DIR}/GApps/Dynamic
-        ZIP_FORMAT=*Dynamic*.zip
-        BRANCH=n-mr1 ;;
+    "beans")
+        SOURCE_DIR=${ANDROID_DIR}/GApps/Beans
+        ZIP_FORMAT=*Beans*.zip
+        BRANCH=n-mr2 ;;
     "open")
         SOURCE_DIR=${ANDROID_DIR}/GApps/Open
         ZIP_FORMAT=open*${VERSION}*.zip
@@ -135,7 +135,7 @@ clear && cd ${SOURCE_DIR}
 # CLEAN UP #
 ############
 
-if [[ ${TYPE} = "dynamic" ]]; then
+if [[ ${TYPE} = "beans" ]]; then
     echoText "CLEANING UP REPO"
 
     git reset --hard origin/${BRANCH}
@@ -162,7 +162,7 @@ fi
 echoText "BUILDING $( echo ${TYPE} | awk '{print toupper($0)}' ) GAPPS"
 
 case "${TYPE}" in
-    "dynamic")
+    "beans")
         source mkgapps.sh both ;;
     "open")
         make arm64-25-${VERSION} ;;
