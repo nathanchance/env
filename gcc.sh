@@ -25,7 +25,15 @@
 ###########
 
 # PURPOSE: Builds aarch64-linux-android and arm-linux-androideabi toolchains from source
-# USAGE: $ bash gcc.sh
+# USAGE: $ bash gcc.sh -h
+
+# PRINT A HELP MENU IF REQUESTED
+if [[ -n ${1} ]]; then
+    echo -e ""
+    echo -e "${BOLD}OVERVIEW:${RST} Build a set of GCC 6 toolchains and uploads them to Flash-ROM's Gitlab\n"
+    echo -e "${BOLD}USAGE:${RST} bash ${0}\n"
+    exit
+fi
 
 
 ###############
@@ -46,6 +54,11 @@ SCRIPTS_DIR=${TOOLCHAIN_HEAD}/Flash-TC/scripts
 
 # SOURCE OUR UNIVERSAL FUNCTIONS SCRIPT
 source $( dirname ${BASH_SOURCE} )/funcs.sh
+
+# MAC CHECK; THIS SCRIPT SHOULD ONLY BE RUN ON LINUX
+if [[ $( uname -a | grep -i "darwin" ) ]]; then
+    reportError "Wrong window! ;)" && exit
+fi
 
 # BUILD FUNCTION
 function build() {

@@ -23,7 +23,15 @@
 ###########
 
 # PURPOSE: Merge LineageOS updates into LineageOMS org
-# USAGE: $ bash lineage_merge.sh
+# USAGE: $ bash lineage_merge.sh -h
+
+# PRINT A HELP MENU IF REQUESTED
+if [[ -n ${1} ]]; then
+    echo -e ""
+    echo -e "${BOLD}OVERVIEW:${RST} Update LineageOMS organization by fetching and rebasing\n"
+    echo -e "${BOLD}USAGE:${RST} bash ${0}\n"
+    exit
+fi
 
 
 ###############
@@ -58,6 +66,11 @@ vendor/cm"
 
 # SOURCE OUR UNIVERSAL FUNCTIONS SCRIPT
 source $( dirname ${BASH_SOURCE} )/funcs.sh
+
+# MAC CHECK; THIS SCRIPT SHOULD ONLY BE RUN ON LINUX
+if [[ $( uname -a | grep -i "darwin" ) ]]; then
+    reportError "Wrong window! ;)" && exit
+fi
 
 
 ################
