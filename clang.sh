@@ -26,24 +26,6 @@
 # USAGE: $ bash clang.sh -h
 
 
-############
-#          #
-#  COLORS  #
-#          #
-############
-
-RED=$(tput setaf 1) # RED
-GRN=$(tput setaf 2) # GREEN
-BLU=$(tput setaf 4) # BLUE
-CYA=$(tput setaf 6) # CYAN
-TXTBLD=$(tput bold) # BOLD
-BLDRED=${TXTBLD}$(tput setaf 1) # RED
-BLDGRN=${TXTBLD}$(tput setaf 2) # GREEN
-BLDBLU=${TXTBLD}$(tput setaf 4) # BLUE
-BLDCYA=${TXTBLD}$(tput setaf 6) # CYAN
-TXTRST=$(tput sgr0) # RESET
-
-
 ###############
 #             #
 #  FUNCTIONS  #
@@ -61,10 +43,10 @@ fi
 # PRINT A HELP MENU IF REQUESTED
 function help_menu() {
     echo -e ""
-    echo -e "${TXTBLD}OVERVIEW:${TXTRST} Builds Clang from source\n"
-    echo -e "${TXTBLD}USAGE:${TXTRST} bash ${0} <version>\n"
-    echo -e "${TXTBLD}EXAMPLE:${TXTRST} bash ${0} 3.9.x\n"
-    echo -e "${TXTBLD}Required options:${TXTRST}"
+    echo -e "${BOLD}OVERVIEW:${RST} Builds Clang from source\n"
+    echo -e "${BOLD}USAGE:${RST} bash ${0} <version>\n"
+    echo -e "${BOLD}EXAMPLE:${RST} bash ${0} 3.9.x\n"
+    echo -e "${BOLD}Required options:${RST}"
     echo -e "   version:    3.9.x | 4.0.x | 5.0.x\n"
     exit
 }
@@ -187,15 +169,15 @@ if ! time cmake --build . -- -j${JOBS} | tee -a ${LOG_NAME}; then
 
     # PRINT FAILURE
     echo "";
-    echo -e ${RED} "**************************************" ${TXTRST};
-    echo -e ${RED} "       ______      _ __         ____  " ${TXTRST};
-    echo -e ${RED} "      / ____/___ _(_) /__  ____/ / /  " ${TXTRST};
-    echo -e ${RED} "     / /_  / __ '/ / / _ \/ __  / /   " ${TXTRST};
-    echo -e ${RED} "    / __/ / /_/ / / /  __/ /_/ /_/    " ${TXTRST};
-    echo -e ${RED} "   /_/    \__,_/_/_/\___/\__,_/_/     " ${TXTRST};
-    echo -e ${RED} "                                      " ${TXTRST};
-    echo -e ${RED} "     Clang has failed to compile!     " ${TXTRST};
-    echo -e ${RED} "**************************************" ${TXTRST};
+    echo -e ${RED} "**************************************" ${RST};
+    echo -e ${RED} "       ______      _ __         ____  " ${RST};
+    echo -e ${RED} "      / ____/___ _(_) /__  ____/ / /  " ${RST};
+    echo -e ${RED} "     / /_  / __ '/ / / _ \/ __  / /   " ${RST};
+    echo -e ${RED} "    / __/ / /_/ / / /  __/ /_/ /_/    " ${RST};
+    echo -e ${RED} "   /_/    \__,_/_/_/\___/\__,_/_/     " ${RST};
+    echo -e ${RED} "                                      " ${RST};
+    echo -e ${RED} "     Clang has failed to compile!     " ${RST};
+    echo -e ${RED} "**************************************" ${RST};
     exit 1;
 else
     BUILD_RESULT_STRING="BUILD SUCCESSFUL"
@@ -227,19 +209,19 @@ binutils source: https://github.com/Flash-TC/binutils" && git push --force
 
     # PRINT SUCCESS
     echo -e "";
-    echo -e ${GRN} "*****************************************************" ${TXTRST};
-    echo -e ${GRN} "     ______                      __     __       __  " ${TXTRST};
-    echo -e ${GRN} "    / ____/___  ____ ___  ____  / /__  / /____  / /  " ${TXTRST};
-    echo -e ${GRN} "   / /   / __ \/ __ '__ \/ __ \/ / _ \/ __/ _ \/ /   " ${TXTRST};
-    echo -e ${GRN} "  / /___/ /_/ / / / / / / /_/ / /  __/ /_/  __/_/    " ${TXTRST};
-    echo -e ${GRN} "  \____/\____/_/ /_/ /_/ .___/_/\___/\__/\___(_)     " ${TXTRST};
-    echo -e ${GRN} "                      /_/                            " ${TXTRST};
-    echo -e ${GRN} "                                                     " ${TXTRST};
-    echo -e ${GRN} "       Clang ${VERSION} has compiled successfully!   " ${TXTRST};
-    echo -e ${GRN} "*****************************************************" ${TXTRST};
+    echo -e ${GRN} "*****************************************************" ${RST};
+    echo -e ${GRN} "     ______                      __     __       __  " ${RST};
+    echo -e ${GRN} "    / ____/___  ____ ___  ____  / /__  / /____  / /  " ${RST};
+    echo -e ${GRN} "   / /   / __ \/ __ '__ \/ __ \/ / _ \/ __/ _ \/ /   " ${RST};
+    echo -e ${GRN} "  / /___/ /_/ / / / / / / /_/ / /  __/ /_/  __/_/    " ${RST};
+    echo -e ${GRN} "  \____/\____/_/ /_/ /_/ .___/_/\___/\__/\___(_)     " ${RST};
+    echo -e ${GRN} "                      /_/                            " ${RST};
+    echo -e ${GRN} "                                                     " ${RST};
+    echo -e ${GRN} "       Clang ${VERSION} has compiled successfully!   " ${RST};
+    echo -e ${GRN} "*****************************************************" ${RST};
     echo -e  "";
-    echo -e ${BLDGRN}"Total time elapsed:${TXTRST} ${GRN}${TMIN} minutes ${TSEC} seconds"${TXTRST};
-    echo -e ${BLDGRN}"Toolchain located at:${TXTRST} ${GRN}${INSTALL_DIR}"${TXTRST};
+    echo -e ${GRN}"Total time elapsed: ${TMIN} minutes ${TSEC} seconds"${RST};
+    echo -e ${GRN}"Toolchain located at: ${INSTALL_DIR}"${RST};
 fi;
 
 

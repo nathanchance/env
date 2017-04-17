@@ -28,17 +28,6 @@
 # USAGE: $ bash rom.sh -h
 
 
-############
-#          #
-#  COLORS  #
-#          #
-############
-
-BOLD="\033[1m"
-RED="\033[01;31m"
-RESTORE="\033[0m"
-
-
 ###############
 #             #
 #  FUNCTIONS  #
@@ -56,18 +45,18 @@ fi
 # PRINT A HELP MENU IF REQUESTED
 function help_menu() {
     echo -e ""
-    echo -e "${BOLD}OVERVIEW:${RESTORE} Build a ROM\n"
-    echo -e "${BOLD}USAGE:${RESTORE} bash ${0} <rom> <device> <options>\n"
-    echo -e "${BOLD}Example:${RESTORE} bash ${0} flash angler user sync\n"
-    echo -e "${BOLD}Required options:${RESTORE}"
+    echo -e "${BOLD}OVERVIEW:${RST} Build a ROM\n"
+    echo -e "${BOLD}USAGE:${RST} bash ${0} <rom> <device> <options>\n"
+    echo -e "${BOLD}Example:${RST} bash ${0} flash angler user sync\n"
+    echo -e "${BOLD}Required options:${RST}"
     echo -e "   rom:        abc | du | du-caf | flash | krexus | lineageos | lineageoms | omni | pn | vanilla"
     echo -e "   device:     angler | bullhead | flo | hammerhead | marlin| sailfish | shamu\n"
-    echo -e "${BOLD}Standard options:${RESTORE}"
+    echo -e "${BOLD}Standard options:${RST}"
     echo -e "   sync:       performs a repo sync before building"
     echo -e "   clean:      performs the specified clean (e.g. clean installclean will run make installclean)"
     echo -e "   make:       performs the specified make (e.g. make SystemUI will run make SystemUI)"
     echo -e "   variant:    build with the specified variant (e.g. variant userdebug). Possible options: eng, userdebug, and user. Userdebug is the default.\n"
-    echo -e "${BOLD}Special options:${RESTORE}"
+    echo -e "${BOLD}Special options:${RST}"
     echo -e "   me:         (Flash only) Builds an Angler (or Shamu if specified) userdebug build"
     echo -e "   plain:      (Flash only) Builds an Angler (or Shamu if specified) userdebug build without root, Substratum, or GApps"
     echo -e "   nosubs:     (Flash only) Builds without Substratum"
@@ -463,13 +452,13 @@ END=$( TZ=MST date +%s )
 # IF THE BUILD WAS SUCCESSFUL, PRINT FILE LOCATION, AND SIZE
 if [[ ${SUCCESS} = true ]]; then
     echo -e ${RED}"FILE LOCATION: $( ls ${ZIP_MOVE}/*.zip )"
-    echo -e "SIZE: $( du -h ${ZIP_MOVE}/*.zip | awk '{print $1}' )"${RESTORE}
+    echo -e "SIZE: $( du -h ${ZIP_MOVE}/*.zip | awk '{print $1}' )"${RST}
 fi
 
 # PRINT THE TIME THE SCRIPT FINISHED
 # AND HOW LONG IT TOOK REGARDLESS OF SUCCESS
 echo -e ${RED}"TIME: $( TZ=MST date +%D\ %r | awk '{print toupper($0)}' )"
-echo -e ${RED}"DURATION: $( format_time ${END} ${START} )"${RESTORE}; newLine
+echo -e ${RED}"DURATION: $( format_time ${END} ${START} )"${RST}; newLine
 
 
 ##################

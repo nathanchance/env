@@ -28,17 +28,6 @@
 # USAGE: $ bash twrp.sh -h
 
 
-############
-#          #
-#  COLORS  #
-#          #
-############
-
-BOLD="\033[1m"
-RED="\033[01;31m"
-RESTORE="\033[0m"
-
-
 ###############
 #             #
 #  FUNCTIONS  #
@@ -55,12 +44,12 @@ fi
 
 function help_menu() {
     echo -e ""
-    echo -e ${BOLD}"OVERVIEW:${RESTORE} Builds and pushes a Substratum APK\n"
-    echo -e ${BOLD}"USAGE:${RESTORE} bash ${0} <device> <options>\n"
-    echo -e ${BOLD}"EXAMPLE:${RESTORE} bash ${0} angler\n"
-    echo -e ${BOLD}"Required options:${RESTORE}"
+    echo -e ${BOLD}"OVERVIEW:${RST} Builds and pushes a Substratum APK\n"
+    echo -e ${BOLD}"USAGE:${RST} bash ${0} <device> <options>\n"
+    echo -e ${BOLD}"EXAMPLE:${RST} bash ${0} angler\n"
+    echo -e ${BOLD}"Required options:${RST}"
     echo -e "   device:    angler | shamu\n"
-    echo -e ${BOLD}"Possible options:${RESTORE}"
+    echo -e ${BOLD}"Possible options:${RST}"
     echo -e "   sync:      performs a repo sync before building\n"
     exit
 }
@@ -266,13 +255,13 @@ newLine; echoText "${BUILD_RESULT_STRING}!"
 # IF THE BUILD WAS SUCCESSFUL, PRINT FILE LOCATION AND SIZE
 if [[ ${SUCCESS} = true ]]; then
     echo -e ${RED}"FILE LOCATION: $( ls "${IMG_MOVE}"/${UPLD_FILE} )"
-    echo -e "SIZE: $( du -h "${IMG_MOVE}"/${UPLD_FILE} | awk '{print $1}' )"${RESTORE}
+    echo -e "SIZE: $( du -h "${IMG_MOVE}"/${UPLD_FILE} | awk '{print $1}' )"${RST}
 fi
 
 # PRINT THE TIME THE SCRIPT FINISHED
 # AND HOW LONG IT TOOK REGARDLESS OF SUCCESS
 echo -e ${RED}"TIME FINISHED: $( TZ=MST date +%D\ %r | awk '{print toupper($0)}' )"
-echo -e ${RED}"DURATION: $( format_time ${END} ${START} )"${RESTORE}; newLine
+echo -e ${RED}"DURATION: $( format_time ${END} ${START} )"${RST}; newLine
 
 
 ##################

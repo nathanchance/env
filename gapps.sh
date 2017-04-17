@@ -28,17 +28,6 @@
 # USAGE: $ bash gapps.sh -h
 
 
-############
-#          #
-#  COLORS  #
-#          #
-############
-
-BOLD="\033[1m"
-RED="\033[01;31m"
-RESTORE="\033[0m"
-
-
 ###############
 #             #
 #  FUNCTIONS  #
@@ -56,12 +45,12 @@ fi
 # PRINT A HELP MENU IF REQUESTED
 function help_menu() {
     echo -e ""
-    echo -e "${BOLD}OVERVIEW:${RESTORE} Builds a GApps zip (either Open or Beans)\n"
-    echo -e "${BOLD}USAGE:${RESTORE} bash ${0} <gapps> <variant>\n"
-    echo -e "${BOLD}EXAMPLE:${RESTORE} bash ${0} open nano\n"
-    echo -e ${BOLD}"Required options:${RESTORE}"
+    echo -e "${BOLD}OVERVIEW:${RST} Builds a GApps zip (either Open or Beans)\n"
+    echo -e "${BOLD}USAGE:${RST} bash ${0} <gapps> <variant>\n"
+    echo -e "${BOLD}EXAMPLE:${RST} bash ${0} open nano\n"
+    echo -e "${BOLD}Required options:${RST}"
     echo -e "   gapps:      open | beans\n"
-    echo -e ${BOLD}"Other options:${RESTORE}"
+    echo -e "${BOLD}Other options:${RST}"
     echo -e "   variant:    (open only) super | stock | full | mini | micro | nano | pico\n"
     exit
 }
@@ -226,13 +215,13 @@ newLine; echoText "${BUILD_RESULT_STRING}!"
 # IF THE BUILD WAS SUCCESSFUL, PRINT FILE LOCATION AND SIZE
 if [[ ${SUCCESS} = true ]]; then
     echo -e ${RED}"FILE LOCATION: $( ls ${ZIP_MOVE}/${ZIP_FORMAT} )"
-    echo -e "SIZE: $( du -h ${ZIP_MOVE}/${ZIP_FORMAT} | awk '{print $1}' )"${RESTORE}
+    echo -e "SIZE: $( du -h ${ZIP_MOVE}/${ZIP_FORMAT} | awk '{print $1}' )"${RST}
 fi
 
 # PRINT THE TIME THE SCRIPT FINISHED
 # AND HOW LONG IT TOOK REGARDLESS OF SUCCESS
 echo -e ${RED}"TIME FINISHED: $( TZ=MST date +%D\ %r | awk '{print toupper($0)}' )"
-echo -e ${RED}"DURATION: $( format_time ${END} ${START} )"${RESTORE}; newLine
+echo -e ${RED}"DURATION: $( format_time ${END} ${START} )"${RST}; newLine
 
 
 ##################

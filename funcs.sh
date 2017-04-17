@@ -25,9 +25,12 @@
 ###############
 
 # COLORS
+BLINK_RED="\033[05;31m"
+BOLD="\033[1m"
+GRN="\033[01;32m"
 RED="\033[01;31m"
-RESTORE="\033[0m"
-YELLOW="\033[01;33m"
+RST="\033[0m"
+YLW="\033[01;33m"
 
 # PRINTS A FORMATTED HEADER TO POINT OUT WHAT IS BEING DONE TO THE USER
 function echoText() {
@@ -35,7 +38,7 @@ function echoText() {
     echo -e "====$( for i in $( seq ${#1} ); do echo -e "=\c"; done )===="
     echo -e "==  ${1}  =="
     echo -e "====$( for i in $( seq ${#1} ); do echo -e "=\c"; done )===="
-    echo -e ${RESTORE}
+    echo -e ${RST}
 }
 
 # FORMATS THE TIME
@@ -80,7 +83,7 @@ function newLine() {
 # PRINTS AN ERROR IN BOLD RED
 function reportError() {
     echo -e ""
-    echo -e ${RED}"${1}"${RESTORE}
+    echo -e ${RED}"${1}"${RST}
     if [[ -z ${2} ]]; then
         echo -e ""
     fi
@@ -89,7 +92,7 @@ function reportError() {
 # PRINTS A WARNING IN BOLD YELLOW
 function reportWarning() {
     echo -e ""
-    echo -e ${YELLOW}"${1}"${RESTORE}
+    echo -e ${YLW}"${1}"${RST}
     if [[ -z ${2} ]]; then
         echo -e ""
     fi

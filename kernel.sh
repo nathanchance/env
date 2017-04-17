@@ -28,18 +28,6 @@
 # USAGE: $ bash kernel.sh -h
 
 
-############
-#          #
-#  COLORS  #
-#          #
-############
-
-BLINK_RED="\033[05;31m"
-BOLD="\033[1m"
-RED="\033[01;31m"
-RESTORE="\033[0m"
-
-
 ###############
 #             #
 #  FUNCTIONS  #
@@ -57,10 +45,10 @@ fi
 # PRINT A HELP MENU IF REQUESTED
 function help_menu() {
     echo -e ""
-    echo -e "${BOLD}OVERVIEW:${RESTORE} Builds and packages Flash Kernel\n"
-    echo -e "${BOLD}USAGE:${RESTORE} bash ${0} <options>\n"
-    echo -e "${BOLD}EXAMPLE:${RESTORE} bash ${0} public tc 4.9 defconfig angler_defconfig\n"
-    echo -e "${BOLD}Options:${RESTORE}"
+    echo -e "${BOLD}OVERVIEW:${RST} Builds and packages Flash Kernel\n"
+    echo -e "${BOLD}USAGE:${RST} bash ${0} <options>\n"
+    echo -e "${BOLD}EXAMPLE:${RST} bash ${0} public tc 4.9 defconfig angler_defconfig\n"
+    echo -e "${BOLD}Options:${RST}"
     echo -e "   public:     builds and pushes to the public folder"
     echo -e "   tc 4.9:     builds with the stock AOSP 4.9 toolchain"
     echo -e "   defconfig:  builds with the specified defconfig\n"
@@ -233,7 +221,7 @@ echo -e "=======================================================================
 
 echoText "KERNEL VERSION"; newLine
 
-echo -e ${RED}${ZIP_NAME}${RESTORE}; newLine
+echo -e ${RED}${ZIP_NAME}${RST}; newLine
 
 
 ####################
@@ -366,16 +354,16 @@ if [[ ${SUCCESS} = true ]]; then
     case ${MODE} in
         "private"|"public")
             echo -e ${RED}"FILE LOCATION: ${ZIP_MOVE}/${ZIP_NAME}.zip"
-            echo -e "SIZE: $( du -h ${ZIP_MOVE}/${ZIP_NAME}.zip | awk '{print $1}' )"${RESTORE} ;;
+            echo -e "SIZE: $( du -h ${ZIP_MOVE}/${ZIP_NAME}.zip | awk '{print $1}' )"${RST} ;;
         "test")
-            echo -e ${RED}"FILE LOCATION: ${URL}"${RESTORE} ;;
+            echo -e ${RED}"FILE LOCATION: ${URL}"${RST} ;;
     esac
 fi
 
 # PRINT THE TIME THE SCRIPT FINISHED
 # AND HOW LONG IT TOOK REGARDLESS OF SUCCESS
 echo -e ${RED}"TIME: $( TZ=MST date +%D\ %r | awk '{print toupper($0)}' )"
-echo -e "DURATION: $( format_time ${END} ${START} )"${RESTORE}; newLine
+echo -e "DURATION: $( format_time ${END} ${START} )"${RST}; newLine
 
 
 ##################

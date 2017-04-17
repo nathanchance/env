@@ -28,17 +28,6 @@
 # USAGE: $ bash ninja.sh -h
 
 
-############
-#          #
-#  COLORS  #
-#          #
-############
-
-BOLD="\033[1m"
-RED="\033[01;31m"
-RESTORE="\033[0m"
-
-
 ###############
 #             #
 #  FUNCTIONS  #
@@ -56,10 +45,10 @@ fi
 # PRINT A HELP MENU IF REQUESTED
 function help_menu() {
     echo -e ""
-    echo -e "${BOLD}OVERVIEW:${RESTORE} Builds and pushes the ninja binary\n"
-    echo -e "${BOLD}USAGE:${RESTORE} bash ${0} <options>\n"
-    echo -e "${BOLD}EXAMPLE:${RESTORE} bash ${0} both\n"
-    echo -e "${BOLD}Options (pick one):${RESTORE}"
+    echo -e "${BOLD}OVERVIEW:${RST} Builds and pushes the ninja binary\n"
+    echo -e "${BOLD}USAGE:${RST} bash ${0} <options>\n"
+    echo -e "${BOLD}EXAMPLE:${RST} bash ${0} both\n"
+    echo -e "${BOLD}Options (pick one):${RST}"
     echo -e "   build:     update the source and builds the ninja binary"
     echo -e "   install:   pushes the binary to /usr/local/bin and updates Flash-ROM prebuilt-tools repo"
     echo -e "   both:      does both build and install\n"

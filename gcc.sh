@@ -28,17 +28,6 @@
 # USAGE: $ bash gcc.sh
 
 
-############
-#          #
-#  COLORS  #
-#          #
-############
-
-BOLD="\033[1m"
-RED="\033[01;31m"
-RESTORE="\033[0m"
-
-
 ###############
 #             #
 #  VARIABLES  #
@@ -219,7 +208,7 @@ END=$( TZ=MST date +%s )
 # AND HOW LONG IT TOOK REGARDLESS OF SUCCESS
 newLine; echoText "SCRIPT COMPLETED"; newLine
 echo -e ${RED}"TIME: $( TZ=MST date +%D\ %r | awk '{print toupper($0)}' )"
-echo -e "DURATION: $( format_time ${END} ${START} )"${RESTORE}; newLine
+echo -e "DURATION: $( format_time ${END} ${START} )"${RST}; newLine
 
 # LOG INFO
 echo -e "\n$( TZ=MST date +"%m/%d/%Y %H:%M:%S" ): ${BASH_SOURCE}" >> ${LOG}

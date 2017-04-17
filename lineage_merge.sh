@@ -50,17 +50,6 @@ system/sepolicy
 vendor/cm"
 
 
-############
-#          #
-#  COLORS  #
-#          #
-############
-
-GREEN="\033[01;32m"
-RED="\033[01;31m"
-RESTORE="\033[0m"
-
-
 ###############
 #             #
 #  FUNCTIONS  #
@@ -105,9 +94,9 @@ for FOLDER in ${SUBS_REPOS}; do
 
     # ADD TO RESULT STRING
     if [[ $? -ne 0 ]]; then
-        RESULT_STRING+="${FOLDER}: ${RED}FAILED${RESTORE}\n"
+        RESULT_STRING+="${FOLDER}: ${RED}FAILED${RST}\n"
     else
-        RESULT_STRING+="${FOLDER}: ${GREEN}SUCCESS${RESTORE}\n"
+        RESULT_STRING+="${FOLDER}: ${GRN}SUCCESS${RST}\n"
 
         git push --force
     fi
@@ -129,4 +118,4 @@ END=$( date +%s )
 
 # PRINT RESULT TO USER
 echoText "SCRIPT COMPLETED!"
-echo -e ${RED}"TIME: $(format_time ${END} ${START})"${RESTORE}; newLine
+echo -e ${RED}"TIME: $(format_time ${END} ${START})"${RST}; newLine

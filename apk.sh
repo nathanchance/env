@@ -28,17 +28,6 @@
 # USAGE: $ bash apk.sh -h
 
 
-############
-#          #
-#  COLORS  #
-#          #
-############
-
-BOLD="\033[1m"
-RED="\033[01;31m"
-RESTORE="\033[0m"
-
-
 ###############
 #             #
 #  FUNCTIONS  #
@@ -56,12 +45,12 @@ fi
 # PRINT A HELP MENU IF REQUESTED
 function help_menu() {
     echo -e ""
-    echo -e "${BOLD}OVERVIEW:${RESTORE} Builds and pushes the specified APK\n"
-    echo -e "${BOLD}USAGE:${RESTORE} bash ${0} <apk> <options>\n"
-    echo -e "${BOLD}EXAMPLE:${RESTORE} bash ${0} substratum build\n"
-    echo -e "${BOLD}Required options:${RESTORE}"
+    echo -e "${BOLD}OVERVIEW:${RST} Builds and pushes the specified APK\n"
+    echo -e "${BOLD}USAGE:${RST} bash ${0} <apk> <options>\n"
+    echo -e "${BOLD}EXAMPLE:${RST} bash ${0} substratum build\n"
+    echo -e "${BOLD}Required options:${RST}"
     echo -e "   apk:       magisk | spectrum | substratum\n"
-    echo -e "${BOLD}Other options (pick one):${RESTORE}"
+    echo -e "${BOLD}Other options (pick one):${RST}"
     echo -e "   build:      update the source and builds the Substratum APK"
     echo -e "   install:    builds and pushes the APK to a local device"
     echo -e "   commit:     (Substratum and Magisk only) pull Flash-ROM/vendor_flash and commits then pushes the new APK"
@@ -245,11 +234,11 @@ END=$( TZ=MST date +%s )
 echoText "${RESULT_STRING}!"
 if [[ ${RESULT_STRING} = "BUILD SUCCESSFUL" ]]; then
      echo -e ${RED}"FILE LOCATION: $( ls "${APK_MOVE}"/${APK_FORMAT} )"
-     echo -e "SIZE: $( du -h "${APK_MOVE}"/${APK_FORMAT} | awk '{print $1}' )"${RESTORE}
+     echo -e "SIZE: $( du -h "${APK_MOVE}"/${APK_FORMAT} | awk '{print $1}' )"${RST}
 fi
 
  # PRINT HOW LONG IT TOOK REGARDLESS OF SUCCESS
- echo -e ${RED}"DURATION: $( format_time ${END} ${START} )"${RESTORE}; newLine
+ echo -e ${RED}"DURATION: $( format_time ${END} ${START} )"${RST}; newLine
 
 # MOVE BACK TO ORIGINAL DIRECTORY
 cd ${CURRENT_DIR}
