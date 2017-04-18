@@ -246,6 +246,10 @@ cd "${SOURCE_FOLDER}"
 
 # TAG THE HEAD COMMIT WITH THE VERSION FIRST IF IT'S A PUBLIC BUILD
 if [[ ${MODE} = "public" ]]; then
+    # WE NEED TO MARK THE PREVIOUS TAG FOR CHANGELOG
+    PREV_TAG_NAME=$(git tag -l --sort=-taggerdate | grep -m 1 flash)
+    PREV_TAG_HASH=$(git log --format=%H -1 ${PREV_TAG_NAME})
+
     git tag -a "${ZIP_NAME}" -m "${ZIP_NAME}"
     git push origin "${ZIP_NAME}"
 fi
@@ -325,6 +329,15 @@ if [[ $( ls ${KERNEL} 2>/dev/null | wc -l ) != 0 ]]; then
     # CLEAN ZIMAGE-DTB FROM ANYKERNEL FOLDER AFTER ZIPPING AND MOVING
     rm -rf "${ANYKERNEL_FOLDER}"/Image.gz-dtb
 
+    ######################
+    # GENERATE CHANGELOG #
+    ######################
+
+    if [[ ${MODE} = "public" ]]; then
+        echoText "GENERATING CHANGELOG"
+        cd "${SOURCE_FOLDER}"
+        git log --format="%nTitle: %s%nAuthor: %aN <%aE>%nAuthored on: %aD%nLink: http://github.com/Flash-ROM/kernel_huawei_angler/commit/%H%nAdded on: %cD%n" ${PREV_TAG_HASH}..HEAD > "${ZIP_MOVE}"/${ZIP_NAME}-changelog.txt
+    fi
 
 ###################
 # IF BUILD FAILED #
