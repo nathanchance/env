@@ -100,25 +100,6 @@ ROM_SOURCE=${HOME}/ROMs/Flash
 ################
 
 if [[ ${MODE} = "build" || ${MODE} = "both" ]]; then
-    # CLEANING
-    echoText "CLEANING REPO"
-    rm -rf ${NINJA_SOURCE}
-    cd $( dirname ${NINJA_SOURCE} )
-    git clone https://github.com/Flash-ROM/ninja
-
-
-    # UPDATE WITH UPSTREAM
-    echoText "UPDATING NINJA SOURCE"
-    cd ninja
-    git checkout n7.1.1
-    git remote add upstream https://github.com/ninja-build/ninja
-    git fetch upstream
-    git remote add aosp https://android.googlesource.com/platform/external/ninja
-    git fetch aosp
-    git merge upstream/master --no-edit && git merge aosp/master --no-edit
-    git push --force
-
-
     # BUILD A NEW BINARY
     echoText "BUILDING NINJA"
     virtualenv2 ${HOME}/venv && source ${HOME}/venv/bin/activate
@@ -139,7 +120,7 @@ if [[ ${MODE} = "install" || ${MODE} = "both" ]]; then
     # COPY NINJA TO ROM SOURCE (PREBUILTS/BUILT-TOOLS)
     echoText "UPDATING NINJA IN PREBUILTS/BUILD-TOOLS"
     cd ${ROM_SOURCE}/prebuilts/build-tools
-    git checkout n7.1.1
+    git checkout n7.1.2
     rm -rf linux-x86/bin/ninja
     cp -v ${NINJA_SOURCE}/ninja linux-x86/bin/ninja
     git add -A && git commit --signoff -m "Ninja $( ./linux-x86/bin/ninja --version ): $( date +%Y%m%d )
