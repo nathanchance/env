@@ -193,8 +193,8 @@ if [[ ${ACTION} = "commit" ]] || [[ ${ACTION} = "both" ]]; then
 
 Compiled by @nathanchance
 Device: MacBook Pro (13-inch, Mid 2012)
-OS: macOS Sierra 10.12.3
-Tools: NDK r14 and Android Studio 2.3
+OS: macOS Sierra 10.12.4
+Tools: NDK r14 and Android Studio 2.4
 
 Currently here: https://github.com/substratum/substratum/commit/${COMMIT_HASH}
 Full source: https://github.com/substratum/substratum
@@ -207,8 +207,8 @@ your ROM." ;;
 
 Compiled by @nathanchance
 Device: MacBook Pro (13-inch, Mid 2012)
-OS: macOS Sierra 10.12.3
-Tools: NDK r14 and Android Studio 2.3
+OS: macOS Sierra 10.12.4
+Tools: NDK r14 and Android Studio 2.4
 
 Currently here: https://github.com/topjohnwu/MagiskManager/commit/${COMMIT_HASH}
 Full source: https://github.com/topjohnwu/MagiskManager
