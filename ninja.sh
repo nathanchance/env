@@ -131,9 +131,7 @@ if [[ ${MODE} = "install" || ${MODE} = "both" ]]; then
     echoText "INSTALLING NINJA LOCALLY"
     cd ${NINJA_SOURCE}
     if [[ -f ninja ]]; then
-        sudo mkdir -p /usr/local/bin
-        sudo cp -v ninja /usr/local/bin
-        sudo chmod +x /usr/local/bin/ninja
+        sudo install ninja /usr/local/bin
     else
         echo "NINJA BINARY NOT FOUND" && exit
     fi
