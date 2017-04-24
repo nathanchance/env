@@ -132,9 +132,7 @@ Kernel version: $( uname -rv )
 gcc version: ${HOST_GCC_VERSION} ${HOST_GCC_DATE}
 Make version: $( make --version  | awk '/Make/ {print $3}' )
 
-Manifest: https://github.com/Flash-TC/manifest/tree/gcc
-gcc source: https://github.com/Flash-TC/gcc
-binutils source: https://github.com/Flash-TC/binutils" && git push --force
+Full source: https://github.com/Flash-TC" && git push --force
 
 }
 
