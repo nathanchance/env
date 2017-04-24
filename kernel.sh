@@ -313,7 +313,7 @@ if [[ $( ls ${KERNEL} 2>/dev/null | wc -l ) != 0 ]]; then
 
     # FIRST MOVE ALL FILES TO OLD FOLDER
     if [[ ${MODE} = "public" ]]; then
-        mv -v $( find ${ZIP_MOVE}/* -maxdepth 0 -type f ) "${ZIP_MOVE}"/Old
+        mv $( find ${ZIP_MOVE}/* -maxdepth 0 -type f ) "${ZIP_MOVE}"/Old
     fi
 
     mv ${ZIP_NAME}.zip "${ZIP_MOVE}"
