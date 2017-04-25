@@ -118,8 +118,8 @@ done
 cd ${SOURCE_DIR}
 
 # SYNC THEME INTERFACER REPO
-newLine; echoText "Syncing packages/apps/ThemeInterfacer"
-repo sync --force-sync packages/apps/ThemeInterfacer
+newLine; echoText "Syncing packages/services/ThemeInterfacer"
+repo sync --force-sync packages/services/ThemeInterfacer
 
 # PRINT RESULTS
 echoText "RESULTS"
