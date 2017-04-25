@@ -53,7 +53,6 @@ packages/apps/ExactCalculator
 packages/apps/PackageInstaller
 packages/apps/PhoneCommon
 packages/apps/Settings
-system/core
 system/sepolicy
 vendor/cm"
 
