@@ -103,7 +103,7 @@ if [[ ${MODE} = "build" || ${MODE} = "both" ]]; then
     # BUILD A NEW BINARY
     echoText "BUILDING NINJA"
     virtualenv2 ${HOME}/venv && source ${HOME}/venv/bin/activate
-    CXX=${CLANG_LOCATION}/bin/clang++ ./configure.py --bootstrap
+    LDFLAGS="-lgomp -lgcc" CXX=${CLANG_LOCATION}/bin/clang++ ./configure.py --bootstrap
     deactivate && rm -rf ${HOME}/venv
 fi
 
