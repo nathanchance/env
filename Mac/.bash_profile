@@ -17,13 +17,19 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 # Add Scripts directory to PATH
-export PATH=${PATH}:${HOME}/Documents/Repos/scripts
+export PATH=${PATH}:${HOME}/Documents/Repos/Scripts
 
 # Export ANDROID_HOME for gradlew
-export ANDROID_HOME=${HOME}/Library/Android/sdk
+export ANDROID_HOME=${HOME}/Library/Android/SDK
+
+# Export build tools to path
+# 26.0.0-rc1 first
+export PATH=${PATH}:${HOME}/Library/Android/SDK/build-tools/26.0.0-rc1
+# Then 25.0.2
+export PATH=${PATH}:${HOME}/Library/Android/SDK/build-tools/25.0.2
 
 # Export NDK to PATH
-export PATH=${PATH}:${HOME}/Library/Android/sdk/ndk-bundle
+export PATH=${PATH}:${HOME}/Library/Android/SDK/ndk-bundle
 
 # ssh alias
 alias sshfb='ssh nathan@nchancellor.net'
@@ -38,9 +44,9 @@ alias git='hub'
 alias gf='git fetch'
 alias gcp='git cherry-pick'
 alias gcpa='git cherry-pick --abort'
+alias gcpe='git cherry-pick --edit'
 alias gcpc='git cherry-pick --continue'
 alias gcpq='git cherry-pick --quit'
-alias gcpe='git cherry-pick -e'
 
 alias gph='git push'
 alias gpo='git push origin'
@@ -93,8 +99,8 @@ alias gdc='git diff --cached'
 ##################
 
 export repodir="cd ${HOME}/Documents/Repos"
-export subsdir="cd ${repodir}/Substratum"
-export scriptsdir="cd ${repodir}/Scripts"
+export subsdir="cd ${HOME}/Documents/Repos/Substratum"
+export scriptsdir="cd ${HOME}/Documents/Repos/Scripts"
 export miscdir="cd ${HOME}/Documents/Misc"
 
 ########
