@@ -71,6 +71,7 @@ function help_menu() {
     echo -e "   noroot:     (Flash only) Builds without Magisk"
     echo -e "   icons:      (Flash only) Builds with round icons"
     echo -e "   nogapps:    (Flash only) Builds without GApps"
+    echo -e "   enforce:    (Flash only) Build with enforcing on boot"
     echo -e "   type:       (Krexus only) sets the specified type as the build tag"
     echo -e "   pixel:      (Vanilla only) Builds a Pixel variant build"
     echo -e "   public:     (Vanilla only) Builds with the public tag\n"
@@ -163,7 +164,8 @@ while [[ $# -ge 1 ]]; do
             export HAS_SUBSTRATUM=false
             export HAS_ROOT=false
             export HAS_ROUNDICONS=false
-            export HAS_GAPPS=false ;;
+            export HAS_GAPPS=false
+            export HAS_ENFORCING=true ;;
         "nosubs")
             export HAS_SUBSTRATUM=false ;;
         "noroot")
@@ -172,6 +174,8 @@ while [[ $# -ge 1 ]]; do
             export HAS_ROUNDICONS=true ;;
         "nogapps")
             export HAS_GAPPS=false ;;
+        "enforce")
+            export HAS_ENFORCING=true ;;
         # KREXUS
         "type")
             shift
