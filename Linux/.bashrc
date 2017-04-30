@@ -110,14 +110,10 @@ alias gdc='git diff --cached'
 
 # Updating Arch function
 function update {
-    if [[ -n $( command -v pacaur ) ]]; then
+    if [[ $( command -v pacaur ) ]]; then
         pacaur -Syyu
     else
         sudo pacman -Syyu
-    fi
-
-    if [[ "${1}" == "reboot" ]]; then
-        sudo reboot
     fi
 }
 
@@ -152,36 +148,30 @@ function mkavenv {
 
 # Deactivate and remove venv
 function rmvenv {
-    deactivate
-    rm -rf ${HOME}/venv
+    deactivate && rm -rf ${HOME}/venv
 }
 
 # Repo sync shorthand
 function rps {
-    unset ARGS
+    local ARGS
 
     if [[ -n ${1} ]]; then
         case ${1} in
             "k")
                 ARGS="kernel/huawei/angler" ;;
-            "tc")
-                ARGS="prebuilts/gcc/linux-x86/aarch64/aarch64-linux-android-6.x "
-                ARGS+="prebuilts/gcc/linux-x86/arm/arm-linux-androideabi-6.x "
-                ARGS+="prebuilts/clang/host/linux-x86/3.9.1 "
-                ARGS+="prebuilts/clang/host/linux-x86/4.0.0" ;;
-            "gapps")
+            "g")
                 ARGS="vendor/google/build "
                 ARGS+="vendor/opengapps/sources/all "
                 ARGS+="vendor/opengapps/sources/arm "
                 ARGS+="vendor/opengapps/sources/arm64" ;;
+            "v")
+                ARGS="vendor/flash" ;;
             *)
                 ARGS=${1} ;;
         esac
     fi
 
     repo sync -j$( nproc --all ) --force-sync -c --no-clone-bundle --no-tags --optimized-fetch --prune ${ARGS}
-
-    unset ARGS
 }
 
 function ris-sparse {
