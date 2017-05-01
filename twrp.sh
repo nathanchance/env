@@ -47,9 +47,9 @@ function help_menu() {
     echo -e ${BOLD}"OVERVIEW:${RST} Builds and pushes a Substratum APK\n"
     echo -e ${BOLD}"USAGE:${RST} bash ${0} <device> <options>\n"
     echo -e ${BOLD}"EXAMPLE:${RST} bash ${0} angler\n"
-    echo -e ${BOLD}"Required options:${RST}"
+    echo -e ${BOLD}"REQUIRED PARAMETERS:${RST}"
     echo -e "   device:    angler | shamu\n"
-    echo -e ${BOLD}"Possible options:${RST}"
+    echo -e ${BOLD}"OPTIONAL PARAMETERS:${RST}"
     echo -e "   sync:      performs a repo sync before building\n"
     exit
 }

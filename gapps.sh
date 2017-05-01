@@ -48,9 +48,9 @@ function help_menu() {
     echo -e "${BOLD}OVERVIEW:${RST} Builds a GApps zip (either Open or Beans)\n"
     echo -e "${BOLD}USAGE:${RST} bash ${0} <gapps> <variant>\n"
     echo -e "${BOLD}EXAMPLE:${RST} bash ${0} open nano\n"
-    echo -e "${BOLD}Required options:${RST}"
+    echo -e "${BOLD}REQUIRED PARAMETERS:${RST}"
     echo -e "   gapps:      open | beans\n"
-    echo -e "${BOLD}Other options:${RST}"
+    echo -e "${BOLD}SECONDARY PARAMETERS:${RST}"
     echo -e "   variant:    (open only) super | stock | full | mini | micro | nano | pico\n"
     exit
 }

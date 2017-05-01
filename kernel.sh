@@ -48,7 +48,7 @@ function help_menu() {
     echo -e "${BOLD}OVERVIEW:${RST} Builds and packages Flash Kernel\n"
     echo -e "${BOLD}USAGE:${RST} bash ${0} <options>\n"
     echo -e "${BOLD}EXAMPLE:${RST} bash ${0} public tc 4.9 defconfig angler_defconfig\n"
-    echo -e "${BOLD}Options:${RST}"
+    echo -e "${BOLD}OPTIONAL PARAMETERS:${RST}"
     echo -e "   public:     builds and pushes to the public folder"
     echo -e "   tc 4.9:     builds with the stock AOSP 4.9 toolchain"
     echo -e "   defconfig:  builds with the specified defconfig\n"

@@ -48,15 +48,15 @@ function help_menu() {
     echo -e "${BOLD}OVERVIEW:${RST} Build a ROM\n"
     echo -e "${BOLD}USAGE:${RST} bash ${0} <rom> <device> <options>\n"
     echo -e "${BOLD}Example:${RST} bash ${0} flash angler user sync\n"
-    echo -e "${BOLD}Required options:${RST}"
+    echo -e "${BOLD}REQUIRED PARAMETERS:${RST}"
     echo -e "   rom:        abc | du | du-caf | flash | krexus | lineageos | lineageoms | omni | pn | vanilla"
     echo -e "   device:     angler | bullhead | flo | hammerhead | marlin| sailfish | shamu\n"
-    echo -e "${BOLD}Standard options:${RST}"
+    echo -e "${BOLD}STANDARD PARAMETERS:${RST}"
     echo -e "   sync:       performs a repo sync before building"
     echo -e "   clean:      performs the specified clean (e.g. clean installclean will run make installclean)"
     echo -e "   make:       performs the specified make (e.g. make SystemUI will run make SystemUI)"
     echo -e "   variant:    build with the specified variant (e.g. variant userdebug). Possible options: eng, userdebug, and user. Userdebug is the default.\n"
-    echo -e "${BOLD}Special options:${RST}"
+    echo -e "${BOLD}SPECIAL PARAMETERS:${RST}"
     echo -e "   me:         (Flash only) Builds an Angler (or Shamu if specified) userdebug build"
     echo -e "   plain:      (Flash only) Builds an Angler (or Shamu if specified) userdebug build without root, Substratum, or GApps"
     echo -e "   nosubs:     (Flash only) Builds without Substratum"
@@ -85,7 +85,7 @@ function make_command() {
         shift
     done
 
-    if [[ -n $( command -v mka ) ]]; then
+    if [[ $( command -v mka ) ]]; then
         mka ${MAKE_PARAMS}
     else
         make -j$( nproc --all ) ${PARAMS}

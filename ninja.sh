@@ -48,7 +48,7 @@ function help_menu() {
     echo -e "${BOLD}OVERVIEW:${RST} Builds and pushes the ninja binary\n"
     echo -e "${BOLD}USAGE:${RST} bash ${0} <options>\n"
     echo -e "${BOLD}EXAMPLE:${RST} bash ${0} both\n"
-    echo -e "${BOLD}Options (pick one):${RST}"
+    echo -e "${BOLD}OPTIONAL PARAMETERS (PICK ONE):${RST}"
     echo -e "   build:     update the source and builds the ninja binary"
     echo -e "   install:   pushes the binary to /usr/local/bin and updates Flash-ROM prebuilt-tools repo"
     echo -e "   both:      does both build and install\n"

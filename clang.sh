@@ -46,7 +46,7 @@ function help_menu() {
     echo -e "${BOLD}OVERVIEW:${RST} Builds Clang from source\n"
     echo -e "${BOLD}USAGE:${RST} bash ${0} <version>\n"
     echo -e "${BOLD}EXAMPLE:${RST} bash ${0} 3.9.x\n"
-    echo -e "${BOLD}Required options:${RST}"
+    echo -e "${BOLD}REQUIRED PARAMETERS:${RST}"
     echo -e "   version:    3.9.x | 4.0.x | 5.0.x\n"
     exit
 }
