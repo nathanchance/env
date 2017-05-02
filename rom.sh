@@ -70,15 +70,10 @@ function help_menu() {
     exit
 }
 
-# UNSETS VARIABLES POTENTIALLY USED IN SCRIPT
-function unsetvars() {
-    unset ROM_BUILD_TYPE HAS_SUBSTRATUM LOCALVERSION BUILD_TAG HAS_ROUNDICONS
-    unset SYNC PERSONAL SUCCESS CLEAN_TYPE MAKE_TYPE PARAMS HAS_ROOT HAS_GAPPS
-    unset PIXEL PUBLIC KBUILD_BUILD_USER KBUILD_BUILD_HOST VARIANT
-}
-
 # CHECKS IF MKA EXISTS
 function make_command() {
+    local MAKE_PARAMS
+
     while [[ $# -ge 1 ]]; do
         MAKE_PARAMS+="${1} "
 
@@ -90,8 +85,6 @@ function make_command() {
     else
         make -j$( nproc --all ) ${PARAMS}
     fi
-
-    unset MAKE_PARAMS
 }
 
 
@@ -100,8 +93,6 @@ function make_command() {
 #  PARAMETERS  #
 #              #
 ################
-
-unsetvars
 
 while [[ $# -ge 1 ]]; do
     PARAMS+="${1} "
@@ -486,6 +477,3 @@ fi
 ########################
 
 echo -e "\a" && cd ${HOME}
-
-# UNSET EXPORTS
-unsetvars
