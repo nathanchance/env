@@ -185,9 +185,7 @@ if [[ $( ls ${SOURCE_DIR}/out/${ZIP_FORMAT} 2>/dev/null | wc -l ) != "0" ]]; the
     # MOVING GAPPS FILES #
     ######################
 
-    newLine; echoText "MOVING FILES TO ZIP_MOVE DIRECTORY"; newLine
-
-    mv -v ${SOURCE_DIR}/out/${ZIP_FORMAT} ${ZIP_MOVE}
+    mv ${SOURCE_DIR}/out/${ZIP_FORMAT} ${ZIP_MOVE}
 
 
 ###################

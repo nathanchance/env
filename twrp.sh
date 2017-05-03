@@ -212,9 +212,7 @@ if [[ $( ls ${OUT_DIR}/${COMP_FILE} 2>/dev/null | wc -l ) != 0 ]]; then
     # MOVING TWRP FILE #
     ####################
 
-    newLine; echoText "MOVING FILE TO UPLOAD DIRECTORY"; newLine
-
-    mv -v ${OUT_DIR}/${COMP_FILE} "${IMG_MOVE}"/${UPLD_FILE}
+    mv ${OUT_DIR}/${COMP_FILE} "${IMG_MOVE}"/${UPLD_FILE}
 
 
     ###################
@@ -245,7 +243,7 @@ if [[ -f /etc/arch-release ]]; then
 fi
 
 END=$( TZ=MST date +%s )
-newLine; echoText "${BUILD_RESULT_STRING}!"
+echoText "${BUILD_RESULT_STRING}!"
 
 
 ######################

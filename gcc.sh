@@ -77,13 +77,11 @@ function build() {
     cd ${REPO}
     git checkout n7.1.2
     git pull
-    rm -vrf *
+    rm -rf *
 
 
     # REMOVE THE OUR DIRECTORY
-    echoText "CLEANING OUT_DIR"
-
-    rm -vrf ${OUT_DIR}
+    rm -rf ${OUT_DIR}
 
 
     # MOVE INTO THE SCRIPTS DIRECTORY
@@ -109,9 +107,7 @@ function build() {
 
 
     # MOVE THE COMPLETED TOOLCHAIN
-    echoText "MOVING TOOLCHAIN"
-
-    cp -vr ${OUT_DIR}/* ${REPO}
+    cp -r ${OUT_DIR}/* ${REPO}
 
 
     # COMMIT AND PUSH THE RESULT

@@ -275,14 +275,14 @@ time make ${THREADS} | tee -a ${LOGDIR}/Compilation/Kernels/${ZIP_NAME}.log
 
 if [[ $( ls ${KERNEL} 2>/dev/null | wc -l ) != 0 ]]; then
     # SET BUILD SUCCESS STRING AND SUCCESS VARIABLE
-    BUILD_RESULT_STRING="BUILD SUCCESSFUL" && SUCCESS=true
+    BUILD_RESULT_STRING="BUILD SUCCESSFUL"
+    SUCCESS=true
 
 
     #####################
     # COPY KERNEL IMAGE #
     #####################
 
-    newLine; echoText "MOVING $( echo ${KERNEL_IMAGE} | awk '{print toupper($0)}' ) ($( du -h "${KERNEL}" | awk '{print $1}' ))"
     cp "${KERNEL}" "${ANYKERNEL_FOLDER}"
 
     # MAKE ZIP_FORMAT VARIABLE
@@ -303,7 +303,7 @@ if [[ $( ls ${KERNEL} 2>/dev/null | wc -l ) != 0 ]]; then
     # MAKE ZIP FILE #
     #################
 
-    echoText "MAKING FLASHABLE ZIP"
+    newLine; echoText "MAKING FLASHABLE ZIP"
     zip -r9 ${ZIP_NAME}.zip * -x README.md ${ZIP_NAME}.zip > /dev/null 2>&1
 
 
@@ -339,7 +339,6 @@ if [[ $( ls ${KERNEL} 2>/dev/null | wc -l ) != 0 ]]; then
     ######################
 
     if [[ ${MODE} = "public" ]]; then
-        echoText "GENERATING CHANGELOG"
         cd "${SOURCE_FOLDER}"
         git log --format="%nTitle: %s%nAuthor: %aN <%aE>%nAuthored on: %aD%nLink: http://github.com/Flash-ROM/kernel_huawei_angler/commit/%H%nAdded on: %cD%n" ${PREV_TAG_HASH}..HEAD > "${ZIP_MOVE}"/${ZIP_NAME}-changelog.txt
     fi
