@@ -412,12 +412,11 @@ else
         # MOVING ROM FILES #
         ####################
 
-        newLine; echoText "MOVING FILES TO ZIP_MOVE DIRECTORY"
         if [[ ${FILES} = 1 ]]; then
-            mv -v "${OUT_DIR}"/*.zip* "${ZIP_MOVE}"
+            mv "${OUT_DIR}"/*.zip* "${ZIP_MOVE}"
         else
             for FILE in $( ls ${OUT_DIR}/*.zip* | grep -v ota ); do
-                mv -v "${FILE}" "${ZIP_MOVE}"
+                mv "${FILE}" "${ZIP_MOVE}"
             done
         fi
 
@@ -461,7 +460,8 @@ fi
 # PRINT THE TIME THE SCRIPT FINISHED
 # AND HOW LONG IT TOOK REGARDLESS OF SUCCESS
 echo -e ${RED}"TIME: $( TZ=MST date +%D\ %r | awk '{print toupper($0)}' )"
-echo -e ${RED}"DURATION: $( format_time ${END} ${START} )"${RST}; newLine
+echo -e ${RED}"DURATION: $( format_time ${END} ${START} )"${RST}
+echo -e "\a"
 
 
 ##################
@@ -482,10 +482,3 @@ if [[ ${SUCCESS} = true ]]; then
     # FILE LOCATION: <PATH>
     echo -e "FILE LOCATION: $( ls ${ZIP_MOVE}/*.zip )" >> ${LOG}
 fi
-
-
-########################
-# ALERT FOR SCRIPT END #
-########################
-
-echo -e "\a" && cd ${HOME}
