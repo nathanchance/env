@@ -27,14 +27,6 @@
 # PURPOSE: Build Flash Kernel and package it into a flashable zip
 # USAGE: $ bash kernel.sh -h
 
-# Script needs to be run in a subshell; sourcing can break stuff
-if [[ "${BASH_SOURCE[0]}" != "${0}" ]]; then
-    echo -e "\033[01;31m"
-    echo "Script cannot be sourced, please run it with the bash command!"
-    echo -e "\033[0m"
-    return 0
-fi
-
 
 ###############
 #             #
