@@ -259,8 +259,11 @@ ROM (unless you want to add the APK everytime I build)." ;;
         # PUSH IT
         git push
 
-        # SET RESULT STRING
-        RESULT_STRING="COMMIT SUCCESSFUL"
+        if [[ ${ACTION} = "commit" ]]; then
+            # SET RESULT STRING
+            RESULT_STRING="COMMIT SUCCESSFUL"
+        fi
+
     else
         reportError "Requested APK was not found; please run the script and use the build option!" && exit
     fi
