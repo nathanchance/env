@@ -201,8 +201,8 @@ git push --force
 echoText "RUNNING BUILD SCRIPTS"
 
 build "aarch64-linux-android"
-build "arm-linux-androideabi"
-build "arm-eabi"
+# build "arm-linux-androideabi"
+# build "arm-eabi"
 
 
 ######################
