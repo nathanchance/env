@@ -159,7 +159,12 @@ if [[ -z ${ROM} ]]; then
 fi
 
 if [[ -z ${VARIANT} ]]; then
-    VARIANT=userdebug
+    case ${ROM} in
+        "krexus"|"pn")
+            VARIANT=user ;;
+        *)
+            VARIANT=userdebug ;;
+    esac
 fi
 
 ###############
