@@ -51,10 +51,8 @@ function help_menu() {
     echo -e "${BOLD}REQUIRED PARAMETERS:${RST}"
     echo -e "   apk:       magisk | spectrum | substratum\n"
     echo -e "${BOLD}OPTIONAL PARAMETERS:${RST}"
-    echo -e "   build:      update the source and builds the Substratum APK"
+    echo -e "   build:      update the source and builds the specified APK"
     echo -e "   install:    builds and pushes the APK to a local device"
-    echo -e "   commit:     (Substratum and Magisk only) pull Flash-ROM/vendor_flash and commits then pushes the new APK"
-    echo -e "   both:       does both build and commit\n"
     echo -e "No options will fallback to build\n"
     exit
 }
@@ -70,7 +68,7 @@ while [[ $# -ge 1 ]]; do
     case "${1}" in
         "magisk"|"spectrum"|"substratum")
             APK=${1} ;;
-        "build"|"both"|"install"|"commit")
+        "build"|"install")
             ACTION=${1} ;;
         "-h"|"--help")
             help_menu ;;
@@ -124,149 +122,55 @@ unset JAVA_HOME
 cd "${SOURCE_DIR}"
 
 # UPDATE REPO IF REQUESTED
-if [[ ${ACTION} = "build" ]] || [[ ${ACTION} = "both" ]] || [[ ${ACTION} = "install" ]]; then
-    echoText "UPDATING SOURCE"
-    git reset --hard HEAD
+echoText "UPDATING SOURCE"
+git reset --hard HEAD
 
-    if [[ ${APK} != "substratum" ]]; then
-        git pull
+if [[ ${APK} != "substratum" ]]; then
+    git pull
+else
+    if [[ $( git remote -v | grep upstream ) ]]; then
+        git pull upstream dev && git push origin
     else
-        if [[ $( git remote -v | grep upstream ) ]]; then
-            git pull upstream dev && git push origin
-        else
-            reportWarning "Upstream remote not set; unable to update!"
-        fi
-    fi
-
-    # MAKE NEW APK
-    echoText "BUILDING APK"
-    case ${ACTION} in
-        "both"|"build"|"install")
-            ./gradlew clean assembleRelease ;;
-        *)
-            reportError "Something serious has happened!" && exit
-    esac
-
-    APK_MOVE=${OUT_DIR}
-
-    # IF THE APK WAS FOUND, MOVE IT
-    if [[ $( ls "${OUT_DIR}"/${APK_FORMAT} 2>/dev/null | wc -l ) != "0" ]]; then
-        RESULT_STRING="BUILD SUCCESSFUL"
-
-        # SIGN APK
-        APK_FILE=$( basename $( ls "${OUT_DIR}"/*.apk ) | sed s/.apk// )
-        zipalign -v -p 4 "${OUT_DIR}"/${APK_FILE}.apk \
-                         "${OUT_DIR}"/${APK_FILE}-aligned.apk
-        if [[ ! -f "${OUT_DIR}"/${APK_FILE}-aligned.apk ]]; then
-            reportError "There was an issue with zipalign!" && exit
-        fi
-        rm "${OUT_DIR}"/${APK_FILE}.apk
-        apksigner sign --ks ${HOME}/Documents/Keys/key.jks \
-                       --out "${OUT_DIR}"/${APK_NAME}.apk \
-                       "${OUT_DIR}"/${APK_FILE}-aligned.apk
-        if [[ ! -f "${OUT_DIR}"/${APK_NAME}.apk ]]; then
-            reportError "There was an issue with signing the build!" && exit
-        fi
-        rm "${OUT_DIR}"/${APK_FILE}-aligned.apk
-
-        if [[ ${ACTION} = "install" ]]; then
-            adb install -r "${OUT_DIR}"/*.apk
-        fi
-    else
-        RESULT_STRING="BUILD FAILED"
+        reportWarning "Upstream remote not set; unable to update!"
     fi
 fi
 
-if [[ ${ACTION} = "commit" ]] || [[ ${ACTION} = "both" ]]; then
-    COMMIT_HASH=$( git log -1 --format=%H )
+# MAKE NEW APK
+echoText "BUILDING APK"
+case ${ACTION} in
+    "both"|"build"|"install")
+        ./gradlew clean assembleRelease ;;
+    *)
+        reportError "Something serious has happened!" && exit
+esac
 
-    case ${APK} in
-        "magisk")
-            SOURCE_DIR=${HOME}/Documents/Repos/MagiskManager ;;
-        "spectrum")
-            SOURCE_DIR=${HOME}/Documents/Repos/Spectrum ;;
-        "substratum")
-            APK_MOVE=${HOME}/Documents/Repos/FlashVendor/prebuilt/app/Substratum
-            VERSION=$( awk '/versionCode/{i++}i==2{print $2; exit}' "${SOURCE_DIR}"/app/build.gradle ) ;;
-        *)
-            reportError "Committing is not supported by this APK" && exit
-    esac
+APK_MOVE=${OUT_DIR}
 
-    # IF THE APK WAS FOUND, MOVE IT
-    if [[ $( ls "${OUT_DIR}"/${APK_FORMAT} 2>/dev/null | wc -l ) != 0 ]]; then
-        # CLEAN/MAKE APK_MOVE
-        if [[ -d "${APK_MOVE}" ]]; then
-            rm -vrf "${APK_MOVE}"/${APK_FORMAT}
-        else
-            mkdir -p "${APK_MOVE}"
-        fi
+# IF THE APK WAS FOUND, MOVE IT
+if [[ $( ls "${OUT_DIR}"/${APK_FORMAT} 2>/dev/null | wc -l ) != "0" ]]; then
+    RESULT_STRING="BUILD SUCCESSFUL"
 
-        # UPDATE APK_MOVE
-        echoText "MOVING APK"
-        cd "${APK_MOVE}" && git checkout n7.1.2 && git pull
-
-        # MOVE NEW APK
-        cp -v "${OUT_DIR}"/${APK_FORMAT} "${APK_MOVE}"/${APK_NAME}.apk
-
-        # COMMIT IT
-        echoText "PUSHING NEW APK"
-        git add -A
-        case ${APK} in
-            "substratum")
-                git commit --signoff -m "Substratum ${VERSION}: $( TZ=MST date +"%b %d %Y %r %Z" )
-
-Compiled by @nathanchance
-Device: MacBook Pro (13-inch, Mid 2012)
-OS: macOS Sierra 10.12.4
-Tools: NDK r14 and Android Studio 2.4
-
-Currently here: https://github.com/Flash-ROM/substratum/commit/${COMMIT_HASH}
-Full source: https://github.com/Flash-ROM/substratum
-
-The APK is a personally signed APK, it is incompatible with any
-Play Store releases so do not add this if you have users of your
-ROM (unless you want to add the APK everytime I build)." ;;
-            "magisk")
-                git commit --signoff -m "MagiskManager: Update to HEAD as of $( TZ=MST date +"%b %d %r %Z" )
-
-Compiled by @nathanchance
-Device: MacBook Pro (13-inch, Mid 2012)
-OS: macOS Sierra 10.12.4
-Tools: NDK r14 and Android Studio 2.4
-
-Currently here: https://github.com/topjohnwu/MagiskManager/commit/${COMMIT_HASH}
-Full source: https://github.com/topjohnwu/MagiskManager
-
-The APK is a personally signed APK, it is incompatible with any
-Play Store releases so do not add this if you have users of your
-ROM (unless you want to add the APK everytime I build)." ;;
-            "spectrum")
-                git commit --signoff -m "Spectrum: Update to HEAD as of $( TZ=MST date +"%b %d %r %Z" )
-
-Compiled by @nathanchance
-Device: MacBook Pro (13-inch, Mid 2012)
-OS: macOS Sierra 10.12.4
-Tools: NDK r14 and Android Studio 2.4
-
-Currently here: https://github.com/frap129/spectrum/commit/${COMMIT_HASH}
-Full source: https://github.com/frap129/spectrum
-
-The APK is a personally signed APK, it is incompatible with any
-Play Store releases so do not add this if you have users of your
-ROM (unless you want to add the APK everytime I build)." ;;
-        esac
-
-        # PUSH IT
-        git push
-
-        if [[ ${ACTION} = "commit" ]]; then
-            # SET RESULT STRING
-            RESULT_STRING="COMMIT SUCCESSFUL"
-        fi
-
-    else
-        reportError "Requested APK was not found; please run the script and use the build option!" && exit
+    # SIGN APK
+    APK_FILE=$( basename $( ls "${OUT_DIR}"/*.apk ) | sed s/.apk// )
+    zipalign -v -p 4 "${OUT_DIR}"/${APK_FILE}.apk \
+                     "${OUT_DIR}"/${APK_FILE}-aligned.apk
+    if [[ ! -f "${OUT_DIR}"/${APK_FILE}-aligned.apk ]]; then
+        reportError "There was an issue with zipalign!" && exit
     fi
+    rm "${OUT_DIR}"/${APK_FILE}.apk
+    apksigner sign --ks ${HOME}/Documents/Keys/key.jks \
+                   --out "${OUT_DIR}"/${APK_NAME}.apk \
+                   "${OUT_DIR}"/${APK_FILE}-aligned.apk
+    if [[ ! -f "${OUT_DIR}"/${APK_NAME}.apk ]]; then
+        reportError "There was an issue with signing the build!" && exit
+    fi
+    rm "${OUT_DIR}"/${APK_FILE}-aligned.apk
+
+    if [[ ${ACTION} = "install" ]]; then
+        adb install -r "${OUT_DIR}"/*.apk
+    fi
+else
+    RESULT_STRING="BUILD FAILED"
 fi
 
 # END TIME TRACKING
