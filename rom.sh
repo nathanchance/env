@@ -49,7 +49,7 @@ function help_menu() {
     echo -e "${BOLD}USAGE:${RST} bash ${0} <rom> <device> <options>\n"
     echo -e "${BOLD}Example:${RST} bash ${0} flash angler user sync\n"
     echo -e "${BOLD}REQUIRED PARAMETERS:${RST}"
-    echo -e "   rom:        abc | du | du-caf | flash | krexus | lineageos | lineageoms | omni | pn | vanilla"
+    echo -e "   rom:        abc | du | du-caf | krexus | lineageos | lineageoms | omni | pn | vanilla"
     echo -e "   device:     angler | bullhead | flo | hammerhead | marlin| sailfish | shamu\n"
     echo -e "${BOLD}STANDARD PARAMETERS:${RST}"
     echo -e "   sync:       performs a repo sync before building"
@@ -57,17 +57,10 @@ function help_menu() {
     echo -e "   make:       performs the specified make (e.g. make SystemUI will run make SystemUI)"
     echo -e "   variant:    build with the specified variant (e.g. variant userdebug). Possible options: eng, userdebug, and user. Userdebug is the default.\n"
     echo -e "${BOLD}SPECIAL PARAMETERS:${RST}"
-    echo -e "   me:         (Flash only) Builds an Angler (or Shamu if specified) userdebug build"
-    echo -e "   plain:      (Flash only) Builds an Angler (or Shamu if specified) userdebug build without root, Substratum, or GApps"
-    echo -e "   nosubs:     (Flash only) Builds without Substratum"
-    echo -e "   noroot:     (Flash only) Builds without Magisk"
-    echo -e "   icons:      (Flash only) Builds with round icons"
-    echo -e "   nogapps:    (Flash only) Builds without GApps"
-    echo -e "   enforce:    (Flash only) Build with enforcing on boot"
     echo -e "   type:       (Krexus only) sets the specified type as the build tag"
     echo -e "   pixel:      (Vanilla only) Builds a Pixel variant build"
     echo -e "   public:     (Vanilla only) Builds with the public tag\n"
-    echo -e "No options will fallback to Flash Angler userdebug\n"
+    echo -e "No options will fallback to DU Angler userdebug\n"
     exit
 }
 
@@ -102,7 +95,7 @@ while [[ $# -ge 1 ]]; do
         # REQUIRED OPTIONS
         "angler"|"bullhead"|"flo"|"hammerhead"|"marlin"|"oneplus3"|"sailfish"|"shamu")
             DEVICE=${1} ;;
-        "abc"|"du"|"du-caf"|"flash"|"krexus"|"lineageos"|"lineageoms"|"omni"|"pn"|"vanilla")
+        "abc"|"du"|"du-caf"|"krexus"|"lineageos"|"lineageoms"|"omni"|"pn"|"vanilla")
             ROM=${1} ;;
         # STANDARD OPTIONS
         "sync")
@@ -132,42 +125,6 @@ while [[ $# -ge 1 ]]; do
                 reportError "Please specify a build variant!" && exit
             fi ;;
         # SPECIAL OPTIONS
-        # FLASH
-        "me")
-            ROM=flash
-            shift
-            if [[ $# -ge 1 ]]; then
-                PARAMS+="${1} "
-                DEVICE=${1}
-            else
-                DEVICE=angler
-            fi
-            export LOCALVERSION=-$( TZ=MST date +%Y%m%d ) ;;
-        "plain")
-            ROM=flash
-            shift
-            if [[ $# -ge 1 ]]; then
-                PARAMS+="${1} "
-                DEVICE=${1}
-            else
-                DEVICE=angler
-            fi
-            export LOCALVERSION=-$( TZ=MST date +%Y%m%d )
-            export HAS_SUBSTRATUM=false
-            export HAS_ROOT=false
-            export HAS_ROUNDICONS=false
-            export HAS_GAPPS=false
-            export HAS_ENFORCING=true ;;
-        "nosubs")
-            export HAS_SUBSTRATUM=false ;;
-        "noroot")
-            export HAS_ROOT=false ;;
-        "icons")
-            export HAS_ROUNDICONS=true ;;
-        "nogapps")
-            export HAS_GAPPS=false ;;
-        "enforce")
-            export HAS_ENFORCING=true ;;
         # KREXUS
         "type")
             shift
@@ -198,8 +155,7 @@ if [[ -z ${DEVICE} ]]; then
 fi
 
 if [[ -z ${ROM} ]]; then
-    ROM=flash
-    export LOCALVERSION=-$( TZ=MST date +%Y%m%d )
+    ROM=du
 fi
 
 if [[ -z ${VARIANT} ]]; then
@@ -230,9 +186,6 @@ case "${ROM}" in
     "du-caf")
         SOURCE_DIR=${ANDROID_DIR}/ROMs/DU-CAF
         ZIP_MOVE=${ZIP_MOVE_PARENT}/DirtyUnicorns/${DEVICE} ;;
-    "flash")
-        SOURCE_DIR=${ANDROID_DIR}/ROMs/Flash
-        ZIP_MOVE=${ZIP_MOVE_PARENT}/Flash/${DEVICE} ;;
     "krexus")
         SOURCE_DIR=${ANDROID_DIR}/ROMs/Krexus
         ZIP_MOVE=${ZIP_MOVE_PARENT}/Krexus/${DEVICE} ;;
@@ -279,17 +232,6 @@ if [[ ${SYNC} = true ]]; then
     echoText "SYNCING LATEST SOURCES"; newLine
 
     ${REPO_SYNC} ${FLAGS}
-
-# IF IT'S MY OWN ROM, ALWAYS SYNC KERNEL, GAPPS, AND VENDOR REPOS BECAUSE THOSE
-# ARE EXTERNALLY UPDATED. EVERYTHING ELSE WILL BE EITHER LOCALLY TRACKED OR
-# SYNCED WHEN IT MATTERS
-elif [[ ${ROM} = "flash" ]]; then
-    echoText "SYNCING REQUESTED REPOS"; newLine
-
-    REPOS="kernel/huawei/angler vendor/google/build vendor/opengapps/sources/all
-    vendor/opengapps/sources/arm vendor/opengapps/sources/arm64 vendor/flash"
-
-    ${REPO_SYNC} ${FLAGS} ${REPOS}
 fi
 
 
@@ -366,8 +308,6 @@ else
     case "${ROM}" in
         "aosip")
             time make_command kronic | tee -a ${LOG_NAME} ;;
-        "flash")
-            time make_command flash | tee -a ${LOG_NAME} ;;
         "krexus")
             time make_command otapackage | tee -a ${LOG_NAME} ;;
         "vanilla")
