@@ -301,7 +301,7 @@ NOW=$( TZ=MST date +"%Y-%m-%d-%S" )
 
 # MAKE THE REQUESTED ITEM
 if [[ -n ${MAKE_TYPE} ]]; then
-    time make_command ${MAKE_TYPE} | tee -a ${LOG_NAME}
+    make_command ${MAKE_TYPE} | tee -a ${LOG_NAME}
 
     ################
     # PRINT RESULT #
@@ -312,13 +312,13 @@ else
     # NOT ALL ROMS USE BACON
     case "${ROM}" in
         "aosip")
-            time make_command kronic | tee -a ${LOG_NAME} ;;
+            make_command kronic | tee -a ${LOG_NAME} ;;
         "krexus")
-            time make_command otapackage | tee -a ${LOG_NAME} ;;
+            make_command otapackage | tee -a ${LOG_NAME} ;;
         "vanilla")
-            time make_command vanilla | tee -a ${LOG_NAME} ;;
+            make_command vanilla | tee -a ${LOG_NAME} ;;
         *)
-            time make_command bacon | tee -a ${LOG_NAME} ;;
+            make_command bacon | tee -a ${LOG_NAME} ;;
     esac
 
     ###################
