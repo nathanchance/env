@@ -106,7 +106,7 @@ case ${APK} in
         SOURCE_DIR=${HOME}/Documents/Repos/MagiskManager
         APK_NAME=MagiskManager ;;
     "substratum")
-        SOURCE_DIR=${HOME}/Documents/Repos/Substratum/flash
+        SOURCE_DIR=${HOME}/Documents/Repos/Substratum/nc
         APK_NAME=Substratum ;;
     "spectrum")
         SOURCE_DIR=${HOME}/Documents/Repos/Spectrum

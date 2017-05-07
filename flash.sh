@@ -72,7 +72,7 @@ SUCCESS=false
 
 # DEFINE NECESSARY VARIABLES
 DEVICE=angler
-KERNEL_BRANCH=n7.1.2-flash
+KERNEL_BRANCH=7.1.2-flash
 
 # GATHER PARAMETERS
 while [[ $# -ge 1 ]]; do

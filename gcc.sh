@@ -66,16 +66,16 @@ function build() {
     OUT_DIR=${TOOLCHAIN_HEAD}/Flash-TC/out/${1}-6.x
     case "${1}" in
         "aarch64"*)
-            REPO=${HOME}/ROMs/Flash/prebuilts/gcc/linux-x86/aarch64/${1}-6.x ;;
+            REPO=${HOME}/Toolchains/Prebuilts/${1}-6.x ;;
         "arm"*)
-            REPO=${HOME}/ROMs/Flash/prebuilts/gcc/linux-x86/arm/${1}-6.x ;;
+            REPO=${HOME}/Toolchains/Prebuilts/${1}-6.x ;;
     esac
 
     # CLEAN IT
     echoText "CLEANING REPO"
 
     cd ${REPO}
-    git checkout n7.1.2
+    git checkout master
     git pull
     rm -rf *
 
