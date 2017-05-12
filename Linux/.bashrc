@@ -184,3 +184,41 @@ function ris {
 
     time repo sync -j$( nproc --all ) --force-sync -c --no-clone-bundle --no-tags --optimized-fetch --prune
 }
+
+function gerrit-push {
+    local ROM=${1}
+    local PROJECT=${2}
+
+    local URL
+    local USER=nathanchance
+
+    case ${1} in
+        "du")
+            URL=gerrit.dirtyunicorns.com
+            BRANCH=n7x ;;
+        "du-caf")
+            URL=gerrit.dirtyunicorns.com
+            BRANCH=n7x-caf ;;
+        "omni")
+            URL=gerrit.omnirom.org
+            BRANCH=android-7.1 ;;
+        "subs")
+            URL=substratum.review
+            if [[ ${PROJECT} = "substratum/interfacer" ]]; then
+                BRANCH=n-rootless
+            else
+                BRANCH=n-mr2
+            fi ;;
+    esac
+
+    if [[ -z ${PROJECT} ]]; then
+        PROJECT=$(grep "projectname" .git/config | sed 's/\tprojectname = //')
+    fi
+
+    if [[ -n ${PROJECT} ]]; then
+        echo "Executing git push ssh://${USER}@${URL}:29418/${PROJECT} HEAD:refs/for/${BRANCH}"
+        git push ssh://${USER}@${URL}:29418/${PROJECT} HEAD:refs/for/${BRANCH}
+    else
+        echo "wtf happened?"
+    fi
+}
