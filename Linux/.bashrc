@@ -44,6 +44,9 @@ export LOG=${LOGDIR}/Results/compile_log_$( TZ=MST date +%m_%d_%y ).log
 # Export for building on Arch
 export LC_ALL=C
 
+# Add Android SDK build tools to path
+export PATH=${PATH}:/opt/android-sdk/build-tools/25.0.3
+
 ###############
 # GIT ALIASES #
 ###############
