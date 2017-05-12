@@ -123,12 +123,8 @@ function update {
 # Flash build function
 function flash_build {
     case ${1} in
-        "arm")
-            export CROSS_COMPILE=/home/nathan/Toolchains/Prebuilts/arm-eabi-6.x/bin/arm-eabi-
-            export ARCH=arm
-            export SUBARCH=arm ;;
         "arm64")
-            export CROSS_COMPILE=/home/nathan/Toolchains/Prebuilts/aarch64-linux-android-6.x/bin/aarch64-linux-android-
+            export CROSS_COMPILE=/home/nathan/Toolchains/Prebuilts/gcc-6.x/bin/aarch64-linux-gnu-
             export ARCH=arm64
             export SUBARCH=arm64 ;;
     esac
