@@ -106,14 +106,16 @@ if [[ ${DEVICE} = "angler" ]]; then
     # Version 6: Add back TWRP app prompt to fix theme
     # Version 7: Update F2FS driver in kernel to 4.11-rc1
     # Version 8: Bump to 3.1.1
-    export TW_DEVICE_VERSION=8
+    # Version 9: Merge upstream updates
+    export TW_DEVICE_VERSION=9
 elif [[ ${DEVICE} = "shamu" ]]; then
     # Version 1: f2fs-tools bumped to 1.7.0, TWRP app removed
     # Version 2: Bump to 3.1.0
     # Version 3: Add back TWRP app prompt to fix theme
     # Version 4: Update F2FS driver in kernel to 4.11-rc1
     # Version 5: Bump to 3.1.1
-    export TW_DEVICE_VERSION=4
+    # Version 6: Merge upstream updates
+    export TW_DEVICE_VERSION=6
 fi
 VERSION=$( grep "TW_MAIN_VERSION_STR" ${SOURCE_DIR}/bootable/recovery/variables.h -m 1 | cut -d \" -f2 )-${TW_DEVICE_VERSION}
 
