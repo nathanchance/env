@@ -129,7 +129,7 @@ function flash_build {
             export ARCH=arm
             export SUBARCH=arm ;;
         "arm64")
-            export CROSS_COMPILE=${HOME}/Toolchains/aarch64-linux-gnu-6.x/bin/aarch64-linux-gnu-
+            export CROSS_COMPILE=${HOME}/Toolchains/aarch64-linaro-linux-gnueabi/bin/aarch64-linaro-linux-gnueabi-
             export ARCH=arm64
             export SUBARCH=arm64 ;;
     esac
