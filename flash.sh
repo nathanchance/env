@@ -143,7 +143,7 @@ fi
 ANDROID_HEAD=${HOME}
 KERNEL_HEAD=${ANDROID_HEAD}/Kernels
 ZIP_MOVE_HEAD=${HOME}/Web/Downloads
-TOOLCHAIN_HEAD=${HOME}/Toolchains/Prebuilts
+TOOLCHAIN_HEAD=${HOME}/Toolchains
 ANYKERNEL_FOLDER=${KERNEL_HEAD}/anykernel
 if [[ -z ${DEFCONFIG} ]]; then
     DEFCONFIG=flash_defconfig
@@ -152,8 +152,8 @@ SOURCE_FOLDER=${KERNEL_HEAD}/${DEVICE}
 ARCHITECTURE=arm64
 KERNEL_IMAGE=Image.gz-dtb
 if [[ -z ${TOOLCHAIN_NAME} ]]; then
-    TOOLCHAIN_NAME=gcc-6.x
-    TOOLCHAIN_PREFIX=aarch64-linux-gnu
+    TOOLCHAIN_NAME=aarch64-linaro-linux-gnueabi
+    TOOLCHAIN_PREFIX=${TOOLCHAIN_NAME}
 else
     TOOLCHAIN_PREFIX=aarch64-linux-android
 fi
