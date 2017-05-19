@@ -342,7 +342,7 @@ if [[ $( ls ${KERNEL} 2>/dev/null | wc -l ) != 0 ]]; then
 
     if [[ ${MODE} = "public" ]]; then
         cd "${SOURCE_FOLDER}"
-        git log --format="%nTitle: %s%nAuthor: %aN <%aE>%nAuthored on: %aD%nLink: http://github.com/Flash-ROM/kernel_huawei_angler/commit/%H%nAdded on: %cD%n" ${PREV_TAG_HASH}..HEAD > "${ZIP_MOVE}"/${ZIP_NAME}-changelog.txt
+        git log --format="%nTitle: %s%nAuthor: %aN <%aE>%nAuthored on: %aD%nLink: http://github.com/nathanchance/angler/commit/%H%nAdded on: %cD%n" ${PREV_TAG_HASH}..HEAD > "${ZIP_MOVE}"/${ZIP_NAME}-changelog.txt
     fi
 
 ###################
