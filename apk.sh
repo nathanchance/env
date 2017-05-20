@@ -37,11 +37,6 @@
 # SOURCE OUR UNIVERSAL FUNCTIONS SCRIPT
 source $( dirname ${BASH_SOURCE} )/funcs.sh
 
-# CURRENTLY I BUILD ALL APKS ON MY PERSONAL MACHINE, NOT MY SERVER
-if [[ -f /etc/arch-release ]]; then
-    reportError "Wrong window! ;)" && exit
-fi
-
 # PRINT A HELP MENU IF REQUESTED
 function help_menu() {
     echo -e ""
