@@ -45,9 +45,11 @@ function! TglInd()
     if(&expandtab == 1)
         set noexpandtab
         set tabstop=8
+        set softtabstop=8
     else
         set expandtab
         set tabstop=4
+        set softtabstop=4
     endif
 endfunc
 
