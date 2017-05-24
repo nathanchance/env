@@ -217,10 +217,11 @@ function gerrit-push {
     esac
 
     if [[ -z ${PROJECT} ]]; then
-        PROJECT=$(grep "projectname" .git/config | sed 's/\tprojectname = //')
+        PROJECT=$( grep "projectname" .git/config | sed 's/\tprojectname = //' )
     fi
 
     if [[ -n ${PROJECT} ]]; then
+        PROJECT=$( echo ${PROJECT} | sed 's/DirtyUnicorns\///' )
         echo "Executing git push ssh://${USER}@${URL}:29418/${PROJECT} HEAD:refs/for/${BRANCH}"
         git push ssh://${USER}@${URL}:29418/${PROJECT} HEAD:refs/for/${BRANCH}
     else
