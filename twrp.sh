@@ -107,7 +107,8 @@ if [[ ${DEVICE} = "angler" ]]; then
     # Version 7: Update F2FS driver in kernel to 4.11-rc1
     # Version 8: Bump to 3.1.1
     # Version 9: Merge upstream updates
-    export TW_DEVICE_VERSION=9
+    # Version 10: Base on flash-angler-20170527-1406 (f2fs + ext4 improvements) and update device tree
+    export TW_DEVICE_VERSION=10
 elif [[ ${DEVICE} = "shamu" ]]; then
     # Version 1: f2fs-tools bumped to 1.7.0, TWRP app removed
     # Version 2: Bump to 3.1.0
