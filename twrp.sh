@@ -208,7 +208,7 @@ if [[ $( ls ${OUT_DIR}/${COMP_FILE} 2>/dev/null | wc -l ) != 0 ]]; then
 
     # MAKE IMG_MOVE IF IT DOESN'T EXIST
     if [[ ! -d "${IMG_MOVE}" ]]; then
-        mkdir -p "${IMG_MOVE}"
+        mkdir -p "${IMG_MOVE}"/Old
     fi
 
 
@@ -216,7 +216,8 @@ if [[ $( ls ${OUT_DIR}/${COMP_FILE} 2>/dev/null | wc -l ) != 0 ]]; then
     # MOVING TWRP FILE #
     ####################
 
-    mv ${OUT_DIR}/${COMP_FILE} "${IMG_MOVE}"/${UPLD_FILE}
+    mv "${IMG_MOVE}"/*.img* "${IMG_DIR}"/Old
+    mv "${OUT_DIR}"/${COMP_FILE} "${IMG_MOVE}"/${UPLD_FILE}
 
 
     ###################
