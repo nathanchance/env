@@ -109,6 +109,9 @@ if [[ ${DEVICE} = "angler" ]]; then
     # Version 9: Merge upstream updates
     # Version 10: Base on flash-angler-20170527-1406 (f2fs + ext4 improvements) and update device tree
     export TW_DEVICE_VERSION=10
+
+    # LOCALVERSION for Flash Kernel
+    export LOCALVERSION=-$( TZ=MST date +%Y%m%d )
 elif [[ ${DEVICE} = "shamu" ]]; then
     # Version 1: f2fs-tools bumped to 1.7.0, TWRP app removed
     # Version 2: Bump to 3.1.0
