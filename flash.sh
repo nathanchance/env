@@ -56,6 +56,12 @@ function help_menu() {
     exit
 }
 
+# GETS A FORMATTED ZIP_NAME
+function getZipName() {
+    local SUBLEVEL=$( grep -m 1 SUBLEVEL ${1}/Makefile | sed 's/SUBLEVEL = //' )
+
+    echo $( cat ${1}/include/config/kernel.release | sed "s/^.*${SUBLEVEL}-//" )-$( date +%H%M )
+}
 
 ################
 #              #
@@ -64,7 +70,6 @@ function help_menu() {
 ################
 
 # UNSET PREVIOUSLY USED VARIABLES IN CASE SCRIPT WAS SOURCED
-unset LOCALVERSION
 unset MODE
 unset TOOLCHAIN_NAME
 unset DEFCONFIG
@@ -191,17 +196,6 @@ if [[ ! $(git status | grep "bisect\|rebase") ]]; then
     git checkout ${KERNEL_BRANCH} > /dev/null 2>&1
 fi
 
-# SET KERNEL VERSION FROM MAKEFILE
-KERNEL_VERSION=$( grep -r "EXTRAVERSION = -" ${SOURCE_FOLDER}/Makefile | sed 's/^.*f/f/' )
-
-# CONDITIONALLY DEFINE ZIP NAME
-if [[ -n ${KERNEL_VERSION} ]]; then
-    export LOCALVERSION=-$( TZ=MST date +%Y%m%d )
-    ZIP_NAME=${KERNEL_VERSION}${LOCALVERSION}-$( TZ=MST date +%H%M )
-else
-    ZIP_NAME=flash-angler-$( TZ=MST date +%Y%m%d-%H%M )
-fi
-
 
 ###################
 # SHOW ASCII TEXT #
@@ -215,15 +209,6 @@ echo -e "  __  /_   __  / __  /| |____ \__  /_/ /    __  ,<  __  __/  __  /_/ /_
 echo -e "  _  __/   _  /___  ___ |___/ /_  __  /     _  /| | _  /___  _  _, _/_  /|  / _  /___  _  /___  "
 echo -e "  /_/      /_____/_/  |_/____/ /_/ /_/      /_/ |_| /_____/  /_/ |_| /_/ |_/  /_____/  /_____/  "; newLine; newLine; newLine
 echo -e "================================================================================================"; newLine; newLine
-
-
-#########################
-#  SHOW KERNEL VERSION  #
-#########################
-
-echoText "KERNEL VERSION"; newLine
-
-echo -e ${RED}${ZIP_NAME}${RST}; newLine
 
 
 ####################
@@ -287,9 +272,6 @@ if [[ $( ls ${KERNEL} 2>/dev/null | wc -l ) != 0 ]]; then
 
     cp "${KERNEL}" "${ANYKERNEL_FOLDER}"
 
-    # MAKE ZIP_FORMAT VARIABLE
-    ZIP_FORMAT=f*.zip
-
     # IF ZIPMOVE DOESN'T EXIST, MAKE IT; OTHERWISE, CLEAN IT
     if [[ ! -d "${ZIP_MOVE}" ]]; then
         mkdir -p "${ZIP_MOVE}"
@@ -306,6 +288,9 @@ if [[ $( ls ${KERNEL} 2>/dev/null | wc -l ) != 0 ]]; then
     #################
 
     newLine; echoText "MAKING FLASHABLE ZIP"
+
+    ZIP_NAME=$( getZipName ${SOURCE_FOLDER} )
+
     zip -r9 ${ZIP_NAME}.zip * -x README.md ${ZIP_NAME}.zip > /dev/null 2>&1
 
 
@@ -417,4 +402,3 @@ if [[ ${MODE} = "test" ]]; then
 fi
 
 echo -e "\a"
-unset LOCALVERSION
