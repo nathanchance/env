@@ -283,8 +283,12 @@ if [[ ${REPOPICK} = true ]]; then
         read -p "Do you have changes to pick? (y/n) " YN
         case ${YN} in
             y|Y)
-                read -p "Please enter the change number: " PARAMS
-                repopick ${PARAMS} ;;
+                read -p "Please enter the change number or topic: " PARAMS
+                if [[ -n ${PARAMS//[0-9]/} ]]; then
+                    repopick --quiet -i --topic ${PARAMS}
+                else
+                    repopick --quiet -i ${PARAMS}
+                fi ;;
             n|N)
                 break ;;
         esac
