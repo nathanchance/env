@@ -56,6 +56,7 @@ function help_menu() {
     echo -e "   clean:      performs the specified clean (e.g. clean installclean will run make installclean)"
     echo -e "   make:       performs the specified make (e.g. make SystemUI will run make SystemUI)"
     echo -e "   variant:    build with the specified variant (e.g. variant userdebug). Possible options: eng, userdebug, and user. Userdebug is the default.\n"
+    echo -e "   rp:         run repopick (on supported ROMs) before building"
     echo -e "${BOLD}SPECIAL PARAMETERS:${RST}"
     echo -e "   type:       (Krexus only) sets the specified type as the build tag"
     echo -e "   pixel:      (Vanilla only) Builds a Pixel variant build"
@@ -116,6 +117,8 @@ while [[ $# -ge 1 ]]; do
             else
                 reportError "Please specify a build variant!" && exit
             fi ;;
+        "rp")
+            export REPOPICK=true ;;
         # SPECIAL OPTIONS
         # KREXUS
         "type")
@@ -268,6 +271,25 @@ case "${ROM}" in
     *)
         breakfast ${DEVICE} ${VARIANT} ;;
 esac
+
+
+############
+# REPOPICK #
+############
+
+if [[ ${REPOPICK} = true ]]; then
+    echoText "RUNNING REPOPICK"
+    while [[ ${YN} != "n" ]]; do
+        read -p "Do you have changes to pick? (y/n) " YN
+        case ${YN} in
+            y|Y)
+                read -p "Please enter the change number: " PARAMS
+                repopick ${PARAMS} ;;
+            n|N)
+                break ;;
+        esac
+    done
+fi
 
 
 ############
