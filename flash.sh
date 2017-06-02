@@ -165,7 +165,7 @@ fi
 TOOLCHAIN_FOLDER=${TOOLCHAIN_HEAD}/${TOOLCHAIN_NAME}
 case ${MODE} in
     "private")
-        ZIP_MOVE=${ZIP_MOVE_HEAD}/.superhidden/Kernels
+        ZIP_MOVE=${ZIP_MOVE_HEAD}/../me/Flash-Kernel
         ANYKERNEL_BRANCH=${DEVICE}-flash-personal-7.1.2 ;;
     "public")
         ZIP_MOVE=${ZIP_MOVE_HEAD}/Kernels
@@ -208,7 +208,7 @@ echo -e "  ___  ____/__  /___    |_  ___/__  / / /   ___  //_/__  ____/__  __ \_
 echo -e "  __  /_   __  / __  /| |____ \__  /_/ /    __  ,<  __  __/  __  /_/ /_   |/ /__  __/  __  /    "
 echo -e "  _  __/   _  /___  ___ |___/ /_  __  /     _  /| | _  /___  _  _, _/_  /|  / _  /___  _  /___  "
 echo -e "  /_/      /_____/_/  |_/____/ /_/ /_/      /_/ |_| /_____/  /_/ |_| /_/ |_/  /_____/  /_____/  "; newLine; newLine; newLine
-echo -e "================================================================================================"; newLine; newLine
+echo -e "================================================================================================"; newLine
 
 
 ####################

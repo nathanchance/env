@@ -58,7 +58,7 @@ function help_menu() {
     echo -e "   variant:    build with the specified variant (e.g. variant userdebug). Possible options: eng, userdebug, and user. Userdebug is the default.\n"
     echo -e "   rp:         run repopick (on supported ROMs) before building"
     echo -e "${BOLD}SPECIAL PARAMETERS:${RST}"
-    echo -e "   type:       (Krexus only) sets the specified type as the build tag"
+    echo -e "   type:       (Krexus and DU only) sets the specified type as the build tag"
     echo -e "   pixel:      (Vanilla only) Builds a Pixel variant build"
     echo -e "   public:     (Vanilla only) Builds with the public tag\n"
     echo -e "No options will fallback to DU Angler userdebug\n"
@@ -120,12 +120,13 @@ while [[ $# -ge 1 ]]; do
         "rp")
             export REPOPICK=true ;;
         # SPECIAL OPTIONS
-        # KREXUS
+        # KREXUS AND DU
         "type")
             shift
             if [[ $# -ge 1 ]]; then
                 PARAMS+="${1} "
                 export BUILD_TAG=${1}
+                export DU_BUILD_TYPE=${1}
             else
                 reportError "Please specify a build type!" && exit
             fi ;;
@@ -151,6 +152,9 @@ fi
 
 if [[ -z ${ROM} ]]; then
     ROM=du
+    if [[ -z ${DU_BUILD_TYPE} ]]; then
+        DU_BUILD_TYPE=RC
+    fi
 fi
 
 if [[ -z ${VARIANT} ]]; then
@@ -173,7 +177,7 @@ fi
 # SOURCE_DIR: Directory that holds the ROM source
 # ZIP_MOVE: Directory to hold completed ROM zips
 ANDROID_DIR=${HOME}
-ZIP_MOVE_PARENT=${HOME}/Web/Downloads/.superhidden/ROMs
+ZIP_MOVE_PARENT=${HOME}/Web
 
 # Otherwise, define them for our various ROMs
 case "${ROM}" in
