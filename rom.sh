@@ -27,6 +27,9 @@
 # PURPOSE: Build an Android ROM from source
 # USAGE: $ bash rom.sh -h
 
+# CACHE WHERE THE SCRIPT IS LOCATED FOR STUFF
+SCRIPT_DIR=$( cd $( dirname $( readlink -f "${BASH_SOURCE[0]}" ) ) && pwd )
+
 
 ###############
 #             #
@@ -35,7 +38,7 @@
 ###############
 
 # SOURCE OUR UNIVERSAL FUNCTIONS SCRIPT
-source $( dirname ${BASH_SOURCE} )/funcs.sh
+source ${SCRIPT_DIR}/funcs.sh
 
 # MAC CHECK; THIS SCRIPT SHOULD ONLY BE RUN ON LINUX
 if [[ $( uname -a | grep -i "darwin" ) ]]; then
@@ -146,15 +149,11 @@ while [[ $# -ge 1 ]]; do
 done
 
 # PARAMETER VERIFICATION
-if [[ -z ${DEVICE} ]]; then
-    DEVICE=angler
-fi
-
+# IF ROM WASN'T SPECIFIED, IT'S A BUILD FOR ME
 if [[ -z ${ROM} ]]; then
     ROM=du
-    if [[ -z ${DU_BUILD_TYPE} ]]; then
-        DU_BUILD_TYPE=RC
-    fi
+    export DU_BUILD_TYPE=RC
+    DEVICE=angler
 fi
 
 if [[ -z ${VARIANT} ]]; then
@@ -177,7 +176,7 @@ fi
 # SOURCE_DIR: Directory that holds the ROM source
 # ZIP_MOVE: Directory to hold completed ROM zips
 ANDROID_DIR=${HOME}
-ZIP_MOVE_PARENT=${HOME}/Web
+ZIP_MOVE_PARENT=${HOME}/Web/me
 
 # Otherwise, define them for our various ROMs
 case "${ROM}" in
@@ -289,9 +288,9 @@ if [[ ${REPOPICK} = true ]]; then
             y|Y)
                 read -p "Please enter the change number or topic: " PARAMS
                 if [[ -n ${PARAMS//[0-9]/} ]]; then
-                    repopick --quiet -i --topic ${PARAMS}
+                    repopick -i --topic ${PARAMS}
                 else
-                    repopick --quiet -i ${PARAMS}
+                    repopick -i ${PARAMS}
                 fi ;;
             n|N)
                 break ;;
