@@ -1,0 +1,348 @@
+From 7e60ec7ef39516746c64b4a7bd45de62ea474ecd Mon Sep 17 00:00:00 2001
+From: yoinx <joseph.schubert@gmail.com>
+Date: Thu, 9 Feb 2017 19:50:34 -0500
+Subject: [PATCH 3/3] Add High brightness mode QS Tile
+
+- This is a conditional tile and will only show if the proper
+support is found in FWB and device tree.
+
+NOTE:
+Proof of Concept tile. This should actually be incorporated as
+a conditional third state in the existing brightness tile to make
+it more apparent to users that the manual and auto brightness
+modes are overriden by this. Essentialy to indicate that it is
+a third mode.
+
+*DU Edits*
+- Cleaned up tile some
+- Use vector for icons
+- Added toast when HSB is active to hopefully prevent bogus bugs
+
+Change-Id: I886d72b0e40bebeb3ed70bb6956ddd104842b7ed
+---
+ .../res/drawable/ic_qs_brightness_high_off.xml     |  46 ++++++++
+ .../res/drawable/ic_qs_brightness_high_on.xml      |  42 +++++++
+ packages/SystemUI/res/values/du_strings.xml        |   2 +
+ .../systemui/qs/tiles/HighBrightnessTile.java      | 124 +++++++++++++++++++++
+ .../systemui/statusbar/phone/QSTileHost.java       |  22 ++--
+ 5 files changed, 227 insertions(+), 9 deletions(-)
+ create mode 100644 packages/SystemUI/res/drawable/ic_qs_brightness_high_off.xml
+ create mode 100644 packages/SystemUI/res/drawable/ic_qs_brightness_high_on.xml
+ create mode 100644 packages/SystemUI/src/com/android/systemui/qs/tiles/HighBrightnessTile.java
+
+diff --git a/packages/SystemUI/res/drawable/ic_qs_brightness_high_off.xml b/packages/SystemUI/res/drawable/ic_qs_brightness_high_off.xml
+new file mode 100644
+index 000000000000..8cf9afa2a7cd
+--- /dev/null
++++ b/packages/SystemUI/res/drawable/ic_qs_brightness_high_off.xml
+@@ -0,0 +1,46 @@
++<?xml version="1.0" encoding="utf-8"?>
++<!--
++     Copyright (C) 2014 The Android Open Source Project
++
++     Licensed under the Apache License, Version 2.0 (the "License");
++     you may not use this file except in compliance with the License.
++     You may obtain a copy of the License at
++
++          http://www.apache.org/licenses/LICENSE-2.0
++
++     Unless required by applicable law or agreed to in writing, software
++     distributed under the License is distributed on an "AS IS" BASIS,
++     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++     See the License for the specific language governing permissions and
++     limitations under the License.
++-->
++
++<vector xmlns:android="http://schemas.android.com/apk/res/android"
++    android:width="64.000000dp"
++    android:height="64.000000dp"
++    android:viewportWidth="48.000000"
++    android:viewportHeight="48.000000">
++
++    <group
++            android:translateY="48.000000"
++            android:scaleX="0.100000"
++            android:scaleY="-0.100000">
++        <path
++            android:fillColor="#4DFFFFFF"
++            android:strokeWidth="1"
++            android:pathData="M222 425 c-13 -29 -21 -31 -48 -10 -28 21 -34 18 -34 -15 0 -28 -3 -30 -35 -30 -33
++0 -34 -1 -25 -26 15 -37 13 -41 -22 -48 l-31 -6 23 -25 23 -25 -23 -25 -23 -25 32
++-11 c33 -12 34 -17 16 -62 -7 -16 -4 -18 29 -12 35 7 36 6 36 -24 0 -35 10 -38 44
++-16 21 14 23 14 34 -10 6 -14 16 -25 22 -25 6 0 16 11 22 25 11 24 13 24 34 10 34
++-22 44 -19 44 16 0 30 1 31 36 24 33 -6 36 -4 29 12 -18 45 -17 50 16 62 l32 11
++-23 25 -23 25 23 25 23 25 -31 6 c-35 7 -37 11 -22 48 9 25 8 26 -25 26 -32 0 -35
++2 -35 30 0 33 -6 36 -34 15 -27 -21 -35 -19 -48 10 -6 14 -14 25 -18 25 -4 0 -12
++-11 -18 -25z m94 -81 c28 -19 54 -72 54 -111 0 -62 -64 -123 -130 -123 -66 0 -130
++61 -130 123 0 59 42 116 95 130 29 8 84 -2 111 -19z" />
++        <path
++            android:fillColor="#4DFFFFFF"
++            android:strokeWidth="1"
++            android:pathData="M177 320 c-38 -30 -52 -80 -33 -123 15 -37 59 -67 96 -67 37 0 81 30 96 67 29 68
++-21 143 -96 143 -22 0 -48 -8 -63 -20z" />
++    </group>
++</vector>
+\ No newline at end of file
+diff --git a/packages/SystemUI/res/drawable/ic_qs_brightness_high_on.xml b/packages/SystemUI/res/drawable/ic_qs_brightness_high_on.xml
+new file mode 100644
+index 000000000000..53ffef4015a0
+--- /dev/null
++++ b/packages/SystemUI/res/drawable/ic_qs_brightness_high_on.xml
+@@ -0,0 +1,42 @@
++<?xml version="1.0" encoding="utf-8"?>
++<!--
++     Copyright (C) 2014 The Android Open Source Project
++
++     Licensed under the Apache License, Version 2.0 (the "License");
++     you may not use this file except in compliance with the License.
++     You may obtain a copy of the License at
++
++          http://www.apache.org/licenses/LICENSE-2.0
++
++     Unless required by applicable law or agreed to in writing, software
++     distributed under the License is distributed on an "AS IS" BASIS,
++     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++     See the License for the specific language governing permissions and
++     limitations under the License.
++-->
++
++<vector xmlns:android="http://schemas.android.com/apk/res/android"
++    android:width="64.000000dp"
++    android:height="64.000000dp"
++    android:viewportWidth="48.000000"
++    android:viewportHeight="48.000000">
++
++    <group
++            android:translateY="48.000000"
++            android:scaleX="0.100000"
++            android:scaleY="-0.100000">
++        <path
++            android:fillColor="#FFFFFFFF"
++            android:strokeWidth="1"
++            android:pathData="M222 425 c-13 -29 -21 -31 -48 -10 -28 21 -34 18 -34 -15 0 -28 -3 -30 -35 -30 -33
++0 -34 -1 -25 -26 15 -37 13 -41 -22 -48 l-31 -6 23 -25 23 -25 -23 -25 -23 -25 32
++-11 c33 -12 34 -17 16 -62 -7 -16 -4 -18 29 -12 35 7 36 6 36 -24 0 -35 10 -38 44
++-16 21 14 23 14 34 -10 6 -14 16 -25 22 -25 6 0 16 11 22 25 11 24 13 24 34 10 34
++-22 44 -19 44 16 0 30 1 31 36 24 33 -6 36 -4 29 12 -18 45 -17 50 16 62 l32 11
++-23 25 -23 25 23 25 23 25 -31 6 c-35 7 -37 11 -22 48 9 25 8 26 -25 26 -32 0 -35
++2 -35 30 0 33 -6 36 -34 15 -27 -21 -35 -19 -48 10 -6 14 -14 25 -18 25 -4 0 -12
++-11 -18 -25z m-22 -130 c0 -34 1 -35 40 -35 39 0 40 1 40 35 0 28 4 35 20 35 19 0
++20 -7 20 -90 0 -83 -1 -90 -20 -90 -17 0 -20 7 -20 40 l0 40 -40 0 -40 0 0 -40 c0
++-33 -3 -40 -20 -40 -19 0 -20 7 -20 90 0 83 1 90 20 90 16 0 20 -7 20 -35z" />
++    </group>
++</vector>
+diff --git a/packages/SystemUI/res/values/du_strings.xml b/packages/SystemUI/res/values/du_strings.xml
+index d75aa69bed8a..fe9609855fe2 100644
+--- a/packages/SystemUI/res/values/du_strings.xml
++++ b/packages/SystemUI/res/values/du_strings.xml
+@@ -97,6 +97,8 @@
+     <string name="quick_settings_hardware_button_label">Lock buttons</string>
+     <string name="accessibility_quick_settings_hardware_button_off">Hardware buttons unlocked</string>
+     <string name="accessibility_quick_settings_hardware_button_on">Hardware buttons locked</string>
++    <string name="quick_settings_high_brightness">High brightness</string>
++    <string name="high_brightness_warning">HBM activated, overriding current brightness settings</string>
+ 
+     <!-- Show lte/4g switch -->
+     <string name="show_lte_fourgee_title">Show 4G instead of LTE</string>
+diff --git a/packages/SystemUI/src/com/android/systemui/qs/tiles/HighBrightnessTile.java b/packages/SystemUI/src/com/android/systemui/qs/tiles/HighBrightnessTile.java
+new file mode 100644
+index 000000000000..4f84bbf41bd3
+--- /dev/null
++++ b/packages/SystemUI/src/com/android/systemui/qs/tiles/HighBrightnessTile.java
+@@ -0,0 +1,124 @@
++/*
++ * Copyright (C) 2014 The Android Open Source Project
++ *
++ * Licensed under the Apache License, Version 2.0 (the "License");
++ * you may not use this file except in compliance with the License.
++ * You may obtain a copy of the License at
++ *
++ *      http://www.apache.org/licenses/LICENSE-2.0
++ *
++ * Unless required by applicable law or agreed to in writing, software
++ * distributed under the License is distributed on an "AS IS" BASIS,
++ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++ * See the License for the specific language governing permissions and
++ * limitations under the License.
++ */
++
++package com.android.systemui.qs.tiles;
++
++import android.content.Intent;
++import android.database.ContentObserver;
++import android.net.Uri;
++import android.os.UserHandle;
++import android.provider.Settings;
++import android.view.View;
++import android.widget.Toast;
++
++import com.android.systemui.R;
++import com.android.systemui.SysUIToast;
++import com.android.systemui.qs.QSTile;
++
++import com.android.internal.logging.MetricsProto.MetricsEvent;
++
++public class HighBrightnessTile extends QSTile<QSTile.BooleanState> {
++
++    public static final String HIGH_BRIGHTNESS_MODE = "high_brightness_mode";
++    private static final int HIGH_BRIGHTNESS_MODE_OFF = 0;
++    private static final int HIGH_BRIGHTNESS_MODE_ON = 1;
++    private static final int DEFAULT_HIGH_BRIGHTNESS_MODE = 0;
++
++    public HighBrightnessTile(Host host) {
++        super(host);
++    }
++
++    @Override
++    public BooleanState newTileState() {
++        return new BooleanState();
++    }
++
++    private ContentObserver mObserver = new ContentObserver(mHandler) {
++        @Override
++        public void onChange(boolean selfChange, Uri uri) {
++            refreshState();
++        }
++    };
++
++    @Override
++    public void setListening(boolean listening) {
++        if (listening) {
++            mContext.getContentResolver().registerContentObserver(
++                    Settings.Secure.getUriFor(Settings.Secure.HIGH_BRIGHTNESS_MODE),
++                    false, mObserver);
++        } else {
++            mContext.getContentResolver().unregisterContentObserver(mObserver);
++        }
++    }
++
++    @Override
++    public void handleClick() {
++        toggleState();
++        refreshState();
++    }
++
++    @Override
++    public void handleLongClick() {
++
++    }
++
++    @Override
++    public CharSequence getTileLabel() {
++        return mContext.getString(R.string.quick_settings_high_brightness);
++    }
++
++    @Override
++    public int getMetricsCategory() {
++        return MetricsEvent.DISPLAY;
++    }
++
++    @Override
++    public Intent getLongClickIntent() {
++        return null;
++    }
++
++    @Override
++    protected void handleUpdateState(BooleanState state, Object arg) {
++        boolean HighBrightness = Settings.Secure.getIntForUser(mContext.getContentResolver(),
++                Settings.Secure.HIGH_BRIGHTNESS_MODE, DEFAULT_HIGH_BRIGHTNESS_MODE,
++                UserHandle.USER_CURRENT) != 0;
++
++        state.label = mContext.getString(R.string.quick_settings_high_brightness);
++        state.icon = HighBrightness
++                ? ResourceIcon.get(R.drawable.ic_qs_brightness_high_on)
++                : ResourceIcon.get(R.drawable.ic_qs_brightness_high_off);
++    }
++
++    protected void toggleState() {
++        int mode = Settings.Secure.getIntForUser(mContext.getContentResolver(),
++                Settings.Secure.HIGH_BRIGHTNESS_MODE, DEFAULT_HIGH_BRIGHTNESS_MODE,
++                UserHandle.USER_CURRENT);
++        switch (mode) {
++            case HIGH_BRIGHTNESS_MODE_OFF:
++                Settings.Secure.putInt(mContext.getContentResolver(),
++                        HIGH_BRIGHTNESS_MODE, HIGH_BRIGHTNESS_MODE_ON);
++                mHost.collapsePanels();
++                SysUIToast.makeText(mContext, mContext.getString(
++                        R.string.high_brightness_warning),
++                        Toast.LENGTH_LONG).show();
++                break;
++            case HIGH_BRIGHTNESS_MODE_ON:
++                Settings.Secure.putInt(mContext.getContentResolver(),
++                        HIGH_BRIGHTNESS_MODE, HIGH_BRIGHTNESS_MODE_OFF);
++                break;
++        }
++    }
++}
+\ No newline at end of file
+diff --git a/packages/SystemUI/src/com/android/systemui/statusbar/phone/QSTileHost.java b/packages/SystemUI/src/com/android/systemui/statusbar/phone/QSTileHost.java
+index 3b54eab4ec3b..4f054f109ba1 100755
+--- a/packages/SystemUI/src/com/android/systemui/statusbar/phone/QSTileHost.java
++++ b/packages/SystemUI/src/com/android/systemui/statusbar/phone/QSTileHost.java
+@@ -56,6 +56,7 @@ import com.android.systemui.qs.tiles.ExpandedDesktopTile;
+ import com.android.systemui.qs.tiles.FlashlightTile;
+ import com.android.systemui.qs.tiles.HardwareButtonTile;
+ import com.android.systemui.qs.tiles.HeadsUpTile;
++import com.android.systemui.qs.tiles.HighBrightnessTile;
+ import com.android.systemui.qs.tiles.HotspotTile;
+ import com.android.systemui.qs.tiles.ImeTile;
+ import com.android.systemui.qs.tiles.IntentTile;
+@@ -97,7 +98,6 @@ import java.util.LinkedHashMap;
+ import java.util.List;
+ import java.util.Map;
+ 
+-/** Platform implementation of the quick settings tile host **/
+ public class QSTileHost implements QSTile.Host, Tunable {
+     private static final String TAG = "QSTileHost";
+     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
+@@ -124,6 +124,7 @@ public class QSTileHost implements QSTile.Host, Tunable {
+     private final BatteryController mBattery;
+     private final StatusBarIconController mIconController;
+     private final TileServices mServices;
++    private final boolean mHighBrightnessSupported;
+ 
+     private final List<Callback> mCallbacks = new ArrayList<>();
+     private final AutoTileManager mAutoTiles;
+@@ -133,14 +134,15 @@ public class QSTileHost implements QSTile.Host, Tunable {
+     private int mCurrentUser;
+ 
+     public QSTileHost(Context context, PhoneStatusBar statusBar,
+-            BluetoothController bluetooth, LocationController location,
+-            RotationLockController rotation, NetworkController network,
+-            ZenModeController zen, HotspotController hotspot,
+-            CastController cast, FlashlightController flashlight,
+-            UserSwitcherController userSwitcher, UserInfoController userInfo,
+-            KeyguardMonitor keyguard, SecurityController security,
+-            BatteryController battery, StatusBarIconController iconController,
+-            NextAlarmController nextAlarmController) {
++                      BluetoothController bluetooth, LocationController location,
++                      RotationLockController rotation, NetworkController network,
++                      ZenModeController zen, HotspotController hotspot,
++                      CastController cast, FlashlightController flashlight,
++                      UserSwitcherController userSwitcher, UserInfoController userInfo,
++                      KeyguardMonitor keyguard, SecurityController security,
++                      BatteryController battery, StatusBarIconController iconController,
++                      NextAlarmController nextAlarmController) {
++
+         mContext = context;
+         mStatusBar = statusBar;
+         mBluetooth = bluetooth;
+@@ -159,6 +161,7 @@ public class QSTileHost implements QSTile.Host, Tunable {
+         mIconController = iconController;
+         mNextAlarmController = nextAlarmController;
+         mProfileController = new ManagedProfileController(this);
++        mHighBrightnessSupported = mContext.getResources().getBoolean(com.android.internal.R.bool.config_supportHighBrightness);
+ 
+         final HandlerThread ht = new HandlerThread(QSTileHost.class.getSimpleName(),
+                 Process.THREAD_PRIORITY_BACKGROUND);
+@@ -466,6 +469,7 @@ public class QSTileHost implements QSTile.Host, Tunable {
+         else if (tileSpec.equals("weather")) return new WeatherTile(this);
+         else if (tileSpec.equals("sound")) return new SoundTile(this);
+         else if (tileSpec.equals("hardware_button")) return new HardwareButtonTile(this);
++        else if (tileSpec.equals("high_brightness") && mHighBrightnessSupported ) return new HighBrightnessTile(this);
+         // Intent tiles.
+         else if (tileSpec.startsWith(IntentTile.PREFIX)) return IntentTile.create(this,tileSpec);
+         else if (tileSpec.startsWith(CustomTile.PREFIX)) return CustomTile.create(this,tileSpec);
+-- 
+2.13.0
+

@@ -1,0 +1,235 @@
+From 58210e4f8e3324618a385c0ce45154eac070c6f3 Mon Sep 17 00:00:00 2001
+From: yoinx <joseph.schubert@gmail.com>
+Date: Fri, 10 Feb 2017 00:44:14 -0500
+Subject: [PATCH 1/3] Add Functionality to control High Brightness Mode [1/3]
+
+This commit will allow controlling of a kernel's High Brightness
+mode by toggling the setting: Settings.Secure.HIGH_BRIGHTNESS_MODE
+
+This mode allows for a brightness beyond 100% brightness from within
+the rom. It is very handy for high brightness scenarios, ie: direct
+sunlight.
+
+Depends on support in the device tree and du vendor overlay. On
+supported devices, this will already typically exist in the kernel.
+
+NOTE:
+While kernel based High Brightness Mode is active it will override
+any manual/automatic brightness settings from the rom.
+
+Change-Id: I147e3fcc331a5881328f43262a69e348ad253567
+---
+ core/java/android/provider/Settings.java           |  7 ++++++
+ core/res/res/values/du_config.xml                  |  5 ++++
+ core/res/res/values/du_symbols.xml                 |  4 +++
+ .../SettingsProvider/res/values/du_defaults.xml    | 24 ++++++++++++++++++
+ .../providers/settings/SettingsProvider.java       | 13 +++++++++-
+ .../android/server/power/PowerManagerService.java  | 29 ++++++++++++++++++++++
+ 6 files changed, 81 insertions(+), 1 deletion(-)
+ create mode 100644 packages/SettingsProvider/res/values/du_defaults.xml
+
+diff --git a/core/java/android/provider/Settings.java b/core/java/android/provider/Settings.java
+index 164562b56cf9..1cffe2d4609d 100755
+--- a/core/java/android/provider/Settings.java
++++ b/core/java/android/provider/Settings.java
+@@ -7455,6 +7455,12 @@ public final class Settings {
+         public static final String DOUBLE_TAP_TO_WAKE = "double_tap_to_wake";
+ 
+         /**
++         * Controls whether high brightness mode via a QS tile
++         * @hide
++         */
++        public static final String HIGH_BRIGHTNESS_MODE = "high_brightness_mode";
++
++        /**
+          * The current assistant component. It could be a voice interaction service,
+          * or an activity that handles ACTION_ASSIST, or empty which means using the default
+          * handling.
+@@ -7801,6 +7807,7 @@ public final class Settings {
+             MOUNT_UMS_NOTIFY_ENABLED,
+             SLEEP_TIMEOUT,
+             DOUBLE_TAP_TO_WAKE,
++            HIGH_BRIGHTNESS_MODE,
+             WAKE_GESTURE_ENABLED,
+             LONG_PRESS_TIMEOUT,
+             CAMERA_GESTURE_DISABLED,
+diff --git a/core/res/res/values/du_config.xml b/core/res/res/values/du_config.xml
+index 331874f780d9..38fcf4862c59 100644
+--- a/core/res/res/values/du_config.xml
++++ b/core/res/res/values/du_config.xml
+@@ -130,4 +130,9 @@
+ 
+     <!-- Whether the device needs axis inversion for the fingerprint notification panel gesture when rotated -->
+     <bool name="config_needsFingerprintAxisInversion">false</bool>
++
++    <!-- High Brightness Mode -->
++    <add-resource type="bool" name="config_supportHighBrightness"></add-resource>
++    <bool name="config_supportHighBrightness">false</bool>
++
+ </resources>
+diff --git a/core/res/res/values/du_symbols.xml b/core/res/res/values/du_symbols.xml
+index 5435396ed7f3..8de628540316 100644
+--- a/core/res/res/values/du_symbols.xml
++++ b/core/res/res/values/du_symbols.xml
+@@ -143,4 +143,8 @@
+   <java-symbol type="bool" name="config_hasDashCharger" />
+ 
+   <java-symbol type="bool" name="config_needsFingerprintAxisInversion" />
++
++  <!-- High Brightness Mode -->
++  <java-symbol type="bool" name="config_supportHighBrightness" />
++
+ </resources>
+diff --git a/packages/SettingsProvider/res/values/du_defaults.xml b/packages/SettingsProvider/res/values/du_defaults.xml
+new file mode 100644
+index 000000000000..e8d6ddc84a94
+--- /dev/null
++++ b/packages/SettingsProvider/res/values/du_defaults.xml
+@@ -0,0 +1,24 @@
++<?xml version="1.0" encoding="utf-8"?>
++<!--
++/**
++ * Copyright (c) 2009, The Android Open Source Project
++ *
++ * Licensed under the Apache License, Version 2.0 (the "License");
++ * you may not use this file except in compliance with the License.
++ * You may obtain a copy of the License at
++ *
++ *     http://www.apache.org/licenses/LICENSE-2.0
++ *
++ * Unless required by applicable law or agreed to in writing, software
++ * distributed under the License is distributed on an "AS IS" BASIS,
++ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++ * See the License for the specific language governing permissions and
++ * limitations under the License.
++ */
++-->
++<resources>
++
++    <!-- Default state of high brightness mode -->
++    <bool name="def_high_brightness_Mode">false</bool>
++
++</resources>
+diff --git a/packages/SettingsProvider/src/com/android/providers/settings/SettingsProvider.java b/packages/SettingsProvider/src/com/android/providers/settings/SettingsProvider.java
+index fec33a270868..9055963bab75 100644
+--- a/packages/SettingsProvider/src/com/android/providers/settings/SettingsProvider.java
++++ b/packages/SettingsProvider/src/com/android/providers/settings/SettingsProvider.java
+@@ -2102,7 +2102,7 @@ public class SettingsProvider extends ContentProvider {
+         }
+ 
+         private final class UpgradeController {
+-            private static final int SETTINGS_VERSION = 132;
++            private static final int SETTINGS_VERSION = 133;
+ 
+             private final int mUserId;
+ 
+@@ -2447,6 +2447,17 @@ public class SettingsProvider extends ContentProvider {
+                     currentVersion = 132;
+                 }
+ 
++                if (currentVersion == 132) {
++                    // v133: Add high brightness mode setting.
++                    final SettingsState secureSettings = getSecureSettingsLocked(userId);
++                    secureSettings.insertSettingLocked(Settings.Secure.HIGH_BRIGHTNESS_MODE,
++                            getContext().getResources().getBoolean(
++                                    R.bool.def_high_brightness_Mode) ? "1" : "0",
++                            SettingsState.SYSTEM_PACKAGE_NAME);
++
++                    currentVersion = 133;
++                }
++
+                 if (currentVersion != newVersion) {
+                     Slog.wtf("SettingsProvider", "warning: upgrading settings database to version "
+                             + newVersion + " left it at "
+diff --git a/services/core/java/com/android/server/power/PowerManagerService.java b/services/core/java/com/android/server/power/PowerManagerService.java
+index 3a85830d901d..897dc3ca8748 100644
+--- a/services/core/java/com/android/server/power/PowerManagerService.java
++++ b/services/core/java/com/android/server/power/PowerManagerService.java
+@@ -186,6 +186,12 @@ public final class PowerManagerService extends SystemService
+     // Default setting for double tap to wake.
+     private static final int DEFAULT_DOUBLE_TAP_TO_WAKE = 0;
+ 
++    // Power feature to Enable High Brightness Mode
++    private static final int POWER_FEATURE_HIGH_BRIGHTNESS_MODE = 1;
++
++    // Default setting for High Brightness Mode.
++    private static final int DEFAULT_HIGH_BRIGHTNESS_MODE = 0;
++
+     /** Constants for {@link #shutdownOrRebootInternal} */
+     @Retention(RetentionPolicy.SOURCE)
+     @IntDef({HALT_MODE_SHUTDOWN, HALT_MODE_REBOOT, HALT_MODE_REBOOT_SAFE_MODE})
+@@ -410,6 +416,9 @@ public final class PowerManagerService extends SystemService
+     // Whether device supports double tap to wake.
+     private boolean mSupportsDoubleTapWakeConfig;
+ 
++    // Whether device supports High Brightness Mode.
++    private boolean mSupportsHighBrightnessModeConfig;
++
+     // The screen off timeout setting value in milliseconds.
+     private int mScreenOffTimeoutSetting;
+ 
+@@ -537,6 +546,9 @@ public final class PowerManagerService extends SystemService
+     // True if double tap to wake is enabled
+     private boolean mDoubleTapWakeEnabled;
+ 
++    // True if High Brightness Mode is enabled
++    private boolean mHighBrightnessModeEnabled;
++
+     private final ArrayList<PowerManagerInternal.LowPowerModeListener> mLowPowerModeListeners
+             = new ArrayList<PowerManagerInternal.LowPowerModeListener>();
+ 
+@@ -587,6 +599,7 @@ public final class PowerManagerService extends SystemService
+             nativeSetAutoSuspend(false);
+             nativeSetInteractive(true);
+             nativeSetFeature(POWER_FEATURE_DOUBLE_TAP_TO_WAKE, 0);
++            nativeSetFeature(POWER_FEATURE_HIGH_BRIGHTNESS_MODE,0);
+         }
+     }
+ 
+@@ -714,6 +727,9 @@ public final class PowerManagerService extends SystemService
+             resolver.registerContentObserver(Settings.Secure.getUriFor(
+                     Settings.Secure.DOUBLE_TAP_TO_WAKE),
+                     false, mSettingsObserver, UserHandle.USER_ALL);
++            resolver.registerContentObserver(Settings.Secure.getUriFor(
++                    Settings.Secure.HIGH_BRIGHTNESS_MODE),
++                    false, mSettingsObserver, UserHandle.USER_ALL);
+             resolver.registerContentObserver(Settings.Global.getUriFor(
+                     Settings.Global.WAKE_WHEN_PLUGGED_OR_UNPLUGGED),
+                     false, mSettingsObserver, UserHandle.USER_ALL);
+@@ -815,6 +831,8 @@ public final class PowerManagerService extends SystemService
+                 com.android.internal.R.fraction.config_maximumScreenDimRatio, 1, 1);
+         mSupportsDoubleTapWakeConfig = resources.getBoolean(
+                 com.android.internal.R.bool.config_supportDoubleTapWake);
++        mSupportsHighBrightnessModeConfig = resources.getBoolean(
++                com.android.internal.R.bool.config_supportHighBrightness);
+         mProximityWakeSupported = resources.getBoolean(
+                  com.android.internal.R.bool.config_proximityCheckOnWake);
+         mProximityWakeEnabledByDefaultConfig = resources.getBoolean(
+@@ -866,6 +884,16 @@ public final class PowerManagerService extends SystemService
+             }
+         }
+ 
++       if (mSupportsHighBrightnessModeConfig) {
++            boolean highBrightnessModeEnabled = Settings.Secure.getIntForUser(resolver,
++                    Settings.Secure.HIGH_BRIGHTNESS_MODE, DEFAULT_HIGH_BRIGHTNESS_MODE,
++                            UserHandle.USER_CURRENT) != 0;
++            if (highBrightnessModeEnabled != mHighBrightnessModeEnabled) {
++                mHighBrightnessModeEnabled = highBrightnessModeEnabled;
++                nativeSetFeature(POWER_FEATURE_HIGH_BRIGHTNESS_MODE, mHighBrightnessModeEnabled ? 1 : 0);
++            }
++        }
++
+         final int oldScreenBrightnessSetting = getCurrentBrightnessSettingLocked();
+ 
+         mScreenBrightnessForVrSetting = Settings.System.getIntForUser(resolver,
+@@ -3141,6 +3169,7 @@ public final class PowerManagerService extends SystemService
+             pw.println("  mScreenBrightnessForVrSetting=" + mScreenBrightnessForVrSetting);
+             pw.println("  mDoubleTapWakeEnabled=" + mDoubleTapWakeEnabled);
+             pw.println("  mIsVrModeEnabled=" + mIsVrModeEnabled);
++            pw.println("  mHighBrightnessModeEnabled=" + mHighBrightnessModeEnabled);
+ 
+             final int sleepTimeout = getSleepTimeoutLocked();
+             final int screenOffTimeout = getScreenOffTimeoutLocked(sleepTimeout);
+-- 
+2.13.0
+

@@ -1,0 +1,121 @@
+From dbeb932923a110ea9169c93835a132e309cb6f70 Mon Sep 17 00:00:00 2001
+From: Nathan Chancellor <natechancellor@gmail.com>
+Date: Fri, 2 Jun 2017 18:35:21 -0700
+Subject: [PATCH] sepolicy: add support for setting props with Spectrum
+
+Change-Id: I9ecdced5a3e2a8eb8fc104fbec99347283c47920
+Signed-off-by: Nathan Chancellor <natechancellor@gmail.com>
+---
+ keys.conf              |  3 +++
+ keys/spectrum.x509.pem | 22 ++++++++++++++++++++++
+ mac_permissions.xml    |  5 +++++
+ property.te            |  1 +
+ property_contexts      |  1 +
+ seapp_contexts         |  1 +
+ spectrum.te            |  8 ++++++++
+ 7 files changed, 41 insertions(+)
+ create mode 100644 keys/spectrum.x509.pem
+ create mode 100644 spectrum.te
+
+diff --git a/keys.conf b/keys.conf
+index 7a307b5d..29f3e17d 100644
+--- a/keys.conf
++++ b/keys.conf
+@@ -23,3 +23,6 @@ ENG       : $DEFAULT_SYSTEM_DEV_CERTIFICATE/testkey.x509.pem
+ USER      : $DEFAULT_SYSTEM_DEV_CERTIFICATE/testkey.x509.pem
+ USERDEBUG : $DEFAULT_SYSTEM_DEV_CERTIFICATE/testkey.x509.pem
+ 
++# Spectrum key
++[@SPECTRUM]
++ALL : system/sepolicy/keys/spectrum.x509.pem
+diff --git a/keys/spectrum.x509.pem b/keys/spectrum.x509.pem
+new file mode 100644
+index 00000000..fad9054c
+--- /dev/null
++++ b/keys/spectrum.x509.pem
+@@ -0,0 +1,22 @@
++-----BEGIN CERTIFICATE-----
++MIIDmzCCAoOgAwIBAgIEcOSIFjANBgkqhkiG9w0BAQsFADB9MQswCQYDVQQGEwJV
++UzELMAkGA1UECBMCQVoxDTALBgNVBAcTBE1lc2ExGjAYBgNVBAoTEU5hdGhhbiBD
++aGFuY2VsbG9yMRowGAYDVQQLExFOYXRoYW4gQ2hhbmNlbGxvcjEaMBgGA1UEAxMR
++TmF0aGFuIENoYW5jZWxsb3IwIBcNMTcwNDMwMDEyNDUxWhgPMjA2NzA0MTgwMTI0
++NTFaMH0xCzAJBgNVBAYTAlVTMQswCQYDVQQIEwJBWjENMAsGA1UEBxMETWVzYTEa
++MBgGA1UEChMRTmF0aGFuIENoYW5jZWxsb3IxGjAYBgNVBAsTEU5hdGhhbiBDaGFu
++Y2VsbG9yMRowGAYDVQQDExFOYXRoYW4gQ2hhbmNlbGxvcjCCASIwDQYJKoZIhvcN
++AQEBBQADggEPADCCAQoCggEBAL5+KzmpFbdQi+vZs3TCHD4TFjGB82ekLLdE9rtH
++HiI2Up3Xi/O7KWZhERLriYmWs6fBEWaLGROP/R4KYeb8ADVbbaBs0XbUtlBCFZJt
++0f2xi1NNi9uo1nXrG61rBVTz29Cj8JyBvih/IQ9b8UDveb0zK12P8sqLh+shdZji
++ytFitbbaZ5ya/EpH1THpKB7JH9IZwoc6OssF6YFoKegO5zicMFa2lr2b5UBGWE7n
++9OTMrwdeBYM0RYKiYFuGaT1VRC2P84CNwhqsFtaN7Jmyeab0RHo2c2sWFwXJlnSI
++LNAmyQBpb16n1zSIY6liiEY3DN+CUFjnLekBSXWv0GZYNCECAwEAAaMhMB8wHQYD
++VR0OBBYEFM77EbL2xSsY4G+PtJnKmD132ZCdMA0GCSqGSIb3DQEBCwUAA4IBAQA+
++WSIIVR4Witu8ppBp9dMWhOsmlCn0Yq6FGIJAqcVAMso1LKcbmhEsztDkopgWQU6Y
++WpXKFz7y5mfLrjKtCjWHObNls6Oa2WOLXxwrNX21ccF9IjEkkxPPaW8EQjmlcIWe
++xnqL+Pe9ASUhHeDnbQp+ts29az5UeqzYQR/8Hl1Tnn/M3SH1saGL8H2oGX/7AkKU
++SecXsw6430reEhFlr4qovZsmGiOy7xjtE9sQ5ogM//KZBdJRP/X/VXSzBbHGYS+V
++FglDQXZ+juRgqCX+KlzIyEfL/ZuKqNH+F2eCjPHWxY3eQzc1S2nZ/bnznq8dAp2P
++EZbchxD1Si7x57hCoYWG
++-----END CERTIFICATE-----
+diff --git a/mac_permissions.xml b/mac_permissions.xml
+index 87efe0e2..4af19015 100644
+--- a/mac_permissions.xml
++++ b/mac_permissions.xml
+@@ -51,4 +51,9 @@
+       <seinfo value="platform" />
+     </signer>
+ 
++    <!-- Signing key for Spectrum -->
++    <signer signature="@SPECTRUM">
++        <seinfo value="spectrum" />
++    </signer>
++
+ </policy>
+diff --git a/property.te b/property.te
+index 44f15bb9..3614ed27 100644
+--- a/property.te
++++ b/property.te
+@@ -39,5 +39,6 @@ type config_prop, property_type, core_property_type;
+ type device_logging_prop, property_type;
+ type safemode_prop, property_type;
+ type theme_prop, property_type;
++type spectrum_prop, property_type;
+ 
+ allow property_type tmpfs:filesystem associate;
+diff --git a/property_contexts b/property_contexts
+index 0280e7a2..b365a78d 100644
+--- a/property_contexts
++++ b/property_contexts
+@@ -56,6 +56,7 @@ persist.sys.audit_safemode      u:object_r:safemode_prop:s0
+ persist.service.        u:object_r:system_prop:s0
+ persist.service.bdroid. u:object_r:bluetooth_prop:s0
+ persist.security.       u:object_r:system_prop:s0
++persist.spectrum.       u:object_r:spectrum_prop:s0
+ 
+ # Boolean property set by system server upon boot indicating
+ # if device owner is provisioned.
+diff --git a/seapp_contexts b/seapp_contexts
+index 350d2046..dbd1951d 100644
+--- a/seapp_contexts
++++ b/seapp_contexts
+@@ -98,3 +98,4 @@ user=_app isAutoPlayApp=true domain=autoplay_app type=autoplay_data_file levelFr
+ user=_app isPrivApp=true domain=priv_app type=app_data_file levelFrom=user
+ user=_app domain=untrusted_app type=app_data_file levelFrom=user
+ user=system isPrivApp=true domain=interfacer seinfo=platform name=projekt.interfacer type=theme_data_file
++user=_app domain=spectrum seinfo=spectrum name=org.frap129.spectrum type=app_data_file
+diff --git a/spectrum.te b/spectrum.te
+new file mode 100644
+index 00000000..fabbe41a
+--- /dev/null
++++ b/spectrum.te
+@@ -0,0 +1,8 @@
++type spectrum, domain;
++
++app_domain(spectrum);
++
++allow spectrum activity_service:service_manager find;
++
++get_prop(spectrum, spectrum_prop);
++set_prop(spectrum, spectrum_prop);
+-- 
+2.13.0
+

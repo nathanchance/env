@@ -1,0 +1,28 @@
+From 8dd2e0d3bbfd3974c7afb3cf5643a6489d107d1a Mon Sep 17 00:00:00 2001
+From: Sultanxda <sultanxda@gmail.com>
+Date: Sat, 6 Aug 2016 13:52:43 -0700
+Subject: [PATCH 1/2] Use 'release-keys' for build tag
+
+Some apps may check for this.
+
+Change-Id: Ibece80d0e6020efaf886d8d5f72290fa6740df7d
+---
+ core/Makefile | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/core/Makefile b/core/Makefile
+index 2671f2ca2..7339bc198 100644
+--- a/core/Makefile
++++ b/core/Makefile
+@@ -138,7 +138,7 @@ endif
+ # Both of these tags will be removed and replaced with "release-keys"
+ # when the target-files is signed in a post-build step.
+ ifeq ($(DEFAULT_SYSTEM_DEV_CERTIFICATE),build/target/product/security/testkey)
+-BUILD_KEYS := test-keys
++BUILD_KEYS := release-keys
+ else
+ BUILD_KEYS := release-keys
+ endif
+-- 
+2.13.0
+
