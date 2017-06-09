@@ -282,6 +282,8 @@ esac
 
 if [[ ${REPOPICK} = true ]]; then
     echoText "RUNNING REPOPICK"
+    # Execute in a subshell otherwise everything is fubared
+    (
     while [[ ${YN} != "n" ]]; do
         read -p "Do you have changes to pick? (y/n) " YN
         case ${YN} in
@@ -296,6 +298,7 @@ if [[ ${REPOPICK} = true ]]; then
                 break ;;
         esac
     done
+    )
 fi
 
 
