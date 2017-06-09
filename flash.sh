@@ -231,16 +231,6 @@ echoText "MAKING KERNEL"
 
 cd "${SOURCE_FOLDER}"
 
-# TAG THE HEAD COMMIT WITH THE VERSION FIRST IF IT'S A PUBLIC BUILD
-if [[ ${MODE} = "public" ]]; then
-    # WE NEED TO MARK THE PREVIOUS TAG FOR CHANGELOG
-    PREV_TAG_NAME=$(git tag -l --sort=-taggerdate | grep -m 1 flash)
-    PREV_TAG_HASH=$(git log --format=%H -1 ${PREV_TAG_NAME})
-
-    git tag -a "${ZIP_NAME}" -m "${ZIP_NAME}"
-    git push origin "${ZIP_NAME}"
-fi
-
 # PROPERLY POINT COMPILER TO TOOLCHAIN AND ARCHITECTURE
 export CROSS_COMPILE=${TOOLCHAIN_FOLDER}/bin/${TOOLCHAIN_PREFIX}-
 export ARCH=${ARCHITECTURE}
@@ -265,6 +255,19 @@ if [[ $( ls ${KERNEL} 2>/dev/null | wc -l ) != 0 ]]; then
     BUILD_RESULT_STRING="BUILD SUCCESSFUL"
     SUCCESS=true
 
+    # GENERATE ZIP_NAME
+    ZIP_NAME=$( getZipName ${SOURCE_FOLDER} )
+
+    # TAG THE HEAD COMMIT WITH THE VERSION FIRST IF IT'S A PUBLIC BUILD
+    if [[ ${MODE} = "public" ]]; then
+        # WE NEED TO MARK THE PREVIOUS TAG FOR CHANGELOG
+        PREV_TAG_NAME=$(git tag -l --sort=-taggerdate | grep -m 1 flash)
+        PREV_TAG_HASH=$(git log --format=%H -1 ${PREV_TAG_NAME})
+
+        git tag -a "${ZIP_NAME}" -m "${ZIP_NAME}"
+        git push origin "${ZIP_NAME}"
+    fi
+
 
     #####################
     # COPY KERNEL IMAGE #
@@ -288,8 +291,6 @@ if [[ $( ls ${KERNEL} 2>/dev/null | wc -l ) != 0 ]]; then
     #################
 
     newLine; echoText "MAKING FLASHABLE ZIP"
-
-    ZIP_NAME=$( getZipName ${SOURCE_FOLDER} )
 
     zip -r9 ${ZIP_NAME}.zip * -x README.md ${ZIP_NAME}.zip > /dev/null 2>&1
 
