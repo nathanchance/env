@@ -23,13 +23,16 @@ export PATH=${PATH}:${HOME}/Documents/Repos/Scripts
 export ANDROID_HOME=${HOME}/Library/Android/SDK
 
 # Export build tools to path
-# 26.0.0-rc1 first
-export PATH=${PATH}:${HOME}/Library/Android/SDK/build-tools/26.0.0-rc1
-# Then 25.0.2
-export PATH=${PATH}:${HOME}/Library/Android/SDK/build-tools/25.0.2
+# 26.0.0-rc2 first
+export PATH=${PATH}:${HOME}/Library/Android/SDK/build-tools/26.0.0-rc2
+# Then 25.0.3
+export PATH=${PATH}:${HOME}/Library/Android/SDK/build-tools/25.0.3
 
 # Export NDK to PATH
 export PATH=${PATH}:${HOME}/Library/Android/SDK/ndk-bundle
+
+# Setting PATH for Python 3.6
+export PATH=/Library/Frameworks/Python.framework/Versions/3.6/bin:${PATH}
 
 # ssh alias
 alias sshfb='ssh nathan@nchancellor.net'
