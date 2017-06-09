@@ -28,6 +28,7 @@ set wildmenu            " Show auto completion menu when typing commands
 set incsearch           " Show search results in realtime
 set hlsearch            " Highlight search matches
 set lazyredraw          " Redraw only when we need to
+set mouse=a             " Enable mouse in all modes
 
 " Special indenting for C and Makefiles (since most will be kernel files)
 filetype indent on

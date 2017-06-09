@@ -19,9 +19,19 @@
 # If not running interactively, don't do anything
 [[ $- != *i* ]] && return
 
+# Try to attach via tmux
+if [[ -z ${TMUX} ]] ;then
+    ID=$( tmux ls | grep -vm1 attached | cut -d: -f1 ) # get the id of a deattached session
+    if [[ -z ${ID} ]] ;then # if not available create a new one
+        tmux -u new-session
+    else
+        tmux -u attach-session -t ${ID} # if available attach to it
+    fi
+fi
+
 alias ls='ls --color=auto'
 #PS1='[\u@\h \W]\$ '
-PS1='\033[01;34m\u@\h \033[01;32m\W \033[39m\$ '
+PS1='\[\033[01;34m\]\u@\h \[\033[01;32m\]\W \[\033[39m\]\$ '
 
 ###########
 # EXPORTS #
@@ -35,7 +45,7 @@ export USE_CCACHE=1
 export PATH="${PATH}$(find ${HOME}/Scripts -name '.*' -prune -o -type d -printf ':%p')"
 
 # Log support so I can see what compiled and at what time
-export LOGDIR=${HOME}/Web/Downloads/.superhidden/Logs
+export LOGDIR=${HOME}/Web/me/Logs
 # Create LOGDIR if it doesn't exist
 if [[ ! -d ${LOGDIR} ]]; then
     mkdir -p ${LOGDIR}/Results
@@ -47,6 +57,9 @@ export LC_ALL=C
 
 # Add Android SDK build tools to path
 export PATH=${PATH}:/opt/android-sdk/build-tools/25.0.3
+
+# tmux alias
+alias tmux='tmux -u'
 
 ###############
 # GIT ALIASES #

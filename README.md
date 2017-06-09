@@ -18,3 +18,4 @@ This repo includes stuff for my build server, MacBook Pro, and other Linux insta
 
 + **vim:** my personal vim settings
 + **Makefile:** Makefile for testing colors in terminal (run make)
++ **.tmux.conf:** my personal tmux settings
