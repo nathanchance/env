@@ -52,7 +52,7 @@ function help_menu() {
     echo -e "${BOLD}USAGE:${RST} bash ${0} <rom> <device> <options>\n"
     echo -e "${BOLD}Example:${RST} bash ${0} flash angler user sync\n"
     echo -e "${BOLD}REQUIRED PARAMETERS:${RST}"
-    echo -e "   rom:        abc | du | du-caf | krexus | lineageos | lineageoms | omni | pn | vanilla"
+    echo -e "   rom:        abc | du-aosp | du-caf | du-personal | krexus | lineageos | lineageoms | omni | pn | vanilla"
     echo -e "   device:     angler | bullhead | flo | hammerhead | marlin| sailfish | shamu\n"
     echo -e "${BOLD}STANDARD PARAMETERS:${RST}"
     echo -e "   sync:       performs a repo sync before building"
@@ -91,7 +91,7 @@ while [[ $# -ge 1 ]]; do
         # REQUIRED OPTIONS
         "angler"|"bullhead"|"flo"|"hammerhead"|"marlin"|"oneplus3"|"sailfish"|"shamu")
             DEVICE=${1} ;;
-        "abc"|"du"|"du-caf"|"krexus"|"lineageos"|"lineageoms"|"omni"|"pn"|"vanilla")
+        "abc"|"du-aosp"|"du-caf"|"du-personal"|"krexus"|"lineageos"|"lineageoms"|"omni"|"pn"|"vanilla")
             ROM=${1} ;;
         # STANDARD OPTIONS
         "sync")
@@ -151,8 +151,7 @@ done
 # PARAMETER VERIFICATION
 # IF ROM WASN'T SPECIFIED, IT'S A BUILD FOR ME
 if [[ -z ${ROM} ]]; then
-    ROM=du
-    export DU_BUILD_TYPE=RC
+    ROM=du-personal
     DEVICE=angler
 fi
 
@@ -183,12 +182,15 @@ case "${ROM}" in
     "abc")
         SOURCE_DIR=${ANDROID_DIR}/ROMs/ABC
         ZIP_MOVE=${ZIP_MOVE_PARENT}/ABC/${DEVICE} ;;
-    "du")
-        SOURCE_DIR=${ANDROID_DIR}/ROMs/DU
+    "du-aosp")
+        SOURCE_DIR=${ANDROID_DIR}/ROMs/DU-AOSP
         ZIP_MOVE=${ZIP_MOVE_PARENT}/DirtyUnicorns/${DEVICE} ;;
     "du-caf")
         SOURCE_DIR=${ANDROID_DIR}/ROMs/DU-CAF
         ZIP_MOVE=${ZIP_MOVE_PARENT}/DirtyUnicorns/${DEVICE} ;;
+    "du-personal")
+        SOURCE_DIR=${ANDROID_DIR}/ROMs/DU
+        ZIP_MOVE=${ZIP_MOVE_PARENT}/DirtyUnicorns/personal ;;
     "krexus")
         SOURCE_DIR=${ANDROID_DIR}/ROMs/Krexus
         ZIP_MOVE=${ZIP_MOVE_PARENT}/Krexus/${DEVICE} ;;
