@@ -51,6 +51,9 @@ device/huawei/angler
 external/skia
 frameworks/base
 frameworks/native
+packages/apps/DUI
+packages/apps/DU-Tweaks
+system/core
 vendor/du"
 
 
@@ -86,12 +89,7 @@ for FOLDER in ${DU_REPOS}; do
     URL=android_$( echo ${FOLDER} | sed "s/\//_/g" )
 
     # FETCH AND MERGE UPSTREAM
-    case ${FOLDER} in
-        "device/huawei/angler")
-            git pull https://github.com/DirtyUnicorns/android_device_huawei_angler n7x ;;
-        *)
-            git pull du n7x ;;
-    esac
+    git pull https://github.com/DirtyUnicorns/${URL} n7x
 
     if [[ $? -ne 0 ]]; then
         RESULT_STRING+="${FOLDER}: ${RED}FAILED${RST}\n"
