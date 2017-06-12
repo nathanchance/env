@@ -237,6 +237,10 @@ if [[ ${SYNC} = true ]]; then
     echoText "SYNCING LATEST SOURCES"; newLine
 
     ${REPO_SYNC} ${FLAGS}
+
+    if [[ ${ROM} = "du-personal" ]]; then
+        source ${SCRIPT_DIR}/du_merge.sh
+    fi
 fi
 
 
