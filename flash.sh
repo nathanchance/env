@@ -157,7 +157,7 @@ SOURCE_FOLDER=${KERNEL_HEAD}/${DEVICE}
 ARCHITECTURE=arm64
 KERNEL_IMAGE=Image.gz-dtb
 if [[ -z ${TOOLCHAIN_NAME} ]]; then
-    TOOLCHAIN_PREFIX=aarch64-linaro-linux-gnueabi
+    TOOLCHAIN_PREFIX=aarch64-linaro-linux-gnu
     TOOLCHAIN_NAME=${TOOLCHAIN_PREFIX}-7.x
 else
     TOOLCHAIN_PREFIX=aarch64-linux-android
