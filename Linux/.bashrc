@@ -137,12 +137,8 @@ function update {
 # Flash build function
 function flash_build {
     case ${1} in
-        "arm")
-            export CROSS_COMPILE=${HOME}/Toolchains/arm-linux-gnueabi-6.x/bin/arm-linux-gnueabi-
-            export ARCH=arm
-            export SUBARCH=arm ;;
         "arm64")
-            export CROSS_COMPILE=${HOME}/Toolchains/aarch64-linaro-linux-gnueabi-7.x/bin/aarch64-linaro-linux-gnueabi-
+            export CROSS_COMPILE=${HOME}/Toolchains/aarch64-linaro-linux-gnu-7.x/bin/aarch64-linaro-linux-gnu-
             export ARCH=arm64
             export SUBARCH=arm64 ;;
     esac
