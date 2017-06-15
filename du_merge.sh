@@ -54,7 +54,10 @@ frameworks/native
 packages/apps/DUI
 packages/apps/DU-Tweaks
 system/core
-vendor/du"
+system/extras
+system/sepolicy
+vendor/du
+vendor/huawei"
 
 
 ###############
