@@ -175,7 +175,7 @@ fi
 # SOURCE_DIR: Directory that holds the ROM source
 # ZIP_MOVE: Directory to hold completed ROM zips
 ANDROID_DIR=${HOME}
-ZIP_MOVE_PARENT=${HOME}/Web/me
+ZIP_MOVE_PARENT=${HOME}/Web/me/ROMs
 
 # Otherwise, define them for our various ROMs
 case "${ROM}" in
@@ -184,13 +184,13 @@ case "${ROM}" in
         ZIP_MOVE=${ZIP_MOVE_PARENT}/ABC/${DEVICE} ;;
     "du-aosp")
         SOURCE_DIR=${ANDROID_DIR}/ROMs/DU-AOSP
-        ZIP_MOVE=${ZIP_MOVE_PARENT}/DirtyUnicorns/${DEVICE} ;;
+        ZIP_MOVE=${ZIP_MOVE_PARENT}/../DirtyUnicorns/${DEVICE} ;;
     "du-caf")
         SOURCE_DIR=${ANDROID_DIR}/ROMs/DU-CAF
-        ZIP_MOVE=${ZIP_MOVE_PARENT}/DirtyUnicorns/${DEVICE} ;;
+        ZIP_MOVE=${ZIP_MOVE_PARENT}/../DirtyUnicorns/${DEVICE} ;;
     "du-personal")
         SOURCE_DIR=${ANDROID_DIR}/ROMs/DU
-        ZIP_MOVE=${ZIP_MOVE_PARENT}/DirtyUnicorns/personal ;;
+        ZIP_MOVE=${ZIP_MOVE_PARENT}/../DirtyUnicorns/personal ;;
     "krexus")
         SOURCE_DIR=${ANDROID_DIR}/ROMs/Krexus
         ZIP_MOVE=${ZIP_MOVE_PARENT}/Krexus/${DEVICE} ;;
