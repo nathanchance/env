@@ -58,9 +58,7 @@ function help_menu() {
 
 # GETS A FORMATTED ZIP_NAME
 function getZipName() {
-    local SUBLEVEL=$( grep -m 1 SUBLEVEL ${1}/Makefile | sed 's/SUBLEVEL = //' )
-
-    echo $( cat ${1}/include/config/kernel.release | sed "s/^.*${SUBLEVEL}-//" )-$( date +%H%M )
+    echo $( cat ${1}/include/config/kernel.release | sed "s/^.*flash-/flash-/g" )-$( date +%H%M )
 }
 
 ################
