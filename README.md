@@ -1,4 +1,4 @@
-# OS Things
+# dotfiles
 
 This repo includes stuff for my build server, MacBook Pro, and other Linux instances. I'll try to update this for what each thing is/does
 
