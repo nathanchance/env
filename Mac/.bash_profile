@@ -18,6 +18,8 @@
 
 # git bash completion
 source ~/.git-prompt.sh
+export GIT_PS1_SHOWDIRTYSTATE=1
+export GIT_PS1_SHOWUPSTREAM=auto
 
 # Cool prompt
 PS1='\[\033[01;31m\]\u@\h \[\033[01;33m\]\w\[\033[01;36m\]$(__git_ps1 " (%s)") \[\033[39m\]\$ '
