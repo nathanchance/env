@@ -16,6 +16,15 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>
 
+# git bash completion
+source ~/.git-prompt.sh
+
+# Cool prompt
+PS1='\[\033[01;31m\]\u@\h \[\033[01;33m\]\w\[\033[01;36m\]$(__git_ps1 " (%s)") \[\033[39m\]\$ '
+
+# For Homebrew
+export PATH=/usr/local/sbin:${PATH}
+
 # Add Scripts directory to PATH
 export PATH=${PATH}:${HOME}/Documents/Repos/Scripts
 
@@ -34,8 +43,20 @@ export PATH=${PATH}:${HOME}/Library/Android/SDK/ndk-bundle
 # Setting PATH for Python 3.6
 export PATH=/Library/Frameworks/Python.framework/Versions/3.6/bin:${PATH}
 
-# ssh alias
+# aliases
 alias sshfb='ssh nathan@nchancellor.net'
+alias tmux='tmux -u'
+alias vim='nvim'
+
+# Try to attach via tmux
+if [[ -z ${TMUX} ]] ;then
+    ID=$( tmux ls | grep -vm1 attached | cut -d: -f1 ) # get the id of a deattached session
+    if [[ -z ${ID} ]] ;then # if not available create a new one
+        tmux -u new-session
+    else
+        tmux -u attach-session -t ${ID} # if available attach to it
+    fi
+fi
 
 ###############
 # GIT ALIASES #
