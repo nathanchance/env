@@ -86,30 +86,9 @@ function diskUsage() {
 	echo "${USED} out of ${ALL} (${PERCENT})"
 }
 
-function updates() {
-	DISTRO=$( cat /etc/os-release | grep ID= | sed s/ID=//g )
-
-	case ${DISTRO} in
-		"arch")
-			# Silently sync up
-			echo "n" | pacaur -Syu | 2>&1
-			# Check for new upgradeable packages
-			PACK_NUM=$( pacaur -Qu | grep -v ignored | wc -l ) ;;
-		"ubuntu*"|"linuxmint")
-			PACK_NUM=$( apt-get -s dist-upgrade | awk '/^Inst/ { print $2 }' | wc -l ) ;;
-		*)
-			PACK_NUM=-1
-	esac
-
-	if [[ ${PACK_NUM} != -1 ]]; then
-		echo "     Package updates   :  ${PACK_NUM}"
-	fi
-	echo ""
-}
-
 clear
 
-echo ""
+echo -e "\033[1m"
 echo ""
 echo ""
 if [[ "$( uname -n )" == "flashbox" ]]; then
@@ -135,12 +114,11 @@ echo ""
 echo ""
 echo "     Today's date      :  $( date "+%B %d, %Y (%A)" )"
 echo "     Current time      :  $( date "+%I:%M %p %Z" )"
-echo "     Operating system  :  $( source /etc/os-release; echo ${PRETTY_NAME} )"
+echo "     Operating system  :  $( source /etc/os-release; echo -e "${PRETTY_NAME} \c"; uname -m )"
 echo "     Kernel version    :  $( uname -rv )"
-echo "     Architecture      :  $( uname -m )"
 echo "     Processor         :  $( cpu )"
 echo "     CPU usage         :  $( grep 'cpu ' /proc/stat | awk '{usage=($2+$4)*100/($2+$4+$5)} END {print usage "%"}' )"
 echo "     Memory usage      :  $( memUsage )"
 echo "     Disk usage        :  $( diskUsage )"
-           updates
 echo ""
+echo -e "\033[0m"
