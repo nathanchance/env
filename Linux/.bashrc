@@ -33,6 +33,8 @@ alias ls='ls --color=auto'
 #PS1='[\u@\h \W]\$ '
 #PS1='\[\033[01;34m\]\u@\h \[\033[01;32m\]\w \[\033[39m\]\$ '
 source ~/.git-prompt.sh
+export GIT_PS1_SHOWDIRTYSTATE=1
+export GIT_PS1_SHOWUPSTREAM=auto
 PS1='\[\033[01;34m\]\u@\h \[\033[01;32m\]\w\[\033[01;31m\] $(__git_ps1 "(%s) ")\[\033[39m\]\$ '
 
 
