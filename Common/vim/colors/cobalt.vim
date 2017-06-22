@@ -14,7 +14,7 @@ let g:colors_name = "cobalt"
 "hi CTagsMember -- no settings --
 "hi CTagsGlobalConstant -- no settings --
 "hi Ignore -- no settings --
-hi Normal guifg=#ffffff guibg=#001b33 guisp=#001b33 gui=bold ctermfg=15 ctermbg=233 cterm=bold
+hi Normal guifg=#ffffff guibg=#001b33 guisp=#001b33 gui=bold ctermfg=15 ctermbg=none cterm=bold
 "hi CTagsImport -- no settings --
 "hi CTagsGlobalVariable -- no settings --
 "hi SpellRare -- no settings --
