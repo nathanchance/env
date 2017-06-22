@@ -31,7 +31,10 @@ fi
 
 alias ls='ls --color=auto'
 #PS1='[\u@\h \W]\$ '
-PS1='\[\033[01;34m\]\u@\h \[\033[01;32m\]\W \[\033[39m\]\$ '
+#PS1='\[\033[01;34m\]\u@\h \[\033[01;32m\]\w \[\033[39m\]\$ '
+source ~/.git-prompt.sh
+PS1='\[\033[01;34m\]\u@\h \[\033[01;32m\]\w\[\033[01;31m\] $(__git_ps1 "(%s) ")\[\033[39m\]\$ '
+
 
 ###########
 # EXPORTS #
@@ -60,6 +63,9 @@ export PATH=${PATH}:/opt/android-sdk/build-tools/25.0.3
 
 # tmux alias
 alias tmux='tmux -u'
+
+# vim alias (because I am lazy af)
+alias vim='nvim'
 
 ###############
 # GIT ALIASES #
@@ -137,15 +143,22 @@ function update {
 # Flash build function
 function flash_build {
     case ${1} in
-        "arm64")
-            export CROSS_COMPILE=${HOME}/Toolchains/aarch64-linaro-linux-gnu-7.x/bin/aarch64-linaro-linux-gnu-
-            export ARCH=arm64
-            export SUBARCH=arm64 ;;
+         "4.9")
+              TOOLCHAIN=${HOME}/Toolchains/AOSP-4.9/bin/aarch64-linux-android- ;;
+         "ad")
+              DEFCONFIG=angler_defconfig ;;
     esac
+
+    [[ -z ${DEFCONFIG} ]] && DEFCONFIG=flash_defconfig
+    [[ -z ${TOOLCHAIN} ]] && TOOLCHAIN=${HOME}/Toolchains/aarch64-linaro-linux-gnu-7.x/bin/aarch64-linaro-linux-gnu-
+
+    export CROSS_COMPILE=${TOOLCHAIN}
+    export ARCH=arm64
+    export SUBARCH=arm64
 
     make clean
     make mrproper
-    make flash_defconfig
+    make ${DEFCONFIG}
     make -j$( nproc --all )
 }
 
