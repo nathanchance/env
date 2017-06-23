@@ -133,6 +133,11 @@ while [[ $# -ge 1 ]]; do
             else
                 reportError "Please specify a build type!" && exit
             fi ;;
+        # DU
+        "nogapps")
+            export HAS_GAPPS=false ;;
+        "nosign")
+            export SIGN_BUILD=false ;;
         # VANILLA
         "pixel")
             export PIXEL=true ;;
