@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-# Flash compilation script for the Nexus 6P
+# Flash Kernel compilation script
 #
 # Copyright (C) 2016-2017 Nathan Chancellor
 #
@@ -28,38 +28,37 @@
 # USAGE: $ bash kernel.sh -h
 
 
-###############
-#             #
-#  FUNCTIONS  #
-#             #
-###############
+###################
+#                 #
+#  INITIAL SETUP  #
+#                 #
+###################
 
 # SOURCE OUR UNIVERSAL FUNCTIONS SCRIPT
-source $( dirname ${BASH_SOURCE} )/funcs.sh
+SCRIPT_DIR=$( cd $( dirname $( readlink -f "${BASH_SOURCE[0]}" ) ) && pwd )
+source ${SCRIPT_DIR}/funcs.sh
 
 # MAC CHECK; THIS SCRIPT SHOULD ONLY BE RUN ON LINUX
-if [[ $( uname -a | grep -i "darwin" ) ]]; then
-    reportError "Wrong window! ;)" && exit
-fi
+[[ $( uname -a | grep -i "darwin" ) ]] && reportError "Wrong window! ;)" && exit
+
 
 # PRINT A HELP MENU IF REQUESTED
 function help_menu() {
     echo -e ""
     echo -e "${BOLD}OVERVIEW:${RST} Builds and packages Flash Kernel\n"
     echo -e "${BOLD}USAGE:${RST} bash ${0} <options>\n"
-    echo -e "${BOLD}EXAMPLE:${RST} bash ${0} public tc 4.9 defconfig angler_defconfig\n"
+    echo -e "${BOLD}EXAMPLE:${RST} bash ${0} -m public -t 4.9 -c angler_defconfig\n"
     echo -e "${BOLD}OPTIONAL PARAMETERS:${RST}"
-    echo -e "   public:     builds and pushes to the public folder"
-    echo -e "   tc 4.9:     builds with the stock AOSP 4.9 toolchain"
-    echo -e "   defconfig:  builds with the specified defconfig\n"
-    echo -e "No options will build a normal kernel and push to private folder\n"
+    echo -e "    -b | --branch:      The branch to compile"
+    echo -e "    -c | --config:      The defconfig to use while compiling"
+    echo -e "    -d | --device:      The device to compile"
+    echo -e "    -m | --mode:        A public, private, or test kernel"
+    echo -e "    -t | --toolchain:   Compile with 4.9 or 7.x"
+    echo -e ""
+    echo -e "No options will build an Angler kernel and push to private folder\n"
     exit
 }
 
-# GETS A FORMATTED ZIP_NAME
-function getZipName() {
-    echo $( cat ${1}/include/config/kernel.release | sed "s/^.*flash-/flash-/g" )-$( date +%H%M )
-}
 
 ################
 #              #
@@ -67,42 +66,60 @@ function getZipName() {
 #              #
 ################
 
-# UNSET PREVIOUSLY USED VARIABLES IN CASE SCRIPT WAS SOURCED
-unset MODE
-unset TOOLCHAIN_NAME
-unset DEFCONFIG
-SUCCESS=false
-
-# DEFINE NECESSARY VARIABLES
-DEVICE=angler
-KERNEL_BRANCH=7.1.2-flash
-
 # GATHER PARAMETERS
 while [[ $# -ge 1 ]]; do
     case "${1}" in
-        "private"|"public"|"test")
-            MODE=${1} ;;
-        "tc")
+        "-b"|"--branch")
             shift
+
             if [[ $# -ge 1 ]]; then
-                case "${1}" in
-                    "4.9")
-                        TOOLCHAIN_NAME=AOSP-4.9 ;;
-                    *)
-                        reportError "Invalid TC type!" && exit ;;
-                esac
+                BRANCH=${1}
             else
-                reportError "Please specify a TC type!" && exit
+                reportError "Please specify a branch!" && exit
             fi ;;
-        "defconfig")
+
+        "-c"|"--config")
             shift
+
             if [[ $# -ge 1 ]]; then
                 DEFCONFIG=${1}
             else
                 reportError "Please specify a defconfig!" && exit
             fi ;;
+
+        "-d"|"--device")
+            shift
+
+            case ${1} in
+                "angler")
+                    DEVICE=${1} ;;
+                *)
+                    reportError "Invalid device!" && exit ;;
+            esac ;;
+
         "-h"|"--help")
             help_menu ;;
+
+        "-m"|"--mode")
+            shift
+
+            case ${1} in
+                "private"|"public"|"test")
+                    MODE=${1} ;;
+                *)
+                    reportError "Invalid mode!" && exit ;;
+            esac ;;
+
+        "-t"|"--toolchain")
+            shift
+
+            case "${1}" in
+                "4.9")
+                    TOOLCHAIN_NAME=${1} ;;
+                *)
+                    reportError "Invalid toolchain!" && exit ;;
+            esac ;;
+
         *)
             reportError "Invalid parameter" && exit ;;
     esac
@@ -110,13 +127,12 @@ while [[ $# -ge 1 ]]; do
     shift
 done
 
-if [[ -z ${DEVICE} || -z ${KERNEL_BRANCH} ]]; then
-    reportError "You did not specify a necessary parameter!" && exit
-fi
-
-if [[ -z ${MODE} ]]; then
-    MODE=private
-fi
+# DEFAULT PARAMETERS
+[[ -z ${BRANCH} ]] && BRANCH="7.1.2-flash"
+[[ -z ${DEFCONFIG} ]] && DEFCONFIG="flash_defconfig"
+[[ -z ${DEVICE} ]] && DEVICE="angler"
+[[ -z ${MODE} ]] && MODE="private"
+[[ -z ${TOOLCHAIN_NAME} ]] && TOOLCHAIN_NAME="7.x"
 
 
 ###############
@@ -125,42 +141,24 @@ fi
 #             #
 ###############
 
-# ANDROID_HEAD: head folder of all Android folders
-# KERNEL_HEAD: head folder to all kernel folders
-# ZIP_MOVE_HEAD: head folder to all the folders that hold completed zips
-# TOOLCHAIN_HEAD: head folder for toolchains (also holds the source)
-# ANYKERNEL_FOLDER: folder that holds AnyKernel source
-# SOURCE_FOLDER: folder that holds kernel source
-# ARCHITECTURE: architecture of the device we are compiling for
-# KERNEL_IMAGE: name of the completed kernel image
-# TOOLCHAIN_PREFIX: end of the toolchain name
-# TOOLCHAIN_NAME: name of the toolchain we want to compile and use
-# TOOLCHAIN_FOLDER: final location of the toolchain after compilation
-# ZIP_MOVE: final location of the completed zip files
-# ANYKERNEL_BRANCH: branch that we are using for our AnyKernel source
-# THREADS: -j flag for make with the number of threads available
-# DEFCONFIG: name of the defconfig we are using
-# KERNEL: location of the kernel image after compilation
-
-
-ANDROID_HEAD=${HOME}
-KERNEL_HEAD=${ANDROID_HEAD}/Kernels
+# FOLDERS
+KERNEL_HEAD=${HOME}/Kernels
 ZIP_MOVE_HEAD=${HOME}/Web/Downloads
 TOOLCHAIN_HEAD=${HOME}/Toolchains
-ANYKERNEL_FOLDER=${KERNEL_HEAD}/anykernel
-if [[ -z ${DEFCONFIG} ]]; then
-    DEFCONFIG=flash_defconfig
-fi
+ANYKERNEL_FOLDER=${KERNEL_HEAD}/ak
 SOURCE_FOLDER=${KERNEL_HEAD}/${DEVICE}
-ARCHITECTURE=arm64
-KERNEL_IMAGE=Image.gz-dtb
-if [[ -z ${TOOLCHAIN_NAME} ]]; then
-    TOOLCHAIN_PREFIX=aarch64-linaro-linux-gnu
-    TOOLCHAIN_NAME=${TOOLCHAIN_PREFIX}-7.x
-else
-    TOOLCHAIN_PREFIX=aarch64-linux-android
-fi
-TOOLCHAIN_FOLDER=${TOOLCHAIN_HEAD}/${TOOLCHAIN_NAME}
+
+case ${TOOLCHAIN_NAME} in
+    "4.9")
+        TOOLCHAIN_FOLDER=AOSP-4.9
+        TOOLCHAIN_PREFIX=aarch64-linux-android- ;;
+    "7.x")
+        TOOLCHAIN_FOLDER=aarch64-linaro-linux-gnu-7.x
+        TOOLCHAIN_PREFIX=aarch64-linaro-linux-gnu- ;;
+esac
+
+TOOLCHAIN_FOLDER=${TOOLCHAIN_HEAD}/${TOOLCHAIN_FOLDER}
+
 case ${MODE} in
     "private")
         ZIP_MOVE=${ZIP_MOVE_HEAD}/../me/Flash-Kernel
@@ -172,8 +170,145 @@ case ${MODE} in
         ZIP_MOVE=${ZIP_MOVE_HEAD}/.tmp
         ANYKERNEL_BRANCH=${DEVICE}-flash-public-7.1.2 ;;
 esac
+
+# KERNEL INFO
+ARCHITECTURE=arm64
+KERNEL_IMAGE=Image.gz-dtb
 THREADS=-j$( nproc --all )
 KERNEL=${SOURCE_FOLDER}/arch/${ARCHITECTURE}/boot/${KERNEL_IMAGE}
+
+
+###############
+#             #
+#  FUNCTIONS  #
+#             #
+###############
+
+# CLEAN UP
+function cleanUp() {
+    # CLEAN ANYKERNEL FOLDER
+    cd "${ANYKERNEL_FOLDER}"
+    git checkout ${ANYKERNEL_BRANCH}
+    git clean -fxd > /dev/null 2>&1
+}
+
+# MAKE KERNEL
+function makeKernel() {
+    cd "${SOURCE_FOLDER}"
+
+    # PROPERLY POINT COMPILER TO TOOLCHAIN AND ARCHITECTURE
+    export CROSS_COMPILE=${TOOLCHAIN_FOLDER}/bin/${TOOLCHAIN_PREFIX}
+    export ARCH=${ARCHITECTURE}
+    export SUBARCH=${ARCHITECTURE}
+
+    # CLEAN PREVIOUSLY COMPILED FILES AND DEFCONFIG
+    make clean && make mrproper
+
+    # POINT TO PROPER DEFCONFIG
+    make ${DEFCONFIG}
+
+    # MAKE THE KERNEL
+    time make ${THREADS} | tee -a ${LOGDIR}/Compilation/Kernels/${ZIP_NAME}.log
+}
+
+# GETS A FORMATTED ZIP_NAME
+function getZipName() {
+    echo $( cat ${SOURCE_FOLDER}/include/config/kernel.release |
+            sed "s/^.*flash-/flash-/g" )-$( date +%H%M )
+}
+
+# TAG FOR RELEASES
+function tagRelease() {
+    # WE NEED TO MARK THE PREVIOUS TAG FOR CHANGELOG
+    PREV_TAG_NAME=$(git tag -l --sort=-taggerdate | grep -m 1 flash)
+    PREV_TAG_HASH=$(git log --format=%H -1 ${PREV_TAG_NAME})
+
+    git tag -a "${ZIP_NAME}" -m "${ZIP_NAME}"
+    git push origin "${ZIP_NAME}"
+}
+
+# SETUP FOLDERS
+function setupFolders() {
+    # IF ZIPMOVE DOESN'T EXIST, MAKE IT
+    [[ ! -d "${ZIP_MOVE}" ]] && mkdir -p "${ZIP_MOVE}"
+
+    # IF IT ISN'T A PUBLIC BUILD, CLEAN THE FOLDER; OTHERWISE, MOVE THE OLD FILES
+    if [[ ${MODE} != "public" ]]; then
+        rm -rf "${ZIP_MOVE}"/*
+    else
+        [[ ! -d "${ZIP_MOVE}"/Old ]] && mkdir -p "${ZIP_MOVE}"/Old
+        mv $( find "${ZIP_MOVE}"/* -maxdepth 0 -type f ) "${ZIP_MOVE}"/Old
+    fi
+}
+
+# PACKAGE ZIP
+function packageZip() {
+    cd "${ANYKERNEL_FOLDER}"
+
+    cp "${KERNEL}" "${ANYKERNEL_FOLDER}"
+
+    zip -r9 ${ZIP_NAME}.zip * -x README.md ${ZIP_NAME}.zip > /dev/null 2>&1
+}
+
+# MOVE FILES
+function moveFiles() {
+    [[ ! -f ${ZIP_NAME}.zip ]] && reportError "Kernel zip not found!" && exit
+
+    mv ${ZIP_NAME}.zip "${ZIP_MOVE}"
+
+    # IF IT IS A TEST BUILD, UPLOAD IT
+    if [[ ${MODE} = "test" ]]; then
+        URL=$( curl -s --upload-file "${ZIP_MOVE}/${ZIP_NAME}.zip" \
+               "https://transfer.sh/${ZIP_NAME}.zip" )
+    fi
+
+    md5sum "${ZIP_MOVE}"/${ZIP_NAME}.zip > "${ZIP_MOVE}"/${ZIP_NAME}.zip.md5sum
+}
+
+# GENERATE CHANGELOG
+function generateChangelog() {
+    git -C "${SOURCE_FOLDER}" log --format="%nTitle: %s
+Author: %aN <%aE>
+Authored on: %aD\
+Link: http://github.com/nathanchance/angler/commit/%H
+Added on: %cD%n" ${PREV_TAG_HASH}..HEAD > "${ZIP_MOVE}"/${ZIP_NAME}-changelog.txt
+}
+
+# PRINT FILE INFO
+function endingInfo() {
+    if [[ ${SUCCESS} = true ]]; then
+        case ${MODE} in
+            "private"|"public")
+                echo -e ${RED}"FILE LOCATION: ${ZIP_MOVE}/${ZIP_NAME}.zip"
+                echo -e "SIZE: $( du -h ${ZIP_MOVE}/${ZIP_NAME}.zip |
+                                  awk '{print $1}' )"${RST} ;;
+            "test")
+                echo -e ${RED}"FILE LOCATION: ${URL}"${RST} ;;
+        esac
+    fi
+
+    echo -e ${RED}"TIME: $( date +%D\ %r | awk '{print toupper($0)}' )"
+    echo -e "DURATION: $( format_time ${END} ${START} )"${RST}; newLine
+}
+
+# LOG GENERATION
+function generateLog() {
+    # DATE: BASH_SOURCE (PARAMETERS)
+    # BUILD <SUCCESSFUL|FAILED> IN # MINUTES AND # SECONDS
+    echo -e "\n$( date +"%m/%d/%Y %H:%M:%S" ): ${BASH_SOURCE} ${1}" >> ${LOG}
+    echo -e "${BUILD_RESULT} IN $( format_time ${END} ${START} )" >> ${LOG}
+
+    # ONLY ADD A LINE ABOUT FILE LOCATION IF SCRIPT COMPLETED SUCCESSFULLY
+    if [[ ${SUCCESS} = true ]]; then
+        # FILE LOCATION: PATH
+        case ${MODE} in
+            "private"|"public")
+                echo -e "FILE LOCATION: ${ZIP_MOVE}/${ZIP_NAME}.zip" >> ${LOG} ;;
+            "test")
+                echo -e "FILE LOCATION: ${URL}" >> ${LOG} ;;
+        esac
+    fi
+}
 
 
 ################
@@ -183,8 +318,7 @@ KERNEL=${SOURCE_FOLDER}/arch/${ARCHITECTURE}/boot/${KERNEL_IMAGE}
 ################
 
 # SET THE START OF THE SCRIPT
-START=$( TZ=MST date +"%s" )
-
+START=$( date +"%s" )
 
 # SILENTLY SHIFT KERNEL BRANCHES
 clear && cd "${SOURCE_FOLDER}"
@@ -215,10 +349,7 @@ echo -e "=======================================================================
 
 echoText "CLEANING UP"
 
-# Cleaning of AnyKernel directory
-cd "${ANYKERNEL_FOLDER}"
-git checkout ${ANYKERNEL_BRANCH}
-rm -rf ${KERNEL_IMAGE}
+cleanUp
 
 
 #################
@@ -227,21 +358,7 @@ rm -rf ${KERNEL_IMAGE}
 
 echoText "MAKING KERNEL"
 
-cd "${SOURCE_FOLDER}"
-
-# PROPERLY POINT COMPILER TO TOOLCHAIN AND ARCHITECTURE
-export CROSS_COMPILE=${TOOLCHAIN_FOLDER}/bin/${TOOLCHAIN_PREFIX}-
-export ARCH=${ARCHITECTURE}
-export SUBARCH=${ARCHITECTURE}
-
-# CLEAN PREVIOUSLY COMPILED FILES AND DEFCONFIG
-make clean && make mrproper
-
-# POINT TO PROPER DEFCONFIG
-make ${DEFCONFIG}
-
-# MAKE THE KERNEL
-time make ${THREADS} | tee -a ${LOGDIR}/Compilation/Kernels/${ZIP_NAME}.log
+makeKernel
 
 
 ######################
@@ -250,91 +367,32 @@ time make ${THREADS} | tee -a ${LOGDIR}/Compilation/Kernels/${ZIP_NAME}.log
 
 if [[ $( ls ${KERNEL} 2>/dev/null | wc -l ) != 0 ]]; then
     # SET BUILD SUCCESS STRING AND SUCCESS VARIABLE
-    BUILD_RESULT_STRING="BUILD SUCCESSFUL"
+    BUILD_RESULT="BUILD SUCCESSFUL"
     SUCCESS=true
 
+    # PRINT PACKAGING
+    newLine; echoText "MAKING AND MOVING FLASHABLE ZIP"
+
     # GENERATE ZIP_NAME
-    ZIP_NAME=$( getZipName ${SOURCE_FOLDER} )
+    ZIP_NAME=$( getZipName )
 
     # TAG THE HEAD COMMIT WITH THE VERSION FIRST IF IT'S A PUBLIC BUILD
-    if [[ ${MODE} = "public" ]]; then
-        # WE NEED TO MARK THE PREVIOUS TAG FOR CHANGELOG
-        PREV_TAG_NAME=$(git tag -l --sort=-taggerdate | grep -m 1 flash)
-        PREV_TAG_HASH=$(git log --format=%H -1 ${PREV_TAG_NAME})
+    [[ ${MODE} = "public" ]] && tagRelease
 
-        git tag -a "${ZIP_NAME}" -m "${ZIP_NAME}"
-        git push origin "${ZIP_NAME}"
-    fi
+    # SETUP ENVIRONMENT AND MAKE/MOVE ZIP
+    setupFolders
+    packageZip
+    moveFiles
 
-
-    #####################
-    # COPY KERNEL IMAGE #
-    #####################
-
-    cp "${KERNEL}" "${ANYKERNEL_FOLDER}"
-
-    # IF ZIPMOVE DOESN'T EXIST, MAKE IT; OTHERWISE, CLEAN IT
-    if [[ ! -d "${ZIP_MOVE}" ]]; then
-        mkdir -p "${ZIP_MOVE}"
-    elif [[ ${MODE} != "public" ]]; then
-        rm -rf "${ZIP_MOVE}"/*
-    fi
-
-    # MOVE TO ANYKERNEL FOLDER
-    cd "${ANYKERNEL_FOLDER}"
-
-
-    #################
-    # MAKE ZIP FILE #
-    #################
-
-    newLine; echoText "MAKING FLASHABLE ZIP"
-
-    zip -r9 ${ZIP_NAME}.zip * -x README.md ${ZIP_NAME}.zip > /dev/null 2>&1
-
-
-    #################
-    # MOVE ZIP FILE #
-    #################
-
-    # FIRST MOVE ALL FILES TO OLD FOLDER
-    if [[ ${MODE} = "public" ]]; then
-        mv $( find ${ZIP_MOVE}/* -maxdepth 0 -type f ) "${ZIP_MOVE}"/Old
-    fi
-
-    mv ${ZIP_NAME}.zip "${ZIP_MOVE}"
-
-    # IF IT IS A TEST BUILD, UPLOAD IT
-    if [[ ${MODE} = "test" ]]; then
-        URL=$( curl -s --upload-file "${ZIP_MOVE}/${ZIP_NAME}.zip" "https://transfer.sh/${ZIP_NAME}.zip" )
-    fi
-
-
-    ###################
-    # GENERATE MD5SUM #
-    ###################
-
-    md5sum "${ZIP_MOVE}"/${ZIP_NAME}.zip > "${ZIP_MOVE}"/${ZIP_NAME}.zip.md5sum
-
-
-    # CLEAN ZIMAGE-DTB FROM ANYKERNEL FOLDER AFTER ZIPPING AND MOVING
-    rm -rf "${ANYKERNEL_FOLDER}"/Image.gz-dtb
-
-    ######################
-    # GENERATE CHANGELOG #
-    ######################
-
-    if [[ ${MODE} = "public" ]]; then
-        cd "${SOURCE_FOLDER}"
-        git log --format="%nTitle: %s%nAuthor: %aN <%aE>%nAuthored on: %aD%nLink: http://github.com/nathanchance/angler/commit/%H%nAdded on: %cD%n" ${PREV_TAG_HASH}..HEAD > "${ZIP_MOVE}"/${ZIP_NAME}-changelog.txt
-    fi
+    # GENERATE CHANGELOG FOR PUBLIC BUILD
+    [[ ${MODE} = "public" ]] && generateChangelog
 
 ###################
 # IF BUILD FAILED #
 ###################
 
 else
-    BUILD_RESULT_STRING="BUILD FAILED"
+    BUILD_RESULT="BUILD FAILED"
     SUCCESS=false
 fi
 
@@ -343,52 +401,23 @@ fi
 # SCRIPT END #
 ##############
 
-echoText "${BUILD_RESULT_STRING}!"
+echoText "${BUILD_RESULT}!"
 
-END=$( TZ=MST date +"%s" )
+END=$( date +"%s" )
 
 
 ######################
 # ENDING INFORMATION #
 ######################
 
-# IF THE BUILD WAS SUCCESSFUL, PRINT FILE LOCATION, AND SIZE
-if [[ ${SUCCESS} = true ]]; then
-    case ${MODE} in
-        "private"|"public")
-            echo -e ${RED}"FILE LOCATION: ${ZIP_MOVE}/${ZIP_NAME}.zip"
-            echo -e "SIZE: $( du -h ${ZIP_MOVE}/${ZIP_NAME}.zip | awk '{print $1}' )"${RST} ;;
-        "test")
-            echo -e ${RED}"FILE LOCATION: ${URL}"${RST} ;;
-    esac
-fi
-
-# PRINT THE TIME THE SCRIPT FINISHED
-# AND HOW LONG IT TOOK REGARDLESS OF SUCCESS
-echo -e ${RED}"TIME: $( TZ=MST date +%D\ %r | awk '{print toupper($0)}' )"
-echo -e "DURATION: $( format_time ${END} ${START} )"${RST}; newLine
+endingInfo
 
 
 ##################
 # LOG GENERATION #
 ##################
 
-# DATE: BASH_SOURCE (PARAMETERS)
-echo -e "\n$( TZ=MST date +"%m/%d/%Y %H:%M:%S" ): ${BASH_SOURCE} ${1}" >> ${LOG}
-
-# BUILD <SUCCESSFUL|FAILED> IN # MINUTES AND # SECONDS
-echo -e "${BUILD_RESULT_STRING} IN $( format_time ${END} ${START} )" >> ${LOG}
-
-# ONLY ADD A LINE ABOUT FILE LOCATION IF SCRIPT COMPLETED SUCCESSFULLY
-if [[ ${SUCCESS} = true ]]; then
-    # FILE LOCATION: PATH
-    case ${MODE} in
-        "private"|"public")
-            echo -e "FILE LOCATION: ${ZIP_MOVE}/${ZIP_NAME}.zip" >> ${LOG} ;;
-        "test")
-            echo -e "FILE LOCATION: ${URL}" >> ${LOG} ;;
-    esac
-fi
+generateLog
 
 
 ##############
@@ -396,8 +425,6 @@ fi
 ##############
 
 # KILL TMP FOLDER
-if [[ ${MODE} = "test" ]]; then
-    rm -rf ${ZIP_MOVE}
-fi
+[[ ${MODE} = "test" ]] && rm -rf ${ZIP_MOVE}
 
 echo -e "\a"
