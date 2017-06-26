@@ -34,13 +34,9 @@
 #                 #
 ###################
 
-# SOURCE OUR UNIVERSAL FUNCTIONS SCRIPT
+# SOURCE OUR UNIVERSAL FUNCTIONS SCRIPT AND MAC CHECK
 SCRIPT_DIR=$( cd $( dirname $( readlink -f "${BASH_SOURCE[0]}" ) ) && pwd )
-source ${SCRIPT_DIR}/funcs.sh
-
-# MAC CHECK; THIS SCRIPT SHOULD ONLY BE RUN ON LINUX
-[[ $( uname -a | grep -i "darwin" ) ]] && reportError "Wrong window! ;)" && exit
-
+source ${SCRIPT_DIR}/funcs.sh && macCheck
 
 # PRINT A HELP MENU IF REQUESTED
 function help_menu() {
@@ -75,7 +71,7 @@ while [[ $# -ge 1 ]]; do
             if [[ $# -ge 1 ]]; then
                 BRANCH=${1}
             else
-                reportError "Please specify a branch!" && exit
+                reportError "Please specify a branch!"
             fi ;;
 
         "-c"|"--config")
@@ -84,7 +80,7 @@ while [[ $# -ge 1 ]]; do
             if [[ $# -ge 1 ]]; then
                 DEFCONFIG=${1}
             else
-                reportError "Please specify a defconfig!" && exit
+                reportError "Please specify a defconfig!"
             fi ;;
 
         "-d"|"--device")
@@ -94,7 +90,7 @@ while [[ $# -ge 1 ]]; do
                 "angler")
                     DEVICE=${1} ;;
                 *)
-                    reportError "Invalid device!" && exit ;;
+                    reportError "Invalid device!" ;;
             esac ;;
 
         "-h"|"--help")
@@ -107,7 +103,7 @@ while [[ $# -ge 1 ]]; do
                 "private"|"public"|"test")
                     MODE=${1} ;;
                 *)
-                    reportError "Invalid mode!" && exit ;;
+                    reportError "Invalid mode!" ;;
             esac ;;
 
         "-t"|"--toolchain")
@@ -117,11 +113,11 @@ while [[ $# -ge 1 ]]; do
                 "4.9")
                     TOOLCHAIN_NAME=${1} ;;
                 *)
-                    reportError "Invalid toolchain!" && exit ;;
+                    reportError "Invalid toolchain!" ;;
             esac ;;
 
         *)
-            reportError "Invalid parameter" && exit ;;
+            reportError "Invalid parameter" ;;
     esac
 
     shift
@@ -252,7 +248,7 @@ function packageZip() {
 
 # MOVE FILES
 function moveFiles() {
-    [[ ! -f ${ZIP_NAME}.zip ]] && reportError "Kernel zip not found!" && exit
+    [[ ! -f ${ZIP_NAME}.zip ]] && reportError "Kernel zip not found!"
 
     mv ${ZIP_NAME}.zip "${ZIP_MOVE}"
 

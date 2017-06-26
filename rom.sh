@@ -27,9 +27,6 @@
 # PURPOSE: Build an Android ROM from source
 # USAGE: $ bash rom.sh -h
 
-# CACHE WHERE THE SCRIPT IS LOCATED FOR STUFF
-SCRIPT_DIR=$( cd $( dirname $( readlink -f "${BASH_SOURCE[0]}" ) ) && pwd )
-
 
 ###############
 #             #
@@ -37,13 +34,9 @@ SCRIPT_DIR=$( cd $( dirname $( readlink -f "${BASH_SOURCE[0]}" ) ) && pwd )
 #             #
 ###############
 
-# SOURCE OUR UNIVERSAL FUNCTIONS SCRIPT
-source ${SCRIPT_DIR}/funcs.sh
-
-# MAC CHECK; THIS SCRIPT SHOULD ONLY BE RUN ON LINUX
-if [[ $( uname -a | grep -i "darwin" ) ]]; then
-    reportError "Wrong window! ;)" && exit
-fi
+# SOURCE OUR UNIVERSAL FUNCTIONS SCRIPT AND MAC CHECK
+SCRIPT_DIR=$( cd $( dirname $( readlink -f "${BASH_SOURCE[0]}" ) ) && pwd )
+source ${SCRIPT_DIR}/funcs.sh && macCheck
 
 # PRINT A HELP MENU IF REQUESTED
 function help_menu() {
@@ -102,7 +95,7 @@ while [[ $# -ge 1 ]]; do
                 PARAMS+="${1} "
                 export CLEAN_TYPE=${1}
             else
-                reportError "Please specify a clean type!" && exit
+                reportError "Please specify a clean type!"
             fi ;;
         "make")
             shift
@@ -110,7 +103,7 @@ while [[ $# -ge 1 ]]; do
                 PARAMS+="${1} "
                 export MAKE_TYPE=${1}
             else
-                reportError "Please specify a make item!" && exit
+                reportError "Please specify a make item!"
             fi ;;
         "variant")
             shift
@@ -118,7 +111,7 @@ while [[ $# -ge 1 ]]; do
                 PARAMS+="${1} "
                 export VARIANT=${1}
             else
-                reportError "Please specify a build variant!" && exit
+                reportError "Please specify a build variant!"
             fi ;;
         "rp")
             export REPOPICK=true ;;
@@ -131,7 +124,7 @@ while [[ $# -ge 1 ]]; do
                 export BUILD_TAG=${1}
                 export DU_BUILD_TYPE=${1}
             else
-                reportError "Please specify a build type!" && exit
+                reportError "Please specify a build type!"
             fi ;;
         # DU
         "nogapps")
@@ -147,7 +140,7 @@ while [[ $# -ge 1 ]]; do
         "-h"|"--help")
             help_menu ;;
         *)
-            reportError "Invalid parameter detected!" && exit ;;
+            reportError "Invalid parameter detected!" ;;
     esac
 
     shift

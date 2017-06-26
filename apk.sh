@@ -35,7 +35,8 @@
 ###############
 
 # SOURCE OUR UNIVERSAL FUNCTIONS SCRIPT
-source $( dirname ${BASH_SOURCE} )/funcs.sh
+SCRIPT_DIR=$( cd $( dirname $( readlink -f "${BASH_SOURCE[0]}" ) ) && pwd )
+source ${SCRIPT_DIR}/funcs.sh
 
 # PRINT A HELP MENU IF REQUESTED
 function help_menu() {
@@ -68,16 +69,14 @@ while [[ $# -ge 1 ]]; do
         "-h"|"--help")
             help_menu ;;
         *)
-            reportError "Invalid parameter" && exit ;;
+            reportError "Invalid parameter" ;;
     esac
 
     shift
 done
 
 if [[ -z ${APK} ]]; then
-    reportError "No specified APK!" -c
-    help_menu
-    exit
+    reportError "No specified APK!"
 fi
 
 if [[ -z ${ACTION} ]]; then
@@ -138,7 +137,7 @@ case ${ACTION} in
     "both"|"build"|"install")
         ./gradlew clean assembleRelease ;;
     *)
-        reportError "Something serious has happened!" && exit
+        reportError "Something serious has happened!"
 esac
 
 APK_MOVE=${OUT_DIR}
@@ -152,14 +151,14 @@ if [[ $( ls "${OUT_DIR}"/${APK_FORMAT} 2>/dev/null | wc -l ) != "0" ]]; then
     zipalign -v -p 4 "${OUT_DIR}"/${APK_FILE}.apk \
                      "${OUT_DIR}"/${APK_FILE}-aligned.apk
     if [[ ! -f "${OUT_DIR}"/${APK_FILE}-aligned.apk ]]; then
-        reportError "There was an issue with zipalign!" && exit
+        reportError "There was an issue with zipalign!"
     fi
     rm "${OUT_DIR}"/${APK_FILE}.apk
     apksigner sign --ks ${HOME}/Documents/Keys/key.jks \
                    --out "${OUT_DIR}"/${APK_NAME}.apk \
                    "${OUT_DIR}"/${APK_FILE}-aligned.apk
     if [[ ! -f "${OUT_DIR}"/${APK_NAME}.apk ]]; then
-        reportError "There was an issue with signing the build!" && exit
+        reportError "There was an issue with signing the build!"
     fi
     rm "${OUT_DIR}"/${APK_FILE}-aligned.apk
 

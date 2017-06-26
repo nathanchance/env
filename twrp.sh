@@ -34,13 +34,9 @@
 #             #
 ###############
 
-# SOURCE OUR UNIVERSAL FUNCTIONS SCRIPT
-source $( dirname ${BASH_SOURCE} )/funcs.sh
-
-# MAC CHECK; THIS SCRIPT SHOULD ONLY BE RUN ON LINUX
-if [[ $( uname -a | grep -i "darwin" ) ]]; then
-    reportError "Wrong window! ;)" -n && exit
-fi
+# SOURCE OUR UNIVERSAL FUNCTIONS SCRIPT AND MAC CHECK
+SCRIPT_DIR=$( cd $( dirname $( readlink -f "${BASH_SOURCE[0]}" ) ) && pwd )
+source ${SCRIPT_DIR}/funcs.sh && macCheck
 
 function help_menu() {
     echo -e ""
@@ -73,7 +69,7 @@ while [[ $# -ge 1 ]]; do
         "-h"|"--help")
             help_menu ;;
         *)
-            reportError "Invalid parameter detected!" && exit ;;
+            reportError "Invalid parameter detected!" ;;
     esac
 
     shift

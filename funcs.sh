@@ -87,6 +87,8 @@ function reportError() {
     if [[ -z ${2} ]]; then
         echo -e ""
     fi
+
+    exit
 }
 
 # PRINTS A WARNING IN BOLD YELLOW
@@ -96,4 +98,9 @@ function reportWarning() {
     if [[ -z ${2} ]]; then
         echo -e ""
     fi
+}
+
+# CHECKS TO SEE IF SCRIPT IS BEING RUN ON A MAC
+function macCheck() {
+    [[ $( uname -a | grep -i "darwin" ) ]] && reportError "Wrong window! ;)"
 }
