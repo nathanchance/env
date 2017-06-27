@@ -18,6 +18,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 
+
 ###########
 #         #
 #  USAGE  #
@@ -26,6 +27,7 @@
 
 # PURPOSE: Build Flash Kernel and package it into a flashable zip
 # USAGE: $ bash kernel.sh -h
+
 
 
 ###################
@@ -49,11 +51,11 @@ function help_menu() {
     echo -e "    -c | --config:      The defconfig to use while compiling"
     echo -e "    -d | --device:      The device to compile"
     echo -e "    -m | --mode:        A public, private, or test kernel"
-    echo -e "    -t | --toolchain:   Compile with 4.9 or 7.x"
-    echo -e ""
+    echo -e "    -t | --toolchain:   Compile with 4.9 or 7.x\n"
     echo -e "No options will build an Angler kernel and push to private folder\n"
     exit
 }
+
 
 
 ################
@@ -110,7 +112,7 @@ while [[ $# -ge 1 ]]; do
             shift
 
             case "${1}" in
-                "4.9")
+                "4.9"|"7.x")
                     TOOLCHAIN_NAME=${1} ;;
                 *)
                     reportError "Invalid toolchain!" ;;
@@ -131,6 +133,7 @@ done
 [[ -z ${TOOLCHAIN_NAME} ]] && TOOLCHAIN_NAME="7.x"
 
 
+
 ###############
 #             #
 #  VARIABLES  #
@@ -139,21 +142,21 @@ done
 
 # FOLDERS
 KERNEL_HEAD=${HOME}/Kernels
-ZIP_MOVE_HEAD=${HOME}/Web/Downloads
-TOOLCHAIN_HEAD=${HOME}/Toolchains
-ANYKERNEL_FOLDER=${KERNEL_HEAD}/ak
 SOURCE_FOLDER=${KERNEL_HEAD}/${DEVICE}
+OUT_FOLDER=${SOURCE_FOLDER}/out
+ANYKERNEL_FOLDER=${KERNEL_HEAD}/anykernel
+ZIP_MOVE_HEAD=${HOME}/Web/Downloads
 
 case ${TOOLCHAIN_NAME} in
     "4.9")
-        TOOLCHAIN_FOLDER=AOSP-4.9
+        TOOLCHAIN_FOLDER=aosp-4.9
         TOOLCHAIN_PREFIX=aarch64-linux-android- ;;
     "7.x")
-        TOOLCHAIN_FOLDER=aarch64-linaro-linux-gnu-7.x
+        TOOLCHAIN_FOLDER=linaro-7.x
         TOOLCHAIN_PREFIX=aarch64-linaro-linux-gnu- ;;
 esac
 
-TOOLCHAIN_FOLDER=${TOOLCHAIN_HEAD}/${TOOLCHAIN_FOLDER}
+TOOLCHAIN_FOLDER=${HOME}/Toolchains/${TOOLCHAIN_FOLDER}
 
 case ${MODE} in
     "private")
@@ -171,7 +174,8 @@ esac
 ARCHITECTURE=arm64
 KERNEL_IMAGE=Image.gz-dtb
 THREADS=-j$( nproc --all )
-KERNEL=${SOURCE_FOLDER}/arch/${ARCHITECTURE}/boot/${KERNEL_IMAGE}
+KERNEL=${OUT_FOLDER}/arch/${ARCHITECTURE}/boot/${KERNEL_IMAGE}
+
 
 
 ###############
@@ -180,38 +184,65 @@ KERNEL=${SOURCE_FOLDER}/arch/${ARCHITECTURE}/boot/${KERNEL_IMAGE}
 #             #
 ###############
 
+
 # CLEAN UP
 function cleanUp() {
     # CLEAN ANYKERNEL FOLDER
     cd "${ANYKERNEL_FOLDER}"
     git checkout ${ANYKERNEL_BRANCH}
-    git clean -fxd > /dev/null 2>&1
+    git clean -fxd
+
+    # CLEAN SOURCE FOLDER
+    cd "${SOURCE_FOLDER}"
+    # ONLY CHECKOUT IF WE AREN'T BISECTING OR REBASING
+    [[ ! $( git status | ag "bisec|rebas" ) ]] && git checkout ${KERNEL_BRANCH}
+    git clean -fxd
 }
+
 
 # MAKE KERNEL
 function makeKernel() {
     cd "${SOURCE_FOLDER}"
+
+    # SET MAKE VARIABLE FOR CONVENIENCE
+    # AS I FOOLISHLY LEARNED, ALL CAF CODE REQUIRES AN OUTPUT DIRECTORY
+    # TO WORK PROPERLY SO WHILE MY NEXUS DOESN'T CURRENTLY REQUIRE IT,
+    # IT'S GOOD TO BE AHEAD OF THE CURVE IF IT WORKS.
+    MAKE="make O=${OUT_FOLDER}"
 
     # PROPERLY POINT COMPILER TO TOOLCHAIN AND ARCHITECTURE
     export CROSS_COMPILE=${TOOLCHAIN_FOLDER}/bin/${TOOLCHAIN_PREFIX}
     export ARCH=${ARCHITECTURE}
     export SUBARCH=${ARCHITECTURE}
 
-    # CLEAN PREVIOUSLY COMPILED FILES AND DEFCONFIG
-    make clean && make mrproper
+    # SETUP OUT FOLDER OR CLEAN IT
+    if [[ -d ${OUT_FOLDER} ]]; then
+        ${MAKE} clean
+        ${MAKE} mrproper
+    else
+        mkdir -p ${OUT_FOLDER}
+    fi
 
     # POINT TO PROPER DEFCONFIG
-    make ${DEFCONFIG}
+    ${MAKE} ${DEFCONFIG}
 
     # MAKE THE KERNEL
-    time make ${THREADS} | tee -a ${LOGDIR}/Compilation/Kernels/${ZIP_NAME}.log
+    time ${MAKE} ${THREADS}
 }
 
-# GETS A FORMATTED ZIP_NAME
-function getZipName() {
-    echo $( cat ${SOURCE_FOLDER}/include/config/kernel.release |
-            sed "s/^.*flash-/flash-/g" )-$( date +%H%M )
+
+# PRINT ZIP INFO
+function printKernelInfo() {
+    # KERNEL VERSION IS AUTOMATICALLY GENERATED
+    export KERNEL_VERSION=$( cat ${OUT_FOLDER}/include/config/kernel.release )
+    export ZIP_NAME=$( echo ${KERNEL_VERSION} |
+                       sed "s/^.*flash-/flash-/g" )-$( date +%H%M )
+    export KERNEL_ZIP=${ZIP_NAME}.zip
+
+    echo -e "${BOLD}Kernel version:${RST} ${KERNEL_VERSION}"
+    echo -e "${BOLD}Kernel zip:${RST} ${KERNEL_ZIP}"; newLine
 }
+
 
 # TAG FOR RELEASES
 function tagRelease() {
@@ -223,43 +254,53 @@ function tagRelease() {
     git push origin "${ZIP_NAME}"
 }
 
+
 # SETUP FOLDERS
 function setupFolders() {
     # IF ZIPMOVE DOESN'T EXIST, MAKE IT
     [[ ! -d "${ZIP_MOVE}" ]] && mkdir -p "${ZIP_MOVE}"
 
-    # IF IT ISN'T A PUBLIC BUILD, CLEAN THE FOLDER; OTHERWISE, MOVE THE OLD FILES
+    # IF IT ISN'T A PUBLIC BUILD, CLEAN THE FOLDER
     if [[ ${MODE} != "public" ]]; then
         rm -rf "${ZIP_MOVE}"/*
     else
+        # OTHERWISE, MOVE THE OLD FILES TO AN "OLD" FOLDER
         [[ ! -d "${ZIP_MOVE}"/Old ]] && mkdir -p "${ZIP_MOVE}"/Old
         mv $( find "${ZIP_MOVE}"/* -maxdepth 0 -type f ) "${ZIP_MOVE}"/Old
     fi
 }
 
+
 # PACKAGE ZIP
 function packageZip() {
     cd "${ANYKERNEL_FOLDER}"
 
+    # MOVE THE KERNEL IMAGE
     cp "${KERNEL}" "${ANYKERNEL_FOLDER}"
 
-    zip -r9 ${ZIP_NAME}.zip * -x README.md ${ZIP_NAME}.zip > /dev/null 2>&1
+    # PACKAGE THE ZIP WITHOUT THE README
+    zip -r9 ${KERNEL_ZIP} * -x README.md ${KERNEL_ZIP} > /dev/null 2>&1
 }
+
 
 # MOVE FILES
 function moveFiles() {
-    [[ ! -f ${ZIP_NAME}.zip ]] && reportError "Kernel zip not found!"
+    # IF PACKAGING FAILED, ERROR OUT
+    [[ ! -f ${KERNEL_ZIP} ]] && reportError "Kernel zip not found!"
 
-    mv ${ZIP_NAME}.zip "${ZIP_MOVE}"
+    # MOVE THE KERNEL ZIP TO WHERE IT NEEDS TO GO
+    mv ${KERNEL_ZIP} "${ZIP_MOVE}"
 
     # IF IT IS A TEST BUILD, UPLOAD IT
     if [[ ${MODE} = "test" ]]; then
-        URL=$( curl -s --upload-file "${ZIP_MOVE}/${ZIP_NAME}.zip" \
-               "https://transfer.sh/${ZIP_NAME}.zip" )
+        URL=$( curl -s --upload-file "${ZIP_MOVE}/${KERNEL_ZIP}" \
+               "https://transfer.sh/${ZIP_NAME}" )
     fi
 
-    md5sum "${ZIP_MOVE}"/${ZIP_NAME}.zip > "${ZIP_MOVE}"/${ZIP_NAME}.zip.md5sum
+    # GENERATE MD5SUM
+    md5sum "${ZIP_MOVE}"/${KERNEL_ZIP} > "${ZIP_MOVE}"/${KERNEL_ZIP}.md5sum
 }
+
 
 # GENERATE CHANGELOG
 function generateChangelog() {
@@ -270,22 +311,26 @@ Link: http://github.com/nathanchance/angler/commit/%H
 Added on: %cD%n" ${PREV_TAG_HASH}..HEAD > "${ZIP_MOVE}"/${ZIP_NAME}-changelog.txt
 }
 
+
 # PRINT FILE INFO
 function endingInfo() {
+    # ONLY PRINT FILE INFO IF IT EXISTS
     if [[ ${SUCCESS} = true ]]; then
         case ${MODE} in
             "private"|"public")
-                echo -e ${RED}"FILE LOCATION: ${ZIP_MOVE}/${ZIP_NAME}.zip"
-                echo -e "SIZE: $( du -h ${ZIP_MOVE}/${ZIP_NAME}.zip |
+                echo -e ${RED}"FILE LOCATION: ${ZIP_MOVE}/${KERNEL_ZIP}"
+                echo -e "SIZE: $( du -h ${ZIP_MOVE}/${KERNEL_ZIP} |
                                   awk '{print $1}' )"${RST} ;;
             "test")
                 echo -e ${RED}"FILE LOCATION: ${URL}"${RST} ;;
         esac
     fi
 
+    # PRINT TIME INFO REGARDLESS OF SUCCESS
     echo -e ${RED}"TIME: $( date +%D\ %r | awk '{print toupper($0)}' )"
     echo -e "DURATION: $( format_time ${END} ${START} )"${RST}; newLine
 }
+
 
 # LOG GENERATION
 function generateLog() {
@@ -299,12 +344,13 @@ function generateLog() {
         # FILE LOCATION: PATH
         case ${MODE} in
             "private"|"public")
-                echo -e "FILE LOCATION: ${ZIP_MOVE}/${ZIP_NAME}.zip" >> ${LOG} ;;
+                echo -e "FILE LOCATION: ${ZIP_MOVE}/${KERNEL_ZIP}" >> ${LOG} ;;
             "test")
                 echo -e "FILE LOCATION: ${URL}" >> ${LOG} ;;
         esac
     fi
 }
+
 
 
 ################
@@ -313,16 +359,8 @@ function generateLog() {
 #              #
 ################
 
-# SET THE START OF THE SCRIPT
-START=$( date +"%s" )
-
-# SILENTLY SHIFT KERNEL BRANCHES
-clear && cd "${SOURCE_FOLDER}"
-
-# ONLY CHECKOUT IF WE ARE NOT CURRENTLY BISECTING OR REBASING
-if [[ ! $(git status | grep "bisect\|rebase") ]]; then
-    git checkout ${KERNEL_BRANCH} > /dev/null 2>&1
-fi
+# SET THE START OF THE SCRIPT AND CLEAR TERMINAL
+START=$( date +"%s" ) && clear
 
 
 ###################
@@ -339,21 +377,13 @@ echo -e "  /_/      /_____/_/  |_/____/ /_/ /_/      /_/ |_| /_____/  /_/ |_| /_
 echo -e "================================================================================================"; newLine
 
 
-####################
-# CLEANING FOLDERS #
-####################
-
-echoText "CLEANING UP"
-
-cleanUp
-
-
 #################
 # MAKING KERNEL #
 #################
 
 echoText "MAKING KERNEL"
 
+cleanUp > /dev/null 2>&1
 makeKernel
 
 
@@ -363,16 +393,14 @@ makeKernel
 
 if [[ $( ls ${KERNEL} 2>/dev/null | wc -l ) != 0 ]]; then
     # SET BUILD SUCCESS STRING AND SUCCESS VARIABLE
-    BUILD_RESULT="BUILD SUCCESSFUL"
-    SUCCESS=true
+    BUILD_RESULT="BUILD SUCCESSFUL" && SUCCESS=true
 
-    # PRINT PACKAGING
     newLine; echoText "MAKING AND MOVING FLASHABLE ZIP"
 
-    # GENERATE ZIP_NAME
-    ZIP_NAME=$( getZipName )
+    # PRINT KERNEL AND ZIP INFO
+    printKernelInfo
 
-    # TAG THE HEAD COMMIT WITH THE VERSION FIRST IF IT'S A PUBLIC BUILD
+    # TAG THE HEAD COMMIT FOR PUBLIC BUILD
     [[ ${MODE} = "public" ]] && tagRelease
 
     # SETUP ENVIRONMENT AND MAKE/MOVE ZIP
@@ -393,32 +421,17 @@ else
 fi
 
 
-##############
-# SCRIPT END #
-##############
-
-echoText "${BUILD_RESULT}!"
-
-END=$( date +"%s" )
-
-
 ######################
 # ENDING INFORMATION #
 ######################
 
+END=$( date +"%s" )
+
+echoText "${BUILD_RESULT}!"
+
 endingInfo
 
-
-##################
-# LOG GENERATION #
-##################
-
 generateLog
-
-
-##############
-# SCRIPT END #
-##############
 
 # KILL TMP FOLDER
 [[ ${MODE} = "test" ]] && rm -rf ${ZIP_MOVE}
