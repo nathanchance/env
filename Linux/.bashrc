@@ -89,6 +89,9 @@ alias gpf='git push --force'
 alias gpsu='git push --set-upstream origin'
 
 alias gpl='git pull'
+alias gm='git merge'
+alias gmc='git merge --continue'
+alias gma='git merge --abort'
 
 alias ga='git add'
 alias gaa='git add -A'
@@ -142,26 +145,48 @@ function update {
     fi
 }
 
-# Flash build function
-function flash_build {
-    case ${1} in
-         "4.9")
-              TOOLCHAIN=${HOME}/Toolchains/AOSP-4.9/bin/aarch64-linux-android- ;;
-         "ad")
-              DEFCONFIG=angler_defconfig ;;
-    esac
+# Kernel build function
+function kernel_build {
+    local TOOLCHAIN
+    local DEFCONFIG
+    local MAKE="make O=out"
+
+    while [[ $# -ge 1 ]]; do
+        case ${1} in
+            "-t"|"--toolchain")
+                shift
+
+                case ${1} in
+                    "4.9")
+                        TOOLCHAIN=${HOME}/Toolchains/aosp-4.9/bin/aarch64-linux-android- ;;
+                    *)
+                        TOOLCHAIN=${1} ;;
+                esac ;;
+
+            "-d"|"--defconfig")
+                shift
+
+                DEFCONFIG=${1} ;;
+        esac
+
+        shift
+    done
 
     [[ -z ${DEFCONFIG} ]] && DEFCONFIG=flash_defconfig
-    [[ -z ${TOOLCHAIN} ]] && TOOLCHAIN=${HOME}/Toolchains/aarch64-linaro-linux-gnu-7.x/bin/aarch64-linaro-linux-gnu-
+    [[ -z ${TOOLCHAIN} ]] && TOOLCHAIN=${HOME}/Toolchains/linaro-7.x/bin/aarch64-linaro-linux-gnu-
 
     export CROSS_COMPILE=${TOOLCHAIN}
     export ARCH=arm64
     export SUBARCH=arm64
 
-    make clean
-    make mrproper
-    make ${DEFCONFIG}
-    make -j$( nproc --all )
+    if [[ -d out ]]; then
+        ${MAKE} clean
+        ${MAKE} mrproper
+    else
+        mkdir out
+    fi
+    ${MAKE} ${DEFCONFIG}
+    ${MAKE} -j$( nproc --all )
 }
 
 # EXKM to RC converter
