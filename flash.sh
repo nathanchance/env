@@ -126,7 +126,7 @@ while [[ $# -ge 1 ]]; do
 done
 
 # DEFAULT PARAMETERS
-[[ -z ${BRANCH} ]] && BRANCH="7.1.2-flash"
+[[ -z ${BRANCH} ]] && BRANCH="7.1.2-flash-staging"
 [[ -z ${DEFCONFIG} ]] && DEFCONFIG="flash_defconfig"
 [[ -z ${DEVICE} ]] && DEVICE="angler"
 [[ -z ${MODE} ]] && MODE="private"
@@ -235,8 +235,7 @@ function makeKernel() {
 function printKernelInfo() {
     # KERNEL VERSION IS AUTOMATICALLY GENERATED
     export KERNEL_VERSION=$( cat ${OUT_FOLDER}/include/config/kernel.release )
-    export ZIP_NAME=$( echo ${KERNEL_VERSION} |
-                       sed "s/^.*flash-/flash-/g" )-$( date +%H%M )
+    export ZIP_NAME=$( echo ${KERNEL_VERSION} | sed "s/^[^-]*-//g" )
     export KERNEL_ZIP=${ZIP_NAME}.zip
 
     echo -e "${BOLD}Kernel version:${RST} ${KERNEL_VERSION}"
@@ -279,7 +278,7 @@ function packageZip() {
     cp "${KERNEL}" "${ANYKERNEL_FOLDER}"
 
     # PACKAGE THE ZIP WITHOUT THE README
-    zip -r9 ${KERNEL_ZIP} * -x README.md ${KERNEL_ZIP} > /dev/null 2>&1
+    zip -q -r9 ${KERNEL_ZIP} * -x README.md ${KERNEL_ZIP}
 }
 
 
@@ -294,7 +293,7 @@ function moveFiles() {
     # IF IT IS A TEST BUILD, UPLOAD IT
     if [[ ${MODE} = "test" ]]; then
         URL=$( curl -s --upload-file "${ZIP_MOVE}/${KERNEL_ZIP}" \
-               "https://transfer.sh/${ZIP_NAME}" )
+               "https://transfer.sh/${KERNEL_ZIP}" )
     fi
 
     # GENERATE MD5SUM
@@ -381,17 +380,20 @@ echo -e "=======================================================================
 # MAKING KERNEL #
 #################
 
-echoText "MAKING KERNEL"
+echoText "CLEANING UP AND MAKING KERNEL"
 
-cleanUp > /dev/null 2>&1
-makeKernel
+# DON'T SHOW CLEAN UP OUTPUT
+cleanUp &>/dev/null
+
+# ONLY SHOW ERRORS, WARNINGS, AND THE IMAGE LINE WHEN COMPILING
+makeKernel |& ag --no-color "error:|warning:|${KERNEL_IMAGE}"
 
 
 ######################
 # IF KERNEL COMPILED #
 ######################
 
-if [[ $( ls ${KERNEL} 2>/dev/null | wc -l ) != 0 ]]; then
+if [[ $( ls ${KERNEL} | wc -l ) != 0 ]]; then
     # SET BUILD SUCCESS STRING AND SUCCESS VARIABLE
     BUILD_RESULT="BUILD SUCCESSFUL" && SUCCESS=true
 
