@@ -51,7 +51,8 @@ function help_menu() {
     echo -e "    -c | --config:      The defconfig to use while compiling"
     echo -e "    -d | --device:      The device to compile"
     echo -e "    -m | --mode:        A public, private, or test kernel"
-    echo -e "    -t | --toolchain:   Compile with 4.9 or 7.x\n"
+    echo -e "    -t | --toolchain:   Compile with 4.9 or 7.x"
+    echo -e "    -v | --verbose:     Compile verbosely (show full errors/warnings)\n"
     echo -e "No options will build an Angler kernel and push to private folder\n"
     exit
 }
@@ -117,6 +118,9 @@ while [[ $# -ge 1 ]]; do
                 *)
                     reportError "Invalid toolchain!" ;;
             esac ;;
+
+        "-v"|"--verbose")
+            VERBOSE=true ;;
 
         *)
             reportError "Invalid parameter" ;;
@@ -385,8 +389,12 @@ echoText "CLEANING UP AND MAKING KERNEL"
 # DON'T SHOW CLEAN UP OUTPUT
 cleanUp &>/dev/null
 
-# ONLY SHOW ERRORS, WARNINGS, AND THE IMAGE LINE WHEN COMPILING
-makeKernel |& ag --no-color "error:|warning:|${KERNEL_IMAGE}"
+# ONLY SHOW ERRORS, WARNINGS, AND THE IMAGE LINE WHEN COMPILING (UNLESS VERBOSE)
+if [[ ${VERBOSE} = true ]]; then
+    makeKernel
+else
+    makeKernel |& ag --no-color "error:|warning:|${KERNEL_IMAGE}"
+fi
 
 
 ######################
