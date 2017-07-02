@@ -72,7 +72,7 @@ while [[ $# -ge 1 ]]; do
             shift
 
             if [[ $# -ge 1 ]]; then
-                BRANCH=${1}
+                KERNEL_BRANCH=${1}
             else
                 reportError "Please specify a branch!"
             fi ;;
@@ -130,7 +130,7 @@ while [[ $# -ge 1 ]]; do
 done
 
 # DEFAULT PARAMETERS
-[[ -z ${BRANCH} ]] && BRANCH="7.1.2-flash-staging"
+[[ -z ${KERNEL_BRANCH} ]] && KERNEL_BRANCH="7.1.2-flash-dev"
 [[ -z ${DEFCONFIG} ]] && DEFCONFIG="flash_defconfig"
 [[ -z ${DEVICE} ]] && DEVICE="angler"
 [[ -z ${MODE} ]] && MODE="private"
@@ -170,7 +170,7 @@ case ${MODE} in
         ZIP_MOVE=${ZIP_MOVE_HEAD}/Kernels
         ANYKERNEL_BRANCH=${DEVICE}-flash-public-7.1.2 ;;
     "test")
-        ZIP_MOVE=${ZIP_MOVE_HEAD}/.tmp
+        ZIP_MOVE=${ZIP_MOVE_HEAD}/Kernels/.tests
         ANYKERNEL_BRANCH=${DEVICE}-flash-public-7.1.2 ;;
 esac
 
@@ -247,17 +247,6 @@ function printKernelInfo() {
 }
 
 
-# TAG FOR RELEASES
-function tagRelease() {
-    # WE NEED TO MARK THE PREVIOUS TAG FOR CHANGELOG
-    PREV_TAG_NAME=$(git tag -l --sort=-taggerdate | grep -m 1 flash)
-    PREV_TAG_HASH=$(git log --format=%H -1 ${PREV_TAG_NAME})
-
-    git tag -a "${ZIP_NAME}" -m "${ZIP_NAME}"
-    git push origin "${ZIP_NAME}"
-}
-
-
 # SETUP FOLDERS
 function setupFolders() {
     # IF ZIPMOVE DOESN'T EXIST, MAKE IT
@@ -294,12 +283,6 @@ function moveFiles() {
     # MOVE THE KERNEL ZIP TO WHERE IT NEEDS TO GO
     mv ${KERNEL_ZIP} "${ZIP_MOVE}"
 
-    # IF IT IS A TEST BUILD, UPLOAD IT
-    if [[ ${MODE} = "test" ]]; then
-        URL=$( curl -s --upload-file "${ZIP_MOVE}/${KERNEL_ZIP}" \
-               "https://transfer.sh/${KERNEL_ZIP}" )
-    fi
-
     # GENERATE MD5SUM
     md5sum "${ZIP_MOVE}"/${KERNEL_ZIP} > "${ZIP_MOVE}"/${KERNEL_ZIP}.md5sum
 }
@@ -307,11 +290,25 @@ function moveFiles() {
 
 # GENERATE CHANGELOG
 function generateChangelog() {
-    git -C "${SOURCE_FOLDER}" log --format="%nTitle: %s
-Author: %aN <%aE>
-Authored on: %aD\
-Link: http://github.com/nathanchance/angler/commit/%H
-Added on: %cD%n" ${PREV_TAG_HASH}..HEAD > "${ZIP_MOVE}"/${ZIP_NAME}-changelog.txt
+    cd "${SOURCE_FOLDER}"
+
+    # WE NEED TO MARK THE PREVIOUS TAG FOR CHANGELOG
+    PREV_TAG_NAME=$( git tag -l *lash* | tail -n1 )
+
+    echo -e "http://github.com/nathanchance/${DEVICE}/commits/${KERNEL_BRANCH}\n" \
+    > "${ZIP_MOVE}"/${ZIP_NAME}-changelog.txt
+
+    git -C "${SOURCE_FOLDER}" log --format="%h %s by %aN" ${PREV_TAG_NAME}..HEAD \
+    >> "${ZIP_MOVE}"/${ZIP_NAME}-changelog.txt
+}
+
+
+# TAG FOR RELEASES
+function tagRelease() {
+    cd "${SOURCE_FOLDER}"
+
+    git tag -a "${ZIP_NAME}" -m "${ZIP_NAME}"
+    git push origin "${ZIP_NAME}"
 }
 
 
@@ -319,14 +316,9 @@ Added on: %cD%n" ${PREV_TAG_HASH}..HEAD > "${ZIP_MOVE}"/${ZIP_NAME}-changelog.tx
 function endingInfo() {
     # ONLY PRINT FILE INFO IF IT EXISTS
     if [[ ${SUCCESS} = true ]]; then
-        case ${MODE} in
-            "private"|"public")
-                echo -e ${RED}"FILE LOCATION: ${ZIP_MOVE}/${KERNEL_ZIP}"
-                echo -e "SIZE: $( du -h ${ZIP_MOVE}/${KERNEL_ZIP} |
-                                  awk '{print $1}' )"${RST} ;;
-            "test")
-                echo -e ${RED}"FILE LOCATION: ${URL}"${RST} ;;
-        esac
+        echo -e ${RED}"FILE LOCATION: ${ZIP_MOVE}/${KERNEL_ZIP}"
+        echo -e "SIZE: $( du -h ${ZIP_MOVE}/${KERNEL_ZIP} |
+                          awk '{print $1}' )"${RST}
     fi
 
     # PRINT TIME INFO REGARDLESS OF SUCCESS
@@ -345,12 +337,7 @@ function generateLog() {
     # ONLY ADD A LINE ABOUT FILE LOCATION IF SCRIPT COMPLETED SUCCESSFULLY
     if [[ ${SUCCESS} = true ]]; then
         # FILE LOCATION: PATH
-        case ${MODE} in
-            "private"|"public")
-                echo -e "FILE LOCATION: ${ZIP_MOVE}/${KERNEL_ZIP}" >> ${LOG} ;;
-            "test")
-                echo -e "FILE LOCATION: ${URL}" >> ${LOG} ;;
-        esac
+        echo -e "FILE LOCATION: ${ZIP_MOVE}/${KERNEL_ZIP}" >> ${LOG}
     fi
 }
 
@@ -410,16 +397,14 @@ if [[ $( ls ${KERNEL} | wc -l ) != 0 ]]; then
     # PRINT KERNEL AND ZIP INFO
     printKernelInfo
 
-    # TAG THE HEAD COMMIT FOR PUBLIC BUILD
-    [[ ${MODE} = "public" ]] && tagRelease
-
     # SETUP ENVIRONMENT AND MAKE/MOVE ZIP
     setupFolders
     packageZip
     moveFiles
+    generateChangelog
 
-    # GENERATE CHANGELOG FOR PUBLIC BUILD
-    [[ ${MODE} = "public" ]] && generateChangelog
+    # TAG THE HEAD COMMIT FOR PUBLIC BUILD (SILENTLY)
+    [[ ${MODE} = "public" ]] && tagRelease &>/dev/null
 
 ###################
 # IF BUILD FAILED #
@@ -442,8 +427,5 @@ echoText "${BUILD_RESULT}!"
 endingInfo
 
 generateLog
-
-# KILL TMP FOLDER
-[[ ${MODE} = "test" ]] && rm -rf ${ZIP_MOVE}
 
 echo -e "\a"
