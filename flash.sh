@@ -290,22 +290,45 @@ function moveFiles() {
 
 # GENERATE CHANGELOG
 function generateChangelog() {
+    GITHUB="http://github.com/nathanchance"
+
+    # KERNEL SOURCE FIRST
     cd "${SOURCE_FOLDER}"
 
     # WE NEED TO MARK THE PREVIOUS TAG FOR CHANGELOG
-    PREV_TAG_NAME=$( git tag -l *lash* | tail -n1 )
+    PREV_TAG_NAME=$( git describe --abbrev=0 --tags )
 
-    echo -e "http://github.com/nathanchance/${DEVICE}/commits/${KERNEL_BRANCH}\n" \
+    echo -e "${GITHUB}/${DEVICE}/commits/${KERNEL_BRANCH}\n" \
     > "${ZIP_MOVE}"/${ZIP_NAME}-changelog.txt
 
-    git -C "${SOURCE_FOLDER}" log --format="%h %s by %aN" ${PREV_TAG_NAME}..HEAD \
+    git log --format="%h %s by %aN" --abbrev=12 ${PREV_TAG_NAME}..HEAD \
     >> "${ZIP_MOVE}"/${ZIP_NAME}-changelog.txt
+
+    # ANYKERNEL NEXT
+    cd "${ANYKERNEL_FOLDER}"
+
+    # WE ONLY WANT TO SHOW ANYKERNEL CHANGES IF THERE HAVE BEEN SOME
+    PREV_TAG_NAME=$( git describe --abbrev=0 --tags --always )
+    NUM_COMMITS=$( git log ${PREV_TAG_NAME}..HEAD --pretty=oneline | wc -l )
+
+    if [[ ${NUM_COMMITS} -gt 0 ]]; then
+        echo -e "\n\n${GITHUB}/AnyKernel2/commits/${ANYKERNEL_BRANCH}\n" \
+        >> "${ZIP_MOVE}"/${ZIP_NAME}-changelog.txt
+
+        git log --format="%h %s by %aN" --abbrev=12 ${PREV_TAG_NAME}..HEAD \
+        >> "${ZIP_MOVE}"/${ZIP_NAME}-changelog.txt
+    fi
 }
 
 
 # TAG FOR RELEASES
 function tagRelease() {
     cd "${SOURCE_FOLDER}"
+
+    git tag -a "${ZIP_NAME}" -m "${ZIP_NAME}"
+    git push origin "${ZIP_NAME}"
+
+    cd "${ANYKERNEL_FOLDER}"
 
     git tag -a "${ZIP_NAME}" -m "${ZIP_NAME}"
     git push origin "${ZIP_NAME}"
