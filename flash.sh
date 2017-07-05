@@ -51,6 +51,7 @@ function help_menu() {
     echo -e "    -c | --config:      The defconfig to use while compiling"
     echo -e "    -d | --device:      The device to compile"
     echo -e "    -m | --mode:        A public, private, or test kernel"
+    echo -e "    -n | --no-clean:    Don't clean the zip clean folder"
     echo -e "    -t | --toolchain:   Compile with 4.9 or 7.x"
     echo -e "    -v | --verbose:     Compile verbosely (show full errors/warnings)\n"
     echo -e "No options will build an Angler kernel and push to private folder\n"
@@ -108,6 +109,9 @@ while [[ $# -ge 1 ]]; do
                 *)
                     reportError "Invalid mode!" ;;
             esac ;;
+
+        "-n"|"--no-clean")
+            NOCLEAN=true ;;
 
         "-t"|"--toolchain")
             shift
@@ -254,7 +258,7 @@ function setupFolders() {
 
     # IF IT ISN'T A PUBLIC BUILD, CLEAN THE FOLDER
     if [[ ${MODE} != "public" ]]; then
-        rm -rf "${ZIP_MOVE}"/*
+        [[ -z ${NOCLEAN} ]] && rm -rf "${ZIP_MOVE}"/*
     else
         # OTHERWISE, MOVE THE OLD FILES TO AN "OLD" FOLDER
         [[ ! -d "${ZIP_MOVE}"/Old ]] && mkdir -p "${ZIP_MOVE}"/Old
