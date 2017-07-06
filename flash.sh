@@ -288,7 +288,7 @@ function moveFiles() {
     mv ${KERNEL_ZIP} "${ZIP_MOVE}"
 
     # GENERATE MD5SUM
-    md5sum "${ZIP_MOVE}"/${KERNEL_ZIP} > "${ZIP_MOVE}"/${KERNEL_ZIP}.md5sum
+    md5sum "${ZIP_MOVE}"/${KERNEL_ZIP} > "${ZIP_MOVE}"/${KERNEL_ZIP}.md5
 }
 
 
