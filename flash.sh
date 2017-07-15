@@ -53,7 +53,8 @@ function help_menu() {
     echo -e "    -m | --mode:        A public, private, or test kernel"
     echo -e "    -n | --no-clean:    Don't clean the zip clean folder"
     echo -e "    -t | --toolchain:   Compile with 4.9 or 7.x"
-    echo -e "    -v | --verbose:     Compile verbosely (show full errors/warnings)\n"
+    echo -e "    -v | --version:     Set LOCALVERSION externally from defconfig\n"
+    echo -e "    -w | --warnings:    Compile verbosely (show full errors/warnings)"
     echo -e "No options will build an Angler kernel and push to private folder\n"
     exit
 }
@@ -123,7 +124,16 @@ while [[ $# -ge 1 ]]; do
                     reportError "Invalid toolchain!" ;;
             esac ;;
 
-        "-v"|"--verbose")
+        "-v"|"--version")
+            shift
+
+            if [[ $# -ge 1 ]]; then
+                export LOCALVERSION="${1}"
+            else
+                reportError "Please specify something for LOCALVERSION!"
+            fi ;;
+
+        "-w"|"--warnings")
             VERBOSE=true ;;
 
         *)
