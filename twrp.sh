@@ -44,9 +44,9 @@ function help_menu() {
     echo -e ${BOLD}"USAGE:${RST} bash ${0} <device> <options>\n"
     echo -e ${BOLD}"EXAMPLE:${RST} bash ${0} angler\n"
     echo -e ${BOLD}"REQUIRED PARAMETERS:${RST}"
-    echo -e "   device:    angler | shamu\n"
+    echo -e "   -d | --device:      angler | shamu\n"
     echo -e ${BOLD}"OPTIONAL PARAMETERS:${RST}"
-    echo -e "   sync:      performs a repo sync before building\n"
+    echo -e "   -s | --sync:        performs a repo sync before building\n"
     exit
 }
 
@@ -56,18 +56,27 @@ function help_menu() {
 #              #
 ################
 
-unset SYNC DEVICE
-
 while [[ $# -ge 1 ]]; do
     PARAMS+="${1} "
 
     case "${1}" in
-        "sync")
-            SYNC=true ;;
-        "angler"|"shamu")
+        "-d"|"--device")
+            shift
             DEVICE=${1} ;;
+
         "-h"|"--help")
             help_menu ;;
+
+        "-p"|"--public")
+            PUBLIC=true ;;
+
+        "-s"|"--sync")
+            SYNC=true ;;
+
+        "-v"|"--version")
+            shift
+            export TW_DEVICE_VERSION=${1} ;;
+
         *)
             reportError "Invalid parameter detected!" ;;
     esac
@@ -76,9 +85,7 @@ while [[ $# -ge 1 ]]; do
 done
 
 # BUILD ANGLER IF DEVICE IS NOT SET
-if [[ -z ${DEVICE} ]]; then
-    DEVICE=angler
-fi
+[[ -z ${DEVICE} ]] && DEVICE=angler
 
 
 ###############
@@ -90,23 +97,10 @@ fi
 # DIRECTORIES
 SOURCE_DIR=${HOME}/TWRP-6.0
 OUT_DIR=${SOURCE_DIR}/out/target/product/${DEVICE}
-IMG_MOVE=${HOME}/Web/Downloads/TWRP/${DEVICE}
-
-# TWRP version
-if [[ ${DEVICE} = "angler" ]]; then
-    # Version 1: f2fs-tools bumped to 1.7.0, TWRP app removed
-    # Version 2: f2fs-tools bumped to 1.8.0
-    # Version 3: Revert f2fs-tools back to 1.7.0
-    # Version 4: Build off of Omni's 6.0 branch so everything works!
-    # Version 5: Bump to 3.1.0
-    # Version 6: Add back TWRP app prompt to fix theme
-    # Version 7: Update F2FS driver in kernel to 4.11-rc1
-    # Version 8: Bump to 3.1.1
-    # Version 9: Merge upstream updates
-    # Version 10: Base on flash-angler-20170527-1406 (f2fs + ext4 improvements) and update device tree
-    # Version 11: Update Flash Kernel, toolchain, and upstream TWRP commits
-    # Version 12: Upstream updates and Flash Kernel update
-    export TW_DEVICE_VERSION=12
+if [[ ${PUBLIC} = true ]]; then
+    IMG_MOVE=${HOME}/Web/Downloads/TWRP/${DEVICE}
+else
+    IMG_MOVE=${HOME}/me/TWRP/${DEVICE}
 fi
 VERSION=$( grep "TW_MAIN_VERSION_STR" ${SOURCE_DIR}/bootable/recovery/variables.h -m 1 | cut -d \" -f2 )-${TW_DEVICE_VERSION}
 
@@ -197,9 +191,7 @@ if [[ $( ls ${OUT_DIR}/${COMP_FILE} 2>/dev/null | wc -l ) != 0 ]]; then
     ##################
 
     # MAKE IMG_MOVE IF IT DOESN'T EXIST
-    if [[ ! -d "${IMG_MOVE}" ]]; then
-        mkdir -p "${IMG_MOVE}"/Old
-    fi
+    [[ ! -d "${IMG_MOVE}" ]] && mkdir -p "${IMG_MOVE}"/Old
 
 
     ####################
