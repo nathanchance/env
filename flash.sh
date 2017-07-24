@@ -38,6 +38,7 @@
 
 # SOURCE OUR UNIVERSAL FUNCTIONS SCRIPT AND MAC CHECK
 SCRIPT_DIR=$( cd $( dirname $( readlink -f "${BASH_SOURCE[0]}" ) ) && pwd )
+BIN_DIR=${SCRIPT_DIR}/bin
 source ${SCRIPT_DIR}/funcs.sh && macCheck
 
 # PRINT A HELP MENU IF REQUESTED
@@ -254,7 +255,7 @@ function printKernelInfo() {
     # KERNEL VERSION IS AUTOMATICALLY GENERATED
     export KERNEL_VERSION=$( cat ${OUT_FOLDER}/include/config/kernel.release )
     export ZIP_NAME=$( echo ${KERNEL_VERSION} | sed "s/^[^-]*-//g" )
-    export KERNEL_ZIP=${ZIP_NAME}.zip
+    export KERNEL_ZIP=${ZIP_NAME}-signed.zip
 
     echo -e "${BOLD}Kernel version:${RST} ${KERNEL_VERSION}"
     echo -e "${BOLD}Kernel zip:${RST} ${KERNEL_ZIP}"; newLine
@@ -285,9 +286,23 @@ function packageZip() {
     cp "${KERNEL}" "${ANYKERNEL_FOLDER}"
 
     # PACKAGE THE ZIP WITHOUT THE README
-    zip -q -r9 ${KERNEL_ZIP} * -x README.md ${KERNEL_ZIP}
-}
+    zip -q -r9 ${ZIP_NAME}-unsigned.zip * -x README.md ${ZIP_NAME}-unsigned.zip
 
+    # SIGN ZIP
+    java -jar ${BIN_DIR}/signapk.jar \
+              ${BIN_DIR}/flash.x509.pem \
+              ${BIN_DIR}/flash.pk8 \
+              ${ZIP_NAME}-unsigned.zip \
+              ${ZIP_NAME}.zip
+
+    ${BIN_DIR}/zipadjust ${ZIP_NAME}.zip ${ZIP_NAME}-adjusted.zip &>/dev/null
+
+    java -jar ${BIN_DIR}/minsignapk.jar \
+              ${BIN_DIR}/flash.x509.pem \
+              ${BIN_DIR}/flash.pk8 \
+              ${ZIP_NAME}-adjusted.zip \
+              ${KERNEL_ZIP}
+}
 
 # MOVE FILES
 function moveFiles() {
