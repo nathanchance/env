@@ -180,13 +180,16 @@ TOOLCHAIN_FOLDER=${HOME}/Toolchains/${TOOLCHAIN_FOLDER}
 case ${MODE} in
     "private")
         ZIP_MOVE=${ZIP_MOVE_HEAD}/../me/Flash-Kernel
-        ANYKERNEL_BRANCH=${DEVICE}-flash-personal-7.1.2 ;;
+        ANYKERNEL_BRANCH=${DEVICE}-flash-personal-7.1.2
+        KEYS=nathan ;;
     "public")
         ZIP_MOVE=${ZIP_MOVE_HEAD}/Kernels
-        ANYKERNEL_BRANCH=${DEVICE}-flash-public-7.1.2 ;;
+        ANYKERNEL_BRANCH=${DEVICE}-flash-public-7.1.2
+        KEYS=testkey ;;
     "test")
         ZIP_MOVE=${ZIP_MOVE_HEAD}/Kernels/.tests
-        ANYKERNEL_BRANCH=${DEVICE}-flash-public-7.1.2 ;;
+        ANYKERNEL_BRANCH=${DEVICE}-flash-public-7.1.2
+        KEYS=testkey ;;
 esac
 
 # KERNEL INFO
@@ -290,16 +293,16 @@ function packageZip() {
 
     # SIGN ZIP
     java -jar ${BIN_DIR}/signapk.jar \
-              ${BIN_DIR}/flash.x509.pem \
-              ${BIN_DIR}/flash.pk8 \
+              ${BIN_DIR}/${KEYS}.x509.pem \
+              ${BIN_DIR}/${KEYS}.pk8 \
               ${ZIP_NAME}-unsigned.zip \
               ${ZIP_NAME}.zip
 
     ${BIN_DIR}/zipadjust ${ZIP_NAME}.zip ${ZIP_NAME}-adjusted.zip &>/dev/null
 
     java -jar ${BIN_DIR}/minsignapk.jar \
-              ${BIN_DIR}/flash.x509.pem \
-              ${BIN_DIR}/flash.pk8 \
+              ${BIN_DIR}/${KEYS}.x509.pem \
+              ${BIN_DIR}/${KEYS}.pk8 \
               ${ZIP_NAME}-adjusted.zip \
               ${KERNEL_ZIP}
 }
