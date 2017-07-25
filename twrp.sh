@@ -100,7 +100,7 @@ OUT_DIR=${SOURCE_DIR}/out/target/product/${DEVICE}
 if [[ ${PUBLIC} = true ]]; then
     IMG_MOVE=${HOME}/Web/Downloads/TWRP/${DEVICE}
 else
-    IMG_MOVE=${HOME}/me/TWRP/${DEVICE}
+    IMG_MOVE=${HOME}/Web/me/TWRP/${DEVICE}
 fi
 VERSION=$( grep "TW_MAIN_VERSION_STR" ${SOURCE_DIR}/bootable/recovery/variables.h -m 1 | cut -d \" -f2 )-${TW_DEVICE_VERSION}
 
