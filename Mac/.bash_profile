@@ -16,13 +16,15 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>
 
+
 # git bash completion
 source ~/.git-prompt.sh
 export GIT_PS1_SHOWDIRTYSTATE=1
 export GIT_PS1_SHOWUPSTREAM=auto
 
 # Cool prompt
-PS1='\[\033[01;31m\]\u@\h \[\033[01;33m\]\w\[\033[01;36m\]$(__git_ps1 " (%s)") \[\033[39m\]\$\[\033[0m\] '
+#PS1='\[\033[01;31m\]\u@\h \[\033[01;33m\]\w\[\033[01;36m\]$(__git_ps1 " (%s)") \[\033[39m\]\$\[\033[0m\] '
+export PROMPT_COMMAND='__git_ps1 "\[\033[01;31m\]\u@\h \[\033[01;33m\]\w\[\033[01;36m\]" " \[\033[39m\]\$\[\033[0m\] "'
 
 # For Homebrew
 export PATH=/usr/local/sbin:${PATH}
@@ -59,6 +61,7 @@ if [[ -z ${TMUX} ]] ;then
         tmux -u attach-session -t ${ID} # if available attach to it
     fi
 fi
+
 
 ###############
 # GIT ALIASES #
@@ -120,6 +123,7 @@ alias gdhh='git diff HEAD^..HEAD'
 alias gdss='git diff --shortstat'
 alias gdc='git diff --cached'
 
+
 ##################
 # FOLDER ALIASES #
 ##################
@@ -128,6 +132,7 @@ export repodir="cd ${HOME}/Documents/Repos"
 export subsdir="cd ${HOME}/Documents/Repos/Substratum"
 export scriptsdir="cd ${HOME}/Documents/Repos/Scripts"
 export miscdir="cd ${HOME}/Documents/Misc"
+
 
 ########
 # MOTD #
