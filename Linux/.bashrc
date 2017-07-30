@@ -30,12 +30,14 @@ if [[ -z ${TMUX} ]] ;then
 fi
 
 alias ls='ls --color=auto'
+
 #PS1='[\u@\h \W]\$ '
-#PS1='\[\033[01;34m\]\u@\h \[\033[01;32m\]\w \[\033[39m\]\$ '
+#PS1='\[\033[01;34m\]\u@\h \[\033[01;32m\]\w\[\033[01;31m\] $(__git_ps1 "(%s) ")\[\033[39m\]\$\[\033[0m\] '
+
 source ~/.git-prompt.sh
 export GIT_PS1_SHOWDIRTYSTATE=1
 export GIT_PS1_SHOWUPSTREAM=auto
-PS1='\[\033[01;34m\]\u@\h \[\033[01;32m\]\w\[\033[01;31m\] $(__git_ps1 "(%s) ")\[\033[39m\]\$\[\033[0m\] '
+export PROMPT_COMMAND='__git_ps1 "\[\033[01;34m\]\u@\h \[\033[01;32m\]\w\[\033[01;31m\]" " \[\033[39m\]\$\[\033[0m\] "'
 
 
 ###########
@@ -68,6 +70,10 @@ alias tmux='tmux -u'
 
 # vim alias (because I am lazy af)
 alias vim='nvim'
+
+# Update alias
+alias update='pacaur -Syyu'
+
 
 ###############
 # GIT ALIASES #
@@ -132,41 +138,53 @@ alias gdhh='git diff HEAD^..HEAD'
 alias gdss='git diff --shortstat'
 alias gdc='git diff --cached'
 
+
 #############
 # FUNCTIONS #
 #############
 
-# Updating Arch function
-function update {
-    if [[ $( command -v pacaur ) ]]; then
-        pacaur -Syyu
-    else
-        sudo pacman -Syyu
-    fi
-}
-
 # Kernel build function
-function kernel_build {
-    local TOOLCHAIN
+function kb {
     local DEFCONFIG
+    local IMAGE
     local MAKE="make O=out"
+    local THREADS="-j$( nproc --all )"
+    local TOOLCHAIN
+    local UPLOAD
+    local VERBOSITY
 
     while [[ $# -ge 1 ]]; do
         case ${1} in
+            "-d"|"--defconfig")
+                shift
+
+                DEFCONFIG=${1} ;;
+
+            "-i"|"--image")
+                shift
+
+                IMAGE=${1} ;;
+
             "-t"|"--toolchain")
                 shift
 
                 case ${1} in
                     "4.9")
                         TOOLCHAIN=${HOME}/Toolchains/aosp-4.9/bin/aarch64-linux-android- ;;
+                    "8.x")
+                        TOOLCHAIN=${HOME}/Toolchains/gcc-8.x/bin/aarch64-gnu-linux-gnu- ;;
                     *)
                         TOOLCHAIN=${1} ;;
                 esac ;;
 
-            "-d"|"--defconfig")
-                shift
+            "-u"|"--upload")
+                UPLOAD=true ;;
 
-                DEFCONFIG=${1} ;;
+            "-v"|"--verboase")
+                VERBOSITY=2 ;;
+
+            "-w"|"--warnings")
+                VERBOSITY=1 ;;
         esac
 
         shift
@@ -174,19 +192,31 @@ function kernel_build {
 
     [[ -z ${DEFCONFIG} ]] && DEFCONFIG=flash_defconfig
     [[ -z ${TOOLCHAIN} ]] && TOOLCHAIN=${HOME}/Toolchains/linaro-7.x/bin/aarch64-linaro-linux-gnu-
+    [[ -z ${IMAGE} ]] && IMAGE=Image.gz-dtb
 
-    export CROSS_COMPILE=${TOOLCHAIN}
+    export CROSS_COMPILE="$( command -v ccache ) ${TOOLCHAIN}"
     export ARCH=arm64
     export SUBARCH=arm64
 
-    if [[ -d out ]]; then
-        ${MAKE} clean
-        ${MAKE} mrproper
-    else
-        mkdir out
-    fi
-    ${MAKE} ${DEFCONFIG}
-    ${MAKE} -j$( nproc --all )
+    rm -rf out && mkdir out && echo
+
+    case ${VERBOSITY} in
+        "2")
+            ${MAKE} ${DEFCONFIG}
+            ${MAKE} ${THREADS} ;;
+        "1")
+            ${MAKE} ${DEFCONFIG} |& ag "error:|warning:"
+            ${MAKE} ${THREADS} |& ag "error:|warning|${IMAGE}" ;;
+        *)
+            ${MAKE} ${DEFCONFIG} &>/dev/null
+            ${MAKE} ${THREADS} |& ag "${IMAGE}" ;;
+    esac
+
+    [[ ${UPLOAD} = true ]] && echo && curl --upload-file out/arch/arm64/boot/${IMAGE} https://transfer.sh/${IMAGE}
+
+    echo -e "\n\a"
+
+    unset CROSS_COMPILE ARCH SUBARCH
 }
 
 # EXKM to RC converter
