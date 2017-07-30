@@ -119,7 +119,7 @@ while [[ $# -ge 1 ]]; do
             shift
 
             case "${1}" in
-                "4.9"|"7.x")
+                "4.9"|"7.x"|"8.x")
                     TOOLCHAIN_NAME=${1} ;;
                 *)
                     reportError "Invalid toolchain!" ;;
@@ -173,6 +173,9 @@ case ${TOOLCHAIN_NAME} in
     "7.x")
         TOOLCHAIN_FOLDER=linaro-7.x
         TOOLCHAIN_PREFIX=aarch64-linaro-linux-gnu- ;;
+    "8.x")
+        TOOLCHAIN_FOLDER=gcc-8.x
+        TOOLCHAIN_PREFIX=aarch64-gnu-linux-gnu- ;;
 esac
 
 TOOLCHAIN_FOLDER=${HOME}/Toolchains/${TOOLCHAIN_FOLDER}
