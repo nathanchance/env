@@ -102,7 +102,7 @@ case ${APK} in
         APK_NAME=MagiskManager ;;
     "substratum")
         SOURCE_DIR=${HOME}/Documents/Repos/Substratum/nc
-        OUT_DIR=${SOURCE_DIR}/app/build/outputs/apk/release
+        OUT_DIR=${SOURCE_DIR}/app/build/outputs/apk/main/release
         APK_NAME=Substratum ;;
     "spectrum")
         SOURCE_DIR=${HOME}/Documents/Repos/Spectrum
