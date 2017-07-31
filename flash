@@ -39,7 +39,7 @@
 # SOURCE OUR UNIVERSAL FUNCTIONS SCRIPT AND MAC CHECK
 SCRIPT_DIR=$( cd $( dirname $( readlink -f "${BASH_SOURCE[0]}" ) ) && pwd )
 BIN_DIR=${SCRIPT_DIR}/bin
-source ${SCRIPT_DIR}/funcs.sh && macCheck
+source ${SCRIPT_DIR}/funcs && macCheck
 
 # PRINT A HELP MENU IF REQUESTED
 function help_menu() {

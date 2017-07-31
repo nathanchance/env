@@ -22,13 +22,13 @@
 #         #
 ###########
 
-# PURPOSE: Merge LineageOS updates into LineageOMS org
-# USAGE: $ bash lineage_merge.sh -h
+# PURPOSE: Merge DU updates into my personal forked repos
+# USAGE: $ bash du_merge.sh -h
 
 # PRINT A HELP MENU IF REQUESTED
 if [[ -n ${1} ]]; then
     echo -e ""
-    echo -e "${BOLD}OVERVIEW:${RST} Update LineageOMS organization by fetching and rebasing\n"
+    echo -e "${BOLD}OVERVIEW:${RST} Update personal Dirty Unicorns repos by fetching and merging\n"
     echo -e "${BOLD}USAGE:${RST} bash ${0}\n"
     exit
 fi
@@ -40,21 +40,24 @@ fi
 #             #
 ###############
 
-SOURCE_DIR=${HOME}/ROMs/LineageOMS
+# If SOURCE_DIR isn't defined, the script is being run separately
+if [[ -z ${SOURCE_DIR} ]]; then
+    SOURCE_DIR=${HOME}/ROMs/DU
+fi
 
-SUBS_REPOS="
-.repo/manifests
+DU_REPOS="
+build
+device/huawei/angler
+external/skia
 frameworks/base
 frameworks/native
-packages/apps/Contacts
-packages/apps/ContactsCommon
-packages/apps/Dialer
-packages/apps/ExactCalculator
-packages/apps/PackageInstaller
-packages/apps/PhoneCommon
-packages/apps/Settings
+packages/apps/DUI
+packages/apps/DU-Tweaks
+system/core
+system/extras
 system/sepolicy
-vendor/cm"
+vendor/du
+vendor/huawei"
 
 
 ###############
@@ -65,7 +68,7 @@ vendor/cm"
 
 # SOURCE OUR UNIVERSAL FUNCTIONS SCRIPT AND MAC CHECK
 SCRIPT_DIR=$( cd $( dirname $( readlink -f "${BASH_SOURCE[0]}" ) ) && pwd )
-source ${SCRIPT_DIR}/funcs.sh && macCheck
+source ${SCRIPT_DIR}/funcs && macCheck
 
 
 ################
@@ -74,56 +77,35 @@ source ${SCRIPT_DIR}/funcs.sh && macCheck
 #              #
 ################
 
-# START TRACKING TIME
-START=$( date +%s )
-
-for FOLDER in ${SUBS_REPOS}; do
+for FOLDER in ${DU_REPOS}; do
     # PRINT TO THE USER WHAT WE ARE DOING
     newLine; echoText "Updating ${FOLDER}"
 
     # SHIFT TO PROPER FOLDER
     cd ${SOURCE_DIR}/${FOLDER}
 
-    # CHECKOUT THE RIGHT BRANCH
-    git checkout cm-14.1
-
     # SET PROPER URL
-    if [[ ${FOLDER} = ".repo/manifests" ]]; then
-        URL=android
-    else
-        URL=android_$( echo ${FOLDER} | sed "s/\//_/g" )
-    fi
+    URL=android_$( echo ${FOLDER} | sed "s/\//_/g" )
 
-    # FETCH THE REPO
-    git fetch https://github.com/LineageOS/${URL} cm-14.1
+    # FETCH AND MERGE UPSTREAM
+    git pull https://github.com/DirtyUnicorns/${URL} n7x
 
-    # REBASE ON FETCH_HEAD
-    git rebase FETCH_HEAD
-
-    # ADD TO RESULT STRING
     if [[ $? -ne 0 ]]; then
         RESULT_STRING+="${FOLDER}: ${RED}FAILED${RST}\n"
+        EXIT_NEEDED=true
     else
         RESULT_STRING+="${FOLDER}: ${GRN}SUCCESS${RST}\n"
 
-        git push --force
+        git push nathanchance HEAD:n7x
     fi
 done
 
 # SHIFT BACK TO THE TOP OF THE REPO
 cd ${SOURCE_DIR}
 
-# SYNC THEME INTERFACER REPO
-newLine; echoText "Syncing packages/services/ThemeInterfacer"
-repo sync --force-sync packages/services/ThemeInterfacer
-
 # PRINT RESULTS
 echoText "RESULTS"
 echo -e ${RESULT_STRING}
 
-# STOP TRACKING TIME
-END=$( date +%s )
-
-# PRINT RESULT TO USER
-echoText "SCRIPT COMPLETED!"
-echo -e ${RED}"TIME: $(format_time ${END} ${START})"${RST}; newLine
+# Signal to rom.sh to exit
+[[ ${EXIT_NEEDED} = true ]] && exit 1
