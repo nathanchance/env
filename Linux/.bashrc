@@ -116,6 +116,7 @@ alias grh='git reset --hard'
 alias grs='git reset --soft'
 
 alias glg='git log'
+alias glp="git log -p"
 alias gl='git log --format=oneline'
 alias gb='git branch -v'
 alias gbd='git branch -D'
@@ -203,16 +204,16 @@ function kb {
     case ${VERBOSITY} in
         "2")
             ${MAKE} ${DEFCONFIG}
-            ${MAKE} ${THREADS} ;;
+            time ${MAKE} ${THREADS} ;;
         "1")
             ${MAKE} ${DEFCONFIG} |& ag "error:|warning:"
-            ${MAKE} ${THREADS} |& ag "error:|warning|${IMAGE}" ;;
+            time ${MAKE} ${THREADS} |& ag "error:|warning|${IMAGE}" ;;
         *)
             ${MAKE} ${DEFCONFIG} &>/dev/null
-            ${MAKE} ${THREADS} |& ag "${IMAGE}" ;;
+            time ${MAKE} ${THREADS} |& ag "${IMAGE}" ;;
     esac
 
-    [[ ${UPLOAD} = true ]] && echo && curl --upload-file out/arch/arm64/boot/${IMAGE} https://transfer.sh/${IMAGE}
+    [[ ${UPLOAD} = true ]] && echo && curl --upload-file out/arch/arm64/boot/"${IMAGE}" https://transfer.sh/"${IMAGE}"
 
     echo -e "\n\a"
 
