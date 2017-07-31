@@ -237,7 +237,7 @@ if [[ ${SYNC} = true ]]; then
     ${REPO_SYNC} ${FLAGS}
 
     if [[ ${ROM} = "du-personal" ]]; then
-        source ${SCRIPT_DIR}/du_merge.sh
+        source ${SCRIPT_DIR}/du_merge
     fi
 fi
 
