@@ -16,10 +16,14 @@
 " You should have received a copy of the GNU General Public License
 " along with this program.  If not, see <http://www.gnu.org/licenses/>
 
+" Special indenting for C and Makefiles (since most will be kernel files)
+filetype plugin indent on
+
 colorscheme cobalt      " Dope af
 syntax enable           " Enable syntax processing
 set tabstop=4           " Show tabs as four spaces
 set softtabstop=4       " When hit, tab = 4 spaces
+set shiftwidth=4        " When indenting with '>', use 4 spaces width
 set expandtab           " Hitting tab generates four spaces
 set number              " Show line numbers when editing
 set showcmd             " Show last command
@@ -29,9 +33,6 @@ set incsearch           " Show search results in realtime
 set hlsearch            " Highlight search matches
 set lazyredraw          " Redraw only when we need to
 set mouse=a             " Enable mouse in all modes
-
-" Special indenting for C and Makefiles (since most will be kernel files)
-filetype indent on
 
 " Move to beginning/end of line or skip letters
 nnoremap B 0
