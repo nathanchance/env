@@ -192,7 +192,7 @@ function kb {
     done
 
     [[ -z ${DEFCONFIG} ]] && DEFCONFIG=flash_defconfig
-    [[ -z ${TOOLCHAIN} ]] && TOOLCHAIN=${HOME}/Toolchains/linaro-7.x/bin/aarch64-linaro-linux-gnu-
+    [[ -z ${TOOLCHAIN} ]] && TOOLCHAIN=${HOME}/Toolchains/aarch64-linaro-linux-android-7.x/bin/aarch64-linaro-linux-android-
     [[ -z ${IMAGE} ]] && IMAGE=Image.gz-dtb
 
     export CROSS_COMPILE="$( command -v ccache ) ${TOOLCHAIN}"
