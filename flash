@@ -171,8 +171,8 @@ case ${TOOLCHAIN_NAME} in
         TOOLCHAIN_FOLDER=aosp-4.9
         TOOLCHAIN_PREFIX=aarch64-linux-android- ;;
     "7.x")
-        TOOLCHAIN_FOLDER=linaro-7.x
-        TOOLCHAIN_PREFIX=aarch64-linaro-linux-gnu- ;;
+        TOOLCHAIN_FOLDER=aarch64-linaro-linux-android-7.x
+        TOOLCHAIN_PREFIX=aarch64-linaro-linux-android- ;;
     "8.x")
         TOOLCHAIN_FOLDER=gcc-8.x
         TOOLCHAIN_PREFIX=aarch64-gnu-linux-gnu- ;;
