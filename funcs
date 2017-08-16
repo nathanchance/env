@@ -104,3 +104,8 @@ function reportWarning() {
 function macCheck() {
     [[ $( uname -a | grep -i "darwin" ) ]] && reportError "Wrong window! ;)"
 }
+
+# ENFORCES THE VALUE NEEDED FOR TWO-PART FLAGS
+function enforceValue() {
+    [[ $# -lt 1 ]] && reportError "A additional value is needed for one of the flags passed to this script!"
+}

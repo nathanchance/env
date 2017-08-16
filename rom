@@ -45,18 +45,16 @@ function help_menu() {
     echo -e "${BOLD}USAGE:${RST} bash ${0} <rom> <device> <options>\n"
     echo -e "${BOLD}Example:${RST} bash ${0} flash angler user sync\n"
     echo -e "${BOLD}REQUIRED PARAMETERS:${RST}"
-    echo -e "   rom:        abc | du-aosp | du-caf | du-personal | krexus | lineageos | lineageoms | omni | pn | vanilla"
-    echo -e "   device:     angler | bullhead | flo | hammerhead | marlin| sailfish | shamu\n"
+    echo -e "   -r  | --rom:        abc | du-aosp | du-caf | du-personal | krexus | lineageos | lineageoms | omni | pn | vanilla"
+    echo -e "   -d  | --device:     angler | bullhead | flo | hammerhead | marlin| sailfish | shamu\n"
     echo -e "${BOLD}STANDARD PARAMETERS:${RST}"
-    echo -e "   sync:       performs a repo sync before building"
-    echo -e "   clean:      performs the specified clean (e.g. clean installclean will run make installclean)"
-    echo -e "   make:       performs the specified make (e.g. make SystemUI will run make SystemUI)"
-    echo -e "   variant:    build with the specified variant (e.g. variant userdebug). Possible options: eng, userdebug, and user. Userdebug is the default.\n"
-    echo -e "   rp:         run repopick (on supported ROMs) before building"
+    echo -e "   -s  | --sync:        performs a repo sync before building"
+    echo -e "   -s  | --clean:       performs the specified clean (e.g. clean installclean will run make installclean)"
+    echo -e "   -m  | --make:        performs the specified make (e.g. make SystemUI will run make SystemUI)"
+    echo -e "   -v  | --variant:     build with the specified variant (e.g. variant userdebug). Possible options: eng, userdebug, and user. Userdebug is the default.\n"
+    echo -e "   -rp | --repopick:    run repopick (on supported ROMs) before building"
     echo -e "${BOLD}SPECIAL PARAMETERS:${RST}"
-    echo -e "   type:       (Krexus and DU only) sets the specified type as the build tag"
-    echo -e "   pixel:      (Vanilla only) Builds a Pixel variant build"
-    echo -e "   public:     (Vanilla only) Builds with the public tag\n"
+    echo -e "   -t  | --type:       (Krexus and DU only) sets the specified type as the build tag\n"
     echo -e "No options will fallback to DU Angler userdebug\n"
     exit
 }
@@ -82,63 +80,64 @@ while [[ $# -ge 1 ]]; do
 
     case "${1}" in
         # REQUIRED OPTIONS
-        "angler"|"bullhead"|"flo"|"hammerhead"|"marlin"|"oneplus3"|"sailfish"|"shamu")
+        "-d"|"--device")
+            shift && enforceValue $@
+
+            PARAMS+="${1} "
             DEVICE=${1} ;;
-        "abc"|"du-aosp"|"du-caf"|"du-personal"|"krexus"|"lineageos"|"lineageoms"|"omni"|"pn"|"vanilla")
+
+        "-r"|"--rom")
+            shift && enforceValue $@
+
+            PARAMS+="${1} "
             ROM=${1} ;;
+
         # STANDARD OPTIONS
-        "sync")
+        "-s"|"--sync")
             SYNC=true ;;
-        "clean")
-            shift
-            if [[ $# -ge 1 ]]; then
-                PARAMS+="${1} "
-                export CLEAN_TYPE=${1}
-            else
-                reportError "Please specify a clean type!"
-            fi ;;
-        "make")
-            shift
-            if [[ $# -ge 1 ]]; then
-                PARAMS+="${1} "
-                export MAKE_TYPE=${1}
-            else
-                reportError "Please specify a make item!"
-            fi ;;
-        "variant")
-            shift
-            if [[ $# -ge 1 ]]; then
-                PARAMS+="${1} "
-                export VARIANT=${1}
-            else
-                reportError "Please specify a build variant!"
-            fi ;;
-        "rp")
+
+        "-c"|"--clean")
+            PARAMS+="${1} "
+            export CLEAN_TYPE=${1} ;;
+
+        "-m"|"--make")
+            shift && enforceValue $@
+
+            PARAMS+="${1} "
+            export MAKE_TYPE=${1} ;;
+
+        "-v"|"--version")
+            shift && enforceValue $@
+
+            PARAMS+="${1} "
+            export VARIANT=${1} ;;
+
+        "-rp"|"--repopick")
             export REPOPICK=true ;;
+
         # SPECIAL OPTIONS
-        # KREXUS AND DU
-        "type")
-            shift
-            if [[ $# -ge 1 ]]; then
-                PARAMS+="${1} "
-                export BUILD_TAG=${1}
-                export DU_BUILD_TYPE=${1}
-            else
-                reportError "Please specify a build type!"
-            fi ;;
+        # KREXUS, DU, VANILLA
+        "-t"|"--type")
+            shift && enforceValue $@
+
+            PARAMS+="${1} "
+            export BUILD_TAG=${1}
+            export DU_BUILD_TYPE=${1} ;;
+
         # DU
-        "nogapps")
+        "-ng"|"--no-gapps")
             export HAS_GAPPS=false ;;
-        "nosign")
-            export SIGN_BUILD=false ;;
+
         # VANILLA
-        "pixel")
+        "-pix"|"--pixel")
             export PIXEL=true ;;
-        "public")
+
+        "-pub"|"--public")
             export PUBLIC=true ;;
 
         "-h"|"--help")
             help_menu ;;
+
         *)
             reportError "Invalid parameter detected!" ;;
     esac
@@ -152,6 +151,8 @@ if [[ -z ${ROM} ]]; then
     ROM=du-personal
     DEVICE=angler
 fi
+
+[[ -z ${DEVICE} ]] && reportError "The device to build is a required parameter!"
 
 if [[ -z ${VARIANT} ]]; then
     case ${ROM} in
@@ -207,6 +208,8 @@ case "${ROM}" in
     "vanilla")
         SOURCE_DIR=${ANDROID_DIR}/ROMs/Vanilla
         ZIP_MOVE=${ZIP_MOVE_PARENT}/Vanilla/${DEVICE} ;;
+    *)
+        reportError "Unknown ROM "${1}" passed!" ;;
 esac
 
 OUT_DIR=${SOURCE_DIR}/out/target/product/${DEVICE}
