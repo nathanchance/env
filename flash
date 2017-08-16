@@ -292,6 +292,13 @@ function packageZip() {
     # MOVE THE KERNEL IMAGE
     cp "${KERNEL}" "${ANYKERNEL_FOLDER}"
 
+    # GRAB MODULES TOO IF THEY ARE PRESENT
+    if [[ -n $( find ${OUT_FOLDER} -name "*.ko" ) ]]; then
+        MODULES_FOLDER=${ANYKERNEL_FOLDER}/modules
+        rm -rf ${MODULES_FOLDER} && mkdir ${MODULES_FOLDER}
+        find ${OUT_FOLDER} -name "*.ko" -exec cp {} ${MODULES_FOLDER} \;
+    fi
+
     # PACKAGE THE ZIP WITHOUT THE README
     zip -q -r9 ${ZIP_NAME}-unsigned.zip * -x README.md ${ZIP_NAME}-unsigned.zip
 
