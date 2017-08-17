@@ -119,7 +119,7 @@ while [[ $# -ge 1 ]]; do
             shift
 
             case "${1}" in
-                "4.9"|"7.x"|"8.x")
+                "4.9"|"5.x"|"7.x"|"8.x")
                     TOOLCHAIN_NAME=${1} ;;
                 *)
                     reportError "Invalid toolchain!" ;;
@@ -145,11 +145,11 @@ while [[ $# -ge 1 ]]; do
 done
 
 # DEFAULT PARAMETERS
-[[ -z ${KERNEL_BRANCH} ]] && KERNEL_BRANCH="7.1.2-flash-dev"
+[[ -z ${KERNEL_BRANCH} ]] && KERNEL_BRANCH="7.1.x-base"
 [[ -z ${DEFCONFIG} ]] && DEFCONFIG="flash_defconfig"
-[[ -z ${DEVICE} ]] && DEVICE="angler"
+[[ -z ${DEVICE} ]] && DEVICE="cheeseburger"
 [[ -z ${MODE} ]] && MODE="private"
-[[ -z ${TOOLCHAIN_NAME} ]] && TOOLCHAIN_NAME="7.x"
+[[ -z ${TOOLCHAIN_NAME} ]] && TOOLCHAIN_NAME="5.x"
 
 
 
@@ -170,6 +170,9 @@ case ${TOOLCHAIN_NAME} in
     "4.9")
         TOOLCHAIN_FOLDER=aosp-4.9
         TOOLCHAIN_PREFIX=aarch64-linux-android- ;;
+    "5.x")
+        TOOLCHAIN_FOLDER=aarch64-linaro-linux-gnu-5.x
+        TOOLCHAIN_PREFIX=aarch64-linaro-linux-gnu- ;;
     "7.x")
         TOOLCHAIN_FOLDER=aarch64-linaro-linux-android-7.x
         TOOLCHAIN_PREFIX=aarch64-linaro-linux-android- ;;
