@@ -93,7 +93,7 @@ while [[ $# -ge 1 ]]; do
             shift
 
             case ${1} in
-                "angler"|"cheeseburger")
+                "angler"|"oneplus5")
                     DEVICE=${1} ;;
                 *)
                     reportError "Invalid device!" ;;
@@ -145,12 +145,11 @@ while [[ $# -ge 1 ]]; do
 done
 
 # DEFAULT PARAMETERS
-[[ -z ${KERNEL_BRANCH} ]] && KERNEL_BRANCH="7.1.x-base"
+[[ -z ${KERNEL_BRANCH} ]] && KERNEL_BRANCH="7.1.x-flash-oos"
 [[ -z ${DEFCONFIG} ]] && DEFCONFIG="flash_defconfig"
-[[ -z ${DEVICE} ]] && DEVICE="cheeseburger"
+[[ -z ${DEVICE} ]] && DEVICE="oneplus5"
 [[ -z ${MODE} ]] && MODE="private"
 [[ -z ${TOOLCHAIN_NAME} ]] && TOOLCHAIN_NAME="5.x"
-
 
 
 ###############
@@ -204,6 +203,17 @@ KERNEL_IMAGE=Image.gz-dtb
 THREADS=-j$( nproc --all )
 KERNEL=${OUT_FOLDER}/arch/${ARCHITECTURE}/boot/${KERNEL_IMAGE}
 
+# Special OnePlus 5 handling
+if [[ ${DEVICE} = "oneplus5" ]]; then
+   [[ -z ${LOCALVERSION} ]] &&  reportError "OP5 requires a version!"
+
+    case "${KERNEL_BRANCH}" in
+        *oos*)
+            ZIP_MOVE=${ZIP_MOVE}/OOS ;;
+        *custom*)
+            ZIP_MOVE=${ZIP_MOVE}/Custom ;;
+    esac
+fi
 
 
 ###############
