@@ -145,7 +145,7 @@ while [[ $# -ge 1 ]]; do
 done
 
 # DEFAULT PARAMETERS
-[[ -z ${KERNEL_BRANCH} ]] && KERNEL_BRANCH="7.1.x-flash-oos"
+[[ -z ${KERNEL_BRANCH} ]] && KERNEL_BRANCH="7.1.x-flash-oos-dev"
 [[ -z ${DEFCONFIG} ]] && DEFCONFIG="flash_defconfig"
 [[ -z ${DEVICE} ]] && DEVICE="oneplus5"
 [[ -z ${MODE} ]] && MODE="private"
