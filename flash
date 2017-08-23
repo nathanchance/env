@@ -149,7 +149,7 @@ done
 [[ -z ${DEFCONFIG} ]] && DEFCONFIG="flash_defconfig"
 [[ -z ${DEVICE} ]] && DEVICE="oneplus5"
 [[ -z ${MODE} ]] && MODE="private"
-[[ -z ${TOOLCHAIN_NAME} ]] && TOOLCHAIN_NAME="5.x"
+[[ -z ${TOOLCHAIN_NAME} ]] && TOOLCHAIN_NAME="7.x"
 
 
 ###############
@@ -164,6 +164,25 @@ SOURCE_FOLDER=${KERNEL_HEAD}/${DEVICE}
 OUT_FOLDER=${SOURCE_FOLDER}/out
 ANYKERNEL_FOLDER=${KERNEL_HEAD}/anykernel
 ZIP_MOVE_HEAD=${HOME}/Web/Downloads
+
+# DEVICE HANDLING
+case ${DEVICE} in
+    "angler")
+        ANDROID_VERSION=8.0.0 ;;
+    "oneplus5")
+        ANDROID_VERSION=7.1.x
+
+        [[ -z ${LOCALVERSION} ]] &&  reportError "OP5 requires a version!"
+
+        case ${KERNEL_BRANCH} in
+            *oos*)
+                ZIP_MOVE_ADD=/OOS
+                MATCH_FLAG="--match=*OOS*";;
+            *custom*)
+                ZIP_MOVE_ADD=/Custom
+                MATCH_FLAG="--match=*Custom*";;
+        esac ;;
+esac
 
 case ${TOOLCHAIN_NAME} in
     "4.9")
@@ -184,16 +203,16 @@ TOOLCHAIN_FOLDER=${HOME}/Toolchains/${TOOLCHAIN_FOLDER}
 
 case ${MODE} in
     "private")
-        ZIP_MOVE=${ZIP_MOVE_HEAD}/../me/Flash-Kernel/${DEVICE}
-        ANYKERNEL_BRANCH=${DEVICE}-flash-personal-7.1.2
+        ZIP_MOVE=${ZIP_MOVE_HEAD}/../me/Flash-Kernel/${DEVICE}${ZIP_MOVE_ADD}
+        ANYKERNEL_BRANCH=${DEVICE}-flash-personal-${ANDROID_VERSION}
         KEYS=nathan ;;
     "public")
-        ZIP_MOVE=${ZIP_MOVE_HEAD}/Kernels/${DEVICE}
-        ANYKERNEL_BRANCH=${DEVICE}-flash-public-7.1.2
+        ZIP_MOVE=${ZIP_MOVE_HEAD}/Kernels/${DEVICE}${ZIP_MOVE_ADD}
+        ANYKERNEL_BRANCH=${DEVICE}-flash-public-${ANDROID_VERSION}
         KEYS=testkey ;;
     "test")
-        ZIP_MOVE=${ZIP_MOVE_HEAD}/Kernels/.tests/${DEVICE}
-        ANYKERNEL_BRANCH=${DEVICE}-flash-public-7.1.2
+        ZIP_MOVE=${ZIP_MOVE_HEAD}/Kernels/.tests/${DEVICE}${ZIP_MOVE_ADD}
+        ANYKERNEL_BRANCH=${DEVICE}-flash-public-${ANDROID_VERSION}
         KEYS=testkey ;;
 esac
 
@@ -202,18 +221,6 @@ ARCHITECTURE=arm64
 KERNEL_IMAGE=Image.gz-dtb
 THREADS=-j$( nproc --all )
 KERNEL=${OUT_FOLDER}/arch/${ARCHITECTURE}/boot/${KERNEL_IMAGE}
-
-# Special OnePlus 5 handling
-if [[ ${DEVICE} = "oneplus5" ]]; then
-   [[ -z ${LOCALVERSION} ]] &&  reportError "OP5 requires a version!"
-
-    case "${KERNEL_BRANCH}" in
-        *oos*)
-            ZIP_MOVE=${ZIP_MOVE}/OOS ;;
-        *custom*)
-            ZIP_MOVE=${ZIP_MOVE}/Custom ;;
-    esac
-fi
 
 
 ###############
@@ -352,7 +359,7 @@ function generateChangelog() {
     cd "${SOURCE_FOLDER}"
 
     # WE NEED TO MARK THE PREVIOUS TAG FOR CHANGELOG
-    PREV_TAG_NAME=$( git describe --abbrev=0 --tags )
+    PREV_TAG_NAME=$( git describe --abbrev=0 --tags ${MATCH_FLAG})
 
     echo -e "${GITHUB}/${DEVICE}/commits/${KERNEL_BRANCH}\n" \
     > "${ZIP_MOVE}"/${ZIP_NAME}-changelog.txt
