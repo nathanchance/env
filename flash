@@ -99,6 +99,15 @@ while [[ $# -ge 1 ]]; do
                     reportError "Invalid device!" ;;
             esac ;;
 
+        "-f"|"--flags")
+            shift
+
+            if [[ $# -ge 1 ]]; then
+                EXTRA_MAKE_FLAGS=${1}
+            else
+                reportError "Please specify extra make flags!"
+            fi ;;
+
         "-h"|"--help")
             help_menu ;;
 
@@ -175,12 +184,14 @@ case ${DEVICE} in
         [[ -z ${LOCALVERSION} ]] &&  reportError "OP5 requires a version!"
 
         case ${KERNEL_BRANCH} in
-            *oos*)
-                ZIP_MOVE_ADD=/OOS
-                MATCH_FLAG="--match=*OOS*";;
+            *base*)
+                ZIP_MOVE_ADD=/Base ;;
             *custom*)
                 ZIP_MOVE_ADD=/Custom
-                MATCH_FLAG="--match=*Custom*";;
+                MATCH_FLAG="--match=*Custom*" ;;
+            *oos*)
+                ZIP_MOVE_ADD=/OOS
+                MATCH_FLAG="--match=*OOS*" ;;
         esac ;;
 esac
 
@@ -273,7 +284,7 @@ function makeKernel() {
     ${MAKE} ${DEFCONFIG}
 
     # MAKE THE KERNEL
-    time ${MAKE} ${THREADS}
+    time ${MAKE} ${THREADS} ${EXTRA_MAKE_FLAGS}
 }
 
 
@@ -281,7 +292,7 @@ function makeKernel() {
 function printKernelInfo() {
     # KERNEL VERSION IS AUTOMATICALLY GENERATED
     export KERNEL_VERSION=$( cat ${OUT_FOLDER}/include/config/kernel.release )
-    export ZIP_NAME=$( echo ${KERNEL_VERSION} | sed "s/^[^-]*-//g" )
+    export ZIP_NAME=$( echo ${KERNEL_VERSION} | sed "s/^.*F/F/g" )
     export KERNEL_ZIP=${ZIP_NAME}-signed.zip
 
     echo -e "${BOLD}Kernel version:${RST} ${KERNEL_VERSION}"
