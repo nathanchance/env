@@ -99,6 +99,15 @@ while [[ $# -ge 1 ]]; do
                     reportError "Invalid device!" ;;
             esac ;;
 
+        "-dv"|"--dirtyversion")
+            shift
+
+            if [[ $# -ge 1 ]]; then
+                DIRTY_VERSION=${1}
+            else
+                reportError "Please specify a dirty version!"
+            fi ;;
+
         "-f"|"--flags")
             shift
 
@@ -177,9 +186,11 @@ ZIP_MOVE_HEAD=${HOME}/Web/Downloads
 # DEVICE HANDLING
 case ${DEVICE} in
     "angler")
-        ANDROID_VERSION=8.0.0 ;;
+        ANDROID_VERSION=8.0.0
+        TC_TARGET=-a57.a53 ;;
     "oneplus5")
         ANDROID_VERSION=7.1.x
+        TC_TARGET=-a73
 
         [[ -z ${LOCALVERSION} ]] &&  reportError "OP5 requires a version!"
 
@@ -203,7 +214,7 @@ case ${TOOLCHAIN_NAME} in
         TOOLCHAIN_FOLDER=aarch64-linaro-linux-gnu-5.x
         TOOLCHAIN_PREFIX=aarch64-linaro-linux-gnu- ;;
     "7.x")
-        TOOLCHAIN_FOLDER=aarch64-linaro-linux-android-7.x
+        TOOLCHAIN_FOLDER=aarch64-linaro-linux-android-7.x${TC_TARGET}
         TOOLCHAIN_PREFIX=aarch64-linaro-linux-android- ;;
     "8.x")
         TOOLCHAIN_FOLDER=gcc-8.x
@@ -280,6 +291,10 @@ function makeKernel() {
         mkdir -p ${OUT_FOLDER}
     fi
 
+    # INCREMENT DIRTY VERSION NUMBER IF PASSED ABOVE
+    [[ -n ${DIRTY_VERSION} ]] && echo $((${DIRTY_VERSION} - 1)) \
+                                 > ${OUT_FOLDER}/.version
+
     # POINT TO PROPER DEFCONFIG
     ${MAKE} ${DEFCONFIG}
 
@@ -292,7 +307,8 @@ function makeKernel() {
 function printKernelInfo() {
     # KERNEL VERSION IS AUTOMATICALLY GENERATED
     export KERNEL_VERSION=$( cat ${OUT_FOLDER}/include/config/kernel.release )
-    export ZIP_NAME=$( echo ${KERNEL_VERSION} | sed "s/^.*F/F/g" )
+    [[ -n ${DIRTY_VERSION} ]] && DIRTY_VERSION=".r${DIRTY_VERSION}"
+    export ZIP_NAME=$( echo ${KERNEL_VERSION} | sed "s/^.*F/F/g" )${DIRTY_VERSION}
     export KERNEL_ZIP=${ZIP_NAME}-signed.zip
 
     echo -e "${BOLD}Kernel version:${RST} ${KERNEL_VERSION}"
