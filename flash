@@ -163,7 +163,6 @@ while [[ $# -ge 1 ]]; do
 done
 
 # DEFAULT PARAMETERS
-[[ -z ${KERNEL_BRANCH} ]] && KERNEL_BRANCH="7.1.x-flash-oos-dev"
 [[ -z ${DEFCONFIG} ]] && DEFCONFIG="flash_defconfig"
 [[ -z ${DEVICE} ]] && DEVICE="oneplus5"
 [[ -z ${MODE} ]] && MODE="private"
@@ -194,13 +193,13 @@ case ${DEVICE} in
 
         [[ -z ${LOCALVERSION} ]] &&  reportError "OP5 requires a version!"
 
-        case ${KERNEL_BRANCH} in
-            *base*)
+        case "${KERNEL_BRANCH}${LOCALVERSION}" in
+            *base*|*Base*)
                 ZIP_MOVE_ADD=/Base ;;
-            *custom*)
+            *custom*|*Custom*)
                 ZIP_MOVE_ADD=/Custom
                 MATCH_FLAG="--match=*Custom*" ;;
-            *oos*)
+            *oos*|*OOS*)
                 ZIP_MOVE_ADD=/OOS
                 MATCH_FLAG="--match=*OOS*" ;;
         esac ;;
@@ -261,8 +260,10 @@ function cleanUp() {
 
     # CLEAN SOURCE FOLDER
     cd "${SOURCE_FOLDER}"
-    # ONLY CHECKOUT IF WE AREN'T BISECTING OR REBASING
-    [[ ! $( git status | ag "bisec|rebas" ) ]] && git checkout ${KERNEL_BRANCH}
+    # ONLY CHECKOUT IF KERNEL_BRANCH EXISTS AND WE AREN'T BISECTING OR REBASING
+    if [[ -n ${KERNEL_BRANCH} ]]; then
+        [[ ! $( git status | ag "bisec|rebas" ) ]] && git checkout ${KERNEL_BRANCH}
+    fi
     git clean -fxd
 }
 
