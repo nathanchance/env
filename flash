@@ -178,7 +178,9 @@ case ${DEVICE} in
 
         [[ -z ${OS} ]] && OS=OOS
 
-        export LOCALVERSION="-${OS}-v${VERSION}"
+        [[ -n ${VERSION} ]] && VERSION="-v${VERSION}"
+
+        export LOCALVERSION="-${OS}${VERSION}"
 
         case "${OS}" in
             *custom*|*Custom*)
