@@ -34,7 +34,8 @@ YLW="\033[01;33m"
 
 # PRINTS A FORMATTED HEADER TO POINT OUT WHAT IS BEING DONE TO THE USER
 function echoText() {
-    echo -e ${RED}
+    [[ -n ${2} ]] && COLOR=${2} || COLOR=${RED}
+    echo -e ${COLOR}
     echo -e "====$( for i in $( seq ${#1} ); do echo -e "=\c"; done )===="
     echo -e "==  ${1}  =="
     echo -e "====$( for i in $( seq ${#1} ); do echo -e "=\c"; done )===="

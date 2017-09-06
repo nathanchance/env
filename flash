@@ -26,7 +26,7 @@
 ###########
 
 # PURPOSE: Build Flash Kernel and package it into a flashable zip
-# USAGE: $ bash kernel.sh -h
+# USAGE: $ bash flash -h
 
 
 
@@ -43,20 +43,34 @@ source ${SCRIPT_DIR}/funcs && macCheck
 
 # PRINT A HELP MENU IF REQUESTED
 function help_menu() {
+    SCRIPT_NAME=$( basename ${0} )
     echo -e ""
     echo -e "${BOLD}OVERVIEW:${RST} Builds and packages Flash Kernel\n"
-    echo -e "${BOLD}USAGE:${RST} bash ${0} <options>\n"
-    echo -e "${BOLD}EXAMPLE:${RST} bash ${0} -m public -t 4.9 -c angler_defconfig\n"
+    echo -e "${BOLD}USAGE:${RST} bash ${SCRIPT_NAME} <options>\n"
+    echo -e "${BOLD}EXAMPLE:${RST} bash ${SCRIPT_NAME} -m public -t 4.9 -c angler_defconfig\n"
     echo -e "${BOLD}OPTIONAL PARAMETERS:${RST}"
-    echo -e "    -b | --branch:      The branch to compile"
-    echo -e "    -c | --config:      The defconfig to use while compiling"
-    echo -e "    -d | --device:      The device to compile"
-    echo -e "    -m | --mode:        A public, private, or test kernel"
-    echo -e "    -n | --no-clean:    Don't clean the zip clean folder"
-    echo -e "    -t | --toolchain:   Compile with 4.9 or 7.x"
-    echo -e "    -v | --version:     Set LOCALVERSION externally from defconfig\n"
-    echo -e "    -w | --warnings:    Compile verbosely (show full errors/warnings)"
-    echo -e "No options will build an Angler kernel and push to private folder\n"
+    echo -e "  -b  | --branch:
+            The branch to compile\n"
+    echo -e "  -bv | --beta-version:
+            Add an additional versioning to zip\n"
+    echo -e "  -c  | --config:
+            The defconfig to use while compiling\n"
+    echo -e "  -d  | --device:
+            The device to compile\n"
+    echo -e "  -db | --debug:
+            Compile verbosely (show full errors/warnings)\n"
+    echo -e "  -f  | --flags:
+            Add extra CONFIG or CFLAGS for compilation\n"
+    echo -e "  -m  | --mode:
+            A public, private, or test kernel\n"
+    echo -e "  -n  | --no-clean:
+            Don't clean the zip clean folder\n"
+    echo -e "  -os | --operating-system:
+            (OnePlus 5 only) OxygenOS or custom ROMs\n"
+    echo -e "  -t  | --toolchain:
+            Compile with 4.9, 5.x, 6.x, 7.x, or 8.x\n"
+    echo -e "  -v  | --version:
+            Set LOCALVERSION externally from defconfig\n"
     exit
 }
 
@@ -72,88 +86,58 @@ function help_menu() {
 while [[ $# -ge 1 ]]; do
     case "${1}" in
         "-b"|"--branch")
-            shift
+            shift && enforceValue $@
 
-            if [[ $# -ge 1 ]]; then
-                KERNEL_BRANCH=${1}
-            else
-                reportError "Please specify a branch!"
-            fi ;;
+            KERNEL_BRANCH=${1} ;;
+
+        "-bv"|"--beta-version")
+            shift && enforceValue $@
+
+            BETA_VERSION=${1} ;;
 
         "-c"|"--config")
-            shift
+            shift && enforceValue $@
 
-            if [[ $# -ge 1 ]]; then
-                DEFCONFIG=${1}
-            else
-                reportError "Please specify a defconfig!"
-            fi ;;
+            DEFCONFIG=${1} ;;
 
         "-d"|"--device")
-            shift
+            shift && enforceValue $@
 
-            case ${1} in
-                "angler"|"oneplus5")
-                    DEVICE=${1} ;;
-                *)
-                    reportError "Invalid device!" ;;
-            esac ;;
+            DEVICE=${1} ;;
 
-        "-dv"|"--dirtyversion")
-            shift
-
-            if [[ $# -ge 1 ]]; then
-                DIRTY_VERSION=${1}
-            else
-                reportError "Please specify a dirty version!"
-            fi ;;
+        "-db"|"--debug")
+            DEBUG=true ;;
 
         "-f"|"--flags")
-            shift
+            shift && enforceValue $@
 
-            if [[ $# -ge 1 ]]; then
-                EXTRA_MAKE_FLAGS=${1}
-            else
-                reportError "Please specify extra make flags!"
-            fi ;;
+            EXTRA_MAKE_FLAGS=${1} ;;
 
         "-h"|"--help")
             help_menu ;;
 
         "-m"|"--mode")
-            shift
+            shift && enforceValue $@
 
-            case ${1} in
-                "private"|"public"|"test")
-                    MODE=${1} ;;
-                *)
-                    reportError "Invalid mode!" ;;
-            esac ;;
+            MODE=${1} ;;
 
         "-n"|"--no-clean")
             NOCLEAN=true ;;
 
-        "-t"|"--toolchain")
-            shift
+        "-os"|"--operating-system")
+            shift && enforceValue $@
 
-            case "${1}" in
-                "4.9"|"5.x"|"7.x"|"8.x")
-                    TOOLCHAIN_NAME=${1} ;;
-                *)
-                    reportError "Invalid toolchain!" ;;
-            esac ;;
+            OS=${1} ;;
+
+        "-t"|"--toolchain")
+            shift && enforceValue $@
+
+            TOOLCHAIN_NAME=${1} ;;
 
         "-v"|"--version")
-            shift
+            shift && enforceValue $@
 
-            if [[ $# -ge 1 ]]; then
-                export LOCALVERSION="${1}"
-            else
-                reportError "Please specify something for LOCALVERSION!"
-            fi ;;
-
-        "-w"|"--warnings")
-            VERBOSE=true ;;
+            VERSION=${1} ;;
 
         *)
             reportError "Invalid parameter" ;;
@@ -180,6 +164,7 @@ KERNEL_HEAD=${HOME}/Kernels
 SOURCE_FOLDER=${KERNEL_HEAD}/${DEVICE}
 OUT_FOLDER=${SOURCE_FOLDER}/out
 ANYKERNEL_FOLDER=${KERNEL_HEAD}/anykernel
+MODULES_FOLDER=${ANYKERNEL_FOLDER}/modules
 ZIP_MOVE_HEAD=${HOME}/Web/Downloads
 
 # DEVICE HANDLING
@@ -191,11 +176,11 @@ case ${DEVICE} in
         ANDROID_VERSION=7.1.x
         TC_TARGET=-a73
 
-        [[ -z ${LOCALVERSION} ]] &&  reportError "OP5 requires a version!"
+        [[ -z ${OS} ]] && OS=OOS
 
-        case "${KERNEL_BRANCH}${LOCALVERSION}" in
-            *base*|*Base*)
-                ZIP_MOVE_ADD=/Base ;;
+        export LOCALVERSION="-${OS}-v${VERSION}"
+
+        case "${OS}" in
             *custom*|*Custom*)
                 ZIP_MOVE_ADD=/Custom
                 MATCH_FLAG="--match=*Custom*" ;;
@@ -203,6 +188,9 @@ case ${DEVICE} in
                 ZIP_MOVE_ADD=/OOS
                 MATCH_FLAG="--match=*OOS*" ;;
         esac ;;
+
+    *)
+        reportError "Invalid device!" ;;
 esac
 
 case ${TOOLCHAIN_NAME} in
@@ -218,6 +206,8 @@ case ${TOOLCHAIN_NAME} in
     "8.x")
         TOOLCHAIN_FOLDER=gcc-8.x
         TOOLCHAIN_PREFIX=aarch64-gnu-linux-gnu- ;;
+    *)
+        reportError "Invalid toolchain specified!" ;;
 esac
 
 TOOLCHAIN_FOLDER=${HOME}/Toolchains/${TOOLCHAIN_FOLDER}
@@ -226,7 +216,7 @@ case ${MODE} in
     "private")
         ZIP_MOVE=${ZIP_MOVE_HEAD}/../me/Flash-Kernel/${DEVICE}${ZIP_MOVE_ADD}
         ANYKERNEL_BRANCH=${DEVICE}-flash-personal-${ANDROID_VERSION}
-        KEYS=nathan ;;
+        KEYS=testkey ;;
     "public")
         ZIP_MOVE=${ZIP_MOVE_HEAD}/Kernels/${DEVICE}${ZIP_MOVE_ADD}
         ANYKERNEL_BRANCH=${DEVICE}-flash-public-${ANDROID_VERSION}
@@ -235,6 +225,8 @@ case ${MODE} in
         ZIP_MOVE=${ZIP_MOVE_HEAD}/Kernels/.tests/${DEVICE}${ZIP_MOVE_ADD}
         ANYKERNEL_BRANCH=${DEVICE}-flash-public-${ANDROID_VERSION}
         KEYS=testkey ;;
+    *)
+        reportError "Invalid mode specified!" ;;
 esac
 
 # KERNEL INFO
@@ -258,62 +250,81 @@ function cleanUp() {
     git checkout ${ANYKERNEL_BRANCH}
     git clean -fxd
 
-    # CLEAN SOURCE FOLDER
-    cd "${SOURCE_FOLDER}"
     # ONLY CHECKOUT IF KERNEL_BRANCH EXISTS AND WE AREN'T BISECTING OR REBASING
+    cd "${SOURCE_FOLDER}"
     if [[ -n ${KERNEL_BRANCH} ]]; then
         [[ ! $( git status | ag "bisec|rebas" ) ]] && git checkout ${KERNEL_BRANCH}
+    # OTHERWISE, NOTATE CURRENT BRANCH FOR CHANGELOG
+    else
+        export KERNEL_BRANCH=$( git rev-parse --abbrev-ref HEAD )
     fi
+    # CLEAN SOURCE FOLDER:
     git clean -fxd
+}
+
+
+# SETUP COMPILATION
+function setupCompilation() {
+    # MAKE OUT FOLDER (IT GETS REMOVED PER CLEAN UP FUNCTION)
+    mkdir -p ${OUT_FOLDER}
+
+    # SHOW TOOLCHAIN LOCATION
+    TOOLCHAIN="${TOOLCHAIN_FOLDER}/bin/${TOOLCHAIN_PREFIX}"
+    echo -e "${BOLD}Toolchain location:${RST} ${TOOLCHAIN}"
+
+    # GET PRECISE LOCATION OF CCACHE
+    CCACHE=$( command -v ccache )
+    echo -e "${BOLD}ccache location:${RST} ${CCACHE}"
+
+    # SHOW TARGET ARCHITECTURE
+    echo -e "${BOLD}Target architecture:${RST} ${ARCHITECTURE}\n"
 }
 
 
 # MAKE KERNEL
 function makeKernel() {
-    cd "${SOURCE_FOLDER}"
-
     # SET MAKE VARIABLE FOR CONVENIENCE
     # AS I FOOLISHLY LEARNED, ALL CAF CODE REQUIRES AN OUTPUT DIRECTORY
     # TO WORK PROPERLY SO WHILE MY NEXUS DOESN'T CURRENTLY REQUIRE IT,
     # IT'S GOOD TO BE AHEAD OF THE CURVE IF IT WORKS.
-    MAKE="make O=${OUT_FOLDER}"
-    CCACHE=$( command -v ccache )
-
-    # PROPERLY POINT COMPILER TO TOOLCHAIN AND ARCHITECTURE
-    export CROSS_COMPILE="${CCACHE} ${TOOLCHAIN_FOLDER}/bin/${TOOLCHAIN_PREFIX}"
-    export ARCH=${ARCHITECTURE}
-    export SUBARCH=${ARCHITECTURE}
-
-    # SETUP OUT FOLDER OR CLEAN IT
-    if [[ -d ${OUT_FOLDER} ]]; then
-        ${MAKE} clean
-        ${MAKE} mrproper
-    else
-        mkdir -p ${OUT_FOLDER}
-    fi
+    MAKE="make -j$( nproc --all ) O=${OUT_FOLDER} ARCH=${ARCHITECTURE}"
 
     # INCREMENT DIRTY VERSION NUMBER IF PASSED ABOVE
-    [[ -n ${DIRTY_VERSION} ]] && echo $((${DIRTY_VERSION} - 1)) \
+    [[ -n ${BETA_VERSION} ]] && echo $(( ${BETA_VERSION} - 1 )) \
                                  > ${OUT_FOLDER}/.version
 
     # POINT TO PROPER DEFCONFIG
     ${MAKE} ${DEFCONFIG}
 
     # MAKE THE KERNEL
-    time ${MAKE} ${THREADS} ${EXTRA_MAKE_FLAGS}
+    ${MAKE} CROSS_COMPILE="${CCACHE} ${TOOLCHAIN}" ${EXTRA_MAKE_FLAGS}
 }
 
 
 # PRINT ZIP INFO
 function printKernelInfo() {
-    # KERNEL VERSION IS AUTOMATICALLY GENERATED
+    # KERNEL VERSION IS AUTOMATICALLY GENERATED AT BUILD TIME
     export KERNEL_VERSION=$( cat ${OUT_FOLDER}/include/config/kernel.release )
-    [[ -n ${DIRTY_VERSION} ]] && DIRTY_VERSION=".r${DIRTY_VERSION}"
-    export ZIP_NAME=$( echo ${KERNEL_VERSION} | sed "s/^.*F/F/g" )${DIRTY_VERSION}
-    export KERNEL_ZIP=${ZIP_NAME}-signed.zip
-
     echo -e "${BOLD}Kernel version:${RST} ${KERNEL_VERSION}"
-    echo -e "${BOLD}Kernel zip:${RST} ${KERNEL_ZIP}"; newLine
+
+    # REMOVE EVERYTHING BEFORE FLASH IN THE KERNEL_VERSION
+    KERNEL_VERSION=$( echo ${KERNEL_VERSION} | sed "s/^.*F/F/g" )
+
+    # DIRTY VERSION IS PASSED AS A PARAMETER FOR BETA VERSIONS
+    [[ -n ${BETA_VERSION} ]] && BETA_VERSION=".r${BETA_VERSION}"
+
+    # IF THE MODE ISN'T PUBLIC, ADD SHA INFORMATION TO THE ZIP
+    [[ "${MODE}" != "public" ]] && SHA="-g$( git rev-parse --verify --short HEAD )"
+
+    # EXPORT KERNEL_NAME BASED ON THE ABOVE INFORMATION
+    export KERNEL_NAME=${KERNEL_VERSION}${BETA_VERSION}${SHA}
+
+    # SET ZIP NAMES
+    export UNSIGNED_ZIP=${KERNEL_NAME}-unsigned.zip
+    export SIGNAPK_ZIP=${KERNEL_NAME}-signapk.zip
+    export ADJUSTED_ZIP=${KERNEL_NAME}-adjusted.zip
+    export SIGNED_ZIP=${KERNEL_NAME}.zip
+    echo -e "${BOLD}Kernel zip:${RST} ${SIGNED_ZIP}"; newLine
 }
 
 
@@ -328,7 +339,8 @@ function setupFolders() {
     else
         # OTHERWISE, MOVE THE OLD FILES TO AN "OLD" FOLDER
         [[ ! -d "${ZIP_MOVE}"/Old ]] && mkdir -p "${ZIP_MOVE}"/Old
-        mv $( find "${ZIP_MOVE}"/* -maxdepth 0 -type f ) "${ZIP_MOVE}"/Old
+        mv $( find "${ZIP_MOVE}"/* -maxdepth 0 -type f ) \
+           "${ZIP_MOVE}"/Old &>/dev/null
     fi
 }
 
@@ -341,41 +353,39 @@ function packageZip() {
     cp "${KERNEL}" "${ANYKERNEL_FOLDER}"
 
     # GRAB MODULES TOO IF THEY ARE PRESENT
-    if [[ -n $( find ${OUT_FOLDER} -name "*.ko" ) ]]; then
-        MODULES_FOLDER=${ANYKERNEL_FOLDER}/modules
-        rm -rf ${MODULES_FOLDER} && mkdir ${MODULES_FOLDER}
-        find ${OUT_FOLDER} -name "*.ko" -exec cp {} ${MODULES_FOLDER} \;
-    fi
+    mkdir -p ${MODULES_FOLDER}
+    find ${OUT_FOLDER} -name "*.ko" -exec cp {} ${MODULES_FOLDER} \;
+    [[ ! $( ls -A ${MODULES_FOLDER} ) ]] && rm -rf ${MODULES_FOLDER}
 
     # PACKAGE THE ZIP WITHOUT THE README
-    zip -q -r9 ${ZIP_NAME}-unsigned.zip * -x README.md ${ZIP_NAME}-unsigned.zip
+    zip -q -r9 ${UNSIGNED_ZIP} * -x README.md ${UNSIGNED_ZIP}
 
     # SIGN ZIP
     java -jar ${BIN_DIR}/signapk.jar \
               ${BIN_DIR}/${KEYS}.x509.pem \
               ${BIN_DIR}/${KEYS}.pk8 \
-              ${ZIP_NAME}-unsigned.zip \
-              ${ZIP_NAME}.zip
+              ${UNSIGNED_ZIP} \
+              ${SIGNAPK_ZIP}
 
-    ${BIN_DIR}/zipadjust ${ZIP_NAME}.zip ${ZIP_NAME}-adjusted.zip &>/dev/null
+    ${BIN_DIR}/zipadjust ${SIGNAPK_ZIP} ${ADJUSTED_ZIP} &>/dev/null
 
     java -jar ${BIN_DIR}/minsignapk.jar \
               ${BIN_DIR}/${KEYS}.x509.pem \
               ${BIN_DIR}/${KEYS}.pk8 \
-              ${ZIP_NAME}-adjusted.zip \
-              ${KERNEL_ZIP}
+              ${ADJUSTED_ZIP} \
+              ${SIGNED_ZIP}
 }
 
 # MOVE FILES
 function moveFiles() {
     # IF PACKAGING FAILED, ERROR OUT
-    [[ ! -f ${KERNEL_ZIP} ]] && reportError "Kernel zip not found!"
+    [[ ! -f ${SIGNED_ZIP} ]] && reportError "Kernel zip not found after signing!"
 
     # MOVE THE KERNEL ZIP TO WHERE IT NEEDS TO GO
-    mv ${KERNEL_ZIP} "${ZIP_MOVE}"
+    mv ${SIGNED_ZIP} "${ZIP_MOVE}"
 
     # GENERATE MD5SUM
-    md5sum "${ZIP_MOVE}"/${KERNEL_ZIP} > "${ZIP_MOVE}"/${KERNEL_ZIP}.md5
+    md5sum "${ZIP_MOVE}"/${SIGNED_ZIP} > "${ZIP_MOVE}"/${SIGNED_ZIP}.md5
 }
 
 
@@ -387,13 +397,13 @@ function generateChangelog() {
     cd "${SOURCE_FOLDER}"
 
     # WE NEED TO MARK THE PREVIOUS TAG FOR CHANGELOG
-    PREV_TAG_NAME=$( git describe --abbrev=0 --tags ${MATCH_FLAG})
+    PREV_TAG_NAME=$( git describe --abbrev=0 --tags ${MATCH_FLAG} )
 
     echo -e "${GITHUB}/${DEVICE}/commits/${KERNEL_BRANCH}\n" \
-    > "${ZIP_MOVE}"/${ZIP_NAME}-changelog.txt
+    > "${ZIP_MOVE}"/${KERNEL_NAME}-changelog.txt
 
     git log --format="%h %s by %aN" --abbrev=12 ${PREV_TAG_NAME}..HEAD \
-    >> "${ZIP_MOVE}"/${ZIP_NAME}-changelog.txt
+    >> "${ZIP_MOVE}"/${KERNEL_NAME}-changelog.txt
 
     # ANYKERNEL NEXT
     cd "${ANYKERNEL_FOLDER}"
@@ -404,10 +414,10 @@ function generateChangelog() {
 
     if [[ ${NUM_COMMITS} -gt 0 ]]; then
         echo -e "\n\n${GITHUB}/AnyKernel2/commits/${ANYKERNEL_BRANCH}\n" \
-        >> "${ZIP_MOVE}"/${ZIP_NAME}-changelog.txt
+        >> "${ZIP_MOVE}"/${KERNEL_NAME}-changelog.txt
 
         git log --format="%h %s by %aN" --abbrev=12 ${PREV_TAG_NAME}..HEAD \
-        >> "${ZIP_MOVE}"/${ZIP_NAME}-changelog.txt
+        >> "${ZIP_MOVE}"/${KERNEL_NAME}-changelog.txt
     fi
 }
 
@@ -416,13 +426,13 @@ function generateChangelog() {
 function tagRelease() {
     cd "${SOURCE_FOLDER}"
 
-    git tag -a "${ZIP_NAME}" -m "${ZIP_NAME}"
-    git push origin "${ZIP_NAME}"
+    git tag -a "${KERNEL_NAME}" -m "${KERNEL_NAME}"
+    git push origin "${KERNEL_NAME}"
 
     cd "${ANYKERNEL_FOLDER}"
 
-    git tag -a "${ZIP_NAME}" -m "${ZIP_NAME}"
-    git push origin "${ZIP_NAME}"
+    git tag -a "${KERNEL_NAME}" -m "${KERNEL_NAME}"
+    git push origin "${KERNEL_NAME}"
 }
 
 
@@ -430,8 +440,8 @@ function tagRelease() {
 function endingInfo() {
     # ONLY PRINT FILE INFO IF IT EXISTS
     if [[ ${SUCCESS} = true ]]; then
-        echo -e ${RED}"FILE LOCATION: ${ZIP_MOVE}/${KERNEL_ZIP}"
-        echo -e "SIZE: $( du -h ${ZIP_MOVE}/${KERNEL_ZIP} |
+        echo -e ${RED}"FILE LOCATION: ${ZIP_MOVE}/${SIGNED_ZIP}"
+        echo -e "SIZE: $( du -h ${ZIP_MOVE}/${SIGNED_ZIP} |
                           awk '{print $1}' )"${RST}
     fi
 
@@ -451,7 +461,7 @@ function generateLog() {
     # ONLY ADD A LINE ABOUT FILE LOCATION IF SCRIPT COMPLETED SUCCESSFULLY
     if [[ ${SUCCESS} = true ]]; then
         # FILE LOCATION: PATH
-        echo -e "FILE LOCATION: ${ZIP_MOVE}/${KERNEL_ZIP}" >> ${LOG}
+        echo -e "FILE LOCATION: ${ZIP_MOVE}/${SIGNED_ZIP}" >> ${LOG}
     fi
 }
 
@@ -490,23 +500,23 @@ echoText "CLEANING UP AND MAKING KERNEL"
 # DON'T SHOW CLEAN UP OUTPUT
 cleanUp &>/dev/null
 
-# ONLY SHOW ERRORS, WARNINGS, AND THE IMAGE LINE WHEN COMPILING (UNLESS VERBOSE)
-if [[ ${VERBOSE} = true ]]; then
-    makeKernel
-else
-    makeKernel |& ag --no-color "error:|warning:|${KERNEL_IMAGE}"
-fi
+# SETUP COMPILATION
+setupCompilation
+
+# ONLY SHOW ERRORS, WARNINGS, AND THE IMAGE LINE WHEN COMPILING (UNLESS DEBUG)
+[[ ${DEBUG} = true ]] && makeKernel \
+                      || makeKernel |& ag --no-color "error:|warning:" && echo
 
 
 ######################
 # IF KERNEL COMPILED #
 ######################
 
-if [[ $( ls ${KERNEL} | wc -l ) != 0 ]]; then
+if [[ -f ${KERNEL} ]]; then
     # SET BUILD SUCCESS STRING AND SUCCESS VARIABLE
     BUILD_RESULT="BUILD SUCCESSFUL" && SUCCESS=true
 
-    newLine; echoText "MAKING AND MOVING FLASHABLE ZIP"
+    echoText "MAKING FLASHABLE ZIP"
 
     # PRINT KERNEL AND ZIP INFO
     printKernelInfo
