@@ -428,6 +428,20 @@ function generateChangelog() {
 }
 
 
+# PUSH KERNEL ZIPS TO GITHUB
+function pushRelease() {
+    cd "${ZIP_MOVE}"
+
+    git add .
+
+    git commit --signoff -m "$(date +%Y%m%d): ${KERNEL_NAME}"
+
+    git push -q
+
+    newLine
+}
+
+
 # TAG FOR RELEASES
 function tagRelease() {
     cd "${SOURCE_FOLDER}"
@@ -532,6 +546,9 @@ if [[ -f ${KERNEL} ]]; then
     packageZip
     moveFiles
     generateChangelog
+
+    # ONLY PUSH RELEASE FOR PUBLIC OR TEST BUILDS
+    [[ ${MODE} != "private" ]] && echoText "PUSHING RELEASE" && pushRelease
 
     # TAG THE HEAD COMMIT FOR PUBLIC BUILD (SILENTLY)
     [[ ${MODE} = "public" ]] && tagRelease &>/dev/null
