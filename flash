@@ -394,41 +394,36 @@ function moveFiles() {
 # GENERATE CHANGELOG
 function generateChangelog() {
     GITHUB="http://github.com/nathanchance"
+    CHANGELOG="${ZIP_MOVE}"/${KERNEL_NAME}-changelog.txt
 
     # KERNEL SOURCE FIRST
     cd "${SOURCE_FOLDER}"
 
     # WE NEED TO MARK THE PREVIOUS TAG FOR CHANGELOG
     PREV_TAG_NAME=$( git describe --abbrev=0 --tags ${MATCH_FLAG} )
+    RANGE=${PREV_TAG_NAME}..HEAD
 
     # SHOW WHERE COMMITS ARE LOCATED
-    echo -e "${GITHUB}/${DEVICE}/commits/${KERNEL_BRANCH}\n" \
-    > "${ZIP_MOVE}"/${KERNEL_NAME}-changelog.txt
+    echo -e "${GITHUB}/${DEVICE}/commits/${KERNEL_BRANCH}\n" > ${CHANGELOG}
 
     # USE SHORTLOG FOR PRETTY OUTPUT
-    git log ${PREV_TAG_NAME}..HEAD | git shortlog \
-    >> "${ZIP_MOVE}"/${KERNEL_NAME}-changelog.txt
+    git log ${RANGE} | git shortlog >> ${CHANGELOG}
 
     # GENERATE A DIFF AS WELL
-    git diff -M --stat --summary ${PREV_TAG_NAME}..HEAD \
-    >> "${ZIP_MOVE}"/${KERNEL_NAME}-changelog.txt
+    git diff -M --stat --summary ${RANGE} >> ${CHANGELOG}
 
     # ANYKERNEL NEXT
     cd "${ANYKERNEL_FOLDER}"
 
     # WE ONLY WANT TO SHOW ANYKERNEL CHANGES IF THERE HAVE BEEN SOME
-    PREV_TAG_NAME=$( git describe --abbrev=0 --tags --always )
-    NUM_COMMITS=$( git log ${PREV_TAG_NAME}..HEAD --pretty=oneline | wc -l )
+    NUM_COMMITS=$( git log ${RANGE} --pretty=oneline | wc -l )
 
     if [[ ${NUM_COMMITS} -gt 0 ]]; then
-        echo -e "\n\n${GITHUB}/AnyKernel2/commits/${ANYKERNEL_BRANCH}\n" \
-        >> "${ZIP_MOVE}"/${KERNEL_NAME}-changelog.txt
+        echo -e "\n\n${GITHUB}/AnyKernel2/commits/${ANYKERNEL_BRANCH}\n" >> ${CHANGELOG}
 
-        git log ${PREV_TAG_NAME}..HEAD | git shortlog \
-        >> "${ZIP_MOVE}"/${KERNEL_NAME}-changelog.txt
+        git log ${RANGE} | git shortlog >> ${CHANGELOG}
 
-        git diff -M --stat --summary ${PREV_TAG_NAME}..HEAD \
-        >> "${ZIP_MOVE}"/${KERNEL_NAME}-changelog.txt
+        git diff -M --stat --summary ${RANGE} >> ${CHANGELOG}
     fi
 }
 
