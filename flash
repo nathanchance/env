@@ -224,7 +224,7 @@ case ${MODE} in
         ANYKERNEL_BRANCH=${DEVICE}-flash-public-${ANDROID_VERSION}
         KEYS=testkey ;;
     "test")
-        ZIP_MOVE=${ZIP_MOVE_HEAD}/Kernels/.tests/${DEVICE}${ZIP_MOVE_ADD}
+        ZIP_MOVE=${ZIP_MOVE_HEAD}/Kernels/${DEVICE}/Tests${ZIP_MOVE_ADD}
         ANYKERNEL_BRANCH=${DEVICE}-flash-public-${ANDROID_VERSION}
         KEYS=testkey ;;
     *)
