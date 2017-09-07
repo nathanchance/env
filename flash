@@ -401,10 +401,16 @@ function generateChangelog() {
     # WE NEED TO MARK THE PREVIOUS TAG FOR CHANGELOG
     PREV_TAG_NAME=$( git describe --abbrev=0 --tags ${MATCH_FLAG} )
 
+    # SHOW WHERE COMMITS ARE LOCATED
     echo -e "${GITHUB}/${DEVICE}/commits/${KERNEL_BRANCH}\n" \
     > "${ZIP_MOVE}"/${KERNEL_NAME}-changelog.txt
 
-    git log --format="%h %s by %aN" --abbrev=12 ${PREV_TAG_NAME}..HEAD \
+    # USE SHORTLOG FOR PRETTY OUTPUT
+    git log ${PREV_TAG_NAME}..HEAD | git shortlog \
+    >> "${ZIP_MOVE}"/${KERNEL_NAME}-changelog.txt
+
+    # GENERATE A DIFF AS WELL
+    git diff -M --stat --summary ${PREV_TAG_NAME}..HEAD \
     >> "${ZIP_MOVE}"/${KERNEL_NAME}-changelog.txt
 
     # ANYKERNEL NEXT
@@ -418,7 +424,10 @@ function generateChangelog() {
         echo -e "\n\n${GITHUB}/AnyKernel2/commits/${ANYKERNEL_BRANCH}\n" \
         >> "${ZIP_MOVE}"/${KERNEL_NAME}-changelog.txt
 
-        git log --format="%h %s by %aN" --abbrev=12 ${PREV_TAG_NAME}..HEAD \
+        git log ${PREV_TAG_NAME}..HEAD | git shortlog \
+        >> "${ZIP_MOVE}"/${KERNEL_NAME}-changelog.txt
+
+        git diff -M --stat --summary ${PREV_TAG_NAME}..HEAD \
         >> "${ZIP_MOVE}"/${KERNEL_NAME}-changelog.txt
     fi
 }
