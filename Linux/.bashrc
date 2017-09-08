@@ -39,17 +39,17 @@ export GIT_PS1_SHOWDIRTYSTATE=1
 export GIT_PS1_SHOWUPSTREAM=auto
 export PROMPT_COMMAND='__git_ps1 "\[\033[01;34m\]\u@\h \[\033[01;32m\]\w\[\033[01;31m\]" " \[\033[39m\]\$\[\033[0m\] "'
 
-
 ###########
 # EXPORTS #
 ###########
 
 # ccache setup
-ccache -M 500G &> /dev/null
+ccache -M 150G &> /dev/null
 export USE_CCACHE=1
+export PATH="/usr/lib/ccache/bin/:${PATH}"
 
 # Add Scripts directory and its subdirectories to $PATH
-export PATH="${PATH}$(find ${HOME}/Scripts -name '.*' -prune -o -type d -printf ':%p')"
+export PATH="${PATH}:${HOME}/Scripts"
 
 # Log support so I can see what compiled and at what time
 export LOGDIR=${HOME}/Web/me/Logs
@@ -67,9 +67,6 @@ export PATH=${PATH}:/opt/android-sdk/build-tools/25.0.3
 
 # tmux alias
 alias tmux='tmux -u'
-
-# vim alias (because I am lazy af)
-alias vim='nvim'
 
 # Update alias
 alias update='pacaur -Syyu'
@@ -107,6 +104,7 @@ alias gam='git am'
 alias gc='git commit'
 alias gcs='git commit --signoff'
 alias gca='git commit --amend'
+alias gcas='git commit --amend --signoff'
 alias gac='git commit --all'
 alias gacs='git commit --all --signoff'
 alias gaca='git commit --all --amend'
@@ -139,6 +137,56 @@ alias gdhh='git diff HEAD^..HEAD'
 alias gdss='git diff --shortstat'
 alias gdc='git diff --cached'
 
+# Function for merging Flash branches
+function fmrg() {
+    local CB=$( git rev-parse --abbrev-ref HEAD )
+    local MB=${1}
+    git merge --no-commit --log=$( git rev-list --count ${CB}..${MB} ) ${MB}
+    [[ -n "$( git status --porcelain )" ]] && git commit --no-edit --signoff \
+                                           || git commit --amend --no-edit --signoff
+}
+
+# Function for merging kernel tags
+function kmrg() {
+    local VERSION PATCHLEVEL CURRENT_SUBLEVEL TARGET_SUBLEVEL OT NT
+
+    [[ ! -f Makefile ]] && echo "Run this in a kernel tree!"
+
+    [[ -z $( git remote | grep stable ) ]] && git remote add stable https://git.kernel.org/pub/scm/linux/kernel/git/stable/linux-stable.git
+    git fetch stable
+
+    VERSION=$( grep -m 1 "VERSION =" Makefile | cut -d ' ' -f 3 )
+    PATCHLEVEL=$( grep -m 1 "PATCHLEVEL =" Makefile | cut -d ' ' -f 3 )
+    CURRENT_SUBLEVEL=$( grep -m 1 "SUBLEVEL =" Makefile | cut -d ' ' -f 3 )
+    TARGET_SUBLEVEL=$(( CURRENT_SUBLEVEL + 1 ))
+
+    OT=v${VERSION}.${PATCHLEVEL}.${CURRENT_SUBLEVEL}
+    NT=v${VERSION}.${PATCHLEVEL}.${TARGET_SUBLEVEL}
+
+    git merge --no-commit --log=$( git rev-list --count ${OT}..${NT} ) ${NT}
+    [[ -n "$( git status --porcelain )" ]] && git commit --no-edit --signoff \
+                                           || git commit --amend --no-edit --signoff
+}
+
+# Function for cherry-picking kernel tags
+function kcp() {
+    local VERSION PATCHLEVEL CURRENT_SUBLEVEL TARGET_SUBLEVEL OT NT
+
+    [[ ! -f Makefile ]] && echo "Run this in a kernel tree!"
+
+    [[ -z $( git remote | grep stable ) ]] && git remote add stable https://git.kernel.org/pub/scm/linux/kernel/git/stable/linux-stable.git
+    git fetch stable
+
+    VERSION=$( grep -m 1 "VERSION =" Makefile | cut -d ' ' -f 3 )
+    PATCHLEVEL=$( grep -m 1 "PATCHLEVEL =" Makefile | cut -d ' ' -f 3 )
+    CURRENT_SUBLEVEL=$( grep -m 1 "SUBLEVEL =" Makefile | cut -d ' ' -f 3 )
+    TARGET_SUBLEVEL=$(( CURRENT_SUBLEVEL + 1 ))
+
+    OT=v${VERSION}.${PATCHLEVEL}.${CURRENT_SUBLEVEL}
+    NT=v${VERSION}.${PATCHLEVEL}.${TARGET_SUBLEVEL}
+
+    git cherry-pick ${OT}..${NT}
+}
 
 #############
 # FUNCTIONS #
@@ -172,6 +220,8 @@ function kb {
                 case ${1} in
                     "4.9")
                         TOOLCHAIN=${HOME}/Toolchains/aosp-4.9/bin/aarch64-linux-android- ;;
+                    "5.4")
+                        TOOLCHAIN=${HOME}/Toolchains/aarch64-linaro-linux-gnu-5.x/bin/aarch64-linaro-linux-gnu- ;;
                     "8.x")
                         TOOLCHAIN=${HOME}/Toolchains/gcc-8.x/bin/aarch64-gnu-linux-gnu- ;;
                     *)
@@ -307,4 +357,41 @@ function gerrit-push {
     else
         echo "wtf happened?"
     fi
+}
+
+#
+# ex - archive extractor
+# usage: ex <file>
+#
+function ex () {
+	if [[ -f ${1} ]]; then
+		case ${1} in
+            *.tar.bz2)
+                tar xjf ${1} ;;
+            *.tar.gz)
+                tar xzf ${1} ;;
+            *.bz2)
+                bunzip2 ${1} ;;
+            *.rar)
+                unrar x ${1} ;;
+            *.gz)
+                gunzip ${1} ;;
+            *.tar)
+                tar xf ${1} ;;
+            *.tbz2)
+                tar xjf ${1} ;;
+            *.tgz)
+                tar xzf ${1} ;;
+            *.zip)
+                unzip ${1} ;;
+            *.Z)
+                uncompress ${1} ;;
+            *.7z)
+                7z x ${1} ;;
+            *)
+                echo "'${1}' cannot be extracted via ex()" ;;
+		esac
+	else
+		echo "'${1}' is not a valid file"
+	fi
 }
