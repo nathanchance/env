@@ -1,0 +1,102 @@
+#!/usr/bin/env bash
+#
+# Copyright (C) 2017 Nathan Chancellor
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>
+
+
+# SOURCE OUR UNIVERSAL FUNCTIONS SCRIPT AND MAC CHECK
+SCRIPT_DIR=$( cd $( dirname $( readlink -f "${BASH_SOURCE[0]}" ) ) && pwd )
+source ${SCRIPT_DIR}/funcs && macCheck
+
+
+################
+#              #
+#  PARAMETERS  #
+#              #
+################
+
+# GATHER PARAMETERS
+while [[ $# -ge 1 ]]; do
+    case "${1}" in
+        "-b"|"--build-only")
+            BUILD_ONLY=true ;;
+        "-u"|"--update-only")
+            UPDATE_ONLY=true ;;
+        *)
+            reportError "Invalid parameter specified!" ;;
+    esac
+
+    shift
+done
+
+
+###############
+#             #
+#  VARIABLES  #
+#             #
+###############
+
+SOURCE_FOLDER=${HOME}/Toolchains/build/ct-ng
+
+
+###############
+#             #
+#  FUNCTIONS  #
+#             #
+###############
+
+function update() {
+    [[ ! -d ${SOURCE_FOLDER} ]] && \
+        cd $( dirname ${SOURCE_FOLDER} ) && \
+        git clone https://github.com/crosstool-ng/crosstool-ng ct-ng
+
+    cd ${SOURCE_FOLDER}
+
+    git fetch origin
+
+    git rebase origin/master
+}
+
+function build() {
+    [[ ! -d ${SOURCE_FOLDER} ]] && update
+
+    git clean -fxd
+
+    ./bootstrap
+
+    ./configure --prefix=/usr/local
+
+    MAKE="make -j$( nproc --all )"
+
+    ${MAKE} clean
+
+    ${MAKE}
+
+    sudo ${MAKE} install
+
+    [[ -f /usr/local/bin/ct-ng ]] && \
+    [[ -f ct-ng ]] && echoText "BUILD SUCCESSFUL!" ${GRN} \
+                   || echoText "BUILD FAILED!" ${RED}
+}
+
+
+################
+#              #
+# SCRIPT START #
+#              #
+################
+
+[[ -z ${BUILD_ONLY} ]] && update
+[[ -z ${UPDATE_ONLY} ]] && build
