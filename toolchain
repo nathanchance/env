@@ -1,0 +1,251 @@
+#!/usr/bin/env bash
+#
+# Copyright (C) 2017 Nathan Chancellor
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>
+
+
+# SOURCE OUR UNIVERSAL FUNCTIONS SCRIPT AND MAC CHECK
+SCRIPT_DIR=$( cd $( dirname $( readlink -f "${BASH_SOURCE[0]}" ) ) && pwd )
+source ${SCRIPT_DIR}/funcs && macCheck
+
+
+################
+#              #
+#  PARAMETERS  #
+#              #
+################
+
+# GATHER PARAMETERS
+while [[ $# -ge 1 ]]; do
+    case "${1}" in
+        "-a"|"--arch")
+            shift && enforceValue $@
+
+            ARCH=${1} ;;
+
+        "-r"|"--release")
+            RELEASE=true ;;
+
+        "-s"|"--source")
+            shift && enforceValue $@
+
+            SOURCE=${1} ;;
+
+        "-t"|"--target")
+            shift && enforceValue $@
+
+            TARGET=${1} ;;
+
+        *)
+            reportError "Invalid parameter specified!" ;;
+    esac
+
+    shift
+done
+
+
+###############
+#             #
+#  VARIABLES  #
+#             #
+###############
+
+TOOLCHAIN_FOLDER=${HOME}/Toolchains
+BUILD_FOLDER=${TOOLCHAIN_FOLDER}/build
+PREBUILT_FOLDER=${TOOLCHAIN_FOLDER}/prebuilts
+
+
+###############
+#             #
+#  FUNCTIONS  #
+#             #
+###############
+
+function setVariables() {
+    case ${SOURCE} in
+        "gnu")
+            export GCC_BRANCH=gcc-7-branch
+            export POS=3 ;;
+        "linaro")
+            export GCC_BRANCH=linaro-local/gcc-7-integration-branch
+            export POS=5 ;;
+        *)
+            reportError "Invalid GCC type!"
+    esac
+
+    case ${ARCH} in
+        "arm")
+            TUPLE_PFX=arm
+            TUPLE_SFX=androideabi ;;
+        "arm64")
+            TUPLE_PFX=aarch64
+            TUPLE_SFX=android ;;
+        *)
+            reportError "Invalid architecture!"
+    esac
+
+    export TUPLE=${TUPLE_PFX}-${SOURCE}-linux-${TUPLE_SFX}
+
+    if [[ -z ${TARGET} ]]; then
+        PREFIX_FOLDER=${BUILD_FOLDER}/out/${TUPLE}
+        BRANCH_PFX=${TUPLE_PFX}
+        BRANCH_SFX=7.x
+    else
+        PREFIX_FOLDER=${TOOLCHAIN_FOLDER}/${TUPLE}-7.x-${TARGET}
+        BRANCH_PFX=personal
+        BRANCH_SFX=7.x-${TARGET}
+    fi
+
+    export PREFIX_FOLDER
+    export PREBUILT_BRANCH=${BRANCH_PFX}-${SOURCE}-${BRANCH_SFX}
+}
+
+function updateRepo() {
+    cd ${BUILD_FOLDER}/source/${1}
+
+    git checkout ${2}
+
+    git fetch origin
+
+    git rebase origin/${2}
+
+    [[ $? -ne 0 ]] && reportError "There was a problem updating ${1}!"
+}
+
+function build() {
+    cd ${BUILD_FOLDER}
+
+    git -C ${PREBUILT_FOLDER} checkout ${PREBUILT_BRANCH}
+
+    ct-ng clean
+
+    [[ -z ${TARGET} ]] && CONFIG_FOLDER=${PREBUILT_FOLDER} \
+                       || CONFIG_FOLDER=${PREFIX_FOLDER}
+    [[ ! -f ${CONFIG_FOLDER}/bin/${TUPLE}-ct-ng.config ]] && \
+                    reportError "Previous config file could not be found!"
+    ${CONFIG_FOLDER}/bin/${TUPLE}-ct-ng.config > .config
+
+    ct-ng savedefconfig
+    
+    mv defconfig .config
+
+    echo -e "\a"
+
+    ct-ng nconfig
+
+    ct-ng build.$( nproc --all )
+
+    [[ ! -f ${PREFIX_FOLDER}/bin/${TUPLE}-gcc ]] && reportError "Problem with compilation!"
+}
+
+function commit() {
+    cd ${PREBUILT_FOLDER}
+    
+    rm -rf *
+    
+    cp -r ${PREFIX_FOLDER}/* .
+    
+    git add .
+    
+    GCC_VERSION=$( ./bin/${TUPLE}-gcc --version | ag gcc | cut -d ' ' -f ${POS} )
+    UTC_DATE=$( TZ=UTC date +%Y%m%d )
+
+    git commit --signoff -m "${TUPLE} ${GCC_VERSION}: ${UTC_DATE}
+
+Compiled on $( source /etc/os-release; echo ${PRETTY_NAME} ) $( uname -m )
+
+Kernel version: $( uname -rv )
+Host GCC version: $( gcc --version | awk '/gcc/ {print $3}' )
+Make version: $( make --version  | awk '/Make/ {print $3}' )
+
+Compiled with crosstool-NG: http://crosstool-ng.github.io/
+GCC source: https://git.linaro.org/toolchain/gcc.git/log/?h=${GCC_BRANCH}"
+
+    git push
+}
+
+function tarballs() {
+    OUT_FOLDER=$( dirname ${PREFIX_FOLDER} )
+
+    cd ${OUT_FOLDER}
+
+    rm -rf *.tar.xz
+
+    for FOLDER in $(ls); do
+        XZ_OPT=-9 tar -Jcf ${FOLDER}.tar.xz ${FOLDER}
+    done
+
+    cd ${PREBUILT_FOLDER}
+
+    git checkout tarballs-7.x
+
+    rm -rf *
+    
+    mv -v ${OUT_FOLDER}/*.tar.xz .
+
+    git add .
+
+
+    git commit --signoff -m "Tarballs: $(TZ=UTC date +%Y%m%d)
+
+Compiled on $( source /etc/os-release; echo ${PRETTY_NAME} ) $( uname -m )
+
+Kernel version: $( uname -rv )
+Host GCC version: $( gcc --version | awk '/gcc/ {print $3}' )
+Make version: $( make --version  | awk '/Make/ {print $3}' )
+
+Compiled with crosstool-NG: http://crosstool-ng.github.io/
+GCC source: https://git.linaro.org/toolchain/gcc.git/log/?h=gcc-7-branch
+            https://git.linaro.org/toolchain/gcc.git/log/?h=linaro-local/gcc-7-integration-branch"
+
+    git push
+
+    exit
+}
+
+function release() {
+    updateRepo binutils binutils-2_29-branch
+    updateRepo linux master
+    
+    for SOURCE in gnu linaro; do
+        for ARCH in arm arm64; do
+            export SOURCE ARCH
+            setVariables
+            updateRepo gcc ${GCC_BRANCH}
+            build
+            commit
+        done
+    done
+
+    tarballs
+
+    return 0
+}
+
+
+################
+#              #
+# SCRIPT START #
+#              #
+################
+
+[[ -n ${RELEASE} ]] && release && exit
+
+setVariables
+updateRepo binutils binutils-2_29-branch
+updateRepo linux master
+updateRepo gcc ${GCC_BRANCH}    
+build
+commit
