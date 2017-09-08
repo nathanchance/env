@@ -18,37 +18,10 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 
-###########
-#         #
-#  USAGE  #
-#         #
-###########
-
-# PURPOSE: Build F2FS TWRP for Angler/Shamu
-# USAGE: $ bash twrp.sh -h
-
-
-###############
-#             #
-#  FUNCTIONS  #
-#             #
-###############
-
 # SOURCE OUR UNIVERSAL FUNCTIONS SCRIPT AND MAC CHECK
 SCRIPT_DIR=$( cd $( dirname $( readlink -f "${BASH_SOURCE[0]}" ) ) && pwd )
 source ${SCRIPT_DIR}/funcs && macCheck
 
-function help_menu() {
-    echo -e ""
-    echo -e ${BOLD}"OVERVIEW:${RST} Builds and pushes a Substratum APK\n"
-    echo -e ${BOLD}"USAGE:${RST} bash ${0} <device> <options>\n"
-    echo -e ${BOLD}"EXAMPLE:${RST} bash ${0} angler\n"
-    echo -e ${BOLD}"REQUIRED PARAMETERS:${RST}"
-    echo -e "   -d | --device:      angler | shamu\n"
-    echo -e ${BOLD}"OPTIONAL PARAMETERS:${RST}"
-    echo -e "   -s | --sync:        performs a repo sync before building\n"
-    exit
-}
 
 ################
 #              #
@@ -63,9 +36,6 @@ while [[ $# -ge 1 ]]; do
         "-d"|"--device")
             shift
             DEVICE=${1} ;;
-
-        "-h"|"--help")
-            help_menu ;;
 
         "-p"|"--public")
             PUBLIC=true ;;

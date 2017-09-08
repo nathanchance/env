@@ -18,16 +18,6 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 
-###########
-#         #
-#  USAGE  #
-#         #
-###########
-
-# PURPOSE: Sign a zip
-# USAGE: $ bash apk.sh -f <path> -k <key_name>
-
-
 ###############
 #             #
 #  FUNCTIONS  #

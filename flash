@@ -19,17 +19,6 @@
 
 
 
-###########
-#         #
-#  USAGE  #
-#         #
-###########
-
-# PURPOSE: Build Flash Kernel and package it into a flashable zip
-# USAGE: $ bash flash -h
-
-
-
 ###################
 #                 #
 #  INITIAL SETUP  #
@@ -40,40 +29,6 @@
 SCRIPT_DIR=$( cd $( dirname $( readlink -f "${BASH_SOURCE[0]}" ) ) && pwd )
 BIN_DIR=${SCRIPT_DIR}/bin
 source ${SCRIPT_DIR}/funcs && macCheck
-
-# PRINT A HELP MENU IF REQUESTED
-function help_menu() {
-    SCRIPT_NAME=$( basename ${0} )
-    echo -e ""
-    echo -e "${BOLD}OVERVIEW:${RST} Builds and packages Flash Kernel\n"
-    echo -e "${BOLD}USAGE:${RST} bash ${SCRIPT_NAME} <options>\n"
-    echo -e "${BOLD}EXAMPLE:${RST} bash ${SCRIPT_NAME} -m public -t 4.9 -c angler_defconfig\n"
-    echo -e "${BOLD}OPTIONAL PARAMETERS:${RST}"
-    echo -e "  -b  | --branch:
-            The branch to compile\n"
-    echo -e "  -bv | --beta-version:
-            Add an additional versioning to zip\n"
-    echo -e "  -c  | --config:
-            The defconfig to use while compiling\n"
-    echo -e "  -d  | --device:
-            The device to compile\n"
-    echo -e "  -db | --debug:
-            Compile verbosely (show full errors/warnings)\n"
-    echo -e "  -f  | --flags:
-            Add extra CONFIG or CFLAGS for compilation\n"
-    echo -e "  -m  | --mode:
-            A public, private, or test kernel\n"
-    echo -e "  -n  | --no-clean:
-            Don't clean the zip clean folder\n"
-    echo -e "  -os | --operating-system:
-            (OnePlus 5 only) OxygenOS or custom ROMs\n"
-    echo -e "  -t  | --toolchain:
-            Compile with 4.9, 5.x, 6.x, 7.x, or 8.x\n"
-    echo -e "  -v  | --version:
-            Set LOCALVERSION externally from defconfig\n"
-    exit
-}
-
 
 
 ################
@@ -112,9 +67,6 @@ while [[ $# -ge 1 ]]; do
             shift && enforceValue $@
 
             EXTRA_MAKE_FLAGS=${1} ;;
-
-        "-h"|"--help")
-            help_menu ;;
 
         "-m"|"--mode")
             shift && enforceValue $@

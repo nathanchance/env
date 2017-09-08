@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 #
+# Merge LineageOS updates into LineageOMS
+#
 # Copyright (C) 2017 Nathan Chancellor
 #
 # This program is free software: you can redistribute it and/or modify
@@ -14,24 +16,6 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>
-
-
-###########
-#         #
-#  USAGE  #
-#         #
-###########
-
-# PURPOSE: Merge LineageOS updates into LineageOMS org
-# USAGE: $ bash lineage_merge.sh -h
-
-# PRINT A HELP MENU IF REQUESTED
-if [[ -n ${1} ]]; then
-    echo -e ""
-    echo -e "${BOLD}OVERVIEW:${RST} Update LineageOMS organization by fetching and rebasing\n"
-    echo -e "${BOLD}USAGE:${RST} bash ${0}\n"
-    exit
-fi
 
 
 ###############

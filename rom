@@ -18,16 +18,6 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 
-###########
-#         #
-#  USAGE  #
-#         #
-###########
-
-# PURPOSE: Build an Android ROM from source
-# USAGE: $ bash rom.sh -h
-
-
 ###############
 #             #
 #  FUNCTIONS  #
@@ -37,27 +27,6 @@
 # SOURCE OUR UNIVERSAL FUNCTIONS SCRIPT AND MAC CHECK
 SCRIPT_DIR=$( cd $( dirname $( readlink -f "${BASH_SOURCE[0]}" ) ) && pwd )
 source ${SCRIPT_DIR}/funcs && macCheck
-
-# PRINT A HELP MENU IF REQUESTED
-function help_menu() {
-    echo -e ""
-    echo -e "${BOLD}OVERVIEW:${RST} Build a ROM\n"
-    echo -e "${BOLD}USAGE:${RST} bash ${0} <rom> <device> <options>\n"
-    echo -e "${BOLD}Example:${RST} bash ${0} flash angler user sync\n"
-    echo -e "${BOLD}REQUIRED PARAMETERS:${RST}"
-    echo -e "   -r  | --rom:        abc | du-aosp | du-caf | du-personal | krexus | lineageos | lineageoms | omni | pn | vanilla"
-    echo -e "   -d  | --device:     angler | bullhead | flo | hammerhead | marlin| sailfish | shamu\n"
-    echo -e "${BOLD}STANDARD PARAMETERS:${RST}"
-    echo -e "   -s  | --sync:        performs a repo sync before building"
-    echo -e "   -s  | --clean:       performs the specified clean (e.g. clean installclean will run make installclean)"
-    echo -e "   -m  | --make:        performs the specified make (e.g. make SystemUI will run make SystemUI)"
-    echo -e "   -v  | --variant:     build with the specified variant (e.g. variant userdebug). Possible options: eng, userdebug, and user. Userdebug is the default.\n"
-    echo -e "   -rp | --repopick:    run repopick (on supported ROMs) before building"
-    echo -e "${BOLD}SPECIAL PARAMETERS:${RST}"
-    echo -e "   -t  | --type:       (Krexus and DU only) sets the specified type as the build tag\n"
-    echo -e "No options will fallback to DU Angler userdebug\n"
-    exit
-}
 
 # CHECKS IF MKA EXISTS
 function make_command() {
@@ -134,9 +103,6 @@ while [[ $# -ge 1 ]]; do
 
         "-pub"|"--public")
             export PUBLIC=true ;;
-
-        "-h"|"--help")
-            help_menu ;;
 
         *)
             reportError "Invalid parameter detected!" ;;
