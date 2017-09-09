@@ -257,12 +257,13 @@ function makeKernel() {
 
 # PRINT ZIP INFO
 function printKernelInfo() {
-    # KERNEL VERSION IS AUTOMATICALLY GENERATED AT BUILD TIME
-    export KERNEL_VERSION=$( cat ${OUT_FOLDER}/include/config/kernel.release )
-    echo -e "${BOLD}Kernel version:${RST} ${KERNEL_VERSION}"
+    # FULL_KERNEL VERSION IS AUTOMATICALLY GENERATED AT BUILD TIME
+    FULL_VERSION=$( cat ${OUT_FOLDER}/include/config/kernel.release )
+    echo -e "${BOLD}Kernel version:${RST} ${FULL_VERSION}"
 
-    # REMOVE EVERYTHING BEFORE FLASH IN THE KERNEL_VERSION
-    KERNEL_VERSION=$( echo ${KERNEL_VERSION} | sed "s/^.*F/F/g" )
+    # REMOVE EVERYTHING BEFORE FLASH IN THE FLASH_VERSION
+    BASE_VERSION=$( make kernelversion )
+    FLASH_VERSION=$( echo ${FULL_VERSION} | sed s/"${BASE_VERSION}"-// )
 
     # DIRTY VERSION IS PASSED AS A PARAMETER FOR BETA VERSIONS
     [[ -n ${BETA_VERSION} ]] && BETA_VERSION=".r${BETA_VERSION}"
@@ -271,7 +272,7 @@ function printKernelInfo() {
     [[ "${MODE}" != "public" ]] && SHA="-g$( git rev-parse --verify --short HEAD )"
 
     # EXPORT KERNEL_NAME BASED ON THE ABOVE INFORMATION
-    export KERNEL_NAME=${KERNEL_VERSION}${BETA_VERSION}${SHA}
+    export KERNEL_NAME=${FLASH_VERSION}${BETA_VERSION}${SHA}
 
     # SET ZIP NAMES
     export UNSIGNED_ZIP=${KERNEL_NAME}-unsigned.zip
