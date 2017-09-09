@@ -71,17 +71,17 @@ function gen_versions() {
     ND=$( git rev-list --count ${RANGE} 2> /dev/null )
     [[ -z ${ND} ]] && reportError "There are no commits to pick/merge!"
 
-    export NEW_VERSION RANGE
+    export NEW_VERSION RANGE ND
 }
 
 # MERGE FUNCTION
 function merge() {
     echoText "MERGING ${NEW_VERSION}"
 
-    git merge v${NEW_VERSION} --edit -m "Merge ${NEW_VERSION} into $( git rev-parse --abbrev-ref HEAD )
+    git merge v${NEW_VERSION} -m "Merge ${NEW_VERSION} into $( git rev-parse --abbrev-ref HEAD )
 
-Changes in ${NEW_VERSION}:
-$( git log --reverse --format="    %s" ${RANGE} )
+Changes in ${NEW_VERSION}: (${ND} commits)
+$( git log --reverse --format="        %s" ${RANGE} )
 
 Signed-off-by: $( git config --get user.name ) <$( git config --get user.email )>"
 
