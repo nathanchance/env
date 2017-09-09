@@ -1,0 +1,122 @@
+#!/usr/bin/env bash
+#
+# Script to build a zImage from a kernel tree
+#
+# Copyright (C) 2017 Nathan Chancellor
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>
+
+
+# SOURCE OUR UNIVERSAL FUNCTIONS SCRIPT AND MAC CHECK
+SCRIPT_DIR=$( cd $( dirname $( readlink -f "${BASH_SOURCE[0]}" ) ) && pwd )
+source ${SCRIPT_DIR}/funcs && macCheck
+
+# START TIME
+START=$( date +%s )
+
+# GATHER PARAMETERS
+while [[ $# -ge 1 ]]; do
+    case ${1} in
+        "-a"|"--arch")
+            shift && enforceValue $@
+
+            ARCH=${1} ;;
+
+        "-d"|"--defconfig")
+            shift && enforceValue $@
+
+            DEFCONFIG=${1} ;;
+
+        "-D"|"--debug")
+            VERBOSITY=2 ;;
+
+        "-i"|"--image")
+            shift && enforceValue $@
+
+            IMAGE=${1} ;;
+
+        "-t"|"--toolchain")
+            shift && enforceValue $@
+
+            case ${1} in
+                "4.9")
+                    TOOLCHAIN=${HOME}/Toolchains/aosp-4.9/bin/aarch64-linux-android- ;;
+                "5.4")
+                    TOOLCHAIN=${HOME}/Toolchains/aarch64-linaro-linux-gnu-5.x/bin/aarch64-linaro-linux-gnu- ;;
+                "8.x")
+                    TOOLCHAIN=${HOME}/Toolchains/gcc-8.x/bin/aarch64-gnu-linux-gnu- ;;
+                *)
+                    TOOLCHAIN=${1} ;;
+            esac ;;
+
+        "-u"|"--upload")
+            UPLOAD=true ;;
+
+        "-w"|"--warnings")
+            VERBOSITY=1 ;;
+    esac
+
+    shift
+done
+
+# DEFAULTS FOR FLASH KERNEL FOR OP5
+[[ -z ${ARCH} ]] && ARCH=arm64
+[[ -z ${DEFCONFIG} ]] && DEFCONFIG=flash_defconfig
+[[ -z ${IMAGE} ]] && IMAGE=Image.gz-dtb
+[[ -z ${TOOLCHAIN} ]] && TOOLCHAIN=${HOME}/Toolchains/aarch64-linaro-linux-android-7.x-a73/bin/aarch64-linaro-linux-android-
+
+# BASIC BUILD FUNCTION
+function build() {
+    # SET MAKE VARIABLE
+    MAKE="make -j$( nproc --all ) O=out ARCH=${ARCH}"
+    
+    # REMOVE OUT FOLDER AND REMAKE IT
+    rm -rf out && mkdir out && echo
+
+    # MAKE DEFCONFIG
+    ${MAKE} ${DEFCONFIG}
+
+    # MAKE KERNEL
+    time ${MAKE} CROSS_COMPILE="$( command -v ccache ) ${TOOLCHAIN}"
+}
+
+# REPORT ERROR IF WE AREN'T IN A TREE WITH A MAKEFILE
+[[ ! -f $(pwd)/Makefile ]] && reportError "This must be run in a kernel tree!"
+
+# SHOW THE BASE VERSION WE ARE MAKING
+echoText "BUILDING $( make kernelversion )"
+
+# SHOW COMPILATION BASED ON FLAGS
+case ${VERBOSITY} in
+    "2")
+        build ;;
+    "1")
+        build |& ag --nocolor "error:|warning" ;;
+    *)
+        build &> /dev/null ;;
+esac
+
+# REPORT SUCCESS
+FINAL_IMAGE=out/arch/${ARCH}/boot/${IMAGE}
+END=$( date +%s )
+[[ -f ${FINAL_IMAGE} ]] && echo -e "${GRN}BUILT IN $( format_time ${END} ${START} )${RST}\n
+${BOLD}IMAGE:${RST} ${FINAL_IMAGE}\n
+${BOLD}VERSION:${RST} $( cat out/include/config/kernel.release )" \
+                        || reportError "Kernel build failed!"
+
+# UPLOAD IMAGE IF NECESSARY
+[[ ${UPLOAD} = true ]] && echo && curl --upload-file ${FINAL_IMAGE} https://transfer.sh/"${IMAGE}"
+
+# ALERT OF SCRIPT END
+echo -e "\n\a"
