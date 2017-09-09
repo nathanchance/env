@@ -1,0 +1,110 @@
+#!/usr/bin/env bash
+#
+# Pull in linux-stable updates to a kernel tree
+#
+# Copyright (C) 2017 Nathan Chancellor
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>
+
+
+# SOURCE OUR UNIVERSAL FUNCTIONS SCRIPT AND MAC CHECK
+SCRIPT_DIR=$( cd $( dirname $( readlink -f "${BASH_SOURCE[0]}" ) ) && pwd )
+source ${SCRIPT_DIR}/funcs && macCheck
+
+
+# GATHER PARAMETERS
+while [[ $# -ge 1 ]]; do
+    case "${1}" in
+        "-m"|"--merge")
+            MERGE=true ;;
+
+        *)
+            reportError "Invalid parameter!" ;;
+    esac
+done
+
+
+# VERIFY REMOTE FUNCTION
+function verify_remote() {
+    [[ -z $( git remote | grep ${1} ) ]] && echo "Adding remote ${1}" && \
+        git remote add ${1} https://git.kernel.org/pub/scm/linux/kernel/git/stable/linux-${1}.git
+
+    git fetch ${1}
+
+    [[ $? -ne 0 ]] && reportError "Remote ${1} update failed!" \
+                   || echo "Remote ${1} updated successfully!"
+}
+
+# GENERATE VERSIONS
+function gen_versions() {
+    CUR_VERSION=$( make kernelversion )
+
+    VERSION=$( echo ${CUR_VERSION} | cut -d . -f 1 )
+    PATCHLEVEL=$( echo ${CUR_VERSION} | cut -d . -f 2 )
+    SUBLEVEL=$(( $( echo ${CUR_VERSION} | cut -d . -f 3 ) + 1 ))
+    NEW_VERSION=${VERSION}.${PATCHLEVEL}.${SUBLEVEL}
+
+    # SET RANGE BASED ON IF WE ARE PICKING A RELEASE OR RC BUILD
+    [[ -z ${RC} ]] && RANGE=v${CUR_VERSION}..v${NEW_VERSION} \
+                   || RANGE=v${CUR_VERSION}..stable-rc/linux-${PATCHLEVEL}.${SUBLEVEL}-y
+
+    export  NEW_VERSION RANGE
+}
+
+# MERGE FUNCTION
+function merge() {
+    echoText "MERGING ${NEW_VERSION}"
+
+    git merge v${NEW_VERSION} --edit -m "Merge ${NEW_VERSION} into $( git rev-parse --abbrev-ref HEAD )
+
+Changes in ${NEW_VERSION}:
+$( git log --reverse --format="    %s" ${RANGE} )
+
+Signed-off-by: $( git config --get user.name ) <$( git config --get user.email )>"
+
+    [[ $? -ne 0 ]] && reportError "Merge needs manual intervention!
+    
+Resolve conflicts then run git merge --continue!" || echoText "${NEW_VERSION} MERGED CLEANLY!" ${GRN}
+}
+
+# CHERRY-PICK FUNCTION
+function cherry_pick() {
+    echoText "CHERRY-PICKING ${NEW_VERSION}"
+
+    git cherry-pick ${RANGE}
+
+    [[ $? -ne 0 ]] && reportError "Cherry-pick needs manual intervention! Resolve conflicts then run:
+
+git add . && git cherry-pick --continue" || echoText "${NEW_VERSION} PICKED CLEANLY!" ${GRN}
+}
+
+
+# THIS MUST BE RUN IN A KERNEL TREE
+[[ ! -f Makefile ]] && reportError "Run this in a kernel tree!"
+
+# MAKE SURE STABLE REMOTES EXISTS
+echoText "UPDATING REMOTES"
+
+verify_remote stable
+verify_remote stable-rc
+
+# GENERATE VERSIONS
+gen_versions
+
+# PICK OR MERGE!
+[[ -n ${MRG} ]] && merge \
+                || cherry_pick
+
+# ALERT OF SCRIPT END
+echo -e "\a"
