@@ -29,6 +29,12 @@ while [[ $# -ge 1 ]]; do
         "-m"|"--merge")
             MERGE=true ;;
 
+        "-rc"|"--release-candidate")
+            RC=true ;;
+
+        "-u"|"--update-only")
+            UPDATE=true ;;
+
         *)
             reportError "Invalid parameter!" ;;
     esac
@@ -44,6 +50,8 @@ function verify_remote() {
 
     [[ $? -ne 0 ]] && reportError "Remote ${1} update failed!" \
                    || echo "Remote ${1} updated successfully!"
+
+    [[ -z ${UPDATE_ONLY} ]] && exit
 }
 
 # GENERATE VERSIONS
