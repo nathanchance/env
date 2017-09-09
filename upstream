@@ -38,6 +38,8 @@ while [[ $# -ge 1 ]]; do
         *)
             reportError "Invalid parameter!" ;;
     esac
+
+    shift
 done
 
 
