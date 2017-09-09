@@ -59,7 +59,11 @@ function gen_versions() {
     [[ -z ${RC} ]] && RANGE=v${CUR_VERSION}..v${NEW_VERSION} \
                    || RANGE=v${CUR_VERSION}..stable-rc/linux-${PATCHLEVEL}.${SUBLEVEL}-y
 
-    export  NEW_VERSION RANGE
+    # NUMBER OF COMMITS DIFFERENT
+    ND=$( git rev-list --count ${RANGE} 2> /dev/null )
+    [[ -z ${ND} ]] && reportError "There are no commits to pick/merge!"
+
+    export NEW_VERSION RANGE
 }
 
 # MERGE FUNCTION
