@@ -68,6 +68,9 @@ function update() {
 
     git fetch origin
 
+    [[ $( git rev-list --count HEAD..origin/master ) -gt 0 ]] && \
+        git log --oneline HEAD..origin/master
+
     git rebase origin/master
 }
 
