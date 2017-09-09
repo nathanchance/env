@@ -1,0 +1,52 @@
+#!/usr/bin/env bash
+#
+# Merge Flash Kernel branches into each other
+#
+# Copyright (C) 2017 Nathan Chancellor
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>
+
+
+# SOURCE OUR UNIVERSAL FUNCTIONS SCRIPT AND MAC CHECK
+SCRIPT_DIR=$( cd $( dirname $( readlink -f "${BASH_SOURCE[0]}" ) ) && pwd )
+source ${SCRIPT_DIR}/funcs && macCheck
+
+# MAKE SURE WE ARE IN A KERNEL TREE
+[[ ! -f Makefile ]] && reportError "Please run this in a kernel tree!"
+
+# CURRENT BRANCH
+CB=$( git rev-parse --abbrev-ref HEAD )
+
+# BRANCH TO MERGE
+[[ $# -eq 0 ]] && reportError "Please supply the branch to merge!"
+BTM=${1}
+
+# RANGE
+RANGE=${CB}..${BTM}
+
+# NUMBER OF COMMITS DIFFERENT
+ND=$( git rev-list --count ${RANGE} 2>/dev/null )
+[[ ${ND} -eq 0 ]] && reportError "There is nothing to merge from ${BTM} into ${CB}!"
+
+# MERGE COMMITS
+git merge ${BTM} -m "Merge branch '${BTM}' into ${CB}
+
+Changes in ${BTM}: (${ND} commits)
+$( git log --reverse --format="        %s" ${RANGE} )
+
+Signed-off-by: $( git config --get user.name ) <$( git config --get user.email )>"
+
+[[ $? -ne 0 ]] && reportError "Merge needs manual intervention!
+
+Resolve conflicts then run git merge --continue!" || echoText "${BTM} merged cleanly!" ${GRN}
