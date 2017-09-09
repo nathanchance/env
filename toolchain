@@ -66,6 +66,7 @@ done
 
 TOOLCHAIN_FOLDER=${HOME}/Toolchains
 BUILD_FOLDER=${TOOLCHAIN_FOLDER}/build
+SOURCE_FOLDER=${BUILD_FOLDER}/source
 PREBUILT_FOLDER=${TOOLCHAIN_FOLDER}/prebuilts
 
 
@@ -114,8 +115,27 @@ function setVariables() {
     export PREBUILT_BRANCH=${BRANCH_PFX}-${SOURCE}-${BRANCH_SFX}
 }
 
+function cloneRepo() {
+    [[ ! -d ${SOURCE_FOLDER} ]] && mkdir -p ${SOURCE_FOLDER}
+
+    cd ${SOURCE_FOLDER}
+
+    case "${1}" in
+        "binutils")
+            git clone -b ${2} http://sourceware.org/git/binutils-gdb.git ${1} ;;
+        "gcc")
+            git clone -b ${2} https://git.linaro.org/toolchain/gcc.git ${1} ;;
+        "linux")
+            git clone -b ${2} https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git ${1};;
+        "prebuilts")
+            cd ..
+            git clone git@github.com:nathanchance/gcc-prebuilts ${1} ;;
+    esac
+}
+
 function updateRepo() {
-    cd ${BUILD_FOLDER}/source/${1}
+   [[ -f ${SOURCE_FOLDER}/${1} ]] && cd ${SOURCE_FOLDER}/${1} \
+                                  || cloneRepo ${1} ${2} && return
 
     git checkout ${2}
 
