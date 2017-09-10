@@ -71,6 +71,15 @@ alias tmux='tmux -u'
 # Update alias
 alias update='pacaur -Syyu'
 
+# Change directory aliases
+alias 6p='cd ${HOME}/Kernels/angler'
+alias asu='cd ${HOME}/Repos/ASU'
+alias ayk='cd ${HOME}/Kernels/anykernel'
+alias lnx='cd ${HOME}/Kernels/linux'
+alias pkg='cd ${HOME}/Repos/PKGBUILDs'
+alias op5='cd ${HOME}/Kernels/oneplus5'
+alias tlc='cd ${HOME}/Toolchains'
+
 
 ###############
 # GIT ALIASES #
@@ -137,138 +146,10 @@ alias gdhh='git diff HEAD^..HEAD'
 alias gdss='git diff --shortstat'
 alias gdc='git diff --cached'
 
-# Function for merging Flash branches
-function fmrg() {
-    local CB=$( git rev-parse --abbrev-ref HEAD )
-    local MB=${1}
-    git merge --no-commit --log=$( git rev-list --count ${CB}..${MB} ) ${MB}
-    [[ -n "$( git status --porcelain )" ]] && git commit --no-edit --signoff \
-                                           || git commit --amend --no-edit --signoff
-}
-
-# Function for merging kernel tags
-function kmrg() {
-    local VERSION PATCHLEVEL CURRENT_SUBLEVEL TARGET_SUBLEVEL OT NT
-
-    [[ ! -f Makefile ]] && echo "Run this in a kernel tree!"
-
-    [[ -z $( git remote | grep stable ) ]] && git remote add stable https://git.kernel.org/pub/scm/linux/kernel/git/stable/linux-stable.git
-    git fetch stable
-
-    VERSION=$( grep -m 1 "VERSION =" Makefile | cut -d ' ' -f 3 )
-    PATCHLEVEL=$( grep -m 1 "PATCHLEVEL =" Makefile | cut -d ' ' -f 3 )
-    CURRENT_SUBLEVEL=$( grep -m 1 "SUBLEVEL =" Makefile | cut -d ' ' -f 3 )
-    TARGET_SUBLEVEL=$(( CURRENT_SUBLEVEL + 1 ))
-
-    OT=v${VERSION}.${PATCHLEVEL}.${CURRENT_SUBLEVEL}
-    NT=v${VERSION}.${PATCHLEVEL}.${TARGET_SUBLEVEL}
-
-    git merge --no-commit --log=$( git rev-list --count ${OT}..${NT} ) ${NT}
-    [[ -n "$( git status --porcelain )" ]] && git commit --no-edit --signoff \
-                                           || git commit --amend --no-edit --signoff
-}
-
-# Function for cherry-picking kernel tags
-function kcp() {
-    local VERSION PATCHLEVEL CURRENT_SUBLEVEL TARGET_SUBLEVEL OT NT
-
-    [[ ! -f Makefile ]] && echo "Run this in a kernel tree!"
-
-    [[ -z $( git remote | grep stable ) ]] && git remote add stable https://git.kernel.org/pub/scm/linux/kernel/git/stable/linux-stable.git
-    git fetch stable
-
-    VERSION=$( grep -m 1 "VERSION =" Makefile | cut -d ' ' -f 3 )
-    PATCHLEVEL=$( grep -m 1 "PATCHLEVEL =" Makefile | cut -d ' ' -f 3 )
-    CURRENT_SUBLEVEL=$( grep -m 1 "SUBLEVEL =" Makefile | cut -d ' ' -f 3 )
-    TARGET_SUBLEVEL=$(( CURRENT_SUBLEVEL + 1 ))
-
-    OT=v${VERSION}.${PATCHLEVEL}.${CURRENT_SUBLEVEL}
-    NT=v${VERSION}.${PATCHLEVEL}.${TARGET_SUBLEVEL}
-
-    git cherry-pick ${OT}..${NT}
-}
 
 #############
 # FUNCTIONS #
 #############
-
-# Kernel build function
-function kb {
-    local DEFCONFIG
-    local IMAGE
-    local MAKE="make O=out"
-    local THREADS="-j$( nproc --all )"
-    local TOOLCHAIN
-    local UPLOAD
-    local VERBOSITY
-
-    while [[ $# -ge 1 ]]; do
-        case ${1} in
-            "-d"|"--defconfig")
-                shift
-
-                DEFCONFIG=${1} ;;
-
-            "-i"|"--image")
-                shift
-
-                IMAGE=${1} ;;
-
-            "-t"|"--toolchain")
-                shift
-
-                case ${1} in
-                    "4.9")
-                        TOOLCHAIN=${HOME}/Toolchains/aosp-4.9/bin/aarch64-linux-android- ;;
-                    "5.4")
-                        TOOLCHAIN=${HOME}/Toolchains/aarch64-linaro-linux-gnu-5.x/bin/aarch64-linaro-linux-gnu- ;;
-                    "8.x")
-                        TOOLCHAIN=${HOME}/Toolchains/gcc-8.x/bin/aarch64-gnu-linux-gnu- ;;
-                    *)
-                        TOOLCHAIN=${1} ;;
-                esac ;;
-
-            "-u"|"--upload")
-                UPLOAD=true ;;
-
-            "-v"|"--verboase")
-                VERBOSITY=2 ;;
-
-            "-w"|"--warnings")
-                VERBOSITY=1 ;;
-        esac
-
-        shift
-    done
-
-    [[ -z ${DEFCONFIG} ]] && DEFCONFIG=flash_defconfig
-    [[ -z ${TOOLCHAIN} ]] && TOOLCHAIN=${HOME}/Toolchains/aarch64-linaro-linux-android-7.x/bin/aarch64-linaro-linux-android-
-    [[ -z ${IMAGE} ]] && IMAGE=Image.gz-dtb
-
-    export CROSS_COMPILE="$( command -v ccache ) ${TOOLCHAIN}"
-    export ARCH=arm64
-    export SUBARCH=arm64
-
-    rm -rf out && mkdir out && echo
-
-    case ${VERBOSITY} in
-        "2")
-            ${MAKE} ${DEFCONFIG}
-            time ${MAKE} ${THREADS} ;;
-        "1")
-            ${MAKE} ${DEFCONFIG} |& ag "error:|warning:"
-            time ${MAKE} ${THREADS} |& ag "error:|warning|${IMAGE}" ;;
-        *)
-            ${MAKE} ${DEFCONFIG} &>/dev/null
-            time ${MAKE} ${THREADS} |& ag "${IMAGE}" ;;
-    esac
-
-    [[ ${UPLOAD} = true ]] && echo && curl --upload-file out/arch/arm64/boot/"${IMAGE}" https://transfer.sh/"${IMAGE}"
-
-    echo -e "\n\a"
-
-    unset CROSS_COMPILE ARCH SUBARCH
-}
 
 # EXKM to RC converter
 function exkm2rc {
@@ -394,4 +275,22 @@ function ex () {
 	else
 		echo "'${1}' is not a valid file"
 	fi
+}
+
+function upstable() {
+    CUR_DIR=$(pwd)
+
+    if [[ ! -d ${HOME}/Kernels/stable ]]; then
+        cd ${HOME}/Kernels
+        git clone --mirror https://git.kernel.org/pub/scm/linux/kernel/git/stable/linux-stable.git stable
+        cd stable
+        git remote set-url --push origin git@github.com:nathanchance/linux-stable
+    fi
+
+    cd ${HOME}/Kernels/stable
+
+    git fetch -p origin
+    git push --mirror
+
+    cd ${CUR_DIR}
 }
