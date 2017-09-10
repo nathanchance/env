@@ -1,0 +1,140 @@
+#!/usr/bin/env bash
+#
+# Script to update and install crosstool-NG
+#
+# Copyright (C) 2017 Nathan Chancellor
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>
+
+
+# SOURCE OUR UNIVERSAL FUNCTIONS SCRIPT AND MAC CHECK
+SCRIPT_DIR=$( cd $( dirname $( readlink -f "${BASH_SOURCE[0]}" ) ) && pwd )
+source ${SCRIPT_DIR}/funcs && mac_check
+
+
+################
+#              #
+#  PARAMETERS  #
+#              #
+################
+
+# GATHER PARAMETERS
+while [[ $# -ge 1 ]]; do
+    case "${1}" in
+        "-1"|"--first-tag")
+            shift && enforce_value $@
+
+            FT=${1} ;;
+
+        "-2"|"--second-tag")
+            shift && enforce_value $@
+
+            ST=${1} ;;
+
+        "-a"|"--all")
+            SHOW_ALL=true ;;
+
+        *)
+            report_error "Invalid parameter specified!" ;;
+    esac
+
+    shift
+done
+
+LOG="git --no-pager log --oneline --no-merges"
+
+PRFX="LA.UM.5.7.r1"
+
+REPOS="arch/arm64
+crypto
+drivers/char
+drivers/clk/msm
+drivers/cpuidle
+drivers/crypto
+drivers/gpu/msm
+drivers/input
+drivers/iommu
+drivers/media/platform/msm
+drivers/misc
+drivers/net/wireless
+drivers/platform/msm/ipa
+drivers/soc/qcom
+drivers/soc/qcom/icnss.c
+drivers/staging
+drivers/usb
+drivers/video/fbdev/msm
+kernel
+lib
+mm
+sound"
+
+
+###############
+#             #
+#  FUNCTIONS  #
+#             #
+###############
+
+function setup_tree() {
+    [[ ! -f Makefile ]] && report_error "This must be run in a kernel tree!"
+
+    echo_text "Fetching CAF"
+
+    [[ ! $( git remote | grep caf ) ]] && echo "Adding CAF remote" \
+            && git remote add caf https://source.codeaurora.org/quic/la/kernel/msm-4.4
+
+    git fetch caf
+}
+
+function validate_tags() {
+    # IF FIRST TAG WASN'T SPECIFIED, USE THE MOST RECENT IN TREE
+    [[ -z ${FT} ]] && FT=$( git describe --tags --abbrev=0 --match "${PRFX}*" )
+    
+    # IF SECOND TAG WASN'T SPECIFIED, USE THE MOST RECENT ON REMOTE
+    [[ -z ${ST} ]] && ST=$( git tag -l | ag --nocolor ${PRFX} | tail -1 )
+   
+    echo_text "Showing changelog for ${ST}"
+    
+    export RANGE=${FT}..${ST}
+}
+
+function show() {
+    # IF A FOLDER TO SHOW WAS SPECIFIED
+    if [[ -n ${1} ]]; then
+        ND=$( git rev-list --count ${RANGE} 2> /dev/null )
+        if [[ -n ${ND} ]] || [[ ${ND} -ne 0 ]]; then
+            echo_text "Showing changes in ${1}" ${BLUE}
+        else
+            echo_text "No changes in ${1}" ${RED}
+            return
+        fi
+    fi
+    ${LOG} ${RANGE} ${1}
+}
+
+
+##################
+#                #
+#  SCRIPT START  #
+#                #
+##################
+
+setup_tree
+validate_tags
+
+[[ -n ${SHOW_ALL} ]] && show && exit
+
+for REPO in ${REPOS}; do
+    show ${REPO}
+done
