@@ -71,7 +71,7 @@ function gen_versions() {
 
     # NUMBER OF COMMITS DIFFERENT
     ND=$( git rev-list --count ${RANGE} 2> /dev/null )
-    [[ -z ${ND} ]] && reportError "There are no commits to pick/merge!"
+    [[ -z ${ND} ]] || [[ ${ND} -eq 0 ]] && reportError "There are no commits to pick/merge!"
 
     export NEW_VERSION RANGE ND
 }
