@@ -38,6 +38,7 @@ source ${SCRIPT_DIR}/funcs && mac_check
 ################
 
 # GATHER PARAMETERS
+PARAMS="$@"
 while [[ $# -ge 1 ]]; do
     case "${1}" in
         "-b"|"--branch")
@@ -428,7 +429,7 @@ function ending_info() {
 function generate_log() {
     # DATE: BASH_SOURCE (PARAMETERS)
     # BUILD <SUCCESSFUL|FAILED> IN # MINUTES AND # SECONDS
-    echo -e "\n$( date +"%m/%d/%Y %H:%M:%S" ): ${BASH_SOURCE} ${1}" >> ${LOG}
+    echo -e "\n$( date +"%m/%d/%Y %H:%M:%S" ): ${BASH_SOURCE} ${PARAMS}" >> ${LOG}
     echo -e "${BUILD_RESULT} IN $( format_time ${END} ${START} )" >> ${LOG}
 
     # ONLY ADD A LINE ABOUT FILE LOCATION IF SCRIPT COMPLETED SUCCESSFULLY
