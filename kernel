@@ -20,7 +20,7 @@
 
 # SOURCE OUR UNIVERSAL FUNCTIONS SCRIPT AND MAC CHECK
 SCRIPT_DIR=$( cd $( dirname $( readlink -f "${BASH_SOURCE[0]}" ) ) && pwd )
-source ${SCRIPT_DIR}/funcs && macCheck
+source ${SCRIPT_DIR}/funcs && mac_check
 
 # START TIME
 START=$( date +%s )
@@ -29,12 +29,12 @@ START=$( date +%s )
 while [[ $# -ge 1 ]]; do
     case ${1} in
         "-a"|"--arch")
-            shift && enforceValue $@
+            shift && enforce_value $@
 
             ARCH=${1} ;;
 
         "-d"|"--defconfig")
-            shift && enforceValue $@
+            shift && enforce_value $@
 
             DEFCONFIG=${1} ;;
 
@@ -42,12 +42,12 @@ while [[ $# -ge 1 ]]; do
             VERBOSITY=2 ;;
 
         "-i"|"--image")
-            shift && enforceValue $@
+            shift && enforce_value $@
 
             IMAGE=${1} ;;
 
         "-t"|"--toolchain")
-            shift && enforceValue $@
+            shift && enforce_value $@
 
             case ${1} in
                 "4.9")
@@ -92,10 +92,10 @@ function build() {
 }
 
 # REPORT ERROR IF WE AREN'T IN A TREE WITH A MAKEFILE
-[[ ! -f $(pwd)/Makefile ]] && reportError "This must be run in a kernel tree!"
+[[ ! -f $(pwd)/Makefile ]] && report_error "This must be run in a kernel tree!"
 
 # SHOW THE BASE VERSION WE ARE MAKING
-echoText "BUILDING $( make kernelversion )"
+echo_text "BUILDING $( make kernelversion )"
 
 # SHOW COMPILATION BASED ON FLAGS
 case ${VERBOSITY} in
@@ -113,7 +113,7 @@ END=$( date +%s )
 [[ -f ${FINAL_IMAGE} ]] && echo -e "${GRN}BUILT IN $( format_time ${END} ${START} )${RST}\n
 ${BOLD}IMAGE:${RST} ${FINAL_IMAGE}\n
 ${BOLD}VERSION:${RST} $( cat out/include/config/kernel.release )" \
-                        || reportError "Kernel build failed!"
+                        || report_error "Kernel build failed!"
 
 # UPLOAD IMAGE IF NECESSARY
 [[ ${UPLOAD} = true ]] && echo && curl --upload-file ${FINAL_IMAGE} https://transfer.sh/"${IMAGE}"

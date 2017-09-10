@@ -28,7 +28,7 @@
 # SOURCE OUR UNIVERSAL FUNCTIONS SCRIPT AND MAC CHECK
 SCRIPT_DIR=$( cd $( dirname $( readlink -f "${BASH_SOURCE[0]}" ) ) && pwd )
 BIN_DIR=${SCRIPT_DIR}/bin
-source ${SCRIPT_DIR}/funcs && macCheck
+source ${SCRIPT_DIR}/funcs && mac_check
 
 
 ################
@@ -41,22 +41,22 @@ source ${SCRIPT_DIR}/funcs && macCheck
 while [[ $# -ge 1 ]]; do
     case "${1}" in
         "-b"|"--branch")
-            shift && enforceValue $@
+            shift && enforce_value $@
 
             KERNEL_BRANCH=${1} ;;
 
         "-bv"|"--beta-version")
-            shift && enforceValue $@
+            shift && enforce_value $@
 
             BETA_VERSION=${1} ;;
 
         "-c"|"--config")
-            shift && enforceValue $@
+            shift && enforce_value $@
 
             DEFCONFIG=${1} ;;
 
         "-d"|"--device")
-            shift && enforceValue $@
+            shift && enforce_value $@
 
             DEVICE=${1} ;;
 
@@ -64,12 +64,12 @@ while [[ $# -ge 1 ]]; do
             DEBUG=true ;;
 
         "-f"|"--flags")
-            shift && enforceValue $@
+            shift && enforce_value $@
 
             EXTRA_MAKE_FLAGS=${1} ;;
 
         "-m"|"--mode")
-            shift && enforceValue $@
+            shift && enforce_value $@
 
             MODE=${1} ;;
 
@@ -77,22 +77,22 @@ while [[ $# -ge 1 ]]; do
             NOCLEAN=true ;;
 
         "-os"|"--operating-system")
-            shift && enforceValue $@
+            shift && enforce_value $@
 
             OS=${1} ;;
 
         "-t"|"--toolchain")
-            shift && enforceValue $@
+            shift && enforce_value $@
 
             TOOLCHAIN_NAME=${1} ;;
 
         "-v"|"--version")
-            shift && enforceValue $@
+            shift && enforce_value $@
 
             VERSION=${1} ;;
 
         *)
-            reportError "Invalid parameter" ;;
+            report_error "Invalid parameter" ;;
     esac
 
     shift
@@ -144,7 +144,7 @@ case ${DEVICE} in
         esac ;;
 
     *)
-        reportError "Invalid device!" ;;
+        report_error "Invalid device!" ;;
 esac
 
 case ${TOOLCHAIN_NAME} in
@@ -161,7 +161,7 @@ case ${TOOLCHAIN_NAME} in
         TOOLCHAIN_FOLDER=gcc-8.x
         TOOLCHAIN_PREFIX=aarch64-gnu-linux-gnu- ;;
     *)
-        reportError "Invalid toolchain specified!" ;;
+        report_error "Invalid toolchain specified!" ;;
 esac
 
 TOOLCHAIN_FOLDER=${HOME}/Toolchains/${TOOLCHAIN_FOLDER}
@@ -180,7 +180,7 @@ case ${MODE} in
         ANYKERNEL_BRANCH=${DEVICE}-flash-public-${ANDROID_VERSION}
         KEYS=testkey ;;
     *)
-        reportError "Invalid mode specified!" ;;
+        report_error "Invalid mode specified!" ;;
 esac
 
 # KERNEL INFO
@@ -198,7 +198,7 @@ KERNEL=${OUT_FOLDER}/arch/${ARCHITECTURE}/boot/${KERNEL_IMAGE}
 
 
 # CLEAN UP
-function cleanUp() {
+function clean_up() {
     # CLEAN ANYKERNEL FOLDER
     cd "${ANYKERNEL_FOLDER}"
     git checkout ${ANYKERNEL_BRANCH}
@@ -218,7 +218,7 @@ function cleanUp() {
 
 
 # SETUP COMPILATION
-function setupCompilation() {
+function setup_compilation() {
     # MAKE OUT FOLDER (IT GETS REMOVED PER CLEAN UP FUNCTION)
     mkdir -p ${OUT_FOLDER}
 
@@ -236,7 +236,7 @@ function setupCompilation() {
 
 
 # MAKE KERNEL
-function makeKernel() {
+function make_kernel() {
     # SET MAKE VARIABLE FOR CONVENIENCE
     # AS I FOOLISHLY LEARNED, ALL CAF CODE REQUIRES AN OUTPUT DIRECTORY
     # TO WORK PROPERLY SO WHILE MY NEXUS DOESN'T CURRENTLY REQUIRE IT,
@@ -255,8 +255,8 @@ function makeKernel() {
 }
 
 
-# PRINT ZIP INFO
-function printKernelInfo() {
+# SETUP ZIP INFO
+function setup_zip_info() {
     # FULL_KERNEL VERSION IS AUTOMATICALLY GENERATED AT BUILD TIME
     FULL_VERSION=$( cat ${OUT_FOLDER}/include/config/kernel.release )
     echo -e "${BOLD}Kernel version:${RST} ${FULL_VERSION}"
@@ -279,12 +279,12 @@ function printKernelInfo() {
     export SIGNAPK_ZIP=${KERNEL_NAME}-signapk.zip
     export ADJUSTED_ZIP=${KERNEL_NAME}-adjusted.zip
     export SIGNED_ZIP=${KERNEL_NAME}.zip
-    echo -e "${BOLD}Kernel zip:${RST} ${SIGNED_ZIP}"; newLine
+    echo -e "${BOLD}Kernel zip:${RST} ${SIGNED_ZIP}"; new_line
 }
 
 
 # SETUP FOLDERS
-function setupFolders() {
+function setup_folders() {
     # IF ZIPMOVE DOESN'T EXIST, MAKE IT
     [[ ! -d "${ZIP_MOVE}" ]] && mkdir -p "${ZIP_MOVE}"
 
@@ -301,7 +301,7 @@ function setupFolders() {
 
 
 # PACKAGE ZIP
-function packageZip() {
+function package_zip() {
     cd "${ANYKERNEL_FOLDER}"
 
     # MOVE THE KERNEL IMAGE
@@ -332,9 +332,9 @@ function packageZip() {
 }
 
 # MOVE FILES
-function moveFiles() {
+function move_files() {
     # IF PACKAGING FAILED, ERROR OUT
-    [[ ! -f ${SIGNED_ZIP} ]] && reportError "Kernel zip not found after signing!"
+    [[ ! -f ${SIGNED_ZIP} ]] && report_error "Kernel zip not found after signing!"
 
     # MOVE THE KERNEL ZIP TO WHERE IT NEEDS TO GO
     mv ${SIGNED_ZIP} "${ZIP_MOVE}"
@@ -345,7 +345,7 @@ function moveFiles() {
 
 
 # GENERATE CHANGELOG
-function generateChangelog() {
+function generate_changelog() {
     GITHUB="http://github.com/nathanchance"
     CHANGELOG="${ZIP_MOVE}"/${KERNEL_NAME}-changelog.txt
 
@@ -382,7 +382,7 @@ function generateChangelog() {
 
 
 # PUSH KERNEL ZIPS TO GITHUB
-function pushRelease() {
+function push_release() {
     cd "${ZIP_MOVE}"
 
     git add .
@@ -391,12 +391,12 @@ function pushRelease() {
 
     git push -q
 
-    newLine
+    new_line
 }
 
 
 # TAG FOR RELEASES
-function tagRelease() {
+function tag_release() {
     cd "${SOURCE_FOLDER}"
 
     git tag -a "${KERNEL_NAME}" -m "${KERNEL_NAME}"
@@ -410,7 +410,7 @@ function tagRelease() {
 
 
 # PRINT FILE INFO
-function endingInfo() {
+function ending_info() {
     # ONLY PRINT FILE INFO IF IT EXISTS
     if [[ ${SUCCESS} = true ]]; then
         echo -e ${RED}"FILE LOCATION: ${ZIP_MOVE}/${SIGNED_ZIP}"
@@ -420,12 +420,12 @@ function endingInfo() {
 
     # PRINT TIME INFO REGARDLESS OF SUCCESS
     echo -e ${RED}"TIME: $( date +%D\ %r | awk '{print toupper($0)}' )"
-    echo -e "DURATION: $( format_time ${END} ${START} )"${RST}; newLine
+    echo -e "DURATION: $( format_time ${END} ${START} )"${RST}; new_line
 }
 
 
 # LOG GENERATION
-function generateLog() {
+function generate_log() {
     # DATE: BASH_SOURCE (PARAMETERS)
     # BUILD <SUCCESSFUL|FAILED> IN # MINUTES AND # SECONDS
     echo -e "\n$( date +"%m/%d/%Y %H:%M:%S" ): ${BASH_SOURCE} ${1}" >> ${LOG}
@@ -454,31 +454,31 @@ START=$( date +"%s" ) && clear
 # SHOW ASCII TEXT #
 ###################
 
-echo -e ${RED}; newLine
-echo -e "================================================================================================"; newLine; newLine
+echo -e ${RED}; new_line
+echo -e "================================================================================================"; new_line; new_line
 echo -e "  ___________________________________  __   ______ _______________________   ________________   "
 echo -e "  ___  ____/__  /___    |_  ___/__  / / /   ___  //_/__  ____/__  __ \__  | / /__  ____/__  /   "
 echo -e "  __  /_   __  / __  /| |____ \__  /_/ /    __  ,<  __  __/  __  /_/ /_   |/ /__  __/  __  /    "
 echo -e "  _  __/   _  /___  ___ |___/ /_  __  /     _  /| | _  /___  _  _, _/_  /|  / _  /___  _  /___  "
-echo -e "  /_/      /_____/_/  |_/____/ /_/ /_/      /_/ |_| /_____/  /_/ |_| /_/ |_/  /_____/  /_____/  "; newLine; newLine; newLine
-echo -e "================================================================================================"; newLine
+echo -e "  /_/      /_____/_/  |_/____/ /_/ /_/      /_/ |_| /_____/  /_/ |_| /_/ |_/  /_____/  /_____/  "; new_line; new_line; new_line
+echo -e "================================================================================================"; new_line
 
 
 #################
 # MAKING KERNEL #
 #################
 
-echoText "CLEANING UP AND MAKING KERNEL"
+echo_text "CLEANING UP AND MAKING KERNEL"
 
 # DON'T SHOW CLEAN UP OUTPUT
-cleanUp &>/dev/null
+clean_up &>/dev/null
 
 # SETUP COMPILATION
-setupCompilation
+setup_compilation
 
 # ONLY SHOW ERRORS, WARNINGS, AND THE IMAGE LINE WHEN COMPILING (UNLESS DEBUG)
-[[ ${DEBUG} = true ]] && makeKernel \
-                      || makeKernel |& ag --no-color "error:|warning:" && echo
+[[ ${DEBUG} = true ]] && make_kernel \
+                      || make_kernel |& ag --no-color "error:|warning:" && echo
 
 
 ######################
@@ -489,22 +489,22 @@ if [[ -f ${KERNEL} ]]; then
     # SET BUILD SUCCESS STRING AND SUCCESS VARIABLE
     BUILD_RESULT="BUILD SUCCESSFUL" && SUCCESS=true
 
-    echoText "MAKING FLASHABLE ZIP"
+    echo_text "MAKING FLASHABLE ZIP"
 
-    # PRINT KERNEL AND ZIP INFO
-    printKernelInfo
+    # SETUP KERNEL AND ZIP INFO
+    setup_zip_info
 
     # SETUP ENVIRONMENT AND MAKE/MOVE ZIP
-    setupFolders
-    packageZip
-    moveFiles
-    generateChangelog
+    setup_folders
+    package_zip
+    move_files
+    generate_changelog
 
     # ONLY PUSH RELEASE FOR PUBLIC OR TEST BUILDS
-    [[ ${MODE} != "private" ]] && echoText "PUSHING RELEASE" && pushRelease
+    [[ ${MODE} != "private" ]] && echo_text "PUSHING RELEASE" && push_release
 
     # TAG THE HEAD COMMIT FOR PUBLIC BUILD (SILENTLY)
-    [[ ${MODE} = "public" ]] && tagRelease &>/dev/null
+    [[ ${MODE} = "public" ]] && tag_release &>/dev/null
 
 ###################
 # IF BUILD FAILED #
@@ -522,10 +522,10 @@ fi
 
 END=$( date +"%s" )
 
-echoText "${BUILD_RESULT}!"
+echo_text "${BUILD_RESULT}!"
 
-endingInfo
+ending_info
 
-generateLog
+generate_log
 
 echo -e "\a"

@@ -20,7 +20,7 @@
 
 # SOURCE OUR UNIVERSAL FUNCTIONS SCRIPT AND MAC CHECK
 SCRIPT_DIR=$( cd $( dirname $( readlink -f "${BASH_SOURCE[0]}" ) ) && pwd )
-source ${SCRIPT_DIR}/funcs && macCheck
+source ${SCRIPT_DIR}/funcs && mac_check
 
 
 ################
@@ -37,7 +37,7 @@ while [[ $# -ge 1 ]]; do
         "-u"|"--update-only")
             UPDATE_ONLY=true ;;
         *)
-            reportError "Invalid parameter specified!" ;;
+            report_error "Invalid parameter specified!" ;;
     esac
 
     shift
@@ -92,8 +92,8 @@ function build() {
     sudo ${MAKE} install
 
     [[ -f /usr/local/bin/ct-ng ]] && \
-    [[ -f ct-ng ]] && echoText "BUILD SUCCESSFUL!" ${GRN} \
-                   || echoText "BUILD FAILED!" ${RED}
+    [[ -f ct-ng ]] && echo_text "BUILD SUCCESSFUL!" ${GRN} \
+                   || echo_text "BUILD FAILED!" ${RED}
 }
 
 

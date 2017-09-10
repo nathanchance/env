@@ -51,7 +51,7 @@ vendor/huawei"
 
 # SOURCE OUR UNIVERSAL FUNCTIONS SCRIPT AND MAC CHECK
 SCRIPT_DIR=$( cd $( dirname $( readlink -f "${BASH_SOURCE[0]}" ) ) && pwd )
-source ${SCRIPT_DIR}/funcs && macCheck
+source ${SCRIPT_DIR}/funcs && mac_check
 
 
 ################
@@ -65,7 +65,7 @@ while [[ $# -ge 1 ]]; do
         "-s"|"--sync")
             SYNC=true ;;
         *)
-            reportError "Unknown parameter!" ;;
+            report_error "Unknown parameter!" ;;
     esac
 
     shift
@@ -85,7 +85,7 @@ fi
 
 for FOLDER in ${DU_REPOS}; do
     # PRINT TO THE USER WHAT WE ARE DOING
-    newLine; echoText "Updating ${FOLDER}"
+    new_line; echo_text "Updating ${FOLDER}"
 
     # SHIFT TO PROPER FOLDER
     cd ${SOURCE_DIR}/${FOLDER}
@@ -110,7 +110,7 @@ done
 cd ${SOURCE_DIR}
 
 # PRINT RESULTS
-echoText "RESULTS"
+echo_text "RESULTS"
 echo -e ${RESULT_STRING}
 
 # Signal to rom.sh to exit

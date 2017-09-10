@@ -26,7 +26,7 @@
 
 # SOURCE OUR UNIVERSAL FUNCTIONS SCRIPT AND MAC CHECK
 SCRIPT_DIR=$( cd $( dirname $( readlink -f "${BASH_SOURCE[0]}" ) ) && pwd )
-source ${SCRIPT_DIR}/funcs && macCheck
+source ${SCRIPT_DIR}/funcs && mac_check
 
 # CHECKS IF MKA EXISTS
 function make_command() {
@@ -50,13 +50,13 @@ while [[ $# -ge 1 ]]; do
     case "${1}" in
         # REQUIRED OPTIONS
         "-d"|"--device")
-            shift && enforceValue $@
+            shift && enforce_value $@
 
             PARAMS+="${1} "
             DEVICE=${1} ;;
 
         "-r"|"--rom")
-            shift && enforceValue $@
+            shift && enforce_value $@
 
             PARAMS+="${1} "
             ROM=${1} ;;
@@ -70,13 +70,13 @@ while [[ $# -ge 1 ]]; do
             export CLEAN_TYPE=${1} ;;
 
         "-m"|"--make")
-            shift && enforceValue $@
+            shift && enforce_value $@
 
             PARAMS+="${1} "
             export MAKE_TYPE=${1} ;;
 
         "-v"|"--version")
-            shift && enforceValue $@
+            shift && enforce_value $@
 
             PARAMS+="${1} "
             export VARIANT=${1} ;;
@@ -87,7 +87,7 @@ while [[ $# -ge 1 ]]; do
         # SPECIAL OPTIONS
         # KREXUS, DU, VANILLA
         "-t"|"--type")
-            shift && enforceValue $@
+            shift && enforce_value $@
 
             PARAMS+="${1} "
             export BUILD_TAG=${1}
@@ -105,7 +105,7 @@ while [[ $# -ge 1 ]]; do
             export PUBLIC=true ;;
 
         *)
-            reportError "Invalid parameter detected!" ;;
+            report_error "Invalid parameter detected!" ;;
     esac
 
     shift
@@ -118,7 +118,7 @@ if [[ -z ${ROM} ]]; then
     DEVICE=angler
 fi
 
-[[ -z ${DEVICE} ]] && reportError "The device to build is a required parameter!"
+[[ -z ${DEVICE} ]] && report_error "The device to build is a required parameter!"
 
 if [[ -z ${VARIANT} ]]; then
     case ${ROM} in
@@ -175,7 +175,7 @@ case "${ROM}" in
         SOURCE_DIR=${ANDROID_DIR}/ROMs/Vanilla
         ZIP_MOVE=${ZIP_MOVE_PARENT}/Vanilla/${DEVICE} ;;
     *)
-        reportError "Unknown ROM "${1}" passed!" ;;
+        report_error "Unknown ROM "${1}" passed!" ;;
 esac
 
 OUT_DIR=${SOURCE_DIR}/out/target/product/${DEVICE}
@@ -201,7 +201,7 @@ FLAGS="-j$( nproc --all ) --force-sync -c --no-clone-bundle --no-tags --optimize
 
 # IF THE SYNC IS REQUESTED, DO SO
 if [[ ${SYNC} = true ]]; then
-    echoText "SYNCING LATEST SOURCES"; newLine
+    echo_text "SYNCING LATEST SOURCES"; new_line
 
     ${REPO_SYNC} ${FLAGS}
 
@@ -215,7 +215,7 @@ fi
 # SETUP BUILD ENVIRONMENT #
 ###########################
 
-echoText "SETTING UP BUILD ENVIRONMENT"
+echo_text "SETTING UP BUILD ENVIRONMENT"
 
 # CHECK AND SEE IF WE ARE ON ARCH
 # IF SO, ACTIVARE A VIRTUAL ENVIRONMENT FOR PROPER PYTHON SUPPORT
@@ -230,7 +230,7 @@ source build/envsetup.sh
 # PREPARE DEVICE #
 ##################
 
-echoText "PREPARING $( echo ${DEVICE} | awk '{print toupper($0)}' )"
+echo_text "PREPARING $( echo ${DEVICE} | awk '{print toupper($0)}' )"
 
 # NOT ALL ROMS USE BREAKFAST
 case "${ROM}" in
@@ -254,7 +254,7 @@ esac
 ############
 
 if [[ ${REPOPICK} = true ]]; then
-    echoText "RUNNING REPOPICK"
+    echo_text "RUNNING REPOPICK"
     # Execute in a subshell otherwise everything is fubared
     (
     while [[ ${YN} != "n" ]]; do
@@ -279,7 +279,7 @@ fi
 # CLEAN UP #
 ############
 
-echoText "CLEANING UP OUT DIRECTORY"
+echo_text "CLEANING UP OUT DIRECTORY"
 
 if [[ -n ${CLEAN_TYPE} ]] && [[ ${CLEAN_TYPE} != "noclean" ]]; then
     make_command ${CLEAN_TYPE}
@@ -292,7 +292,7 @@ fi
 # START BUILDING #
 ##################
 
-echoText "MAKING FILES"; newLine
+echo_text "MAKING FILES"; new_line
 
 NOW=$( TZ=MST date +"%Y-%m-%d-%S" )
 
@@ -304,7 +304,7 @@ if [[ -n ${MAKE_TYPE} ]]; then
     # PRINT RESULT #
     ################
 
-    newLine; echoText "BUILD COMPLETED!"
+    new_line; echo_text "BUILD COMPLETED!"
 else
     # NOT ALL ROMS USE BACON
     case "${ROM}" in
@@ -368,7 +368,7 @@ else
     # PRINT RESULT #
     ################
 
-    echoText "${BUILD_RESULT_STRING}!"
+    echo_text "${BUILD_RESULT_STRING}!"
 fi
 
 

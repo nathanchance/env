@@ -27,7 +27,7 @@
 # SOURCE OUR UNIVERSAL FUNCTIONS SCRIPT
 SCRIPT_DIR=$( cd $( dirname $( readlink -f "${BASH_SOURCE[0]}" ) ) && pwd )
 BIN_DIR=${SCRIPT_DIR}/bin
-source ${SCRIPT_DIR}/funcs && macCheck
+source ${SCRIPT_DIR}/funcs && mac_check
 
 
 ################
@@ -49,18 +49,18 @@ while [[ $# -ge 1 ]]; do
             KEY=${1} ;;
 
         *)
-            reportError "Invalid parameter!" ;;
+            report_error "Invalid parameter!" ;;
     esac
 
     shift
 done
 
 # Defaults and sanity check
-[[ -z ${FILE} ]] && reportError "You didn't specify a file!"
+[[ -z ${FILE} ]] && report_error "You didn't specify a file!"
 [[ -z ${KEY} ]] && KEY=nathan
 
 # Error out if the file isn't a zip file
-[[ $( echo ${FILE} | grep -v zip ) ]] && reportError "This can only sign zip files!"
+[[ $( echo ${FILE} | grep -v zip ) ]] && report_error "This can only sign zip files!"
 
 
 ##############
@@ -70,7 +70,7 @@ done
 ##############
 
 # Show some text
-echoText "Signing ${FILE}"
+echo_text "Signing ${FILE}"
 
 # Shift to the folder containing the zip
 cd $(dirname ${FILE})

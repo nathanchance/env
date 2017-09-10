@@ -20,7 +20,7 @@
 
 # SOURCE OUR UNIVERSAL FUNCTIONS SCRIPT AND MAC CHECK
 SCRIPT_DIR=$( cd $( dirname $( readlink -f "${BASH_SOURCE[0]}" ) ) && pwd )
-source ${SCRIPT_DIR}/funcs && macCheck
+source ${SCRIPT_DIR}/funcs && mac_check
 
 
 # GATHER PARAMETERS
@@ -36,7 +36,7 @@ while [[ $# -ge 1 ]]; do
             UPDATE=true ;;
 
         *)
-            reportError "Invalid parameter!" ;;
+            report_error "Invalid parameter!" ;;
     esac
 
     shift
@@ -50,7 +50,7 @@ function verify_remote() {
 
     git fetch ${1}
 
-    [[ $? -ne 0 ]] && reportError "Remote ${1} update failed!" \
+    [[ $? -ne 0 ]] && report_error "Remote ${1} update failed!" \
                    || echo "Remote ${1} updated successfully!"
 
     [[ -z ${UPDATE_ONLY} ]] && exit
@@ -71,14 +71,14 @@ function gen_versions() {
 
     # NUMBER OF COMMITS DIFFERENT
     ND=$( git rev-list --count ${RANGE} 2> /dev/null )
-    [[ -z ${ND} ]] || [[ ${ND} -eq 0 ]] && reportError "There are no commits to pick/merge!"
+    [[ -z ${ND} ]] || [[ ${ND} -eq 0 ]] && report_error "There are no commits to pick/merge!"
 
     export NEW_VERSION RANGE ND
 }
 
 # MERGE FUNCTION
 function merge() {
-    echoText "MERGING ${NEW_VERSION}"
+    echo_text "MERGING ${NEW_VERSION}"
 
     git merge v${NEW_VERSION} -m "Merge ${NEW_VERSION} into $( git rev-parse --abbrev-ref HEAD )
 
@@ -87,28 +87,28 @@ $( git log --reverse --format="        %s" ${RANGE} )
 
 Signed-off-by: $( git config --get user.name ) <$( git config --get user.email )>"
 
-    [[ $? -ne 0 ]] && reportError "Merge needs manual intervention!
+    [[ $? -ne 0 ]] && report_error "Merge needs manual intervention!
     
-Resolve conflicts then run git merge --continue!" || echoText "${NEW_VERSION} MERGED CLEANLY!" ${GRN}
+Resolve conflicts then run git merge --continue!" || echo_text "${NEW_VERSION} MERGED CLEANLY!" ${GRN}
 }
 
 # CHERRY-PICK FUNCTION
 function cherry_pick() {
-    echoText "CHERRY-PICKING ${NEW_VERSION}"
+    echo_text "CHERRY-PICKING ${NEW_VERSION}"
 
     git cherry-pick ${RANGE}
 
-    [[ $? -ne 0 ]] && reportError "Cherry-pick needs manual intervention! Resolve conflicts then run:
+    [[ $? -ne 0 ]] && report_error "Cherry-pick needs manual intervention! Resolve conflicts then run:
 
-git add . && git cherry-pick --continue" || echoText "${NEW_VERSION} PICKED CLEANLY!" ${GRN}
+git add . && git cherry-pick --continue" || echo_text "${NEW_VERSION} PICKED CLEANLY!" ${GRN}
 }
 
 
 # THIS MUST BE RUN IN A KERNEL TREE
-[[ ! -f Makefile ]] && reportError "Run this in a kernel tree!"
+[[ ! -f Makefile ]] && report_error "Run this in a kernel tree!"
 
 # MAKE SURE STABLE REMOTES EXISTS
-echoText "UPDATING REMOTES"
+echo_text "UPDATING REMOTES"
 
 verify_remote stable
 verify_remote stable-rc

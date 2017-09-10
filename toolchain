@@ -20,7 +20,7 @@
 
 # SOURCE OUR UNIVERSAL FUNCTIONS SCRIPT AND MAC CHECK
 SCRIPT_DIR=$( cd $( dirname $( readlink -f "${BASH_SOURCE[0]}" ) ) && pwd )
-source ${SCRIPT_DIR}/funcs && macCheck
+source ${SCRIPT_DIR}/funcs && mac_check
 
 
 ################
@@ -33,7 +33,7 @@ source ${SCRIPT_DIR}/funcs && macCheck
 while [[ $# -ge 1 ]]; do
     case "${1}" in
         "-a"|"--arch")
-            shift && enforceValue $@
+            shift && enforce_value $@
 
             ARCH=${1} ;;
 
@@ -41,17 +41,17 @@ while [[ $# -ge 1 ]]; do
             RELEASE=true ;;
 
         "-s"|"--source")
-            shift && enforceValue $@
+            shift && enforce_value $@
 
             SOURCE=${1} ;;
 
         "-t"|"--target")
-            shift && enforceValue $@
+            shift && enforce_value $@
 
             TARGET=${1} ;;
 
         *)
-            reportError "Invalid parameter specified!" ;;
+            report_error "Invalid parameter specified!" ;;
     esac
 
     shift
@@ -76,7 +76,7 @@ PREBUILT_FOLDER=${TOOLCHAIN_FOLDER}/prebuilts
 #             #
 ###############
 
-function setVariables() {
+function set_variables() {
     case ${SOURCE} in
         "gnu")
             export GCC_BRANCH=gcc-7-branch
@@ -85,7 +85,7 @@ function setVariables() {
             export GCC_BRANCH=linaro-local/gcc-7-integration-branch
             export POS=5 ;;
         *)
-            reportError "Invalid GCC type!"
+            report_error "Invalid GCC type!"
     esac
 
     case ${ARCH} in
@@ -96,7 +96,7 @@ function setVariables() {
             TUPLE_PFX=aarch64
             TUPLE_SFX=android ;;
         *)
-            reportError "Invalid architecture!"
+            report_error "Invalid architecture!"
     esac
 
     export TUPLE=${TUPLE_PFX}-${SOURCE}-linux-${TUPLE_SFX}
@@ -115,7 +115,7 @@ function setVariables() {
     export PREBUILT_BRANCH=${BRANCH_PFX}-${SOURCE}-${BRANCH_SFX}
 }
 
-function cloneRepo() {
+function clone_repo() {
     [[ ! -d ${SOURCE_FOLDER} ]] && mkdir -p ${SOURCE_FOLDER}
 
     cd ${SOURCE_FOLDER}
@@ -133,9 +133,9 @@ function cloneRepo() {
     esac
 }
 
-function updateRepo() {
+function update_repo() {
    [[ -f ${SOURCE_FOLDER}/${1} ]] && cd ${SOURCE_FOLDER}/${1} \
-                                  || cloneRepo ${1} ${2} && return
+                                  || clone_repo ${1} ${2} && return
 
     git checkout ${2}
 
@@ -143,7 +143,7 @@ function updateRepo() {
 
     git rebase origin/${2}
 
-    [[ $? -ne 0 ]] && reportError "There was a problem updating ${1}!"
+    [[ $? -ne 0 ]] && report_error "There was a problem updating ${1}!"
 }
 
 function build() {
@@ -156,7 +156,7 @@ function build() {
     [[ -z ${TARGET} ]] && CONFIG_FOLDER=${PREBUILT_FOLDER} \
                        || CONFIG_FOLDER=${PREFIX_FOLDER}
     [[ ! -f ${CONFIG_FOLDER}/bin/${TUPLE}-ct-ng.config ]] && \
-                    reportError "Previous config file could not be found!"
+                    report_error "Previous config file could not be found!"
     ${CONFIG_FOLDER}/bin/${TUPLE}-ct-ng.config > .config
 
     ct-ng savedefconfig
@@ -169,7 +169,7 @@ function build() {
 
     ct-ng build.$( nproc --all )
 
-    [[ ! -f ${PREFIX_FOLDER}/bin/${TUPLE}-gcc ]] && reportError "Problem with compilation!"
+    [[ ! -f ${PREFIX_FOLDER}/bin/${TUPLE}-gcc ]] && report_error "Problem with compilation!"
 }
 
 function commit() {
@@ -238,14 +238,14 @@ GCC source: https://git.linaro.org/toolchain/gcc.git/log/?h=gcc-7-branch
 }
 
 function release() {
-    updateRepo binutils binutils-2_29-branch
-    updateRepo linux master
+    update_repo binutils binutils-2_29-branch
+    update_repo linux master
     
     for SOURCE in gnu linaro; do
         for ARCH in arm arm64; do
             export SOURCE ARCH
-            setVariables
-            updateRepo gcc ${GCC_BRANCH}
+            set_variables
+            update_repo gcc ${GCC_BRANCH}
             build
             commit
         done
@@ -265,9 +265,9 @@ function release() {
 
 [[ -n ${RELEASE} ]] && release && exit
 
-setVariables
-updateRepo binutils binutils-2_29-branch
-updateRepo linux master
-updateRepo gcc ${GCC_BRANCH}    
+set_variables
+update_repo binutils binutils-2_29-branch
+update_repo linux master
+update_repo gcc ${GCC_BRANCH}    
 build
 commit

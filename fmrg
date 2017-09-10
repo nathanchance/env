@@ -20,16 +20,16 @@
 
 # SOURCE OUR UNIVERSAL FUNCTIONS SCRIPT AND MAC CHECK
 SCRIPT_DIR=$( cd $( dirname $( readlink -f "${BASH_SOURCE[0]}" ) ) && pwd )
-source ${SCRIPT_DIR}/funcs && macCheck
+source ${SCRIPT_DIR}/funcs && mac_check
 
 # MAKE SURE WE ARE IN A KERNEL TREE
-[[ ! -f Makefile ]] && reportError "Please run this in a kernel tree!"
+[[ ! -f Makefile ]] && report_error "Please run this in a kernel tree!"
 
 # CURRENT BRANCH
 CB=$( git rev-parse --abbrev-ref HEAD )
 
 # BRANCH TO MERGE
-[[ $# -eq 0 ]] && reportError "Please supply the branch to merge!"
+[[ $# -eq 0 ]] && report_error "Please supply the branch to merge!"
 BTM=${1}
 
 # RANGE
@@ -37,7 +37,7 @@ RANGE=${CB}..${BTM}
 
 # NUMBER OF COMMITS DIFFERENT
 ND=$( git rev-list --count ${RANGE} 2>/dev/null )
-[[ ${ND} -eq 0 ]] && reportError "There is nothing to merge from ${BTM} into ${CB}!"
+[[ ${ND} -eq 0 ]] && report_error "There is nothing to merge from ${BTM} into ${CB}!"
 
 # MERGE COMMITS
 git merge ${BTM} -m "Merge branch '${BTM}' into ${CB}
@@ -47,6 +47,6 @@ $( git log --reverse --format="        %s" ${RANGE} )
 
 Signed-off-by: $( git config --get user.name ) <$( git config --get user.email )>"
 
-[[ $? -ne 0 ]] && reportError "Merge needs manual intervention!
+[[ $? -ne 0 ]] && report_error "Merge needs manual intervention!
 
-Resolve conflicts then run git merge --continue!" || echoText "${BTM} merged cleanly!" ${GRN}
+Resolve conflicts then run git merge --continue!" || echo_text "${BTM} merged cleanly!" ${GRN}
