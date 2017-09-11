@@ -101,7 +101,7 @@ distro_shorthand="off"
 # Example:
 # on:  'Arch Linux x86_64'
 # off: 'Arch Linux'
-os_arch="on"
+os_arch="off"
 
 
 # Uptime
@@ -132,7 +132,7 @@ uptime_shorthand="tiny"
 # Example:
 # on:  '/bin/bash'
 # off: 'bash'
-shell_path="on"
+shell_path="off"
 
 # Show $SHELL version
 #
