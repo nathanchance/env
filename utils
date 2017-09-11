@@ -22,10 +22,6 @@
 SCRIPT_DIR=$( cd $( dirname $( readlink -f "${BASH_SOURCE[0]}" ) ) && pwd )
 source ${SCRIPT_DIR}/funcs
 
-function echo() {
-    command echo -e "$@"
-}
-
 function aliases() {
     # default Arch ls alias
     alias ls='ls --color=auto'

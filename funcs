@@ -33,6 +33,11 @@ RED="\033[01;31m"
 RST="\033[0m"
 YLW="\033[01;33m"
 
+# ALIAS FOR ECHO TO PRINT ESCAPE CODES
+function echo() {
+    command echo -e "$@"
+}
+
 # PRINTS A FORMATTED HEADER TO POINT OUT WHAT IS BEING DONE TO THE USER
 function echo_text() {
     [[ -n ${2} ]] && COLOR=${2} || COLOR=${RED}
