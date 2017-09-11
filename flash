@@ -103,7 +103,7 @@ done
 [[ -z ${DEFCONFIG} ]] && DEFCONFIG="flash_defconfig"
 [[ -z ${DEVICE} ]] && DEVICE="oneplus5"
 [[ -z ${MODE} ]] && MODE="private"
-[[ -z ${TOOLCHAIN_NAME} ]] && TOOLCHAIN_NAME="7.x"
+[[ -z ${TOOLCHAIN_NAME} ]] && TOOLCHAIN_NAME="l-7.x"
 
 
 ###############
@@ -149,17 +149,14 @@ case ${DEVICE} in
 esac
 
 case ${TOOLCHAIN_NAME} in
-    "4.9")
+    "a-4.9")
         TOOLCHAIN_FOLDER=aosp-4.9
         TOOLCHAIN_PREFIX=aarch64-linux-android- ;;
-    "5.x")
-        TOOLCHAIN_FOLDER=aarch64-linaro-linux-gnu-5.x
-        TOOLCHAIN_PREFIX=aarch64-linaro-linux-gnu- ;;
-    "7.x")
-        TOOLCHAIN_FOLDER=aarch64-linaro-linux-android-7.x${TC_TARGET}
+    "l-7.x")
+        TOOLCHAIN_FOLDER=linaro-7.x${TC_TARGET}
         TOOLCHAIN_PREFIX=aarch64-linaro-linux-android- ;;
-    "8.x")
-        TOOLCHAIN_FOLDER=gcc-8.x
+    "g-8.x")
+        TOOLCHAIN_FOLDER=gnu-8.x
         TOOLCHAIN_PREFIX=aarch64-gnu-linux-gnu- ;;
     *)
         report_error "Invalid toolchain specified!" ;;
@@ -225,14 +222,17 @@ function setup_compilation() {
 
     # SHOW TOOLCHAIN LOCATION
     TOOLCHAIN="${TOOLCHAIN_FOLDER}/bin/${TOOLCHAIN_PREFIX}"
-    echo -e "${BOLD}Toolchain location:${RST} ${TOOLCHAIN}"
+    echo -e "${BOLD}Toolchain location:${RST} ${TOOLCHAIN}\n"
+
+    # SHOW GCC VERSION
+    GCC_VERSION="$( ${TOOLCHAIN}gcc --version | ag --nocolor gcc )"
+    echo -e "${BOLD}GCC version:${RST} ${GCC_VERSION}\n"
 
     # GET PRECISE LOCATION OF CCACHE
     CCACHE=$( command -v ccache )
-    echo -e "${BOLD}ccache location:${RST} ${CCACHE}"
-
-    # SHOW TARGET ARCHITECTURE
-    echo -e "${BOLD}Target architecture:${RST} ${ARCHITECTURE}\n"
+    [[ -n ${CCACHE} ]] && CCACHE_SUPPORT="${GRN}Yes, found at ${CCACHE}${RST}" \
+                       || CCACHE_SUPPORT="${RED}No, please install it!${RSR}"
+    echo -e "${BOLD}Compiling with ccache?${RST} ${CCACHE_SUPPORT}\n"
 }
 
 
@@ -260,7 +260,7 @@ function make_kernel() {
 function setup_zip_info() {
     # FULL_KERNEL VERSION IS AUTOMATICALLY GENERATED AT BUILD TIME
     FULL_VERSION=$( cat ${OUT_FOLDER}/include/config/kernel.release )
-    echo -e "${BOLD}Kernel version:${RST} ${FULL_VERSION}"
+    echo -e "${BOLD}Kernel version:${RST} ${FULL_VERSION}\n"
 
     # REMOVE EVERYTHING BEFORE FLASH IN THE FLASH_VERSION
     BASE_VERSION=$( make kernelversion )

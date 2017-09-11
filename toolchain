@@ -106,7 +106,7 @@ function set_variables() {
         BRANCH_PFX=${TUPLE_PFX}
         BRANCH_SFX=7.x
     else
-        PREFIX_FOLDER=${TOOLCHAIN_FOLDER}/${TUPLE}-7.x-${TARGET}
+        PREFIX_FOLDER=${TOOLCHAIN_FOLDER}/${SOURCE}-7.x-${TARGET}
         BRANCH_PFX=personal
         BRANCH_SFX=7.x-${TARGET}
     fi
