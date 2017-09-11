@@ -98,4 +98,4 @@ java -jar ${BIN_DIR}/minsignapk.jar \
 rm ${ZIP_NAME}-firstsign.zip ${ZIP_NAME}-adjusted.zip
 
 # Echo zip location
-echo -e "Signed zip: $(pwd)/${ZIP_NAME}-signed.zip\n"
+echo "Signed zip: $(pwd)/${ZIP_NAME}-signed.zip\n"

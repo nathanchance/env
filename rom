@@ -380,15 +380,15 @@ END=$( TZ=MST date +%s )
 
 # IF THE BUILD WAS SUCCESSFUL, PRINT FILE LOCATION, AND SIZE
 if [[ ${SUCCESS} = true ]]; then
-    echo -e ${RED}"FILE LOCATION: $( ls ${ZIP_MOVE}/*.zip )"
-    echo -e "SIZE: $( du -h ${ZIP_MOVE}/*.zip | awk '{print $1}' )"${RST}
+    echo ${RED}"FILE LOCATION: $( ls ${ZIP_MOVE}/*.zip )"
+    echo "SIZE: $( du -h ${ZIP_MOVE}/*.zip | awk '{print $1}' )"${RST}
 fi
 
 # PRINT THE TIME THE SCRIPT FINISHED
 # AND HOW LONG IT TOOK REGARDLESS OF SUCCESS
-echo -e ${RED}"TIME: $( TZ=MST date +%D\ %r | awk '{print toupper($0)}' )"
-echo -e ${RED}"DURATION: $( format_time ${END} ${START} )"${RST}
-echo -e "\a"
+echo ${RED}"TIME: $( TZ=MST date +%D\ %r | awk '{print toupper($0)}' )"
+echo ${RED}"DURATION: $( format_time ${END} ${START} )"${RST}
+echo "\a"
 
 
 ##################
@@ -396,16 +396,16 @@ echo -e "\a"
 ##################
 
 # DATE: BASH_SOURCE (PARAMETERS)
-echo -e "\n$( TZ=MST date +"%m/%d/%Y %H:%M:%S" ): ${BASH_SOURCE} ${PARAMS}" >> ${LOG}
+echo "\n$( TZ=MST date +"%m/%d/%Y %H:%M:%S" ): ${BASH_SOURCE} ${PARAMS}" >> ${LOG}
 
 # BUILD <SUCCESSFUL|FAILED> IN # MINUTES AND # SECONDS
 if [[ -n ${BUILD_RESULT_STRING} ]]; then
-    echo -e "${BUILD_RESULT_STRING} IN \c" >> ${LOG}
+    echo "${BUILD_RESULT_STRING} IN \c" >> ${LOG}
 fi
-echo -e "$( format_time ${END} ${START} )" >> ${LOG}
+echo "$( format_time ${END} ${START} )" >> ${LOG}
 
 # ONLY ADD A LINE ABOUT FILE LOCATION IF SCRIPT COMPLETED SUCCESSFULLY
 if [[ ${SUCCESS} = true ]]; then
     # FILE LOCATION: <PATH>
-    echo -e "FILE LOCATION: $( ls ${ZIP_MOVE}/*.zip )" >> ${LOG}
+    echo "FILE LOCATION: $( ls ${ZIP_MOVE}/*.zip )" >> ${LOG}
 fi

@@ -103,11 +103,11 @@ repo sync --force-sync packages/services/ThemeInterfacer
 
 # PRINT RESULTS
 echo_text "RESULTS"
-echo -e ${RESULT_STRING}
+echo ${RESULT_STRING}
 
 # STOP TRACKING TIME
 END=$( date +%s )
 
 # PRINT RESULT TO USER
 echo_text "SCRIPT COMPLETED!"
-echo -e ${RED}"TIME: $(format_time ${END} ${START})"${RST}; new_line
+echo ${RED}"TIME: $(format_time ${END} ${START})"${RST}; new_line

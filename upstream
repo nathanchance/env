@@ -121,4 +121,4 @@ gen_versions
                 || cherry_pick
 
 # ALERT OF SCRIPT END
-echo -e "\a"
+echo "\a"

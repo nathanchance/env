@@ -111,7 +111,7 @@ cd ${SOURCE_DIR}
 
 # PRINT RESULTS
 echo_text "RESULTS"
-echo -e ${RESULT_STRING}
+echo ${RESULT_STRING}
 
 # Signal to rom.sh to exit
 [[ ${EXIT_NEEDED} = true ]] && exit 1

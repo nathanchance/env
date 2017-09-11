@@ -163,7 +163,7 @@ function build() {
     
     mv defconfig .config
 
-    echo -e "\a"
+    echo "\a"
 
     ct-ng nconfig
 

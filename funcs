@@ -36,11 +36,11 @@ YLW="\033[01;33m"
 # PRINTS A FORMATTED HEADER TO POINT OUT WHAT IS BEING DONE TO THE USER
 function echo_text() {
     [[ -n ${2} ]] && COLOR=${2} || COLOR=${RED}
-    echo -e ${COLOR}
-    echo -e "====$( for i in $( seq ${#1} ); do echo -e "=\c"; done )===="
-    echo -e "==  ${1}  =="
-    echo -e "====$( for i in $( seq ${#1} ); do echo -e "=\c"; done )===="
-    echo -e ${RST}
+    echo ${COLOR}
+    echo "====$( for i in $( seq ${#1} ); do echo "=\c"; done )===="
+    echo "==  ${1}  =="
+    echo "====$( for i in $( seq ${#1} ); do echo "=\c"; done )===="
+    echo ${RST}
 }
 
 # FORMATS THE TIME
@@ -79,22 +79,22 @@ function format_time() {
 
 # CREATES A NEW LINE IN TERMINAL
 function new_line() {
-    echo -e ""
+    echo ""
 }
 
 # PRINTS AN ERROR IN BOLD RED
 function report_error() {
-    echo -e ""
-    echo -e ${RED}"${1}"${RST}
-    [[ -z ${2} ]] && echo -e ""
+    echo ""
+    echo ${RED}"${1}"${RST}
+    [[ -z ${2} ]] && echo ""
     exit
 }
 
 # PRINTS A WARNING IN BOLD YELLOW
 function report_warning() {
-    echo -e ""
-    echo -e ${YLW}"${1}"${RST}
-    [[ -z ${2} ]] && echo -e ""
+    echo ""
+    echo ${YLW}"${1}"${RST}
+    [[ -z ${2} ]] && echo ""
 }
 
 # CHECKS TO SEE IF SCRIPT IS BEING RUN ON A MAC
