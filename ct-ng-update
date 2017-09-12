@@ -60,6 +60,8 @@ SOURCE_FOLDER=${HOME}/Toolchains/build/ct-ng
 ###############
 
 function update() {
+    echo_text "UPDATING SOURCES"
+
     [[ ! -d ${SOURCE_FOLDER} ]] && \
         cd $( dirname ${SOURCE_FOLDER} ) && \
         git clone https://github.com/crosstool-ng/crosstool-ng ct-ng
@@ -76,6 +78,8 @@ function update() {
 
 function build() {
     [[ ! -d ${SOURCE_FOLDER} ]] && update
+
+    echo_text "BUILDING CROSSTOOL-NG"
 
     git clean -fxd
 
