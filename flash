@@ -225,7 +225,7 @@ function setup_compilation() {
     echo "${BOLD}Toolchain location:${RST} ${TOOLCHAIN}\n"
 
     # SHOW GCC VERSION
-    GCC_VERSION="$( ${TOOLCHAIN}gcc --version | ag --nocolor gcc )"
+    GCC_VERSION="$( ${TOOLCHAIN}gcc --version | head -1 )"
     echo "${BOLD}GCC version:${RST} ${GCC_VERSION}\n"
 
     # GET PRECISE LOCATION OF CCACHE
