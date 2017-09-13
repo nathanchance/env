@@ -50,7 +50,7 @@ done
 #             #
 ###############
 
-SOURCE_FOLDER=${HOME}/Toolchains/build/ct-ng
+SOURCE_FOLDER=${HOME}/TCs/build/ct-ng
 
 
 ###############

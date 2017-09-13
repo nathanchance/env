@@ -150,19 +150,16 @@ esac
 
 case ${TOOLCHAIN_NAME} in
     "a-4.9")
-        TOOLCHAIN_FOLDER=aosp-4.9
         TOOLCHAIN_PREFIX=aarch64-linux-android- ;;
     "l-7.x")
-        TOOLCHAIN_FOLDER=linaro-7.x${TC_TARGET}
         TOOLCHAIN_PREFIX=aarch64-linaro-linux-android- ;;
     "g-8.x")
-        TOOLCHAIN_FOLDER=gnu-8.x
         TOOLCHAIN_PREFIX=aarch64-gnu-linux-gnu- ;;
     *)
         report_error "Invalid toolchain specified!" ;;
 esac
 
-TOOLCHAIN_FOLDER=${HOME}/Toolchains/${TOOLCHAIN_FOLDER}
+TOOLCHAIN_FOLDER=${HOME}/TCs/${TOOLCHAIN_NAME}${TC_TARGET}
 
 case ${MODE} in
     "private")

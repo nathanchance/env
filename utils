@@ -39,7 +39,7 @@ function aliases() {
     alias lnx='cd ${HOME}/Kernels/linux'
     alias pkg='cd ${HOME}/Repos/PKGBUILDs'
     alias op5='cd ${HOME}/Kernels/oneplus5'
-    alias tlc='cd ${HOME}/Toolchains'
+    alias tlc='cd ${HOME}/TCs'
     alias spt='cd ${HOME}/Scripts'
 
     # Alias hub to git

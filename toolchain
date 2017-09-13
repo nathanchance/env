@@ -64,7 +64,7 @@ done
 #             #
 ###############
 
-TOOLCHAIN_FOLDER=${HOME}/Toolchains
+TOOLCHAIN_FOLDER=${HOME}/TCs
 BUILD_FOLDER=${TOOLCHAIN_FOLDER}/build
 SOURCE_FOLDER=${BUILD_FOLDER}/source
 PREBUILT_FOLDER=${TOOLCHAIN_FOLDER}/prebuilts
@@ -80,10 +80,12 @@ function set_variables() {
     case ${SOURCE} in
         "gnu")
             export GCC_BRANCH=gcc-7-branch
-            export POS=3 ;;
+            export POS=3
+            export PERSONAL_PFX=g ;;
         "linaro")
             export GCC_BRANCH=linaro-local/gcc-7-integration-branch
-            export POS=5 ;;
+            export POS=5
+            export PERSONAL_PFX=l ;;
         *)
             report_error "Invalid GCC type!"
     esac
@@ -106,7 +108,7 @@ function set_variables() {
         BRANCH_PFX=${TUPLE_PFX}
         BRANCH_SFX=7.x
     else
-        PREFIX_FOLDER=${TOOLCHAIN_FOLDER}/${SOURCE}-7.x-${TARGET}
+        PREFIX_FOLDER=${TOOLCHAIN_FOLDER}/${PERSONAL_PFX}-7.x-${TARGET}
         BRANCH_PFX=personal
         BRANCH_SFX=7.x-${TARGET}
     fi
