@@ -138,28 +138,29 @@ ZIP_MOVE_PARENT=${HOME}/Web/me/ROMs
 # Otherwise, define them for our various ROMs
 case "${ROM}" in
     "aosp")
-        SOURCE_DIR=${ANDROID_DIR}
+        SOURCE_DIR=${ANDROID_DIR}/AOSP
+        ZIP_MOVE=${ZIP_MOVE_PARENT}/AOSP/${DEVICE} ;;
     "du-aosp")
         SOURCE_DIR=${ANDROID_DIR}/DU-AOSP
-        ZIP_MOVE=${ZIP_MOVE_PARENT}/../DirtyUnicorns/${DEVICE} ;;
+        ZIP_MOVE=${ZIP_MOVE_PARENT}/../DU/${DEVICE} ;;
     "du-caf")
         SOURCE_DIR=${ANDROID_DIR}/DU-CAF
-        ZIP_MOVE=${ZIP_MOVE_PARENT}/../DirtyUnicorns/${DEVICE} ;;
+        ZIP_MOVE=${ZIP_MOVE_PARENT}/../DU/${DEVICE} ;;
     "du-personal")
         SOURCE_DIR=${ANDROID_DIR}/DU
-        ZIP_MOVE=${ZIP_MOVE_PARENT}/../DirtyUnicorns/personal ;;
+        ZIP_MOVE=${ZIP_MOVE_PARENT}/../DU/personal ;;
     "krexus")
         SOURCE_DIR=${ANDROID_DIR}/Krexus
         ZIP_MOVE=${ZIP_MOVE_PARENT}/Krexus/${DEVICE} ;;
     "lineageos")
         SOURCE_DIR=${ANDROID_DIR}/LineageOS
-        ZIP_MOVE=${ZIP_MOVE_PARENT}/LineageOS/${DEVICE} ;;
+        ZIP_MOVE=${ZIP_MOVE_PARENT}/LOS/${DEVICE} ;;
     "lineageoms")
         SOURCE_DIR=${ANDROID_DIR}/LineageOMS
-        ZIP_MOVE=${ZIP_MOVE_PARENT}/LineageOMS/${DEVICE} ;;
+        ZIP_MOVE=${ZIP_MOVE_PARENT}/LOMS/${DEVICE} ;;
     "pn")
         SOURCE_DIR=${ANDROID_DIR}/PN
-        ZIP_MOVE=${ZIP_MOVE_PARENT}/PureNexus/${DEVICE} ;;
+        ZIP_MOVE=${ZIP_MOVE_PARENT}/PN/${DEVICE} ;;
     "vanilla")
         SOURCE_DIR=${ANDROID_DIR}/Vanilla
         ZIP_MOVE=${ZIP_MOVE_PARENT}/Vanilla/${DEVICE} ;;
