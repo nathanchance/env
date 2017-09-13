@@ -107,7 +107,7 @@ done
 # PARAMETER VERIFICATION
 # IF ROM WASN'T SPECIFIED, IT'S A BUILD FOR ME
 if [[ -z ${ROM} ]]; then
-    ROM=du-personal
+    ROM=du-aosp
     DEVICE=angler
 fi
 
@@ -132,40 +132,36 @@ fi
 # OUT_DIR: Directory that holds the compiled ROM files
 # SOURCE_DIR: Directory that holds the ROM source
 # ZIP_MOVE: Directory to hold completed ROM zips
-ANDROID_DIR=${HOME}
+ANDROID_DIR=${HOME}/ROMs
 ZIP_MOVE_PARENT=${HOME}/Web/me/ROMs
 
 # Otherwise, define them for our various ROMs
 case "${ROM}" in
-    "abc")
-        SOURCE_DIR=${ANDROID_DIR}/ROMs/ABC
-        ZIP_MOVE=${ZIP_MOVE_PARENT}/ABC/${DEVICE} ;;
+    "aosp")
+        SOURCE_DIR=${ANDROID_DIR}
     "du-aosp")
-        SOURCE_DIR=${ANDROID_DIR}/ROMs/DU-AOSP
+        SOURCE_DIR=${ANDROID_DIR}/DU-AOSP
         ZIP_MOVE=${ZIP_MOVE_PARENT}/../DirtyUnicorns/${DEVICE} ;;
     "du-caf")
-        SOURCE_DIR=${ANDROID_DIR}/ROMs/DU-CAF
+        SOURCE_DIR=${ANDROID_DIR}/DU-CAF
         ZIP_MOVE=${ZIP_MOVE_PARENT}/../DirtyUnicorns/${DEVICE} ;;
     "du-personal")
-        SOURCE_DIR=${ANDROID_DIR}/ROMs/DU
+        SOURCE_DIR=${ANDROID_DIR}/DU
         ZIP_MOVE=${ZIP_MOVE_PARENT}/../DirtyUnicorns/personal ;;
     "krexus")
-        SOURCE_DIR=${ANDROID_DIR}/ROMs/Krexus
+        SOURCE_DIR=${ANDROID_DIR}/Krexus
         ZIP_MOVE=${ZIP_MOVE_PARENT}/Krexus/${DEVICE} ;;
     "lineageos")
-        SOURCE_DIR=${ANDROID_DIR}/ROMs/LineageOS
+        SOURCE_DIR=${ANDROID_DIR}/LineageOS
         ZIP_MOVE=${ZIP_MOVE_PARENT}/LineageOS/${DEVICE} ;;
     "lineageoms")
-        SOURCE_DIR=${ANDROID_DIR}/ROMs/LineageOMS
+        SOURCE_DIR=${ANDROID_DIR}/LineageOMS
         ZIP_MOVE=${ZIP_MOVE_PARENT}/LineageOMS/${DEVICE} ;;
-    "omni")
-        SOURCE_DIR=${ANDROID_DIR}/ROMs/Omni
-        ZIP_MOVE=${ZIP_MOVE_PARENT}/Omni/${DEVICE} ;;
     "pn")
-        SOURCE_DIR=${ANDROID_DIR}/ROMs/PN
+        SOURCE_DIR=${ANDROID_DIR}/PN
         ZIP_MOVE=${ZIP_MOVE_PARENT}/PureNexus/${DEVICE} ;;
     "vanilla")
-        SOURCE_DIR=${ANDROID_DIR}/ROMs/Vanilla
+        SOURCE_DIR=${ANDROID_DIR}/Vanilla
         ZIP_MOVE=${ZIP_MOVE_PARENT}/Vanilla/${DEVICE} ;;
     *)
         report_error "Unknown ROM "${1}" passed!" ;;
@@ -227,16 +223,8 @@ echo_text "PREPARING $( echo ${DEVICE} | awk '{print toupper($0)}' )"
 
 # NOT ALL ROMS USE BREAKFAST
 case "${ROM}" in
-    "aosip")
-        lunch aosip_${DEVICE}-${VARIANT} ;;
-    "krexus")
-        lunch krexus_${DEVICE}-${VARIANT} ;;
-    "vanilla")
-        if [[ ${DEVICE} == "angler" ]]; then
-            export KBUILD_BUILD_USER=skye
-            export KBUILD_BUILD_HOST=vanilla
-        fi
-        lunch vanilla_${DEVICE}-${VARIANT} ;;
+    "aosp"|"krexus"|"vanilla")
+        lunch ${ROM}_${DEVICE}-${VARIANT} ;;
     *)
         breakfast ${DEVICE} ${VARIANT} ;;
 esac
@@ -301,9 +289,7 @@ if [[ -n ${MAKE_TYPE} ]]; then
 else
     # NOT ALL ROMS USE BACON
     case "${ROM}" in
-        "aosip")
-            make_command kronic | tee -a ${LOG_NAME} ;;
-        "krexus")
+        "aosp"|"krexus")
             make_command otapackage | tee -a ${LOG_NAME} ;;
         "vanilla")
             make_command vanilla | tee -a ${LOG_NAME} ;;

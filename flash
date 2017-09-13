@@ -163,7 +163,7 @@ TOOLCHAIN_FOLDER=${HOME}/TCs/${TOOLCHAIN_NAME}${TC_TARGET}
 
 case ${MODE} in
     "private")
-        ZIP_MOVE=${ZIP_MOVE_HEAD}/../me/Flash-Kernel/${DEVICE}${ZIP_MOVE_ADD}
+        ZIP_MOVE=${ZIP_MOVE_HEAD}/../me/FK
         ANYKERNEL_BRANCH=${DEVICE}-flash-personal-${ANDROID_VERSION}
         KEYS=testkey ;;
     "public")
