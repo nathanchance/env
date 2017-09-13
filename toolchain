@@ -136,8 +136,8 @@ function clone_repo() {
 }
 
 function update_repo() {
-   [[ -f ${SOURCE_FOLDER}/${1} ]] && cd ${SOURCE_FOLDER}/${1} \
-                                  || clone_repo ${1} ${2} && return
+   [[ -d ${SOURCE_FOLDER}/${1} ]] && cd ${SOURCE_FOLDER}/${1} \
+                                  || clone_repo ${1} ${2}
 
     git checkout ${2}
 
@@ -155,7 +155,7 @@ function build() {
 
     ct-ng clean
 
-    [[ -z ${TARGET} ]] && CONFIG_FOLDER=${PREBUILT_FOLDER} \
+    [[ -n ${TARGET} ]] && CONFIG_FOLDER=${PREBUILT_FOLDER} \
                        || CONFIG_FOLDER=${PREFIX_FOLDER}
     [[ ! -f ${CONFIG_FOLDER}/bin/${TUPLE}-ct-ng.config ]] && \
                     report_error "Previous config file could not be found!"
