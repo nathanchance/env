@@ -149,6 +149,9 @@ function update_repo() {
 }
 
 function build() {
+    [[ ! -d ${PREBUILT_FOLDER} ]] && cd ${TOOLCHAIN_FOLDER} \
+            && git clone git@github.com:nathanchance/gcc-prebuilts prebuilts
+
     cd ${BUILD_FOLDER}
 
     git -C ${PREBUILT_FOLDER} checkout ${PREBUILT_BRANCH}
