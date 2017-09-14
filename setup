@@ -1,0 +1,86 @@
+#!/usr/bin/env bash
+#
+# Simple script to help install some basic utilities after a clean wipe
+#
+# Copyright (C) 2017 Nathan Chancellor
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>
+
+
+# SOURCE OUR UNIVERSAL FUNCTIONS SCRIPT AND MAC CHECK
+SCRIPT_DIR=$( cd $( dirname $( readlink -f "${BASH_SOURCE[0]}" ) ) && pwd )
+source ${SCRIPT_DIR}/funcs && mac_check
+
+WORKING_DIR=${HOME}/Misc/Building
+
+function santity_checks() {
+    [[ -z $( pacman -Qi sudo ) ]] && report_error "You must have sudo installed!"
+
+    [[ ! -f ~/.ssh/id_rsa ]] && report_error "You must have a git ssh key setup!"
+}
+
+function install_if_absent() {
+    [[ $( command -v pacaur ) ]] && MANAGER=pacaur \
+                                 || MANAGER="sudo pacman"
+
+    [[ -z $( ${MANAGER} -Qi ${1} ) ]] && ${MANAGER} -Si --noconfirm ${1}
+}
+
+function build_pacaur() {
+    install_if_absent expac
+    install_if_absent git
+    install_if_absent perl
+
+    mkdir -p ${WORKING_DIR} && cd ${WORKING_DIR}
+
+    curl https://aur.archlinux.org/cgit/aur.git/plain/PKGBUILD?h=cower > PKGBUILD
+
+    gpg --recv-keys 487EACC08557AD082088DABA1EB2638FF56C0C53
+
+    makepkg -si --noconfirm
+
+    curl https://aur.archlinux.org/cgit/aur.git/plain/PKGBUILD?h=pacaur > PKGBUILD
+   
+    makepkg -si --noconfirm
+}
+
+function move_files() {
+    mkdir -p ${HOME}/Repos && cd ${HOME}/Repos
+
+    git clone git@github.com:nathanchance/dotfiles
+
+    cp -v dotfiles/Common/.git-prompt.sh ${HOME}
+
+    cp -rv dotfiles/Common/vim ${HOME}
+    mv -v ${HOME}/vim/.vimrc ${HOME}
+
+    cp -v dotfiles/Linux/.bashrc ${HOME}
+
+    cp -v dotfiles/Linux/.tmux.conf ${HOME}
+
+    mkdir -p ${HOME}/.config/neofetch
+    cp -v dotfiles/Linux/config ${HOME}/.config/neofetch
+
+    sudo cp -v dotfiles/Linux/motd.sh /etc/profile.d
+}
+
+sanity_checks
+build_pacaur
+install_if_absent ccache
+install_if_absent hub
+install_if_absent neofetch
+install_if_absent the_silver_searcher
+install_if_absent tmux
+move_files
+source ~/.bashrc
