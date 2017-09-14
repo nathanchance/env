@@ -367,3 +367,30 @@ function kernel_remotes() {
 
     git fetch --all
 }
+
+function gmrg() {
+    [[ $# -lt 2 ]] && echo "\n${RED}gmrg <remote> <branch>${RST}\n" && return 1
+
+    git fetch ${1} ${2}
+
+    local CB=$( git rev-parse --abbrev-ref HEAD )
+    local BTM=${2}
+    local RANGE=${CB}..${BTM}
+    local URL
+
+    [[ $( echo ${1} | grep http ) ]] && URL=${1} \
+                                     || URL=$( git remote get-url ${1} )
+
+    git merge -m "Merge branch '${BTM}' of ${URL} into ${CB}
+
+Commits in ${BTM}: ($( git rev-list --count ${RANGE} ) commits)
+$( git log --reverse --format="        %s" ${RANGE} )
+
+Signed-off-by: $( git config --get user.name ) <$( git config --get user.email )>"
+
+[[ $? -ne 0 ]] && echo "Merge needs manual intervention!
+
+Resolve conflicts then run git merge --continue!" && return 1
+
+echo_text "${BTM} merged cleanly!" ${GRN}
+}
