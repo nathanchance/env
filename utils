@@ -197,10 +197,8 @@ function rps {
                 ARGS+="vendor/opengapps/sources/all "
                 ARGS+="vendor/opengapps/sources/arm "
                 ARGS+="vendor/opengapps/sources/arm64" ;;
-            "v")
-                ARGS="vendor/flash" ;;
             *)
-                ARGS=${1} ;;
+                ARGS="$@" ;;
         esac
     fi
 
