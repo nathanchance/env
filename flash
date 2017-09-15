@@ -150,6 +150,7 @@ esac
 
 case ${TOOLCHAIN_NAME} in
     "a-4.9")
+        unset TC_TARGET
         TOOLCHAIN_PREFIX=aarch64-linux-android- ;;
     "l-7.x")
         TOOLCHAIN_PREFIX=aarch64-linaro-linux-android- ;;
