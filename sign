@@ -40,13 +40,13 @@ while [[ $# -ge 1 ]]; do
     case "${1}" in
         # FILE TO SIGN
         "-f"|"--file")
-            shift
+            shift && enforce_value "$@"
 
             FILE=${1} ;;
 
         # KEY TO USE
         "-k"|"--key")
-            shift
+            shift && enforce_value "$@"
 
             KEY=${1} ;;
 
@@ -59,7 +59,7 @@ done
 
 # Defaults and sanity check
 [[ -z ${FILE} ]] && report_error "You didn't specify a file!"
-[[ -z ${KEY} ]] && KEY=nathan
+[[ -z ${KEY} ]] && KEY=testkey
 
 # Error out if the file isn't a zip file
 [[ $( echo ${FILE} | grep -v zip ) ]] && report_error "This can only sign zip files!"
