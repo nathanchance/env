@@ -133,9 +133,6 @@ function clone_repo() {
             git clone -b ${2} https://git.linaro.org/toolchain/gcc.git ${1} ;;
         "linux")
             git clone -b ${2} https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git ${1};;
-        "prebuilts")
-            cd ..
-            git clone git@github.com:nathanchance/gcc-prebuilts ${1} ;;
     esac
 }
 
