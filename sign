@@ -70,7 +70,7 @@ done
 ##############
 
 # Show some text
-echo_text "Signing ${FILE}"
+header "Signing ${FILE}"
 
 # Shift to the folder containing the zip
 cd $(dirname ${FILE})

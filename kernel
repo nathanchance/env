@@ -93,7 +93,7 @@ function build() {
 [[ ! -f $(pwd)/Makefile ]] && report_error "This must be run in a kernel tree!"
 
 # SHOW THE BASE VERSION WE ARE MAKING
-echo_text "BUILDING $( make kernelversion )"
+header "BUILDING $( make kernelversion )"
 
 # SHOW COMPILATION BASED ON FLAGS
 case ${VERBOSITY} in

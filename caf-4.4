@@ -92,7 +92,7 @@ sound"
 function setup_tree() {
     [[ ! -f Makefile ]] && report_error "This must be run in a kernel tree!"
 
-    echo_text "Fetching CAF"
+    header "Fetching CAF"
 
     [[ ! $( git remote | grep caf ) ]] && echo "Adding CAF remote" \
             && git remote add caf https://source.codeaurora.org/quic/la/kernel/msm-4.4
@@ -107,7 +107,7 @@ function validate_tags() {
     # IF SECOND TAG WASN'T SPECIFIED, USE THE MOST RECENT ON REMOTE
     [[ -z ${ST} ]] && ST=$( git tag -l | ag --nocolor ${PRFX} | tail -1 )
    
-    echo_text "Showing changelog for ${ST}"
+    header "Showing changelog for ${ST}"
     
     export RANGE=${FT}..${ST}
 }
@@ -117,9 +117,9 @@ function show() {
     if [[ -n ${1} ]]; then
         ND=$( git rev-list --count ${RANGE} 2> /dev/null )
         if [[ -n ${ND} ]] || [[ ${ND} -ne 0 ]]; then
-            echo_text "Showing changes in ${1}" ${BLUE}
+            header "Showing changes in ${1}" ${BLUE}
         else
-            echo_text "No changes in ${1}" ${RED}
+            header "No changes in ${1}" ${RED}
             return
         fi
     fi

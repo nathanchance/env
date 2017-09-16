@@ -78,7 +78,7 @@ function gen_versions() {
 
 # MERGE FUNCTION
 function merge() {
-    echo_text "MERGING ${NEW_VERSION}"
+    header "MERGING ${NEW_VERSION}"
 
     git merge v${NEW_VERSION} -m "Merge ${NEW_VERSION} into $( git rev-parse --abbrev-ref HEAD )
 
@@ -89,18 +89,18 @@ Signed-off-by: $( git config --get user.name ) <$( git config --get user.email )
 
     [[ $? -ne 0 ]] && report_error "Merge needs manual intervention!
     
-Resolve conflicts then run git merge --continue!" || echo_text "${NEW_VERSION} MERGED CLEANLY!" ${GRN}
+Resolve conflicts then run git merge --continue!" || header "${NEW_VERSION} MERGED CLEANLY!" ${GRN}
 }
 
 # CHERRY-PICK FUNCTION
 function cherry_pick() {
-    echo_text "CHERRY-PICKING ${NEW_VERSION}"
+    header "CHERRY-PICKING ${NEW_VERSION}"
 
     git cherry-pick ${RANGE}
 
     [[ $? -ne 0 ]] && report_error "Cherry-pick needs manual intervention! Resolve conflicts then run:
 
-git add . && git cherry-pick --continue" || echo_text "${NEW_VERSION} PICKED CLEANLY!" ${GRN}
+git add . && git cherry-pick --continue" || header "${NEW_VERSION} PICKED CLEANLY!" ${GRN}
 }
 
 
@@ -108,7 +108,7 @@ git add . && git cherry-pick --continue" || echo_text "${NEW_VERSION} PICKED CLE
 [[ ! -f Makefile ]] && report_error "Run this in a kernel tree!"
 
 # MAKE SURE STABLE REMOTES EXISTS
-echo_text "UPDATING REMOTES"
+header "UPDATING REMOTES"
 
 verify_remote stable
 verify_remote stable-rc

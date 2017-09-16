@@ -57,4 +57,4 @@ Signed-off-by: $( git config --get user.name ) <$( git config --get user.email )
 
 [[ $? -ne 0 ]] && report_error "Merge needs manual intervention!
 
-Resolve conflicts then run git merge --continue!" || echo_text "${BTM} merged cleanly!" ${GRN}
+Resolve conflicts then run git merge --continue!" || header "${BTM} merged cleanly!" ${GRN}

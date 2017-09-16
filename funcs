@@ -39,7 +39,7 @@ function echo() {
 }
 
 # PRINTS A FORMATTED HEADER TO POINT OUT WHAT IS BEING DONE TO THE USER
-function echo_text() {
+function header() {
     [[ -n ${2} ]] && COLOR=${2} || COLOR=${RED}
     echo ${COLOR}
     echo "====$( for i in $( seq ${#1} ); do echo "=\c"; done )===="
@@ -80,11 +80,6 @@ function format_time() {
     fi
 
     echo ${TIME_STRING}
-}
-
-# CREATES A NEW LINE IN TERMINAL
-function new_line() {
-    echo ""
 }
 
 # PRINTS AN ERROR IN BOLD RED

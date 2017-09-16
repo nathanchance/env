@@ -97,7 +97,7 @@ clear && export EXPERIMENTAL_USE_JAVA8=true && START=$( TZ=MST date +%s )
 cd ${SOURCE_DIR}
 
 if [[ ${SYNC} = true ]]; then
-    echo_text "SYNCING LATEST SOURCES"
+    header "SYNCING LATEST SOURCES"
 
     repo sync --force-sync -j$( nproc --all )
 fi
@@ -107,7 +107,7 @@ fi
 # SETUP BUILD ENVIRONMENT #
 ###########################
 
-echo_text "SETTING UP BUILD ENVIRONMENT"
+header "SETTING UP BUILD ENVIRONMENT"
 
 # CHECK AND SEE IF WE ARE ON ARCH
 # IF SO, ACTIVARE A VIRTUAL ENVIRONMENT FOR PROPER PYTHON SUPPORT
@@ -122,7 +122,7 @@ source build/envsetup.sh
 # PREPARE DEVICE #
 ##################
 
-echo_text "PREPARING $( echo ${DEVICE} | awk '{print toupper($0)}' )"
+header "PREPARING $( echo ${DEVICE} | awk '{print toupper($0)}' )"
 
 lunch omni_${DEVICE}-eng
 
@@ -131,7 +131,7 @@ lunch omni_${DEVICE}-eng
 # CLEAN UP #
 ############
 
-echo_text "CLEANING UP OUT DIRECTORY"
+header "CLEANING UP OUT DIRECTORY"
 
 mka clobber
 
@@ -140,7 +140,7 @@ mka clobber
 # START BUILDING #
 ##################
 
-echo_text "MAKING TWRP"
+header "MAKING TWRP"
 NOW=$( TZ=MST date +"%Y-%m-%d-%S" )
 time mka recoveryimage | tee -a ${LOG_NAME}
 
@@ -200,7 +200,7 @@ if [[ -f /etc/arch-release ]]; then
 fi
 
 END=$( TZ=MST date +%s )
-echo_text "${BUILD_RESULT_STRING}!"
+header "${BUILD_RESULT_STRING}!"
 
 
 ######################
@@ -216,7 +216,7 @@ fi
 # PRINT THE TIME THE SCRIPT FINISHED
 # AND HOW LONG IT TOOK REGARDLESS OF SUCCESS
 echo ${RED}"TIME FINISHED: $( TZ=MST date +%D\ %r | awk '{print toupper($0)}' )"
-echo ${RED}"DURATION: $( format_time ${END} ${START} )"${RST}; new_line
+echo ${RED}"DURATION: $( format_time ${END} ${START} )"${RST}; echo
 
 
 ##################

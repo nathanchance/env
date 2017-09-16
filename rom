@@ -191,7 +191,7 @@ FLAGS="-j$( nproc --all ) --force-sync -c --no-clone-bundle --no-tags --optimize
 
 # IF THE SYNC IS REQUESTED, DO SO
 if [[ ${SYNC} = true ]]; then
-    echo_text "SYNCING LATEST SOURCES"; new_line
+    header "SYNCING LATEST SOURCES"; echo
 
     ${REPO_SYNC} ${FLAGS}
 
@@ -205,7 +205,7 @@ fi
 # SETUP BUILD ENVIRONMENT #
 ###########################
 
-echo_text "SETTING UP BUILD ENVIRONMENT"
+header "SETTING UP BUILD ENVIRONMENT"
 
 # CHECK AND SEE IF WE ARE ON ARCH
 # IF SO, ACTIVARE A VIRTUAL ENVIRONMENT FOR PROPER PYTHON SUPPORT
@@ -220,7 +220,7 @@ source build/envsetup.sh
 # PREPARE DEVICE #
 ##################
 
-echo_text "PREPARING $( echo ${DEVICE} | awk '{print toupper($0)}' )"
+header "PREPARING $( echo ${DEVICE} | awk '{print toupper($0)}' )"
 
 # NOT ALL ROMS USE BREAKFAST
 case "${ROM}" in
@@ -236,7 +236,7 @@ esac
 ############
 
 if [[ ${REPOPICK} = true ]]; then
-    echo_text "RUNNING REPOPICK"
+    header "RUNNING REPOPICK"
     # Execute in a subshell otherwise everything is fubared
     (
     while [[ ${YN} != "n" ]]; do
@@ -261,7 +261,7 @@ fi
 # CLEAN UP #
 ############
 
-echo_text "CLEANING UP OUT DIRECTORY"
+header "CLEANING UP OUT DIRECTORY"
 
 if [[ -n ${CLEAN_TYPE} ]] && [[ ${CLEAN_TYPE} != "noclean" ]]; then
     make_command ${CLEAN_TYPE}
@@ -274,7 +274,7 @@ fi
 # START BUILDING #
 ##################
 
-echo_text "MAKING FILES"; new_line
+header "MAKING FILES"; echo
 
 NOW=$( TZ=MST date +"%Y-%m-%d-%S" )
 
@@ -286,7 +286,7 @@ if [[ -n ${MAKE_TYPE} ]]; then
     # PRINT RESULT #
     ################
 
-    new_line; echo_text "BUILD COMPLETED!"
+    echo; header "BUILD COMPLETED!"
 else
     # NOT ALL ROMS USE BACON
     case "${ROM}" in
@@ -348,7 +348,7 @@ else
     # PRINT RESULT #
     ################
 
-    echo_text "${BUILD_RESULT_STRING}!"
+    header "${BUILD_RESULT_STRING}!"
 fi
 
 

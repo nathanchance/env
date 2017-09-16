@@ -60,7 +60,7 @@ SOURCE_FOLDER=${HOME}/TCs/build/ct-ng
 ###############
 
 function update() {
-    echo_text "UPDATING SOURCES"
+    header "UPDATING SOURCES"
 
     [[ ! -d ${SOURCE_FOLDER} ]] && \
         cd $( dirname ${SOURCE_FOLDER} ) && \
@@ -79,7 +79,7 @@ function update() {
 function build() {
     [[ ! -d ${SOURCE_FOLDER} ]] && update
 
-    echo_text "BUILDING CROSSTOOL-NG"
+    header "BUILDING CROSSTOOL-NG"
 
     git clean -fxd
 
@@ -96,8 +96,8 @@ function build() {
     sudo ${MAKE} install
 
     [[ -f /usr/local/bin/ct-ng ]] && \
-    [[ -f ct-ng ]] && echo_text "BUILD SUCCESSFUL!" ${GRN} \
-                   || echo_text "BUILD FAILED!" ${RED}
+    [[ -f ct-ng ]] && header "BUILD SUCCESSFUL!" ${GRN} \
+                   || header "BUILD FAILED!" ${RED}
 }
 
 

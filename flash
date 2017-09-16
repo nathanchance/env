@@ -434,7 +434,7 @@ function ending_info() {
     fi
 
     echo ${RED}"TIME: $( date +%D\ %r | awk '{print toupper($0)}' )"
-    echo "DURATION: $( format_time ${END} ${START} )"${RST}; new_line
+    echo "DURATION: $( format_time ${END} ${START} )"${RST}; echo
 }
 
 
@@ -485,7 +485,7 @@ echo
 # MAKING KERNEL #
 #################
 
-echo_text "CLEANING UP AND MAKING KERNEL"
+header "CLEANING UP AND MAKING KERNEL"
 
 # DON'T SHOW CLEAN UP OUTPUT
 clean_up &>/dev/null
@@ -504,7 +504,7 @@ build_kernel
 if [[ -f ${KERNEL} ]]; then
     BUILD_RESULT="BUILD SUCCESSFUL"
 
-    echo_text "BUILDING FLASHABLE ZIP"
+    header "BUILDING FLASHABLE ZIP"
 
     setup_zip_info
     setup_folders
@@ -533,7 +533,7 @@ fi
 
 END=$( date +"%s" )
 
-echo_text "${BUILD_RESULT}!"
+header "${BUILD_RESULT}!"
 
 ending_info
 

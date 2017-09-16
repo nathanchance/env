@@ -392,5 +392,5 @@ Signed-off-by: $( git config --get user.name ) <$( git config --get user.email )
 
 Resolve conflicts then run git merge --continue!" && return 1
 
-echo_text "${BTM} merged cleanly!" ${GRN}
+header "${BTM} merged cleanly!" ${GRN}
 }
