@@ -56,7 +56,7 @@ while [[ $# -ge 1 ]]; do
 
             DEVICE=${1} ;;
 
-        "-db"|"--debug")
+        "-D"|"--debug")
             DEBUG=true ;;
 
         "-f"|"--flags")
