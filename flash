@@ -179,11 +179,12 @@ case ${MODE} in
         report_error "Invalid mode specified!" ;;
 esac
 
-# KERNEL INFO
+# COMPILATION VARIABLES
 ARCHITECTURE=arm64
-KERNEL_IMAGE=Image.gz-dtb
-THREADS=-j$( nproc --all )
-KERNEL=${OUT_FOLDER}/arch/${ARCHITECTURE}/boot/${KERNEL_IMAGE}
+CCACHE=$( command -v ccache )
+IMAGE=Image.gz-dtb
+KERNEL=${OUT_FOLDER}/arch/${ARCHITECTURE}/boot/${IMAGE}
+TOOLCHAIN=${TOOLCHAIN_FOLDER}/bin/${TOOLCHAIN_PREFIX}
 
 
 ###############
@@ -210,58 +211,66 @@ function clean_up() {
     fi
     # CLEAN SOURCE FOLDER:
     git clean -fxd
+    # MAKE OUT FOLDER (IT GETS REMOVED PER CLEAN UP FUNCTION)
+    mkdir -p ${OUT_FOLDER}
+}
+
+# MAKE WRAPPER FOR MAKE FUNCTION
+function kernel_make() {
+    make -j$( nproc --all ) \
+         ARCH=${ARCHITECTURE} \
+         CROSS_COMPILE="${CCACHE} ${TOOLCHAIN}" \
+         O=${OUT_FOLDER} \
+         "$@"
+}
+
+
+# SILENCE OUTPUT FUNCTION
+function make_wrapper() {
+    # ONLY SHOW ERRORS, WARNINGS, AND THE IMAGE LINE WHEN COMPILING (UNLESS DEBUG)
+    [[ ${DEBUG} = true ]] && kernel_make "$@" \
+                          || kernel_make "$@" |& ag --no-color "error:|warning:" && echo
 }
 
 
 # SETUP COMPILATION
 function setup_compilation() {
-    # MAKE OUT FOLDER (IT GETS REMOVED PER CLEAN UP FUNCTION)
-    mkdir -p ${OUT_FOLDER}
+    # POINT TO PROPER DEFCONFIG AND GENERATE VERSION FILES
+    make_wrapper ${DEFCONFIG} prepare
 
-    # SHOW TOOLCHAIN LOCATION
-    TOOLCHAIN="${TOOLCHAIN_FOLDER}/bin/${TOOLCHAIN_PREFIX}"
-    echo "${BOLD}Toolchain location:${RST} ${TOOLCHAIN}\n"
+    export FULL_VERSION=$( cat ${OUT_FOLDER}/include/config/kernel.release )
 
-    # SHOW GCC VERSION
-    GCC_VERSION="$( ${TOOLCHAIN}gcc --version | head -1 )"
-    echo "${BOLD}GCC version:${RST} ${GCC_VERSION}\n"
-
-    # GET PRECISE LOCATION OF CCACHE
-    CCACHE=$( command -v ccache )
     [[ -n ${CCACHE} ]] && CCACHE_SUPPORT="${GRN}Yes, found at ${CCACHE}${RST}" \
                        || CCACHE_SUPPORT="${RED}No, please install it!${RSR}"
-    echo "${BOLD}Compiling with ccache?${RST} ${CCACHE_SUPPORT}\n"
+
+    echo "${BOLD}Kernel version:${RST}    ${FULL_VERSION}\n"
+
+    echo "${BOLD}Current branch:${RST}    ${KERNEL_BRANCH}\n"
+
+    echo "${BOLD}Toolchain path:${RST}    ${TOOLCHAIN}\n"
+
+    echo "${BOLD}GCC version:${RST}       $( ${TOOLCHAIN}gcc --version | head -1 )\n"
+
+    echo "${BOLD}ccache support?${RST}    ${CCACHE_SUPPORT}\n"
 }
 
 
 # MAKE KERNEL
-function make_kernel() {
-    # SET MAKE VARIABLE FOR CONVENIENCE
-    # AS I FOOLISHLY LEARNED, ALL CAF CODE REQUIRES AN OUTPUT DIRECTORY
-    # TO WORK PROPERLY SO WHILE MY NEXUS DOESN'T CURRENTLY REQUIRE IT,
-    # IT'S GOOD TO BE AHEAD OF THE CURVE IF IT WORKS.
-    MAKE="make -j$( nproc --all ) O=${OUT_FOLDER} ARCH=${ARCHITECTURE}"
-
+function build_kernel() {
     # INCREMENT DIRTY VERSION NUMBER IF PASSED ABOVE
     [[ -n ${REVISION} ]] && echo $(( ${REVISION} - 1 )) > ${OUT_FOLDER}/.version
 
-    # POINT TO PROPER DEFCONFIG
-    ${MAKE} ${DEFCONFIG}
-
     # MAKE THE KERNEL
-    ${MAKE} CROSS_COMPILE="${CCACHE} ${TOOLCHAIN}" ${EXTRA_MAKE_FLAGS}
+    make_wrapper ${EXTRA_MAKE_FLAGS}
 }
 
 
 # SETUP ZIP INFO
 function setup_zip_info() {
-    # FULL_KERNEL VERSION IS AUTOMATICALLY GENERATED AT BUILD TIME
-    FULL_VERSION=$( cat ${OUT_FOLDER}/include/config/kernel.release )
-    echo "${BOLD}Kernel version:${RST} ${FULL_VERSION}\n"
+    echo "  - Generating zip info"
 
     # REMOVE EVERYTHING BEFORE FLASH IN THE FLASH_VERSION
-    BASE_VERSION=$( make kernelversion )
-    FLASH_VERSION=$( echo ${FULL_VERSION} | sed s/"${BASE_VERSION}"-// )
+    FLASH_VERSION=$( echo ${FULL_VERSION} | sed s/"$( make kernelversion)"-// )
 
     # REVISION IS PASSED AS A PARAMETER FOR BETA VERSIONS
     [[ -n ${REVISION} ]] && REVISION=".r${REVISION}"
@@ -277,12 +286,13 @@ function setup_zip_info() {
     export SIGNAPK_ZIP=${KERNEL_NAME}-signapk.zip
     export ADJUSTED_ZIP=${KERNEL_NAME}-adjusted.zip
     export SIGNED_ZIP=${KERNEL_NAME}.zip
-    echo "${BOLD}Kernel zip:${RST} ${SIGNED_ZIP}"; new_line
 }
 
 
 # SETUP FOLDERS
 function setup_folders() {
+    echo "  - Creating folders"
+
     # IF ZIPMOVE DOESN'T EXIST, MAKE IT
     [[ ! -d "${ZIP_MOVE}" ]] && mkdir -p "${ZIP_MOVE}"
 
@@ -300,6 +310,8 @@ function setup_folders() {
 
 # PACKAGE ZIP
 function package_zip() {
+    echo "  - Creating zip ${SIGNED_ZIP}"
+
     cd "${ANYKERNEL_FOLDER}"
 
     # MOVE THE KERNEL IMAGE
@@ -308,11 +320,9 @@ function package_zip() {
     # GRAB MODULES TOO IF THEY ARE PRESENT
     mkdir -p ${MODULES_FOLDER}
     find ${OUT_FOLDER} -name "*.ko" -exec cp {} ${MODULES_FOLDER} \;
-    if [[ $( ls -A ${MODULES_FOLDER} ) ]]; then
-        ${TOOLCHAIN}strip --strip-unneeded ${MODULES_FOLDER}/*.ko
-    else
-        rm -rf ${MODULES_FOLDER}
-    fi
+    [[ $( ls -A ${MODULES_FOLDER} ) ]] \
+            && ${TOOLCHAIN}strip --strip-unneeded ${MODULES_FOLDER}/*.ko \
+            || rm -rf ${MODULES_FOLDER}
 
     # PACKAGE THE ZIP WITHOUT THE README
     zip -q -r9 ${UNSIGNED_ZIP} * -x README.md ${UNSIGNED_ZIP}
@@ -331,23 +341,25 @@ function package_zip() {
               ${BIN_DIR}/${KEYS}.pk8 \
               ${ADJUSTED_ZIP} \
               ${SIGNED_ZIP}
-}
 
-# MOVE FILES
-function move_files() {
     # IF PACKAGING FAILED, ERROR OUT
     [[ ! -f ${SIGNED_ZIP} ]] && report_error "Kernel zip not found after signing!"
+}
 
-    # MOVE THE KERNEL ZIP TO WHERE IT NEEDS TO GO
+# MOVE FILES AND GENERATE MD5SUM
+function move_files() {
+    echo "  - Moving zip"
+
     mv ${SIGNED_ZIP} "${ZIP_MOVE}"
 
-    # GENERATE MD5SUM
     md5sum "${ZIP_MOVE}"/${SIGNED_ZIP} > "${ZIP_MOVE}"/${SIGNED_ZIP}.md5
 }
 
 
 # GENERATE CHANGELOG
 function generate_changelog() {
+    echo "  - Generating changelog"
+
     GITHUB="http://github.com/nathanchance"
     CHANGELOG="${ZIP_MOVE}"/${KERNEL_NAME}-changelog.txt
 
@@ -385,42 +397,42 @@ function generate_changelog() {
 
 # PUSH KERNEL ZIPS TO GITHUB
 function push_release() {
+    echo "  - Pushing release"
+
     cd "${ZIP_MOVE}"
 
     git add .
 
-    git commit --signoff -m "$(date +%Y%m%d): ${KERNEL_NAME}"
+    git commit -q --signoff -m "$(date +%Y%m%d): ${KERNEL_NAME}"
 
     git push -q
-
-    new_line
 }
 
 
 # TAG FOR RELEASES
 function tag_release() {
+    echo "  - Tagging release"
+
     cd "${SOURCE_FOLDER}"
 
     git tag -a "${KERNEL_NAME}" -m "${KERNEL_NAME}"
-    git push origin "${KERNEL_NAME}"
+    git push -q origin "${KERNEL_NAME}"
 
     cd "${ANYKERNEL_FOLDER}"
 
     git tag -a "${KERNEL_NAME}" -m "${KERNEL_NAME}"
-    git push origin "${KERNEL_NAME}"
+    git push -q origin "${KERNEL_NAME}"
 }
 
 
 # PRINT FILE INFO
 function ending_info() {
-    # ONLY PRINT FILE INFO IF IT EXISTS
-    if [[ ${SUCCESS} = true ]]; then
+    if [[ ${BUILD_RESULT} = "BUILD SUCCESSFUL" ]]; then
         echo ${RED}"FILE LOCATION: ${ZIP_MOVE}/${SIGNED_ZIP}"
         echo "SIZE: $( du -h ${ZIP_MOVE}/${SIGNED_ZIP} |
                           awk '{print $1}' )"${RST}
     fi
 
-    # PRINT TIME INFO REGARDLESS OF SUCCESS
     echo ${RED}"TIME: $( date +%D\ %r | awk '{print toupper($0)}' )"
     echo "DURATION: $( format_time ${END} ${START} )"${RST}; new_line
 }
@@ -428,13 +440,10 @@ function ending_info() {
 
 # LOG GENERATION
 function generate_log() {
-    # DATE: BASH_SOURCE (PARAMETERS)
-    # BUILD <SUCCESSFUL|FAILED> IN # MINUTES AND # SECONDS
     echo "\n$( date +"%m/%d/%Y %H:%M:%S" ): ${BASH_SOURCE} ${PARAMS}" >> ${LOG}
     echo "${BUILD_RESULT} IN $( format_time ${END} ${START} )" >> ${LOG}
 
-    # ONLY ADD A LINE ABOUT FILE LOCATION IF SCRIPT COMPLETED SUCCESSFULLY
-    if [[ ${SUCCESS} = true ]]; then
+    if [[ ${BUILD_RESULT} = "BUILD SUCCESSFUL" ]]; then
         # FILE LOCATION: PATH
         echo "FILE LOCATION: ${ZIP_MOVE}/${SIGNED_ZIP}" >> ${LOG}
     fi
@@ -448,23 +457,29 @@ function generate_log() {
 #              #
 ################
 
-# SET THE START OF THE SCRIPT AND CLEAR TERMINAL
-START=$( date +"%s" ) && clear
+START=$( date +"%s" )
 
 
 ###################
 # SHOW ASCII TEXT #
 ###################
 
-echo ${RED}; new_line
-echo "================================================================================================"; new_line; new_line
+clear
+echo ${RED}
+echo
+echo "================================================================================================"
+echo
+echo
 echo "  ___________________________________  __   ______ _______________________   ________________   "
 echo "  ___  ____/__  /___    |_  ___/__  / / /   ___  //_/__  ____/__  __ \__  | / /__  ____/__  /   "
 echo "  __  /_   __  / __  /| |____ \__  /_/ /    __  ,<  __  __/  __  /_/ /_   |/ /__  __/  __  /    "
 echo "  _  __/   _  /___  ___ |___/ /_  __  /     _  /| | _  /___  _  _, _/_  /|  / _  /___  _  /___  "
-echo "  /_/      /_____/_/  |_/____/ /_/ /_/      /_/ |_| /_____/  /_/ |_| /_/ |_/  /_____/  /_____/  "; new_line; new_line; new_line
-echo "================================================================================================"; new_line
-
+echo "  /_/      /_____/_/  |_/____/ /_/ /_/      /_/ |_| /_____/  /_/ |_| /_/ |_/  /_____/  /_____/  "
+echo
+echo
+echo
+echo "================================================================================================"
+echo
 
 #################
 # MAKING KERNEL #
@@ -475,12 +490,11 @@ echo_text "CLEANING UP AND MAKING KERNEL"
 # DON'T SHOW CLEAN UP OUTPUT
 clean_up &>/dev/null
 
-# SETUP COMPILATION
+# SETUP FOR COMPILATION
 setup_compilation
 
-# ONLY SHOW ERRORS, WARNINGS, AND THE IMAGE LINE WHEN COMPILING (UNLESS DEBUG)
-[[ ${DEBUG} = true ]] && make_kernel \
-                      || make_kernel |& ag --no-color "error:|warning:" && echo
+# BUILD KERNEL
+build_kernel
 
 
 ######################
@@ -488,25 +502,21 @@ setup_compilation
 ######################
 
 if [[ -f ${KERNEL} ]]; then
-    # SET BUILD SUCCESS STRING AND SUCCESS VARIABLE
-    BUILD_RESULT="BUILD SUCCESSFUL" && SUCCESS=true
+    BUILD_RESULT="BUILD SUCCESSFUL"
 
-    echo_text "MAKING FLASHABLE ZIP"
+    echo_text "BUILDING FLASHABLE ZIP"
 
-    # SETUP KERNEL AND ZIP INFO
     setup_zip_info
-
-    # SETUP ENVIRONMENT AND MAKE/MOVE ZIP
     setup_folders
     package_zip
     move_files
     generate_changelog
 
-    # ONLY PUSH RELEASE FOR PUBLIC OR TEST BUILDS
-    [[ ${MODE} != "private" ]] && echo_text "PUSHING RELEASE" && push_release
+    [[ ${MODE} != "private" ]] && push_release
 
-    # TAG THE HEAD COMMIT FOR PUBLIC BUILD (SILENTLY)
-    [[ ${MODE} = "public" ]] && tag_release &>/dev/null
+    [[ ${MODE} = "public" ]] && tag_release
+
+    echo
 
 ###################
 # IF BUILD FAILED #
@@ -514,7 +524,6 @@ if [[ -f ${KERNEL} ]]; then
 
 else
     BUILD_RESULT="BUILD FAILED"
-    SUCCESS=false
 fi
 
 
