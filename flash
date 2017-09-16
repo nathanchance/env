@@ -309,7 +309,11 @@ function package_zip() {
     # GRAB MODULES TOO IF THEY ARE PRESENT
     mkdir -p ${MODULES_FOLDER}
     find ${OUT_FOLDER} -name "*.ko" -exec cp {} ${MODULES_FOLDER} \;
-    [[ ! $( ls -A ${MODULES_FOLDER} ) ]] && rm -rf ${MODULES_FOLDER}
+    if [[ $( ls -A ${MODULES_FOLDER} ) ]]; then
+        ${TOOLCHAIN}strip --strip-unneeded ${MODULES_FOLDER}/*.ko
+    else
+        rm -rf ${MODULES_FOLDER}
+    fi
 
     # PACKAGE THE ZIP WITHOUT THE README
     zip -q -r9 ${UNSIGNED_ZIP} * -x README.md ${UNSIGNED_ZIP}
