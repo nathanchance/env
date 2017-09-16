@@ -46,11 +46,6 @@ while [[ $# -ge 1 ]]; do
 
             KERNEL_BRANCH=${1} ;;
 
-        "-bv"|"--beta-version")
-            shift && enforce_value $@
-
-            BETA_VERSION=${1} ;;
-
         "-c"|"--config")
             shift && enforce_value $@
 
@@ -81,6 +76,11 @@ while [[ $# -ge 1 ]]; do
             shift && enforce_value $@
 
             OS=${1} ;;
+
+        "-r"|"--revision")
+            shift && enforce_value $@
+
+            REVISION=${1} ;;
 
         "-t"|"--toolchain")
             shift && enforce_value $@
@@ -243,8 +243,7 @@ function make_kernel() {
     MAKE="make -j$( nproc --all ) O=${OUT_FOLDER} ARCH=${ARCHITECTURE}"
 
     # INCREMENT DIRTY VERSION NUMBER IF PASSED ABOVE
-    [[ -n ${BETA_VERSION} ]] && echo $(( ${BETA_VERSION} - 1 )) \
-                                 > ${OUT_FOLDER}/.version
+    [[ -n ${REVISION} ]] && echo $(( ${REVISION} - 1 )) > ${OUT_FOLDER}/.version
 
     # POINT TO PROPER DEFCONFIG
     ${MAKE} ${DEFCONFIG}
@@ -264,14 +263,14 @@ function setup_zip_info() {
     BASE_VERSION=$( make kernelversion )
     FLASH_VERSION=$( echo ${FULL_VERSION} | sed s/"${BASE_VERSION}"-// )
 
-    # DIRTY VERSION IS PASSED AS A PARAMETER FOR BETA VERSIONS
-    [[ -n ${BETA_VERSION} ]] && BETA_VERSION=".r${BETA_VERSION}"
+    # REVISION IS PASSED AS A PARAMETER FOR BETA VERSIONS
+    [[ -n ${REVISION} ]] && REVISION=".r${REVISION}"
 
     # IF THE MODE ISN'T PUBLIC, ADD SHA INFORMATION TO THE ZIP
     [[ "${MODE}" != "public" ]] && SHA="-g$( git rev-parse --verify --short HEAD )"
 
     # EXPORT KERNEL_NAME BASED ON THE ABOVE INFORMATION
-    export KERNEL_NAME=${FLASH_VERSION}${BETA_VERSION}${SHA}
+    export KERNEL_NAME=${FLASH_VERSION}${REVISION}${SHA}
 
     # SET ZIP NAMES
     export UNSIGNED_ZIP=${KERNEL_NAME}-unsigned.zip
