@@ -38,11 +38,13 @@ source ${SCRIPT_DIR}/funcs && mac_check
 
 while [[ $# -ge 1 ]]; do
     case "${1}" in
+        # FILE TO SIGN
         "-f"|"--file")
             shift
 
             FILE=${1} ;;
 
+        # KEY TO USE
         "-k"|"--key")
             shift
 

@@ -33,16 +33,20 @@ while [[ $# -ge 1 ]]; do
     PARAMS+="${1} "
 
     case "${1}" in
+        # DEVICE TO BUILD TWRP FOR
         "-d"|"--device")
             shift
             DEVICE=${1} ;;
 
+        # PUSH TO PUBLIC FOLDER INSTEAD OF PRIVATE
         "-p"|"--public")
             PUBLIC=true ;;
 
+        # SYNC TREE BEFORE BUILDING
         "-s"|"--sync")
             SYNC=true ;;
 
+        # CUSTOM DEVICE VERSION
         "-v"|"--version")
             shift
             export TW_DEVICE_VERSION=${1} ;;

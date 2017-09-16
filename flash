@@ -41,52 +41,63 @@ source ${SCRIPT_DIR}/funcs && mac_check
 PARAMS="$@"
 while [[ $# -ge 1 ]]; do
     case "${1}" in
+        # BRANCH TO COMPILE; IF ABSENT, USE CURRENT BRANCH
         "-b"|"--branch")
             shift && enforce_value $@
 
             KERNEL_BRANCH=${1} ;;
 
+        # DEFCONFIG TO USE WHILE COMPILING; IF ABSENT, USE FLASH_DEFCONFIG
         "-c"|"--config")
             shift && enforce_value $@
 
             DEFCONFIG=${1} ;;
 
+        # DEVICE TO COMPILE FOR; IF ABSENT, USE ONEPLUS5
         "-d"|"--device")
             shift && enforce_value $@
 
             DEVICE=${1} ;;
 
+        # SHOW FULL COMPILATION, NOT JUST WARNINGS AND ERRORS
         "-D"|"--debug")
             DEBUG=true ;;
 
+        # EXTRA MAKE FLAGS IF NECESSARY (LIKE MISMATCH CONFIG)
         "-f"|"--flags")
             shift && enforce_value $@
 
             EXTRA_MAKE_FLAGS=${1} ;;
 
+        # WHERE TO MOVE ZIP AFTER COMPILATION (PRIVATE, TEST, OR PUBLIC)
         "-m"|"--mode")
             shift && enforce_value $@
 
             MODE=${1} ;;
 
+        # DON'T MOVE/DELETE ZIPS IN ZIP_MOVE FOLDER
         "-n"|"--no-clean")
             NOCLEAN=true ;;
 
+        # (ONEPLUS 5 ONLY) CUSTOM ROMS OR OXYGENOS BUILD
         "-os"|"--operating-system")
             shift && enforce_value $@
 
             OS=${1} ;;
 
+        # BETA VERSIONING (# IN KERNEL VERSION)
         "-r"|"--revision")
             shift && enforce_value $@
 
             REVISION=${1} ;;
 
+        # TOOLCHAIN TO USE WHILE COMPILING
         "-t"|"--toolchain")
             shift && enforce_value $@
 
             TOOLCHAIN_NAME=${1} ;;
 
+        # (ONEPLUS 5 ONLY) VERSION CODE
         "-v"|"--version")
             shift && enforce_value $@
 

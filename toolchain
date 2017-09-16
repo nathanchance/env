@@ -32,19 +32,23 @@ source ${SCRIPT_DIR}/funcs && mac_check
 # GATHER PARAMETERS
 while [[ $# -ge 1 ]]; do
     case "${1}" in
+        # ARCHITECTURE TO BUILD TOOLCHAIN FOR
         "-a"|"--arch")
             shift && enforce_value $@
 
             ARCH=${1} ;;
 
+        # BUILD ALL FOUR VARIANTS FOR THE PUBLIC
         "-r"|"--release")
             RELEASE=true ;;
 
+        # USE GNU OR LINARO SOURCE
         "-s"|"--source")
             shift && enforce_value $@
 
             SOURCE=${1} ;;
 
+        # TARGET A SPECIFIC CPU (A73 or A57.A53)
         "-t"|"--target")
             shift && enforce_value $@
 

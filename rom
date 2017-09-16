@@ -48,33 +48,40 @@ PARAMS="$@"
 while [[ $# -ge 1 ]]; do
     case "${1}" in
         # REQUIRED OPTIONS
+        # DEVICE TO BUILD
         "-d"|"--device")
             shift && enforce_value $@
 
             DEVICE=${1} ;;
 
+        # ROM TO BUILD
         "-r"|"--rom")
             shift && enforce_value $@
 
             ROM=${1} ;;
 
         # STANDARD OPTIONS
+        # SYNC TREE BEFORE BUILDING
         "-s"|"--sync")
             SYNC=true ;;
 
+        # CUSTOM CLEAN TARGET
         "-c"|"--clean")
             export CLEAN_TYPE=${1} ;;
 
+        # CUSTOM MAKE TARGET
         "-m"|"--make")
             shift && enforce_value $@
 
             export MAKE_TYPE=${1} ;;
 
+        # USER, USERDEBUG, and ENG
         "-v"|"--version")
             shift && enforce_value $@
 
             export VARIANT=${1} ;;
 
+        # REPOPICK SEQUENCE
         "-rp"|"--repopick")
             export REPOPICK=true ;;
 

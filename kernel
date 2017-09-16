@@ -28,24 +28,29 @@ START=$( date +%s )
 # GATHER PARAMETERS
 while [[ $# -ge 1 ]]; do
     case ${1} in
+        # ARCHITECTURE TO BUILD; DEFAULTS TO ARM64
         "-a"|"--arch")
             shift && enforce_value $@
 
             ARCH=${1} ;;
 
+        # DEFCONFIG TO BUILD; DEFAULTS TO FLASH_DEFCONFIG
         "-d"|"--defconfig")
             shift && enforce_value $@
 
             DEFCONFIG=${1} ;;
 
+        # SHOW FULL COMPILATION
         "-D"|"--debug")
             VERBOSITY=2 ;;
 
+        # IMAGE TO TARGET; DEFAULTS TO IMAGE.GZ-DTB
         "-i"|"--image")
             shift && enforce_value $@
 
             IMAGE=${1} ;;
 
+        # TOOLCHAIN TO COMPILE WITH; DEFAULTS TO A73 TARGETED LINARO 7.x
         "-t"|"--toolchain")
             shift && enforce_value $@
 
@@ -58,9 +63,11 @@ while [[ $# -ge 1 ]]; do
                     TOOLCHAIN=${1} ;;
             esac ;;
 
+        # UPLOAD IMAGE TO TRANSFER.SH
         "-u"|"--upload")
             UPLOAD=true ;;
 
+        # SHOW WARNINGS AND ERRORS DURING COMPILATION
         "-w"|"--warnings")
             VERBOSITY=1 ;;
     esac

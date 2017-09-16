@@ -32,10 +32,14 @@ source ${SCRIPT_DIR}/funcs && mac_check
 # GATHER PARAMETERS
 while [[ $# -ge 1 ]]; do
     case "${1}" in
+        # ONLY BUILD CROSSTOOL-NG
         "-b"|"--build-only")
             BUILD_ONLY=true ;;
+
+        # ONLY UPDATE CROSSTOOL-NG REPO
         "-u"|"--update-only")
             UPDATE_ONLY=true ;;
+
         *)
             report_error "Invalid parameter specified!" ;;
     esac

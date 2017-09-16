@@ -26,12 +26,15 @@ source ${SCRIPT_DIR}/funcs && mac_check
 # GATHER PARAMETERS
 while [[ $# -ge 1 ]]; do
     case "${1}" in
+        # MERGE VERSION INSTEAD OF CHERRY-PICK
         "-m"|"--merge")
             MERGE=true ;;
 
+        # PICK FROM THE RC TREE
         "-rc"|"--release-candidate")
             RC=true ;;
 
+        # ONLY UPDATE THE REMOTES
         "-u"|"--update-only")
             UPDATE=true ;;
 

@@ -32,16 +32,19 @@ source ${SCRIPT_DIR}/funcs && mac_check
 # GATHER PARAMETERS
 while [[ $# -ge 1 ]]; do
     case "${1}" in
+        # LOWER BOUND TAG; DEFAULTS TO LATEST CAF TAG IN TREE
         "-1"|"--first-tag")
             shift && enforce_value $@
 
             FT=${1} ;;
 
+        # UPPER BOUND TAG; DEFAULTS TO LATEST CAF TAG ON REMOTE
         "-2"|"--second-tag")
             shift && enforce_value $@
 
             ST=${1} ;;
 
+        # SHOW ALL COMMITS INSTEAD OF INDIVIDUAL FOLDERS
         "-a"|"--all")
             SHOW_ALL=true ;;
 
