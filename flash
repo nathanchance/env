@@ -138,7 +138,7 @@ case ${DEVICE} in
         TC_TARGET=-a57.a53 ;;
     "oneplus5")
         ANDROID_VERSION=7.1.x
-        TC_TARGET=-a73
+        TC_TARGET=-a73.a53
 
         [[ -z ${OS} ]] && OS=OOS
 
@@ -176,19 +176,18 @@ TOOLCHAIN_FOLDER=${HOME}/TCs/${TOOLCHAIN_NAME}${TC_TARGET}
 case ${MODE} in
     "private")
         ZIP_MOVE=${ZIP_MOVE_HEAD}/../me/FK
-        ANYKERNEL_BRANCH=${DEVICE}-flash-personal-${ANDROID_VERSION}
         KEYS=testkey ;;
     "public")
         ZIP_MOVE=${ZIP_MOVE_HEAD}/Kernels/${DEVICE}${ZIP_MOVE_ADD}
-        ANYKERNEL_BRANCH=${DEVICE}-flash-public-${ANDROID_VERSION}
         KEYS=testkey ;;
     "test")
         ZIP_MOVE=${ZIP_MOVE_HEAD}/Kernels/${DEVICE}/Tests${ZIP_MOVE_ADD}
-        ANYKERNEL_BRANCH=${DEVICE}-flash-public-${ANDROID_VERSION}
         KEYS=testkey ;;
     *)
         report_error "Invalid mode specified!" ;;
 esac
+
+ANYKERNEL_BRANCH=${DEVICE}-flash-public-${ANDROID_VERSION}
 
 # COMPILATION VARIABLES
 ARCHITECTURE=arm64
@@ -228,7 +227,7 @@ function clean_up() {
 
 # MAKE WRAPPER FOR MAKE FUNCTION
 function kernel_make() {
-    make -j$( nproc --all ) \
+    make -j$(( $( nproc --all ) + 1 )) \
          ARCH=${ARCHITECTURE} \
          CROSS_COMPILE="${CCACHE} ${TOOLCHAIN}" \
          O=${OUT_FOLDER} \
