@@ -35,7 +35,7 @@ CB=$( git rev-parse --abbrev-ref HEAD )
 # IF CURRENT BRANCH IS EQUAL TO BRANCH TO MERGE THEN SECOND PARAMETER
 # WILL TELL THE SCRIPT TO CHECKOUT THAT BRANCH BEFORE MERGING
 if [[ ${BTM} = ${CB} ]]; then
-    [[ $# -gt 1 ]] && report_error "Currently on ${1}! Please specify a branch to checkout."
+    [[ $# -lt 2 ]] && report_error "Currently on ${1}! Please specify a branch to checkout."
     CB=${2}
     git checkout ${2}
 fi
