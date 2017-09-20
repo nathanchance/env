@@ -375,13 +375,13 @@ function gmrg() {
 
     local CB=$( git rev-parse --abbrev-ref HEAD )
     local BTM=${2}
-    local RANGE=${CB}..${BTM}
+    local RANGE=${CB}..FETCH_HEAD
     local URL
 
     [[ $( echo ${1} | grep http ) ]] && URL=${1} \
                                      || URL=$( git remote get-url ${1} )
 
-    git merge -m "Merge branch '${BTM}' of ${URL} into ${CB}
+    git merge FETCH_HEAD -m "Merge branch '${BTM}' of ${URL} into ${CB}
 
 Commits in ${BTM}: ($( git rev-list --count ${RANGE} ) commits)
 $( git log --reverse --format="        %s" ${RANGE} )
