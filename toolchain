@@ -130,7 +130,7 @@ function set_variables() {
         export PREBUILT_BRANCH=${TUPLE_PFX}-${SOURCE}-${GCC_NUMBER}.x
     else
         export PERSONAL_FOLDER=${PERSONAL_PFX}-${GCC_NUMBER}.x${TARGET}
-        export PREFIX_FOLDER=${TOOLCHAIN_FOLDER}/${PERSONAL_FOLDER}
+        export PREFIX_FOLDER=/opt/${PERSONAL_FOLDER}
         export PREBUILT_BRANCH=tarballs-personal
         [[ -n ${TARGET} ]] && TARGET_SUMMARY="This toolchain targets a specific CPU, notated in the file name. Beware if this is not your CPU!"
     fi

@@ -56,9 +56,9 @@ while [[ $# -ge 1 ]]; do
 
             case ${1} in
                 "a-4.9")
-                    TOOLCHAIN=${HOME}/TCs/${1}/bin/aarch64-linux-android- ;;
+                    TOOLCHAIN=/opt/${1}/bin/aarch64-linux-android- ;;
                 "g-8.x")
-                    TOOLCHAIN=${HOME}/TCs/${1}/bin/aarch64-gnu-linux-gnu- ;;
+                    TOOLCHAIN=/opt/${1}/bin/aarch64-gnu-linux-gnu- ;;
                 *)
                     TOOLCHAIN=${1} ;;
             esac ;;
@@ -79,7 +79,7 @@ done
 [[ -z ${ARCH} ]] && ARCH=arm64
 [[ -z ${DEFCONFIG} ]] && DEFCONFIG=flash_defconfig
 [[ -z ${IMAGE} ]] && IMAGE=Image.gz-dtb
-[[ -z ${TOOLCHAIN} ]] && TOOLCHAIN=${HOME}/TCs/l-7.x-a73/bin/aarch64-linaro-linux-android-
+[[ -z ${TOOLCHAIN} ]] && TOOLCHAIN=/opt/l-7.x-a73/bin/aarch64-linaro-linux-android-
 
 # BASIC BUILD FUNCTION
 function build() {
