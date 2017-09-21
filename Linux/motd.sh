@@ -78,6 +78,10 @@ function cpu() {
 	echo $( sed -r 's/\([tT][mM]\)|\([Rr]\)|[pP]rocessor|CPU//g' <<< "${CPU}" | xargs )
 }
 
+function cpuUsage() {
+        echo $( grep 'cpu ' /proc/stat | awk '{usage=($2+$4)*100/($2+$4+$5)} END {printf "%.2g%\n", usage}' )
+}
+
 function diskUsage() {
 	USED=$( df -h | grep -m 1 /home | awk '{print $3}' )
 	ALL=$( df -h | grep -m 1 /home | awk '{print $2}' )
@@ -98,7 +102,7 @@ echo "     Current time      :  $(echo $(export LC_ALL=C; date "+%I:%M %p %Z" ))
 echo "     Operating system  :  $( source /etc/os-release; echo -e "${PRETTY_NAME} \c"; uname -m )"
 echo "     Kernel version    :  $( uname -rv )"
 echo "     Processor         :  $( cpu )"
-echo "     CPU usage         :  $( grep 'cpu ' /proc/stat | awk '{usage=($2+$4)*100/($2+$4+$5)} END {print usage "%"}' )"
+echo "     CPU usage         :  $( cpuUsage )"
 echo "     Memory usage      :  $( memUsage )"
 echo "     Disk usage        :  $( diskUsage )"
 echo -e "\033[0m"
