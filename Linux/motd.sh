@@ -98,8 +98,8 @@ source banner
 
 echo ""
 echo ""
-echo "     Today's date      :  $(echo $(export LC_ALL=C; date "+%B %d, %Y (%A)" ))"
-echo "     Current time      :  $(echo $(export LC_ALL=C; date "+%I:%M %p %Z" ))"
+echo "     Today's date      :  $( echo $( LC_ALL=C date "+%B %d, %Y (%A)" ) )"
+echo "     Current time      :  $( echo $( LC_ALL=C date "+%I:%M %p %Z" ) )"
 echo "     Operating system  :  $( source /etc/os-release; echo -e "${PRETTY_NAME} \c"; uname -m )"
 echo "     Kernel version    :  $( uname -rv )"
 echo "     Processor         :  $( cpu )"
