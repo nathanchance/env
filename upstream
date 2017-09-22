@@ -48,8 +48,7 @@ done
 
 # VERIFY REMOTE FUNCTION
 function verify_remote() {
-    [[ -z $( git remote | grep ${1} ) ]] && echo "Adding remote ${1}" && \
-        git remote add ${1} https://git.kernel.org/pub/scm/linux/kernel/git/stable/linux-${1}.git
+    add_remote ${1} https://git.kernel.org/pub/scm/linux/kernel/git/stable/linux-${1}.git
 
     git fetch ${1}
 

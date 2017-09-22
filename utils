@@ -354,15 +354,15 @@ function haste() {
     return 1
 }
 
-function kernel_remotes() {
+function kremotes() {
     [[ ! -f Makefile ]] && echo "\n${RED}Run this in a kernel tree!${RST}\n" && return 1
 
-    [[ ! $( git remote | grep -m 1 linux ) ]] && \
-        git remote add linux https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git
-    [[ ! $( git remote | grep -m 1 stable ) ]] && \
-        git remote add stable https://git.kernel.org/pub/scm/linux/kernel/git/stable/linux-stable.git
-    [[ ! $( git remote | grep -m 1 stable-rc ) ]] && \
-        git remote add stable-rc https://git.kernel.org/pub/scm/linux/kernel/git/stable/linux-stable-rc.git
+    add_remote aosp-kc https://android.googlesource.com/kernel/common
+    add_remote aosp-msm https://android.googlesource.com/kernel/msm
+    add_remote chromium https://chromium.googlesource.com/chromiumos/third_party/kernel
+    add_remote linux https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git
+    add_remote stable https://git.kernel.org/pub/scm/linux/kernel/git/stable/linux-stable.git
+    add_remote stable-rc https://git.kernel.org/pub/scm/linux/kernel/git/stable/linux-stable-rc.git
 
     git fetch --all
 }
