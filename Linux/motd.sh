@@ -83,9 +83,9 @@ function cpuUsage() {
 }
 
 function diskUsage() {
-	USED=$( df -h | grep -m 1 /home | awk '{print $3}' )
-	ALL=$( df -h | grep -m 1 /home | awk '{print $2}' )
-	PERCENT=$( df -h | grep -m 1 /home | awk '{print $5}' )
+	USED=$( df -h | grep -m 1 /dev/md2 | awk '{print $3}' )
+	ALL=$( df -h | grep -m 1 /dev/md2 | awk '{print $2}' )
+	PERCENT=$( df -h | grep -m 1 /dev/md2 | awk '{print $5}' )
 
 	echo "${USED} out of ${ALL} (${PERCENT})"
 }
@@ -97,6 +97,7 @@ echo -e "\033[1m"
 source banner
 
 echo ""
+echo ""
 echo "     Today's date      :  $(echo $(export LC_ALL=C; date "+%B %d, %Y (%A)" ))"
 echo "     Current time      :  $(echo $(export LC_ALL=C; date "+%I:%M %p %Z" ))"
 echo "     Operating system  :  $( source /etc/os-release; echo -e "${PRETTY_NAME} \c"; uname -m )"
@@ -105,4 +106,5 @@ echo "     Processor         :  $( cpu )"
 echo "     CPU usage         :  $( cpuUsage )"
 echo "     Memory usage      :  $( memUsage )"
 echo "     Disk usage        :  $( diskUsage )"
+echo ""
 echo -e "\033[0m"
