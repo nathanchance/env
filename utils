@@ -67,13 +67,11 @@ function aliases() {
 
     alias gam='git am'
 
-    alias gc='git commit'
-    alias gcs='git commit --signoff'
+    alias gc='git commit --signoff'
+    alias gac='git commit --signoff --all'
     alias gca='git commit --amend'
     alias gcas='git commit --amend --signoff'
-    alias gac='git commit --all'
-    alias gacs='git commit --all --signoff'
-    alias gaca='git commit --all --amend'
+    alias gcaa='git commit --amend --all'
 
     alias grhe='git reset HEAD'
     alias grh='git reset --hard'
@@ -81,7 +79,7 @@ function aliases() {
 
     alias glg='git log'
     alias glp="git log -p"
-    alias gl='git log --format=oneline'
+    alias gl='git log --oneline'
     alias gb='git branch -v'
     alias gbd='git branch -D'
 
@@ -98,10 +96,11 @@ function aliases() {
     alias grbc='git rebase --continue'
 
     alias gd='git diff'
-    alias gdh='git diff HEAD'
-    alias gdhh='git diff HEAD^..HEAD'
-    alias gdss='git diff --shortstat'
     alias gdc='git diff --cached'
+
+    alias gsh='git show'
+    alias gshs='git show --stat'
+    alias gshss='git show --stortstat'
 }
 
 # Try to attach via tmux
