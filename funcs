@@ -20,9 +20,13 @@
 
 ###############
 #             #
-#  FUNCTIONS  #
+#  VARIABLES  #
 #             #
 ###############
+
+# LOCATION OF SCRIPTS FOLDER
+export SCRIPT_DIR=$( cd $( dirname $( readlink -f "${BASH_SOURCE[0]}" ) ) && pwd )
+export BIN_DIR=${SCRIPT_DIR}/bin
 
 # COLORS
 BLINK_RED="\033[05;31m"
@@ -32,6 +36,13 @@ GRN="\033[01;32m"
 RED="\033[01;31m"
 RST="\033[0m"
 YLW="\033[01;33m"
+
+
+###############
+#             #
+#  FUNCTIONS  #
+#             #
+###############
 
 # ALIAS FOR ECHO TO PRINT ESCAPE CODES
 function echo() {
@@ -117,3 +128,6 @@ function add_remote() {
 function web_link() {
     echo "${1}" | sed s/$(echo ${HOME}/Web | sed 's/\//\\\//g')/http:\\/\\/nchancellor.net/
 }
+
+# REQUIRE A PARAMETER TO OPT OUT OF MAC_CHECK
+[[ $# -lt 1 ]] && mac_check

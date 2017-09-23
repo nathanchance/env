@@ -24,9 +24,11 @@
 #             #
 ###############
 
+# SOURCE OUR UNIVERSAL FUNCTIONS SCRIPT AND MAC CHECK
+source funcs
+
 # If SOURCE_DIR isn't defined, the script is being run separately
 [[ -z ${SOURCE_DIR} ]] && SOURCE_DIR=${HOME}/ROMs/DU
-
 
 DU_REPOS="
 build
@@ -41,17 +43,6 @@ system/extras
 system/sepolicy
 vendor/du
 vendor/huawei"
-
-
-###############
-#             #
-#  FUNCTIONS  #
-#             #
-###############
-
-# SOURCE OUR UNIVERSAL FUNCTIONS SCRIPT AND MAC CHECK
-SCRIPT_DIR=$( cd $( dirname $( readlink -f "${BASH_SOURCE[0]}" ) ) && pwd )
-source ${SCRIPT_DIR}/funcs && mac_check
 
 
 ################

@@ -24,10 +24,8 @@
 #             #
 ###############
 
-# SOURCE OUR UNIVERSAL FUNCTIONS SCRIPT
-SCRIPT_DIR=$( cd $( dirname $( readlink -f "${BASH_SOURCE[0]}" ) ) && pwd )
-BIN_DIR=${SCRIPT_DIR}/bin
-source ${SCRIPT_DIR}/funcs && mac_check
+# SOURCE OUR UNIVERSAL FUNCTIONS SCRIPT (DON'T MAC CHECK)
+source funcs -m
 
 
 ################

@@ -18,16 +18,14 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 
-# SOURCE OUR UNIVERSAL FUNCTIONS SCRIPT AND MAC CHECK
-SCRIPT_DIR=$( cd $( dirname $( readlink -f "${BASH_SOURCE[0]}" ) ) && pwd )
-source ${SCRIPT_DIR}/funcs && mac_check
-
-
 ################
 #              #
 #  PARAMETERS  #
 #              #
 ################
+
+# SOURCE OUR UNIVERSAL FUNCTIONS SCRIPT AND MAC CHECK
+source funcs
 
 while [[ $# -ge 1 ]]; do
     PARAMS+="${1} "

@@ -41,22 +41,14 @@ system/sepolicy
 vendor/cm"
 
 
-###############
-#             #
-#  FUNCTIONS  #
-#             #
-###############
-
-# SOURCE OUR UNIVERSAL FUNCTIONS SCRIPT AND MAC CHECK
-SCRIPT_DIR=$( cd $( dirname $( readlink -f "${BASH_SOURCE[0]}" ) ) && pwd )
-source ${SCRIPT_DIR}/funcs && mac_check
-
-
 ################
 #              #
 # SCRIPT START #
 #              #
 ################
+
+# SOURCE OUR UNIVERSAL FUNCTIONS SCRIPT AND MAC CHECK
+source funcs
 
 # START TRACKING TIME
 START=$( date +%s )

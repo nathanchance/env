@@ -19,8 +19,7 @@
 
 
 # SOURCE OUR UNIVERSAL FUNCTIONS SCRIPT AND MAC CHECK
-SCRIPT_DIR=$( cd $( dirname $( readlink -f "${BASH_SOURCE[0]}" ) ) && pwd )
-source ${SCRIPT_DIR}/funcs && mac_check
+source funcs
 
 # MAKE SURE WE ARE IN A KERNEL TREE
 [[ ! -f Makefile ]] && report_error "Please run this in a kernel tree!"

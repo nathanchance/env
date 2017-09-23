@@ -25,8 +25,7 @@
 ###############
 
 # SOURCE OUR UNIVERSAL FUNCTIONS SCRIPT AND MAC CHECK
-SCRIPT_DIR=$( cd $( dirname $( readlink -f "${BASH_SOURCE[0]}" ) ) && pwd )
-source ${SCRIPT_DIR}/funcs && mac_check
+source funcs
 
 # CHECKS IF MKA EXISTS
 function make_command() {

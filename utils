@@ -18,9 +18,8 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 
-# SOURCE OUR UNIVERSAL FUNCTIONS SCRIPT AND MAC CHECK
-SCRIPT_DIR=$( cd $( dirname $( readlink -f "${BASH_SOURCE[0]}" ) ) && pwd )
-source ${SCRIPT_DIR}/funcs
+# SOURCE OUR UNIVERSAL FUNCTIONS SCRIPT (DON'T MAC CHECK THOUGH)
+source funcs -m
 
 function aliases() {
     # default Arch ls alias
