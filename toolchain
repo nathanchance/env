@@ -25,7 +25,7 @@
 ################
 
 # SOURCE OUR UNIVERSAL FUNCTIONS SCRIPT AND MAC CHECK
-source funcs
+source common
 
 # GATHER PARAMETERS
 while [[ $# -ge 1 ]]; do
@@ -80,10 +80,9 @@ done
 #             #
 ###############
 
-TOOLCHAIN_FOLDER=${HOME}/TCs
-BUILD_FOLDER=${TOOLCHAIN_FOLDER}/build
+BUILD_FOLDER=${TC_FOLDER}/build
 SOURCE_FOLDER=${BUILD_FOLDER}/source
-PREBUILT_FOLDER=${TOOLCHAIN_FOLDER}/prebuilts
+PREBUILT_FOLDER=${TC_FOLDER}/prebuilts
 
 
 ###############

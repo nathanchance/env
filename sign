@@ -25,7 +25,7 @@
 ###############
 
 # SOURCE OUR UNIVERSAL FUNCTIONS SCRIPT (DON'T MAC CHECK)
-source funcs -m
+source common -m
 
 
 ################
@@ -79,18 +79,18 @@ cd $(dirname ${FILE})
 ZIP_NAME=$(basename ${FILE} .zip)
 
 # Sign the zip
-java -jar ${BIN_DIR}/signapk.jar \
-          ${BIN_DIR}/${KEY}.x509.pem \
-          ${BIN_DIR}/${KEY}.pk8 \
+java -jar ${BIN_FOLDER}/signapk.jar \
+          ${BIN_FOLDER}/${KEY}.x509.pem \
+          ${BIN_FOLDER}/${KEY}.pk8 \
           ${ZIP_NAME}.zip \
           ${ZIP_NAME}-firstsign.zip
 
-${BIN_DIR}/zipadjust ${ZIP_NAME}-firstsign.zip \
+${BIN_FOLDER}/zipadjust ${ZIP_NAME}-firstsign.zip \
                      ${ZIP_NAME}-adjusted.zip &>/dev/null
 
-java -jar ${BIN_DIR}/minsignapk.jar \
-          ${BIN_DIR}/${KEY}.x509.pem \
-          ${BIN_DIR}/${KEY}.pk8 \
+java -jar ${BIN_FOLDER}/minsignapk.jar \
+          ${BIN_FOLDER}/${KEY}.x509.pem \
+          ${BIN_FOLDER}/${KEY}.pk8 \
           ${ZIP_NAME}-adjusted.zip \
           ${ZIP_NAME}-signed.zip
           

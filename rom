@@ -25,7 +25,7 @@
 ###############
 
 # SOURCE OUR UNIVERSAL FUNCTIONS SCRIPT AND MAC CHECK
-source funcs
+source common
 
 # CHECKS IF MKA EXISTS
 function make_command() {
@@ -134,50 +134,48 @@ fi
 #             #
 ###############
 
-# ANDROID_DIR: Directory that holds all of the Android files
-# OUT_DIR: Directory that holds the compiled ROM files
-# SOURCE_DIR: Directory that holds the ROM source
+# OUT_FOLDER: Directory that holds the compiled ROM files
+# SOURCE_FOLDER: Directory that holds the ROM source
 # ZIP_MOVE: Directory to hold completed ROM zips
-ANDROID_DIR=${HOME}/ROMs
-ZIP_MOVE_PARENT=${HOME}/Web/me/ROMs
+ZIP_MOVE_PARENT=${WEB_FOLDER}/me/roms
 
 # Otherwise, define them for our various ROMs
 case "${ROM}" in
     "aosp")
-        SOURCE_DIR=${ANDROID_DIR}/AOSP
-        ZIP_MOVE=${ZIP_MOVE_PARENT}/AOSP/${DEVICE} ;;
+        SOURCE_FOLDER=${ROM_FOLDER}/aosp
+        ZIP_MOVE=${ZIP_MOVE_PARENT}/aosp/${DEVICE} ;;
     "du-aosp")
-        SOURCE_DIR=${ANDROID_DIR}/DU-AOSP
-        ZIP_MOVE=${ZIP_MOVE_PARENT}/../DU/${DEVICE} ;;
+        SOURCE_FOLDER=${ROM_FOLDER}/du-aosp
+        ZIP_MOVE=${ZIP_MOVE_PARENT}/../du/${DEVICE} ;;
     "du-caf")
-        SOURCE_DIR=${ANDROID_DIR}/DU-CAF
-        ZIP_MOVE=${ZIP_MOVE_PARENT}/../DU/${DEVICE} ;;
+        SOURCE_FOLDER=${ROM_FOLDER}/du-caf
+        ZIP_MOVE=${ZIP_MOVE_PARENT}/../du/${DEVICE} ;;
     "du-personal")
-        SOURCE_DIR=${ANDROID_DIR}/DU
-        ZIP_MOVE=${ZIP_MOVE_PARENT}/../DU/personal ;;
+        SOURCE_FOLDER=${ROM_FOLDER}/du
+        ZIP_MOVE=${ZIP_MOVE_PARENT}/../du/personal ;;
     "krexus")
-        SOURCE_DIR=${ANDROID_DIR}/Krexus
-        ZIP_MOVE=${ZIP_MOVE_PARENT}/Krexus/${DEVICE} ;;
+        SOURCE_FOLDER=${ROM_FOLDER}/krexus
+        ZIP_MOVE=${ZIP_MOVE_PARENT}/krexus/${DEVICE} ;;
     "lineageos")
-        SOURCE_DIR=${ANDROID_DIR}/LineageOS
-        ZIP_MOVE=${ZIP_MOVE_PARENT}/LOS/${DEVICE} ;;
+        SOURCE_FOLDER=${ROM_FOLDER}/los
+        ZIP_MOVE=${ZIP_MOVE_PARENT}/los/${DEVICE} ;;
     "lineageoms")
-        SOURCE_DIR=${ANDROID_DIR}/LineageOMS
-        ZIP_MOVE=${ZIP_MOVE_PARENT}/LOMS/${DEVICE} ;;
+        SOURCE_FOLDER=${ROM_FOLDER}/loms
+        ZIP_MOVE=${ZIP_MOVE_PARENT}/loms/${DEVICE} ;;
     "pn")
-        SOURCE_DIR=${ANDROID_DIR}/PN
-        ZIP_MOVE=${ZIP_MOVE_PARENT}/PN/${DEVICE} ;;
+        SOURCE_FOLDER=${ROM_FOLDER}/pn
+        ZIP_MOVE=${ZIP_MOVE_PARENT}/pn/${DEVICE} ;;
     "vanilla")
-        SOURCE_DIR=${ANDROID_DIR}/Vanilla
-        ZIP_MOVE=${ZIP_MOVE_PARENT}/Vanilla/${DEVICE} ;;
+        SOURCE_FOLDER=${ROM_FOLDER}/vanilla
+        ZIP_MOVE=${ZIP_MOVE_PARENT}/vanilla/${DEVICE} ;;
     *)
         report_error "Unknown ROM "${1}" passed!" ;;
 esac
 
-OUT_DIR=${SOURCE_DIR}/out/target/product/${DEVICE}
+OUT_FOLDER=${SOURCE_FOLDER}/out/target/product/${DEVICE}
 
 # LOG NAME
-LOG_NAME=${LOGDIR}/Compilation/ROMs/${ROM}-${DEVICE}-$(TZ=MST date +"%Y%m%d-%H%M").log
+LOG_NAME=${LOG_FOLDER}/compilation/roms/${ROM}-${DEVICE}-$(TZ=MST date +"%Y%m%d-%H%M").log
 
 ###########################
 # MOVE INTO SOURCE FOLDER #
@@ -185,7 +183,7 @@ LOG_NAME=${LOGDIR}/Compilation/ROMs/${ROM}-${DEVICE}-$(TZ=MST date +"%Y%m%d-%H%M
 ###########################
 
 START=$( TZ=MST date +%s )
-clear && cd ${SOURCE_DIR}
+clear && cd ${SOURCE_FOLDER}
 
 
 #############
@@ -202,7 +200,7 @@ if [[ ${SYNC} = true ]]; then
     ${REPO_SYNC} ${FLAGS}
 
     if [[ ${ROM} = "du-personal" ]]; then
-        source ${SCRIPT_DIR}/du_merge
+        source ${SCRIPTS_FOLDER}/du_merge
     fi
 fi
 
@@ -309,7 +307,7 @@ else
     ###################
 
     # THERE WILL BE A ZIP IN THE OUT FOLDER IF SUCCESSFUL
-    FILES=$( ls ${OUT_DIR}/*.zip 2>/dev/null | wc -l )
+    FILES=$( ls ${OUT_FOLDER}/*.zip 2>/dev/null | wc -l )
     if [[ ${FILES} != 0 ]]; then
         # MAKE BUILD RESULT STRING REFLECT SUCCESSFUL COMPILATION
         BUILD_RESULT_STRING="BUILD SUCCESSFUL"
@@ -333,9 +331,9 @@ else
         ####################
 
         if [[ ${FILES} = 1 ]]; then
-            mv "${OUT_DIR}"/*.zip* "${ZIP_MOVE}"
+            mv "${OUT_FOLDER}"/*.zip* "${ZIP_MOVE}"
         else
-            for FILE in $( ls ${OUT_DIR}/*.zip* | grep -v ota ); do
+            for FILE in $( ls ${OUT_FOLDER}/*.zip* | grep -v ota ); do
                 mv "${FILE}" "${ZIP_MOVE}"
             done
         fi

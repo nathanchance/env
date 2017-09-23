@@ -25,7 +25,7 @@
 ################
 
 # SOURCE OUR UNIVERSAL FUNCTIONS SCRIPT AND MAC CHECK
-source funcs
+source common
 
 while [[ $# -ge 1 ]]; do
     PARAMS+="${1} "
@@ -67,20 +67,20 @@ done
 ###############
 
 # DIRECTORIES
-SOURCE_DIR=${HOME}/TWRP-6.0
-OUT_DIR=${SOURCE_DIR}/out/target/product/${DEVICE}
+SOURCE_FOLDER=${HOME}/TWRP-6.0
+OUT_FOLDER=${SOURCE_FOLDER}/out/target/product/${DEVICE}
 if [[ ${PUBLIC} = true ]]; then
-    IMG_MOVE=${HOME}/Web/Downloads/TWRP/${DEVICE}
+    IMG_MOVE=${WEB_FOLDER}/downloads/twrp/${DEVICE}
 else
-    IMG_MOVE=${HOME}/Web/me/TWRP/${DEVICE}
+    IMG_MOVE=${WEB_FOLDER}/me/twrp/${DEVICE}
 fi
-VERSION=$( grep "TW_MAIN_VERSION_STR" ${SOURCE_DIR}/bootable/recovery/variables.h -m 1 | cut -d \" -f2 )-${TW_DEVICE_VERSION}
+VERSION=$( grep "TW_MAIN_VERSION_STR" ${SOURCE_FOLDER}/bootable/recovery/variables.h -m 1 | cut -d \" -f2 )-${TW_DEVICE_VERSION}
 
 # FILE NAMES
 COMP_FILE=recovery.img
 UPLD_FILE=twrp-${VERSION}-${DEVICE}-f2fs-$( TZ=MST date +%Y%m%d ).img
 FILE_FORMAT=twrp-*-${DEVICE}*
-LOG_NAME=${LOGDIR}/Compilation/TWRP/twrp-${VERSION}-${DEVICE}-f2fs-$( TZ=MST date +%Y%m%d-%H%M ).log
+LOG_NAME=${LOG_FOLDER}/compilation/twrp/twrp-${VERSION}-${DEVICE}-f2fs-$( TZ=MST date +%Y%m%d-%H%M ).log
 
 
 ##################
@@ -96,7 +96,7 @@ clear && export EXPERIMENTAL_USE_JAVA8=true && START=$( TZ=MST date +%s )
 # REPO SYNC #
 #############
 
-cd ${SOURCE_DIR}
+cd ${SOURCE_FOLDER}
 
 if [[ ${SYNC} = true ]]; then
     header "SYNCING LATEST SOURCES"
@@ -152,7 +152,7 @@ time mka recoveryimage | tee -a ${LOG_NAME}
 ####################
 
 # THERE WILL BE A FILE IN THE OUT FOLDER IN THE ABOVE FORMAT
-if [[ $( ls ${OUT_DIR}/${COMP_FILE} 2>/dev/null | wc -l ) != 0 ]]; then
+if [[ $( ls ${OUT_FOLDER}/${COMP_FILE} 2>/dev/null | wc -l ) != 0 ]]; then
     # MAKE BUILD RESULT STRING REFLECT SUCCESSFUL COMPILATION
     BUILD_RESULT_STRING="BUILD SUCCESSFUL"
     SUCCESS=true
@@ -171,7 +171,7 @@ if [[ $( ls ${OUT_DIR}/${COMP_FILE} 2>/dev/null | wc -l ) != 0 ]]; then
     ####################
 
     mv "${IMG_MOVE}"/*.img* "${IMG_MOVE}"/Old
-    mv "${OUT_DIR}"/${COMP_FILE} "${IMG_MOVE}"/${UPLD_FILE}
+    mv "${OUT_FOLDER}"/${COMP_FILE} "${IMG_MOVE}"/${UPLD_FILE}
 
 
     ###################

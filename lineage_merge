@@ -24,7 +24,7 @@
 #             #
 ###############
 
-SOURCE_DIR=${HOME}/ROMs/LineageOMS
+SOURCE_FOLDER=${ROM_FOLDER}/loms
 
 SUBS_REPOS="
 .repo/manifests
@@ -48,7 +48,7 @@ vendor/cm"
 ################
 
 # SOURCE OUR UNIVERSAL FUNCTIONS SCRIPT AND MAC CHECK
-source funcs
+source common
 
 # START TRACKING TIME
 START=$( date +%s )
@@ -58,7 +58,7 @@ for FOLDER in ${SUBS_REPOS}; do
     echo; header "Updating ${FOLDER}"
 
     # SHIFT TO PROPER FOLDER
-    cd ${SOURCE_DIR}/${FOLDER}
+    cd ${SOURCE_FOLDER}/${FOLDER}
 
     # CHECKOUT THE RIGHT BRANCH
     git checkout cm-14.1
@@ -87,7 +87,7 @@ for FOLDER in ${SUBS_REPOS}; do
 done
 
 # SHIFT BACK TO THE TOP OF THE REPO
-cd ${SOURCE_DIR}
+cd ${SOURCE_FOLDER}
 
 # SYNC THEME INTERFACER REPO
 echo; header "Syncing packages/services/ThemeInterfacer"

@@ -25,8 +25,16 @@
 ###############
 
 # LOCATION OF SCRIPTS FOLDER
-export SCRIPT_DIR=$( cd $( dirname $( readlink -f "${BASH_SOURCE[0]}" ) ) && pwd )
-export BIN_DIR=${SCRIPT_DIR}/bin
+SCRIPTS_FOLDER=$( cd $( dirname $( readlink -f "${BASH_SOURCE[0]}" ) ) && pwd )
+BIN_FOLDER=${SCRIPTS_FOLDER}/bin
+
+# COMMON LOCATIONS AMONGST SCRIPTS
+KERNEL_FOLDER=${HOME}/kernels
+MISC_FOLDER=${HOME}/misc
+REPO_FOLDER=${HOME}/repos
+ROM_FOLDER=${HOME}/roms
+TC_FOLDER=${HOME}/toolchains
+WEB_FOLDER=${HOME}/web
 
 # COLORS
 BLINK_RED="\033[05;31m"

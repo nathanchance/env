@@ -19,7 +19,7 @@
 
 
 # SOURCE OUR UNIVERSAL FUNCTIONS SCRIPT (DON'T MAC CHECK THOUGH)
-source funcs -m
+source common -m
 
 function aliases() {
     # default Arch ls alias
@@ -32,14 +32,14 @@ function aliases() {
     alias update='pacaur -Syyu'
 
     # Change directory aliases
-    alias 6p='cd ${HOME}/Kernels/angler'
-    alias asu='cd ${HOME}/Repos/ASU'
-    alias ayk='cd ${HOME}/Kernels/anykernel'
-    alias lnx='cd ${HOME}/Kernels/linux'
-    alias pkg='cd ${HOME}/Repos/PKGBUILDs'
-    alias op5='cd ${HOME}/Kernels/oneplus5'
-    alias tlc='cd ${HOME}/TCs'
-    alias spt='cd ${HOME}/Scripts'
+    alias 6p='cd ${KERNEL_FOLDER}/angler'
+    alias asu='cd ${REPO_FOLDER}/asu'
+    alias ayk='cd ${KERNEL_FOLDER}/anykernel'
+    alias lnx='cd ${KERNEL_FOLDER}/linux'
+    alias pkg='cd ${REPO_FOLDER}/pkgbuilds'
+    alias op5='cd ${KERNEL_FOLDER}/op5'
+    alias tlc='cd ${TC_FOLDER}'
+    alias spt='cd ${SCRIPTS_FOLDER}'
 
     # Alias hub to git
     alias git='hub'
@@ -104,7 +104,7 @@ function aliases() {
 
 # Try to attach via tmux
 function tmux_attach() {
-    if [[ -z ${TMUX} ]] ;then
+    if [[ -z ${TMUX} ]]; then
         ID=$( tmux ls | grep -vm1 attached | cut -d: -f1 ) # get the id of a deattached session
         if [[ -z ${ID} ]]; then # if not available create a new one
             tmux -u new-session
@@ -124,7 +124,7 @@ function prompts() {
 
 # Add something to PATH but only if it isn't already there
 function add_to_path() {
-    [[ ! $( echo ${PATH} | ag --nocolor ${1} ) ]] && export PATH="${1}:${PATH}"
+    [[ ! $( echo ${PATH} | ag -s --nocolor ${1} ) ]] && export PATH="${1}:${PATH}"
 }
 
 # Setup ccache
@@ -144,12 +144,12 @@ function ccache_setup() {
 
 # Log support so I can see what compiled and at what time
 function log_support() {
-    export LOGDIR=${HOME}/Web/me/Logs
+    export LOG_FOLDER=${WEB_FOLDER}/me/logs
 
-    # Create LOGDIR if it doesn't exist
-    [[ ! -d ${LOGDIR} ]] && mkdir -p ${LOGDIR}/Results
+    # Create LOG_FOLDER if it doesn't exist
+    [[ ! -d ${LOG_FOLDER} ]] && mkdir -p ${LOG_FOLDER}/results
     
-    export LOG=${LOGDIR}/Results/compile_log_$( TZ=MST date +%m_%d_%y ).log
+    export LOG=${LOG_FOLDER}/results/compile_log_$( TZ=MST date +%m_%d_%y ).log
 }
 
 function bashrc() {
@@ -158,12 +158,12 @@ function bashrc() {
     prompts
     ccache_setup 150
     log_support
-    add_to_path "${HOME}/Scripts"
+    add_to_path "${SCRIPTS_FOLDER}"
 }
 
 # bashrc update function
 function upbashrc() {
-    source ${HOME}/Scripts/utils
+    source ${SCRIPTS_FOLDER}/utils
     bashrc
 }
 
@@ -288,24 +288,24 @@ function ex () {
 }
 
 function upstable() {
-    CUR_DIR=$(pwd)
+    CUR_FOLDER=$(pwd)
 
-    if [[ ! -d ${HOME}/Kernels/stable ]]; then
-        cd ${HOME}/Kernels
+    if [[ ! -d ${KERNEL_FOLDER}/stable ]]; then
+        cd ${KERNEL_FOLDER}
         git clone --mirror https://git.kernel.org/pub/scm/linux/kernel/git/stable/linux-stable.git stable
         cd stable
         git remote set-url --push origin git@github.com:nathanchance/linux-stable
     fi
 
-    cd ${HOME}/Kernels/stable
+    cd ${KERNEL_FOLDER}/stable
 
     git fetch -p origin
     git push --mirror
 
-    cd ${CUR_DIR}
+    cd ${CUR_FOLDER}
 }
 
-function trnsfr() {
+function transfer() {
     echo
     curl --upload-file ${1} https://transfer.sh/$( basename ${1} )
     echo

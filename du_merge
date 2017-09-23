@@ -25,10 +25,10 @@
 ###############
 
 # SOURCE OUR UNIVERSAL FUNCTIONS SCRIPT AND MAC CHECK
-source funcs
+source common
 
-# If SOURCE_DIR isn't defined, the script is being run separately
-[[ -z ${SOURCE_DIR} ]] && SOURCE_DIR=${HOME}/ROMs/DU
+# If SOURCE_FOLDER isn't defined, the script is being run separately
+[[ -z ${SOURCE_FOLDER} ]] && SOURCE_FOLDER=${ROM_FOLDER}/du
 
 DU_REPOS="
 build
@@ -69,7 +69,7 @@ done
 ################
 
 if [[ ${SYNC} = true ]]; then
-    cd ${SOURCE_DIR}
+    cd ${SOURCE_FOLDER}
     repo sync -j$( nproc --all ) --force-sync -c --no-clone-bundle --no-tags \
               --optimized-fetch --prune
 fi
@@ -79,7 +79,7 @@ for FOLDER in ${DU_REPOS}; do
     echo; header "Updating ${FOLDER}"
 
     # SHIFT TO PROPER FOLDER
-    cd ${SOURCE_DIR}/${FOLDER}
+    cd ${SOURCE_FOLDER}/${FOLDER}
 
     # SET PROPER URL
     URL=android_$( echo ${FOLDER} | sed "s/\//_/g" )
@@ -98,7 +98,7 @@ for FOLDER in ${DU_REPOS}; do
 done
 
 # SHIFT BACK TO THE TOP OF THE REPO
-cd ${SOURCE_DIR}
+cd ${SOURCE_FOLDER}
 
 # PRINT RESULTS
 header "RESULTS"

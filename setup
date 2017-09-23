@@ -19,9 +19,9 @@
 
 
 # SOURCE OUR UNIVERSAL FUNCTIONS SCRIPT AND MAC CHECK
-source funcs
+source common
 
-WORKING_DIR=${HOME}/Misc/Building
+WORKING_FOLDER=${MISC_FOLDER}/building
 
 function santity_checks() {
     [[ -z $( pacman -Qi sudo ) ]] && report_error "You must have sudo installed!"
@@ -41,7 +41,7 @@ function build_pacaur() {
     install_if_absent git
     install_if_absent perl
 
-    mkdir -p ${WORKING_DIR} && cd ${WORKING_DIR}
+    mkdir -p ${WORKING_FOLDER} && cd ${WORKING_FOLDER}
 
     curl https://aur.archlinux.org/cgit/aur.git/plain/PKGBUILD?h=cower > PKGBUILD
 

@@ -19,7 +19,7 @@
 
 
 # SOURCE OUR UNIVERSAL FUNCTIONS SCRIPT AND MAC CHECK
-source funcs
+source common
 
 # MAKE SURE WE ARE IN A KERNEL TREE
 [[ ! -f Makefile ]] && report_error "Please run this in a kernel tree!"
