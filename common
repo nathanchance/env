@@ -134,7 +134,7 @@ function add_remote() {
 
 # CONVERT A FILE LOCATION TO WEB LINK
 function web_link() {
-    echo "${1}" | sed s/$(echo ${HOME}/Web | sed 's/\//\\\//g')/http:\\/\\/nchancellor.net/
+    echo "${1}" | sed s/$(echo ${WEB_FOLDER} | sed 's/\//\\\//g')/http:\\/\\/nchancellor.net/
 }
 
 # REQUIRE A PARAMETER TO OPT OUT OF MAC_CHECK

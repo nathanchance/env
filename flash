@@ -25,7 +25,7 @@
 ################
 
 # SOURCE OUR UNIVERSAL FUNCTIONS SCRIPT AND MAC CHECK
-source funcs
+source common
 
 # GATHER PARAMETERS
 PARAMS="$@"
@@ -102,9 +102,30 @@ done
 
 # DEFAULT PARAMETERS
 [[ -z ${DEFCONFIG} ]] && DEFCONFIG="flash_defconfig"
-[[ -z ${DEVICE} ]] && DEVICE="oneplus5"
-[[ -z ${MODE} ]] && MODE="private"
+[[ -z ${DEVICE} ]] && DEVICE="op5"
+[[ -z ${MODE} ]] && MODE="personal"
 [[ -z ${TOOLCHAIN_NAME} ]] && TOOLCHAIN_NAME="l-7.x"
+
+# DEVICE HANDLING
+case ${DEVICE} in
+    "angler")
+        AK_SFX=public-8.0.0
+        TC_TARGET=-a57.a53 ;;
+
+    "op5")
+        AK_SFX=7.1.x
+        TC_TARGET=-a73.a53
+
+        [[ -z ${OS} ]] && OS=OOS
+        [[ -n ${VERSION} ]] && VERSION="-v${VERSION}"
+        export LOCALVERSION="-${OS}${VERSION}"
+
+        MATCH_FLAG="--match=*${OS}*"
+        OS=/${OS,,} ;;
+
+    *)
+        report_error "Invalid device!" ;;
+esac
 
 
 ###############
@@ -114,39 +135,21 @@ done
 ###############
 
 # FOLDERS
-KERNEL_HEAD=${HOME}/Kernels
-SOURCE_FOLDER=${KERNEL_HEAD}/${DEVICE}
+SOURCE_FOLDER=${KERNEL_FOLDER}/${DEVICE}
 OUT_FOLDER=${SOURCE_FOLDER}/out
-ANYKERNEL_FOLDER=${KERNEL_HEAD}/anykernel
+ANYKERNEL_FOLDER=${KERNEL_FOLDER}/anykernel
+ANYKERNEL_BRANCH=${DEVICE}-flash-${AK_SFX}
 MODULES_FOLDER=${ANYKERNEL_FOLDER}/modules
-ZIP_MOVE_HEAD=${HOME}/Web/Downloads
+ZIP_MOVE_HEAD=${WEB_FOLDER}/downloads
 
-# DEVICE HANDLING
-case ${DEVICE} in
-    "angler")
-        ANDROID_VERSION=8.0.0
-        TC_TARGET=-a57.a53 ;;
-    "oneplus5")
-        ANDROID_VERSION=7.1.x
-        TC_TARGET=-a73.a53
-
-        [[ -z ${OS} ]] && OS=OOS
-
-        [[ -n ${VERSION} ]] && VERSION="-v${VERSION}"
-
-        export LOCALVERSION="-${OS}${VERSION}"
-
-        case "${OS}" in
-            *custom*|*Custom*)
-                ZIP_MOVE_ADD=/Custom
-                MATCH_FLAG="--match=*Custom*" ;;
-            *oos*|*OOS*)
-                ZIP_MOVE_ADD=/OOS
-                MATCH_FLAG="--match=*OOS*" ;;
-        esac ;;
-
+case ${MODE} in
+    "alpha"|"beta"|"stable")
+        ZIP_MOVE=${ZIP_MOVE_HEAD}/kernels/${DEVICE}${OS}/${MODE}
+        ZIP_MOVE_OLD=$( readlink -f ${ZIP_MOVE}/../archive ) ;;
+    "personal")
+        ZIP_MOVE=$( readlink -f ${ZIP_MOVE_HEAD}/../me/fk ) ;;
     *)
-        report_error "Invalid device!" ;;
+        report_error "Invalid mode specified!" ;;
 esac
 
 case ${TOOLCHAIN_NAME} in
@@ -161,30 +164,11 @@ case ${TOOLCHAIN_NAME} in
         report_error "Invalid toolchain specified!" ;;
 esac
 
-TOOLCHAIN_FOLDER=/opt/${TOOLCHAIN_NAME}${TC_TARGET}
-
-case ${MODE} in
-    "private")
-        ZIP_MOVE=$( readlink -f ${ZIP_MOVE_HEAD}/../me/FK )
-        KEYS=testkey ;;
-    "public")
-        ZIP_MOVE=${ZIP_MOVE_HEAD}/Kernels/${DEVICE}${ZIP_MOVE_ADD}
-        KEYS=testkey ;;
-    "test")
-        ZIP_MOVE=${ZIP_MOVE_HEAD}/Kernels/${DEVICE}/Tests${ZIP_MOVE_ADD}
-        KEYS=testkey ;;
-    *)
-        report_error "Invalid mode specified!" ;;
-esac
-
-ANYKERNEL_BRANCH=${DEVICE}-flash-public-${ANDROID_VERSION}
-
 # COMPILATION VARIABLES
 ARCHITECTURE=arm64
 CCACHE=$( command -v ccache )
-IMAGE=Image.gz-dtb
-KERNEL=${OUT_FOLDER}/arch/${ARCHITECTURE}/boot/${IMAGE}
-TOOLCHAIN=${TOOLCHAIN_FOLDER}/bin/${TOOLCHAIN_PREFIX}
+IMAGE=${OUT_FOLDER}/arch/${ARCHITECTURE}/boot/Image.gz-dtb
+TOOLCHAIN=/opt/${TOOLCHAIN_NAME}${TC_TARGET}/bin/${TOOLCHAIN_PREFIX}
 
 
 ###############
@@ -241,7 +225,7 @@ function setup_compilation() {
     export FULL_VERSION=$( cat ${OUT_FOLDER}/include/config/kernel.release )
 
     [[ -n ${CCACHE} ]] && CCACHE_SUPPORT="${GRN}Yes, found at ${CCACHE}${RST}" \
-                       || CCACHE_SUPPORT="${RED}No, please install it!${RSR}"
+                       || CCACHE_SUPPORT="${RED}No, please install it!${RST}"
 
     echo "${BOLD}Kernel version:${RST}    ${FULL_VERSION}\n"
 
@@ -258,7 +242,8 @@ function setup_compilation() {
 # MAKE KERNEL
 function build_kernel() {
     # INCREMENT DIRTY VERSION NUMBER IF PASSED ABOVE
-    [[ -n ${REVISION} ]] && echo $(( ${REVISION} - 1 )) > ${OUT_FOLDER}/.version
+    [[ -n ${REVISION} && ${REVISION} -gt 0 ]] && \
+            echo $(( ${REVISION} - 1 )) > ${OUT_FOLDER}/.version
 
     # MAKE THE KERNEL
     make_wrapper ${EXTRA_MAKE_FLAGS}
@@ -275,8 +260,8 @@ function setup_zip_info() {
     # REVISION IS PASSED AS A PARAMETER FOR BETA VERSIONS
     [[ -n ${REVISION} ]] && REVISION=".r${REVISION}"
 
-    # IF THE MODE ISN'T PUBLIC, ADD SHA INFORMATION TO THE ZIP
-    [[ "${MODE}" != "public" ]] && SHA="-g$( git rev-parse --verify --short HEAD )"
+    # IF THE MODE ISN'T STABLE, ADD SHA INFORMATION TO THE ZIP
+    [[ "${MODE}" != "stable" ]] && SHA="-g$( git rev-parse --verify --short HEAD )"
 
     # EXPORT KERNEL_NAME BASED ON THE ABOVE INFORMATION
     export KERNEL_NAME=${FLASH_VERSION}${REVISION}${SHA}
@@ -296,14 +281,14 @@ function setup_folders() {
     # IF ZIPMOVE DOESN'T EXIST, MAKE IT
     [[ ! -d "${ZIP_MOVE}" ]] && mkdir -p "${ZIP_MOVE}"
 
-    # IF IT ISN'T A PUBLIC BUILD, CLEAN THE FOLDER
-    if [[ ${MODE} != "public" ]]; then
+    # IF IT ISN'T A STABLE BUILD, CLEAN THE FOLDER
+    if [[ ${MODE} != "stable" ]]; then
         [[ -z ${NOCLEAN} ]] && rm -rf "${ZIP_MOVE}"/*
     else
         # OTHERWISE, MOVE THE OLD FILES TO AN "OLD" FOLDER
-        [[ ! -d "${ZIP_MOVE}"/Old ]] && mkdir -p "${ZIP_MOVE}"/Old
+        [[ ! -d "${ZIP_MOVE_OLD}" ]] && mkdir -p "${ZIP_MOVE_OLD}"
         mv $( find "${ZIP_MOVE}"/* -maxdepth 0 -type f ) \
-           "${ZIP_MOVE}"/Old &>/dev/null
+           "${ZIP_MOVE_OLD}" &>/dev/null
     fi
 }
 
@@ -315,7 +300,7 @@ function package_zip() {
     cd "${ANYKERNEL_FOLDER}"
 
     # MOVE THE KERNEL IMAGE
-    cp "${KERNEL}" "${ANYKERNEL_FOLDER}"
+    cp "${IMAGE}" "${ANYKERNEL_FOLDER}"
 
     # GRAB MODULES TOO IF THEY ARE PRESENT
     mkdir -p ${MODULES_FOLDER}
@@ -328,17 +313,17 @@ function package_zip() {
     zip -q -r9 ${UNSIGNED_ZIP} * -x README.md ${UNSIGNED_ZIP}
 
     # SIGN ZIP
-    java -jar ${BIN_DIR}/signapk.jar \
-              ${BIN_DIR}/${KEYS}.x509.pem \
-              ${BIN_DIR}/${KEYS}.pk8 \
+    java -jar ${BIN_FOLDER}/signapk.jar \
+              ${BIN_FOLDER}/testkey.x509.pem \
+              ${BIN_FOLDER}/testkey.pk8 \
               ${UNSIGNED_ZIP} \
               ${SIGNAPK_ZIP}
 
-    ${BIN_DIR}/zipadjust ${SIGNAPK_ZIP} ${ADJUSTED_ZIP} &>/dev/null
+    ${BIN_FOLDER}/zipadjust ${SIGNAPK_ZIP} ${ADJUSTED_ZIP} &>/dev/null
 
-    java -jar ${BIN_DIR}/minsignapk.jar \
-              ${BIN_DIR}/${KEYS}.x509.pem \
-              ${BIN_DIR}/${KEYS}.pk8 \
+    java -jar ${BIN_FOLDER}/minsignapk.jar \
+              ${BIN_FOLDER}/testkey.x509.pem \
+              ${BIN_FOLDER}/testkey.pk8 \
               ${ADJUSTED_ZIP} \
               ${SIGNED_ZIP}
 
@@ -396,8 +381,8 @@ function generate_changelog() {
 
 
 # PUSH KERNEL ZIPS TO GITHUB
-function push_release() {
-    echo "  - Pushing release"
+function push_zip() {
+    echo "  - Pushing zip to GitHub"
 
     cd "${ZIP_MOVE}"
 
@@ -409,9 +394,9 @@ function push_release() {
 }
 
 
-# TAG FOR RELEASES
-function tag_release() {
-    echo "  - Tagging release"
+# TAG FOR STABLE RELEASES
+function tag_stable() {
+    echo "  - Tagging ${KERNEL_NAME} as stable"
 
     cd "${SOURCE_FOLDER}"
 
@@ -500,7 +485,7 @@ build_kernel
 # IF KERNEL COMPILED #
 ######################
 
-if [[ -f ${KERNEL} ]]; then
+if [[ -f ${IMAGE} ]]; then
     BUILD_RESULT="BUILD SUCCESSFUL"
 
     header "BUILDING FLASHABLE ZIP"
@@ -511,9 +496,9 @@ if [[ -f ${KERNEL} ]]; then
     move_files
     generate_changelog
 
-    [[ ${MODE} != "private" ]] && push_release
+    [[ ${MODE} != "personal" ]] && push_zip
 
-    [[ ${MODE} = "public" ]] && tag_release
+    [[ ${MODE} = "stable" ]] && tag_stable
 
     echo
 
