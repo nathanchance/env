@@ -175,7 +175,7 @@ TOOLCHAIN_FOLDER=/opt/${TOOLCHAIN_NAME}${TC_TARGET}
 
 case ${MODE} in
     "private")
-        ZIP_MOVE=${ZIP_MOVE_HEAD}/../me/FK
+        ZIP_MOVE=$( readlink -f ${ZIP_MOVE_HEAD}/../me/FK )
         KEYS=testkey ;;
     "public")
         ZIP_MOVE=${ZIP_MOVE_HEAD}/Kernels/${DEVICE}${ZIP_MOVE_ADD}
@@ -438,7 +438,7 @@ function tag_release() {
 # PRINT FILE INFO
 function ending_info() {
     if [[ ${BUILD_RESULT} = "BUILD SUCCESSFUL" ]]; then
-        echo ${RED}"FILE LOCATION: ${ZIP_MOVE}/${SIGNED_ZIP}"
+        echo ${RED}"FILE LOCATION: $( web_link ${ZIP_MOVE} )"
         echo "SIZE: $( du -h ${ZIP_MOVE}/${SIGNED_ZIP} |
                           awk '{print $1}' )"${RST}
     fi
@@ -454,8 +454,7 @@ function generate_log() {
     echo "${BUILD_RESULT} IN $( format_time ${END} ${START} )" >> ${LOG}
 
     if [[ ${BUILD_RESULT} = "BUILD SUCCESSFUL" ]]; then
-        # FILE LOCATION: PATH
-        echo "FILE LOCATION: ${ZIP_MOVE}/${SIGNED_ZIP}" >> ${LOG}
+        echo "FILE LINK: $( web_link ${ZIP_MOVE} )" >> ${LOG}
     fi
 }
 

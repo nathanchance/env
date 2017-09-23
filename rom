@@ -374,7 +374,7 @@ END=$( TZ=MST date +%s )
 
 # IF THE BUILD WAS SUCCESSFUL, PRINT FILE LOCATION, AND SIZE
 if [[ ${SUCCESS} = true ]]; then
-    echo ${RED}"FILE LOCATION: $( ls ${ZIP_MOVE}/*.zip )"
+    echo ${RED}"FILE LOCATION: $( web_link ${ZIP_MOVE} )"
     echo "SIZE: $( du -h ${ZIP_MOVE}/*.zip | awk '{print $1}' )"${RST}
 fi
 
@@ -401,5 +401,5 @@ echo "$( format_time ${END} ${START} )" >> ${LOG}
 # ONLY ADD A LINE ABOUT FILE LOCATION IF SCRIPT COMPLETED SUCCESSFULLY
 if [[ ${SUCCESS} = true ]]; then
     # FILE LOCATION: <PATH>
-    echo "FILE LOCATION: $( ls ${ZIP_MOVE}/*.zip )" >> ${LOG}
+    echo "FILE LOCATION: $( web_link ${ZIP_MOVE} )" >> ${LOG}
 fi

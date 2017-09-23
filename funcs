@@ -112,3 +112,8 @@ function add_remote() {
     [[ ! $( git remote | grep -m 1 ${1} ) ]] && \
         git remote add ${1} ${2}
 }
+
+# CONVERT A FILE LOCATION TO WEB LINK
+function web_link() {
+    echo "${1}" | sed s/$(echo ${HOME}/Web | sed 's/\//\\\//g')/http:\\/\\/nchancellor.net/
+}
