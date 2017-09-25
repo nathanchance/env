@@ -251,3 +251,13 @@ echo "     Disk usage        :  $( getDiskUsage )"
 echo "     Uptime            :  $( getUptime )"
 echo ""
 echo ""
+
+
+alias nf='neofetch \
+    --kernel_shorthand off \
+    --distro_shorthand tiny \
+    --os_arch off \
+    --uptime_shorthand tiny \
+    --speed_shorthand on \
+    --refresh_rate on \
+    --install_time off'
