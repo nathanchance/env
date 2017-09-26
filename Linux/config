@@ -1,28 +1,6 @@
-#!/usr/bin/env bash
-#
 # Neofetch config file
 # https://github.com/dylanaraps/neofetch
-#
-# Copyright (c) 2016-2017 Dylan Araps
-# Copyright (c) 2017 Nathan Chancellor
-#
-# Permission is hereby granted, free of charge, to any person obtaining a copy
-# of this software and associated documentation files (the "Software"), to deal
-# in the Software without restriction, including without limitation the rights
-# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-# copies of the Software, and to permit persons to whom the Software is
-# furnished to do so, subject to the following conditions:
-#
-# The above copyright notice and this permission notice shall be included in all
-# copies or substantial portions of the Software.
-#
-# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-# SOFTWARE.
+
 
 # See this wiki page for more info:
 # https://github.com/dylanaraps/neofetch/wiki/Customizing-Info
@@ -31,35 +9,17 @@ print_info() {
     info underline
 
     info "OS" distro
-    info "Model" model
     info "Kernel" kernel
     info "Uptime" uptime
     info "Packages" packages
     info "Shell" shell
-    # info "Resolution" resolution
-    # info "DE" de
-    # info "WM" wm
-    # info "WM Theme" wm_theme
-    # info "Theme" theme
-    # info "Icons" icons
-    # info "Terminal" term
-    # info "Terminal Font" term_font
-    info "CPU" cpu
-    # info "GPU" gpu
-    info "Memory" memory
-
+    info "CPU Model" cpu
     info "CPU Usage" cpu_usage
-    info "Disk" disk
-    # info "Battery" battery
-    # info "Font" font
-    # info "Song" song
-    # info "Local IP" local_ip
-    # info "Public IP" public_ip
-    # info "Users" users
-    # info "Install Date" install_date
+    info "Memory" memory
+    info "Disk Usage" disk
+    info "Install Date" install_date
 
     info line_break
-    info cols
     info line_break
 }
 
@@ -101,7 +61,7 @@ distro_shorthand="off"
 # Example:
 # on:  'Arch Linux x86_64'
 # off: 'Arch Linux'
-os_arch="off"
+os_arch="on"
 
 
 # Uptime
@@ -117,7 +77,7 @@ os_arch="off"
 # on:   '2 days, 10 hours, 3 mins'
 # off:  '2 days, 10 hours, 3 minutes'
 # tiny: '2d 10h 3m'
-uptime_shorthand="tiny"
+uptime_shorthand="on"
 
 
 # Shell
@@ -158,19 +118,28 @@ shell_version="on"
 # NOTE: Any file in '/sys/devices/system/cpu/cpu0/cpufreq' can be used as a value.
 speed_type="bios_limit"
 
-# Shorten the output of the CPU function
+# CPU speed shorthand
 #
 # Default: 'off'
-# Values:  'on', 'off', 'tiny', 'name', 'speed'
-# Flag:    --cpu_shorthand
+# Values: 'on', 'off'.
+# Flag:    --speed_shorthand.
+# NOTE: This flag is not supported in systems with CPU speed less than 1 GHz
 #
 # Example:
 # on:    'i7-6500U (4) @ 3.1GHz'
-# off:   'Intel i7-6500U (4) @ 3.1GHz'
-# tiny:  'i7-6500U (4)'
-# name:  'Intel i7-6500U (4)'
-# speed: '3.1GHz'
-cpu_shorthand="on"
+# off:   'i7-6500U (4) @ 3.100GHz'
+speed_shorthand="off"
+
+# Enable/Disable CPU brand in output.
+#
+# Default: 'on'
+# Values:  'on', 'off'
+# Flag:    --cpu_brand
+#
+# Example:
+# on:   'Intel i7-6500U'
+# off:  'i7-6500U (4)'
+cpu_brand="on"
 
 # CPU Speed
 # Hide/Show CPU speed.
@@ -205,7 +174,9 @@ cpu_cores="logical"
 # Default: 'off'
 # Values:  'C', 'F', 'off'
 # Flag:    --cpu_temp
-# Supports: Linux
+# Supports: Linux, BSD
+# NOTE: For FreeBSD and NetBSD-based systems, you'll need to enable
+#       coretemp kernel module. This only supports newer Intel processors.
 #
 # Example:
 # C:   'Intel i7-6500U (4) @ 3.1GHz [27.2°C]'
@@ -331,13 +302,13 @@ public_ip_host="http://ident.me"
 # disk_show=('/'):
 #      'Disk (/): 74G / 118G (66%)'
 #
-disk_show=('/home')
+disk_show=('/')
 
 # Disk subtitle.
 # What to append to the Disk subtitle.
 #
 # Default: 'mount'
-# Values:  'mount', 'name'
+# Values:  'mount', 'name', 'dir'
 # Flag:    --disk_subtitle
 #
 # Example:
@@ -346,6 +317,11 @@ disk_show=('/home')
 #
 # mount:  'Disk (/): 74G / 118G (66%)'
 #         'Disk (/mnt/Local Disk): 74G / 118G (66%)'
+#         'Disk (/mnt/Videos): 74G / 118G (66%)'
+#
+# dir:    'Disk (/): 74G / 118G (66%)'
+#         'Disk (Local Disk): 74G / 118G (66%)'
+#         'Disk (Videos): 74G / 118G (66%)'
 disk_subtitle="mount"
 
 
@@ -407,7 +383,7 @@ install_time_format="12h"
 # Example:
 # colors=(distro)      - Text is colored based on Distro colors.
 # colors=(4 6 1 8 8 6) - Text is colored in the order above.
-colors=(6 7 7 6 7 7)
+colors=(distro)
 
 
 # Text Options
@@ -459,7 +435,7 @@ block_range=(0 7)
 # Default:  'on'
 # Values:   'on', 'off'
 # Flag:     --color_blocks
-color_blocks="off"
+color_blocks="on"
 
 # Color block width in spaces
 #
@@ -543,6 +519,7 @@ disk_display="off"
 
 # Backend Settings
 
+
 # Image backend.
 #
 # Default:  'ascii'
@@ -591,7 +568,7 @@ ascii_distro="auto"
 # Example:
 # ascii_colors=(distro)      - Ascii is colored based on Distro colors.
 # ascii_colors=(4 6 1 8 8 6) - Ascii is colored using these colors.
-ascii_colors=(6 6 6 6 6 6)
+ascii_colors=(distro)
 
 # Bold ascii logo
 # Whether or not to bold the ascii logo.
@@ -604,6 +581,15 @@ ascii_bold="on"
 
 # Image Options
 
+
+# Image loop
+# Setting this to on will make neofetch redraw the image constantly until
+# Ctrl+C is pressed. This fixes display issues in some terminal emulators.
+#
+# Default:  'off'
+# Values:   'on', 'off'
+# Flag:     --loop
+image_loop="off"
 
 # Thumbnail directory
 #
@@ -690,16 +676,6 @@ scrot="off"
 # Flag:    --scrot_cmd
 scrot_cmd="auto"
 
-# Screenshot Directory
-# Where to save the screenshots
-#
-# Default: '~/Pictures/'
-# Values:  'dir'
-# Flag:    --scrot_dir
-#
-# Note: Neofetch won't create the directory if it doesn't exist.
-scrot_dir="$HOME/Pictures/"
-
 # Screenshot Filename
 # What to name the screenshots
 #
@@ -717,14 +693,20 @@ scrot_name="neofetch-$(date +%F-%I-%M-%S-${RANDOM}).png"
 #
 # NOTE: If you'd like another image host to be added to Neofetch.
 #       Open an issue on github.
-image_host="imgur"
+image_host="teknik"
 
 
 # Misc Options
 
+# Stdout mode
+# Turn off all colors and disables image backend (ASCII/Image).
+# Useful for piping into another command.
+# Default: 'off'
+# Values: 'on', 'off'
+stdout="off"
 
 # Config version.
 #
 # NOTE: Don't change this value, neofetch reads this to determine
 # how to handle backwards compatibility.
-config_version="2.1.0"
+config_version="3.3.1-git"
