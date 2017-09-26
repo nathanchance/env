@@ -95,7 +95,7 @@ function setup_tree() {
 
     header "Fetching CAF"
 
-    [[ ! $( git remote | grep caf ) ]] && echo "Adding CAF remote" \
+    [[ ! $(git remote | grep caf) ]] && echo "Adding CAF remote" \
             && git remote add caf https://source.codeaurora.org/quic/la/kernel/msm-4.4
 
     git fetch caf
@@ -103,10 +103,10 @@ function setup_tree() {
 
 function validate_tags() {
     # IF FIRST TAG WASN'T SPECIFIED, USE THE MOST RECENT IN TREE
-    [[ -z ${FT} ]] && FT=$( git describe --tags --abbrev=0 --match "${PRFX}*" )
+    [[ -z ${FT} ]] && FT=$(git describe --tags --abbrev=0 --match "${PRFX}*")
     
     # IF SECOND TAG WASN'T SPECIFIED, USE THE MOST RECENT ON REMOTE
-    [[ -z ${ST} ]] && ST=$( git tag -l | ag --nocolor ${PRFX} | tail -1 )
+    [[ -z ${ST} ]] && ST=$(git tag -l | ag --nocolor ${PRFX} | tail -1)
    
     header "Showing changelog for ${ST}"
     
@@ -116,7 +116,7 @@ function validate_tags() {
 function show() {
     # IF A FOLDER TO SHOW WAS SPECIFIED
     if [[ -n ${1} ]]; then
-        ND=$( git rev-list --count ${RANGE} 2> /dev/null )
+        ND=$(git rev-list --count ${RANGE} 2> /dev/null)
         if [[ -n ${ND} ]] || [[ ${ND} -ne 0 ]]; then
             header "Showing changes in ${1}" ${BLUE}
         else

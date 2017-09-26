@@ -24,16 +24,16 @@ source common
 WORKING_FOLDER=${MISC_FOLDER}/building
 
 function santity_checks() {
-    [[ -z $( pacman -Qi sudo ) ]] && report_error "You must have sudo installed!"
+    [[ -z $(pacman -Qi sudo) ]] && report_error "You must have sudo installed!"
 
     [[ ! -f ~/.ssh/id_rsa ]] && report_error "You must have a git ssh key setup!"
 }
 
 function install_if_absent() {
-    [[ $( command -v pacaur ) ]] && MANAGER=pacaur \
+    [[ $(command -v pacaur) ]] && MANAGER=pacaur \
                                  || MANAGER="sudo pacman"
 
-    [[ -z $( ${MANAGER} -Qi ${1} ) ]] && ${MANAGER} -Si --noconfirm ${1}
+    [[ -z $(${MANAGER} -Qi ${1}) ]] && ${MANAGER} -Si --noconfirm ${1}
 }
 
 function build_pacaur() {

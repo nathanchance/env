@@ -145,9 +145,9 @@ ZIP_MOVE_HEAD=${WEB_FOLDER}/downloads
 case ${MODE} in
     "alpha"|"beta"|"stable")
         ZIP_MOVE=${ZIP_MOVE_HEAD}/kernels/${DEVICE}${OS}/${MODE}
-        ZIP_MOVE_OLD=$( readlink -f ${ZIP_MOVE}/../archive ) ;;
+        ZIP_MOVE_OLD=$(readlink -f ${ZIP_MOVE}/../archive) ;;
     "personal")
-        ZIP_MOVE=$( readlink -f ${ZIP_MOVE_HEAD}/../me/fk ) ;;
+        ZIP_MOVE=$(readlink -f ${ZIP_MOVE_HEAD}/../me/fk) ;;
     *)
         report_error "Invalid mode specified!" ;;
 esac
@@ -166,7 +166,7 @@ esac
 
 # COMPILATION VARIABLES
 ARCHITECTURE=arm64
-CCACHE=$( command -v ccache )
+CCACHE=$(command -v ccache)
 IMAGE=${OUT_FOLDER}/arch/${ARCHITECTURE}/boot/Image.gz-dtb
 TOOLCHAIN=/opt/${TOOLCHAIN_NAME}${TC_TARGET}/bin/${TOOLCHAIN_PREFIX}
 
@@ -188,10 +188,10 @@ function clean_up() {
     # ONLY CHECKOUT IF KERNEL_BRANCH EXISTS AND WE AREN'T BISECTING OR REBASING
     cd "${SOURCE_FOLDER}"
     if [[ -n ${KERNEL_BRANCH} ]]; then
-        [[ ! $( git status | ag "bisec|rebas" ) ]] && git checkout ${KERNEL_BRANCH}
+        [[ ! $(git status | ag "bisec|rebas") ]] && git checkout ${KERNEL_BRANCH}
     # OTHERWISE, NOTATE CURRENT BRANCH FOR CHANGELOG
     else
-        export KERNEL_BRANCH=$( git rev-parse --abbrev-ref HEAD )
+        export KERNEL_BRANCH=$(git rev-parse --abbrev-ref HEAD)
     fi
     # CLEAN SOURCE FOLDER:
     git clean -fxd
@@ -201,7 +201,7 @@ function clean_up() {
 
 # MAKE WRAPPER FOR MAKE FUNCTION
 function kernel_make() {
-    make -j$(( $( nproc --all ) + 1 )) \
+    make -j$(($(nproc --all) + 1)) \
          ARCH=${ARCHITECTURE} \
          CROSS_COMPILE="${CCACHE} ${TOOLCHAIN}" \
          O=${OUT_FOLDER} \
@@ -222,7 +222,7 @@ function setup_compilation() {
     # POINT TO PROPER DEFCONFIG AND GENERATE VERSION FILES
     make_wrapper ${DEFCONFIG} prepare
 
-    export FULL_VERSION=$( cat ${OUT_FOLDER}/include/config/kernel.release )
+    export FULL_VERSION=$(cat ${OUT_FOLDER}/include/config/kernel.release)
 
     [[ -n ${CCACHE} ]] && CCACHE_SUPPORT="${GRN}Yes, found at ${CCACHE}${RST}" \
                        || CCACHE_SUPPORT="${RED}No, please install it!${RST}"
@@ -233,7 +233,7 @@ function setup_compilation() {
 
     echo "${BOLD}Toolchain path:${RST}    ${TOOLCHAIN}\n"
 
-    echo "${BOLD}GCC version:${RST}       $( ${TOOLCHAIN}gcc --version | head -1 )\n"
+    echo "${BOLD}GCC version:${RST}       $(${TOOLCHAIN}gcc --version | head -1)\n"
 
     echo "${BOLD}ccache support?${RST}    ${CCACHE_SUPPORT}\n"
 }
@@ -243,7 +243,7 @@ function setup_compilation() {
 function build_kernel() {
     # INCREMENT DIRTY VERSION NUMBER IF PASSED ABOVE
     [[ -n ${REVISION} && ${REVISION} -gt 0 ]] && \
-            echo $(( ${REVISION} - 1 )) > ${OUT_FOLDER}/.version
+            echo $((${REVISION} - 1)) > ${OUT_FOLDER}/.version
 
     # MAKE THE KERNEL
     make_wrapper ${EXTRA_MAKE_FLAGS}
@@ -255,13 +255,13 @@ function setup_zip_info() {
     echo "  - Generating zip info"
 
     # REMOVE EVERYTHING BEFORE FLASH IN THE FLASH_VERSION
-    FLASH_VERSION=$( echo ${FULL_VERSION} | sed s/"$( make kernelversion)"-// )
+    FLASH_VERSION=$(echo ${FULL_VERSION} | sed s/"$(make kernelversion)"-//)
 
     # REVISION IS PASSED AS A PARAMETER FOR BETA VERSIONS
     [[ -n ${REVISION} ]] && REVISION=".r${REVISION}"
 
     # IF THE MODE ISN'T STABLE, ADD SHA INFORMATION TO THE ZIP
-    [[ "${MODE}" != "stable" ]] && SHA="-g$( git rev-parse --verify --short HEAD )"
+    [[ "${MODE}" != "stable" ]] && SHA="-g$(git rev-parse --verify --short HEAD)"
 
     # EXPORT KERNEL_NAME BASED ON THE ABOVE INFORMATION
     export KERNEL_NAME=${FLASH_VERSION}${REVISION}${SHA}
@@ -287,7 +287,7 @@ function setup_folders() {
     else
         # OTHERWISE, MOVE THE OLD FILES TO AN "OLD" FOLDER
         [[ ! -d "${ZIP_MOVE_OLD}" ]] && mkdir -p "${ZIP_MOVE_OLD}"
-        mv $( find "${ZIP_MOVE}"/* -maxdepth 0 -type f ) \
+        mv $(find "${ZIP_MOVE}"/* -maxdepth 0 -type f) \
            "${ZIP_MOVE_OLD}" &>/dev/null
     fi
 }
@@ -305,7 +305,7 @@ function package_zip() {
     # GRAB MODULES TOO IF THEY ARE PRESENT
     mkdir -p ${MODULES_FOLDER}
     find ${OUT_FOLDER} -name "*.ko" -exec cp {} ${MODULES_FOLDER} \;
-    [[ $( ls -A ${MODULES_FOLDER} ) ]] \
+    [[ $(ls -A ${MODULES_FOLDER}) ]] \
             && ${TOOLCHAIN}strip --strip-unneeded ${MODULES_FOLDER}/*.ko \
             || rm -rf ${MODULES_FOLDER}
 
@@ -352,7 +352,7 @@ function generate_changelog() {
     cd "${SOURCE_FOLDER}"
 
     # WE NEED TO MARK THE PREVIOUS TAG FOR CHANGELOG
-    PREV_TAG_NAME=$( git describe --abbrev=0 --tags ${MATCH_FLAG} )
+    PREV_TAG_NAME=$(git describe --abbrev=0 --tags ${MATCH_FLAG})
     RANGE=${PREV_TAG_NAME}..HEAD
 
     # SHOW WHERE COMMITS ARE LOCATED
@@ -368,7 +368,7 @@ function generate_changelog() {
     cd "${ANYKERNEL_FOLDER}"
 
     # WE ONLY WANT TO SHOW ANYKERNEL CHANGES IF THERE HAVE BEEN SOME
-    NUM_COMMITS=$( git log ${RANGE} --pretty=oneline | wc -l )
+    NUM_COMMITS=$(git log ${RANGE} --pretty=oneline | wc -l)
 
     if [[ ${NUM_COMMITS} -gt 0 ]]; then
         echo "\n\n${GITHUB}/AnyKernel2/commits/${ANYKERNEL_BRANCH}\n" >> ${CHANGELOG}
@@ -413,23 +413,23 @@ function tag_stable() {
 # PRINT FILE INFO
 function ending_info() {
     if [[ ${BUILD_RESULT} = "BUILD SUCCESSFUL" ]]; then
-        echo ${RED}"FILE LOCATION: $( web_link ${ZIP_MOVE} )"
-        echo "SIZE: $( du -h ${ZIP_MOVE}/${SIGNED_ZIP} |
-                          awk '{print $1}' )"${RST}
+        echo ${RED}"FILE LOCATION: $(web_link ${ZIP_MOVE})"
+        echo "SIZE: $(du -h ${ZIP_MOVE}/${SIGNED_ZIP} |
+                          awk '{print $1}')"${RST}
     fi
 
-    echo ${RED}"TIME: $( date +%D\ %r | awk '{print toupper($0)}' )"
-    echo "DURATION: $( format_time ${END} ${START} )"${RST}; echo
+    echo ${RED}"TIME: $(date +%D\ %r | awk '{print toupper($0)}')"
+    echo "DURATION: $(format_time ${END} ${START})"${RST}; echo
 }
 
 
 # LOG GENERATION
 function generate_log() {
-    echo "\n$( date +"%m/%d/%Y %H:%M:%S" ): ${BASH_SOURCE} ${PARAMS}" >> ${LOG}
-    echo "${BUILD_RESULT} IN $( format_time ${END} ${START} )" >> ${LOG}
+    echo "\n$(date +"%m/%d/%Y %H:%M:%S"): ${BASH_SOURCE} ${PARAMS}" >> ${LOG}
+    echo "${BUILD_RESULT} IN $(format_time ${END} ${START})" >> ${LOG}
 
     if [[ ${BUILD_RESULT} = "BUILD SUCCESSFUL" ]]; then
-        echo "FILE LINK: $( web_link ${ZIP_MOVE} )" >> ${LOG}
+        echo "FILE LINK: $(web_link ${ZIP_MOVE})" >> ${LOG}
     fi
 }
 
@@ -441,7 +441,7 @@ function generate_log() {
 #              #
 ################
 
-START=$( date +"%s" )
+START=$(date +"%s")
 
 
 ###################
@@ -515,7 +515,7 @@ fi
 # ENDING INFORMATION #
 ######################
 
-END=$( date +"%s" )
+END=$(date +"%s")
 
 header "${BUILD_RESULT}!"
 

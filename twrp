@@ -74,13 +74,13 @@ if [[ ${PUBLIC} = true ]]; then
 else
     IMG_MOVE=${WEB_FOLDER}/me/twrp/${DEVICE}
 fi
-VERSION=$( grep "TW_MAIN_VERSION_STR" ${SOURCE_FOLDER}/bootable/recovery/variables.h -m 1 | cut -d \" -f2 )-${TW_DEVICE_VERSION}
+VERSION=$(grep "TW_MAIN_VERSION_STR" ${SOURCE_FOLDER}/bootable/recovery/variables.h -m 1 | cut -d \" -f2)-${TW_DEVICE_VERSION}
 
 # FILE NAMES
 COMP_FILE=recovery.img
-UPLD_FILE=twrp-${VERSION}-${DEVICE}-f2fs-$( TZ=MST date +%Y%m%d ).img
+UPLD_FILE=twrp-${VERSION}-${DEVICE}-f2fs-$(date +%Y%m%d).img
 FILE_FORMAT=twrp-*-${DEVICE}*
-LOG_NAME=${LOG_FOLDER}/compilation/twrp/twrp-${VERSION}-${DEVICE}-f2fs-$( TZ=MST date +%Y%m%d-%H%M ).log
+LOG_NAME=${LOG_FOLDER}/compilation/twrp/twrp-${VERSION}-${DEVICE}-f2fs-$(date +%Y%m%d-%H%M).log
 
 
 ##################
@@ -89,7 +89,7 @@ LOG_NAME=${LOG_FOLDER}/compilation/twrp/twrp-${VERSION}-${DEVICE}-f2fs-$( TZ=MST
 #                #
 ##################
 
-clear && export EXPERIMENTAL_USE_JAVA8=true && START=$( TZ=MST date +%s )
+clear && export EXPERIMENTAL_USE_JAVA8=true && START=$(date +%s)
 
 
 #############
@@ -101,7 +101,7 @@ cd ${SOURCE_FOLDER}
 if [[ ${SYNC} = true ]]; then
     header "SYNCING LATEST SOURCES"
 
-    repo sync --force-sync -j$( nproc --all )
+    repo sync --force-sync -j$(nproc --all)
 fi
 
 
@@ -124,7 +124,7 @@ source build/envsetup.sh
 # PREPARE DEVICE #
 ##################
 
-header "PREPARING $( echo ${DEVICE} | awk '{print toupper($0)}' )"
+header "PREPARING $(echo ${DEVICE} | awk '{print toupper($0)}')"
 
 lunch omni_${DEVICE}-eng
 
@@ -143,7 +143,7 @@ mka clobber
 ##################
 
 header "MAKING TWRP"
-NOW=$( TZ=MST date +"%Y-%m-%d-%S" )
+NOW=$(date +"%Y-%m-%d-%S")
 time mka recoveryimage | tee -a ${LOG_NAME}
 
 
@@ -152,7 +152,7 @@ time mka recoveryimage | tee -a ${LOG_NAME}
 ####################
 
 # THERE WILL BE A FILE IN THE OUT FOLDER IN THE ABOVE FORMAT
-if [[ $( ls ${OUT_FOLDER}/${COMP_FILE} 2>/dev/null | wc -l ) != 0 ]]; then
+if [[ -f ${OUT_FOLDER}/${COMP_FILE} ]]; then
     # MAKE BUILD RESULT STRING REFLECT SUCCESSFUL COMPILATION
     BUILD_RESULT_STRING="BUILD SUCCESSFUL"
     SUCCESS=true
@@ -201,7 +201,7 @@ if [[ -f /etc/arch-release ]]; then
     deactivate && rm -rf ${HOME}/venv
 fi
 
-END=$( TZ=MST date +%s )
+END=$(date +%s)
 header "${BUILD_RESULT_STRING}!"
 
 
@@ -211,14 +211,14 @@ header "${BUILD_RESULT_STRING}!"
 
 # IF THE BUILD WAS SUCCESSFUL, PRINT FILE LOCATION AND SIZE
 if [[ ${SUCCESS} = true ]]; then
-    echo ${RED}"FILE LOCATION: $( web_link ${IMG_MOVE} )"
-    echo "SIZE: $( du -h "${IMG_MOVE}"/${UPLD_FILE} | awk '{print $1}' )"${RST}
+    echo ${RED}"FILE LOCATION: $(web_link ${IMG_MOVE})"
+    echo "SIZE: $(du -h "${IMG_MOVE}"/${UPLD_FILE} | awk '{print $1}')"${RST}
 fi
 
 # PRINT THE TIME THE SCRIPT FINISHED
 # AND HOW LONG IT TOOK REGARDLESS OF SUCCESS
-echo ${RED}"TIME FINISHED: $( TZ=MST date +%D\ %r | awk '{print toupper($0)}' )"
-echo ${RED}"DURATION: $( format_time ${END} ${START} )"${RST}; echo
+echo ${RED}"TIME FINISHED: $(date +%D\ %r | awk '{print toupper($0)}')"
+echo ${RED}"DURATION: $(format_time ${END} ${START})"${RST}; echo
 
 
 ##################
@@ -226,15 +226,15 @@ echo ${RED}"DURATION: $( format_time ${END} ${START} )"${RST}; echo
 ##################
 
 # DATE: BASH_SOURCE (PARAMETERS)
-echo "\n$( TZ=MST date +"%m/%d/%Y %H:%M:%S" ): ${BASH_SOURCE} ${DEVICE}" >> ${LOG}
+echo "\n$(date +"%m/%d/%Y %H:%M:%S"): ${BASH_SOURCE} ${DEVICE}" >> ${LOG}
 
 # BUILD <SUCCESSFUL|FAILED> IN # MINUTES AND # SECONDS
-echo "${BUILD_RESULT_STRING} IN $( format_time ${END} ${START} )" >> ${LOG}
+echo "${BUILD_RESULT_STRING} IN $(format_time ${END} ${START})" >> ${LOG}
 
 # ONLY ADD A LINE ABOUT FILE LOCATION IF SCRIPT COMPLETED SUCCESSFULLY
 if [[ ${SUCCESS} = true ]]; then
     # FILE LOCATION: <PATH>
-    echo "FILE LOCATION: $( web_link ${IMG_MOVE} )" >> ${LOG}
+    echo "FILE LOCATION: $(web_link ${IMG_MOVE})" >> ${LOG}
 fi
 
 

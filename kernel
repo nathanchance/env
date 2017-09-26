@@ -22,7 +22,7 @@
 source common
 
 # START TIME
-START=$( date +%s )
+START=$(date +%s)
 
 # GATHER PARAMETERS
 while [[ $# -ge 1 ]]; do
@@ -83,7 +83,7 @@ done
 # BASIC BUILD FUNCTION
 function build() {
     # SET MAKE VARIABLE
-    MAKE="make -j$( nproc --all ) O=out ARCH=${ARCH}"
+    MAKE="make -j$(nproc --all) O=out ARCH=${ARCH}"
     
     # REMOVE OUT FOLDER AND REMAKE IT
     rm -rf out && mkdir out && echo
@@ -92,14 +92,14 @@ function build() {
     ${MAKE} ${DEFCONFIG}
 
     # MAKE KERNEL
-    time ${MAKE} CROSS_COMPILE="$( command -v ccache ) ${TOOLCHAIN}"
+    time ${MAKE} CROSS_COMPILE="$(command -v ccache) ${TOOLCHAIN}"
 }
 
 # REPORT ERROR IF WE AREN'T IN A TREE WITH A MAKEFILE
 [[ ! -f $(pwd)/Makefile ]] && report_error "This must be run in a kernel tree!"
 
 # SHOW THE BASE VERSION WE ARE MAKING
-header "BUILDING $( make kernelversion )"
+header "BUILDING $(make kernelversion)"
 
 # SHOW COMPILATION BASED ON FLAGS
 case ${VERBOSITY} in
@@ -113,11 +113,11 @@ esac
 
 # REPORT SUCCESS
 FINAL_IMAGE=out/arch/${ARCH}/boot/${IMAGE}
-END=$( date +%s )
-[[ -f ${FINAL_IMAGE} ]] && echo "${GRN}BUILT IN $( format_time ${END} ${START} )${RST}\n
+END=$(date +%s)
+[[ -f ${FINAL_IMAGE} ]] && echo "${GRN}BUILT IN $(format_time ${END} ${START})${RST}\n
 ${BOLD}IMAGE:${RST} ${FINAL_IMAGE}\n
-${BOLD}VERSION:${RST} $( cat out/include/config/kernel.release )" \
-                        || report_error "Kernel build failed!"
+${BOLD}VERSION:${RST} $(cat out/include/config/kernel.release)" \
+                      || report_error "Kernel build failed!"
 
 # UPLOAD IMAGE IF NECESSARY
 [[ ${UPLOAD} = true ]] && echo && curl --upload-file ${FINAL_IMAGE} https://transfer.sh/"${IMAGE}"

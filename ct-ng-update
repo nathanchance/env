@@ -65,14 +65,14 @@ function update() {
     header "UPDATING SOURCES"
 
     [[ ! -d ${SOURCE_FOLDER} ]] && \
-        cd $( dirname ${SOURCE_FOLDER} ) && \
+        cd $(dirname ${SOURCE_FOLDER}) && \
         git clone https://github.com/crosstool-ng/crosstool-ng ct-ng
 
     cd ${SOURCE_FOLDER}
 
     git fetch origin
 
-    [[ $( git rev-list --count HEAD..origin/master ) -gt 0 ]] && \
+    [[ $(git rev-list --count HEAD..origin/master) -gt 0 ]] && \
         git log --oneline HEAD..origin/master
 
     git rebase origin/master
@@ -89,7 +89,7 @@ function build() {
 
     ./configure --prefix=/usr/local
 
-    MAKE="make -j$( nproc --all )"
+    MAKE="make -j$(nproc --all)"
 
     ${MAKE} clean
 

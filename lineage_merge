@@ -51,7 +51,7 @@ vendor/cm"
 source common
 
 # START TRACKING TIME
-START=$( date +%s )
+START=$(date +%s)
 
 for FOLDER in ${SUBS_REPOS}; do
     # PRINT TO THE USER WHAT WE ARE DOING
@@ -67,7 +67,7 @@ for FOLDER in ${SUBS_REPOS}; do
     if [[ ${FOLDER} = ".repo/manifests" ]]; then
         URL=android
     else
-        URL=android_$( echo ${FOLDER} | sed "s/\//_/g" )
+        URL=android_$(echo ${FOLDER} | sed "s/\//_/g")
     fi
 
     # FETCH THE REPO
@@ -98,7 +98,7 @@ header "RESULTS"
 echo ${RESULT_STRING}
 
 # STOP TRACKING TIME
-END=$( date +%s )
+END=$(date +%s)
 
 # PRINT RESULT TO USER
 header "SCRIPT COMPLETED!"

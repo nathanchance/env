@@ -192,7 +192,7 @@ function build() {
         ct-ng nconfig
     fi
 
-    ct-ng build.$( nproc --all )
+    ct-ng build.$(nproc --all)
 
     [[ ! -f ${PREFIX_FOLDER}/bin/${TUPLE}-gcc ]] && report_error "Problem with compilation!"
 }
@@ -200,7 +200,7 @@ function build() {
 function commit() {
     cd ${PREBUILT_FOLDER}
     
-    UTC_DATE=$( TZ=UTC date +%Y%m%d )
+    UTC_DATE=$(TZ=UTC date +%Y%m%d)
 
     if [[ -z ${PERSONAL} ]]; then
         rm -rf *
@@ -214,16 +214,16 @@ function commit() {
 
     git add .
     
-    GCC_VERSION=$( ${PREFIX_FOLDER}/bin/${TUPLE}-gcc --version | ag gcc | cut -d ' ' -f ${POS} )
+    GCC_VERSION=$(${PREFIX_FOLDER}/bin/${TUPLE}-gcc --version | ag gcc | cut -d ' ' -f ${POS})
 
     git commit --signoff -m "${TUPLE} ${GCC_VERSION}: ${UTC_DATE}
 
-Compiled on $( source /etc/os-release; echo ${PRETTY_NAME} ) $( uname -m )
+Compiled on $(source /etc/os-release; echo ${PRETTY_NAME}) $(uname -m)
 
-Kernel version: $( uname -rv )
-Host GCC version: $( gcc --version | awk '/gcc/ {print $3}' )
-Make version: $( make --version  | awk '/Make/ {print $3}' )
-$( [[ -n ${TARGET_SUMMARY} ]] && echo && echo -e "${TARGET_SUMMARY}" && echo )
+Kernel version: $(uname -rv)
+Host GCC version: $(gcc --version | awk '/gcc/ {print $3}')
+Make version: $(make --version  | awk '/Make/ {print $3}')
+$([[ -n ${TARGET_SUMMARY} ]] && echo && echo -e "${TARGET_SUMMARY}" && echo)
 
 Compiled with crosstool-NG: http://crosstool-ng.github.io/
 GCC source: https://git.linaro.org/toolchain/gcc.git/log/?h=${GCC_BRANCH}"
@@ -232,7 +232,7 @@ GCC source: https://git.linaro.org/toolchain/gcc.git/log/?h=${GCC_BRANCH}"
 }
 
 function tarballs() {
-    OUT_FOLDER=$( dirname ${PREFIX_FOLDER} )
+    OUT_FOLDER=$(dirname ${PREFIX_FOLDER})
 
     cd ${OUT_FOLDER}
 
@@ -255,11 +255,11 @@ function tarballs() {
 
     git commit --signoff -m "Tarballs: $(TZ=UTC date +%Y%m%d)
 
-Compiled on $( source /etc/os-release; echo ${PRETTY_NAME} ) $( uname -m )
+Compiled on $(source /etc/os-release; echo ${PRETTY_NAME}) $(uname -m)
 
-Kernel version: $( uname -rv )
-Host GCC version: $( gcc --version | awk '/gcc/ {print $3}' )
-Make version: $( make --version  | awk '/Make/ {print $3}' )
+Kernel version: $(uname -rv)
+Host GCC version: $(gcc --version | awk '/gcc/ {print $3}')
+Make version: $(make --version  | awk '/Make/ {print $3}')
 
 Compiled with crosstool-NG: http://crosstool-ng.github.io/
 GCC source: https://git.linaro.org/toolchain/gcc.git/log/?h=gcc-7-branch

@@ -33,8 +33,8 @@ function darwin_prompt() {
 }
 
 function getOS() {
-    prodVers=$( prodVers=$(sw_vers|grep ProductVersion);echo ${prodVers:15} )
-    buildVers=$( buildVers=$(sw_vers|grep BuildVersion);echo ${buildVers:14} )
+    prodVers=$(prodVers=$(sw_vers|grep ProductVersion);echo ${prodVers:15})
+    buildVers=$(buildVers=$(sw_vers|grep BuildVersion);echo ${buildVers:14})
     echo "macOS ${prodVers} ${buildVers}"
 }
 
@@ -112,7 +112,7 @@ function getMemUsage() {
         compressedmem=0
     fi
     usedmem=$(((${wiredmem} + ${activemem} + ${compressedmem}) * 4 / 1024))
-    percent=$( echo $( echo "scale = 2; (${usedmem} / ${totalmem})" | bc -l | awk -F '.' '{print $2}' ) | sed s/^0*//g )
+    percent=$(echo $(echo "scale = 2; (${usedmem} / ${totalmem})" | bc -l | awk -F '.' '{print $2}') | sed s/^0*//g)
     if [[ -z ${percent} ]]; then
         percent=0
     fi
@@ -132,21 +132,21 @@ function motd() {
     echo "   \__|      \________|\__|  \__| \______/ \__|  \__|         \__|    \______/ \__|      "
     echo ""
     echo ""
-    echo "     Today's date      :  $( date "+%B %d, %Y (%A)" )"
-    echo "     Current time      :  $( date "+%I:%M %p %Z" )"
-    echo "     Operating system  :  $( getOS )"
-    echo "     Kernel version    :  $( uname -srm )"
-    echo "     Processor         :  $( getCPU )"
-    echo "     Memory usage      :  $( getMemUsage )"
-    echo "     Disk usage        :  $( getDiskUsage )"
-    echo "     Uptime            :  $( getUptime )"
+    echo "     Today's date      :  $(date "+%B %d, %Y (%A)")"
+    echo "     Current time      :  $(date "+%I:%M %p %Z")"
+    echo "     Operating system  :  $(getOS)"
+    echo "     Kernel version    :  $(uname -srm)"
+    echo "     Processor         :  $(getCPU)"
+    echo "     Memory usage      :  $(getMemUsage)"
+    echo "     Disk usage        :  $(getDiskUsage)"
+    echo "     Uptime            :  $(getUptime)"
     echo ""
     echo ""
 }
 
 function darwin_setup() {
     export ANDROID_HOME=${HOME}/Library/Android/SDK
-    add_to_path_pre  /usr/local/sbin
+    add_to_path_pre /usr/local/sbin
     add_to_path_post ${HOME}/Documents/Repos/Scripts
     add_to_path_post ${HOME}/Library/Android/SDK/build-tools/26.0.0-rc2
     add_to_path_post ${HOME}/Library/Android/SDK/build-tools/25.0.3

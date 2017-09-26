@@ -30,7 +30,7 @@ OS=$(UNAME=$(uname); echo ${UNAME,,})
 [[ ${OS} = "darwin" ]] && alias readlink=greadlink
 
 # LOCATION OF SCRIPTS FOLDER
-SCRIPTS_FOLDER=$( cd $( dirname $( readlink -f "${BASH_SOURCE[0]}" ) ) && pwd )
+SCRIPTS_FOLDER=$(cd $(dirname $(readlink -f "${BASH_SOURCE[0]}")) && pwd)
 BIN_FOLDER=${SCRIPTS_FOLDER}/bin
 
 # COMMON LOCATIONS AMONGST SCRIPTS
@@ -66,19 +66,19 @@ function echo() {
 function header() {
     [[ -n ${2} ]] && COLOR=${2} || COLOR=${RED}
     echo ${COLOR}
-    echo "====$( for i in $( seq ${#1} ); do echo "=\c"; done )===="
+    echo "====$(for i in $(seq ${#1}); do echo "=\c"; done)===="
     echo "==  ${1}  =="
-    echo "====$( for i in $( seq ${#1} ); do echo "=\c"; done )===="
+    echo "====$(for i in $(seq ${#1}); do echo "=\c"; done)===="
     echo ${RST}
 }
 
 # FORMATS THE TIME
 function format_time() {
-    MINS=$((( ${1} - ${2} ) / 60))
-    SECS=$((( ${1} - ${2} ) % 60))
+    MINS=$(((${1} - ${2}) / 60))
+    SECS=$(((${1} - ${2}) % 60))
     if [[ ${MINS} -ge 60 ]]; then
-        HOURS=$(( ${MINS}/  60 ))
-        MINS=$(( ${MINS} % 60 ))
+        HOURS=$((${MINS}/  60))
+        MINS=$((${MINS} % 60))
     fi
 
     if [[ ${HOURS} -eq 1 ]]; then
@@ -123,7 +123,7 @@ function report_warning() {
 
 # CHECKS TO SEE IF SCRIPT IS BEING RUN ON A MAC
 function mac_check() {
-    [[ $( uname -a | grep -i "darwin" ) ]] && report_error "Wrong window! ;)"
+    [[ $(uname -a | grep -i "darwin") ]] && report_error "Wrong window! ;)"
 }
 
 # ENFORCES THE VALUE NEEDED FOR TWO-PART FLAGS
@@ -133,7 +133,7 @@ function enforce_value() {
 
 # ADD A REMOTE IF IT DOESN'T EXIST
 function add_remote() {
-    [[ ! $( git remote | grep -m 1 ${1} ) ]] && \
+    [[ ! $(git remote | grep -m 1 ${1}) ]] && \
         git remote add ${1} ${2}
 }
 

@@ -29,10 +29,10 @@ source common
 
 # CHECKS IF MKA EXISTS
 function make_command() {
-    if [[ $( command -v mka ) ]]; then
+    if [[ $(command -v mka) ]]; then
         mka $@
     else
-        make -j$( nproc --all ) $@
+        make -j$(nproc --all) $@
     fi
 }
 
@@ -175,14 +175,14 @@ esac
 OUT_FOLDER=${SOURCE_FOLDER}/out/target/product/${DEVICE}
 
 # LOG NAME
-LOG_NAME=${LOG_FOLDER}/compilation/roms/${ROM}-${DEVICE}-$(TZ=MST date +"%Y%m%d-%H%M").log
+LOG_NAME=${LOG_FOLDER}/compilation/roms/${ROM}-${DEVICE}-$(date +"%Y%m%d-%H%M").log
 
 ###########################
 # MOVE INTO SOURCE FOLDER #
 # AND START TRACKING TIME #
 ###########################
 
-START=$( TZ=MST date +%s )
+START=$(date +%s)
 clear && cd ${SOURCE_FOLDER}
 
 
@@ -191,7 +191,7 @@ clear && cd ${SOURCE_FOLDER}
 #############
 
 REPO_SYNC="repo sync"
-FLAGS="-j$( nproc --all ) --force-sync -c --no-clone-bundle --no-tags --optimized-fetch --prune"
+FLAGS="-j$(nproc --all) --force-sync -c --no-clone-bundle --no-tags --optimized-fetch --prune"
 
 # IF THE SYNC IS REQUESTED, DO SO
 if [[ ${SYNC} = true ]]; then
@@ -224,7 +224,7 @@ source build/envsetup.sh
 # PREPARE DEVICE #
 ##################
 
-header "PREPARING $( echo ${DEVICE} | awk '{print toupper($0)}' )"
+header "PREPARING $(echo ${DEVICE} | awk '{print toupper($0)}')"
 
 # NOT ALL ROMS USE BREAKFAST
 case "${ROM}" in
@@ -280,8 +280,6 @@ fi
 
 header "MAKING FILES"; echo
 
-NOW=$( TZ=MST date +"%Y-%m-%d-%S" )
-
 # MAKE THE REQUESTED ITEM
 if [[ -n ${MAKE_TYPE} ]]; then
     make_command ${MAKE_TYPE} | tee -a ${LOG_NAME}
@@ -307,7 +305,7 @@ else
     ###################
 
     # THERE WILL BE A ZIP IN THE OUT FOLDER IF SUCCESSFUL
-    FILES=$( ls ${OUT_FOLDER}/*.zip 2>/dev/null | wc -l )
+    FILES=$(ls ${OUT_FOLDER}/*.zip 2>/dev/null | wc -l)
     if [[ ${FILES} != 0 ]]; then
         # MAKE BUILD RESULT STRING REFLECT SUCCESSFUL COMPILATION
         BUILD_RESULT_STRING="BUILD SUCCESSFUL"
@@ -333,7 +331,7 @@ else
         if [[ ${FILES} = 1 ]]; then
             mv "${OUT_FOLDER}"/*.zip* "${ZIP_MOVE}"
         else
-            for FILE in $( ls ${OUT_FOLDER}/*.zip* | grep -v ota ); do
+            for FILE in $(ls ${OUT_FOLDER}/*.zip* | grep -v ota); do
                 mv "${FILE}" "${ZIP_MOVE}"
             done
         fi
@@ -367,18 +365,18 @@ fi
 ######################
 
 # STOP TRACKING TIME
-END=$( TZ=MST date +%s )
+END=$(date +%s)
 
 # IF THE BUILD WAS SUCCESSFUL, PRINT FILE LOCATION, AND SIZE
 if [[ ${SUCCESS} = true ]]; then
-    echo ${RED}"FILE LOCATION: $( web_link ${ZIP_MOVE} )"
-    echo "SIZE: $( du -h ${ZIP_MOVE}/*.zip | awk '{print $1}' )"${RST}
+    echo ${RED}"FILE LOCATION: $(web_link ${ZIP_MOVE})"
+    echo "SIZE: $(du -h ${ZIP_MOVE}/*.zip | awk '{print $1}')"${RST}
 fi
 
 # PRINT THE TIME THE SCRIPT FINISHED
 # AND HOW LONG IT TOOK REGARDLESS OF SUCCESS
-echo ${RED}"TIME: $( TZ=MST date +%D\ %r | awk '{print toupper($0)}' )"
-echo ${RED}"DURATION: $( format_time ${END} ${START} )"${RST}
+echo ${RED}"TIME: $(date +%D\ %r | awk '{print toupper($0)}')"
+echo ${RED}"DURATION: $(format_time ${END} ${START})"${RST}
 echo "\a"
 
 
@@ -387,16 +385,16 @@ echo "\a"
 ##################
 
 # DATE: BASH_SOURCE (PARAMETERS)
-echo "\n$( TZ=MST date +"%m/%d/%Y %H:%M:%S" ): ${BASH_SOURCE} ${PARAMS}" >> ${LOG}
+echo "\n$(date +"%m/%d/%Y %H:%M:%S"): ${BASH_SOURCE} ${PARAMS}" >> ${LOG}
 
 # BUILD <SUCCESSFUL|FAILED> IN # MINUTES AND # SECONDS
 if [[ -n ${BUILD_RESULT_STRING} ]]; then
     echo "${BUILD_RESULT_STRING} IN \c" >> ${LOG}
 fi
-echo "$( format_time ${END} ${START} )" >> ${LOG}
+echo "$(format_time ${END} ${START})" >> ${LOG}
 
 # ONLY ADD A LINE ABOUT FILE LOCATION IF SCRIPT COMPLETED SUCCESSFULLY
 if [[ ${SUCCESS} = true ]]; then
     # FILE LOCATION: <PATH>
-    echo "FILE LOCATION: $( web_link ${ZIP_MOVE} )" >> ${LOG}
+    echo "FILE LOCATION: $(web_link ${ZIP_MOVE})" >> ${LOG}
 fi

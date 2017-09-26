@@ -60,7 +60,7 @@ done
 [[ -z ${KEY} ]] && KEY=testkey
 
 # Error out if the file isn't a zip file
-[[ $( echo ${FILE} | grep -v zip ) ]] && report_error "This can only sign zip files!"
+[[ $(echo ${FILE} | grep -v zip) ]] && report_error "This can only sign zip files!"
 
 
 ##############

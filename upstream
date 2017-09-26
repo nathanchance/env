@@ -59,11 +59,11 @@ function verify_remote() {
 
 # GENERATE VERSIONS
 function gen_versions() {
-    CUR_VERSION=$( make kernelversion )
+    CUR_VERSION=$(make kernelversion)
 
-    VERSION=$( echo ${CUR_VERSION} | cut -d . -f 1 )
-    PATCHLEVEL=$( echo ${CUR_VERSION} | cut -d . -f 2 )
-    SUBLEVEL=$(( $( echo ${CUR_VERSION} | cut -d . -f 3 ) + 1 ))
+    VERSION=$(echo ${CUR_VERSION} | cut -d . -f 1)
+    PATCHLEVEL=$(echo ${CUR_VERSION} | cut -d . -f 2)
+    SUBLEVEL=$(($(echo ${CUR_VERSION} | cut -d . -f 3) + 1))
     NEW_VERSION=${VERSION}.${PATCHLEVEL}.${SUBLEVEL}
 
     # SET RANGE BASED ON IF WE ARE PICKING A RELEASE OR RC BUILD
@@ -71,7 +71,7 @@ function gen_versions() {
                    || RANGE=v${CUR_VERSION}..stable-rc/linux-${VERSION}.${PATCHLEVEL}.y
 
     # NUMBER OF COMMITS DIFFERENT
-    ND=$( git rev-list --count ${RANGE} 2> /dev/null )
+    ND=$(git rev-list --count ${RANGE} 2> /dev/null)
     [[ -z ${ND} || ${ND} -eq 0 ]] && report_error "There are no commits to pick/merge!"
 
     export NEW_VERSION RANGE ND
@@ -81,12 +81,12 @@ function gen_versions() {
 function merge() {
     header "MERGING ${NEW_VERSION}"
 
-    git merge v${NEW_VERSION} -m "Merge ${NEW_VERSION} into $( git rev-parse --abbrev-ref HEAD )
+    git merge v${NEW_VERSION} -m "Merge ${NEW_VERSION} into $(git rev-parse --abbrev-ref HEAD)
 
 Changes in ${NEW_VERSION}: (${ND} commits)
-$( git log --reverse --format="        %s" ${RANGE} )
+$(git log --reverse --format="        %s" ${RANGE})
 
-Signed-off-by: $( git config --get user.name ) <$( git config --get user.email )>"
+Signed-off-by: $(git config --get user.name) <$(git config --get user.email)>"
 
     [[ $? -ne 0 ]] && report_error "Merge needs manual intervention!
     

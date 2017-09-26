@@ -92,22 +92,19 @@ function aliases() {
 # Try to attach via tmux
 function tmux_attach() {
     if [[ -z ${TMUX} ]]; then
-        ID=$( tmux ls | grep -vm1 attached | cut -d: -f1 ) # get the id of a deattached session
-        if [[ -z ${ID} ]]; then # if not available create a new one
-            tmux -u new-session
-        else
-            tmux -u attach-session -t ${ID} # if available attach to it
-        fi
+        ID=$(tmux ls | grep -vm1 attached | cut -d: -f1)
+        [[ -z ${ID} ]] && tmux -u new-session \
+                       || tmux -u attach-session -t ${ID}
     fi
 }
 
 # Add something to PATH but only if it isn't already there
 function add_to_path_pre() {
-    [[ ! $( echo ${PATH} | ag -s --nocolor ${1} ) ]] && export PATH="${1}:${PATH}"
+    [[ ! $(echo ${PATH} | ag -s --nocolor ${1}) ]] && export PATH="${1}:${PATH}"
 }
 
 function add_to_path_post() {
-    [[ ! $( echo ${PATH} | ag -s --nocolor ${1} ) ]] && export PATH="${PATH}:${1}"
+    [[ ! $(echo ${PATH} | ag -s --nocolor ${1}) ]] && export PATH="${PATH}:${1}"
 }
 
 function bash_setup() {
@@ -157,11 +154,11 @@ function gerrit-push {
     esac
 
     if [[ -z ${PROJECT} ]]; then
-        PROJECT=$( grep "projectname" .git/config | sed 's/\tprojectname = //' )
+        PROJECT=$(grep "projectname" .git/config | sed 's/\tprojectname = //')
     fi
 
     if [[ -n ${PROJECT} ]]; then
-        PROJECT=$( echo ${PROJECT} | sed 's/DirtyUnicorns\///' )
+        PROJECT=$(echo ${PROJECT} | sed 's/DirtyUnicorns\///')
         echo "Executing git push ssh://${USER}@${URL}:29418/${PROJECT} HEAD:refs/for/${BRANCH}"
         git push ssh://${USER}@${URL}:29418/${PROJECT} HEAD:refs/for/${BRANCH}
     else
@@ -204,7 +201,7 @@ function ex () {
 
 function transfer() {
     echo
-    curl --upload-file ${1} https://transfer.sh/$( basename ${1} )
+    curl --upload-file ${1} https://transfer.sh/$(basename ${1})
     echo
     echo
 }
@@ -212,7 +209,7 @@ function transfer() {
 function haste() {
     local OUTPUT CONTENTS
 
-    if (( $# == 0 )) && [[ $( printf "%s" "$0" | wc -c ) > 0 ]]; then
+    if (( $# == 0 )) && [[ $(printf "%s" "$0" | wc -c) > 0 ]]; then
         CONTENTS=${0}
 
     elif (( $# != 1 )) || [[ $1 =~ ^(-h|--help)$ ]]; then

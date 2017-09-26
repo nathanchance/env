@@ -51,12 +51,12 @@ function log_support() {
     # Create LOG_FOLDER if it doesn't exist
     [[ ! -d ${LOG_FOLDER} ]] && mkdir -p ${LOG_FOLDER}/results
     
-    export LOG=${LOG_FOLDER}/results/compile_log_$( TZ=MST date +%m_%d_%y ).log
+    export LOG=${LOG_FOLDER}/results/compile_log_$(date +%m_%d_%y).log
 }
 
 # Setup ccache
 function ccache_setup() {
-    if [[ -n $( command -v ccache ) ]]; then
+    if [[ -n $(command -v ccache) ]]; then
         if [[ -n ${1} ]]; then
             ccache -M ${1}G &> /dev/null
             export USE_CCACHE=1
@@ -102,19 +102,19 @@ function rps {
         esac
     fi
 
-    repo sync -j$( nproc --all ) --force-sync -c --no-clone-bundle --no-tags --optimized-fetch --prune ${ARGS}
+    repo sync -j$(nproc --all) --force-sync -c --no-clone-bundle --no-tags --optimized-fetch --prune ${ARGS}
 }
 
 function ris-sparse {
     repo init -u ${1} -b ${2} --no-clone-bundle --depth=1
 
-    time repo sync -j$( nproc --all ) --force-sync -c --no-clone-bundle --no-tags --optimized-fetch --prune
+    time repo sync -j$(nproc --all) --force-sync -c --no-clone-bundle --no-tags --optimized-fetch --prune
 }
 
 function ris {
     repo init -u ${1} -b ${2}
 
-    time repo sync -j$( nproc --all ) --force-sync -c --no-clone-bundle --no-tags --optimized-fetch --prune
+    time repo sync -j$(nproc --all) --force-sync -c --no-clone-bundle --no-tags --optimized-fetch --prune
 }
 
 function upstable() {
@@ -153,20 +153,20 @@ function gmrg() {
 
     git fetch ${1} ${2}
 
-    local CB=$( git rev-parse --abbrev-ref HEAD )
+    local CB=$(git rev-parse --abbrev-ref HEAD)
     local BTM=${2}
     local RANGE=${CB}..FETCH_HEAD
     local URL
 
-    [[ $( echo ${1} | grep http ) ]] && URL=${1} \
-                                     || URL=$( git remote get-url ${1} )
+    [[ $(echo ${1} | grep http) ]] && URL=${1} \
+                                   || URL=$(git remote get-url ${1})
 
     git merge FETCH_HEAD -m "Merge branch '${BTM}' of ${URL} into ${CB}
 
-Commits in ${BTM}: ($( git rev-list --count ${RANGE} ) commits)
-$( git log --reverse --format="        %s" ${RANGE} )
+Commits in ${BTM}: ($(git rev-list --count ${RANGE}) commits)
+$(git log --reverse --format="        %s" ${RANGE})
 
-Signed-off-by: $( git config --get user.name ) <$( git config --get user.email )>"
+Signed-off-by: $(git config --get user.name) <$(git config --get user.email)>"
 
 [[ $? -ne 0 ]] && echo "Merge needs manual intervention!
 
