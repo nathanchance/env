@@ -39072,7 +39072,7 @@
 	<key>DimBackgroundWindows</key>
 	<false/>
 	<key>DimInactiveSplitPanes</key>
-	<true/>
+	<false/>
 	<key>DimOnlyText</key>
 	<false/>
 	<key>DisableFullscreenTransparency</key>
@@ -39280,11 +39280,11 @@
 	<key>NSWindow Frame SessionsPreferences</key>
 	<string>138 73 606 469 0 0 1280 778 </string>
 	<key>NSWindow Frame SharedPreferences</key>
-	<string>192 363 916 394 0 0 1280 778 </string>
+	<string>448 605 918 452 0 0 1920 1058 </string>
 	<key>NSWindow Frame com.apple.typography_panel_DejaVuSansMono</key>
 	<string>212 465 260 56 0 0 1280 778 </string>
 	<key>NSWindow Frame iTerm Window 0</key>
-	<string>0 4 1280 774 0 0 1280 778 </string>
+	<string>247 -529 1920 1058 0 0 1920 1058 </string>
 	<key>NSWindow Frame iTerm Window 1</key>
 	<string>0 32 1920 1018 0 0 1920 1058 </string>
 	<key>New Bookmarks</key>
@@ -39857,7 +39857,7 @@
 			<key>Visual Bell</key>
 			<true/>
 			<key>Window Type</key>
-			<integer>0</integer>
+			<integer>12</integer>
 			<key>Working Directory</key>
 			<string>/Users/nathan</string>
 		</dict>
@@ -39962,7 +39962,7 @@
 	<key>findRegex_iTerm</key>
 	<false/>
 	<key>iTerm Version</key>
-	<string>3.1.20170925</string>
+	<string>3.1.git.99dd4fcbc6</string>
 	<key>kCPKSelectionViewPreferredModeKey</key>
 	<integer>0</integer>
 	<key>kCPKSelectionViewShowHSBTextFieldsKey</key>
