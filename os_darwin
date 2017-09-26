@@ -177,6 +177,7 @@ function nf() {
         --os_arch off \
         --uptime_shorthand tiny \
         --speed_shorthand on \
+        --refresh_rate on \
         --install_time off
     echo
     echo
