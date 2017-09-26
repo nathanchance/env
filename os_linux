@@ -60,7 +60,7 @@ function ccache_setup() {
         if [[ -n ${1} ]]; then
             ccache -M ${1}G &> /dev/null
             export USE_CCACHE=1
-            [[ ${OS} = "linux" ]] && add_to_path "/usr/lib/ccache/bin"
+            add_to_path_pre "/usr/lib/ccache/bin"
         else
             echo "${RED}Please specify ccache size!${RST}"
         fi
