@@ -433,9 +433,15 @@ function tag_stable() {
 
 # PRINT FILE INFO
 function ending_info() {
+    echo "\n$(date +"%m/%d/%Y %H:%M:%S"): ${BASH_SOURCE} ${PARAMS}" >> ${LOG}
+    echo "${BUILD_RESULT} IN $(format_time ${END} ${START})" >> ${LOG}
+
     if [[ ${BUILD_RESULT} = "BUILD SUCCESSFUL" ]]; then
         [[ -n ${TRANSFER_LINK} ]] && FILE_LOCATION=${TRANSFER_LINK} \
                                   || FILE_LOCATION=$(web_link ${ZIP_MOVE})
+
+        echo "FILE LINK: ${FILE_LOCATION}" >> ${LOG}
+
         echo ${RED}"FILE LOCATION: ${FILE_LOCATION}"
         echo "SIZE: $(du -h ${ZIP_MOVE}/${SIGNED_ZIP} |
                           awk '{print $1}')"${RST}
@@ -443,17 +449,6 @@ function ending_info() {
 
     echo ${RED}"TIME: $(date +%D\ %r | awk '{print toupper($0)}')"
     echo "DURATION: $(format_time ${END} ${START})"${RST}; echo
-}
-
-
-# LOG GENERATION
-function generate_log() {
-    echo "\n$(date +"%m/%d/%Y %H:%M:%S"): ${BASH_SOURCE} ${PARAMS}" >> ${LOG}
-    echo "${BUILD_RESULT} IN $(format_time ${END} ${START})" >> ${LOG}
-
-    if [[ ${BUILD_RESULT} = "BUILD SUCCESSFUL" ]]; then
-        echo "FILE LINK: $(web_link ${ZIP_MOVE})" >> ${LOG}
-    fi
 }
 
 
@@ -543,7 +538,5 @@ END=$(date +"%s")
 header "${BUILD_RESULT}!"
 
 ending_info
-
-generate_log
 
 echo "\a"
