@@ -392,3 +392,16 @@ Resolve conflicts then run git merge --continue!" && return 1
 
 header "${BTM} merged cleanly!" ${GRN}
 }
+
+function nf() {
+    echo
+    neofetch \
+        --kernel_shorthand off \
+        --distro_shorthand tiny \
+        --os_arch off \
+        --uptime_shorthand tiny \
+        --speed_shorthand on \
+        --install_time off
+    echo
+    echo
+}
