@@ -26,6 +26,8 @@
 
 # WHAT OS ARE WE ON?
 OS=$(UNAME=$(uname); echo ${UNAME,,})
+# GNU READLINK IS NEEDED FOR SCRIPTS_FOLDER
+[[ ${OS} = "darwin" ]] && alias readlink=greadlink
 
 # LOCATION OF SCRIPTS FOLDER
 SCRIPTS_FOLDER=$( cd $( dirname $( readlink -f "${BASH_SOURCE[0]}" ) ) && pwd )
