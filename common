@@ -126,11 +126,6 @@ function report_warning() {
     [[ -z ${2} ]] && echo ""
 }
 
-# CHECKS TO SEE IF SCRIPT IS BEING RUN ON A MAC
-function mac_check() {
-    [[ $(uname -a | grep -i "darwin") ]] && report_error "Wrong window! ;)"
-}
-
 # ENFORCES THE VALUE NEEDED FOR TWO-PART FLAGS
 function enforce_value() {
     [[ $# -lt 1 ]] && report_error "A additional value is needed for one of the flags passed to this script!"
@@ -148,4 +143,4 @@ function web_link() {
 }
 
 # REQUIRE A PARAMETER TO OPT OUT OF MAC_CHECK
-[[ $# -lt 1 ]] && mac_check
+[[ $# -lt 1 && ${OS} = "darwin" ]] && report_error "Wrong window! ;)"
