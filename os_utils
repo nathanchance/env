@@ -81,7 +81,7 @@ function aliases() {
     alias grba='git rebase --abort'
     alias grbc='git rebase --continue'
 
-    alias gd='git diff'
+    alias gdh='git diff HEAD'
     alias gdc='git diff --cached'
 
     alias gsh='git show'
