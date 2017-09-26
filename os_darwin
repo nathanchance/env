@@ -154,3 +154,17 @@ function darwin_setup() {
     add_to_path_pre /Library/Frameworks/Python.framework/Versions/3.6/bin
     motd
 }
+
+function upterm() {
+    local MAKE="make ${JOBS_FLAG}"
+
+    cd ${HOME}/Documents/Repos/iTerm2
+
+    git fetch origin
+    git rebase origin/master
+    [[ $? -ne 0 ]] && echo "Error updating repo!" && return
+
+    ${MAKE} clean
+    ${MAKE} Development
+    ${MAKE} install
+}

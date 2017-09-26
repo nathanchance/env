@@ -51,7 +51,8 @@ RST="\033[0m"
 YLW="\033[01;33m"
 
 # MAKE THREADS
-THREADS=$(nproc --all)
+[[ ${OS} = "darwin" ]] && THREADS=$(sysctl hw.ncpu | cut -d " " -f 2) \
+                       || THREADS=$(nproc --all)
 JOBS_FLAG="-j${THREADS}"
 
 
