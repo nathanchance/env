@@ -150,6 +150,8 @@ case ${MODE} in
         ZIP_MOVE_OLD=$(readlink -f ${ZIP_MOVE}/../archive) ;;
     "personal")
         ZIP_MOVE=$(readlink -f ${ZIP_MOVE_HEAD}/../me/fk) ;;
+    "transfer")
+        ZIP_MOVE=${ANYKERNEL_FOLDER} ;;
     *)
         report_error "Invalid mode specified!" ;;
 esac
@@ -278,6 +280,9 @@ function setup_zip_info() {
 
 # SETUP FOLDERS
 function setup_folders() {
+    # THIS IS A NO-OP FOR TRANSFER MODE
+    [[ ${MODE} = "transfer" ]] && return
+
     echo "  - Creating folders"
 
     # IF ZIPMOVE DOESN'T EXIST, MAKE IT
@@ -335,6 +340,9 @@ function package_zip() {
 
 # MOVE FILES AND GENERATE MD5SUM
 function move_files() {
+    # THIS IS A NO-OP FOR TRANSFER MODE
+    [[ ${MODE} = "transfer" ]] && return
+
     echo "  - Moving zip"
 
     mv ${SIGNED_ZIP} "${ZIP_MOVE}"
@@ -345,6 +353,9 @@ function move_files() {
 
 # GENERATE CHANGELOG
 function generate_changelog() {
+    # THIS IS A NO-OP FOR TRANSFER MODE
+    [[ ${MODE} = "transfer" ]] && return
+
     echo "  - Generating changelog"
 
     GITHUB="http://github.com/nathanchance"
@@ -384,6 +395,14 @@ function generate_changelog() {
 
 # PUSH KERNEL ZIPS TO GITHUB
 function push_zip() {
+    if [[ ${MODE} = "transfer" ]]; then
+        echo "  - Uploading zip to transfer.sh"
+        TRANSFER_LINK=$(curl -s --upload-file \
+                        "${ZIP_MOVE}"/${SIGNED_ZIP} \
+                        https://transfer.sh/${SIGNED_ZIP})
+        return
+    fi
+
     echo "  - Pushing zip to GitHub"
 
     cd "${ZIP_MOVE}"
@@ -415,7 +434,9 @@ function tag_stable() {
 # PRINT FILE INFO
 function ending_info() {
     if [[ ${BUILD_RESULT} = "BUILD SUCCESSFUL" ]]; then
-        echo ${RED}"FILE LOCATION: $(web_link ${ZIP_MOVE})"
+        [[ -n ${TRANSFER_LINK} ]] && FILE_LOCATION=${TRANSFER_LINK} \
+                                  || FILE_LOCATION=$(web_link ${ZIP_MOVE})
+        echo ${RED}"FILE LOCATION: ${FILE_LOCATION}"
         echo "SIZE: $(du -h ${ZIP_MOVE}/${SIGNED_ZIP} |
                           awk '{print $1}')"${RST}
     fi
