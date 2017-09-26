@@ -21,25 +21,12 @@
 # SOURCE OUR UNIVERSAL FUNCTIONS SCRIPT (DON'T MAC CHECK THOUGH)
 source common -m
 
-function aliases() {
-    # default Arch ls alias
-    alias ls='ls --color=auto'
+# SOURCE THE OS SPECIFIC FUNCTIONS
+source ${SCRIPTS_FOLDER}/os_${OS}
 
+function aliases() {
     # tmux alias
     alias tmux='tmux -u'
-
-    # Update alias
-    alias update='pacaur -Syyu'
-
-    # Change directory aliases
-    alias 6p='cd ${KERNEL_FOLDER}/angler'
-    alias asu='cd ${REPO_FOLDER}/asu'
-    alias ayk='cd ${KERNEL_FOLDER}/anykernel'
-    alias lnx='cd ${KERNEL_FOLDER}/linux'
-    alias pkg='cd ${REPO_FOLDER}/pkgbuilds'
-    alias op5='cd ${KERNEL_FOLDER}/op5'
-    alias tlc='cd ${TC_FOLDER}'
-    alias spt='cd ${SCRIPTS_FOLDER}'
 
     # Alias hub to git
     alias git='hub'
@@ -114,105 +101,33 @@ function tmux_attach() {
     fi
 }
 
-# Setup PS1 and such
-function prompts() {
-    source ~/.git-prompt.sh
-    export GIT_PS1_SHOWDIRTYSTATE=1
-    export GIT_PS1_SHOWUPSTREAM=auto
-    export PROMPT_COMMAND='__git_ps1 "\[\033[01;34m\]\u@\h \[\033[01;32m\]\w\[\033[01;31m\]" " \[\033[39m\]\$\[\033[0m\] "'
-}
-
 # Add something to PATH but only if it isn't already there
-function add_to_path() {
+function add_to_path_pre() {
     [[ ! $( echo ${PATH} | ag -s --nocolor ${1} ) ]] && export PATH="${1}:${PATH}"
 }
 
-# Setup ccache
-function ccache_setup() {
-    if [[ -n $( command -v ccache ) ]]; then
-        if [[ -n ${1} ]]; then
-            ccache -M ${1}G &> /dev/null
-            export USE_CCACHE=1
-            add_to_path "/usr/lib/ccache/bin"
-        else
-            echo "${RED}Please specify ccache size!${RST}"
-        fi
-    else
-        echo "${RED}Please install ccache!${RST}"
-    fi
+function add_to_path_post() {
+    [[ ! $( echo ${PATH} | ag -s --nocolor ${1} ) ]] && export PATH="${PATH}:${1}"
 }
 
-# Log support so I can see what compiled and at what time
-function log_support() {
-    export LOG_FOLDER=${WEB_FOLDER}/me/logs
-
-    # Create LOG_FOLDER if it doesn't exist
-    [[ ! -d ${LOG_FOLDER} ]] && mkdir -p ${LOG_FOLDER}/results
-    
-    export LOG=${LOG_FOLDER}/results/compile_log_$( TZ=MST date +%m_%d_%y ).log
-}
-
-function bashrc() {
+function bash_setup() {
     aliases
+    ${OS}_aliases
     tmux_attach
-    prompts
-    ccache_setup 150
-    log_support
-    add_to_path "${SCRIPTS_FOLDER}"
+    ${OS}_prompt
+    ${OS}_setup
+    add_to_path_pre "${SCRIPTS_FOLDER}"
 }
 
 # bashrc update function
-function upbashrc() {
-    source ${SCRIPTS_FOLDER}/utils
-    bashrc
+function buf() {
+    source ${SCRIPTS_FOLDER}/os_utils
+    bash_setup
 }
 
 # EXKM to RC converter
 function exkm2rc {
     sed -e 's/^/   write /' ${1} > ${2}
-}
-
-# Set up a virtual environment for Python
-function mkavenv {
-    virtualenv2 ${HOME}/venv && source ${HOME}/venv/bin/activate
-}
-
-# Deactivate and remove venv
-function rmvenv {
-    deactivate && rm -rf ${HOME}/venv
-}
-
-# Repo sync shorthand
-function rps {
-    local ARGS
-
-    if [[ -n ${1} ]]; then
-        case ${1} in
-            "k")
-                ARGS="kernel/huawei/angler" ;;
-            "g")
-                ARGS="vendor/google/build "
-                ARGS+="vendor/opengapps/sources/all "
-                ARGS+="vendor/opengapps/sources/arm "
-                ARGS+="vendor/opengapps/sources/arm64" ;;
-            *)
-                ARGS="$@" ;;
-        esac
-    fi
-
-    repo sync -j$( nproc --all ) --force-sync -c --no-clone-bundle --no-tags --optimized-fetch --prune ${ARGS}
-}
-
-function ris-sparse {
-    repo init -u ${1} -b ${2} --no-clone-bundle --depth=1
-
-    time repo sync -j$( nproc --all ) --force-sync -c --no-clone-bundle --no-tags --optimized-fetch --prune
-}
-
-function ris {
-    repo init -u ${1} -b ${2}
-
-    time repo sync -j$( nproc --all ) --force-sync -c --no-clone-bundle --no-tags --optimized-fetch --prune
 }
 
 function gerrit-push {
@@ -287,24 +202,6 @@ function ex () {
 	fi
 }
 
-function upstable() {
-    CUR_FOLDER=$(pwd)
-
-    if [[ ! -d ${KERNEL_FOLDER}/stable ]]; then
-        cd ${KERNEL_FOLDER}
-        git clone --mirror https://git.kernel.org/pub/scm/linux/kernel/git/stable/linux-stable.git stable
-        cd stable
-        git remote set-url --push origin git@github.com:nathanchance/linux-stable
-    fi
-
-    cd ${KERNEL_FOLDER}/stable
-
-    git fetch -p origin
-    git push --mirror
-
-    cd ${CUR_FOLDER}
-}
-
 function transfer() {
     echo
     curl --upload-file ${1} https://transfer.sh/$( basename ${1} )
@@ -351,57 +248,4 @@ function haste() {
     fi
     echo "Upload failed."
     return 1
-}
-
-function kremotes() {
-    [[ ! -f Makefile ]] && echo "\n${RED}Run this in a kernel tree!${RST}\n" && return 1
-
-    add_remote aosp-kc https://android.googlesource.com/kernel/common
-    add_remote aosp-msm https://android.googlesource.com/kernel/msm
-    add_remote chromium https://chromium.googlesource.com/chromiumos/third_party/kernel
-    add_remote linux https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git
-    add_remote stable https://git.kernel.org/pub/scm/linux/kernel/git/stable/linux-stable.git
-    add_remote stable-rc https://git.kernel.org/pub/scm/linux/kernel/git/stable/linux-stable-rc.git
-
-    git fetch --all
-}
-
-function gmrg() {
-    [[ $# -lt 2 ]] && echo "\n${RED}gmrg <remote> <branch>${RST}\n" && return 1
-
-    git fetch ${1} ${2}
-
-    local CB=$( git rev-parse --abbrev-ref HEAD )
-    local BTM=${2}
-    local RANGE=${CB}..FETCH_HEAD
-    local URL
-
-    [[ $( echo ${1} | grep http ) ]] && URL=${1} \
-                                     || URL=$( git remote get-url ${1} )
-
-    git merge FETCH_HEAD -m "Merge branch '${BTM}' of ${URL} into ${CB}
-
-Commits in ${BTM}: ($( git rev-list --count ${RANGE} ) commits)
-$( git log --reverse --format="        %s" ${RANGE} )
-
-Signed-off-by: $( git config --get user.name ) <$( git config --get user.email )>"
-
-[[ $? -ne 0 ]] && echo "Merge needs manual intervention!
-
-Resolve conflicts then run git merge --continue!" && return 1
-
-header "${BTM} merged cleanly!" ${GRN}
-}
-
-function nf() {
-    echo
-    neofetch \
-        --kernel_shorthand off \
-        --distro_shorthand tiny \
-        --os_arch off \
-        --uptime_shorthand tiny \
-        --speed_shorthand on \
-        --install_time off
-    echo
-    echo
 }

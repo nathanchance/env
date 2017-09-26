@@ -24,6 +24,9 @@
 #             #
 ###############
 
+# WHAT OS ARE WE ON?
+OS=$(UNAME=$(uname); echo ${UNAME,,})
+
 # LOCATION OF SCRIPTS FOLDER
 SCRIPTS_FOLDER=$( cd $( dirname $( readlink -f "${BASH_SOURCE[0]}" ) ) && pwd )
 BIN_FOLDER=${SCRIPTS_FOLDER}/bin
