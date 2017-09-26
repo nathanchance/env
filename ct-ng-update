@@ -89,7 +89,7 @@ function build() {
 
     ./configure --prefix=/usr/local
 
-    MAKE="make -j$(nproc --all)"
+    MAKE="make ${JOBS_FLAG}"
 
     ${MAKE} clean
 

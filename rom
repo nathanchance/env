@@ -32,7 +32,7 @@ function make_command() {
     if [[ $(command -v mka) ]]; then
         mka $@
     else
-        make -j$(nproc --all) $@
+        make ${JOBS_FLAG} $@
     fi
 }
 
@@ -191,7 +191,7 @@ clear && cd ${SOURCE_FOLDER}
 #############
 
 REPO_SYNC="repo sync"
-FLAGS="-j$(nproc --all) --force-sync -c --no-clone-bundle --no-tags --optimized-fetch --prune"
+FLAGS="${JOBS_FLAG} --force-sync -c --no-clone-bundle --no-tags --optimized-fetch --prune"
 
 # IF THE SYNC IS REQUESTED, DO SO
 if [[ ${SYNC} = true ]]; then

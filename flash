@@ -201,7 +201,7 @@ function clean_up() {
 
 # MAKE WRAPPER FOR MAKE FUNCTION
 function kernel_make() {
-    make -j$(($(nproc --all) + 1)) \
+    make ${JOBS_FLAG} \
          ARCH=${ARCHITECTURE} \
          CROSS_COMPILE="${CCACHE} ${TOOLCHAIN}" \
          O=${OUT_FOLDER} \

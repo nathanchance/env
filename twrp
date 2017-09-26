@@ -101,7 +101,7 @@ cd ${SOURCE_FOLDER}
 if [[ ${SYNC} = true ]]; then
     header "SYNCING LATEST SOURCES"
 
-    repo sync --force-sync -j$(nproc --all)
+    repo sync --force-sync ${JOBS_FLAG}
 fi
 
 

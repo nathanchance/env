@@ -102,19 +102,19 @@ function rps {
         esac
     fi
 
-    repo sync -j$(nproc --all) --force-sync -c --no-clone-bundle --no-tags --optimized-fetch --prune ${ARGS}
+    repo sync ${JOBS_FLAG} --force-sync -c --no-clone-bundle --no-tags --optimized-fetch --prune ${ARGS}
 }
 
 function ris-sparse {
     repo init -u ${1} -b ${2} --no-clone-bundle --depth=1
 
-    time repo sync -j$(nproc --all) --force-sync -c --no-clone-bundle --no-tags --optimized-fetch --prune
+    time repo sync ${JOBS_FLAG} --force-sync -c --no-clone-bundle --no-tags --optimized-fetch --prune
 }
 
 function ris {
     repo init -u ${1} -b ${2}
 
-    time repo sync -j$(nproc --all) --force-sync -c --no-clone-bundle --no-tags --optimized-fetch --prune
+    time repo sync ${JOBS_FLAG} --force-sync -c --no-clone-bundle --no-tags --optimized-fetch --prune
 }
 
 function upstable() {

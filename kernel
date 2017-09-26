@@ -83,7 +83,7 @@ done
 # BASIC BUILD FUNCTION
 function build() {
     # SET MAKE VARIABLE
-    MAKE="make -j$(nproc --all) O=out ARCH=${ARCH}"
+    MAKE="make ${JOBS_FLAG} O=out ARCH=${ARCH}"
     
     # REMOVE OUT FOLDER AND REMAKE IT
     rm -rf out && mkdir out && echo

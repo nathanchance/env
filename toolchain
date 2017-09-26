@@ -192,7 +192,7 @@ function build() {
         ct-ng nconfig
     fi
 
-    ct-ng build.$(nproc --all)
+    ct-ng build.${THREADS}
 
     [[ ! -f ${PREFIX_FOLDER}/bin/${TUPLE}-gcc ]] && report_error "Problem with compilation!"
 }

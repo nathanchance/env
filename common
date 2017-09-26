@@ -50,6 +50,10 @@ RED="\033[01;31m"
 RST="\033[0m"
 YLW="\033[01;33m"
 
+# MAKE THREADS
+THREADS=$(nproc --all)
+JOBS_FLAG="-j${THREADS}"
+
 
 ###############
 #             #

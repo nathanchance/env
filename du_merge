@@ -70,7 +70,7 @@ done
 
 if [[ ${SYNC} = true ]]; then
     cd ${SOURCE_FOLDER}
-    repo sync -j$(nproc --all) --force-sync -c --no-clone-bundle --no-tags \
+    repo sync ${JOBS_FLAG} --force-sync -c --no-clone-bundle --no-tags \
               --optimized-fetch --prune
 fi
 
