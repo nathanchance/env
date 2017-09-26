@@ -168,3 +168,16 @@ function upterm() {
     ${MAKE} Development
     ${MAKE} install
 }
+
+function nf() {
+    echo
+    neofetch \
+        --kernel_shorthand off \
+        --distro_shorthand tiny \
+        --os_arch off \
+        --uptime_shorthand tiny \
+        --speed_shorthand on \
+        --install_time off
+    echo
+    echo
+}
