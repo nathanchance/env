@@ -19,10 +19,10 @@
 
 function darwin_aliases() {
     alias sshfb='ssh nathan@nchancellor.net'
-    alias repodir="cd ${HOME}/Documents/Repos"
-    alias subsdir="cd ${HOME}/Documents/Repos/Substratum"
-    alias scriptsdir="cd ${HOME}/Documents/Repos/Scripts"
-    alias miscdir="cd ${HOME}/Documents/Misc"
+    alias repo="cd ${HOME}/Documents/Repos"
+    alias subs="cd ${HOME}/Documents/Repos/Substratum"
+    alias scpt="cd ${HOME}/Documents/Repos/Scripts"
+    alias misc="cd ${HOME}/Documents/Misc"
 }
 
 function darwin_prompt() {
@@ -181,4 +181,9 @@ function nf() {
         --install_time off
     echo
     echo
+}
+
+function update() {
+    brew update
+    brew upgrade
 }
