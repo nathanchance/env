@@ -188,3 +188,15 @@ function nf() {
     echo
 }
 
+# Find config values in a kernel tree
+function kfg() {
+    header "LOCATIONS OF ${1} IN TREE"
+    git grep -n -1 ${1} | ag --nocolor Kconfig
+
+    header "LOCATIONS OF ${1} IN CONFIG"
+    local LIST=$(ag --nocolor ${1} out/.config)
+    [[ -z ${LIST} ]] && echo "None found!" \
+                     || echo "${LIST}"
+    echo
+}
+
