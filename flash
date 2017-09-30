@@ -145,7 +145,7 @@ MODULES_FOLDER=${ANYKERNEL_FOLDER}/modules
 ZIP_MOVE_HEAD=${WEB_FOLDER}/downloads
 
 case ${MODE} in
-    "alpha"|"beta"|"stable")
+    "alpha"|"beta"|"rc"|"stable")
         ZIP_MOVE=${ZIP_MOVE_HEAD}/kernels/${DEVICE}${OS}/${MODE}
         ZIP_MOVE_OLD=$(readlink -f ${ZIP_MOVE}/../archive) ;;
     "personal")
@@ -261,8 +261,8 @@ function setup_zip_info() {
     # REMOVE EVERYTHING BEFORE FLASH IN THE FLASH_VERSION
     FLASH_VERSION=$(echo ${FULL_VERSION} | sed s/"$(make kernelversion)"-//)
 
-    # REVISION IS PASSED AS A PARAMETER FOR BETA VERSIONS
-    [[ -n ${REVISION} ]] && REVISION=".r${REVISION}"
+    # REVISION IS PASSED AS A PARAMETER FOR ANYTHING OTHER THAN STABLE VERSIONS
+    [[ -n ${REVISION} ]] && REVISION=".${MODE::1}${REVISION}"
 
     # IF THE MODE ISN'T STABLE, ADD SHA INFORMATION TO THE ZIP
     [[ "${MODE}" != "stable" ]] && SHA="-g$(git rev-parse --verify --short HEAD)"
