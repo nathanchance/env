@@ -25,7 +25,7 @@ set statusline=
 set statusline+=%f                          " Show relative path of file being edited
 set statusline+=\ %{fugitive#statusline()}  " Show git branch if applicable
 set statusline+=%=                          " Column break
-set statusline+=\ %l\:%c                    " Show line and column
+set statusline+=\ %l\:%v                    " Show line and column
 set statusline+=\ \(%p%%\)                  " Show location of cursor location percentage
 
 
@@ -43,6 +43,8 @@ set incsearch                               " Show search results in realtime
 set hlsearch                                " Highlight search matches
 set lazyredraw                              " Redraw only when we need to
 set mouse=a                                 " Enable mouse in all modes
+
+highlight ColorColumn ctermbg=0 guibg=lightgrey
 
 " Move to beginning/end of line or skip letters
 nnoremap B 0
