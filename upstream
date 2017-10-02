@@ -118,8 +118,8 @@ verify_remote stable-rc
 gen_versions
 
 # PICK OR MERGE!
-[[ -n ${MRG} ]] && merge \
-                || cherry_pick
+[[ -n ${MERGE} ]] && merge \
+                  || cherry_pick
 
 # ALERT OF SCRIPT END
 echo "\a"
