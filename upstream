@@ -35,7 +35,7 @@ while [[ $# -ge 1 ]]; do
 
         # ONLY UPDATE THE REMOTES
         "-u"|"--update-only")
-            UPDATE=true ;;
+            UPDATE_ONLY=true ;;
 
         *)
             report_error "Invalid parameter!" ;;
@@ -47,18 +47,18 @@ done
 
 # VERIFY REMOTE FUNCTION
 function verify_remote() {
-    add_remote ${1} https://git.kernel.org/pub/scm/linux/kernel/git/stable/linux-${1}.git
+    add_remote ${1} ${KERNEL_FOLDER}/mirrors/${1}
 
     git fetch ${1}
 
     [[ $? -ne 0 ]] && report_error "Remote ${1} update failed!" \
                    || echo "Remote ${1} updated successfully!"
-
-    [[ -n ${UPDATE_ONLY} ]] && exit
 }
 
 # GENERATE VERSIONS
 function gen_versions() {
+    [[ -n ${UPDATE_ONLY} ]] && exit
+
     CUR_VERSION=$(make kernelversion)
 
     VERSION=$(echo ${CUR_VERSION} | cut -d . -f 1)

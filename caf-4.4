@@ -95,10 +95,10 @@ function setup_tree() {
 
     header "Fetching CAF"
 
-    [[ ! $(git remote | grep caf) ]] && echo "Adding CAF remote" \
-            && git remote add caf https://source.codeaurora.org/quic/la/kernel/msm-4.4
+    [[ ! $(git remote | grep caf-4.4) ]] && echo "Adding CAF remote" \
+            && git remote add caf-4.4 ${KERNEL_FOLDER}/mirrors/caf-4.4
 
-    git fetch caf
+    git fetch caf-4.4
 }
 
 function validate_tags() {
