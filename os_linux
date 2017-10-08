@@ -153,7 +153,7 @@ function ckr() {
     git clone ${MIRROR} https://android.googlesource.com/kernel/msm aosp-msm
     git clone ${MIRROR} https://chromium.googlesource.com/chromiumos/third_party/kernel chromium
     git clone ${MIRROR} https://source.codeaurora.org/quic/la/kernel/msm-4.4 caf-4.4
-    git clone ${MIRROR} https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git
+    git clone ${MIRROR} https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git linux
     git clone ${MIRROR} https://git.kernel.org/pub/scm/linux/kernel/git/stable/linux-stable.git stable
     git clone ${MIRROR} https://git.kernel.org/pub/scm/linux/kernel/git/stable/linux-stable-rc.git stable-rc
 }
