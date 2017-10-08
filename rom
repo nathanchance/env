@@ -230,6 +230,8 @@ header "PREPARING $(echo ${DEVICE} | awk '{print toupper($0)}')"
 case "${ROM}" in
     "aosp"|"krexus"|"vanilla")
         lunch ${ROM}_${DEVICE}-${VARIANT} ;;
+    du*)
+        lunch du_${DEVICE}-${VARIANT} ;;
     *)
         breakfast ${DEVICE} ${VARIANT} ;;
 esac
