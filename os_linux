@@ -235,3 +235,51 @@ function kfg() {
     echo
 }
 
+# Build a toolchain and release Flash Kernel builds
+# flash_release <version>
+function flash_release() {
+    toolchain -p -a arm64 -s linaro -t a73.a53
+    flash -v ${1} -m stable -os Custom -b 7.1.x-custom
+    flash -v ${1} -m stable -os OOS -b 7.1.x-oos
+}
+
+# Build Flash Kernel test builds
+# flash_test <version> <dirty_version> <type>
+function flash_test() {
+    flash -v ${1} -r ${2} -m ${3} -os Custom -b 7.1.x-custom-for-${1}
+    flash -v ${1} -r ${2} -m ${3} -os OOS -b 7.1.x-oos-for-${1}
+}
+
+# Applies patches from the 4.4 stable queue
+function stable_queue() {
+    [[ ! -f Makefile ]] && echo "\n${RED}Run this in a kernel tree!${RST}\n" && return 1
+
+    local FOLDER=${KERNEL_FOLDER}/repos/stable-queue/queue-4.4
+
+    git -C ${FOLDER} pull
+
+    header "PATCHES IN QUEUE"
+    cat ${FOLDER}/series
+
+    header "APPLYING PATCHES"
+
+    for PATCH in $(cat ${FOLDER}/series); do
+        git am ${FOLDER}/${PATCH}
+
+        if [[ $? -ne 0 ]]; then
+            local NUM_TOTAL=$(cat ${FOLDER}/series | wc -l)
+            local NUM_DID=$(grep -n ${PATCH} ${FOLDER}/series | cut -d : -f 1)
+            local NUM_TOGO=$((${NUM_TOTAL} - ${NUM_DID}))
+
+            echo
+            echo "Error applying ${PATCH}"
+            echo
+            echo "Fix the issue by running git apply -3 ${FOLDER}/${PATCH}"
+            echo
+            echo "Then run 'for PATCH in \$(cat ${FOLDER}/series | tail -n ${NUM_TOGO}); do git am ${FOLDER}/\${PATCH}; done'"
+            echo
+
+            return
+        fi
+    done
+}
