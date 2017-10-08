@@ -18,6 +18,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 
+# Linux specific aliases
 function linux_aliases() {
     # default Arch ls alias
     alias ls='ls --color=auto'
@@ -55,6 +56,7 @@ function log_support() {
 }
 
 # Setup ccache
+# ccache_setup <size>
 function ccache_setup() {
     if [[ -n $(command -v ccache) ]]; then
         if [[ -n ${1} ]]; then
@@ -69,6 +71,7 @@ function ccache_setup() {
     fi
 }
 
+# Additional setup steps for Linux
 function linux_setup() {
     ccache_setup 150
     log_support
@@ -90,8 +93,6 @@ function rps {
 
     if [[ -n ${1} ]]; then
         case ${1} in
-            "k")
-                ARGS="kernel/huawei/angler" ;;
             "g")
                 ARGS="vendor/google/build "
                 ARGS+="vendor/opengapps/sources/all "
@@ -105,19 +106,19 @@ function rps {
     repo sync ${JOBS_FLAG} --force-sync -c --no-clone-bundle --no-tags --optimized-fetch --prune ${ARGS}
 }
 
-function ris-sparse {
-    repo init -u ${1} -b ${2} --no-clone-bundle --depth=1
-
-    time repo sync ${JOBS_FLAG} --force-sync -c --no-clone-bundle --no-tags --optimized-fetch --prune
-}
-
+# Repo init and sync function
+# ris <url> <branch> |-s|
 function ris {
-    repo init -u ${1} -b ${2}
+    # User requested a shallow clone
+    [[ ${3} = "-s" ]] && local DEPTH="--depth=1"
+
+    repo init -u ${1} -b ${2} --no-clone-bundle ${DEPTH}
 
     time repo sync ${JOBS_FLAG} --force-sync -c --no-clone-bundle --no-tags --optimized-fetch --prune
 }
 
-function upstable() {
+# Update Linux stable mirror
+function upstb() {
     CUR_FOLDER=$(pwd)
 
     if [[ ! -d ${KERNEL_FOLDER}/mirrors/stable ]]; then
@@ -135,7 +136,8 @@ function upstable() {
     cd ${CUR_FOLDER}
 }
 
-
+# Clone kernel repos
+# ckr |-m|
 function ckr() {
     if [[ "$@" =~ "-m" ]]; then
         FOLDER=${KERNEL_FOLDER}/mirrors
@@ -156,6 +158,8 @@ function ckr() {
     git clone ${MIRROR} https://git.kernel.org/pub/scm/linux/kernel/git/stable/linux-stable-rc.git stable-rc
 }
 
+# Update kernel repos
+# ukr |-m|
 function ukr() {
     if [[ "$@" =~ "-m" ]]; then
         FOLDER=${KERNEL_FOLDER}/mirrors
@@ -173,6 +177,7 @@ function ukr() {
     done
 }
 
+# Add kernel remotes to a kernel repo
 function kremotes() {
     [[ ! -f Makefile ]] && echo "\n${RED}Run this in a kernel tree!${RST}\n" && return 1
 
@@ -183,6 +188,8 @@ function kremotes() {
     git remote update
 }
 
+# Merge one kernel branch into another
+# gmrg <url|remote> <branch>
 function gmrg() {
     [[ $# -lt 2 ]] && echo "\n${RED}gmrg <remote> <branch>${RST}\n" && return 1
 
@@ -210,6 +217,7 @@ Resolve conflicts then run git merge --continue!" && return 1
 header "${BTM} merged cleanly!" ${GRN}
 }
 
+# Neofetch alias
 function nf() {
     echo
     neofetch \
@@ -224,6 +232,7 @@ function nf() {
 }
 
 # Find config values in a kernel tree
+# kfg <config>
 function kfg() {
     header "LOCATIONS OF ${1} IN TREE"
     git grep -n -1 ${1} | ag --nocolor Kconfig
@@ -237,7 +246,7 @@ function kfg() {
 
 # Build a toolchain and release Flash Kernel builds
 # flash_release <version>
-function flash_release() {
+function frel() {
     toolchain -p -a arm64 -s linaro -t a73.a53
     flash -v ${1} -m stable -os Custom -b 7.1.x-custom
     flash -v ${1} -m stable -os OOS -b 7.1.x-oos
@@ -245,7 +254,7 @@ function flash_release() {
 
 # Build Flash Kernel test builds
 # flash_test <version> <dirty_version> <type>
-function flash_test() {
+function ftest() {
     flash -v ${1} -r ${2} -m ${3} -os Custom -b 7.1.x-custom-for-${1}
     flash -v ${1} -r ${2} -m ${3} -os OOS -b 7.1.x-oos-for-${1}
 }
