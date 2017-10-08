@@ -37,6 +37,12 @@ while [[ $# -ge 1 ]]; do
         "-u"|"--update-only")
             UPDATE_ONLY=true ;;
 
+        # SPECIFY THE VERSION TO MERGE/CHERRY-PICK TO
+        "-v"|"--version")
+            shift && enforce_value $@
+
+            NEW_VERSION=${1} ;;
+
         *)
             report_error "Invalid parameter!" ;;
     esac
@@ -61,14 +67,16 @@ function gen_versions() {
 
     CUR_VERSION=$(make kernelversion)
 
-    VERSION=$(echo ${CUR_VERSION} | cut -d . -f 1)
-    PATCHLEVEL=$(echo ${CUR_VERSION} | cut -d . -f 2)
-    SUBLEVEL=$(($(echo ${CUR_VERSION} | cut -d . -f 3) + 1))
-    NEW_VERSION=${VERSION}.${PATCHLEVEL}.${SUBLEVEL}
+    MAJOR_VERSION=$(echo ${CUR_VERSION} | cut -f 1,2 -d .)
+
+    if [[ -z ${NEW_VERSION} ]]; then
+        SUBLEVEL=$(($(echo ${CUR_VERSION} | cut -d . -f 3) + 1))
+        NEW_VERSION=${MAJOR_VERSION}.${SUBLEVEL}
+    fi
 
     # SET RANGE BASED ON IF WE ARE PICKING A RELEASE OR RC BUILD
     [[ -z ${RC} ]] && RANGE=v${CUR_VERSION}..v${NEW_VERSION} \
-                   || RANGE=v${CUR_VERSION}..stable-rc/linux-${VERSION}.${PATCHLEVEL}.y
+                   || RANGE=v${CUR_VERSION}..stable-rc/linux-${MAJOR_VERSION}.y
 
     # NUMBER OF COMMITS DIFFERENT
     ND=$(git rev-list --count ${RANGE} 2> /dev/null)
