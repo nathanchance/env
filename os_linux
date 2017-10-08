@@ -251,35 +251,36 @@ function flash_test() {
 }
 
 # Applies patches from the 4.4 stable queue
-function stable_queue() {
+function sq() {
     [[ ! -f Makefile ]] && echo "\n${RED}Run this in a kernel tree!${RST}\n" && return 1
 
     local FOLDER=${KERNEL_FOLDER}/repos/stable-queue/queue-4.4
 
+    header "UPDATING QUEUE"
     git -C ${FOLDER} pull
 
-    header "PATCHES IN QUEUE"
-    cat ${FOLDER}/series
+    header "SERIES INFORMATION"
+    local NUM_TOTAL=$(cat ${FOLDER}/series | wc -l)
+    echo "${BOLD}SERIES LOCATION:${RST} ${FOLDER}/series"
+    echo "${BOLD}NUMBER OF PATCHES:${RST} ${NUM_TOTAL}"
 
     header "APPLYING PATCHES"
-
     for PATCH in $(cat ${FOLDER}/series); do
         git am ${FOLDER}/${PATCH}
 
         if [[ $? -ne 0 ]]; then
-            local NUM_TOTAL=$(cat ${FOLDER}/series | wc -l)
             local NUM_DID=$(grep -n ${PATCH} ${FOLDER}/series | cut -d : -f 1)
             local NUM_TOGO=$((${NUM_TOTAL} - ${NUM_DID}))
 
+            header "MANUAL INTERVENTION NEEDED"
+            echo "git apply -3 ${FOLDER}/${PATCH}"
             echo
-            echo "Error applying ${PATCH}"
-            echo
-            echo "Fix the issue by running git apply -3 ${FOLDER}/${PATCH}"
-            echo
-            echo "Then run 'for PATCH in \$(cat ${FOLDER}/series | tail -n ${NUM_TOGO}); do git am ${FOLDER}/\${PATCH}; done'"
+            echo "for PATCH in \$(cat ${FOLDER}/series | tail -n ${NUM_TOGO}); do git am ${FOLDER}/\${PATCH}; done"
             echo
 
             return
         fi
     done
+
+    header "PATCHES SUCESSFULLY APPLIED" ${GRN}
 }
