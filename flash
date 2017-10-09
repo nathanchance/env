@@ -204,7 +204,7 @@ function clean_up() {
 }
 
 # MAKE WRAPPER FOR MAKE FUNCTION
-function kernel_make() {
+function make_wrapper() {
     make ${JOBS_FLAG} \
          ARCH=${ARCHITECTURE} \
          CROSS_COMPILE="${CCACHE} ${TOOLCHAIN}" \
@@ -214,17 +214,17 @@ function kernel_make() {
 
 
 # SILENCE OUTPUT FUNCTION
-function make_wrapper() {
+function kmake() {
     # ONLY SHOW ERRORS, WARNINGS, AND THE IMAGE LINE WHEN COMPILING (UNLESS DEBUG)
-    [[ ${DEBUG} = true ]] && kernel_make "$@" \
-                          || kernel_make "$@" |& ag --no-color "error:|warning:" && echo
+    [[ ${DEBUG} = true ]] && make_wrapper "$@" \
+                          || make_wrapper "$@" |& ag --no-color "error:|warning:" && echo
 }
 
 
 # SETUP COMPILATION
 function setup_compilation() {
     # POINT TO PROPER DEFCONFIG AND GENERATE VERSION FILES
-    make_wrapper ${DEFCONFIG} prepare
+    kmake ${DEFCONFIG} prepare
 
     export FULL_VERSION=$(cat ${OUT_FOLDER}/include/config/kernel.release)
 
@@ -250,7 +250,7 @@ function build_kernel() {
             echo $((${REVISION} - 1)) > ${OUT_FOLDER}/.version
 
     # MAKE THE KERNEL
-    make_wrapper ${EXTRA_MAKE_FLAGS}
+    kmake ${EXTRA_MAKE_FLAGS}
 }
 
 

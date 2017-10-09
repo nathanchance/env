@@ -114,10 +114,10 @@ esac
 # REPORT SUCCESS
 FINAL_IMAGE=out/arch/${ARCH}/boot/${IMAGE}
 END=$(date +%s)
-[[ -f ${FINAL_IMAGE} ]] && echo "${GRN}BUILT IN $(format_time ${END} ${START})${RST}\n
+[[ -f ${FINAL_IMAGE} ]] && echo "\n${GRN}BUILT IN $(format_time ${END} ${START})${RST}\n
 ${BOLD}IMAGE:${RST} ${FINAL_IMAGE}\n
 ${BOLD}VERSION:${RST} $(cat out/include/config/kernel.release)" \
-                      || report_error "Kernel build failed!"
+                        || report_error "Kernel build failed!"
 
 # UPLOAD IMAGE IF NECESSARY
 [[ ${UPLOAD} = true ]] && echo && curl --upload-file ${FINAL_IMAGE} https://transfer.sh/"${IMAGE}"
