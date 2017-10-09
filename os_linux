@@ -35,6 +35,9 @@ function linux_aliases() {
     alias op5='cd ${KERNEL_FOLDER}/op5'
     alias tlc='cd ${TC_FOLDER}'
     alias spt='cd ${SCRIPTS_FOLDER}'
+
+    # Generate a kernel version for the current tree
+    alias kver='make kernelversion'
 }
 
 # Setup PS1 and such
