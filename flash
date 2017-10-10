@@ -407,7 +407,7 @@ function push_zip() {
 
     cd "${ZIP_MOVE}"
 
-    git add .
+    git add ..
 
     git commit -q --signoff -m "$(date +%Y%m%d): ${KERNEL_NAME}"
 
