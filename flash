@@ -226,39 +226,7 @@ function setup_compilation() {
     # POINT TO PROPER DEFCONFIG AND GENERATE VERSION FILES
     kmake ${DEFCONFIG} prepare
 
-    export FULL_VERSION=$(cat ${OUT_FOLDER}/include/config/kernel.release)
-
-    [[ -n ${CCACHE} ]] && CCACHE_SUPPORT="${GRN}Yes, found at ${CCACHE}${RST}" \
-                       || CCACHE_SUPPORT="${RED}No, please install it!${RST}"
-
-    echo "${BOLD}Kernel version:${RST}    ${FULL_VERSION}\n"
-
-    echo "${BOLD}Current branch:${RST}    ${KERNEL_BRANCH}\n"
-
-    echo "${BOLD}Toolchain path:${RST}    ${TOOLCHAIN}\n"
-
-    echo "${BOLD}GCC version:${RST}       $(${TOOLCHAIN}gcc --version | head -1)\n"
-
-    echo "${BOLD}ccache support?${RST}    ${CCACHE_SUPPORT}\n"
-}
-
-
-# MAKE KERNEL
-function build_kernel() {
-    # INCREMENT DIRTY VERSION NUMBER IF PASSED ABOVE
-    [[ -n ${REVISION} && ${REVISION} -gt 0 ]] && \
-            echo $((${REVISION} - 1)) > ${OUT_FOLDER}/.version
-
-    # MAKE THE KERNEL
-    kmake ${EXTRA_MAKE_FLAGS}
-}
-
-
-# SETUP ZIP INFO
-function setup_zip_info() {
-    echo "  - Generating zip info"
-
-    # REMOVE EVERYTHING BEFORE FLASH IN THE FLASH_VERSION
+    FULL_VERSION=$(cat ${OUT_FOLDER}/include/config/kernel.release)
     FLASH_VERSION=$(echo ${FULL_VERSION} | sed s/"$(make kernelversion)"-//)
 
     # REVISION IS PASSED AS A PARAMETER FOR ANYTHING OTHER THAN STABLE VERSIONS
@@ -275,6 +243,32 @@ function setup_zip_info() {
     export SIGNAPK_ZIP=${KERNEL_NAME}-signapk.zip
     export ADJUSTED_ZIP=${KERNEL_NAME}-adjusted.zip
     export SIGNED_ZIP=${KERNEL_NAME}.zip
+
+    [[ -n ${CCACHE} ]] && CCACHE_SUPPORT="${GRN}Yes, found at ${CCACHE}${RST}" \
+                       || CCACHE_SUPPORT="${RED}No, please install it!${RST}"
+
+    echo "${BOLD}Kernel version:${RST}    ${FULL_VERSION}\n"
+
+    echo "${BOLD}Full zip name:${RST}     ${SIGNED_ZIP}\n"
+
+    echo "${BOLD}Current branch:${RST}    ${KERNEL_BRANCH}\n"
+
+    echo "${BOLD}Toolchain path:${RST}    ${TOOLCHAIN}\n"
+
+    echo "${BOLD}GCC version:${RST}       $(${TOOLCHAIN}gcc --version | head -1)\n"
+
+    echo "${BOLD}ccache support?${RST}    ${CCACHE_SUPPORT}\n"
+}
+
+
+# MAKE KERNEL
+function build_kernel() {
+    # INCREMENT DIRTY VERSION NUMBER IF PASSED ABOVE
+    [[ -n ${REVISION} && ${REVISION:2:3} -gt 0 ]] && \
+            echo $((${REVISION:2:3} - 1)) > ${OUT_FOLDER}/.version
+
+    # MAKE THE KERNEL
+    kmake ${EXTRA_MAKE_FLAGS}
 }
 
 
@@ -283,7 +277,7 @@ function setup_folders() {
     # THIS IS A NO-OP FOR TRANSFER MODE
     [[ ${MODE} = "transfer" ]] && return
 
-    echo "  - Creating folders"
+    echo "  - Setting up final folders"
 
     # IF ZIPMOVE DOESN'T EXIST, MAKE IT
     [[ ! -d "${ZIP_MOVE}" ]] && mkdir -p "${ZIP_MOVE}"
@@ -302,7 +296,7 @@ function setup_folders() {
 
 # PACKAGE ZIP
 function package_zip() {
-    echo "  - Creating zip ${SIGNED_ZIP}"
+    echo "  - Packaging zip file"
 
     cd "${ANYKERNEL_FOLDER}"
 
@@ -343,7 +337,7 @@ function move_files() {
     # THIS IS A NO-OP FOR TRANSFER MODE
     [[ ${MODE} = "transfer" ]] && return
 
-    echo "  - Moving zip"
+    echo "  - Moving files to web folder"
 
     mv ${SIGNED_ZIP} "${ZIP_MOVE}"
 
@@ -403,7 +397,7 @@ function push_zip() {
         return
     fi
 
-    echo "  - Pushing zip to GitHub"
+    echo "  - Pushing files to GitHub"
 
     cd "${ZIP_MOVE}"
 
@@ -504,7 +498,6 @@ if [[ -f ${IMAGE} ]]; then
 
     header "BUILDING FLASHABLE ZIP"
 
-    setup_zip_info
     setup_folders
     package_zip
     move_files
