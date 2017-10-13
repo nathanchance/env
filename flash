@@ -223,17 +223,19 @@ function kmake() {
 
 # SETUP COMPILATION
 function setup_compilation() {
+    # IF THE MODE ISN'T STABLE, ADD SHA INFORMATION TO THE ZIP
+    [[ "${MODE}" != "stable" ]] && SHA="-g$(git rev-parse --verify --short HEAD)" \
+                                && export LOCALVERSION="${LOCALVERSION}${SHA}"
+
     # POINT TO PROPER DEFCONFIG AND GENERATE VERSION FILES
     kmake ${DEFCONFIG} prepare
 
     FULL_VERSION=$(cat ${OUT_FOLDER}/include/config/kernel.release)
     FLASH_VERSION=$(echo ${FULL_VERSION} | sed s/"$(make kernelversion)"-//)
+    [[ -n ${SHA} ]] && FLASH_VERSION=$(echo ${FLASH_VERSION} | sed s/"${SHA}"//)
 
     # REVISION IS PASSED AS A PARAMETER FOR ANYTHING OTHER THAN STABLE VERSIONS
     [[ -n ${REVISION} ]] && REVISION=".${MODE::1}${REVISION}"
-
-    # IF THE MODE ISN'T STABLE, ADD SHA INFORMATION TO THE ZIP
-    [[ "${MODE}" != "stable" ]] && SHA="-g$(git rev-parse --verify --short HEAD)"
 
     # EXPORT KERNEL_NAME BASED ON THE ABOVE INFORMATION
     export KERNEL_NAME=${FLASH_VERSION}${REVISION}${SHA}
