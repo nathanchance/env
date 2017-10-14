@@ -223,15 +223,20 @@ function kmake() {
 
 # SETUP COMPILATION
 function setup_compilation() {
-    # IF THE MODE ISN'T STABLE, ADD SHA INFORMATION TO THE ZIP
-    [[ "${MODE}" != "stable" ]] && SHA="-g$(git rev-parse --verify --short HEAD)" \
-                                && export LOCALVERSION="${LOCALVERSION}${SHA}"
+    # IF THE MODE ISN'T STABLE, ADD SHA INFORMATION TO THE ZIP FOR DEBUGGING
+    if [[ "${MODE}" != "stable" ]]; then
+        SHA="-g$(git rev-parse --verify --short HEAD)"
+        export LOCALVERSION="${LOCALVERSION}${SHA}"
+    fi
 
     # POINT TO PROPER DEFCONFIG AND GENERATE VERSION FILES
     kmake ${DEFCONFIG} prepare
 
+    # GATHER THE FLASH VERSION FROM THE FULL VERSION
     FULL_VERSION=$(cat ${OUT_FOLDER}/include/config/kernel.release)
+    # REMOVE THE NUMERICAL KERNEL VERSION FROM THE FULL VERSION
     FLASH_VERSION=$(echo ${FULL_VERSION} | sed s/"$(make kernelversion)"-//)
+    # IF THERE IS A SHA, REMOVE IT TOO
     [[ -n ${SHA} ]] && FLASH_VERSION=$(echo ${FLASH_VERSION} | sed s/"${SHA}"//)
 
     # REVISION IS PASSED AS A PARAMETER FOR ANYTHING OTHER THAN STABLE VERSIONS
@@ -308,9 +313,12 @@ function package_zip() {
     # GRAB MODULES TOO IF THEY ARE PRESENT
     mkdir -p ${MODULES_FOLDER}
     find ${OUT_FOLDER} -name "*.ko" -exec cp {} ${MODULES_FOLDER} \;
-    [[ $(ls -A ${MODULES_FOLDER}) ]] \
-            && ${TOOLCHAIN}strip --strip-unneeded ${MODULES_FOLDER}/*.ko \
-            || rm -rf ${MODULES_FOLDER}
+    # IF MODULES WERE FOUND, STRIP THEM; OTHERWISE, REMOVE THE FOLDER
+    if [[ $(ls -A ${MODULES_FOLDER}) ]]; then
+        ${TOOLCHAIN}strip --strip-unneeded ${MODULES_FOLDER}/*.ko
+    else
+        rm -rf ${MODULES_FOLDER}
+    fi
 
     # PACKAGE THE ZIP WITHOUT THE README
     zip -q -r9 ${UNSIGNED_ZIP} * -x README.md ${UNSIGNED_ZIP}
