@@ -250,7 +250,7 @@ function kfg() {
 # Build a toolchain and release Flash Kernel builds
 # flash_release <version>
 function frel() {
-    toolchain -p -a arm64 -s linaro -t a73.a53
+    [[ "${2}" != "-nt" ]] && toolchain -p -a arm64 -s linaro -t a73.a53
     flash -v ${1} -m stable -os Custom -b 7.1.x-custom
     flash -v ${1} -m stable -os OOS -b 7.1.x-oos
 }
