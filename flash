@@ -301,11 +301,9 @@ function setup_folders() {
 }
 
 
-# PACKAGE ZIP
-function package_zip() {
-    echo "  - Packaging zip file"
-
-    cd "${ANYKERNEL_FOLDER}"
+# MOVE COMPILED FILES TO ANYKERNEL FOLDER
+function move_generated_files() {
+    echo "  - Grabbing $(basename ${IMAGE})"
 
     # MOVE THE KERNEL IMAGE
     cp "${IMAGE}" "${ANYKERNEL_FOLDER}"
@@ -315,6 +313,7 @@ function package_zip() {
     find ${OUT_FOLDER} -name "*.ko" -exec cp {} ${MODULES_FOLDER} \;
     # IF MODULES WERE FOUND, STRIP THEM; OTHERWISE, REMOVE THE FOLDER
     if [[ $(ls -A ${MODULES_FOLDER}) ]]; then
+        echo "  - Stripping and signing modules"
         ${TOOLCHAIN}strip --strip-unneeded ${MODULES_FOLDER}/*.ko
         for MOD in $(ls ${MODULES_FOLDER}/*.ko); do
             ${OUT_FOLDER}/scripts/sign-file sha512 \
@@ -325,6 +324,14 @@ function package_zip() {
     else
         rm -rf ${MODULES_FOLDER}
     fi
+}
+
+
+# PACKAGE ZIP
+function package_zip() {
+    echo "  - Packaging zip file"
+
+    cd "${ANYKERNEL_FOLDER}"
 
     # PACKAGE THE ZIP WITHOUT THE README
     zip -q -r9 ${UNSIGNED_ZIP} * -x README.md ${UNSIGNED_ZIP}
@@ -349,7 +356,7 @@ function package_zip() {
 }
 
 # MOVE FILES AND GENERATE MD5SUM
-function move_files() {
+function move_zip() {
     # THIS IS A NO-OP FOR TRANSFER MODE
     [[ ${MODE} = "transfer" ]] && return
 
@@ -515,8 +522,9 @@ if [[ -f ${IMAGE} ]]; then
     header "BUILDING FLASHABLE ZIP"
 
     setup_folders
+    move_generated_files
     package_zip
-    move_files
+    move_zip
     generate_changelog
 
     [[ ${MODE} != "personal" ]] && push_zip
