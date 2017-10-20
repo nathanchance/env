@@ -30,7 +30,7 @@ function linux_aliases() {
     alias 6p='cd ${KERNEL_FOLDER}/angler'
     alias asu='cd ${REPO_FOLDER}/asu'
     alias ayk='cd ${KERNEL_FOLDER}/anykernel'
-    alias lnx='cd ${KERNEL_FOLDER}/linux'
+    alias lnx='cd ${KERNEL_FOLDER}/repos/linux'
     alias pkg='cd ${REPO_FOLDER}/pkgbuilds'
     alias op5='cd ${KERNEL_FOLDER}/op5'
     alias tlc='cd ${TC_FOLDER}'
@@ -164,6 +164,8 @@ function ckr() {
 # Update kernel repos
 # ukr |-m|
 function ukr() {
+    CUR_FOLDER=$(pwd)
+
     if [[ "$@" =~ "-m" ]]; then
         FOLDER=${KERNEL_FOLDER}/mirrors
         local MIRROR=true
@@ -178,6 +180,9 @@ function ukr() {
         [[ ${MIRROR} ]] && git fetch -p origin \
                         || git pull
     done
+
+    cd ${CUR_FOLDER}
+    git remote update
 }
 
 # Add kernel remotes to a kernel repo
@@ -248,7 +253,7 @@ function kfg() {
 }
 
 # Build a toolchain and release Flash Kernel builds
-# flash_release <version>
+# frel <version>
 function frel() {
     [[ "${2}" != "-nt" ]] && toolchain -p -a arm64 -s linaro -t a73.a53
     flash -v ${1} -m stable -os Custom -b 7.1.x-custom
@@ -256,7 +261,7 @@ function frel() {
 }
 
 # Build Flash Kernel test builds
-# flash_test <version> <dirty_version> <type>
+# ftest <version> <dirty_version> <type>
 function ftest() {
     flash -v ${1} -r ${2} -m ${3} -os Custom -b 7.1.x-custom-for-${1}
     flash -v ${1} -r ${2} -m ${3} -os OOS -b 7.1.x-oos-for-${1}
@@ -295,4 +300,23 @@ function sq() {
     done
 
     header "PATCHES SUCESSFULLY APPLIED" ${GRN}
+}
+
+# Sync private repo
+function sync_private() {
+    [[ ! -f Makefile ]] && echo "\n${RED}Run this in a kernel tree!${RST}\n" && return 1
+
+    local BRANCHES="7.1.x-base 7.1.x-custom 7.1.x-oos"
+
+    for BRANCH in ${BRANCHES}; do
+        git checkout ${BRANCH}
+        git push private ${BRANCH}
+    done
+
+    local TAGS="$(git tag -l | grep Flash)"
+
+    for TAG in ${TAGS}; do
+        [[ -z $(git ls-remote private refs/tags/${TAG}) ]] && git push private ${TAG} \
+                                                           || echo "${TAG} already present!"
+    done
 }
