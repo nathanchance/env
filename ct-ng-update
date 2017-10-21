@@ -109,5 +109,5 @@ function build() {
 #              #
 ################
 
-[[ ${BUILD_ONLY} ]] && update
-[[ ${UPDATE_ONLY} ]] && build
+[[ ! ${BUILD_ONLY} ]] && update
+[[ ! ${UPDATE_ONLY} ]] && build
