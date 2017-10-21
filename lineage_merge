@@ -64,11 +64,9 @@ for FOLDER in ${SUBS_REPOS}; do
     git checkout cm-14.1
 
     # SET PROPER URL
-    if [[ ${FOLDER} = ".repo/manifests" ]]; then
-        URL=android
-    else
-        URL=android_$(echo ${FOLDER} | sed "s/\//_/g")
-    fi
+    [[ ${FOLDER} != ".repo/manifests" ]] && \
+        PFX="_$(echo ${FOLDER} | sed "s/\//_/g")"
+    URL=android${PFX}
 
     # FETCH THE REPO
     git fetch https://github.com/LineageOS/${URL} cm-14.1

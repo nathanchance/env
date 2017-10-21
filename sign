@@ -35,16 +35,16 @@ source common -m
 ################
 
 while [[ $# -ge 1 ]]; do
-    case "${1}" in
+    case ${1} in
         # FILE TO SIGN
         "-f"|"--file")
-            shift && enforce_value "$@"
+            shift && enforce_value $@
 
             FILE=${1} ;;
 
         # KEY TO USE
         "-k"|"--key")
-            shift && enforce_value "$@"
+            shift && enforce_value $@
 
             KEY=${1} ;;
 

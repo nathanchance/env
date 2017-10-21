@@ -113,17 +113,17 @@ function format_time() {
 
 # PRINTS AN ERROR IN BOLD RED
 function report_error() {
-    echo ""
-    echo ${RED}"${1}"${RST}
-    [[ -z ${2} ]] && echo ""
+    echo
+    echo ${RED}${1}${RST}
+    [[ -z ${2} ]] && echo
     exit
 }
 
 # PRINTS A WARNING IN BOLD YELLOW
 function report_warning() {
-    echo ""
-    echo ${YLW}"${1}"${RST}
-    [[ -z ${2} ]] && echo ""
+    echo
+    echo ${YLW}${1}${RST}
+    [[ -z ${2} ]] && echo
 }
 
 # ENFORCES THE VALUE NEEDED FOR TWO-PART FLAGS
@@ -139,7 +139,17 @@ function add_remote() {
 
 # CONVERT A FILE LOCATION TO WEB LINK
 function web_link() {
-    echo "${1}" | sed s/$(echo ${WEB_FOLDER} | sed 's/\//\\\//g')/http:\\/\\/nchancellor.net/
+    echo ${1} | sed s/$(echo ${WEB_FOLDER} | sed 's/\//\\\//g')/http:\\/\\/nchancellor.net/
+}
+
+# SET UP A VIRTUAL ENVIRONMENT FOR PYTHON
+function mkavenv {
+    virtualenv2 ${HOME}/venv && source ${HOME}/venv/bin/activate
+}
+
+# REMOVE VIRTUAL ENVIRONMENT
+function rmvenv {
+    deactivate && rm -rf ${HOME}/venv
 }
 
 # REQUIRE A PARAMETER TO OPT OUT OF MAC_CHECK

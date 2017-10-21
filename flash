@@ -32,7 +32,7 @@ unset OS
 # GATHER PARAMETERS
 PARAMS="$@"
 while [[ $# -ge 1 ]]; do
-    case "${1}" in
+    case ${1} in
         # BRANCH TO COMPILE; IF ABSENT, USE CURRENT BRANCH
         "-b"|"--branch")
             shift && enforce_value $@
@@ -107,6 +107,10 @@ done
 [[ -z ${DEVICE} ]] && DEVICE="op5"
 [[ -z ${MODE} ]] && MODE="personal"
 [[ -z ${TOOLCHAIN_NAME} ]] && TOOLCHAIN_NAME="l-7.x"
+
+# EASY TO USE VARIABLES FOR MODE
+[[ ${MODE} != "stable" ]] && NOT_STABLE=true
+[[ ${MODE} = "transfer" ]] && IS_TRANSFER=true
 
 # DEVICE HANDLING
 case ${DEVICE} in
@@ -185,12 +189,12 @@ TOOLCHAIN=/opt/${TOOLCHAIN_NAME}${TC_TARGET}/bin/${TOOLCHAIN_PREFIX}
 # CLEAN UP
 function clean_up() {
     # CLEAN ANYKERNEL FOLDER
-    cd "${ANYKERNEL_FOLDER}"
+    cd ${ANYKERNEL_FOLDER}
     git checkout ${ANYKERNEL_BRANCH}
     git clean -fxd
 
     # ONLY CHECKOUT IF KERNEL_BRANCH EXISTS AND WE AREN'T BISECTING OR REBASING
-    cd "${SOURCE_FOLDER}"
+    cd ${SOURCE_FOLDER}
     if [[ -n ${KERNEL_BRANCH} ]]; then
         [[ ! $(git status | ag "bisec|rebas") ]] && git checkout ${KERNEL_BRANCH}
     # OTHERWISE, NOTATE CURRENT BRANCH FOR CHANGELOG
@@ -209,22 +213,22 @@ function make_wrapper() {
          ARCH=${ARCHITECTURE} \
          CROSS_COMPILE="${CCACHE} ${TOOLCHAIN}" \
          O=${OUT_FOLDER} \
-         "$@"
+         $@
 }
 
 
 # SILENCE OUTPUT FUNCTION
 function kmake() {
     # ONLY SHOW ERRORS, WARNINGS, AND THE IMAGE LINE WHEN COMPILING (UNLESS DEBUG)
-    [[ ${DEBUG} = true ]] && make_wrapper "$@" \
-                          || make_wrapper "$@" |& ag --no-color "error:|warning:" && echo
+    [[ ${DEBUG} ]] && make_wrapper $@ \
+                   || make_wrapper $@ |& ag --no-color "error:|warning:" && echo
 }
 
 
 # SETUP COMPILATION
 function setup_compilation() {
     # IF THE MODE ISN'T STABLE, ADD SHA INFORMATION TO THE ZIP FOR DEBUGGING
-    if [[ "${MODE}" != "stable" ]]; then
+    if [[ ${NOT_STABLE} ]]; then
         SHA="-g$(git rev-parse --verify --short HEAD)"
         export LOCALVERSION="${LOCALVERSION}${SHA}"
     fi
@@ -282,21 +286,21 @@ function build_kernel() {
 # SETUP FOLDERS
 function setup_folders() {
     # THIS IS A NO-OP FOR TRANSFER MODE
-    [[ ${MODE} = "transfer" ]] && return
+    [[ ${IS_TRANSFER} ]] && return
 
     echo "  - Setting up final folders"
 
     # IF ZIPMOVE DOESN'T EXIST, MAKE IT
-    [[ ! -d "${ZIP_MOVE}" ]] && mkdir -p "${ZIP_MOVE}"
+    [[ ! -d ${ZIP_MOVE} ]] && mkdir -p ${ZIP_MOVE}
 
     # IF IT ISN'T A STABLE BUILD, CLEAN THE FOLDER
-    if [[ ${MODE} != "stable" ]]; then
-        [[ -z ${NOCLEAN} ]] && rm -rf "${ZIP_MOVE}"/*
+    if [[ ${NOT_STABLE} ]]; then
+        [[ ! ${NOCLEAN} ]] && rm -rf ${ZIP_MOVE}/*
     else
         # OTHERWISE, MOVE THE OLD FILES TO AN "OLD" FOLDER
-        [[ ! -d "${ZIP_MOVE_OLD}" ]] && mkdir -p "${ZIP_MOVE_OLD}"
-        mv $(find "${ZIP_MOVE}"/* -maxdepth 0 -type f) \
-           "${ZIP_MOVE_OLD}" &>/dev/null
+        [[ ! -d ${ZIP_MOVE_OLD} ]] && mkdir -p ${ZIP_MOVE_OLD}
+        mv $(find ${ZIP_MOVE}/* -maxdepth 0 -type f) \
+           ${ZIP_MOVE_OLD} &>/dev/null
     fi
 }
 
@@ -306,7 +310,7 @@ function move_generated_files() {
     echo "  - Grabbing $(basename ${IMAGE})"
 
     # MOVE THE KERNEL IMAGE
-    cp "${IMAGE}" "${ANYKERNEL_FOLDER}"
+    cp ${IMAGE} ${ANYKERNEL_FOLDER}
 
     # GRAB MODULES TOO IF THEY ARE PRESENT
     mkdir -p ${MODULES_FOLDER}
@@ -331,7 +335,7 @@ function move_generated_files() {
 function package_zip() {
     echo "  - Packaging zip file"
 
-    cd "${ANYKERNEL_FOLDER}"
+    cd ${ANYKERNEL_FOLDER}
 
     # PACKAGE THE ZIP WITHOUT THE README
     zip -q -r9 ${UNSIGNED_ZIP} * -x README.md ${UNSIGNED_ZIP}
@@ -358,28 +362,28 @@ function package_zip() {
 # MOVE FILES AND GENERATE MD5SUM
 function move_zip() {
     # THIS IS A NO-OP FOR TRANSFER MODE
-    [[ ${MODE} = "transfer" ]] && return
+    [[ ${IS_TRANSFER} ]] && return
 
     echo "  - Moving files to web folder"
 
-    mv ${SIGNED_ZIP} "${ZIP_MOVE}"
+    mv ${SIGNED_ZIP} ${ZIP_MOVE}
 
-    md5sum "${ZIP_MOVE}"/${SIGNED_ZIP} > "${ZIP_MOVE}"/${SIGNED_ZIP}.md5
+    md5sum ${ZIP_MOVE}/${SIGNED_ZIP} > ${ZIP_MOVE}/${SIGNED_ZIP}.md5
 }
 
 
 # GENERATE CHANGELOG
 function generate_changelog() {
     # THIS IS A NO-OP FOR TRANSFER MODE
-    [[ ${MODE} = "transfer" ]] && return
+    [[ ${IS_TRANSFER} ]] && return
 
     echo "  - Generating changelog"
 
     GITHUB="http://github.com/nathanchance"
-    CHANGELOG="${ZIP_MOVE}"/${KERNEL_NAME}-changelog.txt
+    CHANGELOG=${ZIP_MOVE}/${KERNEL_NAME}-changelog.txt
 
     # KERNEL SOURCE FIRST
-    cd "${SOURCE_FOLDER}"
+    cd ${SOURCE_FOLDER}
 
     # WE NEED TO MARK THE PREVIOUS TAG FOR CHANGELOG
     PREV_TAG_NAME=$(git describe --abbrev=0 --tags ${MATCH_FLAG})
@@ -395,7 +399,7 @@ function generate_changelog() {
     git diff -M --stat --summary ${RANGE} >> ${CHANGELOG}
 
     # ANYKERNEL NEXT
-    cd "${ANYKERNEL_FOLDER}"
+    cd ${ANYKERNEL_FOLDER}
 
     # WE ONLY WANT TO SHOW ANYKERNEL CHANGES IF THERE HAVE BEEN SOME
     NUM_COMMITS=$(git log ${RANGE} --pretty=oneline | wc -l)
@@ -412,17 +416,17 @@ function generate_changelog() {
 
 # PUSH KERNEL ZIPS TO GITHUB
 function push_zip() {
-    if [[ ${MODE} = "transfer" ]]; then
+    if [[ ${IS_TRANSFER} ]]; then
         echo "  - Uploading zip to transfer.sh"
         TRANSFER_LINK=$(curl -s --upload-file \
-                        "${ZIP_MOVE}"/${SIGNED_ZIP} \
+                        ${ZIP_MOVE}/${SIGNED_ZIP} \
                         https://transfer.sh/${SIGNED_ZIP})
         return
     fi
 
     echo "  - Pushing files to GitHub"
 
-    cd "${ZIP_MOVE}"
+    cd ${ZIP_MOVE}
 
     git add ..
 
@@ -436,15 +440,15 @@ function push_zip() {
 function tag_stable() {
     echo "  - Tagging ${KERNEL_NAME} as stable"
 
-    cd "${SOURCE_FOLDER}"
+    cd ${SOURCE_FOLDER}
 
-    git tag -a "${KERNEL_NAME}" -m "${KERNEL_NAME}"
-    git push -q origin "${KERNEL_NAME}"
+    git tag -a ${KERNEL_NAME} -m ${KERNEL_NAME}
+    git push -q origin ${KERNEL_NAME}
 
-    cd "${ANYKERNEL_FOLDER}"
+    cd ${ANYKERNEL_FOLDER}
 
-    git tag -a "${KERNEL_NAME}" -m "${KERNEL_NAME}"
-    git push -q origin "${KERNEL_NAME}"
+    git tag -a ${KERNEL_NAME} -m ${KERNEL_NAME}
+    git push -q origin ${KERNEL_NAME}
 }
 
 
@@ -529,7 +533,7 @@ if [[ -f ${IMAGE} ]]; then
 
     [[ ${MODE} != "personal" ]] && push_zip
 
-    [[ ${MODE} = "stable" ]] && tag_stable
+    [[ ${IS_STABLE} ]] && tag_stable
 
     echo
 

@@ -24,7 +24,7 @@ source common
 
 # GATHER PARAMETERS
 while [[ $# -ge 1 ]]; do
-    case "${1}" in
+    case ${1} in
         # MERGE VERSION INSTEAD OF CHERRY-PICK
         "-m"|"--merge")
             MERGE=true ;;
@@ -63,7 +63,7 @@ function verify_remote() {
 
 # GENERATE VERSIONS
 function gen_versions() {
-    [[ -n ${UPDATE_ONLY} ]] && exit
+    [[ ${UPDATE_ONLY} ]] && exit
 
     CUR_VERSION=$(make kernelversion)
 
@@ -75,8 +75,8 @@ function gen_versions() {
     fi
 
     # SET RANGE BASED ON IF WE ARE PICKING A RELEASE OR RC BUILD
-    [[ -z ${RC} ]] && RANGE=v${CUR_VERSION}..v${NEW_VERSION} \
-                   || RANGE=v${CUR_VERSION}..stable-rc/linux-${MAJOR_VERSION}.y
+    [[ ! ${RC} ]] && RANGE=v${CUR_VERSION}..v${NEW_VERSION} \
+                  || RANGE=v${CUR_VERSION}..stable-rc/linux-${MAJOR_VERSION}.y
 
     # NUMBER OF COMMITS DIFFERENT
     ND=$(git rev-list --count ${RANGE} 2> /dev/null)
@@ -126,8 +126,8 @@ verify_remote stable-rc
 gen_versions
 
 # PICK OR MERGE!
-[[ -n ${MERGE} ]] && merge \
-                  || cherry_pick
+[[ ${MERGE} ]] && merge \
+               || cherry_pick
 
 # ALERT OF SCRIPT END
 echo "\a"

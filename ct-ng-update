@@ -29,7 +29,7 @@ source common
 
 # GATHER PARAMETERS
 while [[ $# -ge 1 ]]; do
-    case "${1}" in
+    case ${1} in
         # ONLY BUILD CROSSTOOL-NG
         "-b"|"--build-only")
             BUILD_ONLY=true ;;
@@ -109,5 +109,5 @@ function build() {
 #              #
 ################
 
-[[ -z ${BUILD_ONLY} ]] && update
-[[ -z ${UPDATE_ONLY} ]] && build
+[[ ${BUILD_ONLY} ]] && update
+[[ ${UPDATE_ONLY} ]] && build

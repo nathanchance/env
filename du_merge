@@ -52,7 +52,7 @@ vendor/huawei"
 ################
 
 while [[ $# -ge 1 ]]; do
-    case "${1}" in
+    case ${1} in
         "-s"|"--sync")
             SYNC=true ;;
         *)
@@ -68,7 +68,7 @@ done
 #              #
 ################
 
-if [[ ${SYNC} = true ]]; then
+if [[ ${SYNC} ]]; then
     cd ${SOURCE_FOLDER}
     repo sync ${JOBS_FLAG} --force-sync -c --no-clone-bundle --no-tags \
               --optimized-fetch --prune
@@ -105,4 +105,4 @@ header "RESULTS"
 echo ${RESULT_STRING}
 
 # Signal to rom.sh to exit
-[[ ${EXIT_NEEDED} = true ]] && exit 1
+[[ ${EXIT_NEEDED} ]] && exit 1

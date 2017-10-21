@@ -83,16 +83,6 @@ function linux_setup() {
     log_support
 }
 
-# Set up a virtual environment for Python
-function mkavenv {
-    virtualenv2 ${HOME}/venv && source ${HOME}/venv/bin/activate
-}
-
-# Deactivate and remove venv
-function rmvenv {
-    deactivate && rm -rf ${HOME}/venv
-}
-
 # Repo sync shorthand
 function rps {
     local ARGS
@@ -258,7 +248,7 @@ function kfg() {
 # Build a toolchain and release Flash Kernel builds
 # frel <version>
 function frel() {
-    [[ "${2}" != "-nt" ]] && toolchain -p -a arm64 -s linaro -t a73.a53
+    [[ ${2} != "-nt" ]] && toolchain -p -a arm64 -s linaro -t a73.a53
     flash -v ${1} -m stable -os Custom -b 7.1.x-custom
     flash -v ${1} -m stable -os OOS -b 7.1.x-oos
 }

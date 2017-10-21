@@ -45,7 +45,7 @@ function make_command() {
 
 PARAMS="$@"
 while [[ $# -ge 1 ]]; do
-    case "${1}" in
+    case ${1} in
         # REQUIRED OPTIONS
         # DEVICE TO BUILD
         "-d"|"--device")
@@ -194,14 +194,12 @@ REPO_SYNC="repo sync"
 FLAGS="${JOBS_FLAG} --force-sync -c --no-clone-bundle --no-tags --optimized-fetch --prune"
 
 # IF THE SYNC IS REQUESTED, DO SO
-if [[ ${SYNC} = true ]]; then
+if [[ ${SYNC} ]]; then
     header "SYNCING LATEST SOURCES"; echo
 
     ${REPO_SYNC} ${FLAGS}
 
-    if [[ ${ROM} = "du-personal" ]]; then
-        source ${SCRIPTS_FOLDER}/du_merge
-    fi
+    [[ ${ROM} = "du-personal" ]] && source ${SCRIPTS_FOLDER}/du_merge
 fi
 
 
@@ -214,7 +212,6 @@ header "SETTING UP BUILD ENVIRONMENT"
 # CHECK AND SEE IF WE ARE ON ARCH
 # IF SO, ACTIVARE A VIRTUAL ENVIRONMENT FOR PROPER PYTHON SUPPORT
 [[ -f /etc/arch-release ]] && mkavenv
-
 source build/envsetup.sh
 
 
@@ -225,7 +222,7 @@ source build/envsetup.sh
 header "PREPARING $(echo ${DEVICE} | awk '{print toupper($0)}')"
 
 # NOT ALL ROMS USE BREAKFAST
-case "${ROM}" in
+case ${ROM} in
     "aosp"|"krexus"|"vanilla")
         lunch ${ROM}_${DEVICE}-${VARIANT} ;;
     *)
@@ -237,7 +234,7 @@ esac
 # REPOPICK #
 ############
 
-if [[ ${REPOPICK} = true ]]; then
+if [[ ${REPOPICK} ]]; then
     header "RUNNING REPOPICK"
     # Execute in a subshell otherwise everything is fubared
     (
@@ -246,11 +243,8 @@ if [[ ${REPOPICK} = true ]]; then
         case ${YN} in
             y|Y)
                 read -p "Please enter the change number or topic: " PARAMS
-                if [[ -n ${PARAMS//[0-9]/} ]]; then
-                    repopick -i --topic ${PARAMS}
-                else
-                    repopick -i ${PARAMS}
-                fi ;;
+                [[ -n ${PARAMS//[0-9]/} ]] && repopick -i --topic ${PARAMS} \
+                                           || repopick -i ${PARAMS} ;;
             n|N)
                 break ;;
         esac
@@ -298,16 +292,16 @@ make_command ${MAKE_TARGET}
 
 # THERE WILL BE A ZIP IN THE OUT FOLDER IF SUCCESSFUL
 FILES=$(ls ${OUT_FOLDER}/*.zip 2>/dev/null | wc -l)
-if [[ ${FILES} != 0 ]]; then
+if [[ ${FILES} -ne 0 ]]; then
     # MAKE BUILD RESULT STRING REFLECT SUCCESSFUL COMPILATION
     BUILD_RESULT_STRING="BUILD SUCCESSFUL"
     SUCCESS=true
 
     # MAKE ZIP_MOVE IF IT DOESN'T EXIST OR CLEAN IT IF IT DOES
     [[ ! -d "${ZIP_MOVE}" ]] && mkdir -p "${ZIP_MOVE}" \
-                             rm -rf "${ZIP_MOVE}"/*
+                             || rm -rf "${ZIP_MOVE}"/*
 
-    if [[ ${FILES} = 1 ]]; then
+    if [[ ${FILES} -eq 1 ]]; then
         mv "${OUT_FOLDER}"/*.zip* "${ZIP_MOVE}"
     else
         for FILE in $(ls ${OUT_FOLDER}/*.zip* | grep -v ota); do
@@ -334,7 +328,7 @@ END=$(date +%s)
 header "${BUILD_RESULT_STRING}!"
 
 # IF THE BUILD WAS SUCCESSFUL, PRINT FILE LOCATION, AND SIZE
-if [[ ${SUCCESS} = true ]]; then
+if [[ ${SUCCESS} ]]; then
     echo ${RED}"FILE LOCATION: $(web_link ${ZIP_MOVE})"
     echo "SIZE: $(du -h ${ZIP_MOVE}/*.zip | awk '{print $1}')"${RST}
 fi
@@ -354,13 +348,11 @@ echo "\a"
 echo "\n$(date +"%m/%d/%Y %H:%M:%S"): ${BASH_SOURCE} ${PARAMS}" >> ${LOG}
 
 # BUILD <SUCCESSFUL|FAILED> IN # MINUTES AND # SECONDS
-if [[ -n ${BUILD_RESULT_STRING} ]]; then
-    echo "${BUILD_RESULT_STRING} IN \c" >> ${LOG}
-fi
+[[ -n ${BUILD_RESULT_STRING} ]] && echo "${BUILD_RESULT_STRING} IN \c" >> ${LOG}
 echo "$(format_time ${END} ${START})" >> ${LOG}
 
 # ONLY ADD A LINE ABOUT FILE LOCATION IF SCRIPT COMPLETED SUCCESSFULLY
-if [[ ${SUCCESS} = true ]]; then
+if [[ ${SUCCESS} ]]; then
     # FILE LOCATION: <PATH>
     echo "FILE LOCATION: $(web_link ${ZIP_MOVE})" >> ${LOG}
 fi

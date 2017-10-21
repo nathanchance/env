@@ -29,7 +29,7 @@ source common
 
 # GATHER PARAMETERS
 while [[ $# -ge 1 ]]; do
-    case "${1}" in
+    case ${1} in
         # ARCHITECTURE TO BUILD TOOLCHAIN FOR
         "-a"|"--arch")
             shift && enforce_value $@
@@ -94,7 +94,7 @@ PREBUILT_FOLDER=${TC_FOLDER}/prebuilts
 function set_variables() {
     [[ -z ${GCC_NUMBER} ]] && GCC_NUMBER=7
     [[ -n ${TARGET} ]] && PERSONAL=true && ARCH=arm64
-    [[ -n ${PERSONAL} && -z ${SOURCE} ]] && SOURCE=linaro
+    [[ ! ${PERSONAL} && -z ${SOURCE} ]] && SOURCE=linaro
 
     case ${SOURCE} in
         "gnu")
@@ -122,7 +122,7 @@ function set_variables() {
 
     export TUPLE=${TUPLE_PFX}-${SOURCE}-linux-${TUPLE_SFX}
 
-    if [[ -z ${PERSONAL} ]]; then
+    if [[ ! ${PERSONAL} ]]; then
         export PREFIX_FOLDER=${BUILD_FOLDER}/out/${TUPLE}
         export PREBUILT_BRANCH=${TUPLE_PFX}-${SOURCE}-${GCC_NUMBER}.x
     else
@@ -138,7 +138,7 @@ function clone_repo() {
 
     cd ${SOURCE_FOLDER}
 
-    case "${1}" in
+    case ${1} in
         "binutils")
             git clone -b ${2} http://sourceware.org/git/binutils-gdb.git ${1} ;;
         "gcc")
@@ -171,7 +171,7 @@ function build() {
 
     ct-ng clean
 
-    if [[ -n ${PERSONAL} ]]; then
+    if [[ ${PERSONAL} ]]; then
         if [[ ! -d ${PREFIX_FOLDER} ]]; then
             cd ${TOOLCHAIN_FOLDER}
             tar xf ${PERSONAL_FOLDER}*.tar.xx
@@ -202,7 +202,7 @@ function commit() {
     
     UTC_DATE=$(TZ=UTC date +%Y%m%d)
 
-    if [[ -z ${PERSONAL} ]]; then
+    if [[ ! ${PERSONAL} ]]; then
         rm -rf *
         cp -r ${PREFIX_FOLDER}/* .
     else
@@ -223,7 +223,7 @@ Compiled on $(source /etc/os-release; echo ${PRETTY_NAME}) $(uname -m)
 Kernel version: $(uname -rv)
 Host GCC version: $(gcc --version | awk '/gcc/ {print $3}')
 Make version: $(make --version  | awk '/Make/ {print $3}')
-$([[ -n ${TARGET_SUMMARY} ]] && echo && echo -e "${TARGET_SUMMARY}" && echo)
+$([[ -n ${TARGET_SUMMARY} ]] && echo && echo "${TARGET_SUMMARY}" && echo)
 
 Compiled with crosstool-NG: http://crosstool-ng.github.io/
 GCC source: https://git.linaro.org/toolchain/gcc.git/log/?h=${GCC_BRANCH}"
@@ -296,11 +296,11 @@ function release() {
 #              #
 ################
 
-[[ -n ${RELEASE} ]] && release && exit
+[[ ${RELEASE} ]] && release && exit
 
 set_variables
 update_repo binutils binutils-2_29-branch
 update_repo linux master
 update_repo gcc ${GCC_BRANCH}    
 build
-[[ -z ${LOCAL} ]] && commit
+[[ ! ${LOCAL} ]] && commit

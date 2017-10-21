@@ -113,7 +113,7 @@ function bash_setup() {
     tmux_attach
     ${OS}_prompt
     ${OS}_setup
-    add_to_path_pre "${SCRIPTS_FOLDER}"
+    add_to_path_pre ${SCRIPTS_FOLDER}
 }
 
 # bashrc update function
@@ -209,7 +209,7 @@ function transfer() {
 function haste() {
     local OUTPUT CONTENTS
 
-    if (( $# == 0 )) && [[ $(printf "%s" "$0" | wc -c) > 0 ]]; then
+    if (( $# == 0 )) && [[ $(printf "%s" "${0}" | wc -c) > 0 ]]; then
         CONTENTS=${0}
 
     elif (( $# != 1 )) || [[ $1 =~ ^(-h|--help)$ ]]; then
@@ -232,7 +232,7 @@ function haste() {
         return 1
     fi
 
-    if [[ -n "${CONTENTS}" ]] || [[ $(printf "%s" "${CONTENTS}" | wc -c) < 1 ]]; then
+    if [[ -n ${CONTENTS} ]] || [[ $(printf "%s" "${CONTENTS}" | wc -c) < 1 ]]; then
         CONTENTS=$(cat ${1})
     fi
 
@@ -240,7 +240,7 @@ function haste() {
              awk -F '"' '{print "https://hastebin.com/"$4}')
 
     if [[ -n ${OUTPUT} ]]; then
-        echo "${OUTPUT}"
+        echo ${OUTPUT}
         return 0
     fi
     echo "Upload failed."

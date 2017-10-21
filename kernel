@@ -120,7 +120,7 @@ ${BOLD}VERSION:${RST} $(cat out/include/config/kernel.release)" \
                         || report_error "Kernel build failed!"
 
 # UPLOAD IMAGE IF NECESSARY
-[[ ${UPLOAD} = true ]] && echo && curl --upload-file ${FINAL_IMAGE} https://transfer.sh/"${IMAGE}"
+[[ ${UPLOAD} ]] && echo && curl --upload-file ${FINAL_IMAGE} https://transfer.sh/${IMAGE}
 
 # ALERT OF SCRIPT END
 echo "\n\a"

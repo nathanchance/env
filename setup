@@ -31,7 +31,7 @@ function santity_checks() {
 
 function install_if_absent() {
     [[ $(command -v pacaur) ]] && MANAGER=pacaur \
-                                 || MANAGER="sudo pacman"
+                               || MANAGER="sudo pacman"
 
     [[ -z $(${MANAGER} -Qi ${1}) ]] && ${MANAGER} -Si --noconfirm ${1}
 }
@@ -55,7 +55,7 @@ function build_pacaur() {
 }
 
 function move_files() {
-    mkdir -p ${HOME}/Repos && cd ${HOME}/Repos
+    mkdir -p ${HOME}/repos && cd ${HOME}/repos
 
     git clone git@github.com:nathanchance/dotfiles
 

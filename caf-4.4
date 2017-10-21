@@ -29,7 +29,7 @@ source common
 
 # GATHER PARAMETERS
 while [[ $# -ge 1 ]]; do
-    case "${1}" in
+    case ${1} in
         # LOWER BOUND TAG; DEFAULTS TO LATEST CAF TAG IN TREE
         "-1"|"--first-tag")
             shift && enforce_value $@
@@ -137,7 +137,7 @@ function show() {
 setup_tree
 validate_tags
 
-[[ -n ${SHOW_ALL} ]] && show && exit
+[[ ${SHOW_ALL} ]] && show && exit
 
 for REPO in ${REPOS}; do
     show ${REPO}
