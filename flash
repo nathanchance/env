@@ -33,6 +33,12 @@ unset OS
 PARAMS="$@"
 while [[ $# -ge 1 ]]; do
     case ${1} in
+        # ANDROID VERSION
+        "-av"|"--android-version")
+            shift && enforce_value $@
+
+            ANDROID_VERSION=${1} ;;
+
         # BRANCH TO COMPILE; IF ABSENT, USE CURRENT BRANCH
         "-b"|"--branch")
             shift && enforce_value $@
@@ -107,6 +113,7 @@ done
 [[ -z ${DEVICE} ]] && DEVICE="op5"
 [[ -z ${MODE} ]] && MODE="personal"
 [[ -z ${TOOLCHAIN_NAME} ]] && TOOLCHAIN_NAME="l-7.x"
+[[ -z ${ANDROID_VERSION} ]] && ANDROID_VERSION=7.1.x
 
 # EASY TO USE VARIABLES FOR MODE
 [[ ${MODE} != "stable" ]] && NOT_STABLE=true
@@ -119,7 +126,7 @@ case ${DEVICE} in
         TC_TARGET=-a57.a53 ;;
 
     "op5")
-        AK_SFX=7.1.x
+        AK_SFX=${ANDROID_VERSION}
         TC_TARGET=-a73.a53
 
         [[ -z ${OS} ]] && OS=OOS
