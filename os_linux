@@ -38,6 +38,9 @@ function linux_aliases() {
 
     # Generate a kernel version for the current tree
     alias kver='make kernelversion'
+
+    # Setup build for AOSP
+    alias senv='. build/envsetup.sh'
 }
 
 # Setup PS1 and such
