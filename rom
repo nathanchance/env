@@ -66,13 +66,13 @@ while [[ $# -ge 1 ]]; do
 
         # CUSTOM CLEAN TARGET
         "-c"|"--clean")
-            export CLEAN_TYPE=${1} ;;
+            export CLEAN_TARGET=${1} ;;
 
         # CUSTOM MAKE TARGET
         "-m"|"--make")
             shift && enforce_value $@
 
-            export MAKE_TYPE=${1} ;;
+            export MAKE_TARGET=${1} ;;
 
         # USER, USERDEBUG, and ENG
         "-v"|"--version")
@@ -113,8 +113,8 @@ done
 # PARAMETER VERIFICATION
 # IF ROM WASN'T SPECIFIED, IT'S A BUILD FOR ME
 if [[ -z ${ROM} ]]; then
-    ROM=du-aosp
-    DEVICE=angler
+    ROM=du-caf
+    DEVICE=cheeseburger
 fi
 
 [[ -z ${DEVICE} ]] && report_error "The device to build is a required parameter!"
@@ -213,9 +213,7 @@ header "SETTING UP BUILD ENVIRONMENT"
 
 # CHECK AND SEE IF WE ARE ON ARCH
 # IF SO, ACTIVARE A VIRTUAL ENVIRONMENT FOR PROPER PYTHON SUPPORT
-if [[ -f /etc/arch-release ]]; then
-    virtualenv2 ${HOME}/venv && source ${HOME}/venv/bin/activate
-fi
+[[ -f /etc/arch-release ]] && mkavenv
 
 source build/envsetup.sh
 
@@ -230,8 +228,6 @@ header "PREPARING $(echo ${DEVICE} | awk '{print toupper($0)}')"
 case "${ROM}" in
     "aosp"|"krexus"|"vanilla")
         lunch ${ROM}_${DEVICE}-${VARIANT} ;;
-    du*)
-        lunch du_${DEVICE}-${VARIANT} ;;
     *)
         breakfast ${DEVICE} ${VARIANT} ;;
 esac
@@ -269,96 +265,59 @@ fi
 
 header "CLEANING UP OUT DIRECTORY"
 
-if [[ -n ${CLEAN_TYPE} ]] && [[ ${CLEAN_TYPE} != "noclean" ]]; then
-    make_command ${CLEAN_TYPE}
-elif [[ -z ${CLEAN_TYPE} ]]; then
+if [[ -n ${CLEAN_TARGET} ]] && [[ ${CLEAN_TARGET} != "noclean" ]]; then
+    make_command ${CLEAN_TARGET}
+elif [[ -z ${CLEAN_TARGET} ]]; then
     make_command clobber
 fi
 
 
-##################
-# START BUILDING #
-##################
+############
+# BUILDING #
+############
 
 header "MAKING FILES"; echo
 
-# MAKE THE REQUESTED ITEM
-if [[ -n ${MAKE_TYPE} ]]; then
-    make_command ${MAKE_TYPE} | tee -a ${LOG_NAME}
-
-    ################
-    # PRINT RESULT #
-    ################
-
-    echo; header "BUILD COMPLETED!"
-else
-    # NOT ALL ROMS USE BACON
+# SET MAKE_TARGET IF UNSET (NOT ALL ROMS USE BACON)
+if [[ -z ${MAKE_TARGET} ]]; then
     case "${ROM}" in
         "aosp"|"krexus")
-            make_command otapackage | tee -a ${LOG_NAME} ;;
+            MAKE_TARGET=otapackage ;;
         "vanilla")
-            make_command vanilla | tee -a ${LOG_NAME} ;;
+            MAKE_TARGET=vanilla ;;
         *)
-            make_command bacon | tee -a ${LOG_NAME} ;;
+            MAKE_TARGET=bacon ;;
     esac
-
-    ###################
-    # IF ROM COMPILED #
-    ###################
-
-    # THERE WILL BE A ZIP IN THE OUT FOLDER IF SUCCESSFUL
-    FILES=$(ls ${OUT_FOLDER}/*.zip 2>/dev/null | wc -l)
-    if [[ ${FILES} != 0 ]]; then
-        # MAKE BUILD RESULT STRING REFLECT SUCCESSFUL COMPILATION
-        BUILD_RESULT_STRING="BUILD SUCCESSFUL"
-        SUCCESS=true
-
-
-        ##################
-        # ZIP_MOVE LOGIC #
-        ##################
-
-        # MAKE ZIP_MOVE IF IT DOESN'T EXIST OR CLEAN IT IF IT DOES
-        if [[ ! -d "${ZIP_MOVE}" ]]; then
-            mkdir -p "${ZIP_MOVE}"
-        else
-            rm -rf "${ZIP_MOVE}"/*
-        fi
-
-
-        ####################
-        # MOVING ROM FILES #
-        ####################
-
-        if [[ ${FILES} = 1 ]]; then
-            mv "${OUT_FOLDER}"/*.zip* "${ZIP_MOVE}"
-        else
-            for FILE in $(ls ${OUT_FOLDER}/*.zip* | grep -v ota); do
-                mv "${FILE}" "${ZIP_MOVE}"
-            done
-        fi
-
-
-    ###################
-    # IF BUILD FAILED #
-    ###################
-
-    else
-        BUILD_RESULT_STRING="BUILD FAILED"
-        SUCCESS=false
-    fi
-
-    ################
-    # PRINT RESULT #
-    ################
-
-    header "${BUILD_RESULT_STRING}!"
+else
+    EXIT_NEEDED=true
 fi
 
+make_command ${MAKE_TARGET}
 
-# DEACTIVATE VIRTUALENV IF WE ARE ON ARCH
-if [[ -f /etc/arch-release ]]; then
-    deactivate && rm -rf ${HOME}/venv
+[[ ${EXIT_NEEDED} ]] && echo && header "BUILD COMPLETED!" && exit
+
+# THERE WILL BE A ZIP IN THE OUT FOLDER IF SUCCESSFUL
+FILES=$(ls ${OUT_FOLDER}/*.zip 2>/dev/null | wc -l)
+if [[ ${FILES} != 0 ]]; then
+    # MAKE BUILD RESULT STRING REFLECT SUCCESSFUL COMPILATION
+    BUILD_RESULT_STRING="BUILD SUCCESSFUL"
+    SUCCESS=true
+
+    # MAKE ZIP_MOVE IF IT DOESN'T EXIST OR CLEAN IT IF IT DOES
+    [[ ! -d "${ZIP_MOVE}" ]] && mkdir -p "${ZIP_MOVE}" \
+                             rm -rf "${ZIP_MOVE}"/*
+
+    if [[ ${FILES} = 1 ]]; then
+        mv "${OUT_FOLDER}"/*.zip* "${ZIP_MOVE}"
+    else
+        for FILE in $(ls ${OUT_FOLDER}/*.zip* | grep -v ota); do
+            mv "${FILE}" "${ZIP_MOVE}"
+        done
+    fi
+
+else
+    BUILD_RESULT_STRING="BUILD FAILED"
+    SUCCESS=false
 fi
 
 
@@ -366,8 +325,13 @@ fi
 # ENDING INFORMATION #
 ######################
 
+# DEACTIVATE VIRTUALENV IF WE ARE ON ARCH
+[[ -f /etc/arch-release ]] && rmvenv
+
 # STOP TRACKING TIME
 END=$(date +%s)
+
+header "${BUILD_RESULT_STRING}!"
 
 # IF THE BUILD WAS SUCCESSFUL, PRINT FILE LOCATION, AND SIZE
 if [[ ${SUCCESS} = true ]]; then
