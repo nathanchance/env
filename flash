@@ -540,7 +540,7 @@ if [[ -f ${IMAGE} ]]; then
 
     [[ ${MODE} != "personal" ]] && push_zip
 
-    [[ ${IS_STABLE} ]] && tag_stable
+    [[ ! ${NOT_STABLE} ]] && tag_stable
 
     echo
 
