@@ -162,7 +162,7 @@ function update_repo() {
 }
 
 function build() {
-    [[ ! -d ${PREBUILT_FOLDER} ]] && cd ${TOOLCHAIN_FOLDER} \
+    [[ ! -d ${PREBUILT_FOLDER} ]] && cd ${TC_FOLDER} \
             && git clone git@github.com:nathanchance/gcc-prebuilts prebuilts
 
     cd ${BUILD_FOLDER}
@@ -173,8 +173,8 @@ function build() {
 
     if [[ ${PERSONAL} ]]; then
         if [[ ! -d ${PREFIX_FOLDER} ]]; then
-            cd ${TOOLCHAIN_FOLDER}
-            tar xf ${PERSONAL_FOLDER}*.tar.xx
+            cd /opt
+            tar xf ${PREBUILT_FOLDER}/${PERSONAL_FOLDER}*.tar.xz
             cd ${BUILD_FOLDER}
         fi
         CONFIG_FILE=${PREFIX_FOLDER}/bin/${TUPLE}-ct-ng.config
