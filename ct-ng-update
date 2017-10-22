@@ -52,7 +52,8 @@ done
 #             #
 ###############
 
-SOURCE_FOLDER=${TC_FOLDER}/build/ct-ng
+BUILD_FOLDER=${TC_FOLDER}/build
+SOURCE_FOLDER=${BUILD_FOLDER}/ct-ng
 
 
 ###############
@@ -64,9 +65,8 @@ SOURCE_FOLDER=${TC_FOLDER}/build/ct-ng
 function update() {
     header "UPDATING SOURCES"
 
-    [[ ! -d ${SOURCE_FOLDER} ]] && \
-        cd $(dirname ${SOURCE_FOLDER}) && \
-        git clone https://github.com/crosstool-ng/crosstool-ng ct-ng
+    [[ ! -d ${BUILD_FOLDER} ]] && mkdir -p ${BUILD_FOLDER}
+    [[ ! -d ${SOURCE_FOLDER} ]] && hub clone crosstool-ng/crosstool-ng ${SOURCE_FOLDER}
 
     cd ${SOURCE_FOLDER}
 
