@@ -393,7 +393,8 @@ function generate_changelog() {
     cd ${SOURCE_FOLDER}
 
     # WE NEED TO MARK THE PREVIOUS TAG FOR CHANGELOG
-    PREV_TAG_NAME=$(git describe --abbrev=0 --tags ${MATCH_FLAG})
+    PREV_TAG_NAME=$(git describe --abbrev=0 --tags ${MATCH_FLAG} 2>/dev/null)
+    [[ -z ${PREV_TAG_NAME} ]] && return
     RANGE=${PREV_TAG_NAME}..HEAD
 
     # SHOW WHERE COMMITS ARE LOCATED
