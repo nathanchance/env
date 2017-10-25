@@ -313,3 +313,27 @@ function sync_private() {
                                                            || echo "${TAG} already present!"
     done
 }
+
+# Manage private branches
+# priv_branches [-c|-d] <ver>
+function priv_branches() {
+    [[ ! -f Makefile ]] && echo "\n${RED}Run this in a kernel tree!${RST}\n" && return 1
+
+    local BRANCH_SFX="base custom oos"
+
+    for BRANCH in ${BRANCH_SFX}; do
+        TARGET_BRANCH=7.1.x-${BRANCH}-for-${2}
+        BASE_BRANCH=7.1.x-${BRANCH}
+
+        case ${1} in
+            "-c"|"--create")
+                git checkout -b ${TARGET_BRANCH} ${BASE_BRANCH}
+                git push --set-upstream private ${TARGET_BRANCH} ;;
+
+            "-d"|"--delete")
+                git checkout ${BRANCH}
+                git branch -d ${TARGET_BRANCH}
+                git push private :${TARGET_BRANCH} ;;
+        esac
+    done
+}
