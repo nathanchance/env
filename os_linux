@@ -337,3 +337,18 @@ function priv_branches() {
         esac
     done
 }
+
+# Regenerate flash_defconfig using savedefconfig for minimalness
+# regen_config [-d <defconfig>]
+function regen_config() {
+    [[ ! -f Makefile ]] && echo "\n${RED}Run this in a kernel tree!${RST}\n" && return 1
+    [[ ! -d /opt/a-4.9 ]] && echo "\n${RED}Clone Google's 4.9 toolchain to /opt!${RST}\n" && return 1
+
+    [[ $# -lt 2 ]] && local DEFCONFIG=flash_defconfig \
+                   || local DEFCONFIG=${2}
+
+    rm -rf out
+    make O=out ARCH=arm64 ${DEFCONFIG}
+    make O=out ARCH=arm64 savedefconfig
+    cp -v out/defconfig arch/arm64/configs/flash_defconfig
+}
