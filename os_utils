@@ -137,10 +137,10 @@ function gerrit-push {
     case ${1} in
         "du")
             URL=gerrit.dirtyunicorns.com
-            BRANCH=n7x ;;
+            BRANCH=o8x ;;
         "du-caf")
             URL=gerrit.dirtyunicorns.com
-            BRANCH=n7x-caf ;;
+            BRANCH=o8x-caf ;;
         "omni")
             URL=gerrit.omnirom.org
             BRANCH=android-7.1 ;;
