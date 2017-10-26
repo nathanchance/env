@@ -87,9 +87,12 @@ function gen_versions() {
 
 # MERGE FUNCTION
 function merge() {
+    [[ ${RC} ]] && TAG=stable-rc/linux-${MAJOR_VERSION}.y \
+                || TAG=v${NEW_VERSION}
+
     header "MERGING ${NEW_VERSION}"
 
-    git merge v${NEW_VERSION} -m "Merge ${NEW_VERSION} into $(git rev-parse --abbrev-ref HEAD)
+    git merge ${TAG} -m "Merge ${NEW_VERSION} into $(git rev-parse --abbrev-ref HEAD)
 
 Changes in ${NEW_VERSION}: (${ND} commits)
 $(git log --reverse --format="        %s" ${RANGE})
