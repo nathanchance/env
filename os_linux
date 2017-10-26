@@ -233,16 +233,52 @@ function nf() {
 }
 
 # Find config values in a kernel tree
-# kfg <config>
+# kfg [-c <defconfig_file>] [-f <config>] [-e <config>] [-d <config>]
 function kfg() {
-    header "LOCATIONS OF ${1} IN TREE"
-    git grep -n -1 ${1} | ag --nocolor Kconfig
+    local DEFCONFIG CONFIG LIST
 
-    header "LOCATIONS OF ${1} IN CONFIG"
-    local LIST=$(ag --nocolor ${1} out/.config)
-    [[ -z ${LIST} ]] && echo "None found!" \
-                     || echo "${LIST}"
-    echo
+    while [[ $# -ge 1 ]]; do
+        case ${1} in
+            "-c"|"--config")
+                shift
+
+                DEFCONFIG=${1} ;;
+
+            "-d"|"--disable")
+                shift
+
+                CONFIG=$(echo ${1} | sed s/CONFIG_//)
+
+                [[ -z ${DEFCONFIG} ]] && DEFCONFIG=flash_defconfig
+
+                echo "# CONFIG_${CONFIG} is not set" >> arch/arm64/configs/${DEFCONFIG} ;;
+
+            "-e"|"--enable")
+                shift
+
+                CONFIG=$(echo ${1} | sed s/CONFIG_//)
+
+                [[ -z ${DEFCONFIG} ]] && DEFCONFIG=flash_defconfig
+
+                echo "CONFIG_${CONFIG}=y" >> arch/arm64/configs/${DEFCONFIG} ;;
+
+            "-f"|"--find")
+                shift
+
+                CONFIG=$(echo ${1} | sed s/CONFIG_//)
+
+                header "LOCATIONS OF ${CONFIG} IN TREE"
+                git grep -n -1 ${CONFIG} | ag --nocolor Kconfig
+
+                header "LOCATIONS OF ${CONFIG} IN CONFIG FILE"
+                LIST=$(ag --nocolor ${CONFIG} out/.config)
+                [[ -z ${LIST} ]] && echo "None found!" \
+                                 || echo "${LIST}"
+                echo ;;
+        esac
+
+        shift
+    done
 }
 
 # Build a toolchain and release Flash Kernel builds
