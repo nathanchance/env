@@ -124,10 +124,19 @@ function upstb() {
         git remote set-url --push origin git@github.com:nathanchance/linux-stable
     fi
 
+    if [[ ! -d ${KERNEL_FOLDER}/mirrors/stable-rc ]]; then
+        cd ${KERNEL_FOLDER}/mirrors
+        git clone --mirror https://git.kernel.org/pub/scm/linux/kernel/git/stable/linux-stable-rc.git stable-rc
+    fi
+
     cd ${KERNEL_FOLDER}/mirrors/stable
 
     git fetch -p origin
     git push --mirror
+
+    cd ${KERNEL_FOLDER}/mirrors/stable-rc
+
+    git fetch -p origin
 
     cd ${CUR_FOLDER}
 }
