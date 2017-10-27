@@ -113,7 +113,7 @@ done
 [[ -z ${DEVICE} ]] && DEVICE="op5"
 [[ -z ${MODE} ]] && MODE="personal"
 [[ -z ${TOOLCHAIN_NAME} ]] && TOOLCHAIN_NAME="l-7.x"
-[[ -z ${ANDROID_VERSION} ]] && ANDROID_VERSION=7.1.x
+[[ -z ${ANDROID_VERSION} ]] && ANDROID_VERSION=8.0.0
 
 # EASY TO USE VARIABLES FOR MODE
 [[ ${MODE} != "stable" ]] && NOT_STABLE=true
@@ -129,7 +129,7 @@ case ${DEVICE} in
         AK_SFX=${ANDROID_VERSION}
         TC_TARGET=-a73.a53
 
-        [[ -z ${OS} ]] && OS=OOS
+        [[ -z ${OS} ]] && OS=Custom
         [[ -n ${VERSION} ]] && VERSION="-v${VERSION}"
         export LOCALVERSION="-${OS}${VERSION}"
 
