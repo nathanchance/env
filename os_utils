@@ -154,7 +154,7 @@ function gerrit-push {
     esac
 
     if [[ -z ${PROJECT} ]]; then
-        PROJECT=$(grep "projectname" .git/config | sed 's/\tprojectname = //')
+        PROJECT=$(grep -m 1 "projectname" .git/config | sed 's/\tprojectname = //')
     fi
 
     if [[ -n ${PROJECT} ]]; then
