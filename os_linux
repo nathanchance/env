@@ -294,15 +294,15 @@ function kfg() {
 # frel <version>
 function frel() {
     [[ ${2} != "-nt" ]] && toolchain -p -a arm64 -s linaro -t a73.a53
-    flash -v ${1} -m stable -os Custom -b 7.1.x-custom
-    flash -v ${1} -m stable -os OOS -b 7.1.x-oos
+    flash -v ${1} -m stable -os Custom -b 7.1.x-custom -av 7.1.x
+    flash -v ${1} -m stable -os OOS -b 7.1.x-oos -av 7.1.x
 }
 
 # Build Flash Kernel test builds
 # ftest <version> <dirty_version> <type>
 function ftest() {
-    flash -v ${1} -r ${2} -m ${3} -os Custom -b 7.1.x-custom-for-${1}
-    flash -v ${1} -r ${2} -m ${3} -os OOS -b 7.1.x-oos-for-${1}
+    flash -v ${1} -r ${2} -m ${3} -os Custom -b 7.1.x-custom-for-${1} -av 7.1.x
+    flash -v ${1} -r ${2} -m ${3} -os OOS -b 7.1.x-oos-for-${1} -av 7.1.x
 }
 
 # Applies patches from the 4.4 stable queue
