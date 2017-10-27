@@ -157,7 +157,7 @@ ZIP_MOVE_HEAD=${WEB_FOLDER}/downloads
 
 case ${MODE} in
     "alpha"|"beta"|"rc"|"stable")
-        ZIP_MOVE=${ZIP_MOVE_HEAD}/kernels/${DEVICE}${OS}/${MODE}
+        ZIP_MOVE=${ZIP_MOVE_HEAD}/kernels/${DEVICE}/${ANDROID_VERSION}${OS}/${MODE}
         ZIP_MOVE_OLD=$(readlink -f ${ZIP_MOVE}/../archive) ;;
     "personal")
         ZIP_MOVE=$(readlink -f ${ZIP_MOVE_HEAD}/../me/fk) ;;
