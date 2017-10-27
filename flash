@@ -240,6 +240,12 @@ function setup_compilation() {
         export LOCALVERSION="${LOCALVERSION}${SHA}"
     fi
 
+    # IF THERE ARE UNCOMMITTED CHANGES, MARK AS DIRTY
+    if [[ $( git diff-index --name-only HEAD ) ]]; then
+        DIRTY="-dirty"
+        export LOCALVERSION="${LOCALVERSION}${DIRTY}"
+    fi
+
     # POINT TO PROPER DEFCONFIG AND GENERATE VERSION FILES
     kmake ${DEFCONFIG} prepare
 
@@ -254,7 +260,7 @@ function setup_compilation() {
     [[ -n ${REVISION} ]] && REVISION=".${MODE::1}${REVISION}"
 
     # EXPORT KERNEL_NAME BASED ON THE ABOVE INFORMATION
-    export KERNEL_NAME=${FLASH_VERSION}${REVISION}${SHA}
+    export KERNEL_NAME=${FLASH_VERSION}${REVISION}${SHA}${DIRTY}
 
     # SET ZIP NAMES
     export UNSIGNED_ZIP=${KERNEL_NAME}-unsigned.zip
