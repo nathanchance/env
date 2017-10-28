@@ -78,7 +78,7 @@ done
 [[ -z ${ARCH} ]] && ARCH=arm64
 [[ -z ${DEFCONFIG} ]] && DEFCONFIG=flash_defconfig
 [[ -z ${IMAGE} ]] && IMAGE=Image.gz-dtb
-[[ -z ${TOOLCHAIN} ]] && TOOLCHAIN=/opt/l-7.x-a73/bin/aarch64-linaro-linux-android-
+[[ -z ${TOOLCHAIN} ]] && TOOLCHAIN=/opt/l-7.x-a73.a53/bin/aarch64-linaro-linux-android-
 
 # BASIC BUILD FUNCTION
 function build() {
