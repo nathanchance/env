@@ -233,7 +233,7 @@ function kmake() {
 
 
 # SETUP COMPILATION
-function setup_compilation() {
+function generate_variables() {
     # IF THE MODE ISN'T STABLE, ADD SHA INFORMATION TO THE ZIP FOR DEBUGGING
     if [[ ${NOT_STABLE} ]]; then
         SHA="-g$(git rev-parse --verify --short HEAD)"
@@ -267,7 +267,11 @@ function setup_compilation() {
     export SIGNAPK_ZIP=${KERNEL_NAME}-signapk.zip
     export ADJUSTED_ZIP=${KERNEL_NAME}-adjusted.zip
     export SIGNED_ZIP=${KERNEL_NAME}.zip
+}
 
+
+# PRINT VARIABLES
+function print_variables() {
     [[ -n ${CCACHE} ]] && CCACHE_SUPPORT="${GRN}Yes, found at ${CCACHE}${RST}" \
                        || CCACHE_SUPPORT="${RED}No, please install it!${RST}"
 
@@ -523,8 +527,11 @@ header "CLEANING UP AND MAKING KERNEL"
 # DON'T SHOW CLEAN UP OUTPUT
 clean_up &>/dev/null
 
-# SETUP FOR COMPILATION
-setup_compilation
+# GENERATE VARIABLES SUCH AS VERSIONS
+generate_variables
+
+# PRINT RELEVANT VARIABLES
+print_variables
 
 # BUILD KERNEL
 build_kernel
