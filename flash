@@ -95,7 +95,7 @@ while [[ $# -ge 1 ]]; do
 
             TOOLCHAIN_NAME=${1} ;;
 
-        # (ONEPLUS 5 ONLY) VERSION CODE
+        # VERSION CODE
         "-v"|"--version")
             shift && enforce_value $@
 
@@ -111,30 +111,36 @@ done
 # DEFAULT PARAMETERS
 [[ -z ${DEFCONFIG} ]] && DEFCONFIG="flash_defconfig"
 [[ -z ${DEVICE} ]] && DEVICE="op5"
-[[ -z ${MODE} ]] && MODE="personal"
+[[ -z ${MODE} ]] && MODE="personal" && [[ -z ${OS} ]] && OS=Custom
 [[ -z ${TOOLCHAIN_NAME} ]] && TOOLCHAIN_NAME="l-7.x"
 [[ -z ${ANDROID_VERSION} ]] && ANDROID_VERSION=8.0.0
 
-# EASY TO USE VARIABLES FOR MODE
+# EASY TO USE VARIABLES FOR IF STATEMENTS
 [[ ${MODE} != "stable" ]] && NOT_STABLE=true
 [[ ${MODE} = "transfer" ]] && IS_TRANSFER=true
+
+# IF A REVISION OF LESS THAN ONE IS SUPPLIED, UNSET IT
+[[ -n ${REVISION} && ${REVISION} -lt 1 ]] && unset REVISION && REVISION_SUPPLIED=0
 
 # DEVICE HANDLING
 case ${DEVICE} in
     "angler")
+        DEVICE_FOR_HOSTNAME=${DEVICE}
+        DEVICE_FOR_ZIP=${DEVICE^}
+
         AK_SFX=public-8.0.0
         TC_TARGET=-a57.a53 ;;
 
     "op5")
-        AK_SFX=${ANDROID_VERSION}
-        TC_TARGET=-a73.a53
-
-        [[ -z ${OS} ]] && OS=Custom
-        [[ -n ${VERSION} ]] && VERSION="-v${VERSION}"
-        export LOCALVERSION="-${OS}${VERSION}"
-
+        [[ -z ${OS} ]] && report_error "OS must be specified for OnePlus 5!"
         MATCH_FLAG="--match=*${OS}*"
-        OS=/${OS,,} ;;
+        OS_FOLDER=/${OS,,}
+
+        DEVICE_FOR_HOSTNAME=OnePlus5
+        DEVICE_FOR_ZIP=${DEVICE^^}
+
+        AK_SFX=${ANDROID_VERSION}
+        TC_TARGET=-a73.a53 ;;
 
     *)
         report_error "Invalid device!" ;;
@@ -157,7 +163,7 @@ ZIP_MOVE_HEAD=${WEB_FOLDER}/downloads
 
 case ${MODE} in
     "alpha"|"beta"|"rc"|"stable")
-        ZIP_MOVE=${ZIP_MOVE_HEAD}/kernels/${DEVICE}/${ANDROID_VERSION}${OS}/${MODE}
+        ZIP_MOVE=${ZIP_MOVE_HEAD}/kernels/${DEVICE}/${ANDROID_VERSION}${OS_FOLDER}/${MODE}
         ZIP_MOVE_OLD=$(readlink -f ${ZIP_MOVE}/../archive) ;;
     "personal")
         ZIP_MOVE=$(readlink -f ${ZIP_MOVE_HEAD}/../me/fk) ;;
@@ -234,10 +240,19 @@ function kmake() {
 
 # SETUP COMPILATION
 function generate_variables() {
+    # FORMAT OF KERNEL VERSION IN ABOUT PHONE
+    #
+    # <kernel_version>[-g<hash>]
+    # Flash[-OOS|-Custom]@<device>
+    # date
+
+    # GENERATE KERNEL VERSION
+    KVER=$(make --no-print-directory -C ${SOURCE_FOLDER} kernelversion)
+
     # IF THE MODE ISN'T STABLE, ADD SHA INFORMATION TO THE ZIP FOR DEBUGGING
     if [[ ${NOT_STABLE} ]]; then
         SHA="-g$(git rev-parse --verify --short HEAD)"
-        export LOCALVERSION="${LOCALVERSION}${SHA}"
+        export LOCALVERSION="${SHA}"
     fi
 
     # IF THERE ARE UNCOMMITTED CHANGES, MARK AS DIRTY
@@ -246,21 +261,30 @@ function generate_variables() {
         export LOCALVERSION="${LOCALVERSION}${DIRTY}"
     fi
 
-    # POINT TO PROPER DEFCONFIG AND GENERATE VERSION FILES
-    kmake ${DEFCONFIG} prepare
+    # GENERATE FIRST LINE VARIABLE
+    # CONFIG_LOCALVERSION + CONFIG_LOCALVERSION_AUTO ARE DISABLED
+    FIRST_LINE="${KVER}${LOCALVERSION}"
 
-    # GATHER THE FLASH VERSION FROM THE FULL VERSION
-    FULL_VERSION=$(cat ${OUT_FOLDER}/include/config/kernel.release)
-    # REMOVE THE NUMERICAL KERNEL VERSION FROM THE FULL VERSION
-    FLASH_VERSION=$(echo ${FULL_VERSION} | sed s/"$(make kernelversion)"-//)
-    # IF THERE IS A SHA, REMOVE IT TOO
-    [[ -n ${SHA} ]] && FLASH_VERSION=$(echo ${FLASH_VERSION} | sed s/"${SHA}"//)
+    # GENERATE USER
+    [[ -n ${OS} ]] && OS="-${OS}"
+    export KBUILD_BUILD_USER="Flash${OS}"
 
-    # REVISION IS PASSED AS A PARAMETER FOR ANYTHING OTHER THAN STABLE VERSIONS
-    [[ -n ${REVISION} ]] && REVISION=".${MODE::1}${REVISION}"
+    # GENERATE HOSTNAME
+    export KBUILD_BUILD_HOST=${DEVICE_FOR_HOSTNAME}
+
+    # GENERATE VERSION
+    VERSION_CODE=$(echo ${VERSION} | sed s/\\.//)${REVISION}
+
+    # GENERATE SECOND LINE VARIABLE
+    SECOND_LINE="${KBUILD_BUILD_USER}@${KBUILD_BUILD_HOST} #${VERSION_CODE:-1}"
+
+    # GENERATE THIRD LINE VARIABLE
+    THIRD_LINE="$(date)"
 
     # EXPORT KERNEL_NAME BASED ON THE ABOVE INFORMATION
-    export KERNEL_NAME=${FLASH_VERSION}${REVISION}${SHA}${DIRTY}
+    [[ -n ${REVISION_SUPPLIED} ]] && REVISION_FOR_ZIP=".${MODE::1}${REVISION_SUPPLIED}"
+    [[ -n ${REVISION} ]] && REVISION_FOR_ZIP=".${MODE::1}${REVISION}"
+    export KERNEL_NAME="Flash-${DEVICE_FOR_ZIP}${OS}-v${VERSION:-0.00}${REVISION_FOR_ZIP}${SHA}"
 
     # SET ZIP NAMES
     export UNSIGNED_ZIP=${KERNEL_NAME}-unsigned.zip
@@ -275,7 +299,9 @@ function print_variables() {
     [[ -n ${CCACHE} ]] && CCACHE_SUPPORT="${GRN}Yes, found at ${CCACHE}${RST}" \
                        || CCACHE_SUPPORT="${RED}No, please install it!${RST}"
 
-    echo "${BOLD}Kernel version:${RST}    ${FULL_VERSION}\n"
+    echo "${BOLD}Kernel version:${RST}    ${FIRST_LINE}"
+    echo "                   ${SECOND_LINE}"
+    echo "                   ${THIRD_LINE}\n"
 
     echo "${BOLD}Full zip name:${RST}     ${SIGNED_ZIP}\n"
 
@@ -291,9 +317,11 @@ function print_variables() {
 
 # MAKE KERNEL
 function build_kernel() {
+    # POINT TO PROPER DEFCONFIG AND GENERATE VERSION FILES
+    kmake ${DEFCONFIG} prepare
+
     # INCREMENT DIRTY VERSION NUMBER IF PASSED ABOVE
-    [[ -n ${REVISION} && ${REVISION:2:3} -gt 0 ]] && \
-            echo $((${REVISION:2:3} - 1)) > ${OUT_FOLDER}/.version
+    echo $((${VERSION_CODE:-2} - 1)) > ${OUT_FOLDER}/.version
 
     # MAKE THE KERNEL
     kmake ${EXTRA_MAKE_FLAGS}
