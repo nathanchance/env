@@ -409,7 +409,7 @@ function priv_branches() {
                 git push --set-upstream private ${TARGET_BRANCH} ;;
 
             "-d"|"--delete")
-                git checkout ${BRANCH}
+                git checkout ${BASE_BRANCH}
                 git branch -d ${TARGET_BRANCH}
                 git push private :${TARGET_BRANCH} ;;
         esac
