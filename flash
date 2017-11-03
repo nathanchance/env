@@ -93,7 +93,7 @@ while [[ $# -ge 1 ]]; do
         "-t"|"--toolchain")
             shift && enforce_value $@
 
-            TOOLCHAIN_NAME=${1} ;;
+            TOOLCHAIN_FOLDER=${1} ;;
 
         # VERSION CODE
         "-v"|"--version")
@@ -112,7 +112,6 @@ done
 [[ -z ${DEFCONFIG} ]] && DEFCONFIG="flash_defconfig"
 [[ -z ${DEVICE} ]] && DEVICE="op5"
 [[ -z ${MODE} ]] && MODE="personal" && [[ ${DEVICE} = "op5" && -z ${OS} ]] && OS=Custom
-[[ -z ${TOOLCHAIN_NAME} ]] && TOOLCHAIN_NAME="l-7.x"
 [[ -z ${ANDROID_VERSION} ]] && ANDROID_VERSION=8.0.0
 
 # EASY TO USE VARIABLES FOR IF STATEMENTS
@@ -121,61 +120,66 @@ done
 # IF A REVISION OF LESS THAN ONE IS SUPPLIED, UNSET IT
 [[ -n ${REVISION} && ${REVISION} -lt 1 ]] && unset REVISION && REVISION_SUPPLIED=0
 
-# DEVICE HANDLING
+# DEVICE "BOARD" FLAGS
 case ${DEVICE} in
     "angler")
+        # REQUIRED FLAGS
+        AK_SFX=public-8.0.0
+
+        COMPILER=gcc
+
+        COMPRESSION=gz
+
         DEVICE_NAME_FILE=${DEVICE^}
         DEVICE_NAME_GITHUB=${DEVICE}
         DEVICE_NAME_HOST=${DEVICE}
         DEVICE_NAME_WEB=${DEVICE}
 
-        AK_SFX=public-8.0.0
-        TC_TARGET=-a57.a53
-
         MATCH_FLAG="Flash*"
-
-        COMPRESSION=gz
 
         PACKAGE_METHOD=zip
 
-        COMPILER=gcc ;;
+        [[ -z ${TOOLCHAIN_FOLDER} ]] && TOOLCHAIN_FOLDER="l-7.x-a57.a53" ;;
 
     "op5")
+        # DEVICE SPECIFIC HANDLING
         [[ -z ${OS} ]] && report_error "OS must be specified for OnePlus 5!"
-        MATCH_FLAG="*${OS}*"
         OS_FOLDER=/${OS,,}
+
+        # REQUIRED FLAGS
+        AK_SFX=${ANDROID_VERSION}
+
+        COMPILER=gcc
+
+        COMPRESSION=gz
 
         DEVICE_NAME_FILE=${DEVICE^^}
         DEVICE_NAME_GITHUB=${DEVICE}
         DEVICE_NAME_HOST=OnePlus5
         DEVICE_NAME_WEB=${DEVICE}
 
-        AK_SFX=${ANDROID_VERSION}
-        TC_TARGET=-a73.a53
-
-        COMPRESSION=gz
+        MATCH_FLAG="*${OS}*"
 
         PACKAGE_METHOD=zip
 
-        COMPILER=gcc ;;
+        [[ -z ${TOOLCHAIN_FOLDER} ]] && TOOLCHAIN_FOLDER="l-7.x-a73.a53" ;;
 
-    "taimen"|"muskie")
+    "taimen"|"walleye")
+        # REQUIRED FLAGS
+        COMPILER=clang
+
+        COMPRESSION=lz4
+
         DEVICE_NAME_FILE=${DEVICE^}
         DEVICE_NAME_GITHUB=wahoo
         DEVICE_NAME_HOST=${DEVICE^}
         DEVICE_NAME_WEB=${DEVICE}
 
-        TC_TARGET=-a73.a53
-
-        CLANG_TOOLCHAIN=/opt/aosp-clang/clang-3859424/bin/clang
-        CLANG_VERSION=$(${CLANG_TOOLCHAIN} --version | head -n 1)
-        COMPILER=clang
-
         MATCH_FLAG="Flash*"
 
-        COMPRESSION=lz4
+        PACKAGE_METHOD=image
 
-        PACKAGE_METHOD=image ;;
+        [[ -z ${TOOLCHAIN_FOLDER} ]] && TOOLCHAIN_FOLDER="a-4.9" ;;
 
     *)
         report_error "Invalid device!" ;;
@@ -206,14 +210,11 @@ case ${MODE} in
         report_error "Invalid mode specified!" ;;
 esac
 
-case ${TOOLCHAIN_NAME} in
+case ${TOOLCHAIN_FOLDER} in
     "a-4.9")
-        unset TC_TARGET
         TOOLCHAIN_PREFIX=aarch64-linux-android- ;;
     "l-7.x")
         TOOLCHAIN_PREFIX=aarch64-linaro-linux-android- ;;
-    "g-8.x")
-        TOOLCHAIN_PREFIX=aarch64-gnu-linux-gnu- ;;
     *)
         report_error "Invalid toolchain specified!" ;;
 esac
@@ -222,7 +223,12 @@ esac
 ARCHITECTURE=arm64
 CCACHE=$(command -v ccache)
 IMAGE=${OUT_FOLDER}/arch/${ARCHITECTURE}/boot/Image.${COMPRESSION}-dtb
-GCC_TOOLCHAIN=/opt/${TOOLCHAIN_NAME}${TC_TARGET}/bin/${TOOLCHAIN_PREFIX}
+GCC_TOOLCHAIN=/opt/${TOOLCHAIN_FOLDER}/bin/${TOOLCHAIN_PREFIX}
+
+if [[ ${COMPILER} = "clang" ]]; then
+    CLANG_TOOLCHAIN=/opt/aosp-clang/clang-3859424/bin/clang
+    CLANG_VERSION=$(${CLANG_TOOLCHAIN} --version | head -n 1)
+fi
 
 
 ###############
@@ -230,7 +236,6 @@ GCC_TOOLCHAIN=/opt/${TOOLCHAIN_NAME}${TC_TARGET}/bin/${TOOLCHAIN_PREFIX}
 #  FUNCTIONS  #
 #             #
 ###############
-
 
 # CLEAN UP
 function clean_up() {
@@ -251,6 +256,7 @@ function clean_up() {
     git clean -fxd
 }
 
+
 # MAKE WRAPPER FOR MAKE FUNCTION FOR GCC
 function make_wrapper_gcc() {
     make ${JOBS_FLAG} \
@@ -264,7 +270,6 @@ function make_wrapper_gcc() {
 # MAKE WRAPPER FOR MAKE FUNCTION FOR GCC
 function make_wrapper_clang() {
     PATH=${BIN_FOLDER}:${PATH} make ${JOBS_FLAG} \
-                                    V=1 \
                                     ARCH=${ARCHITECTURE} \
                                     CC=${CLANG_TOOLCHAIN} \
                                     CLANG_TRIPLE=aarch64-linux-gnu- \
@@ -499,7 +504,7 @@ function package_image() {
 
 
 # MOVE FILES AND GENERATE MD5SUM
-function move_files() {
+function move_flashable_files() {
     echo "  - Moving files to web folder"
 
     case ${PACKAGE_METHOD} in
@@ -537,26 +542,24 @@ function generate_changelog() {
     # GENERATE A DIFF AS WELL
     git diff -M --stat --summary ${RANGE} >> ${CHANGELOG}
 
-    if [[ ! ${SKIP_ZIP} ]]; then
-        # ANYKERNEL NEXT
-        cd ${ANYKERNEL_FOLDER}
+    # ANYKERNEL NEXT
+    cd ${ANYKERNEL_FOLDER}
 
-        # WE ONLY WANT TO SHOW ANYKERNEL CHANGES IF THERE HAVE BEEN SOME
-        NUM_COMMITS=$(git log ${RANGE} --pretty=oneline | wc -l)
+    # WE ONLY WANT TO SHOW ANYKERNEL CHANGES IF THERE HAVE BEEN SOME
+    NUM_COMMITS=$(git log ${RANGE} --pretty=oneline | wc -l)
 
-        if [[ ${NUM_COMMITS} -gt 0 ]]; then
-            echo "\n\n${GITHUB}/AnyKernel2/commits/${ANYKERNEL_BRANCH}\n" >> ${CHANGELOG}
+    if [[ ${NUM_COMMITS} -gt 0 ]]; then
+        echo "\n\n${GITHUB}/AnyKernel2/commits/${ANYKERNEL_BRANCH}\n" >> ${CHANGELOG}
 
-            git log ${RANGE} | git shortlog >> ${CHANGELOG}
+        git log ${RANGE} | git shortlog >> ${CHANGELOG}
 
-            git diff -M --stat --summary ${RANGE} >> ${CHANGELOG}
-        fi
+        git diff -M --stat --summary ${RANGE} >> ${CHANGELOG}
     fi
 }
 
 
 # PUSH KERNEL FILES (ZIPS/IMAGES) TO GITHUB
-function push_kernel() {
+function push_flashable_files() {
     echo "  - Pushing files to GitHub"
 
     cd ${FILE_MOVE}
@@ -667,10 +670,10 @@ if [[ -f ${IMAGE} ]]; then
 
     setup_folders
     package_${PACKAGE_METHOD}
-    move_files
+    move_flashable_files
     generate_changelog
 
-    [[ ${MODE} != "personal" ]] && push_kernel
+    [[ ${MODE} != "personal" ]] && push_flashable_files
 
     [[ ! ${NOT_STABLE} ]] && tag_stable
 
