@@ -67,6 +67,10 @@ while [[ $# -ge 1 ]]; do
 
             EXTRA_MAKE_FLAGS=${1} ;;
 
+        # DO NOT PACKAGE KERNEL IMAGE
+        "-io"|"--image-only")
+            IMAGE_ONLY=true ;;
+
         # WHERE TO MOVE ZIP AFTER COMPILATION (PRIVATE, TEST, OR PUBLIC)
         "-m"|"--mode")
             shift && enforce_value $@
@@ -593,7 +597,7 @@ function ending_info() {
     echo "\n$(date +"%m/%d/%Y %H:%M:%S"): ${BASH_SOURCE} ${PARAMS}" >> ${LOG}
     echo "${BUILD_RESULT} IN $(format_time ${END} ${START})" >> ${LOG}
 
-    if [[ ${BUILD_RESULT} = "BUILD SUCCESSFUL" ]]; then
+    if [[ ${BUILD_RESULT} = "BUILD SUCCESSFUL" && ! ${IMAGE_ONLY} ]]; then
         FILE_LOCATION=$(web_link ${FILE_MOVE})
         echo "FILE LINK: ${FILE_LOCATION}" >> ${LOG}
 
@@ -666,18 +670,20 @@ build_kernel
 if [[ -f ${IMAGE} ]]; then
     BUILD_RESULT="BUILD SUCCESSFUL"
 
-    header "PREPARING KERNEL FOR FLASHING"
+    if [[ ! ${IMAGE_ONLY} ]]; then
+        header "PREPARING KERNEL FOR FLASHING"
 
-    setup_folders
-    package_${PACKAGE_METHOD}
-    move_flashable_files
-    generate_changelog
+        setup_folders
+        package_${PACKAGE_METHOD}
+        move_flashable_files
+        generate_changelog
 
-    [[ ${MODE} != "personal" ]] && push_flashable_files
+        [[ ${MODE} != "personal" ]] && push_flashable_files
 
-    [[ ! ${NOT_STABLE} ]] && tag_stable
+        [[ ! ${NOT_STABLE} ]] && tag_stable
 
-    echo
+        echo
+    fi
 
 ###################
 # IF BUILD FAILED #
