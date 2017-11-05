@@ -406,7 +406,7 @@ function setup_folders() {
 
     # IF IT ISN'T A STABLE BUILD, CLEAN THE FOLDER
     if [[ ${NOT_STABLE} ]]; then
-        [[ ! ${NOCLEAN} ]] && rm -rf ${FILE_MOVE}/*
+        [[ ! ${NOCLEAN} ]] && rm -rf ${FILE_MOVE}/*${DEVICE_NAME_FILE}*
     else
         # OTHERWISE, MOVE THE OLD FILES TO AN "OLD" FOLDER
         [[ ! -d ${FILE_MOVE_OLD} ]] && mkdir -p ${FILE_MOVE_OLD}
