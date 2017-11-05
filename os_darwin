@@ -187,3 +187,41 @@ function update() {
     brew update
     brew upgrade
 }
+
+function flash_pxl2() {
+    if [[ "$@" =~ "-f" ]]; then
+        header "Fetching new kernel"
+
+        rm -rf ~/Downloads/*Taimen*
+        scp nchancellor.net:~/web/me/fk/*Taimen* ~/Downloads
+    fi
+
+    local BASE=$(ls -t ~/Downloads/* | ag Flash* | head -n 1 | sed -e s/-boot.img// -e s/-dtbo.img//)
+
+    if [[ "$@" =~ "-r" ]]; then
+        header "Rebooting to bootloader"
+
+        adb reboot bootloader
+        echo "Waiting for 10 seconds"
+        sleep 10
+    fi
+
+    header "Flashing kernel"
+
+    echo "Flashing: ${BASE}-boot.img"
+    echo
+
+    fastboot flash boot ${BASE}-boot.img
+
+    echo
+    echo "Flashing: ${BASE}-dtbo.img"
+    echo
+
+    fastboot flash dtbo ${BASE}-dtbo.img
+
+    header "Rebooting"
+
+    fastboot reboot
+
+    echo "\a"
+}
