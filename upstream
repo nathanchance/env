@@ -94,7 +94,7 @@ function merge() {
 
     git merge ${TAG} -m "Merge ${NEW_VERSION} into $(git rev-parse --abbrev-ref HEAD)
 
-Changes from ${CUR_VERSION} to ${NEW_VERSION}: (${ND} commits)
+Changes in ${NEW_VERSION}: (${ND} commits)
 $(git log --reverse --format="        %s" ${RANGE})
 
 Signed-off-by: $(git config --get user.name) <$(git config --get user.email)>"
