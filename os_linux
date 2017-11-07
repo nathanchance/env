@@ -430,3 +430,22 @@ function rgn_kfg() {
     make O=out ARCH=arm64 savedefconfig
     cp -v out/defconfig arch/arm64/configs/flash_defconfig
 }
+
+# Regenerate Pixel 2 build tools
+function rgn_pxl2_tools() {
+    cd ${ROM_FOLDER}/aosp
+
+    mkavenv
+    senv
+    lunch aosp_taimen-user
+    make ${JOBS_FLAGS} clean
+    make ${JOBS_FLAGS} dtc mkdtimg
+    rmvenv
+
+    cp out/host/linux-x86/bin/dtc ${BIN_FOLDER}
+    cp out/host/linux-x86/bin/mkdtimg ${BIN_FOLDER}
+
+    cd ${SCRIPTS_FOLDER}
+
+    git status
+}
