@@ -313,28 +313,48 @@ function kfg() {
     done
 }
 
-# Build a toolchain and release Flash Kernel builds
-# frel <version>
-function frel() {
+# Build a toolchain and release Flash Kernel builds for the OnePlus 5
+# frel_op5 <version>
+function frel_op5() {
     [[ ${2} != "-nt" ]] && toolchain -p -a arm64 -s linaro -t a73.a53
     case ${1} in
         1.*)
-            flash -v ${1} -m stable -os Custom -b 7.1.x-custom -av 7.1.x
-            flash -v ${1} -m stable -os OOS -b 7.1.x-oos -av 7.1.x ;;
+            flash -v ${1} -m stable -os Custom -b 7.1.x-custom -av 7.1.x -d op5
+            flash -v ${1} -m stable -os OOS -b 7.1.x-oos -av 7.1.x -d op5 ;;
         2.*)
-            flash -v ${1} -m stable -os Custom -b 8.0.0-custom -av 8.0.0 ;;
+            flash -v ${1} -m stable -os Custom -b 8.0.0-custom -av 8.0.0 -d op5 ;;
     esac
 }
 
-# Build Flash Kernel test builds
-# ftest <version> <dirty_version> <type>
-function ftest() {
+# Build Flash Kernel test builds for the OnePlus 5
+# ftest_op5 <version> <dirty_version> <type>
+function ftest_op5() {
     case ${1} in
         1.*)
-            flash -v ${1} -r ${2} -m ${3} -os Custom -b 7.1.x-custom-for-${1} -av 7.1.x
-            flash -v ${1} -r ${2} -m ${3} -os OOS -b 7.1.x-oos-for-${1} -av 7.1.x ;;
+            flash -v ${1} -r ${2} -m ${3} -os Custom -b 7.1.x-custom-for-${1} -av 7.1.x -d op5
+            flash -v ${1} -r ${2} -m ${3} -os OOS -b 7.1.x-oos-for-${1} -av 7.1.x -d op5 ;;
         2.*)
-            flash -v ${1} -r ${2} -m ${3} -os Custom -b 8.0.0-custom-for-${1} -av 8.0.0 ;;
+            flash -v ${1} -r ${2} -m ${3} -os Custom -b 8.0.0-custom-for-${1} -av 8.0.0 -d op5 ;;
+    esac
+}
+
+# Build a toolchain and release Flash Kernel builds for the Pixel 2 (XL)
+# frel_pxl2 <version>
+function frel_pxl2() {
+    case ${1} in
+        1.*)
+            flash -v ${1} -m stable -d taimen -b 8.0.0
+            flash -v ${1} -m stable -d walleye -b 8.0.0 ;;
+    esac
+}
+
+# Build Flash Kernel test builds for the Pixel 2 (XL)
+# ftest_pxl2 <version> <dirty_version> <type>
+function ftest_pxl2() {
+    case ${1} in
+        1.*)
+            flash -v ${1} -r ${2} -m ${3} -d taimen -b 8.0.0-for-${1}
+            flash -v ${1} -r ${2} -m ${3} -d walleye -b 8.0.0-for-${1} ;;
     esac
 }
 
