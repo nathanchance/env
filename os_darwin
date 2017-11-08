@@ -195,7 +195,8 @@ function flash_pxl2() {
         header "Fetching new kernel"
 
         rm -rf ~/Downloads/*Taimen*
-        scp nchancellor.net:~/web/me/fk/*Taimen* ~/Downloads
+        [[ "$@" =~ "-s" ]] && scp nchancellor.net:~/web/downloads/kernels/taimen/8.0.0/stable/*Taimen*.img ~/Downloads \
+                           || scp nchancellor.net:~/web/me/fk/*Taimen* ~/Downloads
     fi
 
     BASE=$(ls -t ~/Downloads/* | ag Flash* | head -n 1 | sed -e s/-boot.img// -e s/-dtbo.img//)
@@ -248,6 +249,7 @@ function flash_pxl2() {
             read -n 1 -p "Done patching in Magisk Manager? " RESULT
         done
 
+        echo
         echo
 
         adb pull /sdcard/MagiskManager/patched_boot.img ${BASE}-boot.img
