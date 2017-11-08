@@ -56,6 +56,8 @@ while [[ $# -ge 1 ]]; do
             case ${1} in
                 "a-4.9")
                     TOOLCHAIN=/opt/${1}/bin/aarch64-linux-android- ;;
+                "l-7.x-a73.a53")
+                    TOOLCHAIN=/opt/${1}/bin/aarch64-linaro-linux-android- ;;
                 "g-8.x")
                     TOOLCHAIN=/opt/${1}/bin/aarch64-gnu-linux-gnu- ;;
                 *)
@@ -74,11 +76,13 @@ while [[ $# -ge 1 ]]; do
     shift
 done
 
-# DEFAULTS FOR FLASH KERNEL FOR OP5
+# DEFAULTS
 [[ -z ${ARCH} ]] && ARCH=arm64
-[[ -z ${DEFCONFIG} ]] && DEFCONFIG=flash_defconfig
 [[ -z ${IMAGE} ]] && IMAGE=Image.gz-dtb
-[[ -z ${TOOLCHAIN} ]] && TOOLCHAIN=/opt/l-7.x-a73.a53/bin/aarch64-linaro-linux-android-
+[[ -z ${TOOLCHAIN} ]] && TOOLCHAIN=/opt/a-4.9/bin/aarch64-linux-android-
+
+# ERROR OUT IF DEFCONFIG WASN'T SUPPLIED
+[[ -z ${DEFCONFIG} ]] && report_error "Please supply a defconfig!"
 
 # BASIC BUILD FUNCTION
 function build() {
