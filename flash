@@ -214,7 +214,7 @@ esac
 case ${TOOLCHAIN_FOLDER} in
     "a-4.9")
         TOOLCHAIN_PREFIX=aarch64-linux-android- ;;
-    "l-7.x")
+    "l-7.x"|"l-7.x-a73.a53"|"l-7.x-a57.a53")
         TOOLCHAIN_PREFIX=aarch64-linaro-linux-android- ;;
     *)
         report_error "Invalid toolchain specified!" ;;
