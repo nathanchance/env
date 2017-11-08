@@ -51,7 +51,7 @@ while [[ $# -ge 1 ]]; do
 
             DEFCONFIG=${1} ;;
 
-        # DEVICE TO COMPILE FOR; IF ABSENT, USE ONEPLUS5
+        # DEVICE TO COMPILE FOR; IF ABSENT, USE PIXEL 2 XL
         "-d"|"--device")
             shift && enforce_value $@
 
@@ -114,8 +114,8 @@ done
 
 # DEFAULT PARAMETERS
 [[ -z ${DEFCONFIG} ]] && DEFCONFIG="flash_defconfig"
-[[ -z ${DEVICE} ]] && DEVICE="op5"
-[[ -z ${MODE} ]] && MODE="personal" && [[ ${DEVICE} = "op5" && -z ${OS} ]] && OS=Custom
+[[ -z ${DEVICE} ]] && DEVICE="taimen"
+[[ -z ${MODE} ]] && MODE="personal"
 [[ -z ${ANDROID_VERSION} ]] && ANDROID_VERSION=8.0.0
 
 # EASY TO USE VARIABLES FOR IF STATEMENTS
