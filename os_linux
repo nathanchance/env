@@ -33,6 +33,7 @@ function linux_aliases() {
     alias lnx='cd ${KERNEL_FOLDER}/repos/linux'
     alias pkg='cd ${REPO_FOLDER}/pkgbuilds'
     alias op5='cd ${KERNEL_FOLDER}/op5'
+    alias pxl='cd ${KERNEL_FOLDER}/wahoo'
     alias tlc='cd ${TC_FOLDER}'
     alias spt='cd ${SCRIPTS_FOLDER}'
 
