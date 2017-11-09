@@ -515,7 +515,10 @@ function move_flashable_files() {
     case ${PACKAGE_METHOD} in
         "image")
             mv ${COMPILED_BOOT_IMAGE} ${FILE_MOVE}/${BOOT_IMAGE}
-            mv $(dirname ${IMAGE})/dtbo.img ${FILE_MOVE}/${DTBO_IMAGE} ;;
+            md5sum ${FILE_MOVE}/${BOOT_IMAGE} > ${FILE_MOVE}/${BOOT_IMAGE}.md5
+
+            mv $(dirname ${IMAGE})/dtbo.img ${FILE_MOVE}/${DTBO_IMAGE}
+            md5sum ${FILE_MOVE}/${DTBO_IMAGE} > ${FILE_MOVE}/${DTBO_IMAGE}.md5 ;;
         "zip")
             mv ${SIGNED_ZIP} ${FILE_MOVE}
             md5sum ${FILE_MOVE}/${SIGNED_ZIP} > ${FILE_MOVE}/${SIGNED_ZIP}.md5 ;;
