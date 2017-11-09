@@ -353,8 +353,8 @@ function frel_pxl2() {
 function ftest_pxl2() {
     case ${1} in
         1.*)
-            flash -v ${1} -r ${2} -m ${3} -d taimen -b 8.0.0-for-${1}
-            flash -v ${1} -r ${2} -m ${3} -d walleye -b 8.0.0-for-${1} ;;
+            flash -v ${1} -r ${2} -m ${3} -d taimen -b 8.0.0-queue-${1}
+            flash -v ${1} -r ${2} -m ${3} -d walleye -b 8.0.0-queue-${1} ;;
     esac
 }
 
