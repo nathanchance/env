@@ -164,27 +164,23 @@ function ckr() {
 }
 
 # Update kernel repos
-# ukr |-m|
+# ukr
 function ukr() {
     CUR_FOLDER=$(pwd)
 
-    if [[ "$@" =~ "-m" ]]; then
-        FOLDER=${KERNEL_FOLDER}/mirrors
-        local MIRROR=true
-    else
-        FOLDER=${KERNEL_FOLDER}/repos
-    fi
-
     REPO_LIST="aosp-kc aosp-msm caf-4.4 chromium linux stable stable-rc"
-
     for REPO in ${REPO_LIST}; do
-        cd ${FOLDER}/${REPO}
-        [[ ${MIRROR} ]] && git fetch -p origin \
-                        || git pull
+        cd ${KERNEL_FOLDER}/mirrors/${REPO}
+        git fetch -p origin
+    done
+
+    KERNEL_LIST="op5 wahoo"
+    for KERNEL in ${KERNEL_LIST}; do
+        cd ${KERNEL_FOLDER}/${KERNEL}
+        git remote update
     done
 
     cd ${CUR_FOLDER}
-    git remote update
 }
 
 # Add kernel remotes to a kernel repo
