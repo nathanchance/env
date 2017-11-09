@@ -272,7 +272,7 @@ function make_wrapper_gcc() {
 function make_wrapper_clang() {
     PATH=${BIN_FOLDER}:${PATH} make ${JOBS_FLAG} \
                                     ARCH=${ARCHITECTURE} \
-                                    CC=${CLANG_TOOLCHAIN} \
+                                    CC="${CCACHE} ${CLANG_TOOLCHAIN}" \
                                     CLANG_TRIPLE=aarch64-linux-gnu- \
                                     CROSS_COMPILE=${GCC_TOOLCHAIN} \
                                     O=${OUT_FOLDER} \
@@ -374,14 +374,13 @@ function print_variables() {
 
     echo "${BOLD}GCC version:${RST}       $(${GCC_TOOLCHAIN}gcc --version | head -1)\n"
 
-    case ${COMPILER} in
-        "clang")
-            echo "${BOLD}Clang location:${RST}    ${CLANG_TOOLCHAIN}\n"
+    if [[ ${COMPILER} = "clang" ]]; then
+        echo "${BOLD}Clang location:${RST}    ${CLANG_TOOLCHAIN}\n"
 
-            echo "${BOLD}Clang version:${RST}     ${CLANG_VERSION}\n" ;;
-        "gcc")
-            echo "${BOLD}ccache support?${RST}    ${CCACHE_SUPPORT}\n" ;;
-    esac
+        echo "${BOLD}Clang version:${RST}     ${CLANG_VERSION}\n"
+    fi
+
+    echo "${BOLD}ccache support?${RST}    ${CCACHE_SUPPORT}\n"
 }
 
 
