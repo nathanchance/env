@@ -196,11 +196,30 @@ function flash_pxl2() {
 
         rm -rf ~/Downloads/*Taimen*
         [[ "$@" =~ "-s" ]] && scp nchancellor.net:~/web/downloads/kernels/taimen/8.0.0/stable/*Taimen*.img ~/Downloads \
-                           || scp nchancellor.net:~/web/me/fk/*Taimen* ~/Downloads
+                           || scp nchancellor.net:~/web/me/fk/*Taimen*.img ~/Downloads
     fi
 
     BASE=$(ls -t ~/Downloads/* | ag Flash* | head -n 1 | sed -e s/-boot.img// -e s/-dtbo.img//)
 
+    if [[ "$@" =~ "-m" ]]; then
+        header "Patching boot image for Magisk"
+
+        adb shell rm -rf /sdcard/Download/Flash*img
+        adb push ${BASE}-boot.img /sdcard/Download
+        rm -rf ${BASE}-boot.img
+
+        echo
+
+        RESULT=n
+        while [[ ${RESULT} != "y" ]]; do
+            read -n 1 -p "Done patching in Magisk Manager? " RESULT
+        done
+
+        echo
+        echo
+
+        adb pull /sdcard/MagiskManager/patched_boot.img ${BASE}-boot.img
+    fi
 
     if [[ "$@" =~ "-r" ]]; then
         header "Rebooting to bootloader"
@@ -226,37 +245,4 @@ function flash_pxl2() {
     header "Rebooting"
 
     fastboot reboot
-
-    if [[ "$@" =~ "-m" ]]; then
-        header "Patching boot image for Magisk"
-
-        RESULT=n
-        while [[ ${RESULT} != "y" ]]; do
-            read -n 1 -p "Done rebooting? " RESULT
-        done
-
-        echo
-        echo
-
-        adb shell rm -rf /sdcard/Download/Flash*img
-        adb push ${BASE}-boot.img /sdcard/Download
-        rm -rf ${BASE}-boot.img
-
-        echo
-
-        RESULT=n
-        while [[ ${RESULT} != "y" ]]; do
-            read -n 1 -p "Done patching in Magisk Manager? " RESULT
-        done
-
-        echo
-        echo
-
-        adb pull /sdcard/MagiskManager/patched_boot.img ${BASE}-boot.img
-
-        # DAT RECURSION THO
-        flash_pxl2 -r
-    else
-        echo "\a"
-    fi
 }
