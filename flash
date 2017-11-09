@@ -547,18 +547,20 @@ function generate_changelog() {
     # GENERATE A DIFF AS WELL
     git diff -M --stat --summary ${RANGE} >> ${CHANGELOG}
 
-    # ANYKERNEL NEXT
-    cd ${ANYKERNEL_FOLDER}
+    if [[ ${PACKAGE_METHOD} = "zip" ]]; then
+        # ANYKERNEL NEXT
+        cd ${ANYKERNEL_FOLDER}
 
-    # WE ONLY WANT TO SHOW ANYKERNEL CHANGES IF THERE HAVE BEEN SOME
-    NUM_COMMITS=$(git log ${RANGE} --pretty=oneline | wc -l)
+        # WE ONLY WANT TO SHOW ANYKERNEL CHANGES IF THERE HAVE BEEN SOME
+        NUM_COMMITS=$(git log ${RANGE} --pretty=oneline | wc -l)
 
-    if [[ ${NUM_COMMITS} -gt 0 ]]; then
-        echo "\n\n${GITHUB}/AnyKernel2/commits/${ANYKERNEL_BRANCH}\n" >> ${CHANGELOG}
+        if [[ ${NUM_COMMITS} -gt 0 ]]; then
+            echo "\n\n${GITHUB}/AnyKernel2/commits/${ANYKERNEL_BRANCH}\n" >> ${CHANGELOG}
 
-        git log ${RANGE} | git shortlog >> ${CHANGELOG}
+            git log ${RANGE} | git shortlog >> ${CHANGELOG}
 
-        git diff -M --stat --summary ${RANGE} >> ${CHANGELOG}
+            git diff -M --stat --summary ${RANGE} >> ${CHANGELOG}
+        fi
     fi
 }
 
