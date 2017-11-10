@@ -413,12 +413,12 @@ function rgn_kfg() {
     cp -v out/defconfig arch/arm64/configs/flash_defconfig
 }
 
-# Regenerate Pixel 2 build tools
-function rgn_pxl2_tools() {
-    cd ${ROM_FOLDER}/aosp
+# Regenerate Pixel 2 build binaries
+function rgn_pxl2_bins() {
+    cd ${KERNEL_FOLDER}/aosp-pixel2
 
     mkavenv
-    senv
+    . build/envsetup.sh
     lunch aosp_taimen-user
     make ${JOBS_FLAGS} clean
     make ${JOBS_FLAGS} dtc mkdtimg
