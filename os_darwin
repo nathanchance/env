@@ -195,11 +195,17 @@ function flash_pxl2() {
         header "Fetching new kernel"
 
         rm -rf ~/Downloads/*Taimen*
-        [[ "$@" =~ "-s" ]] && scp nchancellor.net:~/web/downloads/kernels/taimen/8.0.0/stable/*Taimen*.img ~/Downloads \
-                           || scp nchancellor.net:~/web/me/fk/*Taimen*.img ~/Downloads
+        [[ "$@" =~ "-s" ]] && scp nchancellor.net:~/web/downloads/kernels/taimen/8.0.0/stable/*Taimen*.img* ~/Downloads \
+                           || scp nchancellor.net:~/web/me/fk/*Taimen*.img* ~/Downloads
     fi
 
-    BASE=$(ls -t ~/Downloads/* | ag Flash* | head -n 1 | sed -e s/-boot.img// -e s/-dtbo.img//)
+    BASE=$(ls -1 -t ~/Downloads/*.img | ag Flash* | head -n 1 | sed -e s/-boot.img// -e s/-dtbo.img//)
+
+    for IMAGE in $(ls ${BASE}-{boot,dtbo}.img); do
+        CUR_MD5=$(md5 ${IMAGE} | cut -d ' ' -f 4)
+        TARGET_MD5=$(cat ${IMAGE}.md5 | awk '{print $1}')
+        [[ ${CUR_MD5} != ${TARGET_MD5} ]] && echo "${RED}MD5s for $(basename ${IMAGE}) do not match!${RST}" && return
+    done
 
     if [[ "$@" =~ "-m" ]]; then
         header "Patching boot image for Magisk"
