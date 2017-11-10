@@ -356,31 +356,15 @@ function generate_variables() {
 
 # PRINT VARIABLES
 function print_variables() {
-    [[ -n ${CCACHE} ]] && CCACHE_SUPPORT="${GRN}Yes, found at ${CCACHE}${RST}" \
-                       || CCACHE_SUPPORT="${RED}No, please install it!${RST}"
-
     echo "${BOLD}Kernel version:${RST}    ${FIRST_LINE}"
     echo "                   ${SECOND_LINE}"
     echo "                   ${THIRD_LINE}\n"
 
-    case ${PACKAGE_METHOD} in
-        "zip") echo "${BOLD}Full zip name:${RST}     ${SIGNED_ZIP}\n" ;;
-        "image") echo "${BOLD}Full image name:${RST}   ${BOOT_IMAGE}\n" ;;
-    esac
+    echo "${BOLD}Kernel branch:${RST}     ${KERNEL_BRANCH}\n"
 
-    echo "${BOLD}Current branch:${RST}    ${KERNEL_BRANCH}\n"
-
-    echo "${BOLD}GCC location:${RST}      ${GCC_TOOLCHAIN}\n"
+    [[ ${COMPILER} = "clang" ]] && echo "${BOLD}Clang version:${RST}     ${CLANG_VERSION}\n"
 
     echo "${BOLD}GCC version:${RST}       $(${GCC_TOOLCHAIN}gcc --version | head -1)\n"
-
-    if [[ ${COMPILER} = "clang" ]]; then
-        echo "${BOLD}Clang location:${RST}    ${CLANG_TOOLCHAIN}\n"
-
-        echo "${BOLD}Clang version:${RST}     ${CLANG_VERSION}\n"
-    fi
-
-    echo "${BOLD}ccache support?${RST}    ${CCACHE_SUPPORT}\n"
 }
 
 
@@ -397,28 +381,11 @@ function build_kernel() {
 }
 
 
-# SETUP FOLDERS
-function setup_folders() {
-    echo "  - Setting up final folders"
-
-    # IF ZIPMOVE DOESN'T EXIST, MAKE IT
-    [[ ! -d ${FILE_MOVE} ]] && mkdir -p ${FILE_MOVE}
-
-    # IF IT ISN'T A STABLE BUILD, CLEAN THE FOLDER
-    if [[ ${NOT_STABLE} ]]; then
-        [[ ! ${NOCLEAN} ]] && rm -rf ${FILE_MOVE}/*${DEVICE_NAME_FILE}*
-    else
-        # OTHERWISE, MOVE THE OLD FILES TO AN "OLD" FOLDER
-        [[ ! -d ${FILE_MOVE_OLD} ]] && mkdir -p ${FILE_MOVE_OLD}
-        mv $(find ${FILE_MOVE}/* -maxdepth 0 -type f) \
-           ${FILE_MOVE_OLD} &>/dev/null
-    fi
-}
-
-
 # PACKAGE ZIP
 function package_zip() {
-    echo "  - Grabbing $(basename ${IMAGE})"
+    header "PACKAGING AND SIGNING ZIP"
+
+    echo "${BOLD}Signed zip name:${RST}   ${SIGNED_ZIP}\n"
 
     # MOVE THE KERNEL IMAGE
     cp ${IMAGE} ${ANYKERNEL_FOLDER}
@@ -428,7 +395,7 @@ function package_zip() {
     find ${OUT_FOLDER} -name "*.ko" -exec cp {} ${MODULES_FOLDER} \;
     # IF MODULES WERE FOUND, STRIP THEM; OTHERWISE, REMOVE THE FOLDER
     if [[ $(ls -A ${MODULES_FOLDER}) ]]; then
-        echo "  - Stripping and signing modules"
+        echo "${BOLD}Kernel modules:${RST}    $(ls ${MODULES_FOLDER}/*.ko | wc -l)\n"
         ${GCC_TOOLCHAIN}strip --strip-unneeded ${MODULES_FOLDER}/*.ko
         for MOD in $(ls ${MODULES_FOLDER}/*.ko); do
             ${OUT_FOLDER}/scripts/sign-file sha512 \
@@ -439,8 +406,6 @@ function package_zip() {
     else
         rm -rf ${MODULES_FOLDER}
     fi
-
-    echo "  - Packaging zip file"
 
     cd ${ANYKERNEL_FOLDER}
 
@@ -463,7 +428,41 @@ function package_zip() {
               ${SIGNED_ZIP}
 
     # IF PACKAGING FAILED, ERROR OUT
-    [[ ! -f ${SIGNED_ZIP} ]] && report_error "Kernel zip not found after signing!"
+    [[ ! -f ${SIGNED_ZIP} ]] && report_error "Kernel zip not found after signing!" \
+                             || echo "${GRN}Kernel zip successfully generated!${RST}\n"
+}
+
+
+# SILENCE OUTPUT FUNCTION FOR PACKAGE_IMAGE
+function package_image() {
+    AOSP_FOLDER=${KERNEL_FOLDER}/aosp-pixel2
+    cd ${AOSP_FOLDER}
+
+    git -C device/google/wahoo-kernel reset --hard -q
+
+    cp ${IMAGE} ${AOSP_FOLDER}/device/google/wahoo-kernel
+    cp $(dirname ${IMAGE})/dtbo.img ${AOSP_FOLDER}/device/google/wahoo-kernel
+
+    header "COMPILING BOOT IMAGE"
+
+    echo "${BOLD}Image name:${RST}        ${BOOT_IMAGE}\n"
+
+    echo "${BOLD}Current tag:${RST}       $(git -C device/google/wahoo describe --tags HEAD)\n"
+
+    package_image_wrapper
+
+    COMPILED_BOOT_IMAGE=${AOSP_FOLDER}/out/target/product/${DEVICE_NAME_WEB}/boot.img
+
+    [[ ! -f ${COMPILED_BOOT_IMAGE} ]] && report_error "Boot image not found!" \
+                                      || echo "${GRN}Boot image compiled successfully!${RST}\n"
+}
+
+
+# PACKAGE IMAGE WRAPPER
+function package_image_wrapper() {
+    # ONLY SHOW ERRORS WHEN COMPILING (UNLESS DEBUG)
+    [[ ${DEBUG} ]] && package_image_commands \
+                   || package_image_commands |& ag --no-color "error:" && echo
 }
 
 
@@ -478,40 +477,28 @@ function package_image_commands() {
 }
 
 
-# PACKAGE IMAGE WRAPPER
-function package_image_wrapper() {
-    # ONLY SHOW ERRORS WHEN COMPILING (UNLESS DEBUG)
-    [[ ${DEBUG} ]] && package_image_commands \
-                   || package_image_commands |& ag --no-color "error:" && echo
-}
+# SETUP FOLDERS
+function setup_folders() {
+    echo "  - Setting up final folders"
 
-# SILENCE OUTPUT FUNCTION FOR PACKAGE_IMAGE
-function package_image() {
-    echo "  - Grabbing $(basename ${IMAGE})"
+    # IF ZIPMOVE DOESN'T EXIST, MAKE IT
+    [[ ! -d ${FILE_MOVE} ]] && mkdir -p ${FILE_MOVE}
 
-    AOSP_FOLDER=${KERNEL_FOLDER}/aosp-pixel2
-    cd ${AOSP_FOLDER}
-
-    git -C device/google/wahoo-kernel reset --hard -q
-
-    cp ${IMAGE} ${AOSP_FOLDER}/device/google/wahoo-kernel
-    cp $(dirname ${IMAGE})/dtbo.img ${AOSP_FOLDER}/device/google/wahoo-kernel
-
-    echo "  - Building boot image..."
-
-    package_image_wrapper
-
-    COMPILED_BOOT_IMAGE=${AOSP_FOLDER}/out/target/product/${DEVICE_NAME_WEB}/boot.img
-
-    [[ ! -f ${COMPILED_BOOT_IMAGE} ]] && report_error "Boot image not found!"
-
-    echo "  - Boot image generated"
+    # IF IT ISN'T A STABLE BUILD, CLEAN THE FOLDER
+    if [[ ${NOT_STABLE} ]]; then
+        [[ ! ${NOCLEAN} ]] && rm -rf ${FILE_MOVE}/*${DEVICE_NAME_FILE}*
+    else
+        # OTHERWISE, MOVE THE OLD FILES TO AN "OLD" FOLDER
+        [[ ! -d ${FILE_MOVE_OLD} ]] && mkdir -p ${FILE_MOVE_OLD}
+        mv $(find ${FILE_MOVE}/* -maxdepth 0 -type f) \
+           ${FILE_MOVE_OLD} &>/dev/null
+    fi
 }
 
 
 # MOVE FILES AND GENERATE MD5SUM
 function move_flashable_files() {
-    echo "  - Moving files to web folder"
+    echo "  - Moving files"
 
     case ${PACKAGE_METHOD} in
         "image")
@@ -675,12 +662,11 @@ build_kernel
 ######################
 
 if [[ -f ${IMAGE} ]]; then
-    BUILD_RESULT="BUILD SUCCESSFUL"
-
     if [[ ! ${IMAGE_ONLY} ]]; then
-        header "PREPARING KERNEL FOR FLASHING"
-
         package_${PACKAGE_METHOD}
+
+        header "SHUFFLING FILES"
+
         setup_folders
         move_flashable_files
         generate_changelog
@@ -691,6 +677,8 @@ if [[ -f ${IMAGE} ]]; then
 
         echo
     fi
+
+    BUILD_RESULT="BUILD SUCCESSFUL"
 
 ###################
 # IF BUILD FAILED #
