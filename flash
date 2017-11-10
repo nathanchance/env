@@ -180,7 +180,7 @@ case ${DEVICE} in
 
         PACKAGE_METHOD=image
 
-        [[ -z ${TOOLCHAIN_FOLDER} ]] && TOOLCHAIN_FOLDER="a-4.9" ;;
+        [[ -z ${TOOLCHAIN_FOLDER} ]] && TOOLCHAIN_FOLDER="aosp-gcc" ;;
 
     *)
         report_error "Invalid device!" ;;
@@ -212,7 +212,7 @@ case ${MODE} in
 esac
 
 case ${TOOLCHAIN_FOLDER} in
-    "a-4.9")
+    "aosp-gcc")
         TOOLCHAIN_PREFIX=aarch64-linux-android- ;;
     "l-7.x"|"l-7.x-a73.a53"|"l-7.x-a57.a53")
         TOOLCHAIN_PREFIX=aarch64-linaro-linux-android- ;;

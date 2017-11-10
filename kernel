@@ -54,7 +54,7 @@ while [[ $# -ge 1 ]]; do
             shift && enforce_value $@
 
             case ${1} in
-                "a-4.9")
+                "aosp-gcc")
                     TOOLCHAIN=/opt/${1}/bin/aarch64-linux-android- ;;
                 "l-7.x-a73.a53")
                     TOOLCHAIN=/opt/${1}/bin/aarch64-linaro-linux-android- ;;
@@ -79,7 +79,7 @@ done
 # DEFAULTS
 [[ -z ${ARCH} ]] && ARCH=arm64
 [[ -z ${IMAGE} ]] && IMAGE=Image.gz-dtb
-[[ -z ${TOOLCHAIN} ]] && TOOLCHAIN=/opt/a-4.9/bin/aarch64-linux-android-
+[[ -z ${TOOLCHAIN} ]] && TOOLCHAIN=/opt/aosp-gcc/bin/aarch64-linux-android-
 
 # ERROR OUT IF DEFCONFIG WASN'T SUPPLIED
 [[ -z ${DEFCONFIG} ]] && report_error "Please supply a defconfig!"
