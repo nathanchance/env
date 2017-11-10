@@ -469,7 +469,6 @@ function package_zip() {
 
 # PACKAGE IMAGE COMMANDS
 function package_image_commands() {
-    cd ${ROM_FOLDER}/aosp
     mkavenv
     . build/envsetup.sh
     lunch aosp_${DEVICE_NAME_WEB}-user
@@ -490,16 +489,19 @@ function package_image_wrapper() {
 function package_image() {
     echo "  - Grabbing $(basename ${IMAGE})"
 
-    git -C ${ROM_FOLDER}/aosp/device/google/wahoo-kernel reset --hard -q
+    AOSP_FOLDER=${KERNEL_FOLDER}/aosp-pixel2
+    cd ${AOSP_FOLDER}
 
-    cp ${IMAGE} ${ROM_FOLDER}/aosp/device/google/wahoo-kernel
-    cp $(dirname ${IMAGE})/dtbo.img ${ROM_FOLDER}/aosp/device/google/wahoo-kernel
+    git -C device/google/wahoo-kernel reset --hard -q
+
+    cp ${IMAGE} ${AOSP_FOLDER}/device/google/wahoo-kernel
+    cp $(dirname ${IMAGE})/dtbo.img ${AOSP_FOLDER}/device/google/wahoo-kernel
 
     echo "  - Building boot image..."
 
     package_image_wrapper
 
-    COMPILED_BOOT_IMAGE=${ROM_FOLDER}/aosp/out/target/product/${DEVICE_NAME_WEB}/boot.img
+    COMPILED_BOOT_IMAGE=${AOSP_FOLDER}/out/target/product/${DEVICE_NAME_WEB}/boot.img
 
     [[ ! -f ${COMPILED_BOOT_IMAGE} ]] && report_error "Boot image not found!"
 
@@ -678,8 +680,8 @@ if [[ -f ${IMAGE} ]]; then
     if [[ ! ${IMAGE_ONLY} ]]; then
         header "PREPARING KERNEL FOR FLASHING"
 
-        setup_folders
         package_${PACKAGE_METHOD}
+        setup_folders
         move_flashable_files
         generate_changelog
 
