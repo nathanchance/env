@@ -201,11 +201,13 @@ function flash_pxl2() {
 
     BASE=$(ls -1 -t ~/Downloads/*.img | ag Taimen | head -n 1 | sed -e s/-boot.img// -e s/-dtbo.img//)
 
-    for IMAGE in $(ls ${BASE}-{boot,dtbo}.img); do
-        CUR_MD5=$(md5 ${IMAGE} | cut -d ' ' -f 4)
-        TARGET_MD5=$(cat ${IMAGE}.md5 | awk '{print $1}')
-        [[ ${CUR_MD5} != ${TARGET_MD5} ]] && echo "${RED}MD5s for $(basename ${IMAGE}) do not match!${RST}" && return
-    done
+    if [[ "$@" =~ "-f" ]]; then
+        for IMAGE in $(ls ${BASE}-{boot,dtbo}.img); do
+            CUR_MD5=$(md5 ${IMAGE} | cut -d ' ' -f 4)
+            TARGET_MD5=$(cat ${IMAGE}.md5 | awk '{print $1}')
+            [[ ${CUR_MD5} != ${TARGET_MD5} ]] && echo "${RED}MD5s for $(basename ${IMAGE}) do not match!${RST}" && return
+        done
+    fi
 
     if [[ "$@" =~ "-m" ]]; then
         header "Patching boot image for Magisk"
