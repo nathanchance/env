@@ -301,7 +301,7 @@ function generate_variables() {
     # GENERATE KERNEL VERSION
     KVER=$(make kernelversion)
 
-    # IF THE MODE ISN'T STABLE, ADD SHA INFORMATION TO THE ZIP FOR DEBUGGING
+    # IF THE MODE ISN'T STABLE, ADD SHA INFORMATION TO THE FILE FOR DEBUGGING
     if [[ ${NOT_STABLE} ]]; then
         SHA="-g$(git rev-parse --verify --short HEAD)"
         export LOCALVERSION="${SHA}"
@@ -324,8 +324,8 @@ function generate_variables() {
     # GENERATE HOSTNAME
     export KBUILD_BUILD_HOST=${DEVICE_NAME_HOST}
 
-    # IF REVISION EXISTS, USE IT FOR THE ZIP
-    [[ -n ${REVISION} ]] && REVISION_FOR_ZIP=".${MODE::1}${REVISION}"
+    # IF REVISION EXISTS, USE IT FOR THE FILE
+    [[ -n ${REVISION} ]] && REVISION_FOR_FILE=".${MODE::1}${REVISION}"
 
     # IF REVISION IS LESS THAN 1, UNSET IT SO BUILD DOESN'T ERROR
     [[ ${REVISION} -lt 1 ]] && unset REVISION
@@ -340,7 +340,7 @@ function generate_variables() {
     THIRD_LINE="$(date)"
 
     # EXPORT KERNEL_NAME BASED ON THE ABOVE INFORMATION
-    export KERNEL_NAME="Flash-${DEVICE_NAME_FILE}${OS}-v${VERSION:-0.00}${REVISION_FOR_ZIP}${SHA}"
+    export KERNEL_NAME="Flash-${DEVICE_NAME_FILE}${OS}-v${VERSION:-0.00}${REVISION_FOR_FILE}${SHA}"
 
     # SET FINAL NAMES
     case ${PACKAGE_METHOD} in
@@ -430,7 +430,7 @@ function package_zip() {
               ${SIGNED_ZIP}
 
     # IF PACKAGING FAILED, ERROR OUT
-    [[ ! -f ${SIGNED_ZIP} ]] && report_error "Kernel zip not found after signing!" \
+    [[ ! -f ${SIGNED_ZIP} ]] && echo "${RED}Kernel zip not found after signing!${RST}\n" && ending_info \
                              || echo "${GRN}Kernel zip successfully generated!${RST}\n"
 }
 
@@ -454,7 +454,7 @@ function package_image() {
 
     COMPILED_BOOT_IMAGE=${AOSP_FOLDER}/out/target/product/${DEVICE_NAME_WEB}/boot.img
 
-    [[ ! -f ${COMPILED_BOOT_IMAGE} ]] && report_error "Boot image not found!" \
+    [[ ! -f ${COMPILED_BOOT_IMAGE} ]] && echo "${RED}Boot image not found!${RST}\n" && ending_info \
                                       || echo "${GRN}Boot image compiled successfully!${RST}\n"
 }
 
@@ -589,26 +589,34 @@ function tag_stable() {
 
 # PRINT FILE INFO
 function ending_info() {
+    header "SCRIPT FINISHED!"
+
+    END=$(date +"%s")
+
     echo "\n$(date +"%m/%d/%Y %H:%M:%S"): ${BASH_SOURCE} ${PARAMS}" >> ${LOG}
-    echo "${BUILD_RESULT} IN $(format_time ${END} ${START})" >> ${LOG}
 
-    if [[ ${BUILD_RESULT} = "BUILD SUCCESSFUL" && ! ${IMAGE_ONLY} ]]; then
-        FILE_LOCATION=$(web_link ${FILE_MOVE})
-        echo "FILE LINK: ${FILE_LOCATION}" >> ${LOG}
+    if [[ "$@" =~ "-s" ]]; then
+        echo "BUILD SUCCESSFUL IN $(format_time ${END} ${START})" >> ${LOG}
+        if [[ ! ${IMAGE_ONLY} ]]; then
+            FILE_LOCATION=$(web_link ${FILE_MOVE})
+            echo "FILE LINK: ${FILE_LOCATION}" >> ${LOG}
 
-        echo ${RED}"FILE LOCATION: ${FILE_LOCATION}"
-        case ${PACKAGE_METHOD} in
-            "image")
-                echo "SIZE: $(du -h ${FILE_MOVE}/${BOOT_IMAGE} |
-                                  awk '{print $1}')"${RST} ;;
-            "zip")
-                echo "SIZE: $(du -h ${FILE_MOVE}/${SIGNED_ZIP} |
-                                  awk '{print $1}')"${RST} ;;
-        esac
+            echo ${RED}"FILE LOCATION: ${FILE_LOCATION}"
+            case ${PACKAGE_METHOD} in
+                "image")
+                    echo "SIZE: $(du -h ${FILE_MOVE}/${BOOT_IMAGE} |
+                                      awk '{print $1}')"${RST} ;;
+                "zip")
+                    echo "SIZE: $(du -h ${FILE_MOVE}/${SIGNED_ZIP} |
+                                      awk '{print $1}')"${RST} ;;
+            esac
+        fi
+    else
+        echo "BUILD FAILED IN $(format_time ${END} ${START})" >> ${LOG}
     fi
 
-    echo ${RED}"TIME: $(date +%D\ %r | awk '{print toupper($0)}')"
-    echo "DURATION: $(format_time ${END} ${START})"${RST}; echo
+    echo "${RED}DURATION: $(format_time ${END} ${START})${RST}"; echo; echo "\a"
+    exit
 }
 
 
@@ -643,7 +651,7 @@ echo
 # MAKING KERNEL #
 #################
 
-header "CLEANING UP AND MAKING KERNEL"
+header "COMPILING KERNEL"
 
 # DON'T SHOW CLEAN UP OUTPUT
 clean_up &>/dev/null
@@ -663,6 +671,7 @@ build_kernel
 ######################
 
 if [[ -f ${IMAGE} ]]; then
+    echo "${GRN}$(basename ${IMAGE}) compiled successfully!${RST}\n"
     if [[ ! ${IMAGE_ONLY} ]]; then
         package_${PACKAGE_METHOD}
 
@@ -679,25 +688,14 @@ if [[ -f ${IMAGE} ]]; then
         echo
     fi
 
-    BUILD_RESULT="BUILD SUCCESSFUL"
-
 ###################
 # IF BUILD FAILED #
 ###################
 
 else
-    BUILD_RESULT="BUILD FAILED"
+    echo "${RED}$(basename ${IMAGE}) not found!${RST}!\n"
 fi
 
 
-######################
-# ENDING INFORMATION #
-######################
-
-END=$(date +"%s")
-
-header "${BUILD_RESULT}!"
-
-ending_info
-
-echo "\a"
+# PRINT IMAGE/ZIP INFORMATION
+ending_info -s
