@@ -199,7 +199,7 @@ function flash_pxl2() {
                            || scp nchancellor.net:~/web/me/fk/*Taimen*.img* ~/Downloads
     fi
 
-    BASE=$(ls -1 -t ~/Downloads/*.img | ag Flash* | head -n 1 | sed -e s/-boot.img// -e s/-dtbo.img//)
+    BASE=$(ls -1 -t ~/Downloads/*.img | ag Taimen | head -n 1 | sed -e s/-boot.img// -e s/-dtbo.img//)
 
     for IMAGE in $(ls ${BASE}-{boot,dtbo}.img); do
         CUR_MD5=$(md5 ${IMAGE} | cut -d ' ' -f 4)
