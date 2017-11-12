@@ -688,14 +688,13 @@ if [[ -f ${IMAGE} ]]; then
         echo
     fi
 
+    ending_info -s
+
 ###################
 # IF BUILD FAILED #
 ###################
 
 else
-    echo "${RED}$(basename ${IMAGE}) not found!${RST}!\n"
+    echo "${RED}$(basename ${IMAGE}) not found!${RST}\n"
+    ending_info
 fi
-
-
-# PRINT IMAGE/ZIP INFORMATION
-ending_info -s
