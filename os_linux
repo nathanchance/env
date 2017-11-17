@@ -328,10 +328,10 @@ function frel_op5() {
 function ftest_op5() {
     case ${1} in
         1.*)
-            flash -v ${1} -r ${2} -m ${3} -os Custom -b 7.1.x-custom-for-${1} -av 7.1.x -d op5
-            flash -v ${1} -r ${2} -m ${3} -os OOS -b 7.1.x-oos-for-${1} -av 7.1.x -d op5 ;;
+            flash -v ${1} -r ${2} -m ${3} -os Custom -b 7.1.x-custom-queue-${1} -av 7.1.x -d op5
+            flash -v ${1} -r ${2} -m ${3} -os OOS -b 7.1.x-oos-queue-${1} -av 7.1.x -d op5 ;;
         2.*)
-            flash -v ${1} -r ${2} -m ${3} -os Custom -b 8.0.0-custom-for-${1} -av 8.0.0 -d op5 ;;
+            flash -v ${1} -r ${2} -m ${3} -os Custom -b 8.0.0-custom-queue-${1} -av 8.0.0 -d op5 ;;
     esac
 }
 
@@ -382,7 +382,7 @@ function priv_branches() {
     local BRANCH_SFX="base custom oos"
 
     for BRANCH in ${BRANCH_SFX}; do
-        TARGET_BRANCH=7.1.x-${BRANCH}-for-${2}
+        TARGET_BRANCH=7.1.x-${BRANCH}-queue-${2}
         BASE_BRANCH=7.1.x-${BRANCH}
 
         case ${1} in
