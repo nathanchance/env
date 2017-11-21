@@ -370,13 +370,18 @@ function tst_brnch() {
 
     case ${1} in
         "op5")
-            local BRANCHES="7.1.x-base 7.1.x-custom 7.1.x-oos 8.0.0-custom" ;;
+            case ${3} in
+                1.*)
+                    local BRANCHES="7.1.x-base 7.1.x-custom 7.1.x-oos" ;;
+                2.*)
+                    local BRANCHES="8.0.0-custom" ;;
+            esac ;;
         "pxl2")
             local BRANCHES="8.0.0" ;;
     esac
 
     for BRANCH in ${BRANCHES}; do
-        QUEUE_BRANCH=${BRANCH}-queue-${2}
+        QUEUE_BRANCH=${BRANCH}-queue-${3}
         case ${2} in
             "-c"|"--create")
                 git checkout -b ${QUEUE_BRANCH} ${BRANCH}
