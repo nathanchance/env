@@ -55,6 +55,7 @@ done
 function verify_remote() {
     add_remote ${1} ${KERNEL_FOLDER}/mirrors/${1}
 
+    git -C ${KERNEL_FOLDER}/mirrors/${1} fetch -p origin
     git fetch ${1}
 
     [[ $? -ne 0 ]] && report_error "Remote ${1} update failed!" \
