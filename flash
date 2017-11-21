@@ -159,7 +159,7 @@ case ${DEVICE} in
         DEVICE_NAME_HOST=OnePlus5
         DEVICE_NAME_WEB=${DEVICE}
 
-        MATCH_FLAG="*${OS}*"
+        MATCH_FLAG="*${OS}-v${VERSION::1}*"
 
         PACKAGE_METHOD=zip
 
