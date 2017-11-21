@@ -304,113 +304,90 @@ function kfg() {
                 [[ -z ${LIST} ]] && echo "None found!" \
                                  || echo "${LIST}"
                 echo ;;
+
+            "-u"|"--update")
+                shift
+
+                [[ -z ${DEFCONFIG} ]] && DEFCONFIG=flash_defconfig
+
+                rm -rf out
+                make O=out ARCH=arm64 ${DEFCONFIG}
+                make O=out ARCH=arm64 savedefconfig
+                cp -v out/defconfig arch/arm64/configs/${DEFCONFIG} ;;
         esac
 
         shift
     done
 }
 
-# Build a toolchain and release Flash Kernel builds for the OnePlus 5
-# frel_op5 <version>
-function frel_op5() {
-    [[ ${2} != "-nt" ]] && toolchain -p -a arm64 -s linaro -t a73.a53
+# Build a toolchain and release Flash Kernel builds
+# frel <device> <version> [-nt]
+function frel() {
     case ${1} in
-        1.*)
-            flash -v ${1} -m stable -os Custom -b 7.1.x-custom -av 7.1.x -d op5
-            flash -v ${1} -m stable -os OOS -b 7.1.x-oos -av 7.1.x -d op5 ;;
-        2.*)
-            flash -v ${1} -m stable -os Custom -b 8.0.0-custom -av 8.0.0 -d op5 ;;
+        "op5")
+            [[ ${3} != "-nt" ]] && toolchain -p -a arm64 -s linaro -t a73.a53
+            case ${2} in
+                1.*)
+                    flash -v ${2} -m stable -d op5 -os Custom -b 7.1.x-custom -av 7.1.x
+                    flash -v ${2} -m stable -d op5 -os OOS -b 7.1.x-oos -av 7.1.x ;;
+                2.*)
+                    flash -v ${2} -m stable -d op5 -os Custom -b 8.0.0-custom -av 8.0.0 ;;
+            esac ;;
+        "pxl2")
+            case ${2} in
+                1.*)
+                    flash -v ${2} -m stable -d taimen -b 8.0.0
+                    flash -v ${2} -m stable -d walleye -b 8.0.0 ;;
+            esac ;;
     esac
 }
 
-# Build Flash Kernel test builds for the OnePlus 5
-# ftest_op5 <version> <dirty_version> <type>
-function ftest_op5() {
+# Build Flash Kernel test builds
+# ftest <device> <version> <dirty_version> <type>
+function ftest() {
     case ${1} in
-        1.*)
-            flash -v ${1} -r ${2} -m ${3} -os Custom -b 7.1.x-custom-queue-${1} -av 7.1.x -d op5
-            flash -v ${1} -r ${2} -m ${3} -os OOS -b 7.1.x-oos-queue-${1} -av 7.1.x -d op5 ;;
-        2.*)
-            flash -v ${1} -r ${2} -m ${3} -os Custom -b 8.0.0-custom-queue-${1} -av 8.0.0 -d op5 ;;
+        "op5")
+            case ${2} in
+                1.*)
+                    flash -v ${2} -r ${3} -m ${4} -d op5 -os Custom -b 7.1.x-custom-queue-${2} -av 7.1.x
+                    flash -v ${2} -r ${3} -m ${4} -d op5 -os OOS -b 7.1.x-oos-queue-${2} -av 7.1.x ;;
+                2.*)
+                    flash -v ${2} -r ${3} -m ${4} -d op5 -os Custom -b 8.0.0-custom-queue-${2} -av 8.0.0 ;;
+            esac ;;
+        "pxl2")
+            case ${2} in
+                1.*)
+                    flash -v ${2} -r ${3} -m ${4} -d taimen -b 8.0.0-queue-${2}
+                    flash -v ${2} -r ${3} -m ${4} -d walleye -b 8.0.0-queue-${2} ;;
+            esac ;;
     esac
 }
 
-# Build a toolchain and release Flash Kernel builds for the Pixel 2 (XL)
-# frel_pxl2 <version>
-function frel_pxl2() {
-    case ${1} in
-        1.*)
-            flash -v ${1} -m stable -d taimen -b 8.0.0
-            flash -v ${1} -m stable -d walleye -b 8.0.0 ;;
-    esac
-}
-
-# Build Flash Kernel test builds for the Pixel 2 (XL)
-# ftest_pxl2 <version> <dirty_version> <type>
-function ftest_pxl2() {
-    case ${1} in
-        1.*)
-            flash -v ${1} -r ${2} -m ${3} -d taimen -b 8.0.0-queue-${1}
-            flash -v ${1} -r ${2} -m ${3} -d walleye -b 8.0.0-queue-${1} ;;
-    esac
-}
-
-# Sync private repo
-function sync_private() {
+# Manage test branches
+# tst_brnch <device> [-c|-d] <version>
+function tst_brnch() {
     [[ ! -f Makefile ]] && echo "\n${RED}Run this in a kernel tree!${RST}\n" && return 1
 
-    local BRANCHES="7.1.x-base 7.1.x-custom 7.1.x-oos"
+    case ${1} in
+        "op5")
+            local BRANCHES="7.1.x-base 7.1.x-custom 7.1.x-oos 8.0.0-custom" ;;
+        "pxl2")
+            local BRANCHES="8.0.0" ;;
+    esac
 
     for BRANCH in ${BRANCHES}; do
-        git checkout ${BRANCH}
-        git push private ${BRANCH}
-    done
-
-    local TAGS="$(git tag -l | grep Flash)"
-
-    for TAG in ${TAGS}; do
-        [[ -z $(git ls-remote private refs/tags/${TAG}) ]] && git push private ${TAG} \
-                                                           || echo "${TAG} already present!"
-    done
-}
-
-# Manage private branches
-# priv_branches [-c|-d] <ver>
-function priv_branches() {
-    [[ ! -f Makefile ]] && echo "\n${RED}Run this in a kernel tree!${RST}\n" && return 1
-
-    local BRANCH_SFX="base custom oos"
-
-    for BRANCH in ${BRANCH_SFX}; do
-        TARGET_BRANCH=7.1.x-${BRANCH}-queue-${2}
-        BASE_BRANCH=7.1.x-${BRANCH}
-
-        case ${1} in
+        QUEUE_BRANCH=${BRANCH}-queue-${2}
+        case ${2} in
             "-c"|"--create")
-                git checkout -b ${TARGET_BRANCH} ${BASE_BRANCH}
-                git push --set-upstream private ${TARGET_BRANCH} ;;
+                git checkout -b ${QUEUE_BRANCH} ${BRANCH}
+                git push --set-upstream origin ${QUEUE_BRANCH} ;;
 
             "-d"|"--delete")
-                git checkout ${BASE_BRANCH}
-                git branch -d ${TARGET_BRANCH}
-                git push private :${TARGET_BRANCH} ;;
+                git checkout ${BRANCH}
+                git branch -d ${QUEUE_BRANCH}
+                git push origin :${QUEUE_BRANCH} ;;
         esac
     done
-}
-
-# Regenerate flash_defconfig using savedefconfig for minimalness
-# rgn_kfg [-d <defconfig>]
-function rgn_kfg() {
-    [[ ! -f Makefile ]] && echo "\n${RED}Run this in a kernel tree!${RST}\n" && return 1
-    [[ ! -d /opt/aosp-gcc ]] && echo "\n${RED}Clone Google's 4.9 toolchain to /opt!${RST}\n" && return 1
-
-    [[ $# -lt 2 ]] && local DEFCONFIG=flash_defconfig \
-                   || local DEFCONFIG=${2}
-
-    rm -rf out
-    make O=out ARCH=arm64 ${DEFCONFIG}
-    make O=out ARCH=arm64 savedefconfig
-    cp -v out/defconfig arch/arm64/configs/flash_defconfig
 }
 
 # Regenerate Pixel 2 build binaries
@@ -430,4 +407,16 @@ function rgn_pxl2_bins() {
     cd ${SCRIPTS_FOLDER}
 
     git status
+}
+
+# Reset test build folders function
+function wb_fldr_rst() {
+    case ${1} in
+        "op5")
+            rm -rf ${WEB_FOLDER}/downloads/kernels/op5/{7.1.x,8.0.0}/{custom,oos}/{alpha,beta,rc,temp}/* ;;
+        "pxl2")
+            rm -rf ${WEB_FOLDER}/downloads/kernels/{taimen,walleye}/8.0.0/{alpha,beta,rc,temp}/* ;;
+    esac
+
+    cd ${WEB_FOLDER}/downloads/kernels
 }
