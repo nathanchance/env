@@ -133,7 +133,6 @@ case ${DEVICE} in
 
         DEVICE_NAME_FILE=${DEVICE^}
         DEVICE_NAME_GITHUB=${DEVICE}
-        DEVICE_NAME_HOST=${DEVICE}
         DEVICE_NAME_WEB=${DEVICE}
 
         MATCH_FLAG="Flash*"
@@ -156,7 +155,6 @@ case ${DEVICE} in
 
         DEVICE_NAME_FILE=${DEVICE^^}
         DEVICE_NAME_GITHUB=${DEVICE}
-        DEVICE_NAME_HOST=OnePlus5
         DEVICE_NAME_WEB=${DEVICE}
 
         MATCH_FLAG="*${OS}-v${VERSION::1}*"
@@ -173,7 +171,6 @@ case ${DEVICE} in
 
         DEVICE_NAME_FILE=${DEVICE^}
         DEVICE_NAME_GITHUB=wahoo
-        DEVICE_NAME_HOST=${DEVICE^}
         DEVICE_NAME_WEB=${DEVICE}
 
         MATCH_FLAG="Flash*"
@@ -292,19 +289,24 @@ function kmake() {
 
 # SETUP COMPILATION
 function generate_variables() {
-    # FORMAT OF KERNEL VERSION IN ABOUT PHONE
-    #
-    # <kernel_version>[-g<hash>]
-    # Flash[-OOS|-Custom]@<device>
-    # date
-
     # GENERATE KERNEL VERSION
     KVER=$(make kernelversion)
+
+    # FORM LOCAL VERSION BASELINE
+    [[ -n ${OS} ]] && OS="-${OS}"
+    LOCALVERSION_BASELINE="Flash-${DEVICE_NAME_FILE}${OS}"
+    export LOCALVERSION="-${LOCALVERSION_BASELINE}"
+
+    # ADD VERSION IF PRESENT
+    if [[ -n ${VERSION} ]]; then
+        VERSION_TEXT="-v${VERSION}"
+        export LOCALVERSION="${LOCALVERSION}${VERSION_TEXT}"
+    fi
 
     # IF THE MODE ISN'T STABLE, ADD SHA INFORMATION TO THE FILE FOR DEBUGGING
     if [[ ${NOT_STABLE} ]]; then
         SHA="-g$(git rev-parse --verify --short HEAD)"
-        export LOCALVERSION="${SHA}"
+        export LOCALVERSION="${LOCALVERSION}${SHA}"
     fi
 
     # IF THERE ARE UNCOMMITTED CHANGES, MARK AS DIRTY
@@ -317,30 +319,20 @@ function generate_variables() {
     # CONFIG_LOCALVERSION + CONFIG_LOCALVERSION_AUTO ARE DISABLED
     FIRST_LINE="${KVER}${LOCALVERSION}"
 
-    # GENERATE USER
-    [[ -n ${OS} ]] && OS="-${OS}"
-    export KBUILD_BUILD_USER="Flash${OS}"
-
-    # GENERATE HOSTNAME
-    export KBUILD_BUILD_HOST=${DEVICE_NAME_HOST}
-
     # IF REVISION EXISTS, USE IT FOR THE FILE
     [[ -n ${REVISION} ]] && REVISION_FOR_FILE=".${MODE::1}${REVISION}"
 
     # IF REVISION IS LESS THAN 1, UNSET IT SO BUILD DOESN'T ERROR
     [[ ${REVISION} -lt 1 ]] && unset REVISION
 
-    # GENERATE VERSION CODE BASED ON VERSION AND REVISION
-    VERSION_CODE=$(echo ${VERSION} | sed s/\\.//)${REVISION}
-
     # GENERATE SECOND LINE VARIABLE
-    SECOND_LINE="${KBUILD_BUILD_USER}@${KBUILD_BUILD_HOST} #${VERSION_CODE:-1}"
+    SECOND_LINE="$(whoami)@$(uname -n) #${REVISION:-1}"
 
     # GENERATE THIRD LINE VARIABLE
     THIRD_LINE="$(date)"
 
     # EXPORT KERNEL_NAME BASED ON THE ABOVE INFORMATION
-    export KERNEL_NAME="Flash-${DEVICE_NAME_FILE}${OS}-v${VERSION:-0.00}${REVISION_FOR_FILE}${SHA}"
+    export KERNEL_NAME="${LOCALVERSION_BASELINE}${VERSION_TEXT}${REVISION_FOR_FILE}${SHA}"
 
     # SET FINAL NAMES
     case ${PACKAGE_METHOD} in
@@ -376,7 +368,7 @@ function build_kernel() {
     kmake ${DEFCONFIG} prepare
 
     # INCREMENT DIRTY VERSION NUMBER IF PASSED ABOVE
-    echo $((${VERSION_CODE:-2} - 1)) > ${OUT_FOLDER}/.version
+    echo $((${REVISION:-1} - 1)) > ${OUT_FOLDER}/.version
 
     # MAKE THE KERNEL
     kmake ${EXTRA_MAKE_FLAGS}
