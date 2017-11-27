@@ -331,7 +331,8 @@ function frel() {
                     flash -v ${2} -m stable -d op5 -os Custom -b 7.1.x-custom -av 7.1.x
                     flash -v ${2} -m stable -d op5 -os OOS -b 7.1.x-oos -av 7.1.x ;;
                 2.*)
-                    flash -v ${2} -m stable -d op5 -os Custom -b 8.0.0-custom -av 8.0.0 ;;
+                    flash -v ${2} -m stable -d op5 -os Custom -b 8.0.0-custom -av 8.0.0
+                    flash -v ${2} -m stable -d op5 -os OOS -b 8.0.0-oos -av 8.0.0 ;;
             esac ;;
         "pxl2")
             case ${2} in
@@ -352,7 +353,8 @@ function ftest() {
                     flash -v ${2} -r ${3} -m ${4} -d op5 -os Custom -b 7.1.x-custom-queue-${2} -av 7.1.x
                     flash -v ${2} -r ${3} -m ${4} -d op5 -os OOS -b 7.1.x-oos-queue-${2} -av 7.1.x ;;
                 2.*)
-                    flash -v ${2} -r ${3} -m ${4} -d op5 -os Custom -b 8.0.0-custom-queue-${2} -av 8.0.0 ;;
+                    flash -v ${2} -r ${3} -m ${4} -d op5 -os Custom -b 8.0.0-custom-queue-${2} -av 8.0.0
+                    flash -v ${2} -r ${3} -m ${4} -d op5 -os OOS -b 8.0.0-oos-queue-${2} -av 8.0.0 ;;
             esac ;;
         "pxl2")
             case ${2} in
@@ -374,7 +376,7 @@ function tst_brnch() {
                 1.*)
                     local BRANCHES="7.1.x-base 7.1.x-custom 7.1.x-oos" ;;
                 2.*)
-                    local BRANCHES="8.0.0-custom" ;;
+                    local BRANCHES="8.0.0-custom 8.0.0-oos" ;;
             esac ;;
         "pxl2")
             local BRANCHES="8.0.0" ;;
