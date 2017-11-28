@@ -43,6 +43,9 @@ function parse_parameters() {
                 echo "    -pl | --print-latest"
                 echo "        Prints the latest version available for the current kernel tree upstream then exits"
                 echo
+                echo "    -rc | --release-candidate"
+                echo "        Update to the latest RC revision"
+                echo
                 echo "    -u  | --update-only"
                 echo "        Simply fetches the linux-stable and linux-stable-rc remotes then exits"
                 echo
@@ -65,6 +68,10 @@ function parse_parameters() {
             # Print the latest version from kernel.org
             "-pl"|"--print-latest")
                 export PRINT_LATEST=true ;;
+
+            # Use the RC tree for updateing
+            "-rc"|"--release-candidate")
+                export RC=true ;;
 
             # Only update the linux-stable remote
             "-u"|"--update-only")
@@ -148,10 +155,11 @@ function generate_versions() {
     # Make sure target version is between current version and latest version
     TARGET_SUBLEVEL=$(echo ${TARGET_VERSION} | cut -d . -f 3)
     [[ ${TARGET_SUBLEVEL} -le ${CURRENT_SUBLEVEL} ]] && report_error "Current version is up to date with target version ${TARGET_VERSION}!\n"
-    [[ ${TARGET_SUBLEVEL} -gt ${LATEST_SUBLEVEL} ]] && report_error "Target version ${TARGET_VERSION} does not exist!\n"
+    [[ ${TARGET_SUBLEVEL} -gt ${LATEST_SUBLEVEL} && ! ${RC} ]] && report_error "Target version ${TARGET_VERSION} does not exist!\n"
 
-    export CURRENT_VERSION TARGET_VERSION
-    export RANGE=v${CURRENT_VERSION}..v${TARGET_VERSION}
+    export CURRENT_MAJOR_VERSION CURRENT_VERSION TARGET_VERSION
+    [[ ${RC} ]] && export RANGE=v${CURRENT_VERSION}..stable-rc/linux-${CURRENT_MAJOR_VERSION}.y \
+                || export RANGE=v${CURRENT_VERSION}..v${TARGET_VERSION}
 
     echo
     echo "${BOLD}Target kernel version:${RST} ${TARGET_VERSION}"
@@ -168,7 +176,9 @@ function update_to_target_version() {
 git add . && git cherry-pick --continue" || header "${TARGET_VERSION} PICKED CLEANLY!" ${GRN} ;;
 
         "merge")
-			git merge v${TARGET_VERSION} -m "Merge ${TARGET_VERSION} into $(git rev-parse --abbrev-ref HEAD)
+            [[ ${RC} ]] && TAG=stable-rc/linux-${CURRENT_MAJOR_VERSION}.y \
+                        || TAG=v${TARGET_VERSION}
+			git merge ${TAG} -m "Merge ${TARGET_VERSION} into $(git rev-parse --abbrev-ref HEAD)
 
 Changes in ${TARGET_VERSION}: ($(git rev-list --count ${RANGE} 2> /dev/null) commits)
 $(git log --reverse --format="        %s" ${RANGE})
