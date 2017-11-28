@@ -427,3 +427,17 @@ function wb_fldr_rst() {
 
     cd ${WEB_FOLDER}/downloads/kernels
 }
+
+# Generate git hashes with their subject line and links upstream
+function ghsll() {
+    case ${1} in
+        "caf") URL="https://source.codeaurora.org/quic/la/kernel/msm-4.4/commit/?id=" ;;
+        "ls") URL="https://git.kernel.org/pub/scm/linux/kernel/git/stable/linux-stable.git/commit/?id=" ;;
+    esac
+
+    echo
+    echo "$(git show -s --format='%h ("%s")' ${2})"
+    echo
+    echo "ommit [\`$(git show -s --format=%h ${2})\`](${URL}$(git show -s --format='%H) ("%s")' ${2})"
+    echo
+}
