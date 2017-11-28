@@ -165,6 +165,8 @@ case ${DEVICE} in
 
     "taimen"|"walleye")
         # REQUIRED FLAGS
+        AK_SFX=${ANDROID_VERSION}
+
         COMPILER=clang
 
         COMPRESSION=lz4
@@ -175,7 +177,7 @@ case ${DEVICE} in
 
         MATCH_FLAG="Flash*"
 
-        PACKAGE_METHOD=image
+        PACKAGE_METHOD=image_zip
 
         [[ -z ${TOOLCHAIN_FOLDER} ]] && TOOLCHAIN_FOLDER="aosp-gcc" ;;
 
@@ -199,7 +201,7 @@ MODULES_FOLDER=${ANYKERNEL_FOLDER}/modules
 FILE_MOVE_HEAD=${WEB_FOLDER}/downloads
 
 case ${MODE} in
-    "alpha"|"beta"|"rc"|"stable")
+    "alpha"|"beta"|"rc"|"stable"|"tmp")
         FILE_MOVE=${FILE_MOVE_HEAD}/kernels/${DEVICE_NAME_WEB}/${ANDROID_VERSION}${OS_FOLDER}/${MODE}
         FILE_MOVE_OLD=$(readlink -f ${FILE_MOVE}/../archive) ;;
     "personal")
@@ -220,7 +222,8 @@ esac
 # COMPILATION VARIABLES
 ARCHITECTURE=arm64
 CCACHE=$(command -v ccache)
-IMAGE=${OUT_FOLDER}/arch/${ARCHITECTURE}/boot/Image.${COMPRESSION}-dtb
+OUT_KERNEL_IMAGE=${OUT_FOLDER}/arch/${ARCHITECTURE}/boot/Image.${COMPRESSION}-dtb
+OUT_DTBO_IMAGE=${OUT_FOLDER}/arch/${ARCHITECTURE}/boot/dtbo.img
 GCC_TOOLCHAIN=/opt/${TOOLCHAIN_FOLDER}/bin/${TOOLCHAIN_PREFIX}
 
 if [[ ${COMPILER} = "clang" ]]; then
@@ -335,16 +338,17 @@ function generate_variables() {
     export KERNEL_NAME="${LOCALVERSION_BASELINE}${VERSION_TEXT}${REVISION_FOR_FILE}${SHA}"
 
     # SET FINAL NAMES
-    case ${PACKAGE_METHOD} in
-        "image")
-            export BOOT_IMAGE=${KERNEL_NAME}-boot.img
-            export DTBO_IMAGE=${KERNEL_NAME}-dtbo.img ;;
-        "zip")
-            export UNSIGNED_ZIP=${KERNEL_NAME}-unsigned.zip
-            export SIGNAPK_ZIP=${KERNEL_NAME}-signapk.zip
-            export ADJUSTED_ZIP=${KERNEL_NAME}-adjusted.zip
-            export SIGNED_ZIP=${KERNEL_NAME}.zip ;;
-    esac
+    if [[ ${PACKAGE_METHOD} =~ "image" ]]; then
+        export BOOT_IMAGE=${KERNEL_NAME}-boot.img
+        export DTBO_IMAGE=${KERNEL_NAME}-dtbo.img
+    fi
+
+    if [[ ${PACKAGE_METHOD} =~ "zip" ]]; then
+        export UNSIGNED_ZIP=${KERNEL_NAME}-unsigned.zip
+        export SIGNAPK_ZIP=${KERNEL_NAME}-signapk.zip
+        export ADJUSTED_ZIP=${KERNEL_NAME}-adjusted.zip
+        export SIGNED_ZIP=${KERNEL_NAME}.zip
+    fi
 }
 
 
@@ -382,7 +386,8 @@ function package_zip() {
     echo "${BOLD}Signed zip name:${RST}   ${SIGNED_ZIP}\n"
 
     # MOVE THE KERNEL IMAGE
-    cp ${IMAGE} ${ANYKERNEL_FOLDER}
+    cp ${OUT_KERNEL_IMAGE} ${ANYKERNEL_FOLDER}
+    [[ -f ${OUT_DTBO_IMAGE} ]] && cp ${OUT_DTBO_IMAGE} ${ANYKERNEL_FOLDER}
 
     # GRAB MODULES TOO IF THEY ARE PRESENT
     mkdir -p ${MODULES_FOLDER}
@@ -433,8 +438,8 @@ function package_image() {
 
     git -C device/google/wahoo-kernel reset --hard -q
 
-    cp ${IMAGE} ${AOSP_FOLDER}/device/google/wahoo-kernel
-    cp $(dirname ${IMAGE})/dtbo.img ${AOSP_FOLDER}/device/google/wahoo-kernel
+    cp ${OUT_KERNEL_IMAGE} ${AOSP_FOLDER}/device/google/wahoo-kernel
+    cp ${OUT_DTBO_IMAGE} ${AOSP_FOLDER}/device/google/wahoo-kernel
 
     header "COMPILING BOOT IMAGE"
 
@@ -470,6 +475,13 @@ function package_image_commands() {
 }
 
 
+# PACKAGE BOTH AN IMAGE AND ZIP
+function package_image_zip() {
+    package_zip
+    package_image
+}
+
+
 # SETUP FOLDERS
 function setup_folders() {
     echo "  - Setting up final folders"
@@ -493,17 +505,18 @@ function setup_folders() {
 function move_flashable_files() {
     echo "  - Moving files"
 
-    case ${PACKAGE_METHOD} in
-        "image")
-            mv ${COMPILED_BOOT_IMAGE} ${FILE_MOVE}/${BOOT_IMAGE}
-            md5sum ${FILE_MOVE}/${BOOT_IMAGE} > ${FILE_MOVE}/${BOOT_IMAGE}.md5
+    if [[ ${PACKAGE_METHOD} =~ "image" ]]; then
+        mv ${COMPILED_BOOT_IMAGE} ${FILE_MOVE}/${BOOT_IMAGE}
+        md5sum ${FILE_MOVE}/${BOOT_IMAGE} > ${FILE_MOVE}/${BOOT_IMAGE}.md5
 
-            mv $(dirname ${IMAGE})/dtbo.img ${FILE_MOVE}/${DTBO_IMAGE}
-            md5sum ${FILE_MOVE}/${DTBO_IMAGE} > ${FILE_MOVE}/${DTBO_IMAGE}.md5 ;;
-        "zip")
-            mv ${SIGNED_ZIP} ${FILE_MOVE}
-            md5sum ${FILE_MOVE}/${SIGNED_ZIP} > ${FILE_MOVE}/${SIGNED_ZIP}.md5 ;;
-    esac
+        mv $(dirname ${OUT_KERNEL_IMAGE})/dtbo.img ${FILE_MOVE}/${DTBO_IMAGE}
+        md5sum ${FILE_MOVE}/${DTBO_IMAGE} > ${FILE_MOVE}/${DTBO_IMAGE}.md5
+    fi
+
+    if [[ ${PACKAGE_METHOD} =~ "zip" ]]; then
+        mv ${ANYKERNEL_FOLDER}/${SIGNED_ZIP} ${FILE_MOVE}
+        md5sum ${FILE_MOVE}/${SIGNED_ZIP} > ${FILE_MOVE}/${SIGNED_ZIP}.md5
+    fi
 }
 
 
@@ -531,7 +544,7 @@ function generate_changelog() {
     # GENERATE A DIFF AS WELL
     git diff -M --stat --summary ${RANGE} >> ${CHANGELOG}
 
-    if [[ ${PACKAGE_METHOD} = "zip" ]]; then
+    if [[ ${PACKAGE_METHOD} =~ "zip" ]]; then
         # ANYKERNEL NEXT
         cd ${ANYKERNEL_FOLDER}
 
@@ -572,7 +585,7 @@ function tag_stable() {
     git tag -a ${KERNEL_NAME} -m ${KERNEL_NAME}
     git push -q origin ${KERNEL_NAME}
 
-    if [[ ${PACKAGE_METHOD} = "zip" ]]; then
+    if [[ ${PACKAGE_METHOD} =~ "zip" ]]; then
         cd ${ANYKERNEL_FOLDER}
 
         git tag -a ${KERNEL_NAME} -m ${KERNEL_NAME}
@@ -664,8 +677,8 @@ build_kernel
 # IF KERNEL COMPILED #
 ######################
 
-if [[ -f ${IMAGE} ]]; then
-    echo "${GRN}$(basename ${IMAGE}) compiled successfully!${RST}\n"
+if [[ -f ${OUT_KERNEL_IMAGE} ]]; then
+    echo "${GRN}$(basename ${OUT_KERNEL_IMAGE}) compiled successfully!${RST}\n"
     if [[ ! ${IMAGE_ONLY} ]]; then
         package_${PACKAGE_METHOD}
 
@@ -689,6 +702,6 @@ if [[ -f ${IMAGE} ]]; then
 ###################
 
 else
-    echo "${RED}$(basename ${IMAGE}) not found!${RST}\n"
+    echo "${RED}$(basename ${OUT_KERNEL_IMAGE}) not found!${RST}\n"
     ending_info
 fi
