@@ -229,7 +229,10 @@ GCC_TOOLCHAIN=/opt/${TOOLCHAIN_FOLDER}/bin/${TOOLCHAIN_PREFIX}
 if [[ ${COMPILER} = "clang" ]]; then
     export AOSP_FOLDER=${KERNEL_FOLDER}/aosp-pixel2
 
-    CLANG_TOOLCHAIN=${AOSP_FOLDER}/prebuilts/clang/host/linux-x86/clang-4053586/bin/clang
+    case ${DEVICE} in
+        "taimen") CLANG_TOOLCHAIN=${AOSP_FOLDER}/prebuilts/clang/host/linux-x86/clang-4053586/bin/clang ;;
+        "walleye") CLANG_TOOLCHAIN=${AOSP_FOLDER}/prebuilts/clang/host/linux-x86/clang-3859424/bin/clang ;;
+    esac
     CLANG_VERSION=$(${CLANG_TOOLCHAIN} --version | head -n 1)
 fi
 
