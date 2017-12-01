@@ -390,7 +390,7 @@ function package_zip() {
 
     # MOVE THE KERNEL IMAGE
     cp ${OUT_KERNEL_IMAGE} ${ANYKERNEL_FOLDER}
-    [[ -f ${OUT_DTBO_IMAGE} ]] && cp ${OUT_DTBO_IMAGE} ${ANYKERNEL_FOLDER}
+    [[ -f ${OUT_DTBO_IMAGE} ]] && cp ${OUT_DTBO_IMAGE} ${ANYKERNEL_FOLDER}/dtbo
 
     # GRAB MODULES TOO IF THEY ARE PRESENT
     mkdir -p ${MODULES_FOLDER}
