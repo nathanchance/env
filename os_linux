@@ -27,13 +27,13 @@ function linux_aliases() {
     alias update='pacaur -Syyu'
 
     # Change directory aliases
-    alias 6p='cd ${KERNEL_FOLDER}/angler'
+    alias 6p='cd ${KERNEL_FOLDER}/flash/angler'
     alias asu='cd ${REPO_FOLDER}/asu'
-    alias ayk='cd ${KERNEL_FOLDER}/anykernel'
-    alias lnx='cd ${KERNEL_FOLDER}/repos/linux'
+    alias ayk='cd ${KERNEL_FOLDER}/flash/anykernel'
+    alias lnx='cd ${KERNEL_FOLDER}/sources/linux'
     alias pkg='cd ${REPO_FOLDER}/pkgbuilds'
-    alias op5='cd ${KERNEL_FOLDER}/op5'
-    alias pxl='cd ${KERNEL_FOLDER}/wahoo'
+    alias op5='cd ${KERNEL_FOLDER}/flash/op5'
+    alias pxl='cd ${KERNEL_FOLDER}/flash/wahoo'
     alias tlc='cd ${TC_FOLDER}'
     alias spt='cd ${SCRIPTS_FOLDER}'
 
@@ -399,7 +399,7 @@ function tst_brnch() {
 
 # Regenerate Pixel 2 build binaries
 function rgn_pxl2_bins() {
-    cd ${KERNEL_FOLDER}/aosp-pixel2
+    cd ${KERNEL_FOLDER}/sources/aosp-pixel2
 
     mkavenv
     . build/envsetup.sh

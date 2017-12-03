@@ -193,9 +193,9 @@ esac
 ###############
 
 # FOLDERS
-SOURCE_FOLDER=${KERNEL_FOLDER}/${DEVICE_NAME_GITHUB}
+SOURCE_FOLDER=${KERNEL_FOLDER}/flash/${DEVICE_NAME_GITHUB}
 OUT_FOLDER=${SOURCE_FOLDER}/out
-ANYKERNEL_FOLDER=${KERNEL_FOLDER}/anykernel
+ANYKERNEL_FOLDER=${KERNEL_FOLDER}/flash/anykernel
 ANYKERNEL_BRANCH=${DEVICE_NAME_GITHUB}-flash-${AK_SFX}
 MODULES_FOLDER=${ANYKERNEL_FOLDER}/modules
 FILE_MOVE_HEAD=${WEB_FOLDER}/downloads
@@ -227,7 +227,7 @@ OUT_DTBO_IMAGE=${OUT_FOLDER}/arch/${ARCHITECTURE}/boot/dtbo.img
 GCC_TOOLCHAIN=/opt/${TOOLCHAIN_FOLDER}/bin/${TOOLCHAIN_PREFIX}
 
 if [[ ${COMPILER} = "clang" ]]; then
-    export AOSP_FOLDER=${KERNEL_FOLDER}/aosp-pixel2
+    export AOSP_FOLDER=${KERNEL_FOLDER}/sources/aosp-pixel2
 
     case ${DEVICE} in
         "taimen") CLANG_TOOLCHAIN=${AOSP_FOLDER}/prebuilts/clang/host/linux-x86/clang-4053586/bin/clang ;;
