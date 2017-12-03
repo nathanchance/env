@@ -359,8 +359,8 @@ function ftest() {
         "pxl2")
             case ${2} in
                 1.*)
-                    flash -v ${2} -r ${3} -m ${4} -d taimen -b 8.0.0-queue-${2}
-                    flash -v ${2} -r ${3} -m ${4} -d walleye -b 8.0.0-queue-${2} ;;
+                    flash -v ${2} -r ${3} -m ${4} -d taimen -b o-mr1-preview1-queue-${2}
+                    flash -v ${2} -r ${3} -m ${4} -d walleye -b o-mr1-preview1-queue-${2} ;;
             esac ;;
     esac
 }
@@ -379,7 +379,7 @@ function tst_brnch() {
                     local BRANCHES="8.0.0-custom 8.0.0-oos" ;;
             esac ;;
         "pxl2")
-            local BRANCHES="8.0.0" ;;
+            local BRANCHES="o-mr1-preview1" ;;
     esac
 
     for BRANCH in ${BRANCHES}; do
