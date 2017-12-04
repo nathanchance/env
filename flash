@@ -232,7 +232,7 @@ case ${GCC_TOOLCHAIN_FOLDER} in
     "l-7.x"|"l-7.x-a73.a53"|"l-7.x-a57.a53")
         GCC_TOOLCHAIN_PREFIX=aarch64-linaro-linux-android- ;;
     *)
-        report_error "Invalid toolchain specified!" ;;
+        report_error "Invalid GCC toolchain specified!" ;;
 esac
 
 # COMPILATION VARIABLES
@@ -244,8 +244,12 @@ GCC_TOOLCHAIN=/opt/${GCC_TOOLCHAIN_FOLDER}/bin/${GCC_TOOLCHAIN_PREFIX}
 if [[ ${COMPILER} = "clang" ]]; then
     CLANG_TOOLCHAIN=/opt/aosp-clang/${CLANG_TOOLCHAIN_FOLDER}/bin/clang
     case ${CLANG_TOOLCHAIN_FOLDER} in
-        "clang-4053586") CLANG_VERSION=$(${CLANG_TOOLCHAIN} --version | head -n 1) ;;
-        *) CLANG_VERSION=$(${CLANG_TOOLCHAIN} --version | head -n 1 | cut -d'(' -f1,4) ;;
+        "clang-3289846"|"clang-3859424"|"clang-4053586")
+            CLANG_VERSION=$(${CLANG_TOOLCHAIN} --version | head -n 1) ;;
+        "clang-4393122"|"clang-4479392")
+            CLANG_VERSION=$(${CLANG_TOOLCHAIN} --version | head -n 1 | cut -d'(' -f1,4) ;;
+        *)
+            report_error "Invalid Clang version specified!" ;;
     esac
 fi
 
