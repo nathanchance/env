@@ -51,6 +51,12 @@ while [[ $# -ge 1 ]]; do
 
             DEFCONFIG=${1} ;;
 
+        # CLANG TOOLCHAIN TO USE WHILE COMPILING
+        "-ct"|"--clang-toolchain")
+            shift && enforce_value $@
+
+            CLANG_TOOLCHAIN_FOLDER=${1} ;;
+
         # DEVICE TO COMPILE FOR; IF ABSENT, USE PIXEL 2 XL
         "-d"|"--device")
             shift && enforce_value $@
@@ -66,6 +72,12 @@ while [[ $# -ge 1 ]]; do
             shift && enforce_value $@
 
             EXTRA_MAKE_FLAGS=${1} ;;
+
+        # GCC TOOLCHAIN TO USE WHILE COMPILING
+        "-gt"|"--gcc-toolchain")
+            shift && enforce_value $@
+
+            GCC_TOOLCHAIN_FOLDER=${1} ;;
 
         # DO NOT PACKAGE KERNEL IMAGE
         "-io"|"--image-only")
@@ -92,12 +104,6 @@ while [[ $# -ge 1 ]]; do
             shift && enforce_value $@
 
             REVISION=${1} ;;
-
-        # TOOLCHAIN TO USE WHILE COMPILING
-        "-t"|"--toolchain")
-            shift && enforce_value $@
-
-            TOOLCHAIN_FOLDER=${1} ;;
 
         # VERSION CODE
         "-v"|"--version")
@@ -139,7 +145,7 @@ case ${DEVICE} in
 
         PACKAGE_METHOD=zip
 
-        [[ -z ${TOOLCHAIN_FOLDER} ]] && TOOLCHAIN_FOLDER="l-7.x-a57.a53" ;;
+        [[ -z ${GCC_TOOLCHAIN_FOLDER} ]] && GCC_TOOLCHAIN_FOLDER="l-7.x-a57.a53" ;;
 
     "op5")
         # DEVICE SPECIFIC HANDLING
@@ -149,7 +155,11 @@ case ${DEVICE} in
         # REQUIRED FLAGS
         AK_SFX=${ANDROID_VERSION}
 
-        COMPILER=gcc
+        case ${VERSION} in
+            1.*) COMPILER=gcc ;;
+            2.*) COMPILER=clang ;;
+        esac
+        [[ -z ${CLANG_TOOLCHAIN_FOLDER} ]] && CLANG_TOOLCHAIN_FOLDER=clang-4053586
 
         COMPRESSION=gz
 
@@ -157,17 +167,23 @@ case ${DEVICE} in
         DEVICE_NAME_GITHUB=${DEVICE}
         DEVICE_NAME_WEB=${DEVICE}
 
+        if [[ -z ${GCC_TOOLCHAIN_FOLDER} ]]; then
+            case ${COMPILER} in
+                "gcc") GCC_TOOLCHAIN_FOLDER="l-7.x-a73.a53" ;;
+                "clang") GCC_TOOLCHAIN_FOLDER="aosp-gcc" ;;
+            esac
+        fi
+
         MATCH_FLAG="*${OS}-v${VERSION::1}*"
 
-        PACKAGE_METHOD=zip
-
-        [[ -z ${TOOLCHAIN_FOLDER} ]] && TOOLCHAIN_FOLDER="l-7.x-a73.a53" ;;
+        PACKAGE_METHOD=zip ;;
 
     "taimen"|"walleye")
         # REQUIRED FLAGS
         AK_SFX=${ANDROID_VERSION}
 
         COMPILER=clang
+        [[ -z ${CLANG_TOOLCHAIN_FOLDER} ]] && CLANG_TOOLCHAIN_FOLDER=clang-4053586
 
         COMPRESSION=lz4
 
@@ -175,11 +191,11 @@ case ${DEVICE} in
         DEVICE_NAME_GITHUB=wahoo
         DEVICE_NAME_WEB=${DEVICE}
 
+        [[ -z ${GCC_TOOLCHAIN_FOLDER} ]] && GCC_TOOLCHAIN_FOLDER="aosp-gcc"
+
         MATCH_FLAG="Flash*"
 
-        PACKAGE_METHOD=image_zip
-
-        [[ -z ${TOOLCHAIN_FOLDER} ]] && TOOLCHAIN_FOLDER="aosp-gcc" ;;
+        PACKAGE_METHOD=image_zip ;;
 
     *)
         report_error "Invalid device!" ;;
@@ -210,11 +226,11 @@ case ${MODE} in
         report_error "Invalid mode specified!" ;;
 esac
 
-case ${TOOLCHAIN_FOLDER} in
+case ${GCC_TOOLCHAIN_FOLDER} in
     "aosp-gcc")
-        TOOLCHAIN_PREFIX=aarch64-linux-android- ;;
+        GCC_TOOLCHAIN_PREFIX=aarch64-linux-android- ;;
     "l-7.x"|"l-7.x-a73.a53"|"l-7.x-a57.a53")
-        TOOLCHAIN_PREFIX=aarch64-linaro-linux-android- ;;
+        GCC_TOOLCHAIN_PREFIX=aarch64-linaro-linux-android- ;;
     *)
         report_error "Invalid toolchain specified!" ;;
 esac
@@ -224,13 +240,13 @@ ARCHITECTURE=arm64
 CCACHE=$(command -v ccache)
 OUT_KERNEL_IMAGE=${OUT_FOLDER}/arch/${ARCHITECTURE}/boot/Image.${COMPRESSION}-dtb
 OUT_DTBO_IMAGE=${OUT_FOLDER}/arch/${ARCHITECTURE}/boot/dtbo.img
-GCC_TOOLCHAIN=/opt/${TOOLCHAIN_FOLDER}/bin/${TOOLCHAIN_PREFIX}
-
+GCC_TOOLCHAIN=/opt/${GCC_TOOLCHAIN_FOLDER}/bin/${GCC_TOOLCHAIN_PREFIX}
 if [[ ${COMPILER} = "clang" ]]; then
-    export AOSP_FOLDER=${KERNEL_FOLDER}/sources/aosp-pixel2
-
-    CLANG_TOOLCHAIN=${AOSP_FOLDER}/prebuilts/clang/host/linux-x86/clang-4053586/bin/clang
-    CLANG_VERSION=$(${CLANG_TOOLCHAIN} --version | head -n 1)
+    CLANG_TOOLCHAIN=/opt/aosp-clang/${CLANG_TOOLCHAIN_FOLDER}/bin/clang
+    case ${CLANG_TOOLCHAIN_FOLDER} in
+        "clang-4053586") CLANG_VERSION=$(${CLANG_TOOLCHAIN} --version | head -n 1) ;;
+        *) CLANG_VERSION=$(${CLANG_TOOLCHAIN} --version | head -n 1 | cut -d'(' -f1,4) ;;
+    esac
 fi
 
 
@@ -360,9 +376,11 @@ function print_variables() {
 
     echo "${BOLD}Kernel branch:${RST}     ${KERNEL_BRANCH}\n"
 
-    [[ ${COMPILER} = "clang" ]] && echo "${BOLD}Clang version:${RST}     ${CLANG_VERSION}\n"
+    [[ ${COMPILER} = "clang" ]] && echo "${BOLD}Clang info:${RST}        ${CLANG_VERSION}"
+    echo "                   ${CLANG_TOOLCHAIN}\n"
 
-    echo "${BOLD}GCC version:${RST}       $(${GCC_TOOLCHAIN}gcc --version | head -1)\n"
+    echo "${BOLD}GCC info:${RST}          $(${GCC_TOOLCHAIN}gcc --version | head -1)"
+    echo "                   ${GCC_TOOLCHAIN}gcc\n"
 }
 
 
@@ -434,7 +452,7 @@ function package_zip() {
 
 # SILENCE OUTPUT FUNCTION FOR PACKAGE_IMAGE
 function package_image() {
-    cd ${AOSP_FOLDER}
+    AOSP_FOLDER=${KERNEL_FOLDER}/sources/aosp-pixel2 && cd ${AOSP_FOLDER}
 
     git -C device/google/wahoo-kernel reset --hard -q
 
