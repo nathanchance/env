@@ -177,7 +177,7 @@ function ukr() {
 
     KERNEL_LIST="op5 wahoo"
     for KERNEL in ${KERNEL_LIST}; do
-        cd ${KERNEL_FOLDER}/${KERNEL}
+        cd ${KERNEL_FOLDER}/flash/${KERNEL}
         git remote update
     done
 
