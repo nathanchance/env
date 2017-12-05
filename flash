@@ -297,6 +297,7 @@ function make_wrapper_clang() {
                                     CC="${CCACHE} ${CLANG_TOOLCHAIN}" \
                                     CLANG_TRIPLE=aarch64-linux-gnu- \
                                     CROSS_COMPILE=${GCC_TOOLCHAIN} \
+                                    HOSTCC="${CCACHE} ${CLANG_TOOLCHAIN}" \
                                     O=${OUT_FOLDER} \
                                     $@
 }
