@@ -334,12 +334,10 @@ function frel() {
                     flash -v ${2} -m stable -d op5 -os Custom -b 8.0.0-custom -av 8.0.0
                     flash -v ${2} -m stable -d op5 -os OOS -b 8.0.0-oos -av 8.0.0 ;;
             esac ;;
+
         "pxl2")
-            case ${2} in
-                1.*)
-                    flash -v ${2} -m stable -d taimen -b 8.0.0
-                    flash -v ${2} -m stable -d walleye -b 8.0.0 ;;
-            esac ;;
+            flash -v ${2} -m stable -d taimen -b oreo-mr1
+            flash -v ${2} -m stable -d walleye -b oreo-mr1 ;;
     esac
 }
 
@@ -356,12 +354,10 @@ function ftest() {
                     flash -v ${2} -r ${3} -m ${4} -d op5 -os Custom -b 8.0.0-custom-queue-${2} -av 8.0.0
                     flash -v ${2} -r ${3} -m ${4} -d op5 -os OOS -b 8.0.0-oos-queue-${2} -av 8.0.0 ;;
             esac ;;
+
         "pxl2")
-            case ${2} in
-                1.*)
-                    flash -v ${2} -r ${3} -m ${4} -d taimen -b o-mr1-preview1-queue-${2}
-                    flash -v ${2} -r ${3} -m ${4} -d walleye -b o-mr1-preview1-queue-${2} ;;
-            esac ;;
+            flash -v ${2} -r ${3} -m ${4} -d taimen -b oreo-mr1-queue-${2}
+            flash -v ${2} -r ${3} -m ${4} -d walleye -b oreo-mr1-queue-${2} ;;
     esac
 }
 
