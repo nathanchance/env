@@ -122,7 +122,6 @@ done
 [[ -z ${DEFCONFIG} ]] && DEFCONFIG="flash_defconfig"
 [[ -z ${DEVICE} ]] && DEVICE="taimen"
 [[ -z ${MODE} ]] && MODE="personal"
-[[ -z ${ANDROID_VERSION} ]] && ANDROID_VERSION=8.0.0
 
 # EASY TO USE VARIABLES FOR IF STATEMENTS
 [[ ${MODE} != "stable" ]] && NOT_STABLE=true
@@ -153,6 +152,7 @@ case ${DEVICE} in
         OS_FOLDER=/${OS,,}
 
         # REQUIRED FLAGS
+        [[ -z ${ANDROID_VERSION} ]] && ANDROID_VERSION=8.0.0
         AK_SFX=${ANDROID_VERSION}
 
         case ${VERSION} in
@@ -180,6 +180,7 @@ case ${DEVICE} in
 
     "taimen"|"walleye")
         # REQUIRED FLAGS
+        [[ -z ${ANDROID_VERSION} ]] && ANDROID_VERSION=8.1.0
         AK_SFX=${ANDROID_VERSION}
 
         COMPILER=clang
