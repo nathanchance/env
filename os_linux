@@ -418,7 +418,7 @@ function wb_fldr_rst() {
         "op5")
             rm -rf ${WEB_FOLDER}/downloads/kernels/op5/{7.1.x,8.0.0}/{custom,oos}/{alpha,beta,rc,tmp}/* ;;
         "pxl2")
-            rm -rf ${WEB_FOLDER}/downloads/kernels/{taimen,walleye}/8.0.0/{alpha,beta,rc,tmp}/* ;;
+            rm -rf ${WEB_FOLDER}/downloads/kernels/{taimen,walleye}/{8.0.0,8.1.0}/{alpha,beta,rc,tmp}/* ;;
     esac
 
     cd ${WEB_FOLDER}/downloads/kernels
