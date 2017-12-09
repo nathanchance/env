@@ -165,7 +165,7 @@ function generate_versions() {
     [[ ${TARGET_SUBLEVEL} -gt ${LATEST_SUBLEVEL} && ! ${RC} ]] && report_error "Target version ${TARGET_VERSION} does not exist!\n"
 
     export CURRENT_MAJOR_VERSION CURRENT_VERSION TARGET_VERSION
-    [[ ${RC} ]] && export RANGE=v${CURRENT_VERSION}..stable-rc/linux-${CURRENT_MAJOR_VERSION}.y \
+    [[ ${RC} ]] && export RANGE=v${CURRENT_VERSION}..linux-stable-rc/linux-${CURRENT_MAJOR_VERSION}.y \
                 || export RANGE=v${CURRENT_VERSION}..v${TARGET_VERSION}
 
     echo
@@ -183,7 +183,7 @@ function update_to_target_version() {
 git add . && git cherry-pick --continue" || header "${TARGET_VERSION} PICKED CLEANLY!" ${GRN} ;;
 
         "merge")
-            [[ ${RC} ]] && TAG=stable-rc/linux-${CURRENT_MAJOR_VERSION}.y \
+            [[ ${RC} ]] && TAG=linux-stable-rc/linux-${CURRENT_MAJOR_VERSION}.y \
                         || TAG=v${TARGET_VERSION}
             COMMIT_LOG="Changes in ${TARGET_VERSION}: ($(git rev-list --count ${RANGE} 2> /dev/null) commits)
 $(git log --reverse --format="        %s" ${RANGE})"
@@ -202,7 +202,7 @@ Resolve conflicts then run git merge --continue!" || header "${TARGET_VERSION} M
 
 parse_parameters $@
 header "Updating remotes"
-verify_remote stable
-verify_remote stable-rc
+verify_remote linux-stable
+verify_remote linux-stable-rc
 generate_versions
 update_to_target_version

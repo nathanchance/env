@@ -118,24 +118,24 @@ function ris {
 function upstb() {
     CUR_FOLDER=$(pwd)
 
-    if [[ ! -d ${KERNEL_FOLDER}/mirrors/stable ]]; then
+    if [[ ! -d ${KERNEL_FOLDER}/mirrors/linux-stable ]]; then
         cd ${KERNEL_FOLDER}/mirrors
-        git clone --mirror https://git.kernel.org/pub/scm/linux/kernel/git/stable/linux-stable.git stable
-        cd stable
+        git clone --mirror https://git.kernel.org/pub/scm/linux/kernel/git/stable/linux-stable.git linux-stable
+        cd linux-stable
         git remote set-url --push origin git@github.com:nathanchance/linux-stable
     fi
 
-    if [[ ! -d ${KERNEL_FOLDER}/mirrors/stable-rc ]]; then
+    if [[ ! -d ${KERNEL_FOLDER}/mirrors/linux-stable-rc ]]; then
         cd ${KERNEL_FOLDER}/mirrors
-        git clone --mirror https://git.kernel.org/pub/scm/linux/kernel/git/stable/linux-stable-rc.git stable-rc
+        git clone --mirror https://git.kernel.org/pub/scm/linux/kernel/git/stable/linux-stable-rc.git linux-stable-rc
     fi
 
-    cd ${KERNEL_FOLDER}/mirrors/stable
+    cd ${KERNEL_FOLDER}/mirrors/linux-stable
 
     git fetch -p origin
     git push --mirror
 
-    cd ${KERNEL_FOLDER}/mirrors/stable-rc
+    cd ${KERNEL_FOLDER}/mirrors/linux-stable-rc
 
     git fetch -p origin
 
@@ -160,8 +160,8 @@ function ckr() {
     git clone ${MIRROR} https://chromium.googlesource.com/chromiumos/third_party/kernel chromium
     git clone ${MIRROR} https://source.codeaurora.org/quic/la/kernel/msm-4.4 caf-4.4
     git clone ${MIRROR} https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git linux
-    git clone ${MIRROR} https://git.kernel.org/pub/scm/linux/kernel/git/stable/linux-stable.git stable
-    git clone ${MIRROR} https://git.kernel.org/pub/scm/linux/kernel/git/stable/linux-stable-rc.git stable-rc
+    git clone ${MIRROR} https://git.kernel.org/pub/scm/linux/kernel/git/stable/linux-stable.git linux-stable
+    git clone ${MIRROR} https://git.kernel.org/pub/scm/linux/kernel/git/stable/linux-stable-rc.git linux-stable-rc
 }
 
 # Update kernel repos
@@ -169,7 +169,7 @@ function ckr() {
 function ukr() {
     CUR_FOLDER=$(pwd)
 
-    REPO_LIST="aosp-kc aosp-msm caf-4.4 chromium linux stable stable-rc"
+    REPO_LIST="aosp-kc aosp-msm caf-4.4 chromium linux linux-stable linux-stable-rc"
     for REPO in ${REPO_LIST}; do
         cd ${KERNEL_FOLDER}/mirrors/${REPO}
         git fetch -p origin
@@ -188,7 +188,7 @@ function ukr() {
 function kremotes() {
     [[ ! -f Makefile ]] && echo "\n${RED}Run this in a kernel tree!${RST}\n" && return 1
 
-    REPO_LIST="aosp-kc aosp-msm caf-4.4 chromium linux stable stable-rc"
+    REPO_LIST="aosp-kc aosp-msm caf-4.4 chromium linux linux-stable linux-stable-rc"
 
     for REPO in ${REPO_LIST}; do add_remote ${REPO} ${KERNEL_FOLDER}/mirrors/${REPO}; done
 
