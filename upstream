@@ -40,6 +40,9 @@ function parse_parameters() {
                 echo "        Call either git cherry-pick or git merge when updating from upstream"
                 echo
                 echo "${BOLD}Optional parameters"
+                echo "    -nl | --no-log"
+                echo "        Do not add a commit log to the merge commit"
+                echo
                 echo "    -pl | --print-latest"
                 echo "        Prints the latest version available for the current kernel tree upstream then exits"
                 echo
@@ -64,6 +67,10 @@ function parse_parameters() {
             # Use git merge
             "-mg"|"--merge")
                 export UPDATE_METHOD=merge ;;
+
+            # Don't add a log to the commit message
+            "-nl"|"--no-log")
+                export NO_LOG=true ;;
 
             # Print the latest version from kernel.org
             "-pl"|"--print-latest")
@@ -178,10 +185,12 @@ git add . && git cherry-pick --continue" || header "${TARGET_VERSION} PICKED CLE
         "merge")
             [[ ${RC} ]] && TAG=stable-rc/linux-${CURRENT_MAJOR_VERSION}.y \
                         || TAG=v${TARGET_VERSION}
-			git merge ${TAG} -m "Merge ${TARGET_VERSION} into $(git rev-parse --abbrev-ref HEAD)
+            COMMIT_LOG="Changes in ${TARGET_VERSION}: ($(git rev-list --count ${RANGE} 2> /dev/null) commits)
+$(git log --reverse --format="        %s" ${RANGE})"
+            [[ ${NO_LOG} ]] && unset COMMIT_LOG
+            git merge --signoff ${TAG} -m "Merge ${TARGET_VERSION} into $(git rev-parse --abbrev-ref HEAD)
 
-Changes in ${TARGET_VERSION}: ($(git rev-list --count ${RANGE} 2> /dev/null) commits)
-$(git log --reverse --format="        %s" ${RANGE})
+${COMMIT_LOG}
 
 Signed-off-by: $(git config --get user.name) <$(git config --get user.email)>"
 
