@@ -104,7 +104,7 @@ function parse_parameters() {
     done
 
     # Sanity checks
-    [[ ! ${UPDATE_METHOD} ]] && report_error "Neither cherry-pick nor merge were specified, please supply one!" -h
+    [[ ! ${UPDATE_METHOD} && ! ${UPDATE_REMOTE_ONLY} ]] && report_error "Neither cherry-pick nor merge were specified, please supply one!" -h
     [[ ! -f Makefile ]] && report_error "This is not being run in a kernel tree!" -h
     [[ -z ${UPDATE_MODE} ]] && export UPDATE_MODE=0
 }
@@ -119,8 +119,6 @@ function verify_remote() {
 
     [[ $? -ne 0 ]] && report_error "Remote ${1} update failed!" \
                    || echo "Remote ${1} updated successfully!"
-
-    [[ ${UPDATE_REMOTE_ONLY} ]] && echo && exit 0
 }
 
 
@@ -204,5 +202,6 @@ parse_parameters $@
 header "Updating remotes"
 verify_remote linux-stable
 verify_remote linux-stable-rc
+[[ ${UPDATE_REMOTE_ONLY} ]] && echo && exit 0
 generate_versions
 update_to_target_version
