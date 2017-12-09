@@ -78,7 +78,7 @@ done
 
 # DEFAULTS
 [[ -z ${ARCH} ]] && ARCH=arm64
-[[ -z ${IMAGE} ]] && IMAGE=Image.gz-dtb
+[[ -z ${IMAGE} ]] && IMAGE=Image.*-dtb
 [[ -z ${TOOLCHAIN} ]] && TOOLCHAIN=/opt/aosp-gcc/bin/aarch64-linux-android-
 
 # ERROR OUT IF DEFCONFIG WASN'T SUPPLIED
@@ -116,7 +116,7 @@ case ${VERBOSITY} in
 esac
 
 # REPORT SUCCESS
-FINAL_IMAGE=out/arch/${ARCH}/boot/${IMAGE}
+FINAL_IMAGE=$(ls out/arch/${ARCH}/boot/${IMAGE})
 END=$(date +%s)
 [[ -f ${FINAL_IMAGE} ]] && echo "\n${GRN}BUILT IN $(format_time ${END} ${START})${RST}\n
 ${BOLD}IMAGE:${RST} ${FINAL_IMAGE}\n
