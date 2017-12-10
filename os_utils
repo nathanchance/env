@@ -31,62 +31,35 @@ function aliases() {
     # Alias hub to git
     alias git='hub'
 
-    alias gf='git fetch'
-    alias gcp='git cherry-pick'
-    alias gcpa='git cherry-pick --abort'
-    alias gcpe='git cherry-pick --edit'
-    alias gcpc='git cherry-pick --continue'
-    alias gcpq='git cherry-pick --quit'
-
-    alias gph='git push'
-    alias gpo='git push origin'
-    alias gpf='git push --force'
-    alias gpsu='git push --set-upstream origin'
-
-    alias gpl='git pull'
-    alias gm='git merge'
-    alias gmc='git merge --continue'
-    alias gma='git merge --abort'
-
-    alias ga='git add'
-    alias gaa='git add -A'
-
-    alias gam='git am'
-
-    alias gc='git commit --signoff'
-    alias gac='git commit --signoff --all'
-    alias gca='git commit --amend'
-    alias gcas='git commit --amend --signoff'
-    alias gcaa='git commit --amend --all'
-
-    alias grhe='git reset HEAD'
-    alias grh='git reset --hard'
-    alias grs='git reset --soft'
-
-    alias glg='git log'
-    alias glp="git log -p"
-    alias gl='git log --oneline'
-    alias gb='git branch -v'
-    alias gbd='git branch -D'
-
-    alias gs='git status'
-
-    alias grm='git remote'
-
-    alias gch='git checkout'
-    alias gcb='git checkout -b'
-
-    alias grb='git rebase'
-    alias grbi='git rebase -i'
-    alias grba='git rebase --abort'
-    alias grbc='git rebase --continue'
-
-    alias gdh='git diff HEAD'
-    alias gdc='git diff --cached'
-
-    alias gsh='git show'
-    alias gshs='git show --stat'
-    alias gshss='git show --stortstat'
+    git config --global alias.aa 'add -A'
+    git config --global alias.ac 'commit --signoff --all'
+    git config --global alias.b 'branch -v'
+    git config --global alias.bd 'branch -D'
+    git config --global alias.bm 'branch -m'
+    git config --global alias.dc 'diff --cached'
+    git config --global alias.dh 'diff HEAD'
+    git config --global alias.f 'fetch'
+    git config --global alias.fa 'fetch --all'
+    git config --global alias.c 'commit --signoff'
+    git config --global alias.ca 'commit --amend'
+    git config --global alias.ch 'checkout'
+    git config --global alias.cp 'cherry-pick'
+    git config --global alias.cpa 'cherry-pick --abort'
+    git config --global alias.cpc 'cherry-pick --continue'
+    git config --global alias.cpe 'cherry-pick --edit'
+    git config --global alias.cpq 'cherry-pick --quit'
+    git config --global alias.kf 'show -s --format="%h (\"%s\")"'
+    git config --global alias.lo 'log --oneline'
+    git config --global alias.m 'merge'
+    git config --global alias.ma 'merge --abort'
+    git config --global alias.mc 'merge --continue'
+    git config --global alias.psu 'push --set-upstream'
+    git config --global alias.rb 'rebase'
+    git config --global alias.rba 'rebase --abort'
+    git config --global alias.rbc 'rebase --continue'
+    git config --global alias.rh 'reset --hard'
+    git config --global alias.rhd 'reset HEAD'
+    git config --global alias.rs 'reset --soft'
 }
 
 # Try to attach via tmux
