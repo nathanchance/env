@@ -61,6 +61,8 @@ function aliases() {
     git config --global alias.rh 'reset --hard'
     git config --global alias.rhd 'reset HEAD'
     git config --global alias.rs 'reset --soft'
+    git config --global alias.s 'status'
+    git config --global alias.ss 'status -s -b'
 }
 
 # Try to attach via tmux
