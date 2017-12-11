@@ -36,7 +36,7 @@ function aliases() {
     git config --global alias.b 'branch -v'
     git config --global alias.bd 'branch -D'
     git config --global alias.bm 'branch -m'
-    git config --global alias.dc 'diff --cached'
+    git config --global alias.dc 'describe --contains'
     git config --global alias.dh 'diff HEAD'
     git config --global alias.f 'fetch'
     git config --global alias.fa 'fetch --all'
