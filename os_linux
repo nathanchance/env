@@ -251,12 +251,13 @@ header "${TTM} merged cleanly!" ${GRN}
 function nf() {
     echo
     neofetch \
-        --kernel_shorthand off \
+        --kernel_shorthand on \
         --distro_shorthand tiny \
         --os_arch off \
         --uptime_shorthand tiny \
         --speed_shorthand on \
-        --install_time off
+        --install_time off \
+        --color_blocks off
     echo
     echo
 }
