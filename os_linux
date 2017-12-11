@@ -210,7 +210,7 @@ function mrgb() {
     [[ $(echo ${2} | grep http) ]] && URL=${2} \
                                    || URL=$(git remote get-url ${2})
 
-    git merge FETCH_HEAD -m "Merge branch '${BTM}' of ${URL} into ${CB}
+    git merge -S FETCH_HEAD -m "Merge branch '${BTM}' of ${URL} into ${CB}
 
 Commits in ${BTM}: ($(git rev-list --count ${RANGE}) commits)
 $(git log --reverse --format="        %s" ${RANGE})
@@ -233,7 +233,7 @@ function mrgt() {
     local TTM=${1}
     local RANGE=${CB}..${TTM}
 
-    git merge ${TTM} -m "Merge ${TTM} into ${CB}
+    git merge -S ${TTM} -m "Merge ${TTM} into ${CB}
 
 Commits in ${TTM}: ($(git rev-list --count ${RANGE}) commits)
 $(git log --reverse --format="        %s" ${RANGE})

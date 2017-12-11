@@ -186,7 +186,7 @@ git add . && git cherry-pick --continue" || header "${TARGET_VERSION} PICKED CLE
             COMMIT_LOG="Changes in ${TARGET_VERSION}: ($(git rev-list --count ${RANGE} 2> /dev/null) commits)
 $(git log --reverse --format="        %s" ${RANGE})"
             [[ ${NO_LOG} ]] && unset COMMIT_LOG
-            git merge --signoff ${TAG} -m "Merge ${TARGET_VERSION} into $(git rev-parse --abbrev-ref HEAD)
+            git merge -S --signoff ${TAG} -m "Merge ${TARGET_VERSION} into $(git rev-parse --abbrev-ref HEAD)
 
 ${COMMIT_LOG}
 

@@ -594,7 +594,7 @@ function push_flashable_files() {
 
     git add ..
 
-    git commit -q --signoff -m "$(date +%Y%m%d): ${KERNEL_NAME}"
+    git commit -S -q --signoff -m "$(date +%Y%m%d): ${KERNEL_NAME}"
 
     git push -q
 }
@@ -606,13 +606,13 @@ function tag_stable() {
 
     cd ${SOURCE_FOLDER}
 
-    git tag -a ${KERNEL_NAME} -m ${KERNEL_NAME}
+    git tag -s -a ${KERNEL_NAME} -m ${KERNEL_NAME}
     git push -q origin ${KERNEL_NAME}
 
     if [[ ${PACKAGE_METHOD} =~ "zip" ]]; then
         cd ${ANYKERNEL_FOLDER}
 
-        git tag -a ${KERNEL_NAME} -m ${KERNEL_NAME}
+        git tag -s -a ${KERNEL_NAME} -m ${KERNEL_NAME}
         git push -q origin ${KERNEL_NAME}
     fi
 }

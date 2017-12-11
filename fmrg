@@ -47,7 +47,7 @@ ND=$(git rev-list --count ${RANGE} 2>/dev/null)
 [[ ${ND} -eq 0 ]] && report_error "There is nothing to merge from ${BTM} into ${CB}!"
 
 # MERGE COMMITS
-git merge ${BTM} -m "Merge branch '${BTM}' into ${CB}
+git merge -S ${BTM} -m "Merge branch '${BTM}' into ${CB}
 
 Changes in ${BTM}: (${ND} commits)
 $(git log --reverse --format="        %s" ${RANGE})
