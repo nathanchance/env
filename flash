@@ -460,7 +460,7 @@ function package_zip() {
 function package_image() {
     AOSP_FOLDER=${KERNEL_FOLDER}/sources/aosp-pixel2 && cd ${AOSP_FOLDER}
 
-    git -C device/google/wahoo-kernel reset --hard -q
+    git -C device/google/wahoo-kernel reset --hard --quiet
 
     cp ${OUT_KERNEL_IMAGE} ${AOSP_FOLDER}/device/google/wahoo-kernel
     cp ${OUT_DTBO_IMAGE} ${AOSP_FOLDER}/device/google/wahoo-kernel
@@ -566,7 +566,7 @@ function generate_changelog() {
     git log ${RANGE} | git shortlog >> ${CHANGELOG}
 
     # GENERATE A DIFF AS WELL
-    git diff -M --stat --summary ${RANGE} >> ${CHANGELOG}
+    git diff --find-renames --stat --summary ${RANGE} >> ${CHANGELOG}
 
     if [[ ${PACKAGE_METHOD} =~ "zip" ]]; then
         # ANYKERNEL NEXT
@@ -580,7 +580,7 @@ function generate_changelog() {
 
             git log ${RANGE} | git shortlog >> ${CHANGELOG}
 
-            git diff -M --stat --summary ${RANGE} >> ${CHANGELOG}
+            git diff --find-renames --stat --summary ${RANGE} >> ${CHANGELOG}
         fi
     fi
 }
@@ -594,9 +594,9 @@ function push_flashable_files() {
 
     git add ..
 
-    git commit -S -q --signoff -m "$(date +%Y%m%d): ${KERNEL_NAME}"
+    git commit --gpg-sign --quiet --signoff --message "$(date +%Y%m%d): ${KERNEL_NAME}"
 
-    git push -q
+    git push --quiet
 }
 
 
@@ -606,14 +606,14 @@ function tag_stable() {
 
     cd ${SOURCE_FOLDER}
 
-    git tag -s -a ${KERNEL_NAME} -m ${KERNEL_NAME}
-    git push -q origin ${KERNEL_NAME}
+    git tag --sign --annotate ${KERNEL_NAME} --message ${KERNEL_NAME}
+    git push --quiet origin ${KERNEL_NAME}
 
     if [[ ${PACKAGE_METHOD} =~ "zip" ]]; then
         cd ${ANYKERNEL_FOLDER}
 
-        git tag -s -a ${KERNEL_NAME} -m ${KERNEL_NAME}
-        git push -q origin ${KERNEL_NAME}
+        git tag --sign -annotate ${KERNEL_NAME} --message ${KERNEL_NAME}
+        git push --quiet origin ${KERNEL_NAME}
     fi
 }
 
