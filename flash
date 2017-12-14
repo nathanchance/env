@@ -612,7 +612,7 @@ function tag_stable() {
     if [[ ${PACKAGE_METHOD} =~ "zip" ]]; then
         cd ${ANYKERNEL_FOLDER}
 
-        git tag --sign -annotate ${KERNEL_NAME} --message ${KERNEL_NAME}
+        git tag --sign --annotate ${KERNEL_NAME} --message ${KERNEL_NAME}
         git push --quiet origin ${KERNEL_NAME}
     fi
 }
