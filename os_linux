@@ -326,9 +326,9 @@ function kfg() {
 function frel() {
     case ${1} in
         "op5")
-            [[ ${3} != "-nt" ]] && toolchain -p -a arm64 -s linaro -t a73.a53
             case ${2} in
                 1.*)
+                    [[ ${3} != "-nt" ]] && toolchain -p -a arm64 -s linaro -t a73.a53
                     flash -v ${2} -m stable -d op5 -os Custom -b 7.1.x-custom -av 7.1.x
                     flash -v ${2} -m stable -d op5 -os OOS -b 7.1.x-oos -av 7.1.x ;;
                 2.*)
