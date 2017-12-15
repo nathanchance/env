@@ -37,6 +37,7 @@ function aliases() {
     git config --global alias.b 'branch --verbose'
     git config --global alias.bd 'branch --delete --force'
     git config --global alias.bm 'branch --move'
+    git config --global alias.cf 'diff --name-only --diff-filter=U'
     git config --global alias.dc 'describe --contains'
     git config --global alias.dh 'diff HEAD'
     git config --global alias.dhc 'reset --hard HEAD^'
