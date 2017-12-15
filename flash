@@ -184,7 +184,12 @@ case ${DEVICE} in
         AK_SFX=${ANDROID_VERSION}
 
         COMPILER=clang
-        [[ -z ${CLANG_TOOLCHAIN_FOLDER} ]] && CLANG_TOOLCHAIN_FOLDER=clang-4053586
+        if [[ -z ${CLANG_TOOLCHAIN_FOLDER} ]]; then
+            case ${MODE} in
+                "personal") CLANG_TOOLCHAIN_FOLDER=clang-4479392 ;;
+                *) CLANG_TOOLCHAIN_FOLDER=clang-4053586 ;;
+            esac
+        fi
 
         COMPRESSION=lz4
 
