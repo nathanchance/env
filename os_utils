@@ -39,6 +39,7 @@ function aliases() {
     git config --global alias.bm 'branch --move'
     git config --global alias.dc 'describe --contains'
     git config --global alias.dh 'diff HEAD'
+    git config --global alias.dhc 'reset --hard HEAD^'
     git config --global alias.f 'fetch'
     git config --global alias.fa 'fetch --all'
     git config --global alias.c 'commit --gpg-sign --signoff'
