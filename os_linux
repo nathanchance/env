@@ -395,7 +395,7 @@ function tst_brnch() {
 }
 
 # Regenerate Pixel 2 build binaries
-function rgn_pxl2_bins() {
+function rpb() {
     cd ${KERNEL_FOLDER}/sources/aosp-pixel2
 
     mkavenv
@@ -414,7 +414,7 @@ function rgn_pxl2_bins() {
 }
 
 # Reset test build folders function
-function wb_fldr_rst() {
+function wfr() {
     case ${1} in
         "op5")
             rm -rf ${WEB_FOLDER}/downloads/kernels/op5/{7.1.x,8.0.0}/{custom,oos}/{alpha,beta,rc,tmp}/* ;;
@@ -425,8 +425,8 @@ function wb_fldr_rst() {
     cd ${WEB_FOLDER}/downloads/kernels
 }
 
-# Generate git hashes with their subject line and links upstream
-function ghsll() {
+# Generate git hashes with their subject line and links upstream (markdown commit format)
+function mcf() {
     case ${1} in
         "c") URL="https://source.codeaurora.org/quic/la/kernel/msm-4.4/commit/?id=" ;;
         "g") URL="https://android.googlesource.com/kernel/msm/+/" ;;
