@@ -34,12 +34,10 @@ function parse_parameters() {
                 echo
                 echo "${BOLD}Script description:${RST} Merges/cherry-picks Linux upstream into a kernel tree"
                 echo
-                echo "${BOLD}Required parameters:${RST}"
+                echo "${BOLD}Optional parameters:${RST}"
                 echo "    -cp | --cherry-pick"
-                echo "    -mg | --merge"
-                echo "        Call either git cherry-pick or git merge when updating from upstream"
+                echo "        Call git cherry-pick instead of git merge when updating from upstream"
                 echo
-                echo "${BOLD}Optional parameters"
                 echo "    -nl | --no-log"
                 echo "        Do not add a commit log to the merge commit"
                 echo
@@ -63,10 +61,6 @@ function parse_parameters() {
                 echo "    2. If you already have a remote for upstream, rename it to linux-stable so that multiple ones do not get added!"
                 echo
                 exit 1 ;;
-
-            # Use git merge
-            "-mg"|"--merge")
-                export UPDATE_METHOD=merge ;;
 
             # Don't add a log to the commit message
             "-nl"|"--no-log")
@@ -104,8 +98,8 @@ function parse_parameters() {
     done
 
     # Sanity checks
-    [[ ! ${UPDATE_METHOD} && ! ${UPDATE_REMOTES_ONLY} ]] && report_error "Neither cherry-pick nor merge were specified, please supply one!" -h
     [[ ! -f Makefile ]] && report_error "This is not being run in a kernel tree!" -h
+    [[ -z ${UPDATE_METHOD} ]] && export UPDATE_METHOD=merge
     [[ -z ${UPDATE_MODE} ]] && export UPDATE_MODE=0
 }
 
