@@ -167,12 +167,7 @@ case ${DEVICE} in
         DEVICE_NAME_GITHUB=${DEVICE}
         DEVICE_NAME_WEB=${DEVICE}
 
-        if [[ -z ${GCC_TOOLCHAIN_FOLDER} ]]; then
-            case ${COMPILER} in
-                "gcc") GCC_TOOLCHAIN_FOLDER="l-7.x-a73.a53" ;;
-                "clang") GCC_TOOLCHAIN_FOLDER="aosp-gcc" ;;
-            esac
-        fi
+        [[ -z ${GCC_TOOLCHAIN_FOLDER} ]] && GCC_TOOLCHAIN_FOLDER="linaro-gcc"
 
         MATCH_FLAG="*${OS}-v${VERSION::1}*"
 
@@ -197,7 +192,7 @@ case ${DEVICE} in
         DEVICE_NAME_GITHUB=wahoo
         DEVICE_NAME_WEB=${DEVICE}
 
-        [[ -z ${GCC_TOOLCHAIN_FOLDER} ]] && GCC_TOOLCHAIN_FOLDER="aosp-gcc"
+        [[ -z ${GCC_TOOLCHAIN_FOLDER} ]] && GCC_TOOLCHAIN_FOLDER="linaro-gcc"
 
         MATCH_FLAG="Flash*"
 
@@ -237,6 +232,8 @@ case ${GCC_TOOLCHAIN_FOLDER} in
         GCC_TOOLCHAIN_PREFIX=aarch64-linux-android- ;;
     "l-7.x"|"l-7.x-a73.a53"|"l-7.x-a57.a53")
         GCC_TOOLCHAIN_PREFIX=aarch64-linaro-linux-android- ;;
+    "linaro-gcc")
+        GCC_TOOLCHAIN_PREFIX=aarch64-linux-gnu- ;;
     *)
         report_error "Invalid GCC toolchain specified!" ;;
 esac
