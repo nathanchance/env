@@ -48,20 +48,20 @@ function parse_parameters() {
                 echo "    -i | --initial-merge"
                 echo "        Do not add a commit log to the merge commit"
                 echo
-                echo "    -l | --latest"
-                echo "        Updates to the latest version available for the current kernel tree upstream"
-                echo
                 echo "    -p | --print-latest"
                 echo "        Prints the latest version available for the current kernel tree upstream then exits"
                 echo
                 echo "    -r | --release-candidate"
                 echo "        Update to the latest RC revision"
                 echo
+                echo "    -s | --single-version"
+                echo "        Updates to the next immediate version available from linux-stable"
+                echo
                 echo "    -v | --version"
                 echo "        Updates to the specified version (e.g. -v 3.18.78)"
                 echo
                 echo "${BOLD}Notes:${RST}"
-                echo "    1. By default, only ONE version is picked at a time (e.g. 3.18.31 to 3.18.32)"
+                echo "    1. By default, the latest revision will be merged."
                 echo "    2. If you already have a remote for upstream, rename it to linux-stable so that multiple ones do not get added!"
                 echo
                 exit 1 ;;
@@ -70,17 +70,18 @@ function parse_parameters() {
             "-i"|"--initial-merge")
                 export INITIAL_MERGE=true ;;
 
-            # Update to the latest version upstream unconditionally
-            "-l"|"--latest")
-                export UPDATE_MODE=2 ;;
-
             # Print the latest version from kernel.org
             "-p"|"--print-latest")
                 export PRINT_LATEST=true ;;
 
             # Use the RC tree for updating
             "-r"|"--release-candidate")
-                export RC=true ;;
+                export RC=true
+                export UPDATE_MODE=0 ;;
+
+            # Update to the next available version from kernel.org
+            "-s"|"--single-version")
+                export UPDATE_MODE=0 ;;
 
             # Update to the specified version
             "-v"|"--version")
@@ -100,7 +101,7 @@ function parse_parameters() {
     # Sanity checks
     [[ ! -f Makefile ]] && report_error "This is not being run in a kernel tree!" -h
     [[ -z ${UPDATE_METHOD} ]] && export UPDATE_METHOD=merge
-    [[ -z ${UPDATE_MODE} ]] && export UPDATE_MODE=0
+    [[ -z ${UPDATE_MODE} ]] && export UPDATE_MODE=2
 }
 
 
