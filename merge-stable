@@ -193,21 +193,41 @@ git add . && git cherry-pick --continue" || header "${TARGET_VERSION} PICKED CLE
 }
 
 
+function create_merge_message() {
+    MSG_FILE=/tmp/mrg-msg
+
+    rm -rf ${MSG_FILE}
+
+    echo "Merge ${TARGET_VERSION} into $(git rev-parse --abbrev-ref HEAD)" >> ${MSG_FILE}
+    if [[ ! ${INITIAL_MERGE} ]]; then
+        echo "\nChanges in ${TARGET_VERSION}: ($(git rev-list --count ${RANGE} 2> /dev/null) commits)" >> ${MSG_FILE}
+        git log --reverse --format="        %s" ${RANGE} >> ${MSG_FILE}
+    fi
+    echo "\nSigned-off-by: $(git config --get user.name) <$(git config --get user.email)>" >> ${MSG_FILE}
+    CONFLICTS=$(git cf)
+    if [[ -n ${CONFLICTS} ]]; then
+        echo "\nConflicts:" >> ${MSG_FILE}
+        for FILE in ${CONFLICTS}; do
+            echo "\t${FILE}" >> ${MSG_FILE}
+        done
+    fi
+}
+
+
 function mg_target_version() {
     header "Merging ${TARGET_VERSION}"
 
-    COMMIT_LOG="Changes in ${TARGET_VERSION}: ($(git rev-list --count ${RANGE} 2> /dev/null) commits)
-$(git log --reverse --format="        %s" ${RANGE})"
-    [[ ${INITIAL_MERGE} ]] && unset COMMIT_LOG
-    GIT_MERGE_VERBOSITY=1 git merge --gpg-sign --signoff ${TAG} -m "Merge ${TARGET_VERSION} into $(git rev-parse --abbrev-ref HEAD)
+    GIT_MERGE_VERBOSITY=1 git merge --gpg-sign --no-edit ${TAG}
 
-${COMMIT_LOG}
+    if [[ $? -ne 0 ]]; then
+        create_merge_message
 
-Signed-off-by: $(git config --get user.name) <$(git config --get user.email)>"
-
-    [[ $? -ne 0 ]] && report_error "Merge needs manual intervention!
-
-Resolve conflicts then run git merge --continue!" || header "${TARGET_VERSION} MERGED CLEANLY!" ${GRN}
+        report_error "Merge needs manual intervention! Resolve conflicts then run git km."
+    else
+        create_merge_message
+        git commit --amend --no-edit --quiet --gpg-sign --file ${MSG_FILE}
+        header "${TARGET_VERSION} MERGED CLEANLY!" ${GRN}
+    fi
 }
 
 
