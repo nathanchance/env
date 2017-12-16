@@ -199,7 +199,7 @@ function mg_target_version() {
     COMMIT_LOG="Changes in ${TARGET_VERSION}: ($(git rev-list --count ${RANGE} 2> /dev/null) commits)
 $(git log --reverse --format="        %s" ${RANGE})"
     [[ ${INITIAL_MERGE} ]] && unset COMMIT_LOG
-    git merge --gpg-sign --signoff ${TAG} -m "Merge ${TARGET_VERSION} into $(git rev-parse --abbrev-ref HEAD)
+    GIT_MERGE_VERBOSITY=1 git merge --gpg-sign --signoff ${TAG} -m "Merge ${TARGET_VERSION} into $(git rev-parse --abbrev-ref HEAD)
 
 ${COMMIT_LOG}
 
