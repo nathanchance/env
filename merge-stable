@@ -164,8 +164,9 @@ function generate_versions() {
     esac
 
     if [[ ${RC} ]]; then
-        export RANGE=v${CURRENT_VERSION}..linux-stable-rc/linux-${CURRENT_MAJOR_VERSION}.y
         export TAG=linux-stable-rc/linux-${CURRENT_MAJOR_VERSION}.y
+        export RANGE=v${CURRENT_VERSION}..${TAG}
+        TARGET_VERSION=${TARGET_VERSION}$(git grep -h "\-rc" ${TAG} -- Makefile | cut -d ' ' -f 3)
     else
         # Make sure target version is between current version and latest version
         TARGET_SUBLEVEL=$(echo ${TARGET_VERSION} | cut -d . -f 3)
