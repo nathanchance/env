@@ -80,9 +80,9 @@ function parse_parameters() {
             "-rc"|"--release-candidate")
                 export RC=true ;;
 
-            # Only update the linux-stable remote
+            # Only update the linux-stable remotes
             "-u"|"--update-only")
-                export UPDATE_REMOTE_ONLY=true ;;
+                export UPDATE_REMOTES_ONLY=true ;;
 
             # Update to the latest version upstream unconditionally
             "-ul"|"--update-latest")
@@ -104,7 +104,7 @@ function parse_parameters() {
     done
 
     # Sanity checks
-    [[ ! ${UPDATE_METHOD} && ! ${UPDATE_REMOTE_ONLY} ]] && report_error "Neither cherry-pick nor merge were specified, please supply one!" -h
+    [[ ! ${UPDATE_METHOD} && ! ${UPDATE_REMOTES_ONLY} ]] && report_error "Neither cherry-pick nor merge were specified, please supply one!" -h
     [[ ! -f Makefile ]] && report_error "This is not being run in a kernel tree!" -h
     [[ -z ${UPDATE_MODE} ]] && export UPDATE_MODE=0
 }
@@ -202,6 +202,6 @@ parse_parameters $@
 header "Updating remotes"
 verify_remote linux-stable
 verify_remote linux-stable-rc
-[[ ${UPDATE_REMOTE_ONLY} ]] && echo && exit 0
+[[ ${UPDATE_REMOTES_ONLY} ]] && echo && exit 0
 generate_versions
 update_to_target_version
