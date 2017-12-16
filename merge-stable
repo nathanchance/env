@@ -172,31 +172,31 @@ function generate_versions() {
 }
 
 
-function update_to_target_version() {
-    case ${UPDATE_METHOD} in
-        "cherry-pick")
-            git cherry-pick ${RANGE}
-            [[ $? -ne 0 ]] && report_error "Cherry-pick needs manual intervention! Resolve conflicts then run:
+function cp_target_version() {
+    git cherry-pick ${RANGE}
+    [[ $? -ne 0 ]] && report_error "Cherry-pick needs manual intervention! Resolve conflicts then run:
 
-git add . && git cherry-pick --continue" || header "${TARGET_VERSION} PICKED CLEANLY!" ${GRN} ;;
+git add . && git cherry-pick --continue" || header "${TARGET_VERSION} PICKED CLEANLY!" ${GRN}
+}
 
-        "merge")
-            [[ ${RC} ]] && TAG=linux-stable-rc/linux-${CURRENT_MAJOR_VERSION}.y \
-                        || TAG=v${TARGET_VERSION}
-            COMMIT_LOG="Changes in ${TARGET_VERSION}: ($(git rev-list --count ${RANGE} 2> /dev/null) commits)
+
+function mg_target_version(){
+    [[ ${RC} ]] && TAG=linux-stable-rc/linux-${CURRENT_MAJOR_VERSION}.y \
+                || TAG=v${TARGET_VERSION}
+    COMMIT_LOG="Changes in ${TARGET_VERSION}: ($(git rev-list --count ${RANGE} 2> /dev/null) commits)
 $(git log --reverse --format="        %s" ${RANGE})"
-            [[ ${NO_LOG} ]] && unset COMMIT_LOG
-            git merge --gpg-sign --signoff ${TAG} -m "Merge ${TARGET_VERSION} into $(git rev-parse --abbrev-ref HEAD)
+    [[ ${NO_LOG} ]] && unset COMMIT_LOG
+    git merge --gpg-sign --signoff ${TAG} -m "Merge ${TARGET_VERSION} into $(git rev-parse --abbrev-ref HEAD)
 
 ${COMMIT_LOG}
 
 Signed-off-by: $(git config --get user.name) <$(git config --get user.email)>"
 
-            [[ $? -ne 0 ]] && report_error "Merge needs manual intervention!
+    [[ $? -ne 0 ]] && report_error "Merge needs manual intervention!
 
-Resolve conflicts then run git merge --continue!" || header "${TARGET_VERSION} MERGED CLEANLY!" ${GRN} ;;
-    esac
+Resolve conflicts then run git merge --continue!" || header "${TARGET_VERSION} MERGED CLEANLY!" ${GRN}
 }
+
 
 parse_parameters $@
 header "Updating remotes"
@@ -204,4 +204,7 @@ verify_remote linux-stable
 verify_remote linux-stable-rc
 [[ ${UPDATE_REMOTES_ONLY} ]] && echo && exit 0
 generate_versions
-update_to_target_version
+case ${UPDATE_METHOD} in
+    "cherry-pick") cp_target_version ;;
+    "merge") mg_target_version ;;
+esac
