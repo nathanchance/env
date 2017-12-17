@@ -128,24 +128,6 @@ done
 
 # DEVICE "BOARD" FLAGS
 case ${DEVICE} in
-    "angler")
-        # REQUIRED FLAGS
-        AK_SFX=public-8.0.0
-
-        COMPILER=gcc
-
-        COMPRESSION=gz
-
-        DEVICE_NAME_FILE=${DEVICE^}
-        DEVICE_NAME_GITHUB=${DEVICE}
-        DEVICE_NAME_WEB=${DEVICE}
-
-        MATCH_FLAG="Flash*"
-
-        PACKAGE_METHOD=zip
-
-        [[ -z ${GCC_TOOLCHAIN_FOLDER} ]] && GCC_TOOLCHAIN_FOLDER="l-7.x-a57.a53" ;;
-
     "op5")
         # DEVICE SPECIFIC HANDLING
         [[ -z ${OS} ]] && report_error "OS must be specified for OnePlus 5!"
@@ -230,8 +212,6 @@ esac
 case ${GCC_TOOLCHAIN_FOLDER} in
     "aosp-gcc")
         GCC_TOOLCHAIN_PREFIX=aarch64-linux-android- ;;
-    "l-7.x"|"l-7.x-a73.a53"|"l-7.x-a57.a53")
-        GCC_TOOLCHAIN_PREFIX=aarch64-linaro-linux-android- ;;
     "linaro-gcc")
         GCC_TOOLCHAIN_PREFIX=aarch64-linux-gnu- ;;
     *)
