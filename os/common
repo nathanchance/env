@@ -22,7 +22,7 @@
 source common -m
 
 # SOURCE THE OS SPECIFIC FUNCTIONS
-source ${SCRIPTS_FOLDER}/os_${OS}
+source ${SCRIPTS_FOLDER}/os/${OS}
 
 function aliases() {
     # tmux alias
