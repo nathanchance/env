@@ -19,7 +19,7 @@
 # If not running interactively, don't do anything
 [[ $- != *i* ]] && return
 
-[[ -f ${HOME}/scripts/os_utils ]] && source ${HOME}/scripts/os_utils \
-                                  || echo "${RED}Please clone Scripts from GitHub!${RST}"
+[[ -f ${HOME}/scripts/os/common ]] && source ${HOME}/scripts/os/common \
+                                   || echo "${RED}Please clone Scripts from GitHub!${RST}"
 
 bash_setup
