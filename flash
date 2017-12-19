@@ -99,6 +99,12 @@ while [[ $# -ge 1 ]]; do
 
             OS=${1} ;;
 
+        # HOW TO PACKAGE KERNEL (ZIP OR BOOT IMAGE)
+        "-p"|"--package-method")
+            shift && enforce_value $@
+
+            PACKAGE_METHOD=${1} ;;
+
         # BETA VERSIONING (# IN KERNEL VERSION)
         "-r"|"--revision")
             shift && enforce_value $@
@@ -198,7 +204,12 @@ case ${DEVICE} in
 
         MATCH_FLAG="Flash*"
 
-        PACKAGE_METHOD=image_zip ;;
+        if [[ -z ${PACKAGE_METHOD} ]]; then
+            case ${MODE} in
+                "personal") PACKAGE_METHOD=zip ;;
+                *) PACKAGE_METHOD=image_zip ;;
+            esac
+        fi ;;
 
     *)
         die "Invalid device!" ;;
