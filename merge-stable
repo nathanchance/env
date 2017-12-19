@@ -86,8 +86,9 @@ function parse_parameters() {
             # Update to the specified version
             "-v"|"--version")
                 shift
-                [[ $# -lt 1 ]] && die "Please specify a version to update!"
-
+                if [[ $# -lt 1 ]]; then
+                    die "Please specify a version to update!"
+                fi
                 export UPDATE_MODE=1
                 export VERSION_SUPPLIED=${1} ;;
 
@@ -99,9 +100,15 @@ function parse_parameters() {
     done
 
     # Sanity checks
-    [[ ! -f Makefile ]] && die "This is not being run in a kernel tree!" -h
-    [[ -z ${UPDATE_METHOD} ]] && export UPDATE_METHOD=merge
-    [[ -z ${UPDATE_MODE} ]] && export UPDATE_MODE=2
+    if [[ ! -f Makefile ]]; then
+        die "This is not being run in a kernel tree!" -h
+    fi
+    if [[ -z ${UPDATE_METHOD} ]]; then
+        export UPDATE_METHOD=merge
+    fi
+    if [[ -z ${UPDATE_MODE} ]]; then
+        export UPDATE_MODE=2
+    fi
 }
 
 
@@ -112,8 +119,11 @@ function verify_remote() {
     git -C ${KERNEL_FOLDER}/mirrors/${1} fetch -p origin
     git fetch ${1}
 
-    [[ $? -ne 0 ]] && die "Remote ${1} update failed!" \
-                   || echo "Remote ${1} updated successfully!"
+    if [[ $? -ne 0 ]]; then
+        die "Remote ${1} update failed!"
+    else
+        echo "Remote ${1} updated successfully!"
+    fi
 }
 
 
@@ -124,7 +134,10 @@ function update_remotes() {
     verify_remote linux-stable
     verify_remote linux-stable-rc
 
-    [[ ${FETCH_REMOTES_ONLY} ]] && echo && exit 0
+    if [[ ${FETCH_REMOTES_ONLY} ]]; then
+        echo
+        exit 0
+    fi
 }
 
 
@@ -147,7 +160,10 @@ function generate_versions() {
     echo "${BOLD}Current kernel version:${RST} ${CURRENT_VERSION}"
     echo
     echo "${BOLD}Latest kernel version:${RST} ${LATEST_VERSION}"
-    [[ ${PRINT_LATEST} ]] && echo && exit 0
+    if [[ ${PRINT_LATEST} ]]; then
+        echo
+        exit 0
+    fi
 
     # UPDATE_MODES:
     # 0. Update one version
@@ -170,8 +186,12 @@ function generate_versions() {
     else
         # Make sure target version is between current version and latest version
         TARGET_SUBLEVEL=$(echo ${TARGET_VERSION} | cut -d . -f 3)
-        [[ ${TARGET_SUBLEVEL} -le ${CURRENT_SUBLEVEL} ]] && die "Current version is up to date with target version ${TARGET_VERSION}!\n"
-        [[ ${TARGET_SUBLEVEL} -gt ${LATEST_SUBLEVEL}  ]] && die "Target version ${TARGET_VERSION} does not exist!\n"
+        if [[ ${TARGET_SUBLEVEL} -le ${CURRENT_SUBLEVEL} ]]; else
+            die "Current version is up to date with target version ${TARGET_VERSION}!\n"
+        fi
+        if [[ ${TARGET_SUBLEVEL} -gt ${LATEST_SUBLEVEL}  ]]; then
+            die "Target version ${TARGET_VERSION} does not exist!\n"
+        fi
         export RANGE=v${CURRENT_VERSION}..v${TARGET_VERSION}
         export TAG=v${TARGET_VERSION}
     fi
@@ -188,9 +208,13 @@ function cp_target_version() {
     header "Cherry-picking ${TARGET_VERSION}"
 
     git cherry-pick ${RANGE}
-    [[ $? -ne 0 ]] && die "Cherry-pick needs manual intervention! Resolve conflicts then run:
+    if [[ $? -ne 0 ]]; then
+        die "Cherry-pick needs manual intervention! Resolve conflicts then run:
 
-git add . && git cherry-pick --continue" || header "${TARGET_VERSION} PICKED CLEANLY!" ${GRN}
+git add . && git cherry-pick --continue"
+    else
+        header "${TARGET_VERSION} PICKED CLEANLY!" ${GRN}
+    fi
 }
 
 

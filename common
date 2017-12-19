@@ -27,7 +27,9 @@
 # WHAT OS ARE WE ON?
 OS=$(UNAME=$(uname); echo ${UNAME,,})
 # GNU READLINK IS NEEDED FOR SCRIPTS_FOLDER
-[[ ${OS} = "darwin" ]] && alias readlink=greadlink
+if [[ ${OS} = "darwin" ]]; then
+    alias readlink=greadlink
+fi
 
 # LOCATION OF SCRIPTS FOLDER
 SCRIPTS_FOLDER=$(cd $(dirname $(readlink -f "${BASH_SOURCE[0]}")) && pwd)
@@ -51,8 +53,11 @@ RST="\033[0m"
 YLW="\033[01;33m"
 
 # MAKE THREADS
-[[ ${OS} = "darwin" ]] && THREADS=$(sysctl hw.ncpu | cut -d " " -f 2) \
-                       || THREADS=$(nproc --all)
+if [[ ${OS} = "darwin" ]]; then
+    THREADS=$(sysctl hw.ncpu | cut -d " " -f 2)
+else
+    THREADS=$(nproc --all)
+fi
 JOBS_FLAG="-j${THREADS}"
 
 
@@ -69,7 +74,11 @@ function echo() {
 
 # PRINTS A FORMATTED HEADER TO POINT OUT WHAT IS BEING DONE TO THE USER
 function header() {
-    [[ -n ${2} ]] && COLOR=${2} || COLOR=${RED}
+    if [[ -n ${2} ]]; then
+        COLOR=${2}
+    else
+        COLOR=${RED}
+    fi
     echo ${COLOR}
     echo "====$(for i in $(seq ${#1}); do echo "=\c"; done)===="
     echo "==  ${1}  =="
@@ -115,7 +124,9 @@ function format_time() {
 function display_error() {
     echo
     echo ${RED}${1}${RST}
-    [[ -z ${2} ]] && echo
+    if [[ -z ${2} ]]; then
+        echo
+    fi
 }
 
 # PRINTS AN ERROR IN BOLD RED
@@ -128,18 +139,23 @@ function die() {
 function warn() {
     echo
     echo ${YLW}${1}${RST}
-    [[ -z ${2} ]] && echo
+    if [[ -z ${2} ]]; then
+        echo
+    fi
 }
 
 # ENFORCES THE VALUE NEEDED FOR TWO-PART FLAGS
 function enforce_value() {
-    [[ $# -lt 1 ]] && die "A additional value is needed for one of the flags passed to this script!"
+    if [[ $# -lt 1 ]]; then
+        die "A additional value is needed for one of the flags passed to this script!"
+    fi
 }
 
 # ADD A REMOTE IF IT DOESN'T EXIST
 function add_remote() {
-    [[ ! $(git remote | grep -m 1 ${1}) ]] && \
+    if [[ ! $(git remote | grep -m 1 ${1}) ]]; then
         git remote add ${1} ${2}
+    fi
 }
 
 # CONVERT A FILE LOCATION TO WEB LINK
@@ -158,4 +174,6 @@ function rmvenv {
 }
 
 # REQUIRE A PARAMETER TO OPT OUT OF MAC_CHECK
-[[ $# -lt 1 && ${OS} = "darwin" ]] && die "Wrong window! ;)"
+if [[ $# -lt 1 && ${OS} = "darwin" ]]; then
+    die "Wrong window! ;)"
+fi

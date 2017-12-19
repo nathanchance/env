@@ -119,29 +119,43 @@ while [[ $# -ge 1 ]]; do
 done
 
 # DEFAULT PARAMETERS
-[[ -z ${DEFCONFIG} ]] && DEFCONFIG="flash_defconfig"
-[[ -z ${DEVICE} ]] && DEVICE="taimen"
-[[ -z ${MODE} ]] && MODE="personal"
+if [[ -z ${DEFCONFIG} ]]; then
+    DEFCONFIG="flash_defconfig"
+fi
+if [[ -z ${DEVICE} ]]; then
+    DEVICE="taimen"
+fi
+if [[ -z ${MODE} ]]; then
+    MODE="personal"
+fi
 
 # EASY TO USE VARIABLES FOR IF STATEMENTS
-[[ ${MODE} != "stable" ]] && NOT_STABLE=true
+if [[ ${MODE} != "stable" ]]; then
+    NOT_STABLE=true
+fi
 
 # DEVICE "BOARD" FLAGS
 case ${DEVICE} in
     "op5")
         # DEVICE SPECIFIC HANDLING
-        [[ -z ${OS} ]] && die "OS must be specified for OnePlus 5!"
+        if [[ -z ${OS} ]]; then
+            die "OS must be specified for OnePlus 5!"
+        fi
         OS_FOLDER=/${OS,,}
 
         # REQUIRED FLAGS
-        [[ -z ${ANDROID_VERSION} ]] && ANDROID_VERSION=8.0.0
+        if [[ -z ${ANDROID_VERSION} ]]; then
+            ANDROID_VERSION=8.0.0
+        fi
         AK2_SFX=${ANDROID_VERSION}
 
         case ${VERSION} in
             1.*) COMPILER=gcc ;;
             2.*) COMPILER=clang ;;
         esac
-        [[ -z ${CLANG_TOOLCHAIN_FOLDER} ]] && CLANG_TOOLCHAIN_FOLDER=clang-4053586
+        if [[ -z ${CLANG_TOOLCHAIN_FOLDER} ]]; then
+            CLANG_TOOLCHAIN_FOLDER=clang-4053586
+        fi
 
         COMPRESSION=gz
 
@@ -149,7 +163,9 @@ case ${DEVICE} in
         DEVICE_NAME_GITHUB=${DEVICE}
         DEVICE_NAME_WEB=${DEVICE}
 
-        [[ -z ${GCC_TOOLCHAIN_FOLDER} ]] && GCC_TOOLCHAIN_FOLDER="linaro-gcc"
+        if [[ -z ${GCC_TOOLCHAIN_FOLDER} ]]; then
+            GCC_TOOLCHAIN_FOLDER="linaro-gcc"
+        fi
 
         MATCH_FLAG="*${OS}-v${VERSION::1}*"
 
@@ -157,7 +173,9 @@ case ${DEVICE} in
 
     "taimen"|"walleye")
         # REQUIRED FLAGS
-        [[ -z ${ANDROID_VERSION} ]] && ANDROID_VERSION=8.1.0
+        if [[ -z ${ANDROID_VERSION} ]]; then
+            ANDROID_VERSION=8.1.0
+        fi
         AK2_SFX=${ANDROID_VERSION}
 
         COMPILER=clang
@@ -174,7 +192,9 @@ case ${DEVICE} in
         DEVICE_NAME_GITHUB=wahoo
         DEVICE_NAME_WEB=${DEVICE}
 
-        [[ -z ${GCC_TOOLCHAIN_FOLDER} ]] && GCC_TOOLCHAIN_FOLDER="linaro-gcc"
+        if [[ -z ${GCC_TOOLCHAIN_FOLDER} ]]; then
+            GCC_TOOLCHAIN_FOLDER="linaro-gcc"
+        fi
 
         MATCH_FLAG="Flash*"
 
@@ -247,7 +267,9 @@ function clean_up() {
     # ONLY CHECKOUT IF KERNEL_BRANCH EXISTS AND WE AREN'T BISECTING OR REBASING
     cd ${SOURCE_FOLDER}
     if [[ -n ${KERNEL_BRANCH} ]]; then
-        [[ ! $(git status | ag "bisec|rebas") ]] && git checkout ${KERNEL_BRANCH}
+        if [[ ! $(git status | ag "bisec|rebas") ]]; then
+            git checkout ${KERNEL_BRANCH}
+        fi
     # OTHERWISE, NOTATE CURRENT BRANCH FOR CHANGELOG
     else
         export KERNEL_BRANCH=$(git rev-parse --abbrev-ref HEAD)
@@ -283,8 +305,11 @@ function make_wrapper_clang() {
 # SILENCE OUTPUT FUNCTION
 function kmake() {
     # ONLY SHOW ERRORS AND WARNINGS WHEN COMPILING (UNLESS DEBUG)
-    [[ ${DEBUG} ]] && make_wrapper_${COMPILER} $@ \
-                   || make_wrapper_${COMPILER} $@ |& ag --no-color "error:|warning:" && echo
+    if [[ ${DEBUG} ]]; then
+        make_wrapper_${COMPILER} $@
+    else
+        make_wrapper_${COMPILER} $@ |& ag --no-color "error:|warning:" && echo
+    fi
 }
 
 
@@ -294,7 +319,9 @@ function generate_variables() {
     KVER=$(make kernelversion)
 
     # FORM LOCAL VERSION BASELINE
-    [[ -n ${OS} ]] && OS="-${OS}"
+    if [[ -n ${OS} ]]; then
+        OS="-${OS}"
+    fi
     LOCALVERSION_BASELINE="Flash-${DEVICE_NAME_FILE}${OS}"
     export LOCALVERSION="-${LOCALVERSION_BASELINE}"
 
@@ -321,10 +348,14 @@ function generate_variables() {
     FIRST_LINE="${KVER}${LOCALVERSION}"
 
     # IF REVISION EXISTS, USE IT FOR THE FILE
-    [[ -n ${REVISION} ]] && REVISION_FOR_FILE=".${MODE::1}${REVISION}"
+    if [[ -n ${REVISION} ]]; then
+        REVISION_FOR_FILE=".${MODE::1}${REVISION}"
+    fi
 
     # IF REVISION IS LESS THAN 1, UNSET IT SO BUILD DOESN'T ERROR
-    [[ ${REVISION} -lt 1 ]] && unset REVISION
+    if [[ ${REVISION} -lt 1 ]]; then
+        unset REVISION
+    fi
 
     # GENERATE SECOND LINE VARIABLE
     SECOND_LINE="$(whoami)@$(uname -n) #${REVISION:-1}"
@@ -358,8 +389,10 @@ function print_variables() {
 
     echo "${BOLD}Kernel branch:${RST}     ${KERNEL_BRANCH}\n"
 
-    [[ ${COMPILER} = "clang" ]] && echo "${BOLD}Clang info:${RST}        ${CLANG_VERSION}"
-    echo "                   ${CLANG_TOOLCHAIN}\n"
+    if [[ ${COMPILER} = "clang" ]]; then
+        echo "${BOLD}Clang info:${RST}        ${CLANG_VERSION}"
+        echo "                   ${CLANG_TOOLCHAIN}\n"
+    fi
 
     echo "${BOLD}GCC info:${RST}          $(${GCC_TOOLCHAIN} --version | head -1)"
     echo "                   ${GCC_TOOLCHAIN}\n"
@@ -387,7 +420,9 @@ function package_zip() {
 
     # MOVE THE KERNEL IMAGE
     cp ${OUT_KERNEL_IMAGE} ${ANYKERNEL2_FOLDER}
-    [[ -f ${OUT_DTBO_IMAGE} ]] && cp ${OUT_DTBO_IMAGE} ${ANYKERNEL2_FOLDER}/dtbo
+    if [[ -f ${OUT_DTBO_IMAGE} ]]; then
+        cp ${OUT_DTBO_IMAGE} ${ANYKERNEL2_FOLDER}/dtbo
+    fi
 
     # GRAB MODULES TOO IF THEY ARE PRESENT
     mkdir -p ${MODULES_FOLDER}
@@ -427,8 +462,11 @@ function package_zip() {
               ${SIGNED_ZIP}
 
     # IF PACKAGING FAILED, ERROR OUT
-    [[ ! -f ${SIGNED_ZIP} ]] && echo "${RED}Kernel zip not found after signing!${RST}\n" && ending_info \
-                             || echo "${GRN}Kernel zip successfully generated!${RST}\n"
+    if [[ ! -f ${SIGNED_ZIP} ]]; then
+        echo "${RED}Kernel zip not found after signing!${RST}\n" && ending_info
+    else
+        echo "${GRN}Kernel zip successfully generated!${RST}\n"
+    fi
 }
 
 
@@ -451,16 +489,22 @@ function package_image() {
 
     COMPILED_BOOT_IMAGE=${AOSP_FOLDER}/out/target/product/${DEVICE_NAME_WEB}/boot.img
 
-    [[ ! -f ${COMPILED_BOOT_IMAGE} ]] && echo "${RED}Boot image not found!${RST}\n" && ending_info \
-                                      || echo "${GRN}Boot image compiled successfully!${RST}\n"
+    if [[ ! -f ${COMPILED_BOOT_IMAGE} ]]; then
+        echo "${RED}Boot image not found!${RST}\n" && ending_info
+    else
+        echo "${GRN}Boot image compiled successfully!${RST}\n"
+    fi
 }
 
 
 # PACKAGE IMAGE WRAPPER
 function package_image_wrapper() {
     # ONLY SHOW ERRORS WHEN COMPILING (UNLESS DEBUG)
-    [[ ${DEBUG} ]] && package_image_commands \
-                   || package_image_commands |& ag --no-color "error:" && echo
+    if [[ ${DEBUG} ]]; then
+        package_image_commands
+    else
+        package_image_commands |& ag --no-color "error:" && echo
+    fi
 }
 
 
@@ -487,14 +531,20 @@ function setup_folders() {
     echo "  - Setting up final folders"
 
     # IF ZIPMOVE DOESN'T EXIST, MAKE IT
-    [[ ! -d ${FILE_MOVE} ]] && mkdir -p ${FILE_MOVE}
+    if [[ ! -d ${FILE_MOVE} ]]; then
+        mkdir -p ${FILE_MOVE}
+    fi
 
     # IF IT ISN'T A STABLE BUILD, CLEAN THE FOLDER
     if [[ ${NOT_STABLE} ]]; then
-        [[ ! ${NOCLEAN} ]] && rm -rf ${FILE_MOVE}/*${DEVICE_NAME_FILE}*
+        if [[ ! ${NOCLEAN} ]]; then
+            rm -rf ${FILE_MOVE}/*${DEVICE_NAME_FILE}*
+        fi
     else
         # OTHERWISE, MOVE THE OLD FILES TO AN "OLD" FOLDER
-        [[ ! -d ${FILE_MOVE_OLD} ]] && mkdir -p ${FILE_MOVE_OLD}
+        if [[ ! -d ${FILE_MOVE_OLD} ]]; then
+            mkdir -p ${FILE_MOVE_OLD}
+        fi
         mv $(find ${FILE_MOVE}/* -maxdepth 0 -type f) \
            ${FILE_MOVE_OLD} &>/dev/null
     fi
@@ -532,7 +582,9 @@ function generate_changelog() {
 
     # WE NEED TO MARK THE PREVIOUS TAG FOR CHANGELOG
     PREV_TAG_NAME=$(git tag --sort=-taggerdate -l ${MATCH_FLAG} | head -n 1)
-    [[ -z ${PREV_TAG_NAME} ]] && return
+    if [[ -z ${PREV_TAG_NAME} ]]; then
+        return
+    fi
     RANGE=${PREV_TAG_NAME}..HEAD
 
     # SHOW WHERE COMMITS ARE LOCATED
@@ -688,9 +740,13 @@ if [[ -f ${OUT_KERNEL_IMAGE} ]]; then
         move_flashable_files
         generate_changelog
 
-        [[ ${MODE} != "personal" ]] && push_flashable_files
+        if [[ ${MODE} != "personal" ]]; then
+            push_flashable_files
+        fi
 
-        [[ ! ${NOT_STABLE} ]] && tag_stable
+        if [[ ! ${NOT_STABLE} ]]; then
+            tag_stable
+        fi
 
         echo
     fi

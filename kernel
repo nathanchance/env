@@ -77,12 +77,20 @@ while [[ $# -ge 1 ]]; do
 done
 
 # DEFAULTS
-[[ -z ${ARCH} ]] && ARCH=arm64
-[[ -z ${IMAGE} ]] && IMAGE=Image.*-dtb
-[[ -z ${TOOLCHAIN} ]] && TOOLCHAIN=/opt/aosp-gcc/bin/aarch64-linux-android-
+if [[ -z ${ARCH} ]]; then
+    ARCH=arm64
+fi
+if [[ -z ${IMAGE} ]]; then
+    IMAGE=Image.*-dtb
+fi
+if [[ -z ${TOOLCHAIN} ]]; then
+    TOOLCHAIN=/opt/aosp-gcc/bin/aarch64-linux-android-
+fi
 
 # ERROR OUT IF DEFCONFIG WASN'T SUPPLIED
-[[ -z ${DEFCONFIG} ]] && die "Please supply a defconfig!"
+if [[ -z ${DEFCONFIG} ]]; then
+    die "Please supply a defconfig!"
+fi
 
 # BASIC BUILD FUNCTION
 function build() {
@@ -100,7 +108,9 @@ function build() {
 }
 
 # REPORT ERROR IF WE AREN'T IN A TREE WITH A MAKEFILE
-[[ ! -f $(pwd)/Makefile ]] && die "This must be run in a kernel tree!"
+if [[ ! -f $(pwd)/Makefile ]]; then
+    die "This must be run in a kernel tree!"
+fi
 
 # SHOW THE BASE VERSION WE ARE MAKING
 header "BUILDING $(make kernelversion)"
@@ -118,13 +128,19 @@ esac
 # REPORT SUCCESS
 FINAL_IMAGE=$(ls out/arch/${ARCH}/boot/${IMAGE})
 END=$(date +%s)
-[[ -f ${FINAL_IMAGE} ]] && echo "\n${GRN}BUILT IN $(format_time ${END} ${START})${RST}\n
+if [[ -f ${FINAL_IMAGE} ]]; then
+    echo "\n${GRN}BUILT IN $(format_time ${END} ${START})${RST}\n
 ${BOLD}IMAGE:${RST} ${FINAL_IMAGE}\n
-${BOLD}VERSION:${RST} $(cat out/include/config/kernel.release)" \
-                        || die "Kernel build failed!"
+${BOLD}VERSION:${RST} $(cat out/include/config/kernel.release)"
+else
+    die "Kernel build failed!"
+fi
 
 # UPLOAD IMAGE IF NECESSARY
-[[ ${UPLOAD} ]] && echo && curl --upload-file ${FINAL_IMAGE} https://transfer.sh/${IMAGE}
+if [[ ${UPLOAD} ]]; then
+    echo
+    curl --upload-file ${FINAL_IMAGE} https://transfer.sh/${IMAGE}
+fi
 
 # ALERT OF SCRIPT END
 echo "\n\a"

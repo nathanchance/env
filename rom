@@ -117,7 +117,9 @@ if [[ -z ${ROM} ]]; then
     DEVICE=cheeseburger
 fi
 
-[[ -z ${DEVICE} ]] && die "The device to build is a required parameter!"
+if [[ -z ${DEVICE} ]]; then
+    die "The device to build is a required parameter!"
+fi
 
 if [[ -z ${VARIANT} ]]; then
     case ${ROM} in
@@ -199,7 +201,9 @@ if [[ ${SYNC} ]]; then
 
     ${REPO_SYNC} ${FLAGS}
 
-    [[ ${ROM} = "du-personal" ]] && source ${SCRIPTS_FOLDER}/du_merge
+    if [[ ${ROM} = "du-personal" ]]; then
+        source ${SCRIPTS_FOLDER}/du_merge
+    fi
 fi
 
 
@@ -211,7 +215,9 @@ header "SETTING UP BUILD ENVIRONMENT"
 
 # CHECK AND SEE IF WE ARE ON ARCH
 # IF SO, ACTIVARE A VIRTUAL ENVIRONMENT FOR PROPER PYTHON SUPPORT
-[[ -f /etc/arch-release ]] && mkavenv
+if [[ -f /etc/arch-release ]]; then
+    mkavenv
+fi
 source build/envsetup.sh
 
 
@@ -243,8 +249,11 @@ if [[ ${REPOPICK} ]]; then
         case ${YN} in
             y|Y)
                 read -p "Please enter the change number or topic: " PARAMS
-                [[ -n ${PARAMS//[0-9]/} ]] && repopick -i --topic ${PARAMS} \
-                                           || repopick -i ${PARAMS} ;;
+                if [[ -n ${PARAMS//[0-9]/} ]]; then
+                    repopick -i --topic ${PARAMS}
+                else
+                    repopick -i ${PARAMS}
+                fi ;;
             n|N)
                 break ;;
         esac
@@ -259,7 +268,7 @@ fi
 
 header "CLEANING UP OUT DIRECTORY"
 
-if [[ -n ${CLEAN_TARGET} ]] && [[ ${CLEAN_TARGET} != "noclean" ]]; then
+if [[ -n ${CLEAN_TARGET} && ${CLEAN_TARGET} != "noclean" ]]; then
     make_command ${CLEAN_TARGET}
 elif [[ -z ${CLEAN_TARGET} ]]; then
     make_command clobber
@@ -288,7 +297,9 @@ fi
 
 make_command ${MAKE_TARGET}
 
-[[ ${EXIT_NEEDED} ]] && echo && header "BUILD COMPLETED!" && exit
+if [[ ${EXIT_NEEDED} ]]; then
+    echo && header "BUILD COMPLETED!" && exit
+fi
 
 # THERE WILL BE A ZIP IN THE OUT FOLDER IF SUCCESSFUL
 FILES=$(ls ${OUT_FOLDER}/*.zip 2>/dev/null | wc -l)
@@ -298,8 +309,11 @@ if [[ ${FILES} -ne 0 ]]; then
     SUCCESS=true
 
     # MAKE ZIP_MOVE IF IT DOESN'T EXIST OR CLEAN IT IF IT DOES
-    [[ ! -d "${ZIP_MOVE}" ]] && mkdir -p "${ZIP_MOVE}" \
-                             || rm -rf "${ZIP_MOVE}"/*
+    if [[ ! -d "${ZIP_MOVE}" ]]; then
+        mkdir -p "${ZIP_MOVE}"
+    else
+        rm -rf "${ZIP_MOVE}"/*
+    fi
 
     if [[ ${FILES} -eq 1 ]]; then
         mv "${OUT_FOLDER}"/*.zip* "${ZIP_MOVE}"
@@ -320,7 +334,9 @@ fi
 ######################
 
 # DEACTIVATE VIRTUALENV IF WE ARE ON ARCH
-[[ -f /etc/arch-release ]] && rmvenv
+if [[ -f /etc/arch-release ]]; then
+    rmvenv
+fi
 
 # STOP TRACKING TIME
 END=$(date +%s)
@@ -348,7 +364,9 @@ echo "\a"
 echo "\n$(date +"%m/%d/%Y %H:%M:%S"): ${BASH_SOURCE} ${PARAMS}" >> ${LOG}
 
 # BUILD <SUCCESSFUL|FAILED> IN # MINUTES AND # SECONDS
-[[ -n ${BUILD_RESULT_STRING} ]] && echo "${BUILD_RESULT_STRING} IN \c" >> ${LOG}
+if [[ -n ${BUILD_RESULT_STRING} ]]; then
+    echo "${BUILD_RESULT_STRING} IN \c" >> ${LOG}
+fi
 echo "$(format_time ${END} ${START})" >> ${LOG}
 
 # ONLY ADD A LINE ABOUT FILE LOCATION IF SCRIPT COMPLETED SUCCESSFULLY
