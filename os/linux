@@ -439,3 +439,43 @@ function mcf() {
     echo "ommit [\`$(git show -s --format=%h ${2})\`](${URL}$(git show -s --format='%H) ("%s")' ${2})"
     echo
 }
+
+# Sign zip files for TWRP flashability
+function signzip() {
+    local CUR_DIR=$(pwd)
+    local FILE=${1}
+    local KEY=testkey
+    [[ $(echo ${FILE} | grep -v zip) ]] && display_error "This can only sign zip files!" && return 1
+    [[ ! -f ${FILE} ]] && display_error "Zip file does not exist!" && return 1
+
+    header "Signing ${FILE}"
+
+    # Shift to the folder containing the zip
+    cd $(dirname ${FILE})
+
+    # Get the zip name
+    ZIP_NAME=$(basename ${FILE} .zip)
+
+    # Sign the zip
+    java -jar ${BIN_FOLDER}/signapk.jar \
+              ${BIN_FOLDER}/${KEY}.x509.pem \
+              ${BIN_FOLDER}/${KEY}.pk8 \
+              ${ZIP_NAME}.zip \
+              ${ZIP_NAME}-firstsign.zip
+
+    ${BIN_FOLDER}/zipadjust ${ZIP_NAME}-firstsign.zip \
+                            ${ZIP_NAME}-adjusted.zip &>/dev/null
+
+    java -jar ${BIN_FOLDER}/minsignapk.jar \
+              ${BIN_FOLDER}/${KEY}.x509.pem \
+              ${BIN_FOLDER}/${KEY}.pk8 \
+              ${ZIP_NAME}-adjusted.zip \
+              ${ZIP_NAME}-signed.zip
+              
+    # Remove intermediate zip files
+    rm ${ZIP_NAME}-firstsign.zip ${ZIP_NAME}-adjusted.zip
+
+    # Echo zip location
+    echo "Signed zip: $(pwd)/${ZIP_NAME}-signed.zip\n"
+    cd ${CUR_DIR}
+}
