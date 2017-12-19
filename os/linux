@@ -300,10 +300,12 @@ function kfg() {
                 header "LOCATIONS OF ${CONFIG} IN TREE"
                 git grep -n -1 ${CONFIG} | ag --nocolor Kconfig
 
-                header "LOCATIONS OF ${CONFIG} IN CONFIG FILE"
                 LIST=$(ag --nocolor ${CONFIG} out/.config)
-                [[ -z ${LIST} ]] && echo "None found!" \
-                                 || echo "${LIST}"
+                if [[ -n ${LIST} ]]; then
+                    header "LOCATIONS OF ${CONFIG} IN CONFIG FILE"
+                    echo "${LIST}"
+                fi
+
                 echo ;;
 
             "-u"|"--update")
