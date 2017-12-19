@@ -96,9 +96,9 @@ function bash_setup() {
     add_to_path_pre ${SCRIPTS_FOLDER}
 }
 
-# bashrc update function
-function buf() {
-    source ${SCRIPTS_FOLDER}/os_utils
+# bashrc reload function
+function rld() {
+    source ${SCRIPTS_FOLDER}/os/common
     bash_setup
 }
 
