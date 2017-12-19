@@ -86,20 +86,20 @@ function parse_parameters() {
             # Update to the specified version
             "-v"|"--version")
                 shift
-                [[ $# -lt 1 ]] && report_error "Please specify a version to update!"
+                [[ $# -lt 1 ]] && die "Please specify a version to update!"
 
                 export UPDATE_MODE=1
                 export VERSION_SUPPLIED=${1} ;;
 
             *)
-                report_error "Invalid parameter!" ;;
+                die "Invalid parameter!" ;;
         esac
 
         shift
     done
 
     # Sanity checks
-    [[ ! -f Makefile ]] && report_error "This is not being run in a kernel tree!" -h
+    [[ ! -f Makefile ]] && die "This is not being run in a kernel tree!" -h
     [[ -z ${UPDATE_METHOD} ]] && export UPDATE_METHOD=merge
     [[ -z ${UPDATE_MODE} ]] && export UPDATE_MODE=2
 }
@@ -112,7 +112,7 @@ function verify_remote() {
     git -C ${KERNEL_FOLDER}/mirrors/${1} fetch -p origin
     git fetch ${1}
 
-    [[ $? -ne 0 ]] && report_error "Remote ${1} update failed!" \
+    [[ $? -ne 0 ]] && die "Remote ${1} update failed!" \
                    || echo "Remote ${1} updated successfully!"
 }
 
@@ -170,8 +170,8 @@ function generate_versions() {
     else
         # Make sure target version is between current version and latest version
         TARGET_SUBLEVEL=$(echo ${TARGET_VERSION} | cut -d . -f 3)
-        [[ ${TARGET_SUBLEVEL} -le ${CURRENT_SUBLEVEL} ]] && report_error "Current version is up to date with target version ${TARGET_VERSION}!\n"
-        [[ ${TARGET_SUBLEVEL} -gt ${LATEST_SUBLEVEL}  ]] && report_error "Target version ${TARGET_VERSION} does not exist!\n"
+        [[ ${TARGET_SUBLEVEL} -le ${CURRENT_SUBLEVEL} ]] && die "Current version is up to date with target version ${TARGET_VERSION}!\n"
+        [[ ${TARGET_SUBLEVEL} -gt ${LATEST_SUBLEVEL}  ]] && die "Target version ${TARGET_VERSION} does not exist!\n"
         export RANGE=v${CURRENT_VERSION}..v${TARGET_VERSION}
         export TAG=v${TARGET_VERSION}
     fi
@@ -188,7 +188,7 @@ function cp_target_version() {
     header "Cherry-picking ${TARGET_VERSION}"
 
     git cherry-pick ${RANGE}
-    [[ $? -ne 0 ]] && report_error "Cherry-pick needs manual intervention! Resolve conflicts then run:
+    [[ $? -ne 0 ]] && die "Cherry-pick needs manual intervention! Resolve conflicts then run:
 
 git add . && git cherry-pick --continue" || header "${TARGET_VERSION} PICKED CLEANLY!" ${GRN}
 }
@@ -223,7 +223,7 @@ function mg_target_version() {
     if [[ $? -ne 0 ]]; then
         create_merge_message
 
-        report_error "Merge needs manual intervention! Resolve conflicts then run git km."
+        die "Merge needs manual intervention! Resolve conflicts then run git km."
     else
         create_merge_message
         git commit --amend --no-edit --quiet --gpg-sign --file ${MSG_FILE}

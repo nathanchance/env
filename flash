@@ -112,7 +112,7 @@ while [[ $# -ge 1 ]]; do
             VERSION=${1} ;;
 
         *)
-            report_error "Invalid parameter" ;;
+            die "Invalid parameter" ;;
     esac
 
     shift
@@ -130,7 +130,7 @@ done
 case ${DEVICE} in
     "op5")
         # DEVICE SPECIFIC HANDLING
-        [[ -z ${OS} ]] && report_error "OS must be specified for OnePlus 5!"
+        [[ -z ${OS} ]] && die "OS must be specified for OnePlus 5!"
         OS_FOLDER=/${OS,,}
 
         # REQUIRED FLAGS
@@ -181,7 +181,7 @@ case ${DEVICE} in
         PACKAGE_METHOD=image_zip ;;
 
     *)
-        report_error "Invalid device!" ;;
+        die "Invalid device!" ;;
 esac
 
 
@@ -206,7 +206,7 @@ case ${MODE} in
     "personal")
         FILE_MOVE=$(readlink -f ${FILE_MOVE_HEAD}/../me/fk) ;;
     *)
-        report_error "Invalid mode specified!" ;;
+        die "Invalid mode specified!" ;;
 esac
 
 # COMPILATION VARIABLES
@@ -216,7 +216,7 @@ OUT_KERNEL_IMAGE=${OUT_FOLDER}/arch/${ARCHITECTURE}/boot/Image.${COMPRESSION}-dt
 OUT_DTBO_IMAGE=${OUT_FOLDER}/arch/${ARCHITECTURE}/boot/dtbo.img
 GCC_TOOLCHAIN=$(find /opt/${GCC_TOOLCHAIN_FOLDER}/bin -type f -name '*-gcc')
 if [[ -z ${GCC_TOOLCHAIN} ]]; then
-    report_error "GCC toolchain could not be found!"
+    die "GCC toolchain could not be found!"
 fi
 if [[ ${COMPILER} = "clang" ]]; then
     CLANG_TOOLCHAIN=/opt/aosp-clang/${CLANG_TOOLCHAIN_FOLDER}/bin/clang
@@ -226,7 +226,7 @@ if [[ ${COMPILER} = "clang" ]]; then
         "clang-4393122"|"clang-4479392")
             CLANG_VERSION=$(${CLANG_TOOLCHAIN} --version | head -n 1 | cut -d'(' -f1,4) ;;
         *)
-            report_error "Invalid Clang version specified!" ;;
+            die "Invalid Clang version specified!" ;;
     esac
 fi
 

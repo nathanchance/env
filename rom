@@ -104,7 +104,7 @@ while [[ $# -ge 1 ]]; do
             export PUBLIC=true ;;
 
         *)
-            report_error "Invalid parameter detected!" ;;
+            die "Invalid parameter detected!" ;;
     esac
 
     shift
@@ -117,7 +117,7 @@ if [[ -z ${ROM} ]]; then
     DEVICE=cheeseburger
 fi
 
-[[ -z ${DEVICE} ]] && report_error "The device to build is a required parameter!"
+[[ -z ${DEVICE} ]] && die "The device to build is a required parameter!"
 
 if [[ -z ${VARIANT} ]]; then
     case ${ROM} in
@@ -169,7 +169,7 @@ case "${ROM}" in
         SOURCE_FOLDER=${ROM_FOLDER}/vanilla
         ZIP_MOVE=${ZIP_MOVE_PARENT}/vanilla/${DEVICE} ;;
     *)
-        report_error "Unknown ROM "${1}" passed!" ;;
+        die "Unknown ROM "${1}" passed!" ;;
 esac
 
 OUT_FOLDER=${SOURCE_FOLDER}/out/target/product/${DEVICE}

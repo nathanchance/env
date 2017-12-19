@@ -112,15 +112,20 @@ function format_time() {
 }
 
 # PRINTS AN ERROR IN BOLD RED
-function report_error() {
+function display_error() {
     echo
     echo ${RED}${1}${RST}
     [[ -z ${2} ]] && echo
+}
+
+# PRINTS AN ERROR IN BOLD RED
+function die() {
+    display_error "$@"
     exit
 }
 
 # PRINTS A WARNING IN BOLD YELLOW
-function report_warning() {
+function warn() {
     echo
     echo ${YLW}${1}${RST}
     [[ -z ${2} ]] && echo
@@ -128,7 +133,7 @@ function report_warning() {
 
 # ENFORCES THE VALUE NEEDED FOR TWO-PART FLAGS
 function enforce_value() {
-    [[ $# -lt 1 ]] && report_error "A additional value is needed for one of the flags passed to this script!"
+    [[ $# -lt 1 ]] && die "A additional value is needed for one of the flags passed to this script!"
 }
 
 # ADD A REMOTE IF IT DOESN'T EXIST
@@ -153,4 +158,4 @@ function rmvenv {
 }
 
 # REQUIRE A PARAMETER TO OPT OUT OF MAC_CHECK
-[[ $# -lt 1 && ${OS} = "darwin" ]] && report_error "Wrong window! ;)"
+[[ $# -lt 1 && ${OS} = "darwin" ]] && die "Wrong window! ;)"

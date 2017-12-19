@@ -71,10 +71,10 @@ function ccache_setup() {
             export USE_CCACHE=1
             add_to_path_pre "/usr/lib/ccache/bin"
         else
-            echo "${RED}Please specify ccache size!${RST}"
+            display_error "Please specify ccache size!"
         fi
     else
-        echo "${RED}Please install ccache!${RST}"
+        display_error "Please install ccache!"
     fi
 }
 
@@ -186,7 +186,7 @@ function ukr() {
 
 # Add kernel remotes to a kernel repo
 function kremotes() {
-    [[ ! -f Makefile ]] && echo "\n${RED}Run this in a kernel tree!${RST}\n" && return 1
+    [[ ! -f Makefile ]] && display_error "Run this in a kernel tree!" && return 1
 
     REPO_LIST="aosp-kc aosp-msm caf-4.4 chromium linux linux-stable linux-stable-rc"
 
@@ -198,7 +198,7 @@ function kremotes() {
 # Merge one git branch into current branch
 # mrgb <branch> <url|remote>
 function mrgb() {
-    [[ $# -lt 2 ]] && echo "\n${RED}mrgb <branch> <remote|url>${RST}\n" && return 1
+    [[ $# -lt 2 ]] && display_error "mrgb <branch> <remote|url>" && return 1
 
     git fetch ${2} ${1}
 
@@ -217,7 +217,7 @@ $(git log --reverse --format="        %s" ${RANGE})
 
 Signed-off-by: $(git config --get user.name) <$(git config --get user.email)>"
 
-[[ $? -ne 0 ]] && echo "Merge needs manual intervention!
+[[ $? -ne 0 ]] && display_error "Merge needs manual intervention!
 
 Resolve conflicts then run git merge --continue!" && return 1
 
@@ -240,7 +240,7 @@ $(git log --reverse --format="        %s" ${RANGE})
 
 Signed-off-by: $(git config --get user.name) <$(git config --get user.email)>"
 
-[[ $? -ne 0 ]] && echo "Merge needs manual intervention!
+[[ $? -ne 0 ]] && display_error "Merge needs manual intervention!
 
 Resolve conflicts then run git merge --continue!" && return 1
 
@@ -365,7 +365,7 @@ function ftest() {
 # Manage test branches
 # tst_brnch <device> [-c|-d] <version>
 function tst_brnch() {
-    [[ ! -f Makefile ]] && echo "\n${RED}Run this in a kernel tree!${RST}\n" && return 1
+    [[ ! -f Makefile ]] && display_error "Run this in a kernel tree!" && return 1
 
     case ${1} in
         "op5")

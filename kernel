@@ -82,7 +82,7 @@ done
 [[ -z ${TOOLCHAIN} ]] && TOOLCHAIN=/opt/aosp-gcc/bin/aarch64-linux-android-
 
 # ERROR OUT IF DEFCONFIG WASN'T SUPPLIED
-[[ -z ${DEFCONFIG} ]] && report_error "Please supply a defconfig!"
+[[ -z ${DEFCONFIG} ]] && die "Please supply a defconfig!"
 
 # BASIC BUILD FUNCTION
 function build() {
@@ -100,7 +100,7 @@ function build() {
 }
 
 # REPORT ERROR IF WE AREN'T IN A TREE WITH A MAKEFILE
-[[ ! -f $(pwd)/Makefile ]] && report_error "This must be run in a kernel tree!"
+[[ ! -f $(pwd)/Makefile ]] && die "This must be run in a kernel tree!"
 
 # SHOW THE BASE VERSION WE ARE MAKING
 header "BUILDING $(make kernelversion)"
@@ -121,7 +121,7 @@ END=$(date +%s)
 [[ -f ${FINAL_IMAGE} ]] && echo "\n${GRN}BUILT IN $(format_time ${END} ${START})${RST}\n
 ${BOLD}IMAGE:${RST} ${FINAL_IMAGE}\n
 ${BOLD}VERSION:${RST} $(cat out/include/config/kernel.release)" \
-                        || report_error "Kernel build failed!"
+                        || die "Kernel build failed!"
 
 # UPLOAD IMAGE IF NECESSARY
 [[ ${UPLOAD} ]] && echo && curl --upload-file ${FINAL_IMAGE} https://transfer.sh/${IMAGE}
