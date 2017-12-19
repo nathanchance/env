@@ -135,7 +135,7 @@ case ${DEVICE} in
 
         # REQUIRED FLAGS
         [[ -z ${ANDROID_VERSION} ]] && ANDROID_VERSION=8.0.0
-        AK_SFX=${ANDROID_VERSION}
+        AK2_SFX=${ANDROID_VERSION}
 
         case ${VERSION} in
             1.*) COMPILER=gcc ;;
@@ -158,7 +158,7 @@ case ${DEVICE} in
     "taimen"|"walleye")
         # REQUIRED FLAGS
         [[ -z ${ANDROID_VERSION} ]] && ANDROID_VERSION=8.1.0
-        AK_SFX=${ANDROID_VERSION}
+        AK2_SFX=${ANDROID_VERSION}
 
         COMPILER=clang
         if [[ -z ${CLANG_TOOLCHAIN_FOLDER} ]]; then
@@ -194,9 +194,9 @@ esac
 # FOLDERS
 SOURCE_FOLDER=${KERNEL_FOLDER}/flash/${DEVICE_NAME_GITHUB}
 OUT_FOLDER=${SOURCE_FOLDER}/out
-ANYKERNEL_FOLDER=${KERNEL_FOLDER}/flash/anykernel
-ANYKERNEL_BRANCH=${DEVICE_NAME_GITHUB}-flash-${AK_SFX}
-MODULES_FOLDER=${ANYKERNEL_FOLDER}/modules
+ANYKERNEL2_FOLDER=${KERNEL_FOLDER}/flash/anykernel2
+ANYKERNEL2_BRANCH=${DEVICE_NAME_GITHUB}-flash-${AK2_SFX}
+MODULES_FOLDER=${ANYKERNEL2_FOLDER}/modules
 FILE_MOVE_HEAD=${WEB_FOLDER}/downloads
 
 case ${MODE} in
@@ -245,9 +245,9 @@ fi
 
 # CLEAN UP
 function clean_up() {
-    # CLEAN ANYKERNEL FOLDER
-    cd ${ANYKERNEL_FOLDER}
-    git checkout ${ANYKERNEL_BRANCH}
+    # CLEAN ANYKERNEL2 FOLDER
+    cd ${ANYKERNEL2_FOLDER}
+    git checkout ${ANYKERNEL2_BRANCH}
     git clean -fxd
 
     # ONLY CHECKOUT IF KERNEL_BRANCH EXISTS AND WE AREN'T BISECTING OR REBASING
@@ -392,8 +392,8 @@ function package_zip() {
     echo "${BOLD}Signed zip name:${RST}   ${SIGNED_ZIP}\n"
 
     # MOVE THE KERNEL IMAGE
-    cp ${OUT_KERNEL_IMAGE} ${ANYKERNEL_FOLDER}
-    [[ -f ${OUT_DTBO_IMAGE} ]] && cp ${OUT_DTBO_IMAGE} ${ANYKERNEL_FOLDER}/dtbo
+    cp ${OUT_KERNEL_IMAGE} ${ANYKERNEL2_FOLDER}
+    [[ -f ${OUT_DTBO_IMAGE} ]] && cp ${OUT_DTBO_IMAGE} ${ANYKERNEL2_FOLDER}/dtbo
 
     # GRAB MODULES TOO IF THEY ARE PRESENT
     mkdir -p ${MODULES_FOLDER}
@@ -412,7 +412,7 @@ function package_zip() {
         rm -rf ${MODULES_FOLDER}
     fi
 
-    cd ${ANYKERNEL_FOLDER}
+    cd ${ANYKERNEL2_FOLDER}
 
     # PACKAGE THE ZIP WITHOUT THE README
     zip -q -r9 ${UNSIGNED_ZIP} * -x README.md ${UNSIGNED_ZIP}
@@ -520,7 +520,7 @@ function move_flashable_files() {
     fi
 
     if [[ ${PACKAGE_METHOD} =~ "zip" ]]; then
-        mv ${ANYKERNEL_FOLDER}/${SIGNED_ZIP} ${FILE_MOVE}
+        mv ${ANYKERNEL2_FOLDER}/${SIGNED_ZIP} ${FILE_MOVE}
         md5sum ${FILE_MOVE}/${SIGNED_ZIP} > ${FILE_MOVE}/${SIGNED_ZIP}.md5
     fi
 }
@@ -551,14 +551,14 @@ function generate_changelog() {
     git diff --find-renames --stat --summary ${RANGE} >> ${CHANGELOG}
 
     if [[ ${PACKAGE_METHOD} =~ "zip" ]]; then
-        # ANYKERNEL NEXT
-        cd ${ANYKERNEL_FOLDER}
+        # ANYKERNEL2 NEXT
+        cd ${ANYKERNEL2_FOLDER}
 
-        # WE ONLY WANT TO SHOW ANYKERNEL CHANGES IF THERE HAVE BEEN SOME
+        # WE ONLY WANT TO SHOW ANYKERNEL2 CHANGES IF THERE HAVE BEEN SOME
         NUM_COMMITS=$(git log ${RANGE} --pretty=oneline | wc -l)
 
         if [[ ${NUM_COMMITS} -gt 0 ]]; then
-            echo "\n\n${GITHUB}/AnyKernel2/commits/${ANYKERNEL_BRANCH}\n" >> ${CHANGELOG}
+            echo "\n\n${GITHUB}/AnyKernel2/commits/${ANYKERNEL2_BRANCH}\n" >> ${CHANGELOG}
 
             git log ${RANGE} | git shortlog >> ${CHANGELOG}
 
@@ -592,7 +592,7 @@ function tag_stable() {
     git push --quiet origin ${KERNEL_NAME}
 
     if [[ ${PACKAGE_METHOD} =~ "zip" ]]; then
-        cd ${ANYKERNEL_FOLDER}
+        cd ${ANYKERNEL2_FOLDER}
 
         git tag --sign --annotate ${KERNEL_NAME} --message ${KERNEL_NAME}
         git push --quiet origin ${KERNEL_NAME}
