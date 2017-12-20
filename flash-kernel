@@ -441,7 +441,7 @@ function package_zip() {
     # IF MODULES WERE FOUND, STRIP THEM; OTHERWISE, REMOVE THE FOLDER
     if [[ $(ls -A ${MODULES_FOLDER}) ]]; then
         echo "${BOLD}Kernel modules:${RST}    $(ls ${MODULES_FOLDER}/*.ko | wc -l)\n"
-        ${GCC_TOOLCHAIN}strip --strip-unneeded ${MODULES_FOLDER}/*.ko
+        ${GCC_TOOLCHAIN%gcc}strip --strip-unneeded ${MODULES_FOLDER}/*.ko
         for MOD in $(ls ${MODULES_FOLDER}/*.ko); do
             ${OUT_FOLDER}/scripts/sign-file sha512 \
                                             ${OUT_FOLDER}/certs/signing_key.pem \
