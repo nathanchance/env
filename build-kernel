@@ -33,6 +33,17 @@ while [[ $# -ge 1 ]]; do
 
             ARCH=${1} ;;
 
+        # USE CLANG FOR COMPILING THE KERNEL
+        "-c"|"--clang")
+
+            CLANG=true ;;
+
+        # SPECIFY WHICH CLANG TOOLCHAIN TO USE
+        "-ct"|"--clang-toolchain")
+            shift && enforce_value $@
+
+            CLANG_TOOLCHAIN_FOLDER=${1} ;;
+
         # DEFCONFIG TO BUILD; DEFAULTS TO FLASH_DEFCONFIG
         "-d"|"--defconfig")
             shift && enforce_value $@
@@ -49,20 +60,11 @@ while [[ $# -ge 1 ]]; do
 
             IMAGE=${1} ;;
 
-        # TOOLCHAIN TO COMPILE WITH; DEFAULTS TO A73 TARGETED LINARO 7.x
-        "-t"|"--toolchain")
+        # SPECIFY WHICH GCC TOOLCHAIN TO USE
+        "-gt"|"--gcc-toolchain")
             shift && enforce_value $@
 
-            case ${1} in
-                "aosp-gcc")
-                    TOOLCHAIN=/opt/${1}/bin/aarch64-linux-android- ;;
-                "l-7.x-a73.a53")
-                    TOOLCHAIN=/opt/${1}/bin/aarch64-linaro-linux-android- ;;
-                "g-8.x")
-                    TOOLCHAIN=/opt/${1}/bin/aarch64-gnu-linux-gnu- ;;
-                *)
-                    TOOLCHAIN=${1} ;;
-            esac ;;
+            GCC_TOOLCHAIN_FOLDER=${1} ;;
 
         # UPLOAD IMAGE TO TRANSFER.SH
         "-u"|"--upload")
@@ -83,8 +85,8 @@ fi
 if [[ -z ${IMAGE} ]]; then
     IMAGE=Image.*-dtb
 fi
-if [[ -z ${TOOLCHAIN} ]]; then
-    TOOLCHAIN=/opt/aosp-gcc/bin/aarch64-linux-android-
+if [[ -z ${GCC_TOOLCHAIN_FOLDER} ]]; then
+    GCC_TOOLCHAIN_FOLDER=aosp-gcc
 fi
 
 # ERROR OUT IF DEFCONFIG WASN'T SUPPLIED
@@ -92,23 +94,43 @@ if [[ -z ${DEFCONFIG} ]]; then
     die "Please supply a defconfig!"
 fi
 
+# SET TOOLCHAINS
+GCC_TOOLCHAIN=$(find /opt/${GCC_TOOLCHAIN_FOLDER}/bin -type f -name '*-gcc' | head -n1)
+if [[ -z ${GCC_TOOLCHAIN} ]]; then
+    die "GCC toolchain could not be found!"
+fi
+if [[ -z ${CLANG_TOOLCHAIN_FOLDER} ]]; then
+    CLANG_TOOLCHAIN_FOLDER=clang-4053586
+fi
+CLANG_TOOLCHAIN=/opt/aosp-clang/${CLANG_TOOLCHAIN_FOLDER}/bin/clang
+
+# SET CCACHE
+CCACHE=$(command -v ccache)
+
 # BASIC BUILD FUNCTION
 function build() {
     # SET MAKE VARIABLE
     MAKE="make ${JOBS_FLAG} O=out ARCH=${ARCH}"
-    
-    # REMOVE OUT FOLDER AND REMAKE IT
-    rm -rf out && mkdir out && echo
+
+    # CLEAN UP FROM LAST COMPILE
+    rm -rf out
 
     # MAKE DEFCONFIG
     ${MAKE} ${DEFCONFIG}
 
     # MAKE KERNEL
-    time ${MAKE} CROSS_COMPILE="$(command -v ccache) ${TOOLCHAIN}"
+    if [[ ${CLANG} ]]; then
+        PATH=${BIN_FOLDER}:${PATH} ${MAKE} CC="${CCACHE} ${CLANG_TOOLCHAIN}" \
+                                           CLANG_TRIPLE=aarch64-linux-gnu- \
+                                           CROSS_COMPILE=$(echo ${GCC_TOOLCHAIN%gcc}) \
+                                           HOSTCC="${CCACHE} ${CLANG_TOOLCHAIN}"
+    else
+        ${MAKE} CROSS_COMPILE="${CCACHE} $(echo ${GCC_TOOLCHAIN%gcc})"
+    fi
 }
 
 # REPORT ERROR IF WE AREN'T IN A TREE WITH A MAKEFILE
-if [[ ! -f $(pwd)/Makefile ]]; then
+if [[ ! -f Makefile ]]; then
     die "This must be run in a kernel tree!"
 fi
 
