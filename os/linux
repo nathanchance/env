@@ -330,17 +330,16 @@ function frel() {
         "op5")
             case ${2} in
                 1.*)
-                    [[ ${3} != "-nt" ]] && toolchain -p -a arm64 -s linaro -t a73.a53
-                    flash -v ${2} -m stable -d op5 -os Custom -b 7.1.x-custom -av 7.1.x
-                    flash -v ${2} -m stable -d op5 -os OOS -b 7.1.x-oos -av 7.1.x ;;
+                    flash-kernel -v ${2} -m stable -d op5 -os Custom -b 7.1.x-custom -av 7.1.x
+                    flash-kernel -v ${2} -m stable -d op5 -os OOS -b 7.1.x-oos -av 7.1.x ;;
                 2.*)
-                    flash -v ${2} -m stable -d op5 -os Custom -b 8.0.0-custom -av 8.0.0
-                    flash -v ${2} -m stable -d op5 -os OOS -b 8.0.0-oos -av 8.0.0 ;;
+                    flash-kernel -v ${2} -m stable -d op5 -os Custom -b 8.0.0-custom -av 8.0.0
+                    flash-kernel -v ${2} -m stable -d op5 -os OOS -b 8.0.0-oos -av 8.0.0 ;;
             esac ;;
 
         "pxl2")
-            flash -v ${2} -m stable -d taimen -b oreo-mr1
-            flash -v ${2} -m stable -d walleye -b oreo-mr1 ;;
+            flash-kernel -v ${2} -m stable -d taimen -b oreo-mr1
+            flash-kernel -v ${2} -m stable -d walleye -b oreo-mr1 ;;
     esac
 }
 
@@ -351,16 +350,16 @@ function ftest() {
         "op5")
             case ${2} in
                 1.*)
-                    flash -v ${2} -r ${3} -m ${4} -d op5 -os Custom -b 7.1.x-custom-queue-${2} -av 7.1.x
-                    flash -v ${2} -r ${3} -m ${4} -d op5 -os OOS -b 7.1.x-oos-queue-${2} -av 7.1.x ;;
+                    flash-kernel -v ${2} -r ${3} -m ${4} -d op5 -os Custom -b 7.1.x-custom-queue-${2} -av 7.1.x
+                    flash-kernel -v ${2} -r ${3} -m ${4} -d op5 -os OOS -b 7.1.x-oos-queue-${2} -av 7.1.x ;;
                 2.*)
-                    flash -v ${2} -r ${3} -m ${4} -d op5 -os Custom -b 8.0.0-custom-queue-${2} -av 8.0.0
-                    flash -v ${2} -r ${3} -m ${4} -d op5 -os OOS -b 8.0.0-oos-queue-${2} -av 8.0.0 ;;
+                    flash-kernel -v ${2} -r ${3} -m ${4} -d op5 -os Custom -b 8.0.0-custom-queue-${2} -av 8.0.0
+                    flash-kernel -v ${2} -r ${3} -m ${4} -d op5 -os OOS -b 8.0.0-oos-queue-${2} -av 8.0.0 ;;
             esac ;;
 
         "pxl2")
-            flash -v ${2} -r ${3} -m ${4} -d taimen -b oreo-mr1-queue-${2}
-            flash -v ${2} -r ${3} -m ${4} -d walleye -b oreo-mr1-queue-${2} ;;
+            flash-kernel -v ${2} -r ${3} -m ${4} -d taimen -b oreo-mr1-queue-${2}
+            flash-kernel -v ${2} -r ${3} -m ${4} -d walleye -b oreo-mr1-queue-${2} ;;
     esac
 }
 
