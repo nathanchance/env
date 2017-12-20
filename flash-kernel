@@ -249,6 +249,7 @@ GCC_TOOLCHAIN=$(find /opt/${GCC_TOOLCHAIN_FOLDER}/bin -type f -name '*-gcc')
 if [[ -z ${GCC_TOOLCHAIN} ]]; then
     die "GCC toolchain could not be found!"
 fi
+GCC_TOOLCHAIN_CC=${GCC_TOOLCHAIN%gcc}
 if [[ ${COMPILER} = "clang" ]]; then
     CLANG_TOOLCHAIN=/opt/aosp-clang/${CLANG_TOOLCHAIN_FOLDER}/bin/clang
     case ${CLANG_TOOLCHAIN_FOLDER} in
@@ -294,7 +295,7 @@ function clean_up() {
 function make_wrapper_gcc() {
     make ${JOBS_FLAG} \
          ARCH=${ARCHITECTURE} \
-         CROSS_COMPILE="${CCACHE} $(echo ${GCC_TOOLCHAIN%gcc})" \
+         CROSS_COMPILE="${CCACHE} ${GCC_TOOLCHAIN_CC}" \
          O=${OUT_FOLDER} \
          $@
 }
@@ -306,7 +307,7 @@ function make_wrapper_clang() {
                                     ARCH=${ARCHITECTURE} \
                                     CC="${CCACHE} ${CLANG_TOOLCHAIN}" \
                                     CLANG_TRIPLE=aarch64-linux-gnu- \
-                                    CROSS_COMPILE=$(echo ${GCC_TOOLCHAIN%gcc}) \
+                                    CROSS_COMPILE=${GCC_TOOLCHAIN_CC} \
                                     HOSTCC="${CCACHE} ${CLANG_TOOLCHAIN}" \
                                     O=${OUT_FOLDER} \
                                     $@
@@ -441,7 +442,7 @@ function package_zip() {
     # IF MODULES WERE FOUND, STRIP THEM; OTHERWISE, REMOVE THE FOLDER
     if [[ $(ls -A ${MODULES_FOLDER}) ]]; then
         echo "${BOLD}Kernel modules:${RST}    $(ls ${MODULES_FOLDER}/*.ko | wc -l)\n"
-        ${GCC_TOOLCHAIN%gcc}strip --strip-unneeded ${MODULES_FOLDER}/*.ko
+        ${GCC_TOOLCHAIN_CC}strip --strip-unneeded ${MODULES_FOLDER}/*.ko
         for MOD in $(ls ${MODULES_FOLDER}/*.ko); do
             ${OUT_FOLDER}/scripts/sign-file sha512 \
                                             ${OUT_FOLDER}/certs/signing_key.pem \
