@@ -186,7 +186,7 @@ function generate_versions() {
     else
         # Make sure target version is between current version and latest version
         TARGET_SUBLEVEL=$(echo ${TARGET_VERSION} | cut -d . -f 3)
-        if [[ ${TARGET_SUBLEVEL} -le ${CURRENT_SUBLEVEL} ]]; else
+        if [[ ${TARGET_SUBLEVEL} -le ${CURRENT_SUBLEVEL} ]]; then
             die "Current version is up to date with target version ${TARGET_VERSION}!\n"
         fi
         if [[ ${TARGET_SUBLEVEL} -gt ${LATEST_SUBLEVEL}  ]]; then
