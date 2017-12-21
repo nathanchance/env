@@ -57,7 +57,9 @@ function log_support() {
     export LOG_FOLDER=${WEB_FOLDER}/me/logs
 
     # Create LOG_FOLDER if it doesn't exist
-    [[ ! -d ${LOG_FOLDER} ]] && mkdir -p ${LOG_FOLDER}/results
+    if [[ ! -d ${LOG_FOLDER} ]]; then
+        mkdir -p ${LOG_FOLDER}/results
+    fi
     
     export LOG=${LOG_FOLDER}/results/compile_log_$(date +%m_%d_%y).log
 }
@@ -107,7 +109,9 @@ function rps {
 # ris <url> <branch> |-s|
 function ris {
     # User requested a shallow clone
-    [[ ${3} = "-s" ]] && local DEPTH="--depth=1"
+    if [[ ${3} = "-s" ]]; then
+        local DEPTH="--depth=1"
+    fi
 
     repo init -u ${1} -b ${2} --no-clone-bundle ${DEPTH}
 
@@ -186,7 +190,10 @@ function ukr() {
 
 # Add kernel remotes to a kernel repo
 function kremotes() {
-    [[ ! -f Makefile ]] && display_error "Run this in a kernel tree!" && return 1
+    if [[ ! -f Makefile ]]; then
+        display_error "Run this in a kernel tree!"
+        return 1
+    fi
 
     REPO_LIST="aosp-kc aosp-msm caf-4.4 chromium linux linux-stable linux-stable-rc"
 
@@ -198,7 +205,10 @@ function kremotes() {
 # Merge one git branch into current branch
 # mrgb <branch> <url|remote>
 function mrgb() {
-    [[ $# -lt 2 ]] && display_error "mrgb <branch> <remote|url>" && return 1
+    if [[ $# -lt 2 ]]; then
+        display_error "mrgb <branch> <remote|url>"
+        return 1
+    fi
 
     git fetch ${2} ${1}
 
@@ -207,8 +217,11 @@ function mrgb() {
     local RANGE=${CB}..FETCH_HEAD
     local URL
 
-    [[ $(echo ${2} | grep http) ]] && URL=${2} \
-                                   || URL=$(git remote get-url ${2})
+    if [[ $(echo ${2} | grep http) ]]; then
+        URL=${2}
+    else
+        URL=$(git remote get-url ${2})
+    fi
 
     git merge --gpg-sign FETCH_HEAD -m "Merge branch '${BTM}' of ${URL} into ${CB}
 
@@ -217,17 +230,22 @@ $(git log --reverse --format="        %s" ${RANGE})
 
 Signed-off-by: $(git config --get user.name) <$(git config --get user.email)>"
 
-[[ $? -ne 0 ]] && display_error "Merge needs manual intervention!
+    if [[ $? -ne 0 ]]; then
+        display_error "Merge needs manual intervention!
 
-Resolve conflicts then run git merge --continue!" && return 1
-
-header "${BTM} merged cleanly!" ${GRN}
+Resolve conflicts then run git merge --continue!"
+        return 1
+    else
+        header "${BTM} merged cleanly!" ${GRN}
+    fi
 }
 
 # Merge one git tag into current branch
 # mrgt <tag> [<remote|url>]
 function mrgt() {
-    [[ $# -gt 1 ]] && git fetch --tags ${2}
+    if [[ $# -gt 1 ]]; then
+        git fetch --tags ${2}
+    fi
 
     local CB=$(git rev-parse --abbrev-ref HEAD)
     local TTM=${1}
@@ -240,12 +258,16 @@ $(git log --reverse --format="        %s" ${RANGE})
 
 Signed-off-by: $(git config --get user.name) <$(git config --get user.email)>"
 
-[[ $? -ne 0 ]] && display_error "Merge needs manual intervention!
+    if [[ $? -ne 0 ]]; then
+        display_error "Merge needs manual intervention!
 
-Resolve conflicts then run git merge --continue!" && return 1
-
-header "${TTM} merged cleanly!" ${GRN}
+Resolve conflicts then run git merge --continue!"
+        return 1
+    else
+        header "${TTM} merged cleanly!" ${GRN}
+    fi
 }
+
 
 # Neofetch alias
 function nf() {
@@ -279,7 +301,9 @@ function kfg() {
 
                 CONFIG=$(echo ${1} | sed s/CONFIG_//)
 
-                [[ -z ${DEFCONFIG} ]] && DEFCONFIG=flash_defconfig
+                if [[ -z ${DEFCONFIG} ]]; then
+                    DEFCONFIG=flash_defconfig
+                fi
 
                 echo "# CONFIG_${CONFIG} is not set" >> arch/arm64/configs/${DEFCONFIG} ;;
 
@@ -288,7 +312,9 @@ function kfg() {
 
                 CONFIG=$(echo ${1} | sed s/CONFIG_//)
 
-                [[ -z ${DEFCONFIG} ]] && DEFCONFIG=flash_defconfig
+                if [[ -z ${DEFCONFIG} ]]; then
+                    DEFCONFIG=flash_defconfig
+                fi
 
                 echo "CONFIG_${CONFIG}=y" >> arch/arm64/configs/${DEFCONFIG} ;;
 
@@ -311,7 +337,9 @@ function kfg() {
             "-u"|"--update")
                 shift
 
-                [[ -z ${DEFCONFIG} ]] && DEFCONFIG=flash_defconfig
+                if [[ -z ${DEFCONFIG} ]]; then
+                    DEFCONFIG=flash_defconfig
+                fi
 
                 rm -rf out
                 make O=out ARCH=arm64 ${DEFCONFIG}
@@ -366,7 +394,10 @@ function ftest() {
 # Manage test branches
 # tst_brnch <device> [-c|-d] <version>
 function tst_brnch() {
-    [[ ! -f Makefile ]] && display_error "Run this in a kernel tree!" && return 1
+    if [[ ! -f Makefile ]]; then
+        display_error "Run this in a kernel tree!"
+        return 1
+    fi
 
     case ${1} in
         "op5")
@@ -446,8 +477,14 @@ function signzip() {
     local CUR_DIR=$(pwd)
     local FILE=${1}
     local KEY=testkey
-    [[ $(echo ${FILE} | grep -v zip) ]] && display_error "This can only sign zip files!" && return 1
-    [[ ! -f ${FILE} ]] && display_error "Zip file does not exist!" && return 1
+    if [[ $(echo ${FILE} | grep -v zip) ]]; then
+        display_error "This can only sign zip files!"
+        return 1
+    fi
+    if [[ ! -f ${FILE} ]]; then
+        display_error "Zip file does not exist!"
+        return 1
+    fi
 
     header "Signing ${FILE}"
 

@@ -73,18 +73,25 @@ function aliases() {
 function tmux_attach() {
     if [[ -z ${TMUX} ]]; then
         ID=$(tmux ls | grep -vm1 attached | cut -d: -f1)
-        [[ -z ${ID} ]] && tmux -u new-session \
-                       || tmux -u attach-session -t ${ID}
+        if [[ -z ${ID} ]]; then
+            tmux -u new-session
+        else
+            tmux -u attach-session -t ${ID}
+        fi
     fi
 }
 
 # Add something to PATH but only if it isn't already there
 function add_to_path_pre() {
-    [[ ! $(echo ${PATH} | ag -s --nocolor ${1}) ]] && export PATH="${1}:${PATH}"
+    if [[ ! $(echo ${PATH} | ag -s --nocolor ${1}) ]]; then
+        export PATH="${1}:${PATH}"
+    fi
 }
 
 function add_to_path_post() {
-    [[ ! $(echo ${PATH} | ag -s --nocolor ${1}) ]] && export PATH="${PATH}:${1}"
+    if [[ ! $(echo ${PATH} | ag -s --nocolor ${1}) ]]; then
+        export PATH="${PATH}:${1}"
+    fi
 }
 
 function bash_setup() {

@@ -50,8 +50,12 @@ function getUptime() {
         hours=$((${uptime}/3600%24))
         days=$((${uptime}/86400))
         uptime="${mins}m"
-        [[ "${hours}" -ne "0" ]] && uptime="${hours}h ${uptime}"
-        [[ "${days}" -ne "0" ]] && uptime="${days}d ${uptime}"
+        if [[ "${hours}" -ne "0" ]]; then
+            uptime="${hours}h ${uptime}"
+        fi
+        if [[ "${days}" -ne "0" ]]; then
+            uptime="${days}d ${uptime}"
+        fi
 	fi
     echo ${uptime}
 }
@@ -162,7 +166,10 @@ function upterm() {
 
     git fetch origin
     git rebase origin/master
-    [[ $? -ne 0 ]] && echo "Error updating repo!" && return
+    if [[ $? -ne 0 ]]; then
+        echo "Error updating repo!"
+        return
+    fi
 
     ${MAKE} clean
     ${MAKE} Development
@@ -195,8 +202,11 @@ function flash_pxl2() {
         header "Fetching new kernel"
 
         rm -rf ~/Downloads/*Taimen*
-        [[ "$@" =~ "-s" ]] && scp nchancellor.net:~/web/downloads/kernels/taimen/8.0.0/stable/*Taimen*.img* ~/Downloads \
-                           || scp nchancellor.net:~/web/me/fk/*Taimen*.img* ~/Downloads
+        if [[ "$@" =~ "-s" ]]; then
+            scp nchancellor.net:~/web/downloads/kernels/taimen/8.0.0/stable/*Taimen*.img* ~/Downloads
+        else
+            scp nchancellor.net:~/web/me/fk/*Taimen*.img* ~/Downloads
+        fi
     fi
 
     BASE=$(ls -1 -t ~/Downloads/*.img | ag Taimen | head -n 1 | sed -e s/-boot.img// -e s/-dtbo.img//)
