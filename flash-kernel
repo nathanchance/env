@@ -561,6 +561,15 @@ function setup_folders() {
         if [[ -n ${OLD_FILES} ]]; then
             mv ${OLD_FILES} ${FILE_MOVE_OLD} &>/dev/null
         fi
+
+        # CLEAN OLD TEST BUILDS
+        cd ${FILE_MOVE}/..
+        rm -rf {alpha,beta,rc,tmp}/*
+        git add .
+        if [[ -n $(git status --porcelain) ]]; then
+            git commit --gpg-sign --quiet --signoff --message "${DEVICE_NAME_ZIP}${OS}: Remove old test builds"
+            git push --quiet
+        fi
     fi
 }
 
