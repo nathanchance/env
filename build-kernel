@@ -99,10 +99,15 @@ GCC_TOOLCHAIN=$(find ${GCC_TOOLCHAIN_FOLDER}/bin -type f -name '*-gcc' | head -n
 if [[ -z ${GCC_TOOLCHAIN} ]]; then
     die "GCC toolchain could not be found!"
 fi
-if [[ -z ${CLANG_TOOLCHAIN_FOLDER} ]]; then
-    CLANG_TOOLCHAIN_FOLDER=/opt/aosp-clang/clang-4053586
+if [[ ${CLANG} ]]; then
+    if [[ -z ${CLANG_TOOLCHAIN_FOLDER} ]]; then
+        CLANG_TOOLCHAIN_FOLDER=/opt/aosp-clang/clang-4053586
+    fi
+    CLANG_TOOLCHAIN=${CLANG_TOOLCHAIN_FOLDER}/bin/clang
+    if [[ ! -f ${CLANG_TOOLCHAIN} ]]; then
+        die "Clang toolchain could not be found!"
+    fi
 fi
-CLANG_TOOLCHAIN=${CLANG_TOOLCHAIN_FOLDER}/bin/clang
 
 # SET CCACHE
 CCACHE=$(command -v ccache)
