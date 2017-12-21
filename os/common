@@ -54,7 +54,7 @@ function aliases() {
     git config --global alias.cpq 'cherry-pick --quit'
     git config --global alias.kf 'show -s --format="%h (\"%s\")"'
     git config --global alias.lo 'log --oneline'
-    git config --global alias.m 'merge --gpg-sign --signoff'
+    git config --global alias.m 'merge --gpg-sign --signoff --log=500'
     git config --global alias.ma 'merge --abort'
     git config --global alias.mc 'merge --continue'
     git config --global alias.pr 'pull-request'
