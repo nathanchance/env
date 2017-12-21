@@ -247,7 +247,7 @@ function mg_target_version() {
     if [[ $? -ne 0 ]]; then
         create_merge_message
 
-        die "Merge needs manual intervention! Resolve conflicts then run git km."
+        die "Merge needs manual intervention! Resolve conflicts then run git fm."
     else
         create_merge_message
         git commit --amend --no-edit --quiet --gpg-sign --file ${MSG_FILE}

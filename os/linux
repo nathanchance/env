@@ -236,7 +236,7 @@ function merge-tag() {
     if [[ ${MERGE_RESULT} -ne 0 ]]; then
         display_error "Merge needs manual intervention!
 
-Resolve conflicts then run git km!"
+Resolve conflicts then run git fm!"
         return 1
     else
         git commit --amend --no-edit --quiet --gpg-sign --file ${MSG_FILE}
