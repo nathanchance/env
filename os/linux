@@ -248,7 +248,8 @@ function nf() {
 # Find config values in a kernel tree
 # kfg [-c <defconfig_file>] [-f <config>] [-e <config>] [-d <config>]
 function kfg() {
-    local DEFCONFIG CONFIG LIST
+    local DEFCONFIG=flash_defconfig
+    local CONFIG LIST
 
     while [[ $# -ge 1 ]]; do
         case ${1} in
@@ -262,20 +263,12 @@ function kfg() {
 
                 CONFIG=$(echo ${1} | sed s/CONFIG_//)
 
-                if [[ -z ${DEFCONFIG} ]]; then
-                    DEFCONFIG=flash_defconfig
-                fi
-
                 echo "# CONFIG_${CONFIG} is not set" >> arch/arm64/configs/${DEFCONFIG} ;;
 
             "-e"|"--enable")
                 shift
 
                 CONFIG=$(echo ${1} | sed s/CONFIG_//)
-
-                if [[ -z ${DEFCONFIG} ]]; then
-                    DEFCONFIG=flash_defconfig
-                fi
 
                 echo "CONFIG_${CONFIG}=y" >> arch/arm64/configs/${DEFCONFIG} ;;
 
@@ -297,10 +290,6 @@ function kfg() {
 
             "-u"|"--update")
                 shift
-
-                if [[ -z ${DEFCONFIG} ]]; then
-                    DEFCONFIG=flash_defconfig
-                fi
 
                 rm -rf out
                 make O=out ARCH=arm64 ${DEFCONFIG}
