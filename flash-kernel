@@ -170,7 +170,7 @@ case ${DEVICE} in
         DEVICE_NAME_WEB=${DEVICE}
 
         if [[ -z ${GCC_TOOLCHAIN_FOLDER} ]]; then
-            GCC_TOOLCHAIN_FOLDER="linaro-gcc"
+            GCC_TOOLCHAIN_FOLDER="/opt/linaro-gcc"
         fi
 
         MATCH_FLAG="*${OS}-v${VERSION::1}*"
@@ -187,9 +187,10 @@ case ${DEVICE} in
         COMPILER=clang
         if [[ -z ${CLANG_TOOLCHAIN_FOLDER} ]]; then
             case ${MODE} in
-                "personal") CLANG_TOOLCHAIN_FOLDER=clang-4479392 ;;
-                *) CLANG_TOOLCHAIN_FOLDER=clang-4053586 ;;
+                "personal") CLANG_VERSION_FOLDER=clang-4479392 ;;
+                *) CLANG_VERSION_FOLDER=clang-4053586 ;;
             esac
+            CLANG_TOOLCHAIN_FOLDER=/opt/aosp-clang/${CLANG_VERSION_FOLDER}
         fi
 
         COMPRESSION=lz4
@@ -199,7 +200,7 @@ case ${DEVICE} in
         DEVICE_NAME_WEB=${DEVICE}
 
         if [[ -z ${GCC_TOOLCHAIN_FOLDER} ]]; then
-            GCC_TOOLCHAIN_FOLDER="linaro-gcc"
+            GCC_TOOLCHAIN_FOLDER="/opt/linaro-gcc"
         fi
 
         MATCH_FLAG="Flash*"
@@ -245,14 +246,14 @@ ARCHITECTURE=arm64
 CCACHE=$(command -v ccache)
 OUT_KERNEL_IMAGE=${OUT_FOLDER}/arch/${ARCHITECTURE}/boot/Image.${COMPRESSION}-dtb
 OUT_DTBO_IMAGE=${OUT_FOLDER}/arch/${ARCHITECTURE}/boot/dtbo.img
-GCC_TOOLCHAIN=$(find /opt/${GCC_TOOLCHAIN_FOLDER}/bin -type f -name '*-gcc')
+GCC_TOOLCHAIN=$(find ${GCC_TOOLCHAIN_FOLDER}/bin -type f -name '*-gcc' | head -n1)
 if [[ -z ${GCC_TOOLCHAIN} ]]; then
     die "GCC toolchain could not be found!"
 fi
 GCC_TOOLCHAIN_CC=${GCC_TOOLCHAIN%gcc}
 if [[ ${COMPILER} = "clang" ]]; then
-    CLANG_TOOLCHAIN=/opt/aosp-clang/${CLANG_TOOLCHAIN_FOLDER}/bin/clang
-    case ${CLANG_TOOLCHAIN_FOLDER} in
+    CLANG_TOOLCHAIN=${CLANG_TOOLCHAIN_FOLDER}/bin/clang
+    case ${CLANG_VERSION_FOLDER} in
         "clang-3289846"|"clang-3859424"|"clang-4053586")
             CLANG_VERSION=$(${CLANG_TOOLCHAIN} --version | head -n 1) ;;
         "clang-4393122"|"clang-4479392")
