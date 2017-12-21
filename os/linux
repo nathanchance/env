@@ -204,29 +204,43 @@ function kremotes() {
 
 # Merge one git tag into current branch
 # mrgt <tag> [<remote|url>]
-function mrgt() {
+function merge-tag() {
     if [[ $# -gt 1 ]]; then
         git fetch --tags ${2}
     fi
 
+    local MSG_FILE=/tmp/mrg-msg
     local CB=$(git rev-parse --abbrev-ref HEAD)
-    local TTM=${1}
-    local RANGE=${CB}..${TTM}
+    local TAG=${1}
+    local RANGE=${CB}..${TAG}
 
-    git merge --gpg-sign ${TTM} -m "Merge ${TTM} into ${CB}
+    GIT_MERGE_VERBOSITY=1 git merge --gpg-sign --no-edit ${TAG}
+    local MERGE_RESULT=$?
 
-Commits in ${TTM}: ($(git rev-list --count ${RANGE}) commits)
-$(git log --reverse --format="        %s" ${RANGE})
+    rm -rf ${MSG_FILE}
+    echo "Merge ${TAG} into ${CB}" >> ${MSG_FILE}
 
-Signed-off-by: $(git config --get user.name) <$(git config --get user.email)>"
+    echo "\nCommits in ${TAG}: ($(git rev-list --count ${RANGE}) commits)" >> ${MSG_FILE}
+    git log --reverse --format="        %s" ${RANGE} >> ${MSG_FILE}
 
-    if [[ $? -ne 0 ]]; then
+    echo "\nSigned-off-by: $(git config --get user.name) <$(git config --get user.email)>" >> ${MSG_FILE}
+
+    CONFLICTS=$(git cf)
+    if [[ -n ${CONFLICTS} ]]; then
+        echo "\nConflicts:" >> ${MSG_FILE}
+        for FILE in ${CONFLICTS}; do
+            echo "\t${FILE}" >> ${MSG_FILE}
+        done
+    fi
+
+    if [[ ${MERGE_RESULT} -ne 0 ]]; then
         display_error "Merge needs manual intervention!
 
-Resolve conflicts then run git merge --continue!"
+Resolve conflicts then run git km!"
         return 1
     else
-        header "${TTM} merged cleanly!" ${GRN}
+        git commit --amend --no-edit --quiet --gpg-sign --file ${MSG_FILE}
+        header "${TAG} merged cleanly!" ${GRN}
     fi
 }
 
