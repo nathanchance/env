@@ -202,44 +202,6 @@ function kremotes() {
     git remote update
 }
 
-# Merge one git branch into current branch
-# mrgb <branch> <url|remote>
-function mrgb() {
-    if [[ $# -lt 2 ]]; then
-        display_error "mrgb <branch> <remote|url>"
-        return 1
-    fi
-
-    git fetch ${2} ${1}
-
-    local CB=$(git rev-parse --abbrev-ref HEAD)
-    local BTM=${1}
-    local RANGE=${CB}..FETCH_HEAD
-    local URL
-
-    if [[ $(echo ${2} | grep http) ]]; then
-        URL=${2}
-    else
-        URL=$(git remote get-url ${2})
-    fi
-
-    git merge --gpg-sign FETCH_HEAD -m "Merge branch '${BTM}' of ${URL} into ${CB}
-
-Commits in ${BTM}: ($(git rev-list --count ${RANGE}) commits)
-$(git log --reverse --format="        %s" ${RANGE})
-
-Signed-off-by: $(git config --get user.name) <$(git config --get user.email)>"
-
-    if [[ $? -ne 0 ]]; then
-        display_error "Merge needs manual intervention!
-
-Resolve conflicts then run git merge --continue!"
-        return 1
-    else
-        header "${BTM} merged cleanly!" ${GRN}
-    fi
-}
-
 # Merge one git tag into current branch
 # mrgt <tag> [<remote|url>]
 function mrgt() {
@@ -267,7 +229,6 @@ Resolve conflicts then run git merge --continue!"
         header "${TTM} merged cleanly!" ${GRN}
     fi
 }
-
 
 # Neofetch alias
 function nf() {
