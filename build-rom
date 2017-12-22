@@ -66,42 +66,42 @@ while [[ $# -ge 1 ]]; do
 
         # CUSTOM CLEAN TARGET
         "-c"|"--clean")
-            export CLEAN_TARGET=${1} ;;
+            CLEAN_TARGET=${1} ;;
 
         # CUSTOM MAKE TARGET
         "-m"|"--make")
             shift && enforce_value $@
 
-            export MAKE_TARGET=${1} ;;
+            MAKE_TARGET=${1} ;;
 
         # USER, USERDEBUG, and ENG
         "-v"|"--version")
             shift && enforce_value $@
 
-            export VARIANT=${1} ;;
+            VARIANT=${1} ;;
 
         # REPOPICK SEQUENCE
         "-rp"|"--repopick")
-            export REPOPICK=true ;;
+            REPOPICK=true ;;
 
         # SPECIAL OPTIONS
         # KREXUS, DU, VANILLA
         "-t"|"--type")
             shift && enforce_value $@
 
-            export BUILD_TAG=${1}
-            export DU_BUILD_TYPE=${1} ;;
+            BUILD_TAG=${1}
+            DU_BUILD_TYPE=${1} ;;
 
         # DU
         "-ng"|"--no-gapps")
-            export HAS_GAPPS=false ;;
+            HAS_GAPPS=false ;;
 
         # VANILLA
         "-pix"|"--pixel")
-            export PIXEL=true ;;
+            PIXEL=true ;;
 
         "-pub"|"--public")
-            export PUBLIC=true ;;
+            PUBLIC=true ;;
 
         *)
             die "Invalid parameter detected!" ;;

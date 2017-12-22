@@ -286,7 +286,7 @@ function clean_up() {
         fi
     # OTHERWISE, NOTATE CURRENT BRANCH FOR CHANGELOG
     else
-        export KERNEL_BRANCH=$(git rev-parse --abbrev-ref HEAD)
+        KERNEL_BRANCH=$(git rev-parse --abbrev-ref HEAD)
     fi
     # CLEAN SOURCE FOLDER
     git clean -fxd
@@ -298,6 +298,7 @@ function make_wrapper_gcc() {
     make ${JOBS_FLAG} \
          ARCH=${ARCHITECTURE} \
          CROSS_COMPILE="${CCACHE} ${GCC_TOOLCHAIN_CC}" \
+         LOCALVERSION=${LOCALVERSION} \
          O=${OUT_FOLDER} \
          $@
 }
@@ -311,6 +312,7 @@ function make_wrapper_clang() {
                                     CLANG_TRIPLE=aarch64-linux-gnu- \
                                     CROSS_COMPILE=${GCC_TOOLCHAIN_CC} \
                                     HOSTCC="${CCACHE} ${CLANG_TOOLCHAIN}" \
+                                    LOCALVERSION=${LOCALVERSION} \
                                     O=${OUT_FOLDER} \
                                     $@
 }
@@ -337,24 +339,24 @@ function generate_variables() {
         OS="-${OS}"
     fi
     LOCALVERSION_BASELINE="Flash-${DEVICE_NAME_FILE}${OS}"
-    export LOCALVERSION="-${LOCALVERSION_BASELINE}"
+    LOCALVERSION="-${LOCALVERSION_BASELINE}"
 
     # ADD VERSION IF PRESENT
     if [[ -n ${VERSION} ]]; then
         VERSION_TEXT="-v${VERSION}"
-        export LOCALVERSION="${LOCALVERSION}${VERSION_TEXT}"
+        LOCALVERSION="${LOCALVERSION}${VERSION_TEXT}"
     fi
 
     # IF THE MODE ISN'T STABLE, ADD SHA INFORMATION TO THE FILE FOR DEBUGGING
     if [[ ${NOT_STABLE} ]]; then
         SHA="-g$(git rev-parse --verify --short HEAD)"
-        export LOCALVERSION="${LOCALVERSION}${SHA}"
+        LOCALVERSION="${LOCALVERSION}${SHA}"
     fi
 
     # IF THERE ARE UNCOMMITTED CHANGES, MARK AS DIRTY
     if [[ $( git diff-index --name-only HEAD ) ]]; then
         DIRTY="-dirty"
-        export LOCALVERSION="${LOCALVERSION}${DIRTY}"
+        LOCALVERSION="${LOCALVERSION}${DIRTY}"
     fi
 
     # GENERATE FIRST LINE VARIABLE
@@ -378,19 +380,19 @@ function generate_variables() {
     THIRD_LINE="$(date)"
 
     # EXPORT KERNEL_NAME BASED ON THE ABOVE INFORMATION
-    export KERNEL_NAME="${LOCALVERSION_BASELINE}${VERSION_TEXT}${REVISION_FOR_FILE}${SHA}"
+    KERNEL_NAME="${LOCALVERSION_BASELINE}${VERSION_TEXT}${REVISION_FOR_FILE}${SHA}"
 
     # SET FINAL NAMES
     if [[ ${PACKAGE_METHOD} =~ "image" ]]; then
-        export BOOT_IMAGE=${KERNEL_NAME}-boot.img
-        export DTBO_IMAGE=${KERNEL_NAME}-dtbo.img
+        BOOT_IMAGE=${KERNEL_NAME}-boot.img
+        DTBO_IMAGE=${KERNEL_NAME}-dtbo.img
     fi
 
     if [[ ${PACKAGE_METHOD} =~ "zip" ]]; then
-        export UNSIGNED_ZIP=${KERNEL_NAME}-unsigned.zip
-        export SIGNAPK_ZIP=${KERNEL_NAME}-signapk.zip
-        export ADJUSTED_ZIP=${KERNEL_NAME}-adjusted.zip
-        export SIGNED_ZIP=${KERNEL_NAME}.zip
+        UNSIGNED_ZIP=${KERNEL_NAME}-unsigned.zip
+        SIGNAPK_ZIP=${KERNEL_NAME}-signapk.zip
+        ADJUSTED_ZIP=${KERNEL_NAME}-adjusted.zip
+        SIGNED_ZIP=${KERNEL_NAME}.zip
     fi
 }
 

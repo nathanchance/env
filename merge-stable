@@ -27,11 +27,11 @@ function parse_parameters() {
         case ${1} in
             # Use git cherry-pick
             "-c"|"--cherry-pick")
-                export UPDATE_METHOD=cherry-pick ;;
+                UPDATE_METHOD=cherry-pick ;;
 
             # Only update the linux-stable remotes
             "-f"|"--fetch-only")
-                export FETCH_REMOTES_ONLY=true ;;
+                FETCH_REMOTES_ONLY=true ;;
 
             # Help menu
             "-h"|"--help")
@@ -68,20 +68,20 @@ function parse_parameters() {
 
             # Don't add a log to the commit message
             "-i"|"--initial-merge")
-                export INITIAL_MERGE=true ;;
+                INITIAL_MERGE=true ;;
 
             # Print the latest version from kernel.org
             "-p"|"--print-latest")
-                export PRINT_LATEST=true ;;
+                PRINT_LATEST=true ;;
 
             # Use the RC tree for updating
             "-r"|"--release-candidate")
-                export RC=true
-                export UPDATE_MODE=0 ;;
+                RC=true
+                UPDATE_MODE=0 ;;
 
             # Update to the next available version from kernel.org
             "-s"|"--single-version")
-                export UPDATE_MODE=0 ;;
+                UPDATE_MODE=0 ;;
 
             # Update to the specified version
             "-v"|"--version")
@@ -89,8 +89,8 @@ function parse_parameters() {
                 if [[ $# -lt 1 ]]; then
                     die "Please specify a version to update!"
                 fi
-                export UPDATE_MODE=1
-                export VERSION_SUPPLIED=${1} ;;
+                UPDATE_MODE=1
+                VERSION_SUPPLIED=${1} ;;
 
             *)
                 die "Invalid parameter!" ;;
@@ -104,10 +104,10 @@ function parse_parameters() {
         die "This is not being run in a kernel tree!" -h
     fi
     if [[ -z ${UPDATE_METHOD} ]]; then
-        export UPDATE_METHOD=merge
+        UPDATE_METHOD=merge
     fi
     if [[ -z ${UPDATE_MODE} ]]; then
-        export UPDATE_MODE=2
+        UPDATE_MODE=2
     fi
 }
 
@@ -180,8 +180,8 @@ function generate_versions() {
     esac
 
     if [[ ${RC} ]]; then
-        export TAG=linux-stable-rc/linux-${CURRENT_MAJOR_VERSION}.y
-        export RANGE=v${CURRENT_VERSION}..${TAG}
+        TAG=linux-stable-rc/linux-${CURRENT_MAJOR_VERSION}.y
+        RANGE=v${CURRENT_VERSION}..${TAG}
         TARGET_VERSION=${TARGET_VERSION}$(git grep -h "\-rc" ${TAG} -- Makefile | cut -d ' ' -f 3)
     else
         # Make sure target version is between current version and latest version
@@ -192,11 +192,9 @@ function generate_versions() {
         if [[ ${TARGET_SUBLEVEL} -gt ${LATEST_SUBLEVEL}  ]]; then
             die "Target version ${TARGET_VERSION} does not exist!\n"
         fi
-        export RANGE=v${CURRENT_VERSION}..v${TARGET_VERSION}
-        export TAG=v${TARGET_VERSION}
+        RANGE=v${CURRENT_VERSION}..v${TARGET_VERSION}
+        TAG=v${TARGET_VERSION}
     fi
-
-    export CURRENT_MAJOR_VERSION CURRENT_VERSION TARGET_VERSION
 
     echo
     echo "${BOLD}Target kernel version:${RST} ${TARGET_VERSION}"
