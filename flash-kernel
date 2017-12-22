@@ -160,7 +160,7 @@ case ${DEVICE} in
             2.*) COMPILER=clang ;;
         esac
         if [[ -z ${CLANG_TOOLCHAIN_FOLDER} ]]; then
-            CLANG_TOOLCHAIN_FOLDER=clang-4053586
+            CLANG_TOOLCHAIN_FOLDER=clang-4479392
         fi
 
         COMPRESSION=gz
@@ -188,7 +188,7 @@ case ${DEVICE} in
         if [[ -z ${CLANG_TOOLCHAIN_FOLDER} ]]; then
             case ${MODE} in
                 "personal") CLANG_VERSION_FOLDER=clang-4479392 ;;
-                *) CLANG_VERSION_FOLDER=clang-4053586 ;;
+                *) CLANG_VERSION_FOLDER=clang-4479392 ;;
             esac
             CLANG_TOOLCHAIN_FOLDER=/opt/aosp-clang/${CLANG_VERSION_FOLDER}
         fi
