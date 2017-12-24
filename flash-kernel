@@ -200,7 +200,7 @@ case ${DEVICE} in
             GCC_TOOLCHAIN_FOLDER="/opt/linaro-gcc"
         fi
 
-        MATCH_FLAG="Flash*"
+        MATCH_FLAG="*${DEVICE_NAME_FILE}-v${VERSION::1}*"
 
         if [[ -z ${PACKAGE_METHOD} ]]; then
             case ${MODE} in
