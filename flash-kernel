@@ -554,15 +554,6 @@ function setup_folders() {
             rm -rf ${FILE_MOVE}/*${DEVICE_NAME_FILE}*
         fi
     else
-        # OTHERWISE, MOVE THE OLD FILES TO AN "OLD" FOLDER
-        if [[ ! -d ${FILE_MOVE_OLD} ]]; then
-            mkdir -p ${FILE_MOVE_OLD}
-        fi
-        OLD_FILES="$(find ${FILE_MOVE}/* -maxdepth 0 -type f)"
-        if [[ -n ${OLD_FILES} ]]; then
-            mv ${OLD_FILES} ${FILE_MOVE_OLD} &>/dev/null
-        fi
-
         # CLEAN OLD TEST BUILDS
         cd ${FILE_MOVE}/..
         rm -rf {alpha,beta,rc,tmp}/*
@@ -570,6 +561,15 @@ function setup_folders() {
         if [[ -n $(git status --porcelain) ]]; then
             git commit --gpg-sign --quiet --signoff --message "${DEVICE_NAME_FILE}${OS}: Remove old test builds"
             git push --quiet
+        fi
+
+        # MOVE THE OLD FILES TO AN ARCHIVE FOLDER
+        if [[ ! -d ${FILE_MOVE_OLD} ]]; then
+            mkdir -p ${FILE_MOVE_OLD}
+        fi
+        OLD_FILES="$(find ${FILE_MOVE}/* -maxdepth 0 -type f)"
+        if [[ -n ${OLD_FILES} ]]; then
+            mv ${OLD_FILES} ${FILE_MOVE_OLD} &>/dev/null
         fi
     fi
 }
@@ -646,7 +646,7 @@ function push_flashable_files() {
 
     git add ..
 
-    git commit --gpg-sign --quiet --signoff --message "$(date +%Y%m%d): ${KERNEL_NAME}"
+    git commit --gpg-sign --quiet --signoff --message "${KERNEL_NAME}"
 
     git push --quiet
 }
