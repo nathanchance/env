@@ -210,7 +210,7 @@ function merge-tag() {
     fi
 
     local MSG_FILE=/tmp/mrg-msg
-    local CB=$(git rev-parse --abbrev-ref HEAD)
+    local CB=$(git rev-parse --abbrev-ref HEAD | sed 's/-queue-.*//')
     local TAG=${1}
     local RANGE=${CB}..${TAG}
 
