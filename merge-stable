@@ -221,7 +221,7 @@ function create_merge_message() {
 
     rm -rf ${MSG_FILE}
 
-    echo "Merge ${TARGET_VERSION} into $(git rev-parse --abbrev-ref HEAD | sed 's/-queue-.*//')" >> ${MSG_FILE}
+    echo "Merge ${TARGET_VERSION} into $(git rev-parse --abbrev-ref HEAD | sed 's/-queue-[0-9].*//')" >> ${MSG_FILE}
     if [[ ! ${INITIAL_MERGE} ]]; then
         echo "\nChanges in ${TARGET_VERSION}: ($(git rev-list --count ${RANGE} 2> /dev/null) commits)" >> ${MSG_FILE}
         git log --reverse --format="        %s" ${RANGE} >> ${MSG_FILE}
