@@ -51,6 +51,12 @@ while [[ $# -ge 1 ]]; do
 
             DEFCONFIG=${1} ;;
 
+        # COMPILER TO USE
+        "-cc"|"--compiler")
+            shift && enforce_value $@
+
+            COMPILER=${1} ;;
+
         # CLANG TOOLCHAIN TO USE WHILE COMPILING
         "-ct"|"--clang-toolchain")
             shift && enforce_value $@
@@ -155,10 +161,12 @@ case ${DEVICE} in
         fi
         AK2_SFX=${ANDROID_VERSION}
 
-        case ${VERSION} in
-            1.*) COMPILER=gcc ;;
-            2.*) COMPILER=clang ;;
-        esac
+        if [[ -z ${COMPILER} ]]; then
+            case ${VERSION} in
+                1.*) COMPILER=gcc ;;
+                2.*) COMPILER=clang ;;
+            esac
+        fi
         if [[ -z ${CLANG_TOOLCHAIN_FOLDER} ]]; then
             CLANG_VERSION_FOLDER=clang-4479392
             CLANG_TOOLCHAIN_FOLDER=/opt/aosp-clang/${CLANG_VERSION_FOLDER}
@@ -183,7 +191,10 @@ case ${DEVICE} in
         fi
         AK2_SFX=${ANDROID_VERSION}
 
-        COMPILER=clang
+        if [[ -z ${COMPILER} ]]; then
+            COMPILER=clang
+        fi
+
         if [[ -z ${CLANG_TOOLCHAIN_FOLDER} ]]; then
             case ${MODE} in
                 "personal") CLANG_VERSION_FOLDER=clang-4479392 ;;
