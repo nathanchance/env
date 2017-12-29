@@ -42,6 +42,9 @@ function linux_aliases() {
 
     # Setup build for AOSP
     alias senv='. build/envsetup.sh'
+
+    # Alias for makepkg
+    alias mkpkg='makepkg -si --noconfirm'
 }
 
 # Setup PS1 and such
