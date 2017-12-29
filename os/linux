@@ -84,6 +84,7 @@ function ccache_setup() {
 function linux_setup() {
     ccache_setup 150
     log_support
+    add_to_path_post ${HOME}/.gem/ruby/2.4.0/bin
 }
 
 # Repo sync shorthand
