@@ -359,41 +359,6 @@ function ftest() {
     esac
 }
 
-# Manage test branches
-# tst_brnch <device> [-c|-d] <version>
-function tst_brnch() {
-    if [[ ! -f Makefile ]]; then
-        display_error "Run this in a kernel tree!"
-        return 1
-    fi
-
-    case ${1} in
-        "op5")
-            case ${3} in
-                1.*)
-                    local BRANCHES="7.1.x-base 7.1.x-custom 7.1.x-oos" ;;
-                2.*)
-                    local BRANCHES="8.0.0-custom 8.0.0-oos" ;;
-            esac ;;
-        "pxl2")
-            local BRANCHES="o-mr1-preview1" ;;
-    esac
-
-    for BRANCH in ${BRANCHES}; do
-        QUEUE_BRANCH=${BRANCH}-queue-${3}
-        case ${2} in
-            "-c"|"--create")
-                git checkout -b ${QUEUE_BRANCH} ${BRANCH}
-                git push --set-upstream origin ${QUEUE_BRANCH} ;;
-
-            "-d"|"--delete")
-                git checkout ${BRANCH}
-                git branch -d ${QUEUE_BRANCH}
-                git push origin :${QUEUE_BRANCH} ;;
-        esac
-    done
-}
-
 # Regenerate Pixel 2 build binaries
 function rpb() {
     cd ${KERNEL_FOLDER}/sources/aosp-pixel2
@@ -484,4 +449,25 @@ function signzip() {
     # Echo zip location
     echo "Signed zip: $(pwd)/${ZIP_NAME}-signed.zip\n"
     cd ${CUR_DIR}
+}
+
+
+# Manage queue tags
+# queue-tag [-c|-d] <version>
+function queue-tag() {
+    if [[ ! -f Makefile ]]; then
+        display_error "Run this in a kernel tree!"
+        return 1
+    fi
+
+    case ${1} in
+        "-c"|"--create")
+            git tag -d queue-${2} 2>/dev/null
+            git tag -a queue-${2} -m "Queue for Flash v${2}" -s
+            git push -f origin queue-${2} ;;
+
+        "-d"|"--delete")
+            git tag -d queue-${2}
+            git push origin :queue-${2} ;;
+    esac
 }
