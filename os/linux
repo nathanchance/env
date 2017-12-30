@@ -218,9 +218,6 @@ function merge-tag() {
     local TAG=${1}
     local RANGE=${CB}..${TAG}
 
-    GIT_MERGE_VERBOSITY=1 git merge --gpg-sign --no-edit ${TAG}
-    local MERGE_RESULT=$?
-
     rm -rf ${MSG_FILE}
     echo "Merge ${TAG} into ${CB}" >> ${MSG_FILE}
 
@@ -228,6 +225,9 @@ function merge-tag() {
     git log --reverse --format="        %s" ${RANGE} >> ${MSG_FILE}
 
     echo "\nSigned-off-by: $(git config --get user.name) <$(git config --get user.email)>" >> ${MSG_FILE}
+
+    GIT_MERGE_VERBOSITY=1 git merge --gpg-sign --no-edit ${TAG}
+    local MERGE_RESULT=$?
 
     CONFLICTS=$(git cf)
     if [[ -n ${CONFLICTS} ]]; then
