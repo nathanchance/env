@@ -346,16 +346,16 @@ function ftest() {
         "op5")
             case ${2} in
                 1.*)
-                    flash-kernel -v ${2} -r ${3} -m ${4} -d op5 -os Custom -b 7.1.x-custom-queue-${2} -av 7.1.x
-                    flash-kernel -v ${2} -r ${3} -m ${4} -d op5 -os OOS -b 7.1.x-oos-queue-${2} -av 7.1.x ;;
+                    flash-kernel -v ${2} -r ${3} -m ${4} -d op5 -os Custom -b queue-${2} -av 7.1.x
+                    flash-kernel -v ${2} -r ${3} -m ${4} -d op5 -os OOS -b queue-${2} -av 7.1.x ;;
                 2.*)
-                    flash-kernel -v ${2} -r ${3} -m ${4} -d op5 -os Custom -b 8.0.0-custom-queue-${2} -av 8.0.0
-                    flash-kernel -v ${2} -r ${3} -m ${4} -d op5 -os OOS -b 8.0.0-oos-queue-${2} -av 8.0.0 ;;
+                    flash-kernel -v ${2} -r ${3} -m ${4} -d op5 -os Custom -b queue-${2} -av 8.0.0
+                    flash-kernel -v ${2} -r ${3} -m ${4} -d op5 -os OOS -b queue-${2} -av 8.0.0 ;;
             esac ;;
 
         "pxl2")
-            flash-kernel -v ${2} -r ${3} -m ${4} -d taimen -b oreo-mr1-queue-${2}
-            flash-kernel -v ${2} -r ${3} -m ${4} -d walleye -b oreo-mr1-queue-${2} ;;
+            flash-kernel -v ${2} -r ${3} -m ${4} -d taimen -b queue-${2}
+            flash-kernel -v ${2} -r ${3} -m ${4} -d walleye -b queue-${2} ;;
     esac
 }
 
