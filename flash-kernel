@@ -774,9 +774,9 @@ if [[ -n ${OUT_KERNEL_IMAGE} ]]; then
 
         setup_folders
         move_flashable_files
-        generate_changelog
 
         if [[ ${MODE} != "personal" ]]; then
+            generate_changelog
             push_flashable_files
         fi
 
