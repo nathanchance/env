@@ -33,6 +33,12 @@ unset OS
 PARAMS="$@"
 while [[ $# -ge 1 ]]; do
     case ${1} in
+        # ANYKERNEL2 BRANCH
+        "-ak2-b"|"--anykernel2-branch")
+            shift && enforce_value $@
+
+            ANYKERNEL2_BRANCH=${1} ;;
+
         # ANDROID VERSION
         "-av"|"--android-version")
             shift && enforce_value $@
@@ -235,7 +241,6 @@ esac
 SOURCE_FOLDER=${KERNEL_FOLDER}/flash/${DEVICE_NAME_GITHUB}
 OUT_FOLDER=${SOURCE_FOLDER}/out
 ANYKERNEL2_FOLDER=${KERNEL_FOLDER}/flash/anykernel2
-ANYKERNEL2_BRANCH=${DEVICE_NAME_GITHUB}-flash-${AK2_SFX}
 MODULES_FOLDER=${ANYKERNEL2_FOLDER}/modules
 FILE_MOVE_HEAD=${WEB_FOLDER}/downloads
 
@@ -280,6 +285,9 @@ fi
 function clean_up() {
     # CLEAN ANYKERNEL2 FOLDER
     cd ${ANYKERNEL2_FOLDER}
+    if [[ -z ${ANYKERNEL2_BRANCH} ]]; then
+        ANYKERNEL2_BRANCH=${DEVICE_NAME_GITHUB}-flash-${AK2_SFX}
+    fi
     git checkout ${ANYKERNEL2_BRANCH}
     git clean -fxd
 
