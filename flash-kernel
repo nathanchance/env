@@ -164,7 +164,7 @@ case ${DEVICE} in
         if [[ -z ${COMPILER} ]]; then
             case ${VERSION} in
                 1.*) COMPILER=gcc ;;
-                2.*) COMPILER=clang ;;
+                *) COMPILER=clang ;;
             esac
         fi
         if [[ -z ${CLANG_TOOLCHAIN_FOLDER} ]]; then
