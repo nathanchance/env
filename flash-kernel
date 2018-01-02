@@ -191,6 +191,11 @@ case ${DEVICE} in
 
         MATCH_FLAG="*${OS}-v${VERSION::1}*"
 
+        case ${OS} in
+            "OOS") MODULES_FOLDER=/system/lib/modules ;;
+            "Custom") MODULES_FOLDER=/system/vendor/lib/modules ;;
+        esac
+
         PACKAGE_METHOD=zip ;;
 
     "taimen"|"walleye")
@@ -244,7 +249,7 @@ esac
 SOURCE_FOLDER=${KERNEL_FOLDER}/flash/${DEVICE_NAME_GITHUB}
 OUT_FOLDER=${SOURCE_FOLDER}/out
 ANYKERNEL2_FOLDER=${KERNEL_FOLDER}/flash/anykernel2
-MODULES_FOLDER=${ANYKERNEL2_FOLDER}/modules
+MODULES_FOLDER=${ANYKERNEL2_FOLDER}/modules${MODULES_FOLDER}
 FILE_MOVE_HEAD=${WEB_FOLDER}/downloads
 
 case ${MODE} in
