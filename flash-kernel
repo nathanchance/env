@@ -163,9 +163,12 @@ case ${DEVICE} in
 
         # REQUIRED FLAGS
         if [[ -z ${ANDROID_VERSION} ]]; then
-            ANDROID_VERSION=8.0.0
+            case ${OS} in
+                "OOS") ANDROID_VERSION=8.0.0 ;;
+                "Custom") ANDROID_VERSION=8.1.0 ;;
+            esac
         fi
-        AK2_SFX=${ANDROID_VERSION}
+        AK2_SFX=${ANDROID_VERSION}-${OS,,}
 
         if [[ -z ${COMPILER} ]]; then
             case ${VERSION} in
@@ -272,6 +275,11 @@ if [[ ${COMPILER} = "clang" ]]; then
         *)
             die "Invalid Clang version specified!" ;;
     esac
+    # ONEPLUS 5 8.0.0 NEEDS A SPACE AFTER THE COMPILER VERSION IN ORDER NOT TO
+    # BREAK THE KERNEL VERSION IN ABOUT PHONE
+    if [[ ${DEVICE} = "op5" && ${ANDROID_VERSION} = "8.0.0" ]]; then
+        CLANG_VERSION="${CLANG_VERSION} "
+    fi
 fi
 
 
