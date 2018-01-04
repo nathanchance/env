@@ -177,7 +177,7 @@ case ${DEVICE} in
             esac
         fi
         if [[ -z ${CLANG_FOLDER} ]]; then
-            CLANG_FOLDER=/opt/aosp-clang/clang-4479392
+            CLANG_FOLDER=/opt/aosp-clang/clang-4523590
         fi
 
         DEVICE_NAME_FILE=${DEVICE^^}
@@ -205,8 +205,8 @@ case ${DEVICE} in
 
         if [[ -z ${CLANG_FOLDER} ]]; then
             case ${MODE} in
-                "personal") CLANG_FOLDER=/opt/aosp-clang/clang-4479392 ;;
-                *) CLANG_FOLDER=/opt/aosp-clang/clang-4479392 ;;
+                "personal") CLANG_FOLDER=/opt/aosp-clang/clang-4523590 ;;
+                *) CLANG_FOLDER=/opt/aosp-clang/clang-4523590 ;;
             esac
         fi
 
