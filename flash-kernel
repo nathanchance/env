@@ -322,7 +322,7 @@ function make_wrapper_gcc() {
 }
 
 
-# MAKE WRAPPER FOR MAKE FUNCTION FOR GCC
+# MAKE WRAPPER FOR MAKE FUNCTION FOR CLANG
 function make_wrapper_clang() {
     PATH=${BIN_FOLDER}:${PATH} make ${JOBS_FLAG} \
                                     ARCH=${ARCHITECTURE} \
