@@ -191,11 +191,6 @@ case ${DEVICE} in
 
         MATCH_FLAG="*${OS}-v${VERSION::1}*"
 
-        case ${OS} in
-            "OOS") MODULES_FOLDER=/system/lib/modules ;;
-            "Custom") MODULES_FOLDER=/system/vendor/lib/modules ;;
-        esac
-
         PACKAGE_METHOD=zip ;;
 
     "taimen"|"walleye")
@@ -249,7 +244,6 @@ esac
 SOURCE_FOLDER=${KERNEL_FOLDER}/flash/${DEVICE_NAME_GITHUB}
 OUT_FOLDER=${SOURCE_FOLDER}/out
 ANYKERNEL2_FOLDER=${KERNEL_FOLDER}/flash/anykernel2
-MODULES_FOLDER=${ANYKERNEL2_FOLDER}/modules${MODULES_FOLDER}
 FILE_MOVE_HEAD=${WEB_FOLDER}/downloads
 
 case ${MODE} in
@@ -471,20 +465,26 @@ function package_zip() {
     fi
 
     # GRAB MODULES TOO IF THEY ARE PRESENT
-    mkdir -p ${MODULES_FOLDER}
-    find ${OUT_FOLDER} -name "*.ko" -exec cp {} ${MODULES_FOLDER} \;
+    MODULES_SYSTEM_FOLDER=${ANYKERNEL2_FOLDER}/modules/system/lib/modules
+    MODULES_VENDOR_FOLDER=${ANYKERNEL2_FOLDER}/modules/system/vendor/lib/modules
+    mkdir -p ${MODULES_SYSTEM_FOLDER}
+    find ${OUT_FOLDER} -name "*.ko" -exec cp {} ${MODULES_SYSTEM_FOLDER} \;
     # IF MODULES WERE FOUND, STRIP THEM; OTHERWISE, REMOVE THE FOLDER
-    if [[ $(ls -A ${MODULES_FOLDER}) ]]; then
-        echo "${BOLD}Kernel modules:${RST}    $(ls ${MODULES_FOLDER}/*.ko | wc -l)\n"
-        ${GCC_TOOLCHAIN_CC}strip --strip-unneeded ${MODULES_FOLDER}/*.ko
-        for MOD in $(ls ${MODULES_FOLDER}/*.ko); do
+    if [[ $(ls -A ${MODULES_SYSTEM_FOLDER}) ]]; then
+        echo "${BOLD}Kernel modules:${RST}    $(ls ${MODULES_SYSTEM_FOLDER}/*.ko | wc -l)\n"
+        ${GCC_TOOLCHAIN_CC}strip --strip-unneeded ${MODULES_SYSTEM_FOLDER}/*.ko
+        for MOD in $(ls ${MODULES_SYSTEM_FOLDER}/*.ko); do
             ${OUT_FOLDER}/scripts/sign-file sha512 \
                                             ${OUT_FOLDER}/certs/signing_key.pem \
                                             ${OUT_FOLDER}/certs/signing_key.x509 \
                                             ${MOD}
         done
+        if [[ ${DEVICE} = "op5" && ${OS} =~ "Custom" && ${ANDROID_VERSION} = "8.1.0" ]]; then
+            mkdir -p ${MODULES_VENDOR_FOLDER}
+            cp ${MODULES_SYSTEM_FOLDER}/*.ko ${MODULES_VENDOR_FOLDER}
+        fi
     else
-        rm -rf ${MODULES_FOLDER}
+        rm -rf ${MODULES_SYSTEM_FOLDER}
     fi
 
     cd ${ANYKERNEL2_FOLDER}
