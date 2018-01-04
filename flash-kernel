@@ -67,7 +67,7 @@ while [[ $# -ge 1 ]]; do
         "-ct"|"--clang-toolchain")
             shift && enforce_value $@
 
-            CLANG_TOOLCHAIN_FOLDER=${1} ;;
+            CLANG_FOLDER=${1} ;;
 
         # DEVICE TO COMPILE FOR; IF ABSENT, USE PIXEL 2 XL
         "-d"|"--device")
@@ -89,7 +89,7 @@ while [[ $# -ge 1 ]]; do
         "-gt"|"--gcc-toolchain")
             shift && enforce_value $@
 
-            GCC_TOOLCHAIN_FOLDER=${1} ;;
+            GCC_FOLDER=${1} ;;
 
         # DO NOT PACKAGE KERNEL IMAGE
         "-io"|"--image-only")
@@ -176,17 +176,16 @@ case ${DEVICE} in
                 *) COMPILER=clang ;;
             esac
         fi
-        if [[ -z ${CLANG_TOOLCHAIN_FOLDER} ]]; then
-            CLANG_VERSION_FOLDER=clang-4479392
-            CLANG_TOOLCHAIN_FOLDER=/opt/aosp-clang/${CLANG_VERSION_FOLDER}
+        if [[ -z ${CLANG_FOLDER} ]]; then
+            CLANG_FOLDER=/opt/aosp-clang/clang-4479392
         fi
 
         DEVICE_NAME_FILE=${DEVICE^^}
         DEVICE_NAME_GITHUB=${DEVICE}
         DEVICE_NAME_WEB=${DEVICE}
 
-        if [[ -z ${GCC_TOOLCHAIN_FOLDER} ]]; then
-            GCC_TOOLCHAIN_FOLDER="/opt/linaro-gcc"
+        if [[ -z ${GCC_FOLDER} ]]; then
+            GCC_FOLDER="/opt/linaro-gcc"
         fi
 
         MATCH_FLAG="*${OS}-v${VERSION::1}*"
@@ -204,20 +203,19 @@ case ${DEVICE} in
             COMPILER=clang
         fi
 
-        if [[ -z ${CLANG_TOOLCHAIN_FOLDER} ]]; then
+        if [[ -z ${CLANG_FOLDER} ]]; then
             case ${MODE} in
-                "personal") CLANG_VERSION_FOLDER=clang-4479392 ;;
-                *) CLANG_VERSION_FOLDER=clang-4479392 ;;
+                "personal") CLANG_FOLDER=/opt/aosp-clang/clang-4479392 ;;
+                *) CLANG_FOLDER=/opt/aosp-clang/clang-4479392 ;;
             esac
-            CLANG_TOOLCHAIN_FOLDER=/opt/aosp-clang/${CLANG_VERSION_FOLDER}
         fi
 
         DEVICE_NAME_FILE=${DEVICE^}
         DEVICE_NAME_GITHUB=wahoo
         DEVICE_NAME_WEB=${DEVICE}
 
-        if [[ -z ${GCC_TOOLCHAIN_FOLDER} ]]; then
-            GCC_TOOLCHAIN_FOLDER="/opt/linaro-gcc"
+        if [[ -z ${GCC_FOLDER} ]]; then
+            GCC_FOLDER="/opt/linaro-gcc"
         fi
 
         MATCH_FLAG="*${DEVICE_NAME_FILE}-v${VERSION::1}*"
@@ -259,18 +257,18 @@ esac
 # COMPILATION VARIABLES
 ARCHITECTURE=arm64
 CCACHE=$(command -v ccache)
-GCC_TOOLCHAIN=$(find ${GCC_TOOLCHAIN_FOLDER}/bin -type f -name '*-gcc' | head -n1)
-if [[ -z ${GCC_TOOLCHAIN} ]]; then
+GCC=$(find ${GCC_FOLDER}/bin -type f -name '*-gcc' | head -n1)
+if [[ -z ${GCC} ]]; then
     die "GCC toolchain could not be found!"
 fi
-GCC_TOOLCHAIN_CC=${GCC_TOOLCHAIN%gcc}
+CC=${GCC%gcc}
 if [[ ${COMPILER} = "clang" ]]; then
-    CLANG_TOOLCHAIN=${CLANG_TOOLCHAIN_FOLDER}/bin/clang
-    case ${CLANG_VERSION_FOLDER} in
+    CLANG=${CLANG_FOLDER}/bin/clang
+    case "$(basename ${CLANG_FOLDER})" in
         "clang-3289846"|"clang-3859424"|"clang-4053586")
-            CLANG_VERSION=$(${CLANG_TOOLCHAIN} --version | head -n 1) ;;
-        "clang-4393122"|"clang-4479392")
-            CLANG_VERSION=$(${CLANG_TOOLCHAIN} --version | head -n 1 | cut -d'(' -f1,4) ;;
+            CLANG_VERSION=$(${CLANG} --version | head -n 1) ;;
+        "clang-4393122"|"clang-4479392"|"clang-4523590")
+            CLANG_VERSION=$(${CLANG} --version | head -n 1 | cut -d'(' -f1,4) ;;
         *)
             die "Invalid Clang version specified!" ;;
     esac
@@ -317,7 +315,7 @@ function clean_up() {
 function make_wrapper_gcc() {
     make ${JOBS_FLAG} \
          ARCH=${ARCHITECTURE} \
-         CROSS_COMPILE="${CCACHE} ${GCC_TOOLCHAIN_CC}" \
+         CROSS_COMPILE="${CCACHE} ${CC}" \
          LOCALVERSION=${LOCALVERSION} \
          O=${OUT_FOLDER} \
          $@
@@ -328,11 +326,11 @@ function make_wrapper_gcc() {
 function make_wrapper_clang() {
     PATH=${BIN_FOLDER}:${PATH} make ${JOBS_FLAG} \
                                     ARCH=${ARCHITECTURE} \
-                                    CC="${CCACHE} ${CLANG_TOOLCHAIN}" \
+                                    CC="${CCACHE} ${CLANG}" \
                                     CLANG_TRIPLE=aarch64-linux-gnu- \
                                     COMPILER_NAME="${CLANG_VERSION}" \
-                                    CROSS_COMPILE=${GCC_TOOLCHAIN_CC} \
-                                    HOSTCC="${CCACHE} ${CLANG_TOOLCHAIN}" \
+                                    CROSS_COMPILE=${CC} \
+                                    HOSTCC="${CCACHE} ${CLANG}" \
                                     LOCALVERSION=${LOCALVERSION} \
                                     O=${OUT_FOLDER} \
                                     $@
@@ -428,11 +426,11 @@ function print_variables() {
 
     if [[ ${COMPILER} = "clang" ]]; then
         echo "${BOLD}Clang info:${RST}        ${CLANG_VERSION}"
-        echo "                   ${CLANG_TOOLCHAIN}\n"
+        echo "                   ${CLANG}\n"
     fi
 
-    echo "${BOLD}GCC info:${RST}          $(${GCC_TOOLCHAIN} --version | head -1)"
-    echo "                   ${GCC_TOOLCHAIN}\n"
+    echo "${BOLD}GCC info:${RST}          $(${GCC} --version | head -1)"
+    echo "                   ${GCC}\n"
 }
 
 
@@ -472,7 +470,7 @@ function package_zip() {
     # IF MODULES WERE FOUND, STRIP THEM; OTHERWISE, REMOVE THE FOLDER
     if [[ $(ls -A ${MODULES_SYSTEM_FOLDER}) ]]; then
         echo "${BOLD}Kernel modules:${RST}    $(ls ${MODULES_SYSTEM_FOLDER}/*.ko | wc -l)\n"
-        ${GCC_TOOLCHAIN_CC}strip --strip-unneeded ${MODULES_SYSTEM_FOLDER}/*.ko
+        ${CC}strip --strip-unneeded ${MODULES_SYSTEM_FOLDER}/*.ko
         for MOD in $(ls ${MODULES_SYSTEM_FOLDER}/*.ko); do
             ${OUT_FOLDER}/scripts/sign-file sha512 \
                                             ${OUT_FOLDER}/certs/signing_key.pem \
