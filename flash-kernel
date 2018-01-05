@@ -797,10 +797,9 @@ if [[ -n ${OUT_KERNEL_IMAGE} ]]; then
         if [[ ${MODE} != "personal" ]]; then
             generate_changelog
             push_flashable_files
-        fi
-
-        if [[ ! ${NOT_STABLE} ]]; then
-            tag_stable
+            if [[ ! ${NOT_STABLE} ]]; then
+                tag_stable
+            fi
         fi
 
         echo
