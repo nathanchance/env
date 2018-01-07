@@ -137,9 +137,6 @@ while [[ $# -ge 1 ]]; do
 done
 
 # DEFAULT PARAMETERS
-if [[ -z ${DEFCONFIG} ]]; then
-    DEFCONFIG="flash_defconfig"
-fi
 if [[ -z ${DEVICE} ]]; then
     DEVICE="taimen"
 fi
@@ -180,6 +177,10 @@ case ${DEVICE} in
             CLANG_FOLDER=/opt/aosp-clang/clang-4523590
         fi
 
+        if [[ -z ${DEFCONFIG} ]]; then
+            DEFCONFIG="flash-${OS,,}_defconfig"
+        fi
+
         DEVICE_NAME_FILE=${DEVICE^^}
         DEVICE_NAME_GITHUB=${DEVICE}
         DEVICE_NAME_WEB=${DEVICE}
@@ -208,6 +209,10 @@ case ${DEVICE} in
                 "personal") CLANG_FOLDER=/opt/aosp-clang/clang-4523590 ;;
                 *) CLANG_FOLDER=/opt/aosp-clang/clang-4523590 ;;
             esac
+        fi
+
+        if [[ -z ${DEFCONFIG} ]]; then
+            DEFCONFIG="flash_defconfig"
         fi
 
         DEVICE_NAME_FILE=${DEVICE^}
