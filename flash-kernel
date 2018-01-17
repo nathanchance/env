@@ -165,7 +165,13 @@ case ${DEVICE} in
                 "Custom") ANDROID_VERSION=8.1.0 ;;
             esac
         fi
-        AK2_SFX=${ANDROID_VERSION}
+
+        case ${VERSION} in
+            1.*|2.*)
+                AK2_SFX=${ANDROID_VERSION} ;;
+            *)
+                AK2_SFX=8.x ;;
+        esac
 
         if [[ -z ${COMPILER} ]]; then
             case ${VERSION} in
