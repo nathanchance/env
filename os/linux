@@ -29,11 +29,12 @@ function linux_aliases() {
     # Change directory aliases
     alias 6p='cd ${KERNEL_FOLDER}/flash/angler'
     alias asu='cd ${REPO_FOLDER}/asu'
-    alias ayk='cd ${KERNEL_FOLDER}/flash/anykernel2'
     alias lnx='cd ${KERNEL_FOLDER}/sources/linux'
     alias pkg='cd ${REPO_FOLDER}/pkgbuilds'
     alias op5='cd ${KERNEL_FOLDER}/flash/op5'
-    alias pxl='cd ${KERNEL_FOLDER}/flash/wahoo'
+    alias op5ak='cd ${KERNEL_FOLDER}/flash/anykernel2-op5'
+    alias pxl2='cd ${KERNEL_FOLDER}/flash/wahoo'
+    alias pxl2ak='cd ${KERNEL_FOLDER}/flash/anykernel2-wahoo'
     alias tlc='cd ${TC_FOLDER}'
     alias spt='cd ${SCRIPTS_FOLDER}'
 
