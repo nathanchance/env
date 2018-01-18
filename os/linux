@@ -150,48 +150,6 @@ function upstb() {
     cd ${CUR_FOLDER}
 }
 
-# Clone kernel repos
-# ckr |-m|
-function ckr() {
-    if [[ "$@" =~ "-m" ]]; then
-        FOLDER=${KERNEL_FOLDER}/mirrors
-        local MIRROR="--mirror"
-    else
-        FOLDER=${KERNEL_FOLDER}/repos
-    fi
-
-    mkdir -p ${FOLDER}
-    cd ${FOLDER}
-
-    git clone ${MIRROR} https://android.googlesource.com/kernel/common aosp-kc
-    git clone ${MIRROR} https://android.googlesource.com/kernel/msm aosp-msm
-    git clone ${MIRROR} https://chromium.googlesource.com/chromiumos/third_party/kernel chromium
-    git clone ${MIRROR} https://source.codeaurora.org/quic/la/kernel/msm-4.4 caf-4.4
-    git clone ${MIRROR} https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git linux
-    git clone ${MIRROR} https://git.kernel.org/pub/scm/linux/kernel/git/stable/linux-stable.git linux-stable
-    git clone ${MIRROR} https://git.kernel.org/pub/scm/linux/kernel/git/stable/linux-stable-rc.git linux-stable-rc
-}
-
-# Update kernel repos
-# ukr
-function ukr() {
-    CUR_FOLDER=$(pwd)
-
-    REPO_LIST="aosp-kc aosp-msm caf-4.4 chromium linux linux-stable linux-stable-rc"
-    for REPO in ${REPO_LIST}; do
-        cd ${KERNEL_FOLDER}/mirrors/${REPO}
-        git fetch -p origin
-    done
-
-    KERNEL_LIST="op5 wahoo"
-    for KERNEL in ${KERNEL_LIST}; do
-        cd ${KERNEL_FOLDER}/flash/${KERNEL}
-        git remote update
-    done
-
-    cd ${CUR_FOLDER}
-}
-
 # Add kernel remotes to a kernel repo
 function kremotes() {
     if [[ ! -f Makefile ]]; then
@@ -199,9 +157,13 @@ function kremotes() {
         return 1
     fi
 
-    REPO_LIST="aosp-kc aosp-msm caf-4.4 chromium linux linux-stable linux-stable-rc"
-
-    for REPO in ${REPO_LIST}; do add_remote ${REPO} ${KERNEL_FOLDER}/mirrors/${REPO}; done
+    git remote add aosp-kc https://android.googlesource.com/kernel/common
+    git remote add aosp-msm https://android.googlesource.com/kernel/msm
+    git remote add chromium https://chromium.googlesource.com/chromiumos/third_party/kernel
+    git remote add caf-4.4 https://source.codeaurora.org/quic/la/kernel/msm-4.4
+    git remote add linux https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git
+    git remote add linux-stable https://git.kernel.org/pub/scm/linux/kernel/git/stable/linux-stable.git
+    git remote add linux-stable-rc https://git.kernel.org/pub/scm/linux/kernel/git/stable/linux-stable-rc.git
 
     git remote update
 }
