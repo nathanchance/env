@@ -114,9 +114,8 @@ function parse_parameters() {
 
 # Update the linux-stable{-rc} remotes (and add them if they doesn't exist)
 function verify_remote() {
-    add_remote ${1} ${KERNEL_FOLDER}/mirrors/${1}
+    add_remote ${1} https://git.kernel.org/pub/scm/linux/kernel/git/stable/${1}.git/
 
-    git -C ${KERNEL_FOLDER}/mirrors/${1} fetch -p origin
     git fetch ${1}
 
     if [[ $? -ne 0 ]]; then
