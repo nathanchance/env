@@ -340,9 +340,9 @@ function make_wrapper_clang() {
                                     ARCH=${ARCHITECTURE} \
                                     CC="${CCACHE} ${CLANG}" \
                                     CLANG_TRIPLE=aarch64-linux-gnu- \
-                                    COMPILER_NAME="${CLANG_VERSION}" \
                                     CROSS_COMPILE=${CC} \
                                     HOSTCC="${CCACHE} ${CLANG}" \
+                                    KBUILD_COMPILER_STRING="${CLANG_VERSION}" \
                                     KBUILD_BUILD_VERSION=${KBUILD_BUILD_VERSION} \
                                     LOCALVERSION=${LOCALVERSION} \
                                     O=${OUT_FOLDER} \
