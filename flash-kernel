@@ -327,6 +327,7 @@ function make_wrapper_gcc() {
     make ${JOBS_FLAG} \
          ARCH=${ARCHITECTURE} \
          CROSS_COMPILE="${CCACHE} ${CC}" \
+         KBUILD_BUILD_VERSION=${KBUILD_BUILD_VERSION} \
          LOCALVERSION=${LOCALVERSION} \
          O=${OUT_FOLDER} \
          $@
@@ -342,6 +343,7 @@ function make_wrapper_clang() {
                                     COMPILER_NAME="${CLANG_VERSION}" \
                                     CROSS_COMPILE=${CC} \
                                     HOSTCC="${CCACHE} ${CLANG}" \
+                                    KBUILD_BUILD_VERSION=${KBUILD_BUILD_VERSION} \
                                     LOCALVERSION=${LOCALVERSION} \
                                     O=${OUT_FOLDER} \
                                     $@
@@ -396,15 +398,15 @@ function generate_variables() {
     # IF REVISION EXISTS, USE IT FOR THE FILE
     if [[ -n ${REVISION} ]]; then
         REVISION_FOR_FILE=".${MODE::1}${REVISION}"
-    fi
 
-    # IF REVISION IS LESS THAN 1, UNSET IT SO BUILD DOESN'T ERROR
-    if [[ ${REVISION} -lt 1 ]]; then
-        unset REVISION
+        # IF REVISION IS GREATER THAN OR EQUAL TO 1, PASS IT TO THE BUILD SYSTEM
+        if [[ ${REVISION} -ge 1 ]]; then
+            KBUILD_BUILD_VERSION=${REVISION}
+        fi
     fi
 
     # GENERATE SECOND LINE VARIABLE
-    SECOND_LINE="$(whoami)@$(uname -n) #${REVISION:-1}"
+    SECOND_LINE="$(whoami)@$(uname -n) #${KBUILD_BUILD_VERSION:-1}"
 
     # GENERATE THIRD LINE VARIABLE
     THIRD_LINE="$(date)"
@@ -449,9 +451,6 @@ function print_variables() {
 function build_kernel() {
     # POINT TO PROPER DEFCONFIG AND GENERATE VERSION FILES
     kmake ${DEFCONFIG} prepare
-
-    # INCREMENT DIRTY VERSION NUMBER IF PASSED ABOVE
-    echo $((${REVISION:-1} - 1)) > ${OUT_FOLDER}/.version
 
     # MAKE THE KERNEL
     kmake ${EXTRA_MAKE_FLAGS}
