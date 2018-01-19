@@ -56,18 +56,6 @@ function linux_prompt() {
     export PROMPT_COMMAND='__git_ps1 "\[\033[01;34m\]\u@\h \[\033[01;32m\]\w\[\033[01;31m\]" " \[\033[39m\]\$\[\033[0m\] "'
 }
 
-# Log support so I can see what compiled and at what time
-function log_support() {
-    export LOG_FOLDER=${WEB_FOLDER}/me/logs
-
-    # Create LOG_FOLDER if it doesn't exist
-    if [[ ! -d ${LOG_FOLDER} ]]; then
-        mkdir -p ${LOG_FOLDER}/results
-    fi
-    
-    export LOG=${LOG_FOLDER}/results/compile_log_$(date +%m_%d_%y).log
-}
-
 # Setup ccache
 # ccache_setup <size>
 function ccache_setup() {
@@ -87,7 +75,7 @@ function ccache_setup() {
 # Additional setup steps for Linux
 function linux_setup() {
     ccache_setup 150
-    log_support
+    export LOG=/tmp/results.log
     add_to_path_post ${HOME}/.gem/ruby/2.4.0/bin
 }
 
