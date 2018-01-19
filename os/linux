@@ -428,3 +428,19 @@ function queue-tag() {
             git push origin :queue-${2} ;;
     esac
 }
+
+# Does it build function
+function doesitbuild() {
+    CUR_FOLDER=$(pwd)
+    case ${CUR_FOLDER} in
+        *wahoo*)
+            flash-kernel -io ;;
+        *op5*)
+            flash-kernel -d op5 -os OOS -io
+            flash-kernel -d op5 -os Custom -io
+            clear
+            cat ${LOG} | tail -n 5 ;;
+        *)
+            return ;;
+    esac
+}
