@@ -217,7 +217,7 @@ function nf() {
 # Find config values in a kernel tree
 # kfg [-c <defconfig_file>] [-f <config>] [-e <config>] [-d <config>]
 function kfg() {
-    local DEFCONFIG=flash_defconfig
+    local DEFCONFIGS="$(ls arch/arm64/configs/flash*_defconfig)"
     local CONFIG LIST
 
     while [[ $# -ge 1 ]]; do
@@ -231,15 +231,18 @@ function kfg() {
                 shift
 
                 CONFIG=$(echo ${1} | sed s/CONFIG_//)
-
-                echo "# CONFIG_${CONFIG} is not set" >> arch/arm64/configs/${DEFCONFIG} ;;
+                for DEFCONFIG in ${DEFCONFIGS}; do
+                    echo "# CONFIG_${CONFIG} is not set" >> arch/arm64/configs/$(basename ${DEFCONFIG})
+                done ;;
 
             "-e"|"--enable")
                 shift
 
                 CONFIG=$(echo ${1} | sed s/CONFIG_//)
 
-                echo "CONFIG_${CONFIG}=y" >> arch/arm64/configs/${DEFCONFIG} ;;
+                for DEFCONFIG in ${DEFCONFIGS}; do
+                    echo "CONFIG_${CONFIG}=y" >> arch/arm64/configs/$(basename ${DEFCONFIG})
+                done ;;
 
             "-f"|"--find")
                 shift
@@ -260,10 +263,12 @@ function kfg() {
             "-u"|"--update")
                 shift
 
-                rm -rf out
-                make O=out ARCH=arm64 ${DEFCONFIG}
-                make O=out ARCH=arm64 savedefconfig
-                cp -v out/defconfig arch/arm64/configs/${DEFCONFIG} ;;
+                for DEFCONFIG in ${DEFCONFIGS}; do
+                    rm -rf out
+                    make O=out ARCH=arm64 $(basename ${DEFCONFIG})
+                    make O=out ARCH=arm64 savedefconfig
+                    cp -v out/defconfig arch/arm64/configs/$(basename ${DEFCONFIG})
+                done ;;
         esac
 
         shift
