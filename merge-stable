@@ -220,10 +220,14 @@ function create_merge_message() {
 
     rm -rf ${MSG_FILE}
 
-    echo "Merge ${TARGET_VERSION} into $(git rev-parse --abbrev-ref HEAD | sed 's/-queue-[0-9].*//')" >> ${MSG_FILE}
+    echo "Merge tag 'v${TARGET_VERSION}' into $(git rev-parse --abbrev-ref HEAD | sed 's/-queue-[0-9].*//')" >> ${MSG_FILE}
+    HASH=$(git rev-parse $(git tag -l v${TARGET_VERSION} | tail -n1))
+    POS=$(git cat-file -p ${HASH} | tail -n +6 | grep -n PGP | cut -d : -f 1 | head -n 1)
+    echo >> ${MSG_FILE}
+    git cat-file -p ${HASH} | tail -n +6 | head -n $((${POS} - 1)) >> ${MSG_FILE}
     if [[ ! ${INITIAL_MERGE} ]]; then
-        echo "\nChanges in ${TARGET_VERSION}: ($(git rev-list --count ${RANGE} 2> /dev/null) commits)" >> ${MSG_FILE}
-        git log --reverse --format="        %s" ${RANGE} >> ${MSG_FILE}
+        echo "\n* tag 'v${TARGET_VERSION}': ($(git rev-list --count ${RANGE} 2> /dev/null) commits)" >> ${MSG_FILE}
+        git log --reverse --format="  %s" ${RANGE} >> ${MSG_FILE}
     fi
     echo "\nSigned-off-by: $(git config --get user.name) <$(git config --get user.email)>" >> ${MSG_FILE}
     CONFLICTS=$(git cf)
