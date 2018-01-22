@@ -451,3 +451,25 @@ function doesitbuild() {
             return ;;
     esac
 }
+
+
+function ls-stats() {
+    if [[ ! -f Makefile ]]; then
+        display_error "Run this in a kernel tree!"
+        return 1
+    fi
+
+    VER=${1}
+    SBLVL=$(git tag --sort=-taggerdate -l v${VER}* | head -n 1 | sed s/v// | cut -d . -f 3)
+
+    echo "Linux ${VER} was released on $(git log -1 --format=%ai v${VER})
+
+The latest version of ${VER} is ${VER}.${SBLVL}, released on $(git log -1 --format=%ai v${VER}.${SBLVL})
+
+Number of commits in each version of ${VER}:
+
+v${VER}.1: $(git lo v${VER}..v${VER}.1 | wc -l)
+$(for i in $(seq 2 ${SBLVL}); do echo "v${VER}.$i: $(git lo v${VER}.$(($i - 1))..v${VER}.$i | wc -l)"; done)
+
+Average number of commits in a version of ${VER}: $(($(git lo v${VER}..v${VER}.${SBLVL} | wc -l) / ${SBLVL}))" > ~/web/stats/${VER}
+}
