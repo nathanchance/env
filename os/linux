@@ -417,7 +417,7 @@ function signzip() {
 
 
 # Manage queue tags
-# queue-tag [-c|-d] <version>
+# queue-tag [-c|-d] <version> <hash>
 function queue-tag() {
     if [[ ! -f Makefile ]]; then
         display_error "Run this in a kernel tree!"
@@ -427,7 +427,7 @@ function queue-tag() {
     case ${1} in
         "-c"|"--create")
             git tag -d queue-${2} 2>/dev/null
-            git tag -a queue-${2} -m "Queue for Flash v${2}" -s
+            git tag -a queue-${2} -m "Queue for Flash v${2}" -s ${3}
             git push -f origin queue-${2} ;;
 
         "-d"|"--delete")
