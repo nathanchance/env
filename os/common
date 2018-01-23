@@ -46,7 +46,7 @@ function aliases() {
     git config --global alias.cl 'clean -fxd'
     git config --global alias.cp 'cherry-pick --gpg-sign --signoff'
     git config --global alias.cpa 'cherry-pick --abort'
-    git config --global alias.cpc 'cherry-pick --continue --signoff'
+    git config --global alias.cpc 'cherry-pick --continue'
     git config --global alias.cpe 'cherry-pick --edit --signoff'
     git config --global alias.cpq 'cherry-pick --quit'
     git config --global alias.dc 'describe --contains'
