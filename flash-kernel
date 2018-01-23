@@ -370,7 +370,7 @@ function generate_variables() {
     if [[ -n ${OS} ]]; then
         OS="-${OS}"
     fi
-    LOCALVERSION_BASELINE="Flash-${DEVICE_NAME_FILE}${OS}"
+    LOCALVERSION_BASELINE="FlashKernel-${DEVICE_NAME_FILE}${OS}"
     LOCALVERSION="-${LOCALVERSION_BASELINE}"
 
     # ADD VERSION IF PRESENT
