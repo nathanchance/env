@@ -278,7 +278,7 @@ if [[ ${COMPILER} = "clang" ]]; then
     case "$(basename ${CLANG_FOLDER})" in
         "clang-3289846"|"clang-3859424"|"clang-4053586")
             CLANG_VERSION=$(${CLANG} --version | head -n 1) ;;
-        "clang-4393122"|"clang-4479392"|"clang-4536805"|"clang-4556391")
+        "clang-4393122"|"clang-4479392"|"clang-4556391")
             CLANG_VERSION=$(${CLANG} --version | head -n 1 | cut -d'(' -f1,4) ;;
         *)
             die "Invalid Clang version specified!" ;;
