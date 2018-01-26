@@ -118,7 +118,7 @@ function build() {
     MAKE="make ${JOBS_FLAG} O=out ARCH=${ARCH}"
 
     # CLEAN UP FROM LAST COMPILE
-    rm -rf out
+    rm -rf out && mkdir -p out
 
     # MAKE DEFCONFIG
     ${MAKE} ${DEFCONFIG}
