@@ -471,6 +471,7 @@ function package_zip() {
     if [[ -n ${OUT_DTBO_IMAGE} ]]; then
         cp ${OUT_DTBO_IMAGE} ${ANYKERNEL2_FOLDER}/dtbo
     fi
+    cat ${OUT_FOLDER}/include/config/kernel.release > ${ANYKERNEL2_FOLDER}/version
 
     # GRAB MODULES TOO IF THEY ARE PRESENT
     MODULES_SYSTEM_FOLDER=${ANYKERNEL2_FOLDER}/modules/system/lib/modules
