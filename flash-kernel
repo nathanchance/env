@@ -296,10 +296,9 @@ if [[ ${COMPILER} = "clang" ]]; then
     esac
     # ONEPLUS 5 8.0.0 NEEDS A SPACE AFTER THE COMPILER VERSION IN ORDER NOT TO
     # BREAK THE KERNEL VERSION IN ABOUT PHONE
+    CLANG_VERSION="$(echo ${CLANG_VERSION} | sed 's/[[:space:]]*$//')"
     if [[ ${DEVICE} = "op5" && ${ANDROID_VERSION} = "8.0.0" ]]; then
         CLANG_VERSION="${CLANG_VERSION} "
-    else
-        CLANG_VERSION="$(echo ${CLANG_VERSION} | sed 's/[[:space:]]*$//')"
     fi
 fi
 
