@@ -281,7 +281,13 @@ if [[ ${COMPILER} = "clang" ]]; then
         "clang-4393122"|"clang-4479392"|"clang-4556391")
             CLANG_VERSION=$(${CLANG} --version | head -n 1 | cut -d'(' -f1,4) ;;
         "clang-7.x")
-            CLANG_VERSION=$(${CLANG} --version | head -n 1 | cut -d'(' -f1) ;;
+            CLANG_VERSION=$(${CLANG} --version | head -n 1 | cut -d'(' -f1)
+            SCRIPT_OPT_FLAGS="-mllvm -polly \
+                              -mllvm -polly-run-dce \
+                              -mllvm -polly-run-inliner \
+                              -mllvm -polly-opt-fusion=max \
+                              -mllvm -polly-ast-use-context \
+                              -mllvm -polly-vectorizer=stripmine" ;;
         *)
             die "Invalid Clang version specified!" ;;
     esac
@@ -350,6 +356,7 @@ function make_wrapper_clang() {
                                     KBUILD_BUILD_VERSION=${KBUILD_BUILD_VERSION} \
                                     LOCALVERSION=${LOCALVERSION} \
                                     O=${OUT_FOLDER} \
+                                    SCRIPT_OPT_FLAGS="${SCRIPT_OPT_FLAGS}" \
                                     $@
 }
 
