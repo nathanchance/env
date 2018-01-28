@@ -180,7 +180,10 @@ case ${DEVICE} in
             esac
         fi
         if [[ -z ${CLANG_FOLDER} ]]; then
-            CLANG_FOLDER=/opt/aosp-clang/clang-4556391
+            case ${MODE} in
+                "personal") CLANG_FOLDER=/opt/clang-7.x ;;
+                *) CLANG_FOLDER=/opt/aosp-clang/clang-4556391 ;;
+            esac
         fi
 
         if [[ -z ${DEFCONFIG} ]]; then
