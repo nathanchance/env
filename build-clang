@@ -1,0 +1,147 @@
+#!/usr/bin/env bash
+#
+# Clang compilation script
+#
+# Copyright (C) 2017 Nathan Chancellor
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>
+
+
+###############
+#             #
+#  VARIABLES  #
+#             #
+###############
+
+MAIN_FOLDER=${HOME}/toolchains/clang
+LLVM_FOLDER=${MAIN_FOLDER}/llvm
+BUILD_FOLDER=${MAIN_FOLDER}/build
+INSTALL_FOLDER=/opt/clang-7.x
+START=$(date +"%s")
+
+
+###############
+#             #
+#  FUNCTIONS  #
+#             #
+###############
+
+# cmake wrapper
+function cmka() {
+    CC="gcc" GXX="g++" LD="ld.gold" cmake "$@"
+}
+
+# Syncs requested  projects
+function sync() {
+    FOLDER=${1}
+    if [[ ${FOLDER} =~ "binutils" ]]; then
+        URL="http://sourceware.org/git/binutils-gdb.git -b binutils-2_29-branch"
+    else
+        URL=https://git.llvm.org/git/$(basename ${FOLDER})
+    fi
+
+    if [[ ! -d ${FOLDER} ]]; then
+        git clone ${URL} ${FOLDER}
+    else
+        cd ${FOLDER}
+        git clean -fxdq
+        git fetch origin
+        git rebase origin/$(git rev-parse --abbrev-ref HEAD)
+        if [[ $? -ne 0 ]]; then
+            die "Error updating $(basename ${FOLDER})!"
+        fi
+        cd ..
+    fi
+}
+
+function sync_all() {
+    header "Syncing projects"
+
+    mkdir -p ${MAIN_FOLDER}
+    cd ${MAIN_FOLDER}
+
+    sync llvm
+
+    mkdir -p ${LLVM_FOLDER}/tools
+    cd ${LLVM_FOLDER}/tools
+
+    sync binutils
+    sync clang
+    sync lld
+    sync polly
+
+    mkdir -p ${LLVM_FOLDER}/projects
+    cd ${LLVM_FOLDER}/projects
+
+    sync compiler-rt
+    sync libcxx
+    sync libcxxabi
+    sync libunwind
+    sync openmp
+}
+
+function cleanup() {
+    rm -rf ${BUILD_FOLDER}
+    mkdir -p ${BUILD_FOLDER}
+    cd ${BUILD_FOLDER}
+}
+
+function build() {
+    header "Building Clang"
+
+    cmka -DLINK_POLLY_INTO_TOOLS:BOOL=ON \
+         -DCMAKE_CXX_FLAGS:STRING="-O3 -Wno-macro-redefined -pipe -pthread -fopenmp -g0 -march=native -mtune=native" \
+         -DCMAKE_C_FLAGS:STRING="-O3 -Wno-macro-redefined -pipe -pthread -fopenmp -g0 -march=native -mtune=native" \
+         -DLLVM_ENABLE_PIC:BOOL=ON \
+         -DCMAKE_INSTALL_PREFIX:PATH=${INSTALL_FOLDER} \
+         -DLLVM_PARALLEL_COMPILE_JOBS=${THREADS} \
+         -DLLVM_PARALLEL_LINK_JOBS=${THREADS} \
+         -DLLVM_ENABLE_THREADS:BOOL=ON \
+         -DLLVM_ENABLE_WARNINGS:BOOL=OFF \
+         -DLLVM_ENABLE_WERROR:BOOL=OFF \
+         -DLLVM_INCLUDE_EXAMPLES:BOOL=OFF \
+         -DLLVM_INCLUDE_TESTS:BOOL=OFF \
+         -DLLVM_BINUTILS_INCDIR:PATH=${LLVM_FOLDER}/tools/binutils/include \
+         -DLLVM_TARGETS_TO_BUILD:STRING="X86;ARM;AArch64;NVPTX" \
+         -DCMAKE_BUILD_TYPE:STRING=MinSizeRel \
+         -DLLVM_OPTIMIZED_TABLEGEN:BOOL=ON \
+         -DPOLLY_ENABLE_GPGPU_CODEGEN:BOOL=ON \
+         ${LLVM_FOLDER}
+
+    time cmka --build . -- ${JOBS_FLAG}
+
+}
+
+function install() {
+    END=$(date +"%s")
+    if [[ -f ${BUILD_FOLDER}/bin/clang ]]; then
+        header "Installing Clang"
+
+        rm -rf ${INSTALL_FOLDER}
+        cmka --build . --target install -- ${JOBS_FLAG}
+
+        header "SUCCESS!" ${GRN}
+        echo "${GRN}Successfully built and installed Clang toolchain to ${INSTALL_FOLDER}!${GRN}"
+        echo "${GRN}Time elapsed: $(format_time ${END} ${START})${RST}\n"
+    else
+        header "ERROR!"
+        die "Time elapsed: $(format_time ${END} ${START})"
+    fi
+}
+
+source common
+sync_all
+cleanup
+build
+install
