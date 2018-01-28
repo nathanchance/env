@@ -385,7 +385,9 @@ function generate_variables() {
 
     # IF THE MODE ISN'T STABLE, ADD SHA INFORMATION TO THE FILE FOR DEBUGGING
     if [[ ${NOT_STABLE} ]]; then
-        SHA="-g$(git rev-parse --verify --short HEAD)"
+        # FURTHERMORE, IF IT IS A PERSONAL BUILD, USE A SHORTER HASH LENGTH
+        [[ ${MODE} = "personal" ]] && NUM=8 || NUM=12
+        SHA="-g$(git rev-parse --verify --short=${NUM} HEAD)"
         LOCALVERSION="${LOCALVERSION}${SHA}"
     fi
 
