@@ -263,7 +263,7 @@ case ${MODE} in
         FILE_MOVE=${FILE_MOVE_HEAD}/kernels/${DEVICE_NAME_WEB}/${ANDROID_VERSION}${OS_FOLDER}/${MODE}
         FILE_MOVE_OLD=$(readlink -f "${FILE_MOVE}/../archive") ;;
     "personal")
-        FILE_MOVE=$(readlink -f "${FILE_MOVE_HEAD}/../me/fk") ;;
+        FILE_MOVE=$(readlink -f "${FILE_MOVE_HEAD}/../me/fk/${DEVICE_NAME_WEB}") ;;
     *)
         die "Invalid mode specified!" ;;
 esac
@@ -384,7 +384,11 @@ function generate_variables() {
     if [[ -n ${OS} ]]; then
         OS="-${OS}"
     fi
-    LOCALVERSION_BASELINE="FlashKernel-${DEVICE_NAME_FILE}${OS}"
+    if [[ ${MODE} = "personal" ]]; then
+        LOCALVERSION_BASELINE="FlashKernel"
+    else
+        LOCALVERSION_BASELINE="FlashKernel-${DEVICE_NAME_FILE}${OS}"
+    fi
     LOCALVERSION="-${LOCALVERSION_BASELINE}"
 
     # ADD VERSION IF PRESENT
@@ -612,7 +616,7 @@ function setup_folders() {
     # IF IT ISN'T A STABLE BUILD, CLEAN THE FOLDER
     if [[ ${NOT_STABLE} ]]; then
         if [[ ! ${NOCLEAN} ]]; then
-            rm -rf "${FILE_MOVE:?}"/*${DEVICE_NAME_FILE}*
+            rm -rf "${FILE_MOVE:?}"/*
         fi
     else
         # CLEAN OLD TEST BUILDS
