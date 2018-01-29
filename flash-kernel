@@ -182,7 +182,7 @@ case ${DEVICE} in
         if [[ -z ${CLANG_FOLDER} ]]; then
             case ${MODE} in
                 "personal") CLANG_FOLDER=/opt/clang-7.x ;;
-                *) CLANG_FOLDER=/opt/aosp-clang/clang-4556391 ;;
+                *) CLANG_FOLDER=/opt/clang-6.x ;;
             esac
         fi
 
@@ -216,7 +216,7 @@ case ${DEVICE} in
         if [[ -z ${CLANG_FOLDER} ]]; then
             case ${MODE} in
                 "personal") CLANG_FOLDER=/opt/clang-7.x ;;
-                *) CLANG_FOLDER=/opt/aosp-clang/clang-4556391 ;;
+                *) CLANG_FOLDER=/opt/clang-6.x ;;
             esac
         fi
 
@@ -278,12 +278,15 @@ fi
 CC=${GCC%gcc}
 if [[ ${COMPILER} = "clang" ]]; then
     CLANG=${CLANG_FOLDER}/bin/clang
+    if [[ ! -f ${CLANG} ]]; then
+        die "Clang toolchain could not be found!"
+    fi
     case "$(basename ${CLANG_FOLDER})" in
         "clang-3289846"|"clang-3859424"|"clang-4053586")
             CLANG_VERSION=$(${CLANG} --version | head -n 1) ;;
         "clang-4393122"|"clang-4479392"|"clang-4556391")
             CLANG_VERSION=$(${CLANG} --version | head -n 1 | cut -d'(' -f1,4) ;;
-        "clang-7.x")
+        *)
             CLANG_VERSION=$(${CLANG} --version | head -n 1 | cut -d'(' -f1)
             if [[ ${MODE} = "personal" ]]; then
                 SCRIPT_OPT_FLAGS="-mllvm -polly \
@@ -293,8 +296,6 @@ if [[ ${COMPILER} = "clang" ]]; then
                                   -mllvm -polly-ast-use-context \
                                   -mllvm -polly-vectorizer=stripmine"
             fi ;;
-        *)
-            die "Invalid Clang version specified!" ;;
     esac
     # shellcheck disable=SC2001
     CLANG_VERSION="$(echo "${CLANG_VERSION}" | sed 's/[[:space:]]*$//')"
