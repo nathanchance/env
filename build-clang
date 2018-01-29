@@ -46,43 +46,43 @@ function cmka() {
 function sync() {
     FOLDER=${1}
     if [[ ${FOLDER} =~ "binutils" ]]; then
-        URL="http://sourceware.org/git/binutils-gdb.git -b binutils-2_29-branch"
+        URL=( http://sourceware.org/git/binutils-gdb.git -b binutils-2_29-branch )
     else
-        URL=https://git.llvm.org/git/$(basename ${FOLDER})
+        URL=( https://git.llvm.org/git/"$(basename "${FOLDER}")" )
     fi
 
     if [[ ! -d ${FOLDER} ]]; then
-        git clone ${URL} ${FOLDER}
+        git clone "${URL[@]}" "${FOLDER}"
     else
-        cd ${FOLDER}
+        (
+        cd "${FOLDER}" || die "Error moving into ${FOLDER}"
         git clean -fxdq
         git fetch origin
-        git rebase origin/$(git rev-parse --abbrev-ref HEAD)
-        if [[ $? -ne 0 ]]; then
-            die "Error updating $(basename ${FOLDER})!"
+        if ! git rebase origin/"$(git rev-parse --abbrev-ref HEAD)"; then
+            die "Error updating $(basename "${FOLDER}")!"
         fi
-        cd ..
+        )
     fi
 }
 
 function sync_all() {
     header "Syncing projects"
 
-    mkdir -p ${MAIN_FOLDER}
-    cd ${MAIN_FOLDER}
+    mkdir -p "${MAIN_FOLDER}"
+    cd "${MAIN_FOLDER}" || die "Error creating ${MAIN_FOLDER}!"
 
     sync llvm
 
-    mkdir -p ${LLVM_FOLDER}/tools
-    cd ${LLVM_FOLDER}/tools
+    mkdir -p "${LLVM_FOLDER}/tools"
+    cd "${LLVM_FOLDER}/tools" || die "Error creating tools folder!"
 
     sync binutils
     sync clang
     sync lld
     sync polly
 
-    mkdir -p ${LLVM_FOLDER}/projects
-    cd ${LLVM_FOLDER}/projects
+    mkdir -p "${LLVM_FOLDER}/projects"
+    cd "${LLVM_FOLDER}/projects" || die "Error creating projects folder!"
 
     sync compiler-rt
     sync libcxx
@@ -92,9 +92,9 @@ function sync_all() {
 }
 
 function cleanup() {
-    rm -rf ${BUILD_FOLDER}
-    mkdir -p ${BUILD_FOLDER}
-    cd ${BUILD_FOLDER}
+    rm -rf "${BUILD_FOLDER}"
+    mkdir -p "${BUILD_FOLDER}"
+    cd "${BUILD_FOLDER}" || die "Error creating build folder!"
 }
 
 function build() {
@@ -105,21 +105,21 @@ function build() {
          -DCMAKE_C_FLAGS:STRING="-O3 -Wno-macro-redefined -pipe -pthread -fopenmp -g0 -march=native -mtune=native" \
          -DLLVM_ENABLE_PIC:BOOL=ON \
          -DCMAKE_INSTALL_PREFIX:PATH=${INSTALL_FOLDER} \
-         -DLLVM_PARALLEL_COMPILE_JOBS=${THREADS} \
-         -DLLVM_PARALLEL_LINK_JOBS=${THREADS} \
+         -DLLVM_PARALLEL_COMPILE_JOBS="${THREADS}" \
+         -DLLVM_PARALLEL_LINK_JOBS="${THREADS}" \
          -DLLVM_ENABLE_THREADS:BOOL=ON \
          -DLLVM_ENABLE_WARNINGS:BOOL=OFF \
          -DLLVM_ENABLE_WERROR:BOOL=OFF \
          -DLLVM_INCLUDE_EXAMPLES:BOOL=OFF \
          -DLLVM_INCLUDE_TESTS:BOOL=OFF \
-         -DLLVM_BINUTILS_INCDIR:PATH=${LLVM_FOLDER}/tools/binutils/include \
+         -DLLVM_BINUTILS_INCDIR:PATH="${LLVM_FOLDER}/tools/binutils/include" \
          -DLLVM_TARGETS_TO_BUILD:STRING="X86;ARM;AArch64;NVPTX" \
          -DCMAKE_BUILD_TYPE:STRING=MinSizeRel \
          -DLLVM_OPTIMIZED_TABLEGEN:BOOL=ON \
          -DPOLLY_ENABLE_GPGPU_CODEGEN:BOOL=ON \
-         ${LLVM_FOLDER}
+         "${LLVM_FOLDER}"
 
-    time cmka --build . -- ${JOBS_FLAG}
+    time cmka --build . -- "${JOBS_FLAG}"
 
 }
 
@@ -128,15 +128,15 @@ function install() {
     if [[ -f ${BUILD_FOLDER}/bin/clang ]]; then
         header "Installing Clang"
 
-        rm -rf ${INSTALL_FOLDER}
-        cmka --build . --target install -- ${JOBS_FLAG}
+        rm -rf "${INSTALL_FOLDER}"
+        cmka --build . --target install -- "${JOBS_FLAG}"
 
-        header "SUCCESS!" ${GRN}
+        header "SUCCESS!" "${GRN}"
         echo "${GRN}Successfully built and installed Clang toolchain to ${INSTALL_FOLDER}!${GRN}"
-        echo "${GRN}Time elapsed: $(format_time ${END} ${START})${RST}\n"
+        echo "${GRN}Time elapsed: $(format_time "${END}" "${START}")${RST}\n"
     else
         header "ERROR!"
-        die "Time elapsed: $(format_time ${END} ${START})"
+        die "Time elapsed: $(format_time "${END}" "${START}")"
     fi
 }
 
