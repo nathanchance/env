@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# shellcheck disable=SC2034,SC1090
 #
 # Helper functions
 #
@@ -25,14 +26,14 @@
 ###############
 
 # WHAT OS ARE WE ON?
-OS=$(UNAME=$(uname); echo ${UNAME,,})
+OS=$(UNAME=$(uname); echo "${UNAME,,}")
 # GNU READLINK IS NEEDED FOR SCRIPTS_FOLDER
 if [[ ${OS} = "darwin" ]]; then
     alias readlink=greadlink
 fi
 
 # LOCATION OF SCRIPTS FOLDER
-SCRIPTS_FOLDER=$(cd $(dirname $(readlink -f "${BASH_SOURCE[0]}")) && pwd)
+SCRIPTS_FOLDER=$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")" && pwd)
 BIN_FOLDER=${SCRIPTS_FOLDER}/bin
 
 # COMMON LOCATIONS AMONGST SCRIPTS
@@ -79,11 +80,11 @@ function header() {
     else
         COLOR=${RED}
     fi
-    echo ${COLOR}
+    echo "${COLOR}"
     echo "====$(for i in $(seq ${#1}); do echo "=\c"; done)===="
     echo "==  ${1}  =="
     echo "====$(for i in $(seq ${#1}); do echo "=\c"; done)===="
-    echo ${RST}
+    echo "${RST}"
 }
 
 # FORMATS THE TIME
@@ -91,8 +92,8 @@ function format_time() {
     MINS=$(((${1} - ${2}) / 60))
     SECS=$(((${1} - ${2}) % 60))
     if [[ ${MINS} -ge 60 ]]; then
-        HOURS=$((${MINS}/  60))
-        MINS=$((${MINS} % 60))
+        HOURS=$((MINS / 60))
+        MINS=$((MINS % 60))
     fi
 
     if [[ ${HOURS} -eq 1 ]]; then
@@ -117,13 +118,13 @@ function format_time() {
         TIME_STRING+=" AND ${SECS} SECONDS"
     fi
 
-    echo ${TIME_STRING}
+    echo "${TIME_STRING}"
 }
 
 # PRINTS AN ERROR IN BOLD RED
 function display_error() {
     echo
-    echo ${RED}${1}${RST}
+    echo "${RED}${1}${RST}"
     if [[ -z ${2} ]]; then
         echo
     fi
@@ -138,7 +139,7 @@ function die() {
 # PRINTS A WARNING IN BOLD YELLOW
 function warn() {
     echo
-    echo ${YLW}${1}${RST}
+    echo "${YLW}${1}${RST}"
     if [[ -z ${2} ]]; then
         echo
     fi
@@ -153,24 +154,26 @@ function enforce_value() {
 
 # ADD A REMOTE IF IT DOESN'T EXIST
 function add_remote() {
-    if [[ ! $(git remote | grep -m 1 ${1}) ]]; then
-        git remote add ${1} ${2}
+    if git remote | grep -q -m 1 "${1}"; then
+        git remote add "${1}" "${2}"
     fi
 }
 
 # CONVERT A FILE LOCATION TO WEB LINK
 function web_link() {
-    echo ${1} | sed s/$(echo ${WEB_FOLDER} | sed 's/\//\\\//g')/http:\\/\\/nchancellor.net/
+    echo "${1}" | sed s/"$(echo "${WEB_FOLDER}" | sed 's/\//\\\//g')"/http:\\/\\/nchancellor.net/
 }
 
 # SET UP A VIRTUAL ENVIRONMENT FOR PYTHON
 function mkavenv {
-    virtualenv2 ${HOME}/venv && source ${HOME}/venv/bin/activate
+    virtualenv2 "${HOME}/venv"
+    source "${HOME}/venv/bin/activate"
 }
 
 # REMOVE VIRTUAL ENVIRONMENT
 function rmvenv {
-    deactivate && rm -rf ${HOME}/venv
+    deactivate
+    rm -rf "${HOME}/venv"
 }
 
 # REQUIRE A PARAMETER TO OPT OUT OF MAC_CHECK
