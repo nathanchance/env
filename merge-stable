@@ -114,11 +114,9 @@ function parse_parameters() {
 
 # Update the linux-stable{-rc} remotes (and add them if they doesn't exist)
 function verify_remote() {
-    add_remote ${1} https://git.kernel.org/pub/scm/linux/kernel/git/stable/${1}.git/
+    add_remote "${1}" https://git.kernel.org/pub/scm/linux/kernel/git/stable/"${1}".git/
 
-    git fetch ${1}
-
-    if [[ $? -ne 0 ]]; then
+    if ! git fetch "${1}"; then
         die "Remote ${1} update failed!"
     else
         echo "Remote ${1} updated successfully!"
@@ -147,13 +145,13 @@ function generate_versions() {
     # Full kernel version
     CURRENT_VERSION=$(make kernelversion)
     # First two numbers (3.4 | 3.10 | 3.18 | 4.4)
-    CURRENT_MAJOR_VERSION=$(echo ${CURRENT_VERSION} | cut -f 1,2 -d .)
+    CURRENT_MAJOR_VERSION=$(echo "${CURRENT_VERSION}" | cut -f 1,2 -d .)
     # Last number
-    CURRENT_SUBLEVEL=$(echo ${CURRENT_VERSION} | cut -d . -f 3)
+    CURRENT_SUBLEVEL=$(echo "${CURRENT_VERSION}" | cut -d . -f 3)
 
     # Get latest update from upstream
-    LATEST_VERSION=$(git tag --sort=-taggerdate -l v${CURRENT_MAJOR_VERSION}* | head -n 1 | sed s/v//)
-    LATEST_SUBLEVEL=$(echo ${LATEST_VERSION} | cut -d . -f 3)
+    LATEST_VERSION=$(git tag --sort=-taggerdate -l v"${CURRENT_MAJOR_VERSION}"* | head -n 1 | sed s/v//)
+    LATEST_SUBLEVEL=$(echo "${LATEST_VERSION}" | cut -d . -f 3)
 
     # Print the current/latest version and exit if requested
     echo "${BOLD}Current kernel version:${RST} ${CURRENT_VERSION}"
@@ -170,7 +168,7 @@ function generate_versions() {
     # 2. Update to the latest version
     case ${UPDATE_MODE} in
         0)
-            TARGET_SUBLEVEL=$((${CURRENT_SUBLEVEL} + 1))
+            TARGET_SUBLEVEL=$((CURRENT_SUBLEVEL + 1))
             TARGET_VERSION=${CURRENT_MAJOR_VERSION}.${TARGET_SUBLEVEL} ;;
         1)
             TARGET_VERSION=${VERSION_SUPPLIED} ;;
@@ -181,10 +179,10 @@ function generate_versions() {
     if [[ ${RC} ]]; then
         TAG=linux-stable-rc/linux-${CURRENT_MAJOR_VERSION}.y
         RANGE=v${CURRENT_VERSION}..${TAG}
-        TARGET_VERSION=${TARGET_VERSION}$(git grep -h "\-rc" ${TAG} -- Makefile | cut -d ' ' -f 3)
+        TARGET_VERSION=${TARGET_VERSION}$(git grep -h "\-rc" "${TAG}" -- Makefile | cut -d ' ' -f 3)
     else
         # Make sure target version is between current version and latest version
-        TARGET_SUBLEVEL=$(echo ${TARGET_VERSION} | cut -d . -f 3)
+        TARGET_SUBLEVEL=$(echo "${TARGET_VERSION}" | cut -d . -f 3)
         if [[ ${TARGET_SUBLEVEL} -le ${CURRENT_SUBLEVEL} ]]; then
             die "Current version is up to date with target version ${TARGET_VERSION}!\n"
         fi
@@ -204,13 +202,12 @@ function generate_versions() {
 function cp_target_version() {
     header "Cherry-picking ${TARGET_VERSION}"
 
-    git cherry-pick ${RANGE}
-    if [[ $? -ne 0 ]]; then
+    if ! git cherry-pick "${RANGE}"; then
         die "Cherry-pick needs manual intervention! Resolve conflicts then run:
 
 git add . && git cherry-pick --continue"
     else
-        header "${TARGET_VERSION} PICKED CLEANLY!" ${GRN}
+        header "${TARGET_VERSION} PICKED CLEANLY!" "${GRN}"
     fi
 }
 
@@ -222,8 +219,8 @@ function create_merge_message() {
 
     echo "Merge ${TARGET_VERSION} into $(git rev-parse --abbrev-ref HEAD | sed 's/-queue-[0-9].*//')" >> ${MSG_FILE}
     if [[ ! ${INITIAL_MERGE} ]]; then
-        echo "\nChanges in ${TARGET_VERSION}: ($(git rev-list --count ${RANGE} 2> /dev/null) commits)" >> ${MSG_FILE}
-        git log --reverse --format="        %s" ${RANGE} >> ${MSG_FILE}
+        echo "\nChanges in ${TARGET_VERSION}: ($(git rev-list --count "${RANGE}" 2> /dev/null) commits)" >> ${MSG_FILE}
+        git log --reverse --format="        %s" "${RANGE}" >> ${MSG_FILE}
     fi
     echo "\nSigned-off-by: $(git config --get user.name) <$(git config --get user.email)>" >> ${MSG_FILE}
     CONFLICTS=$(git cf)
@@ -239,16 +236,14 @@ function create_merge_message() {
 function mg_target_version() {
     header "Merging ${TARGET_VERSION}"
 
-    GIT_MERGE_VERBOSITY=1 git merge --gpg-sign --no-edit ${TAG}
-
-    if [[ $? -ne 0 ]]; then
+    if ! GIT_MERGE_VERBOSITY=1 git merge --gpg-sign --no-edit "${TAG}"; then
         create_merge_message
 
         die "Merge needs manual intervention! Resolve conflicts then run git fm."
     else
         create_merge_message
         git commit --amend --no-edit --quiet --gpg-sign --file ${MSG_FILE}
-        header "${TARGET_VERSION} MERGED CLEANLY!" ${GRN}
+        header "${TARGET_VERSION} MERGED CLEANLY!" "${GRN}"
     fi
 }
 
@@ -261,7 +256,7 @@ function update_tree() {
 }
 
 
-parse_parameters $@
+parse_parameters "$@"
 update_remotes
 generate_versions
 update_tree
