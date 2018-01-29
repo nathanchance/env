@@ -30,48 +30,48 @@ source common
 unset OS
 
 # GATHER PARAMETERS
-PARAMS="$@"
+PARAMS="$*"
 while [[ $# -ge 1 ]]; do
     case ${1} in
         # ANYKERNEL2 BRANCH
         "-ak2-b"|"--anykernel2-branch")
-            shift && enforce_value $@
+            shift && enforce_value "$@"
 
             ANYKERNEL2_BRANCH=${1} ;;
 
         # ANDROID VERSION
         "-av"|"--android-version")
-            shift && enforce_value $@
+            shift && enforce_value "$@"
 
             ANDROID_VERSION=${1} ;;
 
         # BRANCH TO COMPILE; IF ABSENT, USE CURRENT BRANCH
         "-b"|"--branch")
-            shift && enforce_value $@
+            shift && enforce_value "$@"
 
             KERNEL_BRANCH=${1} ;;
 
         # DEFCONFIG TO USE WHILE COMPILING; IF ABSENT, USE FLASH_DEFCONFIG
         "-c"|"--config")
-            shift && enforce_value $@
+            shift && enforce_value "$@"
 
             DEFCONFIG=${1} ;;
 
         # COMPILER TO USE
         "-cc"|"--compiler")
-            shift && enforce_value $@
+            shift && enforce_value "$@"
 
             COMPILER=${1} ;;
 
         # CLANG TOOLCHAIN TO USE WHILE COMPILING
         "-ct"|"--clang-toolchain")
-            shift && enforce_value $@
+            shift && enforce_value "$@"
 
             CLANG_FOLDER=${1} ;;
 
         # DEVICE TO COMPILE FOR; IF ABSENT, USE PIXEL 2 XL
         "-d"|"--device")
-            shift && enforce_value $@
+            shift && enforce_value "$@"
 
             DEVICE=${1} ;;
 
@@ -81,13 +81,13 @@ while [[ $# -ge 1 ]]; do
 
         # EXTRA MAKE FLAGS IF NECESSARY (LIKE MISMATCH CONFIG)
         "-f"|"--flags")
-            shift && enforce_value $@
+            shift && enforce_value "$@"
 
             EXTRA_MAKE_FLAGS=${1} ;;
 
         # GCC TOOLCHAIN TO USE WHILE COMPILING
         "-gt"|"--gcc-toolchain")
-            shift && enforce_value $@
+            shift && enforce_value "$@"
 
             GCC_FOLDER=${1} ;;
 
@@ -97,7 +97,7 @@ while [[ $# -ge 1 ]]; do
 
         # WHERE TO MOVE ZIP AFTER COMPILATION (PRIVATE, TEST, OR PUBLIC)
         "-m"|"--mode")
-            shift && enforce_value $@
+            shift && enforce_value "$@"
 
             MODE=${1} ;;
 
@@ -107,25 +107,25 @@ while [[ $# -ge 1 ]]; do
 
         # (ONEPLUS 5 ONLY) CUSTOM ROMS OR OXYGENOS BUILD
         "-os"|"--operating-system")
-            shift && enforce_value $@
+            shift && enforce_value "$@"
 
             OS=${1} ;;
 
         # HOW TO PACKAGE KERNEL (ZIP OR BOOT IMAGE)
         "-p"|"--package-method")
-            shift && enforce_value $@
+            shift && enforce_value "$@"
 
             PACKAGE_METHOD=${1} ;;
 
         # BETA VERSIONING (# IN KERNEL VERSION)
         "-r"|"--revision")
-            shift && enforce_value $@
+            shift && enforce_value "$@"
 
             REVISION=${1} ;;
 
         # VERSION CODE
         "-v"|"--version")
-            shift && enforce_value $@
+            shift && enforce_value "$@"
 
             VERSION=${1} ;;
 
@@ -198,7 +198,7 @@ case ${DEVICE} in
             GCC_FOLDER="/opt/linaro-gcc"
         fi
 
-        MATCH_FLAG="*${OS}-v${VERSION::1}*"
+        MATCH_FLAG="${OS}-v${VERSION::1}"
 
         PACKAGE_METHOD=zip ;;
 
@@ -232,7 +232,7 @@ case ${DEVICE} in
             GCC_FOLDER="/opt/linaro-gcc"
         fi
 
-        MATCH_FLAG="*${DEVICE_NAME_FILE}-v${VERSION::1}*"
+        MATCH_FLAG="${DEVICE_NAME_FILE}-v${VERSION::1}"
 
         if [[ -z ${PACKAGE_METHOD} ]]; then
             case ${MODE} in
@@ -261,9 +261,9 @@ FILE_MOVE_HEAD=${WEB_FOLDER}/downloads
 case ${MODE} in
     "alpha"|"beta"|"rc"|"stable"|"tmp")
         FILE_MOVE=${FILE_MOVE_HEAD}/kernels/${DEVICE_NAME_WEB}/${ANDROID_VERSION}${OS_FOLDER}/${MODE}
-        FILE_MOVE_OLD=$(readlink -f ${FILE_MOVE}/../archive) ;;
+        FILE_MOVE_OLD=$(readlink -f "${FILE_MOVE}/../archive") ;;
     "personal")
-        FILE_MOVE=$(readlink -f ${FILE_MOVE_HEAD}/../me/fk) ;;
+        FILE_MOVE=$(readlink -f "${FILE_MOVE_HEAD}/../me/fk") ;;
     *)
         die "Invalid mode specified!" ;;
 esac
@@ -294,9 +294,10 @@ if [[ ${COMPILER} = "clang" ]]; then
         *)
             die "Invalid Clang version specified!" ;;
     esac
+    # shellcheck disable=SC2001
+    CLANG_VERSION="$(echo "${CLANG_VERSION}" | sed 's/[[:space:]]*$//')"
     # ONEPLUS 5 8.0.0 NEEDS A SPACE AFTER THE COMPILER VERSION IN ORDER NOT TO
     # BREAK THE KERNEL VERSION IN ABOUT PHONE
-    CLANG_VERSION="$(echo ${CLANG_VERSION} | sed 's/[[:space:]]*$//')"
     if [[ ${DEVICE} = "op5" && ${ANDROID_VERSION} = "8.0.0" ]]; then
         CLANG_VERSION="${CLANG_VERSION} "
     fi
@@ -312,7 +313,7 @@ fi
 # CLEAN UP
 function clean_up() {
     # CLEAN ANYKERNEL2 FOLDER
-    cd ${ANYKERNEL2_FOLDER}
+    cd "${ANYKERNEL2_FOLDER}" || die "AnyKernel2 source is missing!"
     if [[ -z ${ANYKERNEL2_BRANCH} ]]; then
         ANYKERNEL2_BRANCH=${DEVICE_NAME_GITHUB}-flash-${AK2_SFX}
     fi
@@ -320,10 +321,10 @@ function clean_up() {
     git clean -fxd
 
     # ONLY CHECKOUT IF KERNEL_BRANCH EXISTS AND WE AREN'T BISECTING OR REBASING
-    cd ${SOURCE_FOLDER}
+    cd "${SOURCE_FOLDER}" || die "Kernel source is missing!"
     if [[ -n ${KERNEL_BRANCH} ]]; then
         if [[ ! $(git status | ag "bisec|rebas") ]]; then
-            git checkout ${KERNEL_BRANCH}
+            git checkout "${KERNEL_BRANCH}"
         fi
     # OTHERWISE, NOTATE CURRENT BRANCH FOR CHANGELOG
     else
@@ -336,30 +337,30 @@ function clean_up() {
 
 # MAKE WRAPPER FOR MAKE FUNCTION FOR GCC
 function make_wrapper_gcc() {
-    make ${JOBS_FLAG} \
+    make "${JOBS_FLAG}" \
          ARCH=${ARCHITECTURE} \
          CROSS_COMPILE="${CCACHE} ${CC}" \
-         KBUILD_BUILD_VERSION=${KBUILD_BUILD_VERSION} \
-         LOCALVERSION=${LOCALVERSION} \
-         O=${OUT_FOLDER} \
-         $@
+         KBUILD_BUILD_VERSION="${KBUILD_BUILD_VERSION}" \
+         LOCALVERSION="${LOCALVERSION}" \
+         O="${OUT_FOLDER}" \
+         "$@"
 }
 
 
 # MAKE WRAPPER FOR MAKE FUNCTION FOR CLANG
 function make_wrapper_clang() {
-    PATH=${BIN_FOLDER}:${PATH} make ${JOBS_FLAG} \
+    PATH=${BIN_FOLDER}:${PATH} make "${JOBS_FLAG}" \
                                     ARCH=${ARCHITECTURE} \
                                     CC="${CCACHE} ${CLANG}" \
                                     CLANG_TRIPLE=aarch64-linux-gnu- \
-                                    CROSS_COMPILE=${CC} \
+                                    CROSS_COMPILE="${CC}" \
                                     HOSTCC="${CCACHE} ${CLANG}" \
                                     KBUILD_COMPILER_STRING="${CLANG_VERSION}" \
-                                    KBUILD_BUILD_VERSION=${KBUILD_BUILD_VERSION} \
-                                    LOCALVERSION=${LOCALVERSION} \
-                                    O=${OUT_FOLDER} \
+                                    KBUILD_BUILD_VERSION="${KBUILD_BUILD_VERSION}" \
+                                    LOCALVERSION="${LOCALVERSION}" \
+                                    O="${OUT_FOLDER}" \
                                     SCRIPT_OPT_FLAGS="${SCRIPT_OPT_FLAGS}" \
-                                    $@
+                                    "$@"
 }
 
 
@@ -367,9 +368,9 @@ function make_wrapper_clang() {
 function kmake() {
     # ONLY SHOW ERRORS AND WARNINGS WHEN COMPILING (UNLESS DEBUG)
     if [[ ${DEBUG} ]]; then
-        make_wrapper_${COMPILER} $@
+        make_wrapper_${COMPILER} "$@"
     else
-        make_wrapper_${COMPILER} $@ |& ag --no-color "error:|warning:" && echo
+        make_wrapper_${COMPILER} "$@" |& ag --no-color "error:|warning:" && echo
     fi
 }
 
@@ -468,10 +469,11 @@ function build_kernel() {
     kmake ${DEFCONFIG} prepare
 
     # MAKE THE KERNEL
+    # shellcheck disable=SC2086
     kmake ${EXTRA_MAKE_FLAGS}
 
-    OUT_KERNEL_IMAGE=$(find ${OUT_FOLDER}/arch/${ARCHITECTURE} -name 'Image.*-dtb' 2>/dev/null)
-    OUT_DTBO_IMAGE=$(find ${OUT_FOLDER}/arch/${ARCHITECTURE} -name 'dtbo.img' 2>/dev/null)
+    OUT_KERNEL_IMAGE=$(find "${OUT_FOLDER}/arch/${ARCHITECTURE}" -name 'Image.*-dtb' 2>/dev/null)
+    OUT_DTBO_IMAGE=$(find "${OUT_FOLDER}/arch/${ARCHITECTURE}" -name 'dtbo.img' 2>/dev/null)
 }
 
 
@@ -482,58 +484,59 @@ function package_zip() {
     echo "${BOLD}Signed zip name:${RST}   ${SIGNED_ZIP}\n"
 
     # MOVE THE KERNEL IMAGE
-    cp ${OUT_KERNEL_IMAGE} ${ANYKERNEL2_FOLDER}
+    cp "${OUT_KERNEL_IMAGE}" "${ANYKERNEL2_FOLDER}"
     if [[ -n ${OUT_DTBO_IMAGE} ]]; then
-        cp ${OUT_DTBO_IMAGE} ${ANYKERNEL2_FOLDER}/dtbo
+        cp "${OUT_DTBO_IMAGE}" "${ANYKERNEL2_FOLDER}/dtbo"
     fi
-    cat ${OUT_FOLDER}/include/config/kernel.release > ${ANYKERNEL2_FOLDER}/version
+    cat "${OUT_FOLDER}/include/config/kernel.release" > "${ANYKERNEL2_FOLDER}/version"
 
     # GRAB MODULES TOO IF THEY ARE PRESENT
-    MODULES_SYSTEM_FOLDER=${ANYKERNEL2_FOLDER}/modules/system/lib/modules
-    MODULES_VENDOR_FOLDER=${ANYKERNEL2_FOLDER}/modules/system/vendor/lib/modules
-    mkdir -p ${MODULES_SYSTEM_FOLDER}
-    find ${OUT_FOLDER} -name "*.ko" -exec cp {} ${MODULES_SYSTEM_FOLDER} \;
-    # IF MODULES WERE FOUND, STRIP THEM; OTHERWISE, REMOVE THE FOLDER
-    if [[ $(ls -A ${MODULES_SYSTEM_FOLDER}) ]]; then
-        echo "${BOLD}Kernel modules:${RST}    $(ls ${MODULES_SYSTEM_FOLDER}/*.ko | wc -l)\n"
-        ${CC}strip --strip-unneeded ${MODULES_SYSTEM_FOLDER}/*.ko
-        for MOD in $(ls ${MODULES_SYSTEM_FOLDER}/*.ko); do
-            ${OUT_FOLDER}/scripts/sign-file sha512 \
-                                            ${OUT_FOLDER}/certs/signing_key.pem \
-                                            ${OUT_FOLDER}/certs/signing_key.x509 \
-                                            ${MOD}
+    MODULES="$(find "${OUT_FOLDER}" -name '*.ko')"
+    if [[ -n ${MODULES} ]]; then
+        MODULES_SYSTEM_FOLDER=${ANYKERNEL2_FOLDER}/modules/system/lib/modules
+        MODULES_VENDOR_FOLDER=${ANYKERNEL2_FOLDER}/modules/system/vendor/lib/modules
+        mkdir -p "${MODULES_SYSTEM_FOLDER}"
+        for MOD in ${MODULES}; do
+            "${CC}"strip --strip-unneeded "${MOD}"
+            "${OUT_FOLDER}"/scripts/sign-file sha512 \
+                                              "${OUT_FOLDER}/certs/signing_key.pem" \
+                                              "${OUT_FOLDER}/certs/signing_key.x509" \
+                                              "${MOD}"
+            cp "${MOD}" "${MODULES_SYSTEM_FOLDER}"
         done
+
         if [[ ${DEVICE} = "op5" && ${OS} =~ "Custom" && ${ANDROID_VERSION} = "8.1.0" ]]; then
-            mkdir -p ${MODULES_VENDOR_FOLDER}
-            cp ${MODULES_SYSTEM_FOLDER}/*.ko ${MODULES_VENDOR_FOLDER}
+            mkdir -p "${MODULES_VENDOR_FOLDER}"
+            cp "${MODULES_SYSTEM_FOLDER}/*.ko" "${MODULES_VENDOR_FOLDER}"
         fi
-    else
-        rm -rf ${MODULES_SYSTEM_FOLDER}
+
+        echo "${BOLD}Kernel modules:${RST}    $(find "${MODULES_SYSTEM_FOLDER}" -type f | wc -l)\n"
     fi
 
-    cd ${ANYKERNEL2_FOLDER}
+    cd "${ANYKERNEL2_FOLDER}" || die "AnyKernel2 folder shift failed!"
 
     # PACKAGE THE ZIP WITHOUT THE README
-    zip -q -r9 ${UNSIGNED_ZIP} * -x README.md ${UNSIGNED_ZIP}
+    zip -q -r9 "${UNSIGNED_ZIP}" -- * -x README.md "${UNSIGNED_ZIP}"
 
     # SIGN ZIP
-    java -jar ${BIN_FOLDER}/signapk.jar \
-              ${BIN_FOLDER}/testkey.x509.pem \
-              ${BIN_FOLDER}/testkey.pk8 \
-              ${UNSIGNED_ZIP} \
-              ${SIGNAPK_ZIP}
+    java -jar "${BIN_FOLDER}/signapk.jar" \
+              "${BIN_FOLDER}/testkey.x509.pem" \
+              "${BIN_FOLDER}/testkey.pk8" \
+              "${UNSIGNED_ZIP}" \
+              "${SIGNAPK_ZIP}"
 
-    ${BIN_FOLDER}/zipadjust ${SIGNAPK_ZIP} ${ADJUSTED_ZIP} &>/dev/null
+    "${BIN_FOLDER}"/zipadjust "${SIGNAPK_ZIP}" "${ADJUSTED_ZIP}" &>/dev/null
 
-    java -jar ${BIN_FOLDER}/minsignapk.jar \
-              ${BIN_FOLDER}/testkey.x509.pem \
-              ${BIN_FOLDER}/testkey.pk8 \
-              ${ADJUSTED_ZIP} \
-              ${SIGNED_ZIP}
+    java -jar "${BIN_FOLDER}/minsignapk.jar" \
+              "${BIN_FOLDER}/testkey.x509.pem" \
+              "${BIN_FOLDER}/testkey.pk8" \
+              "${ADJUSTED_ZIP}" \
+              "${SIGNED_ZIP}"
 
     # IF PACKAGING FAILED, ERROR OUT
     if [[ ! -f ${SIGNED_ZIP} ]]; then
-        echo "${RED}Kernel zip not found after signing!${RST}\n" && ending_info
+        echo "${RED}Kernel zip not found after signing!${RST}\n"
+        ending_info
     else
         echo "${GRN}Kernel zip successfully generated!${RST}\n"
     fi
@@ -542,12 +545,13 @@ function package_zip() {
 
 # SILENCE OUTPUT FUNCTION FOR PACKAGE_IMAGE
 function package_image() {
-    AOSP_FOLDER=${KERNEL_FOLDER}/sources/aosp-pixel2 && cd ${AOSP_FOLDER}
+    AOSP_FOLDER=${KERNEL_FOLDER}/sources/aosp-pixel2
+    cd "${AOSP_FOLDER}" || die "AOSP source is not synced!"
 
     git -C device/google/wahoo-kernel reset --hard --quiet
 
-    cp ${OUT_KERNEL_IMAGE} ${AOSP_FOLDER}/device/google/wahoo-kernel
-    cp ${OUT_DTBO_IMAGE} ${AOSP_FOLDER}/device/google/wahoo-kernel
+    cp "${OUT_KERNEL_IMAGE}" "${AOSP_FOLDER}/device/google/wahoo-kernel"
+    cp "${OUT_DTBO_IMAGE}" "${AOSP_FOLDER}/device/google/wahoo-kernel"
 
     header "COMPILING BOOT IMAGE"
 
@@ -583,8 +587,8 @@ function package_image_commands() {
     mkavenv
     . build/envsetup.sh
     lunch aosp_${DEVICE_NAME_WEB}-user
-    make ${JOBS_FLAG} clean
-    make ${JOBS_FLAG} bootimage
+    make "${JOBS_FLAG}" clean
+    make "${JOBS_FLAG}" bootimage
     rmvenv
 }
 
@@ -602,17 +606,17 @@ function setup_folders() {
 
     # IF ZIPMOVE DOESN'T EXIST, MAKE IT
     if [[ ! -d ${FILE_MOVE} ]]; then
-        mkdir -p ${FILE_MOVE}
+        mkdir -p "${FILE_MOVE}"
     fi
 
     # IF IT ISN'T A STABLE BUILD, CLEAN THE FOLDER
     if [[ ${NOT_STABLE} ]]; then
         if [[ ! ${NOCLEAN} ]]; then
-            rm -rf ${FILE_MOVE}/*${DEVICE_NAME_FILE}*
+            rm -rf "${FILE_MOVE:?}"/*${DEVICE_NAME_FILE}*
         fi
     else
         # CLEAN OLD TEST BUILDS
-        cd ${FILE_MOVE}/..
+        cd "${FILE_MOVE}/.." || die "Shift to zip folder failed!"
         rm -rf {alpha,beta,rc,tmp}/*
         git add .
         if [[ -n $(git status --porcelain) ]]; then
@@ -622,11 +626,11 @@ function setup_folders() {
 
         # MOVE THE OLD FILES TO AN ARCHIVE FOLDER
         if [[ ! -d ${FILE_MOVE_OLD} ]]; then
-            mkdir -p ${FILE_MOVE_OLD}
+            mkdir -p "${FILE_MOVE_OLD}"
         fi
-        OLD_FILES="$(find ${FILE_MOVE}/* -maxdepth 0 -type f)"
+        OLD_FILES="$(find "${FILE_MOVE}"/* -maxdepth 0 -type f)"
         if [[ -n ${OLD_FILES} ]]; then
-            mv ${OLD_FILES} ${FILE_MOVE_OLD} &>/dev/null
+            mv "${OLD_FILES}" "${FILE_MOVE_OLD}" &>/dev/null
         fi
     fi
 }
@@ -637,16 +641,16 @@ function move_flashable_files() {
     echo "  - Moving files"
 
     if [[ ${PACKAGE_METHOD} =~ "image" ]]; then
-        mv ${COMPILED_BOOT_IMAGE} ${FILE_MOVE}/${BOOT_IMAGE}
-        md5sum ${FILE_MOVE}/${BOOT_IMAGE} > ${FILE_MOVE}/${BOOT_IMAGE}.md5
+        mv "${COMPILED_BOOT_IMAGE}" "${FILE_MOVE}/${BOOT_IMAGE}"
+        md5sum "${FILE_MOVE}/${BOOT_IMAGE}" > "${FILE_MOVE}/${BOOT_IMAGE}.md5"
 
-        mv $(dirname ${OUT_KERNEL_IMAGE})/dtbo.img ${FILE_MOVE}/${DTBO_IMAGE}
-        md5sum ${FILE_MOVE}/${DTBO_IMAGE} > ${FILE_MOVE}/${DTBO_IMAGE}.md5
+        mv "$(dirname "${OUT_KERNEL_IMAGE}")/dtbo.img" "${FILE_MOVE}/${DTBO_IMAGE}"
+        md5sum "${FILE_MOVE}/${DTBO_IMAGE}" > "${FILE_MOVE}/${DTBO_IMAGE}.md5"
     fi
 
     if [[ ${PACKAGE_METHOD} =~ "zip" ]]; then
-        mv ${ANYKERNEL2_FOLDER}/${SIGNED_ZIP} ${FILE_MOVE}
-        md5sum ${FILE_MOVE}/${SIGNED_ZIP} > ${FILE_MOVE}/${SIGNED_ZIP}.md5
+        mv "${ANYKERNEL2_FOLDER}/${SIGNED_ZIP}" "${FILE_MOVE}"
+        md5sum "${FILE_MOVE}/${SIGNED_ZIP}" > "${FILE_MOVE}/${SIGNED_ZIP}.md5"
     fi
 }
 
@@ -659,37 +663,41 @@ function generate_changelog() {
     CHANGELOG=${FILE_MOVE}/${KERNEL_NAME}-changelog.txt
 
     # KERNEL SOURCE FIRST
-    cd ${SOURCE_FOLDER}
+    cd "${SOURCE_FOLDER}" || die "Kernel source is missing!"
 
     # WE NEED TO MARK THE PREVIOUS TAG FOR CHANGELOG
-    PREV_TAG_NAME=$(git tag --sort=-taggerdate -l ${MATCH_FLAG} | head -n 1)
+    PREV_TAG_NAME=$(git tag --sort=-taggerdate -l "*${MATCH_FLAG}*" | head -n 1)
     if [[ -z ${PREV_TAG_NAME} ]]; then
         return
     fi
     RANGE=${PREV_TAG_NAME}..HEAD
 
     # SHOW WHERE COMMITS ARE LOCATED
-    echo "${GITHUB}/${DEVICE_NAME_GITHUB}/commits/${KERNEL_BRANCH}\n" > ${CHANGELOG}
+    {
+        echo "${GITHUB}/${DEVICE_NAME_GITHUB}/commits/${KERNEL_BRANCH}\n"
 
-    # USE SHORTLOG FOR PRETTY OUTPUT
-    git log ${RANGE} | git shortlog >> ${CHANGELOG}
+        # USE SHORTLOG FOR PRETTY OUTPUT
+        git log "${RANGE}" | git shortlog
 
-    # GENERATE A DIFF AS WELL
-    git diff --find-renames --stat --summary ${RANGE} >> ${CHANGELOG}
+        # GENERATE A DIFF AS WELL
+        git diff --find-renames --stat --summary "${RANGE}"
+    } > "${CHANGELOG}"
 
     if [[ ${PACKAGE_METHOD} =~ "zip" ]]; then
         # ANYKERNEL2 NEXT
-        cd ${ANYKERNEL2_FOLDER}
+        cd "${ANYKERNEL2_FOLDER}" || die "AnyKernel2 source is missing!"
 
         # WE ONLY WANT TO SHOW ANYKERNEL2 CHANGES IF THERE HAVE BEEN SOME
-        NUM_COMMITS=$(git log ${RANGE} --pretty=oneline | wc -l)
+        NUM_COMMITS=$(git log "${RANGE}" --pretty=oneline | wc -l)
 
         if [[ ${NUM_COMMITS} -gt 0 ]]; then
-            echo "\n\n${GITHUB}/AnyKernel2/commits/${ANYKERNEL2_BRANCH}\n" >> ${CHANGELOG}
+            {
+                echo "\n\n${GITHUB}/AnyKernel2/commits/${ANYKERNEL2_BRANCH}\n"
+    
+                git log "${RANGE}" | git shortlog
 
-            git log ${RANGE} | git shortlog >> ${CHANGELOG}
-
-            git diff --find-renames --stat --summary ${RANGE} >> ${CHANGELOG}
+                git diff --find-renames --stat --summary "${RANGE}"
+            } >> "${CHANGELOG}"
         fi
     fi
 }
@@ -699,7 +707,7 @@ function generate_changelog() {
 function push_flashable_files() {
     echo "  - Pushing files to GitHub"
 
-    cd ${FILE_MOVE}
+    cd "${FILE_MOVE}" || die "Zip folder doesn't exist!"
 
     git add ..
 
@@ -713,16 +721,16 @@ function push_flashable_files() {
 function tag_stable() {
     echo "  - Tagging ${KERNEL_NAME} as stable"
 
-    cd ${SOURCE_FOLDER}
+    cd "${SOURCE_FOLDER}" || die "Kernel source is missing!"
 
-    git tag --sign --annotate ${KERNEL_NAME} --message ${KERNEL_NAME}
-    git push --quiet origin ${KERNEL_NAME}
+    git tag --sign --annotate "${KERNEL_NAME}" --message "${KERNEL_NAME}"
+    git push --quiet origin "${KERNEL_NAME}"
 
     if [[ ${PACKAGE_METHOD} =~ "zip" ]]; then
-        cd ${ANYKERNEL2_FOLDER}
+        cd "${ANYKERNEL2_FOLDER}" || die "AnyKernel2 source is missing!"
 
-        git tag --sign --annotate ${KERNEL_NAME} --message ${KERNEL_NAME}
-        git push --quiet origin ${KERNEL_NAME}
+        git tag --sign --annotate "${KERNEL_NAME}" --message "${KERNEL_NAME}"
+        git push --quiet origin "${KERNEL_NAME}"
     fi
 }
 
@@ -732,30 +740,33 @@ function ending_info() {
     header "SCRIPT FINISHED!"
 
     END=$(date +"%s")
+    DURATION=$(format_time "${END}" "${START}")
 
-    echo "\n$(date +"%m/%d/%Y %H:%M:%S"): ${BASH_SOURCE} ${PARAMS}" >> ${LOG}
+    echo "\n$(date +"%m/%d/%Y %H:%M:%S"): $(basename "${BASH_SOURCE[0]}") ${PARAMS}" >> "${LOG}"
 
-    if [[ "$@" =~ "-s" ]]; then
-        echo "BUILD SUCCESSFUL IN $(format_time ${END} ${START})" >> ${LOG}
+    if [[ "$*" =~ "-s" ]]; then
+        echo "BUILD SUCCESSFUL IN ${DURATION}" >> "${LOG}"
         if [[ ! ${IMAGE_ONLY} ]]; then
-            FILE_LOCATION=$(web_link ${FILE_MOVE})
-            echo "FILE LINK: ${FILE_LOCATION}" >> ${LOG}
+            FILE_LOCATION=$(web_link "${FILE_MOVE}")
+            echo "FILE LINK: ${FILE_LOCATION}" >> "${LOG}"
 
-            echo ${RED}"FILE LOCATION: ${FILE_LOCATION}"
+            echo "${RED}FILE LOCATION: ${FILE_LOCATION}"
             case ${PACKAGE_METHOD} in
                 "image")
-                    echo "SIZE: $(du -h ${FILE_MOVE}/${BOOT_IMAGE} |
-                                      awk '{print $1}')"${RST} ;;
+                    echo "SIZE: $(du -h "${FILE_MOVE}/${BOOT_IMAGE}" |
+                                      awk '{print $1}')${RST}" ;;
                 "zip")
-                    echo "SIZE: $(du -h ${FILE_MOVE}/${SIGNED_ZIP} |
-                                      awk '{print $1}')"${RST} ;;
+                    echo "SIZE: $(du -h "${FILE_MOVE}/${SIGNED_ZIP}" |
+                                      awk '{print $1}')${RST}" ;;
             esac
         fi
     else
-        echo "BUILD FAILED IN $(format_time ${END} ${START})" >> ${LOG}
+        echo "BUILD FAILED IN ${DURATION}" >> "${LOG}"
     fi
 
-    echo "${RED}DURATION: $(format_time ${END} ${START})${RST}"; echo; echo "\a"
+    echo "${RED}DURATION: ${DURATION}${RST}"
+    echo
+    echo "\a"
     exit
 }
 
@@ -770,7 +781,7 @@ function ending_info() {
 START=$(date +"%s")
 
 clear
-echo ${RED}
+echo "${RED}"
 echo
 echo "================================================================================================"
 echo
@@ -811,7 +822,7 @@ build_kernel
 ######################
 
 if [[ -n ${OUT_KERNEL_IMAGE} ]]; then
-    echo "${GRN}$(basename ${OUT_KERNEL_IMAGE}) compiled successfully!${RST}\n"
+    echo "${GRN}$(basename "${OUT_KERNEL_IMAGE}") compiled successfully!${RST}\n"
     if [[ ! ${IMAGE_ONLY} ]]; then
         package_${PACKAGE_METHOD}
 
