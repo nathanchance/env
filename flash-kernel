@@ -285,12 +285,14 @@ if [[ ${COMPILER} = "clang" ]]; then
             CLANG_VERSION=$(${CLANG} --version | head -n 1 | cut -d'(' -f1,4) ;;
         "clang-7.x")
             CLANG_VERSION=$(${CLANG} --version | head -n 1 | cut -d'(' -f1)
-            SCRIPT_OPT_FLAGS="-mllvm -polly \
-                              -mllvm -polly-run-dce \
-                              -mllvm -polly-run-inliner \
-                              -mllvm -polly-opt-fusion=max \
-                              -mllvm -polly-ast-use-context \
-                              -mllvm -polly-vectorizer=stripmine" ;;
+            if [[ ${MODE} = "personal" ]]; then
+                SCRIPT_OPT_FLAGS="-mllvm -polly \
+                                  -mllvm -polly-run-dce \
+                                  -mllvm -polly-run-inliner \
+                                  -mllvm -polly-opt-fusion=max \
+                                  -mllvm -polly-ast-use-context \
+                                  -mllvm -polly-vectorizer=stripmine"
+            fi ;;
         *)
             die "Invalid Clang version specified!" ;;
     esac
