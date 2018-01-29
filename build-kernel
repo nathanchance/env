@@ -29,7 +29,7 @@ while [[ $# -ge 1 ]]; do
     case ${1} in
         # ARCHITECTURE TO BUILD; DEFAULTS TO ARM64
         "-a"|"--arch")
-            shift && enforce_value $@
+            shift && enforce_value "$@"
 
             ARCH=${1} ;;
 
@@ -40,13 +40,13 @@ while [[ $# -ge 1 ]]; do
 
         # SPECIFY WHICH CLANG TOOLCHAIN TO USE
         "-ct"|"--clang-toolchain")
-            shift && enforce_value $@
+            shift && enforce_value "$@"
 
             CLANG_TOOLCHAIN_FOLDER=${1} ;;
 
         # DEFCONFIG TO BUILD; DEFAULTS TO FLASH_DEFCONFIG
         "-d"|"--defconfig")
-            shift && enforce_value $@
+            shift && enforce_value "$@"
 
             DEFCONFIG=${1} ;;
 
@@ -54,15 +54,9 @@ while [[ $# -ge 1 ]]; do
         "-D"|"--debug")
             VERBOSITY=2 ;;
 
-        # IMAGE TO TARGET; DEFAULTS TO IMAGE.GZ-DTB
-        "-i"|"--image")
-            shift && enforce_value $@
-
-            IMAGE=${1} ;;
-
         # SPECIFY WHICH GCC TOOLCHAIN TO USE
         "-gt"|"--gcc-toolchain")
-            shift && enforce_value $@
+            shift && enforce_value "$@"
 
             GCC_TOOLCHAIN_FOLDER=${1} ;;
 
@@ -81,9 +75,6 @@ done
 # DEFAULTS
 if [[ -z ${ARCH} ]]; then
     ARCH=arm64
-fi
-if [[ -z ${IMAGE} ]]; then
-    IMAGE=Image.*-dtb
 fi
 if [[ -z ${GCC_TOOLCHAIN_FOLDER} ]]; then
     GCC_TOOLCHAIN_FOLDER=/opt/aosp-gcc
@@ -121,16 +112,16 @@ function build() {
     rm -rf out && mkdir -p out
 
     # MAKE DEFCONFIG
-    ${MAKE} ${DEFCONFIG}
+    ${MAKE} "${DEFCONFIG}"
 
     # MAKE KERNEL
     if [[ ${CLANG} ]]; then
         PATH=${BIN_FOLDER}:${PATH} ${MAKE} CC="${CCACHE} ${CLANG_TOOLCHAIN}" \
                                            CLANG_TRIPLE=aarch64-linux-gnu- \
-                                           CROSS_COMPILE=$(echo ${GCC_TOOLCHAIN%gcc}) \
+                                           CROSS_COMPILE="${GCC_TOOLCHAIN%gcc}" \
                                            HOSTCC="${CCACHE} ${CLANG_TOOLCHAIN}"
     else
-        ${MAKE} CROSS_COMPILE="${CCACHE} $(echo ${GCC_TOOLCHAIN%gcc})"
+        ${MAKE} CROSS_COMPILE="${CCACHE} ${GCC_TOOLCHAIN%gcc}"
     fi
 }
 
@@ -153,10 +144,10 @@ case ${VERBOSITY} in
 esac
 
 # REPORT SUCCESS
-FINAL_IMAGE=$(ls out/arch/${ARCH}/boot/${IMAGE})
+FINAL_IMAGE=$(find out -name 'Image.*-dtb')
 END=$(date +%s)
 if [[ -f ${FINAL_IMAGE} ]]; then
-    echo "\n${GRN}BUILT IN $(format_time ${END} ${START})${RST}\n
+    echo "\n${GRN}BUILT IN $(format_time "${END}" "${START}")${RST}\n
 ${BOLD}IMAGE:${RST} ${FINAL_IMAGE}\n
 ${BOLD}VERSION:${RST} $(cat out/include/config/kernel.release)"
 else
@@ -166,7 +157,7 @@ fi
 # UPLOAD IMAGE IF NECESSARY
 if [[ ${UPLOAD} ]]; then
     echo
-    curl --upload-file ${FINAL_IMAGE} https://transfer.sh/${IMAGE}
+    curl --upload-file "${FINAL_IMAGE}" https://transfer.sh/"${IMAGE}"
 fi
 
 # ALERT OF SCRIPT END
