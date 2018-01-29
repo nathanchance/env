@@ -473,3 +473,9 @@ $(for i in $(seq 2 ${SBLVL}); do echo "v${VER}.$i: $(git lo v${VER}.$(($i - 1)).
 
 Average number of commits in a version of ${VER}: $(($(git lo v${VER}..v${VER}.${SBLVL} | wc -l) / ${SBLVL}))" > ~/web/stats/${VER}
 }
+
+
+# Shellcheck function
+function shellcheck() {
+    SHELLCHECK_OPTS="-e SC2028 -e SC1117 -e SC1091" command shellcheck "$@"
+}
