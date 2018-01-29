@@ -27,7 +27,6 @@
 MAIN_FOLDER=${HOME}/toolchains/clang
 LLVM_FOLDER=${MAIN_FOLDER}/llvm
 BUILD_FOLDER=${MAIN_FOLDER}/build
-INSTALL_FOLDER=/opt/clang-7.x
 START=$(date +"%s")
 
 
@@ -42,23 +41,47 @@ function cmka() {
     CC="gcc" GXX="g++" LD="ld.gold" cmake "$@"
 }
 
+function parse_parameters() {
+    while [[ $# -ge 1 ]]; do
+        case ${1} in
+            "-v"|"--version")
+                shift && enforce_value "$@"
+                VERSION=${1} ;;
+
+            *) die "Invalid parameter specified!" ;;
+        esac
+
+        shift
+    done
+}
+
 # Syncs requested  projects
 function sync() {
     FOLDER=${1}
+
     if [[ ${FOLDER} =~ "binutils" ]]; then
-        URL=( http://sourceware.org/git/binutils-gdb.git -b binutils-2_29-branch )
+        URL=http://sourceware.org/git/binutils-gdb.git
+        BRANCH=binutils-2_29-branch
     else
-        URL=( https://git.llvm.org/git/"$(basename "${FOLDER}")" )
+        URL=https://git.llvm.org/git/$(basename "${FOLDER}")
+
+        if [[ -z ${VERSION} ]]; then
+            BRANCH=master
+            VERSION=7
+        else
+            BRANCH="release_${VERSION}0"
+        fi
     fi
 
     if [[ ! -d ${FOLDER} ]]; then
-        git clone "${URL[@]}" "${FOLDER}"
+        git clone "${URL}" -b "${BRANCH}" "${FOLDER}"
     else
         (
         cd "${FOLDER}" || die "Error moving into ${FOLDER}"
         git clean -fxdq
+        git checkout ${BRANCH}
         git fetch origin
-        if ! git rebase origin/"$(git rev-parse --abbrev-ref HEAD)"; then
+        if ! git rebase origin/${BRANCH}; then
             die "Error updating $(basename "${FOLDER}")!"
         fi
         )
@@ -100,6 +123,8 @@ function cleanup() {
 function build() {
     header "Building Clang"
 
+    INSTALL_FOLDER=/opt/clang-${VERSION}.x
+
     cmka -DLINK_POLLY_INTO_TOOLS:BOOL=ON \
          -DCMAKE_CXX_FLAGS:STRING="-O3 -Wno-macro-redefined -pipe -pthread -fopenmp -g0 -march=native -mtune=native" \
          -DCMAKE_C_FLAGS:STRING="-O3 -Wno-macro-redefined -pipe -pthread -fopenmp -g0 -march=native -mtune=native" \
@@ -140,6 +165,7 @@ function install() {
 }
 
 source common
+parse_parameters "$@"
 sync_all
 cleanup
 build
