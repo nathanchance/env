@@ -119,25 +119,24 @@ function build() {
          -DPOLLY_ENABLE_GPGPU_CODEGEN:BOOL=ON \
          "${LLVM_FOLDER}"
 
-    time cmka --build . -- "${JOBS_FLAG}"
-
+    if ! time cmka --build . -- "${JOBS_FLAG}"; then
+        header "ERROR BUILDING!"
+        die "Time elapsed: $(format_time "$(date +"%s")" "${START}")"
+    fi
 }
 
 function install() {
-    END=$(date +"%s")
-    if [[ -f ${BUILD_FOLDER}/bin/clang ]]; then
-        header "Installing Clang"
+    header "Installing Clang"
 
-        rm -rf "${INSTALL_FOLDER}"
-        cmka --build . --target install -- "${JOBS_FLAG}"
-
-        header "SUCCESS!" "${GRN}"
-        echo "${GRN}Successfully built and installed Clang toolchain to ${INSTALL_FOLDER}!${GRN}"
-        echo "${GRN}Time elapsed: $(format_time "${END}" "${START}")${RST}\n"
-    else
-        header "ERROR!"
-        die "Time elapsed: $(format_time "${END}" "${START}")"
+    rm -rf "${INSTALL_FOLDER}"
+    if ! cmka --build . --target install -- "${JOBS_FLAG}"; then
+        header "ERROR INSTALLING!"
+        die "Time elapsed: $(format_time "$(date +"%s")" "${START}")"
     fi
+
+    header "SUCCESS!" "${GRN}"
+    echo "${GRN}Successfully built and installed Clang toolchain to ${INSTALL_FOLDER}!${GRN}"
+    echo "${GRN}Time elapsed: $(format_time "$(date +"%s")" "${START}")${RST}\n"
 }
 
 source common
