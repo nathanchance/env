@@ -508,7 +508,7 @@ function package_zip() {
 
         if [[ ${DEVICE} = "op5" && ${OS} =~ "Custom" && ${ANDROID_VERSION} = "8.1.0" ]]; then
             mkdir -p "${MODULES_VENDOR_FOLDER}"
-            cp "${MODULES_SYSTEM_FOLDER}/*.ko" "${MODULES_VENDOR_FOLDER}"
+            cp "${MODULES_SYSTEM_FOLDER}"/*.ko "${MODULES_VENDOR_FOLDER}"
         fi
 
         echo "${BOLD}Kernel modules:${RST}    $(find "${MODULES_SYSTEM_FOLDER}" -type f | wc -l)\n"
