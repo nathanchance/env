@@ -61,7 +61,7 @@ function linux_prompt() {
 function ccache_setup() {
     if [[ -n $(command -v ccache) ]]; then
         if [[ -n ${1} ]]; then
-            ccache -M ${1}G &> /dev/null
+            ccache -M "${1}"G &> /dev/null
             export USE_CCACHE=1
             add_to_path_pre "/usr/lib/ccache/bin"
         else
@@ -76,7 +76,7 @@ function ccache_setup() {
 function linux_setup() {
     ccache_setup 150
     export LOG=/tmp/results.log
-    add_to_path_post ${HOME}/.gem/ruby/2.4.0/bin
+    add_to_path_post "${HOME}/.gem/ruby/2.4.0/bin"
 }
 
 # Repo sync shorthand
@@ -86,16 +86,13 @@ function rps {
     if [[ -n ${1} ]]; then
         case ${1} in
             "g")
-                ARGS="vendor/google/build "
-                ARGS+="vendor/opengapps/sources/all "
-                ARGS+="vendor/opengapps/sources/arm "
-                ARGS+="vendor/opengapps/sources/arm64" ;;
+                ARGS=( vendor/google/build vendor/opengapps/sources/all vendor/opengapps/sources/arm vendor/opengapps/sources/arm64 ) ;;
             *)
-                ARGS="$@" ;;
+                ARGS=( "$@" ) ;;
         esac
     fi
 
-    repo sync ${JOBS_FLAG} --force-sync -c --no-clone-bundle --no-tags --optimized-fetch --prune ${ARGS}
+    repo sync "${JOBS_FLAG}" --force-sync -c --no-clone-bundle --no-tags --optimized-fetch --prune "${ARGS[@]}"
 }
 
 # Repo init and sync function
@@ -106,9 +103,9 @@ function ris {
         local DEPTH="--depth=1"
     fi
 
-    repo init -u ${1} -b ${2} --no-clone-bundle ${DEPTH}
+    repo init -u "${1}" -b "${2}" --no-clone-bundle ${DEPTH}
 
-    time repo sync ${JOBS_FLAG} --force-sync -c --no-clone-bundle --no-tags --optimized-fetch --prune
+    time repo sync "${JOBS_FLAG}" --force-sync -c --no-clone-bundle --no-tags --optimized-fetch --prune
 }
 
 # Update Linux stable mirror
@@ -116,27 +113,28 @@ function upstb() {
     CUR_FOLDER=$(pwd)
 
     if [[ ! -d ${KERNEL_FOLDER}/mirrors/linux-stable ]]; then
-        cd ${KERNEL_FOLDER}/mirrors
+        mkdir -p "${KERNEL_FOLDER}/mirrors"
+        cd "${KERNEL_FOLDER}/mirrors" || return
         git clone --mirror https://git.kernel.org/pub/scm/linux/kernel/git/stable/linux-stable.git linux-stable
-        cd linux-stable
+        cd linux-stable || return
         git remote set-url --push origin git@github.com:nathanchance/linux-stable
     fi
 
     if [[ ! -d ${KERNEL_FOLDER}/mirrors/linux-stable-rc ]]; then
-        cd ${KERNEL_FOLDER}/mirrors
+        cd "${KERNEL_FOLDER}/mirrors" || return
         git clone --mirror https://git.kernel.org/pub/scm/linux/kernel/git/stable/linux-stable-rc.git linux-stable-rc
     fi
 
-    cd ${KERNEL_FOLDER}/mirrors/linux-stable
+    cd "${KERNEL_FOLDER}/mirrors/linux-stable" || return
 
     git fetch -p origin
     git push --mirror
 
-    cd ${KERNEL_FOLDER}/mirrors/linux-stable-rc
+    cd "${KERNEL_FOLDER}/mirrors/linux-stable-rc" || return
 
     git fetch -p origin
 
-    cd ${CUR_FOLDER}
+    cd "${CUR_FOLDER}" || return
 }
 
 # Add kernel remotes to a kernel repo
@@ -161,41 +159,37 @@ function kremotes() {
 # mrgt <tag> [<remote|url>]
 function merge-tag() {
     if [[ $# -gt 1 ]]; then
-        git fetch --tags ${2}
+        git fetch --tags "${2}"
     fi
 
     local MSG_FILE=/tmp/mrg-msg
-    local CB=$(git rev-parse --abbrev-ref HEAD | sed 's/-queue-[0-9].*//')
+    local CB; CB=$(git rev-parse --abbrev-ref HEAD | sed 's/-queue-[0-9].*//')
     local TAG=${1}
     local RANGE=${CB}..${TAG}
 
     rm -rf ${MSG_FILE}
-    echo "Merge ${TAG} into ${CB}" >> ${MSG_FILE}
+    {
+        echo "Merge ${TAG} into ${CB}"
 
-    echo "\nCommits in ${TAG}: ($(git rev-list --count ${RANGE}) commits)" >> ${MSG_FILE}
-    git log --reverse --format="        %s" ${RANGE} >> ${MSG_FILE}
+        echo "\nCommits in ${TAG}: ($(git rev-list --count "${RANGE}") commits)"
+        git log --reverse --format="        %s" "${RANGE}"
 
-    echo "\nSigned-off-by: $(git config --get user.name) <$(git config --get user.email)>" >> ${MSG_FILE}
+        echo "\nSigned-off-by: $(git config --get user.name) <$(git config --get user.email)>"
+    } > ${MSG_FILE}
 
-    GIT_MERGE_VERBOSITY=1 git merge --gpg-sign --no-edit ${TAG}
-    local MERGE_RESULT=$?
-
-    CONFLICTS=$(git cf)
-    if [[ -n ${CONFLICTS} ]]; then
+    if ! GIT_MERGE_VERBOSITY=1 git merge --gpg-sign --no-edit "${TAG}"; then
         echo "\nConflicts:" >> ${MSG_FILE}
-        for FILE in ${CONFLICTS}; do
+        for FILE in $(git cf); do
             echo "\t${FILE}" >> ${MSG_FILE}
         done
-    fi
 
-    if [[ ${MERGE_RESULT} -ne 0 ]]; then
         display_error "Merge needs manual intervention!
 
 Resolve conflicts then run git fm!"
         return 1
     else
         git commit --amend --no-edit --quiet --gpg-sign --file ${MSG_FILE}
-        header "${TAG} merged cleanly!" ${GRN}
+        header "${TAG} merged cleanly!" "${GRN}"
     fi
 }
 
@@ -217,6 +211,7 @@ function nf() {
 # Find config values in a kernel tree
 # kfg [-c <defconfig_file>] [-f <config>] [-e <config>] [-d <config>]
 function kfg() {
+    # shellcheck disable=SC2155
     local DEFCONFIGS="$(ls arch/arm64/configs/flash*_defconfig)"
     local CONFIG LIST
 
@@ -230,29 +225,29 @@ function kfg() {
             "-d"|"--disable")
                 shift
 
-                CONFIG=$(echo ${1} | sed s/CONFIG_//)
+                CONFIG=${1//CONFIG_/}
                 for DEFCONFIG in ${DEFCONFIGS}; do
-                    echo "# CONFIG_${CONFIG} is not set" >> arch/arm64/configs/$(basename ${DEFCONFIG})
+                    echo "# CONFIG_${CONFIG} is not set" >> arch/arm64/configs/"$(basename "${DEFCONFIG}")"
                 done ;;
 
             "-e"|"--enable")
                 shift
 
-                CONFIG=$(echo ${1} | sed s/CONFIG_//)
+                CONFIG=${1//CONFIG_/}
 
                 for DEFCONFIG in ${DEFCONFIGS}; do
-                    echo "CONFIG_${CONFIG}=y" >> arch/arm64/configs/$(basename ${DEFCONFIG})
+                    echo "CONFIG_${CONFIG}=y" >> arch/arm64/configs/"$(basename "${DEFCONFIG}")"
                 done ;;
 
             "-f"|"--find")
                 shift
 
-                CONFIG=$(echo ${1} | sed s/CONFIG_//)
+                CONFIG=${1//CONFIG_/}
 
                 header "LOCATIONS OF ${CONFIG} IN TREE"
-                git grep -n -1 ${CONFIG} | ag --nocolor Kconfig
+                git grep -n -1 "${CONFIG}" | ag --nocolor Kconfig
 
-                LIST=$(ag --nocolor ${CONFIG} out/.config)
+                LIST=$(ag --nocolor "${CONFIG}" out/.config)
                 if [[ -n ${LIST} ]]; then
                     header "LOCATIONS OF ${CONFIG} IN CONFIG FILE"
                     echo "${LIST}"
@@ -265,9 +260,9 @@ function kfg() {
 
                 for DEFCONFIG in ${DEFCONFIGS}; do
                     rm -rf out
-                    make O=out ARCH=arm64 $(basename ${DEFCONFIG})
+                    make O=out ARCH=arm64 "$(basename "${DEFCONFIG}")"
                     make O=out ARCH=arm64 savedefconfig
-                    cp -v out/defconfig arch/arm64/configs/$(basename ${DEFCONFIG})
+                    cp -v out/defconfig arch/arm64/configs/"$(basename "${DEFCONFIG}")"
                 done ;;
         esac
 
@@ -282,19 +277,19 @@ function frel() {
         "op5")
             case ${2} in
                 1.*)
-                    flash-kernel -v ${2} -m stable -d op5 -os Custom -b 7.1.x-custom -av 7.1.x
-                    flash-kernel -v ${2} -m stable -d op5 -os OOS -b 7.1.x-oos -av 7.1.x ;;
+                    flash-kernel -v "${2}" -m stable -d op5 -os Custom -b 7.1.x-custom -av 7.1.x
+                    flash-kernel -v "${2}" -m stable -d op5 -os OOS -b 7.1.x-oos -av 7.1.x ;;
                 2.*)
-                    flash-kernel -v ${2} -m stable -d op5 -os Custom -b 8.0.0-custom -av 8.0.0
-                    flash-kernel -v ${2} -m stable -d op5 -os OOS -b 8.0.0-oos -av 8.0.0 ;;
+                    flash-kernel -v "${2}" -m stable -d op5 -os Custom -b 8.0.0-custom -av 8.0.0
+                    flash-kernel -v "${2}" -m stable -d op5 -os OOS -b 8.0.0-oos -av 8.0.0 ;;
                 3.*)
-                    flash-kernel -v ${2} -m stable -d op5 -os Custom -b 8.x-unified -av 8.1.0
-                    flash-kernel -v ${2} -m stable -d op5 -os OOS -b 8.x-unified -av 8.0.0 ;;
+                    flash-kernel -v "${2}" -m stable -d op5 -os Custom -b 8.x-unified -av 8.1.0
+                    flash-kernel -v "${2}" -m stable -d op5 -os OOS -b 8.x-unified -av 8.0.0 ;;
             esac ;;
 
         "pxl2")
-            flash-kernel -v ${2} -m stable -d taimen -b oreo-mr1
-            flash-kernel -v ${2} -m stable -d walleye -b oreo-mr1 ;;
+            flash-kernel -v "${2}" -m stable -d taimen -b oreo-mr1
+            flash-kernel -v "${2}" -m stable -d walleye -b oreo-mr1 ;;
     esac
 }
 
@@ -305,37 +300,37 @@ function ftest() {
         "op5")
             case ${2} in
                 1.*)
-                    flash-kernel -v ${2} -r ${3} -m ${4} -d op5 -os Custom -b queue-${2} -av 7.1.x
-                    flash-kernel -v ${2} -r ${3} -m ${4} -d op5 -os OOS -b queue-${2} -av 7.1.x ;;
+                    flash-kernel -v "${2}" -r "${3}" -m "${4}" -d op5 -os Custom -b "queue-${2}" -av 7.1.x
+                    flash-kernel -v "${2}" -r "${3}" -m "${4}" -d op5 -os OOS -b "queue-${2}" -av 7.1.x ;;
                 2.*)
-                    flash-kernel -v ${2} -r ${3} -m ${4} -d op5 -os Custom -b queue-${2} -av 8.0.0
-                    flash-kernel -v ${2} -r ${3} -m ${4} -d op5 -os OOS -b queue-${2} -av 8.0.0 ;;
+                    flash-kernel -v "${2}" -r "${3}" -m "${4}" -d op5 -os Custom -b "queue-${2}" -av 8.0.0
+                    flash-kernel -v "${2}" -r "${3}" -m "${4}" -d op5 -os OOS -b "queue-${2}" -av 8.0.0 ;;
                 3.*)
-                    flash-kernel -v ${2} -r ${3} -m ${4} -d op5 -os Custom -b queue-${2} -av 8.1.0
-                    flash-kernel -v ${2} -r ${3} -m ${4} -d op5 -os OOS -b queue-${2} -av 8.0.0 ;;
+                    flash-kernel -v "${2}" -r "${3}" -m "${4}" -d op5 -os Custom -b "queue-${2}" -av 8.1.0
+                    flash-kernel -v "${2}" -r "${3}" -m "${4}" -d op5 -os OOS -b "queue-${2}" -av 8.0.0 ;;
             esac ;;
 
         "pxl2")
-            flash-kernel -v ${2} -r ${3} -m ${4} -d taimen -b queue-${2}
-            flash-kernel -v ${2} -r ${3} -m ${4} -d walleye -b queue-${2} ;;
+            flash-kernel -v "${2}" -r "${3}" -m "${4}" -d taimen -b "queue-${2}"
+            flash-kernel -v "${2}" -r "${3}" -m "${4}" -d walleye -b "queue-${2}" ;;
     esac
 }
 
 # Regenerate Pixel 2 build binaries
 function rpb() {
-    cd ${KERNEL_FOLDER}/sources/aosp-pixel2
+    cd "${KERNEL_FOLDER}/sources/aosp-pixel2" || return
 
     mkavenv
     . build/envsetup.sh
     lunch aosp_taimen-user
-    make ${JOBS_FLAGS} clean
-    make ${JOBS_FLAGS} dtc mkdtimg
+    make "${JOBS_FLAGS}" clean
+    make "${JOBS_FLAGS}" dtc mkdtimg
     rmvenv
 
-    cp out/host/linux-x86/bin/dtc ${BIN_FOLDER}
-    cp out/host/linux-x86/bin/mkdtimg ${BIN_FOLDER}
+    cp out/host/linux-x86/bin/dtc "${BIN_FOLDER}"
+    cp out/host/linux-x86/bin/mkdtimg "${BIN_FOLDER}"
 
-    cd ${SCRIPTS_FOLDER}
+    cd "${SCRIPTS_FOLDER}" || return
 
     git status
 }
@@ -344,12 +339,12 @@ function rpb() {
 function wfr() {
     case ${1} in
         "op5")
-            rm -rf ${WEB_FOLDER}/downloads/kernels/op5/{7.1.x,8.0.0}/{custom,oos}/{alpha,beta,rc,tmp}/* ;;
+            rm -rf "${WEB_FOLDER}"/downloads/kernels/op5/{7.1.x,8.0.0}/{custom,oos}/{alpha,beta,rc,tmp}/* ;;
         "pxl2")
-            rm -rf ${WEB_FOLDER}/downloads/kernels/{taimen,walleye}/{8.0.0,8.1.0}/{alpha,beta,rc,tmp}/* ;;
+            rm -rf "${WEB_FOLDER}"/downloads/kernels/{taimen,walleye}/{8.0.0,8.1.0}/{alpha,beta,rc,tmp}/* ;;
     esac
 
-    cd ${WEB_FOLDER}/downloads/kernels
+    cd "${WEB_FOLDER}/downloads/kernels" || return
 }
 
 # Generate git hashes with their subject line and links upstream (markdown commit format)
@@ -363,18 +358,18 @@ function mcf() {
     esac
 
     echo
-    echo "$(git show -s --format='%h ("%s")' ${2})"
+    git show -s --format='%h ("%s")' "${2}"
     echo
-    echo "ommit [\`$(git show -s --format=%h ${2})\`](${URL}$(git show -s --format='%H) ("%s")' ${2})"
+    echo "ommit [\`$(git show -s --format=%h "${2}")\`](${URL}$(git show -s --format='%H) ("%s")' "${2}")"
     echo
 }
 
 # Sign zip files for TWRP flashability
 function signzip() {
-    local CUR_DIR=$(pwd)
+    local CUR_DIR; CUR_DIR=$(pwd)
     local FILE=${1}
     local KEY=testkey
-    if [[ $(echo ${FILE} | grep -v zip) ]]; then
+    if echo "${FILE}" | grep -q -v zip; then
         display_error "This can only sign zip files!"
         return 1
     fi
@@ -386,33 +381,33 @@ function signzip() {
     header "Signing ${FILE}"
 
     # Shift to the folder containing the zip
-    cd $(dirname ${FILE})
+    cd "$(dirname "${FILE}")" || return
 
     # Get the zip name
-    ZIP_NAME=$(basename ${FILE} .zip)
+    ZIP_NAME=$(basename "${FILE}" .zip)
 
     # Sign the zip
-    java -jar ${BIN_FOLDER}/signapk.jar \
-              ${BIN_FOLDER}/${KEY}.x509.pem \
-              ${BIN_FOLDER}/${KEY}.pk8 \
-              ${ZIP_NAME}.zip \
-              ${ZIP_NAME}-firstsign.zip
+    java -jar "${BIN_FOLDER}/signapk.jar" \
+              "${BIN_FOLDER}/${KEY}.x509.pem" \
+              "${BIN_FOLDER}/${KEY}.pk8" \
+              "${ZIP_NAME}.zip" \
+              "${ZIP_NAME}-firstsign.zip"
 
-    ${BIN_FOLDER}/zipadjust ${ZIP_NAME}-firstsign.zip \
-                            ${ZIP_NAME}-adjusted.zip &>/dev/null
+    "${BIN_FOLDER}"/zipadjust "${ZIP_NAME}-firstsign.zip" \
+                              "${ZIP_NAME}-adjusted.zip" &>/dev/null
 
-    java -jar ${BIN_FOLDER}/minsignapk.jar \
-              ${BIN_FOLDER}/${KEY}.x509.pem \
-              ${BIN_FOLDER}/${KEY}.pk8 \
-              ${ZIP_NAME}-adjusted.zip \
-              ${ZIP_NAME}-signed.zip
+    java -jar "${BIN_FOLDER}/minsignapk.jar" \
+              "${BIN_FOLDER}/${KEY}.x509.pem" \
+              "${BIN_FOLDER}/${KEY}.pk8" \
+              "${ZIP_NAME}-adjusted.zip" \
+              "${ZIP_NAME}-signed.zip"
               
     # Remove intermediate zip files
-    rm ${ZIP_NAME}-firstsign.zip ${ZIP_NAME}-adjusted.zip
+    rm "${ZIP_NAME}-firstsign.zip" "${ZIP_NAME}-adjusted.zip"
 
     # Echo zip location
     echo "Signed zip: $(pwd)/${ZIP_NAME}-signed.zip\n"
-    cd ${CUR_DIR}
+    cd "${CUR_DIR}" || return
 }
 
 
@@ -426,13 +421,13 @@ function queue-tag() {
 
     case ${1} in
         "-c"|"--create")
-            git tag -d queue-${2} 2>/dev/null
-            git tag -a queue-${2} -m "Queue for Flash v${2}" -s ${3}
-            git push -f origin queue-${2} ;;
+            git tag -d "queue-${2}" 2>/dev/null
+            git tag -a "queue-${2}" -m "Queue for Flash v${2}" -s "${3}"
+            git push -f origin "queue-${2}" ;;
 
         "-d"|"--delete")
-            git tag -d queue-${2}
-            git push origin :queue-${2} ;;
+            git tag -d "queue-${2}"
+            git push origin :"queue-${2}" ;;
     esac
 }
 
@@ -446,7 +441,7 @@ function doesitbuild() {
             flash-kernel -d op5 -os OOS -io
             flash-kernel -d op5 -os Custom -io
             clear
-            cat ${LOG} | tail -n 5 ;;
+            tail -n 5 < "${LOG}" ;;
         *)
             return ;;
     esac
@@ -460,18 +455,18 @@ function ls-stats() {
     fi
 
     VER=${1}
-    SBLVL=$(git tag --sort=-taggerdate -l v${VER}* | head -n 1 | sed s/v// | cut -d . -f 3)
+    SBLVL=$(git tag --sort=-taggerdate -l v"${VER}"* | head -n 1 | sed s/v// | cut -d . -f 3)
 
-    echo "Linux ${VER} was released on $(git log -1 --format=%ai v${VER})
+    echo "Linux ${VER} was released on $(git log -1 --format=%ai v"${VER}")
 
-The latest version of ${VER} is ${VER}.${SBLVL}, released on $(git log -1 --format=%ai v${VER}.${SBLVL})
+The latest version of ${VER} is ${VER}.${SBLVL}, released on $(git log -1 --format=%ai v"${VER}.${SBLVL}")
 
 Number of commits in each version of ${VER}:
 
-v${VER}.1: $(git lo v${VER}..v${VER}.1 | wc -l)
-$(for i in $(seq 2 ${SBLVL}); do echo "v${VER}.$i: $(git lo v${VER}.$(($i - 1))..v${VER}.$i | wc -l)"; done)
+v${VER}.1: $(git lo v"${VER}..v${VER}.1" | wc -l)
+$(for i in $(seq 2 "${SBLVL}"); do echo "v${VER}.$i: $(git lo "v${VER}.$((i - 1))..v${VER}.$i" | wc -l)"; done)
 
-Average number of commits in a version of ${VER}: $(($(git lo v${VER}..v${VER}.${SBLVL} | wc -l) / ${SBLVL}))" > ~/web/stats/${VER}
+Average number of commits in a version of ${VER}: $(($(git lo "v${VER}..v${VER}.${SBLVL}" | wc -l) / SBLVL))" > "${HOME}/web/stats/${VER}"
 }
 
 
