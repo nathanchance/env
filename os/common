@@ -22,7 +22,7 @@
 source common -m
 
 # SOURCE THE OS SPECIFIC FUNCTIONS
-source ${SCRIPTS_FOLDER}/os/${OS}
+source "${SCRIPTS_FOLDER}/os/${OS}"
 
 function aliases() {
     # tmux alias
@@ -69,6 +69,7 @@ function aliases() {
     git config --global alias.rb 'rebase --gpg-sign'
     git config --global alias.rba 'rebase --abort'
     git config --global alias.rbc 'rebase --continue'
+    # shellcheck disable=SC2016
     git config --global alias.rf '!bash -c "git reset -q -- ${1} && git checkout -- ${1}"'
     git config --global alias.rh 'reset --hard'
     git config --global alias.rs 'reset --soft'
@@ -84,42 +85,45 @@ function tmux_attach() {
         if [[ -z ${ID} ]]; then
             tmux -u new-session
         else
-            tmux -u attach-session -t ${ID}
+            tmux -u attach-session -t "${ID}"
         fi
     fi
 }
 
 # Add something to PATH but only if it isn't already there
 function add_to_path_pre() {
-    if [[ ! $(echo ${PATH} | ag -s --nocolor ${1}) ]]; then
+    if [[ ! $(echo "${PATH}" | ag -s --nocolor "${1}") ]]; then
         export PATH="${1}:${PATH}"
     fi
 }
 
 function add_to_path_post() {
-    if [[ ! $(echo ${PATH} | ag -s --nocolor ${1}) ]]; then
+    if [[ ! $(echo "${PATH}" | ag -s --nocolor "${1}") ]]; then
         export PATH="${PATH}:${1}"
     fi
 }
 
 function bash_setup() {
     aliases
+    # shellcheck disable=SC2086
     ${OS}_aliases
     tmux_attach
+    # shellcheck disable=SC2086
     ${OS}_prompt
+    # shellcheck disable=SC2086
     ${OS}_setup
-    add_to_path_pre ${SCRIPTS_FOLDER}
+    add_to_path_pre "${SCRIPTS_FOLDER}"
 }
 
 # bashrc reload function
 function rld() {
-    source ${SCRIPTS_FOLDER}/os/common
+    source "${SCRIPTS_FOLDER}/os/common"
     bash_setup
 }
 
 # EXKM to RC converter
 function exkm2rc {
-    sed -e 's/^/   write /' ${1} > ${2}
+    sed -e 's/^/   write /' "${1}" > "${2}"
 }
 
 function gerrit-push {
@@ -129,7 +133,7 @@ function gerrit-push {
     local URL
     local USER=nathanchance
 
-    case ${1} in
+    case ${ROM} in
         "du")
             URL=gerrit.dirtyunicorns.com
             BRANCH=o8x ;;
@@ -153,9 +157,9 @@ function gerrit-push {
     fi
 
     if [[ -n ${PROJECT} ]]; then
-        PROJECT=$(echo ${PROJECT} | sed 's/DirtyUnicorns\///')
+        PROJECT=$(echo "${PROJECT}" | sed 's/DirtyUnicorns\///')
         echo "Executing git push ssh://${USER}@${URL}:29418/${PROJECT} HEAD:refs/for/${BRANCH}"
-        git push ssh://${USER}@${URL}:29418/${PROJECT} HEAD:refs/for/${BRANCH}
+        git push ssh://${USER}@${URL}:29418/"${PROJECT}" HEAD:refs/for/${BRANCH}
     else
         echo "wtf happened?"
     fi
