@@ -53,6 +53,10 @@ function parse_parameters() {
 
         shift
     done
+
+    if [[ -z ${VERSION} ]]; then
+        VERSION=7
+    fi
 }
 
 # Syncs requested  projects
@@ -64,13 +68,10 @@ function sync() {
         BRANCH=binutils-2_29-branch
     else
         URL=https://git.llvm.org/git/$(basename "${FOLDER}")
-
-        if [[ -z ${VERSION} ]]; then
-            BRANCH=master
-            VERSION=7
-        else
-            BRANCH="release_${VERSION}0"
-        fi
+        case ${VERSION} in
+            "7") BRANCH=master ;;
+            *) BRANCH="release_${VERSION}0" ;;
+        esac
     fi
 
     if [[ ! -d ${FOLDER} ]]; then
