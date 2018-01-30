@@ -223,25 +223,25 @@ function create_merge_message() {
         git log --reverse --format="        %s" "${RANGE}" >> ${MSG_FILE}
     fi
     echo "\nSigned-off-by: $(git config --get user.name) <$(git config --get user.email)>" >> ${MSG_FILE}
-    CONFLICTS=$(git cf)
-    if [[ -n ${CONFLICTS} ]]; then
-        echo "\nConflicts:" >> ${MSG_FILE}
-        for FILE in ${CONFLICTS}; do
-            echo "\t${FILE}" >> ${MSG_FILE}
-        done
-    fi
+}
+
+
+function append_conflicts() {
+    echo "\nConflicts:" >> ${MSG_FILE}
+    for FILE in $(git cf); do
+        echo "\t${FILE}" >> ${MSG_FILE}
+    done
 }
 
 
 function mg_target_version() {
     header "Merging ${TARGET_VERSION}"
 
+    create_merge_message
     if ! GIT_MERGE_VERBOSITY=1 git merge --gpg-sign --no-edit "${TAG}"; then
-        create_merge_message
-
+        append_conflicts
         die "Merge needs manual intervention! Resolve conflicts then run git fm."
     else
-        create_merge_message
         git commit --amend --no-edit --quiet --gpg-sign --file ${MSG_FILE}
         header "${TARGET_VERSION} MERGED CLEANLY!" "${GRN}"
     fi
