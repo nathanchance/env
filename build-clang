@@ -36,11 +36,6 @@ START=$(date +"%s")
 #             #
 ###############
 
-# cmake wrapper
-function cmka() {
-    CC="gcc" GXX="g++" LD="ld.gold" cmake "$@"
-}
-
 function parse_parameters() {
     while [[ $# -ge 1 ]]; do
         case ${1} in
@@ -126,26 +121,28 @@ function build() {
 
     INSTALL_FOLDER=/opt/clang-${VERSION}.x
 
-    cmka -DLINK_POLLY_INTO_TOOLS:BOOL=ON \
-         -DCMAKE_CXX_FLAGS:STRING="-O3 -Wno-macro-redefined -pipe -pthread -fopenmp -g0 -march=native -mtune=native" \
-         -DCMAKE_C_FLAGS:STRING="-O3 -Wno-macro-redefined -pipe -pthread -fopenmp -g0 -march=native -mtune=native" \
-         -DLLVM_ENABLE_PIC:BOOL=ON \
-         -DCMAKE_INSTALL_PREFIX:PATH=${INSTALL_FOLDER} \
-         -DLLVM_PARALLEL_COMPILE_JOBS="${THREADS}" \
-         -DLLVM_PARALLEL_LINK_JOBS="${THREADS}" \
-         -DLLVM_ENABLE_THREADS:BOOL=ON \
-         -DLLVM_ENABLE_WARNINGS:BOOL=OFF \
-         -DLLVM_ENABLE_WERROR:BOOL=OFF \
-         -DLLVM_INCLUDE_EXAMPLES:BOOL=OFF \
-         -DLLVM_INCLUDE_TESTS:BOOL=OFF \
-         -DLLVM_BINUTILS_INCDIR:PATH="${LLVM_FOLDER}/tools/binutils/include" \
-         -DLLVM_TARGETS_TO_BUILD:STRING="X86;ARM;AArch64;NVPTX" \
-         -DCMAKE_BUILD_TYPE:STRING=MinSizeRel \
-         -DLLVM_OPTIMIZED_TABLEGEN:BOOL=ON \
-         -DPOLLY_ENABLE_GPGPU_CODEGEN:BOOL=ON \
-         "${LLVM_FOLDER}"
+    cmake -DLINK_POLLY_INTO_TOOLS:BOOL=ON \
+          -DCMAKE_CXX_FLAGS:STRING="-O3 -Wno-macro-redefined -pipe -pthread -fopenmp -g0 -march=native -mtune=native" \
+          -DCMAKE_C_FLAGS:STRING="-O3 -Wno-macro-redefined -pipe -pthread -fopenmp -g0 -march=native -mtune=native" \
+          -DLLVM_ENABLE_PIC:BOOL=ON \
+          -DCMAKE_INSTALL_PREFIX:PATH=${INSTALL_FOLDER} \
+          -DLLVM_PARALLEL_COMPILE_JOBS="${THREADS}" \
+          -DLLVM_PARALLEL_LINK_JOBS="${THREADS}" \
+          -DLLVM_ENABLE_THREADS:BOOL=ON \
+          -DLLVM_ENABLE_WARNINGS:BOOL=OFF \
+          -DLLVM_ENABLE_WERROR:BOOL=OFF \
+          -DLLVM_INCLUDE_EXAMPLES:BOOL=OFF \
+          -DLLVM_INCLUDE_TESTS:BOOL=OFF \
+          -DLLVM_BINUTILS_INCDIR:PATH="${LLVM_FOLDER}/tools/binutils/include" \
+          -DLLVM_TARGETS_TO_BUILD:STRING="X86;ARM;AArch64;NVPTX" \
+          -DCMAKE_BUILD_TYPE:STRING=MinSizeRel \
+          -DLLVM_OPTIMIZED_TABLEGEN:BOOL=ON \
+          -DPOLLY_ENABLE_GPGPU_CODEGEN:BOOL=ON \
+          -DLLVM_CCACHE_BUILD:BOOL=ON \
+          -DLLVM_USE_LINKER:STRING=gold \
+          "${LLVM_FOLDER}"
 
-    if ! time cmka --build . -- "${JOBS_FLAG}"; then
+    if ! time cmake --build . -- "${JOBS_FLAG}"; then
         header "ERROR BUILDING!"
         die "Time elapsed: $(format_time "$(date +"%s")" "${START}")"
     fi
@@ -155,7 +152,7 @@ function install() {
     header "Installing Clang"
 
     rm -rf "${INSTALL_FOLDER}"
-    if ! cmka --build . --target install -- "${JOBS_FLAG}"; then
+    if ! cmake --build . --target install -- "${JOBS_FLAG}"; then
         header "ERROR INSTALLING!"
         die "Time elapsed: $(format_time "$(date +"%s")" "${START}")"
     fi
