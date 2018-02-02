@@ -494,24 +494,18 @@ function package_zip() {
     # GRAB MODULES TOO IF THEY ARE PRESENT
     MODULES="$(find "${OUT_FOLDER}" -name '*.ko')"
     if [[ -n ${MODULES} ]]; then
-        MODULES_SYSTEM_FOLDER=${ANYKERNEL2_FOLDER}/modules/system/lib/modules
-        MODULES_VENDOR_FOLDER=${ANYKERNEL2_FOLDER}/modules/system/vendor/lib/modules
-        mkdir -p "${MODULES_SYSTEM_FOLDER}"
+        MODULES_FOLDER=${ANYKERNEL2_FOLDER}/ramdisk/modules
+        mkdir -p "${MODULES_FOLDER}"
         for MOD in ${MODULES}; do
             "${CC}"strip --strip-unneeded "${MOD}"
             "${OUT_FOLDER}"/scripts/sign-file sha512 \
                                               "${OUT_FOLDER}/certs/signing_key.pem" \
                                               "${OUT_FOLDER}/certs/signing_key.x509" \
                                               "${MOD}"
-            cp "${MOD}" "${MODULES_SYSTEM_FOLDER}"
+            cp "${MOD}" "${MODULES_FOLDER}"
         done
 
-        if [[ ${DEVICE} = "op5" && ${OS} =~ "Custom" && ${ANDROID_VERSION} = "8.1.0" ]]; then
-            mkdir -p "${MODULES_VENDOR_FOLDER}"
-            cp "${MODULES_SYSTEM_FOLDER}"/*.ko "${MODULES_VENDOR_FOLDER}"
-        fi
-
-        echo "${BOLD}Kernel modules:${RST}    $(find "${MODULES_SYSTEM_FOLDER}" -type f | wc -l)\n"
+        echo "${BOLD}Kernel modules:${RST}    $(find "${MODULES_FOLDER}" -type f | wc -l)\n"
     fi
 
     cd "${ANYKERNEL2_FOLDER}" || die "AnyKernel2 folder shift failed!"
