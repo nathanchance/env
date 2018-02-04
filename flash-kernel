@@ -619,13 +619,15 @@ function setup_folders() {
             git push --quiet
         fi
 
-        # MOVE THE OLD FILES TO AN ARCHIVE FOLDER
-        if [[ ! -d ${FILE_MOVE_OLD} ]]; then
-            mkdir -p "${FILE_MOVE_OLD}"
-        fi
-        OLD_FILES="$(find "${FILE_MOVE}"/* -maxdepth 0 -type f)"
-        if [[ -n ${OLD_FILES} ]]; then
-            mv "${OLD_FILES}" "${FILE_MOVE_OLD}" &>/dev/null
+        # MOVE THE OLD FILES TO AN ARCHIVE FOLDER UNLESS NO CLEAN IS REQUESTED
+        if [[ ! ${NOCLEAN} ]]; then
+            if [[ ! -d ${FILE_MOVE_OLD} ]]; then
+                mkdir -p "${FILE_MOVE_OLD}"
+            fi
+            OLD_FILES="$(find "${FILE_MOVE}"/* -maxdepth 0 -type f)"
+            if [[ -n ${OLD_FILES} ]]; then
+                mv "${OLD_FILES}" "${FILE_MOVE_OLD}" &>/dev/null
+            fi
         fi
     fi
 }
