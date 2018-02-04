@@ -151,7 +151,8 @@ function build() {
 function install() {
     header "Installing Clang"
 
-    rm -rf "${INSTALL_FOLDER}"
+    rm -rf "${INSTALL_FOLDER}-old"
+    mv "${INSTALL_FOLDER}" "${INSTALL_FOLDER}-old"
     if ! cmake --build . --target install -- "${JOBS_FLAG}"; then
         header "ERROR INSTALLING!"
         die "Time elapsed: $(format_time "$(date +"%s")" "${START}")"
