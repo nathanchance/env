@@ -624,10 +624,7 @@ function setup_folders() {
             if [[ ! -d ${FILE_MOVE_OLD} ]]; then
                 mkdir -p "${FILE_MOVE_OLD}"
             fi
-            OLD_FILES="$(find "${FILE_MOVE}"/* -maxdepth 0 -type f)"
-            if [[ -n ${OLD_FILES} ]]; then
-                mv "${OLD_FILES}" "${FILE_MOVE_OLD}" &>/dev/null
-            fi
+            find "${FILE_MOVE}" -maxdepth 1 -type f -exec mv {} "${FILE_MOVE_OLD}" \; &>/dev/null
         fi
     fi
 }
