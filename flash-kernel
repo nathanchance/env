@@ -183,7 +183,7 @@ function device_flags() {
             fi
             if [[ -z ${CLANG_FOLDER} ]]; then
                 case ${MODE} in
-                    "personal") CLANG_FOLDER=/opt/clang-7.x ;;
+                    "personal") CLANG_FOLDER=/opt/clang-6.x ;;
                     *) CLANG_FOLDER=/opt/clang-6.x ;;
                 esac
             fi
@@ -217,7 +217,7 @@ function device_flags() {
 
             if [[ -z ${CLANG_FOLDER} ]]; then
                 case ${MODE} in
-                    "personal") CLANG_FOLDER=/opt/clang-7.x ;;
+                    "personal") CLANG_FOLDER=/opt/clang-6.x ;;
                     *) CLANG_FOLDER=/opt/clang-6.x ;;
                 esac
             fi
