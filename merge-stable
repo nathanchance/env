@@ -180,6 +180,9 @@ function generate_versions() {
         TAG=linux-stable-rc/linux-${CURRENT_MAJOR_VERSION}.y
         RANGE=v${CURRENT_VERSION}..${TAG}
         TARGET_VERSION=${TARGET_VERSION}$(git grep -h "\-rc" "${TAG}" -- Makefile | cut -d ' ' -f 3)
+        if ! [[ ${TARGET_VERSION} =~ "rc" ]]; then
+            die "There is no RC version for ${CURRENT_MAJOR_VERSION}!\n"
+        fi
     else
         # Make sure target version is between current version and latest version
         TARGET_SUBLEVEL=$(echo "${TARGET_VERSION}" | cut -d . -f 3)
