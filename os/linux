@@ -212,7 +212,7 @@ function nf() {
 # kfg [-c <defconfig_file>] [-f <config>] [-e <config>] [-d <config>]
 function kfg() {
     # shellcheck disable=SC2155
-    local DEFCONFIGS="$(ls arch/arm64/configs/flash*_defconfig)"
+    local DEFCONFIGS="$(ls arch/arm64/configs/flash*_defconfig 2>/dev/null)"
     local CONFIG LIST
 
     while [[ $# -ge 1 ]]; do
@@ -220,7 +220,7 @@ function kfg() {
             "-c"|"--config")
                 shift
 
-                DEFCONFIG=${1} ;;
+                DEFCONFIGS=${1} ;;
 
             "-d"|"--disable")
                 shift
