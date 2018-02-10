@@ -367,7 +367,7 @@ function kmake() {
     if [[ ${DEBUG} ]]; then
         make_wrapper_${COMPILER} "$@"
     else
-        make_wrapper_${COMPILER} "$@" |& ag --no-color "error:|warning:" && echo
+        make_wrapper_${COMPILER} "$@" |& ag --no-color --after=10 "error:|warning:" && echo
     fi
 }
 
