@@ -46,6 +46,9 @@ function linux_aliases() {
 
     # Alias for makepkg
     alias mkpkg='makepkg -si --noconfirm'
+
+    # Alias for flash-kernel script
+    alias fk='flash-kernel'
 }
 
 # Setup PS1 and such
