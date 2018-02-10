@@ -76,7 +76,7 @@ function ccache_setup() {
 function linux_setup() {
     ccache_setup 150
     export LOG=/tmp/results.log
-    add_to_path_post "${HOME}/.gem/ruby/2.4.0/bin"
+    add_to_path_post "${HOME}/.gem/ruby/2.5.0/bin"
 }
 
 # Repo sync shorthand
