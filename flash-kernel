@@ -311,8 +311,6 @@ function clean_up() {
     else
         KERNEL_BRANCH=$(git rev-parse --abbrev-ref HEAD)
     fi
-    # CLEAN SOURCE FOLDER
-    git clean -fxd
 }
 
 
@@ -446,6 +444,9 @@ function print_variables() {
 
 # MAKE KERNEL
 function build_kernel() {
+    # CLEAN SOURCE FOLDER
+    git clean -dfqx
+
     # POINT TO PROPER DEFCONFIG AND GENERATE VERSION FILES
     kmake ${DEFCONFIG} prepare
 
