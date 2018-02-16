@@ -24,7 +24,7 @@ function linux_aliases() {
     alias ls='ls --color=auto'
 
     # Update alias
-    alias update='pacaur -Syyu'
+    alias update='trizen -Syyu'
 
     # Change directory aliases
     alias 6p='cd ${KERNEL_FOLDER}/flash/angler'
