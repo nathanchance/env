@@ -517,7 +517,9 @@ function package_zip() {
     header "PACKAGING AND SIGNING ZIP"
 
     echo "${BOLD}Signed zip name:${RST}   ${SIGNED_ZIP}\n"
-    echo "${BOLD}Kernel modules:${RST}    $(find "${MODULES_FOLDER}" -type f | wc -l)\n"
+    if [[ -n ${MODULES_FOLDER} ]]; then
+        echo "${BOLD}Kernel modules:${RST}    $(find "${MODULES_FOLDER}" -type f | wc -l)\n"
+    fi
 
     cd "${ANYKERNEL2_FOLDER}" || die "AnyKernel2 folder shift failed!"
 
