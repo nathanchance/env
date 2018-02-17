@@ -61,6 +61,10 @@ else
 fi
 JOBS_FLAG="-j${THREADS}"
 
+# SOURCE TELEGRAM BOT INFORMATION
+if [[ -f ${HOME}/.botinfo ]]; then
+    source ~/.botinfo
+fi
 
 ###############
 #             #
@@ -180,3 +184,18 @@ function rmvenv {
 if [[ $# -lt 1 && ${OS} = "darwin" ]]; then
     die "Wrong window! ;)"
 fi
+
+# TELEGRAM NOTIFIER FUNCTION
+function notify() {
+    if [[ -z ${TOKEN} ]]; then
+        display_error "notify() was called but there was no token!"
+        return 1
+    fi
+
+    if [[ -z ${CHAT_ID} ]]; then
+        display_error "notify() was called but there was no chat ID!"
+        return 1
+    fi
+
+    curl -s -X POST https://api.telegram.org/bot${TOKEN}/sendMessage -d chat_id=${CHAT_ID} -d parse_mode="Markdown" -d text="$@" 1>/dev/null
+}
