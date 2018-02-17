@@ -124,7 +124,8 @@ function parse_parameters() {
 
             # SEND UPDATES TO TELEGRAM
             "-t"|"--telegram")
-                TG=true ;;
+                TG=true
+                TG_MSG_FILE=/tmp/tg-msg.1 ;;
 
             # VERSION CODE
             "-v"|"--version")
@@ -159,8 +160,8 @@ function parse_parameters() {
             echo
             echo "$(basename "${0}") ${PARAMS}"
             echo "\`\`\`"
-        } > /tmp/tg-msg
-        notify "$(cat /tmp/tg-msg)"
+        } > ${TG_MSG_FILE}
+        notify "$(cat ${TG_MSG_FILE})"
     fi
 }
 
@@ -491,8 +492,8 @@ function build_kernel() {
                 echo "Boot image: ${BOOT_IMAGE}"
             fi
             echo "\`\`\`"
-        } > /tmp/tg-msg
-        notify "$(cat /tmp/tg-msg)"
+        } > ${TG_MSG_FILE}
+        notify "$(cat ${TG_MSG_FILE})"
     fi
 
     # MAKE THE KERNEL
@@ -849,12 +850,13 @@ function ending_info() {
                         echo "[${BOOT_IMAGE}](${FILE_LOCATION})"
                     fi
                 fi
-            } > /tmp/tg-msg
-            notify "$(cat /tmp/tg-msg)"
+            } > ${TG_MSG_FILE}
+            notify "$(cat ${TG_MSG_FILE})"
         fi
     else
         echo "BUILD FAILED IN ${DURATION}" >> "${LOG}"
         if [[ ${TG} ]]; then
+            load_botinfo
             notify "\`Build failed in ${DURATION,,}\`"
         fi
     fi
