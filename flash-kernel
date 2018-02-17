@@ -122,6 +122,10 @@ function parse_parameters() {
 
                 REVISION=${1} ;;
 
+            # SEND UPDATES TO TELEGRAM
+            "-t"|"--telegram")
+                TG=true ;;
+
             # VERSION CODE
             "-v"|"--version")
                 shift && enforce_value "$@"
@@ -146,6 +150,17 @@ function parse_parameters() {
     # EASY TO USE VARIABLES FOR IF STATEMENTS
     if [[ ${MODE} != "stable" ]]; then
         NOT_STABLE=true
+    fi
+
+    if [[ ${TG} ]]; then
+        {
+            echo "\`\`\`"
+            echo "Currently executing..."
+            echo
+            echo "$(basename "${0}") ${PARAMS}"
+            echo "\`\`\`"
+        } > /tmp/tg-msg
+        notify "$(cat /tmp/tg-msg)"
     fi
 }
 
@@ -450,6 +465,28 @@ function build_kernel() {
 
     # POINT TO PROPER DEFCONFIG AND GENERATE VERSION FILES
     kmake ${DEFCONFIG} prepare
+
+    # NOTIFY TELEGRAM OF BUILD STARTING
+    if [[ ${TG} ]]; then
+        {
+            echo "\`\`\`"
+            echo "Kernel build starting..."
+            echo
+            echo "Device: ${DEVICE_NAME_FILE}"
+            echo
+            echo "Version: $(cat "${OUT_FOLDER}/include/config/kernel.release")"
+            if [[ ${PACKAGE_METHOD} =~ "zip" ]]; then
+                echo
+                echo "Zip file: ${SIGNED_ZIP}"
+            fi
+            if [[ ${PACKAGE_METHOD} =~ "image" ]]; then
+                echo
+                echo "Boot image: ${BOOT_IMAGE}"
+            fi
+            echo "\`\`\`"
+        } > /tmp/tg-msg
+        notify "$(cat /tmp/tg-msg)"
+    fi
 
     # MAKE THE KERNEL
     # shellcheck disable=SC2086
@@ -790,8 +827,29 @@ function ending_info() {
                                       awk '{print $1}')${RST}" ;;
             esac
         fi
+
+        if [[ ${TG} ]]; then
+            {
+                echo "\`Kernel build successful in ${DURATION,,}\`"
+                if [[ ! ${IMAGE_ONLY} ]]; then
+                    if [[ ${PACKAGE_METHOD} =~ "zip" ]]; then
+                        echo
+                        echo "[${SIGNED_ZIP}](${FILE_LOCATION})"
+                    fi
+
+                    if [[ ${PACKAGE_METHOD} =~ "image" ]]; then
+                        echo
+                        echo "[${BOOT_IMAGE}](${FILE_LOCATION})"
+                    fi
+                fi
+            } > /tmp/tg-msg
+            notify "$(cat /tmp/tg-msg)"
+        fi
     else
         echo "BUILD FAILED IN ${DURATION}" >> "${LOG}"
+        if [[ ${TG} ]]; then
+            notify "\`Build failed in ${DURATION,,}\`"
+        fi
     fi
 
     echo "${RED}DURATION: ${DURATION}${RST}"
