@@ -61,11 +61,6 @@ else
 fi
 JOBS_FLAG="-j${THREADS}"
 
-# SOURCE TELEGRAM BOT INFORMATION
-if [[ -f ${HOME}/.botinfo ]]; then
-    source ~/.botinfo
-fi
-
 ###############
 #             #
 #  FUNCTIONS  #
@@ -136,6 +131,23 @@ function display_error() {
 
 # PRINTS AN ERROR IN BOLD RED
 function die() {
+    if [[ ${TG} ]]; then
+        # INFO MUST BE RESOURCED SO PUBLIC CHATS DON'T GET NOTIFIED
+        load_botinfo
+        {
+            echo "\`\`\`"
+            echo "An error was detected while running the following command:"
+            echo
+            echo "$(basename "${0}") ${PARAMS}"
+            echo
+            echo "The error was:"
+            echo
+            echo "$*"
+            echo "\`\`\`"
+        } > /tmp/death-tg-msg
+        notify "$(cat /tmp/death-tg-msg)"
+    fi
+
     display_error "$@"
     exit
 }
@@ -179,6 +191,15 @@ function rmvenv {
     deactivate
     rm -rf "${HOME}/venv"
 }
+
+# SOURCE TELEGRAM BOT INFORMATION
+function load_botinfo() {
+    if [[ -f ${HOME}/.botinfo ]]; then
+        source ~/.botinfo
+    fi
+}
+
+load_botinfo
 
 # REQUIRE A PARAMETER TO OPT OUT OF MAC_CHECK
 if [[ $# -lt 1 && ${OS} = "darwin" ]]; then
