@@ -499,7 +499,7 @@ function move_kernel_files() {
 
 # BUILD FUNCTION SPECIFICALLY FOR THE ONEPLUS 5
 function build_kernel_op5() {
-    if [[ -z ${OS} ]]; then
+    if [[ -z ${OS_LIST} ]]; then
         OS_LIST="OOS Custom"
     fi
 
