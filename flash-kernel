@@ -210,6 +210,11 @@ function device_flags() {
 
             BUILD_FUNCTION=build_kernel
 
+            if [[ ${TG} && ${MODE} != "personal" ]]; then
+                # shellcheck disable=SC2034
+                CHAT_ID=-1001298464571
+            fi
+
             if [[ -z ${COMPILER} ]]; then
                 COMPILER=clang
             fi
@@ -471,8 +476,10 @@ function build_kernel() {
         {
             echo "\`\`\`"
             echo "Kernel build starting..."
-            echo
-            echo "Device: ${DEVICE_NAME_FILE}"
+            if [[ ${MODE} = "personal" ]]; then
+                echo
+                echo "Device: ${DEVICE_NAME_FILE}"
+            fi
             echo
             echo "Version: $(cat "${OUT_FOLDER}/include/config/kernel.release")"
             if [[ ${PACKAGE_METHOD} =~ "zip" ]]; then
