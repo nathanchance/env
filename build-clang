@@ -37,8 +37,14 @@ START=$(date +"%s")
 ###############
 
 function parse_parameters() {
+    PARAMS="$*"
+
     while [[ $# -ge 1 ]]; do
         case ${1} in
+            "-t"|"--telegram")
+                TG=true
+                TG_MSG_FILE=/tmp/tg-msg.2 ;;
+
             "-v"|"--version")
                 shift && enforce_value "$@"
                 VERSION=${1} ;;
@@ -48,6 +54,17 @@ function parse_parameters() {
 
         shift
     done
+
+    if [[ ${TG} ]]; then
+        {
+            echo "\`\`\`"
+            echo "Currently executing..."
+            echo
+            echo "$(basename "${0}") ${PARAMS}"
+            echo "\`\`\`"
+        } > ${TG_MSG_FILE}
+        notify "$(cat ${TG_MSG_FILE})"
+    fi
 
     if [[ -z ${VERSION} ]]; then
         VERSION=7
@@ -119,6 +136,10 @@ function cleanup() {
 function build() {
     header "Building Clang"
 
+    if [[ ${TG} ]]; then
+        notify "\`Beginning build of Clang ${VERSION}...\`"
+    fi
+
     INSTALL_FOLDER=/opt/clang-${VERSION}.x
 
     cmake -DLINK_POLLY_INTO_TOOLS:BOOL=ON \
@@ -155,12 +176,32 @@ function install() {
     mv "${INSTALL_FOLDER}" "${INSTALL_FOLDER}-old"
     if ! cmake --build . --target install -- "${JOBS_FLAG}"; then
         header "ERROR INSTALLING!"
+        if [[ ${TG} ]]; then
+            {
+                echo "\`\`\`"
+                echo "Error while building Clang ${VERSION}!"
+                echo
+                echo "Time elapsed: $(format_time "$(date +"%s")" "${START}")"
+                echo "\`\`\`"
+            } > "${TG_MSG_FILE}"
+            notify "$(cat ${TG_MSG_FILE})"
+        fi
         die "Time elapsed: $(format_time "$(date +"%s")" "${START}")"
     fi
 
     header "SUCCESS!" "${GRN}"
     echo "${GRN}Successfully built and installed Clang toolchain to ${INSTALL_FOLDER}!${GRN}"
     echo "${GRN}Time elapsed: $(format_time "$(date +"%s")" "${START}")${RST}\n"
+    if [[ ${TG} ]]; then
+        {
+            echo "\`\`\`"
+            echo "Clang ${VERSION} build was successful!"
+            echo
+            echo "Time elapsed: $(format_time "$(date +"%s")" "${START}")"
+            echo "\`\`\`"
+        } > "${TG_MSG_FILE}"
+        notify "$(cat ${TG_MSG_FILE})"
+    fi
 }
 
 source common
