@@ -304,11 +304,6 @@ function generate_variables() {
         esac
         # shellcheck disable=SC2001
         CLANG_VERSION="$(echo "${CLANG_VERSION}" | sed 's/[[:space:]]*$//')"
-        # ONEPLUS 5 8.0.0 NEEDS A SPACE AFTER THE COMPILER VERSION IN ORDER NOT TO
-        # BREAK THE KERNEL VERSION IN ABOUT PHONE
-        if [[ ${DEVICE} = "op5" && ${ANDROID_VERSION} = "8.0.0" ]]; then
-            CLANG_VERSION="${CLANG_VERSION} "
-        fi
     fi
 }
 
