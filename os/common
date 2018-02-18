@@ -140,6 +140,9 @@ function gerrit-push {
         "du-caf")
             URL=gerrit.dirtyunicorns.com
             BRANCH=o8x-caf ;;
+        "lineage-15.1")
+            URL=review.lineageos.org
+            BRANCH=lineage-15.1 ;;
         "omni")
             URL=gerrit.omnirom.org
             BRANCH=android-7.1 ;;
