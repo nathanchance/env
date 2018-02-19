@@ -121,7 +121,7 @@ function build() {
                                            CROSS_COMPILE="${GCC_TOOLCHAIN%gcc}" \
                                            HOSTCC="${CCACHE} ${CLANG_TOOLCHAIN}"
     else
-        ${MAKE} CROSS_COMPILE="${CCACHE} ${GCC_TOOLCHAIN%gcc}"
+        PATH=${BIN_FOLDER}:${PATH} ${MAKE} CROSS_COMPILE="${CCACHE} ${GCC_TOOLCHAIN%gcc}"
     fi
 }
 
