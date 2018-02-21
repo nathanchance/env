@@ -179,6 +179,11 @@ function device_flags() {
 
             BUILD_FUNCTION=build_kernel_op5
 
+            if [[ ${TG} && ${MODE} != "personal" ]]; then
+                # shellcheck disable=SC2034
+                CHAT_ID=-1001107088684
+            fi
+
             if [[ -z ${COMPILER} ]]; then
                 COMPILER=clang
             fi
