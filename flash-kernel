@@ -477,7 +477,7 @@ function build_kernel() {
     kmake ${DEFCONFIG} prepare
 
     # NOTIFY TELEGRAM OF BUILD STARTING
-    if [[ ${TG} ]]; then
+    if [[ ${TG} && ${ALREADY_NOTIFIED} != true ]]; then
         {
             echo "\`\`\`"
             echo "Kernel build starting..."
@@ -557,6 +557,7 @@ function build_kernel_op5() {
         DEFCONFIG=flash-${OS,,}_defconfig
         OS_STRING="${OS} "
         build_kernel
+        ALREADY_NOTIFIED=true
     done
 }
 
