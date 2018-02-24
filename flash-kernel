@@ -385,12 +385,12 @@ function generate_version() {
     # GENERATE KERNEL VERSION
     KVER=$(make kernelversion)
 
-    if [[ ${MODE} = "personal" ]]; then
-        LOCALVERSION_BASELINE="FlashKernel"
-    else
-        LOCALVERSION_BASELINE="FlashKernel-${DEVICE_NAME_FILE}"
+    CONFIG_LOCALVERSION="-FlashKernel"
+
+    if [[ ${MODE} != "personal" ]]; then
+        LOCALVERSION="-${DEVICE_NAME_FILE}"
+        LOCALVERSION_ZIP="${LOCALVERSION}"
     fi
-    LOCALVERSION="-${LOCALVERSION_BASELINE}"
 
     # ADD VERSION IF PRESENT
     if [[ -n ${VERSION} ]]; then
@@ -414,7 +414,7 @@ function generate_version() {
 
     # GENERATE FIRST LINE VARIABLE
     # CONFIG_LOCALVERSION + CONFIG_LOCALVERSION_AUTO ARE DISABLED
-    FIRST_LINE="${KVER}${LOCALVERSION}"
+    FIRST_LINE="${KVER}${CONFIG_LOCALVERSION}${LOCALVERSION}"
 
     # IF REVISION EXISTS, USE IT FOR THE FILE
     if [[ -n ${REVISION} ]]; then
@@ -433,7 +433,7 @@ function generate_version() {
     THIRD_LINE="$(date)"
 
     # EXPORT KERNEL_NAME BASED ON THE ABOVE INFORMATION
-    KERNEL_NAME="${LOCALVERSION_BASELINE}${VERSION_TEXT}${REVISION_FOR_FILE}${SHA}"
+    KERNEL_NAME="${CONFIG_LOCALVERSION/-/}${LOCALVERSION_ZIP}${VERSION_TEXT}${REVISION_FOR_FILE}${SHA}"
 
     # SET FINAL NAMES
     if [[ ${PACKAGE_METHOD} =~ "image" ]]; then
