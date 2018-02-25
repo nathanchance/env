@@ -845,15 +845,8 @@ function ending_info() {
             {
                 echo "\`Kernel build successful in ${DURATION,,}\`"
                 if [[ ! ${IMAGE_ONLY} ]]; then
-                    if [[ ${PACKAGE_METHOD} =~ "zip" ]]; then
-                        echo
-                        echo "[${SIGNED_ZIP}](${FILE_LOCATION})"
-                    fi
-
-                    if [[ ${PACKAGE_METHOD} =~ "image" ]]; then
-                        echo
-                        echo "[${BOOT_IMAGE}](${FILE_LOCATION})"
-                    fi
+                    echo
+                    echo "[${FILE_LOCATION}](${FILE_LOCATION})"
                 fi
             } > ${TG_MSG_FILE}
             notify "$(cat ${TG_MSG_FILE})"
