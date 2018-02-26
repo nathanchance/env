@@ -526,7 +526,7 @@ function move_kernel_files() {
         if [[ -n ${OUT_DTBO_IMAGE} ]]; then
             cp "${OUT_DTBO_IMAGE}" "${ANYKERNEL2_FOLDER}/dtbo"
         fi
-        cat "${OUT_FOLDER}/include/config/kernel.release" > "${ANYKERNEL2_FOLDER}/version"
+        echo "Version: $(cat "${OUT_FOLDER}/include/config/kernel.release")" > "${ANYKERNEL2_FOLDER}/version"
 
         # GRAB MODULES TOO IF THEY ARE PRESENT
         MODULES="$(find "${OUT_FOLDER}" -name '*.ko')"
