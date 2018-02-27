@@ -847,6 +847,14 @@ function ending_info() {
                 if [[ ! ${IMAGE_ONLY} ]]; then
                     echo
                     echo "[${FILE_LOCATION}](${FILE_LOCATION})"
+                    if [[ -f /tmp/changelog ]]; then
+                        echo
+                        echo "\`\`\`"
+                        echo "Short changelog:"
+                        cat /tmp/changelog
+                        echo "\`\`\`"
+                        mv /tmp/changelog /tmp/changelog.bak
+                    fi
                 fi
             } > ${TG_MSG_FILE}
             notify "$(cat ${TG_MSG_FILE})"
