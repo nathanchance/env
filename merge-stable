@@ -245,7 +245,7 @@ function mg_target_version() {
         append_conflicts
         die "Merge needs manual intervention! Resolve conflicts then run git fm."
     else
-        git commit --amend --no-edit --quiet --gpg-sign --file ${MSG_FILE}
+        git commit --amend --date="$(date)" --file ${MSG_FILE} --gpg-sign --no-edit --quiet
         header "${TARGET_VERSION} MERGED CLEANLY!" "${GRN}"
     fi
 }
