@@ -700,18 +700,21 @@ function setup_folders() {
 function move_flashable_files() {
     echo "  - Moving files"
 
-    if [[ ${PACKAGE_METHOD} =~ "image" ]]; then
-        mv "${COMPILED_BOOT_IMAGE}" "${FILE_MOVE}/${BOOT_IMAGE}"
-        ( cd "${FILE_MOVE}"; md5sum "${BOOT_IMAGE}" > "${FILE_MOVE}/${BOOT_IMAGE}.md5" )
+    (
+        cd "${FILE_MOVE}" || die "Shift to ending folder failed!"
+        if [[ ${PACKAGE_METHOD} =~ "image" ]]; then
+            mv "${COMPILED_BOOT_IMAGE}" "${FILE_MOVE}/${BOOT_IMAGE}"
+            md5sum "${BOOT_IMAGE}" > "${FILE_MOVE}/${BOOT_IMAGE}.md5"
 
-        mv "$(dirname "${OUT_KERNEL_IMAGE}")/dtbo.img" "${FILE_MOVE}/${DTBO_IMAGE}"
-        ( cd "${FILE_MOVE}"; md5sum "${DTBO_IMAGE}" > "${FILE_MOVE}/${DTBO_IMAGE}.md5" )
-    fi
+            mv "$(dirname "${OUT_KERNEL_IMAGE}")/dtbo.img" "${FILE_MOVE}/${DTBO_IMAGE}"
+            md5sum "${DTBO_IMAGE}" > "${FILE_MOVE}/${DTBO_IMAGE}.md5"
+        fi
 
-    if [[ ${PACKAGE_METHOD} =~ "zip" ]]; then
-        mv "${ANYKERNEL2_FOLDER}/${SIGNED_ZIP}" "${FILE_MOVE}"
-        ( cd "${FILE_MOVE}"; md5sum "${SIGNED_ZIP}" > "${FILE_MOVE}/${SIGNED_ZIP}.md5" )
-    fi
+        if [[ ${PACKAGE_METHOD} =~ "zip" ]]; then
+            mv "${ANYKERNEL2_FOLDER}/${SIGNED_ZIP}" "${FILE_MOVE}"
+            md5sum "${SIGNED_ZIP}" > "${FILE_MOVE}/${SIGNED_ZIP}.md5"
+        fi
+    )
 }
 
 
