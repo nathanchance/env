@@ -390,6 +390,8 @@ function generate_version() {
     if [[ ${MODE} != "personal" ]]; then
         LOCALVERSION="-${DEVICE_NAME_FILE}"
         LOCALVERSION_ZIP="${LOCALVERSION}"
+    else
+        DATE="-$(date +%Y%m%d-%H%M)"
     fi
 
     # ADD VERSION IF PRESENT
@@ -404,6 +406,7 @@ function generate_version() {
         [[ ${MODE} = "personal" ]] && NUM=8 || NUM=12
         SHA="-g$(git rev-parse --verify --short=${NUM} HEAD)"
         LOCALVERSION="${LOCALVERSION}${SHA}"
+        [[ ${MODE} = "personal" ]] && unset SHA
     fi
 
     # IF THERE ARE UNCOMMITTED CHANGES, MARK AS DIRTY
@@ -433,7 +436,7 @@ function generate_version() {
     THIRD_LINE="$(date)"
 
     # EXPORT KERNEL_NAME BASED ON THE ABOVE INFORMATION
-    KERNEL_NAME="${CONFIG_LOCALVERSION/-/}${LOCALVERSION_ZIP}${VERSION_TEXT}${REVISION_FOR_FILE}${SHA}"
+    KERNEL_NAME="${CONFIG_LOCALVERSION/-/}${LOCALVERSION_ZIP}${VERSION_TEXT}${REVISION_FOR_FILE}${SHA}${DATE}"
 
     # SET FINAL NAMES
     if [[ ${PACKAGE_METHOD} =~ "image" ]]; then
