@@ -850,13 +850,14 @@ function ending_info() {
                 if [[ ! ${IMAGE_ONLY} ]]; then
                     echo
                     echo "[${FILE_LOCATION}](${FILE_LOCATION})"
-                    if [[ -f /tmp/changelog ]]; then
+                    SHORT_CHANGELOG=/tmp/changelog.${DEVICE_NAME_FILE,,}
+                    if [[ -f ${SHORT_CHANGELOG} ]]; then
                         echo
                         echo "\`\`\`"
                         echo "Short changelog:"
-                        cat /tmp/changelog
+                        cat ${SHORT_CHANGELOG}
                         echo "\`\`\`"
-                        mv /tmp/changelog /tmp/changelog.bak
+                        mv ${SHORT_CHANGELOG} ${SHORT_CHANGELOG}.bak
                     fi
                 fi
             } > ${TG_MSG_FILE}
