@@ -280,7 +280,7 @@ function generate_variables() {
     # COMPILATION VARIABLES
     ARCHITECTURE=arm64
     CCACHE=$(command -v ccache)
-    GCC=$(find ${GCC_FOLDER}/bin -type f -name '*-gcc' | head -n1)
+    GCC=$(find ${GCC_FOLDER}/bin \( -type f -o -type l \) -name '*-gcc' | head -n1)
     if [[ -z ${GCC} ]]; then
         die "GCC toolchain could not be found!"
     fi
