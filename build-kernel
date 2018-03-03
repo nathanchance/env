@@ -18,53 +18,53 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>
 
 
-# SOURCE OUR UNIVERSAL FUNCTIONS SCRIPT AND MAC CHECK
+# Source our universal functions script and macOS check
 source common
 
-# START TIME
+# Start time
 START=$(date +%s)
 
-# GATHER PARAMETERS
+# Gather parameters
 while [[ $# -ge 1 ]]; do
     case ${1} in
-        # ARCHITECTURE TO BUILD; DEFAULTS TO ARM64
+        # Architecture to build
         "-a"|"--arch")
             shift && enforce_value "$@"
 
             ARCH=${1} ;;
 
-        # USE CLANG FOR COMPILING THE KERNEL
+        # Use Clang for compiling the kernel
         "-c"|"--clang")
 
             CLANG=true ;;
 
-        # SPECIFY WHICH CLANG TOOLCHAIN TO USE
+        # Specify which Clang toolchain to use
         "-ct"|"--clang-toolchain")
             shift && enforce_value "$@"
 
             CLANG_TOOLCHAIN_FOLDER=${1} ;;
 
-        # DEFCONFIG TO BUILD; DEFAULTS TO FLASH_DEFCONFIG
+        # Config to build
         "-d"|"--defconfig")
             shift && enforce_value "$@"
 
             DEFCONFIG=${1} ;;
 
-        # SHOW FULL COMPILATION
+        # Show full compilation
         "-D"|"--debug")
             VERBOSITY=2 ;;
 
-        # SPECIFY WHICH GCC TOOLCHAIN TO USE
+        # Specify which GCC toolchain to use
         "-gt"|"--gcc-toolchain")
             shift && enforce_value "$@"
 
             GCC_TOOLCHAIN_FOLDER=${1} ;;
 
-        # UPLOAD IMAGE TO TRANSFER.SH
+        # Upload image to transfer.sh
         "-u"|"--upload")
             UPLOAD=true ;;
 
-        # SHOW WARNINGS AND ERRORS DURING COMPILATION
+        # Show only warnings and errors during compilation
         "-w"|"--warnings")
             VERBOSITY=1 ;;
     esac
@@ -72,7 +72,7 @@ while [[ $# -ge 1 ]]; do
     shift
 done
 
-# DEFAULTS
+# Defaults
 if [[ -z ${ARCH} ]]; then
     ARCH=arm64
 fi
@@ -80,12 +80,12 @@ if [[ -z ${GCC_TOOLCHAIN_FOLDER} ]]; then
     GCC_TOOLCHAIN_FOLDER=/opt/aosp-gcc
 fi
 
-# ERROR OUT IF DEFCONFIG WASN'T SUPPLIED
+# Error out if defconfig wasn't supplied
 if [[ -z ${DEFCONFIG} ]]; then
     die "Please supply a defconfig!"
 fi
 
-# SET TOOLCHAINS
+# Set toolchains
 GCC_TOOLCHAIN=$(find ${GCC_TOOLCHAIN_FOLDER}/bin -type f -name '*-gcc' | head -n1)
 if [[ -z ${GCC_TOOLCHAIN} ]]; then
     die "GCC toolchain could not be found!"
@@ -100,21 +100,19 @@ if [[ ${CLANG} ]]; then
     fi
 fi
 
-# SET CCACHE
+# Set ccache
 CCACHE=$(command -v ccache)
 
-# BASIC BUILD FUNCTION
+# Basic build function
 function build() {
-    # SET MAKE VARIABLE
+    # Set make variable
     MAKE="make ${JOBS_FLAG} O=out ARCH=${ARCH}"
 
-    # CLEAN UP FROM LAST COMPILE
+    # Clean up from last compile
     rm -rf out && mkdir -p out
 
-    # MAKE DEFCONFIG
+    # Build kernel image
     ${MAKE} "${DEFCONFIG}"
-
-    # MAKE KERNEL
     if [[ ${CLANG} ]]; then
         PATH=${BIN_FOLDER}:${PATH} ${MAKE} CC="${CCACHE} ${CLANG_TOOLCHAIN}" \
                                            CLANG_TRIPLE=aarch64-linux-gnu- \
@@ -125,15 +123,15 @@ function build() {
     fi
 }
 
-# REPORT ERROR IF WE AREN'T IN A TREE WITH A MAKEFILE
+# Report error if we aren't in a tree with a Makefile
 if [[ ! -f Makefile ]]; then
     die "This must be run in a kernel tree!"
 fi
 
-# SHOW THE BASE VERSION WE ARE MAKING
+# Show the base version we are making
 header "BUILDING $(make kernelversion)"
 
-# SHOW COMPILATION BASED ON FLAGS
+# Show compilation based on flags
 case ${VERBOSITY} in
     "2")
         build ;;
@@ -143,7 +141,7 @@ case ${VERBOSITY} in
         build &> /dev/null ;;
 esac
 
-# REPORT SUCCESS
+# Report success
 FINAL_IMAGE=$(find out -name 'Image.*-dtb')
 END=$(date +%s)
 if [[ -f ${FINAL_IMAGE} ]]; then
@@ -154,11 +152,11 @@ else
     die "Kernel build failed!"
 fi
 
-# UPLOAD IMAGE IF NECESSARY
+# Upload image if necessary
 if [[ ${UPLOAD} ]]; then
     echo
     curl --upload-file "${FINAL_IMAGE}" https://transfer.sh/"${IMAGE}"
 fi
 
-# ALERT OF SCRIPT END
+# Alert of script end
 echo "\n\a"
