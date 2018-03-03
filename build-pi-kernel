@@ -45,33 +45,31 @@ function build() {
         make O=out bcm2709_defconfig
 
         if time make O=out "${JOBS_FLAG}" zImage modules dtbs; then
-            {
-                echo "\`\`\`"
-                echo "Raspberry Pi kernel build completed successfully!"
-                echo
-                echo "Duration: $(format_time "${START}" "$(date +"%s")")"
-                echo "\`\`\`"
-            } > ${TG_MSG}
+            RESULT_STRING="completed successfully"
         else
-            {
-                echo "\`\`\`"
-                echo "Raspberry Pi kernel build failed!"
-                echo
-                echo "Duration: $(format_time "${START}" "$(date +"%s")")"
-                echo "\`\`\`"
-            } > ${TG_MSG}
+            RESULT_STRING="failed"
         fi
+        {
+            TIME_STRING="$(format_time "${START}" "$(date +"%s")")"
+            echo "\`\`\`"
+            echo "Raspberry Pi kernel build ${RESULT_STRING}!"
+            echo
+            echo "Duration: ${TIME_STRING,,}"
+            echo "\`\`\`"
+        } > ${TG_MSG}
         notify "$(cat "${TG_MSG}")"
     ) > /dev/null
 }
 
 function install() {
     (
-        sudo make O=out modules_install
-        sudo cp out/arch/arm/boot/dts/*.dtb /boot/
-        sudo cp out/arch/arm/boot/dts/overlays/*.dtb* /boot/overlays/
-        sudo cp arch/arm/boot/dts/overlays/README /boot/overlays/
-        sudo cp out/arch/arm/boot/zImage /boot/$KERNEL.img
+        if [[ -f out/arch/arm/boot/zImage ]]; then
+            sudo make O=out modules_install
+            sudo cp out/arch/arm/boot/dts/*.dtb /boot/
+            sudo cp out/arch/arm/boot/dts/overlays/*.dtb* /boot/overlays/
+            sudo cp arch/arm/boot/dts/overlays/README /boot/overlays/
+            sudo cp out/arch/arm/boot/zImage /boot/$KERNEL.img
+        fi
     ) > /dev/null
 }
 
