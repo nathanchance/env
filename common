@@ -25,18 +25,18 @@
 #             #
 ###############
 
-# WHAT OS ARE WE ON?
+# What OS are we on?
 OS=$(UNAME=$(uname); echo "${UNAME,,}")
-# GNU READLINK IS NEEDED FOR SCRIPTS_FOLDER
+# GNU readlink is needed for SCRIPTS_FOLDER
 if [[ ${OS} = "darwin" ]]; then
     alias readlink=greadlink
 fi
 
-# LOCATION OF SCRIPTS FOLDER
+# Location of "scripts" folder
 SCRIPTS_FOLDER=$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")" && pwd)
 BIN_FOLDER=${SCRIPTS_FOLDER}/bin
 
-# COMMON LOCATIONS AMONGST SCRIPTS
+# Common locations amongst scripts
 KERNEL_FOLDER=${HOME}/kernels
 MISC_FOLDER=${HOME}/misc
 REPO_FOLDER=${HOME}/repos
@@ -44,7 +44,7 @@ ROM_FOLDER=${HOME}/roms
 TC_FOLDER=${HOME}/toolchains
 WEB_FOLDER=${HOME}/web
 
-# COLORS
+# Colors
 BLINK_RED="\033[05;31m"
 BLUE="\033[01;34m"
 BOLD="\033[1m"
@@ -53,7 +53,7 @@ RED="\033[01;31m"
 RST="\033[0m"
 YLW="\033[01;33m"
 
-# MAKE THREADS
+# Number of make threads
 if [[ ${OS} = "darwin" ]]; then
     THREADS=$(sysctl hw.ncpu | cut -d " " -f 2)
 else
@@ -67,12 +67,12 @@ JOBS_FLAG="-j${THREADS}"
 #             #
 ###############
 
-# ALIAS FOR ECHO TO PRINT ESCAPE CODES
+# Alias for echo to print escape codes
 function echo() {
     command echo -e "$@"
 }
 
-# PRINTS A FORMATTED HEADER TO POINT OUT WHAT IS BEING DONE TO THE USER
+# Prints a formatted header to point out what is being done to the user
 function header() {
     if [[ -n ${2} ]]; then
         COLOR=${2}
@@ -86,7 +86,7 @@ function header() {
     echo "${RST}"
 }
 
-# FORMATS THE TIME
+# Formats the time
 function format_time() {
     MINS=$(((${1} - ${2}) / 60))
     SECS=$(((${1} - ${2}) % 60))
@@ -120,7 +120,7 @@ function format_time() {
     echo "${TIME_STRING}"
 }
 
-# PRINTS AN ERROR IN BOLD RED
+# Prints an error in bold red
 function display_error() {
     echo
     echo "${RED}${1}${RST}"
@@ -129,10 +129,10 @@ function display_error() {
     fi
 }
 
-# PRINTS AN ERROR IN BOLD RED
+# Prints an error in bold red and exits the script
 function die() {
     if [[ ${TG} ]]; then
-        # INFO MUST BE RESOURCED SO PUBLIC CHATS DON'T GET NOTIFIED
+        # Info must be resourced so public chats don't get notified
         load_botinfo
         {
             echo "\`\`\`"
@@ -152,7 +152,7 @@ function die() {
     exit
 }
 
-# PRINTS A WARNING IN BOLD YELLOW
+# Prints a warning in bold yellow
 function warn() {
     echo
     echo "${YLW}${1}${RST}"
@@ -161,38 +161,38 @@ function warn() {
     fi
 }
 
-# ENFORCES THE VALUE NEEDED FOR TWO-PART FLAGS
+# Enforces the value needed for two-part flags
 function enforce_value() {
     if [[ $# -lt 1 ]]; then
         die "A additional value is needed for one of the flags passed to this script!"
     fi
 }
 
-# ADD A REMOTE IF IT DOESN'T EXIST
+# Add a remote if it doesn't exist
 function add_remote() {
     if ! git remote | grep -q -m 1 "${1}"; then
         git remote add "${1}" "${2}"
     fi
 }
 
-# CONVERT A FILE LOCATION TO WEB LINK
+# Convert a file location to web link
 function web_link() {
     echo "${1}" | sed s/"$(echo "${WEB_FOLDER}" | sed 's/\//\\\//g')"/http:\\/\\/nchancellor.net/
 }
 
-# SET UP A VIRTUAL ENVIRONMENT FOR PYTHON
+# Set up a virtual environment for Python
 function mkavenv {
     virtualenv2 "${HOME}/venv"
     source "${HOME}/venv/bin/activate"
 }
 
-# REMOVE VIRTUAL ENVIRONMENT
+# Remove virtual environment
 function rmvenv {
     deactivate
     rm -rf "${HOME}/venv"
 }
 
-# SOURCE TELEGRAM BOT INFORMATION
+# Source Telegram bot information
 function load_botinfo() {
     if [[ -f ${HOME}/.botinfo ]]; then
         source ~/.botinfo
@@ -201,12 +201,12 @@ function load_botinfo() {
 
 load_botinfo
 
-# REQUIRE A PARAMETER TO OPT OUT OF MAC_CHECK
+# Require a parameter to opt out of macOS_check
 if [[ $# -lt 1 && ${OS} = "darwin" ]]; then
     die "Wrong window! ;)"
 fi
 
-# TELEGRAM NOTIFIER FUNCTION
+# Telegram notifier function
 function notify() {
     if [[ -z ${TOKEN} ]]; then
         display_error "notify() was called but there was no token!"
