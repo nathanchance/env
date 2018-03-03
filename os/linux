@@ -111,35 +111,6 @@ function ris {
     time repo sync "${JOBS_FLAG}" --force-sync -c --no-clone-bundle --no-tags --optimized-fetch --prune
 }
 
-# Update Linux stable mirror
-function upstb() {
-    CUR_FOLDER=$(pwd)
-
-    if [[ ! -d ${KERNEL_FOLDER}/mirrors/linux-stable ]]; then
-        mkdir -p "${KERNEL_FOLDER}/mirrors"
-        cd "${KERNEL_FOLDER}/mirrors" || return
-        git clone --mirror https://git.kernel.org/pub/scm/linux/kernel/git/stable/linux-stable.git linux-stable
-        cd linux-stable || return
-        git remote set-url --push origin git@github.com:nathanchance/linux-stable
-    fi
-
-    if [[ ! -d ${KERNEL_FOLDER}/mirrors/linux-stable-rc ]]; then
-        cd "${KERNEL_FOLDER}/mirrors" || return
-        git clone --mirror https://git.kernel.org/pub/scm/linux/kernel/git/stable/linux-stable-rc.git linux-stable-rc
-    fi
-
-    cd "${KERNEL_FOLDER}/mirrors/linux-stable" || return
-
-    git fetch -p origin
-    git push --mirror
-
-    cd "${KERNEL_FOLDER}/mirrors/linux-stable-rc" || return
-
-    git fetch -p origin
-
-    cd "${CUR_FOLDER}" || return
-}
-
 # Add kernel remotes to a kernel repo
 function kremotes() {
     if [[ ! -f Makefile ]]; then
