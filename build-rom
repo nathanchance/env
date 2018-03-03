@@ -24,18 +24,12 @@
 #             #
 ###############
 
-# SOURCE OUR UNIVERSAL FUNCTIONS SCRIPT AND MAC CHECK
+# Source our universal functions script and macOS check
 source common
 
-# CHECKS IF MKA EXISTS
 function make_command() {
-    if [[ $(command -v mka) ]]; then
-        mka $@
-    else
-        make ${JOBS_FLAG} $@
-    fi
+    m "${JOBS_FLAG}" "$@"
 }
-
 
 ################
 #              #
@@ -43,65 +37,58 @@ function make_command() {
 #              #
 ################
 
-PARAMS="$@"
+PARAMS="$*"
 while [[ $# -ge 1 ]]; do
     case ${1} in
-        # REQUIRED OPTIONS
-        # DEVICE TO BUILD
+        # Required options
+        # Device to build
         "-d"|"--device")
-            shift && enforce_value $@
+            shift && enforce_value "$@"
 
             DEVICE=${1} ;;
 
-        # ROM TO BUILD
+        # ROM to build
         "-r"|"--rom")
-            shift && enforce_value $@
+            shift && enforce_value "$@"
 
             ROM=${1} ;;
 
-        # STANDARD OPTIONS
-        # SYNC TREE BEFORE BUILDING
+        # Standard options
+        # Sync tree before building
         "-s"|"--sync")
             SYNC=true ;;
 
-        # CUSTOM CLEAN TARGET
+        # Custom clean target
         "-c"|"--clean")
             CLEAN_TARGET=${1} ;;
 
-        # CUSTOM MAKE TARGET
+        # Custom make target
         "-m"|"--make")
-            shift && enforce_value $@
+            shift && enforce_value "$@"
 
             MAKE_TARGET=${1} ;;
 
-        # USER, USERDEBUG, and ENG
+        # Send updates to Telegram
+        "-tg"|"--telegram")
+            TG=true
+            TG_MSG_FILE=/tmp/tg-msg.build-rom ;;
+
+        # user, userdebug, or eng
         "-v"|"--version")
-            shift && enforce_value $@
+            shift && enforce_value "$@"
 
             VARIANT=${1} ;;
 
-        # REPOPICK SEQUENCE
+        # repopick sequence
         "-rp"|"--repopick")
             REPOPICK=true ;;
 
-        # SPECIAL OPTIONS
-        # KREXUS, DU, VANILLA
-        "-t"|"--type")
-            shift && enforce_value $@
-
-            BUILD_TAG=${1}
-            DU_BUILD_TYPE=${1} ;;
-
+        # Special options
         # DU
-        "-ng"|"--no-gapps")
-            HAS_GAPPS=false ;;
-
-        # VANILLA
-        "-pix"|"--pixel")
-            PIXEL=true ;;
-
-        "-pub"|"--public")
-            PUBLIC=true ;;
+        "-t"|"--type")
+            shift && enforce_value "$@"
+ 
+            export DU_BUILD_TYPE=${1} ;;
 
         *)
             die "Invalid parameter detected!" ;;
@@ -110,10 +97,21 @@ while [[ $# -ge 1 ]]; do
     shift
 done
 
-# PARAMETER VERIFICATION
-# IF ROM WASN'T SPECIFIED, IT'S A BUILD FOR ME
+if [[ ${TG} ]]; then
+    {
+        echo "\`\`\`"
+        echo "Currently executing..."
+        echo
+        echo "$(basename "${0}") ${PARAMS}"
+        echo "\`\`\`"
+    } > ${TG_MSG_FILE}
+    notify "$(cat ${TG_MSG_FILE})"
+fi
+
+# Parameter verification
+# If ROM wasn't specified, it's a build for me
 if [[ -z ${ROM} ]]; then
-    ROM=du-caf
+    ROM=du-o8x-caf
     DEVICE=cheeseburger
 fi
 
@@ -143,41 +141,14 @@ ZIP_MOVE_PARENT=${WEB_FOLDER}/me/roms
 
 # Otherwise, define them for our various ROMs
 case "${ROM}" in
-    "aosp")
-        SOURCE_FOLDER=${ROM_FOLDER}/aosp
-        ZIP_MOVE=${ZIP_MOVE_PARENT}/aosp/${DEVICE} ;;
-    "du-aosp")
-        SOURCE_FOLDER=${ROM_FOLDER}/du-aosp
-        ZIP_MOVE=${ZIP_MOVE_PARENT}/../du/${DEVICE} ;;
-    "du-caf")
-        SOURCE_FOLDER=${ROM_FOLDER}/du-caf
-        ZIP_MOVE=${ZIP_MOVE_PARENT}/../du/${DEVICE} ;;
-    "du-personal")
-        SOURCE_FOLDER=${ROM_FOLDER}/du
-        ZIP_MOVE=${ZIP_MOVE_PARENT}/../du/personal ;;
-    "krexus")
-        SOURCE_FOLDER=${ROM_FOLDER}/krexus
-        ZIP_MOVE=${ZIP_MOVE_PARENT}/krexus/${DEVICE} ;;
-    "lineageos")
-        SOURCE_FOLDER=${ROM_FOLDER}/los
-        ZIP_MOVE=${ZIP_MOVE_PARENT}/los/${DEVICE} ;;
-    "lineageoms")
-        SOURCE_FOLDER=${ROM_FOLDER}/loms
-        ZIP_MOVE=${ZIP_MOVE_PARENT}/loms/${DEVICE} ;;
-    "pn")
-        SOURCE_FOLDER=${ROM_FOLDER}/pn
-        ZIP_MOVE=${ZIP_MOVE_PARENT}/pn/${DEVICE} ;;
-    "vanilla")
-        SOURCE_FOLDER=${ROM_FOLDER}/vanilla
-        ZIP_MOVE=${ZIP_MOVE_PARENT}/vanilla/${DEVICE} ;;
+    "aosp"|"du-o8x-caf"|"lineage-15.1")
+        SOURCE_FOLDER=${ROM_FOLDER}/${ROM}
+        ZIP_MOVE=${ZIP_MOVE_PARENT}/${ROM}/${DEVICE} ;;
     *)
-        die "Unknown ROM "${1}" passed!" ;;
+        die "Unknown ROM \"${1}\" passed!" ;;
 esac
 
 OUT_FOLDER=${SOURCE_FOLDER}/out/target/product/${DEVICE}
-
-# LOG NAME
-LOG_NAME=${LOG_FOLDER}/compilation/roms/${ROM}-${DEVICE}-$(date +"%Y%m%d-%H%M").log
 
 ###########################
 # MOVE INTO SOURCE FOLDER #
@@ -185,25 +156,19 @@ LOG_NAME=${LOG_FOLDER}/compilation/roms/${ROM}-${DEVICE}-$(date +"%Y%m%d-%H%M").
 ###########################
 
 START=$(date +%s)
-clear && cd ${SOURCE_FOLDER}
+clear
+cd "${SOURCE_FOLDER}" || die "Source folder does not exist!"
 
 
 #############
 # REPO SYNC #
 #############
 
-REPO_SYNC="repo sync"
-FLAGS="${JOBS_FLAG} --force-sync -c --no-clone-bundle --no-tags --optimized-fetch --prune"
-
-# IF THE SYNC IS REQUESTED, DO SO
+# If the sync is requested, do so
 if [[ ${SYNC} ]]; then
     header "SYNCING LATEST SOURCES"; echo
 
-    ${REPO_SYNC} ${FLAGS}
-
-    if [[ ${ROM} = "du-personal" ]]; then
-        source ${SCRIPTS_FOLDER}/du_merge
-    fi
+    repo sync "${JOBS_FLAG}" --force-sync -c --no-clone-bundle --no-tags --optimized-fetch --prune
 fi
 
 
@@ -213,8 +178,8 @@ fi
 
 header "SETTING UP BUILD ENVIRONMENT"
 
-# CHECK AND SEE IF WE ARE ON ARCH
-# IF SO, ACTIVARE A VIRTUAL ENVIRONMENT FOR PROPER PYTHON SUPPORT
+# Check and see if we are on Arch
+# If so, activare a virtual environment for proper Python support
 if [[ -f /etc/arch-release ]]; then
     mkavenv
 fi
@@ -227,9 +192,9 @@ source build/envsetup.sh
 
 header "PREPARING $(echo ${DEVICE} | awk '{print toupper($0)}')"
 
-# NOT ALL ROMS USE BREAKFAST
+# Not all roms use breakfast
 case ${ROM} in
-    "aosp"|"krexus"|"vanilla")
+    "aosp")
         lunch ${ROM}_${DEVICE}-${VARIANT} ;;
     *)
         breakfast ${DEVICE} ${VARIANT} ;;
@@ -245,14 +210,14 @@ if [[ ${REPOPICK} ]]; then
     # Execute in a subshell otherwise everything is fubared
     (
     while [[ ${YN} != "n" ]]; do
-        read -p "Do you have changes to pick? (y/n) " YN
+        read -r -p "Do you have changes to pick? (y/n) " YN
         case ${YN} in
             y|Y)
-                read -p "Please enter the change number or topic: " PARAMS
+                read -r -p "Please enter the change number or topic: " PARAMS
                 if [[ -n ${PARAMS//[0-9]/} ]]; then
-                    repopick -i --topic ${PARAMS}
+                    repopick -i --topic "${PARAMS}"
                 else
-                    repopick -i ${PARAMS}
+                    repopick -i "${PARAMS}"
                 fi ;;
             n|N)
                 break ;;
@@ -269,7 +234,7 @@ fi
 header "CLEANING UP OUT DIRECTORY"
 
 if [[ -n ${CLEAN_TARGET} && ${CLEAN_TARGET} != "noclean" ]]; then
-    make_command ${CLEAN_TARGET}
+    make_command "${CLEAN_TARGET}"
 elif [[ -z ${CLEAN_TARGET} ]]; then
     make_command clobber
 fi
@@ -281,7 +246,20 @@ fi
 
 header "MAKING FILES"; echo
 
-# SET MAKE_TARGET IF UNSET (NOT ALL ROMS USE BACON)
+if [[ ${TG} ]]; then
+    {
+        echo "\`\`\`"
+        echo "ROM build starting..."
+        echo
+        echo "ROM: ${ROM}"
+        echo
+        echo "Device: ${DEVICE}"
+        echo "\`\`\`"
+    } > ${TG_MSG_FILE}
+    notify "$(cat ${TG_MSG_FILE})"
+fi
+
+# Set make_target if unset (not all roms use bacon)
 if [[ -z ${MAKE_TARGET} ]]; then
     case "${ROM}" in
         "aosp"|"krexus")
@@ -295,34 +273,35 @@ else
     EXIT_NEEDED=true
 fi
 
-make_command ${MAKE_TARGET}
+make_command "${MAKE_TARGET}"
 
 if [[ ${EXIT_NEEDED} ]]; then
     echo && header "BUILD COMPLETED!" && exit
 fi
 
-# THERE WILL BE A ZIP IN THE OUT FOLDER IF SUCCESSFUL
-FILES=$(ls ${OUT_FOLDER}/*.zip 2>/dev/null | wc -l)
-if [[ ${FILES} -ne 0 ]]; then
-    # MAKE BUILD RESULT STRING REFLECT SUCCESSFUL COMPILATION
+# There will be a zip in the out folder if successful
+FILES=$(find "${OUT_FOLDER}" -maxdepth 1 -name '*.zip' 2>/dev/null)
+if [[ -n ${FILES} ]]; then
+    # Make build result string reflect successful compilation
     BUILD_RESULT_STRING="BUILD SUCCESSFUL"
     SUCCESS=true
 
-    # MAKE ZIP_MOVE IF IT DOESN'T EXIST OR CLEAN IT IF IT DOES
+    # Make ZIP_MOVE if it doesn't exist or clean it if it does
     if [[ ! -d "${ZIP_MOVE}" ]]; then
         mkdir -p "${ZIP_MOVE}"
     else
-        rm -rf "${ZIP_MOVE}"/*
+        rm -rf "${ZIP_MOVE:?}"/*
     fi
 
-    if [[ ${FILES} -eq 1 ]]; then
+    if [[ $(echo "${FILES}" | wc -l) -eq 1 ]]; then
         mv "${OUT_FOLDER}"/*.zip* "${ZIP_MOVE}"
     else
-        for FILE in $(ls ${OUT_FOLDER}/*.zip* | grep -v ota); do
-            mv "${FILE}" "${ZIP_MOVE}"
+        for FILE in ${FILES}; do
+            if echo "${FILE}" | grep -v -q ota; then
+                mv "${FILE}"* "${ZIP_MOVE}"
+            fi
         done
     fi
-
 else
     BUILD_RESULT_STRING="BUILD FAILED"
     SUCCESS=false
@@ -333,44 +312,40 @@ fi
 # ENDING INFORMATION #
 ######################
 
-# DEACTIVATE VIRTUALENV IF WE ARE ON ARCH
+# Deactivate virtualenv if we are on arch
 if [[ -f /etc/arch-release ]]; then
     rmvenv
 fi
 
-# STOP TRACKING TIME
+# Stop tracking time
 END=$(date +%s)
 
 header "${BUILD_RESULT_STRING}!"
 
-# IF THE BUILD WAS SUCCESSFUL, PRINT FILE LOCATION, AND SIZE
+# If the build was successful, print file location, and size
 if [[ ${SUCCESS} ]]; then
-    echo ${RED}"FILE LOCATION: $(web_link ${ZIP_MOVE})"
-    echo "SIZE: $(du -h ${ZIP_MOVE}/*.zip | awk '{print $1}')"${RST}
+    echo "${RED}FILE LOCATION: $(web_link "${ZIP_MOVE}")"
+    echo "SIZE: $(du -h "${ZIP_MOVE}"/*.zip | awk '{print $1}')${RST}"
 fi
 
-# PRINT THE TIME THE SCRIPT FINISHED
-# AND HOW LONG IT TOOK REGARDLESS OF SUCCESS
-echo ${RED}"TIME: $(date +%D\ %r | awk '{print toupper($0)}')"
-echo ${RED}"DURATION: $(format_time ${END} ${START})"${RST}
+# Print the time the script finished
+# and how long it took regardless of success
+echo "${RED}TIME: $(date +%D\ %r | awk '{print toupper($0)}')"
+echo "${RED}DURATION: $(format_time "${END}" "${START}")${RST}"
+
+if [[ ${TG} ]]; then
+    {
+        echo "\`\`\`"
+        echo "ROM ${BUILD_RESULT_STRING,,}!"
+        if [[ ${SUCCESS} ]]; then
+            echo
+            echo "Location: $(web_link "${ZIP_MOVE}")"
+        fi
+        echo
+        echo "Duration: $(format_time "${END}" "${START}")"
+        echo "\`\`\`"
+    } > ${TG_MSG_FILE}
+    notify "$(cat ${TG_MSG_FILE})"
+fi
+
 echo "\a"
-
-
-##################
-# LOG GENERATION #
-##################
-
-# DATE: BASH_SOURCE (PARAMETERS)
-echo "\n$(date +"%m/%d/%Y %H:%M:%S"): ${BASH_SOURCE} ${PARAMS}" >> ${LOG}
-
-# BUILD <SUCCESSFUL|FAILED> IN # MINUTES AND # SECONDS
-if [[ -n ${BUILD_RESULT_STRING} ]]; then
-    echo "${BUILD_RESULT_STRING} IN \c" >> ${LOG}
-fi
-echo "$(format_time ${END} ${START})" >> ${LOG}
-
-# ONLY ADD A LINE ABOUT FILE LOCATION IF SCRIPT COMPLETED SUCCESSFULLY
-if [[ ${SUCCESS} ]]; then
-    # FILE LOCATION: <PATH>
-    echo "FILE LOCATION: $(web_link ${ZIP_MOVE})" >> ${LOG}
-fi
