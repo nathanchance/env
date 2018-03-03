@@ -24,9 +24,16 @@
 #             #
 ###############
 
+# Folder that will house the source and build files
 MAIN_FOLDER=${HOME}/toolchains/clang
+
+# Folder that will hold the main LLVM source
 LLVM_FOLDER=${MAIN_FOLDER}/llvm
+
+# Folder that will hold all of the build files and compiled code
 BUILD_FOLDER=${MAIN_FOLDER}/build
+
+# Start tracking time
 START=$(date +"%s")
 
 
@@ -66,9 +73,13 @@ function parse_parameters() {
         notify "$(cat ${TG_MSG_FILE})"
     fi
 
+    # Clang 7.x is compiled by default
     if [[ -z ${VERSION} ]]; then
         VERSION=7
     fi
+
+    # Folder that will hold the final compiled toolchain
+    INSTALL_FOLDER=/opt/clang-${VERSION}.x
 }
 
 # Syncs requested  projects
@@ -101,6 +112,7 @@ function sync() {
     fi
 }
 
+# Syncs all necessary projects
 function sync_all() {
     header "Syncing projects"
 
@@ -127,20 +139,20 @@ function sync_all() {
     sync openmp
 }
 
+# Removes any previous build files
 function cleanup() {
     rm -rf "${BUILD_FOLDER}"
     mkdir -p "${BUILD_FOLDER}"
     cd "${BUILD_FOLDER}" || die "Error creating build folder!"
 }
 
+# Build the toolchain
 function build() {
     header "Building Clang"
 
     if [[ ${TG} ]]; then
         notify "\`Beginning build of Clang ${VERSION}...\`"
     fi
-
-    INSTALL_FOLDER=/opt/clang-${VERSION}.x
 
     cmake -DLINK_POLLY_INTO_TOOLS:BOOL=ON \
           -DCMAKE_CXX_FLAGS:STRING="-O3 -Wno-macro-redefined -pipe -pthread -fopenmp -g0 -march=native -mtune=native" \
@@ -169,6 +181,7 @@ function build() {
     fi
 }
 
+# Install the toolchain
 function install() {
     header "Installing Clang"
 
