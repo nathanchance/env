@@ -251,18 +251,18 @@ function frel() {
         "op5")
             case ${2} in
                 1.*)
-                    flash-kernel -v "${2}" -m stable -d op5 -os Custom -b 7.1.x-custom -av 7.1.x "${3}"
-                    flash-kernel -v "${2}" -m stable -d op5 -os OOS -b 7.1.x-oos -av 7.1.x "${3}" ;;
+                    flash-kernel -v "${2}" -m stable -d op5 -os Custom -b 7.1.x-custom -av 7.1.x ${3:+ "-t"}
+                    flash-kernel -v "${2}" -m stable -d op5 -os OOS -b 7.1.x-oos -av 7.1.x ${3:+ "-t"} ;;
                 2.*)
-                    flash-kernel -v "${2}" -m stable -d op5 -os Custom -b 8.0.0-custom -av 8.0.0 "${3}"
-                    flash-kernel -v "${2}" -m stable -d op5 -os OOS -b 8.0.0-oos -av 8.0.0 "${3}" ;;
+                    flash-kernel -v "${2}" -m stable -d op5 -os Custom -b 8.0.0-custom -av 8.0.0 ${3:+ "-t"}
+                    flash-kernel -v "${2}" -m stable -d op5 -os OOS -b 8.0.0-oos -av 8.0.0 ${3:+ "-t"} ;;
                 3.*)
-                    flash-kernel -v "${2}" -m stable -d op5 -b 8.x-unified -av 8.x "${3}" ;;
+                    flash-kernel -v "${2}" -m stable -d op5 -b 8.x-unified -av 8.x ${3:+ "-t"} ;;
             esac ;;
 
         "pxl2")
-            flash-kernel -v "${2}" -m stable -d taimen -b oreo-mr1 "${3}"
-            flash-kernel -v "${2}" -m stable -d walleye -b oreo-mr1 "${3}" ;;
+            flash-kernel -v "${2}" -m stable -d taimen -b oreo-mr1 ${3:+ "-t"}
+            flash-kernel -v "${2}" -m stable -d walleye -b oreo-mr1 ${3:+ "-t"} ;;
     esac
 }
 
