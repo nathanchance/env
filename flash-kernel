@@ -25,109 +25,109 @@
 ###############
 
 
-# GATHER PARAMETERS
+# Gather parameters
 function parse_parameters() {
-    # UNSET THE UNIVERSAL OS VARIABLE FOR THIS SCRIPT ONLY
+    # Unset the universal OS variable for this script only
     unset OS
     PARAMS="$*"
     while [[ $# -ge 1 ]]; do
         case ${1} in
-            # ANYKERNEL2 BRANCH
+            # AnyKernel2 branch
             "-ak2-b"|"--anykernel2-branch")
                 shift && enforce_value "$@"
 
                 ANYKERNEL2_BRANCH=${1} ;;
 
-            # ANDROID VERSION
+            # Android version
             "-av"|"--android-version")
                 shift && enforce_value "$@"
 
                 ANDROID_VERSION=${1} ;;
 
-            # BRANCH TO COMPILE; IF ABSENT, USE CURRENT BRANCH
+            # Branch to compile
             "-b"|"--branch")
                 shift && enforce_value "$@"
 
                 KERNEL_BRANCH=${1} ;;
 
-            # DEFCONFIG TO USE WHILE COMPILING; IF ABSENT, USE FLASH_DEFCONFIG
+            # Config to use for compiling
             "-c"|"--config")
                 shift && enforce_value "$@"
 
                 DEFCONFIG=${1} ;;
 
-            # COMPILER TO USE
+            # Compiler to use
             "-cc"|"--compiler")
                 shift && enforce_value "$@"
 
                 COMPILER=${1} ;;
 
-            # CLANG TOOLCHAIN TO USE WHILE COMPILING
+            # Clang toolchain to use for compiling
             "-ct"|"--clang-toolchain")
                 shift && enforce_value "$@"
 
                 CLANG_FOLDER=${1} ;;
 
-            # DEVICE TO COMPILE FOR; IF ABSENT, USE PIXEL 2 XL
+            # Device to compile for
             "-d"|"--device")
                 shift && enforce_value "$@"
 
                 DEVICE=${1} ;;
 
-            # SHOW FULL COMPILATION, NOT JUST WARNINGS AND ERRORS
+            # Show full compilation, not just warnings and errors
             "-D"|"--debug")
                 DEBUG=true ;;
 
-            # EXTRA MAKE FLAGS IF NECESSARY (LIKE MISMATCH CONFIG)
+            # Extra make flags if necessary (like mismatch config)
             "-f"|"--flags")
                 shift && enforce_value "$@"
 
                 EXTRA_MAKE_FLAGS=${1} ;;
 
-            # GCC TOOLCHAIN TO USE WHILE COMPILING
+            # GCC toolchain to use for compiling
             "-gt"|"--gcc-toolchain")
                 shift && enforce_value "$@"
 
                 GCC_FOLDER=${1} ;;
 
-            # DO NOT PACKAGE KERNEL IMAGE
+            # Do not package kernel image
             "-io"|"--image-only")
                 IMAGE_ONLY=true ;;
 
-            # WHERE TO MOVE ZIP AFTER COMPILATION (PRIVATE, TEST, OR PUBLIC)
+            # Where to move zip after compilation
             "-m"|"--mode")
                 shift && enforce_value "$@"
 
                 MODE=${1} ;;
 
-            # DON'T MOVE/DELETE ZIPS IN FILE_MOVE FOLDER
+            # Don't move/delete zips in FILE_MOVE folder
             "-n"|"--no-clean")
                 NOCLEAN=true ;;
 
-            # (ONEPLUS 5 ONLY) CUSTOM ROMS OR OXYGENOS BUILD
+            # (OnePlus 5/T only) build only OxygenOS or custom ROM kernel image
             "-os"|"--operating-system")
                 shift && enforce_value "$@"
 
                 OS_LIST=${1} ;;
 
-            # HOW TO PACKAGE KERNEL (ZIP OR BOOT IMAGE)
+            # How to package kernel (zip or boot image)
             "-p"|"--package-method")
                 shift && enforce_value "$@"
 
                 PACKAGE_METHOD=${1} ;;
 
-            # BETA VERSIONING (# IN KERNEL VERSION)
+            # Test versioning (# in kernel version)
             "-r"|"--revision")
                 shift && enforce_value "$@"
 
                 REVISION=${1} ;;
 
-            # SEND UPDATES TO TELEGRAM
+            # Send updates to Telegram
             "-t"|"--telegram")
                 TG=true
                 TG_MSG_FILE=/tmp/tg-msg.1 ;;
 
-            # VERSION CODE
+            # Version number
             "-v"|"--version")
                 shift && enforce_value "$@"
 
@@ -140,7 +140,7 @@ function parse_parameters() {
         shift
     done
 
-    # DEFAULT PARAMETERS
+    # Default parameters
     if [[ -z ${DEVICE} ]]; then
         DEVICE="taimen"
     fi
@@ -148,7 +148,7 @@ function parse_parameters() {
         MODE="personal"
     fi
 
-    # EASY TO USE VARIABLES FOR IF STATEMENTS
+    # Easy to use variables for if statements
     if [[ ${MODE} != "stable" ]]; then
         NOT_STABLE=true
     fi
@@ -166,11 +166,11 @@ function parse_parameters() {
 }
 
 
-# DEVICE "BOARD" FLAGS
+# Device "board" flagsi
 function device_flags() {
     case ${DEVICE} in
         "op5")
-            # REQUIRED FLAGS
+            # Required flags
             if [[ -z ${ANDROID_VERSION} ]]; then
                 ANDROID_VERSION=8.x
             fi
@@ -208,7 +208,7 @@ function device_flags() {
             PACKAGE_METHOD=zip ;;
 
         "taimen"|"walleye")
-            # REQUIRED FLAGS
+            # Required flags
             if [[ -z ${ANDROID_VERSION} ]]; then
                 ANDROID_VERSION=8.1.0
             fi
@@ -259,9 +259,9 @@ function device_flags() {
 }
 
 
-# SET UP OTHER VARIABLES
+# Set up other variables
 function generate_variables() {
-    # FOLDERS
+    # Folders
     SOURCE_FOLDER=${KERNEL_FOLDER}/flash/${DEVICE_NAME_GITHUB}
     OUT_FOLDER=${SOURCE_FOLDER}/out
     ANYKERNEL2_FOLDER=${KERNEL_FOLDER}/flash/anykernel2-${DEVICE_NAME_GITHUB}
@@ -279,7 +279,7 @@ function generate_variables() {
             die "Invalid mode specified!" ;;
     esac
 
-    # COMPILATION VARIABLES
+    # Compilation variables
     ARCHITECTURE=arm64
     CCACHE=$(command -v ccache)
     GCC=$(find ${GCC_FOLDER}/bin \( -type f -o -type l \) -name '*-gcc' | head -n1)
@@ -318,9 +318,9 @@ function generate_variables() {
 }
 
 
-# CLEAN UP
+# Clean up
 function clean_up() {
-    # CLEAN ANYKERNEL2 FOLDER
+    # Clean AnyKernel2 folder
     cd "${ANYKERNEL2_FOLDER}" || die "AnyKernel2 source is missing!"
     if [[ -z ${ANYKERNEL2_BRANCH} ]]; then
         ANYKERNEL2_BRANCH=${DEVICE_NAME_GITHUB}-flash-${AK2_SFX}
@@ -328,20 +328,20 @@ function clean_up() {
     git checkout ${ANYKERNEL2_BRANCH}
     git clean -fxd
 
-    # ONLY CHECKOUT IF KERNEL_BRANCH EXISTS AND WE AREN'T BISECTING OR REBASING
+    # Only checkout if kernel_branch exists and we aren't bisecting or rebasing
     cd "${SOURCE_FOLDER}" || die "Kernel source is missing!"
     if [[ -n ${KERNEL_BRANCH} ]]; then
         if [[ ! $(git status | ag "bisec|rebas") ]]; then
             git checkout "${KERNEL_BRANCH}"
         fi
-    # OTHERWISE, NOTATE CURRENT BRANCH FOR CHANGELOG
+    # Otherwise, notate current branch for changelog
     else
         KERNEL_BRANCH=$(git rev-parse --abbrev-ref HEAD)
     fi
 }
 
 
-# MAKE WRAPPER FOR MAKE FUNCTION FOR GCC
+# Make wrapper for make function for GCC
 function make_wrapper_gcc() {
     make "${JOBS_FLAG}" \
          ARCH=${ARCHITECTURE} \
@@ -353,7 +353,7 @@ function make_wrapper_gcc() {
 }
 
 
-# MAKE WRAPPER FOR MAKE FUNCTION FOR CLANG
+# Make wrapper for make function for Clang
 function make_wrapper_clang() {
     PATH=${BIN_FOLDER}:${PATH} make "${JOBS_FLAG}" \
                                     ARCH=${ARCHITECTURE} \
@@ -371,9 +371,9 @@ function make_wrapper_clang() {
 }
 
 
-# SILENCE OUTPUT FUNCTION
+# Silence output function
 function kmake() {
-    # ONLY SHOW ERRORS AND WARNINGS WHEN COMPILING (UNLESS DEBUG)
+    # Only show errors and warnings when compiling (unless debug)
     if [[ ${DEBUG} ]]; then
         make_wrapper_${COMPILER} "$@"
     else
@@ -382,65 +382,70 @@ function kmake() {
 }
 
 
-# SETUP COMPILATION
+# Setup compilation
 function generate_version() {
-    # GENERATE KERNEL VERSION
+    # Generate kernel version
     KVER=$(make kernelversion)
 
+    # This is set in the defconfig
     CONFIG_LOCALVERSION="-FlashKernel"
 
+    # If the mode is not personal, add the device name to LOCALVERSION
     if [[ ${MODE} != "personal" ]]; then
         LOCALVERSION="-${DEVICE_NAME_FILE}"
         LOCALVERSION_ZIP="${LOCALVERSION}"
-    else
-        DATE="-$(date +%Y%m%d-%H%M)"
     fi
 
-    # ADD VERSION IF PRESENT
+    # Add version if present
     if [[ -n ${VERSION} ]]; then
         VERSION_TEXT="-v${VERSION}"
         LOCALVERSION="${LOCALVERSION}${VERSION_TEXT}"
     fi
 
-    # IF THE MODE ISN'T STABLE, ADD SHA INFORMATION TO THE FILE FOR DEBUGGING
+    # If the mode isn't stable, add hash information to the file for debugging
     if [[ ${NOT_STABLE} ]]; then
-        # FURTHERMORE, IF IT IS A PERSONAL BUILD, USE A SHORTER HASH LENGTH
+        # Furthermore, if it is a personal build, use a shorter hash length
         [[ ${MODE} = "personal" ]] && NUM=8 || NUM=12
         SHA="-g$(git rev-parse --verify --short=${NUM} HEAD)"
         LOCALVERSION="${LOCALVERSION}${SHA}"
-        [[ ${MODE} = "personal" ]] && unset SHA
+
+        # Don't add the hash to the zip name for personal builds, use the date instead
+        if [[ ${MODE} = "personal" ]]; then
+            unset SHA
+            DATE="-$(date +%Y%m%d-%H%M)"
+        fi
     fi
 
-    # IF THERE ARE UNCOMMITTED CHANGES, MARK AS DIRTY
+    # If there are uncommitted changes, mark as dirty
     if [[ $( git diff-index --name-only HEAD ) ]]; then
         DIRTY="-dirty"
         LOCALVERSION="${LOCALVERSION}${DIRTY}"
     fi
 
-    # GENERATE FIRST LINE VARIABLE
-    # CONFIG_LOCALVERSION + CONFIG_LOCALVERSION_AUTO ARE DISABLED
+    # Generate first line variable
+    # CONFIG_LOCALVERSION_AUTO is disabled
     FIRST_LINE="${KVER}${CONFIG_LOCALVERSION}${LOCALVERSION}"
 
-    # IF REVISION EXISTS, USE IT FOR THE FILE
+    # If REVISION exists, use it for the file
     if [[ -n ${REVISION} ]]; then
         REVISION_FOR_FILE=".${MODE::1}${REVISION}"
 
-        # IF REVISION IS GREATER THAN OR EQUAL TO 1, PASS IT TO THE BUILD SYSTEM
+        # If REVISION is greater than or equal to 1, pass it to the build system
         if [[ ${REVISION} -ge 1 ]]; then
             KBUILD_BUILD_VERSION=${REVISION}
         fi
     fi
 
-    # GENERATE SECOND LINE VARIABLE
+    # Generate second line variable
     SECOND_LINE="$(whoami)@$(uname -n) #${KBUILD_BUILD_VERSION:-1}"
 
-    # GENERATE THIRD LINE VARIABLE
+    # Generate third line variable
     THIRD_LINE="$(date)"
 
-    # EXPORT KERNEL_NAME BASED ON THE ABOVE INFORMATION
+    # Export KERNEL_NAME based on the above information
     KERNEL_NAME="${CONFIG_LOCALVERSION/-/}${LOCALVERSION_ZIP}${VERSION_TEXT}${REVISION_FOR_FILE}${SHA}${DATE}"
 
-    # SET FINAL NAMES
+    # Set final package names
     if [[ ${PACKAGE_METHOD} =~ "image" ]]; then
         BOOT_IMAGE=${KERNEL_NAME}-boot.img
         DTBO_IMAGE=${KERNEL_NAME}-dtbo.img
@@ -455,7 +460,7 @@ function generate_version() {
 }
 
 
-# PRINT VARIABLES
+# Print variables
 function print_variables() {
     echo "${BOLD}Kernel version:${RST}    ${FIRST_LINE}"
     echo "                   ${SECOND_LINE}"
@@ -473,15 +478,15 @@ function print_variables() {
 }
 
 
-# MAKE KERNEL
+# Build kernel image
 function build_kernel() {
-    # CLEAN SOURCE FOLDER
+    # Clean source folder
     git clean -dfqx
 
-    # POINT TO PROPER DEFCONFIG AND GENERATE VERSION FILES
+    # Point to proper defconfig and generate version files
     kmake ${DEFCONFIG} prepare
 
-    # NOTIFY TELEGRAM OF BUILD STARTING
+    # Notify Telegram of build starting
     if [[ ${TG} && ${ALREADY_NOTIFIED} != true ]]; then
         {
             echo "\`\`\`"
@@ -505,13 +510,15 @@ function build_kernel() {
         notify "$(cat ${TG_MSG_FILE})"
     fi
 
-    # MAKE THE KERNEL
+    # Make the kernel
     # shellcheck disable=SC2086
     kmake ${EXTRA_MAKE_FLAGS}
 
+    # Find the compiled files
     OUT_KERNEL_IMAGE=$(find "${OUT_FOLDER}/arch/${ARCHITECTURE}" -name 'Image.*-dtb' 2>/dev/null)
     OUT_DTBO_IMAGE=$(find "${OUT_FOLDER}/arch/${ARCHITECTURE}" -name 'dtbo.img' 2>/dev/null)
 
+    # Move them if they exist, error out if not
     if [[ -n ${OUT_KERNEL_IMAGE} ]]; then
         echo "${GRN}${OS_STRING}$(basename "${OUT_KERNEL_IMAGE}") compiled successfully!${RST}\n"
         move_kernel_files
@@ -522,10 +529,10 @@ function build_kernel() {
 }
 
 
-# MOVE KERNEL FILES AFTER COMPILATION
+# Move kernel files after compilation
 function move_kernel_files() {
     if [[ ! ${IMAGE_ONLY} ]]; then
-        # MOVE THE KERNEL IMAGE
+        # Move the kernel image
         mkdir -p "${ANYKERNEL2_FOLDER}${ANYKERNEL2_SUB_FOLDER}"
         cp "${OUT_KERNEL_IMAGE}" "${ANYKERNEL2_FOLDER}${ANYKERNEL2_SUB_FOLDER}"
         if [[ -n ${OUT_DTBO_IMAGE} ]]; then
@@ -533,7 +540,7 @@ function move_kernel_files() {
         fi
         echo "Version: $(cat "${OUT_FOLDER}/include/config/kernel.release")" > "${ANYKERNEL2_FOLDER}/version"
 
-        # GRAB MODULES TOO IF THEY ARE PRESENT
+        # Grab modules too if they are present
         MODULES="$(find "${OUT_FOLDER}" -name '*.ko')"
         if [[ -n ${MODULES} ]]; then
             MODULES_FOLDER=${ANYKERNEL2_FOLDER}/ramdisk/modules
@@ -551,7 +558,7 @@ function move_kernel_files() {
 }
 
 
-# BUILD FUNCTION SPECIFICALLY FOR THE ONEPLUS 5
+# Build function specifically for the OnePlus 5
 function build_kernel_op5() {
     if [[ -z ${OS_LIST} ]]; then
         OS_LIST="OOS Custom"
@@ -567,7 +574,7 @@ function build_kernel_op5() {
 }
 
 
-# PACKAGE ZIP
+# Package zip
 function package_zip() {
     header "PACKAGING AND SIGNING ZIP"
 
@@ -578,10 +585,10 @@ function package_zip() {
 
     cd "${ANYKERNEL2_FOLDER}" || die "AnyKernel2 folder shift failed!"
 
-    # PACKAGE THE ZIP WITHOUT THE README
+    # Package the zip without the README
     zip -q -r9 "${UNSIGNED_ZIP}" -- * -x README.md "${UNSIGNED_ZIP}"
 
-    # SIGN ZIP
+    # Sign zip
     java -jar "${BIN_FOLDER}/signapk.jar" \
               "${BIN_FOLDER}/testkey.x509.pem" \
               "${BIN_FOLDER}/testkey.pk8" \
@@ -596,7 +603,7 @@ function package_zip() {
               "${ADJUSTED_ZIP}" \
               "${SIGNED_ZIP}"
 
-    # IF PACKAGING FAILED, ERROR OUT
+    # If packaging failed, error out
     if [[ ! -f ${SIGNED_ZIP} ]]; then
         echo "${RED}Kernel zip not found after signing!${RST}\n"
         ending_info
@@ -606,7 +613,7 @@ function package_zip() {
 }
 
 
-# SILENCE OUTPUT FUNCTION FOR PACKAGE_IMAGE
+# Silence output function for package_image
 function package_image() {
     AOSP_FOLDER=${KERNEL_FOLDER}/sources/aosp-pixel2
     cd "${AOSP_FOLDER}" || die "AOSP source is not synced!"
@@ -634,9 +641,9 @@ function package_image() {
 }
 
 
-# PACKAGE IMAGE WRAPPER
+# Package image wrapper
 function package_image_wrapper() {
-    # ONLY SHOW ERRORS WHEN COMPILING (UNLESS DEBUG)
+    # Only show errors when compiling (unless debug)
     if [[ ${DEBUG} ]]; then
         package_image_commands
     else
@@ -645,7 +652,7 @@ function package_image_wrapper() {
 }
 
 
-# PACKAGE IMAGE COMMANDS
+# Package image commands
 function package_image_commands() {
     mkavenv
     . build/envsetup.sh
@@ -656,29 +663,29 @@ function package_image_commands() {
 }
 
 
-# PACKAGE BOTH AN IMAGE AND ZIP
+# Package both an image and zip
 function package_image_zip() {
     package_zip
     package_image
 }
 
 
-# SETUP FOLDERS
+# Setup folders
 function setup_folders() {
     echo "  - Setting up final folders"
 
-    # IF ZIPMOVE DOESN'T EXIST, MAKE IT
+    # If FILE_MOVE doesn't exist, make it
     if [[ ! -d ${FILE_MOVE} ]]; then
         mkdir -p "${FILE_MOVE}"
     fi
 
-    # IF IT ISN'T A STABLE BUILD, CLEAN THE FOLDER
+    # If it isn't a stable build, clean the folder
     if [[ ${NOT_STABLE} ]]; then
         if [[ ! ${NOCLEAN} ]]; then
             rm -rf "${FILE_MOVE:?}"/*
         fi
     else
-        # CLEAN OLD TEST BUILDS
+        # Clean old test builds
         cd "${FILE_MOVE}/.." || die "Shift to zip folder failed!"
         rm -rf {alpha,beta,rc,tmp}/*
         git add .
@@ -687,7 +694,7 @@ function setup_folders() {
             git push --quiet
         fi
 
-        # MOVE THE OLD FILES TO AN ARCHIVE FOLDER UNLESS NO CLEAN IS REQUESTED
+        # Move the old files to an archive folder unless no clean is requested
         if [[ ! ${NOCLEAN} ]]; then
             if [[ ! -d ${FILE_MOVE_OLD} ]]; then
                 mkdir -p "${FILE_MOVE_OLD}"
@@ -698,7 +705,7 @@ function setup_folders() {
 }
 
 
-# MOVE FILES AND GENERATE MD5SUM
+# Move files and generate md5 files
 function move_flashable_files() {
     echo "  - Moving files"
 
@@ -720,39 +727,39 @@ function move_flashable_files() {
 }
 
 
-# GENERATE CHANGELOG
+# Generate changelog
 function generate_changelog() {
     echo "  - Generating changelog"
 
     GITHUB="http://github.com/nathanchance"
     CHANGELOG=${FILE_MOVE}/${KERNEL_NAME}-changelog.txt
 
-    # KERNEL SOURCE FIRST
+    # Kernel source first
     cd "${SOURCE_FOLDER}" || die "Kernel source is missing!"
 
-    # WE NEED TO MARK THE PREVIOUS TAG FOR CHANGELOG
+    # We need to mark the previous tag for changelog
     PREV_TAG_NAME=$(git tag --sort=-taggerdate -l "*${MATCH_FLAG}*" | head -n 1)
     if [[ -z ${PREV_TAG_NAME} ]]; then
         return
     fi
     RANGE=${PREV_TAG_NAME}..HEAD
 
-    # SHOW WHERE COMMITS ARE LOCATED
+    # Show where commits are located
     {
         echo "${GITHUB}/${DEVICE_NAME_GITHUB}/commits/${KERNEL_BRANCH}\n"
 
-        # USE SHORTLOG FOR PRETTY OUTPUT
+        # Use shortlog for pretty output
         git log "${RANGE}" | git shortlog
 
-        # GENERATE A DIFF AS WELL
+        # Generate a diff as well
         git diff --find-renames --stat --summary "${RANGE}"
     } > "${CHANGELOG}"
 
     if [[ ${PACKAGE_METHOD} =~ "zip" ]]; then
-        # ANYKERNEL2 NEXT
+        # AnyKernel2 next
         cd "${ANYKERNEL2_FOLDER}" || die "AnyKernel2 source is missing!"
 
-        # WE ONLY WANT TO SHOW ANYKERNEL2 CHANGES IF THERE HAVE BEEN SOME
+        # We only want to show AnyKernel2 changes if there have been some
         NUM_COMMITS=$(git log "${RANGE}" --pretty=oneline | wc -l)
 
         if [[ ${NUM_COMMITS} -gt 0 ]]; then
@@ -768,7 +775,7 @@ function generate_changelog() {
 }
 
 
-# PUSH KERNEL FILES (ZIPS/IMAGES) TO GITHUB
+#Ppush kernel files (zips/images) to GitHub
 function push_flashable_files() {
     echo "  - Pushing files to GitHub"
 
@@ -782,7 +789,7 @@ function push_flashable_files() {
 }
 
 
-# TAG FOR STABLE RELEASES
+# Tag for stable releases
 function tag_stable() {
     echo "  - Tagging ${KERNEL_NAME} as stable"
 
@@ -800,7 +807,7 @@ function tag_stable() {
 }
 
 
-# AFTER BUILD TASKS
+# After build tasks
 function after_build_tasks () {
     if [[ ! ${IMAGE_ONLY} ]]; then
         package_${PACKAGE_METHOD}
@@ -823,7 +830,7 @@ function after_build_tasks () {
 }
 
 
-# PRINT FILE INFO
+# Print file info
 function ending_info() {
     header "SCRIPT FINISHED!"
 
@@ -890,10 +897,10 @@ function ending_info() {
 #              #
 ################
 
-# SOURCE OUR UNIVERSAL FUNCTIONS SCRIPT AND MAC CHECK
+# Source our universal functions script and macOS check
 source common
 
-# START TRACKING TIME
+# Start tracking time
 START=$(date +"%s")
 
 clear
@@ -920,25 +927,25 @@ echo
 
 header "COMPILING KERNEL"
 
-# PARSE COMMAND LINE PAREMETERS AND SETUP OPTIONS
+# Parse command line parameters and setup options
 parse_parameters "$@"
 device_flags
 generate_variables
 
-# DON'T SHOW CLEAN UP OUTPUT
+# Don't show clean up output
 clean_up &>/dev/null
 
-# GENERATE VARIABLES SUCH AS VERSIONS
+# Generate variables such as versions
 generate_version
 
-# PRINT RELEVANT VARIABLES
+# Print relevant variables
 print_variables
 
-# BUILD KERNEL
+# Build kernel
 ${BUILD_FUNCTION}
 
-# AFTER BUILD TASKS
+# After build tasks
 after_build_tasks
 
-# PRINT FILE INFO AND TIME
+# Print file info and time
 ending_info -s
