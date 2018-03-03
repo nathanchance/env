@@ -88,8 +88,8 @@ function header() {
 
 # Formats the time
 function format_time() {
-    MINS=$(((${1} - ${2}) / 60))
-    SECS=$(((${1} - ${2}) % 60))
+    MINS=$(((${2} - ${1}) / 60))
+    SECS=$(((${2} - ${1}) % 60))
     if [[ ${MINS} -ge 60 ]]; then
         HOURS=$((MINS / 60))
         MINS=$((MINS % 60))

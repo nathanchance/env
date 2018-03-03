@@ -835,7 +835,7 @@ function ending_info() {
     header "SCRIPT FINISHED!"
 
     END=$(date +"%s")
-    DURATION=$(format_time "${END}" "${START}")
+    DURATION=$(format_time "${START}" "${END}")
 
     echo "\n$(date +"%m/%d/%Y %H:%M:%S"): $(basename "${BASH_SOURCE[0]}") ${PARAMS}" >> "${LOG}"
 

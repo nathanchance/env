@@ -331,7 +331,7 @@ fi
 # Print the time the script finished
 # and how long it took regardless of success
 echo "${RED}TIME: $(date +%D\ %r | awk '{print toupper($0)}')"
-echo "${RED}DURATION: $(format_time "${END}" "${START}")${RST}"
+echo "${RED}DURATION: $(format_time "${START}" "${END}")${RST}"
 
 if [[ ${TG} ]]; then
     {
@@ -342,7 +342,7 @@ if [[ ${TG} ]]; then
             echo "Location: $(web_link "${ZIP_MOVE}")"
         fi
         echo
-        echo "Duration: $(format_time "${END}" "${START}")"
+        echo "Duration: $(format_time "${START}" "${END}")"
         echo "\`\`\`"
     } > ${TG_MSG_FILE}
     notify "$(cat ${TG_MSG_FILE})"

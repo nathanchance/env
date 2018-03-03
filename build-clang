@@ -177,7 +177,7 @@ function build() {
 
     if ! time cmake --build . -- "${JOBS_FLAG}"; then
         header "ERROR BUILDING!"
-        die "Time elapsed: $(format_time "$(date +"%s")" "${START}")"
+        die "Time elapsed: $(format_time "${START}" "$(date +"%s")")"
     fi
 }
 
@@ -194,23 +194,23 @@ function install() {
                 echo "\`\`\`"
                 echo "Error while building Clang ${VERSION}!"
                 echo
-                echo "Time elapsed: $(format_time "$(date +"%s")" "${START}")"
+                echo "Time elapsed: $(format_time "${START}" "$(date +"%s")")"
                 echo "\`\`\`"
             } > "${TG_MSG_FILE}"
             notify "$(cat ${TG_MSG_FILE})"
         fi
-        die "Time elapsed: $(format_time "$(date +"%s")" "${START}")"
+        die "Time elapsed: $(format_time "${START}" "$(date +"%s")")"
     fi
 
     header "SUCCESS!" "${GRN}"
     echo "${GRN}Successfully built and installed Clang toolchain to ${INSTALL_FOLDER}!${GRN}"
-    echo "${GRN}Time elapsed: $(format_time "$(date +"%s")" "${START}")${RST}\n"
+    echo "${GRN}Time elapsed: $(format_time "${START}" "$(date +"%s")")${RST}\n"
     if [[ ${TG} ]]; then
         {
             echo "\`\`\`"
             echo "Clang ${VERSION} build was successful!"
             echo
-            echo "Time elapsed: $(format_time "$(date +"%s")" "${START}")"
+            echo "Time elapsed: $(format_time "${START}" "$(date +"%s")")"
             echo "\`\`\`"
         } > "${TG_MSG_FILE}"
         notify "$(cat ${TG_MSG_FILE})"
