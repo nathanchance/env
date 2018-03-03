@@ -44,9 +44,6 @@ function linux_aliases() {
     # Setup build for AOSP
     alias senv='. build/envsetup.sh'
 
-    # Alias for makepkg
-    alias mkpkg='makepkg -si --noconfirm'
-
     # Alias for flash-kernel script
     alias fk='flash-kernel'
 }
@@ -446,4 +443,14 @@ Average number of commits in a version of ${VER}: $(($(git lo "v${VER}..v${VER}.
 # Shellcheck function
 function shellcheck() {
     SHELLCHECK_OPTS="-e SC1090 -e SC1091 -e SC1117 -e SC2028" command shellcheck "$@"
+}
+
+
+# makepkg wrapper for Linux kernel
+function mkpkg() {
+    if makepkg -si --noconfirm; then
+        notify "\'Server kernel build completed successfully\'"
+    else
+        notify "\'Server kernel build failed\'"
+    fi
 }
