@@ -99,13 +99,13 @@ function sync() {
         git clone "${URL}" -b "${BRANCH}" "${FOLDER}"
     else
         (
-        cd "${FOLDER}" || die "Error moving into ${FOLDER}"
-        git clean -fxdq
-        git checkout ${BRANCH}
-        git fetch origin
-        if ! git rebase origin/${BRANCH}; then
-            die "Error updating $(basename "${FOLDER}")!"
-        fi
+            cd "${FOLDER}" || die "Error moving into ${FOLDER}"
+            git clean -fxdq
+            git checkout ${BRANCH}
+            git fetch origin
+            if ! git rebase origin/${BRANCH}; then
+                die "Error updating $(basename "${FOLDER}")!"
+            fi
         )
     fi
 }
@@ -199,14 +199,15 @@ function install() {
     fi
 
     header "SUCCESS!" "${GRN}"
+    TIME_STRING="$(format_time "${START}" "$(date +"%s")")"
     echo "${GRN}Successfully built and installed Clang toolchain to ${INSTALL_FOLDER}!${GRN}"
-    echo "${GRN}Time elapsed: $(format_time "${START}" "$(date +"%s")")${RST}\n"
+    echo "${GRN}Time elapsed: ${TIME_STRING,,}${RST}\n"
     if [[ ${TG} ]]; then
         {
             echo "\`\`\`"
             echo "Clang ${VERSION} build was successful!"
             echo
-            echo "Time elapsed: $(format_time "${START}" "$(date +"%s")")"
+            echo "Time elapsed: ${TIME_STRING,,}"
             echo "\`\`\`"
         } > "${TG_MSG_FILE}"
         notify "$(cat ${TG_MSG_FILE})"
