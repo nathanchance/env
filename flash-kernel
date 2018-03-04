@@ -578,7 +578,7 @@ function package_zip() {
     cd "${ANYKERNEL2_FOLDER}" || die "AnyKernel2 folder shift failed!"
 
     # Package the zip without the README
-    zip ${HIDDEN_COMMANDS:+ "-q"} -r9 "${UNSIGNED_ZIP}" -- * -x README.md "${UNSIGNED_ZIP}"
+    zip ${HIDDEN_COMMANDS:+ "-q"} -r9 "${UNSIGNED_ZIP}" -x README.md -- *
 
     # Sign zip
     java -jar "${BIN_FOLDER}/signapk.jar" \
