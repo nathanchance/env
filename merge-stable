@@ -109,9 +109,9 @@ function verify_remote() {
     add_remote "${1}" https://git.kernel.org/pub/scm/linux/kernel/git/stable/"${1}".git/
 
     if ! git fetch "${1}"; then
-        die "Remote ${1} update failed!"
+        die "${1} remote update failed!"
     else
-        echo "Remote ${1} updated successfully!"
+        echo "${1} remote updated successfully!"
     fi
 }
 
@@ -130,7 +130,11 @@ function update_stable_mirror() {
     cd "${KERNEL_FOLDER}/mirrors/linux-stable" || die "linux-stable folder does not exist!"
 
     git fetch -p origin
-    git push --mirror
+    if git push -q --mirror; then
+        echo "linux-stable mirror updated successfully!"
+    else
+        echo "linux-stable mirror update failed!"
+    fi
 
     cd "${CUR_FOLDER}" || die "Cannot return to previous folder!"
 }
@@ -206,7 +210,6 @@ function generate_versions() {
 
     echo
     echo "${BOLD}Target kernel version:${RST} ${TARGET_VERSION}"
-    echo
 }
 
 
