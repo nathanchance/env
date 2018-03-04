@@ -74,10 +74,6 @@ function parse_parameters() {
 
                 DEVICE=${1} ;;
 
-            # Show full compilation, not just warnings and errors
-            "-D"|"--debug")
-                DEBUG=true ;;
-
             # Extra make flags if necessary (like mismatch config)
             "-f"|"--flags")
                 shift && enforce_value "$@"
@@ -133,6 +129,17 @@ function parse_parameters() {
 
                 VERSION=${1} ;;
 
+            # How much script output to show
+            "-V"|"--verbosity-level")
+                shift && enforce_value "$@"
+                VERBOSITY_LEVEL=${1}
+                case ${VERBOSITY_LEVEL} in
+                    "1") SHOW_OUTPUT=true; HIDDEN_COMMANDS=true ;;
+                    "2") SHOW_OUTPUT=true; VERBOSE_COMMANDS=true ;;
+                    "3") EXTRA_MAKE_FLAGS="${EXTRA_MAKE_FLAGS} V=1"; SHOW_OUTPUT=true; HIDDEN_COMMANDS=true ;;
+                    "4") EXTRA_MAKE_FLAGS="${EXTRA_MAKE_FLAGS} V=1"; SHOW_OUTPUT=true; VERBOSE_COMMANDS=true ;;
+                esac ;;
+
             *)
                 die "Invalid parameter" ;;
         esac
@@ -143,6 +150,7 @@ function parse_parameters() {
     # Default parameters
     [[ -z ${DEVICE} ]] && DEVICE="taimen"
     [[ -z ${MODE} ]] && MODE="personal"
+    [[ -z ${VERBOSITY_LEVEL} ]] && HIDDEN_COMMANDS=true
 
     # Easy to use variables for if statements
     [[ ${MODE} != "stable" ]] && NOT_STABLE=true
@@ -157,6 +165,24 @@ function parse_parameters() {
         } > ${TG_MSG_FILE}
         notify "$(cat ${TG_MSG_FILE})"
     fi
+}
+
+
+# 'cp -v' alias
+function cp() {
+    command cp ${VERBOSE_COMMANDS:+ "-v"} "$@"
+}
+
+
+# 'mv -v' alias
+function mv() {
+    command mv ${VERBOSE_COMMANDS:+ "-v"} "$@"
+}
+
+
+# 'rm -v' alias
+function rm() {
+    command rm ${VERBOSE_COMMANDS:+ "-v"} "$@"
 }
 
 
@@ -299,17 +325,18 @@ function clean_up() {
 
     [[ -z ${ANYKERNEL2_BRANCH} ]] && ANYKERNEL2_BRANCH=${DEVICE_NAME_GITHUB}-flash-${AK2_SFX}
 
-    git checkout ${ANYKERNEL2_BRANCH}
-    git clean -fxd
+    git checkout ${HIDDEN_COMMANDS:+ "-q"} ${ANYKERNEL2_BRANCH}
+    git clean -fxd ${HIDDEN_COMMANDS:+ "-q"}
 
     # Only checkout if kernel_branch exists and we aren't bisecting or rebasing
     cd "${SOURCE_FOLDER}" || die "Kernel source is missing!"
     if [[ -n ${KERNEL_BRANCH} ]]; then
-        [[ ! $(git status | ag "bisec|rebas") ]] && git checkout "${KERNEL_BRANCH}"
+        [[ ! $(git status | ag "bisec|rebas") ]] && git checkout ${HIDDEN_COMMANDS:+ "-q"} "${KERNEL_BRANCH}"
     # Otherwise, notate current branch for changelog
     else
         KERNEL_BRANCH=$(git rev-parse --abbrev-ref HEAD)
     fi
+    [[ -z ${HIDDEN_COMMANDS} ]] && echo
 }
 
 
@@ -346,7 +373,7 @@ function make_wrapper_clang() {
 # Silence output function
 function kmake() {
     # Only show errors and warnings when compiling (unless debug)
-    if [[ ${DEBUG} ]]; then
+    if [[ ${SHOW_OUTPUT} ]]; then
         make_wrapper_${COMPILER} "$@"
     else
         make_wrapper_${COMPILER} "$@" |& ag --no-color --after=10 "error:|warning:" && echo
@@ -451,7 +478,7 @@ function print_variables() {
 # Build kernel image
 function build_kernel() {
     # Clean source folder
-    git clean -dfqx
+    git clean -dfx ${HIDDEN_COMMANDS:+ "-q"}
 
     # Point to proper defconfig and generate version files
     kmake ${DEFCONFIG} prepare
@@ -551,7 +578,7 @@ function package_zip() {
     cd "${ANYKERNEL2_FOLDER}" || die "AnyKernel2 folder shift failed!"
 
     # Package the zip without the README
-    zip -q -r9 "${UNSIGNED_ZIP}" -- * -x README.md "${UNSIGNED_ZIP}"
+    zip ${HIDDEN_COMMANDS:+ "-q"} -r9 "${UNSIGNED_ZIP}" -- * -x README.md "${UNSIGNED_ZIP}"
 
     # Sign zip
     java -jar "${BIN_FOLDER}/signapk.jar" \
@@ -583,7 +610,7 @@ function package_image() {
     AOSP_FOLDER=${KERNEL_FOLDER}/sources/aosp-pixel2
     cd "${AOSP_FOLDER}" || die "AOSP source is not synced!"
 
-    git -C device/google/wahoo-kernel reset --hard --quiet
+    git -C device/google/wahoo-kernel reset --hard ${HIDDEN_COMMANDS:+ "--quiet"}
 
     cp "${OUT_KERNEL_IMAGE}" "${AOSP_FOLDER}/device/google/wahoo-kernel"
     cp "${OUT_DTBO_IMAGE}" "${AOSP_FOLDER}/device/google/wahoo-kernel"
@@ -609,7 +636,7 @@ function package_image() {
 # Package image wrapper
 function package_image_wrapper() {
     # Only show errors when compiling (unless debug)
-    if [[ ${DEBUG} ]]; then
+    if [[ ${SHOW_OUTPUT} ]]; then
         package_image_commands
     else
         package_image_commands |& ag --no-color "error:" && echo
@@ -651,14 +678,14 @@ function setup_folders() {
         rm -rf {alpha,beta,rc,tmp}/*
         git add .
         if [[ -n $(git status --porcelain) ]]; then
-            git commit --gpg-sign --quiet --signoff --message "${DEVICE_NAME_FILE}: Remove old test builds"
-            git push --quiet
+            git commit --gpg-sign ${HIDDEN_COMMANDS:+ "--quiet"} --signoff --message "${DEVICE_NAME_FILE}: Remove old test builds"
+            git push ${HIDDEN_COMMANDS:+ "--quiet"}
         fi
 
         # Move the old files to an archive folder unless no clean is requested
         if [[ ! ${NOCLEAN} ]]; then
             [[ ! -d ${FILE_MOVE_OLD} ]] && mkdir -p "${FILE_MOVE_OLD}"
-            find "${FILE_MOVE}" -maxdepth 1 -type f -exec mv {} "${FILE_MOVE_OLD}" \; &>/dev/null
+            find "${FILE_MOVE}" -maxdepth 1 -type f -exec sh -c 'mv ${VERBOSE_COMMANDS:+ "-v"} "$@" "${FILE_MOVE_OLD}"' -- {} \; 2>/dev/null
         fi
     fi
 }
@@ -740,9 +767,9 @@ function push_flashable_files() {
 
     git add ..
 
-    git commit --gpg-sign --quiet --signoff --message "${KERNEL_NAME}"
+    git commit --gpg-sign ${HIDDEN_COMMANDS:+ "--quiet"} --signoff --message "${KERNEL_NAME}"
 
-    git push --quiet
+    git push ${HIDDEN_COMMANDS:+ "--quiet"}
 }
 
 
@@ -753,13 +780,13 @@ function tag_stable() {
     cd "${SOURCE_FOLDER}" || die "Kernel source is missing!"
 
     git tag --sign --annotate "${KERNEL_NAME}" --message "${KERNEL_NAME}"
-    git push --quiet origin "${KERNEL_NAME}"
+    git push ${HIDDEN_COMMANDS:+ "--quiet"} origin "${KERNEL_NAME}"
 
     if [[ ${PACKAGE_METHOD} =~ "zip" ]]; then
         cd "${ANYKERNEL2_FOLDER}" || die "AnyKernel2 source is missing!"
 
         git tag --sign --annotate "${KERNEL_NAME}" --message "${KERNEL_NAME}"
-        git push --quiet origin "${KERNEL_NAME}"
+        git push ${HIDDEN_COMMANDS:+ "--quiet"} origin "${KERNEL_NAME}"
     fi
 }
 
@@ -887,8 +914,8 @@ parse_parameters "$@"
 device_flags
 generate_variables
 
-# Don't show clean up output
-clean_up &>/dev/null
+# Clean up the source
+clean_up
 
 # Generate variables such as versions
 generate_version
