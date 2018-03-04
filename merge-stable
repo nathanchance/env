@@ -147,10 +147,9 @@ function update_stable_mirror() {
 function update_sources() {
     header "Updating remotes"
 
-    update_stable_mirror
+    [[ "$(uname -n)" = "flashbox" ]] && update_stable_mirror
     verify_remote linux-stable
     verify_remote linux-stable-rc
-
 
     if [[ ${FETCH_REMOTES_ONLY} ]]; then
         echo
