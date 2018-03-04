@@ -27,6 +27,30 @@ KERNEL=kernel7
 # Message file for Telegram messages
 TG_MSG=/tmp/tg-msg.pi-kernel
 
+# Check if we are compiling on the Raspberry Pi or not
+[[ "$(whoami)" = "pi" ]] && PI=true
+
+# Set toolchain to use
+if [[ ! ${PI} ]]; then
+    GCC6_FOLDER=/opt/armv7-eabihf--glibc--stable-2018.02-2
+    GCC7_FOLDER=/opt/armv7-eabihf--glibc--bleeding-edge-2018.02-1
+    [[ "$*" =~ "-7" ]] && TOOLCHAIN=${GCC7_FOLDER}/bin/arm-buildroot-linux-gnueabihf-
+    [[ -z ${TOOLCHAIN} ]] && TOOLCHAIN=${GCC6_FOLDER}/bin/arm-buildroot-linux-gnueabihf-
+
+    cd ${HOME}/kernels/pi
+else
+    cd ${HOME}/Documents/Kernel
+fi
+
+# Make function for both host and cross compiling
+function kmake() {
+    if [[ ${PI} ]]; then
+        make O=out "${JOBS_FLAG}" "$@"
+    else
+        make O=out ARCH=arm CROSS_COMPILE="$(command -v ccache) ${TOOLCHAIN}" "${JOBS_FLAG}" "$@"
+    fi
+}
+
 function build() {
     (
         START="$(date +"%s")"
@@ -42,9 +66,9 @@ function build() {
 
         rm -rf out
 
-        make O=out bcm2709_defconfig
+        kmake bcm2709_defconfig
 
-        if time make O=out "${JOBS_FLAG}" zImage modules dtbs; then
+        if time kmake zImage modules dtbs; then
             RESULT_STRING="completed successfully"
         else
             RESULT_STRING="failed"
