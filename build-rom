@@ -315,6 +315,7 @@ fi
 
 # Stop tracking time
 END=$(date +%s)
+TIME_STRING="$(format_time "${START}" "${END}")"
 
 header "${BUILD_RESULT_STRING}!"
 
@@ -327,7 +328,7 @@ fi
 # Print the time the script finished
 # and how long it took regardless of success
 echo "${RED}TIME: $(date +%D\ %r | awk '{print toupper($0)}')"
-echo "${RED}DURATION: $(format_time "${START}" "${END}")${RST}"
+echo "${RED}DURATION: ${TIME_STRING}${RST}"
 
 if [[ ${TG} ]]; then
     {
@@ -338,7 +339,7 @@ if [[ ${TG} ]]; then
             echo "Location: $(web_link "${ZIP_MOVE}")"
         fi
         echo
-        echo "Duration: $(format_time "${START}" "${END}")"
+        echo "Duration: ${TIME_STRING,,}"
         echo "\`\`\`"
     } > ${TG_MSG_FILE}
     notify "$(cat ${TG_MSG_FILE})"
