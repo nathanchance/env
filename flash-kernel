@@ -685,7 +685,12 @@ function setup_folders() {
         # Move the old files to an archive folder unless no clean is requested
         if [[ ! ${NOCLEAN} ]]; then
             [[ ! -d ${FILE_MOVE_OLD} ]] && mkdir -p "${FILE_MOVE_OLD}"
-            find "${FILE_MOVE}" -maxdepth 1 -type f -exec sh -c 'mv ${VERBOSE_COMMANDS:+ "-v"} "$@" "${FILE_MOVE_OLD}"' -- {} \; 2>/dev/null
+            OLD_FILES="$(find "${FILE_MOVE}" -maxdepth 1 -type f 2>/dev/null)"
+            if [[ -n ${OLD_FILES} ]]; then
+                for OLD_FILE in ${OLD_FILES}; do
+                    mv ${VERBOSE_COMMANDS:+ "-v"} "${OLD_FILE}" "${FILE_MOVE_OLD}"
+                done
+            fi
         fi
     fi
 }
