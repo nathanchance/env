@@ -141,17 +141,11 @@ function parse_parameters() {
     done
 
     # Default parameters
-    if [[ -z ${DEVICE} ]]; then
-        DEVICE="taimen"
-    fi
-    if [[ -z ${MODE} ]]; then
-        MODE="personal"
-    fi
+    [[ -z ${DEVICE} ]] && DEVICE="taimen"
+    [[ -z ${MODE} ]] && MODE="personal"
 
     # Easy to use variables for if statements
-    if [[ ${MODE} != "stable" ]]; then
-        NOT_STABLE=true
-    fi
+    [[ ${MODE} != "stable" ]] && NOT_STABLE=true
 
     if [[ ${TG} ]]; then
         {
@@ -171,22 +165,16 @@ function device_flags() {
     case ${DEVICE} in
         "op5")
             # Required flags
-            if [[ -z ${ANDROID_VERSION} ]]; then
-                ANDROID_VERSION=8.x
-            fi
+            [[ -z ${ANDROID_VERSION} ]] && ANDROID_VERSION=8.x
 
             AK2_SFX=${ANDROID_VERSION}
 
             BUILD_FUNCTION=build_kernel_op5
 
-            if [[ ${TG} && ${MODE} != "personal" ]]; then
-                # shellcheck disable=SC2034
-                CHAT_ID=-1001107088684
-            fi
+            # shellcheck disable=SC2034
+            [[ ${TG} && ${MODE} != "personal" ]] && CHAT_ID=-1001107088684
 
-            if [[ -z ${COMPILER} ]]; then
-                COMPILER=clang
-            fi
+            [[ -z ${COMPILER} ]] && COMPILER=clang
 
             if [[ -z ${CLANG_FOLDER} ]]; then
                 case ${MODE} in
@@ -199,9 +187,7 @@ function device_flags() {
             DEVICE_NAME_GITHUB=${DEVICE}
             DEVICE_NAME_WEB=${DEVICE}
 
-            if [[ -z ${GCC_FOLDER} ]]; then
-                GCC_FOLDER="/opt/linaro-gcc"
-            fi
+            [[ -z ${GCC_FOLDER} ]] && GCC_FOLDER="/opt/linaro-gcc"
 
             MATCH_FLAG="${DEVICE_NAME_FILE}-v${VERSION::1}"
 
@@ -209,21 +195,15 @@ function device_flags() {
 
         "taimen"|"walleye")
             # Required flags
-            if [[ -z ${ANDROID_VERSION} ]]; then
-                ANDROID_VERSION=8.1.0
-            fi
+            [[ -z ${ANDROID_VERSION} ]] && ANDROID_VERSION=8.1.0
             AK2_SFX=${ANDROID_VERSION}
 
             BUILD_FUNCTION=build_kernel
 
-            if [[ ${TG} && ${MODE} != "personal" ]]; then
-                # shellcheck disable=SC2034
-                CHAT_ID=-1001298464571
-            fi
+            # shellcheck disable=SC2034
+            [[ ${TG} && ${MODE} != "personal" ]] && CHAT_ID=-1001298464571
 
-            if [[ -z ${COMPILER} ]]; then
-                COMPILER=clang
-            fi
+            [[ -z ${COMPILER} ]] && COMPILER=clang
 
             if [[ -z ${CLANG_FOLDER} ]]; then
                 case ${MODE} in
@@ -232,17 +212,13 @@ function device_flags() {
                 esac
             fi
 
-            if [[ -z ${DEFCONFIG} ]]; then
-                DEFCONFIG="flash_defconfig"
-            fi
+            [[ -z ${DEFCONFIG} ]] && DEFCONFIG="flash_defconfig"
 
             DEVICE_NAME_FILE=${DEVICE^}
             DEVICE_NAME_GITHUB=wahoo
             DEVICE_NAME_WEB=${DEVICE}
 
-            if [[ -z ${GCC_FOLDER} ]]; then
-                GCC_FOLDER="/opt/linaro-gcc"
-            fi
+            [[ -z ${GCC_FOLDER} ]] && GCC_FOLDER="/opt/linaro-gcc"
 
             MATCH_FLAG="${DEVICE_NAME_FILE}-v${VERSION::1}"
 
@@ -283,15 +259,13 @@ function generate_variables() {
     ARCHITECTURE=arm64
     CCACHE=$(command -v ccache)
     GCC=$(find ${GCC_FOLDER}/bin \( -type f -o -type l \) -name '*-gcc' | head -n1)
-    if [[ -z ${GCC} ]]; then
-        die "GCC toolchain could not be found!"
-    fi
+    [[ -z ${GCC} ]] && die "GCC toolchain could not be found!"
+
     CC=${GCC%gcc}
     if [[ ${COMPILER} = "clang" ]]; then
         CLANG=${CLANG_FOLDER}/bin/clang
-        if [[ ! -f ${CLANG} ]]; then
-            die "Clang toolchain could not be found!"
-        fi
+        [[ ! -f ${CLANG} ]] && die "Clang toolchain could not be found!"
+
         case "$(basename ${CLANG_FOLDER})" in
             "clang-3289846"|"clang-3859424"|"clang-4053586")
                 CLANG_VERSION=$(${CLANG} --version | head -n 1)
@@ -322,18 +296,16 @@ function generate_variables() {
 function clean_up() {
     # Clean AnyKernel2 folder
     cd "${ANYKERNEL2_FOLDER}" || die "AnyKernel2 source is missing!"
-    if [[ -z ${ANYKERNEL2_BRANCH} ]]; then
-        ANYKERNEL2_BRANCH=${DEVICE_NAME_GITHUB}-flash-${AK2_SFX}
-    fi
+
+    [[ -z ${ANYKERNEL2_BRANCH} ]] && ANYKERNEL2_BRANCH=${DEVICE_NAME_GITHUB}-flash-${AK2_SFX}
+
     git checkout ${ANYKERNEL2_BRANCH}
     git clean -fxd
 
     # Only checkout if kernel_branch exists and we aren't bisecting or rebasing
     cd "${SOURCE_FOLDER}" || die "Kernel source is missing!"
     if [[ -n ${KERNEL_BRANCH} ]]; then
-        if [[ ! $(git status | ag "bisec|rebas") ]]; then
-            git checkout "${KERNEL_BRANCH}"
-        fi
+        [[ ! $(git status | ag "bisec|rebas") ]] && git checkout "${KERNEL_BRANCH}"
     # Otherwise, notate current branch for changelog
     else
         KERNEL_BRANCH=$(git rev-parse --abbrev-ref HEAD)
@@ -431,9 +403,7 @@ function generate_version() {
         REVISION_FOR_FILE=".${MODE::1}${REVISION}"
 
         # If REVISION is greater than or equal to 1, pass it to the build system
-        if [[ ${REVISION} -ge 1 ]]; then
-            KBUILD_BUILD_VERSION=${REVISION}
-        fi
+        [[ ${REVISION} -ge 1 ]] && KBUILD_BUILD_VERSION=${REVISION}
     fi
 
     # Generate second line variable
@@ -535,9 +505,7 @@ function move_kernel_files() {
         # Move the kernel image
         mkdir -p "${ANYKERNEL2_FOLDER}${ANYKERNEL2_SUB_FOLDER}"
         cp "${OUT_KERNEL_IMAGE}" "${ANYKERNEL2_FOLDER}${ANYKERNEL2_SUB_FOLDER}"
-        if [[ -n ${OUT_DTBO_IMAGE} ]]; then
-            cp "${OUT_DTBO_IMAGE}" "${ANYKERNEL2_FOLDER}/dtbo"
-        fi
+        [[ -n ${OUT_DTBO_IMAGE} ]] && cp "${OUT_DTBO_IMAGE}" "${ANYKERNEL2_FOLDER}/dtbo"
         echo "Version: $(cat "${OUT_FOLDER}/include/config/kernel.release")" > "${ANYKERNEL2_FOLDER}/version"
 
         # Grab modules too if they are present
@@ -560,9 +528,7 @@ function move_kernel_files() {
 
 # Build function specifically for the OnePlus 5
 function build_kernel_op5() {
-    if [[ -z ${OS_LIST} ]]; then
-        OS_LIST="OOS Custom"
-    fi
+    [[ -z ${OS_LIST} ]] && OS_LIST="OOS Custom"
 
     for OS in ${OS_LIST}; do
         ANYKERNEL2_SUB_FOLDER="/kernels/${OS,,}"
@@ -579,9 +545,8 @@ function package_zip() {
     header "PACKAGING AND SIGNING ZIP"
 
     echo "${BOLD}Signed zip name:${RST}   ${SIGNED_ZIP}\n"
-    if [[ -n ${MODULES_FOLDER} ]]; then
+    [[ -n ${MODULES_FOLDER} ]] && \
         echo "${BOLD}Kernel modules:${RST}    $(find "${MODULES_FOLDER}" -type f | wc -l)\n"
-    fi
 
     cd "${ANYKERNEL2_FOLDER}" || die "AnyKernel2 folder shift failed!"
 
@@ -675,15 +640,11 @@ function setup_folders() {
     echo "  - Setting up final folders"
 
     # If FILE_MOVE doesn't exist, make it
-    if [[ ! -d ${FILE_MOVE} ]]; then
-        mkdir -p "${FILE_MOVE}"
-    fi
+    [[ ! -d ${FILE_MOVE} ]] && mkdir -p "${FILE_MOVE}"
 
     # If it isn't a stable build, clean the folder
     if [[ ${NOT_STABLE} ]]; then
-        if [[ ! ${NOCLEAN} ]]; then
-            rm -rf "${FILE_MOVE:?}"/*
-        fi
+        [[ ! ${NOCLEAN} ]] && rm -rf "${FILE_MOVE:?}"/*
     else
         # Clean old test builds
         cd "${FILE_MOVE}/.." || die "Shift to zip folder failed!"
@@ -696,9 +657,7 @@ function setup_folders() {
 
         # Move the old files to an archive folder unless no clean is requested
         if [[ ! ${NOCLEAN} ]]; then
-            if [[ ! -d ${FILE_MOVE_OLD} ]]; then
-                mkdir -p "${FILE_MOVE_OLD}"
-            fi
+            [[ ! -d ${FILE_MOVE_OLD} ]] && mkdir -p "${FILE_MOVE_OLD}"
             find "${FILE_MOVE}" -maxdepth 1 -type f -exec mv {} "${FILE_MOVE_OLD}" \; &>/dev/null
         fi
     fi
@@ -739,9 +698,7 @@ function generate_changelog() {
 
     # We need to mark the previous tag for changelog
     PREV_TAG_NAME=$(git tag --sort=-taggerdate -l "*${MATCH_FLAG}*" | head -n 1)
-    if [[ -z ${PREV_TAG_NAME} ]]; then
-        return
-    fi
+    [[ -z ${PREV_TAG_NAME} ]] && return
     RANGE=${PREV_TAG_NAME}..HEAD
 
     # Show where commits are located
@@ -820,9 +777,7 @@ function after_build_tasks () {
         if [[ ${MODE} != "personal" ]]; then
             generate_changelog
             push_flashable_files
-            if [[ ! ${NOT_STABLE} ]]; then
-                tag_stable
-            fi
+            [[ ! ${NOT_STABLE} ]] && tag_stable
         fi
 
         echo

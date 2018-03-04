@@ -73,10 +73,5 @@ function install() {
     ) > /dev/null
 }
 
-if [[ "$*" =~ "-b" ]]; then
-    build
-fi
-
-if [[ "$*" =~ "-i" ]]; then
-    install
-fi
+[[ "$*" =~ "-b" ]] && build
+[[ "$*" =~ "-i" ]] && install

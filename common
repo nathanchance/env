@@ -28,9 +28,7 @@
 # What OS are we on?
 OS=$(UNAME=$(uname); echo "${UNAME,,}")
 # GNU readlink is needed for SCRIPTS_FOLDER
-if [[ ${OS} = "darwin" ]]; then
-    alias readlink=greadlink
-fi
+[[ ${OS} = "darwin" ]] && alias readlink=greadlink
 
 # Location of "scripts" folder
 SCRIPTS_FOLDER=$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")" && pwd)
@@ -124,9 +122,7 @@ function format_time() {
 function display_error() {
     echo
     echo "${RED}${1}${RST}"
-    if [[ -z ${2} ]]; then
-        echo
-    fi
+    [[ -z ${2} ]] && echo
 }
 
 # Prints an error in bold red and exits the script
@@ -156,16 +152,12 @@ function die() {
 function warn() {
     echo
     echo "${YLW}${1}${RST}"
-    if [[ -z ${2} ]]; then
-        echo
-    fi
+    [[ -z ${2} ]] && echo
 }
 
 # Enforces the value needed for two-part flags
 function enforce_value() {
-    if [[ $# -lt 1 ]]; then
-        die "A additional value is needed for one of the flags passed to this script!"
-    fi
+    [[ $# -lt 1 ]] && die "A additional value is needed for one of the flags passed to this script!"
 }
 
 # Add a remote if it doesn't exist
@@ -194,17 +186,13 @@ function rmvenv {
 
 # Source Telegram bot information
 function load_botinfo() {
-    if [[ -f ${HOME}/.botinfo ]]; then
-        source ~/.botinfo
-    fi
+    [[ -f ${HOME}/.botinfo ]] && source ~/.botinfo
 }
 
 load_botinfo
 
 # Require a parameter to opt out of macOS_check
-if [[ $# -lt 1 && ${OS} = "darwin" ]]; then
-    die "Wrong window! ;)"
-fi
+[[ $# -lt 1 && ${OS} = "darwin" ]] && die "Wrong window! ;)"
 
 # Telegram notifier function
 function notify() {

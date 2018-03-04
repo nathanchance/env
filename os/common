@@ -92,15 +92,11 @@ function tmux_attach() {
 
 # Add something to PATH but only if it isn't already there
 function add_to_path_pre() {
-    if [[ ! $(echo "${PATH}" | ag -s --nocolor "${1}") ]]; then
-        export PATH="${1}:${PATH}"
-    fi
+    [[ ! $(echo "${PATH}" | ag -s --nocolor "${1}") ]] && export PATH="${1}:${PATH}"
 }
 
 function add_to_path_post() {
-    if [[ ! $(echo "${PATH}" | ag -s --nocolor "${1}") ]]; then
-        export PATH="${PATH}:${1}"
-    fi
+    [[ ! $(echo "${PATH}" | ag -s --nocolor "${1}") ]] && export PATH="${PATH}:${1}"
 }
 
 function bash_setup() {
@@ -155,9 +151,7 @@ function gerrit-push {
             fi ;;
     esac
 
-    if [[ -z ${PROJECT} ]]; then
-        PROJECT=$(grep -m 1 "projectname" .git/config | sed 's/\tprojectname = //')
-    fi
+    [[ -z ${PROJECT} ]] && PROJECT=$(grep -m 1 "projectname" .git/config | sed 's/\tprojectname = //')
 
     if [[ -n ${PROJECT} ]]; then
         PROJECT=$(echo "${PROJECT}" | sed 's/DirtyUnicorns\///')

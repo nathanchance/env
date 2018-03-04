@@ -99,9 +99,7 @@ function rps {
 # ris <url> <branch> |-s|
 function ris {
     # User requested a shallow clone
-    if [[ ${3} = "-s" ]]; then
-        local DEPTH="--depth=1"
-    fi
+    [[ ${3} = "-s" ]] && local DEPTH="--depth=1"
 
     repo init -u "${1}" -b "${2}" --no-clone-bundle ${DEPTH}
 
@@ -129,9 +127,7 @@ function kremotes() {
 # Merge one git tag into current branch
 # mrgt <tag> [<remote|url>]
 function merge-tag() {
-    if [[ $# -gt 1 ]]; then
-        git fetch --tags "${2}"
-    fi
+    [[ $# -gt 1 ]] && git fetch --tags "${2}"
 
     local MSG_FILE=/tmp/mrg-msg
     local CB; CB=$(git rev-parse --abbrev-ref HEAD | sed 's/-queue-[0-9].*//')

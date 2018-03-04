@@ -115,9 +115,7 @@ if [[ -z ${ROM} ]]; then
     DEVICE=cheeseburger
 fi
 
-if [[ -z ${DEVICE} ]]; then
-    die "The device to build is a required parameter!"
-fi
+[[ -z ${DEVICE} ]] && die "The device to build is a required parameter!"
 
 if [[ -z ${VARIANT} ]]; then
     case ${ROM} in
@@ -180,9 +178,7 @@ header "SETTING UP BUILD ENVIRONMENT"
 
 # Check and see if we are on Arch
 # If so, activare a virtual environment for proper Python support
-if [[ -f /etc/arch-release ]]; then
-    mkavenv
-fi
+[[ -f /etc/arch-release ]] && mkavenv
 source build/envsetup.sh
 
 
@@ -276,7 +272,9 @@ fi
 make_command "${MAKE_TARGET}"
 
 if [[ ${EXIT_NEEDED} ]]; then
-    echo && header "BUILD COMPLETED!" && exit
+    echo
+    header "BUILD COMPLETED!"
+    exit
 fi
 
 # There will be a zip in the out folder if successful
@@ -313,9 +311,7 @@ fi
 ######################
 
 # Deactivate virtualenv if we are on arch
-if [[ -f /etc/arch-release ]]; then
-    rmvenv
-fi
+[[ -f /etc/arch-release ]] && rmvenv
 
 # Stop tracking time
 END=$(date +%s)

@@ -86,9 +86,7 @@ function parse_parameters() {
             # Update to the specified version
             "-v"|"--version")
                 shift
-                if [[ $# -lt 1 ]]; then
-                    die "Please specify a version to update!"
-                fi
+                [[ $# -lt 1 ]] && die "Please specify a version to update!"
                 UPDATE_MODE=1
                 VERSION_SUPPLIED=${1} ;;
 
@@ -100,15 +98,9 @@ function parse_parameters() {
     done
 
     # Sanity checks
-    if [[ ! -f Makefile ]]; then
-        die "This is not being run in a kernel tree!" -h
-    fi
-    if [[ -z ${UPDATE_METHOD} ]]; then
-        UPDATE_METHOD=merge
-    fi
-    if [[ -z ${UPDATE_MODE} ]]; then
-        UPDATE_MODE=2
-    fi
+    [[ ! -f Makefile ]] && die "This is not being run in a kernel tree!" -h
+    [[ -z ${UPDATE_METHOD} ]] && UPDATE_METHOD=merge
+    [[ -z ${UPDATE_MODE} ]] && UPDATE_MODE=2
 }
 
 
@@ -206,12 +198,8 @@ function generate_versions() {
     else
         # Make sure target version is between current version and latest version
         TARGET_SUBLEVEL=$(echo "${TARGET_VERSION}" | cut -d . -f 3)
-        if [[ ${TARGET_SUBLEVEL} -le ${CURRENT_SUBLEVEL} ]]; then
-            die "Current version is up to date with target version ${TARGET_VERSION}!\n"
-        fi
-        if [[ ${TARGET_SUBLEVEL} -gt ${LATEST_SUBLEVEL}  ]]; then
-            die "Target version ${TARGET_VERSION} does not exist!\n"
-        fi
+        [[ ${TARGET_SUBLEVEL} -le ${CURRENT_SUBLEVEL} ]] && die "Current version is up to date with target version ${TARGET_VERSION}!\n"
+        [[ ${TARGET_SUBLEVEL} -gt ${LATEST_SUBLEVEL}  ]] && die "Target version ${TARGET_VERSION} does not exist!\n"
         RANGE=v${CURRENT_VERSION}..v${TARGET_VERSION}
         TAG=v${TARGET_VERSION}
     fi

@@ -74,9 +74,7 @@ function parse_parameters() {
     fi
 
     # Clang 7.x is compiled by default
-    if [[ -z ${VERSION} ]]; then
-        VERSION=7
-    fi
+    [[ -z ${VERSION} ]] && VERSION=7
 
     # Folder that will hold the final compiled toolchain
     INSTALL_FOLDER=/opt/clang-${VERSION}.x
@@ -150,9 +148,7 @@ function cleanup() {
 function build() {
     header "Building Clang"
 
-    if [[ ${TG} ]]; then
-        notify "\`Beginning build of Clang ${VERSION}...\`"
-    fi
+    [[ ${TG} ]] && notify "\`Beginning build of Clang ${VERSION}...\`"
 
     cmake -DLINK_POLLY_INTO_TOOLS:BOOL=ON \
           -DCMAKE_CXX_FLAGS:STRING="-O3 -Wno-macro-redefined -pipe -pthread -fopenmp -g0 -march=native -mtune=native" \

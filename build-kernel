@@ -73,31 +73,19 @@ while [[ $# -ge 1 ]]; do
 done
 
 # Defaults
-if [[ -z ${ARCH} ]]; then
-    ARCH=arm64
-fi
-if [[ -z ${GCC_TOOLCHAIN_FOLDER} ]]; then
-    GCC_TOOLCHAIN_FOLDER=/opt/aosp-gcc
-fi
+[[ -z ${ARCH} ]] && ARCH=arm64
+[[ -z ${GCC_TOOLCHAIN_FOLDER} ]] && GCC_TOOLCHAIN_FOLDER=/opt/aosp-gcc
 
 # Error out if defconfig wasn't supplied
-if [[ -z ${DEFCONFIG} ]]; then
-    die "Please supply a defconfig!"
-fi
+[[ -z ${DEFCONFIG} ]] && die "Please supply a defconfig!"
 
 # Set toolchains
 GCC_TOOLCHAIN=$(find ${GCC_TOOLCHAIN_FOLDER}/bin -type f -name '*-gcc' | head -n1)
-if [[ -z ${GCC_TOOLCHAIN} ]]; then
-    die "GCC toolchain could not be found!"
-fi
+[[ -z ${GCC_TOOLCHAIN} ]] && die "GCC toolchain could not be found!"
 if [[ ${CLANG} ]]; then
-    if [[ -z ${CLANG_TOOLCHAIN_FOLDER} ]]; then
-        CLANG_TOOLCHAIN_FOLDER=/opt/aosp-clang/clang-4053586
-    fi
+    [[ -z ${CLANG_TOOLCHAIN_FOLDER} ]] && CLANG_TOOLCHAIN_FOLDER=/opt/aosp-clang/clang-4053586
     CLANG_TOOLCHAIN=${CLANG_TOOLCHAIN_FOLDER}/bin/clang
-    if [[ ! -f ${CLANG_TOOLCHAIN} ]]; then
-        die "Clang toolchain could not be found!"
-    fi
+    [[ ! -f ${CLANG_TOOLCHAIN} ]] && die "Clang toolchain could not be found!"
 fi
 
 # Set ccache
@@ -124,9 +112,7 @@ function build() {
 }
 
 # Report error if we aren't in a tree with a Makefile
-if [[ ! -f Makefile ]]; then
-    die "This must be run in a kernel tree!"
-fi
+[[ ! -f Makefile ]] && die "This must be run in a kernel tree!"
 
 # Show the base version we are making
 header "BUILDING $(make kernelversion)"
