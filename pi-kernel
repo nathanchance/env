@@ -62,7 +62,7 @@ function build() {
             echo "Version $(make kernelversion)"
             echo "\`\`\`"
         } > ${TG_MSG}
-        notify "$(cat "${TG_MSG}")"
+        [[ ${PI} || "$*" =~ "-t" ]] && notify "$(cat "${TG_MSG}")"
 
         rm -rf out
 
@@ -81,7 +81,7 @@ function build() {
             echo "Duration: ${TIME_STRING,,}"
             echo "\`\`\`"
         } > ${TG_MSG}
-        notify "$(cat "${TG_MSG}")"
+        [[ ${PI} || "$*" =~ "-t" ]] && notify "$(cat "${TG_MSG}")"
     ) > /dev/null
 }
 
