@@ -80,11 +80,17 @@ function parse_parameters() {
 
                 EXTRA_MAKE_FLAGS=${1} ;;
 
-            # GCC toolchain to use for compiling
+            # 64-bit GCC toolchain to use for compiling
             "-gt"|"--gcc-toolchain")
                 shift && enforce_value "$@"
 
                 GCC_FOLDER=${1} ;;
+
+            # 32-bit GCC toolchain to use for compiling
+            "-gt-32"|"--gcc-32-bit-toolchain")
+                shift && enforce_value "$@"
+
+                GCC_32_BIT_FOLDER=${1} ;;
 
             # Do not package kernel image
             "-io"|"--image-only")
@@ -245,6 +251,7 @@ function device_flags() {
             DEVICE_NAME_WEB=${DEVICE}
 
             [[ -z ${GCC_FOLDER} ]] && GCC_FOLDER="/opt/linaro-gcc"
+            [[ -z ${GCC_32_BIT_FOLDER} ]] && GCC_32_BIT_FOLDER="/opt/linaro-gcc-32"
 
             MATCH_FLAG="${DEVICE_NAME_FILE}-v${VERSION::1}"
 
@@ -284,10 +291,20 @@ function generate_variables() {
     # Compilation variables
     ARCHITECTURE=arm64
     CCACHE=$(command -v ccache)
-    GCC=$(find ${GCC_FOLDER}/bin \( -type f -o -type l \) -name '*-gcc' | head -n1)
-    [[ -z ${GCC} ]] && die "GCC toolchain could not be found!"
 
+    # Normal 64-bit GCC toolchain
+    GCC=$(find ${GCC_FOLDER}/bin \( -type f -o -type l \) -name '*-gcc' | head -n1)
+    [[ -z ${GCC} ]] && die "64-bit GCC toolchain could not be found!"
     CC=${GCC%gcc}
+
+    # 32-bit GCC toolchain if required
+    if [[ -n ${GCC_32_BIT_FOLDER} ]]; then
+        GCC_32_BIT=$(find ${GCC_32_BIT_FOLDER}/bin \( -type f -o -type l \) -name '*-gcc' | head -n1)
+        [[ -z ${GCC_32_BIT} ]] && die "32-bit GCC toolchain could not be found!"
+        CC_32_BIT=${GCC_32_BIT%gcc}
+    fi
+
+    # Handle Clang
     if [[ ${COMPILER} = "clang" ]]; then
         CLANG=${CLANG_FOLDER}/bin/clang
         [[ ! -f ${CLANG} ]] && die "Clang toolchain could not be found!"
@@ -356,6 +373,7 @@ function make_wrapper_clang() {
                                     CC="${CCACHE} ${CLANG}" \
                                     CLANG_TRIPLE=aarch64-linux-gnu- \
                                     CROSS_COMPILE="${CC}" \
+                                    CROSS_COMPILE_ARM32="${CC_32_BIT}" \
                                     HOSTCC="${CCACHE} ${CLANG}" \
                                     KBUILD_COMPILER_STRING="${CLANG_VERSION}" \
                                     KBUILD_BUILD_VERSION="${KBUILD_BUILD_VERSION}" \
