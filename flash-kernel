@@ -294,14 +294,11 @@ function generate_variables() {
 
         case "$(basename ${CLANG_FOLDER})" in
             "clang-3289846"|"clang-3859424"|"clang-4053586")
-                CLANG_VERSION=$(${CLANG} --version | head -n 1)
-                NEEDS_CLANG_HACKS=true ;;
+                CLANG_VERSION=$(${CLANG} --version | head -n 1) ;;
             "clang-4393122"|"clang-4479392"|"clang-4556391")
-                CLANG_VERSION=$(${CLANG} --version | head -n 1 | cut -d'(' -f1,4)
-                NEEDS_CLANG_HACKS=false ;;
+                CLANG_VERSION=$(${CLANG} --version | head -n 1 | cut -d'(' -f1,4) ;;
             *)
                 CLANG_VERSION=$(${CLANG} --version | head -n 1 | cut -d'(' -f1)
-                NEEDS_CLANG_HACKS=false
                 if [[ ${MODE} = "personal" ]]; then
                     SCRIPT_OPT_FLAGS="-mllvm -polly \
                                       -mllvm -polly-run-dce \
@@ -363,7 +360,6 @@ function make_wrapper_clang() {
                                     KBUILD_COMPILER_STRING="${CLANG_VERSION}" \
                                     KBUILD_BUILD_VERSION="${KBUILD_BUILD_VERSION}" \
                                     LOCALVERSION="${LOCALVERSION}" \
-                                    NEEDS_CLANG_HACKS="${NEEDS_CLANG_HACKS}" \
                                     O="${OUT_FOLDER}" \
                                     SCRIPT_OPT_FLAGS="${SCRIPT_OPT_FLAGS}" \
                                     "$@"
