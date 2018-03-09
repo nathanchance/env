@@ -45,9 +45,9 @@ fi
 # Make function for both host and cross compiling
 function kmake() {
     if [[ ${PI} ]]; then
-        make O=out "${JOBS_FLAG}" "$@"
+        make "${JOBS_FLAG}" O=out "$@"
     else
-        make O=out ARCH=arm CROSS_COMPILE="$(command -v ccache) ${TOOLCHAIN}" "${JOBS_FLAG}" "$@"
+        make "${JOBS_FLAG}" ARCH=arm CROSS_COMPILE="$(command -v ccache) ${TOOLCHAIN}" O=out "$@"
     fi
 }
 
