@@ -244,7 +244,7 @@ function device_flags() {
                 esac
             fi
 
-            [[ -z ${DEFCONFIG} ]] && DEFCONFIG="flash_defconfig"
+            [[ -z ${DEFCONFIG} ]] && DEFCONFIG="flash-${DEVICE}_defconfig"
 
             DEVICE_NAME_FILE=${DEVICE^}
             DEVICE_NAME_GITHUB=wahoo
