@@ -80,7 +80,7 @@ done
 [[ -z ${DEFCONFIG} ]] && die "Please supply a defconfig!"
 
 # Set toolchains
-GCC_TOOLCHAIN=$(find ${GCC_TOOLCHAIN_FOLDER}/bin -type f -name '*-gcc' | head -n1)
+GCC_TOOLCHAIN=$(find ${GCC_TOOLCHAIN_FOLDER}/bin \( -type f -o -type l \) -name '*-gcc' | head -n1)
 [[ -z ${GCC_TOOLCHAIN} ]] && die "GCC toolchain could not be found!"
 if [[ ${CLANG} ]]; then
     [[ -z ${CLANG_TOOLCHAIN_FOLDER} ]] && CLANG_TOOLCHAIN_FOLDER=/opt/aosp-clang/clang-4053586
@@ -91,31 +91,38 @@ fi
 # Set ccache
 CCACHE=$(command -v ccache)
 
-# Basic build function
-function build() {
+# Kernel make function
+function kmake() {
     # Set make variable
     MAKE="make ${JOBS_FLAG} O=out ARCH=${ARCH}"
 
-    # Clean up from last compile
-    rm -rf out && mkdir -p out
-
-    # Build kernel image
-    ${MAKE} "${DEFCONFIG}"
     if [[ ${CLANG} ]]; then
         PATH=${BIN_FOLDER}:${PATH} ${MAKE} CC="${CCACHE} ${CLANG_TOOLCHAIN}" \
                                            CLANG_TRIPLE=aarch64-linux-gnu- \
                                            CROSS_COMPILE="${GCC_TOOLCHAIN%gcc}" \
-                                           HOSTCC="${CCACHE} ${CLANG_TOOLCHAIN}"
+                                           HOSTCC="${CCACHE} ${CLANG_TOOLCHAIN}" \
+                                           "$@"
     else
-        PATH=${BIN_FOLDER}:${PATH} ${MAKE} CROSS_COMPILE="${CCACHE} ${GCC_TOOLCHAIN%gcc}"
+        PATH=${BIN_FOLDER}:${PATH} ${MAKE} CROSS_COMPILE="${CCACHE} ${GCC_TOOLCHAIN%gcc}" "$@"
     fi
+}
+
+
+# Basic build function
+function build() {
+    # Clean up from last compile
+    rm -rf out && mkdir -p out
+
+    # Build kernel image
+    kmake "${DEFCONFIG}"
+    kmake
 }
 
 # Report error if we aren't in a tree with a Makefile
 [[ ! -f Makefile ]] && die "This must be run in a kernel tree!"
 
 # Show the base version we are making
-header "BUILDING $(make kernelversion)"
+header "BUILDING $(make CROSS_COMPILE="" kernelversion)"
 
 # Show compilation based on flags
 case ${VERBOSITY} in
