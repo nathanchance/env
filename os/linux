@@ -251,6 +251,8 @@ function frel() {
                     flash-kernel -v "${2}" -m stable -d op5 -os OOS -b 8.0.0-oos -av 8.0.0 ${3:+ "-t"} ;;
                 3.*)
                     flash-kernel -v "${2}" -m stable -d op5 -b 8.x-unified -av 8.x ${3:+ "-t"} ;;
+                4.*)
+                    flash-kernel -v "${2}" -m stable -d op5 -b 8.1.0-unified -av 8.x ${3:+ "-t"} ;;
             esac ;;
 
         "pxl2")
@@ -271,7 +273,7 @@ function ftest() {
                 2.*)
                     flash-kernel -v "${2}" -r "${3}" -m "${4}" -d op5 -os Custom -b "queue-${2}" -av 8.0.0 ${5:+ "-t"}
                     flash-kernel -v "${2}" -r "${3}" -m "${4}" -d op5 -os OOS -b "queue-${2}" -av 8.0.0 ${5:+ "-t"} ;;
-                3.*)
+                3.*|4.*)
                     flash-kernel -v "${2}" -r "${3}" -m "${4}" -d op5 -b "queue-${2}" -av 8.x ${5:+ "-t"} ;;
             esac ;;
 

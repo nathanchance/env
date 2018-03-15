@@ -692,7 +692,13 @@ function setup_folders() {
 
     # If it isn't a stable build, clean the folder
     if [[ ${NOT_STABLE} ]]; then
-        [[ ! ${NOCLEAN} ]] && rm -rf "${FILE_MOVE:?}"/*
+        if [[ ! ${NOCLEAN} ]]; then
+            if [[ ${MODE} = "personal" ]]; then
+                rm -rf "${FILE_MOVE:?}"/*
+            else
+                rm -rf "${FILE_MOVE:?}"/*"${MATCH_FLAG}"*
+            fi
+        fi
     else
         # Clean old test builds
         cd "${FILE_MOVE}/.." || die "Shift to zip folder failed!"
@@ -706,7 +712,7 @@ function setup_folders() {
         # Move the old files to an archive folder unless no clean is requested
         if [[ ! ${NOCLEAN} ]]; then
             [[ ! -d ${FILE_MOVE_OLD} ]] && mkdir -p "${FILE_MOVE_OLD}"
-            OLD_FILES="$(find "${FILE_MOVE}" -maxdepth 1 -type f 2>/dev/null)"
+            OLD_FILES="$(find "${FILE_MOVE}" -maxdepth 1 -type f -name "*${MATCH_FLAG}*" 2>/dev/null)"
             if [[ -n ${OLD_FILES} ]]; then
                 for OLD_FILE in ${OLD_FILES}; do
                     mv ${VERBOSE_COMMANDS:+ "-v"} "${OLD_FILE}" "${FILE_MOVE_OLD}"
