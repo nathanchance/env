@@ -281,9 +281,9 @@ function generate_variables() {
             FILE_MOVE=${FILE_MOVE_HEAD}/kernels/${DEVICE_NAME_WEB}/${ANDROID_VERSION}/${MODE}
             FILE_MOVE_OLD=$(readlink -f "${FILE_MOVE}/../archive") ;;
         "tmp")
-            FILE_MOVE=$(readlink -f "${FILE_MOVE_HEAD}/../tmp/${DEVICE_NAME_WEB}/${ANDROID_VERSION}") ;;
+            FILE_MOVE=${FILE_MOVE_HEAD}/../tmp/${DEVICE_NAME_WEB}/${ANDROID_VERSION} ;;
         "personal")
-            FILE_MOVE=$(readlink -f "${FILE_MOVE_HEAD}/../me/fk/${DEVICE_NAME_WEB}") ;;
+            FILE_MOVE=${FILE_MOVE_HEAD}/../me/fk/${DEVICE_NAME_WEB} ;;
         *)
             die "Invalid mode specified!" ;;
     esac
@@ -690,6 +690,7 @@ function setup_folders() {
 
     # If FILE_MOVE doesn't exist, make it
     [[ ! -d ${FILE_MOVE} ]] && mkdir -p "${FILE_MOVE}"
+    FILE_MOVE=$(readlink -f "${FILE_MOVE}")
 
     # If it isn't a stable build, clean the folder
     if [[ ${NOT_STABLE} ]]; then
