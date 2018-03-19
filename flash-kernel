@@ -877,7 +877,7 @@ function ending_info() {
                 if [[ ! ${IMAGE_ONLY} ]]; then
                     echo
                     echo "[${FILE_LOCATION}](${FILE_LOCATION})"
-                    SHORT_CHANGELOG=/tmp/changelog.${DEVICE_NAME_FILE,,}
+                    SHORT_CHANGELOG=/tmp/${DEVICE_NAME_FILE,,}-${VERSION/./}
                     if [[ -f ${SHORT_CHANGELOG} ]]; then
                         echo
                         echo "\`\`\`"
