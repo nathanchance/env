@@ -836,7 +836,7 @@ function after_build_tasks () {
 
         if [[ ${MODE} != "personal" ]]; then
             generate_changelog
-            push_flashable_files
+            [[ ${MODE} != "tmp" ]] && push_flashable_files
             [[ ! ${NOT_STABLE} ]] && tag_stable
         fi
 
