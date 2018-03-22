@@ -203,9 +203,6 @@ function device_flags() {
 
             BUILD_FUNCTION=build_kernel_op5
 
-            # shellcheck disable=SC2034
-            [[ ${TG} && ${MODE} != "personal" ]] && CHAT_ID=-1001107088684
-
             [[ -z ${COMPILER} ]] && COMPILER=clang
 
             if [[ -z ${CLANG_FOLDER} ]]; then
@@ -231,9 +228,6 @@ function device_flags() {
             AK2_SFX=${ANDROID_VERSION}
 
             BUILD_FUNCTION=build_kernel
-
-            # shellcheck disable=SC2034
-            [[ ${TG} && ${MODE} != "personal" ]] && CHAT_ID=-1001298464571
 
             [[ -z ${COMPILER} ]] && COMPILER=clang
 
@@ -279,7 +273,13 @@ function generate_variables() {
     case ${MODE} in
         "alpha"|"beta"|"bisect"|"rc"|"stable")
             FILE_MOVE=${FILE_MOVE_HEAD}/kernels/${DEVICE_NAME_WEB}/${ANDROID_VERSION}/${MODE}
-            FILE_MOVE_OLD=$(readlink -f "${FILE_MOVE}/../archive") ;;
+            FILE_MOVE_OLD=$(readlink -f "${FILE_MOVE}/../archive")
+            if [[ ${TG} && ${MODE} != "bisect" ]]; then
+                case ${DEVICE} in
+                    "op5") export CHAT_ID=-1001107088684 ;;
+                    "taimen"|"walleye") export CHAT_ID=-1001298464571 ;;
+                esac
+            fi ;;
         "tmp")
             FILE_MOVE=${FILE_MOVE_HEAD}/../tmp/${DEVICE_NAME_WEB}/${ANDROID_VERSION} ;;
         "personal")
