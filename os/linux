@@ -488,3 +488,35 @@ function deldog() {
     echo "https://del.dog/${KEY}"
     echo "https://del.dog/raw/${KEY}"
 }
+
+
+# Update all remotes and run git gc/prune
+function clean-kernels() {
+    REPOS="
+${HOME}/kernels/als/marlin
+${HOME}/kernels/als/mata
+${HOME}/kernels/als/msm-3.18
+${HOME}/kernels/als/msm-4.4
+${HOME}/kernels/als/op3
+${HOME}/kernels/als/op5
+${HOME}/kernels/als/wahoo
+${HOME}/kernels/flash/op5
+${HOME}/kernels/flash/wahoo
+${HOME}/kernels/pi
+${HOME}/kernels/roms/aicp-op5
+${HOME}/kernels/roms/aosip-mata
+${HOME}/kernels/roms/gzr-op3
+${HOME}/kernels/roms/gzr-op5
+${HOME}/kernels/roms/omni-op3"
+
+    for REPO in ${REPOS}; do
+        header "${REPO}"
+        if cd "${REPO}"; then
+            git fetch --all
+            git reflog expire --all --expire=now
+            git gc --aggressive --prune=now
+        else
+            display_error "$(basename "${REPO}") doesn't exist!"
+        fi
+    done
+}
