@@ -514,7 +514,7 @@ ${HOME}/kernels/roms/omni-op3"
         if cd "${REPO}"; then
             git fetch --all
             git reflog expire --all --expire=now
-            git gc --aggressive --prune=now
+            git gc --aggressive --prune=now --force
         else
             display_error "$(basename "${REPO}") doesn't exist!"
         fi
