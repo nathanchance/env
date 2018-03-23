@@ -520,3 +520,38 @@ ${HOME}/kernels/roms/omni-op3"
         fi
     done
 }
+
+
+# Update AnyKernel2 from osm0sis's GitHub
+function update-ak2() {
+    REPOS="
+${HOME}/kernels/flash/anykernel2-op5
+${HOME}/kernels/flash/anykernel2-wahoo"
+
+    for REPO in ${REPOS}; do
+        header "Updating $(basename "${REPO}")"
+
+        cd "${REPO}" || {
+            display_error "${REPO} does not exist, please clone it from GitHub!"
+            return 1
+        }
+
+        if ! git ls-remote --exit-code upstream 1>/dev/null; then
+            git remote add upstream https://github.com/osm0sis/AnyKernel2
+        fi
+
+        CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD)
+
+        git ch -q master
+        git pull -q upstream master
+        git push -q
+
+        git ch -q "${CURRENT_BRANCH}"
+        if ! git ml --no-edit master; then
+            display_error "Conflicts detected! Please fix them then run 'git mc'"
+            return 1
+        fi
+        git push -q
+    done
+    echo
+}
