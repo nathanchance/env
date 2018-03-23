@@ -1,0 +1,170 @@
+#!/usr/bin/env bash
+#
+# Pull in linux-stable updates to the android-linux-stable trees
+#
+# Copyright (C) 2018 Nathan Chancellor
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>
+
+
+source common
+ALS_HOME=${HOME}/kernels/als
+ALS_PATCHES=${SCRIPTS_FOLDER}/als-patches
+
+
+
+
+# Pixel (XL)
+cd "${ALS_HOME}/marlin" || die "Marlin folder does not exist, please clone!"
+git fetch origin
+git reset --hard origin/"$(git rev-parse --abbrev-ref HEAD)"
+
+merge-stable
+
+git push
+
+
+
+
+# msm-3.18 tree
+cd "${ALS_HOME}/msm-3.18" || die "msm-3.18 folder does not exist, please clone!"
+git fetch origin
+git reset --hard origin/"$(git rev-parse --abbrev-ref HEAD)"
+
+merge-stable
+git rf drivers/gpu/drm/msm/msm_gem.c
+git fm
+
+git push
+
+
+
+# OnePlus 3
+cd "${ALS_HOME}/op3" || die "OnePlus 3 folder does not exist, please clone!"
+git fetch origin
+git checkout oneplus/QC8996_O_8.0.0
+git reset --hard origin/"$(git rev-parse --abbrev-ref HEAD)"
+
+merge-stable
+git rf drivers/gpu/drm/msm/msm_gem.c
+git fm
+
+git push
+git checkout oneplus/QC8996_O_8.0.0_Beta
+git reset --hard origin/"$(git rev-parse --abbrev-ref HEAD)"
+
+merge-stable
+git rf drivers/gpu/drm/msm/msm_gem.c
+git fm
+
+git push
+git checkout lineage-15.1
+git reset --hard origin/"$(git rev-parse --abbrev-ref HEAD)"
+git fetch LineageOS
+git ml --no-edit LineageOS/lineage-15.1
+git fetch als-msm-3.18
+git ml --no-edit als-msm-3.18/kernel.lnx.3.18.r33-rel
+git push
+
+
+
+
+# Essential Phone
+cd "${ALS_HOME}/mata" || die "Mata folder does not exist, please clone!"
+git fetch origin
+git reset --hard origin/"$(git rev-parse --abbrev-ref HEAD)"
+git f LineageOS
+git ml --no-edit LineageOS/lineage-15.1
+
+merge-stable
+for FILE in $(git cf); do
+    git rf "${FILE}"
+done
+git ap -3 "${ALS_PATCHES}/4.4.124/0001-ath-Fix-updating-radar-flags-for-coutry-code-India.patch"
+git fm
+
+git push
+
+
+
+
+# msm-4.4
+cd "${ALS_HOME}/msm-4.4" || die "msm-4.4 folder does not exist, please clone!"
+git fetch origin
+git reset --hard origin/"$(git rev-parse --abbrev-ref HEAD)"
+
+merge-stable
+for FILE in $(git cf); do
+    git rf "${FILE}"
+done
+git ap -3 "${ALS_PATCHES}/4.4.124/0001-ath-Fix-updating-radar-flags-for-coutry-code-India.patch"
+git fm
+
+git push
+
+
+
+
+# OnePlus 5
+cd "${ALS_HOME}/op5" || die "OnePlus 5 folder does not exist, please clone!"
+git checkout oneplus/QC8998_O_8.0
+git fetch origin
+git reset --hard origin/"$(git rev-parse --abbrev-ref HEAD)"
+
+merge-stable
+for FILE in $(git cf); do
+    git rf "${FILE}"
+done
+git ap -3 "${ALS_PATCHES}/4.4.124/0001-ath-Fix-updating-radar-flags-for-coutry-code-India.patch"
+git fm
+
+git push
+git checkout oneplus/QC8998_O_8.1
+git reset --hard origin/"$(git rev-parse --abbrev-ref HEAD)"
+
+merge-stable
+for FILE in $(git cf); do
+    git rf "${FILE}"
+done;
+git ap -3 "${ALS_PATCHES}/4.4.124/0001-ath-Fix-updating-radar-flags-for-coutry-code-India.patch"
+git fm
+
+git push
+git checkout lineage-15.1
+git reset --hard origin/"$(git rev-parse --abbrev-ref HEAD)"
+git f LineageOS
+git ml --no-edit LineageOS/lineage-15.1
+
+merge-stable
+for FILE in $(git cf); do
+    git rf "${FILE}"
+done
+git ap -3 "${ALS_PATCHES}/4.4.124/0001-ath-Fix-updating-radar-flags-for-coutry-code-India.patch"
+git fm
+
+git push
+
+
+
+# Pixel 2 (XL)
+cd "${ALS_HOME}/wahoo" || die "Wahoo folder does not exist, please clone!"
+git fetch origin
+git reset --hard origin/"$(git rev-parse --abbrev-ref HEAD)"
+
+merge-stable
+git rf drivers/gpu/drm/msm/msm_gem.c
+git ap -3 "${ALS_PATCHES}/4.4.124/0001-drm-msm-fix-leak-in-failed-get_pages.patch"
+git fm
+
+git push
