@@ -73,8 +73,21 @@ git checkout lineage-15.1
 git reset --hard origin/"$(git rev-parse --abbrev-ref HEAD)"
 git fetch LineageOS
 git ml --no-edit LineageOS/lineage-15.1
-git fetch als-msm-3.18
-git ml --no-edit als-msm-3.18/kernel.lnx.3.18.r33-rel
+
+merge-stable
+git rf drivers/gpu/drm/msm/msm_gem.c
+git fm
+
+git push
+git checkout android-8.1
+git reset --hard origin/"$(git rev-parse --abbrev-ref HEAD)"
+git fetch omni
+git ml --no-edit omni/android-8.1
+
+merge-stable
+git rf drivers/gpu/drm/msm/msm_gem.c
+git fm
+
 git push
 
 
