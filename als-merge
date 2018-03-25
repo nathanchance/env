@@ -83,6 +83,18 @@ git push
 
 
 
+# Xiaomi Mi A1 tree
+cd "${ALS_HOME}/tissot" || die "Mi A1 folder does not exist, please clone!"
+git fetch origin
+git reset --hard origin/"$(git rev-parse --abbrev-ref HEAD)"
+
+merge-stable
+
+git push
+
+
+
+
 # Essential Phone
 cd "${ALS_HOME}/mata" || die "Mata folder does not exist, please clone!"
 git fetch origin
