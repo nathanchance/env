@@ -506,8 +506,7 @@ ${HOME}/kernels/pi
 ${HOME}/kernels/roms/aicp-op5
 ${HOME}/kernels/roms/aosip-mata
 ${HOME}/kernels/roms/gzr-op3
-${HOME}/kernels/roms/gzr-op5
-${HOME}/kernels/roms/omni-op3"
+${HOME}/kernels/roms/gzr-op5"
 
     for REPO in ${REPOS}; do
         header "${REPO}"
