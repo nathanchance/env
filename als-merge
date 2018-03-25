@@ -98,7 +98,7 @@ cd "${ALS_HOME}/mata" || die "Mata folder does not exist, please clone!"
 git fetch origin
 git reset --hard origin/"$(git rev-parse --abbrev-ref HEAD)"
 git f LineageOS
-git ml --no-edit LineageOS/lineage-15.1
+git ml --no-edit LineageOS/lineage-15.1 || die "Merge conflicts detected, please resolve then continue!"
 
 merge-stable
 for FILE in $(git cf); do
@@ -157,7 +157,7 @@ git push
 git checkout lineage-15.1
 git reset --hard origin/"$(git rev-parse --abbrev-ref HEAD)"
 git f LineageOS
-git ml --no-edit LineageOS/lineage-15.1
+git ml --no-edit LineageOS/lineage-15.1 || die "Merge conflicts detected, please resolve then continue!"
 
 merge-stable
 for FILE in $(git cf); do
@@ -170,7 +170,7 @@ git push
 git checkout android-8.1
 git reset --hard origin/"$(git rev-parse --abbrev-ref HEAD)"
 git f omni
-git ml --no-edit omni/android-8.1
+git ml --no-edit omni/android-8.1 || die "Merge conflicts detected, please resolve then continue!"
 
 merge-stable
 for FILE in $(git cf); do
