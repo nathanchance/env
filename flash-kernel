@@ -472,8 +472,6 @@ function generate_version() {
 
     if [[ ${PACKAGE_METHOD} =~ "zip" ]]; then
         UNSIGNED_ZIP=${KERNEL_NAME}-unsigned.zip
-        SIGNAPK_ZIP=${KERNEL_NAME}-signapk.zip
-        ADJUSTED_ZIP=${KERNEL_NAME}-adjusted.zip
         SIGNED_ZIP=${KERNEL_NAME}.zip
     fi
 }
@@ -603,18 +601,8 @@ function package_zip() {
     zip ${HIDDEN_COMMANDS:+ "-q"} -r9 "${UNSIGNED_ZIP}" -x README.md -- *
 
     # Sign zip
-    java -jar "${BIN_FOLDER}/signapk.jar" \
-              "${BIN_FOLDER}/testkey.x509.pem" \
-              "${BIN_FOLDER}/testkey.pk8" \
+    java -jar "${BIN_FOLDER}/zipsigner-2.1.jar" \
               "${UNSIGNED_ZIP}" \
-              "${SIGNAPK_ZIP}"
-
-    "${BIN_FOLDER}"/zipadjust "${SIGNAPK_ZIP}" "${ADJUSTED_ZIP}" &>/dev/null
-
-    java -jar "${BIN_FOLDER}/minsignapk.jar" \
-              "${BIN_FOLDER}/testkey.x509.pem" \
-              "${BIN_FOLDER}/testkey.pk8" \
-              "${ADJUSTED_ZIP}" \
               "${SIGNED_ZIP}"
 
     # If packaging failed, error out
