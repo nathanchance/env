@@ -1,0 +1,75 @@
+#!/usr/bin/env bash
+#
+# Pull in android-linux-stable updates to various ROM kernel trees
+#
+# Copyright (C) 2018 Nathan Chancellor
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>
+
+
+source common
+KERNELS_HOME=${HOME}/kernels/roms
+
+
+
+
+# AICP OnePlus 5
+cd "${KERNELS_HOME}/aicp-op5" || die "aicp-op5 does not exist, please clone!"
+CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD)
+git fetch origin
+git reset --hard origin/"${CURRENT_BRANCH}"
+git fetch aicp
+git ml --no-edit aicp/o8.1 || die "Merge conflicts detected, please resolve then continue!"
+git fetch als
+git ml --no-edit als/lineage-15.1 || die "Merge conflicts detected, please resolve then continue!"
+git push -f origin HEAD:"${CURRENT_BRANCH}"
+
+
+
+
+# AOSiP Essential Phone
+cd "${KERNELS_HOME}/aosip-mata" || die "aosip-mata does not exist, please clone!"
+CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD)
+git fetch origin
+git reset --hard origin/"${CURRENT_BRANCH}"
+git fetch als
+git ml --no-edit als/lineage-15.1 || die "Merge conflicts detected, please resolve then continue!"
+git push -f nathanchance HEAD:"${CURRENT_BRANCH}"
+hub pull-request -b "${CURRENT_BRANCH}" -m "Merge $(make kernelversion) into ${CURRENT_BRANCH}"
+
+
+
+
+# GZR OnePlus 3
+cd "${KERNELS_HOME}/gzr-op3" || die "gzr-op3 does not exist, please clone!"
+CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD)
+git fetch origin
+git reset --hard origin/"${CURRENT_BRANCH}"
+git fetch als
+git ml --no-edit als/lineage-15.1 || die "Merge conflicts detected, please resolve then continue!"
+git push -f nathanchance HEAD:"${CURRENT_BRANCH}"
+hub pull-request -b "${CURRENT_BRANCH}" -m "Merge $(make kernelversion) into ${CURRENT_BRANCH}"
+
+
+
+
+# GZR OnePlus 5
+cd "${KERNELS_HOME}/gzr-op5" || die "gzr-op5 does not exist, please clone!"
+CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD)
+git fetch origin
+git reset --hard origin/"${CURRENT_BRANCH}"
+git fetch als
+git ml --no-edit als/lineage-15.1 || die "Merge conflicts detected, please resolve then continue!"
+git push -f nathanchance HEAD:"${CURRENT_BRANCH}"
+hub pull-request -b "${CURRENT_BRANCH}" -m "Merge $(make kernelversion) into ${CURRENT_BRANCH}"
