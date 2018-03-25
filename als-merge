@@ -43,8 +43,6 @@ git fetch origin
 git reset --hard origin/"$(git rev-parse --abbrev-ref HEAD)"
 
 merge-stable
-git rf drivers/gpu/drm/msm/msm_gem.c
-git fm
 
 git push
 
@@ -57,16 +55,12 @@ git checkout oneplus/QC8996_O_8.0.0
 git reset --hard origin/"$(git rev-parse --abbrev-ref HEAD)"
 
 merge-stable
-git rf drivers/gpu/drm/msm/msm_gem.c
-git fm
 
 git push
 git checkout oneplus/QC8996_O_8.0.0_Beta
 git reset --hard origin/"$(git rev-parse --abbrev-ref HEAD)"
 
 merge-stable
-git rf drivers/gpu/drm/msm/msm_gem.c
-git fm
 
 git push
 git checkout lineage-15.1
@@ -75,8 +69,6 @@ git fetch LineageOS
 git ml --no-edit LineageOS/lineage-15.1
 
 merge-stable
-git rf drivers/gpu/drm/msm/msm_gem.c
-git fm
 
 git push
 git checkout android-8.1
@@ -85,8 +77,6 @@ git fetch omni
 git ml --no-edit omni/android-8.1
 
 merge-stable
-git rf drivers/gpu/drm/msm/msm_gem.c
-git fm
 
 git push
 
@@ -104,7 +94,7 @@ merge-stable
 for FILE in $(git cf); do
     git rf "${FILE}"
 done
-git ap -3 "${ALS_PATCHES}/4.4.124/0001-ath-Fix-updating-radar-flags-for-coutry-code-India.patch"
+git ap -3 "${ALS_PATCHES}/4.4.125/mmu.c"
 git fm
 
 git push
@@ -121,7 +111,7 @@ merge-stable
 for FILE in $(git cf); do
     git rf "${FILE}"
 done
-git ap -3 "${ALS_PATCHES}/4.4.124/0001-ath-Fix-updating-radar-flags-for-coutry-code-India.patch"
+git ap -3 "${ALS_PATCHES}/4.4.125/mmu.c"
 git fm
 
 git push
@@ -139,7 +129,7 @@ merge-stable
 for FILE in $(git cf); do
     git rf "${FILE}"
 done
-git ap -3 "${ALS_PATCHES}/4.4.124/0001-ath-Fix-updating-radar-flags-for-coutry-code-India.patch"
+git ap -3 "${ALS_PATCHES}/4.4.125/mmu.c"
 git fm
 
 git push
@@ -150,7 +140,7 @@ merge-stable
 for FILE in $(git cf); do
     git rf "${FILE}"
 done;
-git ap -3 "${ALS_PATCHES}/4.4.124/0001-ath-Fix-updating-radar-flags-for-coutry-code-India.patch"
+git ap -3 "${ALS_PATCHES}/4.4.125/mmu.c"
 git fm
 
 git push
@@ -163,7 +153,7 @@ merge-stable
 for FILE in $(git cf); do
     git rf "${FILE}"
 done
-git ap -3 "${ALS_PATCHES}/4.4.124/0001-ath-Fix-updating-radar-flags-for-coutry-code-India.patch"
+git ap -3 "${ALS_PATCHES}/4.4.125/mmu.c"
 git fm
 
 git push
@@ -176,7 +166,7 @@ merge-stable
 for FILE in $(git cf); do
     git rf "${FILE}"
 done
-git ap -3 "${ALS_PATCHES}/4.4.124/0001-ath-Fix-updating-radar-flags-for-coutry-code-India.patch"
+git ap -3 "${ALS_PATCHES}/4.4.125/mmu.c"
 git fm
 
 git push
@@ -189,8 +179,10 @@ git fetch origin
 git reset --hard origin/"$(git rev-parse --abbrev-ref HEAD)"
 
 merge-stable
-git rf drivers/gpu/drm/msm/msm_gem.c
-git ap -3 "${ALS_PATCHES}/4.4.124/0001-drm-msm-fix-leak-in-failed-get_pages.patch"
+for FILE in $(git cf); do
+    git rf "${FILE}"
+done
+git ap -3 "${ALS_PATCHES}/4.4.125/mmu.c"
 git fm
 
 git push
