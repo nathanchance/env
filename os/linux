@@ -355,24 +355,10 @@ function signzip() {
     ZIP_NAME=$(basename "${FILE}" .zip)
 
     # Sign the zip
-    java -jar "${BIN_FOLDER}/signapk.jar" \
-              "${BIN_FOLDER}/${KEY}.x509.pem" \
-              "${BIN_FOLDER}/${KEY}.pk8" \
+    java -jar "${BIN_FOLDER}/zipsigner-2.1.jar" \
               "${ZIP_NAME}.zip" \
-              "${ZIP_NAME}-firstsign.zip"
-
-    "${BIN_FOLDER}"/zipadjust "${ZIP_NAME}-firstsign.zip" \
-                              "${ZIP_NAME}-adjusted.zip" &>/dev/null
-
-    java -jar "${BIN_FOLDER}/minsignapk.jar" \
-              "${BIN_FOLDER}/${KEY}.x509.pem" \
-              "${BIN_FOLDER}/${KEY}.pk8" \
-              "${ZIP_NAME}-adjusted.zip" \
               "${ZIP_NAME}-signed.zip"
               
-    # Remove intermediate zip files
-    rm "${ZIP_NAME}-firstsign.zip" "${ZIP_NAME}-adjusted.zip"
-
     # Echo zip location
     echo "Signed zip: $(pwd)/${ZIP_NAME}-signed.zip\n"
     cd "${CUR_DIR}" || return
