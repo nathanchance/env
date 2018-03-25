@@ -167,6 +167,19 @@ git ap -3 "${ALS_PATCHES}/4.4.124/0001-ath-Fix-updating-radar-flags-for-coutry-c
 git fm
 
 git push
+git checkout android-8.1
+git reset --hard origin/"$(git rev-parse --abbrev-ref HEAD)"
+git f omni
+git ml --no-edit omni/android-8.1
+
+merge-stable
+for FILE in $(git cf); do
+    git rf "${FILE}"
+done
+git ap -3 "${ALS_PATCHES}/4.4.124/0001-ath-Fix-updating-radar-flags-for-coutry-code-India.patch"
+git fm
+
+git push
 
 
 
