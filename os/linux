@@ -433,9 +433,9 @@ function shellcheck() {
 # makepkg wrapper for Linux kernel
 function mkpkg() {
     if makepkg -si --noconfirm; then
-        notify "\'Server kernel build completed successfully\'"
+        notify "\`Server kernel build completed successfully\`"
     else
-        notify "\'Server kernel build failed\'"
+        notify "\`Server kernel build failed\`"
     fi
 }
 
