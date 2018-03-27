@@ -185,8 +185,26 @@ git push
 
 
 
+
 # Pixel 2 (XL)
 cd "${ALS_HOME}/wahoo" || die "Wahoo folder does not exist, please clone!"
+git fetch origin
+git reset --hard origin/"$(git rev-parse --abbrev-ref HEAD)"
+
+merge-stable
+for FILE in $(git cf); do
+    git rf "${FILE}"
+done
+git ap -3 "${ALS_PATCHES}/4.4.125/mmu.c"
+git fm
+
+git push
+
+
+
+
+# Xiaomi Mi 6 and Xiaomi Mi Mix 2
+cd "${ALS_HOME}/sagit" || die "Sagit folder does not exist, please clone!"
 git fetch origin
 git reset --hard origin/"$(git rev-parse --abbrev-ref HEAD)"
 
