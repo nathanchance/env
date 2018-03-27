@@ -1,0 +1,69 @@
+diff --git a/kernel/power/process.c b/kernel/power/process.c
+index e7f1f736a5b6..cc177142a08f 100644
+--- a/kernel/power/process.c
++++ b/kernel/power/process.c
+@@ -19,8 +19,9 @@
+ #include <linux/kmod.h>
+ #include <trace/events/power.h>
+ #include <linux/wakeup_reason.h>
++#include <linux/cpuset.h>
+ 
+-/* 
++/*
+  * Timeout for stopping processes
+  */
+ unsigned int __read_mostly freeze_timeout_msecs = 20 * MSEC_PER_SEC;
+@@ -208,6 +209,8 @@ void thaw_processes(void)
+ 	__usermodehelper_set_disable_depth(UMH_FREEZING);
+ 	thaw_workqueues();
+ 
++	cpuset_wait_for_hotplug();
++
+ 	read_lock(&tasklist_lock);
+ 	for_each_process_thread(g, p) {
+ 		/* No other threads should have PF_SUSPEND_TASK set */
+diff --git a/sound/usb/card.c b/sound/usb/card.c
+index 23ea575f3bcf..86096532dfba 100644
+--- a/sound/usb/card.c
++++ b/sound/usb/card.c
+@@ -316,6 +316,7 @@ static int snd_usb_create_streams(struct snd_usb_audio *chip, int ctrlif)
+ 	case UAC_VERSION_1: {
+ 		void *control_header;
+ 		struct uac1_ac_header_descriptor *h1;
++		int rest_bytes;
+ 
+ 		control_header = snd_usb_find_csint_desc(host_iface->extra,
+ 					host_iface->extralen, NULL, UAC_HEADER);
+@@ -324,12 +325,32 @@ static int snd_usb_create_streams(struct snd_usb_audio *chip, int ctrlif)
+ 			return -EINVAL;
+ 		}
+ 
++		rest_bytes = (void *)(host_iface->extra + host_iface->extralen) -
++			control_header;
++
++		/* just to be sure -- this shouldn't hit at all */
++		if (rest_bytes <= 0) {
++			dev_err(&dev->dev, "invalid control header\n");
++			return -EINVAL;
++		}
++
+ 		h1 = control_header;
++
++		if (rest_bytes < sizeof(*h1)) {
++			dev_err(&dev->dev, "too short v1 buffer descriptor\n");
++			return -EINVAL;
++		}
++
+ 		if (!h1->bInCollection) {
+ 			dev_info(&dev->dev, "skipping empty audio interface (v1)\n");
+ 			return -EINVAL;
+ 		}
+ 
++		if (rest_bytes < h1->bLength) {
++			dev_err(&dev->dev, "invalid buffer length (v1)\n");
++			return -EINVAL;
++		}
++
+ 		if (h1->bLength < sizeof(*h1) + h1->bInCollection) {
+ 			dev_err(&dev->dev, "invalid UAC_HEADER (v1)\n");
+ 			return -EINVAL;

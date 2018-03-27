@@ -1,0 +1,3 @@
+git ap -3 ${HOME}/scripts/als-patches/4.4.124/regd.c
+
+git ap -3 ${HOME}/scripts/als-patches/4.4.124/msm_gem.c

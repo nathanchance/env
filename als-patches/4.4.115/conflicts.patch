@@ -1,0 +1,13 @@
+diff --git a/arch/x86/Kconfig b/arch/x86/Kconfig
+index fd68d7a3de24..b22838b0a78a 100644
+--- a/arch/x86/Kconfig
++++ b/arch/x86/Kconfig
+@@ -92,6 +92,8 @@ config X86
+ 	select HAVE_ARCH_TRACEHOOK
+ 	select HAVE_ARCH_TRANSPARENT_HUGEPAGE
+ 	select HAVE_ARCH_WITHIN_STACK_FRAMES
++	select HAVE_BPF_JIT			if X86_64
++	select HAVE_EBPF_JIT			if X86_64
+ 	select HAVE_CC_STACKPROTECTOR
+ 	select HAVE_CMPXCHG_DOUBLE
+ 	select HAVE_CMPXCHG_LOCAL

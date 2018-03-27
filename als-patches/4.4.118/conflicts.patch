@@ -1,0 +1,25 @@
+diff --git a/net/Kconfig b/net/Kconfig
+index b45123cc8bd3..bf9b6947b07a 100644
+--- a/net/Kconfig
++++ b/net/Kconfig
+@@ -409,6 +409,10 @@ config LWTUNNEL
+ 	  weight tunnel endpoint. Tunnel encapsulation parameters are stored
+ 	  with light weight tunnel state associated with fib routes.
+ 
++config DST_CACHE
++	bool
++	default n
++
+ source "net/ipc_router/Kconfig"
+ 
+ endif   # if NET
+diff --git a/net/core/Makefile b/net/core/Makefile
+index 87e2e186602b..340c45af4472 100644
+--- a/net/core/Makefile
++++ b/net/core/Makefile
+@@ -24,4 +24,5 @@ obj-$(CONFIG_NET_PTP_CLASSIFY) += ptp_classifier.o
+ obj-$(CONFIG_CGROUP_NET_PRIO) += netprio_cgroup.o
+ obj-$(CONFIG_CGROUP_NET_CLASSID) += netclassid_cgroup.o
+ obj-$(CONFIG_LWTUNNEL) += lwtunnel.o
++obj-$(CONFIG_DST_CACHE) += dst_cache.o
+ obj-$(CONFIG_SOCKEV_NLMCAST) += sockev_nlmcast.o

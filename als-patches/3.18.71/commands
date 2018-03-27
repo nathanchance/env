@@ -1,0 +1,1 @@
+git ch v3.18.71 -- drivers/usb/serial/option.c drivers/usb/core/quirks.c include/uapi/linux/quirks.h drivers/usb/host/pci-quirks.c

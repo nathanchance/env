@@ -1,0 +1,2 @@
+git ch v3.18.91 -- drivers/net/usb/qmi_wwan.c drivers/usb/serial/option.c
+git ap ${HOME}/scripts/als-patches/3.18.91/*.patch

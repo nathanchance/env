@@ -1,0 +1,1 @@
+git ch v3.18.76 -- drivers/usb/renesas_usbhs drivers/usb/serial/cp210x.c drivers/usb/serial/qcserial.c

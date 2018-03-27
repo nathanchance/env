@@ -1,0 +1,15 @@
+diff --git a/drivers/usb/gadget/function/f_fs.c b/drivers/usb/gadget/function/f_fs.c
+index aed70e0882a3..655514418a1e 100644
+--- a/drivers/usb/gadget/function/f_fs.c
++++ b/drivers/usb/gadget/function/f_fs.c
+@@ -2884,8 +2884,8 @@ static int _ffs_func_bind(struct usb_configuration *c,
+ 	struct ffs_data *ffs = func->ffs;
+ 
+ 	const int full = !!func->ffs->fs_descs_count;
+-	const int high = func->ffs->hs_descs_count;
+-	const int super = func->ffs->ss_descs_count;
++	const int high = !!func->ffs->hs_descs_count;
++	const int super = !!func->ffs->ss_descs_count;
+ 
+ 	int fs_len, hs_len, ss_len, ret, i;
+ 

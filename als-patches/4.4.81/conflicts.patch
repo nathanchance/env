@@ -1,0 +1,49 @@
+diff --git a/fs/f2fs/super.c b/fs/f2fs/super.c
+index 5d3e745d33ae..21907f195e0c 100644
+--- a/fs/f2fs/super.c
++++ b/fs/f2fs/super.c
+@@ -1091,20 +1091,18 @@ static int sanity_check_ckpt(struct f2fs_sb_info *sbi)
+ 	if (unlikely(fsmeta >= total))
+ 		return 1;
+ 
+-	main_segs = le32_to_cpu(sbi->raw_super->segment_count_main);
++	main_segs = le32_to_cpu(raw_super->segment_count_main);
+ 	blocks_per_seg = sbi->blocks_per_seg;
+ 
+ 	for (i = 0; i < NR_CURSEG_NODE_TYPE; i++) {
+ 		if (le32_to_cpu(ckpt->cur_node_segno[i]) >= main_segs ||
+-		    le16_to_cpu(ckpt->cur_node_blkoff[i]) >= blocks_per_seg) {
++			le16_to_cpu(ckpt->cur_node_blkoff[i]) >= blocks_per_seg)
+ 			return 1;
+-		}
+ 	}
+ 	for (i = 0; i < NR_CURSEG_DATA_TYPE; i++) {
+ 		if (le32_to_cpu(ckpt->cur_data_segno[i]) >= main_segs ||
+-		    le16_to_cpu(ckpt->cur_data_blkoff[i]) >= blocks_per_seg) {
++			le16_to_cpu(ckpt->cur_data_blkoff[i]) >= blocks_per_seg)
+ 			return 1;
+-		}
+ 	}
+ 
+ 	if (unlikely(f2fs_cp_error(sbi))) {
+diff --git a/sound/soc/soc-pcm.c b/sound/soc/soc-pcm.c
+index 0ba9dfb854b3..e1541c15e2b1 100644
+--- a/sound/soc/soc-pcm.c
++++ b/sound/soc/soc-pcm.c
+@@ -203,11 +203,12 @@ int dpcm_dapm_stream_event(struct snd_soc_pcm_runtime *fe, int dir,
+ 
+ 		dev_dbg(be->dev, "ASoC: BE %s event %d dir %d\n",
+ 				be->dai_link->name, event, dir);
+-		if (event == SND_SOC_DAPM_STREAM_STOP && be->dpcm[dir].users >= 1) {
+-			pr_debug("%s Don't close BE \n", __func__);
++
++		if ((event == SND_SOC_DAPM_STREAM_STOP) &&
++		    (be->dpcm[dir].users >= 1))
+ 			continue;
+-		}
+-			snd_soc_dapm_stream_event(be, dir, event);
++
++		snd_soc_dapm_stream_event(be, dir, event);
+ 	}
+ 
+ 	snd_soc_dapm_stream_event(fe, dir, event);

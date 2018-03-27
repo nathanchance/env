@@ -1,0 +1,19 @@
+diff --git a/fs/ext4/crypto_key.c b/fs/ext4/crypto_key.c
+index 15ebac242288..d3d6b28ce9b9 100644
+--- a/fs/ext4/crypto_key.c
++++ b/fs/ext4/crypto_key.c
+@@ -220,11 +220,9 @@ int _ext4_get_encryption_info(struct inode *inode)
+ 	int mode;
+ 	int res;
+ 
+-	if (!ext4_read_workqueue) {
+-		res = ext4_init_crypto();
+-		if (res)
+-			return res;
+-	}
++	res = ext4_init_crypto();
++	if (res)
++		return res;
+ 
+ retry:
+ 	crypt_info = ACCESS_ONCE(ei->i_crypt_info);

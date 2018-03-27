@@ -1,0 +1,45 @@
+diff --git a/drivers/usb/host/xhci-hub.c b/drivers/usb/host/xhci-hub.c
+index 09a1e1a3f017..69588a72306f 100644
+--- a/drivers/usb/host/xhci-hub.c
++++ b/drivers/usb/host/xhci-hub.c
+@@ -290,24 +290,25 @@ static int xhci_stop_device(struct xhci_hcd *xhci, int slot_id, int suspend)
+ 						     GFP_NOWAIT);
+ 			if (!command) {
+ 				spin_unlock_irqrestore(&xhci->lock, flags);
+-				xhci_free_command(xhci, cmd);
+-				return -ENOMEM;
+-
++				ret = -ENOMEM;
++				goto cmd_cleanup;
+ 			}
+ 
+ 			ret = xhci_queue_stop_endpoint(xhci, command, slot_id,
+-					i, suspend);
++						       i, suspend);
+ 			if (ret) {
+ 				spin_unlock_irqrestore(&xhci->lock, flags);
+-				goto err_cmd_queue;
++				xhci_free_command(xhci, command);
++				goto cmd_cleanup;
+ 			}
+ 		}
+ 	}
+ 	ret = xhci_queue_stop_endpoint(xhci, cmd, slot_id, 0, suspend);
+ 	if (ret) {
+ 		spin_unlock_irqrestore(&xhci->lock, flags);
+-		goto err_cmd_queue;
++		goto cmd_cleanup;
+ 	}
++
+ 	xhci_ring_cmd_db(xhci);
+ 	spin_unlock_irqrestore(&xhci->lock, flags);
+ 
+@@ -319,7 +320,7 @@ static int xhci_stop_device(struct xhci_hcd *xhci, int slot_id, int suspend)
+ 		ret = -ETIME;
+ 	}
+ 
+-err_cmd_queue:
++cmd_cleanup:
+ 	xhci_free_command(xhci, cmd);
+ 	return ret;
+ }
