@@ -46,6 +46,9 @@ function linux_aliases() {
 
     # Alias for flash-kernel script
     alias fk='flash-kernel'
+
+    # Alias for merge-stable script
+    alias ms='merge-stable'
 }
 
 # Setup PS1 and such
