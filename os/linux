@@ -489,6 +489,7 @@ ${HOME}/kernels/als/msm-4.4
 ${HOME}/kernels/als/nash
 ${HOME}/kernels/als/op3
 ${HOME}/kernels/als/op5
+${HOME}/kernels/als/sagit
 ${HOME}/kernels/als/tissot
 ${HOME}/kernels/als/wahoo
 ${HOME}/kernels/franco/mido
