@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# shellcheck disable=SC2076
 #
 # Pull in linux-stable updates to the android-linux-stable trees
 #
@@ -25,194 +26,208 @@ ALS_PATCHES=${SCRIPTS_FOLDER}/als-patches
 
 
 
-# Pixel (XL)
-cd "${ALS_HOME}/marlin" || die "Marlin folder does not exist, please clone!"
-git fetch origin
-git reset --hard origin/"$(git rev-parse --abbrev-ref HEAD)"
-
-merge-stable
-
-git push
 
 
 
 
-# msm-3.18 tree
-cd "${ALS_HOME}/msm-3.18" || die "msm-3.18 folder does not exist, please clone!"
-git fetch origin
-git reset --hard origin/"$(git rev-parse --abbrev-ref HEAD)"
+# 3.18 kernels
+if [[ "$*" =~ "3.18" ]]; then
+    # Pixel (XL)
+    cd "${ALS_HOME}/marlin" || die "Marlin folder does not exist, please clone!"
+    git fetch origin
+    git reset --hard origin/"$(git rev-parse --abbrev-ref HEAD)"
 
-merge-stable
+    merge-stable
 
-git push
-
-
-
-# OnePlus 3
-cd "${ALS_HOME}/op3" || die "OnePlus 3 folder does not exist, please clone!"
-git fetch origin
-git checkout oneplus/QC8996_O_8.0.0
-git reset --hard origin/"$(git rev-parse --abbrev-ref HEAD)"
-
-merge-stable
-
-git push
-git checkout oneplus/QC8996_O_8.0.0_Beta
-git reset --hard origin/"$(git rev-parse --abbrev-ref HEAD)"
-
-merge-stable
-
-git push
-git checkout lineage-15.1
-git reset --hard origin/"$(git rev-parse --abbrev-ref HEAD)"
-git fetch LineageOS
-git ml --no-edit LineageOS/lineage-15.1
-
-merge-stable
-
-git push
-git checkout android-8.1
-git reset --hard origin/"$(git rev-parse --abbrev-ref HEAD)"
-git fetch omni
-git ml --no-edit omni/android-8.1
-
-merge-stable
-
-git push
+    git push
 
 
 
 
-# Xiaomi Mi A1 tree
-cd "${ALS_HOME}/tissot" || die "Mi A1 folder does not exist, please clone!"
-git fetch origin
-git reset --hard origin/"$(git rev-parse --abbrev-ref HEAD)"
+    # msm-3.18 tree
+    cd "${ALS_HOME}/msm-3.18" || die "msm-3.18 folder does not exist, please clone!"
+    git fetch origin
+    git reset --hard origin/"$(git rev-parse --abbrev-ref HEAD)"
 
-merge-stable
+    merge-stable
 
-git push
-
-
-
-
-# Essential Phone
-cd "${ALS_HOME}/mata" || die "Mata folder does not exist, please clone!"
-git fetch origin
-git reset --hard origin/"$(git rev-parse --abbrev-ref HEAD)"
-git f LineageOS
-git ml --no-edit LineageOS/lineage-15.1 || die "Merge conflicts detected, please resolve then continue!"
-
-merge-stable
-for FILE in $(git cf); do
-    git rf "${FILE}"
-done
-git ap -3 "${ALS_PATCHES}/4.4.125/mmu.c"
-git fm
-
-git push
+    git push
 
 
 
+    # OnePlus 3
+    cd "${ALS_HOME}/op3" || die "OnePlus 3 folder does not exist, please clone!"
+    git fetch origin
+    git checkout oneplus/QC8996_O_8.0.0
+    git reset --hard origin/"$(git rev-parse --abbrev-ref HEAD)"
 
-# msm-4.4
-cd "${ALS_HOME}/msm-4.4" || die "msm-4.4 folder does not exist, please clone!"
-git fetch origin
-git reset --hard origin/"$(git rev-parse --abbrev-ref HEAD)"
+    merge-stable
 
-merge-stable
-for FILE in $(git cf); do
-    git rf "${FILE}"
-done
-git ap -3 "${ALS_PATCHES}/4.4.125/mmu.c"
-git fm
+    git push
+    git checkout oneplus/QC8996_O_8.0.0_Beta
+    git reset --hard origin/"$(git rev-parse --abbrev-ref HEAD)"
 
-git push
+    merge-stable
+
+    git push
+    git checkout lineage-15.1
+    git reset --hard origin/"$(git rev-parse --abbrev-ref HEAD)"
+    git fetch LineageOS
+    git ml --no-edit LineageOS/lineage-15.1
+
+    merge-stable
+
+    git push
+    git checkout android-8.1
+    git reset --hard origin/"$(git rev-parse --abbrev-ref HEAD)"
+    git fetch omni
+    git ml --no-edit omni/android-8.1
+
+    merge-stable
+
+    git push
 
 
 
 
-# OnePlus 5
-cd "${ALS_HOME}/op5" || die "OnePlus 5 folder does not exist, please clone!"
-git checkout oneplus/QC8998_O_8.0
-git fetch origin
-git reset --hard origin/"$(git rev-parse --abbrev-ref HEAD)"
+    # Xiaomi Mi A1 tree
+    cd "${ALS_HOME}/tissot" || die "Mi A1 folder does not exist, please clone!"
+    git fetch origin
+    git reset --hard origin/"$(git rev-parse --abbrev-ref HEAD)"
 
-merge-stable
-for FILE in $(git cf); do
-    git rf "${FILE}"
-done
-git ap -3 "${ALS_PATCHES}/4.4.125/mmu.c"
-git fm
+    merge-stable
 
-git push
-git checkout oneplus/QC8998_O_8.1
-git reset --hard origin/"$(git rev-parse --abbrev-ref HEAD)"
-
-merge-stable
-for FILE in $(git cf); do
-    git rf "${FILE}"
-done;
-git ap -3 "${ALS_PATCHES}/4.4.125/mmu.c"
-git fm
-
-git push
-git checkout lineage-15.1
-git reset --hard origin/"$(git rev-parse --abbrev-ref HEAD)"
-git f LineageOS
-git ml --no-edit LineageOS/lineage-15.1 || die "Merge conflicts detected, please resolve then continue!"
-
-merge-stable
-for FILE in $(git cf); do
-    git rf "${FILE}"
-done
-git ap -3 "${ALS_PATCHES}/4.4.125/mmu.c"
-git fm
-
-git push
-git checkout android-8.1
-git reset --hard origin/"$(git rev-parse --abbrev-ref HEAD)"
-git f omni
-git ml --no-edit omni/android-8.1 || die "Merge conflicts detected, please resolve then continue!"
-
-merge-stable
-for FILE in $(git cf); do
-    git rf "${FILE}"
-done
-git ap -3 "${ALS_PATCHES}/4.4.125/mmu.c"
-git fm
-
-git push
+    git push
+fi
 
 
 
 
-# Pixel 2 (XL)
-cd "${ALS_HOME}/wahoo" || die "Wahoo folder does not exist, please clone!"
-git fetch origin
-git reset --hard origin/"$(git rev-parse --abbrev-ref HEAD)"
-
-merge-stable
-for FILE in $(git cf); do
-    git rf "${FILE}"
-done
-git ap -3 "${ALS_PATCHES}/4.4.125/mmu.c"
-git fm
-
-git push
 
 
 
 
-# Xiaomi Mi 6 and Xiaomi Mi Mix 2
-cd "${ALS_HOME}/sagit" || die "Sagit folder does not exist, please clone!"
-git fetch origin
-git reset --hard origin/"$(git rev-parse --abbrev-ref HEAD)"
+# 4.4 kernels
+if [[ "$*" =~ "4.4" ]]; then
+    # Essential Phone
+    cd "${ALS_HOME}/mata" || die "Mata folder does not exist, please clone!"
+    git fetch origin
+    git reset --hard origin/"$(git rev-parse --abbrev-ref HEAD)"
+    git f LineageOS
+    git ml --no-edit LineageOS/lineage-15.1 || die "Merge conflicts detected, please resolve then continue!"
 
-merge-stable
-for FILE in $(git cf); do
-    git rf "${FILE}"
-done
-git ap -3 "${ALS_PATCHES}/4.4.125/mmu.c"
-git fm
+    merge-stable
+    for FILE in $(git cf); do
+        git rf "${FILE}"
+    done
+    git ap -3 "${ALS_PATCHES}/4.4.125/mmu.c"
+    git fm
 
-git push
+    git push
+
+
+
+
+    # msm-4.4
+    cd "${ALS_HOME}/msm-4.4" || die "msm-4.4 folder does not exist, please clone!"
+    git fetch origin
+    git reset --hard origin/"$(git rev-parse --abbrev-ref HEAD)"
+
+    merge-stable
+    for FILE in $(git cf); do
+        git rf "${FILE}"
+    done
+    git ap -3 "${ALS_PATCHES}/4.4.125/mmu.c"
+    git fm
+
+    git push
+
+
+
+
+    # OnePlus 5
+    cd "${ALS_HOME}/op5" || die "OnePlus 5 folder does not exist, please clone!"
+    git checkout oneplus/QC8998_O_8.0
+    git fetch origin
+    git reset --hard origin/"$(git rev-parse --abbrev-ref HEAD)"
+
+    merge-stable
+    for FILE in $(git cf); do
+        git rf "${FILE}"
+    done
+    git ap -3 "${ALS_PATCHES}/4.4.125/mmu.c"
+    git fm
+
+    git push
+    git checkout oneplus/QC8998_O_8.1
+    git reset --hard origin/"$(git rev-parse --abbrev-ref HEAD)"
+
+    merge-stable
+    for FILE in $(git cf); do
+        git rf "${FILE}"
+    done;
+    git ap -3 "${ALS_PATCHES}/4.4.125/mmu.c"
+    git fm
+
+    git push
+    git checkout lineage-15.1
+    git reset --hard origin/"$(git rev-parse --abbrev-ref HEAD)"
+    git f LineageOS
+    git ml --no-edit LineageOS/lineage-15.1 || die "Merge conflicts detected, please resolve then continue!"
+
+    merge-stable
+    for FILE in $(git cf); do
+        git rf "${FILE}"
+    done
+    git ap -3 "${ALS_PATCHES}/4.4.125/mmu.c"
+    git fm
+
+    git push
+    git checkout android-8.1
+    git reset --hard origin/"$(git rev-parse --abbrev-ref HEAD)"
+    git f omni
+    git ml --no-edit omni/android-8.1 || die "Merge conflicts detected, please resolve then continue!"
+
+    merge-stable
+    for FILE in $(git cf); do
+        git rf "${FILE}"
+    done
+    git ap -3 "${ALS_PATCHES}/4.4.125/mmu.c"
+    git fm
+
+    git push
+
+
+
+
+    # Pixel 2 (XL)
+    cd "${ALS_HOME}/wahoo" || die "Wahoo folder does not exist, please clone!"
+    git fetch origin
+    git reset --hard origin/"$(git rev-parse --abbrev-ref HEAD)"
+
+    merge-stable
+    for FILE in $(git cf); do
+        git rf "${FILE}"
+    done
+    git ap -3 "${ALS_PATCHES}/4.4.125/mmu.c"
+    git fm
+
+    git push
+
+
+
+
+    # Xiaomi Mi 6 and Xiaomi Mi Mix 2
+    cd "${ALS_HOME}/sagit" || die "Sagit folder does not exist, please clone!"
+    git fetch origin
+    git reset --hard origin/"$(git rev-parse --abbrev-ref HEAD)"
+
+    merge-stable
+    for FILE in $(git cf); do
+        git rf "${FILE}"
+    done
+    git ap -3 "${ALS_PATCHES}/4.4.125/mmu.c"
+    git fm
+
+    git push
+fi
