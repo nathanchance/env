@@ -126,6 +126,23 @@ if [[ "$*" =~ "4.4" ]]; then
 
 
 
+    # Moto Z2 (Force)
+    cd "${ALS_HOME}/nash" || die "Nash folder does not exist, please clone!"
+    git fetch origin
+    git reset --hard origin/"$(git rev-parse --abbrev-ref HEAD)"
+    git f LineageOS
+    git ml --no-edit LineageOS/lineage-15.1 || die "Merge conflicts detected, please resolve then continue!"
+
+    merge-stable
+    git ra
+    git ap -3 "${ALS_PATCHES}/4.4.125/mmu.c"
+    git fm
+
+    git push
+
+
+
+
     # msm-4.4
     cd "${ALS_HOME}/msm-4.4" || die "msm-4.4 folder does not exist, please clone!"
     git fetch origin
