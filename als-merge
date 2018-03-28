@@ -117,9 +117,7 @@ if [[ "$*" =~ "4.4" ]]; then
     git ml --no-edit LineageOS/lineage-15.1 || die "Merge conflicts detected, please resolve then continue!"
 
     merge-stable
-    for FILE in $(git cf); do
-        git rf "${FILE}"
-    done
+    git ra
     git ap -3 "${ALS_PATCHES}/4.4.125/mmu.c"
     git fm
 
@@ -134,9 +132,7 @@ if [[ "$*" =~ "4.4" ]]; then
     git reset --hard origin/"$(git rev-parse --abbrev-ref HEAD)"
 
     merge-stable
-    for FILE in $(git cf); do
-        git rf "${FILE}"
-    done
+    git ra
     git ap -3 "${ALS_PATCHES}/4.4.125/mmu.c"
     git fm
 
@@ -152,9 +148,7 @@ if [[ "$*" =~ "4.4" ]]; then
     git reset --hard origin/"$(git rev-parse --abbrev-ref HEAD)"
 
     merge-stable
-    for FILE in $(git cf); do
-        git rf "${FILE}"
-    done
+    git ra
     git ap -3 "${ALS_PATCHES}/4.4.125/mmu.c"
     git fm
 
@@ -163,9 +157,7 @@ if [[ "$*" =~ "4.4" ]]; then
     git reset --hard origin/"$(git rev-parse --abbrev-ref HEAD)"
 
     merge-stable
-    for FILE in $(git cf); do
-        git rf "${FILE}"
-    done;
+    git ra
     git ap -3 "${ALS_PATCHES}/4.4.125/mmu.c"
     git fm
 
@@ -176,9 +168,7 @@ if [[ "$*" =~ "4.4" ]]; then
     git ml --no-edit LineageOS/lineage-15.1 || die "Merge conflicts detected, please resolve then continue!"
 
     merge-stable
-    for FILE in $(git cf); do
-        git rf "${FILE}"
-    done
+    git ra
     git ap -3 "${ALS_PATCHES}/4.4.125/mmu.c"
     git fm
 
@@ -189,9 +179,7 @@ if [[ "$*" =~ "4.4" ]]; then
     git ml --no-edit omni/android-8.1 || die "Merge conflicts detected, please resolve then continue!"
 
     merge-stable
-    for FILE in $(git cf); do
-        git rf "${FILE}"
-    done
+    git ra
     git ap -3 "${ALS_PATCHES}/4.4.125/mmu.c"
     git fm
 
@@ -206,9 +194,7 @@ if [[ "$*" =~ "4.4" ]]; then
     git reset --hard origin/"$(git rev-parse --abbrev-ref HEAD)"
 
     merge-stable
-    for FILE in $(git cf); do
-        git rf "${FILE}"
-    done
+    git ra
     git ap -3 "${ALS_PATCHES}/4.4.125/mmu.c"
     git fm
 
@@ -223,9 +209,7 @@ if [[ "$*" =~ "4.4" ]]; then
     git reset --hard origin/"$(git rev-parse --abbrev-ref HEAD)"
 
     merge-stable
-    for FILE in $(git cf); do
-        git rf "${FILE}"
-    done
+    git ra
     git ap -3 "${ALS_PATCHES}/4.4.125/mmu.c"
     git fm
 
