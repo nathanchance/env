@@ -247,20 +247,20 @@ function frel() {
         "op5")
             case ${2} in
                 1.*)
-                    flash-kernel -v "${2}" -m stable -d op5 -os Custom -b 7.1.x-custom -av 7.1.x ${3:+ "-t"}
-                    flash-kernel -v "${2}" -m stable -d op5 -os OOS -b 7.1.x-oos -av 7.1.x ${3:+ "-t"} ;;
+                    flash-kernel -v "${2}" -m stable -d op5 -os Custom -b 7.1.x-custom -av 7.1.x -t
+                    flash-kernel -v "${2}" -m stable -d op5 -os OOS -b 7.1.x-oos -av 7.1.x -t ;;
                 2.*)
-                    flash-kernel -v "${2}" -m stable -d op5 -os Custom -b 8.0.0-custom -av 8.0.0 ${3:+ "-t"}
-                    flash-kernel -v "${2}" -m stable -d op5 -os OOS -b 8.0.0-oos -av 8.0.0 ${3:+ "-t"} ;;
+                    flash-kernel -v "${2}" -m stable -d op5 -os Custom -b 8.0.0-custom -av 8.0.0 -t
+                    flash-kernel -v "${2}" -m stable -d op5 -os OOS -b 8.0.0-oos -av 8.0.0 -t ;;
                 3.*)
-                    flash-kernel -v "${2}" -m stable -d op5 -b 8.x-unified -av 8.x ${3:+ "-t"} ;;
+                    flash-kernel -v "${2}" -m stable -d op5 -b 8.x-unified -av 8.x -t ;;
                 4.*)
-                    flash-kernel -v "${2}" -m stable -d op5 -b 8.1.0-unified -av 8.x ${3:+ "-t"} ;;
+                    flash-kernel -v "${2}" -m stable -d op5 -b 8.1.0-unified -av 8.x -t ;;
             esac ;;
 
         "pxl2")
-            flash-kernel -v "${2}" -m stable -d taimen -b oreo-mr1 ${3:+ "-t"}
-            flash-kernel -v "${2}" -m stable -d walleye -b oreo-mr1 ${3:+ "-t"} ;;
+            flash-kernel -v "${2}" -m stable -d taimen -b oreo-mr1 -t
+            flash-kernel -v "${2}" -m stable -d walleye -b oreo-mr1 -t ;;
     esac
 }
 
@@ -271,18 +271,18 @@ function ftest() {
         "op5")
             case ${2} in
                 1.*)
-                    flash-kernel -v "${2}" -r "${3}" -m "${4}" -d op5 -os Custom -b "queue-${2}" -av 7.1.x ${5:+ "-t"}
-                    flash-kernel -v "${2}" -r "${3}" -m "${4}" -d op5 -os OOS -b "queue-${2}" -av 7.1.x ${5:+ "-t"} ;;
+                    flash-kernel -v "${2}" -r "${3}" -m "${4}" -d op5 -os Custom -b "queue-${2}" -av 7.1.x -t
+                    flash-kernel -v "${2}" -r "${3}" -m "${4}" -d op5 -os OOS -b "queue-${2}" -av 7.1.x -t ;;
                 2.*)
-                    flash-kernel -v "${2}" -r "${3}" -m "${4}" -d op5 -os Custom -b "queue-${2}" -av 8.0.0 ${5:+ "-t"}
-                    flash-kernel -v "${2}" -r "${3}" -m "${4}" -d op5 -os OOS -b "queue-${2}" -av 8.0.0 ${5:+ "-t"} ;;
+                    flash-kernel -v "${2}" -r "${3}" -m "${4}" -d op5 -os Custom -b "queue-${2}" -av 8.0.0 -t
+                    flash-kernel -v "${2}" -r "${3}" -m "${4}" -d op5 -os OOS -b "queue-${2}" -av 8.0.0 -t ;;
                 3.*|4.*)
-                    flash-kernel -v "${2}" -r "${3}" -m "${4}" -d op5 -b "queue-${2}" -av 8.x ${5:+ "-t"} ;;
+                    flash-kernel -v "${2}" -r "${3}" -m "${4}" -d op5 -b "queue-${2}" -av 8.x -t ;;
             esac ;;
 
         "pxl2")
-            flash-kernel -v "${2}" -r "${3}" -m "${4}" -d taimen -b "queue-${2}" ${5:+ "-t"}
-            flash-kernel -v "${2}" -r "${3}" -m "${4}" -d walleye -b "queue-${2}" ${5:+ "-t"} ;;
+            flash-kernel -v "${2}" -r "${3}" -m "${4}" -d taimen -b "queue-${2}" -t
+            flash-kernel -v "${2}" -r "${3}" -m "${4}" -d walleye -b "queue-${2}" -t ;;
     esac
 }
 
