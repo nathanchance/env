@@ -1,12 +1,13 @@
 diff --git a/arch/arm64/mm/mmu.c b/arch/arm64/mm/mmu.c
-index 6c444d968323..fb1da07803d2 100644
+index 049ca3916fd0..1369b6079fbc 100644
 --- a/arch/arm64/mm/mmu.c
 +++ b/arch/arm64/mm/mmu.c
-@@ -884,3 +884,13 @@ int pmd_clear_huge(pmd_t *pmd)
+@@ -929,3 +929,15 @@ int pmd_clear_huge(pmd_t *pmd)
  	pmd_clear(pmd);
  	return 1;
  }
 +
++#ifdef CONFIG_HAVE_ARCH_HUGE_VMAP
 +int pud_free_pmd_page(pud_t *pud)
 +{
 +	return pud_none(*pud);
@@ -16,3 +17,4 @@ index 6c444d968323..fb1da07803d2 100644
 +{
 +	return pmd_none(*pmd);
 +}
++#endif
