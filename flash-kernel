@@ -522,6 +522,12 @@ function build_kernel() {
                 echo
                 echo "Boot image: ${BOOT_IMAGE}"
             fi
+            SHORT_CHANGELOG=/tmp/${DEVICE_NAME_FILE,,}-${VERSION/./}
+            if [[ -f ${SHORT_CHANGELOG} ]]; then
+                echo
+                echo "Short changelog:"
+                cat "${SHORT_CHANGELOG}"
+            fi
             echo "\`\`\`"
         } > ${TG_MSG_FILE}
         notify "$(cat ${TG_MSG_FILE})"
@@ -866,7 +872,6 @@ function ending_info() {
                 if [[ ! ${IMAGE_ONLY} ]]; then
                     echo
                     echo "[${FILE_LOCATION}](${FILE_LOCATION})"
-                    SHORT_CHANGELOG=/tmp/${DEVICE_NAME_FILE,,}-${VERSION/./}
                     if [[ -f ${SHORT_CHANGELOG} ]]; then
                         echo
                         echo "\`\`\`"
