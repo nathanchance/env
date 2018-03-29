@@ -204,6 +204,7 @@ function generate_versions() {
         TARGET_SUBLEVEL=$(echo "${TARGET_VERSION}" | cut -d . -f 3)
         [[ ${TARGET_SUBLEVEL} -le ${CURRENT_SUBLEVEL} ]] && die "Current version is up to date with target version ${TARGET_VERSION}!\n"
         [[ ${TARGET_SUBLEVEL} -gt ${LATEST_SUBLEVEL}  ]] && die "Target version ${TARGET_VERSION} does not exist!\n"
+        [[ ${CURRENT_SUBLEVEL} -eq 0 ]] && CURRENT_VERSION=${CURRENT_MAJOR_VERSION}
         RANGE=v${CURRENT_VERSION}..v${TARGET_VERSION}
         TAG=v${TARGET_VERSION}
     fi
