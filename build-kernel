@@ -135,7 +135,7 @@ case ${VERBOSITY} in
 esac
 
 # Report success
-FINAL_IMAGE=$(find out -name 'Image.*-dtb')
+FINAL_IMAGE=$(find out -name '*Image*-dtb')
 END=$(date +%s)
 if [[ -f ${FINAL_IMAGE} ]]; then
     echo "\n${GRN}BUILT IN $(format_time "${START}" "${END}")${RST}\n
