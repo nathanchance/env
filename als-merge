@@ -26,16 +26,12 @@ ALS_PATCHES=${SCRIPTS_FOLDER}/als-patches
 
 
 
-
-
-
-
 # 3.18 kernels
 if [[ "$*" =~ "3.18" ]]; then
     # Pixel (XL)
     cd "${ALS_HOME}/marlin" || die "Marlin folder does not exist, please clone!"
-    git fetch origin
-    git reset --hard origin/"$(git rev-parse --abbrev-ref HEAD)"
+    git f origin
+    git rh origin/"$(git rev-parse --abbrev-ref HEAD)"
 
     merge-stable
 
@@ -46,42 +42,46 @@ if [[ "$*" =~ "3.18" ]]; then
 
     # msm-3.18 tree
     cd "${ALS_HOME}/msm-3.18" || die "msm-3.18 folder does not exist, please clone!"
-    git fetch origin
-    git reset --hard origin/"$(git rev-parse --abbrev-ref HEAD)"
+    git f origin
+    git rh origin/"$(git rev-parse --abbrev-ref HEAD)"
 
     merge-stable
 
     git push
+
 
 
 
     # OnePlus 3
     cd "${ALS_HOME}/op3" || die "OnePlus 3 folder does not exist, please clone!"
-    git fetch origin
-    git checkout oneplus/QC8996_O_8.0.0
-    git reset --hard origin/"$(git rev-parse --abbrev-ref HEAD)"
+    git f origin
+    git ch oneplus/QC8996_O_8.0.0
+    git f upstream || die "upstream remote does not exist!"
+    git ml --no-edit upstream/oneplus/QC8996_O_8.0.0 || die "Merge conflicts detected, please resolve then continue!"
+    git rh origin/"$(git rev-parse --abbrev-ref HEAD)"
 
     merge-stable
 
     git push
-    git checkout oneplus/QC8996_O_8.0.0_Beta
-    git reset --hard origin/"$(git rev-parse --abbrev-ref HEAD)"
+    git ch oneplus/QC8996_O_8.0.0_Beta
+    git ml --no-edit upstream/oneplus/QC8996_O_8.0.0_Beta || die "Merge conflicts detected, please resolve then continue!"
+    git rh origin/"$(git rev-parse --abbrev-ref HEAD)"
 
     merge-stable
 
     git push
-    git checkout lineage-15.1
-    git reset --hard origin/"$(git rev-parse --abbrev-ref HEAD)"
-    git fetch LineageOS
-    git ml --no-edit LineageOS/lineage-15.1
+    git ch lineage-15.1
+    git rh origin/"$(git rev-parse --abbrev-ref HEAD)"
+    git f LineageOS || die "LineageOS remote does not exist!"
+    git ml --no-edit LineageOS/lineage-15.1 || die "Merge conflicts detected, please resolve then continue!"
 
     merge-stable
 
     git push
-    git checkout android-8.1
-    git reset --hard origin/"$(git rev-parse --abbrev-ref HEAD)"
-    git fetch omni
-    git ml --no-edit omni/android-8.1
+    git ch android-8.1
+    git rh origin/"$(git rev-parse --abbrev-ref HEAD)"
+    git f omni || die "omni remote does not exist!"
+    git ml --no-edit omni/android-8.1 || die "Merge conflicts detected, please resolve then continue!"
 
     merge-stable
 
@@ -92,8 +92,10 @@ if [[ "$*" =~ "3.18" ]]; then
 
     # Xiaomi Mi A1 tree
     cd "${ALS_HOME}/tissot" || die "Mi A1 folder does not exist, please clone!"
-    git fetch origin
-    git reset --hard origin/"$(git rev-parse --abbrev-ref HEAD)"
+    git f origin
+    git rh origin/"$(git rev-parse --abbrev-ref HEAD)"
+    git f upstream || die "upstream remote does not exist!"
+    git ml --no-edit upstream/tissot-o-oss || die "Merge conflicts detected, please resolve then continue!"
 
     merge-stable
 
@@ -111,15 +113,12 @@ fi
 if [[ "$*" =~ "4.4" ]]; then
     # Essential Phone
     cd "${ALS_HOME}/mata" || die "Mata folder does not exist, please clone!"
-    git fetch origin
-    git reset --hard origin/"$(git rev-parse --abbrev-ref HEAD)"
-    git f LineageOS
+    git f origin
+    git rh origin/"$(git rev-parse --abbrev-ref HEAD)"
+    git f LineageOS || die "LineageOS remote does not exist!"
     git ml --no-edit LineageOS/lineage-15.1 || die "Merge conflicts detected, please resolve then continue!"
 
     merge-stable
-    git ra
-    git ap -3 "${ALS_PATCHES}/4.4.125/mmu.c"
-    git fm
 
     git push
 
@@ -128,30 +127,34 @@ if [[ "$*" =~ "4.4" ]]; then
 
     # Moto Z2 (Force)
     cd "${ALS_HOME}/nash" || die "Nash folder does not exist, please clone!"
-    git fetch origin
-    git reset --hard origin/"$(git rev-parse --abbrev-ref HEAD)"
-    git f LineageOS
+    git ch lineage-15.1
+    git f origin
+    git rh origin/"$(git rev-parse --abbrev-ref HEAD)"
+    git f LineageOS || die "LineageOS remote does not exist!"
     git ml --no-edit LineageOS/lineage-15.1 || die "Merge conflicts detected, please resolve then continue!"
 
     merge-stable
-    git ra
-    git ap -3 "${ALS_PATCHES}/4.4.125/mmu.c"
-    git fm
 
     git push
+    git ch oreo-8.0.0-release-nash
+    git rh origin/"$(git rev-parse --abbrev-ref HEAD)"
+    git f upstream || die "upstream remote does not exist!"
+    git ml --no-edit upstream/oreo-8.0.0-release-nash || die "Merge conflicts detected, please resolve then continue!"
+
+    merge-stable
+
+    git push
+    
 
 
 
 
     # msm-4.4
     cd "${ALS_HOME}/msm-4.4" || die "msm-4.4 folder does not exist, please clone!"
-    git fetch origin
-    git reset --hard origin/"$(git rev-parse --abbrev-ref HEAD)"
+    git f origin
+    git rh origin/"$(git rev-parse --abbrev-ref HEAD)"
 
     merge-stable
-    git ra
-    git ap -3 "${ALS_PATCHES}/4.4.125/mmu.c"
-    git fm
 
     git push
 
@@ -160,45 +163,36 @@ if [[ "$*" =~ "4.4" ]]; then
 
     # OnePlus 5
     cd "${ALS_HOME}/op5" || die "OnePlus 5 folder does not exist, please clone!"
-    git checkout oneplus/QC8998_O_8.0
-    git fetch origin
-    git reset --hard origin/"$(git rev-parse --abbrev-ref HEAD)"
+    git ch oneplus/QC8998_O_8.0
+    git f origin
+    git rh origin/"$(git rev-parse --abbrev-ref HEAD)"
+    git f upstream || die "upstream remote does not exist!"
+    git ml --no-edit upstream/oneplus/QC8998_O_8.0 || die "Merge conflicts detected, please resolve then continue!"
 
     merge-stable
-    git ra
-    git ap -3 "${ALS_PATCHES}/4.4.125/mmu.c"
-    git fm
 
     git push
-    git checkout oneplus/QC8998_O_8.1
-    git reset --hard origin/"$(git rev-parse --abbrev-ref HEAD)"
+    git ch oneplus/QC8998_O_8.1
+    git rh origin/"$(git rev-parse --abbrev-ref HEAD)"
+    git ml --no-edit upstream/oneplus/QC8998_O_8.1 || die "Merge conflicts detected, please resolve then continue!"
 
     merge-stable
-    git ra
-    git ap -3 "${ALS_PATCHES}/4.4.125/mmu.c"
-    git fm
 
     git push
-    git checkout lineage-15.1
-    git reset --hard origin/"$(git rev-parse --abbrev-ref HEAD)"
-    git f LineageOS
+    git ch lineage-15.1
+    git rh origin/"$(git rev-parse --abbrev-ref HEAD)"
+    git f LineageOS || die "LineageOS remote does not exist!"
     git ml --no-edit LineageOS/lineage-15.1 || die "Merge conflicts detected, please resolve then continue!"
 
     merge-stable
-    git ra
-    git ap -3 "${ALS_PATCHES}/4.4.125/mmu.c"
-    git fm
 
     git push
-    git checkout android-8.1
-    git reset --hard origin/"$(git rev-parse --abbrev-ref HEAD)"
-    git f omni
+    git ch android-8.1
+    git rh origin/"$(git rev-parse --abbrev-ref HEAD)"
+    git f omni || die "omni remote does not exist!"
     git ml --no-edit omni/android-8.1 || die "Merge conflicts detected, please resolve then continue!"
 
     merge-stable
-    git ra
-    git ap -3 "${ALS_PATCHES}/4.4.125/mmu.c"
-    git fm
 
     git push
 
@@ -207,13 +201,10 @@ if [[ "$*" =~ "4.4" ]]; then
 
     # Pixel 2 (XL)
     cd "${ALS_HOME}/wahoo" || die "Wahoo folder does not exist, please clone!"
-    git fetch origin
-    git reset --hard origin/"$(git rev-parse --abbrev-ref HEAD)"
+    git f origin
+    git rh origin/"$(git rev-parse --abbrev-ref HEAD)"
 
     merge-stable
-    git ra
-    git ap -3 "${ALS_PATCHES}/4.4.125/mmu.c"
-    git fm
 
     git push
 
@@ -222,13 +213,21 @@ if [[ "$*" =~ "4.4" ]]; then
 
     # Xiaomi Mi 6 and Xiaomi Mi Mix 2
     cd "${ALS_HOME}/sagit" || die "Sagit folder does not exist, please clone!"
-    git fetch origin
-    git reset --hard origin/"$(git rev-parse --abbrev-ref HEAD)"
+    git ch sagit-o-oss
+    git f origin
+    git rh origin/"$(git rev-parse --abbrev-ref HEAD)"
+    git f upstream || die "upstream remote does not exist!"
+    git ml --no-edit upstream/sagit-o-oss || die "Merge conflicts detected, please resolve then continue!"
 
     merge-stable
-    git ra
-    git ap -3 "${ALS_PATCHES}/4.4.125/mmu.c"
-    git fm
+
+    git push
+    git ch android-8.1
+    git rh origin/"$(git rev-parse --abbrev-ref HEAD)"
+    git f omni || die "omni remote does not exist!"
+    git ml --no-edit omni/android-8.1 || die "Merge conflicts detected, please resolve then continue!"
+
+    merge-stable
 
     git push
 fi
