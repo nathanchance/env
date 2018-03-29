@@ -1,0 +1,5 @@
+git rf arch/arm/include/asm/kvm_arm.h
+git ap $(git fp -1 5dc5c8e6551541fa9502b15dd5532c01273fa1f3)
+git ap $(git fp -1 5553b142be11e794ebc0805950b2e8313f93d718)
+git cl
+git fm
