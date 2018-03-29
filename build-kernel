@@ -54,6 +54,12 @@ while [[ $# -ge 1 ]]; do
         "-D"|"--debug")
             VERBOSITY=2 ;;
 
+        # Kernel folder
+        "-f"|"--folder")
+            shift && enforce_value "$@"
+
+            FOLDER=${1} ;;
+
         # Specify which GCC toolchain to use
         "-gt"|"--gcc-toolchain")
             shift && enforce_value "$@"
@@ -119,6 +125,7 @@ function build() {
 }
 
 # Report error if we aren't in a tree with a Makefile
+[[ -n ${FOLDER} ]] && cd "${FOLDER}"
 [[ ! -f Makefile ]] && die "This must be run in a kernel tree!"
 
 # Show the base version we are making
