@@ -28,7 +28,9 @@ function linux_aliases() {
 
     # Change directory aliases
     alias 6p='cd ${KERNEL_FOLDER}/flash/angler'
+    alias ack='cd ${KERNEL_FOLDER}/sources/kernel-common'
     alias asu='cd ${REPO_FOLDER}/asu'
+    alias cros='cd ${KERNEL_FOLDER}/sources/chromium'
     alias lnx='cd ${KERNEL_FOLDER}/sources/linux'
     alias pkg='cd ${REPO_FOLDER}/pkgbuilds'
     alias op5='cd ${KERNEL_FOLDER}/flash/op5'
@@ -548,5 +550,93 @@ ${HOME}/kernels/flash/anykernel2-wahoo"
         fi
         git push -q
     done
+    echo
+}
+
+
+# Build Chrome OS kernel
+function chromeos-kernel() {
+    cd "${HOME}/kernels/sources/chromium" || return
+
+    while [[ $# -ge 1 ]]; do
+        case ${1} in
+            "-u"|"--update") UPDATE=true ;;
+            *) VERSION=${1} ;;
+        esac
+
+        shift
+    done
+    echo
+
+    # Checkout proper branch
+    git checkout -q "chromeos-${VERSION:-4.4}"
+
+    # Update
+    [[ ${UPDATE} ]] && git pull
+
+    # Configure
+    git clean -fxdq
+    mkdir -p out
+    ./chromeos/scripts/prepareconfig chromeos-intel-pineview out/.config
+
+    # Build the kernel
+    CCACHE=$(command -v ccache)
+    time make "${JOBS_FLAG}" CC="${CCACHE} /opt/clang-7.x/bin/clang" O=out > /dev/null
+
+    # Show version information
+    if [[ -f out/arch/x86_64/boot/bzImage ]]; then
+        echo "\nKernel version: $(cat out/include/config/kernel.release)"
+    fi
+    echo
+}
+
+
+# Build android/common kernel
+function ac-kernel() {
+    cd "${HOME}/kernels/sources/kernel-common" || return
+
+    while [[ $# -ge 1 ]]; do
+        case ${1} in
+            "-a"|"--architecture") shift && enforce_value "$@"; ARCH=${1} ;;
+            "-u"|"--update") UPDATE=true ;;
+            *) VERSION=${1} ;;
+        esac
+
+        shift
+    done
+    echo
+
+    [[ -z ${ARCH} ]] && ARCH=arm64
+    [[ -z ${VERSION} ]] && VERSION=4.4
+    
+    # Checkout proper branch
+    git checkout -q "android-${VERSION}"
+
+    # Update
+    [[ ${UPDATE} ]] && git pull
+
+    # Configure
+    git clean -fxdq
+    mkdir -p out
+    {
+        case ${VERSION} in
+            "4.4") ./android/configs/android-fetch-configs.sh ;;
+            *) ./kernel/configs/android-fetch-configs.sh ;;
+        esac
+        cat arch/${ARCH}/configs/defconfig \
+            android-base.cfg \
+            android-base-${ARCH}.cfg \
+            android-recommended.cfg > out/.config
+        make ARCH=${ARCH} O=out olddefconfig
+    } &> /dev/null
+
+    # Build the kernel
+    CCACHE=$(command -v ccache)
+    time make "${JOBS_FLAG}" ARCH=${ARCH} CC="${CCACHE} /opt/clang-7.x/bin/clang" CROSS_COMPILE=/opt/aosp-gcc/bin/aarch64-linux-android- O=out > /dev/null
+
+    # Show version information
+    if [[ -f out/arch/arm64/boot/Image ]]; then
+        echo "\nKernel version: $(cat out/include/config/kernel.release)"
+    fi
     echo
 }
