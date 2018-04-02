@@ -581,7 +581,7 @@ function chromeos-kernel() {
     ./chromeos/scripts/prepareconfig chromeos-intel-pineview out/.config
 
     # Build the kernel
-    time make "${JOBS_FLAG}" CC="${CCACHE} /opt/aosp-clang/clang-4679922/bin/clang" O=out > /dev/null
+    time make "${JOBS_FLAG}" CC="${CCACHE} /opt/clang-7.x/bin/clang" O=out > /dev/null
 
     # Show version information
     if [[ -f out/arch/x86_64/boot/bzImage ]]; then
