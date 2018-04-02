@@ -556,6 +556,7 @@ ${HOME}/kernels/flash/anykernel2-wahoo"
 
 # Build Chrome OS kernel
 function chromeos-kernel() {
+    local UPDATE VERSION
     cd "${HOME}/kernels/sources/chromium" || return
 
     while [[ $# -ge 1 ]]; do
@@ -592,12 +593,11 @@ function chromeos-kernel() {
 
 # Build android/common kernel
 function ac-kernel() {
-    local ARCH CROSS_COMPILE_FOLDER TARGET TRIPLE UPDATE VERSION
+    local CROSS_COMPILE_FOLDER TARGET_TRIPLE UPDATE VERSION
     cd "${HOME}/kernels/sources/kernel-common" || return
 
     while [[ $# -ge 1 ]]; do
         case ${1} in
-            "-a"|"--architecture") shift && enforce_value "$@"; ARCH=${1} ;;
             "-u"|"--update") UPDATE=true ;;
             *) VERSION=${1} ;;
         esac
@@ -606,18 +606,8 @@ function ac-kernel() {
     done
     echo
 
-    [[ -z ${ARCH} ]] && ARCH=arm64
     [[ -z ${VERSION} ]] && VERSION=4.4
     
-    case ${ARCH} in
-        "arm")
-            CROSS_COMPILE_FOLDER=aosp-gcc-32
-            TARGET_TRIPLE=arm-linux-androideabi- ;;
-        "arm64")
-            CROSS_COMPILE_FOLDER=aosp-gcc
-            TARGET_TRIPLE=aarch64-linux-android- ;;
-    esac
-
     # Checkout proper branch
     git checkout -q "android-${VERSION}"
 
@@ -632,22 +622,22 @@ function ac-kernel() {
             "4.4") ./android/configs/android-fetch-configs.sh ;;
             *) ./kernel/configs/android-fetch-configs.sh ;;
         esac
-        cat arch/${ARCH}/configs/defconfig \
+        cat arch/arm64/configs/defconfig \
             android-base.cfg \
-            android-base-${ARCH}.cfg \
+            android-base-arm64.cfg \
             android-recommended.cfg > out/.config
-        make ARCH=${ARCH} O=out olddefconfig
+        make ARCH=arm64 O=out olddefconfig prepare
     } &> /dev/null
 
     # Build the kernel
     time make "${JOBS_FLAG}" \
-              ARCH=${ARCH} \
+              ARCH=arm64 \
               CC="${CCACHE} /opt/aosp-clang/clang-4679922/bin/clang" \
-              CROSS_COMPILE=/opt/${CROSS_COMPILE_FOLDER}/bin/${TARGET_TRIPLE} \
+              CROSS_COMPILE=/opt/aosp-gcc/bin/aarch64-linux-android- \
               O=out > /dev/null
 
     # Show version information
-    if [[ -f out/arch/${ARCH}/boot/Image ]]; then
+    if [[ -f out/arch/arm64/boot/Image ]]; then
         echo "\n${GRN}Kernel build successful!${RST}"
         echo "\n${BOLD}Kernel version:${RST} $(cat out/include/config/kernel.release)"
     else
