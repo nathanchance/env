@@ -47,7 +47,7 @@ function kmake() {
     if [[ ${PI} ]]; then
         make "${JOBS_FLAG}" O=out "$@"
     else
-        make "${JOBS_FLAG}" ARCH=arm CROSS_COMPILE="$(command -v ccache) ${TOOLCHAIN}" O=out "$@"
+        make "${JOBS_FLAG}" ARCH=arm CROSS_COMPILE="${CCACHE} ${TOOLCHAIN}" O=out "$@"
     fi
 }
 

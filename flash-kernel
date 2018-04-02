@@ -290,7 +290,6 @@ function generate_variables() {
 
     # Compilation variables
     ARCHITECTURE=arm64
-    CCACHE=$(command -v ccache)
 
     # Normal 64-bit GCC toolchain
     GCC=$(find ${GCC_FOLDER}/bin \( -type f -o -type l \) -name '*-gcc' | head -n1)

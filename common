@@ -59,6 +59,9 @@ else
 fi
 JOBS_FLAG="-j${THREADS}"
 
+# Common ccache variable
+CCACHE=$(command -v ccache)
+
 ###############
 #             #
 #  FUNCTIONS  #

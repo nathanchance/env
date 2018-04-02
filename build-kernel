@@ -94,9 +94,6 @@ if [[ ${CLANG} ]]; then
     [[ ! -f ${CLANG_TOOLCHAIN} ]] && die "Clang toolchain could not be found!"
 fi
 
-# Set ccache
-CCACHE=$(command -v ccache)
-
 # Kernel make function
 function kmake() {
     # Set make variable

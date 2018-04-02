@@ -64,7 +64,7 @@ function linux_prompt() {
 # Setup ccache
 # ccache_setup <size>
 function ccache_setup() {
-    if [[ -n $(command -v ccache) ]]; then
+    if [[ -f ${CCACHE}  ]]; then
         if [[ -n ${1} ]]; then
             ccache -M "${1}"G &> /dev/null
             export USE_CCACHE=1
@@ -580,7 +580,6 @@ function chromeos-kernel() {
     ./chromeos/scripts/prepareconfig chromeos-intel-pineview out/.config
 
     # Build the kernel
-    CCACHE=$(command -v ccache)
     time make "${JOBS_FLAG}" CC="${CCACHE} /opt/aosp-clang/clang-4679922/bin/clang" O=out > /dev/null
 
     # Show version information
@@ -641,7 +640,6 @@ function ac-kernel() {
     } &> /dev/null
 
     # Build the kernel
-    CCACHE=$(command -v ccache)
     time make "${JOBS_FLAG}" \
               ARCH=${ARCH} \
               CC="${CCACHE} /opt/aosp-clang/clang-4679922/bin/clang" \
