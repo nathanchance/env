@@ -581,7 +581,7 @@ function chromeos-kernel() {
 
     # Build the kernel
     CCACHE=$(command -v ccache)
-    time make "${JOBS_FLAG}" CC="${CCACHE} /opt/clang-7.x/bin/clang" O=out > /dev/null
+    time make "${JOBS_FLAG}" CC="${CCACHE} /opt/aosp-clang/clang-4679922/bin/clang" O=out > /dev/null
 
     # Show version information
     if [[ -f out/arch/x86_64/boot/bzImage ]]; then
@@ -593,6 +593,7 @@ function chromeos-kernel() {
 
 # Build android/common kernel
 function ac-kernel() {
+    local ARCH CROSS_COMPILE_FOLDER TARGET TRIPLE UPDATE VERSION
     cd "${HOME}/kernels/sources/kernel-common" || return
 
     while [[ $# -ge 1 ]]; do
@@ -609,6 +610,15 @@ function ac-kernel() {
     [[ -z ${ARCH} ]] && ARCH=arm64
     [[ -z ${VERSION} ]] && VERSION=4.4
     
+    case ${ARCH} in
+        "arm")
+            CROSS_COMPILE_FOLDER=aosp-gcc-32
+            TARGET_TRIPLE=arm-linux-androideabi- ;;
+        "arm64")
+            CROSS_COMPILE_FOLDER=aosp-gcc
+            TARGET_TRIPLE=aarch64-linux-android- ;;
+    esac
+
     # Checkout proper branch
     git checkout -q "android-${VERSION}"
 
@@ -632,11 +642,18 @@ function ac-kernel() {
 
     # Build the kernel
     CCACHE=$(command -v ccache)
-    time make "${JOBS_FLAG}" ARCH=${ARCH} CC="${CCACHE} /opt/clang-7.x/bin/clang" CROSS_COMPILE=/opt/aosp-gcc/bin/aarch64-linux-android- O=out > /dev/null
+    time make "${JOBS_FLAG}" \
+              ARCH=${ARCH} \
+              CC="${CCACHE} /opt/aosp-clang/clang-4679922/bin/clang" \
+              CROSS_COMPILE=/opt/${CROSS_COMPILE_FOLDER}/bin/${TARGET_TRIPLE} \
+              O=out > /dev/null
 
     # Show version information
-    if [[ -f out/arch/arm64/boot/Image ]]; then
-        echo "\nKernel version: $(cat out/include/config/kernel.release)"
+    if [[ -f out/arch/${ARCH}/boot/Image ]]; then
+        echo "\n${GRN}Kernel build successful!${RST}"
+        echo "\n${BOLD}Kernel version:${RST} $(cat out/include/config/kernel.release)"
+    else
+        display_error "Kernel build failed!"
     fi
     echo
 }
