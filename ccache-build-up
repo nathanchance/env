@@ -30,15 +30,15 @@ for i in $(seq 0 8); do
 done
 
 # Flash Kernel Pixel 2 2.x
-flash-kernel -d walleye -b oreo-mr1 -m tmp -t
+flash-kernel -d walleye -b oreo-m2 -m tmp -t
 for i in $(seq 0 8); do
-    flash-kernel -d walleye -b oreo-mr1 -m tmp
+    flash-kernel -d walleye -b oreo-m2 -m tmp
 done
 
 # Flash Kernel Pixel 2 XL 2.x
-flash-kernel -d taimen -b oreo-mr1 -m tmp -t
+flash-kernel -d taimen -b oreo-m2 -m tmp -t
 for i in $(seq 0 8); do
-    flash-kernel -d taimen -b oreo-mr1 -m tmp
+    flash-kernel -d taimen -b oreo-m2 -m tmp
 done
 
 build-clang -t

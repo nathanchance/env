@@ -261,8 +261,8 @@ function frel() {
             esac ;;
 
         "pxl2")
-            flash-kernel -v "${2}" -m stable -d taimen -b oreo-mr1 -t
-            flash-kernel -v "${2}" -m stable -d walleye -b oreo-mr1 -t ;;
+            flash-kernel -v "${2}" -m stable -d taimen -b oreo-m2 -t
+            flash-kernel -v "${2}" -m stable -d walleye -b oreo-m2 -t ;;
     esac
 }
 
