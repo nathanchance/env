@@ -50,6 +50,8 @@ function aliases() {
     git config --global alias.cpe 'cherry-pick --edit --signoff'
     git config --global alias.cpq 'cherry-pick --quit'
     git config --global alias.dc 'describe --contains'
+    git config --global alias.dfs 'diff --stat'
+    git config --global alias.dfss 'diff --shortstat'
     git config --global alias.dh 'diff HEAD'
     git config --global alias.dhc 'reset --hard HEAD^'
     git config --global alias.f 'fetch'
@@ -75,6 +77,9 @@ function aliases() {
     git config --global alias.rh 'reset --hard'
     git config --global alias.rs 'reset --soft'
     git config --global alias.s 'status'
+    git config --global alias.shf 'show --format=fuller'
+    git config --global alias.shm 'show -s'
+    git config --global alias.shmf 'show -s --format=fuller'
     git config --global alias.ss 'status --short --branch'
     git config --global alias.us 'reset HEAD'
 }
