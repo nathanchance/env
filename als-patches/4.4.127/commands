@@ -1,0 +1,3 @@
+git ra
+git ap $(git fp -1 82cd588052815eb4146f9f7c5347ca5e32c56360)
+git cl
