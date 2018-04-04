@@ -274,7 +274,7 @@ function generate_variables() {
         "alpha"|"beta"|"bisect"|"rc"|"stable")
             FILE_MOVE=${FILE_MOVE_HEAD}/kernels/${DEVICE_NAME_WEB}/${ANDROID_VERSION}/${MODE}
             FILE_MOVE_OLD=$(readlink -f "${FILE_MOVE}/../archive")
-            if [[ ${TG} && ${MODE} != "bisect" ]]; then
+            if [[ ${TG} ]]; then
                 case ${DEVICE} in
                     "op5") export CHAT_ID=-1001107088684 ;;
                     "taimen"|"walleye") export CHAT_ID=-1001298464571 ;;
