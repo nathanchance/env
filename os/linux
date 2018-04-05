@@ -312,7 +312,7 @@ function wfr() {
     case ${1} in
         "op5")
             rm -rf "${WEB_FOLDER}"/downloads/kernels/op5/{7.1.x,8.0.0,8.1.0}/{custom,oos}/{alpha,beta,bisect,rc,tmp}/*
-            rm -rf "${WEB_FOLDER}"/downloads/kernels/op5/8.x/{alpha,beta,rc,tmp}/* ;;
+            rm -rf "${WEB_FOLDER}"/downloads/kernels/op5/8.x/{alpha,beta,bisect,rc,tmp}/* ;;
         "pxl2")
             rm -rf "${WEB_FOLDER}"/downloads/kernels/{taimen,walleye}/{8.0.0,8.1.0}/{alpha,beta,bisect,rc,tmp}/* ;;
     esac
