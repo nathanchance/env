@@ -79,7 +79,7 @@ function ccache_setup() {
 
 # Additional setup steps for Linux
 function linux_setup() {
-    ccache_setup 150
+    ccache_setup 200
     export LOG=/tmp/results.log
     add_to_path_post "${HOME}/.gem/ruby/2.5.0/bin"
 }
