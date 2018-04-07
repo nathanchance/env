@@ -15,7 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>
 
-build-clang -v 6 -t
+build-clang -t
 
 # Flash Kernel OP5 3.x
 flash-kernel -d op5 -b 8.x-unified -m tmp -io -t
@@ -41,16 +41,14 @@ for i in $(seq 0 8); do
     flash-kernel -d taimen -b oreo-m2 -m tmp
 done
 
-build-clang -t
-
-# Flash Kernel OnePlus 5 personal
+# Flash Kernel OnePlus 5 staging
 flash-kernel -d op5 -io -t
 for i in $(seq 0 8); do
     flash-kernel -d op5 -io
 done
 
-# Flash Kernel Pixel 2 XL personal
-flash-kernel -io -t
+# Flash Kernel Pixel 2 XL staging
+flash-kernel -b staging -io -t
 for i in $(seq 0 8); do
-    flash-kernel -io
+    flash-kernel -b staging -io
 done
