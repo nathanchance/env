@@ -1,1 +1,11 @@
-/home/nathan/scripts/als-patches/3.18.103/generic-commands
+#!/usr/bin/env bash
+
+PATCHES_FOLDER=$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")" && pwd)
+git ra
+git ch $(git lo --format=%H -1 upstream/$(git cb) fs/proc/task_mmu.c)^ -- Documentation/filesystems/proc.txt fs/proc/task_mmu.c fs/proc/task_nommu.c
+git ap -3 "${PATCHES_FOLDER}/conflicts.patch"
+git ap -3 $(git fp v3.18.102..v3.18.103 Documentation/filesystems/proc.txt fs/proc/task_nommu.c)
+git cl
+git ch v3.18.103 -- drivers/media/v4l2-core/v4l2-compat-ioctl32.c
+git ap -3 "${PATCHES_FOLDER}/v4l2-compat-ioctl32.c"
+git fm

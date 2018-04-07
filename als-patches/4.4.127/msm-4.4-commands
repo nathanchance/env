@@ -3,4 +3,5 @@
 PATCHES_FOLDER=$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")" && pwd)
 git ra
 git ap -3 "${PATCHES_FOLDER}/memory.h"
+git ap -3 "${PATCHES_FOLDER}/task_mmu.c-msm-4.4"
 git fm
