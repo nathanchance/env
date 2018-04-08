@@ -309,15 +309,15 @@ function generate_variables() {
         [[ ! -f ${CLANG} ]] && die "Clang toolchain could not be found!"
 
         case "$(basename ${CLANG_FOLDER})" in
-            "clang-3289846"|"clang-3859424"|"clang-4053586")
+            "clang-3289846"|"clang-4053586")
                 CLANG_LD_PATH=${CLANG_FOLDER}/lib64
                 CLANG_VERSION=$(${CLANG} --version | head -n 1) ;;
-            "clang-4393122"|"clang-4479392"|"clang-4556391")
+            "clang-4679922"|"clang-4691093")
                 CLANG_LD_PATH=${CLANG_FOLDER}/lib64
-                CLANG_VERSION=$(${CLANG} --version | head -n 1 | cut -d'(' -f1,4) ;;
+                CLANG_VERSION=$(${CLANG} --version | head -n 1 | cut -d ' ' -f 1,6,7,8,13,14,15,16) ;;
             *)
                 CLANG_LD_PATH=${CLANG_FOLDER}/lib
-                CLANG_VERSION=$(${CLANG} --version | head -n 1 | cut -d'(' -f1)
+                CLANG_VERSION=$(${CLANG} --version | head -n 1 | cut -d'(' -f1 )
                 if [[ ${MODE} = "personal" ]]; then
                     SCRIPT_OPT_FLAGS="-mllvm -polly \
                                       -mllvm -polly-run-dce \
