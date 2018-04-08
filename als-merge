@@ -48,7 +48,7 @@ if [[ "$*" =~ "3.18" ]]; then
     git rh origin/"$(git rev-parse --abbrev-ref HEAD)"
 
     merge-stable
-    [[ -f ${PATCHES_318}/msm-3.18-commands ]] && bash "${PATCHES_318}/3.18-commands"
+    [[ -f ${PATCHES_318}/msm-3.18-commands ]] && bash "${PATCHES_318}/msm-3.18-commands"
 
     git push
 
