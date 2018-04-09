@@ -395,12 +395,31 @@ function doesitbuild() {
     CUR_FOLDER=$(pwd)
     case ${CUR_FOLDER} in
         *wahoo*)
-            flash-kernel -io ;;
-        *op5*)
-            flash-kernel -d op5 -os OOS -io
-            flash-kernel -d op5 -os Custom -io
+            # Clang 7.x
+            flash-kernel -m tmp -io
+            # Clang 6.x
+            flash-kernel -m tmp -io -ct /opt/clang-6.x
+            # Clang 5.x
+            flash-kernel -m tmp -io -ct /opt/aosp-clang/clang-4053586
+            # GCC 4.9
+            flash-kernel -m tmp -io -cc gcc -gt /opt/aosp-gcc -gt-32 /opt/aosp-gcc-32
+            # GCC 7.3.0
+            flash-kernel -m tmp -io -cc gcc -gt /opt/aarch64--glibc--bleeding-edge-2018.02-1
             clear
-            tail -n 5 < "${LOG}" ;;
+            tail -n 14 "${LOG}" ;;
+        *op5*)
+            # Clang 7.x
+            flash-kernel -d op5 -m tmp -io
+            # Clang 6.x
+            flash-kernel -d op5 -m tmp -io -ct /opt/clang-6.x
+            # Clang 5.x
+            flash-kernel -d op5 -m tmp -io -ct /opt/aosp-clang/clang-4053586
+            # GCC 4.9
+            flash-kernel -d op5 -m tmp -io -cc gcc -gt /opt/aosp-gcc
+            # GCC 7.3.0
+            flash-kernel -d op5 -m tmp -io -cc gcc -gt /opt/aarch64--glibc--bleeding-edge-2018.02-1
+            clear
+            tail -n 14 "${LOG}" ;;
         *)
             return ;;
     esac
