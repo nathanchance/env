@@ -665,3 +665,43 @@ function ac-kernel() {
     fi
     echo
 }
+
+
+# build-kernel wrapper for known trees
+function bk() {
+    local CUR_DIR CUR_BRANCH PARAMS
+
+    CUR_DIR=$(basename "$(pwd)")
+    CUR_BRANCH=$(git cb)
+
+    case "${CUR_DIR}:${CUR_BRANCH}" in
+        # Custom ROMs
+        "aicp-op5:o8.1"|"gzr-op5:8.1") PARAMS=( lineage_oneplus5_defconfig );;
+        "aosip-mata:oreo-mr1") PARAMS=( illusion_mata_defconfig ) ;;
+        "gzr-op3:8.1") PARAMS=( lineageos_oneplus3_defconfig ) ;;
+        "du-op5:o8x-caf"*) PARAMS=( oneplus5_defconfig -c ) ;;
+
+        # android-linux-stable
+        "angler:"*|"bullhead:"*|"marlin:"*) PARAMS=( ${CUR_DIR}_defconfig ) ;;
+        "mata:lineage-15.1"|"nash:lineage-15.1") PARAMS=( lineageos_${CUR_DIR}_defconfig -c ) ;;
+        "msm-3.18:"*|"msm-4.4:"*) PARAMS=( msmcortex-perf_defconfig ) ;;
+        "op3:android-8.1") PARAMS=( omni_oneplus3_defconfig ) ;;
+        "op3:lineage-15") PARAMS=( lineageos_oneplus3_defconfig ) ;;
+        "op3:oneplus/QC8996_O_8.0.0"*) PARAMS=( msm-perf_defconfig ) ;;
+        "op5:android-8.1") PARAMS=( omni_oneplus5_defconfig ) ;;
+        "op5:lineage-15.1") PARAMS=( lineage_oneplus5_defconfig ) ;;
+        "op5:QC8998_O_8."*) PARAMS=( msmcortex-perf_defconfig ) ;;
+        "sagit:android-8.1") PARAMS=( sagit_defconfig ) ;;
+        "sagit:sagit-o-oss") PARAMS=( sagit_user_defconfig ) ;;
+        "tissot:tissot-o-oss") PARAMS=( tissot-perf_defconfig ) ;;
+        "wahoo:"*) PARAMS=( wahoo_defconfig -c ) ;;
+
+        # Franco Kernel
+        "op3:oreo"|"mido:oreo-treble"|"tissot:oreo"*) PARAMS=( franco_defconfig ) ;;
+
+        # Unknown choice
+        *) display_error "Kernel not supported by wrapper!" && die ;;
+    esac
+
+    build-kernel -w -d "${PARAMS[@]}" "$@"
+}
