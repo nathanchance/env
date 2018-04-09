@@ -48,6 +48,9 @@ function parse_parameters() {
 
     while [[ $# -ge 1 ]]; do
         case ${1} in
+            "-b"|"--build-only")
+                BUILD_ONLY=true ;;
+
             "-t"|"--telegram")
                 TG=true
                 TG_MSG_FILE=/tmp/tg-msg.2 ;;
@@ -87,6 +90,8 @@ function sync() {
     if [[ ${FOLDER} =~ "binutils" ]]; then
         URL=http://sourceware.org/git/binutils-gdb.git
         BRANCH=binutils-2_30-branch
+    elif [[ ${FOLDER} =~ "llvm-svn" ]]; then
+        URL=http://llvm.org/svn/llvm-project/llvm/trunk
     else
         URL=https://git.llvm.org/git/$(basename "${FOLDER}")
         case ${VERSION} in
@@ -96,16 +101,24 @@ function sync() {
     fi
 
     if [[ ! -d ${FOLDER} ]]; then
-        git clone "${URL}" -b "${BRANCH}" "${FOLDER}"
+        case ${FOLDER} in
+            "llvm-svn") svn co "${URL}" "${FOLDER}" ;;
+            *) git clone "${URL}" -b "${BRANCH}" "${FOLDER}" ;;
+        esac
     else
         (
             cd "${FOLDER}" || die "Error moving into ${FOLDER}"
-            git clean -fxdq
-            git checkout ${BRANCH}
-            git fetch origin
-            if ! git rebase origin/${BRANCH}; then
-                die "Error updating $(basename "${FOLDER}")!"
-            fi
+            case ${FOLDER} in
+                "llvm-svn")
+                    svn update ;;
+                *)
+                    git clean -fxdq
+                    git checkout ${BRANCH}
+                    git fetch origin
+                    if ! git rebase origin/${BRANCH}; then
+                        die "Error updating $(basename "${FOLDER}")!"
+                    fi ;;
+            esac
         )
     fi
 }
@@ -118,6 +131,7 @@ function sync_all() {
     cd "${MAIN_FOLDER}" || die "Error creating ${MAIN_FOLDER}!"
 
     sync llvm
+    sync llvm-svn
 
     mkdir -p "${LLVM_FOLDER}/tools"
     cd "${LLVM_FOLDER}/tools" || die "Error creating tools folder!"
@@ -150,25 +164,29 @@ function build() {
 
     [[ ${TG} ]] && notify "\`Beginning build of Clang ${VERSION}...\`"
 
-    cmake -DLINK_POLLY_INTO_TOOLS:BOOL=ON \
-          -DCMAKE_CXX_FLAGS:STRING="-O3 -Wno-macro-redefined -pipe -pthread -fopenmp -g0 -march=native -mtune=native" \
-          -DCMAKE_C_FLAGS:STRING="-O3 -Wno-macro-redefined -pipe -pthread -fopenmp -g0 -march=native -mtune=native" \
-          -DLLVM_ENABLE_PIC:BOOL=ON \
-          -DCMAKE_INSTALL_PREFIX:PATH=${INSTALL_FOLDER} \
+    cmake -DLINK_POLLY_INTO_TOOLS=ON \
+          -DCMAKE_CXX_FLAGS="-O3 -Wno-macro-redefined -pipe -pthread -fopenmp -g0 -march=native -mtune=native" \
+          -DCMAKE_C_FLAGS="-O3 -Wno-macro-redefined -pipe -pthread -fopenmp -g0 -march=native -mtune=native" \
+          -DLLVM_ENABLE_PIC=ON \
+          -DCMAKE_INSTALL_PREFIX=${INSTALL_FOLDER} \
           -DLLVM_PARALLEL_COMPILE_JOBS="${THREADS}" \
           -DLLVM_PARALLEL_LINK_JOBS="${THREADS}" \
-          -DLLVM_ENABLE_THREADS:BOOL=ON \
-          -DLLVM_ENABLE_WARNINGS:BOOL=OFF \
-          -DLLVM_ENABLE_WERROR:BOOL=OFF \
-          -DLLVM_INCLUDE_EXAMPLES:BOOL=OFF \
-          -DLLVM_INCLUDE_TESTS:BOOL=OFF \
-          -DLLVM_BINUTILS_INCDIR:PATH="${LLVM_FOLDER}/tools/binutils/include" \
-          -DLLVM_TARGETS_TO_BUILD:STRING="X86;ARM;AArch64;NVPTX" \
-          -DCMAKE_BUILD_TYPE:STRING=MinSizeRel \
-          -DLLVM_OPTIMIZED_TABLEGEN:BOOL=ON \
-          -DPOLLY_ENABLE_GPGPU_CODEGEN:BOOL=ON \
-          -DLLVM_CCACHE_BUILD:BOOL=ON \
-          -DLLVM_USE_LINKER:STRING=gold \
+          -DLLVM_ENABLE_THREADS=ON \
+          -DLLVM_ENABLE_WARNINGS=OFF \
+          -DLLVM_ENABLE_WERROR=OFF \
+          -DLLVM_INCLUDE_EXAMPLES=OFF \
+          -DLLVM_INCLUDE_TESTS=OFF \
+          -DLLVM_BINUTILS_INCDIR="${LLVM_FOLDER}/tools/binutils/include" \
+          -DLLVM_TARGETS_TO_BUILD="X86;ARM;AArch64;NVPTX" \
+          -DCMAKE_BUILD_TYPE=MinSizeRel \
+          -DLLVM_OPTIMIZED_TABLEGEN=ON \
+          -DPOLLY_ENABLE_GPGPU_CODEGEN=ON \
+          -DLLVM_CCACHE_BUILD=ON \
+          -DLLVM_USE_LINKER=gold \
+          -DCLANG_VENDOR="Flash " \
+          -DLLVM_VERSION_PATCH="$(cd "${MAIN_FOLDER}/llvm-svn" || die "SVN folder doesn't exist";
+                                  svn info -r HEAD --show-item revision)" \
+          -DLLVM_VERSION_SUFFIX="" \
           "${LLVM_FOLDER}"
 
     if ! time cmake --build . -- "${JOBS_FLAG}"; then
@@ -219,4 +237,4 @@ parse_parameters "$@"
 sync_all
 cleanup
 build
-install
+[[ ! ${BUILD_ONLY} ]] && install
