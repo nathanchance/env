@@ -2,11 +2,10 @@
 
 PATCHES_FOLDER=$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")" && pwd)
 git ra
-git ap -3 "${PATCHES_FOLDER}/conflicts.patch"
-git rf fs/proc/task_mmu.c
+git ap -3 "${PATCHES_FOLDER}/f_midi.c"
+git ap -3 "${PATCHES_FOLDER}/gadget.h"
 git ap -3 "${PATCHES_FOLDER}/task_mmu.c-tissot"
 git ch v3.18.103 -- drivers/media/v4l2-core/v4l2-compat-ioctl32.c
 git ap -3 "${PATCHES_FOLDER}/v4l2-compat-ioctl32.c"
-rm 0001-usb-xhci-Handle-error-condition-in-xhci_stop_device.patch
 git aa
 git fm
