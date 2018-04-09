@@ -612,7 +612,7 @@ function chromeos-kernel() {
 
 # Build android/common kernel
 function ac-kernel() {
-    local CROSS_COMPILE_FOLDER TARGET_TRIPLE UPDATE VERSION
+    local UPDATE VERSION
     cd "${HOME}/kernels/sources/kernel-common" || return
 
     while [[ $# -ge 1 ]]; do
@@ -652,6 +652,7 @@ function ac-kernel() {
     time make "${JOBS_FLAG}" \
               ARCH=arm64 \
               CC="${CCACHE} /opt/aosp-clang/clang-4679922/bin/clang" \
+              CLANG_TRIPLE=aarch64-linux-gnu- \
               CROSS_COMPILE=/opt/aosp-gcc/bin/aarch64-linux-android- \
               O=out > /dev/null
 
