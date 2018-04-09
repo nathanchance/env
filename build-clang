@@ -81,6 +81,9 @@ function parse_parameters() {
 
     # Folder that will hold the final compiled toolchain
     INSTALL_FOLDER=/opt/clang-${VERSION}.x
+
+    # SVN copy of the LLVM folder for revisioning
+    SVN_FOLDER=${MAIN_FOLDER}/svn-${VERSION}.x
 }
 
 # Syncs requested  projects
@@ -90,8 +93,11 @@ function sync() {
     if [[ ${FOLDER} =~ "binutils" ]]; then
         URL=http://sourceware.org/git/binutils-gdb.git
         BRANCH=binutils-2_30-branch
-    elif [[ ${FOLDER} =~ "llvm-svn" ]]; then
-        URL=http://llvm.org/svn/llvm-project/llvm/trunk
+    elif [[ ${FOLDER} =~ "svn" ]]; then
+        case ${VERSION} in
+            "7") URL=http://llvm.org/svn/llvm-project/llvm/trunk ;;
+            *) URL=http://llvm.org/svn/llvm-project/llvm/branches/"release_${VERSION}0" ;;
+        esac
     else
         URL=https://git.llvm.org/git/$(basename "${FOLDER}")
         case ${VERSION} in
@@ -102,14 +108,14 @@ function sync() {
 
     if [[ ! -d ${FOLDER} ]]; then
         case ${FOLDER} in
-            "llvm-svn") svn co "${URL}" "${FOLDER}" ;;
+            *svn*) svn co "${URL}" "${FOLDER}" ;;
             *) git clone "${URL}" -b "${BRANCH}" "${FOLDER}" ;;
         esac
     else
         (
             cd "${FOLDER}" || die "Error moving into ${FOLDER}"
             case ${FOLDER} in
-                "llvm-svn")
+                *svn*)
                     svn update ;;
                 *)
                     git clean -fxdq
@@ -131,7 +137,7 @@ function sync_all() {
     cd "${MAIN_FOLDER}" || die "Error creating ${MAIN_FOLDER}!"
 
     sync llvm
-    sync llvm-svn
+    sync "$(basename "${SVN_FOLDER}")"
 
     mkdir -p "${LLVM_FOLDER}/tools"
     cd "${LLVM_FOLDER}/tools" || die "Error creating tools folder!"
@@ -184,7 +190,7 @@ function build() {
           -DLLVM_CCACHE_BUILD=ON \
           -DLLVM_USE_LINKER=gold \
           -DCLANG_VENDOR="Flash " \
-          -DLLVM_VERSION_PATCH="$(cd "${MAIN_FOLDER}/llvm-svn" || die "SVN folder doesn't exist";
+          -DLLVM_VERSION_PATCH="$(cd "${SVN_FOLDER}" || die "SVN folder doesn't exist";
                                   svn info -r HEAD --show-item revision)" \
           -DLLVM_VERSION_SUFFIX="" \
           "${LLVM_FOLDER}"

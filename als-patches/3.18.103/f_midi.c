@@ -40,3 +40,5 @@ index 457142912857..9d9b4f87fcd9 100644
 -		midi_free_ep_req(ep, req);
 +		free_ep_req(ep, req);
  }
+
+ static void f_midi_in_tasklet(unsigned long data)
