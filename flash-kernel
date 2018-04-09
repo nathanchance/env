@@ -317,7 +317,7 @@ function generate_variables() {
                 CLANG_VERSION=$(${CLANG} --version | head -n 1 | cut -d ' ' -f 1,6,7,8,13,14,15,16) ;;
             *)
                 CLANG_LD_PATH=${CLANG_FOLDER}/lib
-                CLANG_VERSION=$(${CLANG} --version | head -n 1 | cut -d'(' -f1 )
+                CLANG_VERSION=$(${CLANG} --version | head -n 1 | cut -d'(' -f1,4 )
                 if [[ ${MODE} = "personal" ]]; then
                     SCRIPT_OPT_FLAGS="-mllvm -polly \
                                       -mllvm -polly-run-dce \
