@@ -686,7 +686,7 @@ function bk() {
         "mata:lineage-15.1"|"nash:lineage-15.1") PARAMS=( lineageos_${CUR_DIR}_defconfig -c ) ;;
         "msm-3.18:"*|"msm-4.4:"*) PARAMS=( msmcortex-perf_defconfig ) ;;
         "op3:android-8.1") PARAMS=( omni_oneplus3_defconfig ) ;;
-        "op3:lineage-15") PARAMS=( lineageos_oneplus3_defconfig ) ;;
+        "op3:lineage-15.1") PARAMS=( lineageos_oneplus3_defconfig ) ;;
         "op3:oneplus/QC8996_O_8.0.0"*) PARAMS=( msm-perf_defconfig ) ;;
         "op5:android-8.1") PARAMS=( omni_oneplus5_defconfig ) ;;
         "op5:lineage-15.1") PARAMS=( lineage_oneplus5_defconfig ) ;;
@@ -700,7 +700,7 @@ function bk() {
         "op3:oreo"|"mido:oreo-treble"|"tissot:oreo"*) PARAMS=( franco_defconfig ) ;;
 
         # Unknown choice
-        *) display_error "Kernel not supported by wrapper!" && die ;;
+        *) display_error "Kernel not supported by wrapper!" && return 1 ;;
     esac
 
     build-kernel -w -d "${PARAMS[@]}" "$@"
