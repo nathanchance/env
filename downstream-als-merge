@@ -67,7 +67,7 @@ if [[ "$*" =~ "3.18" ]]; then
     git fetch origin
     git ml --no-edit origin/"${CURRENT_BRANCH}" || die "Merge conflicts detected, please resolve then continue!"
     merge-stable
-    [[ -f ${SCRIPTS_FOLDER}/als-patches/3.18.104/fk-tissot-commands ]] && bash ${SCRIPTS_FOLDER}/als-patches/3.18.104/fk-tissot-commands
+    [[ -f ${SCRIPTS_FOLDER}/als-patches/3.18.105/fk-tissot-commands ]] && bash ${SCRIPTS_FOLDER}/als-patches/3.18.105/fk-tissot-commands
     git push -f nathanchance HEAD:"${CURRENT_BRANCH}" || die "Can't push source to fork!"
 
 
