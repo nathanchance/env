@@ -21,7 +21,7 @@
 
 source common
 ALS_HOME=${HOME}/kernels/als
-PATCHES_318=${SCRIPTS_FOLDER}/als-patches/3.18.103
+PATCHES_318=${SCRIPTS_FOLDER}/als-patches/3.18.104
 PATCHES_44=${SCRIPTS_FOLDER}/als-patches/4.4.127
 
 
