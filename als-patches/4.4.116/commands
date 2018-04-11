@@ -1,2 +1,2 @@
 git ch v4.4.116 -- drivers/media/v4l2-core/v4l2-compat-ioctl32.c
-git ap ${HOME}/scripts/als-patches/4.4.116/v4l2-compat-ioctl32.c
+git ap ${HOME}/scripts/als-patches/4.4.116/v4l2-compat-ioctl32.c.diff
