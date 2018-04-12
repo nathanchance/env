@@ -690,7 +690,7 @@ function bk() {
         "op3:oneplus/QC8996_O_8.0.0"*) PARAMS=( msm-perf_defconfig ) ;;
         "op5:android-8.1") PARAMS=( omni_oneplus5_defconfig ) ;;
         "op5:lineage-15.1") PARAMS=( lineage_oneplus5_defconfig ) ;;
-        "op5:QC8998_O_8."*) PARAMS=( msmcortex-perf_defconfig ) ;;
+        "op5:oneplus/QC8998_O_8."*) PARAMS=( msmcortex-perf_defconfig ) ;;
         "sagit:android-8.1") PARAMS=( sagit_defconfig ) ;;
         "sagit:sagit-o-oss") PARAMS=( sagit_user_defconfig ) ;;
         "tissot:tissot-o-oss") PARAMS=( tissot-perf_defconfig ) ;;
