@@ -691,7 +691,7 @@ function bk() {
         "op5:android-8.1") PARAMS=( omni_oneplus5_defconfig ) ;;
         "op5:lineage-15.1") PARAMS=( lineage_oneplus5_defconfig ) ;;
         "op5:oneplus/QC8998_O_8."*) PARAMS=( msmcortex-perf_defconfig ) ;;
-        "sagit:android-8.1") PARAMS=( sagit_defconfig ) ;;
+        "sagit:android-8.1") PARAMS=( sagit_defconfig -c ) ;;
         "sagit:sagit-o-oss") PARAMS=( sagit_user_defconfig ) ;;
         "tissot:tissot-o-oss") PARAMS=( tissot-perf_defconfig ) ;;
         "wahoo:"*) PARAMS=( wahoo_defconfig -c ) ;;
