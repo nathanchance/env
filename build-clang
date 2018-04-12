@@ -25,7 +25,7 @@
 ###############
 
 # Folder that will house the source and build files
-MAIN_FOLDER=${HOME}/toolchains/clang
+MAIN_FOLDER=${HOME}/clang-build
 
 # Folder that will hold the main LLVM source
 LLVM_FOLDER=${MAIN_FOLDER}/llvm
@@ -80,7 +80,7 @@ function parse_parameters() {
     [[ -z ${VERSION} ]] && VERSION=7
 
     # Folder that will hold the final compiled toolchain
-    INSTALL_FOLDER=/opt/clang-${VERSION}.x
+    INSTALL_FOLDER=${TC_FOLDER}/flash-clang-${VERSION}.x
 
     # SVN copy of the LLVM folder for revisioning
     SVN_FOLDER=${MAIN_FOLDER}/svn-${VERSION}.x

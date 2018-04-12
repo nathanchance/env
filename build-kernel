@@ -80,16 +80,25 @@ done
 
 # Defaults
 [[ -z ${ARCH} ]] && ARCH=arm64
-[[ -z ${GCC_TOOLCHAIN_FOLDER} ]] && GCC_TOOLCHAIN_FOLDER=/opt/aosp-gcc
+[[ -z ${GCC_TOOLCHAIN_FOLDER} ]] && GCC_TOOLCHAIN_FOLDER=${TC_FOLDER}/aosp-gcc-${ARCH}
 
 # Error out if defconfig wasn't supplied
 [[ -z ${DEFCONFIG} ]] && die "Please supply a defconfig!"
 
 # Set toolchains
-GCC_TOOLCHAIN=$(find ${GCC_TOOLCHAIN_FOLDER}/bin \( -type f -o -type l \) -name '*-gcc' | head -n1)
+if [[ ! -d ${GCC_TOOLCHAIN_FOLDER} ]]; then
+    GCC_TOOLCHAIN_FOLDER=${TC_FOLDER}/${GCC_TOOLCHAIN_FOLDER}
+    [[ ! -d ${GCC_TOOLCHAIN_FOLDER} ]] && die "Invalid GCC folder specified!"
+fi
+GCC_TOOLCHAIN=$(find "${GCC_TOOLCHAIN_FOLDER}/bin" \( -type f -o -type l \) -name '*-gcc' | head -n1)
 [[ -z ${GCC_TOOLCHAIN} ]] && die "GCC toolchain could not be found!"
+
 if [[ ${CLANG} ]]; then
-    [[ -z ${CLANG_TOOLCHAIN_FOLDER} ]] && CLANG_TOOLCHAIN_FOLDER=/opt/aosp-clang/clang-4053586
+    [[ -z ${CLANG_TOOLCHAIN_FOLDER} ]] && CLANG_TOOLCHAIN_FOLDER=${TC_FOLDER}/aosp-clang/clang-4053586
+    if [[ ! -d ${CLANG_TOOLCHAIN_FOLDER} ]]; then
+        CLANG_TOOLCHAIN_FOLDER=${TC_FOLDER}/${CLANG_TOOLCHAIN_FOLDER}
+        [[ ! -d ${CLANG_TOOLCHAIN_FOLDER} ]] && die "Invalid Clang folder specified!"
+    fi
     CLANG_TOOLCHAIN=${CLANG_TOOLCHAIN_FOLDER}/bin/clang
     [[ ! -f ${CLANG_TOOLCHAIN} ]] && die "Clang toolchain could not be found!"
 fi

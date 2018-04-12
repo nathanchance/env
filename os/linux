@@ -398,26 +398,26 @@ function doesitbuild() {
             # Clang 7.x
             flash-kernel -m tmp -io
             # Clang 6.x
-            flash-kernel -m tmp -io -ct /opt/clang-6.x
+            flash-kernel -m tmp -io -ct flash-clang-6.x
             # Clang 5.x
-            flash-kernel -m tmp -io -ct /opt/aosp-clang/clang-4053586
+            flash-kernel -m tmp -io -ct aosp-clang/clang-4053586
             # GCC 4.9
-            flash-kernel -m tmp -io -cc gcc -gt /opt/aosp-gcc -gt-32 /opt/aosp-gcc-32
+            flash-kernel -m tmp -io -cc gcc -gt aosp-gcc-arm64 -gt-32 aosp-gcc-arm
             # GCC 7.3.0
-            flash-kernel -m tmp -io -cc gcc -gt /opt/aarch64--glibc--bleeding-edge-2018.02-1
+            flash-kernel -m tmp -io -cc gcc -gt bootlin-gcc-7.3.0-arm64
             clear
             tail -n 14 "${LOG}" ;;
         *op5*)
             # Clang 7.x
-            flash-kernel -d op5 -m tmp -io
+            flash-kernel -d op5 -m tmp -io -ct flash-clang-7.x
             # Clang 6.x
-            flash-kernel -d op5 -m tmp -io -ct /opt/clang-6.x
+            flash-kernel -d op5 -m tmp -io -ct flash-clang-6.x
             # Clang 5.x
-            flash-kernel -d op5 -m tmp -io -ct /opt/aosp-clang/clang-4053586
+            flash-kernel -d op5 -m tmp -io -ct aosp-clang/clang-4053586
             # GCC 4.9
-            flash-kernel -d op5 -m tmp -io -cc gcc -gt /opt/aosp-gcc
+            flash-kernel -d op5 -m tmp -io -cc gcc -gt aosp-gcc-arm64
             # GCC 7.3.0
-            flash-kernel -d op5 -m tmp -io -cc gcc -gt /opt/aarch64--glibc--bleeding-edge-2018.02-1
+            flash-kernel -d op5 -m tmp -io -cc gcc -gt bootlin-gcc-7.3.0-arm64
             clear
             tail -n 14 "${LOG}" ;;
         *)
@@ -600,7 +600,7 @@ function chromeos-kernel() {
     ./chromeos/scripts/prepareconfig chromeos-intel-pineview out/.config
 
     # Build the kernel
-    time make "${JOBS_FLAG}" CC="${CCACHE} /opt/clang-7.x/bin/clang" O=out > /dev/null
+    time make "${JOBS_FLAG}" CC="${CCACHE} ${TC_FOLDER}/flash-clang-7.x/bin/clang" O=out > /dev/null
 
     # Show version information
     if [[ -f out/arch/x86_64/boot/bzImage ]]; then
@@ -651,9 +651,9 @@ function ac-kernel() {
     # Build the kernel
     time make "${JOBS_FLAG}" \
               ARCH=arm64 \
-              CC="${CCACHE} /opt/aosp-clang/clang-4679922/bin/clang" \
+              CC="${CCACHE} ${TC_FOLDER}/aosp-clang/clang-4679922/bin/clang" \
               CLANG_TRIPLE=aarch64-linux-gnu- \
-              CROSS_COMPILE=/opt/aosp-gcc/bin/aarch64-linux-android- \
+              CROSS_COMPILE="${TC_FOLDER}/aosp-gcc-arm64/bin/aarch64-linux-android-" \
               O=out > /dev/null
 
     # Show version information
