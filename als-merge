@@ -22,7 +22,7 @@
 source common
 ALS_HOME=${HOME}/kernels/als
 PATCHES_318=${SCRIPTS_FOLDER}/als-patches/3.18.105
-PATCHES_44=${SCRIPTS_FOLDER}/als-patches/4.4.1278
+PATCHES_44=${SCRIPTS_FOLDER}/als-patches/4.4.128
 
 
 
@@ -119,21 +119,6 @@ fi
 
 # 4.4 kernels
 if [[ "$*" =~ "4.4" ]]; then
-    # Essential Phone
-    cd "${ALS_HOME}/mata" || die "Mata folder does not exist, please clone!"
-    git f origin
-    git rh origin/"$(git rev-parse --abbrev-ref HEAD)"
-    git f LineageOS || die "LineageOS remote does not exist!"
-    git ml --no-edit LineageOS/lineage-15.1 || die "Merge conflicts detected, please resolve then continue!"
-
-    merge-stable
-    [[ -f ${PATCHES_44}/mata-commands ]] && bash "${PATCHES_44}/mata-commands"
-
-    git push
-
-
-
-
     # Moto Z2 (Force)
     cd "${ALS_HOME}/nash" || die "Nash folder does not exist, please clone!"
     git ch lineage-15.1
