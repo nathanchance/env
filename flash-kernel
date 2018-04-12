@@ -96,6 +96,11 @@ function parse_parameters() {
             "-io"|"--image-only")
                 IMAGE_ONLY=true ;;
 
+            # Build with Kernel Address Sanitizer
+            "-k"|"--kasan")
+
+                KASAN=true ;;
+
             # Where to move zip after compilation
             "-m"|"--mode")
                 shift && enforce_value "$@"
@@ -514,6 +519,22 @@ function build_kernel() {
 
     # Point to proper defconfig and generate version files
     kmake ${DEFCONFIG} prepare
+
+    # If we want to build with KASAN, do it now
+    if [[ ${KASAN} ]]; then
+        ./scripts/config --file out/.config -e CONFIG_KASAN \
+                                            -e CONFIG_KASAN_INLINE \
+                                            -e CONFIG_TEST_KASAN \
+                                            -e CONFIG_KCOV \
+                                            -e CONFIG_SLUB \
+                                            -e CONFIG_SLUB_DEBUG \
+                                            -e CONFIG_SLUB_DEBUG_ON \
+                                            -d CONFIG_SLUB_DEBUG_PANIC_ON \
+                                            -d CONFIG_KASAN_OUTLINE \
+                                            -d CONFIG_KERNEL_LZ4 \
+                                            --set-val CONFIG_FRAME_WARN 0
+        kmake olddefconfig
+    fi
 
     # Notify Telegram of build starting
     if [[ ${TG} && ${ALREADY_NOTIFIED} != true ]]; then
