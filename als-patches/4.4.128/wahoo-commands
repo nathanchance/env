@@ -2,5 +2,5 @@
 
 PATCHES_FOLDER=$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")" && pwd)
 git ra
-git ap -3 "${PATCHES_FOLDER}/compiler-clang.h.diff"
+git ap -v "${PATCHES_FOLDER}/compiler-clang.h.diff"
 git fm
