@@ -164,9 +164,9 @@ function build() {
           -DCMAKE_BUILD_TYPE=Release \
           -DLINK_POLLY_INTO_TOOLS=ON \
           -DCMAKE_C_COMPILER=/usr/lib/ccache/bin/clang \
+          -DCMAKE_C_FLAGS="-O3 -march=native -mtune=native" \
           -DCMAKE_CXX_COMPILER=/usr/lib/ccache/bin/clang++ \
-          -DCMAKE_CXX_FLAGS="-O3 -Wno-macro-redefined -pipe -pthread -fopenmp -g0 -march=native -mtune=native" \
-          -DCMAKE_C_FLAGS="-O3 -Wno-macro-redefined -pipe -pthread -fopenmp -g0 -march=native -mtune=native" \
+          -DCMAKE_CXX_FLAGS="-O3 -march=native -mtune=native" \
           -DLLVM_ENABLE_PIC=ON \
           -DCMAKE_INSTALL_PREFIX="${INSTALL_FOLDER}" \
           -DLLVM_PARALLEL_COMPILE_JOBS="${THREADS}" \
