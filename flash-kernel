@@ -325,16 +325,10 @@ function generate_variables() {
         CLANG=${CLANG_FOLDER}/bin/clang
         [[ ! -f ${CLANG} ]] && die "Clang toolchain could not be found!"
 
+        CLANG_VERSION=$(${CLANG} --version | head -n 1 | perl -pe 's/\(http.*?\)//gs' | sed -e 's/  */ /g')
         case "$(basename "${CLANG_FOLDER}")" in
-            "clang-3289846"|"clang-4053586")
-                CLANG_LD_PATH=${CLANG_FOLDER}/lib64
-                CLANG_VERSION=$(${CLANG} --version | head -n 1) ;;
-            "clang-4679922"|"clang-4691093")
-                CLANG_LD_PATH=${CLANG_FOLDER}/lib64
-                CLANG_VERSION=$(${CLANG} --version | head -n 1 | cut -d ' ' -f 1,6,7,8,13,14,15,16) ;;
-            *)
+            "flash"*)
                 CLANG_LD_PATH=${CLANG_FOLDER}/lib
-                CLANG_VERSION=$(${CLANG} --version | head -n 1 | cut -d'(' -f1,4 )
                 if [[ ${MODE} = "personal" ]]; then
                     SCRIPT_OPT_FLAGS="-mllvm -polly \
                                       -mllvm -polly-run-dce \
@@ -345,6 +339,8 @@ function generate_variables() {
                                       -mllvm -polly-detect-keep-going"
                     [[ ${DEVICE} = "op5" ]] && SCRIPT_OPT_FLAGS="${SCRIPT_OPT_FLAGS} -fsanitize=local-init"
                 fi ;;
+            *)
+                CLANG_LD_PATH=${CLANG_FOLDER}/lib64 ;;
         esac
         # shellcheck disable=SC2001
         CLANG_VERSION="$(echo "${CLANG_VERSION}" | sed 's/[[:space:]]*$//')"
