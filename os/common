@@ -28,8 +28,8 @@ function aliases() {
     # tmux alias
     alias tmux='tmux -u'
 
-    # Alias hub to git
-    alias git='hub'
+    # If hub is installed, alias git to it
+    if command -v hub 2>&1 > /dev/null; then alias git='hub'; fi
 
     git config --global alias.aa 'add --all'
     git config --global alias.ac 'commit --gpg-sign --all --signoff'
@@ -61,12 +61,8 @@ function aliases() {
     git config --global alias.fp 'format-patch'
     git config --global alias.kf 'show -s --format="%h (\"%s\")"'
     git config --global alias.lo 'log --oneline'
-    git config --global alias.m 'merge --gpg-sign --signoff'
-    git config --global alias.ml 'merge --gpg-sign --signoff --log=500'
     git config --global alias.ma 'merge --abort'
     git config --global alias.mc 'merge --continue'
-    git config --global alias.pl 'pull --gpg-sign --signoff'
-    git config --global alias.pll 'pull --gpg-sign --signoff --log=500'
     git config --global alias.pr 'pull-request'
     git config --global alias.psu 'push --set-upstream'
     git config --global alias.ra '!f() { for i in $(git cf); do git rf $i; done }; f'

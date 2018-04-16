@@ -51,6 +51,12 @@ function flashbox_aliases() {
 
     # Alias for merge-stable script
     alias ms='merge-stable'
+
+    # Git aliases
+    git config --global alias.m 'merge --gpg-sign --signoff'
+    git config --global alias.ml 'merge --gpg-sign --signoff --log=500'
+    git config --global alias.pl 'pull --gpg-sign --signoff'
+    git config --global alias.pll 'pull --gpg-sign --signoff --log=500'
 }
 
 
