@@ -325,7 +325,8 @@ function generate_variables() {
         CLANG=${CLANG_FOLDER}/bin/clang
         [[ ! -f ${CLANG} ]] && die "Clang toolchain could not be found!"
 
-        CLANG_VERSION=$(${CLANG} --version | head -n 1 | perl -pe 's/\(http.*?\)//gs' | sed -e 's/  */ /g')
+        # shellcheck disable=SC2001
+        CLANG_VERSION=$(${CLANG} --version | head -n 1 | perl -pe 's/\(http.*?\)//gs' | sed -e 's/  */ /g' -e 's/[[:space:]]*$//')
         case "$(basename "${CLANG_FOLDER}")" in
             "flash"*)
                 CLANG_LD_PATH=${CLANG_FOLDER}/lib
@@ -342,9 +343,6 @@ function generate_variables() {
             *)
                 CLANG_LD_PATH=${CLANG_FOLDER}/lib64 ;;
         esac
-        # shellcheck disable=SC2001
-        CLANG_VERSION="$(echo "${CLANG_VERSION}" | sed 's/[[:space:]]*$//')"
-
         LLVM_DIS=${CLANG_FOLDER}/bin/llvm-dis
     fi
 }
