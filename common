@@ -26,9 +26,7 @@
 ###############
 
 # What OS are we on?
-OS=$(UNAME=$(uname); echo "${UNAME,,}")
-# GNU readlink is needed for SCRIPTS_FOLDER
-[[ ${OS} = "darwin" ]] && alias readlink=greadlink
+HOST=$(uname -n | tr '[:upper:]' '[:lower:]')
 
 # Location of "scripts" folder
 SCRIPTS_FOLDER=$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")" && pwd)
@@ -52,11 +50,7 @@ RST="\033[0m"
 YLW="\033[01;33m"
 
 # Number of make threads
-if [[ ${OS} = "darwin" ]]; then
-    THREADS=$(sysctl hw.ncpu | cut -d " " -f 2)
-else
-    THREADS=$(nproc --all)
-fi
+THREADS=$(nproc --all)
 JOBS_FLAG="-j${THREADS}"
 
 # Common ccache variable
@@ -193,9 +187,6 @@ function load_botinfo() {
 }
 
 load_botinfo
-
-# Require a parameter to opt out of macOS_check
-[[ $# -lt 1 && ${OS} = "darwin" ]] && die "Wrong window! ;)"
 
 # Telegram notifier function
 function notify() {
