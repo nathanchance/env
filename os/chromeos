@@ -59,3 +59,10 @@ function adb() {
 function fastboot() { 
     sudo su --preserve-environment -c "HOME=$(cd /home/user/* || return; pwd) $(which fastboot) $*"
 }
+
+
+# Update function
+function update() {
+    crew update
+    crew upgrade
+}
