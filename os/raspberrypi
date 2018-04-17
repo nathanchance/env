@@ -26,6 +26,9 @@ function raspberrypi_aliases() {
     # Build kernel alias
     alias pk='pi-kernel -b -i'
 
+    # Scripts folder alias
+    alias spt='cd ${HOME}/Documents/scripts'
+
     # Git aliases since Raspbian doesn't have git 2.16.0+
     git config --global alias.m 'merge --gpg-sign'
     git config --global alias.ml 'merge --gpg-sign --log=500'
