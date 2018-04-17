@@ -190,7 +190,8 @@ function nf() {
         --uptime_shorthand tiny \
         --speed_shorthand on \
         --install_time off \
-        --color_blocks off
+        --color_blocks off \
+        "$@"
     echo
     echo
 }
