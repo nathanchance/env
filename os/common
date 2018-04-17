@@ -41,6 +41,7 @@ function aliases() {
     git config --global alias.bm 'branch --move'
     git config --global alias.c 'commit --gpg-sign --signoff'
     git config --global alias.ca 'commit --gpg-sign --amend --signoff'
+    git config --global alias.cad '!git commit --gpg-sign --amend --signoff --date="$(date)"'
     git config --global alias.cb 'rev-parse --abbrev-ref HEAD'
     git config --global alias.cf 'diff --name-only --diff-filter=U'
     git config --global alias.ch 'checkout'
