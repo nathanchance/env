@@ -54,3 +54,10 @@ function upd() {
     sudo apt-get update
     sudo apt-get upgrade
 }
+
+
+# Update kernel function
+function plk() {
+    git f upstream rpi-4.14.y
+    git ml --no-edit upstream rpi-4.14.y
+}
