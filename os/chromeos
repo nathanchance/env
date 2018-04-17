@@ -62,7 +62,7 @@ function fastboot() {
 
 
 # Update function
-function update() {
+function upd() {
     crew update
     crew upgrade
 }
