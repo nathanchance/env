@@ -67,5 +67,7 @@ function upd() {
     crew upgrade
 }
 
-
+# Downloads folder
 alias dwnld='cd ${HOME}/Downloads'
+# Files folder
+alias fls='cd ${HOME}/Downloads/Files'
