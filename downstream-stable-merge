@@ -105,19 +105,6 @@ if [[ "$*" =~ "4.4" ]]; then
 
 
 
-    # AOSiP Essential Phone
-    cd "${ROMS_HOME}/aosip-mata" || die "aosip-mata does not exist, please clone!"
-    CURRENT_BRANCH=$(git cb)
-    git fetch origin
-    git reset --hard origin/"${CURRENT_BRANCH}"
-    merge-stable
-    [[ -f ${PATCHES_44}/aosip-mata-commands ]] && bash "${PATCHES_44}/aosip-mata-commands"
-    git push -f nathanchance HEAD:"${CURRENT_BRANCH}" || die "Can't push source to fork!"
-    hub pull-request -b "${CURRENT_BRANCH}" -m "Merge $(make kernelversion) into ${CURRENT_BRANCH}"
-
-
-
-
     # GZR OnePlus 5 (downstream of op5)
     cd "${ROMS_HOME}/gzr-op5" || die "gzr-op5 does not exist, please clone!"
     CURRENT_BRANCH=$(git cb)
