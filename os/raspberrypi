@@ -24,7 +24,7 @@ function raspberrypi_aliases() {
     alias knl='cd ${HOME}/Documents/Kernel'
 
     # Build kernel alias
-    alias pk='pi-kernel -b -i'
+    alias pk='pi-kernel'
 
     # Scripts folder alias
     alias spt='cd ${HOME}/Documents/scripts'
