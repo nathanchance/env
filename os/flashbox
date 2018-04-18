@@ -735,7 +735,7 @@ function change-email() {
             git config user.email "nathan@prjkt.io"
             git config user.signingkey BA5016990FD3D1F77858CFF7BA3B6486FE8AE132 ;;
         "personal")
-            git config user.email "natechancellor@gmail.com"
-            git config user.signingkey 2437CB76E544CB6AB3D9DFD399739260CB6CB716 ;;
+            git config --unset user.email
+            git config --unset user.signingkey ;;
     esac
 }
