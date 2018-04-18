@@ -718,3 +718,24 @@ function bk() {
 
     build-kernel -w -d "${PARAMS[@]}" "$@"
 }
+
+
+# Change email for git repositories
+function change-email() {
+    if [[ $# -lt 1 ]]; then
+        display_error "This function takes an argument!"
+        return 1
+    fi
+
+    case ${1} in
+        "du")
+            git config user.email "nathan@dirtyunicorns.com"
+            git config user.signingkey 8B07CAAD4B2581BA302A0DB1BA74F524ACD387E1 ;;
+        "prjkt")
+            git config user.email "nathan@prjkt.io"
+            git config user.signingkey BA5016990FD3D1F77858CFF7BA3B6486FE8AE132 ;;
+        "personal")
+            git config user.email "natechancellor@gmail.com"
+            git config user.signingkey 2437CB76E544CB6AB3D9DFD399739260CB6CB716 ;;
+    esac
+}
