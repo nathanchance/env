@@ -549,7 +549,7 @@ function build_kernel() {
                 echo
                 echo "Boot image: ${BOOT_IMAGE}"
             fi
-            SHORT_CHANGELOG=/tmp/${DEVICE_NAME_FILE,,}-${VERSION/./}
+            SHORT_CHANGELOG=${SCRIPTS_FOLDER}/shortlogs/${DEVICE_NAME_FILE,,}-${VERSION/./}
             if [[ -f ${SHORT_CHANGELOG} ]]; then
                 echo
                 echo "Short changelog:"
