@@ -688,10 +688,10 @@ function bk() {
 
     case "${CUR_DIR}:${CUR_BRANCH}" in
         # Custom ROMs
-        "aicp-op5:o8.1"|"gzr-op5:8.1") PARAMS=( lineage_oneplus5_defconfig );;
+        "aicp-op5:o8.1") PARAMS=( lineage_oneplus5_defconfig );;
         "aosip-mata:oreo-mr1") PARAMS=( illusion_mata_defconfig ) ;;
         "gzr-op3:"*) PARAMS=( lineageos_oneplus3_defconfig ) ;;
-        "gzr-op5:"*) PARAMS=( lineage_oneplus5_defconfig ) ;;
+        "gzr-op5:"*) PARAMS=( lineage_oneplus5_defconfig -c ) ;;
         "du-op5:o8x-caf"*) PARAMS=( oneplus5_defconfig -c ) ;;
 
         # android-linux-stable
