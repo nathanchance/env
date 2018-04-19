@@ -111,20 +111,13 @@ fi
 # Parameter verification
 # If ROM wasn't specified, it's a build for me
 if [[ -z ${ROM} ]]; then
-    ROM=du-o8x-caf
-    DEVICE=cheeseburger
+    ROM=du-o8x
+    DEVICE=taimen
+    VARIANT=user
 fi
 
 [[ -z ${DEVICE} ]] && die "The device to build is a required parameter!"
-
-if [[ -z ${VARIANT} ]]; then
-    case ${ROM} in
-        "krexus"|"pn")
-            VARIANT=user ;;
-        *)
-            VARIANT=userdebug ;;
-    esac
-fi
+[[ -z ${VARIANT} ]] && VARIANT=userdebug
 
 ###############
 #             #
@@ -139,11 +132,11 @@ ZIP_MOVE_PARENT=${WEB_FOLDER}/me/roms
 
 # Otherwise, define them for our various ROMs
 case "${ROM}" in
-    "aosp"|"du-o8x-caf"|"lineage-15.1")
+    "aosp"|"du-o8x"|"du-o8x-caf"|"lineage-15.1")
         SOURCE_FOLDER=${ROM_FOLDER}/${ROM}
         ZIP_MOVE=${ZIP_MOVE_PARENT}/${ROM}/${DEVICE} ;;
     *)
-        die "Unknown ROM \"${1}\" passed!" ;;
+        die "Unknown ROM \"${ROM}\" passed!" ;;
 esac
 
 OUT_FOLDER=${SOURCE_FOLDER}/out/target/product/${DEVICE}
