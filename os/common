@@ -175,3 +175,9 @@ function deldog() {
     echo "https://del.dog/${KEY}"
     echo "https://del.dog/raw/${KEY}"
 }
+
+
+# echo signoff
+function signoff() {
+    echo "Signed-off-by: $(git config --get user.name) <$(git config --get user.email)>"
+}
