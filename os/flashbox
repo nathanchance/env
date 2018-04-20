@@ -444,6 +444,15 @@ function doesitbuild() {
             flash-kernel -d op5 -m tmp -io -cc gcc -gt bootlin-gcc-7.3.0-arm64
             clear
             tail -n 14 "${LOG}" ;;
+        *clang*)
+            # Clang 7.x
+            build-kernel -d msmcortex-perf_defconfig -w -c -ct aosp-clang/clang-4679922
+            # Clang 6.x
+            build-kernel -d msmcortex-perf_defconfig -w -c -ct aosp-clang/clang-4691093
+            # Clang 5.x
+            build-kernel -d msmcortex-perf_defconfig -w -c
+            # GCC 4.9.4
+            build-kernel -d msmcortex-perf_defconfig -w ;;
         *)
             return ;;
     esac
