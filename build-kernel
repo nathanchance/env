@@ -168,8 +168,11 @@ case ${VERBOSITY} in
         build &> /dev/null ;;
 esac
 
+# Find final image
+FINAL_IMAGE=$(find out -name 'Image.*-dtb')
+[[ -z ${FINAL_IMAGE} ]] && FINAL_IMAGE=$(find out -name 'Image.*' | tail -1)
+
 # Report success
-FINAL_IMAGE=$(find out -name 'Image.*' | tail -1)
 END=$(date +%s)
 if [[ -f ${FINAL_IMAGE} ]]; then
     echo "\n${GRN}BUILT IN $(format_time "${START}" "${END}")${RST}\n
