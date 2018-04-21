@@ -248,10 +248,11 @@ function kfg() {
                 shift
 
                 for DEFCONFIG in ${DEFCONFIGS}; do
+                    [[ "$@" =~ "-fc" ]] && FILE=out/.config || FILE=out/defconfig
                     rm -rf out
                     make O=out ARCH=arm64 "$(basename "${DEFCONFIG}")"
                     make O=out ARCH=arm64 savedefconfig
-                    cp -v out/defconfig arch/arm64/configs/"$(basename "${DEFCONFIG}")"
+                    cp -v "${FILE}" arch/arm64/configs/"$(basename "${DEFCONFIG}")"
                 done ;;
         esac
 
