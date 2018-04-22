@@ -163,7 +163,7 @@ case ${VERBOSITY} in
     "2")
         build ;;
     "1")
-        build |& ag --nocolor "error:|warning" ;;
+        build |& ag --nocolor "error:|warning:" |& ag -v "which has unmet direct dependencies" ;;
     *)
         build &> /dev/null ;;
 esac
