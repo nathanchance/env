@@ -905,7 +905,6 @@ function ending_info() {
                         echo "Short changelog:"
                         cat "${SHORT_CHANGELOG}"
                         echo "\`\`\`"
-                        mv "${SHORT_CHANGELOG}" "${SHORT_CHANGELOG}.bak"
                     fi
                 fi
             } > ${TG_MSG_FILE}
