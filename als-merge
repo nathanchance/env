@@ -20,9 +20,13 @@
 
 
 source common
+# Current version numbers
+VERSION_318=3.18.106
+VERSION_44=4.4.129
+# Folders
 ALS_HOME=${HOME}/kernels/als
-PATCHES_318=${SCRIPTS_FOLDER}/als-patches/3.18.106
-PATCHES_44=${SCRIPTS_FOLDER}/als-patches/4.4.129
+PATCHES_318=${SCRIPTS_FOLDER}/als-patches/${VERSION_318}
+PATCHES_44=${SCRIPTS_FOLDER}/als-patches/${VERSION_44}
 
 
 
@@ -35,7 +39,7 @@ if [[ "$*" =~ "3.18" ]]; then
     git rh origin/"$(git rev-parse --abbrev-ref HEAD)"
 
     merge-stable
-    [[ -f ${PATCHES_318}/marlin-commands ]] && bash "${PATCHES_318}/marlin-commands"
+    [[ -f ${PATCHES_318}/marlin-commands ]] && bash "${PATCHES_318}/marlin-commands" "v${VERSION_318}"
 
     git push
 
@@ -48,7 +52,7 @@ if [[ "$*" =~ "3.18" ]]; then
     git rh origin/"$(git rev-parse --abbrev-ref HEAD)"
 
     merge-stable
-    [[ -f ${PATCHES_318}/msm-3.18-commands ]] && bash "${PATCHES_318}/msm-3.18-commands"
+    [[ -f ${PATCHES_318}/msm-3.18-commands ]] && bash "${PATCHES_318}/msm-3.18-commands" "v${VERSION_318}"
 
     git push
 
@@ -64,7 +68,7 @@ if [[ "$*" =~ "3.18" ]]; then
     git rh origin/"$(git rev-parse --abbrev-ref HEAD)"
 
     merge-stable
-    [[ -f ${PATCHES_318}/op3-8.0.0-commands ]] && bash "${PATCHES_318}/op3-8.0.0-commands"
+    [[ -f ${PATCHES_318}/op3-8.0.0-commands ]] && bash "${PATCHES_318}/op3-8.0.0-commands" "v${VERSION_318}"
 
     git push
     git ch oneplus/QC8996_O_8.0.0_Beta
@@ -72,7 +76,7 @@ if [[ "$*" =~ "3.18" ]]; then
     git rh origin/"$(git rev-parse --abbrev-ref HEAD)"
 
     merge-stable
-    [[ -f ${PATCHES_318}/op3-8.0.0_Beta-commands ]] && bash "${PATCHES_318}/op3-8.0.0_Beta-commands"
+    [[ -f ${PATCHES_318}/op3-8.0.0_Beta-commands ]] && bash "${PATCHES_318}/op3-8.0.0_Beta-commands" "v${VERSION_318}"
 
     git push
     git ch lineage-15.1
@@ -81,7 +85,7 @@ if [[ "$*" =~ "3.18" ]]; then
     git ml --no-edit LineageOS/lineage-15.1 || die "Merge conflicts detected, please resolve then continue!"
 
     merge-stable
-    [[ -f ${PATCHES_318}/op3-lineage-15.1-commands ]] && bash "${PATCHES_318}/op3-lineage-15.1-commands"
+    [[ -f ${PATCHES_318}/op3-lineage-15.1-commands ]] && bash "${PATCHES_318}/op3-lineage-15.1-commands" "v${VERSION_318}"
 
     git push
     git ch android-8.1
@@ -90,7 +94,7 @@ if [[ "$*" =~ "3.18" ]]; then
     git ml --no-edit omni/android-8.1 || die "Merge conflicts detected, please resolve then continue!"
 
     merge-stable
-    [[ -f ${PATCHES_318}/op3-android-8.1-commands ]] && bash "${PATCHES_318}/op3-android-8.1-commands"
+    [[ -f ${PATCHES_318}/op3-android-8.1-commands ]] && bash "${PATCHES_318}/op3-android-8.1-commands" "v${VERSION_318}"
 
     git push
 
@@ -105,7 +109,7 @@ if [[ "$*" =~ "3.18" ]]; then
     git ml --no-edit upstream/tissot-o-oss || die "Merge conflicts detected, please resolve then continue!"
 
     merge-stable
-    [[ -f ${PATCHES_318}/tissot-commands ]] && bash "${PATCHES_318}/tissot-commands"
+    [[ -f ${PATCHES_318}/tissot-commands ]] && bash "${PATCHES_318}/tissot-commands" "v${VERSION_318}"
 
     git push
 fi
@@ -128,7 +132,7 @@ if [[ "$*" =~ "4.4" ]]; then
     git ml --no-edit LineageOS/lineage-15.1 || die "Merge conflicts detected, please resolve then continue!"
 
     merge-stable
-    [[ -f ${PATCHES_44}/nash-lineage-15.1-commands ]] && bash "${PATCHES_44}/nash-lineage-15.1-commands"
+    [[ -f ${PATCHES_44}/nash-lineage-15.1-commands ]] && bash "${PATCHES_44}/nash-lineage-15.1-commands" "v${VERSION_44}"
 
     git push
     git ch oreo-8.0.0-release-nash
@@ -137,7 +141,7 @@ if [[ "$*" =~ "4.4" ]]; then
     git ml --no-edit upstream/oreo-8.0.0-release-nash || die "Merge conflicts detected, please resolve then continue!"
 
     merge-stable
-    [[ -f ${PATCHES_44}/nash-oreo-8.0.0-commands ]] && bash "${PATCHES_44}/nash-oreo-8.0.0-commands"
+    [[ -f ${PATCHES_44}/nash-oreo-8.0.0-commands ]] && bash "${PATCHES_44}/nash-oreo-8.0.0-commands" "v${VERSION_44}"
 
     git push
     
@@ -151,7 +155,7 @@ if [[ "$*" =~ "4.4" ]]; then
     git rh origin/"$(git rev-parse --abbrev-ref HEAD)"
 
     merge-stable
-    [[ -f ${PATCHES_44}/msm-4.4-commands ]] && bash "${PATCHES_44}/msm-4.4-commands"
+    [[ -f ${PATCHES_44}/msm-4.4-commands ]] && bash "${PATCHES_44}/msm-4.4-commands" "v${VERSION_44}"
 
     git push
 
@@ -167,7 +171,7 @@ if [[ "$*" =~ "4.4" ]]; then
     git ml --no-edit upstream/oneplus/QC8998_O_8.0 || die "Merge conflicts detected, please resolve then continue!"
 
     merge-stable
-    [[ -f ${PATCHES_44}/op5-O_8.0-commands ]] && bash "${PATCHES_44}/op5-O_8.0-commands"
+    [[ -f ${PATCHES_44}/op5-O_8.0-commands ]] && bash "${PATCHES_44}/op5-O_8.0-commands" "v${VERSION_44}"
 
     git push
     git ch oneplus/QC8998_O_8.1
@@ -175,7 +179,7 @@ if [[ "$*" =~ "4.4" ]]; then
     git ml --no-edit upstream/oneplus/QC8998_O_8.1 || die "Merge conflicts detected, please resolve then continue!"
 
     merge-stable
-    [[ -f ${PATCHES_44}/op5-O_8.1-commands ]] && bash "${PATCHES_44}/op5-O_8.1-commands"
+    [[ -f ${PATCHES_44}/op5-O_8.1-commands ]] && bash "${PATCHES_44}/op5-O_8.1-commands" "v${VERSION_44}"
 
     git push
     git ch lineage-15.1
@@ -184,7 +188,7 @@ if [[ "$*" =~ "4.4" ]]; then
     git ml --no-edit LineageOS/lineage-15.1 || die "Merge conflicts detected, please resolve then continue!"
 
     merge-stable
-    [[ -f ${PATCHES_44}/op5-lineage-15.1-commands ]] && bash "${PATCHES_44}/op5-lineage-15.1-commands"
+    [[ -f ${PATCHES_44}/op5-lineage-15.1-commands ]] && bash "${PATCHES_44}/op5-lineage-15.1-commands" "v${VERSION_44}"
 
     git push
     git ch android-8.1
@@ -193,7 +197,7 @@ if [[ "$*" =~ "4.4" ]]; then
     git ml --no-edit omni/android-8.1 || die "Merge conflicts detected, please resolve then continue!"
 
     merge-stable
-    [[ -f ${PATCHES_44}/op5-android-8.1-commands ]] && bash "${PATCHES_44}/op5-android-8.1-commands"
+    [[ -f ${PATCHES_44}/op5-android-8.1-commands ]] && bash "${PATCHES_44}/op5-android-8.1-commands" "v${VERSION_44}"
 
     git push
 
@@ -206,7 +210,7 @@ if [[ "$*" =~ "4.4" ]]; then
     git rh origin/"$(git rev-parse --abbrev-ref HEAD)"
 
     merge-stable
-    [[ -f ${PATCHES_44}/wahoo-commands ]] && bash "${PATCHES_44}/wahoo-commands"
+    [[ -f ${PATCHES_44}/wahoo-commands ]] && bash "${PATCHES_44}/wahoo-commands" "v${VERSION_44}"
 
     git push
 
@@ -222,16 +226,7 @@ if [[ "$*" =~ "4.4" ]]; then
     git ml --no-edit upstream/sagit-o-oss || die "Merge conflicts detected, please resolve then continue!"
 
     merge-stable
-    [[ -f ${PATCHES_44}/sagit-o-oss-commands ]] && bash "${PATCHES_44}/sagit-o-oss-commands"
-
-    git push
-    git ch android-8.1
-    git rh origin/"$(git rev-parse --abbrev-ref HEAD)"
-    git f omni || die "omni remote does not exist!"
-    git ml --no-edit omni/android-8.1 || die "Merge conflicts detected, please resolve then continue!"
-
-    merge-stable
-    [[ -f ${PATCHES_44}/sagit-android-8.1-commands ]] && bash "${PATCHES_44}/sagit-android-8.1-commands"
+    [[ -f ${PATCHES_44}/sagit-commands ]] && bash "${PATCHES_44}/sagit-commands" "v${VERSION_44}"
 
     git push
 fi

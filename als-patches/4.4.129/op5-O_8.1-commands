@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+
+PATCHES_FOLDER=$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")" && pwd)
+git ra
+git ap -v "${PATCHES_FOLDER}/Makefile.diff"
+git fp -1 --stdout  b20f0e105816c951efc48cd53f0b120b5dd5168a fs/ext4/balloc.c | git ap -Rv
+git fp --stdout v4.4.128..${1} fs/ext4/balloc.c | git ap -v
+git fm
