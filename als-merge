@@ -1,5 +1,4 @@
 #!/usr/bin/env bash
-# shellcheck disable=SC2076
 #
 # SPDX-License-Identifier: GPL-3.0-or-later
 #
@@ -21,6 +20,7 @@ PATCHES_44=${SCRIPTS_FOLDER}/als-patches/${VERSION_44}
 
 
 # 3.18 kernels
+# shellcheck disable=SC2076
 if [[ "$*" =~ "3.18" ]]; then
     # Pixel (XL)
     cd "${ALS_HOME}/marlin" || die "Marlin folder does not exist, please clone!"
@@ -111,6 +111,7 @@ fi
 
 
 # 4.4 kernels
+# shellcheck disable=SC2076
 if [[ "$*" =~ "4.4" ]]; then
     # Moto Z2 (Force)
     cd "${ALS_HOME}/nash" || die "Nash folder does not exist, please clone!"
