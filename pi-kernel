@@ -22,12 +22,18 @@ TG_MSG=/tmp/tg-msg.pi-kernel
 if [[ ! ${PI} ]]; then
     GCC6_FOLDER=/opt/armv7-eabihf--glibc--stable-2018.02-2
     GCC7_FOLDER=/opt/armv7-eabihf--glibc--bleeding-edge-2018.02-1
-    [[ "$*" =~ "-7" ]] && TOOLCHAIN=${GCC7_FOLDER}/bin/arm-buildroot-linux-gnueabihf-
-    [[ -z ${TOOLCHAIN} ]] && TOOLCHAIN=${GCC6_FOLDER}/bin/arm-buildroot-linux-gnueabihf-
+    if [[ "$*" =~ "-7" ]]; then
+        [[ ! -f ${GCC7_FOLDER} ]] && die "GCC7 folder not found!"
+        TOOLCHAIN=${GCC7_FOLDER}/bin/arm-buildroot-linux-gnueabihf-
+    fi
+    if [[ -z ${TOOLCHAIN} ]]; then
+        [[ ! -f ${GCC6_FOLDER} ]] && die "GCC6 folder not found!"
+        TOOLCHAIN=${GCC6_FOLDER}/bin/arm-buildroot-linux-gnueabihf-
+    fi
 
-    cd ${HOME}/kernels/pi
+    cd "${HOME}/kernels/pi" || die "Kernel source doesn't exist!"
 else
-    cd ${HOME}/Documents/Kernel
+    cd "${HOME}/Documents/Kernel" || die "Kernel source doesn't exist!"
 fi
 
 # Make function for both host and cross compiling
@@ -85,5 +91,5 @@ function install() {
     ) > /dev/null
 }
 
-[[ "$*" =~ "-b" ]] && build
+[[ "$*" =~ "-b" ]] && build "$@"
 [[ "$*" =~ "-i" ]] && install
