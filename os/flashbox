@@ -471,7 +471,12 @@ Average number of commits in a version of ${VER}: $(($(git lo "v${VER}..v${VER}.
 
 # Shellcheck function
 function shellcheck() {
-    command shellcheck -x -e SC1090 -e SC1091 -e SC1117 -e SC2028 "$@"
+    # SC1090: Can't follow non-constant source. Use a directive to specify location.
+    # SC1091: Not following: build/envsetup.sh: openBinaryFile: does not exist (No such file or directory)
+    # SC1094: Parsing of sourced file failed. Ignoring it.
+    # SC1117: Backslash is literal in "\t". Prefer explicit escaping: "\\t".
+    # SC2028: echo won't expand escape sequences. Consider printf.
+    command shellcheck -x -e SC1090 -e SC1091 -e SC1094 -e SC1117 -e SC2028 "$@"
 }
 
 
