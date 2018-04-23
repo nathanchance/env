@@ -189,9 +189,8 @@ function nf() {
 # Find config values in a kernel tree
 # kfg [-c <defconfig_file>] [-f <config>] [-e <config>] [-d <config>]
 function kfg() {
-    # shellcheck disable=SC2155
-    local DEFCONFIGS="$(ls arch/arm64/configs/flash*_defconfig 2>/dev/null)"
-    local CONFIG LIST
+    local CONFIG DEFCONFIGS LIST
+    DEFCONFIGS="$(ls arch/arm64/configs/flash*_defconfig 2>/dev/null)"
 
     while [[ $# -ge 1 ]]; do
         case ${1} in
@@ -237,7 +236,7 @@ function kfg() {
                 shift
 
                 for DEFCONFIG in ${DEFCONFIGS}; do
-                    [[ "$@" =~ "-fc" ]] && FILE=out/.config || FILE=out/defconfig
+                    [[ "$*" =~ "-fc" ]] && FILE=out/.config || FILE=out/defconfig
                     rm -rf out
                     make O=out ARCH=arm64 "$(basename "${DEFCONFIG}")"
                     make O=out ARCH=arm64 savedefconfig
@@ -354,7 +353,6 @@ function mcf() {
 function signzip() {
     local CUR_DIR; CUR_DIR=$(pwd)
     local FILE=${1}
-    local KEY=testkey
     if echo "${FILE}" | grep -q -v zip; then
         display_error "This can only sign zip files!"
         return 1
@@ -694,8 +692,8 @@ function bk() {
         "du-op5:o8x-caf"*) PARAMS=( oneplus5_defconfig -c ) ;;
 
         # android-linux-stable
-        "angler:"*|"bullhead:"*|"marlin:"*) PARAMS=( ${CUR_DIR}_defconfig ) ;;
-        "mata:lineage-15.1"|"nash:lineage-15.1") PARAMS=( lineageos_${CUR_DIR}_defconfig -c ) ;;
+        "angler:"*|"bullhead:"*|"marlin:"*) PARAMS=( "${CUR_DIR}_defconfig" ) ;;
+        "mata:lineage-15.1"|"nash:lineage-15.1") PARAMS=( "lineageos_${CUR_DIR}_defconfig" -c ) ;;
         "msm-3.18:"*|"msm-4.4:"*) PARAMS=( msmcortex-perf_defconfig ) ;;
         "op3:android-8.1") PARAMS=( omni_oneplus3_defconfig ) ;;
         "op3:lineage-15.1") PARAMS=( lineageos_oneplus3_defconfig ) ;;
