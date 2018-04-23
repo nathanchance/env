@@ -3,6 +3,8 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 #
 # Copyright (C) 2018 Nathan Chancellor
+#
+# shellcheck disable=SC2034
 
 build-clang -t
 
