@@ -17,6 +17,7 @@ PATCHES_318=${SCRIPTS_FOLDER}/als-patches/3.18.106
 
 
 # 3.18 kernels
+# SC2076: Don't quote rhs of =~, it'll match literally rather than as a regex.
 # shellcheck disable=SC2076
 if [[ "$*" =~ "3.18" ]]; then
     # Franco Kernel Mido (downstream of msm-3.18)
@@ -79,6 +80,7 @@ fi
 
 
 # 4.4 kernels
+# SC2076: Don't quote rhs of =~, it'll match literally rather than as a regex.
 # shellcheck disable=SC2076
 if [[ "$*" =~ "4.4" ]]; then
     # AICP OnePlus 5 (downstream of op5)
