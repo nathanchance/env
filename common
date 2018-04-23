@@ -68,9 +68,9 @@ function header() {
         COLOR=${RED}
     fi
     echo "${COLOR}"
-    # shellcheck disable=SC2034
     echo "====$(for i in $(seq ${#1}); do echo "=\c"; done)===="
     echo "==  ${1}  =="
+    # SC2034: i appears unused. Verify it or export it.
     # shellcheck disable=SC2034
     echo "====$(for i in $(seq ${#1}); do echo "=\c"; done)===="
     echo "${RST}"
