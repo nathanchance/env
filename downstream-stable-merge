@@ -1,5 +1,4 @@
 #!/usr/bin/env bash
-# shellcheck disable=SC2076
 #
 # SPDX-License-Identifier: GPL-3.0-or-later
 #
@@ -18,6 +17,7 @@ PATCHES_44=${SCRIPTS_FOLDER}/als-patches/4.4.129
 
 
 # 3.18 kernels
+# shellcheck disable=SC2076
 if [[ "$*" =~ "3.18" ]]; then
     # Franco Kernel Mido (downstream of msm-3.18)
     cd "${FRANCO_HOME}/mido" || die "mido does not exist, please clone!"
@@ -79,6 +79,7 @@ fi
 
 
 # 4.4 kernels
+# shellcheck disable=SC2076
 if [[ "$*" =~ "4.4" ]]; then
     # AICP OnePlus 5 (downstream of op5)
     cd "${ROMS_HOME}/aicp-op5" || die "aicp-op5 does not exist, please clone!"
