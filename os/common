@@ -18,7 +18,7 @@ function aliases() {
     alias tmux='tmux -u'
 
     # If hub is installed, alias git to it
-    if command -v hub 2>&1 > /dev/null; then alias git='hub'; fi
+    if command -v hub > /dev/null 2>&1; then alias git='hub'; fi
 
     git config --global alias.aa 'add --all'
     git config --global alias.ac 'commit --gpg-sign --all --signoff'
@@ -30,6 +30,7 @@ function aliases() {
     git config --global alias.bm 'branch --move'
     git config --global alias.c 'commit --gpg-sign --signoff'
     git config --global alias.ca 'commit --gpg-sign --amend --signoff'
+    # shellcheck disable=SC2016
     git config --global alias.cad '!git commit --gpg-sign --amend --signoff --date="$(date)"'
     git config --global alias.cb 'rev-parse --abbrev-ref HEAD'
     git config --global alias.cf 'diff --name-only --diff-filter=U'
@@ -55,6 +56,7 @@ function aliases() {
     git config --global alias.mc 'merge --continue'
     git config --global alias.pr 'pull-request'
     git config --global alias.psu 'push --set-upstream'
+    # shellcheck disable=SC2016
     git config --global alias.ra '!f() { for i in $(git cf); do git rf $i; done }; f'
     git config --global alias.rb 'rebase --gpg-sign'
     git config --global alias.rba 'rebase --abort'
