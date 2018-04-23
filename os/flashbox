@@ -471,7 +471,7 @@ Average number of commits in a version of ${VER}: $(($(git lo "v${VER}..v${VER}.
 
 # Shellcheck function
 function shellcheck() {
-    SHELLCHECK_OPTS="-e SC1090 -e SC1091 -e SC1117 -e SC2028" command shellcheck "$@"
+    command shellcheck -x -e SC1090 -e SC1091 -e SC1117 -e SC2028 "$@"
 }
 
 
