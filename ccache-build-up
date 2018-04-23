@@ -4,6 +4,7 @@
 #
 # Copyright (C) 2018 Nathan Chancellor
 #
+# SC2034: i appears unused. Verify it or export it.
 # shellcheck disable=SC2034
 
 build-clang -t
