@@ -20,6 +20,7 @@ PATCHES_44=${SCRIPTS_FOLDER}/als-patches/${VERSION_44}
 
 
 # 3.18 kernels
+# SC2076: Don't quote rhs of =~, it'll match literally rather than as a regex.
 # shellcheck disable=SC2076
 if [[ "$*" =~ "3.18" ]]; then
     # Pixel (XL)
@@ -111,6 +112,7 @@ fi
 
 
 # 4.4 kernels
+# SC2076: Don't quote rhs of =~, it'll match literally rather than as a regex.
 # shellcheck disable=SC2076
 if [[ "$*" =~ "4.4" ]]; then
     # Moto Z2 (Force)
