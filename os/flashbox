@@ -475,6 +475,28 @@ function shellcheck() {
 }
 
 
+# Shellcheck wrapper
+function sc() {
+    if ! [[ "$(pwd)" =~ "scripts" ]]; then
+        display_error "Not in scripts folder, why are you running sc?"
+        return;
+    fi
+
+    case ${1} in
+        "-a"|"--all") FILES=$(find . -maxdepth 2 -type f -executable  -printf '%P\n' | ag -v bin) ;;
+        *) FILES=$(git diff --name-only --diff-filter=M) ;;
+    esac
+
+    echo
+    for FILE in ${FILES}; do
+        if shellcheck "${FILE}"; then
+            echo "${GRN}${FILE} is clean of warnings/errors!${RST}"
+        fi
+    done
+    echo
+}
+
+
 # makepkg wrapper for Linux kernel
 function mkpkg() {
     if makepkg -si --noconfirm; then
