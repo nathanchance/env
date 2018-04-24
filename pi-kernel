@@ -31,7 +31,8 @@ if [[ ! ${PI} ]]; then
         TOOLCHAIN=${GCC6_FOLDER}/bin/arm-buildroot-linux-gnueabihf-
     fi
 
-    cd "${HOME}/kernels/pi" || die "Kernel source doesn't exist!"
+    SOURCE_FOLDER=${HOME}/kernels/pi
+    cd "${SOURCE_FOLDER}" || die "Kernel source doesn't exist!"
 else
     cd "${HOME}/Documents/Kernel" || die "Kernel source doesn't exist!"
 fi
@@ -76,6 +77,10 @@ function build() {
             echo "\`\`\`"
         } > ${TG_MSG}
         [[ ${PI} || "$*" =~ "-t" ]] && notify "$(cat "${TG_MSG}")"
+        if [[ ! ${PI} ]]; then
+            mkdir -p "${SOURCE_FOLDER}/out/pi_root"
+            make "${JOBS_FLAG}" ARCH=arm CROSS_COMPILE="${CCACHE} ${TOOLCHAIN}" INSTALL_MOD_PATH="${SOURCE_FOLDER}/out/pi_root" O=out modules_install
+        fi
     ) > /dev/null
 }
 
