@@ -50,3 +50,12 @@ function plk() {
     git f upstream rpi-4.14.y
     git ml --no-edit upstream rpi-4.14.y
 }
+
+
+# Update kernel function
+function updk() {
+    sudo rsync nathan@nchancellor.net:~/kernels/pi/out/arch/arm/boot/dts/*.dtb /boot
+    sudo rsync nathan@nchancellor.net:~/kernels/pi/out/arch/arm/boot/dts/overlays/*.dtb* /boot/overlays
+    sudo rsync nathan@nchancellor.net:~/kernels/pi/out/arch/arm/boot/zImage /boot/kernel-nathan.img
+    sudo rsync -r nathan@nchancellor.net:~/kernels/pi/out/pi_root/lib/modules/* /lib/modules
+}
