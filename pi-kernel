@@ -20,8 +20,8 @@ TG_MSG=/tmp/tg-msg.pi-kernel
 
 # Set toolchain to use
 if [[ ! ${PI} ]]; then
-    GCC6_FOLDER=/opt/armv7-eabihf--glibc--stable-2018.02-2
-    GCC7_FOLDER=/opt/armv7-eabihf--glibc--bleeding-edge-2018.02-1
+    GCC6_FOLDER=${TC_FOLDER}/bootlin-gcc-6.4.0-arm32
+    GCC7_FOLDER=${TC_FOLDER}/bootlin-gcc-7.3.0-arm32
     if [[ "$*" =~ "-7" ]]; then
         [[ ! -f ${GCC7_FOLDER} ]] && die "GCC7 folder not found!"
         TOOLCHAIN=${GCC7_FOLDER}/bin/arm-buildroot-linux-gnueabihf-
