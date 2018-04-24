@@ -23,11 +23,11 @@ if [[ ! ${PI} ]]; then
     GCC6_FOLDER=${TC_FOLDER}/bootlin-gcc-6.4.0-arm32
     GCC7_FOLDER=${TC_FOLDER}/bootlin-gcc-7.3.0-arm32
     if [[ "$*" =~ "-7" ]]; then
-        [[ ! -f ${GCC7_FOLDER} ]] && die "GCC7 folder not found!"
+        [[ ! -d ${GCC7_FOLDER} ]] && die "GCC7 folder not found!"
         TOOLCHAIN=${GCC7_FOLDER}/bin/arm-buildroot-linux-gnueabihf-
     fi
     if [[ -z ${TOOLCHAIN} ]]; then
-        [[ ! -f ${GCC6_FOLDER} ]] && die "GCC6 folder not found!"
+        [[ ! -d ${GCC6_FOLDER} ]] && die "GCC6 folder not found!"
         TOOLCHAIN=${GCC6_FOLDER}/bin/arm-buildroot-linux-gnueabihf-
     fi
 
