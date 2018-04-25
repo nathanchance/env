@@ -9,6 +9,9 @@
 # Source our universal functions script and macOS check
 source common
 
+# Hide all non-error output unless verbosity is requsted
+[[ ! "$*" =~ "-v" ]] && exec > /dev/null
+
 # Kernel variable
 KERNEL=kernel7
 
@@ -19,7 +22,9 @@ TG_MSG=/tmp/tg-msg.pi-kernel
 [[ "$(whoami)" = "pi" ]] && PI=true
 
 # Set toolchain to use
-if [[ ! ${PI} ]]; then
+if [[ ${PI} ]]; then
+    cd "${HOME}/Documents/Kernel" || die "Kernel source doesn't exist!"
+else
     GCC6_FOLDER=${TC_FOLDER}/bootlin-gcc-6.4.0-arm32
     GCC7_FOLDER=${TC_FOLDER}/bootlin-gcc-7.3.0-arm32
     if [[ "$*" =~ "-7" ]]; then
@@ -33,8 +38,6 @@ if [[ ! ${PI} ]]; then
 
     SOURCE_FOLDER=${HOME}/kernels/pi
     cd "${SOURCE_FOLDER}" || die "Kernel source doesn't exist!"
-else
-    cd "${HOME}/Documents/Kernel" || die "Kernel source doesn't exist!"
 fi
 
 # Make function for both host and cross compiling
@@ -47,54 +50,52 @@ function kmake() {
 }
 
 function build() {
-    (
-        START="$(date +"%s")"
+    START="$(date +"%s")"
 
-        {
-            echo "\`\`\`"
-            echo "Raspberry Pi kernel build starting..."
-            echo
-            echo "Version $(make kernelversion)"
-            echo "\`\`\`"
-        } > ${TG_MSG}
-        [[ ${PI} || "$*" =~ "-t" ]] && notify "$(cat "${TG_MSG}")"
+    {
+        echo "\`\`\`"
+        echo "Raspberry Pi kernel build starting..."
+        echo
+        echo "Version $(make kernelversion)"
+        echo "\`\`\`"
+    } > ${TG_MSG}
+    [[ ${PI} || "$*" =~ "-t" ]] && notify "$(cat "${TG_MSG}")"
 
-        rm -rf out
+    rm -rf out
 
-        kmake bcm2709_defconfig
+    kmake bcm2709_defconfig
 
-        if time kmake zImage modules dtbs; then
-            RESULT_STRING="completed successfully"
-        else
-            RESULT_STRING="failed"
-        fi
-        {
-            TIME_STRING="$(format_time "${START}" "$(date +"%s")")"
-            echo "\`\`\`"
-            echo "Raspberry Pi kernel build ${RESULT_STRING}!"
-            echo
-            echo "Duration: ${TIME_STRING,,}"
-            echo "\`\`\`"
-        } > ${TG_MSG}
-        [[ ${PI} || "$*" =~ "-t" ]] && notify "$(cat "${TG_MSG}")"
-        if [[ ! ${PI} ]]; then
-            mkdir -p "${SOURCE_FOLDER}/out/pi_root"
-            make "${JOBS_FLAG}" ARCH=arm CROSS_COMPILE="${CCACHE} ${TOOLCHAIN}" INSTALL_MOD_PATH="${SOURCE_FOLDER}/out/pi_root" O=out modules_install
-        fi
-    ) > /dev/null
+    if time kmake zImage modules dtbs; then
+        RESULT_STRING="completed successfully"
+    else
+        RESULT_STRING="failed"
+    fi
+
+    {
+        TIME_STRING="$(format_time "${START}" "$(date +"%s")")"
+        echo "\`\`\`"
+        echo "Raspberry Pi kernel build ${RESULT_STRING}!"
+        echo
+        echo "Duration: ${TIME_STRING,,}"
+        echo "\`\`\`"
+    } > ${TG_MSG}
+    [[ ${PI} || "$*" =~ "-t" ]] && notify "$(cat "${TG_MSG}")"
+
+    if [[ ! ${PI} ]]; then
+        mkdir -p "${SOURCE_FOLDER}/out/pi_root"
+        make "${JOBS_FLAG}" ARCH=arm CROSS_COMPILE="${CCACHE} ${TOOLCHAIN}" INSTALL_MOD_PATH="${SOURCE_FOLDER}/out/pi_root" O=out modules_install
+    fi
 }
 
 function install() {
-    (
-        if [[ ${PI} && -f out/arch/arm/boot/zImage ]]; then
-            sudo make O=out modules_install
-            sudo cp out/arch/arm/boot/dts/*.dtb /boot/
-            sudo cp out/arch/arm/boot/dts/overlays/*.dtb* /boot/overlays/
-            sudo cp arch/arm/boot/dts/overlays/README /boot/overlays/
-            sudo cp out/arch/arm/boot/zImage /boot/$KERNEL.img
-        fi
-    ) > /dev/null
+    if [[ -f out/arch/arm/boot/zImage ]]; then
+        sudo make O=out modules_install
+        sudo cp out/arch/arm/boot/dts/*.dtb /boot/
+        sudo cp out/arch/arm/boot/dts/overlays/*.dtb* /boot/overlays/
+        sudo cp arch/arm/boot/dts/overlays/README /boot/overlays/
+        sudo cp out/arch/arm/boot/zImage /boot/$KERNEL.img
+    fi
 }
 
 [[ "$*" =~ "-b" ]] && build "$@"
-[[ "$*" =~ "-i" ]] && install
+[[ "$*" =~ "-i" && ${PI} ]] && install
