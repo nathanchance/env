@@ -504,10 +504,13 @@ function sc() {
 
 # makepkg wrapper for Linux kernel
 function mkpkg() {
+    local START TIME_STRING
+    START=$(date +%s)
     if makepkg -si --noconfirm; then
-        notify "\`Server kernel build completed successfully\`"
+        TIME_STRING=$(format_time "${START}" "$(date +%s)")
+        notify "\`Server kernel build completed successfully in ${TIME_STRING,,}\`"
     else
-        notify "\`Server kernel build failed\`"
+        notify "\`Server kernel build failed in ${TIME_STRING,,}\`"
     fi
 }
 
@@ -762,4 +765,31 @@ function change-email() {
             git config --unset user.email
             git config --unset user.signingkey ;;
     esac
+}
+
+
+# Update kernel function
+function updk() {
+    if ! cd "${HOME}/repos/pkgbuilds"; then
+        display_error "PKGBUILD folder not found!"
+        return
+    fi
+
+    if ! git fetch upstream packages/linux; then
+        display_error "Error fetching upstream!"
+        return
+    fi
+
+    if ! git ml --no-edit upstream/packages/linux; then
+        display_error "Error updating from upstream!"
+        return
+    fi
+
+    git push
+
+    git cl
+
+    cd trunk || return
+
+    mkpkg
 }
