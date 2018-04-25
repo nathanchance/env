@@ -156,16 +156,6 @@ if [[ "$*" =~ "4.4" ]]; then
 
     # OnePlus 5
     cd "${ALS_HOME}/op5" || die "OnePlus 5 folder does not exist, please clone!"
-    git ch oneplus/QC8998_O_8.0
-    git f origin
-    git rh origin/"$(git rev-parse --abbrev-ref HEAD)"
-    git f upstream || die "upstream remote does not exist!"
-    git ml --no-edit upstream/oneplus/QC8998_O_8.0 || die "Merge conflicts detected, please resolve then continue!"
-
-    merge-stable
-    [[ -f ${PATCHES_44}/op5-O_8.0-commands ]] && bash "${PATCHES_44}/op5-O_8.0-commands" "v${VERSION_44}"
-
-    git push
     git ch oneplus/QC8998_O_8.1
     git rh origin/"$(git rev-parse --abbrev-ref HEAD)"
     git ml --no-edit upstream/oneplus/QC8998_O_8.1 || die "Merge conflicts detected, please resolve then continue!"
