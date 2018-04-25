@@ -12,6 +12,11 @@ source common
 # Hide all non-error output unless verbosity is requsted
 [[ ! "$*" =~ "-v" ]] && exec > /dev/null
 
+# Allow specification of 32-bit versus 64-bit
+[[ "$*" =~ "-32" ]] && ARCH=arm
+[[ "$*" =~ "-64" ]] && ARCH=arm64
+[[ -z ${ARCH} ]] && ARCH=arm
+
 # Kernel variable
 KERNEL=kernel7
 
@@ -25,16 +30,14 @@ TG_MSG=/tmp/tg-msg.pi-kernel
 if [[ ${PI} ]]; then
     cd "${HOME}/Documents/Kernel" || die "Kernel source doesn't exist!"
 else
-    GCC6_FOLDER=${TC_FOLDER}/bootlin-gcc-6.4.0-arm32
-    GCC7_FOLDER=${TC_FOLDER}/bootlin-gcc-7.3.0-arm32
-    if [[ "$*" =~ "-7" ]]; then
-        [[ ! -d ${GCC7_FOLDER} ]] && die "GCC7 folder not found!"
-        TOOLCHAIN=${GCC7_FOLDER}/bin/arm-buildroot-linux-gnueabihf-
-    fi
-    if [[ -z ${TOOLCHAIN} ]]; then
-        [[ ! -d ${GCC6_FOLDER} ]] && die "GCC6 folder not found!"
-        TOOLCHAIN=${GCC6_FOLDER}/bin/arm-buildroot-linux-gnueabihf-
-    fi
+	case "$*" in
+		*"-6"*) GCC_FOLDER=${TC_FOLDER}/bootlin-gcc-6.4.0-${ARCH} ;;
+		*"-7"*) GCC_FOLDER=${TC_FOLDER}/bootlin-gcc-7.3.0-${ARCH} ;;
+	esac
+	[[ -z ${GCC_FOLDER} ]] && GCC_FOLDER=${TC_FOLDER}/bootlin-gcc-7.3.0-${ARCH}
+    GCC=$(find "${GCC_FOLDER}/bin" \( -type f -o -type l \) -name '*-gcc' | head -n1)
+    [[ -z ${GCC} ]] && die "GCC toolchain could not be found!"
+    CC=${GCC%gcc}
 
     SOURCE_FOLDER=${HOME}/kernels/pi
     cd "${SOURCE_FOLDER}" || die "Kernel source doesn't exist!"
@@ -45,7 +48,7 @@ function kmake() {
     if [[ ${PI} ]]; then
         make "${JOBS_FLAG}" O=out "$@"
     else
-        make "${JOBS_FLAG}" ARCH=arm CROSS_COMPILE="${CCACHE} ${TOOLCHAIN}" O=out "$@"
+        make "${JOBS_FLAG}" ARCH=${ARCH} CROSS_COMPILE="${CCACHE} ${CC}" O=out "$@"
     fi
 }
 
@@ -63,9 +66,17 @@ function build() {
 
     rm -rf out
 
-    kmake bcm2709_defconfig
+    if [[ ${ARCH} = "arm" ]]; then
+        DEFCONFIG=bcm2709_defconfig
+        IMAGE=zImage
+    else
+        DEFCONFIG=bcmrpi3_defconfig
+        IMAGE=Image
+    fi
 
-    if time kmake zImage modules dtbs; then
+    kmake "${DEFCONFIG}"
+
+    if time kmake "${IMAGE}" modules dtbs; then
         RESULT_STRING="completed successfully"
     else
         RESULT_STRING="failed"
@@ -83,7 +94,7 @@ function build() {
 
     if [[ ! ${PI} ]]; then
         mkdir -p "${SOURCE_FOLDER}/out/pi_root"
-        make "${JOBS_FLAG}" ARCH=arm CROSS_COMPILE="${CCACHE} ${TOOLCHAIN}" INSTALL_MOD_PATH="${SOURCE_FOLDER}/out/pi_root" O=out modules_install
+        kmake INSTALL_MOD_PATH="${SOURCE_FOLDER}/out/pi_root" modules_install
     fi
 }
 
