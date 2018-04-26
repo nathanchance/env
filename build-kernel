@@ -185,13 +185,13 @@ FINAL_IMAGE=$(find out -name 'Image.*-dtb')
 END=$(date +%s)
 if [[ -f ${FINAL_IMAGE} ]]; then
     echo
-    errcho "${GRN}BUILT IN $(format_time "${START}" "${END}")${RST}"
+    errcho "${GRN}BUILD SUCCESSFUL IN $(format_time "${START}" "${END}")${RST}"
     echo
     echo "${BOLD}IMAGE:${RST} ${FINAL_IMAGE}"
     echo
     echo "${BOLD}VERSION:${RST} $(parse_version)"
 else
-    >&2 die "Kernel build failed!"
+    >&2 die "BUILD FAILED IN $(format_time "${START}" "${END}")!"
 fi
 
 # Upload image if necessary
