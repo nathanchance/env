@@ -446,19 +446,19 @@ function doesitbuild() {
             echo
             # Clang 7.0.1
             for DEFCONFIG in arch/arm64/configs/aosp_*; do
-                build-kernel -d "$(basename "${DEFCONFIG}")" -w -Werror -r -c -ct aosp-clang/clang-4679922
+                build-kernel -d "$(basename "${DEFCONFIG}")" -w -Werror -c -ct aosp-clang/clang-4679922 "${@}"
             done
             # Clang 6.0.2
             for DEFCONFIG in arch/arm64/configs/aosp_*; do
-                build-kernel -d "$(basename "${DEFCONFIG}")" -w -Werror -r -c -ct aosp-clang/clang-4691093
+                build-kernel -d "$(basename "${DEFCONFIG}")" -w -Werror -c -ct aosp-clang/clang-4691093 "${@}"
             done
             # GCC 7.3.0
             for DEFCONFIG in arch/arm64/configs/aosp_*; do
-                build-kernel -d "$(basename "${DEFCONFIG}")" -w -Werror -r -gt bootlin-gcc-7.3.0-arm64
+                build-kernel -d "$(basename "${DEFCONFIG}")" -w -Werror -gt bootlin-gcc-7.3.0-arm64 "${@}"
             done
             # GCC 4.9.4
             for DEFCONFIG in arch/arm64/configs/aosp_*; do
-                build-kernel -d "$(basename "${DEFCONFIG}")" -w -Werror -r
+                build-kernel -d "$(basename "${DEFCONFIG}")" -w -Werror "${@}"
             done
             echo ;;
         *)
