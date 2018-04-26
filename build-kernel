@@ -10,6 +10,11 @@
 # Source our universal functions script and macOS check
 source common
 
+# Echo to stderr
+function errcho() {
+    (>&2 echo "${@}")
+}
+
 # Start time
 START=$(date +%s)
 
@@ -55,6 +60,10 @@ while [[ $# -ge 1 ]]; do
 
             GCC_TOOLCHAIN_FOLDER=${1} ;;
 
+        # Just show if build was successful or not
+        "-r"|"--show-only-result")
+            SHOW_ONLY_RESULT=true ;;
+
         # Upload image to transfer.sh
         "-u"|"--upload")
             UPLOAD=true ;;
@@ -62,6 +71,10 @@ while [[ $# -ge 1 ]]; do
         # Show only warnings and errors during compilation
         "-w"|"--warnings")
             VERBOSITY=1 ;;
+
+        # Compile with -Werror
+        "-Werror")
+            WERROR=true ;;
     esac
 
     shift
@@ -116,6 +129,10 @@ function build() {
 
     # Build kernel image
     kmake "${DEFCONFIG}"
+    if [[ ${WERROR} ]]; then
+        ./scripts/config --file out/.config -e CC_WERROR
+        kmake olddefconfig
+    fi
     kmake
 }
 
@@ -144,6 +161,9 @@ if [[ -n ${FOLDER} ]]; then
 fi
 [[ ! -f Makefile ]] && die "This must be run in a kernel tree!"
 
+# Start hiding output
+[[ ${SHOW_ONLY_RESULT} ]] && exec > /dev/null
+
 # Show the base version we are making
 header "BUILDING $(make CROSS_COMPILE="" kernelversion)"
 
@@ -164,11 +184,14 @@ FINAL_IMAGE=$(find out -name 'Image.*-dtb')
 # Report success
 END=$(date +%s)
 if [[ -f ${FINAL_IMAGE} ]]; then
-    echo "\n${GRN}BUILT IN $(format_time "${START}" "${END}")${RST}\n
-${BOLD}IMAGE:${RST} ${FINAL_IMAGE}\n
-${BOLD}VERSION:${RST} $(parse_version)"
+    echo
+    errcho "${GRN}BUILT IN $(format_time "${START}" "${END}")${RST}"
+    echo
+    echo "${BOLD}IMAGE:${RST} ${FINAL_IMAGE}"
+    echo
+    echo "${BOLD}VERSION:${RST} $(parse_version)"
 else
-    die "Kernel build failed!"
+    >&2 die "Kernel build failed!"
 fi
 
 # Upload image if necessary
