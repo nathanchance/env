@@ -2,5 +2,5 @@
 
 PATCHES_FOLDER=$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")" && pwd)
 git ra
-git ap -v "${PATCHES_FOLDER}/Makefile.diff"
+git ap "${PATCHES_FOLDER}/Makefile.diff"
 git fm

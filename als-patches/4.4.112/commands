@@ -1,1 +1,1 @@
-git ap -v $(git cl; git fp -1 fbc7c07ec23c040179384a1f16b62b6030eb6bdd; sed -i 's/READ_ONCE/ACCESS_ONCE/g' *.patch); git cl
+git ap $(git cl; git fp -1 fbc7c07ec23c040179384a1f16b62b6030eb6bdd; sed -i 's/READ_ONCE/ACCESS_ONCE/g' *.patch); git cl
