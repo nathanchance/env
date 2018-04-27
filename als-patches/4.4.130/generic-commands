@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+
+PATCHES_FOLDER=$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")" && pwd)
+git ra
+git ap "${PATCHES_FOLDER}/route.c.diff"
+git fm
