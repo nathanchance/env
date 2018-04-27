@@ -680,7 +680,7 @@ function package_image_commands() {
     . build/envsetup.sh
     lunch aosp_${DEVICE_NAME_WEB}-user
     make "${JOBS_FLAG}" clean
-    make "${JOBS_FLAG}" bootimage
+    LANG="" LC_ALL=C make "${JOBS_FLAG}" bootimage
     rmvenv
 }
 
