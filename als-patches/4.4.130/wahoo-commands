@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+
+PATCHES_FOLDER=$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")" && pwd)
+git rf drivers/staging/android/ion/ion_system_heap.c
+git fm

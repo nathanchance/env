@@ -10,8 +10,8 @@
 source common
 ROMS_HOME=${HOME}/kernels/roms
 FRANCO_HOME=${HOME}/kernels/franco
-PATCHES_318=${SCRIPTS_FOLDER}/als-patches/3.18.106
-# PATCHES_44=${SCRIPTS_FOLDER}/als-patches/4.4.129
+PATCHES_318=${SCRIPTS_FOLDER}/als-patches/3.18.107
+# PATCHES_44=${SCRIPTS_FOLDER}/als-patches/4.4.130
 
 
 
