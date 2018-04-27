@@ -172,7 +172,7 @@ case ${VERBOSITY} in
     "2")
         build ;;
     "1")
-        build |& ag --nocolor "error:|warning:" |& ag -v "which has unmet direct dependencies|choice value used outside its choice group" ;;
+        build |& ag --nocolor "error:|warning:" |& ag -v "which has unmet direct dependencies|choice value used outside its choice group|reassigning to symbol|changes choice state" ;;
     *)
         build &> /dev/null ;;
 esac
