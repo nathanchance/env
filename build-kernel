@@ -50,7 +50,8 @@ while [[ $# -ge 1 ]]; do
 
         # Only show errors
         "-e"|"--errors")
-            VERBOSITY=1 ;;
+            VERBOSITY=1
+            AG_LOOK_FOR="error:" ;;
 
         # Kernel folder
         "-f"|"--folder")
@@ -74,7 +75,8 @@ while [[ $# -ge 1 ]]; do
 
         # Show only warnings and errors during compilation
         "-w"|"--warnings")
-            VERBOSITY=2 ;;
+            VERBOSITY=2
+            AG_LOOK_FOR="error:|warning:" ;;
 
         # Compile with -Werror
         "-Werror")
@@ -175,10 +177,9 @@ header "BUILDING $(make CROSS_COMPILE="" kernelversion)"
 case ${VERBOSITY} in
     "3")
         build ;;
-    "2")
-        build |& ag --nocolor "error:|warning:" |& ag -v "which has unmet direct dependencies|choice value used outside its choice group|reassigning to symbol|changes choice state" ;;
-    "1")
-        build |& ag --nocolor "error:" |& ag -v "which has unmet direct dependencies|choice value used outside its choice group|reassigning to symbol|changes choice state" ;;
+    "1"|"2")
+        AG_IGNORE="which has unmet direct dependencies|choice value used outside its choice group|reassigning to symbol|changes choice state"
+        build |& ag --nocolor "${AG_LOOK_FOR}" |& ag -v "${AG_IGNORE}" ;;
     *)
         build &> /dev/null ;;
 esac
