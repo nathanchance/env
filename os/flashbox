@@ -563,7 +563,6 @@ function sq() {
 function clean-kernels() {
     REPOS="
 ${HOME}/kernels/als/marlin
-${HOME}/kernels/als/mata
 ${HOME}/kernels/als/msm-3.18
 ${HOME}/kernels/als/msm-4.4
 ${HOME}/kernels/als/nash
@@ -582,7 +581,8 @@ ${HOME}/kernels/pi
 ${HOME}/kernels/roms/aicp-op5
 ${HOME}/kernels/roms/aosip-mata
 ${HOME}/kernels/roms/gzr-op3
-${HOME}/kernels/roms/gzr-op5"
+${HOME}/kernels/roms/gzr-op5
+${HOME}/kernels/xperia/kernel"
 
     for REPO in ${REPOS}; do
         header "${REPO}"
