@@ -24,9 +24,11 @@ function flashbox_aliases() {
     alias pkg='cd ${REPO_FOLDER}/pkgbuilds'
     alias op5='cd ${KERNEL_FOLDER}/flash/op5'
     alias op5ak='cd ${KERNEL_FOLDER}/flash/anykernel2-op5'
+    alias pi='cd ${KERNEL_FOLDER}/pi'
     alias pxl2='cd ${KERNEL_FOLDER}/flash/wahoo'
     alias pxl2ak='cd ${KERNEL_FOLDER}/flash/anykernel2-wahoo'
     alias tlc='cd ${TC_FOLDER}'
+    alias sod='cd ${KERNEL_FOLDER}/sony/kernel'
     alias spt='cd ${SCRIPTS_FOLDER}'
 
     # Generate a kernel version for the current tree
@@ -441,7 +443,7 @@ function doesitbuild() {
             build-kernel -d msmcortex-perf_defconfig -w -c
             # GCC 4.9.4
             build-kernel -d msmcortex-perf_defconfig -w ;;
-        *xperia*)
+        *sony*)
             local DEFCONFIG
             echo
             # Clang 7.0.1
