@@ -19,6 +19,7 @@ function errcho() {
 START=$(date +%s)
 
 # Gather parameters
+PARAMS=( "${@}" )
 while [[ $# -ge 1 ]]; do
     case ${1} in
         # Architecture to build
@@ -190,15 +191,16 @@ FINAL_IMAGE=$(find out -name 'Image.*-dtb')
 
 # Report success
 END=$(date +%s)
+[[ ${SHOW_ONLY_RESULT} ]] && SCRIPT_COMMAND="$(basename "${0}") ${PARAMS[*]}  |  "
 if [[ -f ${FINAL_IMAGE} ]]; then
     echo
-    errcho "${GRN}BUILD SUCCESSFUL IN $(format_time "${START}" "${END}")${RST}"
+    errcho "${SCRIPT_COMMAND}${GRN}BUILD SUCCESSFUL IN $(format_time "${START}" "${END}")${RST}"
     echo
     echo "${BOLD}IMAGE:${RST} ${FINAL_IMAGE}"
     echo
     echo "${BOLD}VERSION:${RST} $(parse_version)"
 else
-    >&2 die "BUILD FAILED IN $(format_time "${START}" "${END}")!"
+    >&2 die "${RST}${SCRIPT_COMMAND}${RED}BUILD FAILED IN $(format_time "${START}" "${END}")!"
 fi
 
 # Upload image if necessary
