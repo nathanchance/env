@@ -825,3 +825,35 @@ function stable-patch() {
 
     curl https://cdn.kernel.org/pub/linux/kernel/v4.x/incr/patch-4.4."${CUR_VER}"-"${TARGET_VER}".xz | xz -cd | git ap
 }
+
+
+function test-pulls() {
+    local PULLS
+
+    git fetch origin
+
+    case "$(pwd)" in
+        *"build-tools-gcc"*)
+            git ch master
+            git rh origin/master
+            git bd testing &>/dev/null
+            git ch -b testing
+            if [[ $# -gt 0 ]]; then
+                for NUMBER in ${@}; do
+                    git pll --no-edit origin pull/"${NUMBER}"/head
+                done
+            fi ;;
+        *"sony"*)
+            git ch aosp/LA.UM.6.4.r1
+            git rh origin/aosp/LA.UM.6.4.r1
+            git bd testing &>/dev/null
+            git ch -b testing
+            if [[ $# -gt 0 ]]; then
+                for NUMBER in ${@}; do
+                    git pll --no-edit origin pull/"${NUMBER}"/head
+                done
+            fi
+            git m --no-edit wlan
+            doesitbuild -r ;;
+    esac
+}
