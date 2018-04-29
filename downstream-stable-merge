@@ -20,51 +20,6 @@ PATCHES_318=${SCRIPTS_FOLDER}/als-patches/3.18.107
 # SC2076: Don't quote rhs of =~, it'll match literally rather than as a regex.
 # shellcheck disable=SC2076
 if [[ "$*" =~ "3.18" ]]; then
-    # Franco Kernel Mido (downstream of msm-3.18)
-    cd "${FRANCO_HOME}/mido" || die "mido does not exist, please clone!"
-    CURRENT_BRANCH=$(git cb)
-    git fetch origin
-    git ml --no-edit origin/"${CURRENT_BRANCH}" || die "Merge conflicts detected, please resolve then continue!"
-    git fetch als || die "android-linux-stable remote doesn't exist, please add then continue!"
-    git ml --no-edit als/kernel.lnx.3.18.r33-rel || die "Merge conflicts detected, please resolve then continue!"
-    git push -f nathanchance HEAD:"${CURRENT_BRANCH}" || die "Can't push source to fork!"
-
-
-
-
-    # Franco Kernel OP3 (downstream of op3)
-    cd "${FRANCO_HOME}/op3" || die "op3 does not exist, please clone!"
-    CURRENT_BRANCH=$(git cb)
-    git fetch origin
-    git ml --no-edit origin/"${CURRENT_BRANCH}" || die "Merge conflicts detected, please resolve then continue!"
-    git fetch als || die "android-linux-stable remote doesn't exist, please add then continue!"
-    git ml --no-edit als/oneplus/QC8996_O_8.0.0 || die "Merge conflicts detected, please resolve then continue!"
-    git push -f nathanchance HEAD:"${CURRENT_BRANCH}" || die "Can't push source to fork!"
-
-
-
-
-    # Franco Kernel Tissot (downstream of tissot)
-    cd "${FRANCO_HOME}/tissot" || die "tissot does not exist, please clone!"
-    git checkout oreo
-    CURRENT_BRANCH=$(git cb)
-    git fetch origin
-    git ml --no-edit origin/"${CURRENT_BRANCH}" || die "Merge conflicts detected, please resolve then continue!"
-    git fetch als || die "android-linux-stable remote doesn't exist, please add then continue!"
-    git ml --no-edit als/tissot-o-oss || die "Merge conflicts detected, please resolve then continue!"
-    git push -f nathanchance HEAD:"${CURRENT_BRANCH}" || die "Can't push source to fork!"
-
-    git checkout oreo-mr1
-    CURRENT_BRANCH=$(git cb)
-    git fetch origin
-    git ml --no-edit origin/"${CURRENT_BRANCH}" || die "Merge conflicts detected, please resolve then continue!"
-    merge-stable
-    [[ -f ${PATCHES_318}/fk-tissot-commands ]] && bash "${PATCHES_318}/fk-tissot-commands"
-    git push -f nathanchance HEAD:"${CURRENT_BRANCH}" || die "Can't push source to fork!"
-
-
-
-
     # GZR OnePlus 3 (downstream of op3)
     cd "${ROMS_HOME}/gzr-op3" || die "gzr-op3 does not exist, please clone!"
     CURRENT_BRANCH=$(git cb)
