@@ -828,8 +828,6 @@ function stable-patch() {
 
 
 function test-pulls() {
-    local PULLS
-
     git fetch origin
 
     case "$(pwd)" in
@@ -839,7 +837,7 @@ function test-pulls() {
             git bd testing &>/dev/null
             git ch -b testing
             if [[ $# -gt 0 ]]; then
-                for NUMBER in ${@}; do
+                for NUMBER in "${@}"; do
                     git pll --no-edit origin pull/"${NUMBER}"/head
                 done
             fi ;;
@@ -849,7 +847,7 @@ function test-pulls() {
             git bd testing &>/dev/null
             git ch -b testing
             if [[ $# -gt 0 ]]; then
-                for NUMBER in ${@}; do
+                for NUMBER in "${@}"; do
                     git pll --no-edit origin pull/"${NUMBER}"/head
                 done
             fi
