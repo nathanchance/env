@@ -1,0 +1,316 @@
+From 5a6cac93421430ff51308ac40c4f8afaabbf7e71 Mon Sep 17 00:00:00 2001
+From: Vasanthakumar Thiagarajan <vthiagar@qti.qualcomm.com>
+Date: Fri, 27 Oct 2017 18:35:31 +0300
+Subject: [PATCH] ath10k: rebuild crypto header in rx data frames
+
+Rx data frames notified through HTT_T2H_MSG_TYPE_RX_IND and
+HTT_T2H_MSG_TYPE_RX_FRAG_IND expect PN/TSC check to be done
+on host (mac80211) rather than firmware. Rebuild cipher header
+in every received data frames (that are notified through those
+HTT interfaces) from the rx_hdr_status tlv available in the
+rx descriptor of the first msdu. Skip setting RX_FLAG_IV_STRIPPED
+flag for the packets which requires mac80211 PN/TSC check support
+and set appropriate RX_FLAG for stripped crypto tail. Hw QCA988X,
+QCA9887, QCA99X0, QCA9984, QCA9888 and QCA4019 currently need the
+rebuilding of cipher header to perform PN/TSC check for replay
+attack.
+
+Please note that removing crypto tail for CCMP-256, GCMP and GCMP-256 ciphers
+in raw mode needs to be fixed. Since Rx with these ciphers in raw
+mode does not work in the current form even without this patch and
+removing crypto tail for these chipers needs clean up, raw mode related
+issues in CCMP-256, GCMP and GCMP-256 can be addressed in follow up
+patches.
+
+Tested-by: Manikanta Pubbisetty <mpubbise@qti.qualcomm.com>
+Signed-off-by: Vasanthakumar Thiagarajan <vthiagar@qti.qualcomm.com>
+Signed-off-by: Kalle Valo <kvalo@qca.qualcomm.com>
+Signed-off-by: Nathan Chancellor <natechancellor@gmail.com>
+---
+ drivers/net/wireless/ath/ath10k/htt_rx.c  | 105 ++++++++++++++++++----
+ drivers/net/wireless/ath/ath10k/rx_desc.h |   3 +
+ 2 files changed, 92 insertions(+), 16 deletions(-)
+
+diff --git a/drivers/net/wireless/ath/ath10k/htt_rx.c b/drivers/net/wireless/ath/ath10k/htt_rx.c
+index 437ea2c192b3..16d9bd4385de 100644
+--- a/drivers/net/wireless/ath/ath10k/htt_rx.c
++++ b/drivers/net/wireless/ath/ath10k/htt_rx.c
+@@ -564,6 +564,11 @@ static int ath10k_htt_rx_crypto_param_len(struct ath10k *ar,
+ 		return IEEE80211_TKIP_IV_LEN;
+ 	case HTT_RX_MPDU_ENCRYPT_AES_CCM_WPA2:
+ 		return IEEE80211_CCMP_HDR_LEN;
++	case HTT_RX_MPDU_ENCRYPT_AES_CCM256_WPA2:
++		return IEEE80211_CCMP_256_HDR_LEN;
++	case HTT_RX_MPDU_ENCRYPT_AES_GCMP_WPA2:
++	case HTT_RX_MPDU_ENCRYPT_AES_GCMP256_WPA2:
++		return IEEE80211_GCMP_HDR_LEN;
+ 	case HTT_RX_MPDU_ENCRYPT_WEP128:
+ 	case HTT_RX_MPDU_ENCRYPT_WAPI:
+ 		break;
+@@ -589,6 +594,11 @@ static int ath10k_htt_rx_crypto_tail_len(struct ath10k *ar,
+ 		return IEEE80211_TKIP_ICV_LEN;
+ 	case HTT_RX_MPDU_ENCRYPT_AES_CCM_WPA2:
+ 		return IEEE80211_CCMP_MIC_LEN;
++	case HTT_RX_MPDU_ENCRYPT_AES_CCM256_WPA2:
++		return IEEE80211_CCMP_256_MIC_LEN;
++	case HTT_RX_MPDU_ENCRYPT_AES_GCMP_WPA2:
++	case HTT_RX_MPDU_ENCRYPT_AES_GCMP256_WPA2:
++		return IEEE80211_GCMP_MIC_LEN;
+ 	case HTT_RX_MPDU_ENCRYPT_WEP128:
+ 	case HTT_RX_MPDU_ENCRYPT_WAPI:
+ 		break;
+@@ -1040,9 +1050,21 @@ static void ath10k_htt_rx_h_undecap_raw(struct ath10k *ar,
+ 	hdr = (void *)msdu->data;
+ 
+ 	/* Tail */
+-	if (status->flag & RX_FLAG_IV_STRIPPED)
++	if (status->flag & RX_FLAG_IV_STRIPPED) {
+ 		skb_trim(msdu, msdu->len -
+ 			 ath10k_htt_rx_crypto_tail_len(ar, enctype));
++	} else {
++		/* MIC */
++		if ((status->flag & RX_FLAG_MIC_STRIPPED) &&
++		    enctype == HTT_RX_MPDU_ENCRYPT_AES_CCM_WPA2)
++			skb_trim(msdu, msdu->len - 8);
++
++		/* ICV */
++		if (status->flag & RX_FLAG_ICV_STRIPPED &&
++		    enctype != HTT_RX_MPDU_ENCRYPT_AES_CCM_WPA2)
++			skb_trim(msdu, msdu->len -
++				 ath10k_htt_rx_crypto_tail_len(ar, enctype));
++	}
+ 
+ 	/* MMIC */
+ 	if ((status->flag & RX_FLAG_MMIC_STRIPPED) &&
+@@ -1064,7 +1086,8 @@ static void ath10k_htt_rx_h_undecap_raw(struct ath10k *ar,
+ static void ath10k_htt_rx_h_undecap_nwifi(struct ath10k *ar,
+ 					  struct sk_buff *msdu,
+ 					  struct ieee80211_rx_status *status,
+-					  const u8 first_hdr[64])
++					  const u8 first_hdr[64],
++					  enum htt_rx_mpdu_encrypt_type enctype)
+ {
+ 	struct ieee80211_hdr *hdr;
+ 	struct htt_rx_desc *rxd;
+@@ -1072,6 +1095,7 @@ static void ath10k_htt_rx_h_undecap_nwifi(struct ath10k *ar,
+ 	u8 da[ETH_ALEN];
+ 	u8 sa[ETH_ALEN];
+ 	int l3_pad_bytes;
++	int bytes_aligned = ar->hw_params.decap_align_bytes;
+ 
+ 	/* Delivered decapped frame:
+ 	 * [nwifi 802.11 header] <-- replaced with 802.11 hdr
+@@ -1100,6 +1124,14 @@ static void ath10k_htt_rx_h_undecap_nwifi(struct ath10k *ar,
+ 	/* push original 802.11 header */
+ 	hdr = (struct ieee80211_hdr *)first_hdr;
+ 	hdr_len = ieee80211_hdrlen(hdr->frame_control);
++
++	if (!(status->flag & RX_FLAG_IV_STRIPPED)) {
++		memcpy(skb_push(msdu,
++				ath10k_htt_rx_crypto_param_len(ar, enctype)),
++		       (void *)hdr + round_up(hdr_len, bytes_aligned),
++			ath10k_htt_rx_crypto_param_len(ar, enctype));
++	}
++
+ 	memcpy(skb_push(msdu, hdr_len), hdr, hdr_len);
+ 
+ 	/* original 802.11 header has a different DA and in
+@@ -1160,6 +1192,7 @@ static void ath10k_htt_rx_h_undecap_eth(struct ath10k *ar,
+ 	u8 sa[ETH_ALEN];
+ 	int l3_pad_bytes;
+ 	struct htt_rx_desc *rxd;
++	int bytes_aligned = ar->hw_params.decap_align_bytes;
+ 
+ 	/* Delivered decapped frame:
+ 	 * [eth header] <-- replaced with 802.11 hdr & rfc1042/llc
+@@ -1188,6 +1221,14 @@ static void ath10k_htt_rx_h_undecap_eth(struct ath10k *ar,
+ 	/* push original 802.11 header */
+ 	hdr = (struct ieee80211_hdr *)first_hdr;
+ 	hdr_len = ieee80211_hdrlen(hdr->frame_control);
++
++	if (!(status->flag & RX_FLAG_IV_STRIPPED)) {
++		memcpy(skb_push(msdu,
++				ath10k_htt_rx_crypto_param_len(ar, enctype)),
++		       (void *)hdr + round_up(hdr_len, bytes_aligned),
++			ath10k_htt_rx_crypto_param_len(ar, enctype));
++	}
++
+ 	memcpy(skb_push(msdu, hdr_len), hdr, hdr_len);
+ 
+ 	/* original 802.11 header has a different DA and in
+@@ -1201,12 +1242,14 @@ static void ath10k_htt_rx_h_undecap_eth(struct ath10k *ar,
+ static void ath10k_htt_rx_h_undecap_snap(struct ath10k *ar,
+ 					 struct sk_buff *msdu,
+ 					 struct ieee80211_rx_status *status,
+-					 const u8 first_hdr[64])
++					 const u8 first_hdr[64],
++					 enum htt_rx_mpdu_encrypt_type enctype)
+ {
+ 	struct ieee80211_hdr *hdr;
+ 	size_t hdr_len;
+ 	int l3_pad_bytes;
+ 	struct htt_rx_desc *rxd;
++	int bytes_aligned = ar->hw_params.decap_align_bytes;
+ 
+ 	/* Delivered decapped frame:
+ 	 * [amsdu header] <-- replaced with 802.11 hdr
+@@ -1222,6 +1265,14 @@ static void ath10k_htt_rx_h_undecap_snap(struct ath10k *ar,
+ 
+ 	hdr = (struct ieee80211_hdr *)first_hdr;
+ 	hdr_len = ieee80211_hdrlen(hdr->frame_control);
++
++	if (!(status->flag & RX_FLAG_IV_STRIPPED)) {
++		memcpy(skb_push(msdu,
++				ath10k_htt_rx_crypto_param_len(ar, enctype)),
++		       (void *)hdr + round_up(hdr_len, bytes_aligned),
++			ath10k_htt_rx_crypto_param_len(ar, enctype));
++	}
++
+ 	memcpy(skb_push(msdu, hdr_len), hdr, hdr_len);
+ }
+ 
+@@ -1256,13 +1307,15 @@ static void ath10k_htt_rx_h_undecap(struct ath10k *ar,
+ 					    is_decrypted);
+ 		break;
+ 	case RX_MSDU_DECAP_NATIVE_WIFI:
+-		ath10k_htt_rx_h_undecap_nwifi(ar, msdu, status, first_hdr);
++		ath10k_htt_rx_h_undecap_nwifi(ar, msdu, status, first_hdr,
++					      enctype);
+ 		break;
+ 	case RX_MSDU_DECAP_ETHERNET2_DIX:
+ 		ath10k_htt_rx_h_undecap_eth(ar, msdu, status, first_hdr, enctype);
+ 		break;
+ 	case RX_MSDU_DECAP_8023_SNAP_LLC:
+-		ath10k_htt_rx_h_undecap_snap(ar, msdu, status, first_hdr);
++		ath10k_htt_rx_h_undecap_snap(ar, msdu, status, first_hdr,
++					     enctype);
+ 		break;
+ 	}
+ }
+@@ -1305,7 +1358,8 @@ static void ath10k_htt_rx_h_csum_offload(struct sk_buff *msdu)
+ 
+ static void ath10k_htt_rx_h_mpdu(struct ath10k *ar,
+ 				 struct sk_buff_head *amsdu,
+-				 struct ieee80211_rx_status *status)
++				 struct ieee80211_rx_status *status,
++				 bool fill_crypt_header)
+ {
+ 	struct sk_buff *first;
+ 	struct sk_buff *last;
+@@ -1315,7 +1369,6 @@ static void ath10k_htt_rx_h_mpdu(struct ath10k *ar,
+ 	enum htt_rx_mpdu_encrypt_type enctype;
+ 	u8 first_hdr[64];
+ 	u8 *qos;
+-	size_t hdr_len;
+ 	bool has_fcs_err;
+ 	bool has_crypto_err;
+ 	bool has_tkip_err;
+@@ -1340,15 +1393,17 @@ static void ath10k_htt_rx_h_mpdu(struct ath10k *ar,
+ 	 * decapped header. It'll be used for undecapping of each MSDU.
+ 	 */
+ 	hdr = (void *)rxd->rx_hdr_status;
+-	hdr_len = ieee80211_hdrlen(hdr->frame_control);
+-	memcpy(first_hdr, hdr, hdr_len);
++	memcpy(first_hdr, hdr, RX_HTT_HDR_STATUS_LEN);
+ 
+ 	/* Each A-MSDU subframe will use the original header as the base and be
+ 	 * reported as a separate MSDU so strip the A-MSDU bit from QoS Ctl.
+ 	 */
+ 	hdr = (void *)first_hdr;
+-	qos = ieee80211_get_qos_ctl(hdr);
+-	qos[0] &= ~IEEE80211_QOS_CTL_A_MSDU_PRESENT;
++
++	if (ieee80211_is_data_qos(hdr->frame_control)) {
++		qos = ieee80211_get_qos_ctl(hdr);
++		qos[0] &= ~IEEE80211_QOS_CTL_A_MSDU_PRESENT;
++	}
+ 
+ 	/* Some attention flags are valid only in the last MSDU. */
+ 	last = skb_peek_tail(amsdu);
+@@ -1395,9 +1450,14 @@ static void ath10k_htt_rx_h_mpdu(struct ath10k *ar,
+ 		status->flag |= RX_FLAG_DECRYPTED;
+ 
+ 		if (likely(!is_mgmt))
+-			status->flag |= RX_FLAG_IV_STRIPPED |
+-					RX_FLAG_MMIC_STRIPPED;
+-}
++			status->flag |= RX_FLAG_MMIC_STRIPPED;
++
++		if (fill_crypt_header)
++			status->flag |= RX_FLAG_MIC_STRIPPED |
++					RX_FLAG_ICV_STRIPPED;
++		else
++			status->flag |= RX_FLAG_IV_STRIPPED;
++	}
+ 
+ 	skb_queue_walk(amsdu, msdu) {
+ 		ath10k_htt_rx_h_csum_offload(msdu);
+@@ -1413,6 +1473,9 @@ static void ath10k_htt_rx_h_mpdu(struct ath10k *ar,
+ 		if (is_mgmt)
+ 			continue;
+ 
++		if (fill_crypt_header)
++			continue;
++
+ 		hdr = (void *)msdu->data;
+ 		hdr->frame_control &= ~__cpu_to_le16(IEEE80211_FCTL_PROTECTED);
+ 	}
+@@ -1423,6 +1486,9 @@ static void ath10k_htt_rx_h_deliver(struct ath10k *ar,
+ 				    struct ieee80211_rx_status *status)
+ {
+ 	struct sk_buff *msdu;
++	struct sk_buff *first_subframe;
++
++	first_subframe = skb_peek(amsdu);
+ 
+ 	while ((msdu = __skb_dequeue(amsdu))) {
+ 		/* Setup per-MSDU flags */
+@@ -1431,6 +1497,13 @@ static void ath10k_htt_rx_h_deliver(struct ath10k *ar,
+ 		else
+ 			status->flag |= RX_FLAG_AMSDU_MORE;
+ 
++		if (msdu == first_subframe) {
++			first_subframe = NULL;
++			status->flag &= ~RX_FLAG_ALLOW_SAME_PN;
++		} else {
++			status->flag |= RX_FLAG_ALLOW_SAME_PN;
++		}
++
+ 		ath10k_process_rx(ar, status, msdu);
+ 	}
+ }
+@@ -1573,7 +1646,7 @@ static int ath10k_htt_rx_handle_amsdu(struct ath10k_htt *htt)
+ 	ath10k_htt_rx_h_ppdu(ar, &amsdu, rx_status, 0xffff);
+ 	ath10k_htt_rx_h_unchain(ar, &amsdu, ret > 0);
+ 	ath10k_htt_rx_h_filter(ar, &amsdu, rx_status);
+-	ath10k_htt_rx_h_mpdu(ar, &amsdu, rx_status);
++	ath10k_htt_rx_h_mpdu(ar, &amsdu, rx_status, true);
+ 	ath10k_htt_rx_h_deliver(ar, &amsdu, rx_status);
+ 
+ 	return num_msdus;
+@@ -1912,7 +1985,7 @@ static int ath10k_htt_rx_in_ord_ind(struct ath10k *ar, struct sk_buff *skb)
+ 			num_msdus += skb_queue_len(&amsdu);
+ 			ath10k_htt_rx_h_ppdu(ar, &amsdu, status, vdev_id);
+ 			ath10k_htt_rx_h_filter(ar, &amsdu, status);
+-			ath10k_htt_rx_h_mpdu(ar, &amsdu, status);
++			ath10k_htt_rx_h_mpdu(ar, &amsdu, status, false);
+ 			ath10k_htt_rx_h_deliver(ar, &amsdu, status);
+ 			break;
+ 		case -EAGAIN:
+diff --git a/drivers/net/wireless/ath/ath10k/rx_desc.h b/drivers/net/wireless/ath/ath10k/rx_desc.h
+index bb711b525af8..5499bd2712e4 100644
+--- a/drivers/net/wireless/ath/ath10k/rx_desc.h
++++ b/drivers/net/wireless/ath/ath10k/rx_desc.h
+@@ -252,6 +252,9 @@ enum htt_rx_mpdu_encrypt_type {
+ 	HTT_RX_MPDU_ENCRYPT_WAPI             = 5,
+ 	HTT_RX_MPDU_ENCRYPT_AES_CCM_WPA2     = 6,
+ 	HTT_RX_MPDU_ENCRYPT_NONE             = 7,
++	HTT_RX_MPDU_ENCRYPT_AES_CCM256_WPA2  = 8,
++	HTT_RX_MPDU_ENCRYPT_AES_GCMP_WPA2    = 9,
++	HTT_RX_MPDU_ENCRYPT_AES_GCMP256_WPA2 = 10,
+ };
+ 
+ #define RX_MPDU_START_INFO0_PEER_IDX_MASK     0x000007ff
+-- 
+2.17.0
+
