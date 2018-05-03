@@ -537,30 +537,6 @@ function mkpkg() {
 }
 
 
-# Apply stable-queue patches
-function sq() {
-    if [[ ! -f Makefile ]]; then
-        display_error "Run this in a kernel tree!"
-        return 1
-    fi
-
-    MAJOR=$(make kernelversion | cut -d . -f 1,2)
-    SUBLEVEL=$(make kernelversion | cut -d . -f 3)
-
-    QUEUE=${MAJOR}.$((SUBLEVEL + 1))
-
-    if ! git rev-parse --verify "${QUEUE}-queue"; then
-        git checkout -b "${QUEUE}-queue" v"${MAJOR}.${SUBLEVEL}"
-    else
-        git checkout "${QUEUE}-queue"
-        git reset --hard v"${MAJOR}.${SUBLEVEL}"
-    fi
-
-    git -C "${HOME}/kernels/sources/stable-queue" pull
-    git quiltimport --patches "${HOME}/kernels/sources/stable-queue/queue-${MAJOR}"
-}
-
-
 # Update all remotes and run git gc/prune
 function clean-kernels() {
     REPOS="
