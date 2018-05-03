@@ -140,7 +140,9 @@ function build() {
         ./scripts/config --file out/.config -e CC_WERROR
         kmake olddefconfig
     fi
+    mkavenv
     kmake
+    rmvenv
 }
 
 
