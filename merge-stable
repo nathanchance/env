@@ -202,7 +202,7 @@ function generate_versions() {
         echo "${BOLD}Target kernel version:${RST} ${TARGET_VERSION}"
     elif [[ ${QUEUE} ]]; then
         CB=$(git cb)
-        QUEUE_BRANCH=${TARGET_VERSION}-queue
+        QUEUE_BRANCH=queue-${CURRENT_MAJOR_VERSION}
         (
             if ! git rev-parse --verify "${QUEUE_BRANCH}"; then
                 git checkout -b "${QUEUE_BRANCH}" v"${CURRENT_VERSION}"
@@ -216,7 +216,7 @@ function generate_versions() {
         git -C "${HOME}/kernels/sources/stable-queue" pull &>/dev/null
 
         echo "${BOLD}Generating ${QUEUE_BRANCH}...${RST}"
-        git quiltimport --patches "${HOME}/kernels/sources/stable-queue/queue-${CURRENT_MAJOR_VERSION}" &>/dev/null
+        git quiltimport --patches "${HOME}/kernels/sources/stable-queue/${QUEUE_BRANCH}" &>/dev/null
 
         git ch "${CB}" &>/dev/null
 
