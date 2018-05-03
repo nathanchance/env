@@ -137,6 +137,9 @@ function die() {
     fi
 
     display_error "$@"
+    if type -p pre_exit_commands; then
+        pre_exit_commands
+    fi
     exit
 }
 

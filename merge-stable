@@ -112,6 +112,7 @@ function verify_remote() {
     fi
 }
 
+
 # Updates the linux-stable mirror on my GitHub
 function update_stable_mirror() {
     CUR_FOLDER=$(pwd)
@@ -234,8 +235,13 @@ function generate_versions() {
         echo
         echo "${BOLD}Target kernel version:${RST} ${TARGET_VERSION}"
     fi
-
 }
+
+
+function pre_exit_commands() {
+    git bd "${QUEUE_BRANCH}" &>/dev/null
+}
+
 
 
 function cp_target_version() {
@@ -292,7 +298,7 @@ function update_tree() {
         "cherry-pick") cp_target_version ;;
         "merge") mg_target_version ;;
     esac
-    [[ ${QUEUE} ]] && git branch -d "${QUEUE_BRANCH}"
+    pre_exit_commands
 }
 
 
