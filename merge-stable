@@ -40,6 +40,9 @@ function parse_parameters() {
                 echo "    -p | --print-latest"
                 echo "        Prints the latest version available for the current kernel tree upstream then exits"
                 echo
+                echo "    -q | --queue"
+                echo "        Use the patches from the stable queue"
+                echo
                 echo "    -r | --release-candidate"
                 echo "        Update to the latest RC revision"
                 echo
@@ -62,6 +65,11 @@ function parse_parameters() {
             # Print the latest version from kernel.org
             "-p"|"--print-latest")
                 PRINT_LATEST=true ;;
+
+            # Use the patches from the stable queue
+            "-q"|"--queue")
+                QUEUE=true
+                UPDATE_MODE=0 ;;
 
             # Use the RC tree for updating
             "-r"|"--release-candidate")
@@ -182,24 +190,51 @@ function generate_versions() {
     esac
 
     if [[ ${RC} ]]; then
-        TAG=linux-stable-rc/linux-${CURRENT_MAJOR_VERSION}.y
         RANGE=v${CURRENT_VERSION}..${TAG}
+        TAG=linux-stable-rc/linux-${CURRENT_MAJOR_VERSION}.y
         TARGET_VERSION=${TARGET_VERSION}$(git grep -h "\-rc" "${TAG}" -- Makefile | cut -d ' ' -f 3)
         if ! [[ ${TARGET_VERSION} =~ "rc" ]]; then
             die "There is no RC version for ${CURRENT_MAJOR_VERSION}!\n"
         fi
+
+        echo
+        echo "${BOLD}Target kernel version:${RST} ${TARGET_VERSION}"
+    elif [[ ${QUEUE} ]]; then
+        CB=$(git cb)
+        QUEUE_BRANCH=${TARGET_VERSION}-queue
+        (
+            if ! git rev-parse --verify "${QUEUE_BRANCH}"; then
+                git checkout -b "${QUEUE_BRANCH}" v"${CURRENT_VERSION}"
+            else
+                git checkout "${QUEUE_BRANCH}"
+                git reset --hard v"${CURRENT_VERSION}"
+            fi
+        ) &>/dev/null
+
+        echo "\n${BOLD}Fetching stable-queue...${RST}\n"
+        git -C "${HOME}/kernels/sources/stable-queue" pull &>/dev/null
+
+        echo "${BOLD}Generating ${QUEUE_BRANCH}...${RST}"
+        git quiltimport --patches "${HOME}/kernels/sources/stable-queue/queue-${CURRENT_MAJOR_VERSION}" &>/dev/null
+
+        git ch "${CB}" &>/dev/null
+
+        RANGE=v${CURRENT_VERSION}..${QUEUE_BRANCH}
+        TAG=${QUEUE_BRANCH}
+        TARGET_VERSION=${QUEUE_BRANCH}
     else
+        RANGE=v${CURRENT_VERSION}..v${TARGET_VERSION}
+        TAG=v${TARGET_VERSION}
         # Make sure target version is between current version and latest version
         TARGET_SUBLEVEL=$(echo "${TARGET_VERSION}" | cut -d . -f 3)
         [[ ${TARGET_SUBLEVEL} -le ${CURRENT_SUBLEVEL} ]] && die "Current version is up to date with target version ${TARGET_VERSION}!\n"
         [[ ${TARGET_SUBLEVEL} -gt ${LATEST_SUBLEVEL}  ]] && die "Target version ${TARGET_VERSION} does not exist!\n"
         [[ ${CURRENT_SUBLEVEL} -eq 0 ]] && CURRENT_VERSION=${CURRENT_MAJOR_VERSION}
-        RANGE=v${CURRENT_VERSION}..v${TARGET_VERSION}
-        TAG=v${TARGET_VERSION}
+
+        echo
+        echo "${BOLD}Target kernel version:${RST} ${TARGET_VERSION}"
     fi
 
-    echo
-    echo "${BOLD}Target kernel version:${RST} ${TARGET_VERSION}"
 }
 
 
@@ -257,6 +292,7 @@ function update_tree() {
         "cherry-pick") cp_target_version ;;
         "merge") mg_target_version ;;
     esac
+    [[ ${QUEUE} ]] && git branch -d "${QUEUE_BRANCH}"
 }
 
 
