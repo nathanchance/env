@@ -57,7 +57,7 @@ export HOST SCRIPTS_FOLDER BIN_FOLDER KERNEL_FOLDER MISC_FOLDER REPO_FOLDER \
 
 # Alias for echo to print escape codes
 function echo() {
-    command echo -e "$@"
+    command echo -e "${@}"
 }
 
 # Prints a formatted header to point out what is being done to the user
@@ -130,13 +130,13 @@ function die() {
             echo
             echo "The error was:"
             echo
-            echo "$*"
+            echo "${*}"
             echo "\`\`\`"
         } > /tmp/death-tg-msg
         notify "$(cat /tmp/death-tg-msg)"
     fi
 
-    display_error "$@"
+    display_error "${@}"
     if type -p pre_exit_commands; then
         pre_exit_commands
     fi
@@ -152,7 +152,7 @@ function warn() {
 
 # Enforces the value needed for two-part flags
 function enforce_value() {
-    [[ $# -lt 1 ]] && die "A additional value is needed for one of the flags passed to this script!"
+    [[ ${#} -lt 1 ]] && die "A additional value is needed for one of the flags passed to this script!"
 }
 
 # Add a remote if it doesn't exist
@@ -198,12 +198,12 @@ function notify() {
         return 1
     fi
 
-    curl -s -X POST https://api.telegram.org/bot"${TOKEN}"/sendMessage -d chat_id="${CHAT_ID}" -d parse_mode="Markdown" -d text="$*" 1>/dev/null
+    curl -s -X POST https://api.telegram.org/bot"${TOKEN}"/sendMessage -d chat_id="${CHAT_ID}" -d parse_mode="Markdown" -d text="${*}" 1>/dev/null
 }
 
 # Upload a file to transfer.sh
 function transfer {
-    if [[ $# -eq 0 ]]; then
+    if [[ ${#} -eq 0 ]]; then
         echo "No arguments specified. Usage:"
         echo "  transfer /tmp/test.md"
         echo "  cat /tmp/test.md | transfer test.md"

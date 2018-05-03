@@ -17,7 +17,7 @@
 source common
 
 function make_command() {
-    m "${JOBS_FLAG}" "$@"
+    m "${JOBS_FLAG}" "${@}"
 }
 
 ################
@@ -26,19 +26,19 @@ function make_command() {
 #              #
 ################
 
-PARAMS="$*"
-while [[ $# -ge 1 ]]; do
+PARAMS="${*}"
+while [[ ${#} -ge 1 ]]; do
     case ${1} in
         # Required options
         # Device to build
         "-d"|"--device")
-            shift && enforce_value "$@"
+            shift && enforce_value "${@}"
 
             DEVICE=${1} ;;
 
         # ROM to build
         "-r"|"--rom")
-            shift && enforce_value "$@"
+            shift && enforce_value "${@}"
 
             ROM=${1} ;;
 
@@ -53,7 +53,7 @@ while [[ $# -ge 1 ]]; do
 
         # Custom make target
         "-m"|"--make")
-            shift && enforce_value "$@"
+            shift && enforce_value "${@}"
 
             MAKE_TARGET=${1} ;;
 
@@ -64,7 +64,7 @@ while [[ $# -ge 1 ]]; do
 
         # user, userdebug, or eng
         "-v"|"--version")
-            shift && enforce_value "$@"
+            shift && enforce_value "${@}"
 
             VARIANT=${1} ;;
 
@@ -75,7 +75,7 @@ while [[ $# -ge 1 ]]; do
         # Special options
         # DU
         "-t"|"--type")
-            shift && enforce_value "$@"
+            shift && enforce_value "${@}"
  
             export DU_BUILD_TYPE=${1} ;;
 

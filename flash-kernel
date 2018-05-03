@@ -18,66 +18,66 @@
 function parse_parameters() {
     # Unset the universal OS variable for this script only
     unset OS
-    PARAMS="$*"
-    while [[ $# -ge 1 ]]; do
+    PARAMS="${*}"
+    while [[ ${#} -ge 1 ]]; do
         case ${1} in
             # AnyKernel2 branch
             "-ak2-b"|"--anykernel2-branch")
-                shift && enforce_value "$@"
+                shift && enforce_value "${@}"
 
                 ANYKERNEL2_BRANCH=${1} ;;
 
             # Android version
             "-av"|"--android-version")
-                shift && enforce_value "$@"
+                shift && enforce_value "${@}"
 
                 ANDROID_VERSION=${1} ;;
 
             # Branch to compile
             "-b"|"--branch")
-                shift && enforce_value "$@"
+                shift && enforce_value "${@}"
 
                 KERNEL_BRANCH=${1} ;;
 
             # Config to use for compiling
             "-c"|"--config")
-                shift && enforce_value "$@"
+                shift && enforce_value "${@}"
 
                 DEFCONFIG=${1} ;;
 
             # Compiler to use
             "-cc"|"--compiler")
-                shift && enforce_value "$@"
+                shift && enforce_value "${@}"
 
                 COMPILER=${1} ;;
 
             # Clang toolchain to use for compiling
             "-ct"|"--clang-toolchain")
-                shift && enforce_value "$@"
+                shift && enforce_value "${@}"
 
                 CLANG_FOLDER=${1} ;;
 
             # Device to compile for
             "-d"|"--device")
-                shift && enforce_value "$@"
+                shift && enforce_value "${@}"
 
                 DEVICE=${1} ;;
 
             # Extra make flags if necessary (like mismatch config)
             "-f"|"--flags")
-                shift && enforce_value "$@"
+                shift && enforce_value "${@}"
 
                 EXTRA_MAKE_FLAGS=${1} ;;
 
             # 64-bit GCC toolchain to use for compiling
             "-gt"|"--gcc-toolchain")
-                shift && enforce_value "$@"
+                shift && enforce_value "${@}"
 
                 GCC_FOLDER=${1} ;;
 
             # 32-bit GCC toolchain to use for compiling
             "-gt-32"|"--gcc-32-bit-toolchain")
-                shift && enforce_value "$@"
+                shift && enforce_value "${@}"
 
                 GCC_32_BIT_FOLDER=${1} ;;
 
@@ -92,7 +92,7 @@ function parse_parameters() {
 
             # Where to move zip after compilation
             "-m"|"--mode")
-                shift && enforce_value "$@"
+                shift && enforce_value "${@}"
 
                 MODE=${1} ;;
 
@@ -102,19 +102,19 @@ function parse_parameters() {
 
             # (OnePlus 5/T only) build only OxygenOS or custom ROM kernel image
             "-os"|"--operating-system")
-                shift && enforce_value "$@"
+                shift && enforce_value "${@}"
 
                 OS_LIST=${1} ;;
 
             # How to package kernel (zip or boot image)
             "-p"|"--package-method")
-                shift && enforce_value "$@"
+                shift && enforce_value "${@}"
 
                 PACKAGE_METHOD=${1} ;;
 
             # Test versioning (# in kernel version)
             "-r"|"--revision")
-                shift && enforce_value "$@"
+                shift && enforce_value "${@}"
 
                 REVISION=${1} ;;
 
@@ -125,13 +125,13 @@ function parse_parameters() {
 
             # Version number
             "-v"|"--version")
-                shift && enforce_value "$@"
+                shift && enforce_value "${@}"
 
                 VERSION=${1} ;;
 
             # How much script output to show
             "-V"|"--verbosity-level")
-                shift && enforce_value "$@"
+                shift && enforce_value "${@}"
                 VERBOSITY_LEVEL=${1}
                 case ${VERBOSITY_LEVEL} in
                     "1") SHOW_OUTPUT=true; HIDDEN_COMMANDS=true ;;
@@ -170,19 +170,19 @@ function parse_parameters() {
 
 # 'cp -v' alias
 function cp() {
-    command cp ${VERBOSE_COMMANDS:+ "-v"} "$@"
+    command cp ${VERBOSE_COMMANDS:+ "-v"} "${@}"
 }
 
 
 # 'mv -v' alias
 function mv() {
-    command mv ${VERBOSE_COMMANDS:+ "-v"} "$@"
+    command mv ${VERBOSE_COMMANDS:+ "-v"} "${@}"
 }
 
 
 # 'rm -v' alias
 function rm() {
-    command rm ${VERBOSE_COMMANDS:+ "-v"} "$@"
+    command rm ${VERBOSE_COMMANDS:+ "-v"} "${@}"
 }
 
 
@@ -367,7 +367,7 @@ function make_wrapper_gcc() {
                                     KBUILD_BUILD_VERSION="${KBUILD_BUILD_VERSION}" \
                                     LOCALVERSION="${LOCALVERSION}" \
                                     O="${OUT_FOLDER}" \
-                                    "$@"
+                                    "${@}"
 }
 
 
@@ -387,7 +387,7 @@ function make_wrapper_clang() {
                                     LOCALVERSION="${LOCALVERSION}" \
                                     O="${OUT_FOLDER}" \
                                     SCRIPT_OPT_FLAGS="${SCRIPT_OPT_FLAGS}" \
-                                    "$@"
+                                    "${@}"
 }
 
 
@@ -395,9 +395,9 @@ function make_wrapper_clang() {
 function kmake() {
     # Only show errors and warnings when compiling (unless debug)
     if [[ ${SHOW_OUTPUT} ]]; then
-        make_wrapper_${COMPILER} "$@"
+        make_wrapper_${COMPILER} "${@}"
     else
-        make_wrapper_${COMPILER} "$@" |& ag --no-color --after=10 "error:|warning:" && echo
+        make_wrapper_${COMPILER} "${@}" |& ag --no-color --after=10 "error:|warning:" && echo
     fi
 }
 
@@ -863,7 +863,7 @@ function ending_info() {
 
     echo "\n$(date +"%m/%d/%Y %H:%M:%S"): $(basename "${BASH_SOURCE[0]}") ${PARAMS}" >> "${LOG}"
 
-    if [[ "$*" =~ "-s" ]]; then
+    if [[ "${*}" =~ "-s" ]]; then
         echo "BUILD SUCCESSFUL IN ${DURATION}" >> "${LOG}"
         if [[ ! ${IMAGE_ONLY} ]]; then
             FILE_LOCATION=$(web_link "${FILE_MOVE}")
@@ -950,7 +950,7 @@ echo
 header "COMPILING KERNEL"
 
 # Parse command line parameters and setup options
-parse_parameters "$@"
+parse_parameters "${@}"
 device_flags
 generate_variables
 

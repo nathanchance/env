@@ -10,11 +10,11 @@
 source common
 
 # Hide all non-error output unless verbosity is requsted
-[[ ! "$*" =~ "-v" ]] && exec > /dev/null
+[[ ! "${*}" =~ "-v" ]] && exec > /dev/null
 
 # Allow specification of 32-bit versus 64-bit
-[[ "$*" =~ "-32" ]] && ARCH=arm
-[[ "$*" =~ "-64" ]] && ARCH=arm64
+[[ "${*}" =~ "-32" ]] && ARCH=arm
+[[ "${*}" =~ "-64" ]] && ARCH=arm64
 [[ -z ${ARCH} ]] && ARCH=arm
 
 # Kernel variable
@@ -30,7 +30,7 @@ TG_MSG=/tmp/tg-msg.pi-kernel
 if [[ ${PI} ]]; then
     cd "${HOME}/Documents/Kernel" || die "Kernel source doesn't exist!"
 else
-	case "$*" in
+	case "${*}" in
 		*"-6"*) GCC_FOLDER=${TC_FOLDER}/bootlin-gcc-6.4.0-${ARCH} ;;
 		*"-7"*) GCC_FOLDER=${TC_FOLDER}/bootlin-gcc-7.3.0-${ARCH} ;;
 	esac
@@ -46,9 +46,9 @@ fi
 # Make function for both host and cross compiling
 function kmake() {
     if [[ ${PI} ]]; then
-        make "${JOBS_FLAG}" O=out "$@"
+        make "${JOBS_FLAG}" O=out "${@}"
     else
-        make "${JOBS_FLAG}" ARCH=${ARCH} CROSS_COMPILE="${CCACHE} ${CC}" O=out "$@"
+        make "${JOBS_FLAG}" ARCH=${ARCH} CROSS_COMPILE="${CCACHE} ${CC}" O=out "${@}"
     fi
 }
 
@@ -62,7 +62,7 @@ function build() {
         echo "Version $(make kernelversion)"
         echo "\`\`\`"
     } > ${TG_MSG}
-    [[ ${PI} || "$*" =~ "-t" ]] && notify "$(cat "${TG_MSG}")"
+    [[ ${PI} || "${*}" =~ "-t" ]] && notify "$(cat "${TG_MSG}")"
 
     rm -rf out
 
@@ -90,7 +90,7 @@ function build() {
         echo "Duration: ${TIME_STRING,,}"
         echo "\`\`\`"
     } > ${TG_MSG}
-    [[ ${PI} || "$*" =~ "-t" ]] && notify "$(cat "${TG_MSG}")"
+    [[ ${PI} || "${*}" =~ "-t" ]] && notify "$(cat "${TG_MSG}")"
 
     if [[ ! ${PI} ]]; then
         mkdir -p "${SOURCE_FOLDER}/out/pi_root"
@@ -108,5 +108,5 @@ function install() {
     fi
 }
 
-[[ "$*" =~ "-b" ]] && build "$@"
-[[ "$*" =~ "-i" && ${PI} ]] && install
+[[ "${*}" =~ "-b" ]] && build "${@}"
+[[ "${*}" =~ "-i" && ${PI} ]] && install

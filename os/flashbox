@@ -95,7 +95,7 @@ function rps {
             "g")
                 ARGS=( vendor/google/build vendor/opengapps/sources/all vendor/opengapps/sources/arm vendor/opengapps/sources/arm64 ) ;;
             *)
-                ARGS=( "$@" ) ;;
+                ARGS=( "${@}" ) ;;
         esac
     fi
 
@@ -137,7 +137,7 @@ function kremotes() {
 # Merge one git tag into current branch
 # mrgt <tag> [<remote|url>]
 function merge-tag() {
-    [[ $# -gt 1 ]] && git fetch --tags "${2}"
+    [[ ${#} -gt 1 ]] && git fetch --tags "${2}"
 
     local MSG_FILE=/tmp/mrg-msg
     local CB; CB=$(git rev-parse --abbrev-ref HEAD | sed 's/-queue-[0-9].*//')
@@ -182,7 +182,7 @@ function nf() {
         --speed_shorthand on \
         --install_time off \
         --color_blocks off \
-        "$@"
+        "${@}"
     echo
     echo
 }
@@ -194,7 +194,7 @@ function kfg() {
     local CONFIG DEFCONFIGS LIST
     DEFCONFIGS="$(ls arch/arm64/configs/flash*_defconfig 2>/dev/null)"
 
-    while [[ $# -ge 1 ]]; do
+    while [[ ${#} -ge 1 ]]; do
         case ${1} in
             "-c"|"--config")
                 shift
@@ -238,7 +238,7 @@ function kfg() {
                 shift
 
                 for DEFCONFIG in ${DEFCONFIGS}; do
-                    [[ "$*" =~ "-fc" ]] && FILE=out/.config || FILE=out/defconfig
+                    [[ "${*}" =~ "-fc" ]] && FILE=out/.config || FILE=out/defconfig
                     rm -rf out
                     make O=out ARCH=arm64 "$(basename "${DEFCONFIG}")"
                     make O=out ARCH=arm64 savedefconfig
@@ -498,7 +498,7 @@ function shellcheck() {
     # SC1094: Parsing of sourced file failed. Ignoring it.
     # SC1117: Backslash is literal in "\t". Prefer explicit escaping: "\\t".
     # SC2028: echo won't expand escape sequences. Consider printf.
-    command shellcheck -x -e SC1090 -e SC1091 -e SC1094 -e SC1117 -e SC2028 "$@"
+    command shellcheck -x -e SC1090 -e SC1091 -e SC1094 -e SC1117 -e SC2028 "${@}"
 }
 
 
@@ -615,7 +615,7 @@ function chromeos-kernel() {
     local UPDATE VERSION
     cd "${HOME}/kernels/sources/chromium" || return
 
-    while [[ $# -ge 1 ]]; do
+    while [[ ${#} -ge 1 ]]; do
         case ${1} in
             "-u"|"--update") UPDATE=true ;;
             *) VERSION=${1} ;;
@@ -652,7 +652,7 @@ function ac-kernel() {
     local UPDATE VERSION
     cd "${HOME}/kernels/sources/kernel-common" || return
 
-    while [[ $# -ge 1 ]]; do
+    while [[ ${#} -ge 1 ]]; do
         case ${1} in
             "-u"|"--update") UPDATE=true ;;
             *) VERSION=${1} ;;
@@ -741,13 +741,13 @@ function bk() {
         *) display_error "Kernel not supported by wrapper!" && return 1 ;;
     esac
 
-    build-kernel -w -d "${PARAMS[@]}" "$@"
+    build-kernel -w -d "${PARAMS[@]}" "${@}"
 }
 
 
 # Change email for git repositories
 function change-email() {
-    if [[ $# -lt 1 ]]; then
+    if [[ ${#} -lt 1 ]]; then
         display_error "This function takes an argument!"
         return 1
     fi
@@ -812,7 +812,7 @@ function test-pulls() {
             git rh origin/master
             git bd testing &>/dev/null
             git ch -b testing
-            if [[ $# -gt 0 ]]; then
+            if [[ ${#} -gt 0 ]]; then
                 for NUMBER in "${@}"; do
                     git pll --no-edit origin pull/"${NUMBER}"/head
                 done
@@ -822,7 +822,7 @@ function test-pulls() {
             git rh origin/aosp/LA.UM.6.4.r1
             git bd testing &>/dev/null
             git ch -b testing
-            if [[ $# -gt 0 ]]; then
+            if [[ ${#} -gt 0 ]]; then
                 for NUMBER in "${@}"; do
                     git pll --no-edit origin pull/"${NUMBER}"/head
                 done

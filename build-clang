@@ -33,9 +33,9 @@ START=$(date +"%s")
 ###############
 
 function parse_parameters() {
-    PARAMS="$*"
+    PARAMS="${*}"
 
-    while [[ $# -ge 1 ]]; do
+    while [[ ${#} -ge 1 ]]; do
         case ${1} in
             "-b"|"--build-only")
                 BUILD_ONLY=true ;;
@@ -45,7 +45,7 @@ function parse_parameters() {
                 TG_MSG_FILE=/tmp/tg-msg.2 ;;
 
             "-v"|"--version")
-                shift && enforce_value "$@"
+                shift && enforce_value "${@}"
                 VERSION=${1} ;;
 
             *) die "Invalid parameter specified!" ;;
@@ -228,7 +228,7 @@ function install() {
 }
 
 source common
-parse_parameters "$@"
+parse_parameters "${@}"
 sync_all
 cleanup
 build

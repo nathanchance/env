@@ -34,7 +34,7 @@ function raspberrypi_setup() { return; }
 function nf() {
     echo
     echo
-    neofetch "$@"
+    neofetch "${@}"
 }
 
 

@@ -20,11 +20,11 @@ START=$(date +%s)
 
 # Gather parameters
 PARAMS=( "${@}" )
-while [[ $# -ge 1 ]]; do
+while [[ ${#} -ge 1 ]]; do
     case ${1} in
         # Architecture to build
         "-a"|"--arch")
-            shift && enforce_value "$@"
+            shift && enforce_value "${@}"
 
             ARCH=${1} ;;
 
@@ -35,13 +35,13 @@ while [[ $# -ge 1 ]]; do
 
         # Specify which Clang toolchain to use
         "-ct"|"--clang-toolchain")
-            shift && enforce_value "$@"
+            shift && enforce_value "${@}"
 
             CLANG_TOOLCHAIN_FOLDER=${1} ;;
 
         # Config to build
         "-d"|"--defconfig")
-            shift && enforce_value "$@"
+            shift && enforce_value "${@}"
 
             DEFCONFIG=${1} ;;
 
@@ -56,13 +56,13 @@ while [[ $# -ge 1 ]]; do
 
         # Kernel folder
         "-f"|"--folder")
-            shift && enforce_value "$@"
+            shift && enforce_value "${@}"
 
             FOLDER=${1} ;;
 
         # Specify which GCC toolchain to use
         "-gt"|"--gcc-toolchain")
-            shift && enforce_value "$@"
+            shift && enforce_value "${@}"
 
             GCC_TOOLCHAIN_FOLDER=${1} ;;
 
@@ -122,9 +122,9 @@ function kmake() {
                                            CLANG_TRIPLE=aarch64-linux-gnu- \
                                            CROSS_COMPILE="${GCC_TOOLCHAIN%gcc}" \
                                            HOSTCC="${CCACHE} ${CLANG_TOOLCHAIN}" \
-                                           "$@"
+                                           "${@}"
     else
-        PATH=${BIN_FOLDER}:${PATH} ${MAKE} CROSS_COMPILE="${CCACHE} ${GCC_TOOLCHAIN%gcc}" "$@"
+        PATH=${BIN_FOLDER}:${PATH} ${MAKE} CROSS_COMPILE="${CCACHE} ${GCC_TOOLCHAIN%gcc}" "${@}"
     fi
 }
 

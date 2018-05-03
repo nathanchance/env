@@ -16,7 +16,7 @@ ROMS_HOME=${HOME}/kernels/roms
 # 3.18 kernels
 # SC2076: Don't quote rhs of =~, it'll match literally rather than as a regex.
 # shellcheck disable=SC2076
-if [[ "$*" =~ "3.18" ]]; then
+if [[ "${*}" =~ "3.18" ]]; then
     # GZR OnePlus 3 (downstream of op3)
     cd "${ROMS_HOME}/gzr-op3" || die "gzr-op3 does not exist, please clone!"
     CURRENT_BRANCH=$(git cb)
@@ -34,7 +34,7 @@ fi
 # 4.4 kernels
 # SC2076: Don't quote rhs of =~, it'll match literally rather than as a regex.
 # shellcheck disable=SC2076
-if [[ "$*" =~ "4.4" ]]; then
+if [[ "${*}" =~ "4.4" ]]; then
     # AICP OnePlus 5 (downstream of op5)
     cd "${ROMS_HOME}/aicp-op5" || die "aicp-op5 does not exist, please clone!"
     CURRENT_BRANCH=$(git cb)

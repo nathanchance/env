@@ -12,7 +12,7 @@ source common
 
 # Parse the provided parameters
 function parse_parameters() {
-    while [[ $# -ge 1 ]]; do
+    while [[ ${#} -ge 1 ]]; do
         case ${1} in
             # Use git cherry-pick
             "-c"|"--cherry-pick")
@@ -83,7 +83,7 @@ function parse_parameters() {
             # Update to the specified version
             "-v"|"--version")
                 shift
-                [[ $# -lt 1 ]] && die "Please specify a version to update!"
+                [[ ${#} -lt 1 ]] && die "Please specify a version to update!"
                 UPDATE_MODE=1
                 VERSION_SUPPLIED=${1} ;;
 
@@ -302,7 +302,7 @@ function update_tree() {
 }
 
 
-parse_parameters "$@"
+parse_parameters "${@}"
 update_sources
 generate_versions
 update_tree

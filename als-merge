@@ -22,7 +22,7 @@ PATCHES_44=${SCRIPTS_FOLDER}/als-patches/${VERSION_44}
 # 3.18 kernels
 # SC2076: Don't quote rhs of =~, it'll match literally rather than as a regex.
 # shellcheck disable=SC2076
-if [[ ${#} -lt 1 || "$*" =~ "3.18" ]]; then
+if [[ ${#} -lt 1 || "${*}" =~ "3.18" ]]; then
     # Pixel (XL)
     cd "${ALS_HOME}/marlin" || die "Marlin folder does not exist, please clone!"
     git f origin
@@ -114,7 +114,7 @@ fi
 # 4.4 kernels
 # SC2076: Don't quote rhs of =~, it'll match literally rather than as a regex.
 # shellcheck disable=SC2076
-if [[ ${#} -lt 1 || "$*" =~ "4.4" ]]; then
+if [[ ${#} -lt 1 || "${*}" =~ "4.4" ]]; then
     # Moto Z2 (Force)
     cd "${ALS_HOME}/nash" || die "Nash folder does not exist, please clone!"
     git ch lineage-15.1
