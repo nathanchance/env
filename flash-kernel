@@ -140,6 +140,10 @@ function parse_parameters() {
                     "4") EXTRA_MAKE_FLAGS="${EXTRA_MAKE_FLAGS} V=1"; SHOW_OUTPUT=true; VERBOSE_COMMANDS=true ;;
                 esac ;;
 
+            # Disables -Werror config
+            "-Wno-error")
+                NO_WERROR=true ;;
+
             *)
                 die "Invalid parameter" ;;
         esac
@@ -515,6 +519,12 @@ function build_kernel() {
                                             -d CONFIG_KASAN_OUTLINE \
                                             -d CONFIG_KERNEL_LZ4 \
                                             --set-val CONFIG_FRAME_WARN 0
+        kmake olddefconfig
+    fi
+
+    # If requested, disable -Werror
+    if [[ ${NO_WERROR} ]]; then
+        ./scripts/config --file out/.config -d CONFIG_CC_WERROR
         kmake olddefconfig
     fi
 

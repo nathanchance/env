@@ -82,6 +82,10 @@ while [[ ${#} -ge 1 ]]; do
         # Compile with -Werror
         "-Werror")
             WERROR=true ;;
+
+        # Disable -Werror
+        "-Wno-error")
+            WERROR=false ;;
     esac
 
     shift
@@ -136,8 +140,11 @@ function build() {
 
     # Build kernel image
     kmake "${DEFCONFIG}"
-    if [[ ${WERROR} ]]; then
+    if [[ ${WERROR} = "true" ]]; then
         ./scripts/config --file out/.config -e CC_WERROR
+        kmake olddefconfig
+    elif [[ ${WERROR} = "false" ]]; then
+        ./scripts/config --file out/.config -d CC_WERROR
         kmake olddefconfig
     fi
     mkavenv
