@@ -804,22 +804,17 @@ function stable-patch() {
 
 
 function test-pulls() {
+    local BRANCH
+
     git fetch origin
 
     case "$(pwd)" in
-        *"build-tools-gcc"*)
-            git ch master
-            git rh origin/master
-            git bd testing &>/dev/null
-            git ch -b testing
-            if [[ ${#} -gt 0 ]]; then
-                for NUMBER in "${@}"; do
-                    git pll --no-edit origin pull/"${NUMBER}"/head
-                done
-            fi ;;
         *"sony"*)
-            git ch aosp/LA.UM.6.4.r1
-            git rh origin/aosp/LA.UM.6.4.r1
+            BRANCH=aosp/LA.UM.6.4.r1
+            # Checkout a clean tree
+            git ch "${BRANCH}"
+            git push nathanchance HEAD:"${BRANCH}"
+            git rh origin/"${BRANCH}"
             git bd testing &>/dev/null
             git ch -b testing
             if [[ ${#} -gt 0 ]]; then
@@ -827,7 +822,58 @@ function test-pulls() {
                     git pll --no-edit origin pull/"${NUMBER}"/head
                 done
             fi
-            git m --no-edit wlan
+
+            # Get Wi-Fi module
+            qcacld -i
+            git subtree pull -m "Merge pull request #11 from nathanchance/clang
+
+$(signoff)" --prefix=drivers/staging/wlan-qc/qcacld-3.0 qcacld-3.0 refs/pull/11/head
+
+            # Run all builds
             doesitbuild -r ;;
     esac
+}
+
+
+# Update/init qcacld-3.0 tree
+function qcacld() {
+    local REPO REPOS TAG URL
+
+    REPOS=( "fw-api" "qcacld-3.0" "qca-wifi-host-cmn" )
+
+    case "$(pwd)" in
+        *"sony"*)
+            TAG=aosp/LA.UM.6.4.r1
+            URL=https://github.com/sonyxperiadev/vendor-qcom-opensource-wlan-
+            SUBFOLDER=drivers/staging/wlan-qc ;;
+
+        *"op5"*)
+            TAG=LA.UM.6.2.r1-08100-sdm660.0
+            URL=https://source.codeaurora.org/quic/la/platform/vendor/qcom-opensource/wlan/
+            SUBFOLDER=drivers/staging ;;
+    esac
+
+    for REPO in "${REPOS[@]}"; do
+        echo "${REPO}"
+        if ! git ls-remote --exit-code "${REPO}" &>/dev/null; then
+            git remote add "${REPO}" "${URL}${REPO}"
+        fi
+        git fetch "${REPO}" "${TAG}"
+        case "${1}" in
+            "-i"|"--init")
+                if [[ "$(pwd)" =~ "sony" ]]; then
+                    git rm "${SUBFOLDER}/${REPO}"
+                    git ac -m "${REPO}: Remove submodule reference"
+                fi
+
+                git subtree add -m "${REPO}: Checkout at ${TAG}
+
+$(signoff)" --prefix="${SUBFOLDER}/${REPO}" "${REPO}" "${TAG}" ;;
+
+            "-u"|"--update")
+                git subtree pull -m "${REPO}: Merge tag '${TAG}' into $(git cb)
+
+$(signoff)" --prefix="${SUBFOLDER}/${REPO}" "${REPO}" "${TAG}" ;;
+        esac
+    done
 }
