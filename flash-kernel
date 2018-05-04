@@ -193,6 +193,28 @@ function rm() {
 # Device "board" flagsi
 function device_flags() {
     case ${DEVICE} in
+        "marlin")
+            # Required flags
+            [[ -z ${ANDROID_VERSION} ]] && ANDROID_VERSION=8.1.0
+            AK2_SFX=${ANDROID_VERSION}
+
+            BUILD_FUNCTION=build_kernel
+
+            [[ -z ${COMPILER} ]] && COMPILER=gcc
+
+            [[ -z ${DEFCONFIG} ]] && DEFCONFIG="flash_defconfig"
+
+            DEVICE_NAME_FILE=${DEVICE^}
+            DEVICE_NAME_GITHUB=marlin
+            DEVICE_NAME_WEB=${DEVICE}
+
+            [[ -z ${GCC_FOLDER} ]] && GCC_FOLDER=${TC_FOLDER}/bootlin-gcc-7.3.0-arm64
+            [[ -z ${GCC_32_BIT_FOLDER} ]] && GCC_32_BIT_FOLDER=${TC_FOLDER}/bootlin-gcc-7.3.0-arm
+
+            MATCH_FLAG="${DEVICE_NAME_FILE}-v${VERSION::1}"
+
+            PACKAGE_METHOD=none ;;
+
         "op5")
             # Required flags
             [[ -z ${ANDROID_VERSION} ]] && ANDROID_VERSION=8.x
@@ -342,13 +364,15 @@ function generate_variables() {
 
 # Clean up
 function clean_up() {
-    # Clean AnyKernel2 folder
-    cd "${ANYKERNEL2_FOLDER}" || die "AnyKernel2 source is missing!"
+    # Clean AnyKernel2 folder if building a zip
+    if [[ ${PACKAGE_METHOD} =~ "zip" ]]; then
+        cd "${ANYKERNEL2_FOLDER}" || die "AnyKernel2 source is missing!"
 
-    [[ -z ${ANYKERNEL2_BRANCH} ]] && ANYKERNEL2_BRANCH=${DEVICE_NAME_GITHUB}-flash-${AK2_SFX}
+        [[ -z ${ANYKERNEL2_BRANCH} ]] && ANYKERNEL2_BRANCH=${DEVICE_NAME_GITHUB}-flash-${AK2_SFX}
 
-    git checkout ${HIDDEN_COMMANDS:+ "-q"} ${ANYKERNEL2_BRANCH}
-    git clean -fxd ${HIDDEN_COMMANDS:+ "-q"}
+        git checkout ${HIDDEN_COMMANDS:+ "-q"} ${ANYKERNEL2_BRANCH}
+        git clean -fxd ${HIDDEN_COMMANDS:+ "-q"}
+    fi
 
     # Only checkout if kernel_branch exists and we aren't bisecting or rebasing
     cd "${SOURCE_FOLDER}" || die "Kernel source is missing!"
@@ -477,6 +501,10 @@ function generate_version() {
         UNSIGNED_ZIP=${KERNEL_NAME}-unsigned.zip
         SIGNED_ZIP=${KERNEL_NAME}.zip
     fi
+
+    if [[ ${PACKAGE_METHOD} =~ "none" ]]; then
+        KERNEL_IMAGE=${KERNEL_NAME}.img
+    fi
 }
 
 
@@ -568,7 +596,7 @@ function build_kernel() {
     # Move them if they exist, error out if not
     if [[ -n ${OUT_KERNEL_IMAGE} ]]; then
         echo "${GRN}${OS_STRING}$(basename "${OUT_KERNEL_IMAGE}") compiled successfully!${RST}\n"
-        move_kernel_files
+        [[ ${PACKAGE_METHOD} != "none" ]] && move_kernel_files
     else
         echo "${RED}Kernel image not found!${RST}\n"
         ending_info
@@ -702,6 +730,10 @@ function package_image_zip() {
 }
 
 
+# Don't package anything
+function package_none() { return; }
+
+
 # Setup folders
 function setup_folders() {
     echo "  - Setting up final folders"
@@ -760,6 +792,11 @@ function move_flashable_files() {
         if [[ ${PACKAGE_METHOD} =~ "zip" ]]; then
             mv "${ANYKERNEL2_FOLDER}/${SIGNED_ZIP}" "${FILE_MOVE}"
             md5sum "${SIGNED_ZIP}" > "${FILE_MOVE}/${SIGNED_ZIP}.md5"
+        fi
+
+        if [[ ${PACKAGE_METHOD} =~ "none" ]]; then
+            mv "${OUT_KERNEL_IMAGE}" "${FILE_MOVE}/${KERNEL_IMAGE}"
+            md5sum "${KERNEL_IMAGE}" > "${FILE_MOVE}/${KERNEL_IMAGE}.md5"
         fi
     )
 }
