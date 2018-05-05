@@ -134,6 +134,7 @@ function parse_parameters() {
                 shift && enforce_value "${@}"
                 VERBOSITY_LEVEL=${1}
                 case ${VERBOSITY_LEVEL} in
+                    "0") AG_LINES=0; HIDDEN_COMMANDS=true ;;
                     "1") SHOW_OUTPUT=true; HIDDEN_COMMANDS=true ;;
                     "2") SHOW_OUTPUT=true; VERBOSE_COMMANDS=true ;;
                     "3") EXTRA_MAKE_FLAGS="${EXTRA_MAKE_FLAGS} V=1"; SHOW_OUTPUT=true; HIDDEN_COMMANDS=true ;;
@@ -425,7 +426,7 @@ function kmake() {
     if [[ ${SHOW_OUTPUT} ]]; then
         make_wrapper_${COMPILER} "${@}"
     else
-        make_wrapper_${COMPILER} "${@}" |& ag --no-color --after=10 "error:|warning:" && echo
+        make_wrapper_${COMPILER} "${@}" |& ag --no-color --after=${AG_LINES:-10} "error:|warning:" && echo
     fi
 }
 
