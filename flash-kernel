@@ -634,7 +634,12 @@ function move_kernel_files() {
 
 # Build function specifically for the OnePlus 5
 function build_kernel_op5() {
-    [[ -z ${OS_LIST} ]] && OS_LIST="OOS Custom"
+    if [[ -z ${OS_LIST} ]]; then
+        case ${MODE} in
+            "personal") OS_LIST="OOS" ;;
+            *) OS_LIST="OOS Custom" ;;
+        esac
+    fi
 
     for OS in ${OS_LIST}; do
         ANYKERNEL2_SUB_FOLDER="/kernels/${OS,,}"
@@ -648,7 +653,12 @@ function build_kernel_op5() {
 
 # Build function specifically for the Pixel 2
 function build_kernel_pxl2() {
-    [[ -z ${OS_LIST} ]] && OS_LIST="p:28 oreo:27"
+    if [[ -z ${OS_LIST} ]]; then
+        case ${MODE} in
+            "personal") OS_LIST="oreo:27" ;;
+            *) OS_LIST="p:28 oreo:27" ;;
+        esac
+    fi
 
     ORIGINAL_EMF=${EXTRA_MAKE_FLAGS}
     for OS in ${OS_LIST}; do
