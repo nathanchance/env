@@ -214,7 +214,7 @@ function device_flags() {
 
             MATCH_FLAG="${DEVICE_NAME_FILE}-v${VERSION::1}"
 
-            PACKAGE_METHOD=none ;;
+            [[ -z ${PACKAGE_METHOD} ]] && PACKAGE_METHOD=raw_image_zip ;;
 
         "op5")
             # Required flags
@@ -248,7 +248,7 @@ function device_flags() {
             [[ -z ${ANDROID_VERSION} ]] && ANDROID_VERSION=8.1.0
             AK2_SFX=${ANDROID_VERSION}
 
-            BUILD_FUNCTION=build_kernel
+            BUILD_FUNCTION=build_kernel_pxl2
 
             [[ -z ${COMPILER} ]] && COMPILER=clang
 
@@ -273,7 +273,7 @@ function device_flags() {
             if [[ -z ${PACKAGE_METHOD} ]]; then
                 case ${MODE} in
                     "personal") PACKAGE_METHOD=zip ;;
-                    *) PACKAGE_METHOD=image_zip ;;
+                    *) PACKAGE_METHOD=boot_image_zip ;;
                 esac
             fi ;;
 
@@ -493,18 +493,18 @@ function generate_version() {
     KERNEL_NAME="${CONFIG_LOCALVERSION/-/}${LOCALVERSION_ZIP}${VERSION_TEXT}${REVISION_FOR_FILE}${SHA}${DATE}"
 
     # Set final package names
-    if [[ ${PACKAGE_METHOD} =~ "image" ]]; then
+    if [[ ${PACKAGE_METHOD} =~ "boot_image" ]]; then
         BOOT_IMAGE=${KERNEL_NAME}-boot.img
         DTBO_IMAGE=${KERNEL_NAME}-dtbo.img
+    fi
+
+    if [[ ${PACKAGE_METHOD} =~ "raw_image" ]]; then
+        KERNEL_IMAGE=${KERNEL_NAME}.img
     fi
 
     if [[ ${PACKAGE_METHOD} =~ "zip" ]]; then
         UNSIGNED_ZIP=${KERNEL_NAME}-unsigned.zip
         SIGNED_ZIP=${KERNEL_NAME}.zip
-    fi
-
-    if [[ ${PACKAGE_METHOD} =~ "none" ]]; then
-        KERNEL_IMAGE=${KERNEL_NAME}.img
     fi
 }
 
@@ -572,7 +572,7 @@ function build_kernel() {
                 echo
                 echo "Zip file: ${SIGNED_ZIP}"
             fi
-            if [[ ${PACKAGE_METHOD} =~ "image" ]]; then
+            if [[ ${PACKAGE_METHOD} =~ "boot_image" ]]; then
                 echo
                 echo "Boot image: ${BOOT_IMAGE}"
             fi
@@ -597,7 +597,7 @@ function build_kernel() {
     # Move them if they exist, error out if not
     if [[ -n ${OUT_KERNEL_IMAGE} ]]; then
         echo "${GRN}${OS_STRING}$(basename "${OUT_KERNEL_IMAGE}") compiled successfully!${RST}\n"
-        [[ ${PACKAGE_METHOD} != "none" ]] && move_kernel_files
+        [[ ${PACKAGE_METHOD} != "raw_image" ]] && move_kernel_files
     else
         echo "${RED}Kernel image not found!${RST}\n"
         ending_info
@@ -646,6 +646,23 @@ function build_kernel_op5() {
 }
 
 
+# Build function specifically for the Pixel 2
+function build_kernel_pxl2() {
+    [[ -z ${OS_LIST} ]] && OS_LIST="p:28 oreo:27"
+
+    ORIGINAL_EMF=${EXTRA_MAKE_FLAGS}
+    for OS in ${OS_LIST}; do
+        OS_NAME=$(echo "${OS}" | cut -d : -f 1)
+        OS_SDK=$(echo "${OS}" | cut -d : -f 2)
+        ANYKERNEL2_SUB_FOLDER="/kernels/${OS_NAME}"
+        EXTRA_MAKE_FLAGS="${ORIGINAL_EMF} SDK_VERSION=${OS_SDK}"
+        OS_STRING="${OS_NAME^} "
+        build_kernel
+        ALREADY_NOTIFIED=true
+    done
+}
+
+
 # Package zip
 function package_zip() {
     header "PACKAGING AND SIGNING ZIP"
@@ -674,8 +691,8 @@ function package_zip() {
 }
 
 
-# Silence output function for package_image
-function package_image() {
+# Silence output function for package_boot_image
+function package_boot_image() {
     AOSP_FOLDER=${KERNEL_FOLDER}/sources/aosp-pixel2
     cd "${AOSP_FOLDER}" || die "AOSP source is not synced!"
 
@@ -690,7 +707,7 @@ function package_image() {
 
     echo "${BOLD}Current tag:${RST}       $(git -C device/google/wahoo describe --tags HEAD)\n"
 
-    package_image_wrapper
+    package_boot_image_wrapper
 
     COMPILED_BOOT_IMAGE=${AOSP_FOLDER}/out/target/product/${DEVICE_NAME_WEB}/boot.img
 
@@ -702,19 +719,19 @@ function package_image() {
 }
 
 
-# Package image wrapper
-function package_image_wrapper() {
+# Package boot image wrapper
+function package_boot_image_wrapper() {
     # Only show errors when compiling (unless debug)
     if [[ ${SHOW_OUTPUT} ]]; then
-        package_image_commands
+        package_boot_image_commands
     else
-        package_image_commands |& ag --no-color "error:" && echo
+        package_boot_image_commands |& ag --no-color "error:" && echo
     fi
 }
 
 
-# Package image commands
-function package_image_commands() {
+# Package boot image commands
+function package_boot_image_commands() {
     mkavenv
     . build/envsetup.sh
     lunch aosp_${DEVICE_NAME_WEB}-user
@@ -725,14 +742,20 @@ function package_image_commands() {
 
 
 # Package both an image and zip
-function package_image_zip() {
+function package_boot_image_zip() {
     package_zip
-    package_image
+    package_boot_image
 }
 
 
-# Don't package anything
-function package_none() { return; }
+# Raw image doesn't need to be packaged
+function package_raw_image() { return; }
+
+
+# Package zip and ship raw image
+function package_raw_image_zip() {
+    package_zip
+}
 
 
 # Setup folders
@@ -782,7 +805,7 @@ function move_flashable_files() {
 
     (
         cd "${FILE_MOVE}" || die "Shift to ending folder failed!"
-        if [[ ${PACKAGE_METHOD} =~ "image" ]]; then
+        if [[ ${PACKAGE_METHOD} =~ "boot_image" ]]; then
             mv "${COMPILED_BOOT_IMAGE}" "${FILE_MOVE}/${BOOT_IMAGE}"
             md5sum "${BOOT_IMAGE}" > "${FILE_MOVE}/${BOOT_IMAGE}.md5"
 
@@ -790,14 +813,14 @@ function move_flashable_files() {
             md5sum "${DTBO_IMAGE}" > "${FILE_MOVE}/${DTBO_IMAGE}.md5"
         fi
 
+        if [[ ${PACKAGE_METHOD} =~ "raw_image" ]]; then
+            mv "${OUT_KERNEL_IMAGE}" "${FILE_MOVE}/${KERNEL_IMAGE}"
+            md5sum "${KERNEL_IMAGE}" > "${FILE_MOVE}/${KERNEL_IMAGE}.md5"
+        fi
+
         if [[ ${PACKAGE_METHOD} =~ "zip" ]]; then
             mv "${ANYKERNEL2_FOLDER}/${SIGNED_ZIP}" "${FILE_MOVE}"
             md5sum "${SIGNED_ZIP}" > "${FILE_MOVE}/${SIGNED_ZIP}.md5"
-        fi
-
-        if [[ ${PACKAGE_METHOD} =~ "none" ]]; then
-            mv "${OUT_KERNEL_IMAGE}" "${FILE_MOVE}/${KERNEL_IMAGE}"
-            md5sum "${KERNEL_IMAGE}" > "${FILE_MOVE}/${KERNEL_IMAGE}.md5"
         fi
     )
 }
@@ -919,8 +942,11 @@ function ending_info() {
 
             echo "${RED}FILE LOCATION: ${FILE_LOCATION}"
             case ${PACKAGE_METHOD} in
-                "image")
+                "boot_image")
                     echo "SIZE: $(du -h "${FILE_MOVE}/${BOOT_IMAGE}" |
+                                      awk '{print $1}')${RST}" ;;
+                "raw_image")
+                    echo "SIZE: $(du -h "${FILE_MOVE}/${KERNEL_IMAGE}" |
                                       awk '{print $1}')${RST}" ;;
                 "zip")
                     echo "SIZE: $(du -h "${FILE_MOVE}/${SIGNED_ZIP}" |
