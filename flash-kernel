@@ -304,6 +304,7 @@ function generate_variables() {
             FILE_MOVE_OLD=$(readlink -f "${FILE_MOVE}/../archive")
             if [[ ${TG} ]]; then
                 case ${DEVICE} in
+                    "marlin") export CHAT_ID=-1001132593794 ;;
                     "op5") export CHAT_ID=-1001107088684 ;;
                     "taimen"|"walleye") export CHAT_ID=-1001298464571 ;;
                 esac

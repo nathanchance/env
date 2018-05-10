@@ -271,6 +271,9 @@ function frel() {
                     flash-kernel -v "${2}" -m stable -d op5 -b 8.1.0-unified -av 8.x -t ;;
             esac ;;
 
+        "pxl")
+            flash-kernel -v "${2}" -m stable -d marlin -b oreo-m4 -t ;;
+
         "pxl2")
             flash-kernel -v "${2}" -m stable -d taimen -b oreo-m2 -t
             flash-kernel -v "${2}" -m stable -d walleye -b oreo-m2 -t ;;
@@ -293,6 +296,9 @@ function ftest() {
                 3.*|4.*)
                     flash-kernel -v "${2}" -r "${3}" -m "${4}" -d op5 -b "queue-${2}" -av 8.x -t ;;
             esac ;;
+
+        "pxl")
+            flash-kernel -v "${2}" -r "${3}" -m "${4}" -d marlin -b "queue-${2}" -t ;;
 
         "pxl2")
             flash-kernel -v "${2}" -r "${3}" -m "${4}" -d taimen -b "queue-${2}" -t
@@ -410,6 +416,17 @@ function queue-tag() {
 function doesitbuild() {
     CUR_FOLDER=$(pwd)
     case ${CUR_FOLDER} in
+        *marlin*)
+            # Clang 7.x
+            flash-kernel -d marlin -m tmp -io
+            # Clang 6.x
+            flash-kernel -d marlin -m tmp -io -ct flash-clang-6.x
+            # GCC 4.9
+            flash-kernel -d marlin -m tmp -io -cc gcc -gt aosp-gcc-arm64 -gt-32 aosp-gcc-arm
+            # GCC 7.3.0
+            flash-kernel -d marlin -m tmp -io -cc gcc -gt bootlin-gcc-7.3.0-arm64 -gt-32 bootlin-gcc-7.3.0-arm
+            clear
+            tail -n 11 "${LOG}" ;;
         *wahoo*)
             # Clang 7.x
             flash-kernel -m tmp -io
