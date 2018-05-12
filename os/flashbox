@@ -414,6 +414,7 @@ function queue-tag() {
 
 # Does it build function
 function doesitbuild() {
+    local CUR_FOLDER DEFCONFIG
     CUR_FOLDER=$(pwd)
     case ${CUR_FOLDER} in
         *marlin*)
@@ -454,14 +455,18 @@ function doesitbuild() {
             clear
             tail -n 14 "${LOG}" ;;
         *clang*)
+            case "$(kver)" in
+                3.18*) DEFCONFIG=msm ;;
+                4.4*) DEFCONFIG=msmcortex ;;
+            esac
             # Clang 7.x
-            build-kernel -d msmcortex-perf_defconfig -w -c -ct aosp-clang/clang-r328903
+            build-kernel -d ${DEFCONFIG}-perf_defconfig -w -c -ct aosp-clang/clang-r328903 "${@}"
             # Clang 6.x
-            build-kernel -d msmcortex-perf_defconfig -w -c -ct aosp-clang/clang-4691093
+            build-kernel -d ${DEFCONFIG}-perf_defconfig -w -c -ct aosp-clang/clang-4691093 "${@}"
             # Clang 5.x
-            build-kernel -d msmcortex-perf_defconfig -w -c
+            build-kernel -d ${DEFCONFIG}-perf_defconfig -w -c "${@}"
             # GCC 4.9.4
-            build-kernel -d msmcortex-perf_defconfig -w ;;
+            build-kernel -d ${DEFCONFIG}-perf_defconfig -w "${@}" ;;
         *sony*)
             local DEFCONFIG
             echo
