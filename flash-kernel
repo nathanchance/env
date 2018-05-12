@@ -69,6 +69,18 @@ function parse_parameters() {
 
                 EXTRA_MAKE_FLAGS=${1} ;;
 
+            # 64-bit GCC binary to use for compiling (like the system ones)
+            "-gb"|"--gcc-binary")
+                shift && enforce_value "${@}"
+
+                GCC=${1} ;;
+
+            # 32-bit GCC binary to use for compiling (like the system ones)
+            "-gb-32"|"--gcc-32-bit-binary")
+                shift && enforce_value "${@}"
+
+                GCC_32_BIT=${1} ;;
+
             # 64-bit GCC toolchain to use for compiling
             "-gt"|"--gcc-toolchain")
                 shift && enforce_value "${@}"
@@ -321,21 +333,25 @@ function generate_variables() {
     ARCHITECTURE=arm64
 
     # Normal 64-bit GCC toolchain
-    if [[ ! -d ${GCC_FOLDER} ]]; then
-        GCC_FOLDER=${TC_FOLDER}/${GCC_FOLDER}
-        [[ ! -d ${GCC_FOLDER} ]] && die "Invalid GCC folder specified!"
+    if [[ -z ${GCC_BINARY} ]]; then
+        if [[ ! -d ${GCC_FOLDER} ]]; then
+            GCC_FOLDER=${TC_FOLDER}/${GCC_FOLDER}
+            [[ ! -d ${GCC_FOLDER} ]] && die "Invalid GCC folder specified!"
+        fi
+        GCC=$(find "${GCC_FOLDER}/bin" \( -type f -o -type l \) -name '*-gcc' | head -n1)
     fi
-    GCC=$(find "${GCC_FOLDER}/bin" \( -type f -o -type l \) -name '*-gcc' | head -n1)
     [[ -z ${GCC} ]] && die "64-bit GCC toolchain could not be found!"
     CC=${GCC%gcc}
 
     # 32-bit GCC toolchain if required
-    if [[ -n ${GCC_32_BIT_FOLDER} ]]; then
-        if [[ ! -d ${GCC_32_BIT_FOLDER} ]]; then
-            GCC_32_BIT_FOLDER=${TC_FOLDER}/${GCC_32_BIT_FOLDER}
-            [[ ! -d ${GCC_32_BIT_FOLDER} ]] && die "Invalid GCC folder specified!"
+    if [[ -n ${GCC_32_BIT} || -n ${GCC_32_BIT_FOLDER} ]]; then
+        if [[ -z ${GCC_32_BIT} ]]; then
+            if [[ ! -d ${GCC_32_BIT_FOLDER} ]]; then
+                GCC_32_BIT_FOLDER=${TC_FOLDER}/${GCC_32_BIT_FOLDER}
+                [[ ! -d ${GCC_32_BIT_FOLDER} ]] && die "Invalid GCC folder specified!"
+            fi
+            GCC_32_BIT=$(find "${GCC_32_BIT_FOLDER}/bin" \( -type f -o -type l \) -name '*-gcc' | head -n1)
         fi
-        GCC_32_BIT=$(find "${GCC_32_BIT_FOLDER}/bin" \( -type f -o -type l \) -name '*-gcc' | head -n1)
         [[ -z ${GCC_32_BIT} ]] && die "32-bit GCC toolchain could not be found!"
         CC_32_BIT=${GCC_32_BIT%gcc}
     fi
