@@ -228,8 +228,8 @@ function device_flags() {
                 esac
             fi
 
-            [[ -z ${GCC_FOLDER} ]] && GCC_FOLDER=${TC_FOLDER}/linaro-gcc-7.2.1-arm64
-            [[ -z ${GCC_32_BIT_FOLDER} ]] && GCC_32_BIT_FOLDER=${TC_FOLDER}/linaro-gcc-7.2.1-arm
+            [[ -z ${GCC_FOLDER} ]] && GCC_FOLDER=${TC_FOLDER}/btg-linaro-gcc-7.3.1-arm64
+            [[ -z ${GCC_32_BIT_FOLDER} ]] && GCC_32_BIT_FOLDER=${TC_FOLDER}/btg-linaro-gcc-7.3.1-arm
 
             MATCH_FLAG="${DEVICE_NAME_FILE}-v${VERSION::1}"
 
@@ -256,7 +256,7 @@ function device_flags() {
             DEVICE_NAME_GITHUB=${DEVICE}
             DEVICE_NAME_WEB=${DEVICE}
 
-            [[ -z ${GCC_FOLDER} ]] && GCC_FOLDER=${TC_FOLDER}/linaro-gcc-7.2.1-arm64
+            [[ -z ${GCC_FOLDER} ]] && GCC_FOLDER=${TC_FOLDER}/btg-linaro-gcc-7.3.1-arm64
 
             MATCH_FLAG="${DEVICE_NAME_FILE}-v${VERSION::1}"
 
@@ -284,8 +284,8 @@ function device_flags() {
             DEVICE_NAME_GITHUB=wahoo
             DEVICE_NAME_WEB=${DEVICE}
 
-            [[ -z ${GCC_FOLDER} ]] && GCC_FOLDER=${TC_FOLDER}/linaro-gcc-7.2.1-arm64
-            [[ -z ${GCC_32_BIT_FOLDER} ]] && GCC_32_BIT_FOLDER=${TC_FOLDER}/linaro-gcc-7.2.1-arm
+            [[ -z ${GCC_FOLDER} ]] && GCC_FOLDER=${TC_FOLDER}/btg-linaro-gcc-7.3.1-arm64
+            [[ -z ${GCC_32_BIT_FOLDER} ]] && GCC_32_BIT_FOLDER=${TC_FOLDER}/btg-linaro-gcc-7.3.1-arm
 
             MATCH_FLAG="${DEVICE_NAME_FILE}-v${VERSION::1}"
 
