@@ -233,7 +233,9 @@ function device_flags() {
 
             MATCH_FLAG="${DEVICE_NAME_FILE}-v${VERSION::1}"
 
-            [[ -z ${PACKAGE_METHOD} ]] && PACKAGE_METHOD=raw_image_zip ;;
+            [[ -z ${PACKAGE_METHOD} ]] && PACKAGE_METHOD=raw_image_zip
+
+            WANTS_COMPAT_VDSO=true ;;
 
         "op5")
             # Required flags
@@ -294,7 +296,9 @@ function device_flags() {
                     "personal") PACKAGE_METHOD=zip ;;
                     *) PACKAGE_METHOD=boot_image_zip ;;
                 esac
-            fi ;;
+            fi
+
+            WANTS_COMPAT_VDSO=true ;;
 
         *)
             die "Invalid device!" ;;
@@ -578,6 +582,12 @@ function build_kernel() {
     # If requested, disable -Werror
     if [[ ${NO_WERROR} ]]; then
         ./scripts/config --file out/.config -d CONFIG_CC_WERROR
+        kmake olddefconfig
+    fi
+
+    # If requested, build the 32-bit compatible VDSO
+    if [[ ${WANTS_COMPAT_VDSO} ]]; then
+        ./scripts/config --file out/.config -e CONFIG_COMPAT_VDSO
         kmake olddefconfig
     fi
 
