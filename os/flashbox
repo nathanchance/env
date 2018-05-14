@@ -275,8 +275,7 @@ function frel() {
             flash-kernel -v "${2}" -m stable -d marlin -b oreo-m4 -t ;;
 
         "pxl2")
-            flash-kernel -v "${2}" -m stable -d taimen -b oreo-m2 -t
-            flash-kernel -v "${2}" -m stable -d walleye -b oreo-m2 -t ;;
+            flash-kernel -v "${2}" -m stable -d wahoo -b oreo-m2 -t ;;
     esac
 }
 
@@ -301,8 +300,7 @@ function ftest() {
             flash-kernel -v "${2}" -r "${3}" -m "${4}" -d marlin -b "queue-${2}" -t ;;
 
         "pxl2")
-            flash-kernel -v "${2}" -r "${3}" -m "${4}" -d taimen -b "queue-${2}" -t
-            flash-kernel -v "${2}" -r "${3}" -m "${4}" -d walleye -b "queue-${2}" -t ;;
+            flash-kernel -v "${2}" -r "${3}" -m "${4}" -d wahoo -b "queue-${2}" -t ;;
     esac
 }
 
@@ -334,7 +332,7 @@ function wfr() {
             rm -rf "${WEB_FOLDER}"/downloads/kernels/op5/{7.1.x,8.0.0,8.1.0}/{custom,oos}/{alpha,beta,bisect,rc,tmp}/*
             rm -rf "${WEB_FOLDER}"/downloads/kernels/op5/8.x/{alpha,beta,bisect,rc,tmp}/* ;;
         "pxl2")
-            rm -rf "${WEB_FOLDER}"/downloads/kernels/{taimen,walleye}/{8.0.0,8.1.0}/{alpha,beta,bisect,rc,tmp}/* ;;
+            rm -rf "${WEB_FOLDER}"/downloads/kernels/{taimen,walleye,wahoo}/{8.0.0,8.1.0}/{alpha,beta,bisect,rc,tmp}/* ;;
     esac
 
     cd "${WEB_FOLDER}/downloads/kernels" || return
