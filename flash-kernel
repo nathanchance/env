@@ -165,7 +165,7 @@ function parse_parameters() {
     done
 
     # Default parameters
-    [[ -z ${DEVICE} ]] && DEVICE="taimen"
+    [[ -z ${DEVICE} ]] && DEVICE="wahoo"
     [[ -z ${MODE} ]] && MODE="personal"
     [[ -z ${VERBOSITY_LEVEL} ]] && HIDDEN_COMMANDS=true
 
@@ -264,7 +264,7 @@ function device_flags() {
 
             PACKAGE_METHOD=zip ;;
 
-        "taimen"|"walleye")
+        "wahoo")
             # Required flags
             [[ -z ${ANDROID_VERSION} ]] && ANDROID_VERSION=8.1.0
             AK2_SFX=${ANDROID_VERSION}
@@ -280,10 +280,10 @@ function device_flags() {
                 esac
             fi
 
-            [[ -z ${DEFCONFIG} ]] && DEFCONFIG="flash-${DEVICE}_defconfig"
+            [[ -z ${DEFCONFIG} ]] && DEFCONFIG="flash_defconfig"
 
             DEVICE_NAME_FILE=${DEVICE^}
-            DEVICE_NAME_GITHUB=wahoo
+            DEVICE_NAME_GITHUB=${DEVICE}
             DEVICE_NAME_WEB=${DEVICE}
 
             [[ -z ${GCC_FOLDER} ]] && GCC_FOLDER=${TC_FOLDER}/btg-linaro-gcc-7.3.1-arm64
@@ -291,12 +291,7 @@ function device_flags() {
 
             MATCH_FLAG="${DEVICE_NAME_FILE}-v${VERSION::1}"
 
-            if [[ -z ${PACKAGE_METHOD} ]]; then
-                case ${MODE} in
-                    "personal") PACKAGE_METHOD=zip ;;
-                    *) PACKAGE_METHOD=boot_image_zip ;;
-                esac
-            fi
+            PACKAGE_METHOD=zip
 
             WANTS_COMPAT_VDSO=true ;;
 
@@ -322,7 +317,7 @@ function generate_variables() {
                 case ${DEVICE} in
                     "marlin") export CHAT_ID=-1001132593794 ;;
                     "op5") export CHAT_ID=-1001107088684 ;;
-                    "taimen"|"walleye") export CHAT_ID=-1001298464571 ;;
+                    "wahoo") export CHAT_ID=-1001298464571 ;;
                 esac
             fi ;;
         "tmp")
@@ -521,11 +516,6 @@ function generate_version() {
     KERNEL_NAME="${CONFIG_LOCALVERSION/-/}${LOCALVERSION_ZIP}${VERSION_TEXT}${REVISION_FOR_FILE}${SHA}${DATE}"
 
     # Set final package names
-    if [[ ${PACKAGE_METHOD} =~ "boot_image" ]]; then
-        BOOT_IMAGE=${KERNEL_NAME}-boot.img
-        DTBO_IMAGE=${KERNEL_NAME}-dtbo.img
-    fi
-
     if [[ ${PACKAGE_METHOD} =~ "raw_image" ]]; then
         KERNEL_IMAGE=${KERNEL_NAME}.img
     fi
@@ -605,10 +595,6 @@ function build_kernel() {
             if [[ ${PACKAGE_METHOD} =~ "zip" ]]; then
                 echo
                 echo "Zip file: ${SIGNED_ZIP}"
-            fi
-            if [[ ${PACKAGE_METHOD} =~ "boot_image" ]]; then
-                echo
-                echo "Boot image: ${BOOT_IMAGE}"
             fi
             SHORT_CHANGELOG=${SCRIPTS_FOLDER}/shortlogs/${DEVICE_NAME_FILE,,}-${VERSION/./}
             if [[ -f ${SHORT_CHANGELOG} ]]; then
@@ -718,7 +704,7 @@ function package_zip() {
     cd "${ANYKERNEL2_FOLDER}" || die "AnyKernel2 folder shift failed!"
 
     # Apply underclock for personal builds
-    if [[ ${MODE} = "personal" && ${DEVICE} = "taimen" ]]; then
+    if [[ ${MODE} = "personal" && ${DEVICE} = "wahoo" ]]; then
         if ! git apply -3 ${SCRIPTS_FOLDER}/personal-patches/underclock.patch; then
             die "Error apply underclock patch!"
         fi
@@ -728,7 +714,7 @@ function package_zip() {
     zip ${HIDDEN_COMMANDS:+ "-q"} -r9 "${UNSIGNED_ZIP}" -x README.md -- *
 
     # Remove underclock
-    if [[ ${MODE} = "personal" && ${DEVICE} = "taimen" ]]; then
+    if [[ ${MODE} = "personal" && ${DEVICE} = "wahoo" ]]; then
         if ! git apply -3R ${SCRIPTS_FOLDER}/personal-patches/underclock.patch; then
             die "Error apply underclock patch!"
         fi
@@ -746,63 +732,6 @@ function package_zip() {
     else
         echo "${GRN}Kernel zip successfully generated!${RST}\n"
     fi
-}
-
-
-# Silence output function for package_boot_image
-function package_boot_image() {
-    AOSP_FOLDER=${KERNEL_FOLDER}/sources/aosp-pixel2
-    cd "${AOSP_FOLDER}" || die "AOSP source is not synced!"
-
-    git -C device/google/wahoo-kernel reset --hard ${HIDDEN_COMMANDS:+ "--quiet"}
-
-    cp "${OUT_KERNEL_IMAGE}" "${AOSP_FOLDER}/device/google/wahoo-kernel"
-    cp "${OUT_DTBO_IMAGE}" "${AOSP_FOLDER}/device/google/wahoo-kernel"
-
-    header "COMPILING BOOT IMAGE"
-
-    echo "${BOLD}Image name:${RST}        ${BOOT_IMAGE}\n"
-
-    echo "${BOLD}Current tag:${RST}       $(git -C device/google/wahoo describe --tags HEAD)\n"
-
-    package_boot_image_wrapper
-
-    COMPILED_BOOT_IMAGE=${AOSP_FOLDER}/out/target/product/${DEVICE_NAME_WEB}/boot.img
-
-    if [[ ! -f ${COMPILED_BOOT_IMAGE} ]]; then
-        echo "${RED}Boot image not found!${RST}\n" && ending_info
-    else
-        echo "${GRN}Boot image compiled successfully!${RST}\n"
-    fi
-}
-
-
-# Package boot image wrapper
-function package_boot_image_wrapper() {
-    # Only show errors when compiling (unless debug)
-    if [[ ${SHOW_OUTPUT} ]]; then
-        package_boot_image_commands
-    else
-        package_boot_image_commands |& ag --no-color "error:" && echo
-    fi
-}
-
-
-# Package boot image commands
-function package_boot_image_commands() {
-    mkavenv
-    . build/envsetup.sh
-    lunch aosp_${DEVICE_NAME_WEB}-user
-    make "${JOBS_FLAG}" clean
-    LANG="" LC_ALL=C make "${JOBS_FLAG}" bootimage
-    rmvenv
-}
-
-
-# Package both an image and zip
-function package_boot_image_zip() {
-    package_zip
-    package_boot_image
 }
 
 
@@ -863,14 +792,6 @@ function move_flashable_files() {
 
     (
         cd "${FILE_MOVE}" || die "Shift to ending folder failed!"
-        if [[ ${PACKAGE_METHOD} =~ "boot_image" ]]; then
-            mv "${COMPILED_BOOT_IMAGE}" "${FILE_MOVE}/${BOOT_IMAGE}"
-            md5sum "${BOOT_IMAGE}" > "${FILE_MOVE}/${BOOT_IMAGE}.md5"
-
-            mv "$(dirname "${OUT_KERNEL_IMAGE}")/dtbo.img" "${FILE_MOVE}/${DTBO_IMAGE}"
-            md5sum "${DTBO_IMAGE}" > "${FILE_MOVE}/${DTBO_IMAGE}.md5"
-        fi
-
         if [[ ${PACKAGE_METHOD} =~ "raw_image" ]]; then
             mv "${OUT_KERNEL_IMAGE}" "${FILE_MOVE}/${KERNEL_IMAGE}"
             md5sum "${KERNEL_IMAGE}" > "${FILE_MOVE}/${KERNEL_IMAGE}.md5"
@@ -1000,9 +921,6 @@ function ending_info() {
 
             echo "${RED}FILE LOCATION: ${FILE_LOCATION}"
             case ${PACKAGE_METHOD} in
-                "boot_image")
-                    echo "SIZE: $(du -h "${FILE_MOVE}/${BOOT_IMAGE}" |
-                                      awk '{print $1}')${RST}" ;;
                 "raw_image")
                     echo "SIZE: $(du -h "${FILE_MOVE}/${KERNEL_IMAGE}" |
                                       awk '{print $1}')${RST}" ;;
