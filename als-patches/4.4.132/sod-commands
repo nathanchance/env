@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+
+PATCHES_FOLDER=$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")" && pwd)
+git ra
+git ap "${PATCHES_FOLDER}"/*.diff
+git ac -m "treewide: Linux $(kver)
+
+source kernel.org
+https://cdn.kernel.org/pub/linux/kernel/v4.x/incr/patch-4.4.131-132.xz"
