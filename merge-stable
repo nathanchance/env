@@ -105,11 +105,11 @@ function parse_parameters() {
 function verify_remote() {
     add_remote "${1}" https://git.kernel.org/pub/scm/linux/kernel/git/stable/"${1}".git/
 
-    if ! git fetch "${1}"; then
+    if ! git fetch "${1}" && ! git fetch --tags "${1}"; then
         die "${1} remote update failed!"
-    else
-        echo "${1} remote updated successfully!"
     fi
+
+    echo "${1} remote updated successfully!"
 }
 
 
