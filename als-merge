@@ -166,8 +166,6 @@ if [[ ${#} -lt 1 || "${*}" =~ "4.4" ]]; then
     git push
     git ch lineage-15.1
     git rh origin/"$(git rev-parse --abbrev-ref HEAD)"
-    git f LineageOS || die "LineageOS remote does not exist!"
-    git ml --no-edit LineageOS/lineage-15.1 || die "Merge conflicts detected, please resolve then continue!"
 
     merge-stable
     [[ -f ${PATCHES_44}/op5-lineage-15.1-commands ]] && bash "${PATCHES_44}/op5-lineage-15.1-commands" "v${VERSION_44}"
