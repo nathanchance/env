@@ -870,7 +870,7 @@ function qcacld() {
             SUBFOLDER=drivers/staging/wlan-qc ;;
 
         *"op5"*)
-            TAG=LA.UM.6.2.r1-08100-sdm660.0
+            TAG=LA.UM.6.4.r1-08500-8x98.0
             URL=https://source.codeaurora.org/quic/la/platform/vendor/qcom-opensource/wlan/
             SUBFOLDER=drivers/staging ;;
     esac
