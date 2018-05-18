@@ -7,6 +7,16 @@
 # Utility and terminal setup functions for my Pixelbook
 
 
+# Downloads folder
+alias dwnld='cd ${HOME}/Downloads'
+# Files folder
+alias fls='cd ${HOME}/Downloads/Files'
+
+
+# Make hostname 'flashbook'
+sudo hostname flashbook
+
+
 # Fetch this script and reload .bashrc
 function rld() {
     curl -o ~/.chromeos-functions https://raw.githubusercontent.com/nathanchance/scripts/master/os/chromeos
@@ -57,11 +67,37 @@ function upd() {
 }
 
 
-# Downloads folder
-alias dwnld='cd ${HOME}/Downloads'
-# Files folder
-alias fls='cd ${HOME}/Downloads/Files'
+# Reinstall function in case Chromebrew blows up...
+function reinstall() {
+    # Wipe /usr/local and reinstall emerge packages
+    sudo dev_install --reinstall -y
+
+    # Reinstall adb/fastboot
+    dwnld
+    rm -rf tmp
+    mkdir -p tmp
+    local URL
+    URL=$(curl -s https://dl.google.com/android/repository/platform-tools-latest-linux.zip | cut -d \" -f 2)
+    curl -s "${URL}" -o tmp.zip
+    bsdtar -x -f tmp.zip
+    cd platform-tools
+    sudo install adb dmtracedump e2fsdroid etc1tool fastboot hprof-conv make_f2fs mke2fs mke2fs.conf sload_f2fs sqlite3 /usr/local/bin
+    sudo install lib64/libc++.so /usr/local/lib64
+    dwnld
+    rm -rf tmp
+    mkdir -p tmp
+
+    # Reinstall neofetch
+    sudo curl -s https://raw.githubusercontent.com/dylanaraps/neofetch/master/neofetch -o /usr/local/bin/neofetch
+    sudo chmod a+x /usr/local/bin/neofetch
+
+    # Reload functions
+    rld
+}
 
 
-# Make hostname 'flashbook'
-sudo hostname flashbook
+# Generate new SSH key for server interaction
+function gen-ssh() {
+    ssh-keygen -t rsa
+    ssh-copy-id nathan@nchancellor.net
+}
