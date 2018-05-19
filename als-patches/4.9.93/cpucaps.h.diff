@@ -1,0 +1,12 @@
+diff --git a/arch/arm64/include/asm/cpucaps.h b/arch/arm64/include/asm/cpucaps.h
+index d64bf94a79a1..baadab09cdd1 100644
+--- a/arch/arm64/include/asm/cpucaps.h
++++ b/arch/arm64/include/asm/cpucaps.h
+@@ -34,7 +34,6 @@
+ #define ARM64_HAS_32BIT_EL0			13
+ #define ARM64_HYP_OFFSET_LOW			14
+ #define ARM64_MISMATCHED_CACHE_LINE_SIZE	15
+-
+ #define ARM64_UNMAP_KERNEL_AT_EL0		16
+ 
+ #define ARM64_HARDEN_BRANCH_PREDICTOR		17

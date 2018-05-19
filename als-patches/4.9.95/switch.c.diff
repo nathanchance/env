@@ -1,0 +1,13 @@
+diff --git a/arch/arm64/kvm/hyp/switch.c b/arch/arm64/kvm/hyp/switch.c
+index b63a52854c8c..8d50f710539c 100644
+--- a/arch/arm64/kvm/hyp/switch.c
++++ b/arch/arm64/kvm/hyp/switch.c
+@@ -19,6 +19,8 @@
+ #include <linux/jump_label.h>
+ #include <uapi/linux/psci.h>
+ 
++#include <kvm/arm_psci.h>
++
+ #include <asm/kvm_asm.h>
+ #include <asm/kvm_emulate.h>
+ #include <asm/kvm_hyp.h>

@@ -1,0 +1,13 @@
+diff --git a/include/linux/cpuhotplug.h b/include/linux/cpuhotplug.h
+index d92120663e26..650055467ed4 100644
+--- a/include/linux/cpuhotplug.h
++++ b/include/linux/cpuhotplug.h
+@@ -51,7 +51,7 @@ enum cpuhp_state {
+ 	CPUHP_SH_SH3X_PREPARE,
+ 	CPUHP_BLK_MQ_PREPARE,
+ 	CPUHP_TOPOLOGY_PREPARE,
+-	CPUHP_TIMERS_DEAD,
++	CPUHP_TIMERS_PREPARE,
+ 	CPUHP_NOTF_ERR_INJ_PREPARE,
+ 	CPUHP_MIPS_SOC_PREPARE,
+ 	CPUHP_BRINGUP_CPU,

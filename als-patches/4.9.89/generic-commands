@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+
+git ra
+git fp -1 --stdout ecb1886f9b4f | git ap
+git fm

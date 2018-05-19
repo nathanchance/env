@@ -1,0 +1,17 @@
+diff --git a/kernel/time/timer.c b/kernel/time/timer.c
+index 0cf2eb8fa952..c24ca401ce9a 100644
+--- a/kernel/time/timer.c
++++ b/kernel/time/timer.c
+@@ -1887,6 +1887,12 @@ static void __migrate_timers(unsigned int cpu, bool remove_pinned)
+ 		spin_lock_irqsave(&new_base->lock, flags);
+ 		spin_lock_nested(&old_base->lock, SINGLE_DEPTH_NESTING);
+ 
++		/*
++		 * The current CPUs base clock might be stale. Update it
++		 * before moving the timers over.
++		 */
++		forward_timer_base(new_base);
++
+ 		if (!cpu_online(cpu))
+ 			BUG_ON(old_base->running_timer);
+ 
