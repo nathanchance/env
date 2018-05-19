@@ -873,6 +873,11 @@ function qcacld() {
             TAG=LA.UM.6.4.r1-08500-8x98.0
             URL=https://source.codeaurora.org/quic/la/platform/vendor/qcom-opensource/wlan/
             SUBFOLDER=drivers/staging ;;
+
+        *"op6"*)
+            TAG=oneplus/SDM845_O_8.1
+            URL=https://github.com/OnePlusOSS/android_vendor_qcom-opensource_wlan_
+            SUBFOLDER=drivers/staging ;;
     esac
 
     for REPO in "${REPOS[@]}"; do
