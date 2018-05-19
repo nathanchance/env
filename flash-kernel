@@ -733,22 +733,8 @@ function package_zip() {
 
     cd "${ANYKERNEL2_FOLDER}" || die "AnyKernel2 folder shift failed!"
 
-    # Apply underclock for personal builds
-    if [[ ${MODE} = "personal" && ${DEVICE} = "wahoo" ]]; then
-        if ! git apply -3 ${SCRIPTS_FOLDER}/personal-patches/underclock.patch; then
-            die "Error apply underclock patch!"
-        fi
-    fi
-
     # Package the zip without the README
     zip ${HIDDEN_COMMANDS:+ "-q"} -r9 "${UNSIGNED_ZIP}" -x README.md -- *
-
-    # Remove underclock
-    if [[ ${MODE} = "personal" && ${DEVICE} = "wahoo" ]]; then
-        if ! git apply -3R ${SCRIPTS_FOLDER}/personal-patches/underclock.patch; then
-            die "Error apply underclock patch!"
-        fi
-    fi
 
     # Sign zip
     java -jar "${BIN_FOLDER}/zipsigner-2.1.jar" \
