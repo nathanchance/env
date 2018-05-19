@@ -480,9 +480,6 @@ function kmake() {
 
 # Setup compilation
 function generate_version() {
-    # Generate kernel version
-    KVER=$(make kernelversion)
-
     # This is set in the defconfig
     CONFIG_LOCALVERSION="-FlashKernel"
 
@@ -518,10 +515,6 @@ function generate_version() {
         LOCALVERSION="${LOCALVERSION}${DIRTY}"
     fi
 
-    # Generate first line variable
-    # CONFIG_LOCALVERSION_AUTO is disabled
-    FIRST_LINE="${KVER}${CONFIG_LOCALVERSION}${LOCALVERSION}"
-
     # If REVISION exists, use it for the file
     if [[ -n ${REVISION} ]]; then
         REVISION_FOR_FILE=".${MODE::1}${REVISION}"
@@ -529,12 +522,6 @@ function generate_version() {
         # If REVISION is greater than or equal to 1, pass it to the build system
         [[ ${REVISION} -ge 1 ]] && KBUILD_BUILD_VERSION=${REVISION}
     fi
-
-    # Generate second line variable
-    SECOND_LINE="$(whoami)@$(uname -n) #${KBUILD_BUILD_VERSION:-1}"
-
-    # Generate third line variable
-    THIRD_LINE="$(date)"
 
     # Export KERNEL_NAME based on the above information
     KERNEL_NAME="${CONFIG_LOCALVERSION/-/}${LOCALVERSION_ZIP}${VERSION_TEXT}${REVISION_FOR_FILE}${SHA}${DATE}"
@@ -553,19 +540,37 @@ function generate_version() {
 
 # Print variables
 function print_variables() {
-    echo "${BOLD}Kernel version:${RST}    ${FIRST_LINE}"
-    echo "                   ${SECOND_LINE}"
-    echo "                   ${THIRD_LINE}\n"
+    echo "${BOLD}Device:${RST}     ${DEVICE}\n"
 
-    echo "${BOLD}Kernel branch:${RST}     ${KERNEL_BRANCH}\n"
+    echo "${BOLD}Branch:${RST}     ${KERNEL_BRANCH}\n"
 
-    if [[ ${COMPILER} = "clang" ]]; then
-        echo "${BOLD}Clang info:${RST}        ${CLANG_VERSION}"
-        echo "                   ${CLANG}\n"
-    fi
+    [[ ${COMPILER} = "clang" ]] && echo "${BOLD}Clang:${RST}      ${CLANG}\n"
 
-    echo "${BOLD}GCC info:${RST}          $(${GCC} --version | head -1)"
-    echo "                   ${GCC}\n"
+    echo "${BOLD}GCC:${RST}        ${GCC}\n"
+}
+
+
+# Export version variable
+function evv() {
+    FILE=out/include/generated/compile.h
+    export "$(grep "${1}" "${FILE}" | cut -d'"' -f1 | awk '{print $2}')"="$(grep "${1}" "${FILE}" | cut -d'"' -f2)"
+}
+
+
+# Show the version as if looking at "/proc/version"
+function parse_version() {
+    evv UTS_VERSION
+    evv LINUX_COMPILE_BY
+    evv LINUX_COMPILE_HOST
+    evv LINUX_COMPILER
+
+    VERSION=$(cat out/include/config/kernel.release)
+    UTS_VERSION=$(echo "${UTS_VERSION}" | cut -d ' ' -f 4,5,6,7,8,9)
+
+    echo "${BOLD}Version:${RST}    ${VERSION} (${LINUX_COMPILER})"
+    echo "            ${LINUX_COMPILE_BY}@${LINUX_COMPILE_HOST} #${KBUILD_BUILD_NUMBER:-1}"
+    echo "            ${UTS_VERSION}"
+    echo
 }
 
 
@@ -640,6 +645,7 @@ function build_kernel() {
 
     # Move them if they exist, error out if not
     if [[ -n ${OUT_KERNEL_IMAGE} ]]; then
+        parse_version
         echo "${GRN}${OS_STRING}$(basename "${OUT_KERNEL_IMAGE}") compiled successfully!${RST}\n"
         [[ ${PACKAGE_METHOD} != "raw_image" ]] && move_kernel_files
     else
