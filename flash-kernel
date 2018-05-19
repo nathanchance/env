@@ -264,6 +264,30 @@ function device_flags() {
 
             PACKAGE_METHOD=zip ;;
 
+        "op6")
+            # Required flags
+            [[ -z ${ANDROID_VERSION} ]] && ANDROID_VERSION=8.1.0
+
+            AK2_SFX=${ANDROID_VERSION}
+
+            BUILD_FUNCTION=build_kernel
+
+            [[ -z ${COMPILER} ]] && COMPILER=gcc
+
+            [[ -z ${DEFCONFIG} ]] && DEFCONFIG="flash_defconfig"
+
+            DEVICE_NAME_FILE=${DEVICE^^}
+            DEVICE_NAME_GITHUB=${DEVICE}
+            DEVICE_NAME_WEB=${DEVICE}
+
+            [[ -z ${GCC_FOLDER} ]] && GCC_FOLDER=${TC_FOLDER}/aosp-gcc-arm64
+
+            IMAGE_ONLY=true
+
+            MATCH_FLAG="${DEVICE_NAME_FILE}-v${VERSION::1}"
+
+            PACKAGE_METHOD=zip ;;
+
         "wahoo")
             # Required flags
             [[ -z ${ANDROID_VERSION} ]] && ANDROID_VERSION=8.1.0
@@ -389,7 +413,7 @@ function generate_variables() {
 # Clean up
 function clean_up() {
     # Clean AnyKernel2 folder if building a zip
-    if [[ ${PACKAGE_METHOD} =~ "zip" ]]; then
+    if [[ ${PACKAGE_METHOD} =~ "zip" && ! ${IMAGE_ONLY} ]]; then
         cd "${ANYKERNEL2_FOLDER}" || die "AnyKernel2 source is missing!"
 
         [[ -z ${ANYKERNEL2_BRANCH} ]] && ANYKERNEL2_BRANCH=${DEVICE_NAME_GITHUB}-flash-${AK2_SFX}
