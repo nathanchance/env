@@ -890,15 +890,15 @@ function qcacld() {
             "-i"|"--init")
                 if [[ "$(pwd)" =~ "sony" ]]; then
                     git rm "${SUBFOLDER}/${REPO}"
-                    git ac -m "${REPO}: Remove submodule reference"
+                    git ac -m "staging: ${REPO}: Remove submodule reference"
                 fi
 
-                git subtree add -m "${REPO}: Checkout at ${TAG}
+                git subtree add -m "staging: ${REPO}: Checkout at ${TAG}
 
 $(signoff)" --prefix="${SUBFOLDER}/${REPO}" "${REPO}" "${TAG}" ;;
 
             "-u"|"--update")
-                git subtree pull -m "${REPO}: Merge tag '${TAG}' into $(git cb)
+                git subtree pull -m "staging: ${REPO}: Merge tag '${TAG}' into $(git cb)
 
 $(signoff)" --prefix="${SUBFOLDER}/${REPO}" "${REPO}" "${TAG}" ;;
         esac
