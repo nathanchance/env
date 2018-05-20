@@ -24,6 +24,8 @@ function flashbox_aliases() {
     alias pkg='cd ${REPO_FOLDER}/pkgbuilds'
     alias op5='cd ${KERNEL_FOLDER}/flash/op5'
     alias op5ak='cd ${KERNEL_FOLDER}/flash/anykernel2-op5'
+    alias op6='cd ${KERNEL_FOLDER}/flash/op6'
+    alias op6ak='cd ${KERNEL_FOLDER}/flash/anykernel2-op6'
     alias pi='cd ${KERNEL_FOLDER}/pi'
     alias pxl='cd ${KERNEL_FOLDER}/flash/marlin'
     alias pxlak='cd ${KERNEL_FOLDER}/flash/anykernel2-marlin'
