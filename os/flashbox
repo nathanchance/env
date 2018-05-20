@@ -452,6 +452,15 @@ function doesitbuild() {
             flash-kernel -d op5 -m tmp -io -cc gcc -gt bootlin-gcc-7.3.0-arm64
             clear
             tail -n 14 "${LOG}" ;;
+        *op6*)
+            # Clang 7.x
+            flash-kernel -d op6 -m tmp -io
+            # GCC 7.3.0
+            flash-kernel -d op6 -m tmp -io -cc gcc -gt btg-linaro-gcc-7.3.1-arm64
+            # GCC 4.9
+            flash-kernel -d op6 -m tmp -io -cc gcc -gt aosp-gcc-arm64
+            clear
+            tail -n 11 "${LOG}" ;;
         *clang*)
             case "$(kver)" in
                 3.18*) DEFCONFIG=msm ;;
