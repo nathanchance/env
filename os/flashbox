@@ -906,14 +906,13 @@ function qcacld() {
                     git ac -m "staging: ${REPO}: Remove submodule reference"
                 fi
 
-                git subtree add -m "staging: ${REPO}: Checkout at ${TAG}
-
-$(signoff)" --prefix="${SUBFOLDER}/${REPO}" "${REPO}" "${TAG}" ;;
+                git m --allow-unrelated-histories -s ours --no-commit "${REPO}/${TAG}"
+                git read-tree --prefix="${SUBFOLDER}/${REPO}" -u "${REPO}/${TAG}"
+                git c --no-edit -m "staging: ${REPO}: Checkout at ${TAG}" ;;
 
             "-u"|"--update")
-                git subtree pull -m "staging: ${REPO}: Merge tag '${TAG}' into $(git cb)
-
-$(signoff)" --prefix="${SUBFOLDER}/${REPO}" "${REPO}" "${TAG}" ;;
+                git m --no-edit -m "staging: ${REPO}: Merge tag '${TAG}' into $(git cb)" \
+                      -X subtree="${SUBFOLDER}/${REPO}" "${REPO}/${TAG}" ;;
         esac
     done
 }
