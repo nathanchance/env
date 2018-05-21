@@ -462,7 +462,7 @@ function doesitbuild() {
             # GCC 4.9
             flash-kernel -d op6 -m tmp -io -cc gcc -gt aosp-gcc-arm64
             clear
-            tail -n 11 "${LOG}" ;;
+            tail -n 8 "${LOG}" ;;
         *clang*)
             case "$(kver)" in
                 3.18*) DEFCONFIG=msm ;;
