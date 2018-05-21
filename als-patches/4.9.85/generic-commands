@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 PATCHES_FOLDER=$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")" && pwd)
-git rf drivers/usb/dwc3/core.c
+git rf drivers/android/binder.c
 git ra
-git fp -1 --stdout ecb1886f9b4fea6408f4d9c6defcc7ba3db88c29 | git ap
+git ap "${PATCHES_FOLDER}"/*.diff
 git fm

@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+
+PATCHES_FOLDER=$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")" && pwd)
+git ch v"$(basename "${PATCHES_FOLDER}")" -- drivers/media/v4l2-core/v4l2-compat-ioctl32.c
+git ap "${PATCHES_FOLDER}"/v4l2-compat-ioctl32.c.diff
+git fm
