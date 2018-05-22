@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+
+PATCHES_FOLDER=$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")" && pwd)
+git ra
+if [[ "${*}" =~ "--no-als" ]]; then
+    for FILE in assembler.h auditsc.c base.c cputype.h vmscan.c; do
+        git ap "${PATCHES_FOLDER}"/generic/"${FILE}".diff
+    done
+fi
+git ap "${PATCHES_FOLDER}"/generic/futex.h.diff
+if [[ "${*}" =~ "--no-als" ]]; then
+    git fm
+else
+    git mc
+fi

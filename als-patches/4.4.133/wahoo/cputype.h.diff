@@ -1,0 +1,35 @@
+diff --git a/arch/arm64/include/asm/cputype.h b/arch/arm64/include/asm/cputype.h
+index 1ddc9c930097..777e47074f51 100644
+--- a/arch/arm64/include/asm/cputype.h
++++ b/arch/arm64/include/asm/cputype.h
+@@ -55,6 +55,14 @@
+ #define MIDR_IMPLEMENTOR(midr)	\
+ 	(((midr) & MIDR_IMPLEMENTOR_MASK) >> MIDR_IMPLEMENTOR_SHIFT)
+ 
++#define MIDR_CPU_VAR_REV(var, rev) \
++	(((var) << MIDR_VARIANT_SHIFT) | (rev))
++
++#define MIDR_CPU_PART_MASK	  \
++	(MIDR_IMPLEMENTOR_MASK	| \
++	 MIDR_ARCHITECTURE_MASK | \
++	 MIDR_PARTNUM_MASK)
++
+ #define MIDR_CPU_MODEL(imp, partnum) \
+ 	(((imp)			<< MIDR_IMPLEMENTOR_SHIFT) | \
+ 	(0xf			<< MIDR_ARCHITECTURE_SHIFT) | \
+@@ -81,6 +89,7 @@
+ #define ARM_CPU_PART_CORTEX_A57		0xD07
+ #define ARM_CPU_PART_CORTEX_A53		0xD03
+ #define ARM_CPU_PART_CORTEX_A72		0xD08
++#define ARM_CPU_PART_CORTEX_A55		0xD05
+ #define ARM_CPU_PART_KRYO2XX_GOLD	0x800
+ #define ARM_CPU_PART_KRYO2XX_SILVER	0x801
+ 
+@@ -90,6 +99,7 @@
+ 
+ #define MIDR_CORTEX_A53 MIDR_CPU_MODEL(ARM_CPU_IMP_ARM, ARM_CPU_PART_CORTEX_A53)
+ #define MIDR_CORTEX_A57 MIDR_CPU_MODEL(ARM_CPU_IMP_ARM, ARM_CPU_PART_CORTEX_A57)
++#define MIDR_CORTEX_A55 MIDR_CPU_MODEL(ARM_CPU_IMP_ARM, ARM_CPU_PART_CORTEX_A55)
+ #define MIDR_THUNDERX	MIDR_CPU_MODEL(ARM_CPU_IMP_CAVIUM, CAVIUM_CPU_PART_THUNDERX)
+ #define MIDR_KRYO2XX_SILVER \
+ 	MIDR_CPU_MODEL(ARM_CPU_IMP_QCOM, ARM_CPU_PART_KRYO2XX_SILVER)
