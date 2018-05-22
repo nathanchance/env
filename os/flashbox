@@ -876,13 +876,13 @@ function qcacld() {
 
     REPOS=( "fw-api" "qcacld-3.0" "qca-wifi-host-cmn" )
 
-    case "$(pwd)" in
+    case "$(pwd):$(make kernelversion)" in
         *"sony"*)
             TAG=aosp/LA.UM.6.4.r1
             URL=https://github.com/sonyxperiadev/vendor-qcom-opensource-wlan-
             SUBFOLDER=drivers/staging/wlan-qc ;;
 
-        *"op5"*)
+        *:"4.4"*)
             TAG=LA.UM.6.4.r1-08500-8x98.0
             URL=https://source.codeaurora.org/quic/la/platform/vendor/qcom-opensource/wlan/
             SUBFOLDER=drivers/staging ;;
@@ -912,7 +912,7 @@ function qcacld() {
 
             "-u"|"--update")
                 git m --no-edit -m "staging: ${REPO}: Merge tag '${TAG}' into $(git cb)" \
-                      -X subtree="${SUBFOLDER}/${REPO}" "${REPO}/${TAG}" ;;
+                      -X subtree="${SUBFOLDER}/${REPO}" FETCH_HEAD ;;
         esac
     done
 }
