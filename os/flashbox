@@ -906,8 +906,8 @@ function qcacld() {
                     git ac -m "staging: ${REPO}: Remove submodule reference"
                 fi
 
-                git m --allow-unrelated-histories -s ours --no-commit "${REPO}/${TAG}"
-                git read-tree --prefix="${SUBFOLDER}/${REPO}" -u "${REPO}/${TAG}"
+                git m --allow-unrelated-histories -s ours --no-commit FETCH_HEAD
+                git read-tree --prefix="${SUBFOLDER}/${REPO}" -u FETCH_HEAD
                 git c --no-edit -m "staging: ${REPO}: Checkout at ${TAG}" ;;
 
             "-u"|"--update")
