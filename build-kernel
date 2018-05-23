@@ -101,7 +101,7 @@ done
 [[ -z ${ARCH} ]] && ARCH=arm64
 [[ -z ${GCC_TOOLCHAIN_FOLDER} ]] && GCC_TOOLCHAIN_FOLDER=${TC_FOLDER}/aosp-gcc-${ARCH}
 
-if [[ ${PWD} =~ "wahoo" || ${PWD} =~ "marlin" ]]; then
+if [[ "${PWD}$(git cb)" =~ "wahoo" || "${PWD}$(git cb)" =~ "marlin" ]]; then
     [[ -z ${ARCH_32_BIT} ]] && ARCH_32_BIT=arm
     [[ -z ${GCC_32_BIT_TOOLCHAIN_FOLDER} ]] && GCC_32_BIT_TOOLCHAIN_FOLDER=${TC_FOLDER}/aosp-gcc-${ARCH_32_BIT}
 fi
