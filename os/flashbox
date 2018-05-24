@@ -916,3 +916,31 @@ function qcacld() {
         esac
     done
 }
+
+
+# Build an AK2 zip for Pixel 2
+function pxl2-ak2-zip() {
+    (
+        SF=${PWD}
+        AK2=${KERNEL_FOLDER}/flash/anykernel2-wahoo
+        WB=${HOME}/web/tmp/wahoo/stock
+        ZIP=wahoo-$(date +%Y%m%d-%H%M)
+
+        cd "${AK2}" || return
+        CB=$(git cb)
+        git cl
+        git ch wahoo-stock
+
+        find "${SF}/out" -name 'Image.lz4-dtb' -exec cp -v {} "${AK2}" \;
+        find "${SF}/out" -name 'dtbo.img' -exec cp -v {} "${AK2}" \;
+
+        zip -r9 "${ZIP}.zip" -x README.md -- *
+        signzip "${ZIP}.zip"
+
+        rm -rf "${WB}"
+        mkdir -p "${WB}"
+        mv -v wahoo*-signed.zip "${WB}"
+
+        git ch "${CB}"
+    )
+}
