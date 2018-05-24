@@ -422,10 +422,10 @@ function doesitbuild() {
             flash-kernel -d marlin -m tmp -io
             # Clang 6.x
             flash-kernel -d marlin -m tmp -io -ct flash-clang-6.x
+            # GCC 7.3.1
+            flash-kernel -d marlin -m tmp -io -cc gcc
             # GCC 4.9
             flash-kernel -d marlin -m tmp -io -cc gcc -gt aosp-gcc-arm64 -gt-32 aosp-gcc-arm
-            # GCC 7.3.0
-            flash-kernel -d marlin -m tmp -io -cc gcc -gt bootlin-gcc-7.3.0-arm64 -gt-32 bootlin-gcc-7.3.0-arm
             clear
             tail -n 11 "${LOG}" ;;
         *wahoo*)
@@ -435,10 +435,10 @@ function doesitbuild() {
             flash-kernel -m tmp -io -ct flash-clang-6.x
             # Clang 5.x
             flash-kernel -m tmp -io -ct aosp-clang/clang-4053586
+            # GCC 7.3.1
+            flash-kernel -m tmp -io -cc gcc
             # GCC 4.9
             flash-kernel -m tmp -io -cc gcc -gt aosp-gcc-arm64 -gt-32 aosp-gcc-arm
-            # GCC 7.3.0
-            flash-kernel -m tmp -io -cc gcc -gt bootlin-gcc-7.3.0-arm64
             clear
             tail -n 14 "${LOG}" ;;
         *op5*)
@@ -448,17 +448,17 @@ function doesitbuild() {
             flash-kernel -d op5 -m tmp -io -ct flash-clang-6.x
             # Clang 5.x
             flash-kernel -d op5 -m tmp -io -ct aosp-clang/clang-4053586
+            # GCC 7.3.1
+            flash-kernel -d op5 -m tmp -io -cc gcc
             # GCC 4.9
             flash-kernel -d op5 -m tmp -io -cc gcc -gt aosp-gcc-arm64
-            # GCC 7.3.0
-            flash-kernel -d op5 -m tmp -io -cc gcc -gt bootlin-gcc-7.3.0-arm64
             clear
             tail -n 14 "${LOG}" ;;
         *op6*)
             # Clang 7.x
             flash-kernel -d op6 -m tmp -io
-            # GCC 7.3.0
-            flash-kernel -d op6 -m tmp -io -cc gcc -gt btg-linaro-gcc-7.3.1-arm64
+            # GCC 7.3.1
+            flash-kernel -d op6 -m tmp -io -cc gcc
             # GCC 4.9
             flash-kernel -d op6 -m tmp -io -cc gcc -gt aosp-gcc-arm64
             clear
@@ -487,9 +487,9 @@ function doesitbuild() {
             for DEFCONFIG in arch/arm64/configs/aosp_*; do
                 build-kernel -d "$(basename "${DEFCONFIG}")" -w -Werror -c -ct aosp-clang/clang-4691093 "${@}"
             done
-            # GCC 7.3.0
+            # GCC 7.3.1
             for DEFCONFIG in arch/arm64/configs/aosp_*; do
-                build-kernel -d "$(basename "${DEFCONFIG}")" -w -Werror -gt bootlin-gcc-7.3.0-arm64 "${@}"
+                build-kernel -d "$(basename "${DEFCONFIG}")" -w -Werror -gt btg-linaro-gcc-7.3.1-arm64 "${@}"
             done
             # GCC 4.9.4
             for DEFCONFIG in arch/arm64/configs/aosp_*; do
