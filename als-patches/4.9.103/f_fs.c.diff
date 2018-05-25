@@ -1,0 +1,27 @@
+diff --git a/drivers/usb/gadget/function/f_fs.c b/drivers/usb/gadget/function/f_fs.c
+index 4c1693a2e0f2..86a1d3b8d0ac 100644
+--- a/drivers/usb/gadget/function/f_fs.c
++++ b/drivers/usb/gadget/function/f_fs.c
+@@ -877,9 +877,13 @@ static void ffs_user_copy_worker(struct work_struct *work)
+ 	ffs_log("enter: ret %d", ret);
+ 
+ 	if (io_data->read && ret > 0) {
++		mm_segment_t oldfs = get_fs();
++
++		set_fs(USER_DS);
+ 		use_mm(io_data->mm);
+ 		ret = ffs_copy_to_iter(io_data->buf, ret, &io_data->data);
+ 		unuse_mm(io_data->mm);
++		set_fs(oldfs);
+ 	}
+ 
+ 	io_data->kiocb->ki_complete(io_data->kiocb, ret, ret);
+@@ -3796,7 +3800,7 @@ static int ffs_func_setup(struct usb_function *f,
+ 
+ 	ffs_log("exit");
+ 
+-	return 0;
++	return USB_GADGET_DELAYED_STATUS;
+ }
+ 
+ static bool ffs_func_req_match(struct usb_function *f,

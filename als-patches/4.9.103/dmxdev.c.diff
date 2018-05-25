@@ -1,0 +1,15 @@
+diff --git a/drivers/media/dvb-core/dmxdev.c b/drivers/media/dvb-core/dmxdev.c
+index 0eadf082f0ee..6573e4bc4fd2 100644
+--- a/drivers/media/dvb-core/dmxdev.c
++++ b/drivers/media/dvb-core/dmxdev.c
+@@ -4409,9 +4409,7 @@ static int dvb_demux_do_ioctl(struct file *file,
+ 		break;
+ 
+ 	default:
+-		pr_err("%s: unknown ioctl code (0x%x)\n",
+-			__func__, cmd);
+-		ret = -ENOIOCTLCMD;
++		ret = -ENOTTY;
+ 		break;
+ 	}
+ 	mutex_unlock(&dmxdev->mutex);
