@@ -160,6 +160,8 @@ function build() {
     [[ ${TG} ]] && notify "\`Beginning build of Clang ${VERSION}...\`"
 
     cmake -DLINK_POLLY_INTO_TOOLS=ON \
+          -DCMAKE_C_COMPILER=/usr/bin/clang \
+          -DCMAKE_CXX_COMPILER=/usr/bin/clang++ \
           -DCMAKE_CXX_FLAGS="-O3 -Wno-macro-redefined -pipe -pthread -fopenmp -g0 -march=native -mtune=native" \
           -DCMAKE_C_FLAGS="-O3 -Wno-macro-redefined -pipe -pthread -fopenmp -g0 -march=native -mtune=native" \
           -DLLVM_ENABLE_PIC=ON \
