@@ -49,12 +49,14 @@ function deldog() {
 
 
 # adb needs to be executed as root and have HOME defined in a writable folder
+# shellcheck disable=SC2032
 function adb() {
     sudo su --preserve-environment -c "HOME=$(cd /home/user/* || return; pwd) $(which adb) ${*}"
 }
 
 
 # fastboot needs to be executed as root and have HOME defined in a writable folder
+# shellcheck disable=SC2032
 function fastboot() { 
     sudo su --preserve-environment -c "HOME=$(cd /home/user/* || return; pwd) $(which fastboot) ${*}"
 }
@@ -80,7 +82,8 @@ function reinstall() {
     URL=$(curl -s https://dl.google.com/android/repository/platform-tools-latest-linux.zip | cut -d \" -f 2)
     curl -s "${URL}" -o tmp.zip
     bsdtar -x -f tmp.zip
-    cd platform-tools
+    cd platform-tools || return
+    # shellcheck disable=SC2033
     sudo install adb dmtracedump e2fsdroid etc1tool fastboot hprof-conv make_f2fs mke2fs mke2fs.conf sload_f2fs sqlite3 /usr/local/bin
     sudo install lib64/libc++.so /usr/local/lib64
     dwnld
