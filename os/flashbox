@@ -944,3 +944,21 @@ function pxl2-ak2-zip() {
         git ch "${CB}"
     )
 }
+
+
+# build-tools-gcc wrapper
+function btg() {
+    (
+        cd "${HOME}/gcc-build/build-tools-gcc" || return
+        git pull
+
+        for ITEM in arm64:aarch64-linux-gnu arm:arm-linux-gnueabi; do
+            ARCH=${ITEM%:*}
+            TARGET=${ITEM#*:}
+
+            ./build -a "${ARCH}" -s linaro -v 7
+            [[ -d ${TARGET} ]] && \
+                rm -rf "${HOME}/toolchains/btg-linaro-gcc-7.3.1-${ARCH}"
+        done
+    )
+}
