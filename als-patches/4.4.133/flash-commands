@@ -6,6 +6,9 @@ if [[ "${*}" =~ "--no-als" ]]; then
     for FILE in assembler.h auditsc.c base.c cputype.h vmscan.c; do
         git ap "${PATCHES_FOLDER}"/flash/"${FILE}".diff
     done
+else
+    git ap "${PATCHES_FOLDER}"/flash/cputype.h.diff
+    [[ "$(pwd)" =~ "op5" ]] && git ap "${PATCHES_FOLDER}"/flash/assembler.h.diff
 fi
 git ap "${PATCHES_FOLDER}"/flash/futex.h.diff
 if [[ "${*}" =~ "--no-als" ]]; then
