@@ -957,8 +957,10 @@ function btg() {
             TARGET=${ITEM#*:}
 
             ./build -a "${ARCH}" -s linaro -v 7
-            [[ -d ${TARGET} ]] && \
+            if [[ -d ${TARGET} ]]; then
                 rm -rf "${HOME}/toolchains/btg-linaro-gcc-7.3.1-${ARCH}"
+                mv "${TARGET}" "${HOME}/toolchains/btg-linaro-gcc-7.3.1-${ARCH}"
+            fi
         done
     )
 }
