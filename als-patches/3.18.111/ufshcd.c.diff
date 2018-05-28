@@ -1,8 +1,8 @@
 diff --git a/drivers/scsi/ufs/ufshcd.c b/drivers/scsi/ufs/ufshcd.c
-index 1c7b041c895d..b2d51ea9eab8 100644
+index 1d1e51140273..c4592a909a4c 100644
 --- a/drivers/scsi/ufs/ufshcd.c
 +++ b/drivers/scsi/ufs/ufshcd.c
-@@ -5215,7 +5215,7 @@ static int ufshcd_slave_alloc(struct scsi_device *sdev)
+@@ -4749,7 +4749,7 @@ static int ufshcd_slave_alloc(struct scsi_device *sdev)
  	/* REPORT SUPPORTED OPERATION CODES is not supported */
  	sdev->no_report_opcodes = 1;
  

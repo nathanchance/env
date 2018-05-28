@@ -1,8 +1,8 @@
 diff --git a/drivers/media/dvb-core/dmxdev.c b/drivers/media/dvb-core/dmxdev.c
-index a9c4237d631a..4f50ab726dd7 100644
+index b7e95c08864a..80fa2e153326 100644
 --- a/drivers/media/dvb-core/dmxdev.c
 +++ b/drivers/media/dvb-core/dmxdev.c
-@@ -4403,9 +4403,7 @@ static int dvb_demux_do_ioctl(struct file *file,
+@@ -4433,9 +4433,7 @@ static int dvb_demux_do_ioctl(struct file *file,
  		break;
  
  	default:

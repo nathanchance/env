@@ -1,8 +1,8 @@
 diff --git a/drivers/scsi/sd.c b/drivers/scsi/sd.c
-index 2bd0fa4b9dda..bc0cde2b814c 100644
+index 4b7ed4e82551..6c17598f7000 100644
 --- a/drivers/scsi/sd.c
 +++ b/drivers/scsi/sd.c
-@@ -2332,6 +2332,7 @@ sd_read_write_protect_flag(struct scsi_disk *sdkp, unsigned char *buffer)
+@@ -2260,6 +2260,7 @@ sd_read_write_protect_flag(struct scsi_disk *sdkp, unsigned char *buffer)
  	int res;
  	struct scsi_device *sdp = sdkp->device;
  	struct scsi_mode_data data;
@@ -10,7 +10,7 @@ index 2bd0fa4b9dda..bc0cde2b814c 100644
  
  	set_disk_ro(sdkp->disk, 0);
  	if (sdp->skip_ms_page_3f) {
-@@ -2371,7 +2372,7 @@ sd_read_write_protect_flag(struct scsi_disk *sdkp, unsigned char *buffer)
+@@ -2299,7 +2300,7 @@ sd_read_write_protect_flag(struct scsi_disk *sdkp, unsigned char *buffer)
  			  "Test WP failed, assume Write Enabled\n");
  	} else {
  		sdkp->write_prot = ((data.device_specific & 0x80) != 0);

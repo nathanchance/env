@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+
+PATCHES_FOLDER=$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")" && pwd)
+git ra
+for FILE in dmxdev.c.diff inode.c.diff sd.c.diff ufshcd.c.diff; do
+    git ap "${PATCHES_FOLDER}/${FILE}"
+done
+git fm

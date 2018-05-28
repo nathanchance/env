@@ -1,0 +1,44 @@
+diff --git a/fs/f2fs/namei.c b/fs/f2fs/namei.c
+index eaf7476a0942..e2a6df234754 100644
+--- a/fs/f2fs/namei.c
++++ b/fs/f2fs/namei.c
+@@ -213,8 +213,7 @@ static int f2fs_create(struct inode *dir, struct dentry *dentry, umode_t mode,
+ 
+ 	alloc_nid_done(sbi, ino);
+ 
+-	d_instantiate(dentry, inode);
+-	unlock_new_inode(inode);
++	d_instantiate_new(dentry, inode);
+ 
+ 	if (IS_DIRSYNC(dir))
+ 		f2fs_sync_fs(sbi->sb, 1);
+@@ -566,8 +565,7 @@ static int f2fs_symlink(struct inode *dir, struct dentry *dentry,
+ 	err = page_symlink(inode, disk_link.name, disk_link.len);
+ 
+ err_out:
+-	d_instantiate(dentry, inode);
+-	unlock_new_inode(inode);
++	d_instantiate_new(dentry, inode);
+ 
+ 	/*
+ 	 * Let's flush symlink data in order to avoid broken symlink as much as
+@@ -626,8 +624,7 @@ static int f2fs_mkdir(struct inode *dir, struct dentry *dentry, umode_t mode)
+ 
+ 	alloc_nid_done(sbi, inode->i_ino);
+ 
+-	d_instantiate(dentry, inode);
+-	unlock_new_inode(inode);
++	d_instantiate_new(dentry, inode);
+ 
+ 	if (IS_DIRSYNC(dir))
+ 		f2fs_sync_fs(sbi->sb, 1);
+@@ -678,8 +675,7 @@ static int f2fs_mknod(struct inode *dir, struct dentry *dentry,
+ 
+ 	alloc_nid_done(sbi, inode->i_ino);
+ 
+-	d_instantiate(dentry, inode);
+-	unlock_new_inode(inode);
++	d_instantiate_new(dentry, inode);
+ 
+ 	if (IS_DIRSYNC(dir))
+ 		f2fs_sync_fs(sbi->sb, 1);
