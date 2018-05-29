@@ -159,13 +159,13 @@ function generate_versions() {
     # Full kernel version
     CURRENT_VERSION=$(make kernelversion)
     # First two numbers (3.4 | 3.10 | 3.18 | 4.4)
-    CURRENT_MAJOR_VERSION=$(echo "${CURRENT_VERSION}" | cut -f 1,2 -d .)
+    CURRENT_MAJOR_VERSION=${CURRENT_VERSION%.*}
     # Last number
-    CURRENT_SUBLEVEL=$(echo "${CURRENT_VERSION}" | cut -d . -f 3)
+    CURRENT_SUBLEVEL=${CURRENT_VERSION##*.}
 
     # Get latest update from upstream
     LATEST_VERSION=$(git tag --sort=-taggerdate -l v"${CURRENT_MAJOR_VERSION}"* | head -n 1 | sed s/v//)
-    LATEST_SUBLEVEL=$(echo "${LATEST_VERSION}" | cut -d . -f 3)
+    LATEST_SUBLEVEL=${LATEST_VERSION##*.}
 
     # Print the current/latest version and exit if requested
     echo "${BOLD}Current kernel version:${RST} ${CURRENT_VERSION}"
@@ -227,7 +227,7 @@ function generate_versions() {
         RANGE=v${CURRENT_VERSION}..v${TARGET_VERSION}
         TAG=v${TARGET_VERSION}
         # Make sure target version is between current version and latest version
-        TARGET_SUBLEVEL=$(echo "${TARGET_VERSION}" | cut -d . -f 3)
+        TARGET_SUBLEVEL=${TARGET_VERSION##*.}
         [[ ${TARGET_SUBLEVEL} -le ${CURRENT_SUBLEVEL} ]] && die "Current version is up to date with target version ${TARGET_VERSION}!\n"
         [[ ${TARGET_SUBLEVEL} -gt ${LATEST_SUBLEVEL}  ]] && die "Target version ${TARGET_VERSION} does not exist!\n"
         [[ ${CURRENT_SUBLEVEL} -eq 0 ]] && CURRENT_VERSION=${CURRENT_MAJOR_VERSION}

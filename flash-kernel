@@ -572,7 +572,7 @@ function parse_version() {
     evv LINUX_COMPILER
 
     VERSION=$(cat out/include/config/kernel.release)
-    UTS_VERSION=$(echo "${UTS_VERSION}" | cut -d ' ' -f 4,5,6,7,8,9)
+    UTS_VERSION=${UTS_VERSION#*PREEMPT }
 
     echo "${BOLD}Version:${RST}    ${VERSION} (${LINUX_COMPILER})"
     echo "            ${LINUX_COMPILE_BY}@${LINUX_COMPILE_HOST} #${KBUILD_BUILD_NUMBER:-1}"
@@ -719,8 +719,8 @@ function build_kernel_pxl2() {
 
     ORIGINAL_EMF=${EXTRA_MAKE_FLAGS}
     for OS in ${OS_LIST}; do
-        OS_NAME=$(echo "${OS}" | cut -d : -f 1)
-        OS_SDK=$(echo "${OS}" | cut -d : -f 2)
+        OS_NAME=${OS%:*}
+        OS_SDK=${OS#*:}
         ANYKERNEL2_SUB_FOLDER="/kernels/${OS_NAME}"
         EXTRA_MAKE_FLAGS="${ORIGINAL_EMF} SDK_VERSION=${OS_SDK}"
         OS_STRING="${OS_NAME^} "
