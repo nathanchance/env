@@ -1,13 +1,17 @@
 diff --git a/anykernel.sh b/anykernel.sh
-index 8b06e9c336cf..24867e0521cf 100755
+index 7e5c9457e8a8..1166a8c07bd2 100755
 --- a/anykernel.sh
 +++ b/anykernel.sh
-@@ -94,6 +94,10 @@ else
+@@ -99,6 +99,14 @@ else
  fi;
  
  
 +# Enable Sultan's overclock
 +patch_cmdline "cpufreq.enable_underclock=1" "cpufreq.enable_underclock=1"
++
++
++# Enable Sultan's disabling of interaction boost on big
++patch_cmdline "cpufreq.disable_boost_on_big=1" "cpufreq.disable_boost_on_big=1"
 +
 +
  # Unmount system
