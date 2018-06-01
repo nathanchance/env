@@ -1,8 +1,11 @@
 #!/usr/bin/env bash
-# Clang compilation script
-# Copyright (C) 2018 Nathan Chancellor
-# Copyright (C) 2018 Albert I (krasCGQ)
 # SPDX-License-Identifier: GPL-3.0-or-later
+#
+# Copyright (C) 2018 Nathan Chancellor
+#
+# Copyright (C) 2018 Albert I (krasCGQ)
+#
+# Clang compilation script
 
 
 ###############
