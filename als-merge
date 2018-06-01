@@ -209,4 +209,20 @@ if [[ ${#} -lt 1 || "${*}" =~ "4.4" ]]; then
     [[ -f ${PATCHES_44}/sagit-commands ]] && bash "${PATCHES_44}/sagit-commands" "v${VERSION_44}"
 
     git push
+
+
+
+
+    # Xiaomi Redmi Note 5 and Xiaomi Mi 6X
+    cd "${ALS_HOME}/whyred" || die "Whyred folder does not exist, please clone!"
+    git ch whyred-o-oss
+    git f origin
+    git rh origin/"$(git rev-parse --abbrev-ref HEAD)"
+    git f upstream || die "upstream remote does not exist!"
+    git ml --no-edit upstream/whyred-o-oss || die "Merge conflicts detected, please resolve then continue!"
+
+    merge-stable
+    [[ -f ${PATCHES_44}/whyred-commands ]] && bash "${PATCHES_44}/whyred-commands" "v${VERSION_44}"
+
+    git push
 fi
