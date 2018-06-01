@@ -174,10 +174,9 @@ function build() {
           -DLLVM_INCLUDE_EXAMPLES=OFF \
           -DLLVM_INCLUDE_TESTS=OFF \
           -DLLVM_BINUTILS_INCDIR="${LLVM_FOLDER}/tools/binutils/include" \
-          -DLLVM_TARGETS_TO_BUILD="X86;ARM;AArch64;NVPTX" \
+          -DLLVM_TARGETS_TO_BUILD="X86;ARM;AArch64" \
           -DCMAKE_BUILD_TYPE=MinSizeRel \
           -DLLVM_OPTIMIZED_TABLEGEN=ON \
-          -DPOLLY_ENABLE_GPGPU_CODEGEN=ON \
           -DLLVM_CCACHE_BUILD=ON \
           -DLLVM_USE_LINKER=gold \
           -DCLANG_VENDOR="Flash " \
