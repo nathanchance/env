@@ -950,6 +950,8 @@ function pxl2-ak2-zip() {
 # build-tools-gcc wrapper
 function btg() {
     (
+        [[ "${*}" =~ "-t" || "${*}" =~ "--telegram" ]] && TG=true && TG_MSG_FILE=/tmp/tg-msg.3
+        START=$(date +"%s")
         cd "${HOME}/gcc-build/build-tools-gcc" || return
         git pull
 
@@ -959,9 +961,49 @@ function btg() {
 
             ./build -a "${ARCH}" -s linaro -v 7
             if [[ -d ${TARGET} ]]; then
+                if [[ ${TG} ]]; then
+                    {
+                        echo "\`\`\`"
+                        echo "Linaro GCC 7.3.1 for ${ARCH} build successfully!"
+                        echo
+                        echo "Time elapsed: $(format_time "${START}" "$(date +"%s")")"
+                        echo "\`\`\`"
+                    } > "${TG_MSG_FILE}"
+                    notify "$(cat ${TG_MSG_FILE})"
+                fi
                 rm -rf "${HOME}/toolchains/btg-linaro-gcc-7.3.1-${ARCH}"
                 mv "${TARGET}" "${HOME}/toolchains/btg-linaro-gcc-7.3.1-${ARCH}"
+            else
+                if [[ ${TG} ]]; then
+                    {
+                        echo "\`\`\`"
+                        echo "Error while building Linaro GCC 7.3.1 for ${ARCH}!"
+                        echo
+                        echo "Time elapsed: $(format_time "${START}" "$(date +"%s")")"
+                        echo "\`\`\`"
+                    } > "${TG_MSG_FILE}"
+                    notify "$(cat ${TG_MSG_FILE})"
+                fi
             fi
         done
     )
+}
+
+
+# Update all toolchains
+function updtc() {
+    build-clang -v 6 -t
+    build-clang -t
+    btg -t
+
+    clear
+
+    ${HOME}/toolchains/flash-clang-7.x/bin/clang --version
+    echo
+    ${HOME}/toolchains/flash-clang-6.x/bin/clang --version
+    echo
+    ${HOME}/toolchains/btg-linaro-gcc-7.3.1-arm64/bin/aarch64-linux-gnu-ld --version
+    echo
+    ${HOME}/toolchains/btg-linaro-gcc-7.3.1-arm/bin/arm-linux-gnueabi-ld --version
+    echo
 }
