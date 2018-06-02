@@ -160,9 +160,11 @@ function build() {
 
     [[ ${TG} ]] && notify "\`Beginning build of Clang ${VERSION}...\`"
 
-    cmake -DLINK_POLLY_INTO_TOOLS=ON \
-          -DCMAKE_C_COMPILER=/usr/bin/clang \
-          -DCMAKE_CXX_COMPILER=/usr/bin/clang++ \
+    cmake -G Ninja \
+          -DCMAKE_BUILD_TYPE=Release \
+          -DLINK_POLLY_INTO_TOOLS=ON \
+          -DCMAKE_C_COMPILER=/usr/lib/ccache/bin/clang \
+          -DCMAKE_CXX_COMPILER=/usr/lib/ccache/bin/clang++ \
           -DCMAKE_CXX_FLAGS="-O3 -Wno-macro-redefined -pipe -pthread -fopenmp -g0 -march=native -mtune=native" \
           -DCMAKE_C_FLAGS="-O3 -Wno-macro-redefined -pipe -pthread -fopenmp -g0 -march=native -mtune=native" \
           -DLLVM_ENABLE_PIC=ON \
@@ -176,9 +178,7 @@ function build() {
           -DLLVM_INCLUDE_TESTS=OFF \
           -DLLVM_BINUTILS_INCDIR="${LLVM_FOLDER}/tools/binutils/include" \
           -DLLVM_TARGETS_TO_BUILD="X86;ARM;AArch64" \
-          -DCMAKE_BUILD_TYPE=MinSizeRel \
           -DLLVM_OPTIMIZED_TABLEGEN=ON \
-          -DLLVM_CCACHE_BUILD=ON \
           -DLLVM_USE_LINKER=gold \
           -DCLANG_VENDOR="Flash " \
           -DLLVM_VERSION_PATCH="$(cd "${SVN_FOLDER}" || die "SVN folder doesn't exist";
@@ -186,7 +186,7 @@ function build() {
           -DLLVM_VERSION_SUFFIX="" \
           "${LLVM_FOLDER}"
 
-    if ! time cmake --build . -- "${JOBS_FLAG}"; then
+    if ! time ninja; then
         header "ERROR BUILDING!"
         die "Time elapsed: $(format_time "${START}" "$(date +"%s")")"
     fi
@@ -198,7 +198,7 @@ function install() {
 
     rm -rf "${INSTALL_FOLDER}-old"
     mv "${INSTALL_FOLDER}" "${INSTALL_FOLDER}-old"
-    if ! cmake --build . --target install -- "${JOBS_FLAG}"; then
+    if ! ninja install; then
         header "ERROR INSTALLING!"
         if [[ ${TG} ]]; then
             {
