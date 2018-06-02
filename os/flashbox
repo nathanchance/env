@@ -835,7 +835,7 @@ function stable-patch() {
     CUR_VER=$(kver | cut -d . -f 3)
     TARGET_VER=$((CUR_VER + 1))
 
-    curl https://cdn.kernel.org/pub/linux/kernel/v4.x/incr/patch-4.4."${CUR_VER}"-"${TARGET_VER}".xz | xz -cd | git ap
+    curl https://cdn.kernel.org/pub/linux/kernel/v4.x/incr/patch-4.4."${CUR_VER}"-"${TARGET_VER}".xz | xz -cd | git ap "${@}"
 }
 
 
@@ -884,7 +884,7 @@ function qcacld() {
             SUBFOLDER=drivers/staging/wlan-qc ;;
 
         *:"4.4"*)
-            TAG=LA.UM.6.4.r1-08500-8x98.0
+            TAG=LA.UM.6.2.r1-08700-sdm660.0
             URL=https://source.codeaurora.org/quic/la/platform/vendor/qcom-opensource/wlan/
             SUBFOLDER=drivers/staging ;;
 
