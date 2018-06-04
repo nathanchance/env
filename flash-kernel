@@ -400,14 +400,14 @@ function generate_variables() {
             "flash"*)
                 CLANG_LD_PATH=${CLANG_FOLDER}/lib
                 if [[ ${MODE} = "personal" ]]; then
-                    SCRIPT_OPT_FLAGS="-mllvm -polly \
-                                      -mllvm -polly-run-dce \
-                                      -mllvm -polly-run-inliner \
-                                      -mllvm -polly-opt-fusion=max \
-                                      -mllvm -polly-ast-use-context \
-                                      -mllvm -polly-vectorizer=stripmine \
-                                      -mllvm -polly-detect-keep-going"
-                    [[ ${DEVICE} = "op5" ]] && SCRIPT_OPT_FLAGS="${SCRIPT_OPT_FLAGS} -fsanitize=local-init"
+                    KCFLAGS="-mllvm -polly \
+                             -mllvm -polly-run-dce \
+                             -mllvm -polly-run-inliner \
+                             -mllvm -polly-opt-fusion=max \
+                             -mllvm -polly-ast-use-context \
+                             -mllvm -polly-vectorizer=stripmine \
+                             -mllvm -polly-detect-keep-going"
+                    [[ ${DEVICE} = "op5" ]] && KCFLAGS="${KCFLAGS} -fsanitize=local-init"
                 fi ;;
             *)
                 CLANG_LD_PATH=${CLANG_FOLDER}/lib64 ;;
@@ -466,10 +466,10 @@ function make_wrapper_clang() {
                                     HOSTCC="${CCACHE} ${CLANG}" \
                                     KBUILD_COMPILER_STRING="${CLANG_VERSION}" \
                                     KBUILD_BUILD_VERSION="${KBUILD_BUILD_VERSION}" \
+                                    KCFLAGS="${KCFLAGS}" \
                                     LLVM_DIS="${LLVM_DIS}" \
                                     LOCALVERSION="${LOCALVERSION}" \
                                     O="${OUT_FOLDER}" \
-                                    SCRIPT_OPT_FLAGS="${SCRIPT_OPT_FLAGS}" \
                                     "${@}"
 }
 
