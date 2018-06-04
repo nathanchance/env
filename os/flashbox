@@ -951,7 +951,6 @@ function pxl2-ak2-zip() {
 function btg() {
     (
         [[ "${*}" =~ "-t" || "${*}" =~ "--telegram" ]] && TG=true && TG_MSG_FILE=/tmp/tg-msg.3
-        START=$(date +"%s")
         cd "${HOME}/gcc-build/build-tools-gcc" || return
         git pull
 
@@ -959,32 +958,45 @@ function btg() {
             ARCH=${ITEM%:*}
             TARGET=${ITEM#*:}
 
-            ./build -a "${ARCH}" -s linaro -v 7
-            if [[ -d ${TARGET} ]]; then
-                if [[ ${TG} ]]; then
-                    {
-                        echo "\`\`\`"
-                        echo "Linaro GCC 7.3.1 for ${ARCH} build successfully!"
-                        echo
-                        echo "Time elapsed: $(format_time "${START}" "$(date +"%s")")"
-                        echo "\`\`\`"
-                    } > "${TG_MSG_FILE}"
-                    notify "$(cat ${TG_MSG_FILE})"
+            for GCC in Linaro:7.3.1 GNU:8.1.1; do
+                SOURCE=${GCC%:*}
+                VERSION=${GCC#*:}
+                START=$(date +"%s")
+                ./build -a "${ARCH}" -s "${SOURCE,,}" -v "${VERSION:0:1}"
+                TIME_ELAPSED=$(format_time "${START}" "$(date +"%s")")
+                if [[ -d ${TARGET} ]]; then
+                    SOURCE_STRING=${SOURCE}
+                    [[ ${SOURCE} = "GNU" ]] && unset SOURCE || SOURCE="${SOURCE,,}-"
+                    FOLDER=${HOME}/toolchains/btg-${SOURCE}gcc-${VERSION}-${ARCH}
+                    rm -rf "${FOLDER}"
+                    mv "${TARGET}" "${FOLDER}"
+                    if [[ ${TG} ]]; then
+                        {
+                            echo "\`\`\`"
+                            echo "${SOURCE_STRING} GCC ${VERSION} for ${ARCH} build successfully!"
+                            echo
+                            echo "Time elapsed: ${TIME_ELAPSED,,}"
+                            echo
+                            echo "Installation folder: ${FOLDER}"
+                            echo
+                            echo "Version: $(${FOLDER}/bin/${TARGET}-gcc --version | head -1)"
+                            echo "\`\`\`"
+                        } > "${TG_MSG_FILE}"
+                        notify "$(cat ${TG_MSG_FILE})"
+                    fi
+                else
+                    if [[ ${TG} ]]; then
+                        {
+                            echo "\`\`\`"
+                            echo "Error while building ${SOURCE} GCC ${VERSION} for ${ARCH}!"
+                            echo
+                            echo "Time elapsed: ${TIME_ELAPSED,,}"
+                            echo "\`\`\`"
+                        } > "${TG_MSG_FILE}"
+                        notify "$(cat ${TG_MSG_FILE})"
+                    fi
                 fi
-                rm -rf "${HOME}/toolchains/btg-linaro-gcc-7.3.1-${ARCH}"
-                mv "${TARGET}" "${HOME}/toolchains/btg-linaro-gcc-7.3.1-${ARCH}"
-            else
-                if [[ ${TG} ]]; then
-                    {
-                        echo "\`\`\`"
-                        echo "Error while building Linaro GCC 7.3.1 for ${ARCH}!"
-                        echo
-                        echo "Time elapsed: $(format_time "${START}" "$(date +"%s")")"
-                        echo "\`\`\`"
-                    } > "${TG_MSG_FILE}"
-                    notify "$(cat ${TG_MSG_FILE})"
-                fi
-            fi
+            done
         done
     )
 }
@@ -992,18 +1004,21 @@ function btg() {
 
 # Update all toolchains
 function updtc() {
+    local BINARIES
+
     build-clang -v 6 -t
     build-clang -t
     btg -t
 
     clear
 
-    ${HOME}/toolchains/flash-clang-7.x/bin/clang --version
-    echo
-    ${HOME}/toolchains/flash-clang-6.x/bin/clang --version
-    echo
-    ${HOME}/toolchains/btg-linaro-gcc-7.3.1-arm64/bin/aarch64-linux-gnu-ld --version
-    echo
-    ${HOME}/toolchains/btg-linaro-gcc-7.3.1-arm/bin/arm-linux-gnueabi-ld --version
-    echo
+    BINARIES=( "${HOME}/toolchains/flash-clang-7.x/bin/clang"
+               "${HOME}/toolchains/flash-clang-6.x/bin/clang"
+               "${HOME}/toolchains/btg-linaro-gcc-7.3.1-arm64/bin/aarch64-linux-gnu-ld"
+               "${HOME}/toolchains/btg-linaro-gcc-7.3.1-arm/bin/arm-linux-gnueabi-ld" )
+
+    for BINARY in "${BINARIES[@]}"; do
+        ${BINARY} --version | head -1
+        echo
+    done
 }
