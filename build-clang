@@ -198,6 +198,7 @@ function install() {
 
     rm -rf "${INSTALL_FOLDER}-old"
     mv "${INSTALL_FOLDER}" "${INSTALL_FOLDER}-old"
+    TIME_STRING="$(format_time "${START}" "$(date +"%s")")"
     if ! ninja install; then
         header "ERROR INSTALLING!"
         if [[ ${TG} ]]; then
@@ -205,16 +206,15 @@ function install() {
                 echo "\`\`\`"
                 echo "Error while building Clang ${VERSION}!"
                 echo
-                echo "Time elapsed: $(format_time "${START}" "$(date +"%s")")"
+                echo "Time elapsed: ${TIME_STRING,,}"
                 echo "\`\`\`"
             } > "${TG_MSG_FILE}"
             notify "$(cat ${TG_MSG_FILE})"
         fi
-        die "Time elapsed: $(format_time "${START}" "$(date +"%s")")"
+        die "Time elapsed: ${TIME_STRING,,}"
     fi
 
     header "SUCCESS!" "${GRN}"
-    TIME_STRING="$(format_time "${START}" "$(date +"%s")")"
     echo "${GRN}Successfully built and installed Clang toolchain to ${INSTALL_FOLDER}!${GRN}"
     echo "${GRN}Time elapsed: ${TIME_STRING,,}${RST}\n"
     if [[ ${TG} ]]; then
