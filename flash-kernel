@@ -19,6 +19,7 @@ function parse_parameters() {
     # Unset the universal OS variable for this script only
     unset OS
     PARAMS="${*}"
+    EXTRA_MAKE_FLAGS=()
     while [[ ${#} -ge 1 ]]; do
         case ${1} in
             # AnyKernel2 branch
@@ -67,7 +68,7 @@ function parse_parameters() {
             "-f"|"--flags")
                 shift && enforce_value "${@}"
 
-                EXTRA_MAKE_FLAGS=${1} ;;
+                EXTRA_MAKE_FLAGS+=( "${1}" ) ;;
 
             # 64-bit GCC binary to use for compiling (like the system ones)
             "-gb"|"--gcc-binary")
@@ -149,8 +150,8 @@ function parse_parameters() {
                     "0") AG_LINES=0; HIDDEN_COMMANDS=true ;;
                     "1") SHOW_OUTPUT=true; HIDDEN_COMMANDS=true ;;
                     "2") SHOW_OUTPUT=true; VERBOSE_COMMANDS=true ;;
-                    "3") EXTRA_MAKE_FLAGS="${EXTRA_MAKE_FLAGS} V=1"; SHOW_OUTPUT=true; HIDDEN_COMMANDS=true ;;
-                    "4") EXTRA_MAKE_FLAGS="${EXTRA_MAKE_FLAGS} V=1"; SHOW_OUTPUT=true; VERBOSE_COMMANDS=true ;;
+                    "3") EXTRA_MAKE_FLAGS+=( "V=1" ); SHOW_OUTPUT=true; HIDDEN_COMMANDS=true ;;
+                    "4") EXTRA_MAKE_FLAGS+=( "V=1" ); SHOW_OUTPUT=true; VERBOSE_COMMANDS=true ;;
                 esac ;;
 
             # Disables -Werror config
@@ -644,7 +645,7 @@ function build_kernel() {
     fi
 
     # Make the kernel
-    kmake ${EXTRA_MAKE_FLAGS:+ "${EXTRA_MAKE_FLAGS}"}
+    kmake ${EXTRA_MAKE_FLAGS:+ "${EXTRA_MAKE_FLAGS[@]}"}
 
     # Find the compiled files
     OUT_KERNEL_IMAGE=$(find "${OUT_FOLDER}/arch/${ARCHITECTURE}" -name 'Image.*-dtb' 2>/dev/null)
@@ -717,12 +718,12 @@ function build_kernel_pxl2() {
         esac
     fi
 
-    ORIGINAL_EMF=${EXTRA_MAKE_FLAGS}
+    ORIGINAL_EMF=( "${EXTRA_MAKE_FLAGS[@]}" )
     for OS in ${OS_LIST}; do
         OS_NAME=${OS%:*}
         OS_SDK=${OS#*:}
         ANYKERNEL2_SUB_FOLDER="/kernels/${OS_NAME}"
-        EXTRA_MAKE_FLAGS="${ORIGINAL_EMF} SDK_VERSION=${OS_SDK}"
+        EXTRA_MAKE_FLAGS=( "${ORIGINAL_EMF[@]}" "SDK_VERSION=${OS_SDK}" )
         OS_STRING="${OS_NAME^} "
         build_kernel
         ALREADY_NOTIFIED=true
@@ -742,7 +743,7 @@ function package_zip() {
 
     # Apply underclock for personal builds
     if [[ ${MODE} = "personal" && ${DEVICE} = "wahoo" ]]; then
-        if ! git apply -3 ${SCRIPTS_FOLDER}/personal-patches/underclock.patch; then
+        if ! git apply -3 "${SCRIPTS_FOLDER}/personal-patches/underclock.patch"; then
             die "Error apply underclock patch!"
         fi
     fi
@@ -752,7 +753,7 @@ function package_zip() {
 
     # Remove underclock
     if [[ ${MODE} = "personal" && ${DEVICE} = "wahoo" ]]; then
-        if ! git apply -3R ${SCRIPTS_FOLDER}/personal-patches/underclock.patch; then
+        if ! git apply -3R "${SCRIPTS_FOLDER}/personal-patches/underclock.patch"; then
             die "Error apply underclock patch!"
         fi
     fi
