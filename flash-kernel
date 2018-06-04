@@ -301,7 +301,7 @@ function device_flags() {
             [[ -z ${ANDROID_VERSION} ]] && ANDROID_VERSION=8.1.0
             AK2_SFX=${ANDROID_VERSION}
 
-            BUILD_FUNCTION=build_kernel_pxl2
+            BUILD_FUNCTION=build_kernel
 
             [[ -z ${COMPILER} ]] && COMPILER=clang
 
@@ -703,28 +703,6 @@ function build_kernel_op5() {
         ANYKERNEL2_SUB_FOLDER="/kernels/${OS,,}"
         DEFCONFIG=flash-${OS,,}_defconfig
         OS_STRING="${OS} "
-        build_kernel
-        ALREADY_NOTIFIED=true
-    done
-}
-
-
-# Build function specifically for the Pixel 2
-function build_kernel_pxl2() {
-    if [[ -z ${OS_LIST} ]]; then
-        case ${MODE} in
-            "personal") OS_LIST="oreo:27" ;;
-            *) OS_LIST="p:28 oreo:27" ;;
-        esac
-    fi
-
-    ORIGINAL_EMF=( "${EXTRA_MAKE_FLAGS[@]}" )
-    for OS in ${OS_LIST}; do
-        OS_NAME=${OS%:*}
-        OS_SDK=${OS#*:}
-        ANYKERNEL2_SUB_FOLDER="/kernels/${OS_NAME}"
-        EXTRA_MAKE_FLAGS=( "${ORIGINAL_EMF[@]}" "SDK_VERSION=${OS_SDK}" )
-        OS_STRING="${OS_NAME^} "
         build_kernel
         ALREADY_NOTIFIED=true
     done
