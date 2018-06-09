@@ -273,6 +273,9 @@ function frel() {
                     flash-kernel -v "${2}" -m stable -d op5 -b 8.1.0-unified -av 8.x -t ;;
             esac ;;
 
+        "op6")
+            flash-kernel -v "${2}" -m stable -d op6 -b 8.1.0 -t ;;
+
         "pxl")
             flash-kernel -v "${2}" -m stable -d marlin -b oreo-m4 -t ;;
 
@@ -297,6 +300,9 @@ function ftest() {
                 3.*|4.*)
                     flash-kernel -v "${2}" -r "${3}" -m "${4}" -d op5 -b "queue-${2}" -av 8.x -t ;;
             esac ;;
+
+        "op6")
+            flash-kernel -v "${2}" -r "${3}" -m "${4}" -d op6 -b "queue-${2}" -t ;;
 
         "pxl")
             flash-kernel -v "${2}" -r "${3}" -m "${4}" -d marlin -b "queue-${2}" -t ;;

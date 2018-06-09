@@ -347,6 +347,7 @@ function generate_variables() {
                 case ${DEVICE} in
                     "marlin") export CHAT_ID=-1001132593794 ;;
                     "op5") export CHAT_ID=-1001107088684 ;;
+                    "op6") export CHAT_ID=-1001192694857 ;;
                     "wahoo") export CHAT_ID=-1001298464571 ;;
                 esac
             fi ;;
