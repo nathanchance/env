@@ -1,0 +1,13 @@
+diff --git a/arch/arm64/include/asm/kvm_mmu.h b/arch/arm64/include/asm/kvm_mmu.h
+index 175e39b24ea8..ecc2ae66ad98 100644
+--- a/arch/arm64/include/asm/kvm_mmu.h
++++ b/arch/arm64/include/asm/kvm_mmu.h
+@@ -341,7 +341,7 @@ static inline void *kvm_get_hyp_vector(void)
+ 		vect = __bp_harden_hyp_vecs_start +
+ 		       data->hyp_vectors_slot * SZ_2K;
+ 
+-		if (!has_vhe())
++		if (!cpus_have_const_cap(ARM64_HAS_VIRT_HOST_EXTN))
+ 			vect = lm_alias(vect);
+ 	}
+ 
