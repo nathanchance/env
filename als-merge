@@ -9,8 +9,9 @@
 
 source common
 # Current version numbers
-VERSION_318=3.18.112
-VERSION_44=4.4.136
+VERSION_318=3.18.113
+VERSION_44=4.4.137
+VERSION_49=4.9.108
 # Folders
 ALS_HOME=${HOME}/kernels/als
 PATCHES_318=${SCRIPTS_FOLDER}/als-patches/${VERSION_318}
