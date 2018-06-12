@@ -38,7 +38,7 @@ RST="\033[0m"
 YLW="\033[01;33m"
 
 # Number of make threads
-THREADS=$(nproc --all)
+THREADS=$(($(nproc --all) + 1))
 JOBS_FLAG="-j${THREADS}"
 
 # Common ccache variable
