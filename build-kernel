@@ -172,8 +172,13 @@ function build() {
         ./scripts/config --file out/.config -d CC_WERROR
         kmake olddefconfig
     fi
+    if [[ "$(pwd)" =~ "op6" ]]; then
+        ./scripts/config --file out/.config -e BUILD_ARM64_DT_OVERLAY
+        kmake olddefconfig
+    fi
+
     mkavenv
-    kmake
+    kmake ${NEEDS_EXTERNAL_DTC:+ "DTC_EXT=dtc"} |& ag --no-color -v "dts"
     rmvenv
 }
 
