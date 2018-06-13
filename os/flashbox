@@ -589,14 +589,17 @@ ${HOME}/kernels/als/msm-4.4
 ${HOME}/kernels/als/nash
 ${HOME}/kernels/als/op3
 ${HOME}/kernels/als/op5
+${HOME}/kernels/als/op6
 ${HOME}/kernels/als/sagit
 ${HOME}/kernels/als/tissot
 ${HOME}/kernels/als/wahoo
+${HOME}/kernels/als/whyred
 ${HOME}/kernels/franco/mido
 ${HOME}/kernels/franco/op3
 ${HOME}/kernels/franco/op5
 ${HOME}/kernels/franco/tissot
 ${HOME}/kernels/flash/op5
+${HOME}/kernels/flash/op6
 ${HOME}/kernels/flash/wahoo
 ${HOME}/kernels/pi
 ${HOME}/kernels/roms/aicp-op5
