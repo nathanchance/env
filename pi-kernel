@@ -31,10 +31,10 @@ if [[ ${PI} ]]; then
     cd "${HOME}/Documents/Kernel" || die "Kernel source doesn't exist!"
 else
 	case "${*}" in
-		*"-6"*) GCC_FOLDER=${TC_FOLDER}/bootlin-gcc-6.4.0-${ARCH} ;;
-		*"-7"*) GCC_FOLDER=${TC_FOLDER}/bootlin-gcc-7.3.0-${ARCH} ;;
+		*"-7"*) GCC_FOLDER=${TC_FOLDER}/btg-linaro-gcc-7.3.1-${ARCH} ;;
+		*"-8"*) GCC_FOLDER=${TC_FOLDER}/btg-gcc-8.1.1-${ARCH} ;;
 	esac
-	[[ -z ${GCC_FOLDER} ]] && GCC_FOLDER=${TC_FOLDER}/bootlin-gcc-7.3.0-${ARCH}
+	[[ -z ${GCC_FOLDER} ]] && GCC_FOLDER=${TC_FOLDER}/btg-gcc-8.1.1-${ARCH}
     GCC=$(find "${GCC_FOLDER}/bin" \( -type f -o -type l \) -name '*-gcc' | head -n1)
     [[ -z ${GCC} ]] && die "GCC toolchain could not be found!"
     CC=${GCC%gcc}
