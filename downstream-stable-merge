@@ -16,7 +16,7 @@ ROMS_HOME=${HOME}/kernels/roms
 # 3.18 kernels
 # SC2076: Don't quote rhs of =~, it'll match literally rather than as a regex.
 # shellcheck disable=SC2076
-if [[ "${*}" =~ "3.18" ]]; then
+if [[ ${#} -lt 1 || "${*}" =~ "3.18" ]]; then
     # GZR OnePlus 3 (downstream of op3)
     cd "${ROMS_HOME}/gzr-op3" || die "gzr-op3 does not exist, please clone!"
     CURRENT_BRANCH=$(git cb)
@@ -34,21 +34,7 @@ fi
 # 4.4 kernels
 # SC2076: Don't quote rhs of =~, it'll match literally rather than as a regex.
 # shellcheck disable=SC2076
-if [[ "${*}" =~ "4.4" ]]; then
-    # AICP OnePlus 5 (downstream of op5)
-    cd "${ROMS_HOME}/aicp-op5" || die "aicp-op5 does not exist, please clone!"
-    CURRENT_BRANCH=$(git cb)
-    git fetch origin
-    git reset --hard origin/"${CURRENT_BRANCH}"
-    git fetch aicp
-    git ml --no-edit aicp/o8.1 || die "Merge conflicts detected, please resolve then continue!"
-    git fetch als || die "android-linux-stable remote doesn't exist, please add then continue!"
-    git ml --no-edit als/lineage-15.1 || die "Merge conflicts detected, please resolve then continue!"
-    git push -f origin HEAD:"${CURRENT_BRANCH}" || die "Can't push source to fork!"
-
-
-
-
+if [[ ${#} -lt 1 || "${*}" =~ "4.4" ]]; then
     # GZR OnePlus 5 (downstream of op5)
     cd "${ROMS_HOME}/gzr-op5" || die "gzr-op5 does not exist, please clone!"
     CURRENT_BRANCH=$(git cb)
