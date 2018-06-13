@@ -1003,7 +1003,7 @@ function btg() {
                             echo
                             echo "Installation folder: ${FOLDER}"
                             echo
-                            echo "Version: $(${FOLDER}/bin/${TARGET}-gcc --version | head -1)"
+                            echo "Version: $("${FOLDER}/bin/${TARGET}-gcc" --version | head -1)"
                             echo "\`\`\`"
                         } > "${TG_MSG_FILE}"
                         notify "$(cat ${TG_MSG_FILE})"
