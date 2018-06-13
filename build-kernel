@@ -175,6 +175,7 @@ function build() {
     if [[ "$(pwd)" =~ "op6" ]]; then
         ./scripts/config --file out/.config -e BUILD_ARM64_DT_OVERLAY
         kmake olddefconfig
+        NEEDS_EXTERNAL_DTC=true
     fi
 
     mkavenv
