@@ -31,7 +31,7 @@ export VIMRUNTIME=/usr/local/share/vim/vim80
 # Neofetch function
 function neofetch() {
     echo
-    $(which neofetch) --distro_shorthand tiny "${@}"
+    /usr/local/bin/neofetch --distro_shorthand tiny "${@}"
     echo
 }
 
@@ -51,14 +51,14 @@ function deldog() {
 # adb needs to be executed as root and have HOME defined in a writable folder
 # shellcheck disable=SC2032
 function adb() {
-    sudo su --preserve-environment -c "HOME=$(cd /home/user/* || return; pwd) $(which adb) ${*}"
+    sudo su --preserve-environment -c "HOME=$(cd /home/user/* || return; pwd) /usr/local/bin/adb ${*}"
 }
 
 
 # fastboot needs to be executed as root and have HOME defined in a writable folder
 # shellcheck disable=SC2032
 function fastboot() { 
-    sudo su --preserve-environment -c "HOME=$(cd /home/user/* || return; pwd) $(which fastboot) ${*}"
+    sudo su --preserve-environment -c "HOME=$(cd /home/user/* || return; pwd) /usr/local/bin/adb ${*}"
 }
 
 
