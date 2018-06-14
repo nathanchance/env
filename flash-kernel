@@ -352,9 +352,9 @@ function generate_variables() {
                 esac
             fi ;;
         "tmp")
-            FILE_MOVE=${FILE_MOVE_HEAD}/../tmp/${DEVICE_NAME_WEB}/${ANDROID_VERSION} ;;
+            FILE_MOVE=${FILE_MOVE_HEAD}/.tmp/${DEVICE_NAME_WEB}/${ANDROID_VERSION} ;;
         "personal")
-            FILE_MOVE=${FILE_MOVE_HEAD}/../fk/${DEVICE_NAME_WEB} ;;
+            FILE_MOVE=${FILE_MOVE_HEAD}/.fk/${DEVICE_NAME_WEB} ;;
         *)
             die "Invalid mode specified!" ;;
     esac
