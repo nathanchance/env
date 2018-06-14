@@ -26,7 +26,7 @@ MISC_FOLDER=${HOME}/misc
 REPO_FOLDER=${HOME}/repos
 ROM_FOLDER=${HOME}/roms
 TC_FOLDER=${HOME}/toolchains
-WEB_FOLDER=${HOME}/web
+WEB_FOLDER=/var/www
 
 # Colors
 BLINK_RED="\033[05;31m"
@@ -164,7 +164,7 @@ function add_remote() {
 
 # Convert a file location to web link
 function web_link() {
-    echo "${1}" | sed s/"$(echo "${WEB_FOLDER}" | sed 's/\//\\\//g')"/http:\\/\\/nchancellor.net/
+    echo "${1}" | sed s/"$(echo "${WEB_FOLDER}" | sed 's/\//\\\//g')"/https:\\/\\/nchancellor.net/
 }
 
 # Set up a virtual environment for Python
