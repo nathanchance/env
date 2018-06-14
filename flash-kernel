@@ -633,7 +633,7 @@ function build_kernel() {
                 echo
                 echo "Zip file: ${SIGNED_ZIP}"
             fi
-            SHORT_CHANGELOG=${SCRIPTS_FOLDER}/shortlogs/${DEVICE_NAME_FILE,,}-${VERSION//./}
+            SHORT_CHANGELOG=${HOME}/shortlogs/${DEVICE_NAME_FILE,,}-${VERSION//./}
             if [[ -f ${SHORT_CHANGELOG} ]]; then
                 echo
                 echo "Short changelog:"
