@@ -102,5 +102,5 @@ function reinstall() {
 # Generate new SSH key for server interaction
 function gen-ssh() {
     ssh-keygen -t rsa
-    ssh-copy-id nathan@nchancellor.net
+    ssh-copy-id nathan@94.130.39.26
 }

@@ -164,7 +164,7 @@ function add_remote() {
 
 # Convert a file location to web link
 function web_link() {
-    echo "${1}" | sed s/"$(echo "${WEB_FOLDER}" | sed 's/\//\\\//g')"/https:\\/\\/nchancellor.net/
+    echo "${1}" | sed s/"$(echo "${WEB_FOLDER}" | sed 's/\//\\\//g')"/https:\\/\\/nathanchance.me/
 }
 
 # Set up a virtual environment for Python

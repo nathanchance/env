@@ -54,8 +54,8 @@ function plk() {
 
 # Update kernel function
 function updk() {
-    sudo rsync nathan@nchancellor.net:~/kernels/pi/out/arch/arm/boot/dts/*.dtb /boot
-    sudo rsync nathan@nchancellor.net:~/kernels/pi/out/arch/arm/boot/dts/overlays/*.dtb* /boot/overlays
-    sudo rsync nathan@nchancellor.net:~/kernels/pi/out/arch/arm/boot/zImage /boot/kernel-nathan.img
-    sudo rsync -r nathan@nchancellor.net:~/kernels/pi/out/pi_root/lib/modules/* /lib/modules
+    sudo rsync nathan@94.130.39.26:~/kernels/pi/out/arch/arm/boot/dts/*.dtb /boot
+    sudo rsync nathan@94.130.39.26:~/kernels/pi/out/arch/arm/boot/dts/overlays/*.dtb* /boot/overlays
+    sudo rsync nathan@94.130.39.26:~/kernels/pi/out/arch/arm/boot/zImage /boot/kernel-nathan.img
+    sudo rsync -r nathan@94.130.39.26:~/kernels/pi/out/pi_root/lib/modules/* /lib/modules
 }
