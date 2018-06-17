@@ -22,7 +22,7 @@ function aliases() {
 
     git config --global alias.aa 'add --all'
     git config --global alias.ac 'commit --gpg-sign --all --signoff'
-    git config --global alias.am 'am --gpg-sign --signoff'
+    git config --global alias.ams 'am --gpg-sign --signoff'
     git config --global alias.ap 'apply -3 -v'
     git config --global alias.b 'branch --verbose'
     git config --global alias.bd 'branch --delete --force'
