@@ -60,7 +60,7 @@ function adb() {
 
 # fastboot needs to be executed as root and have HOME defined in a writable folder
 function fastboot() { 
-    sudo su --preserve-environment -c "HOME=${USER_HOME} /usr/local/bin/adb ${*}"
+    sudo su --preserve-environment -c "HOME=${USER_HOME} /usr/local/bin/fastboot ${*}"
 }
 
 
