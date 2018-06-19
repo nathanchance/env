@@ -48,17 +48,19 @@ function deldog() {
 }
 
 
+# Export current home for use with su
+export USER_HOME=${HOME}
+
+
 # adb needs to be executed as root and have HOME defined in a writable folder
-# shellcheck disable=SC2032
 function adb() {
-    sudo su --preserve-environment -c "HOME=$(cd /home/user/* || return; pwd) /usr/local/bin/adb ${*}"
+    sudo su --preserve-environment -c "HOME=${USER_HOME} /usr/local/bin/adb ${*}"
 }
 
 
 # fastboot needs to be executed as root and have HOME defined in a writable folder
-# shellcheck disable=SC2032
 function fastboot() { 
-    sudo su --preserve-environment -c "HOME=$(cd /home/user/* || return; pwd) /usr/local/bin/adb ${*}"
+    sudo su --preserve-environment -c "HOME=${USER_HOME} /usr/local/bin/adb ${*}"
 }
 
 
