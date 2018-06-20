@@ -48,22 +48,6 @@ function deldog() {
 }
 
 
-# Export current home for use with su
-export USER_HOME=${HOME}
-
-
-# adb needs to be executed as root and have HOME defined in a writable folder
-function adb() {
-    sudo su --preserve-environment -c "HOME=${USER_HOME} /usr/local/bin/adb ${*}"
-}
-
-
-# fastboot needs to be executed as root and have HOME defined in a writable folder
-function fastboot() { 
-    sudo su --preserve-environment -c "HOME=${USER_HOME} /usr/local/bin/fastboot ${*}"
-}
-
-
 # Update function
 function upd() {
     crew update
@@ -77,20 +61,7 @@ function reinstall() {
     sudo dev_install --reinstall -y
 
     # Reinstall adb/fastboot
-    dwnld
-    rm -rf tmp
-    mkdir -p tmp
-    local URL
-    URL=$(curl -s https://dl.google.com/android/repository/platform-tools-latest-linux.zip | cut -d \" -f 2)
-    curl -s "${URL}" -o tmp.zip
-    bsdtar -x -f tmp.zip
-    cd platform-tools || return
-    # shellcheck disable=SC2033
-    sudo install adb dmtracedump e2fsdroid etc1tool fastboot hprof-conv make_f2fs mke2fs mke2fs.conf sload_f2fs sqlite3 /usr/local/bin
-    sudo install lib64/libc++.so /usr/local/lib64
-    dwnld
-    rm -rf tmp
-    mkdir -p tmp
+    curl -s https://raw.githubusercontent.com/nathanchance/chromeos-adb-fastboot/master/install.sh | bash
 
     # Reinstall neofetch
     sudo curl -s https://raw.githubusercontent.com/dylanaraps/neofetch/master/neofetch -o /usr/local/bin/neofetch
