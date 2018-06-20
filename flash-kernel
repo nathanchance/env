@@ -628,11 +628,24 @@ function build_kernel() {
     [[ -n ${CACHED_BRANCH} ]] && git ch ${HIDDEN_COMMANDS:+ "-q"} "${CACHED_BRANCH}"
 
     case ${DEVICE} in
-        "marlin") FILES_TO_MOVE=( "arch/arm64/boot/Image.lz4-dtb:${ANYKERNEL2_FOLDER}" ) ;;
-        "op5") FILES_TO_MOVE=( "arch/arm64/boot/Image.gz-dtb:${ANYKERNEL2_FOLDER}${ANYKERNEL2_SUBFOLDER}" ) ;;
-        "op6") FILES_TO_MOVE=( "arch/arm64/boot/Image.gz-dtb:${ANYKERNEL2_FOLDER}" ) ;;
-        "wahoo") FILES_TO_MOVE=( "arch/arm64/boot/Image.lz4-dtb:${ANYKERNEL2_FOLDER}"
-                                 "arch/arm64/boot/dtbo.img:${ANYKERNEL2_FOLDER}" ) ;;
+        "marlin")
+            FILES_TO_MOVE=( "arch/arm64/boot/Image.lz4:${ANYKERNEL2_FOLDER}/kernel" )
+            for DTB in out/arch/arm64/boot/dts/htc/*.dtb; do
+                FILES_TO_MOVE+=( "${DTB#*/}:${ANYKERNEL2_FOLDER}/dtbs" )
+            done ;;
+        "op5")
+            FILES_TO_MOVE=( "arch/arm64/boot/Image.gz-dtb:${ANYKERNEL2_FOLDER}${ANYKERNEL2_SUBFOLDER}" ) ;;
+        "op6")
+            FILES_TO_MOVE=( "arch/arm64/boot/Image.gz:${ANYKERNEL2_FOLDER}/kernel" )
+            for DTB in out/arch/arm64/boot/dts/qcom/*.dtb; do
+                FILES_TO_MOVE+=( "${DTB#*/}:${ANYKERNEL2_FOLDER}/dtbs" )
+            done ;;
+        "wahoo")
+            FILES_TO_MOVE=( "arch/arm64/boot/Image.lz4:${ANYKERNEL2_FOLDER}/kernel"
+                            "arch/arm64/boot/dtbo.img:${ANYKERNEL2_FOLDER}" )
+            for DTB in out/arch/arm64/boot/dts/qcom/*.dtb; do
+                FILES_TO_MOVE+=( "${DTB#*/}:${ANYKERNEL2_FOLDER}/dtbs" )
+            done ;;
     esac
 
     # Move them if they exist, error out if not
@@ -654,6 +667,7 @@ function move_kernel_files() {
         # Move the kernel image
         mkdir -p "${ANYKERNEL2_FOLDER}${ANYKERNEL2_SUB_FOLDER}"
         for FTM in "${FILES_TO_MOVE[@]}"; do
+            mkdir -p "${FTM#*:}"
             cp "${OUT_FOLDER}/${FTM%:*}" "${FTM#*:}"
         done
         echo "Version: $(cat "${OUT_FOLDER}/include/config/kernel.release")" > "${ANYKERNEL2_FOLDER}/version"
