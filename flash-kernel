@@ -119,12 +119,6 @@ function parse_parameters() {
 
                 OS_LIST=${1} ;;
 
-            # How to package kernel (zip or boot image)
-            "-p"|"--package-method")
-                shift && enforce_value "${@}"
-
-                PACKAGE_METHOD=${1} ;;
-
             # Test versioning (# in kernel version)
             "-r"|"--revision")
                 shift && enforce_value "${@}"
@@ -234,8 +228,6 @@ function device_flags() {
 
             MATCH_FLAG="${DEVICE_NAME_FILE}-v${VERSION::1}"
 
-            [[ -z ${PACKAGE_METHOD} ]] && PACKAGE_METHOD=raw_image_zip
-
             WANTS_COMPAT_VDSO=true ;;
 
         "op5")
@@ -261,9 +253,7 @@ function device_flags() {
 
             [[ -z ${GCC_FOLDER} ]] && GCC_FOLDER=${TC_FOLDER}/btg-linaro-gcc-7.3.1-arm64
 
-            MATCH_FLAG="${DEVICE_NAME_FILE}-v${VERSION::1}"
-
-            PACKAGE_METHOD=zip ;;
+            MATCH_FLAG="${DEVICE_NAME_FILE}-v${VERSION::1}" ;;
 
         "op6")
             # Required flags
@@ -290,9 +280,7 @@ function device_flags() {
 
             [[ -z ${GCC_FOLDER} ]] && GCC_FOLDER=${TC_FOLDER}/btg-gcc-8.1.1-arm64
 
-            MATCH_FLAG="${DEVICE_NAME_FILE}-v${VERSION::1}"
-
-            PACKAGE_METHOD=zip ;;
+            MATCH_FLAG="${DEVICE_NAME_FILE}-v${VERSION::1}" ;;
 
         "wahoo")
             # Required flags
@@ -320,8 +308,6 @@ function device_flags() {
             [[ -z ${GCC_32_BIT_FOLDER} ]] && GCC_32_BIT_FOLDER=${TC_FOLDER}/btg-gcc-8.1.1-arm
 
             MATCH_FLAG="${DEVICE_NAME_FILE}-v${VERSION::1}"
-
-            PACKAGE_METHOD=zip
 
             WANTS_COMPAT_VDSO=true ;;
 
@@ -420,7 +406,7 @@ function generate_variables() {
 # Clean up
 function clean_up() {
     # Clean AnyKernel2 folder if building a zip
-    if [[ ${PACKAGE_METHOD} =~ "zip" && ! ${IMAGE_ONLY} ]]; then
+    if [[ ! ${IMAGE_ONLY} ]]; then
         cd "${ANYKERNEL2_FOLDER}" || die "AnyKernel2 source is missing!"
 
         [[ -z ${ANYKERNEL2_BRANCH} ]] && ANYKERNEL2_BRANCH=${DEVICE_NAME_GITHUB}-flash-${AK2_SFX}
@@ -535,14 +521,8 @@ function generate_version() {
     KERNEL_NAME="${CONFIG_LOCALVERSION/-/}${LOCALVERSION_ZIP}${VERSION_TEXT}${REVISION_FOR_FILE}${SHA}${DATE}"
 
     # Set final package names
-    if [[ ${PACKAGE_METHOD} =~ "raw_image" ]]; then
-        KERNEL_IMAGE=${KERNEL_NAME}.img
-    fi
-
-    if [[ ${PACKAGE_METHOD} =~ "zip" ]]; then
-        UNSIGNED_ZIP=${KERNEL_NAME}-unsigned.zip
-        SIGNED_ZIP=${KERNEL_NAME}.zip
-    fi
+    UNSIGNED_ZIP=${KERNEL_NAME}-unsigned.zip
+    SIGNED_ZIP=${KERNEL_NAME}.zip
 }
 
 
@@ -629,10 +609,8 @@ function build_kernel() {
             fi
             echo
             echo "Version: $(cat "${OUT_FOLDER}/include/config/kernel.release")"
-            if [[ ${PACKAGE_METHOD} =~ "zip" ]]; then
-                echo
-                echo "Zip file: ${SIGNED_ZIP}"
-            fi
+            echo
+            echo "Zip file: ${SIGNED_ZIP}"
             SHORT_CHANGELOG=${HOME}/shortlogs/${DEVICE_NAME_FILE,,}-${VERSION//./}
             if [[ -f ${SHORT_CHANGELOG} ]]; then
                 echo
@@ -662,7 +640,7 @@ function build_kernel() {
     if [[ -f "${OUT_FOLDER}/${KIMG}" ]]; then
         parse_version
         echo "${GRN}${OS_STRING}$(basename "${KIMG}") compiled successfully!${RST}\n"
-        [[ ${PACKAGE_METHOD} != "raw_image" ]] && move_kernel_files
+        move_kernel_files
     else
         echo "${RED}Kernel image not found!${RST}\n"
         ending_info
@@ -802,15 +780,8 @@ function move_flashable_files() {
 
     (
         cd "${FILE_MOVE}" || die "Shift to ending folder failed!"
-        if [[ ${PACKAGE_METHOD} =~ "raw_image" ]]; then
-            mv "${OUT_KERNEL_IMAGE}" "${FILE_MOVE}/${KERNEL_IMAGE}"
-            md5sum "${KERNEL_IMAGE}" > "${FILE_MOVE}/${KERNEL_IMAGE}.md5"
-        fi
-
-        if [[ ${PACKAGE_METHOD} =~ "zip" ]]; then
-            mv "${ANYKERNEL2_FOLDER}/${SIGNED_ZIP}" "${FILE_MOVE}"
-            md5sum "${SIGNED_ZIP}" > "${FILE_MOVE}/${SIGNED_ZIP}.md5"
-        fi
+        mv "${ANYKERNEL2_FOLDER}/${SIGNED_ZIP}" "${FILE_MOVE}"
+        md5sum "${SIGNED_ZIP}" > "${FILE_MOVE}/${SIGNED_ZIP}.md5"
     )
 }
 
@@ -841,22 +812,20 @@ function generate_changelog() {
         git diff --find-renames --stat --summary "${RANGE}"
     } > "${CHANGELOG}"
 
-    if [[ ${PACKAGE_METHOD} =~ "zip" ]]; then
-        # AnyKernel2 next
-        cd "${ANYKERNEL2_FOLDER}" || die "AnyKernel2 source is missing!"
+    # AnyKernel2 next
+    cd "${ANYKERNEL2_FOLDER}" || die "AnyKernel2 source is missing!"
 
-        # We only want to show AnyKernel2 changes if there have been some
-        NUM_COMMITS=$(git log "${RANGE}" --pretty=oneline | wc -l)
+    # We only want to show AnyKernel2 changes if there have been some
+    NUM_COMMITS=$(git log "${RANGE}" --pretty=oneline | wc -l)
 
-        if [[ ${NUM_COMMITS} -gt 0 ]]; then
-            {
-                echo "\n\n${GITHUB}/AnyKernel2/commits/${ANYKERNEL2_BRANCH}\n"
-    
-                git log "${RANGE}" | git shortlog
+    if [[ ${NUM_COMMITS} -gt 0 ]]; then
+        {
+            echo "\n\n${GITHUB}/AnyKernel2/commits/${ANYKERNEL2_BRANCH}\n"
 
-                git diff --find-renames --stat --summary "${RANGE}"
-            } >> "${CHANGELOG}"
-        fi
+            git log "${RANGE}" | git shortlog
+
+            git diff --find-renames --stat --summary "${RANGE}"
+        } >> "${CHANGELOG}"
     fi
 }
 
@@ -879,24 +848,19 @@ function push_flashable_files() {
 function tag_stable() {
     echo "  - Tagging ${KERNEL_NAME} as stable"
 
-    cd "${SOURCE_FOLDER}" || die "Kernel source is missing!"
-
-    git tag --sign --annotate "${KERNEL_NAME}" --message "${KERNEL_NAME}"
-    git push ${HIDDEN_COMMANDS:+ "--quiet"} origin "${KERNEL_NAME}"
-
-    if [[ ${PACKAGE_METHOD} =~ "zip" ]]; then
-        cd "${ANYKERNEL2_FOLDER}" || die "AnyKernel2 source is missing!"
+    for TAG_FOLDER in ${SOURCE_FOLDER} ${ANYKERNEL2_FOLDER}; do
+        cd "${TAG_FOLDER}" || die "Issue with moving into ${TAG_FOLDER}!"
 
         git tag --sign --annotate "${KERNEL_NAME}" --message "${KERNEL_NAME}"
         git push ${HIDDEN_COMMANDS:+ "--quiet"} origin "${KERNEL_NAME}"
-    fi
+    done
 }
 
 
 # After build tasks
 function after_build_tasks () {
     if [[ ! ${IMAGE_ONLY} ]]; then
-        package_${PACKAGE_METHOD}
+        package_zip
 
         header "SHUFFLING FILES"
 
@@ -930,14 +894,7 @@ function ending_info() {
             echo "FILE LINK: ${FILE_LOCATION}" >> "${LOG}"
 
             echo "${RED}FILE LOCATION: ${FILE_LOCATION}"
-            case ${PACKAGE_METHOD} in
-                "raw_image")
-                    echo "SIZE: $(du -h "${FILE_MOVE}/${KERNEL_IMAGE}" |
-                                      awk '{print $1}')${RST}" ;;
-                "zip")
-                    echo "SIZE: $(du -h "${FILE_MOVE}/${SIGNED_ZIP}" |
-                                      awk '{print $1}')${RST}" ;;
-            esac
+            echo "SIZE: $(du -h "${FILE_MOVE}/${SIGNED_ZIP}" | awk '{print $1}')${RST}"
         fi
 
         if [[ ${TG} ]]; then
