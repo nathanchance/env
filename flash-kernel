@@ -737,16 +737,6 @@ function package_zip() {
 }
 
 
-# Raw image doesn't need to be packaged
-function package_raw_image() { return; }
-
-
-# Package zip and ship raw image
-function package_raw_image_zip() {
-    package_zip
-}
-
-
 # Setup folders
 function setup_folders() {
     echo "  - Setting up final folders"
