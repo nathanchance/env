@@ -165,7 +165,7 @@ function parse_parameters() {
     [[ -z ${VERBOSITY_LEVEL} ]] && HIDDEN_COMMANDS=true
 
     # Easy to use variables for if statements
-    [[ ${MODE} != "stable" ]] && NOT_STABLE=true
+    [[ ${MODE} != "stable" ]] && NOT_STABLE=true || STABLE=true
 
     if [[ ${TG} ]]; then
         {
@@ -786,7 +786,7 @@ function move_flashable_files() {
         cd "${FILE_MOVE}" || die "Shift to ending folder failed!"
         mv "${ANYKERNEL2_FOLDER}/${SIGNED_ZIP}" "${FILE_MOVE}"
         md5sum "${SIGNED_ZIP}" > "${FILE_MOVE}/${SIGNED_ZIP}.md5"
-        [[ ! ${NOT_STABLE} ]] && echo "${VERSION}" > .version
+        [[ ${STABLE} ]] && echo "${VERSION}" > .version
     )
 }
 
@@ -834,7 +834,7 @@ function generate_changelog() {
     fi
 
     # Copy short changelog for FKU
-    [[ ! ${NOT_STABLE} ]] && cp "${SHORT_CHANGELOG}" "${FILE_MOVE}/.changelog"
+    [[ ${STABLE} ]] && cp "${SHORT_CHANGELOG}" "${FILE_MOVE}/.changelog"
 }
 
 
@@ -878,7 +878,7 @@ function after_build_tasks () {
         if [[ ${MODE} != "personal" ]]; then
             generate_changelog
             [[ ${MODE} != "tmp" ]] && push_flashable_files
-            [[ ! ${NOT_STABLE} ]] && tag_stable
+            [[ ${STABLE} ]] && tag_stable
         fi
 
         echo
