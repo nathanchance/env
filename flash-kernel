@@ -521,8 +521,8 @@ function generate_version() {
     KERNEL_NAME="${CONFIG_LOCALVERSION/-/}${LOCALVERSION_ZIP}${VERSION_TEXT}${REVISION_FOR_FILE}${SHA}${DATE}"
 
     # Set final package names
-    UNSIGNED_ZIP=${KERNEL_NAME}-unsigned.zip
-    SIGNED_ZIP=${KERNEL_NAME}.zip
+    UNSIGNED_ZIP=${KERNEL_NAME,,}-unsigned.zip
+    SIGNED_ZIP=${KERNEL_NAME,,}.zip
 }
 
 
@@ -599,6 +599,8 @@ function build_kernel() {
     fi
 
     # Notify Telegram of build starting
+    SHORT_CHANGELOG=${HOME}/shortlogs/${DEVICE_NAME_FILE,,}-${VERSION//./}
+    [[ ! -f ${SHORT_CHANGELOG} ]] && die "Missing short changelog!"
     if [[ ${TG} && ${ALREADY_NOTIFIED} != true ]]; then
         {
             echo "\`\`\`"
@@ -611,12 +613,9 @@ function build_kernel() {
             echo "Version: $(cat "${OUT_FOLDER}/include/config/kernel.release")"
             echo
             echo "Zip file: ${SIGNED_ZIP}"
-            SHORT_CHANGELOG=${HOME}/shortlogs/${DEVICE_NAME_FILE,,}-${VERSION//./}
-            if [[ -f ${SHORT_CHANGELOG} ]]; then
-                echo
-                echo "Short changelog:"
-                cat "${SHORT_CHANGELOG}"
-            fi
+            echo
+            echo "Short changelog:"
+            tail -n +3 "${SHORT_CHANGELOG}"
             echo "\`\`\`"
         } > ${TG_MSG_FILE}
         notify "$(cat ${TG_MSG_FILE})"
@@ -767,6 +766,7 @@ function setup_folders() {
         # Move the old files to an archive folder unless no clean is requested
         if [[ ! ${NOCLEAN} ]]; then
             [[ ! -d ${FILE_MOVE_OLD} ]] && mkdir -p "${FILE_MOVE_OLD}"
+            rm -f "${FILE_MOVE}"/{.version,.changelog}
             OLD_FILES="$(find "${FILE_MOVE}" -maxdepth 1 -type f -name "*${MATCH_FLAG}*" 2>/dev/null)"
             if [[ -n ${OLD_FILES} ]]; then
                 for OLD_FILE in ${OLD_FILES}; do
@@ -786,6 +786,7 @@ function move_flashable_files() {
         cd "${FILE_MOVE}" || die "Shift to ending folder failed!"
         mv "${ANYKERNEL2_FOLDER}/${SIGNED_ZIP}" "${FILE_MOVE}"
         md5sum "${SIGNED_ZIP}" > "${FILE_MOVE}/${SIGNED_ZIP}.md5"
+        [[ ! ${NOT_STABLE} ]] && echo "${VERSION}" > .version
     )
 }
 
@@ -795,7 +796,7 @@ function generate_changelog() {
     echo "  - Generating changelog"
 
     GITHUB="http://github.com/nathanchance"
-    CHANGELOG=${FILE_MOVE}/${KERNEL_NAME}-changelog.txt
+    CHANGELOG=${FILE_MOVE}/${KERNEL_NAME,,}-changelog.txt
 
     # Kernel source first
     cd "${SOURCE_FOLDER}" || die "Kernel source is missing!"
@@ -831,6 +832,9 @@ function generate_changelog() {
             git diff --find-renames --stat --summary "${RANGE}"
         } >> "${CHANGELOG}"
     fi
+
+    # Copy short changelog for FKU
+    [[ ! ${NOT_STABLE} ]] && cp "${SHORT_CHANGELOG}" "${FILE_MOVE}/.changelog"
 }
 
 
@@ -907,13 +911,11 @@ function ending_info() {
                 if [[ ! ${IMAGE_ONLY} ]]; then
                     echo
                     echo "[${FILE_LOCATION}](${FILE_LOCATION})"
-                    if [[ -f ${SHORT_CHANGELOG} ]]; then
-                        echo
-                        echo "\`\`\`"
-                        echo "Short changelog:"
-                        cat "${SHORT_CHANGELOG}"
-                        echo "\`\`\`"
-                    fi
+                    echo
+                    echo "\`\`\`"
+                    echo "Short changelog:"
+                    tail -n +3 "${SHORT_CHANGELOG}"
+                    echo "\`\`\`"
                 fi
             } > ${TG_MSG_FILE}
             notify "$(cat ${TG_MSG_FILE})"
