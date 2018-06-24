@@ -552,10 +552,10 @@ function parse_version() {
     evv LINUX_COMPILE_HOST
     evv LINUX_COMPILER
 
-    VERSION=$(cat out/include/config/kernel.release)
+    VERSION_STRING=$(cat out/include/config/kernel.release)
     UTS_VERSION=${UTS_VERSION#*PREEMPT }
 
-    echo "${BOLD}Version:${RST}    ${VERSION} (${LINUX_COMPILER})"
+    echo "${BOLD}Version:${RST}    ${VERSION_STRING} (${LINUX_COMPILER})"
     echo "            ${LINUX_COMPILE_BY}@${LINUX_COMPILE_HOST} #${KBUILD_BUILD_NUMBER:-1}"
     echo "            ${UTS_VERSION}"
     echo
