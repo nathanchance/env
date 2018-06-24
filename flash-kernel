@@ -599,6 +599,11 @@ function build_kernel() {
         kmake olddefconfig
     fi
 
+    if [[ ${PERSONAL} ]]; then
+        ./scripts/config --file out/.config -e CONFIG_WIREGUARD_DEBUG
+        kmake olddefconfig
+    fi
+
     # Notify Telegram of build starting
     SHORT_CHANGELOG=${HOME}/shortlogs/${DEVICE_NAME_FILE,,}-${VERSION//./}
     [[ ! -f ${SHORT_CHANGELOG} && ! ${PERSONAL} ]] && die "Missing short changelog!"
