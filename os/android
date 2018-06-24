@@ -1,4 +1,7 @@
 #!/usr/bin/env bash
+# shellcheck disable=SC2119,SC2120
+# SC2119: Use deldog "$@" if function's $1 should mean script's $1.
+# SC2120: deldog references arguments, but none are ever passed.
 #
 # SPDX-License-Identifier: GPL-3.0-or-later
 #
