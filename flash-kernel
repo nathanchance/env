@@ -670,7 +670,6 @@ function build_kernel() {
 function move_kernel_files() {
     if [[ ! ${IMAGE_ONLY} ]]; then
         # Move the kernel image
-        mkdir -p "${ANYKERNEL2_FOLDER}${ANYKERNEL2_SUB_FOLDER}"
         for FTM in "${FILES_TO_MOVE[@]}"; do
             mkdir -p "${FTM#*:}"
             cp "${OUT_FOLDER}/${FTM%:*}" "${FTM#*:}"
@@ -705,7 +704,7 @@ function build_kernel_op5() {
     fi
 
     for OS in ${OS_LIST}; do
-        ANYKERNEL2_SUB_FOLDER="/kernels/${OS,,}"
+        ANYKERNEL2_SUBFOLDER="/kernels/${OS,,}"
         DEFCONFIG=flash-${OS,,}_defconfig
         OS_STRING="${OS} "
         build_kernel
