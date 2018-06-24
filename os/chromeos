@@ -43,7 +43,6 @@ function deldog() {
         return 1
     }
     KEY=$(jq -r .key <<< "${RESULT}")
-    echo "https://del.dog/${KEY}"
     echo "https://del.dog/raw/${KEY}"
 }
 
