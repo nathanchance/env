@@ -36,7 +36,7 @@ function deldog() {
 
 # Common WireGuard logs
 function wg_debug() {
-    COMMANDS=( "wg" "ip addr show" "iptables -L -v" "ip6tables -L -v" "dmesg" )
+    COMMANDS=( "wg" "ip -s -d addr" "iptables -L -v" "ip6tables -L -v" "dmesg" )
     {
         for COMMAND in "${COMMANDS[@]}"; do
             su --preserve-environment -c "${COMMAND}"
