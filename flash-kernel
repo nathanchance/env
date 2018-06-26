@@ -621,7 +621,7 @@ function build_kernel() {
             echo "Zip file: ${SIGNED_ZIP}"
             echo
             echo "Short changelog:"
-            tail -n +3 "${SHORT_CHANGELOG}"
+            tail -n +2 "${SHORT_CHANGELOG}"
             echo "\`\`\`"
         } > ${TG_MSG_FILE}
         notify "$(cat ${TG_MSG_FILE})"
@@ -919,7 +919,7 @@ function ending_info() {
                     echo
                     echo "\`\`\`"
                     echo "Short changelog:"
-                    tail -n +3 "${SHORT_CHANGELOG}"
+                    tail -n +2 "${SHORT_CHANGELOG}"
                     echo "\`\`\`"
                 fi
             } > ${TG_MSG_FILE}
