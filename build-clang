@@ -74,6 +74,11 @@ function parse_parameters() {
 
     # SVN copy of the LLVM folder for revisioning
     SVN_FOLDER=${MAIN_FOLDER}/svn-${VERSION}.x
+
+    # Set compiler
+    CC=$(command -v clang || command -v gcc)
+    CXX=$(command -v clang++ || command -v g++)
+    [[ -z ${CC} || -z ${CXX} ]] && die "Neither GCC or Clang could be found on your system!"
 }
 
 # Syncs requested  projects
@@ -163,9 +168,9 @@ function build() {
     cmake -G Ninja \
           -DCMAKE_BUILD_TYPE=Release \
           -DLINK_POLLY_INTO_TOOLS=ON \
-          -DCMAKE_C_COMPILER=/usr/lib/ccache/bin/clang \
+          -DCMAKE_C_COMPILER="${CC}" \
           -DCMAKE_C_FLAGS="-O3 -march=native -mtune=native" \
-          -DCMAKE_CXX_COMPILER=/usr/lib/ccache/bin/clang++ \
+          -DCMAKE_CXX_COMPILER="${CXX}" \
           -DCMAKE_CXX_FLAGS="-O3 -march=native -mtune=native" \
           -DLLVM_ENABLE_PIC=ON \
           -DCMAKE_INSTALL_PREFIX="${INSTALL_FOLDER}" \
