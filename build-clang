@@ -78,7 +78,7 @@ function parse_parameters() {
     # Set compiler
     CC=$(command -v clang || command -v gcc)
     CXX=$(command -v clang++ || command -v g++)
-    [[ -z ${CC} || -z ${CXX} ]] && die "Neither GCC or Clang could be found on your system!"
+    [[ -z ${CC} || -z ${CXX} ]] && die "Neither GCC nor Clang could be found on your system!"
 }
 
 # Syncs requested  projects
