@@ -71,6 +71,10 @@ function reinstall() {
 
     # Reload functions
     rld
+
+    # Install chromebrew + mosh
+    curl -Ls git.io/vddgY | bash
+    crew install -s mosh
 }
 
 
