@@ -9,9 +9,12 @@
 
 # Downloads folder
 alias dwnld='cd ${HOME}/Downloads'
+
 # Files folder
 alias fls='cd ${HOME}/Downloads/Files'
 
+# Connect to my server
+alias mshfb='mosh nathan@nathanchance.me'
 
 # Make hostname 'flashbook'
 sudo hostname flashbook
