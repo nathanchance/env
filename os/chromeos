@@ -58,19 +58,16 @@ function upd() {
 
 
 # Reinstall function in case Chromebrew blows up...
-function reinstall() {
+function install-bin() {
     # Wipe /usr/local and reinstall emerge packages
-    sudo dev_install --reinstall -y
+    [[ ${*} =~ "-c" || ${*} =~ "--clean" ]] && sudo dev_install --reinstall -y
 
-    # Reinstall adb/fastboot
+    # Install adb/fastboot
     curl -s https://raw.githubusercontent.com/nathanchance/chromeos-adb-fastboot/master/install.sh | bash
 
-    # Reinstall neofetch
+    # Install neofetch
     sudo curl -s https://raw.githubusercontent.com/dylanaraps/neofetch/master/neofetch -o /usr/local/bin/neofetch
     sudo chmod a+x /usr/local/bin/neofetch
-
-    # Reload functions
-    rld
 
     # Install chromebrew + mosh
     curl -Ls git.io/vddgY | bash
@@ -79,7 +76,6 @@ function reinstall() {
     # Install crouton and setup a Debian Stretch chroot
     sudo curl -s https://raw.githubusercontent.com/dnschneid/crouton/master/installer/crouton -o /usr/local/bin/crouton
     sudo chmod +x /usr/local/bin/crouton
-    crouton -r stretch -t cli-extra
 }
 
 
@@ -87,4 +83,12 @@ function reinstall() {
 function gen-ssh() {
     ssh-keygen -t ed25519
     ssh-copy-id nathan@94.130.39.26
+}
+
+
+# Things to do only on a clean install
+function setup() {
+    install-bin
+    rld
+    crouton -r stretch -t cli-extra
 }
