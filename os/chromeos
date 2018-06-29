@@ -75,6 +75,11 @@ function reinstall() {
     # Install chromebrew + mosh
     curl -Ls git.io/vddgY | bash
     crew install -s mosh
+
+    # Install crouton and setup a Debian Stretch chroot
+    sudo curl -s https://raw.githubusercontent.com/dnschneid/crouton/master/installer/crouton -o /usr/local/bin/crouton
+    sudo chmod +x /usr/local/bin/crouton
+    crouton -r stretch -t cli-extra
 }
 
 
