@@ -87,7 +87,7 @@ function sync() {
 
     if [[ ${FOLDER} =~ "binutils" ]]; then
         URL=https://sourceware.org/git/binutils-gdb.git
-        BRANCH=binutils-2_30-branch
+        BRANCH=binutils-2_31-branch
     elif [[ ${FOLDER} =~ "svn" ]]; then
         case ${VERSION} in
             "7") URL=https://llvm.org/svn/llvm-project/llvm/trunk ;;
