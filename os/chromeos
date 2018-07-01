@@ -16,9 +16,6 @@ alias fls='cd ${HOME}/Downloads/Files'
 # Connect to my server
 alias mshfb='mosh nathan@nathanchance.me'
 
-# Make hostname 'flashbook'
-sudo hostname flashbook
-
 
 # Fetch this script and reload .bashrc
 function rld() {
