@@ -898,7 +898,7 @@ function qcacld() {
             SUBFOLDER=drivers/staging/wlan-qc ;;
 
         *:"4.4"*)
-            TAG=LA.UM.6.4.r1-09000-8x98.0
+            TAG=LA.UM.6.2.r1-09300-sdm660.0
             URL=https://source.codeaurora.org/quic/la/platform/vendor/qcom-opensource/wlan/
             SUBFOLDER=drivers/staging ;;
 
