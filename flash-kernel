@@ -468,7 +468,7 @@ function kmake() {
     if [[ ${SHOW_OUTPUT} ]]; then
         make_wrapper_${COMPILER} "${@}"
     else
-        make_wrapper_${COMPILER} "${@}" |& ag --no-color -v "specified register cannot be written to at operand 1" |& ag --no-color --after=${AG_LINES:-10} "error:|warning:" && echo
+        make_wrapper_${COMPILER} "${@}" |& ag --no-color --after=${AG_LINES:-10} "error:|warning:" && echo
     fi
 }
 
