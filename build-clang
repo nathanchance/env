@@ -41,6 +41,9 @@ function parse_parameters() {
             "-b"|"--build-only")
                 BUILD_ONLY=true ;;
 
+            "-T"|"--test")
+                TEST=true ;;
+
             "-t"|"--telegram")
                 TG=true
                 TG_MSG_FILE=/tmp/tg-msg.2 ;;
@@ -70,7 +73,7 @@ function parse_parameters() {
     [[ -z ${VERSION} ]] && VERSION=7
 
     # Folder that will hold the final compiled toolchain
-    INSTALL_FOLDER=${TC_FOLDER}/flash-clang-${VERSION}.x
+    INSTALL_FOLDER=${TC_FOLDER}/flash-clang-${VERSION}.x${TEST:+"-test"}
 
     # SVN copy of the LLVM folder for revisioning
     SVN_FOLDER=${MAIN_FOLDER}/svn-${VERSION}.x
@@ -201,8 +204,10 @@ function build() {
 function install() {
     header "Installing Clang"
 
-    rm -rf "${INSTALL_FOLDER}-old"
-    mv "${INSTALL_FOLDER}" "${INSTALL_FOLDER}-old"
+    if [[ -z ${TEST} ]]; then
+        rm -rf "${INSTALL_FOLDER}-old"
+        mv "${INSTALL_FOLDER}" "${INSTALL_FOLDER}-old"
+    fi
     TIME_STRING="$(format_time "${START}" "$(date +"%s")")"
     if ! ninja install; then
         header "ERROR INSTALLING!"
