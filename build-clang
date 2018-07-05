@@ -41,6 +41,10 @@ function parse_parameters() {
             "-b"|"--build-only")
                 BUILD_ONLY=true ;;
 
+            "-d"|"--date")
+                shift && enforce_value "${@}"
+                DATE_OFFSET=${1} ;;
+
             "-T"|"--test")
                 TEST=true ;;
 
@@ -117,10 +121,14 @@ function sync() {
                     svn update ;;
                 *)
                     git clean -fxdq
-                    git checkout ${BRANCH}
-                    git fetch origin
-                    if ! git rebase origin/${BRANCH}; then
-                        die "Error updating $(basename "${FOLDER}")!"
+                    if [[ -n ${DATE_OFFSET} ]]; then
+                        git checkout "$(git log -1 --format=%H --before="$(date --date="-${DATE_OFFSET} day")")"
+                    else
+                        git checkout ${BRANCH}
+                        git fetch origin
+                        if ! git rebase origin/${BRANCH}; then
+                            die "Error updating $(basename "${FOLDER}")!"
+                        fi
                     fi ;;
             esac
         )
