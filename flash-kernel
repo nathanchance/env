@@ -791,55 +791,12 @@ function move_flashable_files() {
         cd "${FILE_MOVE}" || die "Shift to ending folder failed!"
         mv "${ANYKERNEL2_FOLDER}/${SIGNED_ZIP}" "${FILE_MOVE}"
         md5sum "${SIGNED_ZIP}" > "${FILE_MOVE}/${SIGNED_ZIP}.md5"
-        [[ ${STABLE} ]] && echo "${VERSION}" > .version
+        cp "${SHORT_CHANGELOG}" "${KERNEL_NAME,,}-changelog.txt"
+        if [[ ${STABLE} ]]; then
+            ln -sf "${KERNEL_NAME,,}-changelog.txt" .changelog
+            echo "${VERSION}" > .version
+        fi
     )
-}
-
-
-# Generate changelog
-function generate_changelog() {
-    echo "  - Generating changelog"
-
-    GITHUB="http://github.com/nathanchance"
-    CHANGELOG=${FILE_MOVE}/${KERNEL_NAME,,}-changelog.txt
-
-    # Kernel source first
-    cd "${SOURCE_FOLDER}" || die "Kernel source is missing!"
-
-    # We need to mark the previous tag for changelog
-    PREV_TAG_NAME=$(git tag --sort=-taggerdate -l "*${MATCH_FLAG}*" | head -n 1)
-    [[ -z ${PREV_TAG_NAME} ]] && return
-    RANGE=${PREV_TAG_NAME}..HEAD
-
-    # Show where commits are located
-    {
-        echo "${GITHUB}/${DEVICE_NAME_GITHUB}/commits/${KERNEL_BRANCH}\n"
-
-        # Use shortlog for pretty output
-        git log "${RANGE}" | git shortlog
-
-        # Generate a diff as well
-        git diff --find-renames --stat --summary "${RANGE}"
-    } > "${CHANGELOG}"
-
-    # AnyKernel2 next
-    cd "${ANYKERNEL2_FOLDER}" || die "AnyKernel2 source is missing!"
-
-    # We only want to show AnyKernel2 changes if there have been some
-    NUM_COMMITS=$(git log "${RANGE}" --pretty=oneline | wc -l)
-
-    if [[ ${NUM_COMMITS} -gt 0 ]]; then
-        {
-            echo "\n\n${GITHUB}/AnyKernel2/commits/${ANYKERNEL2_BRANCH}\n"
-
-            git log "${RANGE}" | git shortlog
-
-            git diff --find-renames --stat --summary "${RANGE}"
-        } >> "${CHANGELOG}"
-    fi
-
-    # Copy short changelog for FKU
-    [[ ${STABLE} ]] && cp "${SHORT_CHANGELOG}" "${FILE_MOVE}/.changelog"
 }
 
 
@@ -881,7 +838,6 @@ function after_build_tasks () {
         move_flashable_files
 
         if [[ ${MODE} != "personal" ]]; then
-            generate_changelog
             [[ ${MODE} != "tmp" ]] && push_flashable_files
             [[ ${STABLE} ]] && tag_stable
         fi
