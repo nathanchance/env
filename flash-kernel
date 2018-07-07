@@ -772,7 +772,7 @@ function setup_folders() {
         if [[ ! ${NOCLEAN} ]]; then
             [[ ! -d ${FILE_MOVE_OLD} ]] && mkdir -p "${FILE_MOVE_OLD}"
             rm -f "${FILE_MOVE}"/{.version,.changelog}
-            OLD_FILES="$(find "${FILE_MOVE}" -maxdepth 1 -type f -name "*${MATCH_FLAG}*" 2>/dev/null)"
+            OLD_FILES="$(find "${FILE_MOVE}" -maxdepth 1 -type f -name "*${MATCH_FLAG,,}*" 2>/dev/null)"
             if [[ -n ${OLD_FILES} ]]; then
                 for OLD_FILE in ${OLD_FILES}; do
                     mv ${VERBOSE_COMMANDS:+ "-v"} "${OLD_FILE}" "${FILE_MOVE_OLD}"
