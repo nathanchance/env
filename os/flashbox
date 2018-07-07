@@ -47,6 +47,9 @@ function flashbox_aliases() {
     # Alias for merge-stable script
     alias ms='merge-stable'
 
+    # Clean out web folder
+    alias wfc='git -C ${WEB_FOLDER}/downloads/kernels cl'
+
     # Git aliases
     git config --global alias.m 'merge --gpg-sign --signoff'
     git config --global alias.ml 'merge --gpg-sign --signoff --log=500'
@@ -330,20 +333,6 @@ function rpb() {
     cd "${SCRIPTS_FOLDER}" || return
 
     git status
-}
-
-
-# Reset test build folders function
-function wfr() {
-    case ${1} in
-        "op5")
-            rm -rf "${WEB_FOLDER}"/downloads/kernels/op5/{7.1.x,8.0.0,8.1.0}/{custom,oos}/{alpha,beta,bisect,rc,tmp}/*
-            rm -rf "${WEB_FOLDER}"/downloads/kernels/op5/8.x/{alpha,beta,bisect,rc,tmp}/* ;;
-        "pxl2")
-            rm -rf "${WEB_FOLDER}"/downloads/kernels/{taimen,walleye,wahoo}/{8.0.0,8.1.0}/{alpha,beta,bisect,rc,tmp}/* ;;
-    esac
-
-    cd "${WEB_FOLDER}/downloads/kernels" || return
 }
 
 
