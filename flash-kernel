@@ -166,7 +166,7 @@ function parse_parameters() {
 
     # Easy to use variables for if statements
     [[ ${MODE} != "stable" ]] && NOT_STABLE=true || STABLE=true
-    [[ ${MODE} = "personal" ]] && PERSONAL=true || PERSONAL=false
+    [[ ${MODE} = "personal" ]] && PERSONAL=true || NOT_PERSONAL=true
 
     if [[ ${TG} ]]; then
         {
@@ -606,7 +606,7 @@ function build_kernel() {
 
     # Notify Telegram of build starting
     SHORT_CHANGELOG=${HOME}/shortlogs/${DEVICE_NAME_FILE,,}-${VERSION//./}
-    [[ ! -f ${SHORT_CHANGELOG} && ! ${PERSONAL} ]] && die "Missing short changelog!"
+    [[ ! -f ${SHORT_CHANGELOG} && ${NOT_PERSONAL} ]] && die "Missing short changelog!"
     if [[ ${TG} && ${ALREADY_NOTIFIED} != true ]]; then
         {
             echo "\`\`\`"
@@ -791,10 +791,12 @@ function move_flashable_files() {
         cd "${FILE_MOVE}" || die "Shift to ending folder failed!"
         mv "${ANYKERNEL2_FOLDER}/${SIGNED_ZIP}" "${FILE_MOVE}"
         md5sum "${SIGNED_ZIP}" > "${FILE_MOVE}/${SIGNED_ZIP}.md5"
-        cp "${SHORT_CHANGELOG}" "${KERNEL_NAME,,}-changelog.txt"
-        if [[ ${STABLE} ]]; then
-            ln -sf "${KERNEL_NAME,,}-changelog.txt" .changelog
-            echo "${VERSION}" > .version
+        if [[ ${NOT_PERSONAL} ]]; then
+            cp "${SHORT_CHANGELOG}" "${KERNEL_NAME,,}-changelog.txt"
+            if ${STABLE}; then
+                ln -sf "${KERNEL_NAME,,}-changelog.txt" .changelog
+                echo "${VERSION}" > .version
+            fi
         fi
     )
 }
