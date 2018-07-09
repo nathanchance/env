@@ -165,8 +165,10 @@ function parse_parameters() {
     [[ -z ${VERBOSITY_LEVEL} ]] && HIDDEN_COMMANDS=true
 
     # Easy to use variables for if statements
-    [[ ${MODE} != "stable" ]] && NOT_STABLE=true || STABLE=true
+    [[ ${MODE} = "alpha" || ${MODE} = "beta" || ${MODE} = "rc" ]] && TEST=true || NOT_TEST=true
     [[ ${MODE} = "personal" ]] && PERSONAL=true || NOT_PERSONAL=true
+    [[ ${MODE} = "stable" ]] && STABLE=true || NOT_STABLE=true
+    [[ ${MODE} = "tmp" ]] && TMP=true || NOT_TMP=true
 
     if [[ ${TG} ]]; then
         {
@@ -606,7 +608,7 @@ function build_kernel() {
 
     # Notify Telegram of build starting
     SHORT_CHANGELOG=${HOME}/shortlogs/${DEVICE_NAME_FILE,,}-${VERSION//./}
-    [[ ! -f ${SHORT_CHANGELOG} && ${NOT_PERSONAL} ]] && die "Missing short changelog!"
+    [[ ! -f ${SHORT_CHANGELOG} && ${TEST} ]] && die "Missing short changelog!"
     if [[ ${TG} && ${ALREADY_NOTIFIED} != true ]]; then
         {
             echo "\`\`\`"
