@@ -409,7 +409,10 @@ function queue-tag() {
 
 # Does it build function
 function doesitbuild() {
-    [[ "${*}" =~ "-l" || "${*}" =~ "--log" ]] && rm -r "${LOG}"
+    if [[ "${*}" =~ "-l" || "${*}" =~ "--log" ]]; then
+        local MESSAGE
+        rm -r "${LOG}"
+    fi
     case ${PWD} in
         *marlin*)
             # Clang 7.x
@@ -490,7 +493,14 @@ function doesitbuild() {
         *)
             return ;;
     esac
-    [[ "${*}" =~ "-l" || "${*}" =~ "--log" ]] && notify "${CUR_FOLDER} results: $(deldog "${LOG}")"
+
+    clear
+
+    if [[ "${*}" =~ "-l" || "${*}" =~ "--log" ]]; then
+        MESSAGE="$(basename "${PWD}") results: $(deldog "${LOG}")"
+        echo "${MESSAGE}"
+        [[ "${*}" =~ "-t" || "${*}" =~ "--telegram" ]] && notify "${MESSAGE}"
+    fi
 }
 
 
