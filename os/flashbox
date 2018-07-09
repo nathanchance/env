@@ -409,9 +409,8 @@ function queue-tag() {
 
 # Does it build function
 function doesitbuild() {
-    local CUR_FOLDER DEFCONFIG
-    CUR_FOLDER=$(pwd)
-    case ${CUR_FOLDER} in
+    [[ "${*}" =~ "-l" || "${*}" =~ "--log" ]] && rm -r "${LOG}"
+    case ${PWD} in
         *marlin*)
             # Clang 7.x
             flash-kernel -d marlin -m tmp -io
@@ -420,9 +419,7 @@ function doesitbuild() {
             # GCC 7.3.1
             flash-kernel -d marlin -m tmp -io -cc gcc
             # GCC 4.9
-            flash-kernel -d marlin -m tmp -io -cc gcc -gt aosp-gcc-arm64 -gt-32 aosp-gcc-arm
-            clear
-            tail -n 11 "${LOG}" ;;
+            flash-kernel -d marlin -m tmp -io -cc gcc -gt aosp-gcc-arm64 -gt-32 aosp-gcc-arm ;;
         *wahoo*)
             # Clang 7.x
             flash-kernel -m tmp -io
@@ -435,9 +432,7 @@ function doesitbuild() {
             # GCC 7.3.1
             flash-kernel -m tmp -io -cc gcc -gt btg-linaro-gcc-7.3.1-arm64 -gt-32 btg-linaro-gcc-7.3.1-arm
             # GCC 4.9
-            flash-kernel -m tmp -io -cc gcc -gt aosp-gcc-arm64 -gt-32 aosp-gcc-arm
-            clear
-            tail -n 14 "${LOG}" ;;
+            flash-kernel -m tmp -io -cc gcc -gt aosp-gcc-arm64 -gt-32 aosp-gcc-arm ;;
         *op5*)
             # Clang 7.x
             flash-kernel -d op5 -m tmp -io -ct flash-clang-7.x
@@ -448,9 +443,7 @@ function doesitbuild() {
             # GCC 7.3.1
             flash-kernel -d op5 -m tmp -io -cc gcc
             # GCC 4.9
-            flash-kernel -d op5 -m tmp -io -cc gcc -gt aosp-gcc-arm64
-            clear
-            tail -n 14 "${LOG}" ;;
+            flash-kernel -d op5 -m tmp -io -cc gcc -gt aosp-gcc-arm64 ;;
         *op6*)
             # Clang 7.x
             flash-kernel -d op6 -m tmp -io
@@ -459,10 +452,9 @@ function doesitbuild() {
             # GCC 7.3.1
             flash-kernel -d op6 -m tmp -io -cc gcc -gt btg-linaro-gcc-7.3.1-arm64
             # GCC 4.9
-            flash-kernel -d op6 -m tmp -io -cc gcc -gt aosp-gcc-arm64
-            clear
-            tail -n 8 "${LOG}" ;;
+            flash-kernel -d op6 -m tmp -io -cc gcc -gt aosp-gcc-arm64 ;;
         *clang*)
+            local DEFCONFIG
             case "$(kver)" in
                 3.18*) DEFCONFIG=msm ;;
                 4.4*) DEFCONFIG=msmcortex ;;
@@ -498,6 +490,7 @@ function doesitbuild() {
         *)
             return ;;
     esac
+    [[ "${*}" =~ "-l" || "${*}" =~ "--log" ]] && notify "${CUR_FOLDER} results: $(deldog "${LOG}")"
 }
 
 
@@ -1037,5 +1030,21 @@ function updtc() {
     for BINARY in "${BINARIES[@]}"; do
         ${BINARY} --version | head -1
         echo
+    done
+}
+
+
+# Run five rounds of builds after clearing ccache
+function ccache-build-up() {
+    local DEVICE
+    for DEVICE in marlin op5 op6 wahoo; do
+        (
+            rm -f "${LOG}"
+            cd "${KERNEL_FOLDER}/flash/${DEVICE}"
+            for i in $(seq 0 4); do
+                doesitbuild
+            done
+            notify "${DEVICE} results: $(deldog "${LOG}")"
+        )
     done
 }
