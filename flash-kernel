@@ -793,7 +793,7 @@ function move_flashable_files() {
         cd "${FILE_MOVE}" || die "Shift to ending folder failed!"
         mv "${ANYKERNEL2_FOLDER}/${SIGNED_ZIP}" "${FILE_MOVE}"
         md5sum "${SIGNED_ZIP}" > "${FILE_MOVE}/${SIGNED_ZIP}.md5"
-        if [[ ${NOT_PERSONAL} ]]; then
+        if [[ ${TEST} || ${STABLE} ]]; then
             cp "${SHORT_CHANGELOG}" "${KERNEL_NAME,,}-changelog.txt"
             if ${STABLE}; then
                 ln -sf "${KERNEL_NAME,,}-changelog.txt" .changelog
