@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+
+PATCHES_FOLDER=$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")" && pwd)
+git ra
+if [[ "${*}" =~ "--no-als" ]]; then
+    for FILE in dm-bufio.c sg.c; do
+        git ap "${PATCHES_FOLDER}"/wahoo/"${FILE}".diff
+    done
+fi
+git ap "${PATCHES_FOLDER}"/flash-wahoo/balloc.c.diff
+if [[ "${*}" =~ "--no-als" ]]; then
+    git fm
+else
+    git mc
+fi

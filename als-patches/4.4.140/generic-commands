@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+
+PATCHES_FOLDER=$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")" && pwd)
+git ra
+for FILE in assembler.h auditsc.c base.c cputype.h vmscan.c; do
+    git ap "${PATCHES_FOLDER}"/generic/"${FILE}".diff
+done
+git fm
