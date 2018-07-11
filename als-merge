@@ -237,6 +237,16 @@ fi
 # SC2076: Don't quote rhs of =~, it'll match literally rather than as a regex.
 # shellcheck disable=SC2076
 if [[ ${#} -lt 1 || "${*}" =~ "4.9" ]]; then
+    # msm-4.9
+    cd "${ALS_HOME}/msm-4.9" || die "msm-4.9 folder does not exist, please clone!"
+    git f origin
+    git rh origin/"$(git cb)"
+
+    merge-stable
+    [[ -f ${PATCHES_49}/msm-4.9-commands ]] && bash "${PATCHES_49}/msm-4.9-commands" "v${VERSION_49}"
+
+    git push
+
     # OnePlus 6
     cd "${ALS_HOME}/op6" || die "OnePlus 6 folder does not exist, please clone!"
     git rh origin/"$(git cb)"
