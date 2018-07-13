@@ -119,16 +119,6 @@ fi
 if [[ ${#} -lt 1 || "${*}" =~ "4.4" ]]; then
     # Moto Z2 (Force)
     cd "${ALS_HOME}/nash" || die "Nash folder does not exist, please clone!"
-    git ch lineage-15.1
-    git f origin
-    git rh origin/"$(git cb)"
-    git f LineageOS || die "LineageOS remote does not exist!"
-    git ml --no-edit LineageOS/"$(git cb)" || die "Merge conflicts detected, please resolve then continue!"
-
-    merge-stable
-    [[ -f ${PATCHES_44}/nash-lineage-15.1-commands ]] && bash "${PATCHES_44}/nash-lineage-15.1-commands" "v${VERSION_44}"
-
-    git push
     git ch oreo-8.0.0-release-nash
     git rh origin/"$(git cb)"
     git f upstream || die "upstream remote does not exist!"
