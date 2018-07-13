@@ -214,61 +214,25 @@ function kfg() {
 }
 
 
-# Build a toolchain and release Flash Kernel builds
-# frel <device> <version> [-nt]
+# Release Flash Kernel build for specified device
+# frel <device> <version>
 function frel() {
-    case ${1} in
-        "op5")
-            case ${2} in
-                1.*)
-                    flash-kernel -v "${2}" -m stable -d op5 -os Custom -b 7.1.x-custom -av 7.1.x -t
-                    flash-kernel -v "${2}" -m stable -d op5 -os OOS -b 7.1.x-oos -av 7.1.x -t ;;
-                2.*)
-                    flash-kernel -v "${2}" -m stable -d op5 -os Custom -b 8.0.0-custom -av 8.0.0 -t
-                    flash-kernel -v "${2}" -m stable -d op5 -os OOS -b 8.0.0-oos -av 8.0.0 -t ;;
-                3.*)
-                    flash-kernel -v "${2}" -m stable -d op5 -b 8.x-unified -av 8.x -t ;;
-                4.*)
-                    flash-kernel -v "${2}" -m stable -d op5 -b 8.1.0-unified -av 8.x -t ;;
-            esac ;;
-
-        "op6")
-            flash-kernel -v "${2}" -m stable -d op6 -b 8.1.0 -t ;;
-
-        "pxl")
-            flash-kernel -v "${2}" -m stable -d marlin -b oreo-m4 -t ;;
-
-        "pxl2")
-            flash-kernel -v "${2}" -m stable -d wahoo -b oreo-m2 -t ;;
-    esac
+    flash-kernel --device "${1}" \
+                 --mode stable \
+                 --telegram \
+                 --version "${2}"
 }
 
 
 # Build Flash Kernel test builds
 # ftest <device> <version> <dirty_version> <type>
 function ftest() {
-    case ${1} in
-        "op5")
-            case ${2} in
-                1.*)
-                    flash-kernel -v "${2}" -r "${3}" -m "${4}" -d op5 -os Custom -b "queue-${2}" -av 7.1.x -t
-                    flash-kernel -v "${2}" -r "${3}" -m "${4}" -d op5 -os OOS -b "queue-${2}" -av 7.1.x -t ;;
-                2.*)
-                    flash-kernel -v "${2}" -r "${3}" -m "${4}" -d op5 -os Custom -b "queue-${2}" -av 8.0.0 -t
-                    flash-kernel -v "${2}" -r "${3}" -m "${4}" -d op5 -os OOS -b "queue-${2}" -av 8.0.0 -t ;;
-                3.*|4.*)
-                    flash-kernel -v "${2}" -r "${3}" -m "${4}" -d op5 -b "queue-${2}" -av 8.x -t ;;
-            esac ;;
-
-        "op6")
-            flash-kernel -v "${2}" -r "${3}" -m "${4}" -d op6 -b "queue-${2}" -t ;;
-
-        "pxl")
-            flash-kernel -v "${2}" -r "${3}" -m "${4}" -d marlin -b "queue-${2}" -t ;;
-
-        "pxl2")
-            flash-kernel -v "${2}" -r "${3}" -m "${4}" -d wahoo -b "queue-${2}" -t ;;
-    esac
+    flash-kernel --branch "queue-${2}" \
+                 --device "${1}" \
+                 --mode "${4}" \
+                 --revision "${3}" \
+                 --telegram \
+                 --version "${2}"
 }
 
 
