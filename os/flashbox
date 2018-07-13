@@ -750,16 +750,15 @@ function bk() {
 
     case "$(basename "${PWD}"):$(git cb)" in
         # Custom ROMs
-        "aicp-op5:o8.1") PARAMS=( lineage_oneplus5_defconfig );;
-        "aosip-mata:oreo-mr1") PARAMS=( illusion_mata_defconfig ) ;;
+        "du-op5:o8x-caf"*) PARAMS=( oneplus5_defconfig -c ) ;;
         "gzr-op3:"*) PARAMS=( lineageos_oneplus3_defconfig ) ;;
         "gzr-op5:"*) PARAMS=( lineage_oneplus5_defconfig -c ) ;;
-        "du-op5:o8x-caf"*) PARAMS=( oneplus5_defconfig -c ) ;;
+        "lineage-nash:lineage-15.1") PARAMS=( "lineageos_${CUR_DIR}_defconfig" -c ) ;;
 
         # android-linux-stable
         "angler:"*|"bullhead:"*|"marlin:"*) PARAMS=( "${CUR_DIR}_defconfig" ) ;;
-        "mata:lineage-15.1"|"nash:lineage-15.1") PARAMS=( "lineageos_${CUR_DIR}_defconfig" -c ) ;;
-        "msm-3.18:"*|"msm-4.4:"*) PARAMS=( msmcortex-perf_defconfig ) ;;
+        "mata:lineage-15.1") PARAMS=( "lineageos_${CUR_DIR}_defconfig" -c ) ;;
+        "msm-3.18:"*|"msm-4.4:"*|"msm-4.9:"*) PARAMS=( msmcortex-perf_defconfig ) ;;
         "op3:android-8.1") PARAMS=( omni_oneplus3_defconfig ) ;;
         "op3:lineage-15.1") PARAMS=( lineageos_oneplus3_defconfig ) ;;
         "op3:oneplus/QC8996_O_8.0.0"*) PARAMS=( msm-perf_defconfig ) ;;
@@ -767,7 +766,6 @@ function bk() {
         "op5:lineage-15.1") PARAMS=( lineage_oneplus5_defconfig ) ;;
         "op5:oneplus/QC8998_O_8."*) PARAMS=( msmcortex-perf_defconfig ) ;;
         "op6:oneplus/SDM845_O_8.1") PARAMS=( sdm845-perf_defconfig ) ;;
-        "sagit:android-8.1") PARAMS=( sagit_defconfig -c ) ;;
         "sagit:sagit-o-oss") PARAMS=( sagit_user_defconfig ) ;;
         "tissot:tissot-o-oss") PARAMS=( tissot-perf_defconfig ) ;;
         "wahoo:"*) PARAMS=( wahoo_defconfig -c ) ;;
