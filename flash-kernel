@@ -803,7 +803,7 @@ function move_flashable_files() {
         md5sum "${SIGNED_ZIP}" > "${FILE_MOVE}/${SIGNED_ZIP}.md5"
         if [[ ${TEST} || ${STABLE} ]]; then
             cp "${SHORT_CHANGELOG}" "${KERNEL_NAME,,}-changelog.txt"
-            if ${STABLE}; then
+            if [[ ${STABLE} ]]; then
                 ln -sf "${KERNEL_NAME,,}-changelog.txt" .changelog
                 echo "${VERSION}" > .version
             fi
