@@ -165,10 +165,10 @@ function parse_parameters() {
     [[ -z ${VERBOSITY_LEVEL} ]] && HIDDEN_COMMANDS=true
 
     # Easy to use variables for if statements
-    [[ ${MODE} = "alpha" || ${MODE} = "beta" || ${MODE} = "rc" ]] && TEST=true || NOT_TEST=true
-    [[ ${MODE} = "personal" ]] && PERSONAL=true || NOT_PERSONAL=true
+    [[ ${MODE} = "alpha" || ${MODE} = "beta" || ${MODE} = "rc" ]] && TEST=true # || NOT_TEST=true
+    [[ ${MODE} = "personal" ]] && PERSONAL=true # || NOT_PERSONAL=true
     [[ ${MODE} = "stable" ]] && STABLE=true || NOT_STABLE=true
-    [[ ${MODE} = "tmp" ]] && TMP=true || NOT_TMP=true
+    # [[ ${MODE} = "tmp" ]] && TMP=true || NOT_TMP=true
 
     if [[ ${TG} ]]; then
         {

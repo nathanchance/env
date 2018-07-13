@@ -85,7 +85,7 @@ function gen-ssh() {
 
 # Things to do only on a clean install
 function setup() {
-    install-bin
+    install-bin "${@}"
     rld
     crouton -r stretch -t cli-extra
 }

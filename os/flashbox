@@ -1046,9 +1046,8 @@ function updtc() {
 
 # Run five rounds of builds after clearing ccache
 function fk-buildall() {
-    local DEVICE
-    for DEVICE in marlin op5 op6 wahoo; do
-        (
+    (
+        for DEVICE in marlin op5 op6 wahoo; do
             rm -f "${LOG}"
             cd "${KERNEL_FOLDER}/flash/${DEVICE}" || { warn "${DEVICE} folder does not exist, skipping!"; continue; }
             [[ ${1} = "-n" || ${1} = "--number" ]] && { shift; NUM=$((${1} - 1)); }
@@ -1057,6 +1056,6 @@ function fk-buildall() {
                 doesitbuild
             done
             notify "${DEVICE} results: $(deldog "${LOG}")"
-        )
-    done
+        done
+    )
 }
