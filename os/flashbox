@@ -70,7 +70,7 @@ function flashbox_prompt() {
 # Setup ccache
 # ccache_setup <size>
 function ccache_setup() {
-    if [[ -f ${CCACHE}  ]]; then
+    if [[ -f ${CCACHE} ]]; then
         if [[ -n ${1} ]]; then
             ccache -M "${1}"G &> /dev/null
             export USE_CCACHE=1
@@ -243,11 +243,10 @@ function rpb() {
     mkavenv
     . build/envsetup.sh
     lunch aosp_taimen-user
-    make "${JOBS_FLAGS}" clean
-    make "${JOBS_FLAGS}" dtc mkdtimg
+    m "${JOBS_FLAGS}" clean
+    m "${JOBS_FLAGS}" mkdtimg
     rmvenv
 
-    cp out/host/linux-x86/bin/dtc "${BIN_FOLDER}"
     cp out/host/linux-x86/bin/mkdtimg "${BIN_FOLDER}"
 
     cd "${SCRIPTS_FOLDER}" || return
