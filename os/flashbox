@@ -94,19 +94,10 @@ function flashbox_setup() {
 
 
 # Repo sync shorthand
+# SC2120: rps references arguments, but none are ever passed.
+# shellcheck disable=SC2120
 function rps {
-    local ARGS
-
-    if [[ -n ${1} ]]; then
-        case ${1} in
-            "g")
-                ARGS=( vendor/google/build vendor/opengapps/sources/all vendor/opengapps/sources/arm vendor/opengapps/sources/arm64 ) ;;
-            *)
-                ARGS=( "${@}" ) ;;
-        esac
-    fi
-
-    repo sync "${JOBS_FLAG}" --force-sync -c --no-clone-bundle --no-tags --optimized-fetch --prune "${ARGS[@]}"
+    repo sync "${JOBS_FLAG}" --force-sync -c --no-clone-bundle --no-tags --optimized-fetch --prune "${@}"
 }
 
 
@@ -118,7 +109,9 @@ function ris {
 
     repo init -u "${1}" -b "${2}" --no-clone-bundle ${DEPTH}
 
-    time repo sync "${JOBS_FLAG}" --force-sync -c --no-clone-bundle --no-tags --optimized-fetch --prune
+    # SC2119: Use rps "$@" if function's $1 should mean script's $1.
+    # shellcheck disable=SC2119
+    time rps
 }
 
 
