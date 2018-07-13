@@ -134,43 +134,6 @@ function kremotes() {
 }
 
 
-# Merge one git tag into current branch
-# mrgt <tag> [<remote|url>]
-function merge-tag() {
-    [[ ${#} -gt 1 ]] && git fetch --tags "${2}"
-
-    local MSG_FILE=/tmp/mrg-msg
-    local CB; CB=$(git rev-parse --abbrev-ref HEAD | sed 's/-queue-[0-9].*//')
-    local TAG=${1}
-    local RANGE=${CB}..${TAG}
-
-    rm -rf ${MSG_FILE}
-    {
-        echo "Merge ${TAG} into ${CB}"
-
-        echo "\nCommits in ${TAG}: ($(git rev-list --count "${RANGE}") commits)"
-        git log --reverse --format="        %s" "${RANGE}"
-
-        echo "\nSigned-off-by: $(git config --get user.name) <$(git config --get user.email)>"
-    } > ${MSG_FILE}
-
-    if ! GIT_MERGE_VERBOSITY=1 git merge --gpg-sign --no-edit "${TAG}"; then
-        echo "\nConflicts:" >> ${MSG_FILE}
-        for FILE in $(git cf); do
-            echo "\t${FILE}" >> ${MSG_FILE}
-        done
-
-        display_error "Merge needs manual intervention!
-
-Resolve conflicts then run git fm!"
-        return 1
-    else
-        git commit --amend --no-edit --quiet --gpg-sign --file ${MSG_FILE}
-        header "${TAG} merged cleanly!" "${GRN}"
-    fi
-}
-
-
 # Neofetch alias
 function nf() {
     echo
@@ -326,24 +289,6 @@ function rpb() {
     cd "${SCRIPTS_FOLDER}" || return
 
     git status
-}
-
-
-# Generate git hashes with their subject line and links upstream (markdown commit format)
-function mcf() {
-    case ${1} in
-        "c") URL="https://source.codeaurora.org/quic/la/kernel/msm-4.4/commit/?id=" ;;
-        "g") URL="https://android.googlesource.com/kernel/msm/+/" ;;
-        "l") URL="https://git.kernel.org/pub/scm/linux/kernel/git/stable/linux-stable.git/commit/?id=" ;;
-        "o3") URL="https://github.com/OnePlusOSS/android_kernel_oneplus_msm8996/commit/" ;;
-        "o4") URL="https://github.com/OnePlusOSS/android_kernel_oneplus_msm8998/commit/" ;;
-    esac
-
-    echo
-    git show -s --format='%h ("%s")' "${2}"
-    echo
-    echo "ommit [\`$(git show -s --format=%h "${2}")\`](${URL}$(git show -s --format='%H) ("%s")' "${2}")"
-    echo
 }
 
 
@@ -638,43 +583,6 @@ ${HOME}/kernels/flash/anykernel2-wahoo"
         fi
         git push -q
     done
-    echo
-}
-
-
-# Build Chrome OS kernel
-function chromeos-kernel() {
-    local UPDATE VERSION
-    cd "${HOME}/kernels/sources/chromium" || return
-
-    while [[ ${#} -ge 1 ]]; do
-        case ${1} in
-            "-u"|"--update") UPDATE=true ;;
-            *) VERSION=${1} ;;
-        esac
-
-        shift
-    done
-    echo
-
-    # Checkout proper branch
-    git checkout -q "chromeos-${VERSION:-4.4}"
-
-    # Update
-    [[ ${UPDATE} ]] && git pull
-
-    # Configure
-    git clean -fxdq
-    mkdir -p out
-    ./chromeos/scripts/prepareconfig chromeos-intel-pineview out/.config
-
-    # Build the kernel
-    time make "${JOBS_FLAG}" CC="${CCACHE} ${TC_FOLDER}/flash-clang-7.x/bin/clang" O=out > /dev/null
-
-    # Show version information
-    if [[ -f out/arch/x86_64/boot/bzImage ]]; then
-        echo "\nKernel version: $(cat out/include/config/kernel.release)"
-    fi
     echo
 }
 
