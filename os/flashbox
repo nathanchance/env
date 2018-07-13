@@ -296,8 +296,7 @@ function queue-tag() {
 
     case ${1} in
         "-c"|"--create")
-            git tag -d "queue-${2}" 2>/dev/null
-            git tag -a "queue-${2}" -m "Queue for Flash v${2}" -s "${3:-HEAD}"
+            git tag -f -a "queue-${2}" -m "Queue for Flash v${2}" -s "${3:-HEAD}"
             git push -f origin "queue-${2}" ;;
 
         "-d"|"--delete")
