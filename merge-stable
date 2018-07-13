@@ -115,7 +115,7 @@ function verify_remote() {
 
 # Updates the linux-stable mirror on my GitHub
 function update_stable_mirror() {
-    CUR_FOLDER=$(pwd)
+    CUR_FOLDER=${PWD}
 
     if [[ ! -d ${KERNEL_FOLDER}/mirrors/linux-stable ]]; then
         mkdir -p "${KERNEL_FOLDER}/mirrors"

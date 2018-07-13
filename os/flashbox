@@ -356,7 +356,6 @@ function mcf() {
 
 # Sign zip files for TWRP flashability
 function signzip() {
-    local CUR_DIR; CUR_DIR=$(pwd)
     local FILE=${1}
     if echo "${FILE}" | grep -q -v zip; then
         display_error "This can only sign zip files!"
@@ -381,8 +380,8 @@ function signzip() {
               "${ZIP_NAME}-signed.zip"
               
     # Echo zip location
-    echo "Signed zip: $(pwd)/${ZIP_NAME}-signed.zip\n"
-    cd "${CUR_DIR}" || return
+    echo "Signed zip: ${PWD}/${ZIP_NAME}-signed.zip\n"
+    cd "${OLDPWD}" || return
 }
 
 
@@ -539,7 +538,7 @@ function shellcheck() {
 
 # Shellcheck wrapper
 function sc() {
-    if ! [[ "$(pwd)" =~ "scripts" ]]; then
+    if ! [[ "${PWD}" =~ "scripts" ]]; then
         display_error "Not in scripts folder, why are you running sc?"
         return;
     fi
@@ -746,12 +745,10 @@ function ac-kernel() {
 
 # build-kernel wrapper for known trees
 function bk() {
-    local CUR_DIR CUR_BRANCH PARAMS
+    local PARAMS
 
-    CUR_DIR=$(basename "$(pwd)")
-    CUR_BRANCH=$(git cb)
 
-    case "${CUR_DIR}:${CUR_BRANCH}" in
+    case "$(basename "${PWD}"):$(git cb)" in
         # Custom ROMs
         "aicp-op5:o8.1") PARAMS=( lineage_oneplus5_defconfig );;
         "aosip-mata:oreo-mr1") PARAMS=( illusion_mata_defconfig ) ;;
@@ -850,7 +847,7 @@ function test-pulls() {
 
     git fetch origin
 
-    case "$(pwd)" in
+    case "${PWD}" in
         *"sony"*)
             BRANCH=aosp/LA.UM.6.4.r1
             # Checkout a clean tree
@@ -883,7 +880,7 @@ function qcacld() {
 
     REPOS=( "fw-api" "qcacld-3.0" "qca-wifi-host-cmn" )
 
-    case "$(pwd):$(make kernelversion)" in
+    case "${PWD}:$(make kernelversion)" in
         *"sony"*)
             TAG=aosp/LA.UM.6.4.r1
             URL=https://github.com/sonyxperiadev/vendor-qcom-opensource-wlan-
@@ -908,7 +905,7 @@ function qcacld() {
         git fetch "${REPO}" "${TAG}"
         case "${1}" in
             "-i"|"--init")
-                if [[ "$(pwd)" =~ "sony" ]]; then
+                if [[ "${PWD}" =~ "sony" ]]; then
                     git rm "${SUBFOLDER}/${REPO}"
                     git ac -m "staging: ${REPO}: Remove submodule reference"
                 fi
