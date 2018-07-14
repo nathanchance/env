@@ -22,8 +22,6 @@ function flashbox_aliases() {
     alias cros='cd ${KERNEL_FOLDER}/sources/chromium'
     alias lnx='cd ${KERNEL_FOLDER}/sources/linux'
     alias pkg='cd ${REPO_FOLDER}/pkgbuilds'
-    alias op5='cd ${KERNEL_FOLDER}/flash/op5'
-    alias op5ak='cd ${KERNEL_FOLDER}/flash/anykernel2-op5'
     alias op6='cd ${KERNEL_FOLDER}/flash/op6'
     alias op6ak='cd ${KERNEL_FOLDER}/flash/anykernel2-op6'
     alias pi='cd ${KERNEL_FOLDER}/pi'
@@ -335,17 +333,6 @@ function doesitbuild() {
             flash-kernel -m tmp -io -cc gcc -gt btg-linaro-gcc-7.3.1-arm64 -gt-32 btg-linaro-gcc-7.3.1-arm
             # GCC 4.9
             flash-kernel -m tmp -io -cc gcc -gt aosp-gcc-arm64 -gt-32 aosp-gcc-arm ;;
-        *op5*)
-            # Clang 7.x
-            flash-kernel -d op5 -m tmp -io -ct flash-clang-7.x
-            # Clang 6.x
-            flash-kernel -d op5 -m tmp -io -ct flash-clang-6.x
-            # Clang 5.x
-            flash-kernel -d op5 -m tmp -io -ct aosp-clang/clang-4053586
-            # GCC 7.3.1
-            flash-kernel -d op5 -m tmp -io -cc gcc
-            # GCC 4.9
-            flash-kernel -d op5 -m tmp -io -cc gcc -gt aosp-gcc-arm64 ;;
         *op6*)
             # Clang 7.x
             flash-kernel -d op6 -m tmp -io
@@ -489,11 +476,9 @@ ${HOME}/kernels/franco/mido
 ${HOME}/kernels/franco/op3
 ${HOME}/kernels/franco/op5
 ${HOME}/kernels/franco/tissot
-${HOME}/kernels/flash/op5
 ${HOME}/kernels/flash/op6
 ${HOME}/kernels/flash/wahoo
 ${HOME}/kernels/pi
-${HOME}/kernels/roms/aicp-op5
 ${HOME}/kernels/roms/aosip-mata
 ${HOME}/kernels/roms/gzr-op3
 ${HOME}/kernels/roms/gzr-op5
@@ -516,7 +501,6 @@ ${HOME}/kernels/xperia/kernel"
 function update-ak2() {
     REPOS="
 ${HOME}/kernels/flash/anykernel2-marlin
-${HOME}/kernels/flash/anykernel2-op5
 ${HOME}/kernels/flash/anykernel2-op6
 ${HOME}/kernels/flash/anykernel2-wahoo"
 
@@ -905,7 +889,7 @@ function updtc() {
 # Run five rounds of builds after clearing ccache
 function fk-buildall() {
     (
-        for DEVICE in marlin op5 op6 wahoo; do
+        for DEVICE in marlin op6 wahoo; do
             rm -f "${LOG}"
             cd "${KERNEL_FOLDER}/flash/${DEVICE}" || { warn "${DEVICE} folder does not exist, skipping!"; continue; }
             [[ ${1} = "-n" || ${1} = "--number" ]] && { shift; NUM=$((${1} - 1)); }
