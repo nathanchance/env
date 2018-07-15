@@ -146,6 +146,8 @@ function parse_parameters() {
             "-Wno-error")
                 NO_WERROR=true ;;
 
+            "") ;;
+
             *)
                 die "Invalid parameter" ;;
         esac
