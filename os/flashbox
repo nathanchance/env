@@ -560,6 +560,7 @@ function bk() {
         "gzr-op3:"*) PARAMS=( lineageos_oneplus3_defconfig ) ;;
         "gzr-op5:"*) PARAMS=( lineage_oneplus5_defconfig -c ) ;;
         "lineage-nash:lineage-15.1") PARAMS=( "lineageos_${CUR_DIR}_defconfig" -c ) ;;
+        "lineage-op6:"*) PARAMS=( enchilada_defconfig ) ;;
 
         # android-linux-stable
         "angler:"*|"bullhead:"*|"marlin:"*) PARAMS=( "${CUR_DIR}_defconfig" ) ;;
