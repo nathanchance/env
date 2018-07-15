@@ -305,87 +305,49 @@ function queue-tag() {
 
 
 # Does it build function
-function doesitbuild() {
-    if [[ "${*}" =~ "-l" || "${*}" =~ "--log" ]]; then
-        local MESSAGE
-        rm -r "${LOG}"
-    fi
-    case ${PWD} in
-        *marlin*)
-            # Clang 7.x
-            flash-kernel -d marlin -m tmp -io
-            # Clang 6.x
-            flash-kernel -d marlin -m tmp -io -ct flash-clang-6.x
-            # GCC 7.3.1
-            flash-kernel -d marlin -m tmp -io -cc gcc
-            # GCC 4.9
-            flash-kernel -d marlin -m tmp -io -cc gcc -gt aosp-gcc-arm64 -gt-32 aosp-gcc-arm ;;
-        *wahoo*)
-            # Clang 7.x
-            flash-kernel -m tmp -io
-            # Clang 6.x
-            flash-kernel -m tmp -io -ct flash-clang-6.x
-            # Clang 5.x
-            flash-kernel -m tmp -io -ct aosp-clang/clang-4053586
-            # GCC 8.1.1
-            flash-kernel -m tmp -io -cc gcc
-            # GCC 7.3.1
-            flash-kernel -m tmp -io -cc gcc -gt btg-linaro-gcc-7.3.1-arm64 -gt-32 btg-linaro-gcc-7.3.1-arm
-            # GCC 4.9
-            flash-kernel -m tmp -io -cc gcc -gt aosp-gcc-arm64 -gt-32 aosp-gcc-arm ;;
-        *op6*)
-            # Clang 7.x
-            flash-kernel -d op6 -m tmp -io
-            # GCC 8.1.1
-            flash-kernel -d op6 -m tmp -io -cc gcc
-            # GCC 7.3.1
-            flash-kernel -d op6 -m tmp -io -cc gcc -gt btg-linaro-gcc-7.3.1-arm64
-            # GCC 4.9
-            flash-kernel -d op6 -m tmp -io -cc gcc -gt aosp-gcc-arm64 ;;
-        *clang*)
-            local DEFCONFIG
-            case "$(kver)" in
-                3.18*) DEFCONFIG=msm ;;
-                4.4*) DEFCONFIG=msmcortex ;;
-            esac
-            # Clang 7.x
-            build-kernel -d ${DEFCONFIG}-perf_defconfig -w -c -ct aosp-clang/clang-r328903 "${@}"
-            # Clang 6.x
-            build-kernel -d ${DEFCONFIG}-perf_defconfig -w -c -ct aosp-clang/clang-4691093 "${@}"
-            # Clang 5.x
-            build-kernel -d ${DEFCONFIG}-perf_defconfig -w -c "${@}"
-            # GCC 4.9.4
-            build-kernel -d ${DEFCONFIG}-perf_defconfig -w "${@}" ;;
-        *sony*)
-            local DEFCONFIG
-            echo
-            # Clang 7.0.1
-            for DEFCONFIG in arch/arm64/configs/aosp_*; do
-                build-kernel -d "$(basename "${DEFCONFIG}")" -w -Werror -c -ct aosp-clang/clang-r328903 "${@}"
-            done
-            # Clang 6.0.2
-            for DEFCONFIG in arch/arm64/configs/aosp_*; do
-                build-kernel -d "$(basename "${DEFCONFIG}")" -w -Werror -c -ct aosp-clang/clang-4691093 "${@}"
-            done
-            # GCC 7.3.1
-            for DEFCONFIG in arch/arm64/configs/aosp_*; do
-                build-kernel -d "$(basename "${DEFCONFIG}")" -w -Werror -gt btg-linaro-gcc-7.3.1-arm64 "${@}"
-            done
-            # GCC 4.9.4
-            for DEFCONFIG in arch/arm64/configs/aosp_*; do
-                build-kernel -d "$(basename "${DEFCONFIG}")" -w -Werror "${@}"
-            done
-            echo ;;
-        *)
-            return ;;
+function dib() {
+    local CLANG_5 CLANG_6 CLANG_7 DEVICE \
+          GCC_494 GCC_731 GCC_811 \
+          LOG MESSAGE PARAMS TG
+
+    DEVICE=$(basename "${PWD}")
+
+    while [[ ${#} -ge 1 ]]; do
+        case ${1} in
+            "-l"|"--log") LOG=true ;;
+            "-t"|"--telegram") TG=true ;;
+        esac
+        shift
+    done
+
+    [[ ${LOG} ]] && rm -r "${LOG}"
+
+    # Set common parameter lists
+    FLASH_CLANG_7=( "--compiler clang --clang-toolchain flash-clang-7.x" )
+    FLASH_CLANG_6=( "--compiler clang --clang-toolchain flash-clang-6.x" )
+    AOSP_CLANG_5=( "--compiler clang --clang-toolchain aosp-clang/clang-4053586" )
+    GCC_811=( "--compiler gcc --gcc-toolchain btg-gcc-8.1.1-arm64 --gcc-32-bit-toolchain btg-gcc-8.1.1-arm" )
+    GCC_731=( "--compiler gcc --gcc-toolchain btg-linaro-gcc-7.3.1-arm64 --gcc-32-bit-toolchain btg-linaro-gcc-7.3.1-arm" )
+    GCC_494=( "--compiler gcc --gcc-toolchain aosp-gcc-arm64 --gcc-32-bit-toolchain aosp-gcc-arm" )
+
+    case ${DEVICE} in
+        marlin) TC_LIST=( "${FLASH_CLANG_7[@]}" "${FLASH_CLANG_6[@]}" "${GCC_731[@]}" "${GCC_494[@]}" ) ;;
+        wahoo) TC_LIST=( "${FLASH_CLANG_7[@]}" "${FLASH_CLANG_6[@]}" "${AOSP_CLANG_5[@]}" "${GCC_811[@]}" "${GCC_731[@]}" "${GCC_494[@]}" ) ;;
+        op6) TC_LIST=( "${FLASH_CLANG_7[@]}" "${FLASH_CLANG_6[@]}" "${GCC_731[@]}" "${GCC_494[@]}" ) ;;
+        *) display_error "This folder doesn't support dib!"; return ;;
     esac
+
+    for ITEM in "${TC_LIST[@]}"; do
+        read -ra ITEM_ARRAY <<< "${ITEM}"
+        flash-kernel --device "${DEVICE}" --mode tmp --image-only "${ITEM_ARRAY[@]}"
+    done
 
     clear
 
-    if [[ "${*}" =~ "-l" || "${*}" =~ "--log" ]]; then
-        MESSAGE="$(basename "${PWD}") results: $(deldog "${LOG}")"
+    if [[ ${LOG} ]]; then
+        MESSAGE="${DEVICE} results: $(deldog "${LOG}")"
         echo "${MESSAGE}"
-        [[ "${*}" =~ "-t" || "${*}" =~ "--telegram" ]] && notify "${MESSAGE}"
+        [[ ${TG} ]] && notify "${MESSAGE}"
     fi
 }
 
@@ -713,7 +675,12 @@ function test-pulls() {
 $(signoff)" --prefix=drivers/staging/wlan-qc/qcacld-3.0 qcacld-3.0 refs/pull/11/head
 
             # Run all builds
-            doesitbuild -r ;;
+            for DEFCONFIG in arch/arm64/configs/aosp_*; do
+                build-kernel -d "$(basename "${DEFCONFIG}")" -w -Werror -c -ct aosp-clang/clang-r328903 -r
+                build-kernel -d "$(basename "${DEFCONFIG}")" -w -Werror -c -ct aosp-clang/clang-4691093 -r
+                build-kernel -d "$(basename "${DEFCONFIG}")" -w -Werror -gt btg-linaro-gcc-7.3.1-arm64 -r
+                build-kernel -d "$(basename "${DEFCONFIG}")" -w -Werror -r
+            done ;;
     esac
 }
 
@@ -896,9 +863,7 @@ function fk-buildall() {
             cd "${KERNEL_FOLDER}/flash/${DEVICE}" || { warn "${DEVICE} folder does not exist, skipping!"; continue; }
             [[ ${1} = "-n" || ${1} = "--number" ]] && { shift; NUM=$((${1} - 1)); }
             [[ -z ${NUM} ]] && NUM=0
-            for i in $(seq 0 ${NUM}); do
-                doesitbuild
-            done
+            for i in $(seq 0 ${NUM}); do dib; done
             notify "${DEVICE} results: $(deldog "${LOG}")"
         done
     )
