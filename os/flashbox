@@ -855,15 +855,15 @@ function updtc() {
 }
 
 
-# Run five rounds of builds after clearing ccache
-function fk-buildall() {
+# Build all Flash Kernel builds a certain amount of times
+function fkba() {
     (
         for DEVICE in marlin op6 wahoo; do
             rm -f "${LOG}"
             cd "${KERNEL_FOLDER}/flash/${DEVICE}" || { warn "${DEVICE} folder does not exist, skipping!"; continue; }
-            [[ ${1} = "-n" || ${1} = "--number" ]] && { shift; NUM=$((${1} - 1)); }
-            [[ -z ${NUM} ]] && NUM=0
-            for i in $(seq 0 ${NUM}); do dib; done
+            [[ ${1} = "-n" || ${1} = "--number" ]] && { shift; NUM=${1}; }
+            [[ ! ${NUM} ]] && NUM=1
+            for i in $(seq 1 ${NUM}); do dib; done
             notify "${DEVICE} results: $(deldog "${LOG}")"
         done
     )
