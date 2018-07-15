@@ -734,48 +734,6 @@ function qcacld() {
 }
 
 
-# Build an AK2 zip for Pixel 2
-function pxl2-ak2-zip() {
-    (
-    while [[ ${#} -ge 1 ]]; do
-        case ${1} in
-            "-s"|"--stock") STOCK=true ;;
-            "-n"|"--zip-name") shift; ZIP=${1} ;;
-        esac
-        shift
-    done
-
-    SF=${PWD}
-    AOSPF=${KERNEL_FOLDER}/sources/aosp-pixel2/device/google/wahoo-kernel
-    AK2=${KERNEL_FOLDER}/flash/anykernel2-wahoo
-    WB=${HOME}/web/tmp/wahoo/stock
-    [[ -z ${ZIP} ]] && ZIP=wahoo-$(date +%Y%m%d-%H%M)
-
-    cd "${AK2}" || return
-    CB=$(git cb)
-    git cl
-    git ch wahoo-stock
-
-    if [[ ${STOCK} ]]; then
-        cp "${AOSPF}/Image.lz4-dtb" "${AK2}"
-        cp "${AOSPF}/dtbo.img" "${AK2}"
-    else
-        find "${SF}/out" -name 'Image.lz4-dtb' -exec cp -v {} "${AK2}" \;
-        find "${SF}/out" -name 'dtbo.img' -exec cp -v {} "${AK2}" \;
-    fi
-
-    zip -r9 "${ZIP}.zip" -x README.md -- *
-    signzip "${ZIP}.zip"
-
-    rm -rf "${WB}"
-    mkdir -p "${WB}"
-    mv -v wahoo*-signed.zip "${WB}"
-
-    git ch "${CB}"
-    )
-}
-
-
 # build-tools-gcc wrapper
 function btg() {
     (
