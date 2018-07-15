@@ -464,6 +464,7 @@ function clean-kernels() {
 ${HOME}/kernels/als/marlin
 ${HOME}/kernels/als/msm-3.18
 ${HOME}/kernels/als/msm-4.4
+${HOME}/kernels/als/msm-4.9
 ${HOME}/kernels/als/nash
 ${HOME}/kernels/als/op3
 ${HOME}/kernels/als/op5
@@ -472,17 +473,15 @@ ${HOME}/kernels/als/sagit
 ${HOME}/kernels/als/tissot
 ${HOME}/kernels/als/wahoo
 ${HOME}/kernels/als/whyred
-${HOME}/kernels/franco/mido
-${HOME}/kernels/franco/op3
-${HOME}/kernels/franco/op5
-${HOME}/kernels/franco/tissot
+${HOME}/kernels/flash/marlin
 ${HOME}/kernels/flash/op6
 ${HOME}/kernels/flash/wahoo
 ${HOME}/kernels/pi
-${HOME}/kernels/roms/aosip-mata
 ${HOME}/kernels/roms/gzr-op3
 ${HOME}/kernels/roms/gzr-op5
-${HOME}/kernels/xperia/kernel"
+${HOME}/kernels/roms/lineage-nash
+${HOME}/kernels/roms/lineage-op6
+${HOME}/kernels/sony/kernel"
 
     for REPO in ${REPOS}; do
         header "${REPO}"
