@@ -8,16 +8,8 @@
 
 
 source common
-# Current version numbers
-VERSION_318=3.18.116
-VERSION_44=4.4.141
-VERSION_49=4.9.113
 # Folders
 ALS_HOME=${HOME}/kernels/als
-PATCHES_318=${SCRIPTS_FOLDER}/als-patches/${VERSION_318}
-PATCHES_44=${SCRIPTS_FOLDER}/als-patches/${VERSION_44}
-PATCHES_49=${SCRIPTS_FOLDER}/als-patches/${VERSION_49}
-
 
 
 
@@ -31,6 +23,8 @@ if [[ ${#} -lt 1 || "${*}" =~ "3.18" ]]; then
     git rh origin/"$(git cb)"
 
     merge-stable
+    VERSION_318=$(make CROSS_COMPILE="" kernelversion)
+    PATCHES_318=${SCRIPTS_FOLDER}/als-patches/${VERSION_318}
     [[ -f ${PATCHES_318}/marlin-commands ]] && bash "${PATCHES_318}/marlin-commands" "v${VERSION_318}"
 
     git push
@@ -125,6 +119,8 @@ if [[ ${#} -lt 1 || "${*}" =~ "4.4" ]]; then
     git ml --no-edit upstream/"$(git cb)" || die "Merge conflicts detected, please resolve then continue!"
 
     merge-stable
+    VERSION_44=$(make CROSS_COMPILE="" kernelversion)
+    PATCHES_44=${SCRIPTS_FOLDER}/als-patches/${VERSION_44}
     [[ -f ${PATCHES_44}/nash-oreo-8.0.0-commands ]] && bash "${PATCHES_44}/nash-oreo-8.0.0-commands" "v${VERSION_44}"
 
     git push
@@ -233,6 +229,8 @@ if [[ ${#} -lt 1 || "${*}" =~ "4.9" ]]; then
     git rh origin/"$(git cb)"
 
     merge-stable
+    VERSION_49=$(make CROSS_COMPILE="" kernelversion)
+    PATCHES_49=${SCRIPTS_FOLDER}/als-patches/${VERSION_49}
     [[ -f ${PATCHES_49}/msm-4.9-commands ]] && bash "${PATCHES_49}/msm-4.9-commands" "v${VERSION_49}"
 
     git push
