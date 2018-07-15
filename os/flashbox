@@ -725,20 +725,25 @@ function qcacld() {
 
     REPOS=( "fw-api" "qcacld-3.0" "qca-wifi-host-cmn" )
 
+    while [[ ${#} -ge 1 ]]; do
+        case ${1} in
+            "-i"|"--init") INIT=true ;;
+            "-t"|"--tag") shift; TAG=${1} ;;
+            "-u"|"--update") UPDATE=true ;;
+        esac
+        shift
+    done
+    [[ ${INIT} && ${UPDATE} ]] && { display_error "Both init and update were specified!"; return; }
+    [[ ! ${TAG} && ! ${PWD} =~ "sony" ]] && { display_error "No tag was specified!"; return; }
+
     case "${PWD}:$(make kernelversion)" in
         *"sony"*)
             TAG=aosp/LA.UM.6.4.r1
             URL=https://github.com/sonyxperiadev/vendor-qcom-opensource-wlan-
             SUBFOLDER=drivers/staging/wlan-qc ;;
 
-        *:"4.4"*)
-            TAG=LA.UM.6.2.r1-09300-sdm660.0
+        *:"4.4"*|*:"4.9"*)
             URL=https://source.codeaurora.org/quic/la/platform/vendor/qcom-opensource/wlan/
-            SUBFOLDER=drivers/staging ;;
-
-        *"op6"*)
-            TAG=oneplus/SDM845_O_8.1
-            URL=https://github.com/OnePlusOSS/android_vendor_qcom-opensource_wlan_
             SUBFOLDER=drivers/staging ;;
     esac
 
@@ -748,21 +753,19 @@ function qcacld() {
             git remote add "${REPO}" "${URL}${REPO}"
         fi
         git fetch "${REPO}" "${TAG}"
-        case "${1}" in
-            "-i"|"--init")
-                if [[ "${PWD}" =~ "sony" ]]; then
-                    git rm "${SUBFOLDER}/${REPO}"
-                    git ac -m "staging: ${REPO}: Remove submodule reference"
-                fi
+        if [[ ${INIT} ]]; then
+            if [[ "${PWD}" =~ "sony" ]]; then
+                git rm "${SUBFOLDER}/${REPO}"
+                git ac -m "staging: ${REPO}: Remove submodule reference"
+            fi
 
-                git m --allow-unrelated-histories -s ours --no-commit FETCH_HEAD
-                git read-tree --prefix="${SUBFOLDER}/${REPO}" -u FETCH_HEAD
-                git c --no-edit -m "staging: ${REPO}: Checkout at ${TAG}" ;;
-
-            "-u"|"--update")
-                git m --no-edit -m "staging: ${REPO}: Merge tag '${TAG}' into $(git cb)" \
-                      -X subtree="${SUBFOLDER}/${REPO}" FETCH_HEAD ;;
-        esac
+            git m --allow-unrelated-histories -s ours --no-commit FETCH_HEAD
+            git read-tree --prefix="${SUBFOLDER}/${REPO}" -u FETCH_HEAD
+            git c --no-edit -m "staging: ${REPO}: Checkout at ${TAG}"
+        elif [[ ${UPDATE} ]]; then
+            git m --no-edit -m "staging: ${REPO}: Merge tag '${TAG}' into $(git cb)" \
+                  -X subtree="${SUBFOLDER}/${REPO}" FETCH_HEAD
+        fi
     done
 }
 
