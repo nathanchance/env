@@ -306,10 +306,7 @@ function queue-tag() {
 
 # Does it build function
 function dib() {
-    local CLANG_5 CLANG_6 CLANG_7 DEVICE \
-          GCC_494 GCC_731 GCC_811 \
-          LOG MESSAGE PARAMS TG
-
+    (
     DEVICE=$(basename "${PWD}")
 
     while [[ ${#} -ge 1 ]]; do
@@ -349,6 +346,7 @@ function dib() {
         echo "${MESSAGE}"
         [[ ${TG} ]] && notify "${MESSAGE}"
     fi
+    )
 }
 
 
@@ -739,41 +737,41 @@ function qcacld() {
 # Build an AK2 zip for Pixel 2
 function pxl2-ak2-zip() {
     (
-        while [[ ${#} -ge 1 ]]; do
-            case ${1} in
-                "-s"|"--stock") STOCK=true ;;
-                "-n"|"--zip-name") shift; ZIP=${1} ;;
-            esac
-            shift
-        done
+    while [[ ${#} -ge 1 ]]; do
+        case ${1} in
+            "-s"|"--stock") STOCK=true ;;
+            "-n"|"--zip-name") shift; ZIP=${1} ;;
+        esac
+        shift
+    done
 
-        SF=${PWD}
-        AOSPF=${KERNEL_FOLDER}/sources/aosp-pixel2/device/google/wahoo-kernel
-        AK2=${KERNEL_FOLDER}/flash/anykernel2-wahoo
-        WB=${HOME}/web/tmp/wahoo/stock
-        [[ -z ${ZIP} ]] && ZIP=wahoo-$(date +%Y%m%d-%H%M)
+    SF=${PWD}
+    AOSPF=${KERNEL_FOLDER}/sources/aosp-pixel2/device/google/wahoo-kernel
+    AK2=${KERNEL_FOLDER}/flash/anykernel2-wahoo
+    WB=${HOME}/web/tmp/wahoo/stock
+    [[ -z ${ZIP} ]] && ZIP=wahoo-$(date +%Y%m%d-%H%M)
 
-        cd "${AK2}" || return
-        CB=$(git cb)
-        git cl
-        git ch wahoo-stock
+    cd "${AK2}" || return
+    CB=$(git cb)
+    git cl
+    git ch wahoo-stock
 
-        if [[ ${STOCK} ]]; then
-            cp "${AOSPF}/Image.lz4-dtb" "${AK2}"
-            cp "${AOSPF}/dtbo.img" "${AK2}"
-        else
-            find "${SF}/out" -name 'Image.lz4-dtb' -exec cp -v {} "${AK2}" \;
-            find "${SF}/out" -name 'dtbo.img' -exec cp -v {} "${AK2}" \;
-        fi
+    if [[ ${STOCK} ]]; then
+        cp "${AOSPF}/Image.lz4-dtb" "${AK2}"
+        cp "${AOSPF}/dtbo.img" "${AK2}"
+    else
+        find "${SF}/out" -name 'Image.lz4-dtb' -exec cp -v {} "${AK2}" \;
+        find "${SF}/out" -name 'dtbo.img' -exec cp -v {} "${AK2}" \;
+    fi
 
-        zip -r9 "${ZIP}.zip" -x README.md -- *
-        signzip "${ZIP}.zip"
+    zip -r9 "${ZIP}.zip" -x README.md -- *
+    signzip "${ZIP}.zip"
 
-        rm -rf "${WB}"
-        mkdir -p "${WB}"
-        mv -v wahoo*-signed.zip "${WB}"
+    rm -rf "${WB}"
+    mkdir -p "${WB}"
+    mv -v wahoo*-signed.zip "${WB}"
 
-        git ch "${CB}"
+    git ch "${CB}"
     )
 }
 
@@ -781,54 +779,54 @@ function pxl2-ak2-zip() {
 # build-tools-gcc wrapper
 function btg() {
     (
-        [[ "${*}" =~ "-t" || "${*}" =~ "--telegram" ]] && TG=true && TG_MSG_FILE=/tmp/tg-msg.3
-        cd "${HOME}/gcc-build" || return
-        git pull
+    [[ "${*}" =~ "-t" || "${*}" =~ "--telegram" ]] && TG=true && TG_MSG_FILE=/tmp/tg-msg.3
+    cd "${HOME}/gcc-build" || return
+    git pull
 
-        for ITEM in arm64:aarch64-linux-gnu arm:arm-linux-gnueabi; do
-            ARCH=${ITEM%:*}
-            TARGET=${ITEM#*:}
+    for ITEM in arm64:aarch64-linux-gnu arm:arm-linux-gnueabi; do
+        ARCH=${ITEM%:*}
+        TARGET=${ITEM#*:}
 
-            for GCC in Linaro:7.3.1 GNU:8.1.1; do
-                SOURCE=${GCC%:*}
-                VERSION=${GCC#*:}
-                START=$(date +"%s")
-                ./build -a "${ARCH}" -s "${SOURCE,,}" -v "${VERSION:0:1}"
-                TIME_ELAPSED=$(format_time "${START}" "$(date +"%s")")
-                if [[ -d ${TARGET} ]]; then
-                    SOURCE_STRING=${SOURCE}
-                    [[ ${SOURCE} = "GNU" ]] && unset SOURCE || SOURCE="${SOURCE,,}-"
-                    FOLDER=${HOME}/toolchains/btg-${SOURCE}gcc-${VERSION}-${ARCH}
-                    rm -rf "${FOLDER}"
-                    mv "${TARGET}" "${FOLDER}"
-                    if [[ ${TG} ]]; then
-                        {
-                            echo "\`\`\`"
-                            echo "${SOURCE_STRING} GCC ${VERSION} for ${ARCH} build successfully!"
-                            echo
-                            echo "Time elapsed: ${TIME_ELAPSED,,}"
-                            echo
-                            echo "Installation folder: ${FOLDER}"
-                            echo
-                            echo "Version: $("${FOLDER}/bin/${TARGET}-gcc" --version | head -1)"
-                            echo "\`\`\`"
-                        } > "${TG_MSG_FILE}"
-                        notify "$(cat ${TG_MSG_FILE})"
-                    fi
-                else
-                    if [[ ${TG} ]]; then
-                        {
-                            echo "\`\`\`"
-                            echo "Error while building ${SOURCE} GCC ${VERSION} for ${ARCH}!"
-                            echo
-                            echo "Time elapsed: ${TIME_ELAPSED,,}"
-                            echo "\`\`\`"
-                        } > "${TG_MSG_FILE}"
-                        notify "$(cat ${TG_MSG_FILE})"
-                    fi
+        for GCC in Linaro:7.3.1 GNU:8.1.1; do
+            SOURCE=${GCC%:*}
+            VERSION=${GCC#*:}
+            START=$(date +"%s")
+            ./build -a "${ARCH}" -s "${SOURCE,,}" -v "${VERSION:0:1}"
+            TIME_ELAPSED=$(format_time "${START}" "$(date +"%s")")
+            if [[ -d ${TARGET} ]]; then
+                SOURCE_STRING=${SOURCE}
+                [[ ${SOURCE} = "GNU" ]] && unset SOURCE || SOURCE="${SOURCE,,}-"
+                FOLDER=${HOME}/toolchains/btg-${SOURCE}gcc-${VERSION}-${ARCH}
+                rm -rf "${FOLDER}"
+                mv "${TARGET}" "${FOLDER}"
+                if [[ ${TG} ]]; then
+                    {
+                        echo "\`\`\`"
+                        echo "${SOURCE_STRING} GCC ${VERSION} for ${ARCH} build successfully!"
+                        echo
+                        echo "Time elapsed: ${TIME_ELAPSED,,}"
+                        echo
+                        echo "Installation folder: ${FOLDER}"
+                        echo
+                        echo "Version: $("${FOLDER}/bin/${TARGET}-gcc" --version | head -1)"
+                        echo "\`\`\`"
+                    } > "${TG_MSG_FILE}"
+                    notify "$(cat ${TG_MSG_FILE})"
                 fi
-            done
+            else
+                if [[ ${TG} ]]; then
+                    {
+                        echo "\`\`\`"
+                        echo "Error while building ${SOURCE} GCC ${VERSION} for ${ARCH}!"
+                        echo
+                        echo "Time elapsed: ${TIME_ELAPSED,,}"
+                        echo "\`\`\`"
+                    } > "${TG_MSG_FILE}"
+                    notify "$(cat ${TG_MSG_FILE})"
+                fi
+            fi
         done
+    done
     )
 }
 
@@ -858,13 +856,13 @@ function updtc() {
 # Build all Flash Kernel builds a certain amount of times
 function fkba() {
     (
-        for DEVICE in marlin op6 wahoo; do
-            rm -f "${LOG}"
-            cd "${KERNEL_FOLDER}/flash/${DEVICE}" || { warn "${DEVICE} folder does not exist, skipping!"; continue; }
-            [[ ${1} = "-n" || ${1} = "--number" ]] && { shift; NUM=${1}; }
-            [[ ! ${NUM} ]] && NUM=1
-            for i in $(seq 1 ${NUM}); do dib; done
-            notify "${DEVICE} results: $(deldog "${LOG}")"
-        done
+    for DEVICE in marlin op6 wahoo; do
+        rm -f "${LOG}"
+        cd "${KERNEL_FOLDER}/flash/${DEVICE}" || { warn "${DEVICE} folder does not exist, skipping!"; continue; }
+        [[ ${1} = "-n" || ${1} = "--number" ]] && { shift; NUM=${1}; }
+        [[ ! ${NUM} ]] && NUM=1
+        for i in $(seq 1 ${NUM}); do dib; done
+        notify "${DEVICE} results: $(deldog "${LOG}")"
+    done
     )
 }
