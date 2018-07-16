@@ -311,13 +311,13 @@ function dib() {
 
     while [[ ${#} -ge 1 ]]; do
         case ${1} in
-            "-l"|"--log") LOG=true ;;
-            "-t"|"--telegram") TG=true ;;
+            "-l"|"--log") WANTS_LOG=true ;;
+            "-t"|"--telegram") WANTS_TG=true ;;
         esac
         shift
     done
 
-    [[ ${LOG} ]] && rm -r "${LOG}"
+    [[ ${WANTS_LOG} ]] && rm -r "${LOG}"
 
     # Set common parameter lists
     FLASH_CLANG_7=( "--compiler clang --clang-toolchain flash-clang-7.x" )
@@ -341,10 +341,10 @@ function dib() {
 
     clear
 
-    if [[ ${LOG} ]]; then
+    if [[ ${WANTS_LOG} ]]; then
         MESSAGE="${DEVICE} results: $(deldog "${LOG}")"
         echo "${MESSAGE}"
-        [[ ${TG} ]] && notify "${MESSAGE}"
+        [[ ${WANTS_TG} ]] && notify "${MESSAGE}"
     fi
     )
 }
