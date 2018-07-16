@@ -329,8 +329,8 @@ function dib() {
 
     case ${DEVICE} in
         marlin) TC_LIST=( "${FLASH_CLANG_7[@]}" "${FLASH_CLANG_6[@]}" "${GCC_731[@]}" "${GCC_494[@]}" ) ;;
+        op6) TC_LIST=( "${FLASH_CLANG_7[@]}" "${FLASH_CLANG_6[@]}" "${GCC_811}" "${GCC_731[@]}" "${GCC_494[@]}" ) ;;
         wahoo) TC_LIST=( "${FLASH_CLANG_7[@]}" "${FLASH_CLANG_6[@]}" "${AOSP_CLANG_5[@]}" "${GCC_811[@]}" "${GCC_731[@]}" "${GCC_494[@]}" ) ;;
-        op6) TC_LIST=( "${FLASH_CLANG_7[@]}" "${FLASH_CLANG_6[@]}" "${GCC_731[@]}" "${GCC_494[@]}" ) ;;
         *) display_error "This folder doesn't support dib!"; return ;;
     esac
 
