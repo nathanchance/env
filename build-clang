@@ -252,4 +252,4 @@ parse_parameters "${@}"
 sync_all
 cleanup
 build
-[[ ! ${BUILD_ONLY} ]] && install
+[[ -z ${BUILD_ONLY} ]] && install
