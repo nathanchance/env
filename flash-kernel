@@ -161,10 +161,10 @@ function parse_parameters() {
     [[ -z ${VERBOSITY_LEVEL} ]] && HIDDEN_COMMANDS=true
 
     # Easy to use variables for if statements
-    [[ ${MODE} = "alpha" || ${MODE} = "beta" || ${MODE} = "rc" ]] && TEST=true # || NOT_TEST=true
-    [[ ${MODE} = "personal" ]] && PERSONAL=true # || NOT_PERSONAL=true
-    [[ ${MODE} = "stable" ]] && STABLE=true || NOT_STABLE=true
-    # [[ ${MODE} = "tmp" ]] && TMP=true || NOT_TMP=true
+    [[ ${MODE} = "alpha" || ${MODE} = "beta" || ${MODE} = "rc" ]] && TEST=true
+    [[ ${MODE} = "personal" ]] && PERSONAL=true
+    [[ ${MODE} = "stable" ]] && STABLE=true
+    [[ ${MODE} = "tmp" ]] && TMP=true
 
     if [[ -n ${TG} ]]; then
         {
@@ -364,7 +364,7 @@ function generate_variables() {
         case "$(basename "${CLANG_FOLDER}")" in
             "flash"*)
                 CLANG_LD_PATH=${CLANG_FOLDER}/lib
-                if [[ ${MODE} = "personal" ]]; then
+                if [[ -n ${PERSONAL} ]]; then
                     KCFLAGS="-mllvm -polly \
                              -mllvm -polly-run-dce \
                              -mllvm -polly-run-inliner \
@@ -456,7 +456,7 @@ function generate_version() {
     CONFIG_LOCALVERSION="-FlashKernel"
 
     # If the mode is not personal, add the device name to LOCALVERSION
-    if [[ ${MODE} != "personal" ]]; then
+    if [[ -z ${PERSONAL} ]]; then
         LOCALVERSION="-${DEVICE_NAME_FILE}"
         LOCALVERSION_ZIP="${LOCALVERSION}"
     fi
@@ -468,14 +468,14 @@ function generate_version() {
     fi
 
     # If the mode isn't stable, add hash information to the file for debugging
-    if [[ -n ${NOT_STABLE} ]]; then
+    if [[ -z ${STABLE} ]]; then
         # Furthermore, if it is a personal build, use a shorter hash length
-        [[ ${MODE} = "personal" ]] && NUM=8 || NUM=12
+        [[ -n ${PERSONAL} ]] && NUM=8 || NUM=12
         SHA="-g$(git rev-parse --verify --short=${NUM} HEAD)"
         LOCALVERSION="${LOCALVERSION}${SHA}"
 
         # Don't add the hash to the zip name for personal builds, use the date instead
-        if [[ ${MODE} = "personal" ]]; then
+        if [[ -n ${PERSONAL} ]]; then
             unset SHA
             DATE="-$(date +%Y%m%d-%H%M)"
         fi
@@ -583,12 +583,12 @@ function build_kernel() {
 
     # Notify Telegram of build starting
     SHORT_CHANGELOG=${HOME}/shortlogs/${DEVICE_NAME_FILE,,}-${VERSION//./}
-    [[ ! -f ${SHORT_CHANGELOG} && ${TEST} ]] && die "Missing short changelog!"
+    [[ ! -f ${SHORT_CHANGELOG} && -n ${TEST} ]] && die "Missing short changelog!"
     if [[ -n ${TG} && -z ${ALREADY_NOTIFIED} ]]; then
         {
             echo "\`\`\`"
             echo "Kernel build starting..."
-            if [[ ${MODE} = "personal" ]]; then
+            if [[ -n ${PERSONAL} ]]; then
                 echo
                 echo "Device: ${DEVICE_NAME_FILE}"
             fi
@@ -706,9 +706,9 @@ function setup_folders() {
     FILE_MOVE=$(readlink -f "${FILE_MOVE}")
 
     # If it isn't a stable build, clean the folder
-    if [[ -n ${NOT_STABLE} ]]; then
+    if [[ -z ${STABLE} ]]; then
         if [[ ! ${NOCLEAN} ]]; then
-            if [[ ${MODE} = "personal" ]]; then
+            if [[ -n ${PERSONAL} ]]; then
                 rm -rf "${FILE_MOVE:?}"/*
             else
                 rm -rf "${FILE_MOVE:?}"/*"${MATCH_FLAG}"*
@@ -795,8 +795,8 @@ function after_build_tasks () {
         setup_folders
         move_flashable_files
 
-        if [[ ${MODE} != "personal" ]]; then
-            [[ ${MODE} != "tmp" ]] && push_flashable_files
+        if [[ -z ${PERSONAL} ]]; then
+            [[ -z ${TMP} ]] && push_flashable_files
             [[ -n ${STABLE} ]] && tag_stable
         fi
 
