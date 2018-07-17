@@ -91,7 +91,7 @@ while [[ ${#} -ge 1 ]]; do
 
         # Disable -Werror
         "-Wno-error")
-            WERROR=false ;;
+            NO_WERROR=true ;;
     esac
 
     shift
@@ -165,10 +165,10 @@ function build() {
 
     # Build kernel image
     kmake "${DEFCONFIG}" |& ag --no-color -v "format-overflow"
-    if [[ ${WERROR} = "true" ]]; then
+    if [[ -n ${WERROR} ]]; then
         ./scripts/config --file out/.config -e CC_WERROR
         kmake olddefconfig
-    elif [[ ${WERROR} = "false" ]]; then
+    if [[ -n ${NO_WERROR} ]]; then
         ./scripts/config --file out/.config -d CC_WERROR
         kmake olddefconfig
     fi
