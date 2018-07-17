@@ -145,7 +145,7 @@ function update_sources() {
     verify_remote linux-stable
     verify_remote linux-stable-rc
 
-    if [[ ${FETCH_REMOTES_ONLY} ]]; then
+    if [[ -n ${FETCH_REMOTES_ONLY} ]]; then
         echo
         exit 0
     fi
@@ -171,7 +171,7 @@ function generate_versions() {
     echo "${BOLD}Current kernel version:${RST} ${CURRENT_VERSION}"
     echo
     echo "${BOLD}Latest kernel version:${RST} ${LATEST_VERSION}"
-    if [[ ${PRINT_LATEST} ]]; then
+    if [[ -n ${PRINT_LATEST} ]]; then
         echo
         exit 0
     fi
@@ -190,7 +190,7 @@ function generate_versions() {
             TARGET_VERSION=${LATEST_VERSION} ;;
     esac
 
-    if [[ ${RC} ]]; then
+    if [[ -n ${RC} ]]; then
         TAG=linux-stable-rc/linux-${CURRENT_MAJOR_VERSION}.y
         RANGE=v${CURRENT_VERSION}..${TAG}
         TARGET_VERSION=${TARGET_VERSION}$(git grep -h "\-rc" "${TAG}" -- Makefile | cut -d ' ' -f 3)
@@ -200,7 +200,7 @@ function generate_versions() {
 
         echo
         echo "${BOLD}Target kernel version:${RST} ${TARGET_VERSION}"
-    elif [[ ${QUEUE} ]]; then
+    elif [[ -n ${QUEUE} ]]; then
         CB=$(git cb)
         QUEUE_BRANCH=queue-${CURRENT_MAJOR_VERSION}
         (
