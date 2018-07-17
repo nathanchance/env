@@ -166,7 +166,7 @@ function parse_parameters() {
     [[ ${MODE} = "stable" ]] && STABLE=true || NOT_STABLE=true
     # [[ ${MODE} = "tmp" ]] && TMP=true || NOT_TMP=true
 
-    if [[ ${TG} ]]; then
+    if [[ -n ${TG} ]]; then
         {
             echo "\`\`\`"
             echo "Currently executing..."
@@ -225,7 +225,7 @@ function device_flags() {
             [[ -z ${GCC_FOLDER} ]] && GCC_FOLDER=${TC_FOLDER}/btg-linaro-gcc-7.3.1-arm64
             [[ -z ${GCC_32_BIT_FOLDER} ]] && GCC_32_BIT_FOLDER=${TC_FOLDER}/btg-linaro-gcc-7.3.1-arm
 
-            [[ ${STABLE} ]] && KERNEL_BRANCH=oreo-m4
+            [[ -n ${STABLE} ]] && KERNEL_BRANCH=oreo-m4
 
             MATCH_FLAG="${DEVICE_NAME_FILE}-v${VERSION::1}"
 
@@ -256,7 +256,7 @@ function device_flags() {
 
             [[ -z ${GCC_FOLDER} ]] && GCC_FOLDER=${TC_FOLDER}/btg-gcc-8.1.1-arm64
 
-            [[ ${STABLE} ]] && KERNEL_BRANCH=8.1.0
+            [[ -n ${STABLE} ]] && KERNEL_BRANCH=8.1.0
 
             MATCH_FLAG="${DEVICE_NAME_FILE}-v${VERSION::1}" ;;
 
@@ -285,7 +285,7 @@ function device_flags() {
             [[ -z ${GCC_FOLDER} ]] && GCC_FOLDER=${TC_FOLDER}/btg-gcc-8.1.1-arm64
             [[ -z ${GCC_32_BIT_FOLDER} ]] && GCC_32_BIT_FOLDER=${TC_FOLDER}/btg-gcc-8.1.1-arm
 
-            [[ ${STABLE} ]] && KERNEL_BRANCH=oreo-m2
+            [[ -n ${STABLE} ]] && KERNEL_BRANCH=oreo-m2
 
             MATCH_FLAG="${DEVICE_NAME_FILE}-v${VERSION::1}"
 
@@ -309,7 +309,7 @@ function generate_variables() {
         "alpha"|"beta"|"bisect"|"rc"|"stable")
             FILE_MOVE=${FILE_MOVE_HEAD}/kernels/${DEVICE_NAME_WEB}/${ANDROID_VERSION}/${MODE}
             FILE_MOVE_OLD=$(readlink -f "${FILE_MOVE}/../archive")
-            if [[ ${TG} ]]; then
+            if [[ -n ${TG} ]]; then
                 case ${DEVICE} in
                     "marlin") export CHAT_ID=-1001132593794 ;;
                     "op6") export CHAT_ID=-1001192694857 ;;
@@ -442,7 +442,7 @@ function make_wrapper_clang() {
 # Silence output function
 function kmake() {
     # Only show errors and warnings when compiling (unless debug)
-    if [[ ${SHOW_OUTPUT} ]]; then
+    if [[ -n ${SHOW_OUTPUT} ]]; then
         make_wrapper_${COMPILER} "${@}"
     else
         make_wrapper_${COMPILER} "${@}" |& ag --no-color --after=${AG_LINES:-10} "error:|warning:" && echo
@@ -468,7 +468,7 @@ function generate_version() {
     fi
 
     # If the mode isn't stable, add hash information to the file for debugging
-    if [[ ${NOT_STABLE} ]]; then
+    if [[ -n ${NOT_STABLE} ]]; then
         # Furthermore, if it is a personal build, use a shorter hash length
         [[ ${MODE} = "personal" ]] && NUM=8 || NUM=12
         SHA="-g$(git rev-parse --verify --short=${NUM} HEAD)"
@@ -549,7 +549,7 @@ function build_kernel() {
     kmake ${DEFCONFIG} prepare
 
     # If we want to build with KASAN, do it now
-    if [[ ${KASAN} ]]; then
+    if [[ -n ${KASAN} ]]; then
         ./scripts/config --file out/.config -e CONFIG_KASAN \
                                             -e CONFIG_KASAN_INLINE \
                                             -e CONFIG_TEST_KASAN \
@@ -565,18 +565,18 @@ function build_kernel() {
     fi
 
     # If requested, disable -Werror
-    if [[ ${NO_WERROR} ]]; then
+    if [[ -n ${NO_WERROR} ]]; then
         ./scripts/config --file out/.config -d CONFIG_CC_WERROR
         kmake olddefconfig
     fi
 
     # If requested, build the 32-bit compatible VDSO
-    if [[ ${WANTS_COMPAT_VDSO} ]]; then
+    if [[ -n ${WANTS_COMPAT_VDSO} ]]; then
         ./scripts/config --file out/.config -e CONFIG_COMPAT_VDSO
         kmake olddefconfig
     fi
 
-    if [[ ${PERSONAL} ]]; then
+    if [[ -n ${PERSONAL} ]]; then
         ./scripts/config --file out/.config -e CONFIG_WIREGUARD_DEBUG
         kmake olddefconfig
     fi
@@ -584,7 +584,7 @@ function build_kernel() {
     # Notify Telegram of build starting
     SHORT_CHANGELOG=${HOME}/shortlogs/${DEVICE_NAME_FILE,,}-${VERSION//./}
     [[ ! -f ${SHORT_CHANGELOG} && ${TEST} ]] && die "Missing short changelog!"
-    if [[ ${TG} && ${ALREADY_NOTIFIED} != true ]]; then
+    if [[ -n ${TG} && -z ${ALREADY_NOTIFIED} ]]; then
         {
             echo "\`\`\`"
             echo "Kernel build starting..."
@@ -706,7 +706,7 @@ function setup_folders() {
     FILE_MOVE=$(readlink -f "${FILE_MOVE}")
 
     # If it isn't a stable build, clean the folder
-    if [[ ${NOT_STABLE} ]]; then
+    if [[ -n ${NOT_STABLE} ]]; then
         if [[ ! ${NOCLEAN} ]]; then
             if [[ ${MODE} = "personal" ]]; then
                 rm -rf "${FILE_MOVE:?}"/*
@@ -747,9 +747,9 @@ function move_flashable_files() {
         cd "${FILE_MOVE}" || die "Shift to ending folder failed!"
         mv "${ANYKERNEL2_FOLDER}/${SIGNED_ZIP}" "${FILE_MOVE}"
         md5sum "${SIGNED_ZIP}" > "${FILE_MOVE}/${SIGNED_ZIP}.md5"
-        if [[ ${TEST} || ${STABLE} ]]; then
+        if [[ -n ${TEST} || -n ${STABLE} ]]; then
             cp "${SHORT_CHANGELOG}" "${KERNEL_NAME,,}-changelog.txt"
-            if [[ ${STABLE} ]]; then
+            if [[ -n ${STABLE} ]]; then
                 ln -sf "${KERNEL_NAME,,}-changelog.txt" .changelog
                 echo "${VERSION}" > .version
             fi
@@ -797,7 +797,7 @@ function after_build_tasks () {
 
         if [[ ${MODE} != "personal" ]]; then
             [[ ${MODE} != "tmp" ]] && push_flashable_files
-            [[ ${STABLE} ]] && tag_stable
+            [[ -n ${STABLE} ]] && tag_stable
         fi
 
         echo
@@ -824,7 +824,7 @@ function ending_info() {
             echo "SIZE: $(du -h "${FILE_MOVE}/${SIGNED_ZIP}" | awk '{print $1}')${RST}"
         fi
 
-        if [[ ${TG} ]]; then
+        if [[ -n ${TG} ]]; then
             {
                 echo "\`Kernel build successful in ${DURATION,,}\`"
                 if [[ ! ${IMAGE_ONLY} ]]; then
@@ -841,7 +841,7 @@ function ending_info() {
         fi
     else
         echo "BUILD FAILED IN ${DURATION}" >> "${LOG}"
-        if [[ ${TG} ]]; then
+        if [[ -n ${TG} ]]; then
             load_botinfo
             notify "\`Build failed in ${DURATION,,}\`"
         fi
