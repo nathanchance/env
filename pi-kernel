@@ -92,7 +92,7 @@ function build() {
     } > ${TG_MSG}
     [[ -n ${PI} || "${*}" =~ "-t" ]] && notify "$(cat "${TG_MSG}")"
 
-    if [[ ! ${PI} ]]; then
+    if [[ -z ${PI} ]]; then
         mkdir -p "${SOURCE_FOLDER}/out/pi_root"
         kmake INSTALL_MOD_PATH="${SOURCE_FOLDER}/out/pi_root" modules_install
     fi
