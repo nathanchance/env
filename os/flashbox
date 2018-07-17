@@ -702,7 +702,7 @@ function qcacld() {
         shift
     done
     [[ -n ${INIT} && -n ${UPDATE} ]] && { display_error "Both init and update were specified!"; return; }
-    [[ ! ${TAG} && ! ${PWD} =~ "sony" ]] && { display_error "No tag was specified!"; return; }
+    [[ -z ${TAG} && ! ${PWD} =~ "sony" ]] && { display_error "No tag was specified!"; return; }
 
     case "${PWD}:$(make kernelversion)" in
         *"sony"*)
@@ -822,7 +822,7 @@ function fkba() {
         rm -f "${LOG}"
         cd "${KERNEL_FOLDER}/flash/${DEVICE}" || { warn "${DEVICE} folder does not exist, skipping!"; continue; }
         [[ ${1} = "-n" || ${1} = "--number" ]] && { shift; NUM=${1}; }
-        [[ ! ${NUM} ]] && NUM=1
+        [[ -z ${NUM} ]] && NUM=1
         for i in $(seq 1 ${NUM}); do dib; done
         notify "${DEVICE} results: $(deldog "${LOG}")"
     done
