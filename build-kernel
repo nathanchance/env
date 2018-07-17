@@ -126,7 +126,7 @@ if [[ -n ${ARCH_32_BIT} ]]; then
     [[ -z ${GCC_32_BIT_TOOLCHAIN} ]] && die "32-bit GCC toolchain could not be found!"
 fi
 
-if [[ ${CLANG} ]]; then
+if [[ -n ${CLANG} ]]; then
     [[ -z ${CLANG_TOOLCHAIN_FOLDER} ]] && CLANG_TOOLCHAIN_FOLDER=${TC_FOLDER}/aosp-clang/clang-4053586
     if [[ ! -d ${CLANG_TOOLCHAIN_FOLDER} ]]; then
         CLANG_TOOLCHAIN_FOLDER=${TC_FOLDER}/${CLANG_TOOLCHAIN_FOLDER}
@@ -142,7 +142,7 @@ function kmake() {
     # Set make variable
     MAKE="make ${JOBS_FLAG} O=out ARCH=${ARCH}"
 
-    if [[ ${CLANG} ]]; then
+    if [[ -n ${CLANG} ]]; then
         PATH=${BIN_FOLDER}:${PATH} ${MAKE} CC="${CCACHE} ${CLANG_TOOLCHAIN}" \
                                            CLANG_TRIPLE=aarch64-linux-gnu- \
                                            CROSS_COMPILE="${GCC_TOOLCHAIN%gcc}" \
@@ -209,7 +209,7 @@ fi
 [[ ! -f Makefile ]] && die "This must be run in a kernel tree!"
 
 # Start hiding output
-[[ ${SHOW_ONLY_RESULT} ]] && exec > /dev/null
+[[ -n ${SHOW_ONLY_RESULT} ]] && exec > /dev/null
 
 # Show the base version we are making
 header "BUILDING $(make CROSS_COMPILE="" kernelversion)"
@@ -231,7 +231,7 @@ FINAL_IMAGE=$(find out -name 'Image.*-dtb')
 
 # Report success
 END=$(date +%s)
-[[ ${SHOW_ONLY_RESULT} ]] && SCRIPT_COMMAND="$(basename "${0}") ${PARAMS[*]}  |  "
+[[ -n ${SHOW_ONLY_RESULT} ]] && SCRIPT_COMMAND="$(basename "${0}") ${PARAMS[*]}  |  "
 if [[ -f ${FINAL_IMAGE} ]]; then
     echo
     errcho "${SCRIPT_COMMAND}${GRN}BUILD SUCCESSFUL IN $(format_time "${START}" "${END}")${RST}"
@@ -244,7 +244,7 @@ else
 fi
 
 # Upload image if necessary
-if [[ ${UPLOAD} ]]; then
+if [[ -n ${UPLOAD} ]]; then
     echo
     curl --upload-file "${FINAL_IMAGE}" https://transfer.sh/"${IMAGE}"
 fi
