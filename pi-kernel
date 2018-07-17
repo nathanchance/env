@@ -27,7 +27,7 @@ TG_MSG=/tmp/tg-msg.pi-kernel
 [[ "$(whoami)" = "pi" ]] && PI=true
 
 # Set toolchain to use
-if [[ ${PI} ]]; then
+if [[ -n ${PI} ]]; then
     cd "${HOME}/Documents/Kernel" || die "Kernel source doesn't exist!"
 else
 	case "${*}" in
@@ -45,7 +45,7 @@ fi
 
 # Make function for both host and cross compiling
 function kmake() {
-    if [[ ${PI} ]]; then
+    if [[ -n ${PI} ]]; then
         make "${JOBS_FLAG}" O=out "${@}"
     else
         make "${JOBS_FLAG}" ARCH=${ARCH} CROSS_COMPILE="${CCACHE} ${CC}" O=out "${@}"
@@ -62,7 +62,7 @@ function build() {
         echo "Version $(make kernelversion)"
         echo "\`\`\`"
     } > ${TG_MSG}
-    [[ ${PI} || "${*}" =~ "-t" ]] && notify "$(cat "${TG_MSG}")"
+    [[ -n ${PI} || "${*}" =~ "-t" ]] && notify "$(cat "${TG_MSG}")"
 
     rm -rf out
 
@@ -90,7 +90,7 @@ function build() {
         echo "Duration: ${TIME_STRING,,}"
         echo "\`\`\`"
     } > ${TG_MSG}
-    [[ ${PI} || "${*}" =~ "-t" ]] && notify "$(cat "${TG_MSG}")"
+    [[ -n ${PI} || "${*}" =~ "-t" ]] && notify "$(cat "${TG_MSG}")"
 
     if [[ ! ${PI} ]]; then
         mkdir -p "${SOURCE_FOLDER}/out/pi_root"
