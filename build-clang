@@ -62,7 +62,7 @@ function parse_parameters() {
         shift
     done
 
-    if [[ ${TG} ]]; then
+    if [[ -n ${TG} ]]; then
         {
             echo "\`\`\`"
             echo "Currently executing..."
@@ -174,7 +174,7 @@ function cleanup() {
 function build() {
     header "Building Clang"
 
-    [[ ${TG} ]] && notify "\`Beginning build of Clang ${VERSION}...\`"
+    [[ -n ${TG} ]] && notify "\`Beginning build of Clang ${VERSION}...\`"
 
     cmake -G Ninja \
           -DCMAKE_BUILD_TYPE=Release \
@@ -219,7 +219,7 @@ function install() {
     TIME_STRING="$(format_time "${START}" "$(date +"%s")")"
     if ! ninja install; then
         header "ERROR INSTALLING!"
-        if [[ ${TG} ]]; then
+        if [[ -n ${TG} ]]; then
             {
                 echo "\`\`\`"
                 echo "Error while building Clang ${VERSION}!"
@@ -235,7 +235,7 @@ function install() {
     header "SUCCESS!" "${GRN}"
     echo "${GRN}Successfully built and installed Clang toolchain to ${INSTALL_FOLDER}!${GRN}"
     echo "${GRN}Time elapsed: ${TIME_STRING,,}${RST}\n"
-    if [[ ${TG} ]]; then
+    if [[ -n ${TG} ]]; then
         {
             echo "\`\`\`"
             echo "Clang ${VERSION} build was successful!"
