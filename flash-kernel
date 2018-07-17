@@ -384,7 +384,7 @@ function generate_variables() {
 # Clean up
 function clean_up() {
     # Clean AnyKernel2 folder if building a zip
-    if [[ ! ${IMAGE_ONLY} ]]; then
+    if [[ -z ${IMAGE_ONLY} ]]; then
         cd "${ANYKERNEL2_FOLDER}" || die "AnyKernel2 source is missing!"
 
         [[ -z ${ANYKERNEL2_BRANCH} ]] && ANYKERNEL2_BRANCH=${DEVICE_NAME_GITHUB}-flash-${AK2_SFX}
@@ -397,7 +397,7 @@ function clean_up() {
     cd "${SOURCE_FOLDER}" || die "Kernel source is missing!"
     if [[ -n ${KERNEL_BRANCH} ]]; then
         [[ ${KERNEL_BRANCH} =~ "queue-" ]] && CACHED_BRANCH=$(git cb)
-        [[ ! $(git status | ag "bisec|rebas") ]] && git checkout ${HIDDEN_COMMANDS:+ "-q"} "${KERNEL_BRANCH}"
+        [[ -z $(git status | ag "bisec|rebas") ]] && git checkout ${HIDDEN_COMMANDS:+ "-q"} "${KERNEL_BRANCH}"
     # Otherwise, notate current branch for changelog
     else
         KERNEL_BRANCH=$(git rev-parse --abbrev-ref HEAD)
@@ -643,7 +643,7 @@ function build_kernel() {
 
 # Move kernel files after compilation
 function move_kernel_files() {
-    if [[ ! ${IMAGE_ONLY} ]]; then
+    if [[ -z ${IMAGE_ONLY} ]]; then
         # Move the kernel image
         for FTM in "${FILES_TO_MOVE[@]}"; do
             mkdir -p "${FTM#*:}"
@@ -707,7 +707,7 @@ function setup_folders() {
 
     # If it isn't a stable build, clean the folder
     if [[ -z ${STABLE} ]]; then
-        if [[ ! ${NOCLEAN} ]]; then
+        if [[ -z ${NOCLEAN} ]]; then
             if [[ -n ${PERSONAL} ]]; then
                 rm -rf "${FILE_MOVE:?}"/*
             else
@@ -725,7 +725,7 @@ function setup_folders() {
         fi
 
         # Move the old files to an archive folder unless no clean is requested
-        if [[ ! ${NOCLEAN} ]]; then
+        if [[ -z ${NOCLEAN} ]]; then
             [[ ! -d ${FILE_MOVE_OLD} ]] && mkdir -p "${FILE_MOVE_OLD}"
             rm -f "${FILE_MOVE}"/{.version,.changelog}
             OLD_FILES="$(find "${FILE_MOVE}" -maxdepth 1 -type f -name "*${MATCH_FLAG,,}*" 2>/dev/null)"
@@ -787,7 +787,7 @@ function tag_stable() {
 
 # After build tasks
 function after_build_tasks () {
-    if [[ ! ${IMAGE_ONLY} ]]; then
+    if [[ -z ${IMAGE_ONLY} ]]; then
         package_zip
 
         header "SHUFFLING FILES"
@@ -816,7 +816,7 @@ function ending_info() {
 
     if [[ "${*}" =~ "-s" ]]; then
         echo "BUILD SUCCESSFUL IN ${DURATION}" >> "${LOG}"
-        if [[ ! ${IMAGE_ONLY} ]]; then
+        if [[ -z ${IMAGE_ONLY} ]]; then
             FILE_LOCATION=$(web_link "${FILE_MOVE}")
             echo "FILE LINK: ${FILE_LOCATION}" >> "${LOG}"
 
@@ -827,7 +827,7 @@ function ending_info() {
         if [[ -n ${TG} ]]; then
             {
                 echo "\`Kernel build successful in ${DURATION,,}\`"
-                if [[ ! ${IMAGE_ONLY} ]]; then
+                if [[ -z ${IMAGE_ONLY} ]]; then
                     echo
                     echo "[${FILE_LOCATION}](${FILE_LOCATION})"
                     echo
