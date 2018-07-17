@@ -320,7 +320,7 @@ function dib() {
         shift
     done
 
-    [[ ${WANTS_LOG} ]] && rm -r "${LOG}"
+    [[ -n ${WANTS_LOG} ]] && rm -r "${LOG}"
 
     # Set common parameter lists
     FLASH_CLANG_7=( "--compiler clang --clang-toolchain flash-clang-7.x" )
@@ -344,10 +344,10 @@ function dib() {
 
     clear
 
-    if [[ ${WANTS_LOG} ]]; then
+    if [[ -n ${WANTS_LOG} ]]; then
         MESSAGE="${DEVICE} results: $(deldog "${LOG}")"
         echo "${MESSAGE}"
-        [[ ${WANTS_TG} ]] && notify "${MESSAGE}"
+        [[ -n ${WANTS_TG} ]] && notify "${MESSAGE}"
     fi
     )
 }
@@ -516,7 +516,7 @@ function ac-kernel() {
     git checkout -q "android-${VERSION}"
 
     # Update
-    [[ ${UPDATE} ]] && git pull
+    [[ -n ${UPDATE} ]] && git pull
 
     # Configure
     git clean -fxdq
@@ -701,7 +701,7 @@ function qcacld() {
         esac
         shift
     done
-    [[ ${INIT} && ${UPDATE} ]] && { display_error "Both init and update were specified!"; return; }
+    [[ -n ${INIT} && -n ${UPDATE} ]] && { display_error "Both init and update were specified!"; return; }
     [[ ! ${TAG} && ! ${PWD} =~ "sony" ]] && { display_error "No tag was specified!"; return; }
 
     case "${PWD}:$(make kernelversion)" in
@@ -721,7 +721,7 @@ function qcacld() {
             git remote add "${REPO}" "${URL}${REPO}"
         fi
         git fetch "${REPO}" "${TAG}"
-        if [[ ${INIT} ]]; then
+        if [[ -n ${INIT} ]]; then
             if [[ "${PWD}" =~ "sony" ]]; then
                 git rm "${SUBFOLDER}/${REPO}"
                 git ac -m "staging: ${REPO}: Remove submodule reference"
@@ -730,7 +730,7 @@ function qcacld() {
             git m --allow-unrelated-histories -s ours --no-commit FETCH_HEAD
             git read-tree --prefix="${SUBFOLDER}/${REPO}" -u FETCH_HEAD
             git c --no-edit -m "staging: ${REPO}: Checkout at ${TAG}"
-        elif [[ ${UPDATE} ]]; then
+        elif [[ -n ${UPDATE} ]]; then
             git m --no-edit -m "staging: ${REPO}: Merge tag '${TAG}' into $(git cb)" \
                   -X subtree="${SUBFOLDER}/${REPO}" FETCH_HEAD
         fi
@@ -761,7 +761,7 @@ function btg() {
                 FOLDER=${HOME}/toolchains/btg-${SOURCE}gcc-${VERSION}-${ARCH}
                 rm -rf "${FOLDER}"
                 mv "${TARGET}" "${FOLDER}"
-                if [[ ${TG} ]]; then
+                if [[ -n ${TG} ]]; then
                     {
                         echo "\`\`\`"
                         echo "${SOURCE_STRING} GCC ${VERSION} for ${ARCH} build successfully!"
@@ -776,7 +776,7 @@ function btg() {
                     notify "$(cat ${TG_MSG_FILE})"
                 fi
             else
-                if [[ ${TG} ]]; then
+                if [[ -n ${TG} ]]; then
                     {
                         echo "\`\`\`"
                         echo "Error while building ${SOURCE} GCC ${VERSION} for ${ARCH}!"
