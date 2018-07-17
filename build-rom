@@ -86,7 +86,7 @@ while [[ ${#} -ge 1 ]]; do
     shift
 done
 
-if [[ ${TG} ]]; then
+if [[ -n ${TG} ]]; then
     {
         echo "\`\`\`"
         echo "Currently executing..."
@@ -145,7 +145,7 @@ cd "${SOURCE_FOLDER}" || die "Source folder does not exist!"
 #############
 
 # If the sync is requested, do so
-if [[ ${SYNC} ]]; then
+if [[ -n ${SYNC} ]]; then
     header "SYNCING LATEST SOURCES"; echo
 
     repo sync "${JOBS_FLAG}" --force-sync -c --no-clone-bundle --no-tags --optimized-fetch --prune
@@ -183,7 +183,7 @@ esac
 # REPOPICK #
 ############
 
-if [[ ${REPOPICK} ]]; then
+if [[ -n ${REPOPICK} ]]; then
     header "RUNNING REPOPICK"
     # Execute in a subshell otherwise everything is fubared
     (
@@ -224,7 +224,7 @@ fi
 
 header "MAKING FILES"; echo
 
-if [[ ${TG} ]]; then
+if [[ -n ${TG} ]]; then
     {
         echo "\`\`\`"
         echo "ROM build starting..."
@@ -253,7 +253,7 @@ fi
 
 make_command "${MAKE_TARGET}"
 
-if [[ ${EXIT_NEEDED} ]]; then
+if [[ -n ${EXIT_NEEDED} ]]; then
     echo
     header "BUILD COMPLETED!"
     exit
@@ -302,7 +302,7 @@ TIME_STRING="$(format_time "${START}" "${END}")"
 header "${BUILD_RESULT_STRING}!"
 
 # If the build was successful, print file location, and size
-if [[ ${SUCCESS} ]]; then
+if [[ -n ${SUCCESS} ]]; then
     echo "${RED}FILE LOCATION: $(web_link "${ZIP_MOVE}")"
     echo "SIZE: $(du -h "${ZIP_MOVE}"/*.zip | awk '{print $1}')${RST}"
 fi
@@ -312,11 +312,11 @@ fi
 echo "${RED}TIME: $(date +%D\ %r | awk '{print toupper($0)}')"
 echo "${RED}DURATION: ${TIME_STRING}${RST}"
 
-if [[ ${TG} ]]; then
+if [[ -n ${TG} ]]; then
     {
         echo "\`\`\`"
         echo "ROM ${BUILD_RESULT_STRING,,}!"
-        if [[ ${SUCCESS} ]]; then
+        if [[ -n ${SUCCESS} ]]; then
             echo
             echo "Location: $(web_link "${ZIP_MOVE}")"
         fi
