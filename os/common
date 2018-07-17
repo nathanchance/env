@@ -90,11 +90,11 @@ function tmux_attach() {
 
 # Add something to PATH but only if it isn't already there
 function add_to_path_pre() {
-    [[ ! $(echo "${PATH}" | ag -s --nocolor "${1}") ]] && export PATH="${1}:${PATH}"
+    [[ -z $(echo "${PATH}" | ag -s --nocolor "${1}") ]] && export PATH="${1}:${PATH}"
 }
 
 function add_to_path_post() {
-    [[ ! $(echo "${PATH}" | ag -s --nocolor "${1}") ]] && export PATH="${PATH}:${1}"
+    [[ -z $(echo "${PATH}" | ag -s --nocolor "${1}") ]] && export PATH="${PATH}:${1}"
 }
 
 function bash_setup() {
