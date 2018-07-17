@@ -271,15 +271,18 @@ function signzip() {
     cd "$(dirname "${FILE}")" || return
 
     # Get the zip name
-    ZIP_NAME=$(basename "${FILE}" .zip)
+    SIGNED_ZIP="$(basename "${FILE}")"
+    UNSIGNED_ZIP="$(basename "${FILE}" .zip)-unsigned.zip"
 
     # Sign the zip
+    mv "${SIGNED_ZIP}" "${UNSIGNED_ZIP}"
     java -jar "${BIN_FOLDER}/zipsigner-2.1.jar" \
-              "${ZIP_NAME}.zip" \
-              "${ZIP_NAME}-signed.zip"
-              
+              "${UNSIGNED_ZIP}" \
+              "${SIGNED_ZIP}"
+    rm "${UNSIGNED_ZIP}"
+
     # Echo zip location
-    echo "Signed zip: ${PWD}/${ZIP_NAME}-signed.zip\n"
+    echo "Signed zip: ${PWD}/${SIGNED_ZIP}\n"
     cd "${OLDPWD}" || return
 }
 
