@@ -753,7 +753,7 @@ function btg() {
             SOURCE=${GCC%:*}
             VERSION=${GCC#*:}
             START=$(date +"%s")
-            ./build -a "${ARCH}" -s "${SOURCE,,}" -v "${VERSION:0:1}"
+            ./build -a "${ARCH}" -s "${SOURCE,,}" -v "${VERSION:0:1}" --full-src
             TIME_ELAPSED=$(format_time "${START}" "$(date +"%s")")
             if [[ -d ${TARGET} ]]; then
                 SOURCE_STRING=${SOURCE}
