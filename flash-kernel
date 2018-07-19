@@ -779,7 +779,9 @@ function tag_stable() {
     for TAG_FOLDER in ${SOURCE_FOLDER} ${ANYKERNEL2_FOLDER}; do
         cd "${TAG_FOLDER}" || die "Issue with moving into ${TAG_FOLDER}!"
 
-        git tag --sign --annotate "${KERNEL_NAME}" --message "${KERNEL_NAME}"
+        git tag --sign --annotate "${KERNEL_NAME}" --message "${KERNEL_NAME}
+
+$(tail -n +2 "${SHORT_CHANGELOG}")"
         git push ${HIDDEN_COMMANDS:+ "--quiet"} origin "${KERNEL_NAME}"
     done
 }
