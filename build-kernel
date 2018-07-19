@@ -168,6 +168,7 @@ function build() {
     if [[ -n ${WERROR} ]]; then
         ./scripts/config --file out/.config -e CC_WERROR
         kmake olddefconfig
+    fi
     if [[ -n ${NO_WERROR} ]]; then
         ./scripts/config --file out/.config -d CC_WERROR
         kmake olddefconfig
