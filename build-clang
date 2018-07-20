@@ -111,7 +111,15 @@ function sync() {
             *) URL=https://llvm.org/svn/llvm-project/llvm/branches/"release_${VERSION}0" ;;
         esac
     else
-        URL=https://git.llvm.org/git/$(basename "${FOLDER}")
+        LLVM_ORG=https://git.llvm.org/git/
+        case ${FOLDER} in
+            "clang"|"llvm")
+                [[ $(uname -n) = "flashbox" ]] && URL_PREFIX=git@github.com: || URL_PREFIX=https://github.com/
+                URL=${URL_PREFIX}nathanchance/$(basename "${FOLDER}").git ;;
+            *)
+                URL=${LLVM_ORG}$(basename "${FOLDER}") ;;
+        esac
+
         case ${VERSION} in
             "7") BRANCH=master ;;
             *) BRANCH="release_${VERSION}0" ;;
@@ -120,8 +128,16 @@ function sync() {
 
     if [[ ! -d ${FOLDER} ]]; then
         case ${FOLDER} in
-            *svn*) svn co "${URL}" "${FOLDER}" ;;
-            *) git clone "${URL}" -b "${BRANCH}" "${FOLDER}" ;;
+            *svn*)
+                svn co "${URL}" "${FOLDER}" ;;
+            "clang"|"llvm")
+                git clone "${URL}" -b "${BRANCH}" "${FOLDER}"
+                git -C "${FOLDER}" remote add upstream "${LLVM_ORG}$(basename "${FOLDER}")"
+                git -C "${FOLDER}" fetch upstream
+                git -C "${FOLDER}" rebase upstream/"${BRANCH}"
+                [[ $(uname -n) = "flashbox" ]] && git -C "${FOLDER}" push -f ;;
+            *)
+                git clone "${URL}" -b "${BRANCH}" "${FOLDER}" ;;
         esac
     else
         (
@@ -129,6 +145,25 @@ function sync() {
             case ${FOLDER} in
                 *svn*)
                     svn update ;;
+                "clang"|"llvm")
+                    if [[ -n ${DATE_OFFSET} ]]; then
+                        git checkout "$(git log -1 --format=%H --before="$(date --date="-${DATE_OFFSET} day")")"
+                        if [[ ${FOLDER} = "llvm" && ${VERSION} = 6 ]]; then
+                            git cherry-pick 64e3da64729e
+                        else
+                            if [[ ${VERSION} -eq 6 ]]; then
+                                git cherry-pick a095082d10de
+                            else
+                                git cherry-pick d049e5088911
+                            fi
+                        fi
+                    else
+                        git checkout ${BRANCH} || git checkout -b ${BRANCH} origin/${BRANCH}
+                        add_remote upstream "${LLVM_ORG}$(basename "${FOLDER}")"
+                        git fetch upstream
+                        git rebase upstream/"${BRANCH}"
+                        [[ $(uname -n) = "flashbox" ]] && git push -f
+                    fi ;;
                 *)
                     git clean -fxdq
                     if [[ -n ${DATE_OFFSET} ]]; then
