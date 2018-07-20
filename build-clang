@@ -56,6 +56,10 @@ function parse_parameters() {
                 TG=true
                 TG_MSG_FILE=/tmp/tg-msg.2 ;;
 
+            "-V"|"--vendor")
+                shift && enforce_value "${@}"
+                VENDOR=${1} ;;
+
             "-v"|"--version")
                 shift && enforce_value "${@}"
                 VERSION=${1} ;;
@@ -80,8 +84,11 @@ function parse_parameters() {
     # Clang 7.x is compiled by default
     [[ -z ${VERSION} ]] && VERSION=7
 
+    # Flash Clang by default
+    [[ -z ${VENDOR} ]] && VENDOR=Flash
+
     # Folder that will hold the final compiled toolchain
-    [[ -z ${INSTALL_FOLDER} ]] && INSTALL_FOLDER=${TC_FOLDER}/flash-clang-${VERSION}.x${TEST:+"-test"}
+    [[ -z ${INSTALL_FOLDER} ]] && INSTALL_FOLDER=${TC_FOLDER}/${VENDOR,,}-clang-${VERSION}.x${TEST:+"-test"}
 
     # SVN copy of the LLVM folder for revisioning
     SVN_FOLDER=${MAIN_FOLDER}/svn-${VERSION}.x
@@ -200,7 +207,7 @@ function build() {
           -DLLVM_TARGETS_TO_BUILD="X86;ARM;AArch64" \
           -DLLVM_OPTIMIZED_TABLEGEN=ON \
           -DLLVM_USE_LINKER=gold \
-          -DCLANG_VENDOR="Flash " \
+          -DCLANG_VENDOR="${VENDOR} " \
           -DLLVM_VERSION_PATCH="$(cd "${SVN_FOLDER}" || die "SVN folder doesn't exist";
                                   svn info -r HEAD --show-item revision)" \
           -DLLVM_VERSION_SUFFIX="" \
