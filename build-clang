@@ -45,6 +45,10 @@ function parse_parameters() {
                 shift && enforce_value "${@}"
                 DATE_OFFSET=${1} ;;
 
+            "-i"|"--install-folder")
+                shift && enforce_value "${@}"
+                INSTALL_FOLDER=${1} ;;
+
             "-T"|"--test")
                 TEST=true ;;
 
@@ -77,7 +81,7 @@ function parse_parameters() {
     [[ -z ${VERSION} ]] && VERSION=7
 
     # Folder that will hold the final compiled toolchain
-    INSTALL_FOLDER=${TC_FOLDER}/flash-clang-${VERSION}.x${TEST:+"-test"}
+    [[ -z ${INSTALL_FOLDER} ]] && INSTALL_FOLDER=${TC_FOLDER}/flash-clang-${VERSION}.x${TEST:+"-test"}
 
     # SVN copy of the LLVM folder for revisioning
     SVN_FOLDER=${MAIN_FOLDER}/svn-${VERSION}.x
