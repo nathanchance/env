@@ -49,6 +49,9 @@ function parse_parameters() {
                 shift && enforce_value "${@}"
                 INSTALL_FOLDER=${1} ;;
 
+            "-s"|"--stable")
+                VERSION=6 ;;
+
             "-T"|"--test")
                 TEST=true ;;
 
@@ -59,10 +62,6 @@ function parse_parameters() {
             "-V"|"--vendor")
                 shift && enforce_value "${@}"
                 VENDOR=${1} ;;
-
-            "-v"|"--version")
-                shift && enforce_value "${@}"
-                VERSION=${1} ;;
 
             *) die "Invalid parameter specified!" ;;
         esac
