@@ -308,6 +308,8 @@ function queue-tag() {
 
 
 # Does it build function
+# SC2120: dib references arguments, but none are ever passed.
+# shellcheck disable=SC2120
 function dib() {(
     DEVICE=$(basename "${PWD}")
 
@@ -333,7 +335,7 @@ function dib() {(
 
     case ${DEVICE} in
         marlin) TC_LIST=( "${FLASH_CLANG_7[@]}" "${FLASH_CLANG_6[@]}" "${AOSP_CLANG_7[@]}" "${AOSP_CLANG_6[@]}" "${GCC_731[@]}" "${GCC_494[@]}" ) ;;
-        op6) TC_LIST=( "${FLASH_CLANG_7[@]}" "${FLASH_CLANG_6[@]}" "${AOSP_CLANG_7[@]}" "${AOSP_CLANG_6[@]}" "${GCC_811}" "${GCC_731[@]}" "${GCC_494[@]}" ) ;;
+        op6) TC_LIST=( "${FLASH_CLANG_7[@]}" "${FLASH_CLANG_6[@]}" "${AOSP_CLANG_7[@]}" "${AOSP_CLANG_6[@]}" "${GCC_811[@]}" "${GCC_731[@]}" "${GCC_494[@]}" ) ;;
         wahoo) TC_LIST=( "${FLASH_CLANG_7[@]}" "${FLASH_CLANG_6[@]}" "${AOSP_CLANG_7[@]}" "${AOSP_CLANG_6[@]}" "${AOSP_CLANG_5[@]}" "${GCC_811[@]}" "${GCC_731[@]}" "${GCC_494[@]}" ) ;;
         *) display_error "This folder doesn't support dib!"; return ;;
     esac
@@ -820,6 +822,8 @@ function fkba() {(
         cd "${KERNEL_FOLDER}/flash/${DEVICE}" || { warn "${DEVICE} folder does not exist, skipping!"; continue; }
         [[ ${1} = "-n" || ${1} = "--number" ]] && { shift; NUM=${1}; }
         [[ -z ${NUM} ]] && NUM=1
+        # SC2119: Use dib "$@" if function's $1 should mean script's $1.
+        # shellcheck disable=SC2119
         for i in $(seq 1 ${NUM}); do dib; done
         notify "${DEVICE} results: $(deldog "${LOG}")"
     done
