@@ -556,10 +556,11 @@ function ac-kernel() {
 
 # build-kernel wrapper for known trees
 function bk() {
-    local PARAMS
+    local FOLDER PARAMS
 
+    FOLDER=$(basename "${PWD}")
 
-    case "$(basename "${PWD}"):$(git cb)" in
+    case "${FOLDER}:$(git cb)" in
         # Custom ROMs
         "du-op5:o8x-caf"*) PARAMS=( oneplus5_defconfig -c ) ;;
         "gzr-op3:"*) PARAMS=( lineageos_oneplus3_defconfig ) ;;
@@ -568,8 +569,8 @@ function bk() {
         "lineage-op6:"*) PARAMS=( enchilada_defconfig ) ;;
 
         # android-linux-stable
-        "angler:"*|"bullhead:"*|"marlin:"*) PARAMS=( "${CUR_DIR}_defconfig" ) ;;
-        "mata:lineage-15.1") PARAMS=( "lineageos_${CUR_DIR}_defconfig" -c ) ;;
+        "angler:"*|"bullhead:"*|"marlin:"*) PARAMS=( "${FOLDER}_defconfig" ) ;;
+        "mata:lineage-15.1") PARAMS=( "lineageos_${FOLDER}_defconfig" -c ) ;;
         "msm-3.18:"*|"msm-4.4:"*|"msm-4.9:"*) PARAMS=( msmcortex-perf_defconfig ) ;;
         "op3:android-8.1") PARAMS=( omni_oneplus3_defconfig ) ;;
         "op3:lineage-15.1") PARAMS=( lineageos_oneplus3_defconfig ) ;;
