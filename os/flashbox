@@ -308,8 +308,7 @@ function queue-tag() {
 
 
 # Does it build function
-function dib() {
-    (
+function dib() {(
     DEVICE=$(basename "${PWD}")
 
     while [[ ${#} -ge 1 ]]; do
@@ -349,8 +348,7 @@ function dib() {
         echo "${MESSAGE}"
         [[ -n ${WANTS_TG} ]] && notify "${MESSAGE}"
     fi
-    )
-}
+)}
 
 
 function ls-stats() {
@@ -739,8 +737,7 @@ function qcacld() {
 
 
 # build-tools-gcc wrapper
-function btg() {
-    (
+function btg() {(
     [[ "${*}" =~ "-t" || "${*}" =~ "--telegram" ]] && TG=true && TG_MSG_FILE=/tmp/tg-msg.3
     cd "${HOME}/gcc-build" || return
     git pull
@@ -789,8 +786,7 @@ function btg() {
             fi
         done
     done
-    )
-}
+)}
 
 
 # Update all toolchains
@@ -816,8 +812,7 @@ function updtc() {
 
 
 # Build all Flash Kernel builds a certain amount of times
-function fkba() {
-    (
+function fkba() {(
     for DEVICE in marlin op6 wahoo; do
         rm -f "${LOG}"
         cd "${KERNEL_FOLDER}/flash/${DEVICE}" || { warn "${DEVICE} folder does not exist, skipping!"; continue; }
@@ -826,5 +821,4 @@ function fkba() {
         for i in $(seq 1 ${NUM}); do dib; done
         notify "${DEVICE} results: $(deldog "${LOG}")"
     done
-    )
-}
+)}
