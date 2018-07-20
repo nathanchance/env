@@ -788,7 +788,7 @@ $(tail -n +2 "${SHORT_CHANGELOG}")"
 
 
 # After build tasks
-function after_build_tasks () {
+function after_build_tasks() {
     if [[ -z ${IMAGE_ONLY} ]]; then
         package_zip
 
@@ -814,13 +814,24 @@ function ending_info() {
     END=$(date +"%s")
     DURATION=$(format_time "${START}" "${END}")
 
-    echo "\n$(date +"%m/%d/%Y %H:%M:%S"): $(basename "${BASH_SOURCE[0]}") ${PARAMS}" >> "${LOG}"
+    {
+        echo
+        echo
+        echo
+        echo "COMMAND:    $(basename "${BASH_SOURCE[0]}") ${PARAMS}"
+        echo "DATE:       $(date +"%A %B %d %Y %H:%M %Z")"
+    } >> "${LOG}"
 
     if [[ "${*}" =~ "-s" ]]; then
-        echo "BUILD SUCCESSFUL IN ${DURATION}" >> "${LOG}"
+        {
+            echo "DURATION:   ${DURATION,,}"
+            echo "VERSION:    ${VERSION_STRING} (${LINUX_COMPILER})"
+            echo "            ${LINUX_COMPILE_BY}@${LINUX_COMPILE_HOST} #${KBUILD_BUILD_NUMBER:-1}"
+            echo "            ${UTS_VERSION}"
+        } >> "${LOG}"
         if [[ -z ${IMAGE_ONLY} ]]; then
             FILE_LOCATION=$(web_link "${FILE_MOVE}")
-            echo "FILE LINK: ${FILE_LOCATION}" >> "${LOG}"
+            echo "LINK:       ${FILE_LOCATION}" >> "${LOG}"
 
             echo "${RED}FILE LOCATION: ${FILE_LOCATION}"
             echo "SIZE: $(du -h "${FILE_MOVE}/${SIGNED_ZIP}" | awk '{print $1}')${RST}"
@@ -842,7 +853,7 @@ function ending_info() {
             notify "$(cat ${TG_MSG_FILE})"
         fi
     else
-        echo "BUILD FAILED IN ${DURATION}" >> "${LOG}"
+        echo "DURATION:   ${DURATION,,}" >> "${LOG}"
         if [[ -n ${TG} ]]; then
             load_botinfo
             notify "\`Build failed in ${DURATION,,}\`"
