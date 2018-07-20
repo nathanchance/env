@@ -561,8 +561,8 @@ function bk() {
         # Custom ROMs
         "du-op5:o8x-caf"*) PARAMS=( oneplus5_defconfig -c ) ;;
         "gzr-op3:"*) PARAMS=( lineageos_oneplus3_defconfig ) ;;
-        "gzr-op5:"*) PARAMS=( lineage_oneplus5_defconfig -c ) ;;
-        "lineage-nash:lineage-15.1") PARAMS=( "lineageos_${CUR_DIR}_defconfig" -c ) ;;
+        "gzr-op5:"*|"aicp-op5:"*) PARAMS=( lineage_oneplus5_defconfig -c ) ;;
+        "lineage-nash:lineage-15.1") PARAMS=( lineageos_nash_defconfig -c ) ;;
         "lineage-op6:"*) PARAMS=( enchilada_defconfig ) ;;
 
         # android-linux-stable
