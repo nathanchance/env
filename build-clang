@@ -59,6 +59,9 @@ function parse_parameters() {
                 TG=true
                 TG_MSG_FILE=/tmp/tg-msg.2 ;;
 
+            "-u"|"--update-only")
+                UPDATE_ONLY=true ;;
+
             "-v"|"--vendor")
                 shift && enforce_value "${@}"
                 VENDOR=${1} ;;
@@ -206,6 +209,8 @@ function sync_all() {
     sync libcxxabi
     sync libunwind
     sync openmp
+
+    [[ -n ${UPDATE_ONLY} ]] && exit
 }
 
 # Removes any previous build files
