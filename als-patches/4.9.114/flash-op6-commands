@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+
+PATCHES_FOLDER=$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")" && pwd)
+
+if [[ "${*}" =~ "--no-als" ]]; then
+    git ra
+    for FILE in assembler.h cpufeature.h percpu.h thread_info.h; do
+        git ap "${PATCHES_FOLDER}"/"${FILE}".diff
+    done
+    sed -i 's/#TI_FLAGS/#TSK_TI_FLAGS/g' arch/arm64/kernel/entry.S
+    git add arch/arm64/kernel/entry.S
+fi
+
+git ch "${1}" -- include/linux/compiler-gcc.h
+git ap "${PATCHES_FOLDER}"/flash-op6.diff
+
+if [[ "${*}" =~ "--no-als" ]]; then
+    git fm
+else
+    git mc
+fi

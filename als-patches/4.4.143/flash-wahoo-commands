@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+
+PATCHES_FOLDER=$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")" && pwd)
+
+git ch "${1}" -- include/linux/compiler-gcc.h
+git ap "${PATCHES_FOLDER}"/flash-wahoo.diff
+
+if [[ "${*}" =~ "--no-als" ]]; then
+    git fm
+else
+    git mc
+fi

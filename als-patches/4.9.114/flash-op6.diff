@@ -1,0 +1,12 @@
+diff --git a/include/linux/compiler-gcc.h b/include/linux/compiler-gcc.h
+index a6d1bf2a5b8e..73536ec5cdfd 100644
+--- a/include/linux/compiler-gcc.h
++++ b/include/linux/compiler-gcc.h
+@@ -319,3 +319,7 @@
+  * code
+  */
+ #define uninitialized_var(x) x = x
++
++#if GCC_VERSION >= 50100
++#define COMPILER_HAS_GENERIC_BUILTIN_OVERFLOW 1
++#endif

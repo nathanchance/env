@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+
+git ch "${1}" -- include/linux/compiler-gcc.h
+git fm

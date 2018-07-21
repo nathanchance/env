@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+
+PATCHES_FOLDER=$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")" && pwd)
+git ra
+git ap "${PATCHES_FOLDER}"/*.diff
+sed -i 's/#TI_FLAGS/#TSK_TI_FLAGS/g' arch/arm64/kernel/entry.S
+git add arch/arm64/kernel/entry.S
+git fm
