@@ -253,9 +253,9 @@ function build() {
           -DLLVM_VERSION_SUFFIX="" \
           "${LLVM_FOLDER}"
 
-    ! time ninja && FAILED=true
+    time ninja && SUCCESS=true
     TIME_STRING="$(format_time "${START}" "$(date +"%s")")"
-    if [[ -z ${FAILED} ]]; then
+    if [[ -n ${SUCCESS} ]]; then
         VERSION_STRING=$(${BUILD_FOLDER}/bin/clang --version | head -1 | perl -pe 's/\(http.*?\)//gs' | sed -e 's/  */ /g' -e 's/[[:space:]]*$//')
         if [[ -n ${TG} ]]; then
             {
