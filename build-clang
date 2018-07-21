@@ -59,7 +59,7 @@ function parse_parameters() {
                 TG=true
                 TG_MSG_FILE=/tmp/tg-msg.2 ;;
 
-            "-V"|"--vendor")
+            "-v"|"--vendor")
                 shift && enforce_value "${@}"
                 VENDOR=${1} ;;
 
