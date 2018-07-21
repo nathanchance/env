@@ -253,25 +253,28 @@ function build() {
           -DLLVM_VERSION_SUFFIX="" \
           "${LLVM_FOLDER}"
 
-    if ! time ninja; then
-        header "ERROR BUILDING!"
-        die "Time elapsed: $(format_time "${START}" "$(date +"%s")")"
-    fi
-
-    [[ -n ${BUILD_ONLY} ]] && exit
-}
-
-# Install the toolchain
-function install() {
-    header "Installing Clang"
-
-    if [[ -z ${TEST} ]]; then
-        rm -rf "${INSTALL_FOLDER}-old"
-        mv "${INSTALL_FOLDER}" "${INSTALL_FOLDER}-old"
-    fi
+    ! time ninja && FAILED=true
     TIME_STRING="$(format_time "${START}" "$(date +"%s")")"
-    if ! ninja install; then
-        header "ERROR INSTALLING!"
+    if [[ -z ${FAILED} ]]; then
+        VERSION_STRING=$(${BUILD_FOLDER}/bin/clang --version | head -1 | perl -pe 's/\(http.*?\)//gs' | sed -e 's/  */ /g' -e 's/[[:space:]]*$//')
+        if [[ -n ${TG} ]]; then
+            {
+                echo "\`\`\`"
+                echo "Clang ${VERSION} build was successful!"
+                echo
+                echo "Time elapsed: ${TIME_STRING,,}"
+                echo
+                echo "Version string: ${VERSION_STRING}"
+                echo "\`\`\`"
+            } > "${TG_MSG_FILE}"
+            notify "$(cat ${TG_MSG_FILE})"
+        fi
+        header "SUCCESS!" "${GRN}"
+        echo "${BOLD}Time elapsed:${RST} ${TIME_STRING,,}"
+        echo
+        echo "${BOLD}Version string:${RST} ${VERSION_STRING}"
+        echo
+    else
         if [[ -n ${TG} ]]; then
             {
                 echo "\`\`\`"
@@ -282,22 +285,28 @@ function install() {
             } > "${TG_MSG_FILE}"
             notify "$(cat ${TG_MSG_FILE})"
         fi
-        die "Time elapsed: ${TIME_STRING,,}"
+        header "ERROR BUILDING!"
+        display_error "Time elapsed: ${TIME_STRING,,}"
+        exit
     fi
 
-    header "SUCCESS!" "${GRN}"
-    echo "${GRN}Successfully built and installed Clang toolchain to ${INSTALL_FOLDER}!${GRN}"
-    echo "${GRN}Time elapsed: ${TIME_STRING,,}${RST}\n"
-    if [[ -n ${TG} ]]; then
-        {
-            echo "\`\`\`"
-            echo "Clang ${VERSION} build was successful!"
-            echo
-            echo "Time elapsed: ${TIME_STRING,,}"
-            echo "\`\`\`"
-        } > "${TG_MSG_FILE}"
-        notify "$(cat ${TG_MSG_FILE})"
+    [[ -n ${BUILD_ONLY} ]] && exit
+}
+
+# Install the toolchain
+function install() {
+    if [[ -z ${TEST} ]]; then
+        rm -rf "${INSTALL_FOLDER}-old"
+        mv "${INSTALL_FOLDER}" "${INSTALL_FOLDER}-old"
     fi
+
+    if ! ninja install &>/dev/null; then
+        header "ERROR INSTALLING!"
+        exit
+    fi
+
+    echo "${BOLD}Installation location:${RST} ${INSTALL_FOLDER}"
+    echo
 }
 
 source common
