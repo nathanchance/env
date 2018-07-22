@@ -152,6 +152,14 @@ if [[ ${#} -lt 1 || "${*}" =~ "4.4" ]]; then
     [[ -f ${PATCHES_44}/op5-O_8.1-commands ]] && bash "${PATCHES_44}/op5-O_8.1-commands" "v${VERSION_44}"
 
     git push
+    git ch oneplus/QC8998_O_8.1_Beta
+    git rh origin/"$(git cb)"
+    git ml --no-edit upstream/"$(git cb)" || die "Merge conflicts detected, please resolve then continue!"
+
+    merge-stable
+    [[ -f ${PATCHES_44}/op5-O_8.1_Beta-commands ]] && bash "${PATCHES_44}/op5-O_8.1_Beta-commands" "v${VERSION_44}"
+
+    git push
     git ch lineage-15.1
     git rh origin/"$(git cb)"
 
