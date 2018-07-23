@@ -348,8 +348,10 @@ function dib() {(
     clear
 
     if [[ -n ${WANTS_LOG} ]]; then
-        MESSAGE="${DEVICE} results: $(deldog "${LOG}")"
+        MESSAGE="${BOLD}${DEVICE} results:${RST} $(deldog "${LOG}")"
+        echo
         echo "${MESSAGE}"
+        echo
         [[ -n ${WANTS_TG} ]] && notify "${MESSAGE}"
     fi
 )}
