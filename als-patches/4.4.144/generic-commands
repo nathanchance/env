@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+
+PATCHES_FOLDER=$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")" && pwd)
+git ra
+git ch "${1}" -- drivers/mtd/ubi include/sound/rawmidi.h sound/core/rawmidi.c
+git ap "${PATCHES_FOLDER}"/*.diff
+git fm
