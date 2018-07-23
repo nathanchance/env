@@ -355,6 +355,26 @@ function dib() {(
 )}
 
 
+# A version of dib for android-kernel-clang
+function dib-clang() {(
+    case "$(git cb)" in
+        "msm-3.18") DEFCONFIG=msm-perf_defconfig ;;
+        "msm-4.4") DEFCONIFG=msmcortex-perf_defconfig ;;
+        "msm-4.9") DEFCONFIG=sdm845-perf_defconfig ;;
+    esac
+
+    TC_LIST=( "--clang --clang-toolchain aosp-clang/clang-r328903"
+              "--clang --clang-toolchain aosp-clang/clang-4691093"
+              "--clang --clang-toolchain aosp-clang/clang-4053586"
+              "" )
+
+    for ITEM in "${TC_LIST[@]}"; do
+        read -ra ITEM_ARRAY <<< "${ITEM}"
+        build-kernel -d "${DEFCONFIG}" -w -Werror "${ITEM_ARRAY[@]}"
+    done
+)}
+
+
 function ls-stats() {
     if [[ ! -f Makefile ]]; then
         display_error "Run this in a kernel tree!"
