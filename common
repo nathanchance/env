@@ -49,6 +49,7 @@ export HOST SCRIPTS_FOLDER BIN_FOLDER KERNEL_FOLDER MISC_FOLDER REPO_FOLDER \
        ROM_FOLDER TC_FOLDER WEB_FOLDER BLINK_RED BLUE BOLD GRN RED RST YLW \
        THREADS JOBS_FLAG CCACHE
 
+
 ###############
 #             #
 #  FUNCTIONS  #
@@ -59,6 +60,7 @@ export HOST SCRIPTS_FOLDER BIN_FOLDER KERNEL_FOLDER MISC_FOLDER REPO_FOLDER \
 function echo() {
     command echo -e "${@}"
 }
+
 
 # Prints a formatted header to point out what is being done to the user
 function header() {
@@ -75,6 +77,7 @@ function header() {
     echo "====$(for i in $(seq ${#1}); do echo "=\c"; done)===="
     echo "${RST}"
 }
+
 
 # Formats the time
 function format_time() {
@@ -110,12 +113,14 @@ function format_time() {
     echo "${TIME_STRING}"
 }
 
+
 # Prints an error in bold red
 function display_error() {
     echo
     echo "${RED}${1}${RST}"
     [[ -z ${2} ]] && echo
 }
+
 
 # Prints an error in bold red and exits the script
 function die() {
@@ -143,6 +148,7 @@ function die() {
     exit
 }
 
+
 # Prints a warning in bold yellow
 function warn() {
     echo
@@ -150,10 +156,12 @@ function warn() {
     [[ -z ${2} ]] && echo
 }
 
+
 # Enforces the value needed for two-part flags
 function enforce_value() {
     [[ ${#} -lt 1 ]] && die "A additional value is needed for one of the flags passed to this script!"
 }
+
 
 # Add a remote if it doesn't exist
 function add_remote() {
@@ -162,10 +170,12 @@ function add_remote() {
     fi
 }
 
+
 # Convert a file location to web link
 function web_link() {
     echo "${1}" | sed s/"$(echo "${WEB_FOLDER}" | sed 's/\//\\\//g')"/https:\\/\\/nathanchance.me/
 }
+
 
 # Set up a virtual environment for Python
 function mkavenv {
@@ -173,18 +183,20 @@ function mkavenv {
     source "${HOME}/venv/bin/activate"
 }
 
+
 # Remove virtual environment
 function rmvenv {
     deactivate
     rm -rf "${HOME}/venv"
 }
 
+
 # Source Telegram bot information
 function load_botinfo() {
     [[ -f ${HOME}/.botinfo ]] && source ~/.botinfo
 }
-
 load_botinfo
+
 
 # Telegram notifier function
 function notify() {
@@ -200,6 +212,7 @@ function notify() {
 
     curl -s -X POST https://api.telegram.org/bot"${TOKEN}"/sendMessage -d chat_id="${CHAT_ID}" -d parse_mode="Markdown" -d text="${*}" 1>/dev/null
 }
+
 
 # Upload a file to transfer.sh
 function transfer {
