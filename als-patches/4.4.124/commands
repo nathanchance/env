@@ -1,3 +1,0 @@
-git ap ${HOME}/scripts/als-patches/4.4.124/regd.c.diff
-
-git ap ${HOME}/scripts/als-patches/4.4.124/msm_gem.c.diff

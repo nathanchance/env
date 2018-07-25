@@ -55,7 +55,7 @@ if [[ ${#} -lt 1 || "${*}" =~ "4.4" ]]; then
 
     merge-stable
     VERSION_44=$(make CROSS_COMPILE="" kernelversion)
-    PATCHES_44=${SCRIPTS_FOLDER}/als-patches/${VERSION_44}
+    PATCHES_44=${SCRIPTS_FOLDER}/stable-patches/${VERSION_44}
     [[ -f ${PATCHES_44}/nash-lineage-15.1-commands ]] && bash "${PATCHES_44}/nash-lineage-15.1-commands" "v${VERSION_44}"
 
     git push
