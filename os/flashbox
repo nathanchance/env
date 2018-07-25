@@ -118,8 +118,6 @@ function kremotes() {
 
     git remote add aosp-kc https://android.googlesource.com/kernel/common
     git remote add aosp-msm https://android.googlesource.com/kernel/msm
-    git remote add chromium https://chromium.googlesource.com/chromiumos/third_party/kernel
-    git remote add msm-4.4 https://source.codeaurora.org/quic/la/kernel/msm-4.4
     git remote add linux https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git
     git remote add linux-stable https://git.kernel.org/pub/scm/linux/kernel/git/stable/linux.git
     git remote add linux-stable-rc https://git.kernel.org/pub/scm/linux/kernel/git/stable/linux-stable-rc.git
