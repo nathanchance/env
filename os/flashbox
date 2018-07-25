@@ -361,7 +361,7 @@ function dib() {(
 function dib-clang() {(
     case "$(git cb)" in
         "msm-3.18") DEFCONFIG=msm-perf_defconfig ;;
-        "msm-4.4") DEFCONIFG=msmcortex-perf_defconfig ;;
+        "msm-4.4") DEFCONFIG=msmcortex-perf_defconfig ;;
         "msm-4.9") DEFCONFIG=sdm845-perf_defconfig ;;
     esac
 
