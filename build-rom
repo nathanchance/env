@@ -95,8 +95,8 @@ if [[ -n ${TG} ]]; then
         echo
         echo "$(basename "${0}") ${PARAMS}"
         echo "\`\`\`"
-    } > ${TG_MSG_FILE}
-    notify "$(cat ${TG_MSG_FILE})"
+    } > "${TG_MSG_FILE}"
+    notify "$(cat "${TG_MSG_FILE}")"
 fi
 
 # Parameter verification
@@ -235,8 +235,8 @@ if [[ -n ${TG} ]]; then
         echo
         echo "Device: ${DEVICE}"
         echo "\`\`\`"
-    } > ${TG_MSG_FILE}
-    notify "$(cat ${TG_MSG_FILE})"
+    } > "${TG_MSG_FILE}"
+    notify "$(cat "${TG_MSG_FILE}")"
 fi
 
 # Set make_target if unset (not all roms use bacon)
@@ -325,8 +325,8 @@ if [[ -n ${TG} ]]; then
         echo
         echo "Duration: ${TIME_STRING,,}"
         echo "\`\`\`"
-    } > ${TG_MSG_FILE}
-    notify "$(cat ${TG_MSG_FILE})"
+    } > "${TG_MSG_FILE}"
+    notify "$(cat "${TG_MSG_FILE}")"
 fi
 
 echo "\a"

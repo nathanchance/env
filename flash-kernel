@@ -174,8 +174,8 @@ function parse_parameters() {
             echo
             echo "$(basename "${0}") ${PARAMS}"
             echo "\`\`\`"
-        } > ${TG_MSG_FILE}
-        notify "$(cat ${TG_MSG_FILE})"
+        } > "${TG_MSG_FILE}"
+        notify "$(cat "${TG_MSG_FILE}")"
     fi
 }
 
@@ -602,8 +602,8 @@ function build_kernel() {
             echo "Short changelog:"
             tail -n +2 "${SHORT_CHANGELOG}"
             echo "\`\`\`"
-        } > ${TG_MSG_FILE}
-        notify "$(cat ${TG_MSG_FILE})"
+        } > "${TG_MSG_FILE}"
+        notify "$(cat "${TG_MSG_FILE}")"
     fi
 
     # Make the kernel
@@ -851,8 +851,8 @@ function ending_info() {
                     tail -n +2 "${SHORT_CHANGELOG}"
                     echo "\`\`\`"
                 fi
-            } > ${TG_MSG_FILE}
-            notify "$(cat ${TG_MSG_FILE})"
+            } > "${TG_MSG_FILE}"
+            notify "$(cat "${TG_MSG_FILE}")"
         fi
     else
         echo "DURATION:   ${DURATION,,}" >> "${LOG}"

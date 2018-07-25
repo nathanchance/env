@@ -22,8 +22,8 @@ trap 'echo; die "Manually aborted!"' SIGINT SIGTERM
 KERNEL=kernel7
 
 # Message file for Telegram messages
-TG_MSG=$(mktemp)
-trap 'rm -f "${TG_MSG}"' EXIT
+TG_MSG_FILE=$(mktemp)
+trap 'rm -f "${TG_MSG_FILE}"' EXIT
 
 # Check if we are compiling on the Raspberry Pi or not
 [[ "$(whoami)" = "pi" ]] && PI=true
@@ -63,8 +63,8 @@ function build() {
         echo
         echo "Version $(make kernelversion)"
         echo "\`\`\`"
-    } > ${TG_MSG}
-    [[ -n ${PI} || "${*}" =~ "-t" ]] && notify "$(cat "${TG_MSG}")"
+    } > "${TG_MSG_FILE}"
+    [[ -n ${PI} || "${*}" =~ "-t" ]] && notify "$(cat "${TG_MSG_FILE}")"
 
     rm -rf out
 
@@ -91,8 +91,8 @@ function build() {
         echo
         echo "Duration: ${TIME_STRING,,}"
         echo "\`\`\`"
-    } > ${TG_MSG}
-    [[ -n ${PI} || "${*}" =~ "-t" ]] && notify "$(cat "${TG_MSG}")"
+    } > "${TG_MSG_FILE}"
+    [[ -n ${PI} || "${*}" =~ "-t" ]] && notify "$(cat "${TG_MSG_FILE}")"
 
     if [[ -z ${PI} ]]; then
         mkdir -p "${SOURCE_FOLDER}/out/pi_root"

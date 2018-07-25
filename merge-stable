@@ -268,19 +268,19 @@ git add . && git cherry-pick --continue"
 
 function create_merge_message() {
     MSG_FILE=$(mktemp)
-    echo "Merge ${TARGET_VERSION} into ${BRANCH_NAME:-"$(git cb)"}" >> ${MSG_FILE}
+    echo "Merge ${TARGET_VERSION} into ${BRANCH_NAME:-"$(git cb)"}" >> "${MSG_FILE}"
     if [[ -z ${INITIAL_MERGE} ]]; then
-        echo "\nChanges in ${TARGET_VERSION}: ($(git rev-list --count "${RANGE}" 2> /dev/null) commits)" >> ${MSG_FILE}
-        git log --reverse --format="        %s" "${RANGE}" >> ${MSG_FILE}
+        echo "\nChanges in ${TARGET_VERSION}: ($(git rev-list --count "${RANGE}" 2> /dev/null) commits)" >> "${MSG_FILE}"
+        git log --reverse --format="        %s" "${RANGE}" >> "${MSG_FILE}"
     fi
-    echo "\nSigned-off-by: $(git config --get user.name) <$(git config --get user.email)>" >> ${MSG_FILE}
+    echo "\nSigned-off-by: $(git config --get user.name) <$(git config --get user.email)>" >> "${MSG_FILE}"
 }
 
 
 function append_conflicts() {
-    echo "\nConflicts:" >> ${MSG_FILE}
+    echo "\nConflicts:" >> "${MSG_FILE}"
     for FILE in $(git cf); do
-        echo "\t${FILE}" >> ${MSG_FILE}
+        echo "\t${FILE}" >> "${MSG_FILE}"
     done
 }
 

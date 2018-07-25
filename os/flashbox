@@ -776,7 +776,7 @@ function btg() {(
                         echo "Version: $("${FOLDER}/bin/${TARGET}-gcc" --version | head -1)"
                         echo "\`\`\`"
                     } > "${TG_MSG_FILE}"
-                    notify "$(cat ${TG_MSG_FILE})"
+                    notify "$(cat "${TG_MSG_FILE}")"
                 fi
             else
                 if [[ -n ${TG} ]]; then
@@ -787,7 +787,7 @@ function btg() {(
                         echo "Time elapsed: ${TIME_ELAPSED,,}"
                         echo "\`\`\`"
                     } > "${TG_MSG_FILE}"
-                    notify "$(cat ${TG_MSG_FILE})"
+                    notify "$(cat "${TG_MSG_FILE}")"
                 fi
             fi
         done

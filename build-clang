@@ -83,8 +83,8 @@ function parse_parameters() {
             echo
             echo "$(basename "${0}") ${PARAMS}"
             echo "\`\`\`"
-        } > ${TG_MSG_FILE}
-        notify "$(cat ${TG_MSG_FILE})"
+        } > "${TG_MSG_FILE}"
+        notify "$(cat "${TG_MSG_FILE}")"
     fi
 
     # Clang 7.x is compiled by default
@@ -285,7 +285,7 @@ function build() {
                 echo "Version string: ${VERSION_STRING}"
                 echo "\`\`\`"
             } > "${TG_MSG_FILE}"
-            notify "$(cat ${TG_MSG_FILE})"
+            notify "$(cat "${TG_MSG_FILE}")"
         fi
         header "SUCCESS!" "${GRN}"
         echo "${BOLD}Time elapsed:${RST} ${TIME_STRING,,}"
@@ -301,7 +301,7 @@ function build() {
                 echo "Time elapsed: ${TIME_STRING,,}"
                 echo "\`\`\`"
             } > "${TG_MSG_FILE}"
-            notify "$(cat ${TG_MSG_FILE})"
+            notify "$(cat "${TG_MSG_FILE}")"
         fi
         header "ERROR BUILDING!"
         display_error "Time elapsed: ${TIME_STRING,,}"
