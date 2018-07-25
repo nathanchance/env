@@ -8,6 +8,8 @@
 
 
 source common
+trap 'echo; die "Manually aborted!"' SIGINT SIGTERM
+
 # Folders
 ALS_HOME=${HOME}/kernels/als
 

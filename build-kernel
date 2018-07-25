@@ -274,6 +274,7 @@ function report_result() {
 
 
 source common
+trap 'echo; die "Manually aborted!"' SIGINT SIGTERM
 parse_parameters "${@}"
 setup_toolchains
 compile

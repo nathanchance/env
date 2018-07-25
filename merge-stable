@@ -9,6 +9,7 @@
 
 # Source our universal functions script and Mac check
 source common
+trap 'echo; die "Manually aborted!"' SIGINT SIGTERM
 
 # Parse the provided parameters
 function parse_parameters() {

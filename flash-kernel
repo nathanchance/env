@@ -877,6 +877,7 @@ function ending_info() {
 
 # Source our universal functions script and macOS check
 source common
+trap 'echo; die "Manually aborted!"' SIGINT SIGTERM
 
 # Start tracking time
 START=$(date +"%s")

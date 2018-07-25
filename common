@@ -249,7 +249,3 @@ function clang_version() {
 
     "${1}" --version | head -n 1 | perl -pe 's/\(http.*?\)//gs' | sed -e 's/  */ /g' -e 's/[[:space:]]*$//' || display_error "Something went wrong!"
 }
-
-
-# Add trap for catching Ctrl-C
-trap 'echo; die "Manually aborted!"' SIGINT SIGTERM

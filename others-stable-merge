@@ -8,6 +8,7 @@
 
 
 source common
+trap 'echo; die "Manually aborted!"' SIGINT SIGTERM
 ROMS_HOME=${HOME}/kernels/roms
 
 
