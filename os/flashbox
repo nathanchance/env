@@ -446,31 +446,30 @@ function mkpkg() {
 
 
 # Update all remotes and run git gc/prune
-function clean-kernels() {
-    REPOS="
-${HOME}/kernels/als/marlin
-${HOME}/kernels/als/msm-3.18
-${HOME}/kernels/als/msm-4.4
-${HOME}/kernels/als/msm-4.9
-${HOME}/kernels/als/nash
-${HOME}/kernels/als/op3
-${HOME}/kernels/als/op5
-${HOME}/kernels/als/op6
-${HOME}/kernels/als/sagit
-${HOME}/kernels/als/tissot
-${HOME}/kernels/als/wahoo
-${HOME}/kernels/als/whyred
-${HOME}/kernels/flash/marlin
-${HOME}/kernels/flash/op6
-${HOME}/kernels/flash/wahoo
-${HOME}/kernels/pi
-${HOME}/kernels/roms/gzr-op3
-${HOME}/kernels/roms/gzr-op5
-${HOME}/kernels/roms/lineage-nash
-${HOME}/kernels/roms/lineage-op6
-${HOME}/kernels/sony/kernel"
+function clean-kernels() {(
+    REPOS=( "${HOME}/kernels/als/marlin"
+            "${HOME}/kernels/als/msm-3.18"
+            "${HOME}/kernels/als/msm-4.4"
+            "${HOME}/kernels/als/msm-4.9"
+            "${HOME}/kernels/als/nash"
+            "${HOME}/kernels/als/op3"
+            "${HOME}/kernels/als/op5"
+            "${HOME}/kernels/als/op6"
+            "${HOME}/kernels/als/sagit"
+            "${HOME}/kernels/als/tissot"
+            "${HOME}/kernels/als/wahoo"
+            "${HOME}/kernels/als/whyred"
+            "${HOME}/kernels/flash/marlin"
+            "${HOME}/kernels/flash/op6"
+            "${HOME}/kernels/flash/wahoo"
+            "${HOME}/kernels/pi"
+            "${HOME}/kernels/roms/gzr-op3"
+            "${HOME}/kernels/roms/gzr-op5"
+            "${HOME}/kernels/roms/lineage-nash"
+            "${HOME}/kernels/roms/lineage-op6"
+            "${HOME}/kernels/sony/kernel" )
 
-    for REPO in ${REPOS}; do
+    for REPO in "${REPOS[@]}"; do
         header "${REPO}"
         if cd "${REPO}"; then
             git fetch --all
@@ -480,17 +479,16 @@ ${HOME}/kernels/sony/kernel"
             display_error "$(basename "${REPO}") doesn't exist!"
         fi
     done
-}
+)}
 
 
 # Update AnyKernel2 from osm0sis's GitHub
 function update-ak2() {(
-    REPOS="
-${HOME}/kernels/flash/anykernel2-marlin
-${HOME}/kernels/flash/anykernel2-op6
-${HOME}/kernels/flash/anykernel2-wahoo"
+    REPOS=( "${HOME}/kernels/flash/anykernel2-marlin"
+            "${HOME}/kernels/flash/anykernel2-op6"
+            "${HOME}/kernels/flash/anykernel2-wahoo" )
 
-    for REPO in ${REPOS}; do
+    for REPO in "${REPOS[@]}"; do
         header "Updating $(basename "${REPO}")"
 
         cd "${REPO}" || {
