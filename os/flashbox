@@ -693,18 +693,21 @@ function qcacld() {
         shift
     done
     [[ -n ${INIT} && -n ${UPDATE} ]] && { display_error "Both init and update were specified!"; return; }
-    [[ -z ${TAG} && ! ${PWD} =~ "sony" ]] && { display_error "No tag was specified!"; return; }
 
-    case "${PWD}:$(make kernelversion)" in
+    case "${PWD}" in
         *"sony"*)
-            TAG=aosp/LA.UM.6.4.r1
+            case "$(make kernelversion)" in
+                4.4*) TAG=aosp/LA.UM.6.4.r1 ;;
+                4.9*) TAG=aosp/LE.UM.2.3.2.r1.4 ;;
+            esac
             URL=https://github.com/sonyxperiadev/vendor-qcom-opensource-wlan-
             SUBFOLDER=drivers/staging/wlan-qc ;;
 
-        *:"4.4"*|*:"4.9"*)
+        *)
             URL=https://source.codeaurora.org/quic/la/platform/vendor/qcom-opensource/wlan/
             SUBFOLDER=drivers/staging ;;
     esac
+    [[ -z ${TAG} ]] && { display_error "No tag was specified!"; return; }
 
     for REPO in "${REPOS[@]}"; do
         echo "${REPO}"
