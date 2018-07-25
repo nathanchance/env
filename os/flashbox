@@ -736,6 +736,12 @@ function qcacld() {
 }
 
 
+# Defaults for build-clang
+function build-clang() {
+    command build-clang -v "Flash" "${@}"
+}
+
+
 # build-tools-gcc wrapper
 function btg() {(
     [[ "${*}" =~ "-t" || "${*}" =~ "--telegram" ]] && TG=true && TG_MSG_FILE=/tmp/tg-msg.3
