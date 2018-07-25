@@ -665,16 +665,20 @@ function stable-patch() {(
 
     URL=https://cdn.kernel.org/pub/linux/kernel/v4.x/incr/patch-"${CURRENT_VERSION}"-"${TARGET_PATCH_LEVEL}".xz
 
-    curl "${URL}" | xz -cd | git ap "${@}"
-
-    echo
-    echo
-    echo "git ac -m \"treewide: Linux ${CURRENT_VERSION%.*}.${TARGET_PATCH_LEVEL}
+    MESSAGE="treewide: Linux ${CURRENT_VERSION%.*}.${TARGET_PATCH_LEVEL}
 
 source kernel.org
-${URL}\""
-    echo
-    echo
+${URL}"
+
+    if curl "${URL}" | xz -cd | git ap "${@}"; then
+        git ac -m "${MESSAGE}"
+    else
+        echo
+        echo
+        echo "git ac -m \"${MESSAGE}\""
+        echo
+        echo
+    fi
 )}
 
 
