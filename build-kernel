@@ -7,135 +7,24 @@
 # Script to build a zImage from a kernel tree
 
 
-# Source our universal functions script and macOS check
-source common
+######################
+#                    #
+#  HELPER FUNCTIONS  #
+#                    #
+######################
 
 # Echo to stderr
 function errcho() {
     (>&2 echo "${@}")
 }
 
-# Start time
-START=$(date +%s)
 
-# Gather parameters
-PARAMS=( "${@}" )
-while [[ ${#} -ge 1 ]]; do
-    case ${1} in
-        # Architecture to build
-        "-a"|"--arch")
-            shift && enforce_value "${@}"
+# Export version variable
+function evv() {
+    FILE=out/include/generated/compile.h
+    export "$(grep "${1}" "${FILE}" | cut -d'"' -f1 | awk '{print $2}')"="$(grep "${1}" "${FILE}" | cut -d'"' -f2)"
+}
 
-            ARCH=${1} ;;
-
-        # Use Clang for compiling the kernel
-        "-c"|"--clang")
-
-            CLANG=true ;;
-
-        # Specify which Clang toolchain to use
-        "-ct"|"--clang-toolchain")
-            shift && enforce_value "${@}"
-
-            CLANG_TOOLCHAIN_FOLDER=${1} ;;
-
-        # Config to build
-        "-d"|"--defconfig")
-            shift && enforce_value "${@}"
-
-            DEFCONFIG=${1} ;;
-
-        # Show full compilation
-        "-D"|"--debug")
-            VERBOSITY=3 ;;
-
-        # Only show errors
-        "-e"|"--errors")
-            VERBOSITY=1
-            AG_LOOK_FOR="error:" ;;
-
-        # Kernel folder
-        "-f"|"--folder")
-            shift && enforce_value "${@}"
-
-            FOLDER=${1} ;;
-
-        # Specify which GCC toolchain to use
-        "-gt"|"--gcc-toolchain")
-            shift && enforce_value "${@}"
-
-            GCC_TOOLCHAIN_FOLDER=${1} ;;
-
-        # 32-bit GCC toolchain to use for compiling
-        "-gt-32"|"--gcc-32-bit-toolchain")
-            shift && enforce_value "${@}"
-
-            GCC_32_BIT_TOOLCHAIN_FOLDER=${1} ;;
-
-        # Just show if build was successful or not
-        "-r"|"--show-only-result")
-            SHOW_ONLY_RESULT=true ;;
-
-        # Upload image to transfer.sh
-        "-u"|"--upload")
-            UPLOAD=true ;;
-
-        # Show only warnings and errors during compilation
-        "-w"|"--warnings")
-            VERBOSITY=2
-            AG_LOOK_FOR="error:|warning:" ;;
-
-        # Compile with -Werror
-        "-Werror")
-            WERROR=true ;;
-
-        # Disable -Werror
-        "-Wno-error")
-            NO_WERROR=true ;;
-    esac
-
-    shift
-done
-
-# Defaults
-[[ -z ${ARCH} ]] && ARCH=arm64
-[[ -z ${GCC_TOOLCHAIN_FOLDER} ]] && GCC_TOOLCHAIN_FOLDER=${TC_FOLDER}/aosp-gcc-${ARCH}
-
-if [[ "${PWD}$(git cb)" =~ "wahoo" || "${PWD}$(git cb)" =~ "marlin" ]]; then
-    [[ -z ${ARCH_32_BIT} ]] && ARCH_32_BIT=arm
-    [[ -z ${GCC_32_BIT_TOOLCHAIN_FOLDER} ]] && GCC_32_BIT_TOOLCHAIN_FOLDER=${TC_FOLDER}/aosp-gcc-${ARCH_32_BIT}
-fi
-
-# Error out if defconfig wasn't supplied
-[[ -z ${DEFCONFIG} ]] && die "Please supply a defconfig!"
-
-# Set toolchains
-if [[ ! -d ${GCC_TOOLCHAIN_FOLDER} ]]; then
-    GCC_TOOLCHAIN_FOLDER=${TC_FOLDER}/${GCC_TOOLCHAIN_FOLDER}
-    [[ ! -d ${GCC_TOOLCHAIN_FOLDER} ]] && die "Invalid 64-bit GCC folder specified!"
-fi
-GCC_TOOLCHAIN=$(find "${GCC_TOOLCHAIN_FOLDER}/bin" \( -type f -o -type l \) -name '*-gcc' | head -n1)
-[[ -z ${GCC_TOOLCHAIN} ]] && die "64-bit GCC toolchain could not be found!"
-
-if [[ -n ${ARCH_32_BIT} ]]; then
-    if [[ ! -d ${GCC_32_BIT_TOOLCHAIN_FOLDER} ]]; then
-        GCC_32_BIT_TOOLCHAIN_FOLDER=${TC_FOLDER}/${GCC_32_BIT_TOOLCHAIN_FOLDER}
-        [[ ! -d ${GCC_32_BIT_TOOLCHAIN_FOLDER} ]] && die "Invalid 32-bit GCC folder specified!"
-    fi
-    GCC_32_BIT_TOOLCHAIN=$(find "${GCC_32_BIT_TOOLCHAIN_FOLDER}/bin" \( -type f -o -type l \) -name '*-gcc' | head -n1)
-    [[ -z ${GCC_32_BIT_TOOLCHAIN} ]] && die "32-bit GCC toolchain could not be found!"
-fi
-
-if [[ -n ${CLANG} ]]; then
-    [[ -z ${CLANG_TOOLCHAIN_FOLDER} ]] && CLANG_TOOLCHAIN_FOLDER=${TC_FOLDER}/aosp-clang/clang-4053586
-    if [[ ! -d ${CLANG_TOOLCHAIN_FOLDER} ]]; then
-        CLANG_TOOLCHAIN_FOLDER=${TC_FOLDER}/${CLANG_TOOLCHAIN_FOLDER}
-        [[ ! -d ${CLANG_TOOLCHAIN_FOLDER} ]] && die "Invalid Clang folder specified!"
-    fi
-    CLANG_TOOLCHAIN=${CLANG_TOOLCHAIN_FOLDER}/bin/clang
-    [[ ! -f ${CLANG_TOOLCHAIN} ]] && die "Clang toolchain could not be found!"
-    CLANG_VERSION=$(clang_version "${CLANG_TOOLCHAIN}")
-fi
 
 # Kernel make function
 function kmake() {
@@ -154,6 +43,154 @@ function kmake() {
         PATH=${BIN_FOLDER}:${PATH} ${MAKE} CROSS_COMPILE="${CCACHE} ${GCC_TOOLCHAIN%gcc}" \
                                            CROSS_COMPILE_ARM32="${GCC_32_BIT_TOOLCHAIN%gcc}" \
                                            "${@}"
+    fi
+}
+
+
+# Show the version as if looking at "/proc/version"
+function parse_version() {
+    evv UTS_VERSION
+    evv LINUX_COMPILE_BY
+    evv LINUX_COMPILE_HOST
+    evv LINUX_COMPILER
+    VERSION=$(cat out/include/config/kernel.release)
+    echo "Linux version ${VERSION} (${LINUX_COMPILE_BY}@${LINUX_COMPILE_HOST}) (${LINUX_COMPILER}) ${UTS_VERSION}"
+}
+
+
+#######################
+#                     #
+#  PRIMARY FUNCTIONS  #
+#                     #
+#######################
+
+# Gather parameters
+function parse_parameters() {
+    PARAMS="${*}"
+    START=$(date +%s)
+    while [[ ${#} -ge 1 ]]; do
+        case ${1} in
+            # Architecture to build
+            "-a"|"--arch")
+                shift && enforce_value "${@}"
+
+                ARCH=${1} ;;
+
+            # Use Clang for compiling the kernel
+            "-c"|"--clang")
+
+                CLANG=true ;;
+
+            # Specify which Clang toolchain to use
+            "-ct"|"--clang-toolchain")
+                shift && enforce_value "${@}"
+
+                CLANG_TOOLCHAIN_FOLDER=${1} ;;
+
+            # Config to build
+            "-d"|"--defconfig")
+                shift && enforce_value "${@}"
+
+                DEFCONFIG=${1} ;;
+
+            # Show full compilation
+            "-D"|"--debug")
+                VERBOSITY=3 ;;
+
+            # Only show errors
+            "-e"|"--errors")
+                VERBOSITY=1
+                AG_LOOK_FOR="error:" ;;
+
+            # Kernel folder
+            "-f"|"--folder")
+                shift && enforce_value "${@}"
+
+                FOLDER=${1} ;;
+
+            # Specify which GCC toolchain to use
+            "-gt"|"--gcc-toolchain")
+                shift && enforce_value "${@}"
+
+                GCC_TOOLCHAIN_FOLDER=${1} ;;
+
+            # 32-bit GCC toolchain to use for compiling
+            "-gt-32"|"--gcc-32-bit-toolchain")
+                shift && enforce_value "${@}"
+
+                GCC_32_BIT_TOOLCHAIN_FOLDER=${1} ;;
+
+            # Just show if build was successful or not
+            "-r"|"--show-only-result")
+                SHOW_ONLY_RESULT=true ;;
+
+            # Upload image to transfer.sh
+            "-u"|"--upload")
+                UPLOAD=true ;;
+
+            # Show only warnings and errors during compilation
+            "-w"|"--warnings")
+                VERBOSITY=2
+                AG_LOOK_FOR="error:|warning:" ;;
+
+            # Compile with -Werror
+            "-Werror")
+                WERROR=true ;;
+
+            # Disable -Werror
+            "-Wno-error")
+                NO_WERROR=true ;;
+        esac
+
+        shift
+    done
+
+    # Error out if we aren't in a tree with a Makefile
+    if [[ -n ${FOLDER} ]]; then
+        cd "${FOLDER}" || die "Folder requested doesn't exist!"
+    fi
+    [[ ! -f Makefile ]] && die "This must be run in a kernel tree!"
+
+    # Error out if defconfig wasn't supplied
+    [[ -z ${DEFCONFIG} ]] && die "Please supply a defconfig!"
+
+    # Defaults
+    [[ -z ${ARCH} ]] && ARCH=arm64
+    [[ -z ${GCC_TOOLCHAIN_FOLDER} ]] && GCC_TOOLCHAIN_FOLDER=${TC_FOLDER}/aosp-gcc-${ARCH}
+}
+
+
+# Set toolchains
+function setup_toolchains() {
+    # GCC (64-bit or 32-bit)
+    if [[ ! -d ${GCC_TOOLCHAIN_FOLDER} ]]; then
+        GCC_TOOLCHAIN_FOLDER=${TC_FOLDER}/${GCC_TOOLCHAIN_FOLDER}
+        [[ ! -d ${GCC_TOOLCHAIN_FOLDER} ]] && die "Invalid 64-bit GCC folder specified!"
+    fi
+    GCC_TOOLCHAIN=$(find "${GCC_TOOLCHAIN_FOLDER}/bin" \( -type f -o -type l \) -name '*-gcc' | head -n1)
+    [[ -z ${GCC_TOOLCHAIN} ]] && die "64-bit GCC toolchain could not be found!"
+
+    # GCC 32-bit for compat VDSO
+    if [[ "${PWD}$(git cb)" =~ "wahoo" || "${PWD}$(git cb)" =~ "marlin" ]]; then
+        [[ -z ${GCC_32_BIT_TOOLCHAIN_FOLDER} ]] && GCC_32_BIT_TOOLCHAIN_FOLDER=${TC_FOLDER}/aosp-gcc-arm
+        if [[ ! -d ${GCC_32_BIT_TOOLCHAIN_FOLDER} ]]; then
+            GCC_32_BIT_TOOLCHAIN_FOLDER=${TC_FOLDER}/${GCC_32_BIT_TOOLCHAIN_FOLDER}
+            [[ ! -d ${GCC_32_BIT_TOOLCHAIN_FOLDER} ]] && die "Invalid 32-bit GCC folder specified!"
+        fi
+        GCC_32_BIT_TOOLCHAIN=$(find "${GCC_32_BIT_TOOLCHAIN_FOLDER}/bin" \( -type f -o -type l \) -name '*-gcc' | head -n1)
+        [[ -z ${GCC_32_BIT_TOOLCHAIN} ]] && die "32-bit GCC toolchain could not be found!"
+    fi
+
+    # Clang
+    if [[ -n ${CLANG} ]]; then
+        [[ -z ${CLANG_TOOLCHAIN_FOLDER} ]] && CLANG_TOOLCHAIN_FOLDER=${TC_FOLDER}/aosp-clang/clang-4053586
+        if [[ ! -d ${CLANG_TOOLCHAIN_FOLDER} ]]; then
+            CLANG_TOOLCHAIN_FOLDER=${TC_FOLDER}/${CLANG_TOOLCHAIN_FOLDER}
+            [[ ! -d ${CLANG_TOOLCHAIN_FOLDER} ]] && die "Invalid Clang folder specified!"
+        fi
+        CLANG_TOOLCHAIN=${CLANG_TOOLCHAIN_FOLDER}/bin/clang
+        [[ ! -f ${CLANG_TOOLCHAIN} ]] && die "Clang toolchain could not be found!"
+        CLANG_VERSION=$(clang_version "${CLANG_TOOLCHAIN}")
     fi
 }
 
@@ -185,74 +222,59 @@ function build() {
 }
 
 
-# Export version variable
-function evv() {
-    FILE=out/include/generated/compile.h
-    export "$(grep "${1}" "${FILE}" | cut -d'"' -f1 | awk '{print $2}')"="$(grep "${1}" "${FILE}" | cut -d'"' -f2)"
+# Compilation function
+function compile() {
+    # Start hiding output
+    [[ -n ${SHOW_ONLY_RESULT} ]] && exec > /dev/null
+
+    # Show the base version we are making
+    header "BUILDING $(make CROSS_COMPILE="" kernelversion)"
+
+    # Show compilation based on flags
+    case ${VERBOSITY} in
+        "3")
+            build ;;
+        "1"|"2")
+            DISABLED_WARNINGS=( "which has unmet direct dependencies"
+                                "choice value used outside its choice group"
+                                "reassigning to symbol"
+                                "changes choice state" )
+            for ITEM in "${DISABLED_WARNINGS[@]}"; do AG_IGNORE="${AG_IGNORE}${ITEM}|"; done
+            build |& ag --nocolor "${AG_LOOK_FOR}" |& ag -v "${AG_IGNORE/%|}" ;;
+        *)
+            build &> /dev/null ;;
+    esac
+
+    # Find final image
+    FINAL_IMAGE=$(find out -name 'Image.*-dtb')
+    [[ -z ${FINAL_IMAGE} ]] && FINAL_IMAGE=$(find out -name 'Image.*' | tail -1)
 }
 
-
-# Show the version as if looking at "/proc/version"
-function parse_version() {
-    evv UTS_VERSION
-    evv LINUX_COMPILE_BY
-    evv LINUX_COMPILE_HOST
-    evv LINUX_COMPILER
-    VERSION=$(cat out/include/config/kernel.release)
-    echo "Linux version ${VERSION} (${LINUX_COMPILE_BY}@${LINUX_COMPILE_HOST}) (${LINUX_COMPILER}) ${UTS_VERSION}"
-}
-
-
-# Report error if we aren't in a tree with a Makefile
-if [[ -n ${FOLDER} ]]; then
-    cd "${FOLDER}" || die "Folder requested doesn't exist!"
-fi
-[[ ! -f Makefile ]] && die "This must be run in a kernel tree!"
-
-# Start hiding output
-[[ -n ${SHOW_ONLY_RESULT} ]] && exec > /dev/null
-
-# Show the base version we are making
-header "BUILDING $(make CROSS_COMPILE="" kernelversion)"
-
-# Show compilation based on flags
-case ${VERBOSITY} in
-    "3")
-        build ;;
-    "1"|"2")
-        DISABLED_WARNINGS=( "which has unmet direct dependencies"
-                            "choice value used outside its choice group"
-                            "reassigning to symbol"
-                            "changes choice state" )
-        for ITEM in "${DISABLED_WARNINGS[@]}"; do AG_IGNORE="${AG_IGNORE}${ITEM}|"; done
-        build |& ag --nocolor "${AG_LOOK_FOR}" |& ag -v "${AG_IGNORE/%|}" ;;
-    *)
-        build &> /dev/null ;;
-esac
-
-# Find final image
-FINAL_IMAGE=$(find out -name 'Image.*-dtb')
-[[ -z ${FINAL_IMAGE} ]] && FINAL_IMAGE=$(find out -name 'Image.*' | tail -1)
 
 # Report success
-END=$(date +%s)
-[[ -n ${SHOW_ONLY_RESULT} ]] && SCRIPT_COMMAND="$(basename "${0}") ${PARAMS[*]}  |  "
-if [[ -f ${FINAL_IMAGE} ]]; then
-    echo
-    errcho "${SCRIPT_COMMAND}${GRN}BUILD SUCCESSFUL IN $(format_time "${START}" "${END}")${RST}"
-    echo
-    echo "${BOLD}IMAGE:${RST} ${FINAL_IMAGE}"
-    echo
-    echo "${BOLD}VERSION:${RST} $(parse_version)"
-else
-    >&2 die "${RST}${SCRIPT_COMMAND}${RED}BUILD FAILED IN $(format_time "${START}" "${END}")!"
-fi
+function report_result() {
+    END=$(date +%s)
+    [[ -n ${SHOW_ONLY_RESULT} ]] && SCRIPT_COMMAND="$(basename "${0}") ${PARAMS}  |  "
+    if [[ -f ${FINAL_IMAGE} ]]; then
+        echo
+        errcho "${SCRIPT_COMMAND}${GRN}BUILD SUCCESSFUL IN $(format_time "${START}" "${END}")${RST}"
+        echo
+        echo "${BOLD}IMAGE:${RST} ${FINAL_IMAGE}"
+        echo
+        echo "${BOLD}VERSION:${RST} $(parse_version)"
+    else
+        >&2 die "${RST}${SCRIPT_COMMAND}${RED}BUILD FAILED IN $(format_time "${START}" "${END}")!"
+    fi
 
-# Upload image if necessary
-if [[ -n ${UPLOAD} ]]; then
-    echo
-    curl --upload-file "${FINAL_IMAGE}" https://transfer.sh/"${IMAGE}"
-fi
+    [[ -n ${UPLOAD} ]] && transfer "${FINAL_IMAGE}"
 
-# Alert of script end
-echo "\n\a"
+    # Alert of script end
+    echo "\n\a"
+}
+
+
+source common
+parse_parameters "${@}"
+setup_toolchains
+compile
+report_result
