@@ -16,11 +16,7 @@ function flashbox_aliases() {
     alias upd='aurman -Syyu'
 
     # Change directory aliases
-    alias 6p='cd ${KERNEL_FOLDER}/flash/angler'
     alias ack='cd ${KERNEL_FOLDER}/sources/kernel-common'
-    alias asu='cd ${REPO_FOLDER}/asu'
-    alias cros='cd ${KERNEL_FOLDER}/sources/chromium'
-    alias lnx='cd ${KERNEL_FOLDER}/sources/linux'
     alias pkg='cd ${REPO_FOLDER}/pkgbuilds'
     alias op6='cd ${KERNEL_FOLDER}/flash/op6'
     alias op6ak='cd ${KERNEL_FOLDER}/flash/anykernel2-op6'
@@ -682,43 +678,6 @@ ${URL}\""
     echo
     echo
 )}
-
-
-function test-pulls() {
-    local BRANCH
-
-    git fetch origin
-
-    case "${PWD}" in
-        *"sony"*)
-            BRANCH=aosp/LA.UM.6.4.r1
-            # Checkout a clean tree
-            git ch "${BRANCH}"
-            git push nathanchance HEAD:"${BRANCH}"
-            git rh origin/"${BRANCH}"
-            git bd testing &>/dev/null
-            git ch -b testing
-            if [[ ${#} -gt 0 ]]; then
-                for NUMBER in "${@}"; do
-                    git pll --no-edit origin pull/"${NUMBER}"/head
-                done
-            fi
-
-            # Get Wi-Fi module
-            qcacld -i
-            git subtree pull -m "Merge pull request #11 from nathanchance/clang
-
-$(signoff)" --prefix=drivers/staging/wlan-qc/qcacld-3.0 qcacld-3.0 refs/pull/11/head
-
-            # Run all builds
-            for DEFCONFIG in arch/arm64/configs/aosp_*; do
-                build-kernel -d "$(basename "${DEFCONFIG}")" -w -Werror -c -ct aosp-clang/clang-r328903 -r
-                build-kernel -d "$(basename "${DEFCONFIG}")" -w -Werror -c -ct aosp-clang/clang-4691093 -r
-                build-kernel -d "$(basename "${DEFCONFIG}")" -w -Werror -gt btg-linaro-gcc-7.3.1-arm64 -r
-                build-kernel -d "$(basename "${DEFCONFIG}")" -w -Werror -r
-            done ;;
-    esac
-}
 
 
 # Update/init qcacld-3.0 tree
