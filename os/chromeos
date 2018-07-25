@@ -57,7 +57,7 @@ function upd() {
 # Reinstall function in case Chromebrew blows up...
 function install-bin() {
     # Wipe /usr/local and reinstall emerge packages
-    [[ ${*} =~ "-c" || ${*} =~ "--clean" ]] && sudo dev_install --reinstall -y
+    [[ "${*}" =~ "-c" || "${*}" =~ "--clean" ]] && sudo dev_install --reinstall -y
 
     # Install adb/fastboot
     curl -s https://raw.githubusercontent.com/nathanchance/chromeos-adb-fastboot/master/install.sh | bash
@@ -85,6 +85,9 @@ function gen-ssh() {
 
 # Things to do only on a clean install
 function setup() {
+    if ! grep -q chromeos-functions "${HOME}/.bashrc"; then
+        echo "[[ -f \${HOME}/.chromeos-functions ]] && source \${HOME}/.chromeos-functions" >> "${HOME}/.bashrc"
+    fi
     install-bin "${@}"
     rld
     crouton -r stretch -t cli-extra
