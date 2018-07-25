@@ -220,8 +220,12 @@ case ${VERBOSITY} in
     "3")
         build ;;
     "1"|"2")
-        AG_IGNORE="which has unmet direct dependencies|choice value used outside its choice group|reassigning to symbol|changes choice state"
-        build |& ag --nocolor "${AG_LOOK_FOR}" |& ag -v "${AG_IGNORE}" ;;
+        DISABLED_WARNINGS=( "which has unmet direct dependencies"
+                            "choice value used outside its choice group"
+                            "reassigning to symbol"
+                            "changes choice state" )
+        for ITEM in "${DISABLED_WARNINGS[@]}"; do AG_IGNORE="${AG_IGNORE}${ITEM}|"; done
+        build |& ag --nocolor "${AG_LOOK_FOR}" |& ag -v "${AG_IGNORE/%|}" ;;
     *)
         build &> /dev/null ;;
 esac
