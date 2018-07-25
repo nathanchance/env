@@ -134,7 +134,7 @@ if [[ -n ${CLANG} ]]; then
     fi
     CLANG_TOOLCHAIN=${CLANG_TOOLCHAIN_FOLDER}/bin/clang
     [[ ! -f ${CLANG_TOOLCHAIN} ]] && die "Clang toolchain could not be found!"
-    CLANG_VERSION=$(${CLANG_TOOLCHAIN} --version | head -n 1 | perl -pe 's/\(http.*?\)//gs' | sed -e 's/  */ /g' -e 's/[[:space:]]*$//')
+    CLANG_VERSION=$(clang_version "${CLANG_TOOLCHAIN}")
 fi
 
 # Kernel make function

@@ -360,7 +360,7 @@ function generate_variables() {
         CLANG=${CLANG_FOLDER}/bin/clang
         [[ ! -f ${CLANG} ]] && die "Clang toolchain could not be found!"
 
-        CLANG_VERSION=$(${CLANG} --version | head -n 1 | perl -pe 's/\(http.*?\)//gs' | sed -e 's/  */ /g' -e 's/[[:space:]]*$//')
+        CLANG_VERSION=$(clang_version "${CLANG}")
         case "$(basename "${CLANG_FOLDER}")" in
             "flash"*)
                 CLANG_LD_PATH=${CLANG_FOLDER}/lib
