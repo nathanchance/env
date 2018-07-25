@@ -36,6 +36,15 @@ fi
 # SC2076: Don't quote rhs of =~, it'll match literally rather than as a regex.
 # shellcheck disable=SC2076
 if [[ ${#} -lt 1 || "${*}" =~ "4.4" ]]; then
+    # AICP OnePlus 5 (downstream of op5)
+    cd "${ROMS_HOME}/aicp-op5" || die "aicp-op5 does not exist, please clone!"
+    CURRENT_BRANCH=$(git cb)
+    git fetch origin
+    git ml --no-edit origin/"${CURRENT_BRANCH}" || die "Merge conflicts detected, please resolve then continue!"
+    git fetch als || die "android-linux-stable remote doesn't exist, please add then continue!"
+    git ml --no-edit als/oneplus/QC8998_O_8.1 || die "Merge conflicts detected, please resolve then continue!"
+    git push -f nc HEAD:"${CURRENT_BRANCH}" || die "Can't push source to fork!"
+
     # LineageOS Moto Z2 Force
     cd "${ROMS_HOME}"/lineage-nash || die "lineage-nash does not exist, please clone!"
     git ch lineage-15.1
