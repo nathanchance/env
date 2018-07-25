@@ -132,6 +132,8 @@ function git_sync() {(
     # binutils uses another URL/branch scheme
     if [[ ${FOLDER} =~ "binutils" ]]; then
         URL=https://sourceware.org/git/binutils-gdb.git
+        # SC2030: Modification of BRANCH is local (to subshell caused by (..) group).
+        # shellcheck disable=SC2030
         BRANCH=binutils-2_30-branch
     else
         # Set URL based on folder
@@ -142,12 +144,6 @@ function git_sync() {(
                 URL=${URL_PREFIX}nathanchance/$(basename "${FOLDER}").git ;;
             *)
                 URL=${LLVM_ORG}$(basename "${FOLDER}") ;;
-        esac
-
-        # Set branch based on version
-        case ${VERSION} in
-            "7") BRANCH=master ;;
-            *) BRANCH="release_${VERSION}0" ;;
         esac
     fi
 
@@ -185,6 +181,8 @@ function git_sync() {(
 function svn_sync() {(
     FOLDER=${1}
 
+    # SC2031: BRANCH was modified in a subshell. That change might be lost.
+    # shellcheck disable=SC2031
     case ${VERSION} in
         "7") URL_PREFIX=trunk ;;
         *) URL_PREFIX=branches/"${BRANCH}" ;;
@@ -205,6 +203,12 @@ function sync_all() {
 
     mkdir -p "${MAIN_FOLDER}"
     cd "${MAIN_FOLDER}" || die "Error creating ${MAIN_FOLDER}!"
+
+    # Set branch based on version
+    case ${VERSION} in
+        "7") BRANCH=master ;;
+        *) BRANCH="release_${VERSION}0" ;;
+    esac
 
     git_sync llvm
     svn_sync "$(basename "${SVN_FOLDER}")"
