@@ -266,10 +266,7 @@ git add . && git cherry-pick --continue"
 
 
 function create_merge_message() {
-    MSG_FILE=/tmp/mrg-msg
-
-    rm -rf ${MSG_FILE}
-
+    MSG_FILE=$(mktemp)
     echo "Merge ${TARGET_VERSION} into ${BRANCH_NAME:-"$(git cb)"}" >> ${MSG_FILE}
     if [[ -z ${INITIAL_MERGE} ]]; then
         echo "\nChanges in ${TARGET_VERSION}: ($(git rev-list --count "${RANGE}" 2> /dev/null) commits)" >> ${MSG_FILE}
@@ -293,9 +290,11 @@ function mg_target_version() {
     create_merge_message
     if ! GIT_MERGE_VERBOSITY=1 git merge --gpg-sign --no-edit "${TAG}"; then
         append_conflicts
+        mv "${MSG_FILE}" /tmp/mrg-msg
         die "Merge needs manual intervention! Resolve conflicts then run git fm."
     else
-        git commit --amend --date="$(date)" --file ${MSG_FILE} --gpg-sign --no-edit --quiet
+        git commit --amend --date="$(date)" --file "${MSG_FILE}" --gpg-sign --no-edit --quiet
+        rm -f "${MSG_FILE}"
         header "${TARGET_VERSION} MERGED CLEANLY!" "${GRN}"
     fi
 }

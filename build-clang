@@ -60,7 +60,8 @@ function parse_parameters() {
 
             "-t"|"--telegram")
                 TG=true
-                TG_MSG_FILE=/tmp/tg-msg.2 ;;
+                TG_MSG_FILE=$(mktemp)
+                trap 'rm -f "${TG_MSG_FILE}"' EXIT ;;
 
             "-u"|"--update-only")
                 UPDATE_ONLY=true ;;

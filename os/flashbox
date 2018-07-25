@@ -744,7 +744,7 @@ function build-clang() {
 
 # build-tools-gcc wrapper
 function btg() {(
-    [[ "${*}" =~ "-t" || "${*}" =~ "--telegram" ]] && TG=true && TG_MSG_FILE=/tmp/tg-msg.3
+    [[ "${*}" =~ "-t" || "${*}" =~ "--telegram" ]] && TG=true && TG_MSG_FILE=$(mktemp)
     cd "${HOME}/gcc-build" || return
     git pull
 
@@ -792,6 +792,8 @@ function btg() {(
             fi
         done
     done
+
+    rm -f "${TG_MSG_FILE}"
 )}
 
 

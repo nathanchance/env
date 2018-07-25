@@ -60,7 +60,8 @@ while [[ ${#} -ge 1 ]]; do
         # Send updates to Telegram
         "-tg"|"--telegram")
             TG=true
-            TG_MSG_FILE=/tmp/tg-msg.build-rom ;;
+            TG_MSG_FILE=$(mktemp)
+            trap 'rm -f "${TG_MSG_FILE}"' EXIT ;;
 
         # user, userdebug, or eng
         "-v"|"--version")

@@ -125,6 +125,8 @@ function display_error() {
 # Prints an error in bold red and exits the script
 function die() {
     if [[ ${TG} ]]; then
+        local TMP_FILE
+        TMP_FILE=$(mktemp)
         # Info must be resourced so public chats don't get notified
         load_botinfo
         {
@@ -137,8 +139,9 @@ function die() {
             echo
             echo "${*}"
             echo "\`\`\`"
-        } > /tmp/death-tg-msg
-        notify "$(cat /tmp/death-tg-msg)"
+        } > "${TMP_FILE}"
+        notify "$(cat "${TMP_FILE}")"
+        rm -f "${TMP_FILE}"
     fi
 
     display_error "${@}"

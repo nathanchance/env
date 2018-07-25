@@ -21,7 +21,8 @@ source common
 KERNEL=kernel7
 
 # Message file for Telegram messages
-TG_MSG=/tmp/tg-msg.pi-kernel
+TG_MSG=$(mktemp)
+trap 'rm -f "${TG_MSG}"' EXIT
 
 # Check if we are compiling on the Raspberry Pi or not
 [[ "$(whoami)" = "pi" ]] && PI=true

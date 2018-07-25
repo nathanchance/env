@@ -122,7 +122,8 @@ function parse_parameters() {
             # Send updates to Telegram
             "-t"|"--telegram")
                 TG=true
-                TG_MSG_FILE=/tmp/tg-msg.1 ;;
+                TG_MSG_FILE=$(mktemp)
+                trap 'rm -f "${TG_MSG_FILE}"' EXIT ;;
 
             # Version number
             "-v"|"--version")
