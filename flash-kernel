@@ -588,7 +588,8 @@ function build_kernel() {
     if [[ -n ${TG} && -z ${ALREADY_NOTIFIED} ]]; then
         {
             echo "\`\`\`"
-            echo "Kernel build starting..."
+            [[ ${MODE} = "rc" ]] && MODE=${MODE^^} || MODE=${MODE^}
+            echo "${MODE} kernel build starting..."
             if [[ -n ${PERSONAL} ]]; then
                 echo
                 echo "Device: ${DEVICE_NAME_FILE}"
@@ -840,7 +841,7 @@ function ending_info() {
 
         if [[ -n ${TG} ]]; then
             {
-                echo "\`Kernel build successful in ${DURATION,,}\`"
+                echo "\`${MODE} kernel build successful in ${DURATION,,}\`"
                 if [[ -z ${IMAGE_ONLY} ]]; then
                     echo
                     echo "[${FILE_LOCATION}](${FILE_LOCATION})"
