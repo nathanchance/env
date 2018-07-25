@@ -49,6 +49,9 @@ function parse_parameters() {
                 shift && enforce_value "${@}"
                 INSTALL_FOLDER=${1} ;;
 
+            "-S"|"--stock")
+                STOCK=true ;;
+
             "-s"|"--stable")
                 VERSION=6 ;;
 
@@ -96,89 +99,104 @@ function parse_parameters() {
     CC=$(command -v clang || command -v gcc)
     CXX=$(command -v clang++ || command -v g++)
     [[ -z ${CC} || -z ${CXX} ]] && die "Neither GCC nor Clang could be found on your system!"
+
+    # Set ME variable if on my server
+    [[ $(uname -n) = "flashbox" ]] && ME=true
 }
 
-# Syncs requested  projects
-function sync() {
+
+# Rolls back a repo based on a certain date
+function rollback() {
+    if [[ -n ${DATE_OFFSET} ]]; then
+        git checkout "$(git log -1 --format=%H --before="$(date --date="-${DATE_OFFSET} day")")"
+        if [[ -z ${STOCK} ]]; then
+            if [[ ${FOLDER} = "llvm" && ${VERSION} = 6 ]]; then
+                git cherry-pick 64e3da64729e
+            elif [[ ${FOLDER} = "clang" ]]; then
+                if [[ ${VERSION} -eq 6 ]]; then
+                    git cherry-pick a095082d10de
+                else
+                    git cherry-pick d049e5088911
+                fi
+            fi
+        fi
+    fi
+}
+
+
+# Sync a git project
+function git_sync() {(
     FOLDER=${1}
 
+    # binutils uses another URL/branch scheme
     if [[ ${FOLDER} =~ "binutils" ]]; then
         URL=https://sourceware.org/git/binutils-gdb.git
         BRANCH=binutils-2_30-branch
-    elif [[ ${FOLDER} =~ "svn" ]]; then
-        case ${VERSION} in
-            "7") URL=https://llvm.org/svn/llvm-project/llvm/trunk ;;
-            *) URL=https://llvm.org/svn/llvm-project/llvm/branches/"release_${VERSION}0" ;;
-        esac
     else
+        # Set URL based on folder
         LLVM_ORG=https://git.llvm.org/git/
         case ${FOLDER} in
             "clang"|"llvm")
-                [[ $(uname -n) = "flashbox" ]] && URL_PREFIX=git@github.com: || URL_PREFIX=https://github.com/
+                [[ -n ${ME} ]] && URL_PREFIX=git@github.com: || URL_PREFIX=https://github.com/
                 URL=${URL_PREFIX}nathanchance/$(basename "${FOLDER}").git ;;
             *)
                 URL=${LLVM_ORG}$(basename "${FOLDER}") ;;
         esac
 
+        # Set branch based on version
         case ${VERSION} in
             "7") BRANCH=master ;;
             *) BRANCH="release_${VERSION}0" ;;
         esac
     fi
 
-    if [[ ! -d ${FOLDER} ]]; then
-        case ${FOLDER} in
-            *svn*)
-                svn co "${URL}" "${FOLDER}" ;;
-            "clang"|"llvm")
-                git clone "${URL}" -b "${BRANCH}" "${FOLDER}"
-                git -C "${FOLDER}" remote add upstream "${LLVM_ORG}$(basename "${FOLDER}")"
-                git -C "${FOLDER}" fetch upstream
-                git -C "${FOLDER}" rebase upstream/"${BRANCH}"
-                [[ $(uname -n) = "flashbox" ]] && git -C "${FOLDER}" push -f ;;
-            *)
-                git clone "${URL}" -b "${BRANCH}" "${FOLDER}" ;;
-        esac
+    # If folder doesn't exist, we need to clone it
+    [[ ! -d ${FOLDER} ]] && git clone "${URL}" -b "${BRANCH}" "${FOLDER}"
+
+    cd "${FOLDER}" || die "Error moving into ${FOLDER}"
+
+    git clean -fxdq
+
+    # If checking out a branch fails, it's because 'origin/<branch>' and 'upstream/<branch>' exist
+    git checkout ${BRANCH} || git checkout -b ${BRANCH} origin/${BRANCH}
+
+    # For Clang and LLVM, we need to add an upstream remote and rebase on it
+    if [[ ${FOLDER} = "clang" || ${FOLDER} = "llvm" ]]; then
+        add_remote upstream "${LLVM_ORG}$(basename "${FOLDER}")"
+        git fetch upstream
+        if [[ -n ${STOCK} ]]; then
+            git reset --hard upstream/"${BRANCH}"
+        else
+            git reset --hard origin/"${BRANCH}"
+            git rebase upstream/"${BRANCH}"
+            [[ -n ${ME} ]] && git push -f
+        fi
     else
-        (
-            cd "${FOLDER}" || die "Error moving into ${FOLDER}"
-            case ${FOLDER} in
-                *svn*)
-                    svn update ;;
-                "clang"|"llvm")
-                    if [[ -n ${DATE_OFFSET} ]]; then
-                        git checkout "$(git log -1 --format=%H --before="$(date --date="-${DATE_OFFSET} day")")"
-                        if [[ ${FOLDER} = "llvm" && ${VERSION} = 6 ]]; then
-                            git cherry-pick 64e3da64729e
-                        else
-                            if [[ ${VERSION} -eq 6 ]]; then
-                                git cherry-pick a095082d10de
-                            else
-                                git cherry-pick d049e5088911
-                            fi
-                        fi
-                    else
-                        git checkout ${BRANCH} || git checkout -b ${BRANCH} origin/${BRANCH}
-                        add_remote upstream "${LLVM_ORG}$(basename "${FOLDER}")"
-                        git fetch upstream
-                        git rebase upstream/"${BRANCH}"
-                        [[ $(uname -n) = "flashbox" ]] && git push -f
-                    fi ;;
-                *)
-                    git clean -fxdq
-                    if [[ -n ${DATE_OFFSET} ]]; then
-                        git checkout "$(git log -1 --format=%H --before="$(date --date="-${DATE_OFFSET} day")")"
-                    else
-                        git checkout ${BRANCH}
-                        git fetch origin
-                        if ! git rebase origin/${BRANCH}; then
-                            die "Error updating $(basename "${FOLDER}")!"
-                        fi
-                    fi ;;
-            esac
-        )
+        git pull
     fi
-}
+
+    # Rold back if necessary
+    rollback
+)}
+
+
+# Syncs a svn project
+function svn_sync() {(
+    FOLDER=${1}
+
+    case ${VERSION} in
+        "7") URL_PREFIX=trunk ;;
+        *) URL_PREFIX=branches/"${BRANCH}" ;;
+    esac
+
+    if [[ ! -d ${FOLDER} ]]; then
+        svn co "https://llvm.org/svn/llvm-project/llvm/${URL_PREFIX}" "${FOLDER}"
+    else
+        cd "${FOLDER}" || die "Error moving into ${FOLDER}"
+        svn update
+    fi
+)}
+
 
 # Syncs all necessary projects
 function sync_all() {
@@ -187,28 +205,29 @@ function sync_all() {
     mkdir -p "${MAIN_FOLDER}"
     cd "${MAIN_FOLDER}" || die "Error creating ${MAIN_FOLDER}!"
 
-    sync llvm
-    sync "$(basename "${SVN_FOLDER}")"
+    git_sync llvm
+    svn_sync "$(basename "${SVN_FOLDER}")"
 
     mkdir -p "${LLVM_FOLDER}/tools"
     cd "${LLVM_FOLDER}/tools" || die "Error creating tools folder!"
 
-    sync binutils
-    sync clang
-    sync lld
-    sync polly
+    git_sync binutils
+    git_sync clang
+    git_sync lld
+    git_sync polly
 
     mkdir -p "${LLVM_FOLDER}/projects"
     cd "${LLVM_FOLDER}/projects" || die "Error creating projects folder!"
 
-    sync compiler-rt
-    sync libcxx
-    sync libcxxabi
-    sync libunwind
-    sync openmp
+    git_sync compiler-rt
+    git_sync libcxx
+    git_sync libcxxabi
+    git_sync libunwind
+    git_sync openmp
 
     [[ -n ${UPDATE_ONLY} ]] && exit
 }
+
 
 # Removes any previous build files
 function cleanup() {
@@ -216,6 +235,7 @@ function cleanup() {
     mkdir -p "${BUILD_FOLDER}"
     cd "${BUILD_FOLDER}" || die "Error creating build folder!"
 }
+
 
 # Build the toolchain
 function build() {
@@ -290,6 +310,7 @@ function build() {
     [[ -n ${BUILD_ONLY} ]] && exit
 }
 
+
 # Install the toolchain
 function install() {
     if [[ -z ${TEST} ]]; then
@@ -305,6 +326,7 @@ function install() {
     echo "${BOLD}Installation location:${RST} ${INSTALL_FOLDER}"
     echo
 }
+
 
 source common
 parse_parameters "${@}"
