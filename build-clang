@@ -116,8 +116,10 @@ function rollback() {
             elif [[ ${FOLDER} = "clang" ]]; then
                 if [[ ${VERSION} -eq 6 ]]; then
                     git cherry-pick a095082d10de
+                    git cherry-pick 457251e8b546
                 else
                     git cherry-pick d049e5088911
+                    git cherry-pick 7bdc99744204
                 fi
             fi
         fi
@@ -137,7 +139,6 @@ function git_sync() {(
         BRANCH=binutils-2_30-branch
     else
         # Set URL based on folder
-        LLVM_ORG=https://git.llvm.org/git/
         case ${FOLDER} in
             "clang"|"llvm")
                 [[ -n ${ME} ]] && URL_PREFIX=git@github.com: || URL_PREFIX=https://github.com/
@@ -186,12 +187,12 @@ function svn_sync() {(
     # SC2031: BRANCH was modified in a subshell. That change might be lost.
     # shellcheck disable=SC2031
     case ${VERSION} in
-        "7") URL_PREFIX=trunk ;;
-        *) URL_PREFIX=branches/"${BRANCH}" ;;
+        "7") URL_SUFFIX=trunk ;;
+        *) URL_SUFFIX=branches/"${BRANCH}" ;;
     esac
 
     if [[ ! -d ${FOLDER} ]]; then
-        svn co "https://llvm.org/svn/llvm-project/llvm/${URL_PREFIX}" "${FOLDER}"
+        svn co "https://llvm.org/svn/llvm-project/llvm/${URL_SUFFIX}" "${FOLDER}"
     else
         cd "${FOLDER}" || die "Error moving into ${FOLDER}"
         svn update
@@ -211,6 +212,9 @@ function sync_all() {
         "7") BRANCH=master ;;
         *) BRANCH="release_${VERSION}0" ;;
     esac
+
+    # Define the git URL for global use
+    LLVM_ORG=https://git.llvm.org/git/
 
     git_sync llvm
     svn_sync "$(basename "${SVN_FOLDER}")"
@@ -255,6 +259,11 @@ function build() {
 
     [[ -n ${TG} ]] && notify "\`Beginning build of Clang ${VERSION}...\`"
 
+    [[ -n ${STOCK} ]] && URL_PREFIX=${LLVM_ORG} || URL_PREFIX=https://github.com/nathanchance/
+    for REPO in clang llvm; do
+        declare ${REPO^^}_REPOSITORY_STRING=${URL_PREFIX}${REPO}
+    done
+
     cmake -G Ninja \
           -DCMAKE_BUILD_TYPE=Release \
           -DLINK_POLLY_INTO_TOOLS=ON \
@@ -282,6 +291,8 @@ function build() {
           -DLLVM_VERSION_PATCH="$(cd "${SVN_FOLDER}" || die "SVN folder doesn't exist";
                                   svn info -r HEAD --show-item revision)" \
           -DLLVM_VERSION_SUFFIX="" \
+          -DCLANG_REPOSITORY_STRING="${CLANG_REPOSITORY_STRING}" \
+          -DLLVM_REPOSITORY_STRING="${LLVM_REPOSITORY_STRING}" \
           "${LLVM_FOLDER}"
 
     time ninja && SUCCESS=true
