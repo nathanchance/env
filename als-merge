@@ -26,7 +26,7 @@ if [[ ${#} -lt 1 || "${*}" =~ "3.18" ]]; then
 
     merge-stable
     VERSION_318=$(make CROSS_COMPILE="" kernelversion)
-    PATCHES_318=${SCRIPTS_FOLDER}/stable-patches/${VERSION_318}
+    PATCHES_318=${REPO_FOLDER}/stable-patches/${VERSION_318}
     [[ -f ${PATCHES_318}/marlin-commands ]] && bash "${PATCHES_318}/marlin-commands" "v${VERSION_318}"
 
     git push
@@ -122,7 +122,7 @@ if [[ ${#} -lt 1 || "${*}" =~ "4.4" ]]; then
 
     merge-stable
     VERSION_44=$(make CROSS_COMPILE="" kernelversion)
-    PATCHES_44=${SCRIPTS_FOLDER}/stable-patches/${VERSION_44}
+    PATCHES_44=${REPO_FOLDER}/stable-patches/${VERSION_44}
     [[ -f ${PATCHES_44}/nash-oreo-8.0.0-commands ]] && bash "${PATCHES_44}/nash-oreo-8.0.0-commands" "v${VERSION_44}"
 
     git push
@@ -240,7 +240,7 @@ if [[ ${#} -lt 1 || "${*}" =~ "4.9" ]]; then
 
     merge-stable
     VERSION_49=$(make CROSS_COMPILE="" kernelversion)
-    PATCHES_49=${SCRIPTS_FOLDER}/stable-patches/${VERSION_49}
+    PATCHES_49=${REPO_FOLDER}/stable-patches/${VERSION_49}
     [[ -f ${PATCHES_49}/msm-4.9-commands ]] && bash "${PATCHES_49}/msm-4.9-commands" "v${VERSION_49}"
 
     git push

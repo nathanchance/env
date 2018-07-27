@@ -1,8 +1,0 @@
-#!/usr/bin/env bash
-
-PATCHES_FOLDER=$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")" && pwd)
-git ra
-git ap "${PATCHES_FOLDER}/conflicts.diff"
-git ch v3.18.103 -- drivers/media/v4l2-core/v4l2-compat-ioctl32.c
-git ap "${PATCHES_FOLDER}/v4l2-compat-ioctl32.c.diff"
-git fm

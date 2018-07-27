@@ -1,1 +1,0 @@
-git ch v3.18.78 -- drivers/usb/class/cdc-acm.{c,h} drivers/usb/core/quirks.c include/linux/usb/quirks.h
