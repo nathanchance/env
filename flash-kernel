@@ -217,6 +217,8 @@ function device_flags() {
             DEVICE_NAME_WEB=${DEVICE}
 
             if [[ -z ${CLANG_FOLDER} ]]; then
+                # SC2153: Possible misspelling: TC_FOLDER may not be assigned, but GCC_FOLDER is.
+                # shellcheck disable=SC2153
                 case ${MODE} in
                     "personal") CLANG_FOLDER=${TC_FOLDER}/flash-clang-7.x ;;
                     *) CLANG_FOLDER=${TC_FOLDER}/flash-clang-7.x ;;
@@ -876,8 +878,7 @@ function ending_info() {
 #              #
 ################
 
-# Source our universal functions script and macOS check
-source common
+source "$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")" || return; pwd)/common"
 trap 'echo; die "Manually aborted!"' SIGINT SIGTERM
 
 # Start tracking time

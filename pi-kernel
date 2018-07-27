@@ -6,8 +6,7 @@
 #
 # Script to build and install a Raspberry Pi kernel image
 
-# Source our universal functions script and macOS check
-source common
+source "$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")" || return; pwd)/common"
 trap 'echo; die "Manually aborted!"' SIGINT SIGTERM
 
 # Hide all non-error output unless verbosity is requsted
@@ -32,6 +31,8 @@ trap 'rm -f "${TG_MSG_FILE}"' EXIT
 if [[ -n ${PI} ]]; then
     cd "${HOME}/Documents/Kernel" || die "Kernel source doesn't exist!"
 else
+    # SC2153: Possible misspelling: TC_FOLDER may not be assigned, but GCC_FOLDER is.
+    # shellcheck disable=SC2153
     case "${*}" in
         *"-7"*) GCC_FOLDER=${TC_FOLDER}/btg-linaro-gcc-7.3.1-${ARCH} ;;
         *"-8"*) GCC_FOLDER=${TC_FOLDER}/btg-gcc-8.1.1-${ARCH} ;;

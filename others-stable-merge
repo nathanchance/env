@@ -7,7 +7,7 @@
 # Pull in android-linux-stable updates to various ROM and custom kernel trees
 
 
-source common
+source "$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")" || return; pwd)/common"
 trap 'echo; die "Manually aborted!"' SIGINT SIGTERM
 ROMS_HOME=${HOME}/kernels/roms
 

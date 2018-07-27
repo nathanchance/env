@@ -7,7 +7,7 @@
 # Pull in linux-stable updates to the android-linux-stable trees
 
 
-source common
+source "$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")" || return; pwd)/common"
 trap 'echo; die "Manually aborted!"' SIGINT SIGTERM
 
 # Folders

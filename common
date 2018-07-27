@@ -17,7 +17,7 @@
 HOST=$(uname -n | tr '[:upper:]' '[:lower:]')
 
 # Location of "scripts" folder
-SCRIPTS_FOLDER=$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")" && pwd)
+SCRIPTS_FOLDER=$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")" || return; pwd)
 BIN_FOLDER=${SCRIPTS_FOLDER}/bin
 
 # Common locations amongst scripts

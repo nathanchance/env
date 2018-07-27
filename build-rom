@@ -13,8 +13,7 @@
 #             #
 ###############
 
-# Source our universal functions script and macOS check
-source common
+source "$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")" || return; pwd)/common"
 trap 'echo; die "Manually aborted!"' SIGINT SIGTERM
 
 function make_command() {

@@ -8,7 +8,7 @@
 
 
 # SOURCE OUR UNIVERSAL FUNCTIONS SCRIPT (DON'T MAC CHECK THOUGH)
-source common -m
+source "$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")" || return; pwd)/../common" -m
 
 # SOURCE THE MACHINE SPECIFIC FUNCTIONS
 source "${SCRIPTS_FOLDER}/os/${HOST}"

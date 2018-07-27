@@ -7,10 +7,6 @@
 # Pull in linux-stable updates to a kernel tree
 
 
-# Source our universal functions script and Mac check
-source common
-trap 'echo; die "Manually aborted!"' SIGINT SIGTERM
-
 # Parse the provided parameters
 function parse_parameters() {
     while [[ ${#} -ge 1 ]]; do
@@ -310,6 +306,8 @@ function update_tree() {
 }
 
 
+source "$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")" || return; pwd)/common"
+trap 'echo; die "Manually aborted!"' SIGINT SIGTERM
 parse_parameters "${@}"
 update_sources
 generate_versions

@@ -273,7 +273,7 @@ function report_result() {
 }
 
 
-source common
+source "$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")" || return; pwd)/common"
 trap 'echo; die "Manually aborted!"' SIGINT SIGTERM
 parse_parameters "${@}"
 setup_toolchains
