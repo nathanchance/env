@@ -16,8 +16,6 @@
 
 # Gather parameters
 function parse_parameters() {
-    # Unset the universal OS variable for this script only
-    unset OS
     PARAMS="${*}"
     EXTRA_MAKE_FLAGS=()
     while [[ ${#} -ge 1 ]]; do
@@ -636,7 +634,7 @@ function build_kernel() {
     KIMG=${FILES_TO_MOVE[0]%:*}
     if [[ -f "${OUT_FOLDER}/${KIMG}" ]]; then
         parse_version
-        echo "${GRN}${OS_STRING}$(basename "${KIMG}") compiled successfully!${RST}\n"
+        echo "${GRN}$(basename "${KIMG}") compiled successfully!${RST}\n"
         move_kernel_files
     else
         echo "${RED}Kernel image not found!${RST}\n"
