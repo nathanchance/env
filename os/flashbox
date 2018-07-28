@@ -324,7 +324,7 @@ function dib() {(
     AOSP_CLANG_5=( "--compiler clang --clang-toolchain aosp-clang/clang-4053586 ${AOSP_GCC}" )
     FLASH_CLANG_7=( "--compiler clang --clang-toolchain flash-clang-7.x" )
     FLASH_CLANG_6=( "--compiler clang --clang-toolchain flash-clang-6.x" )
-    GCC_811=( "--compiler gcc --gcc-toolchain btg-gcc-8.1.1-arm64 --gcc-32-bit-toolchain btg-gcc-8.1.1-arm" )
+    GCC_811=( "--compiler gcc --gcc-toolchain btg-gcc-8.2.1-arm64 --gcc-32-bit-toolchain btg-gcc-8.2.1-arm" )
     GCC_731=( "--compiler gcc --gcc-toolchain btg-linaro-gcc-7.3.1-arm64 --gcc-32-bit-toolchain btg-linaro-gcc-7.3.1-arm" )
     GCC_494=( "--compiler gcc ${AOSP_GCC}" )
 
@@ -753,7 +753,7 @@ function btg() {(
         ARCH=${ITEM%:*}
         TARGET=${ITEM#*:}
 
-        for GCC in Linaro:7.3.1 GNU:8.1.1; do
+        for GCC in Linaro:7.3.1 GNU:8.2.1; do
             SOURCE=${GCC%:*}
             VERSION=${GCC#*:}
             START=$(date +"%s")
@@ -806,7 +806,7 @@ function updtc() {
     build-clang -t
     # Clang 6.x
     build-clang -t -s
-    # GCC 8.1.1 and GCC 7.3.1
+    # GCC 8.2.1 and GCC 7.3.1
     btg -t
 
     clear
