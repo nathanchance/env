@@ -318,14 +318,15 @@ function dib() {(
     [[ -n ${WANTS_LOG} ]] && rm -r "${LOG}"
 
     # Set common parameter lists
+    AOSP_GCC="--gcc-toolchain aosp-gcc-arm64 --gcc-32-bit-toolchain aosp-gcc-arm"
+    AOSP_CLANG_7=( "--compiler clang --clang-toolchain aosp-clang/clang-r328903 ${AOSP_GCC}" )
+    AOSP_CLANG_6=( "--compiler clang --clang-toolchain aosp-clang/clang-4691093 ${AOSP_GCC}" )
+    AOSP_CLANG_5=( "--compiler clang --clang-toolchain aosp-clang/clang-4053586 ${AOSP_GCC}" )
     FLASH_CLANG_7=( "--compiler clang --clang-toolchain flash-clang-7.x" )
     FLASH_CLANG_6=( "--compiler clang --clang-toolchain flash-clang-6.x" )
-    AOSP_CLANG_7=( "--compiler clang --clang-toolchain aosp-clang/clang-r328903" )
-    AOSP_CLANG_6=( "--compiler clang --clang-toolchain aosp-clang/clang-4691093" )
-    AOSP_CLANG_5=( "--compiler clang --clang-toolchain aosp-clang/clang-4053586" )
     GCC_811=( "--compiler gcc --gcc-toolchain btg-gcc-8.1.1-arm64 --gcc-32-bit-toolchain btg-gcc-8.1.1-arm" )
     GCC_731=( "--compiler gcc --gcc-toolchain btg-linaro-gcc-7.3.1-arm64 --gcc-32-bit-toolchain btg-linaro-gcc-7.3.1-arm" )
-    GCC_494=( "--compiler gcc --gcc-toolchain aosp-gcc-arm64 --gcc-32-bit-toolchain aosp-gcc-arm" )
+    GCC_494=( "--compiler gcc ${AOSP_GCC}" )
 
     case ${DEVICE} in
         marlin) TC_LIST=( "${FLASH_CLANG_7[@]}" "${FLASH_CLANG_6[@]}" "${AOSP_CLANG_7[@]}" "${AOSP_CLANG_6[@]}" "${GCC_811[@]}" "${GCC_731[@]}" "${GCC_494[@]}" ) ;;
