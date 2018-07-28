@@ -841,7 +841,7 @@ function fkba() {(
 # Symlink the generic-commands file to all of the android-linux-stable trees for a particular kernel version
 function symlink-commands() {(
     case ${1} in
-        "3.18") FILES=( "marlin" "msm-3.18" "op3-android-8.1" "op3-lineage-15.1" "op3-8.0.0" "op3-8.0.0-Beta" "tissot" ) ;;
+        "3.18") FILES=( "marlin" "msm-3.18" "op3-android-8.1" "op3-lineage-15.1" "op3-8.0.0" "op3-8.0.0_Beta" "tissot" ) ;;
         "4.4") FILES=( "msm-4.4" "nash-oreo-8.0.0" "nash-lineage-15.1" "op5-android-8.1" "op5-lineage-15.1" "op5-O_8.1" "op5-O_8.1_Beta" "sagit" "wahoo" "whyred" ) ;;
         "4.9") FILES=( "msm-4.9" "op6-O_8.1" ) ;;
     esac
