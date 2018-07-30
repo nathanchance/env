@@ -223,8 +223,8 @@ function device_flags() {
                 esac
             fi
 
-            [[ -z ${GCC_FOLDER} ]] && GCC_FOLDER=${TC_FOLDER}/btg-linaro-gcc-7.3.1-arm64
-            [[ -z ${GCC_32_BIT_FOLDER} ]] && GCC_32_BIT_FOLDER=${TC_FOLDER}/btg-linaro-gcc-7.3.1-arm
+            [[ -z ${GCC_FOLDER} ]] && GCC_FOLDER=${TC_FOLDER}/btg-gcc-8.2.1-arm64
+            [[ -z ${GCC_32_BIT_FOLDER} ]] && GCC_32_BIT_FOLDER=${TC_FOLDER}/btg-gcc-8.2.1-arm
 
             [[ -n ${STABLE} ]] && KERNEL_BRANCH=oreo-m4
 
