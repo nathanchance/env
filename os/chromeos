@@ -96,6 +96,8 @@ function setup() {
 
 # Unzip files
 function uz() {
+    [[ ${#} -lt 1 ]] && { echo; echo "This function takes an argument!"; echo; return; }
+
     FILE=${1}
     EXTRACT_DIR=${1/.zip}
 
