@@ -21,20 +21,20 @@ function aliases() {
     if command -v hub > /dev/null 2>&1; then alias git='hub'; fi
 
     git config --global alias.aa 'add --all'
-    git config --global alias.ac 'commit --gpg-sign --all --signoff'
-    git config --global alias.ams 'am --gpg-sign --signoff'
+    git config --global alias.ac 'commit --gpg-sign --all --signoff' # add and commit
+    git config --global alias.ams 'am --gpg-sign --signoff' # am signoff
     git config --global alias.ap 'apply -3 -v'
     git config --global alias.b 'branch --verbose'
     git config --global alias.bd 'branch --delete --force'
-    git config --global alias.bn 'rev-parse --abbrev-ref HEAD'
+    git config --global alias.bn 'rev-parse --abbrev-ref HEAD' # branch name
     git config --global alias.bm 'branch --move'
     git config --global alias.c 'commit --gpg-sign --signoff'
-    git config --global alias.ca 'commit --gpg-sign --amend --signoff'
+    git config --global alias.ca 'commit --gpg-sign --amend --signoff' # commit ammend
     # SC2016: Expressions don't expand in single quotes, use double quotes for that
     # shellcheck disable=SC2016
-    git config --global alias.cad '!git commit --gpg-sign --amend --signoff --date="$(date)"'
-    git config --global alias.cb 'rev-parse --abbrev-ref HEAD'
-    git config --global alias.cf 'diff --name-only --diff-filter=U'
+    git config --global alias.cad '!git commit --gpg-sign --amend --signoff --date="$(date)"' # commit amend date
+    git config --global alias.cb 'rev-parse --abbrev-ref HEAD' # current branch
+    git config --global alias.cf 'diff --name-only --diff-filter=U' # conflicts
     git config --global alias.ch 'checkout'
     git config --global alias.cl 'clean -fxd'
     git config --global alias.cp 'cherry-pick --gpg-sign --signoff'
@@ -49,9 +49,9 @@ function aliases() {
     git config --global alias.dhc 'reset --hard HEAD^'
     git config --global alias.f 'fetch'
     git config --global alias.fa 'fetch --all'
-    git config --global alias.fm 'commit --gpg-sign --file /tmp/mrg-msg'
+    git config --global alias.fm 'commit --gpg-sign --file /tmp/mrg-msg' # finish merge
     git config --global alias.fp 'format-patch'
-    git config --global alias.kf 'show -s --format="%h (\"%s\")"'
+    git config --global alias.kf 'show -s --abbrev-commit --abbrev=12 --format="%h (\"%s\")"' # kernel format
     git config --global alias.lo 'log --oneline'
     git config --global alias.ma 'merge --abort'
     git config --global alias.mc 'merge --continue'
@@ -59,13 +59,13 @@ function aliases() {
     git config --global alias.psu 'push --set-upstream'
     # SC2016: Expressions don't expand in single quotes, use double quotes for that
     # shellcheck disable=SC2016
-    git config --global alias.ra '!f() { for i in $(git cf); do git rf $i; done }; f'
+    git config --global alias.ra '!f() { for i in $(git cf); do git rf $i; done }; f' # reset all conflicts
     git config --global alias.rb 'rebase --gpg-sign'
     git config --global alias.rba 'rebase --abort'
     git config --global alias.rbc 'rebase --continue'
     # SC2016: Expressions don't expand in single quotes, use double quotes for that
     # shellcheck disable=SC2016
-    git config --global alias.rf '!bash -c "git reset -q -- ${1} && git checkout -- ${1}"'
+    git config --global alias.rf '!bash -c "git reset -q -- ${1} && git checkout -- ${1}"' # reset file
     git config --global alias.rh 'reset --hard'
     git config --global alias.rma 'remote add'
     git config --global alias.rmsu 'remote set-url'
