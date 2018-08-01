@@ -45,3 +45,11 @@ function wg_debug() {
         done
     } | deldog
 }
+
+
+# Setup termux environment
+function setup() {
+    pkg install curl jq openssh
+    upd
+    rld
+}
