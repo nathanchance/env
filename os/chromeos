@@ -92,3 +92,14 @@ function setup() {
     rld
     crouton -r stretch -t cli-extra
 }
+
+
+# Unzip files
+function uz() {
+    FILE=${1}
+    EXTRACT_DIR=${1/.zip}
+
+    mkdir -p "${EXTRACT_DIR}" || { echo; echo "Could not create ${PWD}/${EXTRACT_DIR}!"; echo; return; }
+    bsdtar -C "${EXTRACT_DIR}" -x -f "${FILE}"
+    cd "${EXTRACT_DIR}" || { echo; echo "${PWD}/${EXTRACT_DIR} doesn't exist!"; echo; return; }
+}
