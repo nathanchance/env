@@ -17,15 +17,15 @@ alias fls='cd ${HOME}/Downloads/Files'
 alias mshfb='mosh nathan@nathanchance.me'
 
 
+# Set vim runtime area
+export VIMRUNTIME=/usr/local/share/vim/vim80
+
+
 # Fetch this script and reload .bashrc
 function rld() {
     curl -o ~/.chromeos-functions https://raw.githubusercontent.com/nathanchance/scripts/master/os/chromeos
     source ~/.bashrc
 }
-
-
-# Set vim runtime area
-export VIMRUNTIME=/usr/local/share/vim/vim80
 
 
 # Neofetch function
