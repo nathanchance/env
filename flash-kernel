@@ -584,7 +584,7 @@ function build_kernel() {
 
     # Notify Telegram of build starting
     SHORT_CHANGELOG=${HOME}/shortlogs/${DEVICE_NAME_FILE,,}-${VERSION//./}
-    [[ ! -f ${SHORT_CHANGELOG} && -n ${TEST} ]] && die "Missing short changelog!"
+    [[ ! -f ${SHORT_CHANGELOG} && -n "${TEST}${STABLE}" ]] && die "Missing short changelog!"
     if [[ -n ${TG} && -z ${ALREADY_NOTIFIED} ]]; then
         {
             echo "\`\`\`"
@@ -598,9 +598,11 @@ function build_kernel() {
             echo "Version: $(cat "${OUT_FOLDER}/include/config/kernel.release")"
             echo
             echo "Zip file: ${SIGNED_ZIP}"
-            echo
-            echo "Short changelog:"
-            tail -n +2 "${SHORT_CHANGELOG}"
+            if [[ -f ${SHORT_CHANGELOG} ]]; then
+                echo
+                echo "Short changelog:"
+                tail -n +2 "${SHORT_CHANGELOG}"
+            fi
             echo "\`\`\`"
         } > "${TG_MSG_FILE}"
         notify "$(cat "${TG_MSG_FILE}")"
@@ -845,11 +847,13 @@ function ending_info() {
                 if [[ -z ${IMAGE_ONLY} ]]; then
                     echo
                     echo "[${FILE_LOCATION}](${FILE_LOCATION})"
-                    echo
-                    echo "\`\`\`"
-                    echo "Short changelog:"
-                    tail -n +2 "${SHORT_CHANGELOG}"
-                    echo "\`\`\`"
+                    if [[ -f ${SHORT_CHANGELOG} ]]; then
+                        echo
+                        echo "\`\`\`"
+                        echo "Short changelog:"
+                        tail -n +2 "${SHORT_CHANGELOG}"
+                        echo "\`\`\`"
+                    fi
                 fi
             } > "${TG_MSG_FILE}"
             notify "$(cat "${TG_MSG_FILE}")"
