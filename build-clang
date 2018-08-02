@@ -114,14 +114,14 @@ function parse_parameters() {
 # Rolls back a repo based on a certain date
 function rollback() {
     if [[ -n ${DATE_OFFSET} ]]; then
-        git checkout "$(git log -1 --format=%H --before="$(date --date="-${DATE_OFFSET} day")")"
+        git checkout "$(git log -1 --format=%H --before="$(date --date="-${DATE_OFFSET} day")")" || die "There was an error rolling back ${FOLDER}!"
         if [[ -z ${STOCK} && ${FOLDER} = "clang" ]]; then
             if [[ ${VERSION} -eq ${STABLE_VERSION} ]]; then
-                git cherry-pick 513f3b3fb7
-                git cherry-pick eab6ce7dc6
+                git cherry-pick 513f3b3fb7 || die "There was an error rolling back ${FOLDER}!"
+                git cherry-pick eab6ce7dc6 || die "There was an error rolling back ${FOLDER}!"
             else
-                git cherry-pick 176213e989
-                git cherry-pick 382ac69d5e
+                git cherry-pick 176213e989 || die "There was an error rolling back ${FOLDER}!"
+                git cherry-pick 382ac69d5e || die "There was an error rolling back ${FOLDER}!"
             fi
         fi
     fi
@@ -152,7 +152,7 @@ function git_sync() {(
     fi
 
     # If folder doesn't exist, we need to clone it
-    [[ ! -d ${FOLDER} ]] && git clone "${URL}" -b "${BRANCH}" "${FOLDER}"
+    [[ ! -d ${FOLDER} ]] && git clone "${URL}" -b "${BRANCH}" "${FOLDER}" || die "Error cloning ${FOLDER}!"
 
     cd "${FOLDER}" || die "Error moving into ${FOLDER}"
 
@@ -169,11 +169,11 @@ function git_sync() {(
             git reset --hard upstream/"${BRANCH}"
         else
             git reset --hard origin/"${BRANCH}"
-            git rebase upstream/"${BRANCH}"
+            git rebase upstream/"${BRANCH}" || die "There was an error rebasing ${FOLDER}!"
             [[ -n ${ME} ]] && git push -f
         fi
     else
-        git pull
+        git pull || die "There was an error updating ${FOLDER}!"
     fi
 
     # Roll back if necessary
@@ -193,10 +193,10 @@ function svn_sync() {(
     esac
 
     if [[ ! -d ${FOLDER} ]]; then
-        svn co "https://llvm.org/svn/llvm-project/llvm/${URL_SUFFIX}" "${FOLDER}"
+        svn co "https://llvm.org/svn/llvm-project/llvm/${URL_SUFFIX}" "${FOLDER}" || die "There was an error syncing ${FOLDER}!"
     else
         cd "${FOLDER}" || die "Error moving into ${FOLDER}"
-        svn update
+        svn update || die "There was an error updating ${FOLDER}!"
     fi
 )}
 
@@ -290,7 +290,7 @@ function build() {
                                   svn info -r HEAD --show-item revision)" \
           -DLLVM_VERSION_SUFFIX="" \
           -DCLANG_REPOSITORY_STRING="${URL_PREFIX}clang" \
-          "${LLVM_FOLDER}"
+          "${LLVM_FOLDER}" || die "There was an error running cmake!"
 
     time ninja && SUCCESS=true
     TIME_STRING="$(format_time "${START}" "$(date +"%s")")"
