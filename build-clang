@@ -176,7 +176,7 @@ function git_sync() {(
         git pull
     fi
 
-    # Rold back if necessary
+    # Roll back if necessary
     rollback
 )}
 
