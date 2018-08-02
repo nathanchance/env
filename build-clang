@@ -54,7 +54,7 @@ function parse_parameters() {
                 STOCK=true ;;
 
             "-s"|"--stable")
-                VERSION=6 ;;
+                VERSION=7 ;;
 
             "-T"|"--test")
                 TEST=true ;;
@@ -89,7 +89,7 @@ function parse_parameters() {
     fi
 
     # Clang 7.x is compiled by default
-    [[ -z ${VERSION} ]] && VERSION=7
+    [[ -z ${VERSION} ]] && VERSION=8
 
     # Folder that will hold the final compiled toolchain
     [[ -z ${INSTALL_FOLDER} ]] && INSTALL_FOLDER=${TC_FOLDER}/${VENDOR:+"${VENDOR,,}-"}clang-${VERSION}.x${TEST:+"-test"}
@@ -111,17 +111,13 @@ function parse_parameters() {
 function rollback() {
     if [[ -n ${DATE_OFFSET} ]]; then
         git checkout "$(git log -1 --format=%H --before="$(date --date="-${DATE_OFFSET} day")")"
-        if [[ -z ${STOCK} ]]; then
-            if [[ ${FOLDER} = "llvm" && ${VERSION} = 6 ]]; then
-                git cherry-pick 64e3da64729e
-            elif [[ ${FOLDER} = "clang" ]]; then
-                if [[ ${VERSION} -eq 6 ]]; then
-                    git cherry-pick a095082d10de
-                    git cherry-pick 457251e8b546
-                else
-                    git cherry-pick d049e5088911
-                    git cherry-pick 7bdc99744204
-                fi
+        if [[ -z ${STOCK} && ${FOLDER} = "clang" ]]; then
+            if [[ ${VERSION} -eq 7 ]]; then
+                git cherry-pick 513f3b3fb7
+                git cherry-pick eab6ce7dc6
+            else
+                git cherry-pick 176213e989
+                git cherry-pick 382ac69d5e
             fi
         fi
     fi
@@ -141,7 +137,7 @@ function git_sync() {(
     else
         # Set URL based on folder
         case ${FOLDER} in
-            "clang"|"llvm")
+            "clang")
                 [[ -n ${ME} ]] && URL_PREFIX=git@github.com: || URL_PREFIX=https://github.com/
                 URL=${URL_PREFIX}nathanchance/$(basename "${FOLDER}").git ;;
             "extra")
@@ -161,8 +157,8 @@ function git_sync() {(
     # If checking out a branch fails, it's because 'origin/<branch>' and 'upstream/<branch>' exist
     git checkout ${BRANCH} || git checkout -b ${BRANCH} origin/${BRANCH}
 
-    # For Clang and LLVM, we need to add an upstream remote and rebase on it
-    if [[ ${FOLDER} = "clang" || ${FOLDER} = "llvm" ]]; then
+    # For Clang, we need to add an upstream remote and rebase on it
+    if [[ ${FOLDER} = "clang" ]]; then
         add_remote upstream "${LLVM_ORG}$(basename "${FOLDER}")"
         git fetch upstream
         if [[ -n ${STOCK} ]]; then
@@ -188,7 +184,7 @@ function svn_sync() {(
     # SC2031: BRANCH was modified in a subshell. That change might be lost.
     # shellcheck disable=SC2031
     case ${VERSION} in
-        "7") URL_SUFFIX=trunk ;;
+        "8") URL_SUFFIX=trunk ;;
         *) URL_SUFFIX=branches/"${BRANCH}" ;;
     esac
 
@@ -210,7 +206,7 @@ function sync_all() {
 
     # Set branch based on version
     case ${VERSION} in
-        "7") BRANCH=master ;;
+        "8") BRANCH=master ;;
         *) BRANCH="release_${VERSION}0" ;;
     esac
 
