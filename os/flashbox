@@ -850,3 +850,40 @@ function symlink-commands() {(
         ln -sf generic-commands "${FILE}-commands"
     done
 )}
+
+
+# Small build Magisk function
+# build-magisk <version> <version_code>
+function build-magisk() {
+    # Parameter sanity check
+    [[ ${#} -lt 2 ]] && { display_error "This function takes two arguments!"; return; }
+
+    # Existence sanity checks
+    cd "${HOME}/repos/magisk" || { display_error "Magisk folder doesn't exist, please clone!"; return; }
+    [[ ! -f config.prop ]] && { display_error "config.prop not found!"; return; }
+    [[ ! -f release-key.jks ]] && { display_error "keystore file not found!"; return; }
+
+    # Patch config with proper versions
+    sed -e "/^version=/s/=.*/=${1}/" \
+        -e "/^versionCode=/s/=.*/=${2}/" \
+        -i config.prop
+
+    # Update the repo
+    git fetch origin
+    git reset --hard origin/master
+    git submodule update --init --recursive
+
+    # Clean up
+    git cl --exclude config.prop --exclude release-key.jks
+
+    # Build!
+    ./build.py -r -v all
+
+    if [[ -f out/Magisk-v${1}.zip ]]; then
+        local FOLDER
+        FOLDER=/var/www/downloads/.magisk
+        mkdir -p ${FOLDER}
+        mv -v "out/Magisk-v${1}.zip" ${FOLDER}/"Magisk-v${1}(${2}).zip"
+        mv -v out/app-release.apk "${FOLDER}/MagiskManager-$(date +%Y%m%d-%H%M).apk"
+    fi
+}
