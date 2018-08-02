@@ -218,7 +218,7 @@ function device_flags() {
                 # SC2153: Possible misspelling: TC_FOLDER may not be assigned, but GCC_FOLDER is.
                 # shellcheck disable=SC2153
                 case ${MODE} in
-                    "personal") CLANG_FOLDER=${TC_FOLDER}/flash-clang-7.x ;;
+                    "personal") CLANG_FOLDER=${TC_FOLDER}/flash-clang-8.x ;;
                     *) CLANG_FOLDER=${TC_FOLDER}/flash-clang-7.x ;;
                 esac
             fi
@@ -244,7 +244,7 @@ function device_flags() {
 
             if [[ -z ${CLANG_FOLDER} ]]; then
                 case ${MODE} in
-                    "personal") CLANG_FOLDER=${TC_FOLDER}/flash-clang-7.x ;;
+                    "personal") CLANG_FOLDER=${TC_FOLDER}/flash-clang-8.x ;;
                     *) CLANG_FOLDER=${TC_FOLDER}/flash-clang-7.x ;;
                 esac
             fi
@@ -272,7 +272,7 @@ function device_flags() {
 
             if [[ -z ${CLANG_FOLDER} ]]; then
                 case ${MODE} in
-                    "personal") CLANG_FOLDER=${TC_FOLDER}/flash-clang-7.x ;;
+                    "personal") CLANG_FOLDER=${TC_FOLDER}/flash-clang-8.x ;;
                     *) CLANG_FOLDER=${TC_FOLDER}/flash-clang-7.x ;;
                 esac
             fi
