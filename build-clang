@@ -261,9 +261,6 @@ function build() {
     [[ -n ${TG} ]] && notify "\`Beginning build of Clang ${VERSION}...\`"
 
     [[ -n ${STOCK} ]] && URL_PREFIX=${LLVM_ORG} || URL_PREFIX=https://github.com/nathanchance/
-    for REPO in clang llvm; do
-        declare ${REPO^^}_REPOSITORY_STRING=${URL_PREFIX}${REPO}
-    done
 
     cmake -G Ninja \
           -DCMAKE_BUILD_TYPE=Release \
@@ -292,8 +289,7 @@ function build() {
           -DLLVM_VERSION_PATCH="$(cd "${SVN_FOLDER}" || die "SVN folder doesn't exist";
                                   svn info -r HEAD --show-item revision)" \
           -DLLVM_VERSION_SUFFIX="" \
-          -DCLANG_REPOSITORY_STRING="${CLANG_REPOSITORY_STRING}" \
-          -DLLVM_REPOSITORY_STRING="${LLVM_REPOSITORY_STRING}" \
+          -DCLANG_REPOSITORY_STRING="${URL_PREFIX}clang" \
           "${LLVM_FOLDER}"
 
     time ninja && SUCCESS=true
