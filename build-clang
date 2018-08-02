@@ -27,6 +27,10 @@ BUILD_FOLDER=${MAIN_FOLDER}/build
 # Start tracking time
 START=$(date +"%s")
 
+# Easy to use version variables
+STABLE_VERSION=7
+MASTER_VERSION=8
+
 
 ###############
 #             #
@@ -54,7 +58,7 @@ function parse_parameters() {
                 STOCK=true ;;
 
             "-s"|"--stable")
-                VERSION=7 ;;
+                VERSION=${STABLE_VERSION} ;;
 
             "-T"|"--test")
                 TEST=true ;;
@@ -88,8 +92,8 @@ function parse_parameters() {
         notify "$(cat "${TG_MSG_FILE}")"
     fi
 
-    # Clang 7.x is compiled by default
-    [[ -z ${VERSION} ]] && VERSION=8
+    # The master branch is compiled by default
+    [[ -z ${VERSION} ]] && VERSION=${MASTER_VERSION}
 
     # Folder that will hold the final compiled toolchain
     [[ -z ${INSTALL_FOLDER} ]] && INSTALL_FOLDER=${TC_FOLDER}/${VENDOR:+"${VENDOR,,}-"}clang-${VERSION}.x${TEST:+"-test"}
@@ -112,7 +116,7 @@ function rollback() {
     if [[ -n ${DATE_OFFSET} ]]; then
         git checkout "$(git log -1 --format=%H --before="$(date --date="-${DATE_OFFSET} day")")"
         if [[ -z ${STOCK} && ${FOLDER} = "clang" ]]; then
-            if [[ ${VERSION} -eq 7 ]]; then
+            if [[ ${VERSION} -eq ${STABLE_VERSION} ]]; then
                 git cherry-pick 513f3b3fb7
                 git cherry-pick eab6ce7dc6
             else
@@ -184,7 +188,7 @@ function svn_sync() {(
     # SC2031: BRANCH was modified in a subshell. That change might be lost.
     # shellcheck disable=SC2031
     case ${VERSION} in
-        "8") URL_SUFFIX=trunk ;;
+        ${MASTER_VERSION}) URL_SUFFIX=trunk ;;
         *) URL_SUFFIX=branches/"${BRANCH}" ;;
     esac
 
@@ -206,7 +210,7 @@ function sync_all() {
 
     # Set branch based on version
     case ${VERSION} in
-        "8") BRANCH=master ;;
+        ${MASTER_VERSION}) BRANCH=master ;;
         *) BRANCH="release_${VERSION}0" ;;
     esac
 
