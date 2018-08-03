@@ -184,7 +184,7 @@ function git_sync() {(
 
 
 # Syncs a svn project
-function svn_sync() {(
+function svn_sync() {
     FOLDER=${1}
 
     # SC2031: BRANCH was modified in a subshell. That change might be lost.
@@ -200,7 +200,9 @@ function svn_sync() {(
         cd "${FOLDER}" || die "Error moving into ${FOLDER}"
         svn update || die "There was an error updating ${FOLDER}!"
     fi
-)}
+
+    LLVM_VERSION_PATCH=$(svn info -r HEAD --show-item revision)
+}
 
 
 # Syncs all necessary projects
@@ -288,8 +290,7 @@ function build() {
           -DLLVM_OPTIMIZED_TABLEGEN=ON \
           -DLLVM_USE_LINKER=gold \
           -DCLANG_VENDOR="${VENDOR:+"${VENDOR} "}" \
-          -DLLVM_VERSION_PATCH="$(cd "${SVN_FOLDER}" || die "SVN folder doesn't exist";
-                                  svn info -r HEAD --show-item revision)" \
+          -DLLVM_VERSION_PATCH="${LLVM_VERSION_PATCH:?}" \
           -DLLVM_VERSION_SUFFIX="" \
           -DCLANG_REPOSITORY_STRING="${URL_PREFIX}clang" \
           "${LLVM_FOLDER}" || die "There was an error running cmake!"
