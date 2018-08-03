@@ -687,7 +687,7 @@ function package_zip() {
     zip ${HIDDEN_COMMANDS:+ "-q"} -r9 "${UNSIGNED_ZIP}" -x README.md -- *
 
     # Sign zip
-    java -jar "${BIN_FOLDER}/zipsigner-2.1.jar" \
+    java -jar "${BIN_FOLDER}/zipsigner-2.2.jar" \
               "${UNSIGNED_ZIP}" \
               "${SIGNED_ZIP}"
 

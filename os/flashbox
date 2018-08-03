@@ -270,7 +270,7 @@ function signzip() {
 
     # Sign the zip
     mv "${SIGNED_ZIP}" "${UNSIGNED_ZIP}"
-    java -jar "${BIN_FOLDER}/zipsigner-2.1.jar" \
+    java -jar "${BIN_FOLDER}/zipsigner-2.2.jar" \
               "${UNSIGNED_ZIP}" \
               "${SIGNED_ZIP}"
     rm "${UNSIGNED_ZIP}"
