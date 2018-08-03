@@ -140,7 +140,7 @@ function git_sync() {(
         URL=https://sourceware.org/git/binutils-gdb.git
         # SC2030: Modification of BRANCH is local (to subshell caused by (..) group).
         # shellcheck disable=SC2030
-        BRANCH=binutils-2_30-branch
+        BRANCH=master
     else
         # Set URL based on folder
         case ${FOLDER} in
