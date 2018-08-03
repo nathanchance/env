@@ -50,6 +50,9 @@ function parse_parameters() {
                 shift && enforce_value "${@}"
                 DATE_OFFSET=${1} ;;
 
+            "-I"|"--install-only")
+                INSTALL_ONLY=true ;;
+
             "-i"|"--install-folder")
                 shift && enforce_value "${@}"
                 INSTALL_FOLDER=${1} ;;
@@ -353,10 +356,21 @@ function install() {
 }
 
 
+# Wrapper for syncing and building to minimize boilerplate if in
+function sync_build() {
+    if [[ -n ${INSTALL_ONLY} ]]; then
+        cd "${BUILD_FOLDER}" || die "Build folder doesn't exist!"
+        echo
+        return
+    fi
+    sync_all
+    cleanup
+    build
+}
+
+
 source "$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")" || return; pwd)/common"
 trap 'echo; die "Manually aborted!"' SIGINT SIGTERM
 parse_parameters "${@}"
-sync_all
-cleanup
-build
+sync_build
 install
