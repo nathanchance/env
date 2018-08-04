@@ -684,9 +684,7 @@ ${URL}"
 
 
 # Update/init qcacld-3.0 tree
-function qcacld() {
-    local REPO REPOS TAG URL
-
+function qcacld() {(
     REPOS=( "fw-api" "qcacld-3.0" "qca-wifi-host-cmn" )
 
     while [[ ${#} -ge 1 ]]; do
@@ -734,7 +732,7 @@ function qcacld() {
                   -X subtree="${SUBFOLDER}/${REPO}" FETCH_HEAD
         fi
     done
-}
+)}
 
 
 # Defaults for build-clang
