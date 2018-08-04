@@ -178,7 +178,8 @@ function git_sync() {(
             [[ -n ${ME} ]] && git push -f
         fi
     else
-        git pull || die "There was an error updating ${FOLDER}!"
+        git fetch origin || die "There was an error fetching updates for ${FOLDER}!"
+        git reset --hard origin/"${BRANCH}" || die "There was an error updating ${FOLDER}!"
     fi
 
     # Roll back if necessary
