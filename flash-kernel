@@ -509,7 +509,7 @@ function generate_version() {
 function print_variables() {
     echo "${BOLD}Device:${RST}     ${DEVICE}\n"
 
-    echo "${BOLD}Branch:${RST}     ${KERNEL_BRANCH}\n"
+    echo "${BOLD}Branch:${RST}     $(git describe --exact-match 2>/dev/null || git cb) @ $(git kf)\n"
 
     [[ ${COMPILER} = "clang" ]] && echo "${BOLD}Clang:${RST}      ${CLANG}\n"
 
