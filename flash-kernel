@@ -401,9 +401,6 @@ function clean_up() {
         if [[ -z $(git status | ag "bisec|rebas") ]]; then
             git checkout ${HIDDEN_COMMANDS:+ "-q"} "${KERNEL_BRANCH}" || die "${KERNEL_BRANCH} doesn't exist!"
         fi
-    # Otherwise, notate current branch for changelog
-    else
-        KERNEL_BRANCH=$(git rev-parse --abbrev-ref HEAD)
     fi
     [[ -z ${HIDDEN_COMMANDS} ]] && echo
 }
