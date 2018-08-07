@@ -398,7 +398,9 @@ function clean_up() {
     cd "${SOURCE_FOLDER}" || die "Kernel source is missing!"
     if [[ -n ${KERNEL_BRANCH} ]]; then
         [[ ${KERNEL_BRANCH} =~ "queue-" ]] && CACHED_BRANCH=$(git cb)
-        [[ -z $(git status | ag "bisec|rebas") ]] && git checkout ${HIDDEN_COMMANDS:+ "-q"} "${KERNEL_BRANCH}"
+        if [[ -z $(git status | ag "bisec|rebas") ]]; then
+            git checkout ${HIDDEN_COMMANDS:+ "-q"} "${KERNEL_BRANCH}" || die "${KERNEL_BRANCH} doesn't exist!"
+        fi
     # Otherwise, notate current branch for changelog
     else
         KERNEL_BRANCH=$(git rev-parse --abbrev-ref HEAD)
