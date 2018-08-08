@@ -277,6 +277,7 @@ function build() {
           -DCMAKE_C_FLAGS="-O3 -march=native -mtune=native" \
           -DCMAKE_CXX_COMPILER="${CXX}" \
           -DCMAKE_CXX_FLAGS="-O3 -march=native -mtune=native" \
+          -DLLVM_CCACHE_BUILD=ON \
           -DLLVM_ENABLE_PIC=ON \
           -DCMAKE_INSTALL_PREFIX="${INSTALL_FOLDER}" \
           -DLLVM_PARALLEL_COMPILE_JOBS="${THREADS}" \
