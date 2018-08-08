@@ -83,7 +83,7 @@ function ccache_setup() {
 # Additional setup steps for my build server
 function flashbox_setup() {
     flashbox_prompt
-    ccache_setup 200
+    ccache_setup 250
     export LOG=/tmp/results.log
     add_to_path_post "${HOME}/.gem/ruby/2.5.0/bin"
 }
