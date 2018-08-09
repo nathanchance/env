@@ -70,3 +70,19 @@ if [[ ${#} -lt 1 || "${*}" =~ "4.4" ]]; then
     git push -f nathanchance HEAD:"${CURRENT_BRANCH}" || die "Can't push source to fork!"
     hub pull-request -b "${CURRENT_BRANCH}" -m "Merge $(make kernelversion) into ${CURRENT_BRANCH}"
 fi
+
+
+
+
+# 4.9 kernels
+# SC2076: Don't quote rhs of =~, it'll match literally rather than as a regex.
+# shellcheck disable=SC2076
+if [[ ${#} -lt 1 || "${*}" =~ "4.9" ]]; then
+    # AICP OnePlus 6 (downstream of op6)
+    cd "${ROMS_HOME}/aicp-op6" || die "aicp-op6 does not exist, please clone!"
+    git fetch aicp
+    git ml --no-edit aicp/o8.1-flash || die "Merge conflicts detected, please resolve then continue!"
+    git fetch als || die "android-linux-stable remote doesn't exist, please add then continue!"
+    git ml --no-edit als/lineage-15.1 || die "Merge conflicts detected, please resolve then continue!"
+    git push -f || die "Can't push source to origin!"
+fi
