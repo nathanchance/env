@@ -308,6 +308,7 @@ function queue-tag() {
 # shellcheck disable=SC2120
 function dib() {(
     DEVICE=$(basename "${PWD}")
+    START=$(date +%s)
 
     while [[ ${#} -ge 1 ]]; do
         case ${1} in
@@ -345,6 +346,13 @@ function dib() {(
     clear
 
     if [[ -n ${WANTS_LOG} ]]; then
+        {
+            TIME_STRING=$(format_time "${START}" "$(date +%s)")
+            echo
+            echo
+            echo
+            echo "TOTAL DURATION: ${TIME_STRING,,}"
+        } >> "${LOG}"
         MESSAGE="${BOLD}${DEVICE} results:${RST} $(deldog "${LOG}")"
         echo
         echo "${MESSAGE}"
@@ -827,12 +835,20 @@ function updtc() {
 function fkba() {(
     for DEVICE in marlin op6 wahoo; do
         rm -f "${LOG}"
+        START=$(date +%s)
         cd "${KERNEL_FOLDER}/flash/${DEVICE}" || { warn "${DEVICE} folder does not exist, skipping!"; continue; }
         [[ ${1} = "-n" || ${1} = "--number" ]] && { shift; NUM=${1}; }
         [[ -z ${NUM} ]] && NUM=1
         # SC2119: Use dib "$@" if function's $1 should mean script's $1.
         # shellcheck disable=SC2119
         for i in $(seq 1 ${NUM}); do dib; done
+        {
+            TIME_STRING=$(format_time "${START}" "$(date +%s)")
+            echo
+            echo
+            echo
+            echo "TOTAL DURATION: ${TIME_STRING,,}"
+        } >> "${LOG}"
         notify "${DEVICE} results: $(deldog "${LOG}")"
     done
 )}
