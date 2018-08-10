@@ -408,7 +408,7 @@ function make_wrapper_gcc() {
     PATH=${BIN_FOLDER}:${PATH} make "${JOBS_FLAG}" \
                                     ARCH=${ARCHITECTURE} \
                                     CROSS_COMPILE="${CCACHE} ${CC}" \
-                                    CROSS_COMPILE_ARM32="${CC_32_BIT}" \
+                                    CROSS_COMPILE_ARM32="${CCACHE} ${CC_32_BIT}" \
                                     KBUILD_BUILD_VERSION="${KBUILD_BUILD_VERSION}" \
                                     LOCALVERSION="${LOCALVERSION}" \
                                     O="${OUT_FOLDER}" \
