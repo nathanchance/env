@@ -350,11 +350,11 @@ function dib() {(
             echo
             echo "TOTAL DURATION: ${TIME_STRING,,}"
         } >> "${LOG}"
-        MESSAGE="${BOLD}${DEVICE} results:${RST} $(deldog "${LOG}")"
+        URL="$(deldog "${LOG}")"
         echo
-        echo "${MESSAGE}"
+        echo "${BOLD}${DEVICE} results:${RST} ${URL}"
         echo
-        [[ -n ${WANTS_TG} ]] && notify "${MESSAGE}"
+        [[ -n ${WANTS_TG} ]] && notify "${DEVICE} results: ${URL}"
     fi
 )}
 
