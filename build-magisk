@@ -13,6 +13,8 @@ trap 'echo; die "Manually aborted!"' SIGINT SIGTERM
 # Parse parameters
 while [[ ${#} -ge 1 ]]; do
     case ${1} in
+        "-b"|"--build-only")
+            BUILD_ONLY=true ;;
         "-h"|"--hash")
             shift && enforce_value "${@}"
             HASH=${1} ;;
@@ -62,7 +64,7 @@ header "Building Magisk"
 ./build.py -r -v all
 
 # Only move files if the build actually succeeded
-if [[ -f out/magisk-release.zip ]]; then
+if [[ -f out/magisk-release.zip && -z ${BUILD_ONLY} ]]; then
     FOLDER=${WEB_FOLDER}/downloads/magisk
     SHA="-g$(git rev-parse --verify --short=12 ${HASH})"
     APK="MagiskManager-v${APK_VERSION}(${APK_VERSION_CODE})${SHA}.apk"
