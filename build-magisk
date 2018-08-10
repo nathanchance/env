@@ -60,7 +60,7 @@ if [[ -f out/magisk-release.zip ]]; then
 
     # Move files
     header "Moving files"
-    mkdir -p ${FOLDER}
+    mkdir -p "${FOLDER}"
     mv -v out/app-release.apk "${FOLDER}/${APK}"
     mv -v out/magisk-release.zip "${FOLDER}/${ZIP}"
     mv -v out/magisk-uninstaller.zip "${FOLDER}/${UNINSTALLER}"
@@ -87,7 +87,7 @@ if [[ -f out/magisk-release.zip ]]; then
         echo "}"
     } > "${FOLDER}/updater.json"
 
-    cd "${FOLDER}"
+    cd "${FOLDER}" || die "Can't move into ${FOLDER}"
     git add -f .
     echo
     git ac -m "magisk-files: ${VERSION_CODE}"
