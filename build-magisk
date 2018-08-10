@@ -10,14 +10,25 @@
 source "$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")" || return; pwd)/common"
 trap 'echo; die "Manually aborted!"' SIGINT SIGTERM
 
-# Parameter sanity check
-[[ ${#} -lt 2 ]] && die "This function takes two arguments!"
+# Parse parameters
+while [[ ${#} -ge 1 ]]; do
+    case ${1} in
+        "-h"|"--hash")
+            shift && enforce_value "${@}"
+            HASH=${1} ;;
+        "-v"|"--version")
+            shift && enforce_value "${@}"
+            VERSION=${1}
+            shift && enforce_value "${@}"
+            VERSION_CODE=${1}
+            VERSION_SUFFIX=${VERSION_CODE:4:${#VERSION_CODE}} ;;
+    esac
+    shift
+done
 
-# Version parameters
-VERSION=${1}
-VERSION_CODE=${2}
-BRANCH=${3:-"origin/master"}
-VERSION_SUFFIX=${VERSION_CODE:4:${#VERSION_CODE}}
+# Parameter sanity check
+[[ -z ${VERSION} || -z ${VERSION_CODE} ]] && die "Version or version code is not set!"
+[[ -z ${HASH} ]] && HASH=origin/master
 
 # Existence sanity checks
 cd "${HOME}/repos/magisk" || die "Magisk folder doesn't exist, please clone!"
@@ -27,7 +38,7 @@ cd "${HOME}/repos/magisk" || die "Magisk folder doesn't exist, please clone!"
 # Update the repo
 header "Updating repos"
 git fetch origin
-git reset --hard "${BRANCH}"
+git reset --hard "${HASH}"
 git submodule update --init --recursive
 
 # Clean up
@@ -53,7 +64,7 @@ header "Building Magisk"
 # Only move files if the build actually succeeded
 if [[ -f out/magisk-release.zip ]]; then
     FOLDER=${WEB_FOLDER}/downloads/magisk
-    SHA="-g$(git rev-parse --verify --short=12 ${BRANCH})"
+    SHA="-g$(git rev-parse --verify --short=12 ${HASH})"
     APK="MagiskManager-v${APK_VERSION}(${APK_VERSION_CODE})${SHA}.apk"
     ZIP="Magisk-v${VERSION}(${VERSION_CODE})${SHA}.zip"
     UNINSTALLER="Magisk-uninstaller${SHA}.zip"
