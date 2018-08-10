@@ -228,9 +228,7 @@ function device_flags() {
 
             [[ -n ${STABLE} ]] && KERNEL_BRANCH=pie
 
-            MATCH_FLAG="${DEVICE_NAME_FILE}-v${VERSION::1}"
-
-            WANTS_COMPAT_VDSO=true ;;
+            MATCH_FLAG="${DEVICE_NAME_FILE}-v${VERSION::1}" ;;
 
         "op6")
             # Required flags
@@ -260,9 +258,7 @@ function device_flags() {
 
             [[ -n ${STABLE} ]] && KERNEL_BRANCH=8.1.0
 
-            MATCH_FLAG="${DEVICE_NAME_FILE}-v${VERSION::1}"
-
-            WANTS_COMPAT_VDSO=true ;;
+            MATCH_FLAG="${DEVICE_NAME_FILE}-v${VERSION::1}" ;;
 
         "wahoo")
             # Required flags
@@ -291,9 +287,7 @@ function device_flags() {
 
             [[ -n ${STABLE} ]] && KERNEL_BRANCH=pie
 
-            MATCH_FLAG="${DEVICE_NAME_FILE}-v${VERSION::1}"
-
-            WANTS_COMPAT_VDSO=true ;;
+            MATCH_FLAG="${DEVICE_NAME_FILE}-v${VERSION::1}" ;;
 
         *)
             die "Invalid device!" ;;
@@ -570,12 +564,6 @@ function build_kernel() {
     # If requested, disable -Werror
     if [[ -n ${NO_WERROR} ]]; then
         ./scripts/config --file out/.config -d CONFIG_CC_WERROR
-        kmake olddefconfig
-    fi
-
-    # If requested, build the 32-bit compatible VDSO
-    if [[ -n ${WANTS_COMPAT_VDSO} ]]; then
-        ./scripts/config --file out/.config -e CONFIG_COMPAT_VDSO
         kmake olddefconfig
     fi
 
