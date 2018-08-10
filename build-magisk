@@ -36,6 +36,7 @@ done
 cd "${HOME}/repos/magisk" || die "Magisk folder doesn't exist, please clone!"
 [[ ! -f config.prop ]] && die "config.prop not found!"
 [[ ! -f release-key.jks ]] && die "keystore file not found!"
+[[ ! -d ${TC_FOLDER}/frankendk ]] && die "Please clone topjohnwu/FrankeNDK to ${TC_FOLDER}!"
 
 # Update the repo
 header "Updating repos"
@@ -61,7 +62,7 @@ APK_VERSION_CODE=${APK_VERSION_CODE}${VERSION_SUFFIX}
 
 # Build!
 header "Building Magisk"
-./build.py -r -v all
+ANDROID_NDK_HOME=${TC_FOLDER}/frankendk ./build.py -r -v all
 
 # Only move files if the build actually succeeded
 if [[ -f out/magisk-release.zip && -z ${BUILD_ONLY} ]]; then
