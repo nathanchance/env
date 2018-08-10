@@ -1,0 +1,96 @@
+#!/usr/bin/env bash
+#
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+# Copyright (C) 2018 Nathan Chancellor
+#
+# Builds a Magisk zip and APK then sets up a JSON file
+
+# Source common functions
+source "$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")" || return; pwd)/common"
+trap 'echo; die "Manually aborted!"' SIGINT SIGTERM
+
+# Parameter sanity check
+[[ ${#} -lt 2 ]] && die "This function takes two arguments!"
+
+# Version parameters
+VERSION=${1}
+VERSION_CODE=${2}
+BRANCH=${3:-"origin/master"}
+VERSION_SUFFIX=${VERSION_CODE:4:${#VERSION_CODE}}
+
+# Existence sanity checks
+cd "${HOME}/repos/magisk" || die "Magisk folder doesn't exist, please clone!"
+[[ ! -f config.prop ]] && die "config.prop not found!"
+[[ ! -f release-key.jks ]] && die "keystore file not found!"
+
+# Update the repo
+header "Updating repos"
+git fetch origin
+git reset --hard "${BRANCH}"
+git submodule update --init --recursive
+
+# Clean up
+header "Cleaning up"
+git rf app/build.gradle
+git cl --exclude config.prop --exclude release-key.jks
+
+# Patch config with proper versions
+sed -e "/^version=/s/=.*/=${VERSION}/" \
+    -e "/^versionCode=/s/=.*/=${VERSION_CODE}/" \
+    -i config.prop
+
+# Patch APK with the proper version code
+APK_VERSION=$(grep versionName app/build.gradle | head -n1 | cut -d \" -f 2)
+APK_VERSION_CODE=$(grep versionCode app/build.gradle | head -n1 | awk '{print $2}')
+sed -i "s/${APK_VERSION_CODE}/${APK_VERSION_CODE}${VERSION_SUFFIX}/g" app/build.gradle
+APK_VERSION_CODE=${APK_VERSION_CODE}${VERSION_SUFFIX}
+
+# Build!
+header "Building Magisk"
+./build.py -r -v all
+
+# Only move files if the build actually succeeded
+if [[ -f out/magisk-release.zip ]]; then
+    FOLDER=${WEB_FOLDER}/downloads/magisk
+    SHA="-g$(git rev-parse --verify --short=12 ${BRANCH})"
+    APK="MagiskManager-v${APK_VERSION}(${APK_VERSION_CODE})${SHA}.apk"
+    ZIP="Magisk-v${VERSION}(${VERSION_CODE})${SHA}.zip"
+    UNINSTALLER="Magisk-uninstaller${SHA}.zip"
+
+    # Move files
+    header "Moving files"
+    mkdir -p ${FOLDER}
+    mv -v out/app-release.apk "${FOLDER}/${APK}"
+    mv -v out/magisk-release.zip "${FOLDER}/${ZIP}"
+    mv -v out/magisk-uninstaller.zip "${FOLDER}/${UNINSTALLER}"
+
+    # Generate an updater.json
+    {
+        echo "{"
+        echo "  \"app\": {"
+        echo "    \"version\": \"${APK_VERSION}\","
+        echo "    \"versionCode\": \"${APK_VERSION_CODE}\","
+        echo "    \"link\": \"$(web_link "${FOLDER}/${APK}")\","
+        echo "    \"note\": \"https://github.com/topjohnwu/Magisk/commits/master/app\""
+        echo "  },"
+        echo "  \"magisk\": {"
+        echo "    \"version\": \"${VERSION}\","
+        echo "    \"versionCode\": \"${VERSION_CODE}\","
+        echo "    \"link\": \"$(web_link "${FOLDER}/${ZIP}")\","
+        echo "    \"note\": \"https://github.com/topjohnwu/Magisk/commits/master\","
+        echo "    \"md5\": \"$(md5sum "${FOLDER}/${ZIP}" | awk '{print $1}')\""
+        echo "  },"
+        echo "  \"uninstaller\": {"
+        echo "    \"link\": \"$(web_link "${FOLDER}/${UNINSTALLER}")\""
+        echo "  }"
+        echo "}"
+    } > "${FOLDER}/updater.json"
+
+    cd "${FOLDER}"
+    git add -f .
+    echo
+    git ac -m "magisk-files: ${VERSION_CODE}"
+    git push
+    echo
+fi
