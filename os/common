@@ -28,6 +28,7 @@ function aliases() {
     git config --global alias.bd 'branch --delete --force'
     git config --global alias.bn 'rev-parse --abbrev-ref HEAD' # branch name
     git config --global alias.bm 'branch --move'
+    git config --global alias.bu 'branch --unset-upstream'
     git config --global alias.c 'commit --gpg-sign --signoff'
     git config --global alias.ca 'commit --gpg-sign --amend --signoff' # commit ammend
     # SC2016: Expressions don't expand in single quotes, use double quotes for that
