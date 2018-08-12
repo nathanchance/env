@@ -81,6 +81,7 @@ function header() {
 
 # Formats the time
 function format_time() {
+    local TIME_STRING
     MINS=$(((${2} - ${1}) / 60))
     SECS=$(((${2} - ${1}) % 60))
     if [[ ${MINS} -ge 60 ]]; then
