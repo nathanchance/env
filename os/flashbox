@@ -658,7 +658,7 @@ function updk() {
 
     git push
 
-    git cl
+    git cl --exclude trunk/archlinux-linux -f
 
     cd trunk || return
 
