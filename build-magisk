@@ -20,10 +20,9 @@ while [[ ${#} -ge 1 ]]; do
             HASH=${1} ;;
         "-v"|"--version")
             shift && enforce_value "${@}"
-            VERSION=${1}
-            shift && enforce_value "${@}"
             VERSION_CODE=${1}
-            VERSION_SUFFIX=${VERSION_CODE:4:${#VERSION_CODE}} ;;
+            VERSION=${VERSION_CODE:0:2}.${VERSION_CODE:2:1}
+            VERSION_SUFFIX=${VERSION_CODE:4} ;;
     esac
     shift
 done
