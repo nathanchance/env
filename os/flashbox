@@ -808,21 +808,21 @@ function updtc() {
     local BINARIES
 
     # Clang 7.x
-    build-clang -t
-    # Clang 6.x
     build-clang -t -s
-    # GCC 8.2.1 and GCC 7.3.1
+    # Clang 8.x
+    build-clang -t
+    # Linaro GCC 7.3.1 and GNU GCC 8.2.1 and 9.0.0
     btg -t
 
     clear
 
-    BINARIES=( "${HOME}/toolchains/flash-clang-7.x/bin/clang"
-               "${HOME}/toolchains/flash-clang-6.x/bin/clang"
-               "${HOME}/toolchains/btg-linaro-gcc-7.3.1-arm64/bin/aarch64-linux-gnu-ld"
-               "${HOME}/toolchains/btg-linaro-gcc-7.3.1-arm/bin/arm-linux-gnueabi-ld" )
+    BINARIES=( "${HOME}/toolchains/flash-clang-8.x/bin/clang"
+               "${HOME}/toolchains/flash-clang-7.x/bin/clang"
+               "${HOME}/toolchains/btg-gcc-8.2.1-arm64/bin/aarch64-linux-gnu-ld"
+               "${HOME}/toolchains/btg-gcc-8.2.1-arm/bin/arm-linux-gnueabi-ld" )
 
     for BINARY in "${BINARIES[@]}"; do
-        ${BINARY} --version | head -1
+        ${BINARY} --version
         echo
     done
 }
