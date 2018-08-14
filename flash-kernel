@@ -699,11 +699,7 @@ function setup_folders() {
 
     # If it isn't a stable build, clean the folder
     if [[ -z ${STABLE} ]]; then
-        if [[ -n ${PERSONAL} ]]; then
-            rm -rf "${FILE_MOVE:?}"/*
-        else
-            rm -rf "${FILE_MOVE:?}"/*"${MATCH_FLAG}"*
-        fi
+        rm -rf "${FILE_MOVE:?}"/*
     else
         # Clean old test builds
         cd "${FILE_MOVE}/.." || die "Shift to zip folder failed!"
