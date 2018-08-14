@@ -107,10 +107,6 @@ function parse_parameters() {
 
                 MODE=${1} ;;
 
-            # Don't move/delete zips in FILE_MOVE folder
-            "-n"|"--no-clean")
-                NOCLEAN=true ;;
-
             # Test versioning (# in kernel version)
             "-r"|"--revision")
                 shift && enforce_value "${@}"
@@ -703,12 +699,10 @@ function setup_folders() {
 
     # If it isn't a stable build, clean the folder
     if [[ -z ${STABLE} ]]; then
-        if [[ -z ${NOCLEAN} ]]; then
-            if [[ -n ${PERSONAL} ]]; then
-                rm -rf "${FILE_MOVE:?}"/*
-            else
-                rm -rf "${FILE_MOVE:?}"/*"${MATCH_FLAG}"*
-            fi
+        if [[ -n ${PERSONAL} ]]; then
+            rm -rf "${FILE_MOVE:?}"/*
+        else
+            rm -rf "${FILE_MOVE:?}"/*"${MATCH_FLAG}"*
         fi
     else
         # Clean old test builds
@@ -720,16 +714,14 @@ function setup_folders() {
             git push ${HIDDEN_COMMANDS:+ "--quiet"}
         fi
 
-        # Move the old files to an archive folder unless no clean is requested
-        if [[ -z ${NOCLEAN} ]]; then
-            [[ ! -d ${FILE_MOVE_OLD} ]] && mkdir -p "${FILE_MOVE_OLD}"
-            rm -f "${FILE_MOVE}"/{.version,.changelog}
-            OLD_FILES="$(find "${FILE_MOVE}" -maxdepth 1 -type f -name "*${MATCH_FLAG,,}*" 2>/dev/null)"
-            if [[ -n ${OLD_FILES} ]]; then
-                for OLD_FILE in ${OLD_FILES}; do
-                    mv ${VERBOSE_COMMANDS:+ "-v"} "${OLD_FILE}" "${FILE_MOVE_OLD}"
-                done
-            fi
+        # Move the old files to an archive folder
+        [[ ! -d ${FILE_MOVE_OLD} ]] && mkdir -p "${FILE_MOVE_OLD}"
+        rm -f "${FILE_MOVE}"/{.version,.changelog}
+        OLD_FILES="$(find "${FILE_MOVE}" -maxdepth 1 -type f -name "*${MATCH_FLAG,,}*" 2>/dev/null)"
+        if [[ -n ${OLD_FILES} ]]; then
+            for OLD_FILE in ${OLD_FILES}; do
+                mv ${VERBOSE_COMMANDS:+ "-v"} "${OLD_FILE}" "${FILE_MOVE_OLD}"
+            done
         fi
     fi
 }
