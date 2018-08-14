@@ -318,6 +318,8 @@ function generate_variables() {
             FILE_MOVE=${FILE_MOVE_HEAD}/.tmp/${DEVICE_NAME_WEB}/${ANDROID_VERSION} ;;
         "personal")
             FILE_MOVE=${FILE_MOVE_HEAD}/.fk/${DEVICE_NAME_WEB} ;;
+        "zip")
+            unset FILE_MOVE ;;
         *)
             die "Invalid mode specified!" ;;
     esac
@@ -786,17 +788,18 @@ function after_build_tasks() {
     if [[ -z ${IMAGE_ONLY} ]]; then
         package_zip
 
-        header "SHUFFLING FILES"
+        if [[ -n ${FILE_MOVE} ]]; then
+            header "SHUFFLING FILES"
 
-        setup_folders
-        move_flashable_files
+            setup_folders
+            move_flashable_files
 
-        if [[ -z ${PERSONAL} ]]; then
-            [[ -z ${TMP} ]] && push_flashable_files
-            [[ -n ${STABLE} ]] && tag_stable
-        fi
-
+            if [[ -z ${PERSONAL} ]]; then
+                [[ -z ${TMP} ]] && push_flashable_files
+                [[ -n ${STABLE} ]] && tag_stable
+            fi
         echo
+        fi
     fi
 }
 
@@ -824,11 +827,17 @@ function ending_info() {
             echo "            ${UTS_VERSION}"
         } >> "${LOG}"
         if [[ -z ${IMAGE_ONLY} ]]; then
-            FILE_LOCATION=$(web_link "${FILE_MOVE}")
-            echo "LINK:       ${FILE_LOCATION}" >> "${LOG}"
+            if [[ -n ${FILE_MOVE} ]]; then
+                FILE_LOCATION=$(web_link "${FILE_MOVE}")
+                echo "LINK:       ${FILE_LOCATION}" >> "${LOG}"
+                SIZE=$(du -h "${FILE_MOVE}/${SIGNED_ZIP}" | awk '{print $1}')
+            else
+                FILE_LOCATION=${ANYKERNEL2_FOLDER}/${SIGNED_ZIP}
+                SIZE=$(du -h "${FILE_LOCATION}" | awk '{print $1}')
+            fi
 
             echo "${RED}FILE LOCATION: ${FILE_LOCATION}"
-            echo "SIZE: $(du -h "${FILE_MOVE}/${SIGNED_ZIP}" | awk '{print $1}')${RST}"
+            echo "SIZE: ${SIZE}${RST}"
         fi
 
         if [[ -n ${TG} ]]; then
