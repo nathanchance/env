@@ -83,6 +83,13 @@ function install-bin() {
     # Configure vim
     ln -s /usr/local/share/vim/vim80 ~/.vim
     ln -s ~/.vim/vimrc ~/.vimrc
+    mkdir -p ~/.vim/.backup ~/.vim/.swp ~/.vim/.undo
+    {
+        echo
+        echo "set undodir=~/.vim/.undo//"
+        echo "set backupdir=~/.vim/.backup//"
+        echo "set directory=~/.vim/.swp//"
+    } >> ~/.vimrc
 
     # Install crouton and setup a Debian Stretch chroot
     sudo curl -s https://raw.githubusercontent.com/dnschneid/crouton/master/installer/crouton -o /usr/local/bin/crouton
