@@ -601,6 +601,8 @@ function bk() {
         "op5:android-8.1") PARAMS=( omni_oneplus5_defconfig ) ;;
         "op5:lineage-15.1") PARAMS=( lineage_oneplus5_defconfig ) ;;
         "op5:oneplus/QC8998_O_8."*) PARAMS=( msmcortex-perf_defconfig ) ;;
+        "op6:android-8.1") PARAMS=( omni_oneplus6_defconfig ) ;;
+        "op6:lineage-15.1") PARAMS=( enchilada_defconfig ) ;;
         "op6:oneplus/SDM845_O_8.1") PARAMS=( sdm845-perf_defconfig ) ;;
         "sagit:sagit-o-oss") PARAMS=( sagit_user_defconfig ) ;;
         "tissot:tissot-o-oss") PARAMS=( tissot-perf_defconfig ) ;;
@@ -856,7 +858,7 @@ function symlink-commands() {(
     case ${1} in
         "3.18") FILES=( "marlin" "msm-3.18" "op3-android-8.1" "op3-lineage-15.1" "op3-8.0.0" "tissot" ) ;;
         "4.4") FILES=( "msm-4.4" "nash-oreo-8.0.0" "nash-lineage-15.1" "op5-android-8.1" "op5-lineage-15.1" "op5-O_8.1" "op5-O_8.1_Beta" "sagit" "wahoo" "whyred" ) ;;
-        "4.9") FILES=( "msm-4.9" "op6-O_8.1" ) ;;
+        "4.9") FILES=( "msm-4.9" "op6-android-8.1" "op6-lineage-15.1" "op6-O_8.1" ) ;;
     esac
 
     for FILE in "${FILES[@]}"; do
