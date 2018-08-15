@@ -746,7 +746,7 @@ function qcacld() {(
 
 # Defaults for build-clang
 function build-clang() {
-    command build-clang -v "Flash" "${@}"
+    command build-clang -v "Flash" -B "${@}"
 }
 
 
