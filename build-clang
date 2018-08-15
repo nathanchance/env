@@ -31,6 +31,8 @@ START=$(date +"%s")
 STABLE_VERSION=7
 MASTER_VERSION=8
 
+# Set ME variable if on my server
+[[ $(uname -n) = "flashbox" ]] && ME=true
 
 ###############
 #             #
@@ -43,6 +45,14 @@ function parse_parameters() {
 
     while [[ ${#} -ge 1 ]]; do
         case ${1} in
+            "-B"|"--bootstrap")
+                if [[ -n ${ME} ]]; then
+                    for FLASH_VERSION in ${STABLE_VERSION} ${MASTER_VERSION}; do
+                        [[ -d ${TC_FOLDER}/flash-clang-${FLASH_VERSION}.x ]] && \
+                            export PATH="${TC_FOLDER}/flash-clang-${FLASH_VERSION}.x/bin:${PATH}"
+                    done
+                fi ;;
+
             "-b"|"--build-only")
                 BUILD_ONLY=true ;;
 
@@ -108,9 +118,6 @@ function parse_parameters() {
     CC=$(command -v clang || command -v gcc)
     CXX=$(command -v clang++ || command -v g++)
     [[ -z ${CC} || -z ${CXX} ]] && die "Neither GCC nor Clang could be found on your system!"
-
-    # Set ME variable if on my server
-    [[ $(uname -n) = "flashbox" ]] && ME=true
 }
 
 
