@@ -17,68 +17,7 @@ function aliases() {
     # tmux alias
     alias tmux='tmux -u'
 
-    # If hub is installed, alias git to it
-    if command -v hub > /dev/null 2>&1; then alias git='hub'; fi
-
-    git config --global alias.aa 'add --all'
-    git config --global alias.ac 'commit --gpg-sign --all --signoff' # add and commit
-    git config --global alias.ams 'am --gpg-sign --signoff' # am signoff
-    git config --global alias.ap 'apply -3 -v'
-    git config --global alias.b 'branch --verbose'
-    git config --global alias.bd 'branch --delete --force'
-    git config --global alias.bn 'rev-parse --abbrev-ref HEAD' # branch name
-    git config --global alias.bm 'branch --move'
-    git config --global alias.bu 'branch --unset-upstream'
-    git config --global alias.c 'commit --gpg-sign --signoff'
-    git config --global alias.ca 'commit --gpg-sign --amend --signoff' # commit ammend
-    # SC2016: Expressions don't expand in single quotes, use double quotes for that
-    # shellcheck disable=SC2016
-    git config --global alias.cad '!git commit --gpg-sign --amend --signoff --date="$(date)"' # commit amend date
-    git config --global alias.cb 'rev-parse --abbrev-ref HEAD' # current branch
-    git config --global alias.cf 'diff --name-only --diff-filter=U' # conflicts
-    git config --global alias.ch 'checkout'
-    git config --global alias.cl 'clean -fxd'
-    git config --global alias.cp 'cherry-pick --gpg-sign --signoff'
-    git config --global alias.cpa 'cherry-pick --abort'
-    git config --global alias.cpc 'cherry-pick --continue'
-    git config --global alias.cpe 'cherry-pick --edit --signoff'
-    git config --global alias.cpq 'cherry-pick --quit'
-    git config --global alias.dc 'describe --contains'
-    git config --global alias.dfs 'diff --stat'
-    git config --global alias.dfss 'diff --shortstat'
-    git config --global alias.dh 'diff HEAD'
-    git config --global alias.dhc 'reset --hard HEAD^'
-    git config --global alias.f 'fetch'
-    git config --global alias.fa 'fetch --all'
-    git config --global alias.fm 'commit --gpg-sign --file /tmp/mrg-msg' # finish merge
-    git config --global alias.fp 'format-patch'
-    git config --global alias.kf 'show -s --abbrev-commit --abbrev=12 --format="%h (\"%s\")"' # kernel format
-    git config --global alias.lo 'log --oneline'
-    git config --global alias.ma 'merge --abort'
-    git config --global alias.mc 'merge --continue'
-    git config --global alias.pr 'pull-request'
-    git config --global alias.psu 'push --set-upstream'
-    # SC2016: Expressions don't expand in single quotes, use double quotes for that
-    # shellcheck disable=SC2016
-    git config --global alias.ra '!f() { for i in $(git cf); do git rf $i; done }; f' # reset all conflicts
-    git config --global alias.rb 'rebase --gpg-sign'
-    git config --global alias.rba 'rebase --abort'
-    git config --global alias.rbc 'rebase --continue'
-    # SC2016: Expressions don't expand in single quotes, use double quotes for that
-    # shellcheck disable=SC2016
-    git config --global alias.rf '!bash -c "git reset -q -- ${1} && git checkout -- ${1}"' # reset file
-    git config --global alias.rh 'reset --hard'
-    git config --global alias.rma 'remote add'
-    git config --global alias.rmsu 'remote set-url'
-    git config --global alias.rmv 'remote -v'
-    git config --global alias.rs 'reset --soft'
-    git config --global alias.rv 'revert --gpg-sign --signoff'
-    git config --global alias.s 'status'
-    git config --global alias.shf 'show --format=fuller'
-    git config --global alias.shm 'show -s'
-    git config --global alias.shmf 'show -s --format=fuller'
-    git config --global alias.ss 'status --short --branch'
-    git config --global alias.us 'reset HEAD'
+    source "${SCRIPTS_FOLDER}/os/git_aliases"
 }
 
 # Try to attach via tmux
