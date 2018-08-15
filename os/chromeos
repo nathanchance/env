@@ -67,9 +67,22 @@ function install-bin() {
     sudo curl -s https://raw.githubusercontent.com/dylanaraps/neofetch/master/neofetch -o /usr/local/bin/neofetch
     sudo chmod a+x /usr/local/bin/neofetch
 
-    # Install chromebrew + mosh
+    # Install chromebrew + other desirable programs
     curl -Ls git.io/vddgY | bash
     crew install -s mosh
+    crew install hub gnupg vim
+
+    # Configure git
+    git config --global commit.gpgsign true
+    git config --global core.editor vim
+    git config --global core.pager "/usr/local/bin/less"
+    git config --global user.name "Nathan Chancellor"
+    git config --global user.email "natechancellor@gmail.com"
+    git config --global user.signingkey 2437CB76E544CB6AB3D9DFD399739260CB6CB716
+
+    # Configure vim
+    ln -s /usr/local/share/vim/vim80 ~/.vim
+    ln -s ~/.vim/vimrc ~/.vimrc
 
     # Install crouton and setup a Debian Stretch chroot
     sudo curl -s https://raw.githubusercontent.com/dnschneid/crouton/master/installer/crouton -o /usr/local/bin/crouton
