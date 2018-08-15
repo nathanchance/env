@@ -352,7 +352,7 @@ function build() {
 function install() {
     if [[ -z ${TEST} ]]; then
         rm -rf "${INSTALL_FOLDER}-old"
-        mv "${INSTALL_FOLDER}" "${INSTALL_FOLDER}-old" 2>/dev/null
+        cp -r "${INSTALL_FOLDER}" "${INSTALL_FOLDER}-old" 2>/dev/null
     fi
 
     if ! ninja install &>/dev/null; then
