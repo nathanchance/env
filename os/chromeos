@@ -26,6 +26,7 @@ function rld() {
     curl -o ~/.chromeos-functions https://raw.githubusercontent.com/nathanchance/scripts/master/os/chromeos
     source ~/.bashrc
 }
+source <(curl -Ls https://raw.githubusercontent.com/nathanchance/scripts/master/os/git_aliases)
 
 
 # Neofetch function
