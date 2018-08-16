@@ -303,6 +303,7 @@ function update_tree() {
         "merge") mg_target_version ;;
     esac
     pre_exit_commands
+    exit 0
 }
 
 
