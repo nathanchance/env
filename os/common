@@ -17,7 +17,7 @@ function aliases() {
     # tmux alias
     alias tmux='tmux -u'
 
-    source "${SCRIPTS_FOLDER}/os/git_aliases"
+    source "${SCRIPTS_FOLDER}/snippets/git"
 }
 
 # Try to attach via tmux
