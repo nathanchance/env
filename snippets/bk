@@ -36,7 +36,7 @@ function bk() {
         "op6:lineage-15.1") PARAMS=( enchilada_defconfig ) ;;
         "op6:oneplus/SDM845_O_8.1") PARAMS=( sdm845-perf_defconfig ) ;;
         "sagit:sagit-o-oss") PARAMS=( sagit_user_defconfig ) ;;
-        "tissot:tissot-o-oss") PARAMS=( tissot-perf_defconfig ) ;;
+        "tissot:tissot-o-oss"*) PARAMS=( tissot-perf_defconfig ) ;;
         "wahoo:"*) PARAMS=( wahoo_defconfig -c ) ;;
         "whyred:whyred-o-oss") PARAMS=( whyred-perf_defconfig ) ;;
 
