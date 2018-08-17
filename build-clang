@@ -383,3 +383,4 @@ trap 'echo; die "Manually aborted!"' SIGINT SIGTERM
 parse_parameters "${@}"
 sync_build
 install
+exit 0

@@ -107,3 +107,5 @@ if [[ -f out/magisk-release.zip && -z ${BUILD_ONLY} ]]; then
     git push
     echo
 fi
+
+exit 0

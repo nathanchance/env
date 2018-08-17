@@ -86,3 +86,5 @@ if [[ ${#} -lt 1 || "${*}" =~ "4.9" ]]; then
     git ml --no-edit als/lineage-15.1 || die "Merge conflicts detected, please resolve then continue!"
     git push -f || die "Can't push source to origin!"
 fi
+
+exit 0

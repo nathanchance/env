@@ -192,7 +192,7 @@ function rm() {
 }
 
 
-# Device "board" flagsi
+# Device "board" flags
 function device_flags() {
     case ${DEVICE} in
         "marlin")
@@ -845,18 +845,21 @@ function ending_info() {
             } > "${TG_MSG_FILE}"
             notify "$(cat "${TG_MSG_FILE}")"
         fi
+
+        EXIT_CODE=0
     else
         echo "DURATION:   ${DURATION,,}" >> "${LOG}"
         if [[ -n ${TG} ]]; then
             load_botinfo
             notify "\`Build failed in ${DURATION,,}\`"
         fi
+        EXIT_CODE=1
     fi
 
     echo "${RED}DURATION: ${DURATION}${RST}"
     echo
     echo "\a"
-    exit
+    exit ${EXIT_CODE}
 }
 
 

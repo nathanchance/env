@@ -270,6 +270,8 @@ function report_result() {
 
     # Alert of script end
     echo "\n\a"
+
+    exit 0
 }
 
 

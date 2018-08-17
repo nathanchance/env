@@ -113,3 +113,4 @@ function install() {
 
 [[ "${*}" =~ "-b" ]] && build "${@}"
 [[ "${*}" =~ "-i" && ${PI} ]] && install
+exit 0

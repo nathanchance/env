@@ -250,3 +250,5 @@ if [[ -n ${LOGGING} ]]; then
     echo "Results: $(deldog "${LOG}")"
     echo
 fi
+
+exit 0
