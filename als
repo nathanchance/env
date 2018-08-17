@@ -219,6 +219,8 @@ for VERSION in "${VERSIONS[@]}"; do
                 # Log failure otherwise
                 else
                     log "${LOG_TAG} Merge of ${COMMANDS_BRANCH} failed!"
+                    log "${LOG_TAG} Conflicts:"
+                    log "$(git cf)"
                     failed_steps
                 fi
             fi
