@@ -26,6 +26,7 @@ function rld() {
     curl -o ~/.chromeos-functions https://raw.githubusercontent.com/nathanchance/scripts/master/os/chromeos
     source ~/.bashrc
 }
+source <(curl -Ls https://raw.githubusercontent.com/nathanchance/scripts/master/snippets/deldog)
 source <(curl -Ls https://raw.githubusercontent.com/nathanchance/scripts/master/snippets/git)
 
 
@@ -34,17 +35,6 @@ function neofetch() {
     echo
     /usr/local/bin/neofetch --distro_shorthand tiny "${@}"
     echo
-}
-
-
-# Function to upload to del.dog
-function deldog() {
-    RESULT=$(curl -sf --data-binary @"${1:--}" https://del.dog/documents) || {
-        echo "ERROR: failed to post document" >&2
-        return 1
-    }
-    KEY=$(jq -r .key <<< "${RESULT}")
-    echo "https://del.dog/raw/${KEY}"
 }
 
 
