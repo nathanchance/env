@@ -221,14 +221,14 @@ function frel() {
 # Build Flash Kernel test builds
 # ftest <device> <version> <dirty_version> <type>
 function ftest() {
-    [[ ${#} -gt 4 ]] && queue-tag -c ${2}
+    [[ ${#} -gt 4 ]] && queue-tag -c "${2}"
     flash-kernel --branch "queue-${2}" \
                  --device "${1}" \
                  --mode "${4}" \
                  --revision "${3}" \
                  --telegram \
                  --version "${2}"
-    [[ ${#} -gt 4 ]] && queue-tag -d ${2}
+    [[ ${#} -gt 4 ]] && queue-tag -d "${2}"
 }
 
 
