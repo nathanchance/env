@@ -127,9 +127,11 @@ function rollback() {
         git checkout "$(git log -1 --format=%H --before="$(date --date="-${DATE_OFFSET} day")")" || die "There was an error rolling back ${FOLDER}!"
         if [[ -z ${STOCK} && ${FOLDER} = "clang" ]]; then
             if [[ ${VERSION} -eq ${STABLE_VERSION} ]]; then
+                git cherry-pick 24c9731717 || die "There was an error rolling back ${FOLDER}!"
                 git cherry-pick 513f3b3fb7 || die "There was an error rolling back ${FOLDER}!"
                 git cherry-pick eab6ce7dc6 || die "There was an error rolling back ${FOLDER}!"
             else
+                git cherry-pick 24c9731717 || die "There was an error rolling back ${FOLDER}!"
                 git cherry-pick 176213e989 || die "There was an error rolling back ${FOLDER}!"
                 git cherry-pick 382ac69d5e || die "There was an error rolling back ${FOLDER}!"
             fi
