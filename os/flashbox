@@ -86,6 +86,7 @@ function flashbox_setup() {
     ccache_setup 250
     export LOG=/tmp/results.log
     add_to_path_post "${HOME}/.gem/ruby/2.5.0/bin"
+    source "${SCRIPTS_FOLDER}"/snippets/bk
 }
 
 
