@@ -37,6 +37,9 @@ trap 'echo; die "Manually aborted!"' SIGINT SIGTERM
 
 # Variables
 ALS=${KERNEL_FOLDER}/als
+REPOS_318=( "marlin" "msm-3.18" "op3" "tissot" )
+REPOS_44=( "msm-4.4" "nash" "op5" "sagit" "wahoo" "whyred" )
+REPOS_49=( "msm-4.9" "op6" )
 
 # Parse parameters
 while [[ ${#} -ge 1 ]]; do
@@ -44,6 +47,9 @@ while [[ ${#} -ge 1 ]]; do
         # Build after merging
         "-b"|"--build")
             BUILD=true ;;
+
+        "-i"|"--initialize")
+            INIT=true ;;
 
         # Log merge and build results
         "-l"|"--log")
@@ -90,14 +96,49 @@ done
 # Start with a clean log
 [[ -n ${LOGGING} ]] && rm -rf "${LOG}"
 
+# If initialization was requested
+if [[ -n ${INIT} ]]; then
+    mkdir -p "${ALS}"; cd "${ALS}" || die "${ALS} creation failed!"
+
+    for ITEM in "${REPOS_318[@]}" "${REPOS_44[@]}" "${REPOS_49[@]}"; do
+        git clone "git@github.com:android-linux-stable/${ITEM}.git" || die "Could not clone ${ITEM}!"
+        case ${ITEM} in
+            "marlin"|"wahoo")
+                REMOTES=( "upstream:https://android.googlesource.com/kernel/msm" ) ;;
+            "msm-3.18"|"msm-4.4"|"msm-4.9")
+                REMOTES=( "upstream:https://source.codeaurora.org/quic/la/kernel/${ITEM}" ) ;;
+            "nash")
+                REMOTES=( "upstream:https://github.com/MotorolaMobilityLLC/kernel-msm" ) ;;
+            "op3")
+                REMOTES=( "LineageOS:https://github.com/LineageOS/android_kernel_oneplus_msm8996"
+                          "omni:https://github.com/omnirom/android_kernel_oneplus_msm8996"
+                          "upstream:https://github.com/OnePlusOSS/android_kernel_oneplus_msm8996" ) ;;
+            "op5")
+                REMOTES=( "LineageOS:https://github.com/LineageOS/android_kernel_oneplus_msm8998"
+                          "omni:https://github.com/omnirom/android_kernel_oneplus_msm8998"
+                          "upstream:https://github.com/OnePlusOSS/android_kernel_oneplus_msm8998" ) ;;
+            "op6")
+                REMOTES=( "LineageOS:https://github.com/LineageOS/android_kernel_oneplus_sdm845"
+                          "omni:https://github.com/omnirom/android_kernel_oneplus_sdm845"
+                          "upstream:https://github.com/OnePlusOSS/android_kernel_oneplus_sdm845" ) ;;
+            "sagit"|"tissot"|"whyred")
+                REMOTES=( "upstream:https://github.com/MiCode/Xiaomi_Kernel_OpenSource" ) ;;
+        esac
+        for REMOTE in "${REMOTES[@]}"; do
+            git -C "${ITEM}" remote add "${REMOTE%%:*}" "${REMOTE#*:}"
+        done
+        git -C "${ITEM}" remote update
+    done
+fi
+
 # Iterate through all versions
 for VERSION in "${VERSIONS[@]}"; do
     # Set up repos variable based on version if REPOS is not set
     if [[ -z "${REPOS_PARAM[*]}" ]]; then
         case ${VERSION} in
-            "3.18") REPOS=( "marlin" "msm-3.18" "op3" "tissot" );;
-            "4.4") REPOS=( "msm-4.4" "nash" "op5" "sagit" "wahoo" "whyred" ) ;;
-            "4.9") REPOS=( "msm-4.9" "op6" ) ;;
+            "3.18") REPOS=( "${REPOS_318[@]}" ) ;;
+            "4.4") REPOS=( "${REPOS_44[@]}" ) ;;
+            "4.9") REPOS=( "${REPOS_49[@]}" ) ;;
         esac
     else
         REPOS=( "${REPOS_PARAM[@]}" )
