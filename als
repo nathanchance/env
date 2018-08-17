@@ -290,7 +290,7 @@ done
 if [[ -n ${LOGGING} ]]; then
     clear
     echo
-    echo "Results: $(deldog "${LOG}")"
+    echo "${BOLD}ALS merge results:${RST} $(deldog "${LOG}")"
     echo
 fi
 
