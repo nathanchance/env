@@ -107,6 +107,10 @@ function parse_parameters() {
 
                 MODE=${1} ;;
 
+            # Apply personal optimizations
+            "-p"|"--personal-optimization")
+                PERSONAL_OPTS=true ;;
+
             # Test versioning (# in kernel version)
             "-r"|"--revision")
                 shift && enforce_value "${@}"
@@ -157,7 +161,7 @@ function parse_parameters() {
 
     # Easy to use variables for if statements
     [[ ${MODE} = "alpha" || ${MODE} = "beta" || ${MODE} = "rc" ]] && TEST=true
-    [[ ${MODE} = "personal" ]] && PERSONAL=true
+    [[ ${MODE} = "personal" ]] && { PERSONAL=true; PERSONAL_OPTS=true; }
     [[ ${MODE} = "stable" ]] && STABLE=true
     [[ ${MODE} = "tmp" ]] && TMP=true
 
@@ -213,10 +217,11 @@ function device_flags() {
             if [[ -z ${CLANG_FOLDER} ]]; then
                 # SC2153: Possible misspelling: TC_FOLDER may not be assigned, but GCC_FOLDER is.
                 # shellcheck disable=SC2153
-                case ${MODE} in
-                    "personal") CLANG_FOLDER=${TC_FOLDER}/flash-clang-8.x ;;
-                    *) CLANG_FOLDER=${TC_FOLDER}/flash-clang-7.x ;;
-                esac
+                if [[ -n ${PERSONAL_OPTS} ]]; then
+                    CLANG_FOLDER=${TC_FOLDER}/flash-clang-8.x
+                else
+                    CLANG_FOLDER=${TC_FOLDER}/flash-clang-7.x
+                fi
             fi
 
             [[ -z ${GCC_FOLDER} ]] && GCC_FOLDER=${TC_FOLDER}/btg-gcc-8.2.1-arm64
@@ -237,10 +242,11 @@ function device_flags() {
             [[ -z ${COMPILER} ]] && COMPILER=clang
 
             if [[ -z ${CLANG_FOLDER} ]]; then
-                case ${MODE} in
-                    "personal") CLANG_FOLDER=${TC_FOLDER}/flash-clang-8.x ;;
-                    *) CLANG_FOLDER=${TC_FOLDER}/flash-clang-7.x ;;
-                esac
+                if [[ -n ${PERSONAL_OPTS} ]]; then
+                    CLANG_FOLDER=${TC_FOLDER}/flash-clang-8.x
+                else
+                    CLANG_FOLDER=${TC_FOLDER}/flash-clang-7.x
+                fi
             fi
 
             [[ -z ${DEFCONFIG} ]] && DEFCONFIG="flash_defconfig"
@@ -266,10 +272,11 @@ function device_flags() {
             [[ -z ${COMPILER} ]] && COMPILER=clang
 
             if [[ -z ${CLANG_FOLDER} ]]; then
-                case ${MODE} in
-                    "personal") CLANG_FOLDER=${TC_FOLDER}/flash-clang-8.x ;;
-                    *) CLANG_FOLDER=${TC_FOLDER}/flash-clang-7.x ;;
-                esac
+                if [[ -n ${PERSONAL_OPTS} ]]; then
+                    CLANG_FOLDER=${TC_FOLDER}/flash-clang-8.x
+                else
+                    CLANG_FOLDER=${TC_FOLDER}/flash-clang-7.x
+                fi
             fi
 
             [[ -z ${DEFCONFIG} ]] && DEFCONFIG="flash_defconfig"
@@ -360,7 +367,7 @@ function generate_variables() {
         case "$(basename "${CLANG_FOLDER}")" in
             "flash"*)
                 CLANG_LD_PATH=${CLANG_FOLDER}/lib
-                if [[ -n ${PERSONAL} ]]; then
+                if [[ -n ${PERSONAL_OPTS} ]]; then
                     KCFLAGS="-mllvm -polly \
                              -mllvm -polly-run-dce \
                              -mllvm -polly-run-inliner \
