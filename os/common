@@ -49,7 +49,7 @@ function bash_setup() {
     tmux_attach
     "${HOST}"_setup
     add_to_path_pre "${SCRIPTS_FOLDER}"
-    export GPG_TTY=$(tty)
+    GPG_TTY=$(tty); export GPG_TTY
 }
 
 # bashrc reload function
