@@ -221,6 +221,22 @@ function tg_msg() {
 }
 
 
+# Telegram uploader function
+function tg_upload() {
+    local FILE; FILE=${1}; shift
+
+    if [[ ! -f ${FILE} ]]; then
+        display_error "tg_upload() failed to find ${FILE}!"
+        return 1
+    fi
+
+    curl -s -F chat_id="${CHAT_ID}" \
+            -F document=@"${FILE}" \
+            -F caption="${*}" \
+            -X POST https://api.telegram.org/bot"${TOKEN}"/sendDocument 1>/dev/null
+}
+
+
 # Remove URLs from Clang version
 function clang_version() {
     [[ ${#} -lt 1 || ! ${1} =~ "clang" ]] && { display_error "You didn't supply a Clang binary!"; return; }
