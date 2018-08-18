@@ -65,7 +65,7 @@ function build() {
         echo "Version $(make kernelversion)"
         echo "\`\`\`"
     } > "${TG_MSG_FILE}"
-    [[ -n ${PI} || "${*}" =~ "-t" ]] && notify "$(cat "${TG_MSG_FILE}")"
+    [[ -n ${PI} || "${*}" =~ "-t" ]] && tg_msg "$(cat "${TG_MSG_FILE}")"
 
     rm -rf out
 
@@ -93,7 +93,7 @@ function build() {
         echo "Duration: ${TIME_STRING,,}"
         echo "\`\`\`"
     } > "${TG_MSG_FILE}"
-    [[ -n ${PI} || "${*}" =~ "-t" ]] && notify "$(cat "${TG_MSG_FILE}")"
+    [[ -n ${PI} || "${*}" =~ "-t" ]] && tg_msg "$(cat "${TG_MSG_FILE}")"
 
     if [[ -z ${PI} ]]; then
         mkdir -p "${SOURCE_FOLDER}/out/pi_root"

@@ -141,7 +141,7 @@ function die() {
             echo "${*}"
             echo "\`\`\`"
         } > "${TMP_FILE}"
-        notify "$(cat "${TMP_FILE}")"
+        tg_msg "$(cat "${TMP_FILE}")"
         rm -f "${TMP_FILE}"
     fi
 
@@ -203,14 +203,14 @@ load_botinfo
 
 
 # Telegram notifier function
-function notify() {
+function tg_msg() {
     if [[ -z ${TOKEN} ]]; then
-        display_error "notify() was called but there was no token!"
+        display_error "tg_msg() was called but there was no token!"
         return 1
     fi
 
     if [[ -z ${CHAT_ID} ]]; then
-        display_error "notify() was called but there was no chat ID!"
+        display_error "tg_msg() was called but there was no chat ID!"
         return 1
     fi
 

@@ -357,7 +357,7 @@ function dib() {(
         echo
         echo "${BOLD}${DEVICE} results:${RST} ${URL}"
         echo
-        [[ -n ${WANTS_TG} ]] && notify "${DEVICE} results: ${URL}"
+        [[ -n ${WANTS_TG} ]] && tg_msg "${DEVICE} results: ${URL}"
     fi
 )}
 
@@ -443,9 +443,9 @@ function mkpkg() {
     START=$(date +%s)
     if makepkg -si --noconfirm; then
         TIME_STRING=$(format_time "${START}" "$(date +%s)")
-        notify "\`Server kernel build completed successfully in ${TIME_STRING,,}\`"
+        tg_msg "\`Server kernel build completed successfully in ${TIME_STRING,,}\`"
     else
-        notify "\`Server kernel build failed in ${TIME_STRING,,}\`"
+        tg_msg "\`Server kernel build failed in ${TIME_STRING,,}\`"
     fi
 }
 
@@ -740,7 +740,7 @@ function btg() {(
                         echo "Version: $("${FOLDER}/bin/${TARGET}-gcc" --version | head -1)"
                         echo "\`\`\`"
                     } > "${TG_MSG_FILE}"
-                    notify "$(cat "${TG_MSG_FILE}")"
+                    tg_msg "$(cat "${TG_MSG_FILE}")"
                 fi
             else
                 if [[ -n ${TG} ]]; then
@@ -751,7 +751,7 @@ function btg() {(
                         echo "Time elapsed: ${TIME_ELAPSED,,}"
                         echo "\`\`\`"
                     } > "${TG_MSG_FILE}"
-                    notify "$(cat "${TG_MSG_FILE}")"
+                    tg_msg "$(cat "${TG_MSG_FILE}")"
                 fi
             fi
         done
@@ -804,7 +804,7 @@ function fkba() {(
             echo
             echo "TOTAL DURATION: ${TIME_STRING,,}"
         } >> "${LOG}"
-        notify "${DEVICE} results: $(deldog "${LOG}")"
+        tg_msg "${DEVICE} results: $(deldog "${LOG}")"
     done
 )}
 

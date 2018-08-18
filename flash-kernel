@@ -169,7 +169,7 @@ function parse_parameters() {
             echo "$(basename "${0}") ${PARAMS}"
             echo "\`\`\`"
         } > "${TG_MSG_FILE}"
-        notify "$(cat "${TG_MSG_FILE}")"
+        tg_msg "$(cat "${TG_MSG_FILE}")"
     fi
 }
 
@@ -593,7 +593,7 @@ function build_kernel() {
             fi
             echo "\`\`\`"
         } > "${TG_MSG_FILE}"
-        notify "$(cat "${TG_MSG_FILE}")"
+        tg_msg "$(cat "${TG_MSG_FILE}")"
     fi
 
     # Make the kernel
@@ -844,7 +844,7 @@ function ending_info() {
                     fi
                 fi
             } > "${TG_MSG_FILE}"
-            notify "$(cat "${TG_MSG_FILE}")"
+            tg_msg "$(cat "${TG_MSG_FILE}")"
         fi
 
         EXIT_CODE=0
@@ -852,7 +852,7 @@ function ending_info() {
         echo "DURATION:   ${DURATION,,}" >> "${LOG}"
         if [[ -n ${TG} ]]; then
             load_botinfo
-            notify "\`Build failed in ${DURATION,,}\`"
+            tg_msg "\`Build failed in ${DURATION,,}\`"
         fi
         EXIT_CODE=1
     fi
