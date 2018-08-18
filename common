@@ -214,7 +214,10 @@ function tg_msg() {
         return 1
     fi
 
-    curl -s -X POST https://api.telegram.org/bot"${TOKEN}"/sendMessage -d chat_id="${CHAT_ID}" -d parse_mode="Markdown" -d text="${*}" 1>/dev/null
+    curl -s -X POST https://api.telegram.org/bot"${TOKEN}"/sendMessage \
+            -d chat_id="${CHAT_ID}" \
+            -d parse_mode="Markdown" \
+            -d text="${*}" 1>/dev/null
 }
 
 
