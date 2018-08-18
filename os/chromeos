@@ -28,6 +28,7 @@ function rld() {
 }
 source <(curl -Ls https://raw.githubusercontent.com/nathanchance/scripts/master/snippets/deldog)
 source <(curl -Ls https://raw.githubusercontent.com/nathanchance/scripts/master/snippets/git)
+export GPG_TTY=$(tty)
 
 
 # Neofetch function
