@@ -161,6 +161,7 @@ function parse_parameters() {
 
     # Easy to use variables for if statements
     [[ ${MODE} = "alpha" || ${MODE} = "beta" || ${MODE} = "rc" ]] && TEST=true
+    [[ ${MODE} = "nightly" ]] && { NIGHTLY=true; PERSONAL_OPTS=true; }
     [[ ${MODE} = "personal" ]] && { PERSONAL=true; PERSONAL_OPTS=true; }
     [[ ${MODE} = "stable" ]] && STABLE=true
     [[ ${MODE} = "tmp" ]] && TMP=true
@@ -307,10 +308,12 @@ function generate_variables() {
     FILE_MOVE_HEAD=${WEB_FOLDER}/downloads
 
     case ${MODE} in
-        "alpha"|"beta"|"bisect"|"rc"|"stable")
-            FILE_MOVE=${FILE_MOVE_HEAD}/kernels/${DEVICE_NAME_WEB}/${ANDROID_VERSION}/${MODE}
-            FILE_MOVE_OLD=$(readlink -f "${FILE_MOVE}/../archive")
-            if [[ -n ${TG} ]]; then
+        "beta"|"bisect"|"nightly"|"rc"|"stable")
+            if [[ -z ${NIGHTLY} ]]; then
+                FILE_MOVE=${FILE_MOVE_HEAD}/kernels/${DEVICE_NAME_WEB}/${ANDROID_VERSION}/${MODE}
+                FILE_MOVE_OLD=$(readlink -f "${FILE_MOVE}/../archive")
+            fi
+            if [[ -n ${TG} || -n ${NIGHTLY} ]]; then
                 case ${DEVICE} in
                     "marlin") export CHAT_ID=-1001132593794 ;;
                     "op6") export CHAT_ID=-1001192694857 ;;
@@ -692,6 +695,18 @@ function package_zip() {
         ending_info
     else
         echo "${GRN}Kernel zip successfully generated!${RST}\n"
+    fi
+
+    if [[ -n ${NIGHTLY} ]]; then
+        local TMP_FILE
+        TMP_FILE=$(mktemp)
+        {
+            echo "$(date +%Y%m%d)-nightly"
+            echo
+            echo "To learn more, type #nightly"
+        } > "${TMP_FILE}"
+        tg_upload "${SIGNED_ZIP}" "$(cat "${TMP_FILE}")"
+        rm -rf "${TMP_FILE}"
     fi
 }
 
