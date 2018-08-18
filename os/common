@@ -101,9 +101,3 @@ function gerrit-push {
         echo "wtf happened?"
     fi
 }
-
-
-# echo signoff
-function signoff() {
-    echo "Signed-off-by: $(git config --get user.name) <$(git config --get user.email)>"
-}

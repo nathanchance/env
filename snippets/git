@@ -68,3 +68,21 @@ git config --global alias.shm 'show -s'
 git config --global alias.shmf 'show -s --format=fuller'
 git config --global alias.ss 'status --short --branch'
 git config --global alias.us 'reset HEAD'
+
+
+# Get a git commit message tag
+function gcmt() {
+    local TAG
+
+    case ${1} in
+        "-a"|"--acked-by") TAG="Acked-by" ;;
+        "-r"|"--reviewed-by") TAG="Reviewed-by" ;;
+        "-s"|"--signed-off-by") TAG="Signed-off-by" ;;
+        "-t"|"--tested-by") TAG="Tested-by" ;;
+    esac
+    [[ -z ${TAG} ]] && TAG="Signed-off-by"
+
+    echo
+    echo "${TAG}: $(git config --get user.name) <$(git config --get user.email)>"
+    echo
+}
