@@ -588,14 +588,11 @@ function change-email() {
 
     case ${1} in
         "du")
-            git config user.email "nathan@dirtyunicorns.com"
-            git config user.signingkey 8B07CAAD4B2581BA302A0DB1BA74F524ACD387E1 ;;
+            git config user.email "nathan@dirtyunicorns.com" ;;
         "prjkt")
-            git config user.email "nathan@prjkt.io"
-            git config user.signingkey BA5016990FD3D1F77858CFF7BA3B6486FE8AE132 ;;
+            git config user.email "nathan@prjkt.io" ;;
         "personal")
-            git config --unset user.email
-            git config --unset user.signingkey ;;
+            git config --unset user.email ;;
     esac
 }
 
