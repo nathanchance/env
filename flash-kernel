@@ -787,7 +787,7 @@ function after_build_tasks() {
                 [[ -z ${TMP} ]] && push_flashable_files
                 [[ -n ${STABLE} ]] && tag_stable
             fi
-        echo
+            echo
         fi
     fi
 }
