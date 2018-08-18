@@ -103,6 +103,7 @@ if [[ -f out/magisk-release.zip && -z ${BUILD_ONLY} ]]; then
     cd "${FOLDER}" || die "Can't move into ${FOLDER}"
     git add -f .
     echo
+    gpg_available
     git ac -m "magisk-files: ${VERSION_CODE}"
     git push
     echo

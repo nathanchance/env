@@ -290,6 +290,7 @@ function mg_target_version() {
         mv "${MSG_FILE}" /tmp/mrg-msg
         die "Merge needs manual intervention! Resolve conflicts then run git fm."
     else
+        gpg_available
         git commit --amend --date="$(date)" --file "${MSG_FILE}" --gpg-sign --no-edit --quiet
         rm -f "${MSG_FILE}"
         header "${TARGET_VERSION} MERGED CLEANLY!" "${GRN}"

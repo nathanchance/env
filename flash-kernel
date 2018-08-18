@@ -706,6 +706,7 @@ function setup_folders() {
         rm -rf {alpha,beta,rc,tmp}/*
         git add .
         if [[ -n $(git status --porcelain) ]]; then
+            gpg_available
             git commit --gpg-sign ${HIDDEN_COMMANDS:+ "--quiet"} --signoff --message "${DEVICE_NAME_FILE}: Remove old test builds"
             git push ${HIDDEN_COMMANDS:+ "--quiet"}
         fi
