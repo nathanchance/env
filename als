@@ -39,7 +39,7 @@ trap 'echo; die "Manually aborted!"' SIGINT SIGTERM
 ALS=${KERNEL_FOLDER}/als
 REPOS_318=( "marlin" "msm-3.18" "op3" "tissot" )
 REPOS_44=( "msm-4.4" "nash" "op5" "sagit" "wahoo" "whyred" )
-REPOS_49=( "msm-4.9" "op6" )
+REPOS_49=( "msm-4.9" "op6" "polaris" )
 
 # Parse parameters
 while [[ ${#} -ge 1 ]]; do
@@ -121,7 +121,7 @@ if [[ -n ${INIT} ]]; then
                 REMOTES=( "LineageOS:https://github.com/LineageOS/android_kernel_oneplus_sdm845"
                           "omni:https://github.com/omnirom/android_kernel_oneplus_sdm845"
                           "upstream:https://github.com/OnePlusOSS/android_kernel_oneplus_sdm845" ) ;;
-            "sagit"|"tissot"|"whyred")
+            "polaris"|"sagit"|"tissot"|"whyred")
                 REMOTES=( "upstream:https://github.com/MiCode/Xiaomi_Kernel_OpenSource" ) ;;
         esac
         for REMOTE in "${REMOTES[@]}"; do
@@ -156,6 +156,7 @@ for VERSION in "${VERSIONS[@]}"; do
             "op3") BRANCHES=( "android-8.1:omni" "lineage-15.1:LineageOS" "oneplus/QC8996_O_8.0.0:upstream" ) ;;
             "op5") BRANCHES=( "android-8.1:omni" "lineage-15.1" "oneplus/QC8998_O_8.1:upstream" "oneplus/QC8998_O_8.1_Beta:upstream" ) ;;
             "op6") BRANCHES=( "android-8.1:omni" "lineage-15.1:LineageOS" "oneplus/SDM845_O_8.1:upstream" ) ;;
+            "polaris") BRANCHES=( "polaris-o-oss:upstream" ) ;;
             "sagit") BRANCHES=( "sagit-o-oss:upstream" ) ;;
             "tissot") BRANCHES=( "tissot-o-oss-8.1:upstream" ) ;;
             "wahoo") BRANCHES=( "android-msm-wahoo-4.4" ) ;;
@@ -222,7 +223,7 @@ for VERSION in "${VERSIONS[@]}"; do
                 if [[ -n ${RESOLVE} ]]; then
                     # Get the appropriate resolution command filename (static mapping because it is not uniform)
                     case "${REPO}:${BRANCH}" in
-                        "marlin"*|"msm"*|"sagit"*|"tissot"*|"wahoo"*|"whyred"*) COMMANDS="${REPO}-commands" ;;
+                        "marlin"*|"msm"*|"polaris"*|"sagit"*|"tissot"*|"wahoo"*|"whyred"*) COMMANDS="${REPO}-commands" ;;
                         "nash"*) COMMANDS="nash-oreo-8.0.0-commands" ;;
                         "op3:oneplus/QC8996_O_8.0.0") COMMANDS="${REPO}-8.0.0-commands" ;;
                         "op5:oneplus/QC8998_O_8.1"|"op6:oneplus/SDM845_O_8.1") COMMANDS="${REPO}-O_8.1-commands" ;;
