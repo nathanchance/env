@@ -289,10 +289,13 @@ for VERSION in "${VERSIONS[@]}"; do
 done
 
 if [[ -n ${LOGGING} ]]; then
+    URL=$(deldog "${LOG}")
+
     clear
     echo
-    echo "${BOLD}ALS merge results:${RST} $(deldog "${LOG}")"
+    echo "${BOLD}ALS merge results:${RST} ${URL}"
     echo
+    tg_msg "ALS merge results: ${URL}"
 fi
 
 exit 0
