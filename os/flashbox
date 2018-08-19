@@ -317,7 +317,6 @@ function dib() {(
     while [[ ${#} -ge 1 ]]; do
         case ${1} in
             "-l"|"--log") WANTS_LOG=true ;;
-            "-t"|"--telegram") WANTS_TG=true ;;
         esac
         shift
     done
@@ -358,7 +357,7 @@ function dib() {(
         echo
         echo "${BOLD}${DEVICE} results:${RST} ${URL}"
         echo
-        [[ -n ${WANTS_TG} ]] && tg_msg "${DEVICE} results: ${URL}"
+        tg_msg "${DEVICE} results: ${URL}"
     fi
 )}
 
