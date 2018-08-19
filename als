@@ -174,7 +174,7 @@ for VERSION in "${VERSIONS[@]}"; do
         for BRANCH in "${BRANCHES[@]}"; do
             REMOTE=${BRANCH##*:}
             BRANCH=${BRANCH%%:*}
-            LOG_TAG="${REPO}: ${BRANCH}:"
+            LOG_TAG="${REPO} | ${BRANCH} |"
 
             header "${REPO} - ${BRANCH}"
 
@@ -197,11 +197,17 @@ for VERSION in "${VERSIONS[@]}"; do
             # Cache kernel version. This needs to be done before doing a merge in case Makefile conflicts...
             KVER=$(kv)
             MAJOR_VER=${KVER%.*}
+            if [[ -n ${QUEUE} ]]; then
+                COMMANDS_BRANCH=stable-queue/queue-${MAJOR_VER}
+            else
+                COMMANDS_BRANCH=linux-stable${RC:+"-rc"}/linux-${MAJOR_VER}.y
+            fi
+            LOG_TAG="${LOG_TAG} ${COMMANDS_BRANCH} |"
 
             # Merge the update, logging success and pushing as necessary
             if merge-stable "${ALS_PARAMS[@]}"; then
                 # Show merged kernel version in log
-                log "${LOG_TAG} Merged $(kv) successfully!"
+                log "${LOG_TAG} Merge successful: $(kv)"
 
                 # Don't push if we're just testing
                 [[ -z ${TEST} ]] && git push
@@ -213,12 +219,6 @@ for VERSION in "${VERSIONS[@]}"; do
                     unset SKIP_BUILD
                 fi
             else
-                if [[ -n ${QUEUE} ]]; then
-                    COMMANDS_BRANCH=queue-${MAJOR_VER}
-                else
-                    COMMANDS_BRANCH=linux-stable${RC:+"-rc"}/linux-${MAJOR_VER}.y
-                fi
-
                 # Resolve if requested
                 if [[ -n ${RESOLVE} ]]; then
                     # Get the appropriate resolution command filename (static mapping because it is not uniform)
@@ -239,7 +239,7 @@ for VERSION in "${VERSIONS[@]}"; do
                     if [[ -f ${COMMANDS} ]]; then
                         if bash "${COMMANDS}" "${COMMANDS_BRANCH}"; then
                             # Show merged kernel version in log
-                            log "${LOG_TAG} Merge of ${COMMANDS_BRANCH} initially failed but resolution was successful! Version: $(kv)"
+                            log "${LOG_TAG} Merge failed but resolution was successful: $(kv)"
 
                             # Don't push if we're just testing
                             [[ -z ${TEST} ]] && git push
@@ -251,7 +251,7 @@ for VERSION in "${VERSIONS[@]}"; do
                                 unset SKIP_BUILD
                             fi
                         else
-                            log "${LOG_TAG} Merge of ${COMMANDS_BRANCH} failed, even after attempting resolution!"
+                            log "${LOG_TAG} Merge failed, even after attempting resolution!"
                             failed_steps
                         fi
                     # If no command file was found, something is messed up
@@ -260,7 +260,7 @@ for VERSION in "${VERSIONS[@]}"; do
                     fi
                 # Log failure otherwise
                 else
-                    log "${LOG_TAG} Merge of ${COMMANDS_BRANCH} failed!"
+                    log "${LOG_TAG} Merge failed!"
                     log "${LOG_TAG} Conflicts:"
                     log "$(git cf)"
                     failed_steps
@@ -275,10 +275,10 @@ for VERSION in "${VERSIONS[@]}"; do
                 for BK_COMMAND in "${BK_COMMANDS[@]}"; do
                     if ${BK_COMMAND}; then
                         # Show kernel version in log
-                        log "${LOG_TAG} Build successful -- $(kv)$(cd out || return; ../scripts/setlocalversion ..)"
+                        log "${LOG_TAG} Build successful: $(kv)$(cd out || return; ../scripts/setlocalversion ..)"
                     else
                         # Add command for quick reproduction of build failure
-                        log "${LOG_TAG} Build failed -- ( cd ${ALS}/${REPO}; ${BK_COMMAND} )"
+                        log "${LOG_TAG} Build failed: ( cd ${ALS}/${REPO}; ${BK_COMMAND} )"
                     fi
                 done
             fi
