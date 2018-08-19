@@ -87,6 +87,7 @@ function flashbox_setup() {
     export LOG=/tmp/results.log
     add_to_path_post "${HOME}/.gem/ruby/2.5.0/bin"
     source "${SCRIPTS_FOLDER}"/snippets/bk
+    ( gpg_available )
 }
 
 
