@@ -20,15 +20,24 @@ while [[ ${#} -ge 1 ]]; do
             HASH=${1} ;;
         "-v"|"--version")
             shift && enforce_value "${@}"
-            VERSION_CODE=${1}
+
+            # zipVersionCode,apkVersion,apkVersionCode
+            IFS=',' read -r -a VERSION_VALUES <<< "${1}"
+            [[ ${#VERSION_VALUES[@]} -lt 3 ]] && die "Please specify the correct version format!"
+
+            VERSION_CODE=${VERSION_VALUES[0]}
             VERSION=${VERSION_CODE:0:2}.${VERSION_CODE:2:1}
-            VERSION_SUFFIX=${VERSION_CODE:4} ;;
+            VERSION_SUFFIX=${VERSION_CODE:4}
+
+            APK_VERSION=${VERSION_VALUES[1]}
+            APK_VERSION_CODE=${VERSION_VALUES[2]}${VERSION_SUFFIX} ;;
     esac
     shift
 done
 
 # Parameter sanity check
-[[ -z ${VERSION} || -z ${VERSION_CODE} ]] && die "Version or version code is not set!"
+[[ -z ${VERSION} || -z ${VERSION_CODE} ]] && die "Version or version code is not set!"`
+[[ -z ${APK_VERSION} || -z ${APK_VERSION_CODE} ]] && die "APK version or version code is not set!"`
 [[ -z ${HASH} ]] && HASH=origin/master
 
 # Existence sanity checks
@@ -45,23 +54,18 @@ git submodule update --init --recursive
 
 # Clean up
 header "Cleaning up"
-git rf app/build.gradle
-git cl --exclude config.prop --exclude release-key.jks
+./build.py clean
 
 # Patch config with proper versions
 sed -e "/^version=/s/=.*/=${VERSION}/" \
     -e "/^versionCode=/s/=.*/=${VERSION_CODE}/" \
+    -e "/^appVersion=/s/=.*/=${APK_VERSION}/" \
+    -e "/^appVersionCode=/s/=.*/=${APK_VERSION_CODE}/" \
     -i config.prop
-
-# Patch APK with the proper version code
-APK_VERSION=$(grep versionName app/build.gradle | head -n1 | cut -d \" -f 2)
-APK_VERSION_CODE=$(grep versionCode app/build.gradle | head -n1 | awk '{print $2}')
-sed -i "s/${APK_VERSION_CODE}/${APK_VERSION_CODE}${VERSION_SUFFIX}/g" app/build.gradle
-APK_VERSION_CODE=${APK_VERSION_CODE}${VERSION_SUFFIX}
 
 # Build!
 header "Building Magisk"
-ANDROID_NDK_HOME=${TC_FOLDER}/frankendk ./build.py -r -v all
+ANDROID_NDK_HOME=${TC_FOLDER}/frankendk ./build.py -r all
 
 # Only move files if the build actually succeeded
 if [[ -f out/magisk-release.zip && -z ${BUILD_ONLY} ]]; then
