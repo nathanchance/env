@@ -91,7 +91,7 @@ function parse_parameters() {
             "-d"|"--defconfig")
                 shift && enforce_value "${@}"
 
-                DEFCONFIG=${1} ;;
+                IFS=',' read -r -a DEFCONFIGS <<< "${1}" ;;
 
             # Show full compilation
             "-D"|"--debug")
@@ -152,7 +152,7 @@ function parse_parameters() {
     [[ ! -f Makefile ]] && die "This must be run in a kernel tree!"
 
     # Error out if defconfig wasn't supplied
-    [[ -z ${DEFCONFIG} ]] && die "Please supply a defconfig!"
+    [[ ${#DEFCONFIGS[@]} -lt 1 ]] && die "Please supply a defconfig!"
 
     # Defaults
     [[ -z ${ARCH} ]] && ARCH=arm64
@@ -201,7 +201,12 @@ function build() {
     rm -rf out && mkdir -p out
 
     # Build kernel image
-    kmake "${DEFCONFIG}" |& ag --no-color -v "format-overflow"
+    if [[ ${#DEFCONFIGS[@]} -gt 1 ]]; then
+        cat "${DEFCONFIGS[@]}" > out/.config
+        kmake olddefconfig |& ag --no-color -v "format-overflow"
+    else
+        kmake "${DEFCONFIGS[0]}" |& ag --no-color -v "format-overflow"
+    fi
     if [[ -n ${WERROR} ]]; then
         ./scripts/config --file out/.config -e CC_WERROR
         kmake olddefconfig
