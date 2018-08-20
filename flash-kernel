@@ -155,7 +155,6 @@ function parse_parameters() {
     done
 
     # Default parameters
-    [[ -z ${DEVICE} ]] && DEVICE="wahoo"
     [[ -z ${MODE} ]] && MODE="personal"
     [[ -z ${VERBOSITY_LEVEL} ]] && HIDDEN_COMMANDS=true
 
@@ -165,6 +164,9 @@ function parse_parameters() {
     [[ ${MODE} = "personal" ]] && { PERSONAL=true; PERSONAL_OPTS=true; }
     [[ ${MODE} = "stable" ]] && STABLE=true
     [[ ${MODE} = "tmp" ]] && TMP=true
+
+    [[ -n ${PERSONAL} && ${PWD} =~ flash ]] && DEVICE=$(basename "${PWD}")
+    [[ -z ${DEVICE} ]] && die "DEVICE is not set!"
 
     if [[ -n ${TG} ]]; then
         {
