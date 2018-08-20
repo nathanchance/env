@@ -77,7 +77,8 @@ if [[ -f out/magisk-release.zip && -z ${BUILD_ONLY} ]]; then
 
     # Move files
     header "Moving files"
-    mkdir -p "${FOLDER}"
+    mkdir -p "${FOLDER}"/archive
+    mv -v "${FOLDER}"/*.{zip,apk} "${FOLDER}"/archive
     mv -v out/app-release.apk "${FOLDER}/${APK}"
     mv -v out/magisk-release.zip "${FOLDER}/${ZIP}"
     mv -v out/magisk-uninstaller.zip "${FOLDER}/${UNINSTALLER}"
