@@ -19,6 +19,16 @@ function kv() {
     make CROSS_COMPILE="" kernelversion
 }
 
+# Steps to execute post 'git fm'
+function post_git_fm_steps() {
+    # Log our success
+    log "${LOG_TAG} ${1}"
+    # Don't push if we're just testing
+    [[ -z ${TEST} ]] && git push
+    # Make sure SKIP_BUILD gets unset
+    unset SKIP_BUILD
+}
+
 # Steps to execute if merge failed
 function failed_steps() {
     # Abort merge
@@ -207,17 +217,7 @@ for VERSION in "${VERSIONS[@]}"; do
             # Merge the update, logging success and pushing as necessary
             if merge-stable "${ALS_PARAMS[@]}"; then
                 # Show merged kernel version in log
-                log "${LOG_TAG} Merge successful: $(kv)"
-
-                # Don't push if we're just testing
-                [[ -z ${TEST} ]] && git push
-
-                # Some repos/branches are blacklisted from building
-                if [[ ${REPO} = "nash" ]]; then
-                    SKIP_BUILD=true
-                else
-                    unset SKIP_BUILD
-                fi
+                post_git_fm_steps "Merge successful: $(kv)"
             else
                 # Resolve if requested
                 if [[ -n ${RESOLVE} ]]; then
@@ -239,17 +239,7 @@ for VERSION in "${VERSIONS[@]}"; do
                     if [[ -f ${COMMANDS} ]]; then
                         if bash "${COMMANDS}" "${COMMANDS_BRANCH}"; then
                             # Show merged kernel version in log
-                            log "${LOG_TAG} Merge failed but resolution was successful: $(kv)"
-
-                            # Don't push if we're just testing
-                            [[ -z ${TEST} ]] && git push
-
-                            # Some repos are blacklisted from building
-                            if [[ ${REPO} = "nash" ]]; then
-                                SKIP_BUILD=true
-                            else
-                                unset SKIP_BUILD
-                            fi
+                            post_git_fm_steps "Merge failed but resolution was successful: $(kv)"
                         else
                             log "${LOG_TAG} Merge failed, even after attempting resolution!"
                             failed_steps
