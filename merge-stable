@@ -209,19 +209,20 @@ function generate_versions() {
         CB=$(git cb)
         QUEUE_BRANCH=queue-${CURRENT_MAJOR_VERSION}
         (
-            if ! git rev-parse --verify "${QUEUE_BRANCH}"; then
-                git checkout -b "${QUEUE_BRANCH}" v"${CURRENT_VERSION}"
+            git cl -q
+            if ! git rev-parse --verify "${QUEUE_BRANCH}" &>/dev/null; then
+                git checkout -q -b "${QUEUE_BRANCH}" v"${CURRENT_VERSION}" || die "Error checking out ${QUEUE_BRANCH}!"
             else
-                git checkout "${QUEUE_BRANCH}"
-                git reset --hard v"${CURRENT_VERSION}"
+                git checkout -q "${QUEUE_BRANCH}" || die "Error checking out ${QUEUE_BRANCH}"
+                git reset --hard -q v"${CURRENT_VERSION}" || die "Error resetting ${QUEUE_BRANCH}"
             fi
-        ) &>/dev/null
+        )
 
         echo "\n${BOLD}Fetching stable-queue...${RST}\n"
-        git -C "${HOME}/kernels/sources/stable-queue" pull &>/dev/null
+        git -C "${HOME}/kernels/sources/stable-queue" pull &>/dev/null || die "Error pulling stable queue!"
 
         echo "${BOLD}Generating ${QUEUE_BRANCH}...${RST}"
-        git quiltimport --patches "${HOME}/kernels/sources/stable-queue/${QUEUE_BRANCH}" &>/dev/null
+        git quiltimport --patches "${HOME}/kernels/sources/stable-queue/${QUEUE_BRANCH}" &>/dev/null || die "Error creating ${QUEUE_BRANCH}!"
 
         git ch "${CB}" &>/dev/null
 
