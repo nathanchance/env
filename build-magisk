@@ -44,6 +44,7 @@ done
 cd "${HOME}/repos/magisk" || die "Magisk folder doesn't exist, please clone!"
 [[ ! -f config.prop ]] && die "config.prop not found!"
 [[ ! -f release-key.jks ]] && die "keystore file not found!"
+[[ ! -f snet.patch ]] && die "SafetyNet patch needed!"
 [[ ! -d ${TC_FOLDER}/frankendk ]] && die "Please clone topjohnwu/FrankeNDK to ${TC_FOLDER}!"
 
 # Update the repo
@@ -63,6 +64,9 @@ sed -e "/^version=/s/=.*/=${VERSION}/" \
     -e "/^appVersionCode=/s/=.*/=${APK_VERSION_CODE}/" \
     -i config.prop
 
+# Add SafetyNet Attestion Key
+git ap snet.patch || die "SafetyNet patch needs to be regenerated!"
+
 # Build!
 header "Building Magisk"
 ANDROID_NDK_HOME=${TC_FOLDER}/frankendk ./build.py -r all
@@ -78,10 +82,11 @@ if [[ -f out/magisk-release.zip && -z ${BUILD_ONLY} ]]; then
     # Move files
     header "Moving files"
     mkdir -p "${FOLDER}"/archive
-    mv -v "${FOLDER}"/*.{zip,apk} "${FOLDER}"/archive
+    mv -v "${FOLDER}"/Magisk*.{zip,apk} "${FOLDER}"/archive
     mv -v out/app-full-release.apk "${FOLDER}/${APK}"
     mv -v out/magisk-release.zip "${FOLDER}/${ZIP}"
     mv -v out/magisk-uninstaller.zip "${FOLDER}/${UNINSTALLER}"
+    mv -v out/snet.apk "${FOLDER}"
 
     # Generate an updater.json
     {
@@ -101,6 +106,10 @@ if [[ -f out/magisk-release.zip && -z ${BUILD_ONLY} ]]; then
         echo "  },"
         echo "  \"uninstaller\": {"
         echo "    \"link\": \"$(web_link "${FOLDER}/${UNINSTALLER}")\""
+        echo "  },"
+        echo "  \"snet\": {"
+        echo "    \"versionCode\": \"11\","
+        echo "    \"link\": \"$(web_link "${FOLDER}/snet.apk")\""
         echo "  }"
         echo "}"
     } > "${FOLDER}/updater.json"
