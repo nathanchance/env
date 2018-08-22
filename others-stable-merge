@@ -82,12 +82,8 @@ if [[ ${#} -lt 1 || "${*}" =~ "4.9" ]]; then
     cd "${ROMS_HOME}/aicp-op6" || die "aicp-op6 does not exist, please clone!"
     git fetch aicp
     git ml --no-edit aicp/o8.1-flash || die "Merge conflicts detected, please resolve then continue!"
-
-    merge-stable
-    VERSION_49=$(make CROSS_COMPILE="" kernelversion)
-    PATCHES_49=${REPO_FOLDER}/stable-patches/${VERSION_49}
-    [[ -f ${PATCHES_49}/op6-lineage-15.1-commands ]] && bash "${PATCHES_49}/op6-lineage-15.1-commands" "v${VERSION_49}"
-
+    git fetch als || die "android-linux-stable remote doesn't exist, please add then continue!"
+    git ml --no-edit als/lineage-15.1 || die "Merge conflicts detected, please resolve then continue!"
     git push -f || die "Can't push source to origin!"
 fi
 
