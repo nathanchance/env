@@ -523,30 +523,6 @@ function print_variables() {
 }
 
 
-# Export version variable
-function evv() {
-    FILE=out/include/generated/compile.h
-    export "$(grep "${1}" "${FILE}" | cut -d'"' -f1 | awk '{print $2}')"="$(grep "${1}" "${FILE}" | cut -d'"' -f2)"
-}
-
-
-# Show the version as if looking at "/proc/version"
-function parse_version() {
-    evv UTS_VERSION
-    evv LINUX_COMPILE_BY
-    evv LINUX_COMPILE_HOST
-    evv LINUX_COMPILER
-
-    VERSION_STRING=$(cat out/include/config/kernel.release)
-    UTS_VERSION=${UTS_VERSION#*PREEMPT }
-
-    echo "${BOLD}Version:${RST}    ${VERSION_STRING} (${LINUX_COMPILER})"
-    echo "            ${LINUX_COMPILE_BY}@${LINUX_COMPILE_HOST} #${KBUILD_BUILD_NUMBER:-1}"
-    echo "            ${UTS_VERSION}"
-    echo
-}
-
-
 # Build kernel image
 function build_kernel() {
     # Clean source folder
@@ -635,7 +611,7 @@ function build_kernel() {
     # Move them if they exist, error out if not
     KIMG=${FILES_TO_MOVE[0]%:*}
     if [[ -f "${OUT_FOLDER}/${KIMG}" ]]; then
-        parse_version
+        android_kernel_version
         echo "${GRN}$(basename "${KIMG}") compiled successfully!${RST}\n"
         move_kernel_files
     else
@@ -896,6 +872,7 @@ function ending_info() {
 ################
 
 source "$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")" || return; pwd)/common"
+source "${SCRIPTS_FOLDER}/snippets/akv"
 trap 'echo; die "Manually aborted!"' SIGINT SIGTERM
 
 # Start tracking time
