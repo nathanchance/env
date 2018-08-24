@@ -19,13 +19,6 @@ function errcho() {
 }
 
 
-# Export version variable
-function evv() {
-    FILE=out/include/generated/compile.h
-    export "$(grep "${1}" "${FILE}" | cut -d'"' -f1 | awk '{print $2}')"="$(grep "${1}" "${FILE}" | cut -d'"' -f2)"
-}
-
-
 # Kernel make function
 function kmake() {
     # Set make variable
@@ -44,17 +37,6 @@ function kmake() {
                                            CROSS_COMPILE_ARM32="${GCC_32_BIT_TOOLCHAIN%gcc}" \
                                            "${@}"
     fi
-}
-
-
-# Show the version as if looking at "/proc/version"
-function parse_version() {
-    evv UTS_VERSION
-    evv LINUX_COMPILE_BY
-    evv LINUX_COMPILE_HOST
-    evv LINUX_COMPILER
-    VERSION=$(cat out/include/config/kernel.release)
-    echo "Linux version ${VERSION} (${LINUX_COMPILE_BY}@${LINUX_COMPILE_HOST}) (${LINUX_COMPILER}) ${UTS_VERSION}"
 }
 
 
@@ -264,9 +246,9 @@ function report_result() {
         echo
         errcho "${SCRIPT_COMMAND}${GRN}BUILD SUCCESSFUL IN $(format_time "${START}" "${END}")${RST}"
         echo
-        echo "${BOLD}IMAGE:${RST} ${FINAL_IMAGE}"
+        echo "${BOLD}Image:${RST}      ${FINAL_IMAGE}"
         echo
-        echo "${BOLD}VERSION:${RST} $(parse_version)"
+        android_kernel_version
     else
         >&2 die "${RST}${SCRIPT_COMMAND}${RED}BUILD FAILED IN $(format_time "${START}" "${END}")!"
     fi
@@ -274,13 +256,14 @@ function report_result() {
     [[ -n ${UPLOAD} ]] && transfer "${FINAL_IMAGE}"
 
     # Alert of script end
-    echo "\n\a"
+    echo "\a"
 
     exit 0
 }
 
 
 source "$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")" || return; pwd)/common"
+source "${SCRIPTS_FOLDER}/snippets/akv"
 source "${SCRIPTS_FOLDER}/snippets/transfer"
 trap 'echo; die "Manually aborted!"' SIGINT SIGTERM
 parse_parameters "${@}"
