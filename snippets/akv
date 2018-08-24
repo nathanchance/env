@@ -1,0 +1,31 @@
+#!/usr/bin/env bash
+#
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+# Copyright (C) 2018 Nathan Chancellor
+#
+# Android kernel version display functions for kernel build scripts
+
+
+# Export version variable
+function evv() {
+    FILE="${OUT_FOLDER:-out}"/include/generated/compile.h
+    export "$(grep "${1}" "${FILE}" | cut -d'"' -f1 | awk '{print $2}')"="$(grep "${1}" "${FILE}" | cut -d'"' -f2)"
+}
+
+
+# Show the version as if looking at "Settings -> About phone" on Android Oreo 8.1
+function android_kernel_version() {
+    evv UTS_VERSION
+    evv LINUX_COMPILE_BY
+    evv LINUX_COMPILE_HOST
+    evv LINUX_COMPILER
+
+    VERSION_STRING=$(cat "${OUT_FOLDER:-out}"/include/config/kernel.release)
+    UTS_VERSION=${UTS_VERSION#*PREEMPT }
+
+    echo "${BOLD}Version:${RST}    ${VERSION_STRING} (${LINUX_COMPILER})"
+    echo "            ${LINUX_COMPILE_BY}@${LINUX_COMPILE_HOST} #${KBUILD_BUILD_NUMBER:-1}"
+    echo "            ${UTS_VERSION}"
+    echo
+}
