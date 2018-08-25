@@ -30,28 +30,21 @@ function neofetch() {
 }
 
 
-# Update function
-function upd() {
-    crew update
-    crew upgrade
-}
-
-
-# Reinstall function in case Chromebrew blows up...
+# Reinstall function in case something blows up...
 function install-bin() {
     # Wipe /usr/local and reinstall emerge packages
     [[ "${*}" =~ "-c" || "${*}" =~ "--clean" ]] && sudo dev_install --reinstall -y
 
     # Install adb/fastboot
-    curl -s https://raw.githubusercontent.com/nathanchance/chromeos-adb-fastboot/master/install.sh | bash
+    curl -Ls https://raw.githubusercontent.com/nathanchance/chromeos-adb-fastboot/master/install.sh | bash
 
     # Install neofetch
-    sudo curl -s https://raw.githubusercontent.com/dylanaraps/neofetch/master/neofetch -o /usr/local/bin/neofetch
+    sudo curl -Ls https://raw.githubusercontent.com/dylanaraps/neofetch/master/neofetch -o /usr/local/bin/neofetch
     sudo chmod a+x /usr/local/bin/neofetch
 
-    # Install chromebrew + jq for deldog function
-    curl -Ls git.io/vddgY | bash
-    crew install jq
+    # Install jq
+    sudo curl -Ls https://github.com/stedolan/jq/releases/download/jq-1.5/jq-linux64 -o /usr/local/bin/jq
+    sudo chmod a+x /usr/local/bin/jq
 }
 
 
