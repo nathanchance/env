@@ -237,7 +237,6 @@ function device_flags() {
         "op6")
             # Required flags
             [[ -z ${ANDROID_VERSION} ]] && ANDROID_VERSION=8.1.0
-
             AK2_SFX=${ANDROID_VERSION}
 
             BUILD_FUNCTION=build_kernel
@@ -264,6 +263,25 @@ function device_flags() {
             [[ -n ${STABLE} ]] && KERNEL_BRANCH=8.1
 
             MATCH_FLAG="${DEVICE_NAME_FILE}-v${VERSION::1}" ;;
+
+        "op6-custom")
+            # Required flags
+            BUILD_FUNCTION=build_kernel
+
+            [[ -z ${COMPILER} ]] && COMPILER=clang
+
+            [[ -z ${CLANG_FOLDER} ]] && CLANG_FOLDER=${TC_FOLDER}/aosp-clang/clang-r328903
+
+            [[ -z ${DEFCONFIG} ]] && DEFCONFIG="flash-lite_defconfig"
+
+            DEVICE_NAME_GITHUB=op6-custom
+
+            [[ -z ${GCC_FOLDER} ]] && GCC_FOLDER=${TC_FOLDER}/aosp-gcc-arm64
+            [[ -z ${GCC_32_BIT_FOLDER} ]] && GCC_32_BIT_FOLDER=${TC_FOLDER}/aosp-gcc-arm
+
+            IMAGE_ONLY=true
+
+            [[ -n ${STABLE} ]] && KERNEL_BRANCH=8.1 ;;
 
         "wahoo")
             # Required flags
@@ -306,31 +324,34 @@ function generate_variables() {
     # Folders
     SOURCE_FOLDER=${KERNEL_FOLDER}/flash/${DEVICE_NAME_GITHUB}
     OUT_FOLDER=${SOURCE_FOLDER}/out
-    ANYKERNEL2_FOLDER=${KERNEL_FOLDER}/flash/anykernel2-${DEVICE_NAME_GITHUB}
-    FILE_MOVE_HEAD=${WEB_FOLDER}/downloads
 
-    case ${MODE} in
-        "beta"|"bisect"|"nightly"|"rc"|"stable")
-            if [[ -z ${NIGHTLY} ]]; then
-                FILE_MOVE=${FILE_MOVE_HEAD}/kernels/${DEVICE_NAME_WEB}/${ANDROID_VERSION}/${MODE}
-                FILE_MOVE_OLD=$(readlink -f "${FILE_MOVE}/../archive")
-            fi
-            if [[ -n ${TG} || -n ${NIGHTLY} ]]; then
-                case ${DEVICE} in
-                    "marlin") export CHAT_ID=-1001132593794 ;;
-                    "op6") export CHAT_ID=-1001192694857 ;;
-                    "wahoo") export CHAT_ID=-1001298464571 ;;
-                esac
-            fi ;;
-        "tmp")
-            FILE_MOVE=${FILE_MOVE_HEAD}/.tmp/${DEVICE_NAME_WEB}/${ANDROID_VERSION} ;;
-        "personal")
-            FILE_MOVE=${FILE_MOVE_HEAD}/.fk/${DEVICE_NAME_WEB} ;;
-        "zip")
-            unset FILE_MOVE ;;
-        *)
-            die "Invalid mode specified!" ;;
-    esac
+    if [[ -z ${IMAGE_ONLY} ]]; then
+        ANYKERNEL2_FOLDER=${KERNEL_FOLDER}/flash/anykernel2-${DEVICE_NAME_GITHUB}
+        FILE_MOVE_HEAD=${WEB_FOLDER}/downloads
+
+        case ${MODE} in
+            "beta"|"bisect"|"nightly"|"rc"|"stable")
+                if [[ -z ${NIGHTLY} ]]; then
+                    FILE_MOVE=${FILE_MOVE_HEAD}/kernels/${DEVICE_NAME_WEB}/${ANDROID_VERSION}/${MODE}
+                    FILE_MOVE_OLD=$(readlink -f "${FILE_MOVE}/../archive")
+                fi
+                if [[ -n ${TG} || -n ${NIGHTLY} ]]; then
+                    case ${DEVICE} in
+                        "marlin") export CHAT_ID=-1001132593794 ;;
+                        "op6") export CHAT_ID=-1001192694857 ;;
+                        "wahoo") export CHAT_ID=-1001298464571 ;;
+                    esac
+                fi ;;
+            "tmp")
+                FILE_MOVE=${FILE_MOVE_HEAD}/.tmp/${DEVICE_NAME_WEB}/${ANDROID_VERSION} ;;
+            "personal")
+                FILE_MOVE=${FILE_MOVE_HEAD}/.fk/${DEVICE_NAME_WEB} ;;
+            "zip")
+                unset FILE_MOVE ;;
+            *)
+                die "Invalid mode specified!" ;;
+        esac
+    fi
 
     # Compilation variables
     ARCHITECTURE=arm64
@@ -392,7 +413,7 @@ function generate_variables() {
 # Clean up
 function clean_up() {
     # Clean AnyKernel2 folder if building a zip
-    if [[ -z ${IMAGE_ONLY} ]]; then
+    if [[ -n ${ANYKERNEL2_FOLDER} ]]; then
         cd "${ANYKERNEL2_FOLDER}" || die "AnyKernel2 source is missing!"
 
         [[ -z ${ANYKERNEL2_BRANCH} ]] && ANYKERNEL2_BRANCH=${DEVICE_NAME_GITHUB}-flash-${AK2_SFX}
@@ -463,7 +484,7 @@ function generate_version() {
     CONFIG_LOCALVERSION="-FlashKernel"
 
     # If the mode is not personal, add the device name to LOCALVERSION
-    if [[ -z ${PERSONAL} ]]; then
+    if [[ -z ${PERSONAL} && ${DEVICE} != "op6-custom" ]]; then
         LOCALVERSION="-${DEVICE_NAME_FILE}"
         LOCALVERSION_ZIP="${LOCALVERSION}"
     fi
@@ -475,7 +496,7 @@ function generate_version() {
     fi
 
     # If the mode isn't stable, add hash information to the file for debugging
-    if [[ -z ${STABLE} ]]; then
+    if [[ -z ${STABLE} && ${DEVICE} != "op6-custom" ]]; then
         # Furthermore, if it is a personal build, use a shorter hash length
         [[ -n ${PERSONAL} ]] && NUM=8 || NUM=12
         SHA="-g$(git rev-parse --verify --short=${NUM} HEAD)"
@@ -595,7 +616,7 @@ function build_kernel() {
             for DTB in out/arch/arm64/boot/dts/htc/*.dtb; do
                 FILES_TO_MOVE+=( "${DTB#*/}:${ANYKERNEL2_FOLDER}/dtbs" )
             done ;;
-        "op6")
+        "op6"|"op6-custom")
             FILES_TO_MOVE=( "arch/arm64/boot/Image.gz:${ANYKERNEL2_FOLDER}/kernel" )
             for DTB in out/arch/arm64/boot/dts/qcom/*.dtb; do
                 FILES_TO_MOVE+=( "${DTB#*/}:${ANYKERNEL2_FOLDER}/dtbs" )
@@ -613,7 +634,7 @@ function build_kernel() {
     if [[ -f "${OUT_FOLDER}/${KIMG}" ]]; then
         android_kernel_version
         echo "${GRN}$(basename "${KIMG}") compiled successfully!${RST}\n"
-        move_kernel_files
+        [[ -z ${IMAGE_ONLY} ]] && move_kernel_files
     else
         echo "${RED}Kernel image not found!${RST}\n"
         ending_info
@@ -623,28 +644,26 @@ function build_kernel() {
 
 # Move kernel files after compilation
 function move_kernel_files() {
-    if [[ -z ${IMAGE_ONLY} ]]; then
-        # Move the kernel image
-        for FTM in "${FILES_TO_MOVE[@]}"; do
-            mkdir -p "${FTM#*:}"
-            cp "${OUT_FOLDER}/${FTM%:*}" "${FTM#*:}"
-        done
-        echo "Version: $(cat "${OUT_FOLDER}/include/config/kernel.release")" > "${ANYKERNEL2_FOLDER}/version"
+    # Move the kernel image
+    for FTM in "${FILES_TO_MOVE[@]}"; do
+        mkdir -p "${FTM#*:}"
+        cp "${OUT_FOLDER}/${FTM%:*}" "${FTM#*:}"
+    done
+    echo "Version: $(cat "${OUT_FOLDER}/include/config/kernel.release")" > "${ANYKERNEL2_FOLDER}/version"
 
-        # Grab modules too if they are present
-        MODULES="$(find "${OUT_FOLDER}" -name '*.ko')"
-        if [[ -n ${MODULES} ]]; then
-            MODULES_FOLDER=${ANYKERNEL2_FOLDER}/ramdisk/modules
-            mkdir -p "${MODULES_FOLDER}"
-            for MOD in ${MODULES}; do
-                "${CC}"strip --strip-unneeded "${MOD}"
-                "${OUT_FOLDER}"/scripts/sign-file sha512 \
-                                                  "${OUT_FOLDER}/certs/signing_key.pem" \
-                                                  "${OUT_FOLDER}/certs/signing_key.x509" \
-                                                  "${MOD}"
-                cp "${MOD}" "${MODULES_FOLDER}"
-            done
-        fi
+    # Grab modules too if they are present
+    MODULES="$(find "${OUT_FOLDER}" -name '*.ko')"
+    if [[ -n ${MODULES} ]]; then
+        MODULES_FOLDER=${ANYKERNEL2_FOLDER}/ramdisk/modules
+        mkdir -p "${MODULES_FOLDER}"
+        for MOD in ${MODULES}; do
+            "${CC}"strip --strip-unneeded "${MOD}"
+            "${OUT_FOLDER}"/scripts/sign-file sha512 \
+                                              "${OUT_FOLDER}/certs/signing_key.pem" \
+                                              "${OUT_FOLDER}/certs/signing_key.x509" \
+                                              "${MOD}"
+            cp "${MOD}" "${MODULES_FOLDER}"
+        done
     fi
 }
 
