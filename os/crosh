@@ -13,22 +13,13 @@ alias dwnld='cd ${HOME}/Downloads'
 # Files folder
 alias fls='cd ${HOME}/Downloads/Files'
 
-# Connect to my server
-alias mshfb='mosh nathan@nathanchance.me'
-
-
-# Set vim runtime area
-export VIMRUNTIME=/usr/local/share/vim/vim80
-
 
 # Fetch this script and reload .bashrc
 function rld() {
-    curl -o ~/.chromeos-functions https://raw.githubusercontent.com/nathanchance/scripts/master/os/chromeos
+    curl -o ~/.crosh-functions https://raw.githubusercontent.com/nathanchance/scripts/master/os/crosh
     source ~/.bashrc
 }
 source <(curl -Ls https://raw.githubusercontent.com/nathanchance/scripts/master/snippets/deldog)
-source <(curl -Ls https://raw.githubusercontent.com/nathanchance/scripts/master/snippets/git)
-GPG_TTY=$(tty); export GPG_TTY
 
 
 # Neofetch function
@@ -58,51 +49,19 @@ function install-bin() {
     sudo curl -s https://raw.githubusercontent.com/dylanaraps/neofetch/master/neofetch -o /usr/local/bin/neofetch
     sudo chmod a+x /usr/local/bin/neofetch
 
-    # Install chromebrew + other desirable programs
+    # Install chromebrew + jq for deldog function
     curl -Ls git.io/vddgY | bash
-    crew install -s mosh
-    crew install hub gnupg vim
-
-    # Configure git
-    git config --global commit.gpgsign true
-    git config --global core.editor vim
-    git config --global core.pager "/usr/local/bin/less"
-    git config --global user.name "Nathan Chancellor"
-    git config --global user.email "natechancellor@gmail.com"
-    git config --global user.signingkey 2437CB76E544CB6AB3D9DFD399739260CB6CB716
-
-    # Configure vim
-    ln -s /usr/local/share/vim/vim80 ~/.vim
-    ln -s ~/.vim/vimrc ~/.vimrc
-    mkdir -p ~/.vim/.backup ~/.vim/.swp ~/.vim/.undo
-    {
-        echo
-        echo "set undodir=~/.vim/.undo//"
-        echo "set backupdir=~/.vim/.backup//"
-        echo "set directory=~/.vim/.swp//"
-    } >> ~/.vimrc
-
-    # Install crouton and setup a Debian Stretch chroot
-    sudo curl -s https://raw.githubusercontent.com/dnschneid/crouton/master/installer/crouton -o /usr/local/bin/crouton
-    sudo chmod +x /usr/local/bin/crouton
-}
-
-
-# Generate new SSH key for server interaction
-function gen-ssh() {
-    ssh-keygen -t ed25519
-    ssh-copy-id nathan@nathanchance.me
+    crew install jq
 }
 
 
 # Things to do only on a clean install
 function setup() {
-    if ! grep -q chromeos-functions "${HOME}/.bashrc"; then
-        echo "[[ -f \${HOME}/.chromeos-functions ]] && source \${HOME}/.chromeos-functions" >> "${HOME}/.bashrc"
+    if ! grep -q crosh-functions "${HOME}/.bashrc"; then
+        echo "[[ -f \${HOME}/.crosh-functions ]] && source \${HOME}/.crosh-functions" >> "${HOME}/.bashrc"
     fi
     install-bin "${@}"
     rld
-    crouton -r stretch -t cli-extra
 }
 
 
