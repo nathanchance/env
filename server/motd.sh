@@ -94,7 +94,7 @@ clear
 
 echo -e "\033[1m"
 
-source /home/nathan/repos/dotfiles/Linux/banner
+source /home/nathan/repos/dotfiles/server/banner
 
 echo ""
 echo ""
