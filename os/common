@@ -7,23 +7,28 @@
 # Utility and terminal setup functions (usually for .bashrc)
 
 
-# SOURCE OUR UNIVERSAL FUNCTIONS SCRIPT (DON'T MAC CHECK THOUGH)
-source "$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")" || return; pwd)/../common" -m
+# Source our universal functions script
+source "$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")" || return; pwd)/../common"
 
-# SOURCE THE MACHINE SPECIFIC FUNCTIONS
+
+# Source the machine specific functions
 source "${SCRIPTS_FOLDER}/os/${HOST}"
 
+
+# Universal aliases/functions
 function aliases() {
     # tmux alias
-    alias tmux='tmux -u'
+    command -v tmux &>/dev/null && alias tmux='tmux -u'
 
     source "${SCRIPTS_FOLDER}/snippets/deldog"
     source "${SCRIPTS_FOLDER}/snippets/git"
     source "${SCRIPTS_FOLDER}/snippets/transfer"
 }
 
+
 # Try to attach via tmux
 function tmux_attach() {
+    command -v tmux &>/dev/null || return
     if [[ -z ${TMUX} ]]; then
         ID=$(tmux ls | grep -vm1 attached | cut -d: -f1)
         if [[ -z ${ID} ]]; then
@@ -34,14 +39,20 @@ function tmux_attach() {
     fi
 }
 
-# Add something to PATH but only if it isn't already there
+
+# Add something to the beginning of PATH if it isn't already there
 function add_to_path_pre() {
+    [[ ! -d ${1} ]] && return
     [[ -z $(echo "${PATH}" | ag -s --nocolor "${1}") ]] && export PATH="${1}:${PATH}"
 }
 
+
+# Add something to the end of PATH if it isn't already there
 function add_to_path_post() {
+    [[ ! -d ${1} ]] && return
     [[ -z $(echo "${PATH}" | ag -s --nocolor "${1}") ]] && export PATH="${PATH}:${1}"
 }
+
 
 function bash_setup() {
     aliases
@@ -52,53 +63,9 @@ function bash_setup() {
     GPG_TTY=$(tty); export GPG_TTY
 }
 
+
 # bashrc reload function
 function rld() {
     source "${SCRIPTS_FOLDER}/os/common"
     bash_setup
-}
-
-# EXKM to RC converter
-function exkm2rc {
-    sed -e 's/^/   write /' "${1}" > "${2}"
-}
-
-function gerrit-push {
-    local ROM=${1}
-    local PROJECT=${2}
-
-    local URL
-    local USER=nathanchance
-
-    case ${ROM} in
-        "du")
-            URL=gerrit.dirtyunicorns.com
-            BRANCH=o8x ;;
-        "du-caf")
-            URL=gerrit.dirtyunicorns.com
-            BRANCH=o8x-caf ;;
-        "lineage-15.1")
-            URL=review.lineageos.org
-            BRANCH=lineage-15.1 ;;
-        "omni")
-            URL=gerrit.omnirom.org
-            BRANCH=android-7.1 ;;
-        "subs")
-            URL=substratum.review
-            if [[ ${PROJECT} = "substratum/interfacer" ]]; then
-                BRANCH=n-rootless
-            else
-                BRANCH=n-mr2
-            fi ;;
-    esac
-
-    [[ -z ${PROJECT} ]] && PROJECT=$(grep -m 1 "projectname" .git/config | sed 's/\tprojectname = //')
-
-    if [[ -n ${PROJECT} ]]; then
-        PROJECT=$(echo "${PROJECT}" | sed 's/DirtyUnicorns\///')
-        echo "Executing git push ssh://${USER}@${URL}:29418/${PROJECT} HEAD:refs/for/${BRANCH}"
-        git push ssh://${USER}@${URL}:29418/"${PROJECT}" HEAD:refs/for/${BRANCH}
-    else
-        echo "wtf happened?"
-    fi
 }
