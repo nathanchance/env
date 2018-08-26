@@ -254,3 +254,21 @@ function gpg_available() {
         die "Please run 'echo \"test\" | gpg --clearsign &>/dev/null' to cache gpg passphrase!"
     fi
 }
+
+
+# ripgrep wrapper
+function rg() {
+    # Bail out if rg is not installed
+    command -v rg &>/dev/null || { warn "ripgrep is not installed!"; return; }
+    
+    # Colors match ag
+    command rg --colors "path:fg:green" \
+               --colors "path:style:bold" \
+               --colors "line:fg:yellow" \
+               --colors "line:style:bold" \
+               --colors "column:fg:yellow" \
+               --colors "column:style:bold" \
+               --colors "match:fg:black" \
+               --colors "match:bg:yellow" \
+               "${@}"
+}
