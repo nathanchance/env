@@ -134,7 +134,7 @@ function parse_parameters() {
                 shift && enforce_value "${@}"
                 VERBOSITY_LEVEL=${1}
                 case ${VERBOSITY_LEVEL} in
-                    "0") AG_LINES=0; HIDDEN_COMMANDS=true ;;
+                    "0") RG_LINES=0; HIDDEN_COMMANDS=true ;;
                     "1") SHOW_OUTPUT=true; HIDDEN_COMMANDS=true ;;
                     "2") SHOW_OUTPUT=true; VERBOSE_COMMANDS=true ;;
                     "3") EXTRA_MAKE_FLAGS+=( "V=1" ); SHOW_OUTPUT=true; HIDDEN_COMMANDS=true ;;
@@ -426,7 +426,7 @@ function clean_up() {
     cd "${SOURCE_FOLDER}" || die "Kernel source is missing!"
     if [[ -n ${KERNEL_BRANCH} ]]; then
         [[ ${KERNEL_BRANCH} =~ "queue-" ]] && CACHED_BRANCH=$(git cb)
-        if [[ -z $(git status | ag "bisec|rebas") ]]; then
+        if [[ -z $(git status | rg "bisec|rebas") ]]; then
             git checkout ${HIDDEN_COMMANDS:+ "-q"} "${KERNEL_BRANCH}" || die "${KERNEL_BRANCH} doesn't exist!"
         fi
     fi
@@ -473,7 +473,7 @@ function kmake() {
     if [[ -n ${SHOW_OUTPUT} ]]; then
         make_wrapper_${COMPILER} "${@}"
     else
-        make_wrapper_${COMPILER} "${@}" |& ag --no-color --after=${AG_LINES:-10} "error:|warning:" && echo
+        make_wrapper_${COMPILER} "${@}" |& rg --color=never --after-context=${RG_LINES:-10} "error:|warning:" && echo
     fi
 }
 
