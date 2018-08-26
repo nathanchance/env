@@ -184,9 +184,9 @@ function kfg() {
                 CONFIG=${1//CONFIG_/}
 
                 header "LOCATIONS OF ${CONFIG} IN TREE"
-                git grep -n -1 "${CONFIG}" | ag --nocolor Kconfig
+                git grep -n -1 "${CONFIG}" | rg --color=never Kconfig
 
-                LIST=$(ag --nocolor "${CONFIG}" out/.config)
+                LIST=$(rg --color=never "${CONFIG}" out/.config)
                 if [[ -n ${LIST} ]]; then
                     header "LOCATIONS OF ${CONFIG} IN CONFIG FILE"
                     echo "${LIST}"
@@ -436,7 +436,7 @@ function sc() {
     fi
 
     case ${1} in
-        "-a"|"--all") FILES=$(find . -maxdepth 2 -type f -executable  -printf '%P\n' | ag -v bin) ;;
+        "-a"|"--all") FILES=$(find . -maxdepth 2 -type f -executable  -printf '%P\n' | rg -v bin) ;;
         *) FILES=$(git diff --name-only --diff-filter=M) ;;
     esac
 
