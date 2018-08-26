@@ -9,6 +9,9 @@
 
 # Setup function
 function bootstrap() {
+    # Make sure keys are present
+    [[ ! -d ${HOME}/keys ]] && { echo -e "\033[01;31mAdd GPG and SSH keys to ${HOME}/keys!\033[0m"; return 1; }
+
     # Install packages from Debian repos
     sudo apt update
     sudo apt upgrade -y
@@ -33,30 +36,20 @@ function bootstrap() {
     done
 
     # Setup SSH
-    if [[ -f ${HOME}/keys/id_ed25519 ]]; then
-        mkdir -p ${HOME}/.ssh
-        mv ${HOME}/keys/id_ed25519{,.pub} ${HOME}/.ssh
-        chmod 600 ${HOME}/.ssh/id_ed25519
-    else
-        echo "Please move SSH keys into ${HOME}/keys!"
-        return 1
-    fi
+    mkdir -p ${HOME}/.ssh
+    mv ${HOME}/keys/id_ed25519{,.pub} ${HOME}/.ssh
+    chmod 600 ${HOME}/.ssh/id_ed25519
 
     # Setup GPG
-    if [[ -f ${HOME}/keys/public.asc ]]; then
-        gpg --import ${HOME}/keys/{public,private}.asc
-        gpg --import-ownertrust ${HOME}/keys/ownertrust.asc
-        git config --global commit.gpgsign true
-        git config --global user.signingkey 2437CB76E544CB6AB3D9DFD399739260CB6CB716
-        {
-            echo "default-cache-ttl 3600"
-            echo "max-cache-ttl 86400"
-        } > ${HOME}/.gnupg/gpg-agent.conf
-        gpg-connect-agent reloadagent /bye
-    else
-        echo "Please move GPG keys into ${HOME}/keys!"
-        return 1
-    fi
+    gpg --import ${HOME}/keys/{public,private}.asc
+    gpg --import-ownertrust ${HOME}/keys/ownertrust.asc
+    git config --global commit.gpgsign true
+    git config --global user.signingkey 2437CB76E544CB6AB3D9DFD399739260CB6CB716
+    {
+        echo "default-cache-ttl 3600"
+        echo "max-cache-ttl 86400"
+    } > ${HOME}/.gnupg/gpg-agent.conf
+    gpg-connect-agent reloadagent /bye
 
     # Remove keys
     rm -rf ${HOME}/keys
