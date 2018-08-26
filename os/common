@@ -43,14 +43,14 @@ function tmux_attach() {
 # Add something to the beginning of PATH if it isn't already there
 function add_to_path_pre() {
     [[ ! -d ${1} ]] && return
-    [[ -z $(echo "${PATH}" | ag -s --nocolor "${1}") ]] && export PATH="${1}:${PATH}"
+    [[ -z $(echo "${PATH}" | rg -s --color=never "${1}") ]] && export PATH="${1}:${PATH}"
 }
 
 
 # Add something to the end of PATH if it isn't already there
 function add_to_path_post() {
     [[ ! -d ${1} ]] && return
-    [[ -z $(echo "${PATH}" | ag -s --nocolor "${1}") ]] && export PATH="${PATH}:${1}"
+    [[ -z $(echo "${PATH}" | rg -s --color=never "${1}") ]] && export PATH="${PATH}:${1}"
 }
 
 
