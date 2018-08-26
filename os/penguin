@@ -1,0 +1,116 @@
+#!/usr/bin/env bash
+#
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+# Copyright (C) 2018 Nathan Chancellor
+#
+# Utility and terminal setup functions for crostini on my Pixelbook
+
+
+# Setup function
+function bootstrap() {
+    # Install packages from Debian repos
+    sudo apt update
+    sudo apt upgrade -y
+    sudo apt install -y build-essential git gpg jq mosh ssh tmux vim
+
+    # Setup git
+    git config --global core.editor vim
+    git config --global user.name "Nathan Chancellor"
+    git config --global user.email "natechancellor@gmail.com"
+
+    # Install hub
+    curl -LO https://github.com/github/hub/releases/download/v2.5.1/hub-linux-amd64-2.5.1.tgz
+    tar -xf hub-linux-amd64-2.5.1.tgz
+    cd hub-linux-amd64-2.5.1
+    sudo prefix=/usr/local ./install
+    cd .. && rm -rf hub*
+
+    # Install ripgrep and fd
+    for URL in https://github.com/sharkdp/fd/releases/download/v7.1.0/fd-musl_7.1.0_amd64.deb https://github.com/BurntSushi/ripgrep/releases/download/0.9.0/ripgrep_0.9.0_amd64.deb; do
+        curl -LO "${URL}"
+        sudo dpkg -i "$(basename "${URL}")" && rm "$(basename "${URL}")"
+    done
+
+    # Setup SSH
+    if [[ -f ${HOME}/keys/id_ed25519 ]]; then
+        mkdir -p ${HOME}/.ssh
+        mv ${HOME}/keys/id_ed25519{,.pub} ${HOME}/.ssh
+        chmod 600 ${HOME}/.ssh/id_ed25519
+    else
+        echo "Please move SSH keys into ${HOME}/keys!"
+        return 1
+    fi
+
+    # Setup GPG
+    if [[ -f ${HOME}/keys/public.asc ]]; then
+        gpg --import ${HOME}/keys/{public,private}.asc
+        gpg --import-ownertrust ${HOME}/keys/ownertrust.asc
+        git config --global commit.gpgsign true
+        git config --global user.signingkey 2437CB76E544CB6AB3D9DFD399739260CB6CB716
+        {
+            echo "default-cache-ttl 3600"
+            echo "max-cache-ttl 86400"
+        } > ${HOME}/.gnupg/gpg-agent.conf
+        gpg-connect-agent reloadagent /bye
+    else
+        echo "Please move GPG keys into ${HOME}/keys!"
+        return 1
+    fi
+
+    # Remove keys
+    rm -rf ${HOME}/keys
+
+    # Clone scripts
+    git clone git@github.com:nathanchance/scripts ${HOME}/scripts || return 1
+
+    # Clone repos
+    mkdir -p ${HOME}/repos
+    local DOTFILES; DOTFILES=${HOME}/repos/dotfiles
+    git clone git@github.com:nathanchance/dotfiles ${DOTFILES} || return 1
+
+    # Copy files into their proper locations
+    # vim
+    cp -r ${DOTFILES}/common/vim ${HOME}/.vim
+    mv ${HOME}/.vim/.vimrc ${HOME}
+    # .git-prompt.sh
+    cp ${DOTFILES}/commmon/.git-prompt.sh ${HOME}
+    # tmux
+    cp ${DOTFILES}/pixelbook/.tmux.conf ${HOME}
+
+    # Run small setup scripts from dotfiles
+    bash ${DOTFILES}/common/global_gitignore.sh
+
+    # Setup bash_aliases
+    {
+        echo
+        echo "[[ -f \${HOME}/scripts/os/common ]] && source \"\${HOME}/scripts/os/common\""
+        echo "type -p bash_setup && bash_setup"
+    } > ${HOME}/.bash_aliases
+
+    # Let her rip!
+    source ${HOME}/.bashrc
+}
+
+
+# Laptop specific aliases
+function penguin_aliases() {
+    alias mshfb='mosh nathan@nathanchance.me'
+}
+
+
+# Setup PS1 and such
+function penguin_prompt() {
+    if [[ -f ${HOME}/.git-prompt.sh ]]; then
+        source ${HOME}/.git-prompt.sh
+        export GIT_PS1_SHOWDIRTYSTATE=1
+        export GIT_PS1_SHOWUPSTREAM=auto
+        export PROMPT_COMMAND='__git_ps1 "\[\033[01;31m\]\u@\h \[\033[01;33m\]\w\[\033[01;36m\]" " \[\033[39m\]\$\[\033[0m\] "'
+    fi
+}
+
+
+# Laptop specific setup
+function penguin_setup() {
+    penguin_prompt
+}
