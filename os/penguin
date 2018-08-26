@@ -15,7 +15,7 @@ function bootstrap() {
     # Install packages from Debian repos
     sudo apt update
     sudo apt upgrade -y
-    sudo apt install -y build-essential git gpg jq mosh ssh tmux vim
+    sudo apt install -y build-essential devscripts git gpg jq mosh ssh tmux vim
 
     # Setup git
     git config --global core.editor vim
