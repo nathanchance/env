@@ -385,8 +385,8 @@ function dib-clang() {(
 
     TC_LIST=( "--clang --clang-toolchain aosp-clang/clang-r328903"
               "--clang --clang-toolchain aosp-clang/clang-4691093"
-              "--clang --clang-toolchain aosp-clang/clang-4053586"
               "" )
+    [[ "$(git cb)" =~ oreo ]] && TC_LIST+=( "--clang --clang-toolchain aosp-clang/clang-4053586" )
 
     for ITEM in "${TC_LIST[@]}"; do
         read -ra ITEM_ARRAY <<< "${ITEM}"
