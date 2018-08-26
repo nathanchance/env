@@ -729,7 +729,7 @@ function btg() {(
         ARCH=${ITEM%:*}
         TARGET=${ITEM#*:}
 
-        for GCC in Linaro:7.3.1 GNU:8.2.1 GNU:9.0.0; do
+        for GCC in Linaro:7.3.1 GNU:8.2.1; do
             SOURCE=${GCC%:*}
             VERSION=${GCC#*:}
             START=$(date +"%s")
