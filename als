@@ -52,6 +52,7 @@ REPOS_44=( "msm-4.4" "nash" "op5" "sagit" "wahoo" "whyred" )
 REPOS_49=( "msm-4.9" "op6" "polaris" )
 
 # Parse parameters
+PARAMS="${*}"
 while [[ ${#} -ge 1 ]]; do
     case ${1} in
         # Build after merging
@@ -285,7 +286,7 @@ if [[ -n ${LOGGING} ]]; then
     echo
     echo "${BOLD}ALS merge results:${RST} ${URL}"
     echo
-    tg_msg "ALS merge results: ${URL}"
+    tg_msg "ALS merge results (\`$(basename "${0}") ${PARAMS}\`): ${URL}"
 fi
 
 exit 0
