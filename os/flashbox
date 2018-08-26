@@ -390,7 +390,7 @@ function dib-clang() {(
 
     for ITEM in "${TC_LIST[@]}"; do
         read -ra ITEM_ARRAY <<< "${ITEM}"
-        build-kernel -d "${DEFCONFIG}" -w -Werror "${ITEM_ARRAY[@]}"
+        build-kernel -d "${DEFCONFIG}" -w -Werror "${ITEM_ARRAY[@]}" "${@}"
     done
 )}
 
