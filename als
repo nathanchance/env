@@ -236,7 +236,7 @@ for VERSION in "${VERSIONS[@]}"; do
                     KVER=${MAJOR_VER}.$((${KVER##*.} + 1))
 
                     # If a command file is found, execute it
-                    COMMANDS=${REPO_FOLDER}/stable-patches/${KVER}/${COMMANDS}
+                    COMMANDS=${REPO_FOLDER}/sp/${KVER}/${COMMANDS}
                     if [[ -f ${COMMANDS} ]]; then
                         if bash "${COMMANDS}" "${COMMANDS_BRANCH}"; then
                             # Show merged kernel version in log
