@@ -82,7 +82,7 @@ function parse_parameters() {
             # Only show errors
             "-e"|"--errors")
                 VERBOSITY=1
-                AG_LOOK_FOR="error:" ;;
+                RG_LOOK_FOR="error:" ;;
 
             # Kernel folder
             "-f"|"--folder")
@@ -113,7 +113,7 @@ function parse_parameters() {
             # Show only warnings and errors during compilation
             "-w"|"--warnings")
                 VERBOSITY=2
-                AG_LOOK_FOR="error:|warning:" ;;
+                RG_LOOK_FOR="error:|warning:" ;;
 
             # Compile with -Werror
             "-Werror")
@@ -185,9 +185,9 @@ function build() {
     # Build kernel image
     if [[ ${#DEFCONFIGS[@]} -gt 1 ]]; then
         cat "${DEFCONFIGS[@]}" > out/.config
-        kmake olddefconfig |& ag --no-color -v "format-overflow"
+        kmake olddefconfig |& rg --color=never -v "format-overflow"
     else
-        kmake "${DEFCONFIGS[0]}" |& ag --no-color -v "format-overflow"
+        kmake "${DEFCONFIGS[0]}" |& rg --color=never -v "format-overflow"
     fi
     if [[ -n ${WERROR} ]]; then
         ./scripts/config --file out/.config -e CC_WERROR
@@ -204,7 +204,7 @@ function build() {
     fi
 
     mkavenv
-    kmake ${NEEDS_EXTERNAL_DTC:+ "DTC_EXT=dtc"} |& ag --no-color -v "dts"
+    kmake ${NEEDS_EXTERNAL_DTC:+ "DTC_EXT=dtc"} |& rg --color=never -v "dts"
     rmvenv
 }
 
@@ -226,8 +226,8 @@ function compile() {
                                 "choice value used outside its choice group"
                                 "reassigning to symbol"
                                 "changes choice state" )
-            for ITEM in "${DISABLED_WARNINGS[@]}"; do AG_IGNORE="${AG_IGNORE}${ITEM}|"; done
-            build |& ag --nocolor "${AG_LOOK_FOR}" |& ag -v "${AG_IGNORE/%|}" ;;
+            for ITEM in "${DISABLED_WARNINGS[@]}"; do RG_IGNORE="${RG_IGNORE}${ITEM}|"; done
+            build |& rg --color=never "${RG_LOOK_FOR}" |& rg -v "${RG_IGNORE/%|}" ;;
         *)
             build &> /dev/null ;;
     esac
