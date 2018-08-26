@@ -74,7 +74,7 @@ function bootstrap() {
     cp -r ${DOTFILES}/common/vim ${HOME}/.vim
     mv ${HOME}/.vim/.vimrc ${HOME}
     # .git-prompt.sh
-    cp ${DOTFILES}/commmon/.git-prompt.sh ${HOME}
+    cp ${DOTFILES}/common/.git-prompt.sh ${HOME}
     # tmux
     cp ${DOTFILES}/pixelbook/.tmux.conf ${HOME}
 
