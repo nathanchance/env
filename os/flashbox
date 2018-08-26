@@ -378,9 +378,9 @@ function dib() {(
 # A version of dib for android-kernel-clang
 function dib-clang() {(
     case "$(git cb)" in
-        "msm-3.18") DEFCONFIG=msm-perf_defconfig ;;
-        "msm-4.4") DEFCONFIG=msmcortex-perf_defconfig ;;
-        "msm-4.9") DEFCONFIG=sdm845-perf_defconfig ;;
+        "msm-3.18"*) DEFCONFIG=msm-perf_defconfig ;;
+        "msm-4.4"*) DEFCONFIG=msmcortex-perf_defconfig ;;
+        "msm-4.9"*) DEFCONFIG=sdm845-perf_defconfig ;;
     esac
 
     TC_LIST=( "--clang --clang-toolchain aosp-clang/clang-r328903"
