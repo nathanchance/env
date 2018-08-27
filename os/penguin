@@ -98,7 +98,7 @@ function penguin_prompt() {
         source ${HOME}/.git-prompt.sh
         export GIT_PS1_SHOWDIRTYSTATE=1
         export GIT_PS1_SHOWUPSTREAM=auto
-        export PROMPT_COMMAND='__git_ps1 "\[\033[01;31m\]\u@\h \[\033[01;33m\]\w\[\033[01;36m\]" " \[\033[39m\]\$\[\033[0m\] "'
+        export PROMPT_COMMAND='__git_ps1_custom "\[\033[01;31m\]\u@\h \[\033[01;33m\]\w\[\033[01;36m\]" " \[\033[39m\]\$\[\033[0m\] "'
     fi
 }
 
