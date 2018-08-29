@@ -24,7 +24,7 @@ function post_git_fm_steps() {
     # Log our success
     log "${LOG_TAG} ${1}"
     # Don't push if we're just testing
-    [[ -z ${TEST} ]] && git push
+    [[ -z ${NO_PUSH} ]] && git push
     # Make sure SKIP_BUILD gets unset
     unset SKIP_BUILD
 }
@@ -59,6 +59,10 @@ while [[ ${#} -ge 1 ]]; do
         "-b"|"--build")
             BUILD=true ;;
 
+        # Don't resolve conflicts
+        "-d"|"--dry-run")
+            DRY_RUN=true ;;
+
         "-i"|"--initialize")
             INIT=true ;;
 
@@ -69,23 +73,19 @@ while [[ ${#} -ge 1 ]]; do
         # Merge from stable-queue
         "-q"|"--queue")
             ALS_PARAMS+=( "-q" )
-            QUEUE=true
-            TEST=true ;;
+            NO_PUSH=true
+            QUEUE=true ;;
 
         # Subset of repos (implies -v has been set)
         "-R"|"--repos")
             shift && enforce_value "${@}"
             read -r -a REPOS_PARAM <<< "${1}" ;;
 
-        # Resolve conflicts with stable-patches commands
-        "-r"|"--resolve-conflicts")
-            RESOLVE=true ;;
-
         # Merge from linux-stable-rc
-        "-rc"|"--release-candidate")
+        "-r"|"--release-candidate")
             ALS_PARAMS+=( "-r" )
-            RC=true
-            TEST=true ;;
+            NO_PUSH=true
+            RC=true ;;
 
         # Versions to merge, separated by commas
         "-v"|"--versions")
@@ -100,9 +100,6 @@ done
 
 # If no versions were specified, assume we want all
 [[ -z ${VERSIONS} ]] && VERSIONS=( "3.18" "4.4" "4.9" )
-
-# If '-rc' or '-q' weren't specified, we are doing an actual stable release, meaning RESOLVE=true
-[[ -z ${TEST} ]] && RESOLVE=true
 
 # Start with a clean log
 [[ -n ${LOGGING} ]] && rm -rf "${LOG}"
@@ -221,7 +218,7 @@ for VERSION in "${VERSIONS[@]}"; do
                 post_git_fm_steps "Merge successful: $(kv)"
             else
                 # Resolve if requested
-                if [[ -n ${RESOLVE} ]]; then
+                if [[ -z ${DRY_RUN} ]]; then
                     # Get the appropriate resolution command filename (static mapping because it is not uniform)
                     case "${REPO}:${BRANCH}" in
                         "marlin"*|"msm"*|"polaris"*|"sagit"*|"tissot"*|"wahoo"*|"whyred"*) COMMANDS="${REPO}-commands" ;;
