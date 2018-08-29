@@ -190,11 +190,11 @@ function build() {
         kmake "${DEFCONFIGS[0]}" |& rg --color=never -v "format-overflow"
     fi
     if [[ -n ${WERROR} ]]; then
-        ./scripts/config --file out/.config -e CC_WERROR
+        ./scripts/config --file out/.config -e CC_WERROR -e CONFIG_ERROR_ON_WARNING
         kmake olddefconfig
     fi
     if [[ -n ${NO_WERROR} ]]; then
-        ./scripts/config --file out/.config -d CC_WERROR
+        ./scripts/config --file out/.config -d CC_WERROR -e CONFIG_ERROR_ON_WARNING
         kmake olddefconfig
     fi
     if [[ "${PWD}" =~ "op6" ]]; then
