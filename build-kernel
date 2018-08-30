@@ -194,7 +194,7 @@ function build() {
         kmake olddefconfig
     fi
     if [[ -n ${NO_WERROR} ]]; then
-        ./scripts/config --file out/.config -d CC_WERROR -e CONFIG_ERROR_ON_WARNING
+        ./scripts/config --file out/.config -d CC_WERROR -d CONFIG_ERROR_ON_WARNING
         kmake olddefconfig
     fi
     if [[ "${PWD}" =~ "op6" ]]; then
