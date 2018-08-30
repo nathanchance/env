@@ -12,9 +12,6 @@ function flashbox_aliases() {
     # default Arch ls alias
     alias ls='ls --color=auto'
 
-    # Update alias
-    alias upd='aurman -Syyu'
-
     # Change directory aliases
     alias ack='cd ${KERNEL_FOLDER}/sources/kernel-common'
     alias pkg='cd ${REPO_FOLDER}/pkgbuilds'
