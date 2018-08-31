@@ -10,7 +10,7 @@
 # Setup function
 function bootstrap() {
     # Grab common functions/variables
-    [[ ! -f ${HOME}/scripts/common ]] && source <(curl -Ls https://github.com/nathanchance/scripts/raw/master/common)
+    [[ ! -f ${HOME}/scripts/common ]] && source <(curl -Ls https://github.com/nathanchance/scripts/raw/master/common) &>/dev/null
 
     # Make sure keys are present
     [[ ! -d ${HOME}/keys ]] && { warn "${HOME}/keys not found, skipping GPG and SSH keys setup!"; NO_KEYS=true; }
