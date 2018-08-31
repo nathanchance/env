@@ -12,6 +12,13 @@ function bootstrap() {
     # Make sure keys are present
     [[ ! -d ${HOME}/keys ]] && { echo -e "\033[01;31mAdd GPG and SSH keys to ${HOME}/keys!\033[0m"; return 1; }
 
+    # Set architecture variables
+    case "$(uname -m)" in
+        "aarch64") ARCH=arm64 ;;
+        "x86_64") ARCH=amd64 ;;
+        *) echo -e "\033[01;31mUnsupported architecture!\033[0m"; return 1 ;;
+    esac
+
     # Install packages from Debian repos
     sudo apt update
     sudo apt upgrade -y
@@ -23,17 +30,40 @@ function bootstrap() {
     git config --global user.email "natechancellor@gmail.com"
 
     # Install hub
-    curl -LO https://github.com/github/hub/releases/download/v2.5.1/hub-linux-amd64-2.5.1.tgz
-    tar -xf hub-linux-amd64-2.5.1.tgz
-    cd hub-linux-amd64-2.5.1
+    curl -LO https://github.com/github/hub/releases/download/v2.5.1/hub-linux-"${ARCH}"-2.5.1.tgz
+    tar -xf hub-linux-"${ARCH}"-2.5.1.tgz
+    cd hub-linux-"${ARCH}"-2.5.1
     sudo prefix=/usr/local ./install
     cd .. && rm -rf hub*
 
-    # Install ripgrep and fd
-    for URL in https://github.com/sharkdp/fd/releases/download/v7.1.0/fd-musl_7.1.0_amd64.deb https://github.com/BurntSushi/ripgrep/releases/download/0.9.0/ripgrep_0.9.0_amd64.deb; do
-        curl -LO "${URL}"
-        sudo dpkg -i "$(basename "${URL}")" && rm "$(basename "${URL}")"
-    done
+    # Install prebuilt ripgrep and fd binaries if available
+    if [[ ${ARCH} = "amd64" ]]; then
+        for URL in https://github.com/sharkdp/fd/releases/download/v7.1.0/fd-musl_7.1.0_amd64.deb \
+                   https://github.com/BurntSushi/ripgrep/releases/download/0.9.0/ripgrep_0.9.0_amd64.deb; do
+            curl -LO "${URL}"
+            sudo dpkg -i "$(basename "${URL}")" && rm "$(basename "${URL}")"
+        done
+    # Build them from source otherwise
+    else
+        # Install rust
+        curl https://sh.rustup.rs -sSf | sh
+        source "${HOME}/.cargo/env"
+
+        for PAIR in https://github.com/sharkdp/fd/archive/v7.1.0.zip \
+                    https://github.com/BurntSushi/ripgrep/archive/0.9.0.zip; do
+            BINARY=${PAIR%%:*}
+            URL=${PAIR#*:}
+            TMP=$(mktemp)
+
+            curl -L "${URL}" -o "${TMP}"
+            unzip "${TMP}"
+            cd "${BINARY}"-*
+            cargo build --release
+            cargo install
+            cd "${OLDPWD}"
+            rm -rf "${OLDPWD}" "${TMP}"
+        done
+    fi
 
     # Setup SSH
     mkdir -p ${HOME}/.ssh
