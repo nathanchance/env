@@ -187,6 +187,8 @@ for VERSION in "${VERSIONS[@]}"; do
             header "${REPO} - ${BRANCH}"
 
             # Checkout the branch
+            git ma 2>/dev/null
+            git rh 2>/dev/null
             if ! git ch "${BRANCH}"; then
                 # If we get an error, it's because git can't resolve which branch we want
                 git ch -b "${BRANCH}" "origin/${BRANCH}" || die "Branch doesn't exist!"
