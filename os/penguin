@@ -41,8 +41,8 @@ function bootstrap() {
     chmod 600 ${HOME}/.ssh/id_ed25519
 
     # Setup GPG
-    gpg --import ${HOME}/keys/{public,private}.asc
-    gpg --import-ownertrust ${HOME}/keys/ownertrust.asc
+    gpg --import ${HOME}/keys/{public*,private*}.asc
+    gpg --import-ownertrust ${HOME}/keys/ownertrust*.asc
     git config --global commit.gpgsign true
     git config --global user.signingkey 2437CB76E544CB6AB3D9DFD399739260CB6CB716
     {
