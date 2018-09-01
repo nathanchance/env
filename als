@@ -208,11 +208,12 @@ for VERSION in "${VERSIONS[@]}"; do
             KVER=$(kv)
             MAJOR_VER=${KVER%.*}
             if [[ -n ${QUEUE} ]]; then
-                COMMANDS_BRANCH=stable-queue/queue-${MAJOR_VER}
+                COMMANDS_BRANCH=MERGE_HEAD
+                LOG_TAG="${LOG_TAG} stable-queue/queue-${MAJOR_VER} |"
             else
                 COMMANDS_BRANCH=linux-stable${RC:+"-rc"}/linux-${MAJOR_VER}.y
+                LOG_TAG="${LOG_TAG} ${COMMANDS_BRANCH} |"
             fi
-            LOG_TAG="${LOG_TAG} ${COMMANDS_BRANCH} |"
 
             # Merge the update, logging success and pushing as necessary
             if merge-stable "${ALS_PARAMS[@]}"; then
