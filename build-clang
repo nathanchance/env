@@ -31,9 +31,6 @@ START=$(date +"%s")
 STABLE_VERSION=7
 MASTER_VERSION=8
 
-# Set ME variable if on my server
-[[ $(uname -n) = "flashbox" ]] && ME=true
-
 ###############
 #             #
 #  FUNCTIONS  #
@@ -42,6 +39,9 @@ MASTER_VERSION=8
 
 function parse_parameters() {
     PARAMS="${*}"
+
+    # Set ME variable if on my server
+    [[ ${HOST} = "flashbox" ]] && ME=true
 
     while [[ ${#} -ge 1 ]]; do
         case ${1} in
