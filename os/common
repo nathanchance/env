@@ -12,7 +12,13 @@ source "$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")" || return; pwd)/.
 
 
 # Source the machine specific functions
-source "${SCRIPTS_FOLDER}/os/${HOST}"
+case "$(whoami)@$(uname -n)" in
+    "chronos@localhost") LOCATION=crosh ;;
+    "natechancellor@penguin") LOCATION=crostini ;;
+    "nathan@flashbox") LOCATION=server ;;
+    "pi@raspberrypi") LOCATION=pi ;;
+esac
+source "${SCRIPTS_FOLDER}/os/${LOCATION}"
 
 
 # Universal aliases/functions
@@ -56,9 +62,9 @@ function add_to_path_post() {
 
 function bash_setup() {
     aliases
-    "${HOST}"_aliases
+    "${LOCATION}"_aliases
     tmux_attach
-    "${HOST}"_setup
+    "${LOCATION}"_setup
     add_to_path_pre "${SCRIPTS_FOLDER}"
     GPG_TTY=$(tty); export GPG_TTY
 }

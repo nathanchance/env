@@ -8,7 +8,7 @@
 
 
 # Build server specific aliases
-function flashbox_aliases() {
+function server_aliases() {
     # default Arch ls alias
     alias ls='ls --color=auto'
 
@@ -51,7 +51,7 @@ function flashbox_aliases() {
 
 
 # Setup PS1 and such
-function flashbox_prompt() {
+function server_prompt() {
     source ~/.git-prompt.sh
     export GIT_PS1_SHOWDIRTYSTATE=1
     export GIT_PS1_SHOWUPSTREAM=auto
@@ -79,8 +79,8 @@ function ccache_setup() {
 
 
 # Additional setup steps for my build server
-function flashbox_setup() {
-    flashbox_prompt
+function server_setup() {
+    server_prompt
     ccache_setup 250
     export LOG=/tmp/results.log
     add_to_path_post "${HOME}/.gem/ruby/2.5.0/bin"

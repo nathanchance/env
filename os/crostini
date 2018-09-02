@@ -127,13 +127,13 @@ function bootstrap() {
 
 
 # Laptop specific aliases
-function penguin_aliases() {
+function crostini_aliases() {
     alias mshfb='mosh nathan@nathanchance.me'
 }
 
 
 # Setup PS1 and such
-function penguin_prompt() {
+function crostini_prompt() {
     if [[ -f ${HOME}/.git-prompt.sh ]]; then
         source "${HOME}"/.git-prompt.sh
         export GIT_PS1_SHOWDIRTYSTATE=1
@@ -144,6 +144,6 @@ function penguin_prompt() {
 
 
 # Laptop specific setup
-function penguin_setup() {
-    penguin_prompt
+function crostini_setup() {
+    crostini_prompt
 }

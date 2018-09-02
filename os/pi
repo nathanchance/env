@@ -8,7 +8,7 @@
 
 
 # Raspberry Pi specific aliases
-function raspberrypi_aliases() {
+function pi_aliases() {
     # Kernel alias
     alias knl='cd ${HOME}/Documents/Kernel'
 
@@ -27,7 +27,7 @@ function raspberrypi_aliases() {
 
 
 # Raspberry Pi setup (currently a no-op)
-function raspberrypi_setup() { return; }
+function pi_setup() { return; }
 
 
 # Neofetch alias
