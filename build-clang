@@ -47,7 +47,7 @@ function parse_parameters() {
         case ${1} in
             "-B"|"--bootstrap")
                 if [[ -n ${ME} ]]; then
-                    for FLASH_VERSION in ${STABLE_VERSION} ${MASTER_VERSION}; do
+                    for FLASH_VERSION in ${MASTER_VERSION} ${STABLE_VERSION}; do
                         [[ -d ${TC_FOLDER}/flash-clang-${FLASH_VERSION}.x ]] && \
                             export PATH="${TC_FOLDER}/flash-clang-${FLASH_VERSION}.x/bin:${PATH}"
                     done
