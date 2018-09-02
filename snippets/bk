@@ -33,7 +33,7 @@ function bk() {
         "op5:android-8.1") PARAMS=( omni_oneplus5_defconfig ) ;;
         "op5:lineage-15.1") PARAMS=( lineage_oneplus5_defconfig ) ;;
         "op5:oneplus/QC8998_O_8."*) PARAMS=( msmcortex-perf_defconfig ) ;;
-        "op6:android-8.1") PARAMS=( omni_oneplus6_defconfig ) ;;
+        "op6:android-8.1"|"op6:android-9.0") PARAMS=( omni_oneplus6_defconfig ) ;;
         "op6:lineage-15.1") PARAMS=( enchilada_defconfig ) ;;
         "op6:oneplus/SDM845_O_8.1") PARAMS=( sdm845-perf_defconfig ) ;;
         "polaris"*) PARAMS=( polaris_user_defconfig ) ;;
