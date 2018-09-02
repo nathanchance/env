@@ -45,6 +45,10 @@ function install-bin() {
     # Install jq
     sudo curl -Ls https://github.com/stedolan/jq/releases/download/jq-1.5/jq-linux64 -o /usr/local/bin/jq
     sudo chmod a+x /usr/local/bin/jq
+
+    # Install speedtest-cli
+    sudo curl -Lo /usr/local/bin/speedtest-cli https://raw.githubusercontent.com/sivel/speedtest-cli/master/speedtest.py
+    sudo chmod +x /usr/local/bin/speedtest-cli
 }
 
 

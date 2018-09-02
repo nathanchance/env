@@ -25,7 +25,11 @@ function bootstrap() {
     # Install packages from Debian repos
     sudo apt update
     sudo apt upgrade -y
-    sudo apt install -y build-essential devscripts git gpg jq mosh ssh tmux vim
+    sudo apt install -y build-essential devscripts git gpg jq mosh python-pip ssh tmux vim
+
+    # Install speedtest-cli
+    sudo curl -Lo /usr/local/bin/speedtest-cli https://raw.githubusercontent.com/sivel/speedtest-cli/master/speedtest.py
+    sudo chmod +x /usr/local/bin/speedtest-cli
 
     # Setup git
     git config --global core.editor vim
