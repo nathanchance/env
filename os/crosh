@@ -83,7 +83,7 @@ function install-bin() {
     # Install chromebrew + other desirable programs
     curl -Ls git.io/vddgY | bash
     yes | crew install -s mosh vim
-    yes | crew install hub gnupg ripgrep
+    yes | crew install hub gnupg ripgrep tmux
     pip install speedtest-cli
 
     # Configure git
