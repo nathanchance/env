@@ -7,42 +7,64 @@
 # Utility and terminal setup functions for my Pixelbook
 
 
-# Downloads folder
-alias dwnld='cd ${HOME}/Downloads'
+# Setup function
+function bootstrap() {
+    # Grab common functions/variables
+    [[ ! -f ${HOME}/Downloads/persistent/repos/scripts/common ]] && source <(curl -Ls https://github.com/nathanchance/scripts/raw/master/common) &>/dev/null
 
-# Files folder
-alias fls='cd ${HOME}/Downloads/Files'
+    # Make sure keys are present
+    [[ ! -d ${HOME}/Downloads/keys ]] && { warn "${HOME}/Downloads/keys not found, skipping GPG and SSH keys setup!"; NO_KEYS=true; }
 
-# Connect to my server
-alias mshfb='mosh nathan@nathanchance.me'
+    # Setup binaries
+    install-bin -c
+    sudo crouton -r stretch -t cli-extra
 
+    # Setup SSH and GPG if keys are present
+    if [[ -z ${NO_KEYS} ]]; then
+        local KEYS; KEYS=${HOME}/Downloads/keys
+        mkdir -p "${HOME}"/.ssh
+        mv "${KEYS}"/id_ed25519{,.pub} "${HOME}"/.ssh
+        chmod 600 "${HOME}"/.ssh/id_ed25519
 
-# Set vim runtime area
-export VIMRUNTIME=/usr/local/share/vim/vim80
+        # Setup GPG
+        gpg --import "${KEYS}"/{public*,private*}.asc
+        gpg --import-ownertrust "${KEYS}"/ownertrust*.asc
+        {
+            echo "default-cache-ttl 3600"
+            echo "max-cache-ttl 86400"
+        } > "${HOME}"/.gnupg/gpg-agent.conf
+        gpg-connect-agent reloadagent /bye
+    fi
 
+    # Clone scripts
+    local REPOS; REPOS="${HOME}"/Downloads/persistent/repos; mkdir -p "${REPOS}"
+    git clone git@github.com:nathanchance/scripts "${REPOS}"/scripts || return 1
 
-# Fetch this script and reload .bashrc
-function rld() {
-    curl -o ~/.chromeos-functions https://raw.githubusercontent.com/nathanchance/scripts/master/os/chromeos
-    source ~/.bashrc
-}
-source <(curl -Ls https://raw.githubusercontent.com/nathanchance/scripts/master/snippets/deldog)
-source <(curl -Ls https://raw.githubusercontent.com/nathanchance/scripts/master/snippets/git)
-GPG_TTY=$(tty); export GPG_TTY
+    # Clone repos
+    mkdir -p "${HOME}"/repos
+    local DOTFILES; DOTFILES=${REPOS}/dotfiles
+    git clone git@github.com:nathanchance/dotfiles "${DOTFILES}" || return 1
 
+    # Copy files into their proper locations
+    # .git-prompt.sh
+    cp "${DOTFILES}"/common/.git-prompt.sh "${HOME}"
+    # tmux
+    cp "${DOTFILES}"/pixelbook/.tmux.conf "${HOME}"
 
-# Neofetch function
-function neofetch() {
-    echo
-    /usr/local/bin/neofetch --distro_shorthand tiny "${@}"
-    echo
-}
+    # Run small setup scripts from dotfiles
+    bash "${DOTFILES}"/common/global_gitignore.sh
 
+    # Setup bash_aliases
+    if ! grep -q bash_setup "${HOME}"/.bashrc; then
+        {
+            echo
+            echo "[[ -f \${HOME}/Downloads/persistent/repos/scripts/os/common ]] && source \"\${HOME}/Downloads/persistent/repos/scripts/os/common\""
+            echo "type -p bash_setup && bash_setup"
+        } >> "${HOME}"/.bashrc
+    fi
 
-# Update function
-function upd() {
-    crew update
-    crew upgrade
+    # Let her rip!
+    source "${HOME}"/.bashrc
 }
 
 
@@ -60,20 +82,18 @@ function install-bin() {
 
     # Install chromebrew + other desirable programs
     curl -Ls git.io/vddgY | bash
-    crew install -s mosh
-    crew install hub gnupg vim
+    yes | crew install -s mosh vim
+    yes | crew install hub gnupg ripgrep
+    pip install speedtest-cli
 
     # Configure git
     git config --global commit.gpgsign true
     git config --global core.editor vim
-    git config --global core.pager "/usr/local/bin/less"
     git config --global user.name "Nathan Chancellor"
     git config --global user.email "natechancellor@gmail.com"
     git config --global user.signingkey 2437CB76E544CB6AB3D9DFD399739260CB6CB716
 
     # Configure vim
-    ln -s /usr/local/share/vim/vim80 ~/.vim
-    ln -s ~/.vim/vimrc ~/.vimrc
     mkdir -p ~/.vim/.backup ~/.vim/.swp ~/.vim/.undo
     {
         echo
@@ -88,21 +108,54 @@ function install-bin() {
 }
 
 
-# Generate new SSH key for server interaction
-function gen-ssh() {
-    ssh-keygen -t ed25519
-    ssh-copy-id nathan@nathanchance.me
+# Pixelbook specific aliases
+function crosh_aliases() {
+    # Downloads folder
+    alias dwnld='cd ${HOME}/Downloads'
+
+    # Persistent folder
+    alias per='cd ${HOME}/Download/persistent'
+
+    # Files folder
+    alias fls='cd ${HOME}/Downloads/persistent/files'
+
+    # Connect to my server
+    alias mshfb='mosh nathan@nathanchance.me'
 }
 
 
-# Things to do only on a clean install
-function setup() {
-    if ! grep -q chromeos-functions "${HOME}/.bashrc"; then
-        echo "[[ -f \${HOME}/.chromeos-functions ]] && source \${HOME}/.chromeos-functions" >> "${HOME}/.bashrc"
+# Setup PS1 and such
+function crosh_prompt() {
+    if [[ -f ${HOME}/.git-prompt.sh ]]; then
+        source "${HOME}"/.git-prompt.sh
+        export GIT_PS1_SHOWDIRTYSTATE=1
+        export GIT_PS1_SHOWUPSTREAM=auto
+        export PROMPT_COMMAND='__git_ps1_custom "\[\033[01;31m\]\u@\h \[\033[01;33m\]\w\[\033[01;36m\]" " \[\033[39m\]\$\[\033[0m\] "'
     fi
-    install-bin "${@}"
-    rld
-    crouton -r stretch -t cli-extra
+}
+
+
+# Pixelbook specific shell setup
+function crosh_setup() {
+    crosh_prompt
+    export PAGER=/usr/local/bin/most
+    export MANPATH=/usr/local/man${MANPATH:+":${MANPATH}"}
+    export VIMRUNTIME=${HOME}/.vim
+}
+
+
+# Neofetch function
+function neofetch() {
+    echo
+    /usr/local/bin/neofetch --distro_shorthand tiny "${@}"
+    echo
+}
+
+
+# Update function
+function upd() {
+    crew update
+    crew upgrade
 }
 
 
