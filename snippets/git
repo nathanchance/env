@@ -11,6 +11,8 @@ if command -v hub > /dev/null 2>&1; then alias git='hub'; fi
 
 git config --global alias.aa 'add --all'
 git config --global alias.ac 'commit --gpg-sign --all --signoff' # add and commit
+git config --global alias.ama 'am --abort'
+git config --global alias.amc 'am --continue'
 git config --global alias.ams 'am --gpg-sign --signoff' # am signoff
 git config --global alias.ap 'apply -3 -v'
 git config --global alias.b 'branch --verbose'
