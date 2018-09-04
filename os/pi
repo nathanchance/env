@@ -104,7 +104,9 @@ function bootstrap() {
 
     # Setup bash_aliases
     {
-        SCRIPTS=$(echo ${SCRIPTS} | sed "s;${HOME};\${HOME};g")
+        # SC2001: See if you can use ${variable//search/replace} instead.
+        # shellcheck disable=SC2001
+        SCRIPTS=$(echo "${SCRIPTS}" | sed "s;${HOME};\${HOME};g")
         echo "[[ -f ${SCRIPTS}/os/common ]] && source \"${SCRIPTS}/os/common\""
         echo "[[ -f \${HOME}/.cargo/env ]] && source \"\${HOME}/.cargo/env\""
         echo "type -p bash_setup && bash_setup"
