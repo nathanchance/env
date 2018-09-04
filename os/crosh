@@ -9,11 +9,16 @@
 
 # Setup function
 function bootstrap() {
+    # Common variables
+    local KEYS; KEYS=${HOME}/Downloads/keys
+    local REPOS; REPOS=${HOME}/Downloads/persistent/repos
+    local DOTFILES; DOTFILES=${REPOS}/dotfiles
+    local SCRIPTS; SCRIPTS=${REPOS}/scripts
+
     # Grab common functions/variables
-    [[ ! -f ${HOME}/Downloads/persistent/repos/scripts/common ]] && source <(curl -Ls https://github.com/nathanchance/scripts/raw/master/common) &>/dev/null
+    [[ ! -f ${SCRIPTS}/common ]] && source <(curl -Ls https://github.com/nathanchance/scripts/raw/master/common) &>/dev/null
 
     # Make sure keys are present
-    local KEYS; KEYS=${HOME}/Downloads/keys
     [[ ! -d ${KEYS} ]] && { warn "${KEYS} not found, skipping GPG and SSH keys setup!"; NO_KEYS=true; }
 
     # Setup binaries
@@ -36,13 +41,9 @@ function bootstrap() {
         gpg-connect-agent reloadagent /bye
     fi
 
-    # Clone scripts
-    local REPOS; REPOS="${HOME}"/Downloads/persistent/repos; mkdir -p "${REPOS}"
-    git clone git@github.com:nathanchance/scripts "${REPOS}"/scripts || return 1
-
-    # Clone repos
-    mkdir -p "${HOME}"/repos
-    local DOTFILES; DOTFILES=${REPOS}/dotfiles
+    # Clone scripts and dotfiles
+    mkdir -p "${REPOS}"
+    git clone git@github.com:nathanchance/scripts "${SCRIPTS}" || return 1
     git clone git@github.com:nathanchance/dotfiles "${DOTFILES}" || return 1
 
     # Copy files into their proper locations
