@@ -71,6 +71,14 @@ git config --global alias.ss 'status --short --branch'
 git config --global alias.us 'reset HEAD'
 
 
+# Set up merge aliases based on availability of '--signoff'
+[[ $(git --version | head -n 1 | cut -d . -f 2) -ge 15 ]] && SIGNOFF=" --signoff"
+git config --global alias.m "merge --gpg-sign${SIGNOFF}"
+git config --global alias.ml "merge --gpg-sign${SIGNOFF} --log=500"
+git config --global alias.pl "pull --gpg-sign${SIGNOFF}"
+git config --global alias.pll "pull --gpg-sign${SIGNOFF} --log=500"
+
+
 # Get a git commit message tag
 function gcmt() {
     local TAG

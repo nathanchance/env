@@ -41,12 +41,6 @@ function server_aliases() {
 
     # Clean out web folder
     alias wfc='git -C ${WEB_FOLDER}/downloads/kernels cl'
-
-    # Git aliases
-    git config --global alias.m 'merge --gpg-sign --signoff'
-    git config --global alias.ml 'merge --gpg-sign --signoff --log=500'
-    git config --global alias.pl 'pull --gpg-sign --signoff'
-    git config --global alias.pll 'pull --gpg-sign --signoff --log=500'
 }
 
 

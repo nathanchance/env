@@ -17,12 +17,6 @@ function pi_aliases() {
 
     # Scripts folder alias
     alias spt='cd ${HOME}/Documents/scripts'
-
-    # Git aliases since Raspbian doesn't have git 2.16.0+
-    git config --global alias.m 'merge --gpg-sign'
-    git config --global alias.ml 'merge --gpg-sign --log=500'
-    git config --global alias.pl 'pull --gpg-sign'
-    git config --global alias.pll 'pull --gpg-sign --log=500'
 }
 
 
