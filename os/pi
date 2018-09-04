@@ -159,11 +159,16 @@ function plk() {
 # Update kernel function
 function updk() {
     TMP_FOLDER=$(mktemp -d)
-    mkdir -p "${TMP_FOLDER}"/overlays "${TMP_FOLDER}"/modules
-    rsync nathan@94.130.39.26:~/kernels/pi/out/arch/arm/boot/dts/*.dtb "${TMP_FOLDER}"
-    rsync nathan@94.130.39.26:~/kernels/pi/out/arch/arm/boot/dts/overlays/*.dtb* "${TMP_FOLDER}"/overlays
-    rsync nathan@94.130.39.26:~/kernels/pi/out/arch/arm/boot/zImage "${TMP_FOLDER}"/kernel-nathan.img
-    rsync -r nathan@94.130.39.26:~/kernels/pi/out/pi_root/lib/modules/* "${TMP_FOLDER}"/modules
+    mkdir -p "${TMP_FOLDER}"/overlays "${TMP_FOLDER}"/module
+
+    header "Downloading files"
+
+    rsync -v nathan@94.130.39.26:~/kernels/pi/out/arch/arm/boot/dts/*.dtb "${TMP_FOLDER}"
+    rsync -v nathan@94.130.39.26:~/kernels/pi/out/arch/arm/boot/dts/overlays/*.dtb* "${TMP_FOLDER}"/overlays
+    rsync -v nathan@94.130.39.26:~/kernels/pi/out/arch/arm/boot/zImage "${TMP_FOLDER}"/kernel-nathan.img
+    rsync -vr nathan@94.130.39.26:~/kernels/pi/out/pi_root/lib/modules/* "${TMP_FOLDER}"/modules
+
+    header "Moving files"
 
     sudo mv -v "${TMP_FOLDER}"/{kernel-nathan.img,*.dtb} /boot
     sudo mv -v "${TMP_FOLDER}"/overlays/* /boot/overlays
