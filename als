@@ -48,7 +48,7 @@ trap 'echo; die "Manually aborted!"' SIGINT SIGTERM
 # Variables
 ALS=${KERNEL_FOLDER}/als
 REPOS_318=( "marlin" "msm-3.18" "op3" "tissot" )
-REPOS_44=( "msm-4.4" "nash" "op5" "sagit" "wahoo" "whyred" )
+REPOS_44=( "jasmine" "msm-4.4" "nash" "op5" "sagit" "wahoo" "whyred" )
 REPOS_49=( "msm-4.9" "op6" "polaris" )
 
 # Parse parameters
@@ -111,6 +111,8 @@ if [[ -n ${INIT} ]]; then
     for ITEM in "${REPOS_318[@]}" "${REPOS_44[@]}" "${REPOS_49[@]}"; do
         git clone "git@github.com:android-linux-stable/${ITEM}.git" || die "Could not clone ${ITEM}!"
         case ${ITEM} in
+            "jasmine"|"polaris"|"sagit"|"tissot"|"whyred")
+                REMOTES=( "upstream:https://github.com/MiCode/Xiaomi_Kernel_OpenSource" ) ;;
             "marlin"|"wahoo")
                 REMOTES=( "upstream:https://android.googlesource.com/kernel/msm" ) ;;
             "msm-3.18"|"msm-4.4"|"msm-4.9")
@@ -129,8 +131,6 @@ if [[ -n ${INIT} ]]; then
                 REMOTES=( "LineageOS:https://github.com/LineageOS/android_kernel_oneplus_sdm845"
                           "omni:https://github.com/omnirom/android_kernel_oneplus_sdm845"
                           "upstream:https://github.com/OnePlusOSS/android_kernel_oneplus_sdm845" ) ;;
-            "polaris"|"sagit"|"tissot"|"whyred")
-                REMOTES=( "upstream:https://github.com/MiCode/Xiaomi_Kernel_OpenSource" ) ;;
         esac
         for REMOTE in "${REMOTES[@]}"; do
             git -C "${ITEM}" remote add "${REMOTE%%:*}" "${REMOTE#*:}"
@@ -156,6 +156,7 @@ for VERSION in "${VERSIONS[@]}"; do
     for REPO in "${REPOS[@]}"; do
         # Map all of the branches of the repo to an upstream remote (if relevant)
         case ${REPO} in
+            "jasmine") BRANCHES=( "jasmine-o-oss" ) ;;
             "marlin") BRANCHES=( "android-msm-marlin-3.18" ) ;;
             "msm-3.18") BRANCHES=( "kernel.lnx.3.18.r33-rel" ) ;;
             "msm-4.4") BRANCHES=( "kernel.lnx.4.4.r27-rel" "kernel.lnx.4.4.r35-rel" ) ;;
@@ -224,7 +225,7 @@ for VERSION in "${VERSIONS[@]}"; do
                 if [[ -z ${DRY_RUN} ]]; then
                     # Get the appropriate resolution command filename (static mapping because it is not uniform)
                     case "${REPO}:${BRANCH}" in
-                        "marlin"*|"msm"*|"polaris"*|"sagit"*|"tissot"*|"wahoo"*|"whyred"*) COMMANDS="${REPO}-commands" ;;
+                        "jasmine"*|"marlin"*|"msm"*|"polaris"*|"sagit"*|"tissot"*|"wahoo"*|"whyred"*) COMMANDS="${REPO}-commands" ;;
                         "nash"*) COMMANDS="nash-oreo-8.0.0-commands" ;;
                         "op3:oneplus/QC8996_O_8.0.0") COMMANDS="${REPO}-8.0.0-commands" ;;
                         "op5:oneplus/QC8998_O_8.1"|"op6:oneplus/SDM845_O_8.1") COMMANDS="${REPO}-O_8.1-commands" ;;
