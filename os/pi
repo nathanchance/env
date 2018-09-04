@@ -7,16 +7,124 @@
 # Utility and terminal setup functions for my Raspberry Pi
 
 
+# Setup function
+# Assumes that Wi-Fi and SSH have been set up with 'sudo raspi-config'
+function bootstrap() {
+    # Common variables
+    local KEYS; KEYS=/media/pi/VERBATIM/Keys
+    local REPOS; REPOS=${HOME}/repos
+    local DOTFILES; DOTFILES=${REPOS}/dotfiles
+    local SCRIPTS; SCRIPTS=${REPOS}/scripts
+
+    # Grab common functions/variables
+    [[ ! -f ${SCRIPTS}/common ]] && source <(curl -Ls https://github.com/nathanchance/scripts/raw/master/common) &>/dev/null
+
+    # Make sure keys are present
+    [[ ! -d ${KEYS} ]] && { warn "${KEYS} not found, skipping GPG and SSH keys setup!"; NO_KEYS=true; }
+
+    # Update and install packages
+    sudo apt update
+    sudo apt upgrade -y
+    sudo apt install -y build-essential devscripts git gpg jq mosh most ssh tmux vim
+
+    # Install speedtest-cli
+    sudo curl -Lo /usr/local/bin/speedtest-cli https://raw.githubusercontent.com/sivel/speedtest-cli/master/speedtest.py
+    sudo chmod +x /usr/local/bin/speedtest-cli
+
+    # Setup git
+    git config --global core.editor vim
+    git config --global user.name "Nathan Chancellor"
+    git config --global user.email "natechancellor@gmail.com"
+
+    # Install hub
+    HUB_VERSION=2.5.1
+    curl -LO https://github.com/github/hub/releases/download/v${HUB_VERSION}/hub-linux-arm-${HUB_VERSION}.tgz
+    tar -xf hub-linux-arm-${HUB_VERSION}.tgz
+    cd hub-linux-arm-${HUB_VERSION} || { display_error "Downloading or extracting hub failed!"; return 1; }
+    sudo prefix=/usr/local ./install
+    cd "${OLDPWD}" || { display_error "${OLDPWD} doesn't exist??"; return 1; }
+    rm -rf hub*
+
+    # Install rust
+    curl https://sh.rustup.rs -sSf | sh
+    source "${HOME}"/.cargo/env
+
+    # Build fd and ripgrep binaries from source
+    FD_VERSION=7.1.0
+    RG_VERSION=0.9.0
+    for PAIR in fd:https://github.com/sharkdp/fd/archive/v${FD_VERSION}.zip \
+                ripgrep:https://github.com/BurntSushi/ripgrep/archive/${RG_VERSION}.zip; do
+        BINARY=${PAIR%%:*}
+        URL=${PAIR#*:}
+        TMP=$(mktemp)
+
+        curl -L "${URL}" -o "${TMP}"
+        unzip "${TMP}"
+        cd "${BINARY}"-* || { display_error "Downloading or extracting ${BINARY} failed!"; return 1; }
+        cargo build --release
+        cargo install
+        cd "${OLDPWD}" || { display_error "${OLDPWD} doesn't exist??"; return 1; }
+        rm -rf "${OLDPWD}" "${TMP}"
+    done
+
+    # Setup SSH and GPG if keys are present
+    if [[ -z ${NO_KEYS} ]]; then
+        mkdir -p "${HOME}"/.ssh
+        mv "${KEYS}"/id_ed25519{,.pub} "${HOME}"/.ssh
+        chmod 600 "${HOME}"/.ssh/id_ed25519
+
+        # Setup GPG
+        gpg --import "${KEYS}"/{public*,private*}.asc
+        gpg --import-ownertrust "${KEYS}"/ownertrust*.asc
+        git config --global commit.gpgsign true
+        git config --global user.signingkey 2437CB76E544CB6AB3D9DFD399739260CB6CB716
+        {
+            echo "default-cache-ttl 3600"
+            echo "max-cache-ttl 86400"
+        } > "${HOME}"/.gnupg/gpg-agent.conf
+        gpg-connect-agent reloadagent /bye
+    fi
+
+    # Clone scripts and dotfiles
+    mkdir -p "${REPOS}"
+    git clone git@github.com:nathanchance/scripts "${SCRIPTS}" || return 1
+    git clone git@github.com:nathanchance/dotfiles "${DOTFILES}" || return 1
+
+    # Copy files into their proper locations
+    # vim
+    cp -r "${DOTFILES}"/common/vim "${HOME}"/.vim
+    mv "${HOME}"/.vim/.vimrc "${HOME}"
+    # .git-prompt.sh
+    cp "${DOTFILES}"/common/.git-prompt.sh "${HOME}"
+    # tmux
+    cp "${DOTFILES}"/pi/.tmux.conf "${HOME}"
+
+    # Run small setup scripts from dotfiles
+    bash "${DOTFILES}"/common/global_gitignore.sh
+
+    # Setup bash_aliases
+    {
+        SCRIPTS=$(echo ${SCRIPTS} | sed "s;${HOME};\${HOME};g")
+        echo "[[ -f ${SCRIPTS}/os/common ]] && source \"${SCRIPTS}/os/common\""
+        echo "[[ -f \${HOME}/.cargo/env ]] && source \"\${HOME}/.cargo/env\""
+        echo "type -p bash_setup && bash_setup"
+    } > "${HOME}"/.bash_aliases
+
+    # Let her rip!
+    source "${HOME}"/.bashrc
+ }
+
+
 # Raspberry Pi specific aliases
 function pi_aliases() {
     # Kernel alias
-    alias knl='cd ${HOME}/Documents/Kernel'
+    alias knl='cd ${HOME}/repos/kernel'
 
     # Build kernel alias
     alias pk='pi-kernel'
 
     # Scripts folder alias
-    alias spt='cd ${HOME}/Documents/scripts'
+    alias spt='cd ${HOME}/repos/scripts'
 }
 
 
@@ -34,8 +142,8 @@ function nf() {
 
 # Update alias
 function upd() {
-    sudo apt-get update
-    sudo apt-get upgrade
+    sudo apt update
+    sudo apt upgrade
 }
 
 
