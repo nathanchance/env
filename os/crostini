@@ -13,7 +13,8 @@ function bootstrap() {
     [[ ! -f ${HOME}/scripts/common ]] && source <(curl -Ls https://github.com/nathanchance/scripts/raw/master/common) &>/dev/null
 
     # Make sure keys are present
-    [[ ! -d ${HOME}/keys ]] && { warn "${HOME}/keys not found, skipping GPG and SSH keys setup!"; NO_KEYS=true; }
+    local KEYS; KEYS=${HOME}/keys
+    [[ ! -d ${KEYS} ]] && { warn "${KEYS} not found, skipping GPG and SSH keys setup!"; NO_KEYS=true; }
 
     # Set architecture variables
     case "$(uname -m)" in
@@ -79,12 +80,12 @@ function bootstrap() {
     # Setup SSH and GPG if keys are present
     if [[ -z ${NO_KEYS} ]]; then
         mkdir -p "${HOME}"/.ssh
-        mv "${HOME}"/keys/id_ed25519{,.pub} "${HOME}"/.ssh
+        mv "${KEYS}"/id_ed25519{,.pub} "${HOME}"/.ssh
         chmod 600 "${HOME}"/.ssh/id_ed25519
 
         # Setup GPG
-        gpg --import "${HOME}"/keys/{public*,private*}.asc
-        gpg --import-ownertrust "${HOME}"/keys/ownertrust*.asc
+        gpg --import "${KEYS}"/{public*,private*}.asc
+        gpg --import-ownertrust "${KEYS}"/ownertrust*.asc
         git config --global commit.gpgsign true
         git config --global user.signingkey 2437CB76E544CB6AB3D9DFD399739260CB6CB716
         {

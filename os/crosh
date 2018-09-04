@@ -13,7 +13,8 @@ function bootstrap() {
     [[ ! -f ${HOME}/Downloads/persistent/repos/scripts/common ]] && source <(curl -Ls https://github.com/nathanchance/scripts/raw/master/common) &>/dev/null
 
     # Make sure keys are present
-    [[ ! -d ${HOME}/Downloads/keys ]] && { warn "${HOME}/Downloads/keys not found, skipping GPG and SSH keys setup!"; NO_KEYS=true; }
+    local KEYS; KEYS=${HOME}/Downloads/keys
+    [[ ! -d ${KEYS} ]] && { warn "${KEYS} not found, skipping GPG and SSH keys setup!"; NO_KEYS=true; }
 
     # Setup binaries
     install-bin -c
@@ -21,7 +22,6 @@ function bootstrap() {
 
     # Setup SSH and GPG if keys are present
     if [[ -z ${NO_KEYS} ]]; then
-        local KEYS; KEYS=${HOME}/Downloads/keys
         mkdir -p "${HOME}"/.ssh
         mv "${KEYS}"/id_ed25519{,.pub} "${HOME}"/.ssh
         chmod 600 "${HOME}"/.ssh/id_ed25519
