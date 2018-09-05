@@ -170,9 +170,9 @@ function updk() {
 
     header "Moving files"
 
-    sudo mv -v "${TMP_FOLDER}"/{kernel-nathan.img,*.dtb} /boot
-    sudo mv -v "${TMP_FOLDER}"/overlays/* /boot/overlays
-    sudo mv -v "${TMP_FOLDER}"/modules /lib/modules
+    sudo mv -v "${TMP_FOLDER}"/{kernel-nathan.img,*.dtb} /boot 2>/dev/null
+    sudo mv -v "${TMP_FOLDER}"/overlays/* /boot/overlays 2>/dev/null
+    sudo mv -v "${TMP_FOLDER}"/modules /lib/modules 2>/dev/null
 
     rm -rf "${TMP_FOLDER}"
 }
