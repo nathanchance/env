@@ -6,69 +6,94 @@
 #
 # Script to build and install a Raspberry Pi kernel image
 
-source "$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")" || return; pwd)/common"
-trap 'echo; die "Manually aborted!"' SIGINT SIGTERM
 
-# Hide all non-error output unless verbosity is requsted
-[[ ! "${*}" =~ "-v" ]] && exec > /dev/null
+######################
+#                    #
+#  HELPER FUNCTIONS  #
+#                    #
+######################
 
-# Allow specification of 32-bit versus 64-bit
-[[ "${*}" =~ "-32" ]] && ARCH=arm
-[[ "${*}" =~ "-64" ]] && ARCH=arm64
-[[ -z ${ARCH} ]] && ARCH=arm
+# Echo to stderr
+function errcho() {
+    (>&2 echo "${@}")
+}
 
-# Kernel variable
-KERNEL=kernel7
 
-# Message file for Telegram messages
-TG_MSG_FILE=$(mktemp)
-trap 'rm -f "${TG_MSG_FILE}"' EXIT
-
-# Check if we are compiling on the Raspberry Pi or not
-[[ "$(whoami)" = "pi" ]] && PI=true
-
-# Set toolchain to use
-if [[ -n ${PI} ]]; then
-    cd "${HOME}/Documents/Kernel" || die "Kernel source doesn't exist!"
-else
-    # SC2153: Possible misspelling: TC_FOLDER may not be assigned, but GCC_FOLDER is.
-    # shellcheck disable=SC2153
-    case "${*}" in
-        *"-7"*) GCC_FOLDER=${TC_FOLDER}/btg-linaro-gcc-7.3.1-${ARCH} ;;
-        *"-8"*) GCC_FOLDER=${TC_FOLDER}/btg-gcc-8.2.1-${ARCH} ;;
-    esac
-    [[ -z ${GCC_FOLDER} ]] && GCC_FOLDER=${TC_FOLDER}/btg-gcc-8.2.1-${ARCH}
-    GCC=$(find "${GCC_FOLDER}/bin" \( -type f -o -type l \) -name '*-gcc' | head -n1)
-    [[ -z ${GCC} ]] && die "GCC toolchain could not be found!"
-    CC=${GCC%gcc}
-
-    SOURCE_FOLDER=${HOME}/kernels/pi
-    cd "${SOURCE_FOLDER}" || die "Kernel source doesn't exist!"
-fi
-
-# Make function for both host and cross compiling
+# Kernel make function
 function kmake() {
     if [[ -n ${PI} ]]; then
-        make "${JOBS_FLAG}" O=out "${@}"
+        make "${JOBS_FLAG}" \
+             O=out \
+             "${@}"
     else
-        make "${JOBS_FLAG}" ARCH=${ARCH} CROSS_COMPILE="${CCACHE} ${CC}" O=out "${@}"
+        make ARCH=${ARCH} \
+             CROSS_COMPILE="${CCACHE} ${GCC_TOOLCHAIN%gcc}" \
+             ${JOBS_FLAG} \
+             O=out \
+             "${@}"
     fi
 }
 
-function build() {
-    START="$(date +"%s")"
 
-    {
-        echo "\`\`\`"
-        echo "Raspberry Pi kernel build starting..."
-        echo
-        echo "Version $(make kernelversion)"
-        echo "\`\`\`"
-    } > "${TG_MSG_FILE}"
-    [[ -n ${PI} || "${*}" =~ "-t" ]] && tg_msg "$(cat "${TG_MSG_FILE}")"
+#######################
+#                     #
+#  PRIMARY FUNCTIONS  #
+#                     #
+#######################
 
-    rm -rf out
+# Gather parameters
+function parse_parameters() {
+    PARAMS="${*}"
+    START=$(date +%s)
+    while [[ ${#} -ge 1 ]]; do
+        case ${1} in
+            # Architecture to build
+            "-a"|"--arch")
+                shift && enforce_value "${@}"
 
+                ARCH=${1} ;;
+
+            # Show full compilation
+            "-D"|"--debug")
+                VERBOSITY=3 ;;
+
+            # Only show errors
+            "-e"|"--errors")
+                VERBOSITY=1
+                RG_LOOK_FOR="error:" ;;
+
+            # Specify which GCC toolchain to use
+            "-g"|"--gcc-toolchain")
+                shift && enforce_value "${@}"
+
+                GCC_TOOLCHAIN_FOLDER=${1} ;;
+
+            # Install the kernel if on the Raspberry Pi
+            "-i"|"--install")
+                INSTALL=true ;;
+
+            # Just show if build was successful or not
+            "-r"|"--show-only-result")
+                SHOW_ONLY_RESULT=true ;;
+
+            # Send Telegram message
+            "-t"|"--telegram")
+                TG=true ;;
+
+            # Show only warnings and errors during compilation
+            "-w"|"--warnings")
+                VERBOSITY=2
+                RG_LOOK_FOR="error:|warning:" ;;
+        esac
+
+        shift
+    done
+
+    # Make sure we're actually in a kernel folder
+    [[ ! -f Makefile ]] && die "This must be run in a kernel tree!"
+
+    # Architecture differences
+    [[ -z ${ARCH} ]] && ARCH=arm
     if [[ ${ARCH} = "arm" ]]; then
         DEFCONFIG=bcm2709_defconfig
         IMAGE=zImage
@@ -77,23 +102,45 @@ function build() {
         IMAGE=Image
     fi
 
-    kmake "${DEFCONFIG}"
+    # Are we on the Pi itself?
+    [[ "$(whoami)" = "pi" ]] && PI=true
+}
 
-    if time kmake "${IMAGE}" modules dtbs; then
-        RESULT_STRING="completed successfully"
+
+# Set toolchains
+function setup_toolchains() {
+    [[ -n ${PI} ]] && return
+    [[ -z ${GCC_TOOLCHAIN_FOLDER} ]] && GCC_TOOLCHAIN_FOLDER=${TC_FOLDER}/btg-gcc-8.2.1-${ARCH}
+    if [[ ! -d ${GCC_TOOLCHAIN_FOLDER} ]]; then
+        GCC_TOOLCHAIN_FOLDER=${TC_FOLDER}/${GCC_TOOLCHAIN_FOLDER}
+        [[ ! -d ${GCC_TOOLCHAIN_FOLDER} ]] && die "Invalid 64-bit GCC folder specified!"
+    fi
+    GCC_TOOLCHAIN=$(find "${GCC_TOOLCHAIN_FOLDER}/bin" \( -type f -o -type l \) -name '*-gcc' | head -n1)
+    [[ -z ${GCC_TOOLCHAIN} ]] && die "64-bit GCC toolchain could not be found!"
+}
+
+
+# Basic build function
+function build() {
+    if [[ -n ${PI} ]]; then
+        cd "${HOME}/repos/kernel" || die "Kernel source doesn't exist!"
     else
-        RESULT_STRING="failed"
+        SOURCE_FOLDER=${KERNEL_FOLDER}/pi
+        cd "${SOURCE_FOLDER}" || die "Kernel source doesn't exist!"
     fi
 
     {
-        TIME_STRING="$(format_time "${START}" "$(date +"%s")")"
         echo "\`\`\`"
-        echo "Raspberry Pi kernel build ${RESULT_STRING}!"
+        echo "Raspberry Pi kernel build starting..."
         echo
-        echo "Duration: ${TIME_STRING,,}"
+        echo "Version $(make kernelversion)"
         echo "\`\`\`"
     } > "${TG_MSG_FILE}"
-    [[ -n ${PI} || "${*}" =~ "-t" ]] && tg_msg "$(cat "${TG_MSG_FILE}")"
+	[[ -n ${TG} ]] && tg_msg "$(cat "${TG_MSG_FILE}")"
+
+    # Build kernel image
+    kmake "${DEFCONFIG}"
+    kmake "${IMAGE}" modules dtbs
 
     if [[ -z ${PI} ]]; then
         mkdir -p "${SOURCE_FOLDER}/out/pi_root"
@@ -101,16 +148,90 @@ function build() {
     fi
 }
 
+
+# Compilation function
+function compile() {
+    # Start hiding output and tracking time
+	START="$(date +"%s")"
+    [[ -n ${SHOW_ONLY_RESULT} ]] && exec > /dev/null
+
+    # Show the base version we are making
+    header "BUILDING $(make CROSS_COMPILE="" kernelversion)"
+
+    # Show compilation based on flags
+    case ${VERBOSITY} in
+        "3") build ;;
+        "1"|"2") build |& rg --color=never "${RG_LOOK_FOR}" ;;
+        *) build &> /dev/null ;;
+    esac
+
+    # Find final image
+    FINAL_IMAGE=$(find out -name "${IMAGE}" | tail -1)
+}
+
+
+# Install kernel on Raspberry PI
 function install() {
-    if [[ -f out/arch/arm/boot/zImage ]]; then
+    if [[ -n ${INSTALL} && -n ${PI} && -f out/arch/arm/boot/zImage ]]; then
         sudo make O=out modules_install
         sudo cp out/arch/arm/boot/dts/*.dtb /boot/
         sudo cp out/arch/arm/boot/dts/overlays/*.dtb* /boot/overlays/
         sudo cp arch/arm/boot/dts/overlays/README /boot/overlays/
-        sudo cp out/arch/arm/boot/zImage /boot/$KERNEL.img
+        sudo cp out/arch/arm/boot/zImage /boot/kernel-nathan.img
     fi
 }
 
-[[ "${*}" =~ "-b" ]] && build "${@}"
-[[ "${*}" =~ "-i" && ${PI} ]] && install
-exit 0
+
+# Report success
+function report_result() {
+	TIME_STRING="$(format_time "${START}" "$(date +"%s")")"
+    [[ -n ${SHOW_ONLY_RESULT} ]] && SCRIPT_COMMAND="$(basename "${0}") ${PARAMS}  |  "
+    if [[ -f ${FINAL_IMAGE} ]]; then
+		{
+			echo "\`\`\`"
+			echo "Raspberry Pi kernel build completed successfully!"
+			echo
+			echo "Duration: ${TIME_STRING,,}"
+			echo "\`\`\`"
+		} > "${TG_MSG_FILE}"
+		[[ -n ${TG} ]] && tg_msg "$(cat "${TG_MSG_FILE}")"
+
+        echo
+        errcho "${SCRIPT_COMMAND}${GRN}BUILD SUCCESSFUL IN ${TIME_STRING}${RST}"
+        echo
+        echo "${BOLD}Image:${RST}      ${FINAL_IMAGE}"
+        echo
+        android_kernel_version
+    else
+		{
+			echo "\`\`\`"
+			echo "Raspberry Pi kernel build failed!"
+			echo
+			echo "Duration: ${TIME_STRING,,}"
+			echo "\`\`\`"
+		} > "${TG_MSG_FILE}"
+		[[ -n ${TG} ]] && tg_msg "$(cat "${TG_MSG_FILE}")"
+
+        >&2 die "${RST}${SCRIPT_COMMAND}${RED}BUILD FAILED IN ${TIME_STRING}!"
+    fi
+
+    # Alert of script end
+    echo "\a"
+    exit 0
+}
+
+# Setup
+source "$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")" || return; pwd)/common"
+source "${SCRIPTS_FOLDER}/snippets/akv"
+trap 'echo; die "Manually aborted!"' SIGINT SIGTERM
+
+# Message file for Telegram messages
+TG_MSG_FILE=$(mktemp)
+trap 'rm -f "${TG_MSG_FILE}"' EXIT
+
+# Main
+parse_parameters "${@}"
+setup_toolchains
+compile
+install
+report_result
