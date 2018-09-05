@@ -39,6 +39,46 @@ function failed_steps() {
     SKIP_BUILD=true
 }
 
+# Conflict commands
+function post_merge_commands() {
+    local FIRST_STATEMENT SECOND_STATEMENT THIRD_STATEMENT
+    if [[ ${1} = "-s" ]]; then
+        FIRST_STATEMENT="Post merge steps successfully executed"
+        SECOND_STATEMENT="Post merge steps failed"
+    else
+        FIRST_STATEMENT="Merge failed but resolution was successful: $(kv)"
+        SECOND_STATEMENT="Merge failed, even after attempting resolution!"
+        THIRD_STATEMENT="Resolution was requested but no resolution file was found"
+    fi
+
+    # Get the appropriate resolution command filename (static mapping because it is not uniform)
+    case "${REPO}:${BRANCH}" in
+        "jasmine"*|"marlin"*|"msm"*|"polaris"*|"sagit"*|"tissot"*|"wahoo"*|"whyred"*) COMMANDS="${REPO}-commands" ;;
+        "nash"*) COMMANDS="nash-oreo-8.0.0-commands" ;;
+        "op3:oneplus/QC8996_O_8.0.0") COMMANDS="${REPO}-8.0.0-commands" ;;
+        "op5:oneplus/QC8998_O_8.1"|"op6:oneplus/SDM845_O_8.1") COMMANDS="${REPO}-O_8.1-commands" ;;
+        "op5:oneplus/QC8998_O_8.1_Beta") COMMANDS="${REPO}-O_8.1_Beta-commands" ;;
+        "op"*) COMMANDS="${REPO}-${BRANCH}-commands" ;;
+    esac
+
+    # If it is found, execute it
+    COMMANDS=${REPO_FOLDER}/sp/${KVER}/${COMMANDS}
+    if [[ -f ${COMMANDS} ]]; then
+        if bash "${COMMANDS}" "${COMMANDS_BRANCH}"; then
+            # Log success then push
+            post_git_fm_steps "${FIRST_STATEMENT}"
+        else
+            # Log success and conflicts
+            log "${LOG_TAG} ${SECOND_STATEMENT}"
+            log "${LOG_TAG} Conflicts:"
+            log "$(git cf)"
+            failed_steps
+        fi
+    # If no command file was found and it was a failed merge, log failure
+    elif [[ -n ${THIRD_STATEMENT} ]]; then
+        log "${LOG_TAG} Resolution was requested but no resolution file was found!"
+    fi
+}
 
 source "$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")" || return; pwd)/common"
 source "${SCRIPTS_FOLDER}"/snippets/bk
@@ -220,36 +260,18 @@ for VERSION in "${VERSIONS[@]}"; do
             if merge-stable "${ALS_PARAMS[@]}"; then
                 # Show merged kernel version in log
                 post_git_fm_steps "Merge successful: $(kv)"
+
+                # If a command file is found, execute it
+                post_merge_commands -s
             else
                 # Resolve if requested
                 if [[ -z ${DRY_RUN} ]]; then
-                    # Get the appropriate resolution command filename (static mapping because it is not uniform)
-                    case "${REPO}:${BRANCH}" in
-                        "jasmine"*|"marlin"*|"msm"*|"polaris"*|"sagit"*|"tissot"*|"wahoo"*|"whyred"*) COMMANDS="${REPO}-commands" ;;
-                        "nash"*) COMMANDS="nash-oreo-8.0.0-commands" ;;
-                        "op3:oneplus/QC8996_O_8.0.0") COMMANDS="${REPO}-8.0.0-commands" ;;
-                        "op5:oneplus/QC8998_O_8.1"|"op6:oneplus/SDM845_O_8.1") COMMANDS="${REPO}-O_8.1-commands" ;;
-                        "op5:oneplus/QC8998_O_8.1_Beta") COMMANDS="${REPO}-O_8.1_Beta-commands" ;;
-                        "op"*) COMMANDS="${REPO}-${BRANCH}-commands" ;;
-                    esac
-
                     # Arbitrarily assume that we're only merging one version ahead
                     KVER=${MAJOR_VER}.$((${KVER##*.} + 1))
 
-                    # If a command file is found, execute it
-                    COMMANDS=${REPO_FOLDER}/sp/${KVER}/${COMMANDS}
-                    if [[ -f ${COMMANDS} ]]; then
-                        if bash "${COMMANDS}" "${COMMANDS_BRANCH}"; then
-                            # Show merged kernel version in log
-                            post_git_fm_steps "Merge failed but resolution was successful: $(kv)"
-                        else
-                            log "${LOG_TAG} Merge failed, even after attempting resolution!"
-                            failed_steps
-                        fi
-                    # If no command file was found, something is messed up
-                    else
-                        log "${LOG_TAG} Resolution was requested but no resolution file was found!"
-                    fi
+                    # Attempt resolution
+                    post_merge_commands
+
                 # Log failure otherwise
                 else
                     log "${LOG_TAG} Merge failed!"
