@@ -199,7 +199,7 @@ for VERSION in "${VERSIONS[@]}"; do
             "jasmine") BRANCHES=( "jasmine-o-oss" ) ;;
             "marlin") BRANCHES=( "android-msm-marlin-3.18" ) ;;
             "msm-3.18") BRANCHES=( "kernel.lnx.3.18.r33-rel" "kernel.lnx.3.18.r34-rel" ) ;;
-            "msm-4.4") BRANCHES=( "kernel.lnx.4.4.r27-rel" "kernel.lnx.4.4.r35-rel" ) ;;
+            "msm-4.4") BRANCHES=( "kernel.lnx.4.4.r27-rel" "kernel.lnx.4.4.r34-rel" "kernel.lnx.4.4.r35-rel" ) ;;
             "msm-4.9") BRANCHES=( "kernel.lnx.4.9.r7-rel" ) ;;
             "nash") BRANCHES=( "oreo-8.0.0-release-nash:upstream" ) ;;
             "op3") BRANCHES=( "android-8.1:omni" "lineage-15.1:LineageOS" "oneplus/QC8996_O_8.0.0:upstream" ) ;;
