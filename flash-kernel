@@ -236,7 +236,14 @@ function device_flags() {
 
         "op6")
             # Required flags
-            [[ -z ${ANDROID_VERSION} ]] && ANDROID_VERSION=8.1.0
+            case "${VERSION::1}" in
+                "1")
+                    [[ -z ${ANDROID_VERSION} ]] && ANDROID_VERSION=8.1.0
+                    [[ -n ${STABLE} ]] && KERNEL_BRANCH=8.1 ;;
+                *)
+                    [[ -z ${ANDROID_VERSION} ]] && ANDROID_VERSION=9
+                    [[ -n ${STABLE} ]] && KERNEL_BRANCH=9.0_Beta ;;
+            esac
             AK2_SFX=${ANDROID_VERSION}
 
             BUILD_FUNCTION=build_kernel
@@ -259,8 +266,6 @@ function device_flags() {
 
             [[ -z ${GCC_FOLDER} ]] && GCC_FOLDER=${TC_FOLDER}/btg-gcc-8.2.1-arm64
             [[ -z ${GCC_32_BIT_FOLDER} ]] && GCC_32_BIT_FOLDER=${TC_FOLDER}/btg-gcc-8.2.1-arm
-
-            [[ -n ${STABLE} ]] && KERNEL_BRANCH=8.1
 
             MATCH_FLAG="${DEVICE_NAME_FILE}-v${VERSION::1}" ;;
 
