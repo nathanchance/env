@@ -139,6 +139,7 @@ function build() {
 	[[ -n ${TG} ]] && tg_msg "$(cat "${TG_MSG_FILE}")"
 
     # Build kernel image
+    rm -rf out
     kmake "${DEFCONFIG}"
     kmake "${IMAGE}" modules dtbs
 
