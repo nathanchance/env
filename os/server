@@ -792,10 +792,15 @@ function updtc() {
 
 # Build all Flash Kernel builds a certain amount of times
 function fkba() {(
-    for DEVICE in marlin op6 op6-custom wahoo; do
+    for DEVICE in marlin op6:8.1 op6:9.0_Beta op6-custom wahoo; do
+        BRANCH=${DEVICE##*:}
+        DEVICE=${DEVICE%%:*}
         rm -f "${LOG}"
         START=$(date +%s)
         cd "${KERNEL_FOLDER}/flash/${DEVICE}" || { warn "${DEVICE} folder does not exist, skipping!"; continue; }
+        if [[ ${BRANCH} != ${DEVICE} ]]; then
+            git ch "${BRANCH}" || { warn "${BRANCH} for ${DEVICE} does not exist, skipping!"; continue; }
+        fi
         [[ ${1} = "-n" || ${1} = "--number" ]] && { shift; NUM=${1}; }
         [[ -z ${NUM} ]] && NUM=1
         # SC2119: Use dib "$@" if function's $1 should mean script's $1.
