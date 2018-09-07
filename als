@@ -261,12 +261,21 @@ for VERSION in "${VERSIONS[@]}"; do
                 # Show merged kernel version in log
                 post_git_fm_steps "Merge successful: $(kv)"
 
+                # Properly set KVER for post merge commands
+                if [[ -n ${QUEUE} ]]; then
+                    KVER=${MAJOR_VER}.$((${KVER##*.} + 1))
+                elif [[ -n ${RC} ]]; then
+                    KVER=$(kv | sed 's/-rc.*//')
+                else
+                    KVER=$(kv)
+                fi
+
                 # If a command file is found, execute it
                 post_merge_commands -s
             else
                 # Resolve if requested
                 if [[ -z ${DRY_RUN} ]]; then
-                    # Arbitrarily assume that we're only merging one version ahead
+                    # Set KVER to be one version ahead of current version
                     KVER=${MAJOR_VER}.$((${KVER##*.} + 1))
 
                     # Attempt resolution
