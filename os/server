@@ -494,10 +494,13 @@ function clean-kernels() {(
 # Update AnyKernel2 from osm0sis's GitHub
 function update-ak2() {(
     REPOS=( "${HOME}/kernels/flash/anykernel2-marlin"
-            "${HOME}/kernels/flash/anykernel2-op6"
+            "${HOME}/kernels/flash/anykernel2-op6:op6-flash-8.1.0"
+            "${HOME}/kernels/flash/anykernel2-op6:op6-flash-9"
             "${HOME}/kernels/flash/anykernel2-wahoo" )
 
     for REPO in "${REPOS[@]}"; do
+        BRANCH=${REPO##*:}
+        REPO=${REPO%%:*}
         header "Updating $(basename "${REPO}")"
 
         cd "${REPO}" || {
@@ -509,13 +512,17 @@ function update-ak2() {(
             git remote add upstream https://github.com/osm0sis/AnyKernel2
         fi
 
-        CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD)
+        if [[ ${REPO} != ${BRANCH} ]]; then
+            TARGET_BRANCH=${BRANCH}
+        else
+            TARGET_BRANCH=$(git rev-parse --abbrev-ref HEAD)
+        fi
 
         git ch -q master
         git pull -q upstream master
         git push -q
 
-        git ch -q "${CURRENT_BRANCH}"
+        git ch -q "${TARGET_BRANCH}"
         if ! git ml --no-edit master; then
             display_error "Conflicts detected! Please fix them then run 'git mc'"
             return 1
