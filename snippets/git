@@ -57,7 +57,7 @@ git config --global alias.rba 'rebase --abort'
 git config --global alias.rbc 'rebase --continue'
 # SC2016: Expressions don't expand in single quotes, use double quotes for that
 # shellcheck disable=SC2016
-git config --global alias.rf '!bash -c "git reset -q -- ${1} && git checkout -- ${1}"' # reset file
+git config --global alias.rf '!bash -c "git reset -q -- ${1} && git checkout -q -- ${1}"' # reset file
 git config --global alias.rh 'reset --hard'
 git config --global alias.rma 'remote add'
 git config --global alias.rmsu 'remote set-url'
