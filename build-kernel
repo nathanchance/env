@@ -110,6 +110,12 @@ function parse_parameters() {
             "-u"|"--upload")
                 UPLOAD=true ;;
 
+            # Version to display
+            "-v"|"--version-display")
+                shift && enforce_value "${@}"
+
+                VERSION_DISPLAY=${1} ;;
+                
             # Show only warnings and errors during compilation
             "-w"|"--warnings")
                 VERBOSITY=2
@@ -248,7 +254,7 @@ function report_result() {
         echo
         echo "${BOLD}Image:${RST}      ${FINAL_IMAGE}"
         echo
-        formatted_kernel_version
+        formatted_kernel_version "${VERSION_DISPLAY}"
     else
         >&2 die "${RST}${SCRIPT_COMMAND}${RED}BUILD FAILED IN $(format_time "${START}" "${END}")!"
     fi
