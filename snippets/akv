@@ -25,6 +25,10 @@ function android_kernel_version() {
     UTS_VERSION=${UTS_VERSION#*PREEMPT }
 
     case "${1}" in
+        "pie")
+            echo "${BOLD}Version:${RST}    ${VERSION_STRING}"
+            echo "            #${KBUILD_BUILD_NUMBER:-1} ${UTS_VERSION}"
+            echo ;;
         *)
             echo "${BOLD}Version:${RST}    ${VERSION_STRING} (${LINUX_COMPILER})"
             echo "            ${LINUX_COMPILE_BY}@${LINUX_COMPILE_HOST} #${KBUILD_BUILD_NUMBER:-1}"
