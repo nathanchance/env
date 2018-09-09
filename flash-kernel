@@ -637,7 +637,10 @@ function build_kernel() {
     # Move them if they exist, error out if not
     KIMG=${FILES_TO_MOVE[0]%:*}
     if [[ -f "${OUT_FOLDER}/${KIMG}" ]]; then
-        android_kernel_version
+        case ${ANDROID_VERSION} in
+            "8.1.0") android_kernel_version oreo ;;
+            "9") android_kernel_version pie ;;
+        esac
         echo "${GRN}$(basename "${KIMG}") compiled successfully!${RST}\n"
         [[ -z ${IMAGE_ONLY} ]] && move_kernel_files
     else
