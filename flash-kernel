@@ -397,7 +397,6 @@ function generate_variables() {
         CLANG_VERSION=$(clang_version "${CLANG}")
         case "$(basename "${CLANG_FOLDER}")" in
             "flash"*)
-                CLANG_LD_PATH=${CLANG_FOLDER}/lib
                 if [[ -n ${PERSONAL_OPTS} ]]; then
                     KCFLAGS="-mllvm -polly \
                              -mllvm -polly-run-dce \
@@ -407,10 +406,7 @@ function generate_variables() {
                              -mllvm -polly-vectorizer=stripmine \
                              -mllvm -polly-detect-keep-going"
                 fi ;;
-            *)
-                CLANG_LD_PATH=${CLANG_FOLDER}/lib64 ;;
         esac
-        LLVM_DIS=${CLANG_FOLDER}/bin/llvm-dis
     fi
 }
 
@@ -454,7 +450,6 @@ function make_wrapper_gcc() {
 
 # Make wrapper for make function for Clang
 function make_wrapper_clang() {
-    LD_LIBRARY_PATH="${CLANG_LD_PATH}:${LD_LIBARY_PATH}" \
     PATH=${BIN_FOLDER}:${PATH} make "${JOBS_FLAG}" \
                                     ARCH=${ARCHITECTURE} \
                                     CC="${CCACHE} ${CLANG}" \
@@ -465,7 +460,6 @@ function make_wrapper_clang() {
                                     KBUILD_COMPILER_STRING="${CLANG_VERSION}" \
                                     KBUILD_BUILD_VERSION="${KBUILD_BUILD_VERSION}" \
                                     KCFLAGS="${KCFLAGS}" \
-                                    LLVM_DIS="${LLVM_DIS}" \
                                     LOCALVERSION="${LOCALVERSION}" \
                                     O="${OUT_FOLDER}" \
                                     "${@}"
