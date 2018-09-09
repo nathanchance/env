@@ -30,16 +30,16 @@ function formatted_kernel_version() {
             echo ;;
         # Formatted 'uname -rv': https://android.googlesource.com/platform/frameworks/base/+/d32e79feb3b894288dde86c5b03bff241d816371
         "pie")
-            UTS_VERSION=${UTS_VERSION#*PREEMPT }
             echo "${BOLD}Version:${RST}    ${VERSION_STRING}"
-            echo "            #${KBUILD_BUILD_NUMBER:-1} ${UTS_VERSION}"
+            echo "            #${KBUILD_BUILD_NUMBER:-1} ${UTS_VERSION#*PREEMPT }"
             echo ;;
         # Formatted 'cat /proc/version': https://android.googlesource.com/platform/frameworks/base/+/fa89b60167d698bf8976e59ec97e0a14a0433e38
-        "oreo")
-            UTS_VERSION=${UTS_VERSION#*PREEMPT }
+        "oreo"*)
+            UTS_VERSION=
             echo "${BOLD}Version:${RST}    ${VERSION_STRING} (${LINUX_COMPILER})"
+            [[ ${1} =~ -small ]] && return
             echo "            ${LINUX_COMPILE_BY}@${LINUX_COMPILE_HOST} #${KBUILD_BUILD_NUMBER:-1}"
-            echo "            ${UTS_VERSION}"
+            echo "            ${UTS_VERSION#*PREEMPT }"
             echo ;;
         # 'uname -r'
         *)
