@@ -26,9 +26,9 @@ function kmake() {
              O=out \
              "${@}"
     else
-        make ARCH=${ARCH} \
+        make ARCH="${ARCH}" \
              CROSS_COMPILE="${CCACHE} ${GCC_TOOLCHAIN%gcc}" \
-             ${JOBS_FLAG} \
+             "${JOBS_FLAG}" \
              O=out \
              "${@}"
     fi

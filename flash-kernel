@@ -419,7 +419,7 @@ function clean_up() {
 
         [[ -z ${ANYKERNEL2_BRANCH} ]] && ANYKERNEL2_BRANCH=${DEVICE_NAME_GITHUB}-flash-${AK2_SFX}
 
-        git checkout ${HIDDEN_COMMANDS:+ "-q"} ${ANYKERNEL2_BRANCH}
+        git checkout ${HIDDEN_COMMANDS:+ "-q"} "${ANYKERNEL2_BRANCH}"
         git clean -fxd ${HIDDEN_COMMANDS:+ "-q"}
     fi
 

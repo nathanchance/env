@@ -512,7 +512,7 @@ function update-ak2() {(
             git remote add upstream https://github.com/osm0sis/AnyKernel2
         fi
 
-        if [[ ${REPO} != ${BRANCH} ]]; then
+        if [[ "${REPO}" != "${BRANCH}" ]]; then
             TARGET_BRANCH=${BRANCH}
         else
             TARGET_BRANCH=$(git rev-parse --abbrev-ref HEAD)
@@ -805,7 +805,7 @@ function fkba() {(
         rm -f "${LOG}"
         START=$(date +%s)
         cd "${KERNEL_FOLDER}/flash/${DEVICE}" || { warn "${DEVICE} folder does not exist, skipping!"; continue; }
-        if [[ ${BRANCH} != ${DEVICE} ]]; then
+        if [[ "${BRANCH}" != "${DEVICE}" ]]; then
             git ch "${BRANCH}" || { warn "${BRANCH} for ${DEVICE} does not exist, skipping!"; continue; }
         fi
         [[ ${1} = "-n" || ${1} = "--number" ]] && { shift; NUM=${1}; }
