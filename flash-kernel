@@ -394,7 +394,7 @@ function generate_variables() {
         CLANG=${CLANG_FOLDER}/bin/clang
         [[ ! -f ${CLANG} ]] && die "Clang toolchain could not be found!"
 
-        CLANG_VERSION=$(clang_version "${CLANG}")
+        [[ ${ANDROID_VERSION} = "8.1.0" ]] && CLANG_VERSION=$(clang_version "${CLANG}")
         case "$(basename "${CLANG_FOLDER}")" in
             "flash"*)
                 if [[ -n ${PERSONAL_OPTS} ]]; then
