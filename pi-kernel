@@ -202,7 +202,7 @@ function report_result() {
         echo
         echo "${BOLD}Image:${RST}      ${FINAL_IMAGE}"
         echo
-        android_kernel_version
+        formatted_kernel_version
     else
 		{
 			echo "\`\`\`"
@@ -223,7 +223,7 @@ function report_result() {
 
 # Setup
 source "$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")" || return; pwd)/common"
-source "${SCRIPTS_FOLDER}/snippets/akv"
+source "${SCRIPTS_FOLDER}/snippets/fkv"
 trap 'echo; die "Manually aborted!"' SIGINT SIGTERM
 
 # Message file for Telegram messages

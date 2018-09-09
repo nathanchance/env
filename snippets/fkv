@@ -4,7 +4,7 @@
 #
 # Copyright (C) 2018 Nathan Chancellor
 #
-# Android kernel version display functions for kernel build scripts
+# Formatted kernel version display functions for kernel build scripts
 
 
 # Export version variable
@@ -15,7 +15,7 @@ function evv() {
 
 
 # Show the version as if looking at "Settings -> About phone" on Android Oreo 8.1
-function android_kernel_version() {
+function formatted_kernel_version() {
     evv UTS_VERSION
     evv LINUX_COMPILE_BY
     evv LINUX_COMPILE_HOST

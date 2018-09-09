@@ -638,8 +638,8 @@ function build_kernel() {
     KIMG=${FILES_TO_MOVE[0]%:*}
     if [[ -f "${OUT_FOLDER}/${KIMG}" ]]; then
         case ${ANDROID_VERSION} in
-            "8.1.0") android_kernel_version oreo ;;
-            "9") android_kernel_version pie ;;
+            "8.1.0") formatted_kernel_version oreo ;;
+            "9") formatted_kernel_version pie ;;
         esac
         echo "${GRN}$(basename "${KIMG}") compiled successfully!${RST}\n"
         [[ -z ${IMAGE_ONLY} ]] && move_kernel_files
@@ -899,7 +899,7 @@ function ending_info() {
 ################
 
 source "$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")" || return; pwd)/common"
-source "${SCRIPTS_FOLDER}/snippets/akv"
+source "${SCRIPTS_FOLDER}/snippets/fkv"
 trap 'echo; die "Manually aborted!"' SIGINT SIGTERM
 
 # Start tracking time

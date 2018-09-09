@@ -248,7 +248,7 @@ function report_result() {
         echo
         echo "${BOLD}Image:${RST}      ${FINAL_IMAGE}"
         echo
-        android_kernel_version
+        formatted_kernel_version
     else
         >&2 die "${RST}${SCRIPT_COMMAND}${RED}BUILD FAILED IN $(format_time "${START}" "${END}")!"
     fi
@@ -263,7 +263,7 @@ function report_result() {
 
 
 source "$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")" || return; pwd)/common"
-source "${SCRIPTS_FOLDER}/snippets/akv"
+source "${SCRIPTS_FOLDER}/snippets/fkv"
 source "${SCRIPTS_FOLDER}/snippets/transfer"
 trap 'echo; die "Manually aborted!"' SIGINT SIGTERM
 parse_parameters "${@}"
