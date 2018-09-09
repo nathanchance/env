@@ -242,7 +242,7 @@ function clang_version() {
     [[ ${#} -lt 1 || ! ${1} =~ "clang" ]] && { display_error "You didn't supply a Clang binary!"; return; }
     [[ ! -f ${1} ]] && { display_error "Clang binary supplied doesn't exist!"; return; }
 
-    "${1}" --version | head -n 1 | perl -pe 's/\(http.*?\)//gs' | sed -e 's/  */ /g' -e 's/[[:space:]]*$//' || display_error "Something went wrong!"
+    "${1}" --version | head -n 1 | cut -d \( -f 1 || display_error "Something went wrong!"
 }
 
 
