@@ -244,7 +244,7 @@ function clang_version() {
 
     case "${1}" in
         *aosp*) "${1}" --version | head -n 1 | perl -pe 's/\(http.*?\)//gs' | sed -e 's/  */ /g' -e 's/[[:space:]]*$//' || display_error "Something went wrong!" ;;
-        *) "${1}" --version | head -n 1 | cut -d \( -f 1 || display_error "Something went wrong!" ;;
+        *) "${1}" --version | head -n 1 | cut -d \( -f 1 | sed 's/[[:space:]]*$//' || display_error "Something went wrong!" ;;
     esac
 }
 
