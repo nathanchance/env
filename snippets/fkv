@@ -23,6 +23,8 @@ function formatted_kernel_version() {
 
     VERSION_STRING=$(cat "${OUT_FOLDER:-out}"/include/config/kernel.release)
 
+    [[ ${2} =~ -p ]] && unset BOLD RST
+
     case "${1}" in
         # 'cat /proc/version'
         "full")
@@ -45,4 +47,10 @@ function formatted_kernel_version() {
             echo "${BOLD}Version:${RST}    ${VERSION_STRING}"
             echo ;;
     esac
+
+    if [[ ${2} =~ -p ]]; then
+        BOLD="\033[1m"
+        RST="\033[0m"
+        export BOLD RST
+    fi
 }

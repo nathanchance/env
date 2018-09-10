@@ -832,9 +832,10 @@ function ending_info() {
     if [[ "${*}" =~ "-s" ]]; then
         {
             echo "DURATION:   ${DURATION,,}"
-            echo "VERSION:    ${VERSION_STRING} (${LINUX_COMPILER})"
-            echo "            ${LINUX_COMPILE_BY}@${LINUX_COMPILE_HOST} #${KBUILD_BUILD_NUMBER:-1}"
-            echo "            ${UTS_VERSION}"
+            case ${ANDROID_VERSION} in
+                "8.1.0") formatted_kernel_version oreo -p ;;
+                "9") formatted_kernel_version pie -p ;;
+            esac
         } >> "${LOG}"
         if [[ -z ${IMAGE_ONLY} ]]; then
             if [[ -n ${FILE_MOVE} ]]; then
