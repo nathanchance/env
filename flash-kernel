@@ -271,6 +271,8 @@ function device_flags() {
 
         "op6-custom")
             # Required flags
+            [[ -z ${ANDROID_VERSION} ]] && ANDROID_VERSION=8.1.0
+
             BUILD_FUNCTION=build_kernel
 
             [[ -z ${COMPILER} ]] && COMPILER=clang
