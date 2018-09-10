@@ -35,7 +35,6 @@ function formatted_kernel_version() {
             echo ;;
         # Formatted 'cat /proc/version': https://android.googlesource.com/platform/frameworks/base/+/fa89b60167d698bf8976e59ec97e0a14a0433e38
         "oreo"*)
-            UTS_VERSION=
             echo "${BOLD}Version:${RST}    ${VERSION_STRING} (${LINUX_COMPILER})"
             [[ ${1} =~ -small ]] && return
             echo "            ${LINUX_COMPILE_BY}@${LINUX_COMPILE_HOST} #${KBUILD_BUILD_NUMBER:-1}"
