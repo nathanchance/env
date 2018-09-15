@@ -9,9 +9,7 @@
 
 # Static logging function
 function log() {
-    if [[ -n ${LOGGING} ]]; then
-        echo "${@}" >> "${LOG}"
-    fi
+    echo "${@}" >> "${LOG}"
 }
 
 # Quick kernel version function
@@ -85,6 +83,7 @@ source "$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")" || return; pwd)/c
 source "${SCRIPTS_FOLDER}"/snippets/bk
 source "${SCRIPTS_FOLDER}"/snippets/deldog
 trap 'echo; die "Manually aborted!"' SIGINT SIGTERM
+LOG=$(mktemp)
 
 # Variables
 ALS=${KERNEL_FOLDER}/als
@@ -106,10 +105,6 @@ while [[ ${#} -ge 1 ]]; do
 
         "-i"|"--initialize")
             INIT=true ;;
-
-        # Log merge and build results
-        "-l"|"--log")
-            LOGGING=true ;;
 
         # Merge from stable-queue
         "-q"|"--queue")
@@ -141,9 +136,6 @@ done
 
 # If no versions were specified, assume we want all
 [[ -z ${VERSIONS} ]] && VERSIONS=( "3.18" "4.4" "4.9" )
-
-# Start with a clean log
-[[ -n ${LOGGING} ]] && rm -rf "${LOG}"
 
 # If initialization was requested
 if [[ -n ${INIT} ]]; then
@@ -312,14 +304,13 @@ for VERSION in "${VERSIONS[@]}"; do
     log; log; log
 done
 
-if [[ -n ${LOGGING} ]]; then
-    URL=$(deldog "${LOG}")
+URL=$(deldog "${LOG}")
 
-    clear
-    echo
-    echo "${BOLD}ALS merge results:${RST} ${URL}"
-    echo
-    tg_msg "ALS merge results (\`$(basename "${0}") ${PARAMS}\`): ${URL}"
-fi
+clear
+echo
+echo "${BOLD}ALS merge results:${RST} ${URL}"
+echo
+tg_msg "ALS merge results (\`$(basename "${0}") ${PARAMS}\`): ${URL}"
+rm -rf "${LOG}"
 
 exit 0

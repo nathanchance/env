@@ -76,7 +76,7 @@ function ccache_setup() {
 function server_setup() {
     server_prompt
     ccache_setup 250
-    export LOG=/tmp/results.log
+    export LOG=$(mktemp)
     add_to_path_post "${HOME}/.gem/ruby/2.5.0/bin"
     source "${SCRIPTS_FOLDER}"/snippets/bk
     ( gpg_available )
