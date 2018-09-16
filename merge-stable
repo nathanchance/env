@@ -54,6 +54,9 @@ function parse_parameters() {
                 echo "    -s | --single-version"
                 echo "        Updates to the next immediate version available from linux-stable"
                 echo
+                echo "    -t | --tag"
+                echo "        Pulls the requested tag from Sasha Levin's linux-stable repo (pending stable patches)"
+                echo
                 echo "    -v | --version"
                 echo "        Updates to the specified version (e.g. -v 3.18.78)"
                 echo
@@ -84,6 +87,14 @@ function parse_parameters() {
             # Update to the next available version from kernel.org
             "-s"|"--single-version")
                 UPDATE_MODE=0 ;;
+
+            # Pulls the requested tag from Sasha Levin's linux-stable repo
+            "-t"|"--tag")
+                shift
+                [[ ${#} -lt 1 ]] && die "Please specify a version to update!"
+                TAG_TO_PULL=${1}
+                UPDATE_MODE=0
+                UPDATE_METHOD=tag ;;
 
             # Update to the specified version
             "-v"|"--version")
@@ -144,6 +155,8 @@ function update_stable_mirror() {
 
 # Update the two linux-stable remotes
 function update_sources() {
+    [[ -n ${TAG_TO_PULL} ]] && return
+
     header "Updating remotes"
 
     [[ ${HOST} = "flashbox" ]] && update_stable_mirror
@@ -205,6 +218,10 @@ function generate_versions() {
 
         echo
         echo "${BOLD}Target kernel version:${RST} ${TARGET_VERSION}"
+    elif [[ -n ${TAG_TO_PULL} ]]; then
+        TAG_TO_PULL=for-greg-${CURRENT_MAJOR_VERSION}-${TAG_TO_PULL}
+        echo
+        echo "${BOLD}Tag to pull:${RST} ${TAG_TO_PULL}"
     elif [[ -n ${QUEUE} ]]; then
         CB=$(git cb)
         QUEUE_BRANCH=queue-${CURRENT_MAJOR_VERSION}
@@ -299,10 +316,22 @@ function mg_target_version() {
 }
 
 
+function pl_tag() {
+    header "Merging ${TAG_TO_PULL}"
+
+    gpg_available
+    if ! GIT_MERGE_VERBOSITY=1 git pll --no-edit https://git.kernel.org/pub/scm/linux/kernel/git/sashal/linux-stable.git "${TAG_TO_PULL}"; then
+        die "Merge needs manual intervention! Resolve conflicts then run git fm."
+    else
+        header "${TAG_TO_PULL} MERGED CLEANLY!" "${GRN}"
+    fi
+}
+
 function update_tree() {
     case ${UPDATE_METHOD} in
         "cherry-pick") cp_target_version ;;
         "merge") mg_target_version ;;
+        "tag") pl_tag ;;
     esac
     pre_exit_commands
     exit 0
