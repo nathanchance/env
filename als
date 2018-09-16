@@ -29,6 +29,9 @@ function post_git_fm_steps() {
 
 # Steps to execute if merge failed
 function failed_steps() {
+    # Log conflicts
+    log "${LOG_TAG} Conflicts:"
+    log "$(git cf)"
     # Abort merge
     git ma
     # Reset back to origin
@@ -71,15 +74,14 @@ function post_merge_commands() {
             # Log success then push
             post_git_fm_steps "${FIRST_STATEMENT}"
         else
-            # Log success and conflicts
+            # Log failure and conflicts
             log "${LOG_TAG} ${SECOND_STATEMENT}"
-            log "${LOG_TAG} Conflicts:"
-            log "$(git cf)"
             failed_steps
         fi
     # If no command file was found and it was a failed merge, log failure
     elif [[ -n ${THIRD_STATEMENT} ]]; then
         log "${LOG_TAG} Resolution was requested but no resolution file was found!"
+        failed_steps
     fi
 }
 
@@ -291,8 +293,6 @@ for VERSION in "${VERSIONS[@]}"; do
                 # Log failure otherwise
                 else
                     log "${LOG_TAG} Merge failed!"
-                    log "${LOG_TAG} Conflicts:"
-                    log "$(git cf)"
                     failed_steps
                 fi
             fi
