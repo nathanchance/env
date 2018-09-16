@@ -456,7 +456,8 @@ function mkpkg() {
 
 # Update all remotes and run git gc/prune
 function clean-kernels() {(
-    REPOS=( "${HOME}/kernels/als/marlin"
+    REPOS=( "${HOME}/kernels/als/jasmine"
+            "${HOME}/kernels/als/marlin"
             "${HOME}/kernels/als/msm-3.18"
             "${HOME}/kernels/als/msm-4.4"
             "${HOME}/kernels/als/msm-4.9"
@@ -464,14 +465,18 @@ function clean-kernels() {(
             "${HOME}/kernels/als/op3"
             "${HOME}/kernels/als/op5"
             "${HOME}/kernels/als/op6"
+            "${HOME}/kernels/als/polaris"
             "${HOME}/kernels/als/sagit"
             "${HOME}/kernels/als/tissot"
             "${HOME}/kernels/als/wahoo"
             "${HOME}/kernels/als/whyred"
             "${HOME}/kernels/flash/marlin"
             "${HOME}/kernels/flash/op6"
+            "${HOME}/kernels/flash/op6-custom"
             "${HOME}/kernels/flash/wahoo"
             "${HOME}/kernels/pi"
+            "${HOME}/kernels/roms/aicp-op5"
+            "${HOME}/kernels/roms/aicp-op6"
             "${HOME}/kernels/roms/gzr-op3"
             "${HOME}/kernels/roms/gzr-op5"
             "${HOME}/kernels/roms/lineage-nash"
