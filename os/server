@@ -804,7 +804,7 @@ function updtc() {
 
 # Build all Flash Kernel builds a certain amount of times
 function fkba() {(
-    for DEVICE in marlin op6:8.1 op6:9.0_Beta op6-custom wahoo; do
+    for DEVICE in marlin op6 op6-custom wahoo; do
         BRANCH=${DEVICE##*:}
         DEVICE=${DEVICE%%:*}
         rm -f "${LOG}"
