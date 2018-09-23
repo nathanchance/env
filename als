@@ -58,6 +58,7 @@ function post_merge_commands() {
         "nash"*) COMMANDS="nash-oreo-8.0.0-commands" ;;
         "op3:oneplus/QC8996_O_8.0.0") COMMANDS="${REPO}-8.0.0-commands" ;;
         "op5:oneplus/QC8998_O_8.1"|"op6:oneplus/SDM845_O_8.1") COMMANDS="${REPO}-O_8.1-commands" ;;
+        "op6:oneplus/SDM845_P_9.0") COMMANDS="${REPO}-P_9.0-commands" ;;
         "op6:oneplus/SDM845_P_9.0_Beta") COMMANDS="${REPO}-P_9.0_Beta-commands" ;;
         "op5:oneplus/QC8998_O_8.1_Beta") COMMANDS="${REPO}-O_8.1_Beta-commands" ;;
         "op"*) COMMANDS="${REPO}-${BRANCH}-commands" ;;
@@ -210,7 +211,7 @@ for VERSION in "${VERSIONS[@]}"; do
             "nash") BRANCHES=( "oreo-8.0.0-release-nash:upstream" ) ;;
             "op3") BRANCHES=( "android-8.1:omni" "lineage-15.1:LineageOS" "oneplus/QC8996_O_8.0.0:upstream" ) ;;
             "op5") BRANCHES=( "android-8.1:omni" "lineage-15.1" "oneplus/QC8998_O_8.1:upstream" "oneplus/QC8998_O_8.1_Beta:upstream" ) ;;
-            "op6") BRANCHES=( "android-9.0:omni" "lineage-15.1:LineageOS" "oneplus/SDM845_O_8.1:upstream" "oneplus/SDM845_P_9.0_Beta:upstream" ) ;;
+            "op6") BRANCHES=( "android-9.0:omni" "lineage-15.1:LineageOS" "oneplus/SDM845_P_9.0:upstream" "oneplus/SDM845_P_9.0_Beta:upstream" ) ;;
             "polaris") BRANCHES=( "polaris-o-oss:upstream" ) ;;
             "sagit") BRANCHES=( "sagit-o-oss:upstream" ) ;;
             "tissot") BRANCHES=( "tissot-o-oss-8.1:upstream" ) ;;
