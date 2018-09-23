@@ -242,7 +242,7 @@ function device_flags() {
                     [[ -n ${STABLE} ]] && KERNEL_BRANCH=8.1 ;;
                 *)
                     [[ -z ${ANDROID_VERSION} ]] && ANDROID_VERSION=9
-                    [[ -n ${STABLE} ]] && KERNEL_BRANCH=9.0_Beta ;;
+                    [[ -n ${STABLE} ]] && KERNEL_BRANCH=9.0 ;;
             esac
             AK2_SFX=${ANDROID_VERSION}
 
