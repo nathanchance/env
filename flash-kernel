@@ -221,9 +221,9 @@ function device_flags() {
                 # SC2153: Possible misspelling: TC_FOLDER may not be assigned, but GCC_FOLDER is.
                 # shellcheck disable=SC2153
                 if [[ -n ${PERSONAL_OPTS} ]]; then
-                    CLANG_FOLDER=${TC_FOLDER}/flash-clang-8.x
+                    CLANG_FOLDER=${TC_FOLDER}/clang-8.x
                 else
-                    CLANG_FOLDER=${TC_FOLDER}/flash-clang-7.x
+                    CLANG_FOLDER=${TC_FOLDER}/clang-7.x
                 fi
             fi
 
@@ -252,9 +252,9 @@ function device_flags() {
 
             if [[ -z ${CLANG_FOLDER} ]]; then
                 if [[ -n ${PERSONAL_OPTS} ]]; then
-                    CLANG_FOLDER=${TC_FOLDER}/flash-clang-8.x
+                    CLANG_FOLDER=${TC_FOLDER}/clang-8.x
                 else
-                    CLANG_FOLDER=${TC_FOLDER}/flash-clang-7.x
+                    CLANG_FOLDER=${TC_FOLDER}/clang-7.x
                 fi
             fi
 
@@ -301,9 +301,9 @@ function device_flags() {
 
             if [[ -z ${CLANG_FOLDER} ]]; then
                 if [[ -n ${PERSONAL_OPTS} ]]; then
-                    CLANG_FOLDER=${TC_FOLDER}/flash-clang-8.x
+                    CLANG_FOLDER=${TC_FOLDER}/clang-8.x
                 else
-                    CLANG_FOLDER=${TC_FOLDER}/flash-clang-7.x
+                    CLANG_FOLDER=${TC_FOLDER}/clang-7.x
                 fi
             fi
 
@@ -396,9 +396,9 @@ function generate_variables() {
         CLANG=${CLANG_FOLDER}/bin/clang
         [[ ! -f ${CLANG} ]] && die "Clang toolchain could not be found!"
 
-        [[ ${ANDROID_VERSION} = "8.1.0" ]] && CLANG_VERSION=$(clang_version "${CLANG}")
+        CLANG_VERSION=$(clang_version "${CLANG}")
         case "$(basename "${CLANG_FOLDER}")" in
-            "flash"*)
+            "clang-"*)
                 if [[ -n ${PERSONAL_OPTS} ]]; then
                     KCFLAGS="-mllvm -polly \
                              -mllvm -polly-run-dce \
