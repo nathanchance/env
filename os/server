@@ -320,20 +320,20 @@ function dib() {(
     BTG_GCC="--gcc-toolchain btg-gcc-8.2.1-arm64 --gcc-32-bit-toolchain btg-gcc-8.2.1-arm"
     AOSP_CLANG_7="--compiler clang --clang-toolchain aosp-clang/clang-r328903 ${AOSP_GCC}"
     AOSP_CLANG_6="--compiler clang --clang-toolchain aosp-clang/clang-4691093 ${AOSP_GCC}"
-    FLASH_CLANG_8="--compiler clang --clang-toolchain flash-clang-8.x ${BTG_GCC}"
-    FLASH_CLANG_7="--compiler clang --clang-toolchain flash-clang-7.x ${BTG_GCC}"
-    FLASH_CLANG_8_PERSONAL="${FLASH_CLANG_8} --personal-optimization"
-    FLASH_CLANG_7_PERSONAL="${FLASH_CLANG_7} --personal-optimization"
+    CLANG_8="--compiler clang --clang-toolchain clang-8.x ${BTG_GCC}"
+    CLANG_7="--compiler clang --clang-toolchain clang-7.x ${BTG_GCC}"
+    CLANG_8_PERSONAL="${CLANG_8} --personal-optimization"
+    CLANG_7_PERSONAL="${CLANG_7} --personal-optimization"
     GCC_821="--compiler gcc ${BTG_GCC}"
     GCC_731="--compiler gcc --gcc-toolchain btg-linaro-gcc-7.3.1-arm64 --gcc-32-bit-toolchain btg-linaro-gcc-7.3.1-arm"
     GCC_494="--compiler gcc ${AOSP_GCC}"
 
     case ${DEVICE} in
         marlin|op6|op6-custom|wahoo)
-            TC_LIST=( "${FLASH_CLANG_8}"
-                      "${FLASH_CLANG_7}"
-                      "${FLASH_CLANG_8_PERSONAL}"
-                      "${FLASH_CLANG_7_PERSONAL}"
+            TC_LIST=( "${CLANG_8}"
+                      "${CLANG_7}"
+                      "${CLANG_8_PERSONAL}"
+                      "${CLANG_7_PERSONAL}"
                       "${AOSP_CLANG_7}"
                       "${AOSP_CLANG_6}"
                       "${GCC_821}"
@@ -790,8 +790,8 @@ function updtc() {
 
     clear
 
-    BINARIES=( "${HOME}/toolchains/flash-clang-8.x/bin/clang"
-               "${HOME}/toolchains/flash-clang-7.x/bin/clang"
+    BINARIES=( "${HOME}/toolchains/clang-8.x/bin/clang"
+               "${HOME}/toolchains/clang-7.x/bin/clang"
                "${HOME}/toolchains/btg-gcc-8.2.1-arm64/bin/aarch64-linux-gnu-ld"
                "${HOME}/toolchains/btg-gcc-8.2.1-arm/bin/arm-linux-gnueabi-ld" )
 
