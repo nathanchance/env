@@ -580,28 +580,6 @@ function build_kernel() {
     # Notify Telegram of build starting
     SHORT_CHANGELOG=${HOME}/shortlogs/${DEVICE_NAME_FILE,,}-${VERSION//./}
     [[ ! -f ${SHORT_CHANGELOG} && -n "${TEST}${STABLE}" ]] && die "Missing short changelog!"
-    if [[ -n ${TG} && -z ${ALREADY_NOTIFIED} ]]; then
-        {
-            echo "\`\`\`"
-            [[ ${MODE} = "rc" ]] && MODE=${MODE^^} || MODE=${MODE^}
-            echo "${MODE} kernel build starting..."
-            if [[ -n ${PERSONAL} ]]; then
-                echo
-                echo "Device: ${DEVICE_NAME_FILE}"
-            fi
-            echo
-            echo "Version: $(cat "${OUT_FOLDER}/include/config/kernel.release")"
-            echo
-            echo "Zip file: ${SIGNED_ZIP}"
-            if [[ -f ${SHORT_CHANGELOG} ]]; then
-                echo
-                echo "Short changelog:"
-                tail -n +2 "${SHORT_CHANGELOG}"
-            fi
-            echo "\`\`\`"
-        } > "${TG_MSG_FILE}"
-        tg_msg "$(cat "${TG_MSG_FILE}")"
-    fi
 
     # Make the kernel
     kmake ${EXTRA_MAKE_FLAGS:+ "${EXTRA_MAKE_FLAGS[@]}"}
@@ -852,7 +830,11 @@ function ending_info() {
 
         if [[ -n ${TG} ]]; then
             {
-                echo "\`${MODE} kernel build successful in ${DURATION,,}\`"
+                [[ ${MODE} = "rc" ]] && MODE=${MODE^^} || MODE=${MODE^}
+                echo "\`\`\`"
+                echo "${MODE} kernel build successful in ${DURATION,,}"
+                echo
+                echo "Version: $(cat "${OUT_FOLDER}/include/config/kernel.release")"
                 if [[ -z ${IMAGE_ONLY} ]]; then
                     echo
                     echo "[${FILE_LOCATION}](${FILE_LOCATION})"
