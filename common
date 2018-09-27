@@ -234,6 +234,16 @@ function tg_msg() {
 function tg_upload() {
     local FILE; FILE=${1}; shift
 
+    if [[ -z ${TOKEN} ]]; then
+        display_error "tg_upload() was called but there was no token!"
+        return 1
+    fi
+
+    if [[ -z ${CHAT_ID} ]]; then
+        display_error "tg_upload() was called but there was no chat ID!"
+        return 1
+    fi
+
     if [[ ! -f ${FILE} ]]; then
         display_error "tg_upload() failed to find ${FILE}!"
         return 1
