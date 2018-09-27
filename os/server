@@ -846,6 +846,6 @@ function symlink-commands() {(
 
 # Patch check function
 function pch() {
-    [[ -f scripts/checkpatch.pl ]] && git fp -1 --stdout | ./scripts/checkpatch.pl
-    [[ -f scripts/get_maintainer.pl ]] && git fp -1 --stdout | ./scripts/get_maintainer.pl
+    [[ -f scripts/checkpatch.pl ]] && git fp -1 --stdout "${@}" | ./scripts/checkpatch.pl
+    [[ -f scripts/get_maintainer.pl ]] && git fp -1 --stdout "${@}" | ./scripts/get_maintainer.pl
 }
