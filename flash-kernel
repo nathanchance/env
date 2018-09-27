@@ -835,8 +835,8 @@ function ending_info() {
                 echo "${MODE} kernel build successful in ${DURATION,,}"
                 echo
                 echo "Version: $(cat "${OUT_FOLDER}/include/config/kernel.release")"
+                echo "\`\`\`"
                 if [[ -z ${IMAGE_ONLY} ]]; then
-                    echo
                     echo "[${FILE_LOCATION}](${FILE_LOCATION})"
                     if [[ -f ${SHORT_CHANGELOG} ]]; then
                         echo
