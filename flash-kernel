@@ -344,9 +344,9 @@ function generate_variables() {
                 fi
                 if [[ -n ${TG} || -n ${CANARY} ]]; then
                     case ${DEVICE} in
-                        "marlin") export CHAT_ID=-1001132593794 ;;
-                        "op6") export CHAT_ID=-1001192694857 ;;
-                        "wahoo") export CHAT_ID=-1001298464571 ;;
+                        "marlin") export CHAT_ID=${MARLIN_CHANNEL} ;;
+                        "op6") export CHAT_ID=${OP6_CHANNEL} ;;
+                        "wahoo") export CHAT_ID=${WAHOO_CHANNEL} ;;
                     esac
                 fi ;;
             "tmp")
@@ -701,7 +701,7 @@ function package_zip() {
         {
             echo "$(date +%Y%m%d)-canary"
             echo
-            echo "To learn more, type #canary"
+            echo "To learn more, type #canary in the discussion group"
         } > "${TMP_FILE}"
         tg_upload "${SIGNED_ZIP}" "$(cat "${TMP_FILE}")"
         rm -rf "${TMP_FILE}"
