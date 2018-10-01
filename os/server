@@ -849,3 +849,29 @@ function pch() {
     [[ -f scripts/checkpatch.pl ]] && git fp -1 --stdout "${@}" | ./scripts/checkpatch.pl
     [[ -f scripts/get_maintainer.pl ]] && git fp -1 --stdout "${@}" | ./scripts/get_maintainer.pl
 }
+
+
+# Build kernel with Clang
+function bkc() {
+    local TARGET_ARCH MAKE_FLAGS
+
+    if [[ ! -f Makefile ]]; then
+        display_error "No Makefile found! Are you in a kernel tree?"
+        return
+    fi
+
+    TARGET_ARCH=${1}; shift
+    case "${TARGET_ARCH}" in
+        "arm") MAKE_FLAGS=( "ARCH=arm" "CROSS_COMPILE=arm-linux-gnueabi-" ) ;;
+        "arm64") MAKE_FLAGS=( "ARCH=arm64" "CROSS_COMPILE=aarch64-linux-gnu-" ) ;;
+        "x86") MAKE_FLAGSS=() ;;
+        *) display_error "Invalid TARGET_ARCH specified!"; return ;;
+    esac
+
+    PATH=${TC_FOLDER}/clang-8.x/bin:${TC_FOLDER}/btg-gcc-8.2.1-arm64/bin:${TC_FOLDER}/btg-gcc-8.2.1-arm/bin:${PATH} \
+    make "${JOBS_FLAG}" \
+         CC="${CCACHE} clang" \
+         HOSTCC=clang \
+         "${MAKE_FLAGS[@]}" \
+         "${@}"
+}
