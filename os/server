@@ -499,8 +499,7 @@ function clean-kernels() {(
 # Update AnyKernel2 from osm0sis's GitHub
 function update-ak2() {(
     REPOS=( "${HOME}/kernels/flash/anykernel2-marlin"
-            "${HOME}/kernels/flash/anykernel2-op6:op6-flash-8.1.0"
-            "${HOME}/kernels/flash/anykernel2-op6:op6-flash-9"
+            "${HOME}/kernels/flash/anykernel2-op6"
             "${HOME}/kernels/flash/anykernel2-wahoo" )
 
     for REPO in "${REPOS[@]}"; do
