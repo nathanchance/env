@@ -874,3 +874,25 @@ function bkc() {
          "${MAKE_FLAGS[@]}" \
          "${@}"
 }
+
+
+# Quilt-like patch management function for Linux
+function sync-patches() {
+    [[ ! -f Makefile ]] && { display_error "You're not in a kernel folder!"; return 1; }
+
+    TARGET_FOLDER=${REPO_FOLDER}/patches/linux/$(git cb)
+
+    [[ ! -d ${TARGET_FOLDER} ]] && { display_error "${TARGET_FOLDER} doesn't exist, create it if this is intentional"; return 1; }
+
+    FIRST_HASH=$(git log --reverse --format=%H --committer="$(git config --get user.name) <$(git config --get user.email)>" origin/stable..HEAD | head -n1)
+
+    rm "${TARGET_FOLDER}"/*
+
+    git fp -o "${TARGET_FOLDER}" "${FIRST_HASH}"^..HEAD
+
+    git -C "${TARGET_FOLDER}" aa
+
+    git -C "${TARGET_FOLDER}" c -m "patches: linux: $(git cb): Sync as of $(git sh -s --format=%h)"
+
+    git -C "${TARGET_FOLDER}" push
+}
