@@ -717,7 +717,7 @@ function qcacld() {(
 
 # Defaults for build-clang
 function build-clang() {
-    command build-clang -B "${@}"
+    command build-clang "${@}"
 }
 
 
