@@ -76,7 +76,7 @@ function ccache_setup() {
 function server_setup() {
     server_prompt
     ccache_setup 250
-    export LOG=$(mktemp)
+    LOG=$(mktemp); export LOG
     add_to_path_post "${HOME}/.gem/ruby/2.5.0/bin"
     source "${SCRIPTS_FOLDER}"/snippets/bk
     ( gpg_available )
@@ -863,7 +863,7 @@ function bkc() {
     case "${TARGET_ARCH}" in
         "arm") MAKE_FLAGS=( "ARCH=arm" "CROSS_COMPILE=arm-linux-gnueabi-" ) ;;
         "arm64") MAKE_FLAGS=( "ARCH=arm64" "CROSS_COMPILE=aarch64-linux-gnu-" ) ;;
-        "x86") MAKE_FLAGSS=() ;;
+        "x86") MAKE_FLAGS=() ;;
         *) display_error "Invalid TARGET_ARCH specified!"; return ;;
     esac
 
