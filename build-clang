@@ -188,7 +188,7 @@ function git_sync() {(
         fi
     else
         git fetch origin || die "There was an error fetching updates for ${FOLDER}!"
-        git reset --hard origin/"${BRANCH}" || die "There was an error updating ${FOLDER}!"
+        git rebase origin/"${BRANCH}" || die "There was an error updating ${FOLDER}!"
     fi
 
     # Roll back if necessary
