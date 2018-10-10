@@ -867,7 +867,7 @@ function bkc() {
         *) display_error "Invalid TARGET_ARCH specified!"; return ;;
     esac
 
-    time PATH=${TC_FOLDER}/clang-8.x/bin:${TC_FOLDER}/btg-gcc-8.2.1-arm64/bin:${TC_FOLDER}/btg-gcc-8.2.1-arm/bin:${PATH} \
+    time PATH=${PATH_OVERRIDE:+"${PATH_OVERRIDE}:"}${TC_FOLDER}/clang-8.x/bin:${TC_FOLDER}/btg-gcc-8.2.1-arm64/bin:${TC_FOLDER}/btg-gcc-8.2.1-arm/bin:${PATH} \
     make "${JOBS_FLAG}" \
          CC="${CCACHE} clang" \
          HOSTCC=clang \
