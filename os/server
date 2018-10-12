@@ -896,3 +896,34 @@ function sync-patches() {
 
     git -C "${TARGET_FOLDER}" push
 }
+
+
+# Boot a kernel in QEMU
+function boot-kernel() {
+    local ARCH KERNEL QEMU; ARCH=${1}
+    [[ -z ${ARCH} ]] && { display_error "ARCH not specified!"; return 1; }
+
+    case ${ARCH} in
+        "arm64")
+            IMAGE=Image
+            QEMU=qemu-system-aarch64
+            QEMU_ARCH_CMDLINE=( -append "console=ttyAMA0"
+                                -cpu cortex-a57
+                                -machine virt
+                                -machine "type=virt"
+                                -smp 4 ) ;;
+        "x86_64")
+            [[ ! -f ../qemu/x86_64-rootfs.img ]] && { display_error "QEMU disk image not found! Please create it or use the proper folder."; return 1; }
+            IMAGE=bzImage
+            QEMU=qemu-system-${ARCH}
+            QEMU_ARCH_CMDLINE=( -append "root=/dev/sda console=ttyS0"
+                                -enable-kvm
+                                -hda ../qemu/x86_64-rootfs.img ) ;;
+        *) display_error "Invalid ARCH specified!"; return 1 ;;
+    esac
+
+    KERNEL=arch/${ARCH/_64}/boot/${IMAGE}
+    [[ ! -f ${KERNEL} ]] && { display_error "Kernel doesn't exist! Please build one."; return 1; }
+
+    ${QEMU} "${QEMU_ARCH_CMDLINE[@]}" -kernel "${KERNEL}" -m 4G -nographic
+}
