@@ -398,7 +398,7 @@ function generate_variables() {
 
         CLANG_VERSION=$(clang_version "${CLANG}")
         case "$(basename "${CLANG_FOLDER}")" in
-            "clang-"*)
+            "clang-7.x"|"clang-8.x")
                 if [[ -n ${PERSONAL_OPTS} ]]; then
                     KCFLAGS="-mllvm -polly \
                              -mllvm -polly-run-dce \
