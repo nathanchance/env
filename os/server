@@ -900,7 +900,7 @@ function sync-patches() {
 
 # Boot a kernel in QEMU
 function boot-kernel() {
-    local ARCH KERNEL QEMU; ARCH=${1}
+    local ARCH KERNEL QEMU; ARCH=${1}; shift
     [[ -z ${ARCH} ]] && { display_error "ARCH not specified!"; return 1; }
 
     case ${ARCH} in
@@ -910,20 +910,21 @@ function boot-kernel() {
             QEMU_ARCH_CMDLINE=( -append "console=ttyAMA0"
                                 -cpu cortex-a57
                                 -machine virt
-                                -machine "type=virt"
-                                -smp 4 ) ;;
+                                -machine "type=virt" ) ;;
         "x86_64")
             [[ ! -f ../qemu/x86_64-rootfs.img ]] && { display_error "QEMU disk image not found! Please create it or use the proper folder."; return 1; }
             IMAGE=bzImage
             QEMU=qemu-system-${ARCH}
             QEMU_ARCH_CMDLINE=( -append "root=/dev/sda console=ttyS0"
-                                -enable-kvm
-                                -hda ../qemu/x86_64-rootfs.img ) ;;
+                                -cpu host
+                                -d unimp,guest_errors
+                                -drive "file=../qemu/x86_64-rootfs.img,format=raw,if=ide"
+                                -enable-kvm ) ;;
         *) display_error "Invalid ARCH specified!"; return 1 ;;
     esac
 
     KERNEL=arch/${ARCH/_64}/boot/${IMAGE}
     [[ ! -f ${KERNEL} ]] && { display_error "Kernel doesn't exist! Please build one."; return 1; }
 
-    ${QEMU} "${QEMU_ARCH_CMDLINE[@]}" -kernel "${KERNEL}" -m 4G -nographic
+    ${QEMU} "${QEMU_ARCH_CMDLINE[@]}" -kernel "${KERNEL}" -m 4G -nographic -smp 4 "${@}"
 }
