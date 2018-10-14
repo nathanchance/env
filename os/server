@@ -871,6 +871,7 @@ function bkc() {
     make "${JOBS_FLAG}" \
          CC="${CCACHE} clang" \
          HOSTCC=clang \
+         KCFLAGS="-Werror" \
          "${MAKE_FLAGS[@]}" \
          "${@}"
 }
