@@ -909,10 +909,12 @@ function boot-kernel() {
 
     case ${ARCH} in
         "arm64")
+            [[ ! -f ../qemu/arm64-rootfs.cpio ]] && { display_error "QEMU ramdisk not found! Please build it or use the proper folder."; return 1; }
             IMAGE=Image
             QEMU=qemu-system-aarch64
             QEMU_ARCH_CMDLINE=( -append "console=ttyAMA0"
                                 -cpu cortex-a57
+                                -initrd ../qemu/arm64-rootfs.cpio
                                 -machine virt
                                 -machine "type=virt" ) ;;
         "x86")
