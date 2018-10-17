@@ -26,11 +26,22 @@ function kmake() {
              O=out \
              "${@}"
     else
-        make ARCH="${ARCH}" \
-             CROSS_COMPILE="${CCACHE} ${GCC_TOOLCHAIN%gcc}" \
-             "${JOBS_FLAG}" \
-             O=out \
-             "${@}"
+        if [[ -n ${CLANG} ]]; then
+            PATH="${TC_FOLDER}/clang-8.x/bin:${TC_FOLDER}/btg-gcc-8.2.1-arm/bin:${PATH}" \
+            make ARCH=arm \
+                 CC="${CCACHE} clang" \
+                 HOSTCC=clang \
+                 CROSS_COMPILE=arm-linux-gnueabi- \
+                 "${JOBS_FLAG}" \
+                 O=out \
+                 "${@}"
+        else
+            make ARCH="${ARCH}" \
+                 CROSS_COMPILE="${CCACHE} ${GCC_TOOLCHAIN%gcc}" \
+                 "${JOBS_FLAG}" \
+                 O=out \
+                 "${@}"
+        fi
     fi
 }
 
@@ -52,6 +63,10 @@ function parse_parameters() {
                 shift && enforce_value "${@}"
 
                 ARCH=${1} ;;
+
+            # Use Clang instead of GCC
+            "-c"|"--clang")
+                CLANG=true ;;
 
             # Show full compilation
             "-D"|"--debug")
@@ -109,7 +124,7 @@ function parse_parameters() {
 
 # Set toolchains
 function setup_toolchains() {
-    [[ -n ${PI} ]] && return
+    [[ -n ${PI} || -n ${CLANG} ]] && return
     [[ -z ${GCC_TOOLCHAIN_FOLDER} ]] && GCC_TOOLCHAIN_FOLDER=${TC_FOLDER}/btg-gcc-8.2.1-${ARCH}
     if [[ ! -d ${GCC_TOOLCHAIN_FOLDER} ]]; then
         GCC_TOOLCHAIN_FOLDER=${TC_FOLDER}/${GCC_TOOLCHAIN_FOLDER}
