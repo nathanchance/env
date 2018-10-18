@@ -908,6 +908,13 @@ function boot-kernel() {
     [[ -z ${ARCH} ]] && { display_error "ARCH not specified!"; return 1; }
 
     case ${ARCH} in
+        "arm")
+            [[ ! -f ../qemu/arm-rootfs.cpio ]] && { display_error "QEMU ramdisk not found! Please build it or use the proper folder."; return 1; }
+            IMAGE=zImage
+            QEMU=qemu-system-arm
+            QEMU_ARCH_CMDLINE=( -append "console=ttyAMA0"
+                                -initrd ../qemu/arm-rootfs.cpio
+                                -machine virt ) ;;
         "arm64")
             [[ ! -f ../qemu/arm64-rootfs.cpio ]] && { display_error "QEMU ramdisk not found! Please build it or use the proper folder."; return 1; }
             IMAGE=Image
