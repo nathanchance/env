@@ -853,33 +853,6 @@ function pch() {
 }
 
 
-# Build kernel with Clang
-function bkc() {
-    local TARGET_ARCH MAKE_FLAGS
-
-    if [[ ! -f Makefile ]]; then
-        display_error "No Makefile found! Are you in a kernel tree?"
-        return
-    fi
-
-    TARGET_ARCH=${1}; shift
-    case "${TARGET_ARCH}" in
-        "arm") MAKE_FLAGS=( "ARCH=arm" "CROSS_COMPILE=arm-linux-gnueabi-" ) ;;
-        "arm64") MAKE_FLAGS=( "ARCH=arm64" "CROSS_COMPILE=aarch64-linux-gnu-" ) ;;
-        "x86") MAKE_FLAGS=() ;;
-        *) display_error "Invalid TARGET_ARCH specified!"; return ;;
-    esac
-
-    time PATH=${PATH_OVERRIDE:+"${PATH_OVERRIDE}:"}${TC_FOLDER}/clang-8.x/bin:${TC_FOLDER}/btg-gcc-8.2.1-arm64/bin:${TC_FOLDER}/btg-gcc-8.2.1-arm/bin:${PATH} \
-    make "${JOBS_FLAG}" \
-         CC="${CCACHE} clang" \
-         HOSTCC=clang \
-         KCFLAGS="-Werror" \
-         "${MAKE_FLAGS[@]}" \
-         "${@}"
-}
-
-
 # Quilt-like patch management function for Linux
 function sync-patches() {
     [[ ! -f Makefile ]] && { display_error "You're not in a kernel folder!"; return 1; }
@@ -902,57 +875,35 @@ function sync-patches() {
 }
 
 
-# Boot a kernel in QEMU
-function boot-kernel() {
-    local ARCH KERNEL QEMU; ARCH=${1}; shift
-    [[ -z ${ARCH} ]] && { display_error "ARCH not specified!"; return 1; }
+# Build kernel with Clang (wrapper)
+function bkcw() {
+    local TARGET_ARCH MAKE_FLAGS
 
-    case ${ARCH} in
-        "arm")
-            [[ ! -f ../qemu/arm-rootfs.cpio ]] && { display_error "QEMU ramdisk not found! Please build it or use the proper folder."; return 1; }
-            IMAGE=zImage
-            QEMU=qemu-system-arm
-            QEMU_ARCH_CMDLINE=( -append "console=ttyAMA0"
-                                -initrd ../qemu/arm-rootfs.cpio
-                                -machine virt ) ;;
-        "arm64")
-            [[ ! -f ../qemu/arm64-rootfs.cpio ]] && { display_error "QEMU ramdisk not found! Please build it or use the proper folder."; return 1; }
-            IMAGE=Image
-            QEMU=qemu-system-aarch64
-            QEMU_ARCH_CMDLINE=( -append "console=ttyAMA0"
-                                -cpu cortex-a57
-                                -initrd ../qemu/arm64-rootfs.cpio
-                                -machine virt
-                                -machine "type=virt" ) ;;
-        "x86")
-            [[ ! -f ../qemu/x86_64-rootfs.img ]] && { display_error "QEMU disk image not found! Please create it or use the proper folder."; return 1; }
-            IMAGE=bzImage
-            QEMU=qemu-system-x86_64
-            QEMU_ARCH_CMDLINE=( -append "root=/dev/sda console=ttyS0"
-                                -cpu host
-                                -d unimp,guest_errors
-                                -drive "file=../qemu/x86_64-rootfs.img,format=raw,if=ide"
-                                -enable-kvm ) ;;
-        *) display_error "Invalid ARCH specified!"; return 1 ;;
+    if [[ ! -f Makefile ]]; then
+        display_error "No Makefile found! Are you in a kernel tree?"
+        return
+    fi
+
+    TARGET_ARCH=${1}; shift
+    case "${TARGET_ARCH}" in
+        "arm") MAKE_FLAGS=( "ARCH=arm" "CROSS_COMPILE=arm-linux-gnueabi-" ) ;;
+        "arm64") MAKE_FLAGS=( "ARCH=arm64" "CROSS_COMPILE=aarch64-linux-gnu-" ) ;;
+        "x86") MAKE_FLAGS=() ;;
+        *) display_error "Invalid TARGET_ARCH specified!"; return ;;
     esac
 
-    KERNEL=arch/${ARCH}/boot/${IMAGE}
-    [[ ! -f ${KERNEL} ]] && { display_error "Kernel doesn't exist! Please build one."; return 1; }
-
-    ${QEMU} "${QEMU_ARCH_CMDLINE[@]}" -kernel "${KERNEL}" -m 4G -nographic -smp 4 "${@}"
+    time PATH=${PATH_OVERRIDE:+"${PATH_OVERRIDE}:"}${TC_FOLDER}/clang-8.x/bin:${TC_FOLDER}/btg-gcc-8.2.1-arm64/bin:${TC_FOLDER}/btg-gcc-8.2.1-arm/bin:${PATH} \
+    make "${JOBS_FLAG}" \
+         CC="${CCACHE} clang" \
+         HOSTCC=clang \
+         "${MAKE_FLAGS[@]}" \
+         "${@}"
 }
 
 
-# Build a kernel and boot it
-function babk() {
-    ARCH=${1}
-    [[ -z ${ARCH} ]] && { display_error "ARCH not specified!"; return 1; }
-
-    git cl -q
-
-    bkc "${ARCH}" defconfig
-
-    # From https://github.com/groeck/linux-build-test/blob/master/rootfs/scripts/common.sh
+# Extra configs for build/boot testings
+# From https://github.com/groeck/linux-build-test/blob/master/rootfs/scripts/common.sh
+function extraconfigs() {
     echo "CONFIG_EXPERT=y
 CONFIG_DEBUG_KERNEL=y
 CONFIG_LOCK_DEBUGGING_SUPPORT=y
@@ -1021,12 +972,123 @@ CONFIG_VIRTIO_BLK=y
 CONFIG_VIRTIO_BLK_SCSI=y
 CONFIG_SCSI_VIRTIO=y" >> .config
 
-    [[ ${ARCH} = "arm64" ]] && echo "CONFIG_LOCK_TORTURE_TEST=y
+    [[ ${ARCH} =~ arm ]] && echo "CONFIG_LOCK_TORTURE_TEST=y
 CONFIG_RCU_TORTURE_TEST=y" >> .config
 
-    bkc "${ARCH}" olddefconfig
+    bkcw "${ARCH}" olddefconfig
+}
 
-    bkc "${ARCH}" || return 1
+# Build kernel with Clang
+function bkc() {
+    # Parameters
+    local ARCH CONFIG
+    ARCH=${1}; shift
+    CONFIG=${1}; shift
+
+    # Sanity checks
+    [[ -z ${ARCH} ]] && { display_error "ARCH not specified!"; return 1; }
+    [[ -z ${CONFIG} ]] && { display_error "CONFIG not specified!"; return 1; }
+    case ${ARCH} in
+        "arm"|"arm64"|"x86") ;;
+        *) display_error "Invalid ARCH specifed"; return 1 ;;
+    esac
+
+    # Clean up
+    git cl -q
+
+    # Configure kernel
+    bkcw "${ARCH}" "${CONFIG}"
+    [[ ${CONFIG} =~ defconfig ]] && extraconfigs
+
+    # Build kernel
+    bkcw "${ARCH}" "${@}" || return 1
+}
+
+
+# Boot a kernel in QEMU
+function boot-kernel() {
+    local ARCH KERNEL QEMU; ARCH=${1}; shift
+    [[ -z ${ARCH} ]] && { display_error "ARCH not specified!"; return 1; }
+
+    case ${ARCH} in
+        "arm")
+            [[ ! -f ../qemu/arm-rootfs.cpio ]] && { display_error "QEMU ramdisk not found! Please build it or use the proper folder."; return 1; }
+            IMAGE=zImage
+            QEMU=qemu-system-arm
+            QEMU_ARCH_CMDLINE=( -append "console=ttyAMA0"
+                                -initrd ../qemu/arm-rootfs.cpio
+                                -machine virt ) ;;
+        "arm64")
+            [[ ! -f ../qemu/arm64-rootfs.cpio ]] && { display_error "QEMU ramdisk not found! Please build it or use the proper folder."; return 1; }
+            IMAGE=Image
+            QEMU=qemu-system-aarch64
+            QEMU_ARCH_CMDLINE=( -append "console=ttyAMA0"
+                                -cpu cortex-a57
+                                -initrd ../qemu/arm64-rootfs.cpio
+                                -machine virt
+                                -machine "type=virt" ) ;;
+        "x86")
+            [[ ! -f ../qemu/x86_64-rootfs.img ]] && { display_error "QEMU disk image not found! Please create it or use the proper folder."; return 1; }
+            IMAGE=bzImage
+            QEMU=qemu-system-x86_64
+            QEMU_ARCH_CMDLINE=( -append "root=/dev/sda console=ttyS0"
+                                -cpu host
+                                -d unimp,guest_errors
+                                -drive "file=../qemu/x86_64-rootfs.img,format=raw,if=ide"
+                                -enable-kvm ) ;;
+        *) display_error "Invalid ARCH specified!"; return 1 ;;
+    esac
+
+    KERNEL=arch/${ARCH}/boot/${IMAGE}
+    [[ ! -f ${KERNEL} ]] && { display_error "Kernel doesn't exist! Please build one."; return 1; }
+
+    ${QEMU} "${QEMU_ARCH_CMDLINE[@]}" -kernel "${KERNEL}" -m 4G -nographic -smp 4 "${@}"
+}
+
+
+# Build a kernel and boot it
+function babk() {
+    local ARCH
+    ARCH=${1}; shift
+    [[ -z ${ARCH} ]] && { display_error "ARCH not specified!"; return 1; }
+
+    bkc "${ARCH}" defconfig KCFLAGS="-Werror" "${@}"
 
     boot-kernel "${ARCH}"
+}
+
+
+# linux-next testing
+function lnt() {
+    local ARCH CONFIG CONFIGS LOG
+
+    # Logging
+    LOG=$(mktemp)
+
+    # Configurations known to build with -Werror
+    CONFIGS=( "arm:multi_v7_defconfig"
+              "arm64:defconfig"
+              "arm64:allyesconfig"
+              "x86:defconfig"
+              "x86:allyesconfig" )
+
+    for CONFIG in "${CONFIGS[@]}"; do
+        ARCH=${CONFIG%%:*}
+        CONFIG=${CONFIG##*:}
+
+        if ! bkc "${ARCH}" "${CONFIG}" KCFLAGS="-Werror"; then
+            {
+                echo "${ARCH}:${CONFIG} | Failed!"
+                echo
+            } >> "${LOG}"
+        else
+            {
+                echo "${ARCH}:${CONFIG} | Success!"
+                echo
+            } >> "${LOG}"
+        fi
+    done
+
+    tg_msg "linux$(cat localversion-next) build results: $(deldog "${LOG}")"
+    rm "${LOG}"
 }
