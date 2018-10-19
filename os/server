@@ -1060,7 +1060,7 @@ function babk() {
 
 # linux-next testing
 function lnt() {
-    local ARCH CONFIG CONFIGS LOG
+    local ARCH CONFIG CONFIGS LOG MESSAGE RESULT START TIME_STRING
 
     # Logging
     LOG=$(mktemp)
@@ -1076,19 +1076,27 @@ function lnt() {
         ARCH=${CONFIG%%:*}
         CONFIG=${CONFIG##*:}
 
+        START=$(date +%s)
         if ! bkc "${ARCH}" "${CONFIG}" KCFLAGS="-Werror"; then
-            {
-                echo "${ARCH}:${CONFIG} | Failed!"
-                echo
-            } >> "${LOG}"
+            RESULT=Failed
         else
-            {
-                echo "${ARCH}:${CONFIG} | Success!"
-                echo
-            } >> "${LOG}"
+            RESULT=Success
         fi
+        TIME_STRING=$(format_time "${START}" "$(date +%s)")
+        {
+            echo "${ARCH}:${CONFIG} | ${RESULT} in ${TIME_STRING,,}"
+            echo
+        } >> "${LOG}"
     done
 
-    tg_msg "linux$(cat localversion-next) build results: $(deldog "${LOG}")"
+    MESSAGE="linux$(cat localversion-next) build results: $(deldog "${LOG}")"
+
+    tg_msg "${MESSAGE}"
+
+    clear
+    echo
+    echo "${MESSAGE}"
+    echo
+
     rm "${LOG}"
 }
