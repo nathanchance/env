@@ -326,6 +326,12 @@ function device_flags() {
 }
 
 
+# Automatically get cross compile prefix from GCC
+function get_cc_prefix() {
+    find "${1}" \( -type f -o -type l \) -name '*-gcc' | head -n1 | sed 's@.*/@@' | sed 's/gcc//'
+}
+
+
 # Set up other variables
 function generate_variables() {
     # Folders
@@ -364,27 +370,23 @@ function generate_variables() {
     ARCHITECTURE=arm64
 
     # Normal 64-bit GCC toolchain
-    if [[ -z ${GCC_BINARY} ]]; then
-        if [[ ! -d ${GCC_FOLDER} ]]; then
-            GCC_FOLDER=${TC_FOLDER}/${GCC_FOLDER}
-            [[ ! -d ${GCC_FOLDER} ]] && die "Invalid GCC folder specified!"
-        fi
-        GCC=$(find "${GCC_FOLDER}/bin" \( -type f -o -type l \) -name '*-gcc' | head -n1)
+    if [[ ! -d ${GCC_FOLDER} ]]; then
+        GCC_FOLDER=${TC_FOLDER}/${GCC_FOLDER}
+        [[ ! -d ${GCC_FOLDER} ]] && die "Invalid GCC folder specified!"
     fi
-    [[ -z ${GCC} ]] && die "64-bit GCC toolchain could not be found!"
-    CC=${GCC%gcc}
+    GCC_BIN=${GCC_FOLDER}/bin
+    CROSS_COMPILE=$(get_cc_prefix "${GCC_BIN}")
+    [[ -z ${CROSS_COMPILE} ]] && die "64-bit GCC toolchain could not be found!"
 
     # 32-bit GCC toolchain if required
-    if [[ -n ${GCC_32_BIT} || -n ${GCC_32_BIT_FOLDER} ]]; then
-        if [[ -z ${GCC_32_BIT} ]]; then
-            if [[ ! -d ${GCC_32_BIT_FOLDER} ]]; then
-                GCC_32_BIT_FOLDER=${TC_FOLDER}/${GCC_32_BIT_FOLDER}
-                [[ ! -d ${GCC_32_BIT_FOLDER} ]] && die "Invalid GCC folder specified!"
-            fi
-            GCC_32_BIT=$(find "${GCC_32_BIT_FOLDER}/bin" \( -type f -o -type l \) -name '*-gcc' | head -n1)
+    if [[ -n ${GCC_32_BIT_FOLDER} ]]; then
+        if [[ ! -d ${GCC_32_BIT_FOLDER} ]]; then
+            GCC_32_BIT_FOLDER=${TC_FOLDER}/${GCC_32_BIT_FOLDER}
+            [[ ! -d ${GCC_32_BIT_FOLDER} ]] && die "Invalid GCC folder specified!"
         fi
-        [[ -z ${GCC_32_BIT} ]] && die "32-bit GCC toolchain could not be found!"
-        CC_32_BIT=${GCC_32_BIT%gcc}
+        GCC_32_BIT_BIN=${GCC_32_BIT_FOLDER}/bin
+        CROSS_COMPILE_ARM32=$(get_cc_prefix "${GCC_32_BIT_BIN}")
+        [[ -z ${CROSS_COMPILE_ARM32} ]] && die "32-bit GCC toolchain could not be found!"
     fi
 
     # Handle Clang
@@ -393,10 +395,10 @@ function generate_variables() {
             CLANG_FOLDER=${TC_FOLDER}/${CLANG_FOLDER}
             [[ ! -d ${CLANG_FOLDER} ]] && die "Invalid Clang folder specified!"
         fi
-        CLANG=${CLANG_FOLDER}/bin/clang
-        [[ ! -f ${CLANG} ]] && die "Clang toolchain could not be found!"
+        CLANG_BIN=${CLANG_FOLDER}/bin
+        [[ ! -f ${CLANG_BIN}/clang ]] && die "Clang binary could not be found!"
 
-        CLANG_VERSION=$(clang_version "${CLANG}")
+        CLANG_VERSION=$(clang_version "${CLANG_BIN}")
         case "$(basename "${CLANG_FOLDER}")" in
             "clang-7.x"|"clang-8.x")
                 if [[ -n ${PERSONAL_OPTS} ]]; then
@@ -410,6 +412,9 @@ function generate_variables() {
                 fi ;;
         esac
     fi
+
+    # Add folders to PATH
+    export PATH=${CLANG_BIN:+"${CLANG_BIN}:"}${GCC_BIN}:${GCC_32_BIT_BIN:+"${GCC_32_BIT_BIN}:"}:${BIN_FOLDER}:${PATH}
 }
 
 
@@ -439,32 +444,32 @@ function clean_up() {
 
 # Make wrapper for make function for GCC
 function make_wrapper_gcc() {
-    PATH=${BIN_FOLDER}:${PATH} make "${JOBS_FLAG}" \
-                                    ARCH=${ARCHITECTURE} \
-                                    CROSS_COMPILE="${CCACHE} ${CC}" \
-                                    CROSS_COMPILE_ARM32="${CCACHE} ${CC_32_BIT}" \
-                                    KBUILD_BUILD_VERSION="${KBUILD_BUILD_VERSION}" \
-                                    LOCALVERSION="${LOCALVERSION}" \
-                                    O="${OUT_FOLDER}" \
-                                    "${@}"
+    make "${JOBS_FLAG}" \
+         ARCH=${ARCHITECTURE} \
+         CROSS_COMPILE="${CCACHE} ${CROSS_COMPILE}" \
+         CROSS_COMPILE_ARM32="${CCACHE} ${CROSS_COMPILE_ARM32}" \
+         KBUILD_BUILD_VERSION="${KBUILD_BUILD_VERSION}" \
+         LOCALVERSION="${LOCALVERSION}" \
+         O="${OUT_FOLDER}" \
+         "${@}"
 }
 
 
 # Make wrapper for make function for Clang
 function make_wrapper_clang() {
-    PATH=${BIN_FOLDER}:${PATH} make "${JOBS_FLAG}" \
-                                    ARCH=${ARCHITECTURE} \
-                                    CC="${CCACHE} ${CLANG}" \
-                                    CLANG_TRIPLE=aarch64-linux-gnu- \
-                                    CROSS_COMPILE="${CC}" \
-                                    CROSS_COMPILE_ARM32="${CC_32_BIT}" \
-                                    HOSTCC="${CCACHE} ${CLANG}" \
-                                    KBUILD_COMPILER_STRING="${CLANG_VERSION}" \
-                                    KBUILD_BUILD_VERSION="${KBUILD_BUILD_VERSION}" \
-                                    KCFLAGS="${KCFLAGS}" \
-                                    LOCALVERSION="${LOCALVERSION}" \
-                                    O="${OUT_FOLDER}" \
-                                    "${@}"
+    make "${JOBS_FLAG}" \
+         ARCH=${ARCHITECTURE} \
+         CC="${CCACHE} clang" \
+         CLANG_TRIPLE=aarch64-linux-gnu- \
+         CROSS_COMPILE="${CROSS_COMPILE}" \
+         CROSS_COMPILE_ARM32="${CROSS_COMPILE_ARM32}" \
+         HOSTCC="${CCACHE} clang" \
+         KBUILD_COMPILER_STRING="${CLANG_VERSION}" \
+         KBUILD_BUILD_VERSION="${KBUILD_BUILD_VERSION}" \
+         KCFLAGS="${KCFLAGS}" \
+         LOCALVERSION="${LOCALVERSION}" \
+         O="${OUT_FOLDER}" \
+         "${@}"
 }
 
 
@@ -536,9 +541,9 @@ function print_variables() {
 
     echo "${BOLD}Branch:${RST}     $(git describe --exact-match 2>/dev/null || git cb) @ $(git kf)\n"
 
-    [[ ${COMPILER} = "clang" ]] && echo "${BOLD}Clang:${RST}      ${CLANG}\n"
+    [[ ${COMPILER} = "clang" ]] && echo "${BOLD}Clang:${RST}      $(command -v clang)\n"
 
-    echo "${BOLD}GCC:${RST}        ${GCC}\n"
+    echo "${BOLD}GCC:${RST}        $(command -v ${CROSS_COMPILE}gcc)\n"
 }
 
 
