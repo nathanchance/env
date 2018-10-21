@@ -45,14 +45,6 @@ function parse_parameters() {
 
     while [[ ${#} -ge 1 ]]; do
         case ${1} in
-            "-B"|"--bootstrap")
-                if [[ -n ${ME} ]]; then
-                    for PREBUILT_VERSION in ${MASTER_VERSION} ${STABLE_VERSION}; do
-                        [[ -d ${TC_FOLDER}/${VENDOR:+"${VENDOR,,}-"}clang-${PREBUILT_VERSION}.x ]] && \
-                            export PATH="${TC_FOLDER}/${VENDOR:+"${VENDOR,,}-"}clang-${PREBUILT_VERSION}.x/bin:${PATH}"
-                    done
-                fi ;;
-
             "-b"|"--build-only")
                 BUILD_ONLY=true ;;
 
@@ -354,7 +346,7 @@ function build() {
 function install() {
     if [[ -z ${TEST} ]]; then
         rm -rf "${INSTALL_FOLDER}-old"
-        cp -r "${INSTALL_FOLDER}" "${INSTALL_FOLDER}-old" 2>/dev/null
+        mv "${INSTALL_FOLDER}" "${INSTALL_FOLDER}-old" 2>/dev/null
     fi
 
     if ! ninja install &>/dev/null; then
