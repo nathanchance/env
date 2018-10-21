@@ -159,7 +159,7 @@ function setup_toolchains() {
     [[ -z ${GCC_TOOLCHAIN} ]] && die "64-bit GCC toolchain could not be found!"
 
     # GCC 32-bit for compat VDSO
-    if [[ "${PWD}$(git cb)" =~ "wahoo" || "${PWD}$(git cb)" =~ "marlin" ]]; then
+    if [[ "${PWD}$(git cb)" =~ "wahoo" || "${PWD}$(git cb)" =~ "marlin" || "${PWD}$(git cb)" =~ "bluecross" ]]; then
         [[ -z ${GCC_32_BIT_TOOLCHAIN_FOLDER} ]] && GCC_32_BIT_TOOLCHAIN_FOLDER=${TC_FOLDER}/aosp-gcc-arm
         if [[ ! -d ${GCC_32_BIT_TOOLCHAIN_FOLDER} ]]; then
             GCC_32_BIT_TOOLCHAIN_FOLDER=${TC_FOLDER}/${GCC_32_BIT_TOOLCHAIN_FOLDER}
