@@ -413,8 +413,10 @@ function generate_variables() {
         esac
     fi
 
-    # Add folders to PATH
-    export PATH=${CLANG_BIN:+"${CLANG_BIN}:"}${GCC_BIN}:${GCC_32_BIT_BIN:+"${GCC_32_BIT_BIN}:"}:${BIN_FOLDER}:${PATH}
+    # Add folders to LD_LIBRARY_PATH and PATH
+    LD_LIBRARY_PATH=$(find "${CLANG_FOLDER}" -maxdepth 1 -name 'lib' -o -name 'lib64' -type d)${LD_LIBRARY_PATH:+":${LD_LIBRARY_PATH}"}
+    PATH=${CLANG_BIN:+"${CLANG_BIN}:"}${GCC_BIN}:${GCC_32_BIT_BIN:+"${GCC_32_BIT_BIN}:"}:${BIN_FOLDER}:${PATH}
+    export LD_LIBRARY_PATH PATH
 }
 
 
