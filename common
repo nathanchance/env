@@ -258,15 +258,22 @@ function tg_upload() {
 
 # Remove URLs from Clang version
 function clang_version() {
-    local POS
-    [[ ${#} -lt 1 || ! ${1} =~ "clang" ]] && { display_error "You didn't supply a Clang binary!"; return; }
-    [[ ! -f ${1} ]] && { display_error "Clang binary supplied doesn't exist!"; return; }
+    [[ ${#} -lt 1 ]] && { display_error "This function takes an argument!"; return; }
 
-    case "${1}" in
+    local CLANG POS
+    CLANG=${1}
+    if [[ $(basename "${CLANG}") != "clang" ]]; then
+        CLANG=$(find "${CLANG}" -name clang | head -n1)
+        [[ -z ${CLANG} ]] && { display_error "You didn't supply a Clang folder/binary!"; return; }
+    else
+        [[ ! -f ${CLANG} ]] && { display_error "Clang binary supplied doesn't exist!"; return; }
+    fi
+
+    case "${CLANG}" in
         *aosp*) POS="1,2" ;;
         *) POS="1" ;;
     esac
-    "${1}" --version | head -n 1 | cut -d \( -f "${POS}" | sed 's/[[:space:]]*$//' || display_error "Something went wrong!"
+    "${CLANG}" --version | head -n 1 | cut -d \( -f "${POS}" | sed 's/[[:space:]]*$//' || display_error "Something went wrong!"
 }
 
 
