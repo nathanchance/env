@@ -19,23 +19,29 @@ function errcho() {
 }
 
 
+# Get cross compile prefix
+function get_cc_prefix() {
+    find "${1}" \( -type f -o -type l \) -name '*-gcc' | head -n1 | sed 's@.*/@@' | sed 's/gcc//'
+}
+
+
 # Kernel make function
 function kmake() {
     # Set make variable
     MAKE="make ${JOBS_FLAG} O=out ARCH=${ARCH}"
 
     if [[ -n ${CLANG} ]]; then
-        PATH=${BIN_FOLDER}:${PATH} ${MAKE} CC="${CCACHE} ${CLANG_TOOLCHAIN}" \
-                                           CLANG_TRIPLE=aarch64-linux-gnu- \
-                                           CROSS_COMPILE="${GCC_TOOLCHAIN%gcc}" \
-                                           CROSS_COMPILE_ARM32="${GCC_32_BIT_TOOLCHAIN%gcc}" \
-                                           HOSTCC="${CCACHE} ${CLANG_TOOLCHAIN}" \
-                                           KBUILD_COMPILER_STRING="${CLANG_VERSION}" \
-                                           "${@}"
+        ${MAKE} CC="${CCACHE} clang" \
+                CLANG_TRIPLE=aarch64-linux-gnu- \
+                CROSS_COMPILE="${GCC_CC}" \
+                CROSS_COMPILE_ARM32="${GCC_32_BIT_CC}" \
+                HOSTCC="${CCACHE} clang" \
+                KBUILD_COMPILER_STRING="${CLANG_VERSION}" \
+                "${@}"
     else
-        PATH=${BIN_FOLDER}:${PATH} ${MAKE} CROSS_COMPILE="${CCACHE} ${GCC_TOOLCHAIN%gcc}" \
-                                           CROSS_COMPILE_ARM32="${GCC_32_BIT_TOOLCHAIN%gcc}" \
-                                           "${@}"
+        ${MAKE} CROSS_COMPILE="${CCACHE} ${GCC_CC}" \
+                CROSS_COMPILE_ARM32="${GCC_32_BIT_CC}" \
+                "${@}"
     fi
 }
 
@@ -67,7 +73,7 @@ function parse_parameters() {
             "-ct"|"--clang-toolchain")
                 shift && enforce_value "${@}"
 
-                CLANG_TOOLCHAIN_FOLDER=${1} ;;
+                CLANG_FOLDER=${1} ;;
 
             # Config to build
             "-d"|"--defconfig")
@@ -94,13 +100,13 @@ function parse_parameters() {
             "-gt"|"--gcc-toolchain")
                 shift && enforce_value "${@}"
 
-                GCC_TOOLCHAIN_FOLDER=${1} ;;
+                GCC_FOLDER=${1} ;;
 
             # 32-bit GCC toolchain to use for compiling
             "-gt-32"|"--gcc-32-bit-toolchain")
                 shift && enforce_value "${@}"
 
-                GCC_32_BIT_TOOLCHAIN_FOLDER=${1} ;;
+                GCC_32_BIT_FOLDER=${1} ;;
 
             # Just show if build was successful or not
             "-r"|"--show-only-result")
@@ -144,42 +150,48 @@ function parse_parameters() {
 
     # Defaults
     [[ -z ${ARCH} ]] && ARCH=arm64
-    [[ -z ${GCC_TOOLCHAIN_FOLDER} ]] && GCC_TOOLCHAIN_FOLDER=${TC_FOLDER}/aosp-gcc-${ARCH}
+    # SC2153: Possible misspelling: TC_FOLDER may not be assigned, but GCC_FOLDER is.
+    # shellcheck disable=SC2153
+    [[ -z ${GCC_FOLDER} ]] && GCC_FOLDER=${TC_FOLDER}/aosp-gcc-${ARCH}
 }
 
 
-# Set toolchains
+# Set toolchain paths
 function setup_toolchains() {
     # GCC (64-bit or 32-bit)
-    if [[ ! -d ${GCC_TOOLCHAIN_FOLDER} ]]; then
-        GCC_TOOLCHAIN_FOLDER=${TC_FOLDER}/${GCC_TOOLCHAIN_FOLDER}
-        [[ ! -d ${GCC_TOOLCHAIN_FOLDER} ]] && die "Invalid 64-bit GCC folder specified!"
+    if [[ ! -d ${GCC_FOLDER} ]]; then
+        GCC_FOLDER=${TC_FOLDER}/${GCC_FOLDER}
+        [[ ! -d ${GCC_FOLDER} ]] && die "Invalid 64-bit GCC folder specified!"
     fi
-    GCC_TOOLCHAIN=$(find "${GCC_TOOLCHAIN_FOLDER}/bin" \( -type f -o -type l \) -name '*-gcc' | head -n1)
-    [[ -z ${GCC_TOOLCHAIN} ]] && die "64-bit GCC toolchain could not be found!"
+    GCC_BIN=${GCC_FOLDER}/bin
+    GCC_CC=$(get_cc_prefix "${GCC_BIN}")
+    [[ -z ${GCC_CC} ]] && die "64-bit GCC toolchain could not be found!"
 
     # GCC 32-bit for compat VDSO
     if [[ "${PWD}$(git cb)" =~ "wahoo" || "${PWD}$(git cb)" =~ "marlin" || "${PWD}$(git cb)" =~ "bluecross" ]]; then
-        [[ -z ${GCC_32_BIT_TOOLCHAIN_FOLDER} ]] && GCC_32_BIT_TOOLCHAIN_FOLDER=${TC_FOLDER}/aosp-gcc-arm
-        if [[ ! -d ${GCC_32_BIT_TOOLCHAIN_FOLDER} ]]; then
-            GCC_32_BIT_TOOLCHAIN_FOLDER=${TC_FOLDER}/${GCC_32_BIT_TOOLCHAIN_FOLDER}
-            [[ ! -d ${GCC_32_BIT_TOOLCHAIN_FOLDER} ]] && die "Invalid 32-bit GCC folder specified!"
+        [[ -z ${GCC_32_BIT_FOLDER} ]] && GCC_32_BIT_FOLDER=${TC_FOLDER}/aosp-gcc-arm
+        if [[ ! -d ${GCC_32_BIT_FOLDER} ]]; then
+            GCC_32_BIT_FOLDER=${TC_FOLDER}/${GCC_32_BIT_FOLDER}
+            [[ ! -d ${GCC_32_BIT_FOLDER} ]] && die "Invalid 32-bit GCC folder specified!"
         fi
-        GCC_32_BIT_TOOLCHAIN=$(find "${GCC_32_BIT_TOOLCHAIN_FOLDER}/bin" \( -type f -o -type l \) -name '*-gcc' | head -n1)
-        [[ -z ${GCC_32_BIT_TOOLCHAIN} ]] && die "32-bit GCC toolchain could not be found!"
+        GCC_32_BIT_BIN=${GCC_32_BIT_FOLDER}/bin
+        GCC_32_BIT_CC=$(get_cc_prefix "${GCC_32_BIT_BIN}" )
+        [[ -z ${GCC_32_BIT_CC} ]] && die "32-bit GCC toolchain could not be found!"
     fi
 
     # Clang
     if [[ -n ${CLANG} ]]; then
-        [[ -z ${CLANG_TOOLCHAIN_FOLDER} ]] && CLANG_TOOLCHAIN_FOLDER=${TC_FOLDER}/aosp-clang/clang-4053586
-        if [[ ! -d ${CLANG_TOOLCHAIN_FOLDER} ]]; then
-            CLANG_TOOLCHAIN_FOLDER=${TC_FOLDER}/${CLANG_TOOLCHAIN_FOLDER}
-            [[ ! -d ${CLANG_TOOLCHAIN_FOLDER} ]] && die "Invalid Clang folder specified!"
+        [[ -z ${CLANG_FOLDER} ]] && CLANG_FOLDER=${TC_FOLDER}/aosp-clang/clang-4053586
+        if [[ ! -d ${CLANG_FOLDER} ]]; then
+            CLANG_FOLDER=${TC_FOLDER}/${CLANG_FOLDER}
+            [[ ! -d ${CLANG_FOLDER} ]] && die "Invalid Clang folder specified!"
         fi
-        CLANG_TOOLCHAIN=${CLANG_TOOLCHAIN_FOLDER}/bin/clang
-        [[ ! -f ${CLANG_TOOLCHAIN} ]] && die "Clang toolchain could not be found!"
-        CLANG_VERSION=$(clang_version "${CLANG_TOOLCHAIN}")
+        CLANG_BIN=${CLANG_FOLDER}/bin
+        [[ ! -f ${CLANG_BIN}/clang ]] && die "Clang binary could not be found!"
+        CLANG_VERSION=$(clang_version "${CLANG_BIN}")
     fi
+
+    PATH=${CLANG_BIN:+"${CLANG_BIN}:"}${GCC_BIN}:${GCC_32_BIT_BIN:+"${GCC_32_BIT_BIN}:"}:${BIN_FOLDER}:${PATH}
 }
 
 
