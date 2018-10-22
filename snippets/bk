@@ -23,6 +23,7 @@ function bk() {
 
         # android-linux-stable
         "angler:"*|"bullhead:"*|"marlin:"*) PARAMS=( "${FOLDER}_defconfig" ) ;;
+        "bluecross:"*) PARAMS=( b1c1_defconfig -c -ct aosp-clang-9.0.0_r12/clang-4393122 ) ;;
         "jasmine:"*) PARAMS=( "jasmine-perf_defconfig" ) ;;
         "mata:lineage-15.1") PARAMS=( "lineageos_${FOLDER}_defconfig" -c ) ;;
         "msm-3.18:"*|"msm-4.4:"*) PARAMS=( msmcortex-perf_defconfig ) ;;
