@@ -54,7 +54,7 @@ function post_merge_commands() {
 
     # Get the appropriate resolution command filename (static mapping because it is not uniform)
     case "${REPO}:${BRANCH}" in
-        "jasmine"*|"marlin"*|"msm"*|"polaris"*|"sagit"*|"tissot"*|"wahoo"*|"whyred"*) COMMANDS="${REPO}-commands" ;;
+        "bluecross"|"jasmine"*|"marlin"*|"msm"*|"polaris"*|"sagit"*|"tissot"*|"wahoo"*|"whyred"*) COMMANDS="${REPO}-commands" ;;
         "nash"*) COMMANDS="nash-oreo-8.0.0-commands" ;;
         "op3:oneplus/QC8996_O_8.0.0") COMMANDS="${REPO}-8.0.0-commands" ;;
         "op5:oneplus/QC8998_O_8.1"|"op6:oneplus/SDM845_O_8.1") COMMANDS="${REPO}-O_8.1-commands" ;;
@@ -96,7 +96,7 @@ LOG=$(mktemp)
 ALS=${KERNEL_FOLDER}/als
 REPOS_318=( "marlin" "msm-3.18" "op3" "tissot" )
 REPOS_44=( "jasmine" "msm-4.4" "nash" "op5" "sagit" "wahoo" "whyred" )
-REPOS_49=( "msm-4.9" "op6" "polaris" )
+REPOS_49=( "bluecross" "msm-4.9" "op6" "polaris" )
 
 # Parse parameters
 PARAMS="${*}"
@@ -160,7 +160,7 @@ if [[ -n ${INIT} ]]; then
         case ${ITEM} in
             "jasmine"|"polaris"|"sagit"|"tissot"|"whyred")
                 REMOTES=( "upstream:https://github.com/MiCode/Xiaomi_Kernel_OpenSource" ) ;;
-            "marlin"|"wahoo")
+            "marlin"|"wahoo"|"bluecross")
                 REMOTES=( "upstream:https://android.googlesource.com/kernel/msm" ) ;;
             "msm-3.18"|"msm-4.4"|"msm-4.9")
                 REMOTES=( "upstream:https://source.codeaurora.org/quic/la/kernel/${ITEM}" ) ;;
@@ -203,6 +203,7 @@ for VERSION in "${VERSIONS[@]}"; do
     for REPO in "${REPOS[@]}"; do
         # Map all of the branches of the repo to an upstream remote (if relevant)
         case ${REPO} in
+            "bluecross") BRANCHES=( "android-msm-bluecross-4.9" )
             "jasmine") BRANCHES=( "jasmine-o-oss" ) ;;
             "marlin") BRANCHES=( "android-msm-marlin-3.18" ) ;;
             "msm-3.18") BRANCHES=( "kernel.lnx.3.18.r33-rel" "kernel.lnx.3.18.r34-rel" ) ;;
