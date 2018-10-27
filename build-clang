@@ -122,10 +122,12 @@ function rollback() {
                 git cherry-pick 24c9731717 || die "There was an error rolling back ${FOLDER}!"
                 git cherry-pick 513f3b3fb7 || die "There was an error rolling back ${FOLDER}!"
                 git cherry-pick eab6ce7dc6 || die "There was an error rolling back ${FOLDER}!"
+                git cherry-pick 69ad28caf8 || die "There was an error rolling back ${FOLDER}!"
             else
                 git cherry-pick 24c9731717 || die "There was an error rolling back ${FOLDER}!"
                 git cherry-pick 176213e989 || die "There was an error rolling back ${FOLDER}!"
                 git cherry-pick 382ac69d5e || die "There was an error rolling back ${FOLDER}!"
+                git cherry-pick f50a8a1cf3 || die "There was an error rolling back ${FOLDER}!"
             fi
         fi
     fi
@@ -206,7 +208,7 @@ function svn_sync() {
         svn update || die "There was an error updating ${FOLDER}!"
     fi
 
-    LLVM_VERSION_PATCH=$(svn info -r HEAD --show-item revision)
+    SVN_REVISION=$(svn info -r HEAD --show-item revision)
 }
 
 
@@ -295,10 +297,10 @@ function build() {
           -DLLVM_TARGETS_TO_BUILD="X86;ARM;AArch64" \
           -DLLVM_OPTIMIZED_TABLEGEN=ON \
           -DLLVM_USE_LINKER=gold \
-          -DCLANG_VENDOR="${VENDOR:+"${VENDOR} "}" \
-          -DLLVM_VERSION_PATCH="${LLVM_VERSION_PATCH:?}" \
-          -DLLVM_VERSION_SUFFIX="" \
+          -DLLVM_VERSION_SUFFIX="-r${SVN_REVISION:?}" \
           -DCLANG_REPOSITORY_STRING="${URL_PREFIX}clang" \
+          -DCLANG_VENDOR="${VENDOR:+"${VENDOR} "}" \
+          -DCLANG_VERSION_SUFFIX="-r${SVN_REVISION:?}" \
           "${LLVM_FOLDER}" || die "There was an error running cmake!"
 
     time ninja && SUCCESS=true
