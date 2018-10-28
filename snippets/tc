@@ -1,0 +1,95 @@
+#!/usr/bin/env bash
+#
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+# Copyright (C) 2018 Nathan Chancellor
+#
+# Toolchain building functions
+
+
+# Defaults for build-clang
+function build-clang() {
+    command build-clang "${@}"
+}
+
+
+# build-tools-gcc wrapper
+function btg() {(
+    [[ "${*}" =~ "-t" || "${*}" =~ "--telegram" ]] && TG=true && TG_MSG_FILE=$(mktemp)
+    cd "${HOME}/gcc-build" || return
+    git pull
+
+    for ITEM in arm64:aarch64-linux-gnu arm:arm-linux-gnueabi; do
+        ARCH=${ITEM%:*}
+        TARGET=${ITEM#*:}
+
+        for GCC in Linaro:7.3.1 GNU:8.2.1; do
+            SOURCE=${GCC%:*}
+            VERSION=${GCC#*:}
+            START=$(date +"%s")
+            ./build -a "${ARCH}" -s "${SOURCE,,}" -v "${VERSION:0:1}" --full-src
+            TIME_ELAPSED=$(format_time "${START}" "$(date +"%s")")
+            if [[ -d ${TARGET} ]]; then
+                SOURCE_STRING=${SOURCE}
+                [[ ${SOURCE} = "GNU" ]] && unset SOURCE || SOURCE="${SOURCE,,}-"
+                FOLDER=${HOME}/toolchains/btg-${SOURCE}gcc-${VERSION}-${ARCH}
+                rm -rf "${FOLDER}"
+                mv "${TARGET}" "${FOLDER}"
+                if [[ -n ${TG} ]]; then
+                    {
+                        echo "\`\`\`"
+                        echo "${SOURCE_STRING} GCC ${VERSION} for ${ARCH} build successfully!"
+                        echo
+                        echo "Time elapsed: ${TIME_ELAPSED,,}"
+                        echo
+                        echo "Installation folder: ${FOLDER}"
+                        echo
+                        echo "Version: $("${FOLDER}/bin/${TARGET}-gcc" --version | head -1)"
+                        echo "\`\`\`"
+                    } > "${TG_MSG_FILE}"
+                    tg_msg "$(cat "${TG_MSG_FILE}")"
+                fi
+            else
+                if [[ -n ${TG} ]]; then
+                    {
+                        echo "\`\`\`"
+                        echo "Error while building ${SOURCE} GCC ${VERSION} for ${ARCH}!"
+                        echo
+                        echo "Time elapsed: ${TIME_ELAPSED,,}"
+                        echo "\`\`\`"
+                    } > "${TG_MSG_FILE}"
+                    tg_msg "$(cat "${TG_MSG_FILE}")"
+                fi
+            fi
+        done
+    done
+
+    rm -f "${TG_MSG_FILE}"
+)}
+
+
+# Update all toolchains
+function updtc() {
+    local BINARIES
+
+    # Clang 7.x
+    build-clang -t -s
+    # Clang 8.x
+    build-clang -t
+    # Linaro GCC 7.3.1 and GNU GCC 8.2.1 and 9.0.0
+    btg -t
+
+    clear
+
+    BINARIES=( "${HOME}/toolchains/clang-8.x/bin/clang"
+               "${HOME}/toolchains/clang-7.x/bin/clang"
+               "${HOME}/toolchains/btg-gcc-8.2.1-arm64/bin/aarch64-linux-gnu-ld"
+               "${HOME}/toolchains/btg-gcc-8.2.1-arm/bin/arm-linux-gnueabi-ld" )
+
+    for BINARY in "${BINARIES[@]}"; do
+        ${BINARY} --version
+        echo
+    done
+}
+
+
