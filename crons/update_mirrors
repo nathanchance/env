@@ -5,14 +5,14 @@
 LOG=${HOME}/kernels/mirrors/cron.log
 
 function log() {
-    echo "$(date): ${1}" >> ${LOG}
+    echo "$(date): ${1}" >> "${LOG}"
 }
 
 for REPO in Clang LLVM Linux; do
-    cd ${HOME}/kernels/mirrors/${REPO,,} || { log "${REPO} folder doesn't exist!"; continue; }
+    cd "${HOME}/kernels/mirrors/${REPO,,}" || { log "${REPO} folder doesn't exist!"; continue; }
     git pull github master || { log "Updating ${REPO} from GitHub failed!"; continue; }
     git pull origin master || { log "Updating ${REPO} from origin failed!"; continue; }
     git push github HEAD || { log "Pushing to GitHub failed!"; continue; }
     log "${REPO} update successful"
 done
-echo >> ${LOG}
+echo >> "${LOG}"
