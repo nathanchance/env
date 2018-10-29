@@ -140,7 +140,7 @@ function git_sync() {(
 
     # binutils uses another URL/branch scheme
     if [[ ${FOLDER} =~ "binutils" ]]; then
-        URL=https://sourceware.org/git/binutils-gdb.git
+        URL=git://sourceware.org/git/binutils-gdb.git
         # SC2030: Modification of BRANCH is local (to subshell caused by (..) group).
         # shellcheck disable=SC2030
         BRANCH=master
@@ -180,6 +180,9 @@ function git_sync() {(
             git rebase upstream/"${BRANCH}" || die "There was an error rebasing ${FOLDER}!"
             [[ -n ${ME} ]] && git push -f
         fi
+    elif [[ ${FOLDER} =~ "binutils" ]]; then
+        git fetch origin "${BRANCH}" || die "There was an error fetching updates for ${FOLDER}!"
+        git rebase origin/"${BRANCH}" || die "There was an error updating ${FOLDER}!"
     else
         git fetch origin || die "There was an error fetching updates for ${FOLDER}!"
         git rebase origin/"${BRANCH}" || die "There was an error updating ${FOLDER}!"
