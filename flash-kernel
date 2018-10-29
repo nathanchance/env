@@ -68,18 +68,6 @@ function parse_parameters() {
 
                 EXTRA_MAKE_FLAGS+=( "${1}" ) ;;
 
-            # 64-bit GCC binary to use for compiling (like the system ones)
-            "-gb"|"--gcc-binary")
-                shift && enforce_value "${@}"
-
-                GCC=${1} ;;
-
-            # 32-bit GCC binary to use for compiling (like the system ones)
-            "-gb-32"|"--gcc-32-bit-binary")
-                shift && enforce_value "${@}"
-
-                GCC_32_BIT=${1} ;;
-
             # 64-bit GCC toolchain to use for compiling
             "-gt"|"--gcc-toolchain")
                 shift && enforce_value "${@}"
