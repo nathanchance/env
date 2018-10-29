@@ -533,7 +533,7 @@ function print_variables() {
 
     [[ ${COMPILER} = "clang" ]] && echo "${BOLD}Clang:${RST}      $(command -v clang)\n"
 
-    echo "${BOLD}GCC:${RST}        $(command -v ${CROSS_COMPILE}gcc)\n"
+    echo "${BOLD}GCC:${RST}        $(command -v "${CROSS_COMPILE}"gcc)\n"
 }
 
 
