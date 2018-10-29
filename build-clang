@@ -103,9 +103,6 @@ function parse_parameters() {
     # Folder that will hold the final compiled toolchain
     [[ -z ${INSTALL_FOLDER} ]] && INSTALL_FOLDER=${TC_FOLDER}/${VENDOR:+"${VENDOR,,}-"}clang-${VERSION}.x${TEST:+"-test"}
 
-    # SVN copy of the LLVM folder for revisioning
-    SVN_FOLDER=${MAIN_FOLDER}/svn-${VERSION}.x
-
     # Set compiler
     CC=$(command -v clang || command -v gcc)
     CXX=$(command -v clang++ || command -v g++)
@@ -193,9 +190,9 @@ function git_sync() {(
 ) || exit 1; }
 
 
-# Syncs a svn project
-function svn_sync() {
-    FOLDER=${1}
+# Gets the SVN revision of a particular project
+function svn_revision() {
+    PROJECT=${1}
 
     # SC2031: BRANCH was modified in a subshell. That change might be lost.
     # shellcheck disable=SC2031
@@ -204,14 +201,12 @@ function svn_sync() {
         *) URL_SUFFIX=branches/"${BRANCH}" ;;
     esac
 
-    if [[ ! -d ${FOLDER} ]]; then
-        svn co "https://llvm.org/svn/llvm-project/llvm/${URL_SUFFIX}" "${FOLDER}" || die "There was an error syncing ${FOLDER}!"
-    else
-        cd "${FOLDER}" || die "Error moving into ${FOLDER}"
-        svn update || die "There was an error updating ${FOLDER}!"
-    fi
+    case ${PROJECT} in
+        "clang") URL_SUFFIX=cfe/${URL_SUFFIX} ;;
+        "llvm") URL_SUFFIX=llvm/${URL_SUFFIX} ;;
+    esac
 
-    SVN_REVISION=$(svn info -r HEAD --show-item revision)
+    export "${PROJECT^^}"_SVN_REVISION="$(svn info "https://llvm.org/svn/llvm-project/${URL_SUFFIX}" --show-item revision)"
 }
 
 
@@ -232,13 +227,14 @@ function sync_all() {
     LLVM_ORG=https://git.llvm.org/git/
 
     git_sync llvm
-    svn_sync "$(basename "${SVN_FOLDER}")"
+    svn_revision llvm
 
     mkdir -p "${LLVM_FOLDER}/tools"
     cd "${LLVM_FOLDER}/tools" || die "Error creating tools folder!"
 
     git_sync binutils
     git_sync clang
+    svn_revision clang
     git_sync lld
     git_sync polly
 
@@ -300,10 +296,10 @@ function build() {
           -DLLVM_TARGETS_TO_BUILD="ARM;AArch64;PowerPC;X86" \
           -DLLVM_OPTIMIZED_TABLEGEN=ON \
           -DLLVM_USE_LINKER=gold \
-          -DLLVM_VERSION_SUFFIX="-r${SVN_REVISION:?}" \
+          -DLLVM_VERSION_SUFFIX="-r${LLVM_SVN_REVISION:?}" \
           -DCLANG_REPOSITORY_STRING="${URL_PREFIX}clang" \
           -DCLANG_VENDOR="${VENDOR:+"${VENDOR} "}" \
-          -DCLANG_VERSION_SUFFIX="-r${SVN_REVISION:?}" \
+          -DCLANG_VERSION_SUFFIX="-r${CLANG_SVN_REVISION:?}" \
           "${LLVM_FOLDER}" || die "There was an error running cmake!"
 
     time ninja && SUCCESS=true
