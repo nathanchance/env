@@ -59,6 +59,9 @@ function parse_parameters() {
                 shift && enforce_value "${@}"
                 INSTALL_FOLDER=${1} ;;
 
+            "-l"|"--local-changes")
+                LOCAL_CHANGES=true ;;
+
             "-S"|"--stock")
                 STOCK=true ;;
 
@@ -164,6 +167,7 @@ function git_sync() {(
     git clean -fxdq
 
     # If checking out a branch fails, it's because 'origin/<branch>' and 'upstream/<branch>' exist
+    git reset --hard
     git checkout ${BRANCH} || git checkout -b ${BRANCH} origin/${BRANCH}
 
     # For Clang, we need to add an upstream remote and rebase on it
@@ -173,16 +177,20 @@ function git_sync() {(
         if [[ -n ${STOCK} ]]; then
             git reset --hard upstream/"${BRANCH}"
         else
-            git reset --hard origin/"${BRANCH}"
+            [[ -z ${LOCAL_CHANGES} ]] && git reset --hard origin/"${BRANCH}"
             git rebase upstream/"${BRANCH}" || die "There was an error rebasing ${FOLDER}!"
-            [[ -n ${ME} ]] && git push -f
+            [[ -z ${LOCAL_CHANGES} && -n ${ME} ]] && git push -f
         fi
     elif [[ ${FOLDER} =~ "binutils" ]]; then
         git fetch origin "${BRANCH}" || die "There was an error fetching updates for ${FOLDER}!"
         git rebase origin/"${BRANCH}" || die "There was an error updating ${FOLDER}!"
     else
         git fetch origin || die "There was an error fetching updates for ${FOLDER}!"
-        git rebase origin/"${BRANCH}" || die "There was an error updating ${FOLDER}!"
+        if [[ -z ${LOCAL_CHANGES} ]]; then
+            git reset --hard origin/"${BRANCH}" || die "There was an error updating ${FOLDER}!"
+        else
+            git rebase origin/"${BRANCH}" || die "There was an error updating ${FOLDER}!"
+        fi
     fi
 
     # Roll back if necessary
