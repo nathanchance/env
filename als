@@ -54,7 +54,7 @@ function post_merge_commands() {
 
     # Get the appropriate resolution command filename (static mapping because it is not uniform)
     case "${REPO}:${BRANCH}" in
-        "bluecross"|"jasmine"*|"marlin"*|"msm"*|"polaris"*|"sagit"*|"tissot"*|"wahoo"*|"whyred"*) COMMANDS="${REPO}-commands" ;;
+        "bluecross"*|"jasmine"*|"marlin"*|"msm"*|"polaris"*|"sagit"*|"tissot"*|"wahoo"*|"whyred"*) COMMANDS="${REPO}-commands" ;;
         "nash"*) COMMANDS="nash-oreo-8.0.0-commands" ;;
         "op3:oneplus/QC8996_O_8.0.0") COMMANDS="${REPO}-8.0.0-commands" ;;
         "op5:oneplus/QC8998_O_8.1"|"op6:oneplus/SDM845_O_8.1") COMMANDS="${REPO}-O_8.1-commands" ;;
@@ -203,7 +203,7 @@ for VERSION in "${VERSIONS[@]}"; do
     for REPO in "${REPOS[@]}"; do
         # Map all of the branches of the repo to an upstream remote (if relevant)
         case ${REPO} in
-            "bluecross") BRANCHES=( "android-msm-bluecross-4.9" )
+            "bluecross") BRANCHES=( "android-msm-bluecross-4.9" ) ;;
             "jasmine") BRANCHES=( "jasmine-o-oss" ) ;;
             "marlin") BRANCHES=( "android-msm-marlin-3.18" ) ;;
             "msm-3.18") BRANCHES=( "kernel.lnx.3.18.r33-rel" "kernel.lnx.3.18.r34-rel" ) ;;
