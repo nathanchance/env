@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+# Update ClangBuiltLinux master branches for LLVM, Clang, and Linux
+# */5 * * * * /usr/bin/flock -n /tmp/lock.mirrors /home/nathan/scripts/crons/update_mirrors
+
+LOG=${HOME}/kernels/mirrors/cron.log
+
+for REPO in Clang LLVM Linux; do
+    cd ${HOME}/kernels/mirrors/${REPO,,} || { echo "$(date): ${REPO} folder doesn't exist!" >> ${LOG}; continue; }
+    git pull github master || { echo "$(date): Updating ${REPO} from GitHub failed!" >> ${LOG}; continue; }
+    git pull origin master || { echo "$(date): Updating ${REPO} from origin failed!" >> ${LOG}; continue; }
+    git push github HEAD || { echo "$(date): Pushing to GitHub failed!" >> ${LOG}; continue; }
+    echo "$(date): ${REPO} update successful" >> ${LOG}
+done
+echo >> ${LOG}
