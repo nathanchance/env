@@ -320,7 +320,7 @@ function dib() {(
     # Set common parameter lists
     AOSP_GCC="--gcc-toolchain aosp-gcc-arm64 --gcc-32-bit-toolchain aosp-gcc-arm"
     BTG_GCC="--gcc-toolchain btg-gcc-8.2.1-arm64 --gcc-32-bit-toolchain btg-gcc-8.2.1-arm"
-    AOSP_CLANG_8="--compiler clang --clang-toolchain aosp-clang/clang-r339409b ${AOSP_GCC}"
+    AOSP_CLANG_8="--compiler clang --clang-toolchain aosp-clang/clang-r344140 ${AOSP_GCC}"
     AOSP_CLANG_7="--compiler clang --clang-toolchain aosp-clang/clang-r328903 ${AOSP_GCC}"
     AOSP_CLANG_6="--compiler clang --clang-toolchain aosp-clang/clang-4691093 ${AOSP_GCC}"
     CLANG_8="--compiler clang --clang-toolchain clang-8.x ${BTG_GCC}"
@@ -378,7 +378,7 @@ function dib-clang() {(
         "msm-4.9"*) DEFCONFIG=sdm845-perf_defconfig ;;
     esac
 
-    TC_LIST=( "--clang --clang-toolchain aosp-clang/clang-r339409b"
+    TC_LIST=( "--clang --clang-toolchain aosp-clang/clang-r344140"
               "--clang --clang-toolchain aosp-clang/clang-r328903"
               "--clang --clang-toolchain aosp-clang/clang-4691093"
               "" )
