@@ -26,11 +26,28 @@ function bootstrap() {
     # Install packages from Debian repos
     sudo apt update
     sudo apt upgrade -y
-    sudo apt install -y build-essential devscripts git gpg jq mosh most python-pip ssh tmux vim
+    sudo apt install -y build-essential bc bison devscripts flex git gpg jq libssl-dev mosh most python-pip ssh tmux vim
 
     # Install speedtest-cli
     sudo curl -Lo /usr/local/bin/speedtest-cli https://raw.githubusercontent.com/sivel/speedtest-cli/master/speedtest.py
     sudo chmod +x /usr/local/bin/speedtest-cli
+
+    # Install latest version of LLVM/Clang
+    curl https://apt.llvm.org/llvm-snapshot.gpg.key | sudo apt-key add -
+    echo "deb http://apt.llvm.org/stretch/ llvm-toolchain-stretch main" | sudo tee -a /etc/apt/sources.list
+    sudo apt update -qq
+    sudo apt install -y libllvm-8-ocaml-dev libllvm8 llvm-8 llvm-8-dev llvm-8-doc llvm-8-examples llvm-8-runtime lld-8 \
+                        clang-8 clang-tools-8 clang-8-doc libclang-common-8-dev libclang-8-dev libclang1-8 clang-format-8 python-clang-8
+
+    # Build updated ccache
+    CCACHE_VERSION=3.5
+    curl https://www.samba.org/ftp/ccache/ccache-${CCACHE_VERSION}.tar.gz | tar -xzf -
+    cd ccache-${CCACHE_VERSION}
+    ./configure
+    make -j"$(nproc)"
+    sudo make install
+    cd "${OLDPWD}" || { display_error "${OLDPWD} doesn't exist??"; return 1; }
+    rm -rf ccache*
 
     # Setup git
     git config --global core.editor vim
