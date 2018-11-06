@@ -304,7 +304,7 @@ function device_flags() {
             [[ -z ${GCC_FOLDER} ]] && GCC_FOLDER=${TC_FOLDER}/btg-gcc-8.2.1-arm64
             [[ -z ${GCC_32_BIT_FOLDER} ]] && GCC_32_BIT_FOLDER=${TC_FOLDER}/btg-gcc-8.2.1-arm
 
-            [[ -n ${STABLE} ]] && KERNEL_BRANCH=pie-r2
+            [[ -n ${STABLE} ]] && KERNEL_BRANCH=pie-qpr1
 
             MATCH_FLAG="${DEVICE_NAME_FILE}-v${VERSION::1}" ;;
 
