@@ -261,3 +261,10 @@ function lnt() {
 
     rm "${LOG}"
 }
+
+
+# Pull the latest CBL Docker image and run it
+function cbldckr() {
+    docker pull nathanchance/cbl
+    docker run --privileged --rm -ti nathanchance/cbl
+}
