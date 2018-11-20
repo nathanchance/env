@@ -53,7 +53,7 @@ function bkcw() {
         *) display_error "Invalid TARGET_ARCH specified!"; return ;;
     esac
 
-    time PATH=${PATH_OVERRIDE:+"${PATH_OVERRIDE}:"}${TC_FOLDER}/clang-8.x/bin:${TC_FOLDER}/btg-gcc-8.2.1-arm64/bin:${TC_FOLDER}/btg-gcc-8.2.1-arm/bin:${PATH} \
+    time PATH=${PATH_OVERRIDE:+"${PATH_OVERRIDE}:"}${HOME}/cbl/prebuilt/bin:${PATH} \
     make "${JOBS_FLAG}" \
          CC="${CCACHE} clang" \
          HOSTCC=clang \
@@ -268,3 +268,73 @@ function cbldckr() {
     docker pull nathanchance/cbl
     docker run --privileged --rm -ti nathanchance/cbl
 }
+
+
+# Build Clang and lld
+function cblclang() {(
+    CBL=${HOME}/cbl
+    INSTALL_FOLDER=${CBL}/prebuilt
+
+    if [[ ! -d ${CBL}/llvm ]]; then
+        cd "${CBL}" || die "${CBL} doesn't exist!"
+        git clone --single-branch -b master https://git.llvm.org/git/llvm.git
+        git clone --single-branch -b master https://git.llvm.org/git/clang.git llvm/tools/clang
+        git clone --single-branch -b master https://git.llvm.org/git/lld.git llvm/tools/lld
+    else
+        for FOLDER in llvm llvm/tools/clang llvm/tools/lld; do
+            cd "${CBL}/${FOLDER}" || die "Error moving into ${FOLDER}!"
+            git pull --rebase || die "Error updating ${FOLDER}!"
+        done
+    fi
+    cd "${CBL}" && rm -rf llvm/build && mkdir -p llvm/build && cd llvm/build || die "wtf"
+    cmake -G Ninja -DCMAKE_BUILD_TYPE=Release \
+                   -DCMAKE_C_COMPILER=clang \
+                   -DCMAKE_CXX_COMPILER=clang++ \
+				   -DCMAKE_INSTALL_PREFIX="${INSTALL_FOLDER}" \
+                   -DLLVM_ENABLE_BINDINGS=OFF \
+				   -DLLVM_CCACHE_BUILD=ON \
+                   -DLLVM_ENABLE_OCAMLDOC=OFF \
+                   -DLLVM_ENABLE_WARNINGS=OFF \
+                   -DLLVM_INCLUDE_EXAMPLES=OFF \
+                   -DLLVM_INCLUDE_TESTS=OFF \
+                   -DLLVM_INCLUDE_DOCS=OFF \
+                   -DLLVM_TARGETS_TO_BUILD="ARM;AArch64;PowerPC;X86" \
+                   -DLLVM_USE_LINKER=gold ..
+	time ninja clang lld || die "Error building Clang/lld!"
+	rm -rf "${INSTALL_FOLDER}"
+	ninja install || die "Error installing Clang/lld!"
+)}
+
+
+# Build arm{32,64} and powerpc binutils and install them
+function cblbinutils() {(
+    CBL=${HOME}/cbl
+    INSTALL_FOLDER=${CBL}/prebuilt
+
+    if [[ ! -d ${CBL}/binutils ]]; then
+        cd "${CBL}" || die "${CBL} doesn't exist!"
+        git clone --single-branch -b master git://sourceware.org/git/binutils-gdb.git binutils
+        cd binutils || die "binutils clone failed!"
+    else
+        cd "${CBL}"/binutils || die "Error moving into ${CBL}/binutils"
+        git pull --rebase || die "Error updating ${CBL}/binutils"
+    fi
+
+    for TUPLE in arm-linux-gnueabi aarch64-linux-gnu powerpc-linux-gnu; do
+        rm -rf out && mkdir out && cd out || die "wtf"
+        ../configure --target=${TUPLE} \
+                     --program-prefix=${TUPLE}- \
+                     --enable-deterministic-archives \
+                     --enable-plugins \
+                     --enable-relro \
+                     --disable-gdb \
+                     --disable-nls \
+                     --disable-sim \
+                     --disable-werror \
+                     --with-pic \
+                     --with-system-zlib
+        time make "${JOBS_FLAG}" || die "Error building ${TARGET} binutils"
+        make prefix="${CBL}/prebuilt" install || die "Error installing ${TARGET} binutils"
+        cd ..
+    done
+)}
