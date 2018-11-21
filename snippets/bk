@@ -41,7 +41,7 @@ function bk() {
         "polaris"*) PARAMS=( polaris_user_defconfig ) ;;
         "sagit:sagit-o-oss") PARAMS=( sagit_user_defconfig ) ;;
         "tissot:tissot-o-oss"*) PARAMS=( tissot-perf_defconfig ) ;;
-        "wahoo:"*) PARAMS=( wahoo_defconfig -c ) ;;
+        "wahoo:"*) PARAMS=( wahoo_defconfig -c -ct aosp-clang-9.0.0_r12/clang-4053586 ) ;;
         "whyred:whyred-o-oss") PARAMS=( whyred-perf_defconfig ) ;;
 
         # Franco Kernel
