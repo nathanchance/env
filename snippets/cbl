@@ -290,9 +290,9 @@ function cblclang() {(
     cmake -G Ninja -DCMAKE_BUILD_TYPE=Release \
                    -DCMAKE_C_COMPILER=clang \
                    -DCMAKE_CXX_COMPILER=clang++ \
-				   -DCMAKE_INSTALL_PREFIX="${INSTALL_FOLDER}" \
+                   -DCMAKE_INSTALL_PREFIX="${INSTALL_FOLDER}" \
                    -DLLVM_ENABLE_BINDINGS=OFF \
-				   -DLLVM_CCACHE_BUILD=ON \
+                   -DLLVM_CCACHE_BUILD=ON \
                    -DLLVM_ENABLE_OCAMLDOC=OFF \
                    -DLLVM_ENABLE_WARNINGS=OFF \
                    -DLLVM_INCLUDE_EXAMPLES=OFF \
