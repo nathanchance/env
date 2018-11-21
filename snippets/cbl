@@ -270,8 +270,8 @@ function cbldckr() {
 }
 
 
-# Build Clang and lld
-function cblclang() {(
+# Build Clang, lld. and arm{32,64} and powerpc binutils from source
+function cblbinaries() {(
     CBL=${HOME}/cbl
     INSTALL_FOLDER=${CBL}/prebuilt
 
@@ -303,13 +303,6 @@ function cblclang() {(
 	time ninja clang lld || die "Error building Clang/lld!"
 	rm -rf "${INSTALL_FOLDER}"
 	ninja install || die "Error installing Clang/lld!"
-)}
-
-
-# Build arm{32,64} and powerpc binutils and install them
-function cblbinutils() {(
-    CBL=${HOME}/cbl
-    INSTALL_FOLDER=${CBL}/prebuilt
 
     if [[ ! -d ${CBL}/binutils ]]; then
         cd "${CBL}" || die "${CBL} doesn't exist!"
