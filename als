@@ -42,12 +42,12 @@ function failed_steps() {
 
 # Conflict commands
 function post_merge_commands() {
-    local FIRST_STATEMENT SECOND_STATEMENT THIRD_STATEMENT
+    local FIRST_STATEMENT SECOND_STATEMENT THIRD_STATEMENT NEEDS_KV
     if [[ ${1} = "-s" ]]; then
         FIRST_STATEMENT="Post merge steps successfully executed"
         SECOND_STATEMENT="Post merge steps failed"
     else
-        FIRST_STATEMENT="Merge failed but resolution was successful: $(kv)"
+        FIRST_STATEMENT="Merge failed but resolution was successful:"; NEEDS_KV=true
         SECOND_STATEMENT="Merge failed, even after attempting resolution!"
         THIRD_STATEMENT="Resolution was requested but no resolution file was found"
     fi
@@ -73,7 +73,7 @@ function post_merge_commands() {
     if [[ -f ${COMMANDS} ]]; then
         if bash "${COMMANDS}" "${COMMANDS_BRANCH}"; then
             # Log success then push
-            post_git_fm_steps "${FIRST_STATEMENT}"
+            post_git_fm_steps "${FIRST_STATEMENT}${NEEDS_KV:+ $(kv)}"
         else
             # Log failure and conflicts
             log "${LOG_TAG} ${SECOND_STATEMENT}"
