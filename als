@@ -96,7 +96,7 @@ LOG=$(mktemp)
 ALS=${KERNEL_FOLDER}/als
 REPOS_318=( "marlin" "msm-3.18" "op3" "tissot" )
 REPOS_44=( "jasmine" "msm-4.4" "nash" "op5" "sagit" "wahoo" "whyred" )
-REPOS_49=( "bluecross" "msm-4.9" "op6" "polaris" )
+REPOS_49=( "msm-4.9" "op6" "polaris" )
 
 # Parse parameters
 PARAMS="${*}"
