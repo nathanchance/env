@@ -42,7 +42,7 @@ function bootstrap() {
     # Build updated ccache
     CCACHE_VERSION=3.5
     curl https://www.samba.org/ftp/ccache/ccache-${CCACHE_VERSION}.tar.gz | tar -xzf -
-    cd ccache-${CCACHE_VERSION}
+    cd ccache-${CCACHE_VERSION} || { display_error "Downloading or extracting ccache failed!"; return 1; }
     ./configure
     make -j"$(nproc)"
     sudo make install
