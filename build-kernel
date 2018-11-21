@@ -227,7 +227,7 @@ function build() {
     fi
 
     mkavenv
-    kmake ${NEEDS_EXTERNAL_DTC:+ "DTC_EXT=dtc"} |& rg --color=never -v "dts"
+    kmake ${NEEDS_EXTERNAL_DTC:+ DTC_EXT="dtc -f"} |& rg --color=never -v "dts"
     rmvenv
 }
 
