@@ -289,7 +289,9 @@ function cblbinaries() {(
     cd "${CBL}" && rm -rf llvm/build && mkdir -p llvm/build && cd llvm/build || die "wtf"
     cmake -G Ninja -DCMAKE_BUILD_TYPE=Release \
                    -DCMAKE_C_COMPILER=clang \
+                   -DCMAKE_C_FLAGS="-O2 -march=native -mtune=native" \
                    -DCMAKE_CXX_COMPILER=clang++ \
+                   -DCMAKE_CXX_FLAGS="-O2 -march=native -mtune=native" \
                    -DCMAKE_INSTALL_PREFIX="${INSTALL_FOLDER}" \
                    -DLLVM_ENABLE_BINDINGS=OFF \
                    -DLLVM_CCACHE_BUILD=ON \
@@ -325,7 +327,9 @@ function cblbinaries() {(
                      --disable-sim \
                      --disable-werror \
                      --with-pic \
-                     --with-system-zlib
+                     --with-system-zlib \
+                     CFLAGS="-O2 -march=native -mtune=native" \
+                     CXXFLAGS="-O2 -march=native -mtune=native"
         time make "${JOBS_FLAG}" || die "Error building ${TARGET} binutils"
         make prefix="${CBL}/prebuilt" install || die "Error installing ${TARGET} binutils"
         cd ..
