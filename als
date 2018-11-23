@@ -268,7 +268,7 @@ for VERSION in "${VERSIONS[@]}"; do
             fi
 
             # Merge the update, logging success and pushing as necessary
-            if merge-stable "${ALS_PARAMS[@]}"; then
+            if merge-stable "${ALS_PARAMS[@]}" -s; then
                 # Show merged kernel version in log
                 post_git_fm_steps "Merge successful: $(kv)"
 
