@@ -275,24 +275,34 @@ function cblbinaries() {(
     CBL=${HOME}/cbl
     INSTALL_FOLDER=${CBL}/prebuilt
 
+    # Update/clone LLVM/Clang
     if [[ ! -d ${CBL}/llvm ]]; then
-        cd "${CBL}" || die "${CBL} doesn't exist!"
-        git clone --single-branch -b master https://git.llvm.org/git/llvm.git
-        git clone --single-branch -b master https://git.llvm.org/git/clang.git llvm/tools/clang
-        git clone --single-branch -b master https://git.llvm.org/git/lld.git llvm/tools/lld
+        cd  || die "${CBL} doesn't exist!"
+        git -C "${CBL}" clone --single-branch -b master https://git.llvm.org/git/llvm.git
+        git -C "${CBL}" clone --single-branch -b master https://git.llvm.org/git/clang.git llvm/tools/clang
+        git -C "${CBL}" clone --single-branch -b master https://git.llvm.org/git/lld.git llvm/tools/lld
     else
         for FOLDER in llvm llvm/tools/clang llvm/tools/lld; do
-            cd "${CBL}/${FOLDER}" || die "Error moving into ${FOLDER}!"
-            git pull --rebase || die "Error updating ${FOLDER}!"
+            git -C "${CBL}/${FOLDER}" pull --rebase || die "Error updating ${FOLDER}!"
         done
     fi
-    cd "${CBL}" && rm -rf llvm/build && mkdir -p llvm/build && cd llvm/build || die "wtf"
+
+    # Update/clone binutils
+    if [[ ! -d ${CBL}/binutils ]]; then
+        git -C "${CBL}" clone --single-branch -b master git://sourceware.org/git/binutils-gdb.git binutils
+    else
+        git -C "${CBL}"/binutils pull --rebase || die "Error updating ${CBL}/binutils"
+    fi
+
+    # Build Clang and lld
+    { cd "${CBL}" && rm -rf llvm/build && mkdir -p llvm/build && cd llvm/build; } || die "wtf"
     cmake -G Ninja -DCMAKE_BUILD_TYPE=Release \
                    -DCMAKE_C_COMPILER=clang \
                    -DCMAKE_C_FLAGS="-O2 -march=native -mtune=native" \
                    -DCMAKE_CXX_COMPILER=clang++ \
                    -DCMAKE_CXX_FLAGS="-O2 -march=native -mtune=native" \
                    -DCMAKE_INSTALL_PREFIX="${INSTALL_FOLDER}" \
+                   -DLLVM_BINUTILS_INCDIR="${CBL}/binutils/include" \
                    -DLLVM_ENABLE_BINDINGS=OFF \
                    -DLLVM_CCACHE_BUILD=ON \
                    -DLLVM_ENABLE_OCAMLDOC=OFF \
@@ -306,17 +316,10 @@ function cblbinaries() {(
 	rm -rf "${INSTALL_FOLDER}"
 	ninja install || die "Error installing Clang/lld!"
 
-    if [[ ! -d ${CBL}/binutils ]]; then
-        cd "${CBL}" || die "${CBL} doesn't exist!"
-        git clone --single-branch -b master git://sourceware.org/git/binutils-gdb.git binutils
-        cd binutils || die "binutils clone failed!"
-    else
-        cd "${CBL}"/binutils || die "Error moving into ${CBL}/binutils"
-        git pull --rebase || die "Error updating ${CBL}/binutils"
-    fi
-
+    # Build binutils
+    cd "${CBL}"/binutils || die "Error moving into ${CBL}/binutils"
     for TUPLE in arm-linux-gnueabi aarch64-linux-gnu powerpc-linux-gnu; do
-        rm -rf out && mkdir out && cd out || die "wtf"
+        { rm -rf out && mkdir out && cd out; } || die "wtf"
         ../configure --target=${TUPLE} \
                      --program-prefix=${TUPLE}- \
                      --enable-deterministic-archives \
