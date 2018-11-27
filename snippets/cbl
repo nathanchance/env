@@ -320,6 +320,7 @@ function cblbinaries() {(
         ../configure --target=${TUPLE} \
                      --program-prefix=${TUPLE}- \
                      --enable-deterministic-archives \
+                     --enable-gold \
                      --enable-plugins \
                      --enable-relro \
                      --disable-gdb \
