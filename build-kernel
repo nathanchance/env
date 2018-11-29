@@ -33,6 +33,7 @@ function kmake() {
     if [[ -n ${CLANG} ]]; then
         ${MAKE} CC="${CCACHE} clang" \
                 CLANG_TRIPLE=aarch64-linux-gnu- \
+                CLANG_TRIPLE_ARM32=arm-linux-gnueabi- \
                 CROSS_COMPILE="${GCC_CC}" \
                 CROSS_COMPILE_ARM32="${GCC_32_BIT_CC}" \
                 HOSTCC="${CCACHE} clang" \
