@@ -311,7 +311,7 @@ function cblbinaries() {(
                    -DLLVM_INCLUDE_TESTS=OFF \
                    -DLLVM_INCLUDE_DOCS=OFF \
                    -DLLVM_TARGETS_TO_BUILD="ARM;AArch64;PowerPC;X86" \
-                   -DLLVM_USE_LINKER=gold ..
+                   -DLLVM_USE_LINKER=lld ..
 	time ninja || die "Error building Clang/lld!"
 	rm -rf "${INSTALL_FOLDER}"
 	ninja install || die "Error installing Clang/lld!"
