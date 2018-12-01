@@ -31,6 +31,8 @@ function kmake() {
             make ARCH=arm \
                  CC="${CCACHE} clang" \
                  HOSTCC=clang \
+                 HOSTLD=ld.lld \
+                 LD=ld.lld \
                  CROSS_COMPILE=arm-linux-gnueabi- \
                  "${JOBS_FLAG}" \
                  O=out \
