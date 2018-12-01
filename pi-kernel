@@ -27,7 +27,7 @@ function kmake() {
              "${@}"
     else
         if [[ -n ${CLANG} ]]; then
-            PATH="${TC_FOLDER}/clang-8.x/bin:${TC_FOLDER}/btg-gcc-8.2.1-arm/bin:${PATH}" \
+            PATH="${HOME}/cbl/prebuilt/bin:${PATH}" \
             make ARCH=arm \
                  CC="${CCACHE} clang" \
                  HOSTCC=clang \
