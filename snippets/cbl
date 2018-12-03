@@ -240,8 +240,8 @@ function lnt() {
 
         START=$(date +%s)
 
-        # Use lld for arm64 defconfig as it is known to work without any hacks
-        [[ ${ARCH} = "arm64" && ${CONFIG} = "defconfig" ]] && LD=ld.lld
+        # Use lld for arm{32,64} defconfig
+        [[ ${ARCH} =~ arm && ${CONFIG} =~ defconfig ]] && LD=ld.lld
 
         if ! bkc "${ARCH}" "${CONFIG}" KCFLAGS="-Werror" ${LD:+LD="${LD}"}; then
             RESULT=Failed
