@@ -57,6 +57,7 @@ function bkcw() {
     make "${JOBS_FLAG}" \
          CC="${CCACHE} clang" \
          HOSTCC=clang \
+         HOSTLD=ld.lld \
          "${MAKE_FLAGS[@]}" \
          "${@}"
 }
@@ -221,7 +222,7 @@ function babk() {
 
 # linux-next testing
 function lnt() {
-    local ARCH CONFIG CONFIGS LOG MESSAGE RESULT START TIME_STRING
+    local ARCH CONFIG CONFIGS LD LOG MESSAGE RESULT START TIME_STRING
 
     # Logging
     LOG=$(mktemp)
@@ -238,7 +239,15 @@ function lnt() {
         CONFIG=${CONFIG##*:}
 
         START=$(date +%s)
-        if ! bkc "${ARCH}" "${CONFIG}" KCFLAGS="-Werror"; then
+
+        # Use lld for arm64 defconfig as it is known to work without any hacks
+        if [[ ${ARCH} = "arm64" && ${CONFIG} = "defconfig" ]]; then
+            LD=ld.lld
+        else
+            unset LD
+        fi
+
+        if ! bkc "${ARCH}" "${CONFIG}" KCFLAGS="-Werror" ${LD:+LD="${LD}"}; then
             RESULT=Failed
         else
             RESULT=Success
