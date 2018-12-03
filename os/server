@@ -145,7 +145,7 @@ function nf() {
 # kfg [-c <defconfig_file>] [-f <config>] [-e <config>] [-d <config>]
 function kfg() {
     local CONFIG DEFCONFIGS LIST
-    DEFCONFIGS="$(ls arch/arm64/configs/flash*_defconfig 2>/dev/null)"
+    DEFCONFIGS="$(ls arch/${ARCH:=arm64}/configs/flash*_defconfig 2>/dev/null)"
 
     while [[ ${#} -ge 1 ]]; do
         case ${1} in
@@ -159,7 +159,7 @@ function kfg() {
 
                 CONFIG=${1//CONFIG_/}
                 for DEFCONFIG in ${DEFCONFIGS}; do
-                    echo "# CONFIG_${CONFIG} is not set" >> arch/arm64/configs/"$(basename "${DEFCONFIG}")"
+                    echo "# CONFIG_${CONFIG} is not set" >> arch/${ARCH}/configs/"$(basename "${DEFCONFIG}")"
                 done ;;
 
             "-e"|"--enable")
@@ -168,7 +168,7 @@ function kfg() {
                 CONFIG=${1//CONFIG_/}
 
                 for DEFCONFIG in ${DEFCONFIGS}; do
-                    echo "CONFIG_${CONFIG}=y" >> arch/arm64/configs/"$(basename "${DEFCONFIG}")"
+                    echo "CONFIG_${CONFIG}=y" >> arch/${ARCH}/configs/"$(basename "${DEFCONFIG}")"
                 done ;;
 
             "-f"|"--find")
@@ -193,9 +193,9 @@ function kfg() {
                 for DEFCONFIG in ${DEFCONFIGS}; do
                     [[ "${*}" =~ "-fc" ]] && FILE=out/.config || FILE=out/defconfig
                     rm -rf out
-                    make O=out ARCH=arm64 "$(basename "${DEFCONFIG}")"
-                    make O=out ARCH=arm64 savedefconfig
-                    cp -v "${FILE}" arch/arm64/configs/"$(basename "${DEFCONFIG}")"
+                    make O=out ARCH=${ARCH} "$(basename "${DEFCONFIG}")"
+                    make O=out ARCH=${ARCH} savedefconfig
+                    cp -v "${FILE}" arch/${ARCH}/configs/"$(basename "${DEFCONFIG}")"
                 done ;;
         esac
 
