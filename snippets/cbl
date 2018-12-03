@@ -222,7 +222,7 @@ function babk() {
 
 # linux-next testing
 function lnt() {
-    local ARCH CONFIG CONFIGS LD LOG MESSAGE RESULT START TIME_STRING
+    local CONFIG CONFIGS LOG MESSAGE
 
     # Logging
     LOG=$(mktemp)
@@ -234,18 +234,14 @@ function lnt() {
               "x86:defconfig"
               "x86:allyesconfig" )
 
-    for CONFIG in "${CONFIGS[@]}"; do
+    for CONFIG in "${CONFIGS[@]}"; do (
         ARCH=${CONFIG%%:*}
         CONFIG=${CONFIG##*:}
 
         START=$(date +%s)
 
         # Use lld for arm64 defconfig as it is known to work without any hacks
-        if [[ ${ARCH} = "arm64" && ${CONFIG} = "defconfig" ]]; then
-            LD=ld.lld
-        else
-            unset LD
-        fi
+        [[ ${ARCH} = "arm64" && ${CONFIG} = "defconfig" ]] && LD=ld.lld
 
         if ! bkc "${ARCH}" "${CONFIG}" KCFLAGS="-Werror" ${LD:+LD="${LD}"}; then
             RESULT=Failed
@@ -257,7 +253,7 @@ function lnt() {
             echo "${ARCH}:${CONFIG} | ${RESULT} in ${TIME_STRING,,}"
             echo
         } >> "${LOG}"
-    done
+    ) done
 
     MESSAGE="linux$(cat localversion-next) build results: $(deldog "${LOG}")"
 
