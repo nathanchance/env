@@ -282,7 +282,6 @@ function cblbinaries() {(
 
     # Update/clone LLVM/Clang
     if [[ ! -d ${CBL}/llvm ]]; then
-        cd  || die "${CBL} doesn't exist!"
         git -C "${CBL}" clone --single-branch -b master https://git.llvm.org/git/llvm.git
         git -C "${CBL}" clone --single-branch -b master https://git.llvm.org/git/clang.git llvm/tools/clang
         git -C "${CBL}" clone --single-branch -b master https://git.llvm.org/git/lld.git llvm/tools/lld
