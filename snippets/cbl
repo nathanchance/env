@@ -229,6 +229,7 @@ function lnt() {
 
     # Configurations known to build with -Werror
     CONFIGS=( "arm:multi_v7_defconfig"
+              "arm:allyesconfig"
               "arm64:defconfig"
               "arm64:allyesconfig"
               "x86:defconfig"
