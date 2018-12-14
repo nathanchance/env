@@ -21,6 +21,7 @@ SCRIPTS_FOLDER=$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")" || return;
 BIN_FOLDER=${SCRIPTS_FOLDER}/bin
 
 # Common locations amongst scripts
+CBL_FOLDER=${HOME}/cbl
 KERNEL_FOLDER=${HOME}/kernels
 MISC_FOLDER=${HOME}/misc
 REPO_FOLDER=${HOME}/repos
