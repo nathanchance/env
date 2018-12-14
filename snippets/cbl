@@ -222,7 +222,7 @@ function babk() {
 
 # linux-next testing
 function lnt() {
-    local CONFIG CONFIGS LOG MESSAGE
+    local CONFIG CONFIGS LOG MESSAGE TMP
 
     # Logging
     LOG=$(mktemp)
@@ -241,10 +241,16 @@ function lnt() {
 
         START=$(date +%s)
 
+        # Error log
+        TMP=$(mktemp)
+
         # Use lld for arm{32,64} defconfig
         [[ ${ARCH} =~ arm && ${CONFIG} =~ defconfig ]] && LD=ld.lld
 
-        if ! bkc "${ARCH}" "${CONFIG}" KCFLAGS="-Werror" ${LD:+LD="${LD}"}; then
+        # Make sure that if make fails, it gets propgated to the if statement
+        set -o pipefail
+
+        if ! bkc "${ARCH}" "${CONFIG}" KCFLAGS="-Werror" ${LD:+LD="${LD}"} |& rg --color=never "error:|warning:" > "${TMP}"; then
             RESULT=Failed
         else
             RESULT=Success
@@ -252,8 +258,10 @@ function lnt() {
         TIME_STRING=$(format_time "${START}" "$(date +%s)")
         {
             echo "${ARCH}:${CONFIG} | ${RESULT} in ${TIME_STRING,,}"
+            [[ ${RESULT} = "Failed" ]] && cat "${TMP}"
             echo
         } >> "${LOG}"
+        rm "${TMP}"
     ) done
 
     MESSAGE="linux$(cat localversion-next) build results: $(deldog "${LOG}")"
