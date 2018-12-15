@@ -43,6 +43,7 @@ git config --global alias.f 'fetch'
 git config --global alias.fa 'fetch --all'
 git config --global alias.fm 'commit --gpg-sign --file /tmp/mrg-msg' # finish merge
 git config --global alias.fp 'format-patch'
+git config --global alias.fpk 'format-patch --add-header="X-Patchwork-Bot: notify"'
 git config --global alias.kf 'show -s --abbrev-commit --abbrev=12 --format="%h (\"%s\")"' # kernel format
 git config --global alias.lo 'log --oneline'
 git config --global alias.ma 'merge --abort'
