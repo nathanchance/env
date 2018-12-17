@@ -160,7 +160,7 @@ function bkc() {
 
     # Configure kernel
     bkcw "${ARCH}" "${CONFIG}"
-    [[ ${CONFIG} =~ defconfig ]] && extraconfigs
+    [[ ${PWD} =~ cbl && ${CONFIG} =~ defconfig ]] && extraconfigs
 
     # Build kernel
     bkcw "${ARCH}" "${@}" || return 1
