@@ -247,13 +247,14 @@ function lnt() {
         # Use lld for arm{32,64} defconfig
         [[ ${ARCH} =~ arm && ${CONFIG} =~ defconfig ]] && LD=ld.lld
 
-        # Make sure that if make fails, it gets propgated to the if statement
-        set -o pipefail
+        # Build kernel silently
+        bkc "${ARCH}" "${CONFIG}" KCFLAGS="-Werror" ${LD:+LD="${LD}"} |& rg --color=never "error:|warning:" > "${TMP}"
 
-        if ! bkc "${ARCH}" "${CONFIG}" KCFLAGS="-Werror" ${LD:+LD="${LD}"} |& rg --color=never "error:|warning:" > "${TMP}"; then
-            RESULT=Failed
-        else
+        # Make sure that if make fails, it gets propgated to the if statement
+        if [[ ${PIPESTATUS[0]} -eq 0 ]]; then
             RESULT=Success
+        else
+            RESULT=Failed
         fi
         TIME_STRING=$(format_time "${START}" "$(date +%s)")
         {
