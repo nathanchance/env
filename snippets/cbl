@@ -248,7 +248,8 @@ function lnt() {
         [[ ${ARCH} =~ arm && ${CONFIG} =~ defconfig ]] && LD=ld.lld
 
         # Build kernel silently
-        bkc "${ARCH}" "${CONFIG}" KCFLAGS="-Werror" ${LD:+LD="${LD}"} |& rg --color=never "error:|warning:" > "${TMP}"
+        bkc "${ARCH}" "${CONFIG}" KCFLAGS="-Werror" ${LD:+LD="${LD}"} |& \
+        rg --color=never "error:|warning:|undefined" > "${TMP}"
 
         # Make sure that if make fails, it gets propgated to the if statement
         if [[ ${PIPESTATUS[0]} -eq 0 ]]; then
