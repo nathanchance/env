@@ -222,7 +222,14 @@ function babk() {
 
 # linux-next testing
 function lnt() {
-    local CONFIG CONFIGS LOG MESSAGE TMP
+    local CONFIG CONFIGS DEBUG LOG MESSAGE TMP
+
+    while [[ ${#} -ge 1 ]]; do
+        case ${1} in
+            "-d"|"--debug") DEBUG=true ;;
+        esac
+        shift
+    done
 
     # Logging
     LOG=$(mktemp)
@@ -247,9 +254,13 @@ function lnt() {
         # Use lld for arm{32,64} defconfig
         [[ ${ARCH} =~ arm && ${CONFIG} =~ defconfig ]] && LD=ld.lld
 
-        # Build kernel silently
-        bkc "${ARCH}" "${CONFIG}" KCFLAGS="-Werror" ${LD:+LD="${LD}"} |& \
-        rg --color=never "error:|warning:|undefined" > "${TMP}"
+        # Build kernel silently normally
+        if [[ -z ${DEBUG} ]]; then
+            bkc "${ARCH}" "${CONFIG}" KCFLAGS="-Werror" ${LD:+LD="${LD}"} |& \
+            rg --color=never "error:|warning:|undefined" > "${TMP}"
+        else
+            bkc "${ARCH}" "${CONFIG}" KCFLAGS="-Werror" ${LD:+LD="${LD}"}
+        fi
 
         # Make sure that if make fails, it gets propgated to the if statement
         if [[ ${PIPESTATUS[0]} -eq 0 ]]; then
@@ -260,7 +271,7 @@ function lnt() {
         TIME_STRING=$(format_time "${START}" "$(date +%s)")
         {
             echo "${ARCH}:${CONFIG} | ${RESULT} in ${TIME_STRING,,}"
-            [[ ${RESULT} = "Failed" ]] && cat "${TMP}"
+            [[ -z ${DEBUG} && ${RESULT} = "Failed" ]] && cat "${TMP}"
             echo
         } >> "${LOG}"
         rm "${TMP}"
