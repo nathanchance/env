@@ -144,8 +144,9 @@ function nf() {
 # Find config values in a kernel tree
 # kfg [-c <defconfig_file>] [-f <config>] [-e <config>] [-d <config>]
 function kfg() {
-    local CONFIG DEFCONFIGS LIST
-    DEFCONFIGS="$(ls arch/${ARCH:=arm64}/configs/flash*_defconfig 2>/dev/null)"
+    local ARCH CONFIG DEFCONFIGS LIST
+    [[ -z ${ARCH} ]] && ARCH=arm64
+    DEFCONFIGS="$(ls arch/${ARCH}/configs/flash*_defconfig 2>/dev/null)"
 
     while [[ ${#} -ge 1 ]]; do
         case ${1} in
