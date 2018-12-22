@@ -346,22 +346,31 @@ function cblbinaries() {(
 
     # Build binutils
     cd "${CBL_FOLDER}"/binutils || die "Error moving into ${CBL_FOLDER}/binutils"
-    for TUPLE in arm-linux-gnueabi aarch64-linux-gnu powerpc-linux-gnu; do
+    for TUPLE in host arm-linux-gnueabi aarch64-linux-gnu powerpc-linux-gnu; do
         { rm -rf out && mkdir out && cd out; } || die "wtf"
-        ../configure --target=${TUPLE} \
-                     --program-prefix=${TUPLE}- \
-                     --enable-deterministic-archives \
-                     --enable-gold \
-                     --enable-plugins \
-                     --enable-relro \
-                     --disable-gdb \
-                     --disable-nls \
-                     --disable-sim \
-                     --disable-werror \
-                     --with-pic \
-                     --with-system-zlib \
-                     CFLAGS="-O2 -march=native -mtune=native" \
-                     CXXFLAGS="-O2 -march=native -mtune=native"
+        # SC2191: The = here is literal. To assign by index, use ( [index]=value ) with no spaces. To keep as literal, quote it.
+        # shellcheck disable=SC2191
+        COMMON_FLAGS=( --enable-deterministic-archives
+                       --enable-gold
+                       --enable-plugins
+                       --enable-relro
+                       --disable-gdb
+                       --disable-nls
+                       --disable-sim
+                       --disable-werror
+                       --with-pic
+                       --with-system-zlib
+                       CFLAGS="-O2 -march=native -mtune=native"
+                       CXXFLAGS="-O2 -march=native -mtune=native" )
+        case ${TUPLE} in
+            "host")
+                ../configure "${COMMON_FLAGS[@]}"
+                make configure-host ;;
+            *)
+                ../configure --target=${TUPLE} \
+                             --program-prefix=${TUPLE}- \
+                             "${COMMON_FLAGS[@]}" ;;
+        esac
         time make "${JOBS_FLAG}" || die "Error building ${TARGET} binutils"
         make prefix="${INSTALL_FOLDER}" install || die "Error installing ${TARGET} binutils"
         cd ..
