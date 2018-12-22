@@ -140,6 +140,7 @@ CONFIG_RCU_TORTURE_TEST=y" >> .config
     bkcw "${ARCH}" olddefconfig &>/dev/null
 }
 
+
 # Configure and build a kernel with Clang
 function bkc() {
     # Parameters
@@ -324,6 +325,7 @@ function cblclang() {(
                    -DLLVM_USE_LINKER=lld ..
     time ninja || die "Error building Clang/lld!"
 )}
+
 
 # Build Clang, lld. and arm{32,64} and powerpc binutils from source
 function cblbinaries() {(
