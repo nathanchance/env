@@ -292,9 +292,16 @@ function lnt() {
 
 # Pull the latest CBL Docker image and run it
 function cbldckr() {
-    docker pull nathanchance/cbl
-    docker run --privileged --rm -ti nathanchance/cbl
+    docker pull clangbuiltlinux/ubuntu
+    docker run --interactive \
+               --mount type=bind,source="${PWD}",target=/"$(basename "${PWD}")",readonly \
+               --privileged \
+               --rm \
+               --tty \
+               --workdir /"$(basename "${PWD}")" \
+               clangbuiltlinux/ubuntu
 }
+
 
 # Build Clang
 function cblclang() {(
