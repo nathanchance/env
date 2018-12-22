@@ -55,7 +55,7 @@ function post_merge_commands() {
     # Get the appropriate resolution command filename (static mapping because it is not uniform)
     case "${REPO}:${BRANCH}" in
         "bluecross"*|"marlin"*|"msm"*|"polaris"*|"sagit"*|"tissot"*|"wahoo"*|"whyred"*) COMMANDS="${REPO}-commands" ;;
-        "jasmine:"*) COMMANDS="${REPO}-$(echo ${BRANCH} | cut -d - -f 2)-commands" ;;
+        "jasmine:"*) COMMANDS="${REPO}-$(echo "${BRANCH}" | cut -d - -f 2)-commands" ;;
         "nash"*) COMMANDS="nash-oreo-8.0.0-commands" ;;
         "op3:oneplus/QC8996_O_8.0.0") COMMANDS="${REPO}-8.0.0-commands" ;;
         "op5:oneplus/QC8998_O_8.1"|"op6:oneplus/SDM845_O_8.1") COMMANDS="${REPO}-O_8.1-commands" ;;
@@ -150,7 +150,7 @@ while [[ ${#} -ge 1 ]]; do
 done
 
 # If no versions were specified, assume we want all
-[[ -z ${VERSIONS} ]] && VERSIONS=( "3.18" "4.4" "4.9" )
+[[ -z ${VERSIONS[*]} ]] && VERSIONS=( "3.18" "4.4" "4.9" )
 
 # If initialization was requested
 if [[ -n ${INIT} ]]; then
