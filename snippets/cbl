@@ -59,7 +59,7 @@ function bkcw() {
          HOSTCC=clang \
          HOSTLD=ld.lld \
          "${MAKE_FLAGS[@]}" \
-         O="${PWD}/out" \
+         O="${BUILD_FOLDER}" \
          "${@}"
 }
 
@@ -67,7 +67,8 @@ function bkcw() {
 # Extra configs for build/boot testings
 # From https://github.com/groeck/linux-build-test/blob/master/rootfs/scripts/common.sh
 function extraconfigs() {
-    local OUT_FOLDER="${PWD}/out"
+    local OUT_FOLDER="${BUILD_FOLDER}"
+
     echo "CONFIG_EXPERT=y
 CONFIG_DEBUG_KERNEL=y
 CONFIG_LOCK_DEBUGGING_SUPPORT=y
@@ -159,7 +160,7 @@ function bkc() {
     esac
 
     # Clean up
-    git cl -q
+    cbf
 
     # Configure kernel
     bkcw "${ARCH}" "${CONFIG}" modules_prepare
@@ -181,7 +182,7 @@ function bkcf() {
     [[ -z ${FOLDER} ]] && { display_error "FOLDER not specified!"; return 1; }
     [[ ! -d ${FOLDER} ]] && { display_error "${FOLDER} could not be found!"; return 1; }
 
-    bkc "${ARCH}" "${CONFIG}" M="${PWD}/out" src="${FOLDER}" "${@}"
+    bkc "${ARCH}" "${CONFIG}" M="${BUILD_FOLDER}" src="${FOLDER}" "${@}"
 }
 
 
@@ -323,7 +324,7 @@ function cbldckr() {
 
 # Build Clang
 function cblclang() {(
-    { cd "${CBL_FOLDER}" && rm -rf llvm/build && mkdir -p llvm/build && cd llvm/build; } || die "wtf"
+    { cbf && cd "${BUILD_FOLDER}"; } || die "wtf"
     cmake -G Ninja -DCMAKE_BUILD_TYPE=Release \
                    -DCMAKE_C_COMPILER=clang \
                    -DCMAKE_C_FLAGS="-O2 -march=native -mtune=native" \
@@ -339,7 +340,7 @@ function cblclang() {(
                    -DLLVM_INCLUDE_TESTS=OFF \
                    -DLLVM_INCLUDE_DOCS=OFF \
                    -DLLVM_TARGETS_TO_BUILD="ARM;AArch64;PowerPC;X86" \
-                   -DLLVM_USE_LINKER=lld ..
+                   -DLLVM_USE_LINKER=lld "${CBL_FOLDER}"/llvm
     time ninja || die "Error building Clang/lld!"
 )}
 
@@ -373,7 +374,7 @@ function cblbinaries() {(
     # Build binutils
     cd "${CBL_FOLDER}"/binutils || die "Error moving into ${CBL_FOLDER}/binutils"
     for TUPLE in host arm-linux-gnueabi aarch64-linux-gnu powerpc-linux-gnu; do
-        { rm -rf out && mkdir out && cd out; } || die "wtf"
+        { cbf && cd "${BUILD_FOLDER}"; } || die "wtf"
         # SC2191: The = here is literal. To assign by index, use ( [index]=value ) with no spaces. To keep as literal, quote it.
         # shellcheck disable=SC2191
         COMMON_FLAGS=( --enable-deterministic-archives
@@ -390,12 +391,12 @@ function cblbinaries() {(
                        CXXFLAGS="-O2 -march=native -mtune=native" )
         case ${TUPLE} in
             "host")
-                ../configure "${COMMON_FLAGS[@]}"
+                "${CBL_FOLDER}"/binutils/configure "${COMMON_FLAGS[@]}"
                 make configure-host ;;
             *)
-                ../configure --target=${TUPLE} \
-                             --program-prefix=${TUPLE}- \
-                             "${COMMON_FLAGS[@]}" ;;
+                "${CBL_FOLDER}"/binutils/configure --target=${TUPLE} \
+                                                   --program-prefix=${TUPLE}- \
+                                                   "${COMMON_FLAGS[@]}" ;;
         esac
         time make "${JOBS_FLAG}" || die "Error building ${TARGET} binutils"
         make prefix="${INSTALL_FOLDER}" install || die "Error installing ${TARGET} binutils"

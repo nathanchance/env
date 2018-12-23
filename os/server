@@ -72,10 +72,24 @@ function ccache_setup() {
 }
 
 
+# Setup build folder
+function sbf() {
+    [[ ! -d ${BUILD_FOLDER:?} ]] && { sudo mkdir "${BUILD_FOLDER}"; sudo chown -R "nathan:nathan" "${BUILD_FOLDER}"; }
+    [[ -z $(findmnt /mnt/build) ]] && sudo mount -t tmpfs -o "nodev,nosuid,size=10G" tmpfs /mnt/build
+}
+
+
+# Clean build folder
+function cbf() {
+    rm -rf "${BUILD_FOLDER:?}"/*
+}
+
+
 # Additional setup steps for my build server
 function server_setup() {
     server_prompt
     ccache_setup 250
+    sbf
     LOG=$(mktemp); export LOG
     add_to_path_post "${HOME}/.gem/ruby/2.5.0/bin"
     source "${SCRIPTS_FOLDER}"/snippets/bk
