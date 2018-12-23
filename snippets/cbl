@@ -59,6 +59,7 @@ function bkcw() {
          HOSTCC=clang \
          HOSTLD=ld.lld \
          "${MAKE_FLAGS[@]}" \
+         O="${PWD}/out" \
          "${@}"
 }
 
@@ -66,6 +67,7 @@ function bkcw() {
 # Extra configs for build/boot testings
 # From https://github.com/groeck/linux-build-test/blob/master/rootfs/scripts/common.sh
 function extraconfigs() {
+    local OUT_FOLDER="${PWD}/out"
     echo "CONFIG_EXPERT=y
 CONFIG_DEBUG_KERNEL=y
 CONFIG_LOCK_DEBUGGING_SUPPORT=y
@@ -132,10 +134,10 @@ CONFIG_VIRTIO_MMIO=y
 CONFIG_BLK_MQ_VIRTIO=y
 CONFIG_VIRTIO_BLK=y
 CONFIG_VIRTIO_BLK_SCSI=y
-CONFIG_SCSI_VIRTIO=y" >> .config
+CONFIG_SCSI_VIRTIO=y" >> "${OUT_FOLDER}"/.config
 
     [[ ${ARCH} =~ arm ]] && echo "CONFIG_LOCK_TORTURE_TEST=y
-CONFIG_RCU_TORTURE_TEST=y" >> .config
+CONFIG_RCU_TORTURE_TEST=y" >> "${OUT_FOLDER}"/.config
 
     bkcw "${ARCH}" olddefconfig &>/dev/null
 }
@@ -160,11 +162,26 @@ function bkc() {
     git cl -q
 
     # Configure kernel
-    bkcw "${ARCH}" "${CONFIG}"
+    bkcw "${ARCH}" "${CONFIG}" modules_prepare
     [[ ${PWD} =~ cbl && ${CONFIG} =~ defconfig ]] && extraconfigs
 
     # Build kernel
     bkcw "${ARCH}" "${@}" || return 1
+}
+
+
+# Configure and build a folder in the kernel with Clang
+function bkcf() {
+    # Parameters
+    local ARCH CONFIG FOLDER
+    ARCH=${1}; shift
+    CONFIG=${1}; shift
+    FOLDER=${1}; shift
+
+    [[ -z ${FOLDER} ]] && { display_error "FOLDER not specified!"; return 1; }
+    [[ ! -d ${FOLDER} ]] && { display_error "${FOLDER} could not be found!"; return 1; }
+
+    bkc "${ARCH}" "${CONFIG}" M="${PWD}/out" src="${FOLDER}" "${@}"
 }
 
 
