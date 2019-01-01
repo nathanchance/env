@@ -7,6 +7,10 @@
 # Functions used to assist with ClangBuiltLinux development
 
 
+# Universal variables
+CBL_SRC_FOLDER=${CBL_FOLDER}/src
+CBL_USR_FOLDER=${CBL_FOLDER}/usr
+
 # Patch check function
 function pch() {
     [[ -f scripts/checkpatch.pl ]] && git fp -1 --stdout "${@}" | ./scripts/checkpatch.pl
@@ -53,7 +57,7 @@ function bkcw() {
         *) display_error "Invalid TARGET_ARCH specified!"; return ;;
     esac
 
-    time PATH=${PATH_OVERRIDE:+"${PATH_OVERRIDE}:"}${HOME}/cbl/prebuilt/bin:${PATH} \
+    time PATH=${PATH_OVERRIDE:+"${PATH_OVERRIDE}:"}${CBL_USR_FOLDER}/bin:${PATH} \
     make "${JOBS_FLAG}" \
          CC="${CCACHE} clang" \
          HOSTCC=clang \
@@ -330,8 +334,8 @@ function cblclang() {(
                    -DCMAKE_C_FLAGS="-O2 -march=native -mtune=native" \
                    -DCMAKE_CXX_COMPILER=clang++ \
                    -DCMAKE_CXX_FLAGS="-O2 -march=native -mtune=native" \
-                   -DCMAKE_INSTALL_PREFIX="${INSTALL_FOLDER:+"${CBL_FOLDER}/prebuilt"}" \
-                   -DLLVM_BINUTILS_INCDIR="${CBL_FOLDER}/binutils/include" \
+                   -DCMAKE_INSTALL_PREFIX="${INSTALL_FOLDER:+"${CBL_USR_FOLDER}"}" \
+                   -DLLVM_BINUTILS_INCDIR="${CBL_SRC_FOLDER}/binutils/include" \
                    -DLLVM_ENABLE_BINDINGS=OFF \
                    -DLLVM_CCACHE_BUILD=ON \
                    -DLLVM_ENABLE_OCAMLDOC=OFF \
@@ -340,7 +344,7 @@ function cblclang() {(
                    -DLLVM_INCLUDE_TESTS=OFF \
                    -DLLVM_INCLUDE_DOCS=OFF \
                    -DLLVM_TARGETS_TO_BUILD="ARM;AArch64;PowerPC;X86" \
-                   -DLLVM_USE_LINKER=lld "${CBL_FOLDER}"/llvm
+                   -DLLVM_USE_LINKER=lld "${CBL_SRC_FOLDER}"/llvm
     time ninja || die "Error building Clang/lld!"
 )}
 
@@ -348,31 +352,31 @@ function cblclang() {(
 # Build Clang, lld. and arm{32,64} and powerpc binutils from source
 function cblbinaries() {(
     # Update/clone LLVM/Clang
-    if [[ ! -d ${CBL_FOLDER}/llvm ]]; then
-        git -C "${CBL_FOLDER}" clone --single-branch -b master https://git.llvm.org/git/llvm.git
-        git -C "${CBL_FOLDER}" clone --single-branch -b master https://git.llvm.org/git/clang.git llvm/tools/clang
-        git -C "${CBL_FOLDER}" clone --single-branch -b master https://git.llvm.org/git/lld.git llvm/tools/lld
+    if [[ ! -d ${CBL_SRC_FOLDER}/llvm ]]; then
+        git -C "${CBL_SRC_FOLDER}" clone --single-branch -b master https://git.llvm.org/git/llvm.git
+        git -C "${CBL_SRC_FOLDER}" clone --single-branch -b master https://git.llvm.org/git/clang.git llvm/tools/clang
+        git -C "${CBL_SRC_FOLDER}" clone --single-branch -b master https://git.llvm.org/git/lld.git llvm/tools/lld
     else
         for REPO_FOLDER in llvm llvm/tools/clang llvm/tools/lld; do
-            git -C "${CBL_FOLDER}/${REPO_FOLDER}" pull --rebase || die "Error updating ${REPO_FOLDER}!"
+            git -C "${CBL_SRC_FOLDER}/${REPO_FOLDER}" pull --rebase || die "Error updating ${REPO_FOLDER}!"
         done
     fi
 
     # Update/clone binutils
-    if [[ ! -d ${CBL_FOLDER}/binutils ]]; then
-        git -C "${CBL_FOLDER}" clone --single-branch -b master git://sourceware.org/git/binutils-gdb.git binutils
+    if [[ ! -d ${CBL_SRC_FOLDER}/binutils ]]; then
+        git -C "${CBL_SRC_FOLDER}" clone --single-branch -b master git://sourceware.org/git/binutils-gdb.git binutils
     else
-        git -C "${CBL_FOLDER}"/binutils pull --rebase || die "Error updating ${CBL_FOLDER}/binutils"
+        git -C "${CBL_SRC_FOLDER}"/binutils pull --rebase || die "Error updating ${CBL_SRC_FOLDER}/binutils"
     fi
 
     # Build Clang and lld
-    INSTALL_FOLDER=${CBL_FOLDER}/prebuilt
+    INSTALL_FOLDER=${CBL_USR_FOLDER}
     cblclang
     rm -rf "${INSTALL_FOLDER}"
-    ninja -C "${CBL_FOLDER}/llvm/build" install || die "Error installing Clang/lld!"
+    ninja -C "${CBL_SRC_FOLDER}/llvm/build" install || die "Error installing Clang/lld!"
 
     # Build binutils
-    cd "${CBL_FOLDER}"/binutils || die "Error moving into ${CBL_FOLDER}/binutils"
+    cd "${CBL_SRC_FOLDER}"/binutils || die "Error moving into ${CBL_SRC_FOLDER}/binutils"
     for TUPLE in host arm-linux-gnueabi aarch64-linux-gnu powerpc-linux-gnu; do
         { cbf && cd "${BUILD_FOLDER}"; } || die "wtf"
         # SC2191: The = here is literal. To assign by index, use ( [index]=value ) with no spaces. To keep as literal, quote it.
@@ -391,10 +395,10 @@ function cblbinaries() {(
                        CXXFLAGS="-O2 -march=native -mtune=native" )
         case ${TUPLE} in
             "host")
-                "${CBL_FOLDER}"/binutils/configure "${COMMON_FLAGS[@]}"
+                "${CBL_SRC_FOLDER}"/binutils/configure "${COMMON_FLAGS[@]}"
                 make configure-host ;;
             *)
-                "${CBL_FOLDER}"/binutils/configure --target=${TUPLE} \
+                "${CBL_SRC_FOLDER}"/binutils/configure --target=${TUPLE} \
                                                    --program-prefix=${TUPLE}- \
                                                    "${COMMON_FLAGS[@]}" ;;
         esac
