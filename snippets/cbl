@@ -192,42 +192,48 @@ function bldkf() {
 
 # Boot a kernel in QEMU
 function bootk() {
-    local ARCH KERNEL QEMU; ARCH=${1}; shift
+    local ARCH IMAGES_FOLDER KERNEL QEMU; ARCH=${1}; shift
     [[ -z ${ARCH} ]] && { display_error "ARCH not specified!"; return 1; }
+
+    IMAGES_FOLDER=${CBL_FOLDER}/git/ci-master/images
+    [[ ! -d ${IMAGES_FOLDER} ]] && { display_error "${IMAGES_FOLDER} doesn't exist!"; return 1; }
 
     case ${ARCH} in
         "arm")
-            [[ ! -f ../qemu/arm-rootfs.cpio ]] && { display_error "QEMU ramdisk not found! Please build it or use the proper folder."; return 1; }
             IMAGE=zImage
             QEMU=qemu-system-arm
-            QEMU_ARCH_CMDLINE=( -append "console=ttyAMA0"
-                                -initrd ../qemu/arm-rootfs.cpio
-                                -machine virt ) ;;
+            QEMU_ARCH_CMDLINE=( -machine virt
+                                -no-reboot
+                                -drive "file=${IMAGES_FOLDER}/arm/rootfs.ext4,format=raw,id=rootfs,if=none"
+                                -device "virtio-blk-device,drive=rootfs"
+                                -append "console=ttyAMA0 root=/dev/vda" ) ;;
         "arm64")
-            [[ ! -f ../qemu/arm64-rootfs.cpio ]] && { display_error "QEMU ramdisk not found! Please build it or use the proper folder."; return 1; }
-            IMAGE=Image
+            IMAGE=Image.gz
             QEMU=qemu-system-aarch64
-            QEMU_ARCH_CMDLINE=( -append "console=ttyAMA0"
+            QEMU_ARCH_CMDLINE=( -machine virt
                                 -cpu cortex-a57
-                                -initrd ../qemu/arm64-rootfs.cpio
-                                -machine virt
-                                -machine "type=virt" ) ;;
+                                -drive "file=${IMAGES_FOLDER}/arm64/rootfs.ext4,format=raw"
+                                -append "console=ttyAMA0 root=/dev/vda" ) ;;
         "x86")
-            [[ ! -f ../qemu/x86_64-rootfs.img ]] && { display_error "QEMU disk image not found! Please create it or use the proper folder."; return 1; }
             IMAGE=bzImage
             QEMU=qemu-system-x86_64
             QEMU_ARCH_CMDLINE=( -append "root=/dev/sda console=ttyS0"
                                 -cpu host
                                 -d unimp,guest_errors
-                                -drive "file=../qemu/x86_64-rootfs.img,format=raw,if=ide"
+                                -drive "file=${IMAGES_FOLDER}/x86_64/rootfs.ext4,format=raw,if=ide"
                                 -enable-kvm ) ;;
         *) display_error "Invalid ARCH specified!"; return 1 ;;
     esac
 
-    KERNEL=arch/${ARCH}/boot/${IMAGE}
+    KERNEL=${BUILD_FOLDER}/arch/${ARCH}/boot/${IMAGE}
     [[ ! -f ${KERNEL} ]] && { display_error "Kernel doesn't exist! Please build one."; return 1; }
 
-    ${QEMU} "${QEMU_ARCH_CMDLINE[@]}" -kernel "${KERNEL}" -m 4G -nographic -smp 4 "${@}"
+    # Update the images
+    git -C "${IMAGES_FOLDER}" rh --quiet
+    git -C "${IMAGES_FOLDER}" pull --quiet
+
+    # Run the command
+    timeout 2m unbuffer ${QEMU} "${QEMU_ARCH_CMDLINE[@]}" -kernel "${KERNEL}" -m 512m -nographic "${@}"
 }
 
 
