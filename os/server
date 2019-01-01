@@ -81,7 +81,7 @@ function sbf() {
 
 # Clean build folder
 function cbf() {
-    rm -rf "${BUILD_FOLDER:?}"/*
+    find "${BUILD_FOLDER:?}" -mindepth 1 -delete
 }
 
 
