@@ -379,7 +379,7 @@ function bldusr() {(
     INSTALL_FOLDER=${CBL_USR_FOLDER}
     bldcl
     rm -rf "${INSTALL_FOLDER}"
-    ninja -C "${CBL_SRC_FOLDER}/llvm/build" install || die "Error installing Clang/lld!"
+    ninja -C "${BUILD_FOLDER}" install || die "Error installing Clang/lld!"
 
     # Build binutils
     cd "${CBL_SRC_FOLDER}"/binutils || die "Error moving into ${CBL_SRC_FOLDER}/binutils"
