@@ -41,7 +41,7 @@ function sync-patches() {
 
 
 # Build kernel with Clang (wrapper)
-function bkcw() {
+function bldkw() {
     local TARGET_ARCH MAKE_FLAGS
 
     if [[ ! -f Makefile ]]; then
@@ -144,12 +144,12 @@ CONFIG_SCSI_VIRTIO=y" >> "${OUT_FOLDER}"/.config
     [[ ${ARCH} =~ arm ]] && echo "CONFIG_LOCK_TORTURE_TEST=y
 CONFIG_RCU_TORTURE_TEST=y" >> "${OUT_FOLDER}"/.config
 
-    bkcw "${ARCH}" olddefconfig &>/dev/null
+    bldkw "${ARCH}" olddefconfig &>/dev/null
 }
 
 
 # Configure and build a kernel with Clang
-function bkc() {
+function bldk() {
     # Parameters
     local ARCH CONFIG
     ARCH=${1}; shift
@@ -167,16 +167,16 @@ function bkc() {
     cbf
 
     # Configure kernel
-    bkcw "${ARCH}" "${CONFIG}" modules_prepare
+    bldkw "${ARCH}" "${CONFIG}" modules_prepare
     [[ ${PWD} =~ cbl && ${CONFIG} =~ defconfig ]] && extraconfigs
 
     # Build kernel
-    bkcw "${ARCH}" "${@}" || return 1
+    bldkw "${ARCH}" "${@}" || return 1
 }
 
 
 # Configure and build a folder in the kernel with Clang
-function bkcf() {
+function bldkf() {
     # Parameters
     local ARCH CONFIG FOLDER
     ARCH=${1}; shift
@@ -186,12 +186,12 @@ function bkcf() {
     [[ -z ${FOLDER} ]] && { display_error "FOLDER not specified!"; return 1; }
     [[ ! -d ${FOLDER} ]] && { display_error "${FOLDER} could not be found!"; return 1; }
 
-    bkc "${ARCH}" "${CONFIG}" M="${BUILD_FOLDER}" src="${FOLDER}" "${@}"
+    bldk "${ARCH}" "${CONFIG}" M="${BUILD_FOLDER}" src="${FOLDER}" "${@}"
 }
 
 
 # Boot a kernel in QEMU
-function boot-kernel() {
+function bootk() {
     local ARCH KERNEL QEMU; ARCH=${1}; shift
     [[ -z ${ARCH} ]] && { display_error "ARCH not specified!"; return 1; }
 
@@ -237,9 +237,9 @@ function babk() {
     ARCH=${1}; shift
     [[ -z ${ARCH} ]] && { display_error "ARCH not specified!"; return 1; }
 
-    bkc "${ARCH}" defconfig KCFLAGS="-Werror" "${@}"
+    bldk "${ARCH}" defconfig KCFLAGS="-Werror" "${@}"
 
-    boot-kernel "${ARCH}"
+    bootk "${ARCH}"
 }
 
 
@@ -279,10 +279,10 @@ function lnt() {
 
         # Build kernel silently normally
         if [[ -z ${DEBUG} ]]; then
-            bkc "${ARCH}" "${CONFIG}" KCFLAGS="-Werror" ${LD:+LD="${LD}"} |& \
+            bldk "${ARCH}" "${CONFIG}" KCFLAGS="-Werror" ${LD:+LD="${LD}"} |& \
             rg --color=never "error:|warning:|undefined" > "${TMP}"
         else
-            bkc "${ARCH}" "${CONFIG}" KCFLAGS="-Werror" ${LD:+LD="${LD}"}
+            bldk "${ARCH}" "${CONFIG}" KCFLAGS="-Werror" ${LD:+LD="${LD}"}
         fi
 
         # Make sure that if make fails, it gets propgated to the if statement
@@ -314,7 +314,7 @@ function lnt() {
 
 
 # Pull the latest CBL Docker image and run it
-function cbldckr() {
+function dckrrn() {
     docker pull clangbuiltlinux/ubuntu
     docker run --interactive \
                --mount type=bind,source="${PWD}",target=/"$(basename "${PWD}")",readonly \
@@ -327,7 +327,7 @@ function cbldckr() {
 
 
 # Build Clang
-function cblclang() {(
+function bldcl() {(
     { cbf && cd "${BUILD_FOLDER}"; } || die "wtf"
     cmake -G Ninja -DCMAKE_BUILD_TYPE=Release \
                    -DCMAKE_C_COMPILER=clang \
@@ -350,7 +350,7 @@ function cblclang() {(
 
 
 # Build Clang, lld. and arm{32,64} and powerpc binutils from source
-function cblbinaries() {(
+function bldusr() {(
     # Update/clone LLVM/Clang
     if [[ ! -d ${CBL_SRC_FOLDER}/llvm ]]; then
         git -C "${CBL_SRC_FOLDER}" clone --single-branch -b master https://git.llvm.org/git/llvm.git
@@ -371,7 +371,7 @@ function cblbinaries() {(
 
     # Build Clang and lld
     INSTALL_FOLDER=${CBL_USR_FOLDER}
-    cblclang
+    bldcl
     rm -rf "${INSTALL_FOLDER}"
     ninja -C "${CBL_SRC_FOLDER}/llvm/build" install || die "Error installing Clang/lld!"
 
