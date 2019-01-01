@@ -2,7 +2,7 @@
 #
 # SPDX-License-Identifier: GPL-3.0-or-later
 #
-# Copyright (C) 2017-2018 Nathan Chancellor
+# Copyright (C) 2017-2019 Nathan Chancellor
 #
 # Script to build a zImage from a kernel tree
 
