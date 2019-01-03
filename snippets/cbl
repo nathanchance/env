@@ -350,7 +350,7 @@ function bldcl() {(
                    -DLLVM_INCLUDE_TESTS=OFF \
                    -DLLVM_INCLUDE_DOCS=OFF \
                    -DLLVM_TARGETS_TO_BUILD="ARM;AArch64;PowerPC;X86" \
-                   -DLLVM_USE_LINKER=lld "${CBL_SRC_FOLDER}"/llvm
+                   -DLLVM_USE_LINKER=lld "${CBL_SRC_FOLDER}"/llvm > /dev/null
     time ninja || die "Error building Clang/lld!"
 )}
 
@@ -379,7 +379,7 @@ function bldusr() {(
     INSTALL_FOLDER=${CBL_USR_FOLDER}
     bldcl
     rm -rf "${INSTALL_FOLDER}"
-    ninja -C "${BUILD_FOLDER}" install || die "Error installing Clang/lld!"
+    ninja -C "${BUILD_FOLDER}" install > /dev/null || die "Error installing Clang/lld!"
 
     # Build binutils
     cd "${CBL_SRC_FOLDER}"/binutils || die "Error moving into ${CBL_SRC_FOLDER}/binutils"
@@ -395,6 +395,7 @@ function bldusr() {(
                        --disable-nls
                        --disable-sim
                        --disable-werror
+                       --quiet
                        --with-pic
                        --with-system-zlib
                        CFLAGS="-O2 -march=native -mtune=native"
@@ -402,14 +403,14 @@ function bldusr() {(
         case ${TUPLE} in
             "host")
                 "${CBL_SRC_FOLDER}"/binutils/configure "${COMMON_FLAGS[@]}"
-                make configure-host ;;
+                make -s configure-host V=0 ;;
             *)
                 "${CBL_SRC_FOLDER}"/binutils/configure --target=${TUPLE} \
                                                    --program-prefix=${TUPLE}- \
                                                    "${COMMON_FLAGS[@]}" ;;
         esac
-        time make "${JOBS_FLAG}" || die "Error building ${TARGET} binutils"
-        make prefix="${INSTALL_FOLDER}" install || die "Error installing ${TARGET} binutils"
+        time make -s "${JOBS_FLAG}" V=0 || die "Error building ${TARGET} binutils"
+        make -s prefix="${INSTALL_FOLDER}" install V=0 || die "Error installing ${TARGET} binutils"
         cd ..
     done
 )}
