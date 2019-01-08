@@ -61,6 +61,7 @@ function add_to_path_post() {
 
 
 function bash_setup() {
+    shopt -s checkwinsize
     aliases
     "${LOCATION}"_aliases
     tmux_attach
