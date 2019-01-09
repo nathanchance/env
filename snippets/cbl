@@ -243,11 +243,14 @@ function bootk() {
 
 # Build a kernel and boot it
 function babk() {
-    local ARCH
+    local ARCH LD
     ARCH=${1}; shift
     [[ -z ${ARCH} ]] && { display_error "ARCH not specified!"; return 1; }
 
-    bldk "${ARCH}" defconfig KCFLAGS="-Werror" "${@}"
+    # Use lld for arm{32,64}
+    [[ ${ARCH} =~ arm ]] && LD=ld.lld
+
+    bldk "${ARCH}" defconfig KCFLAGS="-Werror" ${LD:+LD="${LD}"} "${@}"
 
     bootk "${ARCH}"
 }
