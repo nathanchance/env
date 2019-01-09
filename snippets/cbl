@@ -151,7 +151,7 @@ CONFIG_RCU_TORTURE_TEST=y" >> "${OUT_FOLDER}"/.config
 # Configure and build a kernel with Clang
 function bldk() {
     # Parameters
-    local ARCH CONFIG
+    local ARCH CONFIG LD
     ARCH=${1}; shift
     CONFIG=${1}; shift
 
@@ -168,10 +168,14 @@ function bldk() {
 
     # Configure kernel
     bldkw "${ARCH}" "${CONFIG}" modules_prepare
-    [[ ${PWD} =~ cbl && ${CONFIG} =~ defconfig ]] && extraconfigs
+    if [[ ${PWD} =~ cbl && ${CONFIG} =~ defconfig ]]; then
+        extraconfigs
+        # Use lld for arm{32,64}
+        [[ ${ARCH} =~ arm ]] && LD=ld.lld
+    fi
 
     # Build kernel
-    bldkw "${ARCH}" "${@}" || return 1
+    bldkw "${ARCH}" ${LD:+LD="${LD}"} "${@}" || return 1
 }
 
 
