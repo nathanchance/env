@@ -280,8 +280,8 @@ function lnt() {
         # Error log
         TMP=$(mktemp)
 
-        # Use lld for arm{32,64} defconfig
-        [[ ${ARCH} =~ arm && ${CONFIG} =~ defconfig ]] && LD=ld.lld
+        # Use lld for arm{32,64}
+        [[ ${ARCH} =~ arm ]] && LD=ld.lld
 
         # Build kernel silently normally
         if [[ -z ${DEBUG} ]]; then
