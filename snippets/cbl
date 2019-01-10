@@ -53,6 +53,7 @@ function bldkw() {
     case "${TARGET_ARCH}" in
         "arm") MAKE_FLAGS=( "ARCH=arm" "CROSS_COMPILE=arm-linux-gnueabi-" ) ;;
         "arm64") MAKE_FLAGS=( "ARCH=arm64" "CROSS_COMPILE=aarch64-linux-gnu-" ) ;;
+        "ppc64le") MAKE_FLAGS=( "ARCH=powerpc" "CROSS_COMPILE=powerpc64le-linux-gnu-" ) ;;
         "x86") MAKE_FLAGS=() ;;
         *) display_error "Invalid TARGET_ARCH specified!"; return ;;
     esac
@@ -159,7 +160,7 @@ function bldk() {
     [[ -z ${ARCH} ]] && { display_error "ARCH not specified!"; return 1; }
     [[ -z ${CONFIG} ]] && { display_error "CONFIG not specified!"; return 1; }
     case ${ARCH} in
-        "arm"|"arm64"|"x86") ;;
+        "arm"|"arm64"|"x86"|"ppc64le") ;;
         *) display_error "Invalid ARCH specifed"; return 1 ;;
     esac
 
@@ -196,7 +197,7 @@ function bldkf() {
 
 # Boot a kernel in QEMU
 function bootk() {
-    local ARCH IMAGES_FOLDER KERNEL QEMU; ARCH=${1}; shift
+    local ARCH IMAGES_FOLDER KERNEL RAM QEMU; ARCH=${1}; shift
     [[ -z ${ARCH} ]] && { display_error "ARCH not specified!"; return 1; }
 
     IMAGES_FOLDER=${CBL_FOLDER}/git/ci-master/images
@@ -218,6 +219,16 @@ function bootk() {
                                 -cpu cortex-a57
                                 -drive "file=${IMAGES_FOLDER}/arm64/rootfs.ext4,format=raw"
                                 -append "console=ttyAMA0 root=/dev/vda" ) ;;
+        "ppc64le")
+            IMAGE=zImage.epapr
+            RAM=2G
+            QEMU=qemu-system-ppc64
+            QEMU_ARCH_CMDLINE=( -machine powernv
+                                -device "ipmi-bmc-sim,id=bmc0"
+                                -device "isa-ipmi-bt,bmc=bmc0,irq=10"
+                                -L /usr/share/qemu -bios skiboot.lid
+                                -initrd "${IMAGES_FOLDER}/ppc64le/rootfs.cpio" )
+            ARCH=powerpc ;;
         "x86")
             IMAGE=bzImage
             QEMU=qemu-system-x86_64
@@ -237,7 +248,7 @@ function bootk() {
     git -C "${IMAGES_FOLDER}" pull --quiet
 
     # Run the command
-    timeout 2m unbuffer ${QEMU} "${QEMU_ARCH_CMDLINE[@]}" -kernel "${KERNEL}" -m 512m -nographic "${@}"
+    timeout 2m unbuffer ${QEMU} "${QEMU_ARCH_CMDLINE[@]}" -kernel "${KERNEL}" -m "${RAM:-512m}" -nographic "${@}"
 }
 
 
@@ -390,7 +401,7 @@ function bldusr() {(
 
     # Build binutils
     cd "${CBL_SRC_FOLDER}"/binutils || die "Error moving into ${CBL_SRC_FOLDER}/binutils"
-    for TUPLE in host arm-linux-gnueabi aarch64-linux-gnu powerpc-linux-gnu; do
+    for TUPLE in host arm-linux-gnueabi aarch64-linux-gnu powerpc-linux-gnu powerpc64le-linux-gnu; do
         { cbf && cd "${BUILD_FOLDER}"; } || die "wtf"
         # SC2191: The = here is literal. To assign by index, use ( [index]=value ) with no spaces. To keep as literal, quote it.
         # shellcheck disable=SC2191
