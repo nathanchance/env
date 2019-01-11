@@ -358,7 +358,7 @@ function bldcl() {(
                    -DCMAKE_C_FLAGS="-O2 -march=native -mtune=native" \
                    -DCMAKE_CXX_COMPILER=clang++ \
                    -DCMAKE_CXX_FLAGS="-O2 -march=native -mtune=native" \
-                   -DCMAKE_INSTALL_PREFIX="${INSTALL_FOLDER:+"${CBL_USR_FOLDER}"}" \
+                   -DCMAKE_INSTALL_PREFIX="${INSTALL_FOLDER:-"${CBL_USR_FOLDER}"}" \
                    -DLLVM_BINUTILS_INCDIR="${CBL_SRC_FOLDER}/binutils/include" \
                    -DLLVM_ENABLE_BINDINGS=OFF \
                    -DLLVM_CCACHE_BUILD=ON \
