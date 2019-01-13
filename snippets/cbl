@@ -342,7 +342,6 @@ function dckrrn() {
     docker pull clangbuiltlinux/ubuntu
     docker run --interactive \
                --mount type=bind,source="${PWD}",target=/"$(basename "${PWD}")",readonly \
-               --privileged \
                --rm \
                --tty \
                --workdir /"$(basename "${PWD}")" \
