@@ -56,7 +56,8 @@ function post_merge_commands() {
     case "${REPO}:${BRANCH}" in
         "bluecross"*|"marlin"*|"msm"*|"polaris"*|"sagit"*|"tissot"*|"wahoo"*|"whyred"*) COMMANDS="${REPO}-commands" ;;
         "jasmine:"*) COMMANDS="${REPO}-$(echo "${BRANCH}" | cut -d - -f 2)-commands" ;;
-        "nash"*) COMMANDS="nash-oreo-8.0.0-commands" ;;
+        "nash:lineage-16.0") COMMANDS="nash-lineage-16.0-commands" ;;
+        "nash:oreo-8.0.0-release-nash") COMMANDS="nash-oreo-8.0.0-commands" ;;
         "op3:oneplus/QC8996_O_8.0.0") COMMANDS="${REPO}-8.0.0-commands" ;;
         "op5:oneplus/QC8998_O_8.1"|"op6:oneplus/SDM845_O_8.1") COMMANDS="${REPO}-O_8.1-commands" ;;
         "op6:oneplus/SDM845_P_9.0") COMMANDS="${REPO}-P_9.0-commands" ;;
@@ -166,7 +167,8 @@ if [[ -n ${INIT} ]]; then
             "msm-3.18"|"msm-4.4"|"msm-4.9")
                 REMOTES=( "upstream:https://source.codeaurora.org/quic/la/kernel/${ITEM}" ) ;;
             "nash")
-                REMOTES=( "upstream:https://github.com/MotorolaMobilityLLC/kernel-msm" ) ;;
+                REMOTES=( "LineageOS:https://github.com/LineageOS/android_kernel_motorola_msm8998"
+                          "upstream:https://github.com/MotorolaMobilityLLC/kernel-msm" ) ;;
             "op3")
                 REMOTES=( "LineageOS:https://github.com/LineageOS/android_kernel_oneplus_msm8996"
                           "omni:https://github.com/omnirom/android_kernel_oneplus_msm8996"
@@ -210,7 +212,7 @@ for VERSION in "${VERSIONS[@]}"; do
             "msm-3.18") BRANCHES=( "kernel.lnx.3.18.r33-rel" "kernel.lnx.3.18.r34-rel" ) ;;
             "msm-4.4") BRANCHES=( "kernel.lnx.4.4.r27-rel" "kernel.lnx.4.4.r34-rel" "kernel.lnx.4.4.r35-rel" ) ;;
             "msm-4.9") BRANCHES=( "kernel.lnx.4.9.r7-rel" "kernel.lnx.4.9.r11-rel" ) ;;
-            "nash") BRANCHES=( "oreo-8.0.0-release-nash:upstream" ) ;;
+            "nash") BRANCHES=( "oreo-8.0.0-release-nash:upstream" "lineage-16.0:LineageOS" ) ;;
             "op3") BRANCHES=( "android-8.1:omni" "lineage-15.1:LineageOS" "oneplus/QC8996_O_8.0.0:upstream" ) ;;
             "op5") BRANCHES=( "android-8.1:omni" "android-9.0:omni" "lineage-15.1" "oneplus/QC8998_O_8.1:upstream" "oneplus/QC8998_O_8.1_Beta:upstream" "oneplus/QC8998_P_9.0_Beta:upstream" ) ;;
             "op6") BRANCHES=( "android-9.0:omni" "lineage-15.1:LineageOS" "oneplus/SDM845_P_9.0:upstream" "oneplus/SDM845_P_9.0_Beta:upstream" ) ;;
