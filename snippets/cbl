@@ -361,6 +361,7 @@ function bldcl() {(
                    -DCMAKE_INSTALL_PREFIX="${INSTALL_FOLDER:-"${CBL_USR_FOLDER}"}" \
                    -DLLVM_BINUTILS_INCDIR="${CBL_SRC_FOLDER}/binutils/include" \
                    -DLLVM_ENABLE_BINDINGS=OFF \
+                   -DLLVM_ENABLE_PROJECTS="clang;lld" \
                    -DLLVM_CCACHE_BUILD=ON \
                    -DLLVM_ENABLE_OCAMLDOC=OFF \
                    -DLLVM_ENABLE_WARNINGS=OFF \
@@ -377,11 +378,11 @@ function bldcl() {(
 function bldusr() {(
     # Update/clone LLVM/Clang
     if [[ ! -d ${CBL_SRC_FOLDER}/llvm ]]; then
+        git -C "${CBL_SRC_FOLDER}" clone --single-branch -b master https://git.llvm.org/git/clang.git
+        git -C "${CBL_SRC_FOLDER}" clone --single-branch -b master https://git.llvm.org/git/lld.git
         git -C "${CBL_SRC_FOLDER}" clone --single-branch -b master https://git.llvm.org/git/llvm.git
-        git -C "${CBL_SRC_FOLDER}" clone --single-branch -b master https://git.llvm.org/git/clang.git llvm/tools/clang
-        git -C "${CBL_SRC_FOLDER}" clone --single-branch -b master https://git.llvm.org/git/lld.git llvm/tools/lld
     else
-        for REPO_FOLDER in llvm llvm/tools/clang llvm/tools/lld; do
+        for REPO_FOLDER in clang lld llvm; do
             git -C "${CBL_SRC_FOLDER}/${REPO_FOLDER}" pull --rebase || die "Error updating ${REPO_FOLDER}!"
         done
     fi
