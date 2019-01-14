@@ -286,6 +286,7 @@ function lnt() {
               "arm:allyesconfig"
               "arm64:defconfig"
               "arm64:allyesconfig"
+              "ppc64le:powernv_defconfig"
               "x86:defconfig"
               "x86:allyesconfig" )
 
