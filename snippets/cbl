@@ -360,6 +360,7 @@ function dckrrn() {
 
 # Build Clang
 function bldcl() {(
+    header "Building Clang"
     { cbf && cd "${BUILD_FOLDER}"; } || die "wtf"
     cmake -G Ninja -DCMAKE_BUILD_TYPE=Release \
                    -DCMAKE_C_COMPILER=clang \
@@ -386,15 +387,24 @@ function bldcl() {(
 function bldusr() {(
     # Update/clone LLVM/Clang
     if [[ ! -d ${CBL_SRC_FOLDER}/llvm-project ]]; then
+        header "Cloning LLVM"
         git -C "${CBL_SRC_FOLDER}" clone --single-branch -b master git://github.com/llvm/llvm-project
     else
-        git -C "${CBL_SRC_FOLDER}"/llvm-project pull --rebase || die "Error updating LLVM!"
+        (
+            header "Updating LLVM"
+            cd "${CBL_SRC_FOLDER}"/llvm-project
+            PREVIOUS_ORIGIN_SHA=$(git show -s --format=%H origin/master)
+            git pull -q --rebase || die "Error updating LLVM!"
+            git lo ${PREVIOUS_ORIGIN_SHA}..$(git show -s --format=%H origin/master)
+        )
     fi
 
     # Update/clone binutils
     if [[ ! -d ${CBL_SRC_FOLDER}/binutils ]]; then
+        header "Cloning binutils"
         git -C "${CBL_SRC_FOLDER}" clone --single-branch -b master git://sourceware.org/git/binutils-gdb.git binutils
     else
+        header "Updating binutils"
         git -C "${CBL_SRC_FOLDER}"/binutils pull --rebase || die "Error updating ${CBL_SRC_FOLDER}/binutils"
     fi
 
@@ -405,6 +415,7 @@ function bldusr() {(
     ninja -C "${BUILD_FOLDER}" install > /dev/null || die "Error installing Clang/lld!"
 
     # Build binutils
+    header "Building binutils"
     cd "${CBL_SRC_FOLDER}"/binutils || die "Error moving into ${CBL_SRC_FOLDER}/binutils"
     for TUPLE in host arm-linux-gnueabi aarch64-linux-gnu powerpc-linux-gnu powerpc64le-linux-gnu; do
         { cbf && cd "${BUILD_FOLDER}"; } || die "wtf"
