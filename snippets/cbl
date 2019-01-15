@@ -377,7 +377,7 @@ function bldcl() {(
                    -DLLVM_INCLUDE_TESTS=OFF \
                    -DLLVM_INCLUDE_DOCS=OFF \
                    -DLLVM_TARGETS_TO_BUILD="ARM;AArch64;PowerPC;X86" \
-                   -DLLVM_USE_LINKER=lld "${CBL_SRC_FOLDER}"/llvm > /dev/null
+                   -DLLVM_USE_LINKER=lld "${CBL_SRC_FOLDER}"/llvm-project/llvm > /dev/null
     time ninja || die "Error building Clang/lld!"
 )}
 
@@ -385,14 +385,10 @@ function bldcl() {(
 # Build Clang, lld. and arm{32,64} and powerpc binutils from source
 function bldusr() {(
     # Update/clone LLVM/Clang
-    if [[ ! -d ${CBL_SRC_FOLDER}/llvm ]]; then
-        git -C "${CBL_SRC_FOLDER}" clone --single-branch -b master https://git.llvm.org/git/clang.git
-        git -C "${CBL_SRC_FOLDER}" clone --single-branch -b master https://git.llvm.org/git/lld.git
-        git -C "${CBL_SRC_FOLDER}" clone --single-branch -b master https://git.llvm.org/git/llvm.git
+    if [[ ! -d ${CBL_SRC_FOLDER}/llvm-project ]]; then
+        git -C "${CBL_SRC_FOLDER}" clone --single-branch -b master git://github.com/llvm/llvm-project
     else
-        for REPO_FOLDER in clang lld llvm; do
-            git -C "${CBL_SRC_FOLDER}/${REPO_FOLDER}" pull --rebase || die "Error updating ${REPO_FOLDER}!"
-        done
+        git -C "${CBL_SRC_FOLDER}"/llvm-project pull --rebase || die "Error updating LLVM!"
     fi
 
     # Update/clone binutils
