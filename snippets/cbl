@@ -42,7 +42,7 @@ function sync-patches() {
 
 # Build kernel with Clang (wrapper)
 function bldkw() {
-    local TARGET_ARCH MAKE_FLAGS
+    local TARGET_ARCH KCONFIG_ALLCONFIG MAKE_FLAGS
 
     if [[ ! -f Makefile ]]; then
         display_error "No Makefile found! Are you in a kernel tree?"
@@ -58,9 +58,17 @@ function bldkw() {
         *) display_error "Invalid TARGET_ARCH specified!"; return ;;
     esac
 
+    # We are only concerned about little endian for ARM right now unless otherwise stated
+    if [[ ${TARGET_ARCH} =~ arm && -z ${BIG_ENDIAN} ]]; then
+        KCONFIG_ALLCONFIG=${BUILD_FOLDER}/little-endian.config
+        echo "CONFIG_CPU_BIG_ENDIAN=n" >> "${KCONFIG_ALLCONFIG}"
+    fi
+
+
     time PATH=${PATH_OVERRIDE:+"${PATH_OVERRIDE}:"}${CBL_USR_FOLDER}/bin:${PATH} \
     make "${JOBS_FLAG}" \
          CC="${CCACHE} clang" \
+         ${KCONFIG_ALLCONFIG:+KCONFIG_ALLCONFIG="${KCONFIG_ALLCONFIG}"} \
          HOSTCC=clang \
          HOSTLD=ld.lld \
          "${MAKE_FLAGS[@]}" \
