@@ -91,7 +91,7 @@ function server_setup() {
     ccache_setup 250
     sbf
     LOG=$(mktemp); export LOG
-    add_to_path_post "${HOME}/.gem/ruby/2.5.0/bin"
+    add_to_path_post "${HOME}/.gem/ruby/2.6.0/bin"
     source "${SCRIPTS_FOLDER}"/snippets/bk
     source "${SCRIPTS_FOLDER}"/snippets/cbl
     source "${SCRIPTS_FOLDER}"/snippets/tc
