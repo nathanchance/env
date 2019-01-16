@@ -441,8 +441,8 @@ function bldusr() {(
                 make -s configure-host V=0 ;;
             *)
                 "${CBL_SRC_FOLDER}"/binutils/configure --target=${TUPLE} \
-                                                   --program-prefix=${TUPLE}- \
-                                                   "${COMMON_FLAGS[@]}" ;;
+                                                       --program-prefix=${TUPLE}- \
+                                                       "${COMMON_FLAGS[@]}" ;;
         esac
         time make -s "${JOBS_FLAG}" V=0 || die "Error building ${TARGET} binutils"
         make -s prefix="${INSTALL_FOLDER}" install V=0 || die "Error installing ${TARGET} binutils"
