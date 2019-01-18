@@ -364,6 +364,7 @@ function bldcl() {(
     { cbf && cd "${BUILD_FOLDER}"; } || die "wtf"
     cmake -Wno-dev \
           -G Ninja \
+          -DCLANG_PLUGIN_SUPPORT=OFF \
           -DCLANG_REPOSITORY_STRING="https://github.com/llvm/llvm-project $(git -C "${CBL_SRC_FOLDER}/llvm-project" show -s --format=%H origin/master)" \
           -DCMAKE_BUILD_TYPE=Release \
           -DCMAKE_C_COMPILER=clang \
@@ -384,6 +385,9 @@ function bldcl() {(
           -DLLVM_USE_LINKER="$(for LD in lld gold bfd; do command -v ld.${LD} &>/dev/null && break; done; echo ${LD})"  \
           "${CBL_SRC_FOLDER}"/llvm-project/llvm > /dev/null
     time ninja || die "Error building Clang/lld!"
+    for BINARY in clang lld llvm-ar llvm-pdbutil llvm-symbolizer llvm-undname sancov; do
+        strip "${BUILD_FOLDER}"/bin/${BINARY}
+    done
 )}
 
 
