@@ -362,24 +362,27 @@ function dckrrn() {
 function bldcl() {(
     header "Building Clang"
     { cbf && cd "${BUILD_FOLDER}"; } || die "wtf"
-    cmake -G Ninja -DCLANG_REPOSITORY_STRING="https://github.com/llvm/llvm-project $(git -C "${CBL_SRC_FOLDER}/llvm-project" show -s --format=%H origin/master)" \
-                   -DCMAKE_BUILD_TYPE=Release \
-                   -DCMAKE_C_COMPILER=clang \
-                   -DCMAKE_C_FLAGS="-O2 -march=native -mtune=native" \
-                   -DCMAKE_CXX_COMPILER=clang++ \
-                   -DCMAKE_CXX_FLAGS="-O2 -march=native -mtune=native" \
-                   -DCMAKE_INSTALL_PREFIX="${INSTALL_FOLDER:-"${CBL_USR_FOLDER}"}" \
-                   -DLLVM_BINUTILS_INCDIR="${CBL_SRC_FOLDER}/binutils/include" \
-                   -DLLVM_ENABLE_BINDINGS=OFF \
-                   -DLLVM_ENABLE_PROJECTS="clang;lld" \
-                   -DLLVM_CCACHE_BUILD=ON \
-                   -DLLVM_ENABLE_OCAMLDOC=OFF \
-                   -DLLVM_ENABLE_WARNINGS=OFF \
-                   -DLLVM_INCLUDE_EXAMPLES=OFF \
-                   -DLLVM_INCLUDE_TESTS=OFF \
-                   -DLLVM_INCLUDE_DOCS=OFF \
-                   -DLLVM_TARGETS_TO_BUILD="ARM;AArch64;PowerPC;X86" \
-                   -DLLVM_USE_LINKER=lld "${CBL_SRC_FOLDER}"/llvm-project/llvm > /dev/null
+    cmake -Wno-dev \
+          -G Ninja \
+          -DCLANG_REPOSITORY_STRING="https://github.com/llvm/llvm-project $(git -C "${CBL_SRC_FOLDER}/llvm-project" show -s --format=%H origin/master)" \
+          -DCMAKE_BUILD_TYPE=Release \
+          -DCMAKE_C_COMPILER=clang \
+          -DCMAKE_C_FLAGS="-O2 -march=native -mtune=native" \
+          -DCMAKE_CXX_COMPILER=clang++ \
+          -DCMAKE_CXX_FLAGS="-O2 -march=native -mtune=native" \
+          -DCMAKE_INSTALL_PREFIX="${INSTALL_FOLDER:-"${CBL_USR_FOLDER}"}" \
+          -DLLVM_BINUTILS_INCDIR="${CBL_SRC_FOLDER}/binutils/include" \
+          -DLLVM_ENABLE_BINDINGS=OFF \
+          -DLLVM_ENABLE_PROJECTS="clang;lld" \
+          -DLLVM_CCACHE_BUILD=ON \
+          -DLLVM_ENABLE_OCAMLDOC=OFF \
+          -DLLVM_ENABLE_WARNINGS=OFF \
+          -DLLVM_INCLUDE_EXAMPLES=OFF \
+          -DLLVM_INCLUDE_TESTS=OFF \
+          -DLLVM_INCLUDE_DOCS=OFF \
+          -DLLVM_TARGETS_TO_BUILD="ARM;AArch64;PowerPC;X86" \
+          -DLLVM_USE_LINKER="$(for LD in lld gold bfd; do command -v ld.${LD} &>/dev/null && break; done; echo ${LD})"  \
+          "${CBL_SRC_FOLDER}"/llvm-project/llvm > /dev/null
     time ninja || die "Error building Clang/lld!"
 )}
 
