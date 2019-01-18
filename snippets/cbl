@@ -377,6 +377,7 @@ function bldcl() {(
           -DLLVM_ENABLE_PROJECTS="clang;lld" \
           -DLLVM_CCACHE_BUILD=ON \
           -DLLVM_ENABLE_OCAMLDOC=OFF \
+          -DLLVM_ENABLE_TERMINFO=OFF \
           -DLLVM_ENABLE_WARNINGS=OFF \
           -DLLVM_INCLUDE_EXAMPLES=OFF \
           -DLLVM_INCLUDE_TESTS=OFF \
