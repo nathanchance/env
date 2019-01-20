@@ -15,7 +15,7 @@ source "$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")" || return; pwd)/.
 case "$(whoami)@$(uname -n)" in
     "chronos@localhost") LOCATION=crosh ;;
     "natechancellor@penguin") LOCATION=crostini ;;
-    "nathan@flashbox") LOCATION=server ;;
+    "nathan@archlinux-ryzen"|"nathan@flashbox") LOCATION=server ;;
     "pi@raspberrypi") LOCATION=pi ;;
 esac
 source "${SCRIPTS_FOLDER}/os/${LOCATION}"
