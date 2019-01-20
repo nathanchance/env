@@ -17,7 +17,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>
 
-if [[ "$( uname -n )" == "flashbox" ]]; then
+if [[ "$(uname -n)" == "flashbox" || "$(uname -n)" == "archlinux-ryzen" ]]; then
     echo "   \$\$\$\$\$\$\$\$\ \$\$\        \$\$\$\$\$\$\   \$\$\$\$\$\$\  \$\$\   \$\$\       \$\$\$\$\$\$\$\   \$\$\$\$\$\$\  \$\$\   \$\$\ "
     echo "   \$\$  _____|\$\$ |      \$\$  __\$\$\ \$\$  __\$\$\ \$\$ |  \$\$ |      \$\$  __\$\$\ \$\$  __\$\$\ \$\$ |  \$\$ |"
     echo "   \$\$ |      \$\$ |      \$\$ /  \$\$ |\$\$ /  \__|\$\$ |  \$\$ |      \$\$ |  \$\$ |\$\$ /  \$\$ |\\$\$\ \$\$  |"
