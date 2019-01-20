@@ -19,24 +19,29 @@ function pch() {
 
 
 # Quilt-like patch management function for Linux
-function sync-patches() {
+function ptchmn() {
     [[ ! -f Makefile ]] && { display_error "You're not in a kernel folder!"; return 1; }
 
     TARGET_FOLDER=${REPO_FOLDER}/patches/linux/$(git cb)
+    [[ ! -d ${TARGET_FOLDER} ]] && { display_error "${TARGET_FOLDER} doesn't exist!"; return 1; }
 
-    [[ ! -d ${TARGET_FOLDER} ]] && { display_error "${TARGET_FOLDER} doesn't exist, create it if this is intentional"; return 1; }
+    case "${1:?}" in
+        "-s"|"--sync")
+            FIRST_HASH=$(git log --reverse --format=%H --committer="$(git config --get user.name) <$(git config --get user.email)>" origin/stable..HEAD | head -n1)
 
-    FIRST_HASH=$(git log --reverse --format=%H --committer="$(git config --get user.name) <$(git config --get user.email)>" origin/stable..HEAD | head -n1)
+            rm "${TARGET_FOLDER}"/*
 
-    rm "${TARGET_FOLDER}"/*
+            git fp -o "${TARGET_FOLDER}" "${FIRST_HASH}"^..HEAD
 
-    git fp -o "${TARGET_FOLDER}" "${FIRST_HASH}"^..HEAD
+            git -C "${TARGET_FOLDER}" aa
 
-    git -C "${TARGET_FOLDER}" aa
+            git -C "${TARGET_FOLDER}" c -m "patches: linux: $(git cb): Sync as of $(git sh -s --format=%h)"
 
-    git -C "${TARGET_FOLDER}" c -m "patches: linux: $(git cb): Sync as of $(git sh -s --format=%h)"
+            git -C "${TARGET_FOLDER}" push ;;
 
-    git -C "${TARGET_FOLDER}" push
+        "-a"|"--apply")
+            git am "${TARGET_FOLDER}"/* ;;
+    esac
 }
 
 
@@ -63,7 +68,6 @@ function bldkw() {
         KCONFIG_ALLCONFIG=${BUILD_FOLDER}/little-endian.config
         echo "CONFIG_CPU_BIG_ENDIAN=n" >> "${KCONFIG_ALLCONFIG}"
     fi
-
 
     time PATH=${PATH_OVERRIDE:+"${PATH_OVERRIDE}:"}${CBL_USR_FOLDER}/bin:${PATH} \
     make "${JOBS_FLAG}" \
