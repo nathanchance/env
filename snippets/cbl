@@ -397,6 +397,7 @@ function bldusr() {(
     # Update/clone LLVM/Clang
     if [[ ! -d ${CBL_SRC_FOLDER}/llvm-project ]]; then
         header "Cloning LLVM"
+        mkdir -p "${CBL_SRC_FOLDER}"
         git -C "${CBL_SRC_FOLDER}" clone --single-branch -b master git://github.com/llvm/llvm-project
     else
         (
