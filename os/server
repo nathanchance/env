@@ -45,7 +45,11 @@ function bootstrap() {(
     [[ ! -d ${KEYS} ]] && die "${KEYS} doesn't exist, create it, and copy keys!"
 
     # Setup folders that will be used
-    mkdir -p "${CBL_FOLDER}" "${KERNEL_FOLDER}"/sony "${MISC_FOLDER}"/building "${REPO_FOLDER}" "${TC_FOLDER}" || die "Can't create folders, wtf?"
+    mkdir -p "${CBL_FOLDER}"/{git,mirrors,src} \
+             "${KERNEL_FOLDER}"/sony \
+             "${MISC_FOLDER}"/building \
+             "${REPO_FOLDER}" \
+             "${TC_FOLDER}" || die "Can't create folders, wtf?"
 
     # Enable multilib
     sudo sed -i "/\[multilib\]/,/Include/"'s/^#//' /etc/pacman.conf
@@ -157,7 +161,7 @@ function bootstrap() {(
     # https://www.kernel.org/cloning-linux-from-a-bundle.html
     (
         cd "${HOME}"/cbl || die "wtf?"
-        for COMBO in torvalds/linux.git:linux next/linux-next.git:linux-next stable/linux.git:linux-stable; do
+        for COMBO in torvalds/linux.git:linux torvald/linux.git:mirrors/linux next/linux-next.git:linux-next stable/linux.git:linux-stable; do
             FOLDER=${COMBO#*:}
             URL=${COMBO%:*}
             wget -c https://git.kernel.org/pub/scm/linux/kernel/git/"${URL}"/clone.bundle
@@ -171,6 +175,18 @@ function bootstrap() {(
             )
             rm -rf clone.bundle
         done
+    )
+
+    # Download CBL stuff
+    (
+        cd "${HOME}"/cbl/git || die "wtf?"
+        git clone git@github.com:ClangBuiltLinux/continuous-integration.git ci
+        git clone git@github.com:ClangBuiltLinux/continuous-integration.git ci-master
+        git clone git@github.com:ClangBuiltLinux/dockerimage.git
+        for FOLDER in ci dockerimage; do (
+            cd "${FOLDER}"
+            hub fork
+        ) done
     )
 
     # Clone kernel-common
