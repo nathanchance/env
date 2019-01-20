@@ -19,7 +19,7 @@ function pch() {
 
 
 # Quilt-like patch management function for Linux
-function ptchmn() {
+function ptchmn() {(
     [[ ! -f Makefile ]] && { display_error "You're not in a kernel folder!"; return 1; }
 
     TARGET_FOLDER=${REPO_FOLDER}/patches/linux/$(git cb)
@@ -42,7 +42,21 @@ function ptchmn() {
         "-a"|"--apply")
             git am "${TARGET_FOLDER}"/* ;;
     esac
-}
+)}
+
+
+# Download and apply an LLVM/Clang/lld patch
+function phabap() {(
+    [[ ! -f llvm ]] && { display_error "You're not in the llvm-project folder!"; return 1; }
+
+    REVISION=${1:?}
+    FOLDER=${2:?}
+
+    curl -LSs "https://reviews.llvm.org/${REVISION}?download=true" | git ap -p0 --directory="${FOLDER}" || return 1
+    git ac -m "${REVISION}
+
+Link: https://reviews.llvm.org/${REVISION}"
+)}
 
 
 # Build kernel with Clang (wrapper)
