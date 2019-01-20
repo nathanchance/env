@@ -58,6 +58,9 @@ function bootstrap() {(
     sudo sed -i "s/#MAKEFLAGS=\"-j2\"/MAKEFLAGS=\"-j$(nproc --all)\"/g" /etc/makepkg.conf
     sudo sed -i 's/!ccache/ccache/g' /etc/makepkg.conf
 
+    # Set the correct time
+    sudo timedatectl set-timezone America/Phoenix
+
     # Install required binaries
     sudo pacman -Syyu --noconfirm || die "Error updating packages!"
     sudo pacman -S --needed --noconfirm aarch64-linux-gnu-gcc \
