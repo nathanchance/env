@@ -121,7 +121,7 @@ function crosh_aliases() {
     alias fls='cd ${HOME}/Downloads/persistent/files'
 
     # Connect to my server
-    alias mshfb='mosh nathan@nathanchance.me'
+    alias mshsvr='mosh nathan@${RYZEN_IP}'
 }
 
 
