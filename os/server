@@ -84,9 +84,12 @@ function bootstrap() {(
                                         perl-authen-sasl \
                                         perl-mime-tools \
                                         perl-net-smtp-ssl \
+                                        qemu-headless-arch-extra \
                                         ripgrep \
                                         rubygems \
-                                        tmux || die "Error installing packages!"
+                                        "shellcheck" \
+                                        tmux \
+                                        unbuffer || die "Error installing packages!"
 
     # Install hub
     HUB_VERSION=2.7.1
@@ -109,6 +112,7 @@ function bootstrap() {(
         echo "max-cache-ttl 86400"
     } > "${HOME}"/.gnupg/gpg-agent.conf
     gpg-connect-agent reloadagent /bye
+    rm -rf "${KEYS}"
 
     # Configure git
     git config --global commit.gpgsign true
@@ -120,10 +124,6 @@ function bootstrap() {(
     git config --global user.name "Nathan Chancellor"
     git config --global user.email "natechancellor@gmail.com"
     git config --global user.signingkey 2437CB76E544CB6AB3D9DFD399739260CB6CB716
-
-    # Start Docker
-    sudo gpasswd -a nathan docker
-    sudo systemctl enable --now docker.service
 
     # Install yay and AUR packages
     cd "${MISC_FOLDER}"/building || die "wtf?"
@@ -171,15 +171,16 @@ function bootstrap() {(
                 git remote remove origin
                 git remote add origin git://git.kernel.org/pub/scm/linux/kernel/git/"${URL}"
                 git fetch origin
-                git reset --hard origin/$(git rev-parse --abbrev-ref HEAD)
+                git reset --hard origin/"$(git rev-parse --abbrev-ref HEAD)"
+                [[ "${FOLDER}" =~ mirrors ]] && git remote add github git@github.com:ClangBuiltLinux/linux.git
             )
             rm -rf clone.bundle
         done
     )
 
-    # Download CBL stuff
+    # Download other CBL things
     (
-        cd "${HOME}"/cbl/git || die "wtf?"
+        cd "${CBL_FOLDER}"/git || die "wtf?"
         git clone git@github.com:ClangBuiltLinux/continuous-integration.git ci
         git clone git@github.com:ClangBuiltLinux/continuous-integration.git ci-master
         git clone git@github.com:ClangBuiltLinux/dockerimage.git
@@ -187,6 +188,14 @@ function bootstrap() {(
             cd "${FOLDER}"
             hub fork
         ) done
+
+        cd "${CBL_FOLDER}"/mirrors || die "wtf?"
+        git clone git://github.com/llvm/llvm-project llvm
+
+        cd "${CBL_FOLDER}"/src
+        git clone --single-branch -b master git://github.com/llvm/llvm-project
+        git -C llvm-project remote add github git@github.com:ClangBuiltLinux/llvm-project.git
+        git clone --single-branch -b master git://sourceware.org/git/binutils-gdb.git binutils
     )
 
     # Clone kernel-common
@@ -194,6 +203,10 @@ function bootstrap() {(
 
     # Clone sonyxperiadev/kernel
     git -C "${KERNEL_FOLDER}/sony" clone git://github.com/sonyxperiadev/kernel
+
+    # Start Docker
+    sudo gpasswd -a nathan docker
+    sudo systemctl enable --now docker.service
 
     # Install gist
     gem install gist
@@ -205,7 +218,9 @@ function bootstrap() {(
     echo
     echo "1. Add ${HOME}/.botinfo and ${HOME}/.muttrc"
     echo
-    echo "2. cd && source ~/.bashrc"
+    echo "2. EDITOR=vim crontab -e"
+    echo
+    echo "3. cd && source ~/.bashrc"
     echo
 ) || return 1; }
 
