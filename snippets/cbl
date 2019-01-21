@@ -45,6 +45,16 @@ function ptchmn() {(
 )}
 
 
+# Rebase a linux-next branch
+function rbln() {(
+    [[ ! -f Makefile ]] && { display_error "You're not in a kernel folder!"; return 1; }
+    FIRST_HASH=$(git log --reverse --format=%H --committer="$(git config --get user.name) <$(git config --get user.email)>" origin/stable..HEAD | head -n1)
+    SECOND_HASH=$(git show -s --format=%H "$(git cb)")
+    git rh origin/master
+    git cherry-pick --gpg-sign "${FIRST_HASH}^..${SECOND_HASH}"
+)}
+
+
 # Download and apply an LLVM/Clang/lld patch
 function phabap() {(
     [[ ! -f llvm ]] && { display_error "You're not in the llvm-project folder!"; return 1; }
