@@ -72,9 +72,10 @@ function bootstrap() {(
                                         cmake \
                                         docker \
                                         fd \
+                                        git \
                                         htop \
                                         hugo \
-                                        git \
+                                        iputils \
                                         jq \
                                         lld \
                                         mosh \
@@ -111,8 +112,8 @@ function bootstrap() {(
     gpg --import "${KEYS}"/{public*,private*}.asc || die "Error installing gpg keys!"
     gpg --import-ownertrust "${KEYS}"/ownertrust*.asc || die "Error installing gpg ownertrust!"
     {
-        echo "default-cache-ttl 3600"
-        echo "max-cache-ttl 86400"
+        echo "default-cache-ttl 604800"
+        echo "max-cache-ttl 2419200"
     } > "${HOME}"/.gnupg/gpg-agent.conf
     gpg-connect-agent reloadagent /bye
     rm -rf "${KEYS}"
