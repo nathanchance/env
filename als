@@ -325,7 +325,6 @@ done
 
 URL=$(deldog "${LOG}")
 
-clear
 echo
 echo "${BOLD}ALS merge results:${RST} ${URL}"
 echo
