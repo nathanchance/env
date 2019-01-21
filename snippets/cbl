@@ -365,7 +365,6 @@ function lnt() {
 
     tg_msg "${MESSAGE}"
 
-    clear
     echo
     echo "${MESSAGE}"
     echo
