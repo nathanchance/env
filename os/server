@@ -85,6 +85,7 @@ function bootstrap() {(
                                         neofetch \
                                         ninja \
                                         openssl \
+                                        pacman-contrib \
                                         perl-authen-sasl \
                                         perl-mime-tools \
                                         perl-net-smtp-ssl \
