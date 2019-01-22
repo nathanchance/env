@@ -419,6 +419,43 @@ function bldcl() {(
 )}
 
 
+# Build binutils
+function bldbn() {(
+    header "Building binutils"
+    cd "${CBL_SRC_FOLDER}"/binutils || die "Error moving into ${CBL_SRC_FOLDER}/binutils"
+    for TUPLE in host arm-linux-gnueabi aarch64-linux-gnu powerpc-linux-gnu powerpc64le-linux-gnu; do
+        { cbf && cd "${BUILD_FOLDER}"; } || die "wtf"
+        # SC2191: The = here is literal. To assign by index, use ( [index]=value ) with no spaces. To keep as literal, quote it.
+        # shellcheck disable=SC2191
+        COMMON_FLAGS=( --enable-deterministic-archives
+                       --enable-gold
+                       --enable-plugins
+                       --enable-relro
+                       --disable-gdb
+                       --disable-nls
+                       --disable-sim
+                       --disable-werror
+                       --quiet
+                       --with-pic
+                       --with-system-zlib
+                       CFLAGS="-O2 -march=native -mtune=native"
+                       CXXFLAGS="-O2 -march=native -mtune=native" )
+        case ${TUPLE} in
+            "host")
+                "${CBL_SRC_FOLDER}"/binutils/configure "${COMMON_FLAGS[@]}"
+                make -s configure-host V=0 ;;
+            *)
+                "${CBL_SRC_FOLDER}"/binutils/configure --target=${TUPLE} \
+                                                       --program-prefix=${TUPLE}- \
+                                                       "${COMMON_FLAGS[@]}" ;;
+        esac
+        time make -s "${JOBS_FLAG}" V=0 || die "Error building ${TARGET} binutils"
+        make -s prefix="${INSTALL_FOLDER:-"${CBL_USR_FOLDER}"}" install V=0 || die "Error installing ${TARGET} binutils"
+        cd ..
+    done
+)}
+
+
 # Build Clang, lld. and arm{32,64} and powerpc binutils from source
 function bldusr() {(
     # Update/clone LLVM/Clang
@@ -452,36 +489,5 @@ function bldusr() {(
     ninja -C "${BUILD_FOLDER}" install > /dev/null || die "Error installing Clang/lld!"
 
     # Build binutils
-    header "Building binutils"
-    cd "${CBL_SRC_FOLDER}"/binutils || die "Error moving into ${CBL_SRC_FOLDER}/binutils"
-    for TUPLE in host arm-linux-gnueabi aarch64-linux-gnu powerpc-linux-gnu powerpc64le-linux-gnu; do
-        { cbf && cd "${BUILD_FOLDER}"; } || die "wtf"
-        # SC2191: The = here is literal. To assign by index, use ( [index]=value ) with no spaces. To keep as literal, quote it.
-        # shellcheck disable=SC2191
-        COMMON_FLAGS=( --enable-deterministic-archives
-                       --enable-gold
-                       --enable-plugins
-                       --enable-relro
-                       --disable-gdb
-                       --disable-nls
-                       --disable-sim
-                       --disable-werror
-                       --quiet
-                       --with-pic
-                       --with-system-zlib
-                       CFLAGS="-O2 -march=native -mtune=native"
-                       CXXFLAGS="-O2 -march=native -mtune=native" )
-        case ${TUPLE} in
-            "host")
-                "${CBL_SRC_FOLDER}"/binutils/configure "${COMMON_FLAGS[@]}"
-                make -s configure-host V=0 ;;
-            *)
-                "${CBL_SRC_FOLDER}"/binutils/configure --target=${TUPLE} \
-                                                       --program-prefix=${TUPLE}- \
-                                                       "${COMMON_FLAGS[@]}" ;;
-        esac
-        time make -s "${JOBS_FLAG}" V=0 || die "Error building ${TARGET} binutils"
-        make -s prefix="${INSTALL_FOLDER}" install V=0 || die "Error installing ${TARGET} binutils"
-        cd ..
-    done
+    bldbn
 )}
