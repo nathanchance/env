@@ -89,6 +89,8 @@ function bootstrap() {(
                                         perl-authen-sasl \
                                         perl-mime-tools \
                                         perl-net-smtp-ssl \
+                                        python \
+                                        python-pip \
                                         qemu-headless-arch-extra \
                                         ripgrep \
                                         rubygems \
