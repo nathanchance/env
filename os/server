@@ -71,6 +71,7 @@ function bootstrap() {(
                                         ccache \
                                         cmake \
                                         docker \
+                                        dtc \
                                         fd \
                                         git \
                                         htop \
