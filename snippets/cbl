@@ -377,15 +377,15 @@ function lnt() {
 
 
 # Pull the latest CBL Docker image and run it
-function dckrrn() {
-    docker pull clangbuiltlinux/ubuntu
+function dckrrn() {(
+    docker pull "${DOCKER_IMAGE:=clangbuiltlinux/ubuntu}"
     docker run --interactive \
                --mount type=bind,source="${PWD}",target=/"$(basename "${PWD}")",readonly \
                --rm \
                --tty \
                --workdir /"$(basename "${PWD}")" \
-               clangbuiltlinux/ubuntu
-}
+               "${DOCKER_IMAGE}"
+)}
 
 
 # Build Clang
