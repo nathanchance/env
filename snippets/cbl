@@ -472,7 +472,7 @@ function bldusr() {(
             cd "${CBL_SRC_FOLDER}"/llvm-project || die "Error moving into llvm-project!"
             PREVIOUS_ORIGIN_SHA=$(git show -s --format=%H origin/master)
             git pull -q --rebase || die "Error updating LLVM!"
-            git lo "${PREVIOUS_ORIGIN_SHA}..$(git show -s --format=%H origin/master)"
+            git --no-pager lo "${PREVIOUS_ORIGIN_SHA}..$(git show -s --format=%H origin/master)"
         )
     fi
 
