@@ -384,7 +384,7 @@ function dckrrn() {(
                --rm \
                --tty \
                --workdir /"$(basename "${PWD}")" \
-               "${DOCKER_IMAGE}"
+               "${DOCKER_IMAGE}" "${@}"
 )}
 
 
