@@ -155,6 +155,7 @@ function bootstrap() {(
         bash "${DOTFILES}"/server/bashrc.sh
         cp -v "${DOTFILES}"/server/.tmux.conf "${HOME}"
         cp -rv "${DOTFILES}"/common/vim "${HOME}"/.vim
+        curl -LSs https://www.vim.org/scripts/download_script.php?src_id=20912 > "${HOME}"/.vim/plugin/git_patch_tags.vim
         mv -v "${HOME}"/.vim/.vimrc "${HOME}"
         sudo cp -v "${DOTFILES}"/server/motd.sh /etc/profile.d
     ) || die "Error installing dotfiles"
