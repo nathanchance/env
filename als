@@ -207,7 +207,7 @@ for VERSION in "${VERSIONS[@]}"; do
         # Map all of the branches of the repo to an upstream remote (if relevant)
         case ${REPO} in
             "bluecross") BRANCHES=( "android-msm-bluecross-4.9" ) ;;
-            "jasmine") BRANCHES=( "jasmine-o-oss" "jasmine-p-oss" ) ;;
+            "jasmine") BRANCHES=( "jasmine-o-oss:upstream" "jasmine-p-oss:upstream" ) ;;
             "marlin") BRANCHES=( "android-msm-marlin-3.18" ) ;;
             "msm-3.18") BRANCHES=( "kernel.lnx.3.18.r33-rel" "kernel.lnx.3.18.r34-rel" ) ;;
             "msm-4.4") BRANCHES=( "kernel.lnx.4.4.r27-rel" "kernel.lnx.4.4.r34-rel" "kernel.lnx.4.4.r35-rel" ) ;;
