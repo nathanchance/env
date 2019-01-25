@@ -994,7 +994,7 @@ function fkba() {(
 function symlink-commands() {(
     case ${1} in
         "3.18") FILES=( "marlin" "msm-3.18" "op3-android-8.1" "op3-lineage-15.1" "op3-lineage-16.0" "op3-8.0.0" "tissot" ) ;;
-        "4.4") FILES=( "jasmine-o" "jasmine-p" "msm-4.4" "nash-oreo-8.0.0" "nash-lineage-15.1" "op5-android-8.1" "op5-android-9.0" "op5-lineage-15.1" "op5-O_8.1" "op5-O_8.1_Beta" "op5-P_9.0_Beta" "sagit" "wahoo" "whyred" ) ;;
+        "4.4") FILES=( "jasmine-o" "jasmine-p" "msm-4.4" "nash-oreo-8.0.0" "nash-lineage-16.0" "op5-android-8.1" "op5-android-9.0" "op5-lineage-15.1" "op5-O_8.1" "op5-P_9.0" "op5-O_8.1_Beta" "op5-P_9.0_Beta" "sagit" "wahoo" "whyred" ) ;;
         "4.9") FILES=( "bluecross" "msm-4.9" "op6-android-9.0" "op6-lineage-15.1" "op6-P_9.0" "op6-P_9.0_Beta" "polaris" ) ;;
     esac
 
