@@ -299,29 +299,37 @@ function ccache_setup() {
 }
 
 
-# Setup build folder
+# Setup build folders
 function sbf() {
     [[ ! -d ${BUILD_FOLDER:?} ]] && { sudo mkdir "${BUILD_FOLDER}"; sudo chown -R "nathan:nathan" "${BUILD_FOLDER}"; }
-    [[ -z $(findmnt /mnt/build) ]] && sudo mount -t tmpfs -o "nodev,nosuid,size=10G" tmpfs /mnt/build
+    [[ -z $(findmnt "${BUILD_FOLDER}") ]] && sudo mount -t tmpfs -o "nodev,nosuid,size=10G" tmpfs "${BUILD_FOLDER}"
+    type -p crbf && crbf
 }
 
 
 # Clean build folder
-function cbf() {
-    find "${BUILD_FOLDER:?}" -mindepth 1 -delete
-}
+function cbf() {(
+    case "${1}" in
+        b) FTC=${BINUTILS_BUILD_FOLDER:?} ;;
+        c) FTC=${CLANG_BUILD_FOLDER:?} ;;
+        k) FTC=${KERNEL_BUILD_FOLDER:?} ;;
+        *) FTC=${BUILD_FOLDER} ;;
+    esac
+    find "${FTC:?}" -mindepth 1 -delete
+    type -p crbf && crbf
+)}
 
 
 # Additional setup steps for my build server
 function server_setup() {
     server_prompt
     ccache_setup 250
-    sbf
     LOG=$(mktemp); export LOG
     add_to_path_post "${HOME}/.gem/ruby/2.6.0/bin"
     source "${SCRIPTS_FOLDER}"/snippets/bk
     source "${SCRIPTS_FOLDER}"/snippets/cbl
     source "${SCRIPTS_FOLDER}"/snippets/tc
+    sbf
     ( gpg_available )
 }
 

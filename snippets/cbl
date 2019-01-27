@@ -11,6 +11,17 @@
 CBL_SRC_FOLDER=${CBL_FOLDER}/src
 CBL_USR_FOLDER=${CBL_FOLDER}/usr
 
+
+# Create build folders
+function crbf() {
+    local ITEM
+    for ITEM in binutils clang kernel; do
+        export ${ITEM^^}_BUILD_FOLDER=${BUILD_FOLDER}/${ITEM}
+        mkdir -p "${BUILD_FOLDER}/${ITEM}"
+    done
+}
+
+
 # Patch check function
 function pch() {
     [[ -f scripts/checkpatch.pl ]] && git fp -1 --stdout "${@}" | ./scripts/checkpatch.pl
@@ -89,7 +100,7 @@ function bldkw() {
 
     # We are only concerned about little endian for ARM right now unless otherwise stated
     if [[ ${TARGET_ARCH} =~ arm && -z ${BIG_ENDIAN} ]]; then
-        KCONFIG_ALLCONFIG=${BUILD_FOLDER}/little-endian.config
+        KCONFIG_ALLCONFIG=${KERNEL_BUILD_FOLDER}/little-endian.config
         echo "CONFIG_CPU_BIG_ENDIAN=n" >> "${KCONFIG_ALLCONFIG}"
     fi
 
@@ -100,7 +111,7 @@ function bldkw() {
          HOSTCC=clang \
          HOSTLD=ld.lld \
          "${MAKE_FLAGS[@]}" \
-         O="${BUILD_FOLDER}" \
+         O="${KERNEL_BUILD_FOLDER}" \
          "${@}"
 }
 
@@ -108,7 +119,7 @@ function bldkw() {
 # Extra configs for build/boot testings
 # From https://github.com/groeck/linux-build-test/blob/master/rootfs/scripts/common.sh
 function extraconfigs() {
-    local OUT_FOLDER="${BUILD_FOLDER}"
+    local OUT_FOLDER="${KERNEL_BUILD_FOLDER}"
 
     echo "CONFIG_EXPERT=y
 CONFIG_DEBUG_KERNEL=y
@@ -201,7 +212,7 @@ function bldk() {
     esac
 
     # Clean up
-    cbf
+    cbf k
 
     # Configure kernel
     bldkw "${ARCH}" "${CONFIG}" modules_prepare
@@ -227,7 +238,7 @@ function bldkf() {
     [[ -z ${FOLDER} ]] && { display_error "FOLDER not specified!"; return 1; }
     [[ ! -d ${FOLDER} ]] && { display_error "${FOLDER} could not be found!"; return 1; }
 
-    bldk "${ARCH}" "${CONFIG}" M="${BUILD_FOLDER}" src="${FOLDER}" "${@}"
+    bldk "${ARCH}" "${CONFIG}" M="${KERNEL_BUILD_FOLDER}" src="${FOLDER}" "${@}"
 }
 
 
@@ -276,7 +287,7 @@ function bootk() {
         *) display_error "Invalid ARCH specified!"; return 1 ;;
     esac
 
-    KERNEL=${BUILD_FOLDER}/arch/${ARCH}/boot/${IMAGE}
+    KERNEL=${KERNEL_BUILD_FOLDER}/arch/${ARCH}/boot/${IMAGE}
     [[ ! -f ${KERNEL} ]] && { display_error "Kernel doesn't exist! Please build one."; return 1; }
 
     # Update the images
@@ -391,7 +402,7 @@ function dckrrn() {(
 # Build Clang
 function bldcl() {(
     header "Building Clang"
-    { cbf && cd "${BUILD_FOLDER}"; } || die "wtf"
+    { cbf c && cd "${CLANG_BUILD_FOLDER}"; } || die "wtf"
     cmake -Wno-dev \
           -G Ninja \
           -DCLANG_PLUGIN_SUPPORT=OFF \
@@ -417,7 +428,7 @@ function bldcl() {(
           "${CBL_SRC_FOLDER}"/llvm-project/llvm > /dev/null
     time ninja || die "Error building Clang/lld!"
     for BINARY in clang lld llvm-ar llvm-pdbutil llvm-symbolizer llvm-undname sancov; do
-        strip "${BUILD_FOLDER}"/bin/${BINARY}
+        strip "${CLANG_BUILD_FOLDER}"/bin/${BINARY}
     done
 )}
 
@@ -427,7 +438,7 @@ function bldbn() {(
     header "Building binutils"
     cd "${CBL_SRC_FOLDER}"/binutils || die "Error moving into ${CBL_SRC_FOLDER}/binutils"
     for TUPLE in host arm-linux-gnueabi aarch64-linux-gnu powerpc-linux-gnu powerpc64le-linux-gnu; do
-        { cbf && cd "${BUILD_FOLDER}"; } || die "wtf"
+        { cbf b && cd "${BINUTILS_BUILD_FOLDER}"; } || die "wtf"
         # SC2191: The = here is literal. To assign by index, use ( [index]=value ) with no spaces. To keep as literal, quote it.
         # shellcheck disable=SC2191
         COMMON_FLAGS=( --enable-deterministic-archives
@@ -489,7 +500,7 @@ function bldusr() {(
     INSTALL_FOLDER=${CBL_USR_FOLDER}
     bldcl
     rm -rf "${INSTALL_FOLDER}"
-    ninja -C "${BUILD_FOLDER}" install > /dev/null || die "Error installing Clang/lld!"
+    ninja -C "${CLANG_BUILD_FOLDER}" install > /dev/null || die "Error installing Clang/lld!"
 
     # Build binutils
     bldbn
