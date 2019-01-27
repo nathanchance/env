@@ -57,7 +57,7 @@ function rbln() {(
 
 # Download and apply an LLVM/Clang/lld patch
 function phabap() {(
-    [[ ! -f llvm ]] && { display_error "You're not in the llvm-project folder!"; return 1; }
+    [[ ! -d llvm ]] && { display_error "You're not in the llvm-project folder!"; return 1; }
 
     REVISION=${1:?}
     FOLDER=${2:?}
