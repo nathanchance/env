@@ -417,6 +417,7 @@ function bldcl() {(
           -DCMAKE_INSTALL_PREFIX="${INSTALL_FOLDER:-"${CBL_USR_FOLDER}"}" \
           -DLLVM_BINUTILS_INCDIR="${CBL_SRC_FOLDER}/binutils/include" \
           -DLLVM_ENABLE_BINDINGS=OFF \
+          -DLLVM_EXTERNAL_CLANG_TOOLS_EXTRA_SOURCE_DIR="" \
           -DLLVM_ENABLE_PROJECTS="clang;lld" \
           -DLLVM_CCACHE_BUILD=ON \
           -DLLVM_ENABLE_OCAMLDOC=OFF \
