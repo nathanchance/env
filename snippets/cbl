@@ -410,9 +410,9 @@ function bldcl() {(
           -DCLANG_PLUGIN_SUPPORT=OFF \
           -DCLANG_REPOSITORY_STRING="https://github.com/llvm/llvm-project $(git -C "${CBL_SRC_FOLDER}/llvm-project" show -s --format=%H origin/master)" \
           -DCMAKE_BUILD_TYPE=Release \
-          -DCMAKE_C_COMPILER=clang \
+          -DCMAKE_C_COMPILER="$(command -v clang || command -v gcc)" \
           -DCMAKE_C_FLAGS="-O2 -march=native -mtune=native" \
-          -DCMAKE_CXX_COMPILER=clang++ \
+          -DCMAKE_CXX_COMPILER="$(command -v clang++ || command -v g++)" \
           -DCMAKE_CXX_FLAGS="-O2 -march=native -mtune=native" \
           -DCMAKE_INSTALL_PREFIX="${INSTALL_FOLDER:-"${CBL_USR_FOLDER}"}" \
           -DLLVM_BINUTILS_INCDIR="${CBL_SRC_FOLDER}/binutils/include" \
