@@ -405,6 +405,8 @@ function bldcl() {(
     { cbf c && cd "${CLANG_BUILD_FOLDER}"; } || die "wtf"
     cmake -Wno-dev \
           -G Ninja \
+          -DCLANG_ENABLE_ARCMT=OFF \
+          -DCLANG_ENABLE_STATIC_ANALYZER=OFF \
           -DCLANG_PLUGIN_SUPPORT=OFF \
           -DCLANG_REPOSITORY_STRING="https://github.com/llvm/llvm-project $(git -C "${CBL_SRC_FOLDER}/llvm-project" show -s --format=%H origin/master)" \
           -DCMAKE_BUILD_TYPE=Release \
