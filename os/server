@@ -70,6 +70,7 @@ function bootstrap() {(
                                         clang \
                                         ccache \
                                         cmake \
+                                        cpio \
                                         docker \
                                         dtc \
                                         fd \
