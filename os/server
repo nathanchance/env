@@ -960,8 +960,9 @@ function fkba() {(
         fi
         [[ ${1} = "-n" || ${1} = "--number" ]] && { shift; NUM=${1}; }
         [[ -z ${NUM} ]] && NUM=1
+        # SC2034: i appears unused. Verify use (or export if used externally).
         # SC2119: Use dib "$@" if function's $1 should mean script's $1.
-        # shellcheck disable=SC2119
+        # shellcheck disable=SC2034,SC2119
         for i in $(seq 1 ${NUM}); do dib; done
         {
             TIME_STRING=$(format_time "${START}" "$(date +%s)")

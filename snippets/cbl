@@ -16,7 +16,7 @@ CBL_USR_FOLDER=${CBL_FOLDER}/usr
 function crbf() {
     local ITEM
     for ITEM in binutils clang kernel; do
-        export ${ITEM^^}_BUILD_FOLDER=${BUILD_FOLDER}/${ITEM}
+        export ${ITEM^^}_BUILD_FOLDER="${BUILD_FOLDER}/${ITEM}"
         mkdir -p "${BUILD_FOLDER}/${ITEM}"
     done
 }
