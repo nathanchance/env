@@ -141,7 +141,7 @@ function bootstrap() {(
     yay -S --needed arm-linux-gnueabi-gcc lineageos-devel || die "Error running yay!"
 
     # Download repos
-    [[ ! -d ${HOME}/scripts ]] && { git -C "${HOME}" clone git@github.com:nathanchance/scripts || die "Error cloning scripts!"; }
+    [[ ! -d ${MAIN_FOLDER}/scripts ]] && { git -C "${MAIN_FOLDER}" clone git@github.com:nathanchance/scripts || die "Error cloning scripts!"; }
     for REPO in chromeos-adb-fastboot dotfiles hugo-files; do
         [[ ! -d ${REPO_FOLDER}/${REPO} ]] && { git -C "${REPO_FOLDER}" clone git@github.com:nathanchance/"${REPO}" || die "Error cloning ${REPO}!"; }
     done
@@ -169,7 +169,7 @@ function bootstrap() {(
     # Grab linux, linux-next, and linux-stable for CBL
     # https://www.kernel.org/cloning-linux-from-a-bundle.html
     (
-        cd "${HOME}"/cbl || die "wtf?"
+        cd "${CBL_FOLDER}" || die "wtf?"
         for COMBO in torvalds/linux.git:linux torvald/linux.git:mirrors/linux next/linux-next.git:linux-next stable/linux.git:linux-stable; do
             FOLDER=${COMBO#*:}
             URL=${COMBO%:*}
@@ -225,7 +225,7 @@ function bootstrap() {(
     echo
     echo "Things still to do!"
     echo
-    echo "1. Add ${HOME}/.botinfo and ${HOME}/.muttrc"
+    echo "1. Add ${MAIN_FOLDER}/.botinfo and ${HOME}/.muttrc"
     echo
     echo "2. EDITOR=vim crontab -e"
     echo
@@ -328,7 +328,6 @@ function server_setup() {
     add_to_path_post "${HOME}/.gem/ruby/2.6.0/bin"
     source "${SCRIPTS_FOLDER}"/snippets/bk
     source "${SCRIPTS_FOLDER}"/snippets/cbl
-    source "${SCRIPTS_FOLDER}"/snippets/tc
     sbf
     ( gpg_available )
 }
@@ -641,28 +640,6 @@ function dib-clang() {(
 )}
 
 
-function ls-stats() {
-    if [[ ! -f Makefile ]]; then
-        display_error "Run this in a kernel tree!"
-        return 1
-    fi
-
-    VER=${1}
-    SBLVL=$(git tag --sort=-taggerdate -l v"${VER}"* | head -n 1 | sed s/v// | cut -d . -f 3)
-
-    echo "Linux ${VER} was released on $(git log -1 --format=%ai v"${VER}")
-
-The latest version of ${VER} is ${VER}.${SBLVL}, released on $(git log -1 --format=%ai v"${VER}.${SBLVL}")
-
-Number of commits in each version of ${VER}:
-
-v${VER}.1: $(git lo v"${VER}..v${VER}.1" | wc -l)
-$(for i in $(seq 2 "${SBLVL}"); do echo "v${VER}.$i: $(git lo "v${VER}.$((i - 1))..v${VER}.$i" | wc -l)"; done)
-
-Average number of commits in a version of ${VER}: $(($(git lo "v${VER}..v${VER}.${SBLVL}" | wc -l) / SBLVL))" > "${HOME}/web/stats/${VER}"
-}
-
-
 # Shellcheck function
 function shellcheck() {
     # SC1090: Can't follow non-constant source. Use a directive to specify location.
@@ -711,32 +688,32 @@ function mkpkg() {
 
 # Update all remotes and run git gc/prune
 function clean-kernels() {(
-    REPOS=( "${HOME}/kernels/als/jasmine"
-            "${HOME}/kernels/als/marlin"
-            "${HOME}/kernels/als/msm-3.18"
-            "${HOME}/kernels/als/msm-4.4"
-            "${HOME}/kernels/als/msm-4.9"
-            "${HOME}/kernels/als/nash"
-            "${HOME}/kernels/als/op3"
-            "${HOME}/kernels/als/op5"
-            "${HOME}/kernels/als/op6"
-            "${HOME}/kernels/als/polaris"
-            "${HOME}/kernels/als/sagit"
-            "${HOME}/kernels/als/tissot"
-            "${HOME}/kernels/als/wahoo"
-            "${HOME}/kernels/als/whyred"
-            "${HOME}/kernels/flash/marlin"
-            "${HOME}/kernels/flash/op6"
-            "${HOME}/kernels/flash/op6-custom"
-            "${HOME}/kernels/flash/wahoo"
-            "${HOME}/kernels/pi"
-            "${HOME}/kernels/roms/aicp-op5"
-            "${HOME}/kernels/roms/aicp-op6"
-            "${HOME}/kernels/roms/gzr-op3"
-            "${HOME}/kernels/roms/gzr-op5"
-            "${HOME}/kernels/roms/lineage-nash"
-            "${HOME}/kernels/roms/lineage-op6"
-            "${HOME}/kernels/sony/kernel" )
+    REPOS=( "${MAIN_FOLDER}/als/jasmine"
+            "${MAIN_FOLDER}/als/marlin"
+            "${MAIN_FOLDER}/als/msm-3.18"
+            "${MAIN_FOLDER}/als/msm-4.4"
+            "${MAIN_FOLDER}/als/msm-4.9"
+            "${MAIN_FOLDER}/als/nash"
+            "${MAIN_FOLDER}/als/op3"
+            "${MAIN_FOLDER}/als/op5"
+            "${MAIN_FOLDER}/als/op6"
+            "${MAIN_FOLDER}/als/polaris"
+            "${MAIN_FOLDER}/als/sagit"
+            "${MAIN_FOLDER}/als/tissot"
+            "${MAIN_FOLDER}/als/wahoo"
+            "${MAIN_FOLDER}/als/whyred"
+            "${KERNEL_FOLDER}/flash/marlin"
+            "${KERNEL_FOLDER}/flash/op6"
+            "${KERNEL_FOLDER}/flash/op6-custom"
+            "${KERNEL_FOLDER}/flash/wahoo"
+            "${KERNEL_FOLDER}/pi"
+            "${KERNEL_FOLDER}/roms/aicp-op5"
+            "${KERNEL_FOLDER}/roms/aicp-op6"
+            "${KERNEL_FOLDER}/roms/gzr-op3"
+            "${KERNEL_FOLDER}/roms/gzr-op5"
+            "${KERNEL_FOLDER}/roms/lineage-nash"
+            "${KERNEL_FOLDER}/roms/lineage-op6"
+            "${KERNEL_FOLDER}/sony/kernel" )
 
     for REPO in "${REPOS[@]}"; do
         header "${REPO}"
@@ -753,9 +730,9 @@ function clean-kernels() {(
 
 # Update AnyKernel2 from osm0sis's GitHub
 function update-ak2() {(
-    REPOS=( "${HOME}/kernels/flash/anykernel2-marlin"
-            "${HOME}/kernels/flash/anykernel2-op6"
-            "${HOME}/kernels/flash/anykernel2-wahoo" )
+    REPOS=( "${KERNEL_FOLDER}/flash/anykernel2-marlin"
+            "${KERNEL_FOLDER}/flash/anykernel2-op6"
+            "${KERNEL_FOLDER}/flash/anykernel2-wahoo" )
 
     for REPO in "${REPOS[@]}"; do
         BRANCH=${REPO##*:}
@@ -795,7 +772,7 @@ function update-ak2() {(
 # Build android/common kernel
 function ac-kernel() {
     local UPDATE VERSION
-    cd "${HOME}/kernels/sources/kernel-common" || return
+    cd "${KERNEL_FOLDER}/sources/kernel-common" || return
 
     while [[ ${#} -ge 1 ]]; do
         case ${1} in
@@ -869,7 +846,7 @@ function change-email() {
 
 # Update kernel function
 function updk() {
-    if ! cd "${HOME}/repos/pkgbuilds"; then
+    if ! cd "${REPO_FOLDER}/pkgbuilds"; then
         display_error "PKGBUILD folder not found!"
         return
     fi

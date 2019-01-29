@@ -22,12 +22,13 @@ BIN_FOLDER=${SCRIPTS_FOLDER}/bin
 
 # Common locations amongst scripts
 BUILD_FOLDER=/mnt/build
-CBL_FOLDER=${HOME}/cbl
-KERNEL_FOLDER=${HOME}/kernels
-MISC_FOLDER=${HOME}/misc
-REPO_FOLDER=${HOME}/repos
-ROM_FOLDER=${HOME}/roms
-TC_FOLDER=${HOME}/toolchains
+MAIN_FOLDER=${HOME}
+CBL_FOLDER=${MAIN_FOLDER}/cbl
+KERNEL_FOLDER=${MAIN_FOLDER}/kernels
+MISC_FOLDER=${MAIN_FOLDER}/misc
+REPO_FOLDER=${MAIN_FOLDER}/repos
+ROM_FOLDER=${MAIN_FOLDER}/roms
+TC_FOLDER=${MAIN_FOLDER}/toolchains
 WEB_FOLDER=/var/www
 
 # Colors
@@ -60,7 +61,8 @@ VULTR_IP="209.250.235.204"
 
 # Export everything to satisfy shellcheck
 export HOST SCRIPTS_FOLDER BIN_FOLDER CBL_FOLDER KERNEL_FOLDER MISC_FOLDER REPO_FOLDER \
-       BUILD_FOLDER ROM_FOLDER TC_FOLDER WEB_FOLDER BLINK_RED BLUE BOLD GRN RED RST YLW \
+       BUILD_FOLDER ROM_FOLDER TC_FOLDER WEB_FOLDER MAIN_FOLDER \
+       BLINK_RED BLUE BOLD GRN RED RST YLW \
        THREADS JOBS_FLAG CCACHE MARLIN_CHANNEL MARLIN_GROUP OP6_CHANNEL \
        OP6_GROUP WAHOO_CHANNEL WAHOO_GROUP
 
@@ -198,21 +200,21 @@ function web_link() {
 
 # Set up a virtual environment for Python
 function mkavenv {
-    virtualenv2 "${HOME}/venv"
-    source "${HOME}/venv/bin/activate"
+    virtualenv2 "${MAIN_FOLDER}/venv"
+    source "${MAIN_FOLDER}/venv/bin/activate"
 }
 
 
 # Remove virtual environment
 function rmvenv {
     deactivate
-    rm -rf "${HOME}/venv"
+    rm -rf "${MAIN_FOLDER}/venv"
 }
 
 
 # Source Telegram bot information
 function load_botinfo() {
-    [[ -f ${HOME}/.botinfo ]] && source ~/.botinfo
+    [[ -f ${MAIN_FOLDER}/.botinfo ]] && source ~/.botinfo
 }
 load_botinfo
 
