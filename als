@@ -68,9 +68,9 @@ function post_merge_commands() {
 
     # If it is found, execute it
     if [[ -n ${TAG_SUFFIX} ]]; then
-        COMMANDS=${REPO_FOLDER}/sp/${TAG_TO_PULL}/${COMMANDS}
+        COMMANDS=${ALS}/sp/${TAG_TO_PULL}/${COMMANDS}
     else
-        COMMANDS=${REPO_FOLDER}/sp/${KVER}/${COMMANDS}
+        COMMANDS=${ALS}/sp/${KVER}/${COMMANDS}
     fi
     if [[ -f ${COMMANDS} ]]; then
         if bash "${COMMANDS}" "${COMMANDS_BRANCH}"; then

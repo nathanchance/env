@@ -146,8 +146,8 @@ function bootstrap() {(
     for REPO in chromeos-adb-fastboot dotfiles hugo-files; do
         [[ ! -d ${REPO_FOLDER}/${REPO} ]] && { git -C "${REPO_FOLDER}" clone git@github.com:nathanchance/"${REPO}" || die "Error cloning ${REPO}!"; }
     done
-    [[ ! -d ${REPO_FOLDER}/sp ]] && { git -C "${REPO_FOLDER}" clone git@github.com:nathanchance/stable-patches sp || die "Error cloning stable-patches!"; }
     [[ ! -d ${REPO_FOLDER}/git ]] && { git -C "${REPO_FOLDER}" clone git://github.com/git/git || die "Error cloning git!"; }
+    [[ ! -d ${MAIN_FOLDER}/als/sp ]] && { mkdir -p "${MAIN_FOLDER}/als"; git -C "${MAIN_FOLDER}/als" clone git@github.com:nathanchance/stable-patches sp || die "Error cloning stable-patches!"; }
 
     # Install dotfiles
     (
