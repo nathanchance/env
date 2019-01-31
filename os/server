@@ -159,6 +159,8 @@ function bootstrap() {(
         curl -LSs https://www.vim.org/scripts/download_script.php?src_id=20912 > "${HOME}"/.vim/plugin/git_patch_tags.vim
         mv -v "${HOME}"/.vim/.vimrc "${HOME}"
         sudo cp -v "${DOTFILES}"/server/motd.sh /etc/profile.d
+        gpg --output "${MAIN_FOLDER}"/.botinfo --decrypt "${DOTFILES}"/common/botinfo.gpg
+        gpg --output "${HOME}"/.muttrc --decrypt "${DOTFILES}"/common/muttrc.gpg
     ) || die "Error installing dotfiles"
 
     # Download toolchains
@@ -226,11 +228,9 @@ function bootstrap() {(
     echo
     echo "Things still to do!"
     echo
-    echo "1. Add ${MAIN_FOLDER}/.botinfo and ${HOME}/.muttrc"
+    echo "1. EDITOR=vim crontab -e"
     echo
-    echo "2. EDITOR=vim crontab -e"
-    echo
-    echo "3. cd && source ~/.bashrc"
+    echo "2. cd && source ~/.bashrc"
     echo
 ) || return 1; }
 
