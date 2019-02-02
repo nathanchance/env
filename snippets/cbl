@@ -354,10 +354,10 @@ function lnt() {
 
         # Build kernel silently normally
         if [[ -z ${DEBUG} ]]; then
-            bldk "${ARCH}" "${CONFIG}" KCFLAGS="-Werror" ${LD:+LD="${LD}"} |& \
+            bldk "${ARCH}" "${CONFIG}" KCFLAGS="${KCFLAGS:--Werror}" ${LD:+LD="${LD}"} |& \
             rg --color=never "error:|warning:|undefined" > "${TMP}"
         else
-            bldk "${ARCH}" "${CONFIG}" KCFLAGS="-Werror" ${LD:+LD="${LD}"}
+            bldk "${ARCH}" "${CONFIG}" KCFLAGS="${KCFLAGS:--Werror}" ${LD:+LD="${LD}"}
         fi
 
         # Make sure that if make fails, it gets propgated to the if statement
