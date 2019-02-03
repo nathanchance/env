@@ -405,14 +405,12 @@ function dckrrn() {(
 function bldcl() {(
     header "Building Clang"
     { cbf c && cd "${CLANG_BUILD_FOLDER}"; } || die "wtf"
-    # Force the version string to show the upstream hash, not the current tree's (local patches are going to be from Phabricator)
-    sed -i 's/rev-parse HEAD/rev-parse origin\/master/g' "${CBL_SRC_FOLDER}"/llvm-project/llvm/cmake/modules/VersionFromVCS.cmake
     cmake -Wno-dev \
           -G Ninja \
           -DCLANG_ENABLE_ARCMT=OFF \
           -DCLANG_ENABLE_STATIC_ANALYZER=OFF \
           -DCLANG_PLUGIN_SUPPORT=OFF \
-          -DCLANG_REPOSITORY_STRING="https://github.com/llvm/llvm-project" \
+          -DCLANG_REPOSITORY_STRING="https://github.com/llvm/llvm-project $(git -C "${CBL_SRC_FOLDER}/llvm-project" show -s --format=%H origin/master)" \
           -DCMAKE_BUILD_TYPE=Release \
           -DCMAKE_C_COMPILER="$(command -v clang || command -v gcc)" \
           -DCMAKE_C_FLAGS="-O2 -march=native -mtune=native" \
@@ -433,11 +431,10 @@ function bldcl() {(
           -DLLVM_TARGETS_TO_BUILD="ARM;AArch64;PowerPC;X86" \
           -DLLVM_USE_LINKER="$(for LD in lld gold bfd; do command -v ld.${LD} &>/dev/null && break; done; echo ${LD})"  \
           "${CBL_SRC_FOLDER}"/llvm-project/llvm > /dev/null
-    time ninja || { git -C "${CBL_SRC_FOLDER}/llvm-project" rh -q; die "Error building Clang/lld!"; }
+    time ninja || die "Error building Clang/lld!"
     for BINARY in clang lld llvm-ar llvm-pdbutil llvm-symbolizer llvm-undname sancov; do
         strip "${CLANG_BUILD_FOLDER}"/bin/${BINARY}
     done
-    git -C "${CBL_SRC_FOLDER}/llvm-project" rh -q
 )}
 
 
