@@ -402,40 +402,72 @@ function dckrrn() {(
 
 
 # Build Clang
+# SC2120: bldcl references arguments, but none are ever passed.
+# shellcheck disable=SC2120
 function bldcl() {(
+    # SC2191: The = here is literal. To assign by index, use ( [index]=value ) with no spaces. To keep as literal, quote it.
+    # shellcheck disable=SC2191
+    BASE_CMAKE_VALUES=( -DCLANG_ENABLE_ARCMT=OFF
+                        -DCLANG_ENABLE_STATIC_ANALYZER=OFF
+                        -DCLANG_PLUGIN_SUPPORT=OFF
+                        -DCLANG_REPOSITORY_STRING="https://github.com/llvm/llvm-project $(git -C "${CBL_SRC_FOLDER}/llvm-project" show -s --format=%H origin/master)"
+                        -DCMAKE_BUILD_TYPE=Release
+                        -DCMAKE_C_FLAGS="-O2 -march=native -mtune=native"
+                        -DCMAKE_CXX_FLAGS="-O2 -march=native -mtune=native"
+                        -DLLVM_BINUTILS_INCDIR="${CBL_SRC_FOLDER}/binutils/include"
+                        -DLLVM_CCACHE_BUILD=ON
+                        -DLLVM_ENABLE_BINDINGS=OFF
+                        -DLLVM_ENABLE_OCAMLDOC=OFF
+                        -DLLVM_ENABLE_TERMINFO=OFF
+                        -DLLVM_ENABLE_WARNINGS=OFF
+                        -DLLVM_ENABLE_PROJECTS="clang;lld"
+                        -DLLVM_EXTERNAL_CLANG_TOOLS_EXTRA_SOURCE_DIR=""
+                        -DLLVM_INCLUDE_EXAMPLES=OFF
+                        -DLLVM_INCLUDE_TESTS=OFF
+                        -DLLVM_INCLUDE_DOCS=OFF )
+    BINARIES_TO_STRIP=( clang lld llvm-ar llvm-pdbutil llvm-symbolizer llvm-undname sancov )
+    S1_FOLDER=${CLANG_BUILD_FOLDER}/stage1
+    S1_TARGETS="X86"
+    S2_TARGETS="ARM;AArch64;PowerPC;X86"
+
+    while (( ${#} )); do
+        case ${1} in
+            "-d"|"--debug") DEBUG=true; S1_TARGETS=${S2_TARGETS} ;;
+        esac
+        shift
+    done
+
     header "Building Clang"
-    { cbf c && cd "${CLANG_BUILD_FOLDER}"; } || die "wtf"
+    { cbf c && mkdir -p "${S1_FOLDER}" && cd "${S1_FOLDER}"; } || die "wtf"
+
+    # Stage one
     cmake -Wno-dev \
           -G Ninja \
-          -DCLANG_ENABLE_ARCMT=OFF \
-          -DCLANG_ENABLE_STATIC_ANALYZER=OFF \
-          -DCLANG_PLUGIN_SUPPORT=OFF \
-          -DCLANG_REPOSITORY_STRING="https://github.com/llvm/llvm-project $(git -C "${CBL_SRC_FOLDER}/llvm-project" show -s --format=%H origin/master)" \
-          -DCMAKE_BUILD_TYPE=Release \
+          "${BASE_CMAKE_VALUES[@]}" \
           -DCMAKE_C_COMPILER="$(command -v clang || command -v gcc)" \
-          -DCMAKE_C_FLAGS="-O2 -march=native -mtune=native" \
           -DCMAKE_CXX_COMPILER="$(command -v clang++ || command -v g++)" \
-          -DCMAKE_CXX_FLAGS="-O2 -march=native -mtune=native" \
-          -DCMAKE_INSTALL_PREFIX="${INSTALL_FOLDER:-"${CBL_USR_FOLDER}"}" \
-          -DLLVM_BINUTILS_INCDIR="${CBL_SRC_FOLDER}/binutils/include" \
-          -DLLVM_ENABLE_BINDINGS=OFF \
-          -DLLVM_EXTERNAL_CLANG_TOOLS_EXTRA_SOURCE_DIR="" \
-          -DLLVM_ENABLE_PROJECTS="clang;lld" \
-          -DLLVM_CCACHE_BUILD=ON \
-          -DLLVM_ENABLE_LTO=Thin \
-          -DLLVM_ENABLE_OCAMLDOC=OFF \
-          -DLLVM_ENABLE_TERMINFO=OFF \
-          -DLLVM_ENABLE_WARNINGS=OFF \
-          -DLLVM_INCLUDE_EXAMPLES=OFF \
-          -DLLVM_INCLUDE_TESTS=OFF \
-          -DLLVM_INCLUDE_DOCS=OFF \
-          -DLLVM_TARGETS_TO_BUILD="ARM;AArch64;PowerPC;X86" \
+          -DLLVM_TARGETS_TO_BUILD="${S1_TARGETS}" \
           -DLLVM_USE_LINKER="$(for LD in lld gold bfd; do command -v ld.${LD} &>/dev/null && break; done; echo ${LD})"  \
           "${CBL_SRC_FOLDER}"/llvm-project/llvm > /dev/null
-    time ninja || die "Error building Clang/lld!"
-    for BINARY in clang lld llvm-ar llvm-pdbutil llvm-symbolizer llvm-undname sancov; do
-        strip "${CLANG_BUILD_FOLDER}"/bin/${BINARY}
-    done
+    time ninja || die "Error building Clang/lld stage 1!"
+    for BINARY in "${BINARIES_TO_STRIP[@]}"; do strip "${S1_FOLDER}"/bin/"${BINARY}"; done
+
+    [[ -n ${DEBUG} ]] && return
+
+    # Stage two
+    cd "${CLANG_BUILD_FOLDER}" || die "wtf"
+    cmake -Wno-dev \
+          -G Ninja \
+          "${BASE_CMAKE_VALUES[@]}" \
+          -DCMAKE_C_COMPILER="${S1_FOLDER}/bin/clang" \
+          -DCMAKE_CXX_COMPILER="${S1_FOLDER}/bin/clang++" \
+          -DCMAKE_INSTALL_PREFIX="${INSTALL_FOLDER:-"${CBL_USR_FOLDER}"}" \
+          -DLLVM_ENABLE_LTO=Thin \
+          -DLLVM_TARGETS_TO_BUILD="${S2_TARGETS}" \
+          -DLLVM_USE_LINKER="${S1_FOLDER}/bin/ld.lld"  \
+          "${CBL_SRC_FOLDER}"/llvm-project/llvm > /dev/null
+    time ninja || die "Error building Clang/lld stage 2!"
+    for BINARY in "${BINARIES_TO_STRIP[@]}"; do strip "${CLANG_BUILD_FOLDER}"/bin/"${BINARY}"; done
 )}
 
 
@@ -504,6 +536,8 @@ function bldusr() {(
 
     # Build Clang and lld
     INSTALL_FOLDER=${CBL_USR_FOLDER}
+    # SC2119: Use bldcl "$@" if function's $1 should mean script's $1.
+    # shellcheck disable=SC2119
     bldcl
     rm -rf "${INSTALL_FOLDER}"
     ninja -C "${CLANG_BUILD_FOLDER}" install > /dev/null || die "Error installing Clang/lld!"
