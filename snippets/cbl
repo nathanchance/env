@@ -422,6 +422,7 @@ function bldcl() {(
           -DLLVM_EXTERNAL_CLANG_TOOLS_EXTRA_SOURCE_DIR="" \
           -DLLVM_ENABLE_PROJECTS="clang;lld" \
           -DLLVM_CCACHE_BUILD=ON \
+          -DLLVM_ENABLE_LTO=Thin \
           -DLLVM_ENABLE_OCAMLDOC=OFF \
           -DLLVM_ENABLE_TERMINFO=OFF \
           -DLLVM_ENABLE_WARNINGS=OFF \
