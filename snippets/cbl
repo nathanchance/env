@@ -319,7 +319,7 @@ function babk() {
 
 # linux-next testing
 function lnt() {
-    local CONFIG CONFIGS DEBUG LOG MESSAGE TMP
+    local CONFIG CONFIGS DEBUG LOG MESSAGE SHOW_NF_WARNINGS TMP
 
     while [[ ${#} -ge 1 ]]; do
         case ${1} in
