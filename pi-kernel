@@ -56,7 +56,7 @@ function kmake() {
 function parse_parameters() {
     PARAMS="${*}"
     START=$(date +%s)
-    while [[ ${#} -ge 1 ]]; do
+    while (( ${#} )); do
         case ${1} in
             # Architecture to build
             "-a"|"--arch")

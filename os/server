@@ -397,7 +397,7 @@ function kfg() {
     [[ -z ${ARCH} ]] && ARCH=arm64
     DEFCONFIGS="$(ls arch/${ARCH}/configs/flash*_defconfig 2>/dev/null)"
 
-    while [[ ${#} -ge 1 ]]; do
+    while (( ${#} )); do
         case ${1} in
             "-c"|"--config")
                 shift
@@ -558,7 +558,7 @@ function dib() {(
     DEVICE=$(basename "${PWD}")
     START=$(date +%s)
 
-    while [[ ${#} -ge 1 ]]; do
+    while (( ${#} )); do
         case ${1} in
             "-l"|"--log") WANTS_LOG=true ;;
         esac
@@ -775,7 +775,7 @@ function ac-kernel() {
     local UPDATE VERSION
     cd "${KERNEL_FOLDER}/sources/kernel-common" || return
 
-    while [[ ${#} -ge 1 ]]; do
+    while (( ${#} )); do
         case ${1} in
             "-u"|"--update") UPDATE=true ;;
             *) VERSION=${1} ;;
@@ -900,7 +900,7 @@ ${URL}"
 function qcacld() {(
     REPOS=( "fw-api" "qcacld-3.0" "qca-wifi-host-cmn" )
 
-    while [[ ${#} -ge 1 ]]; do
+    while (( ${#} )); do
         case ${1} in
             "-i"|"--init") INIT=true ;;
             "-t"|"--tag") shift; TAG=${1} ;;

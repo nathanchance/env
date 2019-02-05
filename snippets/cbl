@@ -321,7 +321,7 @@ function babk() {
 function lnt() {
     local CONFIG CONFIGS DEBUG LOG MESSAGE SHOW_NF_WARNINGS TMP
 
-    while [[ ${#} -ge 1 ]]; do
+    while (( ${#} )); do
         case ${1} in
             "-d"|"--debug") DEBUG=true ;;
             # Show non-fatal warnings

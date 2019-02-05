@@ -102,7 +102,7 @@ REPOS_49=( "bluecross" "msm-4.9" "op6" "polaris" )
 
 # Parse parameters
 PARAMS="${*}"
-while [[ ${#} -ge 1 ]]; do
+while (( ${#} )); do
     case ${1} in
         # Build after merging
         "-b"|"--build")

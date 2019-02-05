@@ -9,7 +9,7 @@
 
 # Parse the provided parameters
 function parse_parameters() {
-    while [[ ${#} -ge 1 ]]; do
+    while (( ${#} )); do
         case ${1} in
             # Branch name for commit message
             "-b"|"--branch-name")

@@ -18,7 +18,7 @@
 function parse_parameters() {
     PARAMS="${*}"
     EXTRA_MAKE_FLAGS=()
-    while [[ ${#} -ge 1 ]]; do
+    while (( ${#} )); do
         case ${1} in
             # AnyKernel2 branch
             "-ak2-b"|"--anykernel2-branch")
