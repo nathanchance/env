@@ -146,7 +146,7 @@ function bootstrap() {
 
 # Laptop specific aliases
 function crostini_aliases() {
-    alias mshfb='mosh nathan@nathanchance.me'
+    alias mshsvr='mosh nathan@${RYZEN_IP}'
 }
 
 
