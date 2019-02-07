@@ -207,15 +207,15 @@ for VERSION in "${VERSIONS[@]}"; do
         # Map all of the branches of the repo to an upstream remote (if relevant)
         case ${REPO} in
             "bluecross") BRANCHES=( "android-msm-bluecross-4.9" ) ;;
-            "jasmine") BRANCHES=( "jasmine-o-oss:upstream" "jasmine-p-oss:upstream" ) ;;
+            "jasmine") BRANCHES=( "jasmine-p-oss:upstream" ) ;;
             "marlin") BRANCHES=( "android-msm-marlin-3.18" ) ;;
-            "msm-3.18") BRANCHES=( "kernel.lnx.3.18.r33-rel" "kernel.lnx.3.18.r34-rel" ) ;;
-            "msm-4.4") BRANCHES=( "kernel.lnx.4.4.r27-rel" "kernel.lnx.4.4.r34-rel" "kernel.lnx.4.4.r35-rel" ) ;;
-            "msm-4.9") BRANCHES=( "kernel.lnx.4.9.r7-rel" "kernel.lnx.4.9.r11-rel" ) ;;
-            "nash") BRANCHES=( "oreo-8.0.0-release-nash:upstream" "lineage-16.0:LineageOS" ) ;;
-            "op3") BRANCHES=( "android-8.1:omni" "lineage-15.1:LineageOS" "oneplus/QC8996_O_8.0.0:upstream" ) ;;
-            "op5") BRANCHES=( "android-8.1:omni" "android-9.0:omni" "lineage-15.1" "oneplus/QC8998_O_8.1:upstream" "oneplus/QC8998_P_9.0:upstream" "oneplus/QC8998_O_8.1_Beta:upstream" "oneplus/QC8998_P_9.0_Beta:upstream" ) ;;
-            "op6") BRANCHES=( "android-9.0:omni" "lineage-15.1:LineageOS" "lineage-16.0:LineageOS" "oneplus/SDM845_P_9.0:upstream" "oneplus/SDM845_P_9.0_Beta:upstream" ) ;;
+            "msm-3.18") BRANCHES=( "kernel.lnx.3.18.r34-rel" ) ;;
+            "msm-4.4") BRANCHES=( "kernel.lnx.4.4.r34-rel" "kernel.lnx.4.4.r35-rel" ) ;;
+            "msm-4.9") BRANCHES=( "kernel.lnx.4.9.r11-rel" ) ;;
+            "nash") BRANCHES=( "lineage-16.0:LineageOS" ) ;;
+            "op3") BRANCHES=( "oneplus/QC8996_O_8.0.0:upstream" ) ;;
+            "op5") BRANCHES=( "android-9.0:omni" "oneplus/QC8998_P_9.0:upstream" "oneplus/QC8998_P_9.0_Beta:upstream" ) ;;
+            "op6") BRANCHES=( "android-9.0:omni" "lineage-16.0:LineageOS" "oneplus/SDM845_P_9.0_Beta:upstream" ) ;;
             "polaris") BRANCHES=( "polaris-o-oss:upstream" ) ;;
             "sagit") BRANCHES=( "sagit-o-oss:upstream" ) ;;
             "tissot") BRANCHES=( "tissot-o-oss-8.1:upstream" ) ;;
