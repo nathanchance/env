@@ -10,7 +10,7 @@
 # Setup function
 function bootstrap() {
     # Grab common functions/variables
-    [[ ! -f ${HOME}/scripts/common ]] && source <(curl -Ls https://github.com/nathanchance/scripts/raw/master/common) &>/dev/null
+    [[ ! -f ${HOME}/scripts/common ]] && source <(curl -LSs https://github.com/nathanchance/scripts/raw/master/common) &>/dev/null
 
     # Make sure keys are present
     local KEYS; KEYS=${HOME}/keys
@@ -29,19 +29,19 @@ function bootstrap() {
     sudo apt install -y build-essential bc bison devscripts flex git gpg jq libssl-dev mosh most python-pip ssh tmux vim
 
     # Install speedtest-cli
-    sudo curl -Lo /usr/local/bin/speedtest-cli https://raw.githubusercontent.com/sivel/speedtest-cli/master/speedtest.py
+    sudo curl -LSo /usr/local/bin/speedtest-cli https://raw.githubusercontent.com/sivel/speedtest-cli/master/speedtest.py
     sudo chmod +x /usr/local/bin/speedtest-cli
 
     # Install latest version of LLVM/Clang
     curl https://apt.llvm.org/llvm-snapshot.gpg.key | sudo apt-key add -
     echo "deb http://apt.llvm.org/stretch/ llvm-toolchain-stretch main" | sudo tee -a /etc/apt/sources.list
     sudo apt update -qq
-    sudo apt install -y libllvm-8-ocaml-dev libllvm8 llvm-8 llvm-8-dev llvm-8-doc llvm-8-examples llvm-8-runtime lld-8 \
-                        clang-8 clang-tools-8 clang-8-doc libclang-common-8-dev libclang-8-dev libclang1-8 clang-format-8 python-clang-8
+    sudo apt install -y libllvm-9-ocaml-dev libllvm8 llvm-9 llvm-9-dev llvm-9-doc llvm-9-examples llvm-9-runtime lld-9 \
+                        clang-9 clang-tools-9 clang-9-doc libclang-common-9-dev libclang-9-dev libclang1-9 clang-format-9 python-clang-9
 
     # Build updated ccache
-    CCACHE_VERSION=3.5
-    curl https://www.samba.org/ftp/ccache/ccache-${CCACHE_VERSION}.tar.gz | tar -xzf -
+    CCACHE_VERSION=3.6
+    curl -LSs https://www.samba.org/ftp/ccache/ccache-${CCACHE_VERSION}.tar.gz | tar -xzf -
     cd ccache-${CCACHE_VERSION} || { display_error "Downloading or extracting ccache failed!"; return 1; }
     ./configure
     make -j"$(nproc)"
@@ -55,8 +55,8 @@ function bootstrap() {
     git config --global user.email "natechancellor@gmail.com"
 
     # Install hub
-    HUB_VERSION=2.5.1
-    curl -LO https://github.com/github/hub/releases/download/v${HUB_VERSION}/hub-linux-${ARCH}-${HUB_VERSION}.tgz
+    HUB_VERSION=2.8.4
+    curl -LSsO https://github.com/github/hub/releases/download/v${HUB_VERSION}/hub-linux-${ARCH}-${HUB_VERSION}.tgz
     tar -xf hub-linux-${ARCH}-${HUB_VERSION}.tgz
     cd hub-linux-${ARCH}-${HUB_VERSION} || { display_error "Downloading or extracting hub failed!"; return 1; }
     sudo prefix=/usr/local ./install
@@ -64,12 +64,14 @@ function bootstrap() {
     rm -rf hub*
 
     # Install prebuilt ripgrep and fd binaries if available
-    FD_VERSION=7.1.0
-    RG_VERSION=0.9.0
+    BAT_VERSION=0.10.0
+    FD_VERSION=7.2.0
+    RG_VERSION=0.10.0
     if [[ ${ARCH} = "amd64" ]]; then
-        for URL in https://github.com/sharkdp/fd/releases/download/v${FD_VERSION}/fd-musl_${FD_VERSION}_amd64.deb \
+        for URL in https://github.com/sharkdp/bat/releases/download/v${BAT_VERSION}/bat_${BAT_VERSION}_amd64.deb \
+                   https://github.com/sharkdp/fd/releases/download/v${FD_VERSION}/fd-musl_${FD_VERSION}_amd64.deb \
                    https://github.com/BurntSushi/ripgrep/releases/download/${RG_VERSION}/ripgrep_${RG_VERSION}_amd64.deb; do
-            curl -LO "${URL}"
+            curl -LSsO "${URL}"
             sudo dpkg -i "$(basename "${URL}")" && rm "$(basename "${URL}")"
         done
     # Build them from source otherwise
@@ -84,7 +86,7 @@ function bootstrap() {
             URL=${PAIR#*:}
             TMP=$(mktemp)
 
-            curl -L "${URL}" -o "${TMP}"
+            curl -LSs "${URL}" -o "${TMP}"
             unzip "${TMP}"
             cd "${BINARY}"-* || { display_error "Downloading or extracting ${BINARY} failed!"; return 1; }
             cargo build --release
