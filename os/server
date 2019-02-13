@@ -64,6 +64,7 @@ function bootstrap() {(
     # Install required binaries
     sudo pacman -Syyu --noconfirm || die "Error updating packages!"
     sudo pacman -S --needed --noconfirm aarch64-linux-gnu-gcc \
+                                        asciidoc \
                                         base-devel \
                                         bat \
                                         ca-certificates \
