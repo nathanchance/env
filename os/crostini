@@ -85,7 +85,7 @@ function bootstrap() {
     RG_VERSION=0.10.0
     if [[ ${ARCH} = "amd64" ]]; then
         for URL in https://github.com/sharkdp/bat/releases/download/v${BAT_VERSION}/bat_${BAT_VERSION}_amd64.deb \
-                   https://github.com/sharkdp/fd/releases/download/v${FD_VERSION}/fd-musl_${FD_VERSION}_amd64.deb \
+                   https://github.com/sharkdp/fd/releases/download/v${FD_VERSION}/fd_${FD_VERSION}_amd64.deb \
                    https://github.com/BurntSushi/ripgrep/releases/download/${RG_VERSION}/ripgrep_${RG_VERSION}_amd64.deb; do
             curl -LSsO "${URL}"
             sudo dpkg -i "$(basename "${URL}")" && rm "$(basename "${URL}")"
