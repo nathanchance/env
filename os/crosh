@@ -141,7 +141,6 @@ function crosh_setup() {
     crosh_prompt
     export PAGER=/usr/local/bin/most
     export MANPATH=/usr/local/man${MANPATH:+":${MANPATH}"}
-    export VIMRUNTIME=${HOME}/.vim
 }
 
 
