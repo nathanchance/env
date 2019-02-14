@@ -99,7 +99,8 @@ function bootstrap() {(
                                         rubygems \
                                         "shellcheck" \
                                         tmux \
-                                        unbuffer || die "Error installing packages!"
+                                        unbuffer \
+                                        xmlto || die "Error installing packages!"
 
     # Install hub
     HUB_VERSION=2.7.1
