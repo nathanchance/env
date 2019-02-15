@@ -401,6 +401,22 @@ function dckrrn() {(
 )}
 
 
+# Modify Clang to report the upstream hash for the version string, bypassing local patches
+function clrev() {
+    case ${1} in
+        "-r"|"--reset") git -C "${CBL_SRC_FOLDER}"/llvm-project rh -q ;;
+        "-s"|"--set"|*) sed -i 's/rev-parse HEAD/rev-parse origin\/master/g' "${CBL_SRC_FOLDER}"/llvm-project/llvm/cmake/modules/VersionFromVCS.cmake ;;
+    esac
+}
+
+
+# Strip LLVM binaries
+function stripllvmbin() {(
+    BINARIES_TO_STRIP=( clang lld llvm-ar llvm-pdbutil llvm-symbolizer llvm-undname sancov )
+    for BINARY in "${BINARIES_TO_STRIP[@]}"; do strip "${1:?}"/bin/"${BINARY}"; done
+)}
+
+
 # Build Clang
 # SC2120: bldcl references arguments, but none are ever passed.
 # shellcheck disable=SC2120
@@ -425,7 +441,6 @@ function bldcl() {(
                         -DLLVM_INCLUDE_EXAMPLES=OFF
                         -DLLVM_INCLUDE_TESTS=OFF
                         -DLLVM_INCLUDE_DOCS=OFF )
-    BINARIES_TO_STRIP=( clang lld llvm-ar llvm-pdbutil llvm-symbolizer llvm-undname sancov )
     S1_FOLDER=${CLANG_BUILD_FOLDER}/stage1
     S1_TARGETS="X86"
     S2_TARGETS="ARM;AArch64;PowerPC;X86"
@@ -443,8 +458,7 @@ function bldcl() {(
 
     { { [[ -z ${INCREMENTAL} ]] && cbf c; } && mkdir -p "${S1_FOLDER}" && cd "${S1_FOLDER}"; } || die "wtf"
 
-    # Force the version string to show the upstream hash, not the current tree's (local patches are going to be from Phabricator)
-    sed -i 's/rev-parse HEAD/rev-parse origin\/master/g' "${CBL_SRC_FOLDER}"/llvm-project/llvm/cmake/modules/VersionFromVCS.cmake
+    clrev -s
 
     # Stage one
     cmake -Wno-dev \
@@ -455,10 +469,10 @@ function bldcl() {(
           -DLLVM_TARGETS_TO_BUILD="${S1_TARGETS}" \
           -DLLVM_USE_LINKER="$(for LD in lld gold bfd; do command -v ld.${LD} &>/dev/null && break; done; echo ${LD})"  \
           "${CBL_SRC_FOLDER}"/llvm-project/llvm > /dev/null
-    time ninja || { git -C "${CBL_SRC_FOLDER}/llvm-project" rh -q; die "Error building Clang/lld stage 1!"; }
-    for BINARY in "${BINARIES_TO_STRIP[@]}"; do strip "${S1_FOLDER}"/bin/"${BINARY}"; done
+    time ninja || { clrev -r; die "Error building Clang/lld stage 1!"; }
+    stripllvmbin "${S1_FOLDER}"
 
-    [[ -n ${DEBUG} ]] && { git -C "${CBL_SRC_FOLDER}/llvm-project" rh -q; return; }
+    [[ -n ${DEBUG} ]] && { clrev -r; return; }
 
     # Stage two
     cd "${CLANG_BUILD_FOLDER}" || die "wtf"
@@ -472,10 +486,10 @@ function bldcl() {(
           -DLLVM_TARGETS_TO_BUILD="${S2_TARGETS}" \
           -DLLVM_USE_LINKER="${S1_FOLDER}/bin/ld.lld"  \
           "${CBL_SRC_FOLDER}"/llvm-project/llvm > /dev/null
-    time ninja || { git -C "${CBL_SRC_FOLDER}/llvm-project" rh -q; die "Error building Clang/lld stage 2!"; }
-    for BINARY in "${BINARIES_TO_STRIP[@]}"; do strip "${CLANG_BUILD_FOLDER}"/bin/"${BINARY}"; done
+    time ninja || { clrev -r; die "Error building Clang/lld stage 2!"; }
+    stripllvmbin "${INSTALL_FOLDER}"
 
-    git -C "${CBL_SRC_FOLDER}/llvm-project" rh -q
+    clrev -r
 )}
 
 
