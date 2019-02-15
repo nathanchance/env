@@ -1010,6 +1010,6 @@ function bgit() {
                 NO_PERL_CPAN_FALLBACKS=1 )
 
     git cl -q
-    "${MAKE[@]}" all doc
-    sudo "${MAKE[@]}" install install-doc
+    "${MAKE[@]}" all
+    sudo "${MAKE[@]}" install
 }
