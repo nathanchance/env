@@ -23,9 +23,15 @@ function bootstrap() {
         *) display_error "Unsupported architecture!"; return 1 ;;
     esac
 
-    # Install packages from Debian repos
+    # Ensure that packages are all up to date
     sudo apt update
     sudo apt upgrade -y
+
+    # Make sure timezone is correct
+    sudo bash -c 'echo "America/Phoenix" > /etc/timezone'
+    sudo dpkg-reconfigure -f noninteractive tzdata
+
+    # Install packages from Debian repos
     sudo apt install -y --no-install-recommends \
         build-essential \
         bc \
