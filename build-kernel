@@ -21,7 +21,7 @@ function errcho() {
 
 # Get cross compile prefix
 function get_cc_prefix() {
-    find "${1}" \( -type f -o -type l \) -name '*-gcc' | head -n1 | sed 's@.*/@@' | sed 's/gcc//'
+    find "${1}" \( -type f -o -type l \) -name '*-gcc' -printf "%T+\t%p\n" | sort -r | head -n1 | sed 's@.*/@@' | sed 's/gcc//'
 }
 
 
