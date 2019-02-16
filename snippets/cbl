@@ -524,7 +524,7 @@ function bldbn() {(
                                                        "${COMMON_FLAGS[@]}" ;;
         esac
         time make -s "${JOBS_FLAG}" V=0 || die "Error building ${TARGET} binutils"
-        make -s prefix="${INSTALL_FOLDER:-"${CBL_USR_FOLDER}"}" install V=0 || die "Error installing ${TARGET} binutils"
+        make -s prefix="${INSTALL_FOLDER:="${CBL_USR_FOLDER}"}" install V=0 || die "Error installing ${TARGET} binutils"
         cd ..
     done
 )}

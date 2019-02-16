@@ -41,7 +41,7 @@ function bk() {
         "op6:oneplus/SDM845_"*) PARAMS=( sdm845-perf_defconfig ) ;;
         "polaris"*) PARAMS=( polaris_user_defconfig ) ;;
         "sagit:sagit-o-oss") PARAMS=( sagit_user_defconfig ) ;;
-        "tissot:tissot-o-oss"*) PARAMS=( tissot-perf_defconfig ) ;;
+        "tissot:tissot-"*) PARAMS=( tissot-perf_defconfig ) ;;
         "wahoo:"*) PARAMS=( wahoo_defconfig -c -ct clang-4053586 ) ;;
         "whyred:whyred-o-oss") PARAMS=( whyred-perf_defconfig ) ;;
 

@@ -218,7 +218,7 @@ for VERSION in "${VERSIONS[@]}"; do
             "op6") BRANCHES=( "android-9.0:omni" "lineage-16.0:LineageOS" "oneplus/SDM845_P_9.0:upstream" "oneplus/SDM845_P_9.0_Beta:upstream" ) ;;
             "polaris") BRANCHES=( "polaris-o-oss:upstream" ) ;;
             "sagit") BRANCHES=( "sagit-o-oss:upstream" ) ;;
-            "tissot") BRANCHES=( "tissot-o-oss-8.1:upstream" ) ;;
+            "tissot") BRANCHES=( "tissot-p-oss:upstream" ) ;;
             "wahoo") BRANCHES=( "android-msm-wahoo-4.4" ) ;;
             "whyred") BRANCHES=( "whyred-o-oss:upstream" ) ;;
         esac
