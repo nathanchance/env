@@ -418,8 +418,6 @@ function stripllvmbin() {(
 
 
 # Build Clang
-# SC2120: bldcl references arguments, but none are ever passed.
-# shellcheck disable=SC2120
 function bldcl() {(
     # SC2191: The = here is literal. To assign by index, use ( [index]=value ) with no spaces. To keep as literal, quote it.
     # shellcheck disable=SC2191
@@ -448,7 +446,8 @@ function bldcl() {(
     while (( ${#} )); do
         case ${1} in
             "-d"|"--debug") DEBUG=true; S1_TARGETS=${S2_TARGETS} ;;
-            "-i"|"--incremental") INCREMENTAL=true ;;
+            "-i"|"--install") INSTALL=true ;;
+            "-n"|"--no-clean") INCREMENTAL=true ;;
             "-t"|"--targets") shift; if [[ -n ${DEBUG} ]]; then S1_TARGETS="${1}"; else S2_TARGETS="${1}"; fi ;;
         esac
         shift
@@ -456,7 +455,8 @@ function bldcl() {(
 
     header "Building Clang"
 
-    { { [[ -z ${INCREMENTAL} ]] && cbf c; } && mkdir -p "${S1_FOLDER}" && cd "${S1_FOLDER}"; } || die "wtf"
+    [[ -z ${INCREMENTAL} ]] && cbf c
+    { mkdir -p "${S1_FOLDER}" && cd "${S1_FOLDER}"; } || die "wtf"
 
     clrev -s
 
@@ -466,13 +466,17 @@ function bldcl() {(
           "${BASE_CMAKE_VALUES[@]}" \
           -DCMAKE_C_COMPILER="$(command -v clang || command -v gcc)" \
           -DCMAKE_CXX_COMPILER="$(command -v clang++ || command -v g++)" \
+          ${DEBUG:+-DCMAKE_INSTALL_PREFIX="$(mktemp -d)"} \
           -DLLVM_TARGETS_TO_BUILD="${S1_TARGETS}" \
-          -DLLVM_USE_LINKER="$(for LD in lld gold bfd; do command -v ld.${LD} &>/dev/null && break; done; echo ${LD})"  \
+          -DLLVM_USE_LINKER="$(for LD in lld gold bfd; do command -v ld.${LD} &>/dev/null && break; done; echo ${LD})" \
           "${CBL_SRC_FOLDER}"/llvm-project/llvm > /dev/null
     time ninja || { clrev -r; die "Error building Clang/lld stage 1!"; }
     stripllvmbin "${S1_FOLDER}"
-
-    [[ -n ${DEBUG} ]] && { clrev -r; return; }
+    if [[ -n ${DEBUG} ]]; then
+        [[ -n ${INSTALL} ]] && { ninja install || die "Error installing Clang/lld!"; }
+        clrev -r
+        return
+    fi
 
     # Stage two
     cd "${CLANG_BUILD_FOLDER}" || die "wtf"
@@ -481,13 +485,17 @@ function bldcl() {(
           "${BASE_CMAKE_VALUES[@]}" \
           -DCMAKE_C_COMPILER="${S1_FOLDER}/bin/clang" \
           -DCMAKE_CXX_COMPILER="${S1_FOLDER}/bin/clang++" \
-          -DCMAKE_INSTALL_PREFIX="${INSTALL_FOLDER:-"${CBL_USR_FOLDER}"}" \
+          -DCMAKE_INSTALL_PREFIX="${INSTALL_FOLDER:="${CBL_USR_FOLDER}"}" \
           -DLLVM_ENABLE_LTO=Thin \
           -DLLVM_TARGETS_TO_BUILD="${S2_TARGETS}" \
           -DLLVM_USE_LINKER="${S1_FOLDER}/bin/ld.lld"  \
           "${CBL_SRC_FOLDER}"/llvm-project/llvm > /dev/null
     time ninja || { clrev -r; die "Error building Clang/lld stage 2!"; }
-    stripllvmbin "${INSTALL_FOLDER}"
+    stripllvmbin "${CLANG_BUILD_FOLDER}"
+    if [[ -n ${INSTALL} ]]; then
+        rm -rf "${INSTALL_FOLDER}"
+        ninja install > /dev/null || die "Error installing Clang/lld!"
+    fi
 
     clrev -r
 )}
@@ -558,11 +566,7 @@ function bldusr() {(
 
     # Build Clang and lld
     INSTALL_FOLDER=${CBL_USR_FOLDER}
-    # SC2119: Use bldcl "$@" if function's $1 should mean script's $1.
-    # shellcheck disable=SC2119
-    bldcl
-    rm -rf "${INSTALL_FOLDER}"
-    ninja -C "${CLANG_BUILD_FOLDER}" install > /dev/null || die "Error installing Clang/lld!"
+    bldcl -i
 
     # Build binutils
     bldbn
