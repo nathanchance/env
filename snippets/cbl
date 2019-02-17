@@ -332,6 +332,14 @@ function lnt() {
 
     # Logging
     LOG=$(mktemp)
+    {
+        ${CBL_USR_FOLDER}/bin/clang --version | head -n1
+        echo
+        make defconfig &>/dev/null
+        make kernelrelease | tail -n1
+        git cl -q
+        echo
+    } > "${LOG}"
 
     # Configurations known to build with -Werror
     CONFIGS=( "arm:multi_v7_defconfig"
