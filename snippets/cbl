@@ -374,14 +374,22 @@ function lnt() {
 
         # Make sure that if make fails, it gets propgated to the if statement
         if [[ ${PIPESTATUS[0]} -eq 0 ]]; then
-            RESULT=Success
+            RESULT=successful
         else
-            RESULT=Failed
+            RESULT=failed
         fi
         TIME_STRING=$(format_time "${START}" "$(date +%s)")
         {
-            echo "${ARCH}:${CONFIG} | ${RESULT} in ${TIME_STRING,,}"
-            [[ -z ${DEBUG} && ( -n ${SHOW_NF_WARNINGS} || ${RESULT} = "Failed" ) ]] && cat "${TMP}"
+            echo "${ARCH}:${CONFIG} | Build ${RESULT} in ${TIME_STRING,,}\c"
+            if [[ ${RESULT} = "successful" && ${CONFIG} =~ defconfig ]]; then
+                if bootk "${ARCH}" &>/dev/null; then
+                    echo " | Boot successful\c"
+                else
+                    echo " | Boot failed\c"
+                fi
+            fi
+            echo
+            [[ -z ${DEBUG} && ( -n ${SHOW_NF_WARNINGS} || ${RESULT} = "failed" ) ]] && cat "${TMP}"
             echo
         } >> "${LOG}"
         rm "${TMP}"
