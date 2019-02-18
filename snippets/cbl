@@ -333,7 +333,7 @@ function lnt() {
     # Logging
     LOG=$(mktemp)
     {
-        ${CBL_USR_FOLDER}/bin/clang --version | head -n1
+        "${CBL_USR_FOLDER}"/bin/clang --version | head -n1
         echo
         make defconfig &>/dev/null
         make kernelrelease | tail -n1
@@ -488,6 +488,8 @@ function bldcl() {(
 
     # Stage two
     cd "${CLANG_BUILD_FOLDER}" || die "wtf"
+    # SC2030: Modification of INSTALL_FOLDER is local (to subshell caused by (..) group).
+    # shellcheck disable=SC2030
     cmake -Wno-dev \
           -G Ninja \
           "${BASE_CMAKE_VALUES[@]}" \
@@ -540,6 +542,8 @@ function bldbn() {(
                                                        "${COMMON_FLAGS[@]}" ;;
         esac
         time make -s "${JOBS_FLAG}" V=0 || die "Error building ${TARGET} binutils"
+        # SC2031: INSTALL_FOLDER was modified in a subshell. That change might be lost.
+        # shellcheck disable=SC2031
         make -s prefix="${INSTALL_FOLDER:="${CBL_USR_FOLDER}"}" install V=0 || die "Error installing ${TARGET} binutils"
         cd ..
     done
