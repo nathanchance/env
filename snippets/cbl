@@ -244,7 +244,7 @@ function bldkf() {
 
 # Boot a kernel in QEMU
 function bootk() {
-    local ARCH IMAGES_FOLDER KERNEL RAM QEMU; ARCH=${1}; shift
+    local ARCH COMMAND IMAGES_FOLDER KERNEL RAM QEMU; ARCH=${1}; shift
     [[ -z ${ARCH} ]] && { display_error "ARCH not specified!"; return 1; }
 
     IMAGES_FOLDER=${CBL_FOLDER}/git/ci-master/images
@@ -294,8 +294,10 @@ function bootk() {
     git -C "${IMAGES_FOLDER}" rh --quiet
     git -C "${IMAGES_FOLDER}" pull --quiet
 
-    # Run the command
-    timeout 2m unbuffer ${QEMU} "${QEMU_ARCH_CMDLINE[@]}" -kernel "${KERNEL}" -m "${RAM:-512m}" -nographic "${@}"
+    # Print or run the command
+    COMMAND=( timeout 2m unbuffer "${QEMU}" "${QEMU_ARCH_CMDLINE[@]}" -kernel "${KERNEL}" -m "${RAM:-512m}" -nographic )
+    [[ ${1} = "--print" ]] && { echo "${COMMAND[*]}"; return; }
+    "${COMMAND[@]}" "${@}"
 }
 
 
