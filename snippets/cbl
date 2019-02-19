@@ -422,8 +422,16 @@ function dckrrn() {(
 # Modify Clang to report the upstream hash for the version string, bypassing local patches
 function clrev() {
     case ${1} in
-        "-r"|"--reset") git -C "${CBL_SRC_FOLDER}"/llvm-project rh -q ;;
-        "-s"|"--set"|*) sed -i 's/rev-parse HEAD/rev-parse origin\/master/g' "${CBL_SRC_FOLDER}"/llvm-project/llvm/cmake/modules/VersionFromVCS.cmake ;;
+        "-r"|"--reset")
+            git -C "${CBL_SRC_FOLDER}"/llvm-project rh -q ;;
+        "-s"|"--set"|*)
+            (
+                cd "${CBL_SRC_FOLDER}"/llvm-project
+                sed -i 's/rev-parse HEAD/rev-parse origin\/master/g' llvm/cmake/modules/VersionFromVCS.cmake
+                sed -i 's/:%H/:%H origin\/master/g' llvm/utils/GetSourceVersion
+                sed -i 's/GetSourceVersion ${LLD_SOURCE_DIR}/GetSourceVersion ${LLD_SOURCE_DIR}\/../g' lld/CMakeLists.txt
+                sed -i 's/GetRepositoryPath ${LLD_SOURCE_DIR}/GetRepositoryPath ${LLD_SOURCE_DIR}\/../g' lld/CMakeLists.txt
+            ) ;;
     esac
 }
 
@@ -571,6 +579,7 @@ function bldusr() {(
             header "Updating LLVM"
             cd "${CBL_SRC_FOLDER}"/llvm-project || die "Error moving into llvm-project!"
             PREVIOUS_ORIGIN_SHA=$(git show -s --format=%H origin/master)
+            git rh
             git pull -q --rebase || die "Error updating LLVM!"
             git --no-pager lo "${PREVIOUS_ORIGIN_SHA}..$(git show -s --format=%H origin/master)"
         )
