@@ -442,7 +442,6 @@ function bldcl() {(
     BASE_CMAKE_VALUES=( -DCLANG_ENABLE_ARCMT=OFF
                         -DCLANG_ENABLE_STATIC_ANALYZER=OFF
                         -DCLANG_PLUGIN_SUPPORT=OFF
-                        -DCLANG_REPOSITORY_STRING="https://github.com/llvm/llvm-project"
                         -DCMAKE_BUILD_TYPE=Release
                         -DCMAKE_C_FLAGS="-O2 -march=native -mtune=native"
                         -DCMAKE_CXX_FLAGS="-O2 -march=native -mtune=native"
