@@ -78,6 +78,7 @@ function bootstrap() {(
                                         git \
                                         htop \
                                         hugo \
+                                        intel-tbb \
                                         iputils \
                                         jq \
                                         lld \
