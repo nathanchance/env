@@ -71,9 +71,8 @@ function phabap() {(
     [[ ! -d llvm ]] && { display_error "You're not in the llvm-project folder!"; return 1; }
 
     REVISION=${1:?}
-    FOLDER=${2:?}
 
-    curl -LSs "https://reviews.llvm.org/${REVISION}?download=true" | git ap -p0 --directory="${FOLDER}" || return 1
+    curl -LSs "https://reviews.llvm.org/${REVISION}?download=true" | git ap || return 1
     git ac -m "${REVISION}
 
 Link: https://reviews.llvm.org/${REVISION}"
