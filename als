@@ -209,7 +209,7 @@ for VERSION in "${VERSIONS[@]}"; do
             "bluecross") BRANCHES=( "android-msm-bluecross-4.9" ) ;;
             "jasmine") BRANCHES=( "jasmine-p-oss:upstream" ) ;;
             "marlin") BRANCHES=( "android-msm-marlin-3.18" ) ;;
-            "msm-3.18") BRANCHES=( "kernel.lnx.3.18.r34-rel" ) ;;
+            "msm-3.18") BRANCHES=( "kernel.lnx.3.18.r33-rel" "kernel.lnx.3.18.r34-rel" ) ;;
             "msm-4.4") BRANCHES=( "kernel.lnx.4.4.r34-rel" "kernel.lnx.4.4.r35-rel" ) ;;
             "msm-4.9") BRANCHES=( "kernel.lnx.4.9.r11-rel" ) ;;
             "nash") BRANCHES=( "lineage-16.0:LineageOS" ) ;;
