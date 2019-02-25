@@ -450,7 +450,6 @@ function bldcl() {(
                         -DLLVM_ENABLE_OCAMLDOC=OFF
                         -DLLVM_ENABLE_TERMINFO=OFF
                         -DLLVM_ENABLE_WARNINGS=OFF
-                        -DLLVM_ENABLE_PROJECTS="clang;lld"
                         -DLLVM_EXTERNAL_CLANG_TOOLS_EXTRA_SOURCE_DIR=""
                         -DLLVM_INCLUDE_EXAMPLES=OFF
                         -DLLVM_INCLUDE_TESTS=OFF
@@ -483,6 +482,7 @@ function bldcl() {(
           -DCMAKE_C_COMPILER="$(command -v clang || command -v gcc)" \
           -DCMAKE_CXX_COMPILER="$(command -v clang++ || command -v g++)" \
           ${DEBUG:+-DCMAKE_INSTALL_PREFIX="$(mktemp -d)"} \
+          -DLLVM_ENABLE_PROJECTS="clang;lld" \
           -DLLVM_TARGETS_TO_BUILD="${S1_TARGETS}" \
           -DLLVM_USE_LINKER="$(for LD in lld gold bfd; do command -v ld.${LD} &>/dev/null && break; done; echo ${LD})" \
           "${CBL_SRC_FOLDER}"/llvm-project/llvm > /dev/null
@@ -504,7 +504,9 @@ function bldcl() {(
           -DCMAKE_C_COMPILER="${S1_FOLDER}/bin/clang" \
           -DCMAKE_CXX_COMPILER="${S1_FOLDER}/bin/clang++" \
           -DCMAKE_INSTALL_PREFIX="${INSTALL_FOLDER:="${CBL_USR_FOLDER}"}" \
+          -DCOMPILER_RT_BUILD_LIBFUZZER=OFF \
           -DLLVM_ENABLE_LTO=Thin \
+          -DLLVM_ENABLE_PROJECTS="clang;lld;compiler-rt" \
           -DLLVM_TARGETS_TO_BUILD="${S2_TARGETS}" \
           -DLLVM_USE_LINKER="${S1_FOLDER}/bin/ld.lld"  \
           "${CBL_SRC_FOLDER}"/llvm-project/llvm > /dev/null
