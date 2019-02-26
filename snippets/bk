@@ -11,7 +11,7 @@
 function bk() {
     local FOLDER PARAMS
 
-    FOLDER=$(basename "${PWD}")
+    FOLDER=${PWD##*/}
 
     case "${FOLDER}:$(git cb)" in
         # Custom ROMs

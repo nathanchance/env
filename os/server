@@ -561,7 +561,7 @@ function queue-tag() {
 # SC2120: dib references arguments, but none are ever passed.
 # shellcheck disable=SC2120
 function dib() {(
-    DEVICE=$(basename "${PWD}")
+    DEVICE=${PWD##*/}
     START=$(date +%s)
 
     while (( ${#} )); do

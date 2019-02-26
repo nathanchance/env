@@ -417,10 +417,10 @@ function lnt() {
 function dckrrn() {(
     docker pull "${DOCKER_IMAGE:=clangbuiltlinux/ubuntu}"
     docker run --interactive \
-               --mount type=bind,source="${PWD}",target=/"$(basename "${PWD}")",readonly \
+               --mount type=bind,source="${PWD}",target=/"${PWD##*/}",readonly \
                --rm \
                --tty \
-               --workdir /"$(basename "${PWD}")" \
+               --workdir /"${PWD##*/}" \
                "${DOCKER_IMAGE}" "${@}"
 )}
 

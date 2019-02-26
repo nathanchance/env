@@ -153,7 +153,7 @@ function parse_parameters() {
     [[ ${MODE} = "stable" ]] && STABLE=true
     [[ ${MODE} = "tmp" ]] && TMP=true
 
-    [[ -n ${PERSONAL} && ${PWD} =~ flash ]] && DEVICE=$(basename "${PWD}")
+    [[ -n ${PERSONAL} && ${PWD} =~ flash ]] && DEVICE=${PWD##*/}
     [[ -z ${DEVICE} ]] && die "DEVICE is not set!"
 
     if [[ -n ${TG} ]]; then
