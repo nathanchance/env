@@ -358,7 +358,10 @@ function lnt() {
         START=$(date +%s)
 
         # Error log
-        TMP=$(mktemp)
+        ERRORS=$(mktemp)
+
+        # Results log
+        RESULTS=$(mktemp)
 
         # Use lld for arm{32,64}
         [[ ${ARCH} =~ arm ]] && LD=ld.lld
@@ -366,7 +369,7 @@ function lnt() {
         # Build kernel silently normally
         if [[ -z ${DEBUG} ]]; then
             bldk "${ARCH}" "${CONFIG}" KCFLAGS="${KCFLAGS:--Werror}" ${LD:+LD="${LD}"} |& \
-            rg --color=never "error:|warning:|undefined" > "${TMP}"
+            rg --color=never "error:|warning:|undefined" |& sed "s/${PWD//\//\\/}\///g" > "${ERRORS}"
         else
             bldk "${ARCH}" "${CONFIG}" KCFLAGS="${KCFLAGS:--Werror}" ${LD:+LD="${LD}"}
         fi
@@ -388,10 +391,14 @@ function lnt() {
                 fi
             fi
             echo
-            [[ -z ${DEBUG} && ( -n ${SHOW_NF_WARNINGS} || ${RESULT} = "failed" ) ]] && cat "${TMP}"
+        } > "${RESULTS}"
+        cat "${RESULTS}"
+        {
+            cat "${RESULTS}"
+            [[ -z ${DEBUG} && ( -n ${SHOW_NF_WARNINGS} || ${RESULT} = "failed" ) ]] && cat "${ERRORS}"
             echo
         } >> "${LOG}"
-        rm "${TMP}"
+        rm "${ERRORS}" "${RESULTS}"
     ) done
 
     MESSAGE="linux$(cat localversion-next) build results: $(deldog "${LOG}")"
