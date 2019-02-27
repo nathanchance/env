@@ -322,7 +322,7 @@ function cbf() {(
         k) FTC=${KERNEL_BUILD_FOLDER:?} ;;
         *) FTC=${BUILD_FOLDER} ;;
     esac
-    find "${FTC:?}" -mindepth 1 -delete
+    find "${FTC:?}" -mindepth 1 -delete 2>/dev/null
     type -p crbf && crbf
 )}
 
