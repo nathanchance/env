@@ -320,7 +320,7 @@ function babk() {
 
 # linux-next testing
 function lnt() {
-    local CONFIG CONFIGS DEBUG LOG MESSAGE SHOW_NF_WARNINGS TMP
+    local CONFIG CONFIGS DEBUG LOG MESSAGE SHOW_NF_WARNINGS
 
     while (( ${#} )); do
         case ${1} in
@@ -536,8 +536,9 @@ function bldbn() {(
     for TUPLE in host arm-linux-gnueabi aarch64-linux-gnu powerpc-linux-gnu powerpc64le-linux-gnu; do
         BINUTILS_BUILD_FOLDER=${BBFR}/${TUPLE}
         { cbf b && mkdir -p "${BINUTILS_BUILD_FOLDER}" && cd "${BINUTILS_BUILD_FOLDER}"; } || die "wtf"
+        # SC2031: INSTALL_FOLDER was modified in a subshell. That change might be lost.
         # SC2191: The = here is literal. To assign by index, use ( [index]=value ) with no spaces. To keep as literal, quote it.
-        # shellcheck disable=SC2191
+        # shellcheck disable=SC2031,SC2191
         COMMON_FLAGS=( --prefix="${INSTALL_FOLDER:="${CBL_USR_FOLDER}"}"
                        --enable-deterministic-archives
                        --enable-gold
