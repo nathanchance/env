@@ -744,7 +744,7 @@ function kct() {(
         fi
         TIME_STRING=$(format_time "${START}" "$(date +%s)")
         {
-            echo "android-${VERSION} | $(git -C "${COMMON_FOLDER}" kf origin/"$(git cb)") | Build ${RESULT} in ${TIME_STRING,,}\c"
+            echo "android-${VERSION} | $(cd "${COMMON_FOLDER}" || die "wtf"; git kf origin/"$(git cb)") | Build ${RESULT} in ${TIME_STRING,,}\c"
             if [[ ${RESULT} = "successful" ]]; then
                 if KERNEL_LOCATION=${OUT_FOLDER} bootk arm64 &>/dev/null; then
                     echo " | Boot successful\c"
