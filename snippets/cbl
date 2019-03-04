@@ -333,12 +333,15 @@ function lt() {(
 
     # Logging
     LOG=$(mktemp)
+    echo
+    echo "Build log: ${LOG}"
+    echo
     {
         "${CBL_USR_FOLDER}"/bin/clang --version | head -n1
         echo
-        make defconfig &>/dev/null
-        make kernelrelease | tail -n1
-        git cl -q
+        echo "Version: $(make defconfig &>/dev/null && make kernelrelease | tail -n1 && git cl -q)"
+        echo
+        echo "Head commit: $(git kf origin/"$(git cb)")"
         echo
     } > "${LOG}"
 
