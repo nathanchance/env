@@ -318,9 +318,9 @@ function babk() {
 }
 
 
-# linux-next testing
-function lnt() {(
-    cd "${CBL_FOLDER}"/linux-next || die "wtf"
+# linux testing
+function lt() {(
+    cd "${CBL_FOLDER}"/"${TREE:-linux-next}" || die "wtf"
 
     while (( ${#} )); do
         case ${1} in
@@ -401,7 +401,7 @@ function lnt() {(
         rm "${ERRORS}" "${RESULTS}"
     ) done
 
-    MESSAGE="linux$(cat localversion-next) build results: $(deldog "${LOG}")"
+    MESSAGE="linux$([[ -f localversion-next ]] && cat localversion-next) build results: $(deldog "${LOG}")"
 
     tg_msg "${MESSAGE}"
 
