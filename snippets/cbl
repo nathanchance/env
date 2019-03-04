@@ -717,6 +717,9 @@ function kct() {(
 
     # Logging
     LOG=$(mktemp)
+    echo
+    echo "Build log: ${LOG}"
+    echo
     {
         "${CBL_USR_FOLDER}"/bin/clang --version | head -n1
         echo
