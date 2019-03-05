@@ -320,7 +320,7 @@ function babk() {
 
 # linux testing
 function lt() {(
-    cd "${CBL_FOLDER}"/"${TREE:-linux-next}" || die "wtf"
+    cd "${CBL_FOLDER}"/"${TREE:=linux-next}" || die "wtf"
 
     while (( ${#} )); do
         case ${1} in
@@ -341,8 +341,10 @@ function lt() {(
         echo
         echo "Version: $(make defconfig &>/dev/null && make kernelrelease | tail -n1 && git cl -q)"
         echo
-        echo "Head commit: $(git kf origin/"$(git cb)")"
-        echo
+        if [[ ${TREE} != linux-next ]]; then
+            echo "Head commit: $(git kf origin/"$(git cb)")"
+            echo
+        fi
     } > "${LOG}"
 
     # Configurations known to build with -Werror
