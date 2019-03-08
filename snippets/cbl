@@ -326,6 +326,8 @@ function babk() {
 
 
 # linux testing
+# SC2120: lt references arguments, but none are ever passed.
+# shellcheck disable=SC2120
 function lt() {(
     cd "${CBL_FOLDER}"/"${TREE:=linux-next}" || die "wtf"
 
@@ -709,6 +711,8 @@ function update_clang_config() {
 
 
 # kernel/common build testing
+# SC2120: kct references arguments, but none are ever passed.
+# shellcheck disable=SC2120
 function kct() {(
     # SC2031: BUILD_FOLDER was modified in a subshell. That change might be lost.
     # shellcheck disable=SC2031
@@ -788,4 +792,23 @@ function kct() {(
 
     rm "${LOG}"
 
+)}
+
+
+# Build all kernel trees
+function bldallk() {(
+    # SC2119: Use lt "$@" if function's $1 should mean script's $1.
+    # shellcheck disable=SC2119
+    TREE=linux lt
+    # shellcheck disable=SC2119
+    TREE=linux-next lt
+    # shellcheck disable=SC2119
+    kct
+)}
+
+
+# Build new Clang and test all kernel trees
+function bldall() {(
+    bldusr
+    bldallk
 )}
