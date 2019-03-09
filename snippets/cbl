@@ -389,9 +389,6 @@ function lt() {(
         # Error log
         ERRORS=$(mktemp)
 
-        # Results log
-        RESULTS=$(mktemp)
-
         # Use lld for arm{32,64}
         [[ ${ARCH} =~ arm ]] && LD=ld.lld
 
@@ -420,14 +417,10 @@ function lt() {(
                 fi
             fi
             echo
-        } > "${RESULTS}"
-        cat "${RESULTS}"
-        {
-            cat "${RESULTS}"
             [[ -z ${DEBUG} && ( -n ${SHOW_NF_WARNINGS} || ${RESULT} = "failed" ) ]] && cat "${ERRORS}"
             echo
         } >> "${LOG}"
-        rm "${ERRORS}" "${RESULTS}"
+        rm "${ERRORS}"
     ) done
 
     MESSAGE="linux$([[ -f localversion-next ]] && cat localversion-next) build results: $(deldog "${LOG}")"
@@ -759,9 +752,6 @@ function kct() {(
         # Error log
         ERRORS=$(mktemp)
 
-        # Results log
-        RESULTS=$(mktemp)
-
         # Build kernel silently normally
         if [[ -z ${DEBUG} ]]; then
             kcbw "${VERSION}" KCFLAGS="${KCFLAGS:--Werror}" |& \
@@ -787,14 +777,10 @@ function kct() {(
                 fi
             fi
             echo
-        } > "${RESULTS}"
-        cat "${RESULTS}"
-        {
-            cat "${RESULTS}"
             [[ -z ${DEBUG} && ( -n ${SHOW_NF_WARNINGS} || ${RESULT} = "failed" ) ]] && cat "${ERRORS}"
             echo
         } >> "${LOG}"
-        rm "${ERRORS}" "${RESULTS}"
+        rm "${ERRORS}"
     ) done
 
     MESSAGE="kernel/common build results: $(deldog "${LOG}")"
