@@ -294,7 +294,8 @@ function bootk() {
     git -C "${IMAGES_FOLDER}" pull --quiet
 
     # Print or run the command
-    COMMAND=( timeout 2m unbuffer "${QEMU}" "${QEMU_ARCH_CMDLINE[@]}" -kernel "${KERNEL}" -m "${RAM:-512m}" -nographic )
+    COMMAND=( "${QEMU}" "${QEMU_ARCH_CMDLINE[@]}" -kernel "${KERNEL}" -m "${RAM:-512m}" -nographic )
+    [[ -z ${NO_TIMEOUT} ]] && COMMAND=( timeout 2m unbuffer "${COMMAND[@]}" )
     [[ ${1} = "--print" ]] && { echo "${COMMAND[*]}"; return; }
 
     case ${ARCH} in
