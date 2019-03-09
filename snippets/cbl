@@ -97,6 +97,19 @@ function bldkw() {
         *) display_error "Invalid TARGET_ARCH specified!"; return ;;
     esac
 
+    while (( ${#} )); do
+        case ${1} in
+            "KCFLAGS="*)
+                declare "${1%%=*}"="${1##*=}"
+                # SC2191: The = here is literal. To assign by index, use ( [index]=value ) with no spaces. To keep as literal, quote it.
+                # shellcheck disable=SC2191
+                MAKE_FLAGS+=( KCFLAGS="${KCFLAGS} -fno-builtin-bcmp" ) ;;
+            *)
+                MAKE_FLAGS+=( "${1}" ) ;;
+        esac
+        shift
+    done
+
     # We are only concerned about little endian for ARM right now unless otherwise stated
     if [[ ${TARGET_ARCH} =~ arm && -z ${BIG_ENDIAN} ]]; then
         KCONFIG_ALLCONFIG=${KERNEL_BUILD_FOLDER}/little-endian.config
