@@ -257,13 +257,13 @@ function bootk() {
                                 -no-reboot
                                 -drive "file=${IMAGES_FOLDER}/arm/rootfs.ext4,format=raw,id=rootfs,if=none"
                                 -device "virtio-blk-device,drive=rootfs"
-                                -append "console=ttyAMA0 root=/dev/vda" ) ;;
+                                -append "console=ttyAMA0 root=/dev/vda ${QEMU_CMDLINE}" ) ;;
         "arm64")
             IMAGE=Image.gz
             QEMU=qemu-system-aarch64
             QEMU_ARCH_CMDLINE=( -cpu cortex-a57
                                 -drive "file=${IMAGES_FOLDER}/arm64/rootfs.ext4,format=raw"
-                                -append "console=ttyAMA0 root=/dev/vda" ) ;;
+                                -append "console=ttyAMA0 root=/dev/vda ${QEMU_CMDLINE}" ) ;;
         "ppc64le")
             IMAGE=zImage.epapr
             RAM=2G
@@ -272,12 +272,13 @@ function bootk() {
                                 -device "ipmi-bmc-sim,id=bmc0"
                                 -device "isa-ipmi-bt,bmc=bmc0,irq=10"
                                 -L /usr/share/qemu -bios skiboot.lid
-                                -initrd "${IMAGES_FOLDER}/ppc64le/rootfs.cpio" )
+                                -initrd "${IMAGES_FOLDER}/ppc64le/rootfs.cpio"
+                                ${QEMU_CMDLINE:+-append "${QEMU_CMDLINE}"} )
             ARCH=powerpc ;;
         "x86")
             IMAGE=bzImage
             QEMU=qemu-system-x86_64
-            QEMU_ARCH_CMDLINE=( -append "root=/dev/sda console=ttyS0"
+            QEMU_ARCH_CMDLINE=( -append "root=/dev/sda console=ttyS0 ${QEMU_CMDLINE}"
                                 -cpu host
                                 -d unimp,guest_errors
                                 -drive "file=${IMAGES_FOLDER}/x86_64/rootfs.ext4,format=raw,if=ide"
