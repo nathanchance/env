@@ -462,6 +462,7 @@ function bldcl() {(
                         -DCMAKE_BUILD_TYPE=Release
                         -DCMAKE_C_FLAGS="-O2 -march=native -mtune=native"
                         -DCMAKE_CXX_FLAGS="-O2 -march=native -mtune=native"
+                        -DCOMPILER_RT_BUILD_LIBFUZZER=OFF
                         -DLLVM_BINUTILS_INCDIR="${CBL_SRC}/binutils/include"
                         -DLLVM_CCACHE_BUILD=ON
                         -DLLVM_ENABLE_BINDINGS=OFF
@@ -473,14 +474,17 @@ function bldcl() {(
                         -DLLVM_INCLUDE_TESTS=OFF
                         -DLLVM_INCLUDE_DOCS=OFF )
     S1_FOLDER=${CBF}/stage1
-    S1_TARGETS="X86"
-    S2_TARGETS="ARM;AArch64;PowerPC;X86"
+    [[ -z ${S1_TARGETS} ]] && S1_TARGETS="X86"
+    [[ -z ${S2_TARGETS} ]] && S2_TARGETS="ARM;AArch64;PowerPC;X86"
+    [[ -z ${S1_PROJECTS} ]] && S1_PROJECTS="clang;lld;compiler-rt"
+    [[ -z ${S2_PROJECTS} ]] && S2_PROJECTS="clang;lld;compiler-rt"
 
     while (( ${#} )); do
         case ${1} in
-            "-d"|"--debug") DEBUG=true; S1_TARGETS=${S2_TARGETS} ;;
+            "-d"|"--debug") DEBUG=true ;;
             "-i"|"--install") INSTALL=true ;;
             "-n"|"--no-clean") INCREMENTAL=true ;;
+            "-p"|"--projects") shift; if [[ -n ${DEBUG} ]]; then S1_PROJECTS="${1}"; else S2_PROJECTS="${1}"; fi ;;
             "-t"|"--targets") shift; if [[ -n ${DEBUG} ]]; then S1_TARGETS="${1}"; else S2_TARGETS="${1}"; fi ;;
         esac
         shift
@@ -500,7 +504,7 @@ function bldcl() {(
           -DCMAKE_C_COMPILER="$(command -v clang || command -v gcc)" \
           -DCMAKE_CXX_COMPILER="$(command -v clang++ || command -v g++)" \
           ${DEBUG:+-DCMAKE_INSTALL_PREFIX="$(mktemp -d)"} \
-          -DLLVM_ENABLE_PROJECTS="clang;lld" \
+          -DLLVM_ENABLE_PROJECTS="${S1_PROJECTS}" \
           -DLLVM_TARGETS_TO_BUILD="${S1_TARGETS}" \
           -DLLVM_USE_LINKER="$(for LD in lld gold bfd; do command -v ld.${LD} &>/dev/null && break; done; echo ${LD})" \
           "${CBL_SRC}"/llvm-project/llvm > /dev/null
@@ -522,9 +526,8 @@ function bldcl() {(
           -DCMAKE_C_COMPILER="${S1_FOLDER}/bin/clang" \
           -DCMAKE_CXX_COMPILER="${S1_FOLDER}/bin/clang++" \
           -DCMAKE_INSTALL_PREFIX="${INSTALL_FOLDER:="${CBL_USR}"}" \
-          -DCOMPILER_RT_BUILD_LIBFUZZER=OFF \
           -DLLVM_ENABLE_LTO=Thin \
-          -DLLVM_ENABLE_PROJECTS="clang;lld;compiler-rt" \
+          -DLLVM_ENABLE_PROJECTS="${S2_PROJECTS}" \
           -DLLVM_TARGETS_TO_BUILD="${S2_TARGETS}" \
           -DLLVM_USE_LINKER="${S1_FOLDER}/bin/ld.lld"  \
           "${CBL_SRC}"/llvm-project/llvm > /dev/null
