@@ -662,9 +662,9 @@ DEFCONFIG=cuttlefish_defconfig
 EXTRA_CMDS='\'''\''
 KERNEL_DIR='"$(realpath --relative-to="${PWD}" "${COMMON_FOLDER}")"'
 POST_DEFCONFIG_CMDS="check_defconfig && update_clang_config"
-CLANG_PREBUILT_BIN='"$(realpath --relative-to="${PWD}" "${CBL_BIN}")"'
-LD_LIBRARY_PATH='"${CBL_USR}"'/lib
-LINUX_GCC_CROSS_COMPILE_PREBUILTS_BIN='"$(realpath --relative-to="${PWD}" "${CBL_BIN}")"'
+CLANG_PREBUILT_BIN='"$(realpath --relative-to="${PWD}" "${CPB:-${CBL_BIN}}")"'
+LD_LIBRARY_PATH='"${LD_LIBRARY_PATH:-"${CBL_USR}"/lib}"'
+LINUX_GCC_CROSS_COMPILE_PREBUILTS_BIN='"$(realpath --relative-to="${PWD}" "${GCCPB:-${CBL_BIN}}")"'
 FILES="
 arch/arm64/boot/Image.gz
 vmlinux
