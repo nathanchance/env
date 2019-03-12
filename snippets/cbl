@@ -8,16 +8,17 @@
 
 
 # Universal variables
-CBL_SRC_FOLDER=${CBL_FOLDER}/src
-CBL_USR_FOLDER=${CBL_FOLDER}/usr
+CBL_SRC=${CBL}/src
+CBL_USR=${CBL}/usr
+CBL_BIN=${CBL_USR}/bin
 
 
 # Create build folders
 function crbf() {
     local ITEM
     for ITEM in binutils clang kernel; do
-        export ${ITEM^^}_BUILD_FOLDER="${BUILD_FOLDER}/${ITEM}"
-        mkdir -p "${BUILD_FOLDER}/${ITEM}"
+        export "$(echo ${ITEM:0:1} | tr '[:lower:]' '[:upper:]')BF=${BLDF}/${ITEM}"
+        mkdir -p "${BLDF}/${ITEM}"
     done
 }
 
@@ -99,18 +100,18 @@ function bldkw() {
 
     # We are only concerned about little endian for ARM right now unless otherwise stated
     if [[ ${TARGET_ARCH} =~ arm && -z ${BIG_ENDIAN} ]]; then
-        KCONFIG_ALLCONFIG=${KERNEL_BUILD_FOLDER}/little-endian.config
+        KCONFIG_ALLCONFIG=${KBF}/little-endian.config
         echo "CONFIG_CPU_BIG_ENDIAN=n" >> "${KCONFIG_ALLCONFIG}"
     fi
 
-    time PATH=${PATH_OVERRIDE:+"${PATH_OVERRIDE}:"}${CBL_USR_FOLDER}/bin:${PATH} \
+    time PATH=${PATH_OVERRIDE:+"${PATH_OVERRIDE}:"}${CBL_BIN}:${PATH} \
     make "${JOBS_FLAG}" \
          CC="${CCACHE} clang" \
          ${KCONFIG_ALLCONFIG:+KCONFIG_ALLCONFIG="${KCONFIG_ALLCONFIG}"} \
          HOSTCC=clang \
          HOSTLD=ld.lld \
          "${MAKE_FLAGS[@]}" \
-         O="${KERNEL_BUILD_FOLDER}" \
+         O="${KBF}" \
          "${@}"
 }
 
@@ -118,7 +119,7 @@ function bldkw() {
 # Extra configs for build/boot testings
 # From https://github.com/groeck/linux-build-test/blob/master/rootfs/scripts/common.sh
 function extraconfigs() {
-    local OUT_FOLDER="${KERNEL_BUILD_FOLDER}"
+    local OUT_FOLDER="${KBF}"
 
     echo "CONFIG_EXPERT=y
 CONFIG_DEBUG_KERNEL=y
@@ -237,7 +238,7 @@ function bldkf() {
     [[ -z ${FOLDER} ]] && { display_error "FOLDER not specified!"; return 1; }
     [[ ! -d ${FOLDER} ]] && { display_error "${FOLDER} could not be found!"; return 1; }
 
-    bldk "${ARCH}" "${CONFIG}" M="${KERNEL_BUILD_FOLDER}" src="${FOLDER}" "${@}"
+    bldk "${ARCH}" "${CONFIG}" M="${KBF}" src="${FOLDER}" "${@}"
 }
 
 
@@ -246,7 +247,7 @@ function bootk() {
     local ARCH COMMAND IMAGES_FOLDER KERNEL RAM QEMU; ARCH=${1}; shift
     [[ -z ${ARCH} ]] && { display_error "ARCH not specified!"; return 1; }
 
-    IMAGES_FOLDER=${CBL_FOLDER}/git/ci-master/images
+    IMAGES_FOLDER=${CBL}/git/ci-master/images
     [[ ! -d ${IMAGES_FOLDER} ]] && { display_error "${IMAGES_FOLDER} doesn't exist!"; return 1; }
 
     case ${ARCH} in
@@ -286,7 +287,7 @@ function bootk() {
         *) display_error "Invalid ARCH specified!"; return 1 ;;
     esac
 
-    KERNEL=${KERNEL_LOCATION:-${KERNEL_BUILD_FOLDER}}/arch/${ARCH}/boot/${IMAGE}
+    KERNEL=${KERNEL_LOCATION:-${KBF}}/arch/${ARCH}/boot/${IMAGE}
     [[ ! -f ${KERNEL} ]] && { display_error "Kernel doesn't exist! Please build one."; return 1; }
 
     # Update the images
@@ -331,7 +332,7 @@ function babk() {
 # SC2120: lt references arguments, but none are ever passed.
 # shellcheck disable=SC2120
 function lt() {(
-    cd "${CBL_FOLDER}"/"${TREE:=linux-next}" || die "wtf"
+    cd "${CBL}"/"${TREE:=linux-next}" || die "wtf"
 
     while (( ${#} )); do
         case ${1} in
@@ -348,7 +349,7 @@ function lt() {(
     echo "Build log: ${LOG}"
     echo
     {
-        "${CBL_USR_FOLDER}"/bin/clang --version | head -n1
+        "${CBL_BIN}"/clang --version | head -n1
         echo
         echo "Version: $(make defconfig &>/dev/null && make kernelrelease | tail -n1 && git cl -q)"
         echo
@@ -438,8 +439,8 @@ function dckrrn() {(
 # Modify Clang to report the upstream hash for the version string, bypassing local patches
 function clrev() {
     case ${1} in
-        "-r"|"--reset") git -C "${CBL_SRC_FOLDER}"/llvm-project rh -q ;;
-        "-s"|"--set"|*) sed -i 's/rev-parse HEAD/rev-parse origin\/master/g' "${CBL_SRC_FOLDER}"/llvm-project/llvm/cmake/modules/VersionFromVCS.cmake ;;
+        "-r"|"--reset") git -C "${CBL_SRC}"/llvm-project rh -q ;;
+        "-s"|"--set"|*) sed -i 's/rev-parse HEAD/rev-parse origin\/master/g' "${CBL_SRC}"/llvm-project/llvm/cmake/modules/VersionFromVCS.cmake ;;
     esac
 }
 
@@ -461,7 +462,7 @@ function bldcl() {(
                         -DCMAKE_BUILD_TYPE=Release
                         -DCMAKE_C_FLAGS="-O2 -march=native -mtune=native"
                         -DCMAKE_CXX_FLAGS="-O2 -march=native -mtune=native"
-                        -DLLVM_BINUTILS_INCDIR="${CBL_SRC_FOLDER}/binutils/include"
+                        -DLLVM_BINUTILS_INCDIR="${CBL_SRC}/binutils/include"
                         -DLLVM_CCACHE_BUILD=ON
                         -DLLVM_ENABLE_BINDINGS=OFF
                         -DLLVM_ENABLE_OCAMLDOC=OFF
@@ -471,7 +472,7 @@ function bldcl() {(
                         -DLLVM_INCLUDE_EXAMPLES=OFF
                         -DLLVM_INCLUDE_TESTS=OFF
                         -DLLVM_INCLUDE_DOCS=OFF )
-    S1_FOLDER=${CLANG_BUILD_FOLDER}/stage1
+    S1_FOLDER=${CBF}/stage1
     S1_TARGETS="X86"
     S2_TARGETS="ARM;AArch64;PowerPC;X86"
 
@@ -502,7 +503,7 @@ function bldcl() {(
           -DLLVM_ENABLE_PROJECTS="clang;lld" \
           -DLLVM_TARGETS_TO_BUILD="${S1_TARGETS}" \
           -DLLVM_USE_LINKER="$(for LD in lld gold bfd; do command -v ld.${LD} &>/dev/null && break; done; echo ${LD})" \
-          "${CBL_SRC_FOLDER}"/llvm-project/llvm > /dev/null
+          "${CBL_SRC}"/llvm-project/llvm > /dev/null
     time ninja || { clrev -r; die "Error building Clang/lld stage 1!"; }
     stripllvmbin "${S1_FOLDER}"
     if [[ -n ${DEBUG} ]]; then
@@ -512,7 +513,7 @@ function bldcl() {(
     fi
 
     # Stage two
-    cd "${CLANG_BUILD_FOLDER}" || die "wtf"
+    cd "${CBF}" || die "wtf"
     # SC2030: Modification of INSTALL_FOLDER is local (to subshell caused by (..) group).
     # shellcheck disable=SC2030
     cmake -Wno-dev \
@@ -520,15 +521,15 @@ function bldcl() {(
           "${BASE_CMAKE_VALUES[@]}" \
           -DCMAKE_C_COMPILER="${S1_FOLDER}/bin/clang" \
           -DCMAKE_CXX_COMPILER="${S1_FOLDER}/bin/clang++" \
-          -DCMAKE_INSTALL_PREFIX="${INSTALL_FOLDER:="${CBL_USR_FOLDER}"}" \
+          -DCMAKE_INSTALL_PREFIX="${INSTALL_FOLDER:="${CBL_USR}"}" \
           -DCOMPILER_RT_BUILD_LIBFUZZER=OFF \
           -DLLVM_ENABLE_LTO=Thin \
           -DLLVM_ENABLE_PROJECTS="clang;lld;compiler-rt" \
           -DLLVM_TARGETS_TO_BUILD="${S2_TARGETS}" \
           -DLLVM_USE_LINKER="${S1_FOLDER}/bin/ld.lld"  \
-          "${CBL_SRC_FOLDER}"/llvm-project/llvm > /dev/null
+          "${CBL_SRC}"/llvm-project/llvm > /dev/null
     time ninja || { clrev -r; die "Error building Clang/lld stage 2!"; }
-    stripllvmbin "${CLANG_BUILD_FOLDER}"
+    stripllvmbin "${CBF}"
     if [[ -n ${INSTALL} ]]; then
         rm -rf "${INSTALL_FOLDER}"
         ninja install > /dev/null || die "Error installing Clang/lld!"
@@ -541,15 +542,15 @@ function bldcl() {(
 # Build binutils
 function bldbn() {(
     header "Building binutils"
-    cd "${CBL_SRC_FOLDER}"/binutils || die "Error moving into ${CBL_SRC_FOLDER}/binutils"
-    BBFR=${BINUTILS_BUILD_FOLDER}
+    cd "${CBL_SRC}"/binutils || die "Error moving into ${CBL_SRC}/binutils"
+    BBFR=${BBF}
     for TUPLE in host arm-linux-gnueabi aarch64-linux-gnu powerpc-linux-gnu powerpc64le-linux-gnu; do
-        BINUTILS_BUILD_FOLDER=${BBFR}/${TUPLE}
-        { cbf b && mkdir -p "${BINUTILS_BUILD_FOLDER}" && cd "${BINUTILS_BUILD_FOLDER}"; } || die "wtf"
+        BBF=${BBFR}/${TUPLE}
+        { cbf b && mkdir -p "${BBF}" && cd "${BBF}"; } || die "wtf"
         # SC2031: INSTALL_FOLDER was modified in a subshell. That change might be lost.
         # SC2191: The = here is literal. To assign by index, use ( [index]=value ) with no spaces. To keep as literal, quote it.
         # shellcheck disable=SC2031,SC2191
-        COMMON_FLAGS=( --prefix="${INSTALL_FOLDER:="${CBL_USR_FOLDER}"}"
+        COMMON_FLAGS=( --prefix="${INSTALL_FOLDER:="${CBL_USR}"}"
                        --enable-deterministic-archives
                        --enable-gold
                        --enable-ld=default
@@ -559,7 +560,7 @@ function bldbn() {(
                        CXXFLAGS="-O2 -march=native -mtune=native" )
         case ${TUPLE} in
             host)
-                "${CBL_SRC_FOLDER}"/binutils/configure \
+                "${CBL_SRC}"/binutils/configure \
                     --enable-lto \
                     --enable-relro \
                     --enable-shared \
@@ -572,7 +573,7 @@ function bldbn() {(
                     "${COMMON_FLAGS[@]}"
                 make -s configure-host V=0 ;;
             arm-*|aarch64-*)
-                "${CBL_SRC_FOLDER}"/binutils/configure \
+                "${CBL_SRC}"/binutils/configure \
                     --disable-multilib \
                     --disable-nls \
                     --program-prefix=${TUPLE}- \
@@ -582,7 +583,7 @@ function bldbn() {(
                     --with-sysroot="${INSTALL_FOLDER}/${TUPLE}" \
                     "${COMMON_FLAGS[@]}" ;;
             powerpc*)
-                "${CBL_SRC_FOLDER}"/binutils/configure \
+                "${CBL_SRC}"/binutils/configure \
                     --enable-lto \
                     --enable-relro \
                     --enable-shared \
@@ -608,14 +609,14 @@ function bldbn() {(
 # Build Clang, lld. and arm{32,64} and powerpc binutils from source
 function bldusr() {(
     # Update/clone LLVM/Clang
-    if [[ ! -d ${CBL_SRC_FOLDER}/llvm-project ]]; then
+    if [[ ! -d ${CBL_SRC}/llvm-project ]]; then
         header "Cloning LLVM"
-        mkdir -p "${CBL_SRC_FOLDER}"
-        git -C "${CBL_SRC_FOLDER}" clone --single-branch -b master git://github.com/llvm/llvm-project
+        mkdir -p "${CBL_SRC}"
+        git -C "${CBL_SRC}" clone --single-branch -b master git://github.com/llvm/llvm-project
     else
         (
             header "Updating LLVM"
-            cd "${CBL_SRC_FOLDER}"/llvm-project || die "Error moving into llvm-project!"
+            cd "${CBL_SRC}"/llvm-project || die "Error moving into llvm-project!"
             PREVIOUS_ORIGIN_SHA=$(git show -s --format=%H origin/master)
             git rh -q
             git pull -q --rebase || die "Error updating LLVM!"
@@ -624,16 +625,16 @@ function bldusr() {(
     fi
 
     # Update/clone binutils
-    if [[ ! -d ${CBL_SRC_FOLDER}/binutils ]]; then
+    if [[ ! -d ${CBL_SRC}/binutils ]]; then
         header "Cloning binutils"
-        git -C "${CBL_SRC_FOLDER}" clone --single-branch -b master git://sourceware.org/git/binutils-gdb.git binutils
+        git -C "${CBL_SRC}" clone --single-branch -b master git://sourceware.org/git/binutils-gdb.git binutils
     else
         header "Updating binutils"
-        git -C "${CBL_SRC_FOLDER}"/binutils pull --rebase || die "Error updating ${CBL_SRC_FOLDER}/binutils"
+        git -C "${CBL_SRC}"/binutils pull --rebase || die "Error updating ${CBL_SRC}/binutils"
     fi
 
     # Build Clang and lld
-    INSTALL_FOLDER=${CBL_USR_FOLDER}
+    INSTALL_FOLDER=${CBL_USR}
     bldcl -i
 
     # Build binutils
@@ -643,11 +644,9 @@ function bldusr() {(
 
 # kernel/common build wrapper
 function kcbw() {(
-    OUT_FOLDER=${BUILD_FOLDER}/common
-    # SC2030: Modification of BUILD_FOLDER is local (to subshell caused by (..) group).
-    # shellcheck disable=SC2030
     BUILD_FOLDER=${KERNEL_FOLDER}/build
     COMMON_FOLDER=${KERNEL_FOLDER}/common
+    OUT_FOLDER=${BLDF}/common
     BRANCH=android-${1:-4.9}; shift
 
     cd "${BUILD_FOLDER}" || die "wtf"
@@ -663,9 +662,9 @@ DEFCONFIG=cuttlefish_defconfig
 EXTRA_CMDS='\'''\''
 KERNEL_DIR='"$(realpath --relative-to="${PWD}" "${COMMON_FOLDER}")"'
 POST_DEFCONFIG_CMDS="check_defconfig && update_clang_config"
-CLANG_PREBUILT_BIN='"$(realpath --relative-to="${PWD}" "${CBL_USR_FOLDER}"/bin)"'
-LD_LIBRARY_PATH='"${CBL_USR_FOLDER}"'/lib
-LINUX_GCC_CROSS_COMPILE_PREBUILTS_BIN='"$(realpath --relative-to="${PWD}" "${CBL_USR_FOLDER}"/bin)"'
+CLANG_PREBUILT_BIN='"$(realpath --relative-to="${PWD}" "${CBL_BIN}")"'
+LD_LIBRARY_PATH='"${CBL_USR}"'/lib
+LINUX_GCC_CROSS_COMPILE_PREBUILTS_BIN='"$(realpath --relative-to="${PWD}" "${CBL_BIN}")"'
 FILES="
 arch/arm64/boot/Image.gz
 vmlinux
@@ -710,10 +709,8 @@ function update_clang_config() {
 # SC2120: kct references arguments, but none are ever passed.
 # shellcheck disable=SC2120
 function kct() {(
-    # SC2031: BUILD_FOLDER was modified in a subshell. That change might be lost.
-    # shellcheck disable=SC2031
-    OUT_FOLDER=${BUILD_FOLDER}/common
     COMMON_FOLDER=${KERNEL_FOLDER}/common
+    OUT_FOLDER=${BLDF}/common
 
     while (( ${#} )); do
         case ${1} in
@@ -730,7 +727,7 @@ function kct() {(
     echo "Build log: ${LOG}"
     echo
     {
-        "${CBL_USR_FOLDER}"/bin/clang --version | head -n1
+        "${CBL_BIN}"/clang --version | head -n1
         echo
     } > "${LOG}"
 

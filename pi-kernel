@@ -27,7 +27,7 @@ function kmake() {
              "${@}"
     else
         if [[ -n ${CLANG} ]]; then
-            PATH="${CBL_FOLDER}/usr/bin:${PATH}" \
+            PATH="${CBL}/usr/bin:${PATH}" \
             make ARCH=arm \
                  CC="${CCACHE} clang" \
                  HOSTCC=clang \

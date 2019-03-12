@@ -45,7 +45,7 @@ function bootstrap() {(
     [[ ! -d ${KEYS} ]] && die "${KEYS} doesn't exist, create it, and copy keys!"
 
     # Setup folders that will be used
-    mkdir -p "${CBL_FOLDER}"/{git,mirrors,src} \
+    mkdir -p "${CBL}"/{git,mirrors,src} \
              "${KERNEL_FOLDER}"/sony \
              "${MISC_FOLDER}"/building \
              "${REPO_FOLDER}" \
@@ -178,7 +178,7 @@ function bootstrap() {(
     # Grab linux, linux-next, and linux-stable for CBL
     # https://www.kernel.org/cloning-linux-from-a-bundle.html
     (
-        cd "${CBL_FOLDER}" || die "wtf?"
+        cd "${CBL}" || die "wtf?"
         for COMBO in torvalds/linux.git:linux torvald/linux.git:mirrors/linux next/linux-next.git:linux-next stable/linux.git:linux-stable; do
             FOLDER=${COMBO#*:}
             URL=${COMBO%:*}
@@ -198,7 +198,7 @@ function bootstrap() {(
 
     # Download other CBL things
     (
-        cd "${CBL_FOLDER}"/git || die "wtf?"
+        cd "${CBL}"/git || die "wtf?"
         git clone git@github.com:ClangBuiltLinux/continuous-integration.git ci
         git clone git@github.com:ClangBuiltLinux/continuous-integration.git ci-master
         git clone git@github.com:ClangBuiltLinux/dockerimage.git
@@ -207,10 +207,10 @@ function bootstrap() {(
             hub fork
         ) done
 
-        cd "${CBL_FOLDER}"/mirrors || die "wtf?"
+        cd "${CBL}"/mirrors || die "wtf?"
         git clone git://github.com/llvm/llvm-project llvm
 
-        cd "${CBL_FOLDER}"/src
+        cd "${CBL}"/src
         git clone --single-branch -b master git://github.com/llvm/llvm-project
         git -C llvm-project remote add github git@github.com:ClangBuiltLinux/llvm-project.git
         git clone --single-branch -b master git://sourceware.org/git/binutils-gdb.git binutils
@@ -308,8 +308,8 @@ function ccache_setup() {
 
 # Setup build folders
 function sbf() {
-    [[ ! -d ${BUILD_FOLDER:?} ]] && { sudo mkdir "${BUILD_FOLDER}"; sudo chown -R "nathan:nathan" "${BUILD_FOLDER}"; }
-    [[ -z $(findmnt "${BUILD_FOLDER}") ]] && sudo mount -t tmpfs -o "nodev,nosuid,size=15G" tmpfs "${BUILD_FOLDER}"
+    [[ ! -d ${BLDF:?} ]] && { sudo mkdir "${BLDF}"; sudo chown -R "nathan:nathan" "${BLDF}"; }
+    [[ -z $(findmnt "${BLDF}") ]] && sudo mount -t tmpfs -o "nodev,nosuid,size=15G" tmpfs "${BLDF}"
     type -p crbf && crbf
 }
 
@@ -317,10 +317,10 @@ function sbf() {
 # Clean build folder
 function cbf() {(
     case "${1}" in
-        b) FTC=${BINUTILS_BUILD_FOLDER:?} ;;
-        c) FTC=${CLANG_BUILD_FOLDER:?} ;;
-        k) FTC=${KERNEL_BUILD_FOLDER:?} ;;
-        *) FTC=${BUILD_FOLDER} ;;
+        b) FTC=${BBF:?} ;;
+        c) FTC=${CBF:?} ;;
+        k) FTC=${KBF:?} ;;
+        *) FTC=${BLDF} ;;
     esac
     find "${FTC:?}" -mindepth 1 -delete 2>/dev/null
     type -p crbf && crbf
