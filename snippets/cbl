@@ -647,8 +647,8 @@ function bldusr() {(
 
 # kernel/common build wrapper
 function kcbw() {(
-    BUILD_FOLDER=${KERNEL_FOLDER}/build
-    COMMON_FOLDER=${KERNEL_FOLDER}/common
+    BUILD_FOLDER=${CBL}/android/build
+    COMMON_FOLDER=${CBL}/android/common
     OUT_FOLDER=${BLDF}/common
     BRANCH=android-${1:-4.9}; shift
 
@@ -712,7 +712,7 @@ function update_clang_config() {
 # SC2120: kct references arguments, but none are ever passed.
 # shellcheck disable=SC2120
 function kct() {(
-    COMMON_FOLDER=${KERNEL_FOLDER}/common
+    COMMON_FOLDER=${CBL}/android/common
     OUT_FOLDER=${BLDF}/common
 
     while (( ${#} )); do
