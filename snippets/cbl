@@ -438,13 +438,15 @@ function dckrrn() {(
 
 # Modify Clang to report the upstream hash for the version string, bypassing local patches
 function clrev() {(
-    # SC2030: Modification of LLVM is local (to subshell caused by (..) group).
-    # shellcheck disable=SC2030
-    [[ -z ${LLVM} ]] && LLVM=llvm-project
-    case ${1} in
-        "-r"|"--reset") git -C "${CBL_SRC}"/"${LLVM}" rh -q ;;
-        "-s"|"--set"|*) sed -i 's/rev-parse HEAD/rev-parse origin\/master/g' "${CBL_SRC}"/"${LLVM}"/llvm/cmake/modules/VersionFromVCS.cmake ;;
-    esac
+    if [[ -z ${SKIP_REV} ]]; then
+        # SC2030: Modification of LLVM is local (to subshell caused by (..) group).
+        # shellcheck disable=SC2030
+        [[ -z ${LLVM} ]] && LLVM=llvm-project
+        case ${1} in
+            "-r"|"--reset") git -C "${CBL_SRC}"/"${LLVM}" rh -q ;;
+            "-s"|"--set"|*) sed -i 's/rev-parse HEAD/rev-parse origin\/master/g' "${CBL_SRC}"/"${LLVM}"/llvm/cmake/modules/VersionFromVCS.cmake ;;
+        esac
+    fi
 )}
 
 
@@ -484,7 +486,7 @@ function bldcl() {(
 
     while (( ${#} )); do
         case ${1} in
-            "-d"|"--debug") DEBUG=true ;;
+            "-d"|"--debug") DEBUG=true; SKIP_REV=true ;;
             "-i"|"--install") INSTALL=true ;;
             "-n"|"--no-clean") INCREMENTAL=true ;;
             "-p"|"--projects") shift; if [[ -n ${DEBUG} ]]; then S1_PROJECTS="${1}"; else S2_PROJECTS="${1}"; fi ;;
