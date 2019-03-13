@@ -501,7 +501,10 @@ function bldcl() {(
     # shellcheck disable=SC2153
     STABLE_CLANG=${TC_FOLDER}/clang-8.0.0-rc5
     if [[ -d ${STABLE_CLANG} ]]; then
+        OLD_PATH=${PATH}
         export PATH=${STABLE_CLANG}/bin:${PATH}
+
+        OLD_LD_LIBRARY_PATH=${LD_LIBRARY_PATH}
         # SC2030: Modification of LD_LIBRARY_PATH is local (to subshell caused by (..) group).
         # shellcheck disable=SC2030
         export LD_LIBRARY_PATH=${STABLE_CLANG}/lib${LD_LIBRARY_PATH:+":${LD_LIBRARY_PATH}"}
@@ -540,15 +543,24 @@ function bldcl() {(
 
     # Stage two
     cd "${CBF}" || die "wtf"
+
+    [[ -n ${OLD_PATH} ]] && export PATH=${OLD_PATH}
+    # SC2030: Modification of LD_LIBRARY_PATH is local (to subshell caused by (..) group).
+    # shellcheck disable=SC2030
+    [[ -n ${OLD_LD_LIBRARY_PATH} ]] && export LD_LIBRARY_PATH=${OLD_LD_LIBRARY_PATH}
+    export PATH=${S1_FOLDER}/bin:${PATH}
+    # SC2030: Modification of LD_LIBRARY_PATH is local (to subshell caused by (..) group).
+    # shellcheck disable=SC2030
+    export LD_LIBRARY_PATH=${S1_FOLDER}/lib${LD_LIBRARY_PATH:+":${LD_LIBRARY_PATH}"}
+
     # SC2030: Modification of INSTALL_FOLDER is local (to subshell caused by (..) group).
     # shellcheck disable=SC2030
     cmake -Wno-dev \
           -G Ninja \
           "${BASE_CMAKE_VALUES[@]}" \
-          -DCMAKE_C_COMPILER="${S1_FOLDER}/bin/clang" \
-          -DCMAKE_CXX_COMPILER="${S1_FOLDER}/bin/clang++" \
+          -DCMAKE_C_COMPILER=clang \
+          -DCMAKE_CXX_COMPILER=clang++ \
           -DCMAKE_INSTALL_PREFIX="${INSTALL_FOLDER:="${CBL_USR}"}" \
-          -DCMAKE_LINKER="${S1_FOLDER}/bin/ld.lld"  \
           -DLIBCXX_USE_COMPILER_RT=YES \
           -DLIBCXXABI_USE_COMPILER_RT=YES \
           -DLIBCXXABI_USE_LLVM_UNWINDER=YES \
@@ -558,7 +570,7 @@ function bldcl() {(
           -DLLVM_ENABLE_PROJECTS="${S2_PROJECTS}" \
           -DLLVM_ENABLE_RTTI=ON \
           -DLLVM_TARGETS_TO_BUILD="${S2_TARGETS}" \
-          -DLLVM_USE_LINKER="${S1_FOLDER}/bin/ld.lld"  \
+          -DLLVM_USE_LINKER=lld  \
           "${CBL_SRC}"/"${LLVM}"/llvm > /dev/null
     time ninja || { clrev -r; die "Error building Clang/lld stage 2!"; }
     stripllvmbin "${CBF}"
