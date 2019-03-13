@@ -491,6 +491,12 @@ function bldcl() {(
 
     header "Building Clang"
 
+    STABLE_CLANG=${TC_FOLDER}/clang-8.0.0-rc5
+    if [[ -d ${STABLE_CLANG} ]]; then
+        export PATH=${STABLE_CLANG}/bin:${PATH}
+        export LD_LIBRARY_PATH=${STABLE_CLANG}/lib${LD_LIBRARY_PATH:+":${LD_LIBRARY_PATH}"}
+    fi
+
     [[ -z ${INCREMENTAL} ]] && cbf c
     { mkdir -p "${S1_FOLDER}" && cd "${S1_FOLDER}"; } || die "wtf"
 
