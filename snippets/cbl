@@ -458,19 +458,16 @@ function bldcl() {(
     # SC2191: The = here is literal. To assign by index, use ( [index]=value ) with no spaces. To keep as literal, quote it.
     # shellcheck disable=SC2191
     BASE_CMAKE_VALUES=( -DCLANG_ENABLE_ARCMT=OFF
-                        -DCLANG_ENABLE_STATIC_ANALYZER=OFF
                         -DCLANG_PLUGIN_SUPPORT=OFF
                         -DCMAKE_BUILD_TYPE=Release
                         -DCMAKE_C_FLAGS="-O2 -march=native -mtune=native"
                         -DCMAKE_CXX_FLAGS="-O2 -march=native -mtune=native"
-                        -DCOMPILER_RT_BUILD_LIBFUZZER=OFF
                         -DLLVM_BINUTILS_INCDIR="${CBL_SRC}/binutils/include"
                         -DLLVM_CCACHE_BUILD=ON
                         -DLLVM_ENABLE_BINDINGS=OFF
                         -DLLVM_ENABLE_OCAMLDOC=OFF
                         -DLLVM_ENABLE_TERMINFO=OFF
                         -DLLVM_ENABLE_WARNINGS=OFF
-                        -DLLVM_EXTERNAL_CLANG_TOOLS_EXTRA_SOURCE_DIR=""
                         -DLLVM_INCLUDE_EXAMPLES=OFF
                         -DLLVM_INCLUDE_TESTS=OFF
                         -DLLVM_INCLUDE_DOCS=OFF )
@@ -478,8 +475,8 @@ function bldcl() {(
     [[ -z ${LLVM} ]] && LLVM=llvm-project
     [[ -z ${S1_TARGETS} ]] && S1_TARGETS="X86"
     [[ -z ${S2_TARGETS} ]] && S2_TARGETS="ARM;AArch64;PowerPC;X86"
-    [[ -z ${S1_PROJECTS} ]] && S1_PROJECTS="clang;lld;compiler-rt"
-    [[ -z ${S2_PROJECTS} ]] && S2_PROJECTS="clang;lld;compiler-rt"
+    [[ -z ${S1_PROJECTS} ]] && S1_PROJECTS="clang;compiler-rt;lld"
+    [[ -z ${S2_PROJECTS} ]] && S2_PROJECTS="clang;compiler-rt;libcxx;libcxxabi;libunwind;lld"
 
     while (( ${#} )); do
         case ${1} in
@@ -503,10 +500,17 @@ function bldcl() {(
     cmake -Wno-dev \
           -G Ninja \
           "${BASE_CMAKE_VALUES[@]}" \
+          -DCLANG_ENABLE_STATIC_ANALYZER=OFF \
+          -DCOMPILER_RT_BUILD_LIBFUZZER=OFF \
+          -DCOMPILER_RT_BUILD_SANITIZERS=OFF \
           -DCMAKE_C_COMPILER="$(command -v clang || command -v gcc)" \
           -DCMAKE_CXX_COMPILER="$(command -v clang++ || command -v g++)" \
           ${DEBUG:+-DCMAKE_INSTALL_PREFIX="$(mktemp -d)"} \
+          -DLLVM_ENABLE_BACKTRACES=OFF \
           -DLLVM_ENABLE_PROJECTS="${S1_PROJECTS}" \
+          -DLLVM_ENABLE_ZLIB=OFF \
+          -DLLVM_EXTERNAL_CLANG_TOOLS_EXTRA_SOURCE_DIR="" \
+          -DLLVM_INCLUDE_UTILS=OFF \
           -DLLVM_TARGETS_TO_BUILD="${S1_TARGETS}" \
           -DLLVM_USE_LINKER="$(for LD in lld gold bfd; do command -v ld.${LD} &>/dev/null && break; done; echo ${LD})" \
           "${CBL_SRC}"/"${LLVM}"/llvm > /dev/null
@@ -528,8 +532,15 @@ function bldcl() {(
           -DCMAKE_C_COMPILER="${S1_FOLDER}/bin/clang" \
           -DCMAKE_CXX_COMPILER="${S1_FOLDER}/bin/clang++" \
           -DCMAKE_INSTALL_PREFIX="${INSTALL_FOLDER:="${CBL_USR}"}" \
+          -DCMAKE_LINKER="${S1_FOLDER}/bin/ld.lld"  \
+          -DLIBCXX_USE_COMPILER_RT=YES \
+          -DLIBCXXABI_USE_COMPILER_RT=YES \
+          -DLIBCXXABI_USE_LLVM_UNWINDER=YES \
+          -DLLVM_BUILD_LLVM_DYLIB=ON \
+          -DLLVM_LINK_LLVM_DYLIB=OFF \
           -DLLVM_ENABLE_LTO=Thin \
           -DLLVM_ENABLE_PROJECTS="${S2_PROJECTS}" \
+          -DLLVM_ENABLE_RTTI=ON \
           -DLLVM_TARGETS_TO_BUILD="${S2_TARGETS}" \
           -DLLVM_USE_LINKER="${S1_FOLDER}/bin/ld.lld"  \
           "${CBL_SRC}"/"${LLVM}"/llvm > /dev/null
