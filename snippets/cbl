@@ -437,12 +437,13 @@ function dckrrn() {(
 
 
 # Modify Clang to report the upstream hash for the version string, bypassing local patches
-function clrev() {
+function clrev() {(
+    [[ -z ${LLVM} ]] && LLVM=llvm-project
     case ${1} in
-        "-r"|"--reset") git -C "${CBL_SRC}"/llvm-project rh -q ;;
-        "-s"|"--set"|*) sed -i 's/rev-parse HEAD/rev-parse origin\/master/g' "${CBL_SRC}"/llvm-project/llvm/cmake/modules/VersionFromVCS.cmake ;;
+        "-r"|"--reset") git -C "${CBL_SRC}"/"${LLVM}" rh -q ;;
+        "-s"|"--set"|*) sed -i 's/rev-parse HEAD/rev-parse origin\/master/g' "${CBL_SRC}"/"${LLVM}"/llvm/cmake/modules/VersionFromVCS.cmake ;;
     esac
-}
+)}
 
 
 # Strip LLVM binaries
@@ -474,6 +475,7 @@ function bldcl() {(
                         -DLLVM_INCLUDE_TESTS=OFF
                         -DLLVM_INCLUDE_DOCS=OFF )
     S1_FOLDER=${CBF}/stage1
+    [[ -z ${LLVM} ]] && LLVM=llvm-project
     [[ -z ${S1_TARGETS} ]] && S1_TARGETS="X86"
     [[ -z ${S2_TARGETS} ]] && S2_TARGETS="ARM;AArch64;PowerPC;X86"
     [[ -z ${S1_PROJECTS} ]] && S1_PROJECTS="clang;lld;compiler-rt"
@@ -507,7 +509,7 @@ function bldcl() {(
           -DLLVM_ENABLE_PROJECTS="${S1_PROJECTS}" \
           -DLLVM_TARGETS_TO_BUILD="${S1_TARGETS}" \
           -DLLVM_USE_LINKER="$(for LD in lld gold bfd; do command -v ld.${LD} &>/dev/null && break; done; echo ${LD})" \
-          "${CBL_SRC}"/llvm-project/llvm > /dev/null
+          "${CBL_SRC}"/"${LLVM}"/llvm > /dev/null
     time ninja || { clrev -r; die "Error building Clang/lld stage 1!"; }
     stripllvmbin "${S1_FOLDER}"
     if [[ -n ${DEBUG} ]]; then
@@ -530,7 +532,7 @@ function bldcl() {(
           -DLLVM_ENABLE_PROJECTS="${S2_PROJECTS}" \
           -DLLVM_TARGETS_TO_BUILD="${S2_TARGETS}" \
           -DLLVM_USE_LINKER="${S1_FOLDER}/bin/ld.lld"  \
-          "${CBL_SRC}"/llvm-project/llvm > /dev/null
+          "${CBL_SRC}"/"${LLVM}"/llvm > /dev/null
     time ninja || { clrev -r; die "Error building Clang/lld stage 2!"; }
     stripllvmbin "${CBF}"
     if [[ -n ${INSTALL} ]]; then
