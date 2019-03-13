@@ -438,6 +438,8 @@ function dckrrn() {(
 
 # Modify Clang to report the upstream hash for the version string, bypassing local patches
 function clrev() {(
+    # SC2030: Modification of LLVM is local (to subshell caused by (..) group).
+    # shellcheck disable=SC2030
     [[ -z ${LLVM} ]] && LLVM=llvm-project
     case ${1} in
         "-r"|"--reset") git -C "${CBL_SRC}"/"${LLVM}" rh -q ;;
@@ -472,6 +474,8 @@ function bldcl() {(
                         -DLLVM_INCLUDE_TESTS=OFF
                         -DLLVM_INCLUDE_DOCS=OFF )
     S1_FOLDER=${CBF}/stage1
+    # SC2031: LLVM was modified in a subshell. That change might be lost.
+    # shellcheck disable=SC2031
     [[ -z ${LLVM} ]] && LLVM=llvm-project
     [[ -z ${S1_TARGETS} ]] && S1_TARGETS="X86"
     [[ -z ${S2_TARGETS} ]] && S2_TARGETS="ARM;AArch64;PowerPC;X86"
@@ -491,9 +495,13 @@ function bldcl() {(
 
     header "Building Clang"
 
+    # SC2153: Possible misspelling: TC_FOLDER may not be assigned, but S1_FOLDER is.
+    # shellcheck disable=SC2153
     STABLE_CLANG=${TC_FOLDER}/clang-8.0.0-rc5
     if [[ -d ${STABLE_CLANG} ]]; then
         export PATH=${STABLE_CLANG}/bin:${PATH}
+        # SC2030: Modification of LD_LIBRARY_PATH is local (to subshell caused by (..) group).
+        # shellcheck disable=SC2030
         export LD_LIBRARY_PATH=${STABLE_CLANG}/lib${LD_LIBRARY_PATH:+":${LD_LIBRARY_PATH}"}
     fi
 
@@ -675,7 +683,8 @@ function kcbw() {(
 
     # SC1004: This backslash+linefeed is literal. Break outside single quotes if you just want to break the line.
     # SC2016: Expressions don't expand in single quotes, use double quotes for that.
-    # shellcheck disable=SC1004,SC2016
+    # SC2031: LD_LIBRARY_PATH was modified in a subshell. That change might be lost.
+    # shellcheck disable=SC1004,SC2016,SC2031
     echo 'ARCH=arm64
 BRANCH='"${BRANCH}"'
 CLANG_TRIPLE=aarch64-linux-gnu-
