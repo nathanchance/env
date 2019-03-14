@@ -706,7 +706,7 @@ CROSS_COMPILE=aarch64-linux-gnu-
 DEFCONFIG=cuttlefish_defconfig
 EXTRA_CMDS='\'''\''
 KERNEL_DIR='"$(realpath --relative-to="${PWD}" "${COMMON_FOLDER}")"'
-POST_DEFCONFIG_CMDS="check_defconfig"
+POST_DEFCONFIG_CMDS="check_defconfig && update_clang_config"
 CLANG_PREBUILT_BIN='"$(realpath --relative-to="${PWD}" "${CPB:-${CBL_BIN}}")"'
 LD_LIBRARY_PATH='"${LD_LIBRARY_PATH:-"${CBL_USR}"/lib}"'
 LINUX_GCC_CROSS_COMPILE_PREBUILTS_BIN='"$(realpath --relative-to="${PWD}" "${GCCPB:-${CBL_BIN}}")"'
@@ -715,7 +715,16 @@ arch/arm64/boot/Image.gz
 vmlinux
 System.map
 "
-STOP_SHIP_TRACEPRINTK=1' > "${BUILD_CONFIG:=$(mktemp)}"
+STOP_SHIP_TRACEPRINTK=1
+
+function update_clang_config() {
+  ${KERNEL_DIR}/scripts/config --file ${OUT_DIR}/.config \
+    -e LTO_CLANG \
+    -e CFI_CLANG \
+    --set-val FRAME_WARN 2048
+  (cd ${KERNEL_DIR} && \
+    make O=${OUT_DIR} olddefconfig)
+}' > "${BUILD_CONFIG:=$(mktemp)}"
 
     # Make path relative
     BUILD_CONFIG=$(realpath --relative-to="${PWD}" "${BUILD_CONFIG}")
