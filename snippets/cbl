@@ -521,7 +521,7 @@ function bldcl() {(
           "${BASE_CMAKE_VALUES[@]}" \
           -DCLANG_ENABLE_STATIC_ANALYZER=OFF \
           -DCOMPILER_RT_BUILD_LIBFUZZER=OFF \
-          -DCOMPILER_RT_BUILD_SANITIZERS=OFF \
+          $([[ -z ${DEBUG} ]] && echo "-DCOMPILER_RT_BUILD_SANITIZERS=OFF") \
           -DCMAKE_C_COMPILER="$(command -v clang || command -v gcc)" \
           -DCMAKE_CXX_COMPILER="$(command -v clang++ || command -v g++)" \
           ${DEBUG:+-DCMAKE_INSTALL_PREFIX="$(mktemp -d)"} \
