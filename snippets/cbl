@@ -497,12 +497,19 @@ function bldcl() {(
 
     header "Building Clang"
 
+    # Cache old PATH
+    OLD_PATH=${PATH}
+
+    # SC2153: Possible misspelling: TC_FOLDER may not be assigned, but S1_FOLDER is.
+    # shellcheck disable=SC2153
+    STABLE_BINUTILS=${TC_FOLDER}/binutils-2.32
+    [[ -d ${STABLE_BINUTILS} ]] && export PATH=${STABLE_BINUTILS}/bin:${PATH}
+
     # SC2153: Possible misspelling: TC_FOLDER may not be assigned, but S1_FOLDER is.
     # shellcheck disable=SC2153
     STABLE_CLANG=${TC_FOLDER}/clang-8.0.0-rc5
     if [[ -d ${STABLE_CLANG} ]]; then
-        OLD_PATH=${PATH}
-        export PATH=${STABLE_CLANG}/bin:${CBL_BIN}:${PATH}
+        export PATH=${STABLE_CLANG}/bin:${PATH}
 
         OLD_LD_LIBRARY_PATH=${LD_LIBRARY_PATH}
         # SC2030: Modification of LD_LIBRARY_PATH is local (to subshell caused by (..) group).
@@ -549,7 +556,7 @@ function bldcl() {(
     # SC2030: Modification of LD_LIBRARY_PATH is local (to subshell caused by (..) group).
     # shellcheck disable=SC2030
     [[ -n ${OLD_LD_LIBRARY_PATH} ]] && export LD_LIBRARY_PATH=${OLD_LD_LIBRARY_PATH}
-    export PATH=${S1_FOLDER}/bin:${CBL_BIN}:${PATH}
+    export PATH=${S1_FOLDER}/bin:$([[ -d ${STABLE_BINUTILS} ]] && echo "${STABLE_BINUTILS}:"):${PATH}
     # SC2030: Modification of LD_LIBRARY_PATH is local (to subshell caused by (..) group).
     # shellcheck disable=SC2030
     export LD_LIBRARY_PATH=${S1_FOLDER}/lib${LD_LIBRARY_PATH:+":${LD_LIBRARY_PATH}"}
@@ -673,7 +680,7 @@ function bldusr() {(
     # Update/clone binutils
     if [[ ! -d ${CBL_SRC}/binutils ]]; then
         header "Cloning binutils"
-        git -C "${CBL_SRC}" clone --single-branch -b master git://sourceware.org/git/binutils-gdb.git binutils
+        git -C "${CBL_SRC}" clone git://sourceware.org/git/binutils-gdb.git binutils
     else
         header "Updating binutils"
         git -C "${CBL_SRC}"/binutils pull --rebase || die "Error updating ${CBL_SRC}/binutils"
@@ -842,6 +849,6 @@ function bldallk() {(
 
 # Build new Clang and test all kernel trees
 function bldall() {(
-    bldusr
+    bldusr || return
     bldallk
 )}
