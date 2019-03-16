@@ -530,7 +530,7 @@ function bldcl() {(
           "${BASE_CMAKE_VALUES[@]}" \
           -DCLANG_ENABLE_STATIC_ANALYZER=OFF \
           -DCOMPILER_RT_BUILD_LIBFUZZER=OFF \
-          $([[ -z ${DEBUG} ]] && echo "-DCOMPILER_RT_BUILD_SANITIZERS=OFF ") \
+          "$([[ -z ${DEBUG} ]] && echo "-DCOMPILER_RT_BUILD_SANITIZERS=OFF")" \
           -DCMAKE_C_COMPILER="$(command -v clang || command -v gcc)" \
           -DCMAKE_CXX_COMPILER="$(command -v clang++ || command -v g++)" \
           -DCMAKE_LINKER="$(for LD in lld gold bfd; do command -v ld.${LD} &>/dev/null && break; done; echo ld.${LD})" \
