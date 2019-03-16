@@ -859,6 +859,5 @@ function bldallk() {(
 
 # Build new Clang and test all kernel trees
 function bldall() {(
-    bldusr || return
-    bldallk
+    bldusr && bldallk
 )}
