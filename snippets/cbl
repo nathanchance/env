@@ -466,7 +466,6 @@ function bldcl() {(
                         -DCMAKE_BUILD_TYPE=Release
                         -DCMAKE_C_FLAGS="-O2 -march=native -mtune=native"
                         -DCMAKE_CXX_FLAGS="-O2 -march=native -mtune=native"
-                        -DLLVM_BINUTILS_INCDIR="${CBL_SRC}/binutils/include"
                         -DLLVM_CCACHE_BUILD=ON
                         -DLLVM_ENABLE_BINDINGS=OFF
                         -DLLVM_ENABLE_OCAMLDOC=OFF
@@ -511,10 +510,13 @@ function bldcl() {(
     if [[ -d ${STABLE_CLANG} ]]; then
         export PATH=${STABLE_CLANG}/bin:${PATH}
 
-        OLD_LD_LIBRARY_PATH=${LD_LIBRARY_PATH}
-        # SC2030: Modification of LD_LIBRARY_PATH is local (to subshell caused by (..) group).
-        # shellcheck disable=SC2030
-        export LD_LIBRARY_PATH=${STABLE_CLANG}/lib${LD_LIBRARY_PATH:+":${LD_LIBRARY_PATH}"}
+        if [[ -d ${STABLE_BINUTILS} ]]; then
+            OLD_LD_LIBRARY_PATH=${LD_LIBRARY_PATH}
+
+            # SC2030: Modification of LD_LIBRARY_PATH is local (to subshell caused by (..) group).
+            # shellcheck disable=SC2030
+            export LD_LIBRARY_PATH=${STABLE_CLANG}/lib${LD_LIBRARY_PATH:+":${LD_LIBRARY_PATH}"}
+        fi
     fi
 
     [[ -z ${INCREMENTAL} ]] && cbf c
@@ -528,11 +530,12 @@ function bldcl() {(
           "${BASE_CMAKE_VALUES[@]}" \
           -DCLANG_ENABLE_STATIC_ANALYZER=OFF \
           -DCOMPILER_RT_BUILD_LIBFUZZER=OFF \
-          $([[ -z ${DEBUG} ]] && echo "-DCOMPILER_RT_BUILD_SANITIZERS=OFF") \
+          $([[ -z ${DEBUG} ]] && echo "-DCOMPILER_RT_BUILD_SANITIZERS=OFF ") \
           -DCMAKE_C_COMPILER="$(command -v clang || command -v gcc)" \
           -DCMAKE_CXX_COMPILER="$(command -v clang++ || command -v g++)" \
           -DCMAKE_LINKER="$(for LD in lld gold bfd; do command -v ld.${LD} &>/dev/null && break; done; echo ld.${LD})" \
           ${DEBUG:+-DCMAKE_INSTALL_PREFIX="$(mktemp -d)"} \
+          ${DEBUG:+-DLLVM_BINUTILS_INCDIR="${CBL_SRC}/binutils/include"} \
           -DLLVM_ENABLE_BACKTRACES=OFF \
           -DLLVM_ENABLE_PROJECTS="${S1_PROJECTS}" \
           -DLLVM_ENABLE_ZLIB=OFF \
@@ -552,14 +555,20 @@ function bldcl() {(
     # Stage two
     cd "${CBF}" || die "wtf"
 
+    # Restore paths
     [[ -n ${OLD_PATH} ]] && export PATH=${OLD_PATH}
     # SC2030: Modification of LD_LIBRARY_PATH is local (to subshell caused by (..) group).
     # shellcheck disable=SC2030
     [[ -n ${OLD_LD_LIBRARY_PATH} ]] && export LD_LIBRARY_PATH=${OLD_LD_LIBRARY_PATH}
-    export PATH=${S1_FOLDER}/bin:$([[ -d ${STABLE_BINUTILS} ]] && echo "${STABLE_BINUTILS}:"):${PATH}
-    # SC2030: Modification of LD_LIBRARY_PATH is local (to subshell caused by (..) group).
-    # shellcheck disable=SC2030
-    export LD_LIBRARY_PATH=${S1_FOLDER}/lib${LD_LIBRARY_PATH:+":${LD_LIBRARY_PATH}"}
+
+    if [[ -d ${STABLE_BINUTILS} ]]; then
+        export PATH=${STABLE_BINUTILS}/bin:${PATH}
+
+        # SC2030: Modification of LD_LIBRARY_PATH is local (to subshell caused by (..) group).
+        # shellcheck disable=SC2030
+        export LD_LIBRARY_PATH=${S1_FOLDER}/lib${LD_LIBRARY_PATH:+":${LD_LIBRARY_PATH}"}
+    fi
+    export PATH=${S1_FOLDER}/bin:${PATH}
 
     # SC2030: Modification of INSTALL_FOLDER is local (to subshell caused by (..) group).
     # shellcheck disable=SC2030
@@ -573,6 +582,7 @@ function bldcl() {(
           -DLIBCXX_USE_COMPILER_RT=YES \
           -DLIBCXXABI_USE_COMPILER_RT=YES \
           -DLIBCXXABI_USE_LLVM_UNWINDER=YES \
+          -DLLVM_BINUTILS_INCDIR="${CBL_SRC}/binutils/include" \
           -DLLVM_BUILD_LLVM_DYLIB=ON \
           -DLLVM_LINK_LLVM_DYLIB=OFF \
           -DLLVM_ENABLE_LTO=Thin \
@@ -688,7 +698,7 @@ function bldusr() {(
 
     # Build Clang and lld
     INSTALL_FOLDER=${CBL_USR}
-    bldcl -i
+    bldcl -i || return ${?}
 
     # Build binutils
     bldbn -i
