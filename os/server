@@ -37,6 +37,7 @@
 function bootstrap() {(
     # Grab common functions/variables
     source <(curl -LSs https://github.com/nathanchance/scripts/raw/master/common) &>/dev/null || return 1
+    source <(curl -LSs https://github.com/nathanchance/scripts/raw/master/constants/versions) &>/dev/null || return 1
 
     DOTFILES=${REPO_FOLDER}/dotfiles
     KEYS=/tmp/keys
@@ -104,12 +105,11 @@ function bootstrap() {(
                                         xmlto || die "Error installing packages!"
 
     # Install hub
-    HUB_VERSION=2.7.1
     (
         cd /tmp
-        curl -LO https://github.com/github/hub/releases/download/v${HUB_VERSION}/hub-linux-amd64-${HUB_VERSION}.tgz
-        tar -xf hub-linux-amd64-${HUB_VERSION}.tgz
-        cd hub-linux-amd64-${HUB_VERSION} || die "Downloading or extracting hub failed!"
+        curl -LO https://github.com/github/hub/releases/download/v"${HUB_VERSION:?}"/hub-linux-amd64-"${HUB_VERSION}".tgz
+        tar -xf hub-linux-amd64-"${HUB_VERSION}".tgz
+        cd hub-linux-amd64-"${HUB_VERSION}" || die "Downloading or extracting hub failed!"
         sudo ./install
     ) || die "Error installing hub!"
     rm -rf /tmp/hub*
@@ -333,6 +333,7 @@ function server_setup() {
     ccache_setup 250
     LOG=$(mktemp); export LOG
     add_to_path_post "${HOME}/.gem/ruby/2.6.0/bin"
+    source "${SCRIPTS_FOLDER}"/constants/versions
     source "${SCRIPTS_FOLDER}"/snippets/bk
     source "${SCRIPTS_FOLDER}"/snippets/cbl
     sbf

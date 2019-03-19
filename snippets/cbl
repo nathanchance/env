@@ -500,12 +500,12 @@ function bldcl() {(
 
     # SC2153: Possible misspelling: TC_FOLDER may not be assigned, but S1_FOLDER is.
     # shellcheck disable=SC2153
-    STABLE_BINUTILS=${TC_FOLDER}/binutils-2.32
+    STABLE_BINUTILS=${TC_FOLDER}/binutils-${BINUTILS_VERSION:?}
     [[ -d ${STABLE_BINUTILS} ]] && path_push "${STABLE_BINUTILS}/bin"
 
     # SC2153: Possible misspelling: TC_FOLDER may not be assigned, but S1_FOLDER is.
     # shellcheck disable=SC2153
-    STABLE_CLANG=${TC_FOLDER}/clang-8.0.0-rc5
+    STABLE_CLANG=${TC_FOLDER}/clang-${LLVM_VERSION:?}
     if [[ -d ${STABLE_CLANG} ]]; then
         path_push "${STABLE_CLANG}/bin"
         [[ -d ${STABLE_BINUTILS} ]] && export LD_LIBRARY_PATH=${STABLE_CLANG}/lib${LD_LIBRARY_PATH:+":${LD_LIBRARY_PATH}"}

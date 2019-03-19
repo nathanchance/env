@@ -18,6 +18,7 @@ function bootstrap() {
 
     # Grab common functions/variables
     [[ ! -f ${SCRIPTS}/common ]] && source <(curl -Ls https://github.com/nathanchance/scripts/raw/master/common) &>/dev/null
+    [[ ! -f ${SCRIPTS}/constants/versions ]] && source <(curl -Ls https://github.com/nathanchance/scripts/raw/master/constants/versions) &>/dev/null
 
     # Make sure keys are present
     [[ ! -d ${KEYS} ]] && { warn "${KEYS} not found, skipping GPG and SSH keys setup!"; NO_KEYS=true; }
@@ -37,10 +38,9 @@ function bootstrap() {
     git config --global user.email "natechancellor@gmail.com"
 
     # Install hub
-    HUB_VERSION=2.5.1
-    curl -LO https://github.com/github/hub/releases/download/v${HUB_VERSION}/hub-linux-arm-${HUB_VERSION}.tgz
-    tar -xf hub-linux-arm-${HUB_VERSION}.tgz
-    cd hub-linux-arm-${HUB_VERSION} || { display_error "Downloading or extracting hub failed!"; return 1; }
+    curl -LO https://github.com/github/hub/releases/download/v"${HUB_VERSION:?}"/hub-linux-arm-"${HUB_VERSION}".tgz
+    tar -xf hub-linux-arm-"${HUB_VERSION}".tgz
+    cd hub-linux-arm-"${HUB_VERSION}" || { display_error "Downloading or extracting hub failed!"; return 1; }
     sudo prefix=/usr/local ./install
     cd "${OLDPWD}" || { display_error "${OLDPWD} doesn't exist??"; return 1; }
     rm -rf hub*
@@ -50,10 +50,8 @@ function bootstrap() {
     source "${HOME}"/.cargo/env
 
     # Build fd and ripgrep binaries from source
-    FD_VERSION=7.1.0
-    RG_VERSION=0.9.0
-    for PAIR in fd:https://github.com/sharkdp/fd/archive/v${FD_VERSION}.zip \
-                ripgrep:https://github.com/BurntSushi/ripgrep/archive/${RG_VERSION}.zip; do
+    for PAIR in fd:https://github.com/sharkdp/fd/archive/v${FD_VERSION:?}.zip \
+                ripgrep:https://github.com/BurntSushi/ripgrep/archive/${RG_VERSION:?}.zip; do
         BINARY=${PAIR%%:*}
         URL=${PAIR#*:}
         TMP=$(mktemp)
