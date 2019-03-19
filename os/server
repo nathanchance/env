@@ -999,8 +999,7 @@ function symlink-commands() {(
 
 
 # Build/update git
-function bgit() {
-    local MAKE
+function bgit() {(
     # SC2191: The = here is literal. To assign by index, use ( [index]=value ) with no spaces. To keep as literal, quote it.
     # shellcheck disable=SC2191
     MAKE=( make "${JOBS_FLAG}"
@@ -1011,7 +1010,14 @@ function bgit() {
                 NO_CROSS_DIRECTORY_HARDLINKS=1
                 NO_PERL_CPAN_FALLBACKS=1 )
 
+    GIT_FOLDER=${REPO_FOLDER:?}/git
+    [[ ! -d ${GIT_FOLDER} ]] && { display_error "Git folder doesn't exist!"; return; }
+    cd "${GIT_FOLDER}"
+
     git cl -q
+    git f origin
+    git ch v"${GIT_VERSION}"
+
     "${MAKE[@]}" all
     sudo "${MAKE[@]}" install
-}
+)}
