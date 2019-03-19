@@ -861,3 +861,12 @@ function bldallk() {(
 function bldall() {(
     bldusr && bldallk
 )}
+
+
+# Set up path to use CBL_BIN
+function cbl_path() {
+    case ${1} in
+        "-s"|"--set") add_to_path_pre "${CBL_BIN}" ;;
+        "-u"|"--unset") export PATH=${PATH/${CBL_BIN//\//\\/}:/} ;;
+    esac
+}
