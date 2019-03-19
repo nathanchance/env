@@ -85,9 +85,7 @@ Link: https://reviews.llvm.org/${REVISION}"
 
 
 # Build kernel with Clang (wrapper)
-function bldkw() {
-    local TARGET_ARCH KCONFIG_ALLCONFIG MAKE_FLAGS
-
+function bldkw() {(
     if [[ ! -f Makefile ]]; then
         display_error "No Makefile found! Are you in a kernel tree?"
         return
@@ -108,16 +106,20 @@ function bldkw() {
         echo "CONFIG_CPU_BIG_ENDIAN=n" >> "${KCONFIG_ALLCONFIG}"
     fi
 
-    time PATH=${PATH_OVERRIDE:+"${PATH_OVERRIDE}:"}${CBL_BIN}:${PATH} \
-    make "${JOBS_FLAG}" \
-         CC="${CCACHE} clang" \
-         ${KCONFIG_ALLCONFIG:+KCONFIG_ALLCONFIG="${KCONFIG_ALLCONFIG}"} \
-         HOSTCC=clang \
-         HOSTLD=ld.lld \
-         "${MAKE_FLAGS[@]}" \
-         O="${KBF}" \
-         "${@}"
-}
+    # Use our versions of Clang
+    path_push "${CBL_BIN}"
+    [[ -z ${PATH_OVERRIDE} ]] && path_push "${PATH_OVERRIDE}"
+
+    # Build the kernel
+    time make "${JOBS_FLAG}" \
+              CC="${CCACHE} clang" \
+              ${KCONFIG_ALLCONFIG:+KCONFIG_ALLCONFIG="${KCONFIG_ALLCONFIG}"} \
+              HOSTCC=clang \
+              HOSTLD=ld.lld \
+              "${MAKE_FLAGS[@]}" \
+              O="${KBF}" \
+              "${@}"
+)}
 
 
 # Extra configs for build/boot testings
@@ -496,24 +498,17 @@ function bldcl() {(
 
     header "Building Clang"
 
-    # Cache old PATH
-    OLD_PATH=${PATH}
-
     # SC2153: Possible misspelling: TC_FOLDER may not be assigned, but S1_FOLDER is.
     # shellcheck disable=SC2153
     STABLE_BINUTILS=${TC_FOLDER}/binutils-2.32
-    [[ -d ${STABLE_BINUTILS} ]] && export PATH=${STABLE_BINUTILS}/bin:${PATH}
+    [[ -d ${STABLE_BINUTILS} ]] && path_push "${STABLE_BINUTILS}/bin"
 
     # SC2153: Possible misspelling: TC_FOLDER may not be assigned, but S1_FOLDER is.
     # shellcheck disable=SC2153
     STABLE_CLANG=${TC_FOLDER}/clang-8.0.0-rc5
     if [[ -d ${STABLE_CLANG} ]]; then
-        export PATH=${STABLE_CLANG}/bin:${PATH}
-
-        if [[ -d ${STABLE_BINUTILS} ]]; then
-            OLD_LD_LIBRARY_PATH=${LD_LIBRARY_PATH}
-            export LD_LIBRARY_PATH=${STABLE_CLANG}/lib${LD_LIBRARY_PATH:+":${LD_LIBRARY_PATH}"}
-        fi
+        path_push "${STABLE_CLANG}/bin"
+        [[ -d ${STABLE_BINUTILS} ]] && export LD_LIBRARY_PATH=${STABLE_CLANG}/lib${LD_LIBRARY_PATH:+":${LD_LIBRARY_PATH}"}
     fi
 
     [[ -z ${INCREMENTAL} ]] && cbf c
@@ -552,15 +547,17 @@ function bldcl() {(
     # Stage two
     cd "${CBF}" || die "wtf"
 
-    # Restore paths
-    [[ -n ${OLD_PATH} ]] && export PATH=${OLD_PATH}
-    [[ -n ${OLD_LD_LIBRARY_PATH} ]] && export LD_LIBRARY_PATH=${OLD_LD_LIBRARY_PATH}
-
     if [[ -d ${STABLE_BINUTILS} ]]; then
-        export PATH=${STABLE_BINUTILS}/bin:${PATH}
-        export LD_LIBRARY_PATH=${S1_FOLDER}/lib${LD_LIBRARY_PATH:+":${LD_LIBRARY_PATH}"}
+        if [[ -d ${STABLE_CLANG} ]]; then
+            LD_LIBRARY_PATH=${LD_LIBRARY_PATH/${STABLE_BINUTILS//\//\\/}\/lib/}
+            LD_LIBRARY_PATH=${LD_LIBRARY_PATH#*:}
+        fi
+        LD_LIBRARY_PATH=${S1_FOLDER}/lib${LD_LIBRARY_PATH:+":${LD_LIBRARY_PATH}"}
+        export LD_LIBRARY_PATH
     fi
-    export PATH=${S1_FOLDER}/bin:${PATH}
+
+    export PATH=${PATH/${STABLE_CLANG//\//\\/}\/bin:/}
+    path_push "${S1_FOLDER}/bin"
 
     cmake -Wno-dev \
           -G Ninja \
@@ -852,7 +849,7 @@ function bldall() {(
 # Set up path to use CBL_BIN
 function cbl_path() {
     case ${1} in
-        "-s"|"--set") add_to_path_pre "${CBL_BIN}" ;;
+        "-s"|"--set") path_push "${CBL_BIN}" ;;
         "-u"|"--unset") export PATH=${PATH/${CBL_BIN//\//\\/}:/} ;;
     esac
 }
