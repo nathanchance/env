@@ -5,6 +5,10 @@
 # Copyright (C) 2018-2019 Nathan Chancellor
 #
 # Functions used to assist with ClangBuiltLinux development
+#
+# SC2030: Modification of VARIABLE is local (to subshell caused by (..) group).
+# SC2031: VARIABLE was modified in a subshell. That change might be lost.
+# shellcheck disable=SC2030,SC2031
 
 
 # Universal variables
@@ -439,8 +443,6 @@ function dckrrn() {(
 # Modify Clang to report the upstream hash for the version string, bypassing local patches
 function clrev() {(
     if [[ -z ${SKIP_REV} ]]; then
-        # SC2030: Modification of LLVM is local (to subshell caused by (..) group).
-        # shellcheck disable=SC2030
         [[ -z ${LLVM} ]] && LLVM=llvm-project
         case ${1} in
             "-r"|"--reset") git -C "${CBL_SRC}"/"${LLVM}" rh -q ;;
@@ -475,8 +477,6 @@ function bldcl() {(
                         -DLLVM_INCLUDE_TESTS=OFF
                         -DLLVM_INCLUDE_DOCS=OFF )
     S1_FOLDER=${CBF}/stage1
-    # SC2031: LLVM was modified in a subshell. That change might be lost.
-    # shellcheck disable=SC2031
     [[ -z ${LLVM} ]] && LLVM=llvm-project
     [[ -z ${S1_TARGETS} ]] && S1_TARGETS="X86"
     [[ -z ${S2_TARGETS} ]] && S2_TARGETS="ARM;AArch64;PowerPC;X86"
@@ -512,9 +512,6 @@ function bldcl() {(
 
         if [[ -d ${STABLE_BINUTILS} ]]; then
             OLD_LD_LIBRARY_PATH=${LD_LIBRARY_PATH}
-
-            # SC2030: Modification of LD_LIBRARY_PATH is local (to subshell caused by (..) group).
-            # shellcheck disable=SC2030
             export LD_LIBRARY_PATH=${STABLE_CLANG}/lib${LD_LIBRARY_PATH:+":${LD_LIBRARY_PATH}"}
         fi
     fi
@@ -557,21 +554,14 @@ function bldcl() {(
 
     # Restore paths
     [[ -n ${OLD_PATH} ]] && export PATH=${OLD_PATH}
-    # SC2030: Modification of LD_LIBRARY_PATH is local (to subshell caused by (..) group).
-    # shellcheck disable=SC2030
     [[ -n ${OLD_LD_LIBRARY_PATH} ]] && export LD_LIBRARY_PATH=${OLD_LD_LIBRARY_PATH}
 
     if [[ -d ${STABLE_BINUTILS} ]]; then
         export PATH=${STABLE_BINUTILS}/bin:${PATH}
-
-        # SC2030: Modification of LD_LIBRARY_PATH is local (to subshell caused by (..) group).
-        # shellcheck disable=SC2030
         export LD_LIBRARY_PATH=${S1_FOLDER}/lib${LD_LIBRARY_PATH:+":${LD_LIBRARY_PATH}"}
     fi
     export PATH=${S1_FOLDER}/bin:${PATH}
 
-    # SC2030: Modification of INSTALL_FOLDER is local (to subshell caused by (..) group).
-    # shellcheck disable=SC2030
     cmake -Wno-dev \
           -G Ninja \
           "${BASE_CMAKE_VALUES[@]}" \
@@ -610,9 +600,8 @@ function bldbn() {(
     for TUPLE in host arm-linux-gnueabi aarch64-linux-gnu powerpc-linux-gnu powerpc64le-linux-gnu; do
         BBF=${BBFR}/${TUPLE}
         { cbf b && mkdir -p "${BBF}" && cd "${BBF}"; } || die "wtf"
-        # SC2031: INSTALL_FOLDER was modified in a subshell. That change might be lost.
         # SC2191: The = here is literal. To assign by index, use ( [index]=value ) with no spaces. To keep as literal, quote it.
-        # shellcheck disable=SC2031,SC2191
+        # shellcheck disable=SC2191
         COMMON_FLAGS=( --prefix="${INSTALL_FOLDER:="${CBL_USR}"}"
                        --enable-deterministic-archives
                        --enable-gold
@@ -661,8 +650,6 @@ function bldbn() {(
                     "${COMMON_FLAGS[@]}" ;;
         esac
         time make -s "${JOBS_FLAG}" V=0 || die "Error building ${TARGET} binutils"
-        # SC2031: INSTALL_FOLDER was modified in a subshell. That change might be lost.
-        # shellcheck disable=SC2031
         [[ "${1}" =~ "-i" ]] && { make -s prefix="${INSTALL_FOLDER}" install V=0 || die "Error installing ${TARGET} binutils"; }
         cd ..
     done
@@ -716,8 +703,7 @@ function kcbw() {(
 
     # SC1004: This backslash+linefeed is literal. Break outside single quotes if you just want to break the line.
     # SC2016: Expressions don't expand in single quotes, use double quotes for that.
-    # SC2031: LD_LIBRARY_PATH was modified in a subshell. That change might be lost.
-    # shellcheck disable=SC1004,SC2016,SC2031
+    # shellcheck disable=SC1004,SC2016
     echo 'ARCH=arm64
 BRANCH='"${BRANCH}"'
 CLANG_TRIPLE=aarch64-linux-gnu-
