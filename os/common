@@ -35,14 +35,7 @@ function aliases() {
 # Try to attach via tmux
 function tmux_attach() {
     command -v tmux &>/dev/null || return
-    if [[ -z ${TMUX} ]]; then
-        ID=$(tmux ls | grep -vm1 attached | cut -d: -f1)
-        if [[ -z ${ID} ]]; then
-            tmux -u new-session
-        else
-            tmux -u attach-session -t "${ID}"
-        fi
-    fi
+    tmux new-session -AD -s main
 }
 
 
