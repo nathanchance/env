@@ -77,3 +77,22 @@ function rld() {
     source "${SCRIPTS_FOLDER}/os/common"
     bash_setup
 }
+
+
+# Don't kill tmux sessions when one pane exists
+# https://arslan.io/2019/01/07/using-the-ipad-pro-as-my-development-machine/
+function exit() {
+    if [[ -z ${TMUX} ]]; then
+        builtin exit
+        return
+    fi
+
+    PANES=$(tmux list-panes | wc -l)
+    WINS=$(tmux list-windows | wc -l)
+    COUNT=$((PANES + WINS - 1))
+    if [[ ${COUNT} -eq 1 ]]; then
+        tmux detach
+    else
+        builtin exit
+    fi
+}
