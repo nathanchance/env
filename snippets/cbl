@@ -20,7 +20,7 @@ CBL_BIN=${CBL_USR}/bin
 # Create build folders
 function crbf() {
     local ITEM
-    for ITEM in binutils clang kernel; do
+    for ITEM in binutils kernel llvm; do
         export "$(echo ${ITEM:0:1} | tr '[:lower:]' '[:upper:]')BF=${BLDF}/${ITEM}"
         mkdir -p "${BLDF}/${ITEM}"
     done
@@ -461,8 +461,8 @@ function stripllvmbin() {(
 )}
 
 
-# Build Clang
-function bldcl() {(
+# Build LLVM
+function bldllvm() {(
     # SC2191: The = here is literal. To assign by index, use ( [index]=value ) with no spaces. To keep as literal, quote it.
     # shellcheck disable=SC2191
     BASE_CMAKE_VALUES=( -DCLANG_ENABLE_ARCMT=OFF
@@ -478,7 +478,7 @@ function bldcl() {(
                         -DLLVM_INCLUDE_EXAMPLES=OFF
                         -DLLVM_INCLUDE_TESTS=OFF
                         -DLLVM_INCLUDE_DOCS=OFF )
-    S1_FOLDER=${CBF}/stage1
+    S1_FOLDER=${LBF}/stage1
     [[ -z ${LLVM} ]] && LLVM=llvm-project
     [[ -z ${S1_TARGETS} ]] && S1_TARGETS="X86"
     [[ -z ${S2_TARGETS} ]] && S2_TARGETS="ARM;AArch64;PowerPC;X86"
@@ -496,7 +496,7 @@ function bldcl() {(
         shift
     done
 
-    header "Building Clang"
+    header "Building LLVM"
 
     # SC2153: Possible misspelling: TC_FOLDER may not be assigned, but S1_FOLDER is.
     # shellcheck disable=SC2153
@@ -505,10 +505,10 @@ function bldcl() {(
 
     # SC2153: Possible misspelling: TC_FOLDER may not be assigned, but S1_FOLDER is.
     # shellcheck disable=SC2153
-    STABLE_CLANG=${TC_FOLDER}/clang-${LLVM_VERSION:?}
-    if [[ -d ${STABLE_CLANG} ]]; then
-        path_push "${STABLE_CLANG}/bin"
-        [[ -d ${STABLE_BINUTILS} ]] && export LD_LIBRARY_PATH=${STABLE_CLANG}/lib${LD_LIBRARY_PATH:+":${LD_LIBRARY_PATH}"}
+    STABLE_LLVM=${TC_FOLDER}/llvm-${LLVM_VERSION:?}
+    if [[ -d ${STABLE_LLVM} ]]; then
+        path_push "${STABLE_LLVM}/bin"
+        [[ -d ${STABLE_BINUTILS} ]] && export LD_LIBRARY_PATH=${STABLE_LLVM}/lib${LD_LIBRARY_PATH:+":${LD_LIBRARY_PATH}"}
     fi
 
     [[ -z ${INCREMENTAL} ]] && cbf c
@@ -536,19 +536,19 @@ function bldcl() {(
           -DLLVM_TARGETS_TO_BUILD="${S1_TARGETS}" \
           -DLLVM_USE_LINKER="$(for LD in lld gold bfd; do command -v ld.${LD} &>/dev/null && break; done; echo ${LD})" \
           "${CBL_SRC}"/"${LLVM}"/llvm > /dev/null
-    time ninja || { clrev -r; die "Error building Clang/lld stage 1!"; }
+    time ninja || { clrev -r; die "Error building LLVM stage 1!"; }
     stripllvmbin "${S1_FOLDER}"
     if [[ -n ${DEBUG} ]]; then
-        [[ -n ${INSTALL} ]] && { ninja install || die "Error installing Clang/lld!"; }
+        [[ -n ${INSTALL} ]] && { ninja install || die "Error installing LLVM!"; }
         clrev -r
         return
     fi
 
     # Stage two
-    cd "${CBF}" || die "wtf"
+    cd "${LBF}" || die "wtf"
 
     if [[ -d ${STABLE_BINUTILS} ]]; then
-        if [[ -d ${STABLE_CLANG} ]]; then
+        if [[ -d ${STABLE_LLVM} ]]; then
             LD_LIBRARY_PATH=${LD_LIBRARY_PATH/${STABLE_BINUTILS//\//\\/}\/lib/}
             LD_LIBRARY_PATH=${LD_LIBRARY_PATH#*:}
         fi
@@ -556,7 +556,7 @@ function bldcl() {(
         export LD_LIBRARY_PATH
     fi
 
-    export PATH=${PATH/${STABLE_CLANG//\//\\/}\/bin:/}
+    export PATH=${PATH/${STABLE_LLVM//\//\\/}\/bin:/}
     path_push "${S1_FOLDER}/bin"
 
     cmake -Wno-dev \
@@ -578,11 +578,11 @@ function bldcl() {(
           -DLLVM_TARGETS_TO_BUILD="${S2_TARGETS}" \
           -DLLVM_USE_LINKER=lld  \
           "${CBL_SRC}"/"${LLVM}"/llvm > /dev/null
-    time ninja || { clrev -r; die "Error building Clang/lld stage 2!"; }
-    stripllvmbin "${CBF}"
+    time ninja || { clrev -r; die "Error building LLVM stage 2!"; }
+    stripllvmbin "${LBF}"
     if [[ -n ${INSTALL} ]]; then
         rm -rf "${INSTALL_FOLDER}"
-        ninja install > /dev/null || die "Error installing Clang/lld!"
+        ninja install > /dev/null || die "Error installing LLVM!"
     fi
 
     clrev -r
@@ -653,9 +653,9 @@ function bldbn() {(
 )}
 
 
-# Build Clang, lld. and arm{32,64} and powerpc binutils from source
+# Build LLVM/Clang/lld and arm{32,64} and powerpc binutils from source
 function bldusr() {(
-    # Update/clone LLVM/Clang
+    # Update/clone LLVM
     if [[ ! -d ${CBL_SRC}/llvm-project ]]; then
         header "Cloning LLVM"
         mkdir -p "${CBL_SRC}"
@@ -680,9 +680,9 @@ function bldusr() {(
         git -C "${CBL_SRC}"/binutils pull --rebase || die "Error updating ${CBL_SRC}/binutils"
     fi
 
-    # Build Clang and lld
+    # Build LLVM/Clang/lld
     INSTALL_FOLDER=${CBL_USR}
-    bldcl -i || return ${?}
+    bldllvm -i || return ${?}
 
     # Build binutils
     bldbn -i
@@ -840,7 +840,7 @@ function bldallk() {(
 )}
 
 
-# Build new Clang and test all kernel trees
+# Build new LLVM/Clang/lld and test all kernel trees
 function bldall() {(
     bldusr && bldallk
 )}
