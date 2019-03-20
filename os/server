@@ -46,7 +46,7 @@ function bootstrap() {(
     [[ ! -d ${KEYS} ]] && die "${KEYS} doesn't exist, create it, and copy keys!"
 
     # Setup folders that will be used
-    mkdir -p "${CBL}"/{git,mirrors,src} \
+    mkdir -p "${CBL}"/{android,git,mirrors,src} \
              "${KERNEL_FOLDER}"/sony \
              "${MISC_FOLDER}"/building \
              "${REPO_FOLDER}" \
@@ -198,6 +198,10 @@ function bootstrap() {(
 
     # Download other CBL things
     (
+        cd "${CBL}"/android || die "wtf?"
+        git clone https://android.googlesource.com/kernel/build
+        git clone https://android.googlesource.com/kernel/common
+
         cd "${CBL}"/git || die "wtf?"
         git clone git@github.com:ClangBuiltLinux/continuous-integration.git ci
         git clone git@github.com:ClangBuiltLinux/continuous-integration.git ci-master
@@ -215,9 +219,6 @@ function bootstrap() {(
         git -C llvm-project remote add github git@github.com:ClangBuiltLinux/llvm-project.git
         git clone --single-branch -b master git://sourceware.org/git/binutils-gdb.git binutils
     )
-
-    # Clone kernel-common
-    git -C "${KERNEL_FOLDER}" clone https://android.googlesource.com/kernel/common kernel-common
 
     # Clone sonyxperiadev/kernel
     git -C "${KERNEL_FOLDER}/sony" clone git://github.com/sonyxperiadev/kernel
