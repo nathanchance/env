@@ -1,20 +1,8 @@
+" SPDX-License-Identifier: GPL-3.0-or-later
 "
 " My personal vim settings
 "
-" Copyright (C) 2017 Nathan Chancellor
-"
-" This program is free software: you can redistribute it and/or modify
-" it under the terms of the GNU General Public License as published by
-" the Free Software Foundation, either version 3 of the License, or
-" (at your option) any later version.
-"
-" This program is distributed in the hope that it will be useful,
-" but WITHOUT ANY WARRANTY; without even the implied warranty of
-" MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-" GNU General Public License for more details.
-"
-" You should have received a copy of the GNU General Public License
-" along with this program.  If not, see <http://www.gnu.org/licenses/>
+" Copyright (C) 2017-2019 Nathan Chancellor
 
 " Special indenting for C and Makefiles (since most will be kernel files)
 filetype plugin indent on
@@ -23,11 +11,10 @@ filetype plugin indent on
 set laststatus=2                            " Always show status line
 set statusline=
 set statusline+=%f                          " Show relative path of file being edited
-set statusline+=\ %{fugitive#statusline()}  " Show git branch if applicable
+set statusline+=\ %{FugitiveStatusline()}   " Show git branch if applicable
 set statusline+=%=                          " Column break
 set statusline+=\ %l\:%v                    " Show line and column
 set statusline+=\ \(%p%%\)                  " Show location of cursor location percentage
-
 
 colorscheme cobalt                          " Dope af
 syntax enable                               " Enable syntax processing
@@ -60,10 +47,12 @@ function! TglInd()
         set noexpandtab
         set tabstop=8
         set softtabstop=8
+        set shiftwidth=8
     else
         set expandtab
         set tabstop=4
         set softtabstop=4
+        set shiftwidth=4
     endif
 endfunc
 
@@ -75,3 +64,6 @@ function! TglCC()
         set colorcolumn=80
     endif
 endfunc
+
+" Strip trailing whitespace
+nnoremap <silent> -- :let _s=@/ <Bar> :%s/\s\+$//e <Bar> :let @/=_s <Bar> :nohl <Bar> :unlet _s <CR>
