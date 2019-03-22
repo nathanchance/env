@@ -89,12 +89,11 @@ function bootstrap() {
     git clone git@github.com:nathanchance/dotfiles "${DOTFILES}" || return 1
 
     # Copy files into their proper locations
-    # .git-prompt.sh
-    cp "${DOTFILES}"/common/.git-prompt.sh "${HOME}"
     # tmux
     cp "${DOTFILES}"/pi/.tmux.conf "${HOME}"
 
     # Run small setup scripts from dotfiles
+    bash "${DOTFILES}"/common/git-prompt.sh
     bash "${DOTFILES}"/common/global_gitignore.sh
     bash "${DOTFILES}"/common/vim/vim_setup.sh
 

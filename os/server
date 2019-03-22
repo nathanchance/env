@@ -154,7 +154,7 @@ function bootstrap() {(
 
     # Install dotfiles
     (
-        cp -v "${DOTFILES}"/common/.git-prompt.sh "${HOME}"
+        bash "${DOTFILES}"/common/git-prompt.sh
         bash "${DOTFILES}"/common/global_gitignore.sh
         bash "${DOTFILES}"/common/vim/vim_setup.sh
         bash "${DOTFILES}"/server/bashrc.sh
