@@ -156,11 +156,9 @@ function bootstrap() {(
     (
         cp -v "${DOTFILES}"/common/.git-prompt.sh "${HOME}"
         bash "${DOTFILES}"/common/global_gitignore.sh
+        bash "${DOTFILES}"/common/vim/vim_setup.sh
         bash "${DOTFILES}"/server/bashrc.sh
         cp -v "${DOTFILES}"/server/.tmux.conf "${HOME}"
-        cp -rv "${DOTFILES}"/common/vim "${HOME}"/.vim
-        curl -LSs https://www.vim.org/scripts/download_script.php?src_id=20912 > "${HOME}"/.vim/plugin/git_patch_tags.vim
-        mv -v "${HOME}"/.vim/.vimrc "${HOME}"
         sudo cp -v "${DOTFILES}"/server/motd.sh /etc/profile.d
         gpg --output "${MAIN_FOLDER}"/.botinfo --decrypt "${DOTFILES}"/common/botinfo.gpg
         gpg --output "${HOME}"/.muttrc --decrypt "${DOTFILES}"/common/muttrc.gpg

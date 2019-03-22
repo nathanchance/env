@@ -141,9 +141,6 @@ function bootstrap() {
     git clone git@github.com:nathanchance/dotfiles "${DOTFILES}" || return 1
 
     # Copy files into their proper locations
-    # vim
-    cp -r "${DOTFILES}"/common/vim "${HOME}"/.vim
-    mv "${HOME}"/.vim/.vimrc "${HOME}"
     # .git-prompt.sh
     cp "${DOTFILES}"/common/.git-prompt.sh "${HOME}"
     # tmux
@@ -151,6 +148,7 @@ function bootstrap() {
 
     # Run small setup scripts from dotfiles
     bash "${DOTFILES}"/common/global_gitignore.sh
+    bash "${DOTFILES}"/common/vim/vim_setup.sh
 
     # Setup bash_aliases
     {
