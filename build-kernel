@@ -239,7 +239,7 @@ function compile() {
     [[ -n ${SHOW_ONLY_RESULT} ]] && exec > /dev/null
 
     # Show the base version we are making
-    header "BUILDING $(make CROSS_COMPILE="" kernelversion)"
+    header "BUILDING $(make CROSS_COMPILE="" CC=gcc kernelversion)"
 
     # Show compilation based on flags
     case ${VERBOSITY} in
