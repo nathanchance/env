@@ -33,7 +33,7 @@ function aliases() {
 
 
 # Try to attach via tmux
-function tmux_attach() {
+function tmxa() {
     command -v tmux &>/dev/null || return
     [[ -z ${TMUX} ]] && tmux new-session -AD -s main
 }
@@ -65,7 +65,7 @@ function bash_setup() {
     shopt -s checkwinsize
     aliases
     "${LOCATION}"_aliases
-    tmux_attach
+    tmxa
     "${LOCATION}"_setup
     add_to_path_pre "${SCRIPTS_FOLDER}"
     GPG_TTY=$(tty); export GPG_TTY
