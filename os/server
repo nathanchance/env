@@ -168,9 +168,11 @@ function bootstrap() {(
     git -C "${TC_FOLDER}" clone --single-branch https://android.googlesource.com/platform/prebuilts/clang/host/linux-x86/ aosp-clang
     git -C "${TC_FOLDER}" clone --depth=1 -b android-9.0.0_r1 --single-branch https://android.googlesource.com/platform/prebuilts/gcc/linux-x86/aarch64/aarch64-linux-android-4.9/ aosp-gcc-arm64
     git -C "${TC_FOLDER}" clone --depth=1 -b android-9.0.0_r1 --single-branch https://android.googlesource.com/platform/prebuilts/gcc/linux-x86/arm/arm-linux-androideabi-4.9/ aosp-gcc-arm
-    for VERSION in clang-4053586 clang-4393122 clang-4691093; do
+    for VERSION in clang-4053586:android-9.0.0_r1 clang-4393122:android-9.0.0_r1 clang-4691093:android-9.0.0_r1 clang-r346389b:master; do
+        BRANCH=${VERSION#*:}
+        VERSION=${VERSION%:*}
         mkdir -p "${TC_FOLDER}/${VERSION}"
-        curl -LSs https://android.googlesource.com/platform/prebuilts/clang/host/linux-x86/+archive/android-9.0.0_r1/${VERSION}.tar.gz | tar -C "${TC_FOLDER}/${VERSION}" -xzf -
+        curl -LSs https://android.googlesource.com/platform/prebuilts/clang/host/linux-x86/+archive/${BRANCH}/${VERSION}.tar.gz | tar -C "${TC_FOLDER}/${VERSION}" -xzf -
     done
 
     # Grab linux, linux-next, and linux-stable for CBL
