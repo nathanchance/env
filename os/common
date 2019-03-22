@@ -35,7 +35,7 @@ function aliases() {
 # Try to attach via tmux
 function tmux_attach() {
     command -v tmux &>/dev/null || return
-    tmux new-session -AD -s main
+    [[ -z ${TMUX} ]] && tmux new-session -AD -s main
 }
 
 
