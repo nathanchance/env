@@ -64,7 +64,7 @@ RYZEN_IP="95.216.41.81"
 VULTR_IP="209.250.235.204"
 
 # Latest AOSP Clang version
-LACV=clang-r353983
+LACV=clang-r353983b
 LACF=${TC_FOLDER}/aosp-clang/${LACV}
 
 # Export everything to satisfy shellcheck
