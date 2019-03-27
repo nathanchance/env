@@ -914,6 +914,7 @@ done' > "${SCRIPT}"
                  fedora:latest \
                  debian:stretch \
                  debian:buster; do
+        docker pull "${IMAGE}"
         docker run --interactive \
                    --mount type=bind,source="${TC_BLD}",target=/"${TC_BLD##*/}",readonly \
                    --mount type=bind,source="${CCACHE_FOLDER}",target=/ccache \
