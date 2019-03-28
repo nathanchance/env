@@ -38,6 +38,7 @@ function bootstrap() {(
     # Grab common functions/variables
     source <(curl -LSs https://github.com/nathanchance/scripts/raw/master/common) &>/dev/null || return 1
     source <(curl -LSs https://github.com/nathanchance/scripts/raw/master/constants/versions) &>/dev/null || return 1
+    source <(curl -LSs https://github.com/nathanchance/scripts/raw/master/snippets/hub) &>/dev/null || return 1
 
     DOTFILES=${REPO_FOLDER}/dotfiles
     KEYS=/tmp/keys
@@ -105,14 +106,7 @@ function bootstrap() {(
                                         xmlto || die "Error installing packages!"
 
     # Install hub
-    (
-        cd /tmp
-        curl -LO https://github.com/github/hub/releases/download/v"${HUB_VERSION:?}"/hub-linux-amd64-"${HUB_VERSION}".tgz
-        tar -xf hub-linux-amd64-"${HUB_VERSION}".tgz
-        cd hub-linux-amd64-"${HUB_VERSION}" || die "Downloading or extracting hub failed!"
-        sudo ./install
-    ) || die "Error installing hub!"
-    rm -rf /tmp/hub*
+    install_hub
 
     # Setup keys
     mv "${KEYS}"/id_ed25519{,.pub} "${HOME}"/.ssh
@@ -337,6 +331,7 @@ function server_setup() {
     source "${SCRIPTS_FOLDER}"/constants/versions
     source "${SCRIPTS_FOLDER}"/snippets/bk
     source "${SCRIPTS_FOLDER}"/snippets/cbl
+    source "${SCRIPTS_FOLDER}"/snippets/hub
     sbf
     ( gpg_available )
 }

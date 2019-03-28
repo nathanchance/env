@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+
+function install_hub() {(
+    cd "$(mktemp -d)" || die "Error moving into temporary directory!"
+    curl -LO https://github.com/github/hub/releases/download/v"${HUB_VERSION:?}"/hub-linux-amd64-"${HUB_VERSION}".tgz || die "Error downloading hub!"
+    tar -xf hub-linux-amd64-"${HUB_VERSION}".tgz || die "Error extracting hub!"
+    sudo ./hub-linux-amd64-"${HUB_VERSION}"/install || die "Error installing hub!"
+    rm -rf "${PWD}"
+)}
