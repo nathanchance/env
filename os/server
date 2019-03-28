@@ -481,25 +481,6 @@ function ftest() {
 }
 
 
-# Regenerate Pixel 2 build binaries
-function rpb() {
-    cd "${KERNEL_FOLDER}/sources/aosp-pixel2" || return
-
-    mkavenv
-    . build/envsetup.sh
-    lunch aosp_taimen-user
-    m "${JOBS_FLAGS}" clean
-    m "${JOBS_FLAGS}" mkdtimg
-    rmvenv
-
-    cp out/host/linux-x86/bin/mkdtimg "${BIN_FOLDER}"
-
-    cd "${SCRIPTS_FOLDER}" || return
-
-    git status
-}
-
-
 # Sign zip files for TWRP flashability
 function signzip() {
     local FILE=${1}
