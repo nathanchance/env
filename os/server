@@ -504,6 +504,8 @@ function signzip() {
 
     # Sign the zip
     mv "${SIGNED_ZIP}" "${UNSIGNED_ZIP}"
+    # SC2153: Possible misspelling: BIN_FOLDER may not be assigned, but GIT_FOLDER is.
+    # shellcheck disable=SC2153
     java -jar "${BIN_FOLDER}/zipsigner-3.0.jar" \
               "${UNSIGNED_ZIP}" \
               "${SIGNED_ZIP}"
@@ -989,7 +991,7 @@ function bgit() {(
 
     GIT_FOLDER=${REPO_FOLDER:?}/git
     [[ ! -d ${GIT_FOLDER} ]] && { display_error "Git folder doesn't exist!"; return; }
-    cd "${GIT_FOLDER}"
+    cd "${GIT_FOLDER}" || die "Couldn't move into ${GIT_FOLDER}!"
 
     git cl -q
     git f origin

@@ -63,8 +63,8 @@ function bootstrap() {
         lld-9
 
     # Build updated ccache
-    curl -LSs https://www.samba.org/ftp/ccache/ccache-${CCACHE_VERSION:?}.tar.gz | tar -xzf -
-    cd ccache-${CCACHE_VERSION} || { display_error "Downloading or extracting ccache failed!"; return 1; }
+    curl -LSs https://www.samba.org/ftp/ccache/ccache-"${CCACHE_VERSION:?}".tar.gz | tar -xzf -
+    cd ccache-"${CCACHE_VERSION}" || { display_error "Downloading or extracting ccache failed!"; return 1; }
     ./configure
     make -j"$(nproc)"
     sudo make install
