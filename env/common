@@ -6,7 +6,7 @@
 
 
 # Source our universal functions script
-if [[ -n ${ZSH_VERSION} ]]; then
+if [[ -n ${ZSH_NAME} ]]; then
     SCRIPT=${(%):-%x}
 elif [[ -n ${BASH} ]]; then
     SCRIPT=${BASH_SOURCE[0]}
@@ -89,7 +89,7 @@ function path_pop() {
 
 function shell_setup() {
     # Shell specific options
-    if [[ -n ${ZSH_VERSION} ]]; then
+    if [[ -n ${ZSH_NAME} ]]; then
         [[ -n ${terminfo[khome]} ]] && bindkey "${terminfo[khome]}" beginning-of-line
         [[ -n ${terminfo[kend]} ]] && bindkey "${terminfo[kend]}" end-of-line
         TIMEFMT=$'\nreal\t%*E\nuser\t%*U\nsys\t%*S'

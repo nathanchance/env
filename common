@@ -15,7 +15,7 @@
 HOST=$(uname -n | tr '[:upper:]' '[:lower:]')
 
 # Location of "scripts" folder
-if [[ -n ${ZSH_VERSION} ]]; then
+if [[ -n ${ZSH_NAME} ]]; then
     SCRIPT=${(%):-%x}
 elif [[ -n ${BASH} ]]; then
     SCRIPT=${BASH_SOURCE[0]}
@@ -130,7 +130,7 @@ function display_error() {
     echo
     echo "${RED}${1}${RST}"
     if [[ -n ${BASH_VERSION} ]] || \
-       [[ -n ${ZSH_VERSION} && $(prompt -c | tail -n1 | sed 's/.* //') != "pure" ]]; then
+       [[ -n ${ZSH_NAME} && $(prompt -c | tail -n1 | sed 's/.* //') != "pure" ]]; then
         [[ -z ${2} ]] && echo
     fi
 }
