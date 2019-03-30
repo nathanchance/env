@@ -286,7 +286,7 @@ function report_result() {
 }
 
 
-source "$(cd "$(dirname "$(readlink -f "${(%):-%x}")")" || return; pwd)/common"
+source "$(cd "$(dirname "$(readlink -f "${(%):-%x}")")" || return; pwd)/../common"
 source "${SCRIPTS_FOLDER}/constants/server_folders"
 source "${SCRIPTS_FOLDER}/funcs/fkv"
 source "${SCRIPTS_FOLDER}/funcs/transfer"
