@@ -75,6 +75,8 @@ function shell_setup() {
         [[ -n ${terminfo[kend]} ]] && bindkey "${terminfo[kend]}" end-of-line
         TIMEFMT=$'\nreal\t%*E\nuser\t%*U\nsys\t%*S'
         setopt autocd
+        autoload -Uz compinit
+        compinit
     elif [[ -n ${BASH} ]]; then
         shopt -s checkwinsize
     else
