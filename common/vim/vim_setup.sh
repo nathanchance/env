@@ -1,7 +1,7 @@
-#!/usr/bin/env bash
+#!/usr/bin/env zsh
 
 # Move into the folder this script is being run from
-cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")" || return
+cd "$(dirname "$(readlink -f "${(%):-%x}")")" || return
 
 # Indents
 INDENT=${HOME}/.vim/indent
@@ -27,7 +27,7 @@ if [[ ! -d ${START}/vim-one ]]; then
 else
     git -C "${START}"/vim-one pull
 fi
-curl -LSso "${PLUGIN}"/git_patch_tags.vim https://www.vim.org/scripts/download_script.php?src_id=20912
+curl -LSso "${PLUGIN}"/git_patch_tags.vim 'https://www.vim.org/scripts/download_script.php?src_id=20912'
 
 # .vimrc
 cp .vimrc "${HOME}"
