@@ -75,6 +75,7 @@ function bootstrap() {(
                                         cpio \
                                         docker \
                                         dtc \
+                                        expect \
                                         fd \
                                         git \
                                         htop \
@@ -101,7 +102,6 @@ function bootstrap() {(
                                         rubygems \
                                         "shellcheck" \
                                         tmux \
-                                        unbuffer \
                                         xmlto || die "Error installing packages!"
 
     # Install hub
