@@ -1,0 +1,12 @@
+function TRAPTERM() {
+    echo
+    display_error "Program killed!"
+    return 1
+}
+
+function TRAPINT() {
+    echo
+    display_error "Manually aborted!"
+    return 1
+}
+# vi: filetype=zsh
