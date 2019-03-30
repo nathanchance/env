@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/usr/bin/env zsh
 #
 # SPDX-License-Identifier: GPL-3.0-or-later
 #
@@ -182,7 +182,7 @@ function generate_versions() {
     CURRENT_SUBLEVEL=${CURRENT_VERSION##*.}
 
     # Get latest update from upstream
-    LATEST_VERSION=$(git tag --sort=-taggerdate -l v"${CURRENT_MAJOR_VERSION}"* | head -n 1 | sed s/v//)
+    LATEST_VERSION=$(git tag --sort=-taggerdate -l "v${CURRENT_MAJOR_VERSION}*" | head -n 1 | sed s/v//)
     LATEST_SUBLEVEL=${LATEST_VERSION##*.}
 
     # Print the current/latest version and exit if requested
@@ -338,9 +338,9 @@ function update_tree() {
 }
 
 
-source "$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")" || return; pwd)/../common"
+source "$(cd "$(dirname "$(readlink -f "${(%):-%x}")")" || return; pwd)/common"
 source "${SCRIPTS_FOLDER}"/constants/server_folders
-trap 'echo; die "Manually aborted!"' SIGINT SIGTERM
+source "${SCRIPTS_FOLDER}/snippets/traps"
 parse_parameters "${@}"
 update_sources
 generate_versions
