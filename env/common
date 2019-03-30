@@ -46,6 +46,25 @@ function tmxa() {
 }
 
 
+# Smart tmux detach
+# https://arslan.io/2019/01/07/using-the-ipad-pro-as-my-development-machine/
+function tmxd() {
+    local COUNT PANES WINS
+
+    command -v tmux &>/dev/null || return
+    [[ -z ${TMUX} ]] && builtin exit
+
+    PANES=$(tmux list-panes | wc -l)
+    WINS=$(tmux list-windows | wc -l)
+    COUNT=$((PANES + WINS - 1))
+    if [[ ${COUNT} -eq 1 ]]; then
+        tmux detach
+    else
+        builtin exit
+    fi
+}
+
+
 # Add something to the end of PATH if it isn't already there
 function add_to_path_post() {
     [[ -d ${1} ]] || return
@@ -97,24 +116,5 @@ function shell_setup() {
 function rld() {
     source "${SCRIPTS_FOLDER}/env/common"
     shell_setup
-}
-
-
-# Don't kill tmux sessions when one pane exists
-# https://arslan.io/2019/01/07/using-the-ipad-pro-as-my-development-machine/
-function exit() {
-    if [[ -z ${TMUX} ]]; then
-        builtin exit
-        return
-    fi
-
-    PANES=$(tmux list-panes | wc -l)
-    WINS=$(tmux list-windows | wc -l)
-    COUNT=$((PANES + WINS - 1))
-    if [[ ${COUNT} -eq 1 ]]; then
-        tmux detach
-    else
-        builtin exit
-    fi
 }
 # vi: filetype=zsh
