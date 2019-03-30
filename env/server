@@ -229,7 +229,7 @@ function bootstrap() {(
 
     # Install gist
     gem install gist
-    gist --login
+    "${HOME}/.gem/ruby/${RUBY_VERSION}/bin/gist" --login
 
     # Install pure prompt
     (
@@ -344,13 +344,13 @@ function server_setup() {
     server_prompt
     ccache_setup 250
     LOG=$(mktemp); export LOG
-    add_to_path_post "${HOME}/.gem/ruby/2.6.0/bin"
     add_to_path_pre "${SCRIPTS_FOLDER}/server"
     source "${SCRIPTS_FOLDER}"/constants/server_folders
     source "${SCRIPTS_FOLDER}"/constants/versions
     source "${SCRIPTS_FOLDER}"/funcs/bk
     source "${SCRIPTS_FOLDER}"/funcs/cbl
     source "${SCRIPTS_FOLDER}"/funcs/hub
+    add_to_path_post "${HOME}/.gem/ruby/${RUBY_VERSION}/bin"
     load_botinfo
     sbf
     ( gpg_available )
