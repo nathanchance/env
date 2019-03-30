@@ -1,5 +1,3 @@
-#!/usr/bin/env bash
-#
 # SPDX-License-Identifier: GPL-3.0-or-later
 #
 # Copyright (C) 2016-2019 Nathan Chancellor
@@ -17,7 +15,16 @@
 HOST=$(uname -n | tr '[:upper:]' '[:lower:]')
 
 # Location of "scripts" folder
-SCRIPTS_FOLDER=$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")" || return; pwd)
+if [[ -n ${ZSH_VERSION} ]]; then
+    SCRIPT=${(%):-%x}
+elif [[ -n ${BASH} ]]; then
+    SCRIPT=${BASH_SOURCE[0]}
+else
+    echo "Unsupported shell!"
+    return 1
+fi
+SCRIPTS_FOLDER=$(cd "$(dirname "$(readlink -f "${SCRIPT}")")" || return; pwd)
+unset SCRIPT
 
 # Colors
 BLINK_RED="\033[05;31m"
@@ -149,9 +156,7 @@ function die() {
     fi
 
     display_error "${@}"
-    if type -p pre_exit_commands; then
-        pre_exit_commands
-    fi
+    type pre_exit_commands &>/dev/null && pre_exit_commands
     builtin exit 1
 }
 
@@ -297,3 +302,4 @@ function rg() {
                --colors "match:bg:yellow" \
                "${@}"
 }
+# vi: filetype=zsh
