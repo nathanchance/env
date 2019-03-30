@@ -129,7 +129,10 @@ function format_time() {
 function display_error() {
     echo
     echo "${RED}${1}${RST}"
-    [[ -z ${2} ]] && echo
+    if [[ -n ${BASH_VERSION} ]] || \
+       [[ -n ${ZSH_VERSION} && $(prompt -c | tail -n1 | sed 's/.* //') != "pure" ]]; then
+        [[ -z ${2} ]] && echo
+    fi
 }
 
 
