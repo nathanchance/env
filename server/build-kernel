@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/usr/bin/env zsh
 #
 # SPDX-License-Identifier: GPL-3.0-or-later
 #
@@ -28,21 +28,21 @@ function get_cc_prefix() {
 # Kernel make function
 function kmake() {
     # Set make variable
-    MAKE="make ${JOBS_FLAG} O=out ARCH=${ARCH}"
+    MAKE=( make "${JOBS_FLAG}" O=out ARCH=${ARCH} )
 
     if [[ -n ${CLANG} ]]; then
-        ${MAKE} CC="${CCACHE} clang" \
-                CLANG_TRIPLE=aarch64-linux-gnu- \
-                CLANG_TRIPLE_ARM32=arm-linux-gnueabi- \
-                CROSS_COMPILE="${GCC_CC}" \
-                CROSS_COMPILE_ARM32="${GCC_32_BIT_CC}" \
-                HOSTCC="${CCACHE} clang" \
-                KBUILD_COMPILER_STRING="${CLANG_VERSION}" \
-                "${@}"
+        "${MAKE[@]}" CC="${CCACHE} clang" \
+                     CLANG_TRIPLE=aarch64-linux-gnu- \
+                     CLANG_TRIPLE_ARM32=arm-linux-gnueabi- \
+                     CROSS_COMPILE="${GCC_CC}" \
+                     CROSS_COMPILE_ARM32="${GCC_32_BIT_CC}" \
+                     HOSTCC="${CCACHE} clang" \
+                     KBUILD_COMPILER_STRING="${CLANG_VERSION}" \
+                     "${@}"
     else
-        ${MAKE} CROSS_COMPILE="${CCACHE} ${GCC_CC}" \
-                CROSS_COMPILE_ARM32="${GCC_32_BIT_CC}" \
-                "${@}"
+        "${MAKE[@]}" CROSS_COMPILE="${CCACHE} ${GCC_CC}" \
+                     CROSS_COMPILE_ARM32="${GCC_32_BIT_CC}" \
+                     "${@}"
     fi
 }
 
@@ -80,7 +80,7 @@ function parse_parameters() {
             "-d"|"--defconfig")
                 shift && enforce_value "${@}"
 
-                IFS=',' read -r -a DEFCONFIGS <<< "${1}" ;;
+                IFS=',' read -r -A DEFCONFIGS <<< "${1}" ;;
 
             # Show full compilation
             "-D"|"--debug")
@@ -211,7 +211,7 @@ function build() {
         cat "${DEFCONFIGS[@]}" > out/.config
         kmake olddefconfig |& rg --color=never -v "format-overflow"
     else
-        kmake "${DEFCONFIGS[0]}" |& rg --color=never -v "format-overflow"
+        kmake "${DEFCONFIGS[1]}" |& rg --color=never -v "format-overflow"
     fi
     if [[ -n ${WERROR} ]]; then
         ./scripts/config --file out/.config -e CC_WERROR -e CONFIG_ERROR_ON_WARNING
@@ -286,11 +286,11 @@ function report_result() {
 }
 
 
-source "$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")" || return; pwd)/../common"
+source "$(cd "$(dirname "$(readlink -f "${(%):-%x}")")" || return; pwd)/common"
 source "${SCRIPTS_FOLDER}/constants/server_folders"
 source "${SCRIPTS_FOLDER}/funcs/fkv"
 source "${SCRIPTS_FOLDER}/funcs/transfer"
-trap 'echo; die "Manually aborted!"' SIGINT SIGTERM
+source "${SCRIPTS_FOLDER}/snippets/traps"
 parse_parameters "${@}"
 setup_toolchains
 compile
