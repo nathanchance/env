@@ -92,7 +92,7 @@ source "$(cd "$(dirname "$(readlink -f "${(%):-%x}")")" || return; pwd)/../commo
 source "${SCRIPTS_FOLDER}"/constants/server_folders
 source "${SCRIPTS_FOLDER}"/funcs/bk
 source "${SCRIPTS_FOLDER}"/funcs/deldog
-source "${SCRIPTS_FOLDER}"/snippets/traps
+source "${SCRIPTS_FOLDER}"/funcs/traps
 LOG=$(mktemp)
 
 # Variables

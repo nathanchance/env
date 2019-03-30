@@ -290,7 +290,7 @@ source "$(cd "$(dirname "$(readlink -f "${(%):-%x}")")" || return; pwd)/../commo
 source "${SCRIPTS_FOLDER}/constants/server_folders"
 source "${SCRIPTS_FOLDER}/funcs/fkv"
 source "${SCRIPTS_FOLDER}/funcs/transfer"
-source "${SCRIPTS_FOLDER}/snippets/traps"
+source "${SCRIPTS_FOLDER}/funcs/traps"
 parse_parameters "${@}"
 setup_toolchains
 compile
