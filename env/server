@@ -159,7 +159,6 @@ function bootstrap() {(
         zsh "${DOTFILES}"/common/vim/vim_setup.sh
         zsh "${DOTFILES}"/server/zshrc.sh
         cp -v "${DOTFILES}"/server/.tmux.conf "${HOME}"
-        sudo cp -v "${DOTFILES}"/server/motd.sh /etc/profile.d
         gpg --pinentry-mode loopback --output "${MAIN_FOLDER}"/.botinfo --decrypt "${DOTFILES}"/common/botinfo.gpg
         gpg --pinentry-mode loopback --output "${HOME}"/.muttrc --decrypt "${DOTFILES}"/common/muttrc.gpg
     ) || die "Error installing dotfiles"
