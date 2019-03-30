@@ -229,6 +229,17 @@ function bootstrap() {(
     gem install gist
     gist --login
 
+    # Install pure prompt
+    (
+        ZFUNCTIONS=${HOME}/.zfunctions
+        mkdir -p "${ZFUNCTIONS}"
+        cd "${ZFUNCTIONS}"
+        git clone https://github.com/sindresorhus/pure
+        cd pure
+        ln -s "${PWD}"/pure.zsh "${ZFUNCTIONS}"/prompt_pure_setup
+        ln -s "${PWD}"/async.zsh "${ZFUNCTIONS}"/async
+    )
+
     # Reminder of things to do
     echo
     echo "Things still to do!"
