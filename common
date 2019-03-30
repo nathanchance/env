@@ -23,7 +23,7 @@ else
     echo "Unsupported shell!"
     return 1
 fi
-SCRIPTS_FOLDER=$(cd "$(dirname "$(readlink -f "${SCRIPT}")")" || return; pwd)
+[[ ! ${SCRIPT} =~ /proc ]] && SCRIPTS_FOLDER=$(cd "$(dirname "$(readlink -f "${SCRIPT}")")" || return; pwd)
 unset SCRIPT
 
 # Colors
