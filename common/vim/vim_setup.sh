@@ -10,7 +10,7 @@ cp -v indent/make.vim "${INDENT}"
 
 # Plugins
 PLUGIN=${HOME}/.vim/plugin
-START=${HOME}/.vim/my-plugins/start
+START=${HOME}/.vim/pack/my-plugins/start
 mkdir -p "${PLUGIN}" "${START}"
 if [[ ! -d ${START}/vim-fugitive ]]; then
     git -C "${START}" clone https://github.com/tpope/vim-fugitive
