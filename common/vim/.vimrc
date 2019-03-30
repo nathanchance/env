@@ -16,7 +16,11 @@ set statusline+=%=                          " Column break
 set statusline+=\ %l\:%v                    " Show line and column
 set statusline+=\ \(%p%%\)                  " Show location of cursor location percentage
 
-colorscheme cobalt                          " Dope af
+" Ensure color scheme always works
+set t_Co=256
+set background=dark
+colorscheme one
+
 syntax enable                               " Enable syntax processing
 set tabstop=4                               " Show tabs as four spaces
 set softtabstop=4                           " When hit, tab = 4 spaces
