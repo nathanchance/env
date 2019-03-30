@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/usr/bin/env zsh
 
 # Create and configure global .gitignore
 git config --global core.excludesfile ~/.gitignore_global
