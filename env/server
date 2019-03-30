@@ -359,23 +359,6 @@ function ris {
 }
 
 
-# Add kernel remotes to a kernel repo
-function kremotes() {
-    if [[ ! -f Makefile ]]; then
-        display_error "Run this in a kernel tree!"
-        return 1
-    fi
-
-    git remote add aosp-kc https://android.googlesource.com/kernel/common
-    git remote add aosp-msm https://android.googlesource.com/kernel/msm
-    git remote add linux https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git
-    git remote add linux-stable https://git.kernel.org/pub/scm/linux/kernel/git/stable/linux.git
-    git remote add linux-stable-rc https://git.kernel.org/pub/scm/linux/kernel/git/stable/linux-stable-rc.git
-
-    git remote update
-}
-
-
 # Neofetch alias
 function nf() {
     echo
@@ -457,155 +440,6 @@ function kfg() {
 }
 
 
-# Release Flash Kernel build for specified device
-# frel <device> <version>
-function frel() {
-    flash-kernel --device "${1}" \
-                 --mode stable \
-                 --telegram \
-                 --version "${2}"
-}
-
-
-# Build Flash Kernel test builds
-# ftest <device> <version> <dirty_version> <type>
-function ftest() {
-    [[ ${#} -gt 4 ]] && queue-tag -c "${2}"
-    flash-kernel --branch "queue-${2}" \
-                 --device "${1}" \
-                 --mode "${4}" \
-                 --revision "${3}" \
-                 --telegram \
-                 --version "${2}"
-    [[ ${#} -gt 4 ]] && queue-tag -d "${2}"
-}
-
-
-# Sign zip files for TWRP flashability
-function signzip() {
-    local FILE=${1}
-    if echo "${FILE}" | grep -q -v zip; then
-        display_error "This can only sign zip files!"
-        return 1
-    fi
-    if [[ ! -f ${FILE} ]]; then
-        display_error "Zip file does not exist!"
-        return 1
-    fi
-
-    header "Signing ${FILE}"
-
-    # Shift to the folder containing the zip
-    cd "$(dirname "${FILE}")" || return
-
-    # Get the zip name
-    SIGNED_ZIP="$(basename "${FILE}")"
-    UNSIGNED_ZIP="$(basename "${FILE}" .zip)-unsigned.zip"
-
-    # Sign the zip
-    mv "${SIGNED_ZIP}" "${UNSIGNED_ZIP}"
-    # SC2153: Possible misspelling: BIN_FOLDER may not be assigned, but GIT_FOLDER is.
-    # shellcheck disable=SC2153
-    java -jar "${BIN_FOLDER}/zipsigner-3.0.jar" \
-              "${UNSIGNED_ZIP}" \
-              "${SIGNED_ZIP}"
-    rm "${UNSIGNED_ZIP}"
-
-    # Echo zip location
-    echo "Signed zip: ${PWD}/${SIGNED_ZIP}\n"
-    cd "${OLDPWD}" || return
-}
-
-
-# Manage queue tags
-# queue-tag [-c|-d] <version> <hash>
-function queue-tag() {
-    if [[ ! -f Makefile ]]; then
-        display_error "Run this in a kernel tree!"
-        return 1
-    fi
-
-    case ${1} in
-        "-c"|"--create")
-            git tag -f -a "queue-${2}" -m "Queue for Flash v${2}" -s "${3:-HEAD}"
-            git push -f origin "queue-${2}" ;;
-
-        "-d"|"--delete")
-            git tag -d "queue-${2}"
-            git push origin :"queue-${2}" ;;
-    esac
-}
-
-
-# Does it build function
-# SC2120: dib references arguments, but none are ever passed.
-# shellcheck disable=SC2120
-function dib() {(
-    DEVICE=${PWD##*/}
-    START=$(date +%s)
-
-    while (( ${#} )); do
-        case ${1} in
-            "-l"|"--log") WANTS_LOG=true ;;
-        esac
-        shift
-    done
-
-    [[ -n ${WANTS_LOG} ]] && rm -r "${LOG}"
-
-    # Set common parameter lists
-    AOSP_GCC="--gcc-toolchain aosp-gcc-arm64 --gcc-32-bit-toolchain aosp-gcc-arm"
-    BTG_GCC="--gcc-toolchain btg-gcc-8.2.1-arm64 --gcc-32-bit-toolchain btg-gcc-8.2.1-arm"
-    AOSP_CLANG_8="--compiler clang --clang-toolchain aosp-clang/clang-r344140 ${AOSP_GCC}"
-    AOSP_CLANG_7="--compiler clang --clang-toolchain aosp-clang/clang-r328903 ${AOSP_GCC}"
-    AOSP_CLANG_6="--compiler clang --clang-toolchain aosp-clang/clang-4691093 ${AOSP_GCC}"
-    CLANG_8="--compiler clang --clang-toolchain clang-8.x ${BTG_GCC}"
-    CLANG_7="--compiler clang --clang-toolchain clang-7.x ${BTG_GCC}"
-    CLANG_8_PERSONAL="${CLANG_8} --personal-optimization"
-    CLANG_7_PERSONAL="${CLANG_7} --personal-optimization"
-    GCC_821="--compiler gcc ${BTG_GCC}"
-    GCC_731="--compiler gcc --gcc-toolchain btg-linaro-gcc-7.3.1-arm64 --gcc-32-bit-toolchain btg-linaro-gcc-7.3.1-arm"
-    GCC_494="--compiler gcc ${AOSP_GCC}"
-
-    case ${DEVICE} in
-        marlin|op6|op6-custom|wahoo)
-            TC_LIST=( "${CLANG_8}"
-                      "${CLANG_7}"
-                      "${CLANG_8_PERSONAL}"
-                      "${CLANG_7_PERSONAL}"
-                      "${AOSP_CLANG_8}"
-                      "${AOSP_CLANG_7}"
-                      "${AOSP_CLANG_6}"
-                      "${GCC_821}"
-                      "${GCC_731}"
-                      "${GCC_494}" ) ;;
-        *) display_error "This folder doesn't support dib!"; return ;;
-    esac
-
-    for ITEM in "${TC_LIST[@]}"; do
-        read -ra ITEM_ARRAY <<< "${ITEM}"
-        flash-kernel --device "${DEVICE}" --mode tmp --image-only "${ITEM_ARRAY[@]}"
-    done
-
-    clear
-
-    if [[ -n ${WANTS_LOG} ]]; then
-        {
-            TIME_STRING=$(format_time "${START}" "$(date +%s)")
-            echo
-            echo
-            echo
-            echo "TOTAL DURATION: ${TIME_STRING,,}"
-        } >> "${LOG}"
-        URL="$(deldog "${LOG}")"
-        echo
-        echo "${BOLD}${DEVICE} results:${RST} ${URL}"
-        echo
-        tg_msg "${DEVICE} results: ${URL}"
-    fi
-)}
-
-
 # A version of dib for android-kernel-clang
 function dib-clang() {(
     case "$(git cb)" in
@@ -625,52 +459,6 @@ function dib-clang() {(
         build-kernel -d "${DEFCONFIG}" -w -Werror -v oreo-small "${ITEM_ARRAY[@]}" "${@}"
     done
 )}
-
-
-# Shellcheck function
-function shellcheck() {
-    # SC1090: Can't follow non-constant source. Use a directive to specify location.
-    # SC1091: Not following: build/envsetup.sh: openBinaryFile: does not exist (No such file or directory)
-    # SC1094: Parsing of sourced file failed. Ignoring it.
-    # SC1117: Backslash is literal in "\t". Prefer explicit escaping: "\\t".
-    # SC2028: echo won't expand escape sequences. Consider printf.
-    command shellcheck -x -e SC1090 -e SC1091 -e SC1094 -e SC1117 -e SC2028 "${@}"
-}
-
-
-# Shellcheck wrapper
-function sc() {
-    if ! [[ "${PWD}" =~ "scripts" ]]; then
-        display_error "Not in scripts folder, why are you running sc?"
-        return;
-    fi
-
-    case ${1} in
-        "-a"|"--all") FILES=$(find . -maxdepth 2 -type f -executable  -printf '%P\n' | rg -v bin) ;;
-        *) FILES=$(git diff --name-only --diff-filter=M) ;;
-    esac
-
-    echo
-    for FILE in ${FILES}; do
-        if shellcheck "${FILE}"; then
-            echo "${GRN}${FILE} is clean of warnings/errors!${RST}"
-        fi
-    done
-    echo
-}
-
-
-# makepkg wrapper for Linux kernel
-function mkpkg() {
-    local START TIME_STRING
-    START=$(date +%s)
-    if makepkg -si --noconfirm; then
-        TIME_STRING=$(format_time "${START}" "$(date +%s)")
-        tg_msg "\`Server kernel build completed successfully in ${TIME_STRING,,}\`"
-    else
-        tg_msg "\`Server kernel build failed in ${TIME_STRING,,}\`"
-    fi
-}
 
 
 # Update all remotes and run git gc/prune
@@ -715,104 +503,6 @@ function clean-kernels() {(
 )}
 
 
-# Update AnyKernel2 from osm0sis's GitHub
-function update-ak2() {(
-    REPOS=( "${KERNEL_FOLDER}/flash/anykernel2-marlin"
-            "${KERNEL_FOLDER}/flash/anykernel2-op6"
-            "${KERNEL_FOLDER}/flash/anykernel2-wahoo" )
-
-    for REPO in "${REPOS[@]}"; do
-        BRANCH=${REPO##*:}
-        REPO=${REPO%%:*}
-        header "Updating $(basename "${REPO}")"
-
-        cd "${REPO}" || {
-            display_error "${REPO} does not exist, please clone it from GitHub!"
-            return 1
-        }
-
-        if ! git ls-remote --exit-code upstream 1>/dev/null; then
-            git remote add upstream https://github.com/osm0sis/AnyKernel2
-        fi
-
-        if [[ "${REPO}" != "${BRANCH}" ]]; then
-            TARGET_BRANCH=${BRANCH}
-        else
-            TARGET_BRANCH=$(git rev-parse --abbrev-ref HEAD)
-        fi
-
-        git ch -q master
-        git pull -q upstream master
-        git push -q
-
-        git ch -q "${TARGET_BRANCH}"
-        if ! git ml --no-edit master; then
-            display_error "Conflicts detected! Please fix them then run 'git mc'"
-            return 1
-        fi
-        git push -q
-    done
-    echo
-)}
-
-
-# Build android/common kernel
-function ac-kernel() {
-    local UPDATE VERSION
-    cd "${KERNEL_FOLDER}/sources/kernel-common" || return
-
-    while (( ${#} )); do
-        case ${1} in
-            "-u"|"--update") UPDATE=true ;;
-            *) VERSION=${1} ;;
-        esac
-
-        shift
-    done
-    echo
-
-    [[ -z ${VERSION} ]] && VERSION=4.4
-    
-    # Checkout proper branch
-    git checkout -q "android-${VERSION}"
-
-    # Update
-    [[ -n ${UPDATE} ]] && git pull
-
-    # Configure
-    git clean -fxdq
-    mkdir -p out
-    {
-        case ${VERSION} in
-            "4.4") ./android/configs/android-fetch-configs.sh ;;
-            *) ./kernel/configs/android-fetch-configs.sh ;;
-        esac
-        cat arch/arm64/configs/defconfig \
-            android-base.cfg \
-            android-base-arm64.cfg \
-            android-recommended.cfg > out/.config
-        make ARCH=arm64 O=out olddefconfig prepare
-    } &> /dev/null
-
-    # Build the kernel
-    time make "${JOBS_FLAG}" \
-              ARCH=arm64 \
-              CC="${CCACHE} ${TC_FOLDER}/aosp-clang/clang-r328903/bin/clang" \
-              CLANG_TRIPLE=aarch64-linux-gnu- \
-              CROSS_COMPILE="${TC_FOLDER}/aosp-gcc-arm64/bin/aarch64-linux-android-" \
-              O=out > /dev/null
-
-    # Show version information
-    if [[ -f out/arch/arm64/boot/Image ]]; then
-        echo "\n${GRN}Kernel build successful!${RST}"
-        echo "\n${BOLD}Kernel version:${RST} $(cat out/include/config/kernel.release)"
-    else
-        display_error "Kernel build failed!"
-    fi
-    echo
-}
-
-
 # Change email for git repositories
 function change-email() {
     if [[ ${#} -lt 1 ]]; then
@@ -828,33 +518,6 @@ function change-email() {
         "personal")
             git config --unset user.email ;;
     esac
-}
-
-
-# Update kernel function
-function updk() {
-    if ! cd "${REPO_FOLDER}/pkgbuilds"; then
-        display_error "PKGBUILD folder not found!"
-        return
-    fi
-
-    if ! git fetch upstream packages/linux; then
-        display_error "Error fetching upstream!"
-        return
-    fi
-
-    if ! git ml --no-edit upstream/packages/linux; then
-        display_error "Error updating from upstream!"
-        return
-    fi
-
-    git push
-
-    git cl --exclude trunk/archlinux-linux -f
-
-    cd trunk || return
-
-    mkpkg
 }
 
 
@@ -934,39 +597,10 @@ function qcacld() {(
 )}
 
 
-# Build all Flash Kernel builds a certain amount of times
-function fkba() {(
-    for DEVICE in marlin op6 wahoo; do
-        BRANCH=${DEVICE##*:}
-        DEVICE=${DEVICE%%:*}
-        rm -f "${LOG}"
-        START=$(date +%s)
-        cd "${KERNEL_FOLDER}/flash/${DEVICE}" || { warn "${DEVICE} folder does not exist, skipping!"; continue; }
-        if [[ "${BRANCH}" != "${DEVICE}" ]]; then
-            git ch "${BRANCH}" || { warn "${BRANCH} for ${DEVICE} does not exist, skipping!"; continue; }
-        fi
-        [[ ${1} = "-n" || ${1} = "--number" ]] && { shift; NUM=${1}; }
-        [[ -z ${NUM} ]] && NUM=1
-        # SC2034: i appears unused. Verify use (or export if used externally).
-        # SC2119: Use dib "$@" if function's $1 should mean script's $1.
-        # shellcheck disable=SC2034,SC2119
-        for i in $(seq 1 ${NUM}); do dib; done
-        {
-            TIME_STRING=$(format_time "${START}" "$(date +%s)")
-            echo
-            echo
-            echo
-            echo "TOTAL DURATION: ${TIME_STRING,,}"
-        } >> "${LOG}"
-        tg_msg "${DEVICE} results: $(deldog "${LOG}")"
-    done
-)}
-
-
 # Symlink the generic-commands file to all of the android-linux-stable trees for a particular kernel version
 function symlink-commands() {(
     case ${1} in
-        "3.18") FILES=( "marlin" "msm-3.18" "op3-lineage-16.0" "op3-8.0.0" "tissot" ) ;;
+        "3.18") FILES=( "marlin" "msm-3.18" "op3-8.0.0" "tissot" ) ;;
         "4.4") FILES=( "jasmine-p" "msm-4.4" "nash-lineage-16.0" "op5-android-9.0" "op5-P_9.0" "op5-P_9.0_Beta" "sagit" "wahoo" "whyred" ) ;;
         "4.9") FILES=( "bluecross" "msm-4.9" "op6-android-9.0" "op6-lineage-16.0" "op6-P_9.0" "op6-P_9.0_Beta" "polaris" ) ;;
     esac
