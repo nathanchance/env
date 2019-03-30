@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+
+# Common locations amongst scripts
+MAIN_FOLDER=${HOME}
+KERNEL_FOLDER=${MAIN_FOLDER}/kernels
+MISC_FOLDER=${MAIN_FOLDER}/misc
+REPO_FOLDER=${MAIN_FOLDER}/repos
+ROM_FOLDER=${MAIN_FOLDER}/roms
+TC_FOLDER=${MAIN_FOLDER}/toolchains
+WEB_FOLDER=/var/www
+
+# Binary build folder on tmpfs
+BLDF=/mnt/build
+
+# ClangBuiltLinux folder
+CBL=${MAIN_FOLDER}/cbl
+
+# Latest AOSP Clang version
+LACV=clang-r353983b
+LACF=${TC_FOLDER}/aosp-clang/${LACV}

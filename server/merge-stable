@@ -339,6 +339,7 @@ function update_tree() {
 
 
 source "$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")" || return; pwd)/../common"
+source "${SCRIPTS_FOLDER}"/constants/server_folders
 trap 'echo; die "Manually aborted!"' SIGINT SIGTERM
 parse_parameters "${@}"
 update_sources
