@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/usr/bin/env zsh
 #
 # SPDX-License-Identifier: GPL-3.0-or-later
 #
@@ -88,11 +88,11 @@ function post_merge_commands() {
     fi
 }
 
-source "$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")" || return; pwd)/../common"
+source "$(cd "$(dirname "$(readlink -f "${(%):-%x}")")" || return; pwd)/common"
 source "${SCRIPTS_FOLDER}"/constants/server_folders
 source "${SCRIPTS_FOLDER}"/funcs/bk
 source "${SCRIPTS_FOLDER}"/funcs/deldog
-trap 'echo; die "Manually aborted!"' SIGINT SIGTERM
+source "${SCRIPTS_FOLDER}"/snippets/traps
 LOG=$(mktemp)
 
 # Variables
@@ -125,7 +125,7 @@ while (( ${#} )); do
         # Subset of repos (implies -v has been set)
         "-R"|"--repos")
             shift && enforce_value "${@}"
-            read -r -a REPOS_PARAM <<< "${1}" ;;
+            read -r -A REPOS_PARAM <<< "${1}" ;;
 
         # Pull a pending stable tag from Sasha Levin
         "-t"|"--tag")
@@ -146,7 +146,7 @@ while (( ${#} )); do
             # SC2076: Don't quote rhs of =~, it'll match literally rather than as a regex.
             # shellcheck disable=SC2076
             [[ ${1} =~ "3.18" || ${1} =~ "4.4" || ${1} =~ "4.9" ]] || die "Invalid version specified!"
-            IFS="," read -r -a VERSIONS <<< "${1}" ;;
+            IFS="," read -r -A VERSIONS <<< "${1}" ;;
     esac
     shift
 done
