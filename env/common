@@ -67,7 +67,6 @@ function bash_setup() {
     "${LOCATION}"_aliases
     tmxa
     "${LOCATION}"_setup
-    add_to_path_pre "${SCRIPTS_FOLDER}"
     GPG_TTY=$(tty); export GPG_TTY
 }
 

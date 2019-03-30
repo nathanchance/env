@@ -286,7 +286,7 @@ function report_result() {
 }
 
 
-source "$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")" || return; pwd)/common"
+source "$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")" || return; pwd)/../common"
 source "${SCRIPTS_FOLDER}/funcs/fkv"
 source "${SCRIPTS_FOLDER}/funcs/transfer"
 trap 'echo; die "Manually aborted!"' SIGINT SIGTERM
