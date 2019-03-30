@@ -2,11 +2,20 @@
 #
 # Copyright (C) 2017-2019 Nathan Chancellor
 #
-# Utility and terminal setup functions (usually for .bashrc)
+# Utility and terminal setup functions
 
 
 # Source our universal functions script
-source "$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")" || return; pwd)/../common"
+if [[ -n ${ZSH_VERSION} ]]; then
+    SCRIPT=${(%):-%x}
+elif [[ -n ${BASH} ]]; then
+    SCRIPT=${BASH_SOURCE[0]}
+else
+    echo "Unsupported shell!"
+    return 1
+fi
+source "$(cd "$(dirname "$(readlink -f "${SCRIPT}")")" || return; pwd)/../common"
+unset SCRIPT
 
 
 # Source the machine specific functions
@@ -39,15 +48,15 @@ function tmxa() {
 
 # Add something to the end of PATH if it isn't already there
 function add_to_path_post() {
-    [[ ! -d ${1} ]] && return
-    [[ -z $(echo "${PATH}" | rg -s --color=never "${1}") ]] && export PATH="${PATH}:${1}"
+    [[ -d ${1} ]] || return
+    echo "${PATH}" | rg --color=never -s -q "${1}" || export PATH="${PATH}:${1}"
 }
 
 
 # Add something to the beginning of PATH if it isn't already there
 function add_to_path_pre() {
-    [[ ! -d ${1} ]] && return
-    [[ -z $(echo "${PATH}" | rg -s --color=never "${1}") ]] && export PATH="${1}:${PATH}"
+    [[ -d ${1} ]] || return
+    echo "${PATH}" | rg --color=never -s -q "${1}" || export PATH="${1}:${PATH}"
 }
 # Easy alias
 function path_push() { add_to_path_pre "${@}"; }
@@ -59,8 +68,21 @@ function path_pop() {
 }
 
 
-function bash_setup() {
-    shopt -s checkwinsize
+function shell_setup() {
+    # Shell specific options
+    if [[ -n ${ZSH_VERSION} ]]; then
+        [[ -n ${terminfo[khome]} ]] && bindkey "${terminfo[khome]}" beginning-of-line
+        [[ -n ${terminfo[kend]} ]] && bindkey "${terminfo[kend]}" end-of-line
+        TIMEFMT=$'\nreal\t%*E\nuser\t%*U\nsys\t%*S'
+        setopt autocd
+    elif [[ -n ${BASH} ]]; then
+        shopt -s checkwinsize
+    else
+        echo "Unsupported shell!"
+        return 1
+    fi
+
+    # Environment setup
     aliases
     "${LOCATION}"_aliases
     tmxa
@@ -69,10 +91,10 @@ function bash_setup() {
 }
 
 
-# bashrc reload function
+# {bash,zsh}rc reload function
 function rld() {
     source "${SCRIPTS_FOLDER}/env/common"
-    bash_setup
+    shell_setup
 }
 
 
