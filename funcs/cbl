@@ -393,7 +393,7 @@ function lt() {(
         fi
 
         # Make sure that if make fails, it gets propgated to the if statement
-        if [[ ${PIPESTATUS[0]} -eq 0 ]]; then
+        if [[ ${pipestatus[1]} -eq 0 ]]; then
             RESULT=successful
         else
             RESULT=failed
@@ -547,14 +547,14 @@ function bldllvm() {(
 
     if [[ -d ${STABLE_BINUTILS} ]]; then
         if [[ -d ${STABLE_LLVM} ]]; then
-            LD_LIBRARY_PATH=${LD_LIBRARY_PATH/${STABLE_BINUTILS//\//\\/}\/lib/}
+            LD_LIBRARY_PATH=${LD_LIBRARY_PATH/${STABLE_BINUTILS}\/lib/}
             LD_LIBRARY_PATH=${LD_LIBRARY_PATH#*:}
         fi
         LD_LIBRARY_PATH=${S1_FOLDER}/lib${LD_LIBRARY_PATH:+":${LD_LIBRARY_PATH}"}
         export LD_LIBRARY_PATH
     fi
 
-    export PATH=${PATH/${STABLE_LLVM//\//\\/}\/bin:/}
+    export PATH=${PATH/${STABLE_LLVM}\/bin:/}
     path_push "${S1_FOLDER}/bin"
 
     cmake -Wno-dev \
@@ -791,7 +791,7 @@ function kct() {(
         fi
 
         # Make sure that if make fails, it gets propgated to the if statement
-        if [[ ${PIPESTATUS[0]} -eq 0 ]]; then
+        if [[ ${pipestatus[1]} -eq 0 ]]; then
             RESULT=successful
         else
             RESULT=failed
@@ -848,7 +848,7 @@ function bldall() {(
 function cbl_path() {
     case ${1} in
         "-s"|"--set") path_push "${CBL_BIN}" ;;
-        "-u"|"--unset") export PATH=${PATH/${CBL_BIN//\//\\/}:/} ;;
+        "-u"|"--unset") export PATH=${PATH/${CBL_BIN}:/} ;;
     esac
 }
 
