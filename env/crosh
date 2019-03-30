@@ -58,7 +58,7 @@ function bootstrap() {
     if ! grep -q bash_setup "${HOME}"/.bashrc; then
         {
             echo
-            echo "[[ -f \${HOME}/Downloads/persistent/repos/scripts/os/common ]] && source \"\${HOME}/Downloads/persistent/repos/scripts/os/common\""
+            echo "[[ -f \${HOME}/Downloads/persistent/repos/scripts/env/common ]] && source \"\${HOME}/Downloads/persistent/repos/scripts/env/common\""
             echo "type -p bash_setup && bash_setup"
         } >> "${HOME}"/.bashrc
     fi

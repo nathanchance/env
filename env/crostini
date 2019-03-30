@@ -152,7 +152,7 @@ function bootstrap() {
     # Setup bash_aliases
     {
         echo
-        echo "[[ -f \${HOME}/scripts/os/common ]] && source \"\${HOME}/scripts/os/common\""
+        echo "[[ -f \${HOME}/scripts/env/common ]] && source \"\${HOME}/scripts/env/common\""
         echo "type -p bash_setup && bash_setup"
     } > "${HOME}"/.bash_aliases
 

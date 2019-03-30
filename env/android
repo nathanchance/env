@@ -12,7 +12,7 @@
 
 # Fetch this script and reload .bashrc
 function rld() {
-    curl -o ~/.bashrc https://raw.githubusercontent.com/nathanchance/scripts/master/os/android
+    curl -o ~/.bashrc https://raw.githubusercontent.com/nathanchance/scripts/master/env/android
     source ~/.bashrc
 }
 source <(curl -Ls https://raw.githubusercontent.com/nathanchance/scripts/master/snippets/deldog)

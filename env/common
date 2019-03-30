@@ -18,7 +18,7 @@ case "$(whoami)@$(uname -n)" in
     "nathan@archlinux-ryzen"|"nathan@flashbox") LOCATION=server ;;
     "pi@raspberrypi") LOCATION=pi ;;
 esac
-source "${SCRIPTS_FOLDER}/os/${LOCATION}"
+source "${SCRIPTS_FOLDER}/env/${LOCATION}"
 
 
 # Universal aliases/functions
@@ -74,7 +74,7 @@ function bash_setup() {
 
 # bashrc reload function
 function rld() {
-    source "${SCRIPTS_FOLDER}/os/common"
+    source "${SCRIPTS_FOLDER}/env/common"
     bash_setup
 }
 
