@@ -117,7 +117,7 @@ function bootstrap() {(
     # Setup keys
     mv "${KEYS}"/id_ed25519{,.pub} "${HOME}"/.ssh
     chmod 600 "${HOME}"/.ssh/id_ed25519
-    gpg --import "${KEYS}"/{public*,private*}.asc || die "Error installing gpg keys!"
+    gpg --pinentry-mode loopback --import "${KEYS}"/{public*,private*}.asc || die "Error installing gpg keys!"
     gpg --import-ownertrust "${KEYS}"/ownertrust*.asc || die "Error installing gpg ownertrust!"
     {
         echo "default-cache-ttl 604800"
@@ -159,8 +159,8 @@ function bootstrap() {(
         zsh "${DOTFILES}"/server/zshrc.sh
         cp -v "${DOTFILES}"/server/.tmux.conf "${HOME}"
         sudo cp -v "${DOTFILES}"/server/motd.sh /etc/profile.d
-        gpg --output "${MAIN_FOLDER}"/.botinfo --decrypt "${DOTFILES}"/common/botinfo.gpg
-        gpg --output "${HOME}"/.muttrc --decrypt "${DOTFILES}"/common/muttrc.gpg
+        gpg --pinentry-mode loopback --output "${MAIN_FOLDER}"/.botinfo --decrypt "${DOTFILES}"/common/botinfo.gpg
+        gpg --pinentry-mode loopback --output "${HOME}"/.muttrc --decrypt "${DOTFILES}"/common/muttrc.gpg
     ) || die "Error installing dotfiles"
 
     # Download toolchains
