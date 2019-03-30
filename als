@@ -89,8 +89,8 @@ function post_merge_commands() {
 }
 
 source "$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")" || return; pwd)/common"
-source "${SCRIPTS_FOLDER}"/snippets/bk
-source "${SCRIPTS_FOLDER}"/snippets/deldog
+source "${SCRIPTS_FOLDER}"/funcs/bk
+source "${SCRIPTS_FOLDER}"/funcs/deldog
 trap 'echo; die "Manually aborted!"' SIGINT SIGTERM
 LOG=$(mktemp)
 

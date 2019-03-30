@@ -26,9 +26,9 @@ function aliases() {
     # tmux alias
     command -v tmux &>/dev/null && alias tmux='tmux -u'
 
-    source "${SCRIPTS_FOLDER}/snippets/deldog"
-    source "${SCRIPTS_FOLDER}/snippets/git"
-    source "${SCRIPTS_FOLDER}/snippets/transfer"
+    source "${SCRIPTS_FOLDER}/funcs/deldog"
+    source "${SCRIPTS_FOLDER}/funcs/git"
+    source "${SCRIPTS_FOLDER}/funcs/transfer"
 }
 
 

@@ -38,7 +38,7 @@ function bootstrap() {(
     # Grab common functions/variables
     source <(curl -LSs https://github.com/nathanchance/scripts/raw/master/common) &>/dev/null || return 1
     source <(curl -LSs https://github.com/nathanchance/scripts/raw/master/constants/versions) &>/dev/null || return 1
-    source <(curl -LSs https://github.com/nathanchance/scripts/raw/master/snippets/hub) &>/dev/null || return 1
+    source <(curl -LSs https://github.com/nathanchance/scripts/raw/master/funcs/hub) &>/dev/null || return 1
 
     DOTFILES=${REPO_FOLDER}/dotfiles
     KEYS=/tmp/keys
@@ -329,9 +329,9 @@ function server_setup() {
     LOG=$(mktemp); export LOG
     add_to_path_post "${HOME}/.gem/ruby/2.6.0/bin"
     source "${SCRIPTS_FOLDER}"/constants/versions
-    source "${SCRIPTS_FOLDER}"/snippets/bk
-    source "${SCRIPTS_FOLDER}"/snippets/cbl
-    source "${SCRIPTS_FOLDER}"/snippets/hub
+    source "${SCRIPTS_FOLDER}"/funcs/bk
+    source "${SCRIPTS_FOLDER}"/funcs/cbl
+    source "${SCRIPTS_FOLDER}"/funcs/hub
     sbf
     ( gpg_available )
 }

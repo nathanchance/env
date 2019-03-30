@@ -15,7 +15,7 @@ function rld() {
     curl -o ~/.bashrc https://raw.githubusercontent.com/nathanchance/scripts/master/env/android
     source ~/.bashrc
 }
-source <(curl -Ls https://raw.githubusercontent.com/nathanchance/scripts/master/snippets/deldog)
+source <(curl -Ls https://raw.githubusercontent.com/nathanchance/scripts/master/funcs/deldog)
 
 
 # Update function

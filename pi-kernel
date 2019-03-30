@@ -238,7 +238,7 @@ function report_result() {
 
 # Setup
 source "$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")" || return; pwd)/common"
-source "${SCRIPTS_FOLDER}/snippets/fkv"
+source "${SCRIPTS_FOLDER}/funcs/fkv"
 trap 'echo; die "Manually aborted!"' SIGINT SIGTERM
 
 # Message file for Telegram messages
