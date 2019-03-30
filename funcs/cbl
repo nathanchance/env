@@ -547,7 +547,7 @@ function bldllvm() {(
 
     if [[ -d ${STABLE_BINUTILS} ]]; then
         if [[ -d ${STABLE_LLVM} ]]; then
-            LD_LIBRARY_PATH=${LD_LIBRARY_PATH/${STABLE_BINUTILS}\/lib/}
+            LD_LIBRARY_PATH=${LD_LIBRARY_PATH/${STABLE_LLVM}\/lib/}
             LD_LIBRARY_PATH=${LD_LIBRARY_PATH#*:}
         fi
         LD_LIBRARY_PATH=${S1_FOLDER}/lib${LD_LIBRARY_PATH:+":${LD_LIBRARY_PATH}"}
