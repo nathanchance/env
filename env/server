@@ -351,6 +351,7 @@ function server_setup() {
     source "${SCRIPTS_FOLDER}"/funcs/bk
     source "${SCRIPTS_FOLDER}"/funcs/cbl
     source "${SCRIPTS_FOLDER}"/funcs/hub
+    load_botinfo
     sbf
     ( gpg_available )
 }

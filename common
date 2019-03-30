@@ -207,7 +207,6 @@ function rmvenv {
 function load_botinfo() {
     [[ -f ${MAIN_FOLDER:?}/.botinfo ]] && source "${MAIN_FOLDER}"/.botinfo
 }
-load_botinfo
 
 
 # Telegram notifier function
