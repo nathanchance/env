@@ -103,6 +103,7 @@ function bootstrap() {(
                                         rubygems \
                                         "shellcheck" \
                                         tmux \
+                                        wget \
                                         xmlto || die "Error installing packages!"
 
     # Install hub
