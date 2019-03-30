@@ -33,10 +33,11 @@
 #    $ scp {id_ed25519,*.asc} nathan<ip>:/tmp/keys
 #
 function bootstrap() {(
-    # Grab common functions/variables
-    source <(curl -LSs https://github.com/nathanchance/scripts/raw/master/common) &>/dev/null || return 1
+    # Grab common variables
     source <(curl -LSs https://github.com/nathanchance/scripts/raw/master/constants/server_folders) &>/dev/null || return 1
     source <(curl -LSs https://github.com/nathanchance/scripts/raw/master/constants/versions) &>/dev/null || return 1
+    # Grab common functions
+    source <(curl -LSs https://github.com/nathanchance/scripts/raw/master/common) &>/dev/null || return 1
     source <(curl -LSs https://github.com/nathanchance/scripts/raw/master/funcs/hub) &>/dev/null || return 1
 
     DOTFILES=${REPO_FOLDER}/dotfiles
