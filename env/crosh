@@ -1,5 +1,3 @@
-#!/usr/bin/env bash
-#
 # SPDX-License-Identifier: GPL-3.0-or-later
 #
 # Copyright (C) 2018-2019 Nathan Chancellor
@@ -169,3 +167,4 @@ function uz() {
     bsdtar -C "${EXTRACT_DIR}" -x -f "${FILE}"
     cd "${EXTRACT_DIR}" || { echo; echo "${PWD}/${EXTRACT_DIR} doesn't exist!"; echo; return; }
 }
+# vi: filetype=zsh

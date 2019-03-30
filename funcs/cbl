@@ -1,5 +1,3 @@
-#!/usr/bin/env bash
-#
 # SPDX-License-Identifier: GPL-3.0-or-later
 #
 # Copyright (C) 2018-2019 Nathan Chancellor
@@ -931,3 +929,4 @@ done' > "${SCRIPT}"
     cat "${LOG}"
     echo
 )}
+# vi: filetype=zsh

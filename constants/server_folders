@@ -1,5 +1,3 @@
-#!/usr/bin/env bash
-
 # Common locations amongst scripts
 MAIN_FOLDER=${HOME}
 KERNEL_FOLDER=${MAIN_FOLDER}/kernels
@@ -18,3 +16,4 @@ CBL=${MAIN_FOLDER}/cbl
 # Latest AOSP Clang version
 LACV=clang-r353983b
 LACF=${TC_FOLDER}/aosp-clang/${LACV}
+# vi: filetype=zsh

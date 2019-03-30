@@ -1,5 +1,3 @@
-#!/usr/bin/env bash
-#
 # SPDX-License-Identifier: GPL-3.0-or-later
 #
 # Copyright (C) 2017-2019 Nathan Chancellor
@@ -643,3 +641,4 @@ function bgit() {(
     "${MAKE[@]}" all
     sudo "${MAKE[@]}" install
 )}
+# vi: filetype=zsh

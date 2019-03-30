@@ -1,5 +1,3 @@
-#!/usr/bin/env bash
-#
 # SPDX-License-Identifier: GPL-3.0-or-later
 #
 # Copyright (C) 2018-2019 Nathan Chancellor
@@ -54,3 +52,4 @@ function formatted_kernel_version() {
         export BOLD RST
     fi
 }
+# vi: filetype=zsh

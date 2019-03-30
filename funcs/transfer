@@ -1,5 +1,3 @@
-#!/usr/bin/env bash
-
 # Upload a file to transfer.sh
 function transfer {
     if [[ ${#} -eq 0 ]]; then
@@ -24,3 +22,4 @@ function transfer {
     echo ""
 }
 
+# vi: filetype=zsh

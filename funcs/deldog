@@ -1,5 +1,3 @@
-#!/usr/bin/env bash
-
 # Function to upload to del.dog
 function deldog() {
     RESULT=$(curl -sf --data-binary @"${1:--}" https://del.dog/documents) || {
@@ -9,3 +7,4 @@ function deldog() {
     KEY=$(jq -r .key <<< "${RESULT}")
     echo "https://del.dog/raw/${KEY}"
 }
+# vi: filetype=zsh

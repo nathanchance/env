@@ -1,5 +1,3 @@
-#!/usr/bin/env bash
-#
 # SPDX-License-Identifier: GPL-3.0-or-later
 #
 # Copyright (C) 2018-2019 Nathan Chancellor
@@ -182,3 +180,4 @@ function crostini_prompt() {
 function crostini_setup() {
     crostini_prompt
 }
+# vi: filetype=zsh
