@@ -18,7 +18,6 @@ HOST=$(uname -n | tr '[:upper:]' '[:lower:]')
 
 # Location of "scripts" folder
 SCRIPTS_FOLDER=$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")" || return; pwd)
-BIN_FOLDER=${SCRIPTS_FOLDER}/bin
 
 # Common locations amongst scripts
 MAIN_FOLDER=${HOME}
@@ -68,7 +67,7 @@ LACV=clang-r353983b
 LACF=${TC_FOLDER}/aosp-clang/${LACV}
 
 # Export everything to satisfy shellcheck
-export HOST SCRIPTS_FOLDER BIN_FOLDER KERNEL_FOLDER MISC_FOLDER REPO_FOLDER \
+export HOST SCRIPTS_FOLDER KERNEL_FOLDER MISC_FOLDER REPO_FOLDER \
        BLDF ROM_FOLDER TC_FOLDER WEB_FOLDER MAIN_FOLDER \
        BLINK_RED BLUE BOLD GRN RED RST YLW \
        THREADS JOBS_FLAG CCACHE MARLIN_CHANNEL MARLIN_GROUP OP6_CHANNEL \

@@ -108,6 +108,12 @@ function bootstrap() {(
     # Install hub
     install_hub
 
+    # Download and install mkdtimg
+    MKDTIMG_FOLDER=$(mktemp -d)
+    curl -LSs https://android.googlesource.com/platform/prebuilts/misc/+archive/master/linux-x86/libufdt.tar.gz | tar -C "${MKDTIMG_FOLDER}" -xzf -
+    sudo mv "${MKDTIMG_FOLDER}"/mkdtimg /usr/local/bin
+    rm -rf "${MKDTIMG_FOLDER}"
+
     # Setup keys
     mv "${KEYS}"/id_ed25519{,.pub} "${HOME}"/.ssh
     chmod 600 "${HOME}"/.ssh/id_ed25519

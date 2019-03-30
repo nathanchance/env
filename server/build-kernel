@@ -196,7 +196,7 @@ function setup_toolchains() {
         export LD_LIBRARY_PATH
     fi
 
-    PATH=${CLANG_BIN:+"${CLANG_BIN}:"}${GCC_BIN}:${GCC_32_BIT_BIN:+"${GCC_32_BIT_BIN}:"}${BIN_FOLDER}:${PATH}
+    PATH=${CLANG_BIN:+"${CLANG_BIN}:"}${GCC_BIN}:${GCC_32_BIT_BIN:+"${GCC_32_BIT_BIN}:"}:${PATH}
     export PATH
 }
 
