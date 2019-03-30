@@ -236,7 +236,7 @@ function bootstrap() {(
     echo
     echo "1. EDITOR=vim crontab -e"
     echo
-    echo "2. cd && source ~/.bashrc"
+    echo "2. cd && source ~/.zshrc"
     echo
 ) || return 1; }
 
@@ -280,10 +280,10 @@ function server_aliases() {
 
 # Setup PS1 and such
 function server_prompt() {
-    source ~/.git-prompt.sh
-    export GIT_PS1_SHOWDIRTYSTATE=1
-    export GIT_PS1_SHOWUPSTREAM=auto
-    export PROMPT_COMMAND='__git_ps1_custom "\[\033[01;34m\]\u@\h \[\033[01;32m\]\w\[\033[01;31m\]" " \[\033[39m\]\$\[\033[0m\] "'
+    echo "$fpath" | rg -q -s --color=never "${HOME}/.zfunctions" || fpath=( "${HOME}/.zfunctions" $fpath ) 
+    autoload -U promptinit
+    promptinit
+    prompt pure
 }
 
 
@@ -310,7 +310,7 @@ function ccache_setup() {
 function sbf() {
     [[ ! -d ${BLDF:?} ]] && { sudo mkdir "${BLDF}"; sudo chown -R "nathan:nathan" "${BLDF}"; }
     [[ -z $(findmnt "${BLDF}") ]] && sudo mount -t tmpfs -o "nodev,nosuid,size=15G" tmpfs "${BLDF}"
-    type -p crbf && crbf
+    type crbf &>/dev/null && crbf
 }
 
 
@@ -323,7 +323,7 @@ function cbf() {(
         *) FTC=${BLDF} ;;
     esac
     find "${FTC:?}" -mindepth 1 -delete 2>/dev/null
-    type -p crbf && crbf
+    type crbf &>/dev/null && crbf
 )}
 
 
@@ -462,7 +462,7 @@ function dib-clang() {(
     [[ "$(git cb)" =~ oreo ]] && TC_LIST+=( "--clang --clang-toolchain aosp-clang/clang-4053586" )
 
     for ITEM in "${TC_LIST[@]}"; do
-        read -ra ITEM_ARRAY <<< "${ITEM}"
+        read -rA ITEM_ARRAY <<< "${ITEM}"
         build-kernel -d "${DEFCONFIG}" -w -Werror -v oreo-small "${ITEM_ARRAY[@]}" "${@}"
     done
 )}
