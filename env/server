@@ -13,9 +13,9 @@
 #
 #    $ installimage -r yes -l 0 -d sda,sdb -f yes -n archlinux-ryzen
 #
-# 2. My user account has been created
+# 2. My user account has been created (and zsh installed)
 #
-#    $ useradd -m -G wheel -s /bin/bash nathan
+#    $ useradd -m -G wheel -s /bin/zsh nathan
 #    $ passwd
 #    $ passwd nathan
 #
