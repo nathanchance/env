@@ -306,10 +306,16 @@ for VERSION in "${VERSIONS[@]}"; do
             # Build if requested and not Nash
             if [[ -n ${BUILD} && -z ${SKIP_BUILD} ]]; then
                 # msm-3.18 has two defconfigs to build: msm-perf_defconfig and msm8937-perf_defconfig
-                [[ ${REPO} = "msm-3.18" ]] && BK_COMMANDS=( "bk" "bk -d msm8937-perf_defconfig" ) || BK_COMMANDS=( "bk" )
+                if [[ ${REPO} = "msm-3.18" ]]; then
+                    BK_COMMANDS=( "bk" "bk -d msm8937-perf_defconfig" )
+                else
+                    BK_COMMANDS=( "bk" )
+                fi
 
                 for BK_COMMAND in "${BK_COMMANDS[@]}"; do
-                    if ${BK_COMMAND}; then
+                    # Make BK_COMMAND an array
+                    read -rA BK_COMMAND <<< "${BK_COMMAND}"
+                    if "${BK_COMMAND[@]}"; then
                         # Show kernel version in log
                         log "${LOG_TAG} Build successful: $(kv)$(cd out || return; ../scripts/setlocalversion ..)"
                     else
