@@ -212,13 +212,19 @@ function load_botinfo() {
 # Telegram notifier function
 function tg_msg() {
     if [[ -z ${TOKEN} ]]; then
-        display_error "tg_msg() was called but there was no token!"
-        return 1
+        [[ -f ${MAIN_FOLDER:?}/.botinfo ]] && source <(cat ${MAIN_FOLDER}/.botinfo | tail -n1)
+        if [[ -z ${TOKEN} ]]; then
+            display_error "tg_msg() was called but there was no token!"
+            return 1
+        fi
     fi
 
     if [[ -z ${CHAT_ID} ]]; then
-        display_error "tg_msg() was called but there was no chat ID!"
-        return 1
+        [[ -f ${MAIN_FOLDER:?}/.botinfo ]] && source <(cat ${MAIN_FOLDER}/.botinfo | head -n1)
+        if [[ -z ${CHAT_ID} ]]; then
+            display_error "tg_msg() was called but there was no chat ID!"
+            return 1
+        fi
     fi
 
     curl -s -X POST https://api.telegram.org/bot"${TOKEN}"/sendMessage \
