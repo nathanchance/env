@@ -6,6 +6,7 @@
 
 
 # Setup function
+# $ sudo sh -c 'apt update && apt install -y --no-install-recommands zsh && chsh -s /bin/zsh natechancellor'
 function bootstrap() {(
     # Grab common functions/variables
     source <(curl -LSs https://github.com/nathanchance/scripts/raw/master/common) &>/dev/null
@@ -45,7 +46,8 @@ function bootstrap() {(
         python-pip \
         ssh \
         tmux \
-        vim
+        vim \
+        xclip
 
     # Install speedtest-cli
     sudo curl -LSo /usr/local/bin/speedtest-cli https://raw.githubusercontent.com/sivel/speedtest-cli/master/speedtest.py
