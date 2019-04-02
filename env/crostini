@@ -41,6 +41,7 @@ function bootstrap() {(
         mosh \
         most \
         openvpn \
+        pass \
         python-pip \
         ssh \
         tmux \
@@ -133,6 +134,9 @@ function bootstrap() {(
     mkdir -p "${HOME}"/repos
     local DOTFILES; DOTFILES=${HOME}/repos/dotfiles
     git clone git@github.com:nathanchance/dotfiles "${DOTFILES}" || return 1
+
+    # Clone password store
+    git clone git@github.com:nathanchance/password-store.git "${HOME}"/.password-store || die "Error cloning password store!"
 
     # Copy files into their proper locations
     # tmux
