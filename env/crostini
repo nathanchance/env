@@ -20,7 +20,7 @@ function bootstrap() {(
     case "$(uname -m)" in
         "aarch64") ARCH=arm64 ;;
         "x86_64") ARCH=amd64 ;;
-        *) display_error "Unsupported architecture!"; return 1 ;;
+        *) die "Unsupported architecture!" ;;
     esac
 
     # Ensure that packages are all up to date
@@ -61,11 +61,11 @@ function bootstrap() {(
 
     # Build updated ccache
     curl -LSs https://www.samba.org/ftp/ccache/ccache-"${CCACHE_VERSION:?}".tar.gz | tar -xzf -
-    cd ccache-"${CCACHE_VERSION}" || { display_error "Downloading or extracting ccache failed!"; return 1; }
+    cd ccache-"${CCACHE_VERSION}" || die "Downloading or extracting ccache failed!"
     ./configure
     make -j"$(nproc)"
     sudo make install
-    cd "${OLDPWD}" || { display_error "${OLDPWD} doesn't exist??"; return 1; }
+    cd "${OLDPWD}" || die "${OLDPWD} doesn't exist??"
     rm -rf ccache*
 
     # Setup git
@@ -76,9 +76,9 @@ function bootstrap() {(
     # Install hub
     curl -LSsO https://github.com/github/hub/releases/download/v"${HUB_VERSION:?}"/hub-linux-${ARCH}-"${HUB_VERSION}".tgz
     tar -xf hub-linux-${ARCH}-"${HUB_VERSION}".tgz
-    cd hub-linux-${ARCH}-"${HUB_VERSION}" || { display_error "Downloading or extracting hub failed!"; return 1; }
+    cd hub-linux-${ARCH}-"${HUB_VERSION}" || die "Downloading or extracting hub failed!"
     sudo ./install
-    cd "${OLDPWD}" || { display_error "${OLDPWD} doesn't exist??"; return 1; }
+    cd "${OLDPWD}" || die "${OLDPWD} doesn't exist??"
     rm -rf hub*
 
     # Install prebuilt ripgrep and fd binaries if available
@@ -103,10 +103,10 @@ function bootstrap() {(
 
             curl -LSs "${URL}" -o "${TMP}"
             unzip "${TMP}"
-            cd "${BINARY}"-* || { display_error "Downloading or extracting ${BINARY} failed!"; return 1; }
+            cd "${BINARY}"-* || die "Downloading or extracting ${BINARY} failed!"
             cargo build --release
             cargo install
-            cd "${OLDPWD}" || { display_error "${OLDPWD} doesn't exist??"; return 1; }
+            cd "${OLDPWD}" || die "${OLDPWD} doesn't exist??"
             rm -rf "${OLDPWD}" "${TMP}"
         done
     fi
@@ -128,12 +128,12 @@ function bootstrap() {(
     gpg-connect-agent reloadagent /bye
 
     # Clone scripts
-    git clone git@github.com:nathanchance/scripts "${HOME}"/scripts || return 1
+    git clone git@github.com:nathanchance/scripts "${HOME}"/scripts || die "Error cloning script!"
 
     # Clone repos
     mkdir -p "${HOME}"/repos
     local DOTFILES; DOTFILES=${HOME}/repos/dotfiles
-    git clone git@github.com:nathanchance/dotfiles "${DOTFILES}" || return 1
+    git clone git@github.com:nathanchance/dotfiles "${DOTFILES}" || die "Error cloning dotfiles!"
 
     # Clone password store
     git clone git@github.com:nathanchance/password-store.git "${HOME}"/.password-store || die "Error cloning password store!"
@@ -155,10 +155,7 @@ function bootstrap() {(
         echo "[[ -f \${HOME}/scripts/env/common ]] && source \"\${HOME}/scripts/env/common\""
         echo "type shell_setup &>/dev/null && shell_setup"
     } > "${HOME}"/.zshrc
-
-    # Let her rip!
-    source "${HOME}"/.zshrc
-)}
+) && source "${HOME}"/.zshrc; }
 
 
 # Laptop specific aliases
