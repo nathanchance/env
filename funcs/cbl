@@ -840,6 +840,7 @@ function bldallk() {(
 
 # Build new LLVM/Clang/lld and test all kernel trees
 function bldall() {(
+    export TG=true
     bldusr && bldallk
 )}
 
@@ -927,6 +928,7 @@ done' > "${SCRIPT}"
     echo
     echo "Results:"
     cat "${LOG}"
+    tg_msg "$(cat "${LOG}")"
     echo
 )}
 # vi: filetype=zsh
