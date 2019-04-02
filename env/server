@@ -39,6 +39,7 @@ function bootstrap() {(
     # Grab common functions
     source <(curl -LSs https://github.com/nathanchance/scripts/raw/master/common) &>/dev/null || return 1
     source <(curl -LSs https://github.com/nathanchance/scripts/raw/master/funcs/hub) &>/dev/null || return 1
+    source <(curl -LSs https://github.com/nathanchance/scripts/raw/master/funcs/pure) &>/dev/null || return 1
 
     DOTFILES=${REPO_FOLDER}/dotfiles
     KEYS=/tmp/keys
@@ -230,16 +231,8 @@ function bootstrap() {(
     gem install gist
     "${HOME}/.gem/ruby/${RUBY_VERSION}/bin/gist" --login
 
-    # Install pure prompt
-    (
-        ZFUNCTIONS=${HOME}/.zfunctions
-        mkdir -p "${ZFUNCTIONS}"
-        cd "${ZFUNCTIONS}"
-        git clone https://github.com/sindresorhus/pure
-        cd pure
-        ln -s "${PWD}"/pure.zsh "${ZFUNCTIONS}"/prompt_pure_setup
-        ln -s "${PWD}"/async.zsh "${ZFUNCTIONS}"/async
-    )
+    # Install Pure prompt
+    pure_prompt
 
     # Reminder of things to do
     echo
