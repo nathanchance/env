@@ -6,14 +6,15 @@
 
 
 # Setup function
-function bootstrap() {
+function bootstrap() {(
     # Grab common functions/variables
-    [[ ! -f ${HOME}/scripts/common ]] && source <(curl -LSs https://github.com/nathanchance/scripts/raw/master/common) &>/dev/null
-    [[ ! -f ${HOME}/scripts/constants/versions ]] && source <(curl -ls https://github.com/nathanchance/scripts/raw/master/constants/versions) &>/dev/null
+    source <(curl -LSs https://github.com/nathanchance/scripts/raw/master/common) &>/dev/null
+    source <(curl -LSs https://github.com/nathanchance/scripts/raw/master/constants/versions) &>/dev/null
+    source <(curl -LSs https://github.com/nathanchance/scripts/raw/master/funcs/pure) &>/dev/null
 
     # Make sure keys are present
-    local KEYS; KEYS=${HOME}/keys
-    [[ ! -d ${KEYS} ]] && { warn "${KEYS} not found, skipping GPG and SSH keys setup!"; NO_KEYS=true; }
+    local CROSTINI; CROSTINI=${HOME}/Crostini
+    [[ ! -d ${CROSTINI} ]] && die "${CROSTINI} not found!"
 
     # Set architecture variables
     case "$(uname -m)" in
@@ -43,6 +44,7 @@ function bootstrap() {
         libssl-dev \
         mosh \
         most \
+        openvpn \
         python-pip \
         ssh \
         tmux \
@@ -78,7 +80,7 @@ function bootstrap() {
     curl -LSsO https://github.com/github/hub/releases/download/v"${HUB_VERSION:?}"/hub-linux-${ARCH}-"${HUB_VERSION}".tgz
     tar -xf hub-linux-${ARCH}-"${HUB_VERSION}".tgz
     cd hub-linux-${ARCH}-"${HUB_VERSION}" || { display_error "Downloading or extracting hub failed!"; return 1; }
-    sudo prefix=/usr/local ./install
+    sudo ./install
     cd "${OLDPWD}" || { display_error "${OLDPWD} doesn't exist??"; return 1; }
     rm -rf hub*
 
@@ -113,22 +115,20 @@ function bootstrap() {
     fi
 
     # Setup SSH and GPG if keys are present
-    if [[ -z ${NO_KEYS} ]]; then
-        mkdir -p "${HOME}"/.ssh
-        mv "${KEYS}"/id_ed25519{,.pub} "${HOME}"/.ssh
-        chmod 600 "${HOME}"/.ssh/id_ed25519
+    mkdir -p "${HOME}"/.ssh
+    mv "${CROSTINI}"/id_ed25519{,.pub} "${HOME}"/.ssh
+    chmod 600 "${HOME}"/.ssh/id_ed25519
 
-        # Setup GPG
-        gpg --import "${KEYS}"/{public*,private*}.asc
-        gpg --import-ownertrust "${KEYS}"/ownertrust*.asc
-        git config --global commit.gpgsign true
-        git config --global user.signingkey 2437CB76E544CB6AB3D9DFD399739260CB6CB716
-        {
-            echo "default-cache-ttl 3600"
-            echo "max-cache-ttl 86400"
-        } > "${HOME}"/.gnupg/gpg-agent.conf
-        gpg-connect-agent reloadagent /bye
-    fi
+    # Setup GPG
+    gpg --import "${CROSTINI}"/{public*,private*}.asc
+    gpg --import-ownertrust "${CROSTINI}"/ownertrust*.asc
+    git config --global commit.gpgsign true
+    git config --global user.signingkey 2437CB76E544CB6AB3D9DFD399739260CB6CB716
+    {
+        echo "default-cache-ttl 3600"
+        echo "max-cache-ttl 86400"
+    } > "${HOME}"/.gnupg/gpg-agent.conf
+    gpg-connect-agent reloadagent /bye
 
     # Clone scripts
     git clone git@github.com:nathanchance/scripts "${HOME}"/scripts || return 1
@@ -143,20 +143,22 @@ function bootstrap() {
     cp "${DOTFILES}"/pixelbook/.tmux.conf "${HOME}"
 
     # Run small setup scripts from dotfiles
-    bash "${DOTFILES}"/common/git-prompt.sh
-    bash "${DOTFILES}"/common/global_gitignore.sh
-    bash "${DOTFILES}"/common/vim/vim_setup.sh
+    zsh "${DOTFILES}"/common/global_gitignore.sh
+    zsh "${DOTFILES}"/common/vim/vim_setup.sh
 
-    # Setup bash_aliases
+    # Install Pure prompt
+    pure_prompt
+
+    # Setup zshrc
     {
         echo
         echo "[[ -f \${HOME}/scripts/env/common ]] && source \"\${HOME}/scripts/env/common\""
-        echo "type -p bash_setup && bash_setup"
-    } > "${HOME}"/.bash_aliases
+        echo "type shell_setup &>/dev/null && shell_setup"
+    } > "${HOME}"/.zshrc
 
     # Let her rip!
-    source "${HOME}"/.bashrc
-}
+    source "${HOME}"/.zshrc
+)}
 
 
 # Laptop specific aliases
@@ -167,12 +169,10 @@ function crostini_aliases() {
 
 # Setup PS1 and such
 function crostini_prompt() {
-    if [[ -f ${HOME}/.git-prompt.sh ]]; then
-        source "${HOME}"/.git-prompt.sh
-        export GIT_PS1_SHOWDIRTYSTATE=1
-        export GIT_PS1_SHOWUPSTREAM=auto
-        export PROMPT_COMMAND='__git_ps1_custom "\[\033[01;31m\]\u@\h \[\033[01;33m\]\w\[\033[01;36m\]" " \[\033[39m\]\$\[\033[0m\] "'
-    fi
+    echo "$fpath" | rg -q -s --color=never "${HOME}/.zfunctions" || fpath=( "${HOME}/.zfunctions" $fpath )
+    autoload -U promptinit
+    promptinit
+    prompt pure
 }
 
 
