@@ -27,10 +27,6 @@ function bootstrap() {(
     sudo apt update
     sudo apt upgrade -y
 
-    # Make sure timezone is correct
-    sudo bash -c 'echo "America/Phoenix" > /etc/timezone'
-    sudo dpkg-reconfigure -f noninteractive tzdata
-
     # Install packages from Debian repos
     sudo apt install -y --no-install-recommends \
         build-essential \
@@ -179,6 +175,8 @@ function crostini_prompt() {
 
 # Laptop specific setup
 function crostini_setup() {
+    # Until crbug.com/829934 hits stable/beta
+    export TZ=/usr/share/zoneinfo/US/Arizona
     crostini_prompt
 }
 # vi: filetype=zsh
