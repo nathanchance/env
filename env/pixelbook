@@ -178,14 +178,14 @@ function bootstrap() {(
 
 
 # Laptop specific aliases
-function crostini_aliases() {
+function pixelbook_aliases() {
     alias ls='ls --color=auto'
     alias mshsvr='mosh nathan@${RYZEN_IP}'
 }
 
 
 # Setup PS1 and such
-function crostini_prompt() {
+function pixelbook_prompt() {
     echo "$fpath" | rg -q -s --color=never "${HOME}/.zfunctions" || fpath=( "${HOME}/.zfunctions" $fpath )
     autoload -U promptinit
     promptinit
@@ -194,9 +194,9 @@ function crostini_prompt() {
 
 
 # Laptop specific setup
-function crostini_setup() {
+function pixelbook_setup() {
     # Until crbug.com/829934 hits stable/beta
     export TZ=/usr/share/zoneinfo/US/Arizona
-    crostini_prompt
+    pixelbook_prompt
 }
 # vi: filetype=zsh
