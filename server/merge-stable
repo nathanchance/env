@@ -103,6 +103,9 @@ function parse_parameters() {
                 UPDATE_MODE=1
                 VERSION_SUPPLIED=${1} ;;
 
+            # Empty string is fine
+            "") ;;
+
             *)
                 die "Invalid parameter!" ;;
         esac
