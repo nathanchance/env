@@ -2,11 +2,23 @@
 #
 # Copyright (C) 2018-2019 Nathan Chancellor
 #
-# Utility and terminal setup functions for crostini on my Pixelbook
+# Utility and terminal setup functions for my Pixelbook
 
 
 # Setup function
+#
+# Using crosh:
+# $ curl -LSso ~/Downloads/crouton https://github.com/dnschneid/crouton/raw/master/installer/crouton
+# $ sudo sh ~/Downloads/crouton -r buster -t cli-extra
+# $ sudo enter-chroot
+#
+# Using crostini:
+# $ vmc start termina
+# $ vmc container termina penguin
 # $ sudo sh -c 'apt update && apt install -y --no-install-recommands zsh && chsh -s /bin/zsh natechancellor'
+# $ vmc stop termina
+# $ vmc start termina
+# $ vmc container termina penguin
 function bootstrap() {(
     # Grab common functions/variables
     source <(curl -LSs https://github.com/nathanchance/scripts/raw/master/common) &>/dev/null
@@ -14,7 +26,11 @@ function bootstrap() {(
     source <(curl -LSs https://github.com/nathanchance/scripts/raw/master/funcs/pure) &>/dev/null
 
     # Make sure keys are present
-    local CROSTINI; CROSTINI=${HOME}/Crostini
+    if [[ "$(uname -n)" = "penguin" ]]; then
+        CROSTINI=${HOME}/Crostini
+    else
+        CROSTINI=${HOME}/Downloads/Crostini
+    fi
     [[ ! -d ${CROSTINI} ]] && die "${CROSTINI} not found!"
 
     # Set architecture variables
