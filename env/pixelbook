@@ -168,6 +168,12 @@ function bootstrap() {(
     # Install Pure prompt
     pure_prompt
 
+    # We need UTF characters in crouton for the prompt to work
+    if [[ "$(uname -n)" = "localhost" ]]; then
+        sudo apt install -y --no-install-recommends locale
+        sudo dpkg-reconfigure locales
+    fi
+
     # Setup zshrc
     {
         echo
