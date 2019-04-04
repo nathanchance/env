@@ -388,12 +388,14 @@ function lt() {(
         if [[ -z ${DEBUG} ]]; then
             bldk "${ARCH}" "${CONFIG}" KCFLAGS="${KCFLAGS:--Werror}" ${LD:+LD="${LD}"} |& \
             rg --color=never "error:|warning:|undefined" |& sed "s/${PWD//\//\\/}\///g" > "${ERRORS}"
+            MAKE_RESULT=${pipestatus[1]}
         else
             bldk "${ARCH}" "${CONFIG}" KCFLAGS="${KCFLAGS:--Werror}" ${LD:+LD="${LD}"}
+            MAKE_RESULT=${?}
         fi
 
         # Make sure that if make fails, it gets propgated to the if statement
-        if [[ ${pipestatus[1]} -eq 0 ]]; then
+        if [[ ${MAKE_RESULT} -eq 0 ]]; then
             RESULT=successful
         else
             RESULT=failed
