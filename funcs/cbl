@@ -694,7 +694,17 @@ function kcbw() {(
     BUILD_FOLDER=${CBL}/android/build
     COMMON_FOLDER=${CBL}/android/common
     OUT_FOLDER=${BLDF}/common
-    BRANCH=android-${1:-4.9}; shift
+
+    while (( ${#} )); do
+        case ${1} in
+            CC=*|LD=*) export "${1:?}" ;;
+            3.*|4.*) BRANCH=${1} ;;
+        esac
+        shift
+    done
+
+    BRANCH=android-${BRANCH:-4.9}
+    [[ -z ${LD} && ${BRANCH} = "android-4.19" ]] && LD=ld.lld
 
     cd "${BUILD_FOLDER}" || die "wtf"
 
@@ -725,7 +735,7 @@ function update_clang_config() {
     -e CFI_CLANG \
     --set-val FRAME_WARN 2048
   (cd ${KERNEL_DIR} && \
-    make O=${OUT_DIR} olddefconfig)
+    make O=${OUT_DIR} ${CC_LD_ARG} olddefconfig)
 }' > "${BUILD_CONFIG:=$(mktemp)}"
 
     # Make path relative
@@ -744,7 +754,7 @@ function update_clang_config() {
     # shellcheck disable=SC2016
     sed -i 's/=hidden/=hidden $(call cc-option, -fsplit-lto-unit)/g' "${COMMON_FOLDER}"/Makefile
 
-    OUT_DIR=${OUT_FOLDER} BUILD_CONFIG=${BUILD_CONFIG} ./build.sh CC=clang "${@}"
+    OUT_DIR=${OUT_FOLDER} BUILD_CONFIG=${BUILD_CONFIG} CC="${CC:-clang}" LD="${LD}" ./build.sh "${@}"
 
     git -C "${COMMON_FOLDER}" rh -q
 
