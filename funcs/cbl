@@ -798,12 +798,14 @@ function kct() {(
         if [[ -z ${DEBUG} ]]; then
             kcbw "${VERSION}" KCFLAGS="${KCFLAGS:--Werror}" |& \
             rg --color=never "error:|warning:|undefined" |& sed "s/${COMMON_FOLDER//\//\\/}\///g" > "${ERRORS}"
+            MAKE_RESULT=${pipestatus[1]}
         else
             kcbw "${VERSION}" KCFLAGS="${KCFLAGS:--Werror}"
+            MAKE_RESULT=${?}
         fi
 
         # Make sure that if make fails, it gets propgated to the if statement
-        if [[ ${pipestatus[1]} -eq 0 ]]; then
+        if [[ ${MAKE_RESULT} -eq 0 ]]; then
             RESULT=successful
         else
             RESULT=failed
