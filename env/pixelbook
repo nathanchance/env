@@ -192,7 +192,6 @@ function pixelbook_aliases() {
 
 # Setup PS1 and such
 function pixelbook_prompt() {
-    echo "$fpath" | rg -q -s --color=never "${HOME}/.zfunctions" || fpath=( "${HOME}/.zfunctions" $fpath )
     autoload -U promptinit
     promptinit
     prompt pure

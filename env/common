@@ -94,6 +94,7 @@ function shell_setup() {
         [[ -n ${terminfo[kend]} ]] && bindkey "${terminfo[kend]}" end-of-line
         TIMEFMT=$'\nreal\t%*E\nuser\t%*U\nsys\t%*S'
         setopt autocd
+        echo "$fpath" | rg -q -s --color=never "${HOME}/.zfunctions" || fpath=( "${HOME}/.zfunctions" $fpath ) 
         autoload -Uz compinit
         compinit
     elif [[ -n ${BASH} ]]; then
