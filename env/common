@@ -95,8 +95,7 @@ function shell_setup() {
         TIMEFMT=$'\nreal\t%*E\nuser\t%*U\nsys\t%*S'
         setopt autocd
         echo "$fpath" | rg -q -s --color=never "${HOME}/.zfunctions" || fpath=( "${HOME}/.zfunctions" $fpath ) 
-        autoload -Uz compinit
-        compinit
+        autoload -U compinit && compinit
     elif [[ -n ${BASH} ]]; then
         shopt -s checkwinsize
     else
