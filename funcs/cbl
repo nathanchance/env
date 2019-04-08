@@ -222,8 +222,8 @@ function bldk() {
     bldkw "${ARCH}" "${CONFIG}" modules_prepare
     if [[ ${PWD} =~ cbl && ${CONFIG} =~ defconfig ]]; then
         extraconfigs
-        # Use lld for arm{32,64}
-        [[ ${ARCH} =~ arm ]] && LD=ld.lld
+        # Use lld by default for everything but powerpc
+        [[ -z ${LD} && ! ${ARCH} =~ ppc ]] && LD=ld.lld
     fi
 
     # Build kernel
@@ -320,8 +320,8 @@ function babk() {
     ARCH=${1}; shift
     [[ -z ${ARCH} ]] && { display_error "ARCH not specified!"; return 1; }
 
-    # Use lld for arm{32,64}
-    [[ ${ARCH} =~ arm ]] && LD=ld.lld
+    # Use lld by default for everything but powerpc
+    [[ -z ${LD} && ! ${ARCH} =~ ppc ]] && LD=ld.lld
 
     # Define a different defconfig for ppc64le
     [[ ${ARCH} = "ppc64le" ]] && DEFCONFIG=powernv_defconfig
@@ -381,8 +381,8 @@ function lt() {(
         # Error log
         ERRORS=$(mktemp)
 
-        # Use lld for arm{32,64}
-        [[ ${ARCH} =~ arm ]] && LD=ld.lld
+        # Use lld by default for everything but powerpc
+        [[ -z ${LD} && ! ${ARCH} =~ ppc ]] && LD=ld.lld
 
         # Build kernel silently normally
         if [[ -z ${DEBUG} ]]; then
