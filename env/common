@@ -96,6 +96,7 @@ function shell_setup() {
         setopt autocd
         echo "$fpath" | rg -q -s --color=never "${HOME}/.zfunctions" || fpath=( "${HOME}/.zfunctions" $fpath ) 
         autoload -U compinit && compinit
+        export HISTSIZE=100000
     elif [[ -n ${BASH} ]]; then
         shopt -s checkwinsize
     else
