@@ -21,7 +21,7 @@ unset SCRIPT
 # Source the machine specific functions
 case "$(whoami)@$(uname -n)" in
     "natechancellor@penguin"|"nathan@localhost") LOCATION=pixelbook ;;
-    "nathan@archlinux-ryzen"|"nathan@flashbox") LOCATION=server ;;
+    "nathan@archlinux-"*|"nathan@flashbox") LOCATION=server ;;
     "pi@raspberrypi") LOCATION=pi ;;
 esac
 source "${SCRIPTS_FOLDER}/env/${LOCATION}"
