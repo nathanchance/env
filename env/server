@@ -11,10 +11,11 @@
 #
 # 1. The server has had its OS installed (if using Hetzner)
 #
-#    $ installimage -r yes -l 0 -d sda,sdb -f yes -n archlinux-ryzen
+#    $ installimage -r yes -l 0 -f yes -n archlinux-<suffix>
 #
-# 2. My user account has been created (and zsh installed)
+# 2. My user account has been created
 #
+#    $ pacman -S zsh
 #    $ useradd -m -G wheel -s /bin/zsh nathan
 #    $ passwd
 #    $ passwd nathan
@@ -85,6 +86,8 @@ function bootstrap() {(
                                         intel-tbb \
                                         iputils \
                                         jq \
+                                        linux-zen \
+                                        linux-zen-headers \
                                         lld \
                                         mosh \
                                         most \
@@ -102,10 +105,11 @@ function bootstrap() {(
                                         qemu-headless-arch-extra \
                                         ripgrep \
                                         rubygems \
-                                        "shellcheck" \
                                         tmux \
                                         wget \
                                         xmlto || die "Error installing packages!"
+    sudo pacman -R --noconfirm linux
+    sudo grub-mkconfig -o /boot/grub/grub.cfg
 
     # Install hub
     install_hub
