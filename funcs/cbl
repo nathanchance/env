@@ -431,7 +431,7 @@ function lt() {(
 
 # Pull the latest CBL Docker image and run it
 function dckrrn() {(
-    [[ -z ${DOCKER_IMAGE} ]] && DOCKER_IMAGE=clangbuiltlinux/ubuntu
+    [[ -z ${DOCKER_IMAGE} ]] && DOCKER_IMAGE=clangbuiltlinux/debian
     [[ -z ${LOCAL} ]] && docker pull "${DOCKER_IMAGE}"
     docker run --interactive \
                --mount type=bind,source="${PWD}",target=/"${PWD##*/}",readonly \
