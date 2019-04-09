@@ -205,12 +205,15 @@ function bootstrap() {(
         cd "${CBL}"/android || die "wtf?"
         git clone https://android.googlesource.com/kernel/build
         git clone https://android.googlesource.com/kernel/common
+        curl -LSso common/.git/hooks/commit-msg https://android-review.googlesource.com/tools/hooks/commit-msg
+        chmod u+x common/.git/hooks/commit-msg
 
         cd "${CBL}"/git || die "wtf?"
         git clone git@github.com:ClangBuiltLinux/continuous-integration.git ci
         git clone git@github.com:ClangBuiltLinux/continuous-integration.git ci-master
         git clone git@github.com:ClangBuiltLinux/dockerimage.git
-        for FOLDER in ci dockerimage; do (
+        git clone git@github.com:ClangBuiltLinux/tc-build.git
+        for FOLDER in ci dockerimage tc-build; do (
             cd "${FOLDER}"
             hub fork
         ) done
