@@ -143,8 +143,6 @@ while (( ${#} )); do
         # Versions to merge, separated by commas
         "-v"|"--versions")
             shift && enforce_value "${@}"
-            # SC2076: Don't quote rhs of =~, it'll match literally rather than as a regex.
-            # shellcheck disable=SC2076
             [[ ${1} =~ "3.18" || ${1} =~ "4.4" || ${1} =~ "4.9" ]] || die "Invalid version specified!"
             IFS="," read -r -A VERSIONS <<< "${1}" ;;
     esac

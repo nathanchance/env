@@ -55,11 +55,6 @@ HETZNER_IP="95.217.33.123"
 RYZEN_IP="95.216.41.81"
 VULTR_IP="209.250.235.204"
 
-# Export everything to satisfy shellcheck
-export HOST SCRIPTS_FOLDER BLINK_RED BLUE BOLD GRN RED RST YLW \
-       THREADS JOBS_FLAG CCACHE MARLIN_CHANNEL MARLIN_GROUP OP6_CHANNEL \
-       OP6_GROUP WAHOO_CHANNEL WAHOO_GROUP RYZEN_IP VULTR_IP
-
 
 ###############
 #             #
@@ -83,8 +78,6 @@ function header() {
     echo "${COLOR}"
     echo "====$(for i in $(seq ${#1}); do echo "=\c"; done)===="
     echo "==  ${1}  =="
-    # SC2034: i appears unused. Verify it or export it.
-    # shellcheck disable=SC2034
     echo "====$(for i in $(seq ${#1}); do echo "=\c"; done)===="
     echo "${RST}"
 }

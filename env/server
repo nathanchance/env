@@ -353,8 +353,6 @@ function server_setup() {
 
 
 # Repo sync shorthand
-# SC2120: rps references arguments, but none are ever passed.
-# shellcheck disable=SC2120
 function rps {
     repo sync "${JOBS_FLAG}" --force-sync -c --no-clone-bundle --no-tags --optimized-fetch --prune "${@}"
 }
@@ -368,8 +366,6 @@ function ris {
 
     repo init -u "${1}" -b "${2}" --no-clone-bundle ${DEPTH}
 
-    # SC2119: Use rps "$@" if function's $1 should mean script's $1.
-    # shellcheck disable=SC2119
     time rps
 }
 
@@ -628,8 +624,6 @@ function symlink-commands() {(
 
 # Build/update git
 function bgit() {(
-    # SC2191: The = here is literal. To assign by index, use ( [index]=value ) with no spaces. To keep as literal, quote it.
-    # shellcheck disable=SC2191
     MAKE=( make "${JOBS_FLAG}"
                 prefix="/usr/local"
                 CFLAGS="-march=native -O2 -pipe -fstack-protector-strong -fno-plt"

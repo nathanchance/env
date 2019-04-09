@@ -151,8 +151,6 @@ function parse_parameters() {
 
     # Defaults
     [[ -z ${ARCH} ]] && ARCH=arm64
-    # SC2153: Possible misspelling: TC_FOLDER may not be assigned, but GCC_FOLDER is.
-    # shellcheck disable=SC2153
     [[ -z ${GCC_FOLDER} ]] && GCC_FOLDER=${TC_FOLDER}/aosp-gcc-${ARCH}
 }
 
