@@ -186,7 +186,7 @@ function bootstrap() {(
 # Laptop specific aliases
 function pixelbook_aliases() {
     alias ls='ls --color=auto'
-    alias mshsvr='mosh nathan@${RYZEN_IP}'
+    alias mshsvr='mosh nathan@${HETZNER_IP}'
 }
 
 
