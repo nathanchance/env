@@ -851,6 +851,7 @@ function bld_llvm_bntls_sh() {(
     TC_BLD=${CBL}/git/tc-build
 
     mkdir -p "${CCACHE_FOLDER}"
+    [[ -f ${TC_BLD}/build-llvm.sh ]] || die "build-llvm.sh script could not be found!"
 
     echo '#!/usr/env/bash
 
