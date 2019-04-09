@@ -106,6 +106,7 @@ function bldkw() {(
 
     # Build the kernel
     time make "${JOBS_FLAG}" \
+              AR=llvm-ar \
               CC="${CCACHE} clang" \
               ${KCONFIG_ALLCONFIG:+KCONFIG_ALLCONFIG="${KCONFIG_ALLCONFIG}"} \
               HOSTCC=clang \
@@ -378,9 +379,12 @@ function lt() {(
         # Use lld by default for everything but powerpc
         [[ -z ${LD} && ! ${ARCH} =~ ppc ]] && LD=ld.lld
 
+        # Use llvm-objcopy on linux-next and the config is a defconfig
+        [[ ${PWD##*/} = "linux-next" && ${CONFIG} =~ defconfig ]] && OBJCOPY=llvm-objcopy
+
         # Build kernel silently normally
         if [[ -z ${DEBUG} ]]; then
-            bldk "${ARCH}" "${CONFIG}" KCFLAGS="${KCFLAGS:--Werror}" ${LD:+LD="${LD}"} |& \
+            bldk "${ARCH}" "${CONFIG}" KCFLAGS="${KCFLAGS:--Werror}" ${LD:+LD="${LD}"} ${OBJCOPY:+OBJCOPY="${OBJCOPY}"} |& \
             rg --color=never "error:|warning:|undefined" |& sed "s/${PWD//\//\\/}\///g" > "${ERRORS}"
             MAKE_RESULT=${pipestatus[1]}
         else
