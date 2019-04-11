@@ -10,7 +10,7 @@ function log() {
 
 mkdir -p "$(dirname "${LOG}")"
 for REPO in LLVM Linux; do
-    cd "${HOME}/cbl/mirrors/${REPO,,}" || { log "${REPO} folder doesn't exist!"; continue; }
+    cd "${HOME}/cbl/mirrors/${REPO:l}" || { log "${REPO} folder doesn't exist!"; continue; }
     git pull github master || { log "Updating ${REPO} from GitHub failed!"; continue; }
     git pull origin master || { log "Updating ${REPO} from origin failed!"; continue; }
     git push github HEAD || { log "Pushing to GitHub failed!"; continue; }
