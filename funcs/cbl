@@ -432,12 +432,10 @@ function lt() {(
 function dckrrn() {(
     [[ -z ${DOCKER_IMAGE} ]] && DOCKER_IMAGE=clangbuiltlinux/debian
     [[ -z ${LOCAL} ]] && docker pull "${DOCKER_IMAGE}"
-    docker run --interactive \
-               --mount type=bind,source="${PWD}",target=/"${PWD##*/}",readonly \
-               --rm \
-               --tty \
-               --workdir /"${PWD##*/}" \
-               "${DOCKER_IMAGE}" "${@}"
+    docker_mount --interactive \
+                 --rm \
+                 --tty \
+                 "${DOCKER_IMAGE}" "${@}"
 )}
 
 
@@ -852,7 +850,8 @@ function bld_llvm_bntls_sh() {(
     TC_BLD=${CBL}/git/tc-build
 
     mkdir -p "${CCACHE_FOLDER}"
-    [[ -f ${TC_BLD}/build-llvm.sh ]] || die "build-llvm.sh script could not be found!"
+    cd "${TC_BLD}" || die "Could not move into ${TC_BLD}!"
+    [[ -f build-llvm.sh ]] || die "build-llvm.sh script could not be found!"
 
     echo '#!/usr/env/bash
 
@@ -884,7 +883,7 @@ ccache --set-config=compression=true
 ccache --set-config=compression_level=9
 ccache --set-config=cache_dir=/ccache
 
-git clone /'"${TC_BLD##*/}"' /'"${TC_BLD##*/}"'2 && cd /'"${TC_BLD##*/}"'2
+git clone /'"${PWD##*/}"' /'"${PWD##*/}"'2 && cd /'"${PWD##*/}"'2
 
 ./build-binutils.sh -t all || exit 1
 ./build-llvm.sh CC=gcc || exit 1
@@ -903,14 +902,12 @@ done' > "${SCRIPT}"
                  debian:stretch \
                  debian:buster; do
         docker pull "${IMAGE}"
-        docker run --interactive \
-                   --mount type=bind,source="${TC_BLD}",target=/"${TC_BLD##*/}",readonly \
-                   --mount type=bind,source="${CCACHE_FOLDER}",target=/ccache \
-                   --mount type=bind,source="${SCRIPT}",target=/script.sh \
-                   --rm \
-                   --tty \
-                   --workdir /"${TC_BLD##*/}" \
-                   "${IMAGE}" bash /script.sh || { echo "${IMAGE} failed" >> "${LOG}"; continue; }
+        docker_mount --interactive \
+                     --mount type=bind,source="${CCACHE_FOLDER}",target=/ccache \
+                     --mount type=bind,source="${SCRIPT}",target=/script.sh \
+                     --rm \
+                     --tty \
+                     "${IMAGE}" bash /script.sh || { echo "${IMAGE} failed" >> "${LOG}"; continue; }
         echo "${IMAGE} successful" >> "${LOG}"
     done
 

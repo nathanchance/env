@@ -651,10 +651,7 @@ function bgit() {(
 # Shellcheck through Docker
 function shellcheck() {(
     docker pull r.j3ss.co/shellcheck 1>/dev/null
-    docker run --mount type=bind,source="${PWD}",target=/"${PWD##*/}",readonly \
-               --rm \
-               --workdir /"${PWD##*/}" \
-               r.j3ss.co/shellcheck shellcheck "${@}"
+    docker_mount --rm r.j3ss.co/shellcheck shellcheck "${@}"
 
 )}
 

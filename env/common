@@ -117,4 +117,12 @@ function rld() {
     source "${SCRIPTS_FOLDER}/env/common"
     shell_setup
 }
+
+
+# Bind mount current PWD into Docker container
+function docker_mount() {
+    docker run --mount type=bind,source="${PWD}",target=/"${PWD##*/}",readonly \
+               --workdir /"${PWD##*/}" \
+               "${@}"
+}
 # vi: filetype=zsh
