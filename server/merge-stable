@@ -239,10 +239,15 @@ function generate_versions() {
         )
 
         echo "\n${BOLD}Fetching stable-queue...${RST}\n"
-        git -C "${KERNEL_FOLDER}/sources/stable-queue" pull &>/dev/null || die "Error pulling stable queue!"
+        STABLE_QUEUE=${ALS:?}/stable-queue
+        if [[ -d ${STABLE_QUEUE} ]]; then
+            git -C "${STABLE_QUEUE}" pull &>/dev/null || die "Error pulling stable queue!"
+        else
+            git -C "${ALS}" clone git://git.kernel.org/pub/scm/linux/kernel/git/stable/stable-queue.git &>/dev/null || die "Error cloning stable queue!"
+        fi
 
         echo "${BOLD}Generating ${QUEUE_BRANCH}...${RST}"
-        git quiltimport --patches "${KERNEL_FOLDER}/sources/stable-queue/${QUEUE_BRANCH}" &>/dev/null || die "Error creating ${QUEUE_BRANCH}!"
+        git quiltimport --patches "${STABLE_QUEUE}/${QUEUE_BRANCH}" &>/dev/null || die "Error creating ${QUEUE_BRANCH}!"
 
         git ch "${CB}" &>/dev/null
 

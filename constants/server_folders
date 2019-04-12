@@ -7,6 +7,9 @@ ROM_FOLDER=${MAIN_FOLDER}/roms
 TC_FOLDER=${MAIN_FOLDER}/toolchains
 WEB_FOLDER=/var/www
 
+# android-linux-stable folder
+ALS=${MAIN_FOLDER}/als
+
 # Binary build folder on tmpfs
 BLDF=/mnt/build
 
