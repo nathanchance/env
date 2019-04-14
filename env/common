@@ -20,6 +20,7 @@ unset SCRIPT
 
 # Source the machine specific functions
 case "$(whoami)@$(uname -n)" in
+    "u0_a"*"@localhost") LOCATION=android ;;
     "natechancellor@penguin"|"nathan@localhost") LOCATION=pixelbook ;;
     "nathan@archlinux-"*|"nathan@flashbox") LOCATION=server ;;
 esac
