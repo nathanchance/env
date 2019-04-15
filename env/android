@@ -7,7 +7,7 @@
 
 # Download files and set up environment
 # Requires
-# $ pkg install zsh && chsh -s zsh && echo "extra-keys = [['ESC','/','-','HOME','UP','END','PGUP'],['TAB','CTRL','ALT','LEFT','DOWN','RIGHT','PGDN']]" > ~/.termux/termux.properties
+# $ pkg install curl libcurl zsh && chsh -s zsh && echo "extra-keys = [['ESC','/','-','HOME','UP','END','PGUP'],['TAB','CTRL','ALT','LEFT','DOWN','RIGHT','PGDN']]" > ~/.termux/termux.properties
 # GPG and SSH keys to be available in the Downloads folder
 function bootstrap() {(
     source <(curl -LSs https://github.com/nathanchance/scripts/raw/master/common) &>/dev/null || return 1
