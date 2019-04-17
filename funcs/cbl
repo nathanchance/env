@@ -868,7 +868,7 @@ if command -v apt-get &>/dev/null; then
     apt-get install --no-install-recommends -y "${PACKAGES[@]}"
 # Fedora
 elif command -v dnf &>/dev/null; then
-    PACKAGES+=( gcc gcc-c++ lld ninja-build zlib-devel )
+    PACKAGES+=( gcc gcc-c++ lld make ninja-build zlib-devel )
     dnf update -y
     dnf install -y "${PACKAGES[@]}"
 # Arch
