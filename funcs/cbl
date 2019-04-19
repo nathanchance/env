@@ -899,8 +899,9 @@ done' > "${SCRIPT}"
                  ubuntu:devel \
                  archlinux/base:latest \
                  fedora:latest \
-                 debian:stretch \
-                 debian:buster; do
+                 debian:stable-slim \
+                 debian:testing-slim \
+                 debian:unstable-slim; do
         docker pull "${IMAGE}"
         docker_mount --interactive \
                      --mount type=bind,source="${CCACHE_FOLDER}",target=/ccache \
