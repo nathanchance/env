@@ -898,17 +898,17 @@ for FILE in clang ld.lld aarch64-linux-gnu-ld arm-linux-gnueabi-ld powerpc64le-l
     ./build/bin/${FILE} --version || exit 1
 done' > "${SCRIPT}"
 
-    for IMAGE in ubuntu:xenial \
-                 ubuntu:latest \
-                 ubuntu:rolling \
-                 ubuntu:devel \
-                 archlinux/base:latest \
-                 fedora:latest \
-                 fedora:rawhide \
+    for IMAGE in archlinux/base:latest \
                  debian:stable-slim \
                  debian:testing-slim \
                  debian:unstable-slim \
-                 opensuse/tumbleweed:latest; do
+                 fedora:latest \
+                 fedora:rawhide \
+                 opensuse/tumbleweed:latest \
+                 ubuntu:xenial \
+                 ubuntu:latest \
+                 ubuntu:rolling \
+                 ubuntu:devel; do
         docker pull "${IMAGE}"
         docker_mount --interactive \
                      --mount type=bind,source="${CCACHE_FOLDER}",target=/ccache \
