@@ -925,4 +925,9 @@ done' > "${SCRIPT}"
     tg_msg "$(cat "${LOG}")"
     echo
 )}
+
+
+function yapf() {
+    PYTHONPATH=${CBL}/git/yapf python3 ${CBL}/git/yapf/yapf -i -p "${@}"
+}
 # vi: filetype=zsh
