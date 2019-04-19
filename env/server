@@ -40,10 +40,10 @@ function bootstrap() {(
     # Grab common functions
     source <(curl -LSs https://github.com/nathanchance/scripts/raw/master/common) &>/dev/null || return 1
     source <(curl -LSs https://github.com/nathanchance/scripts/raw/master/funcs/hub) &>/dev/null || return 1
-    source <(curl -LSs https://github.com/nathanchance/scripts/raw/master/funcs/pure) &>/dev/null || return 1
 
     DOTFILES=${REPO_FOLDER}/dotfiles
     KEYS=/tmp/keys
+    SCRIPTS=${MAIN_FOLDER}/scripts
 
     # Check if keys are available for installation
     [[ ! -d ${KEYS} ]] && die "${KEYS} doesn't exist, create it, and copy keys!"
@@ -151,7 +151,9 @@ function bootstrap() {(
     yay -S --needed arm-linux-gnueabi-gcc lineageos-devel || die "Error running yay!"
 
     # Download repos
-    [[ ! -d ${MAIN_FOLDER}/scripts ]] && { git -C "${MAIN_FOLDER}" clone git@github.com:nathanchance/scripts || die "Error cloning scripts!"; }
+    [[ ! -d ${SCRIPTS} ]] && { git clone git@github.com:nathanchance/scripts "${SCRIPTS}" || die "Error cloning scripts!"; }
+    source "${SCRIPTS}"/funcs/git && git_aliases
+    source "${SCRIPTS}"/funcs/pure && pure_prompt
     for REPO in chromeos-adb-fastboot dotfiles hugo-files; do
         [[ ! -d ${REPO_FOLDER}/${REPO} ]] && { git -C "${REPO_FOLDER}" clone git@github.com:nathanchance/"${REPO}" || die "Error cloning ${REPO}!"; }
     done
@@ -237,9 +239,6 @@ function bootstrap() {(
     # Install gist
     gem install gist
     "${HOME}/.gem/ruby/${RUBY_VERSION}/bin/gist" --login
-
-    # Install Pure prompt
-    pure_prompt
 
     # Reminder of things to do
     echo

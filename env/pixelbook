@@ -24,7 +24,6 @@ function bootstrap() {(
     # Grab common functions/variables
     source <(curl -LSs https://github.com/nathanchance/scripts/raw/master/common) &>/dev/null
     source <(curl -LSs https://github.com/nathanchance/scripts/raw/master/constants/versions) &>/dev/null
-    source <(curl -LSs https://github.com/nathanchance/scripts/raw/master/funcs/pure) &>/dev/null
 
     # Make sure keys are present
     if [[ "$(uname -n)" = "penguin" ]]; then
@@ -147,7 +146,10 @@ function bootstrap() {(
     gpg-connect-agent reloadagent /bye
 
     # Clone scripts
-    git clone git@github.com:nathanchance/scripts "${HOME}"/scripts || die "Error cloning script!"
+    local SCRIPTS; SCRIPTS=${HOME}/scripts
+    git clone git@github.com:nathanchance/scripts "${SCRIPTS}" || die "Error cloning script!"
+    source "${SCRIPTS}"/funcs/git && git_aliases
+    source "${SCRIPTS}"/funcs/pure && pure_prompt
 
     # Clone repos
     mkdir -p "${HOME}"/repos
@@ -164,9 +166,6 @@ function bootstrap() {(
     # Run small setup scripts from dotfiles
     zsh "${DOTFILES}"/common/global_gitignore.sh
     zsh "${DOTFILES}"/common/vim/vim_setup.sh
-
-    # Install Pure prompt
-    pure_prompt
 
     # We need UTF characters in crouton for the prompt to work
     if [[ "$(uname -n)" = "localhost" ]]; then

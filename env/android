@@ -11,7 +11,6 @@
 # GPG and SSH keys to be available in the Downloads folder
 function bootstrap() {(
     source <(curl -LSs https://github.com/nathanchance/scripts/raw/master/common) &>/dev/null || return 1
-    source <(curl -LSs https://github.com/nathanchance/scripts/raw/master/funcs/pure) &>/dev/null || return 1
 
     pkg upgrade
     termux-setup-storage
@@ -57,6 +56,8 @@ function bootstrap() {(
 
     # Downloads scripts
     git clone git@github.com:nathanchance/scripts
+    source "${HOME}"/scripts/funcs/git && git_aliases
+    source "${HOME}"/scripts/funcs/pure && pure_prompt
 
     # Download and install dotfiles
     DOTFILES=${HOME}/dotfiles
@@ -68,15 +69,11 @@ function bootstrap() {(
         cp -v "${DOTFILES}"/pixelbook/.tmux.conf "${HOME}"
         gpg --pinentry-mode loopback --output "${HOME}"/.muttrc --decrypt "${DOTFILES}"/common/muttrc.gpg
     ) || die "Error installing dotfiles"
-
-    # Install Pure prompt
-    pure_prompt
 )}
 
 
 # Android aliases
 function android_aliases() {
-    alias git='hub'
     alias mshsvr='mosh nathan@${HETZNER_IP}'
     alias upd='pkg upgrade'
 }
