@@ -876,6 +876,11 @@ elif command -v pacman &>/dev/null; then
     PACKAGES+=( base-devel lld ninja )
     pacman -Syyu --noconfirm
     pacman -S --noconfirm "${PACKAGES[@]}"
+# OpenSUSE Tumbleweed
+elif command -v zypper &>/dev/null; then
+    PACKAGES+=( curl gcc gcc-c++ gzip lld make ninja tar zlib-devel )
+    zypper -n up
+    zypper -n in "${PACKAGES[@]}"
 fi
 
 ccache -M 30G
@@ -902,7 +907,8 @@ done' > "${SCRIPT}"
                  fedora:rawhide \
                  debian:stable-slim \
                  debian:testing-slim \
-                 debian:unstable-slim; do
+                 debian:unstable-slim \
+                 opensuse/tumbleweed:latest; do
         docker pull "${IMAGE}"
         docker_mount --interactive \
                      --mount type=bind,source="${CCACHE_FOLDER}",target=/ccache \
