@@ -899,6 +899,7 @@ done' > "${SCRIPT}"
                  ubuntu:devel \
                  archlinux/base:latest \
                  fedora:latest \
+                 fedora:rawhide \
                  debian:stable-slim \
                  debian:testing-slim \
                  debian:unstable-slim; do
