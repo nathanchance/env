@@ -894,9 +894,9 @@ for FILE in clang ld.lld aarch64-linux-gnu-ld arm-linux-gnueabi-ld powerpc64le-l
 done' > "${SCRIPT}"
 
     for IMAGE in ubuntu:xenial \
-                 ubuntu:bionic \
-                 ubuntu:cosmic \
-                 ubuntu:disco \
+                 ubuntu:latest \
+                 ubuntu:rolling \
+                 ubuntu:devel \
                  archlinux/base:latest \
                  fedora:latest \
                  debian:stretch \
