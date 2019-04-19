@@ -70,7 +70,7 @@ function phabap() {(
     [[ ! -d llvm ]] && { display_error "You're not in the llvm-project folder!"; return 1; }
 
     REVISION=${1:?}
-    [[ ${#} -gt 1 ]] && shift
+    [[ ${#} -ge 1 ]] && shift
 
     curl -LSs "https://reviews.llvm.org/${REVISION}?download=true" | git ap "${@}" || return 1
     git ac -m "${REVISION}
@@ -842,7 +842,7 @@ function cbl_path() {
 }
 
 
-# Function to test build-{binutils,llvm}.sh in multiple Docker images
+# Function to test build-{binutils,llvm}.py in multiple Docker images
 function bld_llvm_bntls_py() {(
     CCACHE_FOLDER=${CBL}/git/ccache
     LOG=$(mktemp); echo "Log: ${LOG}"
@@ -890,7 +890,7 @@ CC=gcc ./build-llvm.py || exit 1
 CC=clang ./build-llvm.py || exit 1
 
 for FILE in clang ld.lld aarch64-linux-gnu-ld arm-linux-gnueabi-ld powerpc64le-linux-gnu-ld powerpc-linux-gnu-ld ld; do
-    ./usr/bin/${FILE} --version || exit 1
+    ./build/bin/${FILE} --version || exit 1
 done' > "${SCRIPT}"
 
     for IMAGE in ubuntu:xenial \
