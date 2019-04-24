@@ -576,7 +576,7 @@ function qcacld() {(
         *"sony"*)
             case "$(make kernelversion)" in
                 4.4*) TAG=aosp/LA.UM.6.4.r1 ;;
-                4.9*) TAG=aosp/LE.UM.2.3.2.r1.4 ;;
+                4.9*) TAG=aosp/LA.UM.7.3.r1 ;;
             esac
             URL=https://github.com/sonyxperiadev/vendor-qcom-opensource-wlan-
             SUBFOLDER=drivers/staging/wlan-qc ;;
