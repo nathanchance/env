@@ -735,10 +735,6 @@ function update_clang_config() {
     )
 
     OUT_DIR=${OUT_FOLDER} BUILD_CONFIG=${BUILD_CONFIG} CC="${CC:-clang}" LD="${LD}" ./build.sh "${@}"
-
-    git -C "${COMMON_FOLDER}" rh -q
-
-    rm "${BUILD_CONFIG}"
 )}
 
 
