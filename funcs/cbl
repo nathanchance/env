@@ -349,7 +349,13 @@ function lt() {(
     echo "Build log: ${LOG}"
     echo
     {
-        "${CBL_BIN}"/clang --version | head -n1
+        (
+            path_push "${CBL_BIN}"
+            [[ -n ${PATH_OVERRIDE} ]] && path_push "${PATH_OVERRIDE}"
+            echo "clang location: $(command -v clang)"
+            echo
+            clang --version | head -n1
+        )
         echo
         echo "Version: $(make defconfig &>/dev/null && make kernelrelease | tail -n1 && git cl -q)"
         echo
