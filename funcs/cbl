@@ -700,7 +700,7 @@ function kcbw() {(
     echo 'ARCH=arm64
 BRANCH='"${BRANCH}"'
 CLANG_TRIPLE=aarch64-linux-gnu-
-CROSS_COMPILE=aarch64-linux-gnu-
+CROSS_COMPILE='"${CROSS_COMPILE:-"aarch64-linux-gnu-"}"'
 DEFCONFIG=cuttlefish_defconfig
 EXTRA_CMDS='\'''\''
 KERNEL_DIR='"$(realpath --relative-to="${PWD}" "${COMMON_FOLDER}")"'
