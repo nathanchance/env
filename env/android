@@ -79,17 +79,8 @@ function android_aliases() {
 }
 
 
-# Setup Android prompt
-function android_prompt() {
-    autoload -U promptinit && promptinit
-    prompt pure
-}
-
-
 # Android environment setup
-function android_setup() {
-    android_prompt
-}
+function android_setup() { true; }
 
 
 # vi: filetype=zsh

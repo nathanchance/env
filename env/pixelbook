@@ -189,18 +189,9 @@ function pixelbook_aliases() {
 }
 
 
-# Setup PS1 and such
-function pixelbook_prompt() {
-    autoload -U promptinit
-    promptinit
-    prompt pure
-}
-
-
 # Laptop specific setup
 function pixelbook_setup() {
     # Until crbug.com/829934 hits stable/beta
     export TZ=/usr/share/zoneinfo/US/Arizona
-    pixelbook_prompt
 }
 # vi: filetype=zsh

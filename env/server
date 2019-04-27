@@ -288,14 +288,6 @@ function server_aliases() {
 }
 
 
-# Setup PS1 and such
-function server_prompt() {
-    autoload -U promptinit
-    promptinit
-    prompt pure
-}
-
-
 # Setup ccache
 # ccache_setup <size>
 function ccache_setup() {
@@ -338,7 +330,6 @@ function cbf() {(
 
 # Additional setup steps for my build server
 function server_setup() {
-    server_prompt
     ccache_setup 250
     LOG=$(mktemp); export LOG
     add_to_path_pre "${SCRIPTS_FOLDER}/server"

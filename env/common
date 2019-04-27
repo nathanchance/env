@@ -89,14 +89,20 @@ function path_pop() {
 function shell_setup() {
     # Shell specific options
     if [[ -n ${ZSH_NAME} ]]; then
-        typeset -gU path
         [[ -n ${terminfo[khome]} ]] && bindkey "${terminfo[khome]}" beginning-of-line
         [[ -n ${terminfo[kend]} ]] && bindkey "${terminfo[kend]}" end-of-line
-        TIMEFMT=$'\nreal\t%*E\nuser\t%*U\nsys\t%*S'
+
         setopt autocd
-        echo "$fpath" | rg -q -s --color=never "${HOME}/.zfunctions" || fpath=( "${HOME}/.zfunctions" $fpath ) 
-        autoload -U compinit && compinit
+        typeset -gU path
+
+        echo "$fpath" | rg -q -s --color=never "${HOME}/.zfunctions" || fpath=( "${HOME}/.zfunctions" $fpath )
+
         export HISTSIZE=100000
+        export PURE_GIT_PULL=0
+        export TIMEFMT=$'\nreal\t%*E\nuser\t%*U\nsys\t%*S'
+
+        autoload -U compinit && compinit
+        autoload -U promptinit && promptinit && prompt pure
     elif [[ -n ${BASH} ]]; then
         shopt -s checkwinsize
     else
