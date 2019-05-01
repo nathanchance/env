@@ -9,6 +9,7 @@
 CBL_SRC=${CBL}/src
 CBL_USR=${CBL}/usr
 CBL_BIN=${CBL_USR}/bin
+TCBLD=${CBL}/tc-build
 
 
 # Create build folders
@@ -445,18 +446,6 @@ function dckrrn() {(
 )}
 
 
-# Modify Clang to report the upstream hash for the version string, bypassing local patches
-function clrev() {(
-    if [[ -z ${SKIP_REV} ]]; then
-        [[ -z ${LLVM} ]] && LLVM=llvm-project
-        case ${1} in
-            "-r"|"--reset") git -C "${CBL_SRC}"/"${LLVM}" rh -q ;;
-            "-s"|"--set"|*) sed -i 's/rev-parse HEAD/rev-parse origin\/master/g' "${CBL_SRC}"/"${LLVM}"/llvm/cmake/modules/VersionFromVCS.cmake ;;
-        esac
-    fi
-)}
-
-
 # Strip LLVM binaries
 function stripllvmbin() {(
     BINARIES_TO_STRIP=( clang lld llvm-ar llvm-pdbutil llvm-symbolizer llvm-undname sancov )
@@ -466,221 +455,27 @@ function stripllvmbin() {(
 
 # Build LLVM
 function bldllvm() {(
-    BASE_CMAKE_VALUES=( -DCLANG_ENABLE_ARCMT=OFF
-                        -DCLANG_PLUGIN_SUPPORT=OFF
-                        -DCMAKE_BUILD_TYPE=Release
-                        -DCMAKE_C_FLAGS="-O2 -march=native -mtune=native"
-                        -DCMAKE_CXX_FLAGS="-O2 -march=native -mtune=native"
-                        -DLLVM_CCACHE_BUILD=ON
-                        -DLLVM_ENABLE_BINDINGS=OFF
-                        -DLLVM_ENABLE_OCAMLDOC=OFF
-                        -DLLVM_ENABLE_TERMINFO=OFF
-                        -DLLVM_ENABLE_WARNINGS=OFF
-                        -DLLVM_INCLUDE_EXAMPLES=OFF
-                        -DLLVM_INCLUDE_TESTS=OFF
-                        -DLLVM_INCLUDE_DOCS=OFF )
-    S1_FOLDER=${LBF}/stage1
-    [[ -z ${LLVM} ]] && LLVM=llvm-project
-    [[ -z ${S1_TARGETS} ]] && S1_TARGETS="X86"
-    [[ -z ${S2_TARGETS} ]] && S2_TARGETS="ARM;AArch64;PowerPC;X86"
-    [[ -z ${S1_PROJECTS} ]] && S1_PROJECTS="clang;compiler-rt;lld"
-    [[ -z ${S2_PROJECTS} ]] && S2_PROJECTS="clang;compiler-rt;libcxx;libcxxabi;libunwind;lld"
-
-    while (( ${#} )); do
-        case ${1} in
-            "-d"|"--debug") DEBUG=true; SKIP_REV=true ;;
-            "-i"|"--install") INSTALL=true ;;
-            "-n"|"--no-clean") INCREMENTAL=true ;;
-            "-p"|"--projects") shift; if [[ -n ${DEBUG} ]]; then S1_PROJECTS="${1}"; else S2_PROJECTS="${1}"; fi ;;
-            "-t"|"--targets") shift; if [[ -n ${DEBUG} ]]; then S1_TARGETS="${1}"; else S2_TARGETS="${1}"; fi ;;
-        esac
-        shift
-    done
-
-    header "Building LLVM"
-
-    STABLE_BINUTILS=${TC_FOLDER}/binutils-${BINUTILS_VERSION:?}
-    [[ -d ${STABLE_BINUTILS} ]] && path_push "${STABLE_BINUTILS}/bin"
-
-    STABLE_LLVM=${TC_FOLDER}/llvm-${LLVM_VERSION:?}
-    if [[ -d ${STABLE_LLVM} ]]; then
-        path_push "${STABLE_LLVM}/bin"
-        [[ -d ${STABLE_BINUTILS} ]] && export LD_LIBRARY_PATH=${STABLE_LLVM}/lib${LD_LIBRARY_PATH:+":${LD_LIBRARY_PATH}"}
-    fi
-
-    [[ -z ${INCREMENTAL} ]] && cbf c
-    { mkdir -p "${S1_FOLDER}" && cd "${S1_FOLDER}"; } || die "wtf"
-
-    clrev -s
-
-    # Stage one
-    cmake -Wno-dev \
-          -G Ninja \
-          "${BASE_CMAKE_VALUES[@]}" \
-          -DCLANG_ENABLE_STATIC_ANALYZER=OFF \
-          -DCOMPILER_RT_BUILD_LIBFUZZER=OFF \
-          "$([[ -z ${DEBUG} ]] && echo "-DCOMPILER_RT_BUILD_SANITIZERS=OFF")" \
-          -DCMAKE_C_COMPILER="$(command -v clang || command -v gcc)" \
-          -DCMAKE_CXX_COMPILER="$(command -v clang++ || command -v g++)" \
-          -DCMAKE_LINKER="$(for LD in lld gold bfd; do command -v ld.${LD} &>/dev/null && break; done; echo ld.${LD})" \
-          ${DEBUG:+-DCMAKE_INSTALL_PREFIX="$(mktemp -d)"} \
-          ${DEBUG:+-DLLVM_BINUTILS_INCDIR="${CBL_SRC}/binutils/include"} \
-          -DLLVM_ENABLE_BACKTRACES=OFF \
-          -DLLVM_ENABLE_PROJECTS="${S1_PROJECTS}" \
-          -DLLVM_ENABLE_ZLIB=OFF \
-          -DLLVM_EXTERNAL_CLANG_TOOLS_EXTRA_SOURCE_DIR="" \
-          -DLLVM_INCLUDE_UTILS=OFF \
-          -DLLVM_TARGETS_TO_BUILD="${S1_TARGETS}" \
-          -DLLVM_USE_LINKER="$(for LD in lld gold bfd; do command -v ld.${LD} &>/dev/null && break; done; echo ${LD})" \
-          "${CBL_SRC}"/"${LLVM}"/llvm > /dev/null
-    time ninja || { clrev -r; die "Error building LLVM stage 1!"; }
-    stripllvmbin "${S1_FOLDER}"
-    if [[ -n ${DEBUG} ]]; then
-        [[ -n ${INSTALL} ]] && { ninja install || die "Error installing LLVM!"; }
-        clrev -r
-        return
-    fi
-
-    # Stage two
-    cd "${LBF}" || die "wtf"
-
-    if [[ -d ${STABLE_BINUTILS} ]]; then
-        if [[ -d ${STABLE_LLVM} ]]; then
-            LD_LIBRARY_PATH=${LD_LIBRARY_PATH/${STABLE_LLVM}\/lib/}
-            LD_LIBRARY_PATH=${LD_LIBRARY_PATH#*:}
-        fi
-        LD_LIBRARY_PATH=${S1_FOLDER}/lib${LD_LIBRARY_PATH:+":${LD_LIBRARY_PATH}"}
-        export LD_LIBRARY_PATH
-    fi
-
-    export PATH=${PATH/${STABLE_LLVM}\/bin:/}
-    path_push "${S1_FOLDER}/bin"
-
-    cmake -Wno-dev \
-          -G Ninja \
-          "${BASE_CMAKE_VALUES[@]}" \
-          -DCMAKE_C_COMPILER=clang \
-          -DCMAKE_CXX_COMPILER=clang++ \
-          -DCMAKE_INSTALL_PREFIX="${INSTALL_FOLDER:="${CBL_USR}"}" \
-          -DCMAKE_LINKER=ld.lld \
-          -DLIBCXX_USE_COMPILER_RT=YES \
-          -DLIBCXXABI_USE_COMPILER_RT=YES \
-          -DLIBCXXABI_USE_LLVM_UNWINDER=YES \
-          -DLLVM_BINUTILS_INCDIR="${CBL_SRC}/binutils/include" \
-          -DLLVM_BUILD_LLVM_DYLIB=ON \
-          -DLLVM_LINK_LLVM_DYLIB=OFF \
-          -DLLVM_ENABLE_LTO=Thin \
-          -DLLVM_ENABLE_PROJECTS="${S2_PROJECTS}" \
-          -DLLVM_ENABLE_RTTI=ON \
-          -DLLVM_TARGETS_TO_BUILD="${S2_TARGETS}" \
-          -DLLVM_USE_LINKER=lld  \
-          "${CBL_SRC}"/"${LLVM}"/llvm > /dev/null
-    time ninja || { clrev -r; die "Error building LLVM stage 2!"; }
-    stripllvmbin "${LBF}"
-    if [[ -n ${INSTALL} ]]; then
-        rm -rf "${INSTALL_FOLDER}"
-        ninja install > /dev/null || die "Error installing LLVM!"
-    fi
-
-    clrev -r
+    "${TCBLD}"/build-llvm.py "${@}"
 )}
 
 
 # Build binutils
 function bldbn() {(
-    header "Building binutils"
-    cd "${CBL_SRC}"/binutils || die "Error moving into ${CBL_SRC}/binutils"
-    BBFR=${BBF}
-    for TUPLE in host arm-linux-gnueabi aarch64-linux-gnu powerpc-linux-gnu powerpc64le-linux-gnu; do
-        BBF=${BBFR}/${TUPLE}
-        { cbf b && mkdir -p "${BBF}" && cd "${BBF}"; } || die "wtf"
-        COMMON_FLAGS=( --prefix="${INSTALL_FOLDER:="${CBL_USR}"}"
-                       --enable-deterministic-archives
-                       --enable-gold
-                       --enable-ld=default
-                       --enable-plugins
-                       --quiet
-                       CFLAGS="-O2 -march=native -mtune=native"
-                       CXXFLAGS="-O2 -march=native -mtune=native" )
-        case ${TUPLE} in
-            host)
-                "${CBL_SRC}"/binutils/configure \
-                    --enable-lto \
-                    --enable-relro \
-                    --enable-shared \
-                    --enable-targets=x86_64-pep \
-                    --enable-threads \
-                    --disable-gdb \
-                    --disable-werror \
-                    --with-pic \
-                    --with-system-zlib \
-                    "${COMMON_FLAGS[@]}"
-                make -s configure-host V=0 ;;
-            arm-*|aarch64-*)
-                "${CBL_SRC}"/binutils/configure \
-                    --disable-multilib \
-                    --disable-nls \
-                    --program-prefix=${TUPLE}- \
-                    --target=${TUPLE} \
-                    --with-gnu-as \
-                    --with-gnu-ld \
-                    --with-sysroot="${INSTALL_FOLDER}/${TUPLE}" \
-                    "${COMMON_FLAGS[@]}" ;;
-            powerpc*)
-                "${CBL_SRC}"/binutils/configure \
-                    --enable-lto \
-                    --enable-relro \
-                    --enable-shared \
-                    --enable-threads \
-                    --disable-gdb \
-                    --disable-sim \
-                    --disable-werror \
-                    --program-prefix=${TUPLE}- \
-                    --target=${TUPLE} \
-                    --with-pic \
-                    --with-system-zlib \
-                    "${COMMON_FLAGS[@]}" ;;
-        esac
-        time make -s "${JOBS_FLAG}" V=0 || die "Error building ${TARGET} binutils"
-        [[ "${1}" =~ "-i" ]] && { make -s prefix="${INSTALL_FOLDER}" install V=0 || die "Error installing ${TARGET} binutils"; }
-        cd ..
-    done
+   "${TCBLD}"/build-binutils.py "${@}"
 )}
 
 
 # Build LLVM/Clang/lld and arm{32,64} and powerpc binutils from source
 function bldusr() {(
-    # Update/clone LLVM
-    if [[ ! -d ${CBL_SRC}/llvm-project ]]; then
-        header "Cloning LLVM"
-        mkdir -p "${CBL_SRC}"
-        git -C "${CBL_SRC}" clone --single-branch -b master git://github.com/llvm/llvm-project
-    else
-        (
-            header "Updating LLVM"
-            cd "${CBL_SRC}"/llvm-project || die "Error moving into llvm-project!"
-            PREVIOUS_ORIGIN_SHA=$(git show -s --format=%H origin/master)
-            git rh -q
-            git pull -q --rebase || die "Error updating LLVM!"
-            git --no-pager lo "${PREVIOUS_ORIGIN_SHA}..$(git show -s --format=%H origin/master)"
-        )
-    fi
-
-    # Update/clone binutils
-    if [[ ! -d ${CBL_SRC}/binutils ]]; then
-        header "Cloning binutils"
-        git -C "${CBL_SRC}" clone git://sourceware.org/git/binutils-gdb.git binutils
-    else
-        header "Updating binutils"
-        git -C "${CBL_SRC}"/binutils pull --rebase || die "Error updating ${CBL_SRC}/binutils"
-    fi
+    : ${INSTALL_FOLDER:=${CBL_USR}}
+    rm -rf "${INSTALL_FOLDER}"
 
     # Build LLVM/Clang/lld
-    INSTALL_FOLDER=${CBL_USR}
-    bldllvm -i || return ${?}
+    bldllvm --build-folder "${LBF}" --install-folder "${INSTALL_FOLDER}" --thin-lto --update || return ${?}
+    stripllvmbin "${INSTALL_FOLDER}"
 
     # Build binutils
-    bldbn -i
+    bldbn -B "${BBF}" -I "${INSTALL_FOLDER}"
 )}
 
 
