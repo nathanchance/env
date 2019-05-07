@@ -103,8 +103,8 @@ function bldkw() {(
     fi
 
     # Use our versions of Clang
-    path_push "${CBL_BIN}"
-    [[ -n ${PATH_OVERRIDE} ]] && path_push "${PATH_OVERRIDE}"
+    move_to_front_of_path "${CBL_BIN}"
+    [[ -n ${PATH_OVERRIDE} ]] && move_to_front_of_path "${PATH_OVERRIDE}"
 
     # Build the kernel
     time make "${JOBS_FLAG}" \

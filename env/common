@@ -66,15 +66,34 @@ function tmxd() {
 
 # Add something to the end of PATH if it isn't already there
 function add_to_path_post() {
-    [[ -d ${1} ]] || return
-    echo "${PATH}" | rg --color=never -s -q "${1}" || export PATH="${PATH}:${1}"
+    local ARRAY ITEM
+    IFS=: read -rA ARRAY <<< "${1}"
+    for ITEM in $(printf '%s\n' "${ARRAY[@]}" | tac); do
+        [[ -d ${ITEM} ]] || continue
+        echo "${PATH}" | rg --color=never -s -q "${ITEM}" || export PATH="${PATH}:${ITEM}"
+    done
+}
+
+
+# Does the same thing as add_to_path_pre but doesn't check if item exists or not
+function move_to_front_of_path() {
+    local ARRAY ITEM
+    IFS=: read -rA ARRAY <<< "${1}"
+    for ITEM in $(printf '%s\n' "${ARRAY[@]}" | tac); do
+        [[ -d ${ITEM} ]] || continue
+        export PATH="${ITEM}:${PATH//${ITEM}:}"
+    done
 }
 
 
 # Add something to the beginning of PATH if it isn't already there
 function add_to_path_pre() {
-    [[ -d ${1} ]] || return
-    echo "${PATH}" | rg --color=never -s -q "${1}" || export PATH="${1}:${PATH}"
+    local ARRAY ITEM
+    IFS=: read -rA ARRAY <<< "${1}"
+    for ITEM in $(printf '%s\n' "${ARRAY[@]}" | tac); do
+        [[ -d ${ITEM} ]] || continue
+        echo "${PATH}" | rg --color=never -s -q "${ITEM}" || export PATH="${ITEM}:${PATH}"
+    done
 }
 # Easy alias
 function path_push() { add_to_path_pre "${@}"; }
