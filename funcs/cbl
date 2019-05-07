@@ -107,7 +107,8 @@ function bldkw() {(
     [[ -n ${PATH_OVERRIDE} ]] && move_to_front_of_path "${PATH_OVERRIDE}"
 
     # Build the kernel
-    time make "${JOBS_FLAG}" \
+    time make ${QUIET:+-s} \
+              "${JOBS_FLAG}" \
               AR=llvm-ar \
               CC="${CCACHE} clang" \
               ${KCONFIG_ALLCONFIG:+KCONFIG_ALLCONFIG="${KCONFIG_ALLCONFIG}"} \
