@@ -188,8 +188,9 @@ function bootstrap() {(
         for COMBO in torvalds/linux.git:linux torvald/linux.git:mirrors/linux next/linux-next.git:linux-next stable/linux.git:linux-stable; do
             FOLDER=${COMBO#*:}
             URL=${COMBO%:*}
-            wget -c https://git.kernel.org/pub/scm/linux/kernel/git/"${URL}"/clone.bundle
-            git clone clone.bundle "${FOLDER}"
+            CB=clone.bundle-${FOLDER##*/}
+            [[ ! -f ${CB} ]] && wget -O "${CB}" -c https://git.kernel.org/pub/scm/linux/kernel/git/"${URL}"/clone.bundle
+            git clone "${CB}" "${FOLDER}"
             (
                 cd "${FOLDER}"
                 git remote remove origin
@@ -198,8 +199,8 @@ function bootstrap() {(
                 git reset --hard origin/"$(git rev-parse --abbrev-ref HEAD)"
                 [[ "${FOLDER}" =~ mirrors ]] && git remote add github git@github.com:ClangBuiltLinux/linux.git
             )
-            rm -rf clone.bundle
         done
+        rm -rf clone.bundle-*
         git clone -b personal git@github.com:nathanchance/tc-build.git
     )
 
