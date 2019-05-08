@@ -49,7 +49,7 @@ function bootstrap() {(
     [[ ! -d ${KEYS} ]] && die "${KEYS} doesn't exist, create it, and copy keys!"
 
     # Setup folders that will be used
-    mkdir -p "${CBL}"/{android,git,mirrors,src} \
+    mkdir -p "${CBL}"/{android,git,mirrors} \
              "${KERNEL_FOLDER}"/sony \
              "${MISC_FOLDER}"/building \
              "${REPO_FOLDER}" \
@@ -200,6 +200,7 @@ function bootstrap() {(
             )
             rm -rf clone.bundle
         done
+        git clone -b personal git@github.com:nathanchance/tc-build.git
     )
 
     # Download other CBL things
@@ -222,11 +223,6 @@ function bootstrap() {(
 
         cd "${CBL}"/mirrors || die "wtf?"
         git clone git://github.com/llvm/llvm-project llvm
-
-        cd "${CBL}"/src
-        git clone --single-branch -b master git://github.com/llvm/llvm-project
-        git -C llvm-project remote add github git@github.com:ClangBuiltLinux/llvm-project.git
-        git clone --single-branch -b master git://sourceware.org/git/binutils-gdb.git binutils
     )
 
     # Clone sonyxperiadev/kernel
