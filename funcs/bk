@@ -41,7 +41,7 @@ function bk() {
         "polaris"*) PARAMS=( polaris_user_defconfig ) ;;
         "sagit:sagit-o-oss") PARAMS=( sagit_user_defconfig ) ;;
         "tissot:tissot-"*) PARAMS=( tissot-perf_defconfig ) ;;
-        "wahoo:"*"-q-preview"*) PARAMS=( wahoo_defconfig -c -ct clang-r346389b ) ;;
+        "wahoo:"*"-q-preview"*) PARAMS=( wahoo_defconfig -c -ct clang-r349610b ) ;;
         "wahoo:"*) PARAMS=( wahoo_defconfig -c -ct clang-4053586 ) ;;
         "whyred:whyred-o-oss") PARAMS=( whyred-perf_defconfig ) ;;
 
