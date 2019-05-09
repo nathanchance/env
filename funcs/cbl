@@ -125,7 +125,8 @@ function bldkw() {(
 function extraconfigs() {
     local OUT_FOLDER="${KBF}"
 
-    echo "CONFIG_EXPERT=y
+    echo "CONFIG_INIT_STACK_ALL=y
+CONFIG_EXPERT=y
 CONFIG_DEBUG_KERNEL=y
 CONFIG_LOCK_DEBUGGING_SUPPORT=y
 CONFIG_DEBUG_RT_MUTEXES=y
