@@ -112,10 +112,15 @@ function bldkw() {(
               AR=llvm-ar \
               CC="${CCACHE} clang" \
               ${KCONFIG_ALLCONFIG:+KCONFIG_ALLCONFIG="${KCONFIG_ALLCONFIG}"} \
-              HOSTCC=clang \
+              HOSTCC="${CCACHE} clang" \
+              HOSTCXX="${CCACHE} clang++" \
               HOSTLD=ld.lld \
+              HOSTLDFLAGS="-fuse-ld=lld" \
               "${MAKE_FLAGS[@]}" \
+              NM=llvm-nm \
               O="${KBF}" \
+              OBJDUMP=llvm-objdump \
+              STRIP=llvm-strip \
               "${@}"
 )}
 
@@ -225,6 +230,9 @@ function bldk() {
         extraconfigs
         # Use lld by default for everything but powerpc
         [[ -z ${LD} && ! ${ARCH} =~ ppc ]] && LD=ld.lld
+        # Use llvm-objcopy
+        [[ -z ${OBJCOPY} ]] && OBJCOPY=llvm-objcopy
+
     fi
 
     # Build kernel
@@ -324,10 +332,13 @@ function babk() {
     # Use lld by default for everything but powerpc
     [[ -z ${LD} && ! ${ARCH} =~ ppc ]] && LD=ld.lld
 
+    # Use llvm-objcopy
+    [[ -z ${OBJCOPY} ]] && OBJCOPY=llvm-objcopy
+
     # Define a different defconfig for ppc64le
     [[ ${ARCH} = "ppc64le" ]] && DEFCONFIG=powernv_defconfig
 
-    bldk "${ARCH}" "${DEFCONFIG:-defconfig}" KCFLAGS="-Werror" ${LD:+LD="${LD}"} "${@}"
+    bldk "${ARCH}" "${DEFCONFIG:-defconfig}" KCFLAGS="-Werror" ${LD:+LD="${LD}"} ${OBJCOPY:+OBJCOPY="${OBJCOPY}"} "${@}"
 
     bootk "${ARCH}"
 }
@@ -389,8 +400,8 @@ function lt() {(
         # Use lld by default for everything but powerpc
         [[ -z ${LD} && ! ${ARCH} =~ ppc ]] && LD=ld.lld
 
-        # Use llvm-objcopy on linux-next and the config is a defconfig
-        [[ ${PWD##*/} = "linux-next" && ${CONFIG} =~ defconfig ]] && OBJCOPY=llvm-objcopy
+        # Use llvm-objcopy
+        [[ -z ${OBJCOPY} ]] && OBJCOPY=llvm-objcopy
 
         # Build kernel silently normally
         if [[ -z ${DEBUG} ]]; then
