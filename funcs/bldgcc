@@ -19,7 +19,7 @@ function bldgcc() {(
     GCC_BLD=${GCC_FOLDER}/build
     mkdir -p "${GCC_FOLDER}"
     [[ ! -d ${GCC_BLD} ]] && git -C "${GCC_FOLDER}" clone git://git.infradead.org/users/segher/buildall.git build
-    cd "${GCC_BLD}"
+    cd "${GCC_BLD}" || die "buildall clone failed!"
 
     # Download GCC
     [[ -z ${GCC_VERSION} ]] && GCC_VERSION=9.1.0
