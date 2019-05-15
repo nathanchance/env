@@ -333,6 +333,7 @@ function server_setup() {
     source "${SCRIPTS_FOLDER}"/constants/server_folders
     source "${SCRIPTS_FOLDER}"/constants/versions
     source "${SCRIPTS_FOLDER}"/funcs/bk
+    source "${SCRIPTS_FOLDER}"/funcs/bldgcc
     source "${SCRIPTS_FOLDER}"/funcs/cbl
     source "${SCRIPTS_FOLDER}"/funcs/hub
     add_to_path_post "${HOME}/.gem/ruby/${RUBY_VERSION}/bin"

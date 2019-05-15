@@ -1,0 +1,54 @@
+# Builds GCC and binutils for exclusively building kernels (baremetal target)
+function bldgcc() {(
+    BLD_OPTS=( "--toolchain" )
+    TARGETS=()
+
+    # Get parameters
+    [[ ${#} -eq 0 ]] && die "This function needs targets!"
+    while (( ${#} )); do
+        case ${1} in
+            "--binutils"|"--gcc"|"--toolchain") BLD_OPTS=( "${1}" ) ;;
+            "all") TARGETS=( "arm" "arm64" "x86_64" ) ;;
+            "arm"|"arm64"|"powerpc"|"powerpc64"|"s390"|"x86_64") TARGETS+=( "${1}" ) ;;
+        esac
+        shift
+    done
+
+    # Create folders
+    GCC_FOLDER=${TC_FOLDER:?}/gcc
+    GCC_BLD=${GCC_FOLDER}/build
+    mkdir -p "${GCC_FOLDER}"
+    [[ ! -d ${GCC_BLD} ]] && git -C "${GCC_FOLDER}" clone git://git.infradead.org/users/segher/buildall.git build
+    cd "${GCC_BLD}"
+
+    # Download GCC
+    [[ -z ${GCC_VERSION} ]] && GCC_VERSION=9.1.0
+    GCC_SOURCE=gcc-${GCC_VERSION}
+    [[ ! -d ${GCC_SOURCE} ]] && curl -LSs https://mirrors.kernel.org/gnu/gcc/${GCC_SOURCE}/${GCC_SOURCE}.tar.xz | tar -xJf -
+
+    # Download binutils
+    [[ -z ${BINUTILS_VERSION} ]] && BINUTILS_VERSION=2.32
+    BINUTILS_SOURCE=binutils-${BINUTILS_VERSION}
+    [[ ! -d ${BINUTILS_SOURCE} ]] && curl -LSs https://mirrors.kernel.org/gnu/binutils/${BINUTILS_SOURCE}.tar.xz | tar -xJf -
+
+    # Create timert
+    [[ ! -f timert ]] && make -j$(nproc)
+
+    # Create config
+    cat <<EOF > config
+BINUTILS_SRC=${PWD}/${BINUTILS_SOURCE}
+CHECKING=release
+ECHO=/bin/echo
+GCC_SRC=${PWD}/${GCC_SOURCE}
+MAKEOPTS=-j$(nproc)
+PREFIX=${GCC_FOLDER}/${GCC_VERSION}
+EOF
+
+    # Build the toolchains
+    for TARGET in "${TARGETS[@]}"; do
+        # Clean up previous artifacts, can cause a false failure
+        rm -rf "${TARGET}"
+        ./build "${BLD_OPTS}" "${TARGET}"
+    done
+)}
+# vi: filetype=zsh
