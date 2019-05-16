@@ -83,12 +83,12 @@ function bootstrap() {(
                                         git \
                                         htop \
                                         hugo \
-                                        intel-tbb \
                                         iputils \
                                         jq \
                                         linux-zen \
                                         linux-zen-headers \
                                         lld \
+                                        llvm \
                                         mosh \
                                         most \
                                         multilib-devel \
@@ -148,7 +148,7 @@ function bootstrap() {(
     curl -LSs -o PKGBUILD "https://aur.archlinux.org/cgit/aur.git/plain/PKGBUILD?h=yay"
     makepkg --noconfirm -si || die "Error installing yay!"
     gpg --recv-keys 702353E0F7E48EDB
-    yay -S --needed arm-linux-gnueabi-gcc lineageos-devel || die "Error running yay!"
+    yay -S --needed lineageos-devel || die "Error running yay!"
 
     # Download repos
     [[ ! -d ${SCRIPTS} ]] && { git clone git@github.com:nathanchance/scripts "${SCRIPTS}" || die "Error cloning scripts!"; }
