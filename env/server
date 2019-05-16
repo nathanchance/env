@@ -197,7 +197,8 @@ function bootstrap() {(
                 git remote add origin git://git.kernel.org/pub/scm/linux/kernel/git/"${URL}"
                 git fetch origin
                 git reset --hard origin/"$(git rev-parse --abbrev-ref HEAD)"
-                [[ "${FOLDER}" =~ mirrors ]] && git remote add github git@github.com:ClangBuiltLinux/linux.git
+                [[ ${URL} =~ torvalds ]] && git branch --set-upstream-to=origin/master master
+                [[ ${FOLDER} =~ mirrors ]] && git remote add github git@github.com:ClangBuiltLinux/linux.git
             )
         done
         rm -rf clone.bundle-*
