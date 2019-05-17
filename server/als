@@ -124,6 +124,10 @@ while (( ${#} )); do
             shift && enforce_value "${@}"
             read -r -A REPOS_PARAM <<< "${1}" ;;
 
+        # Skip merging (usual if wanting to build only)
+        "-s"|"--skip-merging")
+            SKIP_MERGE=true ;;
+
         # Pull a pending stable tag from Sasha Levin
         "-t"|"--tag")
             shift && enforce_value "${@}"
@@ -237,55 +241,57 @@ for VERSION in "${VERSIONS[@]}"; do
             git fetch origin
             git rh "origin/${BRANCH}"
 
-            # If there is an upstream remote (REMOTE and BRANCH aren't the same), merge it if the main merge is not an RC or queue merge
-            if [[ "${REMOTE}" != "${BRANCH}" && -z "${ALS_PARAMS[*]}" ]]; then
-                git fetch "${REMOTE}"
-                git ml --no-edit "${REMOTE}/${BRANCH}" || die "${LOG_TAG} ${REMOTE}/${BRANCH} merge error! Please resolve then re-run the script!"
-            fi
-
-            # Cache kernel version. This needs to be done before doing a merge in case Makefile conflicts...
-            KVER=$(kv)
-            MAJOR_VER=${KVER%.*}
-            if [[ -n ${QUEUE} ]]; then
-                COMMANDS_BRANCH=MERGE_HEAD
-                LOG_TAG="${LOG_TAG} stable-queue/queue-${MAJOR_VER} |"
-            elif [[ -n ${TAG_SUFFIX} ]]; then
-                TAG_TO_PULL=for-greg-${MAJOR_VER}-${TAG_SUFFIX}
-                LOG_TAG="${LOG_TAG} sashal/linux-stable.git ${TAG_TO_PULL} |"
-            else
-                COMMANDS_BRANCH=linux-stable${RC:+"-rc"}/linux-${MAJOR_VER}.y
-                LOG_TAG="${LOG_TAG} ${COMMANDS_BRANCH} |"
-            fi
-
-            # Merge the update, logging success and pushing as necessary
-            if merge-stable "${ALS_PARAMS[@]}" -s; then
-                # Show merged kernel version in log
-                post_git_fm_steps "Merge successful: $(kv)"
-
-                # Properly set KVER for post merge commands
-                if [[ -n ${QUEUE} ]]; then
-                    KVER=${MAJOR_VER}.$((${KVER##*.} + 1))
-                elif [[ -n ${RC} ]]; then
-                    KVER=$(kv | sed 's/-rc.*//')
-                else
-                    KVER=$(kv)
+            if [[ -z ${SKIP_MERGE} ]]; then
+                # If there is an upstream remote (REMOTE and BRANCH aren't the same), merge it if the main merge is not an RC or queue merge
+                if [[ "${REMOTE}" != "${BRANCH}" && -z "${ALS_PARAMS[*]}" ]]; then
+                    git fetch "${REMOTE}"
+                    git ml --no-edit "${REMOTE}/${BRANCH}" || die "${LOG_TAG} ${REMOTE}/${BRANCH} merge error! Please resolve then re-run the script!"
                 fi
 
-                # If a command file is found, execute it
-                post_merge_commands -s
-            else
-                # Resolve if requested
-                if [[ -z ${DRY_RUN} ]]; then
-                    # Set KVER to be one version ahead of current version
-                    KVER=${MAJOR_VER}.$((${KVER##*.} + 1))
-
-                    # Attempt resolution
-                    post_merge_commands
-
-                # Log failure otherwise
+                # Cache kernel version. This needs to be done before doing a merge in case Makefile conflicts...
+                KVER=$(kv)
+                MAJOR_VER=${KVER%.*}
+                if [[ -n ${QUEUE} ]]; then
+                    COMMANDS_BRANCH=MERGE_HEAD
+                    LOG_TAG="${LOG_TAG} stable-queue/queue-${MAJOR_VER} |"
+                elif [[ -n ${TAG_SUFFIX} ]]; then
+                    TAG_TO_PULL=for-greg-${MAJOR_VER}-${TAG_SUFFIX}
+                    LOG_TAG="${LOG_TAG} sashal/linux-stable.git ${TAG_TO_PULL} |"
                 else
-                    log "${LOG_TAG} Merge failed!"
-                    failed_steps
+                    COMMANDS_BRANCH=linux-stable${RC:+"-rc"}/linux-${MAJOR_VER}.y
+                    LOG_TAG="${LOG_TAG} ${COMMANDS_BRANCH} |"
+                fi
+
+                # Merge the update, logging success and pushing as necessary
+                if merge-stable "${ALS_PARAMS[@]}" -s; then
+                    # Show merged kernel version in log
+                    post_git_fm_steps "Merge successful: $(kv)"
+
+                    # Properly set KVER for post merge commands
+                    if [[ -n ${QUEUE} ]]; then
+                        KVER=${MAJOR_VER}.$((${KVER##*.} + 1))
+                    elif [[ -n ${RC} ]]; then
+                        KVER=$(kv | sed 's/-rc.*//')
+                    else
+                        KVER=$(kv)
+                    fi
+
+                    # If a command file is found, execute it
+                    post_merge_commands -s
+                else
+                    # Resolve if requested
+                    if [[ -z ${DRY_RUN} ]]; then
+                        # Set KVER to be one version ahead of current version
+                        KVER=${MAJOR_VER}.$((${KVER##*.} + 1))
+
+                        # Attempt resolution
+                        post_merge_commands
+
+                    # Log failure otherwise
+                    else
+                        log "${LOG_TAG} Merge failed!"
+                        failed_steps
+                    fi
                 fi
             fi
 
