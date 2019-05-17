@@ -54,11 +54,10 @@ function post_merge_commands() {
 
     # Get the appropriate resolution command filename (static mapping because it is not uniform)
     case "${REPO}:${BRANCH}" in
-        "bluecross"*|"marlin"*|"msm"*|"polaris"*|"sagit"*|"tissot"*|"wahoo"*|"whyred"*) COMMANDS="${REPO}-commands" ;;
+        "bluecross"*|"msm"*|"polaris"*|"sagit"*|"wahoo"*|"whyred"*) COMMANDS="${REPO}-commands" ;;
         "jasmine:"*) COMMANDS="${REPO}-$(echo "${BRANCH}" | cut -d - -f 2)-commands" ;;
         "nash:lineage-16.0") COMMANDS="nash-lineage-16.0-commands" ;;
         "nash:oreo-8.0.0-release-nash") COMMANDS="nash-oreo-8.0.0-commands" ;;
-        "op3:oneplus/QC8996_O_8.0.0") COMMANDS="${REPO}-8.0.0-commands" ;;
         "op5:oneplus/QC8998_O_8.1"|"op6:oneplus/SDM845_O_8.1") COMMANDS="${REPO}-O_8.1-commands" ;;
         "op5:oneplus/QC8998_P_9.0"|"op6:oneplus/SDM845_P_9.0") COMMANDS="${REPO}-P_9.0-commands" ;;
         "op5:oneplus/QC8998_O_8.1_Beta") COMMANDS="${REPO}-O_8.1_Beta-commands" ;;
@@ -96,7 +95,6 @@ source "${SCRIPTS_FOLDER}"/funcs/traps
 LOG=$(mktemp)
 
 # Variables
-REPOS_318=( "marlin" "msm-3.18" "op3" "tissot" )
 REPOS_44=( "jasmine" "msm-4.4" "nash" "op5" "sagit" "wahoo" "whyred" )
 REPOS_49=( "bluecross" "msm-4.9" "op6" "polaris" )
 
@@ -149,28 +147,24 @@ while (( ${#} )); do
 done
 
 # If no versions were specified, assume we want all
-[[ -z ${VERSIONS[*]} ]] && VERSIONS=( "3.18" "4.4" "4.9" )
+[[ -z ${VERSIONS[*]} ]] && VERSIONS=( "4.4" "4.9" )
 
 # If initialization was requested
 if [[ -n ${INIT} ]]; then
     mkdir -p "${ALS}"; cd "${ALS}" || die "${ALS} creation failed!"
 
-    for ITEM in "${REPOS_318[@]}" "${REPOS_44[@]}" "${REPOS_49[@]}"; do
+    for ITEM in "${REPOS_44[@]}" "${REPOS_49[@]}"; do
         git clone "git@github.com:android-linux-stable/${ITEM}.git" || die "Could not clone ${ITEM}!"
         case ${ITEM} in
-            "jasmine"|"polaris"|"sagit"|"tissot"|"whyred")
+            "jasmine"|"polaris"|"sagit"|"whyred")
                 REMOTES=( "upstream:https://github.com/MiCode/Xiaomi_Kernel_OpenSource" ) ;;
-            "marlin"|"wahoo"|"bluecross")
+            "wahoo"|"bluecross")
                 REMOTES=( "upstream:https://android.googlesource.com/kernel/msm" ) ;;
-            "msm-3.18"|"msm-4.4"|"msm-4.9")
+            "msm-4.4"|"msm-4.9")
                 REMOTES=( "upstream:https://source.codeaurora.org/quic/la/kernel/${ITEM}" ) ;;
             "nash")
                 REMOTES=( "LineageOS:https://github.com/LineageOS/android_kernel_motorola_msm8998"
                           "upstream:https://github.com/MotorolaMobilityLLC/kernel-msm" ) ;;
-            "op3")
-                REMOTES=( "LineageOS:https://github.com/LineageOS/android_kernel_oneplus_msm8996"
-                          "omni:https://github.com/omnirom/android_kernel_oneplus_msm8996"
-                          "upstream:https://github.com/OnePlusOSS/android_kernel_oneplus_msm8996" ) ;;
             "op5")
                 REMOTES=( "LineageOS:https://github.com/LineageOS/android_kernel_oneplus_msm8998"
                           "omni:https://github.com/omnirom/android_kernel_oneplus_msm8998"
@@ -192,7 +186,6 @@ for VERSION in "${VERSIONS[@]}"; do
     # Set up repos variable based on version if REPOS is not set
     if [[ -z "${REPOS_PARAM[*]}" ]]; then
         case ${VERSION} in
-            "3.18") REPOS=( "${REPOS_318[@]}" ) ;;
             "4.4") REPOS=( "${REPOS_44[@]}" ) ;;
             "4.9") REPOS=( "${REPOS_49[@]}" ) ;;
         esac
@@ -206,17 +199,13 @@ for VERSION in "${VERSIONS[@]}"; do
         case ${REPO} in
             "bluecross") BRANCHES=( "android-msm-bluecross-4.9" ) ;;
             "jasmine") BRANCHES=( "jasmine-p-oss:upstream" ) ;;
-            "marlin") BRANCHES=( "android-msm-marlin-3.18" ) ;;
-            "msm-3.18") BRANCHES=( "kernel.lnx.3.18.r33-rel" "kernel.lnx.3.18.r34-rel" ) ;;
             "msm-4.4") BRANCHES=( "kernel.lnx.4.4.r34-rel" "kernel.lnx.4.4.r35-rel" "kernel.lnx.4.4.r37-rel" ) ;;
             "msm-4.9") BRANCHES=( "kernel.lnx.4.9.r11-rel" "kernel.lnx.4.9.r12-rel" ) ;;
             "nash") BRANCHES=( "lineage-16.0:LineageOS" ) ;;
-            "op3") BRANCHES=( "oneplus/QC8996_O_8.0.0:upstream" ) ;;
             "op5") BRANCHES=( "android-9.0:omni" "lineage-16.0:LineageOS" "oneplus/QC8998_P_9.0:upstream" "oneplus/QC8998_P_9.0_Beta:upstream" ) ;;
             "op6") BRANCHES=( "android-9.0:omni" "lineage-16.0:LineageOS" "oneplus/SDM845_P_9.0:upstream" "oneplus/SDM845_P_9.0_Beta:upstream" ) ;;
             "polaris") BRANCHES=( "polaris-o-oss:upstream" ) ;;
             "sagit") BRANCHES=( "sagit-o-oss:upstream" ) ;;
-            "tissot") BRANCHES=( "tissot-p-oss:upstream" ) ;;
             "wahoo") BRANCHES=( "android-msm-wahoo-4.4" ) ;;
             "whyred") BRANCHES=( "whyred-o-oss:upstream" ) ;;
         esac
@@ -302,13 +291,8 @@ for VERSION in "${VERSIONS[@]}"; do
 
             # Build if requested and not Nash
             if [[ -n ${BUILD} && -z ${SKIP_BUILD} ]]; then
-                # msm-3.18 has two defconfigs to build: msm-perf_defconfig and msm8937-perf_defconfig
-                if [[ ${REPO} = "msm-3.18" ]]; then
-                    BK_COMMANDS=( "bk" "bk -d msm8937-perf_defconfig" )
-                else
-                    BK_COMMANDS=( "bk" )
-                fi
-
+                # This weird BK command handling is in case a tree has to do more than one build.
+                BK_COMMANDS=( "bk" )
                 for BK_COMMAND in "${BK_COMMANDS[@]}"; do
                     # Make BK_COMMAND an array
                     read -rA BK_COMMAND <<< "${BK_COMMAND}"
