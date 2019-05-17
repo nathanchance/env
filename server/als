@@ -183,6 +183,8 @@ if [[ -n ${INIT} ]]; then
         done
         git -C "${ITEM}" remote update
     done
+
+    exit 0
 fi
 
 # Iterate through all versions
