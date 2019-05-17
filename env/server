@@ -308,7 +308,7 @@ function ccache_setup() {
 # Setup build folders
 function sbf() {
     [[ ! -d ${BLDF:?} ]] && { sudo mkdir "${BLDF}"; sudo chown -R "nathan:nathan" "${BLDF}"; }
-    [[ -z $(findmnt "${BLDF}") ]] && sudo mount -t tmpfs -o "nodev,nosuid,size=15G" tmpfs "${BLDF}"
+    [[ -z $(findmnt "${BLDF}") ]] && sudo mount -t tmpfs -o "nodev,nosuid,size=30G" tmpfs "${BLDF}"
     type crbf &>/dev/null && crbf
 }
 
