@@ -226,6 +226,8 @@ function bootstrap() {(
 
         cd "${CBL}"/mirrors || die "wtf?"
         git clone git://github.com/llvm/llvm-project llvm
+        cd llvm || die "wtf?"
+        git remote add github git@github.com:ClangBuiltLinux/llvm-project.git
     )
 
     # Clone sonyxperiadev/kernel
