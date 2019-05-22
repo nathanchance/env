@@ -610,6 +610,7 @@ function symlink-commands() {(
         "3.18") FILES=( "marlin" "msm-3.18" "op3-8.0.0" "tissot" ) ;;
         "4.4") FILES=( "jasmine-p" "msm-4.4" "nash-lineage-16.0" "op5-android-9.0" "op5-lineage-16.0" "op5-P_9.0" "op5-P_9.0_Beta" "sagit" "wahoo" "whyred" ) ;;
         "4.9") FILES=( "bluecross" "msm-4.9" "op6-android-9.0" "op6-lineage-16.0" "op6-P_9.0" "op6-P_9.0_Beta" "polaris" ) ;;
+        "4.14") FILES=( "msm-4.14" ) ;;
     esac
 
     for FILE in "${FILES[@]}"; do

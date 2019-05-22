@@ -14,7 +14,7 @@ function log() {
 
 # Quick kernel version function
 function kv() {
-    make CROSS_COMPILE="" kernelversion
+    make CC=gcc CROSS_COMPILE="" kernelversion
 }
 
 # Steps to execute post 'git fm'
@@ -97,6 +97,7 @@ LOG=$(mktemp)
 # Variables
 REPOS_44=( "jasmine" "msm-4.4" "nash" "op5" "sagit" "wahoo" "whyred" )
 REPOS_49=( "bluecross" "msm-4.9" "op6" "polaris" )
+REPOS_414=( "msm-4.14" )
 
 # Parse parameters
 PARAMS="${*}"
@@ -144,14 +145,14 @@ while (( ${#} )); do
         # Versions to merge, separated by commas
         "-v"|"--versions")
             shift && enforce_value "${@}"
-            [[ ${1} =~ "3.18" || ${1} =~ "4.4" || ${1} =~ "4.9" ]] || die "Invalid version specified!"
+            [[ ${1} =~ "4.4" || ${1} =~ "4.9" || ${1} =~ "4.14" ]] || die "Invalid version specified!"
             IFS="," read -r -A VERSIONS <<< "${1}" ;;
     esac
     shift
 done
 
 # If no versions were specified, assume we want all
-[[ -z ${VERSIONS[*]} ]] && VERSIONS=( "4.4" "4.9" )
+[[ -z ${VERSIONS[*]} ]] && VERSIONS=( "4.4" "4.9" "4.14" )
 
 # If initialization was requested
 if [[ -n ${INIT} ]]; then
@@ -164,7 +165,7 @@ if [[ -n ${INIT} ]]; then
                 REMOTES=( "upstream:https://github.com/MiCode/Xiaomi_Kernel_OpenSource" ) ;;
             "wahoo"|"bluecross")
                 REMOTES=( "upstream:https://android.googlesource.com/kernel/msm" ) ;;
-            "msm-4.4"|"msm-4.9")
+            "msm-4.4"|"msm-4.9"|"msm-4.14")
                 REMOTES=( "upstream:https://source.codeaurora.org/quic/la/kernel/${ITEM}" ) ;;
             "nash")
                 REMOTES=( "LineageOS:https://github.com/LineageOS/android_kernel_motorola_msm8998"
@@ -194,6 +195,7 @@ for VERSION in "${VERSIONS[@]}"; do
         case ${VERSION} in
             "4.4") REPOS=( "${REPOS_44[@]}" ) ;;
             "4.9") REPOS=( "${REPOS_49[@]}" ) ;;
+            "4.14") REPOS=( "${REPOS_414[@]}" ) ;;
         esac
     else
         REPOS=( "${REPOS_PARAM[@]}" )
@@ -207,6 +209,7 @@ for VERSION in "${VERSIONS[@]}"; do
             "jasmine") BRANCHES=( "jasmine-p-oss:upstream" ) ;;
             "msm-4.4") BRANCHES=( "kernel.lnx.4.4.r34-rel" "kernel.lnx.4.4.r35-rel" "kernel.lnx.4.4.r37-rel" ) ;;
             "msm-4.9") BRANCHES=( "kernel.lnx.4.9.r11-rel" "kernel.lnx.4.9.r12-rel" ) ;;
+            "msm-4.14") BRANCHES=( "kernel.lnx.4.14.r1" "kernel.lnx.4.14.r3-rel" "kernel.lnx.4.14.r7-rel" ) ;;
             "nash") BRANCHES=( "lineage-16.0:LineageOS" ) ;;
             "op5") BRANCHES=( "android-9.0:omni" "lineage-16.0:LineageOS" "oneplus/QC8998_P_9.0:upstream" "oneplus/QC8998_P_9.0_Beta:upstream" ) ;;
             "op6") BRANCHES=( "android-9.0:omni" "lineage-16.0:LineageOS" "oneplus/SDM845_P_9.0:upstream" "oneplus/SDM845_P_9.0_Beta:upstream" ) ;;
@@ -299,8 +302,13 @@ for VERSION in "${VERSIONS[@]}"; do
 
             # Build if requested and not Nash
             if [[ -n ${BUILD} && -z ${SKIP_BUILD} ]]; then
-                # This weird BK command handling is in case a tree has to do more than one build.
-                BK_COMMANDS=( "bk" )
+                # msm-4.14 has two defconfigs to build: sm8150-perf_defconfig and sdmsteppe-perf_defconfig
+                if [[ ${REPO} = "msm-4.14" && ${BRANCH} != "kernel.lnx.4.14.r1" ]]; then
+                    BK_COMMANDS=( "bk" "bk -d vendor/sdmsteppe-perf_defconfig" )
+                else
+                    BK_COMMANDS=( "bk" )
+                fi
+
                 for BK_COMMAND in "${BK_COMMANDS[@]}"; do
                     # Make BK_COMMAND an array
                     read -rA BK_COMMAND <<< "${BK_COMMAND}"
