@@ -181,6 +181,7 @@ function bootstrap() {(
         mkdir -pv "${TC_FOLDER}/${VERSION}"
         curl -LSs https://android.googlesource.com/platform/prebuilts/clang/host/linux-x86/+archive/${BRANCH}/${VERSION}.tar.gz | tar -C "${TC_FOLDER}/${VERSION}" -xzf - || display_error "Error downloading ${VERSION}!"
     done
+    git -C "${TC_FOLDER}" clone https://github.com/ThankYouMario/proprietary_vendor_qcom_sdclang-6.0_linux-x86 sd-llvm-6.0.2
 
     # Grab linux, linux-next, and linux-stable for CBL
     # https://www.kernel.org/cloning-linux-from-a-bundle.html
