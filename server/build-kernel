@@ -36,7 +36,6 @@ function kmake() {
                      CLANG_TRIPLE_ARM32=arm-linux-gnueabi- \
                      CROSS_COMPILE="${GCC_CC}" \
                      CROSS_COMPILE_ARM32="${GCC_32_BIT_CC}" \
-                     HOSTCC="${CCACHE} clang" \
                      KBUILD_COMPILER_STRING="${CLANG_VERSION}" \
                      "${@}"
     else
@@ -255,7 +254,7 @@ function compile() {
     esac
 
     # Find final image
-    FINAL_IMAGE=$(find out -name 'Image.*-dtb')
+    FINAL_IMAGE=$(find out -name 'Image*-dtb')
     [[ -z ${FINAL_IMAGE} ]] && FINAL_IMAGE=$(find out -name 'Image.*' | tail -1)
 }
 
