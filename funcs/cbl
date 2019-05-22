@@ -11,6 +11,15 @@ CBL_USR=${CBL}/usr
 CBL_BIN=${CBL_USR}/bin
 TCBLD=${CBL}/tc-build
 
+# Configurations known to build with -Werror
+CBLCFGS=( "arm:multi_v7_defconfig"
+          "arm:allyesconfig"
+          "arm64:defconfig"
+          "arm64:allyesconfig"
+          "ppc64le:powernv_defconfig"
+          "x86:defconfig"
+          "x86:allyesconfig" )
+
 
 # Create build folders
 function crbf() {
@@ -379,16 +388,7 @@ function lt() {(
         fi
     } > "${LOG}"
 
-    # Configurations known to build with -Werror
-    CONFIGS=( "arm:multi_v7_defconfig"
-              "arm:allyesconfig"
-              "arm64:defconfig"
-              "arm64:allyesconfig"
-              "ppc64le:powernv_defconfig"
-              "x86:defconfig"
-              "x86:allyesconfig" )
-
-    for CONFIG in "${CONFIGS[@]}"; do (
+    for CONFIG in "${CBLCFGS[@]}"; do (
         ARCH=${CONFIG%%:*}
         CONFIG=${CONFIG##*:}
 
