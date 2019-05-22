@@ -178,7 +178,7 @@ function generate_versions() {
     header "Calculating versions"
 
     # Full kernel version
-    CURRENT_VERSION=$(make kernelversion)
+    CURRENT_VERSION=$(make CC=gcc CROSS_COMPILE="" kernelversion)
     # First two numbers (3.4 | 3.10 | 3.18 | 4.4)
     CURRENT_MAJOR_VERSION=${CURRENT_VERSION%.*}
     # Last number
