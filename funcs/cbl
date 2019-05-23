@@ -685,14 +685,14 @@ elif command -v pacman &>/dev/null; then
     PACKAGES+=( base-devel lld ninja )
     pacman -Syyu --noconfirm
     pacman -S --noconfirm "${PACKAGES[@]}"
-# OpenSUSE Tumbleweed
+# OpenSUSE Leap/Tumbleweed
 elif command -v zypper &>/dev/null; then
     PACKAGES+=( curl gcc gcc-c++ gzip lld make ninja tar zlib-devel )
     zypper -n up
     zypper -n in "${PACKAGES[@]}"
 fi
 
-ccache -M 30G
+ccache -M 50G
 ccache --set-config=compression=true
 ccache --set-config=compression_level=9
 ccache --set-config=cache_dir=/ccache
@@ -704,7 +704,7 @@ CC=gcc ./build-llvm.py || exit 1
 CC=clang ./build-llvm.py || exit 1
 
 for FILE in clang ld.lld aarch64-linux-gnu-ld arm-linux-gnueabi-ld powerpc64le-linux-gnu-ld powerpc-linux-gnu-ld ld; do
-    ./build/bin/${FILE} --version || exit 1
+    ./install/bin/${FILE} --version || exit 1
 done' > "${SCRIPT}"
 
     for IMAGE in archlinux/base:latest \
@@ -712,6 +712,8 @@ done' > "${SCRIPT}"
                  debian:testing-slim \
                  debian:unstable-slim \
                  fedora:latest \
+                 fedora:rawhide \
+                 opensuse/leap:latest \
                  opensuse/tumbleweed:latest \
                  ubuntu:xenial \
                  ubuntu:latest \
