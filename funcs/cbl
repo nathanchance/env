@@ -98,9 +98,9 @@ function bldkw() {(
 
     TARGET_ARCH=${1}; shift
     case "${TARGET_ARCH}" in
-        "arm") MAKE_FLAGS=( "ARCH=arm" "CROSS_COMPILE=arm-linux-gnueabi-" ) ;;
-        "arm64") MAKE_FLAGS=( "ARCH=arm64" "CROSS_COMPILE=aarch64-linux-gnu-" ) ;;
-        "ppc64le") MAKE_FLAGS=( "ARCH=powerpc" "CROSS_COMPILE=powerpc64le-linux-gnu-" ) ;;
+        "arm") MAKE_FLAGS=( "ARCH=arm" "CROSS_COMPILE=${CROSS_COMPILE:-arm-linux-gnueabi-}" ) ;;
+        "arm64") MAKE_FLAGS=( "ARCH=arm64" "CROSS_COMPILE=${CROSS_COMPILE:-aarch64-linux-gnu-}" ) ;;
+        "ppc64le") MAKE_FLAGS=( "ARCH=powerpc" "CROSS_COMPILE=${CROSS_COMPILE:-powerpc64le-linux-gnu-}" ) ;;
         "x86") MAKE_FLAGS=() ;;
         *) display_error "Invalid TARGET_ARCH specified!"; return ;;
     esac
@@ -118,18 +118,18 @@ function bldkw() {(
     # Build the kernel
     time make ${QUIET:+-s} \
               "${JOBS_FLAG}" \
-              AR=llvm-ar \
-              CC="${CCACHE} clang" \
+              AR="${AR:-llvm-ar}" \
+              CC="${CC:-${CCACHE} clang}" \
               ${KCONFIG_ALLCONFIG:+KCONFIG_ALLCONFIG="${KCONFIG_ALLCONFIG}"} \
-              HOSTCC="${CCACHE} clang" \
-              HOSTCXX="${CCACHE} clang++" \
-              HOSTLD=ld.lld \
-              HOSTLDFLAGS="-fuse-ld=lld" \
+              HOSTCC="${HOSTCC:-${CCACHE} clang}" \
+              HOSTCXX="${HOSTCXX:-${CCACHE} clang++}" \
+              HOSTLD="${HOSTLD:-ld.lld}" \
+              HOSTLDFLAGS="${HOSTLDFLAGS--fuse-ld=lld}" \
               "${MAKE_FLAGS[@]}" \
-              NM=llvm-nm \
-              O="${KBF}" \
-              OBJDUMP=llvm-objdump \
-              STRIP=llvm-strip \
+              NM="${NM:-llvm-nm}" \
+              O="${O:-${KBF}}" \
+              OBJDUMP="${OBJDUMP:-llvm-objdump}" \
+              STRIP="${STRIP:-llvm-strip}" \
               "${@}"
 )}
 
