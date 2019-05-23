@@ -321,7 +321,7 @@ function sbf() {
 function cbf() {(
     case "${1}" in
         b) FTC=${BBF:?} ;;
-        c) FTC=${LBF:?} ;;
+        l) FTC=${LBF:?} ;;
         k) FTC=${KBF:?} ;;
         *) FTC=${BLDF} ;;
     esac
