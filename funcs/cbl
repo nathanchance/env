@@ -532,7 +532,7 @@ function update_clang_config() {
         git pull --rebase
     )
 
-    OUT_DIR=${OUT_FOLDER} BUILD_CONFIG=${BUILD_CONFIG} CC="${CC:-clang}" LD="${LD}" ./build.sh "${@}"
+    OUT_DIR=${OUT_FOLDER} BUILD_CONFIG=${BUILD_CONFIG} CC="${CC:-clang}" KCFLAGS="${KCFLAGS}" LD="${LD}" ./build.sh "${@}"
 )}
 
 
@@ -568,11 +568,11 @@ function kct() {(
 
         # Build kernel silently normally
         if [[ -z ${DEBUG} ]]; then
-            kcbw "${VERSION}" KCFLAGS="${KCFLAGS:--Werror}" |& \
+            KCFLAGS="${KCFLAGS:--Werror}" kcbw "${VERSION}" |& \
             rg --color=never "error:|warning:|undefined" |& sed "s/${COMMON_FOLDER//\//\\/}\///g" > "${ERRORS}"
             MAKE_RESULT=${pipestatus[1]}
         else
-            kcbw "${VERSION}" KCFLAGS="${KCFLAGS:--Werror}"
+            KCFLAGS="${KCFLAGS:--Werror}" kcbw "${VERSION}"
             MAKE_RESULT=${?}
         fi
 
