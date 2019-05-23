@@ -332,7 +332,7 @@ function babk() {
     # Define a different defconfig for ppc64le
     [[ ${ARCH} = "ppc64le" ]] && DEFCONFIG=powernv_defconfig
 
-    bldk "${ARCH}" "${DEFCONFIG:-defconfig}" KCFLAGS="-Werror" ${LD:+LD="${LD}"} ${OBJCOPY:+OBJCOPY="${OBJCOPY}"} "${@}"
+    bldk "${ARCH}" "${DEFCONFIG:-defconfig}" KCFLAGS="${KCFLAGS--Werror}" ${LD:+LD="${LD}"} ${OBJCOPY:+OBJCOPY="${OBJCOPY}"} "${@}"
 
     bootk "${ARCH}"
 }
@@ -390,11 +390,11 @@ function lt() {(
 
         # Build kernel silently normally
         if [[ -z ${DEBUG} ]]; then
-            bldk "${ARCH}" "${CONFIG}" KCFLAGS="${KCFLAGS:--Werror}" ${LD:+LD="${LD}"} ${OBJCOPY:+OBJCOPY="${OBJCOPY}"} |& \
+            bldk "${ARCH}" "${CONFIG}" KCFLAGS="${KCFLAGS--Werror}" ${LD:+LD="${LD}"} ${OBJCOPY:+OBJCOPY="${OBJCOPY}"} |& \
             rg --color=never "error:|warning:|undefined" |& sed "s/${PWD//\//\\/}\///g" > "${ERRORS}"
             MAKE_RESULT=${pipestatus[1]}
         else
-            bldk "${ARCH}" "${CONFIG}" KCFLAGS="${KCFLAGS:--Werror}" ${LD:+LD="${LD}"}
+            bldk "${ARCH}" "${CONFIG}" KCFLAGS="${KCFLAGS--Werror}" ${LD:+LD="${LD}"}
             MAKE_RESULT=${?}
         fi
 
@@ -568,11 +568,11 @@ function kct() {(
 
         # Build kernel silently normally
         if [[ -z ${DEBUG} ]]; then
-            KCFLAGS="${KCFLAGS:--Werror}" kcbw "${VERSION}" |& \
+            KCFLAGS="${KCFLAGS--Werror}" kcbw "${VERSION}" |& \
             rg --color=never "error:|warning:|undefined" |& sed "s/${COMMON_FOLDER//\//\\/}\///g" > "${ERRORS}"
             MAKE_RESULT=${pipestatus[1]}
         else
-            KCFLAGS="${KCFLAGS:--Werror}" kcbw "${VERSION}"
+            KCFLAGS="${KCFLAGS--Werror}" kcbw "${VERSION}"
             MAKE_RESULT=${?}
         fi
 
