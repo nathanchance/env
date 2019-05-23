@@ -249,21 +249,6 @@ function bldk() {
 }
 
 
-# Configure and build a folder in the kernel with Clang
-function bldkf() {
-    # Parameters
-    local ARCH CONFIG FOLDER
-    ARCH=${1}; shift
-    CONFIG=${1}; shift
-    FOLDER=${1}; shift
-
-    [[ -z ${FOLDER} ]] && { display_error "FOLDER not specified!"; return 1; }
-    [[ ! -d ${FOLDER} ]] && { display_error "${FOLDER} could not be found!"; return 1; }
-
-    bldk "${ARCH}" "${CONFIG}" M="${KBF}" src="${FOLDER}" "${@}"
-}
-
-
 # Boot a kernel in QEMU
 function bootk() {
     local ARCH COMMAND IMAGES_FOLDER KERNEL RAM QEMU; ARCH=${1}; shift
