@@ -234,6 +234,21 @@ function bootstrap() {(
     # Clone sonyxperiadev/kernel
     git -C "${KERNEL_FOLDER}/sony" clone git://github.com/sonyxperiadev/kernel
 
+    # Clone marlin and msm-3.18 repos (for pulling their upstream updates, not stables)
+    (
+        cd "${ALS}"
+        for REPO in msm-3.18:https://source.codeaurora.org/quic/la/kernel/msm-3.18 marlin:https://android.googlesource.com/kernel/msm/; do
+            URL=${REPO#*:}
+            REPO=${REPO%%:*}
+            git clone git@github.com:android-linux-stable/"${REPO}".git || { display_error "Couldn't clone ${REPO}"; continue; }
+            (
+                cd "${REPO}"
+                git remote add upstream "${URL}"
+                git fetch upstream || { display_error "Couldn't fetch ${URL}"; continue; }
+            )
+        done
+    )
+
     # Start Docker
     sudo gpasswd -a nathan docker
     sudo systemctl enable --now docker.service
