@@ -216,37 +216,32 @@ CONFIG_RCU_TORTURE_TEST=y" >> "${OUT_FOLDER}"/.config
 
 
 # Configure and build a kernel with Clang
-function bldk() {
+function bldk() {(
     # Parameters
-    local ARCH CONFIG LD
-    ARCH=${1}; shift
+    ARCH=${1:?}; shift
     CONFIG=${1}; shift
 
     # Sanity checks
-    [[ -z ${ARCH} ]] && { display_error "ARCH not specified!"; return 1; }
-    [[ -z ${CONFIG} ]] && { display_error "CONFIG not specified!"; return 1; }
+    [[ -z ${ARCH} ]] && die "ARCH not specified!"
+    [[ -z ${CONFIG} ]] && die "CONFIG not specified!"
     case ${ARCH} in
         "arm"|"arm64"|"x86"|"ppc64le") ;;
-        *) display_error "Invalid ARCH specifed"; return 1 ;;
+        *) die "Invalid ARCH specifed" ;;
     esac
 
-    # Clean up
-    cbf k
-
     # Configure kernel
-    bldkw "${ARCH}" "${CONFIG}" modules_prepare
+    bldkw "${ARCH}" distclean "${CONFIG}" modules_prepare
     if [[ ${PWD} =~ cbl && ${CONFIG} =~ defconfig ]]; then
         extraconfigs
         # Use lld by default for everything but powerpc
         [[ -z ${LD} && ! ${ARCH} =~ ppc ]] && LD=ld.lld
         # Use llvm-objcopy
         [[ -z ${OBJCOPY} ]] && OBJCOPY=llvm-objcopy
-
     fi
 
     # Build kernel
-    bldkw "${ARCH}" ${LD:+LD="${LD}"} "${@}" || return 1
-}
+    bldkw "${ARCH}" ${LD:+LD="${LD}"} "${@}"
+)}
 
 
 # Boot a kernel in QEMU
