@@ -480,15 +480,14 @@ function bldbn() {(
 
 # Build LLVM/Clang/lld and arm{32,64} and powerpc binutils from source
 function bldusr() {(
-    : ${INSTALL_FOLDER:=${CBL_USR}}
-    rm -rf "${INSTALL_FOLDER}"
+    rm -rf "${INSTALL_FOLDER:=${CBL_USR}}"
 
     # Build LLVM/Clang/lld
-    bldllvm --build-folder "${LBF}" --install-folder "${INSTALL_FOLDER}" --thin-lto --update || return ${?}
+    bldllvm --build-folder "${LBF:?}" --install-folder "${INSTALL_FOLDER:?}" --thin-lto --update || return ${?}
     stripllvmbin "${INSTALL_FOLDER}"
 
     # Build binutils
-    bldbn -B "${BBF}" -I "${INSTALL_FOLDER}"
+    bldbn --build-folder "${BBF:?}" --install-folder "${INSTALL_FOLDER}"
 )}
 
 
