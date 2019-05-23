@@ -155,7 +155,7 @@ function bootstrap() {(
     [[ ! -d ${SCRIPTS} ]] && { git clone git@github.com:nathanchance/scripts "${SCRIPTS}" || die "Error cloning scripts!"; }
     source "${SCRIPTS}"/funcs/git && git_aliases
     source "${SCRIPTS}"/funcs/pure && pure_prompt
-    for REPO in chromeos-adb-fastboot dotfiles hugo-files; do
+    for REPO in chromeos-adb-fastboot dotfiles hugo-files patches; do
         [[ ! -d ${REPO_FOLDER}/${REPO} ]] && { git -C "${REPO_FOLDER}" clone git@github.com:nathanchance/"${REPO}" || die "Error cloning ${REPO}!"; }
     done
     [[ ! -d ${REPO_FOLDER}/git ]] && { git -C "${REPO_FOLDER}" clone git://github.com/git/git || die "Error cloning git!"; }
