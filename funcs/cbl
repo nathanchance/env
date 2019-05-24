@@ -40,10 +40,10 @@ function pch() {
 
 # Quilt-like patch management function for Linux
 function ptchmn() {(
-    [[ ! -f Makefile ]] && { display_error "You're not in a kernel folder!"; return 1; }
+    [[ ! -f Makefile ]] && die "You're not in a kernel folder!"
 
     TARGET_FOLDER=${REPO_FOLDER}/patches/linux/$(git cb)
-    [[ ! -d ${TARGET_FOLDER} ]] && { display_error "${TARGET_FOLDER} doesn't exist!"; return 1; }
+    [[ ! -d ${TARGET_FOLDER} ]] && die "${TARGET_FOLDER} doesn't exist!"
 
     case "${1:?}" in
         "-s"|"--sync")
