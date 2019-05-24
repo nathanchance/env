@@ -48,6 +48,7 @@ function ptchmn() {(
     case "${1:?}" in
         "-s"|"--sync")
             FIRST_HASH=$(git log --reverse --format=%H --committer="$(git config --get user.name) <$(git config --get user.email)>" origin/stable..HEAD | head -n1)
+            [[ -z ${FIRST_HASH} ]] && die "FIRST_HASH is empty...?"
 
             rm "${TARGET_FOLDER}"/*
 
