@@ -108,7 +108,7 @@ function bldkw() {(
     # We are only concerned about little endian for ARM right now unless otherwise stated
     if [[ ${TARGET_ARCH} =~ arm && -z ${BIG_ENDIAN} ]]; then
         KCONFIG_ALLCONFIG=${KBF}/little-endian.config
-        echo "CONFIG_CPU_BIG_ENDIAN=n" >> "${KCONFIG_ALLCONFIG}"
+        echo "CONFIG_CPU_BIG_ENDIAN=n" > "${KCONFIG_ALLCONFIG}"
     fi
 
     # Use our versions of Clang
