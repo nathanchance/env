@@ -135,7 +135,7 @@ function bootstrap() {(
     chmod 600 "${HOME}"/.ssh/id_ed25519
 
     # Setup GPG
-    gpg --import "${CROSTINI}"/{public*,private*}.asc
+    gpg --pinentry-mode loopback --import "${CROSTINI}"/{public*,private*}.asc
     gpg --import-ownertrust "${CROSTINI}"/ownertrust*.asc
     git config --global commit.gpgsign true
     git config --global user.signingkey 2437CB76E544CB6AB3D9DFD399739260CB6CB716
@@ -169,7 +169,7 @@ function bootstrap() {(
 
     # We need UTF characters in crouton for the prompt to work
     if [[ "$(uname -n)" = "localhost" ]]; then
-        sudo apt install -y --no-install-recommends locale
+        sudo apt install -y --no-install-recommends locales
         sudo dpkg-reconfigure locales
     fi
 
