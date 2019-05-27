@@ -161,7 +161,7 @@ function bootstrap() {(
 
     # Copy files into their proper locations
     # tmux
-    cp "${DOTFILES}"/pixelbook/.tmux.conf "${HOME}"
+    cp "${DOTFILES}"/chromeos/.tmux.conf "${HOME}"
 
     # Run small setup scripts from dotfiles
     zsh "${DOTFILES}"/common/global_gitignore.sh
@@ -183,14 +183,14 @@ function bootstrap() {(
 
 
 # Laptop specific aliases
-function pixelbook_aliases() {
+function chromeos_aliases() {
     alias ls='ls --color=auto'
     alias mshsvr='mosh nathan@${HETZNER_IP}'
 }
 
 
 # Laptop specific setup
-function pixelbook_setup() {
+function chromeos_setup() {
     # Until crbug.com/829934 hits stable/beta
     export TZ=/usr/share/zoneinfo/US/Arizona
 }
