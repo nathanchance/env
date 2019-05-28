@@ -131,7 +131,7 @@ function bootstrap() {(
 
     # Setup SSH and GPG if keys are present
     mkdir -p "${HOME}"/.ssh
-    mv "${CROSTINI}"/id_ed25519{,.pub} "${HOME}"/.ssh
+    cp "${CROSTINI}"/id_ed25519{,.pub} "${HOME}"/.ssh
     chmod 600 "${HOME}"/.ssh/id_ed25519
 
     # Setup GPG
