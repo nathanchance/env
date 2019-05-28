@@ -16,10 +16,10 @@
 # Using crostini:
 # $ vmc start termina
 # $ vmc container termina penguin
-# $ sudo sh -c 'apt update && apt install -y --no-install-recommands zsh && chsh -s /bin/zsh natechancellor'
-# $ vmc stop termina
-# $ vmc start termina
-# $ vmc container termina penguin
+# $ sudo sh -c 'apt update && apt install -y --no-install-recommends zsh && chsh -s /bin/zsh natechancellor'
+# $ exit
+# $ vsh termina penguin
+# $ ln -s /mnt/chromeos .
 function bootstrap() {(
     # Grab common functions/variables
     source <(curl -LSs https://github.com/nathanchance/scripts/raw/master/common) &>/dev/null
