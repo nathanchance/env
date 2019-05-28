@@ -71,7 +71,7 @@ function bootstrap() {(
 
     # Install latest version of LLVM/Clang
     curl https://apt.llvm.org/llvm-snapshot.gpg.key | sudo apt-key add -
-    echo "deb http://apt.llvm.org/$(if [[ "$(cat /etc/os-release)" =~ stretch ]]; then echo stretch; else echo unstable; fi)/ llvm-toolchain$([[ "$(cat /etc/os-release)" =~ stretch ]] && echo "-stretch") main" | sudo tee -a /etc/apt/sources.list
+    grep -q "apt.llvm.org" /etc/apt/sources.list || echo "deb http://apt.llvm.org/$(if [[ "$(cat /etc/os-release)" =~ stretch ]]; then echo stretch; else echo unstable; fi)/ llvm-toolchain$([[ "$(cat /etc/os-release)" =~ stretch ]] && echo "-stretch") main" | sudo tee -a /etc/apt/sources.list
     sudo apt update -qq
     sudo apt install -y --no-install-recommends \
         clang-9 \
