@@ -25,13 +25,23 @@ function bootstrap() {(
     source <(curl -LSs https://github.com/nathanchance/scripts/raw/master/common) &>/dev/null
     source <(curl -LSs https://github.com/nathanchance/scripts/raw/master/constants/versions) &>/dev/null
 
+    # Check hostname to see if we are using Crostini (default) or Crouton
+    [[ "$(uname -n)" = "localhost" ]] && CROSTINI=false
+
     # Make sure keys are present
-    if [[ "$(uname -n)" = "penguin" ]]; then
-        CROSTINI=${HOME}/Crostini
+    if ${CROSTINI:=true}; then
+        # crostini locations (mount them in via Files, USB first, Google Drive second)
+        for FOLDER in removable/VERBATIM/Keys GoogleDrive/MyDrive/Crostini; do
+            KEYS=/mnt/chromeos/${FOLDER}
+            [[ -d ${KEYS} ]] && break
+        done
     else
-        CROSTINI=${HOME}/Downloads/Crostini
+        # crouton folder options (USB first, Google Drive second)
+        for KEYS in /var/host/media/removable/VERBATIM/Keys ${HOME}/Downloads/Crostini; do
+            [[ -d ${KEYS} ]] && break
+        done
     fi
-    [[ ! -d ${CROSTINI} ]] && die "${CROSTINI} not found!"
+    [[ ! -d ${KEYS} ]] && die "Key folders not found!"
 
     # Set architecture variables
     case "$(uname -m)" in
@@ -131,12 +141,12 @@ function bootstrap() {(
 
     # Setup SSH and GPG if keys are present
     mkdir -p "${HOME}"/.ssh
-    cp "${CROSTINI}"/id_ed25519{,.pub} "${HOME}"/.ssh
+    cp "${KEYS}"/id_ed25519{,.pub} "${HOME}"/.ssh
     chmod 600 "${HOME}"/.ssh/id_ed25519
 
     # Setup GPG
-    gpg --pinentry-mode loopback --import "${CROSTINI}"/{public*,private*}.asc
-    gpg --import-ownertrust "${CROSTINI}"/ownertrust*.asc
+    gpg --pinentry-mode loopback --import "${KEYS}"/{public*,private*}.asc
+    gpg --import-ownertrust "${KEYS}"/ownertrust*.asc
     git config --global commit.gpgsign true
     git config --global user.signingkey 2437CB76E544CB6AB3D9DFD399739260CB6CB716
     {
