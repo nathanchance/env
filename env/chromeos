@@ -81,8 +81,16 @@ function bootstrap() {(
 
     # Install latest version of LLVM/Clang
     if [[ ${ARCH} = "amd64" ]]; then
+        if grep -q "unstable" /etc/apt/sources.list; then
+            REPO=llvm-toolchain
+            URL=http://apt.llvm.org/unstable/
+        else
+            DISTRO=$(cat /etc/os-release | grep VERSION_CODENAME | cut -d= -f2)
+            REPO=llvm-toolchain-${DISTRO}
+            URL=http://apt.llvm.org/${DISTRO}/
+        fi
         curl https://apt.llvm.org/llvm-snapshot.gpg.key | sudo apt-key add -
-        grep -q "apt.llvm.org" /etc/apt/sources.list || echo "deb http://apt.llvm.org/$(if [[ "$(cat /etc/os-release)" =~ stretch ]]; then echo stretch; else echo unstable; fi)/ llvm-toolchain$([[ "$(cat /etc/os-release)" =~ stretch ]] && echo "-stretch") main" | sudo tee -a /etc/apt/sources.list
+        grep -q "apt.llvm.org" /etc/apt/sources.list || echo "deb ${URL} ${REPO} main" | sudo tee -a /etc/apt/sources.list
         sudo apt update -qq
         sudo apt install -y --no-install-recommends \
             clang-9 \
