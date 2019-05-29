@@ -1,10 +1,42 @@
 # Builds GCC and binutils for exclusively building kernels (baremetal target)
+#
+# This can be downloaded and sourced without any of the other scripts in this repo.
+#
+# $ curl -LSsO https://github.com/nathanchance/scripts/raw/master/funcs/bldgcc
+#
+# Open the bldgcc file to make sure it matches this one.
+#
+# $ source bldgcc
+#
+# Usage:
+# $ bldgcc arm arm64
+#
+# By default, the script will contain everything to a 'gcc' folder in ${PWD}.
+# To change where that gcc folder is, either 'export TC_FOLDER=<value>' or
+# 'TC_FOLDER=<value> bldgcc'.
+#
+# By default, the GCC and binutils versions will be the latest available.
+# To change the versions, either 'export GCC_VERSION=<value> BINUTILS_VERSION=<value>'
+# or 'GCC_VERSION=<value> BINUTILS_VERSION=<value> bldgcc'.
+#
+# The possible versions can be found here:
+# https://mirrors.kernel.org/gnu/gcc/
+# https://mirrors.kernel.org/gnu/binutils/
+#
+# This script is designed to build release versions of this software, not development
+# versions. If you want to do that, it's not hard to modify this script to do that or
+# use https://github.com/USBhost/build-tools-gcc
 function bldgcc() {(
     BLD_OPTS=( "--toolchain" )
     TARGETS=()
 
     # Get parameters
-    [[ ${#} -eq 0 ]] && die "This function needs targets!"
+    [[ ${#} -eq 0 ]] && {
+        echo "ERROR: This function needs targets!" >&2
+        echo "Possible options (can provide more than one):" >&2
+        echo "      arm, arm64, powerpc, powerpc64, s390, x86_64" >&2
+        exit 1
+    }
     while (( ${#} )); do
         case ${1} in
             "--binutils"|"--gcc"|"--toolchain") BLD_OPTS=( "${1}" ) ;;
@@ -15,11 +47,14 @@ function bldgcc() {(
     done
 
     # Create folders
-    GCC_FOLDER=${TC_FOLDER:?}/gcc
+    GCC_FOLDER=${TC_FOLDER:-${PWD}}/gcc
     GCC_BLD=${GCC_FOLDER}/build
     mkdir -p "${GCC_FOLDER}"
     [[ ! -d ${GCC_BLD} ]] && git -C "${GCC_FOLDER}" clone git://git.infradead.org/users/segher/buildall.git build
-    cd "${GCC_BLD}" || die "buildall clone failed!"
+    cd "${GCC_BLD}" || {
+        echo "buildall clone failed!" >&2
+        exit 1
+    }
 
     # Download GCC
     [[ -z ${GCC_VERSION} ]] && GCC_VERSION=9.1.0
