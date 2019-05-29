@@ -14,8 +14,10 @@ TCBLD=${CBL}/tc-build
 # Configurations known to build with -Werror
 CBLCFGS=( "arm:multi_v7_defconfig"
           "arm:allyesconfig"
+          "arm:allyesconfig-be"
           "arm64:defconfig"
           "arm64:allyesconfig"
+          "arm64:allyesconfig-be"
           "ppc64le:powernv_defconfig"
           "x86:defconfig"
           "x86:allyesconfig" )
@@ -376,8 +378,12 @@ function lt() {(
         # Error log
         ERRORS=$(mktemp)
 
-        # Use lld by default for everything but powerpc
-        [[ -z ${LD} && ! ${ARCH} =~ ppc ]] && LD=ld.lld
+        # Make sure BIG_ENDIAN gets set
+        [[ ${CONFIG} =~ -be ]] && export BIG_ENDIAN=true
+        CONFIG=${CONFIG//-be}
+
+        # Use lld by default for everything but powerpc and arm big endian
+        [[ -z ${LD} && ! ${ARCH} =~ ppc && -z ${BIG_ENDIAN} ]] && LD=ld.lld
 
         # Use llvm-objcopy
         [[ -z ${OBJCOPY} ]] && OBJCOPY=llvm-objcopy
@@ -400,7 +406,7 @@ function lt() {(
         fi
         TIME_STRING=$(format_time "${START}" "$(date +%s)")
         {
-            echo "${ARCH}:${CONFIG} | Build ${RESULT} in ${TIME_STRING:l}\c"
+            echo "${ARCH}:${CONFIG}${BIG_ENDIAN:+"-be"} | Build ${RESULT} in ${TIME_STRING:l}\c"
             if [[ ${RESULT} = "successful" && ${CONFIG} =~ defconfig ]]; then
                 if bootk "${ARCH}" &>/dev/null; then
                     echo " | Boot successful\c"
