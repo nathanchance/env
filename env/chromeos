@@ -63,6 +63,7 @@ function bootstrap() {(
         flex \
         git \
         gpg \
+        irssi \
         jq \
         libssl-dev \
         mosh \
