@@ -1,4 +1,4 @@
-# Builds GCC and binutils for exclusively building kernels (baremetal target)
+# Builds GCC and binutils for exclusively building kernels
 #
 # This can be downloaded and sourced without any of the other scripts in this repo.
 #
