@@ -107,6 +107,7 @@ function bootstrap() {(
                                         ripgrep \
                                         rubygems \
                                         tmux \
+                                        uboot-tools \
                                         wget \
                                         xmlto || die "Error installing packages!"
     sudo pacman -R --noconfirm linux
