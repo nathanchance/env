@@ -31,7 +31,7 @@ function bootstrap() {(
     # Make sure keys are present
     if ${CROSTINI:=true}; then
         # crostini locations (mount them in via Files, USB first, SD card second, Google Drive third)
-        for FOLDER in "removable/VERBATIM/Keys" "removable/SD Card/Keys" "GoogleDrive/MyDrive/Crostini"; do
+        for FOLDER in "removable/VERBATIM/Keys" "removable/USB Drive/Keys" "removable/SD Card/Keys" "GoogleDrive/MyDrive/Crostini"; do
             KEYS=/mnt/chromeos/"${FOLDER}"
             [[ -d ${KEYS} ]] && break
         done
