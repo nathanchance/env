@@ -18,6 +18,8 @@ CBLCFGS=( "arm:multi_v7_defconfig"
           "arm64:defconfig"
           "arm64:allyesconfig"
           "arm64:allyesconfig-be"
+          "ppc32:ppc44x_defconfig"
+          "ppc64:pseries_defconfig"
           "ppc64le:powernv_defconfig"
           "x86:defconfig"
           "x86:allyesconfig" )
@@ -103,6 +105,7 @@ function bldkw() {(
     case "${TARGET_ARCH}" in
         "arm") MAKE_FLAGS=( "ARCH=arm" "CROSS_COMPILE=${CROSS_COMPILE:-arm-linux-gnueabi-}" ) ;;
         "arm64") MAKE_FLAGS=( "ARCH=arm64" "CROSS_COMPILE=${CROSS_COMPILE:-aarch64-linux-gnu-}" ) ;;
+        "ppc32"|"ppc64") MAKE_FLAGS=( "ARCH=powerpc" "CROSS_COMPILE=${CROSS_COMPILE:-powerpc-linux-gnu-}" ) ;;
         "ppc64le") MAKE_FLAGS=( "ARCH=powerpc" "CROSS_COMPILE=${CROSS_COMPILE:-powerpc64le-linux-gnu-}" ) ;;
         "x86") MAKE_FLAGS=() ;;
         *) display_error "Invalid TARGET_ARCH specified!"; return ;;
@@ -228,7 +231,7 @@ function bldk() {(
     [[ -z ${ARCH} ]] && die "ARCH not specified!"
     [[ -z ${CONFIG} ]] && die "CONFIG not specified!"
     case ${ARCH} in
-        "arm"|"arm64"|"x86"|"ppc64le") ;;
+        "arm"|"arm64"|"x86"|"ppc32"|"ppc64"|"ppc64le") ;;
         *) die "Invalid ARCH specifed" ;;
     esac
 
@@ -270,6 +273,15 @@ function bootk() {
             QEMU_ARCH_CMDLINE=( -cpu cortex-a57
                                 -drive "file=${IMAGES_FOLDER}/arm64/rootfs.ext4,format=raw"
                                 -append "console=ttyAMA0 root=/dev/vda ${QEMU_CMDLINE}" ) ;;
+        "ppc32")
+            IMAGE=zImage
+            RAM=128m
+            QEMU=qemu-system-ppc
+            QEMU_ARCH_CMDLINE=( -machine bamboo
+                                -append "console=ttyS0 ${QEMU_CMDLINE}"
+                                -no-reboot
+                                -initrd "${IMAGES_FOLDER}/ppc32/rootfs.cpio" )
+            ARCH=powerpc ;;
         "ppc64le")
             IMAGE=zImage.epapr
             RAM=2G
@@ -327,8 +339,11 @@ function babk() {
     # Use llvm-objcopy
     [[ -z ${OBJCOPY} ]] && OBJCOPY=llvm-objcopy
 
-    # Define a different defconfig for ppc64le
-    [[ ${ARCH} = "ppc64le" ]] && DEFCONFIG=powernv_defconfig
+    # Define a different defconfig for ppc32/ppc64le
+    case ${ARCH} in
+        "ppc32") DEFCONFIG=ppc44x_defconfig ;;
+        "ppc64le") DEFCONFIG=powernv_defconfig ;;
+    esac
 
     bldk "${ARCH}" "${DEFCONFIG:-defconfig}" KCFLAGS="${KCFLAGS--Werror}" ${LD:+LD="${LD}"} ${OBJCOPY:+OBJCOPY="${OBJCOPY}"} "${@}"
 
@@ -407,7 +422,7 @@ function lt() {(
         TIME_STRING=$(format_time "${START}" "$(date +%s)")
         {
             echo "${ARCH}:${CONFIG}${BIG_ENDIAN:+"-be"} | Build ${RESULT} in ${TIME_STRING:l}\c"
-            if [[ ${RESULT} = "successful" && ${CONFIG} =~ defconfig ]]; then
+            if [[ ${RESULT} = "successful" && ${CONFIG} =~ defconfig && ${CONFIG} != "pseries_defconfig" ]]; then
                 if bootk "${ARCH}" &>/dev/null; then
                     echo " | Boot successful\c"
                 else
