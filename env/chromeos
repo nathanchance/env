@@ -7,11 +7,11 @@
 
 # Setup function
 #
-# Using crosh:
-# $ curl -LSso ~/Downloads/crouton https://github.com/dnschneid/crouton/raw/master/installer/crouton
-# $ sudo sh ~/Downloads/crouton -r buster -t cli-extra
+# Using crouton (https://goo.gl/fd3zc):
+# $ sudo install -Dt /usr/local/bin -m 755 ~/Downloads/crouton
+# $ sudo crouton -r buster -t cli-extra
 # $ sudo enter-chroot
-# $ sudo sh -c 'apt update && apt install -y --no-install-recommends curl zsh && chsh -s /bin/zsh'
+# $ sudo sh -c 'apt update && apt install -y --no-install-recommends curl zsh && chsh -s /bin/zsh nathan'
 #
 # Using crostini:
 # $ vmc start termina
