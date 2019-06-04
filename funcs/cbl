@@ -378,7 +378,7 @@ function lt() {(
             clang --version | head -n1
         )
         echo
-        echo "Version: $(make defconfig &>/dev/null && make kernelrelease | tail -n1 && git cl -q)"
+        echo "Version: $(make -s O=out alldefconfig &>/dev/null && make -s O=out kernelrelease && rm -rf out)"
         echo
         echo "Build results:"
         echo
