@@ -194,6 +194,11 @@ function bootstrap() {(
         sudo dpkg-reconfigure locales
     fi
 
+    # Download Android platform-tools
+    curl -LSso "${TMP_ZIP:=$(mktemp --suffix=.zip)}" "https://dl.google.com/android/repository/platform-tools-latest-linux.zip"
+    unzip -d "${HOME}" "${TMP_ZIP}"
+    rm -rf "${TMP_ZIP}"
+
     # Setup zshrc
     {
         echo
@@ -214,5 +219,7 @@ function chromeos_aliases() {
 function chromeos_setup() {
     # Until crbug.com/829934 hits stable/beta
     export TZ=/usr/share/zoneinfo/US/Arizona
+
+    path_push "${HOME}/platform-tools"
 }
 # vi: filetype=zsh
