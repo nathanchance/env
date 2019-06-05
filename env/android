@@ -66,7 +66,7 @@ function bootstrap() {(
         zsh "${DOTFILES}"/common/global_gitignore.sh
         zsh "${DOTFILES}"/common/vim/vim_setup.sh
         zsh "${DOTFILES}"/common/zshrc.sh
-        cp -v "${DOTFILES}"/pixelbook/.tmux.conf "${HOME}"
+        cp -v "${DOTFILES}"/chromeos/.tmux.conf "${HOME}"
         gpg --pinentry-mode loopback --output "${HOME}"/.muttrc --decrypt "${DOTFILES}"/common/muttrc.gpg
     ) || die "Error installing dotfiles"
 )}
