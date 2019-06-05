@@ -187,6 +187,7 @@ function bootstrap() {(
     # Run small setup scripts from dotfiles
     zsh "${DOTFILES}"/common/global_gitignore.sh
     zsh "${DOTFILES}"/common/vim/vim_setup.sh
+    zsh "${DOTFILES}"/common/zshrc.sh
 
     # We need UTF characters in crouton for the prompt to work
     if [[ "$(uname -n)" = "localhost" ]]; then
@@ -198,13 +199,6 @@ function bootstrap() {(
     curl -LSso "${TMP_ZIP:=$(mktemp --suffix=.zip)}" "https://dl.google.com/android/repository/platform-tools-latest-linux.zip"
     unzip -d "${HOME}" "${TMP_ZIP}"
     rm -rf "${TMP_ZIP}"
-
-    # Setup zshrc
-    {
-        echo
-        echo "[[ -f \${HOME}/scripts/env/common ]] && source \"\${HOME}/scripts/env/common\""
-        echo "type shell_setup &>/dev/null && shell_setup"
-    } > "${HOME}"/.zshrc
 ) && source "${HOME}"/.zshrc; }
 
 
