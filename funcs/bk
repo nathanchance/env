@@ -21,7 +21,7 @@ function bk() {
 
         # android-linux-stable
         "angler:"*|"bullhead:"*|"marlin:"*) PARAMS=( "${FOLDER}_defconfig" ) ;;
-        "bluecross:"*"-q-preview"*) PARAMS=( b1c1_defconfig -c -ct clang-r346389b ) ;;
+        "bluecross:"*"-q-preview"*) PARAMS=( b1c1_defconfig -c -ct clang-r349610b ) ;;
         "bluecross:"*) PARAMS=( b1c1_defconfig -c -ct clang-4393122 ) ;;
         "jasmine:"*) PARAMS=( "jasmine-perf_defconfig" ) ;;
         "mata:lineage-15.1") PARAMS=( "lineageos_${FOLDER}_defconfig" -c ) ;;
