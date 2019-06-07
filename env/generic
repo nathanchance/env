@@ -1,0 +1,11 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+# Copyright (C) 2019 Nathan Chancellor
+#
+# Generic server environment setup script (usually for something like Vultr or Packet)
+
+function bootstrap() {
+    true
+}
+
+# vi: filetype=zsh
