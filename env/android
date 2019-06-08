@@ -43,20 +43,9 @@ function bootstrap() {(
     } > "${HOME}"/.gnupg/gpg-agent.conf
     gpg-connect-agent reloadagent /bye
 
-    # Configure git
-    git config --global commit.gpgsign true
-    git config --global core.editor vim
-    git config --global sendemail.smtpEncryption tls
-    git config --global sendemail.smtpServer smtp.gmail.com
-    git config --global sendemail.smtpUser natechancellor@gmail.com
-    git config --global sendemail.smtpServerPort 587
-    git config --global user.name "Nathan Chancellor"
-    git config --global user.email "natechancellor@gmail.com"
-    git config --global user.signingkey 2437CB76E544CB6AB3D9DFD399739260CB6CB716
-
     # Downloads scripts
     git clone git@github.com:nathanchance/scripts
-    source "${HOME}"/scripts/funcs/git && git_aliases
+    source "${HOME}"/scripts/funcs/git && git_setup
     source "${HOME}"/scripts/funcs/pure && pure_prompt
 
     # Download and install dotfiles

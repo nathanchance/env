@@ -32,6 +32,9 @@ function aliases() {
     # tmux alias
     command -v tmux &>/dev/null && alias tmux='tmux -u'
 
+    # hub alias
+    if command -v hub > /dev/null 2>&1; then alias git='hub'; fi
+
     source "${SCRIPTS_FOLDER}/funcs/deldog"
     source "${SCRIPTS_FOLDER}/funcs/git"
     source "${SCRIPTS_FOLDER}/funcs/transfer"

@@ -62,6 +62,7 @@ function bootstrap() {(
         devscripts \
         flex \
         git \
+        git-email \
         gpg \
         irssi \
         jq \
@@ -107,11 +108,6 @@ function bootstrap() {(
     sudo make install
     cd "${OLDPWD}" || die "${OLDPWD} doesn't exist??"
     rm -rf ccache*
-
-    # Setup git
-    git config --global core.editor vim
-    git config --global user.name "Nathan Chancellor"
-    git config --global user.email "natechancellor@gmail.com"
 
     # Install hub
     curl -LSsO https://github.com/github/hub/releases/download/v"${HUB_VERSION:?}"/hub-linux-${ARCH}-"${HUB_VERSION}".tgz
@@ -159,8 +155,6 @@ function bootstrap() {(
     # Setup GPG
     gpg --pinentry-mode loopback --import "${KEYS}"/{public*,private*}.asc
     gpg --import-ownertrust "${KEYS}"/ownertrust*.asc
-    git config --global commit.gpgsign true
-    git config --global user.signingkey 2437CB76E544CB6AB3D9DFD399739260CB6CB716
     {
         echo "default-cache-ttl 3600"
         echo "max-cache-ttl 86400"
@@ -170,7 +164,7 @@ function bootstrap() {(
     # Clone scripts
     local SCRIPTS; SCRIPTS=${HOME}/scripts
     git clone git@github.com:nathanchance/scripts "${SCRIPTS}" || die "Error cloning script!"
-    source "${SCRIPTS}"/funcs/git && git_aliases
+    source "${SCRIPTS}"/funcs/git && git_setup
     source "${SCRIPTS}"/funcs/pure && pure_prompt
 
     # Clone repos
