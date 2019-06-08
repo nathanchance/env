@@ -109,14 +109,6 @@ function bootstrap() {(
     cd "${OLDPWD}" || die "${OLDPWD} doesn't exist??"
     rm -rf ccache*
 
-    # Install hub
-    curl -LSsO https://github.com/github/hub/releases/download/v"${HUB_VERSION:?}"/hub-linux-${ARCH}-"${HUB_VERSION}".tgz
-    tar -xf hub-linux-${ARCH}-"${HUB_VERSION}".tgz
-    cd hub-linux-${ARCH}-"${HUB_VERSION}" || die "Downloading or extracting hub failed!"
-    sudo ./install
-    cd "${OLDPWD}" || die "${OLDPWD} doesn't exist??"
-    rm -rf hub*
-
     # Install prebuilt ripgrep and fd binaries if available
     if [[ ${ARCH} = "amd64" ]]; then
         for URL in https://github.com/sharkdp/bat/releases/download/v${BAT_VERSION:?}/bat_${BAT_VERSION}_amd64.deb \

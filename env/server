@@ -39,7 +39,6 @@ function bootstrap() {(
     source <(curl -LSs https://github.com/nathanchance/scripts/raw/master/constants/versions) &>/dev/null || return 1
     # Grab common functions
     source <(curl -LSs https://github.com/nathanchance/scripts/raw/master/common) &>/dev/null || return 1
-    source <(curl -LSs https://github.com/nathanchance/scripts/raw/master/funcs/hub) &>/dev/null || return 1
 
     DOTFILES=${REPO_FOLDER}/dotfiles
     KEYS=/tmp/keys
@@ -112,9 +111,6 @@ function bootstrap() {(
                                         xmlto || die "Error installing packages!"
     sudo pacman -R --noconfirm linux
     sudo grub-mkconfig -o /boot/grub/grub.cfg
-
-    # Install hub
-    install_hub
 
     # Download and install mkdtimg
     MKDTIMG_FOLDER=$(mktemp -d)
@@ -345,7 +341,6 @@ function server_setup() {
     source "${SCRIPTS_FOLDER}"/funcs/bk
     source "${SCRIPTS_FOLDER}"/funcs/bldgcc
     source "${SCRIPTS_FOLDER}"/funcs/cbl
-    source "${SCRIPTS_FOLDER}"/funcs/hub
     add_to_path_post "${HOME}/.gem/ruby/${RUBY_VERSION}/bin"
     load_botinfo
     sbf

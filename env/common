@@ -154,4 +154,14 @@ function docker_mount() {
                --workdir /"${PWD##*/}" \
                "${@}"
 }
+
+
+# Set common architecture variable
+function get_arch() {(
+    case "$(uname -m)" in
+        "aarch64") echo "arm64" ;;
+        "x86_64") echo "amd64" ;;
+        *) exit 1 ;;
+    esac
+)}
 # vi: filetype=zsh

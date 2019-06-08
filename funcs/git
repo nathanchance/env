@@ -29,6 +29,7 @@ function git_setup() {(
     fi
 
     git_aliases
+    install_hub
 )}
 
 
@@ -121,4 +122,16 @@ function gcmt() {
     echo "${TAG}: $(git config --get user.name) <$(git config --get user.email)>"
     echo
 }
+
+
+function install_hub() {(
+    [[ -z ${HUB_VERSION} ]] && HUB_VERSION=2.11.2
+    HUB_TUPLE="hub-linux-$(get_arch)-${HUB_VERSION}"
+    cd "$(mktemp -d)" || die "Error moving into temporary directory!"
+    curl -LSsO https://github.com/github/hub/releases/download/v"${HUB_VERSION}"/"${HUB_TUPLE}".tgz || die "Error downloading hub!"
+    tar -xf "${HUB_TUPLE}".tgz || die "Error extracting hub!"
+    sudo prefix="${HOME}/usr" ./"${HUB_TUPLE}"/install || die "Error installing hub!"
+    [[ -d ${HOME}/.zfunctions ]] && curl -LSso "${HOME}"/.zfunctions/_hub https://github.com/github/hub/raw/v"${HUB_VERSION}"/etc/hub.zsh_completion
+    rm -rf "${PWD}"
+)}
 # vi: filetype=zsh
