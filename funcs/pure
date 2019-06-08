@@ -2,9 +2,9 @@
 function pure_prompt() {(
     ZFUNCTIONS=${HOME}/.zfunctions
     mkdir -p "${ZFUNCTIONS}"
-    cd "${ZFUNCTIONS}"
-    git clone https://github.com/sindresorhus/pure
-    cd pure
+    [[ -d ${ZFUNCTIONS}/pure ]] || git clone https://github.com/sindresorhus/pure "${ZFUNCTIONS}"/pure
+    cd "${ZFUNCTIONS}"/pure
+    git pull
     ln -s "${PWD}"/pure.zsh "${ZFUNCTIONS}"/prompt_pure_setup
     ln -s "${PWD}"/async.zsh "${ZFUNCTIONS}"/async
 )}

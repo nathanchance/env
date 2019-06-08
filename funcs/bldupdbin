@@ -1,0 +1,192 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+# Copyright (C) 2019 Nathan Chancellor
+#
+# Functions to build the latest versions of certain pieces of software
+
+
+# Build/install bat
+function bibat() {(
+    [[ -z ${BAT_VERSION} ]] && BAT_VERSION=0.11.0
+    if [[ $(uname -m) = "x86_64" ]] && command -v dpkg &>/dev/null; then
+        curl -LSso ${TMP_DEB:=$(mktemp --suffix=.deb)} https://github.com/sharkdp/bat/releases/download/v${BAT_VERSION}/bat_${BAT_VERSION}_amd64.deb
+        sudo dpkg -i "${TMP_DEB}" && rm "${TMP_DEB}"
+    else
+        cd "${TMP_WKDIR:=$(mktemp -d)}"
+        curl -LSs https://github.com/sharkdp/bat/archive/v${BAT_VERSION}.tar.gz | tar -xzf -
+        cd bat-${BAT_VERSION}
+        [[ -d ${HOME}/.cargo/bin ]] || install_rust
+        path_push "${HOME}/.cargo/bin"
+        cargo build --release --locked || die "cargo build failed!"
+        cargo install --force --path . || die "cargo install failed!"
+    fi
+
+    command -v bat
+    bat --version
+)}
+
+
+# Build/update ccache
+function bccache() {(
+    [[ -z ${CCACHE_VERSION} ]] && CCACHE_VERSION=3.7.1
+    CCACHE_FOLDER=ccache-${CCACHE_VERSION}
+    TMP_FOLDER=$(mktemp -d)
+    cd "${TMP_FOLDER}"
+    curl -LSs https://github.com/ccache/ccache/releases/download/v"${CCACHE_VERSION}"/"${CCACHE_FOLDER}".tar.gz | tar -xzf -
+    cd "${CCACHE_FOLDER}" || die "Downloading or extracting ccache failed!"
+    ./configure --prefix="${PREFIX:=${HOME}/usr}"
+    make "${JOBS_FLAG:--j"$(nproc)"}" || die "make failed!"
+    make install || die "install failed!"
+    rm -rf "${TMP_FOLDER}"
+
+    path_push "${PREFIX}"/bin
+    command -v ccache
+    ccache --version
+)}
+
+
+# Build/install fd
+function bifd() {(
+    [[ -z ${FD_VERSION} ]] && FD_VERSION=7.3.0
+    if [[ $(uname -m) = "x86_64" ]] && command -v dpkg &>/dev/null; then
+        curl -LSso ${TMP_DEB:=$(mktemp --suffix=.deb)} https://github.com/sharkdp/fd/releases/download/v${FD_VERSION}/fd_${FD_VERSION}_amd64.deb
+        sudo dpkg -i "${TMP_DEB}" && rm "${TMP_DEB}"
+    else
+        cd "${TMP_WKDIR:=$(mktemp -d)}"
+        curl -LSs https://github.com/sharkdp/fd/archive/v${FD_VERSION}.tar.gz | tar -xzf -
+        cd fd-${FD_VERSION}
+        [[ -d ${HOME}/.cargo/bin ]] || install_rust
+        path_push "${HOME}/.cargo/bin"
+        cargo build --release --locked || die "cargo build failed!"
+        cargo install --force --path . || die "cargo install failed!"
+        [[ -d ${HOME}/.zfunctions ]] || mkdir -p "${HOME}/.zfunctions"
+        install -Dm644 target/release/build/fd-find-*/out/_fd ${HOME}/.zfunctions/_fd
+    fi
+
+    command -v fd
+    fd --version
+)}
+
+
+# Build/update git
+function bgit() {(
+    [[ -z ${PREFIX} ]] && PREFIX=${HOME}/usr
+    [[ $(uname -m) =~ x86 ]] && MARCH="-march=native "
+    MAKE=( make "${JOBS_FLAG:--j"$(nproc)"}"
+                prefix="${PREFIX}"
+                CFLAGS="${MARCH}-O2 -pipe -fstack-protector-strong -fno-plt"
+                LDFLAGS="-Wl,-O1,--sort-common,--as-needed,-z,relro,-z,now"
+                USE_LIBPCRE2=1
+                NO_CROSS_DIRECTORY_HARDLINKS=1
+                NO_PERL_CPAN_FALLBACKS=1 )
+
+    GIT_FOLDER=${REPO_FOLDER:-${HOME}/repos}/git
+    if [[ ! -d ${GIT_FOLDER} ]]; then
+        mkdir -p "${GIT_FOLDER%/*}"
+        git clone git://github.com/git/git "${GIT_FOLDER}"
+    fi
+    cd "${GIT_FOLDER}" || die "Couldn't move into ${GIT_FOLDER}!"
+
+    git clean -fxdq
+    git fetch
+
+    [[ -z ${GIT_VERSION} ]] && GIT_VERSION=2.22.0
+    git checkout v"${GIT_VERSION}"
+
+    "${MAKE[@]}" all install || die "git build/install failed!"
+
+    if [[ -n ${ZSH_NAME} ]]; then
+        mkdir -p "${PREFIX}"/share/bash-completion/completions/
+        install -m 0644 "${GIT_FOLDER}"/contrib/completion/git-completion.bash "${PREFIX}"/share/bash-completion/completions/git
+
+        [[ -d ${HOME}/.zfunctions ]] || mkdir -p "${HOME}/.zfunctions"
+        install -m 0644 "${GIT_FOLDER}"/contrib/completion/git-completion.zsh "${HOME}"/.zfunctions/_git
+    fi
+
+    path_push "${PREFIX}"/bin
+    command -v git
+    git --version
+)}
+
+
+# Build/install ripgrep
+function birg() {(
+    [[ -z ${RG_VERSION} ]] && RG_VERSION=11.0.1
+    if [[ $(uname -m) = "x86_64" ]] && command -v dpkg &>/dev/null; then
+        curl -LSso ${TMP_DEB:=$(mktemp --suffix=.deb)} https://github.com/BurntSushi/ripgrep/releases/download/${RG_VERSION}/ripgrep_${RG_VERSION}_amd64.deb
+        sudo dpkg -i "${TMP_DEB}" && rm "${TMP_DEB}"
+    else
+        cd "${TMP_WKDIR:=$(mktemp -d)}"
+        curl -LSs https://github.com/BurntSushi/ripgrep/archive/${RG_VERSION}.tar.gz | tar -xzf -
+        cd fd-${FD_VERSION}
+        [[ -d ${HOME}/.cargo/bin ]] || install_rust
+        path_push "${HOME}/.cargo/bin"
+        cargo build --release --locked --features 'pcre2' || die "cargo build failed!"
+        cargo install --force --path . || die "cargo install failed!"
+        [[ -d ${HOME}/.zfunctions ]] || mkdir -p "${HOME}/.zfunctions"
+        install -Dm644 complete/_rg ${HOME}/.zfunctions/_rg
+    fi
+
+    command -v rg
+    rg --version
+)}
+
+
+# Build/update tmux
+function btmux() {(
+    [[ -z ${TMUX_VERSION} ]] && TMUX_VERSION=2.9a
+    TMP_FOLDER=$(mktemp -d)
+    TMUX_FOLDER=tmux-${TMUX_VERSION}
+
+    cd "${TMP_FOLDER}"
+    curl -LSs https://github.com/tmux/tmux/releases/download/"${TMUX_VERSION}"/"${TMUX_FOLDER}".tar.gz | tar -xzf -
+    cd "${TMUX_FOLDER}" || die "Downloading or extracting tmux failed!"
+    ./configure --prefix="${PREFIX:=${HOME}/usr}"
+    make "${JOBS_FLAG:--j"$(nproc)"}" || die "make failed!"
+    make install || die "install failed!"
+    rm -rf "${TMP_FOLDER}"
+
+    path_push "${PREFIX}"/bin
+    command -v tmux
+    tmux -V
+)}
+
+
+# Build/update zsh
+function bzsh() {(
+    ZSH_VERSION=5.7.1
+    [[ ${#} -gt 0 ]] && ZSH_VERSION=${1}
+    TMP_FOLDER=$(mktemp -d)
+    ZSH_FOLDER=zsh-${ZSH_VERSION}
+
+    cd "${TMP_FOLDER}"
+    curl -LSs https://www.zsh.org/pub/"${ZSH_FOLDER}".tar.xz | tar -xJf -
+    cd "${ZSH_FOLDER}" || die "Downloading or extracting zsh failed!"
+    ./configure --prefix="${PREFIX:=${HOME}/usr}"
+    make "${JOBS_FLAG:--j"$(nproc)"}" || die "make failed!"
+    make install || die "install failed!"
+    rm -rf "${TMP_FOLDER}"
+
+    sudo chsh -s "${PREFIX:?}/bin/zsh" "$(whoami)"
+
+    path_push "${PREFIX}"/bin
+    command -v zsh
+    zsh --version
+)}
+
+
+function install_rust() {(
+    curl https://sh.rustup.rs -sSf | bash -s -- -y --no-modify-path
+)}
+
+
+function bldupdbin() {(
+    bibat || exit ${?}
+    bccache || exit ${?}
+    bifd || exit ${?}
+    bgit || exit ${?}
+    birg || exit ${?}
+    btmux || exit ${?}
+    bzsh || exit ${?}
+)}
+# vi: filetype=zsh

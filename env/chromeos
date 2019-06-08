@@ -23,7 +23,6 @@
 function bootstrap() {(
     # Grab common functions/variables
     source <(curl -LSs https://github.com/nathanchance/scripts/raw/master/common) &>/dev/null
-    source <(curl -LSs https://github.com/nathanchance/scripts/raw/master/constants/versions) &>/dev/null
 
     # Check hostname to see if we are using Crostini (default) or Crouton
     [[ "$(uname -n)" = "localhost" ]] && CROSTINI=false
@@ -43,13 +42,6 @@ function bootstrap() {(
     fi
     [[ ! -d ${KEYS} ]] && die "Key folders not found!"
 
-    # Set architecture variables
-    case "$(uname -m)" in
-        "aarch64") ARCH=arm64 ;;
-        "x86_64") ARCH=amd64 ;;
-        *) die "Unsupported architecture!" ;;
-    esac
-
     # Ensure that packages are all up to date
     sudo apt update
     sudo apt upgrade -y
@@ -61,11 +53,17 @@ function bootstrap() {(
         bison \
         devscripts \
         flex \
+        gettext \
         git \
         git-email \
         gpg \
         irssi \
         jq \
+        libcurl4-openssl-dev \
+        libevent-dev \
+        libexpat-dev \
+        libncurses-dev \
+        libpcre2-dev \
         libssl-dev \
         mosh \
         most \
@@ -75,15 +73,17 @@ function bootstrap() {(
         python-pip \
         ssh \
         tmux \
+        unzip \
         vim \
-        xclip
+        xclip \
+        zlib1g-dev
 
     # Install speedtest-cli
     sudo curl -LSo /usr/local/bin/speedtest-cli https://raw.githubusercontent.com/sivel/speedtest-cli/master/speedtest.py
     sudo chmod +x /usr/local/bin/speedtest-cli
 
     # Install latest version of LLVM/Clang
-    if [[ ${ARCH} = "amd64" ]]; then
+    if [[ ${ARCH:=$(get_arch)} = "amd64" ]]; then
         if grep -q "unstable" /etc/apt/sources.list; then
             REPO=llvm-toolchain
             URL=http://apt.llvm.org/unstable/
@@ -98,45 +98,6 @@ function bootstrap() {(
         sudo apt install -y --no-install-recommends \
             clang-9 \
             lld-9
-    fi
-
-    # Build updated ccache
-    curl -LSs https://www.samba.org/ftp/ccache/ccache-"${CCACHE_VERSION:?}".tar.gz | tar -xzf -
-    cd ccache-"${CCACHE_VERSION}" || die "Downloading or extracting ccache failed!"
-    ./configure
-    make -j"$(nproc)"
-    sudo make install
-    cd "${OLDPWD}" || die "${OLDPWD} doesn't exist??"
-    rm -rf ccache*
-
-    # Install prebuilt ripgrep and fd binaries if available
-    if [[ ${ARCH} = "amd64" ]]; then
-        for URL in https://github.com/sharkdp/bat/releases/download/v${BAT_VERSION:?}/bat_${BAT_VERSION}_amd64.deb \
-                   https://github.com/sharkdp/fd/releases/download/v${FD_VERSION:?}/fd_${FD_VERSION}_amd64.deb \
-                   https://github.com/BurntSushi/ripgrep/releases/download/${RG_VERSION:?}/ripgrep_${RG_VERSION}_amd64.deb; do
-            curl -LSsO "${URL}"
-            sudo dpkg -i "$(basename "${URL}")" && rm "$(basename "${URL}")"
-        done
-    # Build them from source otherwise
-    else
-        # Install rust
-        curl https://sh.rustup.rs -sSf | sh
-        source "${HOME}"/.cargo/env
-
-        for PAIR in fd:https://github.com/sharkdp/fd/archive/v${FD_VERSION:?}.zip \
-                    ripgrep:https://github.com/BurntSushi/ripgrep/archive/${RG_VERSION:?}.zip; do
-            BINARY=${PAIR%%:*}
-            URL=${PAIR#*:}
-            TMP=$(mktemp)
-
-            curl -LSs "${URL}" -o "${TMP}"
-            unzip "${TMP}"
-            cd "${BINARY}"-* || die "Downloading or extracting ${BINARY} failed!"
-            cargo build --release
-            cargo install
-            cd "${OLDPWD}" || die "${OLDPWD} doesn't exist??"
-            rm -rf "${OLDPWD}" "${TMP}"
-        done
     fi
 
     # Setup SSH and GPG if keys are present
@@ -156,6 +117,8 @@ function bootstrap() {(
     # Clone scripts
     local SCRIPTS; SCRIPTS=${HOME}/scripts
     git clone git@github.com:nathanchance/scripts "${SCRIPTS}" || die "Error cloning script!"
+    source "${SCRIPTS}"/funcs/bldupdbin && { bldupdbin || die "bldupdbin failed!"; }
+    path_push "${HOME}/usr/bin"
     source "${SCRIPTS}"/funcs/git && git_setup
     source "${SCRIPTS}"/funcs/pure && pure_prompt
 

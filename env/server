@@ -139,6 +139,8 @@ function bootstrap() {(
 
     # Download repos
     [[ ! -d ${SCRIPTS} ]] && { git clone git@github.com:nathanchance/scripts "${SCRIPTS}" || die "Error cloning scripts!"; }
+    source "${SCRIPTS}"/funcs/bldupdbin && bgit
+    path_push "${HOME}/usr/bin"
     source "${SCRIPTS}"/funcs/git && git_setup
     source "${SCRIPTS}"/funcs/pure && pure_prompt
     for REPO in chromeos-adb-fastboot dotfiles hugo-files patches; do
@@ -241,7 +243,7 @@ function bootstrap() {(
 
     # Install gist
     gem install gist
-    "${HOME}/.gem/ruby/${RUBY_VERSION}/bin/gist" --login
+    "${HOME}/.gem/ruby/2.6.0/bin/gist" --login
 
     # Reminder of things to do
     echo
@@ -337,11 +339,10 @@ function server_setup() {
     LOG=$(mktemp); export LOG
     add_to_path_pre "${SCRIPTS_FOLDER}/server"
     source "${SCRIPTS_FOLDER}"/constants/server_folders
-    source "${SCRIPTS_FOLDER}"/constants/versions
     source "${SCRIPTS_FOLDER}"/funcs/bk
     source "${SCRIPTS_FOLDER}"/funcs/bldgcc
     source "${SCRIPTS_FOLDER}"/funcs/cbl
-    add_to_path_post "${HOME}/.gem/ruby/${RUBY_VERSION}/bin"
+    add_to_path_post "${HOME}/.gem/ruby/2.6.0/bin"
     load_botinfo
     sbf
     ( gpg_available )
@@ -616,29 +617,6 @@ function symlink-commands() {(
     for FILE in "${FILES[@]}"; do
         ln -sf generic-commands "${FILE}-commands"
     done
-)}
-
-
-# Build/update git
-function bgit() {(
-    MAKE=( make "${JOBS_FLAG}"
-                prefix="/usr/local"
-                CFLAGS="-march=native -O2 -pipe -fstack-protector-strong -fno-plt"
-                LDFLAGS="-Wl,-O1,--sort-common,--as-needed,-z,relro,-z,now"
-                USE_LIBPCRE2=1
-                NO_CROSS_DIRECTORY_HARDLINKS=1
-                NO_PERL_CPAN_FALLBACKS=1 )
-
-    GIT_FOLDER=${REPO_FOLDER:?}/git
-    [[ ! -d ${GIT_FOLDER} ]] && { display_error "Git folder doesn't exist!"; return; }
-    cd "${GIT_FOLDER}" || die "Couldn't move into ${GIT_FOLDER}!"
-
-    git cl -q
-    git f origin
-    git ch v"${GIT_VERSION}"
-
-    "${MAKE[@]}" all
-    sudo "${MAKE[@]}" install
 )}
 
 

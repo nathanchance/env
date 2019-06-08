@@ -35,6 +35,7 @@ function aliases() {
     # hub alias
     if command -v hub > /dev/null 2>&1; then alias git='hub'; fi
 
+    source "${SCRIPTS_FOLDER}/funcs/bldupdbin"
     source "${SCRIPTS_FOLDER}/funcs/deldog"
     source "${SCRIPTS_FOLDER}/funcs/git"
     source "${SCRIPTS_FOLDER}/funcs/transfer"
@@ -67,47 +68,6 @@ function tmxd() {
 }
 
 
-# Add something to the end of PATH if it isn't already there
-function add_to_path_post() {
-    local ARRAY ITEM
-    IFS=: read -rA ARRAY <<< "${1}"
-    for ITEM in $(printf '%s\n' "${ARRAY[@]}" | tac); do
-        [[ -d ${ITEM} ]] || continue
-        echo "${PATH}" | grep -s -q "${ITEM}" || export PATH="${PATH}:${ITEM}"
-    done
-}
-
-
-# Does the same thing as add_to_path_pre but doesn't check if item exists or not
-function move_to_front_of_path() {
-    local ARRAY ITEM
-    IFS=: read -rA ARRAY <<< "${1}"
-    for ITEM in $(printf '%s\n' "${ARRAY[@]}" | tac); do
-        [[ -d ${ITEM} ]] || continue
-        export PATH="${ITEM}:${PATH//${ITEM}:}"
-    done
-}
-
-
-# Add something to the beginning of PATH if it isn't already there
-function add_to_path_pre() {
-    local ARRAY ITEM
-    IFS=: read -rA ARRAY <<< "${1}"
-    for ITEM in $(printf '%s\n' "${ARRAY[@]}" | tac); do
-        [[ -d ${ITEM} ]] || continue
-        echo "${PATH}" | grep -s -q "${ITEM}" || export PATH="${ITEM}:${PATH}"
-    done
-}
-# Easy alias
-function path_push() { add_to_path_pre "${@}"; }
-
-
-# Delete the first folder in PATH
-function path_pop() {
-    export PATH=${PATH#*:}
-}
-
-
 function shell_setup() {
     # Shell specific options
     if [[ -n ${ZSH_NAME} ]]; then
@@ -123,6 +83,9 @@ function shell_setup() {
         export PURE_GIT_PULL=0
         export TIMEFMT=$'\nreal\t%*E\nuser\t%*U\nsys\t%*S'
 
+        [[ -f ${HOME}/usr/share/bash-completion/completions/git ]] && \
+            zstyle ':completion:*:*:git:*' script "${HOME}"/usr/share/bash-completion/completions/git
+
         autoload -U compinit && compinit
         autoload -U promptinit && promptinit && prompt pure
     elif [[ -n ${BASH} ]]; then
@@ -133,6 +96,7 @@ function shell_setup() {
     fi
 
     # Environment setup
+    path_push "${HOME}/usr/bin"
     aliases
     "${LOCATION}"_aliases
     tmxa
@@ -154,14 +118,4 @@ function docker_mount() {
                --workdir /"${PWD##*/}" \
                "${@}"
 }
-
-
-# Set common architecture variable
-function get_arch() {(
-    case "$(uname -m)" in
-        "aarch64") echo "arm64" ;;
-        "x86_64") echo "amd64" ;;
-        *) exit 1 ;;
-    esac
-)}
 # vi: filetype=zsh
