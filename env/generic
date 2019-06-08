@@ -3,9 +3,53 @@
 # Copyright (C) 2019 Nathan Chancellor
 #
 # Generic server environment setup script (usually for something like Vultr or Packet)
+#
+# Install zsh before hand and use 'chsh -s /bin/zsh $(whoami)'
 
-function bootstrap() {
-    true
-}
+function bootstrap() {(
+    # Get list of packages to be installed
+    # Debian/Ubuntu
+    if command -v apt &>/dev/null; then
+        PACKAGES=( bison
+                   build-essential
+                   ca-certificates
+                   clang
+                   cmake
+                   curl
+                   file
+                   flex
+                   gcc
+                   g++
+                   libauthen-sasl-perl
+                   libemail-valid-perl
+                   libevent-dev
+                   libio-socket-ssl-perl
+                   libmailtools-perl
+                   libncurses-dev
+                   libnet-smtp-ssl-perl
+                   libssl-dev
+                   make
+                   mosh
+                   most
+                   ninja-build
+                   python3
+                   sudo
+                   texinfo
+                   tmux
+                   vim
+                   zsh
+                   zlib1g-dev )
+
+        if [[ $(whoami) = "root" ]]; then
+            APT=( apt )
+        else
+            APT=( sudo apt )
+        fi
+
+        "${APT[@]}" update || exit ${?}
+        "${APT[@]}" upgrade -y || exit ${?}
+        "${APT[@]}" install -y --no-install-recommends "${PACKAGES[@]}" || exit ${?}
+    fi
+)}
 
 # vi: filetype=zsh
