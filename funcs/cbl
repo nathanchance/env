@@ -145,7 +145,38 @@ function bldkw() {(
 function extraconfigs() {
     local OUT_FOLDER="${KBF}"
 
-    echo "CONFIG_INIT_STACK_ALL=y
+}
+
+
+# Configure and build a kernel with Clang
+function bldk() {(
+    # Parameters
+    ARCH=${1:?}; shift
+    CONFIG=${1}; shift
+
+    # Sanity checks
+    [[ -z ${ARCH} ]] && die "ARCH not specified!"
+    [[ -z ${CONFIG} ]] && die "CONFIG not specified!"
+    case ${ARCH} in
+        "arm"|"arm64"|"x86"|"ppc32"|"ppc64"|"ppc64le") ;;
+        *) die "Invalid ARCH specifed" ;;
+    esac
+    [[ ${PWD} =~ cbl && ${CONFIG} =~ defconfig ]] && CBL_DEFCONFIG=true
+
+    if ${CBL_DEFCONFIG:=false}; then
+        # Use lld by default for everything but powerpc
+        [[ -z ${LD} && ! ${ARCH} =~ ppc ]] && LD=ld.lld
+        # Use llvm-objcopy
+        [[ -z ${OBJCOPY} ]] && OBJCOPY=llvm-objcopy
+    fi
+
+    BLDKW=( bldkw "${ARCH}" ${LD:+LD="${LD}"} ${OBJCOPY:+OBJCOPY="${OBJCOPY}"} )
+
+    # Configure kernel
+    "${BLDKW[@]}" distclean "${CONFIG}" modules_prepare
+
+    if ${CBL_DEFCONFIG:?}; then
+        echo "CONFIG_INIT_STACK_ALL=y
 CONFIG_EXPERT=y
 CONFIG_DEBUG_KERNEL=y
 CONFIG_LOCK_DEBUGGING_SUPPORT=y
@@ -212,41 +243,16 @@ CONFIG_VIRTIO_MMIO=y
 CONFIG_BLK_MQ_VIRTIO=y
 CONFIG_VIRTIO_BLK=y
 CONFIG_VIRTIO_BLK_SCSI=y
-CONFIG_SCSI_VIRTIO=y" >> "${OUT_FOLDER}"/.config
+CONFIG_SCSI_VIRTIO=y" >> "${O:=${KBF}}"/.config
 
-    [[ ${ARCH} =~ arm ]] && echo "CONFIG_LOCK_TORTURE_TEST=y
-CONFIG_RCU_TORTURE_TEST=y" >> "${OUT_FOLDER}"/.config
+        [[ ${ARCH} =~ arm ]] && echo "CONFIG_LOCK_TORTURE_TEST=y
+CONFIG_RCU_TORTURE_TEST=y" >> "${O}"/.config
 
-    bldkw "${ARCH}" olddefconfig &>/dev/null
-}
-
-
-# Configure and build a kernel with Clang
-function bldk() {(
-    # Parameters
-    ARCH=${1:?}; shift
-    CONFIG=${1}; shift
-
-    # Sanity checks
-    [[ -z ${ARCH} ]] && die "ARCH not specified!"
-    [[ -z ${CONFIG} ]] && die "CONFIG not specified!"
-    case ${ARCH} in
-        "arm"|"arm64"|"x86"|"ppc32"|"ppc64"|"ppc64le") ;;
-        *) die "Invalid ARCH specifed" ;;
-    esac
-
-    # Configure kernel
-    bldkw "${ARCH}" distclean "${CONFIG}" modules_prepare
-    if [[ ${PWD} =~ cbl && ${CONFIG} =~ defconfig ]]; then
-        extraconfigs
-        # Use lld by default for everything but powerpc
-        [[ -z ${LD} && ! ${ARCH} =~ ppc ]] && LD=ld.lld
-        # Use llvm-objcopy
-        [[ -z ${OBJCOPY} ]] && OBJCOPY=llvm-objcopy
+        "${BLDKW[@]}" olddefconfig &>/dev/null
     fi
 
     # Build kernel
-    bldkw "${ARCH}" ${LD:+LD="${LD}"} "${@}"
+    "${BLDKW[@]}" "${@}"
 )}
 
 
