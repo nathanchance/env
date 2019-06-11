@@ -60,6 +60,7 @@ function bootstrap() {(
         jq \
         libevent-dev \
         libncurses-dev \
+        libpcre2-dev \
         libssl-dev \
         mosh \
         most \
@@ -70,7 +71,8 @@ function bootstrap() {(
         ssh \
         tmux \
         vim \
-        xclip
+        xclip \
+        zlib1g-dev
 
     # Install speedtest-cli
     sudo curl -LSo /usr/local/bin/speedtest-cli https://raw.githubusercontent.com/sivel/speedtest-cli/master/speedtest.py
@@ -112,7 +114,7 @@ function bootstrap() {(
     local SCRIPTS; SCRIPTS=${HOME}/scripts
     git clone git@github.com:nathanchance/scripts "${SCRIPTS}" || die "Error cloning script!"
     source "${SCRIPTS}"/env/setup && global_gitignore && create_zshrc
-    source "${SCRIPTS}"/funcs/bldupdbin && bldupdbin
+    source "${SCRIPTS}"/funcs/bldupdbin && { bldupdbin || die "bldupdbin failed!"; }
     path_push "${HOME}/usr/bin"
     source "${SCRIPTS}"/funcs/git && git_setup
     source "${SCRIPTS}"/funcs/pure && pure_prompt

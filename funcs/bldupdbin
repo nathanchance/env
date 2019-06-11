@@ -15,10 +15,10 @@ function bibat() {(
         cd "${TMP_WKDIR:=$(mktemp -d)}"
         curl -LSs https://github.com/sharkdp/bat/archive/v${BAT_VERSION}.tar.gz | tar -xzf -
         cd bat-${BAT_VERSION}
-        [[ ! -d ${HOME}/.cargo/bin ]] && curl https://sh.rustup.rs -sSf | bash -s -- -y --no-modify-path
+        [[ -d ${HOME}/.cargo/bin ]] || install_rust
         path_push "${HOME}/.cargo/bin"
-        cargo build --release --locked
-        cargo install --force --path .
+        cargo build --release --locked || die "cargo build failed!"
+        cargo install --force --path . || die "cargo install failed!"
     fi
 
     command -v bat
@@ -55,10 +55,10 @@ function bifd() {(
         cd "${TMP_WKDIR:=$(mktemp -d)}"
         curl -LSs https://github.com/sharkdp/fd/archive/v${FD_VERSION}.tar.gz | tar -xzf -
         cd fd-${FD_VERSION}
-        [[ ! -d ${HOME}/.cargo/bin ]] && curl https://sh.rustup.rs -sSf | bash -s -- -y --no-modify-path
+        [[ -d ${HOME}/.cargo/bin ]] || install_rust
         path_push "${HOME}/.cargo/bin"
-        cargo build --release --locked
-        cargo install --force --path .
+        cargo build --release --locked || die "cargo build failed!"
+        cargo install --force --path . || die "cargo install failed!"
         [[ -d ${HOME}/.zfunctions ]] && install -Dm644 target/release/build/fd-find-*/out/_fd ${HOME}/.zfunctions/_fd
     fi
 
@@ -92,7 +92,7 @@ function bgit() {(
     [[ -z ${GIT_VERSION} ]] && GIT_VERSION=2.22.0
     git checkout v"${GIT_VERSION}"
 
-    "${MAKE[@]}" all install
+    "${MAKE[@]}" all install || die "git build/install failed!"
 
     if [[ -n ${ZSH_NAME} ]]; then
         mkdir -p "${PREFIX}"/share/bash-completion/completions/
@@ -118,10 +118,10 @@ function birg() {(
         cd "${TMP_WKDIR:=$(mktemp -d)}"
         curl -LSs https://github.com/BurntSushi/ripgrep/archive/${RG_VERSION}.tar.gz | tar -xzf -
         cd fd-${FD_VERSION}
-        [[ ! -d ${HOME}/.cargo/bin ]] && curl https://sh.rustup.rs -sSf | bash -s -- -y --no-modify-path
+        [[ -d ${HOME}/.cargo/bin ]] || install_rust
         path_push "${HOME}/.cargo/bin"
-        cargo build --release --locked --features 'pcre2'
-        cargo install --force --path .
+        cargo build --release --locked --features 'pcre2' || die "cargo build failed!"
+        cargo install --force --path . || die "cargo install failed!"
         [[ -d ${HOME}/.zfunctions ]] && install -Dm644 complete/_rg ${HOME}/.zfunctions/_rg
     fi
 
@@ -144,7 +144,7 @@ function btmux() {(
     make install || die "install failed!"
     rm -rf "${TMP_FOLDER}"
 
-    path_push "${PREFIX}"
+    path_push "${PREFIX}"/bin
     command -v tmux
     tmux --version
 )}
@@ -179,12 +179,12 @@ function install_rust() {(
 
 
 function bldupdbin() {(
-    bibat
-    bccache
-    bifd
-    bgit
-    birg
-    btmux
-    bzsh
+    bibat || exit ${?}
+    bccache || exit ${?}
+    bifd || exit ${?}
+    bgit || exit ${?}
+    birg || exit ${?}
+    btmux || exit ${?}
+    bzsh || exit ${?}
 )}
 # vi: filetype=zsh
