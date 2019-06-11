@@ -1,3 +1,4 @@
+#!/usr/bin/env bash
 # Builds GCC and binutils for exclusively building kernels
 #
 # This can be downloaded and sourced without any of the other scripts in this repo.
@@ -67,7 +68,7 @@ function bldgcc() {(
     [[ ! -d ${BINUTILS_SOURCE} ]] && curl -LSs https://mirrors.kernel.org/gnu/binutils/${BINUTILS_SOURCE}.tar.xz | tar -xJf -
 
     # Create timert
-    [[ ! -f timert ]] && make -j$(nproc)
+    [[ ! -f timert ]] && make -j"$(nproc)"
 
     # Create config
     cat <<EOF > config
@@ -83,7 +84,7 @@ EOF
     for TARGET in "${TARGETS[@]}"; do
         # Clean up previous artifacts, can cause a false failure
         rm -rf "${TARGET}"
-        ./build "${BLD_OPTS}" "${TARGET}"
+        ./build "${BLD_OPTS[@]}" "${TARGET}"
     done
 )}
 # vi: filetype=zsh
