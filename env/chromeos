@@ -68,6 +68,7 @@ function bootstrap() {(
         libssl-dev \
         mosh \
         most \
+        mutt \
         openvpn \
         pass \
         python-pip \
@@ -188,6 +189,9 @@ function bootstrap() {(
     zsh "${DOTFILES}"/common/global_gitignore.sh
     zsh "${DOTFILES}"/common/vim/vim_setup.sh
     zsh "${DOTFILES}"/common/zshrc.sh
+
+    # Decrypt .muttrc
+    gpg --pinentry-mode loopback --output "${HOME}"/.muttrc --decrypt "${DOTFILES}"/common/muttrc.gpg
 
     # We need UTF characters in crouton for the prompt to work
     if [[ "$(uname -n)" = "localhost" ]]; then
