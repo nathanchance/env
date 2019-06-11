@@ -126,7 +126,7 @@ function bootstrap() {(
     git clone git@github.com:nathanchance/password-store.git "${HOME}"/.password-store || die "Error cloning password store!"
 
     # Copy tmux config
-    cp "${DOTFILES}"/chromeos/.tmux.conf "${HOME}"
+    cp "${DOTFILES}"/local/.tmux.conf "${HOME}"
 
     # Setup vim
     zsh "${DOTFILES}"/common/vim/vim_setup.sh
