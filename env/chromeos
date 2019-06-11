@@ -30,13 +30,13 @@ function bootstrap() {(
     # Make sure keys are present
     if ${CROSTINI:=true}; then
         # crostini locations (mount them in via Files, USB first, SD card second, Google Drive third)
-        for FOLDER in "removable/VERBATIM/Keys" "removable/USB Drive/Keys" "removable/SD Card/Keys" "GoogleDrive/MyDrive/Crostini"; do
+        for FOLDER in "removable/USB Drive/Keys" "removable/SD Card/Keys" "GoogleDrive/MyDrive/Crostini"; do
             KEYS=/mnt/chromeos/"${FOLDER}"
             [[ -d ${KEYS} ]] && break
         done
     else
         # crouton folder options (USB first, SD card second, Google Drive third)
-        for KEYS in "/var/host/media/removable/VERBATIM/Keys" "/var/host/media/removable/SD Card/Keys" "${HOME}/Downloads/Crostini"; do
+        for KEYS in "/var/host/media/removable/USB Drive/Keys" "/var/host/media/removable/SD Card/Keys" "${HOME}/Downloads/Crostini"; do
             [[ -d ${KEYS} ]] && break
         done
     fi
