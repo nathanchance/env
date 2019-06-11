@@ -117,6 +117,7 @@ function bootstrap() {(
     # Clone scripts
     local SCRIPTS; SCRIPTS=${HOME}/scripts
     git clone git@github.com:nathanchance/scripts "${SCRIPTS}" || die "Error cloning script!"
+    source "${SCRIPTS}"/env/setup && global_gitignore && create_zshrc
     source "${SCRIPTS}"/funcs/bldupdbin && { bldupdbin || die "bldupdbin failed!"; }
     path_push "${HOME}/usr/bin"
     source "${SCRIPTS}"/funcs/git && git_setup
@@ -130,14 +131,11 @@ function bootstrap() {(
     # Clone password store
     git clone git@github.com:nathanchance/password-store.git "${HOME}"/.password-store || die "Error cloning password store!"
 
-    # Copy files into their proper locations
-    # tmux
+    # Copy tmux config
     cp "${DOTFILES}"/chromeos/.tmux.conf "${HOME}"
 
-    # Run small setup scripts from dotfiles
-    zsh "${DOTFILES}"/common/global_gitignore.sh
+    # Setup vim
     zsh "${DOTFILES}"/common/vim/vim_setup.sh
-    zsh "${DOTFILES}"/common/zshrc.sh
 
     # Decrypt .muttrc
     gpg --pinentry-mode loopback --output "${HOME}"/.muttrc --decrypt "${DOTFILES}"/common/muttrc.gpg

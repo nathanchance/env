@@ -139,6 +139,7 @@ function bootstrap() {(
 
     # Download repos
     [[ ! -d ${SCRIPTS} ]] && { git clone git@github.com:nathanchance/scripts "${SCRIPTS}" || die "Error cloning scripts!"; }
+    source "${SCRIPTS}"/env/setup && global_gitignore && create_zshrc
     source "${SCRIPTS}"/funcs/bldupdbin && bgit
     path_push "${HOME}/usr/bin"
     source "${SCRIPTS}"/funcs/git && git_setup
@@ -151,9 +152,7 @@ function bootstrap() {(
 
     # Install dotfiles
     (
-        zsh "${DOTFILES}"/common/global_gitignore.sh
         zsh "${DOTFILES}"/common/vim/vim_setup.sh
-        zsh "${DOTFILES}"/common/zshrc.sh
         cp -v "${DOTFILES}"/server/.tmux.conf "${HOME}"
         gpg --pinentry-mode loopback --output "${MAIN_FOLDER}"/.botinfo --decrypt "${DOTFILES}"/common/botinfo.gpg
         gpg --pinentry-mode loopback --output "${HOME}"/.muttrc --decrypt "${DOTFILES}"/common/muttrc.gpg

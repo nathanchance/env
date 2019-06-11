@@ -1,0 +1,31 @@
+#!/usr/bin/env zsh
+
+# Create and configure global .gitignore
+function global_gitignore() {(
+    git config --global core.excludesfile "${HOME}"/.gitignore_global
+    curl -LSso "${HOME}"/.gitignore_global https://gist.githubusercontent.com/octocat/9257657/raw/3f9569e65df83a7b328b39a091f0ce9c6efc6429/.gitignore
+
+    # Add my rules
+    {
+        echo
+        echo
+        echo "# Personal exclusions #"
+        echo "#######################"
+        echo "out/"
+        echo "*.ko"
+        echo "Image.*"
+        echo "zImage*"
+        echo "dtbo*"
+        echo "net/wireguard"
+        echo "*.rej"
+    } >> "${HOME}"/.gitignore_global
+)}
+
+# Creates .zshrc
+function create_zshrc() {(
+    {
+        echo "[[ -f \${HOME}/scripts/env/common ]] && source \"\${HOME}/scripts/env/common\""
+        echo "type shell_setup &>/dev/null && shell_setup"
+    } > "${HOME}"/.zshrc
+)}
+# vi: filetype=zsh

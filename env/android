@@ -47,14 +47,13 @@ function bootstrap() {(
     git clone git@github.com:nathanchance/scripts
     source "${HOME}"/scripts/funcs/git && git_setup
     source "${HOME}"/scripts/funcs/pure && pure_prompt
+    source "${HOME}"/scripts/env/setup && global_gitignore && create_zshrc
 
     # Download and install dotfiles
     DOTFILES=${HOME}/dotfiles
     git clone git@github.com:nathanchance/dotfiles
     (
-        zsh "${DOTFILES}"/common/global_gitignore.sh
         zsh "${DOTFILES}"/common/vim/vim_setup.sh
-        zsh "${DOTFILES}"/common/zshrc.sh
         cp -v "${DOTFILES}"/chromeos/.tmux.conf "${HOME}"
         gpg --pinentry-mode loopback --output "${HOME}"/.muttrc --decrypt "${DOTFILES}"/common/muttrc.gpg
     ) || die "Error installing dotfiles"
