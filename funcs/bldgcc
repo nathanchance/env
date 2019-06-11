@@ -1,4 +1,8 @@
 #!/usr/bin/env bash
+#
+# This shebang is just for shellcheck auditing; this script needs to be sourced and
+# called by the function name otherwise it literally does nothing.
+#
 # Builds GCC and binutils for exclusively building kernels
 #
 # This can be downloaded and sourced without any of the other scripts in this repo.
