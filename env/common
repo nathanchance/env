@@ -73,7 +73,7 @@ function add_to_path_post() {
     IFS=: read -rA ARRAY <<< "${1}"
     for ITEM in $(printf '%s\n' "${ARRAY[@]}" | tac); do
         [[ -d ${ITEM} ]] || continue
-        echo "${PATH}" | rg --color=never -s -q "${ITEM}" || export PATH="${PATH}:${ITEM}"
+        echo "${PATH}" | grep -s -q "${ITEM}" || export PATH="${PATH}:${ITEM}"
     done
 }
 
@@ -95,7 +95,7 @@ function add_to_path_pre() {
     IFS=: read -rA ARRAY <<< "${1}"
     for ITEM in $(printf '%s\n' "${ARRAY[@]}" | tac); do
         [[ -d ${ITEM} ]] || continue
-        echo "${PATH}" | rg --color=never -s -q "${ITEM}" || export PATH="${ITEM}:${PATH}"
+        echo "${PATH}" | grep -s -q "${ITEM}" || export PATH="${ITEM}:${PATH}"
     done
 }
 # Easy alias
@@ -117,7 +117,7 @@ function shell_setup() {
         setopt autocd
         typeset -gU path
 
-        echo "$fpath" | rg -q -s --color=never "${HOME}/.zfunctions" || fpath=( "${HOME}/.zfunctions" $fpath )
+        echo "$fpath" | grep -q -s "${HOME}/.zfunctions" || fpath=( "${HOME}/.zfunctions" $fpath )
 
         export HISTSIZE=100000
         export PURE_GIT_PULL=0
