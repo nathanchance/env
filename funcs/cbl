@@ -501,12 +501,12 @@ function bldbn() {(
 function bldusr() {(
     rm -rf "${INSTALL_FOLDER:=${CBL_USR}}"
 
-    # Build LLVM/Clang/lld
-    bldllvm --build-folder "${LBF:?}" --install-folder "${INSTALL_FOLDER:?}" --thin-lto --update || return ${?}
-    stripllvmbin "${INSTALL_FOLDER}"
-
     # Build binutils
-    bldbn --build-folder "${BBF:?}" --install-folder "${INSTALL_FOLDER}"
+    bldbn --build-folder "${BBF:?}" --install-folder "${INSTALL_FOLDER}" --update || return ${?}
+
+    # Build LLVM/Clang/lld
+    bldllvm --build-folder "${LBF:?}" --install-folder "${INSTALL_FOLDER:?}" --pgo --update-llvm || return ${?}
+    stripllvmbin "${INSTALL_FOLDER}"
 )}
 
 
