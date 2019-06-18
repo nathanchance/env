@@ -111,7 +111,11 @@ function bgit() {(
 
 # Build/install PGO'd LLVM
 function bpgollvm() {(
-    CMAKE=( cmake -G Ninja -Wno-dev -DCMAKE_BUILD_TYPE="Release" -DLLVM_ENABLE_PROJECTS=all )
+    CMAKE=( cmake -G Ninja
+                  -Wno-dev
+                  -DCLANG_DEFAULT_LINKER=lld
+                  -DCMAKE_BUILD_TYPE=Release
+                  -DLLVM_ENABLE_PROJECTS=all )
     FLAGS="-O3 -march=native -mtune=native"
     LLVM_PROJECT=${REPO_FOLDER:-${HOME}/repos}/llvm-project
     BUILD_FOLDER=${LLVM_PROJECT}/build
