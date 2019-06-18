@@ -76,6 +76,7 @@ function bootstrap() {(
                                         cmake \
                                         cpio \
                                         docker \
+                                        doxygen \
                                         dtc \
                                         expect \
                                         fd \
@@ -104,6 +105,7 @@ function bootstrap() {(
                                         qemu-headless-arch-extra \
                                         ripgrep \
                                         rubygems \
+                                        swig \
                                         tmux \
                                         uboot-tools \
                                         wget \
