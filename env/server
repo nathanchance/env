@@ -336,6 +336,7 @@ function server_setup() {
     ccache_setup 250
     LOG=$(mktemp); export LOG
     add_to_path_pre "${SCRIPTS_FOLDER}/server"
+    move_to_front_of_path "${HOME}/usr/bin"
     source "${SCRIPTS_FOLDER}"/constants/server_folders
     source "${SCRIPTS_FOLDER}"/funcs/bk
     source "${SCRIPTS_FOLDER}"/funcs/bldgcc
