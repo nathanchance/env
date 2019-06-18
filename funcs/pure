@@ -5,7 +5,7 @@ function pure_prompt() {(
     [[ -d ${ZFUNCTIONS}/pure ]] || git clone https://github.com/sindresorhus/pure "${ZFUNCTIONS}"/pure
     cd "${ZFUNCTIONS}"/pure
     git pull
-    ln -s "${PWD}"/pure.zsh "${ZFUNCTIONS}"/prompt_pure_setup
-    ln -s "${PWD}"/async.zsh "${ZFUNCTIONS}"/async
+    ln -fs "${PWD}"/pure.zsh "${ZFUNCTIONS}"/prompt_pure_setup
+    ln -fs "${PWD}"/async.zsh "${ZFUNCTIONS}"/async
 )}
 # vi: filetype=zsh

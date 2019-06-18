@@ -19,15 +19,21 @@ function bootstrap() {(
                    file
                    flex
                    gcc
+                   gettext
+                   git
                    g++
                    libauthen-sasl-perl
+                   libcurl4-openssl-dev
                    libemail-valid-perl
                    libevent-dev
+                   libexpat1-dev
                    libio-socket-ssl-perl
                    libmailtools-perl
                    libncurses-dev
                    libnet-smtp-ssl-perl
+                   libpcre2-dev
                    libssl-dev
+                   locales
                    make
                    mosh
                    most
@@ -49,7 +55,25 @@ function bootstrap() {(
         "${APT[@]}" update || exit ${?}
         "${APT[@]}" upgrade -y || exit ${?}
         "${APT[@]}" install -y --no-install-recommends "${PACKAGES[@]}" || exit ${?}
+        sudo dpkg-reconfigure locales
     fi
+
+    source <(curl -LSs https://github.com/nathanchance/scripts/raw/master/common) &>/dev/null || return 1
+
+    SCRIPTS=${HOME}/scripts
+    [[ -d ${SCRIPTS} ]] || { git clone https://github.com/nathanchance/scripts "${SCRIPTS}" || die "Error cloning scripts!"; }
+    source "${SCRIPTS}"/env/setup && global_gitignore && create_zshrc
+    source "${SCRIPTS}"/funcs/bldupdbin && { bldupdbin || exit ${?}; }
+    path_push "${HOME}/usr/bin"
+    source "${SCRIPTS}"/funcs/git && git_setup
+    source "${SCRIPTS}"/funcs/pure && pure_prompt
+
+    DOTFILES=${HOME}/dotfiles
+    [[ -d ${DOTFILES} ]] || { git clone https://github.com/nathanchance/dotfiles "${DOTFILES}" || die "Error cloning dotfiles!"; }
+    zsh "${DOTFILES}"/common/vim/vim_setup.sh
+    cp -v "${DOTFILES}"/server/.tmux.conf "${HOME}"
 )}
 
+function generic_aliases() { true; }
+function generic_setup() { true; }
 # vi: filetype=zsh

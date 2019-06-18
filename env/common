@@ -23,6 +23,7 @@ case "$(whoami)@$(uname -n)" in
     "u0_a"*"@localhost") LOCATION=android ;;
     "natechancellor@penguin"|"nathan@localhost") LOCATION=chromeos ;;
     "nathan@archlinux-"*|"nathan@flashbox") LOCATION=server ;;
+    *) LOCATION=generic ;;
 esac
 source "${SCRIPTS_FOLDER}/env/${LOCATION}"
 
