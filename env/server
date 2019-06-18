@@ -36,7 +36,6 @@
 function bootstrap() {(
     # Grab common variables
     source <(curl -LSs https://github.com/nathanchance/scripts/raw/master/constants/server_folders) &>/dev/null || return 1
-    source <(curl -LSs https://github.com/nathanchance/scripts/raw/master/constants/versions) &>/dev/null || return 1
     # Grab common functions
     source <(curl -LSs https://github.com/nathanchance/scripts/raw/master/common) &>/dev/null || return 1
 
