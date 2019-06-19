@@ -16,6 +16,7 @@ function bootstrap() {(
                    clang
                    cmake
                    curl
+                   doxygen
                    file
                    flex
                    gcc
@@ -24,6 +25,7 @@ function bootstrap() {(
                    g++
                    libauthen-sasl-perl
                    libcurl4-openssl-dev
+                   libedit-dev
                    libemail-valid-perl
                    libevent-dev
                    libexpat1-dev
@@ -39,7 +41,9 @@ function bootstrap() {(
                    most
                    ninja-build
                    python3
+                   python3-dev
                    sudo
+                   swig
                    texinfo
                    tmux
                    vim
