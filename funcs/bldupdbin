@@ -116,7 +116,7 @@ function bpgollvm() {(
                   -DCLANG_DEFAULT_LINKER=lld
                   -DCMAKE_BUILD_TYPE=Release
                   -DLLVM_ENABLE_PROJECTS=all )
-    FLAGS="-O3 -march=native -mtune=native"
+    FLAGS="-O3$([[ $(uname -m) = "x86_64" ]] && echo " -march=native -mtune=native")"
     LLVM_PROJECT=${REPO_FOLDER:-${HOME}/repos}/llvm-project
     BUILD_FOLDER=${LLVM_PROJECT}/build
     [[ -z ${LLVM_VERSION} ]] && LLVM_VERSION=llvmorg-8.0.1-rc2
@@ -135,13 +135,14 @@ function bpgollvm() {(
         header "Building LLVM stage 1"
 		mkdir -p "${BUILD_FOLDER}"/stage1
 		cd "${BUILD_FOLDER}"/stage1 || die "Error creating stage1 build folder"
+        LINKER=$(if command -v ld.lld &>/dev/null; then echo lld; else echo gold; fi)
 		"${CMAKE[@]}" -DCMAKE_C_COMPILER=clang \
                       -DCMAKE_C_FLAGS="${FLAGS}" \
 					  -DCMAKE_CXX_COMPILER=clang++ \
                       -DCMAKE_CXX_FLAGS="${FLAGS}" \
                       -DLLVM_CCACHE_BUILD=ON \
 					  -DLLVM_TARGETS_TO_BUILD=host \
-					  -DLLVM_USE_LINKER=lld \
+					  -DLLVM_USE_LINKER=${LINKER} \
 					  "${LLVM_PROJECT}"/llvm || die "Error configuring stage 1!"
 		ninja || die "Error building stage 1!"
     ) || exit ${?}
@@ -212,7 +213,7 @@ function bpgollvm() {(
         "${CMAKE[@]}" "${STAGE_ONE_BIN_DEFINES[@]}" \
                       -DCMAKE_C_FLAGS="${FLAGS} -Wno-backend-plugin" \
                       -DCMAKE_CXX_FLAGS="${FLAGS} -Wno-backend-plugin" \
-                      -DCMAKE_INSTALL_PREFIX=${PREFIX:-${HOME}/usr} \
+                      -DCMAKE_INSTALL_PREFIX=${PREFIX:=${HOME}/usr} \
                       -DLLVM_PROFDATA_FILE=${PROFILE_DATA} \
                       "${LLVM_PROJECT}"/llvm || die "Error configuring stage 3!"
         ninja || die "Error building stage 3!"
@@ -223,6 +224,8 @@ function bpgollvm() {(
 
     TIME_STRING=$(format_time "${START}" "$(date +%s)")
     echo "Total build time: ${TIME_STRING:l}"
+
+    path_push "${PREFIX}/bin"
 
     echo
     command -v clang
