@@ -46,6 +46,7 @@ function bootstrap() {(
                    swig
                    texinfo
                    tmux
+                   u-boot-tools
                    vim
                    zsh
                    zlib1g-dev )
