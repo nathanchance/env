@@ -242,7 +242,7 @@ function birg() {(
     else
         cd "${TMP_WKDIR:=$(mktemp -d)}"
         curl -LSs https://github.com/BurntSushi/ripgrep/archive/${RG_VERSION}.tar.gz | tar -xzf -
-        cd fd-${FD_VERSION}
+        cd rg-${RG_VERSION}
         [[ -d ${HOME}/.cargo/bin ]] || install_rust
         path_push "${HOME}/.cargo/bin"
         cargo build --release --locked --features 'pcre2' || die "cargo build failed!"
