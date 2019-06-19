@@ -119,12 +119,13 @@ function bpgollvm() {(
     FLAGS="-O3 -march=native -mtune=native"
     LLVM_PROJECT=${REPO_FOLDER:-${HOME}/repos}/llvm-project
     BUILD_FOLDER=${LLVM_PROJECT}/build
-    LLVM_VERSION=llvmorg-8.0.1-rc2
+    [[ -z ${LLVM_VERSION} ]] && LLVM_VERSION=llvmorg-8.0.1-rc2
     START=$(date +%s)
 
     header "Updating LLVM and cleaning up"
     [[ -d ${LLVM_PROJECT} ]] || { mkdir -p "${LLVM_PROJECT%/*}"; git clone https://github.com/llvm/llvm-project "${LLVM_PROJECT}"; }
     cd ${LLVM_PROJECT} || die "llvm-project clone failed!"
+    git fetch origin
     git reset --hard
     git clean -fxdq
     git checkout "${LLVM_VERSION}"
