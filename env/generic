@@ -79,8 +79,8 @@ function bootstrap() {(
     zsh "${DOTFILES}"/common/vim/vim_setup.sh
     cp -v "${DOTFILES}"/server/.tmux.conf "${HOME}"
 
-    # Download go
-    curl -LSs https://dl.google.com/go/go1.12.6.linux-amd64.tar.gz | tar -C ${HOME}/usr -xzf -
+    # Download go on x86_64
+    [[ $(get_arch) = "amd64" ]] && curl -LSs https://dl.google.com/go/go1.12.6.linux-amd64.tar.gz | tar -C ${HOME}/usr -xzf -
 )}
 
 function generic_aliases() { true; }
