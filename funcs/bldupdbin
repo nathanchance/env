@@ -125,6 +125,7 @@ function bpgollvm() {(
             "-b"|"--branch") shift; LLVM_VERSION=${1} ;;
             "-t"|"--tip-of-tree") LLVM_VERSION=master ;;
         esac
+        shift
     done
     [[ -z ${LLVM_VERSION} ]] && LLVM_VERSION=llvmorg-8.0.1-rc2
 
