@@ -27,6 +27,7 @@ function bootstrap() {(
                    libcurl4-openssl-dev
                    libedit-dev
                    libemail-valid-perl
+                   libelf-dev
                    libevent-dev
                    libexpat1-dev
                    libio-socket-ssl-perl
