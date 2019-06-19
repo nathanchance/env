@@ -114,21 +114,33 @@ function bpgollvm() {(
     CMAKE=( cmake -G Ninja
                   -Wno-dev
                   -DCLANG_DEFAULT_LINKER=lld
-                  -DCMAKE_BUILD_TYPE=Release
-                  -DLLVM_ENABLE_PROJECTS=all )
+                  -DCMAKE_BUILD_TYPE=Release )
     FLAGS="-O3$([[ $(uname -m) = "x86_64" ]] && echo " -march=native -mtune=native")"
     LLVM_PROJECT=${REPO_FOLDER:-${HOME}/repos}/llvm-project
     BUILD_FOLDER=${LLVM_PROJECT}/build
-    [[ -z ${LLVM_VERSION} ]] && LLVM_VERSION=llvmorg-8.0.1-rc2
     START=$(date +%s)
+
+    while (( ${#} )); do
+        case ${1} in
+            "-b"|"--branch") shift; LLVM_VERSION=${1} ;;
+            "-t"|"--tip-of-tree") LLVM_VERSION=master ;;
+        esac
+    done
+    [[ -z ${LLVM_VERSION} ]] && LLVM_VERSION=llvmorg-8.0.1-rc2
 
     header "Updating LLVM and cleaning up"
     [[ -d ${LLVM_PROJECT} ]] || { mkdir -p "${LLVM_PROJECT%/*}"; git clone https://github.com/llvm/llvm-project "${LLVM_PROJECT}"; }
     cd ${LLVM_PROJECT} || die "llvm-project clone failed!"
-    git fetch origin
     git reset --hard
     git clean -fxdq
+    git fetch origin
     git checkout "${LLVM_VERSION}"
+    # If we are on a branch, we should update it
+    [[ ${LLVM_VERSION} = "master" || ${LLVM_VERSION} =~ release ]] && git pull
+
+    # Ensure that we don't build llgo, it's broken
+    LLVM_ALL_PROJECTS=$(grep -F "set(LLVM_ALL_PROJECTS " llvm/CMakeLists.txt | cut -d \" -f 2)
+    CMAKE=( "${CMAKE[@]}" -DLLVM_ENABLE_PROJECTS="${LLVM_ALL_PROJECTS/;llgo}" )
 
     # Stage 1: Bootstrap compiler
     (
