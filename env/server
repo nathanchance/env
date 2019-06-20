@@ -628,4 +628,23 @@ function shellcheck() {(
 
 )}
 
+
+# Symlink an LLVM toolchain into ${HOME}/usr
+function symlink_llvm() {(
+    header "Removing symlinks"
+    fd -t l . "${HOME}"/usr -x rm -vrf
+
+    header "Removing empty directories"
+    while true; do
+        OUTPUT=$(fd -t e . ${HOME}/usr -x rm -vrf)
+        if [[ -n ${OUTPUT} ]]; then
+            echo "${OUTPUT}"
+        else
+            break
+        fi
+    done
+
+    header "Symlinking new LLVM"
+    cp -frsv "${TC_FOLDER}/${1:?}"/* "${HOME}"/usr
+)}
 # vi: filetype=zsh
