@@ -166,7 +166,7 @@ function setup_toolchains() {
     [[ -z ${GCC_CC} ]] && die "64-bit GCC toolchain could not be found!"
 
     # GCC 32-bit for compat VDSO
-    if [[ "${PWD}$(git cb)" =~ "wahoo" || "${PWD}$(git cb)" =~ "marlin" || "${PWD}$(git cb)" =~ "bluecross" ]]; then
+    if [[ -d arch/arm64/kernel/vdso32 ]]; then
         [[ -z ${GCC_32_BIT_FOLDER} ]] && GCC_32_BIT_FOLDER=${TC_FOLDER}/aosp-gcc-arm
         if [[ ! -d ${GCC_32_BIT_FOLDER} ]]; then
             GCC_32_BIT_FOLDER=${TC_FOLDER}/${GCC_32_BIT_FOLDER}
