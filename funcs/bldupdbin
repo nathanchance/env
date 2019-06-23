@@ -182,11 +182,7 @@ function bpgollvm() {(
                       -DLLVM_BUILD_RUNTIME=OFF \
                       -DLLVM_INCLUDE_GO_TESTS=OFF \
                       "${LLVM_PROJECT}"/llvm || die "Error configuring stage 2a!"
-        ninja clang lld || die "Error building stage2a!"
-        # The Go binding tests are disabled because they fail on my machine
-        # The test suite is just for benchmark coverage, we don't want the build to
-        # fail if they do.
-        ninja check-clang check-llvm || true
+        ninja clang lld check-clang check-llvm || die "Error building or checking stage2a!"
     ) || exit ${?}
 
     STAGE_TWO_BIN=${BUILD_FOLDER}/stage2a/bin
