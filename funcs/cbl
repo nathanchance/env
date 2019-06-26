@@ -510,7 +510,7 @@ function bldusr() {(
     bldbn --build-folder "${BBF:?}" --install-folder "${INSTALL_FOLDER}" --update || return ${?}
 
     # Build LLVM/Clang/lld
-    bldllvm --build-folder "${LBF:?}" --install-folder "${INSTALL_FOLDER:?}" --pgo --update-llvm || return ${?}
+    bldllvm --build-folder "${LBF:?}" --install-folder "${INSTALL_FOLDER:?}" --march-native --pgo --update-llvm || return ${?}
     stripllvmbin "${INSTALL_FOLDER}"
 )}
 
