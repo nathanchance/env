@@ -632,7 +632,9 @@ function shellcheck() {(
 # Symlink an LLVM toolchain into ${HOME}/usr
 function symlink_llvm() {(
     header "Removing symlinks"
-    fd -t l . "${HOME}"/usr -x rm -vrf
+    for FILE in $(fd -t l . "${HOME}"/usr); do
+        [[ $(readlink -f "${FILE}") =~ toolchains/clang ]] && rm -vrf "${FILE}"
+    done
 
     header "Removing empty directories"
     while true; do
