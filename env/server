@@ -113,6 +113,9 @@ function bootstrap() {(
     sudo pacman -R --noconfirm linux
     sudo grub-mkconfig -o /boot/grub/grub.cfg
 
+    # Setup build folder
+    echo "tmpfs ${BLDF} tmpfs nodev,nosuid,uid=$(whoami),gid=$(whoami),size=30G 0 0" | sudo tee -a /etc/fstab
+
     # Download and install mkdtimg
     MKDTIMG_FOLDER=$(mktemp -d)
     curl -LSs https://android.googlesource.com/platform/prebuilts/misc/+archive/master/linux-x86/libufdt.tar.gz | tar -C "${MKDTIMG_FOLDER}" -xzf -
@@ -312,14 +315,6 @@ function ccache_setup() {
 }
 
 
-# Setup build folders
-function sbf() {
-    [[ ! -d ${BLDF:?} ]] && { sudo mkdir "${BLDF}"; sudo chown -R "nathan:nathan" "${BLDF}"; }
-    [[ -z $(findmnt "${BLDF}") ]] && sudo mount -t tmpfs -o "nodev,nosuid,size=30G" tmpfs "${BLDF}"
-    type crbf &>/dev/null && crbf
-}
-
-
 # Clean build folder
 function cbf() {(
     case "${1}" in
@@ -345,7 +340,7 @@ function server_setup() {
     source "${SCRIPTS_FOLDER}"/funcs/cbl
     add_to_path_post "${HOME}/.gem/ruby/2.6.0/bin"
     load_botinfo
-    sbf
+    type crbf &>/dev/null && crbf
     ( gpg_available )
 }
 
