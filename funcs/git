@@ -86,6 +86,8 @@ function git_aliases() {(
     git config --global alias.rfl '!bash -c "git reset -- ${1} && git checkout -- ${1}"' # reset file (loud)
     git config --global alias.rh 'reset --hard'
     git config --global alias.rma 'remote add'
+    # https://lore.kernel.org/lkml/20190624144924.GE29120@arrakis.emea.arm.com/
+    git config --global alias.send-rmk-email '!git send-email --add-header=\"KernelVersion: $(git describe --abbrev=0)\" --no-thread --suppress-cc=all --to="patches@arm.linux.org.uk"'
     git config --global alias.rmsu 'remote set-url'
     git config --global alias.rmv 'remote -v'
     git config --global alias.rs 'reset --soft'
