@@ -164,8 +164,14 @@ function bldk() {(
     [[ ${PWD} =~ cbl && ${CONFIG} =~ defconfig ]] && CBL_DEFCONFIG=true
 
     if ${CBL_DEFCONFIG:=false}; then
-        # Use lld by default for everything but powerpc
-        [[ -z ${LD} && ! ${ARCH} =~ ppc ]] && LD=ld.lld
+        # Use lld by default for everything but certain PowerPC builds
+        if [[ -z ${LD} ]]; then
+            case ${ARCH} in
+                "ppc32"|"ppc64") ;;
+                *) LD=ld.lld ;;
+            esac
+        fi
+
         # Use llvm-objcopy
         [[ -z ${OBJCOPY} ]] && OBJCOPY=llvm-objcopy
     fi
@@ -339,19 +345,13 @@ function babk() {
     ARCH=${1}; shift
     [[ -z ${ARCH} ]] && { display_error "ARCH not specified!"; return 1; }
 
-    # Use lld by default for everything but powerpc
-    [[ -z ${LD} && ! ${ARCH} =~ ppc ]] && LD=ld.lld
-
-    # Use llvm-objcopy
-    [[ -z ${OBJCOPY} ]] && OBJCOPY=llvm-objcopy
-
     # Define a different defconfig for ppc32/ppc64le
     case ${ARCH} in
         "ppc32") DEFCONFIG=ppc44x_defconfig ;;
         "ppc64le") DEFCONFIG=powernv_defconfig ;;
     esac
 
-    bldk "${ARCH}" "${DEFCONFIG:-defconfig}" KCFLAGS="${KCFLAGS--Werror}" ${LD:+LD="${LD}"} ${OBJCOPY:+OBJCOPY="${OBJCOPY}"} "${@}"
+    bldk "${ARCH}" "${DEFCONFIG:-defconfig}" KCFLAGS="${KCFLAGS--Werror}" "${@}"
 
     bootk "${ARCH}"
 }
@@ -403,8 +403,13 @@ function lt() {(
         [[ ${CONFIG} =~ -be ]] && export BIG_ENDIAN=true
         CONFIG=${CONFIG//-be}
 
-        # Use lld by default for everything but powerpc and arm big endian
-        [[ -z ${LD} && ! ${ARCH} =~ ppc && -z ${BIG_ENDIAN} ]] && LD=ld.lld
+        # Use lld by default for everything but certain PowerPC builds
+        if [[ -z ${LD} && -z ${BIG_ENDIAN} ]]; then
+            case ${ARCH} in
+                "ppc32"|"ppc64") ;;
+                *) LD=ld.lld ;;
+            esac
+        fi
 
         # Use llvm-objcopy
         [[ -z ${OBJCOPY} ]] && OBJCOPY=llvm-objcopy
