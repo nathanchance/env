@@ -173,5 +173,9 @@ function chromeos_setup() {
     export TZ=/usr/share/zoneinfo/US/Arizona
 
     path_push "${HOME}/platform-tools"
+
+    # Load the stock completions to make sure we don't miss out on anything
+    echo "$fpath" | grep -q -s "vendor-completions" || fpath=( $fpath /usr/share/zsh/vendor-completions )
+    compinit
 }
 # vi: filetype=zsh
