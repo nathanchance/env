@@ -153,6 +153,13 @@ function bootstrap() {(
 ) && source "${HOME}"/.zshrc; }
 
 
+# Update function
+function upd() {
+    sudo apt update
+    sudo apt upgrade
+}
+
+
 # Laptop specific aliases
 function chromeos_aliases() {
     alias ls='ls --color=auto'
