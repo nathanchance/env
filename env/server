@@ -600,6 +600,12 @@ function shellcheck() {(
 )}
 
 
+# Alias for running PGO LLVM build
+function updpgollvm() {(
+    PREFIX=${LLVM_TC_FOLDER}/$(date +%Y-%m-%d) bpgollvm -t
+)}
+
+
 # Symlink an LLVM toolchain into ${HOME}/usr
 function symlink_llvm() {(
     header "Removing symlinks"
