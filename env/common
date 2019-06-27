@@ -113,9 +113,9 @@ function rld() {
 }
 
 
-# Bind mount current PWD into Docker container
-function docker_mount() {
-    docker run --mount type=bind,source="${PWD}",target=/"${PWD##*/}",readonly \
+# Bind mount current PWD into Podman container
+function podman_mount() {
+    podman run --mount type=bind,source="${PWD}",target=/"${PWD##*/}",ro=true \
                --workdir /"${PWD##*/}" \
                "${@}"
 }

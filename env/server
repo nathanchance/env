@@ -75,7 +75,6 @@ function bootstrap() {(
                                         ccache \
                                         cmake \
                                         cpio \
-                                        docker \
                                         doxygen \
                                         dtc \
                                         expect \
@@ -100,6 +99,7 @@ function bootstrap() {(
                                         perl-authen-sasl \
                                         perl-mime-tools \
                                         perl-net-smtp-ssl \
+                                        podman \
                                         python \
                                         python-pip \
                                         qemu-headless-arch-extra \
@@ -240,9 +240,10 @@ function bootstrap() {(
         done
     )
 
-    # Start Docker
-    sudo gpasswd -a nathan docker
-    sudo systemctl enable --now docker.service
+    # Configure podman
+    echo "kernel.unprivileged_userns_clone=1" | sudo tee /etc/sysctl.d/unprivileged_userns_clone.conf
+    echo "$(whoami):100000:65536" | sudo tee /etc/subgid /etc/subuid
+    echo "session    optional   pam_cgfs.so          -c freezer,memory,name=systemd,unified" | sudo tee -a /etc/pam.d/system-login
 
     # Install gist
     gem install gist
@@ -618,8 +619,8 @@ function symlink-commands() {(
 
 # Shellcheck through Docker
 function shellcheck() {(
-    docker pull r.j3ss.co/shellcheck 1>/dev/null
-    docker_mount --rm r.j3ss.co/shellcheck shellcheck "${@}"
+    podman pull r.j3ss.co/shellcheck 1>/dev/null
+    podman_mount --rm r.j3ss.co/shellcheck shellcheck "${@}"
 
 )}
 

@@ -472,14 +472,14 @@ function lt() {(
 )}
 
 
-# Pull the latest CBL Docker image and run it
-function dckrrn() {(
-    [[ -z ${DOCKER_IMAGE} ]] && DOCKER_IMAGE=clangbuiltlinux/debian
-    [[ -z ${LOCAL} ]] && docker pull "${DOCKER_IMAGE}"
-    docker_mount --interactive \
+# Pull the latest CBL Docker image and run it with podman
+function pdmnrn() {(
+    [[ -z ${PODMAN_IMAGE} ]] && PODMAN_IMAGE=clangbuiltlinux/debian
+    [[ -z ${LOCAL} ]] && podman pull "${PODMAN_IMAGE}"
+    podman_mount --interactive \
                  --rm \
                  --tty \
-                 "${DOCKER_IMAGE}" "${@}"
+                 "${PODMAN_IMAGE}" "${@}"
 )}
 
 
@@ -758,8 +758,8 @@ done' > "${SCRIPT}"
                  ubuntu:latest \
                  ubuntu:rolling \
                  ubuntu:devel; do
-        docker pull "${IMAGE}"
-        docker_mount --interactive \
+        podman pull "${IMAGE}"
+        podman_mount --interactive \
                      --mount type=bind,source="${CCACHE_FOLDER}",target=/ccache \
                      --mount type=bind,source="${SCRIPT}",target=/script.sh \
                      --rm \
