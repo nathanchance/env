@@ -264,33 +264,11 @@ function server_aliases() {
     # default Arch ls alias
     alias ls='ls --color=auto'
 
-    # Change directory aliases
-    alias ack='cd ${KERNEL_FOLDER}/sources/kernel-common'
-    alias op6='cd ${KERNEL_FOLDER}/flash/op6'
-    alias op6c='cd ${KERNEL_FOLDER}/flash/op6-custom'
-    alias op6ak='cd ${KERNEL_FOLDER}/flash/anykernel2-op6'
-    alias pi='cd ${KERNEL_FOLDER}/pi'
-    alias pxl='cd ${KERNEL_FOLDER}/flash/marlin'
-    alias pxlak='cd ${KERNEL_FOLDER}/flash/anykernel2-marlin'
-    alias pxl2='cd ${KERNEL_FOLDER}/flash/wahoo'
-    alias pxl2ak='cd ${KERNEL_FOLDER}/flash/anykernel2-wahoo'
-    alias tlc='cd ${TC_FOLDER}'
-    alias sod='cd ${KERNEL_FOLDER}/sony/kernel'
-
     # Generate a kernel version for the current tree
     alias kver='make kernelversion'
 
-    # Setup build for AOSP
-    alias senv='. build/envsetup.sh'
-
-    # Alias for flash-kernel script
-    alias fk='flash-kernel'
-
     # Alias for merge-stable script
     alias ms='merge-stable'
-
-    # Clean out web folder
-    alias wfc='git -C ${WEB_FOLDER}/downloads/kernels cl'
 }
 
 
