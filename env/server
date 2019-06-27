@@ -50,7 +50,6 @@ function bootstrap() {(
     mkdir -p "${ALS}" \
              "${CBL}"/{android,git,mirrors} \
              "${KERNEL_FOLDER}"/sony \
-             "${MISC_FOLDER}"/building \
              "${REPO_FOLDER}" \
              "${TC_FOLDER}" || die "Can't create folders, wtf?"
 
@@ -135,8 +134,8 @@ function bootstrap() {(
     rm -rf "${KEYS}"
 
     # Install yay and AUR packages
-    cd "${MISC_FOLDER}"/building || die "wtf?"
-    curl -LSs -o PKGBUILD "https://aur.archlinux.org/cgit/aur.git/plain/PKGBUILD?h=yay"
+    cd "${TMP_BLD_FOLDER:=$(mktemp -d)}" || die "wtf?"
+    curl -LSso PKGBUILD "https://aur.archlinux.org/cgit/aur.git/plain/PKGBUILD?h=yay"
     makepkg --noconfirm -si || die "Error installing yay!"
     gpg --recv-keys 702353E0F7E48EDB
     yay -S --needed lineageos-devel || die "Error running yay!"

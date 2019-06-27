@@ -1,7 +1,6 @@
 # Common locations amongst scripts
 MAIN_FOLDER=${HOME}
 KERNEL_FOLDER=${MAIN_FOLDER}/kernels
-MISC_FOLDER=${MAIN_FOLDER}/misc
 REPO_FOLDER=${MAIN_FOLDER}/repos
 ROM_FOLDER=${MAIN_FOLDER}/roms
 TC_FOLDER=${MAIN_FOLDER}/toolchains
