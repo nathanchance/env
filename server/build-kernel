@@ -150,7 +150,7 @@ function parse_parameters() {
 
     # Defaults
     [[ -z ${ARCH} ]] && ARCH=arm64
-    [[ -z ${GCC_FOLDER} ]] && GCC_FOLDER=${TC_FOLDER}/aosp-gcc-${ARCH}
+    [[ -z ${GCC_FOLDER} ]] && GCC_FOLDER=${ANDROID_TC_FOLDER}/gcc-${ARCH}
 }
 
 
@@ -158,7 +158,7 @@ function parse_parameters() {
 function setup_toolchains() {
     # GCC (64-bit or 32-bit)
     if [[ ! -d ${GCC_FOLDER} ]]; then
-        GCC_FOLDER=${TC_FOLDER}/${GCC_FOLDER}
+        GCC_FOLDER=${ANDROID_TC_FOLDER}/${GCC_FOLDER}
         [[ ! -d ${GCC_FOLDER} ]] && die "Invalid 64-bit GCC folder specified!"
     fi
     GCC_BIN=${GCC_FOLDER}/bin
@@ -167,9 +167,9 @@ function setup_toolchains() {
 
     # GCC 32-bit for compat VDSO
     if [[ -d arch/arm64/kernel/vdso32 ]]; then
-        [[ -z ${GCC_32_BIT_FOLDER} ]] && GCC_32_BIT_FOLDER=${TC_FOLDER}/aosp-gcc-arm
+        [[ -z ${GCC_32_BIT_FOLDER} ]] && GCC_32_BIT_FOLDER=${ANDROID_TC_FOLDER}/gcc-arm
         if [[ ! -d ${GCC_32_BIT_FOLDER} ]]; then
-            GCC_32_BIT_FOLDER=${TC_FOLDER}/${GCC_32_BIT_FOLDER}
+            GCC_32_BIT_FOLDER=${ANDROID_TC_FOLDER}/${GCC_32_BIT_FOLDER}
             [[ ! -d ${GCC_32_BIT_FOLDER} ]] && die "Invalid 32-bit GCC folder specified!"
         fi
         GCC_32_BIT_BIN=${GCC_32_BIT_FOLDER}/bin
@@ -179,9 +179,9 @@ function setup_toolchains() {
 
     # Clang
     if [[ -n ${CLANG} ]]; then
-        [[ -z ${CLANG_FOLDER} ]] && CLANG_FOLDER=${TC_FOLDER}/aosp-clang/clang-4053586
+        [[ -z ${CLANG_FOLDER} ]] && CLANG_FOLDER=${ANDROID_TC_FOLDER}/clang-4053586
         if [[ ! -d ${CLANG_FOLDER} ]]; then
-            CLANG_FOLDER=${TC_FOLDER}/${CLANG_FOLDER}
+            CLANG_FOLDER=${ANDROID_TC_FOLDER}/${CLANG_FOLDER}
             [[ ! -d ${CLANG_FOLDER} ]] && die "Invalid Clang folder specified!"
         fi
         CLANG_BIN=${CLANG_FOLDER}/bin

@@ -48,10 +48,10 @@ function bootstrap() {(
 
     # Setup folders that will be used
     mkdir -p "${ALS}" \
+             "${ANDROID_TC_FOLDER}" \
              "${CBL}"/{android,git,mirrors} \
              "${KERNEL_FOLDER}"/sony \
-             "${REPO_FOLDER}" \
-             "${TC_FOLDER}" || die "Can't create folders, wtf?"
+             "${REPO_FOLDER}" || die "Can't create folders, wtf?"
 
     # Enable multilib
     sudo sed -i "/\[multilib\]/,/Include/"'s/^#//' /etc/pacman.conf
@@ -162,14 +162,14 @@ function bootstrap() {(
     ) || die "Error installing dotfiles"
 
     # Download toolchains
-    git -C "${TC_FOLDER}" clone --single-branch https://android.googlesource.com/platform/prebuilts/clang/host/linux-x86/ aosp-clang
-    git -C "${TC_FOLDER}" clone --depth=1 -b android-9.0.0_r1 --single-branch https://android.googlesource.com/platform/prebuilts/gcc/linux-x86/aarch64/aarch64-linux-android-4.9/ aosp-gcc-arm64
-    git -C "${TC_FOLDER}" clone --depth=1 -b android-9.0.0_r1 --single-branch https://android.googlesource.com/platform/prebuilts/gcc/linux-x86/arm/arm-linux-androideabi-4.9/ aosp-gcc-arm
+    git -C "${ANDROID_TC_FOLDER}" clone --single-branch https://android.googlesource.com/platform/prebuilts/clang/host/linux-x86/ clang-master
+    git -C "${ANDROID_TC_FOLDER}" clone --depth=1 -b android-9.0.0_r1 --single-branch https://android.googlesource.com/platform/prebuilts/gcc/linux-x86/aarch64/aarch64-linux-android-4.9/ gcc-arm64
+    git -C "${ANDROID_TC_FOLDER}" clone --depth=1 -b android-9.0.0_r1 --single-branch https://android.googlesource.com/platform/prebuilts/gcc/linux-x86/arm/arm-linux-androideabi-4.9/ gcc-arm
     for VERSION in clang-4053586:android-9.0.0_r1 clang-4393122:android-9.0.0_r1 clang-4691093:android-9.0.0_r1 clang-r349610b:a59d17df840d203e477534a3312b36e2310712d0; do
         BRANCH=${VERSION#*:}
         VERSION=${VERSION%:*}
-        mkdir -pv "${TC_FOLDER}/${VERSION}"
-        curl -LSs https://android.googlesource.com/platform/prebuilts/clang/host/linux-x86/+archive/${BRANCH}/${VERSION}.tar.gz | tar -C "${TC_FOLDER}/${VERSION}" -xzf - || display_error "Error downloading ${VERSION}!"
+        mkdir -pv "${ANDROID_TC_FOLDER}/${VERSION}"
+        curl -LSs https://android.googlesource.com/platform/prebuilts/clang/host/linux-x86/+archive/${BRANCH}/${VERSION}.tar.gz | tar -C "${ANDROID_TC_FOLDER}/${VERSION}" -xzf - || display_error "Error downloading ${VERSION}!"
     done
     git -C "${TC_FOLDER}" clone https://github.com/ThankYouMario/proprietary_vendor_qcom_sdclang-6.0_linux-x86 sd-llvm-6.0.2
 
@@ -452,11 +452,11 @@ function dib-clang() {(
         "msm-4.9"*) DEFCONFIG=sdm845-perf_defconfig ;;
     esac
 
-    TC_LIST=( "--clang --clang-toolchain aosp-clang/clang-r344140"
-              "--clang --clang-toolchain aosp-clang/clang-r328903"
-              "--clang --clang-toolchain aosp-clang/clang-4691093"
+    TC_LIST=( "--clang --clang-toolchain clang-master/clang-r344140"
+              "--clang --clang-toolchain clang-master/clang-r328903"
+              "--clang --clang-toolchain clang-master/clang-4691093"
               "" )
-    [[ "$(git cb)" =~ oreo ]] && TC_LIST+=( "--clang --clang-toolchain aosp-clang/clang-4053586" )
+    [[ "$(git cb)" =~ oreo ]] && TC_LIST+=( "--clang --clang-toolchain clang-master/clang-4053586" )
 
     for ITEM in "${TC_LIST[@]}"; do
         read -rA ITEM_ARRAY <<< "${ITEM}"
@@ -628,7 +628,7 @@ function shellcheck() {(
 function symlink_llvm() {(
     header "Removing symlinks"
     for FILE in $(fd -t l . "${HOME}"/usr); do
-        [[ $(readlink -f "${FILE}") =~ toolchains/clang ]] && rm -vrf "${FILE}"
+        [[ $(readlink -f "${FILE}") =~ toolchains/llvm ]] && rm -vrf "${FILE}"
     done
 
     header "Removing empty directories"
@@ -642,6 +642,6 @@ function symlink_llvm() {(
     done
 
     header "Symlinking new LLVM"
-    cp -frsv "${TC_FOLDER}/${1:?}"/* "${HOME}"/usr
+    cp -frsv "${LLVM_TC_FOLDER}/${1:?}"/* "${HOME}"/usr
 )}
 # vi: filetype=zsh

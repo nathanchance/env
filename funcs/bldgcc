@@ -17,8 +17,8 @@
 # $ bldgcc arm arm64
 #
 # By default, the script will contain everything to a 'gcc' folder in ${PWD}.
-# To change where that gcc folder is, either 'export TC_FOLDER=<value>' or
-# 'TC_FOLDER=<value> bldgcc'.
+# To change where that gcc folder is, either 'export GCC_TC_FOLDER=<value>' or
+# 'GCC_TC_FOLDER=<value> bldgcc'.
 #
 # By default, the GCC and binutils versions will be the latest available.
 # To change the versions, either 'export GCC_VERSION=<value> BINUTILS_VERSION=<value>'
@@ -52,10 +52,9 @@ function bldgcc() {(
     done
 
     # Create folders
-    GCC_FOLDER=${TC_FOLDER:-${PWD}}/gcc
-    GCC_BLD=${GCC_FOLDER}/build
-    mkdir -p "${GCC_FOLDER}"
-    [[ ! -d ${GCC_BLD} ]] && git -C "${GCC_FOLDER}" clone git://git.infradead.org/users/segher/buildall.git build
+    GCC_BLD=${GCC_TC_FOLDER:=${PWD}/gcc}/build
+    mkdir -p "${GCC_TC_FOLDER}"
+    [[ ! -d ${GCC_BLD} ]] && git -C "${GCC_TC_FOLDER}" clone git://git.infradead.org/users/segher/buildall.git build
     cd "${GCC_BLD}" || {
         echo "buildall clone failed!" >&2
         exit 1
@@ -81,7 +80,7 @@ CHECKING=release
 ECHO=/bin/echo
 GCC_SRC=${PWD}/${GCC_SOURCE}
 MAKEOPTS=-j$(nproc)
-PREFIX=${GCC_FOLDER}/${GCC_VERSION}
+PREFIX=${GCC_TC_FOLDER}/${GCC_VERSION}
 EOF
 
     # Build the toolchains

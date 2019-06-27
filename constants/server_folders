@@ -4,6 +4,9 @@ KERNEL_FOLDER=${MAIN_FOLDER}/kernels
 REPO_FOLDER=${MAIN_FOLDER}/repos
 ROM_FOLDER=${MAIN_FOLDER}/roms
 TC_FOLDER=${MAIN_FOLDER}/toolchains
+ANDROID_TC_FOLDER=${TC_FOLDER}/android
+GCC_TC_FOLDER=${TC_FOLDER}/gcc
+LLVM_TC_FOLDER=${TC_FOLDER}/llvm
 WEB_FOLDER=/var/www
 
 # android-linux-stable folder
@@ -16,6 +19,6 @@ BLDF=/mnt/build
 CBL=${MAIN_FOLDER}/cbl
 
 # Latest AOSP Clang version
-LACV=clang-r353983c
-LACF=${TC_FOLDER}/aosp-clang/${LACV}
+LACV=clang-r353983d
+LACF=${ANDROID_TC_FOLDER}/clang-master/${LACV}
 # vi: filetype=zsh
