@@ -39,9 +39,9 @@ function bootstrap() {(
     # Grab common functions
     source <(curl -LSs https://github.com/nathanchance/scripts/raw/master/common) &>/dev/null || return 1
 
-    DOTFILES=${REPO_FOLDER}/dotfiles
+    DOTFILES=${GITHUB_FOLDER}/dotfiles
     KEYS=/tmp/keys
-    SCRIPTS=${MAIN_FOLDER}/scripts
+    SCRIPTS=${GITHUB_FOLDER}/scripts
 
     # Check if keys are available for installation
     [[ ! -d ${KEYS} ]] && die "${KEYS} doesn't exist, create it, and copy keys!"
@@ -50,8 +50,8 @@ function bootstrap() {(
     mkdir -p "${ALS}" \
              "${ANDROID_TC_FOLDER}" \
              "${CBL}"/{android,git,mirrors} \
-             "${KERNEL_FOLDER}"/sony \
-             "${REPO_FOLDER}" || die "Can't create folders, wtf?"
+             "${GITHUB_FOLDER}" \
+             "${KERNEL_FOLDER}"/sony || die "Can't create folders, wtf?"
 
     # Enable multilib
     sudo sed -i "/\[multilib\]/,/Include/"'s/^#//' /etc/pacman.conf
@@ -148,9 +148,9 @@ function bootstrap() {(
     source "${SCRIPTS}"/funcs/git && git_setup
     source "${SCRIPTS}"/funcs/pure && pure_prompt
     for REPO in chromeos-adb-fastboot dotfiles hugo-files patches; do
-        [[ ! -d ${REPO_FOLDER}/${REPO} ]] && { git -C "${REPO_FOLDER}" clone git@github.com:nathanchance/"${REPO}" || die "Error cloning ${REPO}!"; }
+        [[ ! -d ${GITHUB_FOLDER}/${REPO} ]] && { git -C "${GITHUB_FOLDER}" clone git@github.com:nathanchance/"${REPO}" || die "Error cloning ${REPO}!"; }
     done
-    [[ ! -d ${REPO_FOLDER}/git ]] && { git -C "${REPO_FOLDER}" clone git://github.com/git/git || die "Error cloning git!"; }
+    [[ ! -d ${SRC_FOLDER}/git ]] && { git -C "${SRC_FOLDER}" clone git://github.com/git/git || die "Error cloning git!"; }
     [[ ! -d ${ALS}/sp ]] && { git -C "${ALS}" clone git@github.com:nathanchance/stable-patches sp || die "Error cloning stable-patches!"; }
 
     # Install dotfiles
@@ -266,7 +266,6 @@ function server_aliases() {
 
     # Change directory aliases
     alias ack='cd ${KERNEL_FOLDER}/sources/kernel-common'
-    alias pkg='cd ${REPO_FOLDER}/pkgbuilds'
     alias op6='cd ${KERNEL_FOLDER}/flash/op6'
     alias op6c='cd ${KERNEL_FOLDER}/flash/op6-custom'
     alias op6ak='cd ${KERNEL_FOLDER}/flash/anykernel2-op6'
@@ -277,7 +276,6 @@ function server_aliases() {
     alias pxl2ak='cd ${KERNEL_FOLDER}/flash/anykernel2-wahoo'
     alias tlc='cd ${TC_FOLDER}'
     alias sod='cd ${KERNEL_FOLDER}/sony/kernel'
-    alias spt='cd ${SCRIPTS_FOLDER}'
 
     # Generate a kernel version for the current tree
     alias kver='make kernelversion'

@@ -24,7 +24,7 @@ function global_gitignore() {(
 # Creates .zshrc
 function create_zshrc() {(
     {
-        echo "[[ -f \${HOME}/scripts/env/common ]] && source \"\${HOME}/scripts/env/common\""
+        echo "[[ -f ${GITHUB_FOLDER:=${HOME}/github}/scripts/env/common ]] && source \"${GITHUB_FOLDER}/scripts/env/common\""
         echo "type shell_setup &>/dev/null && shell_setup"
     } > "${HOME}"/.zshrc
 )}

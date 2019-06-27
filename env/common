@@ -30,11 +30,14 @@ source "${SCRIPTS_FOLDER}/env/${LOCATION}"
 
 # Universal aliases/functions
 function aliases() {
-    # tmux alias
-    command -v tmux &>/dev/null && alias tmux='tmux -u'
-
     # hub alias
     command -v hub &>/dev/null && alias git='hub'
+
+    # scripts folder alias
+    alias spt='cd ${SCRIPTS_FOLDER}'
+
+    # tmux alias
+    command -v tmux &>/dev/null && alias tmux='tmux -u'
 
     source "${SCRIPTS_FOLDER}/funcs/bldupdbin"
     source "${SCRIPTS_FOLDER}/funcs/deldog"

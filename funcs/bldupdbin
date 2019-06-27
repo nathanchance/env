@@ -80,7 +80,7 @@ function bgit() {(
                 NO_CROSS_DIRECTORY_HARDLINKS=1
                 NO_PERL_CPAN_FALLBACKS=1 )
 
-    GIT_FOLDER=${REPO_FOLDER:-${HOME}/repos}/git
+    GIT_FOLDER=${SRC_FOLDER:-${HOME}/src}/git
     if [[ ! -d ${GIT_FOLDER} ]]; then
         mkdir -p "${GIT_FOLDER%/*}"
         git clone git://github.com/git/git "${GIT_FOLDER}"
@@ -116,7 +116,7 @@ function bpgollvm() {(
                   -DCLANG_DEFAULT_LINKER=lld
                   -DCMAKE_BUILD_TYPE=Release )
     FLAGS="-O3$([[ $(uname -m) = "x86_64" ]] && echo " -march=native -mtune=native")"
-    LLVM_PROJECT=${REPO_FOLDER:-${HOME}/repos}/llvm-project
+    LLVM_PROJECT=${SRC_FOLDER:-${HOME}/src}/llvm-project
     BUILD_FOLDER=${LLVM_PROJECT}/build
     START=$(date +%s)
 

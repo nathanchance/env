@@ -66,7 +66,8 @@ function bootstrap() {(
 
     source <(curl -LSs https://github.com/nathanchance/scripts/raw/master/common) &>/dev/null || return 1
 
-    SCRIPTS=${HOME}/scripts
+    SCRIPTS=${HOME}/github/scripts
+    mkdir -p "${SCRIPTS%/*}"
     [[ -d ${SCRIPTS} ]] || { git clone https://github.com/nathanchance/scripts "${SCRIPTS}" || die "Error cloning scripts!"; }
     source "${SCRIPTS}"/env/setup && global_gitignore && create_zshrc
     source "${SCRIPTS}"/funcs/bldupdbin && { bldupdbin || exit ${?}; }
@@ -74,7 +75,7 @@ function bootstrap() {(
     source "${SCRIPTS}"/funcs/git && git_setup
     source "${SCRIPTS}"/funcs/pure && pure_prompt
 
-    DOTFILES=${HOME}/dotfiles
+    DOTFILES=${HOME}/github/dotfiles
     [[ -d ${DOTFILES} ]] || { git clone https://github.com/nathanchance/dotfiles "${DOTFILES}" || die "Error cloning dotfiles!"; }
     zsh "${DOTFILES}"/common/vim/vim_setup.sh
     cp -v "${DOTFILES}"/server/.tmux.conf "${HOME}"

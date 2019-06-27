@@ -46,7 +46,7 @@ function pch() {
 function ptchmn() {(
     [[ ! -f Makefile ]] && die "You're not in a kernel folder!"
 
-    TARGET_FOLDER=${REPO_FOLDER}/patches/linux/$(git cb)
+    TARGET_FOLDER=${GITHUB_FOLDER}/patches/linux/$(git cb)
     [[ ! -d ${TARGET_FOLDER} ]] && die "${TARGET_FOLDER} doesn't exist!"
 
     case "${1:?}" in

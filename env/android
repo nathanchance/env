@@ -44,13 +44,15 @@ function bootstrap() {(
     gpg-connect-agent reloadagent /bye
 
     # Downloads scripts
-    git clone git@github.com:nathanchance/scripts
-    source "${HOME}"/scripts/funcs/git && git_setup
-    source "${HOME}"/scripts/funcs/pure && pure_prompt
-    source "${HOME}"/scripts/env/setup && global_gitignore && create_zshrc
+    SCRIPTS=${HOME}/github/scripts
+    mkdir -p "${SCRIPTS%/*}"
+    git clone git@github.com:nathanchance/scripts "${SCRIPTS}"
+    source "${SCRIPTS}"/funcs/git && git_setup
+    source "${SCRIPTS}"/funcs/pure && pure_prompt
+    source "${SCRIPTS}"/env/setup && global_gitignore && create_zshrc
 
     # Download and install dotfiles
-    DOTFILES=${HOME}/dotfiles
+    DOTFILES=${HOME}/github/dotfiles
     git clone git@github.com:nathanchance/dotfiles
     (
         zsh "${DOTFILES}"/common/vim/vim_setup.sh
