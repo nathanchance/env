@@ -94,6 +94,17 @@ Link: https://reviews.llvm.org/${REVISION}"
 )}
 
 
+# ccache configuration through environment variables
+function ccache_env() {
+    [[ ! -d ${1:?} ]] && mkdir -p "${1}"
+    export CCACHE_DIR=${1}
+
+    ccache --max-size "${2:?}"G >/dev/null
+    ccache --set-config=compression=true
+    ccache --set-config=compression_level=9
+}
+
+
 # Build kernel with Clang (wrapper)
 function bldkw() {(
     if [[ ! -f Makefile ]]; then
@@ -120,6 +131,9 @@ function bldkw() {(
     # Use our versions of Clang
     move_to_front_of_path "${CBL_BIN}"
     [[ -n ${PATH_OVERRIDE} ]] && move_to_front_of_path "${PATH_OVERRIDE}"
+
+    # Setup ccache
+    ccache_env "${CBL}"/.ccache/kernel 100
 
     # Build the kernel
     time make ${QUIET:+-s} \
@@ -492,12 +506,18 @@ function stripllvmbin() {(
 
 # Build LLVM
 function bldllvm() {(
+    # Setup ccache
+    ccache_env "${CBL}"/.ccache/llvm 75
+
     "${TCBLD}"/build-llvm.py "${@}"
 )}
 
 
 # Build binutils
 function bldbn() {(
+    # Setup ccache
+    ccache_env "${CBL}"/.ccache/binutils 25
+
    "${TCBLD}"/build-binutils.py "${@}"
 )}
 

@@ -306,7 +306,7 @@ function cbf() {(
 
 # Additional setup steps for my build server
 function server_setup() {
-    ccache_setup 250
+    ccache_setup 50
     LOG=$(mktemp); export LOG
     add_to_path_pre "${SCRIPTS_FOLDER}/server"
     move_to_front_of_path "${HOME}/usr/bin"
