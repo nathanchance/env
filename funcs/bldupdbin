@@ -153,7 +153,6 @@ function bpgollvm() {(
                       -DCMAKE_C_FLAGS="${FLAGS}" \
 					  -DCMAKE_CXX_COMPILER=clang++ \
                       -DCMAKE_CXX_FLAGS="${FLAGS}" \
-                      -DLLVM_CCACHE_BUILD=ON \
 					  -DLLVM_TARGETS_TO_BUILD=host \
 					  -DLLVM_USE_LINKER=${LINKER} \
 					  "${LLVM_PROJECT}"/llvm || die "Error configuring stage 1!"
