@@ -151,11 +151,11 @@ function bpgollvm() {(
         LINKER=$(if command -v ld.lld &>/dev/null; then echo lld; else echo gold; fi)
 		"${CMAKE[@]}" -DCMAKE_C_COMPILER=clang \
                       -DCMAKE_C_FLAGS="${FLAGS}" \
-					  -DCMAKE_CXX_COMPILER=clang++ \
+                      -DCMAKE_CXX_COMPILER=clang++ \
                       -DCMAKE_CXX_FLAGS="${FLAGS}" \
-					  -DLLVM_TARGETS_TO_BUILD=host \
-					  -DLLVM_USE_LINKER=${LINKER} \
-					  "${LLVM_PROJECT}"/llvm || die "Error configuring stage 1!"
+                      -DLLVM_TARGETS_TO_BUILD=host \
+                      -DLLVM_USE_LINKER=${LINKER} \
+                      "${LLVM_PROJECT}"/llvm || die "Error configuring stage 1!"
 		ninja || die "Error building stage 1!"
     ) || exit ${?}
 
