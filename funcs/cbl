@@ -10,6 +10,7 @@ CBL_SRC=${CBL}/src
 CBL_USR=${CBL}/usr
 CBL_BIN=${CBL_USR}/bin
 TCBLD=${CBL}/tc-build
+CBL_CCACHE=${CBL}/.ccache
 
 # Configurations known to build with -Werror
 CBLCFGS=( "arm:multi_v7_defconfig"
@@ -109,7 +110,7 @@ function ccache_env() {
 function ccache_for_all() {(
     while (( ${#} )); do
         case ${1} in
-            "binutils"|"kernel"|"llvm") FOLDER=${CBL}/.ccache/${1} ;;
+            "binutils"|"kernel"|"llvm") FOLDER="${CBL_CCACHE}"/${1} ;;
             "clear") CCACHE_OPTS=( -Cz ) ;;
             "stats") CCACHE_OPTS=( -s ) ;;
         esac
@@ -119,7 +120,7 @@ function ccache_for_all() {(
     if [[ -z ${FOLDER} ]]; then
         header "System wide cache"
         ccache "${CCACHE_OPTS[@]}"
-        for FOLDER in "${CBL}"/.ccache/*; do
+        for FOLDER in "${CBL_CCACHE}"/*; do
             header "${FOLDER}"
             CCACHE_DIR=${FOLDER} ccache "${CCACHE_OPTS[@]}"
         done
@@ -170,7 +171,7 @@ function bldkw() {(
     [[ -n ${PATH_OVERRIDE} ]] && move_to_front_of_path "${PATH_OVERRIDE}"
 
     # Setup ccache
-    ccache_env "${CBL}"/.ccache/kernel 100
+    ccache_env "${CBL_CCACHE}"/kernel 100
 
     # Build the kernel
     time make ${QUIET:+-s} \
@@ -544,7 +545,7 @@ function stripllvmbin() {(
 # Build LLVM
 function bldllvm() {(
     # Setup ccache
-    ccache_env "${CBL}"/.ccache/llvm 75
+    ccache_env "${CBL_CCACHE}"/llvm 75
 
     "${TCBLD}"/build-llvm.py "${@}"
 )}
@@ -553,7 +554,7 @@ function bldllvm() {(
 # Build binutils
 function bldbn() {(
     # Setup ccache
-    ccache_env "${CBL}"/.ccache/binutils 25
+    ccache_env "${CBL_CCACHE}"/binutils 25
 
    "${TCBLD}"/build-binutils.py "${@}"
 )}
