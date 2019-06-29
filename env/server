@@ -358,33 +358,30 @@ function nf() {
 
 # Find config values in a kernel tree
 # kfg [-c <defconfig_file>] [-f <config>] [-e <config>] [-d <config>]
-function kfg() {
-    local ARCH CONFIG DEFCONFIGS LIST
+function kfg() {(
     [[ -z ${ARCH} ]] && ARCH=arm64
-    DEFCONFIGS="$(ls arch/${ARCH}/configs/flash*_defconfig 2>/dev/null)"
+    CONFIGS_FOLDER=arch/${ARCH}/configs
+    DEFCONFIGS=$( $(fd -I 'flash*_defconfig') )
 
     while (( ${#} )); do
         case ${1} in
             "-c"|"--config")
                 shift
 
-                DEFCONFIGS=${1} ;;
+                read -rA DEFCONFIGS <<< "${1}" ;;
 
             "-d"|"--disable")
                 shift
 
-                CONFIG=${1//CONFIG_/}
-                for DEFCONFIG in ${DEFCONFIGS}; do
-                    echo "# CONFIG_${CONFIG} is not set" >> arch/${ARCH}/configs/"$(basename "${DEFCONFIG}")"
+                for DEFCONFIG in "${DEFCONFIGS[@]}"; do
+                    echo "# CONFIG_${1//CONFIG_/} is not set" >> "${CONFIGS_FOLDER}/${DEFCONFIG##*/}"
                 done ;;
 
             "-e"|"--enable")
                 shift
 
-                CONFIG=${1//CONFIG_/}
-
-                for DEFCONFIG in ${DEFCONFIGS}; do
-                    echo "CONFIG_${CONFIG}=y" >> arch/${ARCH}/configs/"$(basename "${DEFCONFIG}")"
+                for DEFCONFIG in "${DEFCONFIGS[@]}"; do
+                    echo "CONFIG_${1//CONFIG_/}=y" >> "${CONFIGS_FOLDER}/${DEFCONFIG##*/}"
                 done ;;
 
             "-f"|"--find")
@@ -404,20 +401,18 @@ function kfg() {
                 echo ;;
 
             "-u"|"--update")
-                shift
-
-                for DEFCONFIG in ${DEFCONFIGS}; do
+                for DEFCONFIG in "${DEFCONFIGS[@]}"; do
                     [[ "${*}" =~ "-fc" ]] && FILE=out/.config || FILE=out/defconfig
                     rm -rf out
-                    make O=out ARCH=${ARCH} "$(basename "${DEFCONFIG}")"
+                    make O=out ARCH=${ARCH} "${DEFCONFIG##*/}"
                     make O=out ARCH=${ARCH} savedefconfig
-                    cp -v "${FILE}" arch/${ARCH}/configs/"$(basename "${DEFCONFIG}")"
+                    cp -v "${FILE}" "${CONFIGS_FOLDER}/${DEFCONFIG##*/}"
                 done ;;
         esac
 
         shift
     done
-}
+)}
 
 
 # Update all remotes and run git gc/prune
