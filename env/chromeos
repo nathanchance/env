@@ -19,7 +19,6 @@
 # $ sudo sh -c 'apt update && apt install -y --no-install-recommends zsh && chsh -s /bin/zsh natechancellor'
 # $ exit
 # $ vsh termina penguin
-# $ ln -s /mnt/chromeos .
 function bootstrap() {(
     # Grab common functions/variables
     source <(curl -LSs https://github.com/nathanchance/scripts/raw/master/common) &>/dev/null
@@ -88,8 +87,11 @@ function bootstrap() {(
             REPO=llvm-toolchain
             URL=http://apt.llvm.org/unstable/
         else
-            DISTRO=$(cat /etc/os-release | grep VERSION_CODENAME | cut -d= -f2)
-            REPO=llvm-toolchain-${DISTRO}
+            case $(source /etc/os-release; echo "${VERSION_ID:?}") in
+                "9") DISTRO="stretch" ;;
+                "10") DISTRO="buster" ;;
+            esac
+            REPO=llvm-toolchain-${DISTRO:?}
             URL=http://apt.llvm.org/${DISTRO}/
         fi
         curl https://apt.llvm.org/llvm-snapshot.gpg.key | sudo apt-key add -
