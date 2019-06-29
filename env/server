@@ -560,4 +560,15 @@ function symlink_llvm() {(
     header "Symlinking new LLVM"
     cp -frsv "${LLVM_TC_FOLDER}/${1:?}"/* "${HOME}"/usr
 )}
+
+
+# Print ccache stats for all ccache folders
+function ccache_stats() {(
+    header "System wide cache"
+    ccache -s
+    for FOLDER in "${CBL}"/.ccache/*; do
+        header "${FOLDER}"
+        CCACHE_DIR=${FOLDER} ccache -s
+    done
+)}
 # vi: filetype=zsh
