@@ -420,57 +420,9 @@ function kfg() {
 }
 
 
-# A version of dib for android-kernel-clang
-function dib-clang() {(
-    case "$(git cb)" in
-        "msm-3.18"*) DEFCONFIG=msm-perf_defconfig ;;
-        "msm-4.4"*) DEFCONFIG=msmcortex-perf_defconfig ;;
-        "msm-4.9"*) DEFCONFIG=sdm845-perf_defconfig ;;
-    esac
-
-    TC_LIST=( "--clang --clang-toolchain clang-master/clang-r344140"
-              "--clang --clang-toolchain clang-master/clang-r328903"
-              "--clang --clang-toolchain clang-master/clang-4691093"
-              "" )
-    [[ "$(git cb)" =~ oreo ]] && TC_LIST+=( "--clang --clang-toolchain clang-master/clang-4053586" )
-
-    for ITEM in "${TC_LIST[@]}"; do
-        read -rA ITEM_ARRAY <<< "${ITEM}"
-        build-kernel -d "${DEFCONFIG}" -w -Werror -v oreo-small "${ITEM_ARRAY[@]}" "${@}"
-    done
-)}
-
-
 # Update all remotes and run git gc/prune
 function clean-kernels() {(
-    REPOS=( "${MAIN_FOLDER}/als/jasmine"
-            "${MAIN_FOLDER}/als/marlin"
-            "${MAIN_FOLDER}/als/msm-3.18"
-            "${MAIN_FOLDER}/als/msm-4.4"
-            "${MAIN_FOLDER}/als/msm-4.9"
-            "${MAIN_FOLDER}/als/nash"
-            "${MAIN_FOLDER}/als/op3"
-            "${MAIN_FOLDER}/als/op5"
-            "${MAIN_FOLDER}/als/op6"
-            "${MAIN_FOLDER}/als/polaris"
-            "${MAIN_FOLDER}/als/sagit"
-            "${MAIN_FOLDER}/als/tissot"
-            "${MAIN_FOLDER}/als/wahoo"
-            "${MAIN_FOLDER}/als/whyred"
-            "${KERNEL_FOLDER}/flash/marlin"
-            "${KERNEL_FOLDER}/flash/op6"
-            "${KERNEL_FOLDER}/flash/op6-custom"
-            "${KERNEL_FOLDER}/flash/wahoo"
-            "${KERNEL_FOLDER}/pi"
-            "${KERNEL_FOLDER}/roms/aicp-op5"
-            "${KERNEL_FOLDER}/roms/aicp-op6"
-            "${KERNEL_FOLDER}/roms/gzr-op3"
-            "${KERNEL_FOLDER}/roms/gzr-op5"
-            "${KERNEL_FOLDER}/roms/lineage-nash"
-            "${KERNEL_FOLDER}/roms/lineage-op6"
-            "${KERNEL_FOLDER}/sony/kernel" )
-
-    for REPO in "${REPOS[@]}"; do
+    for REPO in "${ALS}"/* "${CBL}"/linux*; do
         header "${REPO}"
         if cd "${REPO}"; then
             git fetch --all
@@ -481,24 +433,6 @@ function clean-kernels() {(
         fi
     done
 )}
-
-
-# Change email for git repositories
-function change-email() {
-    if [[ ${#} -lt 1 ]]; then
-        display_error "This function takes an argument!"
-        return 1
-    fi
-
-    case ${1} in
-        "du")
-            git config user.email "nathan@dirtyunicorns.com" ;;
-        "prjkt")
-            git config user.email "nathan@prjkt.io" ;;
-        "personal")
-            git config --unset user.email ;;
-    esac
-}
 
 
 # Function to incrementally patch a kernel with stable
