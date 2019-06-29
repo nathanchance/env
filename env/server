@@ -555,41 +555,4 @@ function symlink_llvm() {(
     header "Symlinking new LLVM"
     cp -frsv "${LLVM_TC_FOLDER}/${1:?}"/* "${HOME}"/usr
 )}
-
-
-# Work with multiple ccache folders
-function ccache_for_all() {(
-    while (( ${#} )); do
-        case ${1} in
-            "binutils"|"kernel"|"llvm") FOLDER=${CBL}/.ccache/${1} ;;
-            "clear") CCACHE_OPTS=( -Cz ) ;;
-            "stats") CCACHE_OPTS=( -s ) ;;
-        esac
-        shift
-    done
-
-    if [[ -z ${FOLDER} ]]; then
-        header "System wide cache"
-        ccache "${CCACHE_OPTS[@]}"
-        for FOLDER in "${CBL}"/.ccache/*; do
-            header "${FOLDER}"
-            CCACHE_DIR=${FOLDER} ccache "${CCACHE_OPTS[@]}"
-        done
-    else
-        header "${FOLDER}"
-        CCACHE_DIR=${FOLDER} ccache "${CCACHE_OPTS[@]}"
-    fi
-)}
-
-
-# Print specific folder ccache stats
-function ccache_stats() {(
-    ccache_for_all stats "${@}"
-)}
-
-
-# Clear specific folder ccache
-function ccache_clear() {(
-    ccache_for_all clear "${@}"
-)}
 # vi: filetype=zsh
