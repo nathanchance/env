@@ -139,7 +139,7 @@ function ccache_clear() {(
 
 
 # Create ccache at specific size
-function ccache_size() {(
+function ccache_size() {
     while (( ${#} )); do
         case ${1} in
             "binutils"|"kernel"|"llvm") CCACHE_DIR="${CBL_CCACHE}"/${1} ;;
@@ -151,7 +151,7 @@ function ccache_size() {(
     ccache_call --max-size="${SIZE:?}"G >/dev/null
     ccache --set-config=compression=true
     ccache --set-config=compression_level=9
-)}
+}
 
 
 # Build kernel with Clang (wrapper)
