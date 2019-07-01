@@ -570,6 +570,10 @@ function bldusr() {(
     # Build LLVM/Clang/lld
     bldllvm --build-folder "${LBF:?}" --install-folder "${INSTALL_FOLDER:?}" --march-native --pgo --update-llvm || return ${?}
     stripllvmbin "${INSTALL_FOLDER}"
+
+    # Invalidate our kernel ccache because we have a new compiler that will be used for it
+    ccache_env "${CBL_CCACHE}"/kernel 100
+    ccache_clear kernel
 )}
 
 

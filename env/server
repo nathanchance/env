@@ -554,5 +554,8 @@ function symlink_llvm() {(
 
     header "Symlinking new LLVM"
     cp -frsv "${LLVM_TC_FOLDER}/${1:?}"/* "${HOME}"/usr
+
+    # Invalidate our LLVM cache because we have a new compiler that will be used for it
+    ccache_clear llvm
 )}
 # vi: filetype=zsh
