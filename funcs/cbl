@@ -95,14 +95,11 @@ Link: https://reviews.llvm.org/${REVISION}"
 )}
 
 
-# ccache configuration through environment variables
-function ccache_env() {
-    [[ ! -d ${1:?} ]] && mkdir -p "${1}"
-    export CCACHE_DIR=${1}
-
-    ccache --max-size "${2:?}"G >/dev/null
-    ccache --set-config=compression=true
-    ccache --set-config=compression_level=9
+# Call ccache
+function ccache_call() {
+    header "${CCACHE_DIR:?}"
+    [[ -d ${CCACHE_DIR} ]] && mkdir -p "${CCACHE_DIR}"
+    ccache "${@}"
 }
 
 
@@ -110,24 +107,22 @@ function ccache_env() {
 function ccache_for_all() {(
     while (( ${#} )); do
         case ${1} in
-            "binutils"|"kernel"|"llvm") FOLDER="${CBL_CCACHE}"/${1} ;;
-            "clear") CCACHE_OPTS=( -Cz ) ;;
-            "stats") CCACHE_OPTS=( -s ) ;;
+            "binutils"|"kernel"|"llvm") CCACHE_DIR="${CBL_CCACHE}"/${1} ;;
+            "clear") CCACHE_OPTS=( --clear --zero-stats ) ;;
+            "stats") CCACHE_OPTS=( --show-stats ) ;;
         esac
         shift
     done
 
-    if [[ -z ${FOLDER} ]]; then
-        header "System wide cache"
-        ccache "${CCACHE_OPTS[@]}"
-        for FOLDER in "${CBL_CCACHE}"/*; do
-            header "${FOLDER}"
-            CCACHE_DIR=${FOLDER} ccache "${CCACHE_OPTS[@]}"
+    if [[ -z ${CCACHE_DIR} ]]; then
+        for CCACHE_DIR in "${CBL_CCACHE}"/*; do
+            export CCACHE_DIR
+            ccache_call "${CCACHE_OPTS[@]}"
         done
     else
-        header "${FOLDER}"
-        CCACHE_DIR=${FOLDER} ccache "${CCACHE_OPTS[@]}"
-    fi
+        export CCACHE_DIR
+        ccache_call "${CCACHE_OPTS[@]}"
+   fi
 )}
 
 
@@ -140,6 +135,22 @@ function ccache_stats() {(
 # Clear specific folder ccache
 function ccache_clear() {(
     ccache_for_all clear "${@}"
+)}
+
+
+# Create ccache at specific size
+function ccache_size() {(
+    while (( ${#} )); do
+        case ${1} in
+            "binutils"|"kernel"|"llvm") CCACHE_DIR="${CBL_CCACHE}"/${1} ;;
+            *) SIZE=${1} ;;
+        esac
+        shift
+    done
+    export CCACHE_DIR
+    ccache_call --max-size="${SIZE:?}"G
+    ccache --set-config=compression=true
+    ccache --set-config=compression_level=9
 )}
 
 
@@ -171,7 +182,7 @@ function bldkw() {(
     [[ -n ${PATH_OVERRIDE} ]] && move_to_front_of_path "${PATH_OVERRIDE}"
 
     # Setup ccache
-    ccache_env "${CBL_CCACHE}"/kernel 100
+    ccache_size kernel 100
 
     # Build the kernel
     time make ${QUIET:+-s} \
@@ -545,7 +556,7 @@ function stripllvmbin() {(
 # Build LLVM
 function bldllvm() {(
     # Setup ccache
-    ccache_env "${CBL_CCACHE}"/llvm 75
+    ccache_size llvm 75
 
     "${TCBLD}"/build-llvm.py "${@}"
 )}
@@ -554,7 +565,7 @@ function bldllvm() {(
 # Build binutils
 function bldbn() {(
     # Setup ccache
-    ccache_env "${CBL_CCACHE}"/binutils 25
+    ccache_size binutils 25
 
    "${TCBLD}"/build-binutils.py "${@}"
 )}
@@ -572,7 +583,6 @@ function bldusr() {(
     stripllvmbin "${INSTALL_FOLDER}"
 
     # Invalidate our kernel ccache because we have a new compiler that will be used for it
-    ccache_env "${CBL_CCACHE}"/kernel 100
     ccache_clear kernel
 )}
 
