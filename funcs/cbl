@@ -203,14 +203,6 @@ function bldkw() {(
 )}
 
 
-# Extra configs for build/boot testings
-# From https://github.com/groeck/linux-build-test/blob/master/rootfs/scripts/common.sh
-function extraconfigs() {
-    local OUT_FOLDER="${KBF}"
-
-}
-
-
 # Configure and build a kernel with Clang
 function bldk() {(
     # Parameters
@@ -245,6 +237,8 @@ function bldk() {(
     "${BLDKW[@]}" distclean "${CONFIG}" modules_prepare
 
     if ${CBL_DEFCONFIG:?}; then
+        # Extra configs for build/boot testings
+        # From https://github.com/groeck/linux-build-test/blob/master/rootfs/scripts/common.sh
         echo "CONFIG_INIT_STACK_ALL=y
 CONFIG_EXPERT=y
 CONFIG_DEBUG_KERNEL=y
