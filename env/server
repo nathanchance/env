@@ -147,7 +147,7 @@ function bootstrap() {(
     path_push "${HOME}/usr/bin"
     source "${SCRIPTS}"/funcs/git && git_setup
     source "${SCRIPTS}"/funcs/pure && pure_prompt
-    for REPO in chromeos-adb-fastboot dotfiles hugo-files patches; do
+    for REPO in chromeos-adb-fastboot dotfiles hugo-files nathanchance.github.io patches; do
         [[ ! -d ${GITHUB_FOLDER}/${REPO} ]] && { git -C "${GITHUB_FOLDER}" clone git@github.com:nathanchance/"${REPO}" || die "Error cloning ${REPO}!"; }
     done
     [[ ! -d ${SRC_FOLDER}/git ]] && { git -C "${SRC_FOLDER}" clone git://github.com/git/git || die "Error cloning git!"; }
