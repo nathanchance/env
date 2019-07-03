@@ -117,8 +117,9 @@ function bootstrap() {(
     gpg-connect-agent reloadagent /bye
 
     # Clone scripts
-    mkdir -p "${HOME}"/github
-    local SCRIPTS; SCRIPTS=${HOME}/github/scripts
+    GITHUB=${HOME}/github
+    mkdir -p "${GITHUB}"
+    local SCRIPTS; SCRIPTS=${GITHUB}/scripts
     git clone git@github.com:nathanchance/scripts "${SCRIPTS}" || die "Error cloning script!"
     source "${SCRIPTS}"/env/setup && global_gitignore && create_zshrc
     source "${SCRIPTS}"/funcs/bldupdbin && { bldupdbin || die "bldupdbin failed!"; }
@@ -127,7 +128,7 @@ function bootstrap() {(
     source "${SCRIPTS}"/funcs/pure && pure_prompt
 
     # Clone repos
-    local DOTFILES; DOTFILES=${HOME}/github/dotfiles
+    local DOTFILES; DOTFILES=${GITHUB}/dotfiles
     git clone git@github.com:nathanchance/dotfiles "${DOTFILES}" || die "Error cloning dotfiles!"
 
     # Clone password store
@@ -141,6 +142,23 @@ function bootstrap() {(
 
     # Decrypt .muttrc
     gpg --pinentry-mode loopback --output "${HOME}"/.muttrc --decrypt "${DOTFILES}"/common/muttrc.gpg
+
+    # Install hugo
+    HUGO_VERSION=0.55.6
+    if [[ ${ARCH} = "amd64" ]]; then
+        SUFFIX=64bit
+    else
+        SUFFIX=ARM64
+    fi
+    curl -LSsO "${TMP_DEB:=$(mktemp --suffix=.deb)}" https://github.com/gohugoio/hugo/releases/download/v"${HUGO_VERSION}"/hugo_"${HUGO_VERSION}"_Linux-"${SUFFIX}".deb
+    sudo dpkg -i "${TMP_DEB}"
+    rm -rf "${TMP_DEB}"
+
+    # Download website files
+    for REPO in hugo-files nathanchance.github.io; do
+        git clone git@github.com:nathanchance/"${REPO}" "${GITHUB}/${REPO}"
+    done
+    git -C "${GITHUB}"/hugo-files submodule update --init --recursive
 
     # We need UTF characters in crouton for the prompt to work
     if [[ "$(uname -n)" = "localhost" ]]; then
