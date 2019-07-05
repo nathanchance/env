@@ -143,8 +143,7 @@ function bootstrap() {(
     cd "${TMP_BLD_FOLDER:=$(mktemp -d)}" || die "wtf?"
     curl -LSso PKGBUILD "https://aur.archlinux.org/cgit/aur.git/plain/PKGBUILD?h=yay"
     makepkg --noconfirm -si || die "Error installing yay!"
-    gpg --recv-keys 702353E0F7E48EDB
-    yay -S --needed lineageos-devel perl-benchmark-timer perl-exporter-lite perl-file-which perl-getopt-tabular perl-regexp-common perl-term-readkey || die "Error running yay!"
+    yay -S --needed creduce-git || die "Error running yay!"
 
     # Download repos
     [[ ! -d ${SCRIPTS} ]] && { git clone git@github.com:nathanchance/scripts "${SCRIPTS}" || die "Error cloning scripts!"; }
