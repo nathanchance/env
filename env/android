@@ -58,6 +58,7 @@ function bootstrap() {(
         zsh "${DOTFILES}"/common/vim/vim_setup.sh
         cp -v "${DOTFILES}"/local/.tmux.conf "${HOME}"
         gpg --pinentry-mode loopback --output "${HOME}"/.muttrc --decrypt "${DOTFILES}"/common/muttrc.gpg
+        gpg --pinentry-mode loopback --output "${HOME}"/.hetzner_ip --decrypt "${DOTFILES}"/common/hetzner_ip.gpg
     ) || die "Error installing dotfiles"
 )}
 
@@ -70,7 +71,10 @@ function android_aliases() {
 
 
 # Android environment setup
-function android_setup() { true; }
+function android_setup() {
+    # Source .hetzner_ip for ${HETZNER_IP} value
+    [[ -f ${HOME}/.hetzner_ip ]] && source "${HOME}/.hetzner_ip"
+}
 
 
 # vi: filetype=zsh

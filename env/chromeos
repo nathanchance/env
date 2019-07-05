@@ -140,8 +140,9 @@ function bootstrap() {(
     # Setup vim
     zsh "${DOTFILES}"/common/vim/vim_setup.sh
 
-    # Decrypt .muttrc
+    # Decrypt encrypted files
     gpg --pinentry-mode loopback --output "${HOME}"/.muttrc --decrypt "${DOTFILES}"/common/muttrc.gpg
+    gpg --pinentry-mode loopback --output "${HOME}"/.hetzner_ip --decrypt "${DOTFILES}"/common/hetzner_ip.gpg
 
     # Install hugo
     HUGO_VERSION=0.55.6
@@ -193,6 +194,9 @@ function chromeos_setup() {
     export TZ=/usr/share/zoneinfo/US/Arizona
 
     path_push "${HOME}/platform-tools"
+
+    # Source .hetzner_ip for ${HETZNER_IP} value
+    [[ -f ${HOME}/.hetzner_ip ]] && source "${HOME}/.hetzner_ip"
 
     # Load the stock completions to make sure we don't miss out on anything
     echo "$fpath" | grep -q -s "vendor-completions" || fpath=( $fpath /usr/share/zsh/vendor-completions )
