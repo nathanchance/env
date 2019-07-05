@@ -51,6 +51,7 @@ function bootstrap() {(
              "${ANDROID_TC_FOLDER}" \
              "${CBL}"/{android,git,mirrors} \
              "${GITHUB_FOLDER}" \
+             "${HOME}"/usr/bin \
              "${KERNEL_FOLDER}"/sony || die "Can't create folders, wtf?"
 
     # Enable multilib
@@ -115,10 +116,15 @@ function bootstrap() {(
     # Setup build folder
     echo "tmpfs ${BLDF} tmpfs nodev,nosuid,uid=$(whoami),gid=$(whoami),size=30G 0 0" | sudo tee -a /etc/fstab
 
+    # Configure podman
+    echo "kernel.unprivileged_userns_clone=1" | sudo tee /etc/sysctl.d/unprivileged_userns_clone.conf
+    echo "$(whoami):100000:65536" | sudo tee /etc/subgid /etc/subuid
+    echo "session    optional   pam_cgfs.so          -c freezer,memory,name=systemd,unified" | sudo tee -a /etc/pam.d/system-login
+
     # Download and install mkdtimg
     MKDTIMG_FOLDER=$(mktemp -d)
     curl -LSs https://android.googlesource.com/platform/prebuilts/misc/+archive/master/linux-x86/libufdt.tar.gz | tar -C "${MKDTIMG_FOLDER}" -xzf -
-    sudo mv "${MKDTIMG_FOLDER}"/mkdtimg /usr/local/bin
+    cp "${MKDTIMG_FOLDER}"/mkdtimg "${HOME}"/usr/bin
     rm -rf "${MKDTIMG_FOLDER}"
 
     # Setup keys
@@ -138,7 +144,7 @@ function bootstrap() {(
     curl -LSso PKGBUILD "https://aur.archlinux.org/cgit/aur.git/plain/PKGBUILD?h=yay"
     makepkg --noconfirm -si || die "Error installing yay!"
     gpg --recv-keys 702353E0F7E48EDB
-    yay -S --needed lineageos-devel || die "Error running yay!"
+    yay -S --needed lineageos-devel perl-benchmark-timer perl-exporter-lite perl-file-which perl-getopt-tabular perl-regexp-common perl-term-readkey || die "Error running yay!"
 
     # Download repos
     [[ ! -d ${SCRIPTS} ]] && { git clone git@github.com:nathanchance/scripts "${SCRIPTS}" || die "Error cloning scripts!"; }
@@ -150,7 +156,6 @@ function bootstrap() {(
     for REPO in chromeos-adb-fastboot dotfiles hugo-files nathanchance.github.io patches; do
         [[ ! -d ${GITHUB_FOLDER}/${REPO} ]] && { git -C "${GITHUB_FOLDER}" clone git@github.com:nathanchance/"${REPO}" || die "Error cloning ${REPO}!"; }
     done
-    [[ ! -d ${SRC_FOLDER}/git ]] && { git -C "${SRC_FOLDER}" clone git://github.com/git/git || die "Error cloning git!"; }
     [[ ! -d ${ALS}/sp ]] && { git -C "${ALS}" clone git@github.com:nathanchance/stable-patches sp || die "Error cloning stable-patches!"; }
 
     # Install dotfiles
@@ -238,11 +243,6 @@ function bootstrap() {(
             )
         done
     )
-
-    # Configure podman
-    echo "kernel.unprivileged_userns_clone=1" | sudo tee /etc/sysctl.d/unprivileged_userns_clone.conf
-    echo "$(whoami):100000:65536" | sudo tee /etc/subgid /etc/subuid
-    echo "session    optional   pam_cgfs.so          -c freezer,memory,name=systemd,unified" | sudo tee -a /etc/pam.d/system-login
 
     # Install gist
     gem install gist
