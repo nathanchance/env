@@ -88,7 +88,7 @@ function post_merge_commands() {
 }
 
 source "$(cd "$(dirname "$(readlink -f "${(%):-%x}")")" || return; pwd)/../common"
-source "${SCRIPTS_FOLDER}"/constants/server_folders
+source "${SCRIPTS_FOLDER}"/env/folders
 source "${SCRIPTS_FOLDER}"/funcs/bk
 source "${SCRIPTS_FOLDER}"/funcs/deldog
 source "${SCRIPTS_FOLDER}"/funcs/traps

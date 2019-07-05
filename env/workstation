@@ -2,14 +2,14 @@
 #
 # Copyright (C) 2017-2019 Nathan Chancellor
 #
-# Utility and terminal setup functions for my build server
+# Utility and terminal setup functions for my remote workstation
 
 
-# Setup server function
+# Setup workstation function
 #
 # Assumes the following things have been done:
 #
-# 1. The server has had its OS installed (if using Hetzner)
+# 1. The workstation has had its OS installed (if using Hetzner)
 #
 #    $ installimage -r yes -l 0 -f yes -n archlinux-<suffix>
 #
@@ -35,7 +35,7 @@
 #
 function bootstrap() {(
     # Grab common variables
-    source <(curl -LSs https://github.com/nathanchance/scripts/raw/master/constants/server_folders) &>/dev/null || return 1
+    source <(curl -LSs https://github.com/nathanchance/scripts/raw/master/env/folders) &>/dev/null || return 1
     # Grab common functions
     source <(curl -LSs https://github.com/nathanchance/scripts/raw/master/common) &>/dev/null || return 1
 
@@ -156,7 +156,7 @@ function bootstrap() {(
     # Install dotfiles
     (
         zsh "${DOTFILES}"/common/vim/vim_setup.sh
-        cp -v "${DOTFILES}"/server/.tmux.conf "${HOME}"
+        cp -v "${DOTFILES}"/workstation/.tmux.conf "${HOME}"
         gpg --pinentry-mode loopback --output "${MAIN_FOLDER}"/.botinfo --decrypt "${DOTFILES}"/common/botinfo.gpg
         gpg --pinentry-mode loopback --output "${HOME}"/.muttrc --decrypt "${DOTFILES}"/common/muttrc.gpg
     ) || die "Error installing dotfiles"
@@ -259,8 +259,8 @@ function bootstrap() {(
 ) || return 1; }
 
 
-# Build server specific aliases
-function server_aliases() {
+# Workstation specific aliases
+function workstation_aliases() {
     # default Arch ls alias
     alias ls='ls --color=auto'
 
@@ -304,13 +304,13 @@ function cbf() {(
 )}
 
 
-# Additional setup steps for my build server
-function server_setup() {
+# Additional setup steps for my workstation
+function workstation_setup() {
     ccache_setup 50
     LOG=$(mktemp); export LOG
-    add_to_path_pre "${SCRIPTS_FOLDER}/server"
+    add_to_path_pre "${SCRIPTS_FOLDER}/workstation"
     move_to_front_of_path "${HOME}/usr/bin"
-    source "${SCRIPTS_FOLDER}"/constants/server_folders
+    source "${SCRIPTS_FOLDER}"/env/folders
     source "${SCRIPTS_FOLDER}"/funcs/bk
     source "${SCRIPTS_FOLDER}"/funcs/bldgcc
     source "${SCRIPTS_FOLDER}"/funcs/cbl

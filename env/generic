@@ -2,7 +2,7 @@
 #
 # Copyright (C) 2019 Nathan Chancellor
 #
-# Generic server environment setup script (usually for something like Vultr or Packet)
+# Generic workstation environment setup script (usually for something like Vultr or Packet)
 #
 # Install zsh before hand and use 'chsh -s /bin/zsh $(whoami)'
 
@@ -78,7 +78,7 @@ function bootstrap() {(
     DOTFILES=${HOME}/github/dotfiles
     [[ -d ${DOTFILES} ]] || { git clone https://github.com/nathanchance/dotfiles "${DOTFILES}" || die "Error cloning dotfiles!"; }
     zsh "${DOTFILES}"/common/vim/vim_setup.sh
-    cp -v "${DOTFILES}"/server/.tmux.conf "${HOME}"
+    cp -v "${DOTFILES}"/workstation/.tmux.conf "${HOME}"
 
     # Download go on x86_64
     [[ $(get_arch) = "amd64" ]] && curl -LSs https://dl.google.com/go/go1.12.6.linux-amd64.tar.gz | tar -C ${HOME}/usr -xzf -

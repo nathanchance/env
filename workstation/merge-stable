@@ -347,7 +347,7 @@ function update_tree() {
 
 
 source "$(cd "$(dirname "$(readlink -f "${(%):-%x}")")" || return; pwd)/../common"
-source "${SCRIPTS_FOLDER}"/constants/server_folders
+source "${SCRIPTS_FOLDER}"/env/folders
 source "${SCRIPTS_FOLDER}/funcs/traps"
 parse_parameters "${@}"
 update_sources
