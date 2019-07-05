@@ -37,10 +37,12 @@ function crbf() {
 
 
 # Patch check function
-function pch() {
-    [[ -f scripts/checkpatch.pl ]] && git fp -1 --stdout "${@}" | ./scripts/checkpatch.pl
-    [[ -f scripts/get_maintainer.pl ]] && git fp -1 --stdout "${@}" | ./scripts/get_maintainer.pl --scm
-}
+function pch() {(
+    [[ ${#} -eq 0 ]] && FP_PARAMS=( -1 HEAD )
+    [[ -z ${FP_PARAMS[*]} ]] && FP_PARAMS=( "${@}" )
+    [[ -f scripts/checkpatch.pl ]] && git fp --stdout "${FP_PARAMS[@]}" | ./scripts/checkpatch.pl
+    [[ -f scripts/get_maintainer.pl ]] && git fp --stdout "${FP_PARAMS[@]}" | ./scripts/get_maintainer.pl --scm
+)}
 
 
 # Quilt-like patch management function for Linux
