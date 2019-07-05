@@ -71,10 +71,7 @@ function android_aliases() {
 
 
 # Android environment setup
-function android_setup() {
-    # Source .hetzner_ip for ${HETZNER_IP} value
-    [[ -f ${HOME}/.hetzner_ip ]] && source "${HOME}/.hetzner_ip"
-}
+function android_setup() { true; }
 
 
 # vi: filetype=zsh

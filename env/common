@@ -101,6 +101,7 @@ function shell_setup() {
 
     # Environment setup
     path_push "${HOME}/usr/bin"
+    [[ -f ${HOME}/.hetzner_ip ]] && source "${HOME}/.hetzner_ip"
     aliases
     "${LOCATION}"_aliases
     tmxa

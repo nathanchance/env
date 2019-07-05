@@ -195,9 +195,6 @@ function chromeos_setup() {
 
     path_push "${HOME}/platform-tools"
 
-    # Source .hetzner_ip for ${HETZNER_IP} value
-    [[ -f ${HOME}/.hetzner_ip ]] && source "${HOME}/.hetzner_ip"
-
     # Load the stock completions to make sure we don't miss out on anything
     echo "$fpath" | grep -q -s "vendor-completions" || fpath=( $fpath /usr/share/zsh/vendor-completions )
     compinit
