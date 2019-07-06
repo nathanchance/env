@@ -247,6 +247,9 @@ function bootstrap() {(
     gem install gist
     "${HOME}/.gem/ruby/2.6.0/bin/gist" --login
 
+    # Use new GPG keyserver
+    echo "keyserver hkps://keys.openpgp.org" >> "${HOME}"/.gnupg/dirmngr.conf
+
     # Reminder of things to do
     echo
     echo "Things still to do!"
