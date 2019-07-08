@@ -70,6 +70,7 @@ function bootstrap() {(
                                         asciidoc \
                                         base-devel \
                                         bat \
+                                        bc \
                                         ca-certificates \
                                         clang \
                                         ccache \
