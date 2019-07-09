@@ -144,7 +144,10 @@ function bootstrap() {(
     cd "${TMP_BLD_FOLDER:=$(mktemp -d)}" || die "wtf?"
     curl -LSso PKGBUILD "https://aur.archlinux.org/cgit/aur.git/plain/PKGBUILD?h=yay"
     makepkg --noconfirm -si || die "Error installing yay!"
-    yay -S --needed creduce-git
+    curl -LSso "${TMP_GPG:=$(mktemp)}" https://invisible-island.net/public/dickey-invisible-island.txt || die "Could not download GPG key!"
+    gpg --import "${TMP_GPG}" || die "Could not import GPG key!"
+    yay -S --noconfirm --needed ncurses5-compat-libs || die "Error building AUR packages!"
+    yay -S --noconfirm --needed creduce-git
 
     # Download repos
     [[ ! -d ${SCRIPTS} ]] && { git clone git@github.com:nathanchance/scripts "${SCRIPTS}" || die "Error cloning scripts!"; }
