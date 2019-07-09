@@ -158,7 +158,7 @@ done
 if [[ -n ${INIT} ]]; then
     mkdir -p "${ALS}"; cd "${ALS}" || die "${ALS} creation failed!"
 
-    for ITEM in "${REPOS_44[@]}" "${REPOS_49[@]}"; do
+    for ITEM in "${REPOS_44[@]}" "${REPOS_49[@]}" "${REPOS_414[@]}"; do
         git clone "git@github.com:android-linux-stable/${ITEM}.git" || die "Could not clone ${ITEM}!"
         case ${ITEM} in
             "jasmine"|"polaris"|"sagit"|"whyred")
