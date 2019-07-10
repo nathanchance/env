@@ -109,6 +109,7 @@ function bootstrap() {(
                                         swig \
                                         tmux \
                                         uboot-tools \
+                                        unzip \
                                         wget \
                                         xmlto || die "Error installing packages!"
     sudo pacman -R --noconfirm linux
