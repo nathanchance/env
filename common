@@ -180,6 +180,7 @@ function web_link() {
 
 # Set up a virtual environment for Python
 function mkavenv {
+    command -v virtualenv2 &>/dev/null || return
     virtualenv2 "${MAIN_FOLDER:?}/venv"
     source "${MAIN_FOLDER}/venv/bin/activate"
 }
@@ -187,6 +188,7 @@ function mkavenv {
 
 # Remove virtual environment
 function rmvenv {
+    command -v deactivate &>/dev/null || return
     deactivate
     rm -rf "${MAIN_FOLDER:?}/venv"
 }
