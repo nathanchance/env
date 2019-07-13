@@ -318,9 +318,9 @@ function workstation_setup() {
     add_to_path_pre "${SCRIPTS_FOLDER}/workstation"
     move_to_front_of_path "${HOME}/usr/bin"
     source "${SCRIPTS_FOLDER}"/env/folders
+    source "${SCRIPTS_FOLDER}"/env/cbl
     source "${SCRIPTS_FOLDER}"/funcs/bk
     source "${SCRIPTS_FOLDER}"/funcs/bldgcc
-    source "${SCRIPTS_FOLDER}"/funcs/cbl
     add_to_path_post "${HOME}/.gem/ruby/2.6.0/bin"
     load_botinfo
     type crbf &>/dev/null && crbf
