@@ -224,7 +224,7 @@ function bldk() {(
         # Use lld by default for everything but certain PowerPC builds
         if [[ -z ${LD} ]]; then
             case ${ARCH} in
-                "ppc32"|"ppc64") ;;
+                "ppc64") ;;
                 *) LD=ld.lld ;;
             esac
         fi
@@ -465,7 +465,7 @@ function lt() {(
         # Use lld by default for everything but certain PowerPC builds
         if [[ -z ${LD} && -z ${BIG_ENDIAN} ]]; then
             case ${ARCH} in
-                "ppc32"|"ppc64") ;;
+                "ppc64") ;;
                 *) LD=ld.lld ;;
             esac
         fi
