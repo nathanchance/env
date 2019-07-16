@@ -6,7 +6,7 @@ cd "$(dirname "$(readlink -f "${(%):-%x}")")" || return
 # Indents
 INDENT=${HOME}/.vim/indent
 mkdir -p "${INDENT}"
-cp -v indent/make.vim "${INDENT}"
+ln -fs "${PWD}"/indent/make.vim "${INDENT}"/make.vim
 
 # Plugins
 PLUGIN=${HOME}/.vim/plugin
@@ -30,4 +30,4 @@ fi
 curl -LSso "${PLUGIN}"/git_patch_tags.vim 'https://www.vim.org/scripts/download_script.php?src_id=20912'
 
 # .vimrc
-cp .vimrc "${HOME}"
+ln -fs "${PWD}"/.vimrc "${HOME}"/.vimrc
