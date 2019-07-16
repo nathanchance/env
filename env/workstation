@@ -39,7 +39,6 @@ function bootstrap() {(
     # Grab common functions
     source <(curl -LSs https://github.com/nathanchance/scripts/raw/master/common) &>/dev/null || return 1
 
-    DOTFILES=${GITHUB_FOLDER}/dotfiles
     KEYS=/tmp/keys
     SCRIPTS=${GITHUB_FOLDER}/scripts
 
@@ -157,18 +156,14 @@ function bootstrap() {(
     path_push "${HOME}/usr/bin"
     source "${SCRIPTS}"/funcs/git && git_setup
     source "${SCRIPTS}"/funcs/pure && pure_prompt
-    for REPO in chromeos-adb-fastboot dotfiles hugo-files nathanchance.github.io patches; do
+    zsh "${SCRIPTS}"/configs/common/vim/vim_setup.sh
+    ln -fs "${SCRIPTS}"/configs.workstation/.tmux.conf "${HOME}"/.tmux.conf
+    gpg --pinentry-mode loopback --output "${MAIN_FOLDER}"/.botinfo --decrypt "${SCRIPTS}"/configs/common/botinfo.gpg
+    gpg --pinentry-mode loopback --output "${HOME}"/.muttrc --decrypt "${SCRIPTS}"/configs/common/muttrc.gpg
+    for REPO in chromeos-adb-fastboot hugo-files nathanchance.github.io patches; do
         [[ ! -d ${GITHUB_FOLDER}/${REPO} ]] && { git -C "${GITHUB_FOLDER}" clone git@github.com:nathanchance/"${REPO}" || die "Error cloning ${REPO}!"; }
     done
     [[ ! -d ${ALS}/sp ]] && { git -C "${ALS}" clone git@github.com:nathanchance/stable-patches sp || die "Error cloning stable-patches!"; }
-
-    # Install dotfiles
-    (
-        zsh "${DOTFILES}"/common/vim/vim_setup.sh
-        cp -v "${DOTFILES}"/workstation/.tmux.conf "${HOME}"
-        gpg --pinentry-mode loopback --output "${MAIN_FOLDER}"/.botinfo --decrypt "${DOTFILES}"/common/botinfo.gpg
-        gpg --pinentry-mode loopback --output "${HOME}"/.muttrc --decrypt "${DOTFILES}"/common/muttrc.gpg
-    ) || die "Error installing dotfiles"
 
     # Download toolchains
     git -C "${ANDROID_TC_FOLDER}" clone --single-branch https://android.googlesource.com/platform/prebuilts/clang/host/linux-x86/ clang-master

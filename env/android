@@ -50,16 +50,10 @@ function bootstrap() {(
     source "${SCRIPTS}"/funcs/git && git_setup
     source "${SCRIPTS}"/funcs/pure && pure_prompt
     source "${SCRIPTS}"/env/setup && global_gitignore && create_zshrc
-
-    # Download and install dotfiles
-    DOTFILES=${HOME}/github/dotfiles
-    git clone git@github.com:nathanchance/dotfiles
-    (
-        zsh "${DOTFILES}"/common/vim/vim_setup.sh
-        cp -v "${DOTFILES}"/local/.tmux.conf "${HOME}"
-        gpg --pinentry-mode loopback --output "${HOME}"/.muttrc --decrypt "${DOTFILES}"/common/muttrc.gpg
-        gpg --pinentry-mode loopback --output "${HOME}"/.hetzner_ip --decrypt "${DOTFILES}"/common/hetzner_ip.gpg
-    ) || die "Error installing dotfiles"
+    zsh "${SCRIPTS}"/configs/common/vim/vim_setup.sh
+    ln -fs "${SCRIPTS}"/configs/local/.tmux.conf "${HOME}"/.tmux.conf
+    gpg --pinentry-mode loopback --output "${HOME}"/.muttrc --decrypt "${SCRIPTS}"/configs/common/muttrc.gpg
+    gpg --pinentry-mode loopback --output "${HOME}"/.hetzner_ip --decrypt "${SCRIPTS}"/configs/common/hetzner_ip.gpg
 )}
 
 

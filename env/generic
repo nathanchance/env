@@ -74,11 +74,8 @@ function bootstrap() {(
     path_push "${HOME}/usr/bin"
     source "${SCRIPTS}"/funcs/git && git_setup
     source "${SCRIPTS}"/funcs/pure && pure_prompt
-
-    DOTFILES=${HOME}/github/dotfiles
-    [[ -d ${DOTFILES} ]] || { git clone https://github.com/nathanchance/dotfiles "${DOTFILES}" || die "Error cloning dotfiles!"; }
-    zsh "${DOTFILES}"/common/vim/vim_setup.sh
-    cp -v "${DOTFILES}"/workstation/.tmux.conf "${HOME}"
+    zsh "${SCRIPTS}"/configs/common/vim/vim_setup.sh
+    ln -fs "${SCRIPTS}"/configs/workstation/.tmux.conf "${HOME}"/.tmux.conf
 
     # Download go on x86_64
     [[ $(get_arch) = "amd64" ]] && curl -LSs https://dl.google.com/go/go1.12.6.linux-amd64.tar.gz | tar -C ${HOME}/usr -xzf -
