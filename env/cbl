@@ -85,12 +85,12 @@ function rbln() {(
 
 # Download and apply an LLVM/Clang/lld patch
 function phabap() {(
-    [[ ! -d llvm ]] && { display_error "You're not in the llvm-project folder!"; return 1; }
+    [[ ! -d llvm ]] && die "You're not in the llvm-project folder!"
 
     REVISION=${1:?}
     [[ ${#} -ge 1 ]] && shift
 
-    curl -LSs "https://reviews.llvm.org/${REVISION}?download=true" | git ap "${@}" || return 1
+    curl -LSs "https://reviews.llvm.org/${REVISION}?download=true" | git ap "${@}" || exit ${?}
     git ac -m "${REVISION}
 
 Link: https://reviews.llvm.org/${REVISION}"
