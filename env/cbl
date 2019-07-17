@@ -183,6 +183,10 @@ function bldkw() {(
     move_to_front_of_path "${CBL_BIN}"
     [[ -n ${PATH_OVERRIDE} ]] && move_to_front_of_path "${PATH_OVERRIDE}"
 
+    echo
+    echo "${BOLD}LLVM location:${RST} $(dirname "$(command -v clang)")"
+    echo
+
     # Setup ccache
     ccache_size kernel 100
 
