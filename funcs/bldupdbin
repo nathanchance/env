@@ -28,7 +28,7 @@ function bibat() {(
 
 # Build/update ccache
 function bccache() {(
-    [[ -z ${CCACHE_VERSION} ]] && CCACHE_VERSION=3.7.1
+    [[ -z ${CCACHE_VERSION} ]] && CCACHE_VERSION=3.7.2
     CCACHE_FOLDER=ccache-${CCACHE_VERSION}
     TMP_FOLDER=$(mktemp -d)
     cd "${TMP_FOLDER}"
