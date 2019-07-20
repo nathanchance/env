@@ -11,7 +11,7 @@
 # Usage:
 # $ deldog <file>
 # $ command |& deldog
-function deldog() {
+function deldog() {(
     for BINARY in curl jq; do
         command -v ${BINARY} &>/dev/null || {
             echo "ERROR: ${BINARY} is not installed" >&2
@@ -23,5 +23,5 @@ function deldog() {
         exit 1
     }
     echo "https://del.dog/raw/$(jq -r .key <<< "${RESULT}")"
-}
+)}
 # vi: filetype=zsh
