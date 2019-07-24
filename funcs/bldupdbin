@@ -223,6 +223,7 @@ function bpgollvm() {(
                       -DCMAKE_C_FLAGS="${FLAGS} -Wno-backend-plugin" \
                       -DCMAKE_CXX_FLAGS="${FLAGS} -Wno-backend-plugin" \
                       -DCMAKE_INSTALL_PREFIX=${PREFIX:=${HOME}/usr} \
+                      -DLLVM_ENABLE_LTO=Thin \
                       -DLLVM_PROFDATA_FILE=${PROFILE_DATA} \
                       "${LLVM_PROJECT}"/llvm || die "Error configuring stage 3!"
         ninja || die "Error building stage 3!"
