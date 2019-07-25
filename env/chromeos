@@ -135,7 +135,7 @@ function bootstrap() {(
     git clone git@github.com:nathanchance/password-store.git "${HOME}"/.password-store || die "Error cloning password store!"
 
     # Install hugo
-    HUGO_VERSION=0.55.6
+    HUGO_VERSION=0.56.0
     if [[ ${ARCH} = "amd64" ]]; then
         SUFFIX=64bit
     else
