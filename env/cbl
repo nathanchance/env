@@ -626,6 +626,7 @@ STOP_SHIP_TRACEPRINTK=1
 
 function update_clang_config() {
   ${KERNEL_DIR}/scripts/config --file ${OUT_DIR}/.config \
+    -e JUMP_LABEL \
     -e LTO_CLANG \
     -e CFI_CLANG \
     --set-val FRAME_WARN 2048
