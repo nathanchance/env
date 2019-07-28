@@ -52,9 +52,15 @@ function ptchmn() {(
     TARGET_FOLDER=${GITHUB_FOLDER}/patches/${PWD##*/}/$(git cb)
     [[ ! -d ${TARGET_FOLDER} ]] && die "${TARGET_FOLDER} doesn't exist!"
 
+    case ${PWD##*/} in
+        "linux") UPSTREAM=master ;;
+        "linux-next") UPSTREAM=stable ;;
+        *) die "${PWD##*/} not supported by ptchmn!"
+    esac
+
     case "${1:?}" in
         "-s"|"--sync")
-            FIRST_HASH=$(git log --reverse --format=%H --committer="$(git config --get user.name) <$(git config --get user.email)>" origin/stable..HEAD | head -n1)
+            FIRST_HASH=$(git log --reverse --format=%H --committer="$(git config --get user.name) <$(git config --get user.email)>" origin/"${UPSTREAM}"..HEAD | head -n1)
             [[ -z ${FIRST_HASH} ]] && die "FIRST_HASH is empty...?"
 
             rm "${TARGET_FOLDER}"/*
