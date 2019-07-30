@@ -858,4 +858,21 @@ done' > "${SCRIPT}"
 function yapf() {
     PYTHONPATH=${CBL}/git/yapf python3 ${CBL}/git/yapf/yapf -i -p "${@}"
 }
+
+
+function qualify_tc_bld_uprev() {(
+    TC_BLD=${HOME}/cbl/git/tc-build
+
+    cd "$(mktemp -d)"
+
+    "${TC_BLD}"/build-binutils.py --install-folder "${PWD}"
+
+    "${TC_BLD}"/build-llvm.py --install-folder "${PWD}" --use-good-revision --check-targets lld clang llvm
+
+    PATH=${PWD}/bin:${PATH} clang --version
+
+    git -C "${TC_BLD}"/llvm-project show -s
+
+    PATH_OVERRIDE=${PWD}/bin "${TC_BLD}"/kernel/build.sh --allyesconfig
+)}
 # vi: filetype=zsh
