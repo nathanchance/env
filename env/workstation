@@ -102,6 +102,7 @@ function bootstrap() {(
                                         podman \
                                         python \
                                         python-pip \
+                                        python-psutil \
                                         qemu-headless-arch-extra \
                                         ripgrep \
                                         rubygems \
