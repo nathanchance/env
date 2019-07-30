@@ -147,17 +147,23 @@ function bpgollvm() {(
     # Stage 1: Bootstrap compiler
     (
         header "Building LLVM stage 1"
-		mkdir -p "${BUILD_FOLDER}"/stage1
-		cd "${BUILD_FOLDER}"/stage1 || die "Error creating stage1 build folder"
+        mkdir -p "${BUILD_FOLDER}"/stage1
+        cd "${BUILD_FOLDER}"/stage1 || die "Error creating stage1 build folder"
         LINKER=$(if command -v ld.lld &>/dev/null; then echo lld; else echo gold; fi)
-		"${CMAKE[@]}" -DCMAKE_C_COMPILER=clang \
+        "${CMAKE[@]}" -DCLANG_PLUGIN_SUPPORT=OFF \
+                      -DCMAKE_C_COMPILER=clang \
                       -DCMAKE_C_FLAGS="${FLAGS}" \
                       -DCMAKE_CXX_COMPILER=clang++ \
                       -DCMAKE_CXX_FLAGS="${FLAGS}" \
+                      -DCOMPILER_RT_BUILD_SANITIZERS=OFF \
+                      -DLLVM_ENABLE_BACKTRACES=OFF \
+                      -DLLVM_INCLUDE_DOCS=OFF \
+                      -DLLVM_INCLUDE_EXAMPLES=OFF \
+                      -DLLVM_INCLUDE_TESTS=OFF \
                       -DLLVM_TARGETS_TO_BUILD=host \
                       -DLLVM_USE_LINKER=${LINKER} \
                       "${LLVM_PROJECT}"/llvm || die "Error configuring stage 1!"
-		ninja || die "Error building stage 1!"
+	ninja || die "Error building stage 1!"
     ) || exit ${?}
 
     STAGE_ONE_BIN=${BUILD_FOLDER}/stage1/bin
