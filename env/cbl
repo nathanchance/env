@@ -14,13 +14,17 @@ CBL_CCACHE=${CBL}/.ccache
 
 # Configurations known to build with -Werror
 CBLCFGS=( "arm:multi_v7_defconfig"
+          "arm:allnoconfig"
           "arm:allyesconfig"
           "arm:allyesconfig-be"
           "arm64:defconfig"
+          "arm64:allnoconfig"
           "arm64:allyesconfig"
           "arm64:allyesconfig-be"
           "ppc32:ppc44x_defconfig"
+          "ppc32:allnoconfig"
           "ppc64:pseries_defconfig"
+          "ppc64:allnoconfig"
           "ppc64le:powernv_defconfig"
           "x86:defconfig"
           "x86:allyesconfig" )
