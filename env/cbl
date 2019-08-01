@@ -218,16 +218,20 @@ function bldkw() {(
 # Configure and build a kernel with Clang
 function bldk() {(
     # Parameters
-    ARCH=${1:?}; shift
-    CONFIG=${1}; shift
+    while (( ${#} )); do
+        case ${1} in
+            *config) CONFIG=${1} ;;
+            arm|arm64|x86|ppc32|ppc64|ppc64le) ARCH=${1} ;;
+            KCFLAGS=*|V=*) BLDKW_ARGS+=( "${1}" ) ;;
+            *.o|*/*|all|vmlinux|modules) TARGETS+=( "${1}" ) ;;
+        esac
+
+        shift
+    done
 
     # Sanity checks
     [[ -z ${ARCH} ]] && die "ARCH not specified!"
     [[ -z ${CONFIG} ]] && die "CONFIG not specified!"
-    case ${ARCH} in
-        "arm"|"arm64"|"x86"|"ppc32"|"ppc64"|"ppc64le") ;;
-        *) die "Invalid ARCH specifed" ;;
-    esac
     [[ ${PWD} =~ cbl && ${CONFIG} =~ defconfig ]] && CBL_DEFCONFIG=true
 
     if ${CBL_DEFCONFIG:=false}; then
@@ -244,10 +248,12 @@ function bldk() {(
     fi
 
     BLDKW=( bldkw "${ARCH}" ${LD:+LD="${LD}"} ${OBJCOPY:+OBJCOPY="${OBJCOPY}"} )
+    [[ -n ${BLDKW_ARGS[*]} ]] && BLDKW+=( "${BLDKW_ARGS[@]}" )
 
     # Configure kernel
-    "${BLDKW[@]}" distclean "${CONFIG}" modules_prepare
+    "${BLDKW[@]}" distclean "${CONFIG}"
 
+    : ${O:=${KBF}}
     if ${CBL_DEFCONFIG:?}; then
         # Extra configs for build/boot testings
         # From https://github.com/groeck/linux-build-test/blob/master/rootfs/scripts/common.sh
@@ -318,7 +324,7 @@ CONFIG_VIRTIO_MMIO=y
 CONFIG_BLK_MQ_VIRTIO=y
 CONFIG_VIRTIO_BLK=y
 CONFIG_VIRTIO_BLK_SCSI=y
-CONFIG_SCSI_VIRTIO=y" >> "${O:=${KBF}}"/.config
+CONFIG_SCSI_VIRTIO=y" >> "${O}"/.config
 
         [[ ${ARCH} =~ arm ]] && echo "CONFIG_LOCK_TORTURE_TEST=y
 CONFIG_RCU_TORTURE_TEST=y" >> "${O}"/.config
@@ -327,7 +333,9 @@ CONFIG_RCU_TORTURE_TEST=y" >> "${O}"/.config
     fi
 
     # Build kernel
-    "${BLDKW[@]}" "${@}"
+    [[ -z ${TARGETS[*]} ]] && TARGETS=( all )
+    grep -q "CONFIG_MODULES=y" ${O:?}/.config && TARGETS=( modules_prepare "${TARGETS[@]}" )
+    "${BLDKW[@]}" "${TARGETS[@]}"
 )}
 
 
