@@ -173,7 +173,8 @@ function bldkw() {(
     case "${TARGET_ARCH}" in
         "arm") MAKE_FLAGS=( "ARCH=arm" "CROSS_COMPILE=${CROSS_COMPILE:-arm-linux-gnueabi-}" ) ;;
         "arm64") MAKE_FLAGS=( "ARCH=arm64" "CROSS_COMPILE=${CROSS_COMPILE:-aarch64-linux-gnu-}" ) ;;
-        "ppc32"|"ppc64") MAKE_FLAGS=( "ARCH=powerpc" "CROSS_COMPILE=${CROSS_COMPILE:-powerpc-linux-gnu-}" ) ;;
+        "ppc32") MAKE_FLAGS=( "ARCH=powerpc" "CROSS_COMPILE=${CROSS_COMPILE:-powerpc-linux-gnu-}" ) ;;
+        "ppc64") MAKE_FLAGS=( "ARCH=powerpc" "CROSS_COMPILE=${CROSS_COMPILE:-powerpc64-linux-gnu-}" ) ;;
         "ppc64le") MAKE_FLAGS=( "ARCH=powerpc" "CROSS_COMPILE=${CROSS_COMPILE:-powerpc64le-linux-gnu-}" ) ;;
         "x86") MAKE_FLAGS=() ;;
         *) display_error "Invalid TARGET_ARCH specified!"; return ;;
@@ -837,7 +838,7 @@ git clone /'"${PWD##*/}"' /'"${PWD##*/}"'2 && cd /'"${PWD##*/}"'2
 CC=gcc ./build-llvm.py || exit 1
 CC=clang ./build-llvm.py || exit 1
 
-for FILE in clang ld.lld aarch64-linux-gnu-ld arm-linux-gnueabi-ld powerpc64le-linux-gnu-ld powerpc-linux-gnu-ld ld; do
+for FILE in clang ld.lld aarch64-linux-gnu-ld arm-linux-gnueabi-ld mipsel-linux-gnu-ld powerpc64le-linux-gnu-ld powerpc-linux-gnu-ld powerpc64-linux-gnu-ld ld; do
     ./install/bin/${FILE} --version || exit 1
 done' > "${SCRIPT}"
 
