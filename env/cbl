@@ -489,7 +489,7 @@ function lt() {(
             rg --color=never "error:|warning:|undefined" |& sed "s/${PWD//\//\\/}\///g" > "${ERRORS}"
             MAKE_RESULT=${pipestatus[1]}
         else
-            bldk "${ARCH}" "${CONFIG}" KCFLAGS="${KCFLAGS--Werror}" ${LD:+LD="${LD}"}
+            bldk "${ARCH}" "${CONFIG}" KCFLAGS="${KCFLAGS--Werror}" ${LD:+LD="${LD}"} ${OBJCOPY:+OBJCOPY="${OBJCOPY}"}
             MAKE_RESULT=${?}
         fi
 
