@@ -487,8 +487,8 @@ function lt() {(
 
         # Use lld by default for everything but certain PowerPC builds
         if [[ -z ${LD} && -z ${BIG_ENDIAN} ]]; then
-            case ${ARCH} in
-                "ppc64") ;;
+            case "${ARCH}:${CONFIG}" in
+                ppc64*|arm:allnoconfig) ;;
                 *) LD=ld.lld ;;
             esac
         fi
