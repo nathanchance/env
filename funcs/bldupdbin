@@ -255,7 +255,7 @@ function bpgollvm() {(
 
 # Build/install ripgrep
 function birg() {(
-    [[ -z ${RG_VERSION} ]] && RG_VERSION=11.0.1
+    [[ -z ${RG_VERSION} ]] && RG_VERSION=11.0.2
     if [[ $(uname -m) = "x86_64" ]] && command -v dpkg &>/dev/null; then
         curl -LSso ${TMP_DEB:=$(mktemp --suffix=.deb)} https://github.com/BurntSushi/ripgrep/releases/download/${RG_VERSION}/ripgrep_${RG_VERSION}_amd64.deb
         sudo dpkg -i "${TMP_DEB}" && rm "${TMP_DEB}"
