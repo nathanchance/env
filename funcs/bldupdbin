@@ -90,7 +90,7 @@ function bgit() {(
     git clean -fxdq
     git fetch
 
-    [[ -z ${GIT_VERSION} ]] && GIT_VERSION=2.22.0
+    [[ -z ${GIT_VERSION} ]] && GIT_VERSION=2.23.0-rc1
     git checkout v"${GIT_VERSION}"
 
     "${MAKE[@]}" all install || die "git build/install failed!"
