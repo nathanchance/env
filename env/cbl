@@ -21,6 +21,7 @@ CBLCFGS=( "arm:multi_v7_defconfig"
           "arm64:allnoconfig"
           "arm64:allyesconfig"
           "arm64:allyesconfig-be"
+          "mipsel:malta_defconfig"
           "ppc32:ppc44x_defconfig"
           "ppc32:allnoconfig"
           "ppc64:pseries_defconfig"
@@ -177,6 +178,7 @@ function bldkw() {(
     case "${TARGET_ARCH}" in
         "arm") MAKE_FLAGS=( "ARCH=arm" "CROSS_COMPILE=${CROSS_COMPILE:-arm-linux-gnueabi-}" ) ;;
         "arm64") MAKE_FLAGS=( "ARCH=arm64" "CROSS_COMPILE=${CROSS_COMPILE:-aarch64-linux-gnu-}" ) ;;
+        "mipsel") MAKE_FLAGS=( "ARCH=mips" "CROSS_COMPILE=${CROSS_COMPILE:-mipsel-linux-gnu-}" ) ;;
         "ppc32") MAKE_FLAGS=( "ARCH=powerpc" "CROSS_COMPILE=${CROSS_COMPILE:-powerpc-linux-gnu-}" ) ;;
         "ppc64") MAKE_FLAGS=( "ARCH=powerpc" "CROSS_COMPILE=${CROSS_COMPILE:-powerpc64-linux-gnu-}" ) ;;
         "ppc64le") MAKE_FLAGS=( "ARCH=powerpc" "CROSS_COMPILE=${CROSS_COMPILE:-powerpc64le-linux-gnu-}" ) ;;
@@ -226,7 +228,7 @@ function bldk() {(
     while (( ${#} )); do
         case ${1} in
             *config) CONFIG=${1} ;;
-            arm|arm64|x86|ppc32|ppc64|ppc64le) ARCH=${1} ;;
+            arm|arm64|mipsel|ppc32|ppc64|ppc64le|x86) ARCH=${1} ;;
             KCFLAGS=*|V=*) BLDKW_ARGS+=( "${1}" ) ;;
             *.o|*/*|all|vmlinux|modules) TARGETS+=( "${1}" ) ;;
         esac
@@ -243,7 +245,7 @@ function bldk() {(
         # Use lld by default for everything but certain PowerPC builds
         if [[ -z ${LD} ]]; then
             case ${ARCH} in
-                "ppc64") ;;
+                "mipsel"|"ppc64") ;;
                 *) LD=ld.lld ;;
             esac
         fi
@@ -367,6 +369,13 @@ function bootk() {
             QEMU_ARCH_CMDLINE=( -cpu cortex-a57
                                 -drive "file=${IMAGES_FOLDER}/arm64/rootfs.ext4,format=raw"
                                 -append "console=ttyAMA0 root=/dev/vda ${QEMU_CMDLINE}" ) ;;
+        "mipsel")
+            IMAGE=vmlinux
+            QEMU=qemu-system-mipsel
+            QEMU_ARCH_CMDLINE=( -machine malta
+                                -cpu 24Kf
+                                -append "root=/dev/sda ${QEMU_CMDLINE}"
+                                -drive "file=${IMAGES_FOLDER}/mipsel/rootfs.ext4,format=raw,if=ide" ) ;;
         "ppc32")
             IMAGE=zImage
             RAM=128m
@@ -398,7 +407,8 @@ function bootk() {
         *) display_error "Invalid ARCH specified!"; return 1 ;;
     esac
 
-    KERNEL=${KERNEL_LOCATION:-${KBF}}/arch/${ARCH}/boot/${IMAGE}
+    [[ ${IMAGE} = "vmlinux" ]] || BOOT_FOLDER=arch/${ARCH}/boot/
+    KERNEL=${KERNEL_LOCATION:-${KBF}}/${BOOT_FOLDER:+${BOOT_FOLDER}}${IMAGE}
     [[ ! -f ${KERNEL} ]] && { display_error "Kernel doesn't exist! Please build one."; return 1; }
 
     # Update the images
@@ -429,6 +439,7 @@ function babk() {
 
     # Define a different defconfig for ppc32/ppc64le
     case ${ARCH} in
+        "mipsel") DEFCONFIG=malta_defconfig ;;
         "ppc32") DEFCONFIG=ppc44x_defconfig ;;
         "ppc64le") DEFCONFIG=powernv_defconfig ;;
     esac
@@ -488,7 +499,7 @@ function lt() {(
         # Use lld by default for everything but certain PowerPC builds
         if [[ -z ${LD} && -z ${BIG_ENDIAN} ]]; then
             case "${ARCH}:${CONFIG}" in
-                ppc64*|arm:allnoconfig) ;;
+                arm:allnoconfig|mipsel*|ppc64*) ;;
                 *) LD=ld.lld ;;
             esac
         fi
