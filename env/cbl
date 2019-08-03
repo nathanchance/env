@@ -385,6 +385,14 @@ function bootk() {
                                 -no-reboot
                                 -initrd "${IMAGES_FOLDER}/ppc32/rootfs.cpio" )
             ARCH=powerpc ;;
+        "ppc64")
+            IMAGE=vmlinux
+            RAM=1G
+            QEMU=qemu-system-ppc64
+            QEMU_ARCH_CMDLINE=( -machine pseries
+                                -vga none
+                                -initrd "${IMAGES_FOLDER}/ppc64/rootfs.cpio" )
+            ARCH=powerpc ;;
         "ppc64le")
             IMAGE=zImage.epapr
             RAM=2G
@@ -413,7 +421,7 @@ function bootk() {
 
     # Update the images
     git -C "${IMAGES_FOLDER}" rh --quiet
-    git -C "${IMAGES_FOLDER}" pull --quiet
+    git -C "${IMAGES_FOLDER}" pull --quiet --rebase
 
     # Print or run the command
     COMMAND=( "${QEMU}" "${QEMU_ARCH_CMDLINE[@]}" -kernel "${KERNEL}" -m "${RAM:-512m}" -display none -serial mon:stdio )
@@ -441,6 +449,7 @@ function babk() {
     case ${ARCH} in
         "mipsel") DEFCONFIG=malta_defconfig ;;
         "ppc32") DEFCONFIG=ppc44x_defconfig ;;
+        "ppc64") DEFCONFIG=pseries_defconfig ;;
         "ppc64le") DEFCONFIG=powernv_defconfig ;;
     esac
 
@@ -526,7 +535,7 @@ function lt() {(
         TIME_STRING=$(format_time "${START}" "$(date +%s)")
         {
             echo "${ARCH}:${CONFIG}${BIG_ENDIAN:+"-be"} | Build ${RESULT} in ${TIME_STRING:l}\c"
-            if [[ ${RESULT} = "successful" && ${CONFIG} =~ defconfig && ${CONFIG} != "pseries_defconfig" ]]; then
+            if [[ ${RESULT} = "successful" && ${CONFIG} =~ defconfig ]]; then
                 if bootk "${ARCH}" &>/dev/null; then
                     echo " | Boot successful\c"
                 else
