@@ -17,10 +17,14 @@ CBLCFGS=( "arm:multi_v7_defconfig"
           "arm:allnoconfig"
           "arm:allyesconfig"
           "arm:allyesconfig-be"
+          "arm:allmodconfig"
+          "arm:allmodconfig-be"
           "arm64:defconfig"
           "arm64:allnoconfig"
           "arm64:allyesconfig"
           "arm64:allyesconfig-be"
+          "arm64:allmodconfig"
+          "arm64:allmodconfig-be"
           "mipsel:malta_defconfig"
           "ppc32:ppc44x_defconfig"
           "ppc32:allnoconfig"
@@ -28,7 +32,8 @@ CBLCFGS=( "arm:multi_v7_defconfig"
           "ppc64:allnoconfig"
           "ppc64le:powernv_defconfig"
           "x86:defconfig"
-          "x86:allyesconfig" )
+          "x86:allyesconfig"
+          "x86:allmodconfig" )
 
 
 # Create build folders
