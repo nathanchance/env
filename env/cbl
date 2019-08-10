@@ -245,7 +245,15 @@ function bldk() {(
 
     # Sanity checks
     [[ -z ${ARCH} ]] && die "ARCH not specified!"
-    [[ -z ${CONFIG} ]] && die "CONFIG not specified!"
+    if [[ -z ${CONFIG} ]]; then
+        case ${ARCH} in
+            "mipsel") CONFIG=malta_defconfig ;;
+            "ppc32") CONFIG=ppc44x_defconfig ;;
+            "ppc64") CONFIG=pseries_defconfig ;;
+            "ppc64le") CONFIG=powernv_defconfig ;;
+            *) CONFIG=defconfig ;;
+        esac
+    fi
     [[ ${PWD} =~ cbl && ${CONFIG} =~ defconfig ]] && CBL_DEFCONFIG=true
 
     if ${CBL_DEFCONFIG:=false}; then
@@ -447,23 +455,14 @@ function bootk() {
 
 
 # Build a kernel and boot it
-function babk() {
-    local ARCH DEFCONFIG LD
+function babk() {(
     ARCH=${1}; shift
-    [[ -z ${ARCH} ]] && { display_error "ARCH not specified!"; return 1; }
+    [[ -z ${ARCH} ]] && die "ARCH not specified!"
 
-    # Define a different defconfig for ppc32/ppc64le
-    case ${ARCH} in
-        "mipsel") DEFCONFIG=malta_defconfig ;;
-        "ppc32") DEFCONFIG=ppc44x_defconfig ;;
-        "ppc64") DEFCONFIG=pseries_defconfig ;;
-        "ppc64le") DEFCONFIG=powernv_defconfig ;;
-    esac
-
-    bldk "${ARCH}" "${DEFCONFIG:-defconfig}" KCFLAGS="${KCFLAGS--Werror}" "${@}"
+    bldk "${ARCH}" KCFLAGS="${KCFLAGS--Werror}" "${@}"
 
     bootk "${ARCH}"
-}
+)}
 
 
 # Show local LLVM patches via git log
