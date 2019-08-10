@@ -124,19 +124,13 @@ function display_error() {
 
 # Prints an error in bold red and exits the script
 function die() {
-    if [[ ${TG} ]]; then
+    if [[ -n ${TG} ]]; then
         local TMP_FILE
         TMP_FILE=$(mktemp)
         # Info must be resourced so public chats don't get notified
         load_botinfo
         {
             echo "\`\`\`"
-            echo "An error was detected while running the following command:"
-            echo
-            echo "$(basename "${0}") ${PARAMS}"
-            echo
-            echo "The error was:"
-            echo
             echo "${*}"
             echo "\`\`\`"
         } > "${TMP_FILE}"
