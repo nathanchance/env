@@ -237,7 +237,7 @@ function bldk() {(
             *config) CONFIG=${1} ;;
             arm|arm64|mipsel|ppc32|ppc64|ppc64le|x86) ARCH=${1} ;;
             KCFLAGS=*|V=*|W=*) BLDKW_ARGS+=( "${1}" ) ;;
-            *.o|*/*|all|vmlinux|modules) TARGETS+=( "${1}" ) ;;
+            *.o|*/*|all|vmlinux|modules|*Image*) TARGETS+=( "${1}" ) ;;
         esac
 
         shift
