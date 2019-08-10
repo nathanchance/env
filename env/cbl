@@ -622,7 +622,7 @@ function bldusr() {(
     # Build binutils
     bldbn --build-folder "${BBF:?}" \
           --install-folder "${INSTALL_FOLDER}" \
-          --update || return ${?}
+          --update || die "bldbn failed with exit code ${?}"
 
     # Build LLVM/Clang/lld
     bldllvm --build-folder "${LBF:?}" \
@@ -631,7 +631,7 @@ function bldusr() {(
             --lto=thin \
             --march=native \
             --pgo \
-            --update-llvm || return ${?}
+            --update-llvm || die "bldllvm failed with exit code ${?}"
     stripllvmbin "${INSTALL_FOLDER}"
 
     # Invalidate our kernel ccache because we have a new compiler that will be used for it
