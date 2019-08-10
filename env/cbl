@@ -11,6 +11,8 @@ CBL_USR=${CBL}/usr
 CBL_BIN=${CBL_USR}/bin
 TCBLD=${CBL}/tc-build
 CBL_CCACHE=${CBL}/.ccache
+export CBL_SRC CBL_USR CBL_BIN TCBLD CBL_CCACHE
+
 
 # Configurations known to build with -Werror
 CBLCFGS=( "arm:multi_v7_defconfig"
@@ -464,6 +466,19 @@ function babk() {
 }
 
 
+# Show local LLVM patches via git log
+function llvm_log() {(
+    cd "${TCBLD:?}"/llvm-project || return
+    MFC=$(git log --reverse --format=%H --committer="$(git config --get user.name) <$(git config --get user.email)>" --since="$(date --date="1 week ago")" | head -n1)
+    if [[ -n ${MFC} ]]; then
+        echo
+        echo "LLVM commit log:"
+        echo
+        git lo ${MFC}^^..HEAD
+    fi
+)}
+
+
 # linux testing
 function lt() {(
     cd "${CBL}"/"${TREE:=linux-next}" || die "wtf"
@@ -558,13 +573,7 @@ function lt() {(
         echo "${TREE} commit log:"
         echo
         git lo $(git log --reverse --format=%H --committer="$(git config --get user.name) <$(git config --get user.email)>" --since="$(date --date="1 week ago")" | head -n1)^^..HEAD
-        echo
-        echo "clang commit log:"
-        echo
-        (
-            cd "${TCBLD}"/llvm-project
-            git lo $(git log --reverse --format=%H --committer="$(git config --get user.name) <$(git config --get user.email)>" --since="$(date --date="1 week ago")" | head -n1)^^..HEAD
-        )
+        llvm_log
     } >> "${LOG}"
 
     MESSAGE="linux$([[ -f localversion-next ]] && cat localversion-next) build results: $(deldog "${LOG}")"
@@ -726,13 +735,7 @@ function kct() {(
             echo "clang location: $(command -v clang)"
             echo
             clang --version | head -n1
-            echo
-            echo "clang commit log:"
-            echo
-            (
-                cd "${TCBLD}"/llvm-project
-                git lo $(git log --reverse --format=%H --committer="$(git config --get user.name) <$(git config --get user.email)>" --since="$(date --date="1 week ago")" | head -n1)^^..HEAD
-            )
+            llvm_log
             echo
             echo "Build results:"
             echo
