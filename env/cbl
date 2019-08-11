@@ -655,6 +655,7 @@ function kcbw() {(
 
     while (( ${#} )); do
         case ${1} in
+            arm64|x86) ARCH=${1} ;;
             CC=*|LD=*) export "${1:?}" ;;
             3.*|4.*) BRANCH=${1} ;;
         esac
@@ -666,11 +667,13 @@ function kcbw() {(
 
     cd "${BUILD_FOLDER}" || die "wtf"
 
-    echo 'ARCH=arm64
+    echo 'ARCH='"${ARCH:=arm64}"'
 BRANCH='"${BRANCH}"'
-CLANG_TRIPLE=aarch64-linux-gnu-
-CROSS_COMPILE='"${CROSS_COMPILE:-"aarch64-linux-gnu-"}"'
-DEFCONFIG=cuttlefish_defconfig
+'$(if [[ ${ARCH} = arm64 ]]; then
+    echo "CLANG_TRIPLE=aarch64-linux-gnu-
+CROSS_COMPILE=${CROSS_COMPILE:-"aarch64-linux-gnu-"}"
+fi)'
+DEFCONFIG='"$([[ ${ARCH} = "x86" ]] && echo "x86_64_")"'cuttlefish_defconfig
 EXTRA_CMDS='\'''\''
 KERNEL_DIR='"$(realpath --relative-to="${PWD}" "${COMMON_FOLDER}")"'
 POST_DEFCONFIG_CMDS="check_defconfig && update_clang_config"
@@ -678,7 +681,7 @@ CLANG_PREBUILT_BIN='"$(realpath --relative-to="${PWD}" "${CPB:-${CBL_BIN}}")"'
 LD_LIBRARY_PATH='"${LD_LIBRARY_PATH:-"${CBL_USR}"/lib}"'
 LINUX_GCC_CROSS_COMPILE_PREBUILTS_BIN='"$(realpath --relative-to="${PWD}" "${GCCPB:-${CBL_BIN}}")"'
 FILES="
-arch/arm64/boot/Image.gz
+arch/'"${ARCH}"'/boot/'$(case ${ARCH} in arm64) echo "Image.gz" ;; x86) echo "bzImage" ;; esac)'
 vmlinux
 System.map
 "
@@ -749,11 +752,11 @@ function kct() {(
 
         # Build kernel silently normally
         if [[ -z ${DEBUG} ]]; then
-            KCFLAGS="${KCFLAGS--Werror}" kcbw "${VERSION}" |& \
+            KCFLAGS="${KCFLAGS--Werror}" kcbw arm64 "${VERSION}" |& \
             rg --color=never "error:|warning:|undefined" |& sed "s/${COMMON_FOLDER//\//\\/}\///g" > "${ERRORS}"
             MAKE_RESULT=${pipestatus[1]}
         else
-            KCFLAGS="${KCFLAGS--Werror}" kcbw "${VERSION}"
+            KCFLAGS="${KCFLAGS--Werror}" kcbw arm64 "${VERSION}"
             MAKE_RESULT=${?}
         fi
 
