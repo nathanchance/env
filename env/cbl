@@ -201,7 +201,7 @@ function bldkw() {(
 
     # Use our versions of Clang
     move_to_front_of_path "${CBL_BIN}"
-    [[ -n ${PATH_OVERRIDE} ]] && move_to_front_of_path "${PATH_OVERRIDE}"
+    [[ -n ${PO} ]] && move_to_front_of_path "${PO}"
 
     echo
     echo "${BOLD}LLVM location:${RST} $(dirname "$(command -v clang)")"
@@ -211,7 +211,7 @@ function bldkw() {(
     ccache_size kernel 100
 
     # Build the kernel
-    time make ${QUIET:+-s} \
+    time make ${Q:+-s} \
               "${JOBS_FLAG}" \
               AR="${AR:-llvm-ar}" \
               CC="${CC:-${CCACHE} clang}" \
@@ -499,7 +499,7 @@ function lt() {(
     {
         (
             path_push "${CBL_BIN}"
-            [[ -n ${PATH_OVERRIDE} ]] && path_push "${PATH_OVERRIDE}"
+            [[ -n ${PO} ]] && path_push "${PO}"
             echo "clang location: $(command -v clang)"
             echo
             clang --version | head -n1
