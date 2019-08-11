@@ -362,12 +362,12 @@ CONFIG_RCU_TORTURE_TEST=y" >> "${O}"/.config
 
 
 # Boot a kernel in QEMU
-function bootk() {
-    local ARCH COMMAND IMAGES_FOLDER KERNEL RAM QEMU; ARCH=${1}; shift
-    [[ -z ${ARCH} ]] && { display_error "ARCH not specified!"; return 1; }
+function bootk() {(
+    ARCH=${1}; shift
+    [[ -z ${ARCH} ]] && die "ARCH not specified!"
 
     IMAGES_FOLDER=${CBL}/git/ci-master/images
-    [[ ! -d ${IMAGES_FOLDER} ]] && { display_error "${IMAGES_FOLDER} doesn't exist!"; return 1; }
+    [[ ! -d ${IMAGES_FOLDER} ]] && die "${IMAGES_FOLDER} doesn't exist!"
 
     case ${ARCH} in
         "arm")
@@ -427,12 +427,12 @@ function bootk() {
                                 -d unimp,guest_errors
                                 -drive "file=${IMAGES_FOLDER}/x86_64/rootfs.ext4,format=raw,if=ide"
                                 -enable-kvm ) ;;
-        *) display_error "Invalid ARCH specified!"; return 1 ;;
+        *) die "Invalid ARCH specified!" ;;
     esac
 
     [[ ${IMAGE} = "vmlinux" ]] || BOOT_FOLDER=arch/${ARCH}/boot/
     KERNEL=${O:-${KBF}}/${BOOT_FOLDER:+${BOOT_FOLDER}}${IMAGE}
-    [[ ! -f ${KERNEL} ]] && { display_error "Kernel doesn't exist! Please build one."; return 1; }
+    [[ -f ${KERNEL} ]] || die "Kernel doesn't exist! Please build one."
 
     # Update the images
     git -C "${IMAGES_FOLDER}" rh --quiet
@@ -441,7 +441,7 @@ function bootk() {
     # Print or run the command
     COMMAND=( "${QEMU}" "${QEMU_ARCH_CMDLINE[@]}" -kernel "${KERNEL}" -m "${RAM:-512m}" -display none -serial mon:stdio )
     [[ -z ${NO_TIMEOUT} ]] && COMMAND=( timeout 2m unbuffer "${COMMAND[@]}" )
-    [[ ${1} = "--print" ]] && { echo "${COMMAND[*]}"; return; }
+    [[ ${1} = "--print" ]] && { echo "${COMMAND[*]}"; exit; }
 
     case ${ARCH} in
         "arm64")
@@ -450,8 +450,7 @@ function bootk() {
         *)
             "${COMMAND[@]}" "${@}" ;;
     esac
-
-}
+)}
 
 
 # Build a kernel and boot it
