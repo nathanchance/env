@@ -431,7 +431,7 @@ function bootk() {
     esac
 
     [[ ${IMAGE} = "vmlinux" ]] || BOOT_FOLDER=arch/${ARCH}/boot/
-    KERNEL=${KERNEL_LOCATION:-${KBF}}/${BOOT_FOLDER:+${BOOT_FOLDER}}${IMAGE}
+    KERNEL=${O:-${KBF}}/${BOOT_FOLDER:+${BOOT_FOLDER}}${IMAGE}
     [[ ! -f ${KERNEL} ]] && { display_error "Kernel doesn't exist! Please build one."; return 1; }
 
     # Update the images
