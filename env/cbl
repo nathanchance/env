@@ -483,6 +483,8 @@ function lt() {(
 
     while (( ${#} )); do
         case ${1} in
+            # defconfig + little-endian allyesconfig
+            "-b"|"--basic") BASIC=true ;;
             "-d"|"--debug") DEBUG=true ;;
             # Show non-fatal warnings
             "-w"|"--warnings") SHOW_NF_WARNINGS=true ;;
@@ -514,6 +516,10 @@ function lt() {(
         ARCH=${CONFIG%%:*}
         CONFIG=${CONFIG##*:}
 
+        # Basic configs are defconfigs + little endian allyesconfig
+        [[ -n ${BASIC} && ! ( ${CONFIG} =~ defconfig || ${CONFIG} = "allyesconfig" ) ]] && continue
+
+        # Start timer
         START=$(date +%s)
 
         # Error log
