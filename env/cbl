@@ -203,29 +203,31 @@ function bldkw() {(
     move_to_front_of_path "${CBL_BIN}"
     [[ -n ${PO} ]] && move_to_front_of_path "${PO}"
 
-    echo
-    echo "${BOLD}LLVM location:${RST} $(dirname "$(command -v clang)")"
-    echo
+    if [[ ${Q} -ne 2 ]]; then
+        echo
+        echo "${BOLD}LLVM location:${RST} $(dirname "$(command -v clang)")"
+        echo
+    fi
 
     # Setup ccache
     ccache_size kernel 100
 
     # Build the kernel
-    time make ${Q:+-s} \
-              "${JOBS_FLAG}" \
-              AR="${AR:-llvm-ar}" \
-              CC="${CC:-${CCACHE} clang}" \
-              ${KCONFIG_ALLCONFIG:+KCONFIG_ALLCONFIG="${KCONFIG_ALLCONFIG}"} \
-              HOSTCC="${HOSTCC:-${CCACHE} clang}" \
-              HOSTCXX="${HOSTCXX:-${CCACHE} clang++}" \
-              HOSTLD="${HOSTLD:-ld.lld}" \
-              HOSTLDFLAGS="${HOSTLDFLAGS--fuse-ld=lld}" \
-              "${MAKE_FLAGS[@]}" \
-              NM="${NM:-llvm-nm}" \
-              O="${O:-${KBF}}" \
-              OBJDUMP="${OBJDUMP:-llvm-objdump}" \
-              STRIP="${STRIP:-llvm-strip}" \
-              "${@}"
+    make ${Q:+-s} \
+         "${JOBS_FLAG}" \
+         AR="${AR:-llvm-ar}" \
+         CC="${CC:-${CCACHE} clang}" \
+         ${KCONFIG_ALLCONFIG:+KCONFIG_ALLCONFIG="${KCONFIG_ALLCONFIG}"} \
+         HOSTCC="${HOSTCC:-${CCACHE} clang}" \
+         HOSTCXX="${HOSTCXX:-${CCACHE} clang++}" \
+         HOSTLD="${HOSTLD:-ld.lld}" \
+         HOSTLDFLAGS="${HOSTLDFLAGS--fuse-ld=lld}" \
+         "${MAKE_FLAGS[@]}" \
+         NM="${NM:-llvm-nm}" \
+         O="${O:-${KBF}}" \
+         OBJDUMP="${OBJDUMP:-llvm-objdump}" \
+         STRIP="${STRIP:-llvm-strip}" \
+         "${@}"
 )}
 
 
@@ -493,7 +495,8 @@ function lt() {(
     done
 
     # Logging
-    LOG=$(mktemp)
+    LOG_DIR=$(mktemp -d)
+    LOG=${LOG_DIR}/main.log
     echo
     echo "Build log: ${LOG}"
     echo
@@ -519,11 +522,13 @@ function lt() {(
         # Basic configs are defconfigs + little endian allyesconfig
         [[ -n ${BASIC} && ! ( ${CONFIG} =~ defconfig || ${CONFIG} = "allyesconfig" ) ]] && continue
 
+        header "${ARCH}:${CONFIG}"
+
         # Start timer
         START=$(date +%s)
 
-        # Error log
-        ERRORS=$(mktemp)
+        # Warning/error log
+        WARNING_LOG=${LOG_DIR}/${ARCH}_${CONFIG}.log
 
         # Make sure BIG_ENDIAN gets set
         [[ ${CONFIG} =~ -be ]] && export BIG_ENDIAN=true
@@ -542,8 +547,7 @@ function lt() {(
 
         # Build kernel silently normally
         if [[ -z ${DEBUG} ]]; then
-            bldk "${ARCH}" "${CONFIG}" KCFLAGS="${KCFLAGS--Werror}" ${LD:+LD="${LD}"} ${OBJCOPY:+OBJCOPY="${OBJCOPY}"} |& \
-            rg --color=never "error:|warning:|undefined" |& sed "s/${PWD//\//\\/}\///g" > "${ERRORS}"
+            Q=2 bldk "${ARCH}" "${CONFIG}" KCFLAGS="${KCFLAGS--Werror}" ${LD:+LD="${LD}"} ${OBJCOPY:+OBJCOPY="${OBJCOPY}"} |& tee "${WARNING_LOG}"
             MAKE_RESULT=${pipestatus[1]}
         else
             bldk "${ARCH}" "${CONFIG}" KCFLAGS="${KCFLAGS--Werror}" ${LD:+LD="${LD}"} ${OBJCOPY:+OBJCOPY="${OBJCOPY}"}
@@ -552,10 +556,13 @@ function lt() {(
 
         # Make sure that if make fails, it gets propgated to the if statement
         if [[ ${MAKE_RESULT} -eq 0 ]]; then
+            COLOR=${GRN}
             RESULT=successful
         else
+            COLOR=${RED}
             RESULT=failed
         fi
+        echo "${COLOR}Build ${RESULT}${RST}"
         TIME_STRING=$(format_time "${START}" "$(date +%s)")
         {
             echo "${ARCH}:${CONFIG}${BIG_ENDIAN:+"-be"} | Build ${RESULT} in ${TIME_STRING:l}\c"
@@ -567,10 +574,10 @@ function lt() {(
                 fi
             fi
             echo
-            [[ -z ${DEBUG} && ( -n ${SHOW_NF_WARNINGS} || ${RESULT} = "failed" ) ]] && cat "${ERRORS}"
+            [[ -z ${DEBUG} && ( -n ${SHOW_NF_WARNINGS} || ${RESULT} = "failed" ) ]] && \
+                rg --color=never "error:|warning:|undefined" "${WARNING_LOG}" | sed "s/${PWD//\//\\/}\///g"
             echo
         } >> "${LOG}"
-        rm "${ERRORS}"
     ) done
 
     {
