@@ -369,6 +369,38 @@ CONFIG_RCU_TORTURE_TEST=y" >> "${O}"/.config
 )}
 
 
+# Download EFI firmware
+function download_efi_firmware() {(
+    AAVMF=${HOME}/usr/share/AAVMF
+    AAVMF_FILES=( AAVMF_CODE.fd AAVMF_VARS.fd )
+    AAVMF_DEB=qemu-efi-aarch64_0~20190606.20d2e5a1-2_all.deb
+
+    OVMF=${HOME}/usr/share/OVMF
+    OVMF_FILES=( OVMF_CODE.fd OVMF_VARS.fd )
+    OVMF_DEB=ovmf_0~20190606.20d2e5a1-2_all.deb
+
+    cd "$(mktemp -d)"
+    rm -rf "${AAVMF}"
+    mkdir -p "${AAVMF}"
+    curl -LSsO http://ftp.us.debian.org/debian/pool/main/e/edk2/"${AAVMF_DEB}"
+    ar x "${AAVMF_DEB}"
+    tar xJf data.tar.xz
+    for AAVMF_FILE in "${AAVMF_FILES[@]}"; do
+        mv "${AAVMF//${HOME}\/}"/"${AAVMF_FILE}" "${AAVMF}"
+    done
+
+    cd "$(mktemp -d)"
+    rm -rf "${OVMF}"
+    mkdir -p "${OVMF}"
+    curl -LSsO http://http.us.debian.org/debian/pool/main/e/edk2/"${OVMF_DEB}"
+    ar x "${OVMF_DEB}"
+    tar xJf data.tar.xz
+    for OVMF_FILE in "${OVMF_FILES[@]}"; do
+        mv "${OVMF//${HOME}\/}"/"${OVMF_FILE}" "${OVMF}"
+    done
+)}
+
+
 # Boot a kernel in QEMU
 function bootk() {(
     ARCH=${1}; shift
@@ -392,7 +424,7 @@ function bootk() {(
             QEMU_ARCH_CMDLINE=( -cpu cortex-a57
                                 -drive "file=${IMAGES_FOLDER}/arm64/rootfs.ext4,format=raw,id=rootfs,if=none"
                                 -device "virtio-blk-device,drive=rootfs"
-                                -append "console=ttyAMA0 root=/dev/vda ${QEMU_CMDLINE}" ) ;;
+                                -append "console=ttyAMA0 earlycon root=/dev/vda ${QEMU_CMDLINE}" ) ;;
         "mipsel")
             IMAGE=vmlinux
             QEMU=qemu-system-mipsel
@@ -431,7 +463,7 @@ function bootk() {(
         "x86")
             IMAGE=bzImage
             QEMU=qemu-system-x86_64
-            QEMU_ARCH_CMDLINE=( -append "root=/dev/vda console=ttyS0 ${QEMU_CMDLINE}"
+            QEMU_ARCH_CMDLINE=( -append "console=ttyS0 earlycon root=/dev/vda ${QEMU_CMDLINE}"
                                 -cpu host
                                 -d unimp,guest_errors
                                 -drive "file=${IMAGES_FOLDER}/x86_64/rootfs.ext4,format=raw,if=virtio"
@@ -442,6 +474,17 @@ function bootk() {(
     [[ ${IMAGE} = "vmlinux" ]] || BOOT_FOLDER=arch/${ARCH}/boot/
     KERNEL=${O:-${KBF}}/${BOOT_FOLDER:+${BOOT_FOLDER}}${IMAGE}
     [[ -f ${KERNEL} ]] || die "Kernel doesn't exist! Please build one."
+    if [[ ! "$(readlink -f ${KERNEL})" =~ common ]]; then
+        [[ -d ${HOME}/usr/share/AAVMF && -d ${HOME}/usr/share/OVMF ]] || download_efi_firmware
+        case ${ARCH} in
+            "arm64")
+                QEMU_ARCH_CMDLINE+=( -drive "if=pflash,format=raw,readonly,file=${HOME}/usr/share/AAVMF/AAVMF_CODE.fd"
+                                     -drive "if=pflash,format=raw,file=${HOME}/usr/share/AAVMF/AAVMF_VARS.fd" ) ;;
+            "x86")
+                QEMU_ARCH_CMDLINE+=( -drive "if=pflash,format=raw,readonly,file=${HOME}/usr/share/OVMF/OVMF_CODE.fd"
+                                     -drive "if=pflash,format=raw,file=${HOME}/usr/share/OVMF/OVMF_VARS.fd" ) ;;
+        esac
+    fi
 
     # Update the images
     git -C "${IMAGES_FOLDER}" rh --quiet
@@ -450,8 +493,8 @@ function bootk() {(
     # Print or run the command
     COMMAND=( "${QEMU}" "${QEMU_ARCH_CMDLINE[@]}" -kernel "${KERNEL}" -m "${RAM:-512m}" -display none -serial mon:stdio )
     [[ -z ${NO_TIMEOUT} ]] && COMMAND=( timeout 2m unbuffer "${COMMAND[@]}" )
-    [[ ${1} = "--print" ]] && { echo "${COMMAND[*]}"; exit; }
 
+    set -x
     case ${ARCH} in
         "arm64")
             "${COMMAND[@]}" -machine virt "${@}"
@@ -459,6 +502,9 @@ function bootk() {(
         *)
             "${COMMAND[@]}" "${@}" ;;
     esac
+    EXIT_CODE=${?}
+    set +x
+    exit ${EXIT_CODE}
 )}
 
 
