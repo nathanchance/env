@@ -390,7 +390,8 @@ function bootk() {(
             IMAGE=Image.gz
             QEMU=qemu-system-aarch64
             QEMU_ARCH_CMDLINE=( -cpu cortex-a57
-                                -drive "file=${IMAGES_FOLDER}/arm64/rootfs.ext4,format=raw"
+                                -drive "file=${IMAGES_FOLDER}/arm64/rootfs.ext4,format=raw,id=rootfs,if=none"
+                                -device "virtio-blk-device,drive=rootfs"
                                 -append "console=ttyAMA0 root=/dev/vda ${QEMU_CMDLINE}" ) ;;
         "mipsel")
             IMAGE=vmlinux
@@ -430,10 +431,10 @@ function bootk() {(
         "x86")
             IMAGE=bzImage
             QEMU=qemu-system-x86_64
-            QEMU_ARCH_CMDLINE=( -append "root=/dev/sda console=ttyS0 ${QEMU_CMDLINE}"
+            QEMU_ARCH_CMDLINE=( -append "root=/dev/vda console=ttyS0 ${QEMU_CMDLINE}"
                                 -cpu host
                                 -d unimp,guest_errors
-                                -drive "file=${IMAGES_FOLDER}/x86_64/rootfs.ext4,format=raw,if=ide"
+                                -drive "file=${IMAGES_FOLDER}/x86_64/rootfs.ext4,format=raw,if=virtio"
                                 -enable-kvm ) ;;
         *) die "Invalid ARCH specified!" ;;
     esac
