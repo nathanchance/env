@@ -213,6 +213,7 @@ function bldkw() {(
     ccache_size kernel 100
 
     # Build the kernel
+    set -x
     make ${Q:+-s} \
          "${JOBS_FLAG}" \
          AR="${AR:-llvm-ar}" \
@@ -228,6 +229,9 @@ function bldkw() {(
          OBJDUMP="${OBJDUMP:-llvm-objdump}" \
          STRIP="${STRIP:-llvm-strip}" \
          "${@}"
+    EXIT_CODE=${?}
+    set +x
+    exit ${EXIT_CODE}
 )}
 
 
