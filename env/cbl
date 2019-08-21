@@ -7,11 +7,12 @@
 
 # Universal variables
 CBL_SRC=${CBL}/src
-CBL_USR=${CBL}/usr
-CBL_BIN=${CBL_USR}/bin
+CBL_TC=${CBL}/toolchains
+CBL_LLVM=${CBL_TC}/llvm-tot/bin
+CBL_BNTL=${CBL_TC}/binutils/bin
 TCBLD=${CBL}/tc-build
 CBL_CCACHE=${CBL}/.ccache
-export CBL_SRC CBL_USR CBL_BIN TCBLD CBL_CCACHE
+export CBL_SRC CBL_TC CBL_LLVM CBL_BNTL TCBLD CBL_CCACHE
 
 
 # Configurations known to build with -Werror
@@ -200,7 +201,8 @@ function bldkw() {(
     fi
 
     # Use our versions of Clang
-    move_to_front_of_path "${CBL_BIN}"
+    move_to_front_of_path "${CBL_BNTL}"
+    move_to_front_of_path "${CBL_LLVM}"
     [[ -n ${PO} ]] && move_to_front_of_path "${PO}"
 
     if [[ ${Q} -ne 2 ]]; then
@@ -506,7 +508,8 @@ function lt() {(
     echo
     {
         (
-            path_push "${CBL_BIN}"
+            path_push "${CBL_BNTL}"
+            path_push "${CBL_LLVM}"
             [[ -n ${PO} ]] && path_push "${PO}"
             echo "clang location: $(command -v clang)"
             echo
@@ -644,14 +647,20 @@ function bldusr() {(
     rm -rf "${INSTALL_FOLDER:=${CBL_USR}}"
 
     # Build binutils
+    CBL_BNTL=${CBL_BNTL%/*}
+    rm -rf "${CBL_BNTL}"-old
+    mv "${CBL_BNTL}" "${CBL_BNTL}"-old
     bldbn --build-folder "${BBF:?}" \
-          --install-folder "${INSTALL_FOLDER}" \
+          --install-folder "${CBL_BNTL}" \
           --update || die "bldbn failed with exit code ${?}"
 
     # Build LLVM/Clang/lld
+    CBL_LLVM=${CBL_LLVM%/*}
+    rm -rf "${CBL_LLVM}"-old
+    mv "${CBL_LLVM}" "${CBL_LLVM}"-old
     bldllvm --build-folder "${LBF:?}" \
             --check-targets lld clang llvm \
-            --install-folder "${INSTALL_FOLDER:?}" \
+            --install-folder "${CBL_LLVM}" \
             --lto=thin \
             --march=native \
             --pgo \
@@ -693,9 +702,9 @@ DEFCONFIG='"$([[ ${ARCH} = "x86" ]] && echo "x86_64_")"'cuttlefish_defconfig
 EXTRA_CMDS='\'''\''
 KERNEL_DIR='"$(realpath --relative-to="${PWD}" "${COMMON_FOLDER}")"'
 POST_DEFCONFIG_CMDS="check_defconfig && update_clang_config"
-CLANG_PREBUILT_BIN='"$(realpath --relative-to="${PWD}" "${CPB:-${CBL_BIN}}")"'
+CLANG_PREBUILT_BIN='"$(realpath --relative-to="${PWD}" "${CPB:-${CBL_LLVM}}")"'
 LD_LIBRARY_PATH='"${LD_LIBRARY_PATH:-"${CBL_USR}"/lib}"'
-LINUX_GCC_CROSS_COMPILE_PREBUILTS_BIN='"$(realpath --relative-to="${PWD}" "${GCCPB:-${CBL_BIN}}")"'
+LINUX_GCC_CROSS_COMPILE_PREBUILTS_BIN='"$(realpath --relative-to="${PWD}" "${GCCPB:-${CBL_BNTL}}")"'
 FILES="
 arch/'"${ARCH}"'/boot/'$(case ${ARCH} in arm64) echo "Image.gz" ;; x86) echo "bzImage" ;; esac)'
 vmlinux
@@ -748,7 +757,8 @@ function kct() {(
     echo
     {
         (
-            path_push "${CBL_BIN}"
+            path_push "${CBL_BNTL}"
+            path_push "${CBL_LLVM}"
             [[ -n ${CPB} ]] && path_push "${CPB}"
             echo "clang location: $(command -v clang)"
             echo
@@ -825,15 +835,6 @@ function bldall() {(
     export TG=true
     bldusr && bldallk
 )}
-
-
-# Set up path to use CBL_BIN
-function cbl_path() {
-    case ${1} in
-        "-s"|"--set") path_push "${CBL_BIN}" ;;
-        "-u"|"--unset") export PATH=${PATH/${CBL_BIN}:/} ;;
-    esac
-}
 
 
 # Function to test build-{binutils,llvm}.py in multiple Docker images
