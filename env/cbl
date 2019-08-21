@@ -194,7 +194,7 @@ function bldkw() {(
     esac
 
     # We are only concerned about little endian for ARM right now unless otherwise stated
-    if [[ ${TARGET_ARCH} =~ arm && -z ${BIG_ENDIAN} ]]; then
+    if [[ ${TARGET_ARCH} =~ arm && -z ${BE} ]]; then
         KCONFIG_ALLCONFIG=${KBF}/little-endian.config
         echo "CONFIG_CPU_BIG_ENDIAN=n" > "${KCONFIG_ALLCONFIG}"
     fi
@@ -534,12 +534,12 @@ function lt() {(
         # Warning/error log
         WARNING_LOG=${LOG_DIR}/${ARCH}_${CONFIG}.log
 
-        # Make sure BIG_ENDIAN gets set
-        [[ ${CONFIG} =~ -be ]] && export BIG_ENDIAN=true
+        # Make sure CONFIG_CPU_BIG_ENDIAN gets set
+        [[ ${CONFIG} =~ -be ]] && export BE=true
         CONFIG=${CONFIG//-be}
 
         # Use lld by default for everything but certain PowerPC builds
-        if [[ -z ${LD} && -z ${BIG_ENDIAN} ]]; then
+        if [[ -z ${LD} && -z ${BE} ]]; then
             case "${ARCH}:${CONFIG}" in
                 mipsel*|ppc64*) ;;
                 *) LD=ld.lld ;;
@@ -569,7 +569,7 @@ function lt() {(
         echo "${COLOR}Build ${RESULT}${RST}"
         TIME_STRING=$(format_time "${START}" "$(date +%s)")
         {
-            echo "${ARCH}:${CONFIG}${BIG_ENDIAN:+"-be"} | Build ${RESULT} in ${TIME_STRING:l}\c"
+            echo "${ARCH}:${CONFIG}${BE:+"-be"} | Build ${RESULT} in ${TIME_STRING:l}\c"
             if [[ ${RESULT} = "successful" && ${CONFIG} =~ defconfig ]]; then
                 if bootk "${ARCH}" &>/dev/null; then
                     echo " | Boot successful\c"
