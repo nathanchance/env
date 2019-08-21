@@ -690,9 +690,7 @@ function bldbn() {(
 
 
 # Build LLVM/Clang/lld and arm{32,64} and powerpc binutils from source
-function bldusr() {(
-    rm -rf "${INSTALL_FOLDER:=${CBL_USR}}"
-
+function bldtcs() {(
     # Build binutils
     CBL_BNTL=${CBL_BNTL%/*}
     rm -rf "${CBL_BNTL}"-old
@@ -750,7 +748,7 @@ EXTRA_CMDS='\'''\''
 KERNEL_DIR='"$(realpath --relative-to="${PWD}" "${COMMON_FOLDER}")"'
 POST_DEFCONFIG_CMDS="check_defconfig && update_clang_config"
 CLANG_PREBUILT_BIN='"$(realpath --relative-to="${PWD}" "${CPB:-${CBL_LLVM}}")"'
-LD_LIBRARY_PATH='"${LD_LIBRARY_PATH:-"${CBL_USR}"/lib}"'
+LD_LIBRARY_PATH='"${LD_LIBRARY_PATH:-"${CBL_LLVM%/*}"/lib}"'
 LINUX_GCC_CROSS_COMPILE_PREBUILTS_BIN='"$(realpath --relative-to="${PWD}" "${GCCPB:-${CBL_BNTL}}")"'
 FILES="
 arch/'"${ARCH}"'/boot/'$(case ${ARCH} in arm64) echo "Image.gz" ;; x86) echo "bzImage" ;; esac)'
@@ -880,7 +878,7 @@ function bldallk() {(
 # Build new LLVM/Clang/lld and test all kernel trees
 function bldall() {(
     export TG=true
-    bldusr && bldallk
+    bldtcs && bldallk
 )}
 
 
