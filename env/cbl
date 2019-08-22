@@ -710,7 +710,7 @@ function bldtcs() {(
             --march=native \
             --pgo \
             --update-llvm || die "bldllvm failed with exit code ${?}"
-    stripllvmbin "${INSTALL_FOLDER}"
+    stripllvmbin "${CBL_LLVM}"
 
     # Invalidate our kernel ccache because we have a new compiler that will be used for it
     ccache_clear kernel
