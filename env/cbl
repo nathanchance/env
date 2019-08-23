@@ -737,13 +737,17 @@ function kcbw() {(
 
     cd "${BUILD_FOLDER}" || die "wtf"
 
+    case "${ARCH}:${BRANCH}" in
+        "arm64:android-4.19") CONFIG=gki_defconfig ;;
+        "arm64:"*) CONFIG=cuttlefish_defconfig ;;
+        "x86_64:"*) CONFIG=x86_64_cuttlefish_defconfig ;;
+    esac
+
     echo 'ARCH='"${ARCH:=arm64}"'
 BRANCH='"${BRANCH}"'
-'$(if [[ ${ARCH} = arm64 ]]; then
-    echo "CLANG_TRIPLE=aarch64-linux-gnu-
-CROSS_COMPILE=${CROSS_COMPILE:-"aarch64-linux-gnu-"}"
-fi)'
-DEFCONFIG='"$([[ ${ARCH} = "x86" ]] && echo "x86_64_")"'cuttlefish_defconfig
+'$([[ ${ARCH} = arm64 ]] && echo "CLANG_TRIPLE=aarch64-linux-gnu-")'
+'$([[ ${ARCH} = arm64 ]] && echo "CROSS_COMPILE=${CROSS_COMPILE:-"aarch64-linux-gnu-"}")'
+DEFCONFIG='"${CONFIG}"'
 EXTRA_CMDS='\'''\''
 KERNEL_DIR='"$(realpath --relative-to="${PWD}" "${COMMON_FOLDER}")"'
 POST_DEFCONFIG_CMDS="check_defconfig && update_clang_config"
