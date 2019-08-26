@@ -992,4 +992,33 @@ function qualify_tc_bld_uprev() {(
 
     PATH_OVERRIDE=${PWD}/bin "${TC_BLD}"/kernel/build.sh --allyesconfig
 )}
+
+
+function upd_lnx_tcbld() {(
+    set -e
+
+    LINUX=${HOME}/src/linux
+    KERNEL=${HOME}/cbl/tc-build/kernel
+
+    cd "${LINUX}"
+    rm "${KERNEL}"/linux*
+    git fetch origin
+    KVER=$(git describe --abbrev=0 origin/master | sed 's/v//')
+    for CONFIG in defconfig allyesconfig; do
+        git checkout pgo-${CONFIG}
+        case ${CONFIG} in
+            defconfig) git rebase v${KVER} ;;
+            allyesconfig) git rebase pgo-defconfig ;;
+        esac
+        git format-patch --stdout v${KVER}..pgo-${CONFIG} > "${KERNEL}"/linux-${KVER}-${CONFIG}.patch
+    done
+
+    TARBALL=linux-${KVER}.tar.gz
+    cd "${KERNEL}"
+    curl -LSsO https://git.kernel.org/torvalds/t/${TARBALL}
+    sha256sum ${TARBALL} > ${TARBALL}.sha256
+    rm ${TARBALL}
+    curl -LSsO https://git.kernel.org/torvalds/t/${TARBALL}
+    sha256sum -c ${TARBALL}.sha256
+)}
 # vi: filetype=zsh
