@@ -332,7 +332,7 @@ URL=$(deldog "${LOG}")
 echo
 echo "${BOLD}ALS merge results:${RST} ${URL}"
 echo
-tg_msg "ALS merge results (\`$(basename "${0}") ${PARAMS}\`): ${URL}"
+tg_msg "ALS merge results (\`$(basename "${0}")${PARAMS:+" ${PARAMS}"}\`): ${URL}"
 rm -rf "${LOG}"
 
 exit 0
