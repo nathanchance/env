@@ -46,7 +46,7 @@ function bldgcc() {(
         case ${1} in
             "--binutils"|"--gcc"|"--toolchain") BLD_OPTS=( "${1}" ) ;;
             "all") TARGETS=( "arm" "arm64" "x86_64" ) ;;
-            "arm"|"arm64"|"powerpc"|"powerpc64"|"s390"|"x86_64") TARGETS+=( "${1}" ) ;;
+            "arm"|"arm64"|"powerpc"|"powerpc64"|"powerpc64le"|"s390"|"x86_64") TARGETS+=( "${1}" ) ;;
         esac
         shift
     done
