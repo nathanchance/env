@@ -1020,5 +1020,7 @@ function upd_lnx_tcbld() {(
     rm ${TARBALL}
     curl -LSsO https://git.kernel.org/torvalds/t/${TARBALL}
     sha256sum -c ${TARBALL}.sha256
+
+    sed -i "s/LINUX=.*/LINUX=linux-${KVER}/" ${KERNEL}/build.sh
 )}
 # vi: filetype=zsh
