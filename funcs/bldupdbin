@@ -47,7 +47,7 @@ function bccache() {(
 
 # Build/install fd
 function bifd() {(
-    [[ -z ${FD_VERSION} ]] && FD_VERSION=7.3.0
+    [[ -z ${FD_VERSION} ]] && FD_VERSION=7.4.0
     if [[ $(uname -m) = "x86_64" ]] && command -v dpkg &>/dev/null; then
         curl -LSso ${TMP_DEB:=$(mktemp --suffix=.deb)} https://github.com/sharkdp/fd/releases/download/v${FD_VERSION}/fd_${FD_VERSION}_amd64.deb
         sudo dpkg -i "${TMP_DEB}" && rm "${TMP_DEB}"
