@@ -81,7 +81,10 @@ function bootstrap() {(
     [[ $(get_arch) = "amd64" ]] && curl -LSs https://dl.google.com/go/go1.12.6.linux-amd64.tar.gz | tar -C ${HOME}/usr -xzf -
 )}
 
-function generic_aliases() { true; }
+function generic_aliases() {
+    alias ls='ls --color=auto'
+}
+
 function generic_setup() {
     path_push "${HOME}"/usr/go/bin
 }
