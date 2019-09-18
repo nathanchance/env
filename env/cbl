@@ -995,30 +995,53 @@ function qualify_tc_bld_uprev() {(
 
 
 function upd_lnx_tcbld() {(
-    set -e
+    while (( ${#} )); do
+        case ${1} in
+            "-p"|"--personal") MODE=personal ;;
+            "-r"|"--release") MODE=release ;;
+        esac
+        shift
+    done
+    : ${MODE:=personal}
 
     LINUX=${HOME}/src/linux
-    KERNEL=${HOME}/cbl/tc-build/kernel
-
     cd "${LINUX}"
-    rm "${KERNEL}"/linux*
     git fetch origin
     KVER=$(git describe --abbrev=0 origin/master | sed 's/v//')
+
+    case ${MODE} in
+        "personal")
+            BPREFIX=pgo
+            KERNEL=${HOME}/cbl/tc-build/kernel
+            TAR_EXT=gz
+            URL=https://git.kernel.org/torvalds/t
+            ;;
+        "release")
+            BPREFIX=v${KVER}-pgo
+            KERNEL=${HOME}/cbl/git/tc-build/kernel
+            TAR_EXT=xz
+            URL=https://cdn.kernel.org/pub/linux/kernel/v5.x
+            ;;
+    esac
+
+    set -ex
+
+    rm -f "${KERNEL}"/linux*
     for CONFIG in defconfig allyesconfig; do
-        git checkout pgo-${CONFIG}
+        git checkout ${BPREFIX}-${CONFIG}
         case ${CONFIG} in
             defconfig) git rebase v${KVER} ;;
-            allyesconfig) git rebase pgo-defconfig ;;
+            allyesconfig) git rebase ${BPREFIX}-defconfig ;;
         esac
-        git format-patch --stdout v${KVER}..pgo-${CONFIG} > "${KERNEL}"/linux-${KVER}-${CONFIG}.patch
+        git format-patch --stdout v${KVER}..${BPREFIX}-${CONFIG} > "${KERNEL}"/linux-${KVER}-${CONFIG}.patch
     done
 
-    TARBALL=linux-${KVER}.tar.gz
+    TARBALL=linux-${KVER}.tar.${TAR_EXT}
     cd "${KERNEL}"
-    curl -LSsO https://git.kernel.org/torvalds/t/${TARBALL}
+    curl -LSsO "${URL}/${TARBALL}"
     sha256sum ${TARBALL} > ${TARBALL}.sha256
     rm ${TARBALL}
-    curl -LSsO https://git.kernel.org/torvalds/t/${TARBALL}
+    curl -LSsO "${URL}/${TARBALL}"
     sha256sum -c ${TARBALL}.sha256
 
     sed -i "s/LINUX=.*/LINUX=linux-${KVER}/" ${KERNEL}/build.sh
