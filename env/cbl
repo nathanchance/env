@@ -697,6 +697,7 @@ function bldtcs() {(
     mv "${CBL_BNTL}" "${CBL_BNTL}"-old
     bldbn --build-folder "${BBF:?}" \
           --install-folder "${CBL_BNTL}" \
+          --march=native \
           --update || die "bldbn failed with exit code ${?}"
 
     # Build LLVM/Clang/lld
