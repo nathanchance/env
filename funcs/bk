@@ -21,7 +21,7 @@ function bk() {
 
         # android-linux-stable
         "angler:"*|"bullhead:"*|"marlin:"*) PARAMS=( "${FOLDER}_defconfig" ) ;;
-        "bluecross:"*) PARAMS=( b1c1_defconfig -c -ct clang-r349610b ) ;;
+        "bluecross:"*) PARAMS=( b1c1_defconfig -c -ct clang-r353983c ) ;;
         "jasmine:"*) PARAMS=( "jasmine-perf_defconfig" ) ;;
         "mata:lineage-15.1") PARAMS=( "lineageos_${FOLDER}_defconfig" -c ) ;;
         "msm-3.18:"*|"msm-4.4:"*) PARAMS=( msmcortex-perf_defconfig ) ;;
@@ -41,7 +41,7 @@ function bk() {
         "polaris"*) PARAMS=( polaris_user_defconfig ) ;;
         "sagit:sagit-o-oss") PARAMS=( sagit_user_defconfig ) ;;
         "tissot:tissot-"*) PARAMS=( tissot-perf_defconfig ) ;;
-        "wahoo:"*) PARAMS=( wahoo_defconfig -c -ct clang-r349610b ) ;;
+        "wahoo:"*) PARAMS=( wahoo_defconfig -c -ct clang-r353983c ) ;;
         "whyred:whyred-o-oss") PARAMS=( whyred-perf_defconfig ) ;;
 
         # Franco Kernel
