@@ -236,7 +236,7 @@ function compile() {
     [[ -n ${SHOW_ONLY_RESULT} ]] && exec > /dev/null
 
     # Show the base version we are making
-    header "BUILDING $(make CROSS_COMPILE="" CC=gcc kernelversion)"
+    header "BUILDING $(make -s CROSS_COMPILE="" CC=gcc kernelversion)"
 
     # Show compilation based on flags
     case ${VERBOSITY} in
@@ -256,6 +256,7 @@ function compile() {
     # Find final image
     FINAL_IMAGE=$(find out -name 'Image*-dtb')
     [[ -z ${FINAL_IMAGE} ]] && FINAL_IMAGE=$(find out -name 'Image.*' | tail -1)
+    [[ -z ${FINAL_IMAGE} ]] && FINAL_IMAGE=$(find out -name 'Image*' | tail -1)
 }
 
 
