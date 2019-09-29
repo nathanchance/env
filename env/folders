@@ -20,6 +20,6 @@ BLDF=/mnt/build
 CBL=${MAIN_FOLDER}/cbl
 
 # Latest AOSP Clang version
-LACV=clang-r353983d
+LACV=clang-r365631c
 LACF=${ANDROID_TC_FOLDER}/clang-master/${LACV}
 # vi: filetype=zsh
