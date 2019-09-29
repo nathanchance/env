@@ -73,6 +73,7 @@ function git_aliases() {(
     git config --global alias.fp 'format-patch'
     git config --global alias.fpk 'format-patch --add-header="X-Patchwork-Bot: notify"'
     git config --global alias.kf 'show -s --format="%h (\"%s\")"' # kernel format
+    git config --global alias.korg 'show -s --format="Link: https://git.kernel.org/linus/%H"' # link to a kernel.org commit for cherry-picks
     git config --global alias.lo 'log --oneline'
     git config --global alias.ma 'merge --abort'
     git config --global alias.mc 'merge --continue'
