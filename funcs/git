@@ -129,7 +129,7 @@ function gcmt() {
 
 
 function install_hub() {(
-    [[ -z ${HUB_VERSION} ]] && HUB_VERSION=2.12.7
+    [[ -z ${HUB_VERSION} ]] && HUB_VERSION=2.12.8
     HUB_TUPLE="hub-linux-$(get_arch)-${HUB_VERSION}"
     cd "$(mktemp -d)" || die "Error moving into temporary directory!"
     curl -LSsO https://github.com/github/hub/releases/download/v"${HUB_VERSION}"/"${HUB_TUPLE}".tgz || die "Error downloading hub!"
