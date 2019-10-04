@@ -179,7 +179,7 @@ function setup_toolchains() {
 
     # Clang
     if [[ -n ${CLANG} ]]; then
-        [[ -z ${CLANG_FOLDER} ]] && CLANG_FOLDER=${ANDROID_TC_FOLDER}/clang-4053586
+        [[ -z ${CLANG_FOLDER} ]] && CLANG_FOLDER=${ANDROID_TC_FOLDER}/clang-r353983c
         if [[ ! -d ${CLANG_FOLDER} ]]; then
             CLANG_FOLDER=${ANDROID_TC_FOLDER}/${CLANG_FOLDER}
             [[ ! -d ${CLANG_FOLDER} ]] && die "Invalid Clang folder specified!"
