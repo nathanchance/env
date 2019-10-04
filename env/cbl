@@ -474,7 +474,7 @@ function bootk() {(
     [[ ${IMAGE} = "vmlinux" ]] || BOOT_FOLDER=arch/${ARCH}/boot/
     KERNEL=${O:-${KBF}}/${BOOT_FOLDER:+${BOOT_FOLDER}}${IMAGE}
     [[ -f ${KERNEL} ]] || die "Kernel doesn't exist! Please build one."
-    if [[ ! "$(readlink -f ${KERNEL})" =~ common ]]; then
+    if [[ "$(readlink -f ${KERNEL})" =~ cbl && ! "$(readlink -f ${KERNEL})" =~ common ]]; then
         [[ -d ${HOME}/usr/share/AAVMF && -d ${HOME}/usr/share/OVMF ]] || download_efi_firmware
         case ${ARCH} in
             "arm64")
