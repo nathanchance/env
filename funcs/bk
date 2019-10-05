@@ -39,7 +39,7 @@ function bk() {
 
         # Unknown choice
         *) display_error "Kernel not supported by wrapper!" && return 1 ;;
-    esac4
+    esac
 
     build-kernel -w -d "${PARAMS[@]}" "${@}"
 }
