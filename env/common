@@ -123,4 +123,10 @@ function podman_mount() {
                --workdir /"${PWD##*/}" \
                "${@}"
 }
+
+
+# Get the current status of hardware vulnerabilities
+function hwvulns() {
+    grep --color=always . /sys/devices/system/cpu/vulnerabilities/*
+}
 # vi: filetype=zsh
