@@ -7,6 +7,8 @@
 # Install zsh before hand and use 'chsh -s /bin/zsh $(whoami)'
 
 function bootstrap() {(
+    source <(curl -LSs https://github.com/nathanchance/scripts/raw/master/common) &>/dev/null || return 1
+
     # Get list of packages to be installed
     # Debian/Ubuntu
     if command -v apt &>/dev/null; then
@@ -52,19 +54,11 @@ function bootstrap() {(
                    zsh
                    zlib1g-dev )
 
-        if [[ $(whoami) = "root" ]]; then
-            APT=( apt )
-        else
-            APT=( sudo apt )
-        fi
-
-        "${APT[@]}" update || exit ${?}
-        "${APT[@]}" upgrade -y || exit ${?}
-        "${APT[@]}" install -y --no-install-recommends "${PACKAGES[@]}" || exit ${?}
-        sudo dpkg-reconfigure locales
+        sudo_wrapper apt update || exit ${?}
+        sudo_wrapper upgrade -y || exit ${?}
+        sudo_wrapper install -y --no-install-recommends "${PACKAGES[@]}" || exit ${?}
+        sudo_wrapper dpkg-reconfigure locales
     fi
-
-    source <(curl -LSs https://github.com/nathanchance/scripts/raw/master/common) &>/dev/null || return 1
 
     SCRIPTS=${HOME}/github/scripts
     mkdir -p "${SCRIPTS%/*}"

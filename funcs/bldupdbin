@@ -220,7 +220,7 @@ function birg() {(
 
     if [[ $(uname -m) = "x86_64" ]] && command -v dpkg &>/dev/null; then
         curl -LSsO "${BASE_URL}"/releases/download/"${RG_VERSION}"/"${DEB}" || die "Error downloading ${DEB}"
-        sudo dpkg -i "${DEB}" || die "Error installing ${DEB}"
+        sudo_wrapper dpkg -i "${DEB}" || die "Error installing ${DEB}"
     else
         curl -LSs "${BASE_URL}"/archive/"${RG_VERSION}".tar.gz | tar -xzf - || die "Error downloading ripgrep source"
         cd ripgrep-"${RG_VERSION}" || die "Can't move into ripgrep source"
@@ -262,7 +262,7 @@ function bisharkdp() {(
         if [[ $(uname -m) = "x86_64" ]] && command -v dpkg &>/dev/null; then
             DEB=${BINARY}_${VERSION//v}_amd64.deb
             curl -LSsO "${URL_BASE}"/releases/download/"${VERSION}"/"${DEB}" || die "Error downloading ${DEB}"
-            sudo dpkg -i "${DEB}" || die "Error installing ${DEB}"
+            sudo_wrapper dpkg -i "${DEB}" || die "Error installing ${DEB}"
         else
             curl -LSs "${URL_BASE}"/archive/"${VERSION}".tar.gz | tar -xzf - || die "Error downloading ${BINARY} source"
             cd "${BINARY}-${VERSION}" || die "Can't move into ${BINARY} source"
@@ -324,7 +324,7 @@ function bzsh() {(
     make install || die "install failed"
     rm -rf "${TMP_FOLDER}"
 
-    sudo chsh -s "${PREFIX:?}/bin/zsh" "$(whoami)"
+    sudo_wrapper chsh -s "${PREFIX:?}/bin/zsh" "$(whoami)"
 
     path_push "${PREFIX}"/bin
     command -v zsh
