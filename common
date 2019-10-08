@@ -343,4 +343,10 @@ function get_arch() {(
         *) exit 1 ;;
     esac
 )}
+
+
+# Get latest release of a GitHub project
+function glr() {(
+    curl --silent "https://api.github.com/repos/${1:?}/releases/latest" | jq -r .tag_name
+)}
 # vi: filetype=zsh
