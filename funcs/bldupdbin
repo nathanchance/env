@@ -324,7 +324,9 @@ function bzsh() {(
     make install || die "install failed"
     rm -rf "${TMP_FOLDER}"
 
-    sudo_wrapper chsh -s "${PREFIX:?}/bin/zsh" "$(whoami)"
+    ZSH_BIN=${PREFIX:?}/bin/zsh
+    echo "${ZSH_BIN}" | sudo_wrapper tee -a /etc/shells
+    sudo_wrapper chsh -s "${ZSH_BIN}" "$(whoami)"
 
     path_push "${PREFIX}"/bin
     command -v zsh
