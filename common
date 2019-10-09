@@ -356,7 +356,7 @@ function sudo_wrapper() {(
     if [[ $(id -u) -eq 0 ]]; then
         "${@}"
     else
-        command -v sudo || exit ${?}
+        command -v sudo &>/dev/null || exit ${?}
         sudo "${@}"
     fi
 )}

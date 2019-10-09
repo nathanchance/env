@@ -183,8 +183,19 @@ function bootstrap() {(
         sudo_wrapper dpkg-reconfigure --frontend noninteractive locales
 
         # Build dtc
-        [[ ! -d ${SRC_FOLDER}/dtc ]] && git -C ${SRC_FOLDER} git://git.kernel.org/pub/scm/utils/dtc/dtc.git
+        [[ ! -d ${SRC_FOLDER}/dtc ]] && git -C ${SRC_FOLDER} clone git://git.kernel.org/pub/scm/utils/dtc/dtc.git
         make -C ${SRC_FOLDER}/dtc -j$(nproc) PREFIX=${HOME}/usr install
+
+        # Disable SMT if it does not impact performance a lot
+        # This only holds true for Packet's m2.xlarge.x86 with dual Xeon Gold 5210s right now
+        if hwvulns | grep -q "SMT vulnerable"; then
+            case "$(lscpu)" in
+                *"Gold 5120 CPU"*)
+                    CMDLINE=$(grep GRUB_CMDLINE_LINUX /etc/default/grub | cut -d \" -f 2)
+                    sudo_wrapper sed -i "s/${VAL}/${VAL} nosmt/g" /etc/default/grub
+                    sudo_wrapper update-grub ;;
+            esac
+        fi
 
         # Build folder size
         BFS=25
