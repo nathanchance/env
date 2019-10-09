@@ -186,9 +186,12 @@ function bootstrap() {(
         sudo_wrapper dpkg-reconfigure --frontend noninteractive locales
 
         # Build dtc
-        [[ ! -d ${SRC_FOLDER}/dtc ]] && git -C ${SRC_FOLDER} clone git://git.kernel.org/pub/scm/utils/dtc/dtc.git
-        git -C ${SRC_FOLDER}/dtc clean -fxdq
-        make -C ${SRC_FOLDER}/dtc -j$(nproc) PREFIX=${HOME}/usr install
+        (
+            [[ ! -d ${SRC_FOLDER}/dtc ]] && git -C ${SRC_FOLDER} clone git://git.kernel.org/pub/scm/utils/dtc/dtc.git
+            cd "${SRC_FOLDER}"
+            git clean -fxdq
+            make -j$(nproc) PREFIX=${HOME}/usr install
+        )
 
         # Disable SMT if it does not impact performance a lot
         # This only holds true for Packet's m2.xlarge.x86 with dual Xeon Gold 5210s right now
