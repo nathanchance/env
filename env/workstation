@@ -138,6 +138,7 @@ function bootstrap() {(
                    creduce
                    curl
                    doxygen
+                   expect
                    file
                    flex
                    gcc
