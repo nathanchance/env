@@ -296,15 +296,15 @@ function bqemu() {(
     fi
     cd "${QEMU_FOLDER}" || die "Couldn't move into ${QEMU_FOLDER}"
     [[ -z ${QEMU_VERSION} ]] && QEMU_VERSION=$(git describe --abbrev=0)
-    git cl -q
-    git submodule foreach --recursive git cl -q
-    git rh
-    git submodule foreach --recursive git rh
+    git clean -dfqx
+    git submodule foreach --recursive git clean -dfqx
+    git reset --hard
+    git submodule foreach --recursive git reset --hard
     git submodule deinit slirp 2>/dev/null
     git checkout v"${QEMU_VERSION//v}"
     ( git merge-base --is-ancestor fc1120a7f5f2d4b601003205c598077d3eb11ad2 HEAD && \
       ! git merge-base --is-ancestor ece628fcf69cbbd4b3efb6fbd203af07609467a2 HEAD ) && \
-    git cherry-pick ece628fcf69cbbd
+    git format-patch -1 --stdout ece628fcf69cbbd4b3efb6fbd203af07609467a2 | git apply -3v
 
     ./configure \
         --disable-bluez \
