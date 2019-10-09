@@ -109,7 +109,7 @@ function bootstrap() {(
                                             python-psutil \
                                             qemu-headless-arch-extra \
                                             ripgrep \
-                                            rubygems \
+                                            ruby-dev \
                                             swig \
                                             tmux \
                                             uboot-tools \
@@ -126,6 +126,68 @@ function bootstrap() {(
 
         # Build folder size
         BFS=20
+    elif [[ -n ${UBUNTU} ]]; then
+        PACKAGES=( bison
+                   build-essential
+                   ca-certificates
+                   clang
+                   cmake
+                   curl
+                   doxygen
+                   file
+                   flex
+                   gcc
+                   gettext
+                   git
+                   g++
+                   libauthen-sasl-perl
+                   libcurl4-openssl-dev
+                   libedit-dev
+                   libemail-valid-perl
+                   libelf-dev
+                   libevent-dev
+                   libexpat1-dev
+                   libglib2.0-dev
+                   libio-socket-ssl-perl
+                   libmailtools-perl
+                   libncurses-dev
+                   libnet-smtp-ssl-perl
+                   libpcre2-dev
+                   libpixman-1-dev
+                   libssl-dev
+                   locales
+                   make
+                   mosh
+                   most
+                   neofetch
+                   ninja-build
+                   pkg-config
+                   python3
+                   python3-dev
+                   sudo
+                   swig
+                   texinfo
+                   tmux
+                   u-boot-tools
+                   vim
+                   zsh
+                   zlib1g-dev )
+        ( source /usr/lib/os-release && [[ ${VERSION_ID} = "18.04" ]] ) && PACKAGES+=( linux-generic-hwe-18.04 )
+
+        sudo_wrapper apt update || exit ${?}
+        sudo_wrapper DEBIAN_FRONTEND=noninteractive apt upgrade -y || exit ${?}
+        sudo_wrapper DEBIAN_FRONTEND=noninteractive apt install -y --no-install-recommends "${PACKAGES[@]}" || exit ${?}
+        echo "locales locales/default_environment_locale select en_US.UTF-8" | sudo_wrapper debconf-set-selections
+        echo "locales locales/locales_to_be_generated multiselect en_US.UTF-8 UTF-8" | sudo_wrapper debconf-set-selections
+        sudo_wrapper rm "/etc/locale.gen"
+        sudo_wrapper dpkg-reconfigure --frontend noninteractive locales
+
+        # Build dtc
+        [[ ! -d ${SRC_FOLDER}/dtc ]] && git -C ${SRC_FOLDER} git://git.kernel.org/pub/scm/utils/dtc/dtc.git
+        make -C ${SRC_FOLDER}/dtc -j$(nproc) PREFIX=${HOME}/usr install
+
+        # Build folder size
+        BFS=25
     fi
 
     # Setup build folder
