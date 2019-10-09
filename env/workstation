@@ -188,7 +188,7 @@ function bootstrap() {(
 
         # Disable SMT if it does not impact performance a lot
         # This only holds true for Packet's m2.xlarge.x86 with dual Xeon Gold 5210s right now
-        if hwvulns | grep -q "SMT vulnerable"; then
+        if grep -q "SMT vulnerable" /sys/devices/system/cpu/vulnerabilities/*; then
             case "$(lscpu)" in
                 *"Gold 5120 CPU"*)
                     CMDLINE=$(grep GRUB_CMDLINE_LINUX /etc/default/grub | cut -d \" -f 2)
