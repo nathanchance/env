@@ -208,7 +208,7 @@ function bootstrap() {(
     fi
 
     # Setup build folder
-    grep -q "${BLDF}" || echo "tmpfs ${BLDF} tmpfs nodev,nosuid,uid=$(whoami),gid=$(whoami),size=${BFS}G 0 0" | sudo tee -a /etc/fstab
+    grep -q "${BLDF}" /etc/fstab || echo "tmpfs ${BLDF} tmpfs nodev,nosuid,uid=$(whoami),gid=$(whoami),size=${BFS}G 0 0" | sudo tee -a /etc/fstab
 
     # Download and install mkdtimg
     MKDTIMG_FOLDER=$(mktemp -d)
