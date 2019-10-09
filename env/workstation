@@ -34,6 +34,9 @@
 #    $ scp {id_ed25519,*.asc} nathan<ip>:/tmp/keys
 #
 function bootstrap() {(
+    # Super debug :)
+    set -x
+
     # Grab common variables
     source <(curl -LSs https://github.com/nathanchance/scripts/raw/master/env/folders) &>/dev/null || return 1
     # Grab common functions
@@ -184,6 +187,7 @@ function bootstrap() {(
 
         # Build dtc
         [[ ! -d ${SRC_FOLDER}/dtc ]] && git -C ${SRC_FOLDER} clone git://git.kernel.org/pub/scm/utils/dtc/dtc.git
+        git -C ${SRC_FOLDER}/dtc clean -fxdq
         make -C ${SRC_FOLDER}/dtc -j$(nproc) PREFIX=${HOME}/usr install
 
         # Disable SMT if it does not impact performance a lot
@@ -192,8 +196,10 @@ function bootstrap() {(
             case "$(lscpu)" in
                 *"Gold 5120 CPU"*)
                     CMDLINE=$(grep GRUB_CMDLINE_LINUX /etc/default/grub | cut -d \" -f 2)
-                    sudo_wrapper sed -i "s/${CMDLINE}/${CMDLINE} nosmt/g" /etc/default/grub
-                    sudo_wrapper update-grub ;;
+                    if [[ ! ${CMDLINE} =~ nosmt ]]; then
+                        sudo_wrapper sed -i "s/${CMDLINE}/${CMDLINE} nosmt/g" /etc/default/grub
+                        sudo_wrapper update-grub
+                    fi ;;
             esac
         fi
 
