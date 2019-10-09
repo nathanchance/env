@@ -135,6 +135,7 @@ function bootstrap() {(
                    ca-certificates
                    clang
                    cmake
+                   creduce
                    curl
                    doxygen
                    file
@@ -165,6 +166,7 @@ function bootstrap() {(
                    neofetch
                    ninja-build
                    pkg-config
+                   podman
                    python3
                    python3-dev
                    ruby-dev
@@ -173,11 +175,13 @@ function bootstrap() {(
                    texinfo
                    tmux
                    u-boot-tools
+                   uidmap
                    vim
                    zsh
                    zlib1g-dev )
         ( source /usr/lib/os-release && [[ ${VERSION_ID} = "18.04" ]] ) && PACKAGES+=( linux-generic-hwe-18.04 )
 
+        sudo_wrapper add-apt-repository ppa:projectatomic/ppa || exit ${?}
         sudo_wrapper apt update || exit ${?}
         sudo_wrapper DEBIAN_FRONTEND=noninteractive apt upgrade -y || exit ${?}
         sudo_wrapper DEBIAN_FRONTEND=noninteractive apt install -y --no-install-recommends "${PACKAGES[@]}" || exit ${?}
@@ -185,6 +189,10 @@ function bootstrap() {(
         echo "locales locales/locales_to_be_generated multiselect en_US.UTF-8 UTF-8" | sudo_wrapper debconf-set-selections
         sudo_wrapper rm "/etc/locale.gen"
         sudo_wrapper dpkg-reconfigure --frontend noninteractive locales
+
+        # Rootless podman
+        echo "$(whoami):100000:65536" | sudo_wrapper tee /etc/subgid /etc/subuid
+        sudo_wrapper curl -LSso /etc/containers/registries.conf 'https://git.archlinux.org/svntogit/community.git/plain/trunk/registries.conf?h=packages/skopeo'
 
         # Build dtc
         (
@@ -296,7 +304,7 @@ function bootstrap() {(
                 git remote add origin git://git.kernel.org/pub/scm/linux/kernel/git/"${URL}"
                 git fetch origin
                 git reset --hard origin/"$(git rev-parse --abbrev-ref HEAD)"
-                [[ ${URL} =~ torvalds ]] && git branch --set-upstream-to=origin/master master
+                [[ ! ${URL} =~ linux-next ]] && git branch --set-upstream-to=origin/master master
                 [[ ${FOLDER} =~ mirrors ]] && git remote add github git@github.com:ClangBuiltLinux/linux.git
             )
         done
@@ -355,12 +363,20 @@ function bootstrap() {(
     echo "keyserver hkps://keys.openpgp.org" >> "${HOME}"/.gnupg/dirmngr.conf
 
     # Reminder of things to do
+    set +x
+    echo
     echo
     echo "Things still to do!"
     echo
-    echo "1. EDITOR=vim crontab -e"
-    echo
-    echo "2. cd && source ~/.zshrc"
+    if [[ -n ${ARCH} ]]; then
+        echo "1. EDITOR=vim crontab -e"
+        echo
+        echo "2. cd && source ~/.zshrc"
+    elif [[ -n ${UBUNTU} ]]; then
+        echo "1. sudo poweroff"
+        echo
+        echo "2. Power off machine in Packet portal"
+    fi
     echo
 ) || return 1; }
 
