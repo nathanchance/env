@@ -39,11 +39,7 @@ function bootstrap() {(
     # Grab common functions
     source <(curl -LSs https://github.com/nathanchance/scripts/raw/master/common) &>/dev/null || return 1
 
-    KEYS=/tmp/keys
     SCRIPTS=${GITHUB_FOLDER}/scripts
-
-    # Check if keys are available for installation
-    [[ ! -d ${KEYS} ]] && die "${KEYS} doesn't exist, create it, and copy keys!"
 
     # Setup folders that will be used
     mkdir -p "${ALS}" \
@@ -142,6 +138,8 @@ function bootstrap() {(
     rm -rf "${MKDTIMG_FOLDER}"
 
     # Setup keys
+    KEYS=/tmp/keys
+    git clone https://github.com/nathanchance/keys "${KEYS}"
     mv "${KEYS}"/id_ed25519{,.pub} "${HOME}"/.ssh
     chmod 600 "${HOME}"/.ssh/id_ed25519
     gpg --pinentry-mode loopback --import "${KEYS}"/{public*,private*}.asc || die "Error installing gpg keys!"
