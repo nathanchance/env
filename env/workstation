@@ -192,7 +192,7 @@ function bootstrap() {(
             case "$(lscpu)" in
                 *"Gold 5120 CPU"*)
                     CMDLINE=$(grep GRUB_CMDLINE_LINUX /etc/default/grub | cut -d \" -f 2)
-                    sudo_wrapper sed -i "s/${VAL}/${VAL} nosmt/g" /etc/default/grub
+                    sudo_wrapper sed -i "s/${CMDLINE}/${CMDLINE} nosmt/g" /etc/default/grub
                     sudo_wrapper update-grub ;;
             esac
         fi
