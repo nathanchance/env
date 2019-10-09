@@ -72,6 +72,7 @@ function bpgollvm() {(
                   -DCLANG_DEFAULT_LINKER=lld
                   -DCLANG_VENDOR="$(uname -n)"
                   -DCMAKE_BUILD_TYPE=Release )
+    grep -q Ubuntu /usr/lib/os-release && CMAKE+=( -DPYTHON_EXECUTABLE=$(command -v python3) )
     FLAGS="-O3$([[ $(uname -m) = "x86_64" ]] && echo " -march=native -mtune=native")"
     LLVM_PROJECT=${SRC_FOLDER:-${HOME}/src}/llvm-project
     BUILD_FOLDER=${LLVM_PROJECT}/build
