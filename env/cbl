@@ -453,10 +453,12 @@ function bootk() {(
             IMAGE=zImage.epapr
             RAM=2G
             QEMU=qemu-system-ppc64
+            FIRMWARE_FOLDER=${HOME}/usr/share/qemu
+            [[ ! -d ${FIRMWARE_FOLDER} ]] && FIRMWARE_FOLDER=/usr/share/qemu
             QEMU_ARCH_CMDLINE=( -machine powernv
                                 -device "ipmi-bmc-sim,id=bmc0"
                                 -device "isa-ipmi-bt,bmc=bmc0,irq=10"
-                                -L /usr/share/qemu -bios skiboot.lid
+                                -L ${FIRMWARE_FOLDER} -bios skiboot.lid
                                 -initrd "${IMAGES_FOLDER}/ppc64le/rootfs.cpio"
                                 ${QEMU_CMDLINE:+-append "${QEMU_CMDLINE}"} )
             ARCH=powerpc ;;
