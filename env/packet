@@ -39,9 +39,10 @@ function partition_and_create_user() {(
     fi
 
     # Setup user account
-    apt install -y --no-install-recommends zsh
-    useradd -m -G sudo -s /bin/zsh nathan
-    echo "nathan:${PASSWORD}" | chpasswd
-    cp -rv /root/.ssh /home/nathan
-    chown -R nathan:nathan /home/nathan/.ssh
+    USER=nathan
+    apt install -y --no-install-recommends qemu-kvm zsh
+    useradd -m -G kvm,sudo -s /bin/zsh "${USER}"
+    echo "${USER}:${PASSWORD}" | chpasswd
+    cp -rv /root/.ssh /home/${USER}
+    chown -R ${USER}:${USER} /home/${USER}/.ssh
 )}
