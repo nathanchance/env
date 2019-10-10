@@ -393,7 +393,6 @@ function install_rust() {(
 function bldupdbin() {(
     bccache || exit ${?}
     bgit || exit ${?}
-    bqemu || exit ${?}
     birg || exit ${?}
     bisharkdp all || exit ${?}
     btmux || exit ${?}
