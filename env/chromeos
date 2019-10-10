@@ -135,13 +135,13 @@ function bootstrap() {(
     git clone git@github.com:nathanchance/password-store.git "${HOME}"/.password-store || die "Error cloning password store!"
 
     # Install hugo
-    HUGO_VERSION=0.58.3
+    HUGO_VERSION=$(glr gohugoio/hugo)
     if [[ ${ARCH} = "amd64" ]]; then
         SUFFIX=64bit
     else
         SUFFIX=ARM64
     fi
-    curl -LSsO "${TMP_DEB:=$(mktemp --suffix=.deb)}" https://github.com/gohugoio/hugo/releases/download/v"${HUGO_VERSION}"/hugo_"${HUGO_VERSION}"_Linux-"${SUFFIX}".deb
+    curl -LSso "${TMP_DEB:=$(mktemp --suffix=.deb)}" https://github.com/gohugoio/hugo/releases/download/"${HUGO_VERSION}"/hugo_"${HUGO_VERSION//v}"_Linux-"${SUFFIX}".deb
     sudo dpkg -i "${TMP_DEB}"
     rm -rf "${TMP_DEB}"
 
@@ -158,9 +158,11 @@ function bootstrap() {(
     fi
 
     # Download Android platform-tools
-    curl -LSso "${TMP_ZIP:=$(mktemp --suffix=.zip)}" "https://dl.google.com/android/repository/platform-tools-latest-linux.zip"
-    unzip -d "${HOME}" "${TMP_ZIP}"
-    rm -rf "${TMP_ZIP}"
+    if [[ ${ARCH} = "amd64" ]]; then
+        curl -LSso "${TMP_ZIP:=$(mktemp --suffix=.zip)}" "https://dl.google.com/android/repository/platform-tools-latest-linux.zip"
+        unzip -d "${HOME}" "${TMP_ZIP}"
+        rm -rf "${TMP_ZIP}"
+    fi
 ) && source "${HOME}"/.zshrc; }
 
 
