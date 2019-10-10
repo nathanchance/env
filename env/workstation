@@ -9,29 +9,33 @@
 #
 # Assumes the following things have been done:
 #
-# 1. The workstation has had its OS installed (if using Hetzner)
+# Hetzner:
+#   1. The workstation has had its OS installed (if using Hetzner)
 #
-#    $ installimage -r yes -l 0 -f yes -n archlinux-<suffix>
+#      $ installimage -r yes -l 0 -f yes -n archlinux-<suffix>
 #
-# 2. My user account has been created
+#   2. My user account has been created
 #
-#    $ pacman -S zsh
-#    $ useradd -m -G wheel -s /bin/zsh nathan
-#    $ passwd
-#    $ passwd nathan
+#      $ pacman -S zsh
+#      $ useradd -m -G wheel -s /bin/zsh nathan
+#      $ passwd
+#      $ passwd nathan
 #
-# 3. sudo is installed and configured
+#   3. sudo is installed and configured
 #
-#    $ pacman -S sudo
-#    $ EDITOR=vim visudo
+#      $ pacman -S sudo
+#      $ EDITOR=vim visudo
 #
-#    nathan ALL=(ALL) NOPASSWD:ALL
+#      nathan ALL=(ALL) NOPASSWD:ALL
 #
-# 4. Keys to be installed are available at /tmp/keys
+#   4. Keys to be installed are available at /tmp/keys
 #
-#    $ ssh-copy-id nathan@<ip>
-#    $ ssh nathan@<ip> mkdir /tmp/keys
-#    $ scp {id_ed25519,*.asc} nathan<ip>:/tmp/keys
+#      $ ssh-copy-id nathan@<ip>
+#      $ ssh nathan@<ip> mkdir /tmp/keys
+#      $ scp {id_ed25519,*.asc} nathan<ip>:/tmp/keys
+#
+# Packet:
+#   1. User account and partitions have been created using user-data
 #
 function bootstrap() {(
     # Super debug :)
@@ -344,19 +348,17 @@ function bootstrap() {(
     git -C "${KERNEL_FOLDER}/sony" clone git://github.com/sonyxperiadev/kernel
 
     # Clone marlin and msm-3.18 repos (for pulling their upstream updates, not stables)
-    if [[ -n ${ARCH} ]]; then (
-        cd "${ALS}"
-        for REPO in msm-3.18:https://source.codeaurora.org/quic/la/kernel/msm-3.18 marlin:https://android.googlesource.com/kernel/msm/; do
-            URL=${REPO#*:}
-            REPO=${REPO%%:*}
-            git clone git@github.com:android-linux-stable/"${REPO}".git || { display_error "Couldn't clone ${REPO}"; continue; }
-            (
-                cd "${REPO}"
-                git remote add upstream "${URL}"
-                git fetch upstream || { display_error "Couldn't fetch ${URL}"; continue; }
-            )
-        done
-    ); fi
+    cd "${ALS}"
+    for REPO in msm-3.18:https://source.codeaurora.org/quic/la/kernel/msm-3.18 marlin:https://android.googlesource.com/kernel/msm/; do
+        URL=${REPO#*:}
+        REPO=${REPO%%:*}
+        git clone git@github.com:android-linux-stable/"${REPO}".git || { display_error "Couldn't clone ${REPO}"; continue; }
+        (
+            cd "${REPO}"
+            git remote add upstream "${URL}"
+            git fetch upstream || { display_error "Couldn't fetch ${URL}"; continue; }
+        )
+    done
 
     # Install gist
     gem install --user-install gist
@@ -371,14 +373,15 @@ function bootstrap() {(
     echo
     echo "Things still to do!"
     echo
+    echo "1. EDITOR=vim crontab -e"
     if [[ -n ${ARCH} ]]; then
-        echo "1. EDITOR=vim crontab -e"
         echo
-        echo "2. cd && source ~/.zshrc"
+        echo "2. sudo reboot"
     elif [[ -n ${UBUNTU} ]]; then
-        echo "1. sudo poweroff"
         echo
-        echo "2. Power off machine in Packet portal"
+        echo "2. sudo poweroff"
+        echo
+        echo "3. Power off machine in Packet portal"
     fi
     echo
 ) || return 1; }
