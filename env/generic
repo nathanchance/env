@@ -17,8 +17,10 @@ function bootstrap() {(
                    ca-certificates
                    clang
                    cmake
+                   creduce
                    curl
                    doxygen
+                   expect
                    file
                    flex
                    gcc
@@ -32,22 +34,28 @@ function bootstrap() {(
                    libelf-dev
                    libevent-dev
                    libexpat1-dev
+                   libglib2.0-dev
                    libio-socket-ssl-perl
                    libmailtools-perl
                    libncurses-dev
                    libnet-smtp-ssl-perl
                    libpcre2-dev
+                   libpixman-1-dev
                    libssl-dev
                    locales
                    make
                    mosh
                    most
+                   neofetch
                    ninja-build
+                   pkg-config
                    python3
                    python3-dev
+                   ruby-dev
                    sudo
                    swig
                    texinfo
+                   tcl
                    tmux
                    u-boot-tools
                    vim
