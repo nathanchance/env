@@ -35,6 +35,7 @@ set hlsearch                                " Highlight search matches
 set lazyredraw                              " Redraw only when we need to
 set mouse=a                                 " Enable mouse in all modes
 set modeline                                " For whatever reason, Ubuntu doesn't have this set by default
+set wrap                                    " Wrap lines over a certain length. This is on by default with Arch and I am used to it...
 
 highlight ColorColumn ctermbg=0 guibg=lightgrey
 
