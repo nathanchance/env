@@ -735,7 +735,7 @@ function kcbw() {(
         shift
     done
 
-    BRANCH=android-${BRANCH:-4.9}
+    BRANCH=android-${BRANCH:-4.9-q}
     [[ -z ${LD} && ${BRANCH} = "android-4.19" ]] && LD=ld.lld
 
     cd "${BUILD_FOLDER}" || die "wtf"
@@ -822,7 +822,7 @@ function kct() {(
         )
     } > "${LOG}"
 
-    for VERSION in 4.9 4.14 4.19; do (
+    for VERSION in 4.9-q 4.14 4.19; do (
         START=$(date +%s)
 
         # Error log
