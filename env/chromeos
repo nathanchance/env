@@ -168,8 +168,7 @@ function bootstrap() {(
 
 # Update function
 function upd() {
-    sudo apt update
-    sudo apt upgrade
+    sudo sh -c 'apt update && apt upgrade'
 }
 
 
