@@ -113,6 +113,7 @@ function shell_setup() {
 # {bash,zsh}rc reload function
 function rld() {
     source "${SCRIPTS_FOLDER}/env/common"
+    set_distro
     shell_setup
 }
 

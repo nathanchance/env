@@ -360,4 +360,15 @@ function sudo_wrapper() {(
         sudo "${@}"
     fi
 )}
+
+
+# Set distro function
+function set_distro() {
+    case "$(cat /usr/lib/os-release)" in
+        *"Arch Linux"*) ARCH=true ;;
+        *"Ubuntu"*) UBUNTU=true ;;
+        *) display_error "Distro is not supported"; return 1; ;;
+    esac
+}
+
 # vi: filetype=zsh

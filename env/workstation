@@ -57,11 +57,8 @@ function bootstrap() {(
              "${KERNEL_FOLDER}"/sony \
              "${SRC_FOLDER}" || die "Can't create folders, wtf?"
 
-    case "$(cat /usr/lib/os-release)" in
-        *"Arch Linux"*) ARCH=true ;;
-        *"Ubuntu"*) UBUNTU=true ;;
-        *) die "Distro not supported by this function!" ;;
-    esac
+    # Set distro
+    set_distro || exit ${?}
 
     # Set the correct time
     sudo timedatectl set-timezone America/Phoenix
