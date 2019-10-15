@@ -689,4 +689,14 @@ function symlink_llvm() {(
     # Invalidate our LLVM cache because we have a new compiler that will be used for it
     ccache_clear llvm
 )}
+
+
+# Update function
+function upd() {(
+    if [[ -n ${ARCH} ]]; then
+        yay
+    elif [[ -n ${UBUNTU} ]]; then
+        sudo_wrapper sh -c 'apt update && apt upgrade'
+    fi
+)}
 # vi: filetype=zsh
