@@ -129,7 +129,7 @@ function bootstrap() {(
     ln -fs "${SCRIPTS}"/configs/local/.tmux.conf "${HOME}"/.tmux.conf
     zsh "${SCRIPTS}"/configs/common/vim/vim_setup.sh
     gpg --pinentry-mode loopback --output "${HOME}"/.muttrc --decrypt "${SCRIPTS}"/configs/common/muttrc.gpg
-    gpg --pinentry-mode loopback --output "${HOME}"/.server_ip --decrypt "${SCRIPTS}"/configs/common/server_ip.gpg
+    decrypt_serv_ip
 
     # Clone password store
     git clone git@github.com:nathanchance/password-store.git "${HOME}"/.password-store || die "Error cloning password store!"

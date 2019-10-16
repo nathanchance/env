@@ -372,4 +372,12 @@ function set_distro() {
 # Common ccache variable
 CCACHE=$(path_push "${HOME}/usr/bin"; command -v ccache)
 
+
+# Update server_ip file from scripts folder
+function decrypt_serv_ip() {(
+    [[ -z ${SCRIPTS_FOLDER} && -z ${SCRIPTS} ]] && die "Scripts folder cannot be found!"
+    [[ -z ${SCRIPTS_FOLDER} ]] && SCRIPTS_FOLDER=${SCRIPTS}
+    gpg --pinentry-mode loopback --output "${HOME}"/.server_ip --decrypt "${SCRIPTS_FOLDER:?}"/configs/common/server_ip.gpg
+)}
+
 # vi: filetype=zsh
