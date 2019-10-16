@@ -363,6 +363,7 @@ function sudo_wrapper() {(
 function set_distro() {
     case "$(cat /usr/lib/os-release)" in
         *"Arch Linux"*) ARCH=true ;;
+        *"Debian"*) DEBIAN=true ;;
         *"Ubuntu"*) UBUNTU=true ;;
         *) display_error "Distro is not supported"; return 1; ;;
     esac
