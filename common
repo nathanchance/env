@@ -39,9 +39,6 @@ YLW="\033[01;33m"
 THREADS=$(($(nproc) + 1))
 JOBS_FLAG="-j${THREADS}"
 
-# Common ccache variable
-CCACHE=$(command -v ccache)
-
 # Telegram chat IDs
 MARLIN_CHANNEL=-1001169681748
 MARLIN_GROUP=-1001132593794
@@ -370,5 +367,9 @@ function set_distro() {
         *) display_error "Distro is not supported"; return 1; ;;
     esac
 }
+
+
+# Common ccache variable
+CCACHE=$(path_push "${HOME}/usr/bin"; command -v ccache)
 
 # vi: filetype=zsh
