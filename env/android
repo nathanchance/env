@@ -53,13 +53,13 @@ function bootstrap() {(
     zsh "${SCRIPTS}"/configs/common/vim/vim_setup.sh
     ln -fs "${SCRIPTS}"/configs/local/.tmux.conf "${HOME}"/.tmux.conf
     gpg --pinentry-mode loopback --output "${HOME}"/.muttrc --decrypt "${SCRIPTS}"/configs/common/muttrc.gpg
-    gpg --pinentry-mode loopback --output "${HOME}"/.hetzner_ip --decrypt "${SCRIPTS}"/configs/common/hetzner_ip.gpg
+    gpg --pinentry-mode loopback --output "${HOME}"/.server_ip --decrypt "${SCRIPTS}"/configs/common/server_ip.gpg
 )}
 
 
 # Android aliases
 function android_aliases() {
-    alias mshsvr='mosh nathan@${HETZNER_IP}'
+    alias mshsvr='mosh nathan@${SERVER_IP}'
     alias upd='pkg upgrade'
 }
 
