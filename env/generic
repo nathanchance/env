@@ -30,13 +30,16 @@ function bootstrap() {(
                    libauthen-sasl-perl
                    libcurl4-openssl-dev
                    libedit-dev
-                   libemail-valid-perl
                    libelf-dev
+                   libemail-valid-perl
                    libevent-dev
                    libexpat1-dev
                    libglib2.0-dev
+                   libgmp-dev
                    libio-socket-ssl-perl
                    libmailtools-perl
+                   libmpc-dev
+                   libmpfr-dev
                    libncurses-dev
                    libnet-smtp-ssl-perl
                    libpcre2-dev
