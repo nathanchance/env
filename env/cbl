@@ -536,7 +536,9 @@ function llvm_log() {(
 
 # linux testing
 function lt() {(
-    cd "${CBL}"/"${TREE:=linux-next}" || die "wtf"
+    : ${FOLDER:=${CBL}/${TREE:=linux-next}}
+    cd "${FOLDER}" || die "wtf"
+    echo ${PWD}
 
     while (( ${#} )); do
         case ${1} in
@@ -637,7 +639,7 @@ function lt() {(
     ) done
 
     {
-        echo "${TREE} commit log:"
+        echo "${FOLDER##*/} commit log:"
         echo
         git lo $(git log --reverse --format=%H --committer="$(git config --get user.name) <$(git config --get user.email)>" --since="$(date --date="1 week ago")" | head -n1)^^..HEAD
         llvm_log
