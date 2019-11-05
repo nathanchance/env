@@ -9,6 +9,7 @@ function partition_and_create_user() {(
         case ${1} in
             -d|--drive) shift; DRIVE=${1} ;;
             -p|--password) shift; PASSWORD=${1} ;;
+            -u|--user) shift; USER=${1} ;;
         esac
         shift
     done
@@ -16,8 +17,8 @@ function partition_and_create_user() {(
     # Debug and error if a command fails
     set -eux
 
-    # Password must be supplied
-    : ${PASSWORD}
+    # User and password must be supplied
+    : ${USER} ${PASSWORD}
 
     # Update apt files
     apt update
@@ -39,7 +40,6 @@ function partition_and_create_user() {(
     fi
 
     # Setup user account
-    USER=nathan
     apt install -y --no-install-recommends qemu-kvm zsh
     useradd -m -G kvm,sudo -s /bin/zsh "${USER}"
     echo "${USER}:${PASSWORD}" | chpasswd
