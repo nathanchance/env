@@ -95,7 +95,7 @@ function bpgollvm() {(
     git fetch origin
     git checkout "${LLVM_VERSION}"
     # If we are on a branch, we should update it
-    [[ ${LLVM_VERSION} = "master" || ${LLVM_VERSION} =~ release ]] && git pull
+    [[ ${LLVM_VERSION} = "master" || ${LLVM_VERSION} =~ release ]] && { git pull --rebase || die "llvm-project update failed!"; }
 
     # Ensure that we don't build llgo, it's broken
     LLVM_ALL_PROJECTS=$(grep -F "set(LLVM_ALL_PROJECTS " llvm/CMakeLists.txt | cut -d \" -f 2)
