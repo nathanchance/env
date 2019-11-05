@@ -2,7 +2,7 @@
 
 function partition_and_create_user() {(
     # Function must be run as root
-    [[ $(id -u) -ne 0 ]] && { echo -n "\033[01;31m\nThis script must be run as root.\n\033[0m"; exit 1; }
+    [[ $(id -u) -ne 0 ]] && { printf "\033[01;31m\nThis script must be run as root.\n\033[0m"; exit 1; }
 
     # Drive to use must be provided as argument of script
     while (( ${#} )); do
@@ -19,7 +19,7 @@ function partition_and_create_user() {(
     set -eux
 
     # User and password must be supplied
-    : ${USER} ${PASSWORD}
+    : "${USER}" "${PASSWORD}"
 
     # Update apt files
     apt update
@@ -49,6 +49,6 @@ function partition_and_create_user() {(
     fi
     useradd "${USER_ADD_ARGS[@]}" "${USER}"
     echo "${USER}:${PASSWORD}" | chpasswd
-    cp -rv /root/.ssh /home/${USER}
-    chown -R ${USER}:${USER} /home/${USER}/.ssh
+    cp -rv /root/.ssh /home/"${USER}"
+    chown -R "${USER}:${USER}" /home/"${USER}"/.ssh
 )}
