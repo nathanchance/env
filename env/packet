@@ -37,6 +37,7 @@ function partition_and_create_user() {(
         sleep 15
         mkfs -t ext4 "${DRIVE}${PART}"
         echo "UUID=$(blkid -o value -s UUID "${DRIVE}${PART}") /home ext4 noatime 0 2" >> /etc/fstab
+        sed -i '/^$/d' /etc/fstab
         mount -a
     fi
 
