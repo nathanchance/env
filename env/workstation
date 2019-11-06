@@ -211,17 +211,13 @@ function bootstrap() {(
             make -j$(nproc) PREFIX=${HOME}/usr install
         )
 
-        # Disable SMT if it does not impact performance a lot
-        # This only holds true for Packet's m2.xlarge.x86 with dual Xeon Gold 5210s right now
+        # Disable SMT for security
         if grep -q "SMT vulnerable" /sys/devices/system/cpu/vulnerabilities/*; then
-            case "$(lscpu)" in
-                *"Gold 5120 CPU"*)
-                    CMDLINE=$(grep GRUB_CMDLINE_LINUX /etc/default/grub | cut -d \" -f 2)
-                    if [[ ! ${CMDLINE} =~ nosmt ]]; then
-                        sudo_wrapper sed -i "s/${CMDLINE}/${CMDLINE} nosmt/g" /etc/default/grub
-                        sudo_wrapper update-grub
-                    fi ;;
-            esac
+            CMDLINE=$(grep GRUB_CMDLINE_LINUX /etc/default/grub | cut -d \" -f 2)
+            if [[ ! ${CMDLINE} =~ nosmt ]]; then
+                sudo_wrapper sed -i "s/${CMDLINE}/${CMDLINE} nosmt/g" /etc/default/grub
+                sudo_wrapper update-grub
+            fi
         fi
 
         # Build folder size
