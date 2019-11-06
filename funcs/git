@@ -129,13 +129,13 @@ function gcmt() {
 
 
 function install_hub() {(
-    [[ -z ${HUB_VERSION} ]] && HUB_VERSION=2.12.8
-    HUB_TUPLE="hub-linux-$(get_arch)-${HUB_VERSION}"
+    [[ -z ${HUB_VERSION} ]] && HUB_VERSION=$(glr "github/hub")
+    HUB_TUPLE="hub-linux-$(get_arch)-${HUB_VERSION/v}"
     cd "$(mktemp -d)" || die "Error moving into temporary directory!"
-    curl -LSsO https://github.com/github/hub/releases/download/v"${HUB_VERSION}"/"${HUB_TUPLE}".tgz || die "Error downloading hub!"
+    curl -LSsO https://github.com/github/hub/releases/download/"${HUB_VERSION}"/"${HUB_TUPLE}".tgz || die "Error downloading hub!"
     tar -xf "${HUB_TUPLE}".tgz || die "Error extracting hub!"
     prefix="${PREFIX:=${HOME}/usr}" ./"${HUB_TUPLE}"/install || die "Error installing hub!"
-    [[ -d ${HOME}/.zfunctions ]] && curl -LSso "${HOME}"/.zfunctions/_hub https://github.com/github/hub/raw/v"${HUB_VERSION}"/etc/hub.zsh_completion
+    [[ -d ${HOME}/.zfunctions ]] && curl -LSso "${HOME}"/.zfunctions/_hub https://github.com/github/hub/raw/"${HUB_VERSION}"/etc/hub.zsh_completion
     rm -rf "${PWD}"
 )}
 # vi: filetype=zsh
