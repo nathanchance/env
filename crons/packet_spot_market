@@ -1,0 +1,19 @@
+#!/usr/bin/env zsh
+# SHELL=/home/nathan/usr/bin/zsh
+# */1 * * * * /usr/bin/flock -n /tmp/lock.term /home/nathan/github/scripts/cron/packet_spot_market
+
+LOGS=/home/nathan/logs
+SCRIPTS=/home/nathan/github/scripts
+
+source "${SCRIPTS}"/env/folders
+source "${SCRIPTS}"/common
+mkdir -p "${LOGS}"
+
+TIME=$(curl -s https://metadata.packet.net/metadata | jq -r .termination_date)
+SERVER=$(curl -s https://metadata.packet.net/metadata | jq -r .class)
+MESSAGE="${SERVER}: Termination time is ${TIME} at $(TZ=MST date +"%Y/%m/%d %T %Z")"
+if [[ ${TIME} = "null" ]]; then
+    echo "${MESSAGE}" >> "${LOGS}"/cron-$(TZ=MST date +%Y%m%d).log
+else
+    tg_msg "${MESSAGE}"
+fi
