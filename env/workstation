@@ -114,7 +114,6 @@ function bootstrap() {(
                                             python-psutil \
                                             qemu-headless-arch-extra \
                                             ripgrep \
-                                            ruby-dev \
                                             swig \
                                             tmux \
                                             uboot-tools \
@@ -177,7 +176,6 @@ function bootstrap() {(
                    podman
                    python3
                    python3-dev
-                   ruby-dev
                    sudo
                    swig
                    texinfo
@@ -358,10 +356,6 @@ function bootstrap() {(
         )
     done
 
-    # Install gist
-    gem install --user-install gist
-    "$(gem env | grep "USER INSTALL" | sed 's/.*: //')/bin/gist" --login
-
     # Use new GPG keyserver
     echo "keyserver hkps://keys.openpgp.org" >> "${HOME}"/.gnupg/dirmngr.conf
 
@@ -440,7 +434,6 @@ function workstation_setup() {
     source "${SCRIPTS_FOLDER}"/env/cbl
     source "${SCRIPTS_FOLDER}"/funcs/bk
     source "${SCRIPTS_FOLDER}"/funcs/bldgcc
-    add_to_path_post "$(gem env | grep "USER INSTALL" | sed 's/.*: //')/bin"
     load_botinfo
     type crbf &>/dev/null && crbf
     ( gpg_available )
