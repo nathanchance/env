@@ -80,7 +80,7 @@ CHECKING=release
 ECHO=/bin/echo
 GCC_SRC=${PWD}/${GCC_SOURCE}
 MAKEOPTS=-j$(nproc)
-PREFIX=${GCC_TC_FOLDER}/${GCC_VERSION}
+PREFIX=${PREFIX:-${GCC_TC_FOLDER}/${GCC_VERSION}}
 EOF
 
     # Build the toolchains
