@@ -17,7 +17,7 @@ SERVER=$(curl -s https://metadata.packet.net/metadata | jq -r .class)
 { [[ -z ${TIME} && -z ${SERVER} ]] || [[ ${TIME} = "null" && ${SERVER} = "null" ]]; } && echo "${ERROR_MSG}" >> "${LOG}"
 
 MSG="${SERVER}: Termination time is ${TIME} at $(TZ=MST date +"%Y/%m/%d %T %Z")"
-if [[ ${TIME} = "null" ]]; then
+if [[ ${TIME} = "null" || -z ${TIME} ]]; then
     echo "${MSG}" >> "${LOG}"
 else
     tg_msg "${MSG}"
