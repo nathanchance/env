@@ -1,6 +1,6 @@
 #!/usr/bin/env zsh
 # SHELL=/home/nathan/usr/bin/zsh
-# */1 * * * * /usr/bin/flock -n /tmp/lock.term /home/nathan/github/scripts/cron/packet_spot_market
+# */1 * * * * /usr/bin/flock -n /tmp/lock.term /home/nathan/github/scripts/crons/packet_spot_market
 
 LOG=/home/nathan/logs/cron-$(TZ=MST date +%Y%m%d).log
 SCRIPTS=/home/nathan/github/scripts
