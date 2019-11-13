@@ -1,0 +1,131 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+# Copyright (C) 2019 Nathan Chancellor
+#
+# Utility and terminal setup functions for WSL
+
+
+# Setup function
+#
+# Requires Keys folder to be available in /mnt/c/Users/natec/Documents
+function bootstrap() {(
+    # Grab common functions/variables
+    source <(curl -LSs https://github.com/nathanchance/scripts/raw/master/common) &>/dev/null
+
+    # Keys location
+    KEYS=/mnt/c/Users/natec/Documents/Keys
+    [[ -d ${KEYS} ]] || die "Keys are not available"
+
+    # Ensure that packages are all up to date
+    sudo apt update
+    sudo apt upgrade -y
+
+    # Install packages from Debian repos
+    sudo apt install -y --no-install-recommends \
+        build-essential \
+        bc \
+        bison \
+        devscripts \
+        flex \
+        gettext \
+        git \
+        git-email \
+        gpg \
+        irssi \
+        jq \
+        libcurl4-openssl-dev \
+        libevent-dev \
+        libexpat-dev \
+        libncurses-dev \
+        libpcre2-dev \
+        libssl-dev \
+        mosh \
+        most \
+        mutt \
+        pass \
+        python-pip \
+        ssh \
+        tmux \
+        unzip \
+        vim \
+        zlib1g-dev
+
+    # Install speedtest-cli
+    sudo curl -LSo /usr/local/bin/speedtest-cli https://raw.githubusercontent.com/sivel/speedtest-cli/master/speedtest.py
+    sudo chmod +x /usr/local/bin/speedtest-cli
+
+    # Install latest version of LLVM/Clang
+    curl https://apt.llvm.org/llvm-snapshot.gpg.key | sudo apt-key add -
+    grep -q "apt.llvm.org" /etc/apt/sources.list || echo "deb http://apt.llvm.org/bionic/ llvm-toolchain-bionic main" | sudo tee -a /etc/apt/sources.list
+    sudo apt update -qq
+    sudo apt install -y --no-install-recommends \
+        clang-10 \
+        lld-10
+
+    # Setup SSH and GPG if keys are present
+    mkdir -p "${HOME}"/.ssh
+    cp "${KEYS}"/id_ed25519{,.pub} "${HOME}"/.ssh
+    chmod 600 "${HOME}"/.ssh/id_ed25519
+
+    # Setup GPG
+    gpg --pinentry-mode loopback --import "${KEYS}"/{public*,private*}.asc
+    gpg --import-ownertrust "${KEYS}"/ownertrust*.asc
+    {
+        echo "default-cache-ttl 3600"
+        echo "max-cache-ttl 86400"
+    } > "${HOME}"/.gnupg/gpg-agent.conf
+    gpg-connect-agent reloadagent /bye
+
+    # Clone scripts
+    GITHUB=${HOME}/github
+    mkdir -p "${GITHUB}"
+    local SCRIPTS; SCRIPTS=${GITHUB}/scripts
+    git clone git@github.com:nathanchance/scripts "${SCRIPTS}" || die "Error cloning script!"
+    source "${SCRIPTS}"/env/setup && global_gitignore && create_zshrc
+    source "${SCRIPTS}"/funcs/bldupdbin && { bldupdbin || die "bldupdbin failed!"; }
+    path_push "${HOME}/usr/bin"
+    source "${SCRIPTS}"/funcs/git && git_setup
+    source "${SCRIPTS}"/funcs/pure && pure_prompt
+    ln -fs "${SCRIPTS}"/configs/local/.tmux.conf "${HOME}"/.tmux.conf
+    zsh "${SCRIPTS}"/configs/common/vim/vim_setup.sh
+    gpg --pinentry-mode loopback --output "${HOME}"/.muttrc --decrypt "${SCRIPTS}"/configs/common/muttrc.gpg
+    decrypt_serv_ip
+
+    # Clone password store
+    git clone git@github.com:nathanchance/password-store.git "${HOME}"/.password-store || die "Error cloning password store!"
+
+    # Install hugo
+    HUGO_VERSION=$(glr gohugoio/hugo)
+    SUFFIX=64bit
+    curl -LSso "${TMP_DEB:=$(mktemp --suffix=.deb)}" https://github.com/gohugoio/hugo/releases/download/"${HUGO_VERSION}"/hugo_"${HUGO_VERSION//v}"_Linux-"${SUFFIX}".deb
+    sudo dpkg -i "${TMP_DEB}"
+    rm -rf "${TMP_DEB}"
+
+    # Download website files
+    for REPO in hugo-files nathanchance.github.io; do
+        git clone git@github.com:nathanchance/"${REPO}" "${GITHUB}/${REPO}"
+    done
+    git -C "${GITHUB}"/hugo-files submodule update --init --recursive
+) && source "${HOME}"/.zshrc; }
+
+
+# Update function
+function upd() {
+    sudo sh -c 'apt update && apt upgrade'
+}
+
+
+# Laptop specific aliases
+function wsl_aliases() {
+    alias ls='ls --color=auto'
+    alias mshsvr='mosh nathan@${SERVER_IP}'
+}
+
+
+# Laptop specific setup
+function wsl_setup() {
+    # Load the stock completions to make sure we don't miss out on anything
+    echo "$fpath" | grep -q -s "vendor-completions" || fpath=( $fpath /usr/share/zsh/vendor-completions )
+    compinit
+}
+# vi: filetype=zsh
