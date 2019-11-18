@@ -21,6 +21,9 @@ function partition_and_create_user() {(
     # User and password must be supplied
     : "${USER}" "${PASSWORD}"
 
+    # Always turn on '--no-install-recommends'
+    apt-config dump | grep -we Recommends -e Suggests | sed 's/1/0/g' | tee /etc/apt/apt.conf.d/999norecommend
+
     # Update apt files
     apt update
 
@@ -30,7 +33,7 @@ function partition_and_create_user() {(
             /dev/nvme*) PART=p1 ;;
             /dev/sd*) PART=1 ;;
         esac
-        apt install -y --no-install-recommends parted
+        apt install -y parted
 
         # Partition and modify fstab
         parted -s "${DRIVE}" mklabel gpt mkpart primary ext4 '0%' '100%'
@@ -42,10 +45,10 @@ function partition_and_create_user() {(
     fi
 
     # Setup user account
-    apt install -y --no-install-recommends qemu-kvm
+    apt install -y qemu-kvm
     USER_ADD_ARGS=( -m -G kvm,sudo )
     if [[ "${SHELL_PATH:-}" = "/bin/zsh" ]]; then
-        apt install -y --no-install-recommends zsh
+        apt install -y zsh
         USER_ADD_ARGS=( "${USER_ADD_ARGS[@]}" -s "${SHELL_PATH}" )
     fi
     useradd "${USER_ADD_ARGS[@]}" "${USER}"

@@ -192,7 +192,7 @@ function bootstrap() {(
         sudo_wrapper add-apt-repository ppa:projectatomic/ppa || exit ${?}
         sudo_wrapper apt update || exit ${?}
         sudo_wrapper DEBIAN_FRONTEND=noninteractive apt upgrade -y || exit ${?}
-        sudo_wrapper DEBIAN_FRONTEND=noninteractive apt install -y --no-install-recommends "${PACKAGES[@]}" || exit ${?}
+        sudo_wrapper DEBIAN_FRONTEND=noninteractive apt install -y "${PACKAGES[@]}" || exit ${?}
         echo "locales locales/default_environment_locale select en_US.UTF-8" | sudo_wrapper debconf-set-selections
         echo "locales locales/locales_to_be_generated multiselect en_US.UTF-8 UTF-8" | sudo_wrapper debconf-set-selections
         sudo_wrapper rm "/etc/locale.gen"
