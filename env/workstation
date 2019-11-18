@@ -147,6 +147,7 @@ function bootstrap() {(
                    gettext
                    git
                    g++
+                   irssi
                    libauthen-sasl-perl
                    libcurl4-openssl-dev
                    libedit-dev
