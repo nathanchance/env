@@ -407,6 +407,17 @@ function bzsh() {(
 )}
 
 
+# Install Android tools
+function install_android_tools() {(
+    curl -LSso "${HOME}"/usr/bin/repo https://storage.googleapis.com/git-repo-downloads/repo
+
+    MKDTIMG_FOLDER=$(mktemp -d)
+    curl -LSs https://android.googlesource.com/platform/prebuilts/misc/+archive/master/linux-x86/libufdt.tar.gz | tar -C "${MKDTIMG_FOLDER}" -xzf -
+    cp "${MKDTIMG_FOLDER}"/mkdtimg "${HOME}"/usr/bin
+    rm -rf "${MKDTIMG_FOLDER}"
+)}
+
+
 function install_rust() {(
     curl https://sh.rustup.rs -sSf | bash -s -- -y --no-modify-path
 )}

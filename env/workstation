@@ -218,12 +218,6 @@ function bootstrap() {(
     # Setup build folder
     grep -q "${BLDF}" /etc/fstab || echo "tmpfs ${BLDF} tmpfs nodev,nosuid,uid=$(whoami),gid=$(whoami),size=${BFS}G 0 0" | sudo tee -a /etc/fstab
 
-    # Download and install mkdtimg
-    MKDTIMG_FOLDER=$(mktemp -d)
-    curl -LSs https://android.googlesource.com/platform/prebuilts/misc/+archive/master/linux-x86/libufdt.tar.gz | tar -C "${MKDTIMG_FOLDER}" -xzf -
-    cp "${MKDTIMG_FOLDER}"/mkdtimg "${HOME}"/usr/bin
-    rm -rf "${MKDTIMG_FOLDER}"
-
     # Setup keys
     KEYS=/tmp/keys
     git clone https://github.com/nathanchance/keys "${KEYS}"
@@ -254,7 +248,7 @@ function bootstrap() {(
     source "${SCRIPTS}"/env/setup && global_gitignore && create_zshrc
     source "${SCRIPTS}"/funcs/bldupdbin
     [[ -n ${ARCH} ]] && bgit
-    [[ -n ${UBUNTU} ]] && { bldupdbin && bdtc && bqemu; }
+    [[ -n ${UBUNTU} ]] && { bldupdbin && bdtc && bqemu && install_android_tools; }
     path_push "${HOME}/usr/bin"
     source "${SCRIPTS}"/funcs/git && git_setup
     source "${SCRIPTS}"/funcs/pure && pure_prompt
