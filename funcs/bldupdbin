@@ -24,6 +24,26 @@ function bccache() {(
 )}
 
 
+# Build/update dtc
+function bdtc() {(
+    DTC_FOLDER=${SRC_FOLDER:-${HOME}/src}/dtc
+    if [[ ! -d ${DTC_FOLDER} ]]; then
+        mkdir -p "${DTC_FOLDER%/*}"
+        git clone git://git.kernel.org/pub/scm/utils/dtc/dtc.git "${DTC_FOLDER}"
+    fi
+    cd "${DTC_FOLDER}" || die "Couldn't move into ${DTC_FOLDER}"
+
+    git clean -fxdq
+    git fetch
+
+    [[ -z ${DTC_VERSION} ]] && DTC_VERSION=$(git describe --tags $(git rev-list --tags --max-count=1))
+    git checkout v"${DTC_VERSION//v}"
+
+    [[ -z ${PREFIX} ]] && PREFIX=${HOME}/usr
+    make "${JOBS_FLAGS:--j"$(nproc)"}" PREFIX=${PREFIX} install
+)}
+
+
 # Build/update git
 function bgit() {(
     [[ -z ${PREFIX} ]] && PREFIX=${HOME}/usr
