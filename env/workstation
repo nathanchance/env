@@ -202,14 +202,6 @@ function bootstrap() {(
         echo "$(whoami):100000:65536" | sudo_wrapper tee /etc/subgid /etc/subuid
         sudo_wrapper curl -LSso /etc/containers/registries.conf 'https://git.archlinux.org/svntogit/community.git/plain/trunk/registries.conf?h=packages/skopeo'
 
-        # Build dtc
-        (
-            [[ ! -d ${SRC_FOLDER}/dtc ]] && git -C ${SRC_FOLDER} clone git://git.kernel.org/pub/scm/utils/dtc/dtc.git
-            cd "${SRC_FOLDER}"
-            git clean -fxdq
-            make -j$(nproc) PREFIX=${HOME}/usr install
-        )
-
         # Disable SMT for security
         if grep -q "SMT vulnerable" /sys/devices/system/cpu/vulnerabilities/*; then
             CMDLINE=$(grep GRUB_CMDLINE_LINUX /etc/default/grub | cut -d \" -f 2)
@@ -262,7 +254,7 @@ function bootstrap() {(
     source "${SCRIPTS}"/env/setup && global_gitignore && create_zshrc
     source "${SCRIPTS}"/funcs/bldupdbin
     [[ -n ${ARCH} ]] && bgit
-    [[ -n ${UBUNTU} ]] && { bldupdbin && bqemu; }
+    [[ -n ${UBUNTU} ]] && { bldupdbin && bdtc && bqemu; }
     path_push "${HOME}/usr/bin"
     source "${SCRIPTS}"/funcs/git && git_setup
     source "${SCRIPTS}"/funcs/pure && pure_prompt
