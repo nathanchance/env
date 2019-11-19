@@ -78,7 +78,7 @@ function ptchmn() {(
 
             rm "${TARGET_FOLDER}"/*
 
-            git fp -o "${TARGET_FOLDER}" "${FIRST_HASH}"^..HEAD
+            git fp -o "${TARGET_FOLDER}" --base=auto "${FIRST_HASH}"^..HEAD
 
             git -C "${TARGET_FOLDER}" aa
 
