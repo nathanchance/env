@@ -184,12 +184,12 @@ function bldkw() {(
 
     TARGET_ARCH=${1}; shift
     case "${TARGET_ARCH}" in
-        "arm") MAKE_FLAGS=( "ARCH=arm" "CROSS_COMPILE=${CROSS_COMPILE:-arm-linux-gnueabi-}" ) ;;
-        "arm64") MAKE_FLAGS=( "ARCH=arm64" "CROSS_COMPILE=${CROSS_COMPILE:-aarch64-linux-gnu-}" ) ;;
-        "mipsel") MAKE_FLAGS=( "ARCH=mips" "CROSS_COMPILE=${CROSS_COMPILE:-mipsel-linux-gnu-}" ) ;;
-        "ppc32") MAKE_FLAGS=( "ARCH=powerpc" "CROSS_COMPILE=${CROSS_COMPILE:-powerpc-linux-gnu-}" ) ;;
-        "ppc64") MAKE_FLAGS=( "ARCH=powerpc" "CROSS_COMPILE=${CROSS_COMPILE:-powerpc64-linux-gnu-}" ) ;;
-        "ppc64le") MAKE_FLAGS=( "ARCH=powerpc" "CROSS_COMPILE=${CROSS_COMPILE:-powerpc64le-linux-gnu-}" ) ;;
+        "arm") : "${CROSS_COMPILE:=arm-linux-gnueabi-}" && MAKE_FLAGS=( "ARCH=arm" "CROSS_COMPILE=${CROSS_COMPILE}" ) ;;
+        "arm64") : "${CROSS_COMPILE:=aarch64-linux-gnu-}" && MAKE_FLAGS=( "ARCH=arm64" "CROSS_COMPILE=${CROSS_COMPILE}" ) ;;
+        "mipsel") : "${CROSS_COMPILE:=mipsel-linux-gnu-}" && MAKE_FLAGS=( "ARCH=mips" "CROSS_COMPILE=${CROSS_COMPILE}" ) ;;
+        "ppc32") : "${CROSS_COMPILE:=powerpc-linux-gnu-}" && MAKE_FLAGS=( "ARCH=powerpc" "CROSS_COMPILE=${CROSS_COMPILE}" ) ;;
+        "ppc64") : "${CROSS_COMPILE:=powerpc64-linux-gnu-}" && MAKE_FLAGS=( "ARCH=powerpc" "CROSS_COMPILE=${CROSS_COMPILE}" ) ;;
+        "ppc64le") : "${CROSS_COMPILE:=powerpc64le-linux-gnu-}" && MAKE_FLAGS=( "ARCH=powerpc" "CROSS_COMPILE=${CROSS_COMPILE}" ) ;;
         "x86") MAKE_FLAGS=() ;;
         *) display_error "Invalid TARGET_ARCH specified!"; return ;;
     esac
@@ -208,6 +208,12 @@ function bldkw() {(
     if [[ ${Q} -ne 2 ]]; then
         echo
         echo "${BOLD}LLVM location:${RST} $(dirname "$(command -v clang)")"
+        echo
+        clang --version | head -n1
+        echo
+        echo "${BOLD}binutils location:${RST} $(dirname "$(command -v "${CROSS_COMPILE}"as)")"
+        echo
+        "${CROSS_COMPILE}"as --version | head -n1
         echo
     fi
 
