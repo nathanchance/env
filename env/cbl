@@ -533,12 +533,12 @@ function babk() {(
 # Show local LLVM patches via git log
 function llvm_log() {(
     cd "${TCBLD:?}"/llvm-project || return
-    MFC=$(git log --reverse --format=%H --committer="$(git config --get user.name) <$(git config --get user.email)>" --since="$(date --date="1 week ago")" | head -n1)
-    if [[ -n ${MFC} ]]; then
+    MLFC=$(git log --reverse --format=%H --committer="$(git config --get user.name) <$(git config --get user.email)>" --since="$(date --date="1 week ago")" | head -n1)
+    if [[ -n ${MLFC} ]]; then
         echo
         echo "LLVM commit log:"
         echo
-        git lo ${MFC}^^..HEAD
+        git lo ${MLFC}^^..HEAD
     fi
 )}
 
@@ -648,9 +648,12 @@ function lt() {(
     ) done
 
     {
-        echo "${FOLDER##*/} commit log:"
-        echo
-        git lo $(git log --reverse --format=%H --committer="$(git config --get user.name) <$(git config --get user.email)>" --since="$(date --date="1 week ago")" | head -n1)^^..HEAD
+        MFC=$(git log --reverse --format=%H --committer="$(git config --get user.name) <$(git config --get user.email)>" --since="$(date --date="1 week ago")" | head -n1)
+        if [[ -n ${MFC} ]]; then
+            echo "${FOLDER##*/} commit log:"
+            echo
+            git lo ${MFC}^^..HEAD
+        fi
         llvm_log
     } >> "${LOG}"
 
