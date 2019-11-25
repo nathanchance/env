@@ -290,7 +290,7 @@ function bldk() {(
     "${BLDKW[@]}" distclean "${CONFIG}"
 
     : ${O:=${KBF}}
-    if ${CBL_DEFCONFIG:?}; then
+    if ${CBL_DEFCONFIG:?} || ${USING_QEMU:=false}; then
         # Extra configs for build/boot testings
         # From https://github.com/groeck/linux-build-test/blob/master/rootfs/scripts/common.sh
         echo "CONFIG_INIT_STACK_ALL=y
@@ -520,6 +520,9 @@ function bootk() {(
 function babk() {(
     ARCH=${1}; shift
     [[ -z ${ARCH} ]] && die "ARCH not specified!"
+
+    # Ensure virtio drivers get enabled by bldk
+    export USING_QEMU=true
 
     bldk "${ARCH}" KCFLAGS="${KCFLAGS--Werror}" "${@}"
 
