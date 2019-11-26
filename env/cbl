@@ -614,7 +614,7 @@ function lt() {(
 
         # Build kernel silently normally
         if [[ -z ${DEBUG} ]]; then
-            Q=2 bldk "${ARCH}" "${CONFIG}" KCFLAGS="${KCFLAGS--Werror}" ${LD:+LD="${LD}"} ${OBJCOPY:+OBJCOPY="${OBJCOPY}"} |& tee "${WARNING_LOG}"
+            USING_QEMU=true Q=2 bldk "${ARCH}" "${CONFIG}" KCFLAGS="${KCFLAGS--Werror}" ${LD:+LD="${LD}"} ${OBJCOPY:+OBJCOPY="${OBJCOPY}"} |& tee "${WARNING_LOG}"
             MAKE_RESULT=${pipestatus[1]}
         else
             bldk "${ARCH}" "${CONFIG}" KCFLAGS="${KCFLAGS--Werror}" ${LD:+LD="${LD}"} ${OBJCOPY:+OBJCOPY="${OBJCOPY}"}
