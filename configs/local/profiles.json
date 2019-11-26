@@ -16,7 +16,7 @@
             "commandline": "powershell.exe",
             "hidden": false,
             "fontFace": "Fira Code",
-            "fontSize": 10
+            "fontSize": 9
         },
         {
             // Make changes here to the cmd.exe profile
@@ -25,7 +25,7 @@
             "commandline": "cmd.exe",
             "hidden": false,
             "fontFace": "Fira Code",
-            "fontSize": 10
+            "fontSize": 9
         },
         {
             "guid": "{2c4de342-38b7-51cf-b940-2309a097f518}",
@@ -34,7 +34,7 @@
             "source": "Windows.Terminal.Wsl",
             "colorScheme": "snazzy",
             "fontFace": "Fira Code",
-            "fontSize": 10
+            "fontSize": 9
         },
         {
             "guid": "{b453ae62-4e3d-5e58-b989-0a998ec441b8}",
@@ -42,7 +42,7 @@
             "name": "Azure Cloud Shell",
             "source": "Windows.Terminal.Azure",
             "fontFace": "Fira Code",
-            "fontSize": 10
+            "fontSize": 9
         }
     ],
 
