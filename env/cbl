@@ -268,7 +268,8 @@ function bldk() {(
             *) CONFIG=defconfig ;;
         esac
     fi
-    [[ ${PWD} =~ cbl && ${CONFIG} =~ defconfig ]] && CBL_DEFCONFIG=true
+    [[ ${CONFIG} =~ defconfig ]] && IS_DEFCONFIG=true
+    { [[ ${PWD} =~ cbl ]] && ${IS_DEFCONFIG:=false}; } && CBL_DEFCONFIG=true
 
     if ${CBL_DEFCONFIG:=false}; then
         # Use lld by default for everything but certain PowerPC builds
@@ -290,7 +291,7 @@ function bldk() {(
     "${BLDKW[@]}" distclean "${CONFIG}"
 
     : ${O:=${KBF}}
-    if ${CBL_DEFCONFIG:?} || ${USING_QEMU:=false}; then
+    if ${CBL_DEFCONFIG:?} || { ${IS_DEFCONFIG} && ${USING_QEMU:=false}; }; then
         # Extra configs for build/boot testings
         # From https://github.com/groeck/linux-build-test/blob/master/rootfs/scripts/common.sh
         echo "CONFIG_INIT_STACK_ALL=y
