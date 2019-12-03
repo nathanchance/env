@@ -1,3 +1,4 @@
+#!/usr/bin/env bash
 # Function to upload to del.dog
 #
 # This can be downloaded and sourced without any of the other scripts in this repo.
@@ -18,7 +19,8 @@ function deldog() {(
             exit 1
         }
     done
-    RESULT=$(curl -sf --data-binary @"${1:--}" https://del.dog/documents) || {
+    [[ -n ${DEL_DOG_API_KEY} ]] && CURL_ARGS=( --header "X-api-key: ${DEL_DOG_API_KEY}" )
+    RESULT=$(curl -sf --data-binary @"${1:--}" "${CURL_ARGS[@]}" https://del.dog/documents) || {
         echo "ERROR: failed to post document, ca-certificates might need to be installed" >&2
         exit 1
     }
