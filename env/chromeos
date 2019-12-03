@@ -128,7 +128,8 @@ function bootstrap() {(
     source "${SCRIPTS}"/funcs/pure && pure_prompt
     ln -fs "${SCRIPTS}"/configs/local/.tmux.conf "${HOME}"/.tmux.conf
     zsh "${SCRIPTS}"/configs/common/vim/vim_setup.sh
-    gpg --pinentry-mode loopback --output "${HOME}"/.muttrc --decrypt "${SCRIPTS}"/configs/common/muttrc.gpg
+    decrypt_del_dog_api_key
+    decrypt_gpg_file muttrc
     decrypt_serv_ip
 
     # Clone password store

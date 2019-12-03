@@ -374,11 +374,19 @@ function set_distro() {
 CCACHE=$(path_push "${HOME}/usr/bin"; command -v ccache)
 
 
-# Update server_ip file from scripts folder
-function decrypt_serv_ip() {(
+# Decrypt gpg signed file
+function decrypt_gpg_file() {(
     [[ -z ${SCRIPTS_FOLDER} && -z ${SCRIPTS} ]] && die "Scripts folder cannot be found!"
     [[ -z ${SCRIPTS_FOLDER} ]] && SCRIPTS_FOLDER=${SCRIPTS}
-    gpg --pinentry-mode loopback --output "${HOME}"/.server_ip --decrypt "${SCRIPTS_FOLDER:?}"/configs/common/server_ip.gpg
+    gpg --pinentry-mode loopback --output "${HOME}"/."${1:?}" --decrypt "${SCRIPTS_FOLDER:?}"/configs/common/"${1}".gpg
 )}
+
+# Update server_ip file from scripts folder
+function decrypt_serv_ip() { decrypt_gpg_file server_ip; }
+
+
+# Update del_dog_api_key file from scripts folder
+function decrypt_del_dog_api_key() { decrypt_gpg_file del_dog_api_key; }
+
 
 # vi: filetype=zsh

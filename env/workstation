@@ -254,8 +254,9 @@ function bootstrap() {(
     source "${SCRIPTS}"/funcs/pure && pure_prompt
     zsh "${SCRIPTS}"/configs/common/vim/vim_setup.sh
     ln -fs "${SCRIPTS}"/configs/workstation/.tmux.conf "${HOME}"/.tmux.conf
-    gpg --pinentry-mode loopback --output "${MAIN_FOLDER}"/.botinfo --decrypt "${SCRIPTS}"/configs/common/botinfo.gpg
-    gpg --pinentry-mode loopback --output "${HOME}"/.muttrc --decrypt "${SCRIPTS}"/configs/common/muttrc.gpg
+    decrypt_gpg_file botinfo
+    decrypt_del_dog_api_key
+    decrypt_gpg_file muttrc
     for REPO in chromeos-adb-fastboot hugo-files nathanchance.github.io patches; do
         [[ ! -d ${GITHUB_FOLDER}/${REPO} ]] && { git -C "${GITHUB_FOLDER}" clone git@github.com:nathanchance/"${REPO}" || die "Error cloning ${REPO}!"; }
     done
