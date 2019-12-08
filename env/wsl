@@ -131,4 +131,12 @@ function wsl_setup() {
     echo "$fpath" | grep -q -s "vendor-completions" || fpath=( $fpath /usr/share/zsh/vendor-completions )
     compinit
 }
+
+
+# Update WSL kernel from server
+function upd_wsl_kernel() {(
+    KERNEL=/mnt/c/Users/natec/Linux/kernel-4.19-${1:-clang}
+    rm -rf "${KERNEL}"
+    scp nathan@${SERVER_IP:?}:/home/nathan/src/WSL2-Linux-Kernel/out.x86_64/arch/x86/boot/bzImage "${KERNEL}"
+)}
 # vi: filetype=zsh
