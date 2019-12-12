@@ -843,11 +843,11 @@ function kct() {(
 
         # Build kernel silently normally
         if [[ -z ${DEBUG} ]]; then
-            KCFLAGS="${KCFLAGS--Werror}" kcbw arm64 "${VERSION}" |& \
+            kcbw arm64 "${VERSION}" |& \
             rg --color=never "error:|warning:|undefined" |& sed "s/${COMMON_FOLDER//\//\\/}\///g" > "${ERRORS}"
             MAKE_RESULT=${pipestatus[1]}
         else
-            KCFLAGS="${KCFLAGS--Werror}" kcbw arm64 "${VERSION}"
+            kcbw arm64 "${VERSION}"
             MAKE_RESULT=${?}
         fi
 
