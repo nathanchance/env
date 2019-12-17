@@ -77,3 +77,16 @@ nnoremap <silent> -- :let _s=@/ <Bar> :%s/\s\+$//e <Bar> :let @/=_s <Bar> :nohl 
 " clang-format
 map <C-K> :pyf /usr/share/clang/clang-format.py<cr>
 imap <C-K> <c-o>:pyf /usr/share/clang/clang-format.py<cr>
+
+" highlight trailing whitespace in red
+hi ExtraWhitespace ctermbg=darkred
+match ExtraWhitespace /\s\+$/
+au BufWinEnter * match ExtraWhitespace /\s\+$/
+
+" highlight tabs in yellow
+hi Tabs ctermbg=yellow
+call matchadd('Tabs', '\t')
+au BufWinEnter * call matchadd('Tabs', '\t')
+if version >= 702
+  au BufWinLeave * call clearmatches()
+endif
