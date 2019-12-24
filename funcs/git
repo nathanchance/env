@@ -122,9 +122,7 @@ function gcmt() {
     esac
     [[ -z ${TAG} ]] && TAG="Signed-off-by"
 
-    echo
     echo "${TAG}: $(git config --get user.name) <$(git config --get user.email)>"
-    echo
 }
 
 

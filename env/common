@@ -139,4 +139,22 @@ function encrypt_serv_ip() {(
     [[ -f ${HOME}/.server_ip ]] || die "Server IP file could not be found"
     gpg --output ${SCRIPTS_FOLDER:?}/configs/common/server_ip.gpg --encrypt --recipient natechancellor@gmail.com ${HOME}/.server_ip
 )}
+
+
+# Small macro for responding to a LKML post
+function reply_to_lkml() {(
+    MBOX=$(mktemp --suffix=.mbox) && \
+    curl -LSso "${MBOX}" "${1:?}" && \
+    mutt -f "${MBOX}"
+
+    rm "${MBOX}"
+)}
+
+
+# Apply patch from LKML
+function apply_from_lkml() {(
+    LINK=${1:?} && \
+    PATCH=$(mktemp --suffix=.patch) && \
+    curl -LSso "${PATCH}" "${LINK//\/raw}"/raw
+)}
 # vi: filetype=zsh
