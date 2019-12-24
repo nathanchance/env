@@ -748,7 +748,7 @@ function kcbw() {(
     done
 
     BRANCH=android-${BRANCH:-4.9-q}
-    [[ -z ${LD} && ${BRANCH} = "android-4.19" ]] && LD=ld.lld
+    [[ -z ${LD} && ${BRANCH} != "android-4.9" ]] && LD=ld.lld
 
     cd "${BUILD_FOLDER}" || die "wtf"
 
