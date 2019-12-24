@@ -19,11 +19,12 @@ function deldog() {(
             exit 1
         }
     done
-    [[ -n ${DEL_DOG_API_KEY} ]] && CURL_ARGS=( --header "X-api-key: ${DEL_DOG_API_KEY}" )
-    RESULT=$(curl -sf --data-binary @"${1:--}" "${CURL_ARGS[@]}" https://del.dog/documents) || {
+    [[ -z ${URL} ]] && URL=https://del.dog
+    [[ -n ${DEL_DOG_API_KEY} && ${URL} =~ del ]] && CURL_ARGS=( --header "X-api-key: ${DEL_DOG_API_KEY}" )
+    RESULT=$(curl -sf --data-binary @"${1:--}" "${CURL_ARGS[@]}" "${URL}"/documents) || {
         echo "ERROR: failed to post document, ca-certificates might need to be installed" >&2
         exit 1
     }
-    echo "https://del.dog/raw/$(jq -r .key <<< "${RESULT}")"
+    echo "${URL}/raw/$(jq -r .key <<< "${RESULT}")"
 )}
 # vi: filetype=zsh
