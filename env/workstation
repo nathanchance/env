@@ -212,7 +212,7 @@ function bootstrap() {(
         fi
 
         # Build folder size
-        BFS=25
+        BFS=60
     fi
 
     # Setup build folder
