@@ -9,7 +9,7 @@
 #
 # Requires Keys folder to be available in /mnt/c/Users/natec/Documents
 #
-# $ sudo sh -c 'apt update && apt install -y --no-install-recommends zsh && chsh -s /bin/zsh nathan'
+# $ sudo sh -c 'apt update && apt install -y --no-install-recommends ca-certificates curl zsh && chsh -s /bin/zsh nathan'
 function bootstrap() {(
     # Grab common functions/variables
     source <(curl -LSs https://github.com/nathanchance/scripts/raw/master/common) &>/dev/null
