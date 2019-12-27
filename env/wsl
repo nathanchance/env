@@ -18,17 +18,23 @@ function bootstrap() {(
     KEYS=/mnt/c/Users/natec/Documents/Keys
     [[ -d ${KEYS} ]] || die "Keys are not available"
 
-    # Ensure that packages are all up to date
+    # Convert to Debian unstable
+    sudo sed -i 's/^/# /' /etc/apt/sources.list
+    echo "deb http://deb.debian.org/debian unstable main" | sudo tee -a /etc/apt/sources.list
     sudo apt update
-    sudo apt upgrade -y
+    sudo apt dist-upgrade -y
 
     # Install packages from Debian repos
     sudo apt install -y --no-install-recommends \
         build-essential \
         bc \
         bison \
+        cowsay \
+        curl \
         devscripts \
         flex \
+        fortune \
+        fortunes \
         gettext \
         git \
         git-email \
@@ -41,15 +47,19 @@ function bootstrap() {(
         libncurses-dev \
         libpcre2-dev \
         libssl-dev \
+        lolcat \
+        lsb-release \
         mosh \
         most \
         mutt \
         pass \
         python-pip \
+        software-properties-common \
         ssh \
         tmux \
         unzip \
         vim \
+        wget \
         zlib1g-dev
 
     # Install speedtest-cli
@@ -57,12 +67,11 @@ function bootstrap() {(
     sudo chmod +x /usr/local/bin/speedtest-cli
 
     # Install latest version of LLVM/Clang
-    curl https://apt.llvm.org/llvm-snapshot.gpg.key | sudo apt-key add -
-    grep -q "apt.llvm.org" /etc/apt/sources.list || echo "deb http://apt.llvm.org/bionic/ llvm-toolchain-bionic main" | sudo tee -a /etc/apt/sources.list
-    sudo apt update -qq
-    sudo apt install -y --no-install-recommends \
-        clang-10 \
-        lld-10
+    LLVM_SCRIPT=$(mktemp --suffix=.sh) && \
+    chmod +x ${LLVM_SCRIPT} && \
+    curl -LSso "${LLVM_SCRIPT}" https://apt.llvm.org/llvm.sh && \
+    sudo "${LLVM_SCRIPT}" 10 && \
+    rm "${LLVM_SCRIPT}"
 
     # Setup SSH and GPG if keys are present
     mkdir -p "${HOME}"/.ssh
@@ -82,9 +91,12 @@ function bootstrap() {(
     GITHUB=${HOME}/github
     mkdir -p "${GITHUB}"
     local SCRIPTS; SCRIPTS=${GITHUB}/scripts
-    git clone git@github.com:nathanchance/scripts "${SCRIPTS}" || die "Error cloning script!"
+    git clone git@github.com:nathanchance/scripts "${SCRIPTS}" || die "Error cloning script"
     source "${SCRIPTS}"/env/setup && global_gitignore && create_zshrc
-    source "${SCRIPTS}"/funcs/bldupdbin && { bldupdbin || die "bldupdbin failed!"; }
+    source "${SCRIPTS}"/funcs/bldupdbin && {
+        bldupdbin || die "bldupdbin failed";
+        ihugo || die "ihugo failed";
+    }
     path_push "${HOME}/usr/bin"
     source "${SCRIPTS}"/funcs/git && git_setup
     source "${SCRIPTS}"/funcs/pure && pure_prompt
@@ -95,14 +107,7 @@ function bootstrap() {(
     decrypt_serv_ip
 
     # Clone password store
-    git clone git@github.com:nathanchance/password-store.git "${HOME}"/.password-store || die "Error cloning password store!"
-
-    # Install hugo
-    HUGO_VERSION=$(glr gohugoio/hugo)
-    SUFFIX=64bit
-    curl -LSso "${TMP_DEB:=$(mktemp --suffix=.deb)}" https://github.com/gohugoio/hugo/releases/download/"${HUGO_VERSION}"/hugo_"${HUGO_VERSION//v}"_Linux-"${SUFFIX}".deb
-    sudo dpkg -i "${TMP_DEB}"
-    rm -rf "${TMP_DEB}"
+    git clone git@github.com:nathanchance/password-store.git "${HOME}"/.password-store || die "Error cloning password store"
 
     # Download website files
     for REPO in hugo-files nathanchance.github.io; do

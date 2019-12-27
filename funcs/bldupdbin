@@ -85,6 +85,23 @@ function bgit() {(
 )}
 
 
+# Install hugo
+function ihugo() {(
+    HUGO_VERSION=$(glr gohugoio/hugo)
+    SUFFIX=64bit
+    HUGO_URL=https://github.com/gohugoio/hugo/releases/download/${HUGO_VERSION}/hugo_${HUGO_VERSION//v}_Linux-${SUFFIX}
+    if command -v dpkg &>/dev/null; then
+        curl -LSso "${TMP_DEB:=$(mktemp --suffix=.deb)}" "${HUGO_URL}".deb
+        sudo dpkg -i "${TMP_DEB}"
+        rm -rf "${TMP_DEB}"
+    else
+        TMP_FOLDER=$(mktemp -d)
+        curl -LSs "${HUGO_URL}".tar.gz | tar -C "${TMP_FOLDER}" -xzf -
+        mv "${TMP_FOLDER}"/hugo "${PREFIX:=${HOME}/usr}"/bin
+        rm -rf "${TMP_FOLDER}"
+    fi
+)}
+
 # Build/install PGO'd LLVM
 function bpgollvm() {(
     CMAKE=( cmake -G Ninja
@@ -140,7 +157,7 @@ function bpgollvm() {(
                       -DLLVM_TARGETS_TO_BUILD=host \
                       -DLLVM_USE_LINKER=${LINKER} \
                       "${LLVM_PROJECT}"/llvm || die "Error configuring stage 1"
-	ninja || die "Error building stage 1"
+        ninja || die "Error building stage 1"
     ) || exit ${?}
 
     STAGE_ONE_BIN=${BUILD_FOLDER}/stage1/bin
