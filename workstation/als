@@ -54,8 +54,7 @@ function post_merge_commands() {
 
     # Get the appropriate resolution command filename (static mapping because it is not uniform)
     case "${REPO}:${BRANCH}" in
-        "bluecross"*|"msm"*|"polaris"*|"sagit"*|"wahoo"*|"whyred"*) COMMANDS="${REPO}-commands" ;;
-        "jasmine:"*) COMMANDS="${REPO}-$(echo "${BRANCH}" | cut -d - -f 2)-commands" ;;
+        "bluecross"*|"msm"*|"wahoo"*) COMMANDS="${REPO}-commands" ;;
         "nash:lineage-16.0") COMMANDS="nash-lineage-16.0-commands" ;;
         "nash:oreo-8.0.0-release-nash") COMMANDS="nash-oreo-8.0.0-commands" ;;
         "op5:oneplus/QC8998_O_8.1"|"op6:oneplus/SDM845_O_8.1") COMMANDS="${REPO}-O_8.1-commands" ;;
@@ -95,8 +94,8 @@ source "${SCRIPTS_FOLDER}"/funcs/traps
 LOG=$(mktemp)
 
 # Variables
-REPOS_44=( "jasmine" "msm-4.4" "nash" "op5" "sagit" "wahoo" "whyred" )
-REPOS_49=( "bluecross" "msm-4.9" "op6" "polaris" )
+REPOS_44=( "msm-4.4" "nash" "op5" "wahoo" )
+REPOS_49=( "bluecross" "msm-4.9" "op6" )
 REPOS_414=( "msm-4.14" )
 
 # Parse parameters
@@ -206,17 +205,13 @@ for VERSION in "${VERSIONS[@]}"; do
         # Map all of the branches of the repo to an upstream remote (if relevant)
         case ${REPO} in
             "bluecross") BRANCHES=( "android-msm-bluecross-4.9" ) ;;
-            "jasmine") BRANCHES=( "jasmine-p-oss:upstream" ) ;;
             "msm-4.4") BRANCHES=( "kernel.lnx.4.4.r34-rel" "kernel.lnx.4.4.r37-rel" "kernel.lnx.4.4.r38-rel" "kernel.lnx.4.4.r39-rel" "kernel.lnx.4.4.r40-rel" ) ;;
             "msm-4.9") BRANCHES=( "kernel.lnx.4.9.r11-rel" "kernel.lnx.4.9.r12-rel" "kernel.lnx.4.9.r25-rel" "kernel.lnx.4.9.r27-rel" ) ;;
             "msm-4.14") BRANCHES=( "kernel.lnx.4.14.r1" "kernel.lnx.4.14.r3-rel" "kernel.lnx.4.14.r4-rel" "kernel.lnx.4.14.r7-rel" ) ;;
             "nash") BRANCHES=( "lineage-16.0:LineageOS" ) ;;
-            "op5") BRANCHES=( "android-9.0:omni" "lineage-16.0:LineageOS" "oneplus/QC8998_P_9.0:upstream" "oneplus/QC8998_P_9.0_Beta:upstream" ) ;;
+            "op5") BRANCHES=( "lineage-16.0:LineageOS" "oneplus/QC8998_P_9.0:upstream" "oneplus/QC8998_P_9.0_Beta:upstream" ) ;;
             "op6") BRANCHES=( "lineage-16.0:LineageOS" "oneplus/SDM845_P_9.0:upstream" "oneplus/SDM845_P_9.0_Beta:upstream" ) ;;
-            "polaris") BRANCHES=( "polaris-o-oss:upstream" ) ;;
-            "sagit") BRANCHES=( "sagit-o-oss:upstream" ) ;;
             "wahoo") BRANCHES=( "android-msm-wahoo-4.4" ) ;;
-            "whyred") BRANCHES=( "whyred-o-oss:upstream" ) ;;
         esac
 
         # Move into the repo, unless it doesn't exist
