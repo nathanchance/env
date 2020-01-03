@@ -5,7 +5,7 @@
 {
     "$schema": "https://aka.ms/terminal-profiles-schema",
 
-    "defaultProfile": "{2c4de342-38b7-51cf-b940-2309a097f518}",
+    "defaultProfile": "{58ad8b0c-3ef8-5f4d-bc6f-13e4c00f2530}",
 
     "profiles":
     [
@@ -23,26 +23,22 @@
             "guid": "{0caa0dad-35be-5f56-a8ff-afceeeaa6101}",
             "name": "cmd",
             "commandline": "cmd.exe",
-            "hidden": false,
-            "fontFace": "Fira Code",
-            "fontSize": 9
-        },
-        {
-            "guid": "{2c4de342-38b7-51cf-b940-2309a097f518}",
-            "hidden": false,
-            "name": "Ubuntu",
-            "source": "Windows.Terminal.Wsl",
-            "colorScheme": "snazzy",
-            "fontFace": "Fira Code",
-            "fontSize": 9
+            "hidden": true
         },
         {
             "guid": "{b453ae62-4e3d-5e58-b989-0a998ec441b8}",
-            "hidden": false,
+            "hidden": true,
             "name": "Azure Cloud Shell",
-            "source": "Windows.Terminal.Azure",
+            "source": "Windows.Terminal.Azure"
+        },
+        {
+            "guid": "{58ad8b0c-3ef8-5f4d-bc6f-13e4c00f2530}",
+            "hidden": false,
+            "name": "Debian",
+            "source": "Windows.Terminal.Wsl",
             "fontFace": "Fira Code",
-            "fontSize": 9
+            "fontSize": 9,
+            "colorScheme": "snazzy"
         }
     ],
 
