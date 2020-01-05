@@ -41,6 +41,7 @@ function aliases() {
     command -v tmux &>/dev/null && alias tmux='tmux -u'
 
     source "${SCRIPTS_FOLDER}/funcs/bldupdbin"
+    export HASTE_URL=https://paste.myself5.de
     source "${SCRIPTS_FOLDER}/funcs/deldog"
     source "${SCRIPTS_FOLDER}/funcs/git"
     source "${SCRIPTS_FOLDER}/funcs/transfer"
