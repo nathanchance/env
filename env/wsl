@@ -125,6 +125,9 @@ function upd() {
 
 # Laptop specific aliases
 function wsl_aliases() {
+    # Account for VS Code Insiders having a different binary name
+    # But only overwrite code if it does not already exist
+    ( ! type -f code && type -f code-insiders ) &>/dev/null && alias code='code-insiders'
     alias ls='ls --color=auto'
     alias mshsvr='mosh nathan@${SERVER_IP}'
 }
