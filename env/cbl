@@ -106,10 +106,15 @@ function rbln() {(
 function phabap() {(
     [[ ! -d llvm ]] && die "You're not in the llvm-project folder!"
 
-    REVISION=${1:?}
-    [[ ${#} -ge 1 ]] && shift
+    while (( ${#} )); do
+        case ${1} in
+            D*) REVISION=${1} ;;
+            *) GIT_AP_ARGS=( "${GIT_AP_ARGS[@]}" "${1}" ) ;;
+        esac
+        shift
+    done
 
-    curl -LSs "https://reviews.llvm.org/${REVISION}?download=true" | git ap "${@}" || exit ${?}
+    curl -LSs "https://reviews.llvm.org/${REVISION:?}?download=true" | git ap "${GIT_AP_ARGS[@]}" || exit ${?}
     git ac -m "${REVISION}
 
 Link: https://reviews.llvm.org/${REVISION}"
