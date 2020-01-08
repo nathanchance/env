@@ -102,6 +102,7 @@ function shell_setup() {
     fi
 
     # Environment setup
+    path_push "${HOME}/.cargo/bin"
     path_push "${HOME}/usr/bin"
     [[ -f ${HOME}/.del_dog_api_key ]] && source "${HOME}/.del_dog_api_key"
     [[ -f ${HOME}/.server_ip ]] && source "${HOME}/.server_ip"

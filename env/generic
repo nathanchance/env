@@ -96,6 +96,5 @@ function generic_aliases() {
 
 function generic_setup() {
     path_push "${HOME}"/usr/go/bin
-    path_push "${HOME}"/.cargo/bin
 }
 # vi: filetype=zsh
