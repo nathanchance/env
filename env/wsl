@@ -147,4 +147,10 @@ function upd_wsl_kernel() {(
     rm -rf "${KERNEL}"
     scp nathan@${SERVER_IP:?}:/home/nathan/src/WSL2-Linux-Kernel/out.x86_64/arch/x86/boot/bzImage "${KERNEL}"
 )}
+
+
+# Install rust using the recommended command
+function install_rust_wsl() {(
+    curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+)}
 # vi: filetype=zsh
