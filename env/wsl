@@ -46,6 +46,7 @@ function bootstrap() {(
         libexpat-dev \
         libncurses-dev \
         libpcre2-dev \
+        libsasl2-modules \
         libssl-dev \
         lolcat \
         lsb-release \
