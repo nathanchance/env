@@ -126,6 +126,8 @@ function upd() {
 
 # Laptop specific aliases
 function wsl_aliases() {
+    # Debian sid has bat as batcat
+    ( ! type -f bat && type -f batcat ) &>/dev/null && alias bat='batcat'
     # Account for VS Code Insiders having a different binary name
     # But only overwrite code if it does not already exist
     ( ! type -f code && type -f code-insiders ) &>/dev/null && alias code='code-insiders'
