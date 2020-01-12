@@ -209,8 +209,8 @@ for VERSION in "${VERSIONS[@]}"; do
             "msm-4.9") BRANCHES=( "kernel.lnx.4.9.r11-rel" "kernel.lnx.4.9.r12-rel" "kernel.lnx.4.9.r25-rel" "kernel.lnx.4.9.r27-rel" ) ;;
             "msm-4.14") BRANCHES=( "kernel.lnx.4.14.r1" "kernel.lnx.4.14.r3-rel" "kernel.lnx.4.14.r4-rel" "kernel.lnx.4.14.r7-rel" ) ;;
             "nash") BRANCHES=( "lineage-16.0:LineageOS" ) ;;
-            "op5") BRANCHES=( "lineage-16.0:LineageOS" "oneplus/QC8998_P_9.0:upstream" "oneplus/QC8998_P_9.0_Beta:upstream" ) ;;
-            "op6") BRANCHES=( "lineage-16.0:LineageOS" "oneplus/SDM845_P_9.0:upstream" "oneplus/SDM845_P_9.0_Beta:upstream" ) ;;
+            "op5") BRANCHES=( "lineage-17.1:LineageOS" "oneplus/QC8998_P_9.0:upstream" "oneplus/QC8998_P_9.0_Beta:upstream" ) ;;
+            "op6") BRANCHES=( "oneplus/SDM845_Q_10.0:upstream" ) ;;
             "wahoo") BRANCHES=( "android-msm-wahoo-4.4" ) ;;
         esac
 
