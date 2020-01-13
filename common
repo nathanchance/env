@@ -24,6 +24,7 @@ else
     return 1
 fi
 [[ ! ${SCRIPT} =~ /proc ]] && SCRIPTS_FOLDER=$(cd "$(dirname "$(readlink -f "${SCRIPT}")")" || return; pwd)
+export SCRIPTS_FOLDER
 unset SCRIPT
 
 # Colors
