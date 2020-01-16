@@ -639,7 +639,7 @@ function lt() {(
         echo "${COLOR}Build ${RESULT}${RST}"
         TIME_STRING=$(format_time "${START}" "$(date +%s)")
         {
-            echo "${ARCH}:${CONFIG}${BE:+"-be"} | Build ${RESULT} in ${TIME_STRING:l}\c"
+            echo "${ARCH}:${CONFIG}${BFD:+"-bfd"} | Build ${RESULT} in ${TIME_STRING:l}\c"
             if [[ ${RESULT} = "successful" && ${CONFIG} =~ defconfig ]]; then
                 if bootk "${ARCH}" &>/dev/null; then
                     echo " | Boot successful\c"
