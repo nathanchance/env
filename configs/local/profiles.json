@@ -38,14 +38,16 @@
                 "hidden": false,
                 "name": "Debian",
                 "source": "Windows.Terminal.Wsl",
-                "colorScheme": "snazzy"
+                "colorScheme": "snazzy",
+                "closeOnExit": "always"
             },
             {
                 "guid": "{0110db4a-cf7b-5647-9a03-7232d80cd09e}",
                 "hidden": false,
                 "name": "openSUSE-Leap-15-1",
                 "source": "Windows.Terminal.Wsl",
-                "colorScheme": "snazzy"
+                "colorScheme": "snazzy",
+                "closeOnExit": "always"
             },
             {
                 "guid": "{b39fd1d2-4186-5eaf-9049-77213bc37cd9}",
@@ -58,7 +60,8 @@
                 "hidden": false,
                 "name": "fedoraremix",
                 "source": "Windows.Terminal.Wsl",
-                "colorScheme": "snazzy"
+                "colorScheme": "snazzy",
+                "closeOnExit": "always"
             }
         ]
     },
