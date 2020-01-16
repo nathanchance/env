@@ -59,6 +59,7 @@ function post_merge_commands() {
         "nash:oreo-8.0.0-release-nash") COMMANDS="nash-oreo-8.0.0-commands" ;;
         "op5:oneplus/QC8998_O_8.1"|"op6:oneplus/SDM845_O_8.1") COMMANDS="${REPO}-O_8.1-commands" ;;
         "op5:oneplus/QC8998_P_9.0"|"op6:oneplus/SDM845_P_9.0") COMMANDS="${REPO}-P_9.0-commands" ;;
+        "op6:oneplus/SDM845_Q_10.0") COMMANDS="${REPO}-Q_10.0-commands" ;;
         "op5:oneplus/QC8998_O_8.1_Beta") COMMANDS="${REPO}-O_8.1_Beta-commands" ;;
         "op5:oneplus/QC8998_P_9.0_Beta"|"op6:oneplus/SDM845_P_9.0_Beta") COMMANDS="${REPO}-P_9.0_Beta-commands" ;;
         "op"*) COMMANDS="${REPO}-${BRANCH}-commands" ;;
@@ -171,12 +172,12 @@ if [[ -n ${INIT} ]]; then
                           "upstream:https://github.com/MotorolaMobilityLLC/kernel-msm" ) ;;
             "op5")
                 REMOTES=( "LineageOS:https://github.com/LineageOS/android_kernel_oneplus_msm8998"
-                          "omni:https://github.com/omnirom/android_kernel_oneplus_msm8998"
                           "upstream:https://github.com/OnePlusOSS/android_kernel_oneplus_msm8998" ) ;;
             "op6")
                 REMOTES=( "LineageOS:https://github.com/LineageOS/android_kernel_oneplus_sdm845"
-                          "omni:https://github.com/omnirom/android_kernel_oneplus_sdm845"
-                          "upstream:https://github.com/OnePlusOSS/android_kernel_oneplus_sdm845" ) ;;
+                          "upstream:https://github.com/OnePlusOSS/android_kernel_oneplus_sdm845" )
+                git clone -b oneplus/SDM845_Q_10.0 git://github.com/OnePlusOSS/android_vendor_oneplus_opensource_kernel drivers/oneplus
+                echo "drivers/oneplus" >> ${HOME}/.gitignore_global ;;
         esac
         for REMOTE in "${REMOTES[@]}"; do
             git -C "${ITEM}" remote add "${REMOTE%%:*}" "${REMOTE#*:}"
