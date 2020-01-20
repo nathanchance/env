@@ -28,6 +28,7 @@ function bootstrap() {(
                    gettext
                    git
                    g++
+                   jq
                    libauthen-sasl-perl
                    libcurl4-openssl-dev
                    libedit-dev
