@@ -22,6 +22,7 @@ function bootstrap() {(
                    devscripts
                    doxygen
                    expect
+                   fakeroot
                    file
                    flex
                    gcc
@@ -64,7 +65,9 @@ function bootstrap() {(
                    tcl
                    tmux
                    u-boot-tools
+                   unzip
                    vim
+                   zip
                    zsh
                    zlib1g-dev )
 

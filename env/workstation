@@ -141,6 +141,7 @@ function bootstrap() {(
                    devscripts
                    doxygen
                    expect
+                   fakeroot
                    file
                    flex
                    gcc
@@ -185,7 +186,9 @@ function bootstrap() {(
                    tmux
                    u-boot-tools
                    uidmap
+                   unzip
                    vim
+                   zip
                    zsh
                    zlib1g-dev )
         ( source /usr/lib/os-release && [[ ${VERSION_ID} = "18.04" ]] ) && PACKAGES+=( linux-generic-hwe-18.04 )
