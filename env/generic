@@ -19,6 +19,7 @@ function bootstrap() {(
                    cmake
                    creduce
                    curl
+                   devscripts
                    doxygen
                    expect
                    file
