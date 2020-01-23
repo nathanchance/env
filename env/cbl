@@ -770,6 +770,7 @@ function kcbw() {(
 
     # Build kernels with newer Clang
     sed -i "s;CLANG_PREBUILT_BIN=.*;CLANG_PREBUILT_BIN=$(realpath --relative-to="${COMMON_ROOT_FOLDER}" "${CBL_LLVM}");g" "${COMMON_KERNEL_SRC}"/build.config.common
+    git -C "${COMMON_KERNEL_SRC}" ac -m "build.config.common: Use latest ClangBuiltLinux clang available"
     BUILD_CONFIG=common/build.config."${CONFIG}"."${ARCH}" ./build/build.sh
 )}
 
@@ -814,7 +815,12 @@ function kct() {(
             # Error log
             ERRORS=$(mktemp)
 
-            header "android-${VERSION} ${ARCH}" "${BOLD}"
+            case ${VERSION} in
+                4.9) ACTUAL_BRANCH=4.9-q ;;
+                *) ACTUAL_BRANCH=${VERSION} ;;
+            esac
+
+            header "android-${ACTUAL_BRANCH} ${ARCH}" "${BOLD}"
 
             # Build kernel silently normally
             if [[ -z ${DEBUG} ]]; then
@@ -837,7 +843,7 @@ function kct() {(
             echo "${COLOR}Build ${RESULT}${RST}"
             TIME_STRING=$(format_time "${START}" "$(date +%s)")
             {
-                echo "${ARCH} android-${VERSION} | $(cd "${COMMON_KERNEL_SRC}" || die "wtf"; git kf aosp/android-${VERSION}) | Build and boot ${RESULT} in ${TIME_STRING:l}"
+                echo "android-${ACTUAL_BRANCH} ${ARCH} | $(cd "${COMMON_KERNEL_SRC}" || die "wtf"; git kf aosp/android-${ACTUAL_BRANCH}) | Build and boot ${RESULT} in ${TIME_STRING:l}"
                 [[ -z ${DEBUG} && ( -n ${SHOW_NF_WARNINGS} || ${RESULT} = "failed" ) ]] && cat "${ERRORS}"
                 echo
             } >> "${LOG}"
