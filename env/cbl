@@ -843,7 +843,7 @@ function kct() {(
             echo "${COLOR}Build ${RESULT}${RST}"
             TIME_STRING=$(format_time "${START}" "$(date +%s)")
             {
-                echo "android-${ACTUAL_BRANCH} ${ARCH} | $(cd "${COMMON_KERNEL_SRC}" || die "wtf"; git kf aosp/android-${ACTUAL_BRANCH}) | Build and boot ${RESULT} in ${TIME_STRING:l}"
+                echo "android-${ACTUAL_BRANCH} ${ARCH} | $(cd "${COMMON_KERNEL_SRC}" || die "wtf"; git kf aosp/android-${ACTUAL_BRANCH}) | Build ${RESULT} in ${TIME_STRING:l}"
                 [[ -z ${DEBUG} && ( -n ${SHOW_NF_WARNINGS} || ${RESULT} = "failed" ) ]] && cat "${ERRORS}"
                 echo
             } >> "${LOG}"
