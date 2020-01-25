@@ -6,13 +6,17 @@
 
 
 # Universal variables
+CBL_ANDROID=${CBL}/android
+CBL_CTTLFSH=${CBL_ANDROID}/cuttlefish
+CBL_KC=${CBL_ANDROID}/common
+CBL_KC_SRC=${CBL_KC}/common
 CBL_SRC=${CBL}/src
 CBL_TC=${CBL}/toolchains
 CBL_LLVM=${CBL_TC}/llvm-tot/bin
 CBL_BNTL=${CBL_TC}/binutils/bin
 TCBLD=${CBL}/tc-build
 CBL_CCACHE=${CBL}/.ccache
-export CBL_SRC CBL_TC CBL_LLVM CBL_BNTL TCBLD CBL_CCACHE
+export CBL_ANDROID CBL_CTTLFSH CBL_KC CBL_KC_SRC CBL_SRC CBL_TC CBL_LLVM CBL_BNTL TCBLD CBL_CCACHE
 
 
 # Configurations known to build with -Werror
@@ -741,9 +745,6 @@ function bldtcs() {(
 
 # kernel/common build wrapper
 function kcbw() {(
-    COMMON_ROOT_FOLDER=${CBL}/android/common-repo
-    COMMON_KERNEL_SRC=${COMMON_ROOT_FOLDER}/common
-
     while (( ${#} )); do
         case ${1} in
             3.*|4.*|5.*|mainline) BRANCH=${1} ;;
@@ -760,25 +761,73 @@ function kcbw() {(
     esac
 
     # Download and setup kernel source
-    [[ -d ${COMMON_ROOT_FOLDER} ]] || mkdir -p "${COMMON_ROOT_FOLDER}"
-    cd "${COMMON_ROOT_FOLDER}" || exit ${?}
+    [[ -d ${CBL_KC} ]] || mkdir -p "${CBL_KC}"
+    cd "${CBL_KC}" || exit ${?}
     REPO_INIT_CMD=( repo init -u https://android.googlesource.com/kernel/manifest -b common-android-"${BRANCH}" )
     "${REPO_INIT_CMD[@]}" || die "${REPO_INIT_CMD[@]} failed (${?})"
-    [[ -d ${COMMON_KERNEL_SRC} ]] && git -C "${COMMON_KERNEL_SRC}" rh
+    [[ -d ${CBL_KC_SRC} ]] && git -C "${CBL_KC_SRC}" rh
     REPO_SYNC_CMD=( repo sync "${JOBS_FLAG}" )
     "${REPO_SYNC_CMD[@]}" || die "${REPO_SYNC_CMD[*]} failed (${?})"
 
     # Build kernels with newer Clang
-    sed -i "s;CLANG_PREBUILT_BIN=.*;CLANG_PREBUILT_BIN=$(realpath --relative-to="${COMMON_ROOT_FOLDER}" "${CBL_LLVM}");g" "${COMMON_KERNEL_SRC}"/build.config.common
-    git -C "${COMMON_KERNEL_SRC}" ac -m "build.config.common: Use latest ClangBuiltLinux clang available"
+    sed -i "s;CLANG_PREBUILT_BIN=.*;CLANG_PREBUILT_BIN=$(realpath --relative-to="${CBL_KC}" "${CBL_LLVM}");g" "${CBL_KC_SRC}"/build.config.common
+    git -C "${CBL_KC_SRC}" ac -m "build.config.common: Use latest ClangBuiltLinux clang available"
     BUILD_CONFIG=common/build.config."${CONFIG}"."${ARCH}" ./build/build.sh
+)}
+
+
+# Download Cuttlefish files
+function upd_cuttlefish() {(
+    while (( ${#} )); do
+        case ${1} in
+            https://*.zip) CUTTLEFISH_ZIP_URL=${1} ;;
+            https://*.tar.gz) CUTTLEFISH_TAR_URL=${1} ;;
+        esac
+        shift
+    done
+
+    CUTTLEFISH_ZIP=$(mktemp --suffix=.zip)
+    CUTTLEFISH_TAR=$(mktemp --suffix=.tar.gz)
+
+    curl -LSso "${CUTTLEFISH_ZIP}" "${CUTTLEFISH_ZIP_URL}" || exit ${?}
+    curl -LSso "${CUTTLEFISH_TAR}" "${CUTTLEFISH_TAR_URL}" || exit ${?}
+
+    rm -rf "${CBL_CTTLFSH}"
+    mkdir -p "${CBL_CTTLFSH}"
+    cd "${CBL_CTTLFSH}" || exit ${?}
+
+    unzip "${CUTTLEFISH_ZIP}" || exit ${?}
+    tar -xvf "${CUTTLEFISH_TAR}" || exit ${?}
+
+    rm -rf "${CUTTLEFISH_ZIP}" "${CUTTLEFISH_TAR}"
+)}
+
+
+# Boot Cuttlefish
+function boot_cuttlefish() {(
+    while (( ${#} )); do
+        case ${1} in
+            *) BRANCH=${1} ;;
+        esac
+        shift
+    done
+
+    DIST=${CBL_KC}/out/android-${BRANCH}/dist
+    LAUNCH_CVD=( -daemon -kernel_path ${DIST}/bzImage )
+    [[ -f ${DIST}/initramfs.img ]] && LAUNCH_CVD=( "${LAUNCH_CVD[@]}" -initramfs_path ${DIST}/initramfs.img )
+
+    cd "${CBL_CTTLFSH}" || exit ${?}
+
+    HOME=${PWD} ./bin/launch_cvd "${LAUNCH_CVD[@]}" &>/dev/null &
+
+    sleep 60 && \
+    ./bin/adb -e shell cat /proc/version && \
+    HOME=${PWD} ./bin/stop_cvd
 )}
 
 
 # kernel/common build testing
 function kct() {(
-    COMMON_KERNEL_SRC=${CBL}/android/common-repo/common
-
     while (( ${#} )); do
         case ${1} in
             "-d"|"--debug") DEBUG=true ;;
@@ -825,7 +874,7 @@ function kct() {(
             # Build kernel silently normally
             if [[ -z ${DEBUG} ]]; then
                 kcbw "${ARCH}" "${VERSION}" |& \
-                rg --color=never "error:|warning:|undefined" |& sed "s/${COMMON_KERNEL_SRC//\//\\/}\///g" |& tee "${ERRORS}"
+                rg --color=never "error:|warning:|undefined" |& sed "s/${CBL_KC_SRC//\//\\/}\///g" |& tee "${ERRORS}"
                 MAKE_RESULT=${pipestatus[1]}
             else
                 kcbw "${ARCH}" "${VERSION}"
@@ -834,16 +883,31 @@ function kct() {(
 
             # Make sure that if make fails, it gets propgated to the if statement
             if [[ ${MAKE_RESULT} -eq 0 ]]; then
-                COLOR=${GRN}
-                RESULT=successful
+                BUILD_COLOR=${GRN}
+                BUILD_RESULT=successful
             else
-                COLOR=${RED}
-                RESULT=failed
+                BUILD_COLOR=${RED}
+                BUILD_RESULT=failed
             fi
-            echo "${COLOR}Build ${RESULT}${RST}"
+            echo "${BUILD_COLOR}Build ${BUILD_RESULT}${RST}"
             TIME_STRING=$(format_time "${START}" "$(date +%s)")
+
+            # Boot Cuttlefish for x86
+            if [[ ${ARCH} = "x86" && ${BUILD_RESULT} = "successful" ]]; then
+                if boot_cuttlefish "${ACTUAL_BRANCH}"; then
+                    BOOT_COLOR=${GRN}
+                    BOOT_RESULT=successful
+                else
+                    BOOT_COLOR=${RED}
+                    BOOT_RESULT=failed
+                fi
+                echo "${BOOT_COLOR}Boot ${BOOT_RESULT}${RST}"
+                BOOT_RESULT=" | Boot ${BOOT_RESULT}"
+            fi
+
+            # Log result
             {
-                echo "android-${ACTUAL_BRANCH} ${ARCH} | $(cd "${COMMON_KERNEL_SRC}" || die "wtf"; git kf aosp/android-${ACTUAL_BRANCH}) | Build ${RESULT} in ${TIME_STRING:l}"
+                echo "android-${ACTUAL_BRANCH} ${ARCH} | $(cd "${CBL_KC_SRC}" || die "wtf"; git kf aosp/android-${ACTUAL_BRANCH}) | Build ${BUILD_RESULT} in ${TIME_STRING:l}${BOOT_RESULT}"
                 [[ -z ${DEBUG} && ( -n ${SHOW_NF_WARNINGS} || ${RESULT} = "failed" ) ]] && cat "${ERRORS}"
                 echo
             } >> "${LOG}"
