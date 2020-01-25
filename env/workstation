@@ -177,6 +177,7 @@ function bootstrap() {(
                    ninja-build
                    pkg-config
                    podman
+                   psmisc
                    python3
                    python3-dev
                    sudo
