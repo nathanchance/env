@@ -750,6 +750,7 @@ function kcbw() {(
             3.*|4.*|5.*|mainline) BRANCH=${1} ;;
             arm64) ARCH=aarch64 ;;
             x86) ARCH=x86_64 ;;
+            -n|--no-sync) SYNC=false ;;
         esac
         shift
     done
@@ -763,15 +764,18 @@ function kcbw() {(
     # Download and setup kernel source
     [[ -d ${CBL_KC} ]] || mkdir -p "${CBL_KC}"
     cd "${CBL_KC}" || exit ${?}
-    REPO_INIT_CMD=( repo init -u https://android.googlesource.com/kernel/manifest -b common-android-"${BRANCH}" )
-    "${REPO_INIT_CMD[@]}" || die "${REPO_INIT_CMD[@]} failed (${?})"
-    [[ -d ${CBL_KC_SRC} ]] && git -C "${CBL_KC_SRC}" rh
-    REPO_SYNC_CMD=( repo sync "${JOBS_FLAG}" )
-    "${REPO_SYNC_CMD[@]}" || die "${REPO_SYNC_CMD[*]} failed (${?})"
+    if ${SYNC:=true}; then
+        REPO_INIT_CMD=( repo init -u https://android.googlesource.com/kernel/manifest -b common-android-"${BRANCH}" )
+        "${REPO_INIT_CMD[@]}" || die "${REPO_INIT_CMD[@]} failed (${?})"
+        [[ -d ${CBL_KC_SRC} ]] && git -C "${CBL_KC_SRC}" rh
+        REPO_SYNC_CMD=( repo sync "${JOBS_FLAG}" )
+        "${REPO_SYNC_CMD[@]}" || die "${REPO_SYNC_CMD[*]} failed (${?})"
 
-    # Build kernels with newer Clang
-    sed -i "s;CLANG_PREBUILT_BIN=.*;CLANG_PREBUILT_BIN=$(realpath --relative-to="${CBL_KC}" "${CBL_LLVM}");g" "${CBL_KC_SRC}"/build.config.common
-    git -C "${CBL_KC_SRC}" ac -m "build.config.common: Use latest ClangBuiltLinux clang available"
+        # Build kernels with newer Clang
+       sed -i "s;CLANG_PREBUILT_BIN=.*;CLANG_PREBUILT_BIN=$(realpath --relative-to="${CBL_KC}" "${CBL_LLVM}");g" "${CBL_KC_SRC}"/build.config.common
+        git -C "${CBL_KC_SRC}" ac -m "build.config.common: Use latest ClangBuiltLinux clang available"
+    fi
+
     BUILD_CONFIG=common/build.config."${CONFIG}"."${ARCH}" ./build/build.sh
 )}
 
@@ -833,6 +837,7 @@ function kct() {(
             "-d"|"--debug") DEBUG=true ;;
             # Show non-fatal warnings
             "-w"|"--warnings") SHOW_NF_WARNINGS=true ;;
+            "--x86") ARCHES=( x86 ); X86_ONLY=true ;;
         esac
         shift
     done
@@ -857,8 +862,10 @@ function kct() {(
         )
     } > "${LOG}"
 
+    ${X86_ONLY:=false} || ARCHES=( arm64 x86 )
+
     for VERSION in 4.9 4.14 4.19 5.4 mainline; do (
-        for ARCH in arm64 x86; do (
+        for ARCH in "${ARCHES[@]}"; do (
             START=$(date +%s)
 
             # Error log
@@ -871,13 +878,15 @@ function kct() {(
 
             header "android-${ACTUAL_BRANCH} ${ARCH}" "${BOLD}"
 
+            { ! ${X86_ONLY} && [[ ${ARCH} = "x86" ]]; } && SYNC_FLAGS=( -n )
+
             # Build kernel silently normally
             if [[ -z ${DEBUG} ]]; then
-                kcbw "${ARCH}" "${VERSION}" |& \
+                kcbw "${ARCH}" "${VERSION}" "${SYNC_FLAG[@]}" |& \
                 rg --color=never "error:|warning:|undefined" |& sed "s/${CBL_KC_SRC//\//\\/}\///g" |& tee "${ERRORS}"
                 MAKE_RESULT=${pipestatus[1]}
             else
-                kcbw "${ARCH}" "${VERSION}"
+                kcbw "${ARCH}" "${VERSION}" "${SYNC_FLAG[@]}"
                 MAKE_RESULT=${?}
             fi
 
