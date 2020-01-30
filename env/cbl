@@ -784,11 +784,14 @@ function kcbw() {(
 function upd_cuttlefish() {(
     while (( ${#} )); do
         case ${1} in
-            https://*.zip) CUTTLEFISH_ZIP_URL=${1} ;;
-            https://*.tar.gz) CUTTLEFISH_TAR_URL=${1} ;;
+            [0-9]*) BUILD_NUMBER=${1} ;;
         esac
         shift
     done
+
+    BASE_URL=https://ci.android.com/builds/submitted/${BUILD_NUMBER}/aosp_cf_x86_phone-userdebug/latest/
+    CUTTLEFISH_ZIP_URL=${BASE_URL}/aosp_cf_x86_phone-img-${BUILD_NUMBER}.zip
+    CUTTLEFISH_TAR_URL=${BASE_URL}/cvd-host_package.tar.gz
 
     CUTTLEFISH_ZIP=$(mktemp --suffix=.zip)
     CUTTLEFISH_TAR=$(mktemp --suffix=.tar.gz)
