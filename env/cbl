@@ -754,12 +754,8 @@ function kcbw() {(
         esac
         shift
     done
-    : ${ARCH:?}
-
-    case ${BRANCH:=mainline} in
-        4.9|4.14) CONFIG=cuttlefish ;;
-        *) CONFIG=gki ;;
-    esac
+    : ${ARCH:?} ${BRANCH:=mainline}
+    CONFIG=build.config.cuttlefish.${ARCH}
 
     # Download and setup kernel source
     [[ -d ${CBL_KC} ]] || mkdir -p "${CBL_KC}"
@@ -772,11 +768,17 @@ function kcbw() {(
         "${REPO_SYNC_CMD[@]}" || die "${REPO_SYNC_CMD[*]} failed (${?})"
 
         # Build kernels with newer Clang
-       sed -i "s;CLANG_PREBUILT_BIN=.*;CLANG_PREBUILT_BIN=$(realpath --relative-to="${CBL_KC}" "${CBL_LLVM}");g" "${CBL_KC_SRC}"/build.config.common
+        sed -i "s;CLANG_PREBUILT_BIN=.*;CLANG_PREBUILT_BIN=$(realpath --relative-to="${CBL_KC}" "${CBL_LLVM}");g" "${CBL_KC_SRC}"/build.config.common
         git -C "${CBL_KC_SRC}" ac -m "build.config.common: Use latest ClangBuiltLinux clang available"
+
+        # Automatically move bzImage
+        if [[ ${ARCH} = "x86_64" ]] && grep -q 'FILES=""' "${CBL_KC_SRC}/${CONFIG}"; then
+            sed -i 's/FILES=""//g' "${CBL_KC_SRC}/${CONFIG}"
+            git -C "${CBL_KC_SRC}" ac -m "${CONFIG}: Move bzImage to DIST_FOLDER"
+        fi
     fi
 
-    BUILD_CONFIG=common/build.config."${CONFIG}"."${ARCH}" ./build/build.sh
+    BUILD_CONFIG=common/${CONFIG} ./build/build.sh
 )}
 
 
@@ -825,6 +827,7 @@ function boot_cuttlefish() {(
 
     cd "${CBL_CTTLFSH}" || exit ${?}
 
+    HOME=${PWD} ./bin/stop_cvd &>/dev/null
     HOME=${PWD} ./bin/launch_cvd "${LAUNCH_CVD[@]}" &>/dev/null &
 
     sleep 60 && \
