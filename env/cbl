@@ -773,7 +773,7 @@ function kcbw() {(
 
         # Automatically move bzImage
         if [[ ${ARCH} = "x86_64" ]] && grep -q 'FILES=""' "${CBL_KC_SRC}/${CONFIG}"; then
-            sed -i 's/FILES=""//g' "${CBL_KC_SRC}/${CONFIG}"
+            sed -i '/FILES=""/d' "${CBL_KC_SRC}/${CONFIG}"
             git -C "${CBL_KC_SRC}" ac -m "${CONFIG}: Move bzImage to DIST_FOLDER"
         fi
     fi
