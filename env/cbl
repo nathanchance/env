@@ -743,6 +743,26 @@ function bldtcs() {(
 )}
 
 
+# Switch cuttlefish branch
+function swtch_cttlfsh_brnch() {(
+    while (( ${#} )); do
+        case ${1} in
+            3.*|4.*|5.*|mainline) BRANCH=${1} ;;
+        esac
+        shift
+    done
+    : ${BRANCH:?}
+
+    [[ -d ${CBL_KC} ]] || mkdir -p "${CBL_KC}"
+    cd "${CBL_KC}" || exit ${?}
+    REPO_INIT_CMD=( repo init -u https://android.googlesource.com/kernel/manifest -b common-android-"${BRANCH}" )
+    "${REPO_INIT_CMD[@]}" || die "${REPO_INIT_CMD[@]} failed (${?})"
+    [[ -d ${CBL_KC_SRC} ]] && git -C "${CBL_KC_SRC}" rh
+    REPO_SYNC_CMD=( repo sync "${JOBS_FLAG}" )
+    "${REPO_SYNC_CMD[@]}" || die "${REPO_SYNC_CMD[*]} failed (${?})"
+)}
+
+
 # kernel/common build wrapper
 function kcbw() {(
     while (( ${#} )); do
@@ -761,11 +781,8 @@ function kcbw() {(
     [[ -d ${CBL_KC} ]] || mkdir -p "${CBL_KC}"
     cd "${CBL_KC}" || exit ${?}
     if ${SYNC:=true}; then
-        REPO_INIT_CMD=( repo init -u https://android.googlesource.com/kernel/manifest -b common-android-"${BRANCH}" )
-        "${REPO_INIT_CMD[@]}" || die "${REPO_INIT_CMD[@]} failed (${?})"
-        [[ -d ${CBL_KC_SRC} ]] && git -C "${CBL_KC_SRC}" rh
-        REPO_SYNC_CMD=( repo sync "${JOBS_FLAG}" )
-        "${REPO_SYNC_CMD[@]}" || die "${REPO_SYNC_CMD[*]} failed (${?})"
+        # Sync correct branch
+        swtch_cttlfsh_brnch "${BRANCH}"
 
         # Build kernels with newer Clang
         sed -i "s;CLANG_PREBUILT_BIN=.*;CLANG_PREBUILT_BIN=$(realpath --relative-to="${CBL_KC}" "${CBL_LLVM}");g" "${CBL_KC_SRC}"/build.config.common
