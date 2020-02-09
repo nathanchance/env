@@ -288,7 +288,7 @@ function bldk() {(
         # Use lld by default for everything but certain PowerPC builds
         if [[ -z ${LD} ]]; then
             case ${ARCH} in
-                "mipsel"|"ppc64") ;;
+                "mipsel"|"ppc64"|"s390") ;;
                 *) LD=ld.lld ;;
             esac
         fi
@@ -617,7 +617,7 @@ function lt() {(
         # Use lld by default for everything but certain PowerPC builds
         if [[ -z ${LD} && -z ${BFD} ]]; then
             case "${ARCH}:${CONFIG}" in
-                mipsel*|ppc64*) ;;
+                mipsel*|ppc64*|s390*) ;;
                 *) LD=ld.lld ;;
             esac
         fi
