@@ -204,8 +204,6 @@ function bldkw() {(
         "ppc64le") : "${CROSS_COMPILE:=powerpc64le-linux-gnu-}" && MAKE_FLAGS=( "ARCH=powerpc" "CROSS_COMPILE=${CROSS_COMPILE}" ) ;;
         "s390") : "${CROSS_COMPILE:=s390x-linux-gnu-}"
                 MAKE_FLAGS=( "ARCH=s390" "CROSS_COMPILE=${CROSS_COMPILE}" )
-                LD=${CROSS_COMPILE}ld
-                OBJCOPY=${CROSS_COMPILE}objcopy
                 OBJDUMP=${CROSS_COMPILE}objdump ;;
         "x86") MAKE_FLAGS=() ;;
         *) display_error "Invalid TARGET_ARCH specified!"; return ;;
@@ -289,7 +287,7 @@ function bldk() {(
     { [[ ${PWD} =~ cbl ]] && ${IS_DEFCONFIG:=false}; } && CBL_DEFCONFIG=true
 
     if ${CBL_DEFCONFIG:=false}; then
-        # Use lld by default for everything but certain PowerPC builds
+        # Use lld except in some cases
         if [[ -z ${LD} ]]; then
             case ${ARCH} in
                 "mipsel"|"ppc64"|"s390") ;;
@@ -297,8 +295,13 @@ function bldk() {(
             esac
         fi
 
-        # Use llvm-objcopy
-        [[ -z ${OBJCOPY} ]] && OBJCOPY=llvm-objcopy
+        # Use llvm-objcopy except in some cases
+        if [[ -z ${OBJCOPY} ]]; then
+            case ${ARCH} in
+                "s390") ;;
+                *) OBJCOPY=llvm-objcopy ;;
+            esac
+        fi
     fi
 
     BLDKW=( bldkw "${ARCH}" ${LD:+LD="${LD}"} ${OBJCOPY:+OBJCOPY="${OBJCOPY}"} )
@@ -618,7 +621,7 @@ function lt() {(
         [[ ${CONFIG} =~ -bfd ]] && BFD=true
         CONFIG=${CONFIG//-bfd}
 
-        # Use lld by default for everything but certain PowerPC builds
+        # Use lld except in some cases
         if [[ -z ${LD} && -z ${BFD} ]]; then
             case "${ARCH}:${CONFIG}" in
                 mipsel*|ppc64*|s390*) ;;
@@ -626,8 +629,13 @@ function lt() {(
             esac
         fi
 
-        # Use llvm-objcopy
-        [[ -z ${OBJCOPY} ]] && OBJCOPY=llvm-objcopy
+        # Use llvm-objcopy except in some cases
+        if [[ -z ${OBJCOPY} ]]; then
+            case "${ARCH}:${CONFIG}" in
+                s390*) ;;
+                *) OBJCOPY=llvm-objcopy ;;
+            esac
+        fi
 
         # Build kernel silently normally
         if [[ -z ${DEBUG} ]]; then
