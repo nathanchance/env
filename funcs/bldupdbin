@@ -24,6 +24,30 @@ function bccache() {(
 )}
 
 
+# Build/update cmake
+function bcmake() {(
+    CMAKE_REPO=Kitware/CMake
+    [[ -z ${CMAKE_VERSION} ]] && CMAKE_VERSION=$(glr ${CMAKE_REPO})
+    CMAKE_FOLDER=cmake-${CMAKE_VERSION//v}
+    TMP_FOLDER=$(mktemp -d)
+
+    cd "${TMP_FOLDER}"
+    curl -LSs https://github.com/"${CMAKE_REPO}"/releases/download/"${CMAKE_VERSION}"/"${CMAKE_FOLDER}".tar.gz | tar -xzf -
+    cd "${CMAKE_FOLDER}" || die "Downloading or extracting cmake failed"
+
+    ./bootstrap --parallel="${THREADS:-$(nproc)}" \
+                --prefix="${PREFIX:=${HOME}/usr}"
+
+    make "${JOBS_FLAG:--j"$(nproc)"}" || die "make failed"
+    make install || die "install failed"
+    rm -rf "${TMP_FOLDER}"
+
+    path_push "${PREFIX}"/bin
+    command -v cmake
+    cmake --version
+)}
+
+
 # Build/update cuttlefish tools
 function bcttlfshtools() {(
     TMP_FOLDER=$(mktemp -d)
@@ -451,6 +475,7 @@ function install_rust() {(
 
 function bldupdbin() {(
     bccache || exit ${?}
+    bcmake || exit ${?}
     bgit || exit ${?}
     birg || exit ${?}
     bisharkdp all || exit ${?}
