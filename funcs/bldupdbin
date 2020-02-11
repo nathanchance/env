@@ -19,7 +19,7 @@ function bccache() {(
     make install || die "install failed"
     rm -rf "${TMP_FOLDER}"
 
-    path_push "${PREFIX}"/bin
+    move_to_front_of_path "${PREFIX}"/bin
     command -v ccache
     ccache --version
 )}
@@ -43,7 +43,7 @@ function bcmake() {(
     make install || die "install failed"
     rm -rf "${TMP_FOLDER}"
 
-    path_push "${PREFIX}"/bin
+    move_to_front_of_path "${PREFIX}"/bin
     command -v cmake
     cmake --version
 )}
@@ -119,7 +119,7 @@ function bgit() {(
         install -m 0644 "${GIT_FOLDER}"/contrib/completion/git-completion.zsh "${HOME}"/.zfunctions/_git
     fi
 
-    path_push "${PREFIX}"/bin
+    move_to_front_of_path "${PREFIX}"/bin
     command -v git
     git --version
 )}
@@ -294,7 +294,7 @@ function bpgollvm() {(
     TIME_STRING=$(format_time "${START}" "$(date +%s)")
     echo "Total build time: ${TIME_STRING:l}"
 
-    path_push "${PREFIX}/bin"
+    move_to_front_of_path "${PREFIX}/bin"
 
     echo
     command -v clang
@@ -323,7 +323,7 @@ function birg() {(
         curl -LSs "${BASE_URL}"/archive/"${RG_VERSION}".tar.gz | tar -xzf - || die "Error downloading ripgrep source"
         cd ripgrep-"${RG_VERSION}" || die "Can't move into ripgrep source"
         [[ -d ${HOME}/.cargo/bin ]] || install_rust
-        path_push "${HOME}/.cargo/bin"
+        move_to_front_of_path "${HOME}/.cargo/bin"
         cargo build --release --locked --features 'pcre2' || die "cargo build failed"
         cargo install --force --path . || die "cargo install failed"
         if [[ -n ${ZSH_NAME} ]]; then
@@ -366,7 +366,7 @@ function bisharkdp() {(
             curl -LSs "${URL_BASE}"/archive/"${VERSION}".tar.gz | tar -xzf - || die "Error downloading ${BINARY} source"
             cd "${BINARY}-${VERSION}" || die "Can't move into ${BINARY} source"
             [[ -d ${HOME}/.cargo/bin ]] || install_rust
-            path_push "${HOME}/.cargo/bin"
+            move_to_front_of_path "${HOME}/.cargo/bin"
             cargo build --release --locked || die "cargo build failed"
             cargo install --force --path . || die "cargo install failed"
             if [[ -n ${ZSH_NAME} ]]; then
@@ -427,7 +427,7 @@ function bqemu() {(
 
     make -j$(nproc) install
 
-    path_push "${PREFIX}"/bin
+    move_to_front_of_path "${PREFIX}"/bin
     for QEMU_SUFFIX in aarch64 arm mipsel ppc ppc64 riscv64 s390x x86_64; do
         command -v qemu-system-${QEMU_SUFFIX}
         qemu-system-${QEMU_SUFFIX} --version
@@ -450,7 +450,7 @@ function btmux() {(
     make install || die "install failed"
     rm -rf "${TMP_FOLDER}"
 
-    path_push "${PREFIX}"/bin
+    move_to_front_of_path "${PREFIX}"/bin
     command -v tmux
     tmux -V
 )}
@@ -478,7 +478,7 @@ function bzsh() {(
     echo "${ZSH_BIN}" | sudo_wrapper tee -a /etc/shells
     sudo_wrapper chsh -s "${ZSH_BIN}" "$(whoami)"
 
-    path_push "${PREFIX}"/bin
+    move_to_front_of_path "${PREFIX}"/bin
     command -v zsh
     zsh --version
 )}
