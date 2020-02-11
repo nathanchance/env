@@ -39,7 +39,7 @@ function partition_and_create_user() {(
         parted -s "${DRIVE}" mklabel gpt mkpart primary ext4 '0%' '100%'
         sleep 15
         mkfs -t ext4 "${DRIVE}${PART}"
-        printf 'UUID=%s\t/home\text4\tnoatime\t0\t2' "$(blkid -o value -s UUID "${DRIVE}${PART}")" | tee -a /etc/fstab
+        printf 'UUID=%s\t/home\text4\tnoatime\t0\t2\n' "$(blkid -o value -s UUID "${DRIVE}${PART}")" | tee -a /etc/fstab
         sed -i '/^$/d' /etc/fstab
         mount -a
     fi
