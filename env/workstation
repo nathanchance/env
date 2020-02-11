@@ -131,13 +131,17 @@ function bootstrap() {(
         # Build folder size
         BFS=20
     elif [[ -n ${UBUNTU} ]]; then
-        PACKAGES=( bison
+        PACKAGES=( abootimg
+                   bison
                    build-essential
                    ca-certificates
+                   cdbs
                    clang
                    cmake
+                   config-package-dev
                    creduce
                    curl
+                   debhelper
                    devscripts
                    doxygen
                    expect
@@ -160,6 +164,7 @@ function bootstrap() {(
                    libglib2.0-dev
                    libgmp-dev
                    libio-socket-ssl-perl
+                   liblz4-tool
                    libmailtools-perl
                    libmpc-dev
                    libmpfr-dev
@@ -253,7 +258,7 @@ function bootstrap() {(
     source "${SCRIPTS}"/env/setup && global_gitignore && create_zshrc
     source "${SCRIPTS}"/funcs/bldupdbin
     [[ -n ${ARCH} ]] && bgit
-    [[ -n ${UBUNTU} ]] && { bldupdbin && bdtc && bqemu && install_android_tools; }
+    [[ -n ${UBUNTU} ]] && { bldupdbin && bcttlfshtools && bdtc && bqemu && install_android_tools; }
     path_push "${HOME}/usr/bin"
     source "${SCRIPTS}"/funcs/git && git_setup
     source "${SCRIPTS}"/funcs/pure && pure_prompt
@@ -306,16 +311,19 @@ function bootstrap() {(
         done
         rm -rf clone.bundle-*
         git -C "${CBL}" clone -b personal git@github.com:nathanchance/tc-build.git
+        git clone git@github.com:WireGuard/android-wireguard-module-builder.git
     )
 
     # Download other CBL things
     (
         cd "${CBL}"/android || die "wtf?"
-        git clone https://android.googlesource.com/kernel/build
-        git clone https://android.googlesource.com/kernel/common
+        git clone git@github.com:nathanchance/android-kernel-clang.git
+        mkdir -p common
+        cd common || die "wtf?"
+        repo init -u https://android.googlesource.com/kernel/manifest -b common-android-mainline
+        repo sync
         curl -LSso common/.git/hooks/commit-msg https://android-review.googlesource.com/tools/hooks/commit-msg
         chmod u+x common/.git/hooks/commit-msg
-        git clone git@github.com:nathanchance/android-kernel-clang.git
 
         cd "${CBL}"/git || die "wtf?"
         git clone git@github.com:ClangBuiltLinux/continuous-integration.git ci
@@ -335,19 +343,6 @@ function bootstrap() {(
 
     # Clone sonyxperiadev/kernel
     git -C "${KERNEL_FOLDER}/sony" clone git://github.com/sonyxperiadev/kernel
-
-    # Clone marlin and msm-3.18 repos (for pulling their upstream updates, not stables)
-    cd "${ALS}"
-    for REPO in msm-3.18:https://source.codeaurora.org/quic/la/kernel/msm-3.18 marlin:https://android.googlesource.com/kernel/msm/; do
-        URL=${REPO#*:}
-        REPO=${REPO%%:*}
-        git clone git@github.com:android-linux-stable/"${REPO}".git || { display_error "Couldn't clone ${REPO}"; continue; }
-        (
-            cd "${REPO}"
-            git remote add upstream "${URL}"
-            git fetch upstream || { display_error "Couldn't fetch ${URL}"; continue; }
-        )
-    done
 
     # Use new GPG keyserver
     echo "keyserver hkps://keys.openpgp.org" >> "${HOME}"/.gnupg/dirmngr.conf
