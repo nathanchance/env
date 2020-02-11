@@ -7,11 +7,12 @@
 
 # Build/update ccache
 function bccache() {(
-    [[ -z ${CCACHE_VERSION} ]] && CCACHE_VERSION=$(glr ccache/ccache)
+    CCACHE_REPO=ccache/ccache
+    [[ -z ${CCACHE_VERSION} ]] && CCACHE_VERSION=$(glr "${CCACHE_REPO}")
     CCACHE_FOLDER=ccache-${CCACHE_VERSION//v}
     TMP_FOLDER=$(mktemp -d)
     cd "${TMP_FOLDER}"
-    curl -LSs https://github.com/ccache/ccache/releases/download/"${CCACHE_VERSION}"/"${CCACHE_FOLDER}".tar.gz | tar -xzf -
+    curl -LSs https://github.com/"${CCACHE_REPO}"/releases/download/"${CCACHE_VERSION}"/"${CCACHE_FOLDER}".tar.gz | tar -xzf -
     cd "${CCACHE_FOLDER}" || die "Downloading or extracting ccache failed"
     ./configure --prefix="${PREFIX:=${HOME}/usr}"
     make "${JOBS_FLAG:--j"$(nproc)"}" || die "make failed"
@@ -27,7 +28,7 @@ function bccache() {(
 # Build/update cmake
 function bcmake() {(
     CMAKE_REPO=Kitware/CMake
-    [[ -z ${CMAKE_VERSION} ]] && CMAKE_VERSION=$(glr ${CMAKE_REPO})
+    [[ -z ${CMAKE_VERSION} ]] && CMAKE_VERSION=$(glr "${CMAKE_REPO}")
     CMAKE_FOLDER=cmake-${CMAKE_VERSION//v}
     TMP_FOLDER=$(mktemp -d)
 
@@ -283,8 +284,9 @@ function bpgollvm() {(
 
 # Build/install ripgrep
 function birg() {(
-    [[ -z ${RG_VERSION} ]] && RG_VERSION=$(glr BurntSushi/ripgrep)
-    BASE_URL=https://github.com/BurntSushi/ripgrep
+    RG_REPO=BurntSushi/ripgrep
+    [[ -z ${RG_VERSION} ]] && RG_VERSION=$(glr "${RG_REPO}")
+    BASE_URL=https://github.com/${RG_REPO}
     TMP_FOLDER=$(mktemp -d)
     DEB=ripgrep_${RG_VERSION}_amd64.deb
 
@@ -329,8 +331,9 @@ function bisharkdp() {(
     cd "${TMP_FOLDER}"
 
     for BINARY in "${BINARIES[@]}"; do (
-        URL_BASE=https://github.com/sharkdp/"${BINARY}"
-        [[ -z ${VERSION} ]] && VERSION=$(glr sharkdp/"${BINARY}")
+        BINARY_REPO=sharkdp/${BINARY}
+        URL_BASE=https://github.com/${BINARY_REPO}
+        [[ -z ${VERSION} ]] && VERSION=$(glr "${BINARY_REPO}")
         if [[ $(uname -m) = "x86_64" ]] && command -v dpkg &>/dev/null; then
             DEB=${BINARY}_${VERSION//v}_amd64.deb
             curl -LSsO "${URL_BASE}"/releases/download/"${VERSION}"/"${DEB}" || die "Error downloading ${DEB}"
@@ -401,7 +404,7 @@ function bqemu() {(
     make -j$(nproc) install
 
     path_push "${PREFIX}"/bin
-    for QEMU_SUFFIX in aarch64 arm mipsel ppc ppc64 x86_64; do
+    for QEMU_SUFFIX in aarch64 arm mipsel ppc ppc64 riscv64 s390x x86_64; do
         command -v qemu-system-${QEMU_SUFFIX}
         qemu-system-${QEMU_SUFFIX} --version
     done
@@ -410,12 +413,13 @@ function bqemu() {(
 
 # Build/update tmux
 function btmux() {(
-    [[ -z ${TMUX_VERSION} ]] && TMUX_VERSION=$(glr tmux/tmux)
+    TMUX_REPO=tmux/tmux
+    [[ -z ${TMUX_VERSION} ]] && TMUX_VERSION=$(glr "${TMUX_REPO}")
     TMP_FOLDER=$(mktemp -d)
     TMUX_FOLDER=tmux-${TMUX_VERSION}
 
     cd "${TMP_FOLDER}"
-    curl -LSs https://github.com/tmux/tmux/releases/download/"${TMUX_VERSION}"/"${TMUX_FOLDER}".tar.gz | tar -xzf -
+    curl -LSs https://github.com/"${TMUX_REPO}"/releases/download/"${TMUX_VERSION}"/"${TMUX_FOLDER}".tar.gz | tar -xzf -
     cd "${TMUX_FOLDER}" || die "Downloading or extracting tmux failed"
     ./configure --prefix="${PREFIX:=${HOME}/usr}"
     make "${JOBS_FLAG:--j"$(nproc)"}" || die "make failed"
