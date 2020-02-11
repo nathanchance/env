@@ -125,7 +125,6 @@ function bpgollvm() {(
                   -DCLANG_VENDOR="$(uname -n)"
                   -DCMAKE_BUILD_TYPE=Release )
     grep -q Ubuntu /usr/lib/os-release && CMAKE+=( -DPYTHON_EXECUTABLE=$(command -v python3) )
-    FLAGS="-O3$([[ $(uname -m) = "x86_64" ]] && echo " -march=native -mtune=native")"
     LLVM_PROJECT=${SRC_FOLDER:-${HOME}/src}/llvm-project
     BUILD_FOLDER=${LLVM_PROJECT}/build
     START=$(date +%s)
@@ -161,9 +160,7 @@ function bpgollvm() {(
         LINKER=$(if command -v ld.lld &>/dev/null; then echo lld; else echo gold; fi)
         "${CMAKE[@]}" -DCLANG_PLUGIN_SUPPORT=OFF \
                       -DCMAKE_C_COMPILER=clang \
-                      -DCMAKE_C_FLAGS="${FLAGS}" \
                       -DCMAKE_CXX_COMPILER=clang++ \
-                      -DCMAKE_CXX_FLAGS="${FLAGS}" \
                       -DCOMPILER_RT_BUILD_SANITIZERS=OFF \
                       -DLLVM_ENABLE_BACKTRACES=OFF \
                       -DLLVM_INCLUDE_DOCS=OFF \
@@ -192,8 +189,6 @@ function bpgollvm() {(
         cd "${BUILD_FOLDER}"/stage2a || die "Error creating stage2a build folder"
         export PATH=${STAGE_ONE_BIN:?}:${PATH}
         "${CMAKE[@]}" "${STAGE_ONE_BIN_DEFINES[@]}" \
-                      -DCMAKE_C_FLAGS="${FLAGS}" \
-                      -DCMAKE_CXX_FLAGS="${FLAGS}" \
                       -DLLVM_BUILD_INSTRUMENTED=IR \
                       -DLLVM_BUILD_RUNTIME=OFF \
                       -DLLVM_INCLUDE_GO_TESTS=OFF \
@@ -218,8 +213,6 @@ function bpgollvm() {(
         cd "${BUILD_FOLDER}"/stage2b
         export PATH=${STAGE_TWO_BIN:?}:${PATH}
         "${CMAKE[@]}" "${STAGE_TWO_BIN_DEFINES[@]}" \
-                      -DCMAKE_C_FLAGS="${FLAGS}" \
-                      -DCMAKE_CXX_FLAGS="${FLAGS}" \
                       "${LLVM_PROJECT}"/llvm || die "Error configuring stage 2b"
         ninja || die "Error building stage 2b"
     ) || exit ${?}
@@ -237,8 +230,8 @@ function bpgollvm() {(
 
         # Build compiler with that data
         "${CMAKE[@]}" "${STAGE_ONE_BIN_DEFINES[@]}" \
-                      -DCMAKE_C_FLAGS="${FLAGS} -Wno-backend-plugin" \
-                      -DCMAKE_CXX_FLAGS="${FLAGS} -Wno-backend-plugin" \
+                      -DCMAKE_C_FLAGS="-Wno-backend-plugin" \
+                      -DCMAKE_CXX_FLAGS="-Wno-backend-plugin" \
                       -DCMAKE_INSTALL_PREFIX=${PREFIX:=${HOME}/usr} \
                       -DLLVM_ENABLE_LTO=Thin \
                       -DLLVM_PROFDATA_FILE=${PROFILE_DATA} \
