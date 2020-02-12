@@ -143,6 +143,26 @@ function ihugo() {(
 )}
 
 
+# Build/install GNU make
+function bmake() {(
+    [[ -z ${MAKE_VERSION} ]] && MAKE_VERSION=4.3
+    MAKE_FOLDER=make-${MAKE_VERSION}
+    TMP_FOLDER=$(mktemp -d)
+
+    cd "${TMP_FOLDER}"
+    curl -LSs http://ftp.gnu.org/gnu/make/"${MAKE_FOLDER}".tar.gz | tar -xzf -
+    cd "${MAKE_FOLDER}" || die "Downloading or extracting make failed"
+
+    ./configure --prefix=${PREFIX:=${HOME}/usr}
+    make -j$(nproc) install
+
+    rm -rf "${TMP_FOLDER}"
+    move_to_front_of_path "${PREFIX}"/bin
+    command -v make
+    make --version
+)}
+
+
 # Build/update ninja
 function bninja() {(
     NINJA_REPO=ninja-build/ninja
@@ -505,6 +525,7 @@ function bldupdbin() {(
     bccache || exit ${?}
     bcmake || exit ${?}
     bgit || exit ${?}
+    bmake || exit ${?}
     bninja || exit ${?}
     birg || exit ${?}
     bisharkdp all || exit ${?}
