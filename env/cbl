@@ -803,9 +803,25 @@ function kcbw() {(
         git -C "${CBL_KC_SRC}" ac -m "build.config.common: Use latest ClangBuiltLinux clang available"
 
         # Automatically move bzImage
-        if [[ ${ARCH} = "x86_64" ]] && grep -q 'FILES=""' "${CBL_KC_SRC}/${CONFIG}"; then
-            sed -i '/FILES=""/d' "${CBL_KC_SRC}/${CONFIG}"
-            git -C "${CBL_KC_SRC}" ac -m "${CONFIG}: Move bzImage to DIST_FOLDER"
+        if [[ ${ARCH} = "x86_64" ]]; then
+            if grep -q 'FILES=""' "${CBL_KC_SRC}/${CONFIG}"; then
+                sed -i '/FILES=""/d' "${CBL_KC_SRC}/${CONFIG}"
+                git -C "${CBL_KC_SRC}" ac -m "${CONFIG}: Move bzImage to DIST_FOLDER"
+            fi
+
+            case ${BRANCH} in
+                4.14) CONFIG_FILE=${CBL_KC_SRC}/arch/x86/configs/x86_64_cuttlefish_defconfig ;;
+                4.19|5.4|mainline) CONFIG_FILE=${CBL_KC_SRC}/cuttlefish.fragment ;;
+            esac
+
+            if [[ -n ${CONFIG_FILE} ]]; then
+                sed -i -e '/CONFIG_TEST_MEMINIT/d' -e '/CONFIG_TEST_STACKINIT/d' "${CONFIG_FILE}"
+                git -C "${CBL_KC_SRC}" ac -m "${CONFIG_FILE##*/}: Remove memory initialization tests
+
+These are currently broken with clang 11.0.0.
+
+Link: https://llvm.org/pr44916"
+            fi
         fi
     fi
 
