@@ -1151,7 +1151,7 @@ function upd_lnx_tcbld() {(
 
     rm -f "${KERNEL}"/linux*
     for CONFIG in defconfig allyesconfig; do
-        git checkout ${BPREFIX}-${CONFIG}
+        git checkout ${BPREFIX}-${CONFIG} || continue
         case ${CONFIG} in
             defconfig) git rebase v${KVER} ;;
             allyesconfig) git rebase ${BPREFIX}-defconfig ;;
