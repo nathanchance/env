@@ -55,7 +55,7 @@ function post_merge_commands() {
     # Get the appropriate resolution command filename (static mapping because it is not uniform)
     case "${REPO}:${BRANCH}" in
         "bluecross"*|"msm"*|"wahoo"*) COMMANDS="${REPO}-commands" ;;
-        "nash:lineage-16.0") COMMANDS="nash-lineage-16.0-commands" ;;
+        "nash:lineage-17.1") COMMANDS="nash-lineage-17.1-commands" ;;
         "nash:oreo-8.0.0-release-nash") COMMANDS="nash-oreo-8.0.0-commands" ;;
         "op5:oneplus/QC8998_O_8.1"|"op6:oneplus/SDM845_O_8.1") COMMANDS="${REPO}-O_8.1-commands" ;;
         "op5:oneplus/QC8998_P_9.0"|"op6:oneplus/SDM845_P_9.0") COMMANDS="${REPO}-P_9.0-commands" ;;
@@ -209,7 +209,7 @@ for VERSION in "${VERSIONS[@]}"; do
             "msm-4.4") BRANCHES=( "kernel.lnx.4.4.r34-rel" "kernel.lnx.4.4.r37-rel" "kernel.lnx.4.4.r38-rel" "kernel.lnx.4.4.r39-rel" "kernel.lnx.4.4.r40-rel" ) ;;
             "msm-4.9") BRANCHES=( "kernel.lnx.4.9.r11-rel" "kernel.lnx.4.9.r12-rel" "kernel.lnx.4.9.r25-rel" "kernel.lnx.4.9.r27-rel" ) ;;
             "msm-4.14") BRANCHES=( "kernel.lnx.4.14.r1" "kernel.lnx.4.14.r3-rel" "kernel.lnx.4.14.r4-rel" "kernel.lnx.4.14.r7-rel" ) ;;
-            "nash") BRANCHES=( "lineage-16.0:LineageOS" ) ;;
+            "nash") BRANCHES=( "lineage-17.1:LineageOS" ) ;;
             "op5") BRANCHES=( "lineage-17.1:LineageOS" "oneplus/QC8998_P_9.0:upstream" "oneplus/QC8998_P_9.0_Beta:upstream" ) ;;
             "op6") BRANCHES=( "oneplus/SDM845_Q_10.0:upstream" ) ;;
             "wahoo") BRANCHES=( "android-msm-wahoo-4.4" ) ;;

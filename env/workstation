@@ -617,7 +617,7 @@ function qcacld() {(
 function symlink-commands() {(
     case ${1} in
         "3.18") FILES=( "marlin" "msm-3.18" "op3-8.0.0" "tissot" ) ;;
-        "4.4") FILES=( "msm-4.4" "nash-lineage-16.0" "op5-lineage-17.1" "op5-P_9.0" "op5-P_9.0_Beta" "wahoo" ) ;;
+        "4.4") FILES=( "msm-4.4" "nash-lineage-17.1" "op5-lineage-17.1" "op5-P_9.0" "op5-P_9.0_Beta" "wahoo" ) ;;
         "4.9") FILES=( "bluecross" "msm-4.9" "op6-Q_10.0" ) ;;
         "4.14") FILES=( "msm-4.14" ) ;;
     esac
