@@ -231,12 +231,15 @@ function bldkw() {(
         echo
     fi
 
+    # Don't set -s if V is set
+    [[ -n ${Q} && ! ${*} =~ V= ]] && SILENT_FLAG=( -s )
+
     # Setup ccache
     ccache_size kernel 100
 
     # Build the kernel
     set -x
-    make ${Q:+-s} \
+    make ${SILENT_FLAG:+"${SILENT_FLAG[@]}"} \
          "${JOBS_FLAG}" \
          AR="${AR:-llvm-ar}" \
          CC="${CC:-${CCACHE} clang}" \
