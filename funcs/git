@@ -61,6 +61,7 @@ function git_aliases() {(
     git config --global alias.cpc 'cherry-pick --continue'
     git config --global alias.cpe 'cherry-pick --edit --signoff'
     git config --global alias.cpq 'cherry-pick --quit'
+    git config --global alias.cps 'cherry-pick --skip'
     git config --global alias.dc 'describe --contains'
     git config --global alias.dfs 'diff --stat'
     git config --global alias.dfss 'diff --shortstat'
