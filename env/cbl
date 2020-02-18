@@ -202,9 +202,8 @@ function bldkw() {(
         "ppc32") : "${CROSS_COMPILE:=powerpc-linux-gnu-}" && MAKE_FLAGS=( "ARCH=powerpc" "CROSS_COMPILE=${CROSS_COMPILE}" ) ;;
         "ppc64") : "${CROSS_COMPILE:=powerpc64-linux-gnu-}" && MAKE_FLAGS=( "ARCH=powerpc" "CROSS_COMPILE=${CROSS_COMPILE}" ) ;;
         "ppc64le") : "${CROSS_COMPILE:=powerpc64le-linux-gnu-}" && MAKE_FLAGS=( "ARCH=powerpc" "CROSS_COMPILE=${CROSS_COMPILE}" ) ;;
-        "s390") : "${CROSS_COMPILE:=s390x-linux-gnu-}"
-                MAKE_FLAGS=( "ARCH=s390" "CROSS_COMPILE=${CROSS_COMPILE}" )
-                OBJDUMP=${CROSS_COMPILE}objdump ;;
+        "s390") : "${CROSS_COMPILE:=s390x-linux-gnu-}" "${OBJDUMP:=${CROSS_COMPILE}objdump}"
+                MAKE_FLAGS=( "ARCH=s390" "CROSS_COMPILE=${CROSS_COMPILE}" ) ;;
         "x86") MAKE_FLAGS=() ;;
         *) display_error "Invalid TARGET_ARCH specified!"; return ;;
     esac
