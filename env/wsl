@@ -146,7 +146,7 @@ function wsl_setup() {
 
 # Update WSL kernel from server
 function upd_wsl_kernel() {(
-    KERNEL=/mnt/c/Users/natec/Linux/kernel-${1:-mainline}-${2:-clang}
+    KERNEL=/mnt/c/Users/natec/Linux/kernel-${1:-next}-${2:-clang}
     rm -rf "${KERNEL}"
     scp nathan@${SERVER_IP:?}:/home/nathan/src/WSL2-Linux-Kernel/out.x86_64/arch/x86/boot/bzImage "${KERNEL}"
 )}
