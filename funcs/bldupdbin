@@ -485,7 +485,7 @@ function bzsh() {(
     cd "${TMP_FOLDER}"
     case ${ZSH_VERSION} in
         latest) URL=https://sourceforge.net/projects/zsh/files/latest/download ;;
-        *) URL=https://www.zsh.org/pub/"${ZSH_FOLDER}".tar.xz ;;
+        *) URL=https://www.zsh.org/pub/zsh-"${ZSH_VERSION//zsh-}".tar.xz ;;
     esac
     curl -LSs "${URL}" | tar -xJf -
     cd zsh-* || die "Downloading or extracting zsh failed"
