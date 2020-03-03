@@ -5,7 +5,7 @@
 {
     "$schema": "https://aka.ms/terminal-profiles-schema",
 
-    "defaultProfile": "{58ad8b0c-3ef8-5f4d-bc6f-13e4c00f2530}",
+    "defaultProfile": "{61c54bbd-c2c6-5271-96e7-009a87ff44bf}",
 
     "profiles":  {
         "defaults": {
@@ -13,56 +13,102 @@
             "fontSize": 9
         },
         "list": [
-            {
-                // Make changes here to the powershell.exe profile
-                "guid": "{61c54bbd-c2c6-5271-96e7-009a87ff44bf}",
-                "name": "Windows PowerShell",
-                "commandline": "powershell.exe",
-                "hidden": false
-            },
-            {
-                // Make changes here to the cmd.exe profile
-                "guid": "{0caa0dad-35be-5f56-a8ff-afceeeaa6101}",
-                "name": "cmd",
-                "commandline": "cmd.exe",
-                "hidden": true
-            },
-            {
-                "guid": "{b453ae62-4e3d-5e58-b989-0a998ec441b8}",
-                "hidden": true,
-                "name": "Azure Cloud Shell",
-                "source": "Windows.Terminal.Azure"
-            },
-            {
-                "guid": "{58ad8b0c-3ef8-5f4d-bc6f-13e4c00f2530}",
-                "hidden": false,
-                "name": "Debian",
-                "source": "Windows.Terminal.Wsl",
-                "colorScheme": "snazzy",
-                "closeOnExit": "always"
-            },
-            {
-                "guid": "{0110db4a-cf7b-5647-9a03-7232d80cd09e}",
-                "hidden": false,
-                "name": "openSUSE-Leap-15-1",
-                "source": "Windows.Terminal.Wsl",
-                "colorScheme": "snazzy",
-                "closeOnExit": "always"
-            },
-            {
-                "guid": "{b39fd1d2-4186-5eaf-9049-77213bc37cd9}",
-                "hidden": true,
-                "name": "Ubuntu-19-10",
-                "source": "Windows.Terminal.Wsl"
-            },
-            {
-                "guid": "{d3f31bee-5823-5ed8-8e04-f31ed54f2cd9}",
-                "hidden": false,
-                "name": "fedoraremix",
-                "source": "Windows.Terminal.Wsl",
-                "colorScheme": "snazzy",
-                "closeOnExit": "always"
-            }
+        {
+            // Make changes here to the powershell.exe profile
+            "guid": "{61c54bbd-c2c6-5271-96e7-009a87ff44bf}",
+            "name": "Windows PowerShell",
+            "commandline": "powershell.exe",
+            "hidden": false
+        },
+        {
+            // Make changes here to the cmd.exe profile
+            "guid": "{0caa0dad-35be-5f56-a8ff-afceeeaa6101}",
+            "name": "cmd",
+            "commandline": "cmd.exe",
+            "hidden": true
+        },
+        {
+            "guid": "{b453ae62-4e3d-5e58-b989-0a998ec441b8}",
+            "hidden": true,
+            "name": "Azure Cloud Shell",
+            "source": "Windows.Terminal.Azure"
+        },
+        {
+            "guid": "{58ad8b0c-3ef8-5f4d-bc6f-13e4c00f2530}",
+            "hidden": false,
+            "name": "debian",
+            "source": "Windows.Terminal.Wsl",
+            "colorScheme": "snazzy",
+            "closeOnExit": "always"
+        },
+        {
+            "guid": "{0110db4a-cf7b-5647-9a03-7232d80cd09e}",
+            "hidden": true,
+            "name": "openSUSE-Leap-15-1",
+            "source": "Windows.Terminal.Wsl",
+            "colorScheme": "snazzy",
+            "closeOnExit": "always"
+        },
+        {
+            "guid": "{b39fd1d2-4186-5eaf-9049-77213bc37cd9}",
+            "hidden": true,
+            "name": "Ubuntu-19-10",
+            "source": "Windows.Terminal.Wsl"
+        },
+        {
+            "guid": "{d3f31bee-5823-5ed8-8e04-f31ed54f2cd9}",
+            "hidden": true,
+            "name": "fedoraremix",
+            "source": "Windows.Terminal.Wsl",
+            "colorScheme": "snazzy",
+            "closeOnExit": "always"
+        },
+        {
+            "guid": "{2c4de342-38b7-51cf-b940-2309a097f518}",
+            "hidden": true,
+            "name": "Ubuntu",
+            "source": "Windows.Terminal.Wsl"
+        },
+        {
+            "guid": "{96933987-e7b7-55a2-a499-f9d06dcf0997}",
+            "hidden": false,
+            "name": "alpine",
+            "source": "Windows.Terminal.Wsl",
+            "colorScheme": "snazzy",
+            "closeOnExit": "always"
+        },
+        {
+            "guid": "{89912b0a-f6d1-5e6c-8845-09213757191e}",
+            "hidden": false,
+            "name": "opensuse",
+            "source": "Windows.Terminal.Wsl",
+            "colorScheme": "snazzy",
+            "closeOnExit": "always"
+        },
+        {
+            "guid": "{aabae64a-7cf7-5add-b5d6-744e54ab56d6}",
+            "hidden": false,
+            "name": "centos",
+            "source": "Windows.Terminal.Wsl",
+            "colorScheme": "snazzy",
+            "closeOnExit": "always"
+        },
+        {
+            "guid": "{398d4a22-7802-5051-8c8d-cf771177811e}",
+            "hidden": false,
+            "name": "archlinux",
+            "source": "Windows.Terminal.Wsl",
+            "colorScheme": "snazzy",
+            "closeOnExit": "always"
+        },
+        {
+            "guid": "{190101b4-7fde-5219-90b2-0947ed51033f}",
+            "hidden": false,
+            "name": "fedora",
+            "source": "Windows.Terminal.Wsl",
+            "colorScheme": "snazzy",
+            "closeOnExit": "always"
+        }
         ]
     },
 
