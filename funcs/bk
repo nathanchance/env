@@ -18,6 +18,7 @@ function bk() {
         "jasmine:"*) PARAMS=( "jasmine-perf_defconfig" ) ;;
         "mata:lineage-15.1") PARAMS=( "lineageos_${FOLDER}_defconfig" -c ) ;;
         "msm-3.18:"*|"msm-4.4:"*) PARAMS=( msmcortex-perf_defconfig ) ;;
+        "msm-4.9:kernel.lnx.4.9.r2"*"-rel") PARAMS=( sdm845-perf_defconfig -c -ct sd-llvm-6.0.2 ) ;;
         "msm-4.9:"*) PARAMS=( sdm845-perf_defconfig ) ;;
         "msm-4.14:"*) PARAMS=( vendor/sm8150-perf_defconfig -c -ct sd-llvm-6.0.2 ) ;;
         "nash:lineage-17.1"*) PARAMS=( lineageos_nash_defconfig -c -ct clang-r353983c ) ;;
