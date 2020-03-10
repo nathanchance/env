@@ -42,6 +42,7 @@ function bcmake() {(
     make "${JOBS_FLAG:--j"$(nproc)"}" || die "make failed"
     make install || die "install failed"
     rm -rf "${TMP_FOLDER}"
+    cd || die "Can't go home"
 
     move_to_front_of_path "${PREFIX}"/bin
     command -v cmake
