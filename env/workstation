@@ -677,4 +677,12 @@ function upd() {(
         sudo_wrapper sh -c 'apt update && apt upgrade'
     fi
 )}
+
+
+# Generate ALS conflict lists
+function genalscnflcts() {(
+    for FILE in $(git cf); do
+        echo "\"${FILE}:$(git lo ${1:?}..MERGE_HEAD "${FILE}" | wc -l)\""
+    done
+)}
 # vi: filetype=zsh
