@@ -522,7 +522,7 @@ function bootk() {(
 
     # Print or run the command
     COMMAND=( "${QEMU}" "${QEMU_ARCH_CMDLINE[@]}" -kernel "${KERNEL}" -m "${RAM:-512m}" -display none -serial mon:stdio )
-    [[ -z ${NO_TIMEOUT} ]] && COMMAND=( timeout 2m unbuffer "${COMMAND[@]}" )
+    [[ -z ${NO_TIMEOUT} ]] && COMMAND=( timeout "${TOD:-2m}" unbuffer "${COMMAND[@]}" )
 
     set -x
     case ${ARCH} in
