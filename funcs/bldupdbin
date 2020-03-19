@@ -522,6 +522,16 @@ function install_rust() {(
 )}
 
 
+# Install/upgrade b4
+function iub4() {(
+    case ${1} in
+        -u|--upgrade) PIP_ARGS=( --upgrade ) ;;
+    esac
+
+    python3 -m pip install --user "${PIP_ARGS[@]}" b4
+)}
+
+
 function bldupdbin() {(
     bccache || exit ${?}
     bcmake || exit ${?}
