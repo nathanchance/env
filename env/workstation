@@ -416,6 +416,7 @@ function cbf() {(
 function workstation_setup() {
     LOG=$(mktemp); export LOG
     add_to_path_pre "${SCRIPTS_FOLDER}/workstation"
+    move_to_front_of_path "${HOME}/.local/bin"
     move_to_front_of_path "${HOME}/usr/bin"
     ccache_setup 50
     source "${SCRIPTS_FOLDER}"/env/folders
