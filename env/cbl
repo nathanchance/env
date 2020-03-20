@@ -1007,7 +1007,8 @@ function kct() {(
 function bldallk() {(
     TREE=linux lt
     TREE=linux-next lt
-    kct
+    # Currently on fire
+    # kct
 )}
 
 
