@@ -1,6 +1,6 @@
 #!/usr/bin/env zsh
 # Update ClangBuiltLinux master branches for LLVM, Clang, and Linux
-# */5 * * * * /usr/bin/flock -n /tmp/lock.mirrors /home/nathan/scripts/crons/update_mirrors
+# */5 * * * * /usr/bin/flock -n /tmp/lock.mirrors /home/nathan/github/scripts/crons/update_mirrors
 
 LOG=${HOME}/cbl/mirrors/logs/$(date +%Y%m%d)
 
