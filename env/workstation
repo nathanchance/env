@@ -348,6 +348,7 @@ function bootstrap() {(
         git -C wsl2 remote add next git://git.kernel.org/pub/scm/linux/kernel/git/next/linux-next.git
         git -C wsl2 remote add microsoft git://github.com/microsoft/WSL2-Linux-Kernel
         git -C wsl2 fetch --multiple mainline next microsoft
+        git -C wsl2 config rerere.enabled true
     )
 
     # Clone sonyxperiadev/kernel
