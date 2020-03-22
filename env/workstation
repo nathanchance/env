@@ -368,9 +368,9 @@ function bootstrap() {(
         echo "2. sudo reboot"
     elif [[ -n ${UBUNTU} ]]; then
         echo
-        echo "2. sudo poweroff"
+        echo "2. sudo dpkg -l | rg '4.15' && sudo apt remove"
         echo
-        echo "3. Power off machine in Packet portal"
+        echo "3. sudo systemctl reboot"
     fi
     echo
 ) || return 1; }
