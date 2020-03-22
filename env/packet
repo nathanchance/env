@@ -27,6 +27,9 @@ function partition_and_create_user() {(
     # Update apt files
     apt update
 
+    # Install tmux so that installation progress cannot be lost
+    apt install -y tmux
+
     # Install necessary files
     if [[ -n ${DRIVE:-} ]]; then
         case ${DRIVE} in
