@@ -54,7 +54,7 @@ function bootstrap() {(
         most \
         mutt \
         pass \
-        python-pip \
+        python3-pip \
         software-properties-common \
         ssh \
         tmux \

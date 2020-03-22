@@ -69,7 +69,7 @@ function bootstrap() {(
         mutt \
         openvpn \
         pass \
-        python-pip \
+        python3-pip \
         ssh \
         tmux \
         unzip \
