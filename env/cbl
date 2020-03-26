@@ -714,10 +714,10 @@ function pdmnrn() {(
 )}
 
 
-# Strip LLVM binaries
-function stripllvmbin() {(
-    BINARIES_TO_STRIP=( clang lld llvm-ar llvm-pdbutil llvm-symbolizer llvm-undname sancov )
-    for BINARY in "${BINARIES_TO_STRIP[@]}"; do strip "${1:?}"/bin/"${BINARY}"; done
+# Strip executables within a folder
+function stripall() {(
+    cd "${1:?}"
+    for FILE in $(fd -t file -x file | grep 'not stripped' | cut -d: -f1); do strip "${FILE}"; done
 )}
 
 
@@ -741,25 +741,36 @@ function bldbn() {(
 
 # Build LLVM/Clang/lld and arm{32,64} and powerpc binutils from source
 function bldtcs() {(
+    DATE_TIME=$(date +%Y%m%d-%H%M)
+
     # Build binutils
-    CBL_BNTL=${CBL_BNTL%/*}
-    rm -rf "${CBL_BNTL}"-old
-    mv "${CBL_BNTL}" "${CBL_BNTL}"-old
+    BLDBN_INSTALL_FOLDER=${CBL_TC}/binutils-${DATE_TIME}
     bldbn --build-folder "${BBF:?}" \
-          --install-folder "${CBL_BNTL}" \
+          --install-folder "${BLDBN_INSTALL_FOLDER}" \
           --update || die "bldbn failed with exit code ${?}"
+    stripall "${BLDBN_INSTALL_FOLDER}"
+
+    # Update binutils
+    ( cd "${CBL_TC}" && \
+      rm -f binutils && \
+      ln -s "${BLDBN_INSTALL_FOLDER##*/}" binutils )
 
     # Build LLVM/Clang/lld
-    CBL_LLVM=${CBL_LLVM%/*}
-    rm -rf "${CBL_LLVM}"-old
-    mv "${CBL_LLVM}" "${CBL_LLVM}"-old
+    TC_BLD_LLVM_PRJCT=${TCBLD}/llvm-project
+    [[ -d ${TC_BLD_LLVM_PRJCT} ]] || git -C "${TCBLD}" clone git://github.com/llvm/llvm-project
+    git -C "${TC_BLD_LLVM_PRJCT}" pull --rebase || die "Updating llvm-project failed (${?})"
+    BLDLLVM_INSTALL_FOLDER=${CBL_TC}/llvm-${DATE_TIME}-$(git -C "${TC_BLD_LLVM_PRJCT}" sh -s --format=%H origin/master)
     bldllvm --build-folder "${LBF:?}" \
             --check-targets lld clang llvm \
-            --install-folder "${CBL_LLVM}" \
+            --install-folder "${BLDLLVM_INSTALL_FOLDER}" \
             --lto=thin \
-            --pgo \
-            --update-llvm || die "bldllvm failed with exit code ${?}"
-    stripllvmbin "${CBL_LLVM}"
+            --pgo || die "bldllvm failed with exit code ${?}"
+    stripall "${BLDLLVM_INSTALL_FOLDER}"
+
+    # Update llvm-tot symlink
+    ( cd "${CBL_TC}" && \
+      rm -f llvm-tot && \
+      ln -sf "${BLDLLVM_INSTALL_FOLDER##*/}" llvm-tot )
 
     # Invalidate our kernel ccache because we have a new compiler that will be used for it
     ccache_clear kernel
