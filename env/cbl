@@ -437,107 +437,20 @@ function download_efi_firmware() {(
 function bootk() {(
     ARCH=${1}; shift
     [[ -z ${ARCH} ]] && die "ARCH not specified!"
-
-    IMAGES_FOLDER=${CBL}/git/ci-master/images
-    [[ ! -d ${IMAGES_FOLDER} ]] && die "${IMAGES_FOLDER} doesn't exist!"
-
     case ${ARCH} in
-        "arm")
-            IMAGE=zImage
-            QEMU=qemu-system-arm
-            QEMU_ARCH_CMDLINE=( -machine virt
-                                -no-reboot
-                                -initrd "${IMAGES_FOLDER}/arm/rootfs.cpio"
-                                -append "console=ttyAMA0 ${QEMU_CMDLINE}" ) ;;
-        "arm64")
-            IMAGE=Image.gz
-            QEMU=qemu-system-aarch64
-            QEMU_ARCH_CMDLINE=( -cpu cortex-a57
-                                -initrd "${IMAGES_FOLDER}/arm64/rootfs.cpio"
-                                -append "console=ttyAMA0 earlycon ${QEMU_CMDLINE}" ) ;;
-        "mipsel")
-            IMAGE=vmlinux
-            QEMU=qemu-system-mipsel
-            QEMU_ARCH_CMDLINE=( -machine malta
-                                -cpu 24Kf
-                                ${QEMU_CMDLINE:+-append "${QEMU_CMDLINE}"}
-                                -initrd "${IMAGES_FOLDER}/mipsel/rootfs.cpio" ) ;;
-        "ppc32")
-            IMAGE=zImage
-            RAM=128m
-            QEMU=qemu-system-ppc
-            QEMU_ARCH_CMDLINE=( -machine bamboo
-                                -append "console=ttyS0 ${QEMU_CMDLINE}"
-                                -no-reboot
-                                -initrd "${IMAGES_FOLDER}/ppc32/rootfs.cpio" )
-            ARCH=powerpc ;;
-        "ppc64")
-            IMAGE=vmlinux
-            RAM=1G
-            QEMU=qemu-system-ppc64
-            QEMU_ARCH_CMDLINE=( -machine pseries
-                                -vga none
-                                -initrd "${IMAGES_FOLDER}/ppc64/rootfs.cpio"
-                                ${QEMU_CMDLINE:+-append "${QEMU_CMDLINE}"} )
-            ARCH=powerpc ;;
-        "ppc64le")
-            IMAGE=zImage.epapr
-            RAM=2G
-            QEMU=qemu-system-ppc64
-            FIRMWARE_FOLDER=${HOME}/usr/share/qemu
-            [[ ! -d ${FIRMWARE_FOLDER} ]] && FIRMWARE_FOLDER=/usr/share/qemu
-            QEMU_ARCH_CMDLINE=( -machine powernv
-                                -device "ipmi-bmc-sim,id=bmc0"
-                                -device "isa-ipmi-bt,bmc=bmc0,irq=10"
-                                -L ${FIRMWARE_FOLDER} -bios skiboot.lid
-                                -initrd "${IMAGES_FOLDER}/ppc64le/rootfs.cpio"
-                                ${QEMU_CMDLINE:+-append "${QEMU_CMDLINE}"} )
-            ARCH=powerpc ;;
-        "x86")
-            IMAGE=bzImage
-            QEMU=qemu-system-x86_64
-            QEMU_ARCH_CMDLINE=( -append "console=ttyS0 earlycon ${QEMU_CMDLINE}"
-                                -cpu host
-                                -d unimp,guest_errors
-                                -initrd "${IMAGES_FOLDER}/x86_64/rootfs.cpio"
-                                -enable-kvm ) ;;
-        *) die "Invalid ARCH specified!" ;;
+        arm) ARCH=arm32_v7 ;;
+        x86) ARCH=x86_64 ;;
     esac
 
-    [[ ${IMAGE} = "vmlinux" ]] || BOOT_FOLDER=arch/${ARCH}/boot/
-    KERNEL=${O:-${KBF}}/${BOOT_FOLDER:+${BOOT_FOLDER}}${IMAGE}
-    [[ -f ${KERNEL} ]] || die "Kernel doesn't exist! Please build one."
-    if [[ "$(readlink -f ${KERNEL})" =~ cbl && ! "$(readlink -f ${KERNEL})" =~ common ]]; then
-        [[ -d ${HOME}/usr/share/AAVMF && -d ${HOME}/usr/share/OVMF ]] || download_efi_firmware
-        case ${ARCH} in
-            "arm64")
-                QEMU_ARCH_CMDLINE+=( -drive "if=pflash,format=raw,readonly,file=${HOME}/usr/share/AAVMF/AAVMF_CODE.fd"
-                                     -drive "if=pflash,format=raw,file=${HOME}/usr/share/AAVMF/AAVMF_VARS.fd" ) ;;
-            "x86")
-                QEMU_ARCH_CMDLINE+=( -drive "if=pflash,format=raw,readonly,file=${HOME}/usr/share/OVMF/OVMF_CODE.fd"
-                                     -drive "if=pflash,format=raw,file=${HOME}/usr/share/OVMF/OVMF_VARS.fd" ) ;;
-        esac
-    fi
+    BOOT_QEMU_SH=${CBL}/git/boot-utils-master/boot-qemu.sh
+    [[ -f ${BOOT_QEMU_SH} ]] || die "${BOOT_QEMU_SH} doesn't exist!"
 
-    # Update the images
-    git -C "${IMAGES_FOLDER}" rh --quiet
-    git -C "${IMAGES_FOLDER}" pull --quiet --rebase
+    # Update boot-utils
+    ( cd "${BOOT_QEMU_SH%/*}" && \
+      git rh --quiet && \
+      git pull --quiet --rebase )
 
-    # Print or run the command
-    COMMAND=( "${QEMU}" "${QEMU_ARCH_CMDLINE[@]}" -kernel "${KERNEL}" -m "${RAM:-512m}" -display none -serial mon:stdio )
-    [[ -z ${NO_TIMEOUT} ]] && COMMAND=( timeout "${TOD:-2m}" unbuffer "${COMMAND[@]}" )
-
-    set -x
-    case ${ARCH} in
-        "arm64")
-            "${COMMAND[@]}" -machine virt "${@}"
-            "${COMMAND[@]}" -machine "virt,virtualization" "${@}" ;;
-        *)
-            "${COMMAND[@]}" "${@}" ;;
-    esac
-    EXIT_CODE=${?}
-    set +x
-    exit ${EXIT_CODE}
+    "${BOOT_QEMU_SH}" -a "${ARCH}" -k "${O:-${KBF}}" "${@}"
 )}
 
 
