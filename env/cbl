@@ -657,10 +657,12 @@ function bldtcs() {(
     DATE_TIME=$(date +%Y%m%d-%H%M)
 
     # Build binutils
-    BLDBN_INSTALL_FOLDER=${CBL_TC}/binutils-${DATE_TIME}
+    TC_BLD_BNTLS=${TCBLD}/binutils
+    [[ -d ${TC_BLD_BNTLS} ]] || git clone git://sourceware.org/git/binutils-gdb.git "${TC_BLD_BNTLS}"
+    git -C "${TC_BLD_BNTLS}" pull --rebase || die "Updating binutils failed (${?})"
+    BLDBN_INSTALL_FOLDER=${CBL_TC}/binutils-${DATE_TIME}-$(git -C "${TC_BLD_BNTLS}" sh -s --format=%H origin/master)
     bldbn --build-folder "${BBF:?}" \
-          --install-folder "${BLDBN_INSTALL_FOLDER}" \
-          --update || die "bldbn failed with exit code ${?}"
+          --install-folder "${BLDBN_INSTALL_FOLDER}" || die "bldbn failed with exit code ${?}"
     stripall "${BLDBN_INSTALL_FOLDER}"
 
     # Update binutils
