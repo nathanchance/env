@@ -427,7 +427,6 @@ function bqemu() {(
     git format-patch -1 --stdout ece628fcf69cbbd4b3efb6fbd203af07609467a2 | git apply -3v
 
     ./configure \
-        --disable-bluez \
         --disable-docs \
         --disable-gcrypt \
         --disable-gnutls \
