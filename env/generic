@@ -49,6 +49,7 @@ function bootstrap() {(
                    libpcre2-dev
                    libpixman-1-dev
                    libssl-dev
+                   lld
                    locales
                    make
                    mosh
