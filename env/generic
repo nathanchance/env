@@ -70,8 +70,9 @@ function bootstrap() {(
                    unzip
                    vim
                    zip
+                   zlib1g-dev
                    zsh
-                   zlib1g-dev )
+                   zstd )
 
         sudo_wrapper apt update || exit ${?}
         sudo_wrapper DEBIAN_FRONTEND=noninteractive apt upgrade -y || exit ${?}
