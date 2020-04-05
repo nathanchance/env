@@ -998,7 +998,7 @@ git clone /'"${PWD##*/}"' /'"${PWD##*/}"'2 && cd /'"${PWD##*/}"'2
 CC=gcc ./build-llvm.py || exit 1
 CC=clang ./build-llvm.py || exit 1
 
-for FILE in clang ld.lld aarch64-linux-gnu-ld arm-linux-gnueabi-ld mipsel-linux-gnu-ld powerpc64le-linux-gnu-ld powerpc-linux-gnu-ld powerpc64-linux-gnu-ld ld; do
+for FILE in clang ld.lld aarch64-linux-gnu-as arm-linux-gnueabi-as mips-linux-gnu-as mipsel-linux-gnu-as powerpc-linux-gnu-as powerpc64-linux-gnu-as powerpc64le-linux-gnu-as riscv64-linux-gnu-as s390x-linux-gnu-as as; do
     ./install/bin/${FILE} --version || exit 1
 done' > "${SCRIPT}"
 
