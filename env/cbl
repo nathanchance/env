@@ -972,7 +972,7 @@ if command -v apt-get &>/dev/null; then
     apt-get install --no-install-recommends -y "${PACKAGES[@]}"
 # Fedora
 elif command -v dnf &>/dev/null; then
-    PACKAGES+=( gcc gcc-c++ lld make ninja-build xz zlib-devel )
+    PACKAGES+=( gcc gcc-c++ lld make ninja-build texinfo-tex xz zlib-devel )
     dnf update -y
     dnf install -y "${PACKAGES[@]}"
 # Arch
@@ -982,7 +982,7 @@ elif command -v pacman &>/dev/null; then
     pacman -S --noconfirm "${PACKAGES[@]}"
 # OpenSUSE Leap/Tumbleweed
 elif command -v zypper &>/dev/null; then
-    PACKAGES+=( curl gcc gcc-c++ gzip lld make ninja tar xz zlib-devel )
+    PACKAGES+=( curl gcc gcc-c++ gzip lld make ninja tar texinfo xz zlib-devel )
     zypper -n up
     zypper -n in "${PACKAGES[@]}"
 fi
