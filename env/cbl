@@ -32,7 +32,7 @@ CBLCFGS=( "arm:multi_v7_defconfig"
           "arm64:allyesconfig-bfd"
           "arm64:allmodconfig"
           "arm64:allmodconfig-bfd"
-          "mipsel:malta_defconfig"
+          "mipsel:malta_kvm_guest_defconfig"
           "ppc32:ppc44x_defconfig"
           "ppc32:allnoconfig"
           "ppc64:pseries_defconfig"
@@ -281,7 +281,7 @@ function bldk() {(
     [[ -z ${ARCH} ]] && die "ARCH not specified!"
     if [[ -z ${CONFIG} ]]; then
         case ${ARCH} in
-            "mipsel") CONFIG=malta_defconfig ;;
+            "mipsel") CONFIG=malta_kvm_guest_defconfig ;;
             "ppc32") CONFIG=ppc44x_defconfig ;;
             "ppc64") CONFIG=pseries_defconfig ;;
             "ppc64le") CONFIG=powernv_defconfig ;;
@@ -295,7 +295,7 @@ function bldk() {(
         # Use lld except in some cases
         if [[ -z ${LD} ]]; then
             case ${ARCH} in
-                "mipsel"|"ppc64"|"riscv64"|"s390") ;;
+                "ppc64"|"riscv64"|"s390") ;;
                 *) LD=ld.lld ;;
             esac
         fi
@@ -542,7 +542,7 @@ function lt() {(
         # Use lld except in some cases
         if [[ -z ${LD} && -z ${BFD} ]]; then
             case "${ARCH}:${CONFIG}" in
-                mipsel*|ppc64*|riscv64*|s390*) ;;
+                ppc64*|riscv64*|s390*) ;;
                 *) LD=ld.lld ;;
             esac
         fi
