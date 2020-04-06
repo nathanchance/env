@@ -1098,11 +1098,7 @@ function upd_lnx_tcbld() {(
 
     TARBALL=linux-${KVER}.tar.${TAR_EXT}
     cd "${KERNEL}"
-    curl -LSsO "${URL}/${TARBALL}"
-    sha256sum ${TARBALL} > ${TARBALL}.sha256
-    rm ${TARBALL}
-    curl -LSsO "${URL}/${TARBALL}"
-    sha256sum -c ${TARBALL}.sha256
+    gen_sha256sum "${URL}/${TARBALL}"
 
     sed -i "s/LINUX=.*/LINUX=linux-${KVER}/" ${KERNEL}/build.sh
 )}
