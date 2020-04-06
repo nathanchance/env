@@ -201,7 +201,6 @@ function bootstrap() {(
                    zip
                    zsh
                    zlib1g-dev )
-        ( source /usr/lib/os-release && [[ ${VERSION_ID} = "18.04" ]] ) && PACKAGES+=( linux-generic-hwe-18.04 )
 
         sudo_wrapper add-apt-repository ppa:projectatomic/ppa || exit ${?}
         sudo_wrapper apt update || exit ${?}
