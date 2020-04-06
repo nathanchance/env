@@ -772,20 +772,17 @@ Link: https://llvm.org/pr44916"
 function upd_cuttlefish() {(
     while (( ${#} )); do
         case ${1} in
-            [0-9]*) BUILD_NUMBER=${1} ;;
+            -i|--img-zip) shift && CUTTLEFISH_ZIP_URL=${1} ;;
+            -h|--host-tools-tar) shift && CUTTLEFISH_TAR_URL=${1} ;;
         esac
         shift
     done
 
-    BASE_URL=https://ci.android.com/builds/submitted/${BUILD_NUMBER}/aosp_cf_x86_phone-userdebug/latest/
-    CUTTLEFISH_ZIP_URL=${BASE_URL}/aosp_cf_x86_phone-img-${BUILD_NUMBER}.zip
-    CUTTLEFISH_TAR_URL=${BASE_URL}/cvd-host_package.tar.gz
-
     CUTTLEFISH_ZIP=$(mktemp --suffix=.zip)
     CUTTLEFISH_TAR=$(mktemp --suffix=.tar.gz)
 
-    curl -LSso "${CUTTLEFISH_ZIP}" "${CUTTLEFISH_ZIP_URL}" || exit ${?}
-    curl -LSso "${CUTTLEFISH_TAR}" "${CUTTLEFISH_TAR_URL}" || exit ${?}
+    curl -LSso "${CUTTLEFISH_ZIP}" "${CUTTLEFISH_ZIP_URL:?}" || exit ${?}
+    curl -LSso "${CUTTLEFISH_TAR}" "${CUTTLEFISH_TAR_URL:?}" || exit ${?}
 
     rm -rf "${CBL_CTTLFSH}"
     mkdir -p "${CBL_CTTLFSH}"
