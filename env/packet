@@ -24,8 +24,9 @@ function partition_and_create_user() {(
     # Always turn on '--no-install-recommends'
     apt-config dump | grep -we Recommends -e Suggests | sed 's/1/0/g' | tee /etc/apt/apt.conf.d/999norecommend
 
-    # Update apt files
+    # Update the server
     apt update
+    apt upgrade -y
 
     # Install tmux so that installation progress cannot be lost
     apt install -y tmux
