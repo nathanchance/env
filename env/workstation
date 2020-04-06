@@ -133,6 +133,7 @@ function bootstrap() {(
     elif [[ -n ${UBUNTU} ]]; then
         PACKAGES=( abootimg
                    bison
+                   bsdtar
                    build-essential
                    ca-certificates
                    cdbs
