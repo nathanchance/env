@@ -479,7 +479,7 @@ function btmux() {(
 
 # Build/update zsh
 function bzsh() {(
-    ZSH_VERSION=latest
+    ZSH_VERSION=5.8
     [[ ${#} -gt 0 ]] && ZSH_VERSION=${1}
     TMP_FOLDER=$(mktemp -d)
 
