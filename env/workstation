@@ -323,7 +323,7 @@ function bootstrap() {(
         git clone git@github.com:nathanchance/android-kernel-clang.git
         mkdir -p common
         cd common || die "wtf?"
-        repo init -u https://android.googlesource.com/kernel/manifest -b common-android-mainline
+        repo init -u https://android.googlesource.com/kernel/manifest -b common-android-multi
         repo sync
         curl -LSso common/.git/hooks/commit-msg https://android-review.googlesource.com/tools/hooks/commit-msg
         chmod u+x common/.git/hooks/commit-msg
