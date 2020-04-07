@@ -28,4 +28,69 @@ function create_zshrc() {(
         echo "type shell_setup &>/dev/null && shell_setup"
     } > "${HOME}"/.zshrc
 )}
+
+# Grab linux, linux-next, and linux-stable for CBL
+# https://www.kernel.org/cloning-linux-from-a-bundle.html
+function cbl_linux_repos() {(
+    cd "${SRC_FOLDER:=${HOME}/src}" || die "wtf?"
+    for COMBO in torvalds/linux.git:linux \
+                 torvalds/linux.git:${CBL:=${HOME}/cbl}/linux \
+                 torvalds/linux.git:${CBL}/mirrors/linux \
+                 next/linux-next.git:linux-next \
+                 next/linux-next.git:${CBL}/linux-next \
+                 stable/linux.git:linux-stable; do
+        FOLDER=${COMBO#*:}
+        URL=${COMBO%:*}
+        CB=clone.bundle-${FOLDER##*/}
+        [[ ! -f ${CB} ]] && wget -O "${CB}" -c https://git.kernel.org/pub/scm/linux/kernel/git/"${URL}"/clone.bundle
+        git clone "${CB}" "${FOLDER}"
+        (
+            cd "${FOLDER}"
+            git remote remove origin
+            git remote add origin git://git.kernel.org/pub/scm/linux/kernel/git/"${URL}"
+            git remote update origin
+            git checkout master
+            [[ ${URL} =~ linux-next ]] && git branch --unset-upstream
+            [[ ${FOLDER} =~ mirrors ]] && git remote add github git@github.com:ClangBuiltLinux/linux.git
+        )
+    done
+    rm -rf clone.bundle-*
+    git -C "${CBL}" clone -b personal git@github.com:nathanchance/tc-build.git
+    git clone git@github.com:WireGuard/android-wireguard-module-builder.git
+)}
+
+# Download other CBL things
+function cbl_other_repos() {(
+    cd "${CBL:=${HOME}/cbl}"/android || die "wtf?"
+    git clone git@github.com:nathanchance/android-kernel-clang.git
+    mkdir -p common
+    cd common || die "wtf?"
+    repo init -u https://android.googlesource.com/kernel/manifest -b common-android-multi
+    repo sync
+    curl -LSso common/.git/hooks/commit-msg https://android-review.googlesource.com/tools/hooks/commit-msg
+    chmod u+x common/.git/hooks/commit-msg
+
+    cd "${CBL}"/git || die "wtf?"
+    git clone git@github.com:ClangBuiltLinux/continuous-integration.git ci
+    git clone git@github.com:ClangBuiltLinux/continuous-integration.git ci-master
+    git clone git@github.com:ClangBuiltLinux/dockerimage.git
+    git clone git@github.com:ClangBuiltLinux/tc-build.git
+    for FOLDER in ci dockerimage tc-build; do (
+        cd "${FOLDER}"
+        hub fork
+    ) done
+
+    cd "${CBL}"/mirrors || die "wtf?"
+    git clone git://github.com/llvm/llvm-project llvm
+    cd llvm || die "wtf?"
+    git remote add github git@github.com:ClangBuiltLinux/llvm-project.git
+
+    cd "${CBL}" || die "wtf?"
+    git clone git@github.com:nathanchance/WSL2-Linux-Kernel wsl2
+    git -C wsl2 remote add mainline git://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git
+    git -C wsl2 remote add next git://git.kernel.org/pub/scm/linux/kernel/git/next/linux-next.git
+    git -C wsl2 remote add microsoft git://github.com/microsoft/WSL2-Linux-Kernel
+    git -C wsl2 fetch --multiple mainline next microsoft
+    git -C wsl2 config rerere.enabled true
+)}
 # vi: filetype=zsh

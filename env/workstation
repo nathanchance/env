@@ -215,15 +215,6 @@ function bootstrap() {(
         echo "$(whoami):100000:65536" | sudo_wrapper tee /etc/subgid /etc/subuid
         sudo_wrapper curl -LSso /etc/containers/registries.conf 'https://git.archlinux.org/svntogit/community.git/plain/trunk/registries.conf?h=packages/skopeo'
 
-        # Disable SMT for security
-        if grep -q "SMT vulnerable" /sys/devices/system/cpu/vulnerabilities/*; then
-            CMDLINE=$(grep GRUB_CMDLINE_LINUX /etc/default/grub | cut -d \" -f 2 | head -n1)
-            if [[ ! ${CMDLINE} =~ nosmt ]]; then
-                sudo_wrapper sed -i "s/${CMDLINE}/${CMDLINE} mitigations=auto,nosmt/g" /etc/default/grub
-                sudo_wrapper update-grub
-            fi
-        fi
-
         # Build folder size
         BFS=60
     fi
@@ -276,7 +267,7 @@ function bootstrap() {(
     [[ ! -d ${ALS}/sp ]] && { git -C "${ALS}" clone git@github.com:nathanchance/stable-patches sp || die "Error cloning stable-patches!"; }
 
     # Download toolchains
-    git -C "${ANDROID_TC_FOLDER}" clone --single-branch https://android.googlesource.com/platform/prebuilts/clang/host/linux-x86/ clang-master
+    tmux new-window zsh -c "git -C ${ANDROID_TC_FOLDER} clone --single-branch https://android.googlesource.com/platform/prebuilts/clang/host/linux-x86/ clang-master"
     git -C "${ANDROID_TC_FOLDER}" clone --depth=1 -b android-9.0.0_r1 --single-branch https://android.googlesource.com/platform/prebuilts/gcc/linux-x86/aarch64/aarch64-linux-android-4.9/ gcc-arm64
     git -C "${ANDROID_TC_FOLDER}" clone --depth=1 -b android-9.0.0_r1 --single-branch https://android.googlesource.com/platform/prebuilts/gcc/linux-x86/arm/arm-linux-androideabi-4.9/ gcc-arm
     for VERSION in clang-4691093:android-9.0.0_r1 clang-r353983c:android-10.0.0_r1; do
@@ -288,69 +279,10 @@ function bootstrap() {(
     git -C "${ANDROID_TC_FOLDER}" clone https://github.com/ThankYouMario/proprietary_vendor_qcom_sdclang-6.0_linux-x86 sd-llvm-6.0.2
 
     # Grab linux, linux-next, and linux-stable for CBL
-    # https://www.kernel.org/cloning-linux-from-a-bundle.html
-    (
-        cd "${SRC_FOLDER}" || die "wtf?"
-        for COMBO in torvalds/linux.git:linux \
-                     torvalds/linux.git:${CBL}/linux \
-                     torvalds/linux.git:${CBL}/mirrors/linux \
-                     next/linux-next.git:linux-next \
-                     next/linux-next.git:${CBL}/linux-next \
-                     stable/linux.git:linux-stable; do
-            FOLDER=${COMBO#*:}
-            URL=${COMBO%:*}
-            CB=clone.bundle-${FOLDER##*/}
-            [[ ! -f ${CB} ]] && wget -O "${CB}" -c https://git.kernel.org/pub/scm/linux/kernel/git/"${URL}"/clone.bundle
-            git clone "${CB}" "${FOLDER}"
-            (
-                cd "${FOLDER}"
-                git remote remove origin
-                git remote add origin git://git.kernel.org/pub/scm/linux/kernel/git/"${URL}"
-                git remote update origin
-                git checkout master
-                [[ ${URL} =~ linux-next ]] && git branch --unset-upstream
-                [[ ${FOLDER} =~ mirrors ]] && git remote add github git@github.com:ClangBuiltLinux/linux.git
-            )
-        done
-        rm -rf clone.bundle-*
-        git -C "${CBL}" clone -b personal git@github.com:nathanchance/tc-build.git
-        git clone git@github.com:WireGuard/android-wireguard-module-builder.git
-    )
+    tmux new-window zsh -c "source ${SCRIPTS}/env/setup && cbl_linux_repos"
 
     # Download other CBL things
-    (
-        cd "${CBL}"/android || die "wtf?"
-        git clone git@github.com:nathanchance/android-kernel-clang.git
-        mkdir -p common
-        cd common || die "wtf?"
-        repo init -u https://android.googlesource.com/kernel/manifest -b common-android-multi
-        repo sync
-        curl -LSso common/.git/hooks/commit-msg https://android-review.googlesource.com/tools/hooks/commit-msg
-        chmod u+x common/.git/hooks/commit-msg
-
-        cd "${CBL}"/git || die "wtf?"
-        git clone git@github.com:ClangBuiltLinux/continuous-integration.git ci
-        git clone git@github.com:ClangBuiltLinux/continuous-integration.git ci-master
-        git clone git@github.com:ClangBuiltLinux/dockerimage.git
-        git clone git@github.com:ClangBuiltLinux/tc-build.git
-        for FOLDER in ci dockerimage tc-build; do (
-            cd "${FOLDER}"
-            hub fork
-        ) done
-
-        cd "${CBL}"/mirrors || die "wtf?"
-        git clone git://github.com/llvm/llvm-project llvm
-        cd llvm || die "wtf?"
-        git remote add github git@github.com:ClangBuiltLinux/llvm-project.git
-
-        cd "${CBL}" || die "wtf?"
-        git clone git@github.com:nathanchance/WSL2-Linux-Kernel wsl2
-        git -C wsl2 remote add mainline git://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git
-        git -C wsl2 remote add next git://git.kernel.org/pub/scm/linux/kernel/git/next/linux-next.git
-        git -C wsl2 remote add microsoft git://github.com/microsoft/WSL2-Linux-Kernel
-        git -C wsl2 fetch --multiple mainline next microsoft
-        git -C wsl2 config rerere.enabled true
-    )
+    tmux new-window zsh -c "source ${SCRIPTS}/env/setup && cbl_other_repos"
 
     # Clone sonyxperiadev/kernel
     git -C "${KERNEL_FOLDER}/sony" clone git://github.com/sonyxperiadev/kernel
