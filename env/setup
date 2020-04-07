@@ -32,15 +32,21 @@ function create_zshrc() {(
 # Grab linux, linux-next, and linux-stable for CBL
 # https://www.kernel.org/cloning-linux-from-a-bundle.html
 function cbl_linux_repos() {(
-    cd "${SRC_FOLDER:=${HOME}/src}" || die "wtf?"
-    for COMBO in torvalds/linux.git:linux \
-                 torvalds/linux.git:${CBL:=${HOME}/cbl}/linux \
-                 torvalds/linux.git:${CBL}/mirrors/linux \
-                 next/linux-next.git:linux-next \
-                 next/linux-next.git:${CBL}/linux-next \
-                 stable/linux.git:linux-stable; do
-        FOLDER=${COMBO#*:}
-        URL=${COMBO%:*}
+    : "${CBL:=${HOME}/cbl}" "${SRC_FOLDER:=${HOME}/src}"
+
+    while (( ${#} )); do
+        case ${1} in
+            linux) PAIRS=( "torvalds/linux.git:linux" "torvalds/linux.git:${CBL}/linux" "torvalds/linux.git:${CBL}/mirrors/linux" ) ;;
+            linux-next) PAIRS=( "next/linux-next.git:linux-next" "next/linux-next.git:${CBL}/linux-next" ) ;;
+            linux-stable) PAIRS=( "stable/linux.git:linux-stable" ) ;;
+            *) return 1;
+        esac
+    done
+
+    cd "${SRC_FOLDER}" || die "wtf?"
+    for PAIR in "${PAIRS[@]}"; do
+        FOLDER=${PAIR#*:}
+        URL=${PAIR%:*}
         CB=clone.bundle-${FOLDER##*/}
         [[ ! -f ${CB} ]] && wget -O "${CB}" -c https://git.kernel.org/pub/scm/linux/kernel/git/"${URL}"/clone.bundle
         git clone "${CB}" "${FOLDER}"
@@ -55,7 +61,6 @@ function cbl_linux_repos() {(
         )
     done
     rm -rf clone.bundle-*
-    git -C "${CBL}" clone -b personal git@github.com:nathanchance/tc-build.git
     git clone git@github.com:WireGuard/android-wireguard-module-builder.git
 )}
 
@@ -86,6 +91,7 @@ function cbl_other_repos() {(
     git remote add github git@github.com:ClangBuiltLinux/llvm-project.git
 
     cd "${CBL}" || die "wtf?"
+    git clone -b personal git@github.com:nathanchance/tc-build.git
     git clone git@github.com:nathanchance/WSL2-Linux-Kernel wsl2
     git -C wsl2 remote add mainline git://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git
     git -C wsl2 remote add next git://git.kernel.org/pub/scm/linux/kernel/git/next/linux-next.git

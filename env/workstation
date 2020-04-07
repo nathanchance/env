@@ -248,7 +248,7 @@ function bootstrap() {(
     fi
 
     # Download repos
-    [[ ! -d ${SCRIPTS} ]] && { git clone git@github.com:nathanchance/scripts "${SCRIPTS}" || die "Error cloning scripts!"; }
+    [[ -d ${SCRIPTS} ]] || { git clone git@github.com:nathanchance/scripts "${SCRIPTS}" || die "Error cloning scripts!"; }
     source "${SCRIPTS}"/env/setup && global_gitignore && create_zshrc
     source "${SCRIPTS}"/funcs/bldupdbin
     [[ -n ${ARCH} ]] && bgit
@@ -262,9 +262,10 @@ function bootstrap() {(
     decrypt_del_dog_api_key
     decrypt_gpg_file muttrc
     for REPO in chromeos-adb-fastboot hugo-files nathanchance.github.io patches; do
-        [[ ! -d ${GITHUB_FOLDER}/${REPO} ]] && { git -C "${GITHUB_FOLDER}" clone git@github.com:nathanchance/"${REPO}" || die "Error cloning ${REPO}!"; }
+        [[ -d ${GITHUB_FOLDER}/${REPO} ]] || { git -C "${GITHUB_FOLDER}" clone git@github.com:nathanchance/"${REPO}" || die "Error cloning ${REPO}!"; }
     done
-    [[ ! -d ${ALS}/sp ]] && { git -C "${ALS}" clone git@github.com:nathanchance/stable-patches sp || die "Error cloning stable-patches!"; }
+    [[ -d ${ALS}/sp ]] || { git -C "${ALS}" clone git@github.com:nathanchance/stable-patches sp || die "Error cloning stable-patches!"; }
+    [[ -d ${SRC_FOLDER}/android-wireguard-module-builder ]] || git -C "${SRC_FOLDER}" clone git@github.com:WireGuard/android-wireguard-module-builder.git
 
     # Download toolchains
     tmux new-window zsh -c "git -C ${ANDROID_TC_FOLDER} clone --single-branch https://android.googlesource.com/platform/prebuilts/clang/host/linux-x86/ clang-master"
@@ -279,7 +280,9 @@ function bootstrap() {(
     git -C "${ANDROID_TC_FOLDER}" clone https://github.com/ThankYouMario/proprietary_vendor_qcom_sdclang-6.0_linux-x86 sd-llvm-6.0.2
 
     # Grab linux, linux-next, and linux-stable for CBL
-    tmux new-window zsh -c "source ${SCRIPTS}/env/setup && cbl_linux_repos"
+    for REPO in linux linux-next linux-stable; do
+        tmux new-window zsh -c "source ${SCRIPTS}/env/setup && cbl_linux_repos ${REPO}"
+    done
 
     # Download other CBL things
     tmux new-window zsh -c "source ${SCRIPTS}/env/setup && cbl_other_repos"
