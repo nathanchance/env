@@ -65,8 +65,8 @@ function cbl_other_repos() {(
     git clone git@github.com:nathanchance/android-kernel-clang.git
     mkdir -p common
     cd common || die "wtf?"
-    repo init -u https://android.googlesource.com/kernel/manifest -b common-android-multi
-    repo sync
+    PATH=${HOME}/usr/bin:${PATH} repo init -u https://android.googlesource.com/kernel/manifest -b common-android-multi
+    PATH=${HOME}/usr/bin:${PATH} repo sync
     curl -LSso common/.git/hooks/commit-msg https://android-review.googlesource.com/tools/hooks/commit-msg
     chmod u+x common/.git/hooks/commit-msg
 
