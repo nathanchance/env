@@ -1,8 +1,41 @@
 #!/bin/bash
 
+function partition_drive() {(
+    # Function must be run as root
+    [[ $(id -u) -ne 0 ]] && { printf "\033[01;31m\nThis function must be run as root.\n\033[0m"; exit 1; }
+
+    while (( ${#} )); do
+        case ${1} in
+            -d|--drive) shift; DRIVE=${1} ;;
+            -f|--folder) shift; FOLDER=${1} ;;
+            -u|--user) shift; USER=${1} ;;
+        esac
+        shift
+    done
+
+    set -eux
+
+    : "${DRIVE}" "${FOLDER}" "${USER}"
+
+    case ${DRIVE} in
+        /dev/nvme*) PART=p1 ;;
+        /dev/sd*) PART=1 ;;
+    esac
+
+    # Partition and modify fstab
+    parted -s "${DRIVE}" mklabel gpt mkpart primary ext4 '0%' '100%'
+    sleep 15
+    mkfs -t ext4 "${DRIVE}${PART}"
+    printf 'UUID=%s\t%s\text4\tnoatime\t0\t2\n' "$(blkid -o value -s UUID "${DRIVE}${PART}")" "${FOLDER}" | tee -a /etc/fstab
+    sed -i '/^$/d' /etc/fstab
+    [[ ${FOLDER} != /home ]] && mkdir -p "${FOLDER}"
+    mount -a
+    [[ ${FOLDER} != /home ]] && chown -R "${USER}:${USER}" "${FOLDER}"
+)}
+
 function partition_and_create_user() {(
     # Function must be run as root
-    [[ $(id -u) -ne 0 ]] && { printf "\033[01;31m\nThis script must be run as root.\n\033[0m"; exit 1; }
+    [[ $(id -u) -ne 0 ]] && { printf "\033[01;31m\nThis function must be run as root.\n\033[0m"; exit 1; }
 
     # Drive to use must be provided as argument of script
     while (( ${#} )); do
@@ -33,19 +66,8 @@ function partition_and_create_user() {(
 
     # Install necessary files
     if [[ -n ${DRIVE:-} ]]; then
-        case ${DRIVE} in
-            /dev/nvme*) PART=p1 ;;
-            /dev/sd*) PART=1 ;;
-        esac
         apt install -y parted
-
-        # Partition and modify fstab
-        parted -s "${DRIVE}" mklabel gpt mkpart primary ext4 '0%' '100%'
-        sleep 15
-        mkfs -t ext4 "${DRIVE}${PART}"
-        printf 'UUID=%s\t/home\text4\tnoatime\t0\t2\n' "$(blkid -o value -s UUID "${DRIVE}${PART}")" | tee -a /etc/fstab
-        sed -i '/^$/d' /etc/fstab
-        mount -a
+        partition_drive -d "${DRIVE}" -f /home -u "${USER}"
     fi
 
     # Setup user account
