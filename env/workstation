@@ -219,7 +219,7 @@ function bootstrap() {(
         if grep -q "SMT vulnerable" /sys/devices/system/cpu/vulnerabilities/*; then
             CMDLINE=$(grep GRUB_CMDLINE_LINUX /etc/default/grub | cut -d \" -f 2 | head -n1)
             if [[ ! ${CMDLINE} =~ nosmt ]]; then
-                sudo_wrapper sed -i "s/${CMDLINE}/${CMDLINE} nosmt/g" /etc/default/grub
+                sudo_wrapper sed -i "s/${CMDLINE}/${CMDLINE} mitigations=auto,nosmt/g" /etc/default/grub
                 sudo_wrapper update-grub
             fi
         fi
