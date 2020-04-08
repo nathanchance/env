@@ -675,7 +675,8 @@ function bldtcs() {(
     [[ -d ${TC_BLD_LLVM_PRJCT} ]] || git -C "${TCBLD}" clone git://github.com/llvm/llvm-project
     git -C "${TC_BLD_LLVM_PRJCT}" pull --rebase || die "Updating llvm-project failed (${?})"
     BLDLLVM_INSTALL_FOLDER=${CBL_TC}/llvm-${DATE_TIME}-$(git -C "${TC_BLD_LLVM_PRJCT}" sh -s --format=%H origin/master)
-    bldllvm --build-folder "${LBF:?}" \
+    bldllvm --assertions \
+            --build-folder "${LBF:?}" \
             --check-targets lld clang llvm \
             --install-folder "${BLDLLVM_INSTALL_FOLDER}" \
             --lto=thin \
