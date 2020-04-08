@@ -43,7 +43,7 @@ function cbl_linux_repos() {(
         esac
     done
 
-    cd "${SRC_FOLDER}" || die "wtf?"
+    cd "${SRC_FOLDER}" || die "wtf"
     for PAIR in "${PAIRS[@]}"; do
         FOLDER=${PAIR#*:}
         URL=${PAIR%:*}
@@ -66,31 +66,33 @@ function cbl_linux_repos() {(
 
 # Download other CBL things
 function cbl_other_repos() {(
-    cd "${CBL:=${HOME}/cbl}"/android || die "wtf?"
+    cd "${CBL:=${HOME}/cbl}"/android || die "wtf"
     git clone git@github.com:nathanchance/android-kernel-clang.git
     mkdir -p common
-    cd common || die "wtf?"
+    cd common || die "wtf"
     PATH=${HOME}/usr/bin:${PATH} repo init -u https://android.googlesource.com/kernel/manifest -b common-android-multi
     PATH=${HOME}/usr/bin:${PATH} repo sync
     curl -LSso common/.git/hooks/commit-msg https://android-review.googlesource.com/tools/hooks/commit-msg
     chmod u+x common/.git/hooks/commit-msg
 
-    cd "${CBL}"/git || die "wtf?"
+    cd "${CBL}"/git || die "wtf"
+    git clone git@github.com:ClangBuiltLinux/boot-utils.git
+    git clone git@github.com:ClangBuiltLinux/boot-utils.git boot-utils-master
     git clone git@github.com:ClangBuiltLinux/continuous-integration.git ci
-    git clone git@github.com:ClangBuiltLinux/continuous-integration.git ci-master
     git clone git@github.com:ClangBuiltLinux/dockerimage.git
     git clone git@github.com:ClangBuiltLinux/tc-build.git
-    for FOLDER in ci dockerimage tc-build; do (
+    for FOLDER in boot-utils ci dockerimage tc-build; do (
         cd "${FOLDER}"
         hub fork
     ) done
 
-    cd "${CBL}"/mirrors || die "wtf?"
+    cd "${CBL}"/mirrors || die "wtf"
     git clone git://github.com/llvm/llvm-project llvm
-    cd llvm || die "wtf?"
+    cd llvm || die "wtf"
     git remote add github git@github.com:ClangBuiltLinux/llvm-project.git
 
-    cd "${CBL}" || die "wtf?"
+    cd "${CBL}" || die "wtf"
+    git clone git@github.com:nathanchance/llvm-kernel-testing.git
     git clone -b personal git@github.com:nathanchance/tc-build.git
     git clone git@github.com:nathanchance/WSL2-Linux-Kernel wsl2
     git -C wsl2 remote add mainline git://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git
