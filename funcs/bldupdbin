@@ -416,6 +416,7 @@ function bqemu() {(
         git clone --recursive -j$(nproc) https://git.qemu.org/git/qemu.git "${QEMU_FOLDER}"
     fi
     cd "${QEMU_FOLDER}" || die "Couldn't move into ${QEMU_FOLDER}"
+    git fetch origin
     [[ -z ${QEMU_VERSION} ]] && QEMU_VERSION=$(git tag -l --sort=-taggerdate | grep -v rc | head -n1)
     git clean -dfqx
     git submodule foreach --recursive git clean -dfqx
