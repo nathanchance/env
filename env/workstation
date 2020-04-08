@@ -199,8 +199,9 @@ function bootstrap() {(
                    unzip
                    vim
                    zip
+                   zlib1g-dev
                    zsh
-                   zlib1g-dev )
+                   zstd )
 
         sudo_wrapper add-apt-repository ppa:projectatomic/ppa || exit ${?}
         sudo_wrapper apt update || exit ${?}
