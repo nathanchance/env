@@ -20,12 +20,12 @@ export CBL_ANDROID CBL_CTTLFSH CBL_KC CBL_KC_SRC CBL_SRC CBL_TC CBL_LLVM CBL_BNT
 
 
 # Configurations known to build with -Werror
-CBLCFGS=( "arm:multi_v7_defconfig"
-          "arm:allnoconfig"
-          "arm:allyesconfig"
-          "arm:allyesconfig-bfd"
-          "arm:allmodconfig"
-          "arm:allmodconfig-bfd"
+CBLCFGS=( "arm32:multi_v7_defconfig"
+          "arm32:allnoconfig"
+          "arm32:allyesconfig"
+          "arm32:allyesconfig-bfd"
+          "arm32:allmodconfig"
+          "arm32:allmodconfig-bfd"
           "arm64:defconfig"
           "arm64:allnoconfig"
           "arm64:allyesconfig"
@@ -39,12 +39,12 @@ CBLCFGS=( "arm:multi_v7_defconfig"
           "ppc64:allnoconfig"
           "ppc64le:powernv_defconfig"
           "riscv64:defconfig"
-          "s390:defconfig"
-          "x86:defconfig"
-          "x86:allyesconfig"
-          "x86:allyesconfig-bfd"
-          "x86:allmodconfig"
-          "x86:allmodconfig-bfd" )
+          "s390x:defconfig"
+          "x86_64:defconfig"
+          "x86_64:allyesconfig"
+          "x86_64:allyesconfig-bfd"
+          "x86_64:allmodconfig"
+          "x86_64:allmodconfig-bfd" )
 
 
 # Create build folders
@@ -190,30 +190,99 @@ function ccache_size() {
 
 # Build kernel with Clang (wrapper)
 function bldkw() {(
-    if [[ ! -f Makefile ]]; then
-        display_error "No Makefile found! Are you in a kernel tree?"
-        return
-    fi
+    [[ -f Makefile ]] || die "No Makefile found! Are you in a kernel tree?"
 
-    TARGET_ARCH=${1}; shift
-    case "${TARGET_ARCH}" in
-        "arm") : "${CROSS_COMPILE:=arm-linux-gnueabi-}" && MAKE_FLAGS=( "ARCH=arm" "CROSS_COMPILE=${CROSS_COMPILE}" ) ;;
-        "arm64") : "${CROSS_COMPILE:=aarch64-linux-gnu-}" && MAKE_FLAGS=( "ARCH=arm64" "CROSS_COMPILE=${CROSS_COMPILE}" ) ;;
-        "mipsel") : "${CROSS_COMPILE:=mipsel-linux-gnu-}" && MAKE_FLAGS=( "ARCH=mips" "CROSS_COMPILE=${CROSS_COMPILE}" ) ;;
-        "ppc32") : "${CROSS_COMPILE:=powerpc-linux-gnu-}" && MAKE_FLAGS=( "ARCH=powerpc" "CROSS_COMPILE=${CROSS_COMPILE}" ) ;;
-        "ppc64") : "${CROSS_COMPILE:=powerpc64-linux-gnu-}" && MAKE_FLAGS=( "ARCH=powerpc" "CROSS_COMPILE=${CROSS_COMPILE}" ) ;;
-        "ppc64le") : "${CROSS_COMPILE:=powerpc64le-linux-gnu-}" && MAKE_FLAGS=( "ARCH=powerpc" "CROSS_COMPILE=${CROSS_COMPILE}" ) ;;
-        "riscv64") : "${CROSS_COMPILE:=riscv64-linux-gnu-}" "${AS:=clang}"
-                   MAKE_FLAGS=( "ARCH=riscv" "CROSS_COMPILE=${CROSS_COMPILE}" ${AS:+"AS=${AS}"} ) ;;
-        "s390") : "${CROSS_COMPILE:=s390x-linux-gnu-}" "${OBJDUMP:=${CROSS_COMPILE}objdump}"
-                MAKE_FLAGS=( "ARCH=s390" "CROSS_COMPILE=${CROSS_COMPILE}" ) ;;
-        "x86") MAKE_FLAGS=() ;;
-        *) display_error "Invalid TARGET_ARCH specified!"; return ;;
+    # Parameters
+    MAKE_ARGS=( )
+    while (( ${#} )); do
+        case ${1} in
+            # Supported architectures
+            arm) TARGET_ARCH=arm32 ;;
+            arm32|arm64|mipsel|ppc32|ppc64|ppc64le|riscv64|s390x|x86_64) TARGET_ARCH=${1} ;;
+            x86) TARGET_ARCH=x86_64 ;;
+
+            # Build utilities
+            AR=*|CC=*|HOSTAR=*|HOSTCC=*|HOSTCXX=*|HOSTLD=*|LD=*|NM=*|OBJCOPY=*|OBJDUMP=*|OBJSIZE=*|READELF=*|STRIP=*) export "${1:?}" ;;
+
+            # bldkw vars
+            PO=*|Q=*) export "${1:?}" ;;
+
+            # make flags that are interpreted by bldkw
+            CROSS_COMPILE=*|KCFLAGS=*|LLVM_IAS=*|O=*|V=*|W=*) export "${1:?}" ;;
+
+            # Assume everything else is destined for make (like configs and targets)
+            *) MAKE_ARGS=( "${MAKE_ARGS[@]}" "${1}" ) ;;
+        esac
+
+        shift
+    done
+
+    case ${TARGET_ARCH} in
+        arm32)
+            : "${CROSS_COMPILE:=arm-linux-gnueabi-}"
+            ARCH_FLAGS=( "ARCH=arm" "CROSS_COMPILE=${CROSS_COMPILE}" ) ;;
+
+        arm64)
+            : "${CROSS_COMPILE:=aarch64-linux-gnu-}"
+            ARCH_FLAGS=( "ARCH=arm64" "CROSS_COMPILE=${CROSS_COMPILE}" ) ;;
+
+        mipsel)
+            : "${CROSS_COMPILE:=mipsel-linux-gnu-}"
+            ARCH_FLAGS=( "ARCH=mips" "CROSS_COMPILE=${CROSS_COMPILE}" ) ;;
+
+        ppc32)
+            : "${CROSS_COMPILE:=powerpc-linux-gnu-}"
+            ARCH_FLAGS=( "ARCH=powerpc" "CROSS_COMPILE=${CROSS_COMPILE}" ) ;;
+
+        ppc64)
+            : "${CROSS_COMPILE:=powerpc64-linux-gnu-}" \
+              "${LD:=${CROSS_COMPILE}ld}"
+            ARCH_FLAGS=( "ARCH=powerpc" "CROSS_COMPILE=${CROSS_COMPILE}" ) ;;
+
+        ppc64le)
+            : "${CROSS_COMPILE:=powerpc64le-linux-gnu-}"
+            ARCH_FLAGS=( "ARCH=powerpc" "CROSS_COMPILE=${CROSS_COMPILE}" ) ;;
+
+        riscv64)
+            : "${CROSS_COMPILE:=riscv64-linux-gnu-}" \
+              "${LD:=${CROSS_COMPILE}ld}" \
+              "${LLVM_IAS:=1}"
+            ARCH_FLAGS=( "ARCH=riscv" "CROSS_COMPILE=${CROSS_COMPILE}" ) ;;
+
+        s390x)
+            : "${CROSS_COMPILE:=s390x-linux-gnu-}" \
+              "${LD:=${CROSS_COMPILE}ld}" \
+              "${OBJCOPY:=${CROSS_COMPILE}objcopy}" \
+              "${OBJDUMP:=${CROSS_COMPILE}objdump}"
+            ARCH_FLAGS=( "ARCH=s390" "CROSS_COMPILE=${CROSS_COMPILE}" ) ;;
+
+        x86_64) ARCH_FLAGS=() ;;
+
+        *) die "Invalid TARGET_ARCH specified!" ;;
     esac
+
+    # Default values
+    : "${AR:=llvm-ar}" \
+      "${CC:=${CCACHE} clang}" \
+      "${HOSTAR:=llvm-ar}" \
+      "${HOSTCC:=${CCACHE} clang}" \
+      "${HOSTCXX:=${CCACHE} clang++}" \
+      "${HOSTLD:=ld.lld}" \
+      "${HOSTLDFLAGS:=-fuse-ld=lld}" \
+      "${LD:=ld.lld}" \
+      "${LLVM_IAS:=0}" \
+      "${NM:=llvm-nm}" \
+      "${O:=out/${TARGET_ARCH}}" \
+      "${OBJCOPY:=llvm-objcopy}" \
+      "${OBJDUMP:=llvm-objdump}" \
+      "${OBJSIZE:=llvm-size}" \
+      "${READELF:=llvm-readelf}" \
+      "${STRIP:=llvm-strip}"
 
     # We are only concerned about little endian for ARM
     if [[ ${TARGET_ARCH} =~ arm ]]; then
-        KCONFIG_ALLCONFIG=${KBF}/little-endian.config
+        KCONFIG_ALLCONFIG=${O}/little-endian.config
+        mkdir -p "${KCONFIG_ALLCONFIG%/*}"
         echo "CONFIG_CPU_BIG_ENDIAN=n" > "${KCONFIG_ALLCONFIG}"
     fi
 
@@ -222,7 +291,7 @@ function bldkw() {(
     move_to_front_of_path "${CBL_LLVM}"
     [[ -n ${PO} ]] && move_to_front_of_path "${PO}"
 
-    if [[ ${Q} -ne 2 ]]; then
+    if [[ ${Q:=1} -ne 2 ]]; then
         echo
         echo "${BOLD}LLVM location:${RST} $(dirname "$(command -v clang)")"
         echo
@@ -235,7 +304,9 @@ function bldkw() {(
     fi
 
     # Don't set -s if V is set
-    [[ -n ${Q} && ! ${*} =~ V= ]] && SILENT_FLAG=( -s )
+    case ${Q} in
+        1|2) [[ -z ${V} ]] && SILENT_FLAG=( -s ) ;;
+    esac
 
     # Setup ccache
     ccache_size kernel 100
@@ -244,19 +315,28 @@ function bldkw() {(
     set -x
     make ${SILENT_FLAG:+"${SILENT_FLAG[@]}"} \
          "${JOBS_FLAG}" \
-         AR="${AR:-llvm-ar}" \
-         CC="${CC:-${CCACHE} clang}" \
+         ${ARCH_FLAGS:+"${ARCH_FLAGS[@]}"} \
+         AR="${AR}" \
+         CC="${CC}" \
+         HOSTAR="${HOSTAR}" \
+         HOSTCC="${HOSTCC}" \
+         HOSTCXX="${HOSTCXX}" \
+         HOSTLD="${HOSTLD}" \
+         HOSTLDFLAGS="${HOSTLDFLAGS}" \
+         ${KCFLAGS:+KCFLAGS="${KCFLAGS}"} \
          ${KCONFIG_ALLCONFIG:+KCONFIG_ALLCONFIG="${KCONFIG_ALLCONFIG}"} \
-         HOSTCC="${HOSTCC:-${CCACHE} clang}" \
-         HOSTCXX="${HOSTCXX:-${CCACHE} clang++}" \
-         HOSTLD="${HOSTLD:-ld.lld}" \
-         HOSTLDFLAGS="${HOSTLDFLAGS--fuse-ld=lld}" \
-         "${MAKE_FLAGS[@]}" \
-         NM="${NM:-llvm-nm}" \
-         O="${O:-${KBF}}" \
-         OBJDUMP="${OBJDUMP:-llvm-objdump}" \
-         STRIP="${STRIP:-llvm-strip}" \
-         "${@}"
+         LD="${LD}" \
+         LLVM_IAS="${LLVM_IAS}" \
+         NM="${NM}" \
+         O="${O}" \
+         OBJCOPY="${OBJCOPY}" \
+         OBJDUMP="${OBJDUMP}" \
+         OBJSIZE="${OBJSIZE}" \
+         READELF="${READELF}" \
+         STRIP="${STRIP}" \
+         ${V:+V="${V}"} \
+         ${W:+W="${W}"} \
+         "${MAKE_ARGS[@]}"
     EXIT_CODE=${?}
     set +x
     exit ${EXIT_CODE}
@@ -266,58 +346,59 @@ function bldkw() {(
 # Configure and build a kernel with Clang
 function bldk() {(
     # Parameters
+    BLDKW_ARGS=( )
+    FINAL_ARGS=( )
     while (( ${#} )); do
         case ${1} in
+            # Supported architectures
+            arm) ARCH=arm32 ;;
+            arm32|arm64|mipsel|ppc32|ppc64|ppc64le|riscv64|s390x|x86_64) ARCH=${1} ;;
+            x86) ARCH=x86_64 ;;
+
+            # Build utilities
+            AR=*|CC=*|HOSTAR=*|HOSTCC=*|HOSTCXX=*|HOSTLD=*|LD=*|NM=*|OBJCOPY=*|OBJDUMP=*|OBJSIZE=*|READELF=*|STRIP=*) BLDKW_ARGS=( "${BLDKW_ARGS[@]}" "${1}" ) ;;
+
+            # bldkw vars
+            PO=*|Q=*) BLDKW_ARGS=( "${BLDKW_ARGS[@]}" "${1}" ) ;;
+
+            # make flags that are interpreted by bldkw
+            CROSS_COMPILE=*|KCFLAGS=*|LLVM_IAS=*|O=*|V=*|W=*) BLDKW_ARGS=( "${BLDKW_ARGS[@]}" "${1}" ) ;;
+
+            # The wrapper needs knowledge about O=
+            O=*) export "${1:?}"; BLDKW_ARGS=( "${BLDKW_ARGS[@]}" "${1}" ) ;;
+
+            # The wrapper need to parse the config
             *config) CONFIG=${1} ;;
-            arm|arm64|mipsel|ppc32|ppc64|ppc64le|riscv64|s390|x86) ARCH=${1} ;;
-            KCFLAGS=*|V=*|W=*) BLDKW_ARGS+=( "${1}" ) ;;
-            *.o|*/*|all|vmlinux|modules|*Image*) TARGETS+=( "${1}" ) ;;
+
+            # Assume everything else is destined for make (like configs and targets)
+            *) FINAL_ARGS=( "${FINAL_ARGS[@]}" "${1}" ) ;;
         esac
 
         shift
     done
+    [[ -z ${FINAL_ARGS[*]} ]] && FINAL_ARGS=( all )
 
     # Sanity checks
     [[ -z ${ARCH} ]] && die "ARCH not specified!"
     if [[ -z ${CONFIG} ]]; then
         case ${ARCH} in
-            "mipsel") CONFIG=malta_kvm_guest_defconfig ;;
-            "ppc32") CONFIG=ppc44x_defconfig ;;
-            "ppc64") CONFIG=pseries_defconfig ;;
-            "ppc64le") CONFIG=powernv_defconfig ;;
+            mipsel) CONFIG=malta_kvm_guest_defconfig ;;
+            ppc32) CONFIG=ppc44x_defconfig ;;
+            ppc64) CONFIG=pseries_defconfig ;;
+            ppc64le) CONFIG=powernv_defconfig ;;
             *) CONFIG=defconfig ;;
         esac
     fi
-    [[ ${CONFIG} =~ defconfig ]] && IS_DEFCONFIG=true
     { [[ ${PWD} =~ cbl ]] && ${IS_DEFCONFIG:=false}; } && CBL_DEFCONFIG=true
 
-    if ${CBL_DEFCONFIG:=false}; then
-        # Use lld except in some cases
-        if [[ -z ${LD} ]]; then
-            case ${ARCH} in
-                "ppc64"|"riscv64"|"s390") ;;
-                *) LD=ld.lld ;;
-            esac
-        fi
-
-        # Use llvm-objcopy except in some cases
-        if [[ -z ${OBJCOPY} ]]; then
-            case ${ARCH} in
-                "s390") ;;
-                *) OBJCOPY=llvm-objcopy ;;
-            esac
-        fi
-    fi
-
-    BLDKW=( bldkw "${ARCH}" ${LD:+LD="${LD}"} ${OBJCOPY:+OBJCOPY="${OBJCOPY}"} )
-    [[ -n ${BLDKW_ARGS[*]} ]] && BLDKW+=( "${BLDKW_ARGS[@]}" )
+    BLDKW=( bldkw "${ARCH}" "${BLDKW_ARGS[@]}" )
 
     # Configure kernel
     "${BLDKW[@]}" distclean "${CONFIG}"
 
-    : ${O:=${KBF}}
-    if ${CBL_DEFCONFIG:?} || { ${IS_DEFCONFIG} && ${USING_QEMU:=false}; }; then
-        # Extra configs for build/boot testings
+    : "${O:=out/${ARCH}}"
+    if ${CBL_DEFCONFIG:=false}; then
+        # Extra configs for boot testings (runs extra tests)
         # From https://github.com/groeck/linux-build-test/blob/master/rootfs/scripts/common.sh
         echo "CONFIG_INIT_STACK_ALL=y
 CONFIG_EXPERT=y
@@ -388,16 +469,14 @@ CONFIG_VIRTIO_BLK=y
 CONFIG_VIRTIO_BLK_SCSI=y
 CONFIG_SCSI_VIRTIO=y" >> "${O}"/.config
 
-        [[ ${ARCH} =~ arm ]] && echo "CONFIG_LOCK_TORTURE_TEST=y
+        [[ ${ARCH} != "x86_64" ]] && echo "CONFIG_LOCK_TORTURE_TEST=y
 CONFIG_RCU_TORTURE_TEST=y" >> "${O}"/.config
 
         "${BLDKW[@]}" olddefconfig &>/dev/null
     fi
 
     # Build kernel
-    [[ -z ${TARGETS[*]} ]] && TARGETS=( all )
-    grep -q "CONFIG_MODULES=y" ${O:?}/.config && TARGETS=( modules_prepare "${TARGETS[@]}" )
-    "${BLDKW[@]}" "${TARGETS[@]}"
+    "${BLDKW[@]}" "${FINAL_ARGS[@]}"
 )}
 
 
@@ -438,7 +517,7 @@ function bootk() {(
     ARCH=${1}; shift
     [[ -z ${ARCH} ]] && die "ARCH not specified!"
     case ${ARCH} in
-        arm) ARCH=arm32_v7 ;;
+        arm|arm32) ARCH=arm32_v7; O_ARCH=arm32 ;;
         x86) ARCH=x86_64 ;;
     esac
 
@@ -450,7 +529,7 @@ function bootk() {(
       git rh --quiet && \
       git pull --quiet --rebase )
 
-    "${BOOT_QEMU_SH}" -a "${ARCH}" -k "${O:-${KBF}}" "${@}"
+    "${BOOT_QEMU_SH}" -a "${ARCH}" -k "${O:-out/${O_ARCH:-${ARCH}}}" "${@}"
 )}
 
 
@@ -458,9 +537,6 @@ function bootk() {(
 function babk() {(
     ARCH=${1}; shift
     [[ -z ${ARCH} ]] && die "ARCH not specified!"
-
-    # Ensure virtio drivers get enabled by bldk
-    export USING_QEMU=true
 
     bldk "${ARCH}" KCFLAGS="${KCFLAGS--Werror}" "${@}"
 
@@ -538,29 +614,20 @@ function lt() {(
         # Test bfd builds with ld.bfd
         [[ ${CONFIG} =~ -bfd ]] && BFD=true
         CONFIG=${CONFIG//-bfd}
-
-        # Use lld except in some cases
-        if [[ -z ${LD} && -z ${BFD} ]]; then
-            case "${ARCH}:${CONFIG}" in
-                ppc64*|riscv64*|s390*) ;;
-                *) LD=ld.lld ;;
-            esac
-        fi
-
-        # Use llvm-objcopy except in some cases
-        if [[ -z ${OBJCOPY} ]]; then
-            case "${ARCH}:${CONFIG}" in
-                s390*) ;;
-                *) OBJCOPY=llvm-objcopy ;;
+        if ${BFD:=false}; then
+            case ${ARCH} in
+                arm32) LD=arm-linux-gnueabi-ld ;;
+                arm64) LD=aarch64-linux-gnu-ld ;;
+                x86_64) LD=ld ;;
             esac
         fi
 
         # Build kernel silently normally
         if [[ -z ${DEBUG} ]]; then
-            USING_QEMU=true Q=2 bldk "${ARCH}" "${CONFIG}" KCFLAGS="${KCFLAGS--Werror}" ${LD:+LD="${LD}"} ${OBJCOPY:+OBJCOPY="${OBJCOPY}"} |& tee "${WARNING_LOG}"
+            Q=2 bldk "${ARCH}" "${CONFIG}" KCFLAGS="${KCFLAGS--Werror}" ${LD:+LD="${LD}"} O=${KBF}/${ARCH} |& tee "${WARNING_LOG}"
             MAKE_RESULT=${pipestatus[1]}
         else
-            bldk "${ARCH}" "${CONFIG}" KCFLAGS="${KCFLAGS--Werror}" ${LD:+LD="${LD}"} ${OBJCOPY:+OBJCOPY="${OBJCOPY}"}
+            bldk "${ARCH}" "${CONFIG}" KCFLAGS="${KCFLAGS--Werror}" ${LD:+LD="${LD}"} O=${KBF}/${ARCH}
             MAKE_RESULT=${?}
         fi
 
@@ -575,13 +642,13 @@ function lt() {(
         echo "${COLOR}Build ${RESULT}${RST}"
         TIME_STRING=$(format_time "${START}" "$(date +%s)")
         {
-            echo "${ARCH}:${CONFIG}${BFD:+"-bfd"} | Build ${RESULT} in ${TIME_STRING:l}\c"
+            echo "${ARCH}:${CONFIG}$(${BFD} && echo "-bfd") | Build ${RESULT} in ${TIME_STRING:l}\c"
             case ${ARCH} in
-                riscv64|s390) BOOT=false ;;
+                riscv64|s390x) BOOT=false ;;
                 *) BOOT=true ;;
             esac
             if ${BOOT} && [[ ${RESULT} = "successful" && ${CONFIG} =~ defconfig ]]; then
-                if bootk "${ARCH}" &>/dev/null; then
+                if O=${KBF}/${ARCH} bootk "${ARCH}" &>/dev/null; then
                     echo " | Boot successful\c"
                 else
                     echo " | Boot failed\c"
