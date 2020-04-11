@@ -581,6 +581,8 @@ function lt() {(
     echo "Build log: ${LOG}"
     echo
     {
+        echo "Host: $(uname -n)"
+        echo
         (
             path_push "${CBL_BNTL}"
             path_push "${CBL_LLVM}"
