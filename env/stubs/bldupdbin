@@ -158,10 +158,10 @@ function bmake() {(
     ./configure --prefix=${PREFIX:=${HOME}/usr}
     make -j$(nproc) install
 
-    rm -rf "${TMP_FOLDER}"
     move_to_front_of_path "${PREFIX}"/bin
     command -v make
     make --version
+    rm -rf "${TMP_FOLDER}"
 )}
 
 
