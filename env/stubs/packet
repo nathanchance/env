@@ -1,8 +1,17 @@
 #!/bin/bash
 
+function packet_die() {
+    printf '\n\033[01;31m%s\033[0m\n' "${1:?}"
+    exit "${2:-33}"
+}
+
+function packet_warn() {
+    printf '\n\033[01;33m%s\033[0m\n' "${1:?}"
+}
+
 function partition_drive() {(
     # Function must be run as root
-    [[ $(id -u) -ne 0 ]] && { printf "\033[01;31m\nThis function must be run as root.\n\033[0m"; exit 1; }
+    [[ $(id -u) -ne 0 ]] && packet_die "This function must be run as root."
 
     while (( ${#} )); do
         case ${1} in
@@ -21,23 +30,45 @@ function partition_drive() {(
         /dev/nvme*) PART=p1 ;;
         /dev/sd*) PART=1 ;;
     esac
+    VOLUME=${DRIVE}${PART}
 
-    # Partition and modify fstab
-    parted -s "${DRIVE}" mklabel gpt mkpart primary ext4 '0%' '100%'
-    sleep 15
-    mkfs -t ext4 "${DRIVE}${PART}"
-    printf 'UUID=%s\t%s\text4\tnoatime\t0\t2\n' "$(blkid -o value -s UUID "${DRIVE}${PART}")" "${FOLDER}" | tee -a /etc/fstab
-    sed -i '/^$/d' /etc/fstab
-    [[ ${FOLDER} != /home ]] && mkdir -p "${FOLDER}"
-    mount -a
-    [[ ${FOLDER} != /home ]] && chown -R "${USER}:${USER}" "${FOLDER}"
+    if mountpoint -q "${FOLDER}"; then
+        set +x
+        packet_warn "${FOLDER} is mounted. If this is not expected, unmount it and re-run this function."
+        packet_warn "   $ umount ${FOLDER}"
+        printf '\n'
+        FORMAT=false
+        set -x
+    fi
+
+    if blkid "${VOLUME}"; then
+        set +x
+        packet_warn "${VOLUME} already exists. If this is not expected, wipe it and re-run this function."
+        packet_warn "   $ sed -i '/$(blkid -o value -s UUID "${VOLUME}")/d' /etc/fstab"
+        packet_warn "   $ dd if=/dev/zero of=${DRIVE} bs=8M count=125"
+        printf '\n'
+        FORMAT=false
+        set -x
+    fi
+
+    # Partition and modify fstab if everything is fine
+    if ${FORMAT:=true}; then
+        parted -s "${DRIVE}" mklabel gpt mkpart primary ext4 '0%' '100%'
+        sleep 15
+        mkfs -t ext4 "${VOLUME}"
+        printf 'UUID=%s\t%s\text4\tnoatime\t0\t2\n' "$(blkid -o value -s UUID "${VOLUME}")" "${FOLDER}" | tee -a /etc/fstab
+        sed -i '/^$/d' /etc/fstab
+        [[ ${FOLDER} != /home ]] && mkdir -p "${FOLDER}"
+        mount -a
+        [[ ${FOLDER} != /home ]] && chown -R "${USER}:${USER}" "${FOLDER}"
+    fi
 
     return 0
 )}
 
 function partition_and_create_user() {(
     # Function must be run as root
-    [[ $(id -u) -ne 0 ]] && { printf "\033[01;31m\nThis function must be run as root.\n\033[0m"; exit 1; }
+    [[ $(id -u) -ne 0 ]] && packet_die "This function must be run as root."
 
     # Drive to use must be provided as argument of script
     while (( ${#} )); do
@@ -74,13 +105,22 @@ function partition_and_create_user() {(
 
     # Setup user account
     apt install -y qemu-kvm
-    USER_ADD_ARGS=( -m -G kvm,sudo )
-    if [[ "${SHELL_PATH:-}" = "/bin/zsh" ]]; then
-        apt install -y zsh
-        USER_ADD_ARGS=( "${USER_ADD_ARGS[@]}" -s "${SHELL_PATH}" )
+    if getent passwd "${USER}" &>/dev/null; then
+        set +x
+        packet_warn "${USER} already exists. If this is not expected, delete the user and re-run this function."
+        packet_warn "   $ userdel -f ${USER}"
+        printf '\n'
+        set -x
+    else
+        USER_ADD_ARGS=( -m -G kvm,sudo )
+        if [[ "${SHELL_PATH:-}" = "/bin/zsh" ]]; then
+            apt install -y zsh
+            USER_ADD_ARGS=( "${USER_ADD_ARGS[@]}" -s "${SHELL_PATH}" )
+        fi
+        useradd "${USER_ADD_ARGS[@]}" "${USER}"
+        echo "${USER}:${PASSWORD}" | chpasswd
+        cp -rv /root/.ssh /home/"${USER}"
+        chown -R "${USER}:${USER}" /home/"${USER}"/.ssh
     fi
-    useradd "${USER_ADD_ARGS[@]}" "${USER}"
-    echo "${USER}:${PASSWORD}" | chpasswd
-    cp -rv /root/.ssh /home/"${USER}"
-    chown -R "${USER}:${USER}" /home/"${USER}"/.ssh
+    return 0
 )}
