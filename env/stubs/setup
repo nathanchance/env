@@ -48,6 +48,7 @@ function cbl_linux_repos() {(
         FOLDER=${PAIR#*:}
         URL=${PAIR%:*}
         CB=clone.bundle-${FOLDER##*/}
+        [[ -d ${FOLDER} ]] || continue
         [[ ! -f ${CB} ]] && wget -O "${CB}" -c https://git.kernel.org/pub/scm/linux/kernel/git/"${URL}"/clone.bundle
         git clone "${CB}" "${FOLDER}"
         (
@@ -60,14 +61,13 @@ function cbl_linux_repos() {(
             [[ ${FOLDER} =~ mirrors ]] && git remote add github git@github.com:ClangBuiltLinux/linux.git
         )
     done
-    rm -rf clone.bundle-*
-    git clone git@github.com:WireGuard/android-wireguard-module-builder.git
+    rm -rf 'clone.bundle-*'
 )}
 
 # Download other CBL things
 function cbl_other_repos() {(
     cd "${CBL:=${HOME}/cbl}"/android || die "wtf"
-    git clone git@github.com:nathanchance/android-kernel-clang.git
+    [[ -d android-kernel-clang ]] || git clone git@github.com:nathanchance/android-kernel-clang.git
     mkdir -p common
     cd common || die "wtf"
     PATH=${HOME}/usr/bin:${PATH} repo init -u https://android.googlesource.com/kernel/manifest -b common-android-multi
@@ -76,29 +76,28 @@ function cbl_other_repos() {(
     chmod u+x common/.git/hooks/commit-msg
 
     cd "${CBL}"/git || die "wtf"
-    git clone git@github.com:ClangBuiltLinux/boot-utils.git
-    git clone git@github.com:ClangBuiltLinux/boot-utils.git boot-utils-master
-    git clone git@github.com:ClangBuiltLinux/continuous-integration.git ci
-    git clone git@github.com:ClangBuiltLinux/dockerimage.git
-    git clone git@github.com:ClangBuiltLinux/tc-build.git
-    for FOLDER in boot-utils ci dockerimage tc-build; do (
-        cd "${FOLDER}"
-        hub fork
-    ) done
+    for REPO in boot-utils boot-utils:boot-utils-master continuous-integration:ci dockerimage tc-build; do
+        FOLDER=${REPO#*:}
+        REPO=${REPO%:*}
+
+        [[ -d ${FOLDER} ]] || git clone git@github.com:ClangBuiltLinux/"${REPO}".git "${FOLDER}"
+    done
+    for FOLDER in boot-utils ci dockerimage tc-build; do ( cd "${FOLDER}" && hub fork ); done
 
     cd "${CBL}"/mirrors || die "wtf"
-    git clone git://github.com/llvm/llvm-project llvm
+    [[ -d llvm ]] || git clone git://github.com/llvm/llvm-project llvm
     cd llvm || die "wtf"
-    git remote add github git@github.com:ClangBuiltLinux/llvm-project.git
+    git remote show -n github || git remote add github git@github.com:ClangBuiltLinux/llvm-project.git
 
     cd "${CBL}" || die "wtf"
-    git clone git@github.com:nathanchance/llvm-kernel-testing.git
-    git clone -b personal git@github.com:nathanchance/tc-build.git
-    git clone git@github.com:nathanchance/WSL2-Linux-Kernel wsl2
-    git -C wsl2 remote add mainline git://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git
-    git -C wsl2 remote add next git://git.kernel.org/pub/scm/linux/kernel/git/next/linux-next.git
-    git -C wsl2 remote add microsoft git://github.com/microsoft/WSL2-Linux-Kernel
-    git -C wsl2 fetch --multiple mainline next microsoft
-    git -C wsl2 config rerere.enabled true
+    [[ -d llvm-kernel-testing ]] || git clone git@github.com:nathanchance/llvm-kernel-testing.git
+    [[ -d tc-build ]] || git clone -b personal git@github.com:nathanchance/tc-build.git
+    [[ -d wsl2 ]] || git clone git@github.com:nathanchance/WSL2-Linux-Kernel wsl2
+
+    cd wsl2 || die "wtf"
+    git remote show -n mainline || git remote add -f --tags mainline git://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git
+    git remote show -n next || git remote add -f --tags next git://git.kernel.org/pub/scm/linux/kernel/git/next/linux-next.git
+    git remote show -n microsoft || git remote add -f --tags microsoft git://github.com/microsoft/WSL2-Linux-Kernel
+    git config rerere.enabled true
 )}
 # vi: filetype=zsh
