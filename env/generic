@@ -86,6 +86,7 @@ function bootstrap() {(
     SCRIPTS=${HOME}/github/scripts
     mkdir -p "${SCRIPTS%/*}"
     [[ -d ${SCRIPTS} ]] || { git clone https://github.com/nathanchance/scripts "${SCRIPTS}" || die "Error cloning scripts!"; }
+    git -C "${SCRIPTS}" pull --rebase || die "Error updating script!"
     source "${SCRIPTS}"/env/stubs/setup && global_gitignore && create_zshrc
     source "${SCRIPTS}"/env/stubs/bldupdbin && { ( bldupdbin && bqemu && install_android_tools ) || exit ${?}; }
     path_push "${HOME}/usr/bin"
