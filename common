@@ -68,11 +68,10 @@ function header() {
     else
         COLOR=${RED}
     fi
-    echo "${COLOR}"
-    echo "====$(for i in $(seq ${#1}); do echo "=\c"; done)===="
-    echo "==  ${1}  =="
-    echo "====$(for i in $(seq ${#1}); do echo "=\c"; done)===="
-    echo "${RST}"
+    BORDER="====$(for _ in $(seq ${#1}); do printf '='; done)===="
+    printf "${COLOR}"
+    printf '\n%s\n%s\n%s\n' "${BORDER}" "==  ${1}  ==" "${BORDER}"
+    printf "${RST}"
 }
 
 
@@ -114,9 +113,9 @@ function format_time() {
 
 # Prints an error in bold red
 function display_error() {
-    echo
-    echo "${RED}${1}${RST}"
-    [[ -z ${2} ]] && echo
+    printf "${COLOR:=${RED}}"
+    printf '\n%s\n\n' ${1}
+    printf "${RST}"
 }
 
 
@@ -144,9 +143,7 @@ function die() {
 
 # Prints a warning in bold yellow
 function warn() {
-    echo
-    echo "${YLW}${1}${RST}"
-    [[ -z ${2} ]] && echo
+    COLOR=${YLW} display_error "${@}"
 }
 
 
