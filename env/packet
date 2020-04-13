@@ -31,6 +31,8 @@ function partition_drive() {(
     [[ ${FOLDER} != /home ]] && mkdir -p "${FOLDER}"
     mount -a
     [[ ${FOLDER} != /home ]] && chown -R "${USER}:${USER}" "${FOLDER}"
+
+    return 0
 )}
 
 function partition_and_create_user() {(
