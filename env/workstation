@@ -221,7 +221,10 @@ function bootstrap() {(
     fi
 
     # Setup build folder
-    grep -q "${BLDF}" /etc/fstab || echo "tmpfs ${BLDF} tmpfs nodev,nosuid,uid=$(whoami),gid=$(whoami),size=${BFS}G 0 0" | sudo tee -a /etc/fstab
+    if ! grep -q "${BLDF}" /etc/fstab; then
+        printf 'tmpfs\t%s\ttmpfs\tnodev,nosuid,uid=%s,gid=%s,size=%dG\t0\t0' "${BLDF}" "$(whoami)" "$(whoami)" "${BFS}" | sudo_wrapper tee -a /etc/fstab
+        sudo_wrapper sed -i '/^$/d' /etc/fstab
+    fi
 
     # Setup keys
     KEYS=/tmp/keys
