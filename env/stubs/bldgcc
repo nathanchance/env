@@ -7,7 +7,7 @@
 #
 # This can be downloaded and sourced without any of the other scripts in this repo.
 #
-# $ curl -LSsO https://github.com/nathanchance/scripts/raw/master/funcs/bldgcc
+# $ curl -LSsO https://github.com/nathanchance/scripts/raw/master/env/stubs/bldgcc
 #
 # Open the bldgcc file to make sure it matches this one.
 #

@@ -5,7 +5,7 @@
 LOG=/home/nathan/logs/cron-$(TZ=MST date +%Y%m%d).log
 SCRIPTS=/home/nathan/github/scripts
 
-source "${SCRIPTS}"/env/folders
+source "${SCRIPTS}"/env/stubs/folders
 source "${SCRIPTS}"/common
 mkdir -p "${LOG%/*}"
 

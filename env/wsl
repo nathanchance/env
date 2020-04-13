@@ -93,14 +93,14 @@ function bootstrap() {(
     mkdir -p "${GITHUB}"
     local SCRIPTS; SCRIPTS=${GITHUB}/scripts
     git clone git@github.com:nathanchance/scripts "${SCRIPTS}" || die "Error cloning script"
-    source "${SCRIPTS}"/env/setup && global_gitignore && create_zshrc
-    source "${SCRIPTS}"/funcs/bldupdbin && {
+    source "${SCRIPTS}"/env/stubs/setup && global_gitignore && create_zshrc
+    source "${SCRIPTS}"/env/stubs/bldupdbin && {
         bldupdbin || die "bldupdbin failed";
         ihugo || die "ihugo failed";
     }
     path_push "${HOME}/usr/bin"
-    source "${SCRIPTS}"/funcs/git && git_setup
-    source "${SCRIPTS}"/funcs/pure && pure_prompt
+    source "${SCRIPTS}"/env/stubs/git && git_setup
+    source "${SCRIPTS}"/env/stubs/pure && pure_prompt
     ln -fs "${SCRIPTS}"/configs/local/.tmux.conf "${HOME}"/.tmux.conf
     zsh "${SCRIPTS}"/configs/common/vim/vim_setup.sh
     decrypt_del_dog_api_key

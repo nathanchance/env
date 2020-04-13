@@ -38,10 +38,10 @@ function aliases() {
     # tmux alias
     command -v tmux &>/dev/null && alias tmux='tmux -u'
 
-    source "${SCRIPTS_FOLDER}/funcs/bldupdbin"
-    source "${SCRIPTS_FOLDER}/funcs/deldog"
-    source "${SCRIPTS_FOLDER}/funcs/git"
-    source "${SCRIPTS_FOLDER}/funcs/transfer"
+    source "${SCRIPTS_FOLDER}/env/stubs/bldupdbin"
+    source "${SCRIPTS_FOLDER}/env/stubs/deldog"
+    source "${SCRIPTS_FOLDER}/env/stubs/git"
+    source "${SCRIPTS_FOLDER}/env/stubs/transfer"
 }
 
 

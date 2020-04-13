@@ -285,10 +285,10 @@ function report_result() {
 
 
 source "$(cd "$(dirname "$(readlink -f "${(%):-%x}")")" || return; pwd)/../common"
-source "${SCRIPTS_FOLDER}/env/folders"
-source "${SCRIPTS_FOLDER}/funcs/fkv"
-source "${SCRIPTS_FOLDER}/funcs/transfer"
-source "${SCRIPTS_FOLDER}/funcs/traps"
+source "${SCRIPTS_FOLDER}/env/stubs/folders"
+source "${SCRIPTS_FOLDER}/env/stubs/fkv"
+source "${SCRIPTS_FOLDER}/env/stubs/transfer"
+source "${SCRIPTS_FOLDER}/env/stubs/traps"
 parse_parameters "${@}"
 setup_toolchains
 compile

@@ -86,11 +86,11 @@ function bootstrap() {(
     SCRIPTS=${HOME}/github/scripts
     mkdir -p "${SCRIPTS%/*}"
     [[ -d ${SCRIPTS} ]] || { git clone https://github.com/nathanchance/scripts "${SCRIPTS}" || die "Error cloning scripts!"; }
-    source "${SCRIPTS}"/env/setup && global_gitignore && create_zshrc
-    source "${SCRIPTS}"/funcs/bldupdbin && { ( bldupdbin && bqemu && install_android_tools ) || exit ${?}; }
+    source "${SCRIPTS}"/env/stubs/setup && global_gitignore && create_zshrc
+    source "${SCRIPTS}"/env/stubs/bldupdbin && { ( bldupdbin && bqemu && install_android_tools ) || exit ${?}; }
     path_push "${HOME}/usr/bin"
-    source "${SCRIPTS}"/funcs/git && git_setup
-    source "${SCRIPTS}"/funcs/pure && pure_prompt
+    source "${SCRIPTS}"/env/stubs/git && git_setup
+    source "${SCRIPTS}"/env/stubs/pure && pure_prompt
     zsh "${SCRIPTS}"/configs/common/vim/vim_setup.sh
     ln -fs "${SCRIPTS}"/configs/workstation/.tmux.conf "${HOME}"/.tmux.conf
 
