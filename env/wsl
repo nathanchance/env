@@ -96,6 +96,9 @@ function bootstrap() {(
         wget \
         zlib1g-dev
 
+    # Reinstall 'ping' to avoid issues with permissions
+    sudo apt install -y --reinstall iputils-ping
+
     # Install speedtest-cli
     sudo curl -LSo /usr/local/bin/speedtest-cli https://raw.githubusercontent.com/sivel/speedtest-cli/master/speedtest.py
     sudo chmod +x /usr/local/bin/speedtest-cli
