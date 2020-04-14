@@ -85,6 +85,7 @@ function bootstrap() {(
         mosh \
         most \
         mutt \
+        neofetch \
         pass \
         python3-pip \
         software-properties-common \
