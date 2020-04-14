@@ -1,15 +1,53 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 #
-# Copyright (C) 2019 Nathan Chancellor
+# Copyright (C) 2019-2020 Nathan Chancellor
 #
 # Utility and terminal setup functions for WSL
 
+# Setup function for my Ubuntu WSL instance (from an LXC container, not Microsoft Store)
+function rootstrap() {(
+    [[ $(id -u) -eq 0 ]] || { printf '\n\033[01;31mThis function must be run as root!\033[0m\n\n' && exit 255; }
+
+    while (( ${#} )); do
+        case ${1} in
+            -p|--password) shift; PASSWORD=${1} ;;
+            -u|--user) shift; USER=${1} ;;
+        esac
+        shift
+    done
+
+    set -eux
+
+    : "${USER}" "${PASSWORD}"
+
+    # Some WSL specific tuning
+    printf '[network]\ngenerateResolvConf = false\n\n[user]\ndefault = nathan\n' | tee /etc/wsl.conf
+    rm -rf /etc/resolv.conf
+    printf 'nameserver 8.8.8.8\n' | tee /etc/resolv.conf
+
+    # Update and install some necessary packages
+    apt update
+    apt upgrade -y
+    apt install -y ca-certificates curl zsh
+
+    # Create my user account
+    if getent passwd "${USER}" &>/dev/null; then
+        set +x
+        printf '\n\033[01;33mNot creating user "%s" because they already exist!\033[0m\n\n' "${USER}"
+    else
+        useradd -m -G sudo -s /bin/zsh "${USER}"
+        echo "${USER}:${PASSWORD}" | chpasswd
+    fi
+
+    set +eux
+
+    printf '\n\033[01;34mDo not forget to run \n\n\t$ wsl.exe --terminate ubuntu\n\nso that /etc/wsl.conf changes reflect properly!\033[0m\n\n'
+)}
 
 # Setup function
 #
 # Requires Keys folder to be available in /mnt/c/Users/natec/Documents
-#
-# $ sudo sh -c 'apt update && apt install -y --no-install-recommends ca-certificates curl zsh && chsh -s /bin/zsh nathan'
+
 function bootstrap() {(
     # Grab common functions/variables
     source <(curl -LSs https://github.com/nathanchance/scripts/raw/master/common) &>/dev/null
@@ -18,13 +56,7 @@ function bootstrap() {(
     KEYS=/mnt/c/Users/natec/Documents/Keys
     [[ -d ${KEYS} ]] || die "Keys are not available"
 
-    # Convert to Debian unstable
-    sudo sed -i 's/^/# /' /etc/apt/sources.list
-    echo "deb http://deb.debian.org/debian unstable main" | sudo tee -a /etc/apt/sources.list
-    sudo apt update
-    sudo apt dist-upgrade -y
-
-    # Install packages from Debian repos
+    # Install packages from Ubuntu repos
     sudo apt install -y --no-install-recommends \
         build-essential \
         bc \
@@ -71,7 +103,7 @@ function bootstrap() {(
     LLVM_SCRIPT=$(mktemp --suffix=.sh) && \
     chmod +x ${LLVM_SCRIPT} && \
     curl -LSso "${LLVM_SCRIPT}" https://apt.llvm.org/llvm.sh && \
-    sudo "${LLVM_SCRIPT}" 10 && \
+    sudo "${LLVM_SCRIPT}" 11 && \
     rm "${LLVM_SCRIPT}"
 
     # Setup SSH and GPG if keys are present
@@ -81,18 +113,14 @@ function bootstrap() {(
 
     # Setup GPG
     gpg --pinentry-mode loopback --import "${KEYS}"/{public*,private*}.asc
-    gpg --import-ownertrust "${KEYS}"/ownertrust*.asc
-    {
-        echo "default-cache-ttl 3600"
-        echo "max-cache-ttl 86400"
-    } > "${HOME}"/.gnupg/gpg-agent.conf
+    printf 'default-cache-ttl 604800\nmax-cache-ttl 2419200\n' | tee "${HOME}"/.gnupg/gpg-agent.conf
     gpg-connect-agent reloadagent /bye
 
     # Clone scripts
     GITHUB=${HOME}/github
     mkdir -p "${GITHUB}"
     local SCRIPTS; SCRIPTS=${GITHUB}/scripts
-    git clone git@github.com:nathanchance/scripts "${SCRIPTS}" || die "Error cloning script"
+    [[ -d ${SCRIPTS} ]] || { git clone git@github.com:nathanchance/scripts "${SCRIPTS}" || die "Error cloning script"; }
     source "${SCRIPTS}"/env/stubs/setup && global_gitignore && create_zshrc
     source "${SCRIPTS}"/env/stubs/bldupdbin && {
         bldupdbin || die "bldupdbin failed";
@@ -108,11 +136,11 @@ function bootstrap() {(
     decrypt_serv_ip
 
     # Clone password store
-    git clone git@github.com:nathanchance/password-store.git "${HOME}"/.password-store || die "Error cloning password store"
+    [[ -d ${HOME}/.password-store ]] || { git clone git@github.com:nathanchance/password-store.git "${HOME}"/.password-store || die "Error cloning password store"; }
 
     # Download website files
     for REPO in hugo-files nathanchance.github.io; do
-        git clone git@github.com:nathanchance/"${REPO}" "${GITHUB}/${REPO}"
+        [[ -d ${GITHUB}/${REPO} ]] || git clone git@github.com:nathanchance/"${REPO}" "${GITHUB}/${REPO}"
     done
     git -C "${GITHUB}"/hugo-files submodule update --init --recursive
 ) && source "${HOME}"/.zshrc; }
@@ -126,8 +154,6 @@ function upd() {
 
 # Laptop specific aliases
 function wsl_aliases() {
-    # Debian sid has bat as batcat
-    ( ! type -f bat && type -f batcat ) &>/dev/null && alias bat='batcat'
     # Account for VS Code Insiders having a different binary name
     # But only overwrite code if it does not already exist
     ( ! type -f code && type -f code-insiders ) &>/dev/null && alias code='code-insiders'
