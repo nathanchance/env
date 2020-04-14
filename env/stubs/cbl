@@ -1002,7 +1002,7 @@ function bldallk() {(
     TREE=linux-next lt
     # Currently on fire
     # kct
-    "${CBL}"/wsl2/build.sh
+    "${CBL}"/wsl2/bin/build.sh
 )}
 
 
