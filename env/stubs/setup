@@ -101,5 +101,6 @@ function cbl_other_repos() {(
     git remote show -n next || git remote add -f --tags next git://git.kernel.org/pub/scm/linux/kernel/git/next/linux-next.git
     git remote show -n microsoft || git remote add -f --tags microsoft git://github.com/microsoft/WSL2-Linux-Kernel
     git config rerere.enabled true
+    git config status.aheadBehind false
 )}
 # vi: filetype=zsh
