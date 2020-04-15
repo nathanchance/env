@@ -819,6 +819,8 @@ function kcbw() {(
                 git -C "${CONFIG_DIR}" ac -m "${CONFIG}: Move bzImage to DIST_FOLDER"
             fi
         fi
+    else
+        "${CBL_KC}"/build/multi-switcher.sh "${BRANCH}"
     fi
 
     case ${BRANCH} in
