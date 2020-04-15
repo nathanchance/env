@@ -131,7 +131,7 @@ function bgit() {(
 function ihugo() {(
     HUGO_VERSION=$(glr gohugoio/hugo)
     SUFFIX=64bit
-    HUGO_URL=https://github.com/gohugoio/hugo/releases/download/${HUGO_VERSION}/hugo_${HUGO_VERSION//v}_Linux-${SUFFIX}
+    HUGO_URL=https://github.com/gohugoio/hugo/releases/download/${HUGO_VERSION}/hugo_extended_${HUGO_VERSION//v}_Linux-${SUFFIX}
     if command -v dpkg &>/dev/null; then
         curl -LSso "${TMP_DEB:=$(mktemp --suffix=.deb)}" "${HUGO_URL}".deb
         sudo dpkg -i "${TMP_DEB}"
