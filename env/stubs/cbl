@@ -774,11 +774,12 @@ function swtch_cttlfsh_brnch() {(
 
     [[ -d ${CBL_KC} ]] || mkdir -p "${CBL_KC}"
     cd "${CBL_KC}" || exit ${?}
-    REPO_INIT_CMD=( repo init -u https://android.googlesource.com/kernel/manifest -b common-android-"${BRANCH}" )
+    REPO_INIT_CMD=( repo init -u https://android.googlesource.com/kernel/manifest -b common-android-multi )
     "${REPO_INIT_CMD[@]}" || die "${REPO_INIT_CMD[@]} failed (${?})"
     [[ -d ${CBL_KC_SRC} ]] && git -C "${CBL_KC_SRC}" rh
     REPO_SYNC_CMD=( repo sync "${JOBS_FLAG}" )
     "${REPO_SYNC_CMD[@]}" || die "${REPO_SYNC_CMD[*]} failed (${?})"
+    "${CBL_KC}"/build/multi-switcher.sh "${BRANCH}"
 )}
 
 
@@ -788,13 +789,17 @@ function kcbw() {(
         case ${1} in
             3.*|4.*|5.*|mainline) BRANCH=${1} ;;
             arm64) ARCH=aarch64 ;;
-            x86) ARCH=x86_64 ;;
+            x86*) ARCH=x86_64 ;;
             -n|--no-sync) SYNC=false ;;
         esac
         shift
     done
     : ${ARCH:?} ${BRANCH:=mainline}
     CONFIG=build.config.cuttlefish.${ARCH}
+    case ${BRANCH} in
+        4.19|5.4|mainline) CONFIG_DIR=${CBL_KC}/cuttlefish-modules ;;
+        *) CONFIG_DIR=${CBL_KC_SRC} ;;
+    esac
 
     # Download and setup kernel source
     [[ -d ${CBL_KC} ]] || mkdir -p "${CBL_KC}"
@@ -809,32 +814,19 @@ function kcbw() {(
 
         # Automatically move bzImage
         if [[ ${ARCH} = "x86_64" ]]; then
-            if grep -q 'FILES=""' "${CBL_KC_SRC}/${CONFIG}"; then
-                sed -i '/FILES=""/d' "${CBL_KC_SRC}/${CONFIG}"
-                git -C "${CBL_KC_SRC}" ac -m "${CONFIG}: Move bzImage to DIST_FOLDER"
-            fi
-
-            case ${BRANCH} in
-                4.14) CONFIG_FILE=${CBL_KC_SRC}/arch/x86/configs/x86_64_cuttlefish_defconfig ;;
-                4.19|5.4|mainline) CONFIG_FILE=${CBL_KC_SRC}/cuttlefish.fragment ;;
-            esac
-
-            if [[ -n ${CONFIG_FILE} ]]; then
-                sed -i -e '/CONFIG_TEST_MEMINIT/d' -e '/CONFIG_TEST_STACKINIT/d' "${CONFIG_FILE}"
-                git -C "${CBL_KC_SRC}" ac -m "${CONFIG_FILE##*/}: Remove memory initialization tests
-
-These are currently broken with clang 11.0.0.
-
-Link: https://llvm.org/pr44916"
+            if grep -q 'FILES=""' "${CONFIG_DIR}/${CONFIG}"; then
+                sed -i '/FILES=""/d' "${CONFIG_DIR}/${CONFIG}"
+                git -C "${CONFIG_DIR}" ac -m "${CONFIG}: Move bzImage to DIST_FOLDER"
             fi
         fi
     fi
 
     case ${BRANCH} in
         4.9) BRANCH=4.9-q ;;
+        4.14) BRANCH=4.14 ;;
     esac
     rm -vrf out/android-${BRANCH}/dist
-    BUILD_CONFIG=common/${CONFIG} ./build/build.sh
+    BUILD_CONFIG=${CONFIG_DIR##*/}/${CONFIG} ./build/build.sh
 )}
 
 
@@ -874,8 +866,8 @@ function boot_cuttlefish() {(
         shift
     done
 
-    DIST=${CBL_KC}/out/android-${BRANCH}/dist
-    LAUNCH_CVD=( -daemon -kernel_path ${DIST}/bzImage )
+    DIST=${CBL_KC}/out/android-${BRANCH:?}/dist
+    LAUNCH_CVD=( -daemon -kernel_path ${DIST}/bzImage -report_anonymous_usage_stats n )
     [[ -f ${DIST}/initramfs.img ]] && LAUNCH_CVD=( "${LAUNCH_CVD[@]}" -initramfs_path ${DIST}/initramfs.img )
 
     cd "${CBL_CTTLFSH}" || exit ${?}
@@ -932,6 +924,7 @@ function kct() {(
 
             case ${VERSION} in
                 4.9) ACTUAL_BRANCH=4.9-q ;;
+                4.14) ACTUAL_BRANCH=4.14-stable ;;
                 *) ACTUAL_BRANCH=${VERSION} ;;
             esac
 
@@ -968,6 +961,7 @@ function kct() {(
                 else
                     BOOT_COLOR=${RED}
                     BOOT_RESULT=failed
+                    [[ "${ARCH}-${VERSION}" = "x86-4.19" ]] && BOOT_RESULT="failed (expected)"
                 fi
                 echo "${BOOT_COLOR}Boot ${BOOT_RESULT}${RST}"
                 BOOT_RESULT=" | Boot ${BOOT_RESULT}"
