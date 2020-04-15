@@ -195,4 +195,32 @@ function upd_terminal_config() {(
 function install_rust_wsl() {(
     curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
 )}
+
+
+# Update my website
+function upd_website() {(
+    GITHUB=${HOME}/github
+    WEBSITE=${GITHUB}/nathanchance.github.io
+    HUGO_FILES=${GITHUB}/hugo-files
+
+    while (( ${#} )); do
+        case ${1} in
+            -p|--push) PUSH=true ;;
+        esac
+        shift
+    done
+
+    cd "${HUGO_FILES}" || die "${HUGO_FILES} does not exist..."
+    fd -E CNAME . "${WEBSITE}" -x rm -rf
+    hugo -d "${WEBSITE}"
+
+    HF_URL=$(git remote get-url origin | sed 's/git@github.com:/https:\/\/github.com\//')
+    HF_HASH=$(git sh -s --format=%H)
+
+    cd "${WEBSITE}"
+    git aa
+    git ac -m "website: Update to ${HF_URL}/commit/${HF_HASH}"
+    ${PUSH:=false} || return 0
+    git push
+)}
 # vi: filetype=zsh
