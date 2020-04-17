@@ -763,15 +763,13 @@ function bldtcs() {(
 
 
 # Switch cuttlefish branch
-function swtch_cttlfsh_brnch() {(
-    while (( ${#} )); do
-        case ${1} in
-            3.*|4.*|5.*|mainline) BRANCH=${1} ;;
-        esac
-        shift
-    done
-    : ${BRANCH:?}
+function switch_kc_branch() {(
+    "${CBL_KC}"/build/multi-switcher.sh "${@}"
+)}
 
+
+# Sync kernel/common
+function sync_cbl_kc() {(
     [[ -d ${CBL_KC} ]] || mkdir -p "${CBL_KC}"
     cd "${CBL_KC}" || exit ${?}
     REPO_INIT_CMD=( repo init -u https://android.googlesource.com/kernel/manifest -b common-android-multi )
@@ -779,7 +777,6 @@ function swtch_cttlfsh_brnch() {(
     [[ -d ${CBL_KC_SRC} ]] && git -C "${CBL_KC_SRC}" rh
     REPO_SYNC_CMD=( repo sync "${JOBS_FLAG}" )
     "${REPO_SYNC_CMD[@]}" || die "${REPO_SYNC_CMD[*]} failed (${?})"
-    "${CBL_KC}"/build/multi-switcher.sh "${BRANCH}"
 )}
 
 
@@ -790,7 +787,7 @@ function kcbw() {(
             3.*|4.*|5.*|mainline) BRANCH=${1} ;;
             arm64) ARCH=aarch64 ;;
             x86*) ARCH=x86_64 ;;
-            -n|--no-sync) SYNC=false ;;
+            -s|--sync) SYNC=true ;;
         esac
         shift
     done
@@ -804,23 +801,20 @@ function kcbw() {(
     # Download and setup kernel source
     [[ -d ${CBL_KC} ]] || mkdir -p "${CBL_KC}"
     cd "${CBL_KC}" || exit ${?}
-    if ${SYNC:=true}; then
-        # Sync correct branch
-        swtch_cttlfsh_brnch "${BRANCH}"
+    ${SYNC:=false} && sync_cbl_kc
+    switch_kc_branch "${BRANCH}"
 
+    REL_CBL_LLVM=$(realpath --relative-to="${CBL_KC}" "${CBL_LLVM}")
+    if ! grep -q "${REL_CBL_LLVM}" "${CBL_KC_SRC}"/build.config.common; then
         # Build kernels with newer Clang
-        sed -i "s;CLANG_PREBUILT_BIN=.*;CLANG_PREBUILT_BIN=$(realpath --relative-to="${CBL_KC}" "${CBL_LLVM}");g" "${CBL_KC_SRC}"/build.config.common
+        sed -i "s;CLANG_PREBUILT_BIN=.*;CLANG_PREBUILT_BIN=${REL_CBL_LLVM};g" "${CBL_KC_SRC}"/build.config.common
         git -C "${CBL_KC_SRC}" ac -m "build.config.common: Use latest ClangBuiltLinux clang available"
+    fi
 
-        # Automatically move bzImage
-        if [[ ${ARCH} = "x86_64" ]]; then
-            if grep -q 'FILES=""' "${CONFIG_DIR}/${CONFIG}"; then
-                sed -i '/FILES=""/d' "${CONFIG_DIR}/${CONFIG}"
-                git -C "${CONFIG_DIR}" ac -m "${CONFIG}: Move bzImage to DIST_FOLDER"
-            fi
-        fi
-    else
-        "${CBL_KC}"/build/multi-switcher.sh "${BRANCH}"
+    # Automatically move bzImage
+    if [[ ${ARCH} = "x86_64" ]] && grep -q 'FILES=""' "${CONFIG_DIR}/${CONFIG}"; then
+        sed -i '/FILES=""/d' "${CONFIG_DIR}/${CONFIG}"
+        git -C "${CONFIG_DIR}" ac -m "${CONFIG}: Move bzImage to DIST_FOLDER"
     fi
 
     case ${BRANCH} in
@@ -916,6 +910,8 @@ function kct() {(
 
     ${X86_ONLY:=false} || ARCHES=( arm64 x86 )
 
+    sync_cbl_kc
+
     for VERSION in 4.9 4.14 4.19 5.4 mainline; do (
         for ARCH in "${ARCHES[@]}"; do (
             START=$(date +%s)
@@ -931,8 +927,6 @@ function kct() {(
             UPSTREAM_BRANCH=android-${UPSTREAM_BRANCH}
 
             header "android-${ACTUAL_BRANCH} ${ARCH}" "${BOLD}"
-
-            { ! ${X86_ONLY} && [[ ${ARCH} = "x86" ]]; } && SYNC_FLAGS=( -n )
 
             # Build kernel silently normally
             if [[ -z ${DEBUG} ]]; then
