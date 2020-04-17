@@ -963,7 +963,7 @@ function kct() {(
                 else
                     BOOT_COLOR=${RED}
                     BOOT_RESULT=failed
-                    [[ "${ARCH}-${VERSION}" = "x86-4.19" ]] && BOOT_RESULT="failed (expected)"
+                    [[ "${ARCH}-${VERSION}" = "x86-4.14" || "${ARCH}-${VERSION}" = "x86-4.19" ]] && BOOT_RESULT="failed (expected)"
                 fi
                 echo "${BOOT_COLOR}Boot ${BOOT_RESULT}${RST}"
                 BOOT_RESULT=" | Boot ${BOOT_RESULT}"
@@ -996,8 +996,7 @@ function kct() {(
 function bldallk() {(
     TREE=linux lt
     TREE=linux-next lt
-    # Currently on fire
-    # kct
+    kct
     "${CBL}"/wsl2/bin/build.sh
 )}
 
