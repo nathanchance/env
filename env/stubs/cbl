@@ -825,7 +825,6 @@ function kcbw() {(
 
     case ${BRANCH} in
         4.9) BRANCH=4.9-q ;;
-        4.14) BRANCH=4.14 ;;
     esac
     rm -vrf out/android-${BRANCH}/dist
     BUILD_CONFIG=${CONFIG_DIR##*/}/${CONFIG} ./build/build.sh
@@ -925,10 +924,11 @@ function kct() {(
             ERRORS=$(mktemp)
 
             case ${VERSION} in
-                4.9) ACTUAL_BRANCH=4.9-q ;;
-                4.14) ACTUAL_BRANCH=4.14-stable ;;
-                *) ACTUAL_BRANCH=${VERSION} ;;
+                4.9) DIST_BRANCH=4.9-q; UPSTREAM_BRANCH=${DIST_BRANCH} ;;
+                4.14) DIST_BRANCH=${VERSION}; UPSTEAM_BRANCH=4.14-stable ;;
+                *) DIST_BRANCH=${VERSION}; UPSTREAM_BRANCH=${VERSION} ;;
             esac
+            UPSTREAM_BRANCH=android-${UPSTREAM_BRANCH}
 
             header "android-${ACTUAL_BRANCH} ${ARCH}" "${BOLD}"
 
@@ -957,13 +957,13 @@ function kct() {(
 
             # Boot Cuttlefish for x86
             if [[ ${ARCH} = "x86" && ${BUILD_RESULT} = "successful" ]]; then
-                if boot_cuttlefish "${ACTUAL_BRANCH}"; then
+                if boot_cuttlefish "${DIST_BRANCH}"; then
                     BOOT_COLOR=${GRN}
                     BOOT_RESULT=successful
                 else
                     BOOT_COLOR=${RED}
                     BOOT_RESULT=failed
-                    [[ "${ARCH}-${VERSION}" = "x86-4.14" || "${ARCH}-${VERSION}" = "x86-4.19" ]] && BOOT_RESULT="failed (expected)"
+                    [[ "${ARCH}-${VERSION}" = "x86-4.19" ]] && BOOT_RESULT="failed (expected)"
                 fi
                 echo "${BOOT_COLOR}Boot ${BOOT_RESULT}${RST}"
                 BOOT_RESULT=" | Boot ${BOOT_RESULT}"
@@ -971,7 +971,7 @@ function kct() {(
 
             # Log result
             {
-                echo "android-${ACTUAL_BRANCH} ${ARCH} | $(cd "${CBL_KC_SRC}" || die "wtf"; git kf aosp/android-${ACTUAL_BRANCH}) | Build ${BUILD_RESULT} in ${TIME_STRING:l}${BOOT_RESULT}"
+                echo "${UPSTREAM_BRANCH} ${ARCH} | $(cd "${CBL_KC_SRC}" || die "wtf"; git kf aosp/${UPSTREAM_BRANCH}) | Build ${BUILD_RESULT} in ${TIME_STRING:l}${BOOT_RESULT}"
                 [[ -z ${DEBUG} && ( -n ${SHOW_NF_WARNINGS} || ${RESULT} = "failed" ) ]] && cat "${ERRORS}"
                 echo
             } >> "${LOG}"
