@@ -814,6 +814,8 @@ function kcbw() {(
     # Automatically move bzImage
     if [[ ${ARCH} = "x86_64" ]] && grep -q 'FILES=""' "${CONFIG_DIR}/${CONFIG}"; then
         sed -i '/FILES=""/d' "${CONFIG_DIR}/${CONFIG}"
+        sed -i '/This build step is meant purely to generate/d' "${CONFIG_DIR}/${CONFIG}"
+        sed -i -e :a -e '/^\n*$/{$d;N;};/\n$/ba' "${CONFIG_DIR}/${CONFIG}"
         git -C "${CONFIG_DIR}" ac -m "${CONFIG}: Move bzImage to DIST_FOLDER"
     fi
 
