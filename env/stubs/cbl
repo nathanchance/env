@@ -925,12 +925,12 @@ function kct() {(
 
             case ${VERSION} in
                 4.9) DIST_BRANCH=4.9-q; UPSTREAM_BRANCH=${DIST_BRANCH} ;;
-                4.14) DIST_BRANCH=${VERSION}; UPSTEAM_BRANCH=4.14-stable ;;
+                4.14) DIST_BRANCH=${VERSION}; UPSTREAM_BRANCH=4.14-stable ;;
                 *) DIST_BRANCH=${VERSION}; UPSTREAM_BRANCH=${VERSION} ;;
             esac
             UPSTREAM_BRANCH=android-${UPSTREAM_BRANCH}
 
-            header "android-${ACTUAL_BRANCH} ${ARCH}" "${BOLD}"
+            header "${UPSTREAM_BRANCH} ${ARCH}" "${BOLD}"
 
             # Build kernel silently normally
             if [[ -z ${DEBUG} ]]; then
