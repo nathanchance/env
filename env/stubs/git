@@ -50,7 +50,7 @@ function git_aliases() {(
     git config --global alias.bm 'branch --move'
     git config --global alias.bu 'branch --unset-upstream'
     git config --global alias.c "commit${GPG_SIGN} --signoff --verbose"
-    git config --global alias.ca "commit --gpg-sign --amend --signoff --verbose" # commit ammend
+    git config --global alias.ca "commit${GPG_SIGN} --amend --signoff --verbose" # commit ammend
     git config --global alias.cad "!git commit${GPG_SIGN} --amend --signoff --date=\"\$(date)\" --verbose" # commit amend date
     git config --global alias.cb 'rev-parse --abbrev-ref HEAD' # current branch
     git config --global alias.cf 'diff --name-only --diff-filter=U' # conflicts
