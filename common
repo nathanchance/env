@@ -70,7 +70,7 @@ function header() {
     fi
     BORDER="====$(for _ in $(seq ${#1}); do printf '='; done)===="
     printf "${COLOR}"
-    printf '\n%s\n%s\n%s\n' "${BORDER}" "==  ${1}  ==" "${BORDER}"
+    printf '\n%s\n%s\n%s\n\n' "${BORDER}" "==  ${1}  ==" "${BORDER}"
     printf "${RST}"
 }
 
