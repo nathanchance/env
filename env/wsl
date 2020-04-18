@@ -195,4 +195,11 @@ function upd_terminal_config() {(
 function install_rust_wsl() {(
     curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
 )}
+
+
+# Shortcut for properly running 'hugo server' in WSL 2
+function hugo_serve() {(
+    IP=$(ip addr | grep eth0 | grep inet | awk '{print $2}')
+    hugo server --baseUrl=${IP%/*} --bind=0.0.0.0
+)}
 # vi: filetype=zsh
