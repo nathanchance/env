@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 #
-# Copyright (C) 2018-2019 Nathan Chancellor
+# Copyright (C) 2018-2020 Nathan Chancellor
 #
 # Functions used to assist with ClangBuiltLinux development
 
