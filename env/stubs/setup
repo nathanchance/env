@@ -33,6 +33,7 @@ function cbl_linux_repos() {(
             linux-stable) PAIRS=( "stable/linux.git:linux-stable" ) ;;
             *) return 1;
         esac
+        shift
     done
 
     cd "${SRC_FOLDER}" || die "wtf"
