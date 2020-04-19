@@ -50,7 +50,6 @@ function cbl_linux_repos() {(
             git remote add origin git://git.kernel.org/pub/scm/linux/kernel/git/"${URL}"
             git remote update origin
             git checkout master
-            [[ ${URL} =~ linux-next ]] && git branch --unset-upstream
             [[ ${FOLDER} =~ mirrors ]] && git remote add github git@github.com:ClangBuiltLinux/linux.git
         )
     done
