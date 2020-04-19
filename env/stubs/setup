@@ -41,7 +41,7 @@ function cbl_linux_repos() {(
         FOLDER=${PAIR#*:}
         URL=${PAIR%:*}
         CB=clone.bundle-${FOLDER##*/}
-        [[ -d ${FOLDER} ]] || continue
+        [[ -d ${FOLDER} ]] && continue
         [[ ! -f ${CB} ]] && wget -O "${CB}" -c https://git.kernel.org/pub/scm/linux/kernel/git/"${URL}"/clone.bundle
         git clone "${CB}" "${FOLDER}"
         (
