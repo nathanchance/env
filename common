@@ -282,7 +282,7 @@ function gpg_key_usable() {
 function rg() {
     # Bail out if rg is not installed
     command -v rg &>/dev/null || { warn "ripgrep is not installed!"; return; }
-    
+
     # Colors match ag
     command rg --colors "path:fg:green" \
                --colors "path:style:bold" \
@@ -383,7 +383,7 @@ CCACHE=$(path_push "${HOME}/usr/bin"; command -v ccache)
 function decrypt_gpg_file() {(
     [[ -z ${SCRIPTS_FOLDER} && -z ${SCRIPTS} ]] && die "Scripts folder cannot be found!"
     [[ -z ${SCRIPTS_FOLDER} ]] && SCRIPTS_FOLDER=${SCRIPTS}
-    gpg --pinentry-mode loopback --output "${HOME}"/."${1:?}" --decrypt "${SCRIPTS_FOLDER:?}"/configs/common/"${1}".gpg
+    gpg --batch --yes --pinentry-mode loopback --output "${HOME}"/."${1:?}" --decrypt "${SCRIPTS_FOLDER:?}"/configs/common/"${1}".gpg
 )}
 
 # Update server_ip file from scripts folder
