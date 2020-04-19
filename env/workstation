@@ -381,7 +381,7 @@ function workstation_setup() {
     source "${SCRIPTS_FOLDER}"/env/stubs/bldgcc
     load_botinfo
     type crbf &>/dev/null && crbf
-    ( gpg_available )
+    ( gpg_key_cached )
 }
 
 

@@ -316,7 +316,7 @@ function mg_target_version() {
         mv "${MSG_FILE}" /tmp/mrg-msg
         die "Merge needs manual intervention! Resolve conflicts then run git fm."
     else
-        gpg_available
+        gpg_key_cached
         git commit --amend --date="$(date)" --file "${MSG_FILE}" --gpg-sign --no-edit --quiet
         rm -f "${MSG_FILE}"
         header "${TARGET_VERSION} MERGED CLEANLY!" "${GRN}"
@@ -327,7 +327,7 @@ function mg_target_version() {
 function pl_tag() {
     header "Merging ${TAG_TO_PULL}"
 
-    gpg_available
+    gpg_key_cached
     if ! GIT_MERGE_VERBOSITY=1 git pll --no-edit https://git.kernel.org/pub/scm/linux/kernel/git/sashal/linux-stable.git "${TAG_TO_PULL}"; then
         die "Merge needs manual intervention! Resolve conflicts then run git fm."
     else

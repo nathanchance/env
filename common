@@ -263,7 +263,7 @@ function clang_version() {
 
 # Is GPG passphrase cached?
 # https://demu.red/blog/2016/06/how-to-check-if-your-gpg-key-is-in-cache/
-function gpg_available() {
+function gpg_key_cached() {
     NUM=$(gpg-connect-agent 'keyinfo --list' /bye 2>/dev/null | awk 'BEGIN{CACHED=0} /^S/ {if($7==1){CACHED=1}} END{if($0!=""){print CACHED} else {print "none"}}')
     if [[ ${NUM} = "none" || ${NUM} -eq 0 ]]; then
         die "Please run 'echo \"test\" | gpg --clearsign &>/dev/null' to cache gpg passphrase!"
