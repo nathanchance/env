@@ -73,10 +73,18 @@ function bootstrap() {(
         gpg \
         irssi \
         jq \
+        libauthen-sasl-perl \
         libcurl4-openssl-dev \
+        libemail-valid-perl \
         libevent-dev \
         libexpat-dev \
+        libgmp-dev \
+        libio-socket-ssl-perl \
+        libmailtools-perl \
+        libmpc-dev \
+        libmpfr-dev
         libncurses-dev \
+        libnet-smtp-ssl-perl \
         libpcre2-dev \
         libsasl2-modules \
         libssl-dev \
@@ -90,6 +98,7 @@ function bootstrap() {(
         python3-pip \
         software-properties-common \
         ssh \
+        texinfo \
         tmux \
         unzip \
         vim \
