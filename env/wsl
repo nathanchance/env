@@ -127,6 +127,7 @@ function bootstrap() {(
     # Setup GPG
     if ! gpg_key_usable; then
         gpg --pinentry-mode loopback --import "${KEYS}"/{public*,private}.asc
+        gpg --import-ownertrust "${KEYS}"/ownertrust*.asc
         printf 'default-cache-ttl 604800\nmax-cache-ttl 2419200\n' | tee "${HOME}"/.gnupg/gpg-agent.conf
         gpg-connect-agent reloadagent /bye
     fi
