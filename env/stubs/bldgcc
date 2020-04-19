@@ -87,7 +87,7 @@ EOF
     for TARGET in "${TARGETS[@]}"; do
         # Clean up previous artifacts, can cause a false failure
         rm -rf "${TARGET}"
-        ./build "${BLD_OPTS[@]}" "${TARGET}"
+        PATH=${PATH%%:\/mnt\/c\/*} ./build "${BLD_OPTS[@]}" "${TARGET}"
     done
 )}
 # vi: filetype=zsh
