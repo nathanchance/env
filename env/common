@@ -139,7 +139,12 @@ function hwvulns() {
 # Update main server IP address file
 function encrypt_serv_ip() {(
     [[ -f ${HOME}/.server_ip ]] || die "Server IP file could not be found"
-    gpg --output ${SCRIPTS_FOLDER:?}/configs/common/server_ip.gpg --encrypt --recipient natechancellor@gmail.com ${HOME}/.server_ip
+    gpg --batch \
+        --yes \
+        --output ${SCRIPTS_FOLDER:?}/configs/common/server_ip.gpg \
+        --encrypt \
+        --recipient natechancellor@gmail.com \
+        ${HOME}/.server_ip
 )}
 
 
