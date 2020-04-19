@@ -264,7 +264,7 @@ function bootstrap() {(
     }
     path_push "${HOME}/usr/bin"
     source "${SCRIPTS}"/env/stubs/git && git_setup
-    source "${SCRIPTS}"/env/stubs/pure && pure_prompt
+    source "${SCRIPTS}"/env/stubs/zsh && setup_zsh_env
     zsh "${SCRIPTS}"/configs/common/vim/vim_setup.sh
     ln -fs "${SCRIPTS}"/configs/workstation/.tmux.conf "${HOME}"/.tmux.conf
     decrypt_gpg_file botinfo

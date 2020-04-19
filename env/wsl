@@ -132,7 +132,7 @@ function bootstrap() {(
     }
     path_push "${HOME}/usr/bin"
     source "${SCRIPTS}"/env/stubs/git && git_setup
-    source "${SCRIPTS}"/env/stubs/pure && pure_prompt
+    source "${SCRIPTS}"/env/stubs/zsh && setup_zsh_env
     ln -fs "${SCRIPTS}"/configs/local/.tmux.conf "${HOME}"/.tmux.conf
     zsh "${SCRIPTS}"/configs/common/vim/vim_setup.sh
     decrypt_del_dog_api_key

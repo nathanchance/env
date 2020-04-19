@@ -86,11 +86,14 @@ function shell_setup() {
         export PURE_GIT_PULL=0
         export TIMEFMT=$'\nreal\t%*E\nuser\t%*U\nsys\t%*S'
 
-        [[ -f ${HOME}/usr/share/bash-completion/completions/git ]] && \
-            zstyle ':completion:*:*:git:*' script "${HOME}"/usr/share/bash-completion/completions/git
+        GIT_COMPLETIONS=${HOME}/usr/share/bash-completion/completions/git
+        [[ -f ${GIT_COMPLETIONS} ]] && zstyle ':completion:*:*:git:*' script "${GIT_COMPLETIONS}"
 
         autoload -U compinit && compinit
         autoload -U promptinit && promptinit && prompt pure
+
+        ZSH_HGHLGHT_SYNTAX=${HOME}/.zfunctions/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
+        [[ -f ${ZSH_HGHLGHT_SYNTAX} ]] && source "${ZSH_HGHLGHT_SYNTAX}"
     elif [[ -n ${BASH} ]]; then
         shopt -s checkwinsize
     else

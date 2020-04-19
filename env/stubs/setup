@@ -21,14 +21,6 @@ function global_gitignore() {(
     } >> "${HOME}"/.gitignore_global
 )}
 
-# Creates .zshrc
-function create_zshrc() {(
-    {
-        echo "[[ -f ${GITHUB_FOLDER:=${HOME}/github}/scripts/env/common ]] && source \"${GITHUB_FOLDER}/scripts/env/common\""
-        echo "type shell_setup &>/dev/null && shell_setup"
-    } > "${HOME}"/.zshrc
-)}
-
 # Grab linux, linux-next, and linux-stable for CBL
 # https://www.kernel.org/cloning-linux-from-a-bundle.html
 function cbl_linux_repos() {(
