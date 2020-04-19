@@ -228,16 +228,22 @@ function bootstrap() {(
 
     # Setup keys
     KEYS=/tmp/keys
-    [[ -d ${KEYS} ]] || { git clone https://github.com/nathanchance/keys "${KEYS}" || die "Error downloading keys"; }
-    mv "${KEYS}"/id_ed25519{,.pub} "${HOME}"/.ssh
-    chmod 600 "${HOME}"/.ssh/id_ed25519
-    if ! gpg_key_usable; then
-        gpg --pinentry-mode loopback --import "${KEYS}"/{public*,private*}.asc || die "Error installing gpg keys"
-        gpg --import-ownertrust "${KEYS}"/ownertrust*.asc || die "Error installing gpg ownertrust"
-        printf 'default-cache-ttl 604800\nmax-cache-ttl 2419200\n' | tee -a "${HOME}"/.gnupg/gpg-agent.conf
-        gpg-connect-agent reloadagent /bye
+    [[ -f ${HOME}/.ssh/id_ed25519 ]] || INSTALL_SSH_KEY=true
+    gpg_key_usable || INSTALL_GPG_KEY=true
+    if [[ ${INSTALL_SSH_KEY:=false} = "true" || ${INSTALL_GPG_KEY:=false} = "true" ]]; then
+        [[ -d ${KEYS} ]] || { git clone https://github.com/nathanchance/keys "${KEYS}" || die "Error downloading keys"; }
+        if ${INSTALL_SSH_KEY}; then
+            mv "${KEYS}"/id_ed25519{,.pub} "${HOME}"/.ssh
+            chmod 600 "${HOME}"/.ssh/id_ed25519
+        fi
+        if ${INSTALL_GPG_KEY}; then
+            gpg --pinentry-mode loopback --import "${KEYS}"/{public*,private*}.asc || die "Error installing gpg keys"
+            gpg --import-ownertrust "${KEYS}"/ownertrust*.asc || die "Error installing gpg ownertrust"
+            printf 'default-cache-ttl 604800\nmax-cache-ttl 2419200\n' | tee -a "${HOME}"/.gnupg/gpg-agent.conf
+            gpg-connect-agent reloadagent /bye
+        fi
+        rm -rf "${KEYS}"
     fi
-    rm -rf "${KEYS}"
 
     # Install yay and AUR packages
     if [[ -n ${ARCH} ]]; then
