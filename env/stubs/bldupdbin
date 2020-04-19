@@ -56,7 +56,7 @@ function bcttlfshtools() {(
     cd "${TMP_FOLDER}"
     git clone https://github.com/google/android-cuttlefish
     cd android-cuttlefish
-    git fp -1 --stdout 9798e5ef5f688a13dbaa428d5c6d178e41c94b5f debian/control | git apply -3 -v -R || exit ${?}
+    git format-patch -1 --stdout 9798e5ef5f688a13dbaa428d5c6d178e41c94b5f debian/control | git apply -3 -v -R || exit ${?}
     debuild -i -us -uc -b
     sudo_wrapper dpkg -i ../cuttlefish-common_*_amd64.deb
     sudo_wrapper apt-get install -f -y
