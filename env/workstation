@@ -244,6 +244,8 @@ function bootstrap() {(
         fi
         rm -rf "${KEYS}"
     fi
+    # Ensure GPG passphrase is cached for the rest of the run
+    echo "test" | gpg --clearsign
 
     # Install yay and AUR packages
     if [[ -n ${ARCH} ]]; then
