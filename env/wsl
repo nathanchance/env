@@ -125,9 +125,11 @@ function bootstrap() {(
     chmod 600 "${HOME}"/.ssh/id_ed25519
 
     # Setup GPG
-    gpg --pinentry-mode loopback --import "${KEYS}"/{public*,private*}.asc
-    printf 'default-cache-ttl 604800\nmax-cache-ttl 2419200\n' | tee "${HOME}"/.gnupg/gpg-agent.conf
-    gpg-connect-agent reloadagent /bye
+    if ! gpg_key_usable; then
+        gpg --pinentry-mode loopback --import "${KEYS}"/{public*,private}.asc
+        printf 'default-cache-ttl 604800\nmax-cache-ttl 2419200\n' | tee "${HOME}"/.gnupg/gpg-agent.conf
+        gpg-connect-agent reloadagent /bye
+    fi
 
     # Clone scripts
     GITHUB=${HOME}/github

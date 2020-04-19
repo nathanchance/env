@@ -5,13 +5,6 @@
 # git functions
 
 
-# Check if my GPG key can be used
-function gpg_key_usable() {
-    command -v gpg &>/dev/null || return 1
-    gpg --list-secret-keys --keyid-format LONG | grep -q 2437CB76E544CB6AB3D9DFD399739260CB6CB716
-}
-
-
 # Initial git config setup
 function git_setup() {(
     git config --global user.name "Nathan Chancellor"
@@ -24,7 +17,7 @@ function git_setup() {(
     git config --global sendemail.smtpServerPort 587
     git config --global sendemail.smtpUser natechancellor@gmail.com
 
-    if gpg_key_usable; then
+    if type -f gpg_key_usable &>/dev/null && gpg_key_usable; then
         git config --global commit.gpgsign true
         git config --global user.signingkey 2437CB76E544CB6AB3D9DFD399739260CB6CB716
     fi

@@ -271,6 +271,13 @@ function gpg_available() {
 }
 
 
+# Check if my GPG key can be used
+function gpg_key_usable() {
+    command -v gpg &>/dev/null || return 1
+    gpg --list-secret-keys --keyid-format LONG | grep -q 2437CB76E544CB6AB3D9DFD399739260CB6CB716
+}
+
+
 # ripgrep wrapper
 function rg() {
     # Bail out if rg is not installed
