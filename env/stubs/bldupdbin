@@ -194,7 +194,7 @@ function bllvm() {(
 
     LLVM_SRC=${SRC_FOLDER}/llvm-project
     if [[ ! -d ${LLVM_SRC} ]]; then
-        header "Cloning LLVM" "${BLUE}"
+        header "Cloning LLVM"
         mkdir -p "${LLVM_SRC%/*}"
         git clone git://github.com/llvm/llvm-project "${LLVM_SRC}"
     fi
@@ -244,19 +244,19 @@ function bllvm() {(
         CMAKE=( "${CMAKE[@]}" "-DCMAKE_INSTALL_PREFIX=${PREFIX:=${HOME}/usr}" )
     fi
 
-    header "Configuring LLVM" "${BLUE}"
+    header "Configuring LLVM"
     "${CMAKE[@]}" "${LLVM_SRC}"/llvm >/dev/null
 
-    header "Building LLVM" "${BLUE}"
+    header "Building LLVM"
     ninja
 
     if ! ${BOOTSTRAP}; then
-        header "Running LLVM tests" "${BLUE}"
+        header "Running LLVM tests"
         ninja check-clang check-lld check-llvm check-llvm-unit
     fi
 
     if ${INSTALL}; then
-        header "Installing LLVM" "${BLUE}"
+        header "Installing LLVM"
         ninja install
     fi
 )}
@@ -274,24 +274,32 @@ function bpgollvm() {(
     LLVM_BLD=${LLVM_SRC}/build
     START=$(date +%s)
 
+    set -eu
+
     while (( ${#} )); do
         case ${1} in
-            "-b"|"--branch") shift; LLVM_VERSION=${1} ;;
-            "-t"|"--tip-of-tree") LLVM_VERSION=master ;;
+            -b|--branch) shift; LLVM_VERSION=${1} ;;
+            -u|--update) UPDATE=true ;;
         esac
         shift
     done
-    [[ -z ${LLVM_VERSION} ]] && LLVM_VERSION=master
 
-    header "Updating LLVM and cleaning up"
-    [[ -d ${LLVM_SRC} ]] || { mkdir -p "${LLVM_SRC%/*}"; git clone https://github.com/llvm/llvm-project "${LLVM_SRC}"; }
-    cd ${LLVM_SRC} || die "llvm-project clone failed"
-    git reset --hard
+    if [[ ! -d ${LLVM_SRC} ]]; then
+        header "Downloading LLVM"
+        mkdir -p "${LLVM_SRC%/*}"
+        git clone https://github.com/llvm/llvm-project "${LLVM_SRC}"
+    fi
+
+    cd "${LLVM_SRC}"
     git clean -fxdq
-    git fetch origin
-    git checkout "${LLVM_VERSION}"
-    # If we are on a branch, we should update it
-    [[ ${LLVM_VERSION} = "master" || ${LLVM_VERSION} =~ release ]] && { git pull --rebase || die "llvm-project update failed!"; }
+
+    if ${UPDATE:=false}; then
+        header "Updating LLVM"
+        git reset --hard
+        git fetch origin
+        git checkout "${LLVM_VERSION:=master}"
+        [[ ${LLVM_VERSION} = "master" || ${LLVM_VERSION} =~ release ]] && git pull --rebase
+    fi
 
     # Ensure that we don't build llgo, it's broken
     LLVM_ALL_PROJECTS=$(grep -F "set(LLVM_ALL_PROJECTS " llvm/CMakeLists.txt | cut -d \" -f 2)
@@ -315,7 +323,7 @@ function bpgollvm() {(
                       -DLLVM_USE_LINKER=${LINKER} \
                       "${LLVM_SRC}"/llvm || die "Error configuring stage 1"
         ninja || die "Error building stage 1"
-    ) || exit ${?}
+    )
 
     STAGE_ONE_BIN=${LLVM_BLD}/stage1/bin
     STAGE_ONE_BIN_DEFINES=( -DCMAKE_AR=${STAGE_ONE_BIN}/llvm-ar
@@ -339,7 +347,7 @@ function bpgollvm() {(
                       -DLLVM_INCLUDE_GO_TESTS=OFF \
                       "${LLVM_SRC}"/llvm || die "Error configuring stage 2a"
         ninja clang lld check-clang check-llvm || die "Error building or checking stage2a"
-    ) || exit ${?}
+    )
 
     STAGE_TWO_BIN=${LLVM_BLD}/stage2a/bin
     STAGE_TWO_BIN_DEFINES=( -DCMAKE_AR=${STAGE_TWO_BIN}/llvm-ar
@@ -360,7 +368,7 @@ function bpgollvm() {(
         "${CMAKE[@]}" "${STAGE_TWO_BIN_DEFINES[@]}" \
                       "${LLVM_SRC}"/llvm || die "Error configuring stage 2b"
         ninja || die "Error building stage 2b"
-    ) || exit ${?}
+    )
 
     # Stage 3: Build final compiler
     (
@@ -383,7 +391,7 @@ function bpgollvm() {(
                       "${LLVM_SRC}"/llvm || die "Error configuring stage 3"
         ninja || die "Error building stage 3"
         ninja install || die "Error installing stage 3"
-    ) || exit ${?}
+    )
 
     header "Final LLVM information"
 

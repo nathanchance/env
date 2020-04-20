@@ -608,7 +608,7 @@ function shellcheck() {(
 # Alias for running PGO LLVM build
 function updpgollvm() {(
     DATE=$(date +%Y-%m-%d)
-    PREFIX=${LLVM_TC_FOLDER}/${DATE} bpgollvm -t && \
+    PREFIX=${LLVM_TC_FOLDER}/${DATE} bpgollvm && \
     symlink_llvm "${DATE}"
 )}
 
