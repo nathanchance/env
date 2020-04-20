@@ -188,6 +188,80 @@ function bninja() {(
 )}
 
 
+# Build a "regular" LLVM toolchain or a bootstrap compiler
+function bllvm() {(
+    set -eu
+
+    LLVM_SRC=${SRC_FOLDER}/llvm-project
+    if [[ ! -d ${LLVM_SRC} ]]; then
+        header "Cloning LLVM" "${BLUE}"
+        mkdir -p "${LLVM_SRC%/*}"
+        git clone git://github.com/llvm/llvm-project "${LLVM_SRC}"
+    fi
+
+    LLVM_BLD=${LLVM_SRC}/build/stage1
+    rm -rf "${LLVM_BLD%/*}"
+    mkdir -p "${LLVM_BLD}"
+    cd "${LLVM_BLD}"
+
+    while (( ${#} )); do
+        case ${1} in
+            -b|--bootstrap) BOOTSTRAP=true ;;
+            -i|--install) INSTALL=true ;;
+        esac
+        shift
+    done
+
+    CMAKE=( cmake
+            -G Ninja
+            -Wno-dev
+            "-DCLANG_DEFAULT_LINKER=lld"
+            "-DCLANG_VENDOR=$(uname -n)"
+            "-DCMAKE_AR=$(command -v llvm-ar)"
+            "-DCMAKE_BUILD_TYPE=Release"
+            "-DCMAKE_C_COMPILER=$(command -v clang)"
+            "-DCMAKE_CXX_COMPILER=$(command -v clang++)"
+            "-DCMAKE_LINKER=$(command -v ld.lld)"
+            "-DCMAKE_RANLIB=$(command -v llvm-ranlib)"
+            "-DLLVM_CCACHE_BUILD=ON"
+            "-DLLVM_ENABLE_PROJECTS=all"
+            "-DLLVM_ENABLE_WARNINGS=OFF"
+            "-DLLVM_USE_LINKER=lld"
+            "-DPYTHON_EXECUTABLE=$(command -v python3)" )
+
+    if ${BOOTSTRAP:=false}; then
+        CMAKE=( "${CMAKE[@]}"
+                "-DCLANG_PLUGIN_SUPPORT=OFF"
+                "-DCOMPILER_RT_BUILD_SANITIZERS=OFF"
+                "-DLLVM_ENABLE_BACKTRACES=OFF"
+                "-DLLVM_INCLUDE_DOCS=OFF"
+                "-DLLVM_INCLUDE_EXAMPLES=OFF"
+                "-DLLVM_INCLUDE_TESTS=OFF"
+                "-DLLVM_TARGETS_TO_BUILD=host" )
+    fi
+
+    if ${INSTALL:=false}; then
+        CMAKE=( "${CMAKE[@]}" "-DCMAKE_INSTALL_PREFIX=${PREFIX:=${HOME}/usr}" )
+    fi
+
+    header "Configuring LLVM" "${BLUE}"
+    "${CMAKE[@]}" "${LLVM_SRC}"/llvm >/dev/null
+
+    header "Building LLVM" "${BLUE}"
+    ninja
+
+    if ! ${BOOTSTRAP}; then
+        header "Running LLVM tests" "${BLUE}"
+        ninja check-clang check-lld check-llvm check-llvm-unit
+    fi
+
+    if ${INSTALL}; then
+        header "Installing LLVM" "${BLUE}"
+        ninja install
+    fi
+)}
+
+
 # Build/install PGO'd LLVM
 function bpgollvm() {(
     CMAKE=( cmake -G Ninja
