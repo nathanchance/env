@@ -63,11 +63,7 @@ function echo() {
 
 # Prints a formatted header to point out what is being done to the user
 function header() {
-    if [[ -n ${2} ]]; then
-        COLOR=${2}
-    else
-        COLOR=${RED}
-    fi
+    COLOR=${2:-${BLUE}}
     BORDER="====$(for _ in $(seq ${#1}); do printf '='; done)===="
     printf "${COLOR}"
     printf '\n%s\n%s\n%s\n\n' "${BORDER}" "==  ${1}  ==" "${BORDER}"
