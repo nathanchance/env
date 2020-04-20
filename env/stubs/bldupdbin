@@ -192,7 +192,7 @@ function bninja() {(
 function bllvm() {(
     set -eu
 
-    LLVM_SRC=${SRC_FOLDER}/llvm-project
+    LLVM_SRC=${SRC_FOLDER:=${HOME}/src}/llvm-project
     if [[ ! -d ${LLVM_SRC} ]]; then
         header "Cloning LLVM"
         mkdir -p "${LLVM_SRC%/*}"
