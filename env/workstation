@@ -638,6 +638,13 @@ function symlink_llvm() {(
 )}
 
 
+# Qualify new LLVM revision
+function qualify_llvm_uprev() {(
+    bllvm --bootstrap || exit ${?}
+    bllvm
+)}
+
+
 # Update function
 function upd() {(
     if [[ -n ${ARCH} ]]; then
