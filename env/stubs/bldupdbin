@@ -266,12 +266,12 @@ function bllvm() {(
 function bpgollvm() {(
     CMAKE=( cmake -G Ninja
                   -Wno-dev
-                  -DCLANG_DEFAULT_LINKER=lld
-                  -DCLANG_VENDOR="$(uname -n)"
-                  -DCMAKE_BUILD_TYPE=Release )
-    grep -q Ubuntu /usr/lib/os-release && CMAKE+=( -DPYTHON_EXECUTABLE=$(command -v python3) )
-    LLVM_PROJECT=${SRC_FOLDER:-${HOME}/src}/llvm-project
-    BUILD_FOLDER=${LLVM_PROJECT}/build
+                  "-DCLANG_DEFAULT_LINKER=lld"
+                  "-DCLANG_VENDOR=$(uname -n)"
+                  "-DCMAKE_BUILD_TYPE=Release"
+                  "-DPYTHON_EXECUTABLE=$(command -v python3)" )
+    LLVM_SRC=${SRC_FOLDER:-${HOME}/src}/llvm-project
+    LLVM_BLD=${LLVM_SRC}/build
     START=$(date +%s)
 
     while (( ${#} )); do
@@ -284,8 +284,8 @@ function bpgollvm() {(
     [[ -z ${LLVM_VERSION} ]] && LLVM_VERSION=master
 
     header "Updating LLVM and cleaning up"
-    [[ -d ${LLVM_PROJECT} ]] || { mkdir -p "${LLVM_PROJECT%/*}"; git clone https://github.com/llvm/llvm-project "${LLVM_PROJECT}"; }
-    cd ${LLVM_PROJECT} || die "llvm-project clone failed"
+    [[ -d ${LLVM_SRC} ]] || { mkdir -p "${LLVM_SRC%/*}"; git clone https://github.com/llvm/llvm-project "${LLVM_SRC}"; }
+    cd ${LLVM_SRC} || die "llvm-project clone failed"
     git reset --hard
     git clean -fxdq
     git fetch origin
@@ -300,8 +300,8 @@ function bpgollvm() {(
     # Stage 1: Bootstrap compiler
     (
         header "Building LLVM stage 1"
-        mkdir -p "${BUILD_FOLDER}"/stage1
-        cd "${BUILD_FOLDER}"/stage1 || die "Error creating stage1 build folder"
+        mkdir -p "${LLVM_BLD}"/stage1
+        cd "${LLVM_BLD}"/stage1 || die "Error creating stage1 build folder"
         LINKER=$(if command -v ld.lld &>/dev/null; then echo lld; else echo gold; fi)
         "${CMAKE[@]}" -DCLANG_PLUGIN_SUPPORT=OFF \
                       -DCMAKE_C_COMPILER=clang \
@@ -313,11 +313,11 @@ function bpgollvm() {(
                       -DLLVM_INCLUDE_TESTS=OFF \
                       -DLLVM_TARGETS_TO_BUILD=host \
                       -DLLVM_USE_LINKER=${LINKER} \
-                      "${LLVM_PROJECT}"/llvm || die "Error configuring stage 1"
+                      "${LLVM_SRC}"/llvm || die "Error configuring stage 1"
         ninja || die "Error building stage 1"
     ) || exit ${?}
 
-    STAGE_ONE_BIN=${BUILD_FOLDER}/stage1/bin
+    STAGE_ONE_BIN=${LLVM_BLD}/stage1/bin
     STAGE_ONE_BIN_DEFINES=( -DCMAKE_AR=${STAGE_ONE_BIN}/llvm-ar
                             -DCMAKE_C_COMPILER=${STAGE_ONE_BIN}/clang
                             -DCLANG_TABLEGEN=${STAGE_ONE_BIN}/clang-tblgen
@@ -330,18 +330,18 @@ function bpgollvm() {(
     # Stage 2a: Instrumented compiler
     (
         header "Building LLVM stage 2a"
-        mkdir -p "${BUILD_FOLDER}"/stage2a
-        cd "${BUILD_FOLDER}"/stage2a || die "Error creating stage2a build folder"
+        mkdir -p "${LLVM_BLD}"/stage2a
+        cd "${LLVM_BLD}"/stage2a || die "Error creating stage2a build folder"
         export PATH=${STAGE_ONE_BIN:?}:${PATH}
         "${CMAKE[@]}" "${STAGE_ONE_BIN_DEFINES[@]}" \
                       -DLLVM_BUILD_INSTRUMENTED=IR \
                       -DLLVM_BUILD_RUNTIME=OFF \
                       -DLLVM_INCLUDE_GO_TESTS=OFF \
-                      "${LLVM_PROJECT}"/llvm || die "Error configuring stage 2a"
+                      "${LLVM_SRC}"/llvm || die "Error configuring stage 2a"
         ninja clang lld check-clang check-llvm || die "Error building or checking stage2a"
     ) || exit ${?}
 
-    STAGE_TWO_BIN=${BUILD_FOLDER}/stage2a/bin
+    STAGE_TWO_BIN=${LLVM_BLD}/stage2a/bin
     STAGE_TWO_BIN_DEFINES=( -DCMAKE_AR=${STAGE_TWO_BIN}/llvm-ar
                             -DCMAKE_C_COMPILER=${STAGE_TWO_BIN}/clang
                             -DCLANG_TABLEGEN=${STAGE_TWO_BIN}/clang-tblgen
@@ -354,24 +354,24 @@ function bpgollvm() {(
     # Stage 2b: Build clang with instrumented compiler
     (
         header "Building LLVM stage 2b"
-        mkdir -p "${BUILD_FOLDER}"/stage2b
-        cd "${BUILD_FOLDER}"/stage2b
+        mkdir -p "${LLVM_BLD}"/stage2b
+        cd "${LLVM_BLD}"/stage2b
         export PATH=${STAGE_TWO_BIN:?}:${PATH}
         "${CMAKE[@]}" "${STAGE_TWO_BIN_DEFINES[@]}" \
-                      "${LLVM_PROJECT}"/llvm || die "Error configuring stage 2b"
+                      "${LLVM_SRC}"/llvm || die "Error configuring stage 2b"
         ninja || die "Error building stage 2b"
     ) || exit ${?}
 
     # Stage 3: Build final compiler
     (
         header "Building LLVM stage 3"
-        mkdir -p "${BUILD_FOLDER}"/stage3
-        cd "${BUILD_FOLDER}"/stage3 || die "Error creating stage 3 build folder"
+        mkdir -p "${LLVM_BLD}"/stage3
+        cd "${LLVM_BLD}"/stage3 || die "Error creating stage 3 build folder"
         export PATH=${STAGE_ONE_BIN:?}:${PATH}
 
         # Merge profile data
-        PROFILE_DATA=${BUILD_FOLDER}/stage3/profdata.prof
-        llvm-profdata merge -output=${PROFILE_DATA} ${BUILD_FOLDER}/stage2a/profiles/*.profraw || die "Error merging profile data"
+        PROFILE_DATA=${LLVM_BLD}/stage3/profdata.prof
+        llvm-profdata merge -output=${PROFILE_DATA} ${LLVM_BLD}/stage2a/profiles/*.profraw || die "Error merging profile data"
 
         # Build compiler with that data
         "${CMAKE[@]}" "${STAGE_ONE_BIN_DEFINES[@]}" \
@@ -380,7 +380,7 @@ function bpgollvm() {(
                       -DCMAKE_INSTALL_PREFIX=${PREFIX:=${HOME}/usr} \
                       -DLLVM_ENABLE_LTO=Thin \
                       -DLLVM_PROFDATA_FILE=${PROFILE_DATA} \
-                      "${LLVM_PROJECT}"/llvm || die "Error configuring stage 3"
+                      "${LLVM_SRC}"/llvm || die "Error configuring stage 3"
         ninja || die "Error building stage 3"
         ninja install || die "Error installing stage 3"
     ) || exit ${?}
