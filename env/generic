@@ -50,6 +50,7 @@ function bootstrap() {(
                    libpixman-1-dev
                    libssl-dev
                    lld
+                   llvm
                    locales
                    make
                    mosh
