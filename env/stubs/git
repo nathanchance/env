@@ -71,6 +71,7 @@ function git_aliases() {(
     git config --global alias.lo 'log --oneline'
     git config --global alias.ma 'merge --abort'
     git config --global alias.mc 'merge --continue'
+    git config --global alias.mfc '!git log --format=%H --committer="$(git config --get user.name) <$(git config --get user.email)>" "$(git log --format=%H -n 150 | tail -n1)".. | tail -n1'
     git config --global alias.pr 'pull-request'
     git config --global alias.psu 'push --set-upstream'
     git config --global alias.ra '!f() { for i in $(git cf); do git rf $i; done }; f' # reset all conflicts
