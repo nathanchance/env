@@ -83,12 +83,12 @@ function ptchmn() {(
 
     case "${1:?}" in
         "-s"|"--sync")
-            FIRST_HASH=$(git log --reverse --format=%H --committer="$(git config --get user.name) <$(git config --get user.email)>" origin/"${UPSTREAM}"..HEAD | head -n1)
+            FIRST_HASH=$(git mfc)
             [[ -z ${FIRST_HASH} ]] && die "FIRST_HASH is empty...?"
 
             rm "${TARGET_FOLDER}"/*
 
-            git fp -o "${TARGET_FOLDER}" --base=auto "${FIRST_HASH}"^..HEAD
+            git fp -o "${TARGET_FOLDER}" --base="${FIRST_HASH}^" "${FIRST_HASH}"^..HEAD
 
             git -C "${TARGET_FOLDER}" aa
 
@@ -105,7 +105,7 @@ function ptchmn() {(
 # Rebase a linux-next branch
 function rbln() {(
     [[ ! -f Makefile ]] && { display_error "You're not in a kernel folder!"; return 1; }
-    FIRST_HASH=$(git log --reverse --format=%H --committer="$(git config --get user.name) <$(git config --get user.email)>" origin/stable..HEAD | head -n1)
+    FIRST_HASH=$(git mfc)
     SECOND_HASH=$(git show -s --format=%H "$(git cb)")
     git rh origin/master
     git cherry-pick --gpg-sign "${FIRST_HASH}^..${SECOND_HASH}"
@@ -549,7 +549,7 @@ function babk() {(
 # Show local LLVM patches via git log
 function llvm_log() {(
     cd "${TCBLD:?}"/llvm-project || return
-    MLFC=$(git log --reverse --format=%H --committer="$(git config --get user.name) <$(git config --get user.email)>" --since="$(date --date="1 week ago")" | head -n1)
+    MLFC=$(git mfc)
     if [[ -n ${MLFC} ]]; then
         echo
         echo "LLVM commit log:"
@@ -666,7 +666,7 @@ function lt() {(
     ) done
 
     {
-        MFC=$(git log --reverse --format=%H --committer="$(git config --get user.name) <$(git config --get user.email)>" --since="$(date --date="1 week ago")" | head -n1)
+        MFC=$(git mfc)
         if [[ -n ${MFC} ]]; then
             echo "${FOLDER##*/} commit log:"
             echo
