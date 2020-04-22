@@ -14,11 +14,14 @@ wsl --shutdown
 
 # Start up the VM and print the version
 Start-Sleep -Seconds $sleeptime
-wsl -d Debian -- /usr/bin/batcat /proc/version
+wsl -d ubuntu -- /usr/bin/bat /proc/version
 
 # If the distro fails to start, try again
 if (!$?) {
     wsl --shutdown
     Start-Sleep -Seconds $sleeptime
-    wsl -d Debian -- /usr/bin/batcat /proc/version
+    wsl -d ubuntu -- /usr/bin/bat /proc/version
 }
+
+# Turn debug back off
+Set-PSDebug -Off
