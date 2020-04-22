@@ -150,8 +150,9 @@ function encrypt_serv_ip() {(
 
 # Small macro for responding to a LKML post
 function reply_to_lkml() {(
+    LINK=${1:?} && \
     MBOX=$(mktemp --suffix=.mbox) && \
-    curl -LSso "${MBOX}" "${1:?}" && \
+    curl -LSso "${MBOX}" "${LINK%/*}"/raw && \
     mutt -f "${MBOX}"
 
     rm "${MBOX}"
@@ -160,9 +161,9 @@ function reply_to_lkml() {(
 
 # Apply patch from LKML
 function apply_from_lkml() {(
-    LINK=${1:?} && \
-    PATCH=$(mktemp --suffix=.patch) && \
-    curl -LSso "${PATCH}" "${LINK//\/raw}"/raw
+    LINK=${1:?}
+    METHOD=${2:-apply}
+    curl -LSs "${LINK%/*}"/raw | git "${METHOD}" -3
 )}
 
 
