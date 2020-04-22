@@ -292,7 +292,7 @@ function bootstrap() {(
 
     # Download toolchains
     [[ -d ${ANDROID_TC_FOLDER}/clang-master ]] || tmux new-window zsh -c "git -C ${ANDROID_TC_FOLDER} clone --single-branch https://android.googlesource.com/platform/prebuilts/clang/host/linux-x86/ clang-master"
-    [[ -d ${ANDROID_TC_FOLDER}/gcc-arm ]] || ggit -C "${ANDROID_TC_FOLDER}" clone --depth=1 -b android-9.0.0_r1 --single-branch https://android.googlesource.com/platform/prebuilts/gcc/linux-x86/arm/arm-linux-androideabi-4.9/ gcc-arm
+    [[ -d ${ANDROID_TC_FOLDER}/gcc-arm ]] || git -C "${ANDROID_TC_FOLDER}" clone --depth=1 -b android-9.0.0_r1 --single-branch https://android.googlesource.com/platform/prebuilts/gcc/linux-x86/arm/arm-linux-androideabi-4.9/ gcc-arm
     [[ -d ${ANDROID_TC_FOLDER}/gcc-arm64 ]] || git -C "${ANDROID_TC_FOLDER}" clone --depth=1 -b android-9.0.0_r1 --single-branch https://android.googlesource.com/platform/prebuilts/gcc/linux-x86/aarch64/aarch64-linux-android-4.9/ gcc-arm64
     for VERSION in clang-4691093:android-9.0.0_r1 clang-r353983c:android-10.0.0_r1; do
         BRANCH=${VERSION#*:}
