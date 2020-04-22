@@ -160,10 +160,16 @@ function reply_to_lkml() {(
 
 
 # Apply patch from LKML
-function apply_from_lkml() {(
-    LINK=${1:?}
-    METHOD=${2:-apply}
-    curl -LSs "${LINK%/*}"/raw | git "${METHOD}" -3
+function patch_from_lkml() {(
+    while (( ${#} )); do
+        case ${1} in
+            http*) LINK=${1} ;;
+            am) METHOD=( am ) ;;
+            apply) METHOD=( apply -v ) ;;
+        esac
+        shift
+    done
+    curl -LSs "${LINK%/*}"/raw | git "${METHOD[@]}" -3
 )}
 
 
