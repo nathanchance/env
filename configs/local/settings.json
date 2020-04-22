@@ -1,0 +1,53 @@
+{
+    "$schema": "https://aka.ms/terminal-profiles-schema",
+
+    "defaultProfile": "{00000000-0000-0000-0000-000000000000}",
+
+    "profiles":
+    {
+        "defaults":
+        {
+            "fontFace": "Fira Code",
+            "fontSize": 9
+        },
+        "list":
+        [
+            {
+                "guid": "{00000000-0000-0000-0000-000000000000}",
+                "hidden": false,
+                "name": "foobar",
+                "source": "Windows.Terminal.Wsl",
+                "colorScheme": "snazzy",
+                "closeOnExit": "always"
+            }
+        ]
+    },
+
+    "schemes":
+    [
+        {
+            "name": "snazzy",
+            "background": "#282a36",
+            "foreground": "#eff0eb",
+            "cursorColor": "#97979b",
+            "selectionBackground": "#97979b",
+            "black": "#282a36",
+            "red": "#ff5c57",
+            "green": "#5af78e",
+            "yellow": "#f3f99d",
+            "blue": "#57c7ff",
+            "purple": "#ff6ac1",
+            "cyan": "#9aedfe",
+            "white": "#f1f1f0",
+            "brightBlack": "#686868",
+            "brightRed": "#ff5c57",
+            "brightGreen": "#5af78e",
+            "brightYellow": "#f3f99d",
+            "brightBlue": "#57c7ff",
+            "brightPurple": "#ff6ac1",
+            "brightCyan": "#9aedfe",
+            "brightWhite": "#eff0eb"
+        }
+    ]
+}
+
