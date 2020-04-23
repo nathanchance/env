@@ -610,7 +610,8 @@ function shellcheck() {(
 function updpgollvm() {(
     DATE=$(date +%Y-%m-%d)
     PREFIX=${LLVM_TC_FOLDER}/${DATE} bpgollvm && \
-    symlink_llvm "${DATE}"
+    symlink_llvm "${DATE}" && \
+    ccache_clear llvm
 )}
 
 
@@ -631,11 +632,8 @@ function symlink_llvm() {(
         fi
     done
 
-    header "Symlinking new LLVM"
+    header "Symlinking LLVM"
     cp -frsv "${LLVM_TC_FOLDER}/${1:?}"/* "${HOME}"/usr
-
-    # Invalidate our LLVM cache because we have a new compiler that will be used for it
-    ccache_clear llvm
 )}
 
 
