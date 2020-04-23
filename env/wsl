@@ -96,6 +96,7 @@ function bootstrap() {(
         neofetch \
         pass \
         python3-pip \
+        re2c \
         software-properties-common \
         ssh \
         texinfo \

@@ -250,7 +250,7 @@ function bninja() {(
     curl -LSs https://github.com/"${NINJA_REPO}"/archive/${NINJA_VERSION}.tar.gz | tar -xzf -
     cd "${NINJA_FOLDER}" || die "Downloading or extracting ninja failed"
 
-    ./configure.py --bootstrap
+    python3 ./configure.py --bootstrap
     if [[ -f ninja ]]; then
         cp -v ninja "${PREFIX:=${HOME}/usr}"/bin
         rm -rf "${TMP_FOLDER}"
