@@ -47,6 +47,29 @@
             "brightPurple": "#ff6ac1",
             "brightCyan": "#9aedfe",
             "brightWhite": "#eff0eb"
+        },
+        {
+            "name": "nord",
+            "background": "#2E3440",
+            "foreground": "#D8DEE9",
+            "cursorColor": "#D8DEE9",
+            "selectionBackground": "#434c5e",
+            "black": "#3B4252",
+            "red": "#BF616A",
+            "green": "#A3BE8C",
+            "yellow": "#EBCB8B",
+            "blue": "#81A1C1",
+            "purple": "#B48EAD",
+            "cyan": "#88C0D0",
+            "white": "#E5E9F0",
+            "brightBlack": "#4C566A",
+            "brightRed": "#BF616A",
+            "brightGreen": "#A3BE8C",
+            "brightYellow": "#EBCB8B",
+            "brightBlue": "#81A1C1",
+            "brightPurple": "#B48EAD",
+            "brightCyan": "#88C0D0",
+            "brightWhite": "#ECEFF4"
         }
     ]
 }
