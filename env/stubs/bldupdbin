@@ -145,49 +145,6 @@ function ihugo() {(
 )}
 
 
-# Build/install GNU make
-function bmake() {(
-    [[ -z ${MAKE_VERSION} ]] && MAKE_VERSION=4.3
-    MAKE_FOLDER=make-${MAKE_VERSION}
-    TMP_FOLDER=$(mktemp -d)
-
-    cd "${TMP_FOLDER}"
-    curl -LSs http://ftp.gnu.org/gnu/make/"${MAKE_FOLDER}".tar.gz | tar -xzf -
-    cd "${MAKE_FOLDER}" || die "Downloading or extracting make failed"
-
-    ./configure --prefix=${PREFIX:=${HOME}/usr}
-    make -j$(nproc) install
-
-    move_to_front_of_path "${PREFIX}"/bin
-    command -v make
-    make --version
-    rm -rf "${TMP_FOLDER}"
-)}
-
-
-# Build/update ninja
-function bninja() {(
-    NINJA_REPO=ninja-build/ninja
-    [[ -z ${NINJA_VERSION} ]] && NINJA_VERSION=$(glr "${NINJA_REPO}")
-    NINJA_FOLDER=ninja-${NINJA_VERSION//v}
-    TMP_FOLDER=$(mktemp -d)
-
-    cd "${TMP_FOLDER}"
-    curl -LSs https://github.com/"${NINJA_REPO}"/archive/${NINJA_VERSION}.tar.gz | tar -xzf -
-    cd "${NINJA_FOLDER}" || die "Downloading or extracting ninja failed"
-
-    ./configure.py --bootstrap
-    if [[ -f ninja ]]; then
-        cp -v ninja "${PREFIX:=${HOME}/usr}"/bin
-        rm -rf "${TMP_FOLDER}"
-
-        move_to_front_of_path "${PREFIX}"/bin
-        command -v ninja
-        ninja --version
-    fi
-)}
-
-
 # Build a "regular" LLVM toolchain or a bootstrap compiler
 function bllvm() {(
     set -eu
@@ -258,6 +215,49 @@ function bllvm() {(
     if ${INSTALL}; then
         header "Installing LLVM"
         ninja install
+    fi
+)}
+
+
+# Build/install GNU make
+function bmake() {(
+    [[ -z ${MAKE_VERSION} ]] && MAKE_VERSION=4.3
+    MAKE_FOLDER=make-${MAKE_VERSION}
+    TMP_FOLDER=$(mktemp -d)
+
+    cd "${TMP_FOLDER}"
+    curl -LSs http://ftp.gnu.org/gnu/make/"${MAKE_FOLDER}".tar.gz | tar -xzf -
+    cd "${MAKE_FOLDER}" || die "Downloading or extracting make failed"
+
+    ./configure --prefix=${PREFIX:=${HOME}/usr}
+    make -j$(nproc) install
+
+    move_to_front_of_path "${PREFIX}"/bin
+    command -v make
+    make --version
+    rm -rf "${TMP_FOLDER}"
+)}
+
+
+# Build/update ninja
+function bninja() {(
+    NINJA_REPO=ninja-build/ninja
+    [[ -z ${NINJA_VERSION} ]] && NINJA_VERSION=$(glr "${NINJA_REPO}")
+    NINJA_FOLDER=ninja-${NINJA_VERSION//v}
+    TMP_FOLDER=$(mktemp -d)
+
+    cd "${TMP_FOLDER}"
+    curl -LSs https://github.com/"${NINJA_REPO}"/archive/${NINJA_VERSION}.tar.gz | tar -xzf -
+    cd "${NINJA_FOLDER}" || die "Downloading or extracting ninja failed"
+
+    ./configure.py --bootstrap
+    if [[ -f ninja ]]; then
+        cp -v ninja "${PREFIX:=${HOME}/usr}"/bin
+        rm -rf "${TMP_FOLDER}"
+
+        move_to_front_of_path "${PREFIX}"/bin
+        command -v ninja
+        ninja --version
     fi
 )}
 
