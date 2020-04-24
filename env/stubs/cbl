@@ -555,16 +555,16 @@ function llvm_log() {(
         echo
         echo "LLVM commit log:"
         echo
-        git lo ${MLFC}^^..HEAD
+        git lo "${MLFC}"^^..HEAD
     fi
 )}
 
 
 # linux testing
 function lt() {(
-    : ${FOLDER:=${CBL}/${TREE:=linux-next}}
+    : "${FOLDER:=${CBL}/${TREE:=linux-next}}"
     cd "${FOLDER}" || die "wtf"
-    echo ${PWD}
+    echo "${PWD}"
 
     while (( ${#} )); do
         case ${1} in
@@ -629,10 +629,10 @@ function lt() {(
 
         # Build kernel silently normally
         if [[ -z ${DEBUG} ]]; then
-            Q=2 bldk "${ARCH}" "${CONFIG}" KCFLAGS="${KCFLAGS--Werror}" ${LD:+LD="${LD}"} O=${KBF}/${ARCH} |& tee "${WARNING_LOG}"
+            Q=2 bldk "${ARCH}" "${CONFIG}" KCFLAGS="${KCFLAGS--Werror}" ${LD:+LD="${LD}"} O="${KBF}/${ARCH}" |& tee "${WARNING_LOG}"
             MAKE_RESULT=${pipestatus[1]}
         else
-            bldk "${ARCH}" "${CONFIG}" KCFLAGS="${KCFLAGS--Werror}" ${LD:+LD="${LD}"} O=${KBF}/${ARCH}
+            bldk "${ARCH}" "${CONFIG}" KCFLAGS="${KCFLAGS--Werror}" ${LD:+LD="${LD}"} O="${KBF}/${ARCH}"
             MAKE_RESULT=${?}
         fi
 
@@ -671,7 +671,7 @@ function lt() {(
         if [[ -n ${MFC} ]]; then
             echo "${FOLDER##*/} commit log:"
             echo
-            git lo ${MFC}^^..HEAD
+            git lo "${MFC}"^^..HEAD
         fi
         llvm_log
     } >> "${LOG}"
@@ -794,7 +794,7 @@ function kcbw() {(
         esac
         shift
     done
-    : ${ARCH:?} ${BRANCH:=mainline}
+    : ${ARCH:?} "${BRANCH:=mainline}"
     CONFIG=build.config.cuttlefish.${ARCH}
     case ${BRANCH} in
         4.19|5.4|mainline) CONFIG_DIR=${CBL_KC}/cuttlefish-modules ;;
@@ -867,8 +867,8 @@ function boot_cuttlefish() {(
     done
 
     DIST=${CBL_KC}/out/android-${BRANCH:?}/dist
-    LAUNCH_CVD=( -daemon -kernel_path ${DIST}/bzImage -report_anonymous_usage_stats n )
-    [[ -f ${DIST}/initramfs.img ]] && LAUNCH_CVD=( "${LAUNCH_CVD[@]}" -initramfs_path ${DIST}/initramfs.img )
+    LAUNCH_CVD=( -daemon -kernel_path "${DIST}"/bzImage -report_anonymous_usage_stats n )
+    [[ -f ${DIST}/initramfs.img ]] && LAUNCH_CVD=( "${LAUNCH_CVD[@]}" -initramfs_path "${DIST}"/initramfs.img )
 
     cd "${CBL_CTTLFSH}" || exit ${?}
 
@@ -1094,7 +1094,7 @@ done' > "${SCRIPT}"
 
 
 function yapf() {
-    PYTHONPATH=${CBL}/git/yapf python3 ${CBL}/git/yapf/yapf -i -p "${@}"
+    PYTHONPATH=${CBL}/git/yapf python3 "${CBL}"/git/yapf/yapf -i -p "${@}"
 }
 
 
@@ -1149,18 +1149,18 @@ function upd_lnx_tcbld() {(
 
     rm -f "${KERNEL}"/linux*
     for CONFIG in defconfig allyesconfig; do
-        git checkout ${BPREFIX}-${CONFIG} || continue
+        git checkout "${BPREFIX}"-${CONFIG} || continue
         case ${CONFIG} in
-            defconfig) git rebase v${KVER} ;;
-            allyesconfig) git rebase ${BPREFIX}-defconfig ;;
+            defconfig) git rebase v"${KVER}" ;;
+            allyesconfig) git rebase "${BPREFIX}"-defconfig ;;
         esac
-        git format-patch --stdout v${KVER}..${BPREFIX}-${CONFIG} > "${KERNEL}"/linux-${KVER}-${CONFIG}.patch
+        git format-patch --stdout v"${KVER}".."${BPREFIX}"-"${CONFIG}" > "${KERNEL}"/linux-"${KVER}"-"${CONFIG}".patch
     done
 
     TARBALL=linux-${KVER}.tar.${TAR_EXT}
     cd "${KERNEL}"
     gen_sha256sum "${URL}/${TARBALL}"
 
-    sed -i "s/LINUX=.*/LINUX=linux-${KVER}/" ${KERNEL}/build.sh
+    sed -i "s/LINUX=.*/LINUX=linux-${KVER}/" "${KERNEL}"/build.sh
 )}
 # vi: filetype=zsh
