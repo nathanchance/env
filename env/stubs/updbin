@@ -561,14 +561,12 @@ function btmux() {(
 
 # Build/update zsh
 function bzsh() {(
-    ZSH_VERSION=5.8
-    [[ ${#} -gt 0 ]] && ZSH_VERSION=${1}
     TMP_FOLDER=$(mktemp -d)
 
     cd "${TMP_FOLDER}"
-    case ${ZSH_VERSION} in
+    case ${BZSH_VERSION:=5.8} in
         latest) URL=https://sourceforge.net/projects/zsh/files/latest/download ;;
-        *) URL=https://www.zsh.org/pub/zsh-"${ZSH_VERSION//zsh-}".tar.xz ;;
+        *) URL=https://www.zsh.org/pub/zsh-"${BZSH_VERSION//zsh-}".tar.xz ;;
     esac
     curl -LSs "${URL}" | tar -xJf -
     cd zsh-* || die "Downloading or extracting zsh failed"
