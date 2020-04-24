@@ -27,29 +27,29 @@ BRIGHT_CYAN="\033[01;36m"
 GRAY="\033[37m"
 WHITE="\033[01;37m"
 
-printf "This is a test of \${FOREGROUND}\n"
-printf "${BRIGHT_FOREGROUND}This is a test of \${BRIGHT_FOREGROUND}${RESET}\n\n"
+printf '\nThis is a test of FOREGROUND\n'
+printf '%bThis is a test of BRIGHT_FOREGROUND%b\n\n' "${BRIGHT_FOREGROUND}" "${RESET}"
 
-printf "${BLACK}This is a test of \${BLACK}${RESET}\n"
-printf "${BRIGHT_BLACK}This is a test of \${BRIGHT_BLACK}${RESET}\n\n"
+printf '%bThis is a test of BLACK%b\n' "${BLACK}" "${RESET}"
+printf '%bThis is a test of BRIGHT_BLACK%b\n\n' "${BRIGHT_BLACK}" "${RESET}"
 
-printf "${RED}This is a test of \${RED}${RESET}\n"
-printf "${BRIGHT_RED}This is a test of \${BRIGHT_RED}${RESET}\n\n"
+printf '%bThis is a test of RED%b\n' "${RED}" "${RESET}"
+printf '%bThis is a test of BRIGHT_RED%b\n\n' "${BRIGHT_RED}" "${RESET}"
 
-printf "${GREEN}This is a test of \${GREEN}${RESET}\n"
-printf "${BRIGHT_GREEN}This is a test of \${BRIGHT_GREEN}${RESET}\n\n"
+printf '%bThis is a test of GREEN%b\n' "${GREEN}" "${RESET}"
+printf '%bThis is a test of BRIGHT_GREEN%b\n\n' "${BRIGHT_GREEN}" "${RESET}"
 
-printf "${YELLOW}This is a test of \${YELLOW}${RESET}\n"
-printf "${BRIGHT_YELLOW}This is a test of \${BRIGHT_YELLOW}${RESET}\n\n"
+printf '%bThis is a test of YELLOW%b\n' "${YELLOW}" "${RESET}"
+printf '%bThis is a test of BRIGHT_YELLOW%b\n\n' "${BRIGHT_YELLOW}" "${RESET}"
 
-printf "${BLUE}This is a test of \${BLUE}${RESET}\n"
-printf "${BRIGHT_BLUE}This is a test of \${BRIGHT_BLUE}${RESET}\n\n"
+printf '%bThis is a test of BLUE%b\n' "${BLUE}" "${RESET}"
+printf '%bThis is a test of BRIGHT_BLUE%b\n\n' "${BRIGHT_BLUE}" "${RESET}"
 
-printf "${MAGENTA}This is a test of \${MAGENTA}${RESET}\n"
-printf "${BRIGHT_MAGENTA}This is a test of \${BRIGHT_MAGENTA}${RESET}\n\n"
+printf '%bThis is a test of MAGENTA%b\n' "${MAGENTA}" "${RESET}"
+printf '%bThis is a test of BRIGHT_MAGENTA%b\n\n' "${BRIGHT_MAGENTA}" "${RESET}"
 
-printf "${CYAN}This is a test of \${CYAN}${RESET}\n"
-printf "${BRIGHT_CYAN}This is a test of \${BRIGHT_CYAN}${RESET}\n\n"
+printf '%bThis is a test of CYAN%b\n' "${CYAN}" "${RESET}"
+printf '%bThis is a test of BRIGHT_CYAN%b\n\n' "${BRIGHT_CYAN}" "${RESET}"
 
-printf "${GRAY}This is a test of \${GRAY}${RESET}\n"
-printf "${WHITE}This is a test of \${WHITE}${RESET}\n\n"
+printf '%bThis is a test of GRAY%b\n' "${GRAY}" "${RESET}"
+printf '%bThis is a test of WHIE%b\n\n' "${WHITE}" "${RESET}"
