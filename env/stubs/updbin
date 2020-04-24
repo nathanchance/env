@@ -612,6 +612,17 @@ function ihub() {(
 )}
 
 
+# Install prebuilt shfmt
+function ishfmt() {(
+    [[ -z ${SHFMT_VERSION} ]] && SHFMT_VERSION=$(glr "mvdan/sh")
+    BIN_FOLDER=${PREFIX:=${HOME}/usr}/bin
+    mkdir -p "${BIN_FOLDER}"
+    rm -rf "${BIN_FOLDER}"/shfmt
+    curl -LSso "${BIN_FOLDER}"/shfmt https://github.com/mvdan/sh/releases/download/v"${SHFMT_VERSION//v}"/shfmt_v"${SHFMT_VERSION//v/}"_linux_amd64 || die "Error downloading/installing shfmt"
+    chmod +x "${BIN_FOLDER}"/shfmt
+)}
+
+
 function install_rust() {(
     curl https://sh.rustup.rs -sSf | bash -s -- -y --no-modify-path
 )}
@@ -639,5 +650,6 @@ function updbin() {(
     bisharkdp all || exit ${?}
     btmux || exit ${?}
     bzsh || exit ${?}
+    ishfmt || exit ${?}
 )}
 # vi: filetype=zsh
