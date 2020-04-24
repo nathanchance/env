@@ -352,6 +352,7 @@ function get_distro() {
 
 # Common ccache variable
 CCACHE=$(path_push "${HOME}/usr/bin"; command -v ccache)
+export CCACHE
 
 
 # Decrypt gpg signed file
