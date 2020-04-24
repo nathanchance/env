@@ -78,10 +78,10 @@ function bdtc() {(
     git clean -fxdq
     git fetch
 
-    [[ -z ${DTC_VERSION} ]] && DTC_VERSION=$(git describe --tags $(git rev-list --tags --max-count=1))
+    [[ -z ${DTC_VERSION} ]] && DTC_VERSION=$(git describe --tags "$(git rev-list --tags --max-count=1)")
     git checkout v"${DTC_VERSION//v}"
 
-    make "${JOBS_FLAGS:--j"$(nproc)"}" PREFIX=${PREFIX:-${HOME}/usr} install
+    make "${JOBS_FLAG:--j"$(nproc)"}" PREFIX="${PREFIX:-${HOME}/usr}" install
 )}
 
 
@@ -106,7 +106,7 @@ function bgit() {(
     git clean -fxdq
     git fetch
 
-    [[ -z ${GIT_VERSION} ]] && GIT_VERSION=$(git describe --tags $(git rev-list --tags --max-count=1))
+    [[ -z ${GIT_VERSION} ]] && GIT_VERSION=$(git describe --tags "$(git rev-list --tags --max-count=1)")
     git checkout v"${GIT_VERSION//v}"
 
     "${MAKE[@]}" all install || die "git build/install failed"
@@ -147,7 +147,7 @@ function ihugo() {(
 function bllvm() {(
     set -eu
 
-    LLVM_SRC=${SRC_FOLDER:=${HOME}/src}/llvm-project
+    LLVM_SRC=${SRC_FOLDER:-${HOME}/src}/llvm-project
     if [[ ! -d ${LLVM_SRC} ]]; then
         header "Cloning LLVM"
         mkdir -p "${LLVM_SRC%/*}"
@@ -227,8 +227,8 @@ function bmake() {(
     curl -LSs http://ftp.gnu.org/gnu/make/"${MAKE_FOLDER}".tar.gz | tar -xzf -
     cd "${MAKE_FOLDER}" || die "Downloading or extracting make failed"
 
-    ./configure --prefix=${MAKE_PREFIX:=${PREFIX:-${HOME}/usr}}
-    make -j$(nproc) install
+    ./configure --prefix="${MAKE_PREFIX:=${PREFIX:-${HOME}/usr}}"
+    make "${JOBS_FLAG:--j"$(nproc)"}" install
 
     move_to_front_of_path "${MAKE_PREFIX}"/bin
     command -v make
@@ -245,7 +245,7 @@ function bninja() {(
     TMP_FOLDER=$(mktemp -d)
 
     cd "${TMP_FOLDER}"
-    curl -LSs https://github.com/"${NINJA_REPO}"/archive/${NINJA_VERSION}.tar.gz | tar -xzf -
+    curl -LSs https://github.com/"${NINJA_REPO}"/archive/"${NINJA_VERSION}".tar.gz | tar -xzf -
     cd "${NINJA_FOLDER}" || die "Downloading or extracting ninja failed"
 
     python3 ./configure.py --bootstrap
@@ -270,6 +270,7 @@ function bpgollvm() {(
                   "-DPYTHON_EXECUTABLE=$(command -v python3)" )
     LLVM_SRC=${SRC_FOLDER:-${HOME}/src}/llvm-project
     LLVM_BLD=${LLVM_SRC}/build
+    ORIG_PATH=${PATH}
     START=$(date +%s)
 
     set -eu
@@ -318,27 +319,27 @@ function bpgollvm() {(
                       -DLLVM_INCLUDE_EXAMPLES=OFF \
                       -DLLVM_INCLUDE_TESTS=OFF \
                       -DLLVM_TARGETS_TO_BUILD=host \
-                      -DLLVM_USE_LINKER=${LINKER} \
+                      -DLLVM_USE_LINKER="${LINKER}" \
                       "${LLVM_SRC}"/llvm || die "Error configuring stage 1"
         ninja || die "Error building stage 1"
     )
 
     STAGE_ONE_BIN=${LLVM_BLD}/stage1/bin
-    STAGE_ONE_BIN_DEFINES=( -DCMAKE_AR=${STAGE_ONE_BIN}/llvm-ar
-                            -DCMAKE_C_COMPILER=${STAGE_ONE_BIN}/clang
-                            -DCLANG_TABLEGEN=${STAGE_ONE_BIN}/clang-tblgen
-                            -DCMAKE_CXX_COMPILER=${STAGE_ONE_BIN}/clang++
-                            -DCMAKE_LINKER=${STAGE_ONE_BIN}/ld.lld
-                            -DLLVM_USE_LINKER=${STAGE_ONE_BIN}/ld.lld
-                            -DLLVM_TABLEGEN=${STAGE_ONE_BIN}/llvm-tblgen
-                            -DCMAKE_RANLIB=${STAGE_ONE_BIN}/llvm-ranlib )
+    STAGE_ONE_BIN_DEFINES=( -DCMAKE_AR="${STAGE_ONE_BIN}"/llvm-ar
+                            -DCMAKE_C_COMPILER="${STAGE_ONE_BIN}"/clang
+                            -DCLANG_TABLEGEN="${STAGE_ONE_BIN}"/clang-tblgen
+                            -DCMAKE_CXX_COMPILER="${STAGE_ONE_BIN}"/clang++
+                            -DCMAKE_LINKER="${STAGE_ONE_BIN}"/ld.lld
+                            -DLLVM_USE_LINKER="${STAGE_ONE_BIN}"/ld.lld
+                            -DLLVM_TABLEGEN="${STAGE_ONE_BIN}"/llvm-tblgen
+                            -DCMAKE_RANLIB="${STAGE_ONE_BIN}"/llvm-ranlib )
 
     # Stage 2a: Instrumented compiler
+    export PATH=${STAGE_ONE_BIN:?}:${ORIG_PATH}
     (
         header "Building LLVM stage 2a"
         mkdir -p "${LLVM_BLD}"/stage2a
         cd "${LLVM_BLD}"/stage2a || die "Error creating stage2a build folder"
-        export PATH=${STAGE_ONE_BIN:?}:${PATH}
         "${CMAKE[@]}" "${STAGE_ONE_BIN_DEFINES[@]}" \
                       -DLLVM_BUILD_INSTRUMENTED=IR \
                       -DLLVM_BUILD_RUNTIME=OFF \
@@ -348,21 +349,21 @@ function bpgollvm() {(
     )
 
     STAGE_TWO_BIN=${LLVM_BLD}/stage2a/bin
-    STAGE_TWO_BIN_DEFINES=( -DCMAKE_AR=${STAGE_TWO_BIN}/llvm-ar
-                            -DCMAKE_C_COMPILER=${STAGE_TWO_BIN}/clang
-                            -DCLANG_TABLEGEN=${STAGE_TWO_BIN}/clang-tblgen
-                            -DCMAKE_CXX_COMPILER=${STAGE_TWO_BIN}/clang++
-                            -DCMAKE_LINKER=${STAGE_TWO_BIN}/ld.lld
-                            -DLLVM_USE_LINKER=${STAGE_TWO_BIN}/ld.lld
-                            -DLLVM_TABLEGEN=${STAGE_TWO_BIN}/llvm-tblgen
-                            -DCMAKE_RANLIB=${STAGE_TWO_BIN}/llvm-ranlib )
+    STAGE_TWO_BIN_DEFINES=( -DCMAKE_AR="${STAGE_TWO_BIN}"/llvm-ar
+                            -DCMAKE_C_COMPILER="${STAGE_TWO_BIN}"/clang
+                            -DCLANG_TABLEGEN="${STAGE_TWO_BIN}"/clang-tblgen
+                            -DCMAKE_CXX_COMPILER="${STAGE_TWO_BIN}"/clang++
+                            -DCMAKE_LINKER="${STAGE_TWO_BIN}"/ld.lld
+                            -DLLVM_USE_LINKER="${STAGE_TWO_BIN}"/ld.lld
+                            -DLLVM_TABLEGEN="${STAGE_TWO_BIN}"/llvm-tblgen
+                            -DCMAKE_RANLIB="${STAGE_TWO_BIN}"/llvm-ranlib )
 
     # Stage 2b: Build clang with instrumented compiler
+    export PATH=${STAGE_TWO_BIN:?}:${ORIG_PATH}
     (
         header "Building LLVM stage 2b"
         mkdir -p "${LLVM_BLD}"/stage2b
         cd "${LLVM_BLD}"/stage2b
-        export PATH=${STAGE_TWO_BIN:?}:${PATH}
         "${CMAKE[@]}" "${STAGE_TWO_BIN_DEFINES[@]}" \
                       "${LLVM_SRC}"/llvm || die "Error configuring stage 2b"
         ninja || die "Error building stage 2b"
@@ -370,23 +371,23 @@ function bpgollvm() {(
 
     # Stage 3: Build final compiler
     : "${PGO_LLVM_PREFIX:=${PREFIX:-${HOME}/usr}}"
+    export PATH=${STAGE_ONE_BIN:?}:${ORIG_PATH}
     (
         header "Building LLVM stage 3"
         mkdir -p "${LLVM_BLD}"/stage3
         cd "${LLVM_BLD}"/stage3 || die "Error creating stage 3 build folder"
-        export PATH=${STAGE_ONE_BIN:?}:${PATH}
 
         # Merge profile data
         PROFILE_DATA=${LLVM_BLD}/stage3/profdata.prof
-        llvm-profdata merge -output=${PROFILE_DATA} ${LLVM_BLD}/stage2a/profiles/*.profraw || die "Error merging profile data"
+        llvm-profdata merge -output="${PROFILE_DATA}" "${LLVM_BLD}"/stage2a/profiles/*.profraw || die "Error merging profile data"
 
         # Build compiler with that data
         "${CMAKE[@]}" "${STAGE_ONE_BIN_DEFINES[@]}" \
                       -DCMAKE_C_FLAGS="-Wno-backend-plugin" \
                       -DCMAKE_CXX_FLAGS="-Wno-backend-plugin" \
-                      -DCMAKE_INSTALL_PREFIX=${PGO_LLVM_PREFIX} \
+                      -DCMAKE_INSTALL_PREFIX="${PGO_LLVM_PREFIX}" \
                       -DLLVM_ENABLE_LTO=Thin \
-                      -DLLVM_PROFDATA_FILE=${PROFILE_DATA} \
+                      -DLLVM_PROFDATA_FILE="${PROFILE_DATA}" \
                       "${LLVM_SRC}"/llvm || die "Error configuring stage 3"
         ninja || die "Error building stage 3"
         ninja install || die "Error installing stage 3"
@@ -431,7 +432,7 @@ function birg() {(
         cargo install --force --path . || die "cargo install failed"
         if [[ -n ${ZSH_NAME} ]]; then
             [[ -d ${HOME}/.zfunctions ]] || mkdir -p "${HOME}/.zfunctions"
-            install -Dm644 complete/_rg ${HOME}/.zfunctions/_rg
+            install -Dm644 complete/_rg "${HOME}"/.zfunctions/_rg
         fi
     fi
 
@@ -475,7 +476,7 @@ function bisharkdp() {(
             if [[ -n ${ZSH_NAME} ]]; then
                 [[ -d ${HOME}/.zfunctions ]] || mkdir -p "${HOME}/.zfunctions"
                 case ${BINARY} in
-                    fd) install -Dm644 target/release/build/fd-find-*/out/_fd ${HOME}/.zfunctions/_fd ;;
+                    fd) install -Dm644 target/release/build/fd-find-*/out/_fd "${HOME}"/.zfunctions/_fd ;;
                 esac
             fi
         fi
@@ -493,7 +494,7 @@ function bqemu() {(
     QEMU_FOLDER=${SRC_FOLDER:-${HOME}/src}/qemu
     if [[ ! -d ${QEMU_FOLDER} ]]; then
         mkdir -p "${QEMU_FOLDER%/*}"
-        git clone --recursive -j$(nproc) https://git.qemu.org/git/qemu.git "${QEMU_FOLDER}"
+        git clone --recursive "${JOBS_FLAG:--j"$(nproc)"}" https://git.qemu.org/git/qemu.git "${QEMU_FOLDER}"
     fi
     cd "${QEMU_FOLDER}" || die "Couldn't move into ${QEMU_FOLDER}"
     git fetch origin
@@ -525,9 +526,9 @@ function bqemu() {(
         --disable-xen \
         --disable-xen-pci-passthrough \
         --extra-cflags=-g \
-        --prefix=${QEMU_PREFIX:=${PREFIX:-${HOME}/usr}}
+        --prefix="${QEMU_PREFIX:=${PREFIX:-${HOME}/usr}}"
 
-    make -j$(nproc) install
+    make "${JOBS_FLAG:--j"$(nproc)"}" install
 
     move_to_front_of_path "${QEMU_PREFIX}"/bin
     for QEMU_SUFFIX in aarch64 arm mipsel ppc ppc64 riscv64 s390x x86_64; do
