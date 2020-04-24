@@ -24,6 +24,7 @@ function global_gitignore() {(
 # Grab linux, linux-next, and linux-stable for CBL
 # https://www.kernel.org/cloning-linux-from-a-bundle.html
 function cbl_linux_repos() {(
+    # shellcheck disable=SC2030
     : "${CBL:=${HOME}/cbl}" "${SRC_FOLDER:=${HOME}/src}"
 
     while (( ${#} )); do
@@ -58,6 +59,7 @@ function cbl_linux_repos() {(
 
 # Download other CBL things
 function cbl_other_repos() {(
+    # shellcheck disable=SC2031
     cd "${CBL:=${HOME}/cbl}"/android || die "wtf"
     [[ -d android-kernel-clang ]] || git clone git@github.com:nathanchance/android-kernel-clang.git
     mkdir -p common
