@@ -27,9 +27,9 @@ function parse_parameters() {
             # Help menu
             "-h"|"--help")
                 echo
-                echo "${BOLD}Script description:${RST} Merges/cherry-picks Linux upstream into a kernel tree"
+                printf '%bScript description:%b Merges/cherry-picks Linux upstream into a kernel tree\n' "${BOLD}" "${RST}"
                 echo
-                echo "${BOLD}Optional parameters:${RST}"
+                printf '%bOptional parameters:%b\n' "${BOLD}" "${RST}"
                 echo "    -b | --branch-name"
                 echo "        Use this string instead of the actual branch for the commit message"
                 echo
@@ -60,7 +60,7 @@ function parse_parameters() {
                 echo "    -v | --version"
                 echo "        Updates to the specified version (e.g. -v 3.18.78)"
                 echo
-                echo "${BOLD}Notes:${RST}"
+                printf '%bNotes:%b\n' "${BOLD}" "${RST}"
                 echo "    1. By default, the latest revision will be merged."
                 echo "    2. If you already have a remote for upstream, rename it to linux-stable so that multiple ones do not get added!"
                 echo
@@ -188,9 +188,8 @@ function generate_versions() {
     LATEST_SUBLEVEL=${LATEST_VERSION##*.}
 
     # Print the current/latest version and exit if requested
-    echo "${BOLD}Current kernel version:${RST} ${CURRENT_VERSION}"
-    echo
-    echo "${BOLD}Latest kernel version:${RST} ${LATEST_VERSION}"
+    printf '%bCurrent kernel version:%b %s\n\n' "${BOLD}" "${RST}" "${CURRENT_VERSION}"
+    printf '%bLatest kernel version:%b %s\n' "${BOLD}" "${RST}" "${LATEST_VERSION}"
     if [[ -n ${PRINT_LATEST} ]]; then
         echo
         exit 0
@@ -219,11 +218,11 @@ function generate_versions() {
         fi
 
         echo
-        echo "${BOLD}Target kernel version:${RST} ${TARGET_VERSION}"
+        printf '%bTarget kernel version:%b %s\n' "${BOLD}" "${RST}" "${TARGET_VERSION}"
     elif [[ -n ${TAG_TO_PULL} ]]; then
         TAG_TO_PULL=for-greg-${CURRENT_MAJOR_VERSION}-${TAG_TO_PULL}
         echo
-        echo "${BOLD}Tag to pull:${RST} ${TAG_TO_PULL}"
+        printf '%bTag to pull:%b %s\n' "${BOLD}" "${RST}" "${TAG_TO_PULL}"
     elif [[ -n ${QUEUE} ]]; then
         CB=$(git cb)
         QUEUE_BRANCH=queue-${CURRENT_MAJOR_VERSION}
@@ -237,7 +236,7 @@ function generate_versions() {
             fi
         )
 
-        echo "\n${BOLD}Fetching stable-queue...${RST}\n"
+        printf '\n%bFetching stable-queue...%b\n\n' "${BOLD}" "${RST}"
         STABLE_QUEUE=${ALS:?}/stable-queue
         if [[ -d ${STABLE_QUEUE} ]]; then
             git -C "${STABLE_QUEUE}" pull &>/dev/null || die "Error pulling stable queue!"
@@ -245,7 +244,7 @@ function generate_versions() {
             git -C "${ALS}" clone git://git.kernel.org/pub/scm/linux/kernel/git/stable/stable-queue.git &>/dev/null || die "Error cloning stable queue!"
         fi
 
-        echo "${BOLD}Generating ${QUEUE_BRANCH}...${RST}"
+        printf '%bGenerating %s...%b\n' "${BOLD}" "${QUEUE_BRANCH}" "${RST}"
         git quiltimport --patches "${STABLE_QUEUE}/${QUEUE_BRANCH}" &>/dev/null || die "Error creating ${QUEUE_BRANCH}!"
 
         git ch "${CB}" &>/dev/null
@@ -263,7 +262,7 @@ function generate_versions() {
         [[ ${TARGET_SUBLEVEL} -gt ${LATEST_SUBLEVEL}  ]] && die "Target version ${TARGET_VERSION} does not exist!\n"
 
         echo
-        echo "${BOLD}Target kernel version:${RST} ${TARGET_VERSION}"
+        printf '%bTarget kernel version:%b %s\n' "${BOLD}" "${RST}" "${TARGET_VERSION}"
     fi
 }
 
@@ -291,17 +290,17 @@ function create_merge_message() {
     MSG_FILE=$(mktemp)
     echo "Merge ${TARGET_VERSION} into ${BRANCH_NAME:-"$(git cb)"}" >> "${MSG_FILE}"
     if [[ -z ${INITIAL_MERGE} ]]; then
-        echo "\nChanges in ${TARGET_VERSION}: ($(git rev-list --count "${RANGE}" 2> /dev/null) commits)" >> "${MSG_FILE}"
+        printf '\nChanges in %s: (%d commits)\n' "${TARGET_VERSION}" "$(git rev-list --count "${RANGE}" 2> /dev/null)" >> "${MSG_FILE}"
         git log --reverse --format="        %s" "${RANGE}" >> "${MSG_FILE}"
     fi
-    echo "\nSigned-off-by: $(git config --get user.name) <$(git config --get user.email)>" >> "${MSG_FILE}"
+    printf '\nSigned-off-by: %s <%s>\n' "$(git config --get user.name)" "$(git config --get user.email)" >> "${MSG_FILE}"
 }
 
 
 function append_conflicts() {
-    echo "\nConflicts:" >> "${MSG_FILE}"
+    printf '\nConflicts:\n' >> "${MSG_FILE}"
     for FILE in $(git cf); do
-        echo "\t${FILE}" >> "${MSG_FILE}"
+        printf '\t%s\n' "${FILE}" >> "${MSG_FILE}"
     done
 }
 
