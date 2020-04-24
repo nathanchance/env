@@ -65,13 +65,17 @@ function tmxd() {
 function shell_setup() {
     # Shell specific options
     if [[ -n ${ZSH_NAME} ]]; then
+        # These come from the environment
+        # shellcheck disable=SC2154
         [[ -n ${terminfo[khome]} ]] && bindkey "${terminfo[khome]}" beginning-of-line
         [[ -n ${terminfo[kend]} ]] && bindkey "${terminfo[kend]}" end-of-line
 
         setopt autocd
+        # zsh-ism, which shellcheck doesn't understand
+        # shellcheck disable=SC2034
         typeset -gU path
 
-        echo "$fpath" | grep -q -s "${HOME}/.zfunctions" || fpath=( "${HOME}/.zfunctions" $fpath )
+        echo "${fpath[*]}" | grep -q -s "${HOME}/.zfunctions" || fpath=( "${HOME}/.zfunctions" "${fpath[@]}" )
 
         export HISTSIZE=100000
         export PURE_GIT_PULL=0
@@ -132,10 +136,10 @@ function encrypt_serv_ip() {(
     [[ -f ${HOME}/.server_ip ]] || die "Server IP file could not be found"
     gpg --batch \
         --yes \
-        --output ${SCRIPTS_FOLDER:?}/configs/common/server_ip.gpg \
+        --output "${SCRIPTS_FOLDER:?}"/configs/common/server_ip.gpg \
         --encrypt \
         --recipient natechancellor@gmail.com \
-        ${HOME}/.server_ip
+        "${HOME}"/.server_ip
 )}
 
 
@@ -167,11 +171,11 @@ function patch_from_lkml() {(
 # Generate a sha256sum file based on a URL
 function gen_sha256sum() {(
     URL=${1:?}
-    FILE=${1##*/}
-    curl -LSsO "${1}"
+    FILE=${URL##*/}
+    curl -LSsO "${URL}"
     sha256sum "${FILE}" > "${FILE}".sha256
     rm -rf "${FILE}"
-    curl -LSsO "${1}"
+    curl -LSsO "${URL}"
     sha256sum -c "${FILE}".sha256
     rm -rf "${FILE}"
 )}
@@ -192,14 +196,14 @@ function upd_website() {(
         shift
     done
 
-    cd "${HUGO_FILES}" || die "${HUGO_FILES} does not exist..."
+    cd "${HUGO_FILES}" || die "${HUGO_FILES} is not cloned"
     fd -E CNAME . "${WEBSITE}" -x rm -rf
     hugo -d "${WEBSITE}"
 
     HF_URL=$(git remote get-url origin | sed 's/git@github.com:/https:\/\/github.com\//')
     HF_HASH=$(git sh -s --format=%H)
 
-    cd "${WEBSITE}"
+    cd "${WEBSITE}" || die "Website is not cloned"
     git aa
     git ac -m "website: Update to ${HF_URL}/commit/${HF_HASH}"
     ${PUSH:=false} || return 0
