@@ -536,7 +536,7 @@ function symlink_llvm() {(
 
     header "Removing empty directories"
     while true; do
-        OUTPUT=$(fd -t e . ${HOME}/usr -x rm -vrf)
+        OUTPUT=$(fd -t e . "${HOME}"/usr -x rm -vrf)
         if [[ -n ${OUTPUT} ]]; then
             echo "${OUTPUT}"
         else
@@ -568,7 +568,7 @@ function upd() {(
 # Generate ALS conflict lists
 function genalscnflcts() {(
     for FILE in $(git cf); do
-        echo "\"${FILE}:$(git lo ${1:?}..MERGE_HEAD "${FILE}" | wc -l)\""
+        printf '"%s:%d"\n' "${FILE}" "$(git lo "${1:?}"..MERGE_HEAD "${FILE}" | wc -l)"
     done
 )}
 # vi: filetype=zsh
