@@ -162,7 +162,6 @@ function update_sources() {
 
     header "Updating remotes"
 
-    [[ ${HOST} = "flashbox" ]] && update_stable_mirror
     verify_remote linux-stable linux
     verify_remote linux-stable-rc
 

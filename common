@@ -11,9 +11,6 @@
 #             #
 ###############
 
-# What OS are we on?
-HOST=$(uname -n | tr '[:upper:]' '[:lower:]')
-
 # Location of "scripts" folder
 [[ ${0} =~ /proc ]] || SCRIPTS_FOLDER=$(dirname "$(readlink -f "${0}")")
 export SCRIPTS_FOLDER
