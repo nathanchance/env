@@ -215,4 +215,9 @@ function upd_website() {(
     git push
 )}
 
+
+# Run shfmt on all shell files in the repo (assuming they end with .sh)
+function fdshfmt() {(
+    fd -e sh -x shfmt -ci -i 4 -w
+)}
 # vi: filetype=zsh
