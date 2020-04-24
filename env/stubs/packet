@@ -112,7 +112,7 @@ function partition_and_create_user() {(
         printf '\n'
         set -x
     else
-        USER_ADD_ARGS=( -m -G kvm,sudo )
+        USER_ADD_ARGS=( -m -G "kvm,sudo" )
         if [[ "${SHELL_PATH:-}" = "/bin/zsh" ]]; then
             apt install -y zsh
             USER_ADD_ARGS=( "${USER_ADD_ARGS[@]}" -s "${SHELL_PATH}" )
