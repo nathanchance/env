@@ -57,13 +57,13 @@ function bootstrap() {(
              "${KERNEL_FOLDER}"/sony \
              "${SRC_FOLDER}" || die "Can't create folders, wtf"
 
-    # Set distro
-    set_distro || exit ${?}
+    # Get distro we are on
+    DISTRO=$(get_distro)
 
     # Set the correct time
     sudo timedatectl set-timezone America/Phoenix
 
-    if [[ -n ${ARCH} ]]; then
+    if [[ ${DISTRO} = "arch" ]]; then
         # Enable multilib
         sudo sed -i "/\[multilib\]/,/Include/"'s/^#//' /etc/pacman.conf
 
@@ -130,7 +130,7 @@ function bootstrap() {(
 
         # Build folder size
         BFS=20
-    elif [[ -n ${UBUNTU} ]]; then
+    elif [[ ${DISTRO} = "ubuntu" ]]; then
         PACKAGES=( abootimg
                    bison
                    bsdtar
@@ -221,6 +221,8 @@ function bootstrap() {(
 
         # Build folder size
         BFS=60
+    else
+        die "Unknown or unsupported distro"
     fi
 
     # Setup build folder
@@ -253,7 +255,7 @@ function bootstrap() {(
     echo "test" | gpg --clearsign
 
     # Install yay and AUR packages
-    if [[ -n ${ARCH} ]]; then
+    if [[ ${DISTRO} = "arch" ]]; then
         cd "${TMP_BLD_FOLDER:=$(mktemp -d)}" || die "wtf"
         curl -LSso PKGBUILD "https://aur.archlinux.org/cgit/aur.git/plain/PKGBUILD?h=yay"
         makepkg --noconfirm -si || die "Error installing yay"
@@ -269,8 +271,8 @@ function bootstrap() {(
     source "${SCRIPTS}"/env/stubs/zsh && setup_zsh_env
     source "${SCRIPTS}"/env/stubs/setup && global_gitignore
     source "${SCRIPTS}"/env/stubs/updbin
-    [[ -n ${ARCH} ]] && bgit
-    [[ -n ${UBUNTU} ]] && {
+    [[ ${DISTRO} = "arch" ]] && bgit
+    [[ ${DISTRO} = "ubuntu" ]] && {
         updbin || die "Error installing updated binaries"
         bcttlfshtools || die "Error installing Cuttlefish host package"
         bdtc || die "Error building dtc"
@@ -325,13 +327,8 @@ function bootstrap() {(
     echo "Things still to do!"
     echo
     echo "1. EDITOR=vim crontab -e"
-    if [[ -n ${ARCH} ]]; then
-        echo
-        echo "2. sudo reboot"
-    elif [[ -n ${UBUNTU} ]]; then
-        echo
-        echo "2. sudo systemctl reboot"
-    fi
+    echo
+    echo "2. sudo systemctl reboot"
     echo
 ) || return 1; }
 
@@ -638,11 +635,10 @@ function qualify_llvm_uprev() {(
 
 # Update function
 function upd() {(
-    if [[ -n ${ARCH} ]]; then
-        yay
-    elif [[ -n ${UBUNTU} ]]; then
-        sudo_wrapper sh -c 'apt update && apt upgrade'
-    fi
+    case "$(get_distro)" in
+        arch) yay ;;
+        debian|ubuntu) sudo_wrapper sh -c 'apt update && apt upgrade' ;;
+    esac
 )}
 
 

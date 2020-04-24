@@ -339,13 +339,13 @@ function sudo_wrapper() {(
 )}
 
 
-# Set distro function
-function set_distro() {
+# Function for parsing os-release
+function get_distro() {
     case "$(cat /usr/lib/os-release)" in
-        *"Arch Linux"*) ARCH=true ;;
-        *"Debian"*) DEBIAN=true ;;
-        *"Ubuntu"*) UBUNTU=true ;;
-        *) display_error "Distro is not supported"; return 1; ;;
+        *"Arch Linux"*) echo "arch" ;;
+        *"Debian"*) echo "debian" ;;
+        *"Ubuntu"*) echo "ubuntu" ;;
+        *) echo "unknown" ;;
     esac
 }
 
