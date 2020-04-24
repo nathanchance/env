@@ -779,7 +779,7 @@ function sync_cbl_kc() {(
     [[ -d ${CBL_KC} ]] || mkdir -p "${CBL_KC}"
     cd "${CBL_KC}" || exit ${?}
     REPO_INIT_CMD=( repo init -u https://android.googlesource.com/kernel/manifest -b common-android-multi )
-    "${REPO_INIT_CMD[@]}" || die "${REPO_INIT_CMD[@]} failed (${?})"
+    "${REPO_INIT_CMD[@]}" || die "${REPO_INIT_CMD[*]} failed (${?})"
     [[ -d ${CBL_KC_SRC} ]] && git -C "${CBL_KC_SRC}" rh
     REPO_SYNC_CMD=( repo sync "${JOBS_FLAG}" )
     "${REPO_SYNC_CMD[@]}" || die "${REPO_SYNC_CMD[*]} failed (${?})"
