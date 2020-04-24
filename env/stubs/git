@@ -70,19 +70,24 @@ function git_aliases() {(
     git config --global alias.lo 'log --oneline'
     git config --global alias.ma 'merge --abort'
     git config --global alias.mc 'merge --continue'
+    # shellcheck disable=SC2016
     git config --global alias.mfc '!git log --format=%H --committer="$(git config --get user.name) <$(git config --get user.email)>" "$(git log --format=%H -n 150 | tail -n1)".. | tail -n1'
     git config --global alias.pr 'pull-request'
     git config --global alias.psu 'push --set-upstream'
+    # shellcheck disable=SC2016
     git config --global alias.ra '!f() { for i in $(git cf); do git rf $i; done }; f' # reset all conflicts
     git config --global alias.rb "rebase${GPG_SIGN}"
     git config --global alias.rba 'rebase --abort'
     git config --global alias.rbc 'rebase --continue'
     git config --global alias.rbs 'rebase --skip'
+    # shellcheck disable=SC2016
     git config --global alias.rf '!bash -c "git reset -- ${1} &>/dev/null && git checkout -q -- ${1}"' # reset file
+    # shellcheck disable=SC2016
     git config --global alias.rfl '!bash -c "git reset -- ${1} && git checkout -- ${1}"' # reset file (loud)
     git config --global alias.rh 'reset --hard'
     git config --global alias.rma 'remote add'
     # https://lore.kernel.org/lkml/20190624144924.GE29120@arrakis.emea.arm.com/
+    # shellcheck disable=SC2016
     git config --global alias.send-rmk-email '!git send-email --add-header=\"KernelVersion: $(git describe --abbrev=0)\" --no-thread --suppress-cc=all --to="patches@arm.linux.org.uk"'
     git config --global alias.rmsu 'remote set-url'
     git config --global alias.rmv 'remote -v'
