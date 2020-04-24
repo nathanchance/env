@@ -268,10 +268,10 @@ function bootstrap() {(
     git -C "${SCRIPTS}" pull
     source "${SCRIPTS}"/env/stubs/zsh && setup_zsh_env
     source "${SCRIPTS}"/env/stubs/setup && global_gitignore
-    source "${SCRIPTS}"/env/stubs/bldupdbin
+    source "${SCRIPTS}"/env/stubs/updbin
     [[ -n ${ARCH} ]] && bgit
     [[ -n ${UBUNTU} ]] && {
-        bldupdbin || die "Error installing updated binaries"
+        updbin || die "Error installing updated binaries"
         bcttlfshtools || die "Error installing Cuttlefish host package"
         bdtc || die "Error building dtc"
         bqemu || die "Error building QEMU"

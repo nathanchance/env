@@ -628,7 +628,7 @@ function iub4() {(
 )}
 
 
-function bldupdbin() {(
+function updbin() {(
     bccache || exit ${?}
     bcmake || exit ${?}
     ihub || exit ${?}
