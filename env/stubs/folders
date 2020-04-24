@@ -1,3 +1,5 @@
+# shellcheck disable=SC2034
+
 # Common locations amongst scripts
 MAIN_FOLDER=${HOME}
 KERNEL_FOLDER=${MAIN_FOLDER}/kernels
