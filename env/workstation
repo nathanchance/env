@@ -395,24 +395,6 @@ function workstation_setup() {
 }
 
 
-# Repo sync shorthand
-function rps {
-    repo sync "${JOBS_FLAG}" --force-sync -c --no-clone-bundle --no-tags --optimized-fetch --prune "${@}"
-}
-
-
-# Repo init and sync function
-# ris <url> <branch> |-s|
-function ris {
-    # User requested a shallow clone
-    [[ ${3} = "-s" ]] && local DEPTH="--depth=1"
-
-    repo init -u "${1}" -b "${2}" --no-clone-bundle ${DEPTH}
-
-    time rps
-}
-
-
 # Neofetch alias
 function nf() {
     echo
