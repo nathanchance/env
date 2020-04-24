@@ -598,14 +598,6 @@ function symlink-commands() {(
 )}
 
 
-# Shellcheck through Docker
-function shellcheck() {(
-    podman pull r.j3ss.co/shellcheck 1>/dev/null
-    podman_mount --rm r.j3ss.co/shellcheck shellcheck "${@}"
-
-)}
-
-
 # Alias for running PGO LLVM build
 function updpgollvm() {(
     DATE=$(date +%Y-%m-%d)
