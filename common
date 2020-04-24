@@ -167,7 +167,7 @@ function load_botinfo() {
 # Telegram notifier function
 function tg_msg() {
     if [[ -z ${TOKEN} ]]; then
-        [[ -f ${MAIN_FOLDER:?}/.botinfo ]] && source <(cat ${MAIN_FOLDER}/.botinfo | tail -n1)
+        [[ -f ${MAIN_FOLDER:?}/.botinfo ]] && source <(tail -n1 "${MAIN_FOLDER}"/.botinfo)
         if [[ -z ${TOKEN} ]]; then
             display_error "tg_msg() was called but there was no token!"
             return 1
@@ -175,7 +175,7 @@ function tg_msg() {
     fi
 
     if [[ -z ${CHAT_ID} ]]; then
-        [[ -f ${MAIN_FOLDER:?}/.botinfo ]] && source <(cat ${MAIN_FOLDER}/.botinfo | head -n1)
+        [[ -f ${MAIN_FOLDER:?}/.botinfo ]] && source <(head -n1 "${MAIN_FOLDER}"/.botinfo)
         if [[ -z ${CHAT_ID} ]]; then
             display_error "tg_msg() was called but there was no chat ID!"
             return 1
