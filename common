@@ -47,11 +47,8 @@ function echo() {
 
 # Prints a formatted header to point out what is being done to the user
 function header() {
-    COLOR=${2:-${BLUE}}
     BORDER="====$(for _ in $(seq ${#1}); do printf '='; done)===="
-    printf "${COLOR}"
-    printf '\n%s\n%s\n%s\n\n' "${BORDER}" "==  ${1}  ==" "${BORDER}"
-    printf "${RST}"
+    printf '\n%b%s\n%s\n%s%b\n\n' "${2:-${BLUE}}" "${BORDER}" "==  ${1}  ==" "${BORDER}" "${RST}"
 }
 
 
@@ -93,9 +90,7 @@ function format_time() {
 
 # Prints an error in bold red
 function display_error() {
-    printf "${COLOR:=${RED}}"
-    printf '\n%s\n\n' ${1}
-    printf "${RST}"
+    printf '\n%b%s%b\n\n' "${COLOR:-${RED}}" "${1}" "${RST}"
 }
 
 
