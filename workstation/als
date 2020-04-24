@@ -105,7 +105,7 @@ function post_merge_commands() {
     fi
 }
 
-source "$(cd "$(dirname "$(readlink -f "${(%):-%x}")")" || return; pwd)/../common"
+source "${SCRIPTS_FOLDER:?}"/common
 source "${SCRIPTS_FOLDER}"/env/stubs/folders
 source "${SCRIPTS_FOLDER}"/env/stubs/bk
 source "${SCRIPTS_FOLDER}"/env/stubs/deldog

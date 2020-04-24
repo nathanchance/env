@@ -1,7 +1,7 @@
 #!/usr/bin/env zsh
 
 # Move into the folder this script is being run from
-cd "$(dirname "$(readlink -f "${(%):-%x}")")" || return
+cd "$(dirname "$(readlink -f "${0}")")" || return
 
 # Indents
 INDENT=${HOME}/.vim/indent

@@ -15,15 +15,7 @@
 HOST=$(uname -n | tr '[:upper:]' '[:lower:]')
 
 # Location of "scripts" folder
-if [[ -n ${ZSH_NAME} ]]; then
-    SCRIPT=${(%):-%x}
-elif [[ -n ${BASH} ]]; then
-    SCRIPT=${BASH_SOURCE[0]}
-else
-    echo "Unsupported shell!"
-    return 1
-fi
-[[ ! ${SCRIPT} =~ /proc ]] && SCRIPTS_FOLDER=$(cd "$(dirname "$(readlink -f "${SCRIPT}")")" || return; pwd)
+[[ ${0} =~ /proc ]] || SCRIPTS_FOLDER=$(dirname "$(readlink -f "${0}")")
 export SCRIPTS_FOLDER
 unset SCRIPT
 
