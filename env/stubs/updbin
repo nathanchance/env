@@ -579,8 +579,8 @@ function bzsh() {(
     rm -rf "${TMP_FOLDER}"
 
     ZSH_BIN=${PREFIX:?}/bin/zsh
-    echo "${ZSH_BIN}" | sudo_wrapper tee -a /etc/shells
-    sudo_wrapper chsh -s "${ZSH_BIN}" "$(whoami)"
+    grep -q "${ZSH_BIN}" /etc/shells || echo "${ZSH_BIN}" | sudo_wrapper tee -a /etc/shells
+    [[ ${SHELL} != "${ZSH_BIN}" ]] && sudo_wrapper chsh -s "${ZSH_BIN}" "$(whoami)"
 
     move_to_front_of_path "${PREFIX}"/bin
     command -v zsh
