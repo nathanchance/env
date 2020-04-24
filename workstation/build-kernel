@@ -28,7 +28,7 @@ function get_cc_prefix() {
 # Kernel make function
 function kmake() {
     # Set make variable
-    MAKE=( make "${JOBS_FLAG}" O=out ARCH=${ARCH} )
+    MAKE=( make "${JOBS_FLAG}" O=out ARCH="${ARCH}" )
 
     if [[ -n ${CLANG} ]]; then
         "${MAKE[@]}" CC="${CCACHE} clang" \
