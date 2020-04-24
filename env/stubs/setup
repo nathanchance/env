@@ -46,7 +46,7 @@ function cbl_linux_repos() {(
         [[ ! -f ${CB} ]] && wget -O "${CB}" -c https://git.kernel.org/pub/scm/linux/kernel/git/"${URL}"/clone.bundle
         git clone "${CB}" "${FOLDER}"
         (
-            cd "${FOLDER}"
+            cd "${FOLDER}" || die "${FOLDER} does not exist"
             git remote remove origin
             git remote add origin git://git.kernel.org/pub/scm/linux/kernel/git/"${URL}"
             git remote update origin
