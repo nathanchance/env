@@ -631,6 +631,8 @@ function lt() {(
         # Build kernel silently normally
         if [[ -z ${DEBUG} ]]; then
             Q=2 bldk "${ARCH}" "${CONFIG}" KCFLAGS="${KCFLAGS--Werror}" ${LD:+LD="${LD}"} O="${KBF}/${ARCH}" |& tee "${WARNING_LOG}"
+            # Shellcheck does not understand zsh-isms like pipestatus (bash has PIPESTATUS)
+            # shellcheck disable=SC2154
             MAKE_RESULT=${pipestatus[1]}
         else
             bldk "${ARCH}" "${CONFIG}" KCFLAGS="${KCFLAGS--Werror}" ${LD:+LD="${LD}"} O="${KBF}/${ARCH}"
