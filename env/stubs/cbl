@@ -569,10 +569,11 @@ function lt() {(
     while (( ${#} )); do
         case ${1} in
             # defconfig + little-endian allyesconfig
-            "-b"|"--basic") BASIC=true ;;
-            "-d"|"--debug") DEBUG=true ;;
+            -b|--basic) BASIC=true ;;
+            -d|--debug) DEBUG=true ;;
             # Show non-fatal warnings
-            "-w"|"--warnings") SHOW_NF_WARNINGS=true ;;
+            -w|--warnings) SHOW_NF_WARNINGS=true ;;
+            "") ;;
         esac
         shift
     done
@@ -885,10 +886,11 @@ function boot_cuttlefish() {(
 function kct() {(
     while (( ${#} )); do
         case ${1} in
-            "-d"|"--debug") DEBUG=true ;;
+            -d|--debug) DEBUG=true ;;
             # Show non-fatal warnings
-            "-w"|"--warnings") SHOW_NF_WARNINGS=true ;;
-            "--x86") ARCHES=( x86 ); X86_ONLY=true ;;
+            -w|--warnings) SHOW_NF_WARNINGS=true ;;
+            --x86) ARCHES=( x86 ); X86_ONLY=true ;;
+            "") ;;
         esac
         shift
     done
@@ -993,9 +995,9 @@ function kct() {(
 
 # Build all kernel trees
 function bldallk() {(
-    TREE=linux lt
-    TREE=linux-next lt
-    kct
+    TREE=linux lt ""
+    TREE=linux-next lt ""
+    kct ""
     "${CBL}"/wsl2/bin/build.sh
 )}
 
