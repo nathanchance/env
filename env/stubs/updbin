@@ -14,12 +14,12 @@ function bccache() {(
     cd "${TMP_FOLDER}"
     curl -LSs https://github.com/"${CCACHE_REPO}"/releases/download/"${CCACHE_VERSION}"/"${CCACHE_FOLDER}".tar.gz | tar -xzf -
     cd "${CCACHE_FOLDER}" || die "Downloading or extracting ccache failed"
-    ./configure --prefix="${PREFIX:=${HOME}/usr}"
+    ./configure --prefix="${CCACHE_PREFIX:=${PREFIX:-${HOME}/usr}}"
     make "${JOBS_FLAG:--j"$(nproc)"}" || die "make failed"
     make install || die "install failed"
     rm -rf "${TMP_FOLDER}"
 
-    move_to_front_of_path "${PREFIX}"/bin
+    move_to_front_of_path "${CCACHE_PREFIX}"/bin
     command -v ccache
     ccache --version
 )}
@@ -37,14 +37,14 @@ function bcmake() {(
     cd "${CMAKE_FOLDER}" || die "Downloading or extracting cmake failed"
 
     ./bootstrap --parallel="${THREADS:-$(nproc)}" \
-                --prefix="${PREFIX:=${HOME}/usr}"
+                --prefix="${CMAKE_PREFIX:=${PREFIX:-${HOME}/usr}}"
 
     make "${JOBS_FLAG:--j"$(nproc)"}" || die "make failed"
     make install || die "install failed"
     rm -rf "${TMP_FOLDER}"
     cd || die "Can't go home"
 
-    move_to_front_of_path "${PREFIX}"/bin
+    move_to_front_of_path "${CMAKE_PREFIX}"/bin
     command -v cmake
     cmake --version
 )}
@@ -81,17 +81,15 @@ function bdtc() {(
     [[ -z ${DTC_VERSION} ]] && DTC_VERSION=$(git describe --tags $(git rev-list --tags --max-count=1))
     git checkout v"${DTC_VERSION//v}"
 
-    [[ -z ${PREFIX} ]] && PREFIX=${HOME}/usr
-    make "${JOBS_FLAGS:--j"$(nproc)"}" PREFIX=${PREFIX} install
+    make "${JOBS_FLAGS:--j"$(nproc)"}" PREFIX=${PREFIX:-${HOME}/usr} install
 )}
 
 
 # Build/update git
 function bgit() {(
-    [[ -z ${PREFIX} ]] && PREFIX=${HOME}/usr
     [[ $(uname -m) =~ x86 ]] && MARCH="-march=native "
     MAKE=( make "${JOBS_FLAG:--j"$(nproc)"}"
-                prefix="${PREFIX}"
+                prefix="${GIT_PREFIX:=${PREFIX:-${HOME}/usr}}"
                 CFLAGS="${MARCH}-O2 -pipe -fstack-protector-strong -fno-plt"
                 LDFLAGS="-Wl,-O1,--sort-common,--as-needed,-z,relro,-z,now"
                 USE_LIBPCRE2=1
@@ -114,14 +112,14 @@ function bgit() {(
     "${MAKE[@]}" all install || die "git build/install failed"
 
     if [[ -n ${ZSH_NAME} ]]; then
-        mkdir -p "${PREFIX}"/share/bash-completion/completions/
-        install -m 0644 "${GIT_FOLDER}"/contrib/completion/git-completion.bash "${PREFIX}"/share/bash-completion/completions/git
+        mkdir -p "${GIT_PREFIX}"/share/bash-completion/completions/
+        install -m 0644 "${GIT_FOLDER}"/contrib/completion/git-completion.bash "${GIT_PREFIX}"/share/bash-completion/completions/git
 
         [[ -d ${HOME}/.zfunctions ]] || mkdir -p "${HOME}/.zfunctions"
         install -m 0644 "${GIT_FOLDER}"/contrib/completion/git-completion.zsh "${HOME}"/.zfunctions/_git
     fi
 
-    move_to_front_of_path "${PREFIX}"/bin
+    move_to_front_of_path "${GIT_PREFIX}"/bin
     command -v git
     git --version
 )}
@@ -139,7 +137,7 @@ function ihugo() {(
     else
         TMP_FOLDER=$(mktemp -d)
         curl -LSs "${HUGO_URL}".tar.gz | tar -C "${TMP_FOLDER}" -xzf -
-        mv "${TMP_FOLDER}"/hugo "${PREFIX:=${HOME}/usr}"/bin
+        mv "${TMP_FOLDER}"/hugo "${PREFIX:-${HOME}/usr}"/bin
         rm -rf "${TMP_FOLDER}"
     fi
 )}
@@ -198,7 +196,7 @@ function bllvm() {(
     fi
 
     if ${INSTALL:=false}; then
-        CMAKE=( "${CMAKE[@]}" "-DCMAKE_INSTALL_PREFIX=${PREFIX:=${HOME}/usr}" )
+        CMAKE=( "${CMAKE[@]}" "-DCMAKE_INSTALL_PREFIX=${PREFIX:-${HOME}/usr}" )
     fi
 
     header "Configuring LLVM"
@@ -229,10 +227,10 @@ function bmake() {(
     curl -LSs http://ftp.gnu.org/gnu/make/"${MAKE_FOLDER}".tar.gz | tar -xzf -
     cd "${MAKE_FOLDER}" || die "Downloading or extracting make failed"
 
-    ./configure --prefix=${PREFIX:=${HOME}/usr}
+    ./configure --prefix=${MAKE_PREFIX:=${PREFIX:-${HOME}/usr}}
     make -j$(nproc) install
 
-    move_to_front_of_path "${PREFIX}"/bin
+    move_to_front_of_path "${MAKE_PREFIX}"/bin
     command -v make
     make --version
     rm -rf "${TMP_FOLDER}"
@@ -252,10 +250,10 @@ function bninja() {(
 
     python3 ./configure.py --bootstrap
     if [[ -f ninja ]]; then
-        cp -v ninja "${PREFIX:=${HOME}/usr}"/bin
+        cp -v ninja "${NINJA_PREFIX:=${PREFIX:-${HOME}/usr}}"/bin
         rm -rf "${TMP_FOLDER}"
 
-        move_to_front_of_path "${PREFIX}"/bin
+        move_to_front_of_path "${NINJA_PREFIX}"/bin
         command -v ninja
         ninja --version
     fi
@@ -371,6 +369,7 @@ function bpgollvm() {(
     )
 
     # Stage 3: Build final compiler
+    : "${PGO_LLVM_PREFIX:=${PREFIX:-${HOME}/usr}}"
     (
         header "Building LLVM stage 3"
         mkdir -p "${LLVM_BLD}"/stage3
@@ -385,7 +384,7 @@ function bpgollvm() {(
         "${CMAKE[@]}" "${STAGE_ONE_BIN_DEFINES[@]}" \
                       -DCMAKE_C_FLAGS="-Wno-backend-plugin" \
                       -DCMAKE_CXX_FLAGS="-Wno-backend-plugin" \
-                      -DCMAKE_INSTALL_PREFIX=${PREFIX:=${HOME}/usr} \
+                      -DCMAKE_INSTALL_PREFIX=${PGO_LLVM_PREFIX} \
                       -DLLVM_ENABLE_LTO=Thin \
                       -DLLVM_PROFDATA_FILE=${PROFILE_DATA} \
                       "${LLVM_SRC}"/llvm || die "Error configuring stage 3"
@@ -398,7 +397,7 @@ function bpgollvm() {(
     TIME_STRING=$(format_time "${START}" "$(date +%s)")
     echo "Total build time: ${TIME_STRING:l}"
 
-    move_to_front_of_path "${PREFIX}/bin"
+    move_to_front_of_path "${PGO_LLVM_PREFIX}/bin"
 
     echo
     command -v clang
@@ -491,7 +490,6 @@ function bisharkdp() {(
 
 # Build/install QEMU
 function bqemu() {(
-    [[ -z ${PREFIX} ]] && PREFIX=${HOME}/usr
     QEMU_FOLDER=${SRC_FOLDER:-${HOME}/src}/qemu
     if [[ ! -d ${QEMU_FOLDER} ]]; then
         mkdir -p "${QEMU_FOLDER%/*}"
@@ -527,11 +525,11 @@ function bqemu() {(
         --disable-xen \
         --disable-xen-pci-passthrough \
         --extra-cflags=-g \
-        --prefix=${PREFIX}
+        --prefix=${QEMU_PREFIX:=${PREFIX:-${HOME}/usr}}
 
     make -j$(nproc) install
 
-    move_to_front_of_path "${PREFIX}"/bin
+    move_to_front_of_path "${QEMU_PREFIX}"/bin
     for QEMU_SUFFIX in aarch64 arm mipsel ppc ppc64 riscv64 s390x x86_64; do
         command -v qemu-system-${QEMU_SUFFIX}
         qemu-system-${QEMU_SUFFIX} --version
@@ -549,12 +547,12 @@ function btmux() {(
     cd "${TMP_FOLDER}"
     curl -LSs https://github.com/"${TMUX_REPO}"/releases/download/"${TMUX_VERSION}"/"${TMUX_FOLDER}".tar.gz | tar -xzf -
     cd "${TMUX_FOLDER}" || die "Downloading or extracting tmux failed"
-    ./configure --prefix="${PREFIX:=${HOME}/usr}"
+    ./configure --prefix="${TMUX_PREFIX:=${PREFIX:-${HOME}/usr}}"
     make "${JOBS_FLAG:--j"$(nproc)"}" || die "make failed"
     make install || die "install failed"
     rm -rf "${TMP_FOLDER}"
 
-    move_to_front_of_path "${PREFIX}"/bin
+    move_to_front_of_path "${TMUX_PREFIX}"/bin
     command -v tmux
     tmux -V
 )}
@@ -573,16 +571,16 @@ function bzsh() {(
     esac
     curl -LSs "${URL}" | tar -xJf -
     cd zsh-* || die "Downloading or extracting zsh failed"
-    ./configure --prefix="${PREFIX:=${HOME}/usr}"
+    ./configure --prefix="${ZSH_PREFIX:=${PREFIX:-${HOME}/usr}}"
     make "${JOBS_FLAG:--j"$(nproc)"}" || die "make failed"
     make install || die "install failed"
     rm -rf "${TMP_FOLDER}"
 
-    ZSH_BIN=${PREFIX:?}/bin/zsh
+    ZSH_BIN=${ZSH_PREFIX:?}/bin/zsh
     grep -q "${ZSH_BIN}" /etc/shells || echo "${ZSH_BIN}" | sudo_wrapper tee -a /etc/shells
     [[ ${SHELL} != "${ZSH_BIN}" ]] && sudo_wrapper chsh -s "${ZSH_BIN}" "$(whoami)"
 
-    move_to_front_of_path "${PREFIX}"/bin
+    move_to_front_of_path "${ZSH_PREFIX}"/bin
     command -v zsh
     zsh --version
 )}
@@ -606,7 +604,7 @@ function ihub() {(
     cd "$(mktemp -d)" || die "Error moving into temporary directory!"
     curl -LSsO https://github.com/github/hub/releases/download/"${HUB_VERSION}"/"${HUB_TUPLE}".tgz || die "Error downloading hub!"
     tar -xf "${HUB_TUPLE}".tgz || die "Error extracting hub!"
-    prefix="${PREFIX:=${HOME}/usr}" ./"${HUB_TUPLE}"/install || die "Error installing hub!"
+    prefix="${PREFIX:-${HOME}/usr}" ./"${HUB_TUPLE}"/install || die "Error installing hub!"
     [[ -d ${HOME}/.zfunctions ]] && curl -LSso "${HOME}"/.zfunctions/_hub https://github.com/github/hub/raw/"${HUB_VERSION}"/etc/hub.zsh_completion
     rm -rf "${PWD}"
 )}
@@ -615,7 +613,7 @@ function ihub() {(
 # Install prebuilt shfmt
 function ishfmt() {(
     [[ -z ${SHFMT_VERSION} ]] && SHFMT_VERSION=$(glr "mvdan/sh")
-    BIN_FOLDER=${PREFIX:=${HOME}/usr}/bin
+    BIN_FOLDER=${PREFIX:-${HOME}/usr}/bin
     mkdir -p "${BIN_FOLDER}"
     rm -rf "${BIN_FOLDER}"/shfmt
     curl -LSso "${BIN_FOLDER}"/shfmt https://github.com/mvdan/sh/releases/download/v"${SHFMT_VERSION//v}"/shfmt_v"${SHFMT_VERSION//v/}"_linux_amd64 || die "Error downloading/installing shfmt"
