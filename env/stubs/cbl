@@ -365,7 +365,7 @@ function bldk() {(
             PO=*|Q=*) BLDKW_ARGS=( "${BLDKW_ARGS[@]}" "${1}" ) ;;
 
             # make flags that are interpreted by bldkw
-            CROSS_COMPILE=*|KCFLAGS=*|LLVM_IAS=*|O=*|V=*|W=*) BLDKW_ARGS=( "${BLDKW_ARGS[@]}" "${1}" ) ;;
+            CROSS_COMPILE=*|KCFLAGS=*|LLVM_IAS=*|V=*|W=*) BLDKW_ARGS=( "${BLDKW_ARGS[@]}" "${1}" ) ;;
 
             # The wrapper needs knowledge about O=
             O=*) export "${1:?}"; BLDKW_ARGS=( "${BLDKW_ARGS[@]}" "${1}" ) ;;
