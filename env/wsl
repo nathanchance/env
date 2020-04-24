@@ -115,7 +115,7 @@ function bootstrap() {(
 
     # Install latest version of LLVM/Clang
     LLVM_SCRIPT=$(mktemp --suffix=.sh) && \
-    chmod +x ${LLVM_SCRIPT} && \
+    chmod +x "${LLVM_SCRIPT}" && \
     curl -LSso "${LLVM_SCRIPT}" https://apt.llvm.org/llvm.sh && \
     sudo "${LLVM_SCRIPT}" 11 && \
     rm "${LLVM_SCRIPT}"
@@ -182,7 +182,7 @@ function wsl_aliases() {
 # Laptop specific setup
 function wsl_setup() {
     # Load the stock completions to make sure we don't miss out on anything
-    echo "$fpath" | grep -q -s "vendor-completions" || fpath=( $fpath /usr/share/zsh/vendor-completions )
+    echo "${fpath[*]}" | grep -q -s "vendor-completions" || fpath=( "${fpath[@]}" /usr/share/zsh/vendor-completions )
     compinit
 }
 
@@ -194,7 +194,7 @@ function upd_wsl_kernel() {(
     SRC_FOLDER=${HOME}/cbl/wsl2
     OUT_FOLDER=out/x86_64
     KERNEL_IMAGE=arch/x86/boot/bzImage
-    scp nathan@${SERVER_IP:?}:${SRC_FOLDER}/${OUT_FOLDER}/${KERNEL_IMAGE} "${KERNEL}"
+    scp nathan@"${SERVER_IP:?}":"${SRC_FOLDER}"/${OUT_FOLDER}/${KERNEL_IMAGE} "${KERNEL}"
 )}
 
 
@@ -213,6 +213,6 @@ function install_rust_wsl() {(
 # Shortcut for properly running 'hugo server' in WSL 2
 function hugo_serve() {(
     IP=$(ip addr | grep eth0 | grep inet | awk '{print $2}')
-    hugo server --baseUrl=${IP%/*} --bind=0.0.0.0
+    hugo server --baseUrl="${IP%/*}" --bind=0.0.0.0
 )}
 # vi: filetype=zsh
