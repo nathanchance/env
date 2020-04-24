@@ -275,7 +275,7 @@ function bldkw() {(
       "${LD:=ld.lld}" \
       "${LLVM_IAS:=0}" \
       "${NM:=llvm-nm}" \
-      "${O:=out/${TARGET_ARCH}}" \
+      "${BLDKW_O:=${O:-out/${TARGET_ARCH}}}" \
       "${OBJCOPY:=llvm-objcopy}" \
       "${OBJDUMP:=llvm-objdump}" \
       "${OBJSIZE:=llvm-size}" \
@@ -331,7 +331,7 @@ function bldkw() {(
          LD="${LD}" \
          LLVM_IAS="${LLVM_IAS}" \
          NM="${NM}" \
-         O="${O}" \
+         O="${BLDKW_O}" \
          OBJCOPY="${OBJCOPY}" \
          OBJDUMP="${OBJDUMP}" \
          OBJSIZE="${OBJSIZE}" \
@@ -399,7 +399,7 @@ function bldk() {(
     # Configure kernel
     "${BLDKW[@]}" distclean "${CONFIG}"
 
-    : "${O:=out/${ARCH}}"
+    : "${BLDK_O:=${O:-out/${ARCH}}}"
     if ${CBL_DEFCONFIG:=false}; then
         # Extra configs for boot testings (runs extra tests)
         # From https://github.com/groeck/linux-build-test/blob/master/rootfs/scripts/common.sh
@@ -470,10 +470,10 @@ CONFIG_VIRTIO_MMIO=y
 CONFIG_BLK_MQ_VIRTIO=y
 CONFIG_VIRTIO_BLK=y
 CONFIG_VIRTIO_BLK_SCSI=y
-CONFIG_SCSI_VIRTIO=y" >> "${O}"/.config
+CONFIG_SCSI_VIRTIO=y" >> "${BLDK_O}"/.config
 
         [[ ${ARCH} != "x86_64" ]] && echo "CONFIG_LOCK_TORTURE_TEST=y
-CONFIG_RCU_TORTURE_TEST=y" >> "${O}"/.config
+CONFIG_RCU_TORTURE_TEST=y" >> "${BLDK_O}"/.config
 
         "${BLDKW[@]}" olddefconfig &>/dev/null
     fi
