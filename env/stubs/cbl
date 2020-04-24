@@ -642,20 +642,20 @@ function lt() {(
         # Make sure that if make fails, it gets propgated to the if statement
         if [[ ${MAKE_RESULT} -eq 0 ]]; then
             COLOR=${GRN}
-            RESULT=successful
+            LT_RESULT=successful
         else
             COLOR=${RED}
-            RESULT=failed
+            LT_RESULT=failed
         fi
-        echo "${COLOR}Build ${RESULT}${RST}"
+        echo "${COLOR}Build ${LT_RESULT}${RST}"
         TIME_STRING=$(format_time "${START}" "$(date +%s)")
         {
-            echo "${ARCH}:${CONFIG}$(${BFD} && echo "-bfd") | Build ${RESULT} in ${TIME_STRING:l}\c"
+            echo "${ARCH}:${CONFIG}$(${BFD} && echo "-bfd") | Build ${LT_RESULT} in ${TIME_STRING:l}\c"
             case ${ARCH} in
                 riscv64|s390x) BOOT=false ;;
                 *) BOOT=true ;;
             esac
-            if ${BOOT} && [[ ${RESULT} = "successful" && ${CONFIG} =~ defconfig ]]; then
+            if ${BOOT} && [[ ${LT_RESULT} = "successful" && ${CONFIG} =~ defconfig ]]; then
                 if O=${KBF}/${ARCH} bootk "${ARCH}" &>/dev/null; then
                     echo " | Boot successful\c"
                 else
@@ -663,7 +663,7 @@ function lt() {(
                 fi
             fi
             echo
-            [[ -z ${DEBUG} && ( -n ${SHOW_NF_WARNINGS} || ${RESULT} = "failed" ) ]] && \
+            [[ -z ${DEBUG} && ( -n ${SHOW_NF_WARNINGS} || ${LT_RESULT} = "failed" ) ]] && \
                 rg --color=never "error:|warning:|undefined" "${WARNING_LOG}" | sed "s/${PWD//\//\\/}\///g"
             echo
         } >> "${LOG}"
@@ -975,7 +975,7 @@ function kct() {(
             # Log result
             {
                 echo "${UPSTREAM_BRANCH} ${ARCH} | $(cd "${CBL_KC_SRC}" || die "wtf"; git kf aosp/${UPSTREAM_BRANCH}) | Build ${BUILD_RESULT} in ${TIME_STRING:l}${BOOT_RESULT}"
-                [[ -z ${DEBUG} && ( -n ${SHOW_NF_WARNINGS} || ${RESULT} = "failed" ) ]] && cat "${ERRORS}"
+                [[ -z ${DEBUG} && ( -n ${SHOW_NF_WARNINGS} || ${BUILD_RESULT} = "failed" ) ]] && cat "${ERRORS}"
                 echo
             } >> "${LOG}"
             rm "${ERRORS}"
