@@ -1,39 +1,39 @@
 # Make sure that zfunctions folder exists and set variable for other functions
-function setup_zfunctions {
+function setup_zfunctions() {
     ZFUNCTIONS=${HOME}/.zfunctions
     mkdir -p "${ZFUNCTIONS}"
 }
 
 # Install Pure prompt
-function pure_prompt() {(
+function pure_prompt() { (
     setup_zfunctions
     PURE=${ZFUNCTIONS}/pure
     [[ -d ${PURE} ]] || git clone https://github.com/sindresorhus/pure "${PURE}"
     git -C "${PURE}" pull
     ln -fs "${PURE}"/pure.zsh "${ZFUNCTIONS}"/prompt_pure_setup
     ln -fs "${PURE}"/async.zsh "${ZFUNCTIONS}"/async
-)}
+); }
 
 # Install zsh-syntax-highlighting
-function zsh_syntax_highlighting() {(
+function zsh_syntax_highlighting() { (
     setup_zfunctions
     ZSH_SH=${ZFUNCTIONS}/zsh-syntax-highlighting
     [[ -d ${ZSH_SH} ]] || git clone https://github.com/zsh-users/zsh-syntax-highlighting "${ZSH_SH}"
     git -C "${ZSH_SH}" pull
-)}
+); }
 
 # Creates .zshrc
-function create_zshrc() {(
+function create_zshrc() { (
     {
         echo "[[ -f ${GITHUB_FOLDER:=${HOME}/github}/scripts/env/common ]] && source \"${GITHUB_FOLDER}/scripts/env/common\""
         echo "type shell_setup &>/dev/null && shell_setup"
-    } > "${HOME}"/.zshrc
-)}
+    } >"${HOME}"/.zshrc
+); }
 
 # Completely setup zsh environment
-function setup_zsh_env() {(
+function setup_zsh_env() { (
     pure_prompt
     zsh_syntax_highlighting
     create_zshrc
-)}
+); }
 # vi: filetype=zsh
