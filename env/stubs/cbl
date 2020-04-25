@@ -654,9 +654,8 @@ function lt() { (
             LT_RESULT=failed
         fi
         echo "${COLOR}Build ${LT_RESULT}${RST}"
-        TIME_STRING=$(format_time "${START}" "$(date +%s)")
         {
-            echo "${ARCH}:${CONFIG}$(${BFD} && echo "-bfd") | Build ${LT_RESULT} in ${TIME_STRING:l}\c"
+            echo "${ARCH}:${CONFIG}$(${BFD} && echo "-bfd") | Build ${LT_RESULT} in $(format_time "${START}" "$(date +%s)")\c"
             case ${ARCH} in
                 riscv64 | s390x) BOOT=false ;;
                 *) BOOT=true ;;
@@ -984,7 +983,7 @@ function kct() { (
 
             # Log result
             {
-                echo "${UPSTREAM_BRANCH} ${ARCH} | $(cd "${CBL_KC_SRC}" && git kf aosp/${UPSTREAM_BRANCH}) | Build ${BUILD_RESULT} in ${TIME_STRING:l}${BOOT_RESULT}"
+                echo "${UPSTREAM_BRANCH} ${ARCH} | $(cd "${CBL_KC_SRC}" && git kf aosp/${UPSTREAM_BRANCH}) | Build ${BUILD_RESULT} in ${TIME_STRING}${BOOT_RESULT}"
                 [[ -z ${DEBUG} && (-n ${SHOW_NF_WARNINGS} || ${BUILD_RESULT} = "failed") ]] && cat "${ERRORS}"
                 echo
             } >>"${LOG}"

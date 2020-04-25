@@ -406,8 +406,7 @@ function bpgollvm() { (
 
     header "Final LLVM information"
 
-    TIME_STRING=$(format_time "${START}" "$(date +%s)")
-    echo "Total build time: ${TIME_STRING:l}"
+    echo "Total build time: $(format_time "${START}" "$(date +%s)")"
 
     move_to_front_of_path "${PGO_LLVM_PREFIX}/bin"
 

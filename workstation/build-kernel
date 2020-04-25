@@ -275,13 +275,13 @@ function report_result() {
     [[ -n ${SHOW_ONLY_RESULT} ]] && SCRIPT_COMMAND="$(basename "${0}") ${PARAMS}  |  "
     if [[ -f ${FINAL_IMAGE} ]]; then
         echo
-        errcho "${SCRIPT_COMMAND}${GRN}BUILD SUCCESSFUL IN $(format_time "${START}" "${END}")${RST}"
+        errcho "${SCRIPT_COMMAND}${GRN}Build successful in $(format_time "${START}" "${END}")${RST}"
         echo
         echo "${BOLD}Image:${RST}      ${FINAL_IMAGE}"
         echo
         formatted_kernel_version "${VERSION_DISPLAY}"
     else
-        die "${RST}${SCRIPT_COMMAND}${RED}BUILD FAILED IN $(format_time "${START}" "${END}")!" >&2
+        die "${RST}${SCRIPT_COMMAND}${RED}Build failed in $(format_time "${START}" "${END}")" >&2
     fi
 
     # Alert of script end
