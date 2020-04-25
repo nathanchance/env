@@ -4,9 +4,8 @@
 #
 # git functions
 
-
 # Initial git config setup
-function git_setup() {(
+function git_setup() { (
     git config --global user.name "Nathan Chancellor"
     git config --global user.email "natechancellor@gmail.com"
 
@@ -23,11 +22,10 @@ function git_setup() {(
     fi
 
     git_aliases
-)}
-
+); }
 
 # Set git aliases
-function git_aliases() {(
+function git_aliases() { (
     gpg_key_usable && GPG_SIGN=" --gpg-sign"
 
     git config --global alias.aa 'add --all'
@@ -42,10 +40,10 @@ function git_aliases() {(
     git config --global alias.bm 'branch --move'
     git config --global alias.bu 'branch --unset-upstream'
     git config --global alias.c "commit${GPG_SIGN} --signoff --verbose"
-    git config --global alias.ca "commit${GPG_SIGN} --amend --signoff --verbose" # commit ammend
+    git config --global alias.ca "commit${GPG_SIGN} --amend --signoff --verbose"                           # commit ammend
     git config --global alias.cad "!git commit${GPG_SIGN} --amend --signoff --date=\"\$(date)\" --verbose" # commit amend date
-    git config --global alias.cb 'rev-parse --abbrev-ref HEAD' # current branch
-    git config --global alias.cf 'diff --name-only --diff-filter=U' # conflicts
+    git config --global alias.cb 'rev-parse --abbrev-ref HEAD'                                             # current branch
+    git config --global alias.cf 'diff --name-only --diff-filter=U'                                        # conflicts
     git config --global alias.ch 'checkout'
     git config --global alias.cl 'clean -fxd'
     git config --global alias.cp "cherry-pick${GPG_SIGN} --signoff"
@@ -65,7 +63,7 @@ function git_aliases() {(
     git config --global alias.fm "commit${GPG_SIGN} --file /tmp/mrg-msg" # finish merge
     git config --global alias.fp 'format-patch'
     git config --global alias.fpk 'format-patch --add-header="X-Patchwork-Bot: notify"'
-    git config --global alias.kf 'show -s --format="%h (\"%s\")"' # kernel format
+    git config --global alias.kf 'show -s --format="%h (\"%s\")"'                             # kernel format
     git config --global alias.korg 'show -s --format="Link: https://git.kernel.org/linus/%H"' # link to a kernel.org commit for cherry-picks
     git config --global alias.lo 'log --oneline'
     git config --global alias.ma 'merge --abort'
@@ -107,18 +105,17 @@ function git_aliases() {(
     git config --global alias.ml "merge${GPG_SIGN}${SIGNOFF} --log=500"
     git config --global alias.pl "pull${GPG_SIGN}${SIGNOFF}"
     git config --global alias.pll "pull${GPG_SIGN}${SIGNOFF} --log=500"
-)}
-
+); }
 
 # Get a git commit message tag
 function gcmt() {
     local TAG
 
     case ${1} in
-        "-a"|"--acked-by") TAG="Acked-by" ;;
-        "-r"|"--reviewed-by") TAG="Reviewed-by" ;;
-        "-s"|"--signed-off-by") TAG="Signed-off-by" ;;
-        "-t"|"--tested-by") TAG="Tested-by" ;;
+        "-a" | "--acked-by") TAG="Acked-by" ;;
+        "-r" | "--reviewed-by") TAG="Reviewed-by" ;;
+        "-s" | "--signed-off-by") TAG="Signed-off-by" ;;
+        "-t" | "--tested-by") TAG="Tested-by" ;;
     esac
     [[ -z ${TAG} ]] && TAG="Signed-off-by"
 
