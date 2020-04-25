@@ -4,19 +4,16 @@
 #
 # Utility and terminal setup functions
 
-
 # Source our universal functions script
 source "$(dirname "$(readlink -f "${0}")")"/../common
 
-
 # Source the machine specific functions
 case "$(whoami)@$(uname -n)" in
-    nathan@archlinux-*|nathan@ubuntu-*) LOCATION=workstation ;;
+    nathan@archlinux-* | nathan@ubuntu-*) LOCATION=workstation ;;
     nathan@Ryzen-7-3700X) LOCATION=wsl ;;
     *) LOCATION=generic ;;
 esac
 source "${SCRIPTS_FOLDER}/env/${LOCATION}"
-
 
 # Universal aliases/functions
 function aliases() {
@@ -35,13 +32,11 @@ function aliases() {
     source "${SCRIPTS_FOLDER}/env/stubs/transfer"
 }
 
-
 # Try to attach via tmux
 function tmxa() {
     command -v tmux &>/dev/null || return
     [[ -z ${TMUX} ]] && tmux new-session -AD -s main
 }
-
 
 # Smart tmux detach
 # https://arslan.io/2019/01/07/using-the-ipad-pro-as-my-development-machine/
@@ -61,7 +56,6 @@ function tmxd() {
     fi
 }
 
-
 function shell_setup() {
     # Shell specific options
     if [[ -n ${ZSH_NAME} ]]; then
@@ -75,7 +69,7 @@ function shell_setup() {
         # shellcheck disable=SC2034
         typeset -gU path
 
-        echo "${fpath[*]}" | grep -q -s "${HOME}/.zfunctions" || fpath=( "${HOME}/.zfunctions" "${fpath[@]}" )
+        echo "${fpath[*]}" | grep -q -s "${HOME}/.zfunctions" || fpath=("${HOME}/.zfunctions" "${fpath[@]}")
 
         export HISTSIZE=100000
         export PURE_GIT_PULL=0
@@ -105,9 +99,9 @@ function shell_setup() {
     "${LOCATION}"_aliases
     tmxa
     "${LOCATION}"_setup
-    GPG_TTY=$(tty); export GPG_TTY
+    GPG_TTY=$(tty)
+    export GPG_TTY
 }
-
 
 # {bash,zsh}rc reload function
 function rld() {
@@ -115,23 +109,21 @@ function rld() {
     shell_setup
 }
 
-
 # Bind mount current PWD into Podman container
 function podman_mount() {
-    podman run --mount type=bind,source="${PWD}",target=/"${PWD##*/}",ro=true \
-               --workdir /"${PWD##*/}" \
-               "${@}"
+    podman run \
+        --mount type=bind,source="${PWD}",target=/"${PWD##*/}",ro=true \
+        --workdir /"${PWD##*/}" \
+        "${@}"
 }
-
 
 # Get the current status of hardware vulnerabilities
 function hwvulns() {
     grep --color=always . /sys/devices/system/cpu/vulnerabilities/*
 }
 
-
 # Update main server IP address file
-function encrypt_serv_ip() {(
+function encrypt_serv_ip() { (
     [[ -f ${HOME}/.server_ip ]] || die "Server IP file could not be found"
     gpg --batch \
         --yes \
@@ -139,58 +131,53 @@ function encrypt_serv_ip() {(
         --encrypt \
         --recipient natechancellor@gmail.com \
         "${HOME}"/.server_ip
-)}
-
+); }
 
 # Small macro for responding to a LKML post
-function reply_to_lkml() {(
-    LINK=${1:?} && \
-    MBOX=$(mktemp --suffix=.mbox) && \
-    curl -LSso "${MBOX}" "${LINK%/*}"/raw && \
-    mutt -f "${MBOX}"
-
+function reply_to_lkml() { (
+    LINK=${1:?}
+    MBOX=$(mktemp --suffix=.mbox)
+    curl -LSso "${MBOX}" "${LINK%/*}"/raw &&
+        mutt -f "${MBOX}"
     rm "${MBOX}"
-)}
-
+); }
 
 # Apply patch from LKML
-function patch_from_lkml() {(
-    while (( ${#} )); do
+function patch_from_lkml() { (
+    while ((${#})); do
         case ${1} in
             http*) LINK=${1} ;;
-            am) METHOD=( am ) ;;
-            apply) METHOD=( apply -v ) ;;
+            am) METHOD=(am) ;;
+            apply) METHOD=(apply -v) ;;
         esac
         shift
     done
     curl -LSs "${LINK%/*}"/raw | git "${METHOD[@]}" -3
-)}
-
+); }
 
 # Generate a sha256sum file based on a URL
-function gen_sha256sum() {(
+function gen_sha256sum() { (
     URL=${1:?}
     FILE=${URL##*/}
     curl -LSsO "${URL}"
-    sha256sum "${FILE}" > "${FILE}".sha256
+    sha256sum "${FILE}" >"${FILE}".sha256
     rm -rf "${FILE}"
     curl -LSsO "${URL}"
     sha256sum -c "${FILE}".sha256
     rm -rf "${FILE}"
-)}
-
+); }
 
 # Update my website
-function upd_website() {(
+function upd_website() { (
     GITHUB=${HOME}/github
     WEBSITE=${GITHUB}/nathanchance.github.io
     HUGO_FILES=${GITHUB}/hugo-files
 
     [[ -d ${WEBSITE} && -d ${HUGO_FILES} ]] || die "Website and hugo-files should be cloned before running this function"
 
-    while (( ${#} )); do
+    while ((${#})); do
         case ${1} in
-            -p|--push) PUSH=true ;;
+            -p | --push) PUSH=true ;;
         esac
         shift
     done
@@ -207,11 +194,10 @@ function upd_website() {(
     git ac -m "website: Update to ${HF_URL}/commit/${HF_HASH}"
     ${PUSH:=false} || return 0
     git push
-)}
-
+); }
 
 # Run shfmt on all shell files in the repo (assuming they end with .sh)
-function fdshfmt() {(
+function fdshfmt() { (
     fd -e sh -x shfmt -ci -i 4 -w
-)}
+); }
 # vi: filetype=zsh
