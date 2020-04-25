@@ -188,38 +188,10 @@ function generate_versions() {
         if ! [[ ${TARGET_VERSION} =~ "rc" ]]; then
             die "There is no RC version for ${CURRENT_MAJOR_VERSION}!\n"
         fi
-
-        echo
-        printf '%bTarget kernel version:%b %s\n' "${BOLD}" "${RST}" "${TARGET_VERSION}"
     elif [[ -n ${QUEUE} ]]; then
-        CB=$(git cb)
-        QUEUE_BRANCH=queue-${CURRENT_MAJOR_VERSION}
-        (
-            git cl -q
-            if ! git rev-parse --verify "${QUEUE_BRANCH}" &>/dev/null; then
-                git checkout -q -b "${QUEUE_BRANCH}" v"${CURRENT_VERSION}" || die "Error checking out ${QUEUE_BRANCH}!"
-            else
-                git checkout -q "${QUEUE_BRANCH}" || die "Error checking out ${QUEUE_BRANCH}"
-                git reset --hard -q v"${CURRENT_VERSION}" || die "Error resetting ${QUEUE_BRANCH}"
-            fi
-        )
-
-        printf '\n%bFetching stable-queue...%b\n\n' "${BOLD}" "${RST}"
-        STABLE_QUEUE=${ALS:?}/stable-queue
-        if [[ -d ${STABLE_QUEUE} ]]; then
-            git -C "${STABLE_QUEUE}" pull &>/dev/null || die "Error pulling stable queue!"
-        else
-            git -C "${ALS}" clone git://git.kernel.org/pub/scm/linux/kernel/git/stable/stable-queue.git &>/dev/null || die "Error cloning stable queue!"
-        fi
-
-        printf '%bGenerating %s...%b\n' "${BOLD}" "${QUEUE_BRANCH}" "${RST}"
-        git quiltimport --patches "${STABLE_QUEUE}/${QUEUE_BRANCH}" &>/dev/null || die "Error creating ${QUEUE_BRANCH}!"
-
-        git ch "${CB}" &>/dev/null
-
-        RANGE=v${CURRENT_VERSION}..${QUEUE_BRANCH}
-        TAG=${QUEUE_BRANCH}
-        TARGET_VERSION=${QUEUE_BRANCH}
+        TAG=linux-stable-rc/queue/${CURRENT_MAJOR_VERSION}
+        RANGE=v${CURRENT_VERSION}..${TAG}
+        TARGET_VERSION=${TAG#*/}
     else
         [[ ${CURRENT_SUBLEVEL} -eq 0 ]] && CURRENT_VERSION=${CURRENT_MAJOR_VERSION}
         RANGE=v${CURRENT_VERSION}..v${TARGET_VERSION}
@@ -228,10 +200,9 @@ function generate_versions() {
         TARGET_SUBLEVEL=${TARGET_VERSION##*.}
         [[ ${TARGET_SUBLEVEL} -le ${CURRENT_SUBLEVEL} ]] && die "Current version is up to date with target version ${TARGET_VERSION}!\n"
         [[ ${TARGET_SUBLEVEL} -gt ${LATEST_SUBLEVEL} ]] && die "Target version ${TARGET_VERSION} does not exist!\n"
-
-        echo
-        printf '%bTarget kernel version:%b %s\n' "${BOLD}" "${RST}" "${TARGET_VERSION}"
     fi
+    echo
+    printf '%bTarget kernel version:%b %s\n' "${BOLD}" "${RST}" "${TARGET_VERSION}"
 }
 
 function pre_exit_commands() {
