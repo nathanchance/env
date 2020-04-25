@@ -5,13 +5,19 @@
 # Utility and terminal setup functions for WSL
 
 # Setup function for my Ubuntu WSL instance (from an LXC container, not Microsoft Store)
-function rootstrap() {(
+function rootstrap() { (
     [[ $(id -u) -eq 0 ]] || { printf '\n\033[01;31mThis function must be run as root!\033[0m\n\n' && exit 255; }
 
-    while (( ${#} )); do
+    while ((${#})); do
         case ${1} in
-            -p|--password) shift; PASSWORD=${1} ;;
-            -u|--user) shift; USER=${1} ;;
+            -p | --password)
+                shift
+                PASSWORD=${1}
+                ;;
+            -u | --user)
+                shift
+                USER=${1}
+                ;;
         esac
         shift
     done
@@ -42,13 +48,13 @@ function rootstrap() {(
     set +eux
 
     printf '\n\033[01;34mDo not forget to run \n\n\t$ wsl.exe --terminate ubuntu\n\nso that /etc/wsl.conf changes reflect properly!\033[0m\n\n'
-)}
+); }
 
 # Setup function
 #
 # Requires Keys folder to be available in /mnt/c/Users/natec/Documents
 
-function bootstrap() {(
+function bootstrap() { (
     # Grab common functions/variables
     source <(curl -LSs https://github.com/nathanchance/scripts/raw/master/common) &>/dev/null
 
@@ -82,7 +88,7 @@ function bootstrap() {(
         libio-socket-ssl-perl \
         libmailtools-perl \
         libmpc-dev \
-        libmpfr-dev
+        libmpfr-dev \
         libncurses-dev \
         libnet-smtp-ssl-perl \
         libpcre2-dev \
@@ -114,11 +120,11 @@ function bootstrap() {(
     sudo chmod +x /usr/local/bin/speedtest-cli
 
     # Install latest version of LLVM/Clang
-    LLVM_SCRIPT=$(mktemp --suffix=.sh) && \
-    chmod +x "${LLVM_SCRIPT}" && \
-    curl -LSso "${LLVM_SCRIPT}" https://apt.llvm.org/llvm.sh && \
-    sudo "${LLVM_SCRIPT}" 11 && \
-    rm "${LLVM_SCRIPT}"
+    LLVM_SCRIPT=$(mktemp --suffix=.sh) &&
+        chmod +x "${LLVM_SCRIPT}" &&
+        curl -LSso "${LLVM_SCRIPT}" https://apt.llvm.org/llvm.sh &&
+        sudo "${LLVM_SCRIPT}" 11 &&
+        rm "${LLVM_SCRIPT}"
 
     # Setup SSH and GPG if keys are present
     mkdir -p "${HOME}"/.ssh
@@ -136,12 +142,13 @@ function bootstrap() {(
     # Clone scripts
     GITHUB=${HOME}/github
     mkdir -p "${GITHUB}"
-    local SCRIPTS; SCRIPTS=${GITHUB}/scripts
+    local SCRIPTS
+    SCRIPTS=${GITHUB}/scripts
     [[ -d ${SCRIPTS} ]] || { git clone git@github.com:nathanchance/scripts "${SCRIPTS}" || die "Error cloning script"; }
     source "${SCRIPTS}"/env/stubs/setup && global_gitignore && create_zshrc
     source "${SCRIPTS}"/env/stubs/updbin && {
-        updbin || die "updbin failed";
-        ihugo || die "ihugo failed";
+        updbin || die "updbin failed"
+        ihugo || die "ihugo failed"
     }
     path_push "${HOME}/usr/bin"
     source "${SCRIPTS}"/env/stubs/git && git_setup
@@ -162,57 +169,50 @@ function bootstrap() {(
     git -C "${GITHUB}"/hugo-files submodule update --init --recursive
 ) && source "${HOME}"/.zshrc; }
 
-
 # Update function
 function upd() {
     sudo sh -c 'apt update && apt upgrade'
 }
 
-
 # Laptop specific aliases
 function wsl_aliases() {
     # Account for VS Code Insiders having a different binary name
     # But only overwrite code if it does not already exist
-    ( ! type -f code && type -f code-insiders ) &>/dev/null && alias code='code-insiders'
+    (! type -f code && type -f code-insiders) &>/dev/null && alias code='code-insiders'
     alias ls='ls --color=auto'
     alias mshsvr='mosh nathan@${SERVER_IP}'
 }
 
-
 # Laptop specific setup
 function wsl_setup() {
     # Load the stock completions to make sure we don't miss out on anything
-    echo "${fpath[*]}" | grep -q -s "vendor-completions" || fpath=( "${fpath[@]}" /usr/share/zsh/vendor-completions )
+    echo "${fpath[*]}" | grep -q -s "vendor-completions" || fpath=("${fpath[@]}" /usr/share/zsh/vendor-completions)
     compinit
 }
 
-
 # Update WSL kernel from server
-function upd_wsl_kernel() {(
+function upd_wsl_kernel() { (
     KERNEL=/mnt/c/Users/natec/Linux/kernel-${1:-next}-${2:-clang}
     rm -rf "${KERNEL}"
     SRC_FOLDER=${HOME}/cbl/wsl2
     OUT_FOLDER=out/x86_64
     KERNEL_IMAGE=arch/x86/boot/bzImage
     scp nathan@"${SERVER_IP:?}":"${SRC_FOLDER}"/${OUT_FOLDER}/${KERNEL_IMAGE} "${KERNEL}"
-)}
-
+); }
 
 # Sync the Windows Terminal config to my scripts folder
-function upd_terminal_config() {(
+function upd_terminal_config() { (
     cp -v "$(wslpath -a "C:\Users\natec\AppData\Local\Packages\Microsoft.WindowsTerminal_8wekyb3d8bbwe\LocalState\profiles.json")" "${SCRIPTS_FOLDER:?}"/configs/local
-)}
-
+); }
 
 # Install rust using the recommended command
-function install_rust_wsl() {(
+function install_rust_wsl() { (
     curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
-)}
-
+); }
 
 # Shortcut for properly running 'hugo server' in WSL 2
-function hugo_serve() {(
+function hugo_serve() { (
     IP=$(ip addr | grep eth0 | grep inet | awk '{print $2}')
     hugo server --baseUrl="${IP%/*}" --bind=0.0.0.0
-)}
+); }
 # vi: filetype=zsh
