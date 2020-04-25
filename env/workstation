@@ -273,15 +273,7 @@ function bootstrap() { (
     source "${SCRIPTS}"/env/stubs/zsh && setup_zsh_env
     source "${SCRIPTS}"/env/stubs/setup && global_gitignore
     source "${SCRIPTS}"/env/stubs/updbin
-    [[ ${DISTRO} = "arch" ]] && bgit
-    [[ ${DISTRO} = "ubuntu" ]] && {
-        updbin || die "Error installing updated binaries"
-        bcttlfshtools || die "Error installing Cuttlefish host package"
-        bdtc || die "Error building dtc"
-        bqemu || die "Error building QEMU"
-        install_android_tools || die "Error installing Android tools"
-        iub4 || die "Error installing b4"
-    }
+    SCRIPTS_FOLDER=${SCRIPTS} rbld_usr || exit ${?}
     path_push "${HOME}/usr/bin"
     source "${SCRIPTS}"/env/stubs/git && git_setup
     zsh "${SCRIPTS}"/configs/common/vim/vim_setup.sh
@@ -333,6 +325,29 @@ function bootstrap() { (
     echo "2. sudo systemctl reboot"
     echo
 ) || return 1; }
+
+# Rebuild ~/usr
+function rbld_usr() { (
+    source "${SCRIPTS_FOLDER:?}"/env/stubs/updbin || die "Cannot source updbin"
+    rm -rf "${HOME:?}"/usr
+    case "$(get_distro)" in
+        arch) bgit || die "Error building git" ;;
+        ubuntu)
+            updbin || die "Error installing updated binaries"
+            bcttlfshtools || die "Error installing Cuttlefish host package"
+            bdtc || die "Error building dtc"
+            bqemu || die "Error building QEMU"
+            install_android_tools || die "Error installing Android tools"
+            iub4 || die "Error installing b4"
+            if [[ -d ${LLVM_TC_FOLDER} ]]; then
+                # This will never not be alphanumeric and find is insanely convoluted
+                # shellcheck disable=SC2012
+                DATE=$(ls -1ht "${LLVM_TC_FOLDER}" | head -n1)
+                [[ -n ${DATE} ]] && symlink_llvm "${DATE}"
+            fi
+            ;;
+    esac
+); }
 
 # Workstation specific aliases
 function workstation_aliases() {
