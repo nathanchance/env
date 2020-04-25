@@ -9,15 +9,24 @@ function packet_warn() {
     printf '\n\033[01;33m%s\033[0m\n' "${1:?}"
 }
 
-function partition_drive() {(
+function partition_drive() { (
     # Function must be run as root
     [[ $(id -u) -ne 0 ]] && packet_die "This function must be run as root."
 
-    while (( ${#} )); do
+    while ((${#})); do
         case ${1} in
-            -d|--drive) shift; DRIVE=${1} ;;
-            -f|--folder) shift; FOLDER=${1} ;;
-            -u|--user) shift; USER=${1} ;;
+            -d | --drive)
+                shift
+                DRIVE=${1}
+                ;;
+            -f | --folder)
+                shift
+                FOLDER=${1}
+                ;;
+            -u | --user)
+                shift
+                USER=${1}
+                ;;
         esac
         shift
     done
@@ -64,19 +73,31 @@ function partition_drive() {(
     fi
 
     return 0
-)}
+); }
 
-function partition_and_create_user() {(
+function partition_and_create_user() { (
     # Function must be run as root
     [[ $(id -u) -ne 0 ]] && packet_die "This function must be run as root."
 
     # Drive to use must be provided as argument of script
-    while (( ${#} )); do
+    while ((${#})); do
         case ${1} in
-            -d|--drive) shift; DRIVE=${1} ;;
-            -p|--password) shift; PASSWORD=${1} ;;
-            -s|--shell) shift; SHELL_PATH=${1} ;;
-            -u|--user) shift; USER=${1} ;;
+            -d | --drive)
+                shift
+                DRIVE=${1}
+                ;;
+            -p | --password)
+                shift
+                PASSWORD=${1}
+                ;;
+            -s | --shell)
+                shift
+                SHELL_PATH=${1}
+                ;;
+            -u | --user)
+                shift
+                USER=${1}
+                ;;
         esac
         shift
     done
@@ -112,10 +133,10 @@ function partition_and_create_user() {(
         printf '\n'
         set -x
     else
-        USER_ADD_ARGS=( -m -G "kvm,sudo" )
+        USER_ADD_ARGS=(-m -G "kvm,sudo")
         if [[ "${SHELL_PATH:-}" = "/bin/zsh" ]]; then
             apt install -y zsh
-            USER_ADD_ARGS=( "${USER_ADD_ARGS[@]}" -s "${SHELL_PATH}" )
+            USER_ADD_ARGS=("${USER_ADD_ARGS[@]}" -s "${SHELL_PATH}")
         fi
         useradd "${USER_ADD_ARGS[@]}" "${USER}"
         echo "${USER}:${PASSWORD}" | chpasswd
@@ -123,4 +144,4 @@ function partition_and_create_user() {(
         chown -R "${USER}:${USER}" /home/"${USER}"/.ssh
     fi
     return 0
-)}
+); }
