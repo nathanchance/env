@@ -276,7 +276,7 @@ function report_result() {
         echo
         errcho "${SCRIPT_COMMAND}${GRN}Build successful in $(format_time "${START}" "${END}")${RST}"
         echo
-        echo "${BOLD}Image:${RST}      ${FINAL_IMAGE}"
+        printf '%bImage:%b      %s\n' "${BOLD}" "${RST}" "${FINAL_IMAGE}"
         echo
         formatted_kernel_version "${VERSION_DISPLAY}"
     else
@@ -284,7 +284,7 @@ function report_result() {
     fi
 
     # Alert of script end
-    echo "\a"
+    printf '\a'
 
     exit 0
 }
