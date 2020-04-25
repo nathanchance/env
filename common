@@ -278,9 +278,8 @@ function path_pop() {
 # Set common architecture variable
 function get_arch() { (
     case "$(uname -m)" in
-        "aarch64") echo "arm64" ;;
-        "x86_64") echo "amd64" ;;
-        *) exit 1 ;;
+        aarch64) echo "arm64" ;;
+        x86_64) echo "amd64" ;;
     esac
 ); }
 
@@ -303,8 +302,8 @@ function sudo_wrapper() { (
 function get_distro() {
     case "$(cat /usr/lib/os-release)" in
         *"Arch Linux"*) echo "arch" ;;
-        *"Debian"*) echo "debian" ;;
-        *"Ubuntu"*) echo "ubuntu" ;;
+        *Debian*) echo "debian" ;;
+        *Ubuntu*) echo "ubuntu" ;;
         *) echo "unknown" ;;
     esac
 }
