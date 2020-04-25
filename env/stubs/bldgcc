@@ -31,8 +31,8 @@
 # This script is designed to build release versions of this software, not development
 # versions. If you want to do that, it's not hard to modify this script to do that or
 # use https://github.com/USBhost/build-tools-gcc
-function bldgcc() {(
-    BLD_OPTS=( "--toolchain" )
+function bldgcc() { (
+    BLD_OPTS=(--toolchain)
     TARGETS=()
 
     # Get parameters
@@ -42,11 +42,11 @@ function bldgcc() {(
         echo "      arm, arm64, powerpc, powerpc64, powerpc64le, s390, x86_64" >&2
         exit 1
     }
-    while (( ${#} )); do
+    while ((${#})); do
         case ${1} in
-            --binutils|--gcc|--toolchain) BLD_OPTS=( "${1}" ) ;;
-            all) TARGETS=( arm arm64 powerpc powerpc64 powerpc64le mips mipsel riscv64 s390 x86_64 ) ;;
-            *) TARGETS+=( "${1}" ) ;;
+            --binutils | --gcc | --toolchain) BLD_OPTS=("${1}") ;;
+            all) TARGETS=(arm arm64 powerpc powerpc64 powerpc64le mips mipsel riscv64 s390 x86_64) ;;
+            *) TARGETS+=("${1}") ;;
         esac
         shift
     done
@@ -74,7 +74,7 @@ function bldgcc() {(
     [[ ! -f timert ]] && make -j"$(nproc)"
 
     # Create config
-    cat <<EOF > config
+    cat <<EOF >config
 BINUTILS_SRC=${PWD}/${BINUTILS_SOURCE}
 CHECKING=release
 ECHO=/bin/echo
@@ -89,5 +89,5 @@ EOF
         rm -rf "${TARGET}"
         PATH=${PATH%%:\/mnt\/c\/*} ./build "${BLD_OPTS[@]}" "${TARGET}"
     done
-)}
+); }
 # vi: filetype=zsh
