@@ -337,8 +337,8 @@ function rbld_usr() { (
             bcttlfshtools || die "Error installing Cuttlefish host package"
             bdtc || die "Error building dtc"
             bqemu || die "Error building QEMU"
-            install_android_tools || die "Error installing Android tools"
-            iub4 || die "Error installing b4"
+            iandroidtools || die "Error installing Android tools"
+            ib4 || die "Error installing b4"
             if [[ -d ${LLVM_TC_FOLDER} ]]; then
                 # This will never not be alphanumeric and find is insanely convoluted
                 # shellcheck disable=SC2012

@@ -104,7 +104,7 @@ function rbld_usr() { (
     rm -rf "${HOME:?}"/usr
     updbin || die "updbin failed"
     bqemu || die "bqemu failed"
-    install_android_tools || die "install_android_tools failed"
+    iandroidtools || die "iandroidtools failed"
 ); }
 
 function generic_aliases() {
