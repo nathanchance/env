@@ -4,7 +4,6 @@
 #
 # Functions used to assist with ClangBuiltLinux development
 
-
 # Universal variables
 CBL_ANDROID=${CBL}/android
 CBL_CTTLFSH=${CBL_ANDROID}/cuttlefish
@@ -18,36 +17,36 @@ TCBLD=${CBL}/tc-build
 CBL_CCACHE=${CBL}/.ccache
 export CBL_ANDROID CBL_CTTLFSH CBL_KC CBL_KC_SRC CBL_SRC CBL_TC CBL_LLVM CBL_BNTL TCBLD CBL_CCACHE
 
-
 # Configurations known to build with -Werror
-CBLCFGS=( "arm32:multi_v7_defconfig"
-          "arm32:allnoconfig"
-          "arm32:allyesconfig"
-          "arm32:allyesconfig-bfd"
-          "arm32:allmodconfig"
-          "arm32:allmodconfig-bfd"
-          "arm64:defconfig"
-          "arm64:allnoconfig"
-          "arm64:allyesconfig"
-          "arm64:allyesconfig-bfd"
-          "arm64:allmodconfig"
-          "arm64:allmodconfig-bfd"
-          "mipsel:malta_kvm_guest_defconfig"
-          "ppc32:ppc44x_defconfig"
-          "ppc32:allnoconfig"
-          "ppc64:pseries_defconfig"
-          "ppc64:allnoconfig"
-          "ppc64le:powernv_defconfig"
-          "riscv64:defconfig"
-          "s390x:defconfig"
-          "s390x:allyesconfig"
-          "s390x:allmodconfig"
-          "x86_64:defconfig"
-          "x86_64:allyesconfig"
-          "x86_64:allyesconfig-bfd"
-          "x86_64:allmodconfig"
-          "x86_64:allmodconfig-bfd" )
-
+CBLCFGS=(
+    "arm32:multi_v7_defconfig"
+    "arm32:allnoconfig"
+    "arm32:allyesconfig"
+    "arm32:allyesconfig-bfd"
+    "arm32:allmodconfig"
+    "arm32:allmodconfig-bfd"
+    "arm64:defconfig"
+    "arm64:allnoconfig"
+    "arm64:allyesconfig"
+    "arm64:allyesconfig-bfd"
+    "arm64:allmodconfig"
+    "arm64:allmodconfig-bfd"
+    "mipsel:malta_kvm_guest_defconfig"
+    "ppc32:ppc44x_defconfig"
+    "ppc32:allnoconfig"
+    "ppc64:pseries_defconfig"
+    "ppc64:allnoconfig"
+    "ppc64le:powernv_defconfig"
+    "riscv64:defconfig"
+    "s390x:defconfig"
+    "s390x:allyesconfig"
+    "s390x:allmodconfig"
+    "x86_64:defconfig"
+    "x86_64:allyesconfig"
+    "x86_64:allyesconfig-bfd"
+    "x86_64:allmodconfig"
+    "x86_64:allmodconfig-bfd"
+)
 
 # Create build folders
 function crbf() {
@@ -58,30 +57,27 @@ function crbf() {
     done
 }
 
-
 # Patch check function
-function pch() {(
-    [[ ${#} -eq 0 ]] && FP_PARAMS=( -1 HEAD )
-    [[ -z ${FP_PARAMS[*]} ]] && FP_PARAMS=( "${@}" )
+function pch() { (
+    [[ ${#} -eq 0 ]] && FP_PARAMS=(-1 HEAD)
+    [[ -z ${FP_PARAMS[*]} ]] && FP_PARAMS=("${@}")
     [[ -f scripts/checkpatch.pl ]] && git fp --stdout "${FP_PARAMS[@]}" | ./scripts/checkpatch.pl
     [[ -f scripts/get_maintainer.pl ]] && git fp --stdout "${FP_PARAMS[@]}" | ./scripts/get_maintainer.pl --scm
-)}
-
+); }
 
 # Quilt-like patch management function for Linux
-function ptchmn() {(
+function ptchmn() { (
     [[ ! -f Makefile ]] && die "You're not in a kernel folder!"
 
     REPO=${PWD##*/}
     TARGET_FOLDER=${GITHUB_FOLDER}/patches/${REPO}/$(git cb)
     [[ ! -d ${TARGET_FOLDER} ]] && die "${TARGET_FOLDER} doesn't exist!"
 
-
     case "${1:?}" in
-        "-s"|"--sync")
+        "-s" | "--sync")
             case ${REPO} in
-                linux|linux-next) ;;
-                *) die "${REPO} not supported by ptchmn!"
+                linux | linux-next) ;;
+                *) die "${REPO} not supported by ptchmn!" ;;
             esac
 
             FIRST_HASH=$(git mfc)
@@ -95,32 +91,35 @@ function ptchmn() {(
 
             git -C "${TARGET_FOLDER}" c -m "patches: ${REPO}: $(git cb): Sync as of $(git sh -s --format=%h)"
 
-            git -C "${TARGET_FOLDER}" push ;;
+            git -C "${TARGET_FOLDER}" push
+            ;;
 
-        "-a"|"--apply")
-            git am "${TARGET_FOLDER}"/* ;;
+        "-a" | "--apply")
+            git am "${TARGET_FOLDER}"/*
+            ;;
     esac
-)}
-
+); }
 
 # Rebase a linux-next branch
-function rbln() {(
-    [[ ! -f Makefile ]] && { display_error "You're not in a kernel folder!"; return 1; }
+function rbln() { (
+    [[ ! -f Makefile ]] && {
+        display_error "You're not in a kernel folder!"
+        return 1
+    }
     FIRST_HASH=$(git mfc)
     SECOND_HASH=$(git show -s --format=%H "$(git cb)")
     git rh origin/master
     git cherry-pick --gpg-sign "${FIRST_HASH}^..${SECOND_HASH}"
-)}
-
+); }
 
 # Download and apply an LLVM/Clang/lld patch
-function phabap() {(
+function phabap() { (
     [[ ! -d llvm ]] && die "You're not in the llvm-project folder!"
 
-    while (( ${#} )); do
+    while ((${#})); do
         case ${1} in
             D*) REVISION=${1} ;;
-            *) GIT_AP_ARGS=( "${GIT_AP_ARGS[@]}" "${1}" ) ;;
+            *) GIT_AP_ARGS=("${GIT_AP_ARGS[@]}" "${1}") ;;
         esac
         shift
     done
@@ -129,8 +128,7 @@ function phabap() {(
     git ac -m "${REVISION}
 
 Link: https://reviews.llvm.org/${REVISION}"
-)}
-
+); }
 
 # Call ccache
 function ccache_call() {
@@ -139,14 +137,13 @@ function ccache_call() {
     ccache "${@}"
 }
 
-
 # Work with multiple ccache folders
-function ccache_for_all() {(
-    while (( ${#} )); do
+function ccache_for_all() { (
+    while ((${#})); do
         case ${1} in
-            "binutils"|"kernel"|"llvm") CCACHE_DIR="${CBL_CCACHE}"/${1} ;;
-            "clear") CCACHE_OPTS=( --clear --zero-stats ) ;;
-            "stats") CCACHE_OPTS=( --show-stats ) ;;
+            "binutils" | "kernel" | "llvm") CCACHE_DIR="${CBL_CCACHE}"/${1} ;;
+            "clear") CCACHE_OPTS=(--clear --zero-stats) ;;
+            "stats") CCACHE_OPTS=(--show-stats) ;;
         esac
         shift
     done
@@ -159,27 +156,24 @@ function ccache_for_all() {(
     else
         export CCACHE_DIR
         ccache_call "${CCACHE_OPTS[@]}"
-   fi
-)}
-
+    fi
+); }
 
 # Print specific folder ccache stats
-function ccache_stats() {(
+function ccache_stats() { (
     ccache_for_all stats "${@}"
-)}
-
+); }
 
 # Clear specific folder ccache
-function ccache_clear() {(
+function ccache_clear() { (
     ccache_for_all clear "${@}"
-)}
-
+); }
 
 # Create ccache at specific size
 function ccache_size() {
-    while (( ${#} )); do
+    while ((${#})); do
         case ${1} in
-            "binutils"|"kernel"|"llvm") CCACHE_DIR="${CBL_CCACHE}"/${1} ;;
+            "binutils" | "kernel" | "llvm") CCACHE_DIR="${CBL_CCACHE}"/${1} ;;
             *) SIZE=${1} ;;
         esac
         shift
@@ -190,31 +184,30 @@ function ccache_size() {
     ccache --set-config=compression_level=9
 }
 
-
 # Build kernel with Clang (wrapper)
-function bldkw() {(
+function bldkw() { (
     [[ -f Makefile ]] || die "No Makefile found! Are you in a kernel tree?"
 
     # Parameters
-    MAKE_ARGS=( )
-    while (( ${#} )); do
+    MAKE_ARGS=()
+    while ((${#})); do
         case ${1} in
             # Supported architectures
             arm) TARGET_ARCH=arm32 ;;
-            arm32|arm64|mipsel|ppc32|ppc64|ppc64le|riscv64|s390x|x86_64) TARGET_ARCH=${1} ;;
+            arm32 | arm64 | mipsel | ppc32 | ppc64 | ppc64le | riscv64 | s390x | x86_64) TARGET_ARCH=${1} ;;
             x86) TARGET_ARCH=x86_64 ;;
 
             # Build utilities
-            AR=*|CC=*|HOSTAR=*|HOSTCC=*|HOSTCXX=*|HOSTLD=*|LD=*|NM=*|OBJCOPY=*|OBJDUMP=*|OBJSIZE=*|READELF=*|STRIP=*) export "${1:?}" ;;
+            AR=* | CC=* | HOSTAR=* | HOSTCC=* | HOSTCXX=* | HOSTLD=* | LD=* | NM=* | OBJCOPY=* | OBJDUMP=* | OBJSIZE=* | READELF=* | STRIP=*) export "${1:?}" ;;
 
             # bldkw vars
-            PO=*|Q=*) export "${1:?}" ;;
+            PO=* | Q=*) export "${1:?}" ;;
 
             # make flags that are interpreted by bldkw
-            CROSS_COMPILE=*|KCFLAGS=*|LLVM_IAS=*|O=*|V=*|W=*) export "${1:?}" ;;
+            CROSS_COMPILE=* | KCFLAGS=* | LLVM_IAS=* | O=* | V=* | W=*) export "${1:?}" ;;
 
             # Assume everything else is destined for make (like configs and targets)
-            *) MAKE_ARGS=( "${MAKE_ARGS[@]}" "${1}" ) ;;
+            *) MAKE_ARGS=("${MAKE_ARGS[@]}" "${1}") ;;
         esac
 
         shift
@@ -223,41 +216,49 @@ function bldkw() {(
     case ${TARGET_ARCH} in
         arm32)
             : "${CROSS_COMPILE:=arm-linux-gnueabi-}"
-            ARCH_FLAGS=( "ARCH=arm" "CROSS_COMPILE=${CROSS_COMPILE}" ) ;;
+            ARCH_FLAGS=("ARCH=arm" "CROSS_COMPILE=${CROSS_COMPILE}")
+            ;;
 
         arm64)
             : "${CROSS_COMPILE:=aarch64-linux-gnu-}"
-            ARCH_FLAGS=( "ARCH=arm64" "CROSS_COMPILE=${CROSS_COMPILE}" ) ;;
+            ARCH_FLAGS=("ARCH=arm64" "CROSS_COMPILE=${CROSS_COMPILE}")
+            ;;
 
         mipsel)
             : "${CROSS_COMPILE:=mipsel-linux-gnu-}"
-            ARCH_FLAGS=( "ARCH=mips" "CROSS_COMPILE=${CROSS_COMPILE}" ) ;;
+            ARCH_FLAGS=("ARCH=mips" "CROSS_COMPILE=${CROSS_COMPILE}")
+            ;;
 
         ppc32)
             : "${CROSS_COMPILE:=powerpc-linux-gnu-}"
-            ARCH_FLAGS=( "ARCH=powerpc" "CROSS_COMPILE=${CROSS_COMPILE}" ) ;;
+            ARCH_FLAGS=("ARCH=powerpc" "CROSS_COMPILE=${CROSS_COMPILE}")
+            ;;
 
         ppc64)
             : "${CROSS_COMPILE:=powerpc64-linux-gnu-}" \
-              "${LD:=${CROSS_COMPILE}ld}"
-            ARCH_FLAGS=( "ARCH=powerpc" "CROSS_COMPILE=${CROSS_COMPILE}" ) ;;
+                "${LD:=${CROSS_COMPILE}ld}"
+            ARCH_FLAGS=("ARCH=powerpc" "CROSS_COMPILE=${CROSS_COMPILE}")
+            ;;
 
         ppc64le)
             : "${CROSS_COMPILE:=powerpc64le-linux-gnu-}"
-            ARCH_FLAGS=( "ARCH=powerpc" "CROSS_COMPILE=${CROSS_COMPILE}" ) ;;
+            ARCH_FLAGS=("ARCH=powerpc" "CROSS_COMPILE=${CROSS_COMPILE}")
+            ;;
 
         riscv64)
             : "${CROSS_COMPILE:=riscv64-linux-gnu-}" \
-              "${LD:=${CROSS_COMPILE}ld}" \
-              "${LLVM_IAS:=1}"
-            ARCH_FLAGS=( "ARCH=riscv" "CROSS_COMPILE=${CROSS_COMPILE}" ) ;;
+                "${LD:=${CROSS_COMPILE}ld}" \
+                "${LLVM_IAS:=1}"
+            ARCH_FLAGS=("ARCH=riscv" "CROSS_COMPILE=${CROSS_COMPILE}")
+            ;;
 
         s390x)
             : "${CROSS_COMPILE:=s390x-linux-gnu-}" \
-              "${LD:=${CROSS_COMPILE}ld}" \
-              "${OBJCOPY:=${CROSS_COMPILE}objcopy}" \
-              "${OBJDUMP:=${CROSS_COMPILE}objdump}"
-            ARCH_FLAGS=( "ARCH=s390" "CROSS_COMPILE=${CROSS_COMPILE}" ) ;;
+                "${LD:=${CROSS_COMPILE}ld}" \
+                "${OBJCOPY:=${CROSS_COMPILE}objcopy}" \
+                "${OBJDUMP:=${CROSS_COMPILE}objdump}"
+            ARCH_FLAGS=("ARCH=s390" "CROSS_COMPILE=${CROSS_COMPILE}")
+            ;;
 
         x86_64) ARCH_FLAGS=() ;;
 
@@ -266,27 +267,27 @@ function bldkw() {(
 
     # Default values
     : "${AR:=llvm-ar}" \
-      "${CC:=${CCACHE} clang}" \
-      "${HOSTAR:=llvm-ar}" \
-      "${HOSTCC:=${CCACHE} clang}" \
-      "${HOSTCXX:=${CCACHE} clang++}" \
-      "${HOSTLD:=ld.lld}" \
-      "${HOSTLDFLAGS:=-fuse-ld=lld}" \
-      "${LD:=ld.lld}" \
-      "${LLVM_IAS:=0}" \
-      "${NM:=llvm-nm}" \
-      "${BLDKW_O:=${O:-out/${TARGET_ARCH}}}" \
-      "${OBJCOPY:=llvm-objcopy}" \
-      "${OBJDUMP:=llvm-objdump}" \
-      "${OBJSIZE:=llvm-size}" \
-      "${READELF:=llvm-readelf}" \
-      "${STRIP:=llvm-strip}"
+        "${CC:=${CCACHE} clang}" \
+        "${HOSTAR:=llvm-ar}" \
+        "${HOSTCC:=${CCACHE} clang}" \
+        "${HOSTCXX:=${CCACHE} clang++}" \
+        "${HOSTLD:=ld.lld}" \
+        "${HOSTLDFLAGS:=-fuse-ld=lld}" \
+        "${LD:=ld.lld}" \
+        "${LLVM_IAS:=0}" \
+        "${NM:=llvm-nm}" \
+        "${BLDKW_O:=${O:-out/${TARGET_ARCH}}}" \
+        "${OBJCOPY:=llvm-objcopy}" \
+        "${OBJDUMP:=llvm-objdump}" \
+        "${OBJSIZE:=llvm-size}" \
+        "${READELF:=llvm-readelf}" \
+        "${STRIP:=llvm-strip}"
 
     # We are only concerned about little endian for ARM
     if [[ ${TARGET_ARCH} =~ arm ]]; then
         KCONFIG_ALLCONFIG=${O}/little-endian.config
         mkdir -p "${KCONFIG_ALLCONFIG%/*}"
-        echo "CONFIG_CPU_BIG_ENDIAN=n" > "${KCONFIG_ALLCONFIG}"
+        echo "CONFIG_CPU_BIG_ENDIAN=n" >"${KCONFIG_ALLCONFIG}"
     fi
 
     # Use our versions of Clang
@@ -308,7 +309,7 @@ function bldkw() {(
 
     # Don't set -s if V is set
     case ${Q} in
-        1|2) [[ -z ${V} ]] && SILENT_FLAG=( -s ) ;;
+        1 | 2) [[ -z ${V} ]] && SILENT_FLAG=(-s) ;;
     esac
 
     # Setup ccache
@@ -316,70 +317,73 @@ function bldkw() {(
 
     # Build the kernel
     set -x
-    make ${SILENT_FLAG:+"${SILENT_FLAG[@]}"} \
-         "${JOBS_FLAG}" \
-         ${ARCH_FLAGS:+"${ARCH_FLAGS[@]}"} \
-         AR="${AR}" \
-         CC="${CC}" \
-         HOSTAR="${HOSTAR}" \
-         HOSTCC="${HOSTCC}" \
-         HOSTCXX="${HOSTCXX}" \
-         HOSTLD="${HOSTLD}" \
-         HOSTLDFLAGS="${HOSTLDFLAGS}" \
-         ${KCFLAGS:+KCFLAGS="${KCFLAGS}"} \
-         ${KCONFIG_ALLCONFIG:+KCONFIG_ALLCONFIG="${KCONFIG_ALLCONFIG}"} \
-         LD="${LD}" \
-         LLVM_IAS="${LLVM_IAS}" \
-         NM="${NM}" \
-         O="${BLDKW_O}" \
-         OBJCOPY="${OBJCOPY}" \
-         OBJDUMP="${OBJDUMP}" \
-         OBJSIZE="${OBJSIZE}" \
-         READELF="${READELF}" \
-         STRIP="${STRIP}" \
-         ${V:+V="${V}"} \
-         ${W:+W="${W}"} \
-         "${MAKE_ARGS[@]}"
+    make \
+        ${SILENT_FLAG:+"${SILENT_FLAG[@]}"} \
+        "${JOBS_FLAG}" \
+        ${ARCH_FLAGS:+"${ARCH_FLAGS[@]}"} \
+        AR="${AR}" \
+        CC="${CC}" \
+        HOSTAR="${HOSTAR}" \
+        HOSTCC="${HOSTCC}" \
+        HOSTCXX="${HOSTCXX}" \
+        HOSTLD="${HOSTLD}" \
+        HOSTLDFLAGS="${HOSTLDFLAGS}" \
+        ${KCFLAGS:+KCFLAGS="${KCFLAGS}"} \
+        ${KCONFIG_ALLCONFIG:+KCONFIG_ALLCONFIG="${KCONFIG_ALLCONFIG}"} \
+        LD="${LD}" \
+        LLVM_IAS="${LLVM_IAS}" \
+        NM="${NM}" \
+        O="${BLDKW_O}" \
+        OBJCOPY="${OBJCOPY}" \
+        OBJDUMP="${OBJDUMP}" \
+        OBJSIZE="${OBJSIZE}" \
+        READELF="${READELF}" \
+        STRIP="${STRIP}" \
+        ${V:+V="${V}"} \
+        ${W:+W="${W}"} \
+        "${MAKE_ARGS[@]}"
     EXIT_CODE=${?}
     set +x
     exit ${EXIT_CODE}
-)}
-
+); }
 
 # Configure and build a kernel with Clang
-function bldk() {(
+function bldk() { (
     # Parameters
-    BLDKW_ARGS=( )
-    FINAL_ARGS=( )
-    while (( ${#} )); do
+    BLDKW_ARGS=()
+    FINAL_ARGS=()
+    while ((${#})); do
         case ${1} in
             # Supported architectures
             arm) ARCH=arm32 ;;
-            arm32|arm64|mipsel|ppc32|ppc64|ppc64le|riscv64|s390x|x86_64) ARCH=${1} ;;
+            arm32 | arm64 | mipsel | ppc32 | ppc64 | ppc64le | riscv64 | s390x | x86_64) ARCH=${1} ;;
             x86) ARCH=x86_64 ;;
 
             # Build utilities
-            AR=*|CC=*|HOSTAR=*|HOSTCC=*|HOSTCXX=*|HOSTLD=*|LD=*|NM=*|OBJCOPY=*|OBJDUMP=*|OBJSIZE=*|READELF=*|STRIP=*) BLDKW_ARGS=( "${BLDKW_ARGS[@]}" "${1}" ) ;;
+            AR=* | CC=* | HOSTAR=* | HOSTCC=* | HOSTCXX=* | HOSTLD=* | LD=* | NM=* | OBJCOPY=* | OBJDUMP=* | OBJSIZE=* | READELF=* | STRIP=*) BLDKW_ARGS=("${BLDKW_ARGS[@]}" "${1}") ;;
 
             # bldkw vars
-            PO=*|Q=*) BLDKW_ARGS=( "${BLDKW_ARGS[@]}" "${1}" ) ;;
+            PO=* | Q=*) BLDKW_ARGS=("${BLDKW_ARGS[@]}" "${1}") ;;
 
             # make flags that are interpreted by bldkw
-            CROSS_COMPILE=*|KCFLAGS=*|LLVM_IAS=*|V=*|W=*) BLDKW_ARGS=( "${BLDKW_ARGS[@]}" "${1}" ) ;;
+            CROSS_COMPILE=* | KCFLAGS=* | LLVM_IAS=* | V=* | W=*) BLDKW_ARGS=("${BLDKW_ARGS[@]}" "${1}") ;;
 
             # The wrapper needs knowledge about O=
-            O=*) export "${1:?}"; BLDKW_ARGS=( "${BLDKW_ARGS[@]}" "${1}" ) ;;
+            O=*)
+                export "${1:?}"
+                BLDKW_ARGS=("${BLDKW_ARGS[@]}" "${1}")
+                ;;
 
             # The wrapper need to parse the config
             *config) CONFIG=${1} ;;
 
             # Assume everything else is destined for make (like configs and targets)
-            *) FINAL_ARGS=( "${FINAL_ARGS[@]}" "${1}" ) ;;
+            *) FINAL_ARGS=("${FINAL_ARGS[@]}" "${1}") ;;
         esac
 
         shift
     done
-    [[ -z ${FINAL_ARGS[*]} ]] && FINAL_ARGS=( all )
+    [[ -z ${FINAL_ARGS[*]} ]] && FINAL_ARGS=(all)
 
     # Sanity checks
     [[ -z ${ARCH} ]] && die "ARCH not specified!"
@@ -394,7 +398,7 @@ function bldk() {(
     fi
     { [[ ${PWD} =~ cbl ]] && ${IS_DEFCONFIG:=false}; } && CBL_DEFCONFIG=true
 
-    BLDKW=( bldkw "${ARCH}" "${BLDKW_ARGS[@]}" )
+    BLDKW=(bldkw "${ARCH}" "${BLDKW_ARGS[@]}")
 
     # Configure kernel
     "${BLDKW[@]}" distclean "${CONFIG}"
@@ -470,27 +474,26 @@ CONFIG_VIRTIO_MMIO=y
 CONFIG_BLK_MQ_VIRTIO=y
 CONFIG_VIRTIO_BLK=y
 CONFIG_VIRTIO_BLK_SCSI=y
-CONFIG_SCSI_VIRTIO=y" >> "${BLDK_O}"/.config
+CONFIG_SCSI_VIRTIO=y" >>"${BLDK_O}"/.config
 
         [[ ${ARCH} != "x86_64" ]] && echo "CONFIG_LOCK_TORTURE_TEST=y
-CONFIG_RCU_TORTURE_TEST=y" >> "${BLDK_O}"/.config
+CONFIG_RCU_TORTURE_TEST=y" >>"${BLDK_O}"/.config
 
         "${BLDKW[@]}" olddefconfig &>/dev/null
     fi
 
     # Build kernel
     "${BLDKW[@]}" "${FINAL_ARGS[@]}"
-)}
-
+); }
 
 # Download EFI firmware
-function download_efi_firmware() {(
+function download_efi_firmware() { (
     AAVMF=${HOME}/usr/share/AAVMF
-    AAVMF_FILES=( AAVMF_CODE.fd AAVMF_VARS.fd )
+    AAVMF_FILES=(AAVMF_CODE.fd AAVMF_VARS.fd)
     AAVMF_DEB=qemu-efi-aarch64_0~20190606.20d2e5a1-2_all.deb
 
     OVMF=${HOME}/usr/share/OVMF
-    OVMF_FILES=( OVMF_CODE.fd OVMF_VARS.fd )
+    OVMF_FILES=(OVMF_CODE.fd OVMF_VARS.fd)
     OVMF_DEB=ovmf_0~20190606.20d2e5a1-2_all.deb
 
     cd "$(mktemp -d)"
@@ -500,7 +503,7 @@ function download_efi_firmware() {(
     ar x "${AAVMF_DEB}"
     tar xJf data.tar.xz
     for AAVMF_FILE in "${AAVMF_FILES[@]}"; do
-        mv "${AAVMF//${HOME}\/}"/"${AAVMF_FILE}" "${AAVMF}"
+        mv "${AAVMF//${HOME}\//}"/"${AAVMF_FILE}" "${AAVMF}"
     done
 
     cd "$(mktemp -d)"
@@ -510,17 +513,20 @@ function download_efi_firmware() {(
     ar x "${OVMF_DEB}"
     tar xJf data.tar.xz
     for OVMF_FILE in "${OVMF_FILES[@]}"; do
-        mv "${OVMF//${HOME}\/}"/"${OVMF_FILE}" "${OVMF}"
+        mv "${OVMF//${HOME}\//}"/"${OVMF_FILE}" "${OVMF}"
     done
-)}
-
+); }
 
 # Boot a kernel in QEMU
-function bootk() {(
-    ARCH=${1}; shift
+function bootk() { (
+    ARCH=${1}
+    shift
     [[ -z ${ARCH} ]] && die "ARCH not specified!"
     case ${ARCH} in
-        arm|arm32) ARCH=arm32_v7; O_ARCH=arm32 ;;
+        arm | arm32)
+            ARCH=arm32_v7
+            O_ARCH=arm32
+            ;;
         x86) ARCH=x86_64 ;;
     esac
 
@@ -528,27 +534,26 @@ function bootk() {(
     [[ -f ${BOOT_QEMU_SH} ]] || die "${BOOT_QEMU_SH} doesn't exist!"
 
     # Update boot-utils
-    ( cd "${BOOT_QEMU_SH%/*}" && \
-      git rh --quiet && \
-      git pull --quiet --rebase )
+    (cd "${BOOT_QEMU_SH%/*}" &&
+        git rh --quiet &&
+        git pull --quiet --rebase)
 
     "${BOOT_QEMU_SH}" -a "${ARCH}" -k "${O:-out/${O_ARCH:-${ARCH}}}" "${@}"
-)}
-
+); }
 
 # Build a kernel and boot it
-function babk() {(
-    ARCH=${1}; shift
+function babk() { (
+    ARCH=${1}
+    shift
     [[ -z ${ARCH} ]] && die "ARCH not specified!"
 
     bldk "${ARCH}" KCFLAGS="${KCFLAGS--Werror}" "${@}"
 
     bootk "${ARCH}"
-)}
-
+); }
 
 # Show local LLVM patches via git log
-function llvm_log() {(
+function llvm_log() { (
     cd "${TCBLD:?}"/llvm-project || return
     MLFC=$(git mfc)
     if [[ -n ${MLFC} ]]; then
@@ -557,22 +562,21 @@ function llvm_log() {(
         echo
         git lo "${MLFC}"^^..HEAD
     fi
-)}
-
+); }
 
 # linux testing
-function lt() {(
+function lt() { (
     : "${FOLDER:=${CBL}/${TREE:=linux-next}}"
     cd "${FOLDER}" || die "wtf"
     echo "${PWD}"
 
-    while (( ${#} )); do
+    while ((${#})); do
         case ${1} in
             # defconfig + little-endian allyesconfig
-            -b|--basic) BASIC=true ;;
-            -d|--debug) DEBUG=true ;;
+            -b | --basic) BASIC=true ;;
+            -d | --debug) DEBUG=true ;;
             # Show non-fatal warnings
-            -w|--warnings) SHOW_NF_WARNINGS=true ;;
+            -w | --warnings) SHOW_NF_WARNINGS=true ;;
             "") ;;
         esac
         shift
@@ -600,7 +604,7 @@ function lt() {(
         echo
         echo "Build results:"
         echo
-    } > "${LOG}"
+    } >"${LOG}"
 
     for CONFIG in "${CBLCFGS[@]}"; do (
         ARCH=${CONFIG%%:*}
@@ -609,7 +613,7 @@ function lt() {(
         # Basic configs are defconfigs + little endian allyesconfig
         # warning: This only exits the subshell caused by the (..) group. [SC2106]... that's the idea lol
         # shellcheck disable=SC2106
-        [[ -n ${BASIC} && ! ( ${CONFIG} =~ defconfig || ${CONFIG} = "allyesconfig" ) ]] && continue
+        [[ -n ${BASIC} && ! (${CONFIG} =~ defconfig || ${CONFIG} = "allyesconfig") ]] && continue
 
         header "${ARCH}:${CONFIG}" "${BOLD}"
 
@@ -621,7 +625,7 @@ function lt() {(
 
         # Test bfd builds with ld.bfd
         [[ ${CONFIG} =~ -bfd ]] && BFD=true
-        CONFIG=${CONFIG//-bfd}
+        CONFIG=${CONFIG//-bfd/}
         if ${BFD:=false}; then
             case ${ARCH} in
                 arm32) LD=arm-linux-gnueabi-ld ;;
@@ -654,7 +658,7 @@ function lt() {(
         {
             echo "${ARCH}:${CONFIG}$(${BFD} && echo "-bfd") | Build ${LT_RESULT} in ${TIME_STRING:l}\c"
             case ${ARCH} in
-                riscv64|s390x) BOOT=false ;;
+                riscv64 | s390x) BOOT=false ;;
                 *) BOOT=true ;;
             esac
             if ${BOOT} && [[ ${LT_RESULT} = "successful" && ${CONFIG} =~ defconfig ]]; then
@@ -665,11 +669,11 @@ function lt() {(
                 fi
             fi
             echo
-            [[ -z ${DEBUG} && ( -n ${SHOW_NF_WARNINGS} || ${LT_RESULT} = "failed" ) ]] && \
+            [[ -z ${DEBUG} && (-n ${SHOW_NF_WARNINGS} || ${LT_RESULT} = "failed") ]] &&
                 rg --color=never "error:|warning:|undefined" "${WARNING_LOG}" | sed "s/${PWD//\//\\/}\///g"
             echo
-        } >> "${LOG}"
-    ) done
+        } >>"${LOG}"
+    ); done
 
     {
         MFC=$(git mfc)
@@ -679,7 +683,7 @@ function lt() {(
             git lo "${MFC}"^^..HEAD
         fi
         llvm_log
-    } >> "${LOG}"
+    } >>"${LOG}"
 
     MESSAGE="linux$([[ -f localversion-next ]] && cat localversion-next) build results: $(deldog "${LOG}")"
 
@@ -690,47 +694,43 @@ function lt() {(
     echo
 
     rm "${LOG}"
-)}
-
+); }
 
 # Pull the latest CBL Docker image and run it with podman
-function pdmnrn() {(
+function pdmnrn() { (
     [[ -z ${PODMAN_IMAGE} ]] && PODMAN_IMAGE=clangbuiltlinux/debian
     [[ -z ${LOCAL} ]] && podman pull "${PODMAN_IMAGE}"
-    podman_mount --interactive \
-                 --rm \
-                 --tty \
-                 "${PODMAN_IMAGE}" "${@}"
-)}
-
+    podman_mount \
+        --interactive \
+        --rm \
+        --tty \
+        "${PODMAN_IMAGE}" "${@}"
+); }
 
 # Strip executables within a folder
-function stripall() {(
+function stripall() { (
     cd "${1:?}"
     for FILE in $(fd -t file -x file | grep 'not stripped' | cut -d: -f1); do strip "${FILE}"; done
-)}
-
+); }
 
 # Build LLVM
-function bldllvm() {(
+function bldllvm() { (
     # Setup ccache
     ccache_size llvm 75
 
     "${TCBLD}"/build-llvm.py "${@}"
-)}
-
+); }
 
 # Build binutils
-function bldbn() {(
+function bldbn() { (
     # Setup ccache
     ccache_size binutils 25
 
-   "${TCBLD}"/build-binutils.py "${@}"
-)}
-
+    "${TCBLD}"/build-binutils.py "${@}"
+); }
 
 # Build LLVM/Clang/lld and arm{32,64} and powerpc binutils from source
-function bldtcs() {(
+function bldtcs() { (
     DATE_TIME=$(date +%Y%m%d-%H%M)
 
     # Build binutils
@@ -738,71 +738,70 @@ function bldtcs() {(
     [[ -d ${TC_BLD_BNTLS} ]] || git clone git://sourceware.org/git/binutils-gdb.git "${TC_BLD_BNTLS}"
     git -C "${TC_BLD_BNTLS}" pull --rebase || die "Updating binutils failed (${?})"
     BLDBN_INSTALL_FOLDER=${CBL_TC}/binutils-${DATE_TIME}-$(git -C "${TC_BLD_BNTLS}" sh -s --format=%H origin/master)
-    bldbn --build-folder "${BBF:?}" \
-          --install-folder "${BLDBN_INSTALL_FOLDER}" || die "bldbn failed with exit code ${?}"
+    bldbn \
+        --build-folder "${BBF:?}" \
+        --install-folder "${BLDBN_INSTALL_FOLDER}" || die "bldbn failed with exit code ${?}"
     stripall "${BLDBN_INSTALL_FOLDER}"
 
     # Update binutils
-    ( cd "${CBL_TC}" && \
-      rm -f binutils && \
-      ln -s "${BLDBN_INSTALL_FOLDER##*/}" binutils )
+    (cd "${CBL_TC}" &&
+        rm -f binutils &&
+        ln -s "${BLDBN_INSTALL_FOLDER##*/}" binutils)
 
     # Build LLVM/Clang/lld
     TC_BLD_LLVM_PRJCT=${TCBLD}/llvm-project
     [[ -d ${TC_BLD_LLVM_PRJCT} ]] || git -C "${TCBLD}" clone git://github.com/llvm/llvm-project
     git -C "${TC_BLD_LLVM_PRJCT}" pull --rebase || die "Updating llvm-project failed (${?})"
     BLDLLVM_INSTALL_FOLDER=${CBL_TC}/llvm-${DATE_TIME}-$(git -C "${TC_BLD_LLVM_PRJCT}" sh -s --format=%H origin/master)
-    bldllvm --assertions \
-            --build-folder "${LBF:?}" \
-            --check-targets lld clang llvm \
-            --install-folder "${BLDLLVM_INSTALL_FOLDER}" \
-            --lto=thin \
-            --pgo || die "bldllvm failed with exit code ${?}"
+    bldllvm \
+        --assertions \
+        --build-folder "${LBF:?}" \
+        --check-targets lld clang llvm \
+        --install-folder "${BLDLLVM_INSTALL_FOLDER}" \
+        --lto=thin \
+        --pgo || die "bldllvm failed with exit code ${?}"
     stripall "${BLDLLVM_INSTALL_FOLDER}"
 
     # Update llvm-tot symlink
-    ( cd "${CBL_TC}" && \
-      rm -f llvm-tot && \
-      ln -sf "${BLDLLVM_INSTALL_FOLDER##*/}" llvm-tot )
+    (cd "${CBL_TC}" &&
+        rm -f llvm-tot &&
+        ln -sf "${BLDLLVM_INSTALL_FOLDER##*/}" llvm-tot)
 
     # Invalidate our kernel ccache because we have a new compiler that will be used for it
     ccache_clear kernel
-)}
-
+); }
 
 # Switch cuttlefish branch
-function switch_kc_branch() {(
+function switch_kc_branch() { (
     "${CBL_KC}"/build/multi-switcher.sh "${@}"
-)}
-
+); }
 
 # Sync kernel/common
-function sync_cbl_kc() {(
+function sync_cbl_kc() { (
     [[ -d ${CBL_KC} ]] || mkdir -p "${CBL_KC}"
     cd "${CBL_KC}" || exit ${?}
-    REPO_INIT_CMD=( repo init -u https://android.googlesource.com/kernel/manifest -b common-android-multi )
+    REPO_INIT_CMD=(repo init -u https://android.googlesource.com/kernel/manifest -b common-android-multi)
     "${REPO_INIT_CMD[@]}" || die "${REPO_INIT_CMD[*]} failed (${?})"
     [[ -d ${CBL_KC_SRC} ]] && git -C "${CBL_KC_SRC}" rh
-    REPO_SYNC_CMD=( repo sync "${JOBS_FLAG}" )
+    REPO_SYNC_CMD=(repo sync "${JOBS_FLAG}")
     "${REPO_SYNC_CMD[@]}" || die "${REPO_SYNC_CMD[*]} failed (${?})"
-)}
-
+); }
 
 # kernel/common build wrapper
-function kcbw() {(
-    while (( ${#} )); do
+function kcbw() { (
+    while ((${#})); do
         case ${1} in
-            3.*|4.*|5.*|mainline) BRANCH=${1} ;;
+            3.* | 4.* | 5.* | mainline) BRANCH=${1} ;;
             arm64) ARCH=aarch64 ;;
             x86*) ARCH=x86_64 ;;
-            -s|--sync) SYNC=true ;;
+            -s | --sync) SYNC=true ;;
         esac
         shift
     done
     : ${ARCH:?} "${BRANCH:=mainline}"
     CONFIG=build.config.cuttlefish.${ARCH}
     case ${BRANCH} in
-        4.19|5.4|mainline) CONFIG_DIR=${CBL_KC}/cuttlefish-modules ;;
+        4.19 | 5.4 | mainline) CONFIG_DIR=${CBL_KC}/cuttlefish-modules ;;
         *) CONFIG_DIR=${CBL_KC_SRC} ;;
     esac
 
@@ -832,15 +831,14 @@ function kcbw() {(
     esac
     rm -vrf out/android-${BRANCH}/dist
     BUILD_CONFIG=${CONFIG_DIR##*/}/${CONFIG} ./build/build.sh
-)}
-
+); }
 
 # Download Cuttlefish files
-function upd_cuttlefish() {(
-    while (( ${#} )); do
+function upd_cuttlefish() { (
+    while ((${#})); do
         case ${1} in
-            -i|--img-zip) shift && CUTTLEFISH_ZIP_URL=${1} ;;
-            -h|--host-tools-tar) shift && CUTTLEFISH_TAR_URL=${1} ;;
+            -i | --img-zip) shift && CUTTLEFISH_ZIP_URL=${1} ;;
+            -h | --host-tools-tar) shift && CUTTLEFISH_TAR_URL=${1} ;;
         esac
         shift
     done
@@ -859,12 +857,11 @@ function upd_cuttlefish() {(
     tar -xvf "${CUTTLEFISH_TAR}" || exit ${?}
 
     rm -rf "${CUTTLEFISH_ZIP}" "${CUTTLEFISH_TAR}"
-)}
-
+); }
 
 # Boot Cuttlefish
-function boot_cuttlefish() {(
-    while (( ${#} )); do
+function boot_cuttlefish() { (
+    while ((${#})); do
         case ${1} in
             *) BRANCH=${1} ;;
         esac
@@ -872,28 +869,30 @@ function boot_cuttlefish() {(
     done
 
     DIST=${CBL_KC}/out/android-${BRANCH:?}/dist
-    LAUNCH_CVD=( -daemon -kernel_path "${DIST}"/bzImage -report_anonymous_usage_stats n )
-    [[ -f ${DIST}/initramfs.img ]] && LAUNCH_CVD=( "${LAUNCH_CVD[@]}" -initramfs_path "${DIST}"/initramfs.img )
+    LAUNCH_CVD=(-daemon -kernel_path "${DIST}"/bzImage -report_anonymous_usage_stats n)
+    [[ -f ${DIST}/initramfs.img ]] && LAUNCH_CVD=("${LAUNCH_CVD[@]}" -initramfs_path "${DIST}"/initramfs.img)
 
     cd "${CBL_CTTLFSH}" || exit ${?}
 
     HOME=${PWD} ./bin/stop_cvd &>/dev/null
     HOME=${PWD} ./bin/launch_cvd "${LAUNCH_CVD[@]}" &>/dev/null &
 
-    sleep 60 && \
-    ./bin/adb -e shell cat /proc/version && \
-    HOME=${PWD} ./bin/stop_cvd
-)}
-
+    sleep 60 &&
+        ./bin/adb -e shell cat /proc/version &&
+        HOME=${PWD} ./bin/stop_cvd
+); }
 
 # kernel/common build testing
-function kct() {(
-    while (( ${#} )); do
+function kct() { (
+    while ((${#})); do
         case ${1} in
-            -d|--debug) DEBUG=true ;;
+            -d | --debug) DEBUG=true ;;
             # Show non-fatal warnings
-            -w|--warnings) SHOW_NF_WARNINGS=true ;;
-            --x86) ARCHES=( x86 ); X86_ONLY=true ;;
+            -w | --warnings) SHOW_NF_WARNINGS=true ;;
+            --x86)
+                ARCHES=(x86)
+                X86_ONLY=true
+                ;;
             "") ;;
         esac
         shift
@@ -917,9 +916,9 @@ function kct() {(
             echo "Build results:"
             echo
         )
-    } > "${LOG}"
+    } >"${LOG}"
 
-    ${X86_ONLY:=false} || ARCHES=( arm64 x86 )
+    ${X86_ONLY:=false} || ARCHES=(arm64 x86)
 
     sync_cbl_kc
 
@@ -931,9 +930,18 @@ function kct() {(
             ERRORS=$(mktemp)
 
             case ${VERSION} in
-                4.9) DIST_BRANCH=4.9-q; UPSTREAM_BRANCH=${DIST_BRANCH} ;;
-                4.14) DIST_BRANCH=${VERSION}; UPSTREAM_BRANCH=4.14-stable ;;
-                *) DIST_BRANCH=${VERSION}; UPSTREAM_BRANCH=${VERSION} ;;
+                4.9)
+                    DIST_BRANCH=4.9-q
+                    UPSTREAM_BRANCH=${DIST_BRANCH}
+                    ;;
+                4.14)
+                    DIST_BRANCH=${VERSION}
+                    UPSTREAM_BRANCH=4.14-stable
+                    ;;
+                *)
+                    DIST_BRANCH=${VERSION}
+                    UPSTREAM_BRANCH=${VERSION}
+                    ;;
             esac
             UPSTREAM_BRANCH=android-${UPSTREAM_BRANCH}
 
@@ -941,8 +949,8 @@ function kct() {(
 
             # Build kernel silently normally
             if [[ -z ${DEBUG} ]]; then
-                kcbw "${ARCH}" "${VERSION}" "${SYNC_FLAG[@]}" |& \
-                rg --color=never "error:|warning:|undefined" |& sed "s/${CBL_KC_SRC//\//\\/}\///g" |& tee "${ERRORS}"
+                kcbw "${ARCH}" "${VERSION}" "${SYNC_FLAG[@]}" |&
+                    rg --color=never "error:|warning:|undefined" |& sed "s/${CBL_KC_SRC//\//\\/}\///g" |& tee "${ERRORS}"
                 MAKE_RESULT=${pipestatus[1]}
             else
                 kcbw "${ARCH}" "${VERSION}" "${SYNC_FLAG[@]}"
@@ -976,13 +984,13 @@ function kct() {(
 
             # Log result
             {
-                echo "${UPSTREAM_BRANCH} ${ARCH} | $(cd "${CBL_KC_SRC}" || die "wtf"; git kf aosp/${UPSTREAM_BRANCH}) | Build ${BUILD_RESULT} in ${TIME_STRING:l}${BOOT_RESULT}"
-                [[ -z ${DEBUG} && ( -n ${SHOW_NF_WARNINGS} || ${BUILD_RESULT} = "failed" ) ]] && cat "${ERRORS}"
+                echo "${UPSTREAM_BRANCH} ${ARCH} | $(cd "${CBL_KC_SRC}" && git kf aosp/${UPSTREAM_BRANCH}) | Build ${BUILD_RESULT} in ${TIME_STRING:l}${BOOT_RESULT}"
+                [[ -z ${DEBUG} && (-n ${SHOW_NF_WARNINGS} || ${BUILD_RESULT} = "failed") ]] && cat "${ERRORS}"
                 echo
-            } >> "${LOG}"
+            } >>"${LOG}"
             rm "${ERRORS}"
-        ) done
-    ) done
+        ); done
+    ); done
 
     MESSAGE="kernel/common build results: $(deldog "${LOG}")"
 
@@ -994,29 +1002,27 @@ function kct() {(
 
     rm "${LOG}"
 
-)}
-
+); }
 
 # Build all kernel trees
-function bldallk() {(
+function bldallk() { (
     TREE=linux lt ""
     TREE=linux-next lt ""
     kct ""
     "${CBL}"/wsl2/bin/build.sh
-)}
-
+); }
 
 # Build new LLVM/Clang/lld and test all kernel trees
-function bldall() {(
+function bldall() { (
     export TG=true
     bldtcs && bldallk
-)}
-
+); }
 
 # Function to test build-{binutils,llvm}.py in multiple Docker images
-function bld_llvm_bntls_py() {(
+function bld_llvm_bntls_py() { (
     CCACHE_FOLDER=${CBL}/git/ccache
-    LOG=$(mktemp); echo "Log: ${LOG}"
+    LOG=$(mktemp)
+    echo "Log: ${LOG}"
     SCRIPT=$(mktemp --suffix=.sh)
     TC_BLD=${CBL}/git/tc-build
 
@@ -1024,7 +1030,7 @@ function bld_llvm_bntls_py() {(
     cd "${TC_BLD}" || die "Could not move into ${TC_BLD}!"
     [[ -f build-llvm.py ]] || die "build-llvm.py script could not be found!"
 
-    cat <<'EOF' > "${SCRIPT}"
+    cat <<'EOF' >"${SCRIPT}"
 #!/usr/env/bash
 
 PACKAGES=( ccache clang cmake git python3 )
@@ -1073,26 +1079,31 @@ EOF
 
     sed -i "s;TEXT_TO_REPLACE;git clone /${PWD##*/} /${PWD##*/}2 \&\& cd /${PWD##*/}2;g" "${SCRIPT}"
 
-    for IMAGE in archlinux/base:latest \
-                 debian:stable-slim \
-                 debian:testing-slim \
-                 debian:unstable-slim \
-                 fedora:latest \
-                 fedora:rawhide \
-                 opensuse/leap:latest \
-                 opensuse/tumbleweed:latest \
-                 ubuntu:xenial \
-                 ubuntu:latest \
-                 ubuntu:rolling \
-                 ubuntu:devel; do
+    for IMAGE in \
+        archlinux/base:latest \
+        debian:stable-slim \
+        debian:testing-slim \
+        debian:unstable-slim \
+        fedora:latest \
+        fedora:rawhide \
+        opensuse/leap:latest \
+        opensuse/tumbleweed:latest \
+        ubuntu:xenial \
+        ubuntu:latest \
+        ubuntu:rolling \
+        ubuntu:devel; do
         podman pull "${IMAGE}"
-        podman_mount --interactive \
-                     --mount type=bind,source="${CCACHE_FOLDER}",target=/ccache \
-                     --mount type=bind,source="${SCRIPT}",target=/script.sh \
-                     --rm \
-                     --tty \
-                     "${IMAGE}" bash /script.sh || { echo "${IMAGE} failed" >> "${LOG}"; continue; }
-        echo "${IMAGE} successful" >> "${LOG}"
+        podman_mount \
+            --interactive \
+            --mount type=bind,source="${CCACHE_FOLDER}",target=/ccache \
+            --mount type=bind,source="${SCRIPT}",target=/script.sh \
+            --rm \
+            --tty \
+            "${IMAGE}" bash /script.sh || {
+            echo "${IMAGE} failed" >>"${LOG}"
+            continue
+        }
+        echo "${IMAGE} successful" >>"${LOG}"
     done
 
     echo
@@ -1100,15 +1111,13 @@ EOF
     cat "${LOG}"
     tg_msg "$(cat "${LOG}")"
     echo
-)}
-
+); }
 
 function yapf() {
     PYTHONPATH=${CBL}/git/yapf python3 "${CBL}"/git/yapf/yapf -i -p "${@}"
 }
 
-
-function qualify_tc_bld_uprev() {(
+function qualify_tc_bld_uprev() { (
     TC_BLD=${HOME}/cbl/git/tc-build
 
     cd "$(mktemp -d)"
@@ -1122,14 +1131,13 @@ function qualify_tc_bld_uprev() {(
     git -C "${TC_BLD}"/llvm-project show -s
 
     PATH_OVERRIDE=${PWD}/bin "${TC_BLD}"/kernel/build.sh --allyesconfig
-)}
+); }
 
-
-function upd_lnx_tcbld() {(
-    while (( ${#} )); do
+function upd_lnx_tcbld() { (
+    while ((${#})); do
         case ${1} in
-            "-p"|"--personal") MODE=personal ;;
-            "-r"|"--release") MODE=release ;;
+            "-p" | "--personal") MODE=personal ;;
+            "-r" | "--release") MODE=release ;;
         esac
         shift
     done
@@ -1164,7 +1172,7 @@ function upd_lnx_tcbld() {(
             defconfig) git rebase v"${KVER}" ;;
             allyesconfig) git rebase "${BPREFIX}"-defconfig ;;
         esac
-        git format-patch --stdout v"${KVER}".."${BPREFIX}"-"${CONFIG}" > "${KERNEL}"/linux-"${KVER}"-"${CONFIG}".patch
+        git format-patch --stdout v"${KVER}".."${BPREFIX}"-"${CONFIG}" >"${KERNEL}"/linux-"${KVER}"-"${CONFIG}".patch
     done
 
     TARBALL=linux-${KVER}.tar.${TAR_EXT}
@@ -1172,5 +1180,5 @@ function upd_lnx_tcbld() {(
     gen_sha256sum "${URL}/${TARBALL}"
 
     sed -i "s/LINUX=.*/LINUX=linux-${KVER}/" "${KERNEL}"/build.sh
-)}
+); }
 # vi: filetype=zsh
