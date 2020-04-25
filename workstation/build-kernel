@@ -6,7 +6,6 @@
 #
 # Script to build a zImage from a kernel tree
 
-
 ######################
 #                    #
 #  HELPER FUNCTIONS  #
@@ -15,36 +14,35 @@
 
 # Echo to stderr
 function errcho() {
-    (>&2 echo "${@}")
+    (echo >&2 "${@}")
 }
-
 
 # Get cross compile prefix
 function get_cc_prefix() {
     find "${1}" \( -type f -o -type l \) -name '*-gcc' -printf "%T+\t%p\n" | sort -r | head -n1 | sed 's@.*/@@' | sed 's/real-//' | sed 's/gcc//'
 }
 
-
 # Kernel make function
 function kmake() {
     # Set make variable
-    MAKE=( make "${JOBS_FLAG}" O=out ARCH="${ARCH}" )
+    MAKE=(make "${JOBS_FLAG}" O=out ARCH="${ARCH}")
 
     if [[ -n ${CLANG} ]]; then
-        "${MAKE[@]}" CC="${CCACHE} clang" \
-                     CLANG_TRIPLE=aarch64-linux-gnu- \
-                     CLANG_TRIPLE_ARM32=arm-linux-gnueabi- \
-                     CROSS_COMPILE="${GCC_CC}" \
-                     CROSS_COMPILE_ARM32="${GCC_32_BIT_CC}" \
-                     KBUILD_COMPILER_STRING="${CLANG_VERSION}" \
-                     "${@}"
+        "${MAKE[@]}" \
+            CC="${CCACHE} clang" \
+            CLANG_TRIPLE=aarch64-linux-gnu- \
+            CLANG_TRIPLE_ARM32=arm-linux-gnueabi- \
+            CROSS_COMPILE="${GCC_CC}" \
+            CROSS_COMPILE_ARM32="${GCC_32_BIT_CC}" \
+            KBUILD_COMPILER_STRING="${CLANG_VERSION}" \
+            "${@}"
     else
-        "${MAKE[@]}" CROSS_COMPILE="${CCACHE} ${GCC_CC}" \
-                     CROSS_COMPILE_ARM32="${GCC_32_BIT_CC}" \
-                     "${@}"
+        "${MAKE[@]}" \
+            CROSS_COMPILE="${CCACHE} ${GCC_CC}" \
+            CROSS_COMPILE_ARM32="${GCC_32_BIT_CC}" \
+            "${@}"
     fi
 }
-
 
 #######################
 #                     #
@@ -56,80 +54,94 @@ function kmake() {
 function parse_parameters() {
     PARAMS="${*}"
     START=$(date +%s)
-    while (( ${#} )); do
+    while ((${#})); do
         case ${1} in
             # Architecture to build
-            "-a"|"--arch")
+            "-a" | "--arch")
                 shift && enforce_value "${@}"
 
-                ARCH=${1} ;;
+                ARCH=${1}
+                ;;
 
-            # Use Clang for compiling the kernel
-            "-c"|"--clang")
+                # Use Clang for compiling the kernel
+            "-c" | "--clang")
 
-                CLANG=true ;;
+                CLANG=true
+                ;;
 
-            # Specify which Clang toolchain to use
-            "-ct"|"--clang-toolchain")
+                # Specify which Clang toolchain to use
+            "-ct" | "--clang-toolchain")
                 shift && enforce_value "${@}"
 
-                CLANG_FOLDER=${1} ;;
+                CLANG_FOLDER=${1}
+                ;;
 
-            # Config to build
-            "-d"|"--defconfig")
+                # Config to build
+            "-d" | "--defconfig")
                 shift && enforce_value "${@}"
 
-                IFS=',' read -r -A DEFCONFIGS <<< "${1}" ;;
+                IFS=',' read -r -A DEFCONFIGS <<<"${1}"
+                ;;
 
-            # Show full compilation
-            "-D"|"--debug")
-                VERBOSITY=3 ;;
+                # Show full compilation
+            "-D" | "--debug")
+                VERBOSITY=3
+                ;;
 
-            # Only show errors
-            "-e"|"--errors")
+                # Only show errors
+            "-e" | "--errors")
                 VERBOSITY=1
-                RG_LOOK_FOR="error:" ;;
+                RG_LOOK_FOR="error:"
+                ;;
 
-            # Kernel folder
-            "-f"|"--folder")
+                # Kernel folder
+            "-f" | "--folder")
                 shift && enforce_value "${@}"
 
-                FOLDER=${1} ;;
+                FOLDER=${1}
+                ;;
 
-            # Specify which GCC toolchain to use
-            "-gt"|"--gcc-toolchain")
+                # Specify which GCC toolchain to use
+            "-gt" | "--gcc-toolchain")
                 shift && enforce_value "${@}"
 
-                GCC_FOLDER=${1} ;;
+                GCC_FOLDER=${1}
+                ;;
 
-            # 32-bit GCC toolchain to use for compiling
-            "-gt-32"|"--gcc-32-bit-toolchain")
+                # 32-bit GCC toolchain to use for compiling
+            "-gt-32" | "--gcc-32-bit-toolchain")
                 shift && enforce_value "${@}"
 
-                GCC_32_BIT_FOLDER=${1} ;;
+                GCC_32_BIT_FOLDER=${1}
+                ;;
 
-            # Just show if build was successful or not
-            "-r"|"--show-only-result")
-                SHOW_ONLY_RESULT=true ;;
+                # Just show if build was successful or not
+            "-r" | "--show-only-result")
+                SHOW_ONLY_RESULT=true
+                ;;
 
-            # Version to display
-            "-v"|"--version-display")
+                # Version to display
+            "-v" | "--version-display")
                 shift && enforce_value "${@}"
 
-                VERSION_DISPLAY=${1} ;;
-                
-            # Show only warnings and errors during compilation
-            "-w"|"--warnings")
+                VERSION_DISPLAY=${1}
+                ;;
+
+                # Show only warnings and errors during compilation
+            "-w" | "--warnings")
                 VERBOSITY=2
-                RG_LOOK_FOR="error:|warning:" ;;
+                RG_LOOK_FOR="error:|warning:"
+                ;;
 
-            # Compile with -Werror
+                # Compile with -Werror
             "-Werror")
-                WERROR=true ;;
+                WERROR=true
+                ;;
 
-            # Disable -Werror
+                # Disable -Werror
             "-Wno-error")
-                NO_WERROR=true ;;
+                NO_WERROR=true
+                ;;
         esac
 
         shift
@@ -148,7 +160,6 @@ function parse_parameters() {
     [[ -z ${ARCH} ]] && ARCH=arm64
     [[ -z ${GCC_FOLDER} ]] && GCC_FOLDER=${ANDROID_TC_FOLDER}/gcc-${ARCH}
 }
-
 
 # Set toolchain paths
 function setup_toolchains() {
@@ -169,7 +180,7 @@ function setup_toolchains() {
             [[ ! -d ${GCC_32_BIT_FOLDER} ]] && die "Invalid 32-bit GCC folder specified!"
         fi
         GCC_32_BIT_BIN=${GCC_32_BIT_FOLDER}/bin
-        GCC_32_BIT_CC=$(get_cc_prefix "${GCC_32_BIT_BIN}" )
+        GCC_32_BIT_CC=$(get_cc_prefix "${GCC_32_BIT_BIN}")
         [[ -z ${GCC_32_BIT_CC} ]] && die "32-bit GCC toolchain could not be found!"
     fi
 
@@ -193,7 +204,6 @@ function setup_toolchains() {
     export PATH
 }
 
-
 # Basic build function
 function build() {
     # Clean up from last compile
@@ -201,7 +211,7 @@ function build() {
 
     # Build kernel image
     if [[ ${#DEFCONFIGS[@]} -gt 1 ]]; then
-        cat "${DEFCONFIGS[@]}" > out/.config
+        cat "${DEFCONFIGS[@]}" >out/.config
         kmake olddefconfig |& rg --color=never -v "format-overflow"
     else
         kmake "${DEFCONFIGS[1]}" |& rg --color=never -v "format-overflow"
@@ -225,11 +235,10 @@ function build() {
     rmvenv
 }
 
-
 # Compilation function
 function compile() {
     # Start hiding output
-    [[ -n ${SHOW_ONLY_RESULT} ]] && exec > /dev/null
+    [[ -n ${SHOW_ONLY_RESULT} ]] && exec >/dev/null
 
     # Show the base version we are making
     header "BUILDING $(make -s CROSS_COMPILE="" CC=gcc kernelversion)"
@@ -237,16 +246,21 @@ function compile() {
     # Show compilation based on flags
     case ${VERBOSITY} in
         "3")
-            build ;;
-        "1"|"2")
-            DISABLED_WARNINGS=( "which has unmet direct dependencies"
-                                "choice value used outside its choice group"
-                                "reassigning to symbol"
-                                "changes choice state" )
+            build
+            ;;
+        "1" | "2")
+            DISABLED_WARNINGS=(
+                "which has unmet direct dependencies"
+                "choice value used outside its choice group"
+                "reassigning to symbol"
+                "changes choice state"
+            )
             for ITEM in "${DISABLED_WARNINGS[@]}"; do RG_IGNORE="${RG_IGNORE}${ITEM}|"; done
-            build |& rg --color=never "${RG_LOOK_FOR}" |& rg -v "${RG_IGNORE/%|}" ;;
+            build |& rg --color=never "${RG_LOOK_FOR}" |& rg -v "${RG_IGNORE/%|/}"
+            ;;
         *)
-            build &> /dev/null ;;
+            build &>/dev/null
+            ;;
     esac
 
     # Find final image
@@ -254,7 +268,6 @@ function compile() {
     [[ -z ${FINAL_IMAGE} ]] && FINAL_IMAGE=$(find out -name 'Image.*' | tail -1)
     [[ -z ${FINAL_IMAGE} ]] && FINAL_IMAGE=$(find out -name 'Image*' | tail -1)
 }
-
 
 # Report success
 function report_result() {
@@ -268,7 +281,7 @@ function report_result() {
         echo
         formatted_kernel_version "${VERSION_DISPLAY}"
     else
-        >&2 die "${RST}${SCRIPT_COMMAND}${RED}BUILD FAILED IN $(format_time "${START}" "${END}")!"
+        die "${RST}${SCRIPT_COMMAND}${RED}BUILD FAILED IN $(format_time "${START}" "${END}")!" >&2
     fi
 
     # Alert of script end
@@ -276,7 +289,6 @@ function report_result() {
 
     exit 0
 }
-
 
 source "${SCRIPTS_FOLDER}/common"
 source "${SCRIPTS_FOLDER}/env/stubs/folders"
