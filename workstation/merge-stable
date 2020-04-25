@@ -140,30 +140,6 @@ function verify_remote() {
     echo "${1} remote updated successfully!"
 }
 
-# Updates the linux-stable mirror on my GitHub
-function update_stable_mirror() {
-    CUR_FOLDER=${PWD}
-
-    if [[ ! -d ${KERNEL_FOLDER}/mirrors/linux-stable ]]; then
-        mkdir -p "${KERNEL_FOLDER}/mirrors"
-        cd "${KERNEL_FOLDER}/mirrors" || die "Mirrors folder does not exist!"
-        git clone --mirror https://git.kernel.org/pub/scm/linux/kernel/git/stable/linux.git linux-stable
-        cd linux-stable || die "linux-stable folder does not exist!"
-        git remote set-url --push origin git@github.com:nathanchance/linux-stable
-    fi
-
-    cd "${KERNEL_FOLDER}/mirrors/linux-stable" || die "linux-stable folder does not exist!"
-
-    git fetch -p origin
-    if git push -q --mirror; then
-        echo "linux-stable mirror updated successfully!"
-    else
-        echo "linux-stable mirror update failed!"
-    fi
-
-    cd "${CUR_FOLDER}" || die "Cannot return to previous folder!"
-}
-
 # Update the two linux-stable remotes
 function update_sources() {
     [[ -n ${TAG_TO_PULL} ]] && return
