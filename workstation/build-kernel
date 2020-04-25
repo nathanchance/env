@@ -271,7 +271,7 @@ function compile() {
 # Report success
 function report_result() {
     END=$(date +%s)
-    [[ -n ${SHOW_ONLY_RESULT} ]] && SCRIPT_COMMAND="$(basename "${0}") ${PARAMS}  |  "
+    [[ -n ${SHOW_ONLY_RESULT} ]] && SCRIPT_COMMAND="${0##*/} ${PARAMS}  |  "
     if [[ -f ${FINAL_IMAGE} ]]; then
         echo
         errcho "${SCRIPT_COMMAND}${GRN}Build successful in $(format_time "${START}" "${END}")${RST}"
