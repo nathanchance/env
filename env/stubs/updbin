@@ -83,6 +83,7 @@ function bdtc() { (
 
 # Build/update git
 function bgit() { (
+    ihub || exit ${?}
     [[ $(uname -m) =~ x86 ]] && MARCH="-march=native "
     MAKE=(make "${JOBS_FLAG:--j"$(nproc)"}"
     prefix="${GIT_PREFIX:=${PREFIX:-${HOME}/usr}}"
@@ -108,11 +109,8 @@ function bgit() { (
     "${MAKE[@]}" all install || die "git build/install failed"
 
     if [[ -n ${ZSH_NAME} ]]; then
-        mkdir -p "${GIT_PREFIX}"/share/bash-completion/completions/
-        install -m 0644 "${GIT_FOLDER}"/contrib/completion/git-completion.bash "${GIT_PREFIX}"/share/bash-completion/completions/git
-
-        [[ -d ${HOME}/.zfunctions ]] || mkdir -p "${HOME}/.zfunctions"
-        install -m 0644 "${GIT_FOLDER}"/contrib/completion/git-completion.zsh "${HOME}"/.zfunctions/_git
+        install -Dm644 "${GIT_FOLDER}"/contrib/completion/git-completion.bash "${GIT_PREFIX}"/share/bash-completion/completions/git
+        install -Dm644 "${GIT_FOLDER}"/contrib/completion/git-completion.zsh "${HOME}"/.zfunctions/_git
     fi
 
     move_to_front_of_path "${GIT_PREFIX}"/bin
@@ -132,7 +130,7 @@ function ihugo() { (
     else
         TMP_FOLDER=$(mktemp -d)
         curl -LSs "${HUGO_URL}".tar.gz | tar -C "${TMP_FOLDER}" -xzf -
-        mv "${TMP_FOLDER}"/hugo "${PREFIX:-${HOME}/usr}"/bin
+        install -Dm755 "${TMP_FOLDER}"/hugo "${PREFIX:-${HOME}/usr}"/bin/hugo
         rm -rf "${TMP_FOLDER}"
     fi
 ); }
@@ -246,10 +244,12 @@ function bninja() { (
 
     python3 ./configure.py --bootstrap
     if [[ -f ninja ]]; then
-        cp -v ninja "${NINJA_PREFIX:=${PREFIX:-${HOME}/usr}}"/bin
+        NINJA_BIN=${PREFIX:-${HOME}/usr}/bin
+        mkdir -p "${NINJA_BIN}"
+        cp -v ninja "${NINJA_BIN}"
         rm -rf "${TMP_FOLDER}"
 
-        move_to_front_of_path "${NINJA_PREFIX}"/bin
+        move_to_front_of_path "${NINJA_BIN}"
         command -v ninja
         ninja --version
     fi
@@ -440,7 +440,6 @@ function birg() { (
         cargo build --release --locked --features 'pcre2' || die "cargo build failed"
         cargo install --force --path . || die "cargo install failed"
         if [[ -n ${ZSH_NAME} ]]; then
-            [[ -d ${HOME}/.zfunctions ]] || mkdir -p "${HOME}/.zfunctions"
             install -Dm644 complete/_rg "${HOME}"/.zfunctions/_rg
         fi
     fi
@@ -482,7 +481,6 @@ function bisharkdp() { (
             cargo build --release --locked || die "cargo build failed"
             cargo install --force --path . || die "cargo install failed"
             if [[ -n ${ZSH_NAME} ]]; then
-                [[ -d ${HOME}/.zfunctions ]] || mkdir -p "${HOME}/.zfunctions"
                 case ${BINARY} in
                     fd) install -Dm644 target/release/build/fd-find-*/out/_fd "${HOME}"/.zfunctions/_fd ;;
                 esac
@@ -591,12 +589,14 @@ function bzsh() { (
 
 # Install Android tools
 function install_android_tools() { (
-    curl -LSso "${HOME}"/usr/bin/repo https://storage.googleapis.com/git-repo-downloads/repo
-    chmod a+x "${HOME}"/usr/bin/repo
+    ANDROID_BIN=${PREFIX:-${HOME}/usr}/bin
+    mkdir -p "${ANDROID_BIN}"
+    curl -LSso "${ANDROID_BIN}"/repo https://storage.googleapis.com/git-repo-downloads/repo
+    chmod a+x "${ANDROID_BIN}"/repo
 
     MKDTIMG_FOLDER=$(mktemp -d)
     curl -LSs https://android.googlesource.com/platform/prebuilts/misc/+archive/master/linux-x86/libufdt.tar.gz | tar -C "${MKDTIMG_FOLDER}" -xzf -
-    cp "${MKDTIMG_FOLDER}"/mkdtimg "${HOME}"/usr/bin
+    cp "${MKDTIMG_FOLDER}"/mkdtimg "${ANDROID_BIN}"
     rm -rf "${MKDTIMG_FOLDER}"
 ); }
 
@@ -607,7 +607,10 @@ function ihub() { (
     curl -LSsO https://github.com/github/hub/releases/download/"${HUB_VERSION}"/"${HUB_TUPLE}".tgz || die "Error downloading hub!"
     tar -xf "${HUB_TUPLE}".tgz || die "Error extracting hub!"
     prefix="${PREFIX:-${HOME}/usr}" ./"${HUB_TUPLE}"/install || die "Error installing hub!"
-    [[ -d ${HOME}/.zfunctions ]] && curl -LSso "${HOME}"/.zfunctions/_hub https://github.com/github/hub/raw/"${HUB_VERSION}"/etc/hub.zsh_completion
+    if [[ -n ${ZSH_NAME} ]]; then
+        mkdir -p "${HOME}"/.zfunctions
+        curl -LSso "${HOME}"/.zfunctions/_hub https://github.com/github/hub/raw/"${HUB_VERSION}"/etc/hub.zsh_completion
+    fi
     rm -rf "${PWD}"
 ); }
 
@@ -636,10 +639,13 @@ function iub4() { (
 ); }
 
 function updbin() { (
+    # git comes first in case we are rebuilding ~/usr from scratch
+    # 'alias git=hub' can cause issues
+    bgit || exit ${?}
+
+    # Everything else is alphabetical
     bccache || exit ${?}
     bcmake || exit ${?}
-    ihub || exit ${?}
-    bgit || exit ${?}
     bmake || exit ${?}
     bninja || exit ${?}
     birg || exit ${?}
