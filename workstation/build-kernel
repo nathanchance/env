@@ -56,90 +56,89 @@ function parse_parameters() {
     START=$(date +%s)
     while ((${#})); do
         case ${1} in
-            # Architecture to build
             "-a" | "--arch")
+                # Architecture to build
                 shift && enforce_value "${@}"
 
                 ARCH=${1}
                 ;;
 
-                # Use Clang for compiling the kernel
             "-c" | "--clang")
-
+                # Use Clang for compiling the kernel
                 CLANG=true
                 ;;
 
-                # Specify which Clang toolchain to use
             "-ct" | "--clang-toolchain")
+                # Specify which Clang toolchain to use
                 shift && enforce_value "${@}"
 
                 CLANG_FOLDER=${1}
                 ;;
 
-                # Config to build
             "-d" | "--defconfig")
+                # Config to build
                 shift && enforce_value "${@}"
 
                 IFS=',' read -r -A DEFCONFIGS <<<"${1}"
                 ;;
 
-                # Show full compilation
             "-D" | "--debug")
+                # Show full compilation
                 VERBOSITY=3
                 ;;
 
-                # Only show errors
             "-e" | "--errors")
+                # Only show errors
                 VERBOSITY=1
                 RG_LOOK_FOR="error:"
                 ;;
 
-                # Kernel folder
             "-f" | "--folder")
+                # Kernel folder
                 shift && enforce_value "${@}"
 
                 FOLDER=${1}
                 ;;
 
-                # Specify which GCC toolchain to use
             "-gt" | "--gcc-toolchain")
+                # Specify which GCC toolchain to use
                 shift && enforce_value "${@}"
 
                 GCC_FOLDER=${1}
                 ;;
 
-                # 32-bit GCC toolchain to use for compiling
             "-gt-32" | "--gcc-32-bit-toolchain")
+                # 32-bit GCC toolchain to use for compiling
                 shift && enforce_value "${@}"
 
                 GCC_32_BIT_FOLDER=${1}
                 ;;
 
-                # Just show if build was successful or not
             "-r" | "--show-only-result")
+                # Just show if build was successful or not
                 SHOW_ONLY_RESULT=true
                 ;;
 
-                # Version to display
             "-v" | "--version-display")
+                # Version to display
                 shift && enforce_value "${@}"
 
                 VERSION_DISPLAY=${1}
                 ;;
 
-                # Show only warnings and errors during compilation
             "-w" | "--warnings")
+                # Show only warnings and errors during compilation
                 VERBOSITY=2
                 RG_LOOK_FOR="error:|warning:"
                 ;;
 
-                # Compile with -Werror
             "-Werror")
+                # Compile with -Werror
                 WERROR=true
                 ;;
 
-                # Disable -Werror
             "-Wno-error")
+                # Disable -Werror
                 NO_WERROR=true
                 ;;
         esac
