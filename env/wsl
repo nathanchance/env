@@ -123,13 +123,6 @@ function bootstrap() { (
     sudo curl -LSo /usr/local/bin/speedtest-cli https://raw.githubusercontent.com/sivel/speedtest-cli/master/speedtest.py
     sudo chmod +x /usr/local/bin/speedtest-cli
 
-    # Install latest version of LLVM/Clang
-    LLVM_SCRIPT=$(mktemp --suffix=.sh) &&
-        chmod +x "${LLVM_SCRIPT}" &&
-        curl -LSso "${LLVM_SCRIPT}" https://apt.llvm.org/llvm.sh &&
-        sudo "${LLVM_SCRIPT}" 11 &&
-        rm "${LLVM_SCRIPT}"
-
     # Setup SSH and GPG if keys are present
     mkdir -p "${HOME}"/.ssh
     cp "${KEYS}"/id_ed25519{,.pub} "${HOME}"/.ssh
