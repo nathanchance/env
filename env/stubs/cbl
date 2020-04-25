@@ -285,7 +285,7 @@ function bldkw() { (
 
     # We are only concerned about little endian for ARM
     if [[ ${TARGET_ARCH} =~ arm ]]; then
-        KCONFIG_ALLCONFIG=${O}/little-endian.config
+        KCONFIG_ALLCONFIG=${BLDKW_O}/little-endian.config
         mkdir -p "${KCONFIG_ALLCONFIG%/*}"
         echo "CONFIG_CPU_BIG_ENDIAN=n" >"${KCONFIG_ALLCONFIG}"
     fi
