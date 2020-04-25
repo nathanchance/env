@@ -428,68 +428,6 @@ ${URL}"
     fi
 ); }
 
-# Update/init qcacld-3.0 tree
-function qcacld() { (
-    REPOS=("fw-api" "qcacld-3.0" "qca-wifi-host-cmn")
-
-    while ((${#})); do
-        case ${1} in
-            -i | --init) INIT=true ;;
-            -t | --tag)
-                shift
-                TAG=${1}
-                ;;
-            -u | --update) UPDATE=true ;;
-        esac
-        shift
-    done
-    [[ -n ${INIT} && -n ${UPDATE} ]] && {
-        display_error "Both init and update were specified!"
-        return
-    }
-
-    case "${PWD}" in
-        *sony*)
-            case "$(make kernelversion)" in
-                4.4*) TAG=aosp/LA.UM.6.4.r1 ;;
-                4.9*) TAG=aosp/LA.UM.7.3.r1 ;;
-            esac
-            URL=https://github.com/sonyxperiadev/vendor-qcom-opensource-wlan-
-            SUBFOLDER=drivers/staging/wlan-qc
-            ;;
-
-        *)
-            URL=https://source.codeaurora.org/quic/la/platform/vendor/qcom-opensource/wlan/
-            SUBFOLDER=drivers/staging
-            ;;
-    esac
-    [[ -z ${TAG} ]] && {
-        display_error "No tag was specified!"
-        return
-    }
-
-    for REPO in "${REPOS[@]}"; do
-        echo "${REPO}"
-        if ! git ls-remote --exit-code "${REPO}" &>/dev/null; then
-            git remote add "${REPO}" "${URL}${REPO}"
-        fi
-        git fetch "${REPO}" "${TAG}"
-        if [[ -n ${INIT} ]]; then
-            if [[ "${PWD}" =~ "sony" ]]; then
-                git rm "${SUBFOLDER}/${REPO}"
-                git ac -m "staging: ${REPO}: Remove submodule reference"
-            fi
-
-            git m --allow-unrelated-histories -s ours --no-commit FETCH_HEAD
-            git read-tree --prefix="${SUBFOLDER}/${REPO}" -u FETCH_HEAD
-            git c --no-edit -m "staging: ${REPO}: Checkout at ${TAG}"
-        elif [[ -n ${UPDATE} ]]; then
-            git m --no-edit -m "staging: ${REPO}: Merge tag '${TAG}' into $(git cb)" \
-                -X subtree="${SUBFOLDER}/${REPO}" FETCH_HEAD
-        fi
-    done
-); }
-
 # Symlink the generic-commands file to all of the android-linux-stable trees for a particular kernel version
 function symlink-commands() { (
     case ${1} in
