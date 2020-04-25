@@ -117,6 +117,7 @@ function partition_and_create_user() { (
     # Update the server
     DEBIAN_FRONTEND=noninteractive apt update
     DEBIAN_FRONTEND=noninteractive apt dist-upgrade -y
+    DEBIAN_FRONTEND=noninteractive apt autoremove -y
 
     # Install tmux so that installation progress cannot be lost
     apt install -y tmux
