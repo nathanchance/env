@@ -31,6 +31,9 @@ function rootstrap() { (
     rm -rf /etc/resolv.conf
     printf 'nameserver 8.8.8.8\n' | tee /etc/resolv.conf
 
+    # Always turn on '--no-install-recommends'
+    apt-config dump | grep -we Recommends -e Suggests | sed 's/1/0/g' | tee /etc/apt/apt.conf.d/999norecommend
+
     # Update and install some necessary packages
     apt update
     apt upgrade -y
@@ -63,7 +66,7 @@ function bootstrap() { (
     [[ -d ${KEYS} ]] || die "Keys are not available"
 
     # Install packages from Ubuntu repos
-    sudo apt install -y --no-install-recommends \
+    sudo apt install -y \
         build-essential \
         bc \
         bison \
