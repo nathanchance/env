@@ -10,23 +10,23 @@
 function parse_parameters() {
     while ((${#})); do
         case ${1} in
-            "-b" | "--branch-name")
+            -b | --branch-name)
                 # Branch name for commit message
                 shift && enforce_value "${@}"
                 BRANCH_NAME=${1}
                 ;;
 
-            "-c" | "--cherry-pick")
+            -c | --cherry-pick)
                 # Use git cherry-pick
                 UPDATE_METHOD=cherry-pick
                 ;;
 
-            "-f" | "--fetch-only")
+            -f | --fetch-only)
                 # Only update the linux-stable remotes
                 FETCH_REMOTES_ONLY=true
                 ;;
 
-            "-h" | "--help")
+            -h | --help)
                 # Help menu
                 echo
                 printf '%bScript description:%b Merges/cherry-picks Linux upstream into a kernel tree\n' "${BOLD}" "${RST}"
@@ -69,34 +69,34 @@ function parse_parameters() {
                 exit 1
                 ;;
 
-            "-i" | "--initial-merge")
+            -i | --initial-merge)
                 # Don't add a log to the commit message
                 INITIAL_MERGE=true
                 ;;
 
-            "-p" | "--print-latest")
+            -p | --print-latest)
                 # Print the latest version from kernel.org
                 PRINT_LATEST=true
                 ;;
 
-            "-q" | "--queue")
+            -q | --queue)
                 # Use the patches from the stable queue
                 QUEUE=true
                 UPDATE_MODE=0
                 ;;
 
-            "-r" | "--release-candidate")
+            -r | --release-candidate)
                 # Use the RC tree for updating
                 RC=true
                 UPDATE_MODE=0
                 ;;
 
-            "-s" | "--single-version")
+            -s | --single-version)
                 # Update to the next available version from kernel.org
                 UPDATE_MODE=0
                 ;;
 
-            "-t" | "--tag")
+            -t | --tag)
                 # Pulls the requested tag from Sasha Levin's linux-stable repo
                 shift
                 [[ ${#} -lt 1 ]] && die "Please specify a version to update!"
@@ -105,7 +105,7 @@ function parse_parameters() {
                 UPDATE_METHOD=tag
                 ;;
 
-            "-v" | "--version")
+            -v | --version)
                 # Update to the specified version
                 shift
                 [[ ${#} -lt 1 ]] && die "Please specify a version to update!"
@@ -338,9 +338,9 @@ function pl_tag() {
 
 function update_tree() {
     case ${UPDATE_METHOD} in
-        "cherry-pick") cp_target_version ;;
-        "merge") mg_target_version ;;
-        "tag") pl_tag ;;
+        cherry-pick) cp_target_version ;;
+        merge) mg_target_version ;;
+        tag) pl_tag ;;
     esac
     pre_exit_commands
     exit 0
