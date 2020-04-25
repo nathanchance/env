@@ -297,11 +297,11 @@ function bldkw() { (
 
     if [[ ${Q:=1} -ne 2 ]]; then
         echo
-        echo "${BOLD}LLVM location:${RST} $(dirname "$(command -v clang)")"
+        printf '%bLLVM location:%b %s\n' "${BOLD}" "${RST}" "$(dirname "$(command -v clang)")"
         echo
         clang --version | head -n1
         echo
-        echo "${BOLD}binutils location:${RST} $(dirname "$(command -v "${CROSS_COMPILE}"as)")"
+        printf '%bbinutils location:%b %s\n' "${BOLD}" "${RST}" "$(dirname "$(command -v "${CROSS_COMPILE}"as)")"
         echo
         "${CROSS_COMPILE}"as --version | head -n1
         echo
@@ -653,24 +653,24 @@ function lt() { (
             COLOR=${RED}
             LT_RESULT=failed
         fi
-        echo "${COLOR}Build ${LT_RESULT}${RST}"
+        printf '%bBuild %s%b\n' "${COLOR}" "${LT_RESULT}" "${RST}"
         {
-            echo "${ARCH}:${CONFIG}$(${BFD} && echo "-bfd") | Build ${LT_RESULT} in $(format_time "${START}" "$(date +%s)")\c"
+            printf '%s:%s | Build %s in %s' "${ARCH}" "${CONFIG}$(${BFD} && echo -bfd)" "${LT_RESULT}" "$(format_time "${START}" "$(date +%s)")"
             case ${ARCH} in
                 riscv64 | s390x) BOOT=false ;;
                 *) BOOT=true ;;
             esac
             if ${BOOT} && [[ ${LT_RESULT} = "successful" && ${CONFIG} =~ defconfig ]]; then
                 if O=${KBF}/${ARCH} bootk "${ARCH}" &>/dev/null; then
-                    echo " | Boot successful\c"
+                    printf " | Boot successful"
                 else
-                    echo " | Boot failed\c"
+                    printf " | Boot failed"
                 fi
             fi
-            echo
+            printf '\n'
             [[ -z ${DEBUG} && (-n ${SHOW_NF_WARNINGS} || ${LT_RESULT} = "failed") ]] &&
                 rg --color=never "error:|warning:|undefined" "${WARNING_LOG}" | sed "s/${PWD//\//\\/}\///g"
-            echo
+            printf '\n'
         } >>"${LOG}"
     ); done
 
@@ -964,7 +964,7 @@ function kct() { (
                 BUILD_COLOR=${RED}
                 BUILD_RESULT=failed
             fi
-            echo "${BUILD_COLOR}Build ${BUILD_RESULT}${RST}"
+            printf '%bBuild %s%b\n' "${BUILD_COLOR}" "${BUILD_RESULT}" "${RST}"
             TIME_STRING=$(format_time "${START}" "$(date +%s)")
 
             # Boot Cuttlefish for x86
@@ -977,7 +977,7 @@ function kct() { (
                     BOOT_RESULT=failed
                     [[ "${ARCH}-${VERSION}" = "x86-4.19" ]] && BOOT_RESULT="failed (expected)"
                 fi
-                echo "${BOOT_COLOR}Boot ${BOOT_RESULT}${RST}"
+                printf '%bBoot %s%b\n' "${BOOT_COLOR}" "${BOOT_RESULT}" "${RST}"
                 BOOT_RESULT=" | Boot ${BOOT_RESULT}"
             fi
 
