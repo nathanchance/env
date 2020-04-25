@@ -72,15 +72,15 @@ function post_merge_commands() {
 
     # Get the appropriate resolution command filename (static mapping because it is not uniform)
     case "${REPO}:${BRANCH}" in
-        "bluecross"* | "msm"* | "wahoo"*) COMMANDS="${REPO}-commands" ;;
-        "nash:lineage-17.1") COMMANDS="nash-lineage-17.1-commands" ;;
-        "nash:oreo-8.0.0-release-nash") COMMANDS="nash-oreo-8.0.0-commands" ;;
-        "op5:oneplus/QC8998_O_8.1" | "op6:oneplus/SDM845_O_8.1") COMMANDS="${REPO}-O_8.1-commands" ;;
-        "op5:oneplus/QC8998_P_9.0" | "op6:oneplus/SDM845_P_9.0") COMMANDS="${REPO}-P_9.0-commands" ;;
-        "op6:oneplus/SDM845_Q_10.0") COMMANDS="${REPO}-Q_10.0-commands" ;;
-        "op5:oneplus/QC8998_O_8.1_Beta") COMMANDS="${REPO}-O_8.1_Beta-commands" ;;
-        "op5:oneplus/QC8998_P_9.0_Beta" | "op6:oneplus/SDM845_P_9.0_Beta") COMMANDS="${REPO}-P_9.0_Beta-commands" ;;
-        "op"*) COMMANDS="${REPO}-${BRANCH}-commands" ;;
+        bluecross* | msm* | wahoo*) COMMANDS="${REPO}-commands" ;;
+        nash:lineage-17.1) COMMANDS="nash-lineage-17.1-commands" ;;
+        nash:oreo-8.0.0-release-nash) COMMANDS="nash-oreo-8.0.0-commands" ;;
+        op5:oneplus/QC8998_O_8.1 | op6:oneplus/SDM845_O_8.1) COMMANDS="${REPO}-O_8.1-commands" ;;
+        op5:oneplus/QC8998_P_9.0 | op6:oneplus/SDM845_P_9.0) COMMANDS="${REPO}-P_9.0-commands" ;;
+        op6:oneplus/SDM845_Q_10.0) COMMANDS="${REPO}-Q_10.0-commands" ;;
+        op5:oneplus/QC8998_O_8.1_Beta) COMMANDS="${REPO}-O_8.1_Beta-commands" ;;
+        op5:oneplus/QC8998_P_9.0_Beta | op6:oneplus/SDM845_P_9.0_Beta) COMMANDS="${REPO}-P_9.0_Beta-commands" ;;
+        op*) COMMANDS="${REPO}-${BRANCH}-commands" ;;
     esac
 
     # If it is found, execute it
@@ -121,39 +121,39 @@ REPOS_414=("msm-4.14")
 PARAMS="${*}"
 while ((${#})); do
     case ${1} in
-        "-b" | "--build")
+        -b | --build)
             # Build after merging
             BUILD=true
             ;;
 
-        "-d" | "--dry-run")
+        -d | --dry-run)
             # Don't resolve conflicts
             DRY_RUN=true
             ;;
 
-        "-i" | "--initialize")
+        -i | --initialize)
             INIT=true
             ;;
 
-        "-q" | "--queue")
+        -q | --queue)
             # Merge from stable-queue
             ALS_PARAMS+=("-q")
             NO_PUSH=true
             QUEUE=true
             ;;
 
-        "-R" | "--repos")
+        -R | --repos)
             # Subset of repos (implies -v has been set)
             shift && enforce_value "${@}"
             read -r -A REPOS_PARAM <<<"${1}"
             ;;
 
-        "-s" | "--skip-merging")
+        -s | --skip-merging)
             # Skip merging (usual if wanting to build only)
             SKIP_MERGE=true
             ;;
 
-        "-t" | "--tag")
+        -t | --tag)
             # Pull a pending stable tag from Sasha Levin
             shift && enforce_value "${@}"
             ALS_PARAMS+=("-t" "${1}")
@@ -161,14 +161,14 @@ while ((${#})); do
             TAG_SUFFIX=${1}
             ;;
 
-        "-r" | "--release-candidate")
+        -r | --release-candidate)
             # Merge from linux-stable-rc
             ALS_PARAMS+=("-r")
             NO_PUSH=true
             RC=true
             ;;
 
-        "-v" | "--versions")
+        -v | --versions)
             # Versions to merge, separated by commas
             shift && enforce_value "${@}"
             [[ ${1} =~ 4.4 || ${1} =~ 4.9 || ${1} =~ 4.14 ]] || die "Invalid version specified!"
@@ -189,24 +189,24 @@ if [[ -n ${INIT} ]]; then
     for ITEM in "${REPOS_44[@]}" "${REPOS_49[@]}" "${REPOS_414[@]}"; do
         git clone "git@github.com:android-linux-stable/${ITEM}.git" || die "Could not clone ${ITEM}!"
         case ${ITEM} in
-            "jasmine" | "polaris" | "sagit" | "whyred")
+            jasmine | polaris | sagit | whyred)
                 REMOTES=("upstream:https://github.com/MiCode/Xiaomi_Kernel_OpenSource")
                 ;;
-            "wahoo" | "bluecross")
+            wahoo | bluecross)
                 REMOTES=("upstream:https://android.googlesource.com/kernel/msm")
                 ;;
-            "msm-4.4" | "msm-4.9" | "msm-4.14")
+            msm-4.4 | msm-4.9 | msm-4.14)
                 REMOTES=("upstream:https://source.codeaurora.org/quic/la/kernel/${ITEM}")
                 ;;
-            "nash")
+            nash)
                 REMOTES=("LineageOS:https://github.com/LineageOS/android_kernel_motorola_msm8998"
                     "upstream:https://github.com/MotorolaMobilityLLC/kernel-msm")
                 ;;
-            "op5")
+            op5)
                 REMOTES=("LineageOS:https://github.com/LineageOS/android_kernel_oneplus_msm8998"
                     "upstream:https://github.com/OnePlusOSS/android_kernel_oneplus_msm8998")
                 ;;
-            "op6")
+            op6)
                 REMOTES=("LineageOS:https://github.com/LineageOS/android_kernel_oneplus_sdm845"
                     "upstream:https://github.com/OnePlusOSS/android_kernel_oneplus_sdm845")
                 (cd "${ITEM}" && git clone -b oneplus/SDM845_Q_10.0 git://github.com/OnePlusOSS/android_vendor_oneplus_opensource_kernel drivers/oneplus)
@@ -227,9 +227,9 @@ for VERSION in "${VERSIONS[@]}"; do
     # Set up repos variable based on version if REPOS is not set
     if [[ -z "${REPOS_PARAM[*]}" ]]; then
         case ${VERSION} in
-            "4.4") REPOS=("${REPOS_44[@]}") ;;
-            "4.9") REPOS=("${REPOS_49[@]}") ;;
-            "4.14") REPOS=("${REPOS_414[@]}") ;;
+            4.4) REPOS=("${REPOS_44[@]}") ;;
+            4.9) REPOS=("${REPOS_49[@]}") ;;
+            4.14) REPOS=("${REPOS_414[@]}") ;;
         esac
     else
         REPOS=("${REPOS_PARAM[@]}")
@@ -239,14 +239,14 @@ for VERSION in "${VERSIONS[@]}"; do
     for REPO in "${REPOS[@]}"; do
         # Map all of the branches of the repo to an upstream remote (if relevant)
         case ${REPO} in
-            "bluecross") BRANCHES=("android-msm-bluecross-4.9") ;;
-            "msm-4.4") BRANCHES=("kernel.lnx.4.4.r34-rel" "kernel.lnx.4.4.r37-rel" "kernel.lnx.4.4.r38-rel" "kernel.lnx.4.4.r39-rel" "kernel.lnx.4.4.r40-rel") ;;
-            "msm-4.9") BRANCHES=("kernel.lnx.4.9.r11-rel" "kernel.lnx.4.9.r12-rel" "kernel.lnx.4.9.r25-rel" "kernel.lnx.4.9.r27-rel") ;;
-            "msm-4.14") BRANCHES=("kernel.lnx.4.14.r1" "kernel.lnx.4.14.r3-rel" "kernel.lnx.4.14.r4-rel" "kernel.lnx.4.14.r7-rel") ;;
-            "nash") BRANCHES=("lineage-17.1:LineageOS") ;;
-            "op5") BRANCHES=("lineage-17.1:LineageOS" "oneplus/QC8998_P_9.0:upstream" "oneplus/QC8998_P_9.0_Beta:upstream") ;;
-            "op6") BRANCHES=("oneplus/SDM845_Q_10.0:upstream") ;;
-            "wahoo") BRANCHES=("android-msm-wahoo-4.4") ;;
+            bluecross) BRANCHES=("android-msm-bluecross-4.9") ;;
+            msm-4.4) BRANCHES=("kernel.lnx.4.4.r34-rel" "kernel.lnx.4.4.r37-rel" "kernel.lnx.4.4.r38-rel" "kernel.lnx.4.4.r39-rel" "kernel.lnx.4.4.r40-rel") ;;
+            msm-4.9) BRANCHES=("kernel.lnx.4.9.r11-rel" "kernel.lnx.4.9.r12-rel" "kernel.lnx.4.9.r25-rel" "kernel.lnx.4.9.r27-rel") ;;
+            msm-4.14) BRANCHES=("kernel.lnx.4.14.r1" "kernel.lnx.4.14.r3-rel" "kernel.lnx.4.14.r4-rel" "kernel.lnx.4.14.r7-rel") ;;
+            nash) BRANCHES=("lineage-17.1:LineageOS") ;;
+            op5) BRANCHES=("lineage-17.1:LineageOS" "oneplus/QC8998_P_9.0:upstream" "oneplus/QC8998_P_9.0_Beta:upstream") ;;
+            op6) BRANCHES=("oneplus/SDM845_Q_10.0:upstream") ;;
+            wahoo) BRANCHES=("android-msm-wahoo-4.4") ;;
         esac
 
         # Move into the repo, unless it doesn't exist
