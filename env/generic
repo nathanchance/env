@@ -91,12 +91,20 @@ function bootstrap() { (
     [[ -d ${SCRIPTS} ]] || { git clone https://github.com/nathanchance/scripts "${SCRIPTS}" || die "Error cloning scripts!"; }
     git -C "${SCRIPTS}" pull --rebase || die "Error updating script!"
     source "${SCRIPTS}"/env/stubs/setup && global_gitignore && create_zshrc
-    source "${SCRIPTS}"/env/stubs/updbin && { (updbin && bqemu && install_android_tools) || exit ${?}; }
+    SCRIPTS_FOLDER=${SCRIPTS} rbld_usr || exit ${?}
     path_push "${HOME}/usr/bin"
     source "${SCRIPTS}"/env/stubs/git && git_setup
     source "${SCRIPTS}"/env/stubs/zsh && setup_zsh_env
     zsh "${SCRIPTS}"/configs/common/vim/vim_setup.sh
     ln -fs "${SCRIPTS}"/configs/workstation/.tmux.conf "${HOME}"/.tmux.conf
+); }
+
+function rbld_usr() { (
+    source "${SCRIPTS_FOLDER:?}"/env/stubs/updbin || die "Cannot source updbin"
+    rm -rf "${HOME:?}"/usr
+    updbin || die "updbin failed"
+    bqemu || die "bqemu failed"
+    install_android_tools || die "install_android_tools failed"
 ); }
 
 function generic_aliases() {
