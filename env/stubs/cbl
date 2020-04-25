@@ -74,7 +74,7 @@ function ptchmn() { (
     [[ ! -d ${TARGET_FOLDER} ]] && die "${TARGET_FOLDER} doesn't exist!"
 
     case "${1:?}" in
-        "-s" | "--sync")
+        -s | --sync)
             case ${REPO} in
                 linux | linux-next) ;;
                 *) die "${REPO} not supported by ptchmn!" ;;
@@ -94,7 +94,7 @@ function ptchmn() { (
             git -C "${TARGET_FOLDER}" push
             ;;
 
-        "-a" | "--apply")
+        -a | --apply)
             git am "${TARGET_FOLDER}"/*
             ;;
     esac
@@ -141,9 +141,9 @@ function ccache_call() {
 function ccache_for_all() { (
     while ((${#})); do
         case ${1} in
-            "binutils" | "kernel" | "llvm") CCACHE_DIR="${CBL_CCACHE}"/${1} ;;
-            "clear") CCACHE_OPTS=(--clear --zero-stats) ;;
-            "stats") CCACHE_OPTS=(--show-stats) ;;
+            binutils | kernel | llvm) CCACHE_DIR="${CBL_CCACHE}"/${1} ;;
+            clear) CCACHE_OPTS=(--clear --zero-stats) ;;
+            stats) CCACHE_OPTS=(--show-stats) ;;
         esac
         shift
     done
@@ -173,7 +173,7 @@ function ccache_clear() { (
 function ccache_size() {
     while ((${#})); do
         case ${1} in
-            "binutils" | "kernel" | "llvm") CCACHE_DIR="${CBL_CCACHE}"/${1} ;;
+            binutils | kernel | llvm) CCACHE_DIR="${CBL_CCACHE}"/${1} ;;
             *) SIZE=${1} ;;
         esac
         shift
@@ -1135,8 +1135,8 @@ function qualify_tc_bld_uprev() { (
 function upd_lnx_tcbld() { (
     while ((${#})); do
         case ${1} in
-            "-p" | "--personal") MODE=personal ;;
-            "-r" | "--release") MODE=release ;;
+            -p | --personal) MODE=personal ;;
+            -r | --release) MODE=release ;;
         esac
         shift
     done
@@ -1148,13 +1148,13 @@ function upd_lnx_tcbld() { (
     KVER=$(git describe --abbrev=0 origin/master | sed 's/v//')
 
     case ${MODE} in
-        "personal")
+        personal)
             BPREFIX=pgo
             KERNEL=${HOME}/cbl/tc-build/kernel
             TAR_EXT=gz
             URL=https://git.kernel.org/torvalds/t
             ;;
-        "release")
+        release)
             BPREFIX=v${KVER}-pgo
             KERNEL=${HOME}/cbl/git/tc-build/kernel
             TAR_EXT=xz
