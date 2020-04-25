@@ -4,7 +4,6 @@
 #
 # Helper functions
 
-
 ###############
 #             #
 #  VARIABLES  #
@@ -32,7 +31,6 @@ JOBS_FLAG="-j${THREADS}"
 
 export THREADS JOBS_FLAG
 
-
 ###############
 #             #
 #  FUNCTIONS  #
@@ -44,13 +42,11 @@ function echo() {
     command echo -e "${@}"
 }
 
-
 # Prints a formatted header to point out what is being done to the user
 function header() {
     BORDER="====$(for _ in $(seq ${#1}); do printf '='; done)===="
     printf '\n%b%s\n%s\n%s%b\n\n' "${2:-${BLUE}}" "${BORDER}" "==  ${1}  ==" "${BORDER}" "${RST}"
 }
-
 
 # Formats the time
 function format_time() {
@@ -87,12 +83,10 @@ function format_time() {
     echo "${TIME_STRING}"
 }
 
-
 # Prints an error in bold red
 function display_error() {
     printf '\n%b%s%b\n\n' "${COLOR:-${RED}}" "${1}" "${RST}"
 }
-
 
 # Prints an error in bold red and exits the script
 function die() {
@@ -105,7 +99,7 @@ function die() {
             echo "\`\`\`"
             echo "${*}"
             echo "\`\`\`"
-        } > "${TMP_FILE}"
+        } >"${TMP_FILE}"
         tg_msg "$(cat "${TMP_FILE}")"
         rm -f "${TMP_FILE}"
     fi
@@ -115,18 +109,15 @@ function die() {
     builtin exit 1
 }
 
-
 # Prints a warning in bold yellow
 function warn() {
     COLOR=${YLW} display_error "${@}"
 }
 
-
 # Enforces the value needed for two-part flags
 function enforce_value() {
     [[ ${#} -lt 1 ]] && die "A additional value is needed for one of the flags passed to this script!"
 }
-
 
 # Add a remote if it doesn't exist
 function add_remote() {
@@ -135,34 +126,29 @@ function add_remote() {
     fi
 }
 
-
 # Convert a file location to web link
 function web_link() {
     echo "${1}" | sed s/"$(echo "${WEB_FOLDER:?}" | sed 's/\//\\\//g')"/https:\\/\\/nathanchance.me/
 }
 
-
 # Set up a virtual environment for Python
-function mkavenv {
+function mkavenv() {
     command -v virtualenv2 &>/dev/null || return
     virtualenv2 "${MAIN_FOLDER:?}/venv"
     source "${MAIN_FOLDER}/venv/bin/activate"
 }
 
-
 # Remove virtual environment
-function rmvenv {
+function rmvenv() {
     command -v deactivate &>/dev/null || return
     deactivate
     rm -rf "${MAIN_FOLDER:?}/venv"
 }
 
-
 # Source Telegram bot information
 function load_botinfo() {
     [[ -f ${MAIN_FOLDER:?}/.botinfo ]] && source "${MAIN_FOLDER}"/.botinfo
 }
-
 
 # Telegram notifier function
 function tg_msg() {
@@ -183,15 +169,16 @@ function tg_msg() {
     fi
 
     curl -s -X POST https://api.telegram.org/bot"${TOKEN}"/sendMessage \
-            -d chat_id="${CHAT_ID}" \
-            -d parse_mode="Markdown" \
-            -d text="${*}" 1>/dev/null
+        -d chat_id="${CHAT_ID}" \
+        -d parse_mode="Markdown" \
+        -d text="${*}" 1>/dev/null
 }
-
 
 # Telegram uploader function
 function tg_upload() {
-    local FILE; FILE=${1}; shift
+    local FILE
+    FILE=${1}
+    shift
 
     if [[ -z ${TOKEN} ]]; then
         display_error "tg_upload() was called but there was no token!"
@@ -208,24 +195,34 @@ function tg_upload() {
         return 1
     fi
 
-    curl -s -F chat_id="${CHAT_ID}" \
-            -F document=@"${FILE}" \
-            -F caption="${*}" \
-            -X POST https://api.telegram.org/bot"${TOKEN}"/sendDocument 1>/dev/null
+    curl \
+        -s \
+        -F chat_id="${CHAT_ID}" \
+        -F document=@"${FILE}" \
+        -F caption="${*}" \
+        -X POST https://api.telegram.org/bot"${TOKEN}"/sendDocument 1>/dev/null
 }
-
 
 # Remove URLs from Clang version
 function clang_version() {
-    [[ ${#} -lt 1 ]] && { display_error "This function takes an argument!"; return; }
+    [[ ${#} -lt 1 ]] && {
+        display_error "This function takes an argument!"
+        return
+    }
 
     local CLANG POS
     CLANG=${1}
     if [[ $(basename "${CLANG}") != "clang" ]]; then
         CLANG=$(find "${CLANG}" -name clang | head -n1)
-        [[ -z ${CLANG} ]] && { display_error "You didn't supply a Clang folder/binary!"; return; }
+        [[ -z ${CLANG} ]] && {
+            display_error "You didn't supply a Clang folder/binary!"
+            return
+        }
     else
-        [[ ! -f ${CLANG} ]] && { display_error "Clang binary supplied doesn't exist!"; return; }
+        [[ ! -f ${CLANG} ]] && {
+            display_error "Clang binary supplied doesn't exist!"
+            return
+        }
     fi
 
     case "${CLANG}" in
@@ -234,7 +231,6 @@ function clang_version() {
     esac
     "${CLANG}" --version | head -n 1 | cut -d \( -f "${POS}" | sed 's/[[:space:]]*$//' || display_error "Something went wrong!"
 }
-
 
 # Is GPG passphrase cached?
 # https://demu.red/blog/2016/06/how-to-check-if-your-gpg-key-is-in-cache/
@@ -245,58 +241,57 @@ function gpg_key_cached() {
     fi
 }
 
-
 # Check if my GPG key can be used
 function gpg_key_usable() {
     command -v gpg &>/dev/null || return 1
     gpg --list-secret-keys --keyid-format LONG | grep -q 2437CB76E544CB6AB3D9DFD399739260CB6CB716
 }
 
-
 # ripgrep wrapper
 function rg() {
     # Bail out if rg is not installed
-    command -v rg &>/dev/null || { warn "ripgrep is not installed!"; return; }
+    command -v rg &>/dev/null || {
+        warn "ripgrep is not installed!"
+        return
+    }
 
     # Colors match ag
-    command rg --colors "path:fg:green" \
-               --colors "path:style:bold" \
-               --colors "line:fg:yellow" \
-               --colors "line:style:bold" \
-               --colors "column:fg:yellow" \
-               --colors "column:style:bold" \
-               --colors "match:fg:black" \
-               --colors "match:bg:yellow" \
-               "${@}"
+    command rg \
+        --colors "path:fg:green" \
+        --colors "path:style:bold" \
+        --colors "line:fg:yellow" \
+        --colors "line:style:bold" \
+        --colors "column:fg:yellow" \
+        --colors "column:style:bold" \
+        --colors "match:fg:black" \
+        --colors "match:bg:yellow" \
+        "${@}"
 }
-
 
 # Add something to the end of PATH if it isn't already there
 function add_to_path_post() {
     local ARRAY ITEM
-    IFS=: read -rA ARRAY <<< "${1}"
+    IFS=: read -rA ARRAY <<<"${1}"
     for ITEM in $(printf '%s\n' "${ARRAY[@]}" | tac); do
         [[ -d ${ITEM} ]] || continue
         echo "${PATH}" | grep -s -q "${ITEM}" || export PATH="${PATH}:${ITEM}"
     done
 }
 
-
 # Does the same thing as add_to_path_pre but doesn't check if item exists or not
 function move_to_front_of_path() {
     local ARRAY ITEM
-    IFS=: read -rA ARRAY <<< "${1}"
+    IFS=: read -rA ARRAY <<<"${1}"
     for ITEM in $(printf '%s\n' "${ARRAY[@]}" | tac); do
         [[ -d ${ITEM} ]] || continue
-        export PATH="${ITEM}:${PATH//${ITEM}:}"
+        export PATH="${ITEM}:${PATH//${ITEM}:/}"
     done
 }
-
 
 # Add something to the beginning of PATH if it isn't already there
 function add_to_path_pre() {
     local ARRAY ITEM
-    IFS=: read -rA ARRAY <<< "${1}"
+    IFS=: read -rA ARRAY <<<"${1}"
     for ITEM in $(printf '%s\n' "${ARRAY[@]}" | tac); do
         [[ -d ${ITEM} ]] || continue
         echo "${PATH}" | grep -s -q "${ITEM}" || export PATH="${ITEM}:${PATH}"
@@ -305,39 +300,34 @@ function add_to_path_pre() {
 # Easy alias
 function path_push() { add_to_path_pre "${@}"; }
 
-
 # Delete the first folder in PATH
 function path_pop() {
     export PATH=${PATH#*:}
 }
 
-
 # Set common architecture variable
-function get_arch() {(
+function get_arch() { (
     case "$(uname -m)" in
         "aarch64") echo "arm64" ;;
         "x86_64") echo "amd64" ;;
         *) exit 1 ;;
     esac
-)}
-
+); }
 
 # Get latest release of a GitHub project
-function glr() {(
+function glr() { (
     curl --silent "https://api.github.com/repos/${1:?}/releases/latest" | jq -r .tag_name
-)}
-
+); }
 
 # Only use sudo if needed
-function sudo_wrapper() {(
+function sudo_wrapper() { (
     if [[ $(id -u) -eq 0 ]]; then
         "${@}"
     else
         command -v sudo &>/dev/null || exit ${?}
         sudo "${@}"
     fi
-)}
-
+); }
 
 # Function for parsing os-release
 function get_distro() {
@@ -349,25 +339,24 @@ function get_distro() {
     esac
 }
 
-
 # Common ccache variable
-CCACHE=$(path_push "${HOME}/usr/bin"; command -v ccache)
+CCACHE=$(
+    path_push "${HOME}/usr/bin"
+    command -v ccache
+)
 export CCACHE
 
-
 # Decrypt gpg signed file
-function decrypt_gpg_file() {(
+function decrypt_gpg_file() { (
     [[ -z ${SCRIPTS_FOLDER} && -z ${SCRIPTS} ]] && die "Scripts folder cannot be found!"
     [[ -z ${SCRIPTS_FOLDER} ]] && SCRIPTS_FOLDER=${SCRIPTS}
     gpg --batch --yes --pinentry-mode loopback --output "${HOME}"/."${1:?}" --decrypt "${SCRIPTS_FOLDER:?}"/configs/common/"${1}".gpg
-)}
+); }
 
 # Update server_ip file from scripts folder
 function decrypt_serv_ip() { decrypt_gpg_file server_ip; }
 
-
 # Update del_dog_api_key file from scripts folder
 function decrypt_del_dog_api_key() { decrypt_gpg_file del_dog_api_key; }
-
 
 # vi: filetype=zsh
