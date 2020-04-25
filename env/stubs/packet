@@ -111,9 +111,12 @@ function partition_and_create_user() { (
     # Always turn on '--no-install-recommends'
     apt-config dump | grep -we Recommends -e Suggests | sed 's/1/0/g' | tee /etc/apt/apt.conf.d/999norecommend
 
+    # We want Ubuntu Focal if on Ubuntu Bionic
+    sed -i 's/bionic/focal/g' /etc/apt/sources.list
+
     # Update the server
     DEBIAN_FRONTEND=noninteractive apt update
-    DEBIAN_FRONTEND=noninteractive apt upgrade -y
+    DEBIAN_FRONTEND=noninteractive apt dist-upgrade -y
 
     # Install tmux so that installation progress cannot be lost
     apt install -y tmux
