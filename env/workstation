@@ -391,22 +391,6 @@ function workstation_setup() {
     (gpg_key_cached)
 }
 
-# Neofetch alias
-function nf() {
-    echo
-    neofetch \
-        --kernel_shorthand on \
-        --distro_shorthand tiny \
-        --os_arch off \
-        --uptime_shorthand tiny \
-        --speed_shorthand on \
-        --install_time off \
-        --color_blocks off \
-        "${@}"
-    echo
-    echo
-}
-
 # Update all remotes and run git gc/prune
 function clean-kernels() { (
     for REPO in "${ALS}"/* "${CBL}"/linux*; do
