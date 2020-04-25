@@ -37,11 +37,6 @@ export THREADS JOBS_FLAG
 #             #
 ###############
 
-# Alias for echo to print escape codes
-function echo() {
-    command echo -e "${@}"
-}
-
 # Prints a formatted header to point out what is being done to the user
 function header() {
     BORDER="====$(for _ in $(seq ${#1}); do printf '='; done)===="
