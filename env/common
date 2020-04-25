@@ -197,7 +197,10 @@ function upd_website() { (
 
 # Run shfmt on all shell files in the repo (assuming they end with .sh)
 function fdshfmt() { (
-    fd -e sh -x shfmt -ci -i 4 -w
+    case ${PWD##*/} in
+        scripts) fd -t x -E windows -x shfmt -ci -i 4 -w ;;
+        *) fd -e sh -x shfmt -ci -i 4 -w ;;
+    esac
 ); }
 
 # Update function
