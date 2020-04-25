@@ -623,7 +623,17 @@ function ihub() { (
     rm -rf "${PWD}"
 ); }
 
-# Install prebuilt shfmt
+# Install shellcheck
+function ishellcheck() { (
+    SHCHK_REPO=koalaman/shellcheck
+    [[ -z ${SHELLCHECK_VERSION} ]] && SHELLCHECK_VERSION=$(glr "${SHCHK_REPO}")
+    SHCHK_FOLDER=$(mktemp -d)/shellcheck-v"${SHELLCHECK_VERSION//v/}"
+    curl -LSs https://github.com/"${SHCHK_REPO}"/releases/download/"${SHELLCHECK_VERSION}"/"${SHCHK_FOLDER##*/}".linux.x86_64.tar.xz | tar -C "${SHCHK_FOLDER%/*}" -xJf - || exit ${?}
+    install -Dm755 "${SHCHK_FOLDER}"/shellcheck "${PREFIX:-${HOME}/usr}"/bin/shellcheck || exit ${?}
+    rm -rf "${SHCHK_FOLDER%/*}"
+); }
+
+# Install shfmt
 function ishfmt() { (
     [[ -z ${SHFMT_VERSION} ]] && SHFMT_VERSION=$(glr "mvdan/sh")
     BIN_FOLDER=${PREFIX:-${HOME}/usr}/bin
