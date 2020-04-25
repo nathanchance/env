@@ -142,7 +142,11 @@ function partition_and_create_user() { (
         echo "${USER}:${PASSWORD}" | chpasswd
         cp -rv /root/.ssh /home/"${USER}"
         chown -R "${USER}:${USER}" /home/"${USER}"/.ssh
-        [[ -f /home/${USER]/.zshrc ]] || echo "tmux new-session -ADs main" > /home/"${USER}"/.zshrc
+        ZSHRC=/home/${USER}/.zshrc
+        if ! grep -q shell_setup "${ZSHRC}"; then
+            echo "[[ -z \${TMUX} ]] && tmux new-session -ADs main" >"${ZSHRC}"
+            chown -R "${USER}:${USER}" "${ZSHRC}"
+        fi
     fi
     return 0
 ); }
