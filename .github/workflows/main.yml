@@ -1,0 +1,18 @@
+# Run shellcheck and shfmt on all shell files in this repository
+name: scripts-action
+on: [push, pull_request]
+jobs:
+  shellcheck-shfmt:
+    runs-on: ubuntu-latest
+    name: 'shellcheck and shfmt'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: shellcheck
+        uses: ./ci
+        with:
+          check: 'shellcheck'
+      - name: shfmt
+        uses: ./ci
+        with:
+          check: 'shfmt'

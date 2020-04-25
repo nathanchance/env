@@ -1,0 +1,10 @@
+name: 'Run shellcheck and shfmt in Docker'
+inputs:
+  check:
+    description: 'Which check to run'
+    required: true
+runs:
+  using: docker
+  image: Dockerfile
+  args:
+    - ${{ inputs.check }}
