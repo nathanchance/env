@@ -103,7 +103,5 @@ function generic_aliases() {
     alias ls='ls --color=auto'
 }
 
-function generic_setup() {
-    path_push "${HOME}"/usr/go/bin
-}
+function generic_setup() { true; }
 # vi: filetype=zsh
