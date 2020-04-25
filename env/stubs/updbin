@@ -4,12 +4,11 @@
 #
 # Functions to build the latest versions of certain pieces of software
 
-
 # Build/update ccache
-function bccache() {(
+function bccache() { (
     CCACHE_REPO=ccache/ccache
     [[ -z ${CCACHE_VERSION} ]] && CCACHE_VERSION=$(glr "${CCACHE_REPO}")
-    CCACHE_FOLDER=ccache-${CCACHE_VERSION//v}
+    CCACHE_FOLDER=ccache-${CCACHE_VERSION//v/}
     TMP_FOLDER=$(mktemp -d)
     cd "${TMP_FOLDER}"
     curl -LSs https://github.com/"${CCACHE_REPO}"/releases/download/"${CCACHE_VERSION}"/"${CCACHE_FOLDER}".tar.gz | tar -xzf -
@@ -22,22 +21,22 @@ function bccache() {(
     move_to_front_of_path "${CCACHE_PREFIX}"/bin
     command -v ccache
     ccache --version
-)}
-
+); }
 
 # Build/update cmake
-function bcmake() {(
+function bcmake() { (
     CMAKE_REPO=Kitware/CMake
     [[ -z ${CMAKE_VERSION} ]] && CMAKE_VERSION=$(glr "${CMAKE_REPO}")
-    CMAKE_FOLDER=cmake-${CMAKE_VERSION//v}
+    CMAKE_FOLDER=cmake-${CMAKE_VERSION//v/}
     TMP_FOLDER=$(mktemp -d)
 
     cd "${TMP_FOLDER}"
     curl -LSs https://github.com/"${CMAKE_REPO}"/releases/download/"${CMAKE_VERSION}"/"${CMAKE_FOLDER}".tar.gz | tar -xzf -
     cd "${CMAKE_FOLDER}" || die "Downloading or extracting cmake failed"
 
-    ./bootstrap --parallel="${THREADS:-$(nproc)}" \
-                --prefix="${CMAKE_PREFIX:=${PREFIX:-${HOME}/usr}}"
+    ./bootstrap \
+        --parallel="${THREADS:-$(nproc)}" \
+        --prefix="${CMAKE_PREFIX:=${PREFIX:-${HOME}/usr}}"
 
     make "${JOBS_FLAG:--j"$(nproc)"}" || die "make failed"
     make install || die "install failed"
@@ -47,11 +46,10 @@ function bcmake() {(
     move_to_front_of_path "${CMAKE_PREFIX}"/bin
     command -v cmake
     cmake --version
-)}
-
+); }
 
 # Build/update cuttlefish tools
-function bcttlfshtools() {(
+function bcttlfshtools() { (
     TMP_FOLDER=$(mktemp -d)
     cd "${TMP_FOLDER}"
     git clone https://github.com/google/android-cuttlefish
@@ -63,11 +61,10 @@ function bcttlfshtools() {(
     rm -rf "${TMP_FOLDER}"
     sudo_wrapper usermod -aG cvdnetwork "${USER}"
     sudo_wrapper usermod -aG kvm "${USER}"
-)}
-
+); }
 
 # Build/update dtc
-function bdtc() {(
+function bdtc() { (
     DTC_FOLDER=${SRC_FOLDER:-${HOME}/src}/dtc
     if [[ ! -d ${DTC_FOLDER} ]]; then
         mkdir -p "${DTC_FOLDER%/*}"
@@ -79,22 +76,21 @@ function bdtc() {(
     git fetch
 
     [[ -z ${DTC_VERSION} ]] && DTC_VERSION=$(git describe --tags "$(git rev-list --tags --max-count=1)")
-    git checkout v"${DTC_VERSION//v}"
+    git checkout v"${DTC_VERSION//v/}"
 
     make "${JOBS_FLAG:--j"$(nproc)"}" PREFIX="${PREFIX:-${HOME}/usr}" install
-)}
-
+); }
 
 # Build/update git
-function bgit() {(
+function bgit() { (
     [[ $(uname -m) =~ x86 ]] && MARCH="-march=native "
-    MAKE=( make "${JOBS_FLAG:--j"$(nproc)"}"
-                prefix="${GIT_PREFIX:=${PREFIX:-${HOME}/usr}}"
-                CFLAGS="${MARCH}-O2 -pipe -fstack-protector-strong -fno-plt"
-                LDFLAGS="-Wl,-O1,--sort-common,--as-needed,-z,relro,-z,now"
-                USE_LIBPCRE2=1
-                NO_CROSS_DIRECTORY_HARDLINKS=1
-                NO_PERL_CPAN_FALLBACKS=1 )
+    MAKE=(make "${JOBS_FLAG:--j"$(nproc)"}"
+    prefix="${GIT_PREFIX:=${PREFIX:-${HOME}/usr}}"
+    CFLAGS="${MARCH}-O2 -pipe -fstack-protector-strong -fno-plt"
+    LDFLAGS="-Wl,-O1,--sort-common,--as-needed,-z,relro,-z,now"
+    USE_LIBPCRE2=1
+    NO_CROSS_DIRECTORY_HARDLINKS=1
+    NO_PERL_CPAN_FALLBACKS=1)
 
     GIT_FOLDER=${SRC_FOLDER:-${HOME}/src}/git
     if [[ ! -d ${GIT_FOLDER} ]]; then
@@ -107,7 +103,7 @@ function bgit() {(
     git fetch
 
     [[ -z ${GIT_VERSION} ]] && GIT_VERSION=$(git describe --tags "$(git rev-list --tags --max-count=1)")
-    git checkout v"${GIT_VERSION//v}"
+    git checkout v"${GIT_VERSION//v/}"
 
     "${MAKE[@]}" all install || die "git build/install failed"
 
@@ -122,14 +118,13 @@ function bgit() {(
     move_to_front_of_path "${GIT_PREFIX}"/bin
     command -v git
     git --version
-)}
-
+); }
 
 # Install hugo
-function ihugo() {(
+function ihugo() { (
     HUGO_VERSION=$(glr gohugoio/hugo)
     SUFFIX=64bit
-    HUGO_URL=https://github.com/gohugoio/hugo/releases/download/${HUGO_VERSION}/hugo_extended_${HUGO_VERSION//v}_Linux-${SUFFIX}
+    HUGO_URL=https://github.com/gohugoio/hugo/releases/download/${HUGO_VERSION}/hugo_extended_${HUGO_VERSION//v/}_Linux-${SUFFIX}
     if command -v dpkg &>/dev/null; then
         curl -LSso "${TMP_DEB:=$(mktemp --suffix=.deb)}" "${HUGO_URL}".deb
         sudo dpkg -i "${TMP_DEB}"
@@ -140,11 +135,10 @@ function ihugo() {(
         mv "${TMP_FOLDER}"/hugo "${PREFIX:-${HOME}/usr}"/bin
         rm -rf "${TMP_FOLDER}"
     fi
-)}
-
+); }
 
 # Build a "regular" LLVM toolchain or a bootstrap compiler
-function bllvm() {(
+function bllvm() { (
     set -eu
 
     LLVM_SRC=${SRC_FOLDER:-${HOME}/src}/llvm-project
@@ -159,44 +153,48 @@ function bllvm() {(
     mkdir -p "${LLVM_BLD}"
     cd "${LLVM_BLD}"
 
-    while (( ${#} )); do
+    while ((${#})); do
         case ${1} in
-            -b|--bootstrap) BOOTSTRAP=true ;;
-            -i|--install) INSTALL=true ;;
+            -b | --bootstrap) BOOTSTRAP=true ;;
+            -i | --install) INSTALL=true ;;
         esac
         shift
     done
 
-    CMAKE=( cmake
-            -G Ninja
-            -Wno-dev
-            "-DCLANG_DEFAULT_LINKER=lld"
-            "-DCLANG_VENDOR=$(uname -n)"
-            "-DCMAKE_AR=$(command -v llvm-ar)"
-            "-DCMAKE_BUILD_TYPE=Release"
-            "-DCMAKE_C_COMPILER=$(command -v clang)"
-            "-DCMAKE_CXX_COMPILER=$(command -v clang++)"
-            "-DCMAKE_LINKER=$(command -v ld.lld)"
-            "-DCMAKE_RANLIB=$(command -v llvm-ranlib)"
-            "-DLLVM_CCACHE_BUILD=ON"
-            "-DLLVM_ENABLE_PROJECTS=all"
-            "-DLLVM_ENABLE_WARNINGS=OFF"
-            "-DLLVM_USE_LINKER=lld"
-            "-DPYTHON_EXECUTABLE=$(command -v python3)" )
+    CMAKE=(
+        cmake
+        -G Ninja
+        -Wno-dev
+        "-DCLANG_DEFAULT_LINKER=lld"
+        "-DCLANG_VENDOR=$(uname -n)"
+        "-DCMAKE_AR=$(command -v llvm-ar)"
+        "-DCMAKE_BUILD_TYPE=Release"
+        "-DCMAKE_C_COMPILER=$(command -v clang)"
+        "-DCMAKE_CXX_COMPILER=$(command -v clang++)"
+        "-DCMAKE_LINKER=$(command -v ld.lld)"
+        "-DCMAKE_RANLIB=$(command -v llvm-ranlib)"
+        "-DLLVM_CCACHE_BUILD=ON"
+        "-DLLVM_ENABLE_PROJECTS=all"
+        "-DLLVM_ENABLE_WARNINGS=OFF"
+        "-DLLVM_USE_LINKER=lld"
+        "-DPYTHON_EXECUTABLE=$(command -v python3)"
+    )
 
     if ${BOOTSTRAP:=false}; then
-        CMAKE=( "${CMAKE[@]}"
-                "-DCLANG_PLUGIN_SUPPORT=OFF"
-                "-DCOMPILER_RT_BUILD_SANITIZERS=OFF"
-                "-DLLVM_ENABLE_BACKTRACES=OFF"
-                "-DLLVM_INCLUDE_DOCS=OFF"
-                "-DLLVM_INCLUDE_EXAMPLES=OFF"
-                "-DLLVM_INCLUDE_TESTS=OFF"
-                "-DLLVM_TARGETS_TO_BUILD=host" )
+        CMAKE=(
+            "${CMAKE[@]}"
+            "-DCLANG_PLUGIN_SUPPORT=OFF"
+            "-DCOMPILER_RT_BUILD_SANITIZERS=OFF"
+            "-DLLVM_ENABLE_BACKTRACES=OFF"
+            "-DLLVM_INCLUDE_DOCS=OFF"
+            "-DLLVM_INCLUDE_EXAMPLES=OFF"
+            "-DLLVM_INCLUDE_TESTS=OFF"
+            "-DLLVM_TARGETS_TO_BUILD=host"
+        )
     fi
 
     if ${INSTALL:=false}; then
-        CMAKE=( "${CMAKE[@]}" "-DCMAKE_INSTALL_PREFIX=${PREFIX:-${HOME}/usr}" )
+        CMAKE=("${CMAKE[@]}" "-DCMAKE_INSTALL_PREFIX=${PREFIX:-${HOME}/usr}")
     fi
 
     header "Configuring LLVM"
@@ -214,11 +212,10 @@ function bllvm() {(
         header "Installing LLVM"
         ninja install
     fi
-)}
-
+); }
 
 # Build/install GNU make
-function bmake() {(
+function bmake() { (
     [[ -z ${MAKE_VERSION} ]] && MAKE_VERSION=4.3
     MAKE_FOLDER=make-${MAKE_VERSION}
     TMP_FOLDER=$(mktemp -d)
@@ -234,14 +231,13 @@ function bmake() {(
     command -v make
     make --version
     rm -rf "${TMP_FOLDER}"
-)}
-
+); }
 
 # Build/update ninja
-function bninja() {(
+function bninja() { (
     NINJA_REPO=ninja-build/ninja
     [[ -z ${NINJA_VERSION} ]] && NINJA_VERSION=$(glr "${NINJA_REPO}")
-    NINJA_FOLDER=ninja-${NINJA_VERSION//v}
+    NINJA_FOLDER=ninja-${NINJA_VERSION//v/}
     TMP_FOLDER=$(mktemp -d)
 
     cd "${TMP_FOLDER}"
@@ -257,17 +253,19 @@ function bninja() {(
         command -v ninja
         ninja --version
     fi
-)}
-
+); }
 
 # Build/install PGO'd LLVM
-function bpgollvm() {(
-    CMAKE=( cmake -G Ninja
-                  -Wno-dev
-                  "-DCLANG_DEFAULT_LINKER=lld"
-                  "-DCLANG_VENDOR=$(uname -n)"
-                  "-DCMAKE_BUILD_TYPE=Release"
-                  "-DPYTHON_EXECUTABLE=$(command -v python3)" )
+function bpgollvm() { (
+    CMAKE=(
+        cmake
+        -G Ninja
+        -Wno-dev
+        "-DCLANG_DEFAULT_LINKER=lld"
+        "-DCLANG_VENDOR=$(uname -n)"
+        "-DCMAKE_BUILD_TYPE=Release"
+        "-DPYTHON_EXECUTABLE=$(command -v python3)"
+    )
     LLVM_SRC=${SRC_FOLDER:-${HOME}/src}/llvm-project
     LLVM_BLD=${LLVM_SRC}/build
     ORIG_PATH=${PATH}
@@ -275,10 +273,13 @@ function bpgollvm() {(
 
     set -eu
 
-    while (( ${#} )); do
+    while ((${#})); do
         case ${1} in
-            -b|--branch) shift; LLVM_VERSION=${1} ;;
-            -u|--update) UPDATE=true ;;
+            -b | --branch)
+                shift
+                LLVM_VERSION=${1}
+                ;;
+            -u | --update) UPDATE=true ;;
         esac
         shift
     done
@@ -302,7 +303,7 @@ function bpgollvm() {(
 
     # Ensure that we don't build llgo, it's broken
     LLVM_ALL_PROJECTS=$(grep -F "set(LLVM_ALL_PROJECTS " llvm/CMakeLists.txt | cut -d \" -f 2)
-    CMAKE=( "${CMAKE[@]}" -DLLVM_ENABLE_PROJECTS="${LLVM_ALL_PROJECTS/;llgo}" )
+    CMAKE=("${CMAKE[@]}" -DLLVM_ENABLE_PROJECTS="${LLVM_ALL_PROJECTS/;llgo/}")
 
     # Stage 1: Bootstrap compiler
     (
@@ -310,29 +311,32 @@ function bpgollvm() {(
         mkdir -p "${LLVM_BLD}"/stage1
         cd "${LLVM_BLD}"/stage1 || die "Error creating stage1 build folder"
         LINKER=$(if command -v ld.lld &>/dev/null; then echo lld; else echo gold; fi)
-        "${CMAKE[@]}" -DCLANG_PLUGIN_SUPPORT=OFF \
-                      -DCMAKE_C_COMPILER=clang \
-                      -DCMAKE_CXX_COMPILER=clang++ \
-                      -DCOMPILER_RT_BUILD_SANITIZERS=OFF \
-                      -DLLVM_ENABLE_BACKTRACES=OFF \
-                      -DLLVM_INCLUDE_DOCS=OFF \
-                      -DLLVM_INCLUDE_EXAMPLES=OFF \
-                      -DLLVM_INCLUDE_TESTS=OFF \
-                      -DLLVM_TARGETS_TO_BUILD=host \
-                      -DLLVM_USE_LINKER="${LINKER}" \
-                      "${LLVM_SRC}"/llvm || die "Error configuring stage 1"
+        "${CMAKE[@]}" \
+            -DCLANG_PLUGIN_SUPPORT=OFF \
+            -DCMAKE_C_COMPILER=clang \
+            -DCMAKE_CXX_COMPILER=clang++ \
+            -DCOMPILER_RT_BUILD_SANITIZERS=OFF \
+            -DLLVM_ENABLE_BACKTRACES=OFF \
+            -DLLVM_INCLUDE_DOCS=OFF \
+            -DLLVM_INCLUDE_EXAMPLES=OFF \
+            -DLLVM_INCLUDE_TESTS=OFF \
+            -DLLVM_TARGETS_TO_BUILD=host \
+            -DLLVM_USE_LINKER="${LINKER}" \
+            "${LLVM_SRC}"/llvm || die "Error configuring stage 1"
         ninja || die "Error building stage 1"
     )
 
     STAGE_ONE_BIN=${LLVM_BLD}/stage1/bin
-    STAGE_ONE_BIN_DEFINES=( -DCMAKE_AR="${STAGE_ONE_BIN}"/llvm-ar
-                            -DCMAKE_C_COMPILER="${STAGE_ONE_BIN}"/clang
-                            -DCLANG_TABLEGEN="${STAGE_ONE_BIN}"/clang-tblgen
-                            -DCMAKE_CXX_COMPILER="${STAGE_ONE_BIN}"/clang++
-                            -DCMAKE_LINKER="${STAGE_ONE_BIN}"/ld.lld
-                            -DLLVM_USE_LINKER="${STAGE_ONE_BIN}"/ld.lld
-                            -DLLVM_TABLEGEN="${STAGE_ONE_BIN}"/llvm-tblgen
-                            -DCMAKE_RANLIB="${STAGE_ONE_BIN}"/llvm-ranlib )
+    STAGE_ONE_BIN_DEFINES=(
+        -DCMAKE_AR="${STAGE_ONE_BIN}"/llvm-ar
+        -DCMAKE_C_COMPILER="${STAGE_ONE_BIN}"/clang
+        -DCLANG_TABLEGEN="${STAGE_ONE_BIN}"/clang-tblgen
+        -DCMAKE_CXX_COMPILER="${STAGE_ONE_BIN}"/clang++
+        -DCMAKE_LINKER="${STAGE_ONE_BIN}"/ld.lld
+        -DLLVM_USE_LINKER="${STAGE_ONE_BIN}"/ld.lld
+        -DLLVM_TABLEGEN="${STAGE_ONE_BIN}"/llvm-tblgen
+        -DCMAKE_RANLIB="${STAGE_ONE_BIN}"/llvm-ranlib
+    )
 
     # Stage 2a: Instrumented compiler
     export PATH=${STAGE_ONE_BIN:?}:${ORIG_PATH}
@@ -340,23 +344,26 @@ function bpgollvm() {(
         header "Building LLVM stage 2a"
         mkdir -p "${LLVM_BLD}"/stage2a
         cd "${LLVM_BLD}"/stage2a || die "Error creating stage2a build folder"
-        "${CMAKE[@]}" "${STAGE_ONE_BIN_DEFINES[@]}" \
-                      -DLLVM_BUILD_INSTRUMENTED=IR \
-                      -DLLVM_BUILD_RUNTIME=OFF \
-                      -DLLVM_INCLUDE_GO_TESTS=OFF \
-                      "${LLVM_SRC}"/llvm || die "Error configuring stage 2a"
+        "${CMAKE[@]}" \
+            "${STAGE_ONE_BIN_DEFINES[@]}" \
+            -DLLVM_BUILD_INSTRUMENTED=IR \
+            -DLLVM_BUILD_RUNTIME=OFF \
+            -DLLVM_INCLUDE_GO_TESTS=OFF \
+            "${LLVM_SRC}"/llvm || die "Error configuring stage 2a"
         ninja clang lld check-clang check-llvm || die "Error building or checking stage2a"
     )
 
     STAGE_TWO_BIN=${LLVM_BLD}/stage2a/bin
-    STAGE_TWO_BIN_DEFINES=( -DCMAKE_AR="${STAGE_TWO_BIN}"/llvm-ar
-                            -DCMAKE_C_COMPILER="${STAGE_TWO_BIN}"/clang
-                            -DCLANG_TABLEGEN="${STAGE_TWO_BIN}"/clang-tblgen
-                            -DCMAKE_CXX_COMPILER="${STAGE_TWO_BIN}"/clang++
-                            -DCMAKE_LINKER="${STAGE_TWO_BIN}"/ld.lld
-                            -DLLVM_USE_LINKER="${STAGE_TWO_BIN}"/ld.lld
-                            -DLLVM_TABLEGEN="${STAGE_TWO_BIN}"/llvm-tblgen
-                            -DCMAKE_RANLIB="${STAGE_TWO_BIN}"/llvm-ranlib )
+    STAGE_TWO_BIN_DEFINES=(
+        -DCMAKE_AR="${STAGE_TWO_BIN}"/llvm-ar
+        -DCMAKE_C_COMPILER="${STAGE_TWO_BIN}"/clang
+        -DCLANG_TABLEGEN="${STAGE_TWO_BIN}"/clang-tblgen
+        -DCMAKE_CXX_COMPILER="${STAGE_TWO_BIN}"/clang++
+        -DCMAKE_LINKER="${STAGE_TWO_BIN}"/ld.lld
+        -DLLVM_USE_LINKER="${STAGE_TWO_BIN}"/ld.lld
+        -DLLVM_TABLEGEN="${STAGE_TWO_BIN}"/llvm-tblgen
+        -DCMAKE_RANLIB="${STAGE_TWO_BIN}"/llvm-ranlib
+    )
 
     # Stage 2b: Build clang with instrumented compiler
     export PATH=${STAGE_TWO_BIN:?}:${ORIG_PATH}
@@ -364,8 +371,9 @@ function bpgollvm() {(
         header "Building LLVM stage 2b"
         mkdir -p "${LLVM_BLD}"/stage2b
         cd "${LLVM_BLD}"/stage2b
-        "${CMAKE[@]}" "${STAGE_TWO_BIN_DEFINES[@]}" \
-                      "${LLVM_SRC}"/llvm || die "Error configuring stage 2b"
+        "${CMAKE[@]}" \
+            "${STAGE_TWO_BIN_DEFINES[@]}" \
+            "${LLVM_SRC}"/llvm || die "Error configuring stage 2b"
         ninja || die "Error building stage 2b"
     )
 
@@ -379,16 +387,19 @@ function bpgollvm() {(
 
         # Merge profile data
         PROFILE_DATA=${LLVM_BLD}/stage3/profdata.prof
-        llvm-profdata merge -output="${PROFILE_DATA}" "${LLVM_BLD}"/stage2a/profiles/*.profraw || die "Error merging profile data"
+        llvm-profdata merge \
+            -output="${PROFILE_DATA}" \
+            "${LLVM_BLD}"/stage2a/profiles/*.profraw || die "Error merging profile data"
 
         # Build compiler with that data
-        "${CMAKE[@]}" "${STAGE_ONE_BIN_DEFINES[@]}" \
-                      -DCMAKE_C_FLAGS="-Wno-backend-plugin" \
-                      -DCMAKE_CXX_FLAGS="-Wno-backend-plugin" \
-                      -DCMAKE_INSTALL_PREFIX="${PGO_LLVM_PREFIX}" \
-                      -DLLVM_ENABLE_LTO=Thin \
-                      -DLLVM_PROFDATA_FILE="${PROFILE_DATA}" \
-                      "${LLVM_SRC}"/llvm || die "Error configuring stage 3"
+        "${CMAKE[@]}" \
+            "${STAGE_ONE_BIN_DEFINES[@]}" \
+            -DCMAKE_C_FLAGS="-Wno-backend-plugin" \
+            -DCMAKE_CXX_FLAGS="-Wno-backend-plugin" \
+            -DCMAKE_INSTALL_PREFIX="${PGO_LLVM_PREFIX}" \
+            -DLLVM_ENABLE_LTO=Thin \
+            -DLLVM_PROFDATA_FILE="${PROFILE_DATA}" \
+            "${LLVM_SRC}"/llvm || die "Error configuring stage 3"
         ninja || die "Error building stage 3"
         ninja install || die "Error installing stage 3"
     )
@@ -407,11 +418,10 @@ function bpgollvm() {(
     echo
     command -v ld.lld
     ld.lld --version
-)}
-
+); }
 
 # Build/install ripgrep
-function birg() {(
+function birg() { (
     RG_REPO=BurntSushi/ripgrep
     [[ -z ${RG_VERSION} ]] && RG_VERSION=$(glr "${RG_REPO}")
     BASE_URL=https://github.com/${RG_REPO}
@@ -440,16 +450,15 @@ function birg() {(
     rg --version
 
     rm -rf "${TMP_FOLDER}"
-)}
-
+); }
 
 # Build/install sharkdp binaries
-function bisharkdp() {(
+function bisharkdp() { (
     BINARIES=()
-    while (( ${#} )); do
+    while ((${#})); do
         case ${1} in
-            all) BINARIES=( bat diskus fd hyperfine ) ;;
-            bat|diskus|fd|hyperfine) BINARIES+=( "${1}" ) ;;
+            all) BINARIES=(bat diskus fd hyperfine) ;;
+            bat | diskus | fd | hyperfine) BINARIES+=("${1}") ;;
             *) die "Unsupported binary detected" ;;
         esac
         shift
@@ -463,7 +472,7 @@ function bisharkdp() {(
         URL_BASE=https://github.com/${BINARY_REPO}
         [[ -z ${VERSION} ]] && VERSION=$(glr "${BINARY_REPO}")
         if [[ $(uname -m) = "x86_64" ]] && command -v dpkg &>/dev/null; then
-            DEB=${BINARY}_${VERSION//v}_amd64.deb
+            DEB=${BINARY}_${VERSION//v/}_amd64.deb
             curl -LSsO "${URL_BASE}"/releases/download/"${VERSION}"/"${DEB}" || die "Error downloading ${DEB}"
             sudo_wrapper dpkg -i "${DEB}" || die "Error installing ${DEB}"
         else
@@ -486,11 +495,10 @@ function bisharkdp() {(
     ); done
 
     rm -rf "${TMP_FOLDER}"
-)}
-
+); }
 
 # Build/install QEMU
-function bqemu() {(
+function bqemu() { (
     QEMU_FOLDER=${SRC_FOLDER:-${HOME}/src}/qemu
     if [[ ! -d ${QEMU_FOLDER} ]]; then
         mkdir -p "${QEMU_FOLDER%/*}"
@@ -504,10 +512,10 @@ function bqemu() {(
     git reset --hard
     git submodule foreach --recursive git reset --hard
     git submodule deinit slirp 2>/dev/null
-    git checkout v"${QEMU_VERSION//v}"
-    ( git merge-base --is-ancestor fc1120a7f5f2d4b601003205c598077d3eb11ad2 HEAD && \
-      ! git merge-base --is-ancestor ece628fcf69cbbd4b3efb6fbd203af07609467a2 HEAD ) && \
-    git format-patch -1 --stdout ece628fcf69cbbd4b3efb6fbd203af07609467a2 | git apply -3v
+    git checkout v"${QEMU_VERSION//v/}"
+    (git merge-base --is-ancestor fc1120a7f5f2d4b601003205c598077d3eb11ad2 HEAD &&
+        ! git merge-base --is-ancestor ece628fcf69cbbd4b3efb6fbd203af07609467a2 HEAD) &&
+        git format-patch -1 --stdout ece628fcf69cbbd4b3efb6fbd203af07609467a2 | git apply -3v
 
     ./configure \
         --disable-docs \
@@ -535,11 +543,10 @@ function bqemu() {(
         command -v qemu-system-${QEMU_SUFFIX}
         qemu-system-${QEMU_SUFFIX} --version
     done
-)}
-
+); }
 
 # Build/update tmux
-function btmux() {(
+function btmux() { (
     TMUX_REPO=tmux/tmux
     [[ -z ${TMUX_VERSION} ]] && TMUX_VERSION=$(glr "${TMUX_REPO}")
     TMP_FOLDER=$(mktemp -d)
@@ -556,17 +563,16 @@ function btmux() {(
     move_to_front_of_path "${TMUX_PREFIX}"/bin
     command -v tmux
     tmux -V
-)}
-
+); }
 
 # Build/update zsh
-function bzsh() {(
+function bzsh() { (
     TMP_FOLDER=$(mktemp -d)
 
     cd "${TMP_FOLDER}"
     case ${BZSH_VERSION:=5.8} in
         latest) URL=https://sourceforge.net/projects/zsh/files/latest/download ;;
-        *) URL=https://www.zsh.org/pub/zsh-"${BZSH_VERSION//zsh-}".tar.xz ;;
+        *) URL=https://www.zsh.org/pub/zsh-"${BZSH_VERSION//zsh-/}".tar.xz ;;
     esac
     curl -LSs "${URL}" | tar -xJf -
     cd zsh-* || die "Downloading or extracting zsh failed"
@@ -582,11 +588,10 @@ function bzsh() {(
     move_to_front_of_path "${ZSH_PREFIX}"/bin
     command -v zsh
     zsh --version
-)}
-
+); }
 
 # Install Android tools
-function install_android_tools() {(
+function install_android_tools() { (
     curl -LSso "${HOME}"/usr/bin/repo https://storage.googleapis.com/git-repo-downloads/repo
     chmod a+x "${HOME}"/usr/bin/repo
 
@@ -594,49 +599,44 @@ function install_android_tools() {(
     curl -LSs https://android.googlesource.com/platform/prebuilts/misc/+archive/master/linux-x86/libufdt.tar.gz | tar -C "${MKDTIMG_FOLDER}" -xzf -
     cp "${MKDTIMG_FOLDER}"/mkdtimg "${HOME}"/usr/bin
     rm -rf "${MKDTIMG_FOLDER}"
-)}
+); }
 
-
-function ihub() {(
+function ihub() { (
     [[ -z ${HUB_VERSION} ]] && HUB_VERSION=$(glr "github/hub")
-    HUB_TUPLE="hub-linux-$(get_arch)-${HUB_VERSION/v}"
+    HUB_TUPLE="hub-linux-$(get_arch)-${HUB_VERSION/v/}"
     cd "$(mktemp -d)" || die "Error moving into temporary directory!"
     curl -LSsO https://github.com/github/hub/releases/download/"${HUB_VERSION}"/"${HUB_TUPLE}".tgz || die "Error downloading hub!"
     tar -xf "${HUB_TUPLE}".tgz || die "Error extracting hub!"
     prefix="${PREFIX:-${HOME}/usr}" ./"${HUB_TUPLE}"/install || die "Error installing hub!"
     [[ -d ${HOME}/.zfunctions ]] && curl -LSso "${HOME}"/.zfunctions/_hub https://github.com/github/hub/raw/"${HUB_VERSION}"/etc/hub.zsh_completion
     rm -rf "${PWD}"
-)}
-
+); }
 
 # Install prebuilt shfmt
-function ishfmt() {(
+function ishfmt() { (
     [[ -z ${SHFMT_VERSION} ]] && SHFMT_VERSION=$(glr "mvdan/sh")
     BIN_FOLDER=${PREFIX:-${HOME}/usr}/bin
     mkdir -p "${BIN_FOLDER}"
     rm -rf "${BIN_FOLDER}"/shfmt
-    curl -LSso "${BIN_FOLDER}"/shfmt https://github.com/mvdan/sh/releases/download/v"${SHFMT_VERSION//v}"/shfmt_v"${SHFMT_VERSION//v/}"_linux_amd64 || die "Error downloading/installing shfmt"
+    curl -LSso "${BIN_FOLDER}"/shfmt https://github.com/mvdan/sh/releases/download/v"${SHFMT_VERSION//v/}"/shfmt_v"${SHFMT_VERSION//v/}"_linux_amd64 || die "Error downloading/installing shfmt"
     chmod +x "${BIN_FOLDER}"/shfmt
-)}
+); }
 
-
-function install_rust() {(
+function install_rust() { (
     curl https://sh.rustup.rs -sSf | bash -s -- -y --no-modify-path
-)}
-
+); }
 
 # Install/upgrade b4
-function iub4() {(
-    PIP_ARGS=( )
+function iub4() { (
+    PIP_ARGS=()
     case ${1} in
-        -u|--upgrade) PIP_ARGS=( "${PIP_ARGS[@]}" --upgrade ) ;;
+        -u | --upgrade) PIP_ARGS=("${PIP_ARGS[@]}" --upgrade) ;;
     esac
 
     python3 -m pip install --user ${PIP_ARGS:+"${PIP_ARGS[@]}"} b4
-)}
+); }
 
-
-function updbin() {(
+function updbin() { (
     bccache || exit ${?}
     bcmake || exit ${?}
     ihub || exit ${?}
@@ -648,5 +648,5 @@ function updbin() {(
     btmux || exit ${?}
     bzsh || exit ${?}
     ishfmt || exit ${?}
-)}
+); }
 # vi: filetype=zsh
