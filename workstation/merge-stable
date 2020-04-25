@@ -6,26 +6,28 @@
 #
 # Pull in linux-stable updates to a kernel tree
 
-
 # Parse the provided parameters
 function parse_parameters() {
-    while (( ${#} )); do
+    while ((${#})); do
         case ${1} in
-            # Branch name for commit message
-            "-b"|"--branch-name")
+            "-b" | "--branch-name")
+                # Branch name for commit message
                 shift && enforce_value "${@}"
-                BRANCH_NAME=${1} ;;
+                BRANCH_NAME=${1}
+                ;;
 
-            # Use git cherry-pick
-            "-c"|"--cherry-pick")
-                UPDATE_METHOD=cherry-pick ;;
+            "-c" | "--cherry-pick")
+                # Use git cherry-pick
+                UPDATE_METHOD=cherry-pick
+                ;;
 
-            # Only update the linux-stable remotes
-            "-f"|"--fetch-only")
-                FETCH_REMOTES_ONLY=true ;;
+            "-f" | "--fetch-only")
+                # Only update the linux-stable remotes
+                FETCH_REMOTES_ONLY=true
+                ;;
 
-            # Help menu
-            "-h"|"--help")
+            "-h" | "--help")
+                # Help menu
                 echo
                 printf '%bScript description:%b Merges/cherry-picks Linux upstream into a kernel tree\n' "${BOLD}" "${RST}"
                 echo
@@ -64,50 +66,58 @@ function parse_parameters() {
                 echo "    1. By default, the latest revision will be merged."
                 echo "    2. If you already have a remote for upstream, rename it to linux-stable so that multiple ones do not get added!"
                 echo
-                exit 1 ;;
+                exit 1
+                ;;
 
-            # Don't add a log to the commit message
-            "-i"|"--initial-merge")
-                INITIAL_MERGE=true ;;
+            "-i" | "--initial-merge")
+                # Don't add a log to the commit message
+                INITIAL_MERGE=true
+                ;;
 
-            # Print the latest version from kernel.org
-            "-p"|"--print-latest")
-                PRINT_LATEST=true ;;
+            "-p" | "--print-latest")
+                # Print the latest version from kernel.org
+                PRINT_LATEST=true
+                ;;
 
-            # Use the patches from the stable queue
-            "-q"|"--queue")
+            "-q" | "--queue")
+                # Use the patches from the stable queue
                 QUEUE=true
-                UPDATE_MODE=0 ;;
+                UPDATE_MODE=0
+                ;;
 
-            # Use the RC tree for updating
-            "-r"|"--release-candidate")
+            "-r" | "--release-candidate")
+                # Use the RC tree for updating
                 RC=true
-                UPDATE_MODE=0 ;;
+                UPDATE_MODE=0
+                ;;
 
-            # Update to the next available version from kernel.org
-            "-s"|"--single-version")
-                UPDATE_MODE=0 ;;
+            "-s" | "--single-version")
+                # Update to the next available version from kernel.org
+                UPDATE_MODE=0
+                ;;
 
-            # Pulls the requested tag from Sasha Levin's linux-stable repo
-            "-t"|"--tag")
+            "-t" | "--tag")
+                # Pulls the requested tag from Sasha Levin's linux-stable repo
                 shift
                 [[ ${#} -lt 1 ]] && die "Please specify a version to update!"
                 TAG_TO_PULL=${1}
                 UPDATE_MODE=0
-                UPDATE_METHOD=tag ;;
+                UPDATE_METHOD=tag
+                ;;
 
-            # Update to the specified version
-            "-v"|"--version")
+            "-v" | "--version")
+                # Update to the specified version
                 shift
                 [[ ${#} -lt 1 ]] && die "Please specify a version to update!"
                 UPDATE_MODE=1
-                VERSION_SUPPLIED=${1} ;;
+                VERSION_SUPPLIED=${1}
+                ;;
 
-            # Empty string is fine
             "") ;;
 
             *)
-                die "Invalid parameter!" ;;
+                die "Invalid parameter!"
+                ;;
         esac
 
         shift
@@ -119,7 +129,6 @@ function parse_parameters() {
     [[ -z ${UPDATE_MODE} ]] && UPDATE_MODE=2
 }
 
-
 # Update the linux-stable{-rc} remotes (and add them if they doesn't exist)
 function verify_remote() {
     add_remote "${1}" https://git.kernel.org/pub/scm/linux/kernel/git/stable/"${2:-"${1}"}".git/
@@ -130,7 +139,6 @@ function verify_remote() {
 
     echo "${1} remote updated successfully!"
 }
-
 
 # Updates the linux-stable mirror on my GitHub
 function update_stable_mirror() {
@@ -171,7 +179,6 @@ function update_sources() {
     fi
 }
 
-
 # Generate versions
 function generate_versions() {
     header "Calculating versions"
@@ -202,11 +209,14 @@ function generate_versions() {
     case ${UPDATE_MODE} in
         0)
             TARGET_SUBLEVEL=$((CURRENT_SUBLEVEL + 1))
-            TARGET_VERSION=${CURRENT_MAJOR_VERSION}.${TARGET_SUBLEVEL} ;;
+            TARGET_VERSION=${CURRENT_MAJOR_VERSION}.${TARGET_SUBLEVEL}
+            ;;
         1)
-            TARGET_VERSION=${VERSION_SUPPLIED} ;;
+            TARGET_VERSION=${VERSION_SUPPLIED}
+            ;;
         2)
-            TARGET_VERSION=${LATEST_VERSION} ;;
+            TARGET_VERSION=${LATEST_VERSION}
+            ;;
     esac
 
     if [[ -n ${RC} ]]; then
@@ -259,19 +269,16 @@ function generate_versions() {
         # Make sure target version is between current version and latest version
         TARGET_SUBLEVEL=${TARGET_VERSION##*.}
         [[ ${TARGET_SUBLEVEL} -le ${CURRENT_SUBLEVEL} ]] && die "Current version is up to date with target version ${TARGET_VERSION}!\n"
-        [[ ${TARGET_SUBLEVEL} -gt ${LATEST_SUBLEVEL}  ]] && die "Target version ${TARGET_VERSION} does not exist!\n"
+        [[ ${TARGET_SUBLEVEL} -gt ${LATEST_SUBLEVEL} ]] && die "Target version ${TARGET_VERSION} does not exist!\n"
 
         echo
         printf '%bTarget kernel version:%b %s\n' "${BOLD}" "${RST}" "${TARGET_VERSION}"
     fi
 }
 
-
 function pre_exit_commands() {
     git bd "${QUEUE_BRANCH}" &>/dev/null
 }
-
-
 
 function cp_target_version() {
     header "Cherry-picking ${TARGET_VERSION}"
@@ -285,25 +292,22 @@ git add . && git cherry-pick --continue"
     fi
 }
 
-
 function create_merge_message() {
     MSG_FILE=$(mktemp)
-    echo "Merge ${TARGET_VERSION} into ${BRANCH_NAME:-"$(git cb)"}" >> "${MSG_FILE}"
+    echo "Merge ${TARGET_VERSION} into ${BRANCH_NAME:-"$(git cb)"}" >>"${MSG_FILE}"
     if [[ -z ${INITIAL_MERGE} ]]; then
-        printf '\nChanges in %s: (%d commits)\n' "${TARGET_VERSION}" "$(git rev-list --count "${RANGE}" 2> /dev/null)" >> "${MSG_FILE}"
-        git log --reverse --format="        %s" "${RANGE}" >> "${MSG_FILE}"
+        printf '\nChanges in %s: (%d commits)\n' "${TARGET_VERSION}" "$(git rev-list --count "${RANGE}" 2>/dev/null)" >>"${MSG_FILE}"
+        git log --reverse --format="        %s" "${RANGE}" >>"${MSG_FILE}"
     fi
-    printf '\nSigned-off-by: %s <%s>\n' "$(git config --get user.name)" "$(git config --get user.email)" >> "${MSG_FILE}"
+    printf '\nSigned-off-by: %s <%s>\n' "$(git config --get user.name)" "$(git config --get user.email)" >>"${MSG_FILE}"
 }
-
 
 function append_conflicts() {
-    printf '\nConflicts:\n' >> "${MSG_FILE}"
+    printf '\nConflicts:\n' >>"${MSG_FILE}"
     for FILE in $(git cf); do
-        printf '\t%s\n' "${FILE}" >> "${MSG_FILE}"
+        printf '\t%s\n' "${FILE}" >>"${MSG_FILE}"
     done
 }
-
 
 function mg_target_version() {
     header "Merging ${TARGET_VERSION}"
@@ -320,7 +324,6 @@ function mg_target_version() {
         header "${TARGET_VERSION} MERGED CLEANLY!" "${GRN}"
     fi
 }
-
 
 function pl_tag() {
     header "Merging ${TAG_TO_PULL}"
@@ -342,7 +345,6 @@ function update_tree() {
     pre_exit_commands
     exit 0
 }
-
 
 source "${SCRIPTS_FOLDER}"/common
 source "${SCRIPTS_FOLDER}"/env/stubs/folders
