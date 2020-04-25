@@ -169,11 +169,6 @@ function bootstrap() { (
     git -C "${GITHUB}"/hugo-files submodule update --init --recursive
 ) && source "${HOME}"/.zshrc; }
 
-# Update function
-function upd() {
-    sudo sh -c 'apt update && apt upgrade'
-}
-
 # Laptop specific aliases
 function wsl_aliases() {
     # Account for VS Code Insiders having a different binary name

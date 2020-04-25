@@ -199,4 +199,12 @@ function upd_website() { (
 function fdshfmt() { (
     fd -e sh -x shfmt -ci -i 4 -w
 ); }
+
+# Update function
+function upd() { (
+    case "$(get_distro)" in
+        arch) yay ;;
+        debian | ubuntu) sudo_wrapper sh -c 'apt update && apt upgrade' ;;
+    esac
+); }
 # vi: filetype=zsh

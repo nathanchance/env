@@ -477,14 +477,6 @@ function qualify_llvm_uprev() { (
     bllvm
 ); }
 
-# Update function
-function upd() { (
-    case "$(get_distro)" in
-        arch) yay ;;
-        debian | ubuntu) sudo_wrapper sh -c 'apt update && apt upgrade' ;;
-    esac
-); }
-
 # Generate ALS conflict lists
 function genalscnflcts() { (
     for FILE in $(git cf); do
