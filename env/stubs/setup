@@ -1,7 +1,7 @@
 #!/usr/bin/env zsh
 
 # Create and configure global .gitignore
-function global_gitignore() {(
+function global_gitignore() { (
     git config --global core.excludesfile "${HOME}"/.gitignore_global
     curl -LSso "${HOME}"/.gitignore_global https://gist.githubusercontent.com/octocat/9257657/raw/3f9569e65df83a7b328b39a091f0ce9c6efc6429/.gitignore
 
@@ -18,21 +18,21 @@ function global_gitignore() {(
         echo "dtbo*"
         echo "net/wireguard"
         echo "*.rej"
-    } >> "${HOME}"/.gitignore_global
-)}
+    } >>"${HOME}"/.gitignore_global
+); }
 
 # Grab linux, linux-next, and linux-stable for CBL
 # https://www.kernel.org/cloning-linux-from-a-bundle.html
-function cbl_linux_repos() {(
+function cbl_linux_repos() { (
     # shellcheck disable=SC2030
     : "${CBL:=${HOME}/cbl}" "${SRC_FOLDER:=${HOME}/src}"
 
-    while (( ${#} )); do
+    while ((${#})); do
         case ${1} in
-            linux) PAIRS=( "torvalds/linux.git:linux" "torvalds/linux.git:${CBL}/linux" "torvalds/linux.git:${CBL}/mirrors/linux" ) ;;
-            linux-next) PAIRS=( "next/linux-next.git:linux-next" "next/linux-next.git:${CBL}/linux-next" ) ;;
-            linux-stable) PAIRS=( "stable/linux.git:linux-stable" ) ;;
-            *) return 1;
+            linux) PAIRS=("torvalds/linux.git:linux" "torvalds/linux.git:${CBL}/linux" "torvalds/linux.git:${CBL}/mirrors/linux") ;;
+            linux-next) PAIRS=("next/linux-next.git:linux-next" "next/linux-next.git:${CBL}/linux-next") ;;
+            linux-stable) PAIRS=("stable/linux.git:linux-stable") ;;
+            *) return 1 ;;
         esac
         shift
     done
@@ -55,10 +55,10 @@ function cbl_linux_repos() {(
         )
     done
     rm -rf 'clone.bundle-*'
-)}
+); }
 
 # Download other CBL things
-function cbl_other_repos() {(
+function cbl_other_repos() { (
     # shellcheck disable=SC2031
     cd "${CBL:=${HOME}/cbl}"/android || die "wtf"
     [[ -d android-kernel-clang ]] || git clone git@github.com:nathanchance/android-kernel-clang.git
@@ -76,7 +76,7 @@ function cbl_other_repos() {(
 
         [[ -d ${FOLDER} ]] || git clone git@github.com:ClangBuiltLinux/"${REPO}".git "${FOLDER}"
     done
-    for FOLDER in boot-utils ci dockerimage tc-build; do ( cd "${FOLDER}" && hub fork ); done
+    for FOLDER in boot-utils ci dockerimage tc-build; do (cd "${FOLDER}" && hub fork); done
     [[ -d llvm-kernel-testing ]] || git clone git@github.com:nathanchance/llvm-kernel-testing
     [[ -d yapf ]] || git clone https://github.com/google/yapf
 
@@ -96,5 +96,5 @@ function cbl_other_repos() {(
     git remote show -n microsoft || git remote add -f --tags microsoft git://github.com/microsoft/WSL2-Linux-Kernel
     git config rerere.enabled true
     git config status.aheadBehind false
-)}
+); }
 # vi: filetype=zsh
