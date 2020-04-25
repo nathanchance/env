@@ -112,10 +112,10 @@ function gcmt() {
     local TAG
 
     case ${1} in
-        "-a" | "--acked-by") TAG="Acked-by" ;;
-        "-r" | "--reviewed-by") TAG="Reviewed-by" ;;
-        "-s" | "--signed-off-by") TAG="Signed-off-by" ;;
-        "-t" | "--tested-by") TAG="Tested-by" ;;
+        -a | --acked-by) TAG="Acked-by" ;;
+        -r | --reviewed-by) TAG="Reviewed-by" ;;
+        -s | --signed-off-by) TAG="Signed-off-by" ;;
+        -t | --tested-by) TAG="Tested-by" ;;
     esac
     [[ -z ${TAG} ]] && TAG="Signed-off-by"
 
