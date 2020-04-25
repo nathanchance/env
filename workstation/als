@@ -84,11 +84,7 @@ function post_merge_commands() {
     esac
 
     # If it is found, execute it
-    if [[ -n ${TAG_SUFFIX} ]]; then
-        COMMANDS=${ALS}/sp/${TAG_TO_PULL}/${COMMANDS}
-    else
-        COMMANDS=${ALS}/sp/${KVER}/${COMMANDS}
-    fi
+    COMMANDS=${ALS}/sp/${KVER}/${COMMANDS}
     if [[ -f ${COMMANDS} ]]; then
         if bash "${COMMANDS}" "${COMMANDS_BRANCH}"; then
             # Log success then push
@@ -151,14 +147,6 @@ while ((${#})); do
         -s | --skip-merging)
             # Skip merging (usual if wanting to build only)
             SKIP_MERGE=true
-            ;;
-
-        -t | --tag)
-            # Pull a pending stable tag from Sasha Levin
-            shift && enforce_value "${@}"
-            ALS_PARAMS+=("-t" "${1}")
-            NO_PUSH=true
-            TAG_SUFFIX=${1}
             ;;
 
         -r | --release-candidate)
@@ -289,9 +277,6 @@ for VERSION in "${VERSIONS[@]}"; do
                 if [[ -n ${QUEUE} ]]; then
                     COMMANDS_BRANCH=MERGE_HEAD
                     LOG_TAG="${LOG_TAG} stable-queue/queue-${MAJOR_VER} |"
-                elif [[ -n ${TAG_SUFFIX} ]]; then
-                    TAG_TO_PULL=for-greg-${MAJOR_VER}-${TAG_SUFFIX}
-                    LOG_TAG="${LOG_TAG} sashal/linux-stable.git ${TAG_TO_PULL} |"
                 else
                     COMMANDS_BRANCH=linux-stable${RC:+"-rc"}/linux-${MAJOR_VER}.y
                     LOG_TAG="${LOG_TAG} ${COMMANDS_BRANCH} |"
