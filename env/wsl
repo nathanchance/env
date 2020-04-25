@@ -113,6 +113,7 @@ function bootstrap() { (
         unzip \
         vim \
         wget \
+        wslu \
         zlib1g-dev
 
     # Reinstall 'ping' to avoid issues with permissions
