@@ -607,6 +607,8 @@ function lt() {(
         CONFIG=${CONFIG##*:}
 
         # Basic configs are defconfigs + little endian allyesconfig
+        # warning: This only exits the subshell caused by the (..) group. [SC2106]... that's the idea lol
+        # shellcheck disable=SC2106
         [[ -n ${BASIC} && ! ( ${CONFIG} =~ defconfig || ${CONFIG} = "allyesconfig" ) ]] && continue
 
         header "${ARCH}:${CONFIG}" "${BOLD}"
