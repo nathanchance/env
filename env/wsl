@@ -119,10 +119,6 @@ function bootstrap() { (
     # Reinstall 'ping' to avoid issues with permissions
     sudo_wrapper apt install -y --reinstall iputils-ping
 
-    # Install speedtest-cli
-    sudo_wrapper curl -LSo /usr/local/bin/speedtest-cli https://raw.githubusercontent.com/sivel/speedtest-cli/master/speedtest.py
-    sudo_wrapper chmod +x /usr/local/bin/speedtest-cli
-
     # Setup SSH and GPG if keys are present
     mkdir -p "${HOME}"/.ssh
     cp "${KEYS}"/id_ed25519{,.pub} "${HOME}"/.ssh
