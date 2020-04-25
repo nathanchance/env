@@ -56,88 +56,88 @@ function parse_parameters() {
     START=$(date +%s)
     while ((${#})); do
         case ${1} in
-            "-a" | "--arch")
+            -a | --arch)
                 # Architecture to build
                 shift && enforce_value "${@}"
 
                 ARCH=${1}
                 ;;
 
-            "-c" | "--clang")
+            -c | --clang)
                 # Use Clang for compiling the kernel
                 CLANG=true
                 ;;
 
-            "-ct" | "--clang-toolchain")
+            -ct | --clang-toolchain)
                 # Specify which Clang toolchain to use
                 shift && enforce_value "${@}"
 
                 CLANG_FOLDER=${1}
                 ;;
 
-            "-d" | "--defconfig")
+            -d | --defconfig)
                 # Config to build
                 shift && enforce_value "${@}"
 
                 IFS=',' read -r -A DEFCONFIGS <<<"${1}"
                 ;;
 
-            "-D" | "--debug")
+            -D | --debug)
                 # Show full compilation
                 VERBOSITY=3
                 ;;
 
-            "-e" | "--errors")
+            -e | --errors)
                 # Only show errors
                 VERBOSITY=1
                 RG_LOOK_FOR="error:"
                 ;;
 
-            "-f" | "--folder")
+            -f | --folder)
                 # Kernel folder
                 shift && enforce_value "${@}"
 
                 FOLDER=${1}
                 ;;
 
-            "-gt" | "--gcc-toolchain")
+            -gt | --gcc-toolchain)
                 # Specify which GCC toolchain to use
                 shift && enforce_value "${@}"
 
                 GCC_FOLDER=${1}
                 ;;
 
-            "-gt-32" | "--gcc-32-bit-toolchain")
+            -gt-32 | --gcc-32-bit-toolchain)
                 # 32-bit GCC toolchain to use for compiling
                 shift && enforce_value "${@}"
 
                 GCC_32_BIT_FOLDER=${1}
                 ;;
 
-            "-r" | "--show-only-result")
+            -r | --show-only-result)
                 # Just show if build was successful or not
                 SHOW_ONLY_RESULT=true
                 ;;
 
-            "-v" | "--version-display")
+            -v | --version-display)
                 # Version to display
                 shift && enforce_value "${@}"
 
                 VERSION_DISPLAY=${1}
                 ;;
 
-            "-w" | "--warnings")
+            -w | --warnings)
                 # Show only warnings and errors during compilation
                 VERBOSITY=2
                 RG_LOOK_FOR="error:|warning:"
                 ;;
 
-            "-Werror")
+            -Werror)
                 # Compile with -Werror
                 WERROR=true
                 ;;
 
-            "-Wno-error")
+            -Wno-error)
                 # Disable -Werror
                 NO_WERROR=true
                 ;;
@@ -244,10 +244,10 @@ function compile() {
 
     # Show compilation based on flags
     case ${VERBOSITY} in
-        "3")
+        3)
             build
             ;;
-        "1" | "2")
+        1 | 2)
             DISABLED_WARNINGS=(
                 "which has unmet direct dependencies"
                 "choice value used outside its choice group"
