@@ -4,7 +4,6 @@
 #
 # Utility and terminal setup functions for my remote workstation
 
-
 # Setup workstation function
 #
 # Assumes the following things have been done:
@@ -37,7 +36,7 @@
 # Packet:
 #   1. User account and partitions have been created using user-data
 #
-function bootstrap() {(
+function bootstrap() { (
     # Super debug :)
     set -x
 
@@ -50,12 +49,12 @@ function bootstrap() {(
 
     # Setup folders that will be used
     mkdir -p "${ALS}" \
-             "${ANDROID_TC_FOLDER}" \
-             "${CBL}"/{android,git,mirrors} \
-             "${GITHUB_FOLDER}" \
-             "${HOME}"/usr/bin \
-             "${KERNEL_FOLDER}"/sony \
-             "${SRC_FOLDER}" || die "Can't create folders, wtf"
+        "${ANDROID_TC_FOLDER}" \
+        "${CBL}"/{android,git,mirrors} \
+        "${GITHUB_FOLDER}" \
+        "${HOME}"/usr/bin \
+        "${KERNEL_FOLDER}"/sony \
+        "${SRC_FOLDER}" || die "Can't create folders, wtf"
 
     # Get distro we are on
     DISTRO=$(get_distro)
@@ -73,53 +72,54 @@ function bootstrap() {(
 
         # Install required binaries
         sudo pacman -Syyu --noconfirm || die "Error updating packages!"
-        sudo pacman -S --needed --noconfirm aarch64-linux-gnu-gcc \
-                                            asciidoc \
-                                            base-devel \
-                                            bat \
-                                            bc \
-                                            ca-certificates \
-                                            clang \
-                                            ccache \
-                                            cmake \
-                                            cpio \
-                                            doxygen \
-                                            dtc \
-                                            expect \
-                                            fd \
-                                            gcc-multilib \
-                                            git \
-                                            htop \
-                                            hugo \
-                                            iputils \
-                                            jq \
-                                            linux-zen \
-                                            linux-zen-headers \
-                                            lld \
-                                            llvm \
-                                            mosh \
-                                            most \
-                                            multilib-devel \
-                                            mutt \
-                                            neofetch \
-                                            ninja \
-                                            openssl \
-                                            pacman-contrib \
-                                            perl-authen-sasl \
-                                            perl-mime-tools \
-                                            perl-net-smtp-ssl \
-                                            podman \
-                                            python \
-                                            python-pip \
-                                            python-psutil \
-                                            qemu-headless-arch-extra \
-                                            ripgrep \
-                                            swig \
-                                            tmux \
-                                            uboot-tools \
-                                            unzip \
-                                            wget \
-                                            xmlto || die "Error installing packages!"
+        sudo pacman -S --needed --noconfirm \
+            aarch64-linux-gnu-gcc \
+            asciidoc \
+            base-devel \
+            bat \
+            bc \
+            ca-certificates \
+            clang \
+            ccache \
+            cmake \
+            cpio \
+            doxygen \
+            dtc \
+            expect \
+            fd \
+            gcc-multilib \
+            git \
+            htop \
+            hugo \
+            iputils \
+            jq \
+            linux-zen \
+            linux-zen-headers \
+            lld \
+            llvm \
+            mosh \
+            most \
+            multilib-devel \
+            mutt \
+            neofetch \
+            ninja \
+            openssl \
+            pacman-contrib \
+            perl-authen-sasl \
+            perl-mime-tools \
+            perl-net-smtp-ssl \
+            podman \
+            python \
+            python-pip \
+            python-psutil \
+            qemu-headless-arch-extra \
+            ripgrep \
+            swig \
+            tmux \
+            uboot-tools \
+            unzip \
+            wget \
+            xmlto || die "Error installing packages!"
         sudo pacman -R --noconfirm linux
         sudo grub-mkconfig -o /boot/grub/grub.cfg
 
@@ -131,80 +131,82 @@ function bootstrap() {(
         # Build folder size
         BFS=20
     elif [[ ${DISTRO} = "ubuntu" ]]; then
-        PACKAGES=( abootimg
-                   bison
-                   bsdtar
-                   build-essential
-                   ca-certificates
-                   cdbs
-                   clang
-                   cmake
-                   config-package-dev
-                   creduce
-                   curl
-                   debhelper
-                   devscripts
-                   doxygen
-                   expect
-                   fakeroot
-                   file
-                   flex
-                   gcc
-                   gcc-multilib
-                   gettext
-                   git
-                   g++
-                   irssi
-                   libauthen-sasl-perl
-                   libcurl4-openssl-dev
-                   libedit-dev
-                   libelf-dev
-                   libemail-valid-perl
-                   libevent-dev
-                   libexpat1-dev
-                   libglib2.0-dev
-                   libgmp-dev
-                   libio-socket-ssl-perl
-                   liblz4-tool
-                   libmailtools-perl
-                   libmpc-dev
-                   libmpfr-dev
-                   libncurses-dev
-                   libnet-smtp-ssl-perl
-                   libpcre2-dev
-                   libpixman-1-dev
-                   libssl-dev
-                   llvm
-                   lld
-                   locales
-                   make
-                   mosh
-                   most
-                   mutt
-                   neofetch
-                   ninja-build
-                   pkg-config
-                   podman
-                   psmisc
-                   python3
-                   python3-dev
-                   python3-pip
-                   python3-setuptools
-                   re2c
-                   slirp4netns
-                   sudo
-                   swig
-                   texinfo
-                   tcl
-                   tmux
-                   u-boot-tools
-                   uidmap
-                   unzip
-                   vim
-                   zip
-                   zlib1g-dev
-                   zsh
-                   zstd )
+        PACKAGES=(
+            abootimg
+            bison
+            bsdtar
+            build-essential
+            ca-certificates
+            cdbs
+            clang
+            cmake
+            config-package-dev
+            creduce
+            curl
+            debhelper
+            devscripts
+            doxygen
+            expect
+            fakeroot
+            file
+            flex
+            gcc
+            gcc-multilib
+            gettext
+            git
+            g++
+            irssi
+            libauthen-sasl-perl
+            libcurl4-openssl-dev
+            libedit-dev
+            libelf-dev
+            libemail-valid-perl
+            libevent-dev
+            libexpat1-dev
+            libglib2.0-dev
+            libgmp-dev
+            libio-socket-ssl-perl
+            liblz4-tool
+            libmailtools-perl
+            libmpc-dev
+            libmpfr-dev
+            libncurses-dev
+            libnet-smtp-ssl-perl
+            libpcre2-dev
+            libpixman-1-dev
+            libssl-dev
+            llvm
+            lld
+            locales
+            make
+            mosh
+            most
+            mutt
+            neofetch
+            ninja-build
+            pkg-config
+            podman
+            psmisc
+            python3
+            python3-dev
+            python3-pip
+            python3-setuptools
+            re2c
+            slirp4netns
+            sudo
+            swig
+            texinfo
+            tcl
+            tmux
+            u-boot-tools
+            uidmap
+            unzip
+            vim
+            zip
+            zlib1g-dev
+            zsh
+            zstd
+        )
 
         sudo_wrapper add-apt-repository ppa:projectatomic/ppa || exit ${?}
         sudo_wrapper apt update || exit ${?}
@@ -332,7 +334,6 @@ function bootstrap() {(
     echo
 ) || return 1; }
 
-
 # Workstation specific aliases
 function workstation_aliases() {
     # default Arch ls alias
@@ -345,13 +346,12 @@ function workstation_aliases() {
     alias ms='merge-stable'
 }
 
-
 # Setup ccache
 # ccache_setup <size>
 function ccache_setup() {
     if [[ -f ${CCACHE} ]]; then
         if [[ -n ${1} ]]; then
-            ccache -M "${1}"G &> /dev/null
+            ccache -M "${1}"G &>/dev/null
             ccache --set-config=compression=true
             ccache --set-config=compression_level=9
             export USE_CCACHE=1
@@ -364,9 +364,8 @@ function ccache_setup() {
     fi
 }
 
-
 # Clean build folder
-function cbf() {(
+function cbf() { (
     case "${1}" in
         b) FTC=${BBF:?} ;;
         l) FTC=${LBF:?} ;;
@@ -375,12 +374,12 @@ function cbf() {(
     esac
     find "${FTC:?}" -mindepth 1 -delete 2>/dev/null
     type crbf &>/dev/null && crbf
-)}
-
+); }
 
 # Additional setup steps for my workstation
 function workstation_setup() {
-    LOG=$(mktemp); export LOG
+    LOG=$(mktemp)
+    export LOG
     add_to_path_pre "${SCRIPTS_FOLDER}/workstation"
     move_to_front_of_path "${HOME}/.local/bin"
     move_to_front_of_path "${HOME}/usr/bin"
@@ -391,9 +390,8 @@ function workstation_setup() {
     source "${SCRIPTS_FOLDER}"/env/stubs/bldgcc
     load_botinfo
     type crbf &>/dev/null && crbf
-    ( gpg_key_cached )
+    (gpg_key_cached)
 }
-
 
 # Neofetch alias
 function nf() {
@@ -411,9 +409,8 @@ function nf() {
     echo
 }
 
-
 # Update all remotes and run git gc/prune
-function clean-kernels() {(
+function clean-kernels() { (
     for REPO in "${ALS}"/* "${CBL}"/linux*; do
         header "${REPO}"
         if cd "${REPO}"; then
@@ -424,11 +421,10 @@ function clean-kernels() {(
             display_error "$(basename "${REPO}") doesn't exist!"
         fi
     done
-)}
-
+); }
 
 # Function to incrementally patch a kernel with stable
-function stable-patch() {(
+function stable-patch() { (
     CURRENT_VERSION=$(kver)
     TARGET_PATCH_LEVEL=$((${CURRENT_VERSION##*.} + 1))
 
@@ -448,22 +444,27 @@ ${URL}"
         echo
         echo
     fi
-)}
-
+); }
 
 # Update/init qcacld-3.0 tree
-function qcacld() {(
-    REPOS=( "fw-api" "qcacld-3.0" "qca-wifi-host-cmn" )
+function qcacld() { (
+    REPOS=("fw-api" "qcacld-3.0" "qca-wifi-host-cmn")
 
-    while (( ${#} )); do
+    while ((${#})); do
         case ${1} in
-            "-i"|"--init") INIT=true ;;
-            "-t"|"--tag") shift; TAG=${1} ;;
-            "-u"|"--update") UPDATE=true ;;
+            "-i" | "--init") INIT=true ;;
+            "-t" | "--tag")
+                shift
+                TAG=${1}
+                ;;
+            "-u" | "--update") UPDATE=true ;;
         esac
         shift
     done
-    [[ -n ${INIT} && -n ${UPDATE} ]] && { display_error "Both init and update were specified!"; return; }
+    [[ -n ${INIT} && -n ${UPDATE} ]] && {
+        display_error "Both init and update were specified!"
+        return
+    }
 
     case "${PWD}" in
         *"sony"*)
@@ -472,13 +473,18 @@ function qcacld() {(
                 4.9*) TAG=aosp/LA.UM.7.3.r1 ;;
             esac
             URL=https://github.com/sonyxperiadev/vendor-qcom-opensource-wlan-
-            SUBFOLDER=drivers/staging/wlan-qc ;;
+            SUBFOLDER=drivers/staging/wlan-qc
+            ;;
 
         *)
             URL=https://source.codeaurora.org/quic/la/platform/vendor/qcom-opensource/wlan/
-            SUBFOLDER=drivers/staging ;;
+            SUBFOLDER=drivers/staging
+            ;;
     esac
-    [[ -z ${TAG} ]] && { display_error "No tag was specified!"; return; }
+    [[ -z ${TAG} ]] && {
+        display_error "No tag was specified!"
+        return
+    }
 
     for REPO in "${REPOS[@]}"; do
         echo "${REPO}"
@@ -497,38 +503,35 @@ function qcacld() {(
             git c --no-edit -m "staging: ${REPO}: Checkout at ${TAG}"
         elif [[ -n ${UPDATE} ]]; then
             git m --no-edit -m "staging: ${REPO}: Merge tag '${TAG}' into $(git cb)" \
-                  -X subtree="${SUBFOLDER}/${REPO}" FETCH_HEAD
+                -X subtree="${SUBFOLDER}/${REPO}" FETCH_HEAD
         fi
     done
-)}
-
+); }
 
 # Symlink the generic-commands file to all of the android-linux-stable trees for a particular kernel version
-function symlink-commands() {(
+function symlink-commands() { (
     case ${1} in
-        "3.18") FILES=( "marlin" "msm-3.18" "op3-8.0.0" "tissot" ) ;;
-        "4.4") FILES=( "msm-4.4" "nash-lineage-17.1" "op5-lineage-17.1" "op5-P_9.0" "op5-P_9.0_Beta" "wahoo" ) ;;
-        "4.9") FILES=( "bluecross" "msm-4.9" "op6-Q_10.0" ) ;;
-        "4.14") FILES=( "msm-4.14" ) ;;
+        "3.18") FILES=("marlin" "msm-3.18" "op3-8.0.0" "tissot") ;;
+        "4.4") FILES=("msm-4.4" "nash-lineage-17.1" "op5-lineage-17.1" "op5-P_9.0" "op5-P_9.0_Beta" "wahoo") ;;
+        "4.9") FILES=("bluecross" "msm-4.9" "op6-Q_10.0") ;;
+        "4.14") FILES=("msm-4.14") ;;
     esac
 
     for FILE in "${FILES[@]}"; do
         ln -sf generic-commands "${FILE}-commands"
     done
-)}
-
+); }
 
 # Alias for running PGO LLVM build
-function updpgollvm() {(
+function updpgollvm() { (
     DATE=$(date +%Y-%m-%d)
-    PREFIX=${LLVM_TC_FOLDER}/${DATE} bpgollvm && \
-    symlink_llvm "${DATE}" && \
-    ccache_clear llvm
-)}
-
+    PREFIX=${LLVM_TC_FOLDER}/${DATE} bpgollvm &&
+        symlink_llvm "${DATE}" &&
+        ccache_clear llvm
+); }
 
 # Symlink an LLVM toolchain into ${HOME}/usr
-function symlink_llvm() {(
+function symlink_llvm() { (
     header "Removing symlinks"
     for FILE in $(fd -t l . "${HOME}"/usr); do
         [[ $(readlink -f "${FILE}") =~ toolchains/llvm ]] && rm -vrf "${FILE}"
@@ -546,29 +549,26 @@ function symlink_llvm() {(
 
     header "Symlinking LLVM"
     cp -frsv "${LLVM_TC_FOLDER}/${1:?}"/* "${HOME}"/usr
-)}
-
+); }
 
 # Qualify new LLVM revision
-function qualify_llvm_uprev() {(
+function qualify_llvm_uprev() { (
     bllvm --bootstrap || exit ${?}
     bllvm
-)}
-
+); }
 
 # Update function
-function upd() {(
+function upd() { (
     case "$(get_distro)" in
         arch) yay ;;
-        debian|ubuntu) sudo_wrapper sh -c 'apt update && apt upgrade' ;;
+        debian | ubuntu) sudo_wrapper sh -c 'apt update && apt upgrade' ;;
     esac
-)}
-
+); }
 
 # Generate ALS conflict lists
-function genalscnflcts() {(
+function genalscnflcts() { (
     for FILE in $(git cf); do
         printf '"%s:%d"\n' "${FILE}" "$(git lo "${1:?}"..MERGE_HEAD "${FILE}" | wc -l)"
     done
-)}
+); }
 # vi: filetype=zsh
