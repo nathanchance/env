@@ -66,7 +66,7 @@ function bootstrap() { (
     [[ -d ${KEYS} ]] || die "Keys are not available"
 
     # Install packages from Ubuntu repos
-    sudo apt install -y \
+    sudo_wrapper apt install -y \
         build-essential \
         bc \
         bison \
@@ -117,11 +117,11 @@ function bootstrap() { (
         zlib1g-dev
 
     # Reinstall 'ping' to avoid issues with permissions
-    sudo apt install -y --reinstall iputils-ping
+    sudo_wrapper apt install -y --reinstall iputils-ping
 
     # Install speedtest-cli
-    sudo curl -LSo /usr/local/bin/speedtest-cli https://raw.githubusercontent.com/sivel/speedtest-cli/master/speedtest.py
-    sudo chmod +x /usr/local/bin/speedtest-cli
+    sudo_wrapper curl -LSo /usr/local/bin/speedtest-cli https://raw.githubusercontent.com/sivel/speedtest-cli/master/speedtest.py
+    sudo_wrapper chmod +x /usr/local/bin/speedtest-cli
 
     # Setup SSH and GPG if keys are present
     mkdir -p "${HOME}"/.ssh
