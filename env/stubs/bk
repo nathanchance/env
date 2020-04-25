@@ -4,7 +4,6 @@
 #
 # build-kernel wrapper
 
-
 # build-kernel wrapper for known trees
 function bk() {
     local FOLDER PARAMS
@@ -13,30 +12,30 @@ function bk() {
 
     case "${FOLDER}:$(git cb)" in
         # android-linux-stable
-        "angler:"*|"bullhead:"*|"marlin:"*) PARAMS=( "${FOLDER}_defconfig" ) ;;
-        "bluecross:"*) PARAMS=( b1c1_defconfig -c ) ;;
-        "jasmine:"*) PARAMS=( "jasmine-perf_defconfig" ) ;;
-        "mata:lineage-15.1") PARAMS=( "lineageos_${FOLDER}_defconfig" -c ) ;;
-        "msm-3.18:"*|"msm-4.4:"*) PARAMS=( msmcortex-perf_defconfig ) ;;
-        "msm-4.9:kernel.lnx.4.9.r2"*"-rel") PARAMS=( sdm845-perf_defconfig -c -ct sd-llvm-6.0.2 ) ;;
-        "msm-4.9:"*) PARAMS=( sdm845-perf_defconfig ) ;;
-        "msm-4.14:"*) PARAMS=( vendor/sm8150-perf_defconfig -c -ct sd-llvm-6.0.2 ) ;;
-        "nash:lineage-17.1"*) PARAMS=( lineageos_nash_defconfig -c -ct clang-r353983c ) ;;
-        "nash:"*) PARAMS=( "arch/arm64/configs/msmcortex-perf_defconfig,arch/arm64/configs/ext_config/moto-msmcortex.config,arch/arm64/configs/ext_config/nash-defconfig.config" ) ;;
-        "op3:android-"*) PARAMS=( omni_oneplus3_defconfig ) ;;
-        "op3:lineage-"*) PARAMS=( lineageos_oneplus3_defconfig ) ;;
-        "op3:oneplus/QC8996"*) PARAMS=( msm-perf_defconfig ) ;;
-        "op5:android-"*) PARAMS=( omni_oneplus5_defconfig ) ;;
-        "op5:lineage-"*) PARAMS=( lineage_oneplus5_defconfig ) ;;
-        "op5:oneplus/QC8998"*) PARAMS=( msmcortex-perf_defconfig ) ;;
-        "op6:android-"*) PARAMS=( omni_oneplus6_defconfig ) ;;
-        "op6:lineage-"*) PARAMS=( enchilada_defconfig ) ;;
-        "op6:oneplus/SDM845_"*) PARAMS=( sdm845-perf_defconfig ) ;;
-        "polaris"*) PARAMS=( polaris_user_defconfig ) ;;
-        "sagit:sagit-o-oss") PARAMS=( sagit_user_defconfig ) ;;
-        "tissot:tissot-"*) PARAMS=( tissot-perf_defconfig ) ;;
-        "wahoo:"*) PARAMS=( wahoo_defconfig -c ) ;;
-        "whyred:whyred-o-oss") PARAMS=( whyred-perf_defconfig ) ;;
+        "angler:"* | "bullhead:"* | "marlin:"*) PARAMS=("${FOLDER}_defconfig") ;;
+        "bluecross:"*) PARAMS=(b1c1_defconfig -c) ;;
+        "jasmine:"*) PARAMS=("jasmine-perf_defconfig") ;;
+        "mata:lineage-15.1") PARAMS=("lineageos_${FOLDER}_defconfig" -c) ;;
+        "msm-3.18:"* | "msm-4.4:"*) PARAMS=(msmcortex-perf_defconfig) ;;
+        "msm-4.9:kernel.lnx.4.9.r2"*"-rel") PARAMS=(sdm845-perf_defconfig -c -ct sd-llvm-6.0.2) ;;
+        "msm-4.9:"*) PARAMS=(sdm845-perf_defconfig) ;;
+        "msm-4.14:"*) PARAMS=(vendor/sm8150-perf_defconfig -c -ct sd-llvm-6.0.2) ;;
+        "nash:lineage-17.1"*) PARAMS=(lineageos_nash_defconfig -c -ct clang-r353983c) ;;
+        "nash:"*) PARAMS=("arch/arm64/configs/msmcortex-perf_defconfig,arch/arm64/configs/ext_config/moto-msmcortex.config,arch/arm64/configs/ext_config/nash-defconfig.config") ;;
+        "op3:android-"*) PARAMS=(omni_oneplus3_defconfig) ;;
+        "op3:lineage-"*) PARAMS=(lineageos_oneplus3_defconfig) ;;
+        "op3:oneplus/QC8996"*) PARAMS=(msm-perf_defconfig) ;;
+        "op5:android-"*) PARAMS=(omni_oneplus5_defconfig) ;;
+        "op5:lineage-"*) PARAMS=(lineage_oneplus5_defconfig) ;;
+        "op5:oneplus/QC8998"*) PARAMS=(msmcortex-perf_defconfig) ;;
+        "op6:android-"*) PARAMS=(omni_oneplus6_defconfig) ;;
+        "op6:lineage-"*) PARAMS=(enchilada_defconfig) ;;
+        "op6:oneplus/SDM845_"*) PARAMS=(sdm845-perf_defconfig) ;;
+        "polaris"*) PARAMS=(polaris_user_defconfig) ;;
+        "sagit:sagit-o-oss") PARAMS=(sagit_user_defconfig) ;;
+        "tissot:tissot-"*) PARAMS=(tissot-perf_defconfig) ;;
+        "wahoo:"*) PARAMS=(wahoo_defconfig -c) ;;
+        "whyred:whyred-o-oss") PARAMS=(whyred-perf_defconfig) ;;
 
         # Unknown choice
         *) display_error "Kernel not supported by wrapper!" && return 1 ;;
