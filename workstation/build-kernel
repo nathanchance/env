@@ -12,11 +12,6 @@
 #                    #
 ######################
 
-# Echo to stderr
-function errcho() {
-    (echo >&2 "${@}")
-}
-
 # Get cross compile prefix
 function get_cc_prefix() {
     find "${1}" \( -type f -o -type l \) -name '*-gcc' -printf "%T+\t%p\n" | sort -r | head -n1 | sed 's@.*/@@' | sed 's/real-//' | sed 's/gcc//'
@@ -270,17 +265,18 @@ function compile() {
 
 # Report success
 function report_result() {
-    END=$(date +%s)
-    [[ -n ${SHOW_ONLY_RESULT} ]] && SCRIPT_COMMAND="${0##*/} ${PARAMS}  |  "
+    TIME_STRING=$(format_time "${START}" "$(date +%s)")
+    [[ -n ${SHOW_ONLY_RESULT} ]] && SCRIPT_COMMAND="${SCRIPT_NAME} ${PARAMS}  |  "
     if [[ -f ${FINAL_IMAGE} ]]; then
         echo
-        errcho "${SCRIPT_COMMAND}${GRN}Build successful in $(format_time "${START}" "${END}")${RST}"
+        printf '%s%bBuild successful in %s%b\n' "${SCRIPT_COMMAND}" "${GRN}" "${TIME_STRING}" "${RST}" >&2
         echo
         printf '%bImage:%b      %s\n' "${BOLD}" "${RST}" "${FINAL_IMAGE}"
         echo
         formatted_kernel_version "${VERSION_DISPLAY}"
     else
-        die "${RST}${SCRIPT_COMMAND}${RED}Build failed in $(format_time "${START}" "${END}")" >&2
+        printf '%s%bBuild failed in %s%b\n' "${SCRIPT_COMMAND}" "${RED}" "${TIME_STRING}" "${RST}" >&2
+        exit 33
     fi
 
     # Alert of script end
@@ -293,6 +289,7 @@ source "${SCRIPTS_FOLDER}/common"
 source "${SCRIPTS_FOLDER}/env/stubs/folders"
 source "${SCRIPTS_FOLDER}/env/stubs/fkv"
 source "${SCRIPTS_FOLDER}/env/stubs/traps"
+SCRIPT_NAME=${0##*/}
 parse_parameters "${@}"
 setup_toolchains
 compile
