@@ -22,18 +22,18 @@ function formatted_kernel_version() {
     [[ ${2} =~ -p ]] && unset BOLD RST
 
     case "${1}" in
-        "full")
+        full)
             # 'cat /proc/version'
             echo "${BOLD}Version:${RST}    Linux version ${VERSION_STRING} (${LINUX_COMPILE_BY}@${LINUX_COMPILE_HOST}) (${LINUX_COMPILER}) ${UTS_VERSION}"
             echo
             ;;
-        "pie")
+        pie)
             # Formatted 'uname -rv': https://android.googlesource.com/platform/frameworks/base/+/d32e79feb3b894288dde86c5b03bff241d816371
             echo "${BOLD}Version:${RST}    ${VERSION_STRING}"
             echo "            #${KBUILD_BUILD_NUMBER:-1} ${UTS_VERSION#*PREEMPT }"
             echo
             ;;
-        "oreo"*)
+        oreo*)
             # Formatted 'cat /proc/version': https://android.googlesource.com/platform/frameworks/base/+/fa89b60167d698bf8976e59ec97e0a14a0433e38
             echo "${BOLD}Version:${RST}    ${VERSION_STRING} (${LINUX_COMPILER})"
             [[ ${1} =~ -small ]] && return
