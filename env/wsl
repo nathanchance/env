@@ -195,11 +195,6 @@ function upd_wsl_kernel() { (
     scp nathan@"${SERVER_IP:?}":"${SRC_FOLDER}"/${OUT_FOLDER}/${KERNEL_IMAGE} "${KERNEL}"
 ); }
 
-# Sync the Windows Terminal config to my scripts folder
-function upd_terminal_config() { (
-    cp -v "$(wslpath -a "C:\Users\natec\AppData\Local\Packages\Microsoft.WindowsTerminal_8wekyb3d8bbwe\LocalState\profiles.json")" "${SCRIPTS_FOLDER:?}"/configs/local
-); }
-
 # Install rust using the recommended command
 function install_rust_wsl() { (
     curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
