@@ -340,7 +340,7 @@ function workstation_aliases() {
     alias ls='ls --color=auto'
 
     # Generate a kernel version for the current tree
-    alias kver='make kernelversion'
+    alias kver='make -s kernelversion'
 
     # Alias for merge-stable script
     alias ms='merge-stable'
