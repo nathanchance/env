@@ -1024,7 +1024,8 @@ function bld_llvm_bntls_py() {(
     cd "${TC_BLD}" || die "Could not move into ${TC_BLD}!"
     [[ -f build-llvm.py ]] || die "build-llvm.py script could not be found!"
 
-    echo '#!/usr/env/bash
+    cat <<'EOF' > "${SCRIPT}"
+#!/usr/env/bash
 
 PACKAGES=( ccache clang cmake git python3 )
 
@@ -1059,7 +1060,7 @@ ccache --set-config=compression=true
 ccache --set-config=compression_level=9
 ccache --set-config=cache_dir=/ccache
 
-git clone /'"${PWD##*/}"' /'"${PWD##*/}"'2 && cd /'"${PWD##*/}"'2
+TEXT_TO_REPLACE
 
 ./build-binutils.py -t all || exit 1
 CC=gcc ./build-llvm.py || exit 1
@@ -1067,7 +1068,10 @@ CC=clang ./build-llvm.py || exit 1
 
 for FILE in clang ld.lld aarch64-linux-gnu-as arm-linux-gnueabi-as mips-linux-gnu-as mipsel-linux-gnu-as powerpc-linux-gnu-as powerpc64-linux-gnu-as powerpc64le-linux-gnu-as riscv64-linux-gnu-as s390x-linux-gnu-as as; do
     ./install/bin/${FILE} --version || exit 1
-done' > "${SCRIPT}"
+done
+EOF
+
+    sed -i "s;TEXT_TO_REPLACE;git clone /${PWD##*/} /${PWD##*/}2 \&\& cd /${PWD##*/}2;g" "${SCRIPT}"
 
     for IMAGE in archlinux/base:latest \
                  debian:stable-slim \
