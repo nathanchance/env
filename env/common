@@ -29,7 +29,6 @@ function aliases() {
     source "${SCRIPTS_FOLDER}/env/stubs/updbin"
     source "${SCRIPTS_FOLDER}/env/stubs/deldog"
     source "${SCRIPTS_FOLDER}/env/stubs/git"
-    source "${SCRIPTS_FOLDER}/env/stubs/transfer"
 }
 
 # Try to attach via tmux

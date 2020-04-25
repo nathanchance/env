@@ -112,10 +112,6 @@ function parse_parameters() {
             "-r"|"--show-only-result")
                 SHOW_ONLY_RESULT=true ;;
 
-            # Upload image to transfer.sh
-            "-u"|"--upload")
-                UPLOAD=true ;;
-
             # Version to display
             "-v"|"--version-display")
                 shift && enforce_value "${@}"
@@ -275,8 +271,6 @@ function report_result() {
         >&2 die "${RST}${SCRIPT_COMMAND}${RED}BUILD FAILED IN $(format_time "${START}" "${END}")!"
     fi
 
-    [[ -n ${UPLOAD} ]] && transfer "${FINAL_IMAGE}"
-
     # Alert of script end
     echo "\a"
 
@@ -287,7 +281,6 @@ function report_result() {
 source "${SCRIPTS_FOLDER}/common"
 source "${SCRIPTS_FOLDER}/env/stubs/folders"
 source "${SCRIPTS_FOLDER}/env/stubs/fkv"
-source "${SCRIPTS_FOLDER}/env/stubs/transfer"
 source "${SCRIPTS_FOLDER}/env/stubs/traps"
 parse_parameters "${@}"
 setup_toolchains
