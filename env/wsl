@@ -163,6 +163,18 @@ function rbld_usr() { (
     rm -rf "${HOME:?}"/usr
     updbin || die "updbin failed"
     ihugo || die "ihugo failed"
+    ipneofetch || die "ipneofetch failed"
+); }
+
+# Install and patch neofetch to work around 'uname -r' hijack
+function ipneofetch() { (
+    [[ -z ${NEOFETCH_VERSION} ]] && NEOFETCH_VERSION=$(glr dylanaraps/neofetch)
+    NEOFETCH=${PREFIX:-${HOME}/usr}/bin/neofetch
+    rm -rf "${NEOFETCH}"
+    mkdir -p "${NEOFETCH%/*}"
+    curl -LSso "${NEOFETCH}" https://github.com/dylanaraps/neofetch/raw/"${NEOFETCH_VERSION}"/neofetch
+    chmod +x "${NEOFETCH}"
+    sed -i "s/kernel_version=.*/kernel_version=\"\$(cat \/proc\/sys\/kernel\/osrelease)\"/g" "${NEOFETCH}"
 ); }
 
 # Laptop specific aliases
