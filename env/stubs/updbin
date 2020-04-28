@@ -572,7 +572,7 @@ function bzsh() { (
         latest) URL=https://sourceforge.net/projects/zsh/files/latest/download ;;
         *) URL=https://www.zsh.org/pub/zsh-"${BZSH_VERSION//zsh-/}".tar.xz ;;
     esac
-    curl -LSs "${URL}" | tar -xJf -
+    curl -LSs "${URL}" | tar -xvJf -
     cd zsh-* || die "Downloading or extracting zsh failed"
     ./configure --prefix="${ZSH_PREFIX:=${PREFIX:-${HOME}/usr}}"
     make "${JOBS_FLAG:--j"$(nproc)"}" || die "make failed"
