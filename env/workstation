@@ -212,18 +212,18 @@ function bootstrap() { (
             zstd
         )
 
-        sudo_wrapper add-apt-repository ppa:projectatomic/ppa || exit ${?}
-        sudo_wrapper apt update || exit ${?}
-        sudo_wrapper DEBIAN_FRONTEND=noninteractive apt upgrade -y || exit ${?}
-        sudo_wrapper DEBIAN_FRONTEND=noninteractive apt install -y "${PACKAGES[@]}" || exit ${?}
-        echo "locales locales/default_environment_locale select en_US.UTF-8" | sudo_wrapper debconf-set-selections
-        echo "locales locales/locales_to_be_generated multiselect en_US.UTF-8 UTF-8" | sudo_wrapper debconf-set-selections
-        sudo_wrapper rm "/etc/locale.gen"
-        sudo_wrapper dpkg-reconfigure --frontend noninteractive locales
+        sudo add-apt-repository ppa:projectatomic/ppa || exit ${?}
+        sudo apt update || exit ${?}
+        sudo DEBIAN_FRONTEND=noninteractive apt upgrade -y || exit ${?}
+        sudo DEBIAN_FRONTEND=noninteractive apt install -y "${PACKAGES[@]}" || exit ${?}
+        echo "locales locales/default_environment_locale select en_US.UTF-8" | sudo debconf-set-selections
+        echo "locales locales/locales_to_be_generated multiselect en_US.UTF-8 UTF-8" | sudo debconf-set-selections
+        sudo rm "/etc/locale.gen"
+        sudo dpkg-reconfigure --frontend noninteractive locales
 
         # Rootless podman
-        echo "$(whoami):100000:65536" | sudo_wrapper tee /etc/subgid /etc/subuid
-        sudo_wrapper curl -LSso /etc/containers/registries.conf 'https://git.archlinux.org/svntogit/community.git/plain/trunk/registries.conf?h=packages/skopeo'
+        echo "$(whoami):100000:65536" | sudo tee /etc/subgid /etc/subuid
+        sudo curl -LSso /etc/containers/registries.conf 'https://git.archlinux.org/svntogit/community.git/plain/trunk/registries.conf?h=packages/skopeo'
 
         # Build folder size
         BFS=60
@@ -233,10 +233,10 @@ function bootstrap() { (
 
     # Setup build folder
     if ! grep -q "${BLDF}" /etc/fstab; then
-        printf 'tmpfs\t%s\ttmpfs\tnodev,nosuid,uid=%s,gid=%s,size=%dG\t0\t0' "${BLDF}" "$(whoami)" "$(whoami)" "${BFS}" | sudo_wrapper tee -a /etc/fstab
-        sudo_wrapper sed -i '/^$/d' /etc/fstab
-        sudo_wrapper mkdir -p "${BLDF}"
-        sudo_wrapper mount -a
+        printf 'tmpfs\t%s\ttmpfs\tnodev,nosuid,uid=%s,gid=%s,size=%dG\t0\t0' "${BLDF}" "$(whoami)" "$(whoami)" "${BFS}" | sudo tee -a /etc/fstab
+        sudo sed -i '/^$/d' /etc/fstab
+        sudo mkdir -p "${BLDF}"
+        sudo mount -a
     fi
 
     # Setup keys

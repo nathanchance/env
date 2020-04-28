@@ -68,7 +68,7 @@ function bootstrap() { (
     [[ -d ${KEYS} ]] || die "Keys are not available"
 
     # Install packages from Ubuntu repos
-    sudo_wrapper apt install -y \
+    sudo apt install -y \
         build-essential \
         bc \
         bison \
@@ -119,7 +119,7 @@ function bootstrap() { (
         zlib1g-dev
 
     # Reinstall 'ping' to avoid issues with permissions
-    sudo_wrapper apt install -y --reinstall iputils-ping
+    sudo apt install -y --reinstall iputils-ping
 
     # Setup SSH and GPG if keys are present
     mkdir -p "${HOME}"/.ssh

@@ -83,13 +83,13 @@ function bootstrap() { (
             apt install -y sudo || exit ${?}
         fi
 
-        sudo_wrapper apt update || exit ${?}
-        sudo_wrapper DEBIAN_FRONTEND=noninteractive apt upgrade -y || exit ${?}
-        sudo_wrapper DEBIAN_FRONTEND=noninteractive apt install -y "${PACKAGES[@]}" || exit ${?}
-        echo "locales locales/default_environment_locale select en_US.UTF-8" | sudo_wrapper debconf-set-selections
-        echo "locales locales/locales_to_be_generated multiselect en_US.UTF-8 UTF-8" | sudo_wrapper debconf-set-selections
-        sudo_wrapper rm "/etc/locale.gen"
-        sudo_wrapper dpkg-reconfigure --frontend noninteractive locales
+        sudo apt update || exit ${?}
+        sudo DEBIAN_FRONTEND=noninteractive apt upgrade -y || exit ${?}
+        sudo DEBIAN_FRONTEND=noninteractive apt install -y "${PACKAGES[@]}" || exit ${?}
+        echo "locales locales/default_environment_locale select en_US.UTF-8" | sudo debconf-set-selections
+        echo "locales locales/locales_to_be_generated multiselect en_US.UTF-8 UTF-8" | sudo debconf-set-selections
+        sudo rm "/etc/locale.gen"
+        sudo dpkg-reconfigure --frontend noninteractive locales
     fi
 
     SCRIPTS=${HOME}/github/scripts

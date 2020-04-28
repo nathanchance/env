@@ -283,16 +283,6 @@ function glr() { (
     curl --silent "https://api.github.com/repos/${1:?}/releases/latest" | jq -r .tag_name
 ); }
 
-# Only use sudo if needed
-function sudo_wrapper() { (
-    if [[ $(id -u) -eq 0 ]]; then
-        "${@}"
-    else
-        command -v sudo &>/dev/null || exit ${?}
-        sudo "${@}"
-    fi
-); }
-
 # Function for parsing os-release
 function get_distro() {
     case "$(cat /usr/lib/os-release)" in

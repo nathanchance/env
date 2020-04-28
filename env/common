@@ -207,7 +207,7 @@ function fdshfmt() { (
 function upd() { (
     case "$(get_distro)" in
         arch) yay ;;
-        debian | ubuntu) sudo_wrapper sh -c 'apt update && apt upgrade && apt autoremove -y' ;;
+        debian | ubuntu) sudo sh -c 'apt update && apt upgrade && apt autoremove -y' ;;
     esac
 ); }
 # vi: filetype=zsh

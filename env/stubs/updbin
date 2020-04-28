@@ -62,11 +62,11 @@ function bcttlfshtools() { (
     git clone https://github.com/google/android-cuttlefish
     cd android-cuttlefish
     debuild -i -us -uc -b
-    sudo_wrapper dpkg -i ../cuttlefish-common_*_amd64.deb
-    sudo_wrapper apt-get install -f -y
+    sudo dpkg -i ../cuttlefish-common_*_amd64.deb
+    sudo apt-get install -f -y
     rm -rf "${TMP_FOLDER}"
-    sudo_wrapper usermod -aG cvdnetwork "${USER}"
-    sudo_wrapper usermod -aG kvm "${USER}"
+    sudo usermod -aG cvdnetwork "${USER}"
+    sudo usermod -aG kvm "${USER}"
 ); }
 
 # Build/update dtc
@@ -425,7 +425,7 @@ function birg() { (
     if [[ $(uname -m) = "x86_64" ]] && command -v dpkg &>/dev/null; then
         header "Installing ripgrep"
         curl -LSsO "${BASE_URL}"/releases/download/"${RG_VERSION}"/"${DEB}" || die "Error downloading ${DEB}"
-        sudo_wrapper dpkg -i "${DEB}" || die "Error installing ${DEB}"
+        sudo dpkg -i "${DEB}" || die "Error installing ${DEB}"
     else
         header "Building ripgrep"
         curl -LSs "${BASE_URL}"/archive/"${RG_VERSION}".tar.gz | tar -xzf - || die "Error downloading ripgrep source"
@@ -468,7 +468,7 @@ function bisharkdp() { (
             header "Installing ${BINARY}"
             DEB=${BINARY}_${VERSION//v/}_amd64.deb
             curl -LSsO "${URL_BASE}"/releases/download/"${VERSION}"/"${DEB}" || die "Error downloading ${DEB}"
-            sudo_wrapper dpkg -i "${DEB}" || die "Error installing ${DEB}"
+            sudo dpkg -i "${DEB}" || die "Error installing ${DEB}"
         else
             header "Building ${BINARY}"
             curl -LSs "${URL_BASE}"/archive/"${VERSION}".tar.gz | tar -xzf - || die "Error downloading ${BINARY} source"
@@ -579,8 +579,8 @@ function bzsh() { (
     rm -rf "${TMP_FOLDER}"
 
     ZSH_BIN=${ZSH_PREFIX:?}/bin/zsh
-    grep -q "${ZSH_BIN}" /etc/shells || echo "${ZSH_BIN}" | sudo_wrapper tee -a /etc/shells
-    [[ ${SHELL} != "${ZSH_BIN}" ]] && sudo_wrapper chsh -s "${ZSH_BIN}" "$(whoami)"
+    grep -q "${ZSH_BIN}" /etc/shells || echo "${ZSH_BIN}" | sudo tee -a /etc/shells
+    [[ ${SHELL} != "${ZSH_BIN}" ]] && sudo chsh -s "${ZSH_BIN}" "$(whoami)"
 
     move_to_front_of_path "${ZSH_PREFIX}"/bin
     command -v zsh
