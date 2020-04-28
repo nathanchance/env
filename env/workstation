@@ -45,6 +45,9 @@ function bootstrap() { (
     # Grab common functions
     source <(curl -LSs https://github.com/nathanchance/scripts/raw/master/common) &>/dev/null || return 1
 
+    # Do not run this as root
+    [[ $(id -u) -eq 0 ]] && die "Do not run bootstrap as root"
+
     SCRIPTS=${GITHUB_FOLDER}/scripts
 
     # Setup folders that will be used

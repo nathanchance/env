@@ -60,6 +60,9 @@ function bootstrap() { (
     # Grab common functions/variables
     source <(curl -LSs https://github.com/nathanchance/scripts/raw/master/common) &>/dev/null
 
+    # Do not run this as root
+    [[ $(id -u) -eq 0 ]] && die "Do not run bootstrap as root"
+
     # Keys location
     KEYS=/mnt/c/Users/natec/Documents/Keys
     [[ -d ${KEYS} ]] || die "Keys are not available"
