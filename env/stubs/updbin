@@ -10,6 +10,7 @@
 
 # Build/update ccache
 function bccache() { (
+    header "Building ccache"
     CCACHE_REPO=ccache/ccache
     [[ -z ${CCACHE_VERSION} ]] && CCACHE_VERSION=$(glr "${CCACHE_REPO}")
     CCACHE_FOLDER=ccache-${CCACHE_VERSION//v/}
@@ -29,6 +30,7 @@ function bccache() { (
 
 # Build/update cmake
 function bcmake() { (
+    header "Building cmake"
     CMAKE_REPO=Kitware/CMake
     [[ -z ${CMAKE_VERSION} ]] && CMAKE_VERSION=$(glr "${CMAKE_REPO}")
     CMAKE_FOLDER=cmake-${CMAKE_VERSION//v/}
@@ -54,6 +56,7 @@ function bcmake() { (
 
 # Build/update cuttlefish tools
 function bcttlfshtools() { (
+    header "Building Cuttlefish host package"
     TMP_FOLDER=$(mktemp -d)
     cd "${TMP_FOLDER}"
     git clone https://github.com/google/android-cuttlefish
@@ -69,6 +72,7 @@ function bcttlfshtools() { (
 
 # Build/update dtc
 function bdtc() { (
+    header "Building dtc"
     DTC_FOLDER=${SRC_FOLDER:-${HOME}/src}/dtc
     if [[ ! -d ${DTC_FOLDER} ]]; then
         mkdir -p "${DTC_FOLDER%/*}"
@@ -88,6 +92,7 @@ function bdtc() { (
 # Build/update git
 function bgit() { (
     ihub || exit ${?}
+    header "Building git"
     [[ $(uname -m) =~ x86 ]] && MARCH="-march=native "
     MAKE=(make "${JOBS_FLAG:--j"$(nproc)"}"
     prefix="${GIT_PREFIX:=${PREFIX:-${HOME}/usr}}"
@@ -201,6 +206,7 @@ function bllvm() { (
 
 # Build/install GNU make
 function bmake() { (
+    header "Building make"
     [[ -z ${MAKE_VERSION} ]] && MAKE_VERSION=4.3
     MAKE_FOLDER=make-${MAKE_VERSION}
     TMP_FOLDER=$(mktemp -d)
@@ -220,6 +226,7 @@ function bmake() { (
 
 # Build/update ninja
 function bninja() { (
+    header "Building ninja"
     NINJA_REPO=ninja-build/ninja
     [[ -z ${NINJA_VERSION} ]] && NINJA_VERSION=$(glr "${NINJA_REPO}")
     NINJA_FOLDER=ninja-${NINJA_VERSION//v/}
@@ -417,9 +424,11 @@ function birg() { (
     cd "${TMP_FOLDER}"
 
     if [[ $(uname -m) = "x86_64" ]] && command -v dpkg &>/dev/null; then
+        header "Installing ripgrep"
         curl -LSsO "${BASE_URL}"/releases/download/"${RG_VERSION}"/"${DEB}" || die "Error downloading ${DEB}"
         sudo_wrapper dpkg -i "${DEB}" || die "Error installing ${DEB}"
     else
+        header "Building ripgrep"
         curl -LSs "${BASE_URL}"/archive/"${RG_VERSION}".tar.gz | tar -xzf - || die "Error downloading ripgrep source"
         cd ripgrep-"${RG_VERSION}" || die "Can't move into ripgrep source"
         [[ -d ${HOME}/.cargo/bin ]] || irust
@@ -457,10 +466,12 @@ function bisharkdp() { (
         URL_BASE=https://github.com/${BINARY_REPO}
         [[ -z ${VERSION} ]] && VERSION=$(glr "${BINARY_REPO}")
         if [[ $(uname -m) = "x86_64" ]] && command -v dpkg &>/dev/null; then
+            header "Installing ${BINARY}"
             DEB=${BINARY}_${VERSION//v/}_amd64.deb
             curl -LSsO "${URL_BASE}"/releases/download/"${VERSION}"/"${DEB}" || die "Error downloading ${DEB}"
             sudo_wrapper dpkg -i "${DEB}" || die "Error installing ${DEB}"
         else
+            header "Building ${BINARY}"
             curl -LSs "${URL_BASE}"/archive/"${VERSION}".tar.gz | tar -xzf - || die "Error downloading ${BINARY} source"
             cd "${BINARY}-${VERSION}" || die "Can't move into ${BINARY} source"
             [[ -d ${HOME}/.cargo/bin ]] || irust
@@ -483,6 +494,7 @@ function bisharkdp() { (
 
 # Build/install QEMU
 function bqemu() { (
+    header "Building QEMU"
     QEMU_FOLDER=${SRC_FOLDER:-${HOME}/src}/qemu
     if [[ ! -d ${QEMU_FOLDER} ]]; then
         mkdir -p "${QEMU_FOLDER%/*}"
@@ -531,6 +543,7 @@ function bqemu() { (
 
 # Build/update tmux
 function btmux() { (
+    header "Building tmux"
     TMUX_REPO=tmux/tmux
     [[ -z ${TMUX_VERSION} ]] && TMUX_VERSION=$(glr "${TMUX_REPO}")
     TMP_FOLDER=$(mktemp -d)
@@ -551,6 +564,7 @@ function btmux() { (
 
 # Build/update zsh
 function bzsh() { (
+    header "Building zsh"
     TMP_FOLDER=$(mktemp -d)
 
     cd "${TMP_FOLDER}"
@@ -580,6 +594,7 @@ function bzsh() { (
 
 # Install Android tools
 function iandroidtools() { (
+    header "Installing Android tools"
     ANDROID_BIN=${PREFIX:-${HOME}/usr}/bin
     mkdir -p "${ANDROID_BIN}"
     curl -LSso "${ANDROID_BIN}"/repo https://storage.googleapis.com/git-repo-downloads/repo
@@ -593,6 +608,7 @@ function iandroidtools() { (
 
 # Install hugo
 function ihugo() { (
+    header "Installing hugo"
     HUGO_VERSION=$(glr gohugoio/hugo)
     SUFFIX=64bit
     HUGO_URL=https://github.com/gohugoio/hugo/releases/download/${HUGO_VERSION}/hugo_extended_${HUGO_VERSION//v/}_Linux-${SUFFIX}
@@ -610,6 +626,7 @@ function ihugo() { (
 
 # Install hub
 function ihub() { (
+    header "Installing hub"
     [[ -z ${HUB_VERSION} ]] && HUB_VERSION=$(glr "github/hub")
     HUB_TUPLE="hub-linux-$(get_arch)-${HUB_VERSION/v/}"
     cd "$(mktemp -d)" || die "Error moving into temporary directory!"
@@ -625,6 +642,7 @@ function ihub() { (
 
 # Install shellcheck
 function ishellcheck() { (
+    header "Installing shellcheck"
     SHCHK_REPO=koalaman/shellcheck
     [[ -z ${SHELLCHECK_VERSION} ]] && SHELLCHECK_VERSION=$(glr "${SHCHK_REPO}")
     SHCHK_FOLDER=$(mktemp -d)/shellcheck-v"${SHELLCHECK_VERSION//v/}"
@@ -635,6 +653,7 @@ function ishellcheck() { (
 
 # Install shfmt
 function ishfmt() { (
+    header "Installing shfmt"
     [[ -z ${SHFMT_VERSION} ]] && SHFMT_VERSION=$(glr "mvdan/sh")
     BIN_FOLDER=${PREFIX:-${HOME}/usr}/bin
     mkdir -p "${BIN_FOLDER}"
@@ -649,6 +668,7 @@ function irust() { (
 
 # Install/upgrade b4
 function ib4() { (
+    header "Installing b4"
     PIP_ARGS=()
     case ${1} in
         -u | --upgrade) PIP_ARGS=("${PIP_ARGS[@]}" --upgrade) ;;
