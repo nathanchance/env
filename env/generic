@@ -63,7 +63,6 @@ function bootstrap() { (
             python3
             python3-dev
             ruby-dev
-            sudo
             swig
             texinfo
             tcl
@@ -76,6 +75,13 @@ function bootstrap() { (
             zsh
             zstd
         )
+
+        # If we are root, install sudo so that we don't need a separate set of
+        # commands whether we are root or a regular user
+        if [[ $(id -u) -eq 0 ]]; then
+            apt update || exit ${?}
+            apt install -y sudo || exit ${?}
+        fi
 
         sudo_wrapper apt update || exit ${?}
         sudo_wrapper DEBIAN_FRONTEND=noninteractive apt upgrade -y || exit ${?}
