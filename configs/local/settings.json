@@ -71,6 +71,12 @@
             "brightCyan": "#88C0D0",
             "brightWhite": "#ECEFF4"
         }
+    ],
+
+    "keybindings":
+    [
+        // Unbind Ctrl-^ so that force disconnecting a mosh session works
+        { "command" : "unbound", "keys" : "ctrl+shift+6" }
     ]
 }
 
