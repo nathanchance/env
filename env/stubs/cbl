@@ -834,19 +834,17 @@ function kcbw() { (
 
 # Download Cuttlefish files
 function upd_cuttlefish() { (
-    while ((${#})); do
-        case ${1} in
-            -i | --img-zip) shift && CUTTLEFISH_ZIP_URL=${1} ;;
-            -h | --host-tools-tar) shift && CUTTLEFISH_TAR_URL=${1} ;;
-        esac
-        shift
-    done
+    BASE_URL=$(curl -Ls -o /dev/null -w '%{url_effective}' https://ci.android.com/builds/latest/branches/aosp-master-throttled/targets/aosp_cf_x86_64_phone-userdebug/view/BUILD_INFO)
+    BASE_URL=${BASE_URL%/view/BUILD_INFO}/raw
+
+    CUTTLEFISH_ZIP_URL=${BASE_URL}/aosp_cf_x86_64_phone-img-$(echo "${BASE_URL}" | cut -d '/' -f 6).zip
+    CUTTLEFISH_TAR_URL=${BASE_URL}/cvd-host_package.tar.gz
 
     CUTTLEFISH_ZIP=$(mktemp --suffix=.zip)
     CUTTLEFISH_TAR=$(mktemp --suffix=.tar.gz)
 
-    curl -LSso "${CUTTLEFISH_ZIP}" "${CUTTLEFISH_ZIP_URL:?}" || exit ${?}
-    curl -LSso "${CUTTLEFISH_TAR}" "${CUTTLEFISH_TAR_URL:?}" || exit ${?}
+    curl -LSso "${CUTTLEFISH_ZIP}" "${CUTTLEFISH_ZIP_URL}" || exit ${?}
+    curl -LSso "${CUTTLEFISH_TAR}" "${CUTTLEFISH_TAR_URL}" || exit ${?}
 
     rm -rf "${CBL_CTTLFSH}"
     mkdir -p "${CBL_CTTLFSH}"
