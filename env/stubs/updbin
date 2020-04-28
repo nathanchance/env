@@ -691,6 +691,7 @@ function updbin() { (
     bisharkdp all || exit ${?}
     btmux || exit ${?}
     bzsh || exit ${?}
+    ishellcheck || exit ${?}
     ishfmt || exit ${?}
 ); }
 # vi: filetype=zsh
