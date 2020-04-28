@@ -77,8 +77,26 @@ function shell_setup() {
         GIT_COMPLETIONS=${HOME}/usr/share/bash-completion/completions/git
         [[ -f ${GIT_COMPLETIONS} ]] && zstyle ':completion:*:*:git:*' script "${GIT_COMPLETIONS}"
 
+        # Enable Pure and make it look more like Spaceship
+        # https://github.com/denysdovhan/spaceship-prompt
+        # I would just use Spaceship but it does not have async
+        # git commands so it is significantly slower than Pure.
         autoload -U compinit && compinit
-        autoload -U promptinit && promptinit && prompt pure && zstyle :prompt:pure:git:stash show yes
+        autoload -U promptinit &&
+            promptinit &&
+            prompt pure &&
+            zstyle :prompt:pure:git:stash show yes &&
+            zstyle :prompt:pure:git:arrow color red &&
+            zstyle :prompt:pure:git:dirty color red &&
+            zstyle :prompt:pure:git:stash color red &&
+            zstyle :prompt:pure:git:action color magenta &&
+            zstyle :prompt:pure:git:branch color magenta &&
+            zstyle :prompt:pure:host color green &&
+            zstyle :prompt:pure:prompt:continuation color yellow &&
+            zstyle :prompt:pure:prompt:success color green &&
+            zstyle :prompt:pure:user color yellow &&
+            zstyle :prompt:pure:user:root color red &&
+            zstyle :prompt:pure:virtualenv color blue
 
         ZSH_HGHLGHT_SYNTAX=${HOME}/.zfunctions/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
         [[ -f ${ZSH_HGHLGHT_SYNTAX} ]] && source "${ZSH_HGHLGHT_SYNTAX}"
