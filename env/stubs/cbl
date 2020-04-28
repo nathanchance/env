@@ -874,7 +874,7 @@ function boot_cuttlefish() { (
     HOME=${PWD} ./bin/stop_cvd &>/dev/null
     HOME=${PWD} ./bin/launch_cvd "${LAUNCH_CVD[@]}" &>/dev/null &
 
-    sleep 60 &&
+    sleep 120 &&
         ./bin/adb -e shell cat /proc/version &&
         HOME=${PWD} ./bin/stop_cvd
 ); }
