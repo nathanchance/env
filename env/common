@@ -78,7 +78,7 @@ function shell_setup() {
         [[ -f ${GIT_COMPLETIONS} ]] && zstyle ':completion:*:*:git:*' script "${GIT_COMPLETIONS}"
 
         autoload -U compinit && compinit
-        autoload -U promptinit && promptinit && prompt pure
+        autoload -U promptinit && promptinit && prompt pure && zstyle :prompt:pure:git:stash show yes
 
         ZSH_HGHLGHT_SYNTAX=${HOME}/.zfunctions/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
         [[ -f ${ZSH_HGHLGHT_SYNTAX} ]] && source "${ZSH_HGHLGHT_SYNTAX}"
