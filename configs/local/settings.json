@@ -8,7 +8,9 @@
         "defaults":
         {
             "fontFace": "Fira Code",
-            "fontSize": 9
+            "fontSize": 9,
+            "useAcrylic": true,
+            "acrylicOpacity": 0.9
         },
         "list":
         [
