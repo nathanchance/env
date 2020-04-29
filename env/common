@@ -249,4 +249,23 @@ function symlink_llvm() { (
     header "Symlinking LLVM"
     cp -frsv "${LLVM_TC_FOLDER}/${1:?}"/* "${HOME}"/usr
 ); }
+
+# Setup ccache
+# ccache_setup <size>
+function ccache_setup() { (
+    while ((${#})); do
+        case ${1} in
+            [0-9] | [0-9][0-9] | [0-9][0-9][0-9]) SIZE=${1} ;;
+        esac
+        shift
+    done
+    [[ -f ${CCACHE} ]] || die "\${CCACHE} is not set"
+    [[ -x ${CCACHE} ]] || die "\${CCACHE} cannot be executed"
+    [[ -n ${SIZE} ]] || die "Size of cache is not set"
+
+    "${CCACHE}" -M "${1}"G &>/dev/null
+    "${CCACHE}" --set-config=compression=true
+    "${CCACHE}" --set-config=compression_level=9
+    add_to_path_pre "/usr/lib/ccache/bin"
+); }
 # vi: filetype=zsh

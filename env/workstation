@@ -365,24 +365,6 @@ function workstation_aliases() {
     alias ms='merge-stable'
 }
 
-# Setup ccache
-# ccache_setup <size>
-function ccache_setup() {
-    if [[ -f ${CCACHE} ]]; then
-        if [[ -n ${1} ]]; then
-            ccache -M "${1}"G &>/dev/null
-            ccache --set-config=compression=true
-            ccache --set-config=compression_level=9
-            export USE_CCACHE=1
-            add_to_path_pre "/usr/lib/ccache/bin"
-        else
-            display_error "Please specify ccache size!"
-        fi
-    else
-        display_error "Please install ccache!"
-    fi
-}
-
 # Clean build folder
 function cbf() { (
     case "${1}" in
