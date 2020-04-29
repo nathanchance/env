@@ -228,4 +228,25 @@ function upd() { (
         debian | ubuntu) sudo sh -c 'apt update && apt upgrade && apt autoremove -y' ;;
     esac
 ); }
+
+# Symlink an LLVM toolchain into ${HOME}/usr
+function symlink_llvm() { (
+    header "Removing symlinks"
+    for FILE in $(fd -t l . "${HOME}"/usr); do
+        [[ $(readlink -f "${FILE}") =~ toolchains/llvm ]] && rm -vrf "${FILE}"
+    done
+
+    header "Removing empty directories"
+    while true; do
+        OUTPUT=$(fd -t e . "${HOME}"/usr -x rm -vrf)
+        if [[ -n ${OUTPUT} ]]; then
+            echo "${OUTPUT}"
+        else
+            break
+        fi
+    done
+
+    header "Symlinking LLVM"
+    cp -frsv "${LLVM_TC_FOLDER}/${1:?}"/* "${HOME}"/usr
+); }
 # vi: filetype=zsh
