@@ -167,6 +167,27 @@ function rbld_usr() { (
     updbin || die "updbin failed"
     ihugo || die "ihugo failed"
     ipneofetch || die "ipneofetch failed"
+    if [[ -d ${LLVM_TC_FOLDER} ]]; then
+        # This will never not be alphanumeric and find is insanely convoluted
+        # shellcheck disable=SC2012
+        DATE=$(ls -1ht "${LLVM_TC_FOLDER}" | head -n1)
+        [[ -n ${DATE} ]] && symlink_llvm "${DATE}"
+    fi
+); }
+
+# Build tip of tree LLVM
+function updllvm() { (
+    DATE=$(date +%Y-%m-%d)
+
+    LLVM_SRC=${HOME}/src/llvm-project
+    mkdir -p "${LLVM_SRC%/*}"
+    [[ -d ${LLVM_SRC} ]] || git clone git://github.com/llvm/llvm-project "${LLVM_SRC}"
+    git -C "${LLVM_SRC}" pull || die "Error updating LLVM"
+
+    mkdir -p "${LLVM_TC_FOLDER:?}"
+    PREFIX=${LLVM_TC_FOLDER}/${DATE} bllvm -i &&
+        symlink_llvm "${DATE}" &&
+        ccache -Cz
 ); }
 
 # Install and patch neofetch to work around 'uname -r' hijack
@@ -191,6 +212,10 @@ function wsl_aliases() {
 
 # Laptop specific setup
 function wsl_setup() {
+    LLVM_TC_FOLDER=${HOME}/toolchains/llvm
+    mkdir -p "${LLVM_TC_FOLDER}"
+    export LLVM_TC_FOLDER
+
     # Load the stock completions to make sure we don't miss out on anything
     echo "${fpath[*]}" | grep -q -s "vendor-completions" || fpath=("${fpath[@]}" /usr/share/zsh/vendor-completions)
     compinit
