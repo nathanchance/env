@@ -263,7 +263,7 @@ function setup_ccache() { (
     [[ -x ${CCACHE} ]] || die "\${CCACHE} cannot be executed"
     [[ -n ${SIZE} ]] || die "Size of cache is not set"
 
-    "${CCACHE}" -M "${1}"G &>/dev/null
+    "${CCACHE}" -M "${SIZE}"G &>/dev/null
     "${CCACHE}" --set-config=compression=true
     "${CCACHE}" --set-config=compression_level=9
     add_to_path_pre "/usr/lib/ccache/bin"
