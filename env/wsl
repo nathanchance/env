@@ -219,6 +219,9 @@ function wsl_setup() {
     # Load the stock completions to make sure we don't miss out on anything
     echo "${fpath[*]}" | grep -q -s "vendor-completions" || fpath=("${fpath[@]}" /usr/share/zsh/vendor-completions)
     compinit
+
+    # Setup ccache
+    setup_ccache 25
 }
 
 # Update WSL kernel from server
