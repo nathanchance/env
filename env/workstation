@@ -382,7 +382,7 @@ function workstation_setup() {
     add_to_path_pre "${SCRIPTS_FOLDER}/workstation"
     move_to_front_of_path "${HOME}/.local/bin"
     move_to_front_of_path "${HOME}/usr/bin"
-    ccache_setup 50
+    setup_ccache 50
     source "${SCRIPTS_FOLDER}"/env/stubs/folders
     source "${SCRIPTS_FOLDER}"/env/stubs/cbl
     source "${SCRIPTS_FOLDER}"/env/stubs/bk
