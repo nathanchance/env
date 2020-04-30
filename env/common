@@ -106,10 +106,10 @@ function shell_setup() {
     [[ -f ${HOME}/.server_ip ]] && source "${HOME}/.server_ip"
     aliases
     "${LOCATION}"_aliases
-    tmxa
     "${LOCATION}"_setup
     GPG_TTY=$(tty)
     export GPG_TTY
+    tmxa
 }
 
 # {bash,zsh}rc reload function
