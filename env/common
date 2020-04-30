@@ -8,7 +8,7 @@
 source "$(dirname "$(readlink -f "${0}")")"/../common
 
 # Source the machine specific functions
-case "$(whoami)@$(uname -n)" in
+case "$(id -un)@$(uname -n)" in
     nathan@archlinux-* | nathan@ubuntu-*) LOCATION=workstation ;;
     nathan@Ryzen-7-3700X) LOCATION=wsl ;;
     *) LOCATION=generic ;;
