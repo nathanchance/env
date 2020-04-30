@@ -222,6 +222,9 @@ function wsl_setup() {
 
     # Setup ccache
     setup_ccache 25
+
+    # Connect to main server instance if in tmux and first pane
+    [[ -n ${TMUX} && $(tmux list-windows | wc -l) -eq 1 ]] && mshsvr
 }
 
 # Update WSL kernel from server
