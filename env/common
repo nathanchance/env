@@ -37,21 +37,13 @@ function tmxa() {
     [[ -z ${TMUX} ]] && tmux new-session -AD -s main
 }
 
-# Smart tmux detach
-# https://arslan.io/2019/01/07/using-the-ipad-pro-as-my-development-machine/
+# Try to detach via tmux
 function tmxd() {
-    local COUNT PANES WINS
-
     command -v tmux &>/dev/null || return
-    [[ -z ${TMUX} ]] && builtin exit
-
-    PANES=$(tmux list-panes | wc -l)
-    WINS=$(tmux list-windows | wc -l)
-    COUNT=$((PANES + WINS - 1))
-    if [[ ${COUNT} -eq 1 ]]; then
-        tmux detach
-    else
+    if [[ -z ${TMUX} ]]; then
         builtin exit
+    else
+        tmux detach
     fi
 }
 
