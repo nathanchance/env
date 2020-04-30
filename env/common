@@ -33,13 +33,14 @@ function aliases() {
 
 # Try to attach via tmux
 function tmxa() {
-    command -v tmux &>/dev/null || return
+    command -v tmux &>/dev/null || return ${?}
     [[ -z ${TMUX} ]] && tmux new-session -AD -s main
+    return 0
 }
 
 # Try to detach via tmux
 function tmxd() {
-    command -v tmux &>/dev/null || return
+    command -v tmux &>/dev/null || return ${?}
     if [[ -z ${TMUX} ]]; then
         builtin exit
     else
