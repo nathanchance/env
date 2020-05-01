@@ -82,6 +82,7 @@ function bootstrap() { (
         git \
         git-email \
         gpg \
+        htop \
         irssi \
         jq \
         libauthen-sasl-perl \
