@@ -261,4 +261,10 @@ function setup_ccache() { (
     "${CCACHE}" --set-config=compression_level=9
     add_to_path_pre "/usr/lib/ccache/bin"
 ); }
+
+# Clean up /tmp
+function cltmp() { (
+    fd -t f . /tmp -x rm
+    fd -t d -d 1 -E 'tmux*' -E 'systemd*' . /tmp -x rm -r
+); }
 # vi: filetype=zsh
