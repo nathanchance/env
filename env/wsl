@@ -207,8 +207,11 @@ function wsl_aliases() {
     # But only overwrite code if it does not already exist
     (! type -f code && type -f code-insiders) &>/dev/null && alias code='code-insiders'
     alias ls='ls --color=auto'
-    alias mshsvr='mosh nathan@${SERVER_IP}'
 }
+
+function mshsvr() { (
+    mosh nathan@"${SERVER_IP:?}"
+); }
 
 # Laptop specific setup
 function wsl_setup() {
