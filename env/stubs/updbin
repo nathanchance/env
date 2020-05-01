@@ -635,9 +635,10 @@ function iandroidtools() { (
 # Install hugo
 function ihugo() { (
     header "Installing hugo"
-    HUGO_VERSION=$(glr gohugoio/hugo)
+    HUGO_REPO=gohugoio/hugo
+    HUGO_VERSION=$(glr ${HUGO_REPO})
     SUFFIX=64bit
-    HUGO_URL=https://github.com/gohugoio/hugo/releases/download/${HUGO_VERSION}/hugo_extended_${HUGO_VERSION//v/}_Linux-${SUFFIX}
+    HUGO_URL=https://github.com/${HUGO_REPO}/releases/download/${HUGO_VERSION}/hugo_extended_${HUGO_VERSION//v/}_Linux-${SUFFIX}
     if command -v dpkg &>/dev/null; then
         curl -LSso "${TMP_DEB:=$(mktemp --suffix=.deb)}" "${HUGO_URL}".deb
         sudo dpkg -i "${TMP_DEB}"
@@ -653,15 +654,16 @@ function ihugo() { (
 # Install hub
 function ihub() { (
     header "Installing hub"
-    [[ -z ${HUB_VERSION} ]] && HUB_VERSION=$(glr "github/hub")
+    HUB_REPO=github/hub
+    [[ -z ${HUB_VERSION} ]] && HUB_VERSION=$(glr ${HUB_REPO})
     HUB_TUPLE="hub-linux-$(get_arch)-${HUB_VERSION/v/}"
     cd "$(mktemp -d)" || die "Error moving into temporary directory!"
-    curl -LSsO https://github.com/github/hub/releases/download/"${HUB_VERSION}"/"${HUB_TUPLE}".tgz || die "Error downloading hub!"
+    curl -LSsO https://github.com/${HUB_REPO}/releases/download/"${HUB_VERSION}"/"${HUB_TUPLE}".tgz || die "Error downloading hub!"
     tar -xf "${HUB_TUPLE}".tgz || die "Error extracting hub!"
     prefix="${PREFIX:-${HOME}/usr}" ./"${HUB_TUPLE}"/install || die "Error installing hub!"
     if [[ -n ${ZSH_NAME} ]]; then
         mkdir -p "${HOME}"/.zfunctions
-        curl -LSso "${HOME}"/.zfunctions/_hub https://github.com/github/hub/raw/"${HUB_VERSION}"/etc/hub.zsh_completion
+        curl -LSso "${HOME}"/.zfunctions/_hub https://github.com/${HUB_REPO}/raw/"${HUB_VERSION}"/etc/hub.zsh_completion
     fi
     rm -rf "${PWD}"
 ); }
@@ -680,11 +682,14 @@ function ishellcheck() { (
 # Install shfmt
 function ishfmt() { (
     header "Installing shfmt"
-    [[ -z ${SHFMT_VERSION} ]] && SHFMT_VERSION=$(glr "mvdan/sh")
+    SHFMT_REPO=mvdan/sh
+    [[ -z ${SHFMT_VERSION} ]] && SHFMT_VERSION=$(glr ${SHFMT_REPO})
+    SHFMT_VERSION=v${SHFMT_VERSION//v/}
+
     BIN_FOLDER=${PREFIX:-${HOME}/usr}/bin
     mkdir -p "${BIN_FOLDER}"
     rm -rf "${BIN_FOLDER}"/shfmt
-    curl -LSso "${BIN_FOLDER}"/shfmt https://github.com/mvdan/sh/releases/download/v"${SHFMT_VERSION//v/}"/shfmt_v"${SHFMT_VERSION//v/}"_linux_amd64 || die "Error downloading/installing shfmt"
+    curl -LSso "${BIN_FOLDER}"/shfmt https://github.com/${SHFMT_REPO}/releases/download/"${SHFMT_VERSION}"/shfmt_"${SHFMT_VERSION//v/}"_linux_amd64 || die "Error downloading/installing shfmt"
     chmod +x "${BIN_FOLDER}"/shfmt
 ); }
 
