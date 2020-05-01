@@ -267,4 +267,18 @@ function cltmp() { (
     fd -t f . /tmp -x rm
     fd -t d -d 1 -E 'tmux*' -E 'systemd*' . /tmp -x rm -r
 ); }
+
+# Upgrade pip packages
+function pipup() { (
+    python3 -m pip install \
+        --upgrade \
+        --user \
+        pip
+
+    read -rA PIP_PACKAGES <<<"$(python3 -m pip list --outdated | tail -n +3 | cut -d ' ' -f 1)"
+    python3 -m pip install \
+        --upgrade \
+        --user \
+        "${PIP_PACKAGES[@]}"
+); }
 # vi: filetype=zsh

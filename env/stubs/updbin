@@ -69,6 +69,33 @@ function bcttlfshtools() { (
     sudo usermod -aG kvm "${USER}"
 ); }
 
+# Build/update cvise
+function bcvise() { (
+    header "Building cvise"
+    CVISE_REPO=marxin/cvise
+    [[ -z ${CVISE_VERSION} ]] && CVISE_VERSION=$(glr ${CVISE_REPO})
+    TMP_FOLDER=$(mktemp -d)
+    cd "${TMP_FOLDER}" || die "Cannot move into TMP_FOLDER"
+    curl -LSs https://github.com/${CVISE_REPO}/archive/v"${CVISE_VERSION//v/}".tar.gz | tar -xzf -
+    cd cvise-"${CVISE_VERSION//v/}" || die "Error downloading cvise source"
+    mkdir -p build
+    cd build || die "Error creating build folder"
+    pipup
+    python3 -m pip install \
+        --upgrade \
+        --user \
+        pebble pytest
+    cmake \
+        -DCMAKE_C_COMPILER="$(command -v clang || command -v gcc)" \
+        -DCMAKE_CXX_COMPILER="$(command -v clang++ || command -v g++)" \
+        -DCMAKE_INSTALL_PREFIX="${CVISE_PREFIX:-${PREFIX:-${HOME}/usr}}" \
+        -DPYTHON_EXECUTABLE="$(command -v python3)" \
+        .. &&
+        make "${JOBS_FLAG:--j"$(nproc)"}" &&
+        make install
+    rm -rf "${TMP_FOLDER}"
+); }
+
 # Build/update dtc
 function bdtc() { (
     header "Building dtc"
@@ -685,6 +712,7 @@ function updbin() { (
     # Everything else is alphabetical
     bccache || exit ${?}
     bcmake || exit ${?}
+    bcvise || exit ${?}
     bmake || exit ${?}
     bninja || exit ${?}
     birg || exit ${?}
