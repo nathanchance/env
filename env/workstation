@@ -190,6 +190,7 @@ function bootstrap() { (
             pkg-config
             podman
             psmisc
+            python-is-python3
             python2.7
             python3
             python3-dev
