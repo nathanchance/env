@@ -689,7 +689,7 @@ function ishfmt() { (
     BIN_FOLDER=${PREFIX:-${HOME}/usr}/bin
     mkdir -p "${BIN_FOLDER}"
     rm -rf "${BIN_FOLDER}"/shfmt
-    curl -LSso "${BIN_FOLDER}"/shfmt https://github.com/${SHFMT_REPO}/releases/download/"${SHFMT_VERSION}"/shfmt_"${SHFMT_VERSION//v/}"_linux_amd64 || die "Error downloading/installing shfmt"
+    curl -LSso "${BIN_FOLDER}"/shfmt https://github.com/${SHFMT_REPO}/releases/download/"${SHFMT_VERSION}"/shfmt_"${SHFMT_VERSION}"_linux_amd64 || die "Error downloading/installing shfmt"
     chmod +x "${BIN_FOLDER}"/shfmt
 ); }
 
