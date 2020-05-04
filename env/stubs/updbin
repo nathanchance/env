@@ -85,6 +85,7 @@ function bcvise() { (
         --upgrade \
         --user \
         pebble pytest
+    path_push "${HOME}"/.local/bin
     cmake \
         -DCMAKE_C_COMPILER="$(command -v clang || command -v gcc)" \
         -DCMAKE_CXX_COMPILER="$(command -v clang++ || command -v g++)" \
