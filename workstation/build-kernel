@@ -30,11 +30,13 @@ function kmake() {
             CROSS_COMPILE="${GCC_CC}" \
             CROSS_COMPILE_ARM32="${GCC_32_BIT_CC}" \
             KBUILD_COMPILER_STRING="${CLANG_VERSION}" \
+            PYTHON=$(command -v python2 || command -v python2.7) \
             "${@}"
     else
         "${MAKE[@]}" \
             CROSS_COMPILE="${CCACHE} ${GCC_CC}" \
             CROSS_COMPILE_ARM32="${GCC_32_BIT_CC}" \
+            PYTHON=$(command -v python2 || command -v python2.7) \
             "${@}"
     fi
 }
