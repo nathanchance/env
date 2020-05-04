@@ -1040,8 +1040,8 @@ if command -v apt-get &>/dev/null; then
         *) PACKAGES+=( lld ) ;;
     esac
     apt-get update
-    apt-get upgrade -y
-    apt-get install --no-install-recommends -y "${PACKAGES[@]}"
+    DEBIAN_FRONTEND=noninteractive apt-get upgrade -y
+    DEBIAN_FRONTEND=noninteractive apt-get install --no-install-recommends -y "${PACKAGES[@]}"
 # Fedora
 elif command -v dnf &>/dev/null; then
     PACKAGES+=( gcc gcc-c++ lld make ninja-build texinfo-tex xz zlib-devel )
