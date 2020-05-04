@@ -1034,7 +1034,11 @@ PACKAGES=( ccache clang cmake git python3 )
 
 # Debian/Ubuntu
 if command -v apt-get &>/dev/null; then
-    PACKAGES+=( ca-certificates curl file gcc g++ lld make ninja-build texinfo xz-utils zlib1g-dev )
+    PACKAGES+=( ca-certificates curl file gcc g++ make ninja-build texinfo xz-utils zlib1g-dev )
+    case "$(cat /etc/os-release)" in
+        *xenial*) ;;
+        *) PACKAGES+=( lld ) ;;
+    esac
     apt-get update
     apt-get upgrade -y
     apt-get install --no-install-recommends -y "${PACKAGES[@]}"
