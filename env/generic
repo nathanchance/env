@@ -17,6 +17,7 @@ function bootstrap() { (
             build-essential
             ca-certificates
             clang
+            clang-format
             cmake
             creduce
             curl
@@ -33,6 +34,7 @@ function bootstrap() { (
             g++
             jq
             libauthen-sasl-perl
+            libclang-dev
             libcurl4-openssl-dev
             libedit-dev
             libelf-dev
@@ -52,6 +54,7 @@ function bootstrap() { (
             libssl-dev
             lld
             llvm
+            llvm-dev
             locales
             make
             mosh
@@ -70,6 +73,7 @@ function bootstrap() { (
             tcl
             tmux
             u-boot-tools
+            unifdef
             unzip
             vim
             zip

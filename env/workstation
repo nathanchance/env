@@ -83,6 +83,7 @@ function bootstrap() { (
             bc \
             ca-certificates \
             clang \
+            clang-format \
             ccache \
             cmake \
             cpio \
@@ -160,6 +161,7 @@ function bootstrap() { (
             g++
             irssi
             libauthen-sasl-perl
+            libclang-dev
             libcurl4-openssl-dev
             libedit-dev
             libelf-dev
@@ -178,8 +180,9 @@ function bootstrap() { (
             libpcre2-dev
             libpixman-1-dev
             libssl-dev
-            llvm
             lld
+            llvm
+            llvm-dev
             locales
             make
             mosh
@@ -205,6 +208,7 @@ function bootstrap() { (
             tmux
             u-boot-tools
             uidmap
+            unifdef
             unzip
             vim
             zip
