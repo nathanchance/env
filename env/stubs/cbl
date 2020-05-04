@@ -1087,6 +1087,7 @@ EOF
         opensuse/leap:latest \
         opensuse/tumbleweed:latest \
         ubuntu:xenial \
+        ubuntu:bionic \
         ubuntu:latest \
         ubuntu:rolling \
         ubuntu:devel; do
