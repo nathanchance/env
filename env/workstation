@@ -275,6 +275,7 @@ function bootstrap() { (
     # Download repos
     [[ -d ${SCRIPTS} ]] || { git clone git@github.com:nathanchance/scripts "${SCRIPTS}" || die "Error cloning scripts"; }
     git -C "${SCRIPTS}" pull
+    source <(cat "${SCRIPTS}"/env/common)
     source "${SCRIPTS}"/env/stubs/zsh && setup_zsh_env
     source "${SCRIPTS}"/env/stubs/setup && global_gitignore
     source "${SCRIPTS}"/env/stubs/updbin

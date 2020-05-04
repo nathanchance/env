@@ -96,6 +96,7 @@ function bootstrap() { (
     mkdir -p "${SCRIPTS%/*}"
     [[ -d ${SCRIPTS} ]] || { git clone https://github.com/nathanchance/scripts "${SCRIPTS}" || die "Error cloning scripts!"; }
     git -C "${SCRIPTS}" pull --rebase || die "Error updating script!"
+    source <(cat "${SCRIPTS}"/env/common)
     source "${SCRIPTS}"/env/stubs/zsh && setup_zsh_env
     source "${SCRIPTS}"/env/stubs/setup && global_gitignore
     SCRIPTS_FOLDER=${SCRIPTS} rbld_usr || exit ${?}

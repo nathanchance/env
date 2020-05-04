@@ -141,6 +141,7 @@ function bootstrap() { (
     mkdir -p "${GITHUB}"
     SCRIPTS=${GITHUB}/scripts
     [[ -d ${SCRIPTS} ]] || { git clone git@github.com:nathanchance/scripts "${SCRIPTS}" || die "Error cloning script"; }
+    source <(cat "${SCRIPTS}"/env/common)
     source "${SCRIPTS}"/env/stubs/zsh && setup_zsh_env
     source "${SCRIPTS}"/env/stubs/setup && global_gitignore
     SCRIPTS_FOLDER=${SCRIPTS} rbld_usr
