@@ -1,5 +1,5 @@
-FROM alpine:edge
-RUN apk add --no-cache bash fd shellcheck
-RUN apk add --no-cache -X http://dl-cdn.alpinelinux.org/alpine/edge/testing shfmt
+FROM archlinux/base:latest
+RUN pacman -Syyu --noconfirm
+RUN pacman -S --noconfirm bash fd shellcheck shfmt
 COPY check.sh /check.sh
 ENTRYPOINT ["/check.sh"]
