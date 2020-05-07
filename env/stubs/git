@@ -21,6 +21,9 @@ function git_setup() { (
         git config --global user.signingkey 2437CB76E544CB6AB3D9DFD399739260CB6CB716
     fi
 
+    git config --global url."https://github.com".insteadOf git://github.com
+    git config --global url."https://git.kernel.org".insteadOf git://git.kernel.org
+
     git_aliases
 ); }
 
