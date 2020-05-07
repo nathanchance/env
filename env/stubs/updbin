@@ -84,7 +84,7 @@ function bcvise() { (
     python3 -m pip install \
         --upgrade \
         --user \
-        pebble pytest
+        pebble psutil pytest
     path_push "${HOME}"/.local/bin
     cmake \
         -DCMAKE_C_COMPILER="$(command -v clang || command -v gcc)" \
