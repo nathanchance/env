@@ -103,7 +103,7 @@ function bdtc() { (
     DTC_FOLDER=${SRC_FOLDER:-${HOME}/src}/dtc
     if [[ ! -d ${DTC_FOLDER} ]]; then
         mkdir -p "${DTC_FOLDER%/*}"
-        git clone git://git.kernel.org/pub/scm/utils/dtc/dtc.git "${DTC_FOLDER}"
+        git clone https://git.kernel.org/pub/scm/utils/dtc/dtc.git "${DTC_FOLDER}"
     fi
     cd "${DTC_FOLDER}" || die "Couldn't move into ${DTC_FOLDER}"
 
@@ -132,7 +132,7 @@ function bgit() { (
     GIT_FOLDER=${SRC_FOLDER:-${HOME}/src}/git
     if [[ ! -d ${GIT_FOLDER} ]]; then
         mkdir -p "${GIT_FOLDER%/*}"
-        git clone git://github.com/git/git "${GIT_FOLDER}"
+        git clone https://github.com/git/git "${GIT_FOLDER}"
     fi
     cd "${GIT_FOLDER}" || die "Couldn't move into ${GIT_FOLDER}"
 
@@ -162,7 +162,7 @@ function bllvm() { (
     if [[ ! -d ${LLVM_SRC} ]]; then
         header "Cloning LLVM"
         mkdir -p "${LLVM_SRC%/*}"
-        git clone git://github.com/llvm/llvm-project "${LLVM_SRC}"
+        git clone https://github.com/llvm/llvm-project "${LLVM_SRC}"
     fi
 
     LLVM_BLD=${LLVM_SRC}/build/stage1

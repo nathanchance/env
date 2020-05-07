@@ -48,7 +48,7 @@ function cbl_linux_repos() { (
         (
             cd "${FOLDER}" || die "${FOLDER} does not exist"
             git remote remove origin
-            git remote add origin git://git.kernel.org/pub/scm/linux/kernel/git/"${URL}"
+            git remote add origin https://git.kernel.org/pub/scm/linux/kernel/git/"${URL}"
             git remote update origin
             git checkout master
             [[ ${FOLDER} =~ mirrors ]] && git remote add github git@github.com:ClangBuiltLinux/linux.git
@@ -81,7 +81,7 @@ function cbl_other_repos() { (
     [[ -d yapf ]] || git clone https://github.com/google/yapf
 
     cd "${CBL}"/mirrors || die "wtf"
-    [[ -d llvm ]] || git clone git://github.com/llvm/llvm-project llvm
+    [[ -d llvm ]] || git clone https://github.com/llvm/llvm-project llvm
     cd llvm || die "wtf"
     git remote show -n github || git remote add github git@github.com:ClangBuiltLinux/llvm-project.git
 
@@ -91,9 +91,9 @@ function cbl_other_repos() { (
     [[ -d wsl2 ]] || git clone git@github.com:nathanchance/WSL2-Linux-Kernel wsl2
 
     cd wsl2 || die "wtf"
-    git remote show -n mainline || git remote add -f --tags mainline git://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git
-    git remote show -n next || git remote add -f --tags next git://git.kernel.org/pub/scm/linux/kernel/git/next/linux-next.git
-    git remote show -n microsoft || git remote add -f --tags microsoft git://github.com/microsoft/WSL2-Linux-Kernel
+    git remote show -n mainline || git remote add -f --tags mainline https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git
+    git remote show -n next || git remote add -f --tags next https://git.kernel.org/pub/scm/linux/kernel/git/next/linux-next.git
+    git remote show -n microsoft || git remote add -f --tags microsoft https://github.com/microsoft/WSL2-Linux-Kernel
     git config rerere.enabled true
     git config status.aheadBehind false
 ); }

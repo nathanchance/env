@@ -319,7 +319,7 @@ function bootstrap() { (
     tmux new-window zsh -c "source ${SCRIPTS}/env/stubs/setup && cbl_other_repos"
 
     # Clone sonyxperiadev/kernel
-    [[ -d ${KERNEL_FOLDER}/sony/kernel ]] || git -C "${KERNEL_FOLDER}/sony" clone git://github.com/sonyxperiadev/kernel
+    [[ -d ${KERNEL_FOLDER}/sony/kernel ]] || git -C "${KERNEL_FOLDER}/sony" clone https://github.com/sonyxperiadev/kernel
 
     # Use new GPG keyserver
     grep -q keyserver "${HOME}/.gnupg/dirmngr.conf" || echo "keyserver hkps://keys.openpgp.org" | tee -a "${HOME}"/.gnupg/dirmngr.conf

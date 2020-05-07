@@ -734,7 +734,7 @@ function bldtcs() { (
 
     # Build binutils
     TC_BLD_BNTLS=${TCBLD}/binutils
-    [[ -d ${TC_BLD_BNTLS} ]] || git clone git://sourceware.org/git/binutils-gdb.git "${TC_BLD_BNTLS}"
+    [[ -d ${TC_BLD_BNTLS} ]] || git clone https://sourceware.org/git/binutils-gdb.git "${TC_BLD_BNTLS}"
     git -C "${TC_BLD_BNTLS}" pull --rebase || die "Updating binutils failed (${?})"
     BLDBN_INSTALL_FOLDER=${CBL_TC}/binutils-${DATE_TIME}-$(git -C "${TC_BLD_BNTLS}" sh -s --format=%H origin/master)
     bldbn \
@@ -749,7 +749,7 @@ function bldtcs() { (
 
     # Build LLVM/Clang/lld
     TC_BLD_LLVM_PRJCT=${TCBLD}/llvm-project
-    [[ -d ${TC_BLD_LLVM_PRJCT} ]] || git -C "${TCBLD}" clone git://github.com/llvm/llvm-project
+    [[ -d ${TC_BLD_LLVM_PRJCT} ]] || git -C "${TCBLD}" clone https://github.com/llvm/llvm-project
     git -C "${TC_BLD_LLVM_PRJCT}" pull --rebase || die "Updating llvm-project failed (${?})"
     BLDLLVM_INSTALL_FOLDER=${CBL_TC}/llvm-${DATE_TIME}-$(git -C "${TC_BLD_LLVM_PRJCT}" sh -s --format=%H origin/master)
     bldllvm \

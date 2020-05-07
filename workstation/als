@@ -197,7 +197,7 @@ if [[ -n ${INIT} ]]; then
             op6)
                 REMOTES=("LineageOS:https://github.com/LineageOS/android_kernel_oneplus_sdm845"
                     "upstream:https://github.com/OnePlusOSS/android_kernel_oneplus_sdm845")
-                (cd "${ITEM}" && git clone -b oneplus/SDM845_Q_10.0 git://github.com/OnePlusOSS/android_vendor_oneplus_opensource_kernel drivers/oneplus)
+                (cd "${ITEM}" && git clone -b oneplus/SDM845_Q_10.0 https://github.com/OnePlusOSS/android_vendor_oneplus_opensource_kernel drivers/oneplus)
                 echo "drivers/oneplus" >>"${HOME}"/.gitignore_global
                 ;;
         esac

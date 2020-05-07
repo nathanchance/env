@@ -184,7 +184,7 @@ function updllvm() { (
 
     LLVM_SRC=${HOME}/src/llvm-project
     mkdir -p "${LLVM_SRC%/*}"
-    [[ -d ${LLVM_SRC} ]] || git clone git://github.com/llvm/llvm-project "${LLVM_SRC}"
+    [[ -d ${LLVM_SRC} ]] || git clone https://github.com/llvm/llvm-project "${LLVM_SRC}"
     git -C "${LLVM_SRC}" pull || die "Error updating LLVM"
 
     mkdir -p "${LLVM_TC_FOLDER:?}"
