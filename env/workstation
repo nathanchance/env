@@ -398,18 +398,21 @@ function workstation_setup() {
     (gpg_key_cached)
 }
 
-# Update all remotes and run git gc/prune
-function clean-kernels() { (
-    for REPO in "${ALS}"/* "${CBL}"/linux*; do
+# Clean up certain high volume git repos
+function clean_repos() { (
+    for REPO in "${ALS}"/* "${CBL}"/linux* "${CBL}"/wsl2 "${SRC_FOLDER}"/linux*; do
         header "${REPO}"
         if cd "${REPO}"; then
             git fetch --all
             git reflog expire --all --expire=now
             git gc --aggressive --prune=now --force
         else
-            display_error "$(basename "${REPO}") doesn't exist!"
+            display_error "${REPO##*/} doesn't exist"
         fi
     done
+    cd "${CBL_KC}" || die "${CBL_KC} does not exist"
+    repo sync
+    repo forall -c "git reflog expire --all --expire=now && git gc --aggressive --prune=now --force"
 ); }
 
 # Function to incrementally patch a kernel with stable
