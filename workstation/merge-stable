@@ -4,7 +4,7 @@
 #
 # Copyright (C) 2017-2020 Nathan Chancellor
 #
-# Pull in linux-stable updates to a kernel tree
+# Pull in stable updates to a kernel tree
 
 # Parse the provided parameters
 function parse_parameters() {
@@ -22,7 +22,7 @@ function parse_parameters() {
                 ;;
 
             -f | --fetch-only)
-                # Only update the linux-stable remotes
+                # Only update the stable remotes
                 FETCH_REMOTES_ONLY=true
                 ;;
 
@@ -39,7 +39,7 @@ function parse_parameters() {
                 echo "        Call git cherry-pick instead of git merge when updating from upstream"
                 echo
                 echo "    -f | --fetch-only"
-                echo "        Simply fetches the linux-stable and linux-stable-rc remotes then exits"
+                echo "        Simply fetches the stable and stable-rc remotes then exits"
                 echo
                 echo "    -i | --initial-merge"
                 echo "        Do not add a commit log to the merge commit"
@@ -61,7 +61,7 @@ function parse_parameters() {
                 echo
                 printf '%bNotes:%b\n' "${BOLD}" "${RST}"
                 echo "    1. By default, the latest revision will be merged."
-                echo "    2. If you already have a remote for upstream, rename it to linux-stable so that multiple ones do not get added!"
+                echo "    2. If you already have a remote for upstream, rename it to stable so that multiple ones do not get added!"
                 echo
                 exit 1
                 ;;
@@ -119,7 +119,7 @@ function parse_parameters() {
 
 # Update the linux-stable{-rc} remotes (and add them if they doesn't exist)
 function verify_remote() {
-    add_remote "${1}" https://git.kernel.org/pub/scm/linux/kernel/git/stable/"${2:-"${1}"}".git/
+    add_remote "${1}" https://git.kernel.org/pub/scm/linux/kernel/git/stable/"${2}".git/
 
     if ! git fetch "${1}" && ! git fetch --tags "${1}"; then
         die "${1} remote update failed!"
@@ -128,12 +128,12 @@ function verify_remote() {
     echo "${1} remote updated successfully!"
 }
 
-# Update the two linux-stable remotes
+# Update the two stable remotes
 function update_sources() {
     header "Updating remotes"
 
-    verify_remote linux-stable linux
-    verify_remote linux-stable-rc
+    verify_remote stable linux
+    verify_remote stable-rc linux-stable-rc
 
     if [[ -n ${FETCH_REMOTES_ONLY} ]]; then
         echo
@@ -182,14 +182,14 @@ function generate_versions() {
     esac
 
     if [[ -n ${RC} ]]; then
-        TAG=linux-stable-rc/linux-${CURRENT_MAJOR_VERSION}.y
+        TAG=stable-rc/linux-${CURRENT_MAJOR_VERSION}.y
         RANGE=v${CURRENT_VERSION}..${TAG}
         TARGET_VERSION=${TARGET_VERSION}$(git grep -h "\-rc" "${TAG}" -- Makefile | cut -d ' ' -f 3)
         if ! [[ ${TARGET_VERSION} =~ "rc" ]]; then
             die "There is no RC version for ${CURRENT_MAJOR_VERSION}!\n"
         fi
     elif [[ -n ${QUEUE} ]]; then
-        TAG=linux-stable-rc/queue/${CURRENT_MAJOR_VERSION}
+        TAG=stable-rc/queue/${CURRENT_MAJOR_VERSION}
         RANGE=v${CURRENT_VERSION}..${TAG}
         TARGET_VERSION=${TAG#*/}
     else
