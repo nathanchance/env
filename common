@@ -85,11 +85,18 @@ function enforce_value() {
 }
 
 # Add a remote if it doesn't exist
-function add_remote() {
-    if ! git remote | grep -q -m 1 "${1}"; then
-        git remote add "${1}" "${2}"
-    fi
-}
+function add_remote() { (
+    GIT_REMOTE_ARGS=()
+    while ((${#})); do
+        case ${1} in
+            -*) GIT_REMOTE_ARGS=("${GIT_REMOTE_ARGS[@]}" "${1}") ;;
+            http* | git://* | *@*:*) REMOTE_URL=${1} ;;
+            *) REMOTE_NAME=${1} ;;
+        esac
+        shift
+    done
+    git ls-remote "${REMOTE_NAME:?}" &>/dev/null || git remote add "${REMOTE_NAME}" "${REMOTE_URL:?}"
+); }
 
 # Convert a file location to web link
 function web_link() {
