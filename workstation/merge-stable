@@ -119,7 +119,7 @@ function parse_parameters() {
 
 # Update the linux-stable{-rc} remotes (and add them if they doesn't exist)
 function verify_remote() {
-    add_remote "${1}" https://git.kernel.org/pub/scm/linux/kernel/git/stable/"${2}".git/
+    git_remote_add "${1}" https://git.kernel.org/pub/scm/linux/kernel/git/stable/"${2}".git/
 
     if ! git fetch "${1}" && ! git fetch --tags "${1}"; then
         die "${1} remote update failed!"
