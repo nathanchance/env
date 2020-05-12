@@ -19,12 +19,14 @@ export CBL_ANDROID CBL_CTTLFSH CBL_KC CBL_KC_SRC CBL_SRC CBL_TC CBL_LLVM CBL_BNT
 
 # Configurations known to build with -Werror
 CBLCFGS=(
-    "arm32:multi_v7_defconfig"
-    "arm32:allnoconfig"
-    "arm32:allyesconfig"
-    "arm32:allyesconfig-bfd"
-    "arm32:allmodconfig"
-    "arm32:allmodconfig-bfd"
+    "arm32_v5:multi_v5_defconfig"
+    "arm32_v6:aspeed_g5_defconfig"
+    "arm32_v7:multi_v7_defconfig"
+    "arm32_v7:allnoconfig"
+    "arm32_v7:allyesconfig"
+    "arm32_v7:allyesconfig-bfd"
+    "arm32_v7:allmodconfig"
+    "arm32_v7:allmodconfig-bfd"
     "arm64:defconfig"
     "arm64:allnoconfig"
     "arm64:allyesconfig"
@@ -193,8 +195,8 @@ function bldkw() { (
     while ((${#})); do
         case ${1} in
             # Supported architectures
-            arm) TARGET_ARCH=arm32 ;;
-            arm32 | arm64 | mipsel | ppc32 | ppc64 | ppc64le | riscv64 | s390x | x86_64) TARGET_ARCH=${1} ;;
+            arm) TARGET_ARCH=arm32_v7 ;;
+            arm32_v[0-9] | arm64 | mipsel | ppc32 | ppc64 | ppc64le | riscv64 | s390x | x86_64) TARGET_ARCH=${1} ;;
             x86) TARGET_ARCH=x86_64 ;;
 
             # Build utilities
@@ -214,9 +216,10 @@ function bldkw() { (
     done
 
     case ${TARGET_ARCH} in
-        arm32)
+        arm32_v[0-9])
             : "${CROSS_COMPILE:=arm-linux-gnueabi-}"
-            ARCH_FLAGS=("ARCH=arm" "CROSS_COMPILE=${CROSS_COMPILE}")
+            TARGET_ARCH=arm
+            ARCH_FLAGS=("ARCH=${TARGET_ARCH}" "CROSS_COMPILE=${CROSS_COMPILE}")
             ;;
 
         arm64)
@@ -355,8 +358,8 @@ function bldk() { (
     while ((${#})); do
         case ${1} in
             # Supported architectures
-            arm) ARCH=arm32 ;;
-            arm32 | arm64 | mipsel | ppc32 | ppc64 | ppc64le | riscv64 | s390x | x86_64) ARCH=${1} ;;
+            arm) ARCH=arm32_v7 ;;
+            arm32_v[0-9] | arm64 | mipsel | ppc32 | ppc64 | ppc64le | riscv64 | s390x | x86_64) ARCH=${1} ;;
             x86) ARCH=x86_64 ;;
 
             # Build utilities
@@ -389,6 +392,8 @@ function bldk() { (
     [[ -z ${ARCH} ]] && die "ARCH not specified!"
     if [[ -z ${CONFIG} ]]; then
         case ${ARCH} in
+            arm32_v5) CONFIG=multi_v5_defconfig ;;
+            arm32_v6) CONFIG=aspeed_g5_defconfig ;;
             mipsel) CONFIG=malta_kvm_guest_defconfig ;;
             ppc32) CONFIG=ppc44x_defconfig ;;
             ppc64) CONFIG=pseries_defconfig ;;
@@ -523,10 +528,11 @@ function bootk() { (
     shift
     [[ -z ${ARCH} ]] && die "ARCH not specified!"
     case ${ARCH} in
-        arm | arm32)
+        arm)
+            O_ARCH=${ARCH}
             ARCH=arm32_v7
-            O_ARCH=arm32
             ;;
+        arm32_v[0-9]) O_ARCH=arm ;;
         x86) ARCH=x86_64 ;;
     esac
 
@@ -628,7 +634,7 @@ function lt() { (
         CONFIG=${CONFIG//-bfd/}
         if ${BFD:=false}; then
             case ${ARCH} in
-                arm32) LD=arm-linux-gnueabi-ld ;;
+                arm32_v[0-9]) LD=arm-linux-gnueabi-ld ;;
                 arm64) LD=aarch64-linux-gnu-ld ;;
                 x86_64) LD=ld ;;
             esac
