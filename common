@@ -256,14 +256,6 @@ function path_pop() {
     export PATH=${PATH#*:}
 }
 
-# Set common architecture variable
-function get_arch() { (
-    case "$(uname -m)" in
-        aarch64) echo "arm64" ;;
-        x86_64) echo "amd64" ;;
-    esac
-); }
-
 # Get latest release of a GitHub project
 function glr() { (
     curl --silent "https://api.github.com/repos/${1:?}/releases/latest" | jq -r .tag_name

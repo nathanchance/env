@@ -657,7 +657,13 @@ function ihub() { (
     header "Installing hub"
     HUB_REPO=github/hub
     [[ -z ${HUB_VERSION} ]] && HUB_VERSION=$(glr ${HUB_REPO})
-    HUB_TUPLE="hub-linux-$(get_arch)-${HUB_VERSION/v/}"
+    case "$(uname -m)" in
+        armv7l) ARCH=arm ;;
+        aarch64) ARCH=arm64 ;;
+        x86_64) ARCH=amd64 ;;
+        *) die "Architecture not supported" ;;
+    esac
+    HUB_TUPLE="hub-linux-${ARCH}-${HUB_VERSION/v/}"
     cd "$(mktemp -d)" || die "Error moving into temporary directory!"
     curl -LSsO https://github.com/${HUB_REPO}/releases/download/"${HUB_VERSION}"/"${HUB_TUPLE}".tgz || die "Error downloading hub!"
     tar -xf "${HUB_TUPLE}".tgz || die "Error extracting hub!"

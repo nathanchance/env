@@ -11,6 +11,7 @@
 case "$(id -un)@$(uname -n)" in
     nathan@archlinux-* | nathan@ubuntu-*) LOCATION=workstation ;;
     nathan@Ryzen-7-3700X) LOCATION=wsl ;;
+    pi@raspberrypi) LOCATION=pi ;;
     *) LOCATION=generic ;;
 esac
 [[ -n ${SCRIPTS_FOLDER} ]] && source "${SCRIPTS_FOLDER}/env/${LOCATION}"
