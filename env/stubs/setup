@@ -83,7 +83,7 @@ function cbl_other_repos() { (
     cd "${CBL}"/mirrors || die "wtf"
     [[ -d llvm ]] || git clone https://github.com/llvm/llvm-project llvm
     cd llvm || die "wtf"
-    git remote show -n github || git remote add github git@github.com:ClangBuiltLinux/llvm-project.git
+    add_remote github git@github.com:ClangBuiltLinux/llvm-project.git
 
     cd "${CBL}" || die "wtf"
     [[ -d llvm-kernel-testing ]] || git clone git@github.com:nathanchance/llvm-kernel-testing.git
@@ -92,14 +92,14 @@ function cbl_other_repos() { (
     [[ -d wsl2 ]] || git clone git@github.com:nathanchance/WSL2-Linux-Kernel wsl2
 
     cd "${CBL}"/rpi || die "wtf"
-    git ls-remote -h mainline &>/dev/null || git remote add -f --tags mainline https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git
-    git ls-remote -h stable &>/dev/null || git remote add -f --tags stable https://git.kernel.org/pub/scm/linux/kernel/git/stable/linux.git
-    git ls-remote -h upstream &>/dev/null || git remote add -f upstream https://github.com/raspberrypi/linux
+    add_remote -f --tags mainline https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git
+    add_remote -f --tags stable https://git.kernel.org/pub/scm/linux/kernel/git/stable/linux.git
+    add_remote -f upstream https://github.com/raspberrypi/linux
 
     cd "${CBL}"/wsl2 || die "wtf"
-    git remote show -n mainline || git remote add -f --tags mainline https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git
-    git remote show -n next || git remote add -f --tags next https://git.kernel.org/pub/scm/linux/kernel/git/next/linux-next.git
-    git remote show -n microsoft || git remote add -f --tags microsoft https://github.com/microsoft/WSL2-Linux-Kernel
+    add_remote -f --tags mainline https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git
+    add_remote -f --tags next https://git.kernel.org/pub/scm/linux/kernel/git/next/linux-next.git
+    add_remote -f --tags microsoft https://github.com/microsoft/WSL2-Linux-Kernel
     git config rerere.enabled true
     git config status.aheadBehind false
 ); }
