@@ -1006,6 +1006,7 @@ function bldallk() { (
     TREE=linux lt ""
     TREE=linux-next lt ""
     kct ""
+    "${CBL}"/rpi/bin/build.sh
     "${CBL}"/wsl2/bin/build.sh
 ); }
 
