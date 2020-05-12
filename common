@@ -212,27 +212,6 @@ function gpg_key_usable() {
     gpg --list-secret-keys --keyid-format LONG | grep -q 2437CB76E544CB6AB3D9DFD399739260CB6CB716
 }
 
-# ripgrep wrapper
-function rg() {
-    # Bail out if rg is not installed
-    command -v rg &>/dev/null || {
-        warn "ripgrep is not installed!"
-        return
-    }
-
-    # Colors match ag
-    command rg \
-        --colors "path:fg:green" \
-        --colors "path:style:bold" \
-        --colors "line:fg:yellow" \
-        --colors "line:style:bold" \
-        --colors "column:fg:yellow" \
-        --colors "column:style:bold" \
-        --colors "match:fg:black" \
-        --colors "match:bg:yellow" \
-        "${@}"
-}
-
 # Add something to the end of PATH if it isn't already there
 function add_to_path_post() {
     local ARRAY ITEM
