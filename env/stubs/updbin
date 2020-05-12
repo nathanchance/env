@@ -500,7 +500,7 @@ function bisharkdp() { (
         else
             header "Building ${BINARY}"
             curl -LSs "${URL_BASE}"/archive/"${VERSION}".tar.gz | tar -xzf - || die "Error downloading ${BINARY} source"
-            cd "${BINARY}-${VERSION}" || die "Can't move into ${BINARY} source"
+            cd "${BINARY}-${VERSION//v/}" || die "Can't move into ${BINARY} source"
             [[ -d ${HOME}/.cargo/bin ]] || irust
             move_to_front_of_path "${HOME}/.cargo/bin"
             cargo build --release --locked || die "cargo build failed"
