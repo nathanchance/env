@@ -125,4 +125,55 @@ function pi_aliases() {
 }
 
 function pi_setup() { true; }
+
+# Update kernel from build server
+# Assumes the following in config.txt
+#   * kernel=kernel-nathan.img
+#   * os_prefix=custom-${ARCH}/
+# and maybe
+#   * arm_64bit=1
+function upd_kernel() { (
+    set -eu
+
+    while ((${#})); do
+        case ${1} in
+            arm | arm64) ARCH=${1} ;;
+        esac
+        shift
+    done
+
+    TMP_BOOT=$(mktemp -d)
+    MAIN_BOOT=/boot/custom-${ARCH:=arm64}
+
+    mkdir -p "${TMP_BOOT}"/{modules,overlays}
+
+    case ${ARCH} in
+        arm)
+            DTBS=/
+            KERNEL=zImage
+            ;;
+        arm64)
+            DTBS=broadcom/
+            KERNEL=Image
+            ;;
+    esac
+
+    rsync -v nathan@"${SERVER_IP}":~/cbl/rpi/out/"${ARCH}"/rootfs/"${DTBS}"'*.dtb' "${TMP_BOOT}" &&
+        rsync -vr nathan@"${SERVER_IP}":~/cbl/rpi/out/"${ARCH}"/rootfs/lib/modules/'*' "${TMP_BOOT}"/modules &&
+        rsync -v nathan@"${SERVER_IP}":~/cbl/rpi/out/"${ARCH}"/rootfs/overlays/'*.dtb*' "${TMP_BOOT}"/overlays &&
+        rsync -v nathan@"${SERVER_IP}":~/cbl/rpi/out/"${ARCH}"/arch/"${ARCH}"/boot/"${KERNEL}" "${TMP_BOOT}"/kernel-nathan.img
+
+    # Move modules
+    MOD_DIR=$(fd -d 1 . "${TMP_BOOT}"/modules)
+    sudo rm -vrf /lib/modules/"${MOD_DIR##*/}"
+    sudo mv -v "${MOD_DIR}" /lib/modules
+    sudo rm -vrf "${MAIN_BOOT}"/modules
+
+    # Move all other files
+    sudo rm -vrf "${MAIN_BOOT}"
+    sudo mv -v "${TMP_BOOT}" "${MAIN_BOOT}"
+
+    # Copy cmdline.txt because we are modifying os_prefix
+    sudo cp -v /boot/cmdline.txt "${MAIN_BOOT}"
+); }
 # vi: filetype=zsh
