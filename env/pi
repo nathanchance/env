@@ -167,7 +167,7 @@ function upd_kernel() { (
     MOD_DIR=$(fd -d 1 . "${TMP_BOOT}"/modules)
     sudo rm -vrf /lib/modules/"${MOD_DIR##*/}"
     sudo mv -v "${MOD_DIR}" /lib/modules
-    sudo rm -vrf "${MAIN_BOOT}"/modules
+    sudo rmdir -v "${TMP_BOOT}"/modules
 
     # Move all other files
     sudo rm -vrf "${MAIN_BOOT}"
