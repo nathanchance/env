@@ -176,4 +176,10 @@ function upd_kernel() { (
     # Copy cmdline.txt because we are modifying os_prefix
     sudo cp -v /boot/cmdline.txt "${MAIN_BOOT}"
 ); }
+
+function clmods() { (
+    STOCK_MODULES=$(fd -- '-v7l\+' /lib/modules)
+    [[ -z ${STOCK_MODULES} ]] && exit 0
+    fd -d 1 -E "$(basename "${STOCK_MODULES%-*}")*" -E "$(uname -r)" . /lib/modules -x sudo rm -frv
+); }
 # vi: filetype=zsh
