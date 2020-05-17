@@ -488,7 +488,7 @@ CONFIG_RCU_TORTURE_TEST=y" >>"${BLDK_O}"/.config
     fi
 
     # Build kernel
-    "${BLDKW[@]}" "${FINAL_ARGS[@]}"
+    Q=2 "${BLDKW[@]}" "${FINAL_ARGS[@]}"
 ); }
 
 # Download EFI firmware
