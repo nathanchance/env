@@ -179,8 +179,9 @@ function upd_kernel() { (
 ); }
 
 function clmods() { (
-    STOCK_MODULES=$(fd -- '-v7l\+' /lib/modules)
-    [[ -z ${STOCK_MODULES} ]] && exit 0
-    fd -d 1 -E "$(basename "${STOCK_MODULES%-*}")*" -E "$(uname -r)" . /lib/modules -x sudo rm -frv
+    while IFS=$'\n' read -r STOCK_MODULES; do
+        [[ -z ${STOCK_MODULES} ]] && exit 0
+        fd -d 1 -E "$(basename "${STOCK_MODULES%-*}")*" -E "$(uname -r)" . /lib/modules -x sudo rm -frv
+    done < <(fd -- '-v7l\+' /lib/modules)
 ); }
 # vi: filetype=zsh
