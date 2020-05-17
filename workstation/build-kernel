@@ -29,7 +29,6 @@ function kmake() {
             CLANG_TRIPLE_ARM32=arm-linux-gnueabi- \
             CROSS_COMPILE="${GCC_CC}" \
             CROSS_COMPILE_ARM32="${GCC_32_BIT_CC}" \
-            KBUILD_COMPILER_STRING="${CLANG_VERSION}" \
             PYTHON="$(command -v python2 || command -v python2.7)" \
             "${@}"
     else
@@ -189,7 +188,6 @@ function setup_toolchains() {
         fi
         CLANG_BIN=${CLANG_FOLDER}/bin
         [[ ! -f ${CLANG_BIN}/clang ]] && die "Clang binary could not be found!"
-        CLANG_VERSION=$(clang_version "${CLANG_BIN}")
 
         # LD_LIBRARY_PATH is needed for LTO
         LD_LIBRARY_PATH=$(find "${CLANG_FOLDER}" -maxdepth 1 -name 'lib' -o -name 'lib64' -type d)${LD_LIBRARY_PATH:+":${LD_LIBRARY_PATH}"}
@@ -226,9 +224,7 @@ function build() {
         NEEDS_EXTERNAL_DTC=true
     fi
 
-    mkavenv
     kmake ${NEEDS_EXTERNAL_DTC:+ DTC_EXT="dtc -f"} |& rg --color=never -v "dts"
-    rmvenv
 }
 
 # Compilation function

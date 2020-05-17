@@ -98,25 +98,6 @@ function git_remote_add() { (
     git ls-remote "${REMOTE_NAME:?}" &>/dev/null || git remote add "${REMOTE_ARGS[@]}" "${REMOTE_NAME}" "${REMOTE_URL:?}"
 ); }
 
-# Convert a file location to web link
-function web_link() {
-    echo "${1}" | sed s/"$(echo "${WEB_FOLDER:?}" | sed 's/\//\\\//g')"/https:\\/\\/nathanchance.me/
-}
-
-# Set up a virtual environment for Python
-function mkavenv() {
-    command -v virtualenv2 &>/dev/null || return
-    virtualenv2 "${MAIN_FOLDER:?}/venv"
-    source "${MAIN_FOLDER}/venv/bin/activate"
-}
-
-# Remove virtual environment
-function rmvenv() {
-    command -v deactivate &>/dev/null || return
-    deactivate
-    rm -rf "${MAIN_FOLDER:?}/venv"
-}
-
 # Source Telegram bot information
 function load_botinfo() {
     [[ -f ${MAIN_FOLDER:?}/.botinfo ]] && source "${MAIN_FOLDER}"/.botinfo
@@ -173,35 +154,6 @@ function tg_upload() {
         -F document=@"${FILE}" \
         -F caption="${*}" \
         -X POST https://api.telegram.org/bot"${TOKEN}"/sendDocument 1>/dev/null
-}
-
-# Remove URLs from Clang version
-function clang_version() {
-    [[ ${#} -lt 1 ]] && {
-        display_error "This function takes an argument!"
-        return
-    }
-
-    local CLANG POS
-    CLANG=${1}
-    if [[ $(basename "${CLANG}") != "clang" ]]; then
-        CLANG=$(find "${CLANG}" -name clang | head -n1)
-        [[ -z ${CLANG} ]] && {
-            display_error "You didn't supply a Clang folder/binary!"
-            return
-        }
-    else
-        [[ ! -f ${CLANG} ]] && {
-            display_error "Clang binary supplied doesn't exist!"
-            return
-        }
-    fi
-
-    case "${CLANG}" in
-        *aosp*) POS="1,2" ;;
-        *) POS="1" ;;
-    esac
-    "${CLANG}" --version | head -n 1 | cut -d \( -f "${POS}" | sed 's/[[:space:]]*$//' || display_error "Something went wrong!"
 }
 
 # Is GPG passphrase cached?
