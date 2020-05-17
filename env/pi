@@ -137,13 +137,14 @@ function upd_kernel() { (
 
     while ((${#})); do
         case ${1} in
+            4.19 | 5.4) VER=${1} ;;
             arm | arm64) ARCH=${1} ;;
         esac
         shift
     done
 
     TMP_BOOT=$(mktemp -d)
-    MAIN_BOOT=/boot/custom-${ARCH:=arm64}
+    MAIN_BOOT=/boot/custom-${ARCH:=arm64}-${VER:=4.19}
 
     mkdir -p "${TMP_BOOT}"/{modules,overlays}
 
