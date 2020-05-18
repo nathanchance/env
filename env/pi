@@ -159,10 +159,13 @@ function upd_kernel() { (
             ;;
     esac
 
-    rsync -v nathan@"${SERVER_IP}":~/cbl/rpi/out/"${ARCH}"/rootfs/"${DTBS}"'*.dtb' "${TMP_BOOT}" &&
-        rsync -vr nathan@"${SERVER_IP}":~/cbl/rpi/out/"${ARCH}"/rootfs/lib/modules/'*' "${TMP_BOOT}"/modules &&
-        rsync -v nathan@"${SERVER_IP}":~/cbl/rpi/out/"${ARCH}"/rootfs/overlays/'*.dtb*' "${TMP_BOOT}"/overlays &&
-        rsync -v nathan@"${SERVER_IP}":~/cbl/rpi/out/"${ARCH}"/arch/"${ARCH}"/boot/"${KERNEL}" "${TMP_BOOT}"/kernel-nathan.img
+    USER=nathan
+    OUT=/home/${USER}/cbl/rpi/out/${ARCH}
+    ROOTFS=${OUT}/rootfs
+    rsync -v ${USER}@"${SERVER_IP}":"${ROOTFS}"/"${DTBS}"'*.dtb' "${TMP_BOOT}" &&
+        rsync -vr ${USER}@"${SERVER_IP}":"${ROOTFS}"/lib/modules/'*' "${TMP_BOOT}"/modules &&
+        rsync -v ${USER}@"${SERVER_IP}":"${ROOTFS}"/overlays/'*.dtb*' "${TMP_BOOT}"/overlays &&
+        rsync -v ${USER}@"${SERVER_IP}":"${OUT}"/arch/"${ARCH}"/boot/"${KERNEL}" "${TMP_BOOT}"/kernel-nathan.img
 
     # Move modules
     MOD_DIR=$(fd -d 1 . "${TMP_BOOT}"/modules)
