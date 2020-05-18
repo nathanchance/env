@@ -95,7 +95,7 @@ function bootstrap() { (
     echo "locales locales/locales_to_be_generated multiselect en_US.UTF-8 UTF-8" | sudo debconf-set-selections
     sudo rm "/etc/locale.gen"
     sudo dpkg-reconfigure --frontend noninteractive locales
-    grep -q configs /etc/modules || echo "configs" | sudo tee -a /etc/modules
+    grep -q configs /etc/modules || printf 'configs\nsnd_bcm2835\n' | sudo tee -a /etc/modules
 
     SCRIPTS=${HOME}/github/scripts
     mkdir -p "${SCRIPTS%/*}"
