@@ -188,4 +188,9 @@ function clmods() { (
 
     fd "${FD_ARGS[@]}" . /lib/modules -x sudo rm -frv
 ); }
+
+# Function to properly show host with pure
+function fixp() {
+    eval "$(tmux show-env -s SSH_CONNECTION)" && prompt pure
+}
 # vi: filetype=zsh
