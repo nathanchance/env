@@ -163,7 +163,7 @@ function upd_kernel() { (
     { rsync -v ${USER}@"${SERVER_IP}":"${ROOTFS}"/"${DTBS}"'*.dtb' "${TMP_BOOT}" &&
         rsync -vr ${USER}@"${SERVER_IP}":"${ROOTFS}"/lib/modules/'*' "${TMP_BOOT}"/modules &&
         rsync -v ${USER}@"${SERVER_IP}":"${ROOTFS}"/overlays/'*.dtb*' "${TMP_BOOT}"/overlays &&
-        rsync -v ${USER}@"${SERVER_IP}":"${OUT}"/arch/"${ARCH}"/boot/"${KERNEL}" "${TMP_BOOT}"/kernel-nathan.img; } || exit ${?}
+        rsync -v ${USER}@"${SERVER_IP}":"${OUT}"/arch/"${ARCH}"/boot/"${KERNEL}" "${TMP_BOOT}"; } || exit ${?}
 
     # Move modules
     MOD_DIR=$(fd -d 1 . "${TMP_BOOT}"/modules)
