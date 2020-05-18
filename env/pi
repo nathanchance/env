@@ -133,8 +133,6 @@ function pi_setup() { true; }
 # and maybe
 #   * arm_64bit=1
 function upd_kernel() { (
-    set -eu
-
     while ((${#})); do
         case ${1} in
             4.19 | 5.4) VER=${1} ;;
@@ -162,13 +160,14 @@ function upd_kernel() { (
     USER=nathan
     OUT=/home/${USER}/cbl/rpi/out/${ARCH}
     ROOTFS=${OUT}/rootfs
-    rsync -v ${USER}@"${SERVER_IP}":"${ROOTFS}"/"${DTBS}"'*.dtb' "${TMP_BOOT}" &&
+    { rsync -v ${USER}@"${SERVER_IP}":"${ROOTFS}"/"${DTBS}"'*.dtb' "${TMP_BOOT}" &&
         rsync -vr ${USER}@"${SERVER_IP}":"${ROOTFS}"/lib/modules/'*' "${TMP_BOOT}"/modules &&
         rsync -v ${USER}@"${SERVER_IP}":"${ROOTFS}"/overlays/'*.dtb*' "${TMP_BOOT}"/overlays &&
-        rsync -v ${USER}@"${SERVER_IP}":"${OUT}"/arch/"${ARCH}"/boot/"${KERNEL}" "${TMP_BOOT}"/kernel-nathan.img
+        rsync -v ${USER}@"${SERVER_IP}":"${OUT}"/arch/"${ARCH}"/boot/"${KERNEL}" "${TMP_BOOT}"/kernel-nathan.img; } || exit ${?}
 
     # Move modules
     MOD_DIR=$(fd -d 1 . "${TMP_BOOT}"/modules)
+    : "${MOD_DIR:?}"
     sudo rm -vrf /lib/modules/"${MOD_DIR##*/}"
     sudo mv -v "${MOD_DIR}" /lib/modules
     sudo rmdir -v "${TMP_BOOT}"/modules
