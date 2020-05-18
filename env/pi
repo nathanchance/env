@@ -144,7 +144,7 @@ function upd_kernel() { (
     done
 
     TMP_BOOT=$(mktemp -d)
-    MAIN_BOOT=/boot/custom-${ARCH:=arm64}-${VER:=4.19}
+    MAIN_BOOT=/boot/custom-${VER:=4.19}-${ARCH:=arm64}
 
     mkdir -p "${TMP_BOOT}"/{modules,overlays}
 
