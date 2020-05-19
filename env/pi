@@ -127,11 +127,6 @@ function pi_aliases() {
 function pi_setup() { true; }
 
 # Update kernel from build server
-# Assumes the following in config.txt
-#   * kernel=kernel-nathan.img
-#   * os_prefix=custom-${ARCH}/
-# and maybe
-#   * arm_64bit=1
 function upd_kernel() { (
     while ((${#})); do
         case ${1} in
@@ -142,7 +137,7 @@ function upd_kernel() { (
     done
 
     TMP_BOOT=$(mktemp -d)
-    MAIN_BOOT=/boot/custom-${VER:=4.19}-${ARCH:=arm64}
+    MAIN_BOOT=/boot/custom-${VER:=5.4}-${ARCH:=arm64}
 
     mkdir -p "${TMP_BOOT}"/{modules,overlays}
 
