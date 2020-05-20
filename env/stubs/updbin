@@ -659,7 +659,17 @@ function ihub() { (
     [[ -z ${HUB_VERSION} ]] && HUB_VERSION=$(glr ${HUB_REPO})
     case "$(uname -m)" in
         armv7l) ARCH=arm ;;
-        aarch64) ARCH=arm64 ;;
+        aarch64)
+            # The Raspberry Pi might be running a 64-bit kernel but 32-bit OS
+            if command -v dpkg &>/dev/null; then
+                case "$(dpkg --print-architecture)" in
+                    armhf) ARCH=arm ;;
+                    *) ARCH=arm64 ;;
+                esac
+            else
+                ARCH=arm64
+            fi
+            ;;
         x86_64) ARCH=amd64 ;;
         *) die "Architecture not supported" ;;
     esac
