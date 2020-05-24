@@ -224,7 +224,8 @@ function bldkw() { (
 
         arm64)
             : "${CROSS_COMPILE:=aarch64-linux-gnu-}"
-            ARCH_FLAGS=("ARCH=arm64" "CROSS_COMPILE=${CROSS_COMPILE}")
+            : "${CROSS_COMPILE_COMPAT:=arm-linux-gnueabi-}"
+            ARCH_FLAGS=("ARCH=arm64" "CROSS_COMPILE=${CROSS_COMPILE}" "CROSS_COMPILE_COMPAT=${CROSS_COMPILE_COMPAT}")
             ;;
 
         mipsel)
