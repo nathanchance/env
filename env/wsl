@@ -73,6 +73,7 @@ function bootstrap() { (
         bc \
         bison \
         cowsay \
+        cpio \
         curl \
         devscripts \
         flex \
