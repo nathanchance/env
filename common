@@ -217,7 +217,7 @@ function glr() { (
 function get_distro() {
     case "$(cat /usr/lib/os-release)" in
         *"Arch Linux"*) echo "arch" ;;
-        *Debian*) echo "debian" ;;
+        *Debian* | *Raspbian*) echo "debian" ;;
         *Ubuntu*) echo "ubuntu" ;;
         *) echo "unknown" ;;
     esac
