@@ -76,6 +76,7 @@ function bootstrap() { (
         cpio \
         curl \
         devscripts \
+        expect \
         flex \
         fortune \
         fortunes \
@@ -124,7 +125,8 @@ function bootstrap() { (
         vim \
         wget \
         wslu \
-        zlib1g-dev
+        zlib1g-dev \
+        zstd
 
     # Reinstall 'ping' to avoid issues with permissions
     sudo apt install -y --reinstall iputils-ping
