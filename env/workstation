@@ -138,7 +138,6 @@ function bootstrap() { (
         PACKAGES=(
             abootimg
             bison
-            bsdtar
             build-essential
             ca-certificates
             cdbs
@@ -160,6 +159,7 @@ function bootstrap() { (
             git
             g++
             irssi
+            libarchive-tools
             libauthen-sasl-perl
             libclang-dev
             libcurl4-openssl-dev
