@@ -10,7 +10,7 @@
 # Source the machine specific functions
 case "$(id -un)@$(uname -n)" in
     nathan@archlinux-* | nathan@ubuntu-*) LOCATION=workstation ;;
-    nathan@Ryzen-7-3700X) LOCATION=wsl ;;
+    nathan@Ryzen-9-3900X) LOCATION=wsl ;;
     pi@raspberrypi) LOCATION=pi ;;
     *) LOCATION=generic ;;
 esac
