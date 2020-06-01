@@ -217,7 +217,9 @@ function bootstrap() { (
             zstd
         )
 
-        sudo add-apt-repository ppa:projectatomic/ppa || exit ${?}
+        source /etc/os-release
+        echo "deb https://download.opensuse.org/repositories/devel:/kubic:/libcontainers:/stable/xUbuntu_${VERSION_ID}/ /" | tee /etc/apt/sources.list.d/devel:kubic:libcontainers:stable.list
+        curl -L https://download.opensuse.org/repositories/devel:/kubic:/libcontainers:/stable/xUbuntu_${VERSION_ID}/Release.key | sudo apt-key add -
         sudo apt update || exit ${?}
         sudo DEBIAN_FRONTEND=noninteractive apt upgrade -y || exit ${?}
         sudo DEBIAN_FRONTEND=noninteractive apt install -y "${PACKAGES[@]}" || exit ${?}
