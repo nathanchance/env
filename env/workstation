@@ -180,6 +180,7 @@ function bootstrap() { (
             libpcre2-dev
             libpixman-1-dev
             libssl-dev
+            libtinfo5
             lld
             llvm
             llvm-dev
