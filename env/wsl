@@ -236,14 +236,6 @@ function wsl_setup() {
 
     # Setup ccache
     setup_ccache 25
-
-    # Connect to main server instance if:
-    # * In tmux
-    # * Only one window and pane
-    local PANES WINDOWS
-    PANES=$(tmux list-panes | wc -l)
-    WINDOWS=$(tmux list-windows | wc -l)
-    [[ -n ${TMUX} && ${PANES} -eq 1 && ${WINDOWS} -eq 1 ]] && mshsvr
 }
 
 # Update WSL kernel from server
