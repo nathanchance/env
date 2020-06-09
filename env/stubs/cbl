@@ -18,39 +18,6 @@ TCBLD=${CBL}/tc-build
 CBL_CCACHE=${CBL}/.ccache
 export CBL_ANDROID CBL_CTTLFSH CBL_GIT CBL_KC CBL_KC_SRC CBL_KERNELS CBL_TC CBL_LLVM CBL_BNTL TCBLD CBL_CCACHE
 
-# Configurations known to build with -Werror
-CBLCFGS=(
-    "arm32_v5:multi_v5_defconfig"
-    "arm32_v6:aspeed_g5_defconfig"
-    "arm32_v7:multi_v7_defconfig"
-    "arm32_v7:allnoconfig"
-    "arm32_v7:allyesconfig"
-    "arm32_v7:allyesconfig-bfd"
-    "arm32_v7:allmodconfig"
-    "arm32_v7:allmodconfig-bfd"
-    "arm64:defconfig"
-    "arm64:allnoconfig"
-    "arm64:allyesconfig"
-    "arm64:allyesconfig-bfd"
-    "arm64:allmodconfig"
-    "arm64:allmodconfig-bfd"
-    "mipsel:malta_kvm_guest_defconfig"
-    "ppc32:ppc44x_defconfig"
-    "ppc32:allnoconfig"
-    "ppc64:pseries_defconfig"
-    "ppc64:allnoconfig"
-    "ppc64le:powernv_defconfig"
-    "riscv64:defconfig"
-    "s390x:defconfig"
-    "s390x:allyesconfig"
-    "s390x:allmodconfig"
-    "x86_64:defconfig"
-    "x86_64:allyesconfig"
-    "x86_64:allyesconfig-bfd"
-    "x86_64:allmodconfig"
-    "x86_64:allmodconfig-bfd"
-)
-
 # Create build folders
 function crbf() {
     local ITEM
@@ -561,147 +528,57 @@ function babk() { (
 ); }
 
 # Show local LLVM patches via git log
-function llvm_log() { (
-    cd "${TCBLD:?}"/llvm-project || return
-    MLFC=$(git mfc)
+function llvm_log() {
+    local LLVM_PROJ=${TCBLD:?}/llvm-project
+
+    MLFC=$(git -C "${LLVM_PROJ}" mfc)
     if [[ -n ${MLFC} ]]; then
         echo
         echo "LLVM commit log:"
         echo
-        git lo "${MLFC}"^^..HEAD
+        git -C "${LLVM_PROJ}" lo "${MLFC}"^^..HEAD
     fi
-); }
+}
 
 # linux testing
-function lt() { (
-    : "${FOLDER:=${CBL_KERNELS}/${TREE:=linux-next}}"
-    cd "${FOLDER}" || die "wtf"
-    echo "${PWD}"
+function lt() {
+    local KRNL_DIR LOG_DIR TC_DIR
 
-    while ((${#})); do
-        case ${1} in
-            # defconfig + little-endian allyesconfig
-            -b | --basic) BASIC=true ;;
-            -d | --debug) DEBUG=true ;;
-            # Show non-fatal warnings
-            -w | --warnings) SHOW_NF_WARNINGS=true ;;
-            "") ;;
-        esac
-        shift
-    done
+    : "${KRNL_DIR:=${CBL_KERNELS}/${TREE:=linux-next}}"
+    LOG_DIR=${CBL}/build-logs/${KRNL_DIR##*/}-$(date +%Y%m%d-%H%M)
+    mkdir -p "${LOG_DIR}"
 
-    # Logging
-    LOG_DIR=$(mktemp -d)
-    LOG=${LOG_DIR}/main.log
-    echo
-    echo "Build log: ${LOG}"
-    echo
+    "${CBL}"/llvm-kernel-testing/test.sh \
+        --linux-src "${KRNL_DIR}" \
+        --log-dir "${LOG_DIR}" \
+        --skip-tc-build \
+        --tc-prefix "${TC_DIR:=${CBL_TC}/combo}" || return ${?}
+
     {
         echo "Host: $(uname -n)"
         echo
-        (
-            path_push "${CBL_BNTL}"
-            path_push "${CBL_LLVM}"
-            [[ -n ${PO} ]] && path_push "${PO}"
-            echo "clang location: $(command -v clang)"
-            echo
-            clang --version | head -n1
-        )
-        echo
-        echo "Version: $(make -s O=out alldefconfig &>/dev/null && make -s O=out kernelrelease && rm -rf out)"
-        echo
-        echo "Build results:"
-        echo
-    } >"${LOG}"
-
-    for CONFIG in "${CBLCFGS[@]}"; do (
-        ARCH=${CONFIG%%:*}
-        CONFIG=${CONFIG##*:}
-
-        # Basic configs are defconfigs + little endian allyesconfig
-        # warning: This only exits the subshell caused by the (..) group. [SC2106]... that's the idea lol
-        # shellcheck disable=SC2106
-        [[ -n ${BASIC} && ! (${CONFIG} =~ defconfig || ${CONFIG} = "allyesconfig") ]] && continue
-
-        header "${ARCH}:${CONFIG}" "${BOLD}"
-
-        # Start timer
-        START=$(date +%s)
-
-        # Warning/error log
-        WARNING_LOG=${LOG_DIR}/${ARCH}_${CONFIG}.log
-
-        # Test bfd builds with ld.bfd
-        [[ ${CONFIG} =~ -bfd ]] && BFD=true
-        CONFIG=${CONFIG//-bfd/}
-        if ${BFD:=false}; then
-            case ${ARCH} in
-                arm32_v[0-9]) LD=arm-linux-gnueabi-ld ;;
-                arm64) LD=aarch64-linux-gnu-ld ;;
-                x86_64) LD=ld ;;
-            esac
-        fi
-
-        # Build kernel silently normally
-        if [[ -z ${DEBUG} ]]; then
-            Q=2 bldk "${ARCH}" "${CONFIG}" KCFLAGS="${KCFLAGS--Werror}" ${LD:+LD="${LD}"} O="${KBF}/${ARCH}" |& tee "${WARNING_LOG}"
-            # Shellcheck does not understand zsh-isms like pipestatus (bash has PIPESTATUS)
-            # shellcheck disable=SC2154
-            MAKE_RESULT=${pipestatus[1]}
-        else
-            bldk "${ARCH}" "${CONFIG}" KCFLAGS="${KCFLAGS--Werror}" ${LD:+LD="${LD}"} O="${KBF}/${ARCH}"
-            MAKE_RESULT=${?}
-        fi
-
-        # Make sure that if make fails, it gets propgated to the if statement
-        if [[ ${MAKE_RESULT} -eq 0 ]]; then
-            COLOR=${GRN}
-            LT_RESULT=successful
-        else
-            COLOR=${RED}
-            LT_RESULT=failed
-        fi
-        printf '%bBuild %s%b\n' "${COLOR}" "${LT_RESULT}" "${RST}"
-        {
-            printf '%s:%s | Build %s in %s' "${ARCH}" "${CONFIG}$(${BFD} && echo -bfd)" "${LT_RESULT}" "$(format_time "${START}" "$(date +%s)")"
-            case ${ARCH} in
-                riscv64 | s390x) BOOT=false ;;
-                *) BOOT=true ;;
-            esac
-            if ${BOOT} && [[ ${LT_RESULT} = "successful" && ${CONFIG} =~ defconfig ]]; then
-                if O=${KBF}/${ARCH} bootk "${ARCH}" &>/dev/null; then
-                    printf " | Boot successful"
-                else
-                    printf " | Boot failed"
-                fi
-            fi
-            printf '\n'
-            [[ -z ${DEBUG} && (-n ${SHOW_NF_WARNINGS} || ${LT_RESULT} = "failed") ]] &&
-                rg --color=never "error:|warning:|undefined" "${WARNING_LOG}" | sed "s/${PWD//\//\\/}\///g"
-            printf '\n'
-        } >>"${LOG}"
-    ); done
-
-    {
-        MFC=$(git mfc)
+        cat "${LOG_DIR}"/results.log
+        MFC=$(git -C "${KRNL_DIR}" mfc)
         if [[ -n ${MFC} ]]; then
-            echo "${FOLDER##*/} commit log:"
             echo
-            git lo "${MFC}"^^..HEAD
+            echo "${KRNL_DIR##*/} commit log:"
+            echo
+            git -C "${KRNL_DIR}" lo "${MFC}"^^..HEAD
         fi
         llvm_log
-    } >>"${LOG}"
+    } >"${LOG_DIR}"/deldog.log
 
-    MESSAGE="linux$([[ -f localversion-next ]] && cat localversion-next) build results: $(deldog "${LOG}")"
+    MESSAGE="${LOG_DIR##*/} build results: $(deldog "${LOG_DIR}/deldog.log")"
 
     tg_msg "${MESSAGE}"
 
     echo
     echo "${MESSAGE}"
+    echo "Full logs available at: ${LOG_DIR}"
     echo
 
-    rm "${LOG}"
-); }
+    rm "${LOG_DIR}"/deldog.log
+}
 
 # Pull the latest CBL Docker image and run it with podman
 function pdmnrn() { (
@@ -773,6 +650,13 @@ function bldtcs() { (
     (cd "${CBL_TC}" &&
         rm -f llvm-tot &&
         ln -sf "${BLDLLVM_INSTALL_FOLDER##*/}" llvm-tot)
+
+    # Combine CBL_LLVM and CBL_BNTL for llvm-kernel-testing
+    (cd "${CBL_TC}" &&
+        rm -rf combo &&
+        mkdir -p combo &&
+        cp -frs "${CBL_LLVM%/*}"/* combo &&
+        cp -frs "${CBL_BNTL%/*}"/* combo)
 
     # Invalidate our kernel ccache because we have a new compiler that will be used for it
     ccache_clear kernel
@@ -956,6 +840,8 @@ function kct() { (
             if [[ -z ${DEBUG} ]]; then
                 kcbw "${ARCH}" "${VERSION}" "${SYNC_FLAG[@]}" |&
                     rg --color=never "error:|warning:|undefined" |& sed "s/${CBL_KC_SRC//\//\\/}\///g" |& tee "${ERRORS}"
+                # SC2154: pipestatus is referenced but not assigned.
+                # shellcheck disable=SC2154
                 MAKE_RESULT=${pipestatus[1]}
             else
                 kcbw "${ARCH}" "${VERSION}" "${SYNC_FLAG[@]}"
@@ -1010,13 +896,14 @@ function kct() { (
 ); }
 
 # Build all kernel trees
-function bldallk() { (
-    TREE=linux lt ""
-    TREE=linux-next lt ""
+function bldallk() {
+    local TREE
+
+    for TREE in linux{,-next,-stable}; do TREE=${TREE} lt ""; done
     kct ""
     "${CBL_KERNELS}"/rpi/bin/build.sh
     "${CBL_KERNELS}"/wsl2/bin/build.sh
-); }
+}
 
 # Build new LLVM/Clang/lld and test all kernel trees
 function bldall() { (
