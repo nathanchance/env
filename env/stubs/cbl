@@ -7,6 +7,7 @@
 # Universal variables
 CBL_ANDROID=${CBL}/android
 CBL_CTTLFSH=${CBL_ANDROID}/cuttlefish
+CBL_GIT=${CBL}/github
 CBL_KC=${CBL_ANDROID}/common
 CBL_KC_SRC=${CBL_KC}/common
 CBL_TC=${CBL}/toolchains
@@ -14,7 +15,7 @@ CBL_LLVM=${CBL_TC}/llvm-tot/bin
 CBL_BNTL=${CBL_TC}/binutils/bin
 TCBLD=${CBL}/tc-build
 CBL_CCACHE=${CBL}/.ccache
-export CBL_ANDROID CBL_CTTLFSH CBL_KC CBL_KC_SRC CBL_TC CBL_LLVM CBL_BNTL TCBLD CBL_CCACHE
+export CBL_ANDROID CBL_CTTLFSH CBL_GIT CBL_KC CBL_KC_SRC CBL_TC CBL_LLVM CBL_BNTL TCBLD CBL_CCACHE
 
 # Configurations known to build with -Werror
 CBLCFGS=(
@@ -536,7 +537,7 @@ function bootk() { (
         x86) ARCH=x86_64 ;;
     esac
 
-    BOOT_QEMU_SH=${CBL}/git/boot-utils-master/boot-qemu.sh
+    BOOT_QEMU_SH=${CBL_GIT}/boot-utils-master/boot-qemu.sh
     [[ -f ${BOOT_QEMU_SH} ]] || die "${BOOT_QEMU_SH} doesn't exist!"
 
     # Update boot-utils
@@ -1024,11 +1025,11 @@ function bldall() { (
 
 # Function to test build-{binutils,llvm}.py in multiple Docker images
 function bld_llvm_bntls_py() { (
-    CCACHE_FOLDER=${CBL}/git/ccache
+    CCACHE_FOLDER=${CBL_CCACHE}/bld_llvm_bntls_py
     LOG=$(mktemp)
     echo "Log: ${LOG}"
     SCRIPT=$(mktemp --suffix=.sh)
-    TC_BLD=${CBL}/git/tc-build
+    TC_BLD=${CBL_GIT}/tc-build
 
     mkdir -p "${CCACHE_FOLDER}"
     cd "${TC_BLD}" || die "Could not move into ${TC_BLD}!"
@@ -1120,11 +1121,11 @@ EOF
 ); }
 
 function yapf() {
-    PYTHONPATH=${CBL}/git/yapf python3 "${CBL}"/git/yapf/yapf -i -p "${@}"
+    PYTHONPATH=${CBL_GIT}/yapf python3 "${CBL_GIT}"/yapf/yapf -i -p "${@}"
 }
 
 function qualify_tc_bld_uprev() { (
-    TC_BLD=${HOME}/cbl/git/tc-build
+    TC_BLD=${CBL_GIT}/tc-build
 
     cd "$(mktemp -d)"
 
@@ -1157,13 +1158,13 @@ function upd_lnx_tcbld() { (
     case ${MODE} in
         personal)
             BPREFIX=pgo
-            KERNEL=${HOME}/cbl/tc-build/kernel
+            KERNEL=${CBL}/tc-build/kernel
             TAR_EXT=gz
             URL=https://git.kernel.org/torvalds/t
             ;;
         release)
             BPREFIX=v${KVER}-pgo
-            KERNEL=${HOME}/cbl/git/tc-build/kernel
+            KERNEL=${CBL_GIT}/tc-build/kernel
             TAR_EXT=xz
             URL=https://cdn.kernel.org/pub/linux/kernel/v5.x
             ;;

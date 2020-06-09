@@ -71,7 +71,7 @@ function cbl_other_repos() { (
     curl -LSso common/.git/hooks/commit-msg https://android-review.googlesource.com/tools/hooks/commit-msg
     chmod u+x common/.git/hooks/commit-msg
 
-    cd "${CBL}"/git || die "wtf"
+    cd "${CBL}"/github || die "wtf"
     for REPO in boot-utils boot-utils:boot-utils-master continuous-integration:ci dockerimage tc-build; do
         FOLDER=${REPO#*:}
         REPO=${REPO%:*}
