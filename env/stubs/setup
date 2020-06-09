@@ -79,7 +79,6 @@ function cbl_other_repos() { (
         [[ -d ${FOLDER} ]] || git clone git@github.com:ClangBuiltLinux/"${REPO}".git "${FOLDER}"
     done
     for FOLDER in boot-utils ci dockerimage tc-build; do (cd "${FOLDER}" && hub fork); done
-    [[ -d llvm-kernel-testing ]] || git clone git@github.com:nathanchance/llvm-kernel-testing
     [[ -d yapf ]] || git clone https://github.com/google/yapf
 
     cd "${CBL}"/mirrors || die "wtf"
