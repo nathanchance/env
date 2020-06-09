@@ -10,12 +10,13 @@ CBL_CTTLFSH=${CBL_ANDROID}/cuttlefish
 CBL_GIT=${CBL}/github
 CBL_KC=${CBL_ANDROID}/common
 CBL_KC_SRC=${CBL_KC}/common
+CBL_KERNELS=${CBL}/kernels
 CBL_TC=${CBL}/toolchains
 CBL_LLVM=${CBL_TC}/llvm-tot/bin
 CBL_BNTL=${CBL_TC}/binutils/bin
 TCBLD=${CBL}/tc-build
 CBL_CCACHE=${CBL}/.ccache
-export CBL_ANDROID CBL_CTTLFSH CBL_GIT CBL_KC CBL_KC_SRC CBL_TC CBL_LLVM CBL_BNTL TCBLD CBL_CCACHE
+export CBL_ANDROID CBL_CTTLFSH CBL_GIT CBL_KC CBL_KC_SRC CBL_KERNELS CBL_TC CBL_LLVM CBL_BNTL TCBLD CBL_CCACHE
 
 # Configurations known to build with -Werror
 CBLCFGS=(
@@ -573,7 +574,7 @@ function llvm_log() { (
 
 # linux testing
 function lt() { (
-    : "${FOLDER:=${CBL}/${TREE:=linux-next}}"
+    : "${FOLDER:=${CBL_KERNELS}/${TREE:=linux-next}}"
     cd "${FOLDER}" || die "wtf"
     echo "${PWD}"
 
@@ -1013,8 +1014,8 @@ function bldallk() { (
     TREE=linux lt ""
     TREE=linux-next lt ""
     kct ""
-    "${CBL}"/rpi/bin/build.sh
-    "${CBL}"/wsl2/bin/build.sh
+    "${CBL_KERNELS}"/rpi/bin/build.sh
+    "${CBL_KERNELS}"/wsl2/bin/build.sh
 ); }
 
 # Build new LLVM/Clang/lld and test all kernel trees

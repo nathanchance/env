@@ -53,7 +53,7 @@ function bootstrap() { (
     # Setup folders that will be used
     mkdir -p "${ALS}" \
         "${ANDROID_TC_FOLDER}" \
-        "${CBL}"/{android,github,mirrors} \
+        "${CBL}"/{android,github,kernels,mirrors} \
         "${GITHUB_FOLDER}" \
         "${HOME}"/usr/bin \
         "${KERNEL_FOLDER}"/sony \

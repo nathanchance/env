@@ -25,7 +25,7 @@ function global_gitignore() { (
 # https://www.kernel.org/cloning-linux-from-a-bundle.html
 function cbl_linux_repos() { (
     # shellcheck disable=SC2030
-    : "${CBL:=${HOME}/cbl}" "${SRC_FOLDER:=${HOME}/src}"
+    : "${CBL:=${HOME}/cbl/kernels}" "${SRC_FOLDER:=${HOME}/src}"
 
     while ((${#})); do
         case ${1} in
@@ -89,15 +89,17 @@ function cbl_other_repos() { (
     cd "${CBL}" || die "wtf"
     [[ -d llvm-kernel-testing ]] || git clone git@github.com:nathanchance/llvm-kernel-testing.git
     [[ -d tc-build ]] || git clone -b personal git@github.com:nathanchance/tc-build.git
+
+    cd "${CBL}"/kernels || die "wtf"
     [[ -d rpi ]] || git clone git@github.com:nathanchance/pi-kernel rpi
     [[ -d wsl2 ]] || git clone git@github.com:nathanchance/WSL2-Linux-Kernel wsl2
 
-    cd "${CBL}"/rpi || die "wtf"
+    cd "${CBL}"/kernels/rpi || die "wtf"
     git_remote_add -f --tags mainline https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git
     git_remote_add -f --tags stable https://git.kernel.org/pub/scm/linux/kernel/git/stable/linux.git
     git_remote_add -f upstream https://github.com/raspberrypi/linux
 
-    cd "${CBL}"/wsl2 || die "wtf"
+    cd "${CBL}"/kernels/wsl2 || die "wtf"
     git_remote_add -f --tags mainline https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git
     git_remote_add -f --tags next https://git.kernel.org/pub/scm/linux/kernel/git/next/linux-next.git
     git_remote_add -f --tags microsoft https://github.com/microsoft/WSL2-Linux-Kernel
