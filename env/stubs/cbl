@@ -9,13 +9,12 @@ CBL_ANDROID=${CBL}/android
 CBL_CTTLFSH=${CBL_ANDROID}/cuttlefish
 CBL_KC=${CBL_ANDROID}/common
 CBL_KC_SRC=${CBL_KC}/common
-CBL_SRC=${CBL}/src
 CBL_TC=${CBL}/toolchains
 CBL_LLVM=${CBL_TC}/llvm-tot/bin
 CBL_BNTL=${CBL_TC}/binutils/bin
 TCBLD=${CBL}/tc-build
 CBL_CCACHE=${CBL}/.ccache
-export CBL_ANDROID CBL_CTTLFSH CBL_KC CBL_KC_SRC CBL_SRC CBL_TC CBL_LLVM CBL_BNTL TCBLD CBL_CCACHE
+export CBL_ANDROID CBL_CTTLFSH CBL_KC CBL_KC_SRC CBL_TC CBL_LLVM CBL_BNTL TCBLD CBL_CCACHE
 
 # Configurations known to build with -Werror
 CBLCFGS=(
