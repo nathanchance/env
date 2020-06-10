@@ -16,36 +16,6 @@ function kv() {
     make CC=gcc CROSS_COMPILE="" kernelversion
 }
 
-# Steps to execute post 'git fm'
-function post_git_fm_steps() { (
-    # Log our success
-    log "${LOG_TAG} ${1}"
-    # Build if requested and not Nash
-    if [[ -n ${BUILD} ]]; then
-        # msm-4.14 has two defconfigs to build: sm8150-perf_defconfig and sdmsteppe-perf_defconfig
-        if [[ ${REPO} = "msm-4.14" && ${BRANCH} != "kernel.lnx.4.14.r1" ]]; then
-            BK_COMMANDS=("bk" "bk -d vendor/sdmsteppe-perf_defconfig")
-        else
-            BK_COMMANDS=("bk")
-        fi
-
-        for BK_COMMAND in "${BK_COMMANDS[@]}"; do
-            # Make BK_COMMAND an array
-            read -rA BK_COMMAND <<<"${BK_COMMAND}"
-            if "${BK_COMMAND[@]}"; then
-                # Show kernel version in log
-                log "${LOG_TAG} Build successful: $(kv)$(cd out && ../scripts/setlocalversion ..)"
-            else
-                # Add command for quick reproduction of build failure
-                log "${LOG_TAG} Build failed: ( cd ${ALS}/${REPO}; ${BK_COMMAND} )"
-                BUILD_FAILED=true
-            fi
-        done
-    fi
-    # Don't push if we're just testing
-    [[ -z ${NO_PUSH} && -z ${BUILD_FAILED} ]] && git push
-); }
-
 # Steps to execute if merge failed
 function failed_steps() {
     # Log conflicts
@@ -61,6 +31,7 @@ function failed_steps() {
 function post_merge_commands() {
     local FIRST_STATEMENT SECOND_STATEMENT THIRD_STATEMENT NEEDS_KV
     if [[ ${1} = "-s" ]]; then
+        log "${LOG_TAG} Merge successful: $(kv)"
         FIRST_STATEMENT="Post merge steps successfully executed"
         SECOND_STATEMENT="Post merge steps failed"
     else
@@ -87,18 +58,45 @@ function post_merge_commands() {
     COMMANDS=${ALS}/sp/${KVER}/${COMMANDS}
     if [[ -f ${COMMANDS} ]]; then
         if bash "${COMMANDS}" "${COMMANDS_BRANCH}"; then
-            # Log success then push
-            post_git_fm_steps "${FIRST_STATEMENT}${NEEDS_KV:+ $(kv)}"
+            # Log success
+            log "${LOG_TAG} ${FIRST_STATEMENT}${NEEDS_KV:+ $(kv)}"
         else
             # Log failure and conflicts
             log "${LOG_TAG} ${SECOND_STATEMENT}"
             failed_steps
+            return 2
         fi
     # If no command file was found and it was a failed merge, log failure
     elif [[ -n ${THIRD_STATEMENT} ]]; then
         log "${LOG_TAG} Resolution was requested but no resolution file was found!"
         failed_steps
+        return 3
     fi
+
+    # Build if requested and not Nash
+    if [[ -n ${BUILD} ]]; then
+        # msm-4.14 has two defconfigs to build: sm8150-perf_defconfig and sdmsteppe-perf_defconfig
+        if [[ ${REPO} = "msm-4.14" && ${BRANCH} != "kernel.lnx.4.14.r1" ]]; then
+            BK_COMMANDS=("bk" "bk -d vendor/sdmsteppe-perf_defconfig")
+        else
+            BK_COMMANDS=("bk")
+        fi
+
+        for BK_COMMAND in "${BK_COMMANDS[@]}"; do
+            # Make BK_COMMAND an array
+            read -rA BK_COMMAND <<<"${BK_COMMAND}"
+            if "${BK_COMMAND[@]}"; then
+                # Show kernel version in log
+                log "${LOG_TAG} Build successful: $(kv)$(cd out && ../scripts/setlocalversion ..)"
+            else
+                # Add command for quick reproduction of build failure
+                log "${LOG_TAG} Build failed: ( cd ${ALS}/${REPO}; ${BK_COMMAND} )"
+                BUILD_FAILED=true
+            fi
+        done
+    fi
+    # Don't push if we're just testing
+    [[ -z ${NO_PUSH} && -z ${BUILD_FAILED} ]] && git push
 }
 
 source "${SCRIPTS_FOLDER:?}"/common
@@ -284,9 +282,6 @@ for VERSION in "${VERSIONS[@]}"; do
 
                 # Merge the update, logging success and pushing as necessary
                 if merge-stable "${ALS_PARAMS[@]}" -s; then
-                    # Show merged kernel version in log
-                    post_git_fm_steps "Merge successful: $(kv)"
-
                     # Properly set KVER for post merge commands
                     if [[ -n ${QUEUE} ]]; then
                         KVER=${MAJOR_VER}.$((${KVER##*.} + 1))
