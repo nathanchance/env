@@ -242,7 +242,7 @@ function wsl_setup() {
 function upd_kernel() { (
     KERNEL=/mnt/c/Users/natec/Linux/kernel-${1:-next}-${2:-clang}
     rm -rf "${KERNEL}"
-    SRC_FOLDER=${HOME}/cbl/wsl2
+    SRC_FOLDER=${HOME}/cbl/kernels/wsl2
     OUT_FOLDER=out/x86_64
     KERNEL_IMAGE=arch/x86/boot/bzImage
     scp nathan@"${SERVER_IP:?}":"${SRC_FOLDER}"/${OUT_FOLDER}/${KERNEL_IMAGE} "${KERNEL}"
