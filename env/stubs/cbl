@@ -542,42 +542,44 @@ function llvm_log() {
 
 # linux testing
 function lt() {
-    local KRNL_DIR LOG_DIR TC_DIR
+    local _krnl_dir _log_dir _mfc _msg _tc_dir
 
-    : "${KRNL_DIR:=${CBL_KERNELS}/${TREE:=linux-next}}"
-    LOG_DIR=${CBL}/build-logs/${KRNL_DIR##*/}-$(date +%Y%m%d-%H%M)
-    mkdir -p "${LOG_DIR}"
+    _krnl_dir=${KRNL_DIR:-${CBL_KERNELS}/${TREE:-linux-next}}
+    _log_dir=${CBL}/build-logs/${_krnl_dir##*/}-$(date +%Y%m%d-%H%M)
+    _tc_dir=${TC_DIR:-${CBL_TC}/combo}
+
+    mkdir -p "${_log_dir}"
 
     "${CBL}"/llvm-kernel-testing/test.sh \
-        --linux-src "${KRNL_DIR}" \
-        --log-dir "${LOG_DIR}" \
+        --linux-src "${_krnl_dir}" \
+        --log-dir "${_log_dir}" \
         --skip-tc-build \
-        --tc-prefix "${TC_DIR:=${CBL_TC}/combo}" || return ${?}
+        --tc-prefix "${_tc_dir}" || return ${?}
 
     {
         echo "Host: $(uname -n)"
         echo
-        cat "${LOG_DIR}"/results.log
-        MFC=$(git -C "${KRNL_DIR}" mfc)
-        if [[ -n ${MFC} ]]; then
+        cat "${_log_dir}"/results.log
+        _mfc=$(git -C "${_krnl_dir}" mfc)
+        if [[ -n ${_mfc} ]]; then
             echo
-            echo "${KRNL_DIR##*/} commit log:"
+            echo "${_krnl_dir##*/} commit log:"
             echo
-            git -C "${KRNL_DIR}" lo "${MFC}"^^..HEAD
+            git -C "${_krnl_dir}" lo "${_mfc}"^^..HEAD
         fi
         llvm_log
-    } >"${LOG_DIR}"/deldog.log
+    } >"${_log_dir}"/deldog.log
 
-    MESSAGE="${LOG_DIR##*/} build results: $(deldog "${LOG_DIR}/deldog.log")"
+    _msg="${_log_dir##*/} build results: $(deldog "${_log_dir}/deldog.log")"
 
-    tg_msg "${MESSAGE}"
+    tg_msg "${_msg}"
 
     echo
-    echo "${MESSAGE}"
-    echo "Full logs available at: ${LOG_DIR}"
+    echo "${_msg}"
+    echo "Full logs available at: ${_log_dir}"
     echo
 
-    rm "${LOG_DIR}"/deldog.log
+    rm "${_log_dir}"/deldog.log
 }
 
 # Pull the latest CBL Docker image and run it with podman
