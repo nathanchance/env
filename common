@@ -71,7 +71,7 @@ function die() {
 
     display_error "${@}"
     type pre_exit_commands &>/dev/null && pre_exit_commands
-    builtin exit 1
+    ${EXIT:-true} && builtin exit 1
 }
 
 # Prints a warning in bold yellow
@@ -106,7 +106,7 @@ function load_botinfo() {
 # Telegram notifier function
 function tg_msg() {
     if [[ -z ${TOKEN} ]]; then
-        [[ -f ${MAIN_FOLDER:?}/.botinfo ]] && source <(tail -n1 "${MAIN_FOLDER}"/.botinfo)
+        [[ -f ${MAIN_FOLDER:?}/.botinfo ]] && eval "$(tail -n1 "${MAIN_FOLDER}"/.botinfo)"
         if [[ -z ${TOKEN} ]]; then
             display_error "tg_msg() was called but there was no token!"
             return 1
@@ -114,7 +114,7 @@ function tg_msg() {
     fi
 
     if [[ -z ${CHAT_ID} ]]; then
-        [[ -f ${MAIN_FOLDER:?}/.botinfo ]] && source <(head -n1 "${MAIN_FOLDER}"/.botinfo)
+        [[ -f ${MAIN_FOLDER:?}/.botinfo ]] && eval "$(head -n1 "${MAIN_FOLDER}"/.botinfo)"
         if [[ -z ${CHAT_ID} ]]; then
             display_error "tg_msg() was called but there was no chat ID!"
             return 1

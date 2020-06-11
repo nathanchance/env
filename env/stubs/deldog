@@ -12,19 +12,22 @@
 # Usage:
 # $ deldog <file>
 # $ command |& deldog
-function deldog() { (
-    for BINARY in curl jq; do
-        command -v ${BINARY} &>/dev/null || {
-            echo "ERROR: ${BINARY} is not installed" >&2
-            exit 1
+function deldog() {
+    local binary curl_args _haste_url result
+
+    for binary in curl jq; do
+        command -v ${binary} &>/dev/null || {
+            echo "ERROR: ${binary} is not installed"
+            return 1
         }
     done
-    [[ -z ${HASTE_URL} ]] && HASTE_URL=https://del.dog
-    [[ -n ${DEL_DOG_API_KEY} && ${HASTE_URL} =~ del ]] && CURL_ARGS=(--header "X-api-key: ${DEL_DOG_API_KEY}")
-    RESULT=$(curl -sf --data-binary @"${1:--}" "${CURL_ARGS[@]}" "${HASTE_URL}"/documents) || {
-        echo "ERROR: failed to post document, ca-certificates might need to be installed" >&2
-        exit 1
+
+    _haste_url=${HASTE_URL:-https://del.dog}
+    [[ -n ${DEL_DOG_API_KEY} && ${_haste_url} =~ del ]] && curl_args=(--header "X-api-key: ${DEL_DOG_API_KEY}")
+    result=$(curl -sf --data-binary @"${1:--}" "${curl_args[@]}" "${_haste_url}"/documents) || {
+        echo "ERROR: failed to post document, ca-certificates might need to be installed"
+        return 1
     }
-    echo "${HASTE_URL}/raw/$(jq -r .key <<<"${RESULT}")"
-); }
+    echo "${_haste_url}/raw/$(jq -r .key <<<"${result}")"
+}
 # vi: filetype=zsh

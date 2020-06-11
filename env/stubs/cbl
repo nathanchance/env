@@ -529,57 +529,60 @@ function babk() { (
 
 # Show local LLVM patches via git log
 function llvm_log() {
-    local LLVM_PROJ=${TCBLD:?}/llvm-project
+    local llvm_proj mlfc
 
-    MLFC=$(git -C "${LLVM_PROJ}" mfc)
-    if [[ -n ${MLFC} ]]; then
+    llvm_proj=${TCBLD:?}/llvm-project
+    mlfc=$(git -C "${llvm_proj}" mfc)
+
+    if [[ -n ${mlfc} ]]; then
         echo
         echo "LLVM commit log:"
         echo
-        git -C "${LLVM_PROJ}" lo "${MLFC}"^^..HEAD
+        git -C "${llvm_proj}" lo "${mlfc}"^^..HEAD
     fi
 }
 
 # linux testing
 function lt() {
-    local _krnl_dir _log_dir _mfc _msg _tc_dir
+    local _krnl_dir log_dir mfc msg _tc_dir
 
     _krnl_dir=${KRNL_DIR:-${CBL_KERNELS}/${TREE:-linux-next}}
-    _log_dir=${CBL}/build-logs/${_krnl_dir##*/}-$(date +%Y%m%d-%H%M)
     _tc_dir=${TC_DIR:-${CBL_TC}/combo}
 
-    mkdir -p "${_log_dir}"
+    log_dir=${CBL}/build-logs/${_krnl_dir##*/}-$(date +%Y%m%d-%H%M)
+
+    mkdir -p "${log_dir}"
 
     "${CBL}"/llvm-kernel-testing/test.sh \
         --linux-src "${_krnl_dir}" \
-        --log-dir "${_log_dir}" \
+        --log-dir "${log_dir}" \
         --skip-tc-build \
         --tc-prefix "${_tc_dir}" || return ${?}
 
     {
         echo "Host: $(uname -n)"
         echo
-        cat "${_log_dir}"/results.log
-        _mfc=$(git -C "${_krnl_dir}" mfc)
-        if [[ -n ${_mfc} ]]; then
+        cat "${log_dir}"/results.log
+        mfc=$(git -C "${_krnl_dir}" mfc)
+        if [[ -n ${mfc} ]]; then
             echo
             echo "${_krnl_dir##*/} commit log:"
             echo
-            git -C "${_krnl_dir}" lo "${_mfc}"^^..HEAD
+            git -C "${_krnl_dir}" lo "${mfc}"^^..HEAD
         fi
         llvm_log
-    } >"${_log_dir}"/deldog.log
+    } >"${log_dir}"/deldog.log
 
-    _msg="${_log_dir##*/} build results: $(deldog "${_log_dir}/deldog.log")"
+    msg="${log_dir##*/} build results: $(deldog "${log_dir}/deldog.log")"
 
-    tg_msg "${_msg}"
+    tg_msg "${msg}"
 
     echo
-    echo "${_msg}"
-    echo "Full logs available at: ${_log_dir}"
+    echo "${msg}"
+    echo "Full logs available at: ${log_dir}"
     echo
 
-    rm "${_log_dir}"/deldog.log
+    rm "${log_dir}"/deldog.log
 }
 
 # Pull the latest CBL Docker image and run it with podman
@@ -594,75 +597,80 @@ function pdmnrn() { (
 ); }
 
 # Strip executables within a folder
-function stripall() { (
-    cd "${1:?}"
-    for FILE in $(fd -t file -x file | grep 'not stripped' | cut -d: -f1); do strip "${FILE}"; done
-); }
+function stripall() {
+    local file
+    for file in $(fd -t file "${1:?}" -x file | grep 'not stripped' | cut -d: -f1); do strip "${file}"; done
+}
 
 # Build LLVM
-function bldllvm() { (
+function bldllvm() {
     # Setup ccache
     ccache_size llvm 75
 
     "${TCBLD}"/build-llvm.py "${@}"
-); }
+    local exit_code=${?}
+    unset CCACHE_DIR
+    return ${exit_code}
+}
 
 # Build binutils
-function bldbn() { (
+function bldbn() {
     # Setup ccache
     ccache_size binutils 25
 
     "${TCBLD}"/build-binutils.py "${@}"
-); }
+    local exit_code=${?}
+    unset CCACHE_DIR
+    return ${exit_code}
+}
 
 # Build LLVM/Clang/lld and arm{32,64} and powerpc binutils from source
-function bldtcs() { (
-    DATE_TIME=$(date +%Y%m%d-%H%M)
+function bldtcs() {
+    local bldbn_install_folder bldllvm_install_folder date_time exit_code llvm_bntls_comb tc_bld_bntls tc_bld_llvm_prjct
+
+    date_time=$(date +%Y%m%d-%H%M)
 
     # Build binutils
-    TC_BLD_BNTLS=${TCBLD}/binutils
-    [[ -d ${TC_BLD_BNTLS} ]] || git clone https://sourceware.org/git/binutils-gdb.git "${TC_BLD_BNTLS}"
-    git -C "${TC_BLD_BNTLS}" pull --rebase || die "Updating binutils failed (${?})"
-    BLDBN_INSTALL_FOLDER=${CBL_TC}/binutils-${DATE_TIME}-$(git -C "${TC_BLD_BNTLS}" sh -s --format=%H origin/master)
+    tc_bld_bntls=${TCBLD}/binutils
+    [[ -d ${tc_bld_bntls} ]] || git clone https://sourceware.org/git/binutils-gdb.git "${tc_bld_bntls}"
+    git -C "${tc_bld_bntls}" pull --rebase || { EXIT=false die "Updating binutils failed (${?})" && return 1; }
+    bldbn_install_folder=${CBL_TC}/binutils-${date_time}-$(git -C "${tc_bld_bntls}" sh -s --format=%H origin/master)
     bldbn \
         --build-folder "${BBF:?}" \
-        --install-folder "${BLDBN_INSTALL_FOLDER}" || die "bldbn failed with exit code ${?}"
-    stripall "${BLDBN_INSTALL_FOLDER}"
+        --install-folder "${bldbn_install_folder}" || { EXIT=false die "bldbn failed (${?})" && return 1; }
+    stripall "${bldbn_install_folder}"
 
     # Update binutils
-    (cd "${CBL_TC}" &&
-        rm -f binutils &&
-        ln -s "${BLDBN_INSTALL_FOLDER##*/}" binutils)
+    rm -f "${CBL_BNTL%/*}" &&
+        ln -rs "${bldbn_install_folder}" "${CBL_BNTL%/*}"
 
     # Build LLVM/Clang/lld
-    TC_BLD_LLVM_PRJCT=${TCBLD}/llvm-project
-    [[ -d ${TC_BLD_LLVM_PRJCT} ]] || git -C "${TCBLD}" clone https://github.com/llvm/llvm-project
-    git -C "${TC_BLD_LLVM_PRJCT}" pull --rebase || die "Updating llvm-project failed (${?})"
-    BLDLLVM_INSTALL_FOLDER=${CBL_TC}/llvm-${DATE_TIME}-$(git -C "${TC_BLD_LLVM_PRJCT}" sh -s --format=%H origin/master)
+    tc_bld_llvm_prjct=${TCBLD}/llvm-project
+    [[ -d ${tc_bld_llvm_prjct} ]] || git clone https://github.com/llvm/llvm-project "${tc_bld_llvm_prjct}"
+    git -C "${tc_bld_llvm_prjct}" pull --rebase || { EXIT=false die "Updating llvm-project failed (${?})" && return 1; }
+    bldllvm_install_folder=${CBL_TC}/llvm-${date_time}-$(git -C "${tc_bld_llvm_prjct}" sh -s --format=%H origin/master)
     bldllvm \
         --assertions \
         --build-folder "${LBF:?}" \
         --check-targets lld clang llvm \
-        --install-folder "${BLDLLVM_INSTALL_FOLDER}" \
+        --install-folder "${bldllvm_install_folder}" \
         --lto=thin \
-        --pgo || die "bldllvm failed with exit code ${?}"
-    stripall "${BLDLLVM_INSTALL_FOLDER}"
+        --pgo || { EXIT=false die "bldllvm failed with exit code ${?}" && return 1; }
+    stripall "${bldllvm_install_folder}"
 
-    # Update llvm-tot symlink
-    (cd "${CBL_TC}" &&
-        rm -f llvm-tot &&
-        ln -sf "${BLDLLVM_INSTALL_FOLDER##*/}" llvm-tot)
+    rm -f "${CBL_LLVM%/*}" &&
+        ln -rs "${bldllvm_install_folder}" "${CBL_LLVM%/*}"
 
     # Combine CBL_LLVM and CBL_BNTL for llvm-kernel-testing
-    (cd "${CBL_TC}" &&
-        rm -rf combo &&
-        mkdir -p combo &&
-        cp -frs "${CBL_LLVM%/*}"/* combo &&
-        cp -frs "${CBL_BNTL%/*}"/* combo)
+    llvm_bntls_comb=${CBL_TC}/llvm-binutils
+    rm -rf "${llvm_bntls_comb}" &&
+        mkdir -p "${llvm_bntls_comb}" &&
+        cp -frs "${CBL_LLVM%/*}"/* "${llvm_bntls_comb}" &&
+        cp -frs "${CBL_BNTL%/*}"/* "${llvm_bntls_comb}"
 
     # Invalidate our kernel ccache because we have a new compiler that will be used for it
     ccache_clear kernel
-); }
+}
 
 # Switch cuttlefish branch
 function switch_kc_branch() { (
@@ -899,19 +907,19 @@ function kct() { (
 
 # Build all kernel trees
 function bldallk() {
-    local TREE
+    local tree
 
-    for TREE in linux{,-next,-stable}; do TREE=${TREE} lt ""; done
-    kct ""
+    for tree in linux{,-next,-stable}; do TREE=${tree} lt; done
+    # kct ""
     "${CBL_KERNELS}"/rpi/bin/build.sh
     "${CBL_KERNELS}"/wsl2/bin/build.sh
 }
 
 # Build new LLVM/Clang/lld and test all kernel trees
-function bldall() { (
-    export TG=true
-    bldtcs && bldallk
-); }
+function bldall() {
+    TG=true bldtcs &&
+        bldallk
+}
 
 # Function to test build-{binutils,llvm}.py in multiple Docker images
 function bld_llvm_bntls_py() { (
