@@ -544,7 +544,7 @@ function llvm_log() {
 
 # linux testing
 function lt() {
-    local _krnl_dir log_dir mfc msg _tc_dir
+    local _krnl_dir log_dir mfc msg _tc_dir tc_bld_args
 
     _krnl_dir=${KRNL_DIR:-${CBL_KERNELS}/${TREE:-linux-next}}
     _tc_dir=${TC_DIR:-${CBL_TC}/combo}
@@ -553,11 +553,13 @@ function lt() {
 
     mkdir -p "${log_dir}"
 
+    [[ ${_krnl_dir##*/} = "linux" ]] && tc_bld_args=(--test-lto-cfi-kernels)
     "${CBL}"/llvm-kernel-testing/test.sh \
         --linux-src "${_krnl_dir}" \
         --log-dir "${log_dir}" \
         --skip-tc-build \
-        --tc-prefix "${_tc_dir}" || return ${?}
+        --tc-prefix "${_tc_dir}" \
+        "${tc_bld_args[@]}" || return ${?}
 
     {
         echo "Host: $(uname -n)"
