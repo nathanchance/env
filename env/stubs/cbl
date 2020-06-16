@@ -14,9 +14,10 @@ CBL_KERNELS=${CBL}/kernels
 CBL_TC=${CBL}/toolchains
 CBL_LLVM=${CBL_TC}/llvm-tot/bin
 CBL_BNTL=${CBL_TC}/binutils/bin
+CBL_LLVM_BNTL=${CBL_TC}/llvm-binutils/bin
 TCBLD=${CBL}/tc-build
 CBL_CCACHE=${CBL}/.ccache
-export CBL_ANDROID CBL_CTTLFSH CBL_GIT CBL_KC CBL_KC_SRC CBL_KERNELS CBL_TC CBL_LLVM CBL_BNTL TCBLD CBL_CCACHE
+export CBL_ANDROID CBL_CTTLFSH CBL_GIT CBL_KC CBL_KC_SRC CBL_KERNELS CBL_TC CBL_LLVM CBL_BNTL CBL_LLVM_BNTL TCBLD CBL_CCACHE
 
 # Create build folders
 function crbf() {
@@ -547,7 +548,7 @@ function lt() {
     local _krnl_dir log_dir mfc msg _tc_dir tc_bld_args
 
     _krnl_dir=${KRNL_DIR:-${CBL_KERNELS}/${TREE:-linux-next}}
-    _tc_dir=${TC_DIR:-${CBL_TC}/combo}
+    _tc_dir=${TC_DIR:-${CBL_LLVM_BNTL%/*}}
 
     log_dir=${CBL}/build-logs/${_krnl_dir##*/}-$(date +%Y%m%d-%H%M)
 
@@ -628,7 +629,7 @@ function bldbn() {
 
 # Build LLVM/Clang/lld and arm{32,64} and powerpc binutils from source
 function bldtcs() {
-    local bldbn_install_folder bldllvm_install_folder date_time exit_code llvm_bntls_comb tc_bld_bntls tc_bld_llvm_prjct
+    local bldbn_install_folder bldllvm_install_folder date_time exit_code tc_bld_bntls tc_bld_llvm_prjct
 
     date_time=$(date +%Y%m%d-%H%M)
 
@@ -664,11 +665,10 @@ function bldtcs() {
         ln -rs "${bldllvm_install_folder}" "${CBL_LLVM%/*}"
 
     # Combine CBL_LLVM and CBL_BNTL for llvm-kernel-testing
-    llvm_bntls_comb=${CBL_TC}/llvm-binutils
-    rm -rf "${llvm_bntls_comb}" &&
-        mkdir -p "${llvm_bntls_comb}" &&
-        cp -frs "${CBL_LLVM%/*}"/* "${llvm_bntls_comb}" &&
-        cp -frs "${CBL_BNTL%/*}"/* "${llvm_bntls_comb}"
+    rm -rf "${CBL_LLVM_BNTL%/*}" &&
+        mkdir -p "${CBL_LLVM_BNTL%/*}" &&
+        cp -frs "${CBL_LLVM%/*}"/* "${CBL_LLVM_BNTL%/*}" &&
+        cp -frs "${CBL_BNTL%/*}"/* "${CBL_LLVM_BNTL%/*}"
 
     # Invalidate our kernel ccache because we have a new compiler that will be used for it
     ccache_clear kernel
