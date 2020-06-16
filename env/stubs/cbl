@@ -554,7 +554,7 @@ function lt() {
 
     mkdir -p "${log_dir}"
 
-    [[ ${_krnl_dir##*/} = "linux" ]] && tc_bld_args=(--test-lto-cfi-kernels)
+    [[ ${_krnl_dir##*/} = "linux" ]] && tc_bld_args=(--test-lto-cfi-kernel)
     "${CBL}"/llvm-kernel-testing/test.sh \
         --linux-src "${_krnl_dir}" \
         --log-dir "${log_dir}" \
