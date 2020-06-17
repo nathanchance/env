@@ -240,7 +240,7 @@ function wsl_setup() {
 
 # Update WSL kernel from server
 function upd_kernel() { (
-    KERNEL=/mnt/c/Users/natec/Linux/kernel-${1:-next}-${2:-clang}
+    KERNEL=/mnt/c/Users/natec/Linux/kernel-${1:-next-clang}
     rm -rf "${KERNEL}"
     SRC_FOLDER=${HOME}/cbl/kernels/wsl2
     OUT_FOLDER=out/x86_64
