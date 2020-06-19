@@ -545,7 +545,7 @@ function llvm_log() {
 
 # linux testing
 function lt() {
-    local _krnl_dir log_dir mfc msg _tc_dir tc_bld_args
+    local blocklist _krnl_dir log_dir mfc msg _tc_dir tc_bld_args
 
     _krnl_dir=${KRNL_DIR:-${CBL_KERNELS}/${TREE:-linux-next}}
     _tc_dir=${TC_DIR:-${CBL_LLVM_BNTL%/*}}
@@ -566,6 +566,17 @@ function lt() {
         echo "Host: $(uname -n)"
         echo
         cat "${log_dir}"/results.log
+        echo
+        echo "Full warning report:"
+        echo
+        # arch/powerpc/boot/inffast.c | arch/powerpc/boot/main.c: Two warnings we do not really care about
+        # being placed in: Orphan section placement
+        # DWARF2 only supports one section per compilation unit: Irrelevant for now
+        # objtool: Too many to deal with for now
+        # results.log: Any warnings from this will be in the other logs
+        # same module names found: Kbuild warnings that are not a result of clang
+        blocklist="arch/powerpc/boot/inffast.c|arch/powerpc/boot/main.c|being placed in|DWARF2 only supports one section per compilation unit|objtool:|results.log|same module names found"
+        rg "error:|FATAL:|undefined|warning:|WARNING:" "${log_dir}"/*.log |& rg -v -- "${blocklist}" |& sed 's/.*.log://g' |& cut -d / -f 7- |& sort |& uniq
         mfc=$(git -C "${_krnl_dir}" mfc)
         if [[ -n ${mfc} ]]; then
             echo
