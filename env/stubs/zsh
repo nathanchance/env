@@ -9,7 +9,8 @@ function pure_prompt() { (
     setup_zfunctions
     PURE=${ZFUNCTIONS}/pure
     [[ -d ${PURE} ]] || git clone https://github.com/sindresorhus/pure "${PURE}"
-    git -C "${PURE}" pull
+    # https://github.com/sindresorhus/pure/issues/550
+    git -C "${PURE}" checkout 3589b7f3f8a687b2a3b7f91100bae540fcd4056f
     ln -fs "${PURE}"/pure.zsh "${ZFUNCTIONS}"/prompt_pure_setup
     ln -fs "${PURE}"/async.zsh "${ZFUNCTIONS}"/async
 ); }
