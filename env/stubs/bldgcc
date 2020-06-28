@@ -39,13 +39,13 @@ function bldgcc() { (
     [[ ${#} -eq 0 ]] && {
         echo "ERROR: This function needs targets!" >&2
         echo "Some of the possible options (can provide more than one):" >&2
-        echo "      arm, arm64, powerpc, powerpc64, powerpc64le, s390, x86_64" >&2
+        echo "      arm, arm64, powerpc, powerpc64, powerpc64le, s390x, x86_64" >&2
         exit 1
     }
     while ((${#})); do
         case ${1} in
             --binutils | --gcc | --toolchain) BLD_OPTS=("${1}") ;;
-            all) TARGETS=(arm arm64 powerpc powerpc64 powerpc64le mips mipsel riscv64 s390 x86_64) ;;
+            all) TARGETS=(arm arm64 powerpc powerpc64 powerpc64le mips mipsel riscv64 s390x x86_64) ;;
             *) TARGETS+=("${1}") ;;
         esac
         shift
