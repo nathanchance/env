@@ -169,6 +169,7 @@ function bootstrap() { (
             libevent-dev
             libexpat1-dev
             libglib2.0-dev
+            libglu1-mesa
             libgmp-dev
             libio-socket-ssl-perl
             liblz4-tool
