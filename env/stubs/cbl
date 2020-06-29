@@ -741,7 +741,7 @@ function upd_cuttlefish() { (
     rm -rf "${CBL_CTTLFSH}"
     mkdir -p "${CBL_CTTLFSH}"
     cd "${CBL_CTTLFSH}" || exit ${?}
-    download-aosp.sh "$(uname -m)" || exit ${?}
+    download_cuttlefish "$(uname -m)" || exit ${?}
 ); }
 
 # Boot Cuttlefish

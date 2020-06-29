@@ -369,6 +369,9 @@ function rbld_usr() { (
             fi
             ;;
     esac
+    for SCRIPT in "${SCRIPTS_FOLDER}"/workstation/*; do
+        ln -fs "${SCRIPT}" "${HOME}"/usr/bin/"${SCRIPT##*/}"
+    done
 ); }
 
 # Workstation specific aliases
@@ -397,7 +400,6 @@ function cbf() { (
 
 # Additional setup steps for my workstation
 function workstation_setup() {
-    add_to_path_pre "${SCRIPTS_FOLDER}/workstation"
     move_to_front_of_path "${HOME}/.local/bin"
     move_to_front_of_path "${HOME}/usr/bin"
     setup_ccache 50
