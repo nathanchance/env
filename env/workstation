@@ -292,9 +292,9 @@ function bootstrap() { (
     source "${SCRIPTS}"/env/stubs/git && git_setup
     zsh "${SCRIPTS}"/configs/common/vim/vim_setup.sh
     ln -fs "${SCRIPTS}"/configs/workstation/.tmux.conf "${HOME}"/.tmux.conf
-    decrypt_gpg_file botinfo
-    decrypt_del_dog_api_key
-    decrypt_gpg_file muttrc
+    decrypt_gpg_file botinfo || NEEDS_GPG_DECRYPT=true
+    decrypt_del_dog_api_key || NEEDS_GPG_DECRYPT=true
+    decrypt_gpg_file muttrc || NEEDS_GPG_DECRYPT=true
     for REPO in chromeos-adb-fastboot hugo-files nathanchance.github.io patches; do
         [[ -d ${GITHUB_FOLDER}/${REPO} ]] || { git -C "${GITHUB_FOLDER}" clone git@github.com:nathanchance/"${REPO}" || die "Error cloning ${REPO}!"; }
     done
@@ -335,8 +335,10 @@ function bootstrap() { (
     echo "Things still to do!"
     echo
     echo "1. EDITOR=vim crontab -e"
-    echo
-    echo "2. sudo systemctl reboot"
+    if ${NEEDS_GPG_DECRYPT:=false}; then
+        echo
+        echo "2. decrypt_gpg_file botinfo && decrypt_del_dog_api_key && decrypt_gpg_file muttrc"
+    fi
     echo
 ) || return 1; }
 
