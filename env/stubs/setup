@@ -31,7 +31,7 @@ function cbl_linux_repos() { (
         case ${1} in
             linux) PAIRS=("torvalds/linux.git:linux" "torvalds/linux.git:${CBL}/linux" "torvalds/linux.git:${CBL}/mirrors/linux") ;;
             linux-next) PAIRS=("next/linux-next.git:linux-next" "next/linux-next.git:${CBL}/linux-next") ;;
-            linux-stable) PAIRS=("stable/linux.git:linux-stable") ;;
+            linux-stable) PAIRS=("stable/linux.git:linux-stable" "stable/linux.git:${CBL}/linux-stable") ;;
             *) return 1 ;;
         esac
         shift
@@ -50,7 +50,12 @@ function cbl_linux_repos() { (
             git remote remove origin
             git remote add origin https://git.kernel.org/pub/scm/linux/kernel/git/"${URL}"
             git remote update origin
-            git checkout master
+            case ${FOLDER} in
+                *linux-stable) BRANCH=linux-5.4.y ;;
+                *) BRANCH=master ;;
+            esac
+            git checkout "${BRANCH}"
+            git branch --set-upstream-to=origin/"${BRANCH}" "${BRANCH}"
             [[ ${FOLDER} =~ mirrors ]] && git remote add github git@github.com:ClangBuiltLinux/linux.git
         )
     done
