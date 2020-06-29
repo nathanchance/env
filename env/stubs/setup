@@ -24,14 +24,13 @@ function global_gitignore() { (
 # Grab linux, linux-next, and linux-stable for CBL
 # https://www.kernel.org/cloning-linux-from-a-bundle.html
 function cbl_linux_repos() { (
-    # shellcheck disable=SC2030
-    : "${CBL:=${HOME}/cbl/kernels}" "${SRC_FOLDER:=${HOME}/src}"
+    : "${CBL_K:=${CBL:-${HOME}/cbl}/kernels}" "${SRC_FOLDER:=${HOME}/src}"
 
     while ((${#})); do
         case ${1} in
-            linux) PAIRS=("torvalds/linux.git:linux" "torvalds/linux.git:${CBL}/linux" "torvalds/linux.git:${CBL}/mirrors/linux") ;;
-            linux-next) PAIRS=("next/linux-next.git:linux-next" "next/linux-next.git:${CBL}/linux-next") ;;
-            linux-stable) PAIRS=("stable/linux.git:linux-stable" "stable/linux.git:${CBL}/linux-stable") ;;
+            linux) PAIRS=("torvalds/linux.git:linux" "torvalds/linux.git:${CBL_K}/linux" "torvalds/linux.git:${CBL_K}/mirrors/linux") ;;
+            linux-next) PAIRS=("next/linux-next.git:linux-next" "next/linux-next.git:${CBL_K}/linux-next") ;;
+            linux-stable) PAIRS=("stable/linux.git:linux-stable" "stable/linux.git:${CBL_K}/linux-stable") ;;
             *) return 1 ;;
         esac
         shift
@@ -62,21 +61,29 @@ function cbl_linux_repos() { (
     rm -rf 'clone.bundle-*'
 ); }
 
+# Download Android CBL repos
+function cbl_android_repos() { (
+    cd "${CBL_A_R:=${CBL:-${HOME}/cbl}}"/android || die "wtf"
+    [[ -d android-kernel-clang ]] || git clone git@github.com:nathanchance/android-kernel-clang.git
+    mkdir -p common
+    cd common || die "wtf"
+    PATH=${HOME}/usr/bin:${PATH} repo --color=auto init -u https://android.googlesource.com/kernel/manifest -b common-android-multi
+    PATH=${HOME}/usr/bin:${PATH} repo --color=auto sync
+    curl -LSso common/.git/hooks/commit-msg https://android-review.googlesource.com/tools/hooks/commit-msg
+    chmod u+x common/.git/hooks/commit-msg
+
+    CTTLFSH=${CBL_A_R}/android/cuttlefish
+    rm -rf "${CTTLFSH}"
+    mkdir -p "${CTTLFSH}"
+    cd "${CTTLFSH}" || die "wtf"
+    "${SCRIPTS_FOLDER:-${HOME}/github/scripts}"/workstation/download-aosp.sh x86_64
+); }
+
 # Download other CBL things
 function cbl_other_repos() { (
     source "${SCRIPTS_FOLDER:=${HOME}/github/scripts}"/common || exit ${?}
 
-    # shellcheck disable=SC2031
-    cd "${CBL:=${HOME}/cbl}"/android || die "wtf"
-    [[ -d android-kernel-clang ]] || git clone git@github.com:nathanchance/android-kernel-clang.git
-    mkdir -p common
-    cd common || die "wtf"
-    PATH=${HOME}/usr/bin:${PATH} repo init -u https://android.googlesource.com/kernel/manifest -b common-android-multi
-    PATH=${HOME}/usr/bin:${PATH} repo sync
-    curl -LSso common/.git/hooks/commit-msg https://android-review.googlesource.com/tools/hooks/commit-msg
-    chmod u+x common/.git/hooks/commit-msg
-
-    cd "${CBL}"/github || die "wtf"
+    cd "${CBL_O_R:=${CBL:-${HOME}/cbl}}"/github || die "wtf"
     for REPO in boot-utils boot-utils:boot-utils-master continuous-integration:ci dockerimage tc-build; do
         FOLDER=${REPO#*:}
         REPO=${REPO%:*}
@@ -86,26 +93,26 @@ function cbl_other_repos() { (
     for FOLDER in boot-utils ci dockerimage tc-build; do (cd "${FOLDER}" && hub fork); done
     [[ -d yapf ]] || git clone https://github.com/google/yapf
 
-    cd "${CBL}"/mirrors || die "wtf"
+    cd "${CBL_O_R}"/mirrors || die "wtf"
     [[ -d llvm ]] || git clone https://github.com/llvm/llvm-project llvm
     cd llvm || die "wtf"
     git_remote_add github git@github.com:ClangBuiltLinux/llvm-project.git
 
-    cd "${CBL}" || die "wtf"
+    cd "${CBL_O_R}" || die "wtf"
     [[ -d creduce-files ]] || git clone git@github.com:nathanchance/creduce-files.git
     [[ -d llvm-kernel-testing ]] || git clone git@github.com:nathanchance/llvm-kernel-testing.git
     [[ -d tc-build ]] || git clone -b personal git@github.com:nathanchance/tc-build.git
 
-    cd "${CBL}"/kernels || die "wtf"
+    cd "${CBL_O_R}"/kernels || die "wtf"
     [[ -d rpi ]] || git clone git@github.com:nathanchance/pi-kernel rpi
     [[ -d wsl2 ]] || git clone git@github.com:nathanchance/WSL2-Linux-Kernel wsl2
 
-    cd "${CBL}"/kernels/rpi || die "wtf"
+    cd "${CBL_O_R}"/kernels/rpi || die "wtf"
     git_remote_add -f --tags mainline https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git
     git_remote_add -f --tags stable https://git.kernel.org/pub/scm/linux/kernel/git/stable/linux.git
     git_remote_add -f upstream https://github.com/raspberrypi/linux
 
-    cd "${CBL}"/kernels/wsl2 || die "wtf"
+    cd "${CBL_O_R}"/kernels/wsl2 || die "wtf"
     git_remote_add -f --tags mainline https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git
     git_remote_add -f --tags next https://git.kernel.org/pub/scm/linux/kernel/git/next/linux-next.git
     git_remote_add -f --tags microsoft https://github.com/microsoft/WSL2-Linux-Kernel

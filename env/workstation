@@ -267,7 +267,7 @@ function bootstrap() { (
         rm -rf "${KEYS}"
     fi
     # Ensure GPG passphrase is cached for the rest of the run
-    echo "test" | gpg --clearsign
+    echo "test" | gpg --pinentry-mode loopback --clearsign
 
     # Install yay and AUR packages
     if [[ ${DISTRO} = "arch" ]]; then
@@ -319,6 +319,9 @@ function bootstrap() { (
         tmux new-window zsh -c "source ${SCRIPTS}/env/stubs/setup && cbl_linux_repos ${REPO}"
     done
 
+    # Download Android CBL repos
+    tmux new-window zsh -c "source ${SCRIPTS}/env/stubs/setup && cbl_android_repos"
+
     # Download other CBL things
     tmux new-window zsh -c "source ${SCRIPTS}/env/stubs/setup && cbl_other_repos"
 
@@ -334,11 +337,13 @@ function bootstrap() { (
     echo
     echo "Things still to do!"
     echo
-    echo "1. EDITOR=vim crontab -e"
+    echo "$ EDITOR=vim crontab -e"
     if ${NEEDS_GPG_DECRYPT:=false}; then
         echo
-        echo "2. decrypt_gpg_file botinfo && decrypt_del_dog_api_key && decrypt_gpg_file muttrc"
+        echo "$ decrypt_gpg_file botinfo && decrypt_del_dog_api_key && decrypt_gpg_file muttrc"
     fi
+    echo
+    echo "$ sudo systemctl reboot"
     echo
 ) || return 1; }
 

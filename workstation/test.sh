@@ -1,0 +1,1 @@
+echo test | gpg --clearsign
