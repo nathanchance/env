@@ -236,7 +236,7 @@ function bootstrap() { (
         sudo curl -LSso /etc/containers/registries.conf 'https://git.archlinux.org/svntogit/community.git/plain/trunk/registries.conf?h=packages/skopeo'
 
         # Build folder size
-        BFS=60
+        BFS=80
     else
         die "Unknown or unsupported distro"
     fi
