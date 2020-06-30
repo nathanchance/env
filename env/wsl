@@ -27,9 +27,7 @@ function rootstrap() { (
     : "${USER}" "${PASSWORD}"
 
     # Some WSL specific tuning
-    printf '[network]\ngenerateResolvConf = false\n\n[user]\ndefault = nathan\n' | tee /etc/wsl.conf
-    rm -rf /etc/resolv.conf
-    printf 'nameserver 8.8.8.8\n' | tee /etc/resolv.conf
+    printf '[user]\ndefault = nathan\n' | tee /etc/wsl.conf
 
     # Always turn on '--no-install-recommends'
     apt-config dump | grep -we Recommends -e Suggests | sed 's/1/0/g' | tee /etc/apt/apt.conf.d/999norecommend
