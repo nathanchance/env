@@ -238,12 +238,32 @@ function wsl_setup() {
 
 # Update WSL kernel from server
 function upd_kernel() { (
-    KERNEL=/mnt/c/Users/natec/Linux/kernel-${1:-next-clang}
-    rm -rf "${KERNEL}"
-    SRC_FOLDER=${HOME}/cbl/kernels/wsl2
-    OUT_FOLDER=out/x86_64
-    KERNEL_IMAGE=arch/x86/boot/bzImage
-    scp nathan@"${SERVER_IP:?}":"${SRC_FOLDER}"/${OUT_FOLDER}/${KERNEL_IMAGE} "${KERNEL}"
+    while ((${#})); do
+        case ${1} in
+            -g | --github) KERNEL_LOCATION=github ;;
+            -s | --server) KERNEL_LOCATION=server ;;
+            -k | --kernel-prefix) shift && KERNEL_SUFFIX=${1} ;;
+        esac
+        shift
+    done
+
+    set -x
+
+    KERNEL=/mnt/c/Users/natec/Linux/kernel${KERNEL_SUFFIX}
+    rm -r "${KERNEL}"
+
+    case ${KERNEL_LOCATION:-github} in
+        github)
+            REPO=nathanchance/WSL2-Linux-Kernel
+            curl -LSso "${KERNEL}" https://github.com/"${REPO}"/releases/download/"$(glr "${REPO}")"/bzImage
+            ;;
+        server)
+            SRC_FOLDER=${HOME}/cbl/kernels/wsl2
+            OUT_FOLDER=out/x86_64
+            KERNEL_IMAGE=arch/x86/boot/bzImage
+            scp nathan@"${SERVER_IP:?}":"${SRC_FOLDER}"/${OUT_FOLDER}/${KERNEL_IMAGE} "${KERNEL}"
+            ;;
+    esac
 ); }
 
 # Install rust using the recommended command
