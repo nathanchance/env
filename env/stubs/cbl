@@ -19,15 +19,6 @@ TCBLD=${CBL}/tc-build
 CBL_CCACHE=${CBL}/.ccache
 export CBL_ANDROID CBL_CTTLFSH CBL_GIT CBL_KC CBL_KC_SRC CBL_KERNELS CBL_TC CBL_LLVM CBL_BNTL CBL_LLVM_BNTL TCBLD CBL_CCACHE
 
-# Create build folders
-function crbf() {
-    local ITEM
-    for ITEM in binutils kernel llvm; do
-        export "$(echo ${ITEM:0:1} | tr '[:lower:]' '[:upper:]')BF=${BLDF}/${ITEM}"
-        mkdir -p "${BLDF}/${ITEM}"
-    done
-}
-
 # Patch check function
 function pch() { (
     [[ ${#} -eq 0 ]] && FP_PARAMS=(-1 HEAD)
@@ -551,7 +542,6 @@ function lt() { (
     "${CBL}"/llvm-kernel-testing/test.sh \
         --linux-src "${KRNL_DIR}" \
         --log-dir "${LOG_DIR}" \
-        --out-dir "${KBF}" \
         --skip-tc-build \
         --tc-prefix "${TC_DIR:=${CBL_LLVM_BNTL%/*}}" \
         "${TC_BLD_ARGS[@]}" || die "llvm-kernel-testing failed (${?})"
@@ -635,9 +625,7 @@ function bldtcs() { (
     [[ -d ${TC_BLD_BNTLS} ]] || git clone https://sourceware.org/git/binutils-gdb.git "${TC_BLD_BNTLS}"
     git -C "${TC_BLD_BNTLS}" pull --rebase || die "Updating binutils failed (${?})"
     BLDBN_INSTALL_FOLDER=${CBL_TC}/binutils-${DATE_TIME}-$(git -C "${TC_BLD_BNTLS}" sh -s --format=%H origin/master)
-    bldbn \
-        --build-folder "${BBF:?}" \
-        --install-folder "${BLDBN_INSTALL_FOLDER}" || die "bldbn failed with exit code ${?}"
+    bldbn --install-folder "${BLDBN_INSTALL_FOLDER}" || die "bldbn failed with exit code ${?}"
     stripall "${BLDBN_INSTALL_FOLDER}"
 
     # Update binutils
@@ -652,7 +640,6 @@ function bldtcs() { (
     BLDLLVM_INSTALL_FOLDER=${CBL_TC}/llvm-${DATE_TIME}-$(git -C "${TC_BLD_LLVM_PRJCT}" sh -s --format=%H origin/master)
     bldllvm \
         --assertions \
-        --build-folder "${LBF:?}" \
         --check-targets lld clang llvm \
         --install-folder "${BLDLLVM_INSTALL_FOLDER}" \
         --lto=thin \

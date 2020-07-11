@@ -131,9 +131,6 @@ function bootstrap() { (
         echo "kernel.unprivileged_userns_clone=1" | sudo tee /etc/sysctl.d/unprivileged_userns_clone.conf
         echo "$(whoami):100000:65536" | sudo tee /etc/subgid /etc/subuid
         echo "session    optional   pam_cgfs.so          -c freezer,memory,name=systemd,unified" | sudo tee -a /etc/pam.d/system-login
-
-        # Build folder size
-        BFS=20
     elif [[ ${DISTRO} = "ubuntu" ]]; then
         PACKAGES=(
             abootimg
@@ -234,19 +231,8 @@ function bootstrap() { (
         # Rootless podman
         echo "$(whoami):100000:65536" | sudo tee /etc/subgid /etc/subuid
         sudo curl -LSso /etc/containers/registries.conf 'https://git.archlinux.org/svntogit/community.git/plain/trunk/registries.conf?h=packages/skopeo'
-
-        # Build folder size
-        BFS=80
     else
         die "Unknown or unsupported distro"
-    fi
-
-    # Setup build folder
-    if ! grep -q "${BLDF}" /etc/fstab; then
-        printf 'tmpfs\t%s\ttmpfs\tnodev,nosuid,uid=%s,gid=%s,size=%dG\t0\t0' "${BLDF}" "$(whoami)" "$(whoami)" "${BFS}" | sudo tee -a /etc/fstab
-        sudo sed -i '/^$/d' /etc/fstab
-        sudo mkdir -p "${BLDF}"
-        sudo mount -a
     fi
 
     # Setup keys
@@ -386,18 +372,6 @@ function workstation_aliases() {
     alias ms='merge-stable'
 }
 
-# Clean build folder
-function cbf() { (
-    case "${1}" in
-        b) FTC=${BBF:?} ;;
-        l) FTC=${LBF:?} ;;
-        k) FTC=${KBF:?} ;;
-        *) FTC=${BLDF} ;;
-    esac
-    find "${FTC:?}" -mindepth 1 -delete 2>/dev/null
-    type crbf &>/dev/null && crbf
-); }
-
 # Additional setup steps for my workstation
 function workstation_setup() {
     move_to_front_of_path "${HOME}/.local/bin"
@@ -408,7 +382,6 @@ function workstation_setup() {
     source "${SCRIPTS_FOLDER}"/env/stubs/bk
     source "${SCRIPTS_FOLDER}"/env/stubs/bldgcc
     load_botinfo
-    type crbf &>/dev/null && crbf
     (gpg_key_cached)
 }
 
