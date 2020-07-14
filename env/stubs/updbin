@@ -491,16 +491,16 @@ function bisharkdp() { (
     for BINARY in "${BINARIES[@]}"; do (
         BINARY_REPO=sharkdp/${BINARY}
         URL_BASE=https://github.com/${BINARY_REPO}
-        [[ -z ${VERSION} ]] && VERSION=$(glr "${BINARY_REPO}")
+        [[ -z ${BIN_VERSION} ]] && BIN_VERSION=$(glr "${BINARY_REPO}")
         if [[ $(uname -m) = "x86_64" ]] && command -v dpkg &>/dev/null; then
             header "Installing ${BINARY}"
-            DEB=${BINARY}_${VERSION//v/}_amd64.deb
-            curl -LSsO "${URL_BASE}"/releases/download/"${VERSION}"/"${DEB}" || die "Error downloading ${DEB}"
+            DEB=${BINARY}_${BIN_VERSION//v/}_amd64.deb
+            curl -LSsO "${URL_BASE}"/releases/download/"${BIN_VERSION}"/"${DEB}" || die "Error downloading ${DEB}"
             sudo dpkg -i "${DEB}" || die "Error installing ${DEB}"
         else
             header "Building ${BINARY}"
-            curl -LSs "${URL_BASE}"/archive/"${VERSION}".tar.gz | tar -xzf - || die "Error downloading ${BINARY} source"
-            cd "${BINARY}-${VERSION//v/}" || die "Can't move into ${BINARY} source"
+            curl -LSs "${URL_BASE}"/archive/"${BIN_VERSION}".tar.gz | tar -xzf - || die "Error downloading ${BINARY} source"
+            cd "${BINARY}-${BIN_VERSION//v/}" || die "Can't move into ${BINARY} source"
             [[ -d ${HOME}/.cargo/bin ]] || irust
             move_to_front_of_path "${HOME}/.cargo/bin"
             cargo build --release --locked || die "cargo build failed"
