@@ -24,11 +24,11 @@ function global_gitignore() { (
 # Grab linux, linux-next, and linux-stable for CBL
 # https://www.kernel.org/cloning-linux-from-a-bundle.html
 function cbl_linux_repos() { (
-    : "${CBL_K:=${CBL:-${HOME}/cbl}/kernels}" "${SRC_FOLDER:=${HOME}/src}"
+    : "${CBL_K:=${CBL:-${HOME}/cbl}/kernels}" "${CBL_M:=${CBL:-${HOME}/cbl}/mirrors}" "${SRC_FOLDER:=${HOME}/src}"
 
     while ((${#})); do
         case ${1} in
-            linux) PAIRS=("torvalds/linux.git:linux" "torvalds/linux.git:${CBL_K}/linux" "torvalds/linux.git:${CBL_K}/mirrors/linux") ;;
+            linux) PAIRS=("torvalds/linux.git:linux" "torvalds/linux.git:${CBL_K}/linux" "torvalds/linux.git:${CBL_M}/linux") ;;
             linux-next) PAIRS=("next/linux-next.git:linux-next" "next/linux-next.git:${CBL_K}/linux-next") ;;
             linux-stable) PAIRS=("stable/linux.git:linux-stable" "stable/linux.git:${CBL_K}/linux-stable") ;;
             *) return 1 ;;
