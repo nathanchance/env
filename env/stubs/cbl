@@ -735,12 +735,13 @@ function upd_cuttlefish() { (
 function boot_cuttlefish() { (
     while ((${#})); do
         case ${1} in
-            *) BRANCH=${1} ;;
+            *5.4) BRANCH=${1} ;;
+            *) BRANCH=-${1} ;;
         esac
         shift
     done
 
-    DIST=${CBL_KC}/out/android-${BRANCH:?}/dist
+    DIST=${CBL_KC}/out/android${BRANCH:?}/dist
     LAUNCH_CVD=(-daemon -kernel_path "${DIST}"/bzImage -report_anonymous_usage_stats n)
     [[ -f ${DIST}/initramfs.img ]] && LAUNCH_CVD=("${LAUNCH_CVD[@]}" -initramfs_path "${DIST}"/initramfs.img)
 
@@ -804,18 +805,22 @@ function kct() { (
             case ${VERSION} in
                 4.9)
                     DIST_BRANCH=4.9-q
-                    UPSTREAM_BRANCH=${DIST_BRANCH}
+                    UPSTREAM_BRANCH=-${DIST_BRANCH}
                     ;;
-                4.14)
+                4.14 | 4.19)
                     DIST_BRANCH=${VERSION}
-                    UPSTREAM_BRANCH=4.14-stable
+                    UPSTREAM_BRANCH=-${VERSION}-stable
+                    ;;
+                5.4)
+                    DIST_BRANCH=12-5.4
+                    UPSTREAM_BRANCH=${DIST_BRANCH}
                     ;;
                 *)
                     DIST_BRANCH=${VERSION}
-                    UPSTREAM_BRANCH=${VERSION}
+                    UPSTREAM_BRANCH=-${VERSION}
                     ;;
             esac
-            UPSTREAM_BRANCH=android-${UPSTREAM_BRANCH}
+            UPSTREAM_BRANCH=android${UPSTREAM_BRANCH}
 
             header "${UPSTREAM_BRANCH} ${ARCH}" "${BOLD}"
 
