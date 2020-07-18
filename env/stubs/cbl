@@ -889,7 +889,7 @@ function bldallk() {
 
     for TREE in linux{,-next,-stable}; do TREE=${TREE} lt ""; done
     kct ""
-    "${CBL_KERNELS}"/rpi/bin/build.sh
+    "${CBL_KERNELS}"/pi-scripts/build.sh -k "${CBL_KERNELS}"/rpi
     "${CBL_KERNELS}"/wsl2/bin/build.sh
 }
 
