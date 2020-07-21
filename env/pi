@@ -109,6 +109,12 @@ function bootstrap() { (
     source "${SCRIPTS}"/env/stubs/git && git_setup
     zsh "${SCRIPTS}"/configs/common/vim/vim_setup.sh
     ln -fs "${SCRIPTS}"/configs/workstation/.tmux.conf "${HOME}"/.tmux.conf
+
+    echo "TODO:"
+    echo
+    echo "1. ssh-copy-id"
+    echo
+    echo "2. Download .server_ip"
 ); }
 
 function rbld_usr() { (
