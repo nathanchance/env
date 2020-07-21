@@ -130,7 +130,7 @@ function pi_setup() { true; }
 function upd_kernel() { (
     while ((${#})); do
         case ${1} in
-            4.19 | 5.4) VER=${1} ;;
+            4.19 | 5.4 | 5.7 | mainline) VER=${1} ;;
             arm | arm64) ARCH=${1} ;;
         esac
         shift
@@ -139,7 +139,7 @@ function upd_kernel() { (
     TMP_BOOT=$(mktemp -d)
     MAIN_BOOT=/boot/custom-${VER:=5.4}-${ARCH:=arm64}
 
-    mkdir -p "${TMP_BOOT}"/{modules,overlays}
+    mkdir -p "${TMP_BOOT}"/modules
 
     case ${ARCH} in
         arm)
@@ -157,8 +157,12 @@ function upd_kernel() { (
     ROOTFS=${OUT}/rootfs
     { rsync -v ${USER}@"${SERVER_IP}":"${ROOTFS}"/"${DTBS}"'*.dtb' "${TMP_BOOT}" &&
         rsync -vr ${USER}@"${SERVER_IP}":"${ROOTFS}"/lib/modules/'*' "${TMP_BOOT}"/modules &&
-        rsync -v ${USER}@"${SERVER_IP}":"${ROOTFS}"/overlays/'*.dtb*' "${TMP_BOOT}"/overlays &&
         rsync -v ${USER}@"${SERVER_IP}":"${OUT}"/arch/"${ARCH}"/boot/"${KERNEL}" "${TMP_BOOT}"; } || exit ${?}
+
+    if [[ ${VER} != mainline ]]; then
+        mkdir -p "${TMP_BOOT}"/overlays
+        rsync -v ${USER}@"${SERVER_IP}":"${ROOTFS}"/overlays/'*.dtb*' "${TMP_BOOT}"/overlays || exit ${?}
+    fi
 
     # Move modules
     MOD_DIR=$(fd -d 1 . "${TMP_BOOT}"/modules)
