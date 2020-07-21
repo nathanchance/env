@@ -265,6 +265,7 @@ function bootk() { (
     BOOT_UTILS=${SRC_FOLDER:-${HOME}/src}/boot-utils
     [[ -d ${BOOT_UTILS} ]] || git clone https://github.com/ClangBuiltLinux/boot-utils "${BOOT_UTILS}"
     git -C "${BOOT_UTILS}" pull -q
+    git -C "${BOOT_UTILS}" pull -q origin pull/23/head
 
     set -x
 
