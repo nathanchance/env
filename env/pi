@@ -198,4 +198,76 @@ function clmods() { (
 function fixp() {
     eval "$(tmux show-env -s SSH_CONNECTION)" && prompt pure
 }
+
+# Build an LLVM toolchain
+function updllvm() { (
+    set -eu
+
+    LLVM_SRC=${SRC_FOLDER:-${HOME}/src}/llvm-project
+    if [[ ! -d ${LLVM_SRC} ]]; then
+        header "Cloning LLVM"
+        mkdir -p "${LLVM_SRC%/*}"
+        git clone https://github.com/llvm/llvm-project "${LLVM_SRC}"
+    fi
+
+    LLVM_BLD=${LLVM_SRC}/build
+    rm -rf "${LLVM_BLD}"
+    mkdir -p "${LLVM_BLD}"
+    cd "${LLVM_BLD}"
+
+    CMAKE=(
+        cmake
+        -G Ninja
+        -Wno-dev
+        -DCLANG_DEFAULT_LINKER=lld
+        -DCMAKE_AR="$(command -v llvm-ar)"
+        -DCMAKE_BUILD_TYPE=Release
+        -DCMAKE_C_COMPILER="$(command -v clang)"
+        -DCMAKE_CXX_COMPILER="$(command -v clang++)"
+        -DCMAKE_INSTALL_PREFIX="${LLVM_PREFIX:=${PREFIX:-${HOME}/toolchains/llvm}}"
+        -DCMAKE_LINKER="$(command -v ld.lld)"
+        -DCMAKE_RANLIB="$(command -v llvm-ranlib)"
+        -DLLVM_ENABLE_PROJECTS="clang;lld"
+        -DLLVM_ENABLE_WARNINGS=OFF
+        -DLLVM_USE_LINKER=lld
+        -DPYTHON_EXECUTABLE="$(command -v python3)"
+    )
+
+    header "Configuring LLVM"
+    "${CMAKE[@]}" "${LLVM_SRC}"/llvm >/dev/null
+
+    header "Building LLVM"
+    ninja
+
+    header "Running LLVM tests"
+    ninja check-clang check-lld check-llvm check-llvm-unit
+
+    header "Installing LLVM"
+    rm -vrf "${LLVM_PREFIX}"
+    ninja install
+); }
+
+function bkrnl() { (
+    LINUX=${SRC_FOLDER:-${HOME}/src}/linux
+    [[ -d ${LINUX} ]] || git clone https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/ "${LINUX}"
+
+    set -x
+
+    PATH=${HOME}/toolchains/llvm/bin:${PATH} \
+        make \
+        -skj"$(nproc)" \
+        LLVM=1 \
+        O=out/"$(uname -m)" \
+        distclean defconfig all
+); }
+
+function bootk() { (
+    BOOT_UTILS=${SRC_FOLDER:-${HOME}/src}/boot-utils
+    [[ -d ${BOOT_UTILS} ]] || git clone https://github.com/ClangBuiltLinux/boot-utils "${BOOT_UTILS}"
+    git -C "${BOOT_UTILS}" pull -q
+
+    set -x
+
+    "${BOOT_UTILS}"/boot-qemu.sh -a arm64 -k "${HOME}"/src/linux/out/"$(uname -m)"
+); }
 # vi: filetype=zsh
