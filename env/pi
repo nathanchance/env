@@ -230,7 +230,6 @@ function updllvm() { (
         -DLLVM_ENABLE_PROJECTS="clang;lld"
         -DLLVM_ENABLE_WARNINGS=OFF
         -DLLVM_USE_LINKER=lld
-        -DPYTHON_EXECUTABLE="$(command -v python3)"
     )
 
     header "Configuring LLVM"
