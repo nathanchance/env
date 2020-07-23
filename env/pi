@@ -99,6 +99,8 @@ function bootstrap() { (
     sudo dpkg-reconfigure --frontend noninteractive locales
     grep -q configs /etc/modules || printf 'configs\nsnd_bcm2835\n' | sudo tee -a /etc/modules
     sudo usermod -a -G kvm "$(id -un)"
+    sudo raspi-config --expand-rootfs
+    sudo raspi-config nonint do_serial 0
     rollback_fw
 
     SCRIPTS=${HOME}/github/scripts
@@ -178,7 +180,7 @@ function upd_kernel() { (
         rsync -vr ${USER}@"${SERVER_IP}":"${ROOTFS}"/lib/modules/'*' "${TMP_BOOT}"/modules &&
         rsync -v ${USER}@"${SERVER_IP}":"${OUT}"/arch/"${ARCH}"/boot/"${KERNEL}" "${TMP_BOOT}"; } || exit ${?}
 
-    if [[ ${VER} != mainline && ${VER} != next ]]; then
+    if [[ ${VER} != "mainline" && ${VER} != "next" ]]; then
         mkdir -p "${TMP_BOOT}"/overlays
         rsync -v ${USER}@"${SERVER_IP}":"${ROOTFS}"/overlays/'*.dtb*' "${TMP_BOOT}"/overlays || exit ${?}
     fi
@@ -196,6 +198,21 @@ function upd_kernel() { (
 
     # Copy cmdline.txt because we are modifying os_prefix
     sudo cp -v /boot/cmdline.txt "${MAIN_BOOT}"
+
+    # Ensure that there is always a serial console option
+    if ! grep -q -e ttyS1 -e serial0 "${MAIN_BOOT}"/cmdline.txt; then
+        case "${VER}" in
+            4.* | 5.*) CONSOLE=serial0 ;;
+            mainline | next) CONSOLE=ttyS1 ;;
+        esac
+        CMDLINE="console=${CONSOLE},115200 $(cat "${MAIN_BOOT}"/cmdline.txt)"
+        printf "%s\n" "${CMDLINE}" | sudo tee "${MAIN_BOOT}"/cmdline.txt
+    else
+        [[ ${VER} = "mainline" || ${VER} = "next" ]] && sudo sed -i 's/serial0/ttyS1/' "${MAIN_BOOT}"/cmdline.txt
+    fi
+
+    # Remove "quiet" and "splash" from cmdline
+    sudo sed -i 's/quiet splash //' "${MAIN_BOOT}"/cmdline.txt
 ); }
 
 function clmods() { (
