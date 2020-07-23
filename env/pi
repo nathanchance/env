@@ -99,6 +99,7 @@ function bootstrap() { (
     sudo dpkg-reconfigure --frontend noninteractive locales
     grep -q configs /etc/modules || printf 'configs\nsnd_bcm2835\n' | sudo tee -a /etc/modules
     sudo usermod -a -G kvm "$(id -un)"
+    rollback_fw
 
     SCRIPTS=${HOME}/github/scripts
     mkdir -p "${SCRIPTS%/*}"
@@ -118,6 +119,12 @@ function bootstrap() { (
     echo "1. ssh-copy-id"
     echo
     echo "2. Download .server_ip"
+); }
+
+function rollback_fw() { (
+    # For now, due to a bug, pin us to a specific firmware revision :(
+    # https://github.com/raspberrypi/firmware/issues/1376
+    sudo SKIP_KERNEL=1 rpi-update 23acc388b495f74e65175c30889cb81aaf731618
 ); }
 
 function rbld_usr() { (
