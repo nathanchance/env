@@ -148,8 +148,9 @@ function pi_setup() { true; }
 function upd_kernel() { (
     while ((${#})); do
         case ${1} in
-            4.19 | 5.4 | 5.7 | mainline) VER=${1} ;;
+            4.* | 5.* | mainline | next) VER=${1} ;;
             arm | arm64) ARCH=${1} ;;
+            *) die "Unknown parameter '${1}'" ;;
         esac
         shift
     done
@@ -177,7 +178,7 @@ function upd_kernel() { (
         rsync -vr ${USER}@"${SERVER_IP}":"${ROOTFS}"/lib/modules/'*' "${TMP_BOOT}"/modules &&
         rsync -v ${USER}@"${SERVER_IP}":"${OUT}"/arch/"${ARCH}"/boot/"${KERNEL}" "${TMP_BOOT}"; } || exit ${?}
 
-    if [[ ${VER} != mainline ]]; then
+    if [[ ${VER} != mainline && ${VER} != next ]]; then
         mkdir -p "${TMP_BOOT}"/overlays
         rsync -v ${USER}@"${SERVER_IP}":"${ROOTFS}"/overlays/'*.dtb*' "${TMP_BOOT}"/overlays || exit ${?}
     fi
