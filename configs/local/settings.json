@@ -3,6 +3,9 @@
 
     "defaultProfile": "{00000000-0000-0000-0000-000000000000}",
 
+    // I rely on pasting with new lines so do not warn about it.
+    "multiLinePasteWarning": false,
+
     "profiles":
     {
         "defaults":
@@ -79,6 +82,9 @@
     [
         // Unbind Ctrl-^ so that force disconnecting a mosh session works
         { "command" : "unbound", "keys" : "ctrl+shift+6" }
+
+        // focus mode
+        { "command": "toggleFocusMode", "keys": "shift+f11" }
     ]
 }
 
