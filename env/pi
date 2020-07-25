@@ -231,8 +231,6 @@ function fixp() {
 
 # Build an LLVM toolchain
 function updllvm() { (
-    set -eu
-
     LLVM_SRC=${SRC_FOLDER:-${HOME}/src}/llvm-project
     if [[ ! -d ${LLVM_SRC} ]]; then
         header "Cloning LLVM"
@@ -243,7 +241,7 @@ function updllvm() { (
     LLVM_BLD=${LLVM_SRC}/build
     rm -rf "${LLVM_BLD}"
     mkdir -p "${LLVM_BLD}"
-    cd "${LLVM_BLD}"
+    cd "${LLVM_BLD}" || exit ${?}
 
     CMAKE=(
         cmake
@@ -263,17 +261,17 @@ function updllvm() { (
     )
 
     header "Configuring LLVM"
-    "${CMAKE[@]}" "${LLVM_SRC}"/llvm >/dev/null
+    "${CMAKE[@]}" "${LLVM_SRC}"/llvm >/dev/null || exit ${?}
 
     header "Building LLVM"
-    ninja
+    ninja || exit ${?}
 
     header "Running LLVM tests"
-    ninja check-clang check-lld check-llvm check-llvm-unit
+    ninja check-clang check-llvm check-llvm-unit || exit ${?}
 
     header "Installing LLVM"
-    rm -vrf "${LLVM_PREFIX}"
-    ninja install
+    rm -vrf "${LLVM_PREFIX}" || exit ${?}
+    ninja install || exit ${?}
 ); }
 
 function bkrnl() { (
