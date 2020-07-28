@@ -150,7 +150,7 @@ function pi_setup() { true; }
 function upd_kernel() { (
     while ((${#})); do
         case ${1} in
-            4.* | 5.* | mainline | next) VER=${1} ;;
+            4.* | 5.* | mainline* | next*) VER=${1} ;;
             arm | arm64) ARCH=${1} ;;
             *) die "Unknown parameter '${1}'" ;;
         esac
@@ -180,7 +180,7 @@ function upd_kernel() { (
         rsync -vr ${USER}@"${SERVER_IP}":"${ROOTFS}"/lib/modules/'*' "${TMP_BOOT}"/modules &&
         rsync -v ${USER}@"${SERVER_IP}":"${OUT}"/arch/"${ARCH}"/boot/"${KERNEL}" "${TMP_BOOT}"; } || exit ${?}
 
-    if [[ ${VER} != "mainline" && ${VER} != "next" ]]; then
+    if [[ ! ${VER} =~ mainline && ! ${VER} =~ next ]]; then
         mkdir -p "${TMP_BOOT}"/overlays
         rsync -v ${USER}@"${SERVER_IP}":"${ROOTFS}"/overlays/'*.dtb*' "${TMP_BOOT}"/overlays || exit ${?}
     fi
@@ -203,12 +203,12 @@ function upd_kernel() { (
     if ! grep -q -e ttyS1 -e serial0 "${MAIN_BOOT}"/cmdline.txt; then
         case "${VER}" in
             4.* | 5.*) CONSOLE=serial0 ;;
-            mainline | next) CONSOLE=ttyS1 ;;
+            mainline* | next*) CONSOLE=ttyS1 ;;
         esac
         CMDLINE="console=${CONSOLE},115200 $(cat "${MAIN_BOOT}"/cmdline.txt)"
         printf "%s\n" "${CMDLINE}" | sudo tee "${MAIN_BOOT}"/cmdline.txt
     else
-        [[ ${VER} = "mainline" || ${VER} = "next" ]] && sudo sed -i 's/serial0/ttyS1/' "${MAIN_BOOT}"/cmdline.txt
+        [[ ${VER} =~ mainline || ${VER} =~ next ]] && sudo sed -i 's/serial0/ttyS1/' "${MAIN_BOOT}"/cmdline.txt
     fi
 
     # Remove "quiet" and "splash" from cmdline
