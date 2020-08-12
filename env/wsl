@@ -56,7 +56,7 @@ function rootstrap() { (
 # Requires Keys folder to be available in /mnt/c/Users/natec/Documents
 function bootstrap() { (
     # Grab common functions/variables
-    source <(curl -LSs https://github.com/nathanchance/scripts/raw/master/common) &>/dev/null
+    source <(curl -LSs https://github.com/nathanchance/scripts/raw/main/common) &>/dev/null
 
     # Do not run this as root
     [[ $(id -u) -eq 0 ]] && die "Do not run bootstrap as root"

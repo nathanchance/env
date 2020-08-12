@@ -3,7 +3,7 @@
 #
 # This can be downloaded and sourced without any of the other scripts in this repo.
 #
-# $ curl -LSsO https://github.com/nathanchance/scripts/raw/master/env/stubs/deldog
+# $ curl -LSsO https://github.com/nathanchance/scripts/raw/main/env/stubs/deldog
 #
 # Open the deldog file to make sure it matches this one.
 #

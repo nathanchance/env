@@ -7,7 +7,7 @@
 # $ sudo sh -c "apt update && apt install --no-install-recommends -y zsh && chsh -s /bin/zsh pi"
 
 function bootstrap() { (
-    source <(curl -LSs https://github.com/nathanchance/scripts/raw/master/common) &>/dev/null || return 1
+    source <(curl -LSs https://github.com/nathanchance/scripts/raw/main/common) &>/dev/null || return 1
 
     # Get list of packages to be installed
     # Debian/Ubuntu

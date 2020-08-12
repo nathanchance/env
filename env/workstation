@@ -41,9 +41,9 @@ function bootstrap() { (
     set -x
 
     # Grab common variables
-    source <(curl -LSs https://github.com/nathanchance/scripts/raw/master/env/stubs/folders) &>/dev/null || return 1
+    source <(curl -LSs https://github.com/nathanchance/scripts/raw/main/env/stubs/folders) &>/dev/null || return 1
     # Grab common functions
-    source <(curl -LSs https://github.com/nathanchance/scripts/raw/master/common) &>/dev/null || return 1
+    source <(curl -LSs https://github.com/nathanchance/scripts/raw/main/common) &>/dev/null || return 1
 
     # Do not run this as root
     [[ $(id -u) -eq 0 ]] && die "Do not run bootstrap as root"
