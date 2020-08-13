@@ -108,6 +108,10 @@ function bootstrap() { (
     git -C "${SCRIPTS}" pull --rebase || die "Error updating script!"
     source <(cat "${SCRIPTS}"/env/common)
     source "${SCRIPTS}"/env/stubs/zsh && setup_zsh_env
+    # SC2016: Expressions don't expand in single quotes, use double quotes for that.
+    # That is indeed the point here :)
+    # shellcheck disable=SC2016
+    sed -i '1s;^;[[ $(tty) =~ ttyS1 ]] \&\& return\n;' "${HOME}"/.zshrc
     source "${SCRIPTS}"/env/stubs/setup && global_gitignore
     SCRIPTS_FOLDER=${SCRIPTS} rbld_usr || exit ${?}
     path_push "${HOME}/usr/bin"
