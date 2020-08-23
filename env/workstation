@@ -374,8 +374,6 @@ function workstation_aliases() {
 
 # Additional setup steps for my workstation
 function workstation_setup() {
-    move_to_front_of_path "${HOME}/.local/bin"
-    move_to_front_of_path "${HOME}/usr/bin"
     setup_ccache 50
     source "${SCRIPTS_FOLDER}"/env/stubs/folders
     source "${SCRIPTS_FOLDER}"/env/stubs/cbl
