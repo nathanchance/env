@@ -116,7 +116,7 @@ function cbl_other_repos() { (
     git_remote_add -f --tags mainline https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git
     git_remote_add -f --tags next https://git.kernel.org/pub/scm/linux/kernel/git/next/linux-next.git
     git_remote_add -f --tags microsoft https://github.com/microsoft/WSL2-Linux-Kernel
-    git remote_add -f sami https://github.com/samitolvanen/linux
+    git_remote_add -f sami https://github.com/samitolvanen/linux
     git config rerere.enabled true
     git config status.aheadBehind false
 ); }
