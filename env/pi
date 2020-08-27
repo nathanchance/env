@@ -293,6 +293,6 @@ function bootk() { (
 
     set -x
 
-    "${BOOT_UTILS}"/boot-qemu.sh -a arm64 -k "${HOME}"/src/linux/out/"$(uname -m)"
+    "${BOOT_UTILS}"/boot-qemu.sh -a arm64 -k "${HOME}"/src/linux-next/out/"$(uname -m)"
 ); }
 # vi: filetype=zsh
