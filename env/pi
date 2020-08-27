@@ -279,7 +279,7 @@ function bkrnl() { (
 
     PATH=${HOME}/toolchains/llvm/bin:${PATH} \
         make \
-        -C "${LINUX}" \
+        -C "${LINUX_NEXT}" \
         -skj"$(nproc)" \
         LLVM=1 \
         O=out/"$(uname -m)" \
