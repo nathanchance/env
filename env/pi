@@ -272,8 +272,8 @@ function updllvm() { (
 ); }
 
 function bkrnl() { (
-    LINUX=${SRC_FOLDER:-${HOME}/src}/linux
-    [[ -d ${LINUX} ]] || git clone https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/ "${LINUX}"
+    LINUX_NEXT=${SRC_FOLDER:-${HOME}/src}/linux-next
+    [[ -d ${LINUX_NEXT} ]] || git clone https://git.kernel.org/pub/scm/linux/kernel/git/next/linux-next.git/ "${LINUX_NEXT}"
 
     set -x
 
