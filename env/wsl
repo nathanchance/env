@@ -219,6 +219,10 @@ function wsl_aliases() {
     alias ls='ls --color=auto'
 }
 
+function mshpi() { (
+    mosh pi@192.168.4.104
+); }
+
 function mshsvr() { (
     mosh nathan@"${SERVER_IP:?}"
 ); }
