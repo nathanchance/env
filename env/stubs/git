@@ -101,6 +101,7 @@ function git_aliases() { (
     git config --global alias.rmsu 'remote set-url'
     git config --global alias.rmv 'remote -v'
     git config --global alias.rs 'reset --soft'
+    git config --global alias.ru 'remote update'
     git config --global alias.rv "revert${GPG_SIGN} --signoff"
     git config --global alias.s 'status'
     git config --global alias.sh 'show --first-parent'
