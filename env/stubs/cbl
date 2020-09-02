@@ -538,7 +538,9 @@ function lt() { (
     LOG_DIR=${CBL}/build-logs/${KRNL_DIR##*/}-$(date +%Y%m%d-%H%M)
     mkdir -p "${LOG_DIR}"
 
-    [[ ${KRNL_DIR##*/} = "linux" ]] && TC_BLD_ARGS=(--test-lto-cfi-kernel)
+    TC_BLD_ARGS=()
+    [[ -n ${ARCHES} ]] && TC_BLD_ARGS+=(--arches "${ARCHES}")
+    [[ ${KRNL_DIR##*/} = "linux" ]] && TC_BLD_ARGS+=(--test-lto-cfi-kernel)
     "${CBL}"/llvm-kernel-testing/test.sh \
         --linux-src "${KRNL_DIR}" \
         --log-dir "${LOG_DIR}" \
