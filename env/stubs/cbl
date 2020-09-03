@@ -1065,4 +1065,19 @@ function upd_lnx_tcbld() { (
 
     sed -i "s/LINUX=.*/LINUX=linux-${KVER}/" "${KERNEL}"/build.sh
 ); }
+
+function rbpi() { (
+    PI_SRC=${CBL_KERNELS}/rpi
+
+    set -x
+
+    cd "${PI_SRC}" || exit ${?}
+    git ch rpi-next || exit ${?}
+    git ru || exit ${?}
+    git rh next/master
+    git am "${GITHUB_FOLDER}"/patches/rpi-next/fixes.series || exit ${?}
+    git pll --no-edit mainline master || exit ${?}
+    git pll --no-edit sami clang-cfi || exit ${?}
+    git am "${GITHUB_FOLDER}"/patches/rpi-next/scs-lto-cfi.series
+); }
 # vi: filetype=zsh
