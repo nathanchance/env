@@ -466,4 +466,19 @@ function updsysllvm() { (
 
     qualify_llvm_uprev && updpgollvm
 ); }
+
+# Test upstream QEMU
+function qualify_qemu() { (
+    QEMU_SRC=${SRC_FOLDER:-${HOME}/src}/qemu-master
+    [[ -d ${QEMU_SRC} ]] || git clone https://git.qemu.org/git/qemu.git "${QEMU_SRC}"
+    git -C "${QEMU_SRC}" pull --rebase
+
+    BLD_DIR=${QEMU_SRC}/build
+    rm -rf "${BLD_DIR}"
+    mkdir -p "${BLD_DIR}"
+    cd "${BLD_DIR}" || exit ${?}
+
+    "${QEMU_SRC}"/configure || exit ${?}
+    make -skj"$(nproc)" || exit ${?}
+); }
 # vi: filetype=zsh
