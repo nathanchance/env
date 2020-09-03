@@ -457,4 +457,13 @@ function genalscnflcts() { (
         printf '"%s:%d"\n' "${FILE}" "$(git lo "${1:?}"..MERGE_HEAD "${FILE}" | wc -l)"
     done
 ); }
+
+# Do a full system LLVM update
+function updsysllvm() { (
+    LLVM_SRC=${SRC_FOLDER:-${HOME}/src}/llvm-project
+    [[ -d ${LLVM_SRC} ]] || git clone https://github.com/llvm/llvm-project "${LLVM_SRC}"
+    git -C "${LLVM_SRC}" pull --rebase
+
+    qualify_llvm_uprev && updpgollvm
+); }
 # vi: filetype=zsh
