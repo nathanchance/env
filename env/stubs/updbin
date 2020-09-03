@@ -354,7 +354,7 @@ function bpgollvm() { (
         -DCLANG_TABLEGEN="${STAGE_ONE_BIN}"/clang-tblgen
         -DCMAKE_CXX_COMPILER="${STAGE_ONE_BIN}"/clang++
         -DCMAKE_LINKER="${STAGE_ONE_BIN}"/ld.lld
-        -DLLVM_USE_LINKER="${STAGE_ONE_BIN}"/ld.lld
+        -DLLVM_USE_LINKER=lld
         -DLLVM_TABLEGEN="${STAGE_ONE_BIN}"/llvm-tblgen
         -DCMAKE_RANLIB="${STAGE_ONE_BIN}"/llvm-ranlib
     )
@@ -381,7 +381,7 @@ function bpgollvm() { (
         -DCLANG_TABLEGEN="${STAGE_TWO_BIN}"/clang-tblgen
         -DCMAKE_CXX_COMPILER="${STAGE_TWO_BIN}"/clang++
         -DCMAKE_LINKER="${STAGE_TWO_BIN}"/ld.lld
-        -DLLVM_USE_LINKER="${STAGE_TWO_BIN}"/ld.lld
+        -DLLVM_USE_LINKER=lld
         -DLLVM_TABLEGEN="${STAGE_TWO_BIN}"/llvm-tblgen
         -DCMAKE_RANLIB="${STAGE_TWO_BIN}"/llvm-ranlib
     )
