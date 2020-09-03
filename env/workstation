@@ -459,7 +459,7 @@ function genalscnflcts() { (
 ); }
 
 # Do a full system LLVM update
-function updsysllvm() { (
+function updllvm() { (
     LLVM_SRC=${SRC_FOLDER:-${HOME}/src}/llvm-project
     [[ -d ${LLVM_SRC} ]] || git clone https://github.com/llvm/llvm-project "${LLVM_SRC}"
     git -C "${LLVM_SRC}" pull --rebase
