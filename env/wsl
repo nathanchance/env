@@ -246,6 +246,7 @@ function upd_kernel() { (
     while ((${#})); do
         case ${1} in
             -g | --github) KERNEL_LOCATION=github ;;
+            -l | --local) KERNEL_LOCATION=local ;;
             -s | --server) KERNEL_LOCATION=server ;;
             -k | --kernel-prefix) shift && KERNEL_SUFFIX=${1} ;;
         esac
@@ -258,6 +259,9 @@ function upd_kernel() { (
     rm -r "${KERNEL}"
 
     case ${KERNEL_LOCATION:-github} in
+        local)
+            cp -v "${HOME}"/src/wsl2-kernel/out/x86_64/arch/x86/boot/bzImage "${KERNEL}"
+            ;;
         github)
             REPO=nathanchance/WSL2-Linux-Kernel
             curl -LSso "${KERNEL}" https://github.com/"${REPO}"/releases/download/"$(glr "${REPO}")"/bzImage
@@ -280,5 +284,24 @@ function install_rust_wsl() { (
 function hugo_serve() { (
     IP=$(ip addr | grep eth0 | grep inet | awk '{print $2}')
     hugo server --baseUrl="${IP%/*}" --bind=0.0.0.0
+); }
+
+# Update wsl2-kernel to latest -next
+function rbwk() { (
+    WSL2_KERNEL=${HOME}/src/wsl2-kernel
+
+    set -x
+    cd "${WSL2_KERNEL}"
+    git ru || exit ${?}
+    for BRANCH in clearlinux-patchset microsoft-patchset; do
+        git ch "${BRANCH}" || exit ${?}
+        git rb -i next/master || exit ${?}
+    done
+    git ch next || exit ${?}
+    git rh next/master
+    git pll --no-edit mainline master || exit ${?}
+    git pll --no-edit sami clang-cfi || exit ${?}
+    git ml --no-edit clearlinux-patchset microsoft-patchset || exit ${?}
+    git cp "$(git lo --merges -1 --format=%H origin/HEAD)".."$(git sh -s --format=%H origin/HEAD)"
 ); }
 # vi: filetype=zsh
