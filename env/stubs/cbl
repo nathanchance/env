@@ -1081,4 +1081,53 @@ function rbpi() { (
     git pll --no-edit sami clang-cfi || exit ${?}
     git am "${GITHUB_FOLDER}"/patches/rpi-next/scs-lto-cfi.series
 ); }
+
+function test_stable_llvm_linux() { (
+    TC_BLD=${CBL_GITHUB}/tc-build
+
+    # Build LLVM 10.0.1 and binutils if necessary
+    LLVM_10=${CBL_TC}/llvm-10.0.1
+    [[ -x ${LLVM_10}/bin/clang ]] ||
+        "${TC_BLD}"/build-llvm.py \
+            --assertions \
+            --branch llvmorg-10.0.1 \
+            --install-folder "${LLVM_10}" \
+            --pgo \
+            --targets "$(grep "AArch64;ARM" "${TC_BLD}"/build-llvm.py | cut -d \" -f 2 | sed 's/RISCV;//')"
+    [[ -x ${LLVM_10}/bin/as ]] || "${TC_BLD}"/build-binutils.py --install-folder "${LLVM_10}"
+
+    # Build LLVM 11.0.0-rc2 and binutils if neccesary
+    LLVM_11=${CBL_TC}/llvm-11.0.0-rc2
+    [[ -x ${LLVM_11}/bin/clang ]] ||
+        "${TC_BLD}"/build-llvm.py \
+            --assertions \
+            --branch llvmorg-11.0.0-rc2 \
+            --install-folder "${LLVM_11}" \
+            --pgo
+    [[ -x ${LLVM_11}/bin/as ]] || "${TC_BLD}"/build-binutils.py --install-folder "${LLVM_11}"
+
+    # Update all trees
+    LINUX=${HOME}/src/linux
+    [[ -d ${LINUX} ]] || git clone https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/ "${LINUX}"
+    cd "${LINUX}"
+    git ch master-qualify || git ch -b master-qualify origin/master
+    git pull
+
+    LINUX_STABLE=${HOME}/src/linux-stable
+    [[ -d ${LINUX_STABLE} ]] || git clone https://git.kernel.org/pub/scm/linux/kernel/git/stable/linux.git/ "${LINUX_STABLE}"
+    cd "${LINUX_STABLE}"
+    for SBR in 5.4 5.8; do
+        git ch linux-${SBR}.y-qualify || git ch -b linux-${SBR}.y-qualify origin/linux-${SBR}.y
+        git pull
+    done
+
+    # Build the trees
+    for LLVM_TC in ${LLVM_10} ${LLVM_11}; do
+        KRNL_DIR=${LINUX} TC_DIR=${LLVM_TC} lt
+        for SBR in 5.4 5.8; do
+            git ch linux-${SBR}.y-qualify
+            KRNL_DIR=${LINUX_STABLE} TC_DIR=${LLVM_TC} lt
+        done
+    done
+); }
 # vi: filetype=zsh
