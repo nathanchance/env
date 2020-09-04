@@ -469,9 +469,17 @@ function updllvm() { (
 
 # Test upstream QEMU
 function qualify_qemu() { (
+    set -x
+
     QEMU_SRC=${SRC_FOLDER:-${HOME}/src}/qemu-master
     [[ -d ${QEMU_SRC} ]] || git clone https://git.qemu.org/git/qemu.git "${QEMU_SRC}"
-    git -C "${QEMU_SRC}" pull --rebase
+    cd "${QEMU_SRC}" || exit ${?}
+    git rh
+    git cl -q
+    git submodule foreach git rh
+    git submodule foreach git cl -q
+    git pull --rebase
+    git submodule update --init --recursive
 
     BLD_DIR=${QEMU_SRC}/build
     rm -rf "${BLD_DIR}"
@@ -480,5 +488,7 @@ function qualify_qemu() { (
 
     "${QEMU_SRC}"/configure || exit ${?}
     make -skj"$(nproc)" || exit ${?}
+
+    DO=true PATH=${BLD_DIR}:${PATH} TREE=linux lt
 ); }
 # vi: filetype=zsh
