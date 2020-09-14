@@ -228,7 +228,7 @@ function fixp() {
 
 # Build an LLVM toolchain
 function updllvm() { (
-    LLVM_SRC=${SRC_FOLDER:-${HOME}/src}/llvm-project
+    LLVM_SRC=/mnt/ssd/src/llvm-project
     if [[ ! -d ${LLVM_SRC} ]]; then
         header "Cloning LLVM"
         mkdir -p "${LLVM_SRC%/*}"
@@ -240,6 +240,8 @@ function updllvm() { (
     mkdir -p "${LLVM_BLD}"
     cd "${LLVM_BLD}" || exit ${?}
 
+    export CCACHE_DIR=/mnt/ssd/.ccache
+    export CCACHE_MAXSIZE=25G
     CMAKE=(
         cmake
         -G Ninja
@@ -249,9 +251,10 @@ function updllvm() { (
         -DCMAKE_BUILD_TYPE=Release
         -DCMAKE_C_COMPILER="$(command -v clang)"
         -DCMAKE_CXX_COMPILER="$(command -v clang++)"
-        -DCMAKE_INSTALL_PREFIX="${LLVM_PREFIX:=${PREFIX:-${HOME}/toolchains/llvm}}"
+        -DCMAKE_INSTALL_PREFIX="${LLVM_PREFIX:=${PREFIX:-/mnt/ssd/toolchains/llvm}}"
         -DCMAKE_LINKER="$(command -v ld.lld)"
         -DCMAKE_RANLIB="$(command -v llvm-ranlib)"
+        -DLLVM_CCACHE_BUILD=ON
         -DLLVM_ENABLE_PROJECTS="clang;lld"
         -DLLVM_ENABLE_WARNINGS=OFF
         -DLLVM_USE_LINKER=lld
@@ -272,12 +275,12 @@ function updllvm() { (
 ); }
 
 function bkrnl() { (
-    LINUX_NEXT=${SRC_FOLDER:-${HOME}/src}/linux-next
+    LINUX_NEXT=/mnt/ssd/src/linux-next
     [[ -d ${LINUX_NEXT} ]] || git clone https://git.kernel.org/pub/scm/linux/kernel/git/next/linux-next.git/ "${LINUX_NEXT}"
 
     set -x
 
-    PATH=${HOME}/toolchains/llvm/bin:${PATH} \
+    PATH=/mnt/ssd/toolchains/llvm/bin:${PATH} \
         make \
         -C "${LINUX_NEXT}" \
         -skj"$(nproc)" \
@@ -287,12 +290,12 @@ function bkrnl() { (
 ); }
 
 function bootk() { (
-    BOOT_UTILS=${SRC_FOLDER:-${HOME}/src}/boot-utils
+    BOOT_UTILS=/mnt/ssd/src/boot-utils
     [[ -d ${BOOT_UTILS} ]] || git clone https://github.com/ClangBuiltLinux/boot-utils "${BOOT_UTILS}"
     git -C "${BOOT_UTILS}" pull -q
 
     set -x
 
-    "${BOOT_UTILS}"/boot-qemu.sh -a arm64 -k "${HOME}"/src/linux-next/out/"$(uname -m)"
+    "${BOOT_UTILS}"/boot-qemu.sh -a arm64 -k /mnt/ssd/src/linux-next/out/"$(uname -m)"
 ); }
 # vi: filetype=zsh
