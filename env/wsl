@@ -299,8 +299,18 @@ function rbwk() { (
     done
     git ch next || exit ${?}
     git rh next/master
+    b4 am -o - -l https://lore.kernel.org/lkml/20200917214545.199463-1-ndesaulniers@google.com/ | git ams
     git pll --no-edit mainline master || exit ${?}
-    git pll --no-edit sami clang-cfi || exit ${?}
+    if ! git pll --no-edit sami clang-cfi; then
+        git rf tools/objtool
+        OBJTOOL_PATCHES=${HOME}/github/patches/rpi-next/lto-cfi-objtool.series
+        git -C "${OBJTOOL_PATCHES%/*}" pull -q || exit ${?}
+        git ap "${OBJTOOL_PATCHES}" || exit ${?}
+        curl -LSs https://lore.kernel.org/lkml/20200904044559.GA507165@ubuntu-n2-xlarge-x86/raw | git ap --exclude tools/objtool/check.c || exit ${?}
+        rg "<<<<<<< HEAD" && exit ${?}
+        git aa
+        git c || exit ${?}
+    fi
     git ml --no-edit clearlinux-patchset microsoft-patchset || exit ${?}
     git cp "$(git lo --merges -1 --format=%H origin/HEAD)".."$(git sh -s --format=%H origin/HEAD)"
 ); }
