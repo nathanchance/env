@@ -56,6 +56,7 @@ function cbl_linux_repos() { (
             git checkout "${BRANCH}"
             git branch --set-upstream-to=origin/"${BRANCH}" "${BRANCH}"
             [[ ${FOLDER} =~ mirrors ]] && git remote add github git@github.com:ClangBuiltLinux/linux.git
+            [[ ${FOLDER} = "${CBL_K}"/linux-stable ]] && git remote add stable-rc https://git.kernel.org/pub/scm/linux/kernel/git/stable/linux-stable-rc.git/
         )
     done
     rm -rf 'clone.bundle-*'
