@@ -299,7 +299,6 @@ function rbwk() { (
     done
     git ch next || exit ${?}
     git rh next/master
-    b4 am -o - -l https://lore.kernel.org/lkml/20200917214545.199463-1-ndesaulniers@google.com/ | git ams
     git pll --no-edit mainline master || exit ${?}
     if ! git pll --no-edit sami clang-cfi; then
         git rf tools/objtool
