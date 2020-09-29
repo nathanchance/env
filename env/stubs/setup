@@ -29,7 +29,7 @@ function cbl_linux_repos() { (
     while ((${#})); do
         case ${1} in
             linux) PAIRS=("torvalds/linux.git:linux" "torvalds/linux.git:${CBL_K}/linux" "torvalds/linux.git:${CBL_M}/linux") ;;
-            linux-next) PAIRS=("next/linux-next.git:linux-next" "next/linux-next.git:${CBL_K}/linux-next") ;;
+            linux-next) PAIRS=("next/linux-next.git:linux-next" "next/linux-next.git:${CBL_K}/linux-next" "next/linux-next.git:${CBL_K}/rpi") ;;
             linux-stable) PAIRS=("stable/linux.git:linux-stable" "stable/linux.git:${CBL_K}/linux-stable") ;;
             *) return 1 ;;
         esac
@@ -54,7 +54,12 @@ function cbl_linux_repos() { (
                 *) BRANCH=master ;;
             esac
             git checkout "${BRANCH}"
-            git branch --set-upstream-to=origin/"${BRANCH}" "${BRANCH}"
+            if [[ ${FOLDER##*/} = "rpi" ]]; then
+                git_remote_add -f --tags mainline https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git
+                git config rerere.enabled true
+            else
+                git branch --set-upstream-to=origin/"${BRANCH}" "${BRANCH}"
+            fi
             [[ ${FOLDER} =~ mirrors ]] && git remote add github git@github.com:ClangBuiltLinux/linux.git
             [[ ${FOLDER} = "${CBL_K}"/linux-stable ]] && git remote add stable-rc https://git.kernel.org/pub/scm/linux/kernel/git/stable/linux-stable-rc.git/
         )
@@ -105,16 +110,8 @@ function cbl_other_repos() { (
     [[ -d tc-build ]] || git clone -b personal git@github.com:nathanchance/tc-build.git
 
     cd "${CBL_O_R}"/kernels || die "wtf"
-    [[ -d rpi ]] || git clone git@github.com:nathanchance/pi-kernel rpi
+    [[ -d pi-scripts ]] || git clone git@github.com:nathanchance/pi-scripts
     [[ -d wsl2 ]] || git clone git@github.com:nathanchance/WSL2-Linux-Kernel wsl2
-
-    cd "${CBL_O_R}"/kernels/rpi || die "wtf"
-    git_remote_add -f --tags mainline https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git
-    git_remote_add -f --tags next https://git.kernel.org/pub/scm/linux/kernel/git/next/linux-next.git
-    git_remote_add -f upstream https://github.com/raspberrypi/linux
-    git config rerere.enabled true
-    git checkout -b rpi-next next/master
-    git branch --unset-upstream
 
     cd "${CBL_O_R}"/kernels/wsl2 || die "wtf"
     git_remote_add -f --tags mainline https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git
