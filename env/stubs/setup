@@ -56,6 +56,7 @@ function cbl_linux_repos() { (
             git checkout "${BRANCH}"
             if [[ ${FOLDER##*/} = "rpi" ]]; then
                 git_remote_add -f --tags mainline https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git
+                git_remote_add -f sami https://github.com/samitolvanen/linux
                 git config rerere.enabled true
             else
                 git branch --set-upstream-to=origin/"${BRANCH}" "${BRANCH}"
