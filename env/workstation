@@ -228,7 +228,7 @@ function bootstrap() { (
         echo "locales locales/locales_to_be_generated multiselect en_US.UTF-8 UTF-8" | sudo debconf-set-selections
         sudo rm "/etc/locale.gen"
         sudo dpkg-reconfigure --frontend noninteractive locales
-        grep -q "nameserver 8.8.8.8" /etc/resolv.conf || printf 'nameserver 8.8.8.8\n' | sudo tee -a /etc/resolv.conf
+        grep -q "nameserver 8.8.8.8" /etc/resolv.conf || printf 'nameserver 8.8.8.8\nnameserver 8.8.4.4\n' | sudo tee -a /etc/resolv.conf
 
         # Rootless podman
         echo "$(whoami):100000:65536" | sudo tee /etc/subgid /etc/subuid
