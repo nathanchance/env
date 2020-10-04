@@ -144,6 +144,7 @@ function bootstrap() { (
             creduce
             curl
             debhelper
+            debootstrap
             devscripts
             doxygen
             expect
