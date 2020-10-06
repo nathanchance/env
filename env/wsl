@@ -299,13 +299,14 @@ function rbwk() { (
     done
     git ch next || exit ${?}
     git rh next/master
+    b4 am -o - -l 20201006195848.707504-1-natechancellor@gmail.com | git ams || exit ${?}
+    b4 am -o - -l 20201006201115.716550-1-natechancellor@gmail.com | git ams || exit ${?}
     git pll --no-edit mainline master || exit ${?}
     if ! git pll --no-edit sami clang-cfi; then
         git rf tools/objtool
         OBJTOOL_PATCHES=${HOME}/github/patches/rpi-next/lto-cfi-objtool.series
         git -C "${OBJTOOL_PATCHES%/*}" pull -q || exit ${?}
         git ap "${OBJTOOL_PATCHES}" || exit ${?}
-        b4 am -o - https://lore.kernel.org/lkml/20200928230939.5574-1-natechancellor@gmail.com/ | git ap || exit ${?}
         rg "<<<<<<< HEAD" && exit ${?}
         git aa
         git c || exit ${?}
