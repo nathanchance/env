@@ -1,17 +1,17 @@
 #!/bin/bash
 
-function packet_die() {
+function equinix_die() {
     printf '\n\033[01;31m%s\033[0m\n' "${1:?}"
     exit "${2:-33}"
 }
 
-function packet_warn() {
+function equinix_warn() {
     printf '\n\033[01;33m%s\033[0m\n' "${1:?}"
 }
 
 function partition_drive() { (
     # Function must be run as root
-    [[ $(id -u) -ne 0 ]] && packet_die "This function must be run as root."
+    [[ $(id -u) -ne 0 ]] && equinix_die "This function must be run as root."
 
     while ((${#})); do
         case ${1} in
@@ -43,8 +43,8 @@ function partition_drive() { (
 
     if mountpoint -q "${FOLDER}"; then
         set +x
-        packet_warn "${FOLDER} is mounted. If this is not expected, unmount it and re-run this function."
-        packet_warn "   $ umount ${FOLDER}"
+        equinix_warn "${FOLDER} is mounted. If this is not expected, unmount it and re-run this function."
+        equinix_warn "   $ umount ${FOLDER}"
         printf '\n'
         FORMAT=false
         set -x
@@ -52,9 +52,9 @@ function partition_drive() { (
 
     if blkid "${VOLUME}"; then
         set +x
-        packet_warn "${VOLUME} already exists. If this is not expected, wipe it and re-run this function."
-        packet_warn "   $ sed -i '/$(blkid -o value -s UUID "${VOLUME}")/d' /etc/fstab"
-        packet_warn "   $ dd if=/dev/zero of=${DRIVE} bs=8M count=125"
+        equinix_warn "${VOLUME} already exists. If this is not expected, wipe it and re-run this function."
+        equinix_warn "   $ sed -i '/$(blkid -o value -s UUID "${VOLUME}")/d' /etc/fstab"
+        equinix_warn "   $ dd if=/dev/zero of=${DRIVE} bs=8M count=125"
         printf '\n'
         FORMAT=false
         set -x
@@ -77,7 +77,7 @@ function partition_drive() { (
 
 function partition_and_create_user() { (
     # Function must be run as root
-    [[ $(id -u) -ne 0 ]] && packet_die "This function must be run as root."
+    [[ $(id -u) -ne 0 ]] && equinix_die "This function must be run as root."
 
     # Drive to use must be provided as argument of script
     while ((${#})); do
@@ -129,8 +129,8 @@ function partition_and_create_user() { (
     apt install -y qemu-kvm
     if getent passwd "${USER}" &>/dev/null; then
         set +x
-        packet_warn "${USER} already exists. If this is not expected, delete the user and re-run this function."
-        packet_warn "   $ userdel -f ${USER}"
+        equinix_warn "${USER} already exists. If this is not expected, delete the user and re-run this function."
+        equinix_warn "   $ userdel -f ${USER}"
         printf '\n'
         set -x
     else
