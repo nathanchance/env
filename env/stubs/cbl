@@ -1073,13 +1073,28 @@ function rbpi() { (
     set -x
 
     cd "${PI_SRC}" || exit ${?}
-    git ch rpi-next || exit ${?}
     git ru || exit ${?}
-    git rh next/master
-    git am "${GITHUB_FOLDER}"/patches/rpi-next/fixes.series || exit ${?}
-    git pll --no-edit mainline master || exit ${?}
-    git pll --no-edit sami clang-cfi || exit ${?}
-    git am "${GITHUB_FOLDER}"/patches/rpi-next/scs-lto-cfi.series
+    git rh origin/master
+    b4 am -o - -l 20201006195848.707504-1-natechancellor@gmail.com | git ams || exit ${?}
+    b4 am -o - -l 20201006201115.716550-1-natechancellor@gmail.com | git ams || exit ${?}
+    PATCHES_FOLDER=${GITHUB_FOLDER}/patches/rpi-next
+    FIXES=${PATCHES_FOLDER}/fixes.series
+    [[ -f ${FIXES} ]] && { git am "${FIXES}" || exit ${?}; }
+    ../pi-scripts/build.sh || exit ${?}
+    if ! git pll --no-edit mainline master; then
+        rg "<<<<<<< HEAD" && exit ${?}
+        ../pi-scripts/build.sh || exit ${?}
+        git aa
+        git c || exit ${?}
+    fi
+    if ! git pll --no-edit sami clang-cfi; then
+        OBJTOOL=${PATCHES_FOLDER}/lto-cfi-objtool.series
+        [[ -f ${OBJTOOL} ]] && { git ap --include tools/objtool/objtool.c "${OBJTOOL}" || exit ${?}; }
+        rg "<<<<<<< HEAD" && exit ${?}
+        ../pi-scripts/build.sh || exit ${?}
+        git aa
+        git c || exit ${?}
+    fi
 ); }
 
 function test_stable_llvm_linux() { (
