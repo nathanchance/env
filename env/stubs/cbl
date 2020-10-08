@@ -1111,12 +1111,12 @@ function test_stable_llvm_linux() { (
             --targets "$(grep "AArch64;ARM" "${TC_BLD}"/build-llvm.py | cut -d \" -f 2 | sed 's/RISCV;//')"
     [[ -x ${LLVM_10}/bin/as ]] || "${TC_BLD}"/build-binutils.py --install-folder "${LLVM_10}"
 
-    # Build LLVM 11.0.0-rc5 and binutils if neccesary
-    LLVM_11=${CBL_TC}/llvm-11.0.0-rc5
+    # Build LLVM 11.0.0-rc6 and binutils if neccesary
+    LLVM_11=${CBL_TC}/llvm-11.0.0-rc6
     [[ -x ${LLVM_11}/bin/clang ]] ||
         "${TC_BLD}"/build-llvm.py \
             --assertions \
-            --branch llvmorg-11.0.0-rc5 \
+            --branch llvmorg-11.0.0-rc6 \
             --install-folder "${LLVM_11}" \
             --pgo
     [[ -x ${LLVM_11}/bin/as ]] || "${TC_BLD}"/build-binutils.py --install-folder "${LLVM_11}"
