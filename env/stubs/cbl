@@ -1075,8 +1075,6 @@ function rbpi() { (
     cd "${PI_SRC}" || exit ${?}
     git ru || exit ${?}
     git rh origin/master
-    b4 am -o - -l 20201006195848.707504-1-natechancellor@gmail.com | git ams || exit ${?}
-    b4 am -o - -l 20201006201115.716550-1-natechancellor@gmail.com | git ams || exit ${?}
     PATCHES_FOLDER=${GITHUB_FOLDER}/patches/rpi-next
     FIXES=${PATCHES_FOLDER}/fixes.series
     [[ -f ${FIXES} ]] && { git am "${FIXES}" || exit ${?}; }
@@ -1087,9 +1085,7 @@ function rbpi() { (
         git aa
         git c || exit ${?}
     fi
-    if ! git pll --no-edit sami clang-cfi; then
-        OBJTOOL=${PATCHES_FOLDER}/lto-cfi-objtool.series
-        [[ -f ${OBJTOOL} ]] && { git ap --include tools/objtool/objtool.c "${OBJTOOL}" || exit ${?}; }
+    if ! git pll --no-edit sami tip/clang-cfi; then
         rg "<<<<<<< HEAD" && exit ${?}
         ../pi-scripts/build.sh || exit ${?}
         git aa
