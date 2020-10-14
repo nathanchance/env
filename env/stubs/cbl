@@ -1004,18 +1004,43 @@ function yapf() {
 
 function qualify_tc_bld_uprev() { (
     TC_BLD=${CBL_GIT}/tc-build
+    WORK_DIR=$(mktemp -d)
 
-    cd "$(mktemp -d)"
+    header "Building toolchains"
 
-    "${TC_BLD}"/build-binutils.py --install-folder "${PWD}"
+    "${TC_BLD}"/build-binutils.py --install-folder "${WORK_DIR}" || exit ${?}
+    "${TC_BLD}"/build-llvm.py --check-targets lld clang llvm --install-folder "${WORK_DIR}" --pgo --use-good-revision || exit ${?}
 
-    "${TC_BLD}"/build-llvm.py --install-folder "${PWD}" --use-good-revision --check-targets lld clang llvm
+    header "Toolchain information"
 
-    PATH=${PWD}/bin:${PATH} clang --version
-
+    "${WORK_DIR}"/bin/clang --version
     git -C "${TC_BLD}"/llvm-project show -s
 
-    PATH_OVERRIDE=${PWD}/bin "${TC_BLD}"/kernel/build.sh --allyesconfig
+    header "Updating kernels"
+
+    # Update all trees
+    LINUX=${HOME}/src/linux
+    [[ -d ${LINUX} ]] || git clone https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/ "${LINUX}"
+    cd "${LINUX}"
+    git ch master-qualify || git ch -b master-qualify origin/master
+    git pull
+
+    LINUX_STABLE=${HOME}/src/linux-stable
+    [[ -d ${LINUX_STABLE} ]] || git clone https://git.kernel.org/pub/scm/linux/kernel/git/stable/linux.git/ "${LINUX_STABLE}"
+    cd "${LINUX_STABLE}"
+    for SBR in 5.4 5.8; do
+        git ch linux-${SBR}.y-qualify || git ch -b linux-${SBR}.y-qualify origin/linux-${SBR}.y
+        git pull
+    done
+
+    header "Testing toolchain"
+
+    # Build the trees
+    KRNL_DIR=${LINUX} TC_DIR=${WORK_DIR} lt
+    for SBR in 5.4 5.8; do
+        git ch linux-${SBR}.y-qualify
+        KRNL_DIR=${LINUX_STABLE} TC_DIR=${WORK_DIR} lt
+    done
 ); }
 
 function upd_lnx_tcbld() { (
