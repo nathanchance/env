@@ -1153,7 +1153,7 @@ function test_stable_llvm_linux() { (
     LINUX_STABLE=${HOME}/src/linux-stable
     [[ -d ${LINUX_STABLE} ]] || git clone https://git.kernel.org/pub/scm/linux/kernel/git/stable/linux.git/ "${LINUX_STABLE}"
     cd "${LINUX_STABLE}"
-    for SBR in 5.4 5.8; do
+    for SBR in 5.9 5.4; do
         git ch linux-${SBR}.y-qualify || git ch -b linux-${SBR}.y-qualify origin/linux-${SBR}.y
         git pull
     done
@@ -1161,7 +1161,7 @@ function test_stable_llvm_linux() { (
     # Build the trees
     for LLVM_TC in ${LLVM_10} ${LLVM_11}; do
         KRNL_DIR=${LINUX} TC_DIR=${LLVM_TC} lt
-        for SBR in 5.4 5.8; do
+        for SBR in 5.9 5.4; do
             git ch linux-${SBR}.y-qualify
             KRNL_DIR=${LINUX_STABLE} TC_DIR=${LLVM_TC} lt
         done
