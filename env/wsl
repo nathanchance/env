@@ -299,7 +299,12 @@ function rbwk() { (
     done
     git ch next || exit ${?}
     git rh next/master
-    git pll --no-edit mainline master || exit ${?}
+    b4 am -o - -l CAG5bF+S6OvBnsaR6UpMCqjDR9_hMo6qRMHGiW+iCaRYQW4C3YA@mail.gmail.com | git ams -3 || exit ${?}
+    if ! git pll --no-edit mainline master; then
+        rg "<<<<<<< HEAD" && exit ${?}
+        git aa
+        git c || exit ${?}
+    fi
     if ! git pll --no-edit sami tip/clang-cfi; then
         rg "<<<<<<< HEAD" && exit ${?}
         git aa
