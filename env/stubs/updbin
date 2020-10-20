@@ -18,7 +18,12 @@ function bccache() { (
     cd "${TMP_FOLDER}"
     curl -LSs https://github.com/"${CCACHE_REPO}"/releases/download/"${CCACHE_VERSION}"/"${CCACHE_FOLDER}".tar.gz | tar -xzf -
     cd "${CCACHE_FOLDER}" || die "Downloading or extracting ccache failed"
-    ./configure --prefix="${CCACHE_PREFIX:=${PREFIX:-${HOME}/usr}}"
+    mkdir -p build
+    cd build || die "Could not create build folder"
+    cmake \
+        -DCMAKE_BUILD_TYPE=Release \
+        -DCMAKE_INSTALL_PREFIX="${CCACHE_PREFIX:=${PREFIX:-${HOME}/usr}}" \
+        -DZSTD_FROM_INTERNET=ON .. || die "cmake configuration failed"
     make "${JOBS_FLAG:--j"$(nproc)"}" || die "make failed"
     make install || die "install failed"
     rm -rf "${TMP_FOLDER}"
