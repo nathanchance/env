@@ -313,4 +313,59 @@ function rbwk() { (
     git ml --no-edit clearlinux-patchset microsoft-patchset || exit ${?}
     git cp "$(git lo --merges -1 --format=%H origin/HEAD)".."$(git sh -s --format=%H origin/HEAD)"
 ); }
+
+# Strip executables within a folder
+function stripall() { (
+    cd "${1:?}"
+    for FILE in $(fd -t file -x file | grep 'not stripped' | cut -d: -f1); do strip "${FILE}"; done
+); }
+
+function bldtcs() { (
+    DATE_TIME=$(date +%Y%m%d-%H%M)
+    TC_PREFIX=${HOME}/toolchains/cbl
+
+    # Update tc-build
+    TCBLD=${HOME}/src/tc-build
+    [[ -d ${TCBLD} ]] || git clone -b personal git@github.com:nathanchance/tc-build.git "${TCBLD}"
+    cd "${TCBLD}" || die "Error downloading tc-build"
+    git ru
+    git rh origin/"$(git cb)"
+
+    # Build binutils
+    TC_BLD_BNTLS=${TCBLD}/binutils
+    [[ -d ${TC_BLD_BNTLS} ]] || git clone https://sourceware.org/git/binutils-gdb.git "${TC_BLD_BNTLS}"
+    git -C "${TC_BLD_BNTLS}" pull --rebase || die "Updating binutils failed (${?})"
+    BLDBN_INSTALL_FOLDER=${TC_PREFIX}/binutils-${DATE_TIME}-$(git -C "${TC_BLD_BNTLS}" sh -s --format=%H origin/master)
+    "${TCBLD}"/build-binutils.py --install-folder "${BLDBN_INSTALL_FOLDER}" || die "bldbn failed with exit code ${?}"
+    stripall "${BLDBN_INSTALL_FOLDER}"
+
+    # Update binutils
+    (cd "${TC_PREFIX}" &&
+        rm -f binutils &&
+        ln -s "${BLDBN_INSTALL_FOLDER##*/}" binutils)
+
+    # Build LLVM/Clang/lld
+    TC_BLD_LLVM_PRJCT=${TCBLD}/llvm-project
+    [[ -d ${TC_BLD_LLVM_PRJCT} ]] || git clone https://github.com/llvm/llvm-project "${TC_BLD_LLVM_PRJCT}"
+    git -C "${TC_BLD_LLVM_PRJCT}" pull --rebase || die "Updating llvm-project failed (${?})"
+    BLDLLVM_INSTALL_FOLDER=${TC_PREFIX}/llvm-${DATE_TIME}-$(git -C "${TC_BLD_LLVM_PRJCT}" sh -s --format=%H origin/master)
+    "${TCBLD}"/build-llvm.py \
+        --assertions \
+        --check-targets lld clang llvm \
+        --install-folder "${BLDLLVM_INSTALL_FOLDER}" \
+        --pgo || die "bldllvm failed with exit code ${?}"
+    stripall "${BLDLLVM_INSTALL_FOLDER}"
+
+    # Update llvm-tot symlink
+    (cd "${TC_PREFIX}" &&
+        rm -f llvm-tot &&
+        ln -sf "${BLDLLVM_INSTALL_FOLDER##*/}" llvm-tot)
+
+    # Combine CBL_LLVM and CBL_BNTL for llvm-kernel-testing
+    CBL_LLVM_BNTL=${TC_PREFIX}/llvm-binutils
+    rm -rf "${CBL_LLVM_BNTL}" &&
+        mkdir -p "${CBL_LLVM_BNTL}" &&
+        cp -frs "${BLDBN_INSTALL_FOLDER}"/* "${CBL_LLVM_BNTL}" &&
+        cp -frs "${BLDLLVM_INSTALL_FOLDER}"/* "${CBL_LLVM_BNTL}"
+); }
 # vi: filetype=zsh
