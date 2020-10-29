@@ -70,6 +70,7 @@ function bootstrap() { (
         build-essential \
         bc \
         bison \
+        cmake \
         cowsay \
         cpio \
         curl \
