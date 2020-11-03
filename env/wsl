@@ -300,6 +300,7 @@ function rbwk() { (
     done
     git ch next || exit ${?}
     git rh next/master
+    b4 am -o - -l 20201103012358.168682-1-maskray@google.com | git ams || exit ${?}
     if ! git pll --no-edit mainline master; then
         rg "<<<<<<< HEAD" && exit ${?}
         git aa
