@@ -60,6 +60,7 @@ function bootstrap() { (
         most
         neofetch
         ninja-build
+        pigz
         pkg-config
         psmisc
         python2.7
@@ -294,8 +295,24 @@ function bootk() { (
     [[ -d ${BOOT_UTILS} ]] || git clone https://github.com/ClangBuiltLinux/boot-utils "${BOOT_UTILS}"
     git -C "${BOOT_UTILS}" pull -q
 
+    while ((${#})); do
+        case ${1} in
+            -k | --kernel)
+                shift
+                KERNEL_IMG=${1:-/boot/custom-next-testing-arm64/Image}
+                KERNEL_LOCATION=/mnt/ssd/booting-kernel
+                mkdir -p "${KERNEL_LOCATION}"/arch/arm64/boot
+
+                # This matches the kernel command to create Image.gz
+                # shellcheck disable=SC2002
+                cat "${KERNEL_IMG}" | pigz -n -f -9 >"${KERNEL_LOCATION}"/arch/arm64/boot/Image.gz
+                ;;
+        esac
+        shift
+    done
+
     set -x
 
-    "${BOOT_UTILS}"/boot-qemu.sh -a arm64 -k /mnt/ssd/src/linux-next/out/"$(uname -m)"
+    "${BOOT_UTILS}"/boot-qemu.sh -a arm64 -k "${KERNEL_LOCATION:-/mnt/ssd/src/linux-next/out/"$(uname -m)"}"
 ); }
 # vi: filetype=zsh
