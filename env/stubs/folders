@@ -12,6 +12,9 @@ GCC_TC_FOLDER=${TC_FOLDER}/gcc
 LLVM_TC_FOLDER=${TC_FOLDER}/llvm
 WEB_FOLDER=/var/www
 
+# We need this for other scripts
+export GCC_TC_FOLDER
+
 # android-linux-stable folder
 ALS=${MAIN_FOLDER}/als
 
