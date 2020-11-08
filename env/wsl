@@ -184,6 +184,10 @@ function rbld_usr() { (
         DATE=$(ls -1ht "${LLVM_TC_FOLDER}" | head -n1)
         [[ -n ${DATE} ]] && symlink_llvm "${DATE}"
     fi
+
+    for SCRIPT in "${SCRIPTS_FOLDER}"/kernel/*.sh; do
+        ln -fs "${SCRIPT}" "${HOME}"/usr/bin/"${SCRIPT##*/}"
+    done
 ); }
 
 # Build tip of tree LLVM
