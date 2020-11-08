@@ -9,7 +9,7 @@ function parse_parameters() {
                 export "${1?}"
                 ;;
 
-            */ | *.i | *.ko | *.o | *clean | *config | vmlinux | zImage | modules | dtbs | *_install | *Image*)
+            */ | *.i | *.ko | *.o | all | *clean | *config | dtbs | *_install | *Image* | modules | vmlinux)
                 MAKE_ARGS+=("${1}")
                 ;;
 
