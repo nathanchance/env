@@ -161,19 +161,19 @@ function bgit() { (
 
 # Build a "regular" LLVM toolchain or a bootstrap compiler
 function bllvm() { (
-    set -eu
+    set -u
 
     LLVM_SRC=${SRC_FOLDER:-${HOME}/src}/llvm-project
     if [[ ! -d ${LLVM_SRC} ]]; then
         header "Cloning LLVM"
         mkdir -p "${LLVM_SRC%/*}"
-        git clone https://github.com/llvm/llvm-project "${LLVM_SRC}"
+        git clone https://github.com/llvm/llvm-project "${LLVM_SRC}" || exit ${?}
     fi
 
     LLVM_BLD=${LLVM_SRC}/build/stage1
     rm -rf "${LLVM_BLD%/*}"
     mkdir -p "${LLVM_BLD}"
-    cd "${LLVM_BLD}"
+    cd "${LLVM_BLD}" || exit ${?}
 
     while ((${#})); do
         case ${1} in
@@ -220,19 +220,19 @@ function bllvm() { (
     fi
 
     header "Configuring LLVM"
-    "${CMAKE[@]}" "${LLVM_SRC}"/llvm >/dev/null
+    "${CMAKE[@]}" "${LLVM_SRC}"/llvm >/dev/null || exit ${?}
 
     header "Building LLVM"
-    ninja
+    ninja || exit ${?}
 
     if ! ${BOOTSTRAP}; then
         header "Running LLVM tests"
-        ninja check-clang check-lld check-llvm check-llvm-unit
+        ninja check-clang check-lld check-llvm check-llvm-unit || exit ${?}
     fi
 
     if ${INSTALL}; then
         header "Installing LLVM"
-        ninja install
+        ninja install || exit ${?}
     fi
 ); }
 
