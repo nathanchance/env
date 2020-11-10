@@ -46,9 +46,13 @@ function invoke_make() {
     [[ ${V} -eq 1 || ${V} -eq 2 ]] && SILENT=false
     ${SILENT:=true} && SILENT_MAKE_FLAG=s
 
-    case ${ARCH} in
-        arm | arm64) [[ ${MAKE_ARGS[*]} =~ allmodconfig || ${MAKE_ARGS[*]} =~ allyesconfig ]] && FORCE_LE=true ;;
-    esac
+    if ${FORCE_LE:-false}; then
+        case ${ARCH} in
+            arm | arm64) [[ ${MAKE_ARGS[*]} =~ allmodconfig || ${MAKE_ARGS[*]} =~ allyesconfig ]] && FORCE_LE=true ;;
+        esac
+    else
+        unset FORCE_LE
+    fi
 
     set -x
     time make -"${SILENT_MAKE_FLAG}"kj"$(nproc)" "${MAKE_ARGS[@]}" ${FORCE_LE:+KCONFIG_ALLCONFIG=<(echo CONFIG_CPU_BIG_ENDIAN=n)}
