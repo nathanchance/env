@@ -30,7 +30,7 @@ function cbl_linux_repos() { (
         case ${1} in
             linux) PAIRS=("torvalds/linux.git:linux" "torvalds/linux.git:${CBL_K}/linux" "torvalds/linux.git:${CBL_M}/linux") ;;
             linux-next) PAIRS=("next/linux-next.git:linux-next" "next/linux-next.git:${CBL_K}/linux-next" "next/linux-next.git:${CBL_K}/rpi") ;;
-            linux-stable) PAIRS=("stable/linux.git:linux-stable" "stable/linux.git:${CBL_K}/linux-stable") ;;
+            linux-stable) PAIRS=("stable/linux.git:linux-stable" "stable/linux.git:${CBL_K}/linux-stable-5.4" "stable/linux.git:${CBL_K}/linux-stable-5.9") ;;
             *) return 1 ;;
         esac
         shift
@@ -50,7 +50,7 @@ function cbl_linux_repos() { (
             git remote add origin https://git.kernel.org/pub/scm/linux/kernel/git/"${URL}"
             git remote update origin
             case ${FOLDER} in
-                *linux-stable) BRANCH=linux-5.4.y ;;
+                *linux-stable-*) BRANCH=linux-${FOLDER##*-}.y ;;
                 *) BRANCH=master ;;
             esac
             git checkout "${BRANCH}"
