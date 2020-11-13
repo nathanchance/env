@@ -1119,7 +1119,7 @@ function rbpi() { (
     fi
 ); }
 
-function test_stable_llvm_linux() { (
+function build_stable_llvm() { (
     TC_BLD=${CBL_GIT}/tc-build
 
     # Build LLVM 10.0.1 and binutils if necessary
@@ -1142,6 +1142,11 @@ function test_stable_llvm_linux() { (
             --install-folder "${LLVM_11}" \
             --pgo
     [[ -x ${LLVM_11}/bin/as ]] || "${TC_BLD}"/build-binutils.py --install-folder "${LLVM_11}"
+); }
+
+function test_stable_llvm_linux() { (
+    # Build LLVM if necessary
+    build_stable_llvm
 
     # Update all trees
     LINUX=${HOME}/src/linux
@@ -1159,7 +1164,7 @@ function test_stable_llvm_linux() { (
     done
 
     # Build the trees
-    for LLVM_TC in ${LLVM_10} ${LLVM_11}; do
+    for LLVM_TC in ${CBL_TC}/llvm-{10.0.0,11.0.0}; do
         KRNL_DIR=${LINUX} TC_DIR=${LLVM_TC} lt
         for SBR in 5.9 5.4; do
             git ch linux-${SBR}.y-qualify
