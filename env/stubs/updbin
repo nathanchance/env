@@ -95,6 +95,7 @@ function bcvise() { (
         -DCMAKE_C_COMPILER="$(command -v clang || command -v gcc)" \
         -DCMAKE_CXX_COMPILER="$(command -v clang++ || command -v g++)" \
         -DCMAKE_INSTALL_PREFIX="${CVISE_PREFIX:-${PREFIX:-${HOME}/usr}}" \
+        -DCMAKE_PREFIX_PATH=/usr/lib/llvm-10 \
         -DPYTHON_EXECUTABLE="$(command -v python3)" \
         .. &&
         make "${JOBS_FLAG:--j"$(nproc)"}" &&

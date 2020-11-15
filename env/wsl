@@ -70,6 +70,7 @@ function bootstrap() { (
         build-essential \
         bc \
         bison \
+        clang \
         cmake \
         cowsay \
         cpio \
@@ -87,6 +88,7 @@ function bootstrap() { (
         irssi \
         jq \
         libauthen-sasl-perl \
+        libclang-dev \
         libcurl4-openssl-dev \
         libelf-dev \
         libemail-valid-perl \
@@ -104,6 +106,9 @@ function bootstrap() { (
         libpixman-1-dev \
         libsasl2-modules \
         libssl-dev \
+        lld \
+        llvm \
+        llvm-dev \
         lolcat \
         lsb-release \
         mosh \
