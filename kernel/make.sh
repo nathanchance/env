@@ -46,7 +46,7 @@ function invoke_make() {
     [[ ${V} -eq 1 || ${V} -eq 2 ]] && SILENT=false
     ${SILENT:=true} && SILENT_MAKE_FLAG=s
 
-    if ${FORCE_LE:-false}; then
+    if ${FORCE_LE:-true}; then
         case ${ARCH} in
             arm | arm64) [[ ${MAKE_ARGS[*]} =~ allmodconfig || ${MAKE_ARGS[*]} =~ allyesconfig ]] && FORCE_LE=true ;;
         esac
