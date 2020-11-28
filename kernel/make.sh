@@ -13,6 +13,11 @@ function parse_parameters() {
                 MAKE_ARGS+=("${1}")
                 ;;
 
+            -C)
+                MAKE_ARGS+=("${1}" "${2}")
+                shift
+                ;;
+
             +s)
                 SILENT=false
                 ;;
