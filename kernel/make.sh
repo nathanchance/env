@@ -1,5 +1,10 @@
 #!/usr/bin/env bash
 
+function die() {
+    printf '\n%b%s%b\n\n' "\033[01;31m" "${1}" "\033[0m"
+    exit "${2}"
+}
+
 function parse_parameters() {
     MAKE_ARGS=()
     while ((${#})); do
@@ -39,18 +44,22 @@ function setup_paths() {
         export PATH=${GCC_TC_FOLDER}/10.2.0/bin:${PATH}
         [[ -z ${CC} ]] && CC=${CROSS_COMPILE}gcc
     fi
+    CC_NAME=${CC##* }
+    CC_PATH=$(command -v "${CC_NAME}")
+    [[ -x ${CC_PATH} ]] || die "${CC_NAME} could not be found or it is not executable!" "${?}"
 
     # Account for PATH override variable
     export PATH=${PO:+${PO}:}${PATH}
 
-    CC_LOCATION="$(dirname "$(command -v "${CC##* }")")"
+    CC_LOCATION=${CC_PATH%/*}
     printf '\n\e[01;32mCompiler location:\e[0m %s\n\n' "${CC_LOCATION}"
-    printf '\e[01;32mCompiler version:\e[0m %s \n\n' "$("${CC##* }" --version | head -n1)"
-    if [[ ${LLVM_IAS} -ne 1 && ${CC} = "clang" ]]; then
-        AS=${CROSS_COMPILE}as
-        AS_LOCATION="$(dirname "$(command -v "${AS}")")"
+    printf '\e[01;32mCompiler version:\e[0m %s \n\n' "$("${CC_PATH}" --version | head -n1)"
+    if [[ ${LLVM_IAS} -ne 1 && ${CC_NAME} = "clang" ]]; then
+        AS_PATH=$(command -v "${CROSS_COMPILE}"as)
+        [[ -x ${AS_PATH} ]] || die "binutils could not be found or they are not executable!" "${?}"
+        AS_LOCATION=${AS_PATH%/*}
         [[ "${AS_LOCATION}" = "${CC_LOCATION}" ]] || printf '\e[01;32mBinutils location:\e[0m %s\n\n' "${AS_LOCATION}"
-        printf '\e[01;32mBinutils version:\e[0m %s \n\n' "$("${AS}" --version | head -n1)"
+        printf '\e[01;32mBinutils version:\e[0m %s \n\n' "$("${AS_PATH}" --version | head -n1)"
     fi
 }
 
