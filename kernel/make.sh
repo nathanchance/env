@@ -54,7 +54,7 @@ function setup_paths() {
     CC_LOCATION=${CC_PATH%/*}
     printf '\n\e[01;32mCompiler location:\e[0m %s\n\n' "${CC_LOCATION}"
     printf '\e[01;32mCompiler version:\e[0m %s \n\n' "$("${CC_PATH}" --version | head -n1)"
-    if [[ ${LLVM_IAS} -ne 1 && ${CC_NAME} = "clang" ]]; then
+    if [[ ${LLVM_IAS} -ne 1 ]]; then
         AS_PATH=$(command -v "${CROSS_COMPILE}"as)
         [[ -x ${AS_PATH} ]] || die "binutils could not be found or they are not executable!" "${?}"
         AS_LOCATION=${AS_PATH%/*}
