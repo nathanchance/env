@@ -1132,6 +1132,83 @@ index d01bc4bda7bf..523f588b853c 100644
 2.29.2
 
 EOF
+    cat <<'EOF' | git am || exit ${?}
+From 56339443b6be6eb75e1190f9f0ad137e0addaa13 Mon Sep 17 00:00:00 2001
+From: Nathan Chancellor <natechancellor@gmail.com>
+Date: Mon, 30 Nov 2020 12:12:03 -0700
+Subject: [PATCH] hwmon (pwm-fan) Remove unused variable in pwm_fan_is_visible
+
+Link: https://lore.kernel.org/linux-next/20201130115603.48e91a19@canb.auug.org.au/
+Signed-off-by: Nathan Chancellor <natechancellor@gmail.com>
+---
+ drivers/hwmon/pwm-fan.c | 2 --
+ 1 file changed, 2 deletions(-)
+
+diff --git a/drivers/hwmon/pwm-fan.c b/drivers/hwmon/pwm-fan.c
+index 57b574837b58..777439f48c14 100644
+--- a/drivers/hwmon/pwm-fan.c
++++ b/drivers/hwmon/pwm-fan.c
+@@ -164,8 +164,6 @@ static umode_t pwm_fan_is_visible(const void *data,
+ 				  enum hwmon_sensor_types type,
+ 				  u32 attr, int channel)
+ {
+-	struct pwm_fan_ctx *ctx = (struct pwm_fan_ctx *)data;
+-
+ 	switch (type) {
+ 	case hwmon_pwm:
+ 		return 0644;
+-- 
+2.29.2
+
+EOF
+    cat <<'EOF' | git am || exit ${?}
+From 553335f23c28ffd2f2359d7868e24e37b2efe8e6 Mon Sep 17 00:00:00 2001
+From: Nathan Chancellor <natechancellor@gmail.com>
+Date: Mon, 30 Nov 2020 12:16:02 -0700
+Subject: [PATCH] arm64: mte: Re-apply part of
+ e710c29e0177465a7ce6cdd0ebd81e81e11ac8e0
+
+Link: https://lore.kernel.org/linux-next/CA+G9fYuTS-Kmwy4wfNrFMLnon0v5No3KQeu262c9L91wOrcxkA@mail.gmail.com/
+Signed-off-by: Nathan Chancellor <natechancellor@gmail.com>
+---
+ arch/arm64/kernel/mte.c | 20 --------------------
+ 1 file changed, 20 deletions(-)
+
+diff --git a/arch/arm64/kernel/mte.c b/arch/arm64/kernel/mte.c
+index 21e6e7a065ea..2cbbdea123d8 100644
+--- a/arch/arm64/kernel/mte.c
++++ b/arch/arm64/kernel/mte.c
+@@ -158,26 +158,6 @@ void mte_enable_kernel(void)
+ 	isb();
+ }
+ 
+-static void update_sctlr_el1_tcf0(u64 tcf0)
+-{
+-	/* ISB required for the kernel uaccess routines */
+-	sysreg_clear_set(sctlr_el1, SCTLR_EL1_TCF0_MASK, tcf0);
+-	isb();
+-}
+-
+-static void set_sctlr_el1_tcf0(u64 tcf0)
+-{
+-	/*
+-	 * mte_thread_switch() checks current->thread.sctlr_tcf0 as an
+-	 * optimisation. Disable preemption so that it does not see
+-	 * the variable update before the SCTLR_EL1.TCF0 one.
+-	 */
+-	preempt_disable();
+-	current->thread.sctlr_tcf0 = tcf0;
+-	update_sctlr_el1_tcf0(tcf0);
+-	preempt_enable();
+-}
+-
+ static void update_gcr_el1_excl(u64 excl)
+ {
+ 
+-- 
+2.29.2
+
+EOF
     ../pi-scripts/build.sh || exit ${?}
     if ! git pll --no-edit mainline master; then
         rg "<<<<<<< HEAD" && exit ${?}
