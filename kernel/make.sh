@@ -43,8 +43,15 @@ function setup_paths() {
     # Account for PATH override variable
     export PATH=${PO:+${PO}:}${PATH}
 
-    printf '\n\e[01;32mToolchain location:\e[0m %s\n\n' "$(dirname "$(command -v "${CC##* }")")"
-    printf '\e[01;32mToolchain version:\e[0m %s \n\n' "$("${CC##* }" --version | head -n1)"
+    CC_LOCATION="$(dirname "$(command -v "${CC##* }")")"
+    printf '\n\e[01;32mCompiler location:\e[0m %s\n\n' "${CC_LOCATION}"
+    printf '\e[01;32mCompiler version:\e[0m %s \n\n' "$("${CC##* }" --version | head -n1)"
+    if [[ ${LLVM_IAS} -ne 1 && ${CC} = "clang" ]]; then
+        AS=${CROSS_COMPILE}as
+        AS_LOCATION="$(dirname "$(command -v "${AS}")")"
+        [[ "${AS_LOCATION}" = "${CC_LOCATION}" ]] || printf '\e[01;32mBinutils location:\e[0m %s\n\n' "${AS_LOCATION}"
+        printf '\e[01;32mBinutils version:\e[0m %s \n\n' "$("${AS}" --version | head -n1)"
+    fi
 }
 
 function invoke_make() {
