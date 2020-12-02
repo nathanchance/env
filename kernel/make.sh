@@ -44,12 +44,13 @@ function setup_paths() {
         export PATH=${GCC_TC_FOLDER}/10.2.0/bin:${PATH}
         [[ -z ${CC} ]] && CC=${CROSS_COMPILE}gcc
     fi
-    CC_NAME=${CC##* }
-    CC_PATH=$(command -v "${CC_NAME}")
-    [[ -x ${CC_PATH} ]] || die "${CC_NAME} could not be found or it is not executable!" "${?}"
 
     # Account for PATH override variable
     export PATH=${PO:+${PO}:}${PATH}
+
+    CC_NAME=${CC##* }
+    CC_PATH=$(command -v "${CC_NAME}")
+    [[ -x ${CC_PATH} ]] || die "${CC_NAME} could not be found or it is not executable!" "${?}"
 
     CC_LOCATION=${CC_PATH%/*}
     printf '\n\e[01;32mCompiler location:\e[0m %s\n\n' "${CC_LOCATION}"
