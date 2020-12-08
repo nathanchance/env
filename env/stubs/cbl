@@ -1104,38 +1104,33 @@ function rbpi() { (
     FIXES=${PATCHES_FOLDER}/fixes.series
     [[ -f ${FIXES} ]] && { git am "${FIXES}" || exit ${?}; }
     cat <<'EOF' | git am || exit ${?}
-From 4e152b46aacd1b6fd39207a548e3ba4c1be66584 Mon Sep 17 00:00:00 2001
+From 8bc7cbf2c27e0a2884aa397902a1b3250f967718 Mon Sep 17 00:00:00 2001
 From: Nathan Chancellor <natechancellor@gmail.com>
-Date: Tue, 1 Dec 2020 22:18:16 -0700
-Subject: [PATCH] dpaa_eth: Add fourth parameter to xdp_rxq_info_reg
+Date: Sun, 6 Dec 2020 00:08:00 -0700
+Subject: [PATCH] arm64: Revert part of f74205043541
 
-drivers/net/ethernet/freescale/dpaa/dpaa_eth.c:1136:25: error: too few
-arguments to function call, expected 4, have 3
-                                       dpaa_fq->fqid);
-                                                    ^
-include/net/xdp.h:229:5: note: 'xdp_rxq_info_reg' declared here
-int xdp_rxq_info_reg(struct xdp_rxq_info *xdp_rxq,
-    ^
-1 error generated.
+ <stdin>:1539:2: error: syscall memfd_secret not implemented
+ [-Werror,-W#warnings]
+ #warning syscall memfd_secret not implemented
+  ^
+ 1 error generated.
 
 Signed-off-by: Nathan Chancellor <natechancellor@gmail.com>
 ---
- drivers/net/ethernet/freescale/dpaa/dpaa_eth.c | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
+ arch/arm64/include/uapi/asm/unistd.h | 1 -
+ 1 file changed, 1 deletion(-)
 
-diff --git a/drivers/net/ethernet/freescale/dpaa/dpaa_eth.c b/drivers/net/ethernet/freescale/dpaa/dpaa_eth.c
-index 947b3d2f9c7e..6cc8c4e078de 100644
---- a/drivers/net/ethernet/freescale/dpaa/dpaa_eth.c
-+++ b/drivers/net/ethernet/freescale/dpaa/dpaa_eth.c
-@@ -1133,7 +1133,7 @@ static int dpaa_fq_init(struct dpaa_fq *dpaa_fq, bool td_enable)
- 	if (dpaa_fq->fq_type == FQ_TYPE_RX_DEFAULT ||
- 	    dpaa_fq->fq_type == FQ_TYPE_RX_PCD) {
- 		err = xdp_rxq_info_reg(&dpaa_fq->xdp_rxq, dpaa_fq->net_dev,
--				       dpaa_fq->fqid);
-+				       dpaa_fq->fqid, 0);
- 		if (err) {
- 			dev_err(dev, "xdp_rxq_info_reg() = %d\n", err);
- 			return err;
+diff --git a/arch/arm64/include/uapi/asm/unistd.h b/arch/arm64/include/uapi/asm/unistd.h
+index ce2ee8f1e361..f83a70e07df8 100644
+--- a/arch/arm64/include/uapi/asm/unistd.h
++++ b/arch/arm64/include/uapi/asm/unistd.h
+@@ -20,6 +20,5 @@
+ #define __ARCH_WANT_SET_GET_RLIMIT
+ #define __ARCH_WANT_TIME32_SYSCALLS
+ #define __ARCH_WANT_SYS_CLONE3
+-#define __ARCH_WANT_MEMFD_SECRET
+ 
+ #include <asm-generic/unistd.h>
 -- 
 2.29.2
 
