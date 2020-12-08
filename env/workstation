@@ -233,7 +233,7 @@ function bootstrap() { (
 
         # Rootless podman
         echo "$(whoami):100000:65536" | sudo tee /etc/subgid /etc/subuid
-        sudo curl -LSso /etc/containers/registries.conf 'https://git.archlinux.org/svntogit/community.git/plain/trunk/registries.conf?h=packages/skopeo'
+        printf "[registries.search]\nregistries = ['docker.io', 'quay.io']\n" | sudo tee /etc/containers/registries.conf
     else
         die "Unknown or unsupported distro"
     fi
