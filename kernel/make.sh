@@ -9,6 +9,10 @@ function parse_parameters() {
     MAKE_ARGS=()
     while ((${#})); do
         case ${1} in
+            NO_CCACHE=*)
+                export "${1?}"
+                ;;
+
             *=*)
                 MAKE_ARGS+=("${1}")
                 export "${1?}"
@@ -76,8 +80,14 @@ function invoke_make() {
         unset FORCE_LE
     fi
 
+    if command -v ccache &>/dev/null && [[ -z ${NO_CCACHE} ]]; then
+        CCACHE="ccache "
+    else
+        unset CCACHE
+    fi
+
     set -x
-    time make -"${SILENT_MAKE_FLAG}"kj"$(nproc)" "${MAKE_ARGS[@]}" ${FORCE_LE:+KCONFIG_ALLCONFIG=<(echo CONFIG_CPU_BIG_ENDIAN=n)}
+    time make -"${SILENT_MAKE_FLAG}"kj"$(nproc)" ${CCACHE:+CC="${CCACHE}${CC}"} "${MAKE_ARGS[@]}" ${FORCE_LE:+KCONFIG_ALLCONFIG=<(echo CONFIG_CPU_BIG_ENDIAN=n)}
 }
 
 parse_parameters "${@}"
