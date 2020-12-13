@@ -18,7 +18,7 @@ function parse_parameters() {
                 export "${1?}"
                 ;;
 
-            */ | *.i | *.ko | *.o | all | *clean | *config | dtbs | *_install | *Image* | modules | vmlinux)
+            */ | *.i | *.ko | *.o | all | *clean | *config | dtbs | *_install | *Image* | modules | mrproper | vmlinux)
                 MAKE_ARGS+=("${1}")
                 ;;
 
