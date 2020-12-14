@@ -1135,6 +1135,35 @@ index ce2ee8f1e361..f83a70e07df8 100644
 2.29.2
 
 EOF
+    cat <<'EOF' | git am || exit ${?}
+From f07439ca01bed7819d00f18bef793a58534ca365 Mon Sep 17 00:00:00 2001
+From: Nathan Chancellor <natechancellor@gmail.com>
+Date: Mon, 14 Dec 2020 04:11:20 -0700
+Subject: [PATCH] net: hns3: Fix conditional in hclge_add_fd_entry_by_arfs
+
+Fixes: 0205ec041ec6 ("net: hns3: add support for hw tc offload of tc flower")
+Signed-off-by: Nathan Chancellor <natechancellor@gmail.com>
+---
+ drivers/net/ethernet/hisilicon/hns3/hns3pf/hclge_main.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/drivers/net/ethernet/hisilicon/hns3/hns3pf/hclge_main.c b/drivers/net/ethernet/hisilicon/hns3/hns3pf/hclge_main.c
+index 7a164115c845..e6f37f91c489 100644
+--- a/drivers/net/ethernet/hisilicon/hns3/hns3pf/hclge_main.c
++++ b/drivers/net/ethernet/hisilicon/hns3/hns3pf/hclge_main.c
+@@ -6485,7 +6485,7 @@ static int hclge_add_fd_entry_by_arfs(struct hnae3_handle *handle, u16 queue_id,
+ 	 * arfs should not work
+ 	 */
+ 	spin_lock_bh(&hdev->fd_rule_lock);
+-	if (hdev->fd_active_type != HCLGE_FD_ARFS_ACTIVE ||
++	if (hdev->fd_active_type != HCLGE_FD_ARFS_ACTIVE &&
+ 	    hdev->fd_active_type != HCLGE_FD_RULE_NONE) {
+ 		spin_unlock_bh(&hdev->fd_rule_lock);
+ 		return -EOPNOTSUPP;
+-- 
+2.29.2
+
+EOF
     ../pi-scripts/build.sh || exit ${?}
     if ! git pll --no-edit mainline master; then
         rg "<<<<<<< HEAD" && exit ${?}
