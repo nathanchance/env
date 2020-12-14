@@ -890,7 +890,7 @@ function kct() { (
 function bldallk() {
     local TREE
 
-    for TREE in linux{,-next,-stable-5.{9,4}}; do TREE=${TREE} lt ""; done
+    for TREE in linux{,-next,-stable-5.{10,9,4}}; do TREE=${TREE} lt ""; done
     "${CBL_KERNELS}"/pi-scripts/build.sh -k "${CBL_KERNELS}"/rpi
     "${CBL_KERNELS}"/wsl2/bin/build.sh
 }
