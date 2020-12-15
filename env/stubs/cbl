@@ -408,44 +408,37 @@ function yapf() {
 }
 
 function qualify_tc_bld_uprev() { (
-    TC_BLD=${CBL_GIT}/tc-build
+    TC_BLD_SRC=${CBL_GIT}/tc-build
+    LNX_STBL=${SRC_FOLDER}/linux-stable
     WORK_DIR=$(mktemp -d)
+    TC_BLD=${WORK_DIR}/tc-build
+
+    header "Setting up folders"
+
+    git -C "${TC_BLD_SRC}" worktree add "${TC_BLD}"
+    git -C "${LNX_STBL}" ru
+    for LNX_VER in 5.10 5.9 5.4; do git -C "${LNX_STBL}" worktree add "${WORK_DIR}"/linux-stable-"${LNX_VER}" origin/linux-"${LNX_VER}".y; done
 
     header "Building toolchains"
 
     "${TC_BLD}"/build-binutils.py --install-folder "${WORK_DIR}" || exit ${?}
-    "${TC_BLD}"/build-llvm.py --check-targets lld clang llvm --install-folder "${WORK_DIR}" --pgo --use-good-revision || exit ${?}
+    "${TC_BLD}"/build-llvm.py --check-targets clang lld llvm --install-folder "${WORK_DIR}" --pgo --use-good-revision || exit ${?}
 
     header "Toolchain information"
 
     "${WORK_DIR}"/bin/clang --version
     git -C "${TC_BLD}"/llvm-project show -s
 
-    header "Updating kernels"
-
-    # Update all trees
-    LINUX=${HOME}/src/linux
-    [[ -d ${LINUX} ]] || git clone https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/ "${LINUX}"
-    cd "${LINUX}"
-    git ch master-qualify || git ch -b master-qualify origin/master
-    git pull
-
-    LINUX_STABLE=${HOME}/src/linux-stable
-    [[ -d ${LINUX_STABLE} ]] || git clone https://git.kernel.org/pub/scm/linux/kernel/git/stable/linux.git/ "${LINUX_STABLE}"
-    cd "${LINUX_STABLE}"
-    for SBR in 5.4 5.8; do
-        git ch linux-${SBR}.y-qualify || git ch -b linux-${SBR}.y-qualify origin/linux-${SBR}.y
-        git pull
-    done
-
     header "Testing toolchain"
 
-    # Build the trees
-    KRNL_DIR=${LINUX} TC_DIR=${WORK_DIR} lt
-    for SBR in 5.4 5.8; do
-        git ch linux-${SBR}.y-qualify
-        KRNL_DIR=${LINUX_STABLE} TC_DIR=${WORK_DIR} lt
+    for SRC_FOLDER in "${WORK_DIR}"/linux-stable-{5.10,5.9,5.4}; do
+        KRNL_DIR=${SRC_FOLDER} TC_DIR=${WORK_DIR} lt
     done
+
+    header "Remove worktrees"
+    git -C "${TC_BLD_SRC}" worktree remove "${TC_BLD}"
+    for LNX_VER in 5.10 5.9 5.4; do git -C "${LNX_STBL}" worktree remove "${WORK_DIR}"/linux-stable-"${LNX_VER}"; done
+    rm -rf "${WORK_DIR}"
 ); }
 
 function upd_lnx_tcbld() { (
