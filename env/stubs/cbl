@@ -38,7 +38,7 @@ function ptchmn() { (
     case "${1:?}" in
         -s | --sync)
             case ${REPO} in
-                linux | linux-next) ;;
+                linux | linux-next | linux-stable-5.4 | linux-stable-5.9 | linux-stable-5.10) ;;
                 *) die "${REPO} not supported by ptchmn!" ;;
             esac
 
