@@ -501,6 +501,7 @@ function rbpi() { (
     PATCHES_FOLDER=${GITHUB_FOLDER}/patches/rpi-next
     FIXES=${PATCHES_FOLDER}/fixes.series
     [[ -f ${FIXES} ]] && { git am "${FIXES}" || exit ${?}; }
+    git cp 870d16757ba8 || exit ${?}
     cat <<'EOF' | git am || exit ${?}
 From 8bc7cbf2c27e0a2884aa397902a1b3250f967718 Mon Sep 17 00:00:00 2001
 From: Nathan Chancellor <natechancellor@gmail.com>
@@ -533,7 +534,6 @@ index ce2ee8f1e361..f83a70e07df8 100644
 2.29.2
 
 EOF
-    b4 am -o - -l 20201215000033.85383-1-colin.king@canonical.com | git ams || exit ${?}
     ../pi-scripts/build.sh || exit ${?}
     if ! git pll --no-edit mainline master; then
         rg "<<<<<<< HEAD" && exit ${?}
@@ -545,8 +545,9 @@ EOF
         rg "<<<<<<< HEAD" && exit ${?}
         ../pi-scripts/build.sh || exit ${?}
         git aa
-        git c || exit ${?}
+        git c --no-edit || exit ${?}
     fi
+    ../pi-scripts/build.sh || exit ${?}
 ); }
 
 function build_stable_llvm() { (
