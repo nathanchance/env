@@ -501,7 +501,6 @@ function rbpi() { (
     PATCHES_FOLDER=${GITHUB_FOLDER}/patches/rpi-next
     FIXES=${PATCHES_FOLDER}/fixes.series
     [[ -f ${FIXES} ]] && { git am "${FIXES}" || exit ${?}; }
-    git cp 870d16757ba8 || exit ${?}
     cat <<'EOF' | git am || exit ${?}
 From 8bc7cbf2c27e0a2884aa397902a1b3250f967718 Mon Sep 17 00:00:00 2001
 From: Nathan Chancellor <natechancellor@gmail.com>
@@ -541,7 +540,7 @@ EOF
         git aa
         git c || exit ${?}
     fi
-    if ! git pll --no-edit sami tip/clang-cfi; then
+    if ! git pll --no-edit sami clang-cfi; then
         rg "<<<<<<< HEAD" && exit ${?}
         ../pi-scripts/build.sh || exit ${?}
         git aa
