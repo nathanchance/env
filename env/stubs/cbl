@@ -501,38 +501,7 @@ function rbpi() { (
     PATCHES_FOLDER=${GITHUB_FOLDER}/patches/rpi-next
     FIXES=${PATCHES_FOLDER}/fixes.series
     [[ -f ${FIXES} ]] && { git am "${FIXES}" || exit ${?}; }
-    cat <<'EOF' | git am || exit ${?}
-From 8bc7cbf2c27e0a2884aa397902a1b3250f967718 Mon Sep 17 00:00:00 2001
-From: Nathan Chancellor <natechancellor@gmail.com>
-Date: Sun, 6 Dec 2020 00:08:00 -0700
-Subject: [PATCH] arm64: Revert part of f74205043541
-
- <stdin>:1539:2: error: syscall memfd_secret not implemented
- [-Werror,-W#warnings]
- #warning syscall memfd_secret not implemented
-  ^
- 1 error generated.
-
-Signed-off-by: Nathan Chancellor <natechancellor@gmail.com>
----
- arch/arm64/include/uapi/asm/unistd.h | 1 -
- 1 file changed, 1 deletion(-)
-
-diff --git a/arch/arm64/include/uapi/asm/unistd.h b/arch/arm64/include/uapi/asm/unistd.h
-index ce2ee8f1e361..f83a70e07df8 100644
---- a/arch/arm64/include/uapi/asm/unistd.h
-+++ b/arch/arm64/include/uapi/asm/unistd.h
-@@ -20,6 +20,5 @@
- #define __ARCH_WANT_SET_GET_RLIMIT
- #define __ARCH_WANT_TIME32_SYSCALLS
- #define __ARCH_WANT_SYS_CLONE3
--#define __ARCH_WANT_MEMFD_SECRET
- 
- #include <asm-generic/unistd.h>
--- 
-2.29.2
-
-EOF
+    b4 am -o - -l 20201221161608.417ea4b5@canb.auug.org.au | git ams || exit ${?}
     ../pi-scripts/build.sh || exit ${?}
     if ! git pll --no-edit mainline master; then
         rg "<<<<<<< HEAD" && exit ${?}

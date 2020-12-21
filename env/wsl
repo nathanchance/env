@@ -309,43 +309,13 @@ function rbwk() { (
     done
     git ch next || exit ${?}
     git rh next/master
-    cat <<'EOF' | git am || exit ${?}
-From 1757b6036e33d316e9f96db97ee22599a5498153 Mon Sep 17 00:00:00 2001
-From: Nathan Chancellor <natechancellor@gmail.com>
-Date: Fri, 18 Dec 2020 00:18:05 -0700
-Subject: [PATCH] KVM: SVM: Make vmsave call compatible with LLVM's assembler
-
-LLVM's assembler does not accept 'vmsave' alone, it needs the register
-as well. This matches the other 'vmsave' call in vmenter.S.
-
-Signed-off-by: Nathan Chancellor <natechancellor@gmail.com>
----
- arch/x86/kvm/svm/sev.c | 2 +-
- 1 file changed, 1 insertion(+), 1 deletion(-)
-
-diff --git a/arch/x86/kvm/svm/sev.c b/arch/x86/kvm/svm/sev.c
-index 9858d5ae9ddd..5ae49e9ee63d 100644
---- a/arch/x86/kvm/svm/sev.c
-+++ b/arch/x86/kvm/svm/sev.c
-@@ -2001,7 +2001,7 @@ void sev_es_vcpu_load(struct vcpu_svm *svm, int cpu)
- 	 * of which one step is to perform a VMLOAD. Since hardware does not
- 	 * perform a VMSAVE on VMRUN, the host savearea must be updated.
- 	 */
--	asm volatile(__ex("vmsave") : : "a" (__sme_page_pa(sd->save_area)) : "memory");
-+	asm volatile(__ex("vmsave %%"_ASM_AX) : : "a" (__sme_page_pa(sd->save_area)) : "memory");
- 
- 	/*
- 	 * Certain MSRs are restored on VMEXIT, only save ones that aren't
--- 
-2.29.2
-
-EOF
+    b4 am -o - -l 20201219063711.3526947-1-natechancellor@gmail.com | git am || exit ${?}
     if ! git pll --no-edit mainline master; then
         rg "<<<<<<< HEAD" && exit ${?}
         git aa
         git c || exit ${?}
     fi
-    if ! git pll --no-edit sami tip/clang-cfi; then
+    if ! git pll --no-edit sami clang-cfi; then
         rg "<<<<<<< HEAD" && exit ${?}
         git aa
         git c || exit ${?}
