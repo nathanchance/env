@@ -30,7 +30,7 @@ function cbl_linux_repos() { (
         case ${1} in
             linux) PAIRS=("torvalds/linux.git:linux" "torvalds/linux.git:${CBL_K}/linux" "torvalds/linux.git:${CBL_M}/linux") ;;
             linux-next) PAIRS=("next/linux-next.git:linux-next" "next/linux-next.git:${CBL_K}/linux-next" "next/linux-next.git:${CBL_K}/rpi") ;;
-            linux-stable) PAIRS=("stable/linux.git:linux-stable" "stable/linux.git:${CBL_K}/linux-stable-5.4" "stable/linux.git:${CBL_K}/linux-stable-5.9") ;;
+            linux-stable) PAIRS=("stable/linux.git:linux-stable" "stable/linux.git:${CBL_K}/linux-stable-5.4" "stable/linux.git:${CBL_K}/linux-stable-5.10") ;;
             *) return 1 ;;
         esac
         shift

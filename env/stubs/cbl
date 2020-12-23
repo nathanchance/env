@@ -38,7 +38,7 @@ function ptchmn() { (
     case "${1:?}" in
         -s | --sync)
             case ${REPO} in
-                linux | linux-next | linux-stable-5.4 | linux-stable-5.9 | linux-stable-5.10) ;;
+                linux | linux-next | linux-stable-5.4 | linux-stable-5.10) ;;
                 *) die "${REPO} not supported by ptchmn!" ;;
             esac
 
@@ -417,7 +417,7 @@ function qualify_tc_bld_uprev() { (
 
     git -C "${TC_BLD_SRC}" worktree add "${TC_BLD}"
     git -C "${LNX_STBL}" ru
-    for LNX_VER in 5.10 5.9 5.4; do git -C "${LNX_STBL}" worktree add "${WORK_DIR}"/linux-stable-"${LNX_VER}" origin/linux-"${LNX_VER}".y; done
+    for LNX_VER in 5.10 5.4; do git -C "${LNX_STBL}" worktree add "${WORK_DIR}"/linux-stable-"${LNX_VER}" origin/linux-"${LNX_VER}".y; done
 
     header "Building toolchains"
 
@@ -431,13 +431,13 @@ function qualify_tc_bld_uprev() { (
 
     header "Testing toolchain"
 
-    for SRC_FOLDER in "${WORK_DIR}"/linux-stable-{5.10,5.9,5.4}; do
+    for SRC_FOLDER in "${WORK_DIR}"/linux-stable-{5.10,5.4}; do
         KRNL_DIR=${SRC_FOLDER} TC_DIR=${WORK_DIR} lt
     done
 
     header "Remove worktrees"
     git -C "${TC_BLD_SRC}" worktree remove "${TC_BLD}"
-    for LNX_VER in 5.10 5.9 5.4; do git -C "${LNX_STBL}" worktree remove "${WORK_DIR}"/linux-stable-"${LNX_VER}"; done
+    for LNX_VER in 5.10 5.4; do git -C "${LNX_STBL}" worktree remove "${WORK_DIR}"/linux-stable-"${LNX_VER}"; done
     rm -rf "${WORK_DIR}"
 ); }
 
@@ -566,7 +566,7 @@ function test_stable_llvm_linux() { (
     LINUX_STABLE=${HOME}/src/linux-stable
     [[ -d ${LINUX_STABLE} ]] || git clone https://git.kernel.org/pub/scm/linux/kernel/git/stable/linux.git/ "${LINUX_STABLE}"
     cd "${LINUX_STABLE}"
-    for SBR in 5.9 5.4; do
+    for SBR in 5.10 5.4; do
         git ch linux-${SBR}.y-qualify || git ch -b linux-${SBR}.y-qualify origin/linux-${SBR}.y
         git pull
     done
@@ -574,7 +574,7 @@ function test_stable_llvm_linux() { (
     # Build the trees
     for LLVM_TC in ${CBL_TC}/llvm-{10.0.1,11.0.1-rc2}; do
         KRNL_DIR=${LINUX} TC_DIR=${LLVM_TC} lt
-        for SBR in 5.9 5.4; do
+        for SBR in 5.10 5.4; do
             git ch linux-${SBR}.y-qualify
             KRNL_DIR=${LINUX_STABLE} TC_DIR=${LLVM_TC} lt
         done
