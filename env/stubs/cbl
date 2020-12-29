@@ -168,7 +168,7 @@ function lt() { (
     TC_BLD_ARGS=()
     ${DO:=false} && TC_BLD_ARGS+=(--defconfigs)
     [[ -n ${ARCHES} ]] && TC_BLD_ARGS+=(--arches "${ARCHES}")
-    [[ ${KRNL_DIR##*/} = "linux" ]] && TC_BLD_ARGS+=(--test-lto-cfi-kernel)
+    [[ ${KRNL_DIR##*/} = "linux" || ${KRNL_DIR##*/} = "linux-building" ]] && TC_BLD_ARGS+=(--test-lto-cfi-kernel)
     "${CBL}"/llvm-kernel-testing/test.sh \
         --linux-src "${KRNL_DIR}" \
         --log-dir "${LOG_DIR}" \
