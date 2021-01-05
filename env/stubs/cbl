@@ -501,7 +501,6 @@ function rbpi() { (
     PATCHES_FOLDER=${GITHUB_FOLDER}/patches/rpi-next
     FIXES=${PATCHES_FOLDER}/fixes.series
     [[ -f ${FIXES} ]] && { git am "${FIXES}" || exit ${?}; }
-    b4 am -o - -l https://lore.kernel.org/linux-arm-kernel/20201229081748.1530671-1-geert+renesas@glider.be/ | git ams || exit ${?}
     ../pi-scripts/build.sh || exit ${?}
     if ! git pll --no-edit mainline master; then
         rg "<<<<<<< HEAD" && exit ${?}
