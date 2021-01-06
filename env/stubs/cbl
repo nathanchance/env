@@ -531,25 +531,25 @@ function build_stable_llvm() { (
             --targets "$(grep "AArch64;ARM" "${TC_BLD}"/build-llvm.py | cut -d \" -f 2 | sed 's/RISCV;//')"
     [[ -x ${LLVM_10}/bin/as ]] || "${TC_BLD}"/build-binutils.py --install-folder "${LLVM_10}"
 
-    # Build LLVM 11.0.0 and binutils if neccesary
-    LLVM_11=${CBL_TC}/llvm-11.0.0
+    # Build LLVM 11.0.1 and binutils if neccesary
+    LLVM_11=${CBL_TC}/llvm-11.0.1
     [[ -x ${LLVM_11}/bin/clang ]] ||
         "${TC_BLD}"/build-llvm.py \
             --assertions \
-            --branch llvmorg-11.0.0 \
+            --branch llvmorg-11.0.1 \
             --install-folder "${LLVM_11}" \
             --pgo
     [[ -x ${LLVM_11}/bin/as ]] || "${TC_BLD}"/build-binutils.py --install-folder "${LLVM_11}"
 
-    # Build LLVM 11.0.1-rc1 and binutils if neccesary
-    LLVM_11_RC=${CBL_TC}/llvm-11.0.1-rc2
-    [[ -x ${LLVM_11_RC}/bin/clang ]] ||
-        "${TC_BLD}"/build-llvm.py \
-            --assertions \
-            --branch llvmorg-11.0.1-rc2 \
-            --install-folder "${LLVM_11_RC}" \
-            --pgo
-    [[ -x ${LLVM_11_RC}/bin/as ]] || "${TC_BLD}"/build-binutils.py --install-folder "${LLVM_11_RC}"
+    # Build LLVM 12.0.0-rc1 and binutils if neccesary
+    #LLVM_12_RC=${CBL_TC}/llvm-12.0.0-rc1
+    #[[ -x ${LLVM_12_RC}/bin/clang ]] ||
+    #    "${TC_BLD}"/build-llvm.py \
+    #        --assertions \
+    #        --branch llvmorg-12.0.0-rc1 \
+    #        --install-folder "${LLVM_12_RC}" \
+    #        --pgo
+    #[[ -x ${LLVM_12_RC}/bin/as ]] || "${TC_BLD}"/build-binutils.py --install-folder "${LLVM_12_RC}"
 ); }
 
 function test_stable_llvm_linux() { (
@@ -572,7 +572,7 @@ function test_stable_llvm_linux() { (
     done
 
     # Build the trees
-    for LLVM_TC in ${CBL_TC}/llvm-{10.0.1,11.0.1-rc2}; do
+    for LLVM_TC in ${CBL_TC}/llvm-{10.0.1,11.0.1}; do
         KRNL_DIR=${LINUX} TC_DIR=${LLVM_TC} lt
         for SBR in 5.10 5.4; do
             git ch linux-${SBR}.y-qualify
