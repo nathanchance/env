@@ -221,9 +221,9 @@ function bllvm() { (
     fi
 
     header "Configuring LLVM"
-    set -x
+    echo "${CMAKE[*]}"
+    echo
     "${CMAKE[@]}" "${LLVM_SRC}"/llvm >/dev/null || exit ${?}
-    set +x
 
     header "Building LLVM"
     ninja || exit ${?}
