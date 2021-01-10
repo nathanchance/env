@@ -166,8 +166,9 @@ function lt() { (
     mkdir -p "${LOG_DIR}"
 
     TC_BLD_ARGS=()
-    ${DO:=false} && TC_BLD_ARGS+=(--defconfigs)
     [[ -n ${ARCHES} ]] && TC_BLD_ARGS+=(--arches "${ARCHES}")
+    [[ -n ${BOOT_UTILS} ]] && TC_BLD_ARGS+=(--boot-utils "${BOOT_UTILS}")
+    ${DO:=false} && TC_BLD_ARGS+=(--defconfigs)
     ${LTO:=true} && [[ ${KRNL_DIR##*/} = "linux" || ${KRNL_DIR##*/} = "linux-building" ]] && TC_BLD_ARGS+=(--test-lto-cfi-kernel)
     "${CBL}"/llvm-kernel-testing/test.sh \
         --linux-src "${KRNL_DIR}" \
