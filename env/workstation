@@ -159,6 +159,7 @@ function bootstrap() { (
             irssi
             libarchive-tools
             libauthen-sasl-perl
+            libcapstone-dev
             libclang-dev
             libcurl4-openssl-dev
             libedit-dev
@@ -166,6 +167,7 @@ function bootstrap() { (
             libemail-valid-perl
             libevent-dev
             libexpat1-dev
+            libfdt-dev
             libglib2.0-dev
             libglu1-mesa
             libgmp-dev
