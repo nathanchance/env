@@ -6,18 +6,22 @@
 
 # Universal variables
 CBL_ANDROID=${CBL}/android
+CBL_BLD=${CBL}/build
+CBL_BLD_C=${CBL_BLD}/clean
+CBL_BLD_P=${CBL_BLD}/patched
 CBL_CTTLFSH=${CBL_ANDROID}/cuttlefish
 CBL_GIT=${CBL}/github
 CBL_KC=${CBL_ANDROID}/common
 CBL_KC_SRC=${CBL_KC}/common
-CBL_KERNELS=${CBL}/kernels
 CBL_TC=${CBL}/toolchains
 CBL_LLVM=${CBL_TC}/llvm-tot/bin
 CBL_BNTL=${CBL_TC}/binutils/bin
 CBL_LLVM_BNTL=${CBL_TC}/llvm-binutils/bin
+CBL_SRC=${CBL}/src
+CBL_WRKTR=${CBL}/worktrees
 TCBLD=${CBL}/tc-build
 CBL_CCACHE=${CBL}/.ccache
-export CBL_ANDROID CBL_CTTLFSH CBL_GIT CBL_KC CBL_KC_SRC CBL_KERNELS CBL_TC CBL_LLVM CBL_BNTL CBL_LLVM_BNTL TCBLD CBL_CCACHE
+export CBL_ANDROID CBL_BLD CBL_BLD_C CBL_BLD_P CBL_CTTLFSH CBL_GIT CBL_KC CBL_KC_SRC CBL_TC CBL_LLVM CBL_BNTL CBL_LLVM_BNTL CBL_SRC CBL_WRKTR TCBLD CBL_CCACHE
 
 # Patch check function
 function pch() { (
@@ -161,7 +165,7 @@ function llvm_log() {
 
 # linux testing
 function lt() { (
-    : "${KRNL_DIR:=${CBL_KERNELS}/${TREE:=linux-next}}"
+    : "${KRNL_DIR:=${CBL_BLD_P}/${TREE:=linux-next}}"
     LOG_DIR=${CBL}/build-logs/${KRNL_DIR##*/}-$(date +%Y%m%d-%H%M)
     mkdir -p "${LOG_DIR}"
 
@@ -169,7 +173,7 @@ function lt() { (
     [[ -n ${ARCHES} ]] && TC_BLD_ARGS+=(--arches "${ARCHES}")
     [[ -n ${BOOT_UTILS} ]] && TC_BLD_ARGS+=(--boot-utils "${BOOT_UTILS}")
     ${DO:=false} && TC_BLD_ARGS+=(--defconfigs)
-    ${LTO:=true} && [[ ${KRNL_DIR##*/} = "linux" || ${KRNL_DIR##*/} = "linux-building" ]] && TC_BLD_ARGS+=(--test-lto-cfi-kernel)
+    ${LTO:=true} && [[ ${KRNL_DIR##*/} = "linux" ]] && TC_BLD_ARGS+=(--test-lto-cfi-kernel)
     "${CBL}"/llvm-kernel-testing/test.sh \
         --linux-src "${KRNL_DIR}" \
         --log-dir "${LOG_DIR}" \
@@ -297,8 +301,8 @@ function bldallk() {
     local TREE
 
     for TREE in linux{,-next,-stable-5.{10,4}}; do TREE=${TREE} lt ""; done
-    "${CBL_KERNELS}"/pi-scripts/build.sh -k "${CBL_KERNELS}"/rpi
-    "${CBL_KERNELS}"/wsl2/bin/build.sh
+    "${CBL_BLD}"/pi-scripts/build.sh -k "${CBL_BLD}"/rpi
+    "${CBL_BLD}"/wsl2/bin/build.sh
 }
 
 # Build new LLVM/Clang/lld and test all kernel trees
@@ -452,8 +456,8 @@ function upd_lnx_tcbld() { (
     done
     : ${MODE:=personal}
 
-    LINUX=${HOME}/src/linux
-    cd "${LINUX}"
+    LINUX=${CBL_SRC}/linux
+    cd "${LINUX}" || exit ${?}
     git fetch origin
     KVER=$(git describe --abbrev=0 origin/master | sed 's/v//')
 
@@ -492,7 +496,7 @@ function upd_lnx_tcbld() { (
 ); }
 
 function rbpi() { (
-    PI_SRC=${CBL_KERNELS}/rpi
+    PI_SRC=${CBL_BLD}/rpi
 
     set -x
 
@@ -558,24 +562,22 @@ function test_llvm_linux() { (
     build_stable_llvm
 
     # Update all trees
-    LINUX=${HOME}/src/linux-building
+    LINUX=${CBL_BLD_C}/linux
     [[ -d ${LINUX} ]] || git clone https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/ "${LINUX}"
     git -C "${LINUX}" pull --rebase
 
-    LINUX_STABLE=${HOME}/src/linux-stable-building
-    [[ -d ${LINUX_STABLE} ]] || git clone https://git.kernel.org/pub/scm/linux/kernel/git/stable/linux.git/ "${LINUX_STABLE}"
-    cd "${LINUX_STABLE}"
     for SBR in 5.10 5.4; do
+        LINUX_STABLE=${CBL_BLD_C}/linux-stable-${SBR}
+        [[ -d ${LINUX_STABLE} ]] || git clone https://git.kernel.org/pub/scm/linux/kernel/git/stable/linux.git/ "${LINUX_STABLE}"
+        cd "${LINUX_STABLE}"
         git ch linux-${SBR}.y
         git pull --rebase
     done
 
     # Build the trees
     for LLVM_TC in ${CBL_TC}/llvm-{10.0.1,11.0.1,binutils}; do
-        KRNL_DIR=${LINUX} TC_DIR=${LLVM_TC} lt
-        for SBR in 5.10 5.4; do
-            git ch linux-${SBR}.y
-            KRNL_DIR=${LINUX_STABLE} TC_DIR=${LLVM_TC} lt
+        for KRNL_DIR in ${CBL_BLD_C}/{linux,linux-stable-{5.10,5.4}}; do
+            KRNL_DIR=${KRNL_DIR} TC_DIR=${LLVM_TC} lt
         done
     done
 ); }

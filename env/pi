@@ -172,7 +172,7 @@ function upd_kernel() { (
     esac
 
     USER=nathan
-    OUT=/home/${USER}/cbl/kernels/rpi/out/${ARCH}
+    OUT=/home/${USER}/cbl/build/rpi/out/${ARCH}
     ROOTFS=${OUT}/rootfs
     { rsync -v ${USER}@"${SERVER_IP}":"${ROOTFS}"/"${DTBS}"'*.dtb' "${TMP_BOOT}" &&
         rsync -vr ${USER}@"${SERVER_IP}":"${ROOTFS}"/lib/modules/'*' "${TMP_BOOT}"/modules &&
@@ -298,7 +298,7 @@ function bootk() { (
     while ((${#})); do
         case ${1} in
             -k | --kernel)
-                shift
+                [[ ${#} -gt 0 ]] && shift
                 KERNEL_IMG=${1:-/boot/custom-next-testing-arm64/Image}
                 KERNEL_LOCATION=/mnt/ssd/booting-kernel
                 mkdir -p "${KERNEL_LOCATION}"/arch/arm64/boot
@@ -308,7 +308,7 @@ function bootk() { (
                 cat "${KERNEL_IMG}" | pigz -n -f -9 >"${KERNEL_LOCATION}"/arch/arm64/boot/Image.gz
                 ;;
         esac
-        shift
+        [[ ${#} -gt 0 ]] && shift
     done
 
     set -x

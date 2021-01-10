@@ -277,7 +277,7 @@ function upd_kernel() { (
             curl -LSso "${KERNEL}" https://github.com/"${REPO}"/releases/download/"$(glr "${REPO}")"/bzImage
             ;;
         server)
-            SRC_FOLDER=${HOME}/cbl/kernels/wsl2
+            SRC_FOLDER=${HOME}/cbl/build/wsl2
             OUT_FOLDER=out/x86_64
             KERNEL_IMAGE=arch/x86/boot/bzImage
             scp nathan@"${SERVER_IP:?}":"${SRC_FOLDER}"/${OUT_FOLDER}/${KERNEL_IMAGE} "${KERNEL}"

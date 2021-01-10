@@ -24,19 +24,41 @@ function global_gitignore() { (
 # Grab linux, linux-next, and linux-stable for CBL
 # https://www.kernel.org/cloning-linux-from-a-bundle.html
 function cbl_linux_repos() { (
-    : "${CBL_K:=${CBL:-${HOME}/cbl}/kernels}" "${CBL_M:=${CBL:-${HOME}/cbl}/mirrors}" "${SRC_FOLDER:=${HOME}/src}"
+    : "${CBL_B:=${CBL:-${HOME}/cbl}/build}" "${CBL_M:=${CBL:-${HOME}/cbl}/mirrors}" "${CBL_S:=${CBL:-${HOME}/cbl}/src}"
 
     while ((${#})); do
         case ${1} in
-            linux) PAIRS=("torvalds/linux.git:linux" "torvalds/linux.git:${CBL_K}/linux" "torvalds/linux.git:${CBL_M}/linux") ;;
-            linux-next) PAIRS=("next/linux-next.git:linux-next" "next/linux-next.git:${CBL_K}/linux-next" "next/linux-next.git:${CBL_K}/rpi") ;;
-            linux-stable) PAIRS=("stable/linux.git:linux-stable" "stable/linux.git:${CBL_K}/linux-stable-5.4" "stable/linux.git:${CBL_K}/linux-stable-5.10") ;;
+            linux)
+                PAIRS=(
+                    "torvalds/linux.git:${CBL_B}/clean/linux"
+                    "torvalds/linux.git:${CBL_B}/patched/linux"
+                    "torvalds/linux.git:${CBL_M}/linux"
+                    "torvalds/linux.git:${CBL_S}/linux"
+                )
+                ;;
+            linux-next)
+                PAIRS=(
+                    "next/linux-next.git:${CBL_B}/clean/linux-next"
+                    "next/linux-next.git:${CBL_B}/patched/linux-next"
+                    "next/linux-next.git:${CBL_B}/rpi"
+                    "next/linux-next.git:${CBL_S}/linux-next"
+                )
+                ;;
+            linux-stable)
+                PAIRS=(
+                    "stable/linux.git:${CBL_B}/clean/linux-stable-5.4"
+                    "stable/linux.git:${CBL_B}/clean/linux-stable-5.10"
+                    "stable/linux.git:${CBL_B}/patched/linux-stable-5.4"
+                    "stable/linux.git:${CBL_B}/patched/linux-stable-5.10"
+                    "stable/linux.git:${CBL_S}/linux-stable"
+                )
+                ;;
             *) return 1 ;;
         esac
         shift
     done
 
-    cd "${SRC_FOLDER}" || die "wtf"
+    cd "$(mktemp -d)" || die "wtf"
     for PAIR in "${PAIRS[@]}"; do
         FOLDER=${PAIR#*:}
         URL=${PAIR%:*}
@@ -59,15 +81,16 @@ function cbl_linux_repos() { (
                 git_remote_add -f --tags mainline https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git
                 git_remote_add -f sami https://github.com/samitolvanen/linux
                 git config rerere.enabled true
-                git checkout -b tip/clang-cfi
             else
                 git branch --set-upstream-to=origin/"${BRANCH}" "${BRANCH}"
+                git remote update
+                git pull
             fi
             [[ ${FOLDER} =~ mirrors ]] && git remote add github git@github.com:ClangBuiltLinux/linux.git
-            [[ ${FOLDER} = "${CBL_K}"/linux-stable ]] && git remote add stable-rc https://git.kernel.org/pub/scm/linux/kernel/git/stable/linux-stable-rc.git/
+            [[ ${FOLDER} =~ ${CBL_B}/patched/linux-stable ]] && git remote add stable-rc https://git.kernel.org/pub/scm/linux/kernel/git/stable/linux-stable-rc.git/
         )
     done
-    rm -rf 'clone.bundle-*'
+    rm -rf "${PWD}"
 ); }
 
 # Download Android CBL repos
@@ -93,7 +116,7 @@ function cbl_other_repos() { (
     source "${SCRIPTS_FOLDER:-${HOME}/github/scripts}"/common || exit ${?}
 
     cd "${CBL_O_R:=${CBL:-${HOME}/cbl}}"/github || die "wtf"
-    for REPO in boot-utils boot-utils:boot-utils-master continuous-integration:ci dockerimage tc-build; do
+    for REPO in boot-utils boot-utils:boot-utils-master continuous-integration:ci continuous-integration2:ci2 dockerimage tc-build; do
         FOLDER=${REPO#*:}
         REPO=${REPO%:*}
 
@@ -112,11 +135,11 @@ function cbl_other_repos() { (
     [[ -d llvm-kernel-testing ]] || git clone git@github.com:nathanchance/llvm-kernel-testing.git
     [[ -d tc-build ]] || git clone -b personal git@github.com:nathanchance/tc-build.git
 
-    cd "${CBL_O_R}"/kernels || die "wtf"
+    cd "${CBL_O_R}"/build || die "wtf"
     [[ -d pi-scripts ]] || git clone git@github.com:nathanchance/pi-scripts
     [[ -d wsl2 ]] || git clone git@github.com:nathanchance/WSL2-Linux-Kernel wsl2
 
-    cd "${CBL_O_R}"/kernels/wsl2 || die "wtf"
+    cd "${CBL_O_R}"/build/wsl2 || die "wtf"
     git_remote_add -f --tags mainline https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git
     git_remote_add -f --tags next https://git.kernel.org/pub/scm/linux/kernel/git/next/linux-next.git
     git_remote_add -f --tags microsoft https://github.com/microsoft/WSL2-Linux-Kernel

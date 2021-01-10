@@ -53,7 +53,7 @@ function bootstrap() { (
     # Setup folders that will be used
     mkdir -p "${ALS}" \
         "${ANDROID_TC_FOLDER}" \
-        "${CBL}"/{android,github,kernels,mirrors} \
+        "${CBL}"/{android,github,kernels/clean,kernels/patched,mirrors,src,worktrees} \
         "${GITHUB_FOLDER}" \
         "${HOME}"/usr/bin \
         "${KERNEL_FOLDER}"/sony \
@@ -494,6 +494,6 @@ function qualify_qemu() { (
     "${QEMU_SRC}"/configure || exit ${?}
     ninja || exit ${?}
 
-    DO=true KRNL_DIR=${KRNL_DIR:-${SRC_FOLDER}/linux-building} PATH=${BLD_DIR}:${PATH} lt
+    DO=true KRNL_DIR=${KRNL_DIR:-${CBL_BLD_C:-${HOME}/cbl/build/clean}/linux} PATH=${BLD_DIR}:${PATH} lt
 ); }
 # vi: filetype=zsh
