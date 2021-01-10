@@ -552,32 +552,37 @@ function build_stable_llvm() { (
     #[[ -x ${LLVM_12_RC}/bin/as ]] || "${TC_BLD}"/build-binutils.py --install-folder "${LLVM_12_RC}"
 ); }
 
-function test_stable_llvm_linux() { (
+function test_llvm_linux() { (
     # Build LLVM if necessary
     build_stable_llvm
 
     # Update all trees
-    LINUX=${HOME}/src/linux
+    LINUX=${HOME}/src/linux-building
     [[ -d ${LINUX} ]] || git clone https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/ "${LINUX}"
-    cd "${LINUX}"
-    git ch master-qualify || git ch -b master-qualify origin/master
-    git pull
+    git -C "${LINUX}" pull --rebase
 
-    LINUX_STABLE=${HOME}/src/linux-stable
+    LINUX_STABLE=${HOME}/src/linux-stable-building
     [[ -d ${LINUX_STABLE} ]] || git clone https://git.kernel.org/pub/scm/linux/kernel/git/stable/linux.git/ "${LINUX_STABLE}"
     cd "${LINUX_STABLE}"
     for SBR in 5.10 5.4; do
-        git ch linux-${SBR}.y-qualify || git ch -b linux-${SBR}.y-qualify origin/linux-${SBR}.y
-        git pull
+        git ch linux-${SBR}.y
+        git pull --rebase
     done
 
     # Build the trees
-    for LLVM_TC in ${CBL_TC}/llvm-{10.0.1,11.0.1}; do
+    for LLVM_TC in ${CBL_TC}/llvm-{10.0.1,11.0.1,binutils}; do
         KRNL_DIR=${LINUX} TC_DIR=${LLVM_TC} lt
         for SBR in 5.10 5.4; do
-            git ch linux-${SBR}.y-qualify
+            git ch linux-${SBR}.y
             KRNL_DIR=${LINUX_STABLE} TC_DIR=${LLVM_TC} lt
         done
     done
+); }
+
+function cbl_sunday() { (
+    qualify_qemu || exit ${?}
+    updllvm
+    rld
+    test_llvm_linux
 ); }
 # vi: filetype=zsh
