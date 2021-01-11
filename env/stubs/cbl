@@ -506,6 +506,7 @@ function rbpi() { (
     PATCHES_FOLDER=${GITHUB_FOLDER}/patches/rpi-next
     FIXES=${PATCHES_FOLDER}/fixes.series
     [[ -f ${FIXES} ]] && { git am "${FIXES}" || exit ${?}; }
+    b4 am -o - -l https://lore.kernel.org/linux-spi/20210108181457.30291-1-p.yadav@ti.com/ | sed 's/500UL/500U/g' | git ams || exit ${?}
     ../pi-scripts/build.sh || exit ${?}
     if ! git pll --no-edit mainline master; then
         rg "<<<<<<< HEAD" && exit ${?}
