@@ -558,7 +558,7 @@ function build_stable_llvm() { (
     #[[ -x ${LLVM_12_RC}/bin/as ]] || "${TC_BLD}"/build-binutils.py --install-folder "${LLVM_12_RC}"
 ); }
 
-function test_llvm_linux() { (
+function test_llvm_mainline_linux() { (
     # Build LLVM if necessary
     build_stable_llvm
 
@@ -566,6 +566,16 @@ function test_llvm_linux() { (
     LINUX=${CBL_BLD_C}/linux
     [[ -d ${LINUX} ]] || git clone https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/ "${LINUX}"
     git -C "${LINUX}" pull --rebase
+
+    # Build the tree
+    for LLVM_TC in ${CBL_TC}/llvm-{10.0.1,11.0.1,binutils}; do
+        KRNL_DIR=${LINUX} TC_DIR=${LLVM_TC} lt
+    done
+); }
+
+function test_llvm_stable_linux { (
+    # Build LLVM if necessary
+    build_stable_llvm
 
     for SBR in 5.10 5.4; do
         LINUX_STABLE=${CBL_BLD_C}/linux-stable-${SBR}
@@ -577,10 +587,15 @@ function test_llvm_linux() { (
 
     # Build the trees
     for LLVM_TC in ${CBL_TC}/llvm-{10.0.1,11.0.1,binutils}; do
-        for KRNL_DIR in ${CBL_BLD_C}/{linux,linux-stable-{5.10,5.4}}; do
+        for KRNL_DIR in ${CBL_BLD_C}/linux-stable-{5.10,5.4}; do
             KRNL_DIR=${KRNL_DIR} TC_DIR=${LLVM_TC} lt
         done
     done
+); }
+
+function test_llvm_linux() { (
+    test_llvm_mainline_linux
+    test_llvm_stable_linux
 ); }
 
 function cbl_sunday() { (
