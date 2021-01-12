@@ -134,6 +134,7 @@ function bootstrap() { (
     elif [[ ${DISTRO} = "ubuntu" ]]; then
         PACKAGES=(
             abootimg
+            binutils-dev
             bison
             build-essential
             ca-certificates

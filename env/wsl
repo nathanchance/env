@@ -67,9 +67,10 @@ function bootstrap() { (
 
     # Install packages from Ubuntu repos
     sudo apt install -y \
-        build-essential \
         bc \
+        binutils-dev \
         bison \
+        build-essential \
         clang \
         cmake \
         cowsay \
