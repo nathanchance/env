@@ -506,7 +506,6 @@ function rbpi() { (
     PATCHES_FOLDER=${GITHUB_FOLDER}/patches/rpi-next
     FIXES=${PATCHES_FOLDER}/fixes.series
     [[ -f ${FIXES} ]] && { git am "${FIXES}" || exit ${?}; }
-    b4 am -o - -l https://lore.kernel.org/linux-spi/20210108181457.30291-1-p.yadav@ti.com/ | sed 's/500UL/500U/g' | git ams || exit ${?}
     ../pi-scripts/build.sh || exit ${?}
     if ! git pll --no-edit mainline master; then
         rg "<<<<<<< HEAD" && exit ${?}
@@ -514,6 +513,14 @@ function rbpi() { (
         git aa
         git c || exit ${?}
     fi
+    # Revert https://git.kernel.org/pub/scm/linux/kernel/git/kees/linux.git/log/?h=kspp/lto/v5.11-rc2
+    # to avoid unnecessary conflicts.
+    git diff v5.11-rc2..1354b8946c46fa1e460943594286441fe2bbb457 | git ap -R || exit ${?}
+    git aa
+    git ac -m "Revert kspp/lto/v5.11-rc2
+
+We are merging Sami's clang-cfi branch, which is based on this work. Do
+this to avoid conflicts."
     if ! git pll --no-edit sami clang-cfi; then
         rg "<<<<<<< HEAD" && exit ${?}
         ../pi-scripts/build.sh || exit ${?}
