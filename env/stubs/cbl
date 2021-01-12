@@ -187,15 +187,15 @@ function lt() { (
         cat "${LOG_DIR}"/results.log
         echo
         echo "Full warning report:"
-        echo
-        # arch/powerpc/boot/main.c: A warning we do not really care about
-        # being placed in: Orphan section placement
+        # arch/powerpc/boot/inffast.c: A warning we do not really care about (https://github.com/ClangBuiltLinux/linux/issues/664)
         # DWARF2 only supports one section per compilation unit: Irrelevant for now
         # objtool: Too many to deal with for now
+        # override: CPU_BIG_ENDIAN changes choice state: Warnings from merge_config that are harmless in this context
         # results.log: Any warnings from this will be in the other logs
-        # same module names found: Kbuild warnings that are not a result of clang
-        BLOCKLIST="arch/powerpc/boot/inffast.c|being placed in|DWARF2 only supports one section per compilation unit|objtool:|results.log|same module names found|include/linux/bcache.h:35|Section mismatch in reference from the function r4k_cache_init|Section mismatch in reference from the function mips_sc_init"
-        rg "error:|FATAL:|undefined|warning:|WARNING:" "${LOG_DIR}"/*.log |& rg -v -- "${BLOCKLIST}" |& sed -e "s;${LOG_DIR}/;;g" -e "s;${KRNL_DIR}/;;g" |& sort |& uniq
+        # include/linux/bcache.h:3: https://github.com/ClangBuiltLinux/linux/issues/1065
+        BLOCKLIST="arch/powerpc/boot/inffast.c|DWARF2 only supports one section per compilation unit|objtool:|override: CPU_BIG_ENDIAN changes choice state|results.log|include/linux/bcache.h:3|"
+        SEARCHLIST="error:|FATAL:|undefined|Unsupported relocation type:|warning:|WARNING:"
+        rg "${SEARCHLIST}" "${LOG_DIR}"/*.log |& rg -v -- "${BLOCKLIST}" |& sed -e "s;${LOG_DIR}/;;g" -e "s;${KRNL_DIR}/;;g" |& sort |& uniq
         MFC=$(git -C "${KRNL_DIR}" mfc)
         if [[ -n ${MFC} ]]; then
             echo
