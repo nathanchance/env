@@ -195,7 +195,7 @@ function lt() { (
         # results.log: Any warnings from this will be in the other logs
         # same module names found: Kbuild warnings that are not a result of clang
         BLOCKLIST="arch/powerpc/boot/inffast.c|being placed in|DWARF2 only supports one section per compilation unit|objtool:|results.log|same module names found|include/linux/bcache.h:35|Section mismatch in reference from the function r4k_cache_init|Section mismatch in reference from the function mips_sc_init"
-        rg "error:|FATAL:|undefined|warning:|WARNING:" "${LOG_DIR}"/*.log |& rg -v -- "${BLOCKLIST}" |& sed 's/.*.log://g' |& cut -d / -f 7- |& sort |& uniq
+        rg "error:|FATAL:|undefined|warning:|WARNING:" "${LOG_DIR}"/*.log |& rg -v -- "${BLOCKLIST}" |& sed -e "s;${LOG_DIR}/;;g" -e "s;${KRNL_DIR}/;;g" |& sort |& uniq
         MFC=$(git -C "${KRNL_DIR}" mfc)
         if [[ -n ${MFC} ]]; then
             echo
