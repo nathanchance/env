@@ -112,6 +112,8 @@ function bootstrap() { (
             perl-authen-sasl \
             perl-mime-tools \
             perl-net-smtp-ssl \
+            php \
+            php-curl \
             podman \
             python \
             python-pip \
