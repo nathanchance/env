@@ -165,7 +165,20 @@ function llvm_log() {
 
 # linux testing
 function lt() { (
-    : "${KRNL_DIR:=${CBL_BLD_P}/${TREE:=linux-next}}"
+    : "${KRNL_DIR:=${CBL_BLD_P}/${TREE:=linux-next}}" "${TC_DIR:=${CBL_LLVM_BNTL%/*}}"
+
+    # Make sure that clang can be found in ${TC_DIR}/bin/clang first, otherwise the wrong
+    # value was probably passed
+    [[ -d ${TC_DIR}/bin ]] || die "${TC_DIR} value is wrong, no bin folder"
+    for BIN in "${TC_DIR}"/bin/*; do
+        case ${BIN##*/} in
+            clang) CLANG_FOUND=true ;;
+            as | *-linux-gnu-as) AS_FOUND=true ;;
+        esac
+    done
+    ${AS_FOUND:=false} || die "GNU as could not be found in ${TC_DIR}/bin"
+    ${CLANG_FOUND:=false} || die "clang could not be found in ${TC_DIR}/bin"
+
     LOG_DIR=${CBL}/build-logs/${KRNL_DIR##*/}-$(date +%Y%m%d-%H%M)
     mkdir -p "${LOG_DIR}"
 
@@ -178,7 +191,7 @@ function lt() { (
         --linux-src "${KRNL_DIR}" \
         --log-dir "${LOG_DIR}" \
         --skip-tc-build \
-        --tc-prefix "${TC_DIR:=${CBL_LLVM_BNTL%/*}}" \
+        --tc-prefix "${TC_DIR}" \
         "${TC_BLD_ARGS[@]}" || die "llvm-kernel-testing failed (${?})"
 
     {
