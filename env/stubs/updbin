@@ -641,6 +641,23 @@ function iandroidtools() { (
     rm -rf "${MKDTIMG_FOLDER}"
 ); }
 
+# Install arcanist
+function iarc() { (
+    header "Installing arcanist"
+
+    ARC_FOLDER=${SRC_FOLDER:-${HOME}/src}/arcanist
+    mkdir -p "${ARC_FOLDER}"
+    for REPO in arcanist libphutil; do
+        REPO_FOLDER=${ARC_FOLDER}/${REPO}
+        [[ -d ${REPO_FOLDER} ]] || git clone https://github.com/phacility/${REPO}.git "${REPO_FOLDER}"
+        git -C "${REPO_FOLDER}" pull --rebase --quiet
+    done
+
+    ARC_BIN=${PREFIX:-${HOME}/usr}/bin
+    rm -rf "${ARC_BIN}"/arc
+    ln -s "${ARC_FOLDER}"/arcanist/bin/arc "${ARC_BIN}"/arc
+); }
+
 # Install hugo
 function ihugo() { (
     header "Installing hugo"
