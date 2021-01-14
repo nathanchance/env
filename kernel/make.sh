@@ -14,7 +14,11 @@ function parse_parameters() {
                 ;;
 
             *=*)
-                [[ ${1} =~ CC= ]] || MAKE_ARGS+=("${1}")
+                if [[ ${1} =~ CC= ]]; then
+                    CC_WAS_IN_ARGS=true
+                else
+                    MAKE_ARGS+=("${1}")
+                fi
                 export "${1?}"
                 ;;
 
@@ -84,7 +88,7 @@ function invoke_make() {
         CCACHE="ccache "
     else
         unset CCACHE
-        [[ -n ${CC} ]] && MAKE_ARGS+=("CC=${CC}")
+        [[ -n ${CC} ]] && ${CC_WAS_IN_ARGS:=false} && MAKE_ARGS+=("CC=${CC}")
     fi
 
     set -x
