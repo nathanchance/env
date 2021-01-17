@@ -313,7 +313,7 @@ function bldtcs() { (
 function bldallk() {
     local TREE
 
-    for TREE in linux{,-next,-stable-5.{10,4}}; do TREE=${TREE} lt ""; done
+    for TREE in linux{-next,,-stable-5.{10,4}}; do TREE=${TREE} lt ""; done
     "${CBL_BLD}"/pi-scripts/build.sh -k "${CBL_BLD}"/rpi
     "${CBL_BLD}"/wsl2/bin/build.sh
 }
