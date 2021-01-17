@@ -206,7 +206,7 @@ function lt() { (
         # override: CPU_BIG_ENDIAN changes choice state: Warnings from merge_config that are harmless in this context
         # results.log: Any warnings from this will be in the other logs
         # include/linux/bcache.h:3: https://github.com/ClangBuiltLinux/linux/issues/1065
-        BLOCKLIST="arch/powerpc/boot/inffast.c|DWARF2 only supports one section per compilation unit|objtool:|override: CPU_BIG_ENDIAN changes choice state|results.log|include/linux/bcache.h:3|"
+        BLOCKLIST="arch/powerpc/boot/inffast.c|DWARF3 only supports one section per compilation unit|objtool:|override: CPU_BIG_ENDIAN changes choice state|results.log|union jset::\(anonymous at ./usr/include/linux/bcache.h:"
         SEARCHLIST="error:|FATAL:|undefined|Unsupported relocation type:|warning:|WARNING:"
         rg "${SEARCHLIST}" "${LOG_DIR}"/*.log |& rg -v -- "${BLOCKLIST}" |& sed -e "s;${LOG_DIR}/;;g" -e "s;${KRNL_DIR}/;;g" |& sort |& uniq
         MFC=$(git -C "${KRNL_DIR}" mfc)
