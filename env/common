@@ -112,6 +112,11 @@ function shell_setup() {
     "${LOCATION}"_setup
     GPG_TTY=$(tty)
     export GPG_TTY
+    if [[ -f ${HOME}/.ssh/id_ed25519 && -z ${SSH_AUTH_SOCK} ]]; then
+        # shellcheck disable=SC2046
+        eval $(ssh-agent)
+        ssh-add "${HOME}"/.ssh/id_ed25519
+    fi
     tmxa
 }
 
