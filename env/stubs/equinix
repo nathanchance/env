@@ -145,7 +145,10 @@ function partition_and_create_user() { (
         chown -R "${USER}:${USER}" /home/"${USER}"/.ssh
         ZSHRC=/home/${USER}/.zshrc
         if ! grep -q shell_setup "${ZSHRC}"; then
-            echo "[[ -z \${TMUX} ]] && tmux new-session -ADs main" >"${ZSHRC}"
+            cat <<'EOF' >"${ZSHRC}"
+[[ -z ${SSH_AUTH_SOCK} ]] && eval $(ssh-agent)
+[[ -z ${TMUX} ]] && tmux new-session -ADs main
+EOF
             chown -R "${USER}:${USER}" "${ZSHRC}"
         fi
     fi

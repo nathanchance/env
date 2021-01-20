@@ -252,6 +252,9 @@ function bootstrap() { (
         if ${INSTALL_SSH_KEY}; then
             mv "${KEYS}"/id_ed25519{,.pub} "${HOME}"/.ssh
             chmod 600 "${HOME}"/.ssh/id_ed25519
+            # shellcheck disable=SC2046
+            [[ -z ${SSH_AUTH_SOCK} ]] && eval $(ssh-agent)
+            ssh-add "${HOME}"/.ssh/id_ed25519
         fi
         if ${INSTALL_GPG_KEY}; then
             gpg --pinentry-mode loopback --import "${KEYS}"/{public*,private*}.asc || die "Error installing gpg keys"
