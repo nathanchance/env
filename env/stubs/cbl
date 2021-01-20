@@ -531,7 +531,7 @@ function rbpi() { (
     fi
     # Revert https://git.kernel.org/pub/scm/linux/kernel/git/kees/linux.git/log/?h=kspp/lto/sami/v5.11-rc2-take2
     # to avoid unnecessary conflicts.
-    git diff v5.11-rc2..112b6a8e038d793d016e330f53acb9383ac504b3 | git ap -R || exit ${?}
+    git diff v5.11-rc2..112b6a8e038d793d016e330f53acb9383ac504b3 | git ap --exclude include/asm-generic/vmlinux.lds.h -R || exit ${?}
     git aa
     git ac -m "Revert kspp/lto/sami/v5.11-rc2-take2
 
