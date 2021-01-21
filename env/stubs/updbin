@@ -527,55 +527,6 @@ function bisharkdp() { (
     rm -rf "${TMP_FOLDER}"
 ); }
 
-# Build/install QEMU
-function bqemu() { (
-    header "Building QEMU"
-    QEMU_FOLDER=${SRC_FOLDER:-${HOME}/src}/qemu
-    if [[ ! -d ${QEMU_FOLDER} ]]; then
-        mkdir -p "${QEMU_FOLDER%/*}"
-        git clone --recursive "${JOBS_FLAG:--j"$(nproc)"}" https://git.qemu.org/git/qemu.git "${QEMU_FOLDER}"
-    fi
-    cd "${QEMU_FOLDER}" || die "Couldn't move into ${QEMU_FOLDER}"
-    git fetch origin
-    [[ -z ${QEMU_VERSION} ]] && QEMU_VERSION=$(git tag -l --sort=-taggerdate | grep -v rc | head -n1)
-    git clean -dfqx
-    git submodule foreach --recursive git clean -dfqx
-    git reset --hard
-    git submodule foreach --recursive git reset --hard
-    git submodule deinit slirp 2>/dev/null
-    git checkout v"${QEMU_VERSION//v/}"
-    (git merge-base --is-ancestor fc1120a7f5f2d4b601003205c598077d3eb11ad2 HEAD &&
-        ! git merge-base --is-ancestor ece628fcf69cbbd4b3efb6fbd203af07609467a2 HEAD) &&
-        git format-patch -1 --stdout ece628fcf69cbbd4b3efb6fbd203af07609467a2 | git apply -3v
-
-    ./configure \
-        --disable-docs \
-        --disable-gcrypt \
-        --disable-gnutls \
-        --disable-gtk \
-        --disable-libssh \
-        --disable-nettle \
-        --disable-opengl \
-        --disable-sdl \
-        --disable-strip \
-        --disable-user \
-        --disable-virglrenderer \
-        --disable-vnc-png \
-        --disable-vte \
-        --disable-xen \
-        --disable-xen-pci-passthrough \
-        --extra-cflags=-g \
-        --prefix="${QEMU_PREFIX:=${PREFIX:-${HOME}/usr}}"
-
-    make "${JOBS_FLAG:--j"$(nproc)"}" install
-
-    move_to_front_of_path "${QEMU_PREFIX}"/bin
-    for QEMU_SUFFIX in aarch64 arm mipsel ppc ppc64 riscv64 s390x x86_64; do
-        command -v qemu-system-${QEMU_SUFFIX}
-        qemu-system-${QEMU_SUFFIX} --version
-    done
-); }
-
 # Build/update tmux
 function btmux() { (
     header "Building tmux"

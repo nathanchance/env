@@ -19,9 +19,13 @@ CBL_BNTL=${CBL_TC}/binutils/bin
 CBL_LLVM_BNTL=${CBL_TC}/llvm-binutils/bin
 CBL_SRC=${CBL}/src
 CBL_WRKTR=${CBL}/worktrees
+CBL_QEMU=${CBL}/qemu
+CBL_QEMU_BIN=${CBL_QEMU}/bin
+CBL_QEMU_INSTALL=${CBL_QEMU}/install
+CBL_QEMU_SRC=${CBL_QEMU}/src
 TCBLD=${CBL}/tc-build
 CBL_CCACHE=${CBL}/.ccache
-export CBL_ANDROID CBL_BLD CBL_BLD_C CBL_BLD_P CBL_CTTLFSH CBL_GIT CBL_KC CBL_KC_SRC CBL_TC CBL_LLVM CBL_BNTL CBL_LLVM_BNTL CBL_SRC CBL_WRKTR TCBLD CBL_CCACHE
+export CBL_ANDROID CBL_BLD CBL_BLD_C CBL_BLD_P CBL_CTTLFSH CBL_GIT CBL_KC CBL_KC_SRC CBL_TC CBL_LLVM CBL_BNTL CBL_LLVM_BNTL CBL_SRC CBL_WRKTR CBL_QEMU CBL_QEMU_BIN CBL_QEMU_INSTALL CBL_QEMU_SRC TCBLD CBL_CCACHE
 
 # Patch check function
 function pch() { (
@@ -621,8 +625,8 @@ function test_llvm_stable_linux { (
 
     # Build the trees
     for LLVM_TC in ${CBL_TC}/llvm-{10.0.1,11.1.0-rc1,binutils}; do
-        for KRNL_DIR in ${CBL_BLD_C}/linux-stable-{5.10,5.4}; do
-            KRNL_DIR=${KRNL_DIR} TC_DIR=${LLVM_TC} lt
+        for TEST_KRNL_DIR in ${CBL_BLD_C}/linux-stable-{5.10,5.4}; do
+            KRNL_DIR=${TEST_KRNL_DIR} TC_DIR=${LLVM_TC} lt
         done
     done
 ); }
@@ -633,9 +637,76 @@ function test_llvm_linux() { (
 ); }
 
 function cbl_sunday() { (
-    qualify_qemu || exit ${?}
+    upd_qemu || exit ${?}
     updllvm
     rld
     test_llvm_linux
+); }
+
+function upd_qemu() { (
+    cbl_qemu_build -u
+    DO=true KRNL_DIR=${CBL_BLD_P:-${HOME}/cbl/build/patched}/linux PATH=${CBL_QEMU_BIN}:${PATH} lt
+); }
+
+function cbl_qemu_build() { (
+    while ((${#})); do
+        case ${1} in
+            -u | --update) UPDATE=true ;;
+        esac
+    done
+
+    QEMU_501=${CBL_QEMU_SRC}/qemu-5.0.1
+    QEMU_501_BLD=${QEMU_501}/build
+
+    if [[ ! -x ${CBL_QEMU_INSTALL}/qemu-5.0.1/bin/qemu-system-ppc ]]; then
+        rm -rf "${QEMU_501_BLD}"
+        mkdir -p "${QEMU_501_BLD}"
+        cd "${QEMU_501_BLD}" || exit ${?}
+        "${QEMU_501}"/configure \
+            --prefix="${CBL_QEMU_INSTALL}"/qemu-5.0.1 \
+            --target-list=ppc-softmmu || exit ${?}
+        make -skj"$(nproc)" install || exit ${?}
+    fi
+
+    QEMU_TOT=${CBL_QEMU_SRC}/qemu
+    QEMU_TOT_BLD=${QEMU_TOT}/build
+
+    cd "${QEMU_TOT}" || exit ${?}
+
+    # Cleanup
+    git clean -dfqx
+    git submodule foreach --recursive git clean -dfqx
+
+    # Update QEMU if requested
+    if ${UPDATE:=false}; then
+        git reset --hard
+        git submodule foreach git reset --hard
+        git pull --rebase || exit ${?}
+        git submodule update --recursive || exit ${?}
+    fi
+    grep -q "0xeb7e, ALGSI,   SIY,   GIE, la1, i2, new, 0, asiu64, addu64, MO_TEQ" target/s390x/insn-data.def ||
+        { b4 am -o - -l https://lore.kernel.org/qemu-devel/20210108132049.8501-2-david@redhat.com/ | git ap || exit ${?}; }
+
+    # Build qemu
+    [[ -z ${QEMU_PREFIX} ]] && QEMU_PREFIX=${CBL_QEMU_INSTALL}/qemu-$(git sh -s --format=%H)
+    if [[ ! -x ${QEMU_PREFIX}/bin/qemu-system-x86_64 ]]; then
+        rm -rf "${QEMU_TOT_BLD}"
+        mkdir -p "${QEMU_TOT_BLD}"
+        cd "${QEMU_TOT_BLD}" || exit ${?}
+        "${QEMU_TOT}"/configure --prefix="${QEMU_PREFIX}" || exit ${?}
+        if [[ -f build.ninja ]]; then
+            ninja install || exit ${?}
+        else
+            make -skj"$(nproc)" install || exit ${?}
+        fi
+    fi
+
+    # Symlink latest QEMU into bin folder
+    rm -rf "${CBL_QEMU_BIN}"
+    mkdir -p "${CBL_QEMU_BIN}"
+    ln -s "${CBL_QEMU_INSTALL}"/qemu-5.0.1/bin/qemu-system-ppc "${CBL_QEMU_BIN}"
+    for ARCH in arm aarch64 ppc64 riscv64 s390x i386 x86_64; do
+        ln -s "${QEMU_PREFIX}"/bin/qemu-system-${ARCH} "${CBL_QEMU_BIN}"
+    done
 ); }
 # vi: filetype=zsh

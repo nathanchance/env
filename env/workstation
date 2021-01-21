@@ -478,31 +478,4 @@ function updllvm() { (
 
     qualify_llvm_uprev && updpgollvm
 ); }
-
-# Test upstream QEMU
-function qualify_qemu() { (
-    set -x
-
-    QEMU_SRC=${SRC_FOLDER:-${HOME}/src}/qemu-master
-    [[ -d ${QEMU_SRC} ]] || git clone https://git.qemu.org/git/qemu.git "${QEMU_SRC}"
-    cd "${QEMU_SRC}" || exit ${?}
-    git rh origin/"$(git cb)"
-    git cl -q
-    git submodule foreach git rh
-    git submodule foreach git cl -q
-    git pull --rebase || exit ${?}
-    git submodule update --init --recursive
-    if ! grep -q "0xeb7e, ALGSI,   SIY,   GIE, la1, i2, new, 0, asiu64, addu64, MO_TEQ" target/s390x/insn-data.def; then
-        b4 am -o - -l https://lore.kernel.org/qemu-devel/20210108132049.8501-2-david@redhat.com/ | git ap || exit ${?}
-    fi
-    BLD_DIR=${QEMU_SRC}/build
-    rm -rf "${BLD_DIR}"
-    mkdir -p "${BLD_DIR}"
-    cd "${BLD_DIR}" || exit ${?}
-
-    "${QEMU_SRC}"/configure || exit ${?}
-    ninja || exit ${?}
-
-    DO=true KRNL_DIR=${KRNL_DIR:-${CBL_BLD_C:-${HOME}/cbl/build/clean}/linux} PATH=${BLD_DIR}:${PATH} lt
-); }
 # vi: filetype=zsh

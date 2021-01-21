@@ -23,14 +23,14 @@ function parse_parameters() {
 
 # Update/download boot-utils
 function dwnld_upd_boot_utils() {
-    BOOT_UTILS=${ROOT}/boot-utils
+    [[ -z ${BOOT_UTILS} ]] && BOOT_UTILS=${ROOT}/boot-utils
     [[ -d ${BOOT_UTILS} ]] || git clone https://github.com/ClangBuiltLinux/boot-utils "${BOOT_UTILS}"
-    git -C "${BOOT_UTILS}" pull || exit ${?}
+    ${UPDATE:=true} && { git -C "${BOOT_UTILS}" pull || exit ${?}; }
 }
 
 # Run boot-qemu.sh
 function invoke_boot_qemu() {
-    "${BOOT_UTILS}"/boot-qemu.sh "${BOOT_QEMU_ARGS[@]}"
+    PATH=${PO:+${PO}:}${HOME}/cbl/qemu/bin:${PATH} "${BOOT_UTILS}"/boot-qemu.sh "${BOOT_QEMU_ARGS[@]}"
 }
 
 parse_parameters "${@}"
