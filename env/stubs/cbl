@@ -708,7 +708,7 @@ function cbl_qemu_build() { (
     rm -rf "${CBL_QEMU_BIN}"
     mkdir -p "${CBL_QEMU_BIN}"
     ln -s "${CBL_QEMU_INSTALL}"/qemu-5.0.1/bin/qemu-system-ppc "${CBL_QEMU_BIN}"
-    for ARCH in arm aarch64 ppc64 riscv64 s390x i386 x86_64; do
+    for ARCH in arm aarch64 mips mipsel ppc64 riscv64 s390x i386 x86_64; do
         ln -s "${QEMU_PREFIX}"/bin/qemu-system-${ARCH} "${CBL_QEMU_BIN}"
     done
 ); }
