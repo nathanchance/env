@@ -292,10 +292,12 @@ function bldtcs() { (
     cd "${TC_BLD_LLVM_PRJCT}"
     git rh || die "Error resetting llvm-project"
     git pull --rebase || die "Updating llvm-project failed (${?})"
-    # arc patch --nobranch --nocommit D94833 || die "Error applying D94833"
-    # git stash || die "Error running git stash"
     arc patch --nobranch --nocommit D94996 || die "Error applying D94996"
-    # git stash pop || die "Error running git stash pop"
+    git stash || die "Error running git stash"
+    arc patch --nobranch --nocommit D95219 || die "Error applying D95219"
+    git stash pop || die "Error running git stash pop"
+    git aa
+    curl -LSs 'https://reviews.llvm.org/D94912?download=true' | git ap -p0 || die "Error applying D94912"
     BLDLLVM_INSTALL_FOLDER=${CBL_TC}/llvm-${DATE_TIME}-$(git -C "${TC_BLD_LLVM_PRJCT}" sh -s --format=%H origin/master)
     bldllvm \
         --assertions \
