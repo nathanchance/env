@@ -686,6 +686,16 @@ function ishfmt() { (
     chmod +x "${BIN_FOLDER}"/shfmt
 ); }
 
+function ituxmake() { (
+    TUXMAKE_SRC=${SRC_FOLDER:-${HOME}/src}/tuxmake
+    mkdir -p "${TUXMAKE_SRC%/*}"
+
+    [[ -d ${TUXMAKE_SRC} ]] || git clone https://gitlab.com/Linaro/tuxmake.git "${TUXMAKE_SRC}"
+    git -C "${TUXMAKE_SRC}" pull --rebase
+
+    ln -sf "${TUXMAKE_SRC}"/run "${PREFIX:-${HOME}/usr}"/bin/tuxmake
+); }
+
 function irust() { (
     curl https://sh.rustup.rs -sSf | bash -s -- -y --no-modify-path
 ); }

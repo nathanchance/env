@@ -359,6 +359,7 @@ function rbld_usr() { (
             iandroidtools || die "Error installing Android tools"
             iarc || die "Error installing arcanist"
             ib4 || die "Error installing b4"
+            ituxmake || die "Error installing tuxmake"
             if [[ -d ${LLVM_TC_FOLDER} ]]; then
                 # This will never not be alphanumeric and find is insanely convoluted
                 # shellcheck disable=SC2012
