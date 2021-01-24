@@ -658,6 +658,7 @@ function cbl_qemu_build() { (
         case ${1} in
             -u | --update) UPDATE=true ;;
         esac
+        shift
     done
 
     QEMU_501=${CBL_QEMU_SRC}/qemu-5.0.1
