@@ -690,7 +690,7 @@ function cbl_qemu_build() { (
         git submodule update --recursive || exit ${?}
     fi
     grep -q "0xeb7e, ALGSI,   SIY,   GIE, la1, i2, new, 0, asiu64, addu64, MO_TEQ" target/s390x/insn-data.def ||
-        { b4 am -o - -l https://lore.kernel.org/qemu-devel/20210108132049.8501-2-david@redhat.com/ | git ap || exit ${?}; }
+        { b4 am -o - https://lore.kernel.org/qemu-devel/20210111163845.18148-1-david@redhat.com/ | git ap || exit ${?}; }
 
     # Build qemu
     [[ -z ${QEMU_PREFIX} ]] && QEMU_PREFIX=${CBL_QEMU_INSTALL}/qemu-$(git sh -s --format=%H)
