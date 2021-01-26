@@ -257,8 +257,9 @@ function bootstrap() { (
             ssh-add "${HOME}"/.ssh/id_ed25519
         fi
         if ${INSTALL_GPG_KEY}; then
-            gpg --pinentry-mode loopback --import "${KEYS}"/{public*,private*}.asc || die "Error installing gpg keys"
-            gpg --import-ownertrust "${KEYS}"/ownertrust*.asc || die "Error installing gpg ownertrust"
+            gpg --pinentry-mode loopback --import "${KEYS}"/signing/private.asc || die "Error installing gpg keys"
+            gpg --import "${KEYS}"/main/public.asc || die "Error installing gpg keys"
+            gpg --import-ownertrust "${KEYS}"/main/ownertrust*.asc || die "Error installing gpg ownertrust"
             printf 'default-cache-ttl 604800\nmax-cache-ttl 2419200\n' | tee -a "${HOME}"/.gnupg/gpg-agent.conf
             gpg-connect-agent reloadagent /bye
         fi
