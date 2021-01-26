@@ -318,11 +318,11 @@ function rbwk() { (
         git aa
         git c || exit ${?}
     fi
-    # Revert https://git.kernel.org/pub/scm/linux/kernel/git/kees/linux.git/log/?h=kspp/lto/v5.11-rc2
+    # Revert https://git.kernel.org/pub/scm/linux/kernel/git/kees/linux.git/log/?h=kspp/lto/sami/v5.11-rc2-take2
     # to avoid unnecessary conflicts.
-    git diff v5.11-rc2..1354b8946c46fa1e460943594286441fe2bbb457 | git ap -R || exit ${?}
+    git diff v5.11-rc2..112b6a8e038d793d016e330f53acb9383ac504b3 | git ap --exclude include/asm-generic/vmlinux.lds.h -R || exit ${?}
     git aa
-    git ac -m "Revert kspp/lto/v5.11-rc2
+    git ac -m "Revert kspp/lto/sami/v5.11-rc2-take2
 
 We are merging Sami's clang-cfi branch, which is based on this work. Do
 this to avoid conflicts."
