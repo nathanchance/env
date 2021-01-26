@@ -98,6 +98,8 @@ function git_aliases() { (
     # https://lore.kernel.org/lkml/20190624144924.GE29120@arrakis.emea.arm.com/
     # shellcheck disable=SC2016
     git config --global alias.send-rmk-email '!git send-email --add-header=\"KernelVersion: $(git describe --abbrev=0)\" --no-thread --suppress-cc=all --to="patches@arm.linux.org.uk"'
+    git config --global alias.sha 'show -s --format=%H'
+    git config --global alias.stbl 'show -s --format="commit %H upstream."'
     git config --global alias.rmsu 'remote set-url'
     git config --global alias.rmv 'remote -v'
     git config --global alias.rs 'reset --soft'
