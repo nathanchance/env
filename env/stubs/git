@@ -7,7 +7,7 @@
 # Initial git config setup
 function git_setup() { (
     git config --global user.name "Nathan Chancellor"
-    git config --global user.email "natechancellor@gmail.com"
+    git config --global user.email "nathan@kernel.org"
 
     git config --global core.editor vim
 
@@ -20,9 +20,9 @@ function git_setup() { (
     git config --global pull.rebase false
 
     git config --global sendemail.smtpEncryption tls
-    git config --global sendemail.smtpServer smtp.gmail.com
+    git config --global sendemail.smtpServer mail.kernel.org
     git config --global sendemail.smtpServerPort 587
-    git config --global sendemail.smtpUser natechancellor@gmail.com
+    git config --global sendemail.smtpUser nathan
 
     if type -f gpg_key_usable &>/dev/null && gpg_key_usable; then
         git config --global commit.gpgsign true
