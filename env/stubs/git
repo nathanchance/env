@@ -26,7 +26,7 @@ function git_setup() { (
 
     if type -f gpg_key_usable &>/dev/null && gpg_key_usable; then
         git config --global commit.gpgsign true
-        git config --global user.signingkey 2437CB76E544CB6AB3D9DFD399739260CB6CB716
+        git config --global user.signingkey 1D6B269171C01A96
     fi
 
     git config --global url."https://github.com".insteadOf git://github.com

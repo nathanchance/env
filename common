@@ -168,7 +168,7 @@ function gpg_key_cached() {
 # Check if my GPG key can be used
 function gpg_key_usable() {
     command -v gpg &>/dev/null || return 1
-    gpg --list-secret-keys --keyid-format LONG | grep -q 2437CB76E544CB6AB3D9DFD399739260CB6CB716
+    gpg --list-secret-keys --keyid-format LONG | grep -q 1D6B269171C01A96
 }
 
 # Add something to the end of PATH if it isn't already there
