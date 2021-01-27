@@ -526,34 +526,7 @@ function rbpi() { (
     PATCHES_FOLDER=${GITHUB_FOLDER}/patches/rpi-next
     FIXES=${PATCHES_FOLDER}/fixes.series
     [[ -f ${FIXES} ]] && { git am "${FIXES}" || exit ${?}; }
-    cat <<'EOF' | git am
-From e6b00502328452b1b6a78bea068d67747b217aa6 Mon Sep 17 00:00:00 2001
-From: Nathan Chancellor <natechancellor@gmail.com>
-Date: Tue, 26 Jan 2021 10:15:02 -0700
-Subject: [PATCH] cfg80211: Apply Johannes's fix
-
-Link: https://lore.kernel.org/linux-wireless/9cf620a5ae47bce0cf6344db502589a8763fc861.camel@sipsolutions.net/
-Signed-off-by: Nathan Chancellor <natechancellor@gmail.com>
----
- net/wireless/core.c | 1 -
- 1 file changed, 1 deletion(-)
-
-diff --git a/net/wireless/core.c b/net/wireless/core.c
-index 5e8b523dc645..200cd9f5fd5f 100644
---- a/net/wireless/core.c
-+++ b/net/wireless/core.c
-@@ -1333,7 +1333,6 @@ int cfg80211_register_netdevice(struct net_device *dev)
- 	int ret;
- 
- 	ASSERT_RTNL();
--	lockdep_assert_held(&rdev->wiphy.mtx);
- 
- 	if (WARN_ON(!wdev))
- 		return -EINVAL;
--- 
-2.30.0
-
-EOF
+    git rv --no-edit 2c74435fb784cb57d6bc48836a07721c185b07ec || exit ${?}
     ../pi-scripts/build.sh || exit ${?}
     if ! git pll --no-edit mainline master; then
         rg "<<<<<<< HEAD" && exit ${?}
