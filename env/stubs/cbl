@@ -749,6 +749,8 @@ function cbl_qemu_build() { (
     fi
     grep -q "0xeb7e, ALGSI,   SIY,   GIE, la1, i2, new, 0, asiu64, addu64, MO_TEQ" target/s390x/insn-data.def ||
         { b4 am -o - https://lore.kernel.org/qemu-devel/20210111163845.18148-1-david@redhat.com/ | git ap || exit ${?}; }
+    grep -q "r &= ~CPUID_EXT2_LM" target/i386/cpu.c ||
+        { b4 am -o - -P 8 https://lore.kernel.org/qemu-devel/20210129111814.566629-9-pbonzini@redhat.com/ | git ap || exit ${?}; }
 
     # Build qemu
     [[ -z ${QEMU_PREFIX} ]] && QEMU_PREFIX=${CBL_QEMU_INSTALL}/qemu-$(git sh -s --format=%H)
@@ -768,8 +770,7 @@ function cbl_qemu_build() { (
     rm -rf "${CBL_QEMU_BIN}"
     mkdir -p "${CBL_QEMU_BIN}"
     ln -s "${CBL_QEMU_INSTALL}"/qemu-5.0.1/bin/qemu-system-ppc "${CBL_QEMU_BIN}"
-    ln -s "${CBL_QEMU_INSTALL}"/qemu-48202c712412c803ddb56365c7bca322aa4e7506/bin/qemu-system-i386 "${CBL_QEMU_BIN}"
-    for ARCH in arm aarch64 mips mipsel ppc64 riscv64 s390x x86_64; do
+    for ARCH in arm aarch64 i386 mips mipsel ppc64 riscv64 s390x x86_64; do
         ln -s "${QEMU_PREFIX}"/bin/qemu-system-${ARCH} "${CBL_QEMU_BIN}"
     done
 ); }
