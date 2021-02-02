@@ -526,6 +526,69 @@ function rbpi() { (
     PATCHES_FOLDER=${GITHUB_FOLDER}/patches/rpi-next
     FIXES=${PATCHES_FOLDER}/fixes.series
     [[ -f ${FIXES} ]] && { git am "${FIXES}" || exit ${?}; }
+    cat <<'EOF' | git am || exit ${?}
+From a9745efc70562666431649fe992e121ed85a7620 Mon Sep 17 00:00:00 2001
+From: Nathan Chancellor <nathan@kernel.org>
+Date: Tue, 2 Feb 2021 12:58:58 -0700
+Subject: [PATCH] arm64/mte: Fix merge issue
+
+Link: https://lore.kernel.org/r/CADYN=9Ljjx6GRPk45jkY1N7dVDOFFjMB8yy5QRzVE-1tzEnUjw@mail.gmail.com/
+Signed-off-by: Nathan Chancellor <nathan@kernel.org>
+---
+ arch/arm64/kernel/mte.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/arch/arm64/kernel/mte.c b/arch/arm64/kernel/mte.c
+index 275b5d0f38b8..4033aadc4955 100644
+--- a/arch/arm64/kernel/mte.c
++++ b/arch/arm64/kernel/mte.c
+@@ -113,12 +113,12 @@ void mte_enable_kernel(void)
+ 	sysreg_clear_set(sctlr_el1, SCTLR_ELx_TCF_MASK, SCTLR_ELx_TCF_SYNC);
+ 	isb();
+ }
++EXPORT_SYMBOL(mte_enable_kernel);
+ 
+ void mte_set_report_once(bool state)
+ {
+ 	WRITE_ONCE(report_fault_once, state);
+ }
+-EXPORT_SYMBOL(mte_enable_kernel_sync);
+ EXPORT_SYMBOL(mte_set_report_once);
+ 
+ bool mte_report_once(void)
+-- 
+2.30.0
+
+EOF
+    cat <<'EOF' | git am || exit ${?}
+From 93f18321bba7871d317466aad39296c3ad7db96b Mon Sep 17 00:00:00 2001
+From: Nathan Chancellor <nathan@kernel.org>
+Date: Mon, 1 Feb 2021 14:26:49 -0700
+Subject: [PATCH] net: hns3: Remove pointless d_iname check
+
+Signed-off-by: Nathan Chancellor <nathan@kernel.org>
+---
+ drivers/net/ethernet/hisilicon/hns3/hns3_debugfs.c | 3 ---
+ 1 file changed, 3 deletions(-)
+
+diff --git a/drivers/net/ethernet/hisilicon/hns3/hns3_debugfs.c b/drivers/net/ethernet/hisilicon/hns3/hns3_debugfs.c
+index 6978304f1ac5..c5958754f939 100644
+--- a/drivers/net/ethernet/hisilicon/hns3/hns3_debugfs.c
++++ b/drivers/net/ethernet/hisilicon/hns3/hns3_debugfs.c
+@@ -494,9 +494,6 @@ static ssize_t hns3_dbg_read(struct file *filp, char __user *buffer,
+ 	ssize_t size = 0;
+ 	int ret = 0;
+ 
+-	if (!filp->f_path.dentry->d_iname)
+-		return -EINVAL;
+-
+ 	read_buf = kzalloc(HNS3_DBG_READ_LEN, GFP_KERNEL);
+ 	if (!read_buf)
+ 		return -ENOMEM;
+-- 
+2.30.0
+
+EOF
     ../pi-scripts/build.sh || exit ${?}
     if ! git pll --no-edit mainline master; then
         rg "<<<<<<< HEAD" && exit ${?}
