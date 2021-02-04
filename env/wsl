@@ -279,7 +279,7 @@ function upd_kernel() { (
 
     case ${KERNEL_LOCATION:-github} in
         local)
-            cp -v "${HOME}"/src/wsl2-kernel/out/x86_64/arch/x86/boot/bzImage "${KERNEL}"
+            cp -v "${HOME}"/src/wsl2-kernel/build/x86_64/arch/x86/boot/bzImage "${KERNEL}"
             ;;
         github)
             REPO=nathanchance/WSL2-Linux-Kernel
@@ -287,7 +287,7 @@ function upd_kernel() { (
             ;;
         server)
             SRC_FOLDER=${HOME}/cbl/build/wsl2
-            OUT_FOLDER=out/x86_64
+            OUT_FOLDER=build/x86_64
             KERNEL_IMAGE=arch/x86/boot/bzImage
             scp nathan@"${SERVER_IP:?}":"${SRC_FOLDER}"/${OUT_FOLDER}/${KERNEL_IMAGE} "${KERNEL}"
             ;;
