@@ -174,7 +174,7 @@ function upd_kernel() { (
     esac
 
     USER=nathan
-    OUT=/home/${USER}/cbl/build/rpi/out/${ARCH}
+    OUT=/home/${USER}/cbl/build/rpi/build/${ARCH}
     ROOTFS=${OUT}/rootfs
     { rsync -v ${USER}@"${SERVER_IP}":"${ROOTFS}"/"${DTBS}"'*.dtb' "${TMP_BOOT}" &&
         rsync -vr ${USER}@"${SERVER_IP}":"${ROOTFS}"/lib/modules/'*' "${TMP_BOOT}"/modules &&
@@ -288,7 +288,7 @@ function bkrnl() { (
         -C "${LINUX_NEXT}" \
         -skj"$(nproc)" \
         LLVM=1 \
-        O=out/"$(uname -m)" \
+        O=build/"$(uname -m)" \
         distclean defconfig all
 ); }
 
@@ -315,6 +315,6 @@ function bootk() { (
 
     set -x
 
-    "${BOOT_UTILS}"/boot-qemu.sh -a arm64 -k "${KERNEL_LOCATION:-/mnt/ssd/src/linux-next/out/"$(uname -m)"}"
+    "${BOOT_UTILS}"/boot-qemu.sh -a arm64 -k "${KERNEL_LOCATION:-/mnt/ssd/src/linux-next/build/"$(uname -m)"}"
 ); }
 # vi: filetype=zsh
