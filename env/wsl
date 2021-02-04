@@ -234,7 +234,11 @@ function wsl_aliases() {
     alias ls='ls --color=auto'
 }
 
-function mshpi() { (
+function mshpi3() { (
+    mosh pi@192.168.4.89
+); }
+
+function mshpi4() { (
     mosh pi@192.168.4.104
 ); }
 
