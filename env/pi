@@ -125,6 +125,8 @@ function bootstrap() { (
     echo "1. ssh-copy-id"
     echo
     echo "2. Download .server_ip"
+    echo
+    echo "3. Handle SSD if necessary"
 ); }
 
 function rbld_usr() { (
