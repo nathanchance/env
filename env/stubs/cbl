@@ -526,13 +526,13 @@ function rbpi() { (
     PATCHES_FOLDER=${GITHUB_FOLDER}/patches/rpi-next
     FIXES=${PATCHES_FOLDER}/fixes.series
     [[ -f ${FIXES} ]] && { git am "${FIXES}" || exit ${?}; }
-    b4 am -o - -l 20210202095512.761214-1-kyletso@google.com | git ams || exit ${?}
-    b4 am -o - -l 20210202164531.3982778-1-bleung@chromium.org | git ams || exit ${?}
     b4 am -o - -l -P 7 1612269593-18691-8-git-send-email-tanhuazhong@huawei.com | git ams || exit ${?}
-    ../pi-scripts/build.sh || exit ${?}
+    ../pi-scripts/build.sh ARCH=arm || exit ${?}
+    ../pi-scripts/build.sh ARCH=arm64 || exit ${?}
     if ! git pll --no-edit mainline master; then
         rg "<<<<<<< HEAD" && exit ${?}
-        ../pi-scripts/build.sh || exit ${?}
+        ../pi-scripts/build.sh ARCH=arm || exit ${?}
+        ../pi-scripts/build.sh ARCH=arm64 || exit ${?}
         git aa
         git c || exit ${?}
     fi
@@ -546,11 +546,13 @@ We are merging Sami's clang-cfi branch, which is based on this work. Do
 this to avoid conflicts."
     if ! git pll --no-edit sami clang-cfi; then
         rg "<<<<<<< HEAD" && exit ${?}
-        ../pi-scripts/build.sh || exit ${?}
+        ../pi-scripts/build.sh ARCH=arm || exit ${?}
+        ../pi-scripts/build.sh ARCH=arm64 || exit ${?}
         git aa
         git c --no-edit || exit ${?}
     fi
-    ../pi-scripts/build.sh || exit ${?}
+    ../pi-scripts/build.sh ARCH=arm || exit ${?}
+    ../pi-scripts/build.sh ARCH=arm64 || exit ${?}
 ); }
 
 function build_stable_llvm() { (
