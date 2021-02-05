@@ -361,7 +361,6 @@ function rbld_usr() { (
             updbin || die "Error installing updated binaries"
             bcttlfshtools || die "Error installing Cuttlefish host package"
             bdtc || die "Error building dtc"
-            bqemu || die "Error building QEMU"
             iandroidtools || die "Error installing Android tools"
             iarc || die "Error installing arcanist"
             ib4 || die "Error installing b4"
