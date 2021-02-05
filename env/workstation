@@ -51,12 +51,10 @@ function bootstrap() { (
     SCRIPTS=${GITHUB_FOLDER}/scripts
 
     # Setup folders that will be used
-    mkdir -p "${ALS}" \
-        "${ANDROID_TC_FOLDER}" \
+    mkdir -p "${ANDROID_TC_FOLDER}" \
         "${CBL}"/{android,github,kernels/clean,kernels/patched,mirrors,src,worktrees} \
         "${GITHUB_FOLDER}" \
         "${HOME}"/usr/bin \
-        "${KERNEL_FOLDER}"/sony \
         "${SRC_FOLDER}" || die "Can't create folders, wtf"
 
     # Get distro we are on
@@ -250,8 +248,26 @@ function bootstrap() { (
     if [[ ${INSTALL_SSH_KEY:=false} = "true" || ${INSTALL_GPG_KEY:=false} = "true" ]]; then
         [[ -d ${KEYS} ]] || { git clone https://github.com/nathanchance/keys "${KEYS}" || die "Error downloading keys"; }
         if ${INSTALL_SSH_KEY}; then
-            mv "${KEYS}"/id_ed25519{,.pub} "${HOME}"/.ssh
-            chmod 600 "${HOME}"/.ssh/id_ed25519
+            cp "${KEYS}"/ssh/id_ed25519{,.pub} "${HOME}"/.ssh
+            cp "${KEYS}"/ssh/korg-nathan "${HOME}"/.ssh/id_korg
+            cat <<'EOF' >>"${HOME}"/.ssh/config
+Host gitolite.kernel.org
+  User git
+  IdentityFile ~/.ssh/id_korg
+  IdentitiesOnly yes
+  ClearAllForwardings yes
+  # We prefer ed25519 keys, but will fall back to others if your
+  # openssh client does not support that
+  HostKeyAlgorithms ssh-ed25519,ecdsa-sha2-nistp256,ssh-rsa
+  # Below are very useful for speeding up repeat access
+  # and for 2-factor validating your sessions
+  ControlPath ~/.ssh/cm-%r@%h:%p
+  ControlMaster auto
+  ControlPersist 30m
+  # Helps behind some NAT-ing routers
+  ServerAliveInterval 60
+EOF
+            chmod 600 "${HOME}"/.ssh/{id_ed25519,id_korg}
             # shellcheck disable=SC2046
             [[ -z ${SSH_AUTH_SOCK} ]] && eval $(ssh-agent)
             ssh-add "${HOME}"/.ssh/id_ed25519
@@ -294,24 +310,16 @@ function bootstrap() { (
     decrypt_gpg_file botinfo || NEEDS_GPG_DECRYPT=true
     decrypt_del_dog_api_key || NEEDS_GPG_DECRYPT=true
     decrypt_gpg_file muttrc || NEEDS_GPG_DECRYPT=true
-    for REPO in chromeos-adb-fastboot hugo-files nathanchance.github.io patches; do
+    for REPO in hugo-files nathanchance.github.io patches; do
         [[ -d ${GITHUB_FOLDER}/${REPO} ]] || { git -C "${GITHUB_FOLDER}" clone git@github.com:nathanchance/"${REPO}" || die "Error cloning ${REPO}!"; }
     done
-    [[ -d ${ALS}/sp ]] || { git -C "${ALS}" clone git@github.com:nathanchance/stable-patches sp || die "Error cloning stable-patches!"; }
+    # [[ -d ${ALS}/sp ]] || { git -C "${ALS}" clone git@github.com:nathanchance/stable-patches sp || die "Error cloning stable-patches!"; }
     [[ -d ${SRC_FOLDER}/android-wireguard-module-builder ]] || git -C "${SRC_FOLDER}" clone git@github.com:WireGuard/android-wireguard-module-builder.git
 
     # Download toolchains
     [[ -d ${ANDROID_TC_FOLDER}/clang-master ]] || tmux new-window zsh -c "git -C ${ANDROID_TC_FOLDER} clone --single-branch https://android.googlesource.com/platform/prebuilts/clang/host/linux-x86/ clang-master"
     [[ -d ${ANDROID_TC_FOLDER}/gcc-arm ]] || git -C "${ANDROID_TC_FOLDER}" clone --depth=1 -b android-9.0.0_r1 --single-branch https://android.googlesource.com/platform/prebuilts/gcc/linux-x86/arm/arm-linux-androideabi-4.9/ gcc-arm
     [[ -d ${ANDROID_TC_FOLDER}/gcc-arm64 ]] || git -C "${ANDROID_TC_FOLDER}" clone --depth=1 -b android-9.0.0_r1 --single-branch https://android.googlesource.com/platform/prebuilts/gcc/linux-x86/aarch64/aarch64-linux-android-4.9/ gcc-arm64
-    for VERSION in clang-4691093:android-9.0.0_r1 clang-r353983c:android-10.0.0_r1; do
-        BRANCH=${VERSION#*:}
-        VERSION=${VERSION%:*}
-        [[ -d ${ANDROID_TC_FOLDER}/${VERSION} ]] && continue
-        mkdir -pv "${ANDROID_TC_FOLDER}/${VERSION}"
-        curl -LSs https://android.googlesource.com/platform/prebuilts/clang/host/linux-x86/+archive/${BRANCH}/${VERSION}.tar.gz | tar -C "${ANDROID_TC_FOLDER}/${VERSION}" -xzf - || display_error "Error downloading ${VERSION}!"
-    done
-    [[ -d ${ANDROID_TC_FOLDER}/sd-llvm-6.0.2 ]] || git -C "${ANDROID_TC_FOLDER}" clone https://github.com/ThankYouMario/proprietary_vendor_qcom_sdclang-6.0_linux-x86 sd-llvm-6.0.2
 
     # Grab linux, linux-next, and linux-stable for CBL
     for REPO in linux linux-next linux-stable; do
@@ -323,9 +331,6 @@ function bootstrap() { (
 
     # Download other CBL things
     tmux new-window zsh -c "source ${SCRIPTS}/env/stubs/setup && cbl_other_repos"
-
-    # Clone sonyxperiadev/kernel
-    [[ -d ${KERNEL_FOLDER}/sony/kernel ]] || git -C "${KERNEL_FOLDER}/sony" clone https://github.com/sonyxperiadev/kernel
 
     # Use new GPG keyserver
     grep -q keyserver "${HOME}/.gnupg/dirmngr.conf" || echo "keyserver hkps://keys.openpgp.org" | tee -a "${HOME}"/.gnupg/dirmngr.conf

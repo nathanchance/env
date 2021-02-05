@@ -615,7 +615,7 @@ function test_llvm_mainline_linux() { (
     done
 ); }
 
-function test_llvm_stable_linux { (
+function test_llvm_stable_linux() { (
     # Build LLVM if necessary
     build_stable_llvm
 
