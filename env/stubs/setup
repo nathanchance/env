@@ -91,6 +91,10 @@ function cbl_linux_repos() { (
         )
     done
     rm -rf "${PWD}"
+    git clone git@gitolite.kernel.org:pub/scm/linux/kernel/git/nathan/linux "${CBL_S}"/korg-linux
+    cd "${CBL_S}"/korg-linux || exit ${?}
+    git_remote_add -f linus https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/
+    git_remote_add -f --no-tags next https://git.kernel.org/pub/scm/linux/kernel/git/next/linux-next.git/
 ); }
 
 # Download Android CBL repos
@@ -116,13 +120,13 @@ function cbl_other_repos() { (
     source "${SCRIPTS_FOLDER:-${HOME}/github/scripts}"/common || exit ${?}
 
     cd "${CBL_O_R:=${CBL:-${HOME}/cbl}}"/github || die "wtf"
-    for REPO in boot-utils continuous-integration2:ci2 dockerimage tc-build; do
+    for REPO in boot-utils continuous-integration2:ci dockerimage tc-build; do
         FOLDER=${REPO#*:}
         REPO=${REPO%:*}
 
         [[ -d ${FOLDER} ]] || git clone git@github.com:ClangBuiltLinux/"${REPO}".git "${FOLDER}"
+        hub -C "${FOLDER}" fork
     done
-    for FOLDER in boot-utils ci2 dockerimage tc-build; do (cd "${FOLDER}" && hub fork); done
     [[ -d yapf ]] || git clone https://github.com/google/yapf
 
     cd "${CBL_O_R}"/mirrors || die "wtf"
