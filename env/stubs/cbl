@@ -550,6 +550,11 @@ function rbpi() { (
 function build_stable_llvm() { (
     TC_BLD=${CBL_GIT}/tc-build
 
+    # Use the latest binutils throughout this function
+    rm -rf "${TC_BLD}"/install
+    "${TC_BLD}"/build-binutils.py || exit ${?}
+    export PATH=${TC_BLD}/install/bin:${PATH}
+
     # Build LLVM 10.0.1 and binutils if necessary
     LLVM_10=${CBL_TC}/llvm-10.0.1
     [[ -x ${LLVM_10}/bin/clang ]] ||
