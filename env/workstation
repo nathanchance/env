@@ -193,6 +193,8 @@ function bootstrap() { (
             mutt
             neofetch
             ninja-build
+            php
+            php-curl
             pkg-config
             podman
             psmisc
