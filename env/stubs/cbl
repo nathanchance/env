@@ -556,7 +556,7 @@ function build_stable_llvm() { (
     # Use the latest binutils throughout this function
     rm -rf "${TC_BLD}"/install
     "${TC_BLD}"/build-binutils.py || exit ${?}
-    export PATH=${TC_BLD}/install/bin:${PATH}
+    path_push "${TC_BLD}"/install/bin
 
     # Build LLVM 10.0.1 and binutils if necessary
     LLVM_10=${CBL_TC}/llvm-10.0.1
