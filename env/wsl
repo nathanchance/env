@@ -287,7 +287,7 @@ function rbwk() { (
     WSL2_KERNEL=${HOME}/src/wsl2-kernel
 
     set -x
-    cd "${WSL2_KERNEL}"
+    cd "${WSL2_KERNEL}" || exit ${?}
     git ru || exit ${?}
     for BRANCH in clearlinux-patchset microsoft-patchset; do
         git ch "${BRANCH}" || exit ${?}
@@ -319,7 +319,7 @@ this to avoid conflicts."
 
 # Strip executables within a folder
 function stripall() { (
-    cd "${1:?}"
+    cd "${1:?}" || exit ${?}
     for FILE in $(fd -t file -x file | grep 'not stripped' | cut -d: -f1); do strip "${FILE}"; done
 ); }
 
