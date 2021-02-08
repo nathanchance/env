@@ -4,52 +4,7 @@
 #
 # Utility and terminal setup functions for WSL
 
-# Setup function for my Ubuntu WSL instance (from an LXC container, not Microsoft Store)
-function rootstrap() { (
-    [[ $(id -u) -eq 0 ]] || { printf '\n\033[01;31mThis function must be run as root!\033[0m\n\n' && exit 255; }
-
-    while ((${#})); do
-        case ${1} in
-            -p | --password)
-                shift
-                PASSWORD=${1}
-                ;;
-            -u | --user)
-                shift
-                USER=${1}
-                ;;
-        esac
-        shift
-    done
-
-    set -eux
-
-    : "${USER}" "${PASSWORD}"
-
-    # Some WSL specific tuning
-    printf '[user]\ndefault = nathan\n' | tee /etc/wsl.conf
-
-    # Always turn on '--no-install-recommends'
-    apt-config dump | grep -we Recommends -e Suggests | sed 's/1/0/g' | tee /etc/apt/apt.conf.d/999norecommend
-
-    # Update and install some necessary packages
-    apt update
-    apt upgrade -y
-    apt install -y ca-certificates curl zsh
-
-    # Create my user account
-    if getent passwd "${USER}" &>/dev/null; then
-        set +x
-        printf '\n\033[01;33mNot creating user "%s" because they already exist!\033[0m\n\n' "${USER}"
-    else
-        useradd -m -G sudo -s /bin/zsh "${USER}"
-        echo "${USER}:${PASSWORD}" | chpasswd
-    fi
-
-    set +eux
-
-    printf '\n\033[01;34mDo not forget to run \n\n\t$ wsl.exe --terminate ubuntu\n\nso that /etc/wsl.conf changes reflect properly!\033[0m\n\n'
-); }
+# $ sudo apt update && sudo apt install -y --no-install-recommends ca-certificates curl zsh && sudo chsh -s /bin/zsh nathan
 
 # Setup function
 #
@@ -58,12 +13,16 @@ function bootstrap() { (
     # Grab common functions/variables
     source <(curl -LSs https://github.com/nathanchance/scripts/raw/main/common) &>/dev/null
 
-    # Do not run this as root
-    [[ $(id -u) -eq 0 ]] && die "Do not run bootstrap as root"
-
     # Keys location
     KEYS=/mnt/c/Users/natec/Documents/Keys
     [[ -d ${KEYS} ]] || die "Keys are not available"
+
+    # Always turn on '--no-install-recommends'
+    apt-config dump | grep -we Recommends -e Suggests | sed 's/1/0/g' | sudo tee /etc/apt/apt.conf.d/999norecommend
+
+    # Update all current packages
+    sudo apt update
+    sudo apt upgrade -y
 
     # Install packages from Ubuntu repos
     sudo apt install -y \
@@ -138,8 +97,26 @@ function bootstrap() { (
 
     # Setup SSH and GPG if keys are present
     mkdir -p "${HOME}"/.ssh
-    cp "${KEYS}"/id_ed25519{,.pub} "${HOME}"/.ssh
-    chmod 600 "${HOME}"/.ssh/id_ed25519
+    cp "${KEYS}"/ssh/id_ed25519{,.pub} "${HOME}"/.ssh
+    cp "${KEYS}"/ssh/korg-nathan "${HOME}"/.ssh/id_korg
+    chmod 600 "${HOME}"/.ssh/{id_ed25519,id_korg}
+    cat <<'EOF' >>"${HOME}"/.ssh/config
+Host gitolite.kernel.org
+  User git
+  IdentityFile ~/.ssh/id_korg
+  IdentitiesOnly yes
+  ClearAllForwardings yes
+  # We prefer ed25519 keys, but will fall back to others if your
+  # openssh client does not support that
+  HostKeyAlgorithms ssh-ed25519,ecdsa-sha2-nistp256,ssh-rsa
+  # Below are very useful for speeding up repeat access
+  # and for 2-factor validating your sessions
+  ControlPath ~/.ssh/cm-%r@%h:%p
+  ControlMaster auto
+  ControlPersist 30m
+  # Helps behind some NAT-ing routers
+  ServerAliveInterval 60
+EOF
     # shellcheck disable=SC2046
     [[ -z ${SSH_AUTH_SOCK} ]] && eval $(ssh-agent)
     ssh-add "${HOME}"/.ssh/id_ed25519
