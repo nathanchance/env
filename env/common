@@ -56,6 +56,8 @@ function shell_setup() {
         # shellcheck disable=SC2154
         [[ -n ${terminfo[khome]} ]] && bindkey "${terminfo[khome]}" beginning-of-line
         [[ -n ${terminfo[kend]} ]] && bindkey "${terminfo[kend]}" end-of-line
+        bindkey "^[[1;5D" beginning-of-line
+        bindkey "^[[1;5C" end-of-line
 
         setopt autocd
         # zsh-ism, which shellcheck doesn't understand

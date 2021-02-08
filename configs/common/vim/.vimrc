@@ -38,6 +38,12 @@ set wrap                                    " Wrap lines over a certain length. 
 
 highlight ColorColumn ctermbg=0 guibg=lightgrey
 
+" Map Ctrl + left/right arrow keys to Home and End
+inoremap <esc>[1;5D <C-o>0
+inoremap <esc>[1;5C <C-o>$
+nnoremap <esc>[1;5D 0
+nnoremap <esc>[1;5C $
+
 " Move to beginning/end of line or skip letters
 nnoremap B 0
 nnoremap E $
