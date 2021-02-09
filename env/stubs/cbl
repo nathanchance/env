@@ -292,9 +292,6 @@ function bldtcs() { (
     cd "${TC_BLD_LLVM_PRJCT}"
     git rh || die "Error resetting llvm-project"
     git pull --rebase || die "Updating llvm-project failed (${?})"
-    for REVISION in D96211 D96188 D96214; do
-        curl -LSs "https://reviews.llvm.org/${REVISION}?download=true" | git ap || die "Error applying ${REVISION}"
-    done
     BLDLLVM_INSTALL_FOLDER=${CBL_TC}/llvm-${DATE_TIME}-$(git -C "${TC_BLD_LLVM_PRJCT}" sh -s --format=%H origin/master)
     bldllvm \
         --assertions \
