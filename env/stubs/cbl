@@ -526,6 +526,9 @@ function rbpi() { (
     PATCHES_FOLDER=${GITHUB_FOLDER}/patches/rpi-next
     FIXES=${PATCHES_FOLDER}/fixes.series
     [[ -f ${FIXES} ]] && { git am "${FIXES}" || exit ${?}; }
+    # https://lore.kernel.org/bpf/20210210174451.GA1943051@ubuntu-m3-large-x86/
+    git rv --no-edit 50d3a3f81689586697a38cd60070181ebe626ad9 || exit ${?}
+    b4 am -o - -l 20210210152644.137770-1-colin.king@canonical.com | git ams || exit ${?}
     ../pi-scripts/build.sh ARCH=arm || exit ${?}
     ../pi-scripts/build.sh ARCH=arm64 || exit ${?}
     if ! git pll --no-edit mainline master; then
