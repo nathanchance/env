@@ -10,7 +10,8 @@
     {
         "defaults":
         {
-            "fontFace": "Fira Code",
+            // https://github.com/be5invis/Iosevka
+            "fontFace": "Iosevka Term SS08",
             "fontSize": 9,
             "useAcrylic": true,
             "acrylicOpacity": 0.9
