@@ -290,4 +290,35 @@ function pipup() { (
         --user \
         "${PIP_PACKAGES[@]}"
 ); }
+
+# Update wsl2-kernel to latest -next
+function rbwk() { (
+    case ${LOCATION} in
+        workstation) WSL2_KERNEL=${HOME}/cbl/build/wsl2 ;;
+        wsl) WSL2_KERNEL=${HOME}/src/wsl2-kernel ;;
+        *) die "rbwk() is not supported by ${LOCATION}" ;;
+    esac
+
+    set -x
+    cd "${WSL2_KERNEL}" || exit ${?}
+    git ru || exit ${?}
+    for BRANCH in clearlinux-patchset microsoft-patchset; do
+        git ch "${BRANCH}" || exit ${?}
+        git rb -i next/master || exit ${?}
+    done
+    git ch next || exit ${?}
+    git rh next/master
+    if ! git pll --no-edit mainline master; then
+        rg "<<<<<<< HEAD" && exit ${?}
+        git aa
+        git c || exit ${?}
+    fi
+    if ! git pll --no-edit sami clang-cfi; then
+        rg "<<<<<<< HEAD" && exit ${?}
+        git aa
+        git c || exit ${?}
+    fi
+    git ml --no-edit clearlinux-patchset microsoft-patchset || exit ${?}
+    git cp "$(git lo --merges -1 --format=%H origin/HEAD)".."$(git sh -s --format=%H origin/HEAD)"
+); }
 # vi: filetype=zsh

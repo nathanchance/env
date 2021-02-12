@@ -282,41 +282,6 @@ function hugo_serve() { (
     hugo server --baseUrl="${IP%/*}" --bind=0.0.0.0
 ); }
 
-# Update wsl2-kernel to latest -next
-function rbwk() { (
-    WSL2_KERNEL=${HOME}/src/wsl2-kernel
-
-    set -x
-    cd "${WSL2_KERNEL}" || exit ${?}
-    git ru || exit ${?}
-    for BRANCH in clearlinux-patchset microsoft-patchset; do
-        git ch "${BRANCH}" || exit ${?}
-        git rb -i next/master || exit ${?}
-    done
-    git ch next || exit ${?}
-    git rh next/master
-    if ! git pll --no-edit mainline master; then
-        rg "<<<<<<< HEAD" && exit ${?}
-        git aa
-        git c || exit ${?}
-    fi
-    # Revert https://git.kernel.org/pub/scm/linux/kernel/git/kees/linux.git/log/?h=kspp/lto/sami/v5.11-rc2-take2
-    # to avoid unnecessary conflicts.
-    git diff v5.11-rc2..112b6a8e038d793d016e330f53acb9383ac504b3 | git ap --exclude include/asm-generic/vmlinux.lds.h -R || exit ${?}
-    git aa
-    git ac -m "Revert kspp/lto/sami/v5.11-rc2-take2
-
-We are merging Sami's clang-cfi branch, which is based on this work. Do
-this to avoid conflicts."
-    if ! git pll --no-edit sami clang-cfi; then
-        rg "<<<<<<< HEAD" && exit ${?}
-        git aa
-        git c || exit ${?}
-    fi
-    git ml --no-edit clearlinux-patchset microsoft-patchset || exit ${?}
-    git cp "$(git lo --merges -1 --format=%H origin/HEAD)".."$(git sh -s --format=%H origin/HEAD)"
-); }
-
 # Strip executables within a folder
 function stripall() { (
     cd "${1:?}" || exit ${?}
