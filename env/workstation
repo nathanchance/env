@@ -162,6 +162,7 @@ function bootstrap() { (
             libcapstone-dev
             libclang-dev
             libcurl4-openssl-dev
+            libdw-dev
             libedit-dev
             libelf-dev
             libemail-valid-perl
