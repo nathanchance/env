@@ -131,7 +131,7 @@ function bootstrap() { (
         echo "kernel.unprivileged_userns_clone=1" | sudo tee /etc/sysctl.d/unprivileged_userns_clone.conf
         echo "$(whoami):100000:65536" | sudo tee /etc/subgid /etc/subuid
         echo "session    optional   pam_cgfs.so          -c freezer,memory,name=systemd,unified" | sudo tee -a /etc/pam.d/system-login
-    elif [[ ${DISTRO} = "ubuntu" ]]; then
+    elif [[ ${DISTRO} = "debian" || ${DISTRO} = "ubuntu" ]]; then
         PACKAGES=(
             abootimg
             binutils-dev
@@ -157,7 +157,6 @@ function bootstrap() { (
             gettext
             git
             g++
-            irssi
             libarchive-tools
             libauthen-sasl-perl
             libcapstone-dev
@@ -198,7 +197,6 @@ function bootstrap() { (
             pkg-config
             podman
             psmisc
-            python-is-python3
             python2.7
             python3
             python3-dev
@@ -223,11 +221,24 @@ function bootstrap() { (
             zstd
         )
 
-        # shellcheck disable=SC1091
-        source /etc/os-release
-        echo "deb https://download.opensuse.org/repositories/devel:/kubic:/libcontainers:/stable/xUbuntu_${VERSION_ID}/ /" | sudo tee /etc/apt/sources.list.d/devel:kubic:libcontainers:stable.list
-        curl -L https://download.opensuse.org/repositories/devel:/kubic:/libcontainers:/stable/xUbuntu_"${VERSION_ID}"/Release.key | sudo apt-key add -
-        sudo apt update || exit ${?}
+        if [[ ${DISTRO} = "debian" ]]; then
+            grep -q "buster-backports" /etc/apt/sources.list || echo "deb http://deb.debian.org/debian buster-backports main" | sudo tee -a /etc/apt/sources.list
+
+            echo "deb https://download.opensuse.org/repositories/devel:/kubic:/libcontainers:/stable/Debian_10/ /" | sudo tee /etc/apt/sources.list.d/devel:kubic:libcontainers:stable.list
+            curl -L https://download.opensuse.org/repositories/devel:/kubic:/libcontainers:/stable/Debian_10/Release.key | sudo apt-key add -
+
+            sudo apt update || exit ${?}
+            sudo apt -y -t buster-backports install libseccomp2 || exit ${?}
+        elif [[ ${DISTRO} = "ubuntu" ]]; then
+            PACKAGES+=(python-is-python3)
+
+            # shellcheck disable=SC1091
+            source /etc/os-release
+            echo "deb https://download.opensuse.org/repositories/devel:/kubic:/libcontainers:/stable/xUbuntu_${VERSION_ID}/ /" | sudo tee /etc/apt/sources.list.d/devel:kubic:libcontainers:stable.list
+            curl -L https://download.opensuse.org/repositories/devel:/kubic:/libcontainers:/stable/xUbuntu_"${VERSION_ID}"/Release.key | sudo apt-key add -
+
+            sudo apt update || exit ${?}
+        fi
         sudo DEBIAN_FRONTEND=noninteractive apt upgrade -y || exit ${?}
         sudo DEBIAN_FRONTEND=noninteractive apt install -y "${PACKAGES[@]}" || exit ${?}
         echo "locales locales/default_environment_locale select en_US.UTF-8" | sudo debconf-set-selections
@@ -312,11 +323,12 @@ EOF
     decrypt_gpg_file botinfo || NEEDS_GPG_DECRYPT=true
     decrypt_del_dog_api_key || NEEDS_GPG_DECRYPT=true
     decrypt_gpg_file muttrc || NEEDS_GPG_DECRYPT=true
-    for REPO in hugo-files nathanchance.github.io patches; do
+    for REPO in bug-files hugo-files nathanchance.github.io patches; do
         [[ -d ${GITHUB_FOLDER}/${REPO} ]] || { git -C "${GITHUB_FOLDER}" clone git@github.com:nathanchance/"${REPO}" || die "Error cloning ${REPO}!"; }
     done
     # [[ -d ${ALS}/sp ]] || { git -C "${ALS}" clone git@github.com:nathanchance/stable-patches sp || die "Error cloning stable-patches!"; }
     [[ -d ${SRC_FOLDER}/android-wireguard-module-builder ]] || git -C "${SRC_FOLDER}" clone git@github.com:WireGuard/android-wireguard-module-builder.git
+    [[ -d ${SRC_FOLDER}/pahole ]] || git -C "${SRC_FOLDER}" clone https://git.kernel.org/pub/scm/devel/pahole/pahole.git
 
     # Download toolchains
     [[ -d ${ANDROID_TC_FOLDER}/clang-master ]] || tmux new-window zsh -c "git -C ${ANDROID_TC_FOLDER} clone --single-branch https://android.googlesource.com/platform/prebuilts/clang/host/linux-x86/ clang-master"
@@ -359,7 +371,7 @@ function rbld_usr() { (
     rm -rf "${HOME:?}"/usr
     case "$(get_distro)" in
         arch) bgit || die "Error building git" ;;
-        ubuntu)
+        debian | ubuntu)
             updbin || die "Error installing updated binaries"
             bcttlfshtools || die "Error installing Cuttlefish host package"
             bdtc || die "Error building dtc"

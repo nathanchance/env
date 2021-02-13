@@ -83,18 +83,17 @@ function cbl_linux_repos() { (
                 git config rerere.enabled true
             else
                 git branch --set-upstream-to=origin/"${BRANCH}" "${BRANCH}"
-                git remote update
-                git pull
+                git reset --hard origin/"${BRANCH}"
             fi
             [[ ${FOLDER} =~ mirrors ]] && git remote add github git@github.com:ClangBuiltLinux/linux.git
             [[ ${FOLDER} =~ ${CBL_B}/patched/linux-stable ]] && git remote add stable-rc https://git.kernel.org/pub/scm/linux/kernel/git/stable/linux-stable-rc.git/
         )
     done
-    rm -rf "${PWD}"
     git clone git@gitolite.kernel.org:pub/scm/linux/kernel/git/nathan/linux "${CBL_S}"/korg-linux
     cd "${CBL_S}"/korg-linux || exit ${?}
     git_remote_add -f linus https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/
     git_remote_add -f --no-tags next https://git.kernel.org/pub/scm/linux/kernel/git/next/linux-next.git/
+    rm -rf "${PWD}"
 ); }
 
 # Download Android CBL repos
@@ -120,7 +119,7 @@ function cbl_other_repos() { (
     source "${SCRIPTS_FOLDER:-${HOME}/github/scripts}"/common || exit ${?}
 
     cd "${CBL_O_R:=${CBL:-${HOME}/cbl}}"/github || die "wtf"
-    for REPO in boot-utils continuous-integration2:ci dockerimage tc-build; do
+    for REPO in boot-utils continuous-integration2:ci tc-build qemu-binaries; do
         FOLDER=${REPO#*:}
         REPO=${REPO%:*}
 

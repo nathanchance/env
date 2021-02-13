@@ -119,6 +119,7 @@ function bdtc() { (
     [[ -z ${DTC_VERSION} ]] && DTC_VERSION=$(git describe --tags "$(git rev-list --tags --max-count=1)")
     git checkout v"${DTC_VERSION//v/}"
 
+    make "${JOBS_FLAG:--j"$(nproc)"}" PREFIX="${PREFIX:-${HOME}/usr}"
     make "${JOBS_FLAG:--j"$(nproc)"}" PREFIX="${PREFIX:-${HOME}/usr}" install
 ); }
 
