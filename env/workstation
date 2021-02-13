@@ -9,32 +9,21 @@
 # Assumes the following things have been done:
 #
 # Hetzner:
-#   1. The workstation has had its OS installed (if using Hetzner)
+#   1. The workstation has had its OS installed
 #
 #      $ installimage -r yes -l 0 -f yes -n archlinux-<suffix>
 #
-#   2. My user account has been created
+#   2. My user account has been created with sudo permissions
 #
-#      $ pacman -S zsh
+#      $ pacman -Syyu && pacman -S sudo zsh
 #      $ useradd -m -G wheel -s /bin/zsh nathan
+#      $ EDITOR=vim visudo
+#      nathan ALL=(ALL) ALL
 #      $ passwd
 #      $ passwd nathan
 #
-#   3. sudo is installed and configured
-#
-#      $ pacman -S sudo
-#      $ EDITOR=vim visudo
-#
-#      nathan ALL=(ALL) NOPASSWD:ALL
-#
-#   4. Keys to be installed are available at /tmp/keys
-#
-#      $ ssh-copy-id nathan@<ip>
-#      $ ssh nathan@<ip> mkdir /tmp/keys
-#      $ scp {id_ed25519,*.asc} nathan<ip>:/tmp/keys
-#
 # Packet:
-#   1. User account and partitions have been created using user-data
+#   1. User account and partitions have been created
 #
 function bootstrap() { (
     # Super debug :)
@@ -63,75 +52,7 @@ function bootstrap() { (
     # Set the correct time
     sudo timedatectl set-timezone America/Phoenix
 
-    if [[ ${DISTRO} = "arch" ]]; then
-        # Enable multilib
-        sudo sed -i "/\[multilib\]/,/Include/"'s/^#//' /etc/pacman.conf
-
-        # Custom makepkg config
-        sudo sed -i "s/#MAKEFLAGS=\"-j2\"/MAKEFLAGS=\"-j$(nproc --all)\"/g" /etc/makepkg.conf
-        sudo sed -i 's/!ccache/ccache/g' /etc/makepkg.conf
-
-        # Install required binaries
-        sudo pacman -Syyu --noconfirm || die "Error updating packages!"
-        sudo pacman -S --needed --noconfirm \
-            aarch64-linux-gnu-gcc \
-            asciidoc \
-            base-devel \
-            bat \
-            bc \
-            ca-certificates \
-            clang \
-            clang-format \
-            ccache \
-            cmake \
-            cpio \
-            doxygen \
-            dtc \
-            expect \
-            fd \
-            gcc-multilib \
-            git \
-            htop \
-            hugo \
-            iputils \
-            jq \
-            linux-zen \
-            linux-zen-headers \
-            lld \
-            llvm \
-            mosh \
-            most \
-            multilib-devel \
-            mutt \
-            neofetch \
-            ninja \
-            openssl \
-            pacman-contrib \
-            perl-authen-sasl \
-            perl-mime-tools \
-            perl-net-smtp-ssl \
-            php \
-            php-curl \
-            podman \
-            python \
-            python-pip \
-            python-psutil \
-            qemu-headless-arch-extra \
-            ripgrep \
-            swig \
-            tmux \
-            uboot-tools \
-            unzip \
-            wget \
-            xmlto || die "Error installing packages!"
-        sudo pacman -R --noconfirm linux
-        sudo grub-mkconfig -o /boot/grub/grub.cfg
-
-        # Configure podman
-        echo "kernel.unprivileged_userns_clone=1" | sudo tee /etc/sysctl.d/unprivileged_userns_clone.conf
-        echo "$(whoami):100000:65536" | sudo tee /etc/subgid /etc/subuid
-        echo "session    optional   pam_cgfs.so          -c freezer,memory,name=systemd,unified" | sudo tee -a /etc/pam.d/system-login
-    elif [[ ${DISTRO} = "debian" || ${DISTRO} = "ubuntu" ]]; then
+    if [[ ${DISTRO} = "debian" || ${DISTRO} = "ubuntu" ]]; then
         PACKAGES=(
             abootimg
             binutils-dev
@@ -303,17 +224,6 @@ EOF
     # Ensure GPG passphrase is cached for the rest of the run
     echo "test" | gpg --pinentry-mode loopback --clearsign
 
-    # Install yay and AUR packages
-    if [[ ${DISTRO} = "arch" ]]; then
-        cd "${TMP_BLD_FOLDER:=$(mktemp -d)}" || die "wtf"
-        curl -LSso PKGBUILD "https://aur.archlinux.org/cgit/aur.git/plain/PKGBUILD?h=yay"
-        makepkg --noconfirm -si || die "Error installing yay"
-        curl -LSso "${TMP_GPG:=$(mktemp)}" https://invisible-island.net/public/dickey-invisible-island.txt || die "Could not download GPG key"
-        gpg --import "${TMP_GPG}" || die "Could not import GPG key"
-        yay -S --noconfirm --needed ncurses5-compat-libs || die "Error building AUR packages"
-        yay -S --noconfirm --needed creduce-git
-    fi
-
     # Download repos
     [[ -d ${SCRIPTS} ]] || { git clone git@github.com:nathanchance/scripts "${SCRIPTS}" || die "Error cloning scripts"; }
     git -C "${SCRIPTS}" pull
@@ -376,7 +286,6 @@ function rbld_usr() { (
     source "${SCRIPTS_FOLDER:?}"/env/stubs/updbin || die "Cannot source updbin"
     rm -rf "${HOME:?}"/usr
     case "$(get_distro)" in
-        arch) bgit || die "Error building git" ;;
         debian | ubuntu)
             updbin || die "Error installing updated binaries"
             bcttlfshtools || die "Error installing Cuttlefish host package"
