@@ -89,10 +89,6 @@ function cbl_linux_repos() { (
             [[ ${FOLDER} =~ ${CBL_B}/patched/linux-stable ]] && git remote add stable-rc https://git.kernel.org/pub/scm/linux/kernel/git/stable/linux-stable-rc.git/
         )
     done
-    git clone git@gitolite.kernel.org:pub/scm/linux/kernel/git/nathan/linux "${CBL_S}"/korg-linux
-    cd "${CBL_S}"/korg-linux || exit ${?}
-    git_remote_add -f linus https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/
-    git_remote_add -f --no-tags next https://git.kernel.org/pub/scm/linux/kernel/git/next/linux-next.git/
     rm -rf "${PWD}"
 ); }
 
@@ -149,6 +145,13 @@ function cbl_other_repos() { (
     git_remote_add -f sami https://github.com/samitolvanen/linux
     git config rerere.enabled true
     git config status.aheadBehind false
+
+    cd "${CBL_O_R}"/src || die "wtf"
+    [[ -d korg-linux ]] && git clone git@gitolite.kernel.org:pub/scm/linux/kernel/git/nathan/linux korg-linux
+
+    cd "${CBL_O_R}"/src/korg-linux || exit ${?}
+    git_remote_add -f linus https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/
+    git_remote_add -f --no-tags next https://git.kernel.org/pub/scm/linux/kernel/git/next/linux-next.git/
 
     CBL_O_R_QEMU=${CBL_O_R}/qemu
     mkdir -p "${CBL_O_R_QEMU}"/{bin,install,src}
