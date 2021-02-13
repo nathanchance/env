@@ -4,7 +4,7 @@
 #
 # Utility and terminal setup functions for WSL
 
-# $ sudo apt update && sudo apt install -y --no-install-recommends ca-certificates curl zsh && sudo chsh -s /bin/zsh nathan
+# $ sudo sh -c 'apt update && apt dist-upgrade -y && apt install -y --no-install-recommends ca-certificates curl zsh && chsh -s /bin/zsh nathan'
 
 # Setup function
 #
