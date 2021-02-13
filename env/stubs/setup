@@ -121,6 +121,7 @@ function cbl_other_repos() { (
 
         [[ -d ${FOLDER} ]] || git clone git@github.com:ClangBuiltLinux/"${REPO}".git "${FOLDER}"
         hub -C "${FOLDER}" fork
+        git -C "${FOLDER}" remote update
     done
     [[ -d yapf ]] || git clone https://github.com/google/yapf
 
