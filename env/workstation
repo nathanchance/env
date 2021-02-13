@@ -222,6 +222,10 @@ function bootstrap() { (
         )
 
         if [[ ${DISTRO} = "debian" ]]; then
+            # For rootless podman
+            echo "kernel.unprivileged_userns_clone=1" | sudo tee /etc/sysctl.d/00-local-userns.conf
+            sudo systemctl restart procps
+
             grep -q "buster-backports" /etc/apt/sources.list || echo "deb http://deb.debian.org/debian buster-backports main" | sudo tee -a /etc/apt/sources.list
 
             echo "deb https://download.opensuse.org/repositories/devel:/kubic:/libcontainers:/stable/Debian_10/ /" | sudo tee /etc/apt/sources.list.d/devel:kubic:libcontainers:stable.list
@@ -250,6 +254,7 @@ function bootstrap() { (
         # Rootless podman
         echo "$(whoami):100000:65536" | sudo tee /etc/subgid /etc/subuid
         printf "[registries.search]\nregistries = ['docker.io', 'quay.io']\n" | sudo tee /etc/containers/registries.conf
+        [[ ${DISTRO} = "debian" ]] && systemctl --user restart dbus
     else
         die "Unknown or unsupported distro"
     fi
