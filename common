@@ -243,4 +243,8 @@ function decrypt_serv_ip() { decrypt_gpg_file server_ip; }
 # Update del_dog_api_key file from scripts folder
 function decrypt_del_dog_api_key() { decrypt_gpg_file del_dog_api_key; }
 
+# curl wrapper
+function crl() { (
+    curl -LSs "${@}"
+); }
 # vi: filetype=zsh
