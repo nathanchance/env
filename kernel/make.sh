@@ -42,8 +42,8 @@ function parse_parameters() {
 function setup_paths() {
     if [[ ${LLVM} -eq 1 || ${CC} = "clang" ]]; then
         case "$(id -un)@$(uname -n)" in
-            nathan@ubuntu-*) TC_FOLDER=${CBL_LLVM_BNTL} ;;
-            nathan@Ryzen-5-4500U | nathan@Ryzen-9-3900X) TC_FOLDER=${HOME}/toolchains/cbl/llvm-binutils/bin ;;
+            nathan@debian-* | nathan@ubuntu-*) TC_FOLDER=${CBL_LLVM_BNTL} ;;
+            nathan@MSI | nathan@Ryzen-5-4500U | nathan@Ryzen-9-3900X) TC_FOLDER=${HOME}/toolchains/cbl/llvm-binutils/bin ;;
         esac
         export PATH=${TC_FOLDER}:${PATH}
         # In case CC is not specified (e.g. LLVM=1)
