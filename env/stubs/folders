@@ -1,16 +1,13 @@
 # shellcheck disable=SC2034
 
-# Common locations amongst scripts
-MAIN_FOLDER=${HOME}
+[[ -z ${MAIN_FOLDER} ]] && MAIN_FOLDER=${HOME}
 KERNEL_FOLDER=${MAIN_FOLDER}/kernels
 GITHUB_FOLDER=${MAIN_FOLDER}/github
 SRC_FOLDER=${MAIN_FOLDER}/src
-ROM_FOLDER=${MAIN_FOLDER}/roms
 TC_FOLDER=${MAIN_FOLDER}/toolchains
 ANDROID_TC_FOLDER=${TC_FOLDER}/android
 GCC_TC_FOLDER=${TC_FOLDER}/gcc
 LLVM_TC_FOLDER=${TC_FOLDER}/llvm
-WEB_FOLDER=/var/www
 
 # We need this for other scripts
 export GCC_TC_FOLDER
@@ -20,8 +17,4 @@ ALS=${MAIN_FOLDER}/als
 
 # ClangBuiltLinux folder
 CBL=${MAIN_FOLDER}/cbl
-
-# Latest AOSP Clang version
-LACV=clang-r383902
-LACF=${ANDROID_TC_FOLDER}/clang-master/${LACV}
 # vi: filetype=zsh

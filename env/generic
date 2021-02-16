@@ -7,7 +7,8 @@
 # Install zsh before hand and use 'chsh -s /bin/zsh $(whoami)'
 
 function bootstrap() { (
-    source <(curl -LSs https://github.com/nathanchance/scripts/raw/main/common) &>/dev/null || return 1
+    source <(curl -LSs https://github.com/nathanchance/scripts/raw/main/common) &>/dev/null || exit ${?}
+    source <(curl -LSs https://github.com/nathanchance/scripts/raw/main/env/stubs/folders) &>/dev/null || exit ${?}
 
     # Get list of packages to be installed
     # Debian/Ubuntu
@@ -99,8 +100,8 @@ function bootstrap() { (
         sudo dpkg-reconfigure --frontend noninteractive locales
     fi
 
-    SCRIPTS=${HOME}/github/scripts
-    mkdir -p "${SCRIPTS%/*}"
+    SCRIPTS=${GITHUB_FOLDER}/scripts
+    mkdir -p "${GITHUB_FOLDER}"
     [[ -d ${SCRIPTS} ]] || { git clone https://github.com/nathanchance/scripts "${SCRIPTS}" || die "Error cloning scripts!"; }
     git -C "${SCRIPTS}" pull --rebase || die "Error updating script!"
     source <(cat "${SCRIPTS}"/env/common)
@@ -117,7 +118,6 @@ function rbld_usr() { (
     source "${SCRIPTS_FOLDER:?}"/env/stubs/updbin || die "Cannot source updbin"
     rm -rf "${HOME:?}"/usr
     updbin || die "updbin failed"
-    bqemu || die "bqemu failed"
     iandroidtools || die "iandroidtools failed"
 ); }
 
@@ -125,5 +125,7 @@ function generic_aliases() {
     alias ls='ls --color=auto'
 }
 
-function generic_setup() { true; }
+function generic_setup() {
+    source "${SCRIPTS_FOLDER}/env/stubs/folders"
+}
 # vi: filetype=zsh

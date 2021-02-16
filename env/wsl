@@ -11,7 +11,8 @@
 # Requires Keys folder to be available in /mnt/c/Users/natec/Documents
 function bootstrap() { (
     # Grab common functions/variables
-    source <(curl -LSs https://github.com/nathanchance/scripts/raw/main/common) &>/dev/null
+    source <(curl -LSs https://github.com/nathanchance/scripts/raw/main/common) &>/dev/null || exit ${?}
+    source <(curl -LSs https://github.com/nathanchance/scripts/raw/main/env/stubs/folders) &>/dev/null || exit ${?}
 
     # Keys location
     KEYS=/mnt/c/Users/natec/Documents/Keys
@@ -131,10 +132,10 @@ EOF
     fi
 
     # Clone scripts
-    GITHUB=${HOME}/github
-    mkdir -p "${GITHUB}"
-    SCRIPTS=${GITHUB}/scripts
+    mkdir -p "${GITHUB_FOLDER}"
+    SCRIPTS=${GITHUB_FOLDER}/scripts
     [[ -d ${SCRIPTS} ]] || { git clone git@github.com:nathanchance/scripts "${SCRIPTS}" || die "Error cloning script"; }
+    git -C "${SCRIPTS}" pull
     source <(cat "${SCRIPTS}"/env/common)
     source "${SCRIPTS}"/env/stubs/zsh && setup_zsh_env
     source "${SCRIPTS}"/env/stubs/setup && global_gitignore
@@ -152,9 +153,9 @@ EOF
 
     # Download website files
     for REPO in hugo-files nathanchance.github.io; do
-        [[ -d ${GITHUB}/${REPO} ]] || git clone git@github.com:nathanchance/"${REPO}" "${GITHUB}/${REPO}"
+        [[ -d ${GITHUB_FOLDER}/${REPO} ]] || git clone git@github.com:nathanchance/"${REPO}" "${GITHUB_FOLDER}/${REPO}"
     done
-    git -C "${GITHUB}"/hugo-files submodule update --init --recursive
+    git -C "${GITHUB_FOLDER}"/hugo-files submodule update --init --recursive
 ) && source "${HOME}"/.zshrc; }
 
 # Rebuild ~/usr
@@ -181,8 +182,8 @@ function rbld_usr() { (
 function updllvm() { (
     DATE=$(date +%Y-%m-%d)
 
-    LLVM_SRC=${HOME}/src/llvm-project
-    mkdir -p "${LLVM_SRC%/*}"
+    LLVM_SRC=${SRC_FOLDER:?}/llvm-project
+    mkdir -p "${SRC_FOLDER}"
     [[ -d ${LLVM_SRC} ]] || git clone https://github.com/llvm/llvm-project "${LLVM_SRC}"
     git -C "${LLVM_SRC}" pull || die "Error updating LLVM"
 
@@ -225,9 +226,7 @@ function mshsvr() { (
 
 # Laptop specific setup
 function wsl_setup() {
-    LLVM_TC_FOLDER=${HOME}/toolchains/llvm
-    mkdir -p "${LLVM_TC_FOLDER}"
-    export LLVM_TC_FOLDER
+    source "${SCRIPTS_FOLDER}"/env/stubs/folders
 
     # Load the stock completions to make sure we don't miss out on anything
     echo "${fpath[*]}" | grep -q -s "vendor-completions" || fpath=("${fpath[@]}" /usr/share/zsh/vendor-completions)
@@ -256,17 +255,17 @@ function upd_kernel() { (
 
     case ${KERNEL_LOCATION:-github} in
         local)
-            cp -v "${HOME}"/src/wsl2-kernel/build/x86_64/arch/x86/boot/bzImage "${KERNEL}"
+            cp -v "${SRC_FOLDER}"/wsl2-kernel/build/x86_64/arch/x86/boot/bzImage "${KERNEL}"
             ;;
         github)
             REPO=nathanchance/WSL2-Linux-Kernel
             curl -LSso "${KERNEL}" https://github.com/"${REPO}"/releases/download/"$(glr "${REPO}")"/bzImage
             ;;
         server)
-            SRC_FOLDER=${HOME}/cbl/build/wsl2
+            KSRC_FOLDER=${CBL}/build/wsl2
             OUT_FOLDER=build/x86_64
             KERNEL_IMAGE=arch/x86/boot/bzImage
-            scp nathan@"${SERVER_IP:?}":"${SRC_FOLDER}"/${OUT_FOLDER}/${KERNEL_IMAGE} "${KERNEL}"
+            scp nathan@"${SERVER_IP:?}":"${KSRC_FOLDER}"/${OUT_FOLDER}/${KERNEL_IMAGE} "${KERNEL}"
             ;;
     esac
 ); }
@@ -290,10 +289,10 @@ function stripall() { (
 
 function bldtcs() { (
     DATE_TIME=$(date +%Y%m%d-%H%M)
-    TC_PREFIX=${HOME}/toolchains/cbl
+    TC_PREFIX=${TC_FOLDER}/cbl
 
     # Update tc-build
-    TCBLD=${HOME}/src/tc-build
+    TCBLD=${SRC_FOLDER}/tc-build
     [[ -d ${TCBLD} ]] || git clone -b personal git@github.com:nathanchance/tc-build.git "${TCBLD}"
     cd "${TCBLD}" || die "Error downloading tc-build"
     git ru

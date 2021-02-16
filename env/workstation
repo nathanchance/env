@@ -230,7 +230,6 @@ EOF
     source <(cat "${SCRIPTS}"/env/common)
     source "${SCRIPTS}"/env/stubs/zsh && setup_zsh_env
     source "${SCRIPTS}"/env/stubs/setup && global_gitignore
-    source "${SCRIPTS}"/env/stubs/updbin
     SCRIPTS_FOLDER=${SCRIPTS} rbld_usr || exit ${?}
     path_push "${HOME}/usr/bin"
     source "${SCRIPTS}"/env/stubs/git && git_setup
