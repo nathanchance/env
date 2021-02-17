@@ -70,7 +70,7 @@ function decrypt_del_dog_api_key() { decrypt_gpg_file del_dog_api_key; }
 
 # Decrypt gpg signed file
 function decrypt_gpg_file() { (
-    [[ -z ${SCRIPTS_FOLDER} && -z ${SCRIPTS} ]] && die "Scripts folder cannot be found!"
+    [[ -z ${SCRIPTS_FOLDER} && -z ${SCRIPTS} ]] && die "Scripts folder cannot be found"
     [[ -z ${SCRIPTS_FOLDER} ]] && SCRIPTS_FOLDER=${SCRIPTS}
     gpg_key_cache
     gpg --batch --yes --pinentry-mode loopback --output "${HOME}"/."${1:?}" --decrypt "${SCRIPTS_FOLDER:?}"/configs/common/"${1}".gpg
@@ -81,20 +81,9 @@ function decrypt_serv_ip() { decrypt_gpg_file server_ip; }
 
 # Prints an error in bold red and exits the script
 function die() {
-    if [[ -n ${TG} ]]; then
-        local TMP_FILE
-        TMP_FILE=$(mktemp)
-        # Info must be resourced so public chats don't get notified
-        load_botinfo
-        {
-            echo "\`\`\`"
-            echo "${*}"
-            echo "\`\`\`"
-        } >"${TMP_FILE}"
-        tg_msg "$(cat "${TMP_FILE}")"
-        rm -f "${TMP_FILE}"
-    fi
-
+    # SC2016: Expressions don't expand in single quotes, use double quotes for that.
+    # shellcheck disable=SC2016
+    ${TG:=false} && tg_msg "$(printf '```\n%s\n```' "${*}")"
     display_error "${@}"
     type pre_exit_commands &>/dev/null && pre_exit_commands
     builtin exit 1
@@ -107,7 +96,7 @@ function display_error() {
 
 # Enforces the value needed for two-part flags
 function enforce_value() {
-    [[ ${#} -lt 1 ]] && die "A additional value is needed for one of the flags passed to this script!"
+    [[ ${#} -lt 1 ]] && die "A additional value is needed for one of the flags passed to this script"
 }
 
 # Formats the time
@@ -189,49 +178,34 @@ function path_pop() {
 }
 
 # Telegram notifier function
-function tg_msg() {
+function tg_msg() { (
+    # To prevent recursive calls in die
+    export TG=false
+
     if [[ -z ${TOKEN} ]]; then
         [[ -f ${MAIN_FOLDER:?}/.botinfo ]] && source <(tail -n1 "${MAIN_FOLDER}"/.botinfo)
-        if [[ -z ${TOKEN} ]]; then
-            display_error "tg_msg() was called but there was no token!"
-            return 1
-        fi
+        [[ -z ${TOKEN} ]] && die "tg_msg() was called but there was no token"
     fi
 
     if [[ -z ${CHAT_ID} ]]; then
         [[ -f ${MAIN_FOLDER:?}/.botinfo ]] && source <(head -n1 "${MAIN_FOLDER}"/.botinfo)
-        if [[ -z ${CHAT_ID} ]]; then
-            display_error "tg_msg() was called but there was no chat ID!"
-            return 1
-        fi
+        [[ -z ${CHAT_ID} ]] && die "tg_msg() was called but there was no chat ID"
     fi
 
     curl -s -X POST https://api.telegram.org/bot"${TOKEN}"/sendMessage \
         -d chat_id="${CHAT_ID}" \
         -d parse_mode="Markdown" \
         -d text="${*}" 1>/dev/null
-}
+); }
 
 # Telegram uploader function
-function tg_upload() {
-    local FILE
+function tg_upload() { (
     FILE=${1}
     shift
 
-    if [[ -z ${TOKEN} ]]; then
-        display_error "tg_upload() was called but there was no token!"
-        return 1
-    fi
-
-    if [[ -z ${CHAT_ID} ]]; then
-        display_error "tg_upload() was called but there was no chat ID!"
-        return 1
-    fi
-
-    if [[ ! -f ${FILE} ]]; then
-        display_error "tg_upload() failed to find ${FILE}!"
-        return 1
-    fi
+    [[ -z ${TOKEN} ]] && die "tg_upload() was called but there was no token"
+    [[ -z ${CHAT_ID} ]] && die "tg_upload() was called but there was no chat ID"
+    [[ -f ${FILE} ]] || die "tg_upload() failed to find ${FILE}"
 
     curl \
         -s \
@@ -239,7 +213,7 @@ function tg_upload() {
         -F document=@"${FILE}" \
         -F caption="${*}" \
         -X POST https://api.telegram.org/bot"${TOKEN}"/sendDocument 1>/dev/null
-}
+); }
 
 # Prints a warning in bold yellow
 function warn() {
