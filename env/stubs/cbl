@@ -434,15 +434,15 @@ function yapf() {
 
 function qualify_tc_bld_uprev() { (
     TC_BLD_SRC=${CBL_GIT}/tc-build
-    LNX_STBL=${SRC_FOLDER}/linux-stable
+    LNX_STBL=${CBL_SRC}/linux-stable
     WORK_DIR=$(mktemp -d)
     TC_BLD=${WORK_DIR}/tc-build
 
     header "Setting up folders"
 
-    git -C "${TC_BLD_SRC}" worktree add "${TC_BLD}"
-    git -C "${LNX_STBL}" ru
-    for LNX_VER in 5.10 5.4; do git -C "${LNX_STBL}" worktree add "${WORK_DIR}"/linux-stable-"${LNX_VER}" origin/linux-"${LNX_VER}".y; done
+    git -C "${TC_BLD_SRC}" worktree add "${TC_BLD}" || exit ${?}
+    git -C "${LNX_STBL}" ru || exit ${?}
+    for LNX_VER in 5.10 5.4; do git -C "${LNX_STBL}" worktree add "${WORK_DIR}"/linux-stable-"${LNX_VER}" origin/linux-"${LNX_VER}".y || exit ${?}; done
 
     header "Building toolchains"
 
