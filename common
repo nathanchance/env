@@ -166,8 +166,7 @@ function gpg_key_usable() { (
 function gpg_key_cache() { (
     gpg_key_usable || die "gpg key is not available"
     NUM=$(gpg-connect-agent 'keyinfo --list' /bye 2>/dev/null | awk 'BEGIN{CACHED=0} /^S/ {if($7==1){CACHED=1}} END{if($0!=""){print CACHED} else {print "none"}}')
-    [[ ${NUM} = "none" || ${NUM} -eq 0 ]] && exit 0
-    echo | gpg --pinentry-mode loopback --clearsign &>/dev/null
+    [[ ${NUM} = "none" || ${NUM} -eq 0 ]] && echo | gpg --pinentry-mode loopback --clearsign &>/dev/null
 ); }
 
 # Add something to the end of PATH if it isn't already there
