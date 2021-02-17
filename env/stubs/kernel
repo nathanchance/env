@@ -4,6 +4,20 @@
 #
 # Functions used to assist with upstream kernel development
 
+# checkpatch.pl shorthand
+function chp() { (
+    [[ -x scripts/checkpatch.pl ]] || die "checkpatch.pl does not exist"
+    scripts/checkpatch.pl "${@}"
+ ); }
+
+# get_maintainer.pl shorthand
+# SC2120: gtm references arguments, but none are ever passed.
+# shellcheck disable=SC2120
+function gtm() { (
+    [[ -x scripts/get_maintainer.pl ]] || die "get_maintainer.pl does not exist"
+    scripts/get_maintainer.pl --scm "${@}"
+); }
+
 # Apply patch from LKML
 function patch_from_lkml() { (
     while ((${#})); do
@@ -19,10 +33,18 @@ function patch_from_lkml() { (
 
 # Patch check function
 function pch() { (
-    [[ ${#} -eq 0 ]] && FP_PARAMS=(-1 HEAD)
-    [[ -z ${FP_PARAMS[*]} ]] && FP_PARAMS=("${@}")
-    [[ -f scripts/checkpatch.pl ]] && git fp --stdout "${FP_PARAMS[@]}" | ./scripts/checkpatch.pl
-    [[ -f scripts/get_maintainer.pl ]] && git fp --stdout "${FP_PARAMS[@]}" | ./scripts/get_maintainer.pl --scm
+    REV=${1}
+    [[ -z ${REV} ]] && REV=HEAD~1..HEAD
+
+    for SHA in $(git log --format=%H --no-merges --reverse "${REV}"); do
+        TITLE="Commit $(git kf "${SHA}")"
+        HEADER=$(for _ in $(seq ${#TITLE}); do printf '-'; done)
+        printf "\n%s\n%s\n%s\n\n" "${HEADER}" "${TITLE}" "${HEADER}"
+        chp -g "${SHA}"
+        # SC2119: Use gtm "$@" if function's $1 should mean script's $1.
+        # shellcheck disable=SC2119
+        git fp -1 --stdout "${SHA}" | gtm
+    done
 ); }
 
 # Quilt-like patch management function for Linux
