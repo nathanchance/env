@@ -27,61 +27,6 @@ TCBLD=${CBL}/tc-build
 CBL_CCACHE=${CBL}/.ccache
 export CBL_ANDROID CBL_BLD CBL_BLD_C CBL_BLD_P CBL_CTTLFSH CBL_GIT CBL_KC CBL_KC_SRC CBL_TC CBL_LLVM CBL_BNTL CBL_LLVM_BNTL CBL_SRC CBL_WRKTR CBL_QEMU CBL_QEMU_BIN CBL_QEMU_INSTALL CBL_QEMU_SRC TCBLD CBL_CCACHE
 
-# Patch check function
-function pch() { (
-    [[ ${#} -eq 0 ]] && FP_PARAMS=(-1 HEAD)
-    [[ -z ${FP_PARAMS[*]} ]] && FP_PARAMS=("${@}")
-    [[ -f scripts/checkpatch.pl ]] && git fp --stdout "${FP_PARAMS[@]}" | ./scripts/checkpatch.pl
-    [[ -f scripts/get_maintainer.pl ]] && git fp --stdout "${FP_PARAMS[@]}" | ./scripts/get_maintainer.pl --scm
-); }
-
-# Quilt-like patch management function for Linux
-function ptchmn() { (
-    [[ ! -f Makefile ]] && die "You're not in a kernel folder!"
-
-    REPO=${PWD##*/}
-    TARGET_FOLDER=${GITHUB_FOLDER}/patches/${REPO}/$(git cb)
-    [[ ! -d ${TARGET_FOLDER} ]] && die "${TARGET_FOLDER} doesn't exist!"
-
-    case "${1:?}" in
-        -s | --sync)
-            case ${REPO} in
-                linux | linux-next | linux-stable-5.4 | linux-stable-5.10) ;;
-                *) die "${REPO} not supported by ptchmn!" ;;
-            esac
-
-            FIRST_HASH=$(git mfc)
-            [[ -z ${FIRST_HASH} ]] && die "FIRST_HASH is empty...?"
-
-            rm "${TARGET_FOLDER}"/*
-
-            git fp -o "${TARGET_FOLDER}" --base="${FIRST_HASH}^" "${FIRST_HASH}"^..HEAD
-
-            git -C "${TARGET_FOLDER}" aa
-
-            git -C "${TARGET_FOLDER}" c -m "patches: ${REPO}: $(git cb): Sync as of $(git sh -s --format=%h)"
-
-            git -C "${TARGET_FOLDER}" push
-            ;;
-
-        -a | --apply)
-            git am "${TARGET_FOLDER}"/*
-            ;;
-    esac
-); }
-
-# Rebase a linux-next branch
-function rbln() { (
-    [[ ! -f Makefile ]] && {
-        display_error "You're not in a kernel folder!"
-        return 1
-    }
-    FIRST_HASH=$(git mfc)
-    SECOND_HASH=$(git show -s --format=%H "$(git cb)")
-    git rh origin/master
-    git cherry-pick --gpg-sign "${FIRST_HASH}^..${SECOND_HASH}"
-); }
-
 # Download and apply an LLVM/Clang/lld patch
 function phabap() { (
     [[ ! -d llvm ]] && die "You're not in the llvm-project folder!"
@@ -513,38 +458,6 @@ function upd_lnx_tcbld() { (
     gen_sha256sum "${URL}/${TARBALL}"
 
     sed -i "s/LINUX=.*/LINUX=linux-${KVER}/" "${KERNEL}"/build.sh
-); }
-
-function rbpi() { (
-    PI_SRC=${CBL_BLD}/rpi
-
-    set -x
-
-    cd "${PI_SRC}" || exit ${?}
-    git ru || exit ${?}
-    git rh origin/master
-    PATCHES_FOLDER=${GITHUB_FOLDER}/patches/rpi-next
-    FIXES=${PATCHES_FOLDER}/fixes.series
-    [[ -f ${FIXES} ]] && { git am "${FIXES}" || exit ${?}; }
-    crl https://lore.kernel.org/lkml/TYAPR01MB2990FAA79F1C3F3A0441721892879@TYAPR01MB2990.jpnprd01.prod.outlook.com/2-0001-arm64-dts-visconti-Fix-parse-error-for-TMPV7708-RM-m.patch | git ams || exit ${?}
-    ../pi-scripts/build.sh ARCH=arm || exit ${?}
-    ../pi-scripts/build.sh ARCH=arm64 || exit ${?}
-    if ! git pll --no-edit mainline master; then
-        rg "<<<<<<< HEAD" && exit ${?}
-        ../pi-scripts/build.sh ARCH=arm || exit ${?}
-        ../pi-scripts/build.sh ARCH=arm64 || exit ${?}
-        git aa
-        git c || exit ${?}
-    fi
-    if ! git pll --no-edit sami clang-cfi; then
-        rg "<<<<<<< HEAD" && exit ${?}
-        ../pi-scripts/build.sh ARCH=arm || exit ${?}
-        ../pi-scripts/build.sh ARCH=arm64 || exit ${?}
-        git aa
-        git c --no-edit || exit ${?}
-    fi
-    ../pi-scripts/build.sh ARCH=arm || exit ${?}
-    ../pi-scripts/build.sh ARCH=arm64 || exit ${?}
 ); }
 
 function build_stable_llvm() { (

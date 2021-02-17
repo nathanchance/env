@@ -1,0 +1,147 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+# Copyright (C) 2021 Nathan Chancellor
+#
+# Functions used to assist with upstream kernel development
+
+# Apply patch from LKML
+function patch_from_lkml() { (
+    while ((${#})); do
+        case ${1} in
+            http*) LINK=${1} ;;
+            am) METHOD=(am) ;;
+            apply) METHOD=(apply -v) ;;
+        esac
+        shift
+    done
+    curl -LSs "${LINK%/*}"/raw | git "${METHOD[@]}" -3
+); }
+
+# Patch check function
+function pch() { (
+    [[ ${#} -eq 0 ]] && FP_PARAMS=(-1 HEAD)
+    [[ -z ${FP_PARAMS[*]} ]] && FP_PARAMS=("${@}")
+    [[ -f scripts/checkpatch.pl ]] && git fp --stdout "${FP_PARAMS[@]}" | ./scripts/checkpatch.pl
+    [[ -f scripts/get_maintainer.pl ]] && git fp --stdout "${FP_PARAMS[@]}" | ./scripts/get_maintainer.pl --scm
+); }
+
+# Quilt-like patch management function for Linux
+function ptchmn() { (
+    [[ ! -f Makefile ]] && die "You're not in a kernel folder!"
+
+    REPO=${PWD##*/}
+    TARGET_FOLDER=${GITHUB_FOLDER}/patches/${REPO}/$(git cb)
+    [[ ! -d ${TARGET_FOLDER} ]] && die "${TARGET_FOLDER} doesn't exist!"
+
+    case "${1:?}" in
+        -s | --sync)
+            case ${REPO} in
+                linux | linux-next | linux-stable-5.4 | linux-stable-5.10) ;;
+                *) die "${REPO} not supported by ptchmn!" ;;
+            esac
+
+            FIRST_HASH=$(git mfc)
+            [[ -z ${FIRST_HASH} ]] && die "FIRST_HASH is empty...?"
+
+            rm "${TARGET_FOLDER}"/*
+
+            git fp -o "${TARGET_FOLDER}" --base="${FIRST_HASH}^" "${FIRST_HASH}"^..HEAD
+
+            git -C "${TARGET_FOLDER}" aa
+
+            git -C "${TARGET_FOLDER}" c -m "patches: ${REPO}: $(git cb): Sync as of $(git sh -s --format=%h)"
+
+            git -C "${TARGET_FOLDER}" push
+            ;;
+
+        -a | --apply)
+            git am "${TARGET_FOLDER}"/*
+            ;;
+    esac
+); }
+
+# Rebase a linux-next branch
+function rbln() { (
+    [[ ! -f Makefile ]] && {
+        display_error "You're not in a kernel folder!"
+        return 1
+    }
+    FIRST_HASH=$(git mfc)
+    SECOND_HASH=$(git show -s --format=%H "$(git cb)")
+    git rh origin/master
+    git cherry-pick --gpg-sign "${FIRST_HASH}^..${SECOND_HASH}"
+); }
+
+# Rebase Raspberry Pi kernel
+function rbpi() { (
+    PI_SRC=${CBL_BLD:?}/rpi
+
+    set -x
+
+    cd "${PI_SRC}" || exit ${?}
+    git ru || exit ${?}
+    git rh origin/master
+    PATCHES_FOLDER=${GITHUB_FOLDER}/patches/rpi-next
+    FIXES=${PATCHES_FOLDER}/fixes.series
+    [[ -f ${FIXES} ]] && { git am "${FIXES}" || exit ${?}; }
+    crl https://lore.kernel.org/lkml/TYAPR01MB2990FAA79F1C3F3A0441721892879@TYAPR01MB2990.jpnprd01.prod.outlook.com/2-0001-arm64-dts-visconti-Fix-parse-error-for-TMPV7708-RM-m.patch | git ams || exit ${?}
+    ../pi-scripts/build.sh ARCH=arm || exit ${?}
+    ../pi-scripts/build.sh ARCH=arm64 || exit ${?}
+    if ! git pll --no-edit mainline master; then
+        rg "<<<<<<< HEAD" && exit ${?}
+        ../pi-scripts/build.sh ARCH=arm || exit ${?}
+        ../pi-scripts/build.sh ARCH=arm64 || exit ${?}
+        git aa
+        git c || exit ${?}
+    fi
+    if ! git pll --no-edit sami clang-cfi; then
+        rg "<<<<<<< HEAD" && exit ${?}
+        ../pi-scripts/build.sh ARCH=arm || exit ${?}
+        ../pi-scripts/build.sh ARCH=arm64 || exit ${?}
+        git aa
+        git c --no-edit || exit ${?}
+    fi
+    ../pi-scripts/build.sh ARCH=arm || exit ${?}
+    ../pi-scripts/build.sh ARCH=arm64 || exit ${?}
+); }
+
+# Update wsl2-kernel to latest -next
+function rbwk() { (
+    case ${LOCATION} in
+        workstation) WSL2_KERNEL=${HOME}/cbl/build/wsl2 ;;
+        wsl) WSL2_KERNEL=${HOME}/src/wsl2-kernel ;;
+        *) die "rbwk() is not supported by ${LOCATION}" ;;
+    esac
+
+    set -x
+    cd "${WSL2_KERNEL}" || exit ${?}
+    git ru || exit ${?}
+    for BRANCH in clearlinux-patchset microsoft-patchset; do
+        git ch "${BRANCH}" || exit ${?}
+        git rb -i next/master || exit ${?}
+    done
+    git ch next || exit ${?}
+    git rh next/master
+    if ! git pll --no-edit mainline master; then
+        rg "<<<<<<< HEAD" && exit ${?}
+        git aa
+        git c || exit ${?}
+    fi
+    if ! git pll --no-edit sami clang-cfi; then
+        rg "<<<<<<< HEAD" && exit ${?}
+        git aa
+        git c || exit ${?}
+    fi
+    git ml --no-edit clearlinux-patchset microsoft-patchset || exit ${?}
+    git cp "$(git lo --merges -1 --format=%H origin/HEAD)".."$(git sh -s --format=%H origin/HEAD)"
+); }
+
+# Small macro for responding to a LKML post
+function reply_to_lkml() { (
+    LINK=${1:?}
+    MBOX=$(mktemp --suffix=.mbox)
+    curl -LSso "${MBOX}" "${LINK%/*}"/raw &&
+        mutt -f "${MBOX}"
+    rm "${MBOX}"
+); }
+# vi: filetype=zsh
