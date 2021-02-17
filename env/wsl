@@ -18,83 +18,91 @@ function bootstrap() { (
     KEYS=/mnt/c/Users/natec/Documents/Keys
     [[ -d ${KEYS} ]] || die "Keys are not available"
 
-    # Always turn on '--no-install-recommends'
-    apt-config dump | grep -we Recommends -e Suggests | sed 's/1/0/g' | sudo tee /etc/apt/apt.conf.d/999norecommend
+    DISTRO=$(get_distro)
 
-    # Update all current packages
-    sudo apt update
-    sudo apt upgrade -y
+    if [[ ${DISTRO} = "debian" || ${DISTRO} = "ubuntu" ]]; then
+        # Always turn on '--no-install-recommends'
+        apt-config dump | grep -we Recommends -e Suggests | sed 's/1/0/g' | sudo tee /etc/apt/apt.conf.d/999norecommend
 
-    # Install packages from Ubuntu repos
-    sudo apt install -y \
-        bc \
-        binutils-dev \
-        bison \
-        build-essential \
-        clang \
-        cmake \
-        cowsay \
-        cpio \
-        curl \
-        devscripts \
-        expect \
-        flex \
-        fortune \
-        fortunes \
-        gettext \
-        git \
-        git-email \
-        gpg \
-        htop \
-        irssi \
-        jq \
-        libauthen-sasl-perl \
-        libclang-dev \
-        libcurl4-openssl-dev \
-        libelf-dev \
-        libemail-valid-perl \
-        libevent-dev \
-        libexpat-dev \
-        libglib2.0-dev \
-        libgmp-dev \
-        libio-socket-ssl-perl \
-        libmailtools-perl \
-        libmpc-dev \
-        libmpfr-dev \
-        libncurses-dev \
-        libnet-smtp-ssl-perl \
-        libpcre2-dev \
-        libpixman-1-dev \
-        libsasl2-modules \
-        libssl-dev \
-        lld \
-        llvm \
-        llvm-dev \
-        lolcat \
-        lsb-release \
-        mosh \
-        most \
-        mutt \
-        neofetch \
-        pass \
-        pkg-config \
-        python-is-python3 \
-        python3-pip \
-        re2c \
-        software-properties-common \
-        ssh \
-        texinfo \
-        tmux \
-        u-boot-tools \
-        unzip \
-        vim \
-        wget \
-        wslu \
-        zlib1g-dev \
-        zstd
+        # Update all current packages
+        sudo apt update
+        sudo apt upgrade -y
 
-    # Reinstall 'ping' to avoid issues with permissions
-    sudo apt install -y --reinstall iputils-ping
+        PACKAGES=(
+            bc
+            binutils-dev
+            bison
+            build-essential
+            clang
+            cmake
+            cowsay
+            cpio
+            curl
+            devscripts
+            expect
+            flex
+            fortune
+            fortunes
+            gettext
+            git
+            git-email
+            gpg
+            htop
+            irssi
+            jq
+            libauthen-sasl-perl
+            libclang-dev
+            libcurl4-openssl-dev
+            libelf-dev
+            libemail-valid-perl
+            libevent-dev
+            libexpat-dev
+            libglib2.0-dev
+            libgmp-dev
+            libio-socket-ssl-perl
+            libmailtools-perl
+            libmpc-dev
+            libmpfr-dev
+            libncurses-dev
+            libnet-smtp-ssl-perl
+            libpcre2-dev
+            libpixman-1-dev
+            libsasl2-modules
+            libssl-dev
+            lld
+            llvm
+            llvm-dev
+            lolcat
+            lsb-release
+            mosh
+            most
+            mutt
+            neofetch
+            pass
+            pkg-config
+            python3-pip
+            re2c
+            software-properties-common
+            ssh
+            texinfo
+            tmux
+            u-boot-tools
+            unzip
+            vim
+            wget
+            zlib1g-dev
+            zstd
+        )
+        [[ ${DISTRO} = "ubuntu" ]] && PACKAGES+=(
+            python-is-python3
+            wslu
+        )
+
+        sudo apt install -y "${PACKAGES[@]}"
+
+        # Reinstall 'ping' to avoid issues with permissions
+        sudo apt install -y --reinstall iputils-ping
+    fi
 
     # Setup SSH and GPG if keys are present
     mkdir -p "${HOME}"/.ssh
