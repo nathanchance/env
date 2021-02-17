@@ -9,12 +9,13 @@ ANDROID_TC_FOLDER=${TC_FOLDER}/android
 GCC_TC_FOLDER=${TC_FOLDER}/gcc
 LLVM_TC_FOLDER=${TC_FOLDER}/llvm
 
-# We need this for other scripts
-export GCC_TC_FOLDER
-
 # android-linux-stable folder
 ALS=${MAIN_FOLDER}/als
 
 # ClangBuiltLinux folder
 CBL=${MAIN_FOLDER}/cbl
+
+# We need this for other scripts
+export GCC_TC_FOLDER
+
 # vi: filetype=zsh

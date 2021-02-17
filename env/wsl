@@ -236,6 +236,8 @@ function wsl_setup() {
     gpg_key_cache
 
     source "${SCRIPTS_FOLDER}"/env/stubs/folders
+    CBL_LLVM_BNTL=${TC_FOLDER}/cbl/llvm-binutils/bin
+    export CBL_LLVM_BNTL
 
     # Load the stock completions to make sure we don't miss out on anything
     echo "${fpath[*]}" | grep -q -s "vendor-completions" || fpath=("${fpath[@]}" /usr/share/zsh/vendor-completions)
@@ -338,10 +340,10 @@ function bldtcs() { (
         ln -sf "${BLDLLVM_INSTALL_FOLDER##*/}" llvm-tot)
 
     # Combine CBL_LLVM and CBL_BNTL for llvm-kernel-testing
-    CBL_LLVM_BNTL=${TC_PREFIX}/llvm-binutils
-    rm -rf "${CBL_LLVM_BNTL}" &&
-        mkdir -p "${CBL_LLVM_BNTL}" &&
-        cp -frs "${BLDBN_INSTALL_FOLDER}"/* "${CBL_LLVM_BNTL}" &&
-        cp -frs "${BLDLLVM_INSTALL_FOLDER}"/* "${CBL_LLVM_BNTL}"
+    COMBO_FOLDER=${CBL_LLVM_BNTL%/*}
+    rm -rf "${COMBO_FOLDER}" &&
+        mkdir -p "${COMBO_FOLDER}" &&
+        cp -frs "${BLDBN_INSTALL_FOLDER}"/* "${COMBO_FOLDER}" &&
+        cp -frs "${BLDLLVM_INSTALL_FOLDER}"/* "${COMBO_FOLDER}"
 ); }
 # vi: filetype=zsh
