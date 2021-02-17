@@ -4,6 +4,29 @@
 #
 # Functions used to assist with upstream kernel development
 
+# Apply patch from LKML using b4
+function b4a() { (
+    command -v b4 &>/dev/null || die "b4 needs to be installed"
+    in_kernel_tree
+
+    B4_ARGS=()
+    while ((${#})); do
+        case ${1} in
+            http* | *@*) MSG_ID=${1} ;;
+            -P) B4_ARGS+=(-P "${1}") && shift ;;
+            am) METHOD=(am) ;;
+            ams) METHOD=(ams) ;;
+            # The default
+            ap | apply) ;;
+        esac
+        shift
+    done
+    [[ -z ${MSG_ID} ]] && die "Message ID needs to be passed to script"
+    [[ -z ${METHOD[*]} ]] && METHOD=(apply -v)
+
+    b4 am -o - -l "${B4_ARGS[@]}" "${MSG_ID}" | git "${METHOD[@]}" -3
+); }
+
 # checkpatch.pl shorthand
 function chp() { (
     [[ -x scripts/checkpatch.pl ]] || die "checkpatch.pl does not exist"
@@ -18,21 +41,15 @@ function gtm() { (
     scripts/get_maintainer.pl --scm "${@}"
 ); }
 
-# Apply patch from LKML
-function patch_from_lkml() { (
-    while ((${#})); do
-        case ${1} in
-            http*) LINK=${1} ;;
-            am) METHOD=(am) ;;
-            apply) METHOD=(apply -v) ;;
-        esac
-        shift
-    done
-    curl -LSs "${LINK%/*}"/raw | git "${METHOD[@]}" -3
-); }
+# Check if we are in a kernel tree or not
+function in_kernel_tree() {
+    [[ -f Makefile ]] || die "You do not appear to be in a kernel tree"
+}
 
 # Patch check function
 function pch() { (
+    in_kernel_tree
+
     REV=${1}
     [[ -z ${REV} ]] && REV=HEAD~1..HEAD
 
@@ -49,7 +66,7 @@ function pch() { (
 
 # Quilt-like patch management function for Linux
 function ptchmn() { (
-    [[ ! -f Makefile ]] && die "You're not in a kernel folder!"
+    in_kernel_tree
 
     REPO=${PWD##*/}
     TARGET_FOLDER=${GITHUB_FOLDER}/patches/${REPO}/$(git cb)
@@ -84,10 +101,8 @@ function ptchmn() { (
 
 # Rebase a linux-next branch
 function rbln() { (
-    [[ ! -f Makefile ]] && {
-        display_error "You're not in a kernel folder!"
-        return 1
-    }
+    in_kernel_tree
+
     FIRST_HASH=$(git mfc)
     SECOND_HASH=$(git show -s --format=%H "$(git cb)")
     git rh origin/master
