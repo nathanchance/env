@@ -135,7 +135,6 @@ function rbpi() { (
     PATCHES_FOLDER=${GITHUB_FOLDER}/patches/rpi-next
     FIXES=${PATCHES_FOLDER}/fixes.series
     [[ -f ${FIXES} ]] && { git am "${FIXES}" || exit ${?}; }
-    crl https://lore.kernel.org/lkml/TYAPR01MB2990FAA79F1C3F3A0441721892879@TYAPR01MB2990.jpnprd01.prod.outlook.com/2-0001-arm64-dts-visconti-Fix-parse-error-for-TMPV7708-RM-m.patch | git ams || exit ${?}
     ../pi-scripts/build.sh ARCH=arm || exit ${?}
     ../pi-scripts/build.sh ARCH=arm64 || exit ${?}
     if ! git pll --no-edit mainline master; then
