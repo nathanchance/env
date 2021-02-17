@@ -31,27 +31,56 @@ JOBS_FLAG="-j${THREADS}"
 
 export THREADS JOBS_FLAG
 
+# Common ccache variable
+CCACHE=$(
+    path_push "${HOME}/usr/bin"
+    command -v ccache
+)
+export CCACHE
+
 ###############
 #             #
 #  FUNCTIONS  #
 #             #
 ###############
 
-# Prints a formatted header to point out what is being done to the user
-function header() {
-    BORDER="====$(for _ in $(seq ${#1}); do printf '='; done)===="
-    printf '\n%b%s\n%s\n%s%b\n\n' "${2:-${BLUE}}" "${BORDER}" "==  ${1}  ==" "${BORDER}" "${RST}"
+# Add something to the beginning of PATH if it isn't already there
+function add_to_path_pre() {
+    local ARRAY ITEM
+    IFS=: read -rA ARRAY <<<"${1}"
+    for ITEM in $(printf '%s\n' "${ARRAY[@]}" | tac); do
+        [[ -d ${ITEM} ]] || continue
+        echo "${PATH}" | grep -s -q "${ITEM}" || export PATH="${ITEM}:${PATH}"
+    done
+}
+# Add something to the end of PATH if it isn't already there
+function add_to_path_post() {
+    local ARRAY ITEM
+    IFS=: read -rA ARRAY <<<"${1}"
+    for ITEM in $(printf '%s\n' "${ARRAY[@]}" | tac); do
+        [[ -d ${ITEM} ]] || continue
+        echo "${PATH}" | grep -s -q "${ITEM}" || export PATH="${PATH}:${ITEM}"
+    done
 }
 
-# Formats the time
-function format_time() {
-    python3 -c "import datetime; print(str(datetime.timedelta(seconds=int(${2} - ${1}))))"
-}
+# curl wrapper
+function crl() { (
+    curl -LSs "${@}"
+); }
 
-# Prints an error in bold red
-function display_error() {
-    printf '\n%b%s%b\n\n' "${COLOR:-${RED}}" "${1}" "${RST}"
-}
+# Update del_dog_api_key file from scripts folder
+function decrypt_del_dog_api_key() { decrypt_gpg_file del_dog_api_key; }
+
+# Decrypt gpg signed file
+function decrypt_gpg_file() { (
+    [[ -z ${SCRIPTS_FOLDER} && -z ${SCRIPTS} ]] && die "Scripts folder cannot be found!"
+    [[ -z ${SCRIPTS_FOLDER} ]] && SCRIPTS_FOLDER=${SCRIPTS}
+    gpg_key_cache
+    gpg --batch --yes --pinentry-mode loopback --output "${HOME}"/."${1:?}" --decrypt "${SCRIPTS_FOLDER:?}"/configs/common/"${1}".gpg
+); }
+
+# Update server_ip file from scripts folder
+function decrypt_serv_ip() { decrypt_gpg_file server_ip; }
 
 # Prints an error in bold red and exits the script
 function die() {
@@ -74,14 +103,29 @@ function die() {
     builtin exit 1
 }
 
-# Prints a warning in bold yellow
-function warn() {
-    COLOR=${YLW} display_error "${@}"
+# Prints an error in bold red
+function display_error() {
+    printf '\n%b%s%b\n\n' "${COLOR:-${RED}}" "${1}" "${RST}"
 }
 
 # Enforces the value needed for two-part flags
 function enforce_value() {
     [[ ${#} -lt 1 ]] && die "A additional value is needed for one of the flags passed to this script!"
+}
+
+# Formats the time
+function format_time() {
+    python3 -c "import datetime; print(str(datetime.timedelta(seconds=int(${2} - ${1}))))"
+}
+
+# Function for parsing os-release
+function get_distro() {
+    case "$(cat /usr/lib/os-release)" in
+        *"Arch Linux"*) echo "arch" ;;
+        *Debian* | *Raspbian*) echo "debian" ;;
+        *Ubuntu*) echo "ubuntu" ;;
+        *) echo "unknown" ;;
+    esac
 }
 
 # Add a remote if it doesn't exist
@@ -98,9 +142,53 @@ function git_remote_add() { (
     git ls-remote "${REMOTE_NAME:?}" &>/dev/null || git remote add "${REMOTE_ARGS[@]}" "${REMOTE_NAME}" "${REMOTE_URL:?}"
 ); }
 
+# Get latest release of a GitHub project
+function glr() { (
+    curl --silent "https://api.github.com/repos/${1:?}/releases/latest" | jq -r .tag_name
+); }
+
+# Cache GPG passphrase
+function gpg_key_cache() { (
+    gpg_key_usable || die "gpg key is not available"
+    NUM=$(gpg-connect-agent 'keyinfo --list' /bye 2>/dev/null | awk 'BEGIN{CACHED=0} /^S/ {if($7==1){CACHED=1}} END{if($0!=""){print CACHED} else {print "none"}}')
+    [[ ${NUM} = "none" || ${NUM} -eq 0 ]] && echo | gpg --pinentry-mode loopback --clearsign &>/dev/null
+); }
+
+# Check if my GPG key can be used
+function gpg_key_usable() { (
+    command -v gpg &>/dev/null || exit ${?}
+    gpg --list-secret-keys --keyid-format LONG | grep -q 1D6B269171C01A96
+); }
+
+# Prints a formatted header to point out what is being done to the user
+function header() {
+    BORDER="====$(for _ in $(seq ${#1}); do printf '='; done)===="
+    printf '\n%b%s\n%s\n%s%b\n\n' "${2:-${BLUE}}" "${BORDER}" "==  ${1}  ==" "${BORDER}" "${RST}"
+}
+
 # Source Telegram bot information
 function load_botinfo() {
     [[ -f ${MAIN_FOLDER:?}/.botinfo ]] && source "${MAIN_FOLDER}"/.botinfo
+}
+
+# Does the same thing as add_to_path_pre but doesn't check if item exists or not
+function move_to_front_of_path() {
+    local ARRAY ITEM
+    IFS=: read -rA ARRAY <<<"${1}"
+    for ITEM in $(printf '%s\n' "${ARRAY[@]}" | tac); do
+        [[ -d ${ITEM} ]] || continue
+        export PATH="${ITEM}:${PATH//${ITEM}:/}"
+    done
+}
+
+# Easy alias
+function path_push() {
+    add_to_path_pre "${@}"
+}
+
+# Delete the first folder in PATH
+function path_pop() {
+    export PATH=${PATH#*:}
 }
 
 # Telegram notifier function
@@ -156,96 +244,10 @@ function tg_upload() {
         -X POST https://api.telegram.org/bot"${TOKEN}"/sendDocument 1>/dev/null
 }
 
-# Check if my GPG key can be used
-function gpg_key_usable() { (
-    command -v gpg &>/dev/null || exit ${?}
-    gpg --list-secret-keys --keyid-format LONG | grep -q 1D6B269171C01A96
-); }
-
-# Cache GPG passphrase
-function gpg_key_cache() { (
-    gpg_key_usable || die "gpg key is not available"
-    NUM=$(gpg-connect-agent 'keyinfo --list' /bye 2>/dev/null | awk 'BEGIN{CACHED=0} /^S/ {if($7==1){CACHED=1}} END{if($0!=""){print CACHED} else {print "none"}}')
-    [[ ${NUM} = "none" || ${NUM} -eq 0 ]] && echo | gpg --pinentry-mode loopback --clearsign &>/dev/null
-); }
-
-# Add something to the end of PATH if it isn't already there
-function add_to_path_post() {
-    local ARRAY ITEM
-    IFS=: read -rA ARRAY <<<"${1}"
-    for ITEM in $(printf '%s\n' "${ARRAY[@]}" | tac); do
-        [[ -d ${ITEM} ]] || continue
-        echo "${PATH}" | grep -s -q "${ITEM}" || export PATH="${PATH}:${ITEM}"
-    done
+# Prints a warning in bold yellow
+function warn() {
+    COLOR=${YLW} display_error "${@}"
 }
-
-# Does the same thing as add_to_path_pre but doesn't check if item exists or not
-function move_to_front_of_path() {
-    local ARRAY ITEM
-    IFS=: read -rA ARRAY <<<"${1}"
-    for ITEM in $(printf '%s\n' "${ARRAY[@]}" | tac); do
-        [[ -d ${ITEM} ]] || continue
-        export PATH="${ITEM}:${PATH//${ITEM}:/}"
-    done
-}
-
-# Add something to the beginning of PATH if it isn't already there
-function add_to_path_pre() {
-    local ARRAY ITEM
-    IFS=: read -rA ARRAY <<<"${1}"
-    for ITEM in $(printf '%s\n' "${ARRAY[@]}" | tac); do
-        [[ -d ${ITEM} ]] || continue
-        echo "${PATH}" | grep -s -q "${ITEM}" || export PATH="${ITEM}:${PATH}"
-    done
-}
-# Easy alias
-function path_push() { add_to_path_pre "${@}"; }
-
-# Delete the first folder in PATH
-function path_pop() {
-    export PATH=${PATH#*:}
-}
-
-# Get latest release of a GitHub project
-function glr() { (
-    curl --silent "https://api.github.com/repos/${1:?}/releases/latest" | jq -r .tag_name
-); }
-
-# Function for parsing os-release
-function get_distro() {
-    case "$(cat /usr/lib/os-release)" in
-        *"Arch Linux"*) echo "arch" ;;
-        *Debian* | *Raspbian*) echo "debian" ;;
-        *Ubuntu*) echo "ubuntu" ;;
-        *) echo "unknown" ;;
-    esac
-}
-
-# Common ccache variable
-CCACHE=$(
-    path_push "${HOME}/usr/bin"
-    command -v ccache
-)
-export CCACHE
-
-# Decrypt gpg signed file
-function decrypt_gpg_file() { (
-    [[ -z ${SCRIPTS_FOLDER} && -z ${SCRIPTS} ]] && die "Scripts folder cannot be found!"
-    [[ -z ${SCRIPTS_FOLDER} ]] && SCRIPTS_FOLDER=${SCRIPTS}
-    gpg_key_cache
-    gpg --batch --yes --pinentry-mode loopback --output "${HOME}"/."${1:?}" --decrypt "${SCRIPTS_FOLDER:?}"/configs/common/"${1}".gpg
-); }
-
-# Update server_ip file from scripts folder
-function decrypt_serv_ip() { decrypt_gpg_file server_ip; }
-
-# Update del_dog_api_key file from scripts folder
-function decrypt_del_dog_api_key() { decrypt_gpg_file del_dog_api_key; }
-
-# curl wrapper
-function crl() { (
-    curl -LSs "${@}"
-); }
 
 # ssh-agent handling
 function ssh_agent() {
