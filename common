@@ -247,4 +247,25 @@ function decrypt_del_dog_api_key() { decrypt_gpg_file del_dog_api_key; }
 function crl() { (
     curl -LSs "${@}"
 ); }
+
+# ssh-agent handling
+function ssh_agent() {
+    [[ -r ${HOME}/.ssh/id_ed25519 ]] || return ${?}
+
+    SSH_AGENT_FILE=${HOME}/.ssh/.ssh-agent
+    ssh-add -l &>/dev/null
+    if [[ ${?} -eq 2 ]]; then
+        [[ -r ${SSH_AGENT_FILE} ]] && eval "$(<"${SSH_AGENT_FILE}")" >/dev/null
+
+        ssh-add -l &>/dev/null
+        if [[ ${?} -eq 2 ]]; then
+            (
+                umask 066
+                ssh-agent >"${SSH_AGENT_FILE}"
+            )
+            eval "$(<"${SSH_AGENT_FILE}")" >/dev/null
+            ssh-add "${HOME}"/.ssh/id_ed25519
+        fi
+    fi
+}
 # vi: filetype=zsh

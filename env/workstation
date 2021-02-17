@@ -208,9 +208,7 @@ Host gitolite.kernel.org
   ServerAliveInterval 60
 EOF
             chmod 600 "${HOME}"/.ssh/{id_ed25519,id_korg}
-            # shellcheck disable=SC2046
-            [[ -z ${SSH_AUTH_SOCK} ]] && eval $(ssh-agent)
-            ssh-add "${HOME}"/.ssh/id_ed25519
+            ssh_agent
         fi
         if ${INSTALL_GPG_KEY}; then
             gpg --pinentry-mode loopback --import "${KEYS}"/signing/private.asc || die "Error installing gpg keys"

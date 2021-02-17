@@ -126,9 +126,7 @@ Host gitolite.kernel.org
   # Helps behind some NAT-ing routers
   ServerAliveInterval 60
 EOF
-    # shellcheck disable=SC2046
-    [[ -z ${SSH_AUTH_SOCK} ]] && eval $(ssh-agent)
-    ssh-add "${HOME}"/.ssh/id_ed25519
+    ssh_agent
 
     # Setup GPG
     if ! gpg_key_usable; then
