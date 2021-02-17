@@ -156,20 +156,19 @@ function tg_upload() {
         -X POST https://api.telegram.org/bot"${TOKEN}"/sendDocument 1>/dev/null
 }
 
-# Is GPG passphrase cached?
-# https://demu.red/blog/2016/06/how-to-check-if-your-gpg-key-is-in-cache/
-function gpg_key_cached() {
-    NUM=$(gpg-connect-agent 'keyinfo --list' /bye 2>/dev/null | awk 'BEGIN{CACHED=0} /^S/ {if($7==1){CACHED=1}} END{if($0!=""){print CACHED} else {print "none"}}')
-    if [[ ${NUM} = "none" || ${NUM} -eq 0 ]]; then
-        die "Please run 'echo \"test\" | gpg --clearsign &>/dev/null' to cache gpg passphrase!"
-    fi
-}
-
 # Check if my GPG key can be used
-function gpg_key_usable() {
-    command -v gpg &>/dev/null || return 1
+function gpg_key_usable() { (
+    command -v gpg &>/dev/null || exit ${?}
     gpg --list-secret-keys --keyid-format LONG | grep -q 1D6B269171C01A96
-}
+); }
+
+# Cache GPG passphrase
+function gpg_key_cache() { (
+    gpg_key_usable || die "gpg key is not available"
+    NUM=$(gpg-connect-agent 'keyinfo --list' /bye 2>/dev/null | awk 'BEGIN{CACHED=0} /^S/ {if($7==1){CACHED=1}} END{if($0!=""){print CACHED} else {print "none"}}')
+    [[ ${NUM} = "none" || ${NUM} -eq 0 ]] && exit 0
+    echo | gpg --pinentry-mode loopback --clearsign &>/dev/null
+); }
 
 # Add something to the end of PATH if it isn't already there
 function add_to_path_post() {
@@ -234,6 +233,7 @@ export CCACHE
 function decrypt_gpg_file() { (
     [[ -z ${SCRIPTS_FOLDER} && -z ${SCRIPTS} ]] && die "Scripts folder cannot be found!"
     [[ -z ${SCRIPTS_FOLDER} ]] && SCRIPTS_FOLDER=${SCRIPTS}
+    gpg_key_cache
     gpg --batch --yes --pinentry-mode loopback --output "${HOME}"/."${1:?}" --decrypt "${SCRIPTS_FOLDER:?}"/configs/common/"${1}".gpg
 ); }
 

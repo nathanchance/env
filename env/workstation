@@ -221,8 +221,7 @@ EOF
         fi
         rm -rf "${KEYS}"
     fi
-    # Ensure GPG passphrase is cached for the rest of the run
-    echo "test" | gpg --pinentry-mode loopback --clearsign
+    gpg_key_cache
 
     # Download repos
     [[ -d ${SCRIPTS} ]] || { git clone git@github.com:nathanchance/scripts "${SCRIPTS}" || die "Error cloning scripts"; }
@@ -326,7 +325,7 @@ function workstation_setup() {
     source "${SCRIPTS_FOLDER}"/env/stubs/bk
     source "${SCRIPTS_FOLDER}"/env/stubs/bldgcc
     load_botinfo
-    (gpg_key_cached)
+    gpg_key_cache
 }
 
 # Clean up certain high volume git repos

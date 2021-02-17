@@ -138,6 +138,7 @@ EOF
         printf 'default-cache-ttl 604800\nmax-cache-ttl 2419200\n' | tee "${HOME}"/.gnupg/gpg-agent.conf
         gpg-connect-agent reloadagent /bye
     fi
+    gpg_key_cache
 
     # Clone scripts
     mkdir -p "${GITHUB_FOLDER}"
@@ -234,6 +235,8 @@ function mshsvr() { (
 
 # Laptop specific setup
 function wsl_setup() {
+    gpg_key_cache
+
     source "${SCRIPTS_FOLDER}"/env/stubs/folders
 
     # Load the stock completions to make sure we don't miss out on anything
