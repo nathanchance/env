@@ -33,6 +33,20 @@ function chp() { (
     scripts/checkpatch.pl "${@}"
  ); }
 
+# Grab an thread as an mbox file with b4
+function gmbx() { (
+    command -v b4 &>/dev/null || die "b4 needs to be installed"
+
+    MSG_ID=${1:?}
+    MBOX=$(mktemp --suffix=.mbox)
+
+    set -x
+
+    b4 mbox -n "${MBOX}" "${MSG_ID}" || exit ${?}
+    mutt -f "${MBOX}"
+    rm "${MBOX}"
+); }
+
 # get_maintainer.pl shorthand
 # SC2120: gtm references arguments, but none are ever passed.
 # shellcheck disable=SC2120
@@ -171,14 +185,5 @@ function rbwk() { (
     fi
     git ml --no-edit clearlinux-patchset microsoft-patchset || exit ${?}
     git cp "$(git lo --merges -1 --format=%H origin/HEAD)".."$(git sh -s --format=%H origin/HEAD)"
-); }
-
-# Small macro for responding to a LKML post
-function reply_to_lkml() { (
-    LINK=${1:?}
-    MBOX=$(mktemp --suffix=.mbox)
-    curl -LSso "${MBOX}" "${LINK%/*}"/raw &&
-        mutt -f "${MBOX}"
-    rm "${MBOX}"
 ); }
 # vi: filetype=zsh
