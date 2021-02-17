@@ -46,7 +46,7 @@ function bcmake() { (
     cd "${CMAKE_FOLDER}" || die "Downloading or extracting cmake failed"
 
     ./bootstrap \
-        --parallel="${THREADS:-$(nproc)}" \
+        --parallel="$(nproc)" \
         --prefix="${CMAKE_PREFIX:=${PREFIX:-${HOME}/usr}}"
 
     make "${JOBS_FLAG:--j"$(nproc)"}" || die "make failed"

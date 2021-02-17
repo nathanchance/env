@@ -22,14 +22,11 @@ GRN="\033[01;32m"
 RED="\033[01;31m"
 RST="\033[0m"
 YLW="\033[01;33m"
-
 export BLUE BOLD GRN RED RST YLW
 
 # Number of make threads
-THREADS=$(($(nproc) + 1))
-JOBS_FLAG="-j${THREADS}"
-
-export THREADS JOBS_FLAG
+JOBS_FLAG="-j$(nproc)"
+export JOBS_FLAG
 
 # Common ccache variable
 CCACHE=$(
