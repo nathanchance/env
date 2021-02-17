@@ -92,24 +92,6 @@ function cbl_linux_repos() { (
     rm -rf "${PWD}"
 ); }
 
-# Download Android CBL repos
-function cbl_android_repos() { (
-    cd "${CBL_A_R:=${CBL:-${HOME}/cbl}}"/android || die "wtf"
-    [[ -d android-kernel-clang ]] || git clone git@github.com:nathanchance/android-kernel-clang.git
-    mkdir -p common
-    cd common || die "wtf"
-    PATH=${HOME}/usr/bin:${PATH} repo --color=auto init -u https://android.googlesource.com/kernel/manifest -b common-android-multi
-    PATH=${HOME}/usr/bin:${PATH} repo --color=auto sync
-    curl -LSso common/.git/hooks/commit-msg https://android-review.googlesource.com/tools/hooks/commit-msg
-    chmod u+x common/.git/hooks/commit-msg
-
-    CTTLFSH=${CBL_A_R}/android/cuttlefish
-    rm -rf "${CTTLFSH}"
-    mkdir -p "${CTTLFSH}"
-    cd "${CTTLFSH}" || die "wtf"
-    "${SCRIPTS_FOLDER:-${HOME}/github/scripts}"/workstation/download-aosp.sh x86_64
-); }
-
 # Download other CBL things
 function cbl_other_repos() { (
     source "${SCRIPTS_FOLDER:-${HOME}/github/scripts}"/common || exit ${?}

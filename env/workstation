@@ -252,9 +252,6 @@ EOF
         tmux new-window zsh -c "source ${SCRIPTS}/env/stubs/setup && cbl_linux_repos ${REPO}"
     done
 
-    # Download Android CBL repos (currently disabled due to lack of Android testing)
-    # tmux new-window zsh -c "source ${SCRIPTS}/env/stubs/setup && cbl_android_repos"
-
     # Download other CBL things
     tmux new-window zsh -c "source ${SCRIPTS}/env/stubs/setup && cbl_other_repos"
 
@@ -298,7 +295,7 @@ function rbld_usr() { (
             fi
             ;;
     esac
-    for SCRIPT in "${SCRIPTS_FOLDER}"/workstation/* "${SCRIPTS_FOLDER}"/kernel/*.sh; do
+    for SCRIPT in "${SCRIPTS_FOLDER}"/kernel/*.sh; do
         ln -fs "${SCRIPT}" "${HOME}"/usr/bin/"${SCRIPT##*/}"
     done
 ); }
