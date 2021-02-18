@@ -176,6 +176,7 @@ EOF
         ubuntu:latest \
         ubuntu:rolling \
         ubuntu:devel; do
+        rm -rf "${TC_BLD}"/install
         podman pull docker.io/"${IMAGE}"
         podman run \
             --env="CCACHE_DIR=${CCACHE_FOLDER}" \
