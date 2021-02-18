@@ -448,6 +448,34 @@ function bpgollvm() { (
     ld.lld --version
 ); }
 
+# Build/install exa
+function biexa() { (
+    EXA_REPO=ogham/exa
+    EXA_BASE_URL=https://github.com/${EXA_REPO}
+    EXA_VERSION=$(glr ${EXA_REPO})
+    TMP_FOLDER=$(mktemp -d)
+
+    cd "${TMP_FOLDER}" || exit ${?}
+
+    if [[ $(uname -m) = "exa" ]]; then
+        EXA_ZIP=exa-linux-x86_64-${EXA_VERSION//v/}.zip
+
+        header "Installing exa"
+        curl -LSsO "${EXA_BASE_URL}"/releases/download/"${EXA_VERSION}"/"${EXA_ZIP}" || die "Error downloading ${EXA_ZIP}"
+        unzip "${EXA_ZIP}"
+        install -Dm755 "${TMP_FOLDER}"/exa-linux-x86_64 "${PREFIX:-${HOME}/usr}"/bin/exa
+    else
+        header "Building exa"
+        [[ -d ${HOME}/.cargo/bin ]] || irust
+        curl -LSs "${EXA_BASE_URL}"/archive/"${EXA_VERSION}".tar.gz | tar -xzf - || die "Error downloading exa source"
+        cd exa-"${EXA_VERSION//v/}" || exit ${?}
+        move_to_front_of_path "${HOME}/.cargo/bin"
+        cargo build --release --locked || die "cargo build failed"
+        cargo install --force --path . || die "cargo install failed"
+    fi
+    rm -rf "${TMP_FOLDER}"
+); }
+
 # Build/install ripgrep
 function birg() { (
     RG_REPO=BurntSushi/ripgrep
