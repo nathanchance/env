@@ -34,21 +34,74 @@ function aliases() {
     source "${SCRIPTS_FOLDER}/env/stubs/updbin"
 }
 
-# Try to attach via tmux
-function tmxa() {
-    command -v tmux &>/dev/null || return ${?}
-    [[ -z ${TMUX} ]] && tmux new-session -AD -s main
-    return 0
+# Clean up /tmp
+function cltmp() { (
+    fd -t f . /tmp -x rm
+    fd -t d -d 1 -E 'tmux*' -E 'systemd*' . /tmp -x rm -r
+); }
+
+# Update main server IP address file
+function encrypt_serv_ip() { (
+    [[ -f ${HOME}/.server_ip ]] || die "Server IP file could not be found"
+    gpg --batch \
+        --yes \
+        --output "${SCRIPTS_FOLDER:?}"/configs/common/server_ip.gpg \
+        --encrypt \
+        --recipient natechancellor@gmail.com \
+        "${HOME}"/.server_ip
+); }
+
+# Run shfmt on all shell files in the repo (assuming they end with .sh)
+function fdshfmt() { (
+    case ${PWD##*/} in
+        scripts) fd -t x -E windows -x shfmt -ci -i 4 -w ;;
+        *) fd -e sh -x shfmt -ci -i 4 -w ;;
+    esac
+); }
+
+# Generate a sha256sum file based on a URL
+function gen_sha256sum() { (
+    URL=${1:?}
+    FILE=${URL##*/}
+    curl -LSsO "${URL}"
+    sha256sum "${FILE}" >"${FILE}".sha256
+    rm -rf "${FILE}"
+    curl -LSsO "${URL}"
+    sha256sum -c "${FILE}".sha256
+    rm -rf "${FILE}"
+); }
+
+# Get the current status of hardware vulnerabilities
+function hwvulns() {
+    grep --color=always . /sys/devices/system/cpu/vulnerabilities/*
 }
 
-# Try to detach via tmux
-function tmxd() {
-    command -v tmux &>/dev/null || return ${?}
-    if [[ -z ${TMUX} ]]; then
-        builtin exit
-    else
-        tmux detach
-    fi
+# Upgrade pip packages
+function pipup() { (
+    python3 -m pip install \
+        --upgrade \
+        --user \
+        pip
+
+    read -rA PIP_PACKAGES <<<"$(python3 -m pip list --outdated | tail -n +3 | cut -d ' ' -f 1)"
+    python3 -m pip install \
+        --upgrade \
+        --user \
+        "${PIP_PACKAGES[@]}"
+); }
+
+# Bind mount current PWD into Podman container
+function podman_mount() {
+    podman run \
+        --mount type=bind,source="${PWD}",target=/"${PWD##*/}",ro=true \
+        --workdir /"${PWD##*/}" \
+        "${@}"
+}
+
+# {bash,zsh}rc reload function
+function rld() {
+    source "${SCRIPTS_FOLDER}/env/common"
+    shell_setup
 }
 
 function shell_setup() {
@@ -120,46 +173,50 @@ function shell_setup() {
     tmxa
 }
 
-# {bash,zsh}rc reload function
-function rld() {
-    source "${SCRIPTS_FOLDER}/env/common"
-    shell_setup
-}
+# Symlink an LLVM toolchain into ${HOME}/usr
+function symlink_llvm() { (
+    header "Removing symlinks"
+    for FILE in $(fd -t l . "${HOME}"/usr); do
+        [[ $(readlink -f "${FILE}") =~ toolchains/llvm ]] && rm -vrf "${FILE}"
+    done
 
-# Bind mount current PWD into Podman container
-function podman_mount() {
-    podman run \
-        --mount type=bind,source="${PWD}",target=/"${PWD##*/}",ro=true \
-        --workdir /"${PWD##*/}" \
-        "${@}"
-}
+    header "Removing empty directories"
+    while true; do
+        OUTPUT=$(fd -t e . "${HOME}"/usr -x rm -vrf)
+        if [[ -n ${OUTPUT} ]]; then
+            echo "${OUTPUT}"
+        else
+            break
+        fi
+    done
 
-# Get the current status of hardware vulnerabilities
-function hwvulns() {
-    grep --color=always . /sys/devices/system/cpu/vulnerabilities/*
-}
-
-# Update main server IP address file
-function encrypt_serv_ip() { (
-    [[ -f ${HOME}/.server_ip ]] || die "Server IP file could not be found"
-    gpg --batch \
-        --yes \
-        --output "${SCRIPTS_FOLDER:?}"/configs/common/server_ip.gpg \
-        --encrypt \
-        --recipient natechancellor@gmail.com \
-        "${HOME}"/.server_ip
+    header "Symlinking LLVM"
+    cp -frsv "${LLVM_TC_FOLDER}/${1:?}"/* "${HOME}"/usr
 ); }
 
-# Generate a sha256sum file based on a URL
-function gen_sha256sum() { (
-    URL=${1:?}
-    FILE=${URL##*/}
-    curl -LSsO "${URL}"
-    sha256sum "${FILE}" >"${FILE}".sha256
-    rm -rf "${FILE}"
-    curl -LSsO "${URL}"
-    sha256sum -c "${FILE}".sha256
-    rm -rf "${FILE}"
+# Try to attach via tmux
+function tmxa() {
+    command -v tmux &>/dev/null || return ${?}
+    [[ -z ${TMUX} ]] && tmux new-session -AD -s main
+    return 0
+}
+
+# Try to detach via tmux
+function tmxd() {
+    command -v tmux &>/dev/null || return ${?}
+    if [[ -z ${TMUX} ]]; then
+        builtin exit
+    else
+        tmux detach
+    fi
+}
+
+# Update function
+function upd() { (
+    case "$(get_distro)" in
+        arch) yay ;;
+        debian | ubuntu) sudo sh -c 'apt update && apt upgrade && apt autoremove -y' ;;
+    esac
 ); }
 
 # Update my website
@@ -189,62 +246,5 @@ function upd_website() { (
     git ac -m "website: Update to ${HF_URL}/commit/${HF_HASH}"
     ${PUSH:=false} || return 0
     git push
-); }
-
-# Run shfmt on all shell files in the repo (assuming they end with .sh)
-function fdshfmt() { (
-    case ${PWD##*/} in
-        scripts) fd -t x -E windows -x shfmt -ci -i 4 -w ;;
-        *) fd -e sh -x shfmt -ci -i 4 -w ;;
-    esac
-); }
-
-# Update function
-function upd() { (
-    case "$(get_distro)" in
-        arch) yay ;;
-        debian | ubuntu) sudo sh -c 'apt update && apt upgrade && apt autoremove -y' ;;
-    esac
-); }
-
-# Symlink an LLVM toolchain into ${HOME}/usr
-function symlink_llvm() { (
-    header "Removing symlinks"
-    for FILE in $(fd -t l . "${HOME}"/usr); do
-        [[ $(readlink -f "${FILE}") =~ toolchains/llvm ]] && rm -vrf "${FILE}"
-    done
-
-    header "Removing empty directories"
-    while true; do
-        OUTPUT=$(fd -t e . "${HOME}"/usr -x rm -vrf)
-        if [[ -n ${OUTPUT} ]]; then
-            echo "${OUTPUT}"
-        else
-            break
-        fi
-    done
-
-    header "Symlinking LLVM"
-    cp -frsv "${LLVM_TC_FOLDER}/${1:?}"/* "${HOME}"/usr
-); }
-
-# Clean up /tmp
-function cltmp() { (
-    fd -t f . /tmp -x rm
-    fd -t d -d 1 -E 'tmux*' -E 'systemd*' . /tmp -x rm -r
-); }
-
-# Upgrade pip packages
-function pipup() { (
-    python3 -m pip install \
-        --upgrade \
-        --user \
-        pip
-
-    read -rA PIP_PACKAGES <<<"$(python3 -m pip list --outdated | tail -n +3 | cut -d ' ' -f 1)"
-    python3 -m pip install \
-        --upgrade \
-        --user \
-        "${PIP_PACKAGES[@]}"
 ); }
 # vi: filetype=zsh
