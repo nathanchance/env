@@ -28,13 +28,6 @@ export BLUE BOLD GRN RED RST YLW
 JOBS_FLAG="-j$(nproc)"
 export JOBS_FLAG
 
-# Common ccache variable
-CCACHE=$(
-    path_push "${HOME}/usr/bin"
-    command -v ccache
-)
-export CCACHE
-
 ###############
 #             #
 #  FUNCTIONS  #

@@ -314,7 +314,7 @@ function workstation_aliases() {
 
 # Additional setup steps for my workstation
 function workstation_setup() {
-    setup_ccache 50
+    ccache_setup 100
     source "${SCRIPTS_FOLDER}"/env/stubs/folders
     source "${SCRIPTS_FOLDER}"/env/stubs/cbl
     source "${SCRIPTS_FOLDER}"/env/stubs/bk
