@@ -141,13 +141,8 @@ function rbld_usr() { (
     bzsh || die "Error building/installing zsh"
 ); }
 
-function pi_afv() {
-    alias ls='ls --color=auto'
-}
 
-function pi_setup() {
-    source "${SCRIPTS_FOLDER}/env/stubs/folders"
-}
+function pi_setup() { true; }
 
 # Update kernel from build server
 function upd_kernel() { (
