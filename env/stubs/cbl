@@ -27,123 +27,27 @@ TCBLD=${CBL}/tc-build
 CBL_CCACHE=${CBL}/.ccache
 export CBL_ANDROID CBL_BLD CBL_BLD_C CBL_BLD_P CBL_CTTLFSH CBL_GIT CBL_KC CBL_KC_SRC CBL_TC CBL_LLVM CBL_BNTL CBL_LLVM_BNTL CBL_SRC CBL_WRKTR CBL_QEMU CBL_QEMU_BIN CBL_QEMU_INSTALL CBL_QEMU_SRC TCBLD CBL_CCACHE
 
-# Download and apply an LLVM/Clang/lld patch
-function phabap() { (
-    [[ ! -d llvm ]] && die "You're not in the llvm-project folder!"
-
-    while ((${#})); do
-        case ${1} in
-            D*) REVISION=${1} ;;
-            *) GIT_AP_ARGS=("${GIT_AP_ARGS[@]}" "${1}") ;;
-        esac
-        shift
-    done
-
-    curl -LSs "https://reviews.llvm.org/${REVISION:?}?download=true" | git ap "${GIT_AP_ARGS[@]}" || exit ${?}
-    git ac -m "${REVISION}
-
-Link: https://reviews.llvm.org/${REVISION}"
+# Build new LLVM/Clang/lld and test all kernel trees
+function bldall() { (
+    export TG=true
+    bldtcs && bldallk
 ); }
 
-# Show local LLVM patches via git log
-function llvm_log() {
-    local LLVM_PROJ=${TCBLD:?}/llvm-project
+# Build all kernel trees
+function bldallk() {
+    local TREE
 
-    MLFC=$(git -C "${LLVM_PROJ}" mfc)
-    if [[ -n ${MLFC} ]]; then
-        echo
-        echo "LLVM commit log:"
-        echo
-        git -C "${LLVM_PROJ}" lo "${MLFC}"^^..HEAD
-    fi
+    for TREE in linux{-next,,-stable-5.{10,4}}; do TREE=${TREE} lt ""; done
+    "${CBL_BLD}"/pi-scripts/build.sh -k "${CBL_BLD}"/rpi
+    "${CBL_BLD}"/wsl2/bin/build.sh
 }
 
-# linux testing
-function lt() { (
-    ccache_setup kernel 100
+# Build binutils
+function bldbn() { (
+    # Setup ccache
+    ccache_setup binutils 25
 
-    : "${KRNL_DIR:=${CBL_BLD_P}/${TREE:=linux-next}}" "${TC_DIR:=${CBL_LLVM_BNTL%/*}}"
-
-    # Make sure that clang can be found in ${TC_DIR}/bin/clang first, otherwise the wrong
-    # value was probably passed
-    [[ -d ${TC_DIR}/bin ]] || die "${TC_DIR} value is wrong, no bin folder"
-    for BIN in "${TC_DIR}"/bin/*; do
-        case ${BIN##*/} in
-            clang) CLANG_FOUND=true ;;
-            as | *-linux-gnu-as) AS_FOUND=true ;;
-        esac
-    done
-    ${AS_FOUND:=false} || die "GNU as could not be found in ${TC_DIR}/bin"
-    ${CLANG_FOUND:=false} || die "clang could not be found in ${TC_DIR}/bin"
-
-    LOG_DIR=${CBL}/build-logs/${KRNL_DIR##*/}-$(date +%Y%m%d-%H%M)
-    mkdir -p "${LOG_DIR}"
-
-    TC_BLD_ARGS=()
-    [[ -n ${ARCHES} ]] && TC_BLD_ARGS+=(--arches "${ARCHES}")
-    [[ -n ${BOOT_UTILS} ]] && TC_BLD_ARGS+=(--boot-utils "${BOOT_UTILS}")
-    ${DO:=false} && TC_BLD_ARGS+=(--defconfigs)
-    ${LTO:=true} && [[ ${KRNL_DIR##*/} = "linux" ]] && TC_BLD_ARGS+=(--test-lto-cfi-kernel)
-    PATH=${CBL_QEMU_BIN}:${PATH} \
-        "${CBL}"/llvm-kernel-testing/test.sh \
-        --linux-src "${KRNL_DIR}" \
-        --log-dir "${LOG_DIR}" \
-        --skip-tc-build \
-        --tc-prefix "${TC_DIR}" \
-        "${TC_BLD_ARGS[@]}" || die "llvm-kernel-testing failed (${?})"
-
-    {
-        echo "Host: $(uname -n)"
-        echo
-        cat "${LOG_DIR}"/results.log
-        echo
-        echo "Full warning report:"
-        # arch/powerpc/boot/inffast.c: A warning we do not really care about (https://github.com/ClangBuiltLinux/linux/issues/664)
-        # DWARF2 only supports one section per compilation unit: Irrelevant for now
-        # objtool: Too many to deal with for now
-        # override: CPU_BIG_ENDIAN changes choice state: Warnings from merge_config that are harmless in this context
-        # results.log: Any warnings from this will be in the other logs
-        # include/linux/bcache.h:3: https://github.com/ClangBuiltLinux/linux/issues/1065
-        BLOCKLIST="arch/powerpc/boot/inffast.c|DWARF3 only supports one section per compilation unit|objtool:|override: CPU_BIG_ENDIAN changes choice state|results.log|union jset::\(anonymous at ./usr/include/linux/bcache.h:"
-        SEARCHLIST="error:|FATAL:|undefined|Unsupported relocation type:|warning:|WARNING:"
-        rg "${SEARCHLIST}" "${LOG_DIR}"/*.log |& rg -v -- "${BLOCKLIST}" |& sed -e "s;${LOG_DIR}/;;g" -e "s;${KRNL_DIR}/;;g" |& sort |& uniq
-        MFC=$(git -C "${KRNL_DIR}" mfc)
-        if [[ -n ${MFC} ]]; then
-            echo
-            echo "${KRNL_DIR##*/} commit log:"
-            echo
-            git -C "${KRNL_DIR}" lo "${MFC}"^^..HEAD
-        fi
-        llvm_log
-    } >"${LOG_DIR}"/deldog.log
-
-    MESSAGE="${LOG_DIR##*/} build results: $(deldog "${LOG_DIR}/deldog.log")"
-
-    tg_msg "${MESSAGE}"
-
-    echo
-    echo "${MESSAGE}"
-    echo "Full logs available at: ${LOG_DIR}"
-    echo
-
-    rm "${LOG_DIR}"/deldog.log
-); }
-
-# Pull the latest CBL Docker image and run it with podman
-function pdmnrn() { (
-    [[ -z ${PODMAN_IMAGE} ]] && PODMAN_IMAGE=clangbuiltlinux/debian
-    [[ -z ${LOCAL} ]] && podman pull "${PODMAN_IMAGE}"
-    podman_mount \
-        --interactive \
-        --rm \
-        --tty \
-        "${PODMAN_IMAGE}" "${@}"
-); }
-
-# Strip executables within a folder
-function stripall() { (
-    cd "${1:?}"
-    for FILE in $(fd -t file -x file | grep 'not stripped' | cut -d: -f1); do strip "${FILE}"; done
+    PATH=${CCACHE_BIN}:${PATH} "${TCBLD}"/build-binutils.py "${@}"
 ); }
 
 # Build LLVM
@@ -152,14 +56,6 @@ function bldllvm() { (
     ccache_setup llvm 75
 
     "${TCBLD}"/build-llvm.py "${@}"
-); }
-
-# Build binutils
-function bldbn() { (
-    # Setup ccache
-    ccache_setup binutils 25
-
-    PATH=${CCACHE_BIN}:${PATH} "${TCBLD}"/build-binutils.py "${@}"
 ); }
 
 # Build LLVM/Clang/lld and arm{32,64} and powerpc binutils from source
@@ -207,21 +103,6 @@ function bldtcs() { (
 
     # Invalidate our kernel ccache because we have a new compiler that will be used for it
     ccache_clear kernel
-); }
-
-# Build all kernel trees
-function bldallk() {
-    local TREE
-
-    for TREE in linux{-next,,-stable-5.{10,4}}; do TREE=${TREE} lt ""; done
-    "${CBL_BLD}"/pi-scripts/build.sh -k "${CBL_BLD}"/rpi
-    "${CBL_BLD}"/wsl2/bin/build.sh
-}
-
-# Build new LLVM/Clang/lld and test all kernel trees
-function bldall() { (
-    export TG=true
-    bldtcs && bldallk
 ); }
 
 # Function to test build-{binutils,llvm}.py in multiple Docker images
@@ -321,93 +202,6 @@ EOF
     echo
 ); }
 
-function yapf() {
-    PYTHONPATH=${CBL_GIT}/yapf python3 "${CBL_GIT}"/yapf/yapf -i -p "${@}"
-}
-
-function qualify_tc_bld_uprev() { (
-    TC_BLD_SRC=${CBL_GIT}/tc-build
-    LNX_STBL=${CBL_SRC}/linux-stable
-    WORK_DIR=$(mktemp -d)
-    TC_BLD=${WORK_DIR}/tc-build
-
-    header "Setting up folders"
-
-    git -C "${TC_BLD_SRC}" worktree add "${TC_BLD}" || exit ${?}
-    git -C "${LNX_STBL}" ru || exit ${?}
-    for LNX_VER in 5.10 5.4; do git -C "${LNX_STBL}" worktree add "${WORK_DIR}"/linux-stable-"${LNX_VER}" origin/linux-"${LNX_VER}".y || exit ${?}; done
-
-    header "Building toolchains"
-
-    "${TC_BLD}"/build-binutils.py --install-folder "${WORK_DIR}" || exit ${?}
-    "${TC_BLD}"/build-llvm.py --check-targets clang lld llvm --install-folder "${WORK_DIR}" --pgo --use-good-revision || exit ${?}
-
-    header "Toolchain information"
-
-    "${WORK_DIR}"/bin/clang --version
-    git -C "${TC_BLD}"/llvm-project show -s
-
-    header "Testing toolchain"
-
-    for SRC_FOLDER in "${WORK_DIR}"/linux-stable-{5.10,5.4}; do
-        KRNL_DIR=${SRC_FOLDER} TC_DIR=${WORK_DIR} lt
-    done
-
-    header "Remove worktrees"
-    git -C "${TC_BLD_SRC}" worktree remove "${TC_BLD}"
-    for LNX_VER in 5.10 5.4; do git -C "${LNX_STBL}" worktree remove "${WORK_DIR}"/linux-stable-"${LNX_VER}"; done
-    rm -rf "${WORK_DIR}"
-); }
-
-function upd_lnx_tcbld() { (
-    while ((${#})); do
-        case ${1} in
-            -p | --personal) MODE=personal ;;
-            -r | --release) MODE=release ;;
-        esac
-        shift
-    done
-    : ${MODE:=personal}
-
-    LINUX=${CBL_SRC}/linux
-    cd "${LINUX}" || exit ${?}
-    git fetch origin
-    KVER=$(git describe --abbrev=0 origin/master | sed 's/v//')
-
-    case ${MODE} in
-        personal)
-            BPREFIX=pgo
-            KERNEL=${CBL}/tc-build/kernel
-            TAR_EXT=gz
-            URL=https://git.kernel.org/torvalds/t
-            ;;
-        release)
-            BPREFIX=v${KVER}-pgo
-            KERNEL=${CBL_GIT}/tc-build/kernel
-            TAR_EXT=xz
-            URL=https://cdn.kernel.org/pub/linux/kernel/v5.x
-            ;;
-    esac
-
-    set -ex
-
-    rm -f "${KERNEL}"/linux*
-    for CONFIG in defconfig allyesconfig; do
-        git checkout "${BPREFIX}"-${CONFIG} || continue
-        case ${CONFIG} in
-            defconfig) git rebase v"${KVER}" ;;
-            allyesconfig) git rebase "${BPREFIX}"-defconfig ;;
-        esac
-        git format-patch --stdout v"${KVER}".."${BPREFIX}"-"${CONFIG}" >"${KERNEL}"/linux-"${KVER}"-"${CONFIG}".patch
-    done
-
-    TARBALL=linux-${KVER}.tar.${TAR_EXT}
-    cd "${KERNEL}"
-    gen_sha256sum "${URL}/${TARBALL}"
-
-    sed -i "s/LINUX=.*/LINUX=linux-${KVER}/" "${KERNEL}"/build.sh
-); }
-
 function build_stable_llvm() { (
     TC_BLD=${CBL_GIT}/tc-build
 
@@ -446,58 +240,6 @@ function build_stable_llvm() { (
             --install-folder "${LLVM_12_RC}" \
             --pgo
     [[ -x ${LLVM_12_RC}/bin/as ]] || "${TC_BLD}"/build-binutils.py --install-folder "${LLVM_12_RC}"
-); }
-
-function test_llvm_mainline_linux() { (
-    # Build LLVM if necessary
-    build_stable_llvm
-
-    # Update all trees
-    LINUX=${CBL_BLD_C}/linux
-    [[ -d ${LINUX} ]] || git clone https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/ "${LINUX}"
-    git -C "${LINUX}" pull --rebase
-
-    # Build the tree
-    for LLVM_TC in ${CBL_TC}/llvm-{10.0.1,11.1.0-rc3,12.0.0-rc1,binutils}; do
-        KRNL_DIR=${LINUX} TC_DIR=${LLVM_TC} lt
-    done
-); }
-
-function test_llvm_stable_linux() { (
-    # Build LLVM if necessary
-    build_stable_llvm
-
-    for SBR in 5.10 5.4; do
-        LINUX_STABLE=${CBL_BLD_C}/linux-stable-${SBR}
-        [[ -d ${LINUX_STABLE} ]] || git clone https://git.kernel.org/pub/scm/linux/kernel/git/stable/linux.git/ "${LINUX_STABLE}"
-        cd "${LINUX_STABLE}"
-        git ch linux-${SBR}.y
-        git pull --rebase
-    done
-
-    # Build the trees
-    for LLVM_TC in ${CBL_TC}/llvm-{10.0.1,11.1.0-rc3,12.0.0-rc1,binutils}; do
-        for TEST_KRNL_DIR in ${CBL_BLD_C}/linux-stable-{5.10,5.4}; do
-            KRNL_DIR=${TEST_KRNL_DIR} TC_DIR=${LLVM_TC} lt
-        done
-    done
-); }
-
-function test_llvm_linux() { (
-    test_llvm_mainline_linux
-    test_llvm_stable_linux
-); }
-
-function cbl_sunday() { (
-    upd_qemu || exit ${?}
-    updllvm
-    rld
-    test_llvm_linux
-); }
-
-function upd_qemu() { (
-    cbl_qemu_build -u
-    DO=true KRNL_DIR=${CBL_BLD_P:-${HOME}/cbl/build/patched}/linux PATH=${CBL_QEMU_BIN}:${PATH} lt
 ); }
 
 function cbl_qemu_build() { (
@@ -564,4 +306,251 @@ function cbl_qemu_build() { (
         ln -s "${QEMU_PREFIX}"/bin/qemu-system-${ARCH} "${CBL_QEMU_BIN}"
     done
 ); }
+
+function cbl_sunday() { (
+    upd_qemu || exit ${?}
+    updllvm
+    rld
+    test_llvm_linux
+); }
+
+# Show local LLVM patches via git log
+function llvm_log() {
+    local LLVM_PROJ=${TCBLD:?}/llvm-project
+
+    MLFC=$(git -C "${LLVM_PROJ}" mfc)
+    if [[ -n ${MLFC} ]]; then
+        echo
+        echo "LLVM commit log:"
+        echo
+        git -C "${LLVM_PROJ}" lo "${MLFC}"^^..HEAD
+    fi
+}
+
+# linux testing
+function lt() { (
+    ccache_setup kernel 100
+
+    : "${KRNL_DIR:=${CBL_BLD_P}/${TREE:=linux-next}}" "${TC_DIR:=${CBL_LLVM_BNTL%/*}}"
+
+    # Make sure that clang can be found in ${TC_DIR}/bin/clang first, otherwise the wrong
+    # value was probably passed
+    [[ -d ${TC_DIR}/bin ]] || die "${TC_DIR} value is wrong, no bin folder"
+    for BIN in "${TC_DIR}"/bin/*; do
+        case ${BIN##*/} in
+            clang) CLANG_FOUND=true ;;
+            as | *-linux-gnu-as) AS_FOUND=true ;;
+        esac
+    done
+    ${AS_FOUND:=false} || die "GNU as could not be found in ${TC_DIR}/bin"
+    ${CLANG_FOUND:=false} || die "clang could not be found in ${TC_DIR}/bin"
+
+    LOG_DIR=${CBL}/build-logs/${KRNL_DIR##*/}-$(date +%Y%m%d-%H%M)
+    mkdir -p "${LOG_DIR}"
+
+    TC_BLD_ARGS=()
+    [[ -n ${ARCHES} ]] && TC_BLD_ARGS+=(--arches "${ARCHES}")
+    [[ -n ${BOOT_UTILS} ]] && TC_BLD_ARGS+=(--boot-utils "${BOOT_UTILS}")
+    ${DO:=false} && TC_BLD_ARGS+=(--defconfigs)
+    ${LTO:=true} && [[ ${KRNL_DIR##*/} = "linux" ]] && TC_BLD_ARGS+=(--test-lto-cfi-kernel)
+    PATH=${CBL_QEMU_BIN}:${PATH} \
+        "${CBL}"/llvm-kernel-testing/test.sh \
+        --linux-src "${KRNL_DIR}" \
+        --log-dir "${LOG_DIR}" \
+        --skip-tc-build \
+        --tc-prefix "${TC_DIR}" \
+        "${TC_BLD_ARGS[@]}" || die "llvm-kernel-testing failed (${?})"
+
+    {
+        echo "Host: $(uname -n)"
+        echo
+        cat "${LOG_DIR}"/results.log
+        echo
+        echo "Full warning report:"
+        # arch/powerpc/boot/inffast.c: A warning we do not really care about (https://github.com/ClangBuiltLinux/linux/issues/664)
+        # DWARF2 only supports one section per compilation unit: Irrelevant for now
+        # objtool: Too many to deal with for now
+        # override: CPU_BIG_ENDIAN changes choice state: Warnings from merge_config that are harmless in this context
+        # results.log: Any warnings from this will be in the other logs
+        # include/linux/bcache.h:3: https://github.com/ClangBuiltLinux/linux/issues/1065
+        BLOCKLIST="arch/powerpc/boot/inffast.c|DWARF3 only supports one section per compilation unit|objtool:|override: CPU_BIG_ENDIAN changes choice state|results.log|union jset::\(anonymous at ./usr/include/linux/bcache.h:"
+        SEARCHLIST="error:|FATAL:|undefined|Unsupported relocation type:|warning:|WARNING:"
+        rg "${SEARCHLIST}" "${LOG_DIR}"/*.log |& rg -v -- "${BLOCKLIST}" |& sed -e "s;${LOG_DIR}/;;g" -e "s;${KRNL_DIR}/;;g" |& sort |& uniq
+        MFC=$(git -C "${KRNL_DIR}" mfc)
+        if [[ -n ${MFC} ]]; then
+            echo
+            echo "${KRNL_DIR##*/} commit log:"
+            echo
+            git -C "${KRNL_DIR}" lo "${MFC}"^^..HEAD
+        fi
+        llvm_log
+    } >"${LOG_DIR}"/deldog.log
+
+    MESSAGE="${LOG_DIR##*/} build results: $(deldog "${LOG_DIR}/deldog.log")"
+
+    tg_msg "${MESSAGE}"
+
+    echo
+    echo "${MESSAGE}"
+    echo "Full logs available at: ${LOG_DIR}"
+    echo
+
+    rm "${LOG_DIR}"/deldog.log
+); }
+
+# Download and apply an LLVM/Clang/lld patch
+function phabap() { (
+    [[ ! -d llvm ]] && die "You're not in the llvm-project folder!"
+
+    while ((${#})); do
+        case ${1} in
+            D*) REVISION=${1} ;;
+            *) GIT_AP_ARGS=("${GIT_AP_ARGS[@]}" "${1}") ;;
+        esac
+        shift
+    done
+
+    curl -LSs "https://reviews.llvm.org/${REVISION:?}?download=true" | git ap "${GIT_AP_ARGS[@]}" || exit ${?}
+    git ac -m "${REVISION}
+
+Link: https://reviews.llvm.org/${REVISION}"
+); }
+
+function qualify_tc_bld_uprev() { (
+    TC_BLD_SRC=${CBL_GIT}/tc-build
+    LNX_STBL=${CBL_SRC}/linux-stable
+    WORK_DIR=$(mktemp -d)
+    TC_BLD=${WORK_DIR}/tc-build
+
+    header "Setting up folders"
+
+    git -C "${TC_BLD_SRC}" worktree add "${TC_BLD}" || exit ${?}
+    git -C "${LNX_STBL}" ru || exit ${?}
+    for LNX_VER in 5.10 5.4; do git -C "${LNX_STBL}" worktree add "${WORK_DIR}"/linux-stable-"${LNX_VER}" origin/linux-"${LNX_VER}".y || exit ${?}; done
+
+    header "Building toolchains"
+
+    "${TC_BLD}"/build-binutils.py --install-folder "${WORK_DIR}" || exit ${?}
+    "${TC_BLD}"/build-llvm.py --check-targets clang lld llvm --install-folder "${WORK_DIR}" --pgo --use-good-revision || exit ${?}
+
+    header "Toolchain information"
+
+    "${WORK_DIR}"/bin/clang --version
+    git -C "${TC_BLD}"/llvm-project show -s
+
+    header "Testing toolchain"
+
+    for SRC_FOLDER in "${WORK_DIR}"/linux-stable-{5.10,5.4}; do
+        KRNL_DIR=${SRC_FOLDER} TC_DIR=${WORK_DIR} lt
+    done
+
+    header "Remove worktrees"
+    git -C "${TC_BLD_SRC}" worktree remove "${TC_BLD}"
+    for LNX_VER in 5.10 5.4; do git -C "${LNX_STBL}" worktree remove "${WORK_DIR}"/linux-stable-"${LNX_VER}"; done
+    rm -rf "${WORK_DIR}"
+); }
+
+# Strip executables within a folder
+function stripall() { (
+    cd "${1:?}"
+    for FILE in $(fd -t file -x file | grep 'not stripped' | cut -d: -f1); do strip "${FILE}"; done
+); }
+
+function test_llvm_linux() { (
+    test_llvm_mainline_linux
+    test_llvm_stable_linux
+); }
+
+function test_llvm_mainline_linux() { (
+    # Build LLVM if necessary
+    build_stable_llvm
+
+    # Update all trees
+    LINUX=${CBL_BLD_C}/linux
+    [[ -d ${LINUX} ]] || git clone https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/ "${LINUX}"
+    git -C "${LINUX}" pull --rebase
+
+    # Build the tree
+    for LLVM_TC in ${CBL_TC}/llvm-{10.0.1,11.1.0-rc3,12.0.0-rc1,binutils}; do
+        KRNL_DIR=${LINUX} TC_DIR=${LLVM_TC} lt
+    done
+); }
+
+function test_llvm_stable_linux() { (
+    # Build LLVM if necessary
+    build_stable_llvm
+
+    for SBR in 5.10 5.4; do
+        LINUX_STABLE=${CBL_BLD_C}/linux-stable-${SBR}
+        [[ -d ${LINUX_STABLE} ]] || git clone https://git.kernel.org/pub/scm/linux/kernel/git/stable/linux.git/ "${LINUX_STABLE}"
+        cd "${LINUX_STABLE}"
+        git ch linux-${SBR}.y
+        git pull --rebase
+    done
+
+    # Build the trees
+    for LLVM_TC in ${CBL_TC}/llvm-{10.0.1,11.1.0-rc3,12.0.0-rc1,binutils}; do
+        for TEST_KRNL_DIR in ${CBL_BLD_C}/linux-stable-{5.10,5.4}; do
+            KRNL_DIR=${TEST_KRNL_DIR} TC_DIR=${LLVM_TC} lt
+        done
+    done
+); }
+
+function upd_qemu() { (
+    cbl_qemu_build -u
+    DO=true KRNL_DIR=${CBL_BLD_P:-${HOME}/cbl/build/patched}/linux PATH=${CBL_QEMU_BIN}:${PATH} lt
+); }
+
+function upd_lnx_tcbld() { (
+    while ((${#})); do
+        case ${1} in
+            -p | --personal) MODE=personal ;;
+            -r | --release) MODE=release ;;
+        esac
+        shift
+    done
+    : ${MODE:=personal}
+
+    LINUX=${CBL_SRC}/linux
+    cd "${LINUX}" || exit ${?}
+    git fetch origin
+    KVER=$(git describe --abbrev=0 origin/master | sed 's/v//')
+
+    case ${MODE} in
+        personal)
+            BPREFIX=pgo
+            KERNEL=${CBL}/tc-build/kernel
+            TAR_EXT=gz
+            URL=https://git.kernel.org/torvalds/t
+            ;;
+        release)
+            BPREFIX=v${KVER}-pgo
+            KERNEL=${CBL_GIT}/tc-build/kernel
+            TAR_EXT=xz
+            URL=https://cdn.kernel.org/pub/linux/kernel/v5.x
+            ;;
+    esac
+
+    set -ex
+
+    rm -f "${KERNEL}"/linux*
+    for CONFIG in defconfig allyesconfig; do
+        git checkout "${BPREFIX}"-${CONFIG} || continue
+        case ${CONFIG} in
+            defconfig) git rebase v"${KVER}" ;;
+            allyesconfig) git rebase "${BPREFIX}"-defconfig ;;
+        esac
+        git format-patch --stdout v"${KVER}".."${BPREFIX}"-"${CONFIG}" >"${KERNEL}"/linux-"${KVER}"-"${CONFIG}".patch
+    done
+
+    TARBALL=linux-${KVER}.tar.${TAR_EXT}
+    cd "${KERNEL}"
+    gen_sha256sum "${URL}/${TARBALL}"
+
+    sed -i "s/LINUX=.*/LINUX=linux-${KVER}/" "${KERNEL}"/build.sh
+); }
+
+function yapf() {
+    PYTHONPATH=${CBL_GIT}/yapf python3 "${CBL_GIT}"/yapf/yapf -i -p "${@}"
+}
 # vi: filetype=zsh
