@@ -6,6 +6,47 @@
 #
 # $ sudo sh -c "apt update && apt dist-upgrade -y && apt install --no-install-recommends -y zsh && chsh -s /bin/zsh pi"
 
+function bkrnl() { (
+    LINUX_NEXT=/mnt/ssd/src/linux-next
+    [[ -d ${LINUX_NEXT} ]] || git clone https://git.kernel.org/pub/scm/linux/kernel/git/next/linux-next.git/ "${LINUX_NEXT}"
+
+    set -x
+
+    PATH=/mnt/ssd/toolchains/llvm/bin:${PATH} \
+        make \
+        -C "${LINUX_NEXT}" \
+        -skj"$(nproc)" \
+        LLVM=1 \
+        O=build/"$(uname -m)" \
+        distclean defconfig all
+); }
+
+function bootk() { (
+    BOOT_UTILS=/mnt/ssd/src/boot-utils
+    [[ -d ${BOOT_UTILS} ]] || git clone https://github.com/ClangBuiltLinux/boot-utils "${BOOT_UTILS}"
+    git -C "${BOOT_UTILS}" pull -q
+
+    while ((${#})); do
+        case ${1} in
+            -k | --kernel)
+                [[ ${#} -gt 0 ]] && shift
+                KERNEL_IMG=${1:-/boot/custom-next-testing-arm64/Image}
+                KERNEL_LOCATION=/mnt/ssd/booting-kernel
+                mkdir -p "${KERNEL_LOCATION}"/arch/arm64/boot
+
+                # This matches the kernel command to create Image.gz
+                # shellcheck disable=SC2002
+                cat "${KERNEL_IMG}" | pigz -n -f -9 >"${KERNEL_LOCATION}"/arch/arm64/boot/Image.gz
+                ;;
+        esac
+        [[ ${#} -gt 0 ]] && shift
+    done
+
+    set -x
+
+    "${BOOT_UTILS}"/boot-qemu.sh -a arm64 -k "${KERNEL_LOCATION:-/mnt/ssd/src/linux-next/build/"$(uname -m)"}"
+); }
+
 function bootstrap() { (
     source <(curl -LSs https://github.com/nathanchance/scripts/raw/main/common) &>/dev/null || exit ${?}
     source <(curl -LSs https://github.com/nathanchance/scripts/raw/main/env/stubs/folders) &>/dev/null || exit ${?}
@@ -130,6 +171,22 @@ function bootstrap() { (
     echo "3. Handle SSD if necessary"
 ); }
 
+function clmods() { (
+    FD_ARGS=(-d 1 -E "$(uname -r)")
+    while IFS=$'\n' read -r STOCK_MODULES; do
+        FD_ARGS+=(-E "$(basename "${STOCK_MODULES%-*}")*+")
+    done < <(fd -- '-v7l\+' /lib/modules)
+
+    fd "${FD_ARGS[@]}" . /lib/modules -x sudo rm -frv
+); }
+
+# Function to properly show host with pure
+function fixp() {
+    eval "$(tmux show-env -s SSH_CONNECTION)" && prompt pure
+}
+
+function pi_setup() { true; }
+
 function rbld_usr() { (
     source "${SCRIPTS_FOLDER:?}"/env/stubs/updbin || die "Cannot source updbin"
     rm -rf "${HOME:?}"/usr
@@ -142,8 +199,53 @@ function rbld_usr() { (
     bzsh || die "Error building/installing zsh"
 ); }
 
+# Build an LLVM toolchain
+function updllvm() { (
+    LLVM_SRC=/mnt/ssd/src/llvm-project
+    if [[ ! -d ${LLVM_SRC} ]]; then
+        header "Cloning LLVM"
+        mkdir -p "${LLVM_SRC%/*}"
+        git clone https://github.com/llvm/llvm-project "${LLVM_SRC}"
+    fi
 
-function pi_setup() { true; }
+    LLVM_BLD=${LLVM_SRC}/build
+    rm -rf "${LLVM_BLD}"
+    mkdir -p "${LLVM_BLD}"
+    cd "${LLVM_BLD}" || exit ${?}
+
+    export CCACHE_DIR=/mnt/ssd/.ccache
+    export CCACHE_MAXSIZE=25G
+    CMAKE=(
+        cmake
+        -G Ninja
+        -Wno-dev
+        -DCLANG_DEFAULT_LINKER=lld
+        -DCMAKE_AR="$(command -v llvm-ar)"
+        -DCMAKE_BUILD_TYPE=Release
+        -DCMAKE_C_COMPILER="$(command -v clang)"
+        -DCMAKE_CXX_COMPILER="$(command -v clang++)"
+        -DCMAKE_INSTALL_PREFIX="${LLVM_PREFIX:=${PREFIX:-/mnt/ssd/toolchains/llvm}}"
+        -DCMAKE_LINKER="$(command -v ld.lld)"
+        -DCMAKE_RANLIB="$(command -v llvm-ranlib)"
+        -DLLVM_CCACHE_BUILD=ON
+        -DLLVM_ENABLE_PROJECTS="clang;lld"
+        -DLLVM_ENABLE_WARNINGS=OFF
+        -DLLVM_USE_LINKER=lld
+    )
+
+    header "Configuring LLVM"
+    "${CMAKE[@]}" "${LLVM_SRC}"/llvm >/dev/null || exit ${?}
+
+    header "Building LLVM"
+    ninja || exit ${?}
+
+    header "Running LLVM tests"
+    ninja check-clang check-llvm check-llvm-unit || exit ${?}
+
+    header "Installing LLVM"
+    rm -vrf "${LLVM_PREFIX}" || exit ${?}
+    ninja install || exit ${?}
+); }
 
 # Update kernel from build server
 function upd_kernel() { (
@@ -212,108 +314,5 @@ function upd_kernel() { (
 
     # Remove "quiet" and "splash" from cmdline
     sudo sed -i 's/quiet splash //' "${MAIN_BOOT}"/cmdline.txt
-); }
-
-function clmods() { (
-    FD_ARGS=(-d 1 -E "$(uname -r)")
-    while IFS=$'\n' read -r STOCK_MODULES; do
-        FD_ARGS+=(-E "$(basename "${STOCK_MODULES%-*}")*+")
-    done < <(fd -- '-v7l\+' /lib/modules)
-
-    fd "${FD_ARGS[@]}" . /lib/modules -x sudo rm -frv
-); }
-
-# Function to properly show host with pure
-function fixp() {
-    eval "$(tmux show-env -s SSH_CONNECTION)" && prompt pure
-}
-
-# Build an LLVM toolchain
-function updllvm() { (
-    LLVM_SRC=/mnt/ssd/src/llvm-project
-    if [[ ! -d ${LLVM_SRC} ]]; then
-        header "Cloning LLVM"
-        mkdir -p "${LLVM_SRC%/*}"
-        git clone https://github.com/llvm/llvm-project "${LLVM_SRC}"
-    fi
-
-    LLVM_BLD=${LLVM_SRC}/build
-    rm -rf "${LLVM_BLD}"
-    mkdir -p "${LLVM_BLD}"
-    cd "${LLVM_BLD}" || exit ${?}
-
-    export CCACHE_DIR=/mnt/ssd/.ccache
-    export CCACHE_MAXSIZE=25G
-    CMAKE=(
-        cmake
-        -G Ninja
-        -Wno-dev
-        -DCLANG_DEFAULT_LINKER=lld
-        -DCMAKE_AR="$(command -v llvm-ar)"
-        -DCMAKE_BUILD_TYPE=Release
-        -DCMAKE_C_COMPILER="$(command -v clang)"
-        -DCMAKE_CXX_COMPILER="$(command -v clang++)"
-        -DCMAKE_INSTALL_PREFIX="${LLVM_PREFIX:=${PREFIX:-/mnt/ssd/toolchains/llvm}}"
-        -DCMAKE_LINKER="$(command -v ld.lld)"
-        -DCMAKE_RANLIB="$(command -v llvm-ranlib)"
-        -DLLVM_CCACHE_BUILD=ON
-        -DLLVM_ENABLE_PROJECTS="clang;lld"
-        -DLLVM_ENABLE_WARNINGS=OFF
-        -DLLVM_USE_LINKER=lld
-    )
-
-    header "Configuring LLVM"
-    "${CMAKE[@]}" "${LLVM_SRC}"/llvm >/dev/null || exit ${?}
-
-    header "Building LLVM"
-    ninja || exit ${?}
-
-    header "Running LLVM tests"
-    ninja check-clang check-llvm check-llvm-unit || exit ${?}
-
-    header "Installing LLVM"
-    rm -vrf "${LLVM_PREFIX}" || exit ${?}
-    ninja install || exit ${?}
-); }
-
-function bkrnl() { (
-    LINUX_NEXT=/mnt/ssd/src/linux-next
-    [[ -d ${LINUX_NEXT} ]] || git clone https://git.kernel.org/pub/scm/linux/kernel/git/next/linux-next.git/ "${LINUX_NEXT}"
-
-    set -x
-
-    PATH=/mnt/ssd/toolchains/llvm/bin:${PATH} \
-        make \
-        -C "${LINUX_NEXT}" \
-        -skj"$(nproc)" \
-        LLVM=1 \
-        O=build/"$(uname -m)" \
-        distclean defconfig all
-); }
-
-function bootk() { (
-    BOOT_UTILS=/mnt/ssd/src/boot-utils
-    [[ -d ${BOOT_UTILS} ]] || git clone https://github.com/ClangBuiltLinux/boot-utils "${BOOT_UTILS}"
-    git -C "${BOOT_UTILS}" pull -q
-
-    while ((${#})); do
-        case ${1} in
-            -k | --kernel)
-                [[ ${#} -gt 0 ]] && shift
-                KERNEL_IMG=${1:-/boot/custom-next-testing-arm64/Image}
-                KERNEL_LOCATION=/mnt/ssd/booting-kernel
-                mkdir -p "${KERNEL_LOCATION}"/arch/arm64/boot
-
-                # This matches the kernel command to create Image.gz
-                # shellcheck disable=SC2002
-                cat "${KERNEL_IMG}" | pigz -n -f -9 >"${KERNEL_LOCATION}"/arch/arm64/boot/Image.gz
-                ;;
-        esac
-        [[ ${#} -gt 0 ]] && shift
-    done
-
-    set -x
-
-    "${BOOT_UTILS}"/boot-qemu.sh -a arm64 -k "${KERNEL_LOCATION:-/mnt/ssd/src/linux-next/build/"$(uname -m)"}"
 ); }
 # vi: filetype=zsh
