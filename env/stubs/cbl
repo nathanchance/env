@@ -34,13 +34,11 @@ function bldall() { (
 ); }
 
 # Build all kernel trees
-function bldallk() {
-    local TREE
-
-    for TREE in linux{-next,,-stable-5.{10,4}}; do TREE=${TREE} lt ""; done
-    "${CBL_BLD}"/pi-scripts/build.sh -k "${CBL_BLD}"/rpi
+function bldallk() { (
+    for BLDALLK_TREE in linux{-next,,-stable-5.{10,4}}; do TREE=${BLDALLK_TREE} lt ""; done
+    for RPI_ARCH in arm arm64; do "${CBL_BLD}"/pi-scripts/build.sh -k "${CBL_BLD}"/rpi ARCH=arm; done
     "${CBL_BLD}"/wsl2/bin/build.sh
-}
+); }
 
 # Build binutils
 function bldbn() { (
@@ -108,10 +106,11 @@ function bldtcs() { (
 # Function to test build-{binutils,llvm}.py in multiple Docker images
 function bld_llvm_bntls_py() { (
     CCACHE_FOLDER=${CBL_CCACHE}/bld_llvm_bntls_py
+    TC_BLD=${CBL_GIT}/tc-build
+    SCRIPT=$(mktemp -p "${TC_BLD}" --suffix=.sh)
+
     LOG=$(mktemp)
     echo "Log: ${LOG}"
-    SCRIPT=$(mktemp --suffix=.sh)
-    TC_BLD=${CBL_GIT}/tc-build
 
     mkdir -p "${CCACHE_FOLDER}"
     cd "${TC_BLD}" || die "Could not move into ${TC_BLD}!"
@@ -124,7 +123,7 @@ PACKAGES=( ccache clang cmake git python3 )
 
 # Debian/Ubuntu
 if command -v apt-get &>/dev/null; then
-    PACKAGES+=( ca-certificates curl file gcc g++ make ninja-build texinfo xz-utils zlib1g-dev )
+    PACKAGES+=( binutils-dev ca-certificates curl file gcc g++ make ninja-build texinfo xz-utils zlib1g-dev )
     case "$(cat /etc/os-release)" in
         *xenial*) ;;
         *) PACKAGES+=( lld ) ;;
@@ -134,7 +133,7 @@ if command -v apt-get &>/dev/null; then
     DEBIAN_FRONTEND=noninteractive apt-get install --no-install-recommends -y "${PACKAGES[@]}"
 # Fedora
 elif command -v dnf &>/dev/null; then
-    PACKAGES+=( gcc gcc-c++ lld make ninja-build texinfo-tex xz zlib-devel )
+    PACKAGES+=( binutils-devel gcc gcc-c++ lld make ninja-build texinfo-tex xz zlib-devel )
     dnf update -y
     dnf install -y "${PACKAGES[@]}"
 # Arch
@@ -144,31 +143,27 @@ elif command -v pacman &>/dev/null; then
     pacman -S --noconfirm "${PACKAGES[@]}"
 # OpenSUSE Leap/Tumbleweed
 elif command -v zypper &>/dev/null; then
-    PACKAGES+=( curl gcc gcc-c++ gzip lld make ninja tar texinfo xz zlib-devel )
+    PACKAGES+=( binutils-devel curl gcc gcc-c++ gzip lld make ninja tar texinfo xz zlib-devel )
     zypper -n up
     zypper -n in "${PACKAGES[@]}"
 fi
 
-ccache -M 50G
+ccache --max-size=50G
 ccache --set-config=compression=true
 ccache --set-config=compression_level=9
-ccache --set-config=cache_dir=/ccache
+ccache --show-stats
 
-TEXT_TO_REPLACE
-
-./build-binutils.py -t all || exit 1
-CC=gcc ./build-llvm.py || exit 1
-CC=clang ./build-llvm.py || exit 1
+./build-binutils.py || exit ${?}
+CC=gcc ./build-llvm.py --branch "release/12.x" || exit ${?}
+CC=clang ./build-llvm.py --branch "release/12.x" || exit ${?}
 
 for FILE in clang ld.lld aarch64-linux-gnu-as arm-linux-gnueabi-as mips-linux-gnu-as mipsel-linux-gnu-as powerpc-linux-gnu-as powerpc64-linux-gnu-as powerpc64le-linux-gnu-as riscv64-linux-gnu-as s390x-linux-gnu-as as; do
-    ./install/bin/${FILE} --version || exit 1
+    ./install/bin/${FILE} --version || exit ${?}
 done
 EOF
 
-    sed -i "s;TEXT_TO_REPLACE;git clone /${PWD##*/} /${PWD##*/}2 \&\& cd /${PWD##*/}2;g" "${SCRIPT}"
-
     for IMAGE in \
-        archlinux/base:latest \
+        archlinux:latest \
         debian:stable-slim \
         debian:testing-slim \
         debian:unstable-slim \
@@ -181,19 +176,22 @@ EOF
         ubuntu:latest \
         ubuntu:rolling \
         ubuntu:devel; do
-        podman pull "${IMAGE}"
-        podman_mount \
+        podman pull docker.io/"${IMAGE}"
+        podman run \
+            --env="CCACHE_DIR=${CCACHE_FOLDER}" \
             --interactive \
-            --mount type=bind,source="${CCACHE_FOLDER}",target=/ccache \
-            --mount type=bind,source="${SCRIPT}",target=/script.sh \
             --rm \
             --tty \
-            "${IMAGE}" bash /script.sh || {
+            --volume="${CCACHE_FOLDER}:${CCACHE_FOLDER}" \
+            --volume="${TC_BLD}:${TC_BLD}" \
+            --workdir="${TC_BLD}" \
+            "${IMAGE}" bash "${SCRIPT}" || {
             echo "${IMAGE} failed" >>"${LOG}"
             continue
         }
         echo "${IMAGE} successful" >>"${LOG}"
     done
+    rm "${SCRIPT}"
 
     echo
     echo "Results:"
@@ -315,17 +313,17 @@ function cbl_sunday() { (
 ); }
 
 # Show local LLVM patches via git log
-function llvm_log() {
-    local LLVM_PROJ=${TCBLD:?}/llvm-project
+function llvm_log() { (
+    cd "${TCBLD:?}"/llvm-project || exit ${?}
 
-    MLFC=$(git -C "${LLVM_PROJ}" mfc)
+    MLFC=$(git mfc)
     if [[ -n ${MLFC} ]]; then
         echo
         echo "LLVM commit log:"
         echo
-        git -C "${LLVM_PROJ}" lo "${MLFC}"^^..HEAD
+        git lo "${MLFC}"^^..HEAD
     fi
-}
+); }
 
 # linux testing
 function lt() { (
@@ -471,7 +469,7 @@ function test_llvm_mainline_linux() { (
     git -C "${LINUX}" pull --rebase
 
     # Build the tree
-    for LLVM_TC in ${CBL_TC}/llvm-{10.0.1,11.1.0-rc3,12.0.0-rc1,binutils}; do
+    for LLVM_TC in ${CBL_TC}/llvm-{10.0.1,11.1.0,12.0.0-rc1,binutils}; do
         KRNL_DIR=${LINUX} TC_DIR=${LLVM_TC} lt
     done
 ); }
@@ -489,7 +487,7 @@ function test_llvm_stable_linux() { (
     done
 
     # Build the trees
-    for LLVM_TC in ${CBL_TC}/llvm-{10.0.1,11.1.0-rc3,12.0.0-rc1,binutils}; do
+    for LLVM_TC in ${CBL_TC}/llvm-{10.0.1,11.1.0,12.0.0-rc1,binutils}; do
         for TEST_KRNL_DIR in ${CBL_BLD_C}/linux-stable-{5.10,5.4}; do
             KRNL_DIR=${TEST_KRNL_DIR} TC_DIR=${LLVM_TC} lt
         done
