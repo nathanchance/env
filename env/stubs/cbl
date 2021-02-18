@@ -143,7 +143,7 @@ elif command -v pacman &>/dev/null; then
     pacman -S --noconfirm "${PACKAGES[@]}"
 # OpenSUSE Leap/Tumbleweed
 elif command -v zypper &>/dev/null; then
-    PACKAGES+=( binutils-devel curl gcc gcc-c++ gzip lld make ninja tar texinfo xz zlib-devel )
+    PACKAGES+=( binutils-devel binutils-gold curl gcc gcc-c++ gzip lld make ninja tar texinfo xz zlib-devel )
     zypper -n up
     zypper -n in "${PACKAGES[@]}"
 fi
