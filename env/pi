@@ -135,6 +135,7 @@ function rbld_usr() { (
     rm -rf "${HOME:?}"/usr
     bccache || die "Error building/installing ccache"
     bgit || die "Error building/installing git"
+    biexa || die "Error building/installing exa"
     birg || die "Error building/install ripgrep"
     bisharkdp bat diskus fd || die "Error building/installing a sharkdp binary"
     btmux || die "Error building/installing tmux"

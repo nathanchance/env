@@ -18,8 +18,8 @@ esac
 
 # Universal aliases/functions/variables
 function universal_setup() {
-    # Use ls with colors
-    alias ls='ls --color=auto'
+    # Use exa as ls
+    alias ls='exa'
 
     # scripts folder alias
     alias spt='cd ${SCRIPTS_FOLDER}'

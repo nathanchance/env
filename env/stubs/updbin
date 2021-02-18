@@ -751,6 +751,7 @@ function updbin() { (
     bcvise || exit ${?}
     bmake || exit ${?}
     bninja || exit ${?}
+    biexa || exit ${?}
     birg || exit ${?}
     bisharkdp all || exit ${?}
     btmux || exit ${?}
