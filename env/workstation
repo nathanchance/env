@@ -352,10 +352,8 @@ function workstation_aliases() {
 # Additional setup steps for my workstation
 function workstation_setup() {
     ccache_setup 100
-    source "${SCRIPTS_FOLDER}"/env/stubs/folders
-    source "${SCRIPTS_FOLDER}"/env/stubs/cbl
-    source "${SCRIPTS_FOLDER}"/env/stubs/bk
     source "${SCRIPTS_FOLDER}"/env/stubs/bldgcc
+    source "${SCRIPTS_FOLDER}"/env/stubs/cbl
     load_botinfo
     gpg_key_cache
 }
