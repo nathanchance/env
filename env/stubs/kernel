@@ -31,7 +31,7 @@ function b4a() { (
 function chp() { (
     [[ -x scripts/checkpatch.pl ]] || die "checkpatch.pl does not exist"
     scripts/checkpatch.pl "${@}"
- ); }
+); }
 
 # Grab an thread as an mbox file with b4
 function gmbx() { (

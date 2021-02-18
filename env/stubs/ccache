@@ -33,7 +33,7 @@ function ccache_for_all() { (
     while ((${#})); do
         case ${1} in
             binutils | kernel | llvm) CCACHE_DIRS+=("${CBL_CCACHE}/${1}") ;;
-            */*) CCACHE_DIRS+=("${1}");;
+            */*) CCACHE_DIRS+=("${1}") ;;
             clear) CCACHE_OPTS=(--clear --zero-stats) ;;
             stats) CCACHE_OPTS=(--show-stats) ;;
         esac
