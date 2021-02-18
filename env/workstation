@@ -340,17 +340,11 @@ function updpgollvm() { (
         ccache_clear llvm
 ); }
 
-# Workstation specific aliases
-function workstation_aliases() {
-    # default Arch ls alias
-    alias ls='ls --color=auto'
-
-    # Generate a kernel version for the current tree
-    alias kver='make -s kernelversion'
-}
-
 # Additional setup steps for my workstation
 function workstation_setup() {
+    # Generate a kernel version for the current tree
+    alias kver='make -s kernelversion'
+
     ccache_setup 100
     source "${SCRIPTS_FOLDER}"/env/stubs/bldgcc
     source "${SCRIPTS_FOLDER}"/env/stubs/cbl

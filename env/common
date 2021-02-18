@@ -16,19 +16,23 @@ case "$(id -un)@$(uname -n)" in
 esac
 [[ -n ${SCRIPTS_FOLDER} ]] && source "${SCRIPTS_FOLDER}/env/${LOCATION}"
 
-# Universal aliases/functions
-function aliases() {
-    # hub alias
-    command -v hub &>/dev/null && alias git='hub'
+# Universal aliases/functions/variables
+function universal_setup() {
+    # Use ls with colors
+    alias ls='ls --color=auto'
 
     # scripts folder alias
     alias spt='cd ${SCRIPTS_FOLDER}'
+
+    # hub alias
+    command -v hub &>/dev/null && alias git='hub'
 
     # tmux alias
     command -v tmux &>/dev/null && alias tmux='tmux -u'
 
     source "${SCRIPTS_FOLDER}/env/stubs/ccache"
     source "${SCRIPTS_FOLDER}/env/stubs/deldog"
+    source "${SCRIPTS_FOLDER}/env/stubs/folders"
     source "${SCRIPTS_FOLDER}/env/stubs/git"
     source "${SCRIPTS_FOLDER}/env/stubs/kernel"
     source "${SCRIPTS_FOLDER}/env/stubs/updbin"
@@ -165,8 +169,7 @@ function shell_setup() {
     path_push "${HOME}/usr/bin"
     [[ -f ${HOME}/.del_dog_api_key ]] && source "${HOME}/.del_dog_api_key"
     [[ -f ${HOME}/.server_ip ]] && source "${HOME}/.server_ip"
-    aliases
-    "${LOCATION}"_aliases
+    universal_setup
     "${LOCATION}"_setup
     GPG_TTY=$(tty)
     export GPG_TTY

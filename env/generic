@@ -121,11 +121,5 @@ function rbld_usr() { (
     iandroidtools || die "iandroidtools failed"
 ); }
 
-function generic_aliases() {
-    alias ls='ls --color=auto'
-}
-
-function generic_setup() {
-    source "${SCRIPTS_FOLDER}/env/stubs/folders"
-}
+function generic_setup() { true; }
 # vi: filetype=zsh

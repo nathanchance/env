@@ -141,7 +141,7 @@ function rbld_usr() { (
     bzsh || die "Error building/installing zsh"
 ); }
 
-function pi_aliases() {
+function pi_afv() {
     alias ls='ls --color=auto'
 }
 
