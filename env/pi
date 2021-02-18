@@ -4,7 +4,7 @@
 #
 # Raspberry Pi environment script
 #
-# $ sudo sh -c "apt update && apt install --no-install-recommends -y zsh && chsh -s /bin/zsh pi"
+# $ sudo sh -c "apt update && apt dist-upgrade -y && apt install --no-install-recommends -y zsh && chsh -s /bin/zsh pi"
 
 function bootstrap() { (
     source <(curl -LSs https://github.com/nathanchance/scripts/raw/main/common) &>/dev/null || exit ${?}
