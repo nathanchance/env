@@ -43,6 +43,7 @@ function cltmp() { (
 # Update main server IP address file
 function encrypt_serv_ip() { (
     [[ -f ${HOME}/.server_ip ]] || die "Server IP file could not be found"
+    gpg_key_cache
     gpg --batch \
         --yes \
         --output "${SCRIPTS_FOLDER:?}"/configs/common/server_ip.gpg \
@@ -221,9 +222,8 @@ function upd() { (
 
 # Update my website
 function upd_website() { (
-    GITHUB=${HOME}/github
-    WEBSITE=${GITHUB}/nathanchance.github.io
-    HUGO_FILES=${GITHUB}/hugo-files
+    WEBSITE=${GITHUB_FOLDER}/nathanchance.github.io
+    HUGO_FILES=${GITHUB_FOLDER}/hugo-files
 
     [[ -d ${WEBSITE} && -d ${HUGO_FILES} ]] || die "Website and hugo-files should be cloned before running this function"
 
