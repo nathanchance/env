@@ -274,6 +274,29 @@ EOF
     echo
 ) || return 1; }
 
+# Clean up certain high volume git repos
+function clean_repos() { (
+    for REPO in "${ALS}"/* "${CBL}"/linux* "${CBL}"/wsl2 "${SRC_FOLDER}"/linux*; do
+        header "${REPO}"
+        if cd "${REPO}"; then
+            git fetch --all
+            git reflog expire --all --expire=now
+            git gc --aggressive --prune=now --force
+        else
+            display_error "${REPO##*/} doesn't exist"
+        fi
+    done
+    cd "${CBL_KC}" || die "${CBL_KC} does not exist"
+    repo sync
+    repo forall -c "git reflog expire --all --expire=now && git gc --aggressive --prune=now --force"
+); }
+
+# Qualify new LLVM revision
+function qualify_llvm_uprev() { (
+    bllvm --bootstrap || exit ${?}
+    bllvm
+); }
+
 # Rebuild ~/usr
 function rbld_usr() { (
     source "${SCRIPTS_FOLDER:?}"/env/stubs/updbin || die "Cannot source updbin"
@@ -300,6 +323,23 @@ function rbld_usr() { (
     done
 ); }
 
+# Do a full system LLVM update
+function updllvm() { (
+    LLVM_SRC=${SRC_FOLDER:-${HOME}/src}/llvm-project
+    [[ -d ${LLVM_SRC} ]] || git clone https://github.com/llvm/llvm-project "${LLVM_SRC}"
+    git -C "${LLVM_SRC}" pull --rebase
+
+    qualify_llvm_uprev && updpgollvm
+); }
+
+# Alias for running PGO LLVM build
+function updpgollvm() { (
+    DATE=$(date +%Y-%m-%d)
+    PREFIX=${LLVM_TC_FOLDER}/${DATE} bpgollvm &&
+        symlink_llvm "${DATE}" &&
+        ccache_clear llvm
+); }
+
 # Workstation specific aliases
 function workstation_aliases() {
     # default Arch ls alias
@@ -307,9 +347,6 @@ function workstation_aliases() {
 
     # Generate a kernel version for the current tree
     alias kver='make -s kernelversion'
-
-    # Alias for merge-stable script
-    alias ms='merge-stable'
 }
 
 # Additional setup steps for my workstation
@@ -322,88 +359,4 @@ function workstation_setup() {
     load_botinfo
     gpg_key_cache
 }
-
-# Clean up certain high volume git repos
-function clean_repos() { (
-    for REPO in "${ALS}"/* "${CBL}"/linux* "${CBL}"/wsl2 "${SRC_FOLDER}"/linux*; do
-        header "${REPO}"
-        if cd "${REPO}"; then
-            git fetch --all
-            git reflog expire --all --expire=now
-            git gc --aggressive --prune=now --force
-        else
-            display_error "${REPO##*/} doesn't exist"
-        fi
-    done
-    cd "${CBL_KC}" || die "${CBL_KC} does not exist"
-    repo sync
-    repo forall -c "git reflog expire --all --expire=now && git gc --aggressive --prune=now --force"
-); }
-
-# Function to incrementally patch a kernel with stable
-function stable-patch() { (
-    CURRENT_VERSION=$(kver)
-    TARGET_PATCH_LEVEL=$((${CURRENT_VERSION##*.} + 1))
-
-    URL=https://cdn.kernel.org/pub/linux/kernel/v4.x/incr/patch-"${CURRENT_VERSION}"-"${TARGET_PATCH_LEVEL}".xz
-
-    MESSAGE="treewide: Linux ${CURRENT_VERSION%.*}.${TARGET_PATCH_LEVEL}
-
-source kernel.org
-${URL}"
-
-    if curl "${URL}" | xz -cd | git ap "${@}"; then
-        git ac -m "${MESSAGE}"
-    else
-        echo
-        echo
-        echo "git ac -m \"${MESSAGE}\""
-        echo
-        echo
-    fi
-); }
-
-# Symlink the generic-commands file to all of the android-linux-stable trees for a particular kernel version
-function symlink-commands() { (
-    case ${1} in
-        3.18) FILES=("marlin" "msm-3.18" "op3-8.0.0" "tissot") ;;
-        4.4) FILES=("msm-4.4" "nash-lineage-18.1" "wahoo") ;;
-        4.9) FILES=("bluecross" "msm-4.9" "op6-Q_10.0") ;;
-        4.14) FILES=("msm-4.14") ;;
-    esac
-
-    for FILE in "${FILES[@]}"; do
-        ln -sf generic-commands "${FILE}-commands"
-    done
-); }
-
-# Alias for running PGO LLVM build
-function updpgollvm() { (
-    DATE=$(date +%Y-%m-%d)
-    PREFIX=${LLVM_TC_FOLDER}/${DATE} bpgollvm &&
-        symlink_llvm "${DATE}" &&
-        ccache_clear llvm
-); }
-
-# Qualify new LLVM revision
-function qualify_llvm_uprev() { (
-    bllvm --bootstrap || exit ${?}
-    bllvm
-); }
-
-# Generate ALS conflict lists
-function genalscnflcts() { (
-    for FILE in $(git cf); do
-        printf '"%s:%d"\n' "${FILE}" "$(git lo "${1:?}"..MERGE_HEAD "${FILE}" | wc -l)"
-    done
-); }
-
-# Do a full system LLVM update
-function updllvm() { (
-    LLVM_SRC=${SRC_FOLDER:-${HOME}/src}/llvm-project
-    [[ -d ${LLVM_SRC} ]] || git clone https://github.com/llvm/llvm-project "${LLVM_SRC}"
-    git -C "${LLVM_SRC}" pull --rebase
-
-    qualify_llvm_uprev && updpgollvm
-); }
 # vi: filetype=zsh
