@@ -457,7 +457,7 @@ function biexa() { (
 
     cd "${TMP_FOLDER}" || exit ${?}
 
-    if [[ $(uname -m) = "exa" ]]; then
+    if [[ $(uname -m) = "x86_64" ]]; then
         EXA_ZIP=exa-linux-x86_64-${EXA_VERSION//v/}.zip
 
         header "Installing exa"
