@@ -302,6 +302,7 @@ function cbl_qemu_build() { (
     for ARCH in arm aarch64 i386 mips mipsel ppc64 riscv64 s390x x86_64; do
         ln -s "${QEMU_PREFIX}"/bin/qemu-system-${ARCH} "${CBL_QEMU_BIN}"
     done
+    ln -s "${QEMU_PREFIX}"/bin/qemu-img "${CBL_QEMU_BIN}"
 ); }
 
 function cbl_sunday() { (
