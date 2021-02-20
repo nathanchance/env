@@ -149,12 +149,18 @@ elif command -v zypper &>/dev/null; then
     zypper -n in "${PACKAGES[@]}"
 fi
 
+TMP=$(mktemp -d)
+cp -v "$(command -v ccache)" "${TMP}"
+for BINARY in cc c++ clang clang++ gcc g++; do
+    ln -fsv ccache "${TMP}/${BINARY}"
+done
+
 ccache --max-size=100G
 ccache --set-config=compression=true
 ccache --set-config=compression_level=9
 ccache --show-stats
 
-./build-binutils.py || exit ${?}
+PATH=${TMP}:${PATH} ./build-binutils.py || exit ${?}
 CC=gcc ./build-llvm.py --branch "release/12.x" || exit ${?}
 CC=clang ./build-llvm.py --branch "release/12.x" || exit ${?}
 
