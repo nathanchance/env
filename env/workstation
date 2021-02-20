@@ -175,7 +175,7 @@ function bootstrap() { (
 
         # Rootless podman
         echo "$(whoami):100000:65536" | sudo tee /etc/subgid /etc/subuid
-        printf "[registries.search]\nregistries = ['docker.io', 'quay.io']\n" | sudo tee /etc/containers/registries.conf
+        [[ -f /etc/containers/registries.conf ]] || printf "[registries.search]\nregistries = ['docker.io', 'quay.io']\n" | sudo tee /etc/containers/registries.conf
         [[ ${DISTRO} = "debian" ]] && systemctl --user restart dbus
     else
         die "Unknown or unsupported distro"
