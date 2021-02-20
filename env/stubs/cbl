@@ -169,18 +169,23 @@ for FILE in clang ld.lld aarch64-linux-gnu-as arm-linux-gnueabi-as mips-linux-gn
 done
 EOF
 
-    for IMAGE in \
-        archlinux:latest \
-        debian:stable-slim \
-        debian:testing-slim \
-        debian:unstable-slim \
-        fedora:latest \
-        fedora:rawhide \
-        opensuse/leap:latest \
-        opensuse/tumbleweed:latest \
-        ubuntu:latest \
-        ubuntu:rolling \
-        ubuntu:devel; do
+    IMAGES=(
+        archlinux
+        debian:buster
+        debian:stable
+        debian:testing
+        debian:unstable
+        fedora
+        fedora:rawhide
+        opensuse/leap
+        opensuse/tumbleweed
+        ubuntu:20.04
+        ubuntu
+        ubuntu:rolling
+        ubuntu:devel
+    )
+
+    for IMAGE in "${IMAGES[@]}"; do
         rm -rf "${TC_BLD}"/install
         podman pull docker.io/"${IMAGE}"
         podman run \
