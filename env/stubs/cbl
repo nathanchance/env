@@ -435,7 +435,7 @@ function qualify_tc_bld_uprev() { (
 
     git -C "${TC_BLD_SRC}" worktree add "${TC_BLD}" || exit ${?}
     git -C "${LNX_STBL}" ru || exit ${?}
-    for LNX_VER in 5.10 5.4; do git -C "${LNX_STBL}" worktree add "${WORK_DIR}"/linux-stable-"${LNX_VER}" origin/linux-"${LNX_VER}".y || exit ${?}; done
+    for LNX_VER in 5.11 5.10 5.4; do git -C "${LNX_STBL}" worktree add "${WORK_DIR}"/linux-stable-"${LNX_VER}" origin/linux-"${LNX_VER}".y || exit ${?}; done
 
     header "Building toolchains"
 
@@ -449,13 +449,13 @@ function qualify_tc_bld_uprev() { (
 
     header "Testing toolchain"
 
-    for SRC_FOLDER in "${WORK_DIR}"/linux-stable-{5.10,5.4}; do
+    for SRC_FOLDER in "${WORK_DIR}"/linux-stable-{5.11,5.10,5.4}; do
         KRNL_DIR=${SRC_FOLDER} TC_DIR=${WORK_DIR} lt
     done
 
     header "Remove worktrees"
     git -C "${TC_BLD_SRC}" worktree remove "${TC_BLD}"
-    for LNX_VER in 5.10 5.4; do git -C "${LNX_STBL}" worktree remove "${WORK_DIR}"/linux-stable-"${LNX_VER}"; done
+    for LNX_VER in 5.11 5.10 5.4; do git -C "${LNX_STBL}" worktree remove "${WORK_DIR}"/linux-stable-"${LNX_VER}"; done
     rm -rf "${WORK_DIR}"
 ); }
 
@@ -489,7 +489,7 @@ function test_llvm_stable_linux() { (
     # Build LLVM if necessary
     build_stable_llvm
 
-    for SBR in 5.10 5.4; do
+    for SBR in 5.11 5.10 5.4; do
         LINUX_STABLE=${CBL_BLD_C}/linux-stable-${SBR}
         [[ -d ${LINUX_STABLE} ]] || git clone https://git.kernel.org/pub/scm/linux/kernel/git/stable/linux.git/ "${LINUX_STABLE}"
         cd "${LINUX_STABLE}"

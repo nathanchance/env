@@ -48,12 +48,14 @@ function cbl_linux_repos() { (
                 PAIRS=(
                     "stable/linux.git:${CBL_B}/clean/linux-stable-5.4"
                     "stable/linux.git:${CBL_B}/clean/linux-stable-5.10"
+                    "stable/linux.git:${CBL_B}/clean/linux-stable-5.11"
                     "stable/linux.git:${CBL_B}/patched/linux-stable-5.4"
                     "stable/linux.git:${CBL_B}/patched/linux-stable-5.10"
+                    "stable/linux.git:${CBL_B}/patched/linux-stable-5.11"
                     "stable/linux.git:${CBL_S}/linux-stable"
                 )
                 ;;
-            *) return 1 ;;
+            *) exit 1 ;;
         esac
         shift
     done
