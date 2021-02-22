@@ -17,9 +17,9 @@ set statusline+=\ %l\:%v                    " Show line and column
 set statusline+=\ \(%p%%\)                  " Show location of cursor location percentage
 
 " Ensure color scheme always works
-set t_Co=256
 set background=dark
-colorscheme one
+" set t_Co=256
+" colorscheme one
 
 syntax enable                               " Enable syntax processing
 set tabstop=4                               " Show tabs as four spaces
