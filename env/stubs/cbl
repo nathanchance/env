@@ -117,30 +117,31 @@ function bld_llvm_bntls_py() { (
     [[ -f build-llvm.py ]] || die "build-llvm.py script could not be found!"
 
     cat <<'EOF' >"${SCRIPT}"
-#!/usr/env/bash
+#!/usr/bin/env bash
 
-PACKAGES=( ccache clang cmake git python3 )
+PACKAGES=(ccache clang cmake git python3)
 
 # Debian/Ubuntu
 if command -v apt-get &>/dev/null; then
-    PACKAGES+=( binutils-dev ca-certificates curl file gcc g++ make ninja-build texinfo xz-utils zlib1g-dev )
-    case "$(cat /etc/os-release)" in
-        *xenial*) ;;
-        *) PACKAGES+=( lld ) ;;
-    esac
+    PACKAGES+=(binutils-dev ca-certificates curl file gcc g++ lld make ninja-build texinfo xz-utils zlib1g-dev)
     apt-get update
     DEBIAN_FRONTEND=noninteractive apt-get upgrade -y
     DEBIAN_FRONTEND=noninteractive apt-get install --no-install-recommends -y "${PACKAGES[@]}"
 # Fedora
 elif command -v dnf &>/dev/null; then
-    PACKAGES+=( binutils-devel gcc gcc-c++ lld make ninja-build texinfo-tex xz zlib-devel )
+    PACKAGES+=(binutils-devel gcc gcc-c++ lld make ninja-build texinfo-tex xz zlib-devel)
     dnf update -y
     dnf install -y "${PACKAGES[@]}"
 # Arch
 elif command -v pacman &>/dev/null; then
-    PACKAGES+=( base-devel lld ninja )
+    PACKAGES+=(base-devel lld ninja)
     pacman -Syyu --noconfirm
     pacman -S --noconfirm "${PACKAGES[@]}"
+# Clear Linux
+elif command -v swupd &>/dev/null; then
+    PACKAGES=(c-basic ccache curl dev-utils git python3-basic)
+    swupd update
+    swupd bundle-add "${PACKAGES[@]}"
 # OpenSUSE Leap/Tumbleweed
 elif command -v zypper &>/dev/null; then
     PACKAGES+=( binutils-devel binutils-gold curl gcc gcc-c++ gzip lld make ninja tar texinfo xz zlib-devel )
@@ -161,6 +162,9 @@ ccache --show-stats
 
 PATH=${TMP}:${PATH} ./build-binutils.py || exit ${?}
 CC=gcc ./build-llvm.py --branch "release/12.x" || exit ${?}
+# Clear Linux defines these in the environment and it causes issues
+# We do not do this sooner because we want the optimized flags that Clear Linux provides for GCC
+unset CC CFLAGS CXX CXXFLAGS
 CC=clang ./build-llvm.py --branch "release/12.x" || exit ${?}
 
 for FILE in clang ld.lld aarch64-linux-gnu-as arm-linux-gnueabi-as mips-linux-gnu-as mipsel-linux-gnu-as powerpc-linux-gnu-as powerpc64-linux-gnu-as powerpc64le-linux-gnu-as riscv64-linux-gnu-as s390x-linux-gnu-as as; do
@@ -170,6 +174,7 @@ EOF
 
     IMAGES=(
         archlinux
+        clearlinux
         debian:buster
         debian:stable
         debian:testing
