@@ -341,12 +341,12 @@ function build_stable_llvm() { (
             --pgo
     [[ -x ${LLVM_11_RC}/bin/as ]] || "${TC_BLD}"/build-binutils.py --install-folder "${LLVM_11_RC}"
 
-    # Build LLVM 12.0.0-rc1 and binutils if neccesary
-    LLVM_12_RC=${CBL_TC}/llvm-12.0.0-rc1
+    # Build LLVM 12.0.0-rc2 and binutils if neccesary
+    LLVM_12_RC=${CBL_TC}/llvm-12.0.0-rc2
     [[ -x ${LLVM_12_RC}/bin/clang ]] ||
         "${TC_BLD}"/build-llvm.py \
             --assertions \
-            --branch llvmorg-12.0.0-rc1 \
+            --branch llvmorg-12.0.0-rc2 \
             --install-folder "${LLVM_12_RC}" \
             --pgo
     [[ -x ${LLVM_12_RC}/bin/as ]] || "${TC_BLD}"/build-binutils.py --install-folder "${LLVM_12_RC}"
@@ -582,7 +582,7 @@ function test_llvm_mainline_linux() { (
     git -C "${LINUX}" pull --rebase
 
     # Build the tree
-    for LLVM_TC in ${CBL_TC}/llvm-{10.0.1,11.1.0,12.0.0-rc1,binutils}; do
+    for LLVM_TC in ${CBL_TC}/llvm-{10.0.1,11.1.0,12.0.0-rc2,binutils}; do
         KRNL_DIR=${LINUX} TC_DIR=${LLVM_TC} lt
     done
 ); }
@@ -600,7 +600,7 @@ function test_llvm_stable_linux() { (
     done
 
     # Build the trees
-    for LLVM_TC in ${CBL_TC}/llvm-{10.0.1,11.1.0,12.0.0-rc1,binutils}; do
+    for LLVM_TC in ${CBL_TC}/llvm-{10.0.1,11.1.0,12.0.0-rc2,binutils}; do
         for TEST_KRNL_DIR in ${CBL_BLD_C}/linux-stable-{5.10,5.4}; do
             KRNL_DIR=${TEST_KRNL_DIR} TC_DIR=${LLVM_TC} lt
         done
