@@ -172,6 +172,7 @@ elif command -v dnf &>/dev/null; then
 # Arch
 elif command -v pacman &>/dev/null; then
     PACKAGES+=(
+        bc
         base-devel
         bison
         flex
