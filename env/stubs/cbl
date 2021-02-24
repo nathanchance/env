@@ -119,32 +119,124 @@ function bld_llvm_bntls_py() { (
     cat <<'EOF' >"${SCRIPT}"
 #!/usr/bin/env bash
 
+set -x
+
 PACKAGES=(ccache clang cmake git python3)
 
 # Debian/Ubuntu
 if command -v apt-get &>/dev/null; then
-    PACKAGES+=(binutils-dev ca-certificates curl file gcc g++ lld make ninja-build texinfo xz-utils zlib1g-dev)
+    PACKAGES+=(
+        bc
+        binutils-dev
+        bison
+        ca-certificates
+        curl
+        file
+        flex
+        gcc
+        g++
+        lld
+        libelf-dev
+        libssl-dev
+        make
+        ninja-build
+        texinfo
+        u-boot-tools
+        xz-utils
+        zlib1g-dev
+    )
     apt-get update
     DEBIAN_FRONTEND=noninteractive apt-get upgrade -y
     DEBIAN_FRONTEND=noninteractive apt-get install --no-install-recommends -y "${PACKAGES[@]}"
 # Fedora
 elif command -v dnf &>/dev/null; then
-    PACKAGES+=(binutils-devel gcc gcc-c++ lld make ninja-build texinfo-tex xz zlib-devel)
+    PACKAGES+=(
+        bc
+        binutils-devel
+        bison
+        elfutils-libelf-devel
+        flex
+        gcc
+        gcc-c++
+        lld
+        make
+        ninja-build
+        openssl-devel
+        texinfo-tex
+        uboot-tools
+        xz
+        zlib-devel
+    )
     dnf update -y
     dnf install -y "${PACKAGES[@]}"
 # Arch
 elif command -v pacman &>/dev/null; then
-    PACKAGES+=(base-devel lld ninja)
+    PACKAGES+=(
+        base-devel
+        bison
+        flex
+        libelf
+        lld
+        ninja
+        openssl
+        uboot-tools
+    )
     pacman -Syyu --noconfirm
     pacman -S --noconfirm "${PACKAGES[@]}"
 # Clear Linux
 elif command -v swupd &>/dev/null; then
-    PACKAGES=(c-basic ccache curl dev-utils git python3-basic)
+    PACKAGES=(
+        c-basic
+        ccache
+        curl
+        dev-utils
+        devpkg-elfutils
+        devpkg-openssl
+        git
+        python3-basic
+        which
+    )
     swupd update
     swupd bundle-add "${PACKAGES[@]}"
+
+    # Build u-boot-tools
+    (
+        UBOOT_VERSION=u-boot-2021.01
+        cd /usr/src
+        curl -LSs https://ftp.denx.de/pub/u-boot/"${UBOOT_VERSION}".tar.bz2 | tar -xjf -
+        cd "${UBOOT_VERSION}" || exit ${?}
+        make -j"$(nproc)" defconfig tools-all || exit ${?}
+        install -Dm755 tools/mkimage /usr/local/bin/mkimage
+        mkimage -V
+    ) || exit ${?}
 # OpenSUSE Leap/Tumbleweed
 elif command -v zypper &>/dev/null; then
-    PACKAGES+=( binutils-devel binutils-gold curl gcc gcc-c++ gzip lld make ninja tar texinfo xz zlib-devel )
+    PACKAGES+=(
+        bc
+        binutils-devel
+        binutils-gold
+        bison
+        ccache
+        clang
+        cmake
+        curl
+        flex
+        gcc
+        gcc-c++
+        git
+        gzip
+        libelf-devel
+        libopenssl-devel
+        lld
+        make
+        ninja
+        python3
+        tar
+        texinfo
+        u-boot-tools
+        xz
+        zlib-devel
+    )
     zypper -n up
     zypper -n in "${PACKAGES[@]}"
 fi
@@ -168,8 +260,10 @@ unset CC CFLAGS CXX CXXFLAGS
 CC=clang ./build-llvm.py --branch "release/12.x" || exit ${?}
 
 for FILE in clang ld.lld aarch64-linux-gnu-as arm-linux-gnueabi-as mips-linux-gnu-as mipsel-linux-gnu-as powerpc-linux-gnu-as powerpc64-linux-gnu-as powerpc64le-linux-gnu-as riscv64-linux-gnu-as s390x-linux-gnu-as as; do
-    ./install/bin/${FILE} --version || exit ${?}
+    install/bin/${FILE} --version || exit ${?}
 done
+
+kernel/build.sh -s /linux -t "PowerPC;X86"
 EOF
 
     IMAGES=(
@@ -199,6 +293,7 @@ EOF
             --tty \
             --volume="${CCACHE_FOLDER}:${CCACHE_FOLDER}" \
             --volume="${TC_BLD}:${TC_BLD}" \
+            --volume="${CBL_BLD_P}/linux:/linux" \
             --workdir="${TC_BLD}" \
             "${IMAGE}" bash "${SCRIPT}" || {
             echo "${IMAGE} failed" >>"${LOG}"
