@@ -264,6 +264,7 @@ for FILE in clang ld.lld aarch64-linux-gnu-as arm-linux-gnueabi-as mips-linux-gn
     install/bin/${FILE} --version || exit ${?}
 done
 
+rm -rf /linux/out
 kernel/build.sh -s /linux -t "PowerPC;X86"
 EOF
 
