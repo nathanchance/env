@@ -80,11 +80,13 @@ function bldtcs() { (
     git rh || die "Error resetting llvm-project"
     git pull --rebase || die "Updating llvm-project failed (${?})"
     BLDLLVM_INSTALL_FOLDER=${CBL_TC}/llvm-${DATE_TIME}-$(git -C "${TC_BLD_LLVM_PRJCT}" sh -s --format=%H origin/master)
+    BLD_LLVM_ARGS=()
+    ${LTO:-true} && BLD_LLVM_ARGS+=(--lto=thin)
     bldllvm \
         --assertions \
         --check-targets lld clang llvm \
         --install-folder "${BLDLLVM_INSTALL_FOLDER}" \
-        --lto=thin \
+        "${BLD_LLVM_ARGS[@]}" \
         --pgo || die "bldllvm failed with exit code ${?}"
     stripall "${BLDLLVM_INSTALL_FOLDER}"
 
@@ -463,7 +465,7 @@ function lt() { (
     [[ -n ${ARCHES} ]] && TC_BLD_ARGS+=(--arches "${ARCHES}")
     [[ -n ${BOOT_UTILS} ]] && TC_BLD_ARGS+=(--boot-utils "${BOOT_UTILS}")
     ${DO:=false} && TC_BLD_ARGS+=(--defconfigs)
-    ${LTO:=true} && [[ ${KRNL_DIR##*/} = "linux" ]] && TC_BLD_ARGS+=(--test-lto-cfi-kernel)
+    ${LTO:-true} && [[ ${KRNL_DIR##*/} = "linux" ]] && TC_BLD_ARGS+=(--test-lto-cfi-kernel)
     PATH=${CBL_QEMU_BIN}:${PATH} \
         "${CBL}"/llvm-kernel-testing/test.sh \
         --linux-src "${KRNL_DIR}" \
