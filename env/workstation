@@ -219,7 +219,7 @@ EOF
         rm -rf "${KEYS}"
     fi
     gpg_key_cache
-    ssh_agent
+    ssh-add "${HOME}"/.ssh/id_ed25519
 
     # Download repos
     [[ -d ${SCRIPTS} ]] || { git clone git@github.com:nathanchance/scripts "${SCRIPTS}" || die "Error cloning scripts"; }
