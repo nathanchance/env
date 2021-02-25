@@ -208,7 +208,6 @@ Host gitolite.kernel.org
   ServerAliveInterval 60
 EOF
             chmod 600 "${HOME}"/.ssh/{id_ed25519,id_korg}
-            ssh_agent
         fi
         if ${INSTALL_GPG_KEY}; then
             gpg --pinentry-mode loopback --import "${KEYS}"/signing/private.asc || die "Error installing gpg keys"
@@ -220,6 +219,7 @@ EOF
         rm -rf "${KEYS}"
     fi
     gpg_key_cache
+    ssh_agent
 
     # Download repos
     [[ -d ${SCRIPTS} ]] || { git clone git@github.com:nathanchance/scripts "${SCRIPTS}" || die "Error cloning scripts"; }
