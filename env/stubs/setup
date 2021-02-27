@@ -64,9 +64,14 @@ function cbl_linux_repos() { (
     for PAIR in "${PAIRS[@]}"; do
         FOLDER=${PAIR#*:}
         URL=${PAIR%:*}
-        CB=clone.bundle-${FOLDER##*/}
+        case ${URL} in
+            "next/linux-next.git") CB_SUFFIX=next ;;
+            "stable/linux.git") CB_SUFFIX=stable ;;
+            "torvalds/linux.git") CB_SUFFIX=mainline ;;
+        esac
+        CB=clone.bundle-${CB_SUFFIX}
         [[ -d ${FOLDER} ]] && continue
-        [[ ! -f ${CB} ]] && wget -O "${CB}" -c https://git.kernel.org/pub/scm/linux/kernel/git/"${URL}"/clone.bundle
+        [[ -f ${CB} ]] || wget -O "${CB}" -c https://git.kernel.org/pub/scm/linux/kernel/git/"${URL}"/clone.bundle
         git clone "${CB}" "${FOLDER}"
         (
             cd "${FOLDER}" || die "${FOLDER} does not exist"
