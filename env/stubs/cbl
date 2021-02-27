@@ -61,6 +61,7 @@ function bldtcs() { (
     DATE_TIME=$(date +%Y%m%d-%H%M)
 
     # Build binutils
+    [[ -d ${TCBLD} ]] || git clone -b personal git@github.com:nathanchance/tc-build.git "${TCBLD}"
     TC_BLD_BNTLS=${TCBLD}/binutils
     [[ -d ${TC_BLD_BNTLS} ]] || git clone https://sourceware.org/git/binutils-gdb.git "${TC_BLD_BNTLS}"
     git -C "${TC_BLD_BNTLS}" pull --rebase || die "Updating binutils failed (${?})"
