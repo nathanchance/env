@@ -305,11 +305,7 @@ function debian_rootstrap { (
     systemctl restart procps
 
     grep -q "buster-backports" /etc/apt/sources.list || echo "deb http://deb.debian.org/debian buster-backports main" | tee -a /etc/apt/sources.list
-
-    echo "deb https://download.opensuse.org/repositories/devel:/kubic:/libcontainers:/stable/Debian_10/ /" | tee /etc/apt/sources.list.d/devel:kubic:libcontainers:stable.list
-    curl -L https://download.opensuse.org/repositories/devel:/kubic:/libcontainers:/stable/Debian_10/Release.key | apt-key add -
-
-    apt update || exit ${?}
+    KUBIC_REPO=Debian_10 kubic_repo || exit ${?}
     apt -y -t buster-backports install libseccomp2 || exit ${?}
 
     debian_ubuntu_packages
@@ -470,6 +466,13 @@ nameserver 8.8.4.4
 EOF
 ); }
 
+function kubic_repo() { (
+    echo "deb https://download.opensuse.org/repositories/devel:/kubic:/libcontainers:/stable/${KUBIC_REPO}/ /" | tee /etc/apt/sources.list.d/devel:kubic:libcontainers:stable.list
+    curl -L https://download.opensuse.org/repositories/devel:/kubic:/libcontainers:/stable/"${KUBIC_REPO}"/Release.key | apt-key add -
+
+    apt update || exit ${?}
+); }
+
 # Check if a package is installed
 function is_installed() { (
     case ${DISTRO} in
@@ -525,10 +528,7 @@ function set_wsl() {
 function ubuntu_rootstrap { (
     # shellcheck disable=SC1091
     source /etc/os-release
-    echo "deb https://download.opensuse.org/repositories/devel:/kubic:/libcontainers:/stable/xUbuntu_${VERSION_ID}/ /" | tee /etc/apt/sources.list.d/devel:kubic:libcontainers:stable.list
-    curl -L https://download.opensuse.org/repositories/devel:/kubic:/libcontainers:/stable/xUbuntu_"${VERSION_ID}"/Release.key | apt-key add -
-
-    apt update
+    KUBIC_REPO=xUbuntu_${VERSION_ID} kubic_repo || exit ${?}
 
     debian_ubuntu_packages
     PACKAGES+=(python-is-python3)
