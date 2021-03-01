@@ -1,4 +1,7 @@
 #!/usr/bin/env zsh
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+# Copyright (C) 2021 Nathan Chancellor
 
 # Move into the folder this script is being run from
 cd "$(dirname "$(readlink -f "${0}")")" || return

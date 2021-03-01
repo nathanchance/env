@@ -1,6 +1,9 @@
 #!/usr/bin/env bash
+# SPDX-License-Identifier: GPL-3.0-or-later
 #
-# This shebang is just for shellcheck auditing; this script needs to be sourced and
+# Copyright (C) 2021 Nathan Chancellor
+#
+# The shebang is just for shellcheck auditing; this script needs to be sourced and
 # called by the function name otherwise it literally does nothing.
 #
 # Builds GCC and binutils for exclusively building kernels

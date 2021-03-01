@@ -1,3 +1,10 @@
+#!/usr/bin/env bash
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+# Copyright (C) 2021 Nathan Chancellor
+#
+# Shebang is purely for syntax highlighting and shellcheck auditing; script must be sourced to be useful
+
 # Make sure that zfunctions folder exists and set variable for other functions
 function setup_zfunctions() {
     ZFUNCTIONS=${HOME}/.zfunctions

@@ -1,4 +1,7 @@
 #!/bin/bash
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+# Copyright (C) 2021 Nathan Chancellor
 
 function equinix_die() {
     printf '\n\033[01;31m%s\033[0m\n' "${1:?}"

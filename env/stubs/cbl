@@ -1,6 +1,9 @@
+#!/usr/bin/env bash
 # SPDX-License-Identifier: GPL-3.0-or-later
 #
-# Copyright (C) 2018-2020 Nathan Chancellor
+# Shebang is purely for syntax highlighting and shellcheck auditing; script must be sourced to be useful
+#
+# Copyright (C) 2018-2021 Nathan Chancellor
 #
 # Functions used to assist with ClangBuiltLinux development
 

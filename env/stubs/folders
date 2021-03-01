@@ -1,3 +1,10 @@
+#!/usr/bin/env bash
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+# Shebang is purely for syntax highlighting and shellcheck auditing; script must be sourced to be useful
+#
+# Copyright (C) 2021 Nathan Chancellor
+#
 # shellcheck disable=SC2034
 
 [[ -z ${MAIN_FOLDER} ]] && MAIN_FOLDER=${HOME}

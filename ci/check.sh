@@ -1,4 +1,7 @@
 #!/usr/bin/env bash
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+# Copyright (C) 2021 Nathan Chancellor
 
 ACTIONS=()
 while ((${#})); do

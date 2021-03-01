@@ -1,4 +1,9 @@
-#!/usr/bin/env zsh
+#!/usr/bin/env bash
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+# Copyright (C) 2021 Nathan Chancellor
+#
+# Shebang is purely for syntax highlighting and shellcheck auditing; script must be sourced to be useful
 
 # Grab linux, linux-next, and linux-stable for CBL
 # https://www.kernel.org/cloning-linux-from-a-bundle.html

@@ -1,4 +1,7 @@
 #!/usr/bin/env bash
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+# Copyright (C) 2021 Nathan Chancellor
 
 RESET="\033[0m"
 BRIGHT_FOREGROUND="\033[1m"
