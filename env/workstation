@@ -111,8 +111,8 @@ function bootstrap() { (
             make
             mosh
             most
-            mutt
             neofetch
+            neomutt
             ninja-build
             php
             php-curl
@@ -234,7 +234,7 @@ EOF
     ln -fs "${SCRIPTS}"/configs/workstation/.tmux.conf "${HOME}"/.tmux.conf
     decrypt_gpg_file botinfo || NEEDS_GPG_DECRYPT=true
     decrypt_del_dog_api_key || NEEDS_GPG_DECRYPT=true
-    decrypt_gpg_file muttrc || NEEDS_GPG_DECRYPT=true
+    decrypt_gpg_file neomuttrc || NEEDS_GPG_DECRYPT=true
     for REPO in bug-files hugo-files nathanchance.github.io patches; do
         [[ -d ${GITHUB_FOLDER}/${REPO} ]] || { git -C "${GITHUB_FOLDER}" clone git@github.com:nathanchance/"${REPO}" || die "Error cloning ${REPO}!"; }
     done
@@ -267,7 +267,7 @@ EOF
     echo "$ EDITOR=vim crontab -e"
     if ${NEEDS_GPG_DECRYPT:=false}; then
         echo
-        echo "$ decrypt_gpg_file botinfo && decrypt_del_dog_api_key && decrypt_gpg_file muttrc"
+        echo "$ decrypt_gpg_file botinfo && decrypt_del_dog_api_key && decrypt_gpg_file neomuttrc"
     fi
     echo
     echo "$ sudo systemctl reboot"

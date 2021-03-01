@@ -43,7 +43,7 @@ function gmbx() { (
     set -x
 
     b4 mbox -n "${MBOX}" "${MSG_ID}" || exit ${?}
-    mutt -f "${MBOX}"
+    neomutt -f "${MBOX}"
     rm "${MBOX}"
 ); }
 

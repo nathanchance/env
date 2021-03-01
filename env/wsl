@@ -76,8 +76,8 @@ function bootstrap() { (
             lsb-release
             mosh
             most
-            mutt
             neofetch
+            neomutt
             pass
             pkg-config
             python3-pip
@@ -152,7 +152,7 @@ EOF
     ln -fs "${SCRIPTS}"/configs/local/.tmux.conf "${HOME}"/.tmux.conf
     zsh "${SCRIPTS}"/configs/common/vim/vim_setup.sh
     decrypt_del_dog_api_key
-    decrypt_gpg_file muttrc
+    decrypt_gpg_file neomuttrc
     decrypt_serv_ip
 
     # Clone password store
