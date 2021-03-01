@@ -14,10 +14,10 @@ function bootstrap() { (
     # Super debug :)
     set -x
 
-    # Grab common variables
-    source <(curl -LSs https://github.com/nathanchance/scripts/raw/main/env/stubs/folders) &>/dev/null || return 1
-    # Grab common functions
-    source <(curl -LSs https://github.com/nathanchance/scripts/raw/main/common) &>/dev/null || return 1
+    # Grab common functions/variables
+    source <(curl -LSs https://github.com/nathanchance/scripts/raw/main/common) &>/dev/null || exit ${?}
+    source <(curl -LSs https://github.com/nathanchance/scripts/raw/main/env/stubs/folders) &>/dev/null || exit ${?}
+    source <(curl -LSs https://github.com/nathanchance/scripts/raw/main/env/stubs/setup) &>/dev/null || exit ${?}
 
     # Do not run this as root
     [[ $(EUID) -eq 0 ]] && die "Do not run bootstrap as root"
@@ -34,18 +34,9 @@ function bootstrap() { (
 
     # Setup keys
     KEYS=/tmp/keys
+    install_gpg_keys || exit ${?}
     install_ssh_keys || exit ${?}
-    gpg_key_usable || INSTALL_GPG_KEY=true
-    if [[ ${INSTALL_GPG_KEY:=false} = "true" ]]; then
-        if ${INSTALL_GPG_KEY}; then
-            gpg --pinentry-mode loopback --import "${KEYS}"/signing/private.asc || die "Error installing gpg keys"
-            gpg --import "${KEYS}"/main/public.asc || die "Error installing gpg keys"
-            gpg --import-ownertrust "${KEYS}"/main/ownertrust*.asc || die "Error installing gpg ownertrust"
-            printf 'default-cache-ttl 604800\nmax-cache-ttl 2419200\n' | tee -a "${HOME}"/.gnupg/gpg-agent.conf
-            gpg-connect-agent reloadagent /bye
-        fi
-        rm -rf "${KEYS}"
-    fi
+    rm -rf "${KEYS}"
     gpg_key_cache
     ssh-add "${HOME}"/.ssh/id_ed25519
 

@@ -467,6 +467,30 @@ net/wireguard
 EOF
 ); }
 
+# Install my GPG keys
+function install_gpg_keys() { (
+    # KEYS variable must be set to properly find keys
+    : "${KEYS:?}"
+
+    # If the key is already installed then we are good
+    gpg_key_usable && exit 0
+
+    # Download keys if we do not have them already
+    [[ -d ${KEYS} ]] || { git clone https://github.com/nathanchance/keys "${KEYS}" || exit ${?}; }
+
+    # Install keys
+    gpg --pinentry-mode loopback --import "${KEYS}"/signing/private.asc || exit ${?}
+    gpg --import "${KEYS}"/main/public.asc
+    gpg --import-ownertrust "${KEYS}"/main/ownertrust*.asc
+
+    # GPG configuration
+    cat <<EOF | tee -a "${HOME}"/.gnupg/gpg-agent.conf
+default-cache-ttl 604800
+max-cache-ttl 2419200
+EOF
+    gpg-connect-agent reloadagent /bye
+); }
+
 # Install my SSH keys
 function install_ssh_keys() { (
     # KEYS variable must be set to properly find keys
