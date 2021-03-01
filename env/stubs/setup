@@ -1,27 +1,5 @@
 #!/usr/bin/env zsh
 
-# Create and configure global .gitignore
-function global_gitignore() { (
-    GITIGNORE=${HOME}/.gitignore_global
-    git config --global core.excludesfile "${GITIGNORE}"
-    curl -LSso "${GITIGNORE}" https://gist.githubusercontent.com/octocat/9257657/raw/3f9569e65df83a7b328b39a091f0ce9c6efc6429/.gitignore
-
-    # Add my rules
-    cat <<EOF >>"${GITIGNORE}"
-
-# Personal exclusions #
-#######################
-build/
-out.*/
-*.ko
-Image*
-zImage*
-dtbo*
-net/wireguard
-*.rej
-EOF
-); }
-
 # Grab linux, linux-next, and linux-stable for CBL
 # https://www.kernel.org/cloning-linux-from-a-bundle.html
 function cbl_linux_repos() { (
@@ -149,5 +127,27 @@ function cbl_other_repos() { (
     cd "${CBL_O_R}"/src/korg-linux || exit ${?}
     git_remote_add -f linus https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/
     git_remote_add -f --no-tags next https://git.kernel.org/pub/scm/linux/kernel/git/next/linux-next.git/
+); }
+
+# Create and configure global .gitignore
+function global_gitignore() { (
+    GITIGNORE=${HOME}/.gitignore_global
+    git config --global core.excludesfile "${GITIGNORE}"
+    curl -LSso "${GITIGNORE}" https://gist.githubusercontent.com/octocat/9257657/raw/3f9569e65df83a7b328b39a091f0ce9c6efc6429/.gitignore
+
+    # Add my rules
+    cat <<EOF >>"${GITIGNORE}"
+
+# Personal exclusions #
+#######################
+build/
+out.*/
+*.ko
+Image*
+zImage*
+dtbo*
+net/wireguard
+*.rej
+EOF
 ); }
 # vi: filetype=zsh
