@@ -5,6 +5,14 @@
 #
 # Shebang is purely for syntax highlighting and shellcheck auditing; script must be sourced to be useful
 
+# Add Google DNS servers to resolv.conf
+function add_google_dns() { (
+    grep -q "nameserver 8.8.8.8" /etc/resolv.conf || cat <<EOF | tee -a /etc/resolv.conf
+nameserver 8.8.8.8
+nameserver 8.8.4.4
+EOF
+); }
+
 # Arch Linux setup function (as root)
 # Requires that:
 #   1. Arch Linux has been setup with partitions
@@ -456,13 +464,6 @@ zImage*
 dtbo*
 net/wireguard
 *.rej
-EOF
-); }
-
-function add_google_dns() { (
-    grep -q "nameserver 8.8.8.8" /etc/resolv.conf || cat <<EOF | tee -a /etc/resolv.conf
-nameserver 8.8.8.8
-nameserver 8.8.4.4
 EOF
 ); }
 
