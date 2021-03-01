@@ -467,11 +467,43 @@ net/wireguard
 EOF
 ); }
 
-function kubic_repo() { (
-    echo "deb https://download.opensuse.org/repositories/devel:/kubic:/libcontainers:/stable/${KUBIC_REPO}/ /" | tee /etc/apt/sources.list.d/devel:kubic:libcontainers:stable.list
-    curl -L https://download.opensuse.org/repositories/devel:/kubic:/libcontainers:/stable/"${KUBIC_REPO}"/Release.key | apt-key add -
+# Install my SSH keys
+function install_ssh_keys() { (
+    # KEYS variable must be set to properly find keys
+    : "${KEYS:?}"
 
-    apt update || exit ${?}
+    # If the key is already installed then we are good
+    SSH_FOLDER=${HOME}/.ssh
+    [[ -f ${SSH_FOLDER}/id_ed25519 ]] && exit 0
+
+    # Download keys if we do not have them already
+    [[ -d ${KEYS} ]] || { git clone https://github.com/nathanchance/keys "${KEYS}" || exit ${?}; }
+
+    # Move keys into place and set proper permissions
+    SSH_KEYS=${KEYS}/ssh
+    cp "${SSH_KEYS}"/id_ed25519{,.pub} "${SSH_FOLDER}"
+    cp "${SSH_KEYS}"/korg-nathan "${SSH_FOLDER}"/id_korg
+    chmod 600 "${SSH_FOLDER}"/{id_ed25519,id_korg}
+
+    # Special ssh config for kernel.org
+    # https://korg.docs.kernel.org/access.html#if-you-received-a-ssh-private-key-from-kernel-org
+    cat <<'EOF' >>"${SSH_FOLDER}"/config
+Host gitolite.kernel.org
+  User git
+  IdentityFile ~/.ssh/id_korg
+  IdentitiesOnly yes
+  ClearAllForwardings yes
+  # We prefer ed25519 keys, but will fall back to others if your
+  # openssh client does not support that
+  HostKeyAlgorithms ssh-ed25519,ecdsa-sha2-nistp256,ssh-rsa
+  # Below are very useful for speeding up repeat access
+  # and for 2-factor validating your sessions
+  ControlPath ~/.ssh/cm-%r@%h:%p
+  ControlMaster auto
+  ControlPersist 30m
+  # Helps behind some NAT-ing routers
+  ServerAliveInterval 60
+EOF
 ); }
 
 # Check if a package is installed
@@ -479,6 +511,13 @@ function is_installed() { (
     case ${DISTRO} in
         arch) pacman -Q | grep -q "${1:?}" ;;
     esac
+); }
+
+function kubic_repo() { (
+    echo "deb https://download.opensuse.org/repositories/devel:/kubic:/libcontainers:/stable/${KUBIC_REPO}/ /" | tee /etc/apt/sources.list.d/devel:kubic:libcontainers:stable.list
+    curl -L https://download.opensuse.org/repositories/devel:/kubic:/libcontainers:/stable/"${KUBIC_REPO}"/Release.key | apt-key add -
+
+    apt update || exit ${?}
 ); }
 
 # Setup rootless podman as necessary

@@ -25,7 +25,8 @@ function bootstrap() { (
     SCRIPTS=${GITHUB_FOLDER}/scripts
 
     # Setup folders that will be used
-    mkdir -p "${ANDROID_TC_FOLDER}" \
+    mkdir -p \
+        "${ANDROID_TC_FOLDER}" \
         "${CBL}"/{android,github,kernels/clean,kernels/patched,mirrors,src,worktrees} \
         "${GITHUB_FOLDER}" \
         "${HOME}"/usr/bin \
@@ -33,32 +34,9 @@ function bootstrap() { (
 
     # Setup keys
     KEYS=/tmp/keys
-    [[ -f ${HOME}/.ssh/id_ed25519 ]] || INSTALL_SSH_KEY=true
+    install_ssh_keys || exit ${?}
     gpg_key_usable || INSTALL_GPG_KEY=true
-    if [[ ${INSTALL_SSH_KEY:=false} = "true" || ${INSTALL_GPG_KEY:=false} = "true" ]]; then
-        [[ -d ${KEYS} ]] || { git clone https://github.com/nathanchance/keys "${KEYS}" || die "Error downloading keys"; }
-        if ${INSTALL_SSH_KEY}; then
-            cp "${KEYS}"/ssh/id_ed25519{,.pub} "${HOME}"/.ssh
-            cp "${KEYS}"/ssh/korg-nathan "${HOME}"/.ssh/id_korg
-            cat <<'EOF' >>"${HOME}"/.ssh/config
-Host gitolite.kernel.org
-  User git
-  IdentityFile ~/.ssh/id_korg
-  IdentitiesOnly yes
-  ClearAllForwardings yes
-  # We prefer ed25519 keys, but will fall back to others if your
-  # openssh client does not support that
-  HostKeyAlgorithms ssh-ed25519,ecdsa-sha2-nistp256,ssh-rsa
-  # Below are very useful for speeding up repeat access
-  # and for 2-factor validating your sessions
-  ControlPath ~/.ssh/cm-%r@%h:%p
-  ControlMaster auto
-  ControlPersist 30m
-  # Helps behind some NAT-ing routers
-  ServerAliveInterval 60
-EOF
-            chmod 600 "${HOME}"/.ssh/{id_ed25519,id_korg}
-        fi
+    if [[ ${INSTALL_GPG_KEY:=false} = "true" ]]; then
         if ${INSTALL_GPG_KEY}; then
             gpg --pinentry-mode loopback --import "${KEYS}"/signing/private.asc || die "Error installing gpg keys"
             gpg --import "${KEYS}"/main/public.asc || die "Error installing gpg keys"

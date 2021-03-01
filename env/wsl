@@ -19,30 +19,10 @@ function bootstrap() { (
 
     # Keys location
     KEYS=/mnt/c/Users/natec/Documents/Keys
-    [[ -d ${KEYS} ]] || die "Keys are not available"
+    [[ -d ${KEYS} ]] || die "Keys are not available, please download them to Documents"
 
     # Setup SSH and GPG if keys are present
-    mkdir -p "${HOME}"/.ssh
-    cp "${KEYS}"/ssh/id_ed25519{,.pub} "${HOME}"/.ssh
-    cp "${KEYS}"/ssh/korg-nathan "${HOME}"/.ssh/id_korg
-    chmod 600 "${HOME}"/.ssh/{id_ed25519,id_korg}
-    cat <<'EOF' >>"${HOME}"/.ssh/config
-Host gitolite.kernel.org
-  User git
-  IdentityFile ~/.ssh/id_korg
-  IdentitiesOnly yes
-  ClearAllForwardings yes
-  # We prefer ed25519 keys, but will fall back to others if your
-  # openssh client does not support that
-  HostKeyAlgorithms ssh-ed25519,ecdsa-sha2-nistp256,ssh-rsa
-  # Below are very useful for speeding up repeat access
-  # and for 2-factor validating your sessions
-  ControlPath ~/.ssh/cm-%r@%h:%p
-  ControlMaster auto
-  ControlPersist 30m
-  # Helps behind some NAT-ing routers
-  ServerAliveInterval 60
-EOF
+    install_ssh_keys || exit ${?}
     ssh_agent
 
     # Setup GPG
