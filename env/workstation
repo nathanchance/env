@@ -9,25 +9,7 @@
 
 # Setup workstation function
 #
-# Assumes the following things have been done:
-#
-# Hetzner:
-#   1. The workstation has had its OS installed
-#
-#      $ installimage -r yes -l 0 -f yes -n archlinux-<suffix>
-#
-#   2. My user account has been created with sudo permissions
-#
-#      $ pacman -Syyu && pacman -S sudo zsh
-#      $ useradd -m -G wheel -s /bin/zsh nathan
-#      $ EDITOR=vim visudo
-#      nathan ALL=(ALL) ALL
-#      $ passwd
-#      $ passwd nathan
-#
-# Packet:
-#   1. User account and partitions have been created
-#
+# Assumes that rootstrap has been run
 function bootstrap() { (
     # Super debug :)
     set -x
@@ -38,7 +20,7 @@ function bootstrap() { (
     source <(curl -LSs https://github.com/nathanchance/scripts/raw/main/common) &>/dev/null || return 1
 
     # Do not run this as root
-    [[ $(id -u) -eq 0 ]] && die "Do not run bootstrap as root"
+    [[ $(EUID) -eq 0 ]] && die "Do not run bootstrap as root"
 
     SCRIPTS=${GITHUB_FOLDER}/scripts
 
@@ -48,141 +30,6 @@ function bootstrap() { (
         "${GITHUB_FOLDER}" \
         "${HOME}"/usr/bin \
         "${SRC_FOLDER}" || die "Can't create folders, wtf"
-
-    # Get distro we are on
-    DISTRO=$(get_distro)
-
-    # Set the correct time
-    sudo timedatectl set-timezone America/Phoenix
-
-    if [[ ${DISTRO} = "debian" || ${DISTRO} = "ubuntu" ]]; then
-        PACKAGES=(
-            abootimg
-            binutils-dev
-            bison
-            build-essential
-            ca-certificates
-            cdbs
-            clang
-            cmake
-            config-package-dev
-            creduce
-            curl
-            debhelper
-            debootstrap
-            devscripts
-            doxygen
-            expect
-            fakeroot
-            file
-            flex
-            gcc
-            gcc-multilib
-            gettext
-            git
-            g++
-            libarchive-tools
-            libauthen-sasl-perl
-            libcapstone-dev
-            libclang-dev
-            libcurl4-openssl-dev
-            libdw-dev
-            libedit-dev
-            libelf-dev
-            libemail-valid-perl
-            libevent-dev
-            libexpat1-dev
-            libfdt-dev
-            libglib2.0-dev
-            libglu1-mesa
-            libgmp-dev
-            libio-socket-ssl-perl
-            liblz4-tool
-            libmailtools-perl
-            libmpc-dev
-            libmpfr-dev
-            libncurses-dev
-            libnet-smtp-ssl-perl
-            libpcre2-dev
-            libpixman-1-dev
-            libssl-dev
-            libtinfo5
-            lld
-            llvm
-            llvm-dev
-            locales
-            make
-            mosh
-            most
-            neofetch
-            neomutt
-            ninja-build
-            php
-            php-curl
-            pkg-config
-            podman
-            psmisc
-            python2.7
-            python3
-            python3-dev
-            python3-pip
-            python3-setuptools
-            qemu-user-static
-            re2c
-            slirp4netns
-            sudo
-            swig
-            texinfo
-            tcl
-            tmux
-            u-boot-tools
-            uidmap
-            unifdef
-            unzip
-            vim
-            zip
-            zlib1g-dev
-            zsh
-            zstd
-        )
-
-        if [[ ${DISTRO} = "debian" ]]; then
-            # For rootless podman
-            echo "kernel.unprivileged_userns_clone=1" | sudo tee /etc/sysctl.d/00-local-userns.conf
-            sudo systemctl restart procps
-
-            grep -q "buster-backports" /etc/apt/sources.list || echo "deb http://deb.debian.org/debian buster-backports main" | sudo tee -a /etc/apt/sources.list
-
-            echo "deb https://download.opensuse.org/repositories/devel:/kubic:/libcontainers:/stable/Debian_10/ /" | sudo tee /etc/apt/sources.list.d/devel:kubic:libcontainers:stable.list
-            curl -L https://download.opensuse.org/repositories/devel:/kubic:/libcontainers:/stable/Debian_10/Release.key | sudo apt-key add -
-
-            sudo apt update || exit ${?}
-            sudo apt -y -t buster-backports install libseccomp2 || exit ${?}
-        elif [[ ${DISTRO} = "ubuntu" ]]; then
-            PACKAGES+=(python-is-python3)
-
-            # shellcheck disable=SC1091
-            source /etc/os-release
-            echo "deb https://download.opensuse.org/repositories/devel:/kubic:/libcontainers:/stable/xUbuntu_${VERSION_ID}/ /" | sudo tee /etc/apt/sources.list.d/devel:kubic:libcontainers:stable.list
-            curl -L https://download.opensuse.org/repositories/devel:/kubic:/libcontainers:/stable/xUbuntu_"${VERSION_ID}"/Release.key | sudo apt-key add -
-
-            sudo apt update || exit ${?}
-        fi
-        sudo DEBIAN_FRONTEND=noninteractive apt upgrade -y || exit ${?}
-        sudo DEBIAN_FRONTEND=noninteractive apt install -y "${PACKAGES[@]}" || exit ${?}
-        echo "locales locales/default_environment_locale select en_US.UTF-8" | sudo debconf-set-selections
-        echo "locales locales/locales_to_be_generated multiselect en_US.UTF-8 UTF-8" | sudo debconf-set-selections
-        sudo rm "/etc/locale.gen"
-        sudo dpkg-reconfigure --frontend noninteractive locales
-        grep -q "nameserver 8.8.8.8" /etc/resolv.conf || printf 'nameserver 8.8.8.8\nnameserver 8.8.4.4\n' | sudo tee -a /etc/resolv.conf
-
-        # Rootless podman
-        echo "$(whoami):100000:65536" | sudo tee /etc/subgid /etc/subuid
-        [[ -f /etc/containers/registries.conf ]] || printf "[registries.search]\nregistries = ['docker.io', 'quay.io']\n" | sudo tee /etc/containers/registries.conf
-        [[ ${DISTRO} = "debian" ]] && systemctl --user restart dbus
-    else
-        die "Unknown or unsupported distro"
-    fi
 
     # Setup keys
     KEYS=/tmp/keys
