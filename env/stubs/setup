@@ -297,9 +297,11 @@ function bootstrap() { (
     set +x
     echo "Things that might still need to be done"
     echo
-    echo "* Setup cron jobs via crontab or systemd (EDITOR=vim crontab -e)"
+    echo "* Setup cron jobs via crontab or systemd ($ EDITOR=vim crontab -e)"
     echo
-    echo "* Reboot to finish updates (sudo systemctl reboot)"
+    echo "* Restart ssh-agent ($ eval $(ssh-agent -k) && rm -rf /tmp/ssh-*)"
+    echo
+    echo "* Reboot to finish updates ($ sudo systemctl reboot)"
 ); }
 
 # Grab linux, linux-next, and linux-stable for CBL
