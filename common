@@ -69,7 +69,7 @@ function decrypt_gpg_file() { (
     [[ -z ${SCRIPTS_FOLDER} && -z ${SCRIPTS} ]] && die "Scripts folder cannot be found"
     [[ -z ${SCRIPTS_FOLDER} ]] && SCRIPTS_FOLDER=${SCRIPTS}
     gpg_key_cache
-    OUTPUT=${2:-"${HOME}/${1:?}"}
+    OUTPUT=${2:-"${HOME}/.${1:?}"}
     mkdir -p "${OUTPUT%/*}"
     gpg --batch --yes --pinentry-mode loopback --output "${OUTPUT}" --decrypt "${SCRIPTS_FOLDER:?}"/configs/common/"${1}".gpg
 ); }
