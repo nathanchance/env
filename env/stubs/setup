@@ -280,11 +280,11 @@ function bootstrap() { (
 
         # Grab linux, linux-next, and linux-stable for CBL
         for LINUX_TREE in linux linux-next linux-stable; do
-            tmux new-window zsh -c "source ${SCRIPTS_FOLDER}/env/stubs/setup && cbl_linux_repos ${LINUX_TREE}"
+            tmux new-window zsh -c "source ${SCRIPTS_FOLDER}/env/stubs/setup && cbl_linux_repos ${LINUX_TREE}; sleep 180"
         done
 
         # Download other CBL things
-        tmux new-window zsh -c "source ${SCRIPTS_FOLDER}/env/stubs/setup && cbl_other_repos"
+        tmux new-window zsh -c "source ${SCRIPTS_FOLDER}/env/stubs/setup && cbl_other_repos; sleep 180"
     else
         exit 0
     fi
@@ -356,7 +356,7 @@ function cbl_linux_repos() { (
         CB=clone.bundle-${CB_SUFFIX}
         mkdir -p "${FOLDER%/*}"
         [[ -d ${FOLDER} ]] && continue
-        [[ -f ${CB} ]] || wget -c -O "${CB}" https://mirrors.kernel.org/pub/scm/.bundles/pub/scm/linux/kernel/git/"${URL}"/clone.bundle
+        [[ -f ${CB} ]] || { wget -c -O "${CB}" https://mirrors.kernel.org/pub/scm/.bundles/pub/scm/linux/kernel/git/"${URL//.git/}"/clone.bundle || exit ${?}; }
         git clone "${CB}" "${FOLDER}"
         (
             cd "${FOLDER}" || die "${FOLDER} does not exist"
