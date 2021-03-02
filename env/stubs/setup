@@ -220,7 +220,7 @@ function bootstrap() { (
         install_ssh_keys || exit ${?}
         ${WSL} || rm -rf "${KEYS_FOLDER}"
         gpg_key_cache
-        if type -f ssh_agent &>/dev/null; then
+        if [[ -f ${HOME}/.ssh/.ssh-agent ]]; then
             ssh_agent
         else
             ssh-add -l || ssh-add "${HOME}"/.ssh/id_ed25519
