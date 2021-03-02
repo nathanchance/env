@@ -246,6 +246,7 @@ function bootstrap() { (
         decrypt_gpg_file botinfo
         decrypt_del_dog_api_key
         decrypt_gpg_file neomuttrc
+        decrypt_gpg_file config.ini "${HOME}"/.config/tuxsuite/config.ini
 
         # Get hub API setup so that downloading functions is even easier
         hub api || exit ${?}
