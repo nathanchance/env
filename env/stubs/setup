@@ -97,7 +97,11 @@ function arch_rootstrap() { (
         xmlto
         zsh
     )
-    ${WSL} || PACKAGES+=(podman)
+    if ${WSL}; then
+        PACKAGES+=(pass)
+    else
+        PACKAGES+=(podman)
+    fi
     is_installed git-git || PACKAGES+=(git)
     # This conflicts with sudo in base-devel, remove it as it will be reinstalled after the fact
     remove_if_installed opendoas-sudo
@@ -172,6 +176,128 @@ EOF
     fi
 ); }
 
+# User setup function
+function bootstrap() { (
+    set -x
+
+    # Do not run this as root
+    [[ $(EUID) -eq 0 ]] && die "Do not run bootstrap as root"
+
+    # We need to know if we are in a WSL environment
+    # We do NOT need to know the distribution as we should be distribution agnostic
+    # at this point, aside from rbld_usr, which is handled in that function
+    set_wsl
+
+    # Set yay flags for sudo
+    command -v yay &>/dev/null && yay --sudo doas --sudoflags -- --save
+
+    # Assume that we are currently in a scripts folder, bail out if not. git HAS to be available by this point due to rootstrap
+    for SCRIPT_FILE in common env/common env/stubs/folders env/stubs/git env/stubs/setup env/stubs/zsh; do
+        source <(cat "${SCRIPT_FILE}") || exit ${?}
+    done
+    source env/"${LOCATION:?}"
+
+    # "Trusted" environments need keys and certain repos. Set this variable on certain locations
+    [[ ${LOCATION} = "workstation" || ${LOCATION} = "wsl" ]] && TRUSTED=true
+    : "${TRUSTED:=false}"
+
+    # Setup keys if trusted
+    if ${TRUSTED}; then
+        if ${WSL}; then
+            # This is such a stupid issue...
+            # SC2030: Modification of KEYS_FOLDER is local (to subshell caused by (..) group).
+            # shellcheck disable=SC2030
+            KEYS_FOLDER=/mnt/c/Users/natec/Documents/Keys
+        else
+            KEYS_FOLDER=/tmp/keys
+        fi
+        install_gpg_keys || exit ${?}
+        install_ssh_keys || exit ${?}
+        ${WSL} || rm -rf "${KEYS_FOLDER}"
+        gpg_key_cache
+        ssh-add "${HOME}"/.ssh/id_ed25519
+    fi
+
+    # Download and scripts if necessary
+    : "${SCRIPTS_FOLDER:?}"
+    mkdir -p "${SCRIPTS_FOLDER%/*}"
+    [[ -d ${SCRIPTS_FOLDER} ]] || { git clone git@github.com:nathanchance/scripts.git "${SCRIPTS_FOLDER}" || exit ${?}; }
+    git -C "${SCRIPTS_FOLDER}" pull
+
+    # Run setup functions in a particular order order
+    setup_zsh_env
+    global_gitignore
+    rbld_usr || exit ${?}
+    path_push "${HOME}/usr/bin"
+    git_setup
+
+    zsh "${SCRIPTS_FOLDER}"/configs/common/vim/vim_setup.sh
+    if ${WSL}; then
+        TMUX_CONF_LOC=local
+    else
+        TMUX_CONF_LOC=workstation
+    fi
+    ln -fs "${SCRIPTS_FOLDER}"/configs/${TMUX_CONF_LOC}/.tmux.conf "${HOME}"/.tmux.conf
+
+    if ${TRUSTED}; then
+        decrypt_gpg_file botinfo
+        decrypt_del_dog_api_key
+        decrypt_gpg_file neomuttrc
+
+        # Get hub API setup so that downloading functions is even easier
+        hub api || exit ${?}
+    fi
+
+    if ${WSL}; then
+        decrypt_serv_ip
+        [[ -d ${HOME}/.password-store ]] || { hub clone password-store "${HOME}"/.password-store || exit ${?}; }
+
+        GITHUB_REPOS=(
+            hugo-files
+            nathanchance.github.io
+        )
+    elif ${TRUSTED}; then
+        mkdir -p "${ANDROID_TC_FOLDER:?}"
+        [[ -d ${ANDROID_TC_FOLDER}/clang-master ]] || tmux new-window zsh -c "git -C ${ANDROID_TC_FOLDER} clone --single-branch https://android.googlesource.com/platform/prebuilts/clang/host/linux-x86/ clang-master"
+        [[ -d ${ANDROID_TC_FOLDER}/gcc-arm ]] || git -C "${ANDROID_TC_FOLDER}" clone --depth=1 -b android-9.0.0_r1 --single-branch https://android.googlesource.com/platform/prebuilts/gcc/linux-x86/arm/arm-linux-androideabi-4.9/ gcc-arm
+        [[ -d ${ANDROID_TC_FOLDER}/gcc-arm64 ]] || git -C "${ANDROID_TC_FOLDER}" clone --depth=1 -b android-9.0.0_r1 --single-branch https://android.googlesource.com/platform/prebuilts/gcc/linux-x86/aarch64/aarch64-linux-android-4.9/ gcc-arm64
+
+        mkdir -p "${SRC_FOLDER:?}"
+        [[ -d ${SRC_FOLDER}/android-wireguard-module-builder ]] || git -C "${SRC_FOLDER}" clone git@github.com:WireGuard/android-wireguard-module-builder.git
+        [[ -d ${SRC_FOLDER}/pahole ]] || git -C "${SRC_FOLDER}" clone https://git.kernel.org/pub/scm/devel/pahole/pahole.git
+
+        GITHUB_REPOS=(
+            bug-files
+            hugo-files
+            nathanchance.github.io
+            patches
+        )
+
+        # Grab linux, linux-next, and linux-stable for CBL
+        for LINUX_TREE in linux linux-next linux-stable; do
+            tmux new-window zsh -c "source ${SCRIPTS_FOLDER}/env/stubs/setup && cbl_linux_repos ${LINUX_TREE}"
+        done
+
+        # Download other CBL things
+        tmux new-window zsh -c "source ${SCRIPTS_FOLDER}/env/stubs/setup && cbl_other_repos"
+    else
+        exit 0
+    fi
+
+    mkdir -p "${GITHUB_FOLDER}"
+    for GITHUB_REPO in "${GITHUB_REPOS[@]}"; do
+        [[ -d ${GITHUB_FOLDER}/${GITHUB_REPO} ]] || { hub clone "${GITHUB_REPO}" "${GITHUB_FOLDER}/${GITHUB_REPO}" || exit ${?}; }
+    done
+    git -C "${GITHUB_FOLDER}"/hugo-files submodule update --init --recursive
+
+    set +x
+    echo "Things that might still need to be done"
+    echo
+    echo "* Setup cron jobs via crontab or systemd (EDITOR=vim crontab -e)"
+    echo
+    echo "* Reboot to finish updates (sudo systemctl reboot)"
+); }
+
 # Grab linux, linux-next, and linux-stable for CBL
 # https://www.kernel.org/cloning-linux-from-a-bundle.html
 function cbl_linux_repos() { (
@@ -221,6 +347,7 @@ function cbl_linux_repos() { (
             "torvalds/linux.git") CB_SUFFIX=mainline ;;
         esac
         CB=clone.bundle-${CB_SUFFIX}
+        mkdir -p "${FOLDER%/*}"
         [[ -d ${FOLDER} ]] && continue
         [[ -f ${CB} ]] || wget -O "${CB}" -c https://git.kernel.org/pub/scm/linux/kernel/git/"${URL}"/clone.bundle
         git clone "${CB}" "${FOLDER}"
@@ -254,7 +381,15 @@ function cbl_linux_repos() { (
 function cbl_other_repos() { (
     source "${SCRIPTS_FOLDER:-${HOME}/github/scripts}"/common || exit ${?}
 
-    cd "${CBL_O_R:=${CBL:-${HOME}/cbl}}"/github || die "wtf"
+    : "${CBL_O_R:=${CBL:-${HOME}/cbl}}"
+    CBL_O_R_BUILD=${CBL_O_R}/build
+    CBL_O_R_GITHUB=${CBL_O_R}/github
+    CBL_O_R_MIRRORS=${CBL_O_R}/mirrors
+    CBL_O_R_SRC=${CBL_O_R}/src
+
+    mkdir -p "${CBL_O_R_BUILD}" "${CBL_O_R_GITHUB}" "${CBL_O_R_MIRRORS}" "${CBL_O_R_SRC}"
+
+    cd "${CBL_O_R_GITHUB}" || die "wtf"
     for REPO in boot-utils continuous-integration2:ci tc-build qemu-binaries; do
         FOLDER=${REPO#*:}
         REPO=${REPO%:*}
@@ -265,7 +400,7 @@ function cbl_other_repos() { (
     done
     [[ -d yapf ]] || git clone https://github.com/google/yapf
 
-    cd "${CBL_O_R}"/mirrors || die "wtf"
+    cd "${CBL_O_R_MIRRORS}" || die "wtf"
     [[ -d llvm ]] || git clone https://github.com/llvm/llvm-project llvm
     cd llvm || die "wtf"
     git_remote_add github git@github.com:ClangBuiltLinux/llvm-project.git
@@ -275,11 +410,11 @@ function cbl_other_repos() { (
     [[ -d llvm-kernel-testing ]] || git clone git@github.com:nathanchance/llvm-kernel-testing.git
     [[ -d tc-build ]] || git clone -b personal git@github.com:nathanchance/tc-build.git
 
-    cd "${CBL_O_R}"/build || die "wtf"
+    cd "${CBL_O_R_BUILD}" || die "wtf"
     [[ -d pi-scripts ]] || git clone git@github.com:nathanchance/pi-scripts
     [[ -d wsl2 ]] || git clone git@github.com:nathanchance/WSL2-Linux-Kernel wsl2
 
-    cd "${CBL_O_R}"/build/wsl2 || die "wtf"
+    cd "${CBL_O_R_BUILD}"/wsl2 || die "wtf"
     git_remote_add -f --tags mainline https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git
     git_remote_add -f --tags next https://git.kernel.org/pub/scm/linux/kernel/git/next/linux-next.git
     git_remote_add -f --tags microsoft https://github.com/microsoft/WSL2-Linux-Kernel
@@ -293,10 +428,10 @@ function cbl_other_repos() { (
     [[ -d qemu-5.0.1 ]] || curl -LSs https://download.qemu.org/qemu-5.0.1.tar.xz | tar -xJf -
     [[ -d qemu ]] || git clone -j"$(nproc)" --recurse-submodules https://gitlab.com/qemu-project/qemu.git
 
-    cd "${CBL_O_R}"/src || die "wtf"
+    cd "${CBL_O_R_SRC}" || die "wtf"
     [[ -d korg-linux ]] || git clone git@gitolite.kernel.org:pub/scm/linux/kernel/git/nathan/linux korg-linux
 
-    cd "${CBL_O_R}"/src/korg-linux || exit ${?}
+    cd "${CBL_O_R_SRC}"/korg-linux || exit ${?}
     git_remote_add -f linus https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/
     git_remote_add -f --no-tags next https://git.kernel.org/pub/scm/linux/kernel/git/next/linux-next.git/
 ); }
@@ -305,23 +440,38 @@ function common_rootstrap { (
     # Set time zone to Arizona time
     # Not needed in WSL
     ${WSL} || timedatectl set-timezone America/Phoenix
+
+    # Always setup my .zshrc if it has not already been so that we can use it during setup
+    ZSHRC=/home/${USER_NAME}/.zshrc
+    if ! grep -q shell_setup "${ZSHRC}"; then
+        cat <<'EOF' >"${ZSHRC}"
+[[ -z ${SSH_AUTH_SOCK} ]] && eval $(ssh-agent)
+[[ -z ${TMUX} ]] && tmux new-session -ADs main
+EOF
+    fi
+    chown -R "${USER_NAME}:${USER_NAME}" "${ZSHRC}"
 ); }
 
 function debian_rootstrap { (
     # For rootless podman
-    echo "kernel.unprivileged_userns_clone=1" | tee /etc/sysctl.d/00-local-userns.conf
-    systemctl restart procps
+    if ! ${WSL}; then
+        echo "kernel.unprivileged_userns_clone=1" | tee /etc/sysctl.d/00-local-userns.conf
+        systemctl restart procps
 
-    grep -q "buster-backports" /etc/apt/sources.list || echo "deb http://deb.debian.org/debian buster-backports main" | tee -a /etc/apt/sources.list
-    KUBIC_REPO=Debian_10 kubic_repo || exit ${?}
-    apt -y -t buster-backports install libseccomp2 || exit ${?}
+        grep -q "buster-backports" /etc/apt/sources.list || echo "deb http://deb.debian.org/debian buster-backports main" | tee -a /etc/apt/sources.list
+        KUBIC_REPO=Debian_10 kubic_repo || exit ${?}
+        apt -y -t buster-backports install libseccomp2 || exit ${?}
+    fi
 
     debian_ubuntu_packages
     debian_ubuntu_update_install || exit ${?}
     debian_ubuntu_locales
-    add_google_dns
-    podman_setup
-    systemctl --user restart dbus
+
+    if ! ${WSL}; then
+        add_google_dns
+        podman_setup
+        systemctl --user restart dbus
+    fi
 ); }
 
 function debian_ubuntu_locales() { (
@@ -410,6 +560,7 @@ function debian_ubuntu_packages() {
         python3
         python3-dev
         python3-pip
+        python3-psutil
         python3-setuptools
         qemu-user-static
         re2c
@@ -469,19 +620,22 @@ EOF
 
 # Install my GPG keys
 function install_gpg_keys() { (
-    # KEYS variable must be set to properly find keys
-    : "${KEYS:?}"
+    # KEYS_FOLDER variable must be set to properly find keys
+    # SC2031: KEYS_FOLDER was modified in a subshell. That change might be lost.
+    # No, it is not modified...
+    # shellcheck disable=SC2031
+    : "${IGK_KEYS_FOLDER:=${KEYS_FOLDER:?}}"
 
     # If the key is already installed then we are good
     gpg_key_usable && exit 0
 
     # Download keys if we do not have them already
-    [[ -d ${KEYS} ]] || { git clone https://github.com/nathanchance/keys "${KEYS}" || exit ${?}; }
+    [[ -d ${IGK_KEYS_FOLDER} ]] || { git clone https://github.com/nathanchance/keys "${IGK_KEYS_FOLDER}" || exit ${?}; }
 
     # Install keys
-    gpg --pinentry-mode loopback --import "${KEYS}"/signing/private.asc || exit ${?}
-    gpg --import "${KEYS}"/main/public.asc
-    gpg --import-ownertrust "${KEYS}"/main/ownertrust*.asc
+    gpg --pinentry-mode loopback --import "${IGK_KEYS_FOLDER}"/signing/private.asc || exit ${?}
+    gpg --import "${IGK_KEYS_FOLDER}"/main/public.asc
+    gpg --import-ownertrust "${IGK_KEYS_FOLDER}"/main/ownertrust*.asc
 
     # GPG configuration
     cat <<EOF | tee -a "${HOME}"/.gnupg/gpg-agent.conf
@@ -493,18 +647,21 @@ EOF
 
 # Install my SSH keys
 function install_ssh_keys() { (
-    # KEYS variable must be set to properly find keys
-    : "${KEYS:?}"
+    # KEYS_FOLDER variable must be set to properly find keys
+    # SC2031: KEYS_FOLDER was modified in a subshell. That change might be lost.
+    # No, it is not modified...
+    # shellcheck disable=SC2031
+    : "${ISK_KEYS_FOLDER:=${KEYS_FOLDER:?}}"
 
     # If the key is already installed then we are good
     SSH_FOLDER=${HOME}/.ssh
     [[ -f ${SSH_FOLDER}/id_ed25519 ]] && exit 0
 
     # Download keys if we do not have them already
-    [[ -d ${KEYS} ]] || { git clone https://github.com/nathanchance/keys "${KEYS}" || exit ${?}; }
+    [[ -d ${ISK_KEYS_FOLDER} ]] || { git clone https://github.com/nathanchance/keys "${ISK_KEYS_FOLDER}" || exit ${?}; }
 
     # Move keys into place and set proper permissions
-    SSH_KEYS=${KEYS}/ssh
+    SSH_KEYS=${ISK_KEYS_FOLDER}/ssh
     cp "${SSH_KEYS}"/id_ed25519{,.pub} "${SSH_FOLDER}"
     cp "${SSH_KEYS}"/korg-nathan "${SSH_FOLDER}"/id_korg
     chmod 600 "${SSH_FOLDER}"/{id_ed25519,id_korg}
@@ -590,17 +747,21 @@ function set_wsl() {
 }
 
 function ubuntu_rootstrap { (
-    # shellcheck disable=SC1091
-    source /etc/os-release
-    KUBIC_REPO=xUbuntu_${VERSION_ID} kubic_repo || exit ${?}
+    if ! ${WSL}; then
+        # shellcheck disable=SC1091
+        source /etc/os-release
+        KUBIC_REPO=xUbuntu_${VERSION_ID} kubic_repo || exit ${?}
+    fi
 
     debian_ubuntu_packages
     PACKAGES+=(python-is-python3)
     ${WSL} && PACKAGES+=(wslu)
     debian_ubuntu_update_install
     debian_ubuntu_locales
-    add_google_dns
-    podman_setup
+    if ! ${WSL}; then
+        add_google_dns
+        podman_setup
+    fi
 ); }
 
 function unsupported_rootstrap { (

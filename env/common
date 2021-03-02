@@ -7,9 +7,6 @@
 #
 # Utility and terminal setup functions
 
-# Source our universal functions script
-[[ ${0} =~ /proc ]] || source "$(dirname "$(readlink -f "${0}")")"/../common
-
 # Source the machine specific functions
 case "$(id -un)@$(uname -n)" in
     nathan@archlinux-* | nathan@debian-* | nathan@ubuntu-*) LOCATION=workstation ;;
@@ -17,7 +14,12 @@ case "$(id -un)@$(uname -n)" in
     pi@raspberrypi) LOCATION=pi ;;
     *) LOCATION=generic ;;
 esac
-[[ -n ${SCRIPTS_FOLDER} ]] && source "${SCRIPTS_FOLDER}/env/${LOCATION}"
+
+# Source our universal function and location specific scripts if we are not being run via source <(cat ...)
+if [[ ! ${0} =~ /proc ]]; then
+    source "$(dirname "$(readlink -f "${0}")")"/../common
+    source "${SCRIPTS_FOLDER}/env/${LOCATION}"
+fi
 
 # Universal aliases/functions/variables
 function universal_setup() {

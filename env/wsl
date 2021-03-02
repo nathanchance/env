@@ -7,57 +7,6 @@
 #
 # Utility and terminal setup functions for WSL
 
-# $ sh -c 'apt update && apt dist-upgrade -y && apt install -y --no-install-recommends ca-certificates curl zsh && chsh -s /bin/zsh nathan'
-
-# Setup function
-#
-# Requires Keys folder to be available in /mnt/c/Users/natec/Documents
-function bootstrap() { (
-    # Grab common functions/variables
-    source <(curl -LSs https://github.com/nathanchance/scripts/raw/main/common) &>/dev/null || exit ${?}
-    source <(curl -LSs https://github.com/nathanchance/scripts/raw/main/env/stubs/folders) &>/dev/null || exit ${?}
-    source <(curl -LSs https://github.com/nathanchance/scripts/raw/main/env/stubs/setup) &>/dev/null || exit ${?}
-
-    # Do not run this as root
-    [[ $(EUID) -eq 0 ]] && die "Do not run bootstrap as root"
-
-    # Keys location
-    KEYS=/mnt/c/Users/natec/Documents/Keys
-    [[ -d ${KEYS} ]] || die "Keys are not available, please download them to Documents"
-
-    # Setup SSH and GPG keys
-    install_ssh_keys || exit ${?}
-    install_gpg_keys || exit ${?}
-    ssh_agent
-    gpg_key_cache
-
-    # Clone scripts
-    mkdir -p "${GITHUB_FOLDER}"
-    SCRIPTS=${GITHUB_FOLDER}/scripts
-    [[ -d ${SCRIPTS} ]] || { git clone git@github.com:nathanchance/scripts "${SCRIPTS}" || die "Error cloning script"; }
-    git -C "${SCRIPTS}" pull
-    source <(cat "${SCRIPTS}"/env/common)
-    source "${SCRIPTS}"/env/stubs/zsh && setup_zsh_env
-    source "${SCRIPTS}"/env/stubs/setup && global_gitignore
-    SCRIPTS_FOLDER=${SCRIPTS} rbld_usr
-    path_push "${HOME}/usr/bin"
-    source "${SCRIPTS}"/env/stubs/git && git_setup
-    ln -fs "${SCRIPTS}"/configs/local/.tmux.conf "${HOME}"/.tmux.conf
-    zsh "${SCRIPTS}"/configs/common/vim/vim_setup.sh
-    decrypt_del_dog_api_key
-    decrypt_gpg_file neomuttrc
-    decrypt_serv_ip
-
-    # Clone password store
-    [[ -d ${HOME}/.password-store ]] || { git clone git@github.com:nathanchance/password-store.git "${HOME}"/.password-store || die "Error cloning password store"; }
-
-    # Download website files
-    for REPO in hugo-files nathanchance.github.io; do
-        [[ -d ${GITHUB_FOLDER}/${REPO} ]] || git clone git@github.com:nathanchance/"${REPO}" "${GITHUB_FOLDER}/${REPO}"
-    done
-    git -C "${GITHUB_FOLDER}"/hugo-files submodule update --init --recursive
-) && source "${HOME}"/.zshrc; }
-
 # Rebuild ~/usr
 function rbld_usr() { (
     source "${SCRIPTS_FOLDER:?}"/env/stubs/updbin || die "Cannot source updbin"
