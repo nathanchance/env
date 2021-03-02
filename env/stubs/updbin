@@ -88,17 +88,20 @@ function bcvise() { (
     cd cvise-"${CVISE_VERSION//v/}" || die "Error downloading cvise source"
     mkdir -p build
     cd build || die "Error creating build folder"
-    pipup
-    python3 -m pip install \
-        --upgrade \
-        --user \
-        pebble psutil pytest
+    python3 -m pip install --upgrade --user pebble pytest
     path_push "${HOME}"/.local/bin
+    for LLVM_VER in $(seq 20 -1 7); do
+        LLVM_DIR=/usr/lib/llvm-${LLVM_VER}
+        if [[ -d ${LLVM_DIR} ]]; then
+            CMAKE_PREFIX_PATH=${LLVM_DIR}
+            break
+        fi
+    done
     cmake \
         -DCMAKE_C_COMPILER="$(command -v clang || command -v gcc)" \
         -DCMAKE_CXX_COMPILER="$(command -v clang++ || command -v g++)" \
         -DCMAKE_INSTALL_PREFIX="${CVISE_PREFIX:-${PREFIX:-${HOME}/usr}}" \
-        -DCMAKE_PREFIX_PATH=/usr/lib/llvm-10 \
+        ${CMAKE_PREFIX_PATH:+-DCMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}} \
         -DPYTHON_EXECUTABLE="$(command -v python3)" \
         .. &&
         make "${JOBS_FLAG:--j"$(nproc)"}" &&
