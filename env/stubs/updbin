@@ -724,7 +724,9 @@ function ituxmake() { (
     [[ -d ${TUXMAKE_SRC} ]] || git clone https://gitlab.com/Linaro/tuxmake.git "${TUXMAKE_SRC}"
     git -C "${TUXMAKE_SRC}" pull --rebase
 
-    ln -sf "${TUXMAKE_SRC}"/run "${PREFIX:-${HOME}/usr}"/bin/tuxmake
+    TUXMAKE_BIN=${PREFIX:-${HOME}/usr}/bin
+    mkdir -p "${TUXMAKE_BIN}"
+    ln -sf "${TUXMAKE_SRC}"/run "${TUXMAKE_BIN}"/tuxmake
 ); }
 
 function irust() { (
@@ -734,12 +736,17 @@ function irust() { (
 # Install/upgrade b4
 function ib4() { (
     header "Installing b4"
-    PIP_ARGS=()
-    case ${1} in
-        -u | --upgrade) PIP_ARGS=("${PIP_ARGS[@]}" --upgrade) ;;
-    esac
 
-    python3 -m pip install --user ${PIP_ARGS:+"${PIP_ARGS[@]}"} b4
+    B4_SRC=${SRC_FOLDER:-${HOME}/src}/b4
+    mkdir -p "${B4_SRC%/*}"
+
+    [[ -d ${B4_SRC} ]] || git clone https://git.kernel.org/pub/scm/utils/b4/b4.git/ "${B4_SRC}"
+    git -C "${B4_SRC}" pull --rebase
+
+    B4_BIN=${PREFIX:-${HOME}/usr}/bin
+    mkdir -p "${B4_BIN}"
+    ln -sf "${B4_SRC}"/b4.sh "${B4_BIN}"/b4
+    python3 -m pip install --requirement "${B4_SRC}"/requirements.txt --upgrade --user
 ); }
 
 # Main install function
