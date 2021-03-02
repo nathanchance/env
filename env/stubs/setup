@@ -152,7 +152,8 @@ EOF
     [[ -d ${WORK_DIR} ]] || git clone --depth=1 -b packages/git https://github.com/nathanchance/archpkgbuilds "${WORK_DIR}"
     chown -R "nobody:nobody" "${AUR_DIR}"
     cd "${WORK_DIR}"/trunk || exit ${?}
-    HOME=${WORK_DIR} su -m -s /bin/bash nobody -c "makepkg -s --nocheck --noconfirm" || exit ${?}
+    CCACHE_DIR=${AUR_DIR}/.ccache CCACHE_TEMPDIR=${AUR_DIR}/.ccache/tmp HOME=${AUR_DIR} \
+        su -m -s /bin/bash nobody -c "makepkg -s --nocheck --noconfirm" || exit ${?}
     yes | pacman -U -- *.tar.zst || exit ${?}
     cd || exit ${?}
     rm -rf "${AUR_DIR}"
