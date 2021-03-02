@@ -447,6 +447,7 @@ function common_rootstrap { (
 
     # Always setup my .zshrc if it has not already been so that we can use it during setup
     ZSHRC=/home/${USER_NAME}/.zshrc
+    touch "${ZSHRC}"
     if ! grep -q shell_setup "${ZSHRC}"; then
         cat <<'EOF' >"${ZSHRC}"
 [[ -z ${SSH_AUTH_SOCK} ]] && eval $(ssh-agent)
