@@ -50,6 +50,7 @@ function arch_rootstrap() { (
         bat
         bc
         bpytop
+        catatonit
         ca-certificates
         ccache
         clang
