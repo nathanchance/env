@@ -288,7 +288,7 @@ function bootstrap() { (
         done
 
         # Download other CBL things
-        tmux new-window zsh -c "source ${SCRIPTS_FOLDER}/env/stubs/setup && cbl_other_repos; sleep 180"
+        tmux new-window zsh -c "source ${SCRIPTS_FOLDER}/common && ssh_agent && source ${SCRIPTS_FOLDER}/env/stubs/setup && cbl_other_repos; sleep 180"
     else
         exit 0
     fi
