@@ -67,6 +67,7 @@ function arch_rootstrap() { (
         hyperfine
         iputils
         jq
+        libxkbcommon
         lld
         llvm
         mosh
