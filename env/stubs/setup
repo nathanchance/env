@@ -110,6 +110,8 @@ function arch_rootstrap() { (
     # This conflicts with sudo in base-devel, remove it as it will be reinstalled after the fact
     remove_if_installed opendoas-sudo
     pacman -S --needed --noconfirm "${PACKAGES[@]}" || exit ${?}
+    # Reinstall shadow to fix permissions with newuidmap
+    pacman -S --noconfirm shadow
 
     # doas configuration
     cat <<EOF >/etc/doas.conf
