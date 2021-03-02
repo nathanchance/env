@@ -662,6 +662,7 @@ function install_ssh_keys() { (
 
     # If the key is already installed then we are good
     SSH_FOLDER=${HOME}/.ssh
+    mkdir -p "${SSH_FOLDER}"
     [[ -f ${SSH_FOLDER}/id_ed25519 ]] && exit 0
 
     # Download keys if we do not have them already
