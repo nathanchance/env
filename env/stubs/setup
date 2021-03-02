@@ -72,8 +72,8 @@ function arch_rootstrap() { (
         mosh
         most
         multilib-devel
-        mutt
         neofetch
+        neomutt
         ninja
         openssl
         perl-authen-sasl
