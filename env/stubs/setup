@@ -185,7 +185,7 @@ function bootstrap() { (
     set -x
 
     # Do not run this as root
-    [[ $(EUID) -eq 0 ]] && die "Do not run bootstrap as root"
+    [[ ${EUID} -eq 0 ]] && die "Do not run bootstrap as root"
 
     # We need to know if we are in a WSL environment
     # We do NOT need to know the distribution as we should be distribution agnostic
