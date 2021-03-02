@@ -266,6 +266,7 @@ function bootstrap() { (
         [[ -d ${HOME}/.password-store ]] || { hub clone password-store "${HOME}"/.password-store || exit ${?}; }
 
         GITHUB_REPOS=(
+            archpkgbuilds
             hugo-files
             nathanchance.github.io
         )
@@ -280,6 +281,7 @@ function bootstrap() { (
         [[ -d ${SRC_FOLDER}/pahole ]] || git -C "${SRC_FOLDER}" clone https://git.kernel.org/pub/scm/devel/pahole/pahole.git
 
         GITHUB_REPOS=(
+            archpkgbuilds
             bug-files
             hugo-files
             nathanchance.github.io
