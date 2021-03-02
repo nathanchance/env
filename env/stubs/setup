@@ -356,7 +356,7 @@ function cbl_linux_repos() { (
         CB=clone.bundle-${CB_SUFFIX}
         mkdir -p "${FOLDER%/*}"
         [[ -d ${FOLDER} ]] && continue
-        [[ -f ${CB} ]] || wget -O "${CB}" -c https://git.kernel.org/pub/scm/linux/kernel/git/"${URL}"/clone.bundle
+        [[ -f ${CB} ]] || wget -c --no-check-certificate -O "${CB}" https://git.kernel.org/pub/scm/linux/kernel/git/"${URL}"/clone.bundle
         git clone "${CB}" "${FOLDER}"
         (
             cd "${FOLDER}" || die "${FOLDER} does not exist"
