@@ -34,23 +34,34 @@ function qualify_llvm_uprev() { (
 function rbld_usr() { (
     source "${SCRIPTS_FOLDER:?}"/env/stubs/updbin || die "Cannot source updbin"
     rm -rf "${HOME:?}"/usr
+
+    # Distribution specific packages
     case "$(get_distro)" in
+        arch)
+            bcvise || exit ${?}
+            ;;
         debian | ubuntu)
-            updbin || die "Error installing updated binaries"
-            bcttlfshtools || die "Error installing Cuttlefish host package"
-            bdtc || die "Error building dtc"
-            iandroidtools || die "Error installing Android tools"
-            iarc || die "Error installing arcanist"
-            ib4 || die "Error installing b4"
-            ituxmake || die "Error installing tuxmake"
-            if [[ -d ${LLVM_TC_FOLDER} ]]; then
-                # This will never not be alphanumeric and find is insanely convoluted
-                # shellcheck disable=SC2012
-                DATE=$(ls -1ht "${LLVM_TC_FOLDER}" | head -n1)
-                [[ -n ${DATE} ]] && symlink_llvm "${DATE}"
-            fi
+            updbin || exit ${?}
+            bcttlfshtools || exit ${?}
+            bdtc || exit ${?}
+            iandroidtools || exit ${?}
             ;;
     esac
+
+    # Binaries to install on any distribution
+    iarc || exit ${?}
+    ib4 || exit ${?}
+    ituxmake || exit ${?}
+
+    # Self compiled ToT LLVM
+    if [[ -d ${LLVM_TC_FOLDER} ]]; then
+        # This will never not be alphanumeric and find is insanely convoluted
+        # shellcheck disable=SC2012
+        DATE=$(ls -1ht "${LLVM_TC_FOLDER}" | head -n1)
+        [[ -n ${DATE} ]] && symlink_llvm "${DATE}"
+    fi
+
+    # Standalone kernel development scripts
     for SCRIPT in "${SCRIPTS_FOLDER}"/kernel/*.sh; do
         ln -fs "${SCRIPT}" "${HOME}"/usr/bin/"${SCRIPT##*/}"
     done

@@ -11,10 +11,23 @@
 function rbld_usr() { (
     source "${SCRIPTS_FOLDER:?}"/env/stubs/updbin || die "Cannot source updbin"
     rm -rf "${HOME:?}"/usr
-    updbin || die "updbin failed"
-    ib4 || die "ib4 failed"
-    ihugo || die "ihugo failed"
+
+    # Distribution specific packages
+    case "$(get_distro)" in
+        arch)
+            bcvise || exit ${?}
+            ;;
+        debian | ubuntu)
+            updbin || die "updbin failed"
+            ihugo || die "ihugo failed"
+            ;;
+    esac
+
+    # Binaries to install on any distribution
+    ib4 || exit ${?}
     ipneofetch || die "ipneofetch failed"
+
+    # Self compiled ToT LLVM
     if [[ -d ${LLVM_TC_FOLDER} ]]; then
         # This will never not be alphanumeric and find is insanely convoluted
         # shellcheck disable=SC2012
@@ -22,6 +35,7 @@ function rbld_usr() { (
         [[ -n ${DATE} ]] && symlink_llvm "${DATE}"
     fi
 
+    # Standalone kernel development scripts
     for SCRIPT in "${SCRIPTS_FOLDER}"/kernel/*.sh; do
         ln -fs "${SCRIPT}" "${HOME}"/usr/bin/"${SCRIPT##*/}"
     done
