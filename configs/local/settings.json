@@ -107,6 +107,10 @@
         // Unbind Ctrl-^ so that force disconnecting a mosh session works
         { "command" : "unbound", "keys" : "ctrl+shift+6" }
 
+        // Unbind Ctrl-{N,P} so that I can use them for neomutt
+        { "command" : "unbound", "keys" : "ctrl+shift+n" },
+        { "command" : "unbound", "keys" : "ctrl+shift+p" },
+
         // focus mode
         { "command": "toggleFocusMode", "keys": "shift+f11" }
     ]
