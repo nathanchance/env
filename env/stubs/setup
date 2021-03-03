@@ -88,6 +88,7 @@ function arch_rootstrap() { (
         python-psutil
         python-requests
         python-setuptools
+        python-yaml
         qemu-headless-arch-extra
         repo
         ripgrep
