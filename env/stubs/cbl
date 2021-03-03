@@ -85,7 +85,7 @@ function bldtcs() { (
     git pull --rebase || die "Updating llvm-project failed (${?})"
     BLDLLVM_INSTALL_FOLDER=${CBL_TC}/llvm-${DATE_TIME}-$(git -C "${TC_BLD_LLVM_PRJCT}" sh -s --format=%H origin/master)
     BLD_LLVM_ARGS=()
-    ${LTO:-true} && BLD_LLVM_ARGS+=(--lto=thin)
+    ${LTO:-false} && BLD_LLVM_ARGS+=(--lto=thin)
     bldllvm \
         --assertions \
         --check-targets lld clang llvm \
