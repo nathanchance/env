@@ -325,29 +325,29 @@ function cbl_linux_repos() { (
         case ${1} in
             linux)
                 PAIRS=(
-                    "torvalds/linux.git:${CBL_B}/clean/linux"
-                    "torvalds/linux.git:${CBL_B}/patched/linux"
-                    "torvalds/linux.git:${CBL_M}/linux"
-                    "torvalds/linux.git:${CBL_S}/linux"
+                    "torvalds/linux:${CBL_B}/clean/linux"
+                    "torvalds/linux:${CBL_B}/patched/linux"
+                    "torvalds/linux:${CBL_M}/linux"
+                    "torvalds/linux:${CBL_S}/linux"
                 )
                 ;;
             linux-next)
                 PAIRS=(
-                    "next/linux-next.git:${CBL_B}/clean/linux-next"
-                    "next/linux-next.git:${CBL_B}/patched/linux-next"
-                    "next/linux-next.git:${CBL_B}/rpi"
-                    "next/linux-next.git:${CBL_S}/linux-next"
+                    "next/linux-next:${CBL_B}/clean/linux-next"
+                    "next/linux-next:${CBL_B}/patched/linux-next"
+                    "next/linux-next:${CBL_B}/rpi"
+                    "next/linux-next:${CBL_S}/linux-next"
                 )
                 ;;
             linux-stable)
                 PAIRS=(
-                    "stable/linux.git:${CBL_B}/clean/linux-stable-5.4"
-                    "stable/linux.git:${CBL_B}/clean/linux-stable-5.10"
-                    "stable/linux.git:${CBL_B}/clean/linux-stable-5.11"
-                    "stable/linux.git:${CBL_B}/patched/linux-stable-5.4"
-                    "stable/linux.git:${CBL_B}/patched/linux-stable-5.10"
-                    "stable/linux.git:${CBL_B}/patched/linux-stable-5.11"
-                    "stable/linux.git:${CBL_S}/linux-stable"
+                    "stable/linux:${CBL_B}/clean/linux-stable-5.4"
+                    "stable/linux:${CBL_B}/clean/linux-stable-5.10"
+                    "stable/linux:${CBL_B}/clean/linux-stable-5.11"
+                    "stable/linux:${CBL_B}/patched/linux-stable-5.4"
+                    "stable/linux:${CBL_B}/patched/linux-stable-5.10"
+                    "stable/linux:${CBL_B}/patched/linux-stable-5.11"
+                    "stable/linux:${CBL_S}/linux-stable"
                 )
                 ;;
             *) exit 1 ;;
@@ -360,19 +360,19 @@ function cbl_linux_repos() { (
         FOLDER=${PAIR#*:}
         URL=${PAIR%:*}
         case ${URL} in
-            "next/linux-next.git") CB_SUFFIX=next ;;
-            "stable/linux.git") CB_SUFFIX=stable ;;
-            "torvalds/linux.git") CB_SUFFIX=mainline ;;
+            "next/linux-next") CB_SUFFIX=next ;;
+            "stable/linux") CB_SUFFIX=stable ;;
+            "torvalds/linux") CB_SUFFIX=mainline ;;
         esac
         CB=clone.bundle-${CB_SUFFIX}
         mkdir -p "${FOLDER%/*}"
         [[ -d ${FOLDER} ]] && continue
-        [[ -f ${CB} ]] || { wget -c -O "${CB}" https://mirrors.kernel.org/pub/scm/.bundles/pub/scm/linux/kernel/git/"${URL//.git/}"/clone.bundle || exit ${?}; }
+        [[ -f ${CB} ]] || { wget -c -O "${CB}" https://mirrors.kernel.org/pub/scm/.bundles/pub/scm/linux/kernel/git/"${URL}"/clone.bundle || exit ${?}; }
         git clone "${CB}" "${FOLDER}"
         (
             cd "${FOLDER}" || die "${FOLDER} does not exist"
             git remote remove origin
-            git remote add origin https://git.kernel.org/pub/scm/linux/kernel/git/"${URL}"
+            git remote add origin https://git.kernel.org/pub/scm/linux/kernel/git/"${URL}".git
             git remote update origin
             case ${FOLDER} in
                 *linux-stable-*) BRANCH=linux-${FOLDER##*-}.y ;;
