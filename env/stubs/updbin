@@ -97,11 +97,12 @@ function bcvise() { (
             break
         fi
     done
+    [[ -z ${CMAKE_PREFIX_PATH} ]] && CMAKE_PREFIX_PATH=/usr
     cmake \
         -DCMAKE_C_COMPILER="$(command -v clang || command -v gcc)" \
         -DCMAKE_CXX_COMPILER="$(command -v clang++ || command -v g++)" \
         -DCMAKE_INSTALL_PREFIX="${CVISE_PREFIX:-${PREFIX:-${HOME}/usr}}" \
-        ${CMAKE_PREFIX_PATH:+-DCMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}} \
+        -DCMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH} \
         -DPYTHON_EXECUTABLE="$(command -v python3)" \
         .. &&
         make "${JOBS_FLAG:--j"$(nproc)"}" &&
