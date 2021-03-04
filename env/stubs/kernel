@@ -138,6 +138,7 @@ function rbpi() { (
     PATCHES_FOLDER=${GITHUB_FOLDER}/patches/rpi-next
     FIXES=${PATCHES_FOLDER}/fixes.series
     [[ -f ${FIXES} ]] && { git am "${FIXES}" || exit ${?}; }
+    b4a 20210303091835.5024-1-colin.king@canonical.com am || exit ${?}
     ../pi-scripts/build.sh ARCH=arm || exit ${?}
     ../pi-scripts/build.sh ARCH=arm64 || exit ${?}
     if ! git pll --no-edit mainline master; then
