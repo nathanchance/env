@@ -568,7 +568,7 @@ function qualify_tc_bld_uprev() { (
     TC_BLD_SRC=${CBL_GIT}/tc-build
     LNX_STBL=${CBL_SRC}/linux-stable
     WORK_DIR=$(mktemp -d -p "${TMP_FOLDER}")
-    TC_BLD=${WORK_DIR}/tc-build
+    TC_BLD=$(mktemp -d -p "${WORK_DIR}" -u)
 
     header "Setting up folders"
 
