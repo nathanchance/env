@@ -46,7 +46,7 @@ function universal_setup() {
 # Clean up /tmp
 function cltmp() { (
     fd -t f . /tmp -x rm
-    fd -t d -d 1 -E 'tmux*' -E 'systemd*' . /tmp -x rm -r
+    fd -t d -d 1 -E 'tmux*' -E 'ssh-*' -E 'systemd*' . /tmp -x rm -r
 ); }
 
 # Update main server IP address file
