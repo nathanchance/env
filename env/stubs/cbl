@@ -567,7 +567,7 @@ Link: https://reviews.llvm.org/${REVISION}"
 function qualify_tc_bld_uprev() { (
     TC_BLD_SRC=${CBL_GIT}/tc-build
     LNX_STBL=${CBL_SRC}/linux-stable
-    WORK_DIR=$(mktemp -d)
+    WORK_DIR=$(mktemp -d -p "${TMP_FOLDER}")
     TC_BLD=${WORK_DIR}/tc-build
 
     header "Setting up folders"

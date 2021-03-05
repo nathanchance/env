@@ -43,10 +43,12 @@ function universal_setup() {
     source "${SCRIPTS_FOLDER}/env/stubs/updbin"
 }
 
-# Clean up /tmp
+# Clean up /tmp and ~/tmp
 function cltmp() { (
     fd -t f . /tmp -x rm
     fd -t d -d 1 -E 'tmux*' -E 'ssh-*' -E 'systemd*' . /tmp -x rm -r
+    rm -rf "${TMP_FOLDER}"
+    mkdir -p "${TMP_FOLDER}"
 ); }
 
 # Update main server IP address file
