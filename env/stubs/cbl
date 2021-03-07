@@ -38,7 +38,7 @@ function bldall() { (
 
 # Build all kernel trees
 function bldallk() { (
-    for BLDALLK_TREE in linux{-next,,-stable-5.{10,4}}; do TREE=${BLDALLK_TREE} lt ""; done
+    for BLDALLK_TREE in linux{-next,,-stable-5.{11,10,4}}; do TREE=${BLDALLK_TREE} lt ""; done
     for RPI_ARCH in arm arm64; do "${CBL_BLD}"/pi-scripts/build.sh -k "${CBL_BLD}"/rpi ARCH=${RPI_ARCH}; done
     "${CBL_BLD}"/wsl2/bin/build.sh
 ); }
