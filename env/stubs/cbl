@@ -509,21 +509,42 @@ function lt() { (
         --tc-prefix "${TC_DIR}" \
         "${TC_BLD_ARGS[@]}" || die "llvm-kernel-testing failed (${?})"
 
+    # arch/powerpc/boot/inffast.c: A warning we do not really care about (https://github.com/ClangBuiltLinux/linux/issues/664)
+    # DWARF2 only supports one section per compilation unit: Irrelevant for now
+    # objtool: Too many to deal with for now
+    # override: CPU_BIG_ENDIAN changes choice state | override: LTO_CLANG_THIN changes choice state: Warnings from merge_config that are harmless in this context
+    # results.log: Any warnings from this will be in the other logs
+    # include/linux/bcache.h:3: https://github.com/ClangBuiltLinux/linux/issues/1065
+    BLOCKLIST="arch/powerpc/boot/inffast.c|DWARF3 only supports one section per compilation unit|objtool:|override: CPU_BIG_ENDIAN changes choice state|override: LTO_CLANG_THIN changes choice state|results.log|union jset::\(anonymous at ./usr/include/linux/bcache.h:"
+    SEARCHLIST="error:|FATAL:|undefined|Unsupported relocation type:|warning:|WARNING:"
+
+    # File paths to remove from logs
+    SED_ARGS=()
+    for FILE_PATH in ${LOG_DIR} ${KRNL_DIR} ${CBL}/llvm-kernel-testing/src/linux-clang-cfi; do
+        SED_ARGS+=(-e "s;${FILE_PATH}/;;g")
+    done
+
+    # Cache filtered logs
+    TMP_FILE=$(mktemp)
+    rg "${SEARCHLIST}" "${LOG_DIR}"/*.log |& rg -v -- "${BLOCKLIST}" |& sed "${SED_ARGS[@]}" |& sort |& uniq >"${TMP_FILE}"
+
     {
         echo "Host: $(uname -n)"
         echo
         cat "${LOG_DIR}"/results.log
-        echo
-        echo "Full warning report:"
-        # arch/powerpc/boot/inffast.c: A warning we do not really care about (https://github.com/ClangBuiltLinux/linux/issues/664)
-        # DWARF2 only supports one section per compilation unit: Irrelevant for now
-        # objtool: Too many to deal with for now
-        # override: CPU_BIG_ENDIAN changes choice state: Warnings from merge_config that are harmless in this context
-        # results.log: Any warnings from this will be in the other logs
-        # include/linux/bcache.h:3: https://github.com/ClangBuiltLinux/linux/issues/1065
-        BLOCKLIST="arch/powerpc/boot/inffast.c|DWARF3 only supports one section per compilation unit|objtool:|override: CPU_BIG_ENDIAN changes choice state|results.log|union jset::\(anonymous at ./usr/include/linux/bcache.h:"
-        SEARCHLIST="error:|FATAL:|undefined|Unsupported relocation type:|warning:|WARNING:"
-        rg "${SEARCHLIST}" "${LOG_DIR}"/*.log |& rg -v -- "${BLOCKLIST}" |& sed -e "s;${LOG_DIR}/;;g" -e "s;${KRNL_DIR}/;;g" |& sort |& uniq
+        # Filter harder
+        UNIQUE_WARNINGS=$(sed -e 's/^[^:]*://g' -e 's/^.*Section mismatch/Section mismatch/' "${TMP_FILE}" |& sort |& uniq)
+        if [[ -n ${UNIQUE_WARNINGS} ]]; then
+            echo
+            echo "Unique warning report:"
+            echo "${UNIQUE_WARNINGS}"
+        fi
+        FULL_WARNINGS=$(cat "${TMP_FILE}")
+        if [[ -n ${FULL_WARNINGS} ]]; then
+            echo
+            echo "Full warning report:"
+            echo "${FULL_WARNINGS}"
+        fi
         MFC=$(git -C "${KRNL_DIR}" mfc)
         if [[ -n ${MFC} ]]; then
             echo
@@ -533,6 +554,8 @@ function lt() { (
         fi
         llvm_log
     } >"${LOG_DIR}"/deldog.log
+
+    rm "${TMP_FILE}"
 
     MESSAGE="${LOG_DIR##*/} build results: $(deldog "${LOG_DIR}/deldog.log")"
 
