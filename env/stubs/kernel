@@ -138,14 +138,6 @@ function rbpi() { (
     PATCHES_FOLDER=${GITHUB_FOLDER}/patches/rpi-next
     FIXES=${PATCHES_FOLDER}/fixes.series
     [[ -f ${FIXES} ]] && { git am "${FIXES}" || exit ${?}; }
-    git ch v5.12-rc2 -- fs/io-wq.c fs/io_uring.c
-    git ac -m "fs: Revert io-wq and io_uring back to 5.12-rc2"
-    if ! git pll --no-edit mainline master; then
-        rg "<<<<<<< HEAD" && exit ${?}
-        git aa
-        git c || exit ${?}
-    fi
-    git pll --no-edit https://git.kernel.org/pub/scm/linux/kernel/git/axboe/linux-block.git for-next || exit ${?}
     for SHA in 358afb8b746d4a7ebaeeeaab7a1523895a8572c2 4564363351e2680e55edc23c7953aebd2acb4ab7; do
         git fp -1 --stdout "${SHA}" arch/arm/boot/dts/bcm2711-rpi-4-b.dts | git ap -R || exit ${?}
     done
