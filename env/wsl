@@ -43,7 +43,7 @@ function rbld_usr() { (
 
 # Build tip of tree LLVM
 function updllvm() { (
-    DATE=$(date +%Y-%m-%d)
+    DATE=$(date +%F)
 
     LLVM_SRC=${SRC_FOLDER:?}/llvm-project
     mkdir -p "${SRC_FOLDER}"
@@ -151,7 +151,7 @@ function stripall() { (
 ); }
 
 function bldtcs() { (
-    DATE_TIME=$(date +%Y%m%d-%H%M)
+    DATE_TIME=$(date +%F-%T)
     TC_PREFIX=${TC_FOLDER}/cbl
 
     # Update tc-build

@@ -61,7 +61,7 @@ function bldllvm() { (
 
 # Build LLVM/Clang/lld and arm{32,64} and powerpc binutils from source
 function bldtcs() { (
-    DATE_TIME=$(date +%Y%m%d-%H%M)
+    DATE_TIME=$(date +%F-%T)
 
     # Build binutils
     [[ -d ${TCBLD} ]] || git clone -b personal git@github.com:nathanchance/tc-build.git "${TCBLD}"
@@ -493,7 +493,7 @@ function lt() { (
     ${AS_FOUND:=false} || die "GNU as could not be found in ${TC_DIR}/bin"
     ${CLANG_FOUND:=false} || die "clang could not be found in ${TC_DIR}/bin"
 
-    LOG_DIR=${CBL}/build-logs/${KRNL_DIR##*/}-$(date +%Y%m%d-%H%M)
+    LOG_DIR=${CBL}/build-logs/${KRNL_DIR##*/}-$(date +%F-%T)
     mkdir -p "${LOG_DIR}"
 
     TC_BLD_ARGS=()

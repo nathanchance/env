@@ -78,7 +78,7 @@ function updllvm() { (
 
 # Alias for running PGO LLVM build
 function updpgollvm() { (
-    DATE=$(date +%Y-%m-%d)
+    DATE=$(date +%F)
     PREFIX=${LLVM_TC_FOLDER}/${DATE} bpgollvm &&
         symlink_llvm "${DATE}" &&
         ccache_clear llvm
