@@ -61,7 +61,7 @@ function bldllvm() { (
 
 # Build LLVM/Clang/lld and arm{32,64} and powerpc binutils from source
 function bldtcs() { (
-    DATE_TIME=$(date +%F-%T)
+    DATE_TIME=$(date +%F_%H-%M-%S)
 
     # Build binutils
     [[ -d ${TCBLD} ]] || git clone -b personal git@github.com:nathanchance/tc-build.git "${TCBLD}"

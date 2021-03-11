@@ -156,7 +156,7 @@ function stripall() { (
 ); }
 
 function bldtcs() { (
-    DATE_TIME=$(date +%F-%T)
+    DATE_TIME=$(date +%F_%H-%M-%S)
     TC_PREFIX=${TC_FOLDER}/cbl
 
     # Update tc-build
