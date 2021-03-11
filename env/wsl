@@ -39,6 +39,11 @@ function rbld_usr() { (
     for SCRIPT in "${SCRIPTS_FOLDER}"/kernel/*.sh; do
         ln -fs "${SCRIPT}" "${HOME}"/usr/bin/"${SCRIPT##*/}"
     done
+
+    # git functions
+    for SCRIPT in "${SCRIPTS_FOLDER}"/git/*; do
+        ln -fs "${SCRIPT}" "${HOME}"/usr/bin/git-"${SCRIPT##*/}"
+    done
 ); }
 
 # Build tip of tree LLVM

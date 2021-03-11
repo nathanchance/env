@@ -1,0 +1,38 @@
+#!/usr/bin/env bash
+
+# Print bold red error message and immediately exit
+function die() {
+    printf '\n%b%s%b\n\n' "\033[01;31m" "${1}" "\033[0m"
+    exit "${2:-33}"
+}
+
+# Parse user inputs
+function parse_parameters() {
+    B4_ARGS=()
+    while ((${#})); do
+        case ${1} in
+            http* | *@*) MSG_ID=${1} ;;
+            -P) B4_ARGS+=(-P "${1}") && shift ;;
+            am) METHOD=(am) ;;
+            ams) METHOD=(ams) ;;
+            # The default
+            ap | apply) ;;
+        esac
+        shift
+    done
+}
+
+function environment_check() {
+    command -v b4 &>/dev/null || die "b4 needs to be installed"
+    [[ -f Makefile ]] || die "You do not appear to be in a kernel tree"
+    [[ -z ${MSG_ID} ]] && die "Message ID needs to be passed to script"
+    [[ -z ${METHOD[*]} ]] && METHOD=(apply -v)
+}
+
+function call_b4() {
+    b4 am -o - -l "${B4_ARGS[@]}" "${MSG_ID}" | git "${METHOD[@]}" -3
+}
+
+parse_parameters "${@}"
+environment_check
+call_b4
