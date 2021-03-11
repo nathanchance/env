@@ -115,6 +115,118 @@ function rbpi() { (
     PATCHES_FOLDER=${GITHUB_FOLDER}/patches/rpi-next
     FIXES=${PATCHES_FOLDER}/fixes.series
     [[ -f ${FIXES} ]] && { git am "${FIXES}" || exit ${?}; }
+    crl https://git.kernel.org/ardb/p/295a2a7d5fd9ff0e1fd50d5265297464888cbfef | git ams || exit ${?}
+    cat <<'EOF' | git am || exit ${?}
+From 8b07b642a452185c9101f2d7105c49d7c925d4fe Mon Sep 17 00:00:00 2001
+From: Nathan Chancellor <nathan@kernel.org>
+Date: Wed, 10 Mar 2021 16:11:57 -0700
+Subject: [PATCH 1/2] kbuild: Add macros for controlling warnings to
+ compiler-clang.h
+
+Similar to commit 8793bb7f4a9d ("kbuild: add macro for controlling
+warnings to linux/compiler.h") but for clang. This allows developers to
+have more local control over clang warnings.
+
+Signed-off-by: Nathan Chancellor <nathan@kernel.org>
+---
+ include/linux/compiler-clang.h | 22 ++++++++++++++++++++++
+ include/linux/compiler_types.h |  4 ++++
+ 2 files changed, 26 insertions(+)
+
+diff --git a/include/linux/compiler-clang.h b/include/linux/compiler-clang.h
+index d217c382b02d..9dc3ab51a241 100644
+--- a/include/linux/compiler-clang.h
++++ b/include/linux/compiler-clang.h
+@@ -61,3 +61,25 @@
+ #if __has_feature(shadow_call_stack)
+ # define __noscs	__attribute__((__no_sanitize__("shadow-call-stack")))
+ #endif
++
++/*
++ * Turn individual warnings and errors on and off locally, depending
++ * on version.
++ */
++#define __diag_clang(version, severity, s) \
++		__diag_clang_ ## version(__diag_clang_ ## severity s)
++
++/* Severity used in pragma directives */
++#define __diag_clang_ignore	ignored
++#define __diag_clang_warn	warning
++#define __diag_clang_error	error
++
++#define __diag_str1(s)		#s
++#define __diag_str(s)		__diag_str1(s)
++#define __diag(s)		_Pragma(__diag_str(clang diagnostic s))
++
++#if CONFIG_CLANG_VERSION >= 130000
++#define __diag_clang_13(s)		__diag(s)
++#else
++#define __diag_clang_13(s)
++#endif
+diff --git a/include/linux/compiler_types.h b/include/linux/compiler_types.h
+index e5dd5a4ae946..a505d8a4302d 100644
+--- a/include/linux/compiler_types.h
++++ b/include/linux/compiler_types.h
+@@ -328,6 +328,10 @@ struct ftrace_likely_data {
+ #define __diag(string)
+ #endif
+ 
++#ifndef __diag_clang
++#define __diag_clang(version, severity, string)
++#endif
++
+ #ifndef __diag_GCC
+ #define __diag_GCC(version, severity, string)
+ #endif
+-- 
+2.31.0.rc1
+
+
+From e7149e7bb5ece72ff5fc4adde6751c5902c70448 Mon Sep 17 00:00:00 2001
+From: Nathan Chancellor <nathan@kernel.org>
+Date: Wed, 10 Mar 2021 16:15:17 -0700
+Subject: [PATCH 2/2] blk-mq: Disable -Walign-mismatch in
+ blk_mq_complete_send_ipi
+
+When compiling with clang-13:
+
+block/blk-mq.c:630:39: warning: passing 8-byte aligned argument to
+32-byte aligned parameter 2 of 'smp_call_function_single_async' may
+result in an unaligned pointer access [-Walign-mismatch]
+                smp_call_function_single_async(cpu, &rq->csd);
+                                                    ^
+1 warning generated.
+
+This was purposefully done in commit 4ccafe032005 ("block: unalign
+call_single_data in struct request") and there is no real bug here.
+Disable the warning using the __diag_ignore infrastructure.
+
+Link: https://github.com/ClangBuiltLinux/linux/issues/1328
+Link: https://lore.kernel.org/r/20210310182307.zzcbi5w5jrmveld4@archlinux-ax161/
+Signed-off-by: Nathan Chancellor <nathan@kernel.org>
+---
+ block/blk-mq.c | 3 +++
+ 1 file changed, 3 insertions(+)
+
+diff --git a/block/blk-mq.c b/block/blk-mq.c
+index 2e825a7a3606..3f738b1b748b 100644
+--- a/block/blk-mq.c
++++ b/block/blk-mq.c
+@@ -627,7 +627,10 @@ static void blk_mq_complete_send_ipi(struct request *rq)
+ 	list = &per_cpu(blk_cpu_done, cpu);
+ 	if (llist_add(&rq->ipi_list, list)) {
+ 		INIT_CSD(&rq->csd, __blk_mq_complete_request_remote, rq);
++		__diag_push();
++		__diag_ignore(clang, 13, "-Walign-mismatch", "There is no issue with misalignment here");
+ 		smp_call_function_single_async(cpu, &rq->csd);
++		__diag_pop();
+ 	}
+ }
+ 
+-- 
+2.31.0.rc1
+
+EOF
     for SHA in 358afb8b746d4a7ebaeeeaab7a1523895a8572c2 4564363351e2680e55edc23c7953aebd2acb4ab7; do
         git fp -1 --stdout "${SHA}" arch/arm/boot/dts/bcm2711-rpi-4-b.dts | git ap -R || exit ${?}
     done
