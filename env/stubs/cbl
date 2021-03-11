@@ -73,9 +73,7 @@ function bldtcs() { (
     stripall "${BLDBN_INSTALL_FOLDER}"
 
     # Update binutils
-    (cd "${CBL_TC}" &&
-        rm -f binutils &&
-        ln -s "${BLDBN_INSTALL_FOLDER##*/}" binutils)
+    ln -fnrs "${BLDBN_INSTALL_FOLDER}" "${CBL_BNTL%/*}"
 
     # Build LLVM/Clang/lld
     TC_BLD_LLVM_PRJCT=${TCBLD}/llvm-project
@@ -96,15 +94,11 @@ function bldtcs() { (
     stripall "${BLDLLVM_INSTALL_FOLDER}"
 
     # Update llvm-tot symlink
-    (cd "${CBL_TC}" &&
-        rm -f llvm-tot &&
-        ln -sf "${BLDLLVM_INSTALL_FOLDER##*/}" llvm-tot)
+    ln -fnrs "${BLDLLVM_INSTALL_FOLDER##*/}" "${CBL_LLVM%/*}"
 
     # Combine CBL_LLVM and CBL_BNTL for llvm-kernel-testing
-    rm -rf "${CBL_LLVM_BNTL%/*}" &&
-        mkdir -p "${CBL_LLVM_BNTL%/*}" &&
-        cp -frs "${CBL_LLVM%/*}"/* "${CBL_LLVM_BNTL%/*}" &&
-        cp -frs "${CBL_BNTL%/*}"/* "${CBL_LLVM_BNTL%/*}"
+    stow -R -d "${CBL_TC}" -t "${CBL_LLVM_BNTL%/*}" "$(basename "${CBL_BNTL%/*}")"
+    stow -R -d "${CBL_TC}" -t "${CBL_LLVM_BNTL%/*}" "$(basename "${CBL_LLVM%/*}")"
 
     # Invalidate our kernel ccache because we have a new compiler that will be used for it
     ccache_clear kernel
