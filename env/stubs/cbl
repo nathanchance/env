@@ -261,7 +261,7 @@ CC=gcc ./build-llvm.py --branch "release/12.x" || exit ${?}
 unset CC CFLAGS CXX CXXFLAGS
 CC=clang ./build-llvm.py --branch "release/12.x" || exit ${?}
 
-for FILE in clang ld.lld aarch64-linux-gnu-as arm-linux-gnueabi-as mips-linux-gnu-as mipsel-linux-gnu-as powerpc-linux-gnu-as powerpc64-linux-gnu-as powerpc64le-linux-gnu-as riscv64-linux-gnu-as s390x-linux-gnu-as as; do
+for FILE in clang ld.lld aarch64-linux-gnu-as arm-linux-gnueabi-as m68k-linux-gnu-as mips-linux-gnu-as mipsel-linux-gnu-as powerpc-linux-gnu-as powerpc64-linux-gnu-as powerpc64le-linux-gnu-as riscv64-linux-gnu-as s390x-linux-gnu-as as; do
     install/bin/${FILE} --version || exit ${?}
 done
 
