@@ -548,11 +548,11 @@ function lt() { (
             git -C "${KRNL_DIR}" lo "${MFC}"^^..HEAD
         fi
         llvm_log
-    } >"${LOG_DIR}"/deldog.log
+    } >"${LOG_DIR}"/haste.log
 
     rm "${TMP_FILE}"
 
-    MESSAGE="${LOG_DIR##*/} build results: $(deldog "${LOG_DIR}/deldog.log")"
+    MESSAGE="${LOG_DIR##*/} build results: $(haste "${LOG_DIR}/haste.log")"
 
     tg_msg "${MESSAGE}"
 
@@ -561,7 +561,7 @@ function lt() { (
     echo "Full logs available at: ${LOG_DIR}"
     echo
 
-    rm "${LOG_DIR}"/deldog.log
+    rm "${LOG_DIR}"/haste.log
 ); }
 
 # Download and apply an LLVM/Clang/lld patch

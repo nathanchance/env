@@ -3,29 +3,28 @@
 #
 # Copyright (C) 2021 Nathan Chancellor
 #
-# Function to upload to del.dog
+# Function to upload to a haste-server (points to https://paste.myself5.de/ by default)
 #
 # This can be downloaded and sourced without any of the other scripts in this repo.
 #
-# $ curl -LSsO https://github.com/nathanchance/scripts/raw/main/env/stubs/deldog
+# $ curl -LSsO https://github.com/nathanchance/scripts/raw/main/env/stubs/haste
 #
-# Open the deldog file to make sure it matches this one.
+# Open the haste file to make sure it matches this one.
 #
-# $ source deldog
+# $ source haste
 #
 # Usage:
-# $ deldog <file>
-# $ command |& deldog
-function deldog() { (
+# $ haste <file>
+# $ command |& haste
+function haste() { (
     for BINARY in curl jq; do
         command -v ${BINARY} &>/dev/null || {
             echo "ERROR: ${BINARY} is not installed" >&2
             exit 1
         }
     done
-    [[ -z ${HASTE_URL} ]] && HASTE_URL=https://del.dog
-    [[ -n ${DEL_DOG_API_KEY} && ${HASTE_URL} =~ del ]] && CURL_ARGS=(--header "X-api-key: ${DEL_DOG_API_KEY}")
-    RESULT=$(curl -sf --data-binary @"${1:--}" "${CURL_ARGS[@]}" "${HASTE_URL}"/documents) || {
+    [[ -z ${HASTE_URL} ]] && HASTE_URL=https://paste.myself5.de
+    RESULT=$(curl -sf --data-binary @"${1:--}" "${HASTE_URL}"/documents) || {
         echo "ERROR: failed to post document, ca-certificates might need to be installed" >&2
         exit 1
     }
