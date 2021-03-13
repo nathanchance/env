@@ -49,7 +49,6 @@ function arch_rootstrap() { (
         base-devel
         bat
         bc
-        bpytop
         catatonit
         ca-certificates
         ccache
@@ -63,6 +62,7 @@ function arch_rootstrap() { (
         expect
         fd
         gcc-multilib
+        htop
         hub
         hugo
         hyperfine
