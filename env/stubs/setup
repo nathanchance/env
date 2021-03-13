@@ -71,6 +71,7 @@ function arch_rootstrap() { (
         libxkbcommon
         lld
         llvm
+        lm_sensors
         mosh
         most
         multilib-devel
