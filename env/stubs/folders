@@ -17,6 +17,7 @@ TC_FOLDER=${MAIN_FOLDER}/toolchains
 ANDROID_TC_FOLDER=${TC_FOLDER}/android
 GCC_TC_FOLDER=${TC_FOLDER}/gcc
 LLVM_TC_FOLDER=${TC_FOLDER}/llvm
+USR_FOLDER=${MAIN_FOLDER}/usr
 
 # android-linux-stable folder
 ALS=${MAIN_FOLDER}/als

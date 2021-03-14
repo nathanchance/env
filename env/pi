@@ -114,6 +114,7 @@ function bootstrap() { (
         python3-pip
         qemu-system-arm
         ruby-dev
+        stow
         swig
         texinfo
         tcl
@@ -192,12 +193,23 @@ function pi_setup() { true; }
 
 function rbld_usr() { (
     source "${SCRIPTS_FOLDER:?}"/env/stubs/updbin || die "Cannot source updbin"
-    rm -rf "${HOME:?}"/usr
+
+    # Clean up PREFIX
+    RBLD_USR_PREFIX=${PREFIX:-${USR_FOLDER:?}}
+    RBLD_USR_STOW=${RBLD_USR_PREFIX}/stow
+    if [[ -d ${RBLD_USR_STOW} ]]; then (
+        header "Cleaning up stow directory"
+        cd "${RBLD_USR_STOW}" || exit ${?}
+        for PACKAGE in *-latest prebuilts; do [[ -d ${PACKAGE} ]] && stow -D -v "${PACKAGE}"; done
+    ); fi
+    rm -rf "${RBLD_USR_PREFIX:?}"/{bin,doc,include,lib,libexec,share}
+    mkdir -p "${RBLD_USR_STOW}"
+
     bccache || die "Error building/installing ccache"
     bgit || die "Error building/installing git"
     biexa || die "Error building/installing exa"
     birg || die "Error building/install ripgrep"
-    bisharkdp bat diskus fd || die "Error building/installing a sharkdp binary"
+    bisharkdp all || die "Error building/installing a sharkdp binary"
     btmux || die "Error building/installing tmux"
     bzsh || die "Error building/installing zsh"
 ); }

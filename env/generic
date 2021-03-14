@@ -9,9 +9,28 @@
 
 function rbld_usr() { (
     source "${SCRIPTS_FOLDER:?}"/env/stubs/updbin || die "Cannot source updbin"
-    rm -rf "${HOME:?}"/usr
+
+    # Clean up PREFIX
+    RBLD_USR_PREFIX=${PREFIX:-${USR_FOLDER:?}}
+    RBLD_USR_STOW=${RBLD_USR_PREFIX}/stow
+    if [[ -d ${RBLD_USR_STOW} ]]; then (
+        header "Cleaning up stow directory"
+        cd "${RBLD_USR_STOW}" || exit ${?}
+        for PACKAGE in *-latest git prebuilts scripts; do [[ -d ${PACKAGE} ]] && stow -D -v "${PACKAGE}"; done
+    ); fi
+    rm -rf "${RBLD_USR_PREFIX:?}"/{bin,doc,include,lib,libexec,share}
+    mkdir -p "${RBLD_USR_STOW}"
+
     updbin || die "updbin failed"
     iandroidtools || die "iandroidtools failed"
+
+    # Standalone kernel development scripts
+    SCRIPTS_BIN=${RBLD_USR_STOW}/scripts/bin
+    mkdir -p "${SCRIPTS_BIN}"
+    for SCRIPT in "${SCRIPTS_FOLDER}"/kernel/*.sh; do
+        ln -fsv "${SCRIPT}" "${SCRIPTS_BIN}"/"${SCRIPT##*/}"
+    done
+    stow -d "${RBLD_USR_STOW}" -v scripts
 ); }
 
 function generic_setup() { true; }

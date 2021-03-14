@@ -73,7 +73,7 @@ function bldtcs() { (
     stripall "${BLDBN_INSTALL_FOLDER}"
 
     # Update binutils
-    ln -fnrs "${BLDBN_INSTALL_FOLDER}" "${CBL_BNTL%/*}"
+    ln -fnrsv "${BLDBN_INSTALL_FOLDER}" "${CBL_BNTL%/*}"
 
     # Build LLVM/Clang/lld
     TC_BLD_LLVM_PRJCT=${TCBLD}/llvm-project
@@ -94,11 +94,11 @@ function bldtcs() { (
     stripall "${BLDLLVM_INSTALL_FOLDER}"
 
     # Update llvm-tot symlink
-    ln -fnrs "${BLDLLVM_INSTALL_FOLDER##*/}" "${CBL_LLVM%/*}"
+    ln -fnrsv "${BLDLLVM_INSTALL_FOLDER##*/}" "${CBL_LLVM%/*}"
 
     # Combine CBL_LLVM and CBL_BNTL for llvm-kernel-testing
-    stow -R -d "${CBL_TC}" -t "${CBL_LLVM_BNTL%/*}" "$(basename "${CBL_BNTL%/*}")"
-    stow -R -d "${CBL_TC}" -t "${CBL_LLVM_BNTL%/*}" "$(basename "${CBL_LLVM%/*}")"
+    stow -d "${CBL_TC}" -R -t "${CBL_LLVM_BNTL%/*}" -v "$(basename "${CBL_BNTL%/*}")"
+    stow -d "${CBL_TC}" -R -t "${CBL_LLVM_BNTL%/*}" -v "$(basename "${CBL_LLVM%/*}")"
 
     # Invalidate our kernel ccache because we have a new compiler that will be used for it
     ccache_clear kernel
@@ -443,11 +443,11 @@ EOF
     # Symlink latest QEMU into bin folder
     rm -rf "${CBL_QEMU_BIN}"
     mkdir -p "${CBL_QEMU_BIN}"
-    ln -s "${CBL_QEMU_INSTALL}"/qemu-5.0.1/bin/qemu-system-ppc "${CBL_QEMU_BIN}"
+    ln -fsv "${CBL_QEMU_INSTALL}"/qemu-5.0.1/bin/qemu-system-ppc "${CBL_QEMU_BIN}"
     for ARCH in arm aarch64 i386 mips mipsel ppc64 riscv64 s390x x86_64; do
-        ln -s "${QEMU_PREFIX}"/bin/qemu-system-${ARCH} "${CBL_QEMU_BIN}"
+        ln -fsv "${QEMU_PREFIX}"/bin/qemu-system-${ARCH} "${CBL_QEMU_BIN}"
     done
-    ln -s "${QEMU_PREFIX}"/bin/qemu-img "${CBL_QEMU_BIN}"
+    ln -fsv "${QEMU_PREFIX}"/bin/qemu-img "${CBL_QEMU_BIN}"
 ); }
 
 function cbl_sunday() { (

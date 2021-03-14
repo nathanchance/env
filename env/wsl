@@ -10,11 +10,22 @@
 # Rebuild ~/usr
 function rbld_usr() { (
     source "${SCRIPTS_FOLDER:?}"/env/stubs/updbin || die "Cannot source updbin"
-    rm -rf "${HOME:?}"/usr
+
+    # Clean up PREFIX
+    RBLD_USR_PREFIX=${PREFIX:-${USR_FOLDER:?}}
+    RBLD_USR_STOW=${RBLD_USR_PREFIX}/stow
+    if [[ -d ${RBLD_USR_STOW} ]]; then (
+        header "Cleaning up stow directory"
+        cd "${RBLD_USR_STOW}" || exit ${?}
+        for PACKAGE in *-latest git prebuilts scripts; do [[ -d ${PACKAGE} ]] && stow -D -v "${PACKAGE}"; done
+    ); fi
+    rm -rf "${RBLD_USR_PREFIX:?}"/{bin,doc,include,lib,libexec,share}
+    mkdir -p "${RBLD_USR_STOW}"
 
     # Distribution specific packages
     case "$(get_distro)" in
         arch)
+            bgit || exit ${?}
             bcvise || exit ${?}
             ;;
         debian | ubuntu)
@@ -25,25 +36,30 @@ function rbld_usr() { (
 
     # Binaries to install on any distribution
     ib4 || exit ${?}
-    ipneofetch || die "ipneofetch failed"
+
+    # Standalone kernel development scripts
+    SCRIPTS_BIN=${RBLD_USR_STOW}/scripts/bin
+    mkdir -p "${SCRIPTS_BIN}"
+    for SCRIPT in "${SCRIPTS_FOLDER}"/kernel/*.sh; do
+        ln -fsv "${SCRIPT}" "${SCRIPTS_BIN}"/"${SCRIPT##*/}"
+    done
+    stow -d "${RBLD_USR_STOW}" -v scripts
+
+    # git functions
+    GIT_BIN=${RBLD_USR_STOW}/git/bin
+    mkdir -p "${GIT_BIN}"
+    for SCRIPT in "${SCRIPTS_FOLDER}"/git/*; do
+        ln -fsv "${SCRIPT}" "${GIT_BIN}"/git-"${SCRIPT##*/}"
+    done
+    stow -d "${RBLD_USR_STOW}" -v git
 
     # Self compiled ToT LLVM
     if [[ -d ${LLVM_TC_FOLDER} ]]; then
         # This will never not be alphanumeric and find is insanely convoluted
         # shellcheck disable=SC2012
-        DATE=$(ls -1ht "${LLVM_TC_FOLDER}" | head -n1)
-        [[ -n ${DATE} ]] && symlink_llvm "${DATE}"
+        DATE=$(command ls -1ht "${LLVM_TC_FOLDER}" | head -n1)
+        [[ -n ${DATE} ]] && stow_llvm "${DATE}"
     fi
-
-    # Standalone kernel development scripts
-    for SCRIPT in "${SCRIPTS_FOLDER}"/kernel/*.sh; do
-        ln -fs "${SCRIPT}" "${HOME}"/usr/bin/"${SCRIPT##*/}"
-    done
-
-    # git functions
-    for SCRIPT in "${SCRIPTS_FOLDER}"/git/*; do
-        ln -fs "${SCRIPT}" "${HOME}"/usr/bin/git-"${SCRIPT##*/}"
-    done
 ); }
 
 # Build tip of tree LLVM
@@ -57,19 +73,8 @@ function updllvm() { (
 
     mkdir -p "${LLVM_TC_FOLDER:?}"
     PREFIX=${LLVM_TC_FOLDER}/${DATE} bllvm -i &&
-        symlink_llvm "${DATE}" &&
+        stow_llvm "${DATE}" &&
         ccache -Cz
-); }
-
-# Install and patch neofetch to work around 'uname -r' hijack
-function ipneofetch() { (
-    [[ -z ${NEOFETCH_VERSION} ]] && NEOFETCH_VERSION=$(glr dylanaraps/neofetch)
-    NEOFETCH=${PREFIX:-${HOME}/usr}/bin/neofetch
-    rm -rf "${NEOFETCH}"
-    mkdir -p "${NEOFETCH%/*}"
-    curl -LSso "${NEOFETCH}" https://github.com/dylanaraps/neofetch/raw/"${NEOFETCH_VERSION}"/neofetch
-    chmod +x "${NEOFETCH}"
-    sed -i "s/kernel_version=.*/kernel_version=\"\$(cat \/proc\/sys\/kernel\/osrelease)\"/g" "${NEOFETCH}"
 ); }
 
 function mshpi3() { (
@@ -175,9 +180,7 @@ function bldtcs() { (
     stripall "${BLDBN_INSTALL_FOLDER}"
 
     # Update binutils
-    (cd "${TC_PREFIX}" &&
-        rm -f binutils &&
-        ln -s "${BLDBN_INSTALL_FOLDER##*/}" binutils)
+    ln -fnrsv "${BLDBN_INSTALL_FOLDER}" "${TC_PREFIX}"/binutils
 
     # Build LLVM/Clang/lld
     TC_BLD_LLVM_PRJCT=${TCBLD}/llvm-project
@@ -192,15 +195,10 @@ function bldtcs() { (
     stripall "${BLDLLVM_INSTALL_FOLDER}"
 
     # Update llvm-tot symlink
-    (cd "${TC_PREFIX}" &&
-        rm -f llvm-tot &&
-        ln -sf "${BLDLLVM_INSTALL_FOLDER##*/}" llvm-tot)
+    ln -fnrsv "${BLDLLVM_INSTALL_FOLDER}" "${TC_PREFIX}"/llvm-tot
 
     # Combine CBL_LLVM and CBL_BNTL for llvm-kernel-testing
-    COMBO_FOLDER=${CBL_LLVM_BNTL%/*}
-    rm -rf "${COMBO_FOLDER}" &&
-        mkdir -p "${COMBO_FOLDER}" &&
-        cp -frs "${BLDBN_INSTALL_FOLDER}"/* "${COMBO_FOLDER}" &&
-        cp -frs "${BLDLLVM_INSTALL_FOLDER}"/* "${COMBO_FOLDER}"
+    stow -d "${TC_PREFIX}" -R -t "${CBL_LLVM_BNTL%/*}" -v binutils
+    stow -d "${TC_PREFIX}" -R -t "${CBL_LLVM_BNTL%/*}" -v llvm-tot
 ); }
 # vi: filetype=zsh

@@ -171,9 +171,9 @@ function shell_setup() {
     fi
 
     # Environment setup
-    path_push "${HOME}/.cargo/bin"
-    path_push "${HOME}/.local/bin"
-    path_push "${HOME}/usr/bin"
+    move_to_front_of_path "${HOME}/.cargo/bin"
+    move_to_front_of_path "${HOME}/.local/bin"
+    move_to_front_of_path "${HOME}/usr/bin"
     [[ -f ${HOME}/.del_dog_api_key ]] && source "${HOME}/.del_dog_api_key"
     [[ -f ${HOME}/.server_ip ]] && source "${HOME}/.server_ip"
     universal_setup
@@ -184,25 +184,14 @@ function shell_setup() {
     tmxa
 }
 
-# Symlink an LLVM toolchain into ${HOME}/usr
-function symlink_llvm() { (
-    header "Removing symlinks"
-    for FILE in $(fd -t l . "${HOME}"/usr); do
-        [[ $(readlink -f "${FILE}") =~ toolchains/llvm ]] && rm -vrf "${FILE}"
-    done
+# Use stow to put an LLVM toolchain into a "usr" structure
+function stow_llvm() { (
+    header "Stowing LLVM"
 
-    header "Removing empty directories"
-    while true; do
-        OUTPUT=$(fd -t e . "${HOME}"/usr -x rm -vrf)
-        if [[ -n ${OUTPUT} ]]; then
-            echo "${OUTPUT}"
-        else
-            break
-        fi
-    done
-
-    header "Symlinking LLVM"
-    cp -frsv "${LLVM_TC_FOLDER}/${1:?}"/* "${HOME}"/usr
+    LLVM_STOW=${PREFIX:-${USR_FOLDER:?}}/stow
+    mkdir -p "${LLVM_STOW}"
+    ln -fnrsv "${LLVM_TC_FOLDER}/${1:?}" "${LLVM_STOW}"/llvm-latest
+    stow -d "${LLVM_STOW}" -R -v llvm-latest
 ); }
 
 # Try to attach via tmux

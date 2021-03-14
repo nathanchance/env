@@ -14,24 +14,38 @@
 # Build/update ccache
 function bccache() { (
     header "Building ccache"
+
+    # Variables for function
     CCACHE_REPO=ccache/ccache
     [[ -z ${CCACHE_VERSION} ]] && CCACHE_VERSION=$(glr "${CCACHE_REPO}")
-    CCACHE_FOLDER=ccache-${CCACHE_VERSION//v/}
-    TMP_FOLDER=$(mktemp -d)
-    cd "${TMP_FOLDER}"
-    curl -LSs https://github.com/"${CCACHE_REPO}"/releases/download/"${CCACHE_VERSION}"/"${CCACHE_FOLDER}".tar.gz | tar -xzf -
-    cd "${CCACHE_FOLDER}" || die "Downloading or extracting ccache failed"
-    mkdir -p build
-    cd build || die "Could not create build folder"
+    CCACHE_SRC=${SRC_FOLDER:?}/ccache/ccache-${CCACHE_VERSION//v/}
+    CCACHE_STOW=${PREFIX:-${USR_FOLDER:?}}/stow
+    CCACHE_PREFIX=${CCACHE_STOW}/packages/ccache/${CCACHE_VERSION//v/}-$(date +%F-%H-%M-%S)
+
+    # Download source
+    mkdir -p "${CCACHE_SRC%/*}"
+    [[ -d ${CCACHE_SRC} ]] || curl -LSs https://github.com/"${CCACHE_REPO}"/releases/download/"${CCACHE_VERSION}"/"${CCACHE_SRC##*/}".tar.gz | tar -C "${CCACHE_SRC%/*}" -xzf -
+
+    # Prepare build folder
+    CCACHE_BUILD=${CCACHE_SRC}/build
+    rm -rf "${CCACHE_BUILD}"
+    mkdir -p "${CCACHE_BUILD}"
+    cd "${CCACHE_BUILD}" || die "Could not create build folder"
+
+    # Build software
+    mkdir -p "${CCACHE_PREFIX%/*}"
     cmake \
         -DCMAKE_BUILD_TYPE=Release \
-        -DCMAKE_INSTALL_PREFIX="${CCACHE_PREFIX:=${PREFIX:-${HOME}/usr}}" \
+        -DCMAKE_INSTALL_PREFIX="${CCACHE_PREFIX}" \
         -DZSTD_FROM_INTERNET=ON .. || die "cmake configuration failed"
-    make "${JOBS_FLAG:--j"$(nproc)"}" || die "make failed"
-    make install || die "install failed"
-    rm -rf "${TMP_FOLDER}"
+    make "${JOBS_FLAG}" install || die "make install failed"
 
-    move_to_front_of_path "${CCACHE_PREFIX}"/bin
+    # Update symlink and stow new package
+    ln -fnrsv "${CCACHE_PREFIX}" "${CCACHE_STOW}"/ccache-latest
+    stow -d "${CCACHE_STOW}" -R -v ccache-latest
+
+    # Print information about new binary
+    move_to_front_of_path "${CCACHE_STOW%/*}"/bin
     command -v ccache
     ccache --version
 ); }
@@ -39,57 +53,55 @@ function bccache() { (
 # Build/update cmake
 function bcmake() { (
     header "Building cmake"
+
+    # Variables for function
     CMAKE_REPO=Kitware/CMake
     [[ -z ${CMAKE_VERSION} ]] && CMAKE_VERSION=$(glr "${CMAKE_REPO}")
-    CMAKE_FOLDER=cmake-${CMAKE_VERSION//v/}
-    TMP_FOLDER=$(mktemp -d)
+    CMAKE_SRC=${SRC_FOLDER:?}/cmake/cmake-${CMAKE_VERSION//v/}
+    CMAKE_STOW=${PREFIX:-${USR_FOLDER:?}}/stow
+    CMAKE_PREFIX=${CMAKE_STOW}/packages/cmake/${CMAKE_VERSION//v/}-$(date +%F-%H-%M-%S)
 
-    cd "${TMP_FOLDER}"
-    curl -LSs https://github.com/"${CMAKE_REPO}"/releases/download/"${CMAKE_VERSION}"/"${CMAKE_FOLDER}".tar.gz | tar -xzf -
-    cd "${CMAKE_FOLDER}" || die "Downloading or extracting cmake failed"
+    # Download source
+    mkdir -p "${CMAKE_SRC%/*}"
+    [[ -d ${CMAKE_SRC} ]] || curl -LSs https://github.com/"${CMAKE_REPO}"/releases/download/"${CMAKE_VERSION}"/"${CMAKE_SRC##*/}".tar.gz | tar -C "${CMAKE_SRC%/*}" -xzf -
 
+    # Build software
+    cd "${CMAKE_SRC}" || die "Downloading or extracting cmake failed"
     ./bootstrap \
         --parallel="$(nproc)" \
-        --prefix="${CMAKE_PREFIX:=${PREFIX:-${HOME}/usr}}"
+        --prefix="${CMAKE_PREFIX}"
+    make "${JOBS_FLAG}" install || die "make failed"
 
-    make "${JOBS_FLAG:--j"$(nproc)"}" || die "make failed"
-    make install || die "install failed"
-    rm -rf "${TMP_FOLDER}"
-    cd || die "Can't go home"
+    # Update symlink and stow new package
+    ln -fnrsv "${CMAKE_PREFIX}" "${CMAKE_STOW}"/cmake-latest
+    stow -d "${CMAKE_STOW}" -R -v cmake-latest
 
-    move_to_front_of_path "${CMAKE_PREFIX}"/bin
+    # Print information about new binary
+    move_to_front_of_path "${CMAKE_STOW%/*}"/bin
     command -v cmake
     cmake --version
-); }
-
-# Build/update cuttlefish tools
-function bcttlfshtools() { (
-    header "Building Cuttlefish host package"
-    TMP_FOLDER=$(mktemp -d)
-    cd "${TMP_FOLDER}"
-    git clone https://github.com/google/android-cuttlefish
-    cd android-cuttlefish
-    debuild -i -us -uc -b
-    sudo dpkg -i ../cuttlefish-common_*_amd64.deb
-    sudo apt-get install -f -y
-    rm -rf "${TMP_FOLDER}"
-    sudo usermod -aG cvdnetwork "${USER}"
-    sudo usermod -aG kvm "${USER}"
 ); }
 
 # Build/update cvise
 function bcvise() { (
     header "Building cvise"
+
+    # Variables for function
     CVISE_REPO=marxin/cvise
     [[ -z ${CVISE_VERSION} ]] && CVISE_VERSION=$(glr ${CVISE_REPO})
-    TMP_FOLDER=$(mktemp -d)
-    cd "${TMP_FOLDER}" || die "Cannot move into TMP_FOLDER"
-    curl -LSs https://github.com/${CVISE_REPO}/archive/v"${CVISE_VERSION//v/}".tar.gz | tar -xzf -
-    cd cvise-"${CVISE_VERSION//v/}" || die "Error downloading cvise source"
-    mkdir -p build
-    cd build || die "Error creating build folder"
+    CVISE_SRC=${SRC_FOLDER:?}/cvise/cvise-${CVISE_VERSION//v/}
+    CVISE_STOW=${PREFIX:-${USR_FOLDER:?}}/stow
+    CVISE_PREFIX=${CVISE_STOW}/packages/cvise/${CVISE_VERSION//v/}-$(date +%F-%H-%M-%S)
+
+    # Download source
+    mkdir -p "${CVISE_SRC%/*}"
+    [[ -d ${CVISE_SRC} ]] || curl -LSs https://github.com/${CVISE_REPO}/archive/v"${CVISE_VERSION//v/}".tar.gz | tar -C "${CVISE_SRC%/*}" -xzf -
+
+    # Download and install dependencies
     python3 -m pip install --upgrade --user pebble pytest
     path_push "${HOME}"/.local/bin
+
+    # Find distribution version of LLVM (special handling for Debian / Ubuntu)
     for LLVM_VER in $(seq 20 -1 7); do
         LLVM_DIR=/usr/lib/llvm-${LLVM_VER}
         if [[ -d ${LLVM_DIR} ]]; then
@@ -98,71 +110,120 @@ function bcvise() { (
         fi
     done
     [[ -z ${CMAKE_PREFIX_PATH} ]] && CMAKE_PREFIX_PATH=/usr
+
+    # Prepare build folder
+    CVISE_BLD=${CVISE_SRC}/build
+    rm -rf "${CVISE_BLD}"
+    mkdir -p "${CVISE_BLD}"
+    cd "${CVISE_BLD}" || die "Error creating build folder"
+
+    # Build software
     cmake \
         -DCMAKE_C_COMPILER="$(command -v clang || command -v gcc)" \
         -DCMAKE_CXX_COMPILER="$(command -v clang++ || command -v g++)" \
-        -DCMAKE_INSTALL_PREFIX="${CVISE_PREFIX:-${PREFIX:-${HOME}/usr}}" \
+        -DCMAKE_INSTALL_PREFIX="${CVISE_PREFIX}" \
         -DCMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH} \
         -DPYTHON_EXECUTABLE="$(command -v python3)" \
-        .. &&
-        make "${JOBS_FLAG:--j"$(nproc)"}" &&
-        make install
-    rm -rf "${TMP_FOLDER}"
+        .. || die "Error configuring cvise"
+    make "${JOBS_FLAG}" install || die "Error building cvise"
+
+    # Update symlink and stow new package
+    ln -fnrsv "${CVISE_PREFIX}" "${CVISE_STOW}"/cvise-latest
+    stow -d "${CVISE_STOW}" -R -v cvise-latest
+
+    # Print information about new binary
+    move_to_front_of_path "${CVISE_STOW%/*}"/bin
+    command -v cvise
+    cvise --version
 ); }
 
 # Build/update dtc
 function bdtc() { (
     header "Building dtc"
-    DTC_FOLDER=${SRC_FOLDER:-${HOME}/src}/dtc
+
+    # Download source
+    DTC_FOLDER=${SRC_FOLDER:?}/dtc
     if [[ ! -d ${DTC_FOLDER} ]]; then
         mkdir -p "${DTC_FOLDER%/*}"
         git clone https://git.kernel.org/pub/scm/utils/dtc/dtc.git "${DTC_FOLDER}"
     fi
     cd "${DTC_FOLDER}" || die "Couldn't move into ${DTC_FOLDER}"
 
+    # Clean up from previous compiles and update repo
     git clean -fxdq
     git fetch
-
     [[ -z ${DTC_VERSION} ]] && DTC_VERSION=$(git describe --tags "$(git rev-list --tags --max-count=1)")
     git checkout v"${DTC_VERSION//v/}"
 
-    make "${JOBS_FLAG:--j"$(nproc)"}" NO_PYTHON=1 PREFIX="${PREFIX:-${HOME}/usr}" install
+    # Path variables
+    DTC_STOW=${PREFIX:-${USR_FOLDER:?}}/stow
+    DTC_PREFIX=${DTC_STOW}/packages/dtc/${DTC_VERSION//v/}-$(date +%F-%H-%M-%S)
+
+    # Build software
+    mkdir -p "${DTC_PREFIX%/*}"
+    make "${JOBS_FLAG}" NO_PYTHON=1 PREFIX="${DTC_PREFIX}" install
+
+    # Update symlink and stow new package
+    ln -fnrsv "${DTC_PREFIX}" "${DTC_STOW}"/dtc-latest
+    stow -d "${DTC_STOW}" -R -v dtc-latest
+
+    # Print information about new binary
+    move_to_front_of_path "${DTC_STOW%/*}"/bin
+    command -v dtc
+    dtc --version
 ); }
 
 # Build/update git
 function bgit() { (
+    # Install hub first in case git is an alias to hub
     ihub || exit ${?}
-    header "Building git"
-    [[ $(uname -m) =~ x86 ]] && MARCH="-march=native "
-    MAKE=(make "${JOBS_FLAG:--j"$(nproc)"}"
-    prefix="${GIT_PREFIX:=${PREFIX:-${HOME}/usr}}"
-    CFLAGS="${MARCH}-O2 -pipe -fstack-protector-strong -fno-plt"
-    LDFLAGS="-Wl,-O1,--sort-common,--as-needed,-z,relro,-z,now"
-    USE_LIBPCRE2=1
-    NO_CROSS_DIRECTORY_HARDLINKS=1
-    NO_PERL_CPAN_FALLBACKS=1)
 
-    GIT_FOLDER=${SRC_FOLDER:-${HOME}/src}/git
+    header "Building git"
+
+    # If we are on x86, we should tune for native
+    [[ $(uname -m) =~ x86 ]] && MARCH="-march=native "
+
+    # Variables for function
+
+    # Make variable
+    # Taken from https://github.com/archlinux/svntogit-packages/blob/packages/git/trunk/PKGBUILD
+    MAKE=(
+        make
+        "${JOBS_FLAG}"
+        CFLAGS="${MARCH}-O2 -pipe -fstack-protector-strong -fno-plt"
+        LDFLAGS="-Wl,-O1,--sort-common,--as-needed,-z,relro,-z,now"
+        INSTALL_SYMLINKS=1
+        NO_PERL_CPAN_FALLBACKS=1
+        USE_LIBPCRE2=1
+    )
+
+    # Download/update source
+    GIT_FOLDER=${SRC_FOLDER:?}/git
     if [[ ! -d ${GIT_FOLDER} ]]; then
         mkdir -p "${GIT_FOLDER%/*}"
-        git clone https://github.com/git/git "${GIT_FOLDER}"
+        git clone https://git.kernel.org/pub/scm/git/git.git "${GIT_FOLDER}"
     fi
     cd "${GIT_FOLDER}" || die "Couldn't move into ${GIT_FOLDER}"
-
     git clean -fxdq
-    git fetch
+    git pull --rebase
 
-    [[ -z ${GIT_VERSION} ]] && GIT_VERSION=$(git describe --tags "$(git rev-list --tags --max-count=1)")
-    git checkout v"${GIT_VERSION//v/}"
+    # Path variables
+    GIT_STOW=${PREFIX:-${USR_FOLDER:?}}/stow
+    GIT_PREFIX=${GIT_STOW}/packages/git/$(git show -s --format=%H)-$(date +%F-%H-%M-%S)
 
-    "${MAKE[@]}" all install || die "git build/install failed"
-
+    # Build and install software + completions
+    "${MAKE[@]}" prefix="${GIT_PREFIX}" all install || die "git build/install failed"
     if [[ -n ${ZSH_NAME} ]]; then
         install -Dm644 "${GIT_FOLDER}"/contrib/completion/git-completion.bash "${GIT_PREFIX}"/share/bash-completion/completions/git
         install -Dm644 "${GIT_FOLDER}"/contrib/completion/git-completion.zsh "${HOME}"/.zfunctions/_git
     fi
 
-    move_to_front_of_path "${GIT_PREFIX}"/bin
+    # Update symlink and stow new package
+    ln -fnrsv "${GIT_PREFIX}" "${GIT_STOW}"/git-latest
+    stow -d "${GIT_STOW}" -R -v git-latest
+
+    # Print information about new binary
+    move_to_front_of_path "${GIT_STOW%/*}"/bin
     command -v git
     git --version
 ); }
@@ -224,7 +285,7 @@ function bllvm() { (
     fi
 
     if ${INSTALL:=false}; then
-        CMAKE=("${CMAKE[@]}" "-DCMAKE_INSTALL_PREFIX=${PREFIX:-${HOME}/usr}")
+        CMAKE=("${CMAKE[@]}" "-DCMAKE_INSTALL_PREFIX=${PREFIX:-${USR_FOLDER:?}}")
     fi
 
     header "Configuring LLVM"
@@ -249,41 +310,51 @@ function bllvm() { (
 # Build/install GNU make
 function bmake() { (
     header "Building make"
+
+    # Variables for function
     [[ -z ${MAKE_VERSION} ]] && MAKE_VERSION=4.3
-    MAKE_FOLDER=make-${MAKE_VERSION}
-    TMP_FOLDER=$(mktemp -d)
+    MAKE_SRC=${SRC_FOLDER:?}/make/make-${MAKE_VERSION}
+    MAKE_STOW=${PREFIX:-${USR_FOLDER:?}}/stow
+    MAKE_PREFIX=${MAKE_STOW}/packages/make/${MAKE_VERSION}-$(date +%F-%H-%M-%S)
 
-    cd "${TMP_FOLDER}"
-    curl -LSs http://ftp.gnu.org/gnu/make/"${MAKE_FOLDER}".tar.gz | tar -xzf -
-    cd "${MAKE_FOLDER}" || die "Downloading or extracting make failed"
+    # Download source
+    mkdir -p "${MAKE_SRC%/*}"
+    [[ -d ${MAKE_SRC} ]] || curl -LSs http://ftp.gnu.org/gnu/make/"${MAKE_SRC##*/}".tar.gz | tar -C "${MAKE_SRC%/*}" -xzf -
 
-    ./configure --prefix="${MAKE_PREFIX:=${PREFIX:-${HOME}/usr}}"
-    make "${JOBS_FLAG:--j"$(nproc)"}" install
+    # Build software
+    cd "${MAKE_SRC}" || die "Downloading or extracting make failed"
+    ./configure --prefix="${MAKE_PREFIX}" || die "Error configuring make"
+    make "${JOBS_FLAG}" install || die "Error building make"
 
-    move_to_front_of_path "${MAKE_PREFIX}"/bin
+    # Update symlink and stow new package
+    ln -fnrsv "${MAKE_PREFIX}" "${MAKE_STOW}"/make-latest
+    stow -d "${MAKE_STOW}" -R -v make-latest
+
+    # Print information about new binary
+    move_to_front_of_path "${MAKE_STOW%/*}"/bin
     command -v make
     make --version
-    rm -rf "${TMP_FOLDER}"
 ); }
 
 # Build/update ninja
 function bninja() { (
     header "Building ninja"
+
+    # Variables for function
     NINJA_REPO=ninja-build/ninja
     [[ -z ${NINJA_VERSION} ]] && NINJA_VERSION=$(glr "${NINJA_REPO}")
-    NINJA_FOLDER=ninja-${NINJA_VERSION//v/}
-    TMP_FOLDER=$(mktemp -d)
+    NINJA_SRC=${SRC_FOLDER:?}/ninja/ninja-${NINJA_VERSION//v/}
 
-    cd "${TMP_FOLDER}"
-    curl -LSs https://github.com/"${NINJA_REPO}"/archive/"${NINJA_VERSION}".tar.gz | tar -xzf -
-    cd "${NINJA_FOLDER}" || die "Downloading or extracting ninja failed"
+    # Download source
+    mkdir -p "${NINJA_SRC%/*}"
+    [[ -d ${NINJA_SRC} ]] || curl -LSs https://github.com/"${NINJA_REPO}"/archive/"${NINJA_VERSION}".tar.gz | tar -C "${NINJA_SRC%/*}" -xzf -
 
+    # Build software
+    cd "${NINJA_SRC}" || die "Downloading or extracting ninja failed"
     python3 ./configure.py --bootstrap
     if [[ -f ninja ]]; then
-        NINJA_BIN=${PREFIX:-${HOME}/usr}/bin
-        mkdir -p "${NINJA_BIN}"
-        cp -v ninja "${NINJA_BIN}"
-        rm -rf "${TMP_FOLDER}"
+        NINJA_BIN=${PREFIX:-${USR_FOLDER:?}}/bin
+        install -Dm755 ninja "${NINJA_BIN}"/ninja
 
         move_to_front_of_path "${NINJA_BIN}"
         command -v ninja
@@ -302,7 +373,7 @@ function bpgollvm() { (
         "-DCMAKE_BUILD_TYPE=Release"
         "-DPYTHON_EXECUTABLE=$(command -v python3)"
     )
-    LLVM_SRC=${SRC_FOLDER:-${HOME}/src}/llvm-project
+    LLVM_SRC=${SRC_FOLDER}/llvm-project
     LLVM_BLD=${LLVM_SRC}/build
     ORIG_PATH=${PATH}
     START=$(date +%s)
@@ -414,7 +485,7 @@ function bpgollvm() { (
     )
 
     # Stage 3: Build final compiler
-    : "${PGO_LLVM_PREFIX:=${PREFIX:-${HOME}/usr}}"
+    : "${PGO_LLVM_PREFIX:=${PREFIX:-${USR_FOLDER:?}}}"
     export PATH=${STAGE_ONE_BIN:?}:${ORIG_PATH}
     (
         header "Building LLVM stage 3"
@@ -460,27 +531,48 @@ function biexa() { (
     EXA_REPO=ogham/exa
     EXA_BASE_URL=https://github.com/${EXA_REPO}
     EXA_VERSION=$(glr ${EXA_REPO})
-    TMP_FOLDER=$(mktemp -d)
 
-    cd "${TMP_FOLDER}" || exit ${?}
-
-    if [[ $(uname -m) = "x86_64" ]]; then
+    if [[ $(uname -m) != "x86_64" ]]; then
+        EXA_STOW=${PREFIX:-${USR_FOLDER:?}}/stow
+        EXA_BIN=${EXA_STOW}/prebuilts/bin
         EXA_ZIP=exa-linux-x86_64-${EXA_VERSION//v/}.zip
+
+        TMP_FOLDER=$(mktemp -d)
+        cd "${TMP_FOLDER}" || exit ${?}
 
         header "Installing exa"
         curl -LSsO "${EXA_BASE_URL}"/releases/download/"${EXA_VERSION}"/"${EXA_ZIP}" || die "Error downloading ${EXA_ZIP}"
         unzip "${EXA_ZIP}"
-        install -Dm755 "${TMP_FOLDER}"/exa-linux-x86_64 "${PREFIX:-${HOME}/usr}"/bin/exa
+        install -Dm755 "${TMP_FOLDER}"/exa-linux-x86_64 "${EXA_BIN}"/exa
+
+        stow -d "${EXA_STOW}" -R -v prebuilts
+
+        move_to_front_of_path "${EXA_STOW%/*}"/bin
+
+        cd && rm -rf "${TMP_FOLDER}"
     else
         header "Building exa"
+
+        # Install rust
         [[ -d ${HOME}/.cargo/bin ]] || irust
-        curl -LSs "${EXA_BASE_URL}"/archive/"${EXA_VERSION}".tar.gz | tar -xzf - || die "Error downloading exa source"
-        cd exa-"${EXA_VERSION//v/}" || exit ${?}
         move_to_front_of_path "${HOME}/.cargo/bin"
+
+        # Variables for function
+        EXA_SRC=${SRC_FOLDER:?}/exa/exa-${EXA_VERSION//v/}
+
+        # Download source
+        mkdir -p "${EXA_SRC%/*}"
+        [[ -d ${EXA_SRC} ]] || curl -LSs "${EXA_BASE_URL}"/archive/"${EXA_VERSION}".tar.gz | tar -C "${EXA_SRC%/*}" -xzf -
+
+        # Build software
+        cd "${EXA_SRC}" || die "Error downloading/extracting exa source"
         cargo build --release --locked || die "cargo build failed"
         cargo install --force --path . || die "cargo install failed"
     fi
-    rm -rf "${TMP_FOLDER}"
+
+    # Print information about new binary
+    command -v exa
+    exa --version
 ); }
 
 # Build/install ripgrep
@@ -488,32 +580,39 @@ function birg() { (
     RG_REPO=BurntSushi/ripgrep
     [[ -z ${RG_VERSION} ]] && RG_VERSION=$(glr "${RG_REPO}")
     BASE_URL=https://github.com/${RG_REPO}
-    TMP_FOLDER=$(mktemp -d)
-    DEB=ripgrep_${RG_VERSION}_amd64.deb
-
-    cd "${TMP_FOLDER}"
 
     if [[ $(uname -m) = "x86_64" ]] && command -v dpkg &>/dev/null; then
         header "Installing ripgrep"
+
+        DEB=ripgrep_${RG_VERSION}_amd64.deb
+
+        TMP_FOLDER=$(mktemp -d)
+        cd "${TMP_FOLDER}"
+
         curl -LSsO "${BASE_URL}"/releases/download/"${RG_VERSION}"/"${DEB}" || die "Error downloading ${DEB}"
         sudo dpkg -i "${DEB}" || die "Error installing ${DEB}"
+        cd && rm -rf "${TMP_FOLDER}"
     else
         header "Building ripgrep"
-        curl -LSs "${BASE_URL}"/archive/"${RG_VERSION}".tar.gz | tar -xzf - || die "Error downloading ripgrep source"
-        cd ripgrep-"${RG_VERSION}" || die "Can't move into ripgrep source"
+
+        # Install rust if necessary
         [[ -d ${HOME}/.cargo/bin ]] || irust
         move_to_front_of_path "${HOME}/.cargo/bin"
+
+        # Download source
+        RG_SRC=${SRC_FOLDER:?}/ripgrep/ripgrep-${RG_VERSION}
+        mkdir -p "${RG_SRC%/*}"
+        [[ -d ${RG_SRC} ]] || curl -LSs "${BASE_URL}"/archive/"${RG_VERSION}".tar.gz | tar -C "${RG_SRC%/*}" -xzf -
+
+        # Build and install software
+        cd "${RG_SRC}" || die "Error downloading ripgrep source"
         cargo build --release --locked --features 'pcre2' || die "cargo build failed"
         cargo install --force --path . || die "cargo install failed"
-        if [[ -n ${ZSH_NAME} ]]; then
-            install -Dm644 complete/_rg "${HOME}"/.zfunctions/_rg
-        fi
+        [[ -n ${ZSH_NAME} ]] && install -Dm644 complete/_rg "${HOME}"/.zfunctions/_rg
     fi
 
     command -v rg
     rg --version
-
-    rm -rf "${TMP_FOLDER}"
 ); }
 
 # Build/install sharkdp binaries
@@ -529,25 +628,36 @@ function bisharkdp() { (
     done
 
     TMP_FOLDER=$(mktemp -d)
-    cd "${TMP_FOLDER}"
 
     for BINARY in "${BINARIES[@]}"; do (
         BINARY_REPO=sharkdp/${BINARY}
         URL_BASE=https://github.com/${BINARY_REPO}
         [[ -z ${BIN_VERSION} ]] && BIN_VERSION=$(glr "${BINARY_REPO}")
+
         if [[ $(uname -m) = "x86_64" ]] && command -v dpkg &>/dev/null; then
             header "Installing ${BINARY}"
-            DEB=${BINARY}_${BIN_VERSION//v/}_amd64.deb
-            curl -LSsO "${URL_BASE}"/releases/download/"${BIN_VERSION}"/"${DEB}" || die "Error downloading ${DEB}"
-            sudo dpkg -i "${DEB}" || die "Error installing ${DEB}"
+
+            DEB=${TMP_FOLDER}/${BINARY}_${BIN_VERSION//v/}_amd64.deb
+            curl -LSso "${DEB}" "${URL_BASE}"/releases/download/"${BIN_VERSION}"/"${DEB##*/}" || die "Error downloading ${DEB##*/}"
+            sudo dpkg -i "${DEB}" || die "Error installing ${DEB##*/}"
         else
             header "Building ${BINARY}"
-            curl -LSs "${URL_BASE}"/archive/"${BIN_VERSION}".tar.gz | tar -xzf - || die "Error downloading ${BINARY} source"
-            cd "${BINARY}-${BIN_VERSION//v/}" || die "Can't move into ${BINARY} source"
+
+            # Install rust if necessary
             [[ -d ${HOME}/.cargo/bin ]] || irust
             move_to_front_of_path "${HOME}/.cargo/bin"
+
+            # Download source
+            BINARY_SRC=${SRC_FOLDER}/${BINARY}/${BINARY}-${BIN_VERSION//v/}
+            mkdir -p "${BINARY_SRC%/*}"
+            [[ -d ${BINARY_SRC} ]] || curl -LSs "${URL_BASE}"/archive/"${BIN_VERSION}".tar.gz | tar -C "${BINARY_SRC%/*}" -xzf -
+
+            # Build software
+            cd "${BINARY_SRC}" || die "Error downloading ${BINARY} source"
             cargo build --release --locked || die "cargo build failed"
             cargo install --force --path . || die "cargo install failed"
+
+            # Install zsh completions
             if [[ -n ${ZSH_NAME} ]]; then
                 case ${BINARY} in
                     fd) install -Dm644 target/release/build/fd-find-*/out/_fd "${HOME}"/.zfunctions/_fd ;;
@@ -555,6 +665,8 @@ function bisharkdp() { (
             fi
         fi
 
+        # Print information about new binary
+        move_to_front_of_path "${HOME}/.cargo/bin"
         command -v "${BINARY}"
         "${BINARY}" --version
     ); done
@@ -565,20 +677,29 @@ function bisharkdp() { (
 # Build/update tmux
 function btmux() { (
     header "Building tmux"
+
+    # Variables for function
     TMUX_REPO=tmux/tmux
     [[ -z ${TMUX_VERSION} ]] && TMUX_VERSION=$(glr "${TMUX_REPO}")
-    TMP_FOLDER=$(mktemp -d)
-    TMUX_FOLDER=tmux-${TMUX_VERSION}
+    TMUX_SRC=${SRC_FOLDER:?}/tmux/tmux-${TMUX_VERSION}
+    TMUX_STOW=${PREFIX:-${USR_FOLDER:?}}/stow
+    TMUX_PREFIX=${TMUX_STOW}/packages/tmux/${TMUX_VERSION}-$(date +%F-%H-%M-%S)
 
-    cd "${TMP_FOLDER}"
-    curl -LSs https://github.com/"${TMUX_REPO}"/releases/download/"${TMUX_VERSION}"/"${TMUX_FOLDER}".tar.gz | tar -xzf -
-    cd "${TMUX_FOLDER}" || die "Downloading or extracting tmux failed"
-    ./configure --prefix="${TMUX_PREFIX:=${PREFIX:-${HOME}/usr}}"
-    make "${JOBS_FLAG:--j"$(nproc)"}" || die "make failed"
-    make install || die "install failed"
-    rm -rf "${TMP_FOLDER}"
+    # Download source
+    mkdir -p "${TMUX_SRC%/*}"
+    [[ -d ${TMUX_SRC} ]] || curl -LSs https://github.com/"${TMUX_REPO}"/releases/download/"${TMUX_VERSION}"/"${TMUX_SRC##*/}".tar.gz | tar -C "${TMUX_SRC%/*}" -xzf -
 
-    move_to_front_of_path "${TMUX_PREFIX}"/bin
+    # Build software
+    cd "${TMUX_SRC}" || die "Downloading or extracting tmux failed"
+    ./configure --prefix="${TMUX_PREFIX}"
+    make "${JOBS_FLAG}" install || die "make install failed"
+
+    # Update symlink and stow new package
+    ln -fnrsv "${TMUX_PREFIX}" "${TMUX_STOW}"/tmux-latest
+    stow -d "${TMUX_STOW}" -R -v tmux-latest
+
+    # Print information about new binary
+    move_to_front_of_path "${TMUX_STOW%/*}"/bin
     command -v tmux
     tmux -V
 ); }
@@ -586,25 +707,31 @@ function btmux() { (
 # Build/update zsh
 function bzsh() { (
     header "Building zsh"
-    TMP_FOLDER=$(mktemp -d)
 
-    cd "${TMP_FOLDER}"
-    case ${BZSH_VERSION:=5.8} in
-        latest) URL=https://sourceforge.net/projects/zsh/files/latest/download ;;
-        *) URL=https://www.zsh.org/pub/zsh-"${BZSH_VERSION//zsh-/}".tar.xz ;;
-    esac
-    curl -LSs "${URL}" | tar -xvJf -
-    cd zsh-* || die "Downloading or extracting zsh failed"
-    ./configure --prefix="${ZSH_PREFIX:=${PREFIX:-${HOME}/usr}}"
-    make "${JOBS_FLAG:--j"$(nproc)"}" || die "make failed"
-    make install || die "install failed"
-    rm -rf "${TMP_FOLDER}"
+    [[ -z ${BZSH_VERSION} ]] && BZSH_VERSION=5.8
+    ZSH_SRC=${SRC_FOLDER:?}/zsh/zsh-${BZSH_VERSION}
+    ZSH_STOW=${PREFIX:-${USR_FOLDER:?}}/stow
+    ZSH_PREFIX=${ZSH_STOW}/packages/zsh/${BZSH_VERSION}-$(date +%F-%H-%M-%S)
 
-    ZSH_BIN=${ZSH_PREFIX:?}/bin/zsh
-    grep -q "${ZSH_BIN}" /etc/shells || echo "${ZSH_BIN}" | sudo tee -a /etc/shells
-    [[ ${SHELL} != "${ZSH_BIN}" ]] && sudo chsh -s "${ZSH_BIN}" "$(whoami)"
+    # Download source
+    mkdir -p "${ZSH_SRC%/*}"
+    [[ -d ${ZSH_SRC} ]] || curl -LSs https://www.zsh.org/pub/"${ZSH_SRC##*/}".tar.xz | tar -C "${ZSH_SRC%/*}" -xvJf -
 
-    move_to_front_of_path "${ZSH_PREFIX}"/bin
+    # Build software
+    cd "${ZSH_SRC}" || die "Downloading or extracting zsh failed"
+    ./configure --prefix="${ZSH_PREFIX}"
+    make "${JOBS_FLAG}" install || die "make install failed"
+
+    # Update symlink and stow new package
+    ln -fnrsv "${ZSH_PREFIX}" "${ZSH_STOW}"/zsh-latest
+    stow -d "${ZSH_STOW}" -R -v zsh-latest
+
+    # Change shell
+    ZSH_BIN=${ZSH_STOW%/*}/bin/zsh
+    # grep -q "${ZSH_BIN}" /etc/shells || echo "${ZSH_BIN}" | sudo tee -a /etc/shells
+    # [[ ${SHELL} != "${ZSH_BIN}" ]] && sudo chsh -s "${ZSH_BIN}" "$(whoami)"
+
+    move_to_front_of_path "${ZSH_BIN%/*}"
     command -v zsh
     zsh --version
 ); }
@@ -616,7 +743,10 @@ function bzsh() { (
 # Install Android tools
 function iandroidtools() { (
     header "Installing Android tools"
-    ANDROID_BIN=${PREFIX:-${HOME}/usr}/bin
+
+    ANDROID_STOW=${PREFIX:-${USR_FOLDER:?}}/stow
+    ANDROID_BIN=${ANDROID_STOW}/prebuilts/bin
+
     mkdir -p "${ANDROID_BIN}"
     curl -LSso "${ANDROID_BIN}"/repo https://storage.googleapis.com/git-repo-downloads/repo
     chmod a+x "${ANDROID_BIN}"/repo
@@ -625,13 +755,15 @@ function iandroidtools() { (
     curl -LSs https://android.googlesource.com/platform/prebuilts/misc/+archive/master/linux-x86/libufdt.tar.gz | tar -C "${MKDTIMG_FOLDER}" -xzf -
     cp "${MKDTIMG_FOLDER}"/mkdtimg "${ANDROID_BIN}"
     rm -rf "${MKDTIMG_FOLDER}"
+
+    stow -d "${ANDROID_STOW}" -R -v prebuilts
 ); }
 
 # Install arcanist
 function iarc() { (
     header "Installing arcanist"
 
-    ARC_FOLDER=${SRC_FOLDER:-${HOME}/src}/arcanist
+    ARC_FOLDER=${SRC_FOLDER:?}/arcanist
     mkdir -p "${ARC_FOLDER}"
     for REPO in arcanist libphutil; do
         REPO_FOLDER=${ARC_FOLDER}/${REPO}
@@ -639,9 +771,11 @@ function iarc() { (
         git -C "${REPO_FOLDER}" pull --rebase --quiet
     done
 
-    ARC_BIN=${PREFIX:-${HOME}/usr}/bin
-    rm -rf "${ARC_BIN}"/arc
-    ln -s "${ARC_FOLDER}"/arcanist/bin/arc "${ARC_BIN}"/arc
+    ARC_STOW=${PREFIX:-${USR_FOLDER:?}}/stow
+    ARC_BIN=${ARC_STOW}/prebuilts/bin
+    mkdir -p "${ARC_BIN}"
+    ln -fs "${ARC_FOLDER}"/arcanist/bin/arc "${ARC_BIN}"/arc
+    stow -d "${ARC_STOW}" -R -v prebuilts
 ); }
 
 # Install hugo
@@ -658,7 +792,10 @@ function ihugo() { (
     else
         TMP_FOLDER=$(mktemp -d)
         curl -LSs "${HUGO_URL}".tar.gz | tar -C "${TMP_FOLDER}" -xzf -
-        install -Dm755 "${TMP_FOLDER}"/hugo "${PREFIX:-${HOME}/usr}"/bin/hugo
+        HUGO_STOW=${PREFIX:-${USR_FOLDER:?}}/stow
+        HUGO_BIN=${HUGO_STOW}/prebuilts/bin/hugo
+        install -Dm755 "${TMP_FOLDER}"/"${HUGO_BIN##*/}" "${HUGO_BIN}"
+        stow -d "${HUGO_STOW}" -R -v prebuilts
         rm -rf "${TMP_FOLDER}"
     fi
 ); }
@@ -688,11 +825,13 @@ function ihub() { (
     cd "$(mktemp -d)" || die "Error moving into temporary directory!"
     curl -LSsO https://github.com/${HUB_REPO}/releases/download/"${HUB_VERSION}"/"${HUB_TUPLE}".tgz || die "Error downloading hub!"
     tar -xf "${HUB_TUPLE}".tgz || die "Error extracting hub!"
-    prefix="${PREFIX:-${HOME}/usr}" ./"${HUB_TUPLE}"/install || die "Error installing hub!"
+    HUB_STOW=${PREFIX:-${USR_FOLDER:?}}/stow
+    prefix="${HUB_STOW}"/prebuilts ./"${HUB_TUPLE}"/install || die "Error installing hub!"
     if [[ -n ${ZSH_NAME} ]]; then
         mkdir -p "${HOME}"/.zfunctions
         curl -LSso "${HOME}"/.zfunctions/_hub https://github.com/${HUB_REPO}/raw/"${HUB_VERSION}"/etc/hub.zsh_completion
     fi
+    stow -d "${HUB_STOW}" -R -v prebuilts
     rm -rf "${PWD}"
 ); }
 
@@ -703,7 +842,9 @@ function ishellcheck() { (
     [[ -z ${SHELLCHECK_VERSION} ]] && SHELLCHECK_VERSION=$(glr "${SHCHK_REPO}")
     SHCHK_FOLDER=$(mktemp -d)/shellcheck-v"${SHELLCHECK_VERSION//v/}"
     curl -LSs https://github.com/"${SHCHK_REPO}"/releases/download/"${SHELLCHECK_VERSION}"/"${SHCHK_FOLDER##*/}".linux.x86_64.tar.xz | tar -C "${SHCHK_FOLDER%/*}" -xJf - || exit ${?}
-    install -Dm755 "${SHCHK_FOLDER}"/shellcheck "${PREFIX:-${HOME}/usr}"/bin/shellcheck || exit ${?}
+    SHCHK_STOW=${PREFIX:-${USR_FOLDER:?}}/stow
+    install -Dm755 "${SHCHK_FOLDER}"/shellcheck "${SHCHK_STOW}"/prebuilts/bin/shellcheck || exit ${?}
+    stow -d "${SHCHK_STOW}" -R -v prebuilts
     rm -rf "${SHCHK_FOLDER%/*}"
 ); }
 
@@ -714,23 +855,27 @@ function ishfmt() { (
     [[ -z ${SHFMT_VERSION} ]] && SHFMT_VERSION=$(glr ${SHFMT_REPO})
     SHFMT_VERSION=v${SHFMT_VERSION//v/}
 
-    BIN_FOLDER=${PREFIX:-${HOME}/usr}/bin
-    mkdir -p "${BIN_FOLDER}"
-    rm -rf "${BIN_FOLDER}"/shfmt
-    curl -LSso "${BIN_FOLDER}"/shfmt https://github.com/${SHFMT_REPO}/releases/download/"${SHFMT_VERSION}"/shfmt_"${SHFMT_VERSION}"_linux_amd64 || die "Error downloading/installing shfmt"
-    chmod +x "${BIN_FOLDER}"/shfmt
+    SHFMT_STOW=${PREFIX:-${USR_FOLDER:?}}/stow
+    SHFMT_BIN=${SHFMT_STOW}/prebuilts/bin/shfmt
+    mkdir -p "${SHFMT_BIN%/*}"
+    rm -rf "${SHFMT_BIN}"
+    curl -LSso "${SHFMT_BIN}" https://github.com/${SHFMT_REPO}/releases/download/"${SHFMT_VERSION}"/shfmt_"${SHFMT_VERSION}"_linux_amd64 || die "Error downloading/installing shfmt"
+    chmod +x "${SHFMT_BIN}"
+    stow -d "${SHFMT_STOW}" -R -v prebuilts
 ); }
 
 function ituxmake() { (
-    TUXMAKE_SRC=${SRC_FOLDER:-${HOME}/src}/tuxmake
+    TUXMAKE_SRC=${SRC_FOLDER:?}/tuxmake
     mkdir -p "${TUXMAKE_SRC%/*}"
 
     [[ -d ${TUXMAKE_SRC} ]] || git clone https://gitlab.com/Linaro/tuxmake.git "${TUXMAKE_SRC}"
     git -C "${TUXMAKE_SRC}" pull --rebase
 
-    TUXMAKE_BIN=${PREFIX:-${HOME}/usr}/bin
+    TUXMAKE_STOW=${PREFIX:-${USR_FOLDER:?}}/stow
+    TUXMAKE_BIN=${TUXMAKE_STOW}/prebuilts/bin
     mkdir -p "${TUXMAKE_BIN}"
     ln -sf "${TUXMAKE_SRC}"/run "${TUXMAKE_BIN}"/tuxmake
+    stow -d "${TUXMAKE_STOW}" -R -v prebuilts
 ); }
 
 function irust() { (
@@ -741,16 +886,18 @@ function irust() { (
 function ib4() { (
     header "Installing b4"
 
-    B4_SRC=${SRC_FOLDER:-${HOME}/src}/b4
+    B4_SRC=${SRC_FOLDER:?}/b4
     mkdir -p "${B4_SRC%/*}"
 
     [[ -d ${B4_SRC} ]] || git clone https://git.kernel.org/pub/scm/utils/b4/b4.git/ "${B4_SRC}"
     git -C "${B4_SRC}" pull --rebase
 
-    B4_BIN=${PREFIX:-${HOME}/usr}/bin
+    B4_STOW=${PREFIX:-${USR_FOLDER:?}}/stow
+    B4_BIN=${B4_STOW}/prebuilts/bin
     mkdir -p "${B4_BIN}"
     ln -sf "${B4_SRC}"/b4.sh "${B4_BIN}"/b4
     python3 -m pip install --requirement "${B4_SRC}"/requirements.txt --upgrade --user
+    stow -d "${B4_STOW}" -R -v prebuilts
 ); }
 
 # Main install function

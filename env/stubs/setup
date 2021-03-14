@@ -62,6 +62,7 @@ function arch_rootstrap() { (
         expect
         fd
         gcc-multilib
+        git
         htop
         hub
         hugo
@@ -91,6 +92,7 @@ function arch_rootstrap() { (
         python-setuptools
         python-yaml
         qemu-headless-arch-extra
+        re2c
         repo
         ripgrep
         shellcheck
@@ -109,7 +111,6 @@ function arch_rootstrap() { (
     else
         PACKAGES+=(podman)
     fi
-    is_installed git-git || PACKAGES+=(git)
     # This conflicts with sudo in base-devel, remove it as it will be reinstalled after the fact
     remove_if_installed opendoas-sudo
     pacman -S --needed --noconfirm "${PACKAGES[@]}" || exit ${?}
@@ -155,13 +156,6 @@ EOF
         su -m -s /bin/bash nobody -c "makepkg -s" || exit ${?}
         pacman -U --needed --noconfirm -- *.tar.zst || exit ${?}
     done
-    WORK_DIR=${AUR_DIR}/git-git
-    [[ -d ${WORK_DIR} ]] || git clone --depth=1 -b packages/git https://github.com/nathanchance/archpkgbuilds "${WORK_DIR}"
-    chown -R "nobody:nobody" "${AUR_DIR}"
-    cd "${WORK_DIR}"/trunk || exit ${?}
-    CCACHE_DIR=${AUR_DIR}/.ccache CCACHE_TEMPDIR=${AUR_DIR}/.ccache/tmp HOME=${AUR_DIR} \
-        su -m -s /bin/bash nobody -c "makepkg -s --nocheck --noconfirm" || exit ${?}
-    yes | pacman -U -- *.tar.zst || exit ${?}
     cd || exit ${?}
     rm -rf "${AUR_DIR}"
 
@@ -590,6 +584,7 @@ function debian_ubuntu_packages() {
         slirp4netns
         ssh
         software-properties-common
+        stow
         sudo
         swig
         texinfo
