@@ -268,7 +268,6 @@ function bllvm() { (
         "-DLLVM_ENABLE_PROJECTS=all"
         "-DLLVM_ENABLE_WARNINGS=OFF"
         "-DLLVM_USE_LINKER=lld"
-        "-DPYTHON_EXECUTABLE=$(command -v python3)"
     )
 
     if ${BOOTSTRAP:=false}; then
@@ -371,7 +370,6 @@ function bpgollvm() { (
         "-DCLANG_DEFAULT_LINKER=lld"
         "-DCLANG_VENDOR=$(uname -n)"
         "-DCMAKE_BUILD_TYPE=Release"
-        "-DPYTHON_EXECUTABLE=$(command -v python3)"
     )
     LLVM_SRC=${SRC_FOLDER}/llvm-project
     LLVM_BLD=${LLVM_SRC}/build
