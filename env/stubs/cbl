@@ -427,7 +427,7 @@ EOF
         { b4 am -o - -P 8 https://lore.kernel.org/qemu-devel/20210129111814.566629-9-pbonzini@redhat.com/ | git ap || exit ${?}; }
 
     # Build qemu
-    [[ -z ${QEMU_PREFIX} ]] && QEMU_PREFIX=${CBL_QEMU_INSTALL}/qemu-$(git sh -s --format=%H)
+    [[ -z ${QEMU_PREFIX} ]] && QEMU_PREFIX=${CBL_QEMU_INSTALL}/$(git sh -s --format=%H)-$(date +%F-%H-%M-%S)
     if [[ ! -x ${QEMU_PREFIX}/bin/qemu-system-x86_64 ]]; then
         rm -rf "${QEMU_TOT_BLD}"
         mkdir -p "${QEMU_TOT_BLD}"
@@ -444,7 +444,7 @@ EOF
     rm -rf "${CBL_QEMU_BIN}"
     mkdir -p "${CBL_QEMU_BIN}"
     ln -fsv "${CBL_QEMU_INSTALL}"/qemu-5.0.1/bin/qemu-system-ppc "${CBL_QEMU_BIN}"
-    for ARCH in arm aarch64 i386 mips mipsel ppc64 riscv64 s390x x86_64; do
+    for ARCH in arm aarch64 i386 m68k mips mipsel ppc64 riscv64 s390x x86_64; do
         ln -fsv "${QEMU_PREFIX}"/bin/qemu-system-${ARCH} "${CBL_QEMU_BIN}"
     done
     ln -fsv "${QEMU_PREFIX}"/bin/qemu-img "${CBL_QEMU_BIN}"
