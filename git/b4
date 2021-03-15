@@ -12,7 +12,7 @@ function parse_parameters() {
     while ((${#})); do
         case ${1} in
             http* | *@*) MSG_ID=${1} ;;
-            -P) B4_ARGS+=(-P "${1}") && shift ;;
+            -P) shift && B4_ARGS+=(-P "${1}") ;;
             am) METHOD=(am) ;;
             ams) METHOD=(ams) ;;
             # The default
