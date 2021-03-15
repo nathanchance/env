@@ -94,7 +94,7 @@ function bldtcs() { (
     stripall "${BLDLLVM_INSTALL_FOLDER}"
 
     # Update llvm-tot symlink
-    ln -fnrsv "${BLDLLVM_INSTALL_FOLDER##*/}" "${CBL_LLVM%/*}"
+    ln -fnrsv "${BLDLLVM_INSTALL_FOLDER}" "${CBL_LLVM%/*}"
 
     # Combine CBL_LLVM and CBL_BNTL for llvm-kernel-testing
     stow -d "${CBL_TC}" -R -t "${CBL_LLVM_BNTL%/*}" -v "$(basename "${CBL_BNTL%/*}")"
