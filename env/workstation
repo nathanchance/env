@@ -116,5 +116,7 @@ function workstation_setup() {
     source "${SCRIPTS_FOLDER}"/env/stubs/cbl
     load_botinfo
     gpg_key_cache
+
+    [[ "$(get_distro)" = "arch" ]] && export STORAGE_DRIVER=overlay
 }
 # vi: filetype=zsh
