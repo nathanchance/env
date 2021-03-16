@@ -115,7 +115,7 @@ function rbpi() { (
     PATCHES_FOLDER=${GITHUB_FOLDER}/patches/rpi-next
     FIXES=${PATCHES_FOLDER}/fixes.series
     [[ -f ${FIXES} ]] && { git am "${FIXES}" || exit ${?}; }
-    crl https://git.kernel.org/ardb/p/295a2a7d5fd9ff0e1fd50d5265297464888cbfef | git ams || exit ${?}
+    crl https://git.kernel.org/ardb/p/17bdef976555d001276f0dc188201399e03b0e90 | git ams || exit ${?}
     cat <<'EOF' | git am || exit ${?}
 From 8b07b642a452185c9101f2d7105c49d7c925d4fe Mon Sep 17 00:00:00 2001
 From: Nathan Chancellor <nathan@kernel.org>
