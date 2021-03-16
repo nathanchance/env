@@ -265,7 +265,7 @@ function bllvm() { (
         "-DCMAKE_LINKER=$(command -v ld.lld)"
         "-DCMAKE_RANLIB=$(command -v llvm-ranlib)"
         "-DLLVM_CCACHE_BUILD=ON"
-        "-DLLVM_ENABLE_PROJECTS=all"
+        "-DLLVM_ENABLE_PROJECTS=$(llvm_all_projects "${LLVM_SRC}")"
         "-DLLVM_ENABLE_WARNINGS=OFF"
         "-DLLVM_USE_LINKER=lld"
     )
@@ -288,7 +288,7 @@ function bllvm() { (
     fi
 
     header "Configuring LLVM"
-    echo "${CMAKE[*]}"
+    echo "$ ${CMAKE[*]}"
     echo
     "${CMAKE[@]}" "${LLVM_SRC}"/llvm >/dev/null || exit ${?}
 
@@ -363,6 +363,7 @@ function bninja() { (
 
 # Build/install PGO'd LLVM
 function bpgollvm() { (
+    LLVM_SRC=${SRC_FOLDER}/llvm-project
     CMAKE=(
         cmake
         -G Ninja
@@ -370,8 +371,8 @@ function bpgollvm() { (
         "-DCLANG_DEFAULT_LINKER=lld"
         "-DCLANG_VENDOR=$(uname -n)"
         "-DCMAKE_BUILD_TYPE=Release"
+        "-DLLVM_ENABLE_PROJECTS=$(llvm_all_projects "${LLVM_SRC}")"
     )
-    LLVM_SRC=${SRC_FOLDER}/llvm-project
     LLVM_BLD=${LLVM_SRC}/build
     ORIG_PATH=${PATH}
     START=$(date +%s)
@@ -405,10 +406,6 @@ function bpgollvm() { (
         git checkout "${LLVM_VERSION:=master}"
         [[ ${LLVM_VERSION} = "master" || ${LLVM_VERSION} =~ release ]] && git pull --rebase
     fi
-
-    # Ensure that we don't build llgo, it's broken
-    LLVM_ALL_PROJECTS=$(grep -F "set(LLVM_ALL_PROJECTS " llvm/CMakeLists.txt | cut -d \" -f 2)
-    CMAKE=("${CMAKE[@]}" -DLLVM_ENABLE_PROJECTS="${LLVM_ALL_PROJECTS/;llgo/}")
 
     # Stage 1: Bootstrap compiler
     (
@@ -732,6 +729,13 @@ function bzsh() { (
     move_to_front_of_path "${ZSH_BIN%/*}"
     command -v zsh
     zsh --version
+); }
+
+# Get LLVM_ALL_PROJECTS value minus a couple of problematic projects
+function llvm_all_projects() { (
+    # llgo is/was broken (https://llvm.org/pr42548)
+    # debuginfo-tests breaks frequently due to mlir changes (https://reviews.llvm.org/D98613)
+    grep -F "set(LLVM_ALL_PROJECTS " "${1:?}"/llvm/CMakeLists.txt | cut -d \" -f 2 | sed -e 's/debuginfo-tests//' -e 's/llgo//' -e 's/;;/;/g' -e 's/;$//' -e 's/^;//'
 ); }
 
 #######################
