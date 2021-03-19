@@ -207,6 +207,7 @@ function rbld_usr() { (
 
     bccache || die "Error building/installing ccache"
     bgit || die "Error building/installing git"
+    bmake || die "Error building/installing make"
     biexa || die "Error building/installing exa"
     birg || die "Error building/install ripgrep"
     bisharkdp all || die "Error building/installing a sharkdp binary"
