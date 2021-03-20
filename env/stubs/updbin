@@ -527,7 +527,7 @@ function biexa() { (
     EXA_BASE_URL=https://github.com/${EXA_REPO}
     EXA_VERSION=$(glr ${EXA_REPO})
 
-    if [[ $(uname -m) != "x86_64" ]]; then
+    if [[ $(uname -m) = "x86_64" ]]; then
         EXA_STOW=${PREFIX:-${USR_FOLDER:?}}/stow
         EXA_BIN=${EXA_STOW}/prebuilts/bin
         EXA_ZIP=exa-linux-x86_64-${EXA_VERSION//v/}.zip
