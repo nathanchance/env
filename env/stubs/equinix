@@ -122,6 +122,9 @@ function partition_and_create_user() { (
     # Install tmux so that installation progress cannot be lost
     apt install -y tmux
 
+    # Install git in case it is not installed by default
+    apt install -y git
+
     # Install necessary files
     if [[ -n ${DRIVE:-} ]]; then
         apt install -y parted
@@ -129,7 +132,7 @@ function partition_and_create_user() { (
     fi
 
     # Setup user account
-    apt install -y qemu-kvm
+    [[ "$(uname -m)" = "x86_64" ]] && apt install -y qemu-kvm
     if getent passwd "${USER}" &>/dev/null; then
         set +x
         equinix_warn "${USER} already exists. If this is not expected, delete the user and re-run this function."
