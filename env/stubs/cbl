@@ -496,6 +496,7 @@ function lt() { (
     [[ -n ${BOOT_UTILS} ]] && TC_BLD_ARGS+=(--boot-utils "${BOOT_UTILS}")
     ${DO:=false} && TC_BLD_ARGS+=(--defconfigs)
     ${LTO:-true} && [[ ${KRNL_DIR##*/} = "linux" ]] && TC_BLD_ARGS+=(--test-lto-cfi-kernel)
+    set -x
     PATH=${CBL_QEMU_BIN}:${PATH} \
         "${CBL}"/llvm-kernel-testing/test.sh \
         --linux-src "${KRNL_DIR}" \
@@ -503,6 +504,7 @@ function lt() { (
         --skip-tc-build \
         --tc-prefix "${TC_DIR}" \
         "${TC_BLD_ARGS[@]}" || die "llvm-kernel-testing failed (${?})"
+    set +x
 
     # arch/powerpc/boot/inffast.c: A warning we do not really care about (https://github.com/ClangBuiltLinux/linux/issues/664)
     # DWARF2 only supports one section per compilation unit: Irrelevant for now
