@@ -84,6 +84,21 @@ function bcmake() { (
 
 # Build/update cvise
 function bcvise() { (
+    # Find distribution version of LLVM (special handling for Debian / Ubuntu)
+    for LLVM_VER in $(seq 20 -1 7); do
+        LLVM_DIR=/usr/lib/llvm-${LLVM_VER}
+        if [[ -d ${LLVM_DIR} ]]; then
+            CMAKE_PREFIX_PATH=${LLVM_DIR}
+            break
+        fi
+    done
+    [[ -z ${CMAKE_PREFIX_PATH} ]] && CMAKE_PREFIX_PATH=/usr
+
+    if [[ $("${SCRIPTS_FOLDER}"/external/cc-version.sh "${CMAKE_PREFIX_PATH}"/bin/clang | awk '{print $2}') -lt 90000 ]]; then
+        header "Skipping cvise due to older clang"
+        exit 0
+    fi
+
     header "Building cvise"
 
     # Variables for function
@@ -100,16 +115,6 @@ function bcvise() { (
     # Download and install dependencies
     python3 -m pip install --upgrade --user pebble pytest
     path_push "${HOME}"/.local/bin
-
-    # Find distribution version of LLVM (special handling for Debian / Ubuntu)
-    for LLVM_VER in $(seq 20 -1 7); do
-        LLVM_DIR=/usr/lib/llvm-${LLVM_VER}
-        if [[ -d ${LLVM_DIR} ]]; then
-            CMAKE_PREFIX_PATH=${LLVM_DIR}
-            break
-        fi
-    done
-    [[ -z ${CMAKE_PREFIX_PATH} ]] && CMAKE_PREFIX_PATH=/usr
 
     # Prepare build folder
     CVISE_BLD=${CVISE_SRC}/build
