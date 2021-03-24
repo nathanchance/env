@@ -225,12 +225,15 @@ function bootstrap() { (
         else
             ssh-add -l || ssh-add "${HOME}"/.ssh/id_ed25519
         fi
+        GITHUB_PREFIX=git@github.com:
+    else
+        GITHUB_PREFIX=https://github.com/
     fi
 
     # Download and scripts if necessary
     : "${SCRIPTS_FOLDER:?}"
     mkdir -p "${SCRIPTS_FOLDER%/*}"
-    [[ -d ${SCRIPTS_FOLDER} ]] || { git clone git@github.com:nathanchance/scripts.git "${SCRIPTS_FOLDER}" || exit ${?}; }
+    [[ -d ${SCRIPTS_FOLDER} ]] || { git clone "${GITHUB_PREFIX}"nathanchance/scripts.git "${SCRIPTS_FOLDER}" || exit ${?}; }
     git -C "${SCRIPTS_FOLDER}" pull
 
     # Run setup functions in a particular order order
