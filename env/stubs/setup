@@ -472,7 +472,7 @@ EOF
 
 function debian_rootstrap { (
     # For rootless podman
-    if ! ${WSL}; then
+    if ! ${WSL} && [[ $(uname -m) = "x86_64" ]]; then
         echo "kernel.unprivileged_userns_clone=1" | tee /etc/sysctl.d/00-local-userns.conf
         systemctl restart procps
 
@@ -526,7 +526,6 @@ function debian_ubuntu_packages() {
         fortune
         fortunes
         gcc
-        gcc-multilib
         gettext
         git
         git-email
@@ -606,7 +605,10 @@ function debian_ubuntu_packages() {
     if ${WSL}; then
         PACKAGES+=(pass)
     else
-        PACKAGES+=(podman)
+        [[ $(uname -m) = "x86_64" ]] && PACKAGES+=(
+            gcc-multilib
+            podman
+        )
     fi
 }
 
@@ -725,6 +727,7 @@ function kubic_repo() { (
 
 # Setup rootless podman as necessary
 function podman_setup { (
+    [[ $(uname -m) = "x86_64" ]] || exit 0
     echo "${USER_NAME:?}:100000:65536" | tee /etc/subgid /etc/subuid
     [[ -f /etc/containers/registries.conf ]] || cat <<EOF | tee /etc/containers/registries.conf
 [registries.search]
@@ -769,7 +772,7 @@ function set_wsl() {
 }
 
 function ubuntu_rootstrap { (
-    if ! ${WSL}; then
+    if ! ${WSL} && [[ $(uname -m) = "x86_64" ]]; then
         # shellcheck disable=SC1091
         source /etc/os-release
         KUBIC_REPO=xUbuntu_${VERSION_ID} kubic_repo || exit ${?}
