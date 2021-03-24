@@ -115,6 +115,7 @@ function rbpi() { (
     PATCHES_FOLDER=${GITHUB_FOLDER}/patches/rpi-next
     FIXES=${PATCHES_FOLDER}/fixes.series
     [[ -f ${FIXES} ]] && { git am "${FIXES}" || exit ${?}; }
+    git b4 ams 20210324071128.1723273-1-masahiroy@kernel.org || exit ${?}
     cat <<'EOF' | git am || exit ${?}
 From baae80a9bdadca63f8b1e425e88a5f129d11e918 Mon Sep 17 00:00:00 2001
 From: Nathan Chancellor <nathan@kernel.org>
