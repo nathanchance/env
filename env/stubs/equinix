@@ -122,9 +122,6 @@ function partition_and_create_user() { (
     # Install tmux so that installation progress cannot be lost
     apt install -y tmux
 
-    # Install git in case it is not installed by default
-    apt install -y git
-
     # Install necessary files
     if [[ -n ${DRIVE:-} ]]; then
         apt install -y parted
