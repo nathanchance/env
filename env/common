@@ -237,7 +237,7 @@ function upd_website() { (
     fd -E CNAME . "${WEBSITE}" -x rm -rf
     hugo -d "${WEBSITE}"
 
-    HF_URL=$(git remote get-url origin | sed 's/git@github.com:/https:\/\/github.com\//')
+    HF_URL=$(git remote get-url origin | sed -e 's/git@github.com:/https:\/\/github.com\//' -e 's/.git$//')
     HF_HASH=$(git sh -s --format=%H)
 
     cd "${WEBSITE}" || die "Website is not cloned"
