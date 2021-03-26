@@ -117,36 +117,6 @@ function rbpi() { (
     [[ -f ${FIXES} ]] && { git am "${FIXES}" || exit ${?}; }
     git b4 ams 20210324071128.1723273-1-masahiroy@kernel.org || exit ${?}
     cat <<'EOF' | git am || exit ${?}
-From baae80a9bdadca63f8b1e425e88a5f129d11e918 Mon Sep 17 00:00:00 2001
-From: Nathan Chancellor <nathan@kernel.org>
-Date: Wed, 17 Mar 2021 10:38:43 -0700
-Subject: [PATCH] drm/rockchip: Remove unused variable in
- vop_plane_atomic_update
-
-Link: https://lore.kernel.org/r/20210317135355.1f9b0139@canb.auug.org.au/
-Signed-off-by: Nathan Chancellor <nathan@kernel.org>
----
- drivers/gpu/drm/rockchip/rockchip_drm_vop.c | 2 --
- 1 file changed, 2 deletions(-)
-
-diff --git a/drivers/gpu/drm/rockchip/rockchip_drm_vop.c b/drivers/gpu/drm/rockchip/rockchip_drm_vop.c
-index 81c70d7a0471..64469439ddf2 100644
---- a/drivers/gpu/drm/rockchip/rockchip_drm_vop.c
-+++ b/drivers/gpu/drm/rockchip/rockchip_drm_vop.c
-@@ -879,8 +879,6 @@ static void vop_plane_atomic_disable(struct drm_plane *plane,
- static void vop_plane_atomic_update(struct drm_plane *plane,
- 		struct drm_atomic_state *state)
- {
--	struct drm_plane_state *old_state = drm_atomic_get_old_plane_state(state,
--									   plane);
- 	struct drm_plane_state *new_state = drm_atomic_get_new_plane_state(state,
- 									   plane);
- 	struct drm_crtc *crtc = new_state->crtc;
--- 
-2.31.0
-
-EOF
-    cat <<'EOF' | git am || exit ${?}
 From 8b07b642a452185c9101f2d7105c49d7c925d4fe Mon Sep 17 00:00:00 2001
 From: Nathan Chancellor <nathan@kernel.org>
 Date: Wed, 10 Mar 2021 16:11:57 -0700
