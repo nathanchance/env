@@ -10,31 +10,95 @@
 # $ sudo sh -c "apt update && apt dist-upgrade -y && apt install --no-install-recommends -y zsh && chsh -s /bin/zsh pi"
 
 function bkrnl() { (
-    LINUX_NEXT=/mnt/ssd/src/linux-next
-    [[ -d ${LINUX_NEXT} ]] || git clone https://git.kernel.org/pub/scm/linux/kernel/git/next/linux-next.git/ "${LINUX_NEXT}"
-
     set -x
 
-    PATH=/mnt/ssd/toolchains/llvm/bin:${PATH} \
-        make \
-        -C "${LINUX_NEXT}" \
-        -skj"$(nproc)" \
+    PO=${SSD_TC}/llvm-binutils/bin \
+        make.sh \
+        -C "${SSD_SRC}"/linux-next \
         LLVM=1 \
-        O=build/"$(uname -m)" \
+        LLVM_IAS=1 \
+        "${@}" \
         distclean defconfig all
 ); }
 
+function bkrnls() { (
+    bkrnl O=build/"$(uname -m)" || exit ${?}
+    [[ $(uname -m) = "aarch64" ]] && bkrnl ARCH=x86_64 CROSS_COMPILE=x86_64-linux-gnu- O=build/x86_64
+); }
+
+# Build LLVM then kernels
+function bldall() { (
+    upd_lnx_nxt || exit ${?}
+    bldtcs || exit ${?}
+    bkrnls || exit ${?}
+    bootk "" || exit ${?}
+    "${SSD_SRC}"/boot-utils/boot-qemu.sh -a x86_64 -k "${SSD_SRC}"/linux-next/build/x86_64
+); }
+
+# Build LLVM and binutils
+function bldtcs() { (
+    DATE_TIME=$(date +%F_%H-%M-%S)
+
+    # Update tc-build
+    TCBLD=${SSD_SRC}/tc-build
+    [[ -d ${TCBLD} ]] || git clone -b personal https://github.com/nathanchance/tc-build.git "${TCBLD}"
+    cd "${TCBLD}" || die "Error downloading tc-build"
+    git ru
+    git rh origin/"$(git cb)"
+
+    # Build binutils
+    TC_BLD_BNTLS=${TCBLD}/binutils
+    [[ -d ${TC_BLD_BNTLS} ]] || git clone https://sourceware.org/git/binutils-gdb.git "${TC_BLD_BNTLS}"
+    git -C "${TC_BLD_BNTLS}" pull --rebase || die "Updating binutils failed (${?})"
+    BLDBN_INSTALL_FOLDER=${SSD_TC}/binutils-${DATE_TIME}-$(git -C "${TC_BLD_BNTLS}" sh -s --format=%H origin/master)
+    "${TCBLD}"/build-binutils.py \
+        --install-folder "${BLDBN_INSTALL_FOLDER}" \
+        --targets host x86_64 || die "bldbn failed with exit code ${?}"
+    stripall "${BLDBN_INSTALL_FOLDER}"
+
+    # Update binutils
+    ln -fnrsv "${BLDBN_INSTALL_FOLDER}" "${SSD_TC}"/binutils-latest
+
+    # Build LLVM/Clang/lld
+    TC_BLD_LLVM_PRJCT=${TCBLD}/llvm-project
+    [[ -d ${TC_BLD_LLVM_PRJCT} ]] || git clone https://github.com/llvm/llvm-project "${TC_BLD_LLVM_PRJCT}"
+    git -C "${TC_BLD_LLVM_PRJCT}" pull --rebase || die "Updating llvm-project failed (${?})"
+    BLDLLVM_INSTALL_FOLDER=${SSD_TC}/llvm-${DATE_TIME}-$(git -C "${TC_BLD_LLVM_PRJCT}" sh -s --format=%H origin/main)
+    PATH=${SSD_TC}/llvm-latest/bin:${PATH} \
+        "${TCBLD}"/build-llvm.py \
+        --assertions \
+        --build-stage1-only \
+        --check-targets clang llvm llvm-unit \
+        --install-folder "${BLDLLVM_INSTALL_FOLDER}" \
+        --install-stage1-only \
+        --projects "clang;lld" \
+        --targets "AArch64;ARM;X86" || die "bldllvm failed with exit code ${?}"
+    stripall "${BLDLLVM_INSTALL_FOLDER}"
+
+    # Update llvm-tot symlink
+    ln -fnrsv "${BLDLLVM_INSTALL_FOLDER}" "${SSD_TC}"/llvm-latest
+
+    # Combine binutils-latest and llvm-latest for easy testing
+    stow -d "${SSD_TC}" -R -t "${SSD_TC}"/llvm-binutils -v binutils-latest
+    stow -d "${SSD_TC}" -R -t "${SSD_TC}"/llvm-binutils -v llvm-latest
+); }
+
 function bootk() { (
-    BOOT_UTILS=/mnt/ssd/src/boot-utils
+    BOOT_UTILS=${SSD_SRC}/boot-utils
     [[ -d ${BOOT_UTILS} ]] || git clone https://github.com/ClangBuiltLinux/boot-utils "${BOOT_UTILS}"
     git -C "${BOOT_UTILS}" pull -q
 
     while ((${#})); do
         case ${1} in
+            -a | --arch)
+                shift
+                ARCH=${1}
+                ;;
+
             -k | --kernel)
                 [[ ${#} -gt 0 ]] && shift
                 KERNEL_IMG=${1:-/boot/custom-next-testing-arm64/Image}
-                KERNEL_LOCATION=/mnt/ssd/booting-kernel
+                KERNEL_LOCATION=${SSD}/booting-kernel
                 mkdir -p "${KERNEL_LOCATION}"/arch/arm64/boot
 
                 # This matches the kernel command to create Image.gz
@@ -47,7 +111,7 @@ function bootk() { (
 
     set -x
 
-    "${BOOT_UTILS}"/boot-qemu.sh -a arm64 -k "${KERNEL_LOCATION:-/mnt/ssd/src/linux-next/build/"$(uname -m)"}"
+    "${BOOT_UTILS}"/boot-qemu.sh -a "${ARCH:-arm64}" -k "${KERNEL_LOCATION:-${SSD_SRC}/linux-next/build/"$(uname -m)"}"
 ); }
 
 function bootstrap() { (
@@ -113,6 +177,7 @@ function bootstrap() { (
         python3-dev
         python3-pip
         qemu-system-arm
+        qemu-system-x86
         ruby-dev
         stow
         swig
@@ -189,7 +254,11 @@ function fixp() {
     eval "$(tmux show-env -s SSH_CONNECTION)" && prompt pure
 }
 
-function pi_setup() { true; }
+function pi_setup() {
+    export SSD=/mnt/ssd
+    export SSD_SRC=${SSD}/src
+    export SSD_TC=${SSD}/toolchains
+}
 
 function rbld_usr() { (
     source "${SCRIPTS_FOLDER:?}"/env/stubs/updbin || die "Cannot source updbin"
@@ -215,52 +284,10 @@ function rbld_usr() { (
     bzsh || die "Error building/installing zsh"
 ); }
 
-# Build an LLVM toolchain
-function updllvm() { (
-    LLVM_SRC=/mnt/ssd/src/llvm-project
-    if [[ ! -d ${LLVM_SRC} ]]; then
-        header "Cloning LLVM"
-        mkdir -p "${LLVM_SRC%/*}"
-        git clone https://github.com/llvm/llvm-project "${LLVM_SRC}"
-    fi
-
-    LLVM_BLD=${LLVM_SRC}/build
-    rm -rf "${LLVM_BLD}"
-    mkdir -p "${LLVM_BLD}"
-    cd "${LLVM_BLD}" || exit ${?}
-
-    export CCACHE_DIR=/mnt/ssd/.ccache
-    export CCACHE_MAXSIZE=25G
-    CMAKE=(
-        cmake
-        -G Ninja
-        -Wno-dev
-        -DCLANG_DEFAULT_LINKER=lld
-        -DCMAKE_AR="$(command -v llvm-ar)"
-        -DCMAKE_BUILD_TYPE=Release
-        -DCMAKE_C_COMPILER="$(command -v clang)"
-        -DCMAKE_CXX_COMPILER="$(command -v clang++)"
-        -DCMAKE_INSTALL_PREFIX="${LLVM_PREFIX:=${PREFIX:-/mnt/ssd/toolchains/llvm}}"
-        -DCMAKE_LINKER="$(command -v ld.lld)"
-        -DCMAKE_RANLIB="$(command -v llvm-ranlib)"
-        -DLLVM_CCACHE_BUILD=ON
-        -DLLVM_ENABLE_PROJECTS="clang;lld"
-        -DLLVM_ENABLE_WARNINGS=OFF
-        -DLLVM_USE_LINKER=lld
-    )
-
-    header "Configuring LLVM"
-    "${CMAKE[@]}" "${LLVM_SRC}"/llvm >/dev/null || exit ${?}
-
-    header "Building LLVM"
-    ninja || exit ${?}
-
-    header "Running LLVM tests"
-    ninja check-clang check-llvm check-llvm-unit || exit ${?}
-
-    header "Installing LLVM"
-    rm -vrf "${LLVM_PREFIX}" || exit ${?}
-    ninja install || exit ${?}
+# Strip executables within a folder
+function stripall() { (
+    cd "${1:?}" || exit ${?}
+    for FILE in $(fd -t file -x file | grep 'not stripped' | cut -d: -f1); do strip "${FILE}"; done
 ); }
 
 # Update kernel from build server
@@ -330,5 +357,12 @@ function upd_kernel() { (
 
     # Remove "quiet" and "splash" from cmdline
     sudo sed -i 's/quiet splash //' "${MAIN_BOOT}"/cmdline.txt
+); }
+
+function upd_lnx_nxt() { (
+    LINUX_NEXT=${SSD_SRC}/linux-next
+    [[ -d ${LINUX_NEXT} ]] || git clone https://git.kernel.org/pub/scm/linux/kernel/git/next/linux-next.git/ "${LINUX_NEXT}"
+    git -C "${LINUX_NEXT}" ru
+    git -C "${LINUX_NEXT}" rb -i origin/master
 ); }
 # vi: filetype=zsh
