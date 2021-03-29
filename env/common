@@ -77,9 +77,11 @@ function gen_sha256sum() { (
     FILE=${URL##*/}
     curl -LSsO "${URL}"
     sha256sum "${FILE}" >"${FILE}".sha256
+    diskus "${FILE}"
     rm -rf "${FILE}"
     curl -LSsO "${URL}"
     sha256sum -c "${FILE}".sha256
+    diskus "${FILE}"
     rm -rf "${FILE}"
 ); }
 
