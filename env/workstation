@@ -106,6 +106,87 @@ function updpgollvm() { (
         ccache_clear llvm
 ); }
 
+# Update kernel using makepkg
+function upd_kernel() { (
+    WORK_DIR=${GITHUB_FOLDER}/archpkgbuilds/trunk
+    SLIM_CFG=${WORK_DIR}/slim_config
+    SRC_DIR=${WORK_DIR}/src/linux-llvm
+    SRC_CFG=${SRC_DIR}/.config
+
+    set -x
+
+    cd "${WORK_DIR}" || exit ${?}
+
+    # Step 1: Rebase so that source information can be properly updated
+    git fetch https://github.com/archlinux/svntogit-packages packages/linux
+    git rebase -i FETCH_HEAD || exit ${?}
+
+    # Step 2: Download and extract files
+    makepkg -Cdo || exit ${?}
+    rm "${SRC_CFG}"
+
+    # Step 3: Copy configuration
+    cp "${WORK_DIR}"/config "${SLIM_CFG}"
+    git add "${SLIM_CFG}"
+    git c -m "slim_config: Create from current config"
+
+    # Step 4: Run olddefconfig
+    make -C "${SRC_DIR}" -j"$(nproc)" KCONFIG_CONFIG="${SLIM_CFG}" olddefconfig
+    git add "${SLIM_CFG}"
+    git c -m "slim_config: Run through olddefconfig"
+
+    # Step 5: Run localmodconfig
+    cp "${SLIM_CFG}" "${SRC_CFG}"
+    make -C "${SRC_DIR}" -j"$(nproc)" localmodconfig
+    cp "${SRC_CFG}" "${SLIM_CFG}"
+    # CONFIG_TUN needs to stay aroun
+    "${SRC_DIR}"/scripts/config --file "${SLIM_CFG}" -m TUN
+    git add "${SLIM_CFG}"
+    git c -m "slim_config: Run through localmodconfig"
+
+    # Step 6: Run through olddefconfig with Clang
+    PATH=${CBL_LLVM}:${PATH} make -C "${SRC_DIR}" -j"$(nproc)" KCONFIG_CONFIG="${SLIM_CFG}" LLVM=1 LLVM_IAS=1 olddefconfig
+    git add "${SLIM_CFG}"
+    git c -m "slim_config: Run through olddefconfig with LLVM=1"
+
+    # Step 7: Disable debug info and enable ThinLTO
+    "${SRC_DIR}"/scripts/config --file "${SLIM_CFG}" -d DEBUG_INFO -d LTO_NONE -e LTO_CLANG_THIN
+    PATH=${CBL_LLVM}:${PATH} make -C "${SRC_DIR}" -j"$(nproc)" KCONFIG_CONFIG="${SLIM_CFG}" LLVM=1 LLVM_IAS=1 olddefconfig
+    git add "${SLIM_CFG}"
+    git c -m "slim_config: Disable debug info and enable ThinLTO"
+
+    # Step 8: Enable and use the new slim configuration
+    cat <<'EOF' | git ap || exit ${?}
+diff --git a/trunk/PKGBUILD b/trunk/PKGBUILD
+index 78d7e87..ed32971 100644
+--- a/trunk/PKGBUILD
++++ b/trunk/PKGBUILD
+@@ -18,6 +18,7 @@ _srcname=$pkgbase
+ source=(
+   "$_srcname::git+https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git?signed#tag=$_srctag"
+   config         # the main kernel config file
++  slim_config    # personal server config file
+ )
+ validpgpkeys=(
+   'ABAF11C65A2970B130ABE3C479BE3E4300411886'  # Linus Torvalds
+@@ -53,7 +54,7 @@ prepare() {
+   done
+ 
+   echo "Setting config..."
+-  cp ../config .config
++  cp ../slim_config .config
+   _kmake olddefconfig
+ 
+   _kmake -s kernelrelease > version
+EOF
+    updpkgsums
+    git add PKGBUILD
+    git c -m "PKGBUILD: Use slim configuration"
+
+    # Step 9: Build it!
+    makepkg -Cf
+); }
+
 # Additional setup steps for my workstation
 function workstation_setup() {
     # Generate a kernel version for the current tree

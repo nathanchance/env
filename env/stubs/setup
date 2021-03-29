@@ -40,8 +40,11 @@ function arch_rootstrap() { (
     pacman -Syyu --noconfirm || exit ${?}
 
     # Remove fakeroot-tcp if it is installed (fakeroot is in the base-devel packages)
-    sed -i 's/IgnorePkg   = fakeroot/#IgnorePkg =/g' /etc/pacman.conf
+    sed -i 's/IgnorePkg   = fakeroot/#IgnorePkg   =/g' /etc/pacman.conf
     remove_if_installed fakeroot-tcp
+
+    # Ignore linux-llvm{,-headers}
+    sed -i 's/#IgnorePkg   =/IgnorePkg    = linux-llvm linux-llvm-headers/g' /etc/pacman.conf
 
     # Install all packages that we want
     PACKAGES=(
@@ -80,6 +83,7 @@ function arch_rootstrap() { (
         neomutt
         ninja
         openssl
+        pacman-contrib
         perl-authen-sasl
         perl-mime-tools
         perl-net-smtp-ssl
