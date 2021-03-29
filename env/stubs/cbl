@@ -17,8 +17,8 @@ CBL_GIT=${CBL}/github
 CBL_KC=${CBL_ANDROID}/common
 CBL_KC_SRC=${CBL_KC}/common
 CBL_TC=${CBL}/toolchains
-CBL_LLVM=${CBL_TC}/llvm-tot/bin
-CBL_BNTL=${CBL_TC}/binutils/bin
+CBL_LLVM=${CBL_TC}/llvm-latest/bin
+CBL_BNTL=${CBL_TC}/binutils-latest/bin
 CBL_LLVM_BNTL=${CBL_TC}/llvm-binutils/bin
 CBL_SRC=${CBL}/src
 CBL_WRKTR=${CBL}/worktrees
@@ -93,7 +93,7 @@ function bldtcs() { (
         --pgo || die "bldllvm failed with exit code ${?}"
     stripall "${BLDLLVM_INSTALL_FOLDER}"
 
-    # Update llvm-tot symlink
+    # Update llvm-latest symlink
     ln -fnrsv "${BLDLLVM_INSTALL_FOLDER}" "${CBL_LLVM%/*}"
 
     # Combine CBL_LLVM and CBL_BNTL for llvm-kernel-testing

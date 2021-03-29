@@ -180,7 +180,7 @@ function bldtcs() { (
     stripall "${BLDBN_INSTALL_FOLDER}"
 
     # Update binutils
-    ln -fnrsv "${BLDBN_INSTALL_FOLDER}" "${TC_PREFIX}"/binutils
+    ln -fnrsv "${BLDBN_INSTALL_FOLDER}" "${TC_PREFIX}"/binutils-latest
 
     # Build LLVM/Clang/lld
     TC_BLD_LLVM_PRJCT=${TCBLD}/llvm-project
@@ -194,11 +194,11 @@ function bldtcs() { (
         --pgo || die "bldllvm failed with exit code ${?}"
     stripall "${BLDLLVM_INSTALL_FOLDER}"
 
-    # Update llvm-tot symlink
-    ln -fnrsv "${BLDLLVM_INSTALL_FOLDER}" "${TC_PREFIX}"/llvm-tot
+    # Update llvm-latest symlink
+    ln -fnrsv "${BLDLLVM_INSTALL_FOLDER}" "${TC_PREFIX}"/llvm-latest
 
     # Combine CBL_LLVM and CBL_BNTL for llvm-kernel-testing
-    stow -d "${TC_PREFIX}" -R -t "${CBL_LLVM_BNTL%/*}" -v binutils
-    stow -d "${TC_PREFIX}" -R -t "${CBL_LLVM_BNTL%/*}" -v llvm-tot
+    stow -d "${TC_PREFIX}" -R -t "${CBL_LLVM_BNTL%/*}" -v binutils-latest
+    stow -d "${TC_PREFIX}" -R -t "${CBL_LLVM_BNTL%/*}" -v llvm-latest
 ); }
 # vi: filetype=zsh

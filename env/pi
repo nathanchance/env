@@ -75,7 +75,7 @@ function bldtcs() { (
         --targets "AArch64;ARM;X86" || die "bldllvm failed with exit code ${?}"
     stripall "${BLDLLVM_INSTALL_FOLDER}"
 
-    # Update llvm-tot symlink
+    # Update llvm-latest symlink
     ln -fnrsv "${BLDLLVM_INSTALL_FOLDER}" "${SSD_TC}"/llvm-latest
 
     # Combine binutils-latest and llvm-latest for easy testing
