@@ -81,7 +81,6 @@ function bldtcs() { (
     cd "${TC_BLD_LLVM_PRJCT}"
     git rh || die "Error resetting llvm-project"
     git pull --rebase || die "Updating llvm-project failed (${?})"
-    crl 'https://reviews.llvm.org/D97971?download=true' | git ap || die "Error applying D97971"
     BLDLLVM_INSTALL_FOLDER=${CBL_TC}/llvm-${DATE_TIME}-$(git -C "${TC_BLD_LLVM_PRJCT}" sh -s --format=%H origin/main)
     BLD_LLVM_ARGS=()
     ${LTO:-false} && BLD_LLVM_ARGS+=(--lto=thin)
