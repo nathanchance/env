@@ -25,7 +25,7 @@ function parse_parameters() {
                 export "${1?}"
                 ;;
 
-            */ | *.i | *.ko | *.o | *.s | all | *clean | *config | *docs | dtbs | *_install | *Image* | modules | mrproper | *_prepare | vmlinux)
+            */ | *.i | *.ko | *.o | *.s | all | bindeb-pkg | *clean | *config | *docs | dtbs | *_install | *Image* | modules | mrproper | *_prepare | vmlinux)
                 MAKE_ARGS+=("${1}")
                 ;;
 
