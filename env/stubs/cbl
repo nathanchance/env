@@ -7,28 +7,58 @@
 #
 # Functions used to assist with ClangBuiltLinux development
 
-# Universal variables
+# Parent variables
 CBL_ANDROID=${CBL}/android
 CBL_BLD=${CBL}/build
-CBL_BLD_C=${CBL_BLD}/clean
-CBL_BLD_P=${CBL_BLD}/patched
-CBL_CTTLFSH=${CBL_ANDROID}/cuttlefish
+CBL_CCACHE=${CBL}/.ccache
 CBL_GIT=${CBL}/github
+CBL_QEMU=${CBL}/qemu
+CBL_SRC=${CBL}/src
+CBL_TC=${CBL}/toolchains
+CBL_TC_BLD=${CBL}/tc-build
+CBL_WRKTR=${CBL}/worktrees
+
+# Android sub-variables
+CBL_CTTLFSH=${CBL_ANDROID}/cuttlefish
 CBL_KC=${CBL_ANDROID}/common
 CBL_KC_SRC=${CBL_KC}/common
-CBL_TC=${CBL}/toolchains
-CBL_LLVM=${CBL_TC}/llvm-latest/bin
+
+# Build sub-variables
+CBL_BLD_C=${CBL_BLD}/clean
+CBL_BLD_P=${CBL_BLD}/patched
+
+# Toolchain sub-variables
 CBL_BNTL=${CBL_TC}/binutils-latest/bin
+CBL_LLVM=${CBL_TC}/llvm-latest/bin
 CBL_LLVM_BNTL=${CBL_TC}/llvm-binutils/bin
-CBL_SRC=${CBL}/src
-CBL_WRKTR=${CBL}/worktrees
-CBL_QEMU=${CBL}/qemu
+
+# QEMU sub-variables
 CBL_QEMU_BIN=${CBL_QEMU}/bin
 CBL_QEMU_INSTALL=${CBL_QEMU}/install
 CBL_QEMU_SRC=${CBL_QEMU}/src
-TCBLD=${CBL}/tc-build
-CBL_CCACHE=${CBL}/.ccache
-export CBL_ANDROID CBL_BLD CBL_BLD_C CBL_BLD_P CBL_CTTLFSH CBL_GIT CBL_KC CBL_KC_SRC CBL_TC CBL_LLVM CBL_BNTL CBL_LLVM_BNTL CBL_SRC CBL_WRKTR CBL_QEMU CBL_QEMU_BIN CBL_QEMU_INSTALL CBL_QEMU_SRC TCBLD CBL_CCACHE
+
+# Export these variables
+export \
+    CBL_ANDROID \
+    CBL_BLD \
+    CBL_CCACHE \
+    CBL_GIT \
+    CBL_QEMU \
+    CBL_SRC \
+    CBL_TC \
+    CBL_TC_BLD \
+    CBL_WRKTR \
+    CBL_CTTLFSH \
+    CBL_KC \
+    CBL_KC_SRC \
+    CBL_BLD_C \
+    CBL_BLD_P \
+    CBL_BNTL \
+    CBL_LLVM \
+    CBL_LLVM_BNTL \
+    CBL_QEMU_BIN \
+    CBL_QEMU_INSTALL \
+    CBL_QEMU_SRC
 
 # Build new LLVM/Clang/lld and test all kernel trees
 function bldall() { (
@@ -48,7 +78,7 @@ function bldbn() { (
     # Setup ccache
     ccache_setup binutils 25
 
-    PATH=${CCACHE_BIN}:${PATH} "${TCBLD}"/build-binutils.py "${@}"
+    PATH=${CCACHE_BIN}:${PATH} "${CBL_TC_BLD}"/build-binutils.py "${@}"
 ); }
 
 # Build LLVM
@@ -56,7 +86,7 @@ function bldllvm() { (
     # Setup ccache
     ccache_setup llvm 75
 
-    "${TCBLD}"/build-llvm.py "${@}"
+    "${CBL_TC_BLD}"/build-llvm.py "${@}"
 ); }
 
 # Build LLVM/Clang/lld and arm{32,64} and powerpc binutils from source
@@ -64,8 +94,8 @@ function bldtcs() { (
     DATE_TIME=$(date +%F_%H-%M-%S)
 
     # Build binutils
-    [[ -d ${TCBLD} ]] || git clone -b personal git@github.com:nathanchance/tc-build.git "${TCBLD}"
-    TC_BLD_BNTLS=${TCBLD}/binutils
+    [[ -d ${CBL_TC_BLD} ]] || git clone -b personal git@github.com:nathanchance/tc-build.git "${CBL_TC_BLD}"
+    TC_BLD_BNTLS=${CBL_TC_BLD}/binutils
     [[ -d ${TC_BLD_BNTLS} ]] || git clone https://sourceware.org/git/binutils-gdb.git "${TC_BLD_BNTLS}"
     git -C "${TC_BLD_BNTLS}" pull --rebase || die "Updating binutils failed (${?})"
     BLDBN_INSTALL_FOLDER=${CBL_TC}/binutils-${DATE_TIME}-$(git -C "${TC_BLD_BNTLS}" sh -s --format=%H origin/master)
@@ -76,8 +106,8 @@ function bldtcs() { (
     ln -fnrsv "${BLDBN_INSTALL_FOLDER}" "${CBL_BNTL%/*}"
 
     # Build LLVM/Clang/lld
-    TC_BLD_LLVM_PRJCT=${TCBLD}/llvm-project
-    [[ -d ${TC_BLD_LLVM_PRJCT} ]] || git -C "${TCBLD}" clone https://github.com/llvm/llvm-project
+    TC_BLD_LLVM_PRJCT=${CBL_TC_BLD}/llvm-project
+    [[ -d ${TC_BLD_LLVM_PRJCT} ]] || git -C "${CBL_TC_BLD}" clone https://github.com/llvm/llvm-project
     cd "${TC_BLD_LLVM_PRJCT}"
     git rh || die "Error resetting llvm-project"
     git pull --rebase || die "Updating llvm-project failed (${?})"
@@ -458,7 +488,7 @@ function cbl_sunday() { (
 
 # Show local LLVM patches via git log
 function llvm_log() { (
-    cd "${TCBLD:?}"/llvm-project || exit ${?}
+    cd "${CBL_TC_BLD:?}"/llvm-project || exit ${?}
 
     MLFC=$(git mfc)
     if [[ -n ${MLFC} ]]; then
