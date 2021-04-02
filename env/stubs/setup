@@ -58,8 +58,10 @@ function arch_rootstrap() { (
         clang
         cmake
         cpio
+        debootstrap
         diskus
         doas
+        dpkg
         dtc
         exa
         expect
@@ -150,6 +152,8 @@ EOF
     AUR_PACKAGES=(
         yay-bin
         inetutils-hostname
+        binfmt-qemu-static-all-arch
+        qemu-user-static-bin
         opendoas-sudo
     )
     for AUR_PACKAGE in "${AUR_PACKAGES[@]}"; do
@@ -183,6 +187,10 @@ EOF
         touch /etc/subgid /etc/subuid
         usermod --add-subuids 165536-231072 --add-subgids 165536-231072 "${USER_NAME}"
     fi
+
+    # qemu-debootstrap
+    curl -LSso /usr/local/bin/qemu-debootstrap 'https://salsa.debian.org/qemu-team/qemu/-/raw/3e1429e38553d430e547709947c74a03d2f5ed38/debian/qemu-debootstrap?inline=false'
+    chmod +x /usr/local/bin/qemu-debootstrap
 ); }
 
 # User setup function
