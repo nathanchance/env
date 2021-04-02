@@ -139,8 +139,12 @@ function upd_kernel() { (
     cp "${SLIM_CFG}" "${SRC_CFG}"
     make -C "${SRC_DIR}" -j"$(nproc)" localmodconfig
     cp "${SRC_CFG}" "${SLIM_CFG}"
-    # CONFIG_TUN needs to stay aroun
-    "${SRC_DIR}"/scripts/config --file "${SLIM_CFG}" -m TUN
+    # A few configs needs to stay around, build them in though
+    "${SRC_DIR}"/scripts/config \
+        --file "${SLIM_CFG}" \
+        -e BLK_DEV_LOOP \
+        -e TUN \
+        --set-val BLK_DEV_LOOP_MIN_COUNT 0
     git add "${SLIM_CFG}"
     git c -m "slim_config: Run through localmodconfig"
 
