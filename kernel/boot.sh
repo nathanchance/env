@@ -33,7 +33,7 @@ function dwnld_upd_boot_utils() {
 
 # Run boot-qemu.sh
 function invoke_boot_qemu() {
-    PATH=${PO:+${PO}:}${HOME}/cbl/qemu/bin:${PATH} "${BOOT_UTILS}"/boot-qemu.sh "${BOOT_QEMU_ARGS[@]}"
+    PATH=${PO:+${PO}:}${CBL_BIN}:${PATH} "${BOOT_UTILS}"/boot-qemu.sh "${BOOT_QEMU_ARGS[@]}"
 }
 
 parse_parameters "${@}"

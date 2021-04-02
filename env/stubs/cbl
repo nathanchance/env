@@ -28,8 +28,6 @@ CBL_BLD_C=${CBL_BLD}/clean
 CBL_BLD_P=${CBL_BLD}/patched
 
 # QEMU sub-variables
-CBL_QEMU_BIN=${CBL_QEMU}/bin
-CBL_QEMU_INSTALL=${CBL_QEMU}/install
 CBL_QEMU_SRC=${CBL_QEMU}/src
 
 # usr sub-variables
@@ -39,6 +37,8 @@ CBL_STOW_BNTL=${CBL_STOW}/binutils
 CBL_BNTL=${CBL_STOW_BNTL}-latest/bin
 CBL_STOW_LLVM=${CBL_STOW}/llvm
 CBL_LLVM=${CBL_STOW_LLVM}-latest/bin
+CBL_STOW_QEMU=${CBL_STOW}/qemu
+CBL_QEMU_BIN=${CBL_STOW_QEMU}-latest/bin
 
 # Export these variables
 export \
@@ -56,15 +56,15 @@ export \
     CBL_KC_SRC \
     CBL_BLD_C \
     CBL_BLD_P \
-    CBL_QEMU_BIN \
-    CBL_QEMU_INSTALL \
     CBL_QEMU_SRC \
     CBL_BIN \
     CBL_STOW \
     CBL_STOW_BNTL \
     CBL_BNTL \
     CBL_STOW_LLVM \
-    CBL_LLVM
+    CBL_LLVM \
+    CBL_STOW_QEMU \
+    CBL_QEMU_BIN
 
 # Build new LLVM/Clang/lld and test all kernel trees
 function bldall() { (
@@ -400,7 +400,9 @@ function cbl_qemu_build() { (
     QEMU_501=${CBL_QEMU_SRC}/qemu-5.0.1
     QEMU_501_BLD=${QEMU_501}/build
 
-    if [[ ! -x ${CBL_QEMU_INSTALL}/qemu-5.0.1/bin/qemu-system-ppc ]]; then
+    QEMU_PPC=${CBL_STOW_QEMU}/5.0.1/bin/qemu-system-ppc
+    mkdir -p "${QEMU_PPC%/*}"
+    if [[ ! -x ${QEMU_PPC} ]]; then
         cd "${QEMU_501}" || exit ${?}
         grep -q 'LDFLAGS_NOPIE="-no-pie"' configure && cat <<'EOF' | patch -p1
 diff --git a/configure b/configure
@@ -436,7 +438,7 @@ EOF
         mkdir -p "${QEMU_501_BLD}"
         cd "${QEMU_501_BLD}" || exit ${?}
         "${QEMU_501}"/configure \
-            --prefix="${CBL_QEMU_INSTALL}"/qemu-5.0.1 \
+            --prefix="${QEMU_PPC%*/bin/qemu-system-ppc}" \
             --target-list=ppc-softmmu || exit ${?}
         make -skj"$(nproc)" install || exit ${?}
     fi
@@ -463,7 +465,7 @@ EOF
         { b4 am -o - -P 8 https://lore.kernel.org/qemu-devel/20210129111814.566629-9-pbonzini@redhat.com/ | git ap || exit ${?}; }
 
     # Build qemu
-    [[ -z ${QEMU_PREFIX} ]] && QEMU_PREFIX=${CBL_QEMU_INSTALL}/$(git sh -s --format=%H)-$(date +%F-%H-%M-%S)
+    [[ -z ${QEMU_PREFIX} ]] && QEMU_PREFIX=${CBL_STOW_QEMU}/$(date +%F-%H-%M-%S)-$(git sh -s --format=%H)
     if [[ ! -x ${QEMU_PREFIX}/bin/qemu-system-x86_64 ]]; then
         rm -rf "${QEMU_TOT_BLD}"
         mkdir -p "${QEMU_TOT_BLD}"
@@ -479,11 +481,14 @@ EOF
     # Symlink latest QEMU into bin folder
     rm -rf "${CBL_QEMU_BIN}"
     mkdir -p "${CBL_QEMU_BIN}"
-    ln -fsv "${CBL_QEMU_INSTALL}"/qemu-5.0.1/bin/qemu-system-ppc "${CBL_QEMU_BIN}"
+    ln -frsv "${QEMU_PPC}" "${CBL_QEMU_BIN}"
     for ARCH in arm aarch64 i386 m68k mips mipsel ppc64 riscv64 s390x x86_64; do
-        ln -fsv "${QEMU_PREFIX}"/bin/qemu-system-${ARCH} "${CBL_QEMU_BIN}"
+        ln -frsv "${QEMU_PREFIX}"/bin/qemu-system-${ARCH} "${CBL_QEMU_BIN}"
     done
     ln -fsv "${QEMU_PREFIX}"/bin/qemu-img "${CBL_QEMU_BIN}"
+
+    # Update CBL_USR
+    stow -d "${CBL_STOW}" -R -v "$(basename "${CBL_QEMU_BIN%/*}")"
 ); }
 
 function cbl_sunday() { (
@@ -702,7 +707,7 @@ function test_llvm_stable_linux() { (
 
 function upd_qemu() { (
     cbl_qemu_build -u
-    DO=true KRNL_DIR=${CBL_BLD_P:-${HOME}/cbl/build/patched}/linux PATH=${CBL_QEMU_BIN}:${PATH} lt
+    DO=true KRNL_DIR=${CBL_BLD_P:-${HOME}/cbl/build/patched}/linux lt
 ); }
 
 function upd_lnx_tcbld() { (
