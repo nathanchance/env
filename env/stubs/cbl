@@ -124,10 +124,10 @@ function bldtcs() { (
     ${LTO:-false} && BLD_LLVM_ARGS+=(--lto=thin)
     bldllvm \
         --assertions \
-        --check-targets lld clang llvm \
+        --check-targets lld clang llvm llvm-unit \
         --install-folder "${BLDLLVM_INSTALL_FOLDER}" \
         "${BLD_LLVM_ARGS[@]}" \
-        --pgo || die "bldllvm failed with exit code ${?}"
+        --pgo kernel-defconfig kernel-allmodconfig || die "bldllvm failed with exit code ${?}"
     stripall "${BLDLLVM_INSTALL_FOLDER}"
 
     # Update llvm-latest symlink
@@ -364,7 +364,7 @@ function build_stable_llvm() { (
             --assertions \
             --branch llvmorg-10.0.1 \
             --install-folder "${LLVM_10}" \
-            --pgo \
+            --pgo kernel-defconfig \
             --targets "$(grep "AArch64;ARM" "${TC_BLD}"/build-llvm.py | cut -d \" -f 2 | sed 's/RISCV;//')"
     [[ -x ${LLVM_10}/bin/as ]] || "${TC_BLD}"/build-binutils.py --install-folder "${LLVM_10}"
 
@@ -375,7 +375,7 @@ function build_stable_llvm() { (
             --assertions \
             --branch llvmorg-11.1.0 \
             --install-folder "${LLVM_11_RC}" \
-            --pgo
+            --pgo kernel-defconfig
     [[ -x ${LLVM_11_RC}/bin/as ]] || "${TC_BLD}"/build-binutils.py --install-folder "${LLVM_11_RC}"
 
     # Build LLVM 12.0.0-rc4 and binutils if neccesary
@@ -385,7 +385,7 @@ function build_stable_llvm() { (
             --assertions \
             --branch llvmorg-12.0.0-rc4 \
             --install-folder "${LLVM_12_RC}" \
-            --pgo
+            --pgo kernel-defconfig
     [[ -x ${LLVM_12_RC}/bin/as ]] || "${TC_BLD}"/build-binutils.py --install-folder "${LLVM_12_RC}"
 ); }
 
@@ -640,7 +640,7 @@ function qualify_tc_bld_uprev() { (
     header "Building toolchains"
 
     "${TC_BLD}"/build-binutils.py --install-folder "${WORK_DIR}" || exit ${?}
-    "${TC_BLD}"/build-llvm.py --check-targets clang lld llvm --install-folder "${WORK_DIR}" --pgo --use-good-revision || exit ${?}
+    "${TC_BLD}"/build-llvm.py --check-targets clang lld llvm llvm-unit --install-folder "${WORK_DIR}" --pgo kernel-defconfig --use-good-revision || exit ${?}
 
     header "Toolchain information"
 
