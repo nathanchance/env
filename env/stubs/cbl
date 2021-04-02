@@ -14,8 +14,8 @@ CBL_CCACHE=${CBL}/.ccache
 CBL_GIT=${CBL}/github
 CBL_QEMU=${CBL}/qemu
 CBL_SRC=${CBL}/src
-CBL_TC=${CBL}/toolchains
 CBL_TC_BLD=${CBL}/tc-build
+CBL_USR=${CBL}/usr
 CBL_WRKTR=${CBL}/worktrees
 
 # Android sub-variables
@@ -27,15 +27,18 @@ CBL_KC_SRC=${CBL_KC}/common
 CBL_BLD_C=${CBL_BLD}/clean
 CBL_BLD_P=${CBL_BLD}/patched
 
-# Toolchain sub-variables
-CBL_BNTL=${CBL_TC}/binutils-latest/bin
-CBL_LLVM=${CBL_TC}/llvm-latest/bin
-CBL_LLVM_BNTL=${CBL_TC}/llvm-binutils/bin
-
 # QEMU sub-variables
 CBL_QEMU_BIN=${CBL_QEMU}/bin
 CBL_QEMU_INSTALL=${CBL_QEMU}/install
 CBL_QEMU_SRC=${CBL_QEMU}/src
+
+# usr sub-variables
+CBL_BIN=${CBL_USR}/bin
+CBL_STOW=${CBL_USR}/stow
+CBL_STOW_BNTL=${CBL_STOW}/binutils
+CBL_BNTL=${CBL_STOW_BNTL}-latest/bin
+CBL_STOW_LLVM=${CBL_STOW}/llvm
+CBL_LLVM=${CBL_STOW_LLVM}-latest/bin
 
 # Export these variables
 export \
@@ -45,20 +48,23 @@ export \
     CBL_GIT \
     CBL_QEMU \
     CBL_SRC \
-    CBL_TC \
     CBL_TC_BLD \
+    CBL_USR \
     CBL_WRKTR \
     CBL_CTTLFSH \
     CBL_KC \
     CBL_KC_SRC \
     CBL_BLD_C \
     CBL_BLD_P \
-    CBL_BNTL \
-    CBL_LLVM \
-    CBL_LLVM_BNTL \
     CBL_QEMU_BIN \
     CBL_QEMU_INSTALL \
-    CBL_QEMU_SRC
+    CBL_QEMU_SRC \
+    CBL_BIN \
+    CBL_STOW \
+    CBL_STOW_BNTL \
+    CBL_BNTL \
+    CBL_STOW_LLVM \
+    CBL_LLVM
 
 # Build new LLVM/Clang/lld and test all kernel trees
 function bldall() { (
@@ -98,7 +104,8 @@ function bldtcs() { (
     TC_BLD_BNTLS=${CBL_TC_BLD}/binutils
     [[ -d ${TC_BLD_BNTLS} ]] || git clone https://sourceware.org/git/binutils-gdb.git "${TC_BLD_BNTLS}"
     git -C "${TC_BLD_BNTLS}" pull --rebase || die "Updating binutils failed (${?})"
-    BLDBN_INSTALL_FOLDER=${CBL_TC}/binutils-${DATE_TIME}-$(git -C "${TC_BLD_BNTLS}" sh -s --format=%H origin/master)
+    BLDBN_INSTALL_FOLDER=${CBL_STOW_BNTL}/${DATE_TIME}-$(git -C "${TC_BLD_BNTLS}" sh -s --format=%H origin/master)
+    mkdir -p "${BLDBN_INSTALL_FOLDER%/*}"
     bldbn --install-folder "${BLDBN_INSTALL_FOLDER}" || die "bldbn failed with exit code ${?}"
     stripall "${BLDBN_INSTALL_FOLDER}"
 
@@ -111,7 +118,8 @@ function bldtcs() { (
     cd "${TC_BLD_LLVM_PRJCT}"
     git rh || die "Error resetting llvm-project"
     git pull --rebase || die "Updating llvm-project failed (${?})"
-    BLDLLVM_INSTALL_FOLDER=${CBL_TC}/llvm-${DATE_TIME}-$(git -C "${TC_BLD_LLVM_PRJCT}" sh -s --format=%H origin/main)
+    BLDLLVM_INSTALL_FOLDER=${CBL_STOW_LLVM}/${DATE_TIME}-$(git -C "${TC_BLD_LLVM_PRJCT}" sh -s --format=%H origin/main)
+    mkdir -p "${BLDLLVM_INSTALL_FOLDER%/*}"
     BLD_LLVM_ARGS=()
     ${LTO:-false} && BLD_LLVM_ARGS+=(--lto=thin)
     bldllvm \
@@ -126,8 +134,7 @@ function bldtcs() { (
     ln -fnrsv "${BLDLLVM_INSTALL_FOLDER}" "${CBL_LLVM%/*}"
 
     # Combine CBL_LLVM and CBL_BNTL for llvm-kernel-testing
-    stow -d "${CBL_TC}" -R -t "${CBL_LLVM_BNTL%/*}" -v "$(basename "${CBL_BNTL%/*}")"
-    stow -d "${CBL_TC}" -R -t "${CBL_LLVM_BNTL%/*}" -v "$(basename "${CBL_LLVM%/*}")"
+    stow -d "${CBL_STOW}" -R -v "$(basename "${CBL_BNTL%/*}")" "$(basename "${CBL_LLVM%/*}")"
 
     # Invalidate our kernel ccache because we have a new compiler that will be used for it
     ccache_clear kernel
@@ -351,7 +358,7 @@ function build_stable_llvm() { (
     path_push "${TC_BLD}"/install/bin
 
     # Build LLVM 10.0.1 and binutils if necessary
-    LLVM_10=${CBL_TC}/llvm-10.0.1
+    LLVM_10=${CBL_STOW_LLVM}/10.0.1
     [[ -x ${LLVM_10}/bin/clang ]] ||
         "${TC_BLD}"/build-llvm.py \
             --assertions \
@@ -362,7 +369,7 @@ function build_stable_llvm() { (
     [[ -x ${LLVM_10}/bin/as ]] || "${TC_BLD}"/build-binutils.py --install-folder "${LLVM_10}"
 
     # Build LLVM 11.1.0 and binutils if neccesary
-    LLVM_11_RC=${CBL_TC}/llvm-11.1.0
+    LLVM_11_RC=${CBL_STOW_LLVM}/11.1.0
     [[ -x ${LLVM_11_RC}/bin/clang ]] ||
         "${TC_BLD}"/build-llvm.py \
             --assertions \
@@ -372,7 +379,7 @@ function build_stable_llvm() { (
     [[ -x ${LLVM_11_RC}/bin/as ]] || "${TC_BLD}"/build-binutils.py --install-folder "${LLVM_11_RC}"
 
     # Build LLVM 12.0.0-rc4 and binutils if neccesary
-    LLVM_12_RC=${CBL_TC}/llvm-12.0.0-rc4
+    LLVM_12_RC=${CBL_STOW_LLVM}/12.0.0-rc4
     [[ -x ${LLVM_12_RC}/bin/clang ]] ||
         "${TC_BLD}"/build-llvm.py \
             --assertions \
@@ -503,7 +510,7 @@ function llvm_log() { (
 function lt() { (
     ccache_setup kernel 250
 
-    : "${KRNL_DIR:=${CBL_BLD_P}/${TREE:=linux-next}}" "${TC_DIR:=${CBL_LLVM_BNTL%/*}}"
+    : "${KRNL_DIR:=${CBL_BLD_P}/${TREE:=linux-next}}" "${TC_DIR:=${CBL_USR}}"
 
     # Make sure that clang can be found in ${TC_DIR}/bin/clang first, otherwise the wrong
     # value was probably passed
@@ -668,7 +675,7 @@ function test_llvm_mainline_linux() { (
     git -C "${LINUX}" pull --rebase
 
     # Build the tree
-    for LLVM_TC in ${CBL_TC}/llvm-{10.0.1,11.1.0,12.0.0-rc4,binutils}; do
+    for LLVM_TC in "${CBL_STOW_LLVM}"/{10.0.1,11.1.0,12.0.0-rc4} "${CBL_USR}"; do
         KRNL_DIR=${LINUX} TC_DIR=${LLVM_TC} lt
     done
 ); }
@@ -686,8 +693,8 @@ function test_llvm_stable_linux() { (
     done
 
     # Build the trees
-    for LLVM_TC in ${CBL_TC}/llvm-{10.0.1,11.1.0,12.0.0-rc4,binutils}; do
-        for TEST_KRNL_DIR in ${CBL_BLD_C}/linux-stable-{5.10,5.4}; do
+    for LLVM_TC in "${CBL_STOW_LLVM}"/{10.0.1,11.1.0,12.0.0-rc4} "${CBL_USR}"; do
+        for TEST_KRNL_DIR in ${CBL_BLD_C}/linux-stable-{5.11,5.10,5.4}; do
             KRNL_DIR=${TEST_KRNL_DIR} TC_DIR=${LLVM_TC} lt
         done
     done

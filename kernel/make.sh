@@ -44,7 +44,8 @@ function parse_parameters() {
 
 function setup_paths() {
     if [[ ${LLVM} -eq 1 || ${CC} = "clang" ]]; then
-        [[ -n ${CBL_LLVM_BNTL} ]] && export PATH=${CBL_LLVM_BNTL}:${PATH}
+        [[ -n ${CBL_BIN} && -d ${CBL_BIN} ]] && export PATH=${CBL_BIN}:${PATH}
+        [[ -n ${CBL_LLVM_BNTL} && -d ${CBL_LLVM_BNTL} ]] && export PATH=${CBL_LLVM_BNTL}:${PATH}
         # In case CC is not specified (e.g. LLVM=1)
         [[ -z ${CC} ]] && CC=clang
     else
