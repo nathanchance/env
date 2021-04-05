@@ -109,7 +109,7 @@ function updpgollvm() { (
 # Update kernel using makepkg
 function upd_kernel() { (
     WORK_DIR=${GITHUB_FOLDER}/archpkgbuilds/trunk
-    SLIM_CFG=${WORK_DIR}/slim_config
+    LLVM_CFG=${WORK_DIR}/llvm_config
     SRC_DIR=${WORK_DIR}/src/linux-llvm
     SRC_CFG=${SRC_DIR}/.config
 
@@ -126,40 +126,27 @@ function upd_kernel() { (
     rm "${SRC_CFG}"
 
     # Step 3: Copy configuration
-    cp "${WORK_DIR}"/config "${SLIM_CFG}"
-    git add "${SLIM_CFG}"
-    git c -m "slim_config: Create from current config"
+    cp "${WORK_DIR}"/config "${LLVM_CFG}"
+    git add "${LLVM_CFG}"
+    git c -m "llvm_config: Create from current config"
 
     # Step 4: Run olddefconfig
-    make -C "${SRC_DIR}" -j"$(nproc)" KCONFIG_CONFIG="${SLIM_CFG}" olddefconfig
-    git add "${SLIM_CFG}"
-    git c -m "slim_config: Run through olddefconfig"
+    make -C "${SRC_DIR}" -j"$(nproc)" KCONFIG_CONFIG="${LLVM_CFG}" olddefconfig
+    git add "${LLVM_CFG}"
+    git c -m "llvm_config: Run through olddefconfig"
 
-    # Step 5: Run localmodconfig
-    cp "${SLIM_CFG}" "${SRC_CFG}"
-    make -C "${SRC_DIR}" -j"$(nproc)" localmodconfig
-    cp "${SRC_CFG}" "${SLIM_CFG}"
-    # A few configs needs to stay around, build them in though
-    "${SRC_DIR}"/scripts/config \
-        --file "${SLIM_CFG}" \
-        -e BLK_DEV_LOOP \
-        -e TUN \
-        --set-val BLK_DEV_LOOP_MIN_COUNT 0
-    git add "${SLIM_CFG}"
-    git c -m "slim_config: Run through localmodconfig"
+    # Step 5: Run through olddefconfig with Clang
+    PATH=${CBL_LLVM}:${PATH} make -C "${SRC_DIR}" -j"$(nproc)" KCONFIG_CONFIG="${LLVM_CFG}" LLVM=1 LLVM_IAS=1 olddefconfig
+    git add "${LLVM_CFG}"
+    git c -m "llvm_config: Run through olddefconfig with LLVM=1 LLVM_IAS=1"
 
-    # Step 6: Run through olddefconfig with Clang
-    PATH=${CBL_LLVM}:${PATH} make -C "${SRC_DIR}" -j"$(nproc)" KCONFIG_CONFIG="${SLIM_CFG}" LLVM=1 LLVM_IAS=1 olddefconfig
-    git add "${SLIM_CFG}"
-    git c -m "slim_config: Run through olddefconfig with LLVM=1"
+    # Step 6: Disable debug info and enable ThinLTO
+    "${SRC_DIR}"/scripts/config --file "${LLVM_CFG}" -d DEBUG_INFO -d LTO_NONE -e LTO_CLANG_THIN
+    PATH=${CBL_LLVM}:${PATH} make -C "${SRC_DIR}" -j"$(nproc)" KCONFIG_CONFIG="${LLVM_CFG}" LLVM=1 LLVM_IAS=1 olddefconfig
+    git add "${LLVM_CFG}"
+    git c -m "llvm_config: Disable debug info and enable ThinLTO"
 
-    # Step 7: Disable debug info and enable ThinLTO
-    "${SRC_DIR}"/scripts/config --file "${SLIM_CFG}" -d DEBUG_INFO -d LTO_NONE -e LTO_CLANG_THIN
-    PATH=${CBL_LLVM}:${PATH} make -C "${SRC_DIR}" -j"$(nproc)" KCONFIG_CONFIG="${SLIM_CFG}" LLVM=1 LLVM_IAS=1 olddefconfig
-    git add "${SLIM_CFG}"
-    git c -m "slim_config: Disable debug info and enable ThinLTO"
-
-    # Step 8: Enable and use the new slim configuration
+    # Step 7: Enable and use the new LLVM configuration
     cat <<'EOF' | git ap || exit ${?}
 diff --git a/trunk/PKGBUILD b/trunk/PKGBUILD
 index 78d7e87..ed32971 100644
@@ -169,7 +156,7 @@ index 78d7e87..ed32971 100644
  source=(
    "$_srcname::git+https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git?signed#tag=$_srctag"
    config         # the main kernel config file
-+  slim_config    # personal server config file
++  llvm_config    # personal server config file
  )
  validpgpkeys=(
    'ABAF11C65A2970B130ABE3C479BE3E4300411886'  # Linus Torvalds
@@ -178,16 +165,16 @@ index 78d7e87..ed32971 100644
  
    echo "Setting config..."
 -  cp ../config .config
-+  cp ../slim_config .config
++  cp ../llvm_config .config
    _kmake olddefconfig
  
    _kmake -s kernelrelease > version
 EOF
     updpkgsums
     git add PKGBUILD
-    git c -m "PKGBUILD: Use slim configuration"
+    git c -m "PKGBUILD: Use LLVM configuration"
 
-    # Step 9: Build it!
+    # Step 8: Build it!
     makepkg -Cf
 ); }
 
