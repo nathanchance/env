@@ -363,15 +363,15 @@ function biexa() { (
     if [[ $(uname -m) = "x86_64" ]]; then
         EXA_STOW=${PREFIX:-${USR_FOLDER:?}}/stow
         EXA_BIN=${EXA_STOW}/prebuilts/bin
-        EXA_ZIP=exa-linux-x86_64-${EXA_VERSION//v/}.zip
+        EXA_ZIP=exa-linux-x86_64-${EXA_VERSION}.zip
 
         WORK_DIR=$(mktemp -d)
         cd "${WORK_DIR}" || exit ${?}
 
         header "Installing exa"
         curl -LSsO "${EXA_BASE_URL}"/releases/download/"${EXA_VERSION}"/"${EXA_ZIP}" || die "Error downloading ${EXA_ZIP}"
-        unzip "${EXA_ZIP}"
-        install -Dm755 bin/exa-linux-x86_64 "${EXA_BIN}"/exa
+        unzip "${EXA_ZIP}" || exit ${?}
+        install -Dm755 bin/exa "${EXA_BIN}"/exa
         [[ -n ${ZSH_NAME} ]] && install -Dm644 completions/exa.zsh "${HOME}"/.zfunctions/_exa
 
         stow -d "${EXA_STOW}" -R -v prebuilts
