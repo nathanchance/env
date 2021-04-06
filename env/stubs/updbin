@@ -693,7 +693,7 @@ function bqemu_user_static() { (
     QEMU_BLD=${TMP_FOLDER}/qemu-build
 
     # Download source
-    curl -LSs https://download.qemu.org/${QEMU_SRC##*/}.tar.xz | tar xJf - || exit ${?}
+    curl -LSs https://download.qemu.org/"${QEMU_SRC##*/}".tar.xz | tar xJf - || exit ${?}
     "${QEMU_SRC}"/scripts/gensyscalls.sh /home/nathan/cbl/src/linux "${QEMU_SRC}"
 
     # Install location
@@ -741,11 +741,7 @@ function bqemu_user_static() { (
         --disable-linux-io-uring \
         --static \
         --target-list-exclude=hexagon-linux-user || exit ${?}
-    if [[ -f build.ninja ]]; then
-        ninja install || exit ${?}
-    else
-        make -skj"$(nproc)" install || exit ${?}
-    fi
+    make -skj"$(nproc)" install || exit ${?}
 
     # Rename binaries to "-static" for tools that expect it
     rm -v "${QEMU_US_PREFIX}"/bin/qemu-*-static

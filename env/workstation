@@ -118,7 +118,7 @@ function upd_kernel() { (
     cd "${WORK_DIR}" || exit ${?}
 
     # Prerequisite: Clean up old kernels
-    rm *.tar.zst
+    rm -- *.tar.zst
 
     # Step 1: Rebase so that source information can be properly updated
     git fetch https://github.com/archlinux/svntogit-packages packages/linux
@@ -198,7 +198,7 @@ EOF
     # Step 10: Print steps to install
     set +x
     echo "Run"
-    printf "\t$ yay -U %s\n" "$(readlink -f *.tar.zst | perl -pe 's/\n/ /')"
+    printf "\t$ yay -U %s\n" "$(readlink -f -- *.tar.zst | perl -pe 's/\n/ /')"
     echo "to install new kernel"
 ); }
 
