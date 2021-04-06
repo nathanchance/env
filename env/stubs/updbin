@@ -543,7 +543,8 @@ function biexa() { (
         header "Installing exa"
         curl -LSsO "${EXA_BASE_URL}"/releases/download/"${EXA_VERSION}"/"${EXA_ZIP}" || die "Error downloading ${EXA_ZIP}"
         unzip "${EXA_ZIP}"
-        install -Dm755 "${TMP_FOLDER}"/exa-linux-x86_64 "${EXA_BIN}"/exa
+        install -Dm755 bin/exa-linux-x86_64 "${EXA_BIN}"/exa
+        [[ -n ${ZSH_NAME} ]] && install -Dm644 completions/exa.zsh "${HOME}"/.zfunctions/_exa
 
         stow -d "${EXA_STOW}" -R -v prebuilts
 
