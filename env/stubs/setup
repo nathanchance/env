@@ -519,6 +519,33 @@ function debian_rootstrap { (
     fi
 ); }
 
+function debian_ubuntu_doas() { (
+    WORK_DIR=$(mktemp -d)
+    cd "${WORK_DIR}" || exit ${?}
+
+    DOAS_VERSION=6.8.1-3
+    git clone https://salsa.debian.org/debian/doas.git
+    cd doas || exit ${?}
+
+    dpkg-buildpackage -b -uc -us || exit ${?}
+    dpkg -i ../doas_${DOAS_VERSION}_amd64.deb || exit ${?}
+
+    cat <<EOF >/etc/doas.conf
+# Allow me to be root for 5 minutes at a time
+permit persist ${USER_NAME:?} as root
+# Do not require root to put in a password (makes no sense)
+permit nopass root
+EOF
+
+    # Uninstall sudo but create a symlink in case a program expects only sudo
+    apt remove -y sudo
+    SUDO_PREFIX=${PREFIX:-/usr/local}/stow/sudo
+    SUDO_BIN=${SUDO_PREFIX}/bin/sudo
+    mkdir -p "${SUDO_BIN%/*}"
+    ln -frsv "$(command -v doas)" "${SUDO_BIN}"
+    stow -d "${STOW_PREFIX%/*}" -R -v "${SUDO_PREFIX##*/}"
+); }
+
 function debian_ubuntu_locales() { (
     echo "locales locales/default_environment_locale select en_US.UTF-8" | debconf-set-selections
     echo "locales locales/locales_to_be_generated multiselect en_US.UTF-8 UTF-8" | debconf-set-selections
@@ -546,6 +573,7 @@ function debian_ubuntu_packages() {
         debootstrap
         devscripts
         doxygen
+        dpkg-dev
         expect
         fakeroot
         file
@@ -580,6 +608,7 @@ function debian_ubuntu_packages() {
         libmpfr-dev
         libncurses-dev
         libnet-smtp-ssl-perl
+        libpam0g-dev
         libpcre2-dev
         libpixman-1-dev
         libssl-dev
@@ -615,7 +644,6 @@ function debian_ubuntu_packages() {
         ssh
         software-properties-common
         stow
-        sudo
         swig
         texinfo
         tcl
@@ -641,6 +669,7 @@ function debian_ubuntu_packages() {
 function debian_ubuntu_update_install() { (
     DEBIAN_FRONTEND=noninteractive apt upgrade -y || exit ${?}
     DEBIAN_FRONTEND=noninteractive apt install -y "${PACKAGES[@]}" || exit ${?}
+    debian_ubuntu_doas
     # Reinstall 'ping' to avoid issues with permissions
     ${WSL} && apt install -y --reinstall iputils-ping
 ); }
