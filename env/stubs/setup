@@ -152,8 +152,6 @@ EOF
     AUR_PACKAGES=(
         yay-bin
         inetutils-hostname
-        binfmt-qemu-static-all-arch
-        qemu-user-static-bin
         opendoas-sudo
     )
     for AUR_PACKAGE in "${AUR_PACKAGES[@]}"; do
@@ -189,8 +187,25 @@ EOF
     fi
 
     # qemu-debootstrap
-    curl -LSso /usr/local/bin/qemu-debootstrap 'https://salsa.debian.org/qemu-team/qemu/-/raw/3e1429e38553d430e547709947c74a03d2f5ed38/debian/qemu-debootstrap?inline=false'
-    chmod +x /usr/local/bin/qemu-debootstrap
+    LOCAL_STOW=/usr/local/stow
+    SCRIPTS_STOW=${LOCAL_STOW}/scripts
+    QEMU_DEBOOTSTRAP=${SCRIPTS_STOW}/bin/qemu-debootstrap
+    mkdir -p "${QEMU_DEBOOTSTRAP%*/}"
+    curl -LSso "${QEMU_DEBOOTSTRAP}" 'https://salsa.debian.org/qemu-team/qemu/-/raw/3e1429e38553d430e547709947c74a03d2f5ed38/debian/qemu-debootstrap?inline=false'
+    chmod +x "${QEMU_DEBOOTSTRAP}"
+    stow -d "${SCRIPTS_STOW%/*}" -R -v "${SCRIPTS_STOW##*/}"
+
+    # qemu-user-static
+    source <(curl -LSs https://github.com/nathanchance/scripts/raw/main/env/stubs/updbin)
+    bqemu_user_static || exit ${?}
+
+    # Register qemu-formats
+    BINFMT_D_STOW=${LOCAL_STOW}/binfmt-d
+    BINFMT_D_CONF=${BINFMT_D_STOW}/lib/binfmt.d/qemu-static.conf
+    mkdir -p "${BINFMT_D_CONF%/*}"
+    curl -LSs 'https://aur.archlinux.org/cgit/aur.git/plain/qemu-static.conf?h=binfmt-qemu-static' | sed 's;/usr/bin/;/usr/local/bin/;g' >"${BINFMT_D_CONF}"
+    stow -d "${BINFMT_D_STOW%/*}" -R -v "${BINFMT_D_STOW##*/}"
+    /usr/share/libalpm/scripts/systemd-hook binfmt
 ); }
 
 # User setup function
