@@ -609,6 +609,7 @@ function debian_ubuntu_packages() {
         python3-requests
         python3-setuptools
         qemu-user-static
+        qemu-utils
         re2c
         slirp4netns
         ssh
