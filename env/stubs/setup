@@ -543,7 +543,7 @@ EOF
     SUDO_BIN=${SUDO_PREFIX}/bin/sudo
     mkdir -p "${SUDO_BIN%/*}"
     ln -frsv "$(command -v doas)" "${SUDO_BIN}"
-    stow -d "${STOW_PREFIX%/*}" -R -v "${SUDO_PREFIX##*/}"
+    stow -d "${SUDO_PREFIX%/*}" -R -v "${SUDO_PREFIX##*/}"
 ); }
 
 function debian_ubuntu_locales() { (
