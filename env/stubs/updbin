@@ -537,8 +537,8 @@ function biexa() { (
         EXA_BIN=${EXA_STOW}/prebuilts/bin
         EXA_ZIP=exa-linux-x86_64-${EXA_VERSION//v/}.zip
 
-        TMP_FOLDER=$(mktemp -d)
-        cd "${TMP_FOLDER}" || exit ${?}
+        WORK_DIR=$(mktemp -d)
+        cd "${WORK_DIR}" || exit ${?}
 
         header "Installing exa"
         curl -LSsO "${EXA_BASE_URL}"/releases/download/"${EXA_VERSION}"/"${EXA_ZIP}" || die "Error downloading ${EXA_ZIP}"
@@ -550,7 +550,7 @@ function biexa() { (
 
         move_to_front_of_path "${EXA_STOW%/*}"/bin
 
-        cd && rm -rf "${TMP_FOLDER}"
+        cd && rm -rf "${WORK_DIR}"
     else
         header "Building exa"
 
@@ -589,8 +589,8 @@ function birg() { (
         RG_BIN=${RG_STOW}/prebuilts/bin
         RG_TAR=ripgrep-${RG_VERSION}-x86_64-unknown-linux-musl.tar.gz
 
-        TMP_FOLDER=$(mktemp -d)
-        cd "${TMP_FOLDER}" || exit ${?}
+        WORK_DIR=$(mktemp -d)
+        cd "${WORK_DIR}" || exit ${?}
 
         curl -LSs "${BASE_URL}"/releases/download/"${RG_VERSION}"/"${RG_TAR}" | tar -xzf - || die "Error downloading ${RG_TAR}"
         cd "${RG_TAR%.tar.gz}" || exit ${?}
@@ -617,7 +617,7 @@ function birg() { (
         cargo install --force --path . || die "cargo install failed"
     fi
     [[ -n ${ZSH_NAME} ]] && install -Dm644 complete/_rg "${HOME}"/.zfunctions/_rg
-    [[ -n ${TMP_FOLDER} ]] && cd && rm -rf "${TMP_FOLDER}"
+    [[ -n ${WORK_DIR} ]] && cd && rm -rf "${WORK_DIR}"
 
     command -v rg
     rg --version
@@ -635,7 +635,7 @@ function bisharkdp() { (
         shift
     done
 
-    TMP_FOLDER=$(mktemp -d)
+    WORK_DIR=$(mktemp -d)
 
     for BINARY in "${BINARIES[@]}"; do (
         BINARY_REPO=sharkdp/${BINARY}
@@ -649,7 +649,7 @@ function bisharkdp() { (
             BINARY_BIN=${BINARY_STOW}/prebuilts/bin
             BINARY_TAR=${BINARY}-${BIN_VERSION}-x86_64-unknown-linux-gnu.tar.gz
 
-            cd "${TMP_FOLDER}" || exit ${?}
+            cd "${WORK_DIR}" || exit ${?}
             curl -LSs "${URL_BASE}"/releases/download/"${BIN_VERSION}"/"${BINARY_TAR}" | tar -xzf - || die "Error downloading ${BINARY_TAR}"
             cd "${BINARY_TAR%.tar.gz}" || exit ${?}
             install -Dm755 "${BINARY}" "${BINARY_BIN}"/"${BINARY}"
@@ -695,7 +695,7 @@ function bisharkdp() { (
         "${BINARY}" --version
     ); done
 
-    rm -rf "${TMP_FOLDER}"
+    rm -rf "${WORK_DIR}"
 ); }
 
 # Build/update qemu-user-static
@@ -708,13 +708,13 @@ function bqemu_user_static() { (
     set -x
 
     # Setup workspace
-    TMP_FOLDER=$(mktemp -d)
-    cd "${TMP_FOLDER}" || exit ${?}
+    WORK_DIR=$(mktemp -d)
+    cd "${WORK_DIR}" || exit ${?}
 
     # Folders and version information
     [[ -z ${QEMU_VERSION} ]] && QEMU_VERSION=6.0.0-rc1
-    QEMU_SRC=${TMP_FOLDER}/qemu-${QEMU_VERSION}
-    QEMU_BLD=${TMP_FOLDER}/qemu-build
+    QEMU_SRC=${WORK_DIR}/qemu-${QEMU_VERSION}
+    QEMU_BLD=${WORK_DIR}/qemu-build
 
     # Download source
     curl -LSs https://download.qemu.org/"${QEMU_SRC##*/}".tar.xz | tar xJf - || exit ${?}
@@ -778,7 +778,7 @@ function bqemu_user_static() { (
     stow -d "${QEMU_US_STOW}" -R -v qemu-user-static-latest
 
     # Cleanup
-    rm -rf "${TMP_FOLDER}"
+    rm -rf "${WORK_DIR}"
 ); }
 
 # Build/update tmux
@@ -904,13 +904,13 @@ function ihugo() { (
         sudo dpkg -i "${TMP_DEB}"
         rm -rf "${TMP_DEB}"
     else
-        TMP_FOLDER=$(mktemp -d)
-        curl -LSs "${HUGO_URL}".tar.gz | tar -C "${TMP_FOLDER}" -xzf -
+        WORK_DIR=$(mktemp -d)
+        curl -LSs "${HUGO_URL}".tar.gz | tar -C "${WORK_DIR}" -xzf -
         HUGO_STOW=${PREFIX:-${USR_FOLDER:?}}/stow
         HUGO_BIN=${HUGO_STOW}/prebuilts/bin/hugo
-        install -Dm755 "${TMP_FOLDER}"/"${HUGO_BIN##*/}" "${HUGO_BIN}"
+        install -Dm755 "${WORK_DIR}"/"${HUGO_BIN##*/}" "${HUGO_BIN}"
         stow -d "${HUGO_STOW}" -R -v prebuilts
-        rm -rf "${TMP_FOLDER}"
+        rm -rf "${WORK_DIR}"
     fi
 ); }
 
