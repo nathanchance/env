@@ -20,7 +20,7 @@ function bccache() { (
     [[ -z ${CCACHE_VERSION} ]] && CCACHE_VERSION=$(glr "${CCACHE_REPO}")
     CCACHE_SRC=${SRC_FOLDER:?}/ccache/ccache-${CCACHE_VERSION//v/}
     CCACHE_STOW=${PREFIX:-${USR_FOLDER:?}}/stow
-    CCACHE_PREFIX=${CCACHE_STOW}/packages/ccache/${CCACHE_VERSION//v/}-$(date +%F-%H-%M-%S)
+    CCACHE_PREFIX=${CCACHE_STOW}/packages/ccache/$(date +%F-%H-%M-%S)-${CCACHE_VERSION//v/}
 
     # Download source
     mkdir -p "${CCACHE_SRC%/*}"
@@ -59,7 +59,7 @@ function bcmake() { (
     [[ -z ${CMAKE_VERSION} ]] && CMAKE_VERSION=$(glr "${CMAKE_REPO}")
     CMAKE_SRC=${SRC_FOLDER:?}/cmake/cmake-${CMAKE_VERSION//v/}
     CMAKE_STOW=${PREFIX:-${USR_FOLDER:?}}/stow
-    CMAKE_PREFIX=${CMAKE_STOW}/packages/cmake/${CMAKE_VERSION//v/}-$(date +%F-%H-%M-%S)
+    CMAKE_PREFIX=${CMAKE_STOW}/packages/cmake/$(date +%F-%H-%M-%S)-${CMAKE_VERSION//v/}
 
     # Download source
     mkdir -p "${CMAKE_SRC%/*}"
@@ -106,7 +106,7 @@ function bcvise() { (
     [[ -z ${CVISE_VERSION} ]] && CVISE_VERSION=$(glr ${CVISE_REPO})
     CVISE_SRC=${SRC_FOLDER:?}/cvise/cvise-${CVISE_VERSION//v/}
     CVISE_STOW=${PREFIX:-${USR_FOLDER:?}}/stow
-    CVISE_PREFIX=${CVISE_STOW}/packages/cvise/${CVISE_VERSION//v/}-$(date +%F-%H-%M-%S)
+    CVISE_PREFIX=${CVISE_STOW}/packages/cvise/$(date +%F-%H-%M-%S)-${CVISE_VERSION//v/}
 
     # Download source
     mkdir -p "${CVISE_SRC%/*}"
@@ -162,7 +162,7 @@ function bdtc() { (
 
     # Path variables
     DTC_STOW=${PREFIX:-${USR_FOLDER:?}}/stow
-    DTC_PREFIX=${DTC_STOW}/packages/dtc/${DTC_VERSION//v/}-$(date +%F-%H-%M-%S)
+    DTC_PREFIX=${DTC_STOW}/packages/dtc/$(date +%F-%H-%M-%S)-${DTC_VERSION//v/}
 
     # Build software
     mkdir -p "${DTC_PREFIX%/*}"
@@ -214,7 +214,7 @@ function bgit() { (
 
     # Path variables
     GIT_STOW=${PREFIX:-${USR_FOLDER:?}}/stow
-    GIT_PREFIX=${GIT_STOW}/packages/git/$(git show -s --format=%H)-$(date +%F-%H-%M-%S)
+    GIT_PREFIX=${GIT_STOW}/packages/git/$(date +%F-%H-%M-%S)-$(git show -s --format=%H)
 
     # Build and install software + completions
     "${MAKE[@]}" prefix="${GIT_PREFIX}" all install || die "git build/install failed"
@@ -319,7 +319,7 @@ function bmake() { (
     [[ -z ${MAKE_VERSION} ]] && MAKE_VERSION=4.3
     MAKE_SRC=${SRC_FOLDER:?}/make/make-${MAKE_VERSION}
     MAKE_STOW=${PREFIX:-${USR_FOLDER:?}}/stow
-    MAKE_PREFIX=${MAKE_STOW}/packages/make/${MAKE_VERSION}-$(date +%F-%H-%M-%S)
+    MAKE_PREFIX=${MAKE_STOW}/packages/make/$(date +%F-%H-%M-%S)-${MAKE_VERSION}
 
     # Download source
     mkdir -p "${MAKE_SRC%/*}"
@@ -790,7 +790,7 @@ function btmux() { (
     [[ -z ${TMUX_VERSION} ]] && TMUX_VERSION=$(glr "${TMUX_REPO}")
     TMUX_SRC=${SRC_FOLDER:?}/tmux/tmux-${TMUX_VERSION}
     TMUX_STOW=${PREFIX:-${USR_FOLDER:?}}/stow
-    TMUX_PREFIX=${TMUX_STOW}/packages/tmux/${TMUX_VERSION}-$(date +%F-%H-%M-%S)
+    TMUX_PREFIX=${TMUX_STOW}/packages/tmux/$(date +%F-%H-%M-%S)-${TMUX_VERSION}
 
     # Download source
     mkdir -p "${TMUX_SRC%/*}"
@@ -818,7 +818,7 @@ function bzsh() { (
     [[ -z ${BZSH_VERSION} ]] && BZSH_VERSION=5.8
     ZSH_SRC=${SRC_FOLDER:?}/zsh/zsh-${BZSH_VERSION}
     ZSH_STOW=${PREFIX:-${USR_FOLDER:?}}/stow
-    ZSH_PREFIX=${ZSH_STOW}/packages/zsh/${BZSH_VERSION}-$(date +%F-%H-%M-%S)
+    ZSH_PREFIX=${ZSH_STOW}/packages/zsh/$(date +%F-%H-%M-%S)-${BZSH_VERSION}
 
     # Download source
     mkdir -p "${ZSH_SRC%/*}"
