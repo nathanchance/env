@@ -117,6 +117,9 @@ function upd_kernel() { (
 
     cd "${WORK_DIR}" || exit ${?}
 
+    # Prerequisite: Clean up old kernels
+    rm *.tar.zst
+
     # Step 1: Rebase so that source information can be properly updated
     git fetch https://github.com/archlinux/svntogit-packages packages/linux
     git rebase -i FETCH_HEAD || exit ${?}
@@ -143,6 +146,8 @@ function upd_kernel() { (
     "${SRC_DIR}"/scripts/config \
         --file "${SLIM_CFG}" \
         -e BLK_DEV_LOOP \
+        -e EDAC_AMD64 \
+        -e EDAC_DECODE_MCE \
         -e TUN \
         --set-val BLK_DEV_LOOP_MIN_COUNT 0
     git add "${SLIM_CFG}"
@@ -188,7 +193,13 @@ EOF
     git c -m "PKGBUILD: Use slim configuration"
 
     # Step 9: Build it!
-    makepkg -Cf
+    makepkg -C || exit ${?}
+
+    # Step 10: Print steps to install
+    set +x
+    echo "Run"
+    printf "\t$ yay -U %s\n" "$(readlink -f *.tar.zst | perl -pe 's/\n/ /')"
+    echo "to install new kernel"
 ); }
 
 # Additional setup steps for my workstation
