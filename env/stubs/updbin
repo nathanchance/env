@@ -233,81 +233,64 @@ function bgit() { (
     git --version
 ); }
 
-# Build a "regular" LLVM toolchain or a bootstrap compiler
+# Build a full LLVM toolchain
 function bllvm() { (
-    set -u
-
-    LLVM_SRC=${SRC_FOLDER:-${HOME}/src}/llvm-project
-    if [[ ! -d ${LLVM_SRC} ]]; then
-        header "Cloning LLVM"
-        mkdir -p "${LLVM_SRC%/*}"
-        git clone https://github.com/llvm/llvm-project "${LLVM_SRC}" || exit ${?}
-    fi
-
-    LLVM_BLD=${LLVM_SRC}/build/stage1
-    rm -rf "${LLVM_BLD%/*}"
-    mkdir -p "${LLVM_BLD}"
-    cd "${LLVM_BLD}" || exit ${?}
-
+    TC_BLD_ARGS=()
     while ((${#})); do
         case ${1} in
-            -b | --bootstrap) BOOTSTRAP=true ;;
-            -i | --install) INSTALL=true ;;
+            --lto)
+                TC_BLD_ARGS+=(--lto thin)
+                ;;
+            --pgo)
+                TC_BLD_ARGS+=(--pgo llvm)
+                ;;
+            --prefix)
+                shift
+                LLVM_PREFIX=${1}
+                ;;
+            --qualify-two-stages)
+                LLVM_PREFIX=$(mktemp -d -p "${TMP_FOLDER}")
+                INSTALL=false
+                ;;
+            --qualify)
+                TC_BLD_ARGS+=(--build-stage1-only)
+                ;;
         esac
         shift
     done
 
-    CMAKE=(
-        cmake
-        -G Ninja
-        -Wno-dev
-        "-DCLANG_DEFAULT_LINKER=lld"
-        "-DCLANG_VENDOR=$(uname -n)"
-        "-DCMAKE_AR=$(command -v llvm-ar)"
-        "-DCMAKE_BUILD_TYPE=Release"
-        "-DCMAKE_C_COMPILER=$(command -v clang)"
-        "-DCMAKE_CXX_COMPILER=$(command -v clang++)"
-        "-DCMAKE_LINKER=$(command -v ld.lld)"
-        "-DCMAKE_RANLIB=$(command -v llvm-ranlib)"
-        "-DLLVM_CCACHE_BUILD=ON"
-        "-DLLVM_ENABLE_PROJECTS=$(llvm_all_projects "${LLVM_SRC}")"
-        "-DLLVM_ENABLE_WARNINGS=OFF"
-        "-DLLVM_USE_LINKER=lld"
-    )
+    TC_BLD=${GITHUB_FOLDER}/tc-build
+    header "Updating/cloning tc-build"
+    [[ -d ${TC_BLD} ]] || git clone https://github.com/ClangBuiltLinux/tc-build "${TC_BLD}"
+    git -C "${TC_BLD}" pull --rebase
 
-    if ${BOOTSTRAP:=false}; then
-        CMAKE=(
-            "${CMAKE[@]}"
-            "-DCLANG_PLUGIN_SUPPORT=OFF"
-            "-DCOMPILER_RT_BUILD_SANITIZERS=OFF"
-            "-DLLVM_ENABLE_BACKTRACES=OFF"
-            "-DLLVM_INCLUDE_DOCS=OFF"
-            "-DLLVM_INCLUDE_EXAMPLES=OFF"
-            "-DLLVM_INCLUDE_TESTS=OFF"
-            "-DLLVM_TARGETS_TO_BUILD=host"
-        )
+    LLVM_SRC=${TC_BLD}/llvm-project
+    if [[ ! -d ${LLVM_SRC} ]]; then
+        header "Cloning LLVM"
+        git clone https://github.com/llvm/llvm-project "${LLVM_SRC}" || exit ${?}
     fi
+
+    if [[ -z ${LLVM_PREFIX} ]]; then
+        LLVM_STOW=${PREFIX:-${USR_FOLDER:?}}/stow
+        LLVM_PREFIX=${LLVM_STOW}/packages/llvm/$(date +%F-%H-%M-%S)-$(git -C "${LLVM_SRC}" sh -s --format=%H origin/main)
+    fi
+
+    set -x
+    "${TC_BLD}"/build-llvm.py \
+        --check-targets clang lld llvm llvm-unit \
+        --clang-vendor "$(uname -n)" \
+        --defines CLANG_DEFAULT_LINKER=lld \
+        --full-toolchain \
+        --install-folder "${LLVM_PREFIX}" \
+        --no-update \
+        --show-build-commands \
+        --projects "$(llvm_all_projects "${LLVM_SRC}")" \
+        "${TC_BLD_ARGS[@]}" || exit ${?}
+    set +x
 
     if ${INSTALL:=false}; then
-        CMAKE=("${CMAKE[@]}" "-DCMAKE_INSTALL_PREFIX=${PREFIX:-${USR_FOLDER:?}}")
-    fi
-
-    header "Configuring LLVM"
-    echo "$ ${CMAKE[*]}"
-    echo
-    "${CMAKE[@]}" "${LLVM_SRC}"/llvm >/dev/null || exit ${?}
-
-    header "Building LLVM"
-    ninja || exit ${?}
-
-    if ! ${BOOTSTRAP}; then
-        header "Running LLVM tests"
-        ninja check-clang check-lld check-llvm check-llvm-unit || exit ${?}
-    fi
-
-    if ${INSTALL}; then
-        header "Installing LLVM"
-        ninja install || exit ${?}
+        ln -fnrsv "${LLVM_PREFIX}" "${LLVM_STOW}"/llvm-latest
+        stow -d "${LLVM_STOW}" -R -v llvm-latest
     fi
 ); }
 
@@ -368,162 +351,7 @@ function bninja() { (
 
 # Build/install PGO'd LLVM
 function bpgollvm() { (
-    LLVM_SRC=${SRC_FOLDER}/llvm-project
-    CMAKE=(
-        cmake
-        -G Ninja
-        -Wno-dev
-        "-DCLANG_DEFAULT_LINKER=lld"
-        "-DCLANG_VENDOR=$(uname -n)"
-        "-DCMAKE_BUILD_TYPE=Release"
-        "-DLLVM_ENABLE_PROJECTS=$(llvm_all_projects "${LLVM_SRC}")"
-    )
-    LLVM_BLD=${LLVM_SRC}/build
-    ORIG_PATH=${PATH}
-    START=$(date +%s)
-
-    set -eu
-
-    while ((${#})); do
-        case ${1} in
-            -b | --branch)
-                shift
-                LLVM_VERSION=${1}
-                ;;
-            -u | --update) UPDATE=true ;;
-        esac
-        shift
-    done
-
-    if [[ ! -d ${LLVM_SRC} ]]; then
-        header "Downloading LLVM"
-        mkdir -p "${LLVM_SRC%/*}"
-        git clone https://github.com/llvm/llvm-project "${LLVM_SRC}"
-    fi
-
-    cd "${LLVM_SRC}"
-    git clean -fxdq
-
-    if ${UPDATE:=false}; then
-        header "Updating LLVM"
-        git reset --hard
-        git fetch origin
-        git checkout "${LLVM_VERSION:=master}"
-        [[ ${LLVM_VERSION} = "master" || ${LLVM_VERSION} =~ release ]] && git pull --rebase
-    fi
-
-    # Stage 1: Bootstrap compiler
-    (
-        header "Building LLVM stage 1"
-        mkdir -p "${LLVM_BLD}"/stage1
-        cd "${LLVM_BLD}"/stage1 || die "Error creating stage1 build folder"
-        LINKER=$(if command -v ld.lld &>/dev/null; then echo lld; else echo gold; fi)
-        "${CMAKE[@]}" \
-            -DCLANG_PLUGIN_SUPPORT=OFF \
-            -DCMAKE_C_COMPILER=clang \
-            -DCMAKE_CXX_COMPILER=clang++ \
-            -DCOMPILER_RT_BUILD_SANITIZERS=OFF \
-            -DLLVM_ENABLE_BACKTRACES=OFF \
-            -DLLVM_INCLUDE_DOCS=OFF \
-            -DLLVM_INCLUDE_EXAMPLES=OFF \
-            -DLLVM_INCLUDE_TESTS=OFF \
-            -DLLVM_TARGETS_TO_BUILD=host \
-            -DLLVM_USE_LINKER="${LINKER}" \
-            "${LLVM_SRC}"/llvm || die "Error configuring stage 1"
-        ninja || die "Error building stage 1"
-    )
-
-    STAGE_ONE_BIN=${LLVM_BLD}/stage1/bin
-    STAGE_ONE_BIN_DEFINES=(
-        -DCMAKE_AR="${STAGE_ONE_BIN}"/llvm-ar
-        -DCMAKE_C_COMPILER="${STAGE_ONE_BIN}"/clang
-        -DCLANG_TABLEGEN="${STAGE_ONE_BIN}"/clang-tblgen
-        -DCMAKE_CXX_COMPILER="${STAGE_ONE_BIN}"/clang++
-        -DCMAKE_LINKER="${STAGE_ONE_BIN}"/ld.lld
-        -DLLVM_USE_LINKER=lld
-        -DLLVM_TABLEGEN="${STAGE_ONE_BIN}"/llvm-tblgen
-        -DCMAKE_RANLIB="${STAGE_ONE_BIN}"/llvm-ranlib
-    )
-
-    # Stage 2a: Instrumented compiler
-    export PATH=${STAGE_ONE_BIN:?}:${ORIG_PATH}
-    (
-        header "Building LLVM stage 2a"
-        mkdir -p "${LLVM_BLD}"/stage2a
-        cd "${LLVM_BLD}"/stage2a || die "Error creating stage2a build folder"
-        "${CMAKE[@]}" \
-            "${STAGE_ONE_BIN_DEFINES[@]}" \
-            -DLLVM_BUILD_INSTRUMENTED=IR \
-            -DLLVM_BUILD_RUNTIME=OFF \
-            -DLLVM_INCLUDE_GO_TESTS=OFF \
-            "${LLVM_SRC}"/llvm || die "Error configuring stage 2a"
-        ninja clang lld check-clang check-llvm || die "Error building or checking stage2a"
-    )
-
-    STAGE_TWO_BIN=${LLVM_BLD}/stage2a/bin
-    STAGE_TWO_BIN_DEFINES=(
-        -DCMAKE_AR="${STAGE_TWO_BIN}"/llvm-ar
-        -DCMAKE_C_COMPILER="${STAGE_TWO_BIN}"/clang
-        -DCLANG_TABLEGEN="${STAGE_TWO_BIN}"/clang-tblgen
-        -DCMAKE_CXX_COMPILER="${STAGE_TWO_BIN}"/clang++
-        -DCMAKE_LINKER="${STAGE_TWO_BIN}"/ld.lld
-        -DLLVM_USE_LINKER=lld
-        -DLLVM_TABLEGEN="${STAGE_TWO_BIN}"/llvm-tblgen
-        -DCMAKE_RANLIB="${STAGE_TWO_BIN}"/llvm-ranlib
-    )
-
-    # Stage 2b: Build clang with instrumented compiler
-    export PATH=${STAGE_TWO_BIN:?}:${ORIG_PATH}
-    (
-        header "Building LLVM stage 2b"
-        mkdir -p "${LLVM_BLD}"/stage2b
-        cd "${LLVM_BLD}"/stage2b
-        "${CMAKE[@]}" \
-            "${STAGE_TWO_BIN_DEFINES[@]}" \
-            "${LLVM_SRC}"/llvm || die "Error configuring stage 2b"
-        ninja || die "Error building stage 2b"
-    )
-
-    # Stage 3: Build final compiler
-    : "${PGO_LLVM_PREFIX:=${PREFIX:-${USR_FOLDER:?}}}"
-    export PATH=${STAGE_ONE_BIN:?}:${ORIG_PATH}
-    (
-        header "Building LLVM stage 3"
-        mkdir -p "${LLVM_BLD}"/stage3
-        cd "${LLVM_BLD}"/stage3 || die "Error creating stage 3 build folder"
-
-        # Merge profile data
-        PROFILE_DATA=${LLVM_BLD}/stage3/profdata.prof
-        llvm-profdata merge \
-            -output="${PROFILE_DATA}" \
-            "${LLVM_BLD}"/stage2a/profiles/*.profraw || die "Error merging profile data"
-
-        # Build compiler with that data
-        "${CMAKE[@]}" \
-            "${STAGE_ONE_BIN_DEFINES[@]}" \
-            -DCMAKE_C_FLAGS="-Wno-backend-plugin" \
-            -DCMAKE_CXX_FLAGS="-Wno-backend-plugin" \
-            -DCMAKE_INSTALL_PREFIX="${PGO_LLVM_PREFIX}" \
-            -DLLVM_ENABLE_LTO=Thin \
-            -DLLVM_PROFDATA_FILE="${PROFILE_DATA}" \
-            "${LLVM_SRC}"/llvm || die "Error configuring stage 3"
-        ninja || die "Error building stage 3"
-        ninja install || die "Error installing stage 3"
-    )
-
-    header "Final LLVM information"
-
-    echo "Total build time: $(format_time "${START}" "$(date +%s)")"
-
-    move_to_front_of_path "${PGO_LLVM_PREFIX}/bin"
-
-    echo
-    command -v clang
-    clang --version | head -n1
-
-    echo
-    command -v ld.lld
-    ld.lld --version
+    bllvm --lto --pgo
 ); }
 
 # Build/install exa

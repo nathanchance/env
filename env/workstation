@@ -26,8 +26,8 @@ function clean_repos() { (
 
 # Qualify new LLVM revision
 function qualify_llvm_uprev() { (
-    bllvm --bootstrap || exit ${?}
-    bllvm
+    bllvm --qualify || exit ${?}
+    bllvm --qualify-two-stages
 ); }
 
 # Rebuild ~/usr
@@ -91,19 +91,13 @@ function rbld_usr() { (
 
 # Do a full system LLVM update
 function updllvm() { (
-    LLVM_SRC=${SRC_FOLDER:-${HOME}/src}/llvm-project
+    TC_BLD=${SRC_FOLDER}/tc-build
+    [[ -d ${TC_BLD} ]] || git clone https://github.com/ClangBuiltLinux/tc-build "${TC_BLD}"
+    LLVM_SRC=${TC_BLD}/llvm-project
     [[ -d ${LLVM_SRC} ]] || git clone https://github.com/llvm/llvm-project "${LLVM_SRC}"
     git -C "${LLVM_SRC}" pull --rebase
 
-    qualify_llvm_uprev && updpgollvm
-); }
-
-# Alias for running PGO LLVM build
-function updpgollvm() { (
-    DATE=$(date +%F)
-    PREFIX=${LLVM_TC_FOLDER}/${DATE} bpgollvm &&
-        stow_llvm "${DATE}" &&
-        ccache_clear llvm
+    qualify_llvm_uprev && bpgollvm && ccache_clear llvm
 ); }
 
 # Update kernel using makepkg
