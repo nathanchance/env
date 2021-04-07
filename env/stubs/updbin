@@ -546,7 +546,7 @@ function bqemu_user_static() { (
 
     # Download source
     curl -LSs https://download.qemu.org/"${QEMU_SRC##*/}".tar.xz | tar xJf - || exit ${?}
-    "${QEMU_SRC}"/scripts/gensyscalls.sh /home/nathan/cbl/src/linux "${QEMU_SRC}"
+    /home/"$(logname)"/usr/bin/b4 am -o - -P _ 20210406174031.64299-13-richard.henderson@linaro.org | patch -d "${QEMU_SRC}" -p1
 
     # Install location
     QEMU_US_STOW=${PREFIX:-/usr/local}/stow
