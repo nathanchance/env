@@ -259,7 +259,7 @@ function bllvm() { (
         shift
     done
 
-    TC_BLD=${GITHUB_FOLDER}/tc-build
+    TC_BLD=${SRC_FOLDER}/tc-build
     header "Updating/cloning tc-build"
     [[ -d ${TC_BLD} ]] || git clone https://github.com/ClangBuiltLinux/tc-build "${TC_BLD}"
     git -C "${TC_BLD}" pull --rebase
