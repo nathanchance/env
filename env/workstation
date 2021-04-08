@@ -192,7 +192,7 @@ EOF
     # Step 10: Print steps to install
     set +x
     echo "Run"
-    printf "\t$ yay -U %s\n" "$(readlink -f -- *.tar.zst | perl -pe 's/\n/ /')"
+    printf "\n\t$ yay -U %s\n\n" "$(readlink -f -- *.tar.zst | perl -pe 's/\n/ /')"
     echo "to install new kernel"
 ); }
 
