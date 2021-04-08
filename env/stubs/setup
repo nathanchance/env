@@ -43,8 +43,10 @@ function arch_rootstrap() { (
     sed -i 's/IgnorePkg   = fakeroot/#IgnorePkg   =/g' /etc/pacman.conf
     remove_if_installed fakeroot-tcp
 
-    # Ignore linux-llvm{,-headers}
-    sed -i 's/#IgnorePkg   =/IgnorePkg    = linux-llvm linux-llvm-headers/g' /etc/pacman.conf
+    # Ignore linux-llvm{,-headers} because I build that package myself: https://github.com/nathanchance/archpkgbuilds/commits/linux-llvm
+    # Ignore podman: https://github.com/containers/podman/issues/9936
+    # Ignore uboot-tools: https://lore.kernel.org/r/20210408182253.6m3j6lhmh3iflquz@archlinux-ax161/
+    sed -i 's/#IgnorePkg   =/IgnorePkg    = linux-llvm linux-llvm-headers podman uboot-tools/g' /etc/pacman.conf
 
     # Install all packages that we want
     PACKAGES=(
