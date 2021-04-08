@@ -49,7 +49,7 @@ function setup_paths() {
         # In case CC is not specified (e.g. LLVM=1)
         [[ -z ${CC} ]] && CC=clang
     else
-        [[ -n ${GCC_TC_FOLDER} ]] && export PATH=${GCC_TC_FOLDER}/10.2.0/bin:${PATH}
+        [[ -n ${GCC_TC_FOLDER} ]] && export PATH=${GCC_TC_FOLDER}/10.3.0/bin:${PATH}
         [[ -z ${CC} ]] && CC=${CROSS_COMPILE}gcc
     fi
 

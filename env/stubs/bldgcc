@@ -64,7 +64,7 @@ function bldgcc() { (
     }
 
     # Download GCC
-    [[ -z ${GCC_VERSION} ]] && GCC_VERSION=10.2.0
+    [[ -z ${GCC_VERSION} ]] && GCC_VERSION=10.3.0
     GCC_SOURCE=gcc-${GCC_VERSION}
     [[ ! -d ${GCC_SOURCE} ]] && curl -LSs https://mirrors.kernel.org/gnu/gcc/${GCC_SOURCE}/${GCC_SOURCE}.tar.xz | tar -xJf -
 
