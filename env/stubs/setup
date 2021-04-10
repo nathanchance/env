@@ -150,18 +150,37 @@ EOF
     AUR_DIR=$(mktemp -d)
     cd "${AUR_DIR}" || exit ${?}
 
-    # opendoas-sudo NEEDS to be last
+    # Create 'sudo' symlink temporarily
+    ln -s "$(command -v doas)" "${AUR_DIR}"/sudo
+    export PATH=${AUR_DIR}:${PATH}
+
     AUR_PACKAGES=(
-        yay-bin
+        # Alphabetized
         inetutils-hostname
         opendoas-sudo
+        yay-bin
+        # qemu-user-static depends on glib2-static and pcre-static so build those first
+        # binfmt-qemu-static needs qemu-user-static to be installed in order to register properly
+        glib2-static
+        pcre-static
+        qemu-user-static
+        binfmt-qemu-static
     )
     for AUR_PACKAGE in "${AUR_PACKAGES[@]}"; do
         WORK_DIR=${AUR_DIR}/${AUR_PACKAGE}
-        [[ -d ${WORK_DIR} ]] || git clone https://aur.archlinux.org/"${AUR_PACKAGE}".git "${WORK_DIR}"
+        case "${AUR_PACKAGE}" in
+            qemu-user-static)
+                HOME=${AUR_DIR} su -m -s /bin/bash nobody -c "gpg --recv-keys 3353C9CEF108B584" || exit ${?}
+                GIT_ARGS=(-b "${AUR_PACKAGE}" https://github.com/nathanchance/archpkgbuilds)
+                ;;
+            *)
+                GIT_ARGS=(https://aur.archlinux.org/"${AUR_PACKAGE}".git)
+                ;;
+        esac
+        [[ -d ${WORK_DIR} ]] || git clone "${GIT_ARGS[@]}" "${WORK_DIR}"
         chown -R "nobody:nobody" "${AUR_DIR}"
         cd "${WORK_DIR}" || exit ${?}
-        su -m -s /bin/bash nobody -c "makepkg -s" || exit ${?}
+        HOME=${AUR_DIR} su -m -s /bin/bash nobody -c "makepkg --nocheck --noconfirm -s" || exit ${?}
         pacman -U --needed --noconfirm -- *.tar.zst || exit ${?}
     done
     cd || exit ${?}
@@ -176,38 +195,7 @@ EOF
 
     # Rootless podman (https://wiki.archlinux.org/index.php/Podman#Rootless_Podman)
     # Not possible on WSL
-    if ! ${WSL}; then
-        echo "kernel.unprivileged_userns_clone=1" | tee /etc/sysctl.d/unprivileged_userns_clone.conf
-        if ! grep -q "systemd.unified_cgroup_hierarchy=1" /etc/default/grub; then
-            OLD_CMDLINE="$(grep GRUB_CMDLINE_LINUX= /etc/default/grub | cut -d \" -f 2)"
-            NEW_CMDLINE="${OLD_CMDLINE:+${OLD_CMDLINE} }systemd.unified_cgroup_hierarchy=1"
-            sed -i "s;GRUB_CMDLINE_LINUX=\"${OLD_CMDLINE}\";GRUB_CMDLINE_LINUX=\"${NEW_CMDLINE}\";g" /etc/default/grub
-            grub-mkconfig -o /boot/grub/grub.cfg
-        fi
-        touch /etc/subgid /etc/subuid
-        usermod --add-subuids 165536-231072 --add-subgids 165536-231072 "${USER_NAME}"
-    fi
-
-    # qemu-debootstrap
-    LOCAL_STOW=/usr/local/stow
-    SCRIPTS_STOW=${LOCAL_STOW}/scripts
-    QEMU_DEBOOTSTRAP=${SCRIPTS_STOW}/bin/qemu-debootstrap
-    mkdir -p "${QEMU_DEBOOTSTRAP%*/}"
-    curl -LSso "${QEMU_DEBOOTSTRAP}" 'https://salsa.debian.org/qemu-team/qemu/-/raw/3e1429e38553d430e547709947c74a03d2f5ed38/debian/qemu-debootstrap?inline=false'
-    chmod +x "${QEMU_DEBOOTSTRAP}"
-    stow -d "${SCRIPTS_STOW%/*}" -R -v "${SCRIPTS_STOW##*/}"
-
-    # qemu-user-static
-    source <(curl -LSs https://github.com/nathanchance/scripts/raw/main/env/stubs/updbin)
-    bqemu_user_static || exit ${?}
-
-    # Register qemu-formats
-    BINFMT_D_STOW=${LOCAL_STOW}/binfmt-d
-    BINFMT_D_CONF=${BINFMT_D_STOW}/lib/binfmt.d/qemu-static.conf
-    mkdir -p "${BINFMT_D_CONF%/*}"
-    curl -LSs 'https://aur.archlinux.org/cgit/aur.git/plain/qemu-static.conf?h=binfmt-qemu-static' | sed 's;/usr/bin/;/usr/local/bin/;g' >"${BINFMT_D_CONF}"
-    stow -d "${BINFMT_D_STOW%/*}" -R -v "${BINFMT_D_STOW##*/}"
-    /usr/share/libalpm/scripts/systemd-hook binfmt
+    ${WSL} || podman_setup
 ); }
 
 # User setup function
