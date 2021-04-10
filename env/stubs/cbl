@@ -127,7 +127,7 @@ function bldtcs() { (
         --check-targets lld clang llvm llvm-unit \
         --install-folder "${BLDLLVM_INSTALL_FOLDER}" \
         "${BLD_LLVM_ARGS[@]}" \
-        --pgo kernel-defconfig kernel-allmodconfig || die "bldllvm failed with exit code ${?}"
+        --pgo kernel-defconfig || die "bldllvm failed with exit code ${?}"
     stripall "${BLDLLVM_INSTALL_FOLDER}"
 
     # Update llvm-latest symlink
