@@ -283,7 +283,6 @@ function bootstrap() { (
         [[ -d ${HOME}/.password-store ]] || { hub clone password-store "${HOME}"/.password-store || exit ${?}; }
 
         GITHUB_REPOS=(
-            archpkgbuilds
             hugo-files
             nathanchance.github.io
         )
@@ -298,7 +297,6 @@ function bootstrap() { (
         [[ -d ${SRC_FOLDER}/pahole ]] || git -C "${SRC_FOLDER}" clone https://git.kernel.org/pub/scm/devel/pahole/pahole.git
 
         GITHUB_REPOS=(
-            archpkgbuilds
             bug-files
             hugo-files
             nathanchance.github.io
@@ -321,6 +319,15 @@ function bootstrap() { (
         [[ -d ${GITHUB_FOLDER}/${GITHUB_REPO} ]] || { hub clone "${GITHUB_REPO}" "${GITHUB_FOLDER}/${GITHUB_REPO}" || exit ${?}; }
     done
     git -C "${GITHUB_FOLDER}"/hugo-files submodule update --init --recursive
+
+    PKGBUILDS=${GITHUB_FOLDER}/archpkgbuilds
+    mkdir -p "${PKGBUILDS}"
+    cd "${PKGBUILDS}" || exit ${?}
+    git clone "${PKGBUILDS##*/}" main || exit ${?}
+    for PACKAGE in linux-llvm qemu-user-static; do
+        PACKAGE_DIR=${PKGBUILDS}/${PACKAGE}
+        [[ -d ${PACKAGE_DIR} ]] || git -C "${PKGBUILDS}"/main worktree add -b "${PACKAGE}" "${PACKAGE_DIR}" origin/"${PACKAGE}"
+    done
 
     set +x
     echo "Things that might still need to be done"

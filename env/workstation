@@ -102,7 +102,7 @@ function updllvm() { (
 
 # Update kernel using makepkg
 function upd_kernel() { (
-    WORK_DIR=${GITHUB_FOLDER}/archpkgbuilds/trunk
+    WORK_DIR=${GITHUB_FOLDER}/archpkgbuilds/linux-llvm/trunk
     SLIM_CFG=${WORK_DIR}/slim_config
     SRC_DIR=${WORK_DIR}/src/linux-llvm
     SRC_CFG=${SRC_DIR}/.config
