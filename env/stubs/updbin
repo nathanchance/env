@@ -395,7 +395,7 @@ function biexa() { (
 
         # Build software
         cd "${EXA_SRC}" || die "Error downloading/extracting exa source"
-        cargo build --release --locked || die "cargo build failed"
+        cargo build --release || die "cargo build failed"
         cargo install --force --path . || die "cargo install failed"
     fi
 
@@ -441,7 +441,7 @@ function birg() { (
 
         # Build and install software
         cd "${RG_SRC}" || die "Error downloading ripgrep source"
-        cargo build --release --locked --features 'pcre2' || die "cargo build failed"
+        cargo build --release --features 'pcre2' || die "cargo build failed"
         cargo install --force --path . || die "cargo install failed"
     fi
     [[ -n ${ZSH_NAME} ]] && install -Dm644 complete/_rg "${HOME}"/.zfunctions/_rg
@@ -506,7 +506,7 @@ function bisharkdp() { (
 
             # Build software
             cd "${BINARY_SRC}" || die "Error downloading ${BINARY} source"
-            cargo build --release --locked || die "cargo build failed"
+            cargo build --release || die "cargo build failed"
             cargo install --force --path . || die "cargo install failed"
 
             # Install zsh completions
