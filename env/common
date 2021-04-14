@@ -23,6 +23,9 @@ fi
 
 # Universal aliases/functions/variables
 function universal_setup() {
+    # Move to git repo root
+    alias cdr='cd $(git root)'
+
     # Use exa as ls
     alias ls='exa'
 
