@@ -186,6 +186,58 @@ index e76ce40a12ab..1c1b4b7c4260 100644
 2.31.1.272.g89b43f80a5
 
 EOF
+    cat <<'EOF' | git am || exit ${?}
+From 609fcdf28ff4fcba5e4f500e420b32a8bed958cd Mon Sep 17 00:00:00 2001
+From: Nathan Chancellor <nathan@kernel.org>
+Date: Thu, 15 Apr 2021 09:10:12 -0700
+Subject: [PATCH] net: stmmac: Remove unused dma_recycle_rx_skbufs()
+
+Link: https://lore.kernel.org/r/DM6PR11MB2780C0D45E70297CC5CE5423CA4D9@DM6PR11MB2780.namprd11.prod.outlook.com/
+Signed-off-by: Nathan Chancellor <nathan@kernel.org>
+---
+ .../net/ethernet/stmicro/stmmac/stmmac_main.c | 25 -------------------
+ 1 file changed, 25 deletions(-)
+
+diff --git a/drivers/net/ethernet/stmicro/stmmac/stmmac_main.c b/drivers/net/ethernet/stmicro/stmmac/stmmac_main.c
+index a8b6f66a68a1..9f396648d76f 100644
+--- a/drivers/net/ethernet/stmicro/stmmac/stmmac_main.c
++++ b/drivers/net/ethernet/stmicro/stmmac/stmmac_main.c
+@@ -1557,31 +1557,6 @@ static int stmmac_alloc_rx_buffers(struct stmmac_priv *priv, u32 queue,
+ 	return 0;
+ }
+ 
+-/**
+- * dma_recycle_rx_skbufs - recycle RX dma buffers
+- * @priv: private structure
+- * @queue: RX queue index
+- */
+-static void dma_recycle_rx_skbufs(struct stmmac_priv *priv, u32 queue)
+-{
+-	struct stmmac_rx_queue *rx_q = &priv->rx_queue[queue];
+-	int i;
+-
+-	for (i = 0; i < priv->dma_rx_size; i++) {
+-		struct stmmac_rx_buffer *buf = &rx_q->buf_pool[i];
+-
+-		if (buf->page) {
+-			page_pool_recycle_direct(rx_q->page_pool, buf->page);
+-			buf->page = NULL;
+-		}
+-
+-		if (priv->sph && buf->sec_page) {
+-			page_pool_recycle_direct(rx_q->page_pool, buf->sec_page);
+-			buf->sec_page = NULL;
+-		}
+-	}
+-}
+-
+ /**
+  * dma_free_rx_xskbufs - free RX dma buffers from XSK pool
+  * @priv: private structure
+-- 
+2.31.1.272.g89b43f80a5
+
+EOF
     for SHA in 358afb8b746d4a7ebaeeeaab7a1523895a8572c2 4564363351e2680e55edc23c7953aebd2acb4ab7; do
         git fp -1 --stdout "${SHA}" arch/arm/boot/dts/bcm2711-rpi-4-b.dts | git ap -R || exit ${?}
     done
