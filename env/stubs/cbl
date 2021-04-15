@@ -118,6 +118,7 @@ function bldtcs() { (
     cd "${TC_BLD_LLVM_PRJCT}"
     git rh || die "Error resetting llvm-project"
     git pull --rebase || die "Updating llvm-project failed (${?})"
+    arc patch --nobranch --nocommit D100412 || die "Error applying D100412"
     BLDLLVM_INSTALL_FOLDER=${CBL_STOW_LLVM}/${DATE_TIME}-$(git -C "${TC_BLD_LLVM_PRJCT}" sh -s --format=%H origin/main)
     mkdir -p "${BLDLLVM_INSTALL_FOLDER%/*}"
     BLD_LLVM_ARGS=()
