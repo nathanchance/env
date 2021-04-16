@@ -187,53 +187,30 @@ index e76ce40a12ab..1c1b4b7c4260 100644
 
 EOF
     cat <<'EOF' | git am || exit ${?}
-From 609fcdf28ff4fcba5e4f500e420b32a8bed958cd Mon Sep 17 00:00:00 2001
+From b8be4559b191ce176c16489196ef29730db6919d Mon Sep 17 00:00:00 2001
 From: Nathan Chancellor <nathan@kernel.org>
-Date: Thu, 15 Apr 2021 09:10:12 -0700
-Subject: [PATCH] net: stmmac: Remove unused dma_recycle_rx_skbufs()
+Date: Fri, 16 Apr 2021 13:53:21 -0700
+Subject: [PATCH] PCI: Remove unused 'rdev' variable in quirk_amd_nvme_fixup
 
-Link: https://lore.kernel.org/r/DM6PR11MB2780C0D45E70297CC5CE5423CA4D9@DM6PR11MB2780.namprd11.prod.outlook.com/
+Fixes: 9597624ef606 ("nvme: put some AMD PCIE downstream NVME device to simple suspend/resume path")
 Signed-off-by: Nathan Chancellor <nathan@kernel.org>
 ---
- .../net/ethernet/stmicro/stmmac/stmmac_main.c | 25 -------------------
- 1 file changed, 25 deletions(-)
+ drivers/pci/quirks.c | 2 --
+ 1 file changed, 2 deletions(-)
 
-diff --git a/drivers/net/ethernet/stmicro/stmmac/stmmac_main.c b/drivers/net/ethernet/stmicro/stmmac/stmmac_main.c
-index a8b6f66a68a1..9f396648d76f 100644
---- a/drivers/net/ethernet/stmicro/stmmac/stmmac_main.c
-+++ b/drivers/net/ethernet/stmicro/stmmac/stmmac_main.c
-@@ -1557,31 +1557,6 @@ static int stmmac_alloc_rx_buffers(struct stmmac_priv *priv, u32 queue,
- 	return 0;
- }
+diff --git a/drivers/pci/quirks.c b/drivers/pci/quirks.c
+index 2e24dced699a..c86ede081534 100644
+--- a/drivers/pci/quirks.c
++++ b/drivers/pci/quirks.c
+@@ -309,8 +309,6 @@ DECLARE_PCI_FIXUP_FINAL(PCI_VENDOR_ID_AMD,	PCI_DEVICE_ID_AMD_8151_0,	quirk_nopci
  
--/**
-- * dma_recycle_rx_skbufs - recycle RX dma buffers
-- * @priv: private structure
-- * @queue: RX queue index
-- */
--static void dma_recycle_rx_skbufs(struct stmmac_priv *priv, u32 queue)
--{
--	struct stmmac_rx_queue *rx_q = &priv->rx_queue[queue];
--	int i;
+ static void quirk_amd_nvme_fixup(struct pci_dev *dev)
+ {
+-	struct pci_dev *rdev;
 -
--	for (i = 0; i < priv->dma_rx_size; i++) {
--		struct stmmac_rx_buffer *buf = &rx_q->buf_pool[i];
--
--		if (buf->page) {
--			page_pool_recycle_direct(rx_q->page_pool, buf->page);
--			buf->page = NULL;
--		}
--
--		if (priv->sph && buf->sec_page) {
--			page_pool_recycle_direct(rx_q->page_pool, buf->sec_page);
--			buf->sec_page = NULL;
--		}
--	}
--}
--
- /**
-  * dma_free_rx_xskbufs - free RX dma buffers from XSK pool
-  * @priv: private structure
+ 	dev->dev_flags |= PCI_DEV_FLAGS_AMD_NVME_SIMPLE_SUSPEND;
+ 	pci_info(dev, "AMD simple suspend opt enabled\n");
+ 
 -- 
 2.31.1.272.g89b43f80a5
 
