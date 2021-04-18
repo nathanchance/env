@@ -250,7 +250,8 @@ function rbwk() { (
     set -x
     cd "${WSL2_KERNEL}" || exit ${?}
     git ru || exit ${?}
-    for BRANCH in clearlinux-patchset microsoft-patchset; do
+    BRANCHES=(dxgkrnl)
+    for BRANCH in "${BRANCHES[@]}"; do
         git ch "${BRANCH}" || exit ${?}
         git rb -i next/master || exit ${?}
     done
@@ -266,7 +267,7 @@ function rbwk() { (
         git aa
         git c || exit ${?}
     fi
-    git ml --no-edit clearlinux-patchset microsoft-patchset || exit ${?}
+    git ml --no-edit "${BRANCHES[@]}" || exit ${?}
     git cp "$(git lo --merges -1 --format=%H origin/HEAD)".."$(git sh -s --format=%H origin/HEAD)"
 ); }
 # vi: filetype=zsh
