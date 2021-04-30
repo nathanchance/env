@@ -12,9 +12,7 @@
         {
             // https://github.com/be5invis/Iosevka
             "fontFace": "Iosevka Term SS08",
-            "fontSize": 9,
-            "useAcrylic": true,
-            "acrylicOpacity": 0.9
+            "fontSize": 9
         },
         "list":
         [
@@ -107,12 +105,20 @@
         // Unbind Ctrl-^ so that force disconnecting a mosh session works
         { "command" : "unbound", "keys" : "ctrl+shift+6" }
 
-        // Unbind Ctrl-{N,P} so that I can use them for neomutt
-        { "command" : "unbound", "keys" : "ctrl+shift+n" },
-        { "command" : "unbound", "keys" : "ctrl+shift+p" },
+        // Focus mode
+        { "command": "toggleFocusMode", "keys": "shift+f11" },
 
-        // focus mode
-        { "command": "toggleFocusMode", "keys": "shift+f11" }
+        // Unbind keys involving alt so that fish partial complete works
+        { "command": "unbound", "keys": "alt+shift+-" },
+        { "command": "unbound", "keys": "alt+shift+plus" },
+        { "command": "unbound", "keys": "alt+down" },
+        { "command": "unbound", "keys": "alt+left" },
+        { "command": "unbound", "keys": "alt+right" },
+        { "command": "unbound", "keys": "alt+up" },
+        { "command": "unbound", "keys": "alt+shift+down" },
+        { "command": "unbound", "keys": "alt+shift+left" },
+        { "command": "unbound", "keys": "alt+shift+right" },
+        { "command": "unbound", "keys": "alt+shift+up" }
     ]
 }
 
