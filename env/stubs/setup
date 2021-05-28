@@ -44,8 +44,7 @@ function arch_root_setup() { (
     remove_if_installed fakeroot-tcp
 
     # Ignore linux-llvm{,-headers} because I build that package myself: https://github.com/nathanchance/archpkgbuilds/commits/linux-llvm
-    # Ignore podman: https://github.com/containers/podman/issues/9936
-    sed -i 's/#IgnorePkg   =/IgnorePkg    = linux-llvm linux-llvm-headers podman/g' /etc/pacman.conf
+    sed -i 's/#IgnorePkg   =/IgnorePkg    = linux-llvm linux-llvm-headers/g' /etc/pacman.conf
 
     # Install all packages that we want
     PACKAGES=(
