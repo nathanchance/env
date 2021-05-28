@@ -144,8 +144,8 @@ EOF
         echo "${USER_NAME}:${USER_PASS}" | chpasswd
     fi
 
-    # Build certain AUR packages in a temporary directory
-    AUR_DIR=$(mktemp -d)
+    # Build certain AUR packages in a temporary directory within '/var'
+    AUR_DIR=$(mktemp -d -p /var)
     cd "${AUR_DIR}" || exit ${?}
 
     # Create 'sudo' symlink temporarily
