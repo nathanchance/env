@@ -11,6 +11,7 @@
         "defaults":
         {
             // https://github.com/be5invis/Iosevka
+            "bellStyle": "visual",
             "fontFace": "Iosevka Term SS08",
             "fontSize": 9
         },
@@ -22,7 +23,9 @@
                 "name": "foobar",
                 "source": "Windows.Terminal.Wsl",
                 "colorScheme": "snazzy",
-                "closeOnExit": "always"
+                "closeOnExit": "always",
+                "startingDirectory": "\\\\wsl$\\Arch\\home\\nathan",
+                "icon": "ms-appdata:///roaming/archlinux.ico"
             }
         ]
     },
@@ -103,7 +106,7 @@
     "keybindings":
     [
         // Unbind Ctrl-^ so that force disconnecting a mosh session works
-        { "command" : "unbound", "keys" : "ctrl+shift+6" }
+        { "command" : "unbound", "keys" : "ctrl+shift+6" },
 
         // Focus mode
         { "command": "toggleFocusMode", "keys": "shift+f11" },
