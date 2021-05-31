@@ -93,10 +93,6 @@ function partition_and_create_user() { (
                 shift
                 PASSWORD=${1}
                 ;;
-            -s | --shell)
-                shift
-                SHELL_PATH=${1}
-                ;;
             -u | --user)
                 shift
                 USER=${1}
@@ -138,22 +134,10 @@ function partition_and_create_user() { (
         set -x
     else
         USER_ADD_ARGS=(-m -G "kvm,sudo")
-        if [[ "${SHELL_PATH:-}" = "/bin/zsh" ]]; then
-            apt install -y zsh
-            USER_ADD_ARGS=("${USER_ADD_ARGS[@]}" -s "${SHELL_PATH}")
-        fi
         useradd "${USER_ADD_ARGS[@]}" "${USER}"
         echo "${USER}:${PASSWORD}" | chpasswd
         cp -rv /root/.ssh /home/"${USER}"
         chown -R "${USER}:${USER}" /home/"${USER}"/.ssh
-        ZSHRC=/home/${USER}/.zshrc
-        if ! grep -q shell_setup "${ZSHRC}"; then
-            cat <<'EOF' >"${ZSHRC}"
-[[ -z ${SSH_AUTH_SOCK} ]] && eval $(ssh-agent)
-[[ -z ${TMUX} ]] && tmux new-session -ADs main
-EOF
-            chown -R "${USER}:${USER}" "${ZSHRC}"
-        fi
     fi
     return 0
 ); }
