@@ -155,6 +155,7 @@ EOF
 
     AUR_PACKAGES=(
         # Alphabetized
+        duf-bin
         opendoas-sudo
         yay-bin
         # Dependency based
