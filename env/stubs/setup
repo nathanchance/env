@@ -170,7 +170,7 @@ EOF
         case "${AUR_PACKAGE}" in
             qemu-user-static)
                 HOME=${AUR_DIR} su -m -s /bin/bash nobody -c "gpg --recv-keys 3353C9CEF108B584" || exit ${?}
-                GIT_ARGS=(-b "${AUR_PACKAGE}" https://github.com/nathanchance/archpkgbuilds)
+                GIT_ARGS=(https://aur.archlinux.org/"${AUR_PACKAGE}".git)
                 ;;
             *)
                 GIT_ARGS=(https://aur.archlinux.org/"${AUR_PACKAGE}".git)
