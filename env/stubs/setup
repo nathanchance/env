@@ -17,7 +17,7 @@ EOF
 # Requires that:
 #   1. Arch Linux has been setup with partitions
 #      For Hetzner: $ installimage -r yes -l 0 -f yes -n archlinux-<suffix>
-function arch_rootstrap() { (
+function arch_root_setup() { (
     set -x
 
     : "${ROOT_PASS:?}" "${USER_PASS:?}"
@@ -212,7 +212,7 @@ function bootstrap() { (
     # Set yay flags for sudo
     command -v yay &>/dev/null && yay --sudo doas --sudoflags -- --save
 
-    # Assume that we are currently in a scripts folder, bail out if not. git HAS to be available by this point due to rootstrap
+    # Assume that we are currently in a scripts folder, bail out if not. git HAS to be available by this point due to root_setup
     for SCRIPT_FILE in common env/common env/stubs/folders env/stubs/git env/stubs/setup env/stubs/zsh; do
         source <(cat "${SCRIPT_FILE}") || exit ${?}
     done
@@ -476,7 +476,7 @@ function cbl_other_repos() { (
     git_remote_add -f --no-tags next https://git.kernel.org/pub/scm/linux/kernel/git/next/linux-next.git/
 ); }
 
-function common_rootstrap { (
+function common_root_setup { (
     # Set time zone to Arizona time
     # Not needed in WSL
     ${WSL} || timedatectl set-timezone America/Phoenix
@@ -493,7 +493,7 @@ EOF
     chown -R "${USER_NAME}:${USER_NAME}" "${ZSHRC}"
 ); }
 
-function debian_rootstrap { (
+function debian_root_setup { (
     # For rootless podman
     if ! ${WSL}; then
         echo "kernel.unprivileged_userns_clone=1" | tee /etc/sysctl.d/00-local-userns.conf
@@ -794,15 +794,15 @@ function remove_if_installed() { (
 ); }
 
 # Setup function (as root, calls distribution specific function)
-function rootstrap() { (
+function root_setup() { (
     : "${USER_NAME:=nathan}"
 
     [[ ${EUID} -eq 0 ]] || exit ${?}
     set_distro
     set_wsl
 
-    "${DISTRO}"_rootstrap || exit ${?}
-    common_rootstrap
+    "${DISTRO}"_root_setup || exit ${?}
+    common_root_setup
 ); }
 
 # Set distro variable
@@ -821,7 +821,7 @@ function set_wsl() {
     : "${WSL:=false}"
 }
 
-function ubuntu_rootstrap { (
+function ubuntu_root_setup { (
     if ! ${WSL}; then
         # shellcheck disable=SC1091
         source /etc/os-release
@@ -839,8 +839,8 @@ function ubuntu_rootstrap { (
     fi
 ); }
 
-function unsupported_rootstrap { (
-    echo "Unsupported distribution for rootstrap, please add it"
+function unsupported_root_setup { (
+    echo "Unsupported distribution for root_setup, please add it"
     exit 1
 ); }
 # vi: filetype=zsh
