@@ -155,7 +155,7 @@ out.*/
 
     bash $ENV_FOLDER/configs/common/vim/vim_setup.bash
 
-    if test "$wsl" != true
+    if test "$wsl" != true; and not set -q DISPLAY
         ln -fsv $ENV_FOLDER/configs/headless/.tmux.conf $HOME/.tmux.conf
     end
 
