@@ -21,6 +21,8 @@ switch $user@$host
         set -U LOCATION pi
     case nathan@archlinux-'*' nathan@debian-'*' nathan@ubuntu-'*'
         set -U LOCATION server
+    case nathan@hyperv nathan@vmware
+        set -U LOCATION vm
     case nathan@MSI nathan@Ryzen-5-4500U nathan@Ryzen-9-3900X
         set -U LOCATION wsl
     case '*'

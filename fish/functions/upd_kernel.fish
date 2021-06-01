@@ -6,7 +6,7 @@ function upd_kernel -d "Update machine's kernel"
     set fish_trace 1
 
     switch $LOCATION
-        case generic server
+        case generic server vm
             pushd $ENV_FOLDER/pkgbuilds/linux-mainline-llvm; or return
 
             # Prerequisite: Clean up old kernels

@@ -6,10 +6,10 @@ function ccache_setup -d "Setup ccache size and compression"
     switch $LOCATION
         case generic wsl
             set size 25
+        case pi vm
+            set size 15
         case server
             set size 150
-        case pi
-            set size 15
     end
     ccache --max-size="$size"G >/dev/null
     ccache --set-config=compression=true

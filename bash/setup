@@ -16,10 +16,14 @@ EOF
 function arch_root_setup() { (
     set -x
 
-    : "${ROOT_PASS:?}" "${USER_PASS:?}"
+    # Arch Linux VM will be set up with archinstall, which set the user and root password
+    # TODO: Handle bare metal workstation if/when that happens
+    if [[ $(uname -n) = "hyperv" ]]; then
+        : "${ROOT_PASS:?}" "${USER_PASS:?}"
 
-    # Remove the root password so that all commands that would normally require a root password are non-interactive
-    passwd -d root
+        # Remove the root password so that all commands that would normally require a root password are non-interactive
+        passwd -d root
+    fi
 
     # Enable the multilib repository
     sed -i "/\[multilib\]/,/Include/"'s/^#//' /etc/pacman.conf
@@ -208,7 +212,7 @@ EOF
     mv /etc/doas.conf.tmp /etc/doas.conf
 
     # Reset root account's password
-    echo "root:${ROOT_PASS}" | chpasswd
+    [[ -n ${ROOT_PASS} ]] && echo "root:${ROOT_PASS}" | chpasswd
 
     # Rootless podman (https://wiki.archlinux.org/index.php/Podman#Rootless_Podman)
     podman_setup

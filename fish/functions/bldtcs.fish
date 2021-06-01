@@ -11,6 +11,10 @@ function bldtcs -d "Build LLVM and binutils from source for kernel development"
     end
 
     switch $LOCATION
+        case generic server wsl
+            set bld_llvm_args \
+                --pgo kernel-{def,allmod}config
+
         case pi
             set bld_bntls_args \
                 --targets host x86_64
@@ -22,12 +26,9 @@ function bldtcs -d "Build LLVM and binutils from source for kernel development"
                 --targets "AArch64;ARM;X86"
 
             set check_targets clang llvm{,-unit}
-
-        case '*'
-            set bld_llvm_args \
-                --pgo kernel-{def,allmod}config
-
-            set check_targets clang lld llvm{,-unit}
+    end
+    if not set -q check_targets
+        set check_targets clang lld llvm{,-unit}
     end
     if test "$lto" = true
         set -a bld_llvm_args --lto=thin
