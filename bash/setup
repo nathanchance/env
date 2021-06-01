@@ -157,7 +157,7 @@ EOF
         inetutils-hostname
         mosh-git
         opendoas-sudo
-        yay-bin
+        yay
         # Dependency based
         # qemu-user-static depends on glib2-static and pcre-static so build those first
         glib2-static
