@@ -1,14 +1,22 @@
-From 5efbc1e8b83eef959f629d556589487255bbf0f6 Mon Sep 17 00:00:00 2001
-From: Nathan Chancellor <nathan@kernel.org>
-Date: Sun, 30 May 2021 17:42:55 -0700
-Subject: [PATCH] Revert "fb_defio: Remove custom address_space_operations"
+From 0b78f8bcf4951af30b0ae83ea4fad27d641ab617 Mon Sep 17 00:00:00 2001
+From: Matthew Wilcox <willy@infradead.org>
+Date: Tue, 1 Jun 2021 15:30:30 +0100
+Subject: Revert "fb_defio: Remove custom address_space_operations"
 
-This reverts commit ccf953d8f3d68e85e577e843fdcde8872b0a9769.
+Commit ccf953d8f3d6 makes framebuffers which use deferred I/O stop
+displaying updates after the first one.  This is because the pages
+handled by fb_defio no longer have a page_mapping().  That prevents
+page_mkclean() from marking the PTEs as clean, and so writes are only
+noticed the first time.
 
-Link: https://lore.kernel.org/r/YLPjwUUmHDRjyPpR@Ryzen-9-3900X.localdomain/
+Reported-by: Andy Shevchenko <andy.shevchenko@gmail.com>
+Signed-off-by: Matthew Wilcox (Oracle) <willy@infradead.org>
+Signed-off-by: Daniel Vetter <daniel.vetter@ffwll.ch>
+Link: https://patchwork.freedesktop.org/patch/msgid/YLZEhv0cpZp8uVE3@casper.infradead.org
+Link: https://cgit.freedesktop.org/drm/drm-misc/commit/?id=0b78f8bcf4951af30b0ae83ea4fad27d641ab617
 Signed-off-by: Nathan Chancellor <nathan@kernel.org>
 ---
- drivers/video/fbdev/core/fb_defio.c | 35 +++++++++++++++++++++++++++++
+ drivers/video/fbdev/core/fb_defio.c | 35 +++++++++++++++++++++++++++++++++++
  drivers/video/fbdev/core/fbmem.c    |  4 ++++
  include/linux/fb.h                  |  3 +++
  3 files changed, 42 insertions(+)
@@ -109,5 +117,5 @@ index a8dccd23c249..ecfbcc0553a5 100644
  extern int fb_deferred_io_fsync(struct file *file, loff_t start,
  				loff_t end, int datasync);
 -- 
-2.32.0.rc0
+cgit v1.2.1
 
