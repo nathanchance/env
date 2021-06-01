@@ -111,6 +111,14 @@ function arch_root_setup() { (
     if ${WSL}; then
         PACKAGES+=(pass)
     else
+        if [[ -n ${DISPLAY} ]]; then
+            PACKAGES+=(
+                discord
+                telegram-desktop
+                thunderbird
+                ttc-iosevka-ss08
+            )
+        fi
         PACKAGES+=(podman)
     fi
     # This conflicts with sudo in base-devel, remove it as it will be reinstalled after the fact
@@ -154,9 +162,12 @@ EOF
     AUR_PACKAGES=(
         # Alphabetized
         duf-bin
+        google-chrome
         inetutils-hostname
         mosh-git
         opendoas-sudo
+        slack-desktop
+        visual-studio-code-bin
         yay
         # Dependency based
         # qemu-user-static depends on glib2-static and pcre-static so build those first
