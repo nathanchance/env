@@ -155,7 +155,6 @@ EOF
 
     AUR_PACKAGES=(
         # Alphabetized
-        inetutils-hostname
         opendoas-sudo
         yay-bin
         # Dependency based
