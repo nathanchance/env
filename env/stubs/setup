@@ -103,6 +103,7 @@ function arch_root_setup() { (
         ripgrep
         shellcheck
         shfmt
+        stow
         swig
         tmux
         uboot-tools
