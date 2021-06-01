@@ -201,6 +201,28 @@ EOF
     ${WSL} || podman_setup
 ); }
 
+# Build mosh from source
+function bmosh() { (
+    [[ ${EUID} -eq 0 ]] || exit
+
+    MOSH_SRC=/usr/local/src/mosh
+    if [[ ! -d ${MOSH_SRC} ]]; then
+        mkdir -p "${MOSH_SRC%/*}"
+        git clone https://github.com/mobile-shell/mosh "${MOSH_SRC}"
+    fi
+    git -C "${MOSH_SRC}" pull -r || exit
+    MOSH_STOW=${PREFIX:-/usr/local}/stow
+    MOSH_PREFIX=${MOSH_STOW}/packages/mosh/$(date +%F-%H-%M-%S)-$(git -C "${MOSH_SRC}" show -s --format=%H)
+
+    cd "${MOSH_SRC}" || exit
+    ./autogen.sh || exit
+    ./configure --enable-ufw --prefix="${MOSH_PREFIX}" || exit
+    make -j"$(nproc)" install || exit
+
+    ln -fnrsv "${MOSH_PREFIX}" "${MOSH_STOW}"/mosh-latest
+    stow -d "${MOSH_STOW}" -R -v mosh-latest
+); }
+
 # User setup function
 function bootstrap() { (
     set -x
@@ -611,6 +633,7 @@ function debian_ubuntu_packages() {
         libpam0g-dev
         libpcre2-dev
         libpixman-1-dev
+        libprotobuf-dev
         libssl-dev
         libtinfo5
         lld
@@ -628,6 +651,7 @@ function debian_ubuntu_packages() {
         php
         php-curl
         pkg-config
+        protobuf-compiler
         psmisc
         python2.7
         python3
@@ -670,6 +694,7 @@ function debian_ubuntu_update_install() { (
     DEBIAN_FRONTEND=noninteractive apt upgrade -y || exit ${?}
     DEBIAN_FRONTEND=noninteractive apt install -y "${PACKAGES[@]}" || exit ${?}
     debian_ubuntu_doas
+    bmosh || exit ${?}
     # Reinstall 'ping' to avoid issues with permissions
     ${WSL} && apt install -y --reinstall iputils-ping
 ); }
