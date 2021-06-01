@@ -14,7 +14,6 @@ function rbpi -d "Rebase Raspberry Pi kernel on latest linux-next"
     git rh origin/master
 
     set -a patches 20210514213032.575161-1-arnd@kernel.org # [PATCH] drm/msm/dsi: fix 32-bit clang warning
-    set -a patches 20210531033426.74031-1-cuibixuan@huawei.com # [PATCH -next v2] mm/mmap_lock: fix warning when CONFIG_TRACING is not defined
     for patch in $patches
         git b4 ams $patch; or return
     end
