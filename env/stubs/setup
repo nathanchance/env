@@ -602,6 +602,7 @@ function debian_ubuntu_packages() {
         flex
         fortune
         fortunes
+        fuse-overlayfs
         gcc
         gettext
         git
