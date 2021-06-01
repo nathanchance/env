@@ -147,8 +147,10 @@ EOF
     pacman -R --noconfirm sudo
 
     # Create my user account and password if it is not already created
-    if ! getent passwd "${USER_NAME}"; then
-        useradd -m -G wheel -s /bin/fish "${USER_NAME}"
+    if getent passwd "${USER_NAME}"; then
+        chsh -s /bin/fish "${USER_NAME}"
+    else
+        useradd -G wheel -m -s /bin/fish "${USER_NAME}"
         echo "${USER_NAME}:${USER_PASS}" | chpasswd
     fi
 
@@ -277,8 +279,8 @@ function can_install_podman() { (
 function clone_env() { (
     ENV_FOLDER=/tmp/env
     [[ -d ${ENV_FOLDER} ]] || git clone https://github.com/nathanchance/env "${ENV_FOLDER}"
-    chown -R "${USER_NAME}:${USER_NAME}" ${ENV_FOLDER}
     git -C "${ENV_FOLDER}" pull -qr
+    chown -R "${USER_NAME}:${USER_NAME}" ${ENV_FOLDER}
 ); }
 
 function common_root_setup { (
