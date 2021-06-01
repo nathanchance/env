@@ -3,9 +3,16 @@
 # Copyright (C) 2021 Nathan Chancellor
 
 function gen_localmodconfig -d "Generate a slimmed down configuration file for Arch Linux"
-    set linux_llvm $ENV_FOLDER/pkgbuilds/linux-mainline-llvm
+    for arg in $argv
+        switch $arg
+            case linux-mainline-llvm linux-next-llvm
+                set pkg $arg
+        end
+    end
+
+    set linux_llvm $ENV_FOLDER/pkgbuilds/$pkg
     set cfg $linux_llvm/config
-    set src $linux_llvm/src/linux-mainline-llvm
+    set src $linux_llvm/src/$pkg
     set src_cfg $src/.config
 
     pushd $linux_llvm; or return
