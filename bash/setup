@@ -16,12 +16,14 @@ EOF
 function arch_root_setup() { (
     set -x
 
-    # Arch Linux VM will be set up with archinstall, which set the user and root password
-    # TODO: Handle bare metal workstation if/when that happens
-    if [[ $(uname -n) = "hyperv" ]]; then
+    # Certain Arch Linux installs will be set up with archinstall, which sets
+    # up the user account/password and root password, so we do not need to do
+    # anything here
+    if ! getent passwd "${USER_NAME}"; then
         : "${ROOT_PASS:?}" "${USER_PASS:?}"
 
-        # Remove the root password so that all commands that would normally require a root password are non-interactive
+        # Remove the root password so that all commands that would normally
+        # require a root password are non-interactive
         passwd -d root
     fi
 
@@ -146,9 +148,10 @@ EOF
     # Remove sudo, which comes in via base-devel
     pacman -R --noconfirm sudo
 
-    # Create my user account and password if it is not already created
+    # Set shell to fish if user account has already been created
     if getent passwd "${USER_NAME}"; then
         chsh -s /bin/fish "${USER_NAME}"
+    # Create my user account and password if it is not already created
     else
         useradd -G wheel -m -s /bin/fish "${USER_NAME}"
         echo "${USER_NAME}:${USER_PASS}" | chpasswd
