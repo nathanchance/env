@@ -18,7 +18,7 @@ function updllvm -d "Updates LLVM for system-wide use"
 
     qualify_llvm_uprev; or return
     switch $LOCATION
-        case workstation
+        case server
             bpgollvm
         case '*'
             bllvm

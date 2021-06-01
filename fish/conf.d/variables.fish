@@ -17,12 +17,12 @@ end
 set -l user (id -un)
 set -l host (uname -n)
 switch $user@$host
-    case nathan@archlinux-'*' nathan@debian-'*' nathan@ubuntu-'*'
-        set -U LOCATION workstation
-    case nathan@MSI nathan@Ryzen-5-4500U nathan@Ryzen-9-3900X
-        set -U LOCATION wsl
     case pi@raspberrypi
         set -U LOCATION pi
+    case nathan@archlinux-'*' nathan@debian-'*' nathan@ubuntu-'*'
+        set -U LOCATION server
+    case nathan@MSI nathan@Ryzen-5-4500U nathan@Ryzen-9-3900X
+        set -U LOCATION wsl
     case '*'
         set -U LOCATION generic
 end

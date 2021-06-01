@@ -11,7 +11,7 @@ function user_setup -d "Setup a user account, downloading all files and placing 
         yay --sudo doas --sudoflags -- --save
     end
 
-    if test "$LOCATION" = workstation; or test "$LOCATION" = wsl
+    if test "$LOCATION" = server; or test "$LOCATION" = wsl
         set trusted true
     end
 

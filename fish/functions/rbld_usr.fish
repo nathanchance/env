@@ -33,7 +33,7 @@ function rbld_usr -d "Rebuild the binaries and scripts in ~/usr"
             bisharkdp all; or return
             btmux; or return
 
-        case workstation
+        case server
             switch (get_distro)
                 case arch
                     bgit; or return

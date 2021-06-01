@@ -4,7 +4,7 @@
 
 function rbwk -d "Rebase WSL2 kernel on latest linux-next"
     switch $LOCATION
-        case workstation wsl
+        case server wsl
             set src $CBL_BLD/wsl2
         case '*'
             print_error "rbwk is not supported by $LOCATION"
