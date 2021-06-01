@@ -158,11 +158,12 @@ EOF
         inetutils-hostname
         opendoas-sudo
         yay-bin
+        # Dependency based
         # qemu-user-static depends on glib2-static and pcre-static so build those first
-        # binfmt-qemu-static needs qemu-user-static to be installed in order to register properly
         glib2-static
         pcre-static
         qemu-user-static
+        # binfmt-qemu-static needs qemu-user-static to be installed in order to register properly
         binfmt-qemu-static
     )
     for AUR_PACKAGE in "${AUR_PACKAGES[@]}"; do
