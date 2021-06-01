@@ -67,15 +67,5 @@ case "$name" in
 esac
 
 cversion=$(get_canonical_version $version)
-min_cversion=$(get_canonical_version $min_version)
 
-if [ "$cversion" -lt "$min_cversion" ]; then
-    echo >&2 "***"
-    echo >&2 "*** Compiler is too old."
-    echo >&2 "***   Your $name version:    $version"
-    echo >&2 "***   Minimum $name version: $min_version"
-    echo >&2 "***"
-    exit 1
-fi
-
-echo $name $cversion
+echo $cversion

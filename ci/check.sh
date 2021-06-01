@@ -6,15 +6,18 @@
 ACTIONS=()
 while ((${#})); do
     case ${1} in
-        shellcheck | shfmt) ACTIONS=("${1}") ;;
+        fish_indent | shellcheck | shfmt) ACTIONS=("${1}") ;;
     esac
     shift
 done
-[[ -z ${ACTIONS[*]} ]] && ACTIONS=(shellcheck shfmt)
+[[ -z ${ACTIONS[*]} ]] && ACTIONS=(fish_indent shellcheck shfmt)
+
+set -x
 
 for ACTION in "${ACTIONS[@]}"; do
     case ${ACTION} in
-        shellcheck) fd -t x -E windows -x shellcheck ;;
-        shfmt) fd -t x -E windows -x shfmt -ci -d -i 4 ;;
+        fish_indent) fd -e fish . fish/ -x fish_indent -c ;;
+        shellcheck) fd -t x . bash/ configs/ -x shellcheck ;;
+        shfmt) fd -t x . bash/ configs/ -x shfmt -ci -d -i 4 ;;
     esac
 done

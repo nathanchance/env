@@ -1,4 +1,4 @@
-name: 'Run shellcheck and shfmt in Docker'
+name: 'Run fish_indent, shellcheck, and shfmt in Docker'
 inputs:
   check:
     description: 'Which check to run'

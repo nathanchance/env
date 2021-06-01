@@ -1,0 +1,38 @@
+# Maintainer: Alexander F. Rødseth <xyproto@archlinux.org>
+# Contributor: Christian Neukirchen <chneukirchen@gmail.com>
+# Contributor: Thomas Weißschuh <thomas_weissschuh@lavabit.com>
+
+_pkgname=mosh
+pkgname=$_pkgname-git
+pkgver=20200518
+pkgrel=1
+pkgdesc='Mobile shell, surviving disconnects with local echo and line editing'
+arch=(x86_64)
+url='https://mosh.org/'
+license=(GPL3)
+depends=(libutempter openssh openssl perl-io-tty protobuf)
+makedepends=(git)
+options=(!emptydirs)
+conflicts=('mosh')
+source=("git+https://github.com/mobile-shell/mosh")
+sha512sums=('SKIP')
+
+pkgver() {
+  git -C "$srcdir/$_pkgname" log -1 --format="%cd" --date=short | sed 's|-||g'
+}
+
+build() {
+  cd $_pkgname
+  ./autogen.sh
+  ./configure --enable-ufw --prefix=/usr --sysconfdir=/etc
+  make
+}
+
+package() {
+  DESTDIR="$pkgdir" make -C $_pkgname install
+  install -Dm644 "$_pkgname/conf/bash-completion/completions/$_pkgname" \
+    "$pkgdir/usr/share/bash-completion/completions/$_pkgname"
+}
+
+# getver: raw.githubusercontent.com/mobile-shell/mosh/master/ChangeLog
+# vim: ts=2 sw=2 et:

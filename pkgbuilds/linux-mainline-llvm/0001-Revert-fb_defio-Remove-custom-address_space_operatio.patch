@@ -1,0 +1,113 @@
+From 5efbc1e8b83eef959f629d556589487255bbf0f6 Mon Sep 17 00:00:00 2001
+From: Nathan Chancellor <nathan@kernel.org>
+Date: Sun, 30 May 2021 17:42:55 -0700
+Subject: [PATCH] Revert "fb_defio: Remove custom address_space_operations"
+
+This reverts commit ccf953d8f3d68e85e577e843fdcde8872b0a9769.
+
+Link: https://lore.kernel.org/r/YLPjwUUmHDRjyPpR@Ryzen-9-3900X.localdomain/
+Signed-off-by: Nathan Chancellor <nathan@kernel.org>
+---
+ drivers/video/fbdev/core/fb_defio.c | 35 +++++++++++++++++++++++++++++
+ drivers/video/fbdev/core/fbmem.c    |  4 ++++
+ include/linux/fb.h                  |  3 +++
+ 3 files changed, 42 insertions(+)
+
+diff --git a/drivers/video/fbdev/core/fb_defio.c b/drivers/video/fbdev/core/fb_defio.c
+index b292887a2481..a591d291b231 100644
+--- a/drivers/video/fbdev/core/fb_defio.c
++++ b/drivers/video/fbdev/core/fb_defio.c
+@@ -52,6 +52,13 @@ static vm_fault_t fb_deferred_io_fault(struct vm_fault *vmf)
+ 		return VM_FAULT_SIGBUS;
+ 
+ 	get_page(page);
++
++	if (vmf->vma->vm_file)
++		page->mapping = vmf->vma->vm_file->f_mapping;
++	else
++		printk(KERN_ERR "no mapping available\n");
++
++	BUG_ON(!page->mapping);
+ 	page->index = vmf->pgoff;
+ 
+ 	vmf->page = page;
+@@ -144,6 +151,17 @@ static const struct vm_operations_struct fb_deferred_io_vm_ops = {
+ 	.page_mkwrite	= fb_deferred_io_mkwrite,
+ };
+ 
++static int fb_deferred_io_set_page_dirty(struct page *page)
++{
++	if (!PageDirty(page))
++		SetPageDirty(page);
++	return 0;
++}
++
++static const struct address_space_operations fb_deferred_io_aops = {
++	.set_page_dirty = fb_deferred_io_set_page_dirty,
++};
++
+ int fb_deferred_io_mmap(struct fb_info *info, struct vm_area_struct *vma)
+ {
+ 	vma->vm_ops = &fb_deferred_io_vm_ops;
+@@ -194,12 +212,29 @@ void fb_deferred_io_init(struct fb_info *info)
+ }
+ EXPORT_SYMBOL_GPL(fb_deferred_io_init);
+ 
++void fb_deferred_io_open(struct fb_info *info,
++			 struct inode *inode,
++			 struct file *file)
++{
++	file->f_mapping->a_ops = &fb_deferred_io_aops;
++}
++EXPORT_SYMBOL_GPL(fb_deferred_io_open);
++
+ void fb_deferred_io_cleanup(struct fb_info *info)
+ {
+ 	struct fb_deferred_io *fbdefio = info->fbdefio;
++	struct page *page;
++	int i;
+ 
+ 	BUG_ON(!fbdefio);
+ 	cancel_delayed_work_sync(&info->deferred_work);
++
++	/* clear out the mapping that we setup */
++	for (i = 0 ; i < info->fix.smem_len; i += PAGE_SIZE) {
++		page = fb_deferred_io_page(info, i);
++		page->mapping = NULL;
++	}
++
+ 	mutex_destroy(&fbdefio->lock);
+ }
+ EXPORT_SYMBOL_GPL(fb_deferred_io_cleanup);
+diff --git a/drivers/video/fbdev/core/fbmem.c b/drivers/video/fbdev/core/fbmem.c
+index 072780b0e570..98f193078c05 100644
+--- a/drivers/video/fbdev/core/fbmem.c
++++ b/drivers/video/fbdev/core/fbmem.c
+@@ -1415,6 +1415,10 @@ __releases(&info->lock)
+ 		if (res)
+ 			module_put(info->fbops->owner);
+ 	}
++#ifdef CONFIG_FB_DEFERRED_IO
++	if (info->fbdefio)
++		fb_deferred_io_open(info, inode, file);
++#endif
+ out:
+ 	unlock_fb_info(info);
+ 	if (res)
+diff --git a/include/linux/fb.h b/include/linux/fb.h
+index a8dccd23c249..ecfbcc0553a5 100644
+--- a/include/linux/fb.h
++++ b/include/linux/fb.h
+@@ -659,6 +659,9 @@ static inline void __fb_pad_aligned_buffer(u8 *dst, u32 d_pitch,
+ /* drivers/video/fb_defio.c */
+ int fb_deferred_io_mmap(struct fb_info *info, struct vm_area_struct *vma);
+ extern void fb_deferred_io_init(struct fb_info *info);
++extern void fb_deferred_io_open(struct fb_info *info,
++				struct inode *inode,
++				struct file *file);
+ extern void fb_deferred_io_cleanup(struct fb_info *info);
+ extern int fb_deferred_io_fsync(struct file *file, loff_t start,
+ 				loff_t end, int datasync);
+-- 
+2.32.0.rc0
+

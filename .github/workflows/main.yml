@@ -2,6 +2,16 @@
 name: linting
 on: [push, pull_request]
 jobs:
+  fish_indent:
+    runs-on: ubuntu-latest
+    name: 'fish_indent'
+    steps:
+      - name: checkout
+        uses: actions/checkout@v2
+      - name: fish_indent
+        uses: ./ci
+        with:
+          check: 'fish_indent'
   shellcheck:
     runs-on: ubuntu-latest
     name: 'shellcheck'

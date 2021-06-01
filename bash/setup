@@ -1,0 +1,623 @@
+#!/usr/bin/env bash
+# SPDX-License-Identifier: MIT
+#
+# Copyright (C) 2021 Nathan Chancellor
+#
+# Shebang is purely for syntax highlighting and shellcheck auditing; script must be sourced to be useful
+
+# Add Google DNS servers to resolv.conf
+function add_google_dns() { (
+    grep -q "nameserver 8.8.8.8" /etc/resolv.conf || cat <<EOF | tee -a /etc/resolv.conf
+nameserver 8.8.8.8
+nameserver 8.8.4.4
+EOF
+); }
+
+function arch_root_setup() { (
+    set -x
+
+    : "${ROOT_PASS:?}" "${USER_PASS:?}"
+
+    # Remove the root password so that all commands that would normally require a root password are non-interactive
+    passwd -d root
+
+    # Enable the multilib repository
+    sed -i "/\[multilib\]/,/Include/"'s/^#//' /etc/pacman.conf
+
+    # Build with ccache and all cores with makepkg
+    sed -i "s/#MAKEFLAGS=\"-j2\"/MAKEFLAGS=\"-j$(nproc --all)\"/g" /etc/makepkg.conf
+    sed -i 's/!ccache/ccache/g' /etc/makepkg.conf
+
+    # Populate pacman keyring
+    pacman-key --init || exit ${?}
+    pacman-key --populate archlinux || exit ${?}
+
+    # Update all currently installed packages
+    pacman -Syyu --noconfirm || exit ${?}
+
+    # Remove fakeroot-tcp if it is installed (fakeroot is in the base-devel packages)
+    sed -i 's/IgnorePkg   = fakeroot/#IgnorePkg   =/g' /etc/pacman.conf
+    remove_if_installed fakeroot-tcp
+
+    # Handle IgnorePkg as necessary
+    # sed -i 's/#IgnorePkg   =/IgnorePkg    = .../g' /etc/pacman.conf
+
+    # Install all packages that we want
+    PACKAGES=(
+        asciidoc
+        base-devel
+        bat
+        bc
+        catatonit
+        ca-certificates
+        ccache
+        clang
+        cmake
+        cpio
+        debootstrap
+        diskus
+        doas
+        dpkg
+        dtc
+        exa
+        expect
+        fd
+        fish
+        gcc-multilib
+        git
+        htop
+        hub
+        hugo
+        hyperfine
+        iputils
+        jq
+        libxkbcommon
+        lld
+        llvm
+        lm_sensors
+        most
+        multilib-devel
+        mutt
+        neofetch
+        ninja
+        openssl
+        pacman-contrib
+        perl-authen-sasl
+        perl-mime-tools
+        perl-net-smtp-ssl
+        php
+        python
+        python-dnspython
+        python-pip
+        python-psutil
+        python-requests
+        python-setuptools
+        python-yaml
+        qemu-headless-arch-extra
+        re2c
+        repo
+        ripgrep
+        shellcheck
+        shfmt
+        stow
+        swig
+        tmux
+        uboot-tools
+        unifdef
+        unzip
+        wget
+        xmlto
+    )
+    if ${WSL}; then
+        PACKAGES+=(pass)
+    else
+        PACKAGES+=(podman)
+    fi
+    # This conflicts with sudo in base-devel, remove it as it will be reinstalled after the fact
+    remove_if_installed opendoas-sudo
+    pacman -S --needed --noconfirm "${PACKAGES[@]}" || exit ${?}
+    # Reinstall shadow to fix permissions with newuidmap
+    pacman -S --noconfirm shadow
+
+    # doas configuration
+    cat <<EOF >/etc/doas.conf
+# Allow me to be root for 5 minutes at a time
+permit persist ${USER_NAME} as root
+# Allow me to update or install packages without a password
+permit nopass ${USER_NAME} cmd pacman
+# Do not require root to put in a password (makes no sense)
+permit nopass root
+# Allow nobody with no password for this function only (will be deleted later)
+permit nopass nobody
+EOF
+    cp -v /etc/pam.d/sudo /etc/pam.d/doas
+    # Remove sudo, which comes in via base-devel
+    pacman -R --noconfirm sudo
+
+    # Create my user account and password if it is not already created
+    if ! getent passwd "${USER_NAME}"; then
+        useradd -m -G wheel -s /bin/fish "${USER_NAME}"
+        echo "${USER_NAME}:${USER_PASS}" | chpasswd
+    fi
+
+    # Download temporary copy of env for PKGBULDs and environment bootstrapping
+    clone_env
+
+    # Build certain AUR packages in a temporary directory within '/var'
+    AUR_DIR=$(mktemp -d -p /var)
+    cd "${AUR_DIR}" || exit ${?}
+
+    # Create 'sudo' symlink temporarily
+    ln -s "$(command -v doas)" "${AUR_DIR}"/sudo
+    export PATH=${AUR_DIR}:${PATH}
+
+    AUR_PACKAGES=(
+        # Alphabetized
+        duf-bin
+        inetutils-hostname
+        mosh-git
+        opendoas-sudo
+        yay-bin
+        # Dependency based
+        # qemu-user-static depends on glib2-static and pcre-static so build those first
+        glib2-static
+        pcre-static
+        qemu-user-static
+        # binfmt-qemu-static needs qemu-user-static to be installed in order to register properly
+        binfmt-qemu-static
+    )
+    for AUR_PACKAGE in "${AUR_PACKAGES[@]}"; do
+        WORK_DIR=${AUR_DIR}/${AUR_PACKAGE}
+        case "${AUR_PACKAGE}" in
+            inetutils-hostname | mosh-git)
+                mkdir -p "${WORK_DIR}"
+                cp -v /tmp/env/pkgbuilds/"${AUR_PACKAGE}"/PKGBUILD "${WORK_DIR}"
+                ;;
+            qemu-user-static)
+                HOME=${AUR_DIR} su -m -s /bin/bash nobody -c "gpg --recv-keys 3353C9CEF108B584" || exit ${?}
+                GIT_ARGS=(https://aur.archlinux.org/"${AUR_PACKAGE}".git)
+                ;;
+            *)
+                GIT_ARGS=(https://aur.archlinux.org/"${AUR_PACKAGE}".git)
+                ;;
+        esac
+        [[ -d ${WORK_DIR} ]] || git clone "${GIT_ARGS[@]}" "${WORK_DIR}"
+        chown -R "nobody:nobody" "${AUR_DIR}"
+        cd "${WORK_DIR}" || exit ${?}
+        HOME=${AUR_DIR} su -m -s /bin/bash nobody -c "makepkg --nocheck --noconfirm -s" || exit ${?}
+        pacman -U --needed --noconfirm -- *.tar.zst || exit ${?}
+        cd "${AUR_DIR}" || exit ${?}
+        rm -rf "${WORK_DIR}" || exit ${?}
+    done
+    cd || exit ${?}
+    rm -rf "${AUR_DIR}"
+
+    # Remove nobody line from /etc/doas.conf
+    head -n -2 /etc/doas.conf >/etc/doas.conf.tmp
+    mv /etc/doas.conf.tmp /etc/doas.conf
+
+    # Reset root account's password
+    echo "root:${ROOT_PASS}" | chpasswd
+
+    # Rootless podman (https://wiki.archlinux.org/index.php/Podman#Rootless_Podman)
+    podman_setup
+); }
+
+# Build fish shell from source
+function bfish() { (
+    FISH_REPO=fish-shell/fish-shell
+    [[ -z ${FISH_VERSION} ]] && FISH_VERSION=$(curl --silent "https://api.github.com/repos/${FISH_REPO}/releases/latest" | jq -r .tag_name)
+    FISH_SRC=/usr/local/src/fish/fish-${FISH_VERSION}
+    FISH_STOW=${PREFIX:-/usr/local}/stow
+    FISH_PREFIX=${CCACHE_STOW}/packages/fish/$(date +%F-%H-%M-%S)-${FISH_VERSION}
+
+    # Download source
+    mkdir -p "${FISH_SRC%/*}"
+    [[ -d ${FISH_SRC} ]] || curl -LSs https://github.com/"${FISH_REPO}"/releases/download/"${FISH_VERSION}"/"${FISH_SRC##*/}".tar.xz | tar -C "${FISH_SRC%/*}" -xJf -
+
+    # Prepare build folder
+    FISH_BUILD=${FISH_SRC}/build
+    rm -rf "${FISH_BUILD}"
+    mkdir -p "${FISH_BUILD}"
+    cd "${FISH_BUILD}" || die "Could not create build folder"
+
+    cmake -DCMAKE_INSTALL_PREFIX="${FISH_PREFIX}" ..
+    make -j"$(nproc)" install
+
+    ln -fnrsv "${FISH_PREFIX}" "${FISH_STOW}"/fish-latest
+    stow -d "${FISH_STOW}" -R -v fish-latest
+
+    FISH_PATH=${FISH_STOW%/*}/bin/fish
+    grep -q "${FISH_PATH}" /etc/shells || echo "${FISH_PATH}" >>/etc/shells
+); }
+
+# Build mosh from source
+function bmosh() { (
+    MOSH_SRC=/usr/local/src/mosh
+    if [[ ! -d ${MOSH_SRC} ]]; then
+        mkdir -p "${MOSH_SRC%/*}"
+        git clone https://github.com/mobile-shell/mosh "${MOSH_SRC}"
+    fi
+    git -C "${MOSH_SRC}" pull -r || exit
+    MOSH_STOW=${PREFIX:-/usr/local}/stow
+    MOSH_PREFIX=${MOSH_STOW}/packages/mosh/$(date +%F-%H-%M-%S)-$(git -C "${MOSH_SRC}" show -s --format=%H)
+
+    cd "${MOSH_SRC}" || exit
+    ./autogen.sh || exit
+    ./configure --enable-ufw --prefix="${MOSH_PREFIX}" || exit
+    make -j"$(nproc)" install || exit
+
+    ln -fnrsv "${MOSH_PREFIX}" "${MOSH_STOW}"/mosh-latest
+    stow -d "${MOSH_STOW}" -R -v mosh-latest
+); }
+
+# Skip podman steps if we are on WSL or 32-bit Raspberry Pi OS
+function can_install_podman() { (
+    ${WSL} && return 1
+    ${PI} && [[ $(dpkg --print-architecture) = "armhf" ]] && return 1
+    return 0
+); }
+
+# Download temporary copy of env for PKGBULDs and environment bootstrapping
+function clone_env() { (
+    ENV_FOLDER=/tmp/env
+    [[ -d ${ENV_FOLDER} ]] || git clone https://github.com/nathanchance/env "${ENV_FOLDER}"
+    chown -R "${USER_NAME}:${USER_NAME}" ${ENV_FOLDER}
+    git -C "${ENV_FOLDER}" pull -qr
+); }
+
+function common_root_setup { (
+    # Set time zone to Arizona time
+    # Not needed in WSL
+    ${WSL} || timedatectl set-timezone America/Phoenix
+
+    # Always setup my config.fish if it has not already been so that we can use it during setup
+    FSH_CFG=/home/${USER_NAME}/.config/fish/config.fish
+    if [[ ! -L ${FSH_CFG} ]]; then
+        mkdir -p "${FSH_CFG%/*}"
+        touch "${FSH_CFG}"
+        cat <<'EOF' >"${FSH_CFG}"
+# Start an ssh-agent
+if test -z "$SSH_AUTH_SOCK"
+    eval (ssh-agent -c)
+end
+
+# If we are in a login shell...
+status is-login
+# and we are not in a graphical environment (implies a terminal application with tabs)...
+and not set -q DISPLAY
+# and we are not in WSL (implies Windows Terminal, which has tabs)...
+and not set -q WSLENV
+# and we are not already in a tmux environment...
+and not set -q TMUX
+# and we have it installed,
+and command -q tmux
+# attempt to attach to a session named "main" while detaching everyone
+# else or create a new session if one does not already exist
+and tmux new-session -AD -s main
+
+# Set up user environment wrapper
+function env_setup
+    if not test -d /tmp/env
+        git -C /tmp clone -q https://github.com/nathanchance/env
+    end
+    git -C /tmp/env pull -qr
+    curl -LSs https://git.io/fisher | source
+    and fisher install jorgebucaran/fisher 1>/dev/null
+    and fisher install /tmp/env/fish 1>/dev/null
+    and user_setup
+end
+EOF
+    fi
+    chown -R "${USER_NAME}:${USER_NAME}" /home/"${USER_NAME}"/.config
+); }
+
+function debian_root_setup { (
+    # For rootless podman
+    if can_install_podman; then
+        echo "kernel.unprivileged_userns_clone=1" | tee /etc/sysctl.d/00-local-userns.conf
+        systemctl restart procps
+
+        grep -q "buster-backports" /etc/apt/sources.list || echo "deb http://deb.debian.org/debian buster-backports main" | tee -a /etc/apt/sources.list
+        KUBIC_REPO=Debian_10 kubic_repo || exit ${?}
+        apt -y -t buster-backports install libseccomp2 || exit ${?}
+    fi
+
+    debian_ubuntu_packages
+    debian_ubuntu_update_install || exit ${?}
+    debian_ubuntu_locales
+
+    clone_env
+
+    if ! ${WSL}; then
+        add_google_dns
+        podman_setup
+        systemctl --user restart dbus
+
+        ${PI} && pi_root_setup
+    fi
+
+    return 0
+); }
+
+function debian_ubuntu_doas() { (
+    WORK_DIR=$(mktemp -d)
+    cd "${WORK_DIR}" || exit ${?}
+
+    DOAS_VERSION=6.8.1-3
+    git clone https://salsa.debian.org/debian/doas.git
+    cd doas || exit ${?}
+
+    dpkg-buildpackage -b -uc -us || exit ${?}
+    dpkg -i ../doas_${DOAS_VERSION}_"$(dpkg --print-architecture)".deb || exit ${?}
+
+    cat <<EOF >/etc/doas.conf
+# Allow me to be root for 5 minutes at a time
+permit persist ${USER_NAME:?} as root
+# Do not require root to put in a password (makes no sense)
+permit nopass root
+EOF
+
+    # Uninstall sudo but create a symlink in case a program expects only sudo
+    [[ -n ${ROOT_PASS} ]] && echo "root:${ROOT_PASS}" | chpasswd
+    apt remove -y sudo
+    SUDO_PREFIX=${PREFIX:-/usr/local}/stow/sudo
+    SUDO_BIN=${SUDO_PREFIX}/bin/sudo
+    mkdir -p "${SUDO_BIN%/*}"
+    ln -frsv "$(command -v doas)" "${SUDO_BIN}"
+    stow -d "${SUDO_PREFIX%/*}" -R -v "${SUDO_PREFIX##*/}"
+); }
+
+function debian_ubuntu_locales() { (
+    echo "locales locales/default_environment_locale select en_US.UTF-8" | debconf-set-selections
+    echo "locales locales/locales_to_be_generated multiselect en_US.UTF-8 UTF-8" | debconf-set-selections
+    rm "/etc/locale.gen"
+    dpkg-reconfigure --frontend noninteractive locales
+); }
+
+# List of Debian and Ubuntu packages to install
+function debian_ubuntu_packages() {
+    PACKAGES=(
+        abootimg
+        bc
+        binutils-dev
+        bison
+        build-essential
+        ca-certificates
+        cdbs
+        clang
+        clang-format
+        cmake
+        config-package-dev
+        cowsay
+        cpio
+        creduce
+        curl
+        debhelper
+        debootstrap
+        devscripts
+        doxygen
+        dpkg-dev
+        expect
+        fakeroot
+        file
+        flex
+        fortune
+        fortunes
+        fuse-overlayfs
+        gcc
+        gettext
+        git
+        git-email
+        g++
+        htop
+        jq
+        libarchive-tools
+        libauthen-sasl-perl
+        libcapstone-dev
+        libclang-dev
+        libcurl4-openssl-dev
+        libdw-dev
+        libedit-dev
+        libelf-dev
+        libemail-valid-perl
+        libevent-dev
+        libexpat1-dev
+        libfdt-dev
+        libglib2.0-dev
+        libglu1-mesa
+        libgmp-dev
+        libio-socket-ssl-perl
+        liblz4-tool
+        libmailtools-perl
+        libmpc-dev
+        libmpfr-dev
+        libncurses-dev
+        libnet-smtp-ssl-perl
+        libpam0g-dev
+        libpcre2-dev
+        libpixman-1-dev
+        libprotobuf-dev
+        libssl-dev
+        libtinfo5
+        lld
+        llvm
+        llvm-dev
+        locales
+        lolcat
+        lsb-release
+        make
+        most
+        mutt
+        neofetch
+        ninja-build
+        php
+        php-curl
+        pigz
+        pkg-config
+        protobuf-compiler
+        psmisc
+        python2.7
+        python3
+        python3-dev
+        python3-dnspython
+        python3-pip
+        python3-psutil
+        python3-requests
+        python3-setuptools
+        re2c
+        ruby-dev
+        slirp4netns
+        software-properties-common
+        ssh
+        stow
+        swig
+        texinfo
+        tcl
+        tmux
+        u-boot-tools
+        uidmap
+        unifdef
+        unzip
+        vim
+        zip
+        zlib1g-dev
+        zstd
+    )
+
+    if ${PI}; then
+        PACKAGES+=(
+            qemu-system-arm
+            qemu-system-x86
+        )
+    else
+        if ${WSL}; then
+            PACKAGES+=(pass)
+        fi
+        [[ $(uname -m) = "x86_64" ]] && PACKAGES+=(gcc-multilib)
+        PACKAGES+=(
+            qemu-user-static
+            qemu-utils
+        )
+    fi
+
+    can_install_podman && PACKAGES+=(podman)
+}
+
+function debian_ubuntu_update_install() { (
+    DEBIAN_FRONTEND=noninteractive apt update -y || exit ${?}
+    DEBIAN_FRONTEND=noninteractive apt upgrade -y || exit ${?}
+    DEBIAN_FRONTEND=noninteractive apt install -y "${PACKAGES[@]}" || exit ${?}
+    debian_ubuntu_doas
+    bfish || exit ${?}
+    chsh -s /usr/local/bin/fish "${USER_NAME}"
+    bmosh || exit ${?}
+    # Reinstall 'ping' to avoid issues with permissions
+    ${WSL} && apt install -y --reinstall iputils-ping
+    return 0
+); }
+
+# Check if a package is installed
+function is_installed() { (
+    case ${DISTRO} in
+        arch) pacman -Q | grep -q "${1:?}" ;;
+    esac
+); }
+
+function kubic_repo() { (
+    echo "deb https://download.opensuse.org/repositories/devel:/kubic:/libcontainers:/stable/${KUBIC_REPO}/ /" | tee /etc/apt/sources.list.d/devel:kubic:libcontainers:stable.list
+    curl -L https://download.opensuse.org/repositories/devel:/kubic:/libcontainers:/stable/"${KUBIC_REPO}"/Release.key | apt-key add -
+
+    apt update || exit ${?}
+); }
+
+# Pi specific setup steps
+function pi_root_setup() { (
+    grep -q configs /etc/modules || printf 'configs\nsnd_bcm2835\n' | tee -a /etc/modules
+    usermod -a -G kvm pi
+    raspi-config --expand-rootfs
+    raspi-config nonint do_serial 0
+    echo "${USER_NAME}:${USER_PASS}" | chpasswd
+
+    if [[ -b /dev/sda1 ]]; then
+        MNT_PNT=/mnt/ssd
+        mkdir -p "${MNT_PNT}"
+        chown -R "${USER_NAME:?}:${USER_NAME}" "${MNT_PNT}"
+        grep -q "${MNT_PNT}" /etc/fstab || printf "PARTUUID=%s\t%s\text4\tdefaults,noatime\t0\t1\n" "$(blkid -o value -s PARTUUID "/dev/sda1")" "${MNT_PNT}" | tee -a "${MOUNT_DIR}"/etc/fstab
+    fi
+); }
+
+# Setup rootless podman as necessary
+function podman_setup { (
+    can_install_podman || return 0
+    echo "${USER_NAME:?}:100000:65536" | tee /etc/subgid /etc/subuid
+    [[ -f /etc/containers/registries.conf ]] || cat <<EOF | tee /etc/containers/registries.conf
+[registries.search]
+registries = ['docker.io', 'quay.io']
+EOF
+); }
+
+# Remove package but only if it is not installed
+function remove_if_installed() { (
+    is_installed "${1:?}" || exit ${?}
+    case ${DISTRO} in
+        arch) pacman -R --noconfirm "${1}" ;;
+    esac
+); }
+
+# Setup function (as root, calls distribution specific function)
+function root_setup() { (
+    : "${USER_NAME:=nathan}"
+
+    [[ ${EUID} -eq 0 ]] || exit ${?}
+    set_global_variables
+
+    "${DISTRO}"_root_setup || exit ${?}
+    common_root_setup
+); }
+
+# Set global variables to control behavior
+function set_global_variables() {
+    case "$(cat /usr/lib/os-release)" in
+        *"Arch Linux"*) DISTRO=arch ;;
+        *Debian* | *Raspbian*) DISTRO=debian ;;
+        *Ubuntu*) DISTRO=ubuntu ;;
+    esac
+
+    if [[ $(uname -n) = "raspberrypi" ]]; then
+        PI=true
+        USER_NAME=pi
+        : "${ROOT_PASS:?}" "${USER_PASS:?}"
+    fi
+
+    uname -r | grep -iq microsoft && WSL=true
+
+    : "${DISTRO:=unsupported}" "${PI:=false}" "${WSL:=false}"
+}
+
+function ubuntu_root_setup { (
+    if ! ${WSL}; then
+        # shellcheck disable=SC1091
+        source /etc/os-release
+        KUBIC_REPO=xUbuntu_${VERSION_ID} kubic_repo || exit ${?}
+    fi
+
+    debian_ubuntu_packages
+    PACKAGES+=(python-is-python3)
+    ${WSL} && PACKAGES+=(wslu)
+    debian_ubuntu_update_install || exit ${?}
+    debian_ubuntu_locales
+
+    clone_env
+
+    if ! ${WSL}; then
+        add_google_dns
+        podman_setup
+    fi
+); }
+
+function unsupported_root_setup { (
+    echo "Unsupported distribution for root_setup, please add it"
+    exit 1
+); }
+# vi: filetype=zsh

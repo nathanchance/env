@@ -4,6 +4,10 @@
 "
 " Copyright (C) 2017-2019 Nathan Chancellor
 
+if &shell =~# 'fish$'
+    set shell=sh
+endif
+
 " Special indenting for C and Makefiles (since most will be kernel files)
 filetype plugin indent on
 
