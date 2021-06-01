@@ -26,6 +26,9 @@ function upd_kernel -d "Update machine's kernel"
             popd
 
         case pi
+            # Cache sudo/doas permissions
+            sudo true; or return
+
             for arg in $argv
                 switch $arg
                     case arm arm64
