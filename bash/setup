@@ -126,9 +126,11 @@ function arch_root_setup() { (
         if [[ -n ${DISPLAY} ]]; then
             PACKAGES+=(
                 discord
+                obs-studio
                 telegram-desktop
                 thunderbird
                 ttc-iosevka-ss08
+                vlc
             )
         fi
         PACKAGES+=(podman)
