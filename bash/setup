@@ -30,6 +30,12 @@ function arch_root_setup() { (
     # Enable the multilib repository
     sed -i "/\[multilib\]/,/Include/"'s/^#//' /etc/pacman.conf
 
+    # Enable colors for pacman
+    sed -i 's/#Color/Color/g' /etc/pacman.conf
+
+    # Enable parallel downloads
+    sed -i 's/#ParallelDownloads = 5/ParallelDownloads = 7/g' /etc/pacman.conf
+
     # Build with ccache and all cores with makepkg
     sed -i "s/#MAKEFLAGS=\"-j2\"/MAKEFLAGS=\"-j$(nproc --all)\"/g" /etc/makepkg.conf
     sed -i 's/!ccache/ccache/g' /etc/makepkg.conf
