@@ -15,10 +15,6 @@ function bldtcs -d "Build LLVM and binutils from source for kernel development"
             set bld_llvm_args \
                 --pgo kernel-{def,allmod}config
 
-        case vm wsl
-            set bld_llvm_args \
-                --pgo kernel-defconfig
-
         case pi
             set bld_bntls_args \
                 --targets host x86_64
@@ -30,6 +26,18 @@ function bldtcs -d "Build LLVM and binutils from source for kernel development"
                 --targets "AArch64;ARM;X86"
 
             set check_targets clang llvm{,-unit}
+
+        case vm
+            set bld_bntls_args \
+                --targets x86_64
+
+            set bld_llvm_args \
+                --pgo kernel-defconfig \
+                --targets X86
+
+        case wsl
+            set bld_llvm_args \
+                --pgo kernel-defconfig
     end
     if not set -q check_targets
         set check_targets clang lld llvm{,-unit}
