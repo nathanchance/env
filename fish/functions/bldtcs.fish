@@ -11,9 +11,13 @@ function bldtcs -d "Build LLVM and binutils from source for kernel development"
     end
 
     switch $LOCATION
-        case generic server wsl
+        case generic server
             set bld_llvm_args \
                 --pgo kernel-{def,allmod}config
+
+        case vm wsl
+            set bld_llvm_args \
+                --pgo kernel-defconfig
 
         case pi
             set bld_bntls_args \
