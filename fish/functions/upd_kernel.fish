@@ -7,13 +7,23 @@ function upd_kernel -d "Update machine's kernel"
 
     switch $LOCATION
         case generic server vm
-            pushd $ENV_FOLDER/pkgbuilds/linux-mainline-llvm; or return
+            for arg in $argv
+                switch $arg
+                    case linux-mainline-llvm linux-next-llvm
+                        set pkg $arg
+                end
+            end
+            if not set -q pkg
+                set pkg linux-mainline-llvm
+            end
+
+            pushd $ENV_FOLDER/pkgbuilds/$pkg; or return
 
             # Prerequisite: Clean up old kernels
             rm -- *.tar.zst
 
             # Generate localmodconfig
-            gen_localmodconfig
+            gen_localmodconfig $pkg
 
             # Build the kernel
             makepkg -C; or return
