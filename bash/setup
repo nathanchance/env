@@ -332,6 +332,21 @@ end
 EOF
     fi
     chown -R "${USER_NAME}:${USER_NAME}" /home/"${USER_NAME}"/.config
+
+    # Allow these functions to be re-run in a root shell
+    # TODO: This is brittle and duplicated from fish/conf.d/variables.fish
+    if [[ -d /mnt/ssd ]]; then
+        # Raspberry Pi 4
+        MAIN_FOLDER=/mnt/ssd
+    elif [[ $(uname -n) = "hyperv" || $(uname -n) = "vmware" ]]; then
+        # Virtual machine
+        MAIN_FOLDER=/home/${USER_NAME}/Dev
+    else
+        # Server or WSL
+        MAIN_FOLDER=/home/${USER_NAME}
+    fi
+    echo "local SETUP=${MAIN_FOLDER}/github/env/bash/setup
+[[ -f ${SETUP} ]] && source ${SETUP}" >/root/.bashrc
 ); }
 
 function debian_root_setup { (
