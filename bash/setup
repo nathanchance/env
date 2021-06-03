@@ -27,18 +27,8 @@ function arch_root_setup() { (
         passwd -d root
     fi
 
-    # Enable the multilib repository
-    sed -i "/\[multilib\]/,/Include/"'s/^#//' /etc/pacman.conf
-
-    # Enable colors for pacman
-    sed -i 's/#Color/Color/g' /etc/pacman.conf
-
-    # Enable parallel downloads
-    sed -i 's/#ParallelDownloads = 5/ParallelDownloads = 7/g' /etc/pacman.conf
-
-    # Build with ccache and all cores with makepkg
-    sed -i "s/#MAKEFLAGS=\"-j2\"/MAKEFLAGS=\"-j$(nproc --all)\"/g" /etc/makepkg.conf
-    sed -i 's/!ccache/ccache/g' /etc/makepkg.conf
+    # Modify /etc/{makepkg,pacman}.conf
+    pacman_settings
 
     # Populate pacman keyring
     pacman-key --init || exit ${?}
@@ -561,6 +551,25 @@ function kubic_repo() { (
     curl -L https://download.opensuse.org/repositories/devel:/kubic:/libcontainers:/stable/"${KUBIC_REPO}"/Release.key | apt-key add -
 
     apt update || exit ${?}
+); }
+
+function pacman_settings() { (
+    # Update /etc/{makepkg,pacman}.conf if necessary
+    [[ -f /etc/makepkg.conf.pacnew ]] && mv -v /etc/makepkg.conf{.pacnew,}
+    [[ -f /etc/pacman.conf.pacnew ]] && mv -v /etc/pacman.conf{.pacnew,}
+
+    # Enable colors for pacman
+    sed -i 's/#Color/Color/g' /etc/pacman.conf
+
+    # Enable parallel downloads
+    sed -i 's/#ParallelDownloads = 5/ParallelDownloads = 7/g' /etc/pacman.conf
+
+    # Enable the multilib repository
+    sed -i "/\[multilib\]/,/Include/"'s/^#//' /etc/pacman.conf
+
+    # Build with ccache and all cores with makepkg
+    sed -i "s/#MAKEFLAGS=\"-j2\"/MAKEFLAGS=\"-j$(nproc --all)\"/g" /etc/makepkg.conf
+    sed -i 's/!ccache/ccache/g' /etc/makepkg.conf
 ); }
 
 # Pi specific setup steps
