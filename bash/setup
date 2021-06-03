@@ -194,6 +194,7 @@ EOF
     )
     for AUR_PACKAGE in "${AUR_PACKAGES[@]}"; do
         WORK_DIR=${AUR_DIR}/${AUR_PACKAGE}
+        MAKEPKG_ARGS=""
         case "${AUR_PACKAGE}" in
             inetutils-hostname | mosh-git)
                 mkdir -p "${WORK_DIR}"
@@ -203,6 +204,9 @@ EOF
                 HOME=${AUR_DIR} su -m -s /bin/bash nobody -c "gpg --recv-keys 3353C9CEF108B584" || exit ${?}
                 GIT_ARGS=(https://aur.archlinux.org/"${AUR_PACKAGE}".git)
                 ;;
+            yay)
+                MAKEPKG_ARGS=" -r"
+                ;;
             *)
                 GIT_ARGS=(https://aur.archlinux.org/"${AUR_PACKAGE}".git)
                 ;;
@@ -210,7 +214,7 @@ EOF
         [[ -d ${WORK_DIR} ]] || git clone "${GIT_ARGS[@]}" "${WORK_DIR}"
         chown -R "nobody:nobody" "${AUR_DIR}"
         cd "${WORK_DIR}" || exit ${?}
-        HOME=${AUR_DIR} su -m -s /bin/bash nobody -c "makepkg --nocheck --noconfirm -s" || exit ${?}
+        HOME=${AUR_DIR} su -m -s /bin/bash nobody -c "makepkg --nocheck --noconfirm${MAKEPKG_ARGS} -s" || exit ${?}
         pacman -U --needed --noconfirm -- *.tar.zst || exit ${?}
         cd "${AUR_DIR}" || exit ${?}
         rm -rf "${WORK_DIR}" || exit ${?}
