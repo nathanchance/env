@@ -48,9 +48,15 @@ function bldtcs -d "Build LLVM and binutils from source for kernel development"
 
     set date_time (date +%F_%H-%M-%S)
 
+    if test -f $HOME/.ssh/id_ed25519
+        set github_prefix git@github.com:
+    else
+        set github_prefix https://github.com/
+    end
+
     if not test -d $CBL_TC_BLD
         mkdir -p (dirname $CBL_TC_BLD)
-        git clone -b personal git@github.com:nathanchance/tc-build.git $CBL_TC_BLD
+        git clone -b personal "$github_prefix"nathanchance/tc-build.git $CBL_TC_BLD
     end
 
     set bntls $CBL_TC_BLD/binutils
