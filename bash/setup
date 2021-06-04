@@ -159,8 +159,8 @@ EOF
     clone_env
 
     # Build certain AUR packages in a temporary directory within '/var'
-    rm -rf /var/tmp.*
-    AUR_DIR=$(mktemp -d -p /var)
+    rm -rf /var/aur.*
+    AUR_DIR=$(mktemp -d -p /var aur.XXXXXXXXXX)
     cd "${AUR_DIR}" || exit ${?}
 
     # Create 'sudo' symlink temporarily
