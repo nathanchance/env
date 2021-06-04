@@ -166,6 +166,9 @@ out.*/
         mkdir -p $konsole_share
         ln -fsv $configs/local/Nathan.profile $konsole_share/Nathan.profile
         ln -fsv $configs/local/snazzy.colorscheme $konsole_share/snazzy.colorscheme
+
+        echo "--enable-features=WebUIDarkMode
+--force-dark-mode" >$HOME/.config/chrome-flags.conf
     end
 
     if test "$trusted" = true
