@@ -153,10 +153,19 @@ out.*/
     ccache_setup
     git_setup
 
-    bash $ENV_FOLDER/configs/common/vim/vim_setup.bash
+    set configs $ENV_FOLDER/configs
+
+    bash $configs/common/vim/vim_setup.bash
 
     if test "$wsl" != true; and not set -q DISPLAY
-        ln -fsv $ENV_FOLDER/configs/headless/.tmux.conf $HOME/.tmux.conf
+        ln -fsv $configs/headless/.tmux.conf $HOME/.tmux.conf
+    end
+
+    if set -q DISPLAY
+        set konsole_share $HOME/.local/share/konsole
+        mkdir -p $konsole_share
+        ln -fsv $configs/local/Nathan.profile $konsole_share/Nathan.profile
+        ln -fsv $configs/local/snazzy.colorscheme $konsole_share/snazzy.colorscheme
     end
 
     if test "$trusted" = true
