@@ -159,6 +159,7 @@ EOF
     clone_env
 
     # Build certain AUR packages in a temporary directory within '/var'
+    rm -rf /var/tmp.*
     AUR_DIR=$(mktemp -d -p /var)
     cd "${AUR_DIR}" || exit ${?}
 
