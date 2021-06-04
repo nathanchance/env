@@ -175,7 +175,7 @@ EOF
         opendoas-sudo
         slack-desktop
         visual-studio-code-bin
-        yay
+        yay-bin
         # Dependency based
         # qemu-user-static depends on glib2-static and pcre-static so build those first
         glib2-static
@@ -195,9 +195,6 @@ EOF
             qemu-user-static)
                 HOME=${AUR_DIR} su -m -s /bin/bash nobody -c "gpg --recv-keys 3353C9CEF108B584" || exit ${?}
                 GIT_ARGS=(https://aur.archlinux.org/"${AUR_PACKAGE}".git)
-                ;;
-            yay)
-                MAKEPKG_ARGS=" -r"
                 ;;
             *)
                 GIT_ARGS=(https://aur.archlinux.org/"${AUR_PACKAGE}".git)
