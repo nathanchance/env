@@ -14,7 +14,6 @@ function rbpi -d "Rebase Raspberry Pi kernel on latest linux-next"
     git rh origin/master
 
     set -a patches 20210514213032.575161-1-arnd@kernel.org # [PATCH] drm/msm/dsi: fix 32-bit clang warning
-    set -a patches 20210603173410.310362-1-nathan@kernel.org # [PATCH net-next] net: ethernet: rmnet: Restructure if checks to avoid uninitialized warning
     set -a patches 20210603174311.1008645-1-nathan@kernel.org # [PATCH] btrfs: Remove total_data_size variable in btrfs_batch_insert_items()
     for patch in $patches
         git b4 ams $patch; or return
