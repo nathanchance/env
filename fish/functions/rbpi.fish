@@ -15,55 +15,48 @@ function rbpi -d "Rebase Raspberry Pi kernel on latest linux-next"
 
     set -a patches 20210514213032.575161-1-arnd@kernel.org # [PATCH] drm/msm/dsi: fix 32-bit clang warning
     set -a patches 20210603174311.1008645-1-nathan@kernel.org # [PATCH] btrfs: Remove total_data_size variable in btrfs_batch_insert_items()
+    set -a patches 20210607041529.392451-1-david@fromorbit.com # [PATCH] xfs: drop the AGI being passed to xfs_check_agi_freecount
     for patch in $patches
         git b4 ams $patch; or return
     end
 
-    echo 'From 63e60e529ad7ae8f27f2e85d4804bd58695c2927 Mon Sep 17 00:00:00 2001
+    echo 'From 7b81a2b3cd00ea55f9ace4da51fcf56d5b3ffc4b Mon Sep 17 00:00:00 2001
 From: Nathan Chancellor <nathan@kernel.org>
-Date: Thu, 3 Jun 2021 13:25:06 -0700
-Subject: [PATCH] dm: Fix uninitialized use of bio
+Date: Tue, 8 Jun 2021 10:55:28 -0700
+Subject: [PATCH] scsi: ufs: Fix uninitialized use of lrbp
 
-Fixes: 2c243153d1d4 ("dm: Forbid requeue of writes to zones")
-Link: https://lore.kernel.org/r/DM6PR04MB70816EEC41ADCB7C4B18F9B5E73C9@DM6PR04MB7081.namprd04.prod.outlook.com/
+Link: https://lore.kernel.org/r/YL+umjDMd4Rao%2FNs@Ryzen-9-3900X/
 Signed-off-by: Nathan Chancellor <nathan@kernel.org>
 ---
- drivers/md/dm.c | 4 ++--
- 1 file changed, 2 insertions(+), 2 deletions(-)
+ drivers/scsi/ufs/ufshcd.c | 3 +--
+ 1 file changed, 1 insertion(+), 2 deletions(-)
 
-diff --git a/drivers/md/dm.c b/drivers/md/dm.c
-index 9d71dc6fe000..9903214bc8d6 100644
---- a/drivers/md/dm.c
-+++ b/drivers/md/dm.c
-@@ -841,6 +841,7 @@ static void dec_pending(struct dm_io *io, blk_status_t error)
+diff --git a/drivers/scsi/ufs/ufshcd.c b/drivers/scsi/ufs/ufshcd.c
+index f066ffa8914b..66ea7de8c88b 100644
+--- a/drivers/scsi/ufs/ufshcd.c
++++ b/drivers/scsi/ufs/ufshcd.c
+@@ -2975,7 +2975,7 @@ static int ufshcd_exec_dev_cmd(struct ufs_hba *hba,
+ 
+ 	if (unlikely(test_bit(tag, &hba->outstanding_reqs))) {
+ 		err = -EBUSY;
+-		goto out;
++		goto out_put_tag;
  	}
  
- 	if (atomic_dec_and_test(&io->io_count)) {
-+		bio = io->orig_bio;
- 		if (io->status == BLK_STS_DM_REQUEUE) {
- 			/*
- 			 * Target requested pushing back the I/O.
-@@ -849,7 +850,7 @@ static void dec_pending(struct dm_io *io, blk_status_t error)
- 			if (__noflush_suspending(md) &&
- 			    !WARN_ON_ONCE(dm_is_zone_write(md, bio)))
- 				/* NOTE early return due to BLK_STS_DM_REQUEUE below */
--				bio_list_add_head(&md->deferred, io->orig_bio);
-+				bio_list_add_head(&md->deferred, bio);
- 			else
- 				/*
- 				 * noflush suspend was interrupted or this is
-@@ -860,7 +861,6 @@ static void dec_pending(struct dm_io *io, blk_status_t error)
- 		}
+ 	init_completion(&wait);
+@@ -2993,7 +2993,6 @@ static int ufshcd_exec_dev_cmd(struct ufs_hba *hba,
  
- 		io_error = io->status;
--		bio = io->orig_bio;
- 		end_io_acct(io);
- 		free_io(md, io);
+ 	ufshcd_send_command(hba, tag);
+ 	err = ufshcd_wait_for_dev_cmd(hba, lrbp, timeout);
+-out:
+ 	ufshcd_add_query_upiu_trace(hba, err ? UFS_QUERY_ERR : UFS_QUERY_COMP,
+ 				    (struct utp_upiu_req *)lrbp->ucd_rsp_ptr);
  
 -- 
 2.32.0.rc3
 
 ' | git ams; or return
+
     for hash in 358afb8b746d4a7ebaeeeaab7a1523895a8572c2 4564363351e2680e55edc23c7953aebd2acb4ab7
         git fp -1 --stdout $hash arch/arm/boot/dts/bcm2711-rpi-4-b.dts | git ap -R; or return
     end
