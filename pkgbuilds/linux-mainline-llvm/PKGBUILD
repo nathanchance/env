@@ -171,7 +171,7 @@ _package-headers() {
   ln -sr "$builddir" "$pkgdir/usr/src/${pkgbase%$_pkgsuffix}"
 }
 
-pkgname=("$pkgbase" "$pkgbase-headers")
+pkgname=("$pkgbase")
 for _p in "${pkgname[@]}"; do
   eval "package_$_p() {
     $(declare -f "_package${_p#$pkgbase}")
