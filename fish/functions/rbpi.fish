@@ -16,51 +16,77 @@ function rbpi -d "Rebase Raspberry Pi kernel on latest linux-next"
     set -a patches 20210514213032.575161-1-arnd@kernel.org # [PATCH] drm/msm/dsi: fix 32-bit clang warning
     set -a patches 20210603174311.1008645-1-nathan@kernel.org # [PATCH] btrfs: Remove total_data_size variable in btrfs_batch_insert_items()
     set -a patches 20210607041529.392451-1-david@fromorbit.com # [PATCH] xfs: drop the AGI being passed to xfs_check_agi_freecount
+    set -a patches 1623227044-22635-1-git-send-email-cang@codeaurora.org # [PATCH v3] scsi: ufs: Fix a possible use before initialization case
     for patch in $patches
         git b4 ams $patch; or return
     end
 
-    echo 'From 7b81a2b3cd00ea55f9ace4da51fcf56d5b3ffc4b Mon Sep 17 00:00:00 2001
+    echo 'From 26af5261cf08f10513e72439a82b3eafa7e44732 Mon Sep 17 00:00:00 2001
 From: Nathan Chancellor <nathan@kernel.org>
-Date: Tue, 8 Jun 2021 10:55:28 -0700
-Subject: [PATCH] scsi: ufs: Fix uninitialized use of lrbp
+Date: Wed, 9 Jun 2021 10:44:20 -0700
+Subject: [PATCH] ARM: dts: bcm2711: Disable the display pipeline
 
-Link: https://lore.kernel.org/r/YL+umjDMd4Rao%2FNs@Ryzen-9-3900X/
 Signed-off-by: Nathan Chancellor <nathan@kernel.org>
 ---
- drivers/scsi/ufs/ufshcd.c | 3 +--
- 1 file changed, 1 insertion(+), 2 deletions(-)
+ arch/arm/boot/dts/bcm2711-rpi-4-b.dts | 16 ++++++++--------
+ 1 file changed, 8 insertions(+), 8 deletions(-)
 
-diff --git a/drivers/scsi/ufs/ufshcd.c b/drivers/scsi/ufs/ufshcd.c
-index f066ffa8914b..66ea7de8c88b 100644
---- a/drivers/scsi/ufs/ufshcd.c
-+++ b/drivers/scsi/ufs/ufshcd.c
-@@ -2975,7 +2975,7 @@ static int ufshcd_exec_dev_cmd(struct ufs_hba *hba,
+diff --git a/arch/arm/boot/dts/bcm2711-rpi-4-b.dts b/arch/arm/boot/dts/bcm2711-rpi-4-b.dts
+index f24bdd0870a5..66cfc5d057ce 100644
+--- a/arch/arm/boot/dts/bcm2711-rpi-4-b.dts
++++ b/arch/arm/boot/dts/bcm2711-rpi-4-b.dts
+@@ -57,11 +57,11 @@ sd_vcc_reg: sd_vcc_reg {
+ };
  
- 	if (unlikely(test_bit(tag, &hba->outstanding_reqs))) {
- 		err = -EBUSY;
--		goto out;
-+		goto out_put_tag;
- 	}
+ &ddc0 {
+-	status = "okay";
++	status = "disabled";
+ };
  
- 	init_completion(&wait);
-@@ -2993,7 +2993,6 @@ static int ufshcd_exec_dev_cmd(struct ufs_hba *hba,
+ &ddc1 {
+-	status = "okay";
++	status = "disabled";
+ };
  
- 	ufshcd_send_command(hba, tag);
- 	err = ufshcd_wait_for_dev_cmd(hba, lrbp, timeout);
--out:
- 	ufshcd_add_query_upiu_trace(hba, err ? UFS_QUERY_ERR : UFS_QUERY_COMP,
- 				    (struct utp_upiu_req *)lrbp->ucd_rsp_ptr);
+ &expgpio {
+@@ -149,27 +149,27 @@ &gpio {
+ };
  
+ &hdmi0 {
+-	status = "okay";
++	status = "disabled";
+ };
+ 
+ &hdmi1 {
+-	status = "okay";
++	status = "disabled";
+ };
+ 
+ &pixelvalve0 {
+-	status = "okay";
++	status = "disabled";
+ };
+ 
+ &pixelvalve1 {
+-	status = "okay";
++	status = "disabled";
+ };
+ 
+ &pixelvalve2 {
+-	status = "okay";
++	status = "disabled";
+ };
+ 
+ &pixelvalve4 {
+-	status = "okay";
++	status = "disabled";
+ };
+ 
+ &pwm1 {
 -- 
-2.32.0.rc3
+2.32.0
 
 ' | git ams; or return
-
-    for hash in 358afb8b746d4a7ebaeeeaab7a1523895a8572c2 4564363351e2680e55edc23c7953aebd2acb4ab7
-        git fp -1 --stdout $hash arch/arm/boot/dts/bcm2711-rpi-4-b.dts | git ap -R; or return
-    end
-    git ac -m "ARM: dts: bcm2711: Disable the display pipeline"
 
     for arch in arm arm64
         ../pi-scripts/build.fish $arch; or return
