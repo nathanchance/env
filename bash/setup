@@ -122,6 +122,13 @@ function arch_root_setup() { (
                 ttc-iosevka-ss08
                 vlc
             )
+            if [[ $(uname -n) = "vmware" ]]; then
+                PACKAGES+=(
+                    gtkmm
+                    gtk2
+                    open-vm-tools
+                )
+            fi
         fi
         PACKAGES+=(podman)
     fi
@@ -221,6 +228,15 @@ EOF
 
     # Rootless podman (https://wiki.archlinux.org/index.php/Podman#Rootless_Podman)
     podman_setup
+
+    # VMware needs a few more steps for seamless integration
+    if [[ $(uname -n) = "vmware" ]]; then
+        # May not be necessary yet
+        # sed -i 's;MODULES=();MODULES=(vsock vmw_vsock_vmci_transport vmw_balloon vmw_vmci vmwgfx);g' /etc/mkinitcpio.conf
+        # mkinitcpio -P
+        systemctl enable vmtoolsd.service
+        systemctl enable vmware-vmblock-fuse.service
+    fi
 ); }
 
 # Build fish shell from source
