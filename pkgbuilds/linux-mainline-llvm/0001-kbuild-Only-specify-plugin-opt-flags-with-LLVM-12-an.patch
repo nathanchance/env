@@ -1,0 +1,48 @@
+From d5098e4b44daed2aa6d82e85095e0a2cf0b69166 Mon Sep 17 00:00:00 2001
+From: Nathan Chancellor <nathan@kernel.org>
+Date: Wed, 9 Jun 2021 14:21:28 -0700
+Subject: [PATCH] kbuild: Only specify '-plugin-opt=' flags with LLVM 12 and
+ older
+
+Signed-off-by: Nathan Chancellor <nathan@kernel.org>
+---
+ Makefile          | 2 ++
+ arch/x86/Makefile | 5 +++--
+ 2 files changed, 5 insertions(+), 2 deletions(-)
+
+diff --git a/Makefile b/Makefile
+index 144d4f8b7eb3..9a5b72c3c2b3 100644
+--- a/Makefile
++++ b/Makefile
+@@ -930,10 +930,12 @@ CC_FLAGS_LTO	+= -fvisibility=hidden
+ KBUILD_LDFLAGS += -mllvm -import-instr-limit=5
+ 
+ # Check for frame size exceeding threshold during prolog/epilog insertion.
++ifeq ($(shell test $(CONFIG_LLD_VERSION) -lt 130000; echo $$?),0)
+ ifneq ($(CONFIG_FRAME_WARN),0)
+ KBUILD_LDFLAGS	+= -plugin-opt=-warn-stack-size=$(CONFIG_FRAME_WARN)
+ endif
+ endif
++endif
+ 
+ ifdef CONFIG_LTO
+ KBUILD_CFLAGS	+= -fno-lto $(CC_FLAGS_LTO)
+diff --git a/arch/x86/Makefile b/arch/x86/Makefile
+index 307529417021..cb5e8d39cac1 100644
+--- a/arch/x86/Makefile
++++ b/arch/x86/Makefile
+@@ -200,8 +200,9 @@ endif
+ KBUILD_LDFLAGS += -m elf_$(UTS_MACHINE)
+ 
+ ifdef CONFIG_LTO_CLANG
+-KBUILD_LDFLAGS	+= -plugin-opt=-code-model=kernel \
+-		   -plugin-opt=-stack-alignment=$(if $(CONFIG_X86_32),4,8)
++ifeq ($(shell test $(CONFIG_LLD_VERSION) -lt 130000; echo $$?),0)
++KBUILD_LDFLAGS	+= -plugin-opt=-stack-alignment=$(if $(CONFIG_X86_32),4,8)
++endif
+ endif
+ 
+ ifdef CONFIG_X86_NEED_RELOCS
+-- 
+2.32.0
+

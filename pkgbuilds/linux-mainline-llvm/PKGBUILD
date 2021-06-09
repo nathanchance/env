@@ -19,11 +19,13 @@ _srcname=$pkgbase
 source=(
   "$_srcname::git+https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git?signed#tag=$_srctag"
   config         # the main kernel config file
+  0001-kbuild-Only-specify-plugin-opt-flags-with-LLVM-12-an.patch
 )
 validpgpkeys=(
   'ABAF11C65A2970B130ABE3C479BE3E4300411886'  # Linus Torvalds
 )
 sha256sums=('SKIP'
+            'SKIP'
             'SKIP')
 
 _kmake() {

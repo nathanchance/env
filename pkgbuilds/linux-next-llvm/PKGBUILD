@@ -19,11 +19,13 @@ _srcname=$pkgbase
 source=(
   "$_srcname::git+https://git.kernel.org/pub/scm/linux/kernel/git/next/linux-next.git?signed#tag=$_srctag"
   config         # the main kernel config file
+  0001-kbuild-Only-specify-plugin-opt-flags-with-LLVM-12-an.patch
 )
 validpgpkeys=(
   '985B681FA45919699753A26489F91C0A41D5C07A'  # Stephen Rothwell
 )
 sha256sums=('SKIP'
+            'SKIP'
             'SKIP')
 
 _kmake() {
