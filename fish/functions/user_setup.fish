@@ -182,10 +182,6 @@ out.*/
     if test "$wsl" = true
         decrypt_gpg_file server_ip
 
-        if not test -d $HOME/.password-store
-            hub clone password-store $HOME/.password-store; or return
-        end
-
         set github_repos hugo-files nathanchance.github.io
     else if test "$trusted" = true
         mkdir -p $ANDROID_TC_FOLDER

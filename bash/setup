@@ -110,9 +110,7 @@ function arch_root_setup() { (
         wget
         xmlto
     )
-    if ${WSL}; then
-        PACKAGES+=(pass)
-    else
+    if ! ${WSL}; then
         if [[ -n ${DISPLAY} ]]; then
             PACKAGES+=(
                 discord
@@ -542,9 +540,6 @@ function debian_ubuntu_packages() {
             qemu-system-x86
         )
     else
-        if ${WSL}; then
-            PACKAGES+=(pass)
-        fi
         [[ $(uname -m) = "x86_64" ]] && PACKAGES+=(gcc-multilib)
         PACKAGES+=(
             qemu-user-static
