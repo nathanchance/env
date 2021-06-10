@@ -592,6 +592,7 @@ function pacman_settings() { (
     sed -i "/\[multilib\]/,/Include/"'s/^#//' /etc/pacman.conf
 
     # Build with ccache and all cores with makepkg
+    # shellcheck disable=SC2016
     sed -i 's/#MAKEFLAGS="-j2"/MAKEFLAGS="-j$(nproc)"/g' /etc/makepkg.conf
     sed -i 's/!ccache/ccache/g' /etc/makepkg.conf
 ); }
