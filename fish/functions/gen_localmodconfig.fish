@@ -10,6 +10,16 @@ function gen_localmodconfig -d "Generate a slimmed down configuration file for A
         end
     end
 
+    switch $pkg
+        case linux-mainline-llvm
+            set gpg_key 79BE3E43004118861
+        case linux-next-llvm
+            set gpg_key 489F91C0A41D5C07A
+    end
+    if not gpg -k $gpg_key &>/dev/null
+        gpg --receive-keys $gpg_key
+    end
+
     set linux_llvm $ENV_FOLDER/pkgbuilds/$pkg
     set cfg $linux_llvm/config
     set src $linux_llvm/src/$pkg

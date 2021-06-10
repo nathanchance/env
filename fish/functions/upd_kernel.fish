@@ -17,16 +17,6 @@ function upd_kernel -d "Update machine's kernel"
                 set pkg linux-mainline-llvm
             end
 
-            switch $pkg
-                case linux-mainline-llvm
-                    set gpg_key 79BE3E43004118861
-                case linux-next-llvm
-                    set gpg_key 489F91C0A41D5C07A
-            end
-            if not gpg -k $gpg_key &>/dev/null
-                gpg --receive-keys $gpg_key
-            end
-
             pushd $ENV_FOLDER/pkgbuilds/$pkg; or return
 
             # Prerequisite: Clean up old kernels
