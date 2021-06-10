@@ -12,9 +12,9 @@ function gen_localmodconfig -d "Generate a slimmed down configuration file for A
 
     switch $pkg
         case linux-mainline-llvm
-            set gpg_key 79BE3E43004118861
+            set gpg_key 79BE3E4300411886
         case linux-next-llvm
-            set gpg_key 489F91C0A41D5C07A
+            set gpg_key 89F91C0A41D5C07A
     end
     if not gpg -k $gpg_key &>/dev/null
         gpg --receive-keys $gpg_key
