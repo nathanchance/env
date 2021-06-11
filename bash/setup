@@ -175,12 +175,9 @@ EOF
     AUR_PACKAGES=(
         # Alphabetized
         duf-bin
-        google-chrome
         inetutils-hostname
         mosh-git
         opendoas-sudo
-        slack-desktop
-        visual-studio-code-bin
         yay-bin
         # Dependency based
         # qemu-user-static depends on glib2-static and pcre-static so build those first
@@ -190,6 +187,14 @@ EOF
         # binfmt-qemu-static needs qemu-user-static to be installed in order to register properly
         binfmt-qemu-static
     )
+    if [[ -n ${DISPLAY} ]]; then
+        AUR_PACKAGES+=(
+            # Alphabetized
+            google-chrome
+            slack-desktop
+            visual-studio-code-bin
+        )
+    fi
     for AUR_PACKAGE in "${AUR_PACKAGES[@]}"; do
         WORK_DIR=${AUR_DIR}/${AUR_PACKAGE}
         MAKEPKG_ARGS=""
