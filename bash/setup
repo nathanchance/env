@@ -95,7 +95,6 @@ function arch_root_setup() { (
         python-requests
         python-setuptools
         python-yaml
-        qemu-headless-arch-extra
         re2c
         repo
         ripgrep
@@ -110,11 +109,14 @@ function arch_root_setup() { (
         wget
         xmlto
     )
-    if ! ${WSL}; then
+    if ${WSL}; then
+        PACKAGES+=(qemu-headless-arch-extra)
+    else
         if [[ -n ${DISPLAY} ]]; then
             PACKAGES+=(
                 discord
                 obs-studio
+                qemu-arch-extra
                 telegram-desktop
                 thunderbird
                 ttc-iosevka-ss08
@@ -127,6 +129,8 @@ function arch_root_setup() { (
                     open-vm-tools
                 )
             fi
+        else
+            PACKAGES+=(qemu-headless-arch-extra)
         fi
         PACKAGES+=(podman)
     fi
