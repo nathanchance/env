@@ -1,0 +1,29 @@
+From c3ad5c0bbd7b9f9d6646d9e095c4d8a57a6d2d6b Mon Sep 17 00:00:00 2001
+From: Nathan Chancellor <nathan@kernel.org>
+Date: Thu, 10 Jun 2021 15:01:18 -0700
+Subject: [PATCH] kbuild: Make -warn-stack-size conditional on LLD < 13.0.0
+
+Signed-off-by: Nathan Chancellor <nathan@kernel.org>
+---
+ Makefile | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/Makefile b/Makefile
+index 7b643a1a7886..57a8d210776a 100644
+--- a/Makefile
++++ b/Makefile
+@@ -1017,9 +1017,11 @@ KBUILD_LDFLAGS += -mllvm -import-instr-limit=5
+ 
+ # Check for frame size exceeding threshold during prolog/epilog insertion.
+ ifneq ($(CONFIG_FRAME_WARN),0)
++ifeq ($(shell test $(CONFIG_LLD_VERSION) -lt 130000; echo $$?),0)
+ KBUILD_LDFLAGS	+= -plugin-opt=-warn-stack-size=$(CONFIG_FRAME_WARN)
+ endif
+ endif
++endif
+ 
+ ifdef CONFIG_LTO
+ KBUILD_CFLAGS	+= -fno-lto $(CC_FLAGS_LTO)
+-- 
+2.32.0
+
