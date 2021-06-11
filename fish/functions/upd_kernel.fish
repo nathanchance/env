@@ -9,12 +9,12 @@ function upd_kernel -d "Update machine's kernel"
         case generic server vm
             for arg in $argv
                 switch $arg
-                    case linux-mainline-llvm linux-next-llvm
+                    case linux-mainline-'*' linux-next-'*'
                         set pkg $arg
                 end
             end
             if not set -q pkg
-                set pkg linux-mainline-llvm
+                set pkg linux-mainline-'*'
             end
 
             pushd $ENV_FOLDER/pkgbuilds/$pkg; or return

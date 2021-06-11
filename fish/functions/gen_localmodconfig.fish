@@ -5,15 +5,15 @@
 function gen_localmodconfig -d "Generate a slimmed down configuration file for Arch Linux"
     for arg in $argv
         switch $arg
-            case linux-mainline-llvm linux-next-llvm
+            case linux-mainline-'*' linux-next-'*'
                 set pkg $arg
         end
     end
 
     switch $pkg
-        case linux-mainline-llvm
+        case linux-mainline-'*'
             set gpg_key 79BE3E4300411886
-        case linux-next-llvm
+        case linux-next-'*'
             set gpg_key 89F91C0A41D5C07A
     end
     if not gpg -k $gpg_key &>/dev/null
