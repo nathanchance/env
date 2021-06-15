@@ -5,14 +5,16 @@
 function user_setup -d "Setup a user account, downloading all files and placing them where they need to go"
     # If we are using GNOME Terminal, the "Unnamed" profile needs to be set
     if is_installed gnome-terminal
-        set gnome_prof (dconf dump /org/gnome/terminal/legacy/profiles:/ | head -1 | awk -F '[][]' '{print $2}')
-        if test "$gnome_prof" = ""
-            set gnome_prof :(dconf dump /org/gnome/terminal/legacy/profiles:/ | grep "list=" | cut -d \' -f 2)
-            if test "$gnome_prof" = ""
+        set gnome_prof_dir /org/gnome/terminal/legacy/profiles:/
+        set gnome_prof_base :(dconf dump $gnome_prof_dir | grep "list=" | cut -d \' -f 2)
+        if test "$gnome_prof_base" = ""
+            set gnome_prof_base (dconf dump $gnome_prof_dir | head -1 | awk -F '[][]' '{print $2}')
+            if test "$gnome_prof_base" = ""
                 print_error "Rename 'Unnamed' profile in GNOME Terminal before running this function"
                 return 1
             end
         end
+        set gnome_prof $gnome_prof_dir$gnome_prof_base/
     end
 
     if uname -r | grep -iq microsoft
@@ -175,7 +177,7 @@ out.*/
 
     if set -q DISPLAY
         if is_installed gnome-terminal
-            dconf load dconf load /org/gnome/terminal/legacy/profiles:/$gnome_prof/ <$configs/local/Nathan.dconf
+            dconf load $gnome_prof <$configs/local/Nathan.dconf
         end
 
         if is_installed konsole
