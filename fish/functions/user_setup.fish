@@ -7,8 +7,11 @@ function user_setup -d "Setup a user account, downloading all files and placing 
     if is_installed gnome-terminal
         set gnome_prof (dconf dump /org/gnome/terminal/legacy/profiles:/ | head -1 | awk -F '[][]' '{print $2}')
         if test "$gnome_prof" = ""
-            print_error "Rename 'Unnamed' profile in GNOME Terminal before running this function"
-            return 1
+            set gnome_prof :(dconf dump /org/gnome/terminal/legacy/profiles:/ | grep "list=" | cut -d \' -f 2)
+            if test "$gnome_prof" = ""
+                print_error "Rename 'Unnamed' profile in GNOME Terminal before running this function"
+                return 1
+            end
         end
     end
 
