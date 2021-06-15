@@ -17,6 +17,8 @@ end
 set -l user (id -un)
 set -l host (uname -n)
 switch $user@$host
+    case nathan@asus
+        set -U LOCATION laptop
     case pi@raspberrypi
         set -U LOCATION pi
     case nathan@archlinux-'*' nathan@debian-'*' nathan@ubuntu-'*'

@@ -47,7 +47,7 @@ function rbld_usr -d "Rebuild the binaries and scripts in ~/usr"
             iarc; or return
             ituxmake; or return
 
-        case vm wsl
+        case laptop vm wsl
             switch (get_distro)
                 case arch
                     bgit; or return
