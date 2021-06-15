@@ -2,9 +2,13 @@
 # SPDX-License-Identifier: MIT
 # Copyright (C) 2021 Nathan Chancellor
 
-function gen_localmodconfig -d "Generate a slimmed down configuration file for Arch Linux"
+function gen_archconfig -d "Generate a configuration file for Arch Linux"
     for arg in $argv
         switch $arg
+            case -f --full
+                set config full
+            case -l --local
+                set config local
             case linux-mainline-'*' linux-next-'*'
                 set pkg $arg
         end
@@ -32,26 +36,28 @@ function gen_localmodconfig -d "Generate a slimmed down configuration file for A
     makepkg -Cdo; or return
     rm $src_cfg
 
-    # Step 2: Copy configuration
+    # Step 2: Copy default Arch configuration
     crl 'https://github.com/archlinux/svntogit-packages/raw/packages/linux/trunk/config' >$cfg
 
     # Step 3: Run olddefconfig
     kmake -C $src KCONFIG_CONFIG=$cfg olddefconfig
 
-    # Step 4: Run localmodconfig
-    cp $cfg $src_cfg
-    kmake -C $src localmodconfig
-    cp $src_cfg $cfg
-    # A few configs might need to stay around for various reasons, build them as modules
-    $src/scripts/config \
-        --file $cfg \
-        -m BLK_DEV_LOOP \
-        -m EDAC_AMD64 \
-        -m EDAC_DECODE_MCE \
-        -m TUN \
-        -m USB_HID \
-        --set-val BLK_DEV_LOOP_MIN_COUNT 0
-    kmake -C $src KCONFIG_CONFIG=$cfg olddefconfig
+    # Step 4: Run localmodconfig if requested
+    if test "$config" = local
+        cp $cfg $src_cfg
+        kmake -C $src localmodconfig
+        cp $src_cfg $cfg
+        # A few configs might need to stay around for various reasons, build them as modules
+        $src/scripts/config \
+            --file $cfg \
+            -m BLK_DEV_LOOP \
+            -m EDAC_AMD64 \
+            -m EDAC_DECODE_MCE \
+            -m TUN \
+            -m USB_HID \
+            --set-val BLK_DEV_LOOP_MIN_COUNT 0
+        kmake -C $src KCONFIG_CONFIG=$cfg olddefconfig
+    end
 
     # Step 5: Run through olddefconfig with Clang
     kmake -C $src KCONFIG_CONFIG=$cfg LLVM=1 LLVM_IAS=1 olddefconfig
