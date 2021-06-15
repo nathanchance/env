@@ -3,6 +3,15 @@
 # Copyright (C) 2021 Nathan Chancellor
 
 function user_setup -d "Setup a user account, downloading all files and placing them where they need to go"
+    # If we are using GNOME Terminal, the "Unnamed" profile needs to be set
+    if is_installed gnome-terminal
+        set gnome_prof (dconf dump /org/gnome/terminal/legacy/profiles:/ | head -1 | awk -F '[][]' '{print $2}')
+        if test "$gnome_prof" = ""
+            print_error "Rename 'Unnamed' profile in GNOME Terminal before running this function"
+            return 1
+        end
+    end
+
     if uname -r | grep -iq microsoft
         set wsl true
     end
@@ -162,13 +171,21 @@ out.*/
     end
 
     if set -q DISPLAY
-        set konsole_share $HOME/.local/share/konsole
-        mkdir -p $konsole_share
-        ln -fsv $configs/local/Nathan.profile $konsole_share/Nathan.profile
-        ln -fsv $configs/local/snazzy.colorscheme $konsole_share/snazzy.colorscheme
+        if is_installed gnome-terminal
+            dconf load dconf load /org/gnome/terminal/legacy/profiles:/$gnome_prof/ < $configs/local/Nathan.dconf
+        end
 
-        echo "--enable-features=WebUIDarkMode
+        if is_installed konsole
+            set konsole_share $HOME/.local/share/konsole
+            mkdir -p $konsole_share
+            ln -fsv $configs/local/Nathan.profile $konsole_share/Nathan.profile
+            ln -fsv $configs/local/snazzy.colorscheme $konsole_share/snazzy.colorscheme
+        end
+
+        if is_installed google-chrome
+            echo "--enable-features=WebUIDarkMode
 --force-dark-mode" >$HOME/.config/chrome-flags.conf
+        end
     end
 
     if test "$trusted" = true
