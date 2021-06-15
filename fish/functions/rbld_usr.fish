@@ -51,7 +51,6 @@ function rbld_usr -d "Rebuild the binaries and scripts in ~/usr"
             switch (get_distro)
                 case arch
                     bgit; or return
-                    bcvise; or return
 
                 case debian ubuntu
                     updbin; or return
