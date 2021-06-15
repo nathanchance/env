@@ -172,7 +172,7 @@ out.*/
 
     if set -q DISPLAY
         if is_installed gnome-terminal
-            dconf load dconf load /org/gnome/terminal/legacy/profiles:/$gnome_prof/ < $configs/local/Nathan.dconf
+            dconf load dconf load /org/gnome/terminal/legacy/profiles:/$gnome_prof/ <$configs/local/Nathan.dconf
         end
 
         if is_installed konsole
