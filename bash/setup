@@ -42,7 +42,8 @@ function arch_root_setup() { (
     remove_if_installed fakeroot-tcp
 
     # Handle IgnorePkg as necessary
-    # sed -i 's/#IgnorePkg   =/IgnorePkg    = .../g' /etc/pacman.conf
+    # git-git: I maintain my own PKGBUILD
+    sed -i 's/#IgnorePkg   =/IgnorePkg    = git-git/g' /etc/pacman.conf
 
     # Install all packages that we want
     PACKAGES=(
@@ -115,6 +116,7 @@ function arch_root_setup() { (
         if [[ -n ${DISPLAY} ]]; then
             PACKAGES+=(
                 discord
+                firefox
                 obs-studio
                 qemu-arch-extra
                 telegram-desktop
@@ -179,11 +181,13 @@ EOF
     AUR_PACKAGES=(
         # Alphabetized
         duf-bin
+        git-git
         inetutils-hostname
         mosh-git
         opendoas-sudo
         yay-bin
         # Dependency based
+        cvise
         # qemu-user-static depends on glib2-static and pcre-static so build those first
         glib2-static
         pcre-static
@@ -191,6 +195,14 @@ EOF
         # binfmt-qemu-static needs qemu-user-static to be installed in order to register properly
         binfmt-qemu-static
     )
+    # There is no point in running cvise on a low core system
+    if [[ $(nproc) -ge 8 ]]; then
+        AUR_PACKAGES+=(
+            # cvise depends on python-pebble
+            python-pebble
+            cvise
+        )
+    fi
     if [[ -n ${DISPLAY} ]]; then
         AUR_PACKAGES+=(
             # Alphabetized
@@ -203,7 +215,7 @@ EOF
         WORK_DIR=${AUR_DIR}/${AUR_PACKAGE}
         MAKEPKG_ARGS=""
         case "${AUR_PACKAGE}" in
-            inetutils-hostname | mosh-git)
+            cvise | git-git | inetutils-hostname | mosh-git)
                 mkdir -p "${WORK_DIR}"
                 cp -v /tmp/env/pkgbuilds/"${AUR_PACKAGE}"/PKGBUILD "${WORK_DIR}"
                 ;;

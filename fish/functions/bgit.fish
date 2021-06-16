@@ -3,6 +3,21 @@
 # Copyright (C) 2021 Nathan Chancellor
 
 function bgit -d "Build git from source"
+    # If the development version of git is installed via pacman, update that
+    if is_installed git-git
+        cd $ENV_FOLDER/pkgbuilds/git-git; or return
+
+        rm -rf -- *.tar.zst
+
+        makepkg -C; or return
+
+        yay -U --needed --noconfirm -- git-git-*.tar.zst; or return
+
+        prevd
+
+        return 0
+    end
+
     # Ensure that all PATH modifications are local to this function (like a subshell)
     set -lx PATH $PATH
 

@@ -35,10 +35,6 @@ function rbld_usr -d "Rebuild the binaries and scripts in ~/usr"
 
         case server
             switch (get_distro)
-                case arch
-                    bgit; or return
-                    bcvise; or return
-
                 case debian ubuntu
                     updbin; or return
                     bdtc; or return
@@ -49,9 +45,6 @@ function rbld_usr -d "Rebuild the binaries and scripts in ~/usr"
 
         case laptop vm wsl
             switch (get_distro)
-                case arch
-                    bgit; or return
-
                 case debian ubuntu
                     updbin; or return
             end
