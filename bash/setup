@@ -233,7 +233,7 @@ EOF
         chown -R "nobody:nobody" "${AUR_DIR}"
         cd "${WORK_DIR}" || exit ${?}
         HOME=${AUR_DIR} su -m -s /bin/bash nobody -c "makepkg --nocheck --noconfirm${MAKEPKG_ARGS} -s" || exit ${?}
-        if [[ ${AUR_PACKAGE} = "git-git" ]] && is_installed git; then
+        if [[ ${AUR_PACKAGE} = "git-git" ]] && is_installed -n git; then
             pacman -R -dd --noconfirm git || exit ${?}
         fi
         pacman -U --needed --noconfirm -- *.tar.zst || exit ${?}
@@ -592,7 +592,7 @@ function debian_ubuntu_update_install() { (
 # Check if a package is installed
 function is_installed() { (
     case ${DISTRO} in
-        arch) pacman -Q "${1:?}" &>/dev/null ;;
+        arch) pacman -Q "${@:?}" &>/dev/null ;;
     esac
 ); }
 
