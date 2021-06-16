@@ -38,12 +38,12 @@ end
 ##########################################
 
 switch $LOCATION
+    case laptop vm
+        set -Ux MAIN_FOLDER $HOME/Dev
     case pi
         if test -d /mnt/ssd
             set -Ux MAIN_FOLDER /mnt/ssd
         end
-    case vm
-        set -Ux MAIN_FOLDER $HOME/Dev
 end
 
 
