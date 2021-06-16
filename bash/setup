@@ -376,15 +376,16 @@ EOF
     if [[ -d /mnt/ssd ]]; then
         # Raspberry Pi 4
         MAIN_FOLDER=/mnt/ssd
-    elif [[ $(uname -n) = "hyperv" || $(uname -n) = "vmware" ]]; then
-        # Virtual machine
+    elif [[ -n ${DISPLAY} && $(uname -n) != "raspberrypi" ]]; then
+        # Virtual machine or laptop
         MAIN_FOLDER=/home/${USER_NAME}/Dev
     else
         # Server or WSL
         MAIN_FOLDER=/home/${USER_NAME}
     fi
-    echo "local SETUP=${MAIN_FOLDER}/github/env/bash/setup
-[[ -f ${SETUP} ]] && source ${SETUP}" >/root/.bashrc
+    echo "SETUP=${MAIN_FOLDER}/github/env/bash/setup" >/root/.bashrc
+    # shellcheck disable=SC2016
+    echo '[[ -f ${SETUP} ]] && source ${SETUP}' >>/root/.bashrc
 ); }
 
 function debian_root_setup { (
