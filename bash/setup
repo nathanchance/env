@@ -233,7 +233,9 @@ EOF
         chown -R "nobody:nobody" "${AUR_DIR}"
         cd "${WORK_DIR}" || exit ${?}
         HOME=${AUR_DIR} su -m -s /bin/bash nobody -c "makepkg --nocheck --noconfirm${MAKEPKG_ARGS} -s" || exit ${?}
-        [[ ${AUR_PACKAGE} = "git-git" ]] && { pacman -R -dd --noconfirm git || exit ${?}; }
+        if [[ ${AUR_PACKAGE} = "git-git" ]] && is_installed git; then
+            pacman -R -dd --noconfirm git || exit ${?}
+        fi
         pacman -U --needed --noconfirm -- *.tar.zst || exit ${?}
         cd "${AUR_DIR}" || exit ${?}
         rm -rf "${WORK_DIR}" || exit ${?}
