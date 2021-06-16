@@ -15,8 +15,6 @@ function rbpi -d "Rebase Raspberry Pi kernel on latest linux-next"
 
     set -a patches 20210514213032.575161-1-arnd@kernel.org # [PATCH] drm/msm/dsi: fix 32-bit clang warning
     set -a patches 20210603174311.1008645-1-nathan@kernel.org # [PATCH] btrfs: Remove total_data_size variable in btrfs_batch_insert_items()
-    set -a patches 20210607041529.392451-1-david@fromorbit.com # [PATCH] xfs: drop the AGI being passed to xfs_check_agi_freecount
-    set -a patches 1623227044-22635-1-git-send-email-cang@codeaurora.org # [PATCH v3] scsi: ufs: Fix a possible use before initialization case
     for patch in $patches
         git b4 ams $patch; or return
     end
