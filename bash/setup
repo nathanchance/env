@@ -67,7 +67,6 @@ function arch_root_setup() { (
         fd
         fish
         gcc-multilib
-        git
         htop
         hub
         hugo
@@ -110,6 +109,7 @@ function arch_root_setup() { (
         wget
         xmlto
     )
+    is_installed git-git || PACKAGES+=(git)
     if ${WSL}; then
         PACKAGES+=(qemu-headless-arch-extra)
     else
@@ -590,7 +590,7 @@ function debian_ubuntu_update_install() { (
 # Check if a package is installed
 function is_installed() { (
     case ${DISTRO} in
-        arch) pacman -Q | grep -q "${1:?}" ;;
+        arch) pacman -Q "${1:?}" &>/dev/null ;;
     esac
 ); }
 
