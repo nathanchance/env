@@ -33,7 +33,7 @@ function gen_archconfig -d "Generate a configuration file for Arch Linux"
 
     # Step 1: Download and extract files
     touch $cfg
-    makepkg -Cdo; or return
+    makepkg -Cdo --skipchecksums; or return
     rm $src_cfg
 
     # Step 2: Copy default Arch configuration
@@ -69,6 +69,9 @@ function gen_archconfig -d "Generate a configuration file for Arch Linux"
         -d LTO_NONE \
         -e LTO_CLANG_THIN
     kmake -C $src KCONFIG_CONFIG=$cfg LLVM=1 LLVM_IAS=1 olddefconfig
+
+    # Step 7: Update checksums
+    updpkgsums
 
     popd
 end
