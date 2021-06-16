@@ -187,7 +187,6 @@ EOF
         opendoas-sudo
         yay-bin
         # Dependency based
-        cvise
         # qemu-user-static depends on glib2-static and pcre-static so build those first
         glib2-static
         pcre-static
