@@ -215,9 +215,12 @@ EOF
         WORK_DIR=${AUR_DIR}/${AUR_PACKAGE}
         MAKEPKG_ARGS=""
         case "${AUR_PACKAGE}" in
-            cvise | git-git | inetutils-hostname | mosh-git)
+            cvise | inetutils-hostname | mosh-git)
                 mkdir -p "${WORK_DIR}"
                 cp -v /tmp/env/pkgbuilds/"${AUR_PACKAGE}"/PKGBUILD "${WORK_DIR}"
+                ;;
+            git-git)
+                cp -rv /tmp/env/pkgbuilds/"${AUR_PACKAGE}" "${WORK_DIR}"
                 ;;
             qemu-user-static)
                 HOME=${AUR_DIR} su -m -s /bin/bash nobody -c "gpg --recv-keys 3353C9CEF108B584" || exit ${?}
