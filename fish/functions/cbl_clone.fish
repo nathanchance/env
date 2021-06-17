@@ -5,6 +5,9 @@
 function cbl_clone -d "Clone certain repos for ClangBuiltLinux testing and development"
     for arg in $argv
         switch $arg
+            case boot-utils tc-build
+                set url https://github.com/ClangBuiltLinux/$arg.git
+                set dest $CBL_GIT/$arg
             case linux
                 set url https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/
                 set dest $CBL_SRC/$arg
@@ -14,9 +17,6 @@ function cbl_clone -d "Clone certain repos for ClangBuiltLinux testing and devel
             case linux-stable
                 set url https://git.kernel.org/pub/scm/linux/kernel/git/stable/linux.git/
                 set dest $CBL_SRC/$arg
-            case tc-build
-                set url https://github.com/ClangBuiltLinux/tc-build.git
-                set dest $CBL_GIT/$arg
             case wsl2
                 set url git@github.com:nathanchance/WSL2-Linux-Kernel
                 set dest $CBL_BLD/wsl2
