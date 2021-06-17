@@ -180,6 +180,11 @@ out.*/
             dconf load $gnome_prof <$configs/local/Nathan.dconf
         end
 
+        if is_installed google-chrome
+            echo "--enable-features=WebUIDarkMode
+--force-dark-mode" >$HOME/.config/chrome-flags.conf
+        end
+
         if is_installed konsole
             set konsole_share $HOME/.local/share/konsole
             mkdir -p $konsole_share
@@ -187,9 +192,10 @@ out.*/
             ln -fsv $configs/local/snazzy.colorscheme $konsole_share/snazzy.colorscheme
         end
 
-        if is_installed google-chrome
-            echo "--enable-features=WebUIDarkMode
---force-dark-mode" >$HOME/.config/chrome-flags.conf
+        if is_installed xfce4-terminal
+            set xfce_share $HOME/.local/share/xfce4/terminal/colorschemes
+            mkdir -p $xfce_share
+            ln -fsv $configs/local/snazzy.theme $xfce_share
         end
     end
 
