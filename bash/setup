@@ -186,20 +186,24 @@ EOF
         mosh-git
         opendoas-sudo
         yay-bin
-        # Dependency based
-        # qemu-user-static depends on glib2-static and pcre-static so build those first
-        glib2-static
-        pcre-static
-        qemu-user-static
-        # binfmt-qemu-static needs qemu-user-static to be installed in order to register properly
-        binfmt-qemu-static
+        # Dependency based (if there are any)
     )
-    # There is no point in running cvise on a low core system
+    # Do not build certain packages when the machine has less than 8 cores
     if [[ $(nproc) -ge 8 ]]; then
+        # cvise does not take a long time to build but it is not useful with fewer cores
         AUR_PACKAGES+=(
-            # cvise depends on python-pebble
+            # cvise depends on python-pebble (order matters)
             python-pebble
             cvise
+        )
+        # glib2-static takes a long time due to LTO
+        AUR_PACKAGES+=(
+            # qemu-user-static depends on glib2-static and pcre-static so build those first (order matters)
+            glib2-static
+            pcre-static
+            qemu-user-static
+            # binfmt-qemu-static needs qemu-user-static to be installed in order to register properly
+            binfmt-qemu-static
         )
     fi
     if [[ -n ${DISPLAY} ]]; then
