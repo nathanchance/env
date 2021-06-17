@@ -115,6 +115,7 @@ function arch_root_setup() { (
     else
         if [[ -n ${DISPLAY} ]]; then
             PACKAGES+=(
+                cantarell-fonts
                 discord
                 firefox
                 obs-studio
