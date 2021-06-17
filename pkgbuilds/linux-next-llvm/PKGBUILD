@@ -3,7 +3,7 @@
 _localversion=-llvm
 _pkgsuffix=-next$_localversion
 pkgbase=linux$_pkgsuffix
-_srctag=next-20210616
+_srctag=next-20210617
 pkgver=${_srctag//-/.}
 pkgrel=1
 pkgdesc='linux-next'
@@ -19,16 +19,12 @@ _srcname=$pkgbase
 source=(
   "$_srcname::git+https://git.kernel.org/pub/scm/linux/kernel/git/next/linux-next.git?signed#tag=$_srctag"
   config
-  0001-Makefile-Pass-warn-stack-size-only-on-LLD-13.0.0.patch
-  0001-mtd_blkdevs-initialze-new-rq-in-add_mtd_blktrans_dev.patch
 )
 validpgpkeys=(
   '985B681FA45919699753A26489F91C0A41D5C07A'  # Stephen Rothwell
 )
 sha256sums=('SKIP'
-            '8ce2133f60c7ed69b819e7894faf057650369fa55f4ae61a82f64f30c762b05b'
-            'b6464ab5cc1af39728524e8aef62c429833ba4b6cc4d533b21ff8fa6ffd6eadf'
-            '29351401e2d111b73bbed959e16f055a7abf57aa6746cab0f4e220347e57cdb3')
+            '0fc0ae4e661935c78102e397bf4779e2284c197945e8b3f315f8fcea5f7481cb')
 
 _kmake() {
   PATH=${CBL_BIN}:${PATH} \
