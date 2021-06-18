@@ -40,7 +40,7 @@ function bldtcs -d "Build LLVM and binutils from source for kernel development"
                 --pgo kernel-defconfig
     end
     if not set -q check_targets
-        set check_targets clang lld llvm{,-unit}
+        set check_targets clang ll{d,vm{,-unit}}
     end
     if test "$lto" = true
         set -a bld_llvm_args --lto=thin
