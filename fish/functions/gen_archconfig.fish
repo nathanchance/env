@@ -5,11 +5,16 @@
 function gen_archconfig -d "Generate a configuration file for Arch Linux"
     for arg in $argv
         switch $arg
+            case --cfi --cfi-permissive
+                set -a config_args -e CFI_CLANG
+                if test $arg = --cfi-permissive
+                    set -a config_args -e CFI_PERMISSIVE
+                end
             case -f --full
                 set config full
             case -l --local
                 set config local
-            case linux-mainline-'*' linux-next-'*'
+            case linux-cfi linux-mainline-'*' linux-next-'*'
                 set pkg $arg
         end
     end
@@ -24,12 +29,12 @@ function gen_archconfig -d "Generate a configuration file for Arch Linux"
         gpg --receive-keys $gpg_key
     end
 
-    set linux_llvm $ENV_FOLDER/pkgbuilds/$pkg
-    set cfg $linux_llvm/config
-    set src $linux_llvm/src/$pkg
+    set linux $ENV_FOLDER/pkgbuilds/$pkg
+    set cfg $linux/config
+    set src $linux/src/$pkg
     set src_cfg $src/.config
 
-    pushd $linux_llvm; or return
+    pushd $linux; or return
 
     # Step 1: Download and extract files
     touch $cfg
@@ -67,7 +72,8 @@ function gen_archconfig -d "Generate a configuration file for Arch Linux"
         --file $cfg \
         -d DEBUG_INFO \
         -d LTO_NONE \
-        -e LTO_CLANG_THIN
+        -e LTO_CLANG_THIN \
+        $config_args
     kmake -C $src KCONFIG_CONFIG=$cfg LLVM=1 LLVM_IAS=1 olddefconfig
 
     # Step 7: Update checksums

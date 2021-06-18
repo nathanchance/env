@@ -9,7 +9,7 @@ function cbl_linux_repos -d "Clone ClangBuiltLinux Linux repos into their proper
                 set pairs torvalds/linux:{$CBL_BLD_C,$CBL_BLD_P,$CBL_MIRRORS,$CBL_SRC}/$arg
 
             case linux-next
-                set pairs next/linux-next:{{$CBL_BLD_C,$CBL_BLD_P,$CBL_SRC}/$arg,$CBL_BLD/rpi}
+                set pairs next/linux-next:{{$CBL_BLD_C,$CBL_BLD_P,$CBL_SRC}/$arg,$CBL_BLD/rpi,$CBL_SRC/linux-cfi}
 
             case linux-stable
                 set pairs stable/linux:{$CBL_BLD_C,$CBL_BLD_P}/$arg-$CBL_STABLE_VERSIONS stable/linux:$CBL_SRC/$arg
@@ -54,7 +54,7 @@ function cbl_linux_repos -d "Clone ClangBuiltLinux Linux repos into their proper
         end
         git -C $folder checkout $branch
 
-        if test (basename $folder) = rpi
+        if test (basename $folder) = rpi; or test (basename $folder) = linux-cfi
             git -C $folder config rerere.enabled true
             git -C $folder remote add -f --tags mainline https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git
             git -C $folder remote add -f --tags sami https://github.com/samitolvanen/linux.git

@@ -10,8 +10,10 @@ function upd_kernel -d "Update machine's kernel"
             for arg in $argv
                 switch $arg
                     case -f --full -l --local
-                        set config_args $arg
-                    case linux-mainline-'*' linux-next-'*'
+                        set -a config_args $arg
+                    case -p --permissive
+                        set -a config_args --cfi-permissive
+                    case linux-cfi linux-mainline-'*' linux-next-'*'
                         set pkg $arg
                 end
             end
@@ -25,6 +27,9 @@ function upd_kernel -d "Update machine's kernel"
             rm -- *.tar.zst
 
             # Generate .config
+            if test $pkg = linux-cfi
+                set -a config_args --cfi
+            end
             gen_archconfig $config_args $pkg
 
             # Build the kernel
