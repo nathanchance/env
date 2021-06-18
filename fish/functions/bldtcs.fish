@@ -88,7 +88,6 @@ function bldtcs -d "Build LLVM and binutils from source for kernel development"
     end
 
     # Add patches to revert here
-    set -a reverts 76d0747e0807307780ba84cbd7e5c80b20c26bd7 # https://reviews.llvm.org/D103717
     for revert in $reverts
         if not git -C $llvm_project rv -n $revert
             set message "Failed to revert $revert"
