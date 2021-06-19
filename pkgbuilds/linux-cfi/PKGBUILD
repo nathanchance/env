@@ -3,7 +3,7 @@
 _localversion=-cfi
 _pkgsuffix=$_localversion
 pkgbase=linux$_pkgsuffix
-pkgver=v5.13.rc6.61.g2b6dc9f056c3
+pkgver=next.20210618.45.g0d177cd43f08
 pkgrel=1
 pkgdesc='Linux kernel with Control Flow Integrity'
 arch=(x86_64)
@@ -15,11 +15,11 @@ makedepends=(
 options=('!strip')
 _srcname=$pkgbase
 source=(
-  "$_srcname::git+file://$CBL_SRC/linux-cfi"
+  "$_srcname::git+file://$CBL_SRC/linux-cfi#branch=next"
   config
 )
 sha256sums=('SKIP'
-            '38b974e2c2efb9b2e3b3b3d8ded92332e351c2a0fdf73d2536f3495b06514aeb')
+            'e5eaec7a5e87a68499b7f7d076016788a5e9a847ef2a4fe90c2510be3fd4c7a2')
 
 _kmake() {
   PATH=${CBL_BIN}:${PATH} \
