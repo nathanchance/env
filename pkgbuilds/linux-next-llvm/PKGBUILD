@@ -3,7 +3,7 @@
 _localversion=-llvm
 _pkgsuffix=-next$_localversion
 pkgbase=linux$_pkgsuffix
-_srctag=next-20210618
+_srctag=next-20210621
 pkgver=${_srctag//-/.}
 pkgrel=1
 pkgdesc='linux-next'
@@ -24,7 +24,7 @@ validpgpkeys=(
   '985B681FA45919699753A26489F91C0A41D5C07A'  # Stephen Rothwell
 )
 sha256sums=('SKIP'
-            '61043a8100eed53191ba255a217c1beb31eb6c79e03106c2e453684add8c2f71')
+            '0bae1bae55e54e015efb0df7dd005f3107f05fd99dff39ae1092ff026020d056')
 
 _kmake() {
   PATH=${CBL_BIN}:${PATH} \
