@@ -20,8 +20,6 @@ function rbpi -d "Rebase Raspberry Pi kernel on latest linux-next"
         git b4 ams $patch; or return
     end
 
-    crl https://git.kernel.org/arm64/p/69bb0585ebb0c48c93fc55fc27afbfc06adef2fd | git ams; or return
-
     echo 'From 26af5261cf08f10513e72439a82b3eafa7e44732 Mon Sep 17 00:00:00 2001
 From: Nathan Chancellor <nathan@kernel.org>
 Date: Wed, 9 Jun 2021 10:44:20 -0700

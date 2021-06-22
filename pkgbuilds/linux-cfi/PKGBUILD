@@ -3,7 +3,7 @@
 _localversion=-cfi
 _pkgsuffix=$_localversion
 pkgbase=linux$_pkgsuffix
-pkgver=next.20210618.45.g0d177cd43f08
+pkgver=next.20210622.19.g554d892fee75
 pkgrel=1
 pkgdesc='Linux kernel with Control Flow Integrity'
 arch=(x86_64)
@@ -19,15 +19,18 @@ source=(
   config
 )
 sha256sums=('SKIP'
-            'e5eaec7a5e87a68499b7f7d076016788a5e9a847ef2a4fe90c2510be3fd4c7a2')
+            'd839a230f394462d8b9cb7ac4e277a166ac49ea7530515b974ef4968f5d0c8e3')
 
 _kmake() {
+  set -x
   PATH=${CBL_BIN}:${PATH} \
     make \
     -j"$(nproc)" \
+    KCFLAGS=${KCFLAGS--Werror} \
     LLVM=1 \
     LLVM_IAS=1 \
     "${@}"
+  set +x
 }
 
 prepare() {

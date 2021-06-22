@@ -27,12 +27,15 @@ sha256sums=('SKIP'
             '6dad1dfc72785cccdcf07ade7714085e942ea50cf7caedeca61591866dad2991')
 
 _kmake() {
+  set -x
   PATH=${CBL_BIN}:${PATH} \
     make \
     -j"$(nproc)" \
+    KCFLAGS=${KCFLAGS--Werror} \
     LLVM=1 \
     LLVM_IAS=1 \
     "${@}"
+  set +x
 }
 
 prepare() {

@@ -3,7 +3,7 @@
 _localversion=-llvm
 _pkgsuffix=-next$_localversion
 pkgbase=linux$_pkgsuffix
-_srctag=next-20210621
+_srctag=next-20210622
 pkgver=${_srctag//-/.}
 pkgrel=1
 pkgdesc='linux-next'
@@ -24,15 +24,18 @@ validpgpkeys=(
   '985B681FA45919699753A26489F91C0A41D5C07A'  # Stephen Rothwell
 )
 sha256sums=('SKIP'
-            '0bae1bae55e54e015efb0df7dd005f3107f05fd99dff39ae1092ff026020d056')
+            '52c480452c9f774c7da318ab24a7901db709225c439cb3bb86c6e33bb7452aeb')
 
 _kmake() {
+  set -x
   PATH=${CBL_BIN}:${PATH} \
     make \
     -j"$(nproc)" \
+    KCFLAGS=${KCFLAGS--Werror} \
     LLVM=1 \
     LLVM_IAS=1 \
     "${@}"
+  set +x
 }
 
 prepare() {
@@ -50,6 +53,10 @@ prepare() {
     echo "Applying patch $src..."
     patch -Np1 < "../$src"
   done
+
+  echo "Applying patches from mailing list..."
+  b4 am -o - 20210618000358.2402567-1-nathan@kernel.org | patch -Np1
+  b4 am -o - 62c5ed786f81ddea6d3587647520e9e4254c8612.1624174954.git.objelf@gmail.com | patch -Np1
 
   echo "Setting config..."
   cp ../config .config
