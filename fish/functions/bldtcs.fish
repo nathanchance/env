@@ -98,6 +98,7 @@ function bldtcs -d "Build LLVM and binutils from source for kernel development"
     end
 
     # Add in-review patches here
+    set -a patches D104058 # ThinLTO: Fix inline assembly references to static functions with CFI
     for revision in $revisions
         if not crl "https://reviews.llvm.org/$revision?download=true" | git -C $llvm_project ap
             set message "Failed to apply $revision"
