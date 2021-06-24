@@ -19,7 +19,7 @@ source=(
   config
 )
 sha256sums=('SKIP'
-            'd839a230f394462d8b9cb7ac4e277a166ac49ea7530515b974ef4968f5d0c8e3')
+            '58029e32236a1ca432419a832a739adc36faea4d920bfd18000feb89b38bfb22')
 
 _kmake() {
   set -x
