@@ -3,7 +3,7 @@
 _localversion=-llvm
 _pkgsuffix=-next$_localversion
 pkgbase=linux$_pkgsuffix
-_srctag=next-20210623
+_srctag=next-20210624
 pkgver=${_srctag//-/.}
 pkgrel=1
 pkgdesc='linux-next'
@@ -24,7 +24,7 @@ validpgpkeys=(
   '985B681FA45919699753A26489F91C0A41D5C07A'  # Stephen Rothwell
 )
 sha256sums=('SKIP'
-            '3f9ff430b91802c9907ea9d61e489174a2d2a64e87a254d3ea6f9035f8709fda')
+            'a8af5c52db503c8bfba070953eb3a2353d6c78536a354363cdc8120a4b9fbe72')
 
 _kmake() {
   set -x
@@ -55,11 +55,11 @@ prepare() {
   done
 
   echo "Applying patches from mailing list..."
-  b4 am -o - 20210618000358.2402567-1-nathan@kernel.org | patch -Np1
   b4 am -o - 62c5ed786f81ddea6d3587647520e9e4254c8612.1624174954.git.objelf@gmail.com | patch -Np1
+  b4 am -o - 20210624052918.4946-1-kvalo@codeaurora.org | patch -Np1
+  b4 am -o - 20210624212048.1356136-1-nathan@kernel.org | patch -Np1
 
-  echo "Reverting commits..."
-  git revert -m 1 --no-commit 070258effa3b9603ac0cd6a40297b00a01ea5fd8
+  # echo "Reverting commits..."
 
   echo "Setting config..."
   cp ../config .config

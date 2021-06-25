@@ -14,8 +14,8 @@ function rbpi -d "Rebase Raspberry Pi kernel on latest linux-next"
     git rh origin/master
 
     set -a patches 20210514213032.575161-1-arnd@kernel.org # [PATCH] drm/msm/dsi: fix 32-bit clang warning
-    set -a patches 20210618000358.2402567-1-nathan@kernel.org # [PATCH net-next] net/mlx5: Use cpumask_available() in mlx5_eq_create_generic()
     set -a patches 20210621185645.2373845-1-nathan@kernel.org # [PATCH] mailbox: imx: Avoid using val uninitialized in imx_mu_isr()
+    set -a patches 20210624212048.1356136-1-nathan@kernel.org # [PATCH] ALSA: usb-audio: scarlett2: Fix for loop increment in scarlett2_usb_get_config
     for patch in $patches
         git b4 ams $patch; or return
     end
