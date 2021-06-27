@@ -3,7 +3,7 @@
 _localversion=-llvm
 _pkgsuffix=-next$_localversion
 pkgbase=linux$_pkgsuffix
-_srctag=next-20210624
+_srctag=next-20210625
 pkgver=${_srctag//-/.}
 pkgrel=1
 pkgdesc='linux-next'
@@ -24,7 +24,7 @@ validpgpkeys=(
   '985B681FA45919699753A26489F91C0A41D5C07A'  # Stephen Rothwell
 )
 sha256sums=('SKIP'
-            'a8af5c52db503c8bfba070953eb3a2353d6c78536a354363cdc8120a4b9fbe72')
+            'c7819221663c28893d8df1b44d477b99530e8a5ca794cbe7b20ecae8477d7515')
 
 _kmake() {
   set -x
@@ -55,9 +55,12 @@ prepare() {
   done
 
   echo "Applying patches from mailing list..."
-  b4 am -o - 62c5ed786f81ddea6d3587647520e9e4254c8612.1624174954.git.objelf@gmail.com | patch -Np1
-  b4 am -o - 20210624052918.4946-1-kvalo@codeaurora.org | patch -Np1
-  b4 am -o - 20210624212048.1356136-1-nathan@kernel.org | patch -Np1
+
+  # [PATCH 2/2] mt76: fix build error implicit enumeration conversion
+  b4 am -o - -P _ https://lore.kernel.org/r/62c5ed786f81ddea6d3587647520e9e4254c8612.1624174954.git.objelf@gmail.com/ | patch -Np1
+
+  # [PATCH v5] ALSA: usb-audio: scarlett2: Fix for loop increment in scarlett2_usb_get_config
+  b4 am -o - https://lore.kernel.org/r/20210627051202.1888250-1-nathan@kernel.org/ | patch -Np1
 
   # echo "Reverting commits..."
 
