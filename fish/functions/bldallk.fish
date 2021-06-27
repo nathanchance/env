@@ -31,5 +31,8 @@ function bldallk -d "Build all kernels for ClangBuiltLinux testing"
                 $CBL_BLD/pi-scripts/build.fish $arch $CBL_BLD/rpi
             end
             $CBL_BLD/wsl2/bin/build.fish
+            for krnl in linux-{next-llvm,cfi}
+                upd_kernel $krnl
+            end
     end
 end
