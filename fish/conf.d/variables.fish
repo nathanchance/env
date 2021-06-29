@@ -19,6 +19,8 @@ set -l host (uname -n)
 switch $user@$host
     case nathan@asus
         set -U LOCATION laptop
+    case nathan@hp-4300G
+        set -U LOCATION desktop
     case pi@raspberrypi
         set -U LOCATION pi
     case nathan@archlinux-'*' nathan@debian-'*' nathan@ubuntu-'*'

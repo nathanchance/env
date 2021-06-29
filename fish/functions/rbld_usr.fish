@@ -19,6 +19,12 @@ function rbld_usr -d "Rebuild the binaries and scripts in ~/usr"
     mkdir -p $stow
 
     switch $LOCATION
+        case desktop laptop vm wsl
+            switch (get_distro)
+                case debian ubuntu
+                    updbin; or return
+            end
+
         case generic
             updbin; or return
             iandroidtools; or return
@@ -42,12 +48,6 @@ function rbld_usr -d "Rebuild the binaries and scripts in ~/usr"
             end
             iarc; or return
             ituxmake; or return
-
-        case laptop vm wsl
-            switch (get_distro)
-                case debian ubuntu
-                    updbin; or return
-            end
     end
 
     ib4; or return

@@ -4,10 +4,10 @@
 
 function ccache_setup -d "Setup ccache size and compression"
     switch $LOCATION
+        case desktop laptop pi vm
+            set size 15
         case generic wsl
             set size 25
-        case laptop pi vm
-            set size 15
         case server
             set size 150
     end
