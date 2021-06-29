@@ -229,7 +229,7 @@ EOF
                 cp -rv /tmp/env/pkgbuilds/"${AUR_PACKAGE}" "${WORK_DIR}"
                 ;;
             qemu-user-static)
-                HOME=${AUR_DIR} su -m -s /bin/bash nobody -c "gpg --recv-keys 3353C9CEF108B584" || exit ${?}
+                HOME=${AUR_DIR} su -m -s /bin/bash nobody -c "gpg --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys 3353C9CEF108B584" || exit ${?}
                 GIT_ARGS=(https://aur.archlinux.org/"${AUR_PACKAGE}".git)
                 ;;
             *)
