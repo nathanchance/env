@@ -268,6 +268,12 @@ EOF
         systemctl enable vmtoolsd.service
         systemctl enable vmware-vmblock-fuse.service
     fi
+
+    # Set SSH options
+    set_sshd_config
+
+    # Make sure LightDM does not start too quickly
+    is_installed lightdm && sed -i 's/#logind-check-graphical=false/logind-check-graphical=true/g' /etc/lightdm/lightdm.conf
 ); }
 
 # Build fish shell from source
@@ -694,6 +700,11 @@ function set_global_variables() {
 
     : "${DISTRO:=unsupported}" "${PI:=false}" "${WSL:=false}"
 }
+
+# Set sshd_config options
+function set_sshd_config() { (
+    sed -i 's/#PermitRootLogin prohibit-password/PermitRootLogin prohibit-password/g' /etc/ssh/sshd_config
+); }
 
 function ubuntu_root_setup { (
     if ! ${WSL}; then
