@@ -4,6 +4,8 @@
 
 function msh -d "Shorthand for mosh -o" -w mosh
     switch $argv[1]
+        case dsktp
+            set user_host nathan@192.168.4.133
         case pi3
             set user_host pi@192.168.4.89
         case pi4
