@@ -13,7 +13,6 @@ function rbpi -d "Rebase Raspberry Pi kernel on latest linux-next"
 
     git rh origin/master
 
-    set -a patches 20210621185645.2373845-1-nathan@kernel.org # [PATCH] mailbox: imx: Avoid using val uninitialized in imx_mu_isr()
     set -a patches 20210627051202.1888250-1-nathan@kernel.org # [PATCH v5] ALSA: usb-audio: scarlett2: Fix for loop increment in scarlett2_usb_get_config
     for patch in $patches
         git b4 ams $patch; or return
