@@ -32,7 +32,7 @@ _kmake() {
   set -x
   PATH=${CBL_BIN}:${PATH} \
     make \
-    -j"$(nproc)" \
+    -skj"$(nproc)" \
     KCFLAGS=${KCFLAGS--Werror} \
     LLVM=1 \
     LLVM_IAS=1 \
