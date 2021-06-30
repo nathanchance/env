@@ -3,7 +3,7 @@
 _localversion=-llvm
 _pkgsuffix=-mainline$_localversion
 pkgbase=linux$_pkgsuffix
-_srctag=v5.13-rc7
+_srctag=v5.13
 pkgver=${_srctag//-/.}
 pkgrel=1
 pkgdesc='Linux'
@@ -24,7 +24,7 @@ validpgpkeys=(
   'ABAF11C65A2970B130ABE3C479BE3E4300411886'  # Linus Torvalds
 )
 sha256sums=('SKIP'
-            '6dad1dfc72785cccdcf07ade7714085e942ea50cf7caedeca61591866dad2991')
+            'e92cc16d8fb64e64e279c6158ed4b9ea721147e627f5a0979741b5d28d534128')
 
 _kmake() {
   set -x
@@ -53,6 +53,11 @@ prepare() {
     echo "Applying patch $src..."
     patch -Np1 < "../$src"
   done
+
+  echo "Applying patches from mailing lists..."
+
+  # [PATCH] btrfs: Remove total_data_size variable in btrfs_batch_insert_items()
+  b4 am -o - https://lore.kernel.org/r/20210603174311.1008645-1-nathan@kernel.org/ | patch -Np1
 
   echo "Setting config..."
   cp ../config .config

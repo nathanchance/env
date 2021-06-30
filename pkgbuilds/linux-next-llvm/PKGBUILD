@@ -3,7 +3,7 @@
 _localversion=-llvm
 _pkgsuffix=-next$_localversion
 pkgbase=linux$_pkgsuffix
-_srctag=next-20210625
+_srctag=next-20210628
 pkgver=${_srctag//-/.}
 pkgrel=1
 pkgdesc='linux-next'
@@ -19,12 +19,14 @@ _srcname=$pkgbase
 source=(
   "$_srcname::git+https://git.kernel.org/pub/scm/linux/kernel/git/next/linux-next.git?signed#tag=$_srctag"
   config
+  inode.c.patch
 )
 validpgpkeys=(
   '985B681FA45919699753A26489F91C0A41D5C07A'  # Stephen Rothwell
 )
 sha256sums=('SKIP'
-            'c7819221663c28893d8df1b44d477b99530e8a5ca794cbe7b20ecae8477d7515')
+            'b67709dfbe0ce63ba56fcb64dc27b8dc15f139d8d04a51dc5859a65b03fcb75f'
+            '63686b9c4ee847a885d5d60a926848d66074d8be1daf8320c71f39ad2156ff72')
 
 _kmake() {
   set -x
