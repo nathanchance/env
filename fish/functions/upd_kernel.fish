@@ -70,7 +70,7 @@ function upd_kernel -d "Update machine's kernel"
 
             switch $arch
                 case arm
-                    set dtbs /
+                    set dtbs /bcm
                     set kernel zImage
                 case arm64
                     set dtbs /broadcom/
