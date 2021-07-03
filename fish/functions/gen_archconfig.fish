@@ -14,7 +14,7 @@ function gen_archconfig -d "Generate a configuration file for Arch Linux"
                 set config full
             case -l --local
                 set config local
-            case linux-cfi linux-mainline-'*' linux-next-'*'
+            case linux-cfi linux-debug linux-mainline-'*' linux-next-'*'
                 set pkg $arg
         end
     end

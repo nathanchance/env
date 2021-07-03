@@ -13,7 +13,7 @@ function upd_kernel -d "Update machine's kernel"
                         set -a config_args $arg
                     case -p --permissive
                         set -a config_args --cfi-permissive
-                    case linux-cfi linux-mainline-'*' linux-next-'*'
+                    case linux-cfi linux-debug inux-mainline-'*' linux-next-'*'
                         set pkg $arg
                 end
             end
