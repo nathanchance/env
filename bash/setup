@@ -104,6 +104,7 @@ function arch_root_setup() { (
         stow
         swig
         tmux
+        ttc-iosevka-ss08
         uboot-tools
         unifdef
         unzip
@@ -123,7 +124,6 @@ function arch_root_setup() { (
                 qemu-arch-extra
                 telegram-desktop
                 thunderbird
-                ttc-iosevka-ss08
                 vlc
             )
             if [[ $(uname -n) = "vmware" ]]; then
