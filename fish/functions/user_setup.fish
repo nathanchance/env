@@ -171,9 +171,7 @@ out.*/
 
     bash $configs/common/vim/vim_setup.bash
 
-    if test "$wsl" != true; and not set -q DISPLAY
-        ln -fsv $configs/headless/.tmux.conf $HOME/.tmux.conf
-    end
+    ln -fsv $configs/headless/.tmux.conf $HOME/.tmux.conf
 
     if set -q DISPLAY
         if is_installed gnome-terminal
