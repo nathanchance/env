@@ -18,6 +18,11 @@ function rbpi -d "Rebase Raspberry Pi kernel on latest linux-next"
         git b4 ams $patch; or return
     end
 
+    set -a reverts 411efa18e4b03840553ff58ad9b4621b82a30c04 # drm/vc4: hdmi: Move the HSM clock enable to runtime_pm (https://lore.kernel.org/r/YN%2FvDANOUcWlYPJi@Ryzen-9-3900X.localdomain/)
+    for revert in $reverts
+        git rv --no-edit $revert; or return
+    end
+
     echo 'From 26af5261cf08f10513e72439a82b3eafa7e44732 Mon Sep 17 00:00:00 2001
 From: Nathan Chancellor <nathan@kernel.org>
 Date: Wed, 9 Jun 2021 10:44:20 -0700
