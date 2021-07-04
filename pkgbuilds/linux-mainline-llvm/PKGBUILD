@@ -3,8 +3,8 @@
 _localversion=-llvm
 _pkgsuffix=-mainline$_localversion
 pkgbase=linux$_pkgsuffix
-_srctag=v5.13
-pkgver=${_srctag//-/.}
+_srctag=28e92f990337b8b4c5fdec47667f8b96089c503e
+pkgver=v5.13.9881.g28e92f990337
 pkgrel=1
 pkgdesc='Linux'
 url="https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/log/?h=$_srctag"
@@ -17,7 +17,7 @@ makedepends=(
 options=('!strip')
 _srcname=$pkgbase
 source=(
-  "$_srcname::git+https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git?signed#tag=$_srctag"
+  "$_srcname::git+https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git#commit=$_srctag"
   config
 )
 validpgpkeys=(
@@ -56,8 +56,8 @@ prepare() {
 
   echo "Applying patches from mailing lists..."
 
-  # [PATCH] btrfs: Remove total_data_size variable in btrfs_batch_insert_items()
-  b4 am -o - https://lore.kernel.org/r/20210603174311.1008645-1-nathan@kernel.org/ | patch -Np1
+  # [PATCH 2/2] mt76: fix build error implicit enumeration conversion
+  b4 am -o - -P _ https://lore.kernel.org/r/62c5ed786f81ddea6d3587647520e9e4254c8612.1624174954.git.objelf@gmail.com/ | patch -Np1
 
   echo "Setting config..."
   cp ../config .config
