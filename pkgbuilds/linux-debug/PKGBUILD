@@ -3,11 +3,10 @@
 _localversion=-debug
 _pkgsuffix=$_localversion
 pkgbase=linux$_pkgsuffix
-_srctag=v5.13
-pkgver=${_srctag//-/.}
+pkgver=v5.13
 pkgrel=1
 pkgdesc='Linux'
-url="https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/log/?h=$_srctag"
+url="https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/"
 arch=(x86_64)
 license=(GPL2)
 makedepends=(
@@ -17,7 +16,7 @@ makedepends=(
 options=('!strip')
 _srcname=$pkgbase
 source=(
-  "$_srcname::git+https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git?signed#tag=$_srctag"
+  "$_srcname::git+file://$CBL_SRC/linux-debug#branch=master"
   config
 )
 validpgpkeys=(
@@ -31,7 +30,6 @@ _kmake() {
   PATH=${CBL_BIN}:${PATH} \
     make \
     -skj"$(nproc)" \
-    KCFLAGS=${KCFLAGS--Werror} \
     LLVM=1 \
     LLVM_IAS=1 \
     "${@}"
@@ -44,20 +42,6 @@ prepare() {
   echo "Setting version..."
   scripts/setlocalversion --save-scmversion
   echo "${_localversion}" > localversion.10-pkgname
-
-  local src
-  for src in "${source[@]}"; do
-    src="${src%%::*}"
-    src="${src##*/}"
-    [[ $src = *.patch ]] || continue
-    echo "Applying patch $src..."
-    patch -Np1 < "../$src"
-  done
-
-  echo "Applying patches from mailing lists..."
-
-  # [PATCH] btrfs: Remove total_data_size variable in btrfs_batch_insert_items()
-  b4 am -o - https://lore.kernel.org/r/20210603174311.1008645-1-nathan@kernel.org/ | patch -Np1
 
   echo "Setting config..."
   cp ../config .config
