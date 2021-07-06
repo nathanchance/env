@@ -1,0 +1,134 @@
+From fecdb4509790137b8b921654eebbbaee188263a2 Mon Sep 17 00:00:00 2001
+From: Nathan Chancellor <nathan@kernel.org>
+Date: Tue, 6 Jul 2021 12:16:18 -0700
+Subject: [PATCH] Robin's fix
+
+Link: https://lore.kernel.org/r/a59f771f-3289-62f0-ca50-8f3675d9b166@arm.com/
+Signed-off-by: Nathan Chancellor <nathan@kernel.org>
+---
+ drivers/base/core.c     |  3 ---
+ include/linux/swiotlb.h | 11 ++++++++---
+ kernel/dma/swiotlb.c    | 14 +++++++-------
+ 3 files changed, 15 insertions(+), 13 deletions(-)
+
+diff --git a/drivers/base/core.c b/drivers/base/core.c
+index cb3123e3954d..025422cea661 100644
+--- a/drivers/base/core.c
++++ b/drivers/base/core.c
+@@ -2737,9 +2737,6 @@ void device_initialize(struct device *dev)
+     defined(CONFIG_ARCH_HAS_SYNC_DMA_FOR_CPU_ALL)
+ 	dev->dma_coherent = dma_default_coherent;
+ #endif
+-#ifdef CONFIG_SWIOTLB
+-	dev->dma_io_tlb_mem = io_tlb_default_mem;
+-#endif
+ }
+ EXPORT_SYMBOL_GPL(device_initialize);
+ 
+diff --git a/include/linux/swiotlb.h b/include/linux/swiotlb.h
+index 39284ff2a6cd..a1de59b449c9 100644
+--- a/include/linux/swiotlb.h
++++ b/include/linux/swiotlb.h
+@@ -107,16 +107,21 @@ struct io_tlb_mem {
+ };
+ extern struct io_tlb_mem *io_tlb_default_mem;
+ 
++static inline struct io_tlb_mem *dev_iotlb_mem(struct device *dev)
++{
++	return dev->dma_io_tlb_mem ?: io_tlb_default_mem;
++}
++
+ static inline bool is_swiotlb_buffer(struct device *dev, phys_addr_t paddr)
+ {
+-	struct io_tlb_mem *mem = dev->dma_io_tlb_mem;
++	struct io_tlb_mem *mem = dev_iotlb_mem(dev);
+ 
+ 	return mem && paddr >= mem->start && paddr < mem->end;
+ }
+ 
+ static inline bool is_swiotlb_force_bounce(struct device *dev)
+ {
+-	struct io_tlb_mem *mem = dev->dma_io_tlb_mem;
++	struct io_tlb_mem *mem = dev_iotlb_mem(dev);
+ 
+ 	return mem && mem->force_bounce;
+ }
+@@ -167,7 +172,7 @@ bool swiotlb_free(struct device *dev, struct page *page, size_t size);
+ 
+ static inline bool is_swiotlb_for_alloc(struct device *dev)
+ {
+-	return dev->dma_io_tlb_mem->for_alloc;
++	return dev_iotlb_mem(dev)->for_alloc;
+ }
+ #else
+ static inline struct page *swiotlb_alloc(struct device *dev, size_t size)
+diff --git a/kernel/dma/swiotlb.c b/kernel/dma/swiotlb.c
+index b7f76bca89bf..f4942149f87d 100644
+--- a/kernel/dma/swiotlb.c
++++ b/kernel/dma/swiotlb.c
+@@ -359,7 +359,7 @@ static unsigned int swiotlb_align_offset(struct device *dev, u64 addr)
+ static void swiotlb_bounce(struct device *dev, phys_addr_t tlb_addr, size_t size,
+ 			   enum dma_data_direction dir)
+ {
+-	struct io_tlb_mem *mem = dev->dma_io_tlb_mem;
++	struct io_tlb_mem *mem = dev_iotlb_mem(dev);
+ 	int index = (tlb_addr - mem->start) >> IO_TLB_SHIFT;
+ 	phys_addr_t orig_addr = mem->slots[index].orig_addr;
+ 	size_t alloc_size = mem->slots[index].alloc_size;
+@@ -440,7 +440,7 @@ static unsigned int wrap_index(struct io_tlb_mem *mem, unsigned int index)
+ static int swiotlb_find_slots(struct device *dev, phys_addr_t orig_addr,
+ 			      size_t alloc_size)
+ {
+-	struct io_tlb_mem *mem = dev->dma_io_tlb_mem;
++	struct io_tlb_mem *mem = dev_iotlb_mem(dev);
+ 	unsigned long boundary_mask = dma_get_seg_boundary(dev);
+ 	dma_addr_t tbl_dma_addr =
+ 		phys_to_dma_unencrypted(dev, mem->start) & boundary_mask;
+@@ -522,7 +522,7 @@ phys_addr_t swiotlb_tbl_map_single(struct device *dev, phys_addr_t orig_addr,
+ 		size_t mapping_size, size_t alloc_size,
+ 		enum dma_data_direction dir, unsigned long attrs)
+ {
+-	struct io_tlb_mem *mem = dev->dma_io_tlb_mem;
++	struct io_tlb_mem *mem = dev_iotlb_mem(dev);
+ 	unsigned int offset = swiotlb_align_offset(dev, orig_addr);
+ 	unsigned int i;
+ 	int index;
+@@ -565,7 +565,7 @@ phys_addr_t swiotlb_tbl_map_single(struct device *dev, phys_addr_t orig_addr,
+ 
+ static void swiotlb_release_slots(struct device *dev, phys_addr_t tlb_addr)
+ {
+-	struct io_tlb_mem *mem = dev->dma_io_tlb_mem;
++	struct io_tlb_mem *mem = dev_iotlb_mem(dev);
+ 	unsigned long flags;
+ 	unsigned int offset = swiotlb_align_offset(dev, tlb_addr);
+ 	int index = (tlb_addr - offset - mem->start) >> IO_TLB_SHIFT;
+@@ -682,7 +682,7 @@ size_t swiotlb_max_mapping_size(struct device *dev)
+ 
+ bool is_swiotlb_active(struct device *dev)
+ {
+-	return dev->dma_io_tlb_mem != NULL;
++	return dev_iotlb_mem(dev) != NULL;
+ }
+ EXPORT_SYMBOL_GPL(is_swiotlb_active);
+ 
+@@ -729,7 +729,7 @@ static void rmem_swiotlb_debugfs_init(struct reserved_mem *rmem)
+ 
+ struct page *swiotlb_alloc(struct device *dev, size_t size)
+ {
+-	struct io_tlb_mem *mem = dev->dma_io_tlb_mem;
++	struct io_tlb_mem *mem = dev_iotlb_mem(dev);
+ 	phys_addr_t tlb_addr;
+ 	int index;
+ 
+@@ -792,7 +792,7 @@ static int rmem_swiotlb_device_init(struct reserved_mem *rmem,
+ static void rmem_swiotlb_device_release(struct reserved_mem *rmem,
+ 					struct device *dev)
+ {
+-	dev->dma_io_tlb_mem = io_tlb_default_mem;
++	dev->dma_io_tlb_mem = NULL;
+ }
+ 
+ static const struct reserved_mem_ops rmem_swiotlb_ops = {
+-- 
+2.32.0.93.g670b81a890
+

@@ -3,7 +3,7 @@
 _localversion=-llvm
 _pkgsuffix=-next$_localversion
 pkgbase=linux$_pkgsuffix
-_srctag=next-20210701
+_srctag=next-20210706
 pkgver=${_srctag//-/.}
 pkgrel=1
 pkgdesc='linux-next'
@@ -19,14 +19,18 @@ _srcname=$pkgbase
 source=(
   "$_srcname::git+https://git.kernel.org/pub/scm/linux/kernel/git/next/linux-next.git?signed#tag=$_srctag"
   config
-  revert-restricted-dma.patch
+  0001-ext4-Remove-exit_thread-label-in-kmmpd.patch
+  0001-virtio_net-Remove-bytes-variable-in-start_xmit.patch
+  0001-Robin-s-fix.patch
 )
 validpgpkeys=(
   '985B681FA45919699753A26489F91C0A41D5C07A'  # Stephen Rothwell
 )
 sha256sums=('SKIP'
-            '0994e503773d95205d6cfcb5d8b3003feb693e3b48c09128f1ebaa4a97a18a41'
-            'cb9aafd739e7d7b22328d2d7144c264ab3114d4b23e9593530c8f83f6dc8142f')
+            'b60709388ae6d5fd4063b42224427f8fbbb9713ca605212af34dc95f07ac771a'
+            '962e1f84f648f3f27408afc083c5ed9e5e681ddf1378400a79343015a2c26b54'
+            '7067d9055391ae54930e85d32e6a89fa883e2c3d933f2d861e7d4af491c0de06'
+            '353b162e118881d5164037abe01869577d108ec392f5b441827e491f8fe9839d')
 
 _kmake() {
   set -x
@@ -60,9 +64,6 @@ prepare() {
 
   # [PATCH 2/2] mt76: fix build error implicit enumeration conversion
   b4 am -o - -P _ https://lore.kernel.org/r/62c5ed786f81ddea6d3587647520e9e4254c8612.1624174954.git.objelf@gmail.com/ | patch -Np1
-
-  # [PATCH v5] ALSA: usb-audio: scarlett2: Fix for loop increment in scarlett2_usb_get_config
-  b4 am -o - https://lore.kernel.org/r/20210627051202.1888250-1-nathan@kernel.org/ | patch -Np1
 
   # echo "Reverting commits..."
 
