@@ -6,41 +6,43 @@ function upd_kernel -d "Update machine's kernel"
     set fish_trace 1
 
     switch $LOCATION
-        case generic server vm
+        case desktop laptop vm
             for arg in $argv
                 switch $arg
-                    case -f --full -l --local
-                        set -a config_args $arg
-                    case -p --permissive
-                        set -a config_args --cfi-permissive
-                    case linux-cfi linux-debug inux-mainline-'*' linux-next-'*'
-                        set pkg $arg
+                    case -r --reboot
+                        set reboot true
+                    case '*'
+                        set krnl $arg
                 end
             end
-            if not set -q pkg
-                set pkg linux-mainline-llvm
+            if not set -q krnl
+                print_error "Kernel is required!"
+                return 1
             end
 
-            pushd $ENV_FOLDER/pkgbuilds/$pkg; or return
-
-            # Prerequisite: Clean up old kernels
-            rm -- *.tar.zst
-
-            # Generate .config
-            if test $pkg = linux-cfi
-                set -a config_args --cfi
+            # Cache sudo/doas permissions
+            if test "$reboot" = true
+                sudo true; or return
             end
-            gen_archconfig $config_args $pkg
 
-            # Build the kernel
-            makepkg -C; or return
+            cd /tmp; or return
 
-            set -e fish_trace
-            echo Run
-            printf '\n\t$ yay -U %s\n\n' (readlink -f -- *.tar.zst | perl -pe 's/\n/ /')
-            echo "to install new kernel"
+            scp nathan@$SERVER_IP:/home/nathan/github/env/pkgbuilds/$krnl/'*'.tar.zst .; or return
 
-            popd
+            yay -U --noconfirm *$krnl*.tar.zst
+
+            if test "$reboot" = true
+                if test -d /sys/firmware/efi
+                    set boot_conf /boot/loader/entries/$krnl.conf
+                    if test -f $boot_conf
+                        sudo bootctl set-oneshot $krnl.conf; or return
+                    else
+                        print_error "$boot_conf does not exist!"
+                        return 1
+                    end
+                end
+                sudo reboot
+            end
 
         case pi
             # Cache sudo/doas permissions
@@ -52,6 +54,8 @@ function upd_kernel -d "Update machine's kernel"
                         set arch $arg
                     case 'mainline*' 'next*'
                         set ver $arg
+                    case -r --reboot
+                        set reboot true
                 end
             end
             if not set -q arch
@@ -115,6 +119,10 @@ function upd_kernel -d "Update machine's kernel"
             # Remove "quiet" and "splash" from cmdline
             sudo sed -i 's/quiet splash //' $cmdline
 
+            if test "$reboot" = true
+                sudo systemctl reboot
+            end
+
         case wsl
             set i 1
             while test $i -le (count $argv)
@@ -151,5 +159,41 @@ function upd_kernel -d "Update machine's kernel"
                     set image arch/x86/boot/bzImage
                     scp nathan@$SERVER_IP:$src/$out/$image $kernel
             end
+
+        case server
+            for arg in $argv
+                switch $arg
+                    case -f --full -l --local
+                        set -a config_args $arg
+                    case -p --permissive
+                        set -a config_args --cfi-permissive
+                    case linux-cfi linux-debug linux-mainline-'*' linux-next-'*'
+                        set pkg $arg
+                end
+            end
+            if not set -q pkg
+                set pkg linux-mainline-llvm
+            end
+
+            pushd $ENV_FOLDER/pkgbuilds/$pkg; or return
+
+            # Prerequisite: Clean up old kernels
+            rm -- *.tar.zst
+
+            # Generate .config
+            if test $pkg = linux-cfi
+                set -a config_args --cfi
+            end
+            gen_archconfig $config_args $pkg
+
+            # Build the kernel
+            makepkg -C; or return
+
+            set -e fish_trace
+            echo Run
+            printf '\n\t$ yay -U %s\n\n' (readlink -f -- *.tar.zst | perl -pe 's/\n/ /')
+            echo "to install new kernel"
+
+            popd
     end
 end
