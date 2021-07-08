@@ -186,6 +186,11 @@ function upd_kernel -d "Update machine's kernel"
             end
             gen_archconfig $config_args $pkg
 
+            # Update the pkgver if using a local tree
+            if grep -q "file://" PKGBUILD
+                upd_krnl_pkgver (basename $PWD)
+            end
+
             # Build the kernel
             makepkg -C; or return
 
