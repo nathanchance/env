@@ -65,35 +65,6 @@ index 5c576a0d0d46..00df4834cf76 100644
 
 ' | git ams; or return
 
-    echo 'From 465b474aea80bcbd428d1d48f11851689e269284 Mon Sep 17 00:00:00 2001
-From: Nathan Chancellor <nathan@kernel.org>
-Date: Tue, 6 Jul 2021 12:26:28 -0700
-Subject: [PATCH] ext4: Remove exit_thread label in kmmpd()
-
-Fixes: abc8250d1f1e ("ext4: possible use-after-free when remounting r/o a mmp-protected file system")
-Link: https://lore.kernel.org/r/20210706094627.1ebe4b98@canb.auug.org.au/
-Signed-off-by: Nathan Chancellor <nathan@kernel.org>
----
- fs/ext4/mmp.c | 1 -
- 1 file changed, 1 deletion(-)
-
-diff --git a/fs/ext4/mmp.c b/fs/ext4/mmp.c
-index af461df1c1ec..1fb464b2ed27 100644
---- a/fs/ext4/mmp.c
-+++ b/fs/ext4/mmp.c
-@@ -244,7 +244,6 @@ static int kmmpd(void *data)
- 
- 	retval = write_mmp_block(sb, bh);
- 
--exit_thread:
- 	return retval;
- wait_to_exit:
- 	while (!kthread_should_stop())
--- 
-2.32.0.93.g670b81a890
-
-' | git ams; or return
-
     echo 'From 6abb233bfa0d02859a1bcda858e29cd470d63b71 Mon Sep 17 00:00:00 2001
 From: Nathan Chancellor <nathan@kernel.org>
 Date: Tue, 6 Jul 2021 12:35:00 -0700
