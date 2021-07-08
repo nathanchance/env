@@ -263,9 +263,9 @@ EOF
 
     # VMware needs a few more steps for seamless integration
     if [[ $(uname -n) = "vmware" ]]; then
-        # May not be necessary yet
-        # sed -i 's;MODULES=();MODULES=(vsock vmw_vsock_vmci_transport vmw_balloon vmw_vmci vmwgfx);g' /etc/mkinitcpio.conf
-        # mkinitcpio -P
+        May not be necessary yet
+        sed -i 's;MODULES=();MODULES=(vsock vmw_vsock_vmci_transport vmw_balloon vmw_vmci vmwgfx);g' /etc/mkinitcpio.conf
+        mkinitcpio -P
         systemctl enable vmtoolsd.service
         systemctl enable vmware-vmblock-fuse.service
     fi
