@@ -3,7 +3,7 @@
 _localversion=-llvm
 _pkgsuffix=-next$_localversion
 pkgbase=linux$_pkgsuffix
-_srctag=next-20210708
+_srctag=next-20210709
 pkgver=${_srctag//-/.}
 pkgrel=1
 pkgdesc='linux-next'
@@ -19,16 +19,16 @@ _srcname=$pkgbase
 source=(
   "$_srcname::git+https://git.kernel.org/pub/scm/linux/kernel/git/next/linux-next.git?signed#tag=$_srctag"
   config
-  0001-virtio_net-Remove-bytes-variable-in-start_xmit.patch
   0001-Robin-s-fix.patch
+  next-20210709-fixups.patch
 )
 validpgpkeys=(
   '985B681FA45919699753A26489F91C0A41D5C07A'  # Stephen Rothwell
 )
 sha256sums=('SKIP'
-            'e2dbd1785c9f0f24391826ac26c258b4b659abbe2407f9bd9d4f95ead9469637'
-            '7067d9055391ae54930e85d32e6a89fa883e2c3d933f2d861e7d4af491c0de06'
-            '353b162e118881d5164037abe01869577d108ec392f5b441827e491f8fe9839d')
+            '883de6c47846daeb9f9a576ad83f60f7e15b185c286189e9e0e9bb5b115a8cd1'
+            '353b162e118881d5164037abe01869577d108ec392f5b441827e491f8fe9839d'
+            'daa3190628069ae67da536be9649180ef15714276e10a38d91b818a385da694c')
 
 _kmake() {
   set -x
