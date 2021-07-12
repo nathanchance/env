@@ -11,15 +11,3 @@ index 7912ce991d30..9122dcf42c46 100644
  				atif->bd = dm->backlight_dev[0];
  #endif
  		} else {
-diff --git a/kernel/bpf/verifier.c b/kernel/bpf/verifier.c
-index 0d24a68ad2cf..4e53d63d28f1 100644
---- a/kernel/bpf/verifier.c
-+++ b/kernel/bpf/verifier.c
-@@ -12052,7 +12052,6 @@ static int jit_subprogs(struct bpf_verifier_env *env)
- {
- 	struct bpf_prog *prog = env->prog, **func, *tmp;
- 	int i, j, subprog_start, subprog_end = 0, len, subprog;
--	struct bpf_map *map_ptr;
- 	struct bpf_insn *insn;
- 	void *old_bpf_func;
- 	int err, num_exentries;
