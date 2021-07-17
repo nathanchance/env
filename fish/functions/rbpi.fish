@@ -14,9 +14,12 @@ function rbpi -d "Rebase Raspberry Pi kernel on latest linux-next"
     git rh origin/master
 
     set -a patches 20210628124257.140453-2-maxime@cerno.tech # [PATCH v5 01/10] drm/vc4: hdmi: Remove the DDC probing for status detection
+    set -a patches 20210715164018.62712-1-colin.king@canonical.com # [PATCH][next] smpboot: remove inline from __always_inline'd function idle_init
     for patch in $patches
         git b4 ams -P _ $patch; or return
     end
+
+    git fp -1 --stdout d936eb23874433caa3e3d841cfa16f5434b85dcf | git ams; or return # Revert "Makefile: Enable -Wimplicit-fallthrough for Clang"
 
     echo 'From a15dde63a894a2159b0ab7dec98edbfaabb7750a Mon Sep 17 00:00:00 2001
 From: Maxime Ripard <maxime@cerno.tech>

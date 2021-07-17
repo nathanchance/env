@@ -14,6 +14,8 @@ function gen_archconfig -d "Generate a configuration file for Arch Linux"
                 set config full
             case -l --local
                 set config local
+            case -m --menuconfig
+                set menuconfig true
             case linux-cfi linux-debug linux-mainline-'*' linux-next-'*'
                 set pkg $arg
         end
@@ -76,7 +78,12 @@ function gen_archconfig -d "Generate a configuration file for Arch Linux"
         $config_args
     kmake -C $src KCONFIG_CONFIG=$cfg LLVM=1 LLVM_IAS=1 olddefconfig
 
-    # Step 7: Update checksums
+    # Step 7: Run menuconfig if additional options are needed
+    if test "$menuconfig" = true
+        kmake -C $src KCONFIG_CONFIG=$cfg LLVM=1 LLVM_IAS=1 menuconfig
+    end
+
+    # Step 8: Update checksums
     updpkgsums
 
     popd

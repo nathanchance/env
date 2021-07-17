@@ -1,0 +1,52 @@
+From 9307ca8921a8ef97fb7e7b7c73fdde5afe71294b Mon Sep 17 00:00:00 2001
+From: Will Deacon <will@kernel.org>
+Date: Fri, 16 Jul 2021 15:20:40 +0100
+Subject: [PATCH 4/7] swiotlb: Free tbl memory in swiotlb_exit()
+
+Signed-off-by: Will Deacon <will@kernel.org>
+Link: https://git.kernel.org/will/c/8b87725c7c7460966c3c0058d4875588edc38d47
+Signed-off-by: Nathan Chancellor <nathan@kernel.org>
+---
+ kernel/dma/swiotlb.c | 21 +++++++++++++++------
+ 1 file changed, 15 insertions(+), 6 deletions(-)
+
+diff --git a/kernel/dma/swiotlb.c b/kernel/dma/swiotlb.c
+index 7948f274f9bb..677bcc488b06 100644
+--- a/kernel/dma/swiotlb.c
++++ b/kernel/dma/swiotlb.c
+@@ -328,17 +328,26 @@ swiotlb_late_init_with_tbl(char *tlb, unsigned long nslabs)
+ 
+ void __init swiotlb_exit(void)
+ {
+-	size_t size;
+ 	struct io_tlb_mem *mem = &io_tlb_default_mem;
++	unsigned long tbl_vaddr;
++	size_t tbl_size, slots_size;
+ 
+ 	if (!mem->nslabs)
+ 		return;
+ 
+-	size = array_size(sizeof(*mem->slots), mem->nslabs);
+-	if (mem->late_alloc)
+-		free_pages((unsigned long)mem->slots, get_order(size));
+-	else
+-		memblock_free_late(__pa(mem->slots), PAGE_ALIGN(size));
++	tbl_vaddr = (unsigned long)phys_to_virt(mem->start);
++	tbl_size = PAGE_ALIGN(mem->end - mem->start);
++	slots_size = PAGE_ALIGN(array_size(sizeof(*mem->slots), mem->nslabs));
++
++	set_memory_encrypted(tbl_vaddr, tbl_size >> PAGE_SHIFT);
++	if (mem->late_alloc) {
++		free_pages(tbl_vaddr, get_order(tbl_size));
++		free_pages((unsigned long)mem->slots, get_order(slots_size));
++	} else {
++		memblock_free_late(mem->start, tbl_size);
++		memblock_free_late(__pa(mem->slots), slots_size);
++	}
++
+ 	memset(mem, 0, sizeof(*mem));
+ }
+ 
+-- 
+2.32.0.93.g670b81a890
+

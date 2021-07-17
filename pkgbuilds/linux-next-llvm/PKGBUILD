@@ -3,7 +3,7 @@
 _localversion=-llvm
 _pkgsuffix=-next$_localversion
 pkgbase=linux$_pkgsuffix
-_srctag=next-20210712
+_srctag=next-20210716
 pkgver=${_srctag//-/.}
 pkgrel=1
 pkgdesc='linux-next'
@@ -19,16 +19,26 @@ _srcname=$pkgbase
 source=(
   "$_srcname::git+https://git.kernel.org/pub/scm/linux/kernel/git/next/linux-next.git?signed#tag=$_srctag"
   config
-  0001-Robin-s-fix.patch
-  next-20210709-fixups.patch
+  0001-of-Return-success-from-of_dma_set_restricted_buffer-.patch
+  0002-swiotlb-Point-io_default_tlb_mem-at-static-allocatio.patch
+  0003-swiotlb-Remove-io_tlb_default_mem-indirection.patch
+  0004-swiotlb-Free-tbl-memory-in-swiotlb_exit.patch
+  0005-Revert-Makefile-Enable-Wimplicit-fallthrough-for-Cla.patch
+  0006-smpboot-remove-inline-from-__always_inline-d-functio.patch
+  0007-Revert-smb3-add-minor-debug-statement.patch
 )
 validpgpkeys=(
   '985B681FA45919699753A26489F91C0A41D5C07A'  # Stephen Rothwell
 )
 sha256sums=('SKIP'
-            '39339259128c4193c0c73f5ebc83ef07394a19d3a22a1b7c6cd9b35a855753c5'
-            '353b162e118881d5164037abe01869577d108ec392f5b441827e491f8fe9839d'
-            '6ce0aaab95e57d32bec656bf18fa2a9860e0f3cfdb07fe21af6c01ffc427bbed')
+            'a15e4bc57ff0e14cf97e18d470bcdcd9ad9ea37933f7b9f6df8e3fee9d29067d'
+            'd5ae6172ba79a86d5d55a070b671ddf31fb990be0a74c8d4758c3c8a690865a0'
+            'e15a5234baf482ad48f9c3f1861d7a63be5e54d792f67522262038d0c0d0a53f'
+            '6c3289a8d3a2fd1b775d161ce9a730c681e5171649320d2551cd6a6c68fc4718'
+            'e22db08c566dd659450f6bad54635aac88c664a6cfd9dc456ea94d1099006179'
+            '58f486b5f25178a006b6e50c7df3508c5cc72c65bbed0fd9d5d4b31dcaecc691'
+            '74aec09ef28e86cf4dcf5243f34e198d1c7822043edd218162fd74e815025c9c'
+            '6a667c2d8515d33399bee92221275c6a45f1c2556fad302d3fbd9f94447b8997')
 
 _kmake() {
   set -x
