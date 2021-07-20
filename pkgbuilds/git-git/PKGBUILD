@@ -3,7 +3,7 @@
 
 _pkgname=git
 pkgname=$_pkgname-git
-pkgver=2.32.0.r93.g670b81a890
+pkgver=2.32.0.r264.g75ae10bc75
 pkgrel=1
 pkgdesc='the fast distributed version control system'
 arch=('x86_64')
