@@ -3,8 +3,8 @@
 _localversion=-llvm
 _pkgsuffix=-mainline$_localversion
 pkgbase=linux$_pkgsuffix
-_srctag=28e92f990337b8b4c5fdec47667f8b96089c503e
-pkgver=v5.13.9881.g28e92f990337
+_srctag=v5.14-rc2
+pkgver=${_srctag//-/.}
 pkgrel=1
 pkgdesc='Linux'
 url="https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/log/?h=$_srctag"
@@ -17,14 +17,14 @@ makedepends=(
 options=('!strip')
 _srcname=$pkgbase
 source=(
-  "$_srcname::git+https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git#commit=$_srctag"
+  "$_srcname::git+https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git?signed#tag=$_srctag"
   config
 )
 validpgpkeys=(
   'ABAF11C65A2970B130ABE3C479BE3E4300411886'  # Linus Torvalds
 )
 sha256sums=('SKIP'
-            'e92cc16d8fb64e64e279c6158ed4b9ea721147e627f5a0979741b5d28d534128')
+            'a3211e6d6642ce0bb6e7fda52eb9efe120039f5931963b3e2a87b5aee7669d15')
 
 _kmake() {
   set -x
