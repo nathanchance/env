@@ -3,7 +3,7 @@
 _localversion=-llvm
 _pkgsuffix=-next$_localversion
 pkgbase=linux$_pkgsuffix
-_srctag=next-20210716
+_srctag=next-20210720
 pkgver=${_srctag//-/.}
 pkgrel=1
 pkgdesc='linux-next'
@@ -19,26 +19,20 @@ _srcname=$pkgbase
 source=(
   "$_srcname::git+https://git.kernel.org/pub/scm/linux/kernel/git/next/linux-next.git?signed#tag=$_srctag"
   config
-  0001-of-Return-success-from-of_dma_set_restricted_buffer-.patch
-  0002-swiotlb-Point-io_default_tlb_mem-at-static-allocatio.patch
-  0003-swiotlb-Remove-io_tlb_default_mem-indirection.patch
-  0004-swiotlb-Free-tbl-memory-in-swiotlb_exit.patch
-  0005-Revert-Makefile-Enable-Wimplicit-fallthrough-for-Cla.patch
-  0006-smpboot-remove-inline-from-__always_inline-d-functio.patch
-  0007-Revert-smb3-add-minor-debug-statement.patch
+  0001-Revert-Input-serio-make-write-method-mandatory.patch
+  0002-ALSA-cs4281-Fix-missing-chip-initialization.patch
+  0003-ALSA-als300-Fix-missing-chip-initialization.patch
+  0004-ALSA-korg1212-Fix-wrongly-shuffled-firmware-loader-c.patch
 )
 validpgpkeys=(
   '985B681FA45919699753A26489F91C0A41D5C07A'  # Stephen Rothwell
 )
 sha256sums=('SKIP'
-            'a15e4bc57ff0e14cf97e18d470bcdcd9ad9ea37933f7b9f6df8e3fee9d29067d'
-            'd5ae6172ba79a86d5d55a070b671ddf31fb990be0a74c8d4758c3c8a690865a0'
-            'e15a5234baf482ad48f9c3f1861d7a63be5e54d792f67522262038d0c0d0a53f'
-            '6c3289a8d3a2fd1b775d161ce9a730c681e5171649320d2551cd6a6c68fc4718'
-            'e22db08c566dd659450f6bad54635aac88c664a6cfd9dc456ea94d1099006179'
-            '58f486b5f25178a006b6e50c7df3508c5cc72c65bbed0fd9d5d4b31dcaecc691'
-            '74aec09ef28e86cf4dcf5243f34e198d1c7822043edd218162fd74e815025c9c'
-            '6a667c2d8515d33399bee92221275c6a45f1c2556fad302d3fbd9f94447b8997')
+            '76b89329362d3e0de86dc2aa363d3130c068e67bb1ca03d6cd691d0ab3440f0a'
+            '6c9f24bd9d1bfb2b272e11593376a4bced4c9ab5c56ee9ba88516020fceaa016'
+            'f63b265fa5d148669d76f6c3a714abd474e3a36b5ccabc4130b51a72dfc8c2ba'
+            '5fcfdafc9ec7d8d953afc36dcfbab7b88910859e8c3b4a2c1646acecd847814f'
+            '57922ef0a04dbf23596cea3cc426bac860e8124cbf7cb1c6cce00a4cacb993eb')
 
 _kmake() {
   set -x
@@ -72,6 +66,12 @@ prepare() {
 
   # [PATCH 2/2] mt76: fix build error implicit enumeration conversion
   b4 am -o - -P _ https://lore.kernel.org/r/62c5ed786f81ddea6d3587647520e9e4254c8612.1624174954.git.objelf@gmail.com/ | patch -Np1
+
+  # [PATCH v2 0/4] Fix restricted DMA vs swiotlb_exit()
+  b4 am -o - https://lore.kernel.org/r/20210720133826.9075-1-will@kernel.org/ | patch -Np1
+
+  # [PATCH][next] smpboot: remove inline from __always_inline'd function idle_init
+  b4 am -o - https://lore.kernel.org/r/20210715164018.62712-1-colin.king@canonical.com/ | patch -Np1
 
   # echo "Reverting commits..."
 

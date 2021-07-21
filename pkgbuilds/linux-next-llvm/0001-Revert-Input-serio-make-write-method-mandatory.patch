@@ -1,0 +1,74 @@
+From 6c79418cb278203aa3f207d60d250064ffedaebb Mon Sep 17 00:00:00 2001
+From: Nathan Chancellor <nathan@kernel.org>
+Date: Tue, 20 Jul 2021 18:57:40 -0700
+Subject: [PATCH 1/4] Revert "Input: serio - make write method mandatory"
+
+This reverts commit 81c7c0a350bfe9306ad9fb10356534ede8f4ab31.
+
+Link: https://lore.kernel.org/r/YPd+nl30LwKWpEZa@Ryzen-9-3900X.localdomain/
+Signed-off-by: Nathan Chancellor <nathan@kernel.org>
+---
+ drivers/input/serio/ams_delta_serio.c | 6 ------
+ drivers/input/serio/serio.c           | 5 -----
+ include/linux/serio.h                 | 5 ++++-
+ 3 files changed, 4 insertions(+), 12 deletions(-)
+
+diff --git a/drivers/input/serio/ams_delta_serio.c b/drivers/input/serio/ams_delta_serio.c
+index a1c314897951..1c0be299f179 100644
+--- a/drivers/input/serio/ams_delta_serio.c
++++ b/drivers/input/serio/ams_delta_serio.c
+@@ -89,11 +89,6 @@ static irqreturn_t ams_delta_serio_interrupt(int irq, void *dev_id)
+ 	return IRQ_HANDLED;
+ }
+ 
+-static int ams_delta_serio_write(struct serio *serio, u8 data)
+-{
+-	return -EINVAL;
+-}
+-
+ static int ams_delta_serio_open(struct serio *serio)
+ {
+ 	struct ams_delta_serio *priv = serio->port_data;
+@@ -162,7 +157,6 @@ static int ams_delta_serio_init(struct platform_device *pdev)
+ 	priv->serio = serio;
+ 
+ 	serio->id.type = SERIO_8042;
+-	serio->write = ams_delta_serio_write;
+ 	serio->open = ams_delta_serio_open;
+ 	serio->close = ams_delta_serio_close;
+ 	strlcpy(serio->name, "AMS DELTA keyboard adapter", sizeof(serio->name));
+diff --git a/drivers/input/serio/serio.c b/drivers/input/serio/serio.c
+index 8d229a11bb6b..29f491082926 100644
+--- a/drivers/input/serio/serio.c
++++ b/drivers/input/serio/serio.c
+@@ -694,11 +694,6 @@ EXPORT_SYMBOL(serio_reconnect);
+  */
+ void __serio_register_port(struct serio *serio, struct module *owner)
+ {
+-	if (!serio->write) {
+-		pr_err("%s: refusing to register %s without write method\n",
+-		       __func__, serio->name);
+-		return;
+-	}
+ 	serio_init_port(serio);
+ 	serio_queue_event(serio, owner, SERIO_REGISTER_PORT);
+ }
+diff --git a/include/linux/serio.h b/include/linux/serio.h
+index 075f1b8d76fa..6c27d413da92 100644
+--- a/include/linux/serio.h
++++ b/include/linux/serio.h
+@@ -121,7 +121,10 @@ void serio_unregister_driver(struct serio_driver *drv);
+ 
+ static inline int serio_write(struct serio *serio, unsigned char data)
+ {
+-	return serio->write(serio, data);
++	if (serio->write)
++		return serio->write(serio, data);
++	else
++		return -1;
+ }
+ 
+ static inline void serio_drv_write_wakeup(struct serio *serio)
+-- 
+2.32.0.264.g75ae10bc75
+

@@ -19,8 +19,6 @@ function rbpi -d "Rebase Raspberry Pi kernel on latest linux-next"
         git b4 ams -P _ $patch; or return
     end
 
-    git fp -1 --stdout d936eb23874433caa3e3d841cfa16f5434b85dcf | git ams; or return # Revert "Makefile: Enable -Wimplicit-fallthrough for Clang"
-
     echo 'From a15dde63a894a2159b0ab7dec98edbfaabb7750a Mon Sep 17 00:00:00 2001
 From: Maxime Ripard <maxime@cerno.tech>
 Date: Mon, 28 Jun 2021 14:42:49 +0200
