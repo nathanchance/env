@@ -1,0 +1,26 @@
+From a4b0f1b32c869c58d63bd1b7c9b87339592a64d8 Mon Sep 17 00:00:00 2001
+From: Nathan Chancellor <nathan@kernel.org>
+Date: Wed, 21 Jul 2021 09:59:43 -0700
+Subject: [PATCH 1/2] dm-raid: Fix missing recovery assignment in raid_status()
+
+Link: https://lore.kernel.org/r/202107211307.WaOQR1zv-lkp@intel.com/
+Signed-off-by: Nathan Chancellor <nathan@kernel.org>
+---
+ drivers/md/dm-raid.c | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/drivers/md/dm-raid.c b/drivers/md/dm-raid.c
+index 75829ddad60e..d9ef52159a22 100644
+--- a/drivers/md/dm-raid.c
++++ b/drivers/md/dm-raid.c
+@@ -3683,6 +3683,7 @@ static void raid_status(struct dm_target *ti, status_type_t type,
+ 
+ 		/* Access most recent mddev properties for status output */
+ 		smp_rmb();
++		recovery = rs->md.recovery;
+ 		state = decipher_sync_action(mddev, recovery);
+ 		DMEMIT(",raid_state=%s", sync_str(state));
+ 
+-- 
+2.32.0.264.g75ae10bc75
+

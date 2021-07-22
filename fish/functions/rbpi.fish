@@ -15,6 +15,7 @@ function rbpi -d "Rebase Raspberry Pi kernel on latest linux-next"
 
     set -a patches 20210628124257.140453-2-maxime@cerno.tech # [PATCH v5 01/10] drm/vc4: hdmi: Remove the DDC probing for status detection
     set -a patches 20210715164018.62712-1-colin.king@canonical.com # [PATCH][next] smpboot: remove inline from __always_inline'd function idle_init
+    set -a patches 20210721131704.10306-1-tzimmermann@suse.de # [PATCH] drm/hisilicon/hibmc: Remove variable 'priv' from hibmc_unload()
     for patch in $patches
         git b4 ams -P _ $patch; or return
     end

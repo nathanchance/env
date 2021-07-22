@@ -3,7 +3,7 @@
 _localversion=-llvm
 _pkgsuffix=-next$_localversion
 pkgbase=linux$_pkgsuffix
-_srctag=next-20210720
+_srctag=next-20210722
 pkgver=${_srctag//-/.}
 pkgrel=1
 pkgdesc='linux-next'
@@ -19,20 +19,15 @@ _srcname=$pkgbase
 source=(
   "$_srcname::git+https://git.kernel.org/pub/scm/linux/kernel/git/next/linux-next.git?signed#tag=$_srctag"
   config
-  0001-Revert-Input-serio-make-write-method-mandatory.patch
-  0002-ALSA-cs4281-Fix-missing-chip-initialization.patch
-  0003-ALSA-als300-Fix-missing-chip-initialization.patch
-  0004-ALSA-korg1212-Fix-wrongly-shuffled-firmware-loader-c.patch
+  0001-dm-raid-Fix-missing-recovery-assignment-in-raid_stat.patch
 )
+
 validpgpkeys=(
   '985B681FA45919699753A26489F91C0A41D5C07A'  # Stephen Rothwell
 )
 sha256sums=('SKIP'
-            '76b89329362d3e0de86dc2aa363d3130c068e67bb1ca03d6cd691d0ab3440f0a'
-            '6c9f24bd9d1bfb2b272e11593376a4bced4c9ab5c56ee9ba88516020fceaa016'
-            'f63b265fa5d148669d76f6c3a714abd474e3a36b5ccabc4130b51a72dfc8c2ba'
-            '5fcfdafc9ec7d8d953afc36dcfbab7b88910859e8c3b4a2c1646acecd847814f'
-            '57922ef0a04dbf23596cea3cc426bac860e8124cbf7cb1c6cce00a4cacb993eb')
+            'e5a736274843763112370643c3a2710c587481ccb9e9a6b3a812e4d6e2457f26'
+            'f8b1d932efc9f6b8c0db403b2d73834c0556e74c987f5c82373d9bfc8926c888')
 
 _kmake() {
   set -x
@@ -67,11 +62,11 @@ prepare() {
   # [PATCH 2/2] mt76: fix build error implicit enumeration conversion
   b4 am -o - -P _ https://lore.kernel.org/r/62c5ed786f81ddea6d3587647520e9e4254c8612.1624174954.git.objelf@gmail.com/ | patch -Np1
 
-  # [PATCH v2 0/4] Fix restricted DMA vs swiotlb_exit()
-  b4 am -o - https://lore.kernel.org/r/20210720133826.9075-1-will@kernel.org/ | patch -Np1
-
   # [PATCH][next] smpboot: remove inline from __always_inline'd function idle_init
   b4 am -o - https://lore.kernel.org/r/20210715164018.62712-1-colin.king@canonical.com/ | patch -Np1
+
+  # [PATCH v2 0/4] Fix restricted DMA vs swiotlb_exit()
+  b4 am -o - https://lore.kernel.org/r/20210720133826.9075-1-will@kernel.org/ | patch -Np1
 
   # echo "Reverting commits..."
 
