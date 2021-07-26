@@ -88,12 +88,11 @@ function lt -d "Tests a Linux kernel with llvm-kernel-testing"
     set -e fish_trace
 
     # arch/powerpc/boot/inffast.c: A warning we do not really care about (https://github.com/ClangBuiltLinux/linux/issues/664)
-    # DWARF2 only supports one section per compilation unit: Irrelevant for now
     # objtool: Too many to deal with for now
     # override: CPU_BIG_ENDIAN changes choice state | override: LTO_CLANG_THIN changes choice state: Warnings from merge_config that are harmless in this context
     # results.log: Any warnings from this will be in the other logs
     # include/linux/bcache.h:3: https://github.com/ClangBuiltLinux/linux/issues/1065
-    set blocklist "arch/powerpc/boot/inffast.c|DWARF3 only supports one section per compilation unit|objtool:|override: CPU_BIG_ENDIAN changes choice state|override: LTO_CLANG_THIN changes choice state|results.log|union jset::\(anonymous at ./usr/include/linux/bcache.h:"
+    set blocklist "arch/powerpc/boot/inffast.c|objtool:|override: CPU_BIG_ENDIAN changes choice state|override: LTO_CLANG_THIN changes choice state|results.log|union jset::\(anonymous at ./usr/include/linux/bcache.h:"
     # https://github.com/ClangBuiltLinux/linux/issues/1432
     set temporary_blocklist ".text.asan.module_ctor|.text.asan.module_dtor"
     set searchlist "error:|FATAL:|undefined|Unsupported relocation type:|warning:|WARNING:"
