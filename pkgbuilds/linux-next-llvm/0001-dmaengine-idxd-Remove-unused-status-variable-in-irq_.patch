@@ -1,0 +1,27 @@
+From 3faac85d75965942a2ee7e2118c0397f0b589877 Mon Sep 17 00:00:00 2001
+From: Nathan Chancellor <nathan@kernel.org>
+Date: Fri, 30 Jul 2021 10:43:34 -0700
+Subject: [PATCH] dmaengine: idxd: Remove unused status variable in
+ irq_process_work_list()
+
+Signed-off-by: Nathan Chancellor <nathan@kernel.org>
+---
+ drivers/dma/idxd/irq.c | 2 --
+ 1 file changed, 2 deletions(-)
+
+diff --git a/drivers/dma/idxd/irq.c b/drivers/dma/idxd/irq.c
+index 65dc7bbb0a13..91e46ca3a0ad 100644
+--- a/drivers/dma/idxd/irq.c
++++ b/drivers/dma/idxd/irq.c
+@@ -252,8 +252,6 @@ static int irq_process_work_list(struct idxd_irq_entry *irq_entry,
+ 	spin_unlock_irqrestore(&irq_entry->list_lock, flags);
+ 
+ 	list_for_each_entry(desc, &flist, list) {
+-		u8 status = desc->completion->status & DSA_COMP_STATUS_MASK;
+-
+ 		/*
+ 		 * Check against the original status as ABORT is software defined
+ 		 * and 0xff, which DSA_COMP_STATUS_MASK can mask out.
+-- 
+2.32.0.264.g75ae10bc75
+

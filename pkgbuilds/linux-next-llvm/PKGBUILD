@@ -3,7 +3,7 @@
 _localversion=-llvm
 _pkgsuffix=-next$_localversion
 pkgbase=linux$_pkgsuffix
-_srctag=next-20210729
+_srctag=next-20210730
 pkgver=${_srctag//-/.}
 pkgrel=1
 pkgdesc='linux-next'
@@ -19,6 +19,7 @@ _srcname=$pkgbase
 source=(
   "$_srcname::git+https://git.kernel.org/pub/scm/linux/kernel/git/next/linux-next.git?signed#tag=$_srctag"
   config
+  0001-dmaengine-idxd-Remove-unused-status-variable-in-irq_.patch
 )
 
 validpgpkeys=(
@@ -26,7 +27,8 @@ validpgpkeys=(
   '3F2568AAC26998F9E813A1C5C3F436CA30F5D8EB'  # Mark Brown
 )
 sha256sums=('SKIP'
-            'cf3155484a773f1f0afe8f5014f414bccfa487e8d5dc0ac4f8080f014f890584')
+            '42cdae9e06677b566b9a50dd71c09050ff8b32448eda323921c52f08e74cb3eb'
+            'd02de072f94afa1c5e8d8e4a5c630ba684193d029991ee945a8d01c6144928a4')
 
 _kmake() {
   set -x
@@ -56,10 +58,13 @@ prepare() {
     patch -Np1 < "../$src"
   done
 
-  echo "Applying patches from mailing list..."
+  echo "Applying patches from web..."
 
   # [PATCH 2/2] mt76: fix build error implicit enumeration conversion
-  b4 am -o - -P _ https://lore.kernel.org/r/62c5ed786f81ddea6d3587647520e9e4254c8612.1624174954.git.objelf@gmail.com/ | patch -Np1
+  b4 -q am -o - -P _ https://lore.kernel.org/r/62c5ed786f81ddea6d3587647520e9e4254c8612.1624174954.git.objelf@gmail.com/ | patch -Np1
+
+  # [PATCH v3 0/7] nfc: constify pointed data - missed part
+  b4 -q am -o - https://lore.kernel.org/r/20210730144202.255890-1-krzysztof.kozlowski@canonical.com/ | patch -Np1
 
   echo "Setting config..."
   cp ../config .config
