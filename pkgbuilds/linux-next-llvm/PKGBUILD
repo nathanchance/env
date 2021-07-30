@@ -3,7 +3,7 @@
 _localversion=-llvm
 _pkgsuffix=-next$_localversion
 pkgbase=linux$_pkgsuffix
-_srctag=next-20210727
+_srctag=next-20210729
 pkgver=${_srctag//-/.}
 pkgrel=1
 pkgdesc='linux-next'
@@ -26,7 +26,7 @@ validpgpkeys=(
   '3F2568AAC26998F9E813A1C5C3F436CA30F5D8EB'  # Mark Brown
 )
 sha256sums=('SKIP'
-            '69d7e038427e9f99de3d172ded097ee6e19612286d43dd0952db656acb98cf77')
+            'cf3155484a773f1f0afe8f5014f414bccfa487e8d5dc0ac4f8080f014f890584')
 
 _kmake() {
   set -x
@@ -60,9 +60,6 @@ prepare() {
 
   # [PATCH 2/2] mt76: fix build error implicit enumeration conversion
   b4 am -o - -P _ https://lore.kernel.org/r/62c5ed786f81ddea6d3587647520e9e4254c8612.1624174954.git.objelf@gmail.com/ | patch -Np1
-
-  # [PATCH] nfc: s3fwrn5: fix undefined parameter values in dev_err()
-  b4 am -o - https://lore.kernel.org/r/20210727122506.6900-1-tangbin@cmss.chinamobile.com/ | patch -Np1
 
   echo "Setting config..."
   cp ../config .config

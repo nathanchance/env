@@ -14,68 +14,21 @@ function rbpi -d "Rebase Raspberry Pi kernel on latest linux-next"
     git rh origin/master
 
     set -a patches 20210721131704.10306-1-tzimmermann@suse.de # [PATCH] drm/hisilicon/hibmc: Remove variable 'priv' from hibmc_unload()
-    set -a patches 20210727122506.6900-1-tangbin@cmss.chinamobile.com # [PATCH] nfc: s3fwrn5: fix undefined parameter values in dev_err()
-    set -a patches 20210628124257.140453-2-maxime@cerno.tech # [PATCH v5 01/10] drm/vc4: hdmi: Remove the DDC probing for status detection
     for patch in $patches
         git b4 ams -P _ $patch; or return
     end
 
-    echo 'From a15dde63a894a2159b0ab7dec98edbfaabb7750a Mon Sep 17 00:00:00 2001
-From: Maxime Ripard <maxime@cerno.tech>
-Date: Mon, 28 Jun 2021 14:42:49 +0200
-Subject: [PATCH] drm/vc4: hdmi: Fix HPD GPIO detection
-
-Prior to commit 6800234ceee0 ("drm/vc4: hdmi: Convert to gpiod"), in the
-detect hook, if we had an HPD GPIO we would only rely on it and return
-whatever state it was in.
-
-However, that commit changed that by mistake to only consider the case
-where we have a GPIO and it returns a logical high, and would fall back
-to the other methods otherwise.
-
-Since we can read the EDIDs when the HPD signal is low on some displays,
-we changed the detection status from disconnected to connected, and we
-would ignore an HPD pulse.
-
-Fixes: 6800234ceee0 ("drm/vc4: hdmi: Convert to gpiod")
-Signed-off-by: Maxime Ripard <maxime@cerno.tech>
-Link: https://lore.kernel.org/r/20210628124257.140453-3-maxime@cerno.tech
-Signed-off-by: Nathan Chancellor <nathan@kernel.org>
----
- drivers/gpu/drm/vc4/vc4_hdmi.c | 6 +++---
- 1 file changed, 3 insertions(+), 3 deletions(-)
-
-diff --git a/drivers/gpu/drm/vc4/vc4_hdmi.c b/drivers/gpu/drm/vc4/vc4_hdmi.c
-index 5c576a0d0d46..00df4834cf76 100644
---- a/drivers/gpu/drm/vc4/vc4_hdmi.c
-+++ b/drivers/gpu/drm/vc4/vc4_hdmi.c
-@@ -168,9 +168,9 @@ vc4_hdmi_connector_detect(struct drm_connector *connector, bool force)
- 
- 	WARN_ON(pm_runtime_resume_and_get(&vc4_hdmi->pdev->dev));
- 
--	if (vc4_hdmi->hpd_gpio &&
--	    gpiod_get_value_cansleep(vc4_hdmi->hpd_gpio)) {
--		connected = true;
-+	if (vc4_hdmi->hpd_gpio) {
-+		if (gpiod_get_value_cansleep(vc4_hdmi->hpd_gpio))
-+			connected = true;
- 	} else if (HDMI_READ(HDMI_HOTPLUG) & VC4_HDMI_HOTPLUG_CONNECTED) {
- 		connected = true;
- 	}
--- 
-2.32.0.93.g670b81a890
-
-' | git ams; or return
-
-    echo 'From 26af5261cf08f10513e72439a82b3eafa7e44732 Mon Sep 17 00:00:00 2001
+    echo 'From f16e7af3d188d6aa9d45d7502ba3fcebc441f22a Mon Sep 17 00:00:00 2001
 From: Nathan Chancellor <nathan@kernel.org>
-Date: Wed, 9 Jun 2021 10:44:20 -0700
-Subject: [PATCH] ARM: dts: bcm2711: Disable the display pipeline
+Date: Wed, 28 Jul 2021 12:14:27 -0700
+Subject: [PATCH] ARM: dts: bcm2{711,837}: Disable the display pipeline
 
 Signed-off-by: Nathan Chancellor <nathan@kernel.org>
 ---
- arch/arm/boot/dts/bcm2711-rpi-4-b.dts | 16 ++++++++--------
- 1 file changed, 8 insertions(+), 8 deletions(-)
+ arch/arm/boot/dts/bcm2711-rpi-4-b.dts      | 16 ++++++++--------
+ arch/arm/boot/dts/bcm2837-rpi-3-b-plus.dts |  2 +-
+ arch/arm/boot/dts/bcm2837-rpi-3-b.dts      |  2 +-
+ 3 files changed, 10 insertions(+), 10 deletions(-)
 
 diff --git a/arch/arm/boot/dts/bcm2711-rpi-4-b.dts b/arch/arm/boot/dts/bcm2711-rpi-4-b.dts
 index f24bdd0870a5..66cfc5d057ce 100644
@@ -129,8 +82,34 @@ index f24bdd0870a5..66cfc5d057ce 100644
  };
  
  &pwm1 {
+diff --git a/arch/arm/boot/dts/bcm2837-rpi-3-b-plus.dts b/arch/arm/boot/dts/bcm2837-rpi-3-b-plus.dts
+index 61010266ca9a..e1a6c95f65f9 100644
+--- a/arch/arm/boot/dts/bcm2837-rpi-3-b-plus.dts
++++ b/arch/arm/boot/dts/bcm2837-rpi-3-b-plus.dts
+@@ -128,7 +128,7 @@ &gpio {
+ &hdmi {
+ 	hpd-gpios = <&gpio 28 GPIO_ACTIVE_LOW>;
+ 	power-domains = <&power RPI_POWER_DOMAIN_HDMI>;
+-	status = "okay";
++	status = "disabled";
+ };
+ 
+ &pwm {
+diff --git a/arch/arm/boot/dts/bcm2837-rpi-3-b.dts b/arch/arm/boot/dts/bcm2837-rpi-3-b.dts
+index dd4a48604097..ab2173e3951b 100644
+--- a/arch/arm/boot/dts/bcm2837-rpi-3-b.dts
++++ b/arch/arm/boot/dts/bcm2837-rpi-3-b.dts
+@@ -127,7 +127,7 @@ &pwm {
+ &hdmi {
+ 	hpd-gpios = <&expgpio 4 GPIO_ACTIVE_LOW>;
+ 	power-domains = <&power RPI_POWER_DOMAIN_HDMI>;
+-	status = "okay";
++	status = "disabled";
+ };
+ 
+ /* uart0 communicates with the BT module */
 -- 
-2.32.0
+2.32.0.264.g75ae10bc75
 
 ' | git ams; or return
 

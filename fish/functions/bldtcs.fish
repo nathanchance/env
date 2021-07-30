@@ -99,7 +99,6 @@ function bldtcs -d "Build LLVM and binutils from source for kernel development"
 
     # Add in-review patches here
     set -a patches D104058 # ThinLTO: Fix inline assembly references to static functions with CFI
-    set -a patches D106754 # [RISCV] Restrict performANY_EXTENDCombine to prevent an infinite loop.
     for revision in $revisions
         if not crl "https://reviews.llvm.org/$revision?download=true" | git -C $llvm_project ap
             set message "Failed to apply $revision"
