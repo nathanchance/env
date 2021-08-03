@@ -4,10 +4,10 @@
 
 function bldgcc -d "Builds the latest GCC suitable for building the Linux kernel"
     if test -z "$BINUTILS"
-        set BINUTILS 2.36.1
+        set BINUTILS 2.37
     end
     if test -z "$GCC"
-        set GCC 11.1.0
+        set GCC 11.2.0
     end
 
     if test (count $argv) -eq 0

@@ -57,7 +57,7 @@ function kmake -d "Run make with all cores and adjust PATH temporarily"
         end
     else
         if set -q GCC_TC_FOLDER
-            set -p PATH $GCC_TC_FOLDER/11.1.0/bin
+            set -p PATH $GCC_TC_FOLDER/11.2.0/bin
         end
         if not set -q CC
             set CC "$CROSS_COMPILE"gcc
