@@ -611,7 +611,7 @@ function is_installed() { (
     case ${DISTRO} in
         arch) pacman -Q "${@:?}" &>/dev/null ;;
     esac
-); }
+) }
 
 function kubic_repo() { (
     echo "deb https://download.opensuse.org/repositories/devel:/kubic:/libcontainers:/stable/${KUBIC_REPO}/ /" | tee /etc/apt/sources.list.d/devel:kubic:libcontainers:stable.list
@@ -672,7 +672,7 @@ function remove_if_installed() { (
     case ${DISTRO} in
         arch) pacman -R --noconfirm "${1}" ;;
     esac
-); }
+) }
 
 # Setup function (as root, calls distribution specific function)
 function root_setup() { (
