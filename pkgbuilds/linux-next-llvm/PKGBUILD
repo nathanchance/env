@@ -3,7 +3,7 @@
 _localversion=-llvm
 _pkgsuffix=-next$_localversion
 pkgbase=linux$_pkgsuffix
-_srctag=next-20210803
+_srctag=next-20210804
 pkgver=${_srctag//-/.}
 pkgrel=1
 pkgdesc='linux-next'
@@ -26,7 +26,7 @@ validpgpkeys=(
   '3F2568AAC26998F9E813A1C5C3F436CA30F5D8EB'  # Mark Brown
 )
 sha256sums=('SKIP'
-            '3d4afdc8f54261d8a993cce4c2a2a44e23381b70c70ec9e7077175b434e3daf0')
+            'dba6b857f6ed897fc613543ae47166bafbe027c377e113023f1d43a13c5796b6')
 
 _kmake() {
   set -x
@@ -70,8 +70,8 @@ prepare() {
   # [PATCH] netfilter: ipset: Fix maximal range check in hash_ipportnet4_uadt()
   b4 -q am -o - https://lore.kernel.org/r/20210803191813.282980-1-nathan@kernel.org/ | patch -Np1
 
-  # [PATCH][next] brcmfmac: firmware: Fix uninitialized variable ret
-  b4 -q am -o - https://lore.kernel.org/r/20210803150904.80119-1-colin.king@canonical.com/ | patch -Np1
+  # [PATCH v2] brcmfmac: firmware: Fix firmware loading
+  b4 -q am -o - https://lore.kernel.org/r/20210804153434.3429348-1-linus.walleij@linaro.org/ | patch -Np1
 
   # [PATCH 0/4] staging: r8188eu: Fix clang warnings
   b4 -q am -o - https://lore.kernel.org/r/20210803223609.1627280-1-nathan@kernel.org/ | patch -Np1

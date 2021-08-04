@@ -14,7 +14,7 @@ function rbpi -d "Rebase Raspberry Pi kernel on latest linux-next"
     git rh origin/master
 
     set -a patches 20210803200836.500658-1-nathan@kernel.org # [PATCH] PCI: Always initialize dev in pciconfig_read
-    set -a patches 20210803150904.80119-1-colin.king@canonical.com # [PATCH][next] brcmfmac: firmware: Fix uninitialized variable ret
+    set -a patches 20210804153434.3429348-1-linus.walleij@linaro.org # [PATCH v2] brcmfmac: firmware: Fix firmware loading
     for patch in $patches
         git b4 ams -P _ $patch; or return
     end
