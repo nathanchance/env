@@ -8,15 +8,25 @@ function die() {
 
 # Parse user inputs
 function parse_parameters() {
-    B4_ARGS=()
+    B4_AM_ARGS=()
     while ((${#})); do
         case ${1} in
-            http* | *@*) MSG_ID=${1} ;;
-            -P) shift && B4_ARGS+=(-P "${1}") ;;
-            am) METHOD=(am) ;;
-            ams) METHOD=(ams) ;;
+            http* | *@*)
+                MSG_ID=${1}
+                ;;
+            -P | -v)
+                B4_AM_ARGS+=("${1}" "${2}")
+                shift
+                ;;
+            -v*)
+                B4_AM_ARGS+=("${1}")
+                ;;
+            am | ams)
+                METHOD=("${1}")
+                ;;
             # The default
-            ap | apply) ;;
+            ap | apply)
+                ;;
         esac
         shift
     done
@@ -30,7 +40,7 @@ function environment_check() {
 }
 
 function call_b4() {
-    b4 am -o - -l "${B4_ARGS[@]}" "${MSG_ID}" | git "${METHOD[@]}" -3
+    b4 -q am -l -o - "${B4_AM_ARGS[@]}" "${MSG_ID}" | git "${METHOD[@]}" -3
 }
 
 parse_parameters "${@}"
