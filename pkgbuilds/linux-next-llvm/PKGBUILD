@@ -3,7 +3,7 @@
 _localversion=-llvm
 _pkgsuffix=-next$_localversion
 pkgbase=linux$_pkgsuffix
-_srctag=next-20210805
+_srctag=next-20210806
 pkgver=${_srctag//-/.}
 pkgrel=1
 pkgdesc='linux-next'
@@ -19,7 +19,6 @@ _srcname=$pkgbase
 source=(
   "$_srcname::git+https://git.kernel.org/pub/scm/linux/kernel/git/next/linux-next.git?signed#tag=$_srctag"
   config
-  0001-fuse-Initialize-err-before-use-in-fuse_fill_super.patch
 )
 
 validpgpkeys=(
@@ -27,8 +26,7 @@ validpgpkeys=(
   '3F2568AAC26998F9E813A1C5C3F436CA30F5D8EB'  # Mark Brown
 )
 sha256sums=('SKIP'
-            'dba6b857f6ed897fc613543ae47166bafbe027c377e113023f1d43a13c5796b6'
-            'ff16b0246772b387c7a7e624d4d985ef74b0176790d36451c40e6e5a992bd115')
+            'b85d8f92fa3bd8b68149e0f67eba4368d56432c3e93daf999ad7130b9191da83')
 
 _kmake() {
   set -x
