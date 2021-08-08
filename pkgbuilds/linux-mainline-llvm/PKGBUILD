@@ -3,7 +3,7 @@
 _localversion=-llvm
 _pkgsuffix=-mainline$_localversion
 pkgbase=linux$_pkgsuffix
-_srctag=v5.14-rc4
+_srctag=v5.14-rc5
 pkgver=${_srctag//-/.}
 pkgrel=1
 pkgdesc='Linux'
@@ -24,7 +24,7 @@ validpgpkeys=(
   'ABAF11C65A2970B130ABE3C479BE3E4300411886'  # Linus Torvalds
 )
 sha256sums=('SKIP'
-            '6016a4f2b6896a1cd5e50f1782e414ef4098a81a08cd684423244bc42b8ba5d4')
+            'b4260a482dc903d4abe55a63afca377520097937a3b4eaf403704e6cbe1ae898')
 
 _kmake() {
   set -x
@@ -57,7 +57,7 @@ prepare() {
   echo "Applying patches from mailing lists..."
 
   # [PATCH 2/2] mt76: fix build error implicit enumeration conversion
-  b4 am -o - -P _ https://lore.kernel.org/r/62c5ed786f81ddea6d3587647520e9e4254c8612.1624174954.git.objelf@gmail.com/ | patch -Np1
+  b4 -q am -o - -P _ https://lore.kernel.org/r/62c5ed786f81ddea6d3587647520e9e4254c8612.1624174954.git.objelf@gmail.com/ | patch -Np1
 
   echo "Setting config..."
   cp ../config .config
