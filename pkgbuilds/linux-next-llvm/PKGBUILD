@@ -3,7 +3,7 @@
 _localversion=-llvm
 _pkgsuffix=-next$_localversion
 pkgbase=linux$_pkgsuffix
-_srctag=next-20210806
+_srctag=next-20210809
 pkgver=${_srctag//-/.}
 pkgrel=1
 pkgdesc='linux-next'
@@ -26,7 +26,7 @@ validpgpkeys=(
   '3F2568AAC26998F9E813A1C5C3F436CA30F5D8EB'  # Mark Brown
 )
 sha256sums=('SKIP'
-            'b85d8f92fa3bd8b68149e0f67eba4368d56432c3e93daf999ad7130b9191da83')
+            '31717ae6e7091690bbaf1aac428de5205571bb92f6d763aaf94a5d300772cdc5')
 
 _kmake() {
   set -x
@@ -58,20 +58,11 @@ prepare() {
 
   echo "Applying patches from web..."
 
-  # [PATCH 2/2] mt76: fix build error implicit enumeration conversion
-  b4 -q am -o - -P _ https://lore.kernel.org/r/62c5ed786f81ddea6d3587647520e9e4254c8612.1624174954.git.objelf@gmail.com/ | patch -Np1
-
   # [PATCH v2] ASoC: Intel: boards: Fix CONFIG_SND_SOC_SDW_MOCKUP select
   b4 -q am -o - https://lore.kernel.org/r/20210802212409.3207648-1-nathan@kernel.org/ | patch -Np1
 
-  # [PATCH] dmaengine: idxd: Remove unused status variable in irq_process_work_list()
-  b4 -q am -o - https://lore.kernel.org/r/20210802175820.3153920-1-nathan@kernel.org/ | patch -Np1
-
-  # [PATCH v3] brcmfmac: firmware: Fix firmware loading
-  b4 -q am -o - https://lore.kernel.org/r/20210805093023.3465081-1-linus.walleij@linaro.org/ | patch -Np1
-
-  # [PATCH 0/4] staging: r8188eu: Fix clang warnings
-  b4 -q am -o - -v1 https://lore.kernel.org/r/20210803223609.1627280-1-nathan@kernel.org/ | patch -Np1
+  # [PATCH v5] brcmfmac: firmware: Fix firmware loading
+  b4 -q am -o - https://lore.kernel.org/r/20210808180510.8753-1-digetx@gmail.com/ | patch -Np1
 
   echo "Setting config..."
   cp ../config .config
