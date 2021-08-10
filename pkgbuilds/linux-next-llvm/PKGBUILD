@@ -3,7 +3,7 @@
 _localversion=-llvm
 _pkgsuffix=-next$_localversion
 pkgbase=linux$_pkgsuffix
-_srctag=next-20210809
+_srctag=next-20210810
 pkgver=${_srctag//-/.}
 pkgrel=1
 pkgdesc='linux-next'
@@ -19,6 +19,7 @@ _srcname=$pkgbase
 source=(
   "$_srcname::git+https://git.kernel.org/pub/scm/linux/kernel/git/next/linux-next.git?signed#tag=$_srctag"
   config
+  0001-mm-hugetlb-Initialize-page-to-NULL-in-alloc_buddy_hu.patch
 )
 
 validpgpkeys=(
@@ -26,7 +27,8 @@ validpgpkeys=(
   '3F2568AAC26998F9E813A1C5C3F436CA30F5D8EB'  # Mark Brown
 )
 sha256sums=('SKIP'
-            '31717ae6e7091690bbaf1aac428de5205571bb92f6d763aaf94a5d300772cdc5')
+            'b74c0941921f06506a62a6b596fae86c6a741d4f0ee1b814ee2eb6b6f0ddb9e4'
+            '2693119316fb68f75c7d9f6f47b47e4b510123747c072293173e93f4f215a152')
 
 _kmake() {
   set -x
@@ -63,6 +65,9 @@ prepare() {
 
   # [PATCH v5] brcmfmac: firmware: Fix firmware loading
   b4 -q am -o - https://lore.kernel.org/r/20210808180510.8753-1-digetx@gmail.com/ | patch -Np1
+
+  # [PATCH -next] spi: mxic: add missing braces
+  b4 -q am -o - https://lore.kernel.org/r/20210810142405.2221540-1-yangyingliang@huawei.com/ | patch -Np1
 
   echo "Setting config..."
   cp ../config .config
