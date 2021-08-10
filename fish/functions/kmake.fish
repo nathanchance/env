@@ -122,6 +122,9 @@ function kmake -d "Run make with all cores and adjust PATH temporarily"
         end
     end
 
+    # make might be an alias, we want that actual binary
+    set make_binary (command -v make)
+
     set fish_trace 1
-    time make -"$silent_make_flag"kj(nproc) $make_args
+    time $make_binary -"$silent_make_flag"kj(nproc) $make_args
 end
