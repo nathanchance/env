@@ -3,7 +3,7 @@
 _localversion=-llvm
 _pkgsuffix=-next$_localversion
 pkgbase=linux$_pkgsuffix
-_srctag=next-20210810
+_srctag=next-20210813
 pkgver=${_srctag//-/.}
 pkgrel=1
 pkgdesc='linux-next'
@@ -19,7 +19,6 @@ _srcname=$pkgbase
 source=(
   "$_srcname::git+https://git.kernel.org/pub/scm/linux/kernel/git/next/linux-next.git?signed#tag=$_srctag"
   config
-  0001-mm-hugetlb-Initialize-page-to-NULL-in-alloc_buddy_hu.patch
 )
 
 validpgpkeys=(
@@ -27,8 +26,7 @@ validpgpkeys=(
   '3F2568AAC26998F9E813A1C5C3F436CA30F5D8EB'  # Mark Brown
 )
 sha256sums=('SKIP'
-            'b74c0941921f06506a62a6b596fae86c6a741d4f0ee1b814ee2eb6b6f0ddb9e4'
-            '2693119316fb68f75c7d9f6f47b47e4b510123747c072293173e93f4f215a152')
+            'dbe5d82e2faba1e2d2e5eb7250ff60decd4b4ec8f0662f839946afd2258361ee')
 
 _kmake() {
   set -x
@@ -68,6 +66,15 @@ prepare() {
 
   # [PATCH -next] spi: mxic: add missing braces
   b4 -q am -o - https://lore.kernel.org/r/20210810142405.2221540-1-yangyingliang@huawei.com/ | patch -Np1
+
+  # staging: r8188eu: remove unused function parameters
+  curl -LSs https://git.kernel.org/gregkh/staging/p/86d90d776e1cfe169457a64666e73abb6dfb1423 | patch -Np1
+
+  # [PATCH 0/3] staging: r8188eu: Fix -Wuninitialized instances from clang
+  b4 -q am -o - https://lore.kernel.org/r/20210812204027.338872-1-nathan@kernel.org/ | patch -Np1
+
+  # [PATCH] ASoC: rt5682: Remove unused variable in rt5682_i2c_remove()
+  b4 -q am -o - https://lore.kernel.org/r/20210813073402.1.Iaa9425cfab80f5233afa78b32d02b6dc23256eb3@changeid/ | patch -Np1
 
   echo "Setting config..."
   cp ../config .config

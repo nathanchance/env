@@ -18,8 +18,6 @@ function rbpi -d "Rebase Raspberry Pi kernel on latest linux-next"
         git b4 ams -P _ $patch; or return
     end
 
-    git am $ENV_FOLDER/pkgbuilds/linux-next-llvm/0001-mm-hugetlb-Initialize-page-to-NULL-in-alloc_buddy_hu.patch; or exit
-
     echo 'From f16e7af3d188d6aa9d45d7502ba3fcebc441f22a Mon Sep 17 00:00:00 2001
 From: Nathan Chancellor <nathan@kernel.org>
 Date: Wed, 28 Jul 2021 12:14:27 -0700
