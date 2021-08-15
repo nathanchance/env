@@ -26,7 +26,7 @@ validpgpkeys=(
   '3F2568AAC26998F9E813A1C5C3F436CA30F5D8EB'  # Mark Brown
 )
 sha256sums=('SKIP'
-            'dbe5d82e2faba1e2d2e5eb7250ff60decd4b4ec8f0662f839946afd2258361ee')
+            '8082c63d02cd3879f5119758f8113be19e448680868b79e6ffd5af95d003fe3f')
 
 _kmake() {
   set -x
@@ -75,6 +75,15 @@ prepare() {
 
   # [PATCH] ASoC: rt5682: Remove unused variable in rt5682_i2c_remove()
   b4 -q am -o - https://lore.kernel.org/r/20210813073402.1.Iaa9425cfab80f5233afa78b32d02b6dc23256eb3@changeid/ | patch -Np1
+
+  # [PATCH] iwlwifi: mvm: Fix bitwise vs logical operator in iwl_mvm_scan_fits()
+  b4 -q am -o - https://lore.kernel.org/r/20210814234248.1755703-1-nathan@kernel.org/ | patch -Np1
+
+  # [PATCH] staging: rtl8192u: Fix bitwise vs logical operator in TranslateRxSignalStuff819xUsb()
+  b4 -q am -o - https://lore.kernel.org/r/20210814235625.1780033-1-nathan@kernel.org/ | patch -Np1
+
+  # [PATCH] lib/zstd: Fix bitwise vs logical operators
+  b4 -q am -o - https://lore.kernel.org/r/20210815004154.1781834-1-nathan@kernel.org/ | patch -Np1
 
   echo "Setting config..."
   cp ../config .config
