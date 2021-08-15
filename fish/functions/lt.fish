@@ -20,8 +20,8 @@ function lt -d "Tests a Linux kernel with llvm-kernel-testing"
                 set linux_src $argv[$next]
                 set i $next
 
-            case --no-lto
-                set lto false
+            case --no-cfi
+                set cfi false
 
             case -t --tc-prefix
                 set next (math $i + 1)
@@ -44,6 +44,9 @@ function lt -d "Tests a Linux kernel with llvm-kernel-testing"
     end
     if test -z "$tc_prefix"
         set tc_prefix $CBL_USR
+    end
+    if test (basename $linux_src) = linux; and test "$cfi" != false
+        set -a test_sh_args --test-cfi-kernel
     end
 
     if not test -d $tc_prefix/bin
@@ -76,7 +79,7 @@ function lt -d "Tests a Linux kernel with llvm-kernel-testing"
         mkdir -p (dirname $lkt)
         git clone https://github.com/nathanchance/llvm-kernel-testing $lkt
     end
-    git -C $lkt pull -r -q
+    git -C $lkt pull -qr
 
     set fish_trace 1
     PATH="$CBL_QEMU_BIN:$PATH" $CBL/llvm-kernel-testing/test.sh \
