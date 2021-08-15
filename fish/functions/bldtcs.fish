@@ -98,9 +98,15 @@ function bldtcs -d "Build LLVM and binutils from source for kernel development"
     end
 
     # Add in-review patches here
-    set -a revisions D106030 # [Clang] add support for error+warning fn attrs (https://reviews.llvm.org/D106030)
+    set -a revisions D106030 # [Clang] add support for error+warning fn attrs | https://reviews.llvm.org/D106030
+    set -a revisions D108003 # [Clang] Extend -Wbool-operation to warn about bitwise and of bools with side effects | https://reviews.llvm.org/D108003
+    set -a revisions D107933 # [clang] Expose unreachable fallthrough annotation warning | https://reviews.llvm.org/D107933
     for revision in $revisions
-        if not crl "https://reviews.llvm.org/$revision?download=true" | git -C $llvm_project ap
+        set -l git_ap_args
+        if test "$revision" = D108003
+            set git_ap_args --directory=clang
+        end
+        if not crl "https://reviews.llvm.org/$revision?download=true" | git -C $llvm_project ap $git_ap_args
             set message "Failed to apply $revision"
             print_error "$message"
             tg_msg "$message"
