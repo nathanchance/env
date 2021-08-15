@@ -12,7 +12,7 @@ function cbl_linux_repos -d "Clone ClangBuiltLinux Linux repos into their proper
                 set pairs next/linux-next:{{$CBL_BLD_C,$CBL_BLD_P,$CBL_SRC}/$arg,$CBL_BLD/rpi,$CBL_SRC/linux-cfi}
 
             case linux-stable
-                set pairs stable/linux:{$CBL_BLD_C,$CBL_BLD_P}/$arg-$CBL_STABLE_VERSIONS stable/linux:$CBL_SRC/$arg
+                set pairs stable/linux:{$CBL_BLD_C,$CBL_BLD_P,$CBL_SRC}/$arg
         end
     end
 
@@ -46,28 +46,23 @@ function cbl_linux_repos -d "Clone ClangBuiltLinux Linux repos into their proper
         git -C $folder remote add origin https://git.kernel.org/pub/scm/linux/kernel/git/$url.git
         git -C $folder remote update origin
 
-        switch $folder
-            case '*linux-stable-*'
-                set branch (string replace 'stable-' (basename $folder)).y
-            case '*'
-                set branch master
-        end
-        git -C $folder checkout $branch
+        git -C $folder checkout master
 
         if test (basename $folder) = rpi; or test (basename $folder) = linux-cfi
             git -C $folder config rerere.enabled true
             git -C $folder remote add -f --tags mainline https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git
             git -C $folder remote add -f --tags sami https://github.com/samitolvanen/linux.git
         else
-            git -C $folder branch --set-upstream-to=origin/$branch $branch
-            git -C $folder reset --hard origin/$branch
+            git -C $folder branch --set-upstream-to=origin/master
+            git -C $folder reset --hard origin/master
+        end
+
+        if string match -q -r linux-stable $folder
+            upd_stbl_wrktrs $folder
         end
 
         if string match -q -r mirrors $folder
             git -C $folder remote add github git@github.com:ClangBuiltLinux/linux.git
-        end
-        if string match -q -r "$CBL_BLD_P/linux-stable" $folder
-            git remote add -f stable-rc https://git.kernel.org/pub/scm/linux/kernel/git/stable/linux-stable-rc.git/
         end
     end
     rm -rf $tmp_dir
