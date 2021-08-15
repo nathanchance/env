@@ -4,9 +4,9 @@
 
 function cbl_upd_stable -d "Update ClangBuiltLinux stable trees"
     for tree in linux-stable-$CBL_STABLE_VERSIONS
-        echo "Updating $tree..."
+        header "Updating $tree"
         pushd $CBL_BLD_P/$tree; or return
-        git pull -qr; or return
+        git pull -r; or return
         ptchmn -s
     end
 end
