@@ -9,7 +9,7 @@ function bldallk -d "Build all kernels for ClangBuiltLinux testing"
                 -C $CBL_SRC/linux-next \
                 LLVM=1 \
                 LLVM_IAS=1 \
-                O=build/(uname -m) \
+                O=.build/(uname -m) \
                 distclean defconfig all; or return
 
             if test (uname -m) = aarch64
@@ -19,7 +19,7 @@ function bldallk -d "Build all kernels for ClangBuiltLinux testing"
                     CROSS_COMPILE=x86_64-linux-gnu- \
                     LLVM=1 \
                     LLVM_IAS=1 \
-                    O=build/x86_64 \
+                    O=.build/x86_64 \
                     distclean defconfig all; or return
             end
 

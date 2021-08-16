@@ -158,6 +158,7 @@ function user_setup -d "Setup a user account, downloading all files and placing 
 # Personal exclusions #
 #######################
 build/
+.build/
 out.*/
 *.rej' >>$gitignore
 

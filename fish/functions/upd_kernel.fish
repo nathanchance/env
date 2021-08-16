@@ -83,7 +83,7 @@ function upd_kernel -d "Update machine's kernel"
 
             set user nathan
             set remote_build (string replace pi $user $CBL_BLD | string replace /mnt/ssd /home/$user $remote_build)
-            set out $remote_build/rpi/build/$arch
+            set out $remote_build/rpi/.build/$arch
             set rootfs $out/rootfs
 
             rsync -v $user@$SERVER_IP:$rootfs$dtbs'*'.dtb $tmp_boot; or return
@@ -149,13 +149,13 @@ function upd_kernel -d "Update machine's kernel"
 
             switch $kernel_location
                 case local
-                    cp -v $CBL_BLD/wsl2/build/x86_64/arch/x86/boot/bzImage $kernel
+                    cp -v $CBL_BLD/wsl2/.build/x86_64/arch/x86/boot/bzImage $kernel
                 case github
                     set repo nathanchance/WSL2-Linux-Kernel
                     crl -o $kernel https://github.com/$repo/releases/download/(glr $repo)/bzImage
                 case server
                     set src $CBL_BLD/wsl2
-                    set out build/x86_64
+                    set out .build/x86_64
                     set image arch/x86/boot/bzImage
                     scp nathan@$SERVER_IP:$src/$out/$image $kernel
             end

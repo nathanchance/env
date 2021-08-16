@@ -18,8 +18,8 @@ function bldall -d "Build latest LLVM and test it against several Linux kernels"
             bldallk; or return
 
             # Boot kernels
-            bootk -a arm64 -k $CBL_SRC/linux-next/build/aarch64
-            bootk -a x86_64 -k $CBL_SRC/linux-next/build/x86_64
+            bootk -a arm64 -k $CBL_SRC/linux-next/.build/aarch64
+            bootk -a x86_64 -k $CBL_SRC/linux-next/.build/x86_64
 
         case '*'
             bldtcs; and bldallk

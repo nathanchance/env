@@ -12,7 +12,7 @@ function test_kvm -d "Test KVM against a Clang built kernel with QEMU"
     cbl_clone linux
 
     set lnx $CBL_SRC/linux
-    set out build/$arch
+    set out .build/$arch
 
     git -C $lnx pull -qr
 
