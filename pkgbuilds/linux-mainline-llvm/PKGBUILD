@@ -3,7 +3,7 @@
 _localversion=-llvm
 _pkgsuffix=-mainline$_localversion
 pkgbase=linux$_pkgsuffix
-_srctag=v5.14-rc5
+_srctag=v5.14-rc6
 pkgver=${_srctag//-/.}
 pkgrel=1
 pkgdesc='Linux'
@@ -24,7 +24,7 @@ validpgpkeys=(
   'ABAF11C65A2970B130ABE3C479BE3E4300411886'  # Linus Torvalds
 )
 sha256sums=('SKIP'
-            'b4260a482dc903d4abe55a63afca377520097937a3b4eaf403704e6cbe1ae898')
+            'f56c6d9f5652cda8a1c0d05c19026ef4052569090540785750f5f0046ddcda3f')
 
 _kmake() {
   set -x
@@ -56,8 +56,17 @@ prepare() {
 
   echo "Applying patches from mailing lists..."
 
-  # [PATCH 2/2] mt76: fix build error implicit enumeration conversion
-  b4 -q am -o - -P _ https://lore.kernel.org/r/62c5ed786f81ddea6d3587647520e9e4254c8612.1624174954.git.objelf@gmail.com/ | patch -Np1
+  # mt76: fix enum type mismatch
+  curl -LSs https://git.kernel.org/kvalo/wireless-drivers/p/abf3d98dee7c4038152ce88833ddc2189f68cbd4 | patch -Np1
+
+  # staging: rtl8192u: Fix bitwise vs logical operator in TranslateRxSignalStuff819xUsb()
+  curl -LSs https://git.kernel.org/gregkh/staging/p/099ec97ac92911abfb102bb5c68ed270fc12e0dd | patch -Np1
+
+  # [PATCH] iwlwifi: mvm: Fix bitwise vs logical operator in iwl_mvm_scan_fits()
+  b4 -q am -o - https://lore.kernel.org/r/20210814234248.1755703-1-nathan@kernel.org/ | patch -Np1
+
+  # [PATCH] lib/zstd: Fix bitwise vs logical operators
+  b4 -q am -o - https://lore.kernel.org/r/20210815004154.1781834-1-nathan@kernel.org/ | patch -Np1
 
   echo "Setting config..."
   cp ../config .config
