@@ -96,7 +96,8 @@ function lt -d "Tests a Linux kernel with llvm-kernel-testing"
     # results.log: Any warnings from this will be in the other logs
     # include/linux/bcache.h:3: https://github.com/ClangBuiltLinux/linux/issues/1065
     # llvm-objdump: error: 'vmlinux': not a dynamic object: https://github.com/ClangBuiltLinux/linux/issues/1427
-    set blocklist "arch/powerpc/boot/inffast.c|objtool:|override: CPU_BIG_ENDIAN changes choice state|override: LTO_CLANG_THIN changes choice state|results.log|union jset::\(anonymous at ./usr/include/linux/bcache.h:|llvm-objdump: error: 'vmlinux': not a dynamic object"
+    # warningng: argument unused during compilation: '-march=arm: https://github.com/ClangBuiltLinux/linux/issues/1315
+    set blocklist "arch/powerpc/boot/inffast.c|objtool:|override: CPU_BIG_ENDIAN changes choice state|override: LTO_CLANG_THIN changes choice state|results.log|union jset::\(anonymous at ./usr/include/linux/bcache.h:|llvm-objdump: error: 'vmlinux': not a dynamic object|warning: argument unused during compilation: '-march=arm"
     set searchlist "error:|FATAL:|undefined|Unsupported relocation type:|warning:|WARNING:"
 
     for file_path in $log_dir $linux_src $CBL/llvm-kernel-testing/src/linux-clang-cfi
