@@ -3,7 +3,7 @@
 _localversion=-llvm
 _pkgsuffix=-next$_localversion
 pkgbase=linux$_pkgsuffix
-_srctag=next-20210813
+_srctag=next-20210816
 pkgver=${_srctag//-/.}
 pkgrel=1
 pkgdesc='linux-next'
@@ -26,7 +26,7 @@ validpgpkeys=(
   '3F2568AAC26998F9E813A1C5C3F436CA30F5D8EB'  # Mark Brown
 )
 sha256sums=('SKIP'
-            '8082c63d02cd3879f5119758f8113be19e448680868b79e6ffd5af95d003fe3f')
+            '9ffd90185572b0902f5eaebc6f7f8451e96f1e5b6ebb7536a3cbfc921bacb3b4')
 
 _kmake() {
   set -x
@@ -63,18 +63,6 @@ prepare() {
 
   # [PATCH v5] brcmfmac: firmware: Fix firmware loading
   b4 -q am -o - https://lore.kernel.org/r/20210808180510.8753-1-digetx@gmail.com/ | patch -Np1
-
-  # [PATCH -next] spi: mxic: add missing braces
-  b4 -q am -o - https://lore.kernel.org/r/20210810142405.2221540-1-yangyingliang@huawei.com/ | patch -Np1
-
-  # staging: r8188eu: remove unused function parameters
-  curl -LSs https://git.kernel.org/gregkh/staging/p/86d90d776e1cfe169457a64666e73abb6dfb1423 | patch -Np1
-
-  # [PATCH 0/3] staging: r8188eu: Fix -Wuninitialized instances from clang
-  b4 -q am -o - https://lore.kernel.org/r/20210812204027.338872-1-nathan@kernel.org/ | patch -Np1
-
-  # [PATCH] ASoC: rt5682: Remove unused variable in rt5682_i2c_remove()
-  b4 -q am -o - https://lore.kernel.org/r/20210813073402.1.Iaa9425cfab80f5233afa78b32d02b6dc23256eb3@changeid/ | patch -Np1
 
   # [PATCH] iwlwifi: mvm: Fix bitwise vs logical operator in iwl_mvm_scan_fits()
   b4 -q am -o - https://lore.kernel.org/r/20210814234248.1755703-1-nathan@kernel.org/ | patch -Np1

@@ -14,6 +14,7 @@ function rbpi -d "Rebase Raspberry Pi kernel on latest linux-next"
     git rh origin/master
 
     set -a patches 20210808180510.8753-1-digetx@gmail.com # [PATCH v5] brcmfmac: firmware: Fix firmware loading
+    set -a patches 20210815004154.1781834-1-nathan@kernel.org # [PATCH] lib/zstd: Fix bitwise vs logical operators
     for patch in $patches
         git b4 ams -P _ $patch; or return
     end
