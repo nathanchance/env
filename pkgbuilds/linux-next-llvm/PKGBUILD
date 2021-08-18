@@ -3,7 +3,7 @@
 _localversion=-llvm
 _pkgsuffix=-next$_localversion
 pkgbase=linux$_pkgsuffix
-_srctag=next-20210816
+_srctag=next-20210817
 pkgver=${_srctag//-/.}
 pkgrel=1
 pkgdesc='linux-next'
@@ -26,7 +26,7 @@ validpgpkeys=(
   '3F2568AAC26998F9E813A1C5C3F436CA30F5D8EB'  # Mark Brown
 )
 sha256sums=('SKIP'
-            '9ffd90185572b0902f5eaebc6f7f8451e96f1e5b6ebb7536a3cbfc921bacb3b4')
+            '29f805fb19ba48b844b6a6552ef6e7064529c50b2566e11914693c4383291439')
 
 _kmake() {
   set -x
@@ -66,9 +66,6 @@ prepare() {
 
   # [PATCH] iwlwifi: mvm: Fix bitwise vs logical operator in iwl_mvm_scan_fits()
   b4 -q am -o - https://lore.kernel.org/r/20210814234248.1755703-1-nathan@kernel.org/ | patch -Np1
-
-  # [PATCH] staging: rtl8192u: Fix bitwise vs logical operator in TranslateRxSignalStuff819xUsb()
-  b4 -q am -o - https://lore.kernel.org/r/20210814235625.1780033-1-nathan@kernel.org/ | patch -Np1
 
   # [PATCH] lib/zstd: Fix bitwise vs logical operators
   b4 -q am -o - https://lore.kernel.org/r/20210815004154.1781834-1-nathan@kernel.org/ | patch -Np1
