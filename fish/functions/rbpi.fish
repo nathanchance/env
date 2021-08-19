@@ -21,7 +21,11 @@ function rbpi -d "Rebase Raspberry Pi kernel on latest linux-next"
         git b4 ams -P _ $patch; or return
     end
 
-    crl https://git.kernel.org/jberg/mac80211-next/p/c448f0fd2ce59947b3b8b8d6b56e15036449d1f1 | git am; or return
+    git rv -n b7987aff1d0c; or return
+    crl https://git.infradead.org/users/hch/dma-mapping.git/patch/22f9feb49950885cdb6e37513f134d154175e743 | git ap; or return
+    git ac -m "dma-mapping: Apply new version of 'dma-mapping: make the global coherent pool conditional'
+
+Link: https://lore.kernel.org/r/20210819085440.0ef51c24@canb.auug.org.au/"; or return
 
     echo 'From f16e7af3d188d6aa9d45d7502ba3fcebc441f22a Mon Sep 17 00:00:00 2001
 From: Nathan Chancellor <nathan@kernel.org>

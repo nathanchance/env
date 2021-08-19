@@ -3,7 +3,7 @@
 _localversion=-llvm
 _pkgsuffix=-next$_localversion
 pkgbase=linux$_pkgsuffix
-_srctag=next-20210818
+_srctag=next-20210819
 pkgver=${_srctag//-/.}
 pkgrel=1
 pkgdesc='linux-next'
@@ -26,7 +26,7 @@ validpgpkeys=(
   '3F2568AAC26998F9E813A1C5C3F436CA30F5D8EB'  # Mark Brown
 )
 sha256sums=('SKIP'
-            'e198e9df2ddcf0de4c194e24d6ba7c37db81a5769b43ddd9acee2ea65af015e8')
+            '985c3ec572d9a4962c2f0ee2f98e5c5b0b2325add798e29dbd84bdced3e2253c')
 
 _kmake() {
   set -x
@@ -69,9 +69,6 @@ prepare() {
 
   # [PATCH] lib/zstd: Fix bitwise vs logical operators
   b4 -q am -o - https://lore.kernel.org/r/20210815004154.1781834-1-nathan@kernel.org/ | patch -Np1
-
-  # cfg80211: fix BSS color notify trace enum confusion
-  curl -LSs https://git.kernel.org/jberg/mac80211-next/p/c448f0fd2ce59947b3b8b8d6b56e15036449d1f1 | patch -Np1
 
   # [PATCH][next] net/mlx5: Bridge: Fix uninitialized variable err
   b4 -q am -o - https://lore.kernel.org/r/20210818142558.36722-1-colin.king@canonical.com/ | patch -Np1
