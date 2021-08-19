@@ -88,7 +88,6 @@ function bldtcs -d "Build LLVM and binutils from source for kernel development"
     end
 
     # Add patches to revert here
-    set -a reverts 9934a5b2ed5aa6e6bbb2e55c3cd98839722c226e # [CVP] processSwitch: Remove default case when switch cover all possible values. (https://reviews.llvm.org/D106056)
     for revert in $reverts
         if not git -C $llvm_project rv -n $revert
             set message "Failed to revert $revert"
