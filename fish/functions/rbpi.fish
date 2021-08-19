@@ -15,9 +15,13 @@ function rbpi -d "Rebase Raspberry Pi kernel on latest linux-next"
 
     set -a patches 20210808180510.8753-1-digetx@gmail.com # [PATCH v5] brcmfmac: firmware: Fix firmware loading
     set -a patches 20210815004154.1781834-1-nathan@kernel.org # [PATCH] lib/zstd: Fix bitwise vs logical operators
+    set -a patches 20210818142558.36722-1-colin.king@canonical.com # [PATCH][next] net/mlx5: Bridge: Fix uninitialized variable err
+    set -a patches 20210818155210.14522-1-tim.gardner@canonical.com # [PATCH][linux-next] net/mlx5: Bridge, fix uninitialized variable in mlx5_esw_bridge_port_changeupper()
     for patch in $patches
         git b4 ams -P _ $patch; or return
     end
+
+    crl https://git.kernel.org/jberg/mac80211-next/p/c448f0fd2ce59947b3b8b8d6b56e15036449d1f1 | git am; or return
 
     echo 'From f16e7af3d188d6aa9d45d7502ba3fcebc441f22a Mon Sep 17 00:00:00 2001
 From: Nathan Chancellor <nathan@kernel.org>
