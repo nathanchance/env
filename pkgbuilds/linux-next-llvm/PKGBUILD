@@ -3,7 +3,7 @@
 _localversion=-llvm
 _pkgsuffix=-next$_localversion
 pkgbase=linux$_pkgsuffix
-_srctag=next-20210819
+_srctag=next-20210823
 pkgver=${_srctag//-/.}
 pkgrel=1
 pkgdesc='linux-next'
@@ -19,6 +19,7 @@ _srcname=$pkgbase
 source=(
   "$_srcname::git+https://git.kernel.org/pub/scm/linux/kernel/git/next/linux-next.git?signed#tag=$_srctag"
   config
+  mandatory-file-locking-fixups.patch
 )
 
 validpgpkeys=(
@@ -26,7 +27,8 @@ validpgpkeys=(
   '3F2568AAC26998F9E813A1C5C3F436CA30F5D8EB'  # Mark Brown
 )
 sha256sums=('SKIP'
-            '985c3ec572d9a4962c2f0ee2f98e5c5b0b2325add798e29dbd84bdced3e2253c')
+            '591b11aaa6189ea9ac1cd70edc372851dd7e3951d9f01f37194ce2f76153631a'
+            '142b2689b849278b092a064e866813be880be48edec83a4be716be64e897371c')
 
 _kmake() {
   set -x
@@ -61,9 +63,6 @@ prepare() {
   # [PATCH v2] ASoC: Intel: boards: Fix CONFIG_SND_SOC_SDW_MOCKUP select
   b4 -q am -o - https://lore.kernel.org/r/20210802212409.3207648-1-nathan@kernel.org/ | patch -Np1
 
-  # [PATCH v5] brcmfmac: firmware: Fix firmware loading
-  b4 -q am -o - https://lore.kernel.org/r/20210808180510.8753-1-digetx@gmail.com/ | patch -Np1
-
   # [PATCH] iwlwifi: mvm: Fix bitwise vs logical operator in iwl_mvm_scan_fits()
   b4 -q am -o - https://lore.kernel.org/r/20210814234248.1755703-1-nathan@kernel.org/ | patch -Np1
 
@@ -75,6 +74,12 @@ prepare() {
 
   # [PATCH][linux-next] net/mlx5: Bridge, fix uninitialized variable in mlx5_esw_bridge_port_changeupper()
   b4 -q am -o - https://lore.kernel.org/r/20210818155210.14522-1-tim.gardner@canonical.com/ | patch -Np1
+
+  # [PATCH] scsi: st: Add missing break in switch statement in st_ioctl()
+  b4 -q am -o - https://lore.kernel.org/r/20210817235531.172995-1-nathan@kernel.org/ | patch -Np1
+
+  # [PATCH] rtlwifi: rtl8192de: Fix initialization of place in _rtl92c_phy_get_rightchnlplace()
+  b4 -q am -o - https://lore.kernel.org/r/20210823222014.764557-1-nathan@kernel.org/ | patch -Np1
 
   echo "Setting config..."
   cp ../config .config

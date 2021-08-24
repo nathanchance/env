@@ -13,7 +13,6 @@ function rbpi -d "Rebase Raspberry Pi kernel on latest linux-next"
 
     git rh origin/master
 
-    set -a patches 20210808180510.8753-1-digetx@gmail.com # [PATCH v5] brcmfmac: firmware: Fix firmware loading
     set -a patches 20210815004154.1781834-1-nathan@kernel.org # [PATCH] lib/zstd: Fix bitwise vs logical operators
     set -a patches 20210818142558.36722-1-colin.king@canonical.com # [PATCH][next] net/mlx5: Bridge: Fix uninitialized variable err
     set -a patches 20210818155210.14522-1-tim.gardner@canonical.com # [PATCH][linux-next] net/mlx5: Bridge, fix uninitialized variable in mlx5_esw_bridge_port_changeupper()
@@ -21,11 +20,13 @@ function rbpi -d "Rebase Raspberry Pi kernel on latest linux-next"
         git b4 ams -P _ $patch; or return
     end
 
-    git rv -n b7987aff1d0c; or return
-    crl https://git.infradead.org/users/hch/dma-mapping.git/patch/22f9feb49950885cdb6e37513f134d154175e743 | git ap; or return
-    git ac -m "dma-mapping: Apply new version of 'dma-mapping: make the global coherent pool conditional'
+    git ap $ENV_FOLDER/pkgbuilds/linux-next-llvm/mandatory-file-locking-fixups.patch; or return
+    git c -m "mandatory-file-locking-fixups"
 
-Link: https://lore.kernel.org/r/20210819085440.0ef51c24@canb.auug.org.au/"; or return
+    sed -i 's;\&priv->cmdq_reg, priv->regs, DISP_AAL_OUTPUT_SIZE;\&aal->cmdq_reg, aal->regs, DISP_AAL_OUTPUT_SIZE;g' drivers/gpu/drm/mediatek/mtk_disp_aal.c
+    git ac -m "Fix mtk_disp_aal.c merge resolution
+
+Link: https://lore.kernel.org/r/20210824101231.72801784@canb.auug.org.au/"
 
     echo 'From f16e7af3d188d6aa9d45d7502ba3fcebc441f22a Mon Sep 17 00:00:00 2001
 From: Nathan Chancellor <nathan@kernel.org>
