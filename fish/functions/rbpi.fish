@@ -20,14 +20,6 @@ function rbpi -d "Rebase Raspberry Pi kernel on latest linux-next"
         git b4 ams -P _ $patch; or return
     end
 
-    git ap $ENV_FOLDER/pkgbuilds/linux-next-llvm/mandatory-file-locking-fixups.patch; or return
-    git c -m "mandatory-file-locking-fixups"
-
-    sed -i 's;\&priv->cmdq_reg, priv->regs, DISP_AAL_OUTPUT_SIZE;\&aal->cmdq_reg, aal->regs, DISP_AAL_OUTPUT_SIZE;g' drivers/gpu/drm/mediatek/mtk_disp_aal.c
-    git ac -m "Fix mtk_disp_aal.c merge resolution
-
-Link: https://lore.kernel.org/r/20210824101231.72801784@canb.auug.org.au/"
-
     echo 'From f16e7af3d188d6aa9d45d7502ba3fcebc441f22a Mon Sep 17 00:00:00 2001
 From: Nathan Chancellor <nathan@kernel.org>
 Date: Wed, 28 Jul 2021 12:14:27 -0700
