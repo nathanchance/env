@@ -98,7 +98,6 @@ function bldtcs -d "Build LLVM and binutils from source for kernel development"
     end
 
     # Add in-review patches here
-    set -a revisions D106030 # [Clang] add support for error+warning fn attrs | https://reviews.llvm.org/D106030
     # set -a revisions D108003 # [Clang] Extend -Wbool-operation to warn about bitwise and of bools with side effects | https://reviews.llvm.org/D108003
     for revision in $revisions
         set -l git_ap_args
