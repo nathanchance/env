@@ -3,7 +3,7 @@
 _localversion=-llvm
 _pkgsuffix=-next$_localversion
 pkgbase=linux$_pkgsuffix
-_srctag=next-20210824
+_srctag=next-20210826
 pkgver=${_srctag//-/.}
 pkgrel=1
 pkgdesc='linux-next'
@@ -26,7 +26,7 @@ validpgpkeys=(
   '3F2568AAC26998F9E813A1C5C3F436CA30F5D8EB'  # Mark Brown
 )
 sha256sums=('SKIP'
-            '32d9d1d977016fe0dccd0eef52b89a2c99b9e231873a0e5ef8b5f037234d9114')
+            'ab5e63e8416f8df782b387fb1d8c4252e68400625e3e223475ae2a37b6fff64b')
 
 _kmake() {
   set -x
@@ -79,8 +79,8 @@ prepare() {
   # [PATCH] rtlwifi: rtl8192de: Fix initialization of place in _rtl92c_phy_get_rightchnlplace()
   b4 -q am -o - https://lore.kernel.org/r/20210823222014.764557-1-nathan@kernel.org/ | patch -Np1
 
-  # [PATCH] cxgb4: Properly revert VPD changes
-  b4 -q am -o - https://lore.kernel.org/r/20210824205104.2778110-1-nathan@kernel.org/ | patch -Np1
+  # [PATCH] cxl/core: Avoid using dev uninitialized in devm_cxl_add_decoder()
+  b4 -q am -o - https://lore.kernel.org/r/20210825173301.358381-1-nathan@kernel.org/ | patch -Np1
 
   echo "Setting config..."
   cp ../config .config
