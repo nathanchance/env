@@ -11,6 +11,13 @@ function rbwk -d "Rebase WSL2 kernel on latest linux-next"
             return
     end
 
+    for arg in $argv
+        switch $arg
+            case -s --skip-mainline
+                set skip_mainline true
+        end
+    end
+
     git -C $src ru; or return
 
     set branches dxgkrnl
@@ -22,7 +29,11 @@ function rbwk -d "Rebase WSL2 kernel on latest linux-next"
     git -C $src ch next; or return
     git -C $src rh next/master
 
-    for remotebranch in mainline:master sami:clang-cfi
+    if test "$skip_mainline" != true
+        set remotebranches mainline:master
+    end
+    set -a remotebranches sami:clang-cfi
+    for remotebranch in $remotebranches
         if not git -C $src pll --no-edit (string split -f1 ":" $remotebranch) (string split -f2 ":" $remotebranch)
             rg "<<<<<<< HEAD" $src; and return
             git -C $src aa

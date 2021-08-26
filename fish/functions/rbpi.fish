@@ -5,6 +5,13 @@
 function rbpi -d "Rebase Raspberry Pi kernel on latest linux-next"
     set pi_src $CBL_BLD/rpi
 
+    for arg in $argv
+        switch $arg
+            case -s --skip-mainline
+                set skip_mainline true
+        end
+    end
+
     set fish_trace 1
 
     pushd $pi_src; or return
@@ -119,17 +126,19 @@ index dd4a48604097..ab2173e3951b 100644
         ../pi-scripts/build.fish $arch; or return
     end
 
-    if not git pll --no-edit mainline master
-        rg "<<<<<<< HEAD"; and return
+    if test "$skip_mainline" != true
+        if not git pll --no-edit mainline master
+            rg "<<<<<<< HEAD"; and return
+            for arch in arm arm64
+                ../pi-scripts/build.fish $arch; or return
+            end
+            git aa
+            git c --no-edit; or return
+        end
+
         for arch in arm arm64
             ../pi-scripts/build.fish $arch; or return
         end
-        git aa
-        git c --no-edit; or return
-    end
-
-    for arch in arm arm64
-        ../pi-scripts/build.fish $arch; or return
     end
 
     popd
