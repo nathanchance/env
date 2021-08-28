@@ -95,6 +95,6 @@ set -Ux GCC_TC_FOLDER $TC_FOLDER/gcc
 set -Ux LLVM_TC_FOLDER $TC_FOLDER/llvm
 
 set -Ux CBL_STABLE_VERSIONS 5.{13,10,4}
-set -Ux CBL_LLVM_VERSIONS 10.0.1 11.1.0 12.0.1 13.0.0-rc1
+set -Ux CBL_LLVM_VERSIONS 10.0.1 11.1.0 12.0.1 13.0.0-rc2
 # https://www.kernel.org/category/releases.html
 set -Ux SUPPORTED_STABLE_VERSIONS 4.{{,1}4,{,1}9} 5.{4,1{0,3}}
