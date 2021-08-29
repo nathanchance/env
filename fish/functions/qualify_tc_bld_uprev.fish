@@ -6,8 +6,8 @@ function qualify_tc_bld_uprev -d "Qualify a new known good revision for tc-build
     set tc_bld_src $CBL_GIT/tc-build
     set lnx_stbl $CBL_SRC/linux-stable
 
-    mkdir -p $TMP_FOLDER
-    set work_dir (mktemp -d -p $TMP_FOLDER)
+    mkdir -p $CBL_TMP
+    set work_dir (mktemp -d -p $CBL_TMP)
     set tc_bld (mktemp -d -p $work_dir -u)
     set usr $work_dir/usr
     set linux_srcs $work_dir/linux-stable-$CBL_STABLE_VERSIONS
