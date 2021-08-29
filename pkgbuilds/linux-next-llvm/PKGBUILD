@@ -3,7 +3,7 @@
 _localversion=-llvm
 _pkgsuffix=-next$_localversion
 pkgbase=linux$_pkgsuffix
-_srctag=next-20210826
+_srctag=next-20210827
 pkgver=${_srctag//-/.}
 pkgrel=1
 pkgdesc='linux-next'
@@ -26,7 +26,7 @@ validpgpkeys=(
   '3F2568AAC26998F9E813A1C5C3F436CA30F5D8EB'  # Mark Brown
 )
 sha256sums=('SKIP'
-            'ab5e63e8416f8df782b387fb1d8c4252e68400625e3e223475ae2a37b6fff64b')
+            '53606ca3a5262976a36586b17100f71a542066149f3fcc1aadf396f4767252dd')
 
 _kmake() {
   set -x
@@ -58,14 +58,17 @@ prepare() {
 
   echo "Applying patches from web..."
 
+  # rtlwifi: rtl8192de: Fix initialization of place in _rtl92c_phy_get_rightchnlplace()
+  curl -LSs https://git.kernel.org/kvalo/wireless-drivers-next/p/533ccdae76faa6fd8e0857ec494b264a5d87a191 | patch -Np1
+
   # [PATCH v2] ASoC: Intel: boards: Fix CONFIG_SND_SOC_SDW_MOCKUP select
   b4 -q am -o - https://lore.kernel.org/r/20210802212409.3207648-1-nathan@kernel.org/ | patch -Np1
 
   # [PATCH] iwlwifi: mvm: Fix bitwise vs logical operator in iwl_mvm_scan_fits()
-  b4 -q am -o - https://lore.kernel.org/r/20210814234248.1755703-1-nathan@kernel.org/ | patch -Np1
+  # b4 -q am -o - https://lore.kernel.org/r/20210814234248.1755703-1-nathan@kernel.org/ | patch -Np1
 
   # [PATCH] lib/zstd: Fix bitwise vs logical operators
-  b4 -q am -o - https://lore.kernel.org/r/20210815004154.1781834-1-nathan@kernel.org/ | patch -Np1
+  # b4 -q am -o - https://lore.kernel.org/r/20210815004154.1781834-1-nathan@kernel.org/ | patch -Np1
 
   # [PATCH][next] net/mlx5: Bridge: Fix uninitialized variable err
   b4 -q am -o - https://lore.kernel.org/r/20210818142558.36722-1-colin.king@canonical.com/ | patch -Np1
@@ -76,11 +79,8 @@ prepare() {
   # [PATCH] scsi: st: Add missing break in switch statement in st_ioctl()
   b4 -q am -o - https://lore.kernel.org/r/20210817235531.172995-1-nathan@kernel.org/ | patch -Np1
 
-  # [PATCH] rtlwifi: rtl8192de: Fix initialization of place in _rtl92c_phy_get_rightchnlplace()
-  b4 -q am -o - https://lore.kernel.org/r/20210823222014.764557-1-nathan@kernel.org/ | patch -Np1
-
-  # [PATCH] cxl/core: Avoid using dev uninitialized in devm_cxl_add_decoder()
-  b4 -q am -o - https://lore.kernel.org/r/20210825173301.358381-1-nathan@kernel.org/ | patch -Np1
+  # [PATCH] cxl/core: Replace devm_cxl_add_decoder() with non-devm version
+  b4 -q am -o - https://lore.kernel.org/r/163002073312.1700305.17017280228713298614.stgit@dwillia2-desk3.amr.corp.intel.com/ | patch -Np1
 
   echo "Setting config..."
   cp ../config .config
