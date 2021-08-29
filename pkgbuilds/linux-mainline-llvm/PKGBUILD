@@ -3,7 +3,7 @@
 _localversion=-llvm
 _pkgsuffix=-mainline$_localversion
 pkgbase=linux$_pkgsuffix
-_srctag=v5.14-rc7
+_srctag=v5.14
 pkgver=${_srctag//-/.}
 pkgrel=1
 pkgdesc='Linux'
@@ -24,7 +24,7 @@ validpgpkeys=(
   'ABAF11C65A2970B130ABE3C479BE3E4300411886'  # Linus Torvalds
 )
 sha256sums=('SKIP'
-            'b1cacfc11edd9d17150880830b64491ee213ac8e7f26d17cb62efe194abfb5e3')
+            '9ec68b8b185fad6b6ba28172fb1adf61a60e361febcc45e73924219f8578f135')
 
 _kmake() {
   set -x
@@ -54,16 +54,16 @@ prepare() {
     patch -Np1 < "../$src"
   done
 
-  echo "Applying patches from mailing lists..."
+  # echo "Applying patches from mailing lists..."
 
   # staging: rtl8192u: Fix bitwise vs logical operator in TranslateRxSignalStuff819xUsb()
-  curl -LSs https://git.kernel.org/gregkh/staging/p/099ec97ac92911abfb102bb5c68ed270fc12e0dd | patch -Np1
+  # curl -LSs https://git.kernel.org/gregkh/staging/p/099ec97ac92911abfb102bb5c68ed270fc12e0dd | patch -Np1
 
   # [PATCH] iwlwifi: mvm: Fix bitwise vs logical operator in iwl_mvm_scan_fits()
-  b4 -q am -o - https://lore.kernel.org/r/20210814234248.1755703-1-nathan@kernel.org/ | patch -Np1
+  # b4 -q am -o - https://lore.kernel.org/r/20210814234248.1755703-1-nathan@kernel.org/ | patch -Np1
 
   # [PATCH] lib/zstd: Fix bitwise vs logical operators
-  b4 -q am -o - https://lore.kernel.org/r/20210815004154.1781834-1-nathan@kernel.org/ | patch -Np1
+  # b4 -q am -o - https://lore.kernel.org/r/20210815004154.1781834-1-nathan@kernel.org/ | patch -Np1
 
   echo "Setting config..."
   cp ../config .config
