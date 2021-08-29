@@ -71,6 +71,7 @@ set -Ux CBL_MIRRORS $CBL/mirrors
 set -Ux CBL_QEMU $CBL/qemu
 set -Ux CBL_SRC $CBL/src
 set -Ux CBL_TC_BLD $CBL/tc-build
+set -Ux CBL_TMP $CBL/tmp
 set -Ux CBL_USR $CBL/usr
 set -Ux CBL_WRKTR $CBL/worktrees
 
