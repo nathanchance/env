@@ -48,7 +48,7 @@ function kmake -d "Run make with all cores and adjust PATH temporarily"
     end
 
     # Setup paths
-    if test "$LLVM" = 1; or test "$CC" = clang
+    if test "$LLVM" = 1; or string match -q -- "*clang" "$CC"
         if set -q CBL_BIN; and test -d "$CBL_BIN"
             set -p PATH $CBL_BIN
         end
