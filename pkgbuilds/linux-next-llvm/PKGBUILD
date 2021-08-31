@@ -3,7 +3,7 @@
 _localversion=-llvm
 _pkgsuffix=-next$_localversion
 pkgbase=linux$_pkgsuffix
-_srctag=next-20210827
+_srctag=next-20210830
 pkgver=${_srctag//-/.}
 pkgrel=1
 pkgdesc='linux-next'
@@ -26,7 +26,7 @@ validpgpkeys=(
   '3F2568AAC26998F9E813A1C5C3F436CA30F5D8EB'  # Mark Brown
 )
 sha256sums=('SKIP'
-            '53606ca3a5262976a36586b17100f71a542066149f3fcc1aadf396f4767252dd')
+            'ab50dc9d72224fca1bb10ba3b89e580baa0f95620377cdb8ff743dc589d6387c')
 
 _kmake() {
   set -x
@@ -58,9 +58,6 @@ prepare() {
 
   echo "Applying patches from web..."
 
-  # rtlwifi: rtl8192de: Fix initialization of place in _rtl92c_phy_get_rightchnlplace()
-  curl -LSs https://git.kernel.org/kvalo/wireless-drivers-next/p/533ccdae76faa6fd8e0857ec494b264a5d87a191 | patch -Np1
-
   # [PATCH v2] ASoC: Intel: boards: Fix CONFIG_SND_SOC_SDW_MOCKUP select
   b4 -q am -o - https://lore.kernel.org/r/20210802212409.3207648-1-nathan@kernel.org/ | patch -Np1
 
@@ -78,9 +75,6 @@ prepare() {
 
   # [PATCH] scsi: st: Add missing break in switch statement in st_ioctl()
   b4 -q am -o - https://lore.kernel.org/r/20210817235531.172995-1-nathan@kernel.org/ | patch -Np1
-
-  # [PATCH] cxl/core: Replace devm_cxl_add_decoder() with non-devm version
-  b4 -q am -o - https://lore.kernel.org/r/163002073312.1700305.17017280228713298614.stgit@dwillia2-desk3.amr.corp.intel.com/ | patch -Np1
 
   echo "Setting config..."
   cp ../config .config
