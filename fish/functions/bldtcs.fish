@@ -99,6 +99,10 @@ function bldtcs -d "Build LLVM and binutils from source for kernel development"
 
     # Add in-review patches here
     # set -a revisions D108003 # [Clang] Extend -Wbool-operation to warn about bitwise and of bools with side effects | https://reviews.llvm.org/D108003
+    set -a revisions D108926 # [MipsISelLowering] avoid emitting libcalls to __multi3 | https://reviews.llvm.org/D108926
+    set -a revisions D108928 # [X86ISelLowering] avoid emitting libcalls to __mulodi4() | https://reviews.llvm.org/D108928
+    set -a revisions D108936 # [PPCISelLowering] avoid emitting libcalls to __mulodi4() | https://reviews.llvm.org/D108936
+    set -a revisions D108939 # [RISCVISelLowering] avoid emitting libcalls to __mulodi4() and __multi3() | https://reviews.llvm.org/D108939
     for revision in $revisions
         set -l git_ap_args
         if test "$revision" = D108003
