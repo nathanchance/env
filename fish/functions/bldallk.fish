@@ -24,7 +24,17 @@ function bldallk -d "Build all kernels for ClangBuiltLinux testing"
             end
 
         case '*'
-            for tree in linux-next linux linux-stable-$CBL_STABLE_VERSIONS
+            for arg in $argv
+                switch $arg
+                    case -n --no-stable
+                        set no_stable true
+                end
+            end
+            set trees linux{-next,}
+            if test "$no_stable" != true
+                set -a trees linux-stable-$CBL_STABLE_VERSIONS
+            end
+            for tree in $trees
                 lt --tree $tree
             end
             for arch in arm arm64

@@ -22,6 +22,12 @@ function bldall -d "Build latest LLVM and test it against several Linux kernels"
             bootk -a x86_64 -k $CBL_SRC/linux-next/.build/x86_64
 
         case '*'
-            bldtcs; and bldallk
+            for arg in $argv
+                switch $arg
+                    case -n --no-stable
+                        set -a bldallk_args $arg
+                end
+            end
+            bldtcs; and bldallk $bldallk_args
     end
 end
