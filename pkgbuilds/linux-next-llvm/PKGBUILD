@@ -3,7 +3,7 @@
 _localversion=-llvm
 _pkgsuffix=-next$_localversion
 pkgbase=linux$_pkgsuffix
-_srctag=next-20210902
+_srctag=next-20210903
 pkgver=${_srctag//-/.}
 pkgrel=1
 pkgdesc='linux-next'
@@ -26,7 +26,7 @@ validpgpkeys=(
   '3F2568AAC26998F9E813A1C5C3F436CA30F5D8EB'  # Mark Brown
 )
 sha256sums=('SKIP'
-            'c5bfbcb5706d6a54efbfa66f84ffa5fc16294e2f6bce42994e98996775c78dd0')
+            '02acd93b475740dfb6221cb07e10ee2b6f8ee6970f93ba78726f2f8f67874f22')
 
 _kmake() {
   set -x
@@ -75,6 +75,9 @@ prepare() {
 
   # [PATCH] scsi: st: Add missing break in switch statement in st_ioctl()
   b4 -q am -o - https://lore.kernel.org/r/20210817235531.172995-1-nathan@kernel.org/ | patch -Np1
+
+  # [PATCH][next] io_uring: Fix a read of ununitialized pointer tctx
+  b4 -q am -o - https://lore.kernel.org/r/20210903113535.11257-1-colin.king@canonical.com/ | patch -Np1
 
   echo "Setting config..."
   cp ../config .config
