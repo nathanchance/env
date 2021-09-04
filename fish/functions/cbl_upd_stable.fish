@@ -7,6 +7,6 @@ function cbl_upd_stable -d "Update ClangBuiltLinux stable trees"
         header "Updating $tree"
         pushd $CBL_BLD_P/$tree; or return
         git pull -r; or return
-        ptchmn -s
+        cbl_ptchmn -s
     end
 end

@@ -233,10 +233,10 @@ out.*/
         set github_repos bug-files hugo-files nathanchance.github.io patches
 
         for linux_tree in linux linux-next linux-stable
-            tmux new-window fish -c "cbl_linux_repos $linux_tree; sleep 180"
+            tmux new-window fish -c "cbl_setup_linux_repos $linux_tree; sleep 180"
         end
 
-        tmux new-window fish -c "ssh_agent; and cbl_other_repos; sleep 180"
+        tmux new-window fish -c "ssh_agent; and cbl_setup_other_repos; sleep 180"
     else
         return 0
     end
