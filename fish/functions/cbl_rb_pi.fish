@@ -20,10 +20,7 @@ function cbl_rb_pi -d "Rebase Raspberry Pi kernel on latest linux-next"
 
     git rh origin/master
 
-    # set -a patches 20210815004154.1781834-1-nathan@kernel.org # [PATCH] lib/zstd: Fix bitwise vs logical operators
-    set -a patches 20210818142558.36722-1-colin.king@canonical.com # [PATCH][next] net/mlx5: Bridge: Fix uninitialized variable err
-    set -a patches 20210818155210.14522-1-tim.gardner@canonical.com # [PATCH][linux-next] net/mlx5: Bridge, fix uninitialized variable in mlx5_esw_bridge_port_changeupper()
-    set -a patches 20210903113535.11257-1-colin.king@canonical.com # [PATCH][next] io_uring: Fix a read of ununitialized pointer tctx
+    set -a patches 20210902190554.211497-4-saeed@kernel.org # [net-next 03/15] net/mlx5: Bridge, fix uninitialized variable usage
     for patch in $patches
         git b4 ams -P _ $patch; or return
     end

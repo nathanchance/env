@@ -3,7 +3,7 @@
 _localversion=-llvm
 _pkgsuffix=-next$_localversion
 pkgbase=linux$_pkgsuffix
-_srctag=next-20210903
+_srctag=next-20210906
 pkgver=${_srctag//-/.}
 pkgrel=1
 pkgdesc='linux-next'
@@ -26,7 +26,7 @@ validpgpkeys=(
   '3F2568AAC26998F9E813A1C5C3F436CA30F5D8EB'  # Mark Brown
 )
 sha256sums=('SKIP'
-            '02acd93b475740dfb6221cb07e10ee2b6f8ee6970f93ba78726f2f8f67874f22')
+            'f8e37c2e250671bc530bbecba26f1621b1924923bca4dbb143cd097380bc8ace')
 
 _kmake() {
   set -x
@@ -58,26 +58,17 @@ prepare() {
 
   echo "Applying patches from web..."
 
-  # [PATCH v2] ASoC: Intel: boards: Fix CONFIG_SND_SOC_SDW_MOCKUP select
-  b4 -q am -o - https://lore.kernel.org/r/20210802212409.3207648-1-nathan@kernel.org/ | patch -Np1
-
   # [PATCH] iwlwifi: mvm: Fix bitwise vs logical operator in iwl_mvm_scan_fits()
   # b4 -q am -o - https://lore.kernel.org/r/20210814234248.1755703-1-nathan@kernel.org/ | patch -Np1
 
   # [PATCH] lib/zstd: Fix bitwise vs logical operators
   # b4 -q am -o - https://lore.kernel.org/r/20210815004154.1781834-1-nathan@kernel.org/ | patch -Np1
 
-  # [PATCH][next] net/mlx5: Bridge: Fix uninitialized variable err
-  b4 -q am -o - https://lore.kernel.org/r/20210818142558.36722-1-colin.king@canonical.com/ | patch -Np1
-
-  # [PATCH][linux-next] net/mlx5: Bridge, fix uninitialized variable in mlx5_esw_bridge_port_changeupper()
-  b4 -q am -o - https://lore.kernel.org/r/20210818155210.14522-1-tim.gardner@canonical.com/ | patch -Np1
+  # [net-next 03/15] net/mlx5: Bridge, fix uninitialized variable usage
+  b4 -q am -o - -P _ https://lore.kernel.org/r/20210902190554.211497-4-saeed@kernel.org/ | patch -Np1
 
   # [PATCH] scsi: st: Add missing break in switch statement in st_ioctl()
   b4 -q am -o - https://lore.kernel.org/r/20210817235531.172995-1-nathan@kernel.org/ | patch -Np1
-
-  # [PATCH][next] io_uring: Fix a read of ununitialized pointer tctx
-  b4 -q am -o - https://lore.kernel.org/r/20210903113535.11257-1-colin.king@canonical.com/ | patch -Np1
 
   echo "Setting config..."
   cp ../config .config
