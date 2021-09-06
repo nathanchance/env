@@ -12,7 +12,7 @@ function cbl_upd_krnl -d "Update machine's kernel"
                     case -r --reboot
                         set reboot true
                     case '*'
-                        set krnl (string replace 'linux-' '' $arg)
+                        set krnl linux-(string replace 'linux-' '' $arg)
                 end
             end
             if not set -q krnl

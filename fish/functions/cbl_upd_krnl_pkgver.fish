@@ -8,7 +8,7 @@ function cbl_upd_krnl_pkgver -d "Update the pkgver variable in a kernel PKGBUILD
             case -b --bisect
                 set bisect true
             case '*'
-                set krnl $arg
+                set krnl linux-(string replace 'linux-' '' $arg)
         end
     end
 
