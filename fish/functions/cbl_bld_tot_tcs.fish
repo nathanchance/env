@@ -99,7 +99,6 @@ function cbl_bld_tot_tcs -d "Build LLVM and binutils from source for kernel deve
 
     # Add in-review patches here
     # set -a revisions D108003 # [Clang] Extend -Wbool-operation to warn about bitwise and of bools with side effects | https://reviews.llvm.org/D108003
-    set -a revisions D108928 # [X86ISelLowering] avoid emitting libcalls to __mulodi4() | https://reviews.llvm.org/D108928
     for revision in $revisions
         set -l git_ap_args
         if test "$revision" = D108003
