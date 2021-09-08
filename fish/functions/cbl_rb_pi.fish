@@ -20,7 +20,7 @@ function cbl_rb_pi -d "Rebase Raspberry Pi kernel on latest linux-next"
 
     git rh origin/master
 
-    set -a patches 20210902190554.211497-4-saeed@kernel.org # [net-next 03/15] net/mlx5: Bridge, fix uninitialized variable usage
+    set -a patches 20210907212420.28529-2-saeed@kernel.org # [net 1/7] net/mlx5: Bridge, fix uninitialized variable usage
     for patch in $patches
         git b4 ams -P _ $patch; or return
     end
