@@ -1,0 +1,34 @@
+From fc46b651e6c181b80e1a6c8ac6df39f5a0c8eb8f Mon Sep 17 00:00:00 2001
+From: Nathan Chancellor <nathan@kernel.org>
+Date: Thu, 9 Sep 2021 13:27:10 -0700
+Subject: [PATCH] Revert "IB/qib: Fix null pointer subtraction compiler
+ warning"
+
+This reverts commit 84f969e1c48ed3825986e91a0786e363d57f69d1.
+
+Link: https://github.com/ClangBuiltLinux/linux/issues/1452
+Signed-off-by: Nathan Chancellor <nathan@kernel.org>
+---
+ drivers/infiniband/hw/qib/qib_sysfs.c | 4 +---
+ 1 file changed, 1 insertion(+), 3 deletions(-)
+
+diff --git a/drivers/infiniband/hw/qib/qib_sysfs.c b/drivers/infiniband/hw/qib/qib_sysfs.c
+index 452e2355d24e..d57e49de6650 100644
+--- a/drivers/infiniband/hw/qib/qib_sysfs.c
++++ b/drivers/infiniband/hw/qib/qib_sysfs.c
+@@ -403,11 +403,9 @@ static ssize_t diagc_attr_store(struct ib_device *ibdev, u32 port_num,
+ }
+ 
+ #define QIB_DIAGC_ATTR(N)                                                      \
+-	static_assert(&((struct qib_ibport *)0)->rvp.n_##N != (u64 *)NULL);    \
+ 	static struct qib_diagc_attr qib_diagc_attr_##N = {                    \
+ 		.attr = __ATTR(N, 0664, diagc_attr_show, diagc_attr_store),    \
+-		.counter =                                                     \
+-			offsetof(struct qib_ibport, rvp.n_##N) / sizeof(u64)   \
++		.counter = &((struct qib_ibport *)0)->rvp.n_##N - (u64 *)0,    \
+ 	}
+ 
+ QIB_DIAGC_ATTR(rc_resends);
+-- 
+2.33.0
+
