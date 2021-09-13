@@ -3,7 +3,7 @@
 _localversion=-llvm
 _pkgsuffix=-mainline$_localversion
 pkgbase=linux$_pkgsuffix
-_srctag=v5.14
+_srctag=v5.15-rc1
 pkgver=${_srctag//-/.}
 pkgrel=1
 pkgdesc='Linux'
@@ -19,12 +19,14 @@ _srcname=$pkgbase
 source=(
   "$_srcname::git+https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git?signed#tag=$_srctag"
   config
+  0001-IB-qib-Fix-type-check-in-QIB_DIAGC_ATTR.patch
 )
 validpgpkeys=(
   'ABAF11C65A2970B130ABE3C479BE3E4300411886'  # Linus Torvalds
 )
 sha256sums=('SKIP'
-            '9ec68b8b185fad6b6ba28172fb1adf61a60e361febcc45e73924219f8578f135')
+            'c5d622dfe0ae100d13be03c1a58dfa33644decbd2ca58019f095f7b0f468b08f'
+            'd562a7a2ab81b889078beaca2b89098a75ad0a2f20d08dfff42c68751fed420f')
 
 _kmake() {
   set -x
@@ -54,16 +56,10 @@ prepare() {
     patch -Np1 < "../$src"
   done
 
-  # echo "Applying patches from mailing lists..."
+  echo "Applying patches from mailing lists or git repos..."
 
-  # staging: rtl8192u: Fix bitwise vs logical operator in TranslateRxSignalStuff819xUsb()
-  # curl -LSs https://git.kernel.org/gregkh/staging/p/099ec97ac92911abfb102bb5c68ed270fc12e0dd | patch -Np1
-
-  # [PATCH] iwlwifi: mvm: Fix bitwise vs logical operator in iwl_mvm_scan_fits()
-  # b4 -q am -o - https://lore.kernel.org/r/20210814234248.1755703-1-nathan@kernel.org/ | patch -Np1
-
-  # [PATCH] lib/zstd: Fix bitwise vs logical operators
-  # b4 -q am -o - https://lore.kernel.org/r/20210815004154.1781834-1-nathan@kernel.org/ | patch -Np1
+  # net/mlx5: Bridge, fix uninitialized variable usage
+  curl -LSs https://git.kernel.org/netdev/net/p/8343268ec3cf4e097aa8b2071f0cd6779e2c4953 | patch -Np1
 
   echo "Setting config..."
   cp ../config .config

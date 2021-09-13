@@ -3,7 +3,7 @@
 _localversion=-llvm
 _pkgsuffix=-next$_localversion
 pkgbase=linux$_pkgsuffix
-_srctag=next-20210910
+_srctag=next-20210913
 pkgver=${_srctag//-/.}
 pkgrel=1
 pkgdesc='linux-next'
@@ -19,7 +19,7 @@ _srcname=$pkgbase
 source=(
   "$_srcname::git+https://git.kernel.org/pub/scm/linux/kernel/git/next/linux-next.git?signed#tag=$_srctag"
   config
-  0001-Revert-IB-qib-Fix-null-pointer-subtraction-compiler-.patch
+  0001-IB-qib-Fix-type-check-in-QIB_DIAGC_ATTR.patch
 )
 
 validpgpkeys=(
@@ -27,8 +27,8 @@ validpgpkeys=(
   '3F2568AAC26998F9E813A1C5C3F436CA30F5D8EB'  # Mark Brown
 )
 sha256sums=('SKIP'
-            '10e372ca93f9f66fe3781c4fe6f5b741e815e4775ff5bdd0531317f37414127d'
-            '9cedbfd6e383cf4b21cd0ad51d271eb1360f356f5e23cc3381d2572d5a105c4d')
+            '0da7adf29295344bad7ce682c92b1516888fa7f770518aedd6b65534eeff347c'
+            'd562a7a2ab81b889078beaca2b89098a75ad0a2f20d08dfff42c68751fed420f')
 
 _kmake() {
   set -x
