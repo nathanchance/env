@@ -74,15 +74,14 @@ function cbl_lkt -d "Tests a Linux kernel with llvm-kernel-testing"
     set log_dir $CBL/build-logs/(basename $linux_src)-(date +%F-%T)
     mkdir -p $log_dir
 
-    set lkt $CBL/llvm-kernel-testing
-    if not test -d $lkt
-        mkdir -p (dirname $lkt)
-        git clone https://github.com/nathanchance/llvm-kernel-testing $lkt
+    if not test -d $CBL_LKT
+        mkdir -p (dirname $CBL_LKT)
+        git clone https://github.com/nathanchance/llvm-kernel-testing $CBL_LKT
     end
-    git -C $lkt pull -qr
+    git -C $CBL_LKT pull -qr
 
     set fish_trace 1
-    PATH="$CBL_QEMU_BIN:$PATH" $CBL/llvm-kernel-testing/test.sh \
+    PATH="$CBL_QEMU_BIN:$PATH" $CBL_LKT/test.sh \
         --linux-src $linux_src \
         --log-dir $log_dir \
         --skip-tc-build \
@@ -100,7 +99,7 @@ function cbl_lkt -d "Tests a Linux kernel with llvm-kernel-testing"
     set blocklist "arch/powerpc/boot/inffast.c|objtool:|override: CPU_BIG_ENDIAN changes choice state|override: LTO_CLANG_THIN changes choice state|results.log|union jset::\(anonymous at ./usr/include/linux/bcache.h:|llvm-objdump: error: 'vmlinux': not a dynamic object|warning: argument unused during compilation: '-march=arm"
     set searchlist "error:|FATAL:|undefined|Unsupported relocation type:|warning:|WARNING:"
 
-    for file_path in $log_dir $linux_src $CBL/llvm-kernel-testing/src/linux-clang-cfi
+    for file_path in $log_dir $linux_src $CBL_LKT/src/linux-clang-cfi
         set -a sed_args -e "s;$file_path/;;g"
     end
 

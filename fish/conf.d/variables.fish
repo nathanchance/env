@@ -67,6 +67,7 @@ set -Ux USR_FOLDER $MAIN_FOLDER/usr
 
 set -Ux CBL_BLD $CBL/build
 set -Ux CBL_GIT $CBL/github
+set -Ux CBL_LKT $CBL/llvm-kernel-testing
 set -Ux CBL_MIRRORS $CBL/mirrors
 set -Ux CBL_QEMU $CBL/qemu
 set -Ux CBL_SRC $CBL/src
