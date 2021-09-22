@@ -3,7 +3,7 @@
 _localversion=-llvm
 _pkgsuffix=-next$_localversion
 pkgbase=linux$_pkgsuffix
-_srctag=next-20210921
+_srctag=next-20210922
 pkgver=${_srctag//-/.}
 pkgrel=1
 pkgdesc='linux-next'
@@ -19,8 +19,6 @@ _srcname=$pkgbase
 source=(
   "$_srcname::git+https://git.kernel.org/pub/scm/linux/kernel/git/next/linux-next.git?signed#tag=$_srctag"
   config
-  1c1046581f1a3809e075669a3df0191869d96dd1-v2.patch
-  amd-Wmacro-redefined.patch
 )
 
 validpgpkeys=(
@@ -28,9 +26,7 @@ validpgpkeys=(
   '3F2568AAC26998F9E813A1C5C3F436CA30F5D8EB'  # Mark Brown
 )
 sha256sums=('SKIP'
-            'ef8a99735dbbc3d649912dc8192a7174f2f285f65c2296d9cd54f87891b12291'
-            'bbbb85e8df6b6c9f63e602e7d76cd924346c0bc618b333fe332f42a522490434'
-            '24970fe952e45e618d0cccdc4f28236bdb360710829a232472d781581b9680a6')
+            '7ec877f5d7eb004b2098a1fd3dc8e03d134be1dc643cd3b2b3f82433164cad56')
 
 _kmake() {
   set -x

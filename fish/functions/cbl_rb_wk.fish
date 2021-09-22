@@ -32,7 +32,7 @@ function cbl_rb_wk -d "Rebase WSL2 kernel on latest linux-next"
     if test "$skip_mainline" != true
         set remotebranches mainline:master
     end
-    set -a remotebranches sami:clang-cfi
+    set -a remotebranches sami:tip/clang-cfi
     for remotebranch in $remotebranches
         if not git -C $src pll --no-edit (string split -f1 ":" $remotebranch) (string split -f2 ":" $remotebranch)
             rg "<<<<<<< HEAD" $src; and return
