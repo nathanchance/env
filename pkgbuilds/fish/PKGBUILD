@@ -1,0 +1,60 @@
+# Maintainer: Levente Polyak <anthraxx[at]archlinux[dot]org>
+# Contributor: Bartłomiej Piotrowski <bpiotrowski@archlinux.org>
+# Contributor: Kaiting Chen <kaitocracy@gmail.com>
+# Contributor: Abhishek Dasgupta <abhidg@gmail.com>
+# Contributor: Eric Belanger <eric@archlinux.org>
+# Contributor: Jan Fader <jan.fader@web.de>
+
+pkgname=fish
+pkgver=3.3.1
+pkgrel=1
+pkgdesc='Smart and user friendly shell intended mostly for interactive use'
+url='https://fishshell.com/'
+arch=('x86_64')
+license=('GPL2')
+depends=('glibc' 'gcc-libs' 'ncurses' 'pcre2')
+optdepends=('python: man page completion parser / web config tool'
+            'pkgfile: command-not-found hook')
+makedepends=('cmake' 'python-sphinx')
+checkdepends=('expect' 'procps-ng')
+install=fish.install
+backup=(etc/fish/config.fish)
+source=(https://github.com/fish-shell/fish-shell/releases/download/${pkgver}/${pkgname}-${pkgver}.tar.xz{,.asc}
+        https://github.com/fish-shell/fish-shell/commit/4bb1c72a910eb267704c1c4eed627c861abb017b.patch)
+validpgpkeys=(003837986104878835FA516D7A67D962D88A709A) # David Adam <zanchey@gmail.com>
+sha256sums=('b5b4ee1a5269762cbbe993a4bd6507e675e4100ce9bbe84214a5eeb2b19fae89'
+            'SKIP'
+            '4404d1473a178e2e735a1d5f993128b24dffb327e28763a9deb8d196acce3dea')
+sha512sums=('fc50ca44fab3f2d942284d4f714150f7ccf1e49c73da36f8d4ae4a33a9b3280f98bed15848839f5d443b4274fd0ff90174bafa6a8e9a4da226dda63d7766a660'
+            'SKIP'
+            '4febd07a22eef70ac06f8cd4ac3b376ea2e320d109d41febcb874563309c4d5ca23380d3ab59d342f9dcff3842299a00b9da68788d25fbb5f30b80ea86dd634a')
+
+prepare() {
+  cd ${pkgname}-${pkgver}
+  patch -Np1 < ../4bb1c72a910eb267704c1c4eed627c861abb017b.patch
+}
+
+build() {
+  cd ${pkgname}-${pkgver}
+  export CXXFLAGS+=" ${CPPFLAGS}"
+  cmake \
+    -B build \
+    -DCMAKE_INSTALL_PREFIX=/usr \
+    -DCMAKE_INSTALL_SYSCONFDIR=/etc \
+    -DCMAKE_BUILD_TYPE=None \
+    -DBUILD_DOCS=True \
+    -Wno-dev
+  make -C build VERBOSE=1
+}
+
+check() {
+  cd ${pkgname}-${pkgver}
+  make -C build test
+}
+
+package() {
+  cd ${pkgname}-${pkgver}
+  make -C build DESTDIR="${pkgdir}" install
+}
+
+# vim: ts=2 sw=2 et:
