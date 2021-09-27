@@ -3,7 +3,7 @@
 _localversion=-cfi
 _pkgsuffix=$_localversion
 pkgbase=linux$_pkgsuffix
-pkgver=next.20210922.16.g63786e95fbe7
+pkgver=next.20210924.32.gdcb38c088330
 pkgrel=1
 pkgdesc='Linux kernel with Control Flow Integrity'
 arch=(x86_64)
@@ -19,7 +19,7 @@ source=(
   config
 )
 sha256sums=('SKIP'
-            '2bec2aa4b19f4aaf80c45461501fb55175d0e64af6d5733098802248ed52337a')
+            '0cb98b227903600b4189b886cbc2dd42b820925542ba1fa437850de92554c04b')
 
 _kmake() {
   set -x
