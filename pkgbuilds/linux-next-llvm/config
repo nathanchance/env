@@ -1,6 +1,6 @@
 #
 # Automatically generated file; DO NOT EDIT.
-# Linux/x86 5.15.0-rc2 Kernel Configuration
+# Linux/x86 5.15.0-rc3 Kernel Configuration
 #
 CONFIG_CC_VERSION_TEXT="ClangBuiltLinux clang version 14.0.0 (https://github.com/llvm/llvm-project ce6ed64a6953ad0a88b08665c54bae0c1f0f2c84)"
 CONFIG_GCC_VERSION=0
@@ -6435,7 +6435,7 @@ CONFIG_FB_EFI=y
 CONFIG_XEN_FBDEV_FRONTEND=m
 # CONFIG_FB_METRONOME is not set
 # CONFIG_FB_MB862XX is not set
-CONFIG_FB_HYPERV=m
+# CONFIG_FB_HYPERV is not set
 CONFIG_FB_SIMPLE=y
 # CONFIG_FB_SSD1307 is not set
 # CONFIG_FB_SM712 is not set
@@ -10361,7 +10361,6 @@ CONFIG_DEBUG_INFO=y
 CONFIG_DEBUG_INFO_DWARF4=y
 # CONFIG_DEBUG_INFO_DWARF5 is not set
 # CONFIG_DEBUG_INFO_BTF is not set
-CONFIG_PAHOLE_HAS_SPLIT_BTF=y
 # CONFIG_GDB_SCRIPTS is not set
 CONFIG_FRAME_WARN=2048
 CONFIG_STRIP_ASM_SYMS=y

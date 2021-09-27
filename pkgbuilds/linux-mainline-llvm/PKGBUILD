@@ -3,7 +3,7 @@
 _localversion=-llvm
 _pkgsuffix=-mainline$_localversion
 pkgbase=linux$_pkgsuffix
-_srctag=v5.15-rc2
+_srctag=v5.15-rc3
 pkgver=${_srctag//-/.}
 pkgrel=1
 pkgdesc='Linux'
@@ -24,8 +24,7 @@ validpgpkeys=(
   'ABAF11C65A2970B130ABE3C479BE3E4300411886'  # Linus Torvalds
 )
 sha256sums=('SKIP'
-            'c5d622dfe0ae100d13be03c1a58dfa33644decbd2ca58019f095f7b0f468b08f'
-            'd562a7a2ab81b889078beaca2b89098a75ad0a2f20d08dfff42c68751fed420f')
+            'e079227ff99e55f37f2130bad18912c722c39792d20ddcf72f4b7c10067fb914')
 
 _kmake() {
   set -x
@@ -58,7 +57,7 @@ prepare() {
   echo "Applying patches from mailing lists or git repos..."
 
   # IB/qib: Fix clang confusion of NULL pointer comparison
-  curl -LSs https://git.kernel.org/rdma/rdma/c/3110b942d36b961858664486d72f815d78c956c3 | patch -Np1
+  curl -LSs https://git.kernel.org/rdma/rdma/p/3110b942d36b961858664486d72f815d78c956c3 | patch -Np1
 
   echo "Setting config..."
   cp ../config .config
