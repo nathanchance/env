@@ -4,7 +4,7 @@
 
 _pkgname=mosh
 pkgname=$_pkgname-git
-pkgver=20200518
+pkgver=20210721
 pkgrel=1
 pkgdesc='Mobile shell, surviving disconnects with local echo and line editing'
 arch=(x86_64)
