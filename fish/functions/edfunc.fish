@@ -7,6 +7,7 @@ function edfunc -d "Edit function file in $ENV_FOLDER"
         set func_file $ENV_FOLDER/fish/functions/$func_name.fish
         if test -f "$func_file"
             vim $func_file
+            rld
         else
             print_error "$func_file does not exist!"
         end
