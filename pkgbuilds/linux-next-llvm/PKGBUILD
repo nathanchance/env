@@ -3,7 +3,7 @@
 _localversion=-llvm
 _pkgsuffix=-next$_localversion
 pkgbase=linux$_pkgsuffix
-_srctag=next-20210928
+_srctag=next-20211018
 pkgver=${_srctag//-/.}
 pkgrel=1
 pkgdesc='linux-next'
@@ -19,7 +19,6 @@ _srcname=$pkgbase
 source=(
   "$_srcname::git+https://git.kernel.org/pub/scm/linux/kernel/git/next/linux-next.git?signed#tag=$_srctag"
   config
-  0001-Revert-Merge-branch-bpf-xsk-rx-batch.patch
 )
 
 validpgpkeys=(
@@ -27,8 +26,7 @@ validpgpkeys=(
   '3F2568AAC26998F9E813A1C5C3F436CA30F5D8EB'  # Mark Brown
 )
 sha256sums=('SKIP'
-            '4a1e47a1ad4155ffee63a004afc8d3e346b17f7a733684b6fc51f7f1ad4b4041'
-            '7190ae183de16c1ed7aa8323ec79e1d18c98da9be4f0db24737f89cd898e3a1d')
+            'e7217485d413739d7c5b0ddbffd11e1ac58627a22ac1bccdad7509171aa290e1')
 
 _kmake() {
   set -x
@@ -59,6 +57,24 @@ prepare() {
   done
 
   echo "Applying patches from web..."
+
+  # [PATCH] drm/i915: Avoid bitwise vs logical OR warning in snb_wm_latency_quirk()
+  b4 am -o - https://lore.kernel.org/r/20211014211916.3550122-1-nathan@kernel.org/ | patch -Np1
+
+  # [PATCH] KVM: x86: avoid warning with -Wbitwise-instead-of-logical
+  # b4 am -o - https://lore.kernel.org/r/20211015085148.67943-1-pbonzini@redhat.com/ | patch -Np1
+
+  # [PATCH] platform/x86: thinkpad_acpi: Fix bitwise vs. logical warning
+  b4 am -o - https://lore.kernel.org/r/20211018182537.2316800-1-nathan@kernel.org/ | patch -Np1
+
+  # [PATCH] nfp: bpf: Fix bitwise vs. logical OR warning
+  b4 am -o - https://lore.kernel.org/r/20211018193101.2340261-1-nathan@kernel.org/ | patch -Np1
+
+  # [PATCH] regulator: lp872x: Remove lp872x_dvs_state
+  b4 am -o - https://lore.kernel.org/r/20211019004335.193492-1-nathan@kernel.org/ | patch -Np1
+
+  # [PATCH] ice: Fix clang -Wimplicit-fallthrough in ice_pull_qvec_from_rc()
+  b4 am -o - https://lore.kernel.org/r/20211019014203.1926130-1-nathan@kernel.org/ | patch -Np1
 
   echo "Setting config..."
   cp ../config .config

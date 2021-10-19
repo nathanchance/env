@@ -3,7 +3,7 @@
 _localversion=-llvm
 _pkgsuffix=-mainline$_localversion
 pkgbase=linux$_pkgsuffix
-_srctag=v5.15-rc3
+_srctag=v5.15-rc6
 pkgver=${_srctag//-/.}
 pkgrel=1
 pkgdesc='Linux'
@@ -24,7 +24,7 @@ validpgpkeys=(
   'ABAF11C65A2970B130ABE3C479BE3E4300411886'  # Linus Torvalds
 )
 sha256sums=('SKIP'
-            'e079227ff99e55f37f2130bad18912c722c39792d20ddcf72f4b7c10067fb914')
+            '5f3711bf98e9c468d12ff52f0d80ea64fde46e16ad80a4357a5e032d3e07b2b8')
 
 _kmake() {
   set -x
@@ -56,8 +56,20 @@ prepare() {
 
   echo "Applying patches from mailing lists or git repos..."
 
-  # IB/qib: Fix clang confusion of NULL pointer comparison
-  curl -LSs https://git.kernel.org/rdma/rdma/p/3110b942d36b961858664486d72f815d78c956c3 | patch -Np1
+  # [PATCH] drm/i915: Avoid bitwise vs logical OR warning in snb_wm_latency_quirk()
+  b4 am -o - https://lore.kernel.org/r/20211014211916.3550122-1-nathan@kernel.org/ | patch -Np1
+
+  # [PATCH] staging: wlan-ng: Avoid bitwise vs logical OR warning in hfa384x_usb_throttlefn()
+  b4 am -o - https://lore.kernel.org/r/20211014215703.3705371-1-nathan@kernel.org/ | patch -Np1
+
+  # [PATCH] KVM: x86: avoid warning with -Wbitwise-instead-of-logical
+  b4 am -o - https://lore.kernel.org/r/20211015085148.67943-1-pbonzini@redhat.com/ | patch -Np1
+
+  # [PATCH] platform/x86: thinkpad_acpi: Fix bitwise vs. logical warning
+  b4 am -o - https://lore.kernel.org/r/20211018182537.2316800-1-nathan@kernel.org/ | patch -Np1
+
+  # [PATCH] nfp: bpf: Fix bitwise vs. logical OR warning
+  b4 am -o - https://lore.kernel.org/r/20211018193101.2340261-1-nathan@kernel.org/ | patch -Np1
 
   echo "Setting config..."
   cp ../config .config

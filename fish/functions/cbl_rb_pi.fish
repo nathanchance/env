@@ -20,9 +20,18 @@ function cbl_rb_pi -d "Rebase Raspberry Pi kernel on latest linux-next"
 
     git rh origin/master
 
+    set -a patches https://lore.kernel.org/r/20211014132331.GA4811@kernel.org/ # [PATCH] compiler_types: mark __compiletime_assert failure as __noreturn
+    set -a patches https://lore.kernel.org/r/20211019004335.193492-1-nathan@kernel.org/ # [PATCH] regulator: lp872x: Remove lp872x_dvs_state
+
     for patch in $patches
         git b4 ams -P _ $patch; or return
     end
+
+    # zstd: avoid clang -Wbitwise warning
+    crl https://git.kernel.org/arnd/playground/p/4b13a592983a677f92b6d5bddee256cc656ddfd4 | git ams
+
+    # soc: tegra-fuse: avoid clang -Wbitwise warning
+    crl https://git.kernel.org/arnd/playground/p/f0eea38e4f875bdd52d3f58fbc99c172db0174ed | git ams
 
     echo 'From f16e7af3d188d6aa9d45d7502ba3fcebc441f22a Mon Sep 17 00:00:00 2001
 From: Nathan Chancellor <nathan@kernel.org>
