@@ -22,8 +22,9 @@ function cbl_rb_pi -d "Rebase Raspberry Pi kernel on latest linux-next"
 
     set -a patches https://lore.kernel.org/r/20211021202353.2356400-1-nathan@kernel.org/ # [PATCH] lib: zstd: Add cast to silence clang's -Wbitwise-instead-of-logical
     set -a patches https://lore.kernel.org/r/20211021214500.2388146-1-nathan@kernel.org/ # [PATCH] soc/tegra: fuse: Fix bitwise vs. logical OR warning
-    set -a patches https://lore.kernel.org/r/20211014132331.GA4811@kernel.org/ # [PATCH] compiler_types: mark __compiletime_assert failure as __noreturn
-    set -a patches https://lore.kernel.org/r/20211019004335.193492-1-nathan@kernel.org/ # [PATCH] regulator: lp872x: Remove lp872x_dvs_state
+    set -a patches https://lore.kernel.org/r/20211025211238.178768-1-nathan@kernel.org/ # [PATCH 1/2] net: ax88796c: Fix clang -Wimplicit-fallthrough in ax88796c_set_mac()
+    set -a patches https://lore.kernel.org/r/20211025211238.178768-2-nathan@kernel.org/ # [PATCH 2/2] net: ax88796c: Remove pointless check in ax88796c_open()
+    set -a patches https://lore.kernel.org/r/20211026142435.3606413-1-nathan@kernel.org/ # [PATCH] drm/msm/dpu: Remove commit and its uses in dpu_crtc_set_crc_source()
 
     for patch in $patches
         b4 shazam -l -P _ -s $patch; or return
