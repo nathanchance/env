@@ -46,6 +46,7 @@ prepare() {
   echo "Setting config..."
   cp ../config .config
   _kmake olddefconfig
+  diff -u ../config .config || :
 
   _kmake -s kernelrelease > version
   echo "Prepared $pkgbase version $(<version)"
