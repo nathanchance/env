@@ -23,7 +23,6 @@ function cbl_rb_pi -d "Rebase Raspberry Pi kernel on latest linux-next"
     set -a patches https://lore.kernel.org/r/20211021202353.2356400-1-nathan@kernel.org/ # [PATCH] lib: zstd: Add cast to silence clang's -Wbitwise-instead-of-logical
     set -a patches https://lore.kernel.org/r/20211021214500.2388146-1-nathan@kernel.org/ # [PATCH] soc/tegra: fuse: Fix bitwise vs. logical OR warning
     set -a patches https://lore.kernel.org/r/20211027153122.3224673-1-nathan@kernel.org/ # [PATCH net-next] net/mlx5: Add esw assignment back in mlx5e_tc_sample_unoffload()
-    set -a patches https://lore.kernel.org/r/20211027190823.4057382-1-nathan@kernel.org/ # [PATCH] ASoC: qdsp6: audioreach: Fix clang -Wimplicit-fallthrough
     set -a patches https://lore.kernel.org/r/20211027212506.3418521-1-marcel@ziswiler.com/ # [PATCH v2] drm: import DMA_BUF module namespace
 
     for patch in $patches
