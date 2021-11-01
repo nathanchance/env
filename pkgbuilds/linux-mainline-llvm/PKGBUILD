@@ -3,7 +3,7 @@
 _localversion=-llvm
 _pkgsuffix=-mainline$_localversion
 pkgbase=linux$_pkgsuffix
-_srctag=v5.15-rc7
+_srctag=v5.15
 pkgver=${_srctag//-/.}
 pkgrel=1
 pkgdesc='Linux'
@@ -24,7 +24,7 @@ validpgpkeys=(
   'ABAF11C65A2970B130ABE3C479BE3E4300411886'  # Linus Torvalds
 )
 sha256sums=('SKIP'
-            '962239003a3739875bbbed71af165a0759aeeaecbb358b72c84e1a157888329e')
+            'cc3445933c7ac4953a1b401bc914b9b08f69fa5b8b1276af59aaff2c87d5017b')
 
 _kmake() {
   set -x
@@ -57,13 +57,13 @@ prepare() {
   echo "Applying patches from mailing lists or git repos..."
 
   # [PATCH] drm/i915: Avoid bitwise vs logical OR warning in snb_wm_latency_quirk()
-  b4 am -o - https://lore.kernel.org/r/20211014211916.3550122-1-nathan@kernel.org/ | patch -Np1
+  b4 -q am -o - https://lore.kernel.org/r/20211014211916.3550122-1-nathan@kernel.org/ | patch -Np1
 
   # [PATCH] staging: wlan-ng: Avoid bitwise vs logical OR warning in hfa384x_usb_throttlefn()
-  b4 am -o - https://lore.kernel.org/r/20211014215703.3705371-1-nathan@kernel.org/ | patch -Np1
+  b4 -q am -o - https://lore.kernel.org/r/20211014215703.3705371-1-nathan@kernel.org/ | patch -Np1
 
   # [PATCH] platform/x86: thinkpad_acpi: Fix bitwise vs. logical warning
-  b4 am -o - https://lore.kernel.org/r/20211018182537.2316800-1-nathan@kernel.org/ | patch -Np1
+  b4 -q am -o - https://lore.kernel.org/r/20211018182537.2316800-1-nathan@kernel.org/ | patch -Np1
 
   # KVM: x86: avoid warning with -Wbitwise-instead-of-logical
   curl -LSs 'https://git.kernel.org/pub/scm/virt/kvm/kvm.git/patch/?id=3d5e7a28b1ea2d603dea478e58e37ce75b9597ab' | patch -Np1
