@@ -3,7 +3,7 @@
 _localversion=-llvm
 _pkgsuffix=-next$_localversion
 pkgbase=linux$_pkgsuffix
-_srctag=next-20211102
+_srctag=next-20211103
 pkgver=${_srctag//-/.}
 pkgrel=1
 pkgdesc='linux-next'
@@ -26,7 +26,7 @@ validpgpkeys=(
   '3F2568AAC26998F9E813A1C5C3F436CA30F5D8EB'  # Mark Brown
 )
 sha256sums=('SKIP'
-            'e741400b87afce912f781c33bfc29b5f848a76b6f90fd82d8844e0e4a81235dc')
+            'fe96336b7879e94e561cb7a72a967d9ee52c741af5f6a7f2f980fae64106cd8d')
 
 _kmake() {
   set -x
