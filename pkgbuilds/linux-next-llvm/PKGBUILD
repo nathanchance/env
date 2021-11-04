@@ -3,7 +3,7 @@
 _localversion=-llvm
 _pkgsuffix=-next$_localversion
 pkgbase=linux$_pkgsuffix
-_srctag=next-20211103
+_srctag=next-20211104
 pkgver=${_srctag//-/.}
 pkgrel=1
 pkgdesc='linux-next'
