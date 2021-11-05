@@ -3,7 +3,7 @@
 _localversion=-llvm
 _pkgsuffix=-next$_localversion
 pkgbase=linux$_pkgsuffix
-_srctag=next-20211104
+_srctag=next-20211105
 pkgver=${_srctag//-/.}
 pkgrel=1
 pkgdesc='linux-next'
@@ -26,7 +26,7 @@ validpgpkeys=(
   '3F2568AAC26998F9E813A1C5C3F436CA30F5D8EB'  # Mark Brown
 )
 sha256sums=('SKIP'
-            'fe96336b7879e94e561cb7a72a967d9ee52c741af5f6a7f2f980fae64106cd8d')
+            '2f0ca6f69d6da908b2ed920c9af5e9aa49337d49388be19ff7b71846e09ee474')
 
 _kmake() {
   set -x
@@ -60,6 +60,12 @@ prepare() {
 
   # drm/i915: Avoid bitwise vs logical OR warning in snb_wm_latency_quirk()
   curl -LSs 'https://cgit.freedesktop.org/drm/drm-intel/patch/?id=2e70570656adfe1c5d9a29940faa348d5f132199' | patch -Np1
+
+  # [PATCH v2] usb: dwc2: hcd_queue: Fix use of floating point literal
+  b4 -q am -o - https://lore.kernel.org/r/20211105145802.2520658-1-nathan@kernel.org/ | patch -Np1
+
+  # [PATCH] NFS: Don't trace an uninitialised value
+  b4 -q am -o - https://lore.kernel.org/r/20211105163852.214665-1-trondmy@kernel.org/ | patch -Np1
 
   echo "Setting config..."
   cp ../config .config
