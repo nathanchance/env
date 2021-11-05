@@ -26,7 +26,7 @@ validpgpkeys=(
   '3F2568AAC26998F9E813A1C5C3F436CA30F5D8EB'  # Mark Brown
 )
 sha256sums=('SKIP'
-            '2f0ca6f69d6da908b2ed920c9af5e9aa49337d49388be19ff7b71846e09ee474')
+            '720f4f08f1774ab71441c3b6a005035de37e545db58cbeff03933404a6e504ef')
 
 _kmake() {
   set -x
