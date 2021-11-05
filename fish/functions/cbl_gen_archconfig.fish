@@ -43,8 +43,9 @@ function cbl_gen_archconfig -d "Generate a configuration file for Arch Linux"
     makepkg -Cdo --skipchecksums; or return
     rm $src_cfg
 
-    # Step 2: Copy default Arch configuration
-    crl 'https://github.com/archlinux/svntogit-packages/raw/ff9d62bffc4421979c855ebd87d94beaa81691d0/trunk/config' >$cfg
+    # Step 2: Copy default Arch configuration (and set CONFIG_DRM to 'm' to avoid issues)
+    crl 'https://github.com/archlinux/svntogit-packages/raw/packages/linux/trunk/config' >$cfg
+    $src/scripts/config --file $cfg -m DRM
 
     # Step 3: Run olddefconfig
     kmake -C $src KCONFIG_CONFIG=$cfg olddefconfig
