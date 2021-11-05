@@ -410,9 +410,11 @@ function debian_root_setup { (
         echo "kernel.unprivileged_userns_clone=1" | tee /etc/sysctl.d/00-local-userns.conf
         systemctl restart procps
 
-        grep -q "buster-backports" /etc/apt/sources.list || echo "deb http://deb.debian.org/debian buster-backports main" | tee -a /etc/apt/sources.list
-        KUBIC_REPO=Debian_10 kubic_repo || exit ${?}
-        apt -y -t buster-backports install libseccomp2 || exit ${?}
+        if grep -q buster /etc/apt/sources.list; then
+            grep -q "buster-backports" /etc/apt/sources.list || echo "deb http://deb.debian.org/debian buster-backports main" | tee -a /etc/apt/sources.list
+            KUBIC_REPO=Debian_10 kubic_repo || exit ${?}
+            apt -y -t buster-backports install libseccomp2 || exit ${?}
+        fi
     fi
 
     debian_ubuntu_packages
