@@ -521,6 +521,7 @@ function debian_ubuntu_packages() {
         libglib2.0-dev
         libglu1-mesa
         libgmp-dev
+        libhiredis-dev
         libio-socket-ssl-perl
         liblz4-tool
         libmailtools-perl
