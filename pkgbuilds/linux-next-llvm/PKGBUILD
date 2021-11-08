@@ -3,7 +3,7 @@
 _localversion=-llvm
 _pkgsuffix=-next$_localversion
 pkgbase=linux$_pkgsuffix
-_srctag=next-20211105
+_srctag=next-20211108
 pkgver=${_srctag//-/.}
 pkgrel=1
 pkgdesc='linux-next'
@@ -26,7 +26,7 @@ validpgpkeys=(
   '3F2568AAC26998F9E813A1C5C3F436CA30F5D8EB'  # Mark Brown
 )
 sha256sums=('SKIP'
-            '720f4f08f1774ab71441c3b6a005035de37e545db58cbeff03933404a6e504ef')
+            '92ae6eb4ab64edb80449dd438b71b1b4c6647a6acc760dd6f71b71ec7503e100')
 
 _kmake() {
   set -x
@@ -63,9 +63,6 @@ prepare() {
 
   # [PATCH v2] usb: dwc2: hcd_queue: Fix use of floating point literal
   b4 -q am -o - https://lore.kernel.org/r/20211105145802.2520658-1-nathan@kernel.org/ | patch -Np1
-
-  # [PATCH] NFS: Don't trace an uninitialised value
-  b4 -q am -o - https://lore.kernel.org/r/20211105163852.214665-1-trondmy@kernel.org/ | patch -Np1
 
   echo "Setting config..."
   cp ../config .config

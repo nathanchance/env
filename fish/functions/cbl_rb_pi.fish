@@ -20,9 +20,7 @@ function cbl_rb_pi -d "Rebase Raspberry Pi kernel on latest linux-next"
 
     git rh origin/master
 
-    set -a patches https://lore.kernel.org/r/20211021202353.2356400-1-nathan@kernel.org/ # [PATCH] lib: zstd: Add cast to silence clang's -Wbitwise-instead-of-logical
     set -a patches https://lore.kernel.org/r/20211021214500.2388146-1-nathan@kernel.org/ # [PATCH] soc/tegra: fuse: Fix bitwise vs. logical OR warning
-    set -a patches https://lore.kernel.org/r/20211105163852.214665-1-trondmy@kernel.org/ # [PATCH] NFS: Don't trace an uninitialised value
 
     for patch in $patches
         b4 shazam -l -P _ -s $patch; or return
