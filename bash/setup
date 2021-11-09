@@ -285,7 +285,7 @@ function bfish() { (
     [[ -z ${FISH_VERSION} ]] && FISH_VERSION=$(curl --silent "https://api.github.com/repos/${FISH_REPO}/releases/latest" | jq -r .tag_name)
     FISH_SRC=/usr/local/src/fish/fish-${FISH_VERSION}
     FISH_STOW=${PREFIX:-/usr/local}/stow
-    FISH_PREFIX=${CCACHE_STOW}/packages/fish/$(date +%F-%H-%M-%S)-${FISH_VERSION}
+    FISH_PREFIX=${FISH_STOW}/packages/fish/$(date +%F-%H-%M-%S)-${FISH_VERSION}
 
     # Download source
     mkdir -p "${FISH_SRC%/*}"
