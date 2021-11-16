@@ -7,18 +7,6 @@
 
 set -e
 
-# When you raise the minimum compiler version, please update
-# Documentation/process/changes.rst as well.
-gcc_min_version=4.9.0
-clang_min_version=10.0.1
-icc_min_version=16.0.3 # temporary
-
-# https://gcc.gnu.org/bugzilla/show_bug.cgi?id=63293
-# https://lore.kernel.org/r/20210107111841.GN1551@shell.armlinux.org.uk
-if [ "$SRCARCH" = arm64 ]; then
-    gcc_min_version=5.1.0
-fi
-
 # Print the compiler name and some version components.
 get_compiler_info() {
     cat <<-EOF | "$@" -E -P -x c - 2>/dev/null
@@ -50,15 +38,12 @@ name=$1
 case "$name" in
     GCC)
         version=$2.$3.$4
-        min_version=$gcc_min_version
         ;;
     Clang)
         version=$2.$3.$4
-        min_version=$clang_min_version
         ;;
     ICC)
         version=$(($2 / 100)).$(($2 % 100)).$3
-        min_version=$icc_min_version
         ;;
     *)
         echo "$orig_args: unknown compiler" >&2
@@ -66,6 +51,4 @@ case "$name" in
         ;;
 esac
 
-cversion=$(get_canonical_version $version)
-
-echo $cversion
+get_canonical_version $version
