@@ -10,6 +10,6 @@ x fish -c \"curl -LSs 'https://cgit.freedesktop.org/drm/drm-intel/patch/?id=2e70
 # [PATCH v2] usb: dwc2: hcd_queue: Fix use of floating point literal
 x b4 -q shazam -l -s https://lore.kernel.org/r/20211105145802.2520658-1-nathan@kernel.org/
 
-x git ml --no-edit sami/clang-cfi^
+x git ml --no-edit sami/clang-cfi
 "
 end

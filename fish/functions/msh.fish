@@ -21,5 +21,5 @@ function msh -d "Shorthand for mosh -o" -w mosh
             return 1
     end
 
-    mosh -o $user_host
+    mosh $user_host
 end

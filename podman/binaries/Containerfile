@@ -1,0 +1,8 @@
+FROM docker.io/alpine:edge
+
+COPY setup-env.sh /setup-env.sh
+
+ARG BINARY
+RUN /bin/ash /setup-env.sh ${BINARY} && rm /setup-env.sh
+
+ENTRYPOINT ["/entrypoint.sh"]

@@ -2,12 +2,14 @@
 # SPDX-License-Identifier: MIT
 # Copyright (C) 2021 Nathan Chancellor
 
-function yapf -d "Download yapf if necessary then run it"
-    set src $SRC_FOLDER/yapf
-    if not test -d $src
-        mkdir -p (dirname $src)
-        git clone https://github.com/google/yapf $src
+function yapf -d "Run yapf from a git checkout"
+    if command -q yapf
+        command yapf $argv
+    else
+        set yapf $BIN_SRC_FOLDER/yapf/yapf
+        if not test -d $yapf
+            upd yapf; or return
+        end
+        PYTHONPATH=(dirname $yapf) python3 $yapf -i -p $argv
     end
-
-    PYTHONPATH=$src python3 $src/yapf -i -p $argv
 end

@@ -3,5 +3,5 @@
 # Copyright (C) 2021 Nathan Chancellor
 
 function cde -d "Change to env folder"
-    cd $ENV_FOLDER
+    z $ENV_FOLDER
 end

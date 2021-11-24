@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: MIT
 # Copyright (C) 2021 Nathan Chancellor
 
-function cbl_lkt_tc_bld -d "Test build-llvm.py and build-binutils.py in Docker images"
+function cbl_tst_tc_bld -d "Test build-llvm.py and build-binutils.py in Docker images"
     set ccache_folder $CBL/.config/ccache/cbl_lkt_tc_bld
     set tc_bld $CBL_GIT/tc-build
     set script (mktemp -p $tc_bld --suffix=.sh)
@@ -98,7 +98,7 @@ elif command -v swupd &>/dev/null; then
     swupd bundle-add "${PACKAGES[@]}"
     # Build u-boot-tools
     (
-        UBOOT_VERSION=u-boot-2021.01
+        UBOOT_VERSION=u-boot-2021.10
         cd /usr/src
         curl -LSs https://ftp.denx.de/pub/u-boot/"${UBOOT_VERSION}".tar.bz2 | tar -xjf -
         cd "${UBOOT_VERSION}" || exit ${?}
@@ -147,11 +147,11 @@ ccache --set-config=compression=true
 ccache --set-config=compression_level=9
 ccache --show-stats
 PATH=${TMP}:${PATH} ./build-binutils.py || exit ${?}
-CC=gcc ./build-llvm.py --branch "release/12.x" || exit ${?}
+CC=gcc ./build-llvm.py --branch "release/13.x" || exit ${?}
 # Clear Linux defines these in the environment and it causes issues
 # We do not do this sooner because we want the optimized flags that Clear Linux provides for GCC
 unset CC CFLAGS CXX CXXFLAGS
-CC=clang ./build-llvm.py --branch "release/12.x" || exit ${?}
+CC=clang ./build-llvm.py --branch "release/13.x" || exit ${?}
 for FILE in clang ld.lld aarch64-linux-gnu-as arm-linux-gnueabi-as m68k-linux-gnu-as mips-linux-gnu-as mipsel-linux-gnu-as powerpc-linux-gnu-as powerpc64-linux-gnu-as powerpc64le-linux-gnu-as riscv64-linux-gnu-as s390x-linux-gnu-as as; do
     install/bin/${FILE} --version || exit ${?}
 done
@@ -197,7 +197,7 @@ kernel/build.sh -s /linux -t "PowerPC;X86"' >$script
     echo
     echo "Results:"
     cat $log
-    tg_msg (cat $log | string collect)
+    mail_msg $log
     echo
 
 end

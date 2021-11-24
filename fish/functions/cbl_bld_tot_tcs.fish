@@ -19,9 +19,9 @@ function cbl_bld_tot_tcs -d "Build LLVM and binutils from source for kernel deve
                 --pgo kernel-defconfig \
                 --targets X86
 
-        case generic server
+        case generic wsl
             set bld_llvm_args \
-                --pgo kernel-{def,allmod}config
+                --pgo kernel-defconfig
 
         case pi
             set bld_bntls_args \
@@ -29,15 +29,16 @@ function cbl_bld_tot_tcs -d "Build LLVM and binutils from source for kernel deve
 
             set bld_llvm_args \
                 --build-stage1-only \
+                --defines LLVM_PARALLEL_COMPILE_JOBS=(math (nproc) - 1) LLVM_PARALLEL_LINK_JOBS=1 \
                 --install-stage1-only \
-                --projects "clang;lld" \
-                --targets "AArch64;ARM;X86"
+                --projects '"clang;lld"' \
+                --targets '"AArch64;ARM;X86"'
 
             set check_targets clang llvm{,-unit}
 
-        case wsl
+        case server
             set bld_llvm_args \
-                --pgo kernel-defconfig
+                --pgo kernel-{def,allmod}config
     end
     if not set -q check_targets
         set check_targets clang ll{d,vm{,-unit}}
@@ -65,15 +66,15 @@ function cbl_bld_tot_tcs -d "Build LLVM and binutils from source for kernel deve
     end
     git -C $bntls pull --rebase; or return
 
-    set bntls_install $CBL_STOW_BNTL/$date_time-(git -C $bntls sh -s --format=%H origin/master)
-    if not PATH="/usr/lib/ccache/bin:$PATH" $CBL_TC_BLD/build-binutils.py $bld_bntls_args --install-folder $bntls_install
+    set bntls_install $CBL_TC_STOW_BNTL/$date_time-(git -C $bntls sh -s --format=%H origin/master)
+    if not podcmd -s PATH="/usr/lib/ccache/bin:$PATH" $CBL_TC_BLD/build-binutils.py $bld_bntls_args --install-folder $bntls_install
         set message "build-binutils.py failed"
         print_error "$message"
         tg_msg "$message"
         return 1
     end
-    stripall $bntls_install
-    ln -fnrsv $bntls_install (dirname $CBL_BNTL)
+    podcmd stripall $bntls_install
+    ln -fnrsv $bntls_install (dirname $CBL_TC_BNTL)
 
     set llvm_project $CBL_TC_BLD/llvm-project
     if not test -d $llvm_project
@@ -98,12 +99,9 @@ function cbl_bld_tot_tcs -d "Build LLVM and binutils from source for kernel deve
     end
 
     # Add in-review patches here
-    # set -a revisions D108003 # [Clang] Extend -Wbool-operation to warn about bitwise and of bools with side effects | https://reviews.llvm.org/D108003
+    set -a revisions D116059 # [Clang][CFG] check children statements of asm goto
     for revision in $revisions
         set -l git_ap_args
-        if test "$revision" = D108003
-            set git_ap_args --directory=clang
-        end
         if not crl "https://reviews.llvm.org/$revision?download=true" | git -C $llvm_project ap $git_ap_args
             set message "Failed to apply $revision"
             print_error "$message"
@@ -112,8 +110,8 @@ function cbl_bld_tot_tcs -d "Build LLVM and binutils from source for kernel deve
         end
     end
 
-    set llvm_install $CBL_STOW_LLVM/$date_time-(git -C $llvm_project sh -s --format=%H origin/main)
-    if not $CBL_TC_BLD/build-llvm.py \
+    set llvm_install $CBL_TC_STOW_LLVM/$date_time-(git -C $llvm_project sh -s --format=%H origin/main)
+    if not podcmd -s $CBL_TC_BLD/build-llvm.py \
             --assertions \
             --check-targets $check_targets \
             --install-folder $llvm_install \
@@ -124,8 +122,8 @@ function cbl_bld_tot_tcs -d "Build LLVM and binutils from source for kernel deve
         tg_msg "$message"
         return 1
     end
-    stripall $llvm_install
-    ln -fnrsv $llvm_install (dirname $CBL_LLVM)
+    podcmd stripall $llvm_install
+    ln -fnrsv $llvm_install (dirname $CBL_TC_LLVM)
 
-    stow -d $CBL_STOW -R -v (basename (dirname $CBL_BNTL)) (basename (dirname $CBL_LLVM))
+    stow -d $CBL_TC_STOW -R -v (basename (dirname $CBL_TC_BNTL)) (basename (dirname $CBL_TC_LLVM))
 end

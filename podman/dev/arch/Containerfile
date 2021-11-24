@@ -1,0 +1,14 @@
+FROM docker.io/archlinux:base-devel
+
+COPY setup-env.sh /
+RUN bash /setup-env.sh && rm /setup-env.sh
+
+USER build
+WORKDIR /home/build
+COPY build-install-aur-packages.fish /home/build
+RUN fish /home/build/build-install-aur-packages.fish
+
+USER root
+RUN userdel -f -r build
+
+CMD ["/usr/bin/fish", "-l"]

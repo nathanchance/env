@@ -4,5 +4,5 @@
 
 function hugo_serve -d "Runs 'hugo server' based on WSL's IP address"
     set ip (dirname (ip addr | grep eth0 | grep inet | awk '{print $2}'))
-    hugo server --baseUrl=$ip --bind=0.0.0.0
+    hugo server --baseUrl=$ip --bind=0.0.0.0 $argv
 end

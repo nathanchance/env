@@ -1,0 +1,16 @@
+diff --git a/tests/checks/type.fish b/tests/checks/type.fish
+index 85a2d142a..e325f6cae 100644
+--- a/tests/checks/type.fish
++++ b/tests/checks/type.fish
+@@ -28,11 +28,6 @@ type --quiet '['
+ echo $status
+ # CHECK: 0
+ 
+-# Test that we print a command path
+-type sh
+-# (we resolve the path, so if /bin is a symlink to /usr/bin this shows /usr/bin/sh)
+-# CHECK: sh is {{.*}}/bin/sh
+-
+ # Test that we print a function definition.
+ # The exact definition and description here depends on the system, so we'll ignore the actual code.
+ type realpath | grep -v "^  *"

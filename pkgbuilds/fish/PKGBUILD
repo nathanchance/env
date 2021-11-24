@@ -20,18 +20,26 @@ checkdepends=('expect' 'procps-ng')
 install=fish.install
 backup=(etc/fish/config.fish)
 source=(https://github.com/fish-shell/fish-shell/releases/download/${pkgver}/${pkgname}-${pkgver}.tar.xz{,.asc}
-        https://github.com/fish-shell/fish-shell/commit/4bb1c72a910eb267704c1c4eed627c861abb017b.patch)
+        https://github.com/fish-shell/fish-shell/commit/4bb1c72a910eb267704c1c4eed627c861abb017b.patch
+        ec8844d834cc9fe626e9fc326c6f5410341d532a.patch
+        type.fish.patch)
 validpgpkeys=(003837986104878835FA516D7A67D962D88A709A) # David Adam <zanchey@gmail.com>
 sha256sums=('b5b4ee1a5269762cbbe993a4bd6507e675e4100ce9bbe84214a5eeb2b19fae89'
             'SKIP'
-            '4404d1473a178e2e735a1d5f993128b24dffb327e28763a9deb8d196acce3dea')
+            '4404d1473a178e2e735a1d5f993128b24dffb327e28763a9deb8d196acce3dea'
+            '59ffff6839b0896201c3035f7274de31e2b6816239d7f4dd8712349100a94371'
+            'f6b9b5fa1c2a7d7ad2119863b4a5ee6a8d39bf87cd72678aa5f39806221264b2')
 sha512sums=('fc50ca44fab3f2d942284d4f714150f7ccf1e49c73da36f8d4ae4a33a9b3280f98bed15848839f5d443b4274fd0ff90174bafa6a8e9a4da226dda63d7766a660'
             'SKIP'
-            '4febd07a22eef70ac06f8cd4ac3b376ea2e320d109d41febcb874563309c4d5ca23380d3ab59d342f9dcff3842299a00b9da68788d25fbb5f30b80ea86dd634a')
+            '4febd07a22eef70ac06f8cd4ac3b376ea2e320d109d41febcb874563309c4d5ca23380d3ab59d342f9dcff3842299a00b9da68788d25fbb5f30b80ea86dd634a'
+            '913b71d439521bc5af85b25c92319229a6dc4fa948869893e0f7344a113d9bb98020d6b2439c10bd84ad45d8086ca77b1cbb1b129046f7f12f47bd57017e0bfb'
+            'e4b16e142e96ec5fcd7f2830b52c747b4811db7363e9b595c2ed937e705aaa9520e854511f3249ef3c1b9a8b339a80767d258b85ba6933ba21df8c927735f154')
 
 prepare() {
   cd ${pkgname}-${pkgver}
   patch -Np1 < ../4bb1c72a910eb267704c1c4eed627c861abb017b.patch
+  patch -Np1 < ../ec8844d834cc9fe626e9fc326c6f5410341d532a.patch
+  patch -Np1 < ../type.fish.patch
 }
 
 build() {

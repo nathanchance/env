@@ -6,7 +6,7 @@ function cbl_setup_linux_repos -d "Clone ClangBuiltLinux Linux repos into their 
     for arg in $argv
         switch $arg
             case linux
-                set pairs torvalds/linux:{$CBL_BLD_C,$CBL_BLD_P,$CBL_MIRRORS,$CBL_SRC}/$arg
+                set pairs torvalds/linux:{$CBL_BLD_C,$CBL_BLD_P,$CBL_SRC}/$arg
 
             case linux-next
                 set pairs next/linux-next:{{$CBL_BLD_C,$CBL_BLD_P,$CBL_SRC}/$arg,$CBL_BLD/rpi,$CBL_SRC/linux-cfi}
@@ -57,12 +57,12 @@ function cbl_setup_linux_repos -d "Clone ClangBuiltLinux Linux repos into their 
             git -C $folder reset --hard origin/master
         end
 
-        if string match -q -r linux-stable $folder
+        if string match -qr linux-stable $folder
             cbl_upd_stbl_wrktrs $folder
         end
 
-        if string match -q -r mirrors $folder
-            git -C $folder remote add github git@github.com:ClangBuiltLinux/linux.git
+        if test "$folder" = $CBL_SRC/linux; or test "$folder" = $CBL_SRC/linux-next
+            git -C $folder remote add -f korg git@gitolite.kernel.org:pub/scm/linux/kernel/git/nathan/linux
         end
     end
     rm -rf $tmp_dir

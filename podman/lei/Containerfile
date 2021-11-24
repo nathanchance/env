@@ -1,0 +1,18 @@
+FROM docker.io/fedora:latest
+
+ENV EDITOR=vim
+
+RUN dnf update -y && \
+    dnf install -y \
+        dnf-plugins-core \
+        perl-Data-Dumper \
+        perl-Digest-SHA \
+        perl-Encode \
+        perl-IO-Compress \
+        perl-Storable \
+        perl-Text-ParseWords \
+        vim && \
+    dnf copr enable -y icon/b4 && \
+    dnf install -y lei
+
+ENTRYPOINT ["/usr/bin/lei"]

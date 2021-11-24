@@ -149,15 +149,14 @@ function cbl_upd_krnl -d "Update machine's kernel"
 
             switch $kernel_location
                 case local
-                    cp -v $CBL_BLD/wsl2/.build/x86_64/arch/x86/boot/bzImage $kernel
+                    cp -v $CBL_BLD/wsl2/arch/x86/boot/bzImage $kernel
                 case github
                     set repo nathanchance/WSL2-Linux-Kernel
                     crl -o $kernel https://github.com/$repo/releases/download/(glr $repo)/bzImage
                 case server
                     set src $CBL_BLD/wsl2
-                    set out .build/x86_64
                     set image arch/x86/boot/bzImage
-                    scp nathan@$SERVER_IP:$src/$out/$image $kernel
+                    scp nathan@$SERVER_IP:$src/$image $kernel
             end
 
         case server

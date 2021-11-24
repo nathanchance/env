@@ -17,18 +17,15 @@ function user_setup -d "Setup a user account, downloading all files and placing 
         set gnome_prof $gnome_prof_dir$gnome_prof_base/
     end
 
+    # Set WSL and "trusted environment" variables to make decisions later
     if uname -r | grep -iq microsoft
         set wsl true
     end
-
-    if command -q yay
-        yay --sudo doas --sudoflags -- --save
-    end
-
     if test "$LOCATION" = server; or test "$LOCATION" = wsl
         set trusted true
     end
 
+    # GPG and SSH keys (trusted environment only)
     if test "$trusted" = true
         if test "$wsl" = true
             set keys_folder /mnt/c/Users/natec/Documents/Keys
@@ -96,6 +93,7 @@ function user_setup -d "Setup a user account, downloading all files and placing 
         set github_prefix https://github.com/
     end
 
+    # Downloading/updating environment scripts and prompt
     if not test -d $ENV_FOLDER
         mkdir -p (dirname $ENV_FOLDER)
         git clone "$github_prefix"nathanchance/env.git $ENV_FOLDER; or return
@@ -109,48 +107,19 @@ function user_setup -d "Setup a user account, downloading all files and placing 
     end
     git -C $hydro remote update
 
-    fisher remove /tmp/env/fish
+    # Set up fish environment with fisher
+    if fisher list &| grep -q /tmp/env/fish
+        fisher remove /tmp/env/fish
+    end
     fisher install $ENV_FOLDER/fish
     fisher install $hydro
+    if not command -q zoxide
+        fisher install jethrokuan/z
+    end
     rm -rf $__fish_config_dir/config.fish
     ln -fsv $ENV_FOLDER/fish/config.fish $__fish_config_dir/config.fish
 
-    # fish colors
-    set -U fish_color_normal normal
-    set -U fish_color_command blue
-    set -U fish_color_quote yellow
-    set -U fish_color_redirection green
-    set -U fish_color_end green
-    set -U fish_color_error red
-    set -U fish_color_param cyan
-    set -U fish_color_comment brblack
-    set -U fish_color_match normal
-    set -U fish_color_selection 97979b
-    set -U fish_color_search_match yellow
-    set -U fish_color_history_current normal
-    set -U fish_color_operator magenta
-    set -U fish_color_escape magenta
-    set -U fish_color_cwd blue
-    set -U fish_color_cwd_root blue
-    set -U fish_color_valid_path normal
-    set -U fish_color_autosuggestion 97979b
-    set -U fish_color_user yellow
-    set -U fish_color_host green
-    set -U fish_color_cancel normal
-    set -U fish_pager_color_completion normal
-    set -U fish_pager_color_description B3A06D yellow
-    set -U fish_pager_color_prefix white --bold --underline
-    set -U fish_pager_color_progress brwhite --background=cyan
-
-    # hydro colors
-    set -U hydro_color_user yellow
-    set -U hydro_color_at green
-    set -U hydro_color_host green
-    set -U hydro_color_pwd blue
-    set -U hydro_color_git magenta
-    set -U hydro_color_duration yellow
-    set -U hydro_color_prompt green
-
+    # Global .gitignore
     set gitignore $HOME/.gitignore_global
     git config --global core.excludesfile $gitignore
     crl -o $gitignore https://gist.githubusercontent.com/octocat/9257657/raw/3f9569e65df83a7b328b39a091f0ce9c6efc6429/.gitignore
@@ -162,18 +131,32 @@ build/
 out.*/
 *.rej' >>$gitignore
 
-    rbld_usr; or return
-    fish_add_path -m $USR_FOLDER/bin
+    # Ensure podman registers with correct options for environment
+    if command -q podman
+        podman info
+    end
 
-    ccache_setup
+    # Binaries
+    if test (get_distro) = arch
+        clone_aur_repos
+        if not is_installed opendoas-sudo
+            pushd $AUR_FOLDER/opendoas-sudo; or return
+            makepkg; or return
+            doas pacman -U --noconfirm *.pkg.tar.zst; or return
+            popd
+        end
+    end
+    updall --no-os; or return
+
+    # Git config and aliases
     git_setup
 
+    # Configuration files (vim, tmux, etc)
     set configs $ENV_FOLDER/configs
-
     bash $configs/common/vim/vim_setup.bash
-
     ln -fsv $configs/headless/.tmux.conf $HOME/.tmux.conf
 
+    # Terminal profiles
     if set -q DISPLAY
         if is_installed gnome-terminal
             dconf load $gnome_prof <$configs/local/Nathan.dconf
@@ -198,37 +181,23 @@ out.*/
         end
     end
 
+    # Private configuration files
     if test "$trusted" = true
         decrypt_gpg_file botinfo
         decrypt_gpg_file muttrc
+        decrypt_gpg_file muttrc.notifier
         decrypt_gpg_file config.ini $HOME/.config/tuxsuite/config.ini
 
         hub api; or return
     end
 
+    # git repos and source folders
     if test "$wsl" = true
         decrypt_gpg_file server_ip
 
         set github_repos hugo-files nathanchance.github.io
     else if test "$trusted" = true
-        mkdir -p $ANDROID_TC_FOLDER
-        if not test -d $ANDROID_TC_FOLDER/clang-master
-            tmux new-window fish -c "git -C $ANDROID_TC_FOLDER clone --single-branch https://android.googlesource.com/platform/prebuilts/clang/host/linux-x86/ clang-master"
-        end
-        if not test -d $ANDROID_TC_FOLDER/gcc-arm
-            git -C $ANDROID_TC_FOLDER clone --depth=1 -b android-9.0.0_r1 --single-branch https://android.googlesource.com/platform/prebuilts/gcc/linux-x86/arm/arm-linux-androideabi-4.9/ gcc-arm
-        end
-        if not test -d $ANDROID_TC_FOLDER/gcc-arm64
-            git -C $ANDROID_TC_FOLDER clone --depth=1 -b android-9.0.0_r1 --single-branch https://android.googlesource.com/platform/prebuilts/gcc/linux-x86/aarch64/aarch64-linux-android-4.9/ gcc-arm64
-        end
-
         mkdir -p $SRC_FOLDER
-        if not test -d $SRC_FOLDER/android-wireguard-module-builder
-            git -C $SRC_FOLDER clone git@github.com:WireGuard/android-wireguard-module-builder.git
-        end
-        if not test -d $SRC_FOLDER/pahole
-            git -C $SRC_FOLDER clone https://git.kernel.org/pub/scm/devel/pahole/pahole.git
-        end
 
         set github_repos bug-files hugo-files nathanchance.github.io patches
 

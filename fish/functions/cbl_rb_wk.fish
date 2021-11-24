@@ -20,7 +20,6 @@ function cbl_rb_wk -d "Rebase WSL2 kernel on latest linux-next"
 
     git -C $src ru; or return
 
-    set branches dxgkrnl
     for branch in $branches
         git -C $src ch $branch; or return
         git -C $src rb -i next/master; or return
@@ -32,7 +31,8 @@ function cbl_rb_wk -d "Rebase WSL2 kernel on latest linux-next"
     if test "$skip_mainline" != true
         set remotebranches mainline:master
     end
-    set -a remotebranches sami:tip/clang-cfi
+    # Disabled for now: https://git.kernel.org/linus/2105a92748e83e2e3ee6be539da959706bbb3898
+    # set -a remotebranches sami:clang-cfi
     for remotebranch in $remotebranches
         if not git -C $src pll --no-edit (string split -f1 ":" $remotebranch) (string split -f2 ":" $remotebranch)
             rg "<<<<<<< HEAD" $src; and return
@@ -41,7 +41,8 @@ function cbl_rb_wk -d "Rebase WSL2 kernel on latest linux-next"
         end
     end
 
+    set -a branches dxgkrnl
     git -C $src ml --no-edit $branches; or return
     git -C $src cp (git -C $src lo --merges -1 --format=%H origin/HEAD)..(git -C $src sh -s --format=%H origin/HEAD); or return
-    $src/bin/build.fish; or return
+    podcmd $src/bin/build.fish; or return
 end

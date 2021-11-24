@@ -3,6 +3,11 @@
 # Copyright (C) 2021 Nathan Chancellor
 
 function kmake -d "Run make with all cores and adjust PATH temporarily"
+    if test -z "$container"; and test -z "$OVERRIDE_CONTAINER"
+        print_error "This needs to be run in a container!"
+        return 1
+    end
+
     # Ensure that all PATH modifications are local to this function (like a subshell)
     set -lx PATH $PATH
 
@@ -11,23 +16,26 @@ function kmake -d "Run make with all cores and adjust PATH temporarily"
     while test $i -le (count $argv)
         set arg $argv[$i]
         switch $arg
-            case 'NO_CCACHE=*'
-                set (string split -f1 = $arg) (string split -f2 = $arg)
+            case 'CCACHE=*' 'NO_CCACHE=*'
+                set arg (string split = $arg)
+                set $arg[1] $arg[2]
 
             case '*=*'
-                if string match -q -r 'CC=' $arg
+                if string match -qr 'CC=' $arg
                     set cc_was_in_args true
                 else
                     set -a make_args $arg
                 end
-                set (string split -f1 = $arg) (string split -f2 = $arg)
+                set arg (string split = $arg)
+                set $arg[1] $arg[2]
 
-            case '*/' '*.i' '*.ko' '*.o' '*.s' all bindeb-pkg '*clean' '*config' '*docs' dtbs '*_install' '*Image*' kselftest modules mrproper '*_prepare' vmlinux
+            case '*/' '*.i' '*.ko' '*.o' '*.s' all bin'*'-pkg '*clean' '*config' '*docs' dtbs '*_install' '*Image*' kselftest modules mrproper '*_prepare' vmlinu'*'
                 set -a make_args $arg
 
             case -C
                 set next (math $i + 1)
-                set -a make_args $arg $argv[$next]
+                set lnx_dir $argv[$next]
+                set -a make_args $arg $lnx_dir
                 set i $next
 
             case +s
@@ -41,7 +49,10 @@ function kmake -d "Run make with all cores and adjust PATH temporarily"
         set cc_was_in_args false
     end
     if not set -q FORCE_LE
-        set FORCE_LE true
+        set FORCE_LE false
+    end
+    if not set -q lnx_dir
+        set lnx_dir $PWD
     end
     if not set -q silent
         set silent true
@@ -49,16 +60,12 @@ function kmake -d "Run make with all cores and adjust PATH temporarily"
 
     # Setup paths
     if test "$LLVM" = 1; or string match -q -- "*clang" "$CC"
-        if set -q CBL_BIN; and test -d "$CBL_BIN"
-            set -p PATH $CBL_BIN
-        end
+        set clang true
         if not set -q CC
             set CC clang
         end
     else
-        if set -q GCC_TC_FOLDER
-            set -p PATH $GCC_TC_FOLDER/11.2.0/bin
-        end
+        set clang false
         if not set -q CC
             set CC "$CROSS_COMPILE"gcc
         end
@@ -82,7 +89,15 @@ function kmake -d "Run make with all cores and adjust PATH temporarily"
     printf '\e[01;32mCompiler version:\e[0m %s \n\n' (eval $cc_path --version | head -1)
 
     # Print information about binutils if necessary
-    if test "$LLVM_IAS" != 1
+    if not set -q LLVM_IAS
+        # LLVM_IAS because default in v5.15 with commit f12b034afeb3 ("scripts/Makefile.clang: default to LLVM_IAS=1")
+        if test "$clang" = true; and test -f $lnx_dir/scripts/Makefile.clang
+            set LLVM_IAS 1
+        else
+            set LLVM_IAS 0
+        end
+    end
+    if test "$LLVM_IAS" = 0
         set as_path (command -v "$CROSS_COMPILE"as)
         if not test -x $as_path
             print_error "binutils could not be found or they are not executable!"
@@ -114,8 +129,10 @@ function kmake -d "Run make with all cores and adjust PATH temporarily"
         end
     end
 
-    if command -q ccache; and test -z "$NO_CCACHE"
-        set -p make_args CC="ccache $CC"
+    if command -q ccache
+        if test "$CCACHE" != 0; and test "$CCACHE" != false; and test "$NO_CCACHE" != 1; and test "$NO_CCACHE" != false
+            set -p make_args CC="ccache $CC"
+        end
     else
         if test "$cc_was_in_args" = true
             set -p make_args CC="$CC"
@@ -126,5 +143,5 @@ function kmake -d "Run make with all cores and adjust PATH temporarily"
     set make_binary (command -v make)
 
     set fish_trace 1
-    time $make_binary -"$silent_make_flag"kj(nproc) $make_args
+    time stdbuf -eL -oL $make_binary -"$silent_make_flag"kj(nproc) $make_args
 end

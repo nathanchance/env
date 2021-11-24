@@ -20,11 +20,47 @@ function cbl_rb_pi -d "Rebase Raspberry Pi kernel on latest linux-next"
 
     git rh origin/master
 
-    set -a patches https://lore.kernel.org/r/20211021214500.2388146-1-nathan@kernel.org/ # [PATCH] soc/tegra: fuse: Fix bitwise vs. logical OR warning
-
     for patch in $patches
         b4 shazam -l -P _ -s $patch; or return
     end
+
+    echo 'From 9e4b305c284a64530ca8f6c81c7d7d5006d94139 Mon Sep 17 00:00:00 2001
+From: Nathan Chancellor <nathan@kernel.org>
+Date: Mon, 27 Dec 2021 10:30:20 -0700
+Subject: [PATCH] scsi: hisi_sas: Fix -Wuninitialized in
+ hisi_sas_send_ata_reset_each_phy()
+
+Link: https://lore.kernel.org/r/Ycn3FoW9eOZNFMiL@archlinux-ax161/
+Signed-off-by: Nathan Chancellor <nathan@kernel.org>
+---
+ drivers/scsi/hisi_sas/hisi_sas_main.c | 3 +--
+ 1 file changed, 1 insertion(+), 2 deletions(-)
+
+diff --git a/drivers/scsi/hisi_sas/hisi_sas_main.c b/drivers/scsi/hisi_sas/hisi_sas_main.c
+index f46f679fe825..8cf607f63220 100644
+--- a/drivers/scsi/hisi_sas/hisi_sas_main.c
++++ b/drivers/scsi/hisi_sas/hisi_sas_main.c
+@@ -1525,7 +1525,6 @@ static void hisi_sas_send_ata_reset_each_phy(struct hisi_hba *hisi_hba,
+ 	struct device *dev = hisi_hba->dev;
+ 	int s = sizeof(struct host_to_dev_fis);
+ 	int rc = TMF_RESP_FUNC_FAILED;
+-	struct asd_sas_phy *sas_phy;
+ 	struct ata_link *link;
+ 	u8 fis[20] = {0};
+ 	u32 state;
+@@ -1533,7 +1532,7 @@ static void hisi_sas_send_ata_reset_each_phy(struct hisi_hba *hisi_hba,
+ 
+ 	state = hisi_hba->hw->get_phys_state(hisi_hba);
+ 	for (i = 0; i < hisi_hba->n_phy; i++) {
+-		if (!(state & BIT(sas_phy->id)))
++		if (!(state & BIT(i)))
+ 			continue;
+ 		if (!(sas_port->phy_mask & BIT(i)))
+ 			continue;
+-- 
+2.34.1
+
+' | git ams; or return
 
     echo 'From f16e7af3d188d6aa9d45d7502ba3fcebc441f22a Mon Sep 17 00:00:00 2001
 From: Nathan Chancellor <nathan@kernel.org>
@@ -122,21 +158,21 @@ index dd4a48604097..ab2173e3951b 100644
 ' | git ams; or return
 
     for arch in arm arm64
-        ../pi-scripts/build.fish $arch; or return
+        podcmd ../pi-scripts/build.fish $arch; or return
     end
 
     if test "$skip_mainline" != true
         if not git pll --no-edit mainline master
             rg "<<<<<<< HEAD"; and return
             for arch in arm arm64
-                ../pi-scripts/build.fish $arch; or return
+                podcmd ../pi-scripts/build.fish $arch; or return
             end
             git aa
             git c --no-edit; or return
         end
 
         for arch in arm arm64
-            ../pi-scripts/build.fish $arch; or return
+            podcmd ../pi-scripts/build.fish $arch; or return
         end
     end
 

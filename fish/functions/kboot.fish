@@ -3,6 +3,11 @@
 # Copyright (C) 2021 Nathan Chancellor
 
 function kboot -d "Boot a kernel in QEMU"
+    if test -z "$container"; and test -z "$OVERRIDE_CONTAINER"
+        print_error "This needs to be run in a container!"
+        return 1
+    end
+
     # Ensure that all PATH modifications are local to this function (like a subshell)
     set -lx PATH $PATH
 
@@ -37,5 +42,5 @@ function kboot -d "Boot a kernel in QEMU"
     end
 
     set fish_trace 1
-    PATH="$PO$CBL_BIN:$PATH" eval $BOOT_UTILS/boot-qemu.sh $boot_qemu_args
+    $BOOT_UTILS/boot-qemu.sh $boot_qemu_args
 end

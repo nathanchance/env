@@ -8,7 +8,7 @@ function cbl_check_cfi -d "Run LTP's read_all testcase and check for CFI failure
     set read_all $CBL_GIT/boot-utils/debian/ltp/testcases/kernel/fs/read_all/read_all
 
     if not test -x $read_all
-        $CBL_GIT/boot-utils/debian/ltp.sh; or return
+        podcmd $CBL_GIT/boot-utils/debian/ltp.sh; or return
     end
 
     sudo true; or return

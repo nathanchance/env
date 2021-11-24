@@ -1,0 +1,6 @@
+FROM docker.io/opensuse/tumbleweed
+
+COPY setup-env.sh /
+RUN bash /setup-env.sh && rm /setup-env.sh
+
+CMD ["/usr/bin/fish", "-l"]

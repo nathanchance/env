@@ -40,20 +40,23 @@ function cbl_gen_archconfig -d "Generate a configuration file for Arch Linux"
 
     # Step 1: Download and extract files
     touch $cfg
-    makepkg -Cdo --skipchecksums; or return
+    command makepkg -Cdo --skipchecksums; or return
     rm $src_cfg
 
-    # Step 2: Copy default Arch configuration (and set CONFIG_DRM to 'm' to avoid issues)
+    # Step 2: Copy default Arch configuration and set a few options
     crl 'https://github.com/archlinux/svntogit-packages/raw/packages/linux/trunk/config' >$cfg
-    $src/scripts/config --file $cfg -m DRM
+    $src/scripts/config \
+        --file $cfg \
+        -e WERROR \
+        -m DRM
 
     # Step 3: Run olddefconfig
-    kmake -C $src KCONFIG_CONFIG=$cfg olddefconfig
+    podcmd kmake -C $src KCONFIG_CONFIG=$cfg olddefconfig
 
     # Step 4: Run localmodconfig if requested
     if test "$config" = local
         cp $cfg $src_cfg
-        kmake -C $src localmodconfig
+        podcmd kmake -C $src localmodconfig
         cp $src_cfg $cfg
         # A few configs might need to stay around for various reasons, build them as modules
         $src/scripts/config \
@@ -64,11 +67,11 @@ function cbl_gen_archconfig -d "Generate a configuration file for Arch Linux"
             -m TUN \
             -m USB_HID \
             --set-val BLK_DEV_LOOP_MIN_COUNT 0
-        kmake -C $src KCONFIG_CONFIG=$cfg olddefconfig
+        podcmd kmake -C $src KCONFIG_CONFIG=$cfg olddefconfig
     end
 
     # Step 5: Run through olddefconfig with Clang
-    kmake -C $src KCONFIG_CONFIG=$cfg LLVM=1 LLVM_IAS=1 olddefconfig
+    podcmd kmake -C $src KCONFIG_CONFIG=$cfg LLVM=1 LLVM_IAS=1 olddefconfig
 
     # Step 6: Disable BTF debug info and enable ThinLTO
     $src/scripts/config \
@@ -77,15 +80,12 @@ function cbl_gen_archconfig -d "Generate a configuration file for Arch Linux"
         -d LTO_NONE \
         -e LTO_CLANG_THIN \
         $config_args
-    kmake -C $src KCONFIG_CONFIG=$cfg LLVM=1 LLVM_IAS=1 olddefconfig
+    podcmd kmake -C $src KCONFIG_CONFIG=$cfg LLVM=1 LLVM_IAS=1 olddefconfig
 
     # Step 7: Run menuconfig if additional options are needed
     if test "$menuconfig" = true
-        kmake -C $src KCONFIG_CONFIG=$cfg LLVM=1 LLVM_IAS=1 menuconfig
+        podcmd kmake -C $src KCONFIG_CONFIG=$cfg LLVM=1 LLVM_IAS=1 menuconfig
     end
-
-    # Step 8: Update checksums
-    updpkgsums
 
     popd
 end

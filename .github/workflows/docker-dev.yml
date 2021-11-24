@@ -1,0 +1,61 @@
+name: Build development container images
+
+on:
+  push:
+    branches:
+      - dev
+      - main
+    paths:
+      - .github/workflows/docker-dev.yml
+      - podman/dev/*
+  schedule:
+    - cron: 0 0 * * 0
+  workflow_dispatch: null
+
+jobs:
+  docker:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: arch
+            platforms: linux/amd64
+          - os: fedora
+            platforms: linux/amd64,linux/arm64
+          - os: ubuntu
+            platforms: linux/amd64,linux/arm64
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v1
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
+
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v1
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set variables
+        id: variables
+        run: |
+          echo "::set-output name=date::$(date +'%Y-%m-%d-%H-%M')"
+          echo "::set-output name=folder::./podman/dev"
+
+      - name: Build
+        uses: docker/build-push-action@v2
+        with:
+          context: ${{ steps.variables.outputs.folder }}/${{ matrix.os }}
+          file: ${{ steps.variables.outputs.folder }}/${{ matrix.os }}/Containerfile
+          platforms: ${{ matrix.platforms }}
+          push: true
+          tags: |
+            ghcr.io/nathanchance/dev/${{ matrix.os }}:${{ steps.variables.outputs.date }}
+            ghcr.io/nathanchance/dev/${{ matrix.os }}:latest

@@ -111,9 +111,18 @@ function partition_and_create_user() { (
     apt-config dump | grep -we Recommends -e Suggests | sed 's/1/0/g' | tee /etc/apt/apt.conf.d/999norecommend
 
     # Update the server
-    DEBIAN_FRONTEND=noninteractive apt update
-    DEBIAN_FRONTEND=noninteractive apt upgrade -y
-    DEBIAN_FRONTEND=noninteractive apt autoremove -y
+    export APT_LISTCHANGES_FRONTEND=none
+    export DEBIAN_FRONTEND=noninteractive
+    export NEEDRESTART_SUSPEND=true
+
+    apt update -y || exit ${?}
+
+    apt upgrade \
+        -o Dpkg::Options::='--force-confdef' \
+        -o Dpkg::Options::='--force-confold' \
+        -y || exit ${?}
+
+    apt autoremove -y
 
     # Install tmux so that installation progress cannot be lost
     apt install -y tmux

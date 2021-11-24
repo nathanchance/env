@@ -41,33 +41,33 @@ function cbl_qualify_tc_bld_uprev -d "Qualify a new known good revision for tc-b
         --use-good-revision
 
     # Check that two stage build works fine
-    $tc_bld/build-llvm.py \
+    podcmd -s $tc_bld/build-llvm.py \
         $common_tc_bld_args; or return 125
 
     # Check that kernel build works okay with PGO
-    $tc_bld/build-llvm.py \
+    podcmd -s $tc_bld/build-llvm.py \
         $common_tc_bld_args \
         --pgo kernel-defconfig kernel-allmodconfig; or return 125
 
     # Check that ThinLTO alone works okay
-    $tc_bld/build-llvm.py \
+    podcmd -s $tc_bld/build-llvm.py \
         $common_tc_bld_args \
         --lto thin; or return 125
 
     # Check that full LTO alone works okay
-    $tc_bld/build-llvm.py \
+    podcmd -s $tc_bld/build-llvm.py \
         $common_tc_bld_args \
         --lto full; or return 125
 
     # Check that PGO + ThinLTO works okay
-    $tc_bld/build-llvm.py \
+    podcmd -s $tc_bld/build-llvm.py \
         $common_tc_bld_args \
         --lto thin \
         --pgo kernel-defconfig kernel-allmodconfig; or return 125
 
     # Check that PGO + ThinLTO with only ARM targets works okay (because some people are weird like that)
     # Cannot build the tests because they assume X86 is in the list of targets
-    $tc_bld/build-llvm.py \
+    podcmd -s $tc_bld/build-llvm.py \
         --assertions \
         --lto thin \
         --pgo kernel-defconfig kernel-allmodconfig \
@@ -75,7 +75,7 @@ function cbl_qualify_tc_bld_uprev -d "Qualify a new known good revision for tc-b
         --use-good-revision; or return 125
 
     # Finally, build with PGO and
-    $tc_bld/build-llvm.py \
+    podcmd -s $tc_bld/build-llvm.py \
         $common_tc_bld_args \
         --install-folder $usr \
         --lto full \
@@ -83,13 +83,13 @@ function cbl_qualify_tc_bld_uprev -d "Qualify a new known good revision for tc-b
 
     header "Toolchain information"
 
-    $usr/bin/clang --version
+    podcmd $usr/bin/clang --version
     git -C $tc_bld/llvm-project show -s
 
     if not test -L $CBL_QEMU_BIN/qemu-system-x86_64
         header "Building QEMU"
 
-        VERSION=6.0.0 cbl_bld_qemu
+        VERSION=6.1.0 cbl_bld_qemu
     end
 
     header "Testing toolchain"

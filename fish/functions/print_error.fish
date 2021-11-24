@@ -3,5 +3,5 @@
 # Copyright (C) 2021 Nathan Chancellor
 
 function print_error -d "Print a message in bold red"
-    printf '\n%b%s%b\n\n' '\033[01;31m' $argv '\033[0m'
+    printf '\n%bERROR: %s%b\n\n' '\033[01;31m' $argv '\033[0m'
 end

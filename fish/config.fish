@@ -2,9 +2,19 @@
 # SPDX-License-Identifier: MIT
 # Copyright (C) 2021 Nathan Chancellor
 
-fish_add_path -m $HOME/.cargo/bin
-fish_add_path -m $HOME/.local/bin
-fish_add_path -m $USR_FOLDER/bin
-gpg_key_cache
-ssh_agent
-tmux_ssh_fixup
+if test -z "$container"
+    gpg_key_cache
+    ssh_agent
+    tmux_ssh_fixup
+
+    set -e fish_user_paths; or true
+else
+    set -l folder
+    for folder in /qemu /tc /binutils /llvm
+        fish_add_path -gm $folder/bin
+    end
+end
+
+if command -q zoxide
+    zoxide init --hook prompt fish | source
+end

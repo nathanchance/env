@@ -16,6 +16,6 @@ function cbl_test_kvm -d "Test KVM against a Clang built kernel with QEMU"
 
     git -C $lnx pull -qr
 
-    kmake -C $lnx LLVM=1 LLVM_IAS=1 O=$out distclean defconfig all; or return
-    kboot -a $arch -k $lnx/$out -t 45s
+    podcmd kmake -C $lnx LLVM=1 LLVM_IAS=1 O=$out distclean defconfig all; or return
+    podcmd kboot -a $arch -k $lnx/$out -t 45s
 end

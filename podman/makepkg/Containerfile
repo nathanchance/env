@@ -1,0 +1,26 @@
+FROM docker.io/archlinux:base-devel
+
+RUN sed -i 's/#Color/Color/g' /etc/pacman.conf && \
+    sed -i 's/#ParallelDownloads = 5/ParallelDownloads = 7/g' /etc/pacman.conf && \
+    sed -i "/\[multilib\]/,/Include/"'s/^#//' /etc/pacman.conf && \
+    sed -i 's/#MAKEFLAGS="-j2"/MAKEFLAGS="-j$(nproc)"/g' /etc/makepkg.conf && \
+    sed -i 's/!ccache/ccache/g' /etc/makepkg.conf && \
+    pacman -Syyu --noconfirm && \
+    pacman -S --noconfirm ccache git && \
+    useradd -m build && \
+    echo "build ALL=(ALL) NOPASSWD: ALL" >/etc/sudoers.d/build
+
+USER build
+WORKDIR /home/build
+
+RUN mkdir .gnupg && \
+    touch .gnupg/gpg.conf && \
+    echo "keyserver-options auto-key-retrieve" > .gnupg/gpg.conf && \
+    git clone --depth=1 https://aur.archlinux.org/yay-bin.git && \
+    cd yay-bin && \
+    makepkg -irs --noconfirm
+
+COPY makepkg.sh /makepkg.sh
+
+WORKDIR /pkg
+CMD ["/bin/bash", "/makepkg.sh"]

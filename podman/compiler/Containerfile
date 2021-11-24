@@ -1,0 +1,12 @@
+ARG BASE
+FROM ${BASE}
+
+COPY setup-env.sh /
+COPY dwarves-1.23.tar.xz /tmp
+COPY 2f7d61b2bfb59427926867c886595ff28dd50607.patch /tmp
+
+ARG BASE
+ARG COMPILER
+RUN bash /setup-env.sh ${BASE} ${COMPILER} && rm -f /setup-env.sh
+
+CMD ["/usr/bin/fish", "-l"]
