@@ -6,9 +6,9 @@ pkgdesc="Super-parallel Python port of the C-Reduce"
 arch=(x86_64)
 url="https://github.com/marxin/cvise"
 license=('custom:University of Illinois Open Source License')
-depends=(clang colordiff llvm python python-pebble python-psutil unifdef)
+depends=(clang colordiff llvm python python-chardet python-pebble python-psutil unifdef)
 makedepends=(cmake flex)
-checkdepends=(python-chardet python-pytest-flake8)
+checkdepends=(python-pytest-flake8)
 source=("$pkgname-$pkgver.tar.gz::https://github.com/marxin/$pkgname/archive/refs/tags/v$pkgver.tar.gz")
 sha256sums=('55ae8c39bdbaddba9a2ac1173bef7995e58387bc81f4610125dd1488c8e8b1ae')
 
