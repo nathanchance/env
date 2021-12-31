@@ -1,5 +1,5 @@
 # Run shellcheck and shfmt on all shell files in this repository
-name: linting
+name: Linting
 on: [push, pull_request]
 jobs:
   fish_indent:
