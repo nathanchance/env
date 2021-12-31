@@ -6,11 +6,11 @@ function updoci -d "Downloads OCI container images from GitHub"
     switch $LOCATION
         case server
             set images \
-               dev/{arch,fedora,ubuntu} \
-               gcc-{5,6,7,8,9,1{0,1}} \
-               lei \
-               llvm-1{1,2,3,4} \
-               makepkg
+                dev/{arch,fedora,ubuntu} \
+                gcc-{5,6,7,8,9,1{0,1}} \
+                lei \
+                llvm-1{1,2,3,4} \
+                makepkg
         case '*'
             switch (uname -m)
                 case aarch64
