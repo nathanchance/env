@@ -8,23 +8,6 @@ function podrun -d "Runs 'podman run' with arguments to facilitate building in c
         return 1
     end
 
-    for arg in $argv
-        switch $arg
-            case --no-cap-drop
-                set cap_drop false
-            case '*'
-                set -a args $arg
-        end
-    end
-
-    # Ensures that permissions works for LLVM test suite (since container is
-    # technically root). This can cause issues when using container
-    # interactively so it can be dropped.
-    if test "$cap_drop" != false
-        set -a podman_args \
-            --cap-drop CAP_DAC_OVERRIDE
-    end
-
     # Allows KVM to be used inside the container
     # https://www.redhat.com/sysadmin/files-devices-podman
     if test -c /dev/kvm
@@ -92,5 +75,5 @@ function podrun -d "Runs 'podman run' with arguments to facilitate building in c
     end
 
     set fish_trace 1
-    podman run $podman_args $args
+    podman run $podman_args $argv
 end
