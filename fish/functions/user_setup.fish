@@ -1,6 +1,6 @@
 #!/usr/bin/env fish
 # SPDX-License-Identifier: MIT
-# Copyright (C) 2021 Nathan Chancellor
+# Copyright (C) 2021-2022 Nathan Chancellor
 
 function user_setup -d "Setup a user account, downloading all files and placing them where they need to go"
     # If we are using GNOME Terminal, the "Unnamed" profile needs to be set

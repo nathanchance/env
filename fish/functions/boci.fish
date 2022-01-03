@@ -1,7 +1,7 @@
 #
 #/usr/bin/env fish
 # SPDX-License-Identifier: MIT
-# Copyright (C) 2021 Nathan Chancellor
+# Copyright (C) 2021-2022 Nathan Chancellor
 
 function boci -d "Build an OCI container image"
     if not command -q podman

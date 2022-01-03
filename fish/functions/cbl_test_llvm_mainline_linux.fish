@@ -1,6 +1,6 @@
 #!/usr/bin/env fish
 # SPDX-License-Identifier: MIT
-# Copyright (C) 2021 Nathan Chancellor
+# Copyright (C) 2021-2022 Nathan Chancellor
 
 function cbl_test_llvm_mainline_linux -d "Test mainline Linux with all supported versions of LLVM"
     set linux_src $CBL_BLD_C/linux

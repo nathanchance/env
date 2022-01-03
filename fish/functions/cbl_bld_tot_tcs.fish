@@ -1,6 +1,6 @@
 #!/usr/bin/env fish
 # SPDX-License-Identifier: MIT
-# Copyright (C) 2021 Nathan Chancellor
+# Copyright (C) 2021-2022 Nathan Chancellor
 
 function cbl_bld_tot_tcs -d "Build LLVM and binutils from source for kernel development"
     for arg in $argv

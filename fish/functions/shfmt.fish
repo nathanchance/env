@@ -1,6 +1,6 @@
 #!/usr/bin/env fish
 # SPDX-License-Identifier: MIT
-# Copyright (C) 2021 Nathan Chancellor
+# Copyright (C) 2021-2022 Nathan Chancellor
 
 function shfmt -d "Runs shfmt through the system or podman depending on how it is available"
     if command -q shfmt

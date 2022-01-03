@@ -1,6 +1,6 @@
 #!/usr/bin/env fish
 # SPDX-License-Identifier: MIT
-# Copyright (C) 2021 Nathan Chancellor
+# Copyright (C) 2021-2022 Nathan Chancellor
 
 function upd -d "Runs the update command for the current distro or downloads/updates requested binary"
     if test (count $argv) -eq 0

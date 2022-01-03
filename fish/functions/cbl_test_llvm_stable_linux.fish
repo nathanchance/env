@@ -1,6 +1,6 @@
 #!/usr/bin/env fish
 # SPDX-License-Identifier: MIT
-# Copyright (C) 2021 Nathan Chancellor
+# Copyright (C) 2021-2022 Nathan Chancellor
 
 function cbl_test_llvm_stable_linux -d "Test all current versions of stable Linux with all supported versions of LLVM"
     set base $CBL_BLD_C/linux-stable

@@ -1,6 +1,6 @@
 #!/usr/bin/env fish
 # SPDX-License-Identifier: MIT
-# Copyright (C) 2021 Nathan Chancellor
+# Copyright (C) 2021-2022 Nathan Chancellor
 
 function kmake -d "Run make with all cores and adjust PATH temporarily"
     if test -z "$container"; and test -z "$OVERRIDE_CONTAINER"
