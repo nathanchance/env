@@ -1,5 +1,5 @@
 pkgname=linux-debug
-pkgver=next.20211217
+pkgver=v5.16.rc7.2423.gdc7bb522ef7f
 pkgrel=1
 arch=(x86_64)
 license=(GPL2)

@@ -1,5 +1,5 @@
 pkgname=linux-mainline-llvm
-_srctag=v5.16-rc7
+_srctag=v5.16-rc8
 pkgver=${_srctag//-/.}
 pkgrel=1
 url="https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/log/?h=$_srctag"
