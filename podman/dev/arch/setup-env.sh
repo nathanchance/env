@@ -6,7 +6,7 @@ set -eux
 function pacman_conf() {
     sed -i 's/#Color/Color/g' /etc/pacman.conf
     sed -i 's/#ParallelDownloads = 5/ParallelDownloads = 7/g' /etc/pacman.conf
-    sed -i "/\[multilib\]/,/Include/"'s/^#//' /etc/pacman.conf
+    sed -i '/^\[core\]/i [toolchain]\nServer = http://allanmcrae.com/toolchain\nSigLevel = Required\n' /etc/pacman.conf
 }
 
 # Edit /etc/makepkg.conf to gain some speed up
