@@ -28,7 +28,7 @@ function cbl_gen_ubuntuconfig -d "Generate a kernel .config from Ubuntu's config
     mkdir -p $out
 
     for file in config.common.ubuntu $ubuntu_arch/config.{common.$ubuntu_arch,flavour.generic}
-        crl "https://git.launchpad.net/~ubuntu-kernel-test/ubuntu/+source/linux/+git/mainline-crack/plain/debian.master/config/$file?h=cod/mainline/v5.16-rc7"
+        crl "https://git.launchpad.net/~ubuntu-kernel-test/ubuntu/+source/linux/+git/mainline-crack/plain/debian.master/config/$file?h=cod/mainline/v5.16-rc8"
     end >$cfg
 
     scripts/config \

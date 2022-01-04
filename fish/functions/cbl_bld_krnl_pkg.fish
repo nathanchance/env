@@ -69,6 +69,8 @@ index 17bf55fe3169..2376ee484362 100644
  /*
   * vmbus_device_register - Register the child device
   */' | patch -Np1; or return
+
+            b4 am -o - https://lore.kernel.org/r/20220104171527.5E8416A8@davehans-spike.ostc.intel.com/ | patch -Np1; or return
     end
 
     echo "Setting config..."
