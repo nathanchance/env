@@ -95,7 +95,7 @@ function podcmd -d "A wrapper for 'podrun <img> fish -c'"
     # the lld tests will fail.
     if test "$llvm" = true
         set -a podman_args \
-           --cap-drop CAP_DAC_OVERRIDE
+            --cap-drop CAP_DAC_OVERRIDE
     end
 
     if test "$debug" = true
