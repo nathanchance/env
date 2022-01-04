@@ -81,7 +81,7 @@ function boci -d "Build an OCI container image"
             $podman_args \
             --layers=false \
             --pull \
-            --tag nathan/$image .; or return
+            --tag $GHCR/$image .; or return
         set -e fish_trace
 
         popd; or return
