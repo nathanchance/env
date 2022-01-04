@@ -7,7 +7,7 @@ on:
       - main
     paths:
       - .github/workflows/docker-compiler.yml
-      - podman/compiler/*
+      - podman/compiler/**
   schedule:
     - cron: 0 0 * * 0
   workflow_dispatch: null
