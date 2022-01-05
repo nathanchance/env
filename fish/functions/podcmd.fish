@@ -21,6 +21,13 @@ function podcmd -d "A wrapper for 'podrun <img> fish -c'"
                     set debug true
                 end
 
+            case -l --llvm
+                if test "$seen_cmd" = true
+                    set -a fish_cmd $arg
+                else
+                    set llvm true
+                end
+
             case -s --skip-path
                 if test "$seen_cmd" = true
                     set -a fish_cmd $arg
@@ -33,7 +40,7 @@ function podcmd -d "A wrapper for 'podrun <img> fish -c'"
                 set -a podman_args $arg $argv[$next]
                 set i $next
 
-            case --env='*' --volume='*'
+            case --cap-drop='*' --env='*' --volume='*'
                 set -a podman_args $arg
 
             case nathan/'*' $GHCR/'*'
@@ -95,7 +102,7 @@ function podcmd -d "A wrapper for 'podrun <img> fish -c'"
     # the lld tests will fail.
     if test "$llvm" = true
         set -a podman_args \
-            --cap-drop CAP_DAC_OVERRIDE
+            --cap-drop=CAP_DAC_OVERRIDE
     end
 
     if test "$debug" = true
