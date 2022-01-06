@@ -64,6 +64,7 @@ function install_packages() {
         zstd
 
         # LLVM/clang
+        binutils-devel
         clang
         cmake
         lld
