@@ -104,6 +104,12 @@ function install_packages_apt() {
         zstd
     )
 
+    # Ubuntu has qemu-system-s390x in its own package, Debian has it in
+    # qemu-system-misc
+    if [[ $base = "ubuntu" ]]; then
+        packages+=(qemu-system-x86)
+    fi
+
     # lz4 had a different name on different hosts
     case $version in
         xenial | stretch | bionic)
@@ -141,6 +147,7 @@ function install_packages_apt() {
                     binutils-x86-64-linux-gnu
                 )
                 ;;
+
             debian:* | ubuntu:*)
                 packages+=(
                     binutils-riscv64-linux-gnu
