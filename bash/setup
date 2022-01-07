@@ -49,6 +49,7 @@ function arch_root_setup() { (
         # Nicer versions of certain GNU utilities
         bat
         diskus
+        dust
         exa
         fd
         ripgrep
