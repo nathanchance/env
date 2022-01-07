@@ -20,6 +20,7 @@ function cbl_rb_pi -d "Rebase Raspberry Pi kernel on latest linux-next"
 
     git rh origin/master
 
+    set -a patches https://lore.kernel.org/r/20220107183303.2337676-1-nathan@kernel.org/ # clk: visconti: Remove pointless NULL check in visconti_pll_add_lookup()
     for patch in $patches
         b4 shazam -l -P _ -s $patch; or return
     end

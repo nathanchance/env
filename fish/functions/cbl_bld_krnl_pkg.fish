@@ -71,6 +71,9 @@ index 17bf55fe3169..2376ee484362 100644
   */' | patch -Np1; or return
 
             b4 am -o - https://lore.kernel.org/r/20220104171527.5E8416A8@davehans-spike.ostc.intel.com/ | patch -Np1; or return
+
+            # https://lore.kernel.org/r/YdiABvwrK3WxfHqb@archlinux-ax161/
+            git diff -R 92823548cdec291c909dd4e99f96969d3d6423a2^..7406e90d67dc1a04f95c07660c31f0aae873cad9 | patch -Np1; or return
     end
 
     echo "Setting config..."
