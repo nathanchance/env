@@ -17,6 +17,9 @@ function cbl_lkt -d "Tests a Linux kernel with llvm-kernel-testing"
                 set binutils_prefix $argv[$next]
                 set i $next
 
+            case --cfi
+                set cfi true
+
             case --defconfigs
                 set -a test_sh_args $arg
 
@@ -61,6 +64,9 @@ function cbl_lkt -d "Tests a Linux kernel with llvm-kernel-testing"
             set tree linux-next
         end
         set linux_src $CBL_BLD_P/$tree
+    end
+    if test -z "$cfi"
+        set cfi false
     end
     if test (basename $linux_src) = linux; and test "$cfi" != false
         set -a test_sh_args --test-cfi-kernel
