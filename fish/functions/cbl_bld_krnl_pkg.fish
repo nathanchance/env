@@ -70,11 +70,8 @@ index 17bf55fe3169..2376ee484362 100644
   * vmbus_device_register - Register the child device
   */' | patch -Np1; or return
 
-            # [PATCH] [v3] x86/sgx: Fix NULL pointer dereference on non-SGX systems
-            b4 am -o - https://lore.kernel.org/r/20220104171527.5E8416A8@davehans-spike.ostc.intel.com/ | patch -Np1; or return
-
-            # [PATCH] vdpa/mlx5: fix error handling in mlx5_vdpa_dev_add()
-            b4 am -o - https://lore.kernel.org/r/20220107211352.3940570-1-trix@redhat.com/ | patch -Np1; or return
+            # [PATCH net-next] netfilter: nf_tables: fix compile warnings
+            b4 am -o - https://lore.kernel.org/r/20220110122808.272697-1-pablo@netfilter.org/ | patch -Np1; or return
     end
 
     echo "Setting config..."
