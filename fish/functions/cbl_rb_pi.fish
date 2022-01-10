@@ -20,23 +20,42 @@ function cbl_rb_pi -d "Rebase Raspberry Pi kernel on latest linux-next"
 
     git rh origin/master
 
-    set -a patches https://lore.kernel.org/r/1641300126-53574-1-git-send-email-chenxiang66@hisilicon.com/ # scsi: hisi_sas: Remove unused variable and check in hisi_sas_send_ata_reset_each_phy()
-    set -a patches https://lore.kernel.org/r/20220107183303.2337676-1-nathan@kernel.org/ # clk: visconti: Remove pointless NULL check in visconti_pll_add_lookup()
+    set -a patches https://lore.kernel.org/r/20220110122808.272697-1-pablo@netfilter.org/ # [PATCH net-next] netfilter: nf_tables: fix compile warnings
     for patch in $patches
         b4 shazam -l -P _ -s $patch; or return
     end
 
-    # Needed for Tailscale
+    # Tailscale configs
     for cfg_file in arch/arm/configs/multi_v7_defconfig arch/arm64/configs/defconfig
         scripts/config \
             --file $cfg_file \
+            -e IP_NF_IPTABLES \
             -e NETFILTER \
+            -e NETFILTER_NETLINK \
             -e NETFILTER_XTABLES \
+            -e NETFILTER_XT_MATCH_COMMENT \
+            -e NETFILTER_XT_MARK \
+            -e NETFILTER_XT_TARGET_MASQUERADE \
+            -e NF_CONNTRACK \
+            -e NF_NAT \
             -e NF_TABLES \
+            -e NF_TABLES_IPV4 \
+            -e NF_TABLES_IPV6 \
             -e NFT_COMPAT \
+            -e NFT_NAT \
             -e TUN
     end
-    git ac -m "arm/arm64: Enable configs needed for Tailscale in defconfigs"
+
+    # arm64 hardening
+    scripts/config \
+        --file arch/arm64/configs/defconfig \
+        -d DEBUG_INFO \
+        -d LTO_NONE \
+        -e CFI_CLANG \
+        -e LTO_CLANG_THIN \
+        -e SHADOW_CALL_STACK
+
+    git ac -m "arm{,64}: Customize defconfig"
 
     echo 'From f16e7af3d188d6aa9d45d7502ba3fcebc441f22a Mon Sep 17 00:00:00 2001
 From: Nathan Chancellor <nathan@kernel.org>
