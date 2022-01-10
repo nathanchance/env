@@ -20,7 +20,7 @@ function cbl_lkt -d "Tests a Linux kernel with llvm-kernel-testing"
             case --cfi
                 set cfi true
 
-            case --defconfigs
+            case --defconfigs --no-ccache
                 set -a test_sh_args $arg
 
             case -i --image
