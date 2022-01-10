@@ -107,6 +107,8 @@ function arch_root_setup() { (
         zoxide
     )
     if ! ${WSL}; then
+        PACKAGES+=(tailscale)
+
         if [[ -n ${DISPLAY} ]]; then
             PACKAGES+=(
                 cantarell-fonts
@@ -117,6 +119,7 @@ function arch_root_setup() { (
                 ttc-iosevka-ss08
                 vlc
             )
+
             if [[ $(uname -n) = "vmware" ]]; then
                 PACKAGES+=(
                     gtkmm
@@ -170,11 +173,14 @@ EOF
         systemctl enable vmware-vmblock-fuse.service
     fi
 
-    # Set SSH options
     if ! ${WSL}; then
+        # Set SSH options
         systemctl enable sshd.service
         systemctl start sshd.service
         set_sshd_config
+
+        # Enable Tailscale
+        systemctl enable --now tailscaled
     fi
 
     # Make sure LightDM does not start too quickly
@@ -285,9 +291,22 @@ function debian_root_setup { (
 
     debian_ubuntu_packages
     debian_ubuntu_update_install || exit ${?}
+
+    # https://tailscale.com/download/linux/rpi
+    if ${PI}; then
+        apt install -y apt-transport-https
+
+        curl -fLSs https://pkgs.tailscale.com/stable/raspbian/bullseye.noarmor.gpg | tee /usr/share/keyrings/tailscale-archive-keyring.gpg >/dev/null
+        curl -fLSs https://pkgs.tailscale.com/stable/raspbian/bullseye.tailscale-keyring.list | tee /etc/apt/sources.list.d/tailscale.list
+
+        apt update
+        apt install -y tailscale
+    fi
+
     if [[ $VERSION_ID = "10" ]]; then
         update-alternatives --install /usr/bin/python python /usr/bin/python3.7 1
     fi
+
     debian_ubuntu_locales
 
     clone_env
