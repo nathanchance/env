@@ -5,6 +5,9 @@ set -eux
 function install_packages() {
     dnf update -y
 
+    dnf install -y dnf-plugins-core
+    dnf copr enable -y @fedora-llvm-team/llvm-snapshots
+
     packages=(
         # Generic
         ccache
