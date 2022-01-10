@@ -3,6 +3,11 @@
 # Copyright (C) 2021-2022 Nathan Chancellor
 
 function cbl_qualify_tc_bld_uprev -d "Qualify a new known good revision for tc-build"
+    if not test -f $HOME/.muttrc.notifier
+        print_error "This function runs cbl_lkt, which requires the notifier!"
+        return 1
+    end
+
     set tc_bld_src $CBL_GIT/tc-build
     set lnx_stbl $CBL_SRC/linux-stable
 
@@ -66,7 +71,7 @@ function cbl_qualify_tc_bld_uprev -d "Qualify a new known good revision for tc-b
         --pgo kernel-defconfig kernel-allmodconfig; or return 125
 
     # Check that PGO + ThinLTO with only ARM targets works okay (because some people are weird like that)
-    # Cannot build the tests because they assume X86 is in the list of targets
+    # Cannot build the tests because they assume the host (X86) is in the list of targets
     podcmd -s $tc_bld/build-llvm.py \
         --assertions \
         --lto thin \
@@ -74,7 +79,7 @@ function cbl_qualify_tc_bld_uprev -d "Qualify a new known good revision for tc-b
         --targets "ARM;AArch64" \
         --use-good-revision; or return 125
 
-    # Finally, build with PGO and
+    # Finally, build with PGO and full LTO
     podcmd -s $tc_bld/build-llvm.py \
         $common_tc_bld_args \
         --install-folder $usr \
@@ -85,12 +90,6 @@ function cbl_qualify_tc_bld_uprev -d "Qualify a new known good revision for tc-b
 
     podcmd $usr/bin/clang --version
     git -C $tc_bld/llvm-project show -s
-
-    if not test -L $CBL_QEMU_BIN/qemu-system-x86_64
-        header "Building QEMU"
-
-        VERSION=6.1.0 cbl_bld_qemu
-    end
 
     header "Testing toolchain"
 
