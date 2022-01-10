@@ -303,6 +303,8 @@ function debian_root_setup { (
         apt install -y tailscale
     fi
 
+    debian_ubuntu_doas
+
     if [[ $VERSION_ID = "10" ]]; then
         update-alternatives --install /usr/bin/python python /usr/bin/python3.7 1
     fi
