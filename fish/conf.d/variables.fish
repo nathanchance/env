@@ -111,10 +111,10 @@ set -Ux ENV_FOLDER $GITHUB_FOLDER/env
 ## OTHER VARIABLES ##
 #####################
 
-set -Ux CBL_STABLE_VERSIONS 5.{1{5,0},4}
+set -Ux CBL_STABLE_VERSIONS 5.{1{6,5,0},4}
 set -Ux CBL_LLVM_VERSIONS 10.0.1 11.1.0 12.0.1 13.0.0
 # https://www.kernel.org/category/releases.html
-set -Ux SUPPORTED_STABLE_VERSIONS 4.{{,1}4,{,1}9} 5.{4,1{0,5}}
+set -Ux SUPPORTED_STABLE_VERSIONS 4.{{,1}4,{,1}9} 5.{4,1{0,5,6}}
 
 # For building .deb packages on distros other than Debian/Ubuntu
 set -Ux KMAKE_DEB_ARGS DPKG_FLAGS=-d KDEB_CHANGELOG_DIST=unstable
