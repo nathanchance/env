@@ -53,7 +53,7 @@ function msh -d "Shorthand for mosh -o" -w mosh
 
         case '*'
             # Equinix server, perform look up
-            if string match -qr "[c|m|n]{1}[1-3]{1}-.*" $msh_args
+            if string match -qr "[a|c|g|m|n|s|t|x]{1}[1-3]{1}-.*" $msh_args
                 set equinix_ips $HOME/.equinix_ips
                 if test -f $equinix_ips
                     set ip (grep $msh_args $equinix_ips | string split -f 2 ,)
