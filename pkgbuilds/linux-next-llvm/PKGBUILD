@@ -1,5 +1,5 @@
 pkgname=linux-next-llvm
-_srctag=next-20220110
+_srctag=next-20220111
 pkgver=${_srctag//-/.}
 pkgrel=1
 url="https://git.kernel.org/pub/scm/linux/kernel/git/next/linux-next.git/log/?h=$_srctag"
