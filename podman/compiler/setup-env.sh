@@ -266,7 +266,7 @@ function install_packages_apt() {
     rm -fr /var/lib/apt/lists/*
     if [[ $compiler =~ llvm ]]; then
         if [[ $compiler = "llvm-android" ]]; then
-            local android_clang=r437112
+            local android_clang=r437112b
             wget --output-document=/dev/stdout --progress=dot:giga https://android.googlesource.com/platform/prebuilts/clang/host/linux-x86/+archive/refs/heads/master/clang-$android_clang.tar.gz |
                 tar -C /usr/local -xzf -
         else
