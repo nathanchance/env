@@ -52,8 +52,24 @@ function msh -d "Shorthand for mosh -o" -w mosh
             set user_host $argv[1]
 
         case '*'
-            print_error "Please specify a user@host combination"
-            return 1
+            # Equinix server, perform look up
+            if string match -qr "[c|m|n]{1}[1-3]{1}-.*" $msh_args
+                set equinix_ips $HOME/.equinix_ips
+                if test -f $equinix_ips
+                    set ip (grep $msh_args $equinix_ips | string split -f 2 ,)
+                    if test -z "$ip"
+                        print_error "Could not find $msh_args in $equinix_ips!"
+                        return 1
+                    end
+                    set user_host nathan@$ip
+                else
+                    print_error "Equinix hostname provided but no IP file!"
+                    return 1
+                end
+            else
+                print_error "Please specify a valid shorthand or user@host combination!"
+                return 1
+            end
     end
 
     mosh $user_host
