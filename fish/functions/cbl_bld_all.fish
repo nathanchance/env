@@ -18,8 +18,9 @@ function cbl_bld_all -d "Build latest LLVM and test it against several Linux ker
             cbl_bld_all_krnl; or return
 
             # Boot kernels
-            podcmd kboot -a arm64 -k $CBL_SRC/linux-next/.build/aarch64
-            podcmd kboot -a x86_64 -k $CBL_SRC/linux-next/.build/x86_64
+            for arch in arm64 x86_64
+                podcmd kboot -a $arch -k $CBL_SRC/linux-next/.build/$arch
+            end
 
         case '*'
             for arg in $argv
