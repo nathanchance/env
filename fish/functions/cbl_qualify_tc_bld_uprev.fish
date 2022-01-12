@@ -42,8 +42,9 @@ function cbl_qualify_tc_bld_uprev -d "Qualify a new known good revision for tc-b
 
     set common_tc_bld_args \
         --assertions \
-        --check-targets clang lld llvm llvm-unit \
+        --check-targets clang ll{d,vm{,-unit}} \
         --use-good-revision
+    set pgo_arg --pgo kernel-{def,allmod}config
 
     # Check that two stage build works fine
     podcmd -s $tc_bld/build-llvm.py \
@@ -52,7 +53,7 @@ function cbl_qualify_tc_bld_uprev -d "Qualify a new known good revision for tc-b
     # Check that kernel build works okay with PGO
     podcmd -s $tc_bld/build-llvm.py \
         $common_tc_bld_args \
-        --pgo kernel-defconfig kernel-allmodconfig; or return 125
+        $pgo_arg; or return 125
 
     # Check that ThinLTO alone works okay
     podcmd -s $tc_bld/build-llvm.py \
@@ -68,14 +69,14 @@ function cbl_qualify_tc_bld_uprev -d "Qualify a new known good revision for tc-b
     podcmd -s $tc_bld/build-llvm.py \
         $common_tc_bld_args \
         --lto thin \
-        --pgo kernel-defconfig kernel-allmodconfig; or return 125
+        $pgo_arg; or return 125
 
     # Check that PGO + ThinLTO with only ARM targets works okay (because some people are weird like that)
     # Cannot build the tests because they assume the host (X86) is in the list of targets
     podcmd -s $tc_bld/build-llvm.py \
         --assertions \
         --lto thin \
-        --pgo kernel-defconfig kernel-allmodconfig \
+        $pgo_arg \
         --targets "ARM;AArch64" \
         --use-good-revision; or return 125
 
@@ -84,7 +85,7 @@ function cbl_qualify_tc_bld_uprev -d "Qualify a new known good revision for tc-b
         $common_tc_bld_args \
         --install-folder $usr \
         --lto full \
-        --pgo kernel-defconfig kernel-allmodconfig; or return 125
+        $pgo_arg; or return 125
 
     header "Toolchain information"
 
