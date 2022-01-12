@@ -12,8 +12,7 @@ function cbl_bld_tot_tcs -d "Build LLVM and binutils from source for kernel deve
 
     switch $LOCATION
         case desktop vm
-            set bld_bntls_args \
-                --targets x86_64
+            set bld_bntls false
 
             set bld_llvm_args \
                 --pgo kernel-defconfig \
@@ -24,12 +23,12 @@ function cbl_bld_tot_tcs -d "Build LLVM and binutils from source for kernel deve
                 --pgo kernel-defconfig
 
         case pi
-            set bld_bntls_args \
-                --targets host x86_64
+            set bld_bntls false
 
             set bld_llvm_args \
                 --build-stage1-only \
-                --defines LLVM_PARALLEL_COMPILE_JOBS=(math (nproc) - 1) LLVM_PARALLEL_LINK_JOBS=1 \
+                --defines LLVM_PARALLEL_COMPILE_JOBS=(math (nproc) - 1) \
+                LLVM_PARALLEL_LINK_JOBS=1 \
                 --install-stage1-only \
                 --projects '"clang;lld"' \
                 --targets '"AArch64;ARM;X86"'
@@ -60,21 +59,23 @@ function cbl_bld_tot_tcs -d "Build LLVM and binutils from source for kernel deve
         git clone -b personal "$github_prefix"nathanchance/tc-build.git $CBL_TC_BLD
     end
 
-    set bntls $CBL_TC_BLD/binutils
-    if not test -d $bntls
-        git clone https://sourceware.org/git/binutils-gdb.git "$bntls"
-    end
-    git -C $bntls pull --rebase; or return
+    if test "$bld_bntls" != false
+        set bntls $CBL_TC_BLD/binutils
+        if not test -d $bntls
+            git clone https://sourceware.org/git/binutils-gdb.git "$bntls"
+        end
+        git -C $bntls pull --rebase; or return
 
-    set bntls_install $CBL_TC_STOW_BNTL/$date_time-(git -C $bntls sh -s --format=%H origin/master)
-    if not podcmd -s PATH="/usr/lib/ccache/bin:$PATH" $CBL_TC_BLD/build-binutils.py $bld_bntls_args --install-folder $bntls_install
-        set message "build-binutils.py failed"
-        print_error "$message"
-        tg_msg "$message"
-        return 1
+        set bntls_install $CBL_TC_STOW_BNTL/$date_time-(git -C $bntls sh -s --format=%H origin/master)
+        if not podcmd -s PATH="/usr/lib/ccache/bin:$PATH" $CBL_TC_BLD/build-binutils.py $bld_bntls_args --install-folder $bntls_install
+            set message "build-binutils.py failed"
+            print_error "$message"
+            tg_msg "$message"
+            return 1
+        end
+        podcmd stripall $bntls_install
+        ln -fnrsv $bntls_install (dirname $CBL_TC_BNTL)
     end
-    podcmd stripall $bntls_install
-    ln -fnrsv $bntls_install (dirname $CBL_TC_BNTL)
 
     set llvm_project $CBL_TC_BLD/llvm-project
     if not test -d $llvm_project
