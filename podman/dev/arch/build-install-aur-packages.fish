@@ -26,11 +26,8 @@ function build_cvise
     cd $python_pebble; or exit
     makepkg -irs --noconfirm; or exit
 
-    # Next, fetch cvise PKGBUILD
-    set cvise $HOME/cvise
-    mkdir $cvise
-    cd $cvise; or exit
-    curl -LSsO https://github.com/nathanchance/env/raw/main/pkgbuilds/cvise/PKGBUILD
+    # Next, build and install cvise
+    cd $HOME/cvise; or exit
     makepkg -irs --noconfirm
 end
 
