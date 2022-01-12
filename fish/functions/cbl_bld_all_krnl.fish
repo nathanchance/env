@@ -40,7 +40,7 @@ function cbl_bld_all_krnl -d "Build all kernels for ClangBuiltLinux testing"
             for arch in arm arm64
                 podcmd $CBL_BLD/pi-scripts/build.fish $arch $CBL_BLD/rpi
             end
-            podcmd $CBL_BLD/wsl2/bin/build.fish
+            $CBL_BLD/wsl2/bin/build.fish
             for krnl in linux-next-llvm
                 cbl_bld_krnl_pkg $krnl
             end

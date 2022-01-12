@@ -44,5 +44,5 @@ function cbl_rb_wk -d "Rebase WSL2 kernel on latest linux-next"
     set -a branches dxgkrnl
     git -C $src ml --no-edit $branches; or return
     git -C $src cp (git -C $src lo --merges -1 --format=%H origin/HEAD)..(git -C $src sh -s --format=%H origin/HEAD); or return
-    podcmd $src/bin/build.fish; or return
+    $src/bin/build.fish; or return
 end
