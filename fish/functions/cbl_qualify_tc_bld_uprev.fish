@@ -77,7 +77,7 @@ function cbl_qualify_tc_bld_uprev -d "Qualify a new known good revision for tc-b
         --assertions \
         --lto thin \
         $pgo_arg \
-        --targets '"ARM;AArch64"' \
+        --targets '"AArch64;ARM"' \
         --use-good-revision; or return 125
 
     # Finally, build with PGO and full LTO
