@@ -20,7 +20,6 @@ function cbl_rb_pi -d "Rebase Raspberry Pi kernel on latest linux-next"
 
     git rh origin/master
 
-    set -a patches https://lore.kernel.org/r/20220110122808.272697-1-pablo@netfilter.org/ # [PATCH net-next] netfilter: nf_tables: fix compile warnings
     for patch in $patches
         b4 shazam -l -P _ -s $patch; or return
     end
