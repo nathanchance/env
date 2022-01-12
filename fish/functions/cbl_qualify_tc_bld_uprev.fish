@@ -38,7 +38,7 @@ function cbl_qualify_tc_bld_uprev -d "Qualify a new known good revision for tc-b
 
     header "Building toolchains"
 
-    $tc_bld/build-binutils.py --install-folder $usr; or return
+    podcmd -s $tc_bld/build-binutils.py --install-folder $usr; or return
 
     set common_tc_bld_args \
         --assertions \
