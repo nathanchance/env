@@ -75,6 +75,8 @@ function cbl_bld_tot_tcs -d "Build LLVM and binutils from source for kernel deve
         end
         podcmd stripall $bntls_install
         ln -fnrsv $bntls_install (dirname $CBL_TC_BNTL)
+
+        set stow_pkgs (basename (dirname $CBL_TC_BNTL))
     end
 
     set llvm_project $CBL_TC_BLD/llvm-project
@@ -125,5 +127,7 @@ function cbl_bld_tot_tcs -d "Build LLVM and binutils from source for kernel deve
     podcmd stripall $llvm_install
     ln -fnrsv $llvm_install (dirname $CBL_TC_LLVM)
 
-    stow -d $CBL_TC_STOW -R -v (basename (dirname $CBL_TC_BNTL)) (basename (dirname $CBL_TC_LLVM))
+    set -a stow_pkgs (basename (dirname $CBL_TC_LLVM))
+
+    stow -d $CBL_TC_STOW -R -v $stow_pkgs
 end
