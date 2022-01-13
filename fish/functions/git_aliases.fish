@@ -80,6 +80,8 @@ function git_aliases -d "Configure git aliases"
     git config --global alias.shm 'show --no-patch'
     git config --global alias.shmf 'show --format=fuller --no-patch'
     git config --global alias.ss 'status --short --branch'
+    git config --global alias.sw 'switch'
+    git config --global alias.swi '!git switch $(git branch --format="%(refname:short)" | fzf)'
     git config --global alias.us 'reset HEAD'
 
     # Set up merge aliases based on availability of '--signoff'
