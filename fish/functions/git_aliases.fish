@@ -6,6 +6,7 @@ function git_aliases -d "Configure git aliases"
     if gpg_key_usable
         set gpg_sign " --gpg-sign"
     end
+    git config --global alias.ai '!f() { for file in $(git status --porcelain | awk \'{print $2}\' | fzf -m); do git add $file; done }; f' # add interactive
     git config --global alias.aa 'add --all'
     git config --global alias.ac "commit$gpgsign --all --signoff --verbose" # add and commit
     git config --global alias.ama 'am --abort'
