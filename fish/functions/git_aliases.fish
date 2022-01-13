@@ -80,7 +80,7 @@ function git_aliases -d "Configure git aliases"
     git config --global alias.shf 'show --first-parent --format=fuller'
     git config --global alias.shm 'show --no-patch'
     git config --global alias.shmf 'show --format=fuller --no-patch'
-    git config --global alias.sw 'switch'
+    git config --global alias.sw switch
     git config --global alias.swi '!git switch $(git branch --format="%(refname:short)" | fzf)'
     git config --global alias.us 'reset HEAD'
 
