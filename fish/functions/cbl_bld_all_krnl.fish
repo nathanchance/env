@@ -5,7 +5,7 @@
 function cbl_bld_all_krnl -d "Build all kernels for ClangBuiltLinux testing"
     switch $LOCATION
         case pi
-            for arch in arm64 x86_64
+            for arch in arm arm64 x86_64
                 podcmd kmake \
                     -C $CBL_SRC/linux-next \
                     ARCH=$arch \
