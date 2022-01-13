@@ -16,6 +16,7 @@ function install_packages() {
         fish
         git
         glibc-devel
+        glibc-static
         libfl-devel
         make
         patch
