@@ -90,7 +90,6 @@ function cbl_bld_tot_tcs -d "Build LLVM and binutils from source for kernel deve
     end
 
     # Add patches to revert here
-    set -a reverts 82fb4f4b223d78e86647f3576e41e3086ab42cd5 # [SCEV] Sequential/in-order UMin expression
     for revert in $reverts
         if not git -C $llvm_project rv -n $revert
             set message "Failed to revert $revert"
