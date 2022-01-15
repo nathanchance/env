@@ -19,7 +19,13 @@ function cbl_bld_all -d "Build latest LLVM and test it against several Linux ker
 
             # Boot kernels
             for arch in arm arm64 x86_64
-                podcmd kboot -a $arch -k $CBL_SRC/linux-next/.build/$arch
+                switch $arch
+                    case arm
+                        set kboot_arch arm32_v7
+                    case '*'
+                        set kboot_arch $arch
+                end
+                podcmd kboot -a $kboot_arch -k $CBL_SRC/linux-next/.build/$arch
             end
 
         case '*'
