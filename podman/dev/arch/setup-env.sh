@@ -33,6 +33,7 @@ function install_packages() {
         git
         hyperfine
         fish
+        fzf
         less
         python
         python-setuptools

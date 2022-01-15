@@ -14,6 +14,7 @@ function install_packages() {
         curl
         cvise
         fish
+        fzf
         git
         glibc-devel
         glibc-static
