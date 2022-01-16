@@ -82,7 +82,7 @@ function user_setup -d "Setup a user account, downloading all files and placing 
         gpg_key_cache; or return
 
         if test -f $HOME/.ssh/.ssh-agent.fish
-            ssh_agent; or return
+            start_ssh_agent; or return
         else
             if not ssh-add -l
                 ssh-add $HOME/.ssh/id_ed25519; or return
@@ -206,7 +206,7 @@ out.*/
             tmux new-window fish -c "cbl_setup_linux_repos $linux_tree; sleep 180"
         end
 
-        tmux new-window fish -c "ssh_agent; and cbl_setup_other_repos; sleep 180"
+        tmux new-window fish -c "start_ssh_agent; and cbl_setup_other_repos; sleep 180"
     else
         return 0
     end

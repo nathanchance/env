@@ -4,7 +4,7 @@
 
 if test -z "$container"
     gpg_key_cache
-    ssh_agent
+    start_ssh_agent
     tmux_ssh_fixup
 
     set -e fish_user_paths; or true

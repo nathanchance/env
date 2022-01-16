@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: MIT
 # Copyright (C) 2021-2022 Nathan Chancellor
 
-function ssh_agent -d "Launch an ssh agent only if it has not already been launched"
+function start_ssh_agent -d "Launch an ssh agent only if it has not already been launched"
     status is-interactive; or return 0
 
     set ssh_key $HOME/.ssh/id_ed25519
