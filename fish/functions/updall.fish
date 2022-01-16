@@ -21,6 +21,7 @@ function updall -d "Update binaries in $BIN_FOLDER"
         duf \
         exa \
         fd \
+        fzf \
         hyperfine \
         repo \
         rg \

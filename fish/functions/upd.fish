@@ -139,6 +139,21 @@ function upd -d "Runs the update command for the current distro or downloads/upd
                             install -Dvm644 completions/exa.fish $__fish_config_dir/completions/exa.fish
                     end
 
+                case fzf
+                    switch $arch
+                        case arm
+                            set arch armv7
+                        case x86_64
+                            set arch amd64
+                    end
+
+                    set repo junegunn/fzf
+                    set ver (glr $repo)
+                    set url https://github.com/$repo/releases/download/$ver/fzf-$ver-linux_$arch.tar.gz
+
+                    crl $url | tar -xzf -
+                    install -Dvm755 fzf $binary
+
                 case hub
                     switch $arch
                         case x86_64
@@ -216,7 +231,7 @@ function upd -d "Runs the update command for the current distro or downloads/upd
                     crl -o $binary $url
                     chmod +x $binary
 
-                case dev lei strip
+                case dev lei
                     boci $target
             end
 
