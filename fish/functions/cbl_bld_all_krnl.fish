@@ -4,6 +4,17 @@
 
 function cbl_bld_all_krnl -d "Build all kernels for ClangBuiltLinux testing"
     switch $LOCATION
+        case desktop laptop
+            cbl_test_kvm
+
+            set lnx_src $CBL_SRC/linux
+            echo CONFIG_WERROR=n >$lnx_src/allmod.config
+            podcmd kmake \
+                -C $lnx_src \
+                LLVM=1 \
+                O=.build/(uname -m) \
+                distclean allmodconfig all
+
         case pi
             for arch in arm arm64 x86_64
                 switch $arch
