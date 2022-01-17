@@ -6,13 +6,22 @@ function cbl_bld_all_krnl -d "Build all kernels for ClangBuiltLinux testing"
     switch $LOCATION
         case pi
             for arch in arm arm64 x86_64
+                switch $arch
+                    case arm
+                        set image zImage
+                    case arm64
+                        set image Image.gz
+                    case x86_64
+                        set image bzImage
+                end
+
                 podcmd kmake \
                     -C $CBL_SRC/linux-next \
                     ARCH=$arch \
                     HOSTCFLAGS=-Wno-deprecated-declarations \
                     LLVM=1 \
                     O=.build/$arch \
-                    distclean defconfig all; or return
+                    distclean defconfig $image; or return
             end
 
         case '*'
