@@ -11,11 +11,11 @@ function cbl_bld_tot_tcs -d "Build LLVM and binutils from source for kernel deve
     end
 
     switch $LOCATION
-        case desktop vm
+        case desktop
             set bld_bntls false
 
             set bld_llvm_args \
-                --pgo kernel-defconfig \
+                --pgo kernel-{allmod,def}config \
                 --targets X86
 
         case generic wsl
@@ -38,6 +38,14 @@ function cbl_bld_tot_tcs -d "Build LLVM and binutils from source for kernel deve
         case server
             set bld_llvm_args \
                 --pgo kernel-{def,allmod}config
+
+        case vm
+            set bld_bntls false
+
+            set bld_llvm_args \
+                --pgo kernel-defconfig \
+                --targets X86
+
     end
     if not set -q check_targets
         set check_targets clang ll{d,vm{,-unit}}
