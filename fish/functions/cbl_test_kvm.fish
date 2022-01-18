@@ -3,10 +3,15 @@
 # Copyright (C) 2021-2022 Nathan Chancellor
 
 function cbl_test_kvm -d "Test KVM against a Clang built kernel with QEMU"
-    set arch x86_64
-    if test (uname -m) != $arch
-        print_error "cbl_test_kvm only supports x86_64 at this point!"
-        return 1
+    set arch (uname -m)
+    switch $arch
+        case aarch64
+            set arch arm64
+        case x86_64
+            :
+        case '*'
+            print_error "cbl_test_kvm does not support $arch!"
+            return 1
     end
 
     cbl_clone_repo linux
@@ -16,6 +21,6 @@ function cbl_test_kvm -d "Test KVM against a Clang built kernel with QEMU"
 
     git -C $lnx pull -qr
 
-    podcmd kmake -C $lnx LLVM=1 LLVM_IAS=1 O=$out distclean defconfig all; or return
+    podcmd kmake -C $lnx LLVM=1 O=$out distclean defconfig all; or return
     podcmd kboot -a $arch -k $lnx/$out -t 45s
 end
