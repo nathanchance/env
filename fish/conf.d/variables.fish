@@ -19,7 +19,7 @@ if test -z "$LOCATION"
     switch $user@$hostname
         case nathan@asus
             set -U LOCATION laptop
-        case nathan@hp-4300G
+        case nathan@hp-amd-ryzen-4300G
             set -U LOCATION desktop
         case pi@raspberrypi
             set -U LOCATION pi
