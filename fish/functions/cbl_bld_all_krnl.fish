@@ -11,6 +11,7 @@ function cbl_bld_all_krnl -d "Build all kernels for ClangBuiltLinux testing"
             echo CONFIG_WERROR=n >$lnx_src/allmod.config
             podcmd kmake \
                 -C $lnx_src \
+                KCONFIG_ALLCONFIG=1 \
                 LLVM=1 \
                 O=.build/(uname -m) \
                 distclean allmodconfig all
