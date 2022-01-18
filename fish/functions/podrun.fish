@@ -53,9 +53,10 @@ function podrun -d "Runs 'podman run' with arguments to facilitate building in c
         --rm \
         --tty
 
-    # Mount in home directory for access to files
+    # Mount in home directory for access to files and timezone file for accurate time
     set -a podman_args \
-        --volume=$HOME:$HOME
+        --volume=$HOME:$HOME \
+        --volume=(readlink -f /etc/localtime):/etc/localtime:ro
 
     # If the main folder that holds my files is not the same as the home
     # folder, mount that in too
