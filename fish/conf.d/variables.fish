@@ -17,7 +17,7 @@ end
 set -l user (id -un)
 if test -z "$LOCATION"
     switch $user@$hostname
-        case nathan@asus
+        case nathan@asus-intel-core-4210U
             set -U LOCATION laptop
         case nathan@hp-amd-ryzen-4300G
             set -U LOCATION desktop
