@@ -18,6 +18,7 @@ function install_packages() {
         git
         glibc-devel
         glibc-static
+        jq
         libfl-devel
         make
         patch
@@ -26,6 +27,7 @@ function install_packages() {
         tar
         texinfo-tex
         vim
+        zoxide
 
         # Kernel
         bc

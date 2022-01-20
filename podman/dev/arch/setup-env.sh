@@ -34,11 +34,13 @@ function install_packages() {
         hyperfine
         fish
         fzf
+        jq
         less
         python
         python-setuptools
         python-yaml
         vim
+        zoxide
 
         # Kernel
         aarch64-linux-gnu-gcc
