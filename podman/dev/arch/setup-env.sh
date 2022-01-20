@@ -37,6 +37,9 @@ function install_packages() {
         jq
         less
         openssh
+        perl-authen-sasl
+        perl-mime-tools
+        perl-net-smtp-ssl
         python
         python-dkim
         python-requests
