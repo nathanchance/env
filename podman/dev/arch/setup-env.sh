@@ -36,6 +36,7 @@ function install_packages() {
         fzf
         jq
         less
+        openssh
         python
         python-setuptools
         python-yaml

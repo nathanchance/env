@@ -21,6 +21,7 @@ function install_packages() {
         jq
         libfl-devel
         make
+        openssh
         patch
         python2
         python3
