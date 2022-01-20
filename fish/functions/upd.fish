@@ -33,6 +33,8 @@ function upd -d "Runs the update command for the current distro or downloads/upd
                 set git_clone_args --recursive
                 set git_urls https://git.kernel.org/pub/scm/utils/b4/b4.git
                 set submodules true
+            case distrobox
+                set git_urls https://github.com/89luca89/distrobox
             case tuxmake
                 set git_urls https://gitlab.com/Linaro/tuxmake.git
             case yapf
