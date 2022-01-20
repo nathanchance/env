@@ -40,6 +40,7 @@ function install_packages() {
         perl-authen-sasl
         perl-mime-tools
         perl-net-smtp-ssl
+        php
         python
         python-dkim
         python-requests
