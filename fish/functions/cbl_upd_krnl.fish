@@ -29,7 +29,7 @@ function cbl_upd_krnl -d "Update machine's kernel"
 
             scp nathan@$SERVER_IP:/home/nathan/github/env/pkgbuilds/$krnl/'*'.tar.zst .; or return
 
-            yay -U --noconfirm *$krnl*.tar.zst
+            sudo pacman -U --noconfirm *$krnl*.tar.zst
 
             if test "$reboot" = true
                 if test -d /sys/firmware/efi
