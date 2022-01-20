@@ -38,6 +38,8 @@ function install_packages() {
         less
         openssh
         python
+        python-dkim
+        python-requests
         python-setuptools
         python-yaml
         vim
