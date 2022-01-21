@@ -36,6 +36,7 @@ function install_packages() {
         fzf
         jq
         less
+        mutt
         openssh
         perl-authen-sasl
         perl-mime-tools
