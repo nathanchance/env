@@ -1,0 +1,40 @@
+From ef9d4c09a7a4db1d5732a4896654a8dcadabb887 Mon Sep 17 00:00:00 2001
+From: Fabian Homborg <FHomborg@gmail.com>
+Date: Sat, 24 Jul 2021 09:28:39 +0200
+Subject: [PATCH 1/5] UPSTREAM: Revert "Clear to eol before outputting line in
+ multi-line prompt"
+
+This means, if we repaint with a shorter prompt, we won't overwrite the longer parts.
+
+This reintroduces #8002, but that's a much rarer usecase - having a prompt that fills the entire screen,
+in certain terminals.
+
+This reverts commit d3ceba107e88b6c6e1a0358ebcb30366aeef653f.
+
+Fixes #8163.
+
+(cherry picked from commit 4bb1c72a910eb267704c1c4eed627c861abb017b)
+Signed-off-by: Nathan Chancellor <nathan@kernel.org>
+---
+ src/screen.cpp | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/src/screen.cpp b/src/screen.cpp
+index 7ef191fe3..715b3332d 100644
+--- a/src/screen.cpp
++++ b/src/screen.cpp
+@@ -740,10 +740,10 @@ static void s_update(screen_t *scr, const wcstring &left_prompt, const wcstring
+         s_move(scr, 0, 0);
+         size_t start = 0;
+         for (const size_t line_break : left_prompt_layout.line_breaks) {
++            s_write_str(scr, left_prompt.substr(start, line_break - start));
+             if (clr_eol) {
+                 s_write_mbs(scr, clr_eol);
+             }
+-            s_write_str(scr, left_prompt.substr(start, line_break - start));
+             start = line_break;
+         }
+         s_write_str(scr, left_prompt.substr(start));
+-- 
+2.34.1
+

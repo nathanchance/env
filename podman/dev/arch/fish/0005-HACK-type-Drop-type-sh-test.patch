@@ -1,3 +1,15 @@
+From 6bf783405e22a8270876560b33520b0481177577 Mon Sep 17 00:00:00 2001
+From: Nathan Chancellor <nathan@kernel.org>
+Date: Fri, 21 Jan 2022 16:13:17 -0700
+Subject: [PATCH 5/5] HACK: type: Drop 'type sh' test
+
+Does not work in a container.
+
+Signed-off-by: Nathan Chancellor <nathan@kernel.org>
+---
+ tests/checks/type.fish | 5 -----
+ 1 file changed, 5 deletions(-)
+
 diff --git a/tests/checks/type.fish b/tests/checks/type.fish
 index 85a2d142a..e325f6cae 100644
 --- a/tests/checks/type.fish
@@ -14,3 +26,6 @@ index 85a2d142a..e325f6cae 100644
  # Test that we print a function definition.
  # The exact definition and description here depends on the system, so we'll ignore the actual code.
  type realpath | grep -v "^  *"
+-- 
+2.34.1
+

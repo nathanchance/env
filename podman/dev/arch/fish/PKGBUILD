@@ -1,0 +1,76 @@
+# Maintainer: Levente Polyak <anthraxx[at]archlinux[dot]org>
+# Contributor: Bartłomiej Piotrowski <bpiotrowski@archlinux.org>
+# Contributor: Kaiting Chen <kaitocracy@gmail.com>
+# Contributor: Abhishek Dasgupta <abhidg@gmail.com>
+# Contributor: Eric Belanger <eric@archlinux.org>
+# Contributor: Jan Fader <jan.fader@web.de>
+
+pkgname=fish
+pkgver=3.3.1
+pkgrel=1
+pkgdesc='Smart and user friendly shell intended mostly for interactive use'
+url='https://fishshell.com/'
+arch=('x86_64')
+license=('GPL2')
+depends=('glibc' 'gcc-libs' 'ncurses' 'pcre2')
+optdepends=('python: man page completion parser / web config tool'
+            'pkgfile: command-not-found hook')
+makedepends=('cmake' 'python-sphinx')
+checkdepends=('expect' 'procps-ng')
+install=fish.install
+backup=(etc/fish/config.fish)
+source=(https://github.com/fish-shell/fish-shell/releases/download/${pkgver}/${pkgname}-${pkgver}.tar.xz{,.asc}
+        0001-UPSTREAM-Revert-Clear-to-eol-before-outputting-line-.patch
+        0002-BACKPORT-Drop-tests-with-resetting-match-start-insid.patch
+        0003-UPSTREAM-Make-zombie-test-smarter.patch
+        0004-UPSTREAM-Fix-detection-of-zombies-in-test.patch
+        0005-HACK-type-Drop-type-sh-test.patch)
+validpgpkeys=(003837986104878835FA516D7A67D962D88A709A) # David Adam <zanchey@gmail.com>
+sha256sums=('b5b4ee1a5269762cbbe993a4bd6507e675e4100ce9bbe84214a5eeb2b19fae89'
+            'SKIP'
+            'acc2a09c5afdc993ac9afd07e5159a4146407c4d79adc4a54167f7390534cf9a'
+            '92717340f518dc24cda47d22e6a009d852704c9d86e06b2973e4d4437b527d17'
+            'a69ec6d655cc146fcfe04a578b3e7f49a1779d8c6979961e976522c8f60d9d32'
+            'c01c5427a74fa91c0b4773d3a8f03b1c8cc0f97cc621974488a53c3bc9018928'
+            'b5349b769ae49da43142fcee99520f76db3f4fb042be61066178a2e736c00903')
+sha512sums=('fc50ca44fab3f2d942284d4f714150f7ccf1e49c73da36f8d4ae4a33a9b3280f98bed15848839f5d443b4274fd0ff90174bafa6a8e9a4da226dda63d7766a660'
+            'SKIP'
+            'b32843aaef62c4e00742e0ea8f334e63cc93c8574608cc88e623a346a8da33a1f23e5e98fcf94a5a721e107b1c22b4ddb723d4f0f5ec5faaf65794d7d179a157'
+            '45ba9c23d18fc9a6e73147ee25aa44930a5dad731e8afcc0e0ffb530f06dbb439abdf1d84334726ddb9912fbe8aee071a41e154f25df169150e852dc83d148d0'
+            '5a82228d1178059f6628d2ea1cb738e4b6cb673c129117628be56feaf77798d2fed42a10a021856afdc70f9f5d5eb47bcbcdfcd8e6b003bfdb1406e547f6450f'
+            '635d07dbc595885bb97b661a970fb4c68414a9cc0ec227edd3f65e8a02f480725d9cf02583650e8ba997c75481f48a56be46ca21e8b0ec46aecaf466c6fc2c6e'
+            '996c32437b03320b080d6c1a0f9b111376049e2f686152d172b9a630f634b962622d4771656ce9ca428b72ba71352b85621e9ac44d44740eacd71ad3c70fff9c')
+
+prepare() {
+  cd ${pkgname}-${pkgver}
+  patch -Np1 < ../0001-UPSTREAM-Revert-Clear-to-eol-before-outputting-line-.patch
+  patch -Np1 < ../0002-BACKPORT-Drop-tests-with-resetting-match-start-insid.patch
+  patch -Np1 < ../0003-UPSTREAM-Make-zombie-test-smarter.patch
+  patch -Np1 < ../0004-UPSTREAM-Fix-detection-of-zombies-in-test.patch
+  patch -Np1 < ../0005-HACK-type-Drop-type-sh-test.patch
+}
+
+build() {
+  cd ${pkgname}-${pkgver}
+  export CXXFLAGS+=" ${CPPFLAGS}"
+  cmake \
+    -B build \
+    -DCMAKE_INSTALL_PREFIX=/usr \
+    -DCMAKE_INSTALL_SYSCONFDIR=/etc \
+    -DCMAKE_BUILD_TYPE=None \
+    -DBUILD_DOCS=True \
+    -Wno-dev
+  make -C build VERBOSE=1
+}
+
+check() {
+  cd ${pkgname}-${pkgver}
+  make -C build test
+}
+
+package() {
+  cd ${pkgname}-${pkgver}
+  make -C build DESTDIR="${pkgdir}" install
+}
+
+# vim: ts=2 sw=2 et:

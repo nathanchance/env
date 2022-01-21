@@ -31,6 +31,12 @@ function build_cvise
     makepkg -irs --noconfirm
 end
 
+function build_fish
+    cd $HOME/fish; or exit
+    makepkg -irs --noconfirm
+end
+
 check_user
 setup_gpg
 build_cvise
+build_fish

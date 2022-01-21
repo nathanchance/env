@@ -1,29 +1,32 @@
-From 6a4e8b07c98b3c320370eedc5c20c4fd6c22d752 Mon Sep 17 00:00:00 2001
+From ef355872ede7c2ae7d1ba95517b4b2db80d4fbfc Mon Sep 17 00:00:00 2001
 From: Fabian Homborg <FHomborg@gmail.com>
 Date: Thu, 14 Oct 2021 18:18:51 +0200
-Subject: [PATCH] Drop tests with resetting match start inside lookaround
+Subject: [PATCH 2/5] BACKPORT: Drop tests with resetting match start inside
+ lookaround
 
 This seems to be of little use
 
 Fixes #8353
+
+(cherry picked from commit ec8844d834cc9fe626e9fc326c6f5410341d532a)
+Signed-off-by: Nathan Chancellor <nathan@kernel.org>
 ---
- src/fish_tests.cpp | 3 ---
- 1 file changed, 3 deletions(-)
+ src/fish_tests.cpp | 2 --
+ 1 file changed, 2 deletions(-)
 
 diff --git a/src/fish_tests.cpp b/src/fish_tests.cpp
-index 2b46986f2..3af168598 100644
+index 2b46986f2..f1f486599 100644
 --- a/src/fish_tests.cpp
 +++ b/src/fish_tests.cpp
-@@ -5723,9 +5723,6 @@ static void test_string() {
+@@ -5723,8 +5723,6 @@ static void test_string() {
          {{L"string", L"match", L"-r", L"-a", L"a*", L"b", 0}, STATUS_CMD_OK, L"\n\n"},
          {{L"string", L"match", L"-r", L"foo\\Kbar", L"foobar", 0}, STATUS_CMD_OK, L"bar\n"},
          {{L"string", L"match", L"-r", L"(foo)\\Kbar", L"foobar", 0}, STATUS_CMD_OK, L"bar\nfoo\n"},
 -        {{L"string", L"match", L"-r", L"(?=ab\\K)", L"ab", 0}, STATUS_CMD_OK, L"\n"},
 -        {{L"string", L"match", L"-r", L"(?=ab\\K)..(?=cd\\K)", L"abcd", 0}, STATUS_CMD_OK, L"\n"},
--
+ 
          {{L"string", L"replace", 0}, STATUS_INVALID_ARGS, L""},
          {{L"string", L"replace", L"", 0}, STATUS_INVALID_ARGS, L""},
-         {{L"string", L"replace", L"", L"", 0}, STATUS_CMD_ERROR, L""},
 -- 
 2.34.1
 
