@@ -16,15 +16,21 @@ function install_packages() {
         fish
         fzf
         git
+        git-email
         glibc-devel
         glibc-static
         jq
         libfl-devel
         make
+        mutt
         openssh
         patch
+        php
         python2
         python3
+        python3-dkimpy
+        python3-dns
+        python3-requests
         tar
         texinfo-tex
         vim
