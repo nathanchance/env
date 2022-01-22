@@ -13,11 +13,17 @@ function install_packages() {
         findutils
         fish
         git
+        git-email
         make
+        mutt
         patch
+        php
         python2
         python3
         python3-chardet
+        python3-dns
+        python3-dkimpy
+        python3-requests
         shadow
         sudo
         tar
@@ -30,10 +36,7 @@ function install_packages() {
         bison
         bzip2
         cpio
-        cross-arm-gcc11
-        cross-mips-gcc11
-        cross-ppc64-gcc11
-        cross-s390x-gcc11
+        cross-{arm,mips,ppc64,s390x}-gcc11
         dwarves
         flex
         gcc
@@ -45,11 +48,7 @@ function install_packages() {
         lzop
         ncurses-devel
         perl
-        qemu-arm
-        qemu-extra
-        qemu-ppc
-        qemu-s390x
-        qemu-x86
+        qemu-{arm,extra,ppc,s390x,x86}
         rsync
         socat
         u-boot-tools
