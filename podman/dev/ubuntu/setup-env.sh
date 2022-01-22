@@ -29,6 +29,7 @@ function install_packages() {
         gzip
         locales
         python3
+        sudo
         vim
         wget
 

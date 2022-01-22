@@ -10,6 +10,7 @@ function install_packages() {
         ccache
         curl
         cvise
+        findutils
         fish
         git
         make
@@ -17,8 +18,11 @@ function install_packages() {
         python2
         python3
         python3-chardet
+        shadow
+        sudo
         tar
         texinfo
+        util-linux
         vim
 
         # Kernel

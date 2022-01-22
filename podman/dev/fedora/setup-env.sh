@@ -24,6 +24,7 @@ function install_packages() {
         make
         mutt
         openssh
+        passwd
         patch
         php
         python2
