@@ -31,6 +31,7 @@ function install_packages() {
         # Generic
         ccache
         git
+        hub
         hyperfine
         fish
         fzf
