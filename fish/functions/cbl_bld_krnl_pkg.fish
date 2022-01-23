@@ -51,8 +51,20 @@ function cbl_bld_krnl_pkg -d "Build ClangBuiltLinux Arch Linux kernel package"
 
     switch $pkg
         case linux-mainline-llvm
-            # drm/i915: Avoid bitwise vs logical OR warning in snb_wm_latency_quirk()
-            crl 'https://cgit.freedesktop.org/drm/drm-intel/patch/?id=2e70570656adfe1c5d9a29940faa348d5f132199' | patch -Np1; or return
+            # https://lore.kernel.org/r/YcC1CobR%2Fn0tJhdV@archlinux-ax161/
+            echo 'diff --git a/drivers/hv/vmbus_drv.c b/drivers/hv/vmbus_drv.c
+index 17bf55fe3169..2376ee484362 100644
+--- a/drivers/hv/vmbus_drv.c
++++ b/drivers/hv/vmbus_drv.c
+@@ -2079,7 +2079,7 @@ struct hv_device *vmbus_device_create(const guid_t *type,
+ 	return child_device_obj;
+ }
+ 
+-static u64 vmbus_dma_mask = DMA_BIT_MASK(64);
++static u64 vmbus_dma_mask = ~0ULL;
+ /*
+  * vmbus_device_register - Register the child device
+  */' | patch -Np1; or return
 
         case linux-next-llvm
             # https://lore.kernel.org/r/YcC1CobR%2Fn0tJhdV@archlinux-ax161/
