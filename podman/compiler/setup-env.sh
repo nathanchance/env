@@ -78,6 +78,7 @@ function install_packages_apt() {
         flex
         git
         gzip
+        iproute2
         kmod
         libc-dev
         libdw-dev
