@@ -16,7 +16,7 @@ function kmake -d "Run make with all cores and adjust PATH temporarily"
     while test $i -le (count $argv)
         set arg $argv[$i]
         switch $arg
-            case 'CCACHE=*' 'NO_CCACHE=*'
+            case 'CCACHE=*' 'NO_CCACHE=*' 'PO=*'
                 set arg (string split = $arg)
                 set $arg[1] $arg[2]
 
