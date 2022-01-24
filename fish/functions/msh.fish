@@ -15,7 +15,7 @@ function msh -d "Shorthand for mosh -o" -w mosh
     switch $msh_args
         case dsktp
             if test "$tailscale" = true
-                set ip 100.109.76.49
+                set ip 100.127.171.46
             else
                 set ip 192.168.4.177
             end
