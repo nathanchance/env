@@ -156,23 +156,22 @@ function upd -d "Runs the update command for the current distro or downloads/upd
                     crl $url | tar -xzf -
                     install -Dvm755 fzf $binary
 
-                case hub
+                case gh
                     switch $arch
+                        case arm
+                            set arch armv6
                         case x86_64
                             set arch amd64
                     end
 
-                    set repo github/hub
+                    set repo cli/cli
                     set ver (glr $repo)
-                    set url https://github.com/$repo/releases/download/$ver/hub-linux-$arch-(string replace "v" "" $ver).tgz
+                    set url https://github.com/$repo/releases/download/$ver/gh_(string replace "v" "" $ver)_linux_$arch.tar.gz
 
                     crl $url | tar -xzf -
-                    cd (string replace ".tgz" "" (basename $url)); or return
+                    cd (string replace ".tar.gz" "" (basename $url)); or return
 
-                    install -Dvm755 bin/hub $binary
-                    install -Dvm644 etc/hub.fish_completion $__fish_config_dir/completions/hub.fish
-                    install -Dvm644 share/vim/vimfiles/ftdetect/pullrequest.vim $HOME/.vim/ftdetect/pullrequest.vim
-                    install -Dvm644 share/vim/vimfiles/syntax/pullrequest.vim $HOME/.vim/syntax/pullrequest.vim
+                    install -Dvm755 bin/gh $binary
 
                 case repo
                     mkdir -p (dirname $binary)

@@ -189,7 +189,7 @@ out.*/
         decrypt_gpg_file muttrc.notifier
         decrypt_gpg_file config.ini $HOME/.config/tuxsuite/config.ini
 
-        hub api; or return
+        gh auth login; or return
     end
 
     # git repos and source folders
@@ -215,7 +215,7 @@ out.*/
     for github_repo in $github_repos
         set folder $GITHUB_FOLDER/$github_repo
         if not test -d $folder
-            hub clone $github_repo $folder; or return
+            gh repo clone $github_repo $folder; or return
         end
     end
     git -C $GITHUB_FOLDER/hugo-files submodule update --init --recursive
