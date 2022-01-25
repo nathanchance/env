@@ -1,8 +1,8 @@
 #!/usr/bin/env fish
 # SPDX-License-Identifier: MIT
-# Copyright (C) 2021-2022 Nathan Chancellor
+# Copyright (C) 2022 Nathan Chancellor
 
-function cbl_bld_krnl_deb -d "Build a .deb kernel package"
+function cbl_bld_krnl_rpm -d "Build a .rpm kernel package"
     in_container; or return
     in_kernel_tree; or return
 
@@ -29,13 +29,12 @@ function cbl_bld_krnl_deb -d "Build a .deb kernel package"
         end
     end
 
-    cbl_gen_ubuntuconfig $arch
+    cbl_gen_fedoraconfig $arch
 
     kmake \
        ARCH=$arch \
        HOSTCFLAGS=-Wno-deprecated-declarations \
        LLVM=1 \
-       $KMAKE_DEB_ARGS \
-       O=.build/$arch \
-       olddefconfig bindeb-pkg
+       RPMOPTS="--define '_topdir $PWD/rpmbuild'" \
+       olddefconfig binrpm-pkg
 end
