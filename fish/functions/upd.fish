@@ -173,6 +173,22 @@ function upd -d "Runs the update command for the current distro or downloads/upd
 
                     install -Dvm755 bin/gh $binary
 
+                case iosevka
+                    if in_container -q
+                        print_error "Iosevka should be installed on the host, not the container!"
+                        continue
+                    end
+
+                    set repo be5invis/Iosevka
+                    set ver (glr $repo)
+                    set url https://github.com/$repo/releases/download/$ver/super-ttc-iosevka-ss08-(string replace "v" "" $ver).zip
+
+                    crl -O $url; or return
+                    unzip (basename $url); or return
+
+                    install -Dvm644 iosevka-ss08.ttc $HOME/.local/share/fonts/iosevka-ss08.ttc
+                    fc-cache -fv
+
                 case repo
                     mkdir -p (dirname $binary)
                     crl -o $binary https://storage.googleapis.com/git-repo-downloads/repo
