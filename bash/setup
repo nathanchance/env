@@ -74,7 +74,7 @@ function arch_root_setup() { (
         debootstrap
         dpkg
         git
-        hub
+        github-cli
         hyperfine
         jq
         mutt
