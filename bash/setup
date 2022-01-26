@@ -173,7 +173,10 @@ EOF
         systemctl enable vmware-vmblock-fuse.service
     fi
 
-    if ! ${WSL}; then
+    if ${WSL}; then
+        # Make /tmp a true tmpfs, needed for podman and avoiding stale sockets after a reboot
+        printf "tmpfs\t/tmp\ttmpfs\tdefaults\t0\t0\n" | tee -a /etc/fstab
+    else
         # Set SSH options
         systemctl enable sshd.service
         systemctl start sshd.service
