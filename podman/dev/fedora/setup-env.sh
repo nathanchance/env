@@ -26,7 +26,9 @@ function install_packages() {
         openssh
         passwd
         patch
+        pbzip2
         php
+        pigz
         python2
         python3
         python3-dkimpy
@@ -34,6 +36,7 @@ function install_packages() {
         python3-requests
         tar
         texinfo-tex
+        unzip
         vim
         zoxide
 

@@ -39,15 +39,18 @@ function install_packages() {
         less
         mutt
         openssh
+        pbzip2
         perl-authen-sasl
         perl-mime-tools
         perl-net-smtp-ssl
         php
+        pigz
         python
         python-dkim
         python-requests
         python-setuptools
         python-yaml
+        unzip
         vim
         zoxide
 
