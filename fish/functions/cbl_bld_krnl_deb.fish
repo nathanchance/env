@@ -32,10 +32,10 @@ function cbl_bld_krnl_deb -d "Build a .deb kernel package"
     cbl_gen_ubuntuconfig $arch
 
     kmake \
-       ARCH=$arch \
-       HOSTCFLAGS=-Wno-deprecated-declarations \
-       LLVM=1 \
-       $KMAKE_DEB_ARGS \
-       O=.build/$arch \
-       olddefconfig bindeb-pkg
+        ARCH=$arch \
+        HOSTCFLAGS=-Wno-deprecated-declarations \
+        LLVM=1 \
+        $KMAKE_DEB_ARGS \
+        O=.build/$arch \
+        olddefconfig bindeb-pkg
 end

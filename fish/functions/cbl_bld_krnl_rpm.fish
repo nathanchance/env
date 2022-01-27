@@ -32,9 +32,9 @@ function cbl_bld_krnl_rpm -d "Build a .rpm kernel package"
     cbl_gen_fedoraconfig $arch
 
     kmake \
-       ARCH=$arch \
-       HOSTCFLAGS=-Wno-deprecated-declarations \
-       LLVM=1 \
-       RPMOPTS="--define '_topdir $PWD/rpmbuild'" \
-       olddefconfig binrpm-pkg
+        ARCH=$arch \
+        HOSTCFLAGS=-Wno-deprecated-declarations \
+        LLVM=1 \
+        RPMOPTS="--define '_topdir $PWD/rpmbuild'" \
+        olddefconfig binrpm-pkg
 end
