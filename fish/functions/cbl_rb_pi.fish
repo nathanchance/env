@@ -20,6 +20,8 @@ function cbl_rb_pi -d "Rebase Raspberry Pi kernel on latest linux-next"
 
     git rh origin/master
 
+    set -a patches https://lore.kernel.org/r/20220126234017.3619108-2-robert.hancock@calian.com/ # [PATCH v8 1/3] usb: dwc3: xilinx: fix uninitialized return value
+
     for patch in $patches
         b4 shazam -l -P _ -s $patch; or return
     end
