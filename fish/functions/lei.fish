@@ -3,10 +3,7 @@
 # Copyright (C) 2021-2022 Nathan Chancellor
 
 function lei -d "Runs lei in a Podman container"
-    if in_container -q
-        print_error "This function needs to be run in the host OS!"
-        return 1
-    end
+    in_container_msg -h; or return
 
     if command -q podman
         podman run \

@@ -174,7 +174,7 @@ function upd -d "Runs the update command for the current distro or downloads/upd
                     install -Dvm755 bin/gh $binary
 
                 case iosevka
-                    if in_container -q
+                    if in_container
                         print_error "Iosevka should be installed on the host, not the container!"
                         continue
                     end

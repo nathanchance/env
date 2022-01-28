@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: MIT
 # Copyright (C) 2021-2022 Nathan Chancellor
 
-if in_container -q
+if in_container
     set -l folder
     for folder in /qemu /tc /binutils /llvm
         fish_add_path -gm $folder/bin

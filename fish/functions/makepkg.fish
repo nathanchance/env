@@ -3,7 +3,7 @@
 # Copyright (C) 2021-2022 Nathan Chancellor
 
 function makepkg -d "Runs makepkg in a container"
-    if in_container -q
+    if in_container
         command makepkg $argv
     else
         if not test -f PKGBUILD
