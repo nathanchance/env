@@ -39,6 +39,7 @@ function install_packages() {
         less
         mutt
         openssh
+        pacman-contrib
         pbzip2
         perl-authen-sasl
         perl-mime-tools
