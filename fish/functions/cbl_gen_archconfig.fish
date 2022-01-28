@@ -73,10 +73,9 @@ function cbl_gen_archconfig -d "Generate a configuration file for Arch Linux"
     # Step 5: Run through olddefconfig with Clang
     podcmd kmake -C $src KCONFIG_CONFIG=$cfg LLVM=1 LLVM_IAS=1 olddefconfig
 
-    # Step 6: Disable BTF debug info and enable ThinLTO
+    # Step 6: Enable ThinLTO
     $src/scripts/config \
         --file $cfg \
-        -d DEBUG_INFO_BTF \
         -d LTO_NONE \
         -e LTO_CLANG_THIN \
         $config_args
