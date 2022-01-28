@@ -67,6 +67,9 @@ index 17bf55fe3169..2376ee484362 100644
   */' | patch -Np1; or return
 
         case linux-next-llvm
+            # [PATCH] drm/amdgpu: Fix uninitialized variable use warning
+            b4 am -o - https://lore.kernel.org/r/20220128064019.2469388-1-lijo.lazar@amd.com/ | patch -Np1; or return
+
             # https://lore.kernel.org/r/YcC1CobR%2Fn0tJhdV@archlinux-ax161/
             echo 'diff --git a/drivers/hv/vmbus_drv.c b/drivers/hv/vmbus_drv.c
 index 17bf55fe3169..2376ee484362 100644

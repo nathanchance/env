@@ -20,7 +20,7 @@ function cbl_rb_pi -d "Rebase Raspberry Pi kernel on latest linux-next"
 
     git rh origin/master
 
-    set -a patches https://lore.kernel.org/r/20220126234017.3619108-2-robert.hancock@calian.com/ # [PATCH v8 1/3] usb: dwc3: xilinx: fix uninitialized return value
+    set -a patches https://lore.kernel.org/r/20220127221500.177021-1-robert.hancock@calian.com/ # [PATCH] usb: dwc3: xilinx: fix uninitialized return value
 
     for patch in $patches
         b4 shazam -l -P _ -s $patch; or return
@@ -50,11 +50,20 @@ function cbl_rb_pi -d "Rebase Raspberry Pi kernel on latest linux-next"
     # arm64 hardening
     scripts/config \
         --file arch/arm64/configs/defconfig \
-        -d DEBUG_INFO \
         -d LTO_NONE \
         -e CFI_CLANG \
         -e LTO_CLANG_THIN \
         -e SHADOW_CALL_STACK
+
+    # Disable DEBUG_INFO for smaller builds
+    if grep -q "config DEBUG_INFO_NONE" lib/Kconfig.debug
+        set sc_args -e DEBUG_INFO_NONE
+    else
+        set sc_args -d DEBUG_INFO
+    end
+    scripts/config \
+        --file arch/arm64/configs/defconfig \
+        $sc_args
 
     git ac -m "arm{,64}: Customize defconfig"
 
