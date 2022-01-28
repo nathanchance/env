@@ -86,5 +86,8 @@ function cbl_gen_archconfig -d "Generate a configuration file for Arch Linux"
         podcmd kmake -C $src KCONFIG_CONFIG=$cfg LLVM=1 LLVM_IAS=1 menuconfig
     end
 
+    # Step 8: Update checksums
+    updpkgsums
+
     popd
 end
