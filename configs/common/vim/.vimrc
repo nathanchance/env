@@ -48,6 +48,10 @@ inoremap <esc>[1;5C <C-o>$
 nnoremap <esc>[1;5D 0
 nnoremap <esc>[1;5C $
 
+" Map Alt + left/right arrow keys to move one word like most shells
+noremap <esc>[1;3C w
+noremap <esc>[1;3D b
+
 " Move to beginning/end of line or skip letters
 nnoremap B 0
 nnoremap E $
