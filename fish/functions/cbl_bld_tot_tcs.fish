@@ -3,6 +3,8 @@
 # Copyright (C) 2021-2022 Nathan Chancellor
 
 function cbl_bld_tot_tcs -d "Build LLVM and binutils from source for kernel development"
+    in_container_msg -c; or return
+
     for arg in $argv
         switch $arg
             case --lto
@@ -75,13 +77,13 @@ function cbl_bld_tot_tcs -d "Build LLVM and binutils from source for kernel deve
         git -C $bntls pull --rebase; or return
 
         set bntls_install $CBL_TC_STOW_BNTL/$date_time-(git -C $bntls sh -s --format=%H origin/master)
-        if not podcmd -s PATH="/usr/lib/ccache/bin:$PATH" $CBL_TC_BLD/build-binutils.py $bld_bntls_args --install-folder $bntls_install
+        if not PATH="/usr/lib/ccache/bin:$PATH" $CBL_TC_BLD/build-binutils.py $bld_bntls_args --install-folder $bntls_install
             set message "build-binutils.py failed"
             print_error "$message"
             tg_msg "$message"
             return 1
         end
-        podcmd stripall $bntls_install
+        stripall $bntls_install
         ln -fnrsv $bntls_install (dirname $CBL_TC_BNTL)
 
         set stow_pkgs (basename (dirname $CBL_TC_BNTL))
@@ -121,7 +123,7 @@ function cbl_bld_tot_tcs -d "Build LLVM and binutils from source for kernel deve
     end
 
     set llvm_install $CBL_TC_STOW_LLVM/$date_time-(git -C $llvm_project sh -s --format=%H origin/main)
-    if not podcmd -s $CBL_TC_BLD/build-llvm.py \
+    if not $CBL_TC_BLD/build-llvm.py \
             --assertions \
             --check-targets $check_targets \
             --install-folder $llvm_install \
@@ -132,7 +134,7 @@ function cbl_bld_tot_tcs -d "Build LLVM and binutils from source for kernel deve
         tg_msg "$message"
         return 1
     end
-    podcmd stripall $llvm_install
+    stripall $llvm_install
     ln -fnrsv $llvm_install (dirname $CBL_TC_LLVM)
 
     set -a stow_pkgs (basename (dirname $CBL_TC_LLVM))
