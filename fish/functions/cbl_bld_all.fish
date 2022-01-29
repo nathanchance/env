@@ -3,6 +3,8 @@
 # Copyright (C) 2021-2022 Nathan Chancellor
 
 function cbl_bld_all -d "Build latest LLVM and test it against several Linux kernels"
+    in_container_msg -c; or return
+
     switch $LOCATION
         case pi
             # Update linux-next
@@ -25,7 +27,7 @@ function cbl_bld_all -d "Build latest LLVM and test it against several Linux ker
                     case '*'
                         set kboot_arch $arch
                 end
-                podcmd kboot -a $kboot_arch -k $CBL_SRC/linux-next/.build/$arch
+                kboot -a $kboot_arch -k $CBL_SRC/linux-next/.build/$arch
             end
 
         case '*'

@@ -3,13 +3,15 @@
 # Copyright (C) 2021-2022 Nathan Chancellor
 
 function cbl_bld_all_krnl -d "Build all kernels for ClangBuiltLinux testing"
+    in_container_msg -c; or return
+
     switch $LOCATION
         case desktop laptop
             cbl_test_kvm
 
             set lnx_src $CBL_SRC/linux
             echo CONFIG_WERROR=n >$lnx_src/allmod.config
-            podcmd kmake \
+            kmake \
                 -C $lnx_src \
                 KCONFIG_ALLCONFIG=1 \
                 LLVM=1 \
@@ -27,7 +29,7 @@ function cbl_bld_all_krnl -d "Build all kernels for ClangBuiltLinux testing"
                         set image bzImage
                 end
 
-                podcmd kmake \
+                kmake \
                     -C $CBL_SRC/linux-next \
                     ARCH=$arch \
                     HOSTCFLAGS=-Wno-deprecated-declarations \
@@ -51,7 +53,7 @@ function cbl_bld_all_krnl -d "Build all kernels for ClangBuiltLinux testing"
                 cbl_lkt --tree $tree
             end
             for arch in arm arm64
-                podcmd $CBL_BLD/pi-scripts/build.fish $arch $CBL_BLD/rpi
+                $CBL_BLD/pi-scripts/build.fish $arch $CBL_BLD/rpi
             end
             $CBL_BLD/wsl2/bin/build.fish
             for krnl in linux-next-llvm

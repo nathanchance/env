@@ -3,6 +3,8 @@
 # Copyright (C) 2021-2022 Nathan Chancellor
 
 function cbl_lkt -d "Tests a Linux kernel with llvm-kernel-testing"
+    in_container_msg -c; or return
+
     set i 1
     while test $i -le (count $argv)
         set arg $argv[$i]
@@ -23,11 +25,6 @@ function cbl_lkt -d "Tests a Linux kernel with llvm-kernel-testing"
             case --defconfigs --no-ccache
                 set -a test_sh_args $arg
 
-            case -i --image
-                set next (math $i + 1)
-                set podman_image $argv[$next]
-                set i $next
-
             case -l --linux-src
                 set next (math $i + 1)
                 set linux_src $argv[$next]
@@ -45,6 +42,9 @@ function cbl_lkt -d "Tests a Linux kernel with llvm-kernel-testing"
                 set next (math $i + 1)
                 set qemu_prefix $argv[$next]
                 set i $next
+
+            case -s --system-binaries
+                set system_binaries true
 
             case -t --tc-prefix
                 set next (math $i + 1)
@@ -73,7 +73,7 @@ function cbl_lkt -d "Tests a Linux kernel with llvm-kernel-testing"
     end
 
     # We assume that the dependencies are available in an image other than nathan/dev/arch
-    if test -z "$podman_image"
+    if test "$system_binaries" != true
         if test -z "$llvm_prefix$binutils_prefix$tc_prefix"
             set tc_prefix $CBL_TC
         end
@@ -175,7 +175,7 @@ function cbl_lkt -d "Tests a Linux kernel with llvm-kernel-testing"
     git -C $CBL_LKT pull -qr
 
     set fish_trace 1
-    podcmd $podman_image $CBL_LKT/test.sh \
+    $CBL_LKT/test.sh \
         --linux-src $linux_src \
         --log-dir $log_dir \
         $test_sh_args; or return

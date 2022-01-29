@@ -3,6 +3,8 @@
 # Copyright (C) 2021-2022 Nathan Chancellor
 
 function cbl_bld_qemu -d "Build QEMU for use with ClangBuiltLinux"
+    in_container_msg -c; or return
+
     for arg in $argv
         switch $arg
             case -u --update
@@ -45,8 +47,8 @@ function cbl_bld_qemu -d "Build QEMU for use with ClangBuiltLinux"
         mkdir -p $qemu_bld
         pushd $qemu_bld; or return
 
-        podcmd -s $qemu_src/configure --prefix=$PREFIX; or return
-        podcmd -s make -skj(nproc) install; or return
+        $qemu_src/configure --prefix=$PREFIX; or return
+        make -skj(nproc) install; or return
         popd
     end
 

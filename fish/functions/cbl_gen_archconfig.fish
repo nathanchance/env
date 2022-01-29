@@ -3,6 +3,8 @@
 # Copyright (C) 2021-2022 Nathan Chancellor
 
 function cbl_gen_archconfig -d "Generate a configuration file for Arch Linux"
+    in_container_msg -c; or return
+
     for arg in $argv
         switch $arg
             case --cfi --cfi-permissive
@@ -51,12 +53,12 @@ function cbl_gen_archconfig -d "Generate a configuration file for Arch Linux"
         -m DRM
 
     # Step 3: Run olddefconfig
-    podcmd kmake -C $src KCONFIG_CONFIG=$cfg olddefconfig
+    kmake -C $src KCONFIG_CONFIG=$cfg olddefconfig
 
     # Step 4: Run localmodconfig if requested
     if test "$config" = local
         cp $cfg $src_cfg
-        podcmd kmake -C $src localmodconfig
+        kmake -C $src localmodconfig
         cp $src_cfg $cfg
         # A few configs might need to stay around for various reasons, build them as modules
         $src/scripts/config \
@@ -67,11 +69,11 @@ function cbl_gen_archconfig -d "Generate a configuration file for Arch Linux"
             -m TUN \
             -m USB_HID \
             --set-val BLK_DEV_LOOP_MIN_COUNT 0
-        podcmd kmake -C $src KCONFIG_CONFIG=$cfg olddefconfig
+        kmake -C $src KCONFIG_CONFIG=$cfg olddefconfig
     end
 
     # Step 5: Run through olddefconfig with Clang
-    podcmd kmake -C $src KCONFIG_CONFIG=$cfg LLVM=1 LLVM_IAS=1 olddefconfig
+    kmake -C $src KCONFIG_CONFIG=$cfg LLVM=1 LLVM_IAS=1 olddefconfig
 
     # Step 6: Enable ThinLTO
     $src/scripts/config \
@@ -79,11 +81,11 @@ function cbl_gen_archconfig -d "Generate a configuration file for Arch Linux"
         -d LTO_NONE \
         -e LTO_CLANG_THIN \
         $config_args
-    podcmd kmake -C $src KCONFIG_CONFIG=$cfg LLVM=1 LLVM_IAS=1 olddefconfig
+    kmake -C $src KCONFIG_CONFIG=$cfg LLVM=1 LLVM_IAS=1 olddefconfig
 
     # Step 7: Run menuconfig if additional options are needed
     if test "$menuconfig" = true
-        podcmd kmake -C $src KCONFIG_CONFIG=$cfg LLVM=1 LLVM_IAS=1 menuconfig
+        kmake -C $src KCONFIG_CONFIG=$cfg LLVM=1 LLVM_IAS=1 menuconfig
     end
 
     # Step 8: Update checksums

@@ -3,6 +3,8 @@
 # Copyright (C) 2021-2022 Nathan Chancellor
 
 function cbl_rb_pi -d "Rebase Raspberry Pi kernel on latest linux-next"
+    in_container_msg -c; or return
+
     set pi_src $CBL_BLD/rpi
 
     for arg in $argv
@@ -163,21 +165,21 @@ index dd4a48604097..ab2173e3951b 100644
 ' | git ams; or return
 
     for arch in arm arm64
-        podcmd ../pi-scripts/build.fish $arch; or return
+        ../pi-scripts/build.fish $arch; or return
     end
 
     if test "$skip_mainline" != true
         if not git pll --no-edit mainline master
             rg "<<<<<<< HEAD"; and return
             for arch in arm arm64
-                podcmd ../pi-scripts/build.fish $arch; or return
+                ../pi-scripts/build.fish $arch; or return
             end
             git aa
             git c --no-edit; or return
         end
 
         for arch in arm arm64
-            podcmd ../pi-scripts/build.fish $arch; or return
+            ../pi-scripts/build.fish $arch; or return
         end
     end
 
