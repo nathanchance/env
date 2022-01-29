@@ -39,7 +39,7 @@ function cbl_bld_tot_tcs -d "Build LLVM and binutils from source for kernel deve
 
         case server
             set bld_llvm_args \
-                --pgo kernel-{def,allmod}config
+                --pgo kernel-{allmod,def}config
 
         case vm
             set bld_bntls false
