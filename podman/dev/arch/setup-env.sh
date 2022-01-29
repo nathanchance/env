@@ -51,6 +51,7 @@ function install_packages() {
         python-requests
         python-setuptools
         python-yaml
+        stow
         unzip
         vim
         zoxide

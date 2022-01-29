@@ -37,6 +37,7 @@ function install_packages() {
         python3-dkimpy
         python3-dns
         python3-requests
+        stow
         tar
         texinfo-tex
         unzip
