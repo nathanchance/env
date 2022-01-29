@@ -2,17 +2,19 @@
 # SPDX-License-Identifier: MIT
 # Copyright (C) 2021-2022 Nathan Chancellor
 
+set -e fish_user_paths
+
 if in_container
-    set -l folder
-    for folder in /qemu /tc /binutils /llvm
-        fish_add_path -gm $folder/bin
+    if test "$USE_CBL" -eq 1
+        set -l folder
+        for folder in $CBL_QEMU_BIN $CBL_TC_BNTL $CBL_TC_LLVM
+            fish_add_path -gm $folder
+        end
     end
 else
     gpg_key_cache
     start_ssh_agent
     tmux_ssh_fixup
-
-    set -e fish_user_paths; or true
 end
 
 if command -q zoxide

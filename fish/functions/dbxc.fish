@@ -45,15 +45,7 @@ function dbxc -d "Shorthand for 'distrobox create'"
             set def_img $GHCR/dev/arch
     end
     if test "$img" = "$def_img"
-        if test -d $CBL_TC_BNTL
-            set -a dbx_args --volume (dirname $CBL_TC_BNTL):/binutils
-        end
-        if test -d $CBL_TC_LLVM
-            set -a dbx_args --volume (dirname $CBL_TC_LLVM):/llvm
-        end
-        if test -d $CBL_QEMU_BIN
-            set -a dbx_args --volume $CBL_QEMU:/qemu
-        end
+        set -a add_args -e USE_CBL=1
     end
 
     dbx create -a "$add_args" $dbx_args $dbx_img
