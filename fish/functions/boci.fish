@@ -4,6 +4,8 @@
 # Copyright (C) 2021-2022 Nathan Chancellor
 
 function boci -d "Build an OCI container image"
+    in_container_msg -h; or return
+
     if not command -q podman
         print_warning "boci requires podman, skipping..."
         return 0
