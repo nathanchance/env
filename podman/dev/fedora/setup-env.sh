@@ -5,8 +5,8 @@ set -eux
 function install_packages() {
     dnf update -y
 
+    dnf install -y dnf-plugins-core
     # Disabled for now
-    # dnf install -y dnf-plugins-core
     # dnf copr enable -y @fedora-llvm-team/llvm-snapshots
     dnf config-manager --add-repo https://cli.github.com/packages/rpm/gh-cli.repo
 
