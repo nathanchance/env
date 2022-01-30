@@ -3,6 +3,8 @@
 # Copyright (C) 2021-2022 Nathan Chancellor
 
 function cbl_qualify_tc_bld_uprev -d "Qualify a new known good revision for tc-build"
+    in_container_msg -c; or return
+
     if not test -f $HOME/.muttrc.notifier
         print_error "This function runs cbl_lkt, which requires the notifier!"
         return 1
@@ -38,7 +40,7 @@ function cbl_qualify_tc_bld_uprev -d "Qualify a new known good revision for tc-b
 
     header "Building toolchains"
 
-    podcmd -s $tc_bld/build-binutils.py --install-folder $usr; or return
+    $tc_bld/build-binutils.py --install-folder $usr; or return
 
     set common_tc_bld_args \
         --assertions \
@@ -47,33 +49,33 @@ function cbl_qualify_tc_bld_uprev -d "Qualify a new known good revision for tc-b
     set pgo_arg --pgo kernel-{def,allmod}config
 
     # Check that two stage build works fine
-    podcmd -s $tc_bld/build-llvm.py \
+    $tc_bld/build-llvm.py \
         $common_tc_bld_args; or return 125
 
     # Check that kernel build works okay with PGO
-    podcmd -s $tc_bld/build-llvm.py \
+    $tc_bld/build-llvm.py \
         $common_tc_bld_args \
         $pgo_arg; or return 125
 
     # Check that ThinLTO alone works okay
-    podcmd -s $tc_bld/build-llvm.py \
+    $tc_bld/build-llvm.py \
         $common_tc_bld_args \
         --lto thin; or return 125
 
     # Check that full LTO alone works okay
-    podcmd -s $tc_bld/build-llvm.py \
+    $tc_bld/build-llvm.py \
         $common_tc_bld_args \
         --lto full; or return 125
 
     # Check that PGO + ThinLTO works okay
-    podcmd -s $tc_bld/build-llvm.py \
+    $tc_bld/build-llvm.py \
         $common_tc_bld_args \
         --lto thin \
         $pgo_arg; or return 125
 
     # Check that PGO + ThinLTO with only ARM targets works okay (because some people are weird like that)
     # Cannot build the tests because they assume the host (X86) is in the list of targets
-    podcmd -s $tc_bld/build-llvm.py \
+    $tc_bld/build-llvm.py \
         --assertions \
         --lto thin \
         $pgo_arg \
@@ -81,7 +83,7 @@ function cbl_qualify_tc_bld_uprev -d "Qualify a new known good revision for tc-b
         --use-good-revision; or return 125
 
     # Finally, build with PGO and full LTO
-    podcmd -s $tc_bld/build-llvm.py \
+    $tc_bld/build-llvm.py \
         $common_tc_bld_args \
         --install-folder $usr \
         --lto full \
@@ -89,7 +91,7 @@ function cbl_qualify_tc_bld_uprev -d "Qualify a new known good revision for tc-b
 
     header "Toolchain information"
 
-    podcmd $usr/bin/clang --version
+    $usr/bin/clang --version
     git -C $tc_bld/llvm-project show -s
 
     header "Testing toolchain"
