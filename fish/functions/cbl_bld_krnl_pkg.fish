@@ -3,6 +3,8 @@
 # Copyright (C) 2021-2022 Nathan Chancellor
 
 function cbl_bld_krnl_pkg -d "Build ClangBuiltLinux Arch Linux kernel package"
+    in_container_msg -c; or return
+
     for arg in $argv
         switch $arg
             case -f --full -l --local -m --menuconfig

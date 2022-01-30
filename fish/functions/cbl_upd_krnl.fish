@@ -7,6 +7,8 @@ function cbl_upd_krnl -d "Update machine's kernel"
 
     switch $LOCATION
         case desktop laptop vm
+            in_container_msg -h; or return
+
             for arg in $argv
                 switch $arg
                     case -r --reboot
@@ -45,6 +47,8 @@ function cbl_upd_krnl -d "Update machine's kernel"
             end
 
         case pi
+            in_container_msg -h; or return
+
             # Cache sudo/doas permissions
             sudo true; or return
 
@@ -125,6 +129,8 @@ function cbl_upd_krnl -d "Update machine's kernel"
             end
 
         case wsl
+            in_container_msg -h; or return
+
             set i 1
             while test $i -le (count $argv)
                 switch $argv[$i]
