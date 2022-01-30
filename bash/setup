@@ -415,6 +415,7 @@ function debian_ubuntu_packages() {
         unzip
         vim
         zip
+        zstd
     )
 
     if ${PI}; then
