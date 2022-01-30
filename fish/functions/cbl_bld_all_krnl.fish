@@ -38,6 +38,16 @@ function cbl_bld_all_krnl -d "Build all kernels for ClangBuiltLinux testing"
                     distclean defconfig $image; or return
             end
 
+            for arch in arm arm64 x86_64
+                switch $arch
+                    case arm
+                        set kboot_arch arm32_v7
+                    case '*'
+                        set kboot_arch $arch
+                end
+                kboot -a $kboot_arch -k $CBL_SRC/linux-next/.build/$arch
+            end
+
         case '*'
             for arg in $argv
                 switch $arg
