@@ -5,7 +5,7 @@
 set -e fish_user_paths
 
 if in_container
-    if test "$USE_CBL" -eq 1
+    if test "$USE_CBL" = 1
         set -l folder
         for folder in $CBL_QEMU_BIN $CBL_TC_BNTL $CBL_TC_LLVM
             fish_add_path -gm $folder
