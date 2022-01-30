@@ -63,9 +63,11 @@ function cbl_rb_pi -d "Rebase Raspberry Pi kernel on latest linux-next"
     else
         set sc_args -d DEBUG_INFO
     end
-    scripts/config \
-        --file arch/arm64/configs/defconfig \
-        $sc_args
+    # Always enable -Werror
+    set -a sc_args -e WERROR
+    for cfg in arch/arm/configs/multi_v7_defconfig arch/arm64/configs/defconfig
+        scripts/config --file $cfg $sc_args
+    end
 
     git ac -m "arm{,64}: Customize defconfig"
 
