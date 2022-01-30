@@ -67,49 +67,50 @@ function cbl_upd_krnl -d "Update machine's kernel"
                 return 1
             end
 
-            set tmp_boot (mktemp -d)
-            set main_boot /boot/custom-$ver-$arch
+            # Installation folder
+            set prefix /boot/custom-$ver-$arch
 
-            mkdir -p $tmp_boot/modules
+            # Temporary work folder
+            set workdir (mktemp -d)
+            cd $workdir; or return
 
-            switch $arch
-                case arm
-                    set dtbs /bcm
-                    set kernel zImage
-                case arm64
-                    set dtbs /broadcom/
-                    set kernel Image
-            end
-
+            # Grab .tar.zst package
             set user nathan
             set remote_build (string replace pi $user $CBL_BLD | string replace /mnt/ssd /home/$user $remote_build)
             set out $remote_build/rpi/.build/$arch
-            set rootfs $out/rootfs
+            scp $user@$SERVER_IP:$out/linux-'*'-$arch.tar.zst .
 
-            rsync -v $user@$SERVER_IP:$rootfs$dtbs'*'.dtb $tmp_boot; or return
-            rsync -rv $user@$SERVER_IP:$rootfs/lib/modules/'*' $tmp_boot/modules; or return
-            rsync -v $user@$SERVER_IP:$out/arch/$arch/boot/$kernel $tmp_boot; or return
+            # Extract .tar.zst
+            tar --zstd -xvf *.tar.zst; or return
 
-            set mod_dir (fd -d 1 . $tmp_boot/modules)
-            if test -z "$mod_dir"
-                print_error "Could not find modules in at $tmp_boot/modules"
-                return 1
+            # Move modules into their place
+            set mod_dir lib/modules/*
+            rm $mod_dir/{build,source}
+            sudo rm -frv /lib/modules/(basename $mod_dir)
+            sudo mv -v $mod_dir /lib/modules; or return
+
+            # Install image and dtbs
+            sudo rm -fr $prefix
+            switch $arch
+                case arm
+                    set dtbs boot/dtbs/*/bcm2{71,83}*
+
+                    sudo install -Dvm755 boot/vmlinux-kbuild-* $prefix/zImage; or return
+                case arm64
+                    set dtbs boot/dtbs/*/broadcom/bcm2{7,8}*
+
+                    zcat boot/vmlinuz-* >Image
+                    sudo install -Dvm755 Image $prefix/Image; or return
+            end
+            for dtb in $dtbs
+                sudo install -Dvm755 $dtb $prefix/(basename $dtb); or return
             end
 
-            # Move modules
-            sudo rm -frv /lib/modules/(basename $mod_dir)
-            sudo mv -v $mod_dir /lib/modules
-            sudo rmdir -v $tmp_boot/modules
-
-            # Move all other files
-            sudo rm -frv $main_boot
-            sudo mv -v $tmp_boot $main_boot
-
             # Copy cmdline.txt because we are modifying os_prefix
-            sudo cp -v /boot/cmdline.txt $main_boot
+            set cmdline $prefix/cmdline.txt
+            sudo cp -v /boot/cmdline.txt $cmdline; or return
 
             # Ensure that there is always a serial console option
-            set cmdline $main_boot/cmdline.txt
             if grep -q console= $cmdline
                 sudo sed -i s/serial0/ttyS1/ $cmdline
             else
