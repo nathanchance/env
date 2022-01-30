@@ -42,6 +42,7 @@ function install_packages() {
         texinfo-tex
         unzip
         vim
+        vte-profile
         zoxide
 
         # Kernel

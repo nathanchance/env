@@ -14,6 +14,7 @@ function install_packages() {
         fish
         git
         git-email
+        libvte-2
         make
         mutt
         patch

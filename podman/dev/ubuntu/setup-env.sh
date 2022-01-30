@@ -27,6 +27,7 @@ function install_packages() {
         fish
         git
         gzip
+        libvte-common
         locales
         python3
         sudo

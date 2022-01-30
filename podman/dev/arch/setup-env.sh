@@ -54,6 +54,7 @@ function install_packages() {
         stow
         unzip
         vim
+        vte-common
         zoxide
 
         # Kernel
