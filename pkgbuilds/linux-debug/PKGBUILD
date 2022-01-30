@@ -1,5 +1,5 @@
 pkgname=linux-debug
-pkgver=v5.16.rc7.2423.gdc7bb522ef7f
+pkgver=v5.17.rc2
 pkgrel=1
 arch=(x86_64)
 license=(GPL2)
