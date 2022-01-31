@@ -11,81 +11,84 @@ function install_packages() {
     dnf config-manager --add-repo https://cli.github.com/packages/rpm/gh-cli.repo
 
     packages=(
-        # Generic
-        ccache
-        curl
+        # arc
+        php
+
+        # b4
+        python3-{dkimpy,dns,requests}
+
+        # compression/decompression/extraction
+        bzip2
+        gzip
+        lzop
+        lz4
+        pbzip2
+        pigz
+        tar
+        unzip
+        xz
+        zstd
+
+        # cvise
         cvise
-        cyrus-sasl-plain
+        python3-chardet
+
+        # development
+        ccache
+        glibc-devel
+        glibc-static
+        libfl-devel
+        make
+        patch
+        python2
+        python3
+        texinfo-tex
+
+        # distrobox
+        passwd
+        vte-profile
+
+        # env
+        curl
         fish
         fzf
+        jq
+        openssh
+        stow
+        vim
+        zoxide
+
+
+        # email
+        cyrus-sasl-plain
+        mutt
+
+        # git
         gh
         git
         git-email
-        glibc-devel
-        glibc-static
-        jq
-        libfl-devel
-        make
-        mutt
-        openssh
-        passwd
-        patch
-        pbzip2
-        php
-        pigz
-        python2
-        python3
-        python3-dkimpy
-        python3-dns
-        python3-requests
-        stow
-        tar
-        texinfo-tex
-        unzip
-        vim
-        vte-profile
-        zoxide
 
-        # Kernel
+        # kernel / tuxmake
         bc
         bison
-        bzip2
         cpio
-        {binutils,gcc}-arm-linux-gnu
-        {binutils,gcc}-mips64-linux-gnu
-        {binutils,gcc}-powerpc64-linux-gnu
-        {binutils,gcc}-powerpc64le-linux-gnu
-        {binutils,gcc}-riscv64-linux-gnu
-        {binutils,gcc}-s390x-linux-gnu
-        dpkg-dev
+        {binutils,gcc}-{arm,mips64,powerpc64{,le},riscv64,s390x}-linux-gnu
         dwarves
         elfutils-libelf-devel
         flex
         gcc
         gcc-c++
         gmp-devel
-        gzip
         libmpc-devel
-        lz4
-        lzop
         ncurses-devel
         openssl
         openssl-devel
         perl
-        qemu-system-aarch64
-        qemu-system-arm
-        qemu-system-mips
-        qemu-system-ppc
-        qemu-system-riscv
-        qemu-system-s390x
-        qemu-system-x86
-        rpm-build
+        qemu-system-{aarch64,arm,mips,ppc,riscv,s390x,x86}
         rsync
         socat
         uboot-tools
         wget
-        xz
-        zstd
 
         # LLVM/clang
         binutils-devel
@@ -94,6 +97,10 @@ function install_packages() {
         lld
         ninja-build
         zlib-devel
+
+        # package building
+        dpkg-dev
+        rpm-build
     )
 
     case "$(uname -m)" in

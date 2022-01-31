@@ -28,47 +28,60 @@ function install_packages() {
         fd
         ripgrep
 
-        # Generic
+        # arc
+        php
+
+        # b4
+        python-dkim
+        python-requests
+
+        # compression/decompression/extraction
+        bzip2
+        gzip
+        lzop
+        lz4
+        pbzip2
+        pigz
+        unzip
+        zstd
+
+        # development
         ccache
-        git
-        github-cli
         hyperfine
+        python
+        python-setuptools
+        python-yaml
+
+        # distrobox
+        vte-common
+
+        # email
+        mutt
+
+        # env
         fish
         fzf
         jq
         less
-        mutt
         openssh
-        pacman-contrib
-        pbzip2
+        stow
+        vim
+        zoxide
+
+        # git
+        git
+        github-cli
         perl-authen-sasl
         perl-mime-tools
         perl-net-smtp-ssl
-        php
-        pigz
-        python
-        python-dkim
-        python-requests
-        python-setuptools
-        python-yaml
-        stow
-        unzip
-        vim
-        vte-common
-        zoxide
 
-        # Kernel
+        # kernel / tuxmake
         aarch64-linux-gnu-gcc
         bc
         bison
-        bzip2
         cpio
-        dpkg
         flex
-        gzip
         libelf
-        lzop
-        lz4
         ncurses
         openssl
         pahole
@@ -76,7 +89,6 @@ function install_packages() {
         socat
         uboot-tools
         wget
-        zstd
 
         # LLVM/clang
         clang
@@ -84,6 +96,11 @@ function install_packages() {
         lld
         llvm
         ninja
+
+        # package building
+        dpkg
+        pacman-contrib
+        rpm-tools
 
         # QEMU
         libevent

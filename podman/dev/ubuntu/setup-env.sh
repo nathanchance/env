@@ -24,64 +24,68 @@ function setup_gh_repo() {
 
 function install_packages() {
     packages=(
-        # Generic
-        build-essential
-        ca-certificates
-        ccache
-        curl
+        # arc
+        php
+
+        # b4
+        python3{,-dkim,-requests}
+
+        # cvise
         cvise
+
+        # compression / decompression / extraction
+        bzip2
+        gzip
+        lzop
+        lz4
+        pbzip2
+        pigz
+        tar
+        unzip
+        xz-utils
+        zstd
+
+        # development
+        build-essential
+        ccache
+
+        # distrobox
+        libvte-common
+        sudo
+
+        # env
+        ca-certificates
+        curl
         fish
+        jq
+        locales
+        openssh-client
+        stow
+        wget
+        vim
+        zoxide
+
+        # git
         gh
         git
         git-email
-        gzip
-        jq
         libauthen-sasl-perl
         libio-socket-ssl-perl
-        libvte-common
-        locales
-        openssh-client
-        pbzip2
-        php
-        pigz
-        python3{,-dkim,-requests}
-        stow
-        sudo
-        unzip
-        vim
-        wget
-        zoxide
-        zstd
 
-        # Kernel
+        # kernel / tuxmake
         bc
-        {binutils,gcc}-aarch64-linux-gnu
-        {binutils,gcc}-arm-linux-gnueabi
-        {binutils,gcc}-arm-linux-gnueabihf
-        {binutils,gcc}-mips{,el}-linux-gnu
-        {binutils,gcc}-riscv64-linux-gnu
-        {binutils,gcc}-s390x-linux-gnu
+        {binutils,gcc}-{aarch64,mips{,el},riscv64,s390x}-linux-gnu
+        {binutils,gcc}-arm-linux-gnueabi{,hf}
         bison
-        bzip2
         cpio
         flex
         kmod
-        libc-dev
-        libdw-dev
-        libelf-dev
-        libncurses5-dev
-        libssl-dev
-        lz4
-        lzop
+        lib{c,dw,elf,ncurses5,ssl}-dev
         openssl
         qemu-system-{arm,mips,misc,ppc,x86}
         rsync
         socat
-        tar
         u-boot-tools
-        xz-utils
-        zlib1g-dev
-        zstd
 
         # LLVM
         clang
@@ -90,6 +94,11 @@ function install_packages() {
         llvm
         ninja-build
         python3-distutils
+        zlib1g-dev
+
+        # package building
+        dpkg
+        rpm
     )
 
     apt-get update -qq
