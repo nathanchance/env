@@ -3,14 +3,14 @@
 # Copyright (C) 2021-2022 Nathan Chancellor
 
 function get_distro -d "Prints a short name for the currently running distro"
-    set os_release (cat /usr/lib/os-release)
-    switch "$os_release"
-        case "*Arch Linux*"
-            echo arch
-        case "*Debian*" "*Raspbian*"
+    set os_release_id (grep ^ID= /usr/lib/os-release | string split -f 2 = | string replace -a '"' "")
+    switch "$os_release_id"
+        case arch debian fedora ubuntu
+            echo $os_release_id
+        case opensuse-'*'
+            echo opensuse
+        case raspbian
             echo debian
-        case "*Ubuntu*"
-            echo ubuntu
         case "*"
             echo unknown
     end
