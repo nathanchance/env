@@ -76,7 +76,7 @@ function cbl_upd_krnl -d "Update machine's kernel"
 
             # Temporary work folder
             set workdir (mktemp -d)
-            cd $workdir; or return
+            pushd $workdir; or return
 
             # Grab .tar.zst package
             set user nathan
@@ -125,6 +125,9 @@ function cbl_upd_krnl -d "Update machine's kernel"
 
             if test "$reboot" = true
                 sudo systemctl reboot
+            else
+                popd
+                rm -fr $workdir
             end
 
         case wsl
