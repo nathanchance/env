@@ -32,8 +32,8 @@ function cbl_bld_tot_tcs -d "Build LLVM and binutils from source for kernel deve
                 --defines LLVM_PARALLEL_COMPILE_JOBS=(math (nproc) - 1) \
                 LLVM_PARALLEL_LINK_JOBS=1 \
                 --install-stage1-only \
-                --projects '"clang;lld"' \
-                --targets '"AArch64;ARM;X86"'
+                --projects "clang;lld" \
+                --targets "AArch64;ARM;X86"
 
             set check_targets clang llvm{,-unit}
 
