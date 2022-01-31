@@ -58,7 +58,6 @@ function install_packages() {
         vim
         zoxide
 
-
         # email
         cyrus-sasl-plain
         mutt
