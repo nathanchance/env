@@ -14,8 +14,15 @@ function upd -d "Runs the update command for the current distro or downloads/upd
             switch (get_distro)
                 case arch
                     sudo pacman -Syyu
-                case debian ubuntu
-                    sudo sh -c 'apt update && apt upgrade && apt autoremove -y'
+                case debian raspbian ubuntu
+                    sudo sh -c 'apt update && apt full-upgrade && apt autoremove -y'
+                case fedora
+                    sudo dnf update
+                case opensuse
+                    sudo zypper dup
+                case '*'
+                    print_error "Unknown OS! Cannot upgrade using 'upd'. Modify 'get_distro' to support this distro."
+                    return 1
             end
             continue
         else if test "$target" = env
