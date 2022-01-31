@@ -18,7 +18,12 @@ function upd -d "Runs the update command for the current distro or downloads/upd
                     sudo sh -c 'apt update && apt upgrade && apt autoremove -y'
             end
             continue
+        else if test "$target" = env
+            git -C $ENV_FOLDER pull -qr; or return
+            rld
+            continue
         end
+
         # These need to be local to the loop so they are reset each invocation
         set -l git_clone_args
         set -l git_urls
