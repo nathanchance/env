@@ -57,14 +57,8 @@ function boci -d "Build an OCI container image"
 
         switch $image
             case dev
-                switch (uname -m)
-                    case x86_64
-                        set folder dev/arch
-                        set image dev/arch
-                    case '*'
-                        set folder dev/fedora
-                        set image dev/fedora
-                end
+                set folder (get_dev_img)
+                set image $folder
 
             case {gcc,llvm}-'*'
                 set podman_args \

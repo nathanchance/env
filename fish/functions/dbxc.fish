@@ -26,25 +26,27 @@ function dbxc -d "Shorthand for 'distrobox create'"
 
             case dev/'*' gcc-'*' llvm-'*'
                 set img $GHCR/$arg
-                set -a dbx_args -i $img -n (string replace "/" "-" $arg)
+                set name (string replace / - $arg)
 
             case dev-'*'
-                set img $GHCR/(string replace "-" "/" $arg)
-                set -a dbx_args -i $img -n $arg
+                set img $GHCR/(string replace - / $arg)
+                set name $arg
         end
         set i (math $i + 1)
     end
 
-    # If we are using a development image AND it is the default one for our
-    # architecture (to avoid weird dynamic linking failures), bind mount some
-    # folders into convenient to use locations.
-    switch (uname -m)
-        case aarch64
-            set def_img $GHCR/dev/fedora
-        case x86_64
-            set def_img $GHCR/dev/arch
+    # If no image was specified, default to the one for the architecture
+    if not set -q img
+        set img $GHCR/(get_dev_img)
+        set name (string replace / - (get_dev_img))
     end
-    if test "$img" = "$def_img"
+
+    set -a dbx_args -i $img -n $name
+
+    # If we are using a development image AND it is the default one for our
+    # architecture (to avoid weird dynamic linking failures), use the binaries
+    # in $CBL by default
+    if test "$img" = $GHCR/(get_dev_img)
         set -a add_args -e USE_CBL=1
     end
 

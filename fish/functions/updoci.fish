@@ -12,12 +12,7 @@ function updoci -d "Downloads OCI container images from GitHub"
                 llvm-1{1,2,3,4} \
                 makepkg
         case '*'
-            switch (uname -m)
-                case aarch64
-                    set images dev/fedora llvm-14
-                case x86_64
-                    set images dev/arch llvm-14
-            end
+            set images (get_dev_img) llvm-14
     end
 
     podman pull $GHCR/$images
