@@ -15,6 +15,7 @@ function install_packages() {
         ccache
         curl
         cvise
+        cyrus-sasl-plain
         fish
         fzf
         gh

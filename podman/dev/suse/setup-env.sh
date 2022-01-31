@@ -3,18 +3,24 @@
 set -eux
 
 function install_packages() {
-    zypper -n -q up
+    zypper -n -q ar https://cli.github.com/packages/rpm/gh-cli.repo
+
+    zypper -n -q --gpg-auto-import-keys dup
 
     packages=(
         # Generic
         ccache
+        cyrus-sasl-plain
         curl
         cvise
         findutils
         fish
+        fzf
+        gh
         git
         git-email
-        libvte-2
+        jq
+        libvte-2*
         make
         mutt
         patch
@@ -22,13 +28,14 @@ function install_packages() {
         python2
         python3
         python3-chardet
-        python3-dns
         python3-dkimpy
         python3-requests
         shadow
+        stow
         sudo
         tar
         texinfo
+        unzip
         util-linux
         vim
 
@@ -48,7 +55,9 @@ function install_packages() {
         lz4
         lzop
         ncurses-devel
+        pbzip2
         perl
+        pigz
         qemu-{arm,extra,ppc,s390x,x86}
         rsync
         socat
@@ -71,6 +80,14 @@ function install_packages() {
     esac
 
     zypper -n -q in "${packages[@]}"
+
+    # Install zoxide from GitHub
+    zoxide_repo=ajeetdsouza/zoxide
+    zoxide_ver=$(curl -fLSs https://api.github.com/repos/"$zoxide_repo"/releases/latest | jq -r .tag_name)
+    tmp_dir=$(mktemp -d)
+    curl -fLSs https://github.com/"$zoxide_repo"/releases/download/"$zoxide_ver"/zoxide-"$zoxide_ver"-"$(uname -m)"-unknown-linux-musl.tar.gz | tar -C "$tmp_dir" -xzf -
+    install -Dvm755 "$tmp_dir"/zoxide /usr/local/bin/zoxide
+    rm -fr "$tmp_dir"
 }
 
 install_packages

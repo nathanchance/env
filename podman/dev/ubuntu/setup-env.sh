@@ -10,10 +10,16 @@ function setup_fish_repo() {
     apt-get update -qq
 
     apt-get install -qq \
-        gpg-agent \
+        curl \
+        gnupg \
         software-properties-common
 
     apt-add-repository -y ppa:fish-shell/release-3
+}
+
+function setup_gh_repo() {
+    curl -fLSs https://cli.github.com/packages/githubcli-archive-keyring.gpg | dd of=/etc/apt/trusted.gpg.d/githubcli-archive-keyring.gpg
+    echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/trusted.gpg.d/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | tee /etc/apt/sources.list.d/github-cli.list >/dev/null
 }
 
 function install_packages() {
@@ -25,14 +31,27 @@ function install_packages() {
         curl
         cvise
         fish
+        gh
         git
+        git-email
         gzip
+        jq
+        libauthen-sasl-perl
+        libio-socket-ssl-perl
         libvte-common
         locales
-        python3
+        openssh-client
+        pbzip2
+        php
+        pigz
+        python3{,-dkim,-requests}
+        stow
         sudo
+        unzip
         vim
         wget
+        zoxide
+        zstd
 
         # Kernel
         bc
@@ -75,7 +94,7 @@ function install_packages() {
 
     apt-get update -qq
 
-    apt-get upgrade -qq
+    apt-get dist-upgrade -qq
 
     apt-get install -qq "${packages[@]}"
 
@@ -119,6 +138,7 @@ function check_tools() {
 }
 
 setup_fish_repo
+setup_gh_repo
 install_packages
 setup_locales
 build_pahole
