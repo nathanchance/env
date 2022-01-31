@@ -103,8 +103,7 @@ function cbl_upd_krnl -d "Update machine's kernel"
                 case arm64
                     set dtbs boot/dtbs/*/broadcom/bcm2{7,8}*
 
-                    zcat boot/vmlinuz-* >Image
-                    sudo install -Dvm755 Image $prefix/Image; or return
+                    zcat boot/vmlinuz-* | sudo install -Dvm755 /dev/stdin $prefix/Image; or return
             end
             for dtb in $dtbs
                 sudo install -Dvm755 $dtb $prefix/(basename $dtb); or return
