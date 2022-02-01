@@ -29,7 +29,7 @@ function kmake -d "Run make with all cores and adjust PATH temporarily"
                 set arg (string split = $arg)
                 set $arg[1] $arg[2]
 
-            case '*/' '*.i' '*.ko' '*.o' '*.s' all '*'-pkg '*clean' '*config' '*docs' dtbs '*_install' '*Image*' kselftest modules mrproper '*_prepare' vmlinu'*'
+            case '*/' '*.i' '*.ko' '*.o' '*.s' all '*'-pkg '*clean' '*config' '*docs' dtbs '*_install' '*Image*' kselftest modules mrproper '*'prepare vmlinu'*'
                 set -a make_args $arg
 
             case -C
