@@ -3,7 +3,7 @@
 _localversion=-llvm
 _pkgsuffix=-next$_localversion
 pkgbase=linux$_pkgsuffix
-_srctag=next-20220131
+_srctag=next-20220201
 pkgver=${_srctag//-/.}
 pkgrel=1
 pkgdesc='linux-next'
@@ -26,7 +26,7 @@ validpgpkeys=(
   '3F2568AAC26998F9E813A1C5C3F436CA30F5D8EB'  # Mark Brown
 )
 sha256sums=('SKIP'
-            '1e9b0e51f6e8877752ad82b3c21cf2aefbcc5f59dad258d3bf58e2a3a38dd3c7'
+            '76dc4e5fc9a68ed9a53feed202ac7caf0ccbd19cc363e80ae1c733c987caf38a'
             '77885a48b60ee772e5c519c8d8bc633cc1c794ae861af173ec10fa27a545de36')
 
 _kmake() {
@@ -56,9 +56,6 @@ prepare() {
   done
 
   echo "Applying patches from web..."
-
-  # [PATCH] drm/amdgpu: Fix uninitialized variable use warning
-  fish -c "b4 am -o - https://lore.kernel.org/r/20220128064019.2469388-1-lijo.lazar@amd.com/" | patch -Np1
 
   echo "Setting config..."
   cp ../config .config
