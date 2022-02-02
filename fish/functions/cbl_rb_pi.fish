@@ -26,6 +26,24 @@ function cbl_rb_pi -d "Rebase Raspberry Pi kernel on latest linux-next"
         b4 shazam -l -P _ -s $patch; or return
     end
 
+    echo 'diff --git a/drivers/gpu/drm/stm/ltdc.c b/drivers/gpu/drm/stm/ltdc.c
+index 5eeb32c9c9ce..dc07077bfd7a 100644
+--- a/drivers/gpu/drm/stm/ltdc.c
++++ b/drivers/gpu/drm/stm/ltdc.c
+@@ -624,7 +624,7 @@ static inline void ltdc_set_ycbcr_config(struct drm_plane *plane, u32 drm_pix_fm
+ 		break;
+ 	default:
+ 		/* RGB or not a YCbCr supported format */
+-		break;
++		return;
+ 	}
+ 
+ 	/* Enable limited range */
+' | git ap
+    git ac -m "drm/stm: ltdc: Don't use val uninitialized in ltdc_set_ycbcr_config()
+
+Link: https://lore.kernel.org/r/Yfq3XwozrxYaFhgD@dev-arch.archlinux-ax161/"
+
     # Tailscale configs
     for cfg_file in arch/arm/configs/multi_v7_defconfig arch/arm64/configs/defconfig
         scripts/config \
