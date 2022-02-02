@@ -46,9 +46,10 @@ function cbl_gen_archconfig -d "Generate a configuration file for Arch Linux"
     rm $src_cfg
 
     # Step 2: Copy default Arch configuration and set a few options
-    crl 'https://github.com/archlinux/svntogit-packages/raw/packages/linux/trunk/config' >$cfg
+    crl https://github.com/archlinux/svntogit-packages/raw/packages/linux/trunk/config >$cfg
     $src/scripts/config \
         --file $cfg \
+        -e DEBUG_INFO_DWARF5 \
         -e WERROR \
         -m DRM
 
@@ -60,16 +61,6 @@ function cbl_gen_archconfig -d "Generate a configuration file for Arch Linux"
         cp $cfg $src_cfg
         kmake -C $src localmodconfig
         cp $src_cfg $cfg
-        # A few configs might need to stay around for various reasons, build them as modules
-        $src/scripts/config \
-            --file $cfg \
-            -m BLK_DEV_LOOP \
-            -m EDAC_AMD64 \
-            -m EDAC_DECODE_MCE \
-            -m TUN \
-            -m USB_HID \
-            --set-val BLK_DEV_LOOP_MIN_COUNT 0
-        kmake -C $src KCONFIG_CONFIG=$cfg olddefconfig
     end
 
     # Step 5: Run through olddefconfig with Clang
