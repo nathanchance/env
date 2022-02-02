@@ -97,6 +97,9 @@ function install_packages() {
         ninja-build
         zlib-devel
 
+        # locale
+        glibc-langpack-en
+
         # package building
         dpkg-dev
         rpm-build

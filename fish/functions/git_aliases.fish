@@ -35,7 +35,7 @@ function git_aliases -d "Configure git aliases"
     git config --global alias.dfs 'diff --stat'
     git config --global alias.dfss 'diff --shortstat'
     git config --global alias.dh 'diff HEAD'
-    git config --global alias.dhc 'reset --hard HEAD^'
+    git config --global alias.dhc 'reset --hard HEAD^' # delete head commit
     git config --global alias.f fetch
     git config --global alias.fa 'fetch --all'
     git config --global alias.fixes 'show -s --format="Fixes: %h (\"%s\")"'
