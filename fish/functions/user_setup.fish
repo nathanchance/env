@@ -217,6 +217,8 @@ out.*/
         if not test -d $folder
             gh repo clone $github_repo $folder; or return
         end
+        if test "$github_repo" = hugo-files
+            git -C $folder submodule update --init --recursive
+        end
     end
-    git -C $GITHUB_FOLDER/hugo-files submodule update --init --recursive
 end
