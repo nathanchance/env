@@ -10,8 +10,7 @@ function cbl_bld_all -d "Build latest LLVM and test it against several Linux ker
             # Update linux-next
             cbl_clone_repo linux-next; or return
             git -C $CBL_SRC/linux-next ru; or return
-            printf '\a'
-            git -C $CBL_SRC/linux-next rb -i origin/master; or return
+            git -C $CBL_SRC/linux-next rh origin/master; or return
 
         case '*'
             for arg in $argv
