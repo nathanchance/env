@@ -5,11 +5,18 @@
 function edfunc -d "Edit function file in $ENV_FOLDER"
     for arg in $argv
         switch $arg
+            case -f --fzf
+                set fzf true
             case -r --reload
                 set reload true
             case '*'
                 set -a funcs_to_edit $arg
         end
+    end
+
+    if test "$fzf" = true
+        set func_dir $ENV_FOLDER/fish/functions
+        set -a funcs_to_edit (fd . $func_dir | sed -e "s;$func_dir/;;g" -e "s;.fish;;" | fzf -m)
     end
 
     for func_to_edit in $funcs_to_edit
