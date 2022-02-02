@@ -6,7 +6,6 @@ function git_aliases -d "Configure git aliases"
     if gpg_key_usable
         set gpg_sign " --gpg-sign"
     end
-    git config --global alias.ai '!f() { for file in $(git status --porcelain | awk \'{print $2}\' | fzf -m); do git add $file; done }; f' # add interactive
     git config --global alias.aa 'add --all'
     git config --global alias.ac "commit$gpg_sign --all --signoff --verbose" # add and commit
     git config --global alias.ama 'am --abort'
@@ -52,15 +51,10 @@ function git_aliases -d "Configure git aliases"
     git config --global alias.pr pull-request
     git config --global alias.psu 'push --set-upstream'
     # shellcheck disable=SC2016
-    git config --global alias.ra '!f() { for i in $(git cf); do git rf $i; done }; f' # reset all conflicts
     git config --global alias.rb "rebase$gpg_sign"
     git config --global alias.rba 'rebase --abort'
     git config --global alias.rbc 'rebase --continue'
     git config --global alias.rbs 'rebase --skip'
-    # shellcheck disable=SC2016
-    git config --global alias.rf '!bash -c "git reset -- ${*} &>/dev/null && git checkout -q -- ${*}"' # reset file
-    # shellcheck disable=SC2016
-    git config --global alias.rfl '!bash -c "git reset -- ${*} && git checkout -- ${*}"' # reset file (loud)
     git config --global alias.rh 'reset --hard'
     git config --global alias.rma 'remote add'
     # https://lore.kernel.org/lkml/20190624144924.GE29120@arrakis.emea.arm.com/
@@ -81,8 +75,18 @@ function git_aliases -d "Configure git aliases"
     git config --global alias.shm 'show --no-patch'
     git config --global alias.shmf 'show --format=fuller --no-patch'
     git config --global alias.sw switch
-    git config --global alias.swi '!git switch $(git branch --format="%(refname:short)" | fzf)'
     git config --global alias.us 'reset HEAD'
+
+    # fish git aliases
+    # no arguments
+    for alias in af dmb swf sync ra
+        git config --global alias.$alias "!fish -c git_$alias"
+    end
+    # with arguments
+    for alias in rfl
+        git config --global alias.$alias '!fish -c "git_'$alias' $@"'
+    end
+    git config --global alias.rf '!fish -c "git_rf -q $@"'
 
     # Set up merge aliases based on availability of '--signoff'
     if test (git --version | head -n 1 | cut -d . -f 2) -ge 15
