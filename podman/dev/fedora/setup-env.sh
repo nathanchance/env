@@ -100,6 +100,10 @@ function install_packages() {
         # package building
         dpkg-dev
         rpm-build
+
+        # spdxcheck.py
+        python3-GitPython
+        python3-ply
     )
 
     case "$(uname -m)" in

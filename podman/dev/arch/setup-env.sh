@@ -102,6 +102,10 @@ function install_packages() {
         pacman-contrib
         rpm-tools
 
+        # spdxcheck.py
+        python-gitpython
+        python-ply
+
         # QEMU
         libevent
         libutempter

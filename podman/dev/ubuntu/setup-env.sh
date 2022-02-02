@@ -99,6 +99,10 @@ function install_packages() {
         # package building
         dpkg
         rpm
+
+        # spdxcheck.py
+        python3-git
+        python3-ply
     )
 
     apt-get update -qq
