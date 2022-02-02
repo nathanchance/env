@@ -5,6 +5,7 @@
 function clone_aur_repos -d "Clone repos from AUR to build packages locally"
     set packages \
         binfmt-qemu-static \
+        modprobed-db \
         opendoas-sudo \
         slack-desktop \
         qemu-user-static-bin \

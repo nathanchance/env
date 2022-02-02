@@ -140,11 +140,22 @@ out.*/
     # Binaries
     if test (get_distro) = arch
         clone_aur_repos
-        if not is_installed opendoas-sudo
-            pushd $AUR_FOLDER/opendoas-sudo; or return
-            makepkg; or return
-            doas pacman -U --noconfirm *.pkg.tar.zst; or return
-            popd
+        set aur_pkgs opendoas-sudo
+        if test "$wsl" != true
+            set -a aur_pkgs modprobed-db
+        end
+        for $aur_pkg in $aur_pkgs
+            if not is_installed $aur_pkg
+                pushd $AUR_FOLDER/$aur_pkg; or return
+                makepkg; or return
+                doas pacman -U --noconfirm $aur_pkg*.pkg.tar.zst; or return
+                popd
+            end
+        end
+        if is_installed modprobed-db
+            modprobed-db
+            modprobed-db store
+            systemctl --user enable --now modprobed-db.service
         end
     end
     updall --no-os; or return
