@@ -128,6 +128,7 @@ function cbl_bld_tot_tcs -d "Build LLVM and binutils from source for kernel deve
             --check-targets $check_targets \
             --install-folder $llvm_install \
             $bld_llvm_args \
+            --no-ccache \
             --show-build-commands
         set message "build-llvm.py failed"
         print_error "$message"
