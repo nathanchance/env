@@ -9,7 +9,7 @@ function cbl_upd_krnl_pkg -d "Update Arch Linux ClangBuiltLinux kernels"
             case linux-cfi
                 pushd $CBL_SRC/$krnl; or return
                 git ru; or return
-                git rb -i origin/master; or return
+                git rbi origin/master; or return
                 popd
 
             case linux-debug linux-mainline'*' linux-next'*'

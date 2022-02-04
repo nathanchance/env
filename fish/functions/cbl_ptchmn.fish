@@ -6,7 +6,7 @@ function cbl_ptchmn -d "Quilt-like patch management function for Linux"
     in_kernel_tree; or return
 
     set repo (basename $PWD)
-    set out $GITHUB_FOLDER/patches/$repo/(git cb)
+    set out $GITHUB_FOLDER/patches/$repo/(git bn)
     if not test -d $out
         print_error "$out does not exist!"
         return 1
@@ -33,7 +33,7 @@ function cbl_ptchmn -d "Quilt-like patch management function for Linux"
             rm $out/*
             git fp -o $out --base=$mfc^ $mfc^..HEAD
             git -C $out aa
-            git -C $out c -m "patches: $repo: "(git cb)": sync as of"(git sh -s --format=%h)
+            git -C $out c -m "patches: $repo: "(git bn)": sync as of"(git sha)
             git -C $out push
     end
 end
