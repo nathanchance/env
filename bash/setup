@@ -275,6 +275,7 @@ function debian_root_setup { (
     source /etc/os-release
 
     debian_ubuntu_fish_repo
+    debian_ubuntu_gh_repo
 
     # For rootless podman
     if can_install_podman; then
@@ -373,7 +374,12 @@ function debian_ubuntu_fish_repo() { (
             apt-add-repository ppa:fish-shell/release-3 -y || exit
             ;;
     esac
-) }
+); }
+
+function debian_ubuntu_gh_repo() { (
+    curl -fLSs https://cli.github.com/packages/githubcli-archive-keyring.gpg | dd of=/etc/apt/trusted.gpg.d/githubcli-archive-keyring.gpg
+    echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/trusted.gpg.d/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | tee /etc/apt/sources.list.d/github-cli.list
+); }
 
 function debian_ubuntu_locales() { (
     echo "locales locales/default_environment_locale select en_US.UTF-8" | debconf-set-selections
@@ -390,6 +396,7 @@ function debian_ubuntu_packages() {
         debootstrap
         file
         fish
+        gh
         git
         git-email
         htop
@@ -575,6 +582,7 @@ function ubuntu_root_setup { (
     esac
 
     debian_ubuntu_fish_repo
+    debian_ubuntu_gh_repo
     apt-add-repository -y ppa:git-core/ppa || exit ${?}
     debian_ubuntu_packages
     debian_ubuntu_update_install || exit ${?}
