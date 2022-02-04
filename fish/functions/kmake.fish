@@ -129,10 +129,8 @@ function kmake -d "Run make with all cores and adjust PATH temporarily"
         end
     end
 
-    if command -q ccache
-        if test "$CCACHE" != 0; and test "$CCACHE" != false; and test "$NO_CCACHE" != 1; and test "$NO_CCACHE" != false
-            set -p make_args CC="ccache $CC"
-        end
+    if command -q ccache; and test "$CCACHE" != 0; and test "$CCACHE" != false; and test "$NO_CCACHE" != 1; and test "$NO_CCACHE" != false
+        set -p make_args CC="ccache $CC"
     else
         if test "$cc_was_in_args" = true
             set -p make_args CC="$CC"
