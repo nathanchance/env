@@ -132,12 +132,14 @@ function git_aliases -d "Configure git aliases"
 
     # fish git aliases
     # no arguments
-    for alias in af dmb swf sync ra
+    for alias in af dmb swf sync
         git config --global alias.$alias "!fish -c git_$alias"
     end
     # with arguments
-    for alias in rfl
-        git config --global alias.$alias '!fish -c "git_'$alias' $@"'
+    for alias in rfl rn
+        git config --global alias.$alias '!fish -c "git_'$alias' $*"'
     end
-    git config --global alias.rf '!fish -c "git_rf -q $@"'
+    git config --global alias.rf '!fish -c "git_rf -q $*"'
+    git config --global alias.urbi '!fish -c "git_ua rbi $*"'
+    git config --global alias.urh '!fish -c "git_ua rh $*"'
 end

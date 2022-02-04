@@ -4,7 +4,7 @@
 
 function git_dmb -d "Delete merged git branches"
     for branch in (git_bf)
-        set remotename (git for-each-ref --format='%(upstream:remotename)' refs/heads/$branch)
+        set remotename (git rn $branch)
         git bd $branch
         if set -q remotename
             git push $remotename :$branch; or return
