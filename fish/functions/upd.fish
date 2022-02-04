@@ -3,23 +3,34 @@
 # Copyright (C) 2021-2022 Nathan Chancellor
 
 function upd -d "Runs the update command for the current distro or downloads/updates requested binary"
-    if test (count $argv) -eq 0
+    for arg in $argv
+        switch $arg
+            case -y --yes
+                if command -q pacman
+                    set yes --noconfirm
+                else
+                    set yes -y
+                end
+            case '*'
+                set -a targets $arg
+        end
+    end
+
+    if not set -q targets
         set targets os
-    else
-        set targets $argv
     end
 
     for target in $targets
         if test "$target" = os
             switch (get_distro)
                 case arch
-                    sudo pacman -Syyu
+                    sudo pacman -Syyu $yes
                 case debian raspbian ubuntu
-                    sudo sh -c 'apt update && apt full-upgrade && apt autoremove -y'
+                    sudo sh -c "apt update $yes && apt full-upgrade $yes && apt autoremove -y"
                 case fedora
-                    sudo dnf update
+                    sudo dnf update $yes
                 case opensuse
-                    sudo zypper dup
+                    sudo zypper dup $yes
                 case '*'
                     print_error "Unknown OS! Cannot upgrade using 'upd'. Modify 'get_distro' to support this distro."
                     return 1
