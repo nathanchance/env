@@ -58,15 +58,14 @@ function cbl_bld_tot_tcs -d "Build LLVM and binutils from source for kernel deve
 
     set date_time (date +%F_%H-%M-%S)
 
-    if test -f $HOME/.ssh/id_ed25519
-        set github_prefix git@github.com:
-    else
-        set github_prefix https://github.com/
-    end
-
     if not test -d $CBL_TC_BLD
         mkdir -p (dirname $CBL_TC_BLD)
-        git clone -b personal "$github_prefix"nathanchance/tc-build.git $CBL_TC_BLD
+        set -l clone_args -b personal
+        if gh auth status
+            gh repo clone tc-build $CBL_TC_BLD -- $clone_args
+        else
+            git clone $clone_args https://github.com/nathanchance/tc-build.git $CBL_TC_BLD
+        end
     end
 
     if test "$bld_bntls" != false

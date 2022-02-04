@@ -27,6 +27,12 @@ function user_setup -d "Setup a user account, downloading all files and placing 
 
     # GPG and SSH keys (trusted environment only)
     if test "$trusted" = true
+        # Set up gh
+        if not gh auth status
+            gh auth login; or return
+        end
+        set use_gh true
+
         if test "$wsl" = true
             set keys_folder /mnt/c/Users/natec/Documents/Keys
         else
@@ -37,7 +43,7 @@ function user_setup -d "Setup a user account, downloading all files and placing 
         if not test -f $ssh_folder/id_ed25519
             mkdir -p $ssh_folder
             if not test -d $keys_folder
-                git clone https://github.com/nathanchance/keys $keys_folder; or return
+                gh repo clone keys $keys_folder; or return
             end
 
             set ssh_keys $keys_folder/ssh
@@ -63,7 +69,7 @@ function user_setup -d "Setup a user account, downloading all files and placing 
 
         if not gpg_key_usable
             if not test -d $keys_folder
-                git clone https://github.com/nathanchance/keys $keys_folder; or return
+                gh repo clone keys $keys_folder; or return
             end
 
             gpg --pinentry-mode loopback --import $keys_folder/encryption/private.asc; or return
@@ -88,22 +94,27 @@ function user_setup -d "Setup a user account, downloading all files and placing 
                 ssh-add $HOME/.ssh/id_ed25519; or return
             end
         end
-        set github_prefix git@github.com:
-    else
-        set github_prefix https://github.com/
     end
 
     # Downloading/updating environment scripts and prompt
     if not test -d $ENV_FOLDER
         mkdir -p (dirname $ENV_FOLDER)
-        git clone "$github_prefix"nathanchance/env.git $ENV_FOLDER; or return
+        if test "$use_gh" = true
+            gh repo clone (basename $ENV_FOLDER) $ENV_FOLDER; or return
+        else
+            git clone https://github.com/nathanchance/(basename $ENV_FOLDER).git $ENV_FOLDER; or return
+        end
     end
     git -C $ENV_FOLDER pull
     set hydro $GITHUB_FOLDER/hydro
     if not test -d $hydro
         mkdir -p (dirname $hydro)
-        git clone -b me "$github_prefix"nathanchance/hydro.git $hydro; or return
-        git -C $hydro remote add upstream https://github.com/jorgebucaran/hydro.git
+        set -l clone_args -b personal
+        if test "$use_gh" = true
+            gh repo clone (basename $hydro) $hydro -- $clone_args
+        else
+            git clone $clone_args https://github.com/nathanchance/(basename $hydro).git $hydro; or return
+        end
     end
     git -C $hydro remote update
 

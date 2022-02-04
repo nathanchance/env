@@ -30,7 +30,7 @@ function cbl_setup_other_repos -d "Download other ClangBuiltLinux repos"
     set pi_scripts $CBL_BLD/pi-scripts
     if not test -d $pi_scripts
         mkdir -p (dirname $pi_scripts)
-        git clone git@github.com:nathanchance/pi-scripts $pi_scripts
+        gh repo clone pi-scripts $pi_scripts
     end
 
     set tuxmake $CBL_SRC/tuxmake

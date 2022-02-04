@@ -6,13 +6,13 @@ function updweb -d "Update my website with hugo"
     set website $GITHUB_FOLDER/nathanchance.github.io
     if not test -d $website
         mkdir -p (dirname $website)
-        git clone git@github.com:nathanchance/(basename $website).git $website
+        gh repo clone (basename $website) $website
     end
 
     set hugo_files $GITHUB_FOLDER/hugo-files
     if not test -d $hugo_files
         mkdir -p (dirname $hugo_files)
-        git clone git@github.com:nathanchance/(basename $hugo_files).git $hugo_files
+        gh repo clone (basename $hugo_files) $hugo_files
     end
 
     for arg in $argv
