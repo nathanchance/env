@@ -7,4 +7,5 @@ function git_sync -d "Deletes merged branches and syncs fork with upstream"
     git pull; or return
     git dmb; or return
     gh repo sync --force nathanchance/(basename $PWD)
+    git ru
 end
