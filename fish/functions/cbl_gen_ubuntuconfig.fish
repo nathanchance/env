@@ -39,6 +39,7 @@ function cbl_gen_ubuntuconfig -d "Generate a kernel .config from Ubuntu's config
     scripts/config \
         --file $cfg \
         -d DEBUG_INFO \
+        -d DEBUG_INFO_DWARF4 \
         --set-val FRAME_WARN 1500 \
         -d IMA_APPRAISE_MODSIG \
         -d MODULE_SIG \
@@ -48,6 +49,7 @@ function cbl_gen_ubuntuconfig -d "Generate a kernel .config from Ubuntu's config
         -u SYSTEM_REVOCATION_KEYS \
         -u SYSTEM_TRUSTED_KEYS \
         -d UBSAN \
+        -e DEBUG_INFO_NONE \
         -e LOCALVERSION_AUTO \
         -e WERROR
 end
