@@ -223,7 +223,7 @@ function cbl_lkt -d "Tests a Linux kernel with llvm-kernel-testing"
             echo
             echo (basename $linux_src)" commit log:"
             echo
-            git -C $linux_src lo $mfc^^..HEAD
+            git -C $linux_src l $mfc^^..HEAD
         end
     end >$mail_log
 
