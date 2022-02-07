@@ -18,7 +18,7 @@ function cbl_upd_tc_bld_lnx -d "Update the version of Linux built for PGO in tc-
 
     set linux $CBL_SRC/linux
     pushd $linux; or return
-    git ru
+    git ru origin
     set kver (git describe --abbrev=0 origin/master | sed 's/v//')
 
     switch $mode
