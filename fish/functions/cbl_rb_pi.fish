@@ -22,27 +22,14 @@ function cbl_rb_pi -d "Rebase Raspberry Pi kernel on latest linux-next"
 
     git rh origin/master
 
+    set -a patches https://lore.kernel.org/r/20220207162410.1013466-1-nathan@kernel.org/ # [PATCH] io_uring: Fix use of uninitialized ret in io_eventfd_register()
+    set -a patches https://lore.kernel.org/r/20220207165304.1046867-1-nathan@kernel.org/ # [PATCH] drm/stm: Avoid using val uninitialized in ltdc_set_ycbcr_config()
+    set -a patches https://lore.kernel.org/r/20220207163829.1025904-1-nathan@kernel.org/ # [PATCH] thermal: netlink: Fix parameter type of thermal_genl_cpu_capability_event() stub
+    set -a patches https://lore.kernel.org/r/20220207171049.1102239-1-nathan@kernel.org/ # [PATCH] proc: Avoid unused variable warning in pagemap_pmd_range()
+
     for patch in $patches
         b4 shazam -l -P _ -s $patch; or return
     end
-
-    echo 'diff --git a/drivers/gpu/drm/stm/ltdc.c b/drivers/gpu/drm/stm/ltdc.c
-index 5eeb32c9c9ce..dc07077bfd7a 100644
---- a/drivers/gpu/drm/stm/ltdc.c
-+++ b/drivers/gpu/drm/stm/ltdc.c
-@@ -624,7 +624,7 @@ static inline void ltdc_set_ycbcr_config(struct drm_plane *plane, u32 drm_pix_fm
- 		break;
- 	default:
- 		/* RGB or not a YCbCr supported format */
--		break;
-+		return;
- 	}
- 
- 	/* Enable limited range */
-' | git ap
-    git ac -m "drm/stm: ltdc: Don't use val uninitialized in ltdc_set_ycbcr_config()
-
-Link: https://lore.kernel.org/r/Yfq3XwozrxYaFhgD@dev-arch.archlinux-ax161/"
 
     # Tailscale configs
     for cfg_file in arch/arm/configs/multi_v7_defconfig arch/arm64/configs/defconfig
