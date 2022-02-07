@@ -14,17 +14,17 @@ else
     set -e SERVER_IP
 end
 
-set -l user (id -un)
 if test -z "$LOCATION"
+    set -l user (id -un)
     switch $user@$hostname
-        case nathan@asus-intel-core-4210U
-            set -U LOCATION laptop
-        case nathan@hp-amd-ryzen-4300G
-            set -U LOCATION desktop
+        case nathan@archlinux-'*' nathan@debian-'*' nathan@ubuntu-'*'
+            set -U LOCATION hetzner-server
         case pi@raspberrypi
             set -U LOCATION pi
-        case nathan@archlinux-'*' nathan@debian-'*' nathan@ubuntu-'*'
-            set -U LOCATION server
+        case nathan@hp-amd-ryzen-4300G
+            set -U LOCATION test-desktop-amd
+        case nathan@asus-intel-core-4210U
+            set -U LOCATION test-laptop-intel
         case nathan@hyperv nathan@vmware
             set -U LOCATION vm
         case nathan@MSI nathan@Ryzen-5-4500U nathan@Ryzen-9-3900X
@@ -42,22 +42,22 @@ end
 
 # MAIN_FOLDER value
 switch $LOCATION
-    case desktop laptop vm
-        set -Ux MAIN_FOLDER $HOME/Dev
     case pi
         if test -d /mnt/ssd
             set -Ux MAIN_FOLDER /mnt/ssd
         end
+    case test-desktop-amd test-laptop-intel vm
+        set -Ux MAIN_FOLDER $HOME/Dev
 end
 
 # CCACHE_SIZE
 switch $LOCATION
-    case desktop laptop pi vm
-        set -Ux CCACHE_MAXSIZE 15G
     case generic wsl
         set -Ux CCACHE_MAXSIZE 25G
-    case server
-        set -Ux CCACHE_MAXSIZE 150G
+    case hetzner-server
+        set -Ux CCACHE_MAXSIZE 200G
+    case test-desktop-amd test-laptop-intel pi vm
+        set -Ux CCACHE_MAXSIZE 15G
 end
 
 

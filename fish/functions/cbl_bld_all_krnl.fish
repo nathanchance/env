@@ -6,18 +6,6 @@ function cbl_bld_all_krnl -d "Build all kernels for ClangBuiltLinux testing"
     in_container_msg -c; or return
 
     switch $LOCATION
-        case desktop laptop
-            cbl_test_kvm
-
-            set lnx_src $CBL_SRC/linux
-            echo CONFIG_WERROR=n >$lnx_src/allmod.config
-            kmake \
-                -C $lnx_src \
-                KCONFIG_ALLCONFIG=1 \
-                LLVM=1 \
-                O=.build/(uname -m) \
-                distclean allmodconfig all
-
         case pi
             for arch in arm arm64 x86_64
                 switch $arch
@@ -47,6 +35,18 @@ function cbl_bld_all_krnl -d "Build all kernels for ClangBuiltLinux testing"
                 end
                 kboot -a $kboot_arch -k $CBL_SRC/linux-next/.build/$arch
             end
+
+        case test-desktop-amd test-laptop-intel
+            cbl_test_kvm
+
+            set lnx_src $CBL_SRC/linux
+            echo CONFIG_WERROR=n >$lnx_src/allmod.config
+            kmake \
+                -C $lnx_src \
+                KCONFIG_ALLCONFIG=1 \
+                LLVM=1 \
+                O=.build/(uname -m) \
+                distclean allmodconfig all
 
         case '*'
             for arg in $argv

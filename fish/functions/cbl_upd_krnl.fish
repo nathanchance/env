@@ -6,45 +6,8 @@ function cbl_upd_krnl -d "Update machine's kernel"
     set fish_trace 1
 
     switch $LOCATION
-        case desktop laptop vm
-            in_container_msg -h; or return
-
-            for arg in $argv
-                switch $arg
-                    case -r --reboot
-                        set reboot true
-                    case '*'
-                        set krnl linux-(string replace 'linux-' '' $arg)
-                end
-            end
-            if not set -q krnl
-                print_error "Kernel is required!"
-                return 1
-            end
-
-            # Cache sudo/doas permissions
-            if test "$reboot" = true
-                sudo true; or return
-            end
-
-            cd /tmp; or return
-
-            scp nathan@$SERVER_IP:/home/nathan/github/env/pkgbuilds/$krnl/'*'.tar.zst .; or return
-
-            sudo pacman -U --noconfirm *$krnl*.tar.zst
-
-            if test "$reboot" = true
-                if test -d /sys/firmware/efi
-                    set boot_conf /boot/loader/entries/$krnl.conf
-                    if test -f $boot_conf
-                        sudo bootctl set-oneshot $krnl.conf; or return
-                    else
-                        print_error "$boot_conf does not exist!"
-                        return 1
-                    end
-                end
-                sudo reboot
-            end
+        case hetzner-server
+            cbl_upd_krnl_pkg $argv
 
         case pi
             in_container_msg -h; or return
@@ -130,6 +93,46 @@ function cbl_upd_krnl -d "Update machine's kernel"
                 rm -fr $workdir
             end
 
+        case test-desktop-amd test-laptop-intel vm
+            in_container_msg -h; or return
+
+            for arg in $argv
+                switch $arg
+                    case -r --reboot
+                        set reboot true
+                    case '*'
+                        set krnl linux-(string replace 'linux-' '' $arg)
+                end
+            end
+            if not set -q krnl
+                print_error "Kernel is required!"
+                return 1
+            end
+
+            # Cache sudo/doas permissions
+            if test "$reboot" = true
+                sudo true; or return
+            end
+
+            cd /tmp; or return
+
+            scp nathan@$SERVER_IP:/home/nathan/github/env/pkgbuilds/$krnl/'*'.tar.zst .; or return
+
+            sudo pacman -U --noconfirm *$krnl*.tar.zst
+
+            if test "$reboot" = true
+                if test -d /sys/firmware/efi
+                    set boot_conf /boot/loader/entries/$krnl.conf
+                    if test -f $boot_conf
+                        sudo bootctl set-oneshot $krnl.conf; or return
+                    else
+                        print_error "$boot_conf does not exist!"
+                        return 1
+                    end
+                end
+                sudo reboot
+            end
+
         case wsl
             in_container_msg -h; or return
 
@@ -167,8 +170,5 @@ function cbl_upd_krnl -d "Update machine's kernel"
                     set image arch/x86/boot/bzImage
                     scp nathan@$SERVER_IP:$src/$image $kernel
             end
-
-        case server
-            cbl_upd_krnl_pkg $argv
     end
 end

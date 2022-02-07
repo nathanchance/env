@@ -4,7 +4,7 @@
 
 function updoci -d "Downloads OCI container images from GitHub"
     switch $LOCATION
-        case server
+        case hetzner-server
             set images \
                 dev/{arch,fedora,ubuntu} \
                 gcc-{5,6,7,8,9,1{0,1}} \

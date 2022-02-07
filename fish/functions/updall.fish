@@ -31,7 +31,7 @@ function updall -d "Update binaries in $BIN_FOLDER"
         yapf
 
     switch $LOCATION
-        case server
+        case hetzner-server
             set -a targets \
                 arc
     end

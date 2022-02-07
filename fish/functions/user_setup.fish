@@ -21,8 +21,10 @@ function user_setup -d "Setup a user account, downloading all files and placing 
     if uname -r | grep -iq microsoft
         set wsl true
     end
-    if test "$LOCATION" = server; or test "$LOCATION" = wsl
-        set trusted true
+
+    switch $LOCATION
+        case hetzner-server wsl
+            set trusted true
     end
 
     # GPG and SSH keys (trusted environment only)
