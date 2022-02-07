@@ -3,7 +3,7 @@
 _localversion=-llvm
 _pkgsuffix=-mainline$_localversion
 pkgbase=linux$_pkgsuffix
-_srctag=v5.17-rc2
+_srctag=v5.17-rc3
 pkgver=${_srctag//-/.}
 pkgrel=1
 pkgdesc='Linux'
@@ -18,14 +18,12 @@ _srcname=$pkgbase
 source=(
   "$_srcname::git+https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git?signed#tag=$_srctag"
   config
-  vmbus_drv.c.patch
 )
 validpgpkeys=(
   'ABAF11C65A2970B130ABE3C479BE3E4300411886'  # Linus Torvalds
 )
 sha256sums=('SKIP'
-            '7e8d4c0c94cf559d752ae3140e698ec67204ec47a0358563ccbca7e154f075f3'
-            '77885a48b60ee772e5c519c8d8bc633cc1c794ae861af173ec10fa27a545de36')
+            '4f90d5e445b5923e05ac03776ae60bb6116c3bfc9e32ced3ed6b76cbc68430e2')
 
 _kmake() {
   set -x
@@ -54,6 +52,9 @@ prepare() {
   done
 
   echo "Applying patches from mailing lists or git repos..."
+
+  # [PATCH 1/1] Drivers: hv: vmbus: Rework use of DMA_BIT_MASK(64)
+  fish -c "b4 am -o - https://lore.kernel.org/r/1644176216-12531-1-git-send-email-mikelley@microsoft.com | patch -Np1"
 
   echo "Setting config..."
   cp ../config .config
