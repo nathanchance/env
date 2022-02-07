@@ -50,10 +50,11 @@ function setup_fish_repo() {
 }
 
 function setup_apt_llvm_org() {
-    if [[ $compiler = "llvm-14" ]]; then
-        get_apt_gpg_key https://apt.llvm.org/llvm-snapshot.gpg.key apt_llvm_org
-        add-apt-repository "deb http://apt.llvm.org/impish/ llvm-toolchain-impish main"
-    fi
+    get_apt_gpg_key https://apt.llvm.org/llvm-snapshot.gpg.key apt_llvm_org
+    case $compiler in
+        llvm-14) add-apt-repository "deb http://apt.llvm.org/impish/ llvm-toolchain-impish-14 main" ;;
+        llvm-15) add-apt-repository "deb http://apt.llvm.org/impish/ llvm-toolchain-impish main" ;;
+    esac
 }
 
 function setup_llvm_copr() {
