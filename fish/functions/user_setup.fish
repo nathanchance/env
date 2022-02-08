@@ -20,23 +20,33 @@ function user_setup -d "Setup a user account, downloading all files and placing 
     # Set "trusted environment" variable to make decisions later
     switch $LOCATION
         case hetzner-server wsl
-            set trusted true
+            set trusted_gpg true
+            set trusted_ssh true
+        case pi test-desktop-amd test-laptop-intel
+            set trusted_ssh true
     end
 
-    # GPG and SSH keys (trusted environment only)
-    if test "$trusted" = true
+    # Trusting an environment with GPG but not SSH makes little sense
+    if test "$trusted_gpg" = true; and not test "$trusted_ssh" = true
+        print_error "This environment trusts GPG but not SSH?"
+        return 1
+    end
+
+    # Set up where keys should be available
+    switch $LOCATION
+        case wsl
+            set keys_folder /mnt/c/Users/natec/Documents/Keys
+        case '*'
+            set keys_folder /tmp/keys
+    end
+
+    # Set up SSH keys if requested
+    if test "$trusted_ssh" = true
         # Set up gh
         if not gh auth status
             gh auth login; or return
         end
         set use_gh true
-
-        switch $LOCATION
-            case wsl
-                set keys_folder /mnt/c/Users/natec/Documents/Keys
-            case '*'
-                set keys_folder /tmp/keys
-        end
 
         set ssh_folder $HOME/.ssh
         if not test -f $ssh_folder/id_ed25519
@@ -49,6 +59,7 @@ function user_setup -d "Setup a user account, downloading all files and placing 
             cp -v $ssh_keys/id_ed25519{,.pub} $ssh_folder
             cp -v $ssh_keys/korg-nathan $ssh_folder/id_korg
             chmod 600 $ssh_folder/id_{ed25519,korg}
+            # https://korg.docs.kernel.org/access.html#if-you-received-a-ssh-private-key-from-kernel-org
             echo 'Host gitolite.kernel.org
   User git
   IdentityFile ~/.ssh/id_korg
@@ -66,6 +77,16 @@ function user_setup -d "Setup a user account, downloading all files and placing 
   ServerAliveInterval 60' >>$ssh_folder/config
         end
 
+        if test -f $HOME/.ssh/.ssh-agent.fish
+            start_ssh_agent; or return
+        else
+            if not ssh-add -l
+                ssh-add $HOME/.ssh/id_ed25519; or return
+            end
+        end
+    end
+
+    if test "$trusted_gpg" = true
         if not gpg_key_usable
             if not test -d $keys_folder
                 gh repo clone keys $keys_folder; or return
@@ -80,19 +101,11 @@ function user_setup -d "Setup a user account, downloading all files and placing 
             gpg-connect-agent reloadagent /bye
         end
 
-        if test "$LOCATION" != wsl
-            rm -rf $keys_folder
-        end
-
         gpg_key_cache; or return
+    end
 
-        if test -f $HOME/.ssh/.ssh-agent.fish
-            start_ssh_agent; or return
-        else
-            if not ssh-add -l
-                ssh-add $HOME/.ssh/id_ed25519; or return
-            end
-        end
+    if test "$LOCATION" != wsl
+        rm -rf $keys_folder
     end
 
     # Downloading/updating environment scripts and prompt
@@ -204,32 +217,33 @@ out.*/
     end
 
     # Private configuration files
-    if test "$trusted" = true
+    if test "$trusted_gpg" = true
         decrypt_gpg_file botinfo
         decrypt_gpg_file muttrc
         decrypt_gpg_file muttrc.notifier
         decrypt_gpg_file config.ini $HOME/.config/tuxsuite/config.ini
-
-        gh auth login; or return
     end
 
     # git repos and source folders
-    if test "$LOCATION" = wsl
-        decrypt_gpg_file server_ip
+    switch $LOCATION
+        case heztner-server
+            mkdir -p $SRC_FOLDER
 
-        set github_repos hugo-files nathanchance.github.io
-    else if test "$trusted" = true
-        mkdir -p $SRC_FOLDER
+            set github_repos bug-files hugo-files nathanchance.github.io patches
 
-        set github_repos bug-files hugo-files nathanchance.github.io patches
+            for linux_tree in linux linux-next linux-stable
+                tmux new-window fish -c "cbl_setup_linux_repos $linux_tree; sleep 180"
+            end
 
-        for linux_tree in linux linux-next linux-stable
-            tmux new-window fish -c "cbl_setup_linux_repos $linux_tree; sleep 180"
-        end
+            tmux new-window fish -c "start_ssh_agent; and cbl_setup_other_repos; sleep 180"
 
-        tmux new-window fish -c "start_ssh_agent; and cbl_setup_other_repos; sleep 180"
-    else
-        return 0
+        case wsl
+            decrypt_gpg_file server_ip
+
+            set github_repos hugo-files nathanchance.github.io
+
+        case '*'
+            return 0
     end
 
     mkdir -p $GITHUB_FOLDER
