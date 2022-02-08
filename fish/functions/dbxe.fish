@@ -15,8 +15,15 @@ function dbxe -d "Shorthand for 'distrobox enter'"
                 set i $next
             case --env='*'
                 set -a add_args $arg
+            case --
+                set end_of_args true
+                set -a dbx_cmd_args $arg
             case '*'
-                set dbx_img $arg
+                if set -q end_of_args
+                    set -a dbx_cmd_args $arg
+                else
+                    set dbx_img $arg
+                end
         end
         set i (math $i + 1)
     end
@@ -29,5 +36,5 @@ function dbxe -d "Shorthand for 'distrobox enter'"
         set dbx_args -a "$add_args"
     end
 
-    dbx enter $dbx_args $dbx_img
+    dbx enter $dbx_args $dbx_img $dbx_cmd_args
 end
