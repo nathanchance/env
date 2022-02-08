@@ -3,7 +3,7 @@
 _localversion=-llvm
 _pkgsuffix=-next$_localversion
 pkgbase=linux$_pkgsuffix
-_srctag=next-20220207
+_srctag=next-20220208
 pkgver=${_srctag//-/.}
 pkgrel=1
 pkgdesc='linux-next'
@@ -57,9 +57,6 @@ prepare() {
 
   # [PATCH] io_uring: Fix use of uninitialized ret in io_eventfd_register()
   fish -c "b4 am -o - https://lore.kernel.org/r/20220207162410.1013466-1-nathan@kernel.org/ | patch -Np1"
-
-  # [PATCH 1/1] Drivers: hv: vmbus: Rework use of DMA_BIT_MASK(64)
-  fish -c "b4 am -o - https://lore.kernel.org/r/1644176216-12531-1-git-send-email-mikelley@microsoft.com | patch -Np1"
 
   echo "Setting config..."
   cp ../config .config
