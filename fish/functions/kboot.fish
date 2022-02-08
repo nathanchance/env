@@ -37,8 +37,8 @@ function kboot -d "Boot a kernel in QEMU"
         git -C $BOOT_UTILS pull -q -r; or return
     end
 
-    if test -n "$PO"
-        set PO $PO:
+    if set -q PO
+        set -p PATH $PO
     end
 
     set fish_trace 1
