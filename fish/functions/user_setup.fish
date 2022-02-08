@@ -17,11 +17,7 @@ function user_setup -d "Setup a user account, downloading all files and placing 
         set gnome_prof $gnome_prof_dir$gnome_prof_base/
     end
 
-    # Set WSL and "trusted environment" variables to make decisions later
-    if uname -r | grep -iq microsoft
-        set wsl true
-    end
-
+    # Set "trusted environment" variable to make decisions later
     switch $LOCATION
         case hetzner-server wsl
             set trusted true
@@ -35,10 +31,11 @@ function user_setup -d "Setup a user account, downloading all files and placing 
         end
         set use_gh true
 
-        if test "$wsl" = true
-            set keys_folder /mnt/c/Users/natec/Documents/Keys
-        else
-            set keys_folder /tmp/keys
+        switch $LOCATION
+            case wsl
+                set keys_folder /mnt/c/Users/natec/Documents/Keys
+            case '*'
+                set keys_folder /tmp/keys
         end
 
         set ssh_folder $HOME/.ssh
@@ -83,7 +80,7 @@ function user_setup -d "Setup a user account, downloading all files and placing 
             gpg-connect-agent reloadagent /bye
         end
 
-        if test "$wsl" != true
+        if test "$LOCATION" != wsl
             rm -rf $keys_folder
         end
 
@@ -154,7 +151,7 @@ out.*/
     if test (get_distro) = arch
         clone_aur_repos
         set aur_pkgs opendoas-sudo
-        if test "$wsl" != true
+        if test "$LOCATION" != wsl
             set -a aur_pkgs modprobed-db
         end
         for $aur_pkg in $aur_pkgs
@@ -217,7 +214,7 @@ out.*/
     end
 
     # git repos and source folders
-    if test "$wsl" = true
+    if test "$LOCATION" = wsl
         decrypt_gpg_file server_ip
 
         set github_repos hugo-files nathanchance.github.io
