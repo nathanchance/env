@@ -1,0 +1,93 @@
+#!/usr/bin/env bash
+# shellcheck disable=SC1091
+# SPDX-License-Identifier: MIT
+# Copyright (C) 2021-2022 Nathan Chancellor
+
+bash_root=$(dirname "$0")
+
+# Add common functions
+source "$bash_root"/common || exit
+
+# Source os-release file for version variables
+source /usr/lib/os-release || exit
+
+function reality_check() {
+    assert_root
+
+    # This setup script only supports Fedora 35 and 36
+    case $VERSION_ID in
+        35 | 36) ;;
+        *)
+            print_error "Fedora $VERSION_ID is not tested with this script, add support for it if it works."
+            exit 1
+            ;;
+    esac
+}
+
+function install_initial_packages() {
+    dnf update -y || exit
+    dnf install -y dnf-plugins-core || exit
+}
+
+function setup_gh_repo() {
+    dnf config-manager --add-repo https://cli.github.com/packages/rpm/gh-cli.repo || exit
+}
+
+function install_packages() {
+    packages=(
+        # administration
+        htop
+        opendoas
+        util-linux-user
+
+        # b4
+        python3-{dkimpy,dns,requests}
+
+        # email
+        cyrus-sasl-plain
+        mutt
+
+        # env
+        curl
+        fish
+        fzf
+        jq
+        neofetch
+        openssh
+        stow
+        tmux
+        vim
+        zoxide
+
+        # git
+        gh
+        git{,-email}
+    )
+
+    dnf install -y "${packages[@]}" || exit
+}
+
+function setup_doas() {
+    # Fedora provides a doas.conf already, just modify it to suit our needs
+    sed -i 's/permit :wheel/permit persist :wheel/g' /etc/doas.conf
+    cat <<EOF >>/etc/doas.conf
+
+# Do not require root to put in a password (makes no sense)
+permit nopass root
+EOF
+
+    # Remove sudo but set up a symlink for compatibility
+    rm -f /etc/dnf/protected.d/sudo.conf
+    remove_if_installed sudo || exit
+    setup_sudo_symlink
+}
+
+set_global_variables
+reality_check
+install_initial_packages
+setup_gh_repo
+install_packages
+setup_doas
+chsh_fish
+clone_env
+setup_initial_fish_config

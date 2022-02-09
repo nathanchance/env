@@ -40,7 +40,9 @@ function clone_env() {
 }
 
 function is_installed() {
-    if command -v pacman &>/dev/null; then
+    if command -v dnf &>/dev/null; then
+        dnf list --installed "${@:?}" &>/dev/null
+    elif command -v pacman &>/dev/null; then
         pacman -Q "${@:?}" &>/dev/null
     else
         print_error "is_installed not implemented for current package manager."
@@ -91,7 +93,9 @@ function remove_if_installed() {
     # Do not return an error if the package is not installed
     is_installed "$@" || return 0
 
-    if command -v pacman &>/dev/null; then
+    if command -v dnf &>/dev/null; then
+        dnf remove -y "$@"
+    elif command -v pacman &>/dev/null; then
         pacman -R --noconfirm "$@"
     else
         print_error "is_installed not implemented for current package manager."
@@ -164,6 +168,14 @@ EOF
 
     # Make sure permissions of newly created folder are not messed up
     chown -R "$user_name:$user_name" /home/"$user_name"/.config
+}
+
+function setup_sudo_symlink() {
+    sudo_prefix=${PREFIX:-/usr/local}/stow/sudo
+    sudo_bin=$sudo_prefix/bin/sudo
+    mkdir -p "${sudo_bin%/*}"
+    ln -frsv "$(command -v doas)" "$sudo_bin"
+    stow -d "${sudo_prefix%/*}" -R "${sudo_prefix##*/}" -v
 }
 
 function user_exists() {

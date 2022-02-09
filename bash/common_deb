@@ -118,11 +118,7 @@ EOF
 
     # Uninstall sudo but create a symlink in case a program expects only sudo
     apt remove -y sudo
-    sudo_prefix=${PREFIX:-/usr/local}/stow/sudo
-    sudo_bin=$sudo_prefix/bin/sudo
-    mkdir -p "${sudo_bin%/*}"
-    ln -frsv "$(command -v doas)" "$sudo_bin"
-    stow -d "${sudo_prefix%/*}" -R "${sudo_prefix##*/}" -v
+    setup_sudo_symlink
 
     rm -fr "$work_dir"
 }
