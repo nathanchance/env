@@ -167,7 +167,7 @@ out.*/
         if test "$LOCATION" != wsl
             set -a aur_pkgs modprobed-db
         end
-        for $aur_pkg in $aur_pkgs
+        for aur_pkg in $aur_pkgs
             if not is_installed $aur_pkg
                 pushd $AUR_FOLDER/$aur_pkg; or return
                 makepkg; or return
