@@ -1,0 +1,147 @@
+#!/usr/bin/env bash
+# SPDX-License-Identifier: MIT
+# Copyright (C) 2021-2022 Nathan Chancellor
+
+function base_packages() {
+    packages=(
+        # arc
+        php{,-curl}
+
+        # b4
+        python3{,-{dkim,requests}}
+
+        # debian.sh from boot-utils
+        binfmt-support
+        debootstrap
+        qemu-user-static
+        qemu-utils
+
+        # doas
+        libpam0g
+
+        # Downloading/extracting utilities
+        ca-certificates
+        curl
+        unzip
+        zip
+        zstd
+
+        # email
+        mutt
+
+        # env
+        fish
+        jq
+        neofetch
+        ripgrep
+        stow
+        tmux
+        vim
+
+        # git
+        gh
+        git
+        git-email
+        libauthen-sasl-perl
+        libemail-valid-perl
+        libio-socket-ssl-perl
+        libnet-smtp-ssl-perl
+
+        # Miscellaneous
+        file
+        locales
+
+        # Remote work
+        mosh
+        ssh
+
+        # repo
+        python-is-python3
+    )
+
+    if can_install_podman; then
+        packages+=(
+            buildah
+            containernetworking-plugins
+            fuse-overlayfs
+            podman
+            slirp4netns
+            uidmap
+        )
+    fi
+}
+
+function install_packages() {
+    base_packages
+    if type -t distro_packages &>/dev/null; then
+        distro_packages
+    fi
+
+    apt_args=(
+        -o Dpkg::Options::='--force-confdef'
+        -o Dpkg::Options::='--force-confold'
+        -y
+    )
+
+    apt update -qq || exit
+    apt upgrade "${apt_args[@]}" || exit
+    apt install \
+        --no-install-recommends \
+        "${apt_args[@]}" \
+        "${packages[@]}" || exit
+}
+
+function set_apt_variables() {
+    export APT_LISTCHANGES_FRONTEND=none
+    export DEBIAN_FRONTEND=noninteractive
+    export NEEDRESTART_SUSPEND=true
+}
+
+function setup_doas() {
+    work_dir=$(mktemp -d)
+
+    doas_version=6.8.1-3
+    doas_deb="$work_dir"/doas_"$doas_version"_"$(dpkg --print-architecture)".deb
+
+    curl -LSso "$doas_deb" http://http.us.debian.org/debian/pool/main/d/doas/"${doas_deb##*/}" || exit
+    dpkg -i "$doas_deb" || exit
+
+    cat <<EOF >/etc/doas.conf
+# Allow me to be root for 5 minutes at a time
+permit persist ${user_name:?} as root
+# Do not require root to put in a password (makes no sense)
+permit nopass root
+EOF
+
+    # Add a root password if requested so that there is no warning about removing sudo
+    [[ -n $root_pass ]] && echo "root:$root_pass" | chpasswd
+
+    # Uninstall sudo but create a symlink in case a program expects only sudo
+    apt remove -y sudo
+    sudo_prefix=${PREFIX:-/usr/local}/stow/sudo
+    sudo_bin=$sudo_prefix/bin/sudo
+    mkdir -p "${sudo_bin%/*}"
+    ln -frsv "$(command -v doas)" "$sudo_bin"
+    stow -d "${sudo_prefix%/*}" -R "${sudo_prefix##*/}" -v
+
+    rm -fr "$work_dir"
+}
+
+function setup_gh_repo() {
+    curl -fLSs https://cli.github.com/packages/githubcli-archive-keyring.gpg | dd of=/etc/apt/trusted.gpg.d/githubcli-archive-keyring.gpg || exit
+    echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/trusted.gpg.d/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | tee /etc/apt/sources.list.d/github-cli.list || exit
+}
+
+function setup_locales() {
+    echo "locales locales/default_environment_locale select en_US.UTF-8" | debconf-set-selections
+    echo "locales locales/locales_to_be_generated multiselect en_US.UTF-8 UTF-8" | debconf-set-selections
+    rm -f /etc/locale.gen
+    dpkg-reconfigure --frontend noninteractive locales
+}
+
+function setup_podman_repo() {
+    can_install_podman || return 0
+
+    curl -fLSs https://download.opensuse.org/repositories/devel:/kubic:/libcontainers:/stable/"${1:?}"/Release.key | gpg --dearmor | dd of=/etc/apt/trusted.gpg.d/devel_kubic_libcontainers_stable.gpg || exit
+    echo "deb https://download.opensuse.org/repositories/devel:/kubic:/libcontainers:/stable/$1/ /" | tee /etc/apt/sources.list.d/devel:kubic:libcontainers:stable.list
+}

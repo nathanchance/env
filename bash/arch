@@ -1,0 +1,265 @@
+#!/usr/bin/env bash
+# SPDX-License-Identifier: MIT
+# Copyright (C) 2021-2022 Nathan Chancellor
+
+bash_root=$(dirname "$0")
+
+# Add common functions
+# shellcheck disable=SC1091
+source "$bash_root"/common || exit
+
+function reality_check() {
+    assert_root
+
+    # Certain Arch Linux installs will be set up with archinstall, which sets
+    # up the user account/password and root password, so we do not need to do
+    # anything here
+    if ! user_exists "${user_name:?}"; then
+        : "${root_pass:?}" "${user_pass:?}"
+
+        # Remove the root password so that all commands that would normally
+        # require a root password are non-interactive
+        passwd -d root
+    fi
+}
+
+function pacman_settings() {
+    # Update /etc/{makepkg,pacman}.conf if necessary
+    [[ -f /etc/makepkg.conf.pacnew ]] && mv -v /etc/makepkg.conf{.pacnew,}
+    [[ -f /etc/pacman.conf.pacnew ]] && mv -v /etc/pacman.conf{.pacnew,}
+
+    # Enable colors for pacman
+    sed -i 's/#Color/Color/g' /etc/pacman.conf
+
+    # Enable parallel downloads
+    sed -i 's/#ParallelDownloads = 5/ParallelDownloads = 7/g' /etc/pacman.conf
+}
+
+function pacman_key_setup() {
+    pacman-key --init || exit
+    pacman-key --populate archlinux || exit
+}
+
+function pacman_update() {
+    pacman -Syyu --noconfirm || exit
+}
+
+function remove_fakeroot_tcp() {
+    sed -i 's/IgnorePkg   = fakeroot/#IgnorePkg   =/g' /etc/pacman.conf
+    remove_if_installed fakeroot-tcp || exit
+}
+
+function add_ignorepkg() {
+    # Handle IgnorePkg as necessary
+    # sed -i 's/#IgnorePkg   =/IgnorePkg    =/g' /etc/pacman.conf
+    :
+}
+
+function install_pkgs() {
+    packages=(
+        # Administration tools
+        htop
+        iputils
+        opendoas
+
+        # arc
+        php
+
+        # b4
+        python-{dkim,requests}
+
+        # Container tools
+        buildah
+        catatonit
+        podman
+
+        # continuous-integration2 (generate.sh)
+        python-yaml
+
+        # debian.sh from boot-utils
+        debootstrap
+
+        # Development tools
+        dos2unix
+        hyperfine
+        patch
+
+        # Downloading and extracting utilities
+        ca-certificates
+        curl
+        unzip
+        wget
+
+        # Email
+        mutt
+
+        # env
+        fish
+        hugo
+        jq
+        shfmt
+        stow
+        tmux
+        zoxide
+
+        # git
+        git
+        github-cli
+        perl-authen-sasl
+        perl-mime-tools
+        perl-net-smtp-ssl
+        repo
+
+        # Miscellaneous
+        libxkbcommon
+        lm_sensors
+        which
+
+        # Nicer versions of certain GNU utilities
+        bat
+        diskus
+        duf
+        dust
+        exa
+        fd
+        ripgrep
+
+        # Package management
+        pacman-contrib
+
+        # Remote work
+        mosh
+        openssh
+    )
+
+    # This variable is assigned in bash/common
+    # shellcheck disable=SC2154
+    if ! $wsl; then
+        packages+=(tailscale)
+
+        if [[ -n $DISPLAY ]]; then
+            packages+=(
+                # Chat applications
+                discord
+                telegram-desktop
+
+                # Fonts
+                cantarell-fonts
+                ttc-iosevka-ss08
+
+                # Streaming
+                obs-studio
+
+                # Web browsing
+                firefox
+
+                # Video viewing
+                vlc
+            )
+        fi
+
+        # https://wiki.archlinux.org/title/VMware/Install_Arch_Linux_as_a_guest
+        if [[ $(uname -n) = "vmware" ]]; then
+            packages+=(
+                # All of these are needed for autofit
+                gtkmm
+                gtk2
+                open-vm-tools
+            )
+        fi
+    fi
+
+    pacman -S --needed --noconfirm "${packages[@]}" || exit
+
+    # Reinstall shadow to fix permissions with newuidmap
+    pacman -S --noconfirm shadow
+}
+
+function setup_doas() {
+    cat <<EOF >/etc/doas.conf
+# Allow me to be root for 5 minutes at a time
+permit persist ${user_name} as root
+# Allow me to update or install packages without a password
+permit nopass ${user_name} cmd pacman
+# Do not require root to put in a password (makes no sense)
+permit nopass root
+EOF
+
+    cat <<EOF >/etc/pam.d/doas
+#%PAM-1.0
+auth        include     system-auth
+account     include     system-auth
+session     include     system-auth
+EOF
+
+    remove_if_installed sudo || exit
+}
+
+function setup_user() {
+    if user_exists "$user_name"; then
+        chsh_fish
+    else
+        useradd -G wheel -m -s "$(readlink -f "$(command -v fish)")" "$user_name"
+        echo "$user_name:$user_pass" | chpasswd
+    fi
+}
+
+function vmware_adjustments() {
+    if [[ $(uname -n) = "vmware" ]]; then
+        # https://wiki.archlinux.org/title/VMware/Install_Arch_Linux_as_a_guest#In-kernel_drivers
+        sed -i 's;MODULES=();MODULES=(vsock vmw_vsock_vmci_transport vmw_balloon vmw_vmci vmwgfx);g' /etc/mkinitcpio.conf
+        mkinitcpio -P
+
+        # https://wiki.archlinux.org/title/VMware/Install_Arch_Linux_as_a_guest#Installation
+        systemctl enable vmtoolsd.service
+        systemctl enable vmware-vmblock-fuse.service
+    fi
+}
+
+function wsl_tmpfs() {
+    if $wsl; then
+        # Make /tmp a true tmpfs, needed for podman and avoiding stale sockets after a reboot
+        printf "tmpfs\t/tmp\ttmpfs\tdefaults\t0\t0\n" | tee -a /etc/fstab
+    fi
+}
+
+function enable_ssh() {
+    if ! $wsl; then
+        sed -i 's/#PermitRootLogin prohibit-password/PermitRootLogin prohibit-password/g' /etc/ssh/sshd_config
+        systemctl enable --now sshd.service
+    fi
+}
+
+function enable_tailscale() {
+    if is_installed tailscale; then
+        systemctl enable --now tailscaled
+    fi
+}
+
+function fix_lightdm() {
+    if is_installed lightdm; then
+        # https://wiki.archlinux.org/title/LightDM#LightDM_does_not_appear_or_monitor_only_displays_TTY_output
+        sed -i 's/#logind-check-graphical=false/logind-check-graphical=true/g' /etc/lightdm/lightdm.conf
+    fi
+}
+
+parse_parameters "$@"
+set_global_variables
+reality_check
+pacman_settings
+pacman_key_setup
+pacman_update
+remove_fakeroot_tcp
+add_ignorepkg
+install_pkgs
+setup_doas
+setup_user
+clone_env
+podman_setup
+vmware_adjustments
+wsl_tmpfs
+enable_ssh
+enable_tailscale
+fix_lightdm
+set_date_time
+setup_initial_fish_config
