@@ -40,16 +40,6 @@ end
 ##  LOCATION SPECIFIC FOLDER VARIABLES  ##
 ##########################################
 
-# MAIN_FOLDER value
-switch $LOCATION
-    case pi
-        if test -d /mnt/ssd
-            set -Ux MAIN_FOLDER /mnt/ssd
-        end
-    case test-desktop-amd test-laptop-intel vm
-        set -Ux MAIN_FOLDER $HOME/Dev
-end
-
 # CCACHE_SIZE
 switch $LOCATION
     case generic wsl
@@ -66,9 +56,15 @@ end
 ##  GLOBAL FOLDER VARIABLES  ##
 ###############################
 
+if test -d /mnt/ssd
+    set -Ux MAIN_FOLDER /mnt/ssd
+else if test -d $HOME/Downloads
+    set -Ux MAIN_FOLDER $HOME/Dev
+end
 if not set -q MAIN_FOLDER
     set -Ux MAIN_FOLDER $HOME
 end
+
 set -Ux AUR_FOLDER $MAIN_FOLDER/aur
 set -Ux BIN_FOLDER $MAIN_FOLDER/bin
 set -Ux BIN_SRC_FOLDER $BIN_FOLDER/src
