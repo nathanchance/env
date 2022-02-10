@@ -22,9 +22,7 @@ function cbl_rb_pi -d "Rebase Raspberry Pi kernel on latest linux-next"
 
     git rh origin/master
 
-    set -a patches https://lore.kernel.org/r/20220207162410.1013466-1-nathan@kernel.org/ # [PATCH] io_uring: Fix use of uninitialized ret in io_eventfd_register()
     set -a patches https://lore.kernel.org/r/20220207165304.1046867-1-nathan@kernel.org/ # [PATCH] drm/stm: Avoid using val uninitialized in ltdc_set_ycbcr_config()
-    set -a patches https://lore.kernel.org/r/20220207171049.1102239-1-nathan@kernel.org/ # [PATCH] proc: Avoid unused variable warning in pagemap_pmd_range()
 
     for patch in $patches
         b4 shazam -l -P _ -s $patch; or return
