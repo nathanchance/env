@@ -43,7 +43,7 @@ function cbl_upd_krnl -d "Update machine's kernel"
 
             # Grab .tar.zst package
             set user nathan
-            set remote_build (string replace pi $user $CBL_BLD | string replace /mnt/ssd /home/$user $remote_build)
+            set remote_build (string replace $MAIN_FOLDER /home/$user $CBL_BLD)
             set out $remote_build/rpi/.build/$arch
             scp $user@$SERVER_IP:$out/linux-'*'-$arch.tar.zst .
 
