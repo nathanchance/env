@@ -5,6 +5,8 @@
 function is_installed -d "Checks if a package is installed depending on the package manager"
     if command -q pacman
         pacman -Q $argv &>/dev/null
+    else if command -q dnf
+        dnf list --installed $argv &>/dev/null
     else if command -q dpkg
         dpkg -s $argv &>/dev/null
     else
