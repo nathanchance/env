@@ -13,10 +13,6 @@ function cbl_bld_tot_tcs -d "Build LLVM and binutils from source for kernel deve
     end
 
     switch $LOCATION
-        case generic wsl
-            set bld_llvm_args \
-                --pgo kernel-defconfig
-
         case hetzner-server
             set bld_llvm_args \
                 --pgo kernel-{allmod,def}config
@@ -40,6 +36,10 @@ function cbl_bld_tot_tcs -d "Build LLVM and binutils from source for kernel deve
             set bld_llvm_args \
                 --pgo kernel-{allmod,def}config \
                 --targets X86
+
+        case test-desktop-intel generic wsl
+            set bld_llvm_args \
+                --pgo kernel-defconfig
 
         case vm
             set bld_bntls false

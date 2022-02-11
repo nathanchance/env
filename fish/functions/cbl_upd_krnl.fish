@@ -93,7 +93,7 @@ function cbl_upd_krnl -d "Update machine's kernel"
                 rm -fr $workdir
             end
 
-        case test-desktop-amd test-laptop-intel vm
+        case test-desktop-amd test-desktop-intel test-laptop-intel vm
             in_container_msg -h; or return
 
             for arg in $argv

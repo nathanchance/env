@@ -36,7 +36,7 @@ function cbl_bld_all_krnl -d "Build all kernels for ClangBuiltLinux testing"
                 kboot -a $kboot_arch -k $CBL_SRC/linux-next/.build/$arch
             end
 
-        case test-desktop-amd test-laptop-intel
+        case test-desktop-amd test-desktop-intel test-laptop-intel
             cbl_test_kvm
 
             set lnx_src $CBL_SRC/linux
