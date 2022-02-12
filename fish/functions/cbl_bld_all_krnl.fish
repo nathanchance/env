@@ -36,7 +36,7 @@ function cbl_bld_all_krnl -d "Build all kernels for ClangBuiltLinux testing"
                 kboot -a $kboot_arch -k $CBL_SRC/linux-next/.build/$arch
             end
 
-        case test-desktop-amd test-desktop-intel test-laptop-intel
+        case test-desktop-amd test-laptop-intel
             cbl_test_kvm
 
             set lnx_src $CBL_SRC/linux
@@ -47,6 +47,13 @@ function cbl_bld_all_krnl -d "Build all kernels for ClangBuiltLinux testing"
                 LLVM=1 \
                 O=.build/(uname -m) \
                 distclean allmodconfig all
+
+        case test-desktop-intel
+            cbl_clone_repo linux
+            git -C $CBL_SRC/linux urh
+            cbl_lkt \
+                --arches arm32,arm64,x86,x86_64 \
+                --linux-src $CBL_SRC/linux
 
         case '*'
             for arg in $argv
