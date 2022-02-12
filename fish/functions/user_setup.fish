@@ -45,6 +45,7 @@ function user_setup -d "Setup a user account, downloading all files and placing 
         # Set up gh
         if not gh auth status
             gh auth login; or return
+            set first_time_gh true
         end
         set use_gh true
 
@@ -83,6 +84,14 @@ function user_setup -d "Setup a user account, downloading all files and placing 
             if not ssh-add -l
                 ssh-add $HOME/.ssh/id_ed25519; or return
             end
+        end
+
+        # Switch back to SSH protocol for GitHub CLI
+        if test "$first_time_gh" = true
+            gh config set -h github.com git_protocol ssh
+            gh config set git_protocol ssh
+            # This contains the credential helper configs; it will be properly recreated below
+            rm -fr $HOME/.gitconfig
         end
     end
 
