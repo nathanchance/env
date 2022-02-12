@@ -13,7 +13,7 @@ function msh -d "Shorthand for mosh -o" -w mosh
     end
 
     switch $msh_args
-        case dsktp
+        case amd-desktop
             if test "$tailscale" = true
                 set ip 100.127.171.46
             else
@@ -21,7 +21,15 @@ function msh -d "Shorthand for mosh -o" -w mosh
             end
             set user_host nathan@$ip
 
-        case lptp
+        case intel-desktop
+            if test "$tailscale" = true
+                set ip 100.122.30.49
+            else
+                set ip 192.168.4.189
+            end
+            set user_host nathan@$ip
+
+        case intel-laptop
             if test "$tailscale" = true
                 set ip 100.85.161.103
             else
@@ -45,7 +53,7 @@ function msh -d "Shorthand for mosh -o" -w mosh
             end
             set user_host pi@$ip
 
-        case svr
+        case hetzner-server
             set user_host nathan@$SERVER_IP
 
         case '*@*'
