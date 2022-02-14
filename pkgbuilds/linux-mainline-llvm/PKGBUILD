@@ -3,7 +3,7 @@
 _localversion=-llvm
 _pkgsuffix=-mainline$_localversion
 pkgbase=linux$_pkgsuffix
-_srctag=v5.17-rc3
+_srctag=v5.17-rc4
 pkgver=${_srctag//-/.}
 pkgrel=1
 pkgdesc='Linux'
@@ -23,7 +23,7 @@ validpgpkeys=(
   'ABAF11C65A2970B130ABE3C479BE3E4300411886'  # Linus Torvalds
 )
 sha256sums=('SKIP'
-            '4f90d5e445b5923e05ac03776ae60bb6116c3bfc9e32ced3ed6b76cbc68430e2')
+            'f74f933470611babffd8ceff39bf006021559edd21fedd6c6cfbd7a986d2df15')
 
 _kmake() {
   set -x
