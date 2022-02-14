@@ -3,7 +3,7 @@
 _localversion=-llvm
 _pkgsuffix=-next$_localversion
 pkgbase=linux$_pkgsuffix
-_srctag=next-20220211
+_srctag=next-20220214
 pkgver=${_srctag//-/.}
 pkgrel=1
 pkgdesc='linux-next'
@@ -25,7 +25,7 @@ validpgpkeys=(
   '3F2568AAC26998F9E813A1C5C3F436CA30F5D8EB'  # Mark Brown
 )
 sha256sums=('SKIP'
-            '54608c96ae84b21d9a91e0e8bc3dd83bf15cb81510c8e8e50f52baf75fd80286')
+            'bf44225b936b78cb36d9ccbd204d6bf8cf63c373ee12ad85b076dd2f66270ef5')
 
 _kmake() {
   set -x
@@ -57,9 +57,6 @@ prepare() {
 
   # [Intel-gfx] [PATCH v1] drm/i915: fix null pointer dereference
   fish -c "b4 am -o - https://lore.kernel.org/r/20220201153354.11971-1-lukasz.bartosik@semihalf.com/ | patch -Np1"
-
-  # [PATCH] drm/amd/pm: fix enabled features retrieving on Renoir and Cyan Skillfish
-  fish -c "b4 am -o - https://lore.kernel.org/r/20220210014700.856667-1-evan.quan@amd.com/ | patch -Np1"
 
   echo "Setting config..."
   cp ../config .config
