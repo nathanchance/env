@@ -52,6 +52,11 @@ function cbl_gen_archconfig -d "Generate a configuration file for Arch Linux"
         -e DEBUG_INFO_DWARF5 \
         -e WERROR \
         -m DRM
+    # https://git.kernel.org/next/linux-next/c/0177212e2789919be68c7922f33c71febc74842b
+    $src/scripts/config \
+        --file $cfg \
+        -m SPI_INTEL_PCI \
+        -m SPI_INTEL_PLATFORM
 
     # Step 3: Run olddefconfig
     kmake -C $src KCONFIG_CONFIG=$cfg olddefconfig
