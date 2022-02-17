@@ -3,7 +3,7 @@
 _localversion=-llvm
 _pkgsuffix=-next$_localversion
 pkgbase=linux$_pkgsuffix
-_srctag=next-20220214
+_srctag=next-20220217
 pkgver=${_srctag//-/.}
 pkgrel=1
 pkgdesc='linux-next'
@@ -25,7 +25,7 @@ validpgpkeys=(
   '3F2568AAC26998F9E813A1C5C3F436CA30F5D8EB'  # Mark Brown
 )
 sha256sums=('SKIP'
-            'bf44225b936b78cb36d9ccbd204d6bf8cf63c373ee12ad85b076dd2f66270ef5')
+            '80e81e79ecb80c1f7175970e19d5b29f5468074c0007b4cdc9f9d911131c1545')
 
 _kmake() {
   set -x
@@ -35,6 +35,10 @@ _kmake() {
     LLVM=1 \
     "${@}"
   set +x
+}
+
+b4_apply() {
+  fish -c "b4 am -o - ${@} | patch -Np1"
 }
 
 prepare() {
@@ -56,7 +60,13 @@ prepare() {
   echo "Applying patches from web..."
 
   # [Intel-gfx] [PATCH v1] drm/i915: fix null pointer dereference
-  fish -c "b4 am -o - https://lore.kernel.org/r/20220201153354.11971-1-lukasz.bartosik@semihalf.com/ | patch -Np1"
+  b4_apply https://lore.kernel.org/r/20220201153354.11971-1-lukasz.bartosik@semihalf.com/
+
+  # [PATCH] drm/amdgpu: fix amdgpu_ras_block_late_init error handler
+  b4_apply https://lore.kernel.org/r/20220217153842.3252424-1-trix@redhat.com/
+
+  # [PATCH] drm/amdkfd: Use proper enum in pm_unmap_queues_v9()
+  b4_apply https://lore.kernel.org/r/20220217162142.1828990-1-nathan@kernel.org/
 
   echo "Setting config..."
   cp ../config .config
