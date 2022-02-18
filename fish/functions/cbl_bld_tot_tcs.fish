@@ -117,7 +117,6 @@ function cbl_bld_tot_tcs -d "Build LLVM and binutils from source for kernel deve
     end
 
     # Add patches to revert here
-    set -a reverts 66f8ac8d3604d67599734c3fd272032e9448aca2 # https://github.com/ClangBuiltLinux/linux/issues/1597
     for revert in $reverts
         if not git -C $llvm_project rv -n $revert
             set message "Failed to revert $revert"
