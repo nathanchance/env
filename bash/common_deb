@@ -51,6 +51,9 @@ function base_packages() {
         file
         locales
 
+        # Monitoring
+        htop
+
         # Remote work
         mosh
         ssh
