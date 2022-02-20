@@ -7,6 +7,7 @@ function pacman_conf() {
     sed -i 's/#Color/Color/g' /etc/pacman.conf
     sed -i 's/#ParallelDownloads = 5/ParallelDownloads = 7/g' /etc/pacman.conf
     sed -i "/\[testing\]/,/Include/"'s/^#//' /etc/pacman.conf
+    sed -i "/\[community-testing\]/,/Include/"'s/^#//' /etc/pacman.conf
 }
 
 # Edit /etc/makepkg.conf to gain some speed up
