@@ -3,7 +3,7 @@
 _localversion=-llvm
 _pkgsuffix=-mainline$_localversion
 pkgbase=linux$_pkgsuffix
-_srctag=v5.17-rc4
+_srctag=v5.17-rc5
 pkgver=${_srctag//-/.}
 pkgrel=1
 pkgdesc='Linux'
@@ -23,7 +23,7 @@ validpgpkeys=(
   'ABAF11C65A2970B130ABE3C479BE3E4300411886'  # Linus Torvalds
 )
 sha256sums=('SKIP'
-            'f74f933470611babffd8ceff39bf006021559edd21fedd6c6cfbd7a986d2df15')
+            '73b276e31a40c25d947adfb4c8834bba3a6d5dc36106231b18ec1dcef1cdfd98')
 
 _kmake() {
   set -x
@@ -52,9 +52,6 @@ prepare() {
   done
 
   echo "Applying patches from mailing lists or git repos..."
-
-  # [PATCH 1/1] Drivers: hv: vmbus: Rework use of DMA_BIT_MASK(64)
-  fish -c "b4 am -o - https://lore.kernel.org/r/1644176216-12531-1-git-send-email-mikelley@microsoft.com | patch -Np1"
 
   echo "Setting config..."
   cp ../config .config
