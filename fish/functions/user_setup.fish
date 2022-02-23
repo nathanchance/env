@@ -169,7 +169,7 @@ out.*/
         # Use SSD for container storage on Raspberry Pi
         if test "$LOCATION" = pi; and test "$MAIN_FOLDER" != "$HOME"
             upd_strg_cfg
-        fi
+        end
         podman system info
     end
 
