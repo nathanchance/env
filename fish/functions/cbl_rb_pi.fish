@@ -22,7 +22,9 @@ function cbl_rb_pi -d "Rebase Raspberry Pi kernel on latest linux-next"
 
     git rh origin/master
 
-    set -a patches https://lore.kernel.org/r/20220207165304.1046867-1-nathan@kernel.org/ # [PATCH] drm/stm: Avoid using val uninitialized in ltdc_set_ycbcr_config()
+    set -a patches https://lore.kernel.org/r/20220215184322.440969-1-nathan@kernel.org/ # [PATCH] mm/page_alloc: Mark pagesets as __maybe_unused
+    set -a patches https://lore.kernel.org/r/20220221210423.28805-1-fw@strlen.de/ # [PATCH nf] netfilter: nf_tables: make sure err is initialised to sane value
+    set -a patches https://lore.kernel.org/r/20220222152045.484610-1-nathan@kernel.org/ # [PATCH v2] drm/stm: Avoid using val uninitialized in ltdc_set_ycbcr_config()
     set -a patches https://lore.kernel.org/r/20220218081209.354383-1-maskray@google.com/ # [PATCH] arm64 module: remove (NOLOAD)
 
     for patch in $patches

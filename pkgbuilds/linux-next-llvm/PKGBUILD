@@ -3,7 +3,7 @@
 _localversion=-llvm
 _pkgsuffix=-next$_localversion
 pkgbase=linux$_pkgsuffix
-_srctag=next-20220217
+_srctag=next-20220222
 pkgver=${_srctag//-/.}
 pkgrel=1
 pkgdesc='linux-next'
@@ -25,7 +25,7 @@ validpgpkeys=(
   '3F2568AAC26998F9E813A1C5C3F436CA30F5D8EB'  # Mark Brown
 )
 sha256sums=('SKIP'
-            'd24f6d3ea99af985bf0dde4506aaa10024229610a740ce099831bb7bac4d55a0')
+            'f9098cad9453345e31d74aa04df97585210ae01455e0fcad9c0b952ba577ebb9')
 
 _kmake() {
   set -x
@@ -59,14 +59,17 @@ prepare() {
 
   echo "Applying patches from web..."
 
+  # [PATCH] mm/page_alloc: Mark pagesets as __maybe_unused
+  b4_apply https://lore.kernel.org/r/20220215184322.440969-1-nathan@kernel.org/
+
   # [Intel-gfx] [PATCH v1] drm/i915: fix null pointer dereference
   b4_apply https://lore.kernel.org/r/20220201153354.11971-1-lukasz.bartosik@semihalf.com/
 
-  # [PATCH] drm/amdgpu: fix amdgpu_ras_block_late_init error handler
-  b4_apply https://lore.kernel.org/r/20220217153842.3252424-1-trix@redhat.com/
+  # [PATCH] KVM: x86: Fix pointer mistmatch warning when patching RET0 static calls
+  b4_apply https://lore.kernel.org/r/20220223162355.3174907-1-seanjc@google.com/
 
-  # [PATCH] drm/amdkfd: Use proper enum in pm_unmap_queues_v9()
-  b4_apply https://lore.kernel.org/r/20220217162142.1828990-1-nathan@kernel.org/
+  # [PATCH nf] netfilter: nf_tables: make sure err is initialised to sane value
+  b4_apply https://lore.kernel.org/r/20220221210423.28805-1-fw@strlen.de/
 
   echo "Setting config..."
   cp ../config .config
