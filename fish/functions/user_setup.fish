@@ -166,7 +166,11 @@ out.*/
 
     # Ensure podman registers with correct options for environment
     if command -q podman
-        podman info
+        # Use SSD for container storage on Raspberry Pi
+        if test "$LOCATION" = pi; and test "$MAIN_FOLDER" != "$HOME"
+            upd_strg_cfg
+        fi
+        podman system info
     end
 
     # Binaries
