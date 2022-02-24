@@ -49,6 +49,7 @@ function install_packages() {
         # development
         ccache
         hyperfine
+        lib32-glibc
         python
         python-setuptools
         python-yaml
