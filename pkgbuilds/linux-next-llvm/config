@@ -2,7 +2,7 @@
 # Automatically generated file; DO NOT EDIT.
 # Linux/x86 5.17.0-rc5 Kernel Configuration
 #
-CONFIG_CC_VERSION_TEXT="ClangBuiltLinux clang version 15.0.0 (https://github.com/llvm/llvm-project 774b571546915d34a7254b38833001c77745e760)"
+CONFIG_CC_VERSION_TEXT="ClangBuiltLinux clang version 15.0.0 (https://github.com/llvm/llvm-project 18fa0b15ccf610f34af1231440f89d20cb99e7a0)"
 CONFIG_GCC_VERSION=0
 CONFIG_CC_IS_CLANG=y
 CONFIG_CLANG_VERSION=150000
@@ -10701,6 +10701,7 @@ CONFIG_DEBUG_LIST=y
 # CONFIG_DEBUG_SG is not set
 # CONFIG_DEBUG_NOTIFIERS is not set
 # CONFIG_BUG_ON_DATA_CORRUPTION is not set
+# CONFIG_DEBUG_MAPLE_TREE is not set
 # end of Debug kernel data structures
 
 # CONFIG_DEBUG_CREDENTIALS is not set

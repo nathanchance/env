@@ -3,7 +3,7 @@
 _localversion=-llvm
 _pkgsuffix=-next$_localversion
 pkgbase=linux$_pkgsuffix
-_srctag=next-20220222
+_srctag=next-20220223
 pkgver=${_srctag//-/.}
 pkgrel=1
 pkgdesc='linux-next'
@@ -25,7 +25,7 @@ validpgpkeys=(
   '3F2568AAC26998F9E813A1C5C3F436CA30F5D8EB'  # Mark Brown
 )
 sha256sums=('SKIP'
-            'f9098cad9453345e31d74aa04df97585210ae01455e0fcad9c0b952ba577ebb9')
+            'b0b94e849cfb932f685fe1cab24fd9f215fff69d2f351470e6690a8fc832751d')
 
 _kmake() {
   set -x
@@ -57,19 +57,18 @@ prepare() {
     patch -Np1 < "../$src"
   done
 
+  echo "Reverting patches..."
+
+  git revert              --no-commit eb43d8f31565dad3e52ff7bd01df8edb8a8ff0e0 # https://lore.kernel.org/r/4e5fe60d-abbb-6e73-b8cc-c3e1a314fbce@samsung.com/
+  git revert --mainline 1 --no-commit 7e0469db34b87ff21c9294f8804f3701e9f2623b # https://lore.kernel.org/r/5e0084b9-0090-c2a6-ab64-58fd1887d95f@samsung.com/
+
   echo "Applying patches from web..."
 
-  # [PATCH] mm/page_alloc: Mark pagesets as __maybe_unused
-  b4_apply https://lore.kernel.org/r/20220215184322.440969-1-nathan@kernel.org/
-
-  # [Intel-gfx] [PATCH v1] drm/i915: fix null pointer dereference
-  b4_apply https://lore.kernel.org/r/20220201153354.11971-1-lukasz.bartosik@semihalf.com/
-
-  # [PATCH] KVM: x86: Fix pointer mistmatch warning when patching RET0 static calls
-  b4_apply https://lore.kernel.org/r/20220223162355.3174907-1-seanjc@google.com/
-
-  # [PATCH nf] netfilter: nf_tables: make sure err is initialised to sane value
-  b4_apply https://lore.kernel.org/r/20220221210423.28805-1-fw@strlen.de/
+  b4_apply https://lore.kernel.org/r/20220215184322.440969-1-nathan@kernel.org/           # [PATCH] mm/page_alloc: Mark pagesets as __maybe_unused
+  b4_apply https://lore.kernel.org/r/20220201153354.11971-1-lukasz.bartosik@semihalf.com/ # [Intel-gfx] [PATCH v1] drm/i915: fix null pointer dereference
+  b4_apply https://lore.kernel.org/r/20220223162355.3174907-1-seanjc@google.com/          # [PATCH] KVM: x86: Fix pointer mistmatch warning when patching RET0 static calls
+  b4_apply https://lore.kernel.org/r/20220223142307.1659697-1-alexander.deucher@amd.com/  # [PATCH] drm/amdgpu/benchmark: fix error handling
+  b4_apply https://lore.kernel.org/r/20220224161705.1937458-1-nathan@kernel.org/          # [PATCH] lib/maple_tree: Fix clang -Wimplicit-fallthrough in mte_set_pivot()
 
   echo "Setting config..."
   cp ../config .config

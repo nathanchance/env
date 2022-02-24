@@ -22,10 +22,12 @@ function cbl_rb_pi -d "Rebase Raspberry Pi kernel on latest linux-next"
 
     git rh origin/master
 
+    git revert --no-edit eb43d8f31565dad3e52ff7bd01df8edb8a8ff0e0 # https://lore.kernel.org/r/4e5fe60d-abbb-6e73-b8cc-c3e1a314fbce@samsung.com/
+    git revert --mainline 1 --no-edit 7e0469db34b87ff21c9294f8804f3701e9f2623b # https://lore.kernel.org/r/5e0084b9-0090-c2a6-ab64-58fd1887d95f@samsung.com/
     set -a patches https://lore.kernel.org/r/20220215184322.440969-1-nathan@kernel.org/ # [PATCH] mm/page_alloc: Mark pagesets as __maybe_unused
-    set -a patches https://lore.kernel.org/r/20220221210423.28805-1-fw@strlen.de/ # [PATCH nf] netfilter: nf_tables: make sure err is initialised to sane value
     set -a patches https://lore.kernel.org/r/20220222152045.484610-1-nathan@kernel.org/ # [PATCH v2] drm/stm: Avoid using val uninitialized in ltdc_set_ycbcr_config()
     set -a patches https://lore.kernel.org/r/20220218081209.354383-1-maskray@google.com/ # [PATCH] arm64 module: remove (NOLOAD)
+    set -a patches https://lore.kernel.org/r/20220224161705.1937458-1-nathan@kernel.org/ # [PATCH] lib/maple_tree: Fix clang -Wimplicit-fallthrough in mte_set_pivot()
 
     for patch in $patches
         b4 shazam -l -P _ -s $patch; or return
@@ -68,6 +70,8 @@ function cbl_rb_pi -d "Rebase Raspberry Pi kernel on latest linux-next"
     end
     # Always enable -Werror
     set -a sc_args -e WERROR
+    # Shut up -Wframe-larger-than
+    set -a sc_args --set-val FRAME_WARN 0
     for cfg in arch/arm/configs/multi_v7_defconfig arch/arm64/configs/defconfig
         scripts/config --file $cfg $sc_args
     end
