@@ -33,6 +33,19 @@ function cbl_rb_pi -d "Rebase Raspberry Pi kernel on latest linux-next"
         b4 shazam -l -P _ -s $patch; or return
     end
 
+    # Regenerate defconfigs
+    for arch in arm arm64
+        switch $arch
+            case arm
+                set config multi_v7_defconfig
+            case arm64
+                set config defconfig
+        end
+        kmake ARCH=$arch LLVM=1 O=.build/$arch $config savedefconfig
+        mv -v .build/$arch/defconfig arch/$arch/configs/$config
+    end
+    git ac -m "ARM: configs: savedefconfig"
+
     # Tailscale configs
     for cfg_file in arch/arm/configs/multi_v7_defconfig arch/arm64/configs/defconfig
         scripts/config \
@@ -76,7 +89,18 @@ function cbl_rb_pi -d "Rebase Raspberry Pi kernel on latest linux-next"
         scripts/config --file $cfg $sc_args
     end
 
-    git ac -m "arm{,64}: Customize defconfig"
+    # Ensure configs are run through savedefconfig before committing
+    for arch in arm arm64
+        switch $arch
+            case arm
+                set config multi_v7_defconfig
+            case arm64
+                set config defconfig
+        end
+        kmake ARCH=$arch LLVM=1 O=.build/$arch $config savedefconfig
+        mv -v .build/$arch/defconfig arch/$arch/configs/$config
+    end
+    git ac -m "ARM: configs: Update defconfigs"
 
     echo 'From f16e7af3d188d6aa9d45d7502ba3fcebc441f22a Mon Sep 17 00:00:00 2001
 From: Nathan Chancellor <nathan@kernel.org>
