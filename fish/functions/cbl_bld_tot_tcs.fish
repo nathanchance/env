@@ -117,6 +117,7 @@ function cbl_bld_tot_tcs -d "Build LLVM and binutils from source for kernel deve
     end
 
     # Add patches to revert here
+    set -a reverts 370ebc9d9a573d6a0bcb0d7c3e0a57d55b7a7673 # [DAG] Attempt to fold bswap(shl(x,c)) -> zext(bswap(trunc(shl(x,c-bw/2)))), https://reviews.llvm.org/D120192
     for revert in $reverts
         if not git -C $llvm_project rv -n $revert
             set message "Failed to revert $revert"
