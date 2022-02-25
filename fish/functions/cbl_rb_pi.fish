@@ -22,12 +22,17 @@ function cbl_rb_pi -d "Rebase Raspberry Pi kernel on latest linux-next"
 
     git rh origin/master
 
-    git revert --no-edit eb43d8f31565dad3e52ff7bd01df8edb8a8ff0e0 # https://lore.kernel.org/r/4e5fe60d-abbb-6e73-b8cc-c3e1a314fbce@samsung.com/
-    git revert --mainline 1 --no-edit 7e0469db34b87ff21c9294f8804f3701e9f2623b # https://lore.kernel.org/r/5e0084b9-0090-c2a6-ab64-58fd1887d95f@samsung.com/
+    git revert --no-edit eb43d8f31565dad3e52ff7bd01df8edb8a8ff0e0; or return # https://lore.kernel.org/r/4e5fe60d-abbb-6e73-b8cc-c3e1a314fbce@samsung.com/
+    git revert --mainline 1 --no-edit 7e0469db34b87ff21c9294f8804f3701e9f2623b; or return # https://lore.kernel.org/r/5e0084b9-0090-c2a6-ab64-58fd1887d95f@samsung.com/
+    git diff -R b1120fca2cd0a03d63fcd256d3e7702352d91458^..db28fbb7b941f8237a380ee1be5d00237c38a12e | git ap; or return
+    git ac -m "Revert maple and folio trees due to bad merge resolution
+
+Link: https://lore.kernel.org/r/YhbnUNKjN5SBWKwD@sirena.org.uk/"; or return
+
     set -a patches https://lore.kernel.org/r/20220215184322.440969-1-nathan@kernel.org/ # [PATCH] mm/page_alloc: Mark pagesets as __maybe_unused
     set -a patches https://lore.kernel.org/r/20220222152045.484610-1-nathan@kernel.org/ # [PATCH v2] drm/stm: Avoid using val uninitialized in ltdc_set_ycbcr_config()
     set -a patches https://lore.kernel.org/r/20220218081209.354383-1-maskray@google.com/ # [PATCH] arm64 module: remove (NOLOAD)
-    set -a patches https://lore.kernel.org/r/20220224161705.1937458-1-nathan@kernel.org/ # [PATCH] lib/maple_tree: Fix clang -Wimplicit-fallthrough in mte_set_pivot()
+    # set -a patches https://lore.kernel.org/r/20220224161705.1937458-1-nathan@kernel.org/ # [PATCH] lib/maple_tree: Fix clang -Wimplicit-fallthrough in mte_set_pivot()
 
     for patch in $patches
         b4 shazam -l -P _ -s $patch; or return

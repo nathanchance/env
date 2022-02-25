@@ -25,7 +25,7 @@ validpgpkeys=(
   '3F2568AAC26998F9E813A1C5C3F436CA30F5D8EB'  # Mark Brown
 )
 sha256sums=('SKIP'
-            'b0b94e849cfb932f685fe1cab24fd9f215fff69d2f351470e6690a8fc832751d')
+            '10cab49219c2757a64df49af670a2aad72ca6229934c2d9fe2910a899ec24ef7')
 
 _kmake() {
   set -x
@@ -61,6 +61,7 @@ prepare() {
 
   git revert              --no-commit eb43d8f31565dad3e52ff7bd01df8edb8a8ff0e0 # https://lore.kernel.org/r/4e5fe60d-abbb-6e73-b8cc-c3e1a314fbce@samsung.com/
   git revert --mainline 1 --no-commit 7e0469db34b87ff21c9294f8804f3701e9f2623b # https://lore.kernel.org/r/5e0084b9-0090-c2a6-ab64-58fd1887d95f@samsung.com/
+  git diff -R b1120fca2cd0a03d63fcd256d3e7702352d91458^..db28fbb7b941f8237a380ee1be5d00237c38a12e | patch -Np1 # https://lore.kernel.org/r/YhbnUNKjN5SBWKwD@sirena.org.uk/
 
   echo "Applying patches from web..."
 
@@ -68,7 +69,7 @@ prepare() {
   b4_apply https://lore.kernel.org/r/20220201153354.11971-1-lukasz.bartosik@semihalf.com/ # [Intel-gfx] [PATCH v1] drm/i915: fix null pointer dereference
   b4_apply https://lore.kernel.org/r/20220223162355.3174907-1-seanjc@google.com/          # [PATCH] KVM: x86: Fix pointer mistmatch warning when patching RET0 static calls
   b4_apply https://lore.kernel.org/r/20220223142307.1659697-1-alexander.deucher@amd.com/  # [PATCH] drm/amdgpu/benchmark: fix error handling
-  b4_apply https://lore.kernel.org/r/20220224161705.1937458-1-nathan@kernel.org/          # [PATCH] lib/maple_tree: Fix clang -Wimplicit-fallthrough in mte_set_pivot()
+  # b4_apply https://lore.kernel.org/r/20220224161705.1937458-1-nathan@kernel.org/          # [PATCH] lib/maple_tree: Fix clang -Wimplicit-fallthrough in mte_set_pivot()
 
   echo "Setting config..."
   cp ../config .config
