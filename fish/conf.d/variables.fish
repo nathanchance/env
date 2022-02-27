@@ -35,7 +35,7 @@ if test -z "$LOCATION"
 end
 
 set -gx CCACHE_COMPRESS true
-set -gx CCACHE_COMPRESSLEVEL 19
+set -gx CCACHE_COMPRESSLEVEL 5
 
 
 ##########################################
