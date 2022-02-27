@@ -1,0 +1,78 @@
+diff --git a/drivers/hwmon/system76-io_dev.c b/drivers/hwmon/system76-io_dev.c
+index 8356dff..11c4df1 100644
+--- a/drivers/hwmon/system76-io_dev.c
++++ b/drivers/hwmon/system76-io_dev.c
+@@ -269,24 +269,6 @@ static int io_dev_set_duty(struct io_dev * io_dev, const char * device, u16 valu
+     return 0;
+ }
+ 
+-static int io_dev_suspend(struct io_dev * io_dev, u16 * value, int timeout) {
+-    int len;
+-    int result;
+-
+-    len = snprintf(io_dev->command, IO_MSG_SIZE, "IoSUSP\r");
+-    if (len >= IO_MSG_SIZE) {
+-        return -EINVAL;
+-    }
+-
+-    result = io_dev_command(io_dev, io_dev->command, len, io_dev->response, IO_MSG_SIZE, timeout);
+-    if (result) {
+-        dev_err(&io_dev->usb_dev->dev, "io_dev_suspend failed: %d: %s\n", -result, io_dev->response);
+-        return result;
+-    }
+-
+-    return kstrtou16(io_dev->response, 16, value);
+-}
+-
+ static int io_dev_set_suspend(struct io_dev * io_dev, u16 value, int timeout) {
+     int len;
+     int result;
+diff --git a/drivers/hwmon/system76-io_hwmon.c b/drivers/hwmon/system76-io_hwmon.c
+index 00b8032..7f94ba5 100644
+--- a/drivers/hwmon/system76-io_hwmon.c
++++ b/drivers/hwmon/system76-io_hwmon.c
+@@ -38,12 +38,13 @@ static const char * io_fan_name(int index) {
+ static ssize_t io_fan_input_show(struct device *dev, struct device_attribute *attr, char *buf) {
+     u16 value;
+     int ret;
++    const char * name;
+ 
+     struct io_dev * io_dev = dev_get_drvdata(dev);
+ 
+     mutex_lock(&io_dev->lock);
+ 
+-    const char * name = io_fan_name(to_sensor_dev_attr(attr)->index);
++    name = io_fan_name(to_sensor_dev_attr(attr)->index);
+     if (name) {
+         ret = io_dev_tach(io_dev, name, &value, IO_TIMEOUT);
+         if (!ret) {
+@@ -74,12 +75,13 @@ static ssize_t io_fan_label_show(struct device *dev, struct device_attribute *at
+ static ssize_t io_pwm_show(struct device *dev, struct device_attribute *attr, char *buf) {
+     u16 value;
+     int ret;
++    const char * name;
+ 
+     struct io_dev * io_dev = dev_get_drvdata(dev);
+ 
+     mutex_lock(&io_dev->lock);
+ 
+-    const char * name = io_fan_name(to_sensor_dev_attr(attr)->index);
++    name = io_fan_name(to_sensor_dev_attr(attr)->index);
+     if (name) {
+         ret = io_dev_duty(io_dev, name, &value, IO_TIMEOUT);
+         if (!ret) {
+@@ -97,12 +99,13 @@ static ssize_t io_pwm_show(struct device *dev, struct device_attribute *attr, ch
+ static ssize_t io_pwm_set(struct device *dev, struct device_attribute *attr, const char *buf, size_t count) {
+   	u32 value;
+   	int ret;
++	const char * name;
+ 
+     struct io_dev * io_dev = dev_get_drvdata(dev);
+ 
+     mutex_lock(&io_dev->lock);
+ 
+-    const char * name = io_fan_name(to_sensor_dev_attr(attr)->index);
++    name = io_fan_name(to_sensor_dev_attr(attr)->index);
+     if (name) {
+       	ret = kstrtou32(buf, 10, &value);
+       	if (!ret) {
