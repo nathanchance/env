@@ -46,14 +46,14 @@ _kmake() {
 prepare() {
   cd $_srcname
 
+  echo "Setting version..."
+  scripts/setlocalversion --save-scmversion
+  echo "${_localversion}" > localversion.10-pkgname
+
   for file in system76-io{,_dev,_hwmon}.c; do
     cp -v "$(readlink -f ../$file)" drivers/hwmon
   done
   echo "obj-m += system76-io.o" >> drivers/hwmon/Makefile
-
-  echo "Setting version..."
-  scripts/setlocalversion --save-scmversion
-  echo "${_localversion}" > localversion.10-pkgname
 
   local src
   for src in "${source[@]}"; do
