@@ -3,7 +3,7 @@
 _localversion=-llvm
 _pkgsuffix=-mainline$_localversion
 pkgbase=linux$_pkgsuffix
-_srctag=v5.17-rc5
+_srctag=v5.17-rc6
 pkgver=${_srctag//-/.}
 pkgrel=1
 pkgdesc='Linux'
@@ -31,7 +31,7 @@ sha256sums=('SKIP'
             'a6f7a5eb3134269737b7790a6286dc671b491547d6c0b59e92959dca0b66cc20'
             '1739b36d09e3d555e1c1b1ef079160b808972f84fc40bd81476cbe3079cad54e'
             'a8e46f08be1010c716dff5e0ed09a277673e8bf197ef3b9aade367977428111d'
-            '5134dbd2038c8afd751fe1f01958c2187202a22900c00eaacea6b91c70fdb346')
+            '328da9cd42809946ee911702ee1ff19e578e5ed564f57b83e3d460fcda6123c6')
 
 _kmake() {
   set -x
