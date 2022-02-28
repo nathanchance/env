@@ -346,6 +346,20 @@ function install_packages_dnf() {
     dnf install -y "${packages[@]}"
 }
 
+function install_zoxide() {
+    zoxide_workdir=/tmp/zoxide
+    zoxide_url=$(curl -LSs https://api.github.com/repos/ajeetdsouza/zoxide/releases/latest | grep -E "browser_download_url.*$(uname -m)-unknown-linux-musl" | cut -d\" -f4)
+
+    mkdir -p "$zoxide_workdir"
+    curl -LSs "$zoxide_url" | tar -C "$zoxide_workdir" -xzvf -
+    install -Dm0755 -t /usr/local/bin "$zoxide_workdir"/zoxide
+
+    cd
+    command -v zoxide
+    zoxide --version
+    rm -rf "$zoxide_workdir"
+}
+
 function setup_locales() {
     echo "locales locales/default_environment_locale select en_US.UTF-8" | debconf-set-selections
     echo "locales locales/locales_to_be_generated multiselect en_US.UTF-8 UTF-8" | debconf-set-selections
@@ -397,6 +411,7 @@ function setup_environment() {
         setup_fish_repo
         setup_apt_llvm_org
         install_packages_apt
+        install_zoxide
         setup_locales
         build_pahole
     fi
