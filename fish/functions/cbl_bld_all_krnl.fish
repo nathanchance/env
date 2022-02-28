@@ -7,6 +7,10 @@ function cbl_bld_all_krnl -d "Build all kernels for ClangBuiltLinux testing"
 
     switch $LOCATION
         case pi
+            # Update linux-next
+            cbl_clone_repo linux-next; or return
+            git -C $CBL_SRC/linux-next urh; or return
+
             for arch in arm arm64 x86_64
                 switch $arch
                     case arm
