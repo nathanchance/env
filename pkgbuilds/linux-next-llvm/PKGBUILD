@@ -3,7 +3,7 @@
 _localversion=-llvm
 _pkgsuffix=-next$_localversion
 pkgbase=linux$_pkgsuffix
-_srctag=next-20220224
+_srctag=next-20220228
 pkgver=${_srctag//-/.}
 pkgrel=1
 pkgdesc='linux-next'
@@ -25,7 +25,7 @@ validpgpkeys=(
   '3F2568AAC26998F9E813A1C5C3F436CA30F5D8EB'  # Mark Brown
 )
 sha256sums=('SKIP'
-            'e8ee884e32370dd9e1efb7fc54631e646d04002c9f85f0455003eb12fb4c1811')
+            'f6204c80c670224f10d0377267571a5798e6b49b16b011d1522651f4593edae9')
 
 _kmake() {
   set -x
@@ -57,15 +57,10 @@ prepare() {
     patch -Np1 < "../$src"
   done
 
-  echo "Reverting patches..."
-
-  git revert --mainline 1 --no-commit 7e0469db34b87ff21c9294f8804f3701e9f2623b # https://lore.kernel.org/r/5e0084b9-0090-c2a6-ab64-58fd1887d95f@samsung.com/
-  git revert --no-commit 5d8d2bfc5e65226d8f70466c0bb0c9026eea3058 # https://lore.kernel.org/r/YhkCzS1rGYyJ0mKP@google.com/
-  git diff -R d640e788c938ecf417c8300060f29de24379a579^..15aa3a056caa5192fe614cacebf054634b4c5e90 | patch -Np1 # https://lore.kernel.org/r/YhbnUNKjN5SBWKwD@sirena.org.uk/
+  # echo "Reverting patches..."
 
   echo "Applying patches from web..."
 
-  b4_apply https://lore.kernel.org/r/20220215184322.440969-1-nathan@kernel.org/           # [PATCH] mm/page_alloc: Mark pagesets as __maybe_unused
   b4_apply https://lore.kernel.org/r/20220201153354.11971-1-lukasz.bartosik@semihalf.com/ # [Intel-gfx] [PATCH v1] drm/i915: fix null pointer dereference
   b4_apply https://lore.kernel.org/r/20220223162355.3174907-1-seanjc@google.com/          # [PATCH] KVM: x86: Fix pointer mistmatch warning when patching RET0 static calls
 
