@@ -3,7 +3,17 @@
 # Copyright (C) 2021-2022 Nathan Chancellor
 
 function cbl_setup_other_repos -d "Download other ClangBuiltLinux repos"
-    for repo in boot-utils containers continuous-integration2 tc-build
+    set repos_cbl_github \
+        actions-workflows \
+        boot-utils \
+        ClangBuiltLinux.github.io \
+        containers \
+        continuous-integration2 \
+        frame-larger-than \
+        meeting-notes \
+        misc-scripts \
+        tc-build
+    for repo in $repos_cbl_github
         set folder $CBL_GIT/$repo
         if not test -d $folder
             mkdir -p (dirname $folder)
@@ -15,7 +25,12 @@ function cbl_setup_other_repos -d "Download other ClangBuiltLinux repos"
         end
     end
 
-    for repo in creduce-files llvm-kernel-testing repro-scripts tc-build
+    set repos_personal_github \
+        creduce-files \
+        llvm-kernel-testing \
+        repro-scripts \
+        tc-build
+    for repo in $repos_personal_github
         set folder $CBL/$repo
         if not test -d $folder
             mkdir -p (dirname $folder)
