@@ -48,21 +48,23 @@ function cbl_setup_linux_repos -d "Clone ClangBuiltLinux Linux repos into their 
 
         git -C $folder checkout master
 
-        if test (basename $folder) = rpi; or test (basename $folder) = linux-cfi
-            git -C $folder config rerere.enabled true
-            git -C $folder remote add -f --tags mainline https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git
-            git -C $folder remote add -f --tags sami https://github.com/samitolvanen/linux.git
-        else
-            git -C $folder branch --set-upstream-to=origin/master
-            git -C $folder reset --hard origin/master
+        switch (basename $folder)
+            case linux-cfi rpi
+                git -C $folder config rerere.enabled true
+                git -C $folder remote add -f --tags mainline https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git
+                git -C $folder remote add -f --tags sami https://github.com/samitolvanen/linux.git
+            case '*'
+                git -C $folder branch --set-upstream-to=origin/master
+                git -C $folder reset --hard origin/master
         end
 
         if string match -qr linux-stable $folder
             cbl_upd_stbl_wrktrs $folder
         end
 
-        if test "$folder" = $CBL_SRC/linux; or test "$folder" = $CBL_SRC/linux-next
-            git -C $folder remote add -f korg git@gitolite.kernel.org:pub/scm/linux/kernel/git/nathan/linux
+        switch $folder
+            case $CBL_SRC/linux $CBL_SRC/linux-next
+                git -C $folder remote add -f korg git@gitolite.kernel.org:pub/scm/linux/kernel/git/nathan/linux
         end
     end
     rm -rf $tmp_dir
