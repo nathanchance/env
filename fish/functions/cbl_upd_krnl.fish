@@ -6,7 +6,7 @@ function cbl_upd_krnl -d "Update machine's kernel"
     set fish_trace 1
 
     switch $LOCATION
-        case hetzner-server
+        case hetzner-server workstation
             cbl_upd_krnl_pkg $argv
 
         case pi

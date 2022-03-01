@@ -4,7 +4,7 @@
 
 function cbl_rb_wk -d "Rebase WSL2 kernel on latest linux-next"
     switch $LOCATION
-        case hetzner-server wsl
+        case hetzner-server workstation wsl
             set src $CBL_BLD/wsl2
         case '*'
             print_error "cbl_rb_wk is not supported by $LOCATION"

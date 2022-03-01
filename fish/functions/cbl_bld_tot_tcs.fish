@@ -17,7 +17,7 @@ function cbl_bld_tot_tcs -d "Build LLVM and binutils from source for kernel deve
             set bld_llvm_args \
                 --pgo kernel-defconfig
 
-        case hetzner-server
+        case hetzner-server workstation
             set bld_llvm_args \
                 --pgo kernel-{allmod,def}config
 

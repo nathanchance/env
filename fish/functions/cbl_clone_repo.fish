@@ -32,10 +32,11 @@ function cbl_clone_repo -d "Clone certain repos for ClangBuiltLinux testing and 
             git clone $url $dest; or return
             switch $arg
                 case llvm-project
-                    if test "$LOCATION" = hetzner-server
-                        git -C $dest remote add -f nathanchance git@github.com:nathanchance/llvm-project.git
-                        git -C $dest remote add -f origin-ssh git@github.com:llvm/llvm-project.git
-                        ln -frsv $dest/llvm/utils/git/pre-push.py $dest/.git/hooks/pre-push
+                    switch $LOCATION
+                        case hetzner-server workstation
+                            git -C $dest remote add -f nathanchance git@github.com:nathanchance/llvm-project.git
+                            git -C $dest remote add -f origin-ssh git@github.com:llvm/llvm-project.git
+                            ln -frsv $dest/llvm/utils/git/pre-push.py $dest/.git/hooks/pre-push
                     end
                 case wsl2
                     git -C $dest remote add -f --tags mainline https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git

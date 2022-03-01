@@ -15,6 +15,7 @@ function updall -d "Update binaries in $BIN_FOLDER"
     end
 
     set -a targets \
+        arc \
         b4 \
         bat \
         diskus \
@@ -30,12 +31,6 @@ function updall -d "Update binaries in $BIN_FOLDER"
         shfmt \
         tuxmake \
         yapf
-
-    switch $LOCATION
-        case hetzner-server
-            set -a targets \
-                arc
-    end
 
     upd $targets
 end
