@@ -56,6 +56,14 @@ function msh -d "Shorthand for mosh -o" -w mosh
         case hetzner-server
             set user_host nathan@$SERVER_IP
 
+        case thelio
+            if test "$tailscale" = true
+                set ip 100.108.36.65
+            else
+                set ip 192.168.4.188
+            end
+            set user_host nathan@$ip
+
         case '*@*'
             set user_host $argv[1]
 
