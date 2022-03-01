@@ -6,7 +6,7 @@ function cbl_upd_krnl -d "Update machine's kernel"
     set fish_trace 1
 
     set remote user nathan
-    set remote_host $SERVER_IP
+    set remote_host 192.168.4.188
     set remote_home /home/$remote_user
 
     switch $LOCATION
