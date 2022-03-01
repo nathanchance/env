@@ -5,6 +5,10 @@
 function cbl_upd_krnl -d "Update machine's kernel"
     set fish_trace 1
 
+    set remote user nathan
+    set remote_host $SERVER_IP
+    set remote_home /home/$remote_user
+
     switch $LOCATION
         case hetzner-server workstation
             cbl_upd_krnl_pkg $argv
@@ -42,10 +46,9 @@ function cbl_upd_krnl -d "Update machine's kernel"
             pushd $workdir; or return
 
             # Grab .tar.zst package
-            set user nathan
-            set remote_build (string replace $MAIN_FOLDER /home/$user $CBL_BLD)
+            set remote_build (string replace $MAIN_FOLDER $remote_main_folder $CBL_BLD)
             set out $remote_build/rpi/.build/$arch
-            scp $user@$SERVER_IP:$out/linux-'*'-$arch.tar.zst .
+            scp $remote_user@$remote_host:$out/linux-'*'-$arch.tar.zst .
 
             # Extract .tar.zst
             tar --zstd -xvf *.tar.zst; or return
@@ -116,7 +119,7 @@ function cbl_upd_krnl -d "Update machine's kernel"
 
             cd /tmp; or return
 
-            scp nathan@$SERVER_IP:/home/nathan/github/env/pkgbuilds/$krnl/'*'.tar.zst .; or return
+            scp $remote_user:$remote_host:(string replace $MAIN_FOLDER $remote_main_folder $ENV_FOLDER)/pkgbuilds/$krnl/'*'.tar.zst .; or return
 
             sudo pacman -U --noconfirm *$krnl*.tar.zst
 
@@ -166,9 +169,9 @@ function cbl_upd_krnl -d "Update machine's kernel"
                     set repo nathanchance/WSL2-Linux-Kernel
                     crl -o $kernel https://github.com/$repo/releases/download/(glr $repo)/bzImage
                 case server
-                    set src $CBL_BLD/wsl2
+                    set src (string replace $MAIN_FOLDER $remote_main_folder $CBL_BLD)/wsl2
                     set image arch/x86/boot/bzImage
-                    scp nathan@$SERVER_IP:$src/$image $kernel
+                    scp $remote_user:$remote_host:$src/$image $kernel
             end
     end
 end
