@@ -5,9 +5,9 @@
 function cbl_upd_krnl -d "Update machine's kernel"
     set fish_trace 1
 
-    set remote user nathan
+    set remote_user nathan
     set remote_host 192.168.4.188
-    set remote_home /home/$remote_user
+    set remote_main_folder /home/$remote_user
 
     switch $LOCATION
         case hetzner-server workstation
@@ -119,7 +119,7 @@ function cbl_upd_krnl -d "Update machine's kernel"
 
             cd /tmp; or return
 
-            scp $remote_user:$remote_host:(string replace $MAIN_FOLDER $remote_main_folder $ENV_FOLDER)/pkgbuilds/$krnl/'*'.tar.zst .; or return
+            scp $remote_user@$remote_host:(string replace $MAIN_FOLDER $remote_main_folder $ENV_FOLDER)/pkgbuilds/$krnl/'*'.tar.zst .; or return
 
             sudo pacman -U --noconfirm *$krnl*.tar.zst
 
@@ -171,7 +171,7 @@ function cbl_upd_krnl -d "Update machine's kernel"
                 case server
                     set src (string replace $MAIN_FOLDER $remote_main_folder $CBL_BLD)/wsl2
                     set image arch/x86/boot/bzImage
-                    scp $remote_user:$remote_host:$src/$image $kernel
+                    scp $remote_user@$remote_host:$src/$image $kernel
             end
     end
 end
