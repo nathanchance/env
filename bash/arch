@@ -69,8 +69,10 @@ function install_pkgs() {
         python-{dkim,requests}
 
         # Container tools
+        aardvark-dns
         buildah
         catatonit
+        netavark
         podman
 
         # continuous-integration2 (generate.sh)
