@@ -50,13 +50,14 @@ function install_packages() {
         ccache
 
         # distrobox
-        libvte-common
+        libvte-*-common
         sudo
 
         # env
         ca-certificates
         curl
         fish
+        fzf
         jq
         locales
         openssh-client
@@ -95,6 +96,9 @@ function install_packages() {
         ninja-build
         python3-distutils
         zlib1g-dev
+
+        # llvm.sh
+        lsb-release
 
         # package building
         dpkg
