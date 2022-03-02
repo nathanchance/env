@@ -18,7 +18,7 @@ function boci -d "Build an OCI container image"
                     gcc-{5,6,7,8,9,10,11} \
                     llvm-{1{0,1,2,3,4,5},android}
 
-            case dev dev/{arch,fedora,suse,ubuntu} lei {gcc,llvm}-'*' makepkg
+            case dev dev/{arch,debian,fedora,suse,ubuntu} lei {gcc,llvm}-'*' makepkg
                 set -a images $arg
         end
     end
