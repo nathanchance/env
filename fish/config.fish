@@ -4,6 +4,8 @@
 
 set -e fish_user_paths
 
+start_ssh_agent
+
 if in_container
     if test "$USE_CBL" = 1
         set -l folder
@@ -13,7 +15,6 @@ if in_container
     end
 else
     gpg_key_cache
-    start_ssh_agent
     tmux_ssh_fixup
 end
 
