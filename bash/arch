@@ -83,6 +83,7 @@ function install_pkgs() {
         dos2unix
         hyperfine
         patch
+        vim
 
         # Downloading and extracting utilities
         ca-certificates
