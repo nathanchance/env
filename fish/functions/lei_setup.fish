@@ -4,7 +4,7 @@
 
 function lei_setup -d "Sets up local email interface for Linux kernel mailing lists"
     # Make sure that folders exists that will hold configuration files
-    mkdir -p $HOME/.{cache,config,local/share}/lei
+    mkdir -p $HOME/.{cache,config,local/share}/lei $HOME/mail
 
     # Setup query for certain lists that are interesting
     set -a lists_query l:kernel-janitors.vger.kernel.org
