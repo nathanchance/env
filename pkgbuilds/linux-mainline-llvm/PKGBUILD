@@ -64,8 +64,6 @@ prepare() {
     patch -Np1 < "../$src"
   done
 
-  echo "Applying patches from mailing lists or git repos..."
-
   echo "Setting config..."
   cp ../config .config
   _kmake olddefconfig

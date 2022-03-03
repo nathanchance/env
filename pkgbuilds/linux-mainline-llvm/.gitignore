@@ -1,3 +1,4 @@
 config.old
 linux-mainline-llvm/
 *.c
+!*.patch
