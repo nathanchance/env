@@ -126,3 +126,6 @@ set -gx KMAKE_DEB_ARGS DPKG_FLAGS=-d KDEB_CHANGELOG_DIST=unstable
 
 # GitHub Container Registry for myself
 set -gx GHCR ghcr.io/nathanchance
+
+# Always use blackbg for menuconfig
+set -gx MENUCONFIG_COLOR blackbg
