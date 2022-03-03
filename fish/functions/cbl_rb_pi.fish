@@ -23,6 +23,7 @@ function cbl_rb_pi -d "Rebase Raspberry Pi kernel on latest linux-next"
     git rh origin/master
 
     set -a patches https://lore.kernel.org/r/20220222152045.484610-1-nathan@kernel.org/ # [PATCH v2] drm/stm: Avoid using val uninitialized in ltdc_set_ycbcr_config()
+    set -a patches https://lore.kernel.org/r/20220303163826.1120936-1-nathan@kernel.org/ # [PATCH] netfs: Ensure ret is always initialized in netfs_begin_read()
 
     for patch in $patches
         b4 shazam -l -P _ -s $patch; or return

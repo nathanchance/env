@@ -1,0 +1,55 @@
+From git@z Thu Jan  1 00:00:00 1970
+Subject: [PATCH] KVM: x86: Fix pointer mistmatch warning when patching RET0 static calls
+From: Sean Christopherson <seanjc@google.com>
+Date: Wed, 23 Feb 2022 16:23:55 +0000
+Message-Id: <20220223162355.3174907-1-seanjc@google.com>
+To: Paolo Bonzini <pbonzini@redhat.com>, Nathan Chancellor <nathan@kernel.org>, Nick Desaulniers <ndesaulniers@google.com>
+Cc: Sean Christopherson <seanjc@google.com>, Vitaly Kuznetsov <vkuznets@redhat.com>, Wanpeng Li <wanpengli@tencent.com>, Jim Mattson <jmattson@google.com>, Joerg Roedel <joro@8bytes.org>, kvm@vger.kernel.org, llvm@lists.linux.dev, linux-kernel@vger.kernel.org, Like Xu <like.xu.linux@gmail.com>
+Reply-To: Sean Christopherson <seanjc@google.com>
+List-Id: <llvm.lists.linux.dev>
+MIME-Version: 1.0
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 7bit
+
+Cast kvm_x86_ops.func to 'void *' when updating KVM static calls that are
+conditionally patched to __static_call_return0().  clang complains about
+using mismatching pointers in the ternary operator, which breaks the
+build when compiling with CONFIG_KVM_WERROR=y.
+
+  >> arch/x86/include/asm/kvm-x86-ops.h:82:1: warning: pointer type mismatch
+  ('bool (*)(struct kvm_vcpu *)' and 'void *') [-Wpointer-type-mismatch]
+
+Fixes: 5be2226f417d ("KVM: x86: allow defining return-0 static calls")
+Reported-by: Like Xu <like.xu.linux@gmail.com>
+Reported-by: kernel test robot <lkp@intel.com>
+Signed-off-by: Sean Christopherson <seanjc@google.com>
+Reviewed-by: David Dunn <daviddunn@google.com>
+Reviewed-by: Nathan Chancellor <nathan@kernel.org>
+Tested-by: Nathan Chancellor <nathan@kernel.org>
+Link: https://lore.kernel.org/r/20220223162355.3174907-1-seanjc@google.com
+---
+ arch/x86/include/asm/kvm_host.h | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/arch/x86/include/asm/kvm_host.h b/arch/x86/include/asm/kvm_host.h
+index 713e08f62385..f285ddb8b66b 100644
+--- a/arch/x86/include/asm/kvm_host.h
++++ b/arch/x86/include/asm/kvm_host.h
+@@ -1547,8 +1547,8 @@ static inline void kvm_ops_static_call_update(void)
+ 	WARN_ON(!kvm_x86_ops.func); __KVM_X86_OP(func)
+ #define KVM_X86_OP_OPTIONAL __KVM_X86_OP
+ #define KVM_X86_OP_OPTIONAL_RET0(func) \
+-	static_call_update(kvm_x86_##func, kvm_x86_ops.func ? : \
+-			   (void *) __static_call_return0);
++	static_call_update(kvm_x86_##func, (void *)kvm_x86_ops.func ? : \
++					   (void *)__static_call_return0);
+ #include <asm/kvm-x86-ops.h>
+ #undef __KVM_X86_OP
+ }
+
+base-commit: f4bc051fc91ab9f1d5225d94e52d369ef58bec58
+
+-- 
+2.35.1.473.g83b2b277ed-goog
+
+
