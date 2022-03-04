@@ -2,16 +2,12 @@
 # SPDX-License-Identifier: MIT
 # Copyright (C) 2021-2022 Nathan Chancellor
 
-######################################
-##  GLOBAL CONFIGURATION VARIABLES  ##
-######################################
+#########################
+##  LOCATION VARIABLE  ##
+#########################
 
-set -gx EDITOR vim
-
-if test -f $HOME/.server_ip
-    set -g SERVER_IP (cat $HOME/.server_ip)
-end
-
+# This is the only variable that should be universal,
+# as it needs to exist in containers
 if test -z "$LOCATION"
     set -l user (id -un)
     switch $user@$hostname
@@ -36,8 +32,6 @@ if test -z "$LOCATION"
     end
 end
 
-set -gx CCACHE_COMPRESS true
-set -gx CCACHE_COMPRESSLEVEL 5
 
 
 ##########################################
@@ -112,23 +106,36 @@ set -gx ENV_FOLDER $GITHUB_FOLDER/env
 
 
 
-#####################
-## OTHER VARIABLES ##
-#####################
+############################
+## OTHER GLOBAL VARIABLES ##
+############################
 
+# Versions of stable that I build locally
 set -gx CBL_STABLE_VERSIONS 5.{1{6,5,0},4}
-set -gx CBL_LLVM_VERSIONS 10.0.1 11.1.0 12.0.1 13.0.0
-# https://www.kernel.org/category/releases.html
-set -gx SUPPORTED_STABLE_VERSIONS 4.{{,1}4,{,1}9} 5.{4,1{0,5,6}}
+
+# ccache compression level
+set -gx CCACHE_COMPRESS true
+set -gx CCACHE_COMPRESSLEVEL 5
+
+# vim as editor
+set -gx EDITOR vim
+
+# My GitHub Container Registry URL
+set -gx GHCR ghcr.io/nathanchance
 
 # For building .deb packages on distros other than Debian/Ubuntu
 set -gx KMAKE_DEB_ARGS DPKG_FLAGS=-d KDEB_CHANGELOG_DIST=unstable
 
-# GitHub Container Registry for myself
-set -gx GHCR ghcr.io/nathanchance
-
 # Always use blackbg for menuconfig
 set -gx MENUCONFIG_COLOR blackbg
 
-# Unlimited number of PIDs for tuxmake containers
+# My server IP address
+if test -f $HOME/.server_ip
+    set -g SERVER_IP (cat $HOME/.server_ip)
+end
+
+# https://www.kernel.org/category/releases.html
+set -gx SUPPORTED_STABLE_VERSIONS 4.{{,1}4,{,1}9} 5.{4,1{0,5,6}}
+
+# Allow an unlimited number of PIDs for tuxmake containers
 set -gx TUXMAKE_PODMAN_RUN --pids-limit=-1
