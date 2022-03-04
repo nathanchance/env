@@ -65,7 +65,11 @@ function kmake -d "Run make with all cores and adjust PATH temporarily"
             if test -n "$LLVM"; and test "$LLVM" = 1
                 set CC clang
             else
-                set CC clang$LLVM
+                if string match -qr / $LLVM
+                    set CC "$LLVM"clang
+                else if string match -qr - $LLVM
+                    set CC clang$LLVM
+                end
             end
         end
     else
