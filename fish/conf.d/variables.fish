@@ -129,3 +129,6 @@ set -gx GHCR ghcr.io/nathanchance
 
 # Always use blackbg for menuconfig
 set -gx MENUCONFIG_COLOR blackbg
+
+# Unlimited number of PIDs for tuxmake containers
+set -gx TUXMAKE_PODMAN_RUN --pids-limit=-1
