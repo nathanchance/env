@@ -1,0 +1,29 @@
+diff --git a/drivers/gpu/drm/amd/amdkfd/kfd_device_queue_manager.c b/drivers/gpu/drm/amd/amdkfd/kfd_device_queue_manager.c
+index 77364afdc606..1cd2ea536bd0 100644
+--- a/drivers/gpu/drm/amd/amdkfd/kfd_device_queue_manager.c
++++ b/drivers/gpu/drm/amd/amdkfd/kfd_device_queue_manager.c
+@@ -505,16 +505,14 @@ static int dbgdev_wave_reset_wavefronts(struct kfd_dev *dev, struct kfd_process
+ 	 * to check which VMID the current process is mapped to.
+ 	 */
+ 
+-	if (dev->kfd2kgd->get_atc_vmid_pasid_mapping_info) {
+-		for (vmid = first_vmid_to_scan; vmid <= last_vmid_to_scan; vmid++) {
+-			status = dev->kfd2kgd->get_atc_vmid_pasid_mapping_info
+-					(dev->adev, vmid, &queried_pasid);
+-
+-			if (status && queried_pasid == p->pasid) {
+-				pr_debug("Killing wave fronts of vmid %d and pasid 0x%x\n",
+-						vmid, p->pasid);
+-				break;
+-			}
++	for (vmid = first_vmid_to_scan; vmid <= last_vmid_to_scan; vmid++) {
++		status = dev->kfd2kgd->get_atc_vmid_pasid_mapping_info
++				(dev->adev, vmid, &queried_pasid);
++
++		if (status && queried_pasid == p->pasid) {
++			pr_debug("Killing wave fronts of vmid %d and pasid 0x%x\n",
++					vmid, p->pasid);
++			break;
+ 		}
+ 	}
+ 

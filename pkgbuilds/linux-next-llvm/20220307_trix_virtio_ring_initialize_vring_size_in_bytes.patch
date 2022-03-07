@@ -1,0 +1,48 @@
+From git@z Thu Jan  1 00:00:00 1970
+Subject: [PATCH] virtio_ring: Initialize vring_size_in_bytes
+From: trix@redhat.com <trix@redhat.com>
+Date: Mon, 07 Mar 2022 09:49:16 -0800
+Message-Id: <20220307174916.892433-1-trix@redhat.com>
+To: mst@redhat.com, jasowang@redhat.com, nathan@kernel.org, ndesaulniers@google.com
+Cc: virtualization@lists.linux-foundation.org, linux-kernel@vger.kernel.org, llvm@lists.linux.dev, Tom Rix <trix@redhat.com>
+List-Id: <llvm.lists.linux.dev>
+MIME-Version: 1.0
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 7bit
+
+From: Tom Rix <trix@redhat.com>
+
+On the clang build, there is this error
+virtio_ring.c:1772:26: error: variable 'ring_size_in_bytes'
+  is uninitialized when used here
+  vring_free_queue(vdev, ring_size_in_bytes,
+                         ^~~~~~~~~~~~~~~~~~
+
+ring_dma_addr was intialized twice, once with the ring_size_in_bytes.
+value.  So fix typo.
+
+Signed-off-by: Tom Rix <trix@redhat.com>
+Reviewed-by: Nathan Chancellor <nathan@kernel.org>
+Link: https://lore.kernel.org/r/20220307174916.892433-1-trix@redhat.com
+---
+ drivers/virtio/virtio_ring.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/drivers/virtio/virtio_ring.c b/drivers/virtio/virtio_ring.c
+index 905c882600618..b2b567ebb9120 100644
+--- a/drivers/virtio/virtio_ring.c
++++ b/drivers/virtio/virtio_ring.c
+@@ -1756,7 +1756,7 @@ static void vring_free_vring_packed(struct vring_packed *vring,
+ 	ring                  = vring->ring;
+ 	driver                = vring->driver;
+ 	device                = vring->device;
+-	ring_dma_addr         = vring->ring_size_in_bytes;
++	ring_size_in_bytes    = vring->ring_size_in_bytes;
+ 	event_size_in_bytes   = vring->event_size_in_bytes;
+ 	ring_dma_addr         = vring->ring_dma_addr;
+ 	driver_event_dma_addr = vring->driver_event_dma_addr;
+
+-- 
+2.26.3
+
+
