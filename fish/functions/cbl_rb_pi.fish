@@ -22,11 +22,11 @@ function cbl_rb_pi -d "Rebase Raspberry Pi kernel on latest linux-next"
 
     git rh origin/master
 
-    set -a patches https://lore.kernel.org/r/20220307174916.892433-1-trix@redhat.com/ # [PATCH] virtio_ring: Initialize vring_size_in_bytes
-
     for patch in $patches
         b4 shazam -l -P _ -s $patch; or return
     end
+
+    git revert --no-edit 77e98756c2d587f504b13ccba29d6ddc99a168a8 # https://lore.kernel.org/r/CAHbLzko0cGBjPzfB28+AKRsb=B_m1NnPoHQ+HdKibP7wH7HxZA@mail.gmail.com/
 
     # Regenerate defconfigs
     for arch in arm arm64

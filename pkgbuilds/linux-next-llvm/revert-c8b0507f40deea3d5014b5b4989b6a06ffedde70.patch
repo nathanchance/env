@@ -1,3 +1,22 @@
+From b25f42bd25a790fb3d4c8d29a04a5631d9f2d587 Mon Sep 17 00:00:00 2001
+From: Nathan Chancellor <nathan@kernel.org>
+Date: Tue, 8 Mar 2022 10:11:49 -0700
+Subject: [PATCH] Revert "drm/amdkfd: judge get_atc_vmid_pasid_mapping_info
+ before call"
+
+This reverts commit c8b0507f40deea3d5014b5b4989b6a06ffedde70.
+
+This patch causes a clang warning and the main reason it was added has
+been addressed in the follow up patch.
+
+Revert it until a fix for the warning can be created.
+
+Link: https://lore.kernel.org/r/YieOPO1WaQ%2FVnqdD@dev-arch.thelio-3990X/
+Signed-off-by: Nathan Chancellor <nathan@kernel.org>
+---
+ .../drm/amd/amdkfd/kfd_device_queue_manager.c  | 18 ++++++++----------
+ 1 file changed, 8 insertions(+), 10 deletions(-)
+
 diff --git a/drivers/gpu/drm/amd/amdkfd/kfd_device_queue_manager.c b/drivers/gpu/drm/amd/amdkfd/kfd_device_queue_manager.c
 index 77364afdc606..1cd2ea536bd0 100644
 --- a/drivers/gpu/drm/amd/amdkfd/kfd_device_queue_manager.c
@@ -27,3 +46,6 @@ index 77364afdc606..1cd2ea536bd0 100644
  		}
  	}
  
+-- 
+2.35.1
+

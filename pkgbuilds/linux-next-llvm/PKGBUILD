@@ -3,7 +3,7 @@
 _localversion=-llvm
 _pkgsuffix=-next$_localversion
 pkgbase=linux$_pkgsuffix
-_srctag=next-20220307
+_srctag=next-20220308
 pkgver=${_srctag//-/.}
 pkgrel=1
 pkgdesc='linux-next'
@@ -19,8 +19,8 @@ source=(
   "$_srcname::git+https://git.kernel.org/pub/scm/linux/kernel/git/next/linux-next.git?signed#tag=$_srctag"
   config
   20220201_lb_drm_i915_fix_null_pointer_dereference.patch
-  20220307_trix_virtio_ring_initialize_vring_size_in_bytes.patch
-  revert-c8b0507f40de.patch
+  revert-c8b0507f40deea3d5014b5b4989b6a06ffedde70.patch
+  revert-77e98756c2d587f504b13ccba29d6ddc99a168a8.patch
 )
 
 validpgpkeys=(
@@ -28,10 +28,10 @@ validpgpkeys=(
   '3F2568AAC26998F9E813A1C5C3F436CA30F5D8EB'  # Mark Brown
 )
 sha256sums=('SKIP'
-            '0a4f18d25f4ba812f1f7ef735fbe22a23c08b9495434c5a41e62ec86e07fee97'
+            '7e01ed90596d4b0a40512375d6b2d799b6fe5f0ac2f61a9aa18abc05923fe934'
             'b79f03f480e7c0571a31ebb68ff9b8c39bbc8f4e064499c0dadabdfde23c4cac'
-            'c3d45554351ee3347436667410916e450e4b1bf1379e7e5e14b9946699ecc953'
-            '7b992edc3c4ded7518ba403f3edba8648029dd922808feac543e4cc5d3a59738')
+            '1e52695240f8f57dc407f614f3ee3482e62f1b27f61461ea9b6cee9856f3899e'
+            'ec0193a09f3a721bcf010c5ebf3ef835b6146ad8cbb0d9608d5c100315ea17fb')
 
 _kmake() {
   set -x
