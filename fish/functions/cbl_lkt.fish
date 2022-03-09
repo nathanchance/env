@@ -19,11 +19,11 @@ function cbl_lkt -d "Tests a Linux kernel with llvm-kernel-testing"
                 set binutils_prefix $argv[$next]
                 set i $next
 
+            case --ccache --defconfigs --no-ccache
+                set -a test_sh_args $arg
+
             case --cfi
                 set cfi true
-
-            case --defconfigs --no-ccache
-                set -a test_sh_args $arg
 
             case -l --linux-src
                 set next (math $i + 1)
