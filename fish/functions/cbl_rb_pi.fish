@@ -22,11 +22,16 @@ function cbl_rb_pi -d "Rebase Raspberry Pi kernel on latest linux-next"
 
     git rh origin/master
 
+    set -a patches https://lore.kernel.org/r/20220309191633.2307110-1-nathan@kernel.org/ # [PATCH] arm64: Do not include __READ_ONCE() block in assembly files
+
     for patch in $patches
         b4 shazam -l -P _ -s $patch; or return
     end
 
     git revert --no-edit 77e98756c2d587f504b13ccba29d6ddc99a168a8 # https://lore.kernel.org/r/CAHbLzko0cGBjPzfB28+AKRsb=B_m1NnPoHQ+HdKibP7wH7HxZA@mail.gmail.com/
+
+    sed -i 's/NOCROSSREFS //g' arch/arm/include/asm/vmlinux.lds.h
+    git ac -m "ARM: Remove NOCROSSREFS for now"; or return
 
     # Regenerate defconfigs
     for arch in arm arm64
