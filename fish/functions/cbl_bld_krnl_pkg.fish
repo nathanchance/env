@@ -42,7 +42,7 @@ function cbl_bld_krnl_pkg -d "Build ClangBuiltLinux Arch Linux kernel package"
 
     set -e fish_trace
     echo Run
-    printf '\n\t$ sudo pacman -U %s\n\n' (readlink -f -- *.tar.zst | perl -pe 's/\n/ /')
+    printf '\n\t$ sudo pacman -U %s\n\n' (readlink -f -- *.tar.zst | perl -pe 's/\n/ /' | string replace $ENV_FOLDER "\$ENV_FOLDER")
     echo "to install new kernel"
 
     popd
