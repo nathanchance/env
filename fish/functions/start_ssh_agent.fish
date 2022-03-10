@@ -4,6 +4,7 @@
 
 function start_ssh_agent -d "Launch an ssh agent only if it has not already been launched"
     status is-interactive; or return 0
+    command -q ssh-add; or return 0
 
     set ssh_key $HOME/.ssh/id_ed25519
     if not test -r "$ssh_key"
