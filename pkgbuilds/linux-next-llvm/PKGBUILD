@@ -3,7 +3,7 @@
 _localversion=-llvm
 _pkgsuffix=-next$_localversion
 pkgbase=linux$_pkgsuffix
-_srctag=next-20220309
+_srctag=next-20220310
 pkgver=${_srctag//-/.}
 pkgrel=1
 pkgdesc='linux-next'
@@ -18,9 +18,7 @@ _srcname=$pkgbase
 source=(
   "$_srcname::git+https://git.kernel.org/pub/scm/linux/kernel/git/next/linux-next.git?signed#tag=$_srctag"
   config
-  revert-77e98756c2d587f504b13ccba29d6ddc99a168a8.patch
   20220201_lb_drm_i915_fix_null_pointer_dereference.patch
-  v2_20220309_yifan1_zhang_drm_amkfd_bail_out_early_if_no_get_atc_vmid_pasid_mapping_info.patch
 )
 
 validpgpkeys=(
@@ -28,10 +26,8 @@ validpgpkeys=(
   '3F2568AAC26998F9E813A1C5C3F436CA30F5D8EB'  # Mark Brown
 )
 sha256sums=('SKIP'
-            'c06c8f2ee35c36a5e441afabb9f3c1a578383a439d043ca880736939b7c52f49'
-            'ec0193a09f3a721bcf010c5ebf3ef835b6146ad8cbb0d9608d5c100315ea17fb'
-            'b79f03f480e7c0571a31ebb68ff9b8c39bbc8f4e064499c0dadabdfde23c4cac'
-            'cf56de8a7a54932d8c33b3e144eb88bf3103926e54078ef5749fb8a13a2b709f')
+            'ed1c8dc7bae98a0c2cf8298d6bded4720536d07d633f4dceed0eca2066e98b3e'
+            'b79f03f480e7c0571a31ebb68ff9b8c39bbc8f4e064499c0dadabdfde23c4cac')
 
 _kmake() {
   set -x
