@@ -3,6 +3,7 @@
 # Copyright (C) 2021-2022 Nathan Chancellor
 
 function tuxmake -d "Calls tuxmake from a git checkout if it is not available in PATH"
+    in_container_msg -h; or return
     if command -q tuxmake
         command tuxmake $argv
     else
