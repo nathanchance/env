@@ -26,6 +26,8 @@ jobs:
         include:
           - os: arch
             platforms: linux/amd64
+          - os: debian
+            platforms: linux/amd64,linux/arm64
           - os: fedora
             platforms: linux/amd64,linux/arm64
           - os: ubuntu
