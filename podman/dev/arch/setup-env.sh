@@ -79,6 +79,7 @@ function install_packages() {
 
         # kernel / tuxmake
         aarch64-linux-gnu-gcc
+        arm-none-eabi-gcc
         bc
         bison
         cpio
@@ -87,6 +88,7 @@ function install_packages() {
         ncurses
         openssl
         pahole
+        riscv64-linux-gnu-gcc
         rsync
         socat
         uboot-tools
