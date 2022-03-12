@@ -9,7 +9,7 @@ function cbl_lkt -d "Tests a Linux kernel with llvm-kernel-testing"
     while test $i -le (count $argv)
         set arg $argv[$i]
         switch $arg
-            case --arches --boot-utils
+            case --arches --boot-utils --out-dir
                 set next (math $i + 1)
                 set -a test_sh_args $arg $argv[$next]
                 set i $next
@@ -19,7 +19,7 @@ function cbl_lkt -d "Tests a Linux kernel with llvm-kernel-testing"
                 set binutils_prefix $argv[$next]
                 set i $next
 
-            case --ccache --defconfigs --no-ccache
+            case --ccache --defconfigs --no-ccache --save-objects
                 set -a test_sh_args $arg
 
             case --cfi
@@ -163,6 +163,10 @@ function cbl_lkt -d "Tests a Linux kernel with llvm-kernel-testing"
         end
 
         set -a test_sh_args --qemu-prefix $qemu_prefix
+    end
+
+    if not string match -qr -- --out-dir $test_sh_args
+        set -a test_sh_args --out-dir $TMP_FOLDER/build
     end
 
     set log_dir $CBL/build-logs/(basename $linux_src)-(date +%F-%T)
