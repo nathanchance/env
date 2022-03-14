@@ -41,6 +41,6 @@ function cbl_bld_krnl_deb -d "Build a .deb kernel package"
         olddefconfig bindeb-pkg
 
     echo Run
-    printf '\n\t$ sudo fish -c "dpkg -i %s; and reboot"\n\n' (realpath --relative-base=$PWD -- .build/linux-image-*.deb)
+    printf '\n\t$ sudo fish -c "dpkg -i %s; and reboot"\n\n' (realpath -- .build/linux-image-*.deb | string replace $HOME \$HOME)
     echo "to install and use new kernel."
 end
