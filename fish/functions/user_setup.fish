@@ -143,12 +143,19 @@ function user_setup -d "Setup a user account, downloading all files and placing 
     if fisher list &| grep -q /tmp/env/fish
         fisher remove /tmp/env/fish
     end
-    fisher install $ENV_FOLDER/fish; or return
-    fisher install $hydro; or return
+    set fisher_plugins \
+        $ENV_FOLDER/fish \
+        $hydro \
+        PatrickF1/fzf.fish \
+        jorgebucaran/autopair.fish
     if not command -q zoxide
-        fisher install jethrokuan/z; or return
+        set -a fisher_plugins jethrokuan/z
     end
-    fisher install PatrickF1/fzf.fish; or return
+    for fisher_plugin in $fisher_plugins
+        fisher install $fisher_plugin; or return
+    end
+
+    # config.fish
     rm -rf $__fish_config_dir/config.fish
     ln -fsv $ENV_FOLDER/fish/config.fish $__fish_config_dir/config.fish
 
