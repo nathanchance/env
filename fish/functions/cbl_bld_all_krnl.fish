@@ -10,7 +10,7 @@ function cbl_bld_all_krnl -d "Build all kernels for ClangBuiltLinux testing"
             # Update linux-next
             cbl_clone_repo linux-next; or return
             git -C $CBL_SRC/linux-next urh; or return
-            git pll --no-edit https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/; or return
+            git -C $CBL_SRC/linux-next pll --no-edit https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/; or return
 
             for arch in arm arm64 x86_64
                 switch $arch
