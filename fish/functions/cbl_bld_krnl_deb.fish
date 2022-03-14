@@ -39,4 +39,8 @@ function cbl_bld_krnl_deb -d "Build a .deb kernel package"
         $KMAKE_DEB_ARGS \
         O=.build/$arch \
         olddefconfig bindeb-pkg
+
+    echo Run
+    printf '\n\t$ sudo fish -c "dpkg -i %s; and reboot"\n\n' (realpath --relative-base=$PWD -- .build/linux-image-*.deb)
+    echo "to install and use new kernel."
 end
