@@ -136,9 +136,9 @@ function git_aliases -d "Configure git aliases"
     end
     # with arguments
     for alias in rfl rn sw
-        git config --global alias.$alias '!fish -c "git_'$alias' $*"'
+        git config --global alias.$alias '!f() { fish -c "'git_$alias' $*"; }; f'
     end
-    git config --global alias.rf '!fish -c "git_rf -q $*"'
-    git config --global alias.urbi '!fish -c "git_ua rbi $*"'
-    git config --global alias.urh '!fish -c "git_ua rh $*"'
+    git config --global alias.rf '!f() { fish -c "git_rf -q $*"; }; f'
+    git config --global alias.urbi '!f() { fish -c "git_ua rbi $*"; }; f'
+    git config --global alias.urh '!f() { fish -c "git_ua rh $*"; }; f'
 end
