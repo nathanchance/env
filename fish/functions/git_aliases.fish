@@ -127,16 +127,15 @@ function git_aliases -d "Configure git aliases"
     git config --global alias.sf status
 
     # git switch
-    git config --global alias.sw switch
     git config --global alias.swc 'sw -c'
 
     # fish git aliases
     # no arguments
-    for alias in af bf dmb swf sync
+    for alias in af bf dmb sync
         git config --global alias.$alias "!fish -c git_$alias"
     end
     # with arguments
-    for alias in rfl rn
+    for alias in rfl rn sw
         git config --global alias.$alias '!fish -c "git_'$alias' $*"'
     end
     git config --global alias.rf '!fish -c "git_rf -q $*"'
