@@ -347,6 +347,7 @@ function install_packages_dnf() {
 }
 
 function check_fish() {
+    # shellcheck disable=SC2016
     fish_version=$(fish -c 'echo $version' | sed 's;\.;;g')
     if [[ $fish_version -lt 340 ]]; then
         printf "\n%s is too old!\n" "$(fish --version)"
