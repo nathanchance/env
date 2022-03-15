@@ -102,6 +102,7 @@ function install_packages_apt() {
         u-boot-tools
         vim
         libvte-common
+        libvte-*-common
         wget
         xz-utils
         zlib1g-dev
