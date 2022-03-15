@@ -52,7 +52,7 @@ jobs:
             compiler: gcc-11
             platforms: linux/amd64,linux/arm64
 
-          - base: debian:bookworm
+          - base: ubuntu:impish
             compiler: llvm-11
             platforms: linux/amd64,linux/arm64
 

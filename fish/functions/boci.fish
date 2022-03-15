@@ -41,11 +41,7 @@ function boci -d "Build an OCI container image"
                 set base debian:bullseye
             case gcc-11
                 set base ubuntu:impish
-            case llvm-10
-                set base ubuntu:groovy
-            case llvm-11
-                set base debian:bookworm
-            case llvm-1{2,3,4,5}
+            case llvm-1{1,2,3,4,5}
                 set base ubuntu:impish
             case llvm-android
                 if test (uname -m) != x86_64
