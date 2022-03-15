@@ -26,8 +26,6 @@ function cbl_rb_pi -d "Rebase Raspberry Pi kernel on latest linux-next"
         b4 shazam -l -P _ -s $patch; or return
     end
 
-    git pll --no-edit mainline master; or return
-
     # Regenerate defconfigs
     for arch in arm arm64
         switch $arch
