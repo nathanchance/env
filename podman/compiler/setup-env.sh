@@ -346,6 +346,14 @@ function install_packages_dnf() {
     dnf install -y "${packages[@]}"
 }
 
+function check_fish() {
+    fish_version=$(fish -c 'echo $version' | sed 's;\.;;g')
+    if [[ $fish_version -lt 340 ]]; then
+        printf "\n%s is too old!\n" "$(fish --version)"
+        exit 1
+    fi
+}
+
 function install_zoxide() {
     zoxide_workdir=/tmp/zoxide
     zoxide_url=$(curl -LSs https://api.github.com/repos/ajeetdsouza/zoxide/releases/latest | grep -E "browser_download_url.*$(uname -m)-unknown-linux-musl" | cut -d\" -f4)
@@ -407,10 +415,12 @@ function setup_environment() {
     if command -v dnf &>/dev/null; then
         setup_llvm_copr
         install_packages_dnf
+        check_fish
     elif command -v apt &>/dev/null; then
         setup_fish_repo
         setup_apt_llvm_org
         install_packages_apt
+        check_fish
         install_zoxide
         setup_locales
         build_pahole

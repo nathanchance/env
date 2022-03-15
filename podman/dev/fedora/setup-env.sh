@@ -117,4 +117,13 @@ function install_packages() {
     dnf install -y "${packages[@]}"
 }
 
+function check_fish() {
+    fish_version=$(fish -c 'echo $version' | sed 's;\.;;g')
+    if [[ $fish_version -lt 340 ]]; then
+        printf "\n%s is too old!\n" "$(fish --version)"
+        exit 1
+    fi
+}
+
 install_packages
+check_fish

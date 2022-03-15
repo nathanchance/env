@@ -120,6 +120,14 @@ function install_packages() {
     ln -fsv /usr/lib/llvm-*/bin/* /usr/local/bin
 }
 
+function check_fish() {
+    fish_version=$(fish -c 'echo $version' | sed 's;\.;;g')
+    if [[ $fish_version -lt 340 ]]; then
+        printf "\n%s is too old!\n" "$(fish --version)"
+        exit 1
+    fi
+}
+
 function setup_locales() {
     echo "locales locales/default_environment_locale select en_US.UTF-8" | debconf-set-selections
     echo "locales locales/locales_to_be_generated multiselect en_US.UTF-8 UTF-8" | debconf-set-selections
@@ -157,6 +165,7 @@ function check_tools() {
 setup_fish_repo
 setup_gh_repo
 install_packages
+check_fish
 setup_locales
 build_pahole
 check_tools

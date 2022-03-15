@@ -34,6 +34,10 @@ end
 function build_fish
     cd $HOME/fish; or exit
     makepkg -irs --noconfirm
+
+    if test (fish -c 'echo $version' | string replace -a . '') -lt 340
+        error (fish --version)"is too old!"
+    end
 end
 
 check_user

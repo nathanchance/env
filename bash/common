@@ -123,6 +123,13 @@ function set_global_variables() {
 }
 
 function setup_initial_fish_config() {
+    # Check that fish 3.4.0 or newer is available, which is needed for env to work
+    fish_version=$(fish -c 'echo $version' | sed 's;\.;;g')
+    if [[ $fish_version -lt 340 ]]; then
+        print_error "$(fish --version) is too old!"
+        exit 1
+    fi
+
     fish_cfg=/home/$user_name/.config/fish/config.fish
     if [[ ! -L $fish_cfg ]]; then
         mkdir -p "${fish_cfg%/*}"
