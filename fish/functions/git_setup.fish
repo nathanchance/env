@@ -30,4 +30,8 @@ function git_setup -d "Configure git"
     git config --global url."https://git.kernel.org".insteadOf git://git.kernel.org
 
     git_aliases
+
+    if command -q gh
+        gh extension install gennaro-tedesco/gh-f
+    end
 end
