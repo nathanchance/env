@@ -208,14 +208,14 @@ function cbl_lkt -d "Tests a Linux kernel with llvm-kernel-testing"
         cat $log_dir/results.log
 
         # Filter harder
-        set unique_warnings (sed -e 's/^[^:]*://g' -e 's/^.*Section mismatch/Section mismatch/' $tmp_file &| sort &| uniq &| string collect)
+        set unique_warnings "$(sed -e 's/^[^:]*://g' -e 's/^.*Section mismatch/Section mismatch/' $tmp_file &| sort &| uniq)"
         if test -n "$unique_warnings"
             echo
             echo "Unique warning report:"
             echo "$unique_warnings"
         end
 
-        set full_warnings (cat $tmp_file | string collect)
+        set full_warnings "$(cat $tmp_file)"
         if test -n "$full_warnings"
             echo
             echo "Full warning report:"
