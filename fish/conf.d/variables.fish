@@ -9,8 +9,7 @@
 # This is the only variable that should be universal,
 # as it needs to exist in containers
 if test -z "$LOCATION"
-    set -l user (id -un)
-    switch $user@$hostname
+    switch "$(id -un)@$hostname"
         case nathan@archlinux-'*' nathan@debian-'*' nathan@ubuntu-'*'
             set -U LOCATION hetzner-server
         case pi@raspberrypi
