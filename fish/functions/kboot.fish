@@ -43,4 +43,5 @@ function kboot -d "Boot a kernel in QEMU"
 
     set fish_trace 1
     $BOOT_UTILS/boot-qemu.sh $boot_qemu_args
+    set -e fish_trace
 end

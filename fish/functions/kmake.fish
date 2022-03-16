@@ -150,4 +150,5 @@ function kmake -d "Run make with all cores and adjust PATH temporarily"
 
     set fish_trace 1
     time stdbuf -eL -oL $make_binary -"$silent_make_flag"kj(nproc) $make_args
+    set -e fish_trace
 end

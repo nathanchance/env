@@ -14,8 +14,6 @@ function cbl_rb_pi -d "Rebase Raspberry Pi kernel on latest linux-next"
         end
     end
 
-    set fish_trace 1
-
     pushd $pi_src; or return
 
     git ru; or return

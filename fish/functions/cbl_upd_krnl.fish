@@ -3,8 +3,6 @@
 # Copyright (C) 2021-2022 Nathan Chancellor
 
 function cbl_upd_krnl -d "Update machine's kernel"
-    set fish_trace 1
-
     set remote_user nathan
     set remote_host 192.168.4.188
     set remote_main_folder /home/$remote_user

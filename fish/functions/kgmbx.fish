@@ -6,8 +6,6 @@ function kgmbx -d "Fetch an mbox file from lore.kernel.org using b4 and open it 
     set msg_id $argv[1]
     set mbox (mktemp --suffix=.mbox)
 
-    set fish_trace 1
-
     if b4 mbox -n $mbox $msg_id
         mutt -f $mbox
         rm $mbox
