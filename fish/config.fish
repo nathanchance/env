@@ -21,3 +21,8 @@ end
 if command -q zoxide
     zoxide init --hook prompt fish | source
 end
+
+fish_add_path -aP /usr/local/sbin /usr/sbin /sbin
+
+# Make sure that sourcing config.fish always returns 0
+true
