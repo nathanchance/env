@@ -3,7 +3,7 @@
 _localversion=-llvm
 _pkgsuffix=-next$_localversion
 pkgbase=linux$_pkgsuffix
-_srctag=next-20220316
+_srctag=next-20220318
 pkgver=${_srctag//-/.}
 pkgrel=1
 pkgdesc='linux-next'
@@ -19,7 +19,7 @@ source=(
   "$_srcname::git+https://git.kernel.org/pub/scm/linux/kernel/git/next/linux-next.git?signed#tag=$_srctag"
   config
   20220201_lb_drm_i915_fix_null_pointer_dereference.patch
-  nilfs2-Wsometimes-uninitialized.patch
+  20220318_rostedt_tracing_have_type_enum_modifications_copy_the_strings.patch
 )
 
 validpgpkeys=(
@@ -27,9 +27,9 @@ validpgpkeys=(
   '3F2568AAC26998F9E813A1C5C3F436CA30F5D8EB'  # Mark Brown
 )
 sha256sums=('SKIP'
-            'd9f2b263c84e9425c581477fc2f886467142d852b496671231b3d33c5d07b7b0'
+            '05e4eed219245497ed89b3c8ee80f8c59460937cd10b39fb392ad3ece8b95b5a'
             'b79f03f480e7c0571a31ebb68ff9b8c39bbc8f4e064499c0dadabdfde23c4cac'
-            '6f3bc9693e31a59ae88e619d1f3c12fec1cdac89e70dbf3969a025d3d1e3ff8b')
+            '6c95c3f26e7f4225ceffec585943aea7ebcd7d6374dbf9690e509fc5d19e9892')
 
 _kmake() {
   set -x

@@ -765,6 +765,7 @@ CONFIG_ARCH_WANTS_NO_INSTR=y
 CONFIG_HAVE_ASM_MODVERSIONS=y
 CONFIG_HAVE_REGS_AND_STACK_ACCESS_API=y
 CONFIG_HAVE_RSEQ=y
+CONFIG_HAVE_RUST=y
 CONFIG_HAVE_FUNCTION_ARG_ACCESS_API=y
 CONFIG_HAVE_HW_BREAKPOINT=y
 CONFIG_HAVE_MIXED_BREAKPOINTS_REGS=y
@@ -3806,6 +3807,7 @@ CONFIG_MT7915E=m
 CONFIG_MT7921_COMMON=m
 CONFIG_MT7921E=m
 CONFIG_MT7921S=m
+CONFIG_MT7921U=n
 CONFIG_WLAN_VENDOR_MICROCHIP=y
 CONFIG_WILC1000=m
 CONFIG_WILC1000_SDIO=m
@@ -5947,11 +5949,11 @@ CONFIG_V4L_MEM2MEM_DRIVERS=y
 CONFIG_VIDEO_MEM2MEM_DEINTERLACE=m
 
 #
-# Allegro DVT drivers
+# Allegro DVT media platform drivers
 #
 
 #
-# Amlogic drivers
+# Amlogic media platform drivers
 #
 
 #
@@ -5959,64 +5961,68 @@ CONFIG_VIDEO_MEM2MEM_DEINTERLACE=m
 #
 
 #
-# Aspeed drivers
+# Aspeed media platform drivers
 #
 CONFIG_VIDEO_ASPEED=m
 
 #
-# Atmel drivers
+# Atmel media platform drivers
 #
 
 #
-# Cadence drivers
+# Cadence media platform drivers
 #
 CONFIG_VIDEO_CADENCE_CSI2RX=m
 CONFIG_VIDEO_CADENCE_CSI2TX=m
 
 #
-# Chips&Media drivers
+# Chips&Media media platform drivers
 #
 
 #
-# Intel drivers
+# Intel media platform drivers
 #
 
 #
-# Marvell drivers
+# Marvell media platform drivers
 #
 CONFIG_VIDEO_CAFE_CCIC=m
 
 #
-# Mediatek drivers
+# Mediatek media platform drivers
 #
 
 #
-# NVidia drivers
+# NVidia media platform drivers
 #
 
 #
-# NXP drivers
+# NXP media platform drivers
 #
 CONFIG_VIDEO_IMX_MIPI_CSIS=n
 
 #
-# Qualcomm drivers
+# Qualcomm media platform drivers
 #
 
 #
-# Renesas drivers
+# Renesas media platform drivers
 #
 
 #
-# Rockchip drivers
+# Rockchip media platform drivers
 #
 
 #
-# Samsung drivers
+# Samsung media platform drivers
 #
 
 #
-# STMicroelectronics drivers
+# STMicroelectronics media platform drivers
+#
+
+#
+# Sunxi media platform drivers
 #
 
 #
@@ -6024,11 +6030,11 @@ CONFIG_VIDEO_IMX_MIPI_CSIS=n
 #
 
 #
-# VIA drivers
+# VIA media platform drivers
 #
 
 #
-# Xilinx drivers
+# Xilinx media platform drivers
 #
 
 #
@@ -10752,7 +10758,6 @@ CONFIG_DEBUG_SHIRQ=y
 # Debug Oops, Lockups and Hangs
 #
 CONFIG_PANIC_ON_OOPS=n
-CONFIG_PANIC_ON_OOPS_VALUE=0
 CONFIG_PANIC_TIMEOUT=0
 CONFIG_LOCKUP_DETECTOR=y
 CONFIG_SOFTLOCKUP_DETECTOR=y
