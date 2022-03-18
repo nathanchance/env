@@ -201,8 +201,9 @@ EOF
 function setup_user() {
     if user_exists "$user_name"; then
         chsh_fish
+        usermod -aG uucp "$user_name"
     else
-        useradd -G wheel -m -s "$(readlink -f "$(command -v fish)")" "$user_name"
+        useradd -G wheel,uucp -m -s "$(readlink -f "$(command -v fish)")" "$user_name"
         echo "$user_name:$user_pass" | chpasswd
     fi
 }
