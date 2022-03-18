@@ -23,6 +23,7 @@ function cbl_gen_fedoraconfig -d "Downloads and modifies Fedora's kernel configu
 
     scripts/config \
         -d DEBUG_INFO \
+        -d DEBUG_INFO_DWARF_TOOLCHAIN_DEFAULT \
         -e LOCALVERSION_AUTO \
         -e WERROR \
         --set-val FRAME_WARN 1500 \
