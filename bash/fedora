@@ -62,6 +62,9 @@ function install_packages() {
         # git
         gh
         git{,-email}
+
+        # repo
+        python
     )
 
     dnf install -y "${packages[@]}" || exit
