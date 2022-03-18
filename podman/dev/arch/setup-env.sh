@@ -88,6 +88,7 @@ function install_packages() {
         ncurses
         openssl
         pahole
+        picocom
         riscv64-linux-gnu-gcc
         rsync
         socat
