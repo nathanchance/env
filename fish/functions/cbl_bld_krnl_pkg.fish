@@ -30,7 +30,7 @@ function cbl_bld_krnl_pkg -d "Build ClangBuiltLinux Arch Linux kernel package"
     if test $pkg = linux-cfi
         set -a config_args --cfi
     end
-    cbl_gen_archconfig $config_args $pkg
+    cbl_gen_archconfig $config_args $pkg; or return
 
     # Update the pkgver if using a local tree
     if grep -q "file://" PKGBUILD
