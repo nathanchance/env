@@ -32,6 +32,10 @@ function cbl_bld_qemu -d "Build QEMU for use with ClangBuiltLinux"
             git -C $qemu_src submodule foreach git reset --hard
             git -C $qemu_src pull --rebase
             git -C $qemu_src submodule update --recursive
+
+            # Revert "x86: Grant AMX permission for guest"
+            # https://lore.kernel.org/r/YjII86LKWTe0mVED@angien.pipo.sk/
+            git -C $qemu_src revert --no-commit 19db68ca68a78fa033a21d419036b6e416554564; or return
         end
 
         set qemu_ver (git -C $qemu_src sh -s --format=%H)
