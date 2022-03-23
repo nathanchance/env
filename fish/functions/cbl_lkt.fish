@@ -238,7 +238,7 @@ function cbl_lkt -d "Tests a Linux kernel with llvm-kernel-testing"
             echo "$filtered_warnings"
         end
 
-        set full_warnings "$(rg "$searchlist" $log_dir/*.log)"
+        set full_warnings "$(rg "$searchlist" $log_dir/*.log &| sed $sed_args &| sort &| uniq)"
         if test -n "$full_warnings"
             echo
             echo "Full warning report:"
