@@ -187,12 +187,12 @@ function cbl_lkt -d "Tests a Linux kernel with llvm-kernel-testing"
 
     # objtool: Too many to deal with for now
     # override: CPU_BIG_ENDIAN changes choice state | override: LTO_CLANG_THIN changes choice state: Warnings from merge_config that are harmless in this context
-    # results.log: Any warnings from this will be in the other logs
+    # *.log: Any warnings from this will be in the other logs
     # include/linux/bcache.h:3: https://github.com/ClangBuiltLinux/linux/issues/1065
     # llvm-objdump: error: 'vmlinux': not a dynamic object: https://github.com/ClangBuiltLinux/linux/issues/1427
     # warning: argument unused during compilation: '-march=arm: https://github.com/ClangBuiltLinux/linux/issues/1315
     # scripts/(extract-cert|sign-file).c: OpenSSL deprecation warnings, we do not care: https://github.com/ClangBuiltLinux/linux/issues/1555
-    set blocklist "objtool:|override: (CPU_BIG_ENDIAN|LTO_CLANG_THIN) changes choice state|results.log|union jset::\(anonymous at ./usr/include/linux/bcache.h:|llvm-objdump: error: 'vmlinux': not a dynamic object|warning: argument unused during compilation: '-march=arm|scripts/(extract-cert|sign-file).c:[0-9]+:[0-9]+: warning: '(ENGINE|ERR)_.*' is deprecated \[-Wdeprecated-declarations\]"
+    set blocklist "objtool:|override: (CPU_BIG_ENDIAN|LTO_CLANG_THIN) changes choice state|info.log|success.log|failed.log|skipped.log|union jset::\(anonymous at ./usr/include/linux/bcache.h:|llvm-objdump: error: 'vmlinux': not a dynamic object|warning: argument unused during compilation: '-march=arm|scripts/(extract-cert|sign-file).c:[0-9]+:[0-9]+: warning: '(ENGINE|ERR)_.*' is deprecated \[-Wdeprecated-declarations\]"
     set searchlist "error:|FATAL:|undefined|Unsupported relocation type:|warning:|WARNING:"
 
     for file_path in $log_dir $linux_src $CBL_LKT/src/linux-clang-cfi
@@ -205,7 +205,23 @@ function cbl_lkt -d "Tests a Linux kernel with llvm-kernel-testing"
     set mail_log $log_dir/mail.log
 
     begin
-        cat $log_dir/results.log
+        cat $log_dir/info.log
+        echo
+        echo "List of successful tests:"
+        echo
+        cat $log_dir/success.log
+        if test -f $log_dir/failed.log
+            echo
+            echo "List of failed tests:"
+            echo
+            cat $log_dir/failed.log
+        end
+        if test -f $log_dir/skipped.log
+            echo
+            echo "List of skipped tests:"
+            echo
+            cat $log_dir/skipped.log
+        end
 
         # Filter harder
         set unique_warnings "$(sed -e 's/^[^:]*://g' -e 's/^.*Section mismatch/Section mismatch/' $tmp_file &| sort &| uniq)"
@@ -215,7 +231,14 @@ function cbl_lkt -d "Tests a Linux kernel with llvm-kernel-testing"
             echo "$unique_warnings"
         end
 
-        set full_warnings "$(cat $tmp_file)"
+        set filtered_warnings "$(cat $tmp_file)"
+        if test -n "$filtered_warnings"
+            echo
+            echo "Filtered warning report:"
+            echo "$filtered_warnings"
+        end
+
+        set full_warnings "$(rg "$searchlist" $log_dir/*.log)"
         if test -n "$full_warnings"
             echo
             echo "Full warning report:"
