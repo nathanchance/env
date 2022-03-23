@@ -3,11 +3,14 @@
 _localversion=-llvm
 _pkgsuffix=-mainline$_localversion
 pkgbase=linux$_pkgsuffix
-_srctag=v5.17
-pkgver=${_srctag//-/.}
+# _srctag=v5.17
+# pkgver=${_srctag//-/.}
+_srccommit=6b1f86f8e9c7f9de7ca1cb987b2cf25e99b1ae3a
+pkgver=v5.17.2172.g6b1f86f8e9c7
 pkgrel=1
 pkgdesc='Linux'
-url="https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/log/?h=$_srctag"
+# url="https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/log/?h=$_srctag"
+url="https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/log/?h=$_srccommit"
 arch=(x86_64)
 license=(GPL2)
 makedepends=(
@@ -15,8 +18,9 @@ makedepends=(
 )
 options=('!strip')
 _srcname=$pkgbase
+#  "$_srcname::git+https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git?signed#tag=$_srctag"
 source=(
-  "$_srcname::git+https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git?signed#tag=$_srctag"
+  "$_srcname::git+https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git?#commit=$_srccommit"
   https://github.com/pop-os/system76-io-dkms/raw/master/system76-io.c
   https://github.com/pop-os/system76-io-dkms/raw/master/system76-io_dev.c
   https://github.com/pop-os/system76-io-dkms/raw/master/system76-io_hwmon.c
@@ -31,7 +35,7 @@ sha256sums=('SKIP'
             'a6f7a5eb3134269737b7790a6286dc671b491547d6c0b59e92959dca0b66cc20'
             '1739b36d09e3d555e1c1b1ef079160b808972f84fc40bd81476cbe3079cad54e'
             'a8e46f08be1010c716dff5e0ed09a277673e8bf197ef3b9aade367977428111d'
-            '68f48412aa2ddee36bce5a88bc36a8139dd7d0cfb6c435e51bb31580f7ae42c5')
+            '416fe137bc3c3cd1ff0671897d62ff6d47599df526a5729f66ddf126c5f99f70')
 
 _kmake() {
   set -x
