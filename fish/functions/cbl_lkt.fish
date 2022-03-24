@@ -233,6 +233,7 @@ function cbl_lkt -d "Tests a Linux kernel with llvm-kernel-testing"
         if test -n "$unique_warnings"
             echo
             echo "Unique warning report:"
+            echo
             echo "$unique_warnings"
         end
 
@@ -240,6 +241,7 @@ function cbl_lkt -d "Tests a Linux kernel with llvm-kernel-testing"
         if test -n "$filtered_warnings"
             echo
             echo "Filtered warning report:"
+            echo
             echo "$filtered_warnings"
         end
 
@@ -247,6 +249,7 @@ function cbl_lkt -d "Tests a Linux kernel with llvm-kernel-testing"
         if test -n "$full_warnings"
             echo
             echo "Full warning report:"
+            echo
             echo "$full_warnings"
         end
 
