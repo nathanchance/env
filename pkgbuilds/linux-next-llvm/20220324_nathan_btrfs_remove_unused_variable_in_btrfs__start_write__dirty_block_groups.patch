@@ -1,0 +1,91 @@
+From git@z Thu Jan  1 00:00:00 1970
+Subject: [PATCH] btrfs: Remove unused variable in btrfs_{start,write}_dirty_block_groups()
+From: Nathan Chancellor <nathan@kernel.org>
+Date: Thu, 24 Mar 2022 08:36:45 -0700
+Message-Id: <20220324153644.4079376-1-nathan@kernel.org>
+To: Chris Mason <clm@fb.com>, Josef Bacik <josef@toxicpanda.com>, David Sterba <dsterba@suse.com>
+Cc: Nick Desaulniers <ndesaulniers@google.com>, linux-btrfs@vger.kernel.org, linux-kernel@vger.kernel.org, llvm@lists.linux.dev, patches@lists.linux.dev, Nathan Chancellor <nathan@kernel.org>, stable@vger.kernel.org
+List-Id: <llvm.lists.linux.dev>
+MIME-Version: 1.0
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 7bit
+
+Clang's version of -Wunused-but-set-variable recently gained support for
+unary operations, which reveals two unused variables:
+
+  fs/btrfs/block-group.c:2949:6: error: variable 'num_started' set but not used [-Werror,-Wunused-but-set-variable]
+          int num_started = 0;
+              ^
+  fs/btrfs/block-group.c:3116:6: error: variable 'num_started' set but not used [-Werror,-Wunused-but-set-variable]
+          int num_started = 0;
+              ^
+  2 errors generated.
+
+These variables appear to be unused from their introduction, so just
+remove them to silence the warnings.
+
+Cc: stable@vger.kernel.org
+Fixes: c9dc4c657850 ("Btrfs: two stage dirty block group writeout")
+Fixes: 1bbc621ef284 ("Btrfs: allow block group cache writeout outside critical section in commit")
+Link: https://github.com/ClangBuiltLinux/linux/issues/1614
+Signed-off-by: Nathan Chancellor <nathan@kernel.org>
+Link: https://lore.kernel.org/r/20220324153644.4079376-1-nathan@kernel.org
+---
+
+I am requesting a stable backport because this is visible with
+allmodconfig, which enables CONFIG_WERROR, breaking the build.
+
+To quote Linus:
+
+"EVERYBODY should have CONFIG_WERROR=y on at least x86-64 and other
+serious architectures, unless you have some completely random
+experimental (and broken) compiler."
+
+https://lore.kernel.org/r/CAHk-=wifoM9VOp-55OZCRcO9MnqQ109UTuCiXeZ-eyX_JcNVGg@mail.gmail.com/
+
+ fs/btrfs/block-group.c | 4 ----
+ 1 file changed, 4 deletions(-)
+
+diff --git a/fs/btrfs/block-group.c b/fs/btrfs/block-group.c
+index c22d287e020b..9ad265066225 100644
+--- a/fs/btrfs/block-group.c
++++ b/fs/btrfs/block-group.c
+@@ -2946,7 +2946,6 @@ int btrfs_start_dirty_block_groups(struct btrfs_trans_handle *trans)
+ 	struct btrfs_path *path = NULL;
+ 	LIST_HEAD(dirty);
+ 	struct list_head *io = &cur_trans->io_bgs;
+-	int num_started = 0;
+ 	int loops = 0;
+ 
+ 	spin_lock(&cur_trans->dirty_bgs_lock);
+@@ -3012,7 +3011,6 @@ int btrfs_start_dirty_block_groups(struct btrfs_trans_handle *trans)
+ 			cache->io_ctl.inode = NULL;
+ 			ret = btrfs_write_out_cache(trans, cache, path);
+ 			if (ret == 0 && cache->io_ctl.inode) {
+-				num_started++;
+ 				should_put = 0;
+ 
+ 				/*
+@@ -3113,7 +3111,6 @@ int btrfs_write_dirty_block_groups(struct btrfs_trans_handle *trans)
+ 	int should_put;
+ 	struct btrfs_path *path;
+ 	struct list_head *io = &cur_trans->io_bgs;
+-	int num_started = 0;
+ 
+ 	path = btrfs_alloc_path();
+ 	if (!path)
+@@ -3171,7 +3168,6 @@ int btrfs_write_dirty_block_groups(struct btrfs_trans_handle *trans)
+ 			cache->io_ctl.inode = NULL;
+ 			ret = btrfs_write_out_cache(trans, cache, path);
+ 			if (ret == 0 && cache->io_ctl.inode) {
+-				num_started++;
+ 				should_put = 0;
+ 				list_add_tail(&cache->io_list, io);
+ 			} else {
+
+base-commit: d3e29967079c522ce1c5cab0e9fab2c280b977eb
+
+-- 
+2.35.1
+
+
