@@ -76,10 +76,10 @@ function cbl_lkt -d "Tests a Linux kernel with llvm-kernel-testing"
     if test "$system_binaries" != true
         if test -z "$llvm_prefix$binutils_prefix$tc_prefix"
             if test -e $CBL_TC_BNTL
-                set binutils_prefix $CBL_TC_BNTL
+                set binutils_prefix (dirname $CBL_TC_BNTL)
             end
             if test -e $CBL_TC_LLVM
-                set llvm_prefix $CBL_TC_LLVM
+                set llvm_prefix (dirname $CBL_TC_LLVM)
             end
         end
         if test -z "$qemu_prefix"
