@@ -211,10 +211,6 @@ function cbl_lkt -d "Tests a Linux kernel with llvm-kernel-testing"
 
     begin
         cat $log_dir/info.log
-        echo
-        echo "List of successful tests:"
-        echo
-        cat $log_dir/success.log
         if test -f $log_dir/failed.log
             echo
             echo "List of failed tests:"
@@ -227,6 +223,10 @@ function cbl_lkt -d "Tests a Linux kernel with llvm-kernel-testing"
             echo
             cat $log_dir/skipped.log
         end
+        echo
+        echo "List of successful tests:"
+        echo
+        cat $log_dir/success.log
 
         # Filter harder
         set unique_warnings "$(sed -e 's/^[^:]*://g' -e 's/^.*Section mismatch/Section mismatch/' $tmp_file &| sort &| uniq)"
