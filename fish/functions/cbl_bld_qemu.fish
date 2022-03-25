@@ -55,10 +55,5 @@ function cbl_bld_qemu -d "Build QEMU for use with ClangBuiltLinux"
         popd
     end
 
-    rm -rf $CBL_QEMU_BIN
-    mkdir -p $CBL_QEMU_BIN
-    for arch in arm aarch64 i386 m68k mips mipsel ppc ppc64 riscv64 s390x x86_64
-        ln -frsv $PREFIX/bin/qemu-system-$arch $CBL_QEMU_BIN
-    end
-    ln -frsv $PREFIX/bin/qemu-img $CBL_QEMU_BIN
+    cbl_upd_software_symlinks qemu $PREFIX
 end
