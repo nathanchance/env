@@ -32,9 +32,6 @@ function cbl_bld_qemu -d "Build QEMU for use with ClangBuiltLinux"
             git -C $qemu_src submodule foreach git reset --hard
             git -C $qemu_src pull --rebase
             git -C $qemu_src submodule update --recursive
-
-            # [PATCH] KVM: x86: workaround invalid CPUID[0xD, 9] info on some AMD processors
-            b4 am -o - https://lore.kernel.org/r/20220323114315.22594-1-pbonzini@redhat.com/ | git -C $qemu_src ap; or return
         end
 
         set qemu_ver (git -C $qemu_src sh -s --format=%H)
