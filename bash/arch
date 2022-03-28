@@ -58,7 +58,7 @@ function add_ignorepkg() {
 function install_pkgs() {
     packages=(
         # Administration tools
-        htop
+        btop
         iputils
         opendoas
 

@@ -18,6 +18,7 @@ function updall -d "Update binaries in $BIN_FOLDER"
         arc \
         b4 \
         bat \
+        btop \
         diskus \
         distrobox \
         duf \

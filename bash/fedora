@@ -36,7 +36,6 @@ function setup_gh_repo() {
 function install_packages() {
     packages=(
         # administration
-        htop
         opendoas
         util-linux-user
 

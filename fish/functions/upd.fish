@@ -136,6 +136,31 @@ function upd -d "Runs the update command for the current distro or downloads/upd
                             install -Dvm644 autocomplete/$target.fish $__fish_config_dir/completions/$target.fish
                     end
 
+                case btop
+                    switch $arch
+                        case arm
+                            set btop_triple arm-linux-musleabi
+                        case arm64
+                            set btop_triple aarch64-linux-musl
+                        case x86_64
+                            set btop_triple x86_64-linux-musl
+                    end
+
+                    set repo aristocratos/btop
+                    set ver (glr $repo)
+
+                    set url https://github.com/$repo/releases/download/$ver/btop-$btop_triple.tbz
+
+                    crl $url | tar -xjf -; or return
+
+                    set -l prefix $BIN_FOLDER/btop
+                    rm -fr $prefix
+                    install -Dvm755 -t $prefix/bin bin/$target
+                    for theme in themes/*
+                        install -Dvm755 -t $prefix/share/btop/themes $theme
+                    end
+                    set binary $prefix/bin/btop
+
                 case duf
                     switch $arch
                         case arm
