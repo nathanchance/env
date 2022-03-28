@@ -177,6 +177,9 @@ function install_pkgs() {
 
     # Reinstall shadow to fix permissions with newuidmap
     pacman -S --noconfirm shadow
+
+    # Install local fish package
+    pacman -U --noconfirm "$(dirname "$bash_root")"/fish-3.4.1-0.1-x86_64.pkg.tar.zst || exit
 }
 
 function setup_doas() {
