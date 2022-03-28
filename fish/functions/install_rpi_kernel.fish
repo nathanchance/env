@@ -17,7 +17,7 @@ function install_rpi_kernel -d "Install Raspberry Pi kernel from a tarball"
             case -r --reboot
                 set reboot true
             case '*'.tar.zst
-                set krnl_pkg $arg
+                set krnl_pkg (realpath $arg)
         end
     end
 
