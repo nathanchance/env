@@ -6,7 +6,7 @@
 # Contributor: Jan Fader <jan.fader@web.de>
 
 pkgname=fish
-pkgver=3.4.0
+pkgver=3.4.1
 pkgrel=0.1
 pkgdesc='Smart and user friendly shell intended mostly for interactive use'
 url='https://fishshell.com/'
@@ -22,10 +22,10 @@ backup=(etc/fish/config.fish)
 source=(https://github.com/fish-shell/fish-shell/releases/download/${pkgver}/${pkgname}-${pkgver}.tar.xz{,.asc}
         0001-HACK-type-Drop-type-sh-test.patch)
 validpgpkeys=(003837986104878835FA516D7A67D962D88A709A) # David Adam <zanchey@gmail.com>
-sha256sums=('b5b48ab8486b19ef716a32f7f46b88b9ea5356155f0e967ee99f4093645413c5'
+sha256sums=('b6f23b3843b04db6b0a90fea1f6f0d0e40cc027b4a732098200863f2864a94ea'
             'SKIP'
             '8fdcaaa5bd2d16a4b835850b205d729da41f8f6c4362a5ddf67153d1a70307f5')
-sha512sums=('463ee8d86815520c6de9777fd2b5975f06cc0842137c86cca7ae0331e95d74e755bf6f4b0bdea7e96c11371436ff9f97ce483ae026daa1e8d385f6cad8860ed4'
+sha512sums=('20a2892ec0c413c4c3fcfe5fbf52fb2398de35a9172758728bd2ccdccc5fb6e0e18712a664d02db67543d47180a4d04f3998a6297d23088926b6d03baefdf981'
             'SKIP'
             'd45bc3c27b44da7d633e550a52caeaae0be78c3a506b26a5effedc887483703a30ec03a45eb3c6af4d981de2ead41f31a49ff1a26c962707822dfa7314e22c6d')
 
