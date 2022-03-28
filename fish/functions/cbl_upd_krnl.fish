@@ -24,7 +24,7 @@ function cbl_upd_krnl -d "Update machine's kernel"
                     case 'mainline*' 'next*'
                         set ver $arg
                     case -r --reboot
-                        set reboot true
+                        set -a install_args $arg
                 end
             end
             if not set -q arch
@@ -36,63 +36,13 @@ function cbl_upd_krnl -d "Update machine's kernel"
                 return 1
             end
 
-            # Installation folder
-            set prefix /boot/custom-$ver-$arch
-
-            # Temporary work folder
-            set workdir (mktemp -d)
-            pushd $workdir; or return
-
             # Grab .tar.zst package
             set remote_build (string replace $MAIN_FOLDER $remote_main_folder $CBL_BLD)
             set out $remote_build/rpi/.build/$arch
-            scp $remote_user@$remote_host:$out/linux-'*'-$arch.tar.zst .
+            scp $remote_user@$remote_host:$out/linux-'*'-$arch.tar.zst /tmp
 
-            # Extract .tar.zst
-            tar --zstd -xvf *.tar.zst; or return
-
-            # Move modules into their place
-            set mod_dir lib/modules/*
-            rm $mod_dir/{build,source}
-            sudo rm -frv /lib/modules/(basename $mod_dir)
-            sudo mv -v $mod_dir /lib/modules; or return
-
-            # Install image and dtbs
-            sudo rm -fr $prefix
-            switch $arch
-                case arm
-                    set dtbs boot/dtbs/*/bcm2{71,83}*
-
-                    sudo install -Dvm755 boot/vmlinux-kbuild-* $prefix/zImage; or return
-                case arm64
-                    set dtbs boot/dtbs/*/broadcom/bcm2{7,8}*
-
-                    zcat boot/vmlinuz-* | sudo install -Dvm755 /dev/stdin $prefix/Image; or return
-            end
-            for dtb in $dtbs
-                sudo install -Dvm755 $dtb $prefix/(basename $dtb); or return
-            end
-
-            # Copy cmdline.txt because we are modifying os_prefix
-            set cmdline $prefix/cmdline.txt
-            sudo cp -v /boot/cmdline.txt $cmdline; or return
-
-            # Ensure that there is always a serial console option
-            if grep -q console= $cmdline
-                sudo sed -i s/serial0/ttyS1/ $cmdline
-            else
-                printf "console=ttyS1,115200 %s\n" (cat $cmdline) | sudo tee $cmdline
-            end
-
-            # Remove "quiet" and "splash" from cmdline
-            sudo sed -i 's/quiet splash //' $cmdline
-
-            if test "$reboot" = true
-                sudo systemctl reboot
-            else
-                popd
-                rm -fr $workdir
-            end
+            # Install kernel
+            install_rpi_kernel $arch $ver $install_args /tmp/linux-'*'-$arch.tar.zst
 
         case test-desktop-amd test-desktop-intel test-laptop-intel vm
             in_container_msg -h; or return
