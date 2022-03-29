@@ -109,7 +109,7 @@ function kmake -d "Run make with all cores and adjust PATH temporarily"
             set LLVM_IAS 0
         end
     end
-    if test "$LLVM_IAS" = 0
+    if test "$LLVM_IAS" = 0; or test -z "$LLVM"
         set as_path (command -v "$CROSS_COMPILE"as)
         if not test -x $as_path
             print_error "binutils could not be found or they are not executable!"
