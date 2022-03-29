@@ -42,7 +42,7 @@ function cbl_upd_krnl -d "Update machine's kernel"
             scp $remote_user@$remote_host:$out/linux-'*'-$arch.tar.zst /tmp
 
             # Install kernel
-            install_rpi_kernel $arch $ver $install_args /tmp/linux-'*'-$arch.tar.zst
+            install_rpi_kernel $arch $ver $install_args /tmp/linux-*-$arch.tar.zst
 
         case test-desktop-amd test-desktop-intel test-laptop-intel vm
             in_container_msg -h; or return
