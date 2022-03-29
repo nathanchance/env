@@ -27,6 +27,10 @@ function install_packages() {
         # arc
         php
 
+        # build-binutils.py
+        file
+        texinfo
+
         # b4
         python3{,-dkim,-requests}
 
@@ -89,6 +93,7 @@ function install_packages() {
         u-boot-tools
 
         # LLVM
+        binutils-dev
         clang
         cmake
         lld

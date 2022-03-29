@@ -40,6 +40,10 @@ function install_packages() {
         # b4
         python3{,-dkim,-requests}
 
+        # build-binutils.py
+        file
+        texinfo
+
         # cvise
         cvise
 
@@ -99,6 +103,7 @@ function install_packages() {
         u-boot-tools
 
         # LLVM
+        binutils-dev
         clang-"$llvm_version"
         cmake
         lld-"$llvm_version"
