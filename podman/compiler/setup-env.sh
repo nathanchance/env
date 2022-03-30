@@ -88,6 +88,7 @@ function install_packages_apt() {
         libssl-dev
         locales
         lzop
+        mutt
         openssl
         python3
         qemu-system-arm
