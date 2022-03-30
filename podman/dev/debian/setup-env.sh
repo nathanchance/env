@@ -27,9 +27,25 @@ function setup_gh_repo() {
 }
 
 function setup_llvm_repo() {
-    llvm_version=14
     curl -fLSs https://apt.llvm.org/llvm-snapshot.gpg.key | gpg --dearmor | dd of=/etc/apt/trusted.gpg.d/apt_llvm_org.gpg
-    echo "deb http://apt.llvm.org/$VERSION_CODENAME/ llvm-toolchain-$VERSION_CODENAME-$llvm_version main" | tee /etc/apt/sources.list.d/llvm-"$llvm_version".list
+
+    llvm_main=15
+    llvm_stable=14
+    llvm_versions=(
+        "$llvm_main"
+        "$llvm_stable"
+        13
+        12
+        11
+    )
+
+    for llvm_version in "${llvm_versions[@]}"; do
+        case $llvm_version in
+            "$llvm_main") ;;
+            *) deb_suffix=-$llvm_version ;;
+        esac
+        echo "deb http://apt.llvm.org/$VERSION_CODENAME/ llvm-toolchain-$VERSION_CODENAME${deb_suffix:-} main" | tee /etc/apt/sources.list.d/llvm-"$llvm_version".list
+    done
 }
 
 function install_packages() {
@@ -104,10 +120,7 @@ function install_packages() {
 
         # LLVM
         binutils-dev
-        clang-"$llvm_version"
         cmake
-        lld-"$llvm_version"
-        llvm-"$llvm_version"
         ninja-build
         python3-distutils
         zlib1g-dev
@@ -124,6 +137,13 @@ function install_packages() {
         python3-git
         python3-ply
     )
+    for llvm_version in "${llvm_versions[@]}"; do
+        packages+=(
+            clang-"$llvm_version"
+            lld-"$llvm_version"
+            llvm-"$llvm_version"
+        )
+    done
 
     apt-get update -qq
 
@@ -133,7 +153,7 @@ function install_packages() {
 
     rm -fr /var/lib/apt/lists/*
 
-    ln -fsv /usr/lib/llvm-*/bin/* /usr/local/bin
+    ln -fsv /usr/lib/llvm-"$llvm_stable"/bin/* /usr/local/bin
 }
 
 function check_fish() {
@@ -176,6 +196,9 @@ function build_pahole() {
 function check_tools() {
     for binary in clang ld.lld llvm-objcopy; do
         "$binary" --version | head -n1
+        for llvm_version in "${llvm_versions[@]}"; do
+            "$binary-$llvm_version" --version | head -n1
+        done
     done
 }
 
