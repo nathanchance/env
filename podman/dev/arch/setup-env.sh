@@ -85,6 +85,7 @@ function install_packages() {
         cpio
         flex
         libelf
+        inetutils
         ncurses
         openssl
         pahole
