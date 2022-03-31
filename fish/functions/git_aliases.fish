@@ -23,6 +23,7 @@ function git_aliases -d "Configure git aliases"
     git config --global alias.bd 'branch --delete --force'
     git config --global alias.bm 'branch --move'
     git config --global alias.bu 'branch --unset-upstream'
+    git config --global alias.bv 'branch --verbose --verbose'
 
     # git checkout
     git config --global alias.ch checkout
