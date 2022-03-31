@@ -5,8 +5,8 @@ _pkgsuffix=-mainline$_localversion
 pkgbase=linux$_pkgsuffix
 # _srctag=v5.17
 # pkgver=${_srctag//-/.}
-_srccommit=d888c83fcec75194a8a48ccd283953bdba7b2550
-pkgver=v5.17.13034.gd888c83fcec7
+_srccommit=b4a5ea09b29371c2e6a10783faa3593428404343
+pkgver=v5.17.13532.gb4a5ea09b293
 pkgrel=1
 pkgdesc='Linux'
 # url="https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/log/?h=$_srctag"
@@ -37,7 +37,7 @@ sha256sums=('SKIP'
             'a6f7a5eb3134269737b7790a6286dc671b491547d6c0b59e92959dca0b66cc20'
             '1739b36d09e3d555e1c1b1ef079160b808972f84fc40bd81476cbe3079cad54e'
             'a8e46f08be1010c716dff5e0ed09a277673e8bf197ef3b9aade367977428111d'
-            '651d1411c90aec2a50fb4d1de4fb6e12be39d93d741badff2ff1217ee80397ca'
+            '557ddc0aa61d25e8a1540816985db460079dfe2a45311ad6bd30ad8b5f8de9cf'
             'b70e744576793bb6520c9c765e608e45a90646038f2a2e706a0f85393a41b821'
             '6bd28a58786ede7b4350f484c9932f68d94eca67ba6c5daa7bb654af08783b4d')
 
