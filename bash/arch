@@ -251,6 +251,11 @@ function fix_lightdm() {
     fi
 }
 
+# For archinstall, which causes ^M in /etc/fstab
+function fix_fstab() {
+    dos2unix /etc/fstab
+}
+
 parse_parameters "$@"
 set_global_variables
 reality_check
@@ -269,5 +274,6 @@ wsl_tmpfs
 enable_ssh
 enable_tailscale
 fix_lightdm
+fix_fstab
 set_date_time
 setup_initial_fish_config
