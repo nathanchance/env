@@ -22,7 +22,7 @@ if test -z "$LOCATION"
             set -U LOCATION test-laptop-intel
         case nathan@thelio-3990X
             set -U LOCATION workstation
-        case nathan@hyperv nathan@vmware
+        case nathan@hyperv nathan@qemu nathan@vmware
             set -U LOCATION vm
         case nathan@MSI nathan@Ryzen-5-4500U nathan@Ryzen-9-3900X
             set -U LOCATION wsl
