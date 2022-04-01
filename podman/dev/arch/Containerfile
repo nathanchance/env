@@ -7,7 +7,6 @@ USER build
 WORKDIR /home/build
 COPY --chown=build:build build-install-aur-packages.fish build-install-aur-packages.fish
 COPY --chown=build:build cvise cvise/
-COPY --chown=build:build fish fish/
 RUN fish build-install-aur-packages.fish
 
 USER root
