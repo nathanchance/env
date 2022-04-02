@@ -86,6 +86,7 @@ function install_packages() {
         flex
         libelf
         inetutils
+        mkinitcpio
         ncurses
         openssl
         pahole
@@ -113,6 +114,8 @@ function install_packages() {
         python-ply
 
         # QEMU
+        edk2-armvirt
+        edk2-ovmf
         libevent
         libutempter
         qemu-headless-arch-extra
