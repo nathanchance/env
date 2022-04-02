@@ -152,7 +152,7 @@ def default_qemu_arguments(args, vm_folder):
     qemu += ["-m", args.memory]
 
     # Networking
-    qemu += ["-nic", "user,model=virtio-net-pci"]
+    qemu += ["-nic", "user,model=virtio-net-pci,hostfwd=tcp::8022-:22"]
 
     # Number of processor cores
     qemu += ["-smp", str(args.cores)]
