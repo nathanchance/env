@@ -143,10 +143,9 @@ def default_qemu_arguments(args, vm_folder):
     disk_img = get_disk_img(vm_folder)
     qemu += ["-drive", "if=virtio,format=qcow2,file={}".format(disk_img)]
 
-    # KVM acceleration (when possible)
-    if platform.machine() == args.architecture:
-        qemu += ["-cpu", "host"]
-        qemu += ["-enable-kvm"]
+    # KVM acceleration
+    qemu += ["-cpu", "host"]
+    qemu += ["-enable-kvm"]
 
     # Memory
     qemu += ["-m", args.memory]
@@ -215,6 +214,9 @@ def run(args, vm_folder):
 
 def main():
     args = parse_parameters()
+
+    if args.architecture != platform.machine():
+        raise RuntimeError("Host architecture and target architecture don't match, this is not currently supported!")
 
     if args.architecture != "x86_64":
         raise RuntimeError("{} is not currently supported!".format(
