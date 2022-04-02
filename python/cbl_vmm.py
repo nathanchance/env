@@ -149,6 +149,7 @@ def default_qemu_arguments(args, vm_folder):
 
     # Memory
     qemu += ["-m", args.memory]
+    qemu += ["-device", "virtio-balloon"]
 
     # Networking
     qemu += ["-nic", "user,model=virtio-net-pci,hostfwd=tcp::8022-:22"]
