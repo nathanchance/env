@@ -3,7 +3,7 @@
 _localversion=-llvm
 _pkgsuffix=-next$_localversion
 pkgbase=linux$_pkgsuffix
-_srctag=next-20220401
+_srctag=next-20220404
 pkgver=${_srctag//-/.}
 pkgrel=1
 pkgdesc='linux-next'
@@ -27,7 +27,7 @@ validpgpkeys=(
   '3F2568AAC26998F9E813A1C5C3F436CA30F5D8EB'  # Mark Brown
 )
 sha256sums=('SKIP'
-            '9ef53851ecc2b7b2c5f5588a2825b3321903635bac968e7b52065d5570181208'
+            '421e26951edb6ee2e02d0c6033f44db5337133878dd3cb66ae9ed421596098a0'
             'b79f03f480e7c0571a31ebb68ff9b8c39bbc8f4e064499c0dadabdfde23c4cac'
             '6bd28a58786ede7b4350f484c9932f68d94eca67ba6c5daa7bb654af08783b4d')
 
