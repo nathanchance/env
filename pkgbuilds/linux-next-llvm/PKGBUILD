@@ -33,7 +33,7 @@ sha256sums=('SKIP'
 
 _kmake() {
   set -x
-  PATH=${PO}:${CBL_TC_BIN}:${PATH} \
+  PATH=${PO:+${PO}:}${CBL_TC_BIN}:${PATH} \
     make \
     -skj"$(nproc)" \
     LLVM=1 \
