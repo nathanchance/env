@@ -84,7 +84,7 @@ def get_efi_img(args, vm_folder):
     if src.exists():
         return src
 
-    raise RuntimeError("{} could not be found!".format(src))
+    raise RuntimeError("{} could not be found!".format(src.name))
 
 
 def get_efi_vars(args, vm_folder):
@@ -97,7 +97,7 @@ def get_efi_vars(args, vm_folder):
             shutil.copyfile(src, dst)
         return dst
 
-    raise RuntimeError("{} could not be found!".format(src))
+    raise RuntimeError("{} could not be found!".format(src.name))
 
 
 def get_iso(args, vm_folder):
