@@ -196,7 +196,7 @@ def run(args, vm_folder):
         if not kernel.exists():
             raise RuntimeError("{} could not be found!".format(kernel))
         if not initrd.exists():
-            raise RuntimeError("{} could not be found!".format(kernel))
+            raise RuntimeError("{} could not be found!".format(initrd))
 
         # yapf: disable
         qemu += ["-append", "root=/dev/vda2 rw rootfstype=ext4 console={}".format(console)]
