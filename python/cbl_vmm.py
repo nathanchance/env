@@ -79,25 +79,25 @@ def get_disk_img(vm_folder):
 
 def get_efi_img(args, vm_folder):
     if args.architecture == "x86_64":
-        efi_img = Path("/usr/share/edk2-ovmf/x64/OVMF_CODE.fd")
+        src = Path("/usr/share/edk2-ovmf/x64/OVMF_CODE.fd")
 
-    if efi_img.exists():
-        return efi_img
+    if src.exists():
+        return src
 
-    raise RuntimeError("{} could not be found!".format(efi_img))
+    raise RuntimeError("{} could not be found!".format(src))
 
 
 def get_efi_vars(args, vm_folder):
     if args.architecture == "x86_64":
-        efivars_src = Path("/usr/share/OVMF/x64/OVMF_VARS.fd")
+        src = Path("/usr/share/OVMF/x64/OVMF_VARS.fd")
 
-    if efivars_src.exists():
-        efivars_dst = vm_folder.joinpath(efivars_src.name)
-        if not efivars_dst.exists():
-            shutil.copyfile(efivars_src, efivars_dst)
-        return efivars_dst
+    if src.exists():
+        dst = vm_folder.joinpath(efivars_src.name)
+        if not dst.exists():
+            shutil.copyfile(src, dst)
+        return dst
 
-    raise RuntimeError("{} could not be found!".format(efivars_src))
+    raise RuntimeError("{} could not be found!".format(src))
 
 
 def get_iso(args, vm_folder):
@@ -105,11 +105,11 @@ def get_iso(args, vm_folder):
         ver = "2022.04.01"
         url = "https://mirror.arizona.edu/archlinux/iso/{0}/archlinux-{0}-x86_64.iso".format(ver)
 
-    iso_dst = vm_folder.joinpath(url.split("/")[-1])
-    if not iso_dst.exists():
-        run_cmd(["wget", "-c", "-O", iso_dst, url])
+    dst = vm_folder.joinpath(url.split("/")[-1])
+    if not dst.exists():
+        run_cmd(["wget", "-c", "-O", dst, url])
 
-    return iso_dst
+    return dst
 
 
 def get_vm_folder(args):
@@ -127,11 +127,11 @@ def default_qemu_arguments(args, vm_folder):
     qemu += ["-serial", "mon:stdio"]
 
     # Firmware
-    firmware_common = "if=pflash,format=raw,file="
+    fw_str = "if=pflash,format=raw,file="
     efi_img = get_efi_img(args, vm_folder)
     efi_vars = get_efi_vars(args, vm_folder)
-    qemu += ["-drive", "{}{},readonly=on".format(firmware_common, efi_img)]
-    qemu += ["-drive", "{}{}".format(firmware_common, efi_vars)]
+    qemu += ["-drive", "{}{},readonly=on".format(fw_str, efi_img)]
+    qemu += ["-drive", "{}{}".format(fw_str, efi_vars)]
 
     # Hard drive
     disk_img = get_disk_img(vm_folder)
