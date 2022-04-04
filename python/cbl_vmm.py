@@ -217,7 +217,9 @@ def main():
     args = parse_parameters()
 
     if args.architecture != platform.machine():
-        raise RuntimeError("Host architecture and target architecture don't match, this is not currently supported!")
+        raise RuntimeError(
+            "Host architecture and target architecture don't match, this is not currently supported!"
+        )
 
     if args.architecture != "x86_64":
         raise RuntimeError("{} is not currently supported!".format(
