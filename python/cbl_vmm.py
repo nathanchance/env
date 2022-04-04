@@ -78,32 +78,65 @@ def get_disk_img(vm_folder):
 
 
 def get_efi_img(args, vm_folder):
-    if args.architecture == "x86_64":
+    arch = args.architecture
+
+    if arch == "aarch64":
+        src = Path("/usr/share/edk2/aarch64/QEMU_EFI.fd")
+        if not src.exists():
+            raise RuntimeError("{} could not be found!".format(src.name))
+
+        dst = vm_folder.joinpath("efi.img")
+        if not dst.exists():
+            run_cmd(["truncate", "-s", "64m", efi_img_dst])
+            run_cmd(["dd", "if={}".format(src), "of={}".format(dst), "conv=notrunc"])
+
+        return dst
+
+    if arch == "x86_64":
         src = Path("/usr/share/edk2-ovmf/x64/OVMF_CODE.fd")
 
-    if src.exists():
-        return src
+        if src.exists():
+            return src
 
-    raise RuntimeError("{} could not be found!".format(src.name))
+        raise RuntimeError("{} could not be found!".format(src.name))
+
+    raise RuntimeError("get_efi_img() is not implemented for {}".format(arch))
 
 
 def get_efi_vars(args, vm_folder):
-    if args.architecture == "x86_64":
+    arch = args.architecture
+
+    if arch == "aarch64":
+        efivars = vm_folder.joinpath("efivars.img")
+        if not efivars.exists():
+            run_cmd(["truncate", "-s", "64m", efivars])
+        return efivars
+
+    if arch == "x86_64":
         src = Path("/usr/share/OVMF/x64/OVMF_VARS.fd")
 
-    if src.exists():
-        dst = vm_folder.joinpath(efivars_src.name)
-        if not dst.exists():
-            shutil.copyfile(src, dst)
-        return dst
+        if src.exists():
+            dst = vm_folder.joinpath(efivars_src.name)
+            if not dst.exists():
+                shutil.copyfile(src, dst)
+            return dst
 
-    raise RuntimeError("{} could not be found!".format(src.name))
+        raise RuntimeError("{} could not be found!".format(src.name))
+
+    raise RuntimeError("get_efi_vars() is not implemented for {}".format(arch))
 
 
 def get_iso(args, vm_folder):
-    if args.architecture == "x86_64":
+    arch = args.architecture
+    if arch == "aarch64":
+        ver = 35
+        url = "https://download.fedoraproject.org/pub/fedora/linux/releases/{0}/Server/aarch64/iso/Fedora-Server-netinst-aarch64-{0}-1.2.iso".format(
+            ver)
+    elif arch == "x86_64":
         ver = "2022.04.01"
         url = "https://mirror.arizona.edu/archlinux/iso/{0}/archlinux-{0}-x86_64.iso".format(ver)
+    else:
+        raise RuntimeError("get_iso() is not implemented for {}".format(arch))
 
     dst = vm_folder.joinpath(url.split("/")[-1])
     if not dst.exists():
@@ -119,8 +152,10 @@ def get_vm_folder(args):
 
 
 def default_qemu_arguments(args, vm_folder):
+    arch = args.architecture
+
     # QEMU binary
-    qemu = ["qemu-system-{}".format(args.architecture)]
+    qemu = ["qemu-system-{}".format(arch)]
 
     # No display
     qemu += ["-display", "none"]
@@ -136,6 +171,10 @@ def default_qemu_arguments(args, vm_folder):
     # Hard drive
     disk_img = get_disk_img(vm_folder)
     qemu += ["-drive", "if=virtio,format=qcow2,file={}".format(disk_img)]
+
+    # Machine (AArch64 only)
+    if arch == "aarch64":
+        qemu += ["-M", "virt"]
 
     # KVM acceleration
     qemu += ["-cpu", "host"]
@@ -184,25 +223,30 @@ def setup(args, vm_folder):
 
 
 def run(args, vm_folder):
+    arch = args.architecture
     qemu = default_qemu_arguments(args, vm_folder)
 
     if args.kernel:
         kernel_folder = Path(args.kernel)
-        if args.architecture == "x86_64":
+        if arch == "aarch64":
+            cmdline = "root=/dev/vda3 ro rootflags=subvol=root rootfstype=btrfs console=ttyAMA0"
+            kernel = kernel_folder.joinpath("arch/arm64/boot/Image")
+            initrd = kernel_folder.joinpath("initramfs.img")
+        elif arch == "x86_64":
+            cmdline = "root=/dev/vda2 rw rootfstype=ext4 console=ttyS0"
             kernel = kernel_folder.joinpath("arch/x86/boot/bzImage")
             initrd = kernel_folder.joinpath("rootfs/initramfs.img")
-            console = "ttyS0"
+        else:
+            raise RuntimeError("run() with a kernel is not implemented for {}".format(arch))
 
         if not kernel.exists():
             raise RuntimeError("{} could not be found!".format(kernel))
         if not initrd.exists():
             raise RuntimeError("{} could not be found!".format(initrd))
 
-        # yapf: disable
-        qemu += ["-append", "root=/dev/vda2 rw rootfstype=ext4 console={}".format(console)]
+        qemu += ["-append", cmdline]
         qemu += ["-kernel", kernel]
         qemu += ["-initrd", initrd]
-        # yapf: enable
 
     run_cmd(qemu)
 
@@ -215,8 +259,10 @@ def main():
             "Host architecture and target architecture don't match, this is not currently supported!"
         )
 
-    if args.architecture != "x86_64":
-        raise RuntimeError("{} is not currently supported!".format(args.architecture))
+    arch = args.architecture
+    supported_arches = ["aarch64", "x86_64"]
+    if not arch in supported_arches:
+        raise RuntimeError("{} is not currently supported!".format(arch))
 
     args.func(args, get_vm_folder(args))
 
