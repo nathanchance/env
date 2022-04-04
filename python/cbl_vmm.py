@@ -53,21 +53,16 @@ def parse_parameters():
                                   help="Amount of memory virtual machine has")
 
     # Arguments for "setup"
-    setup_parser = subparsers.add_parser(
-        "setup",
-        help="Run virtual machine for first time",
-        parents=[common_parser, setup_run_parser])
+    setup_parser = subparsers.add_parser("setup",
+                                         help="Run virtual machine for first time",
+                                         parents=[common_parser, setup_run_parser])
     setup_parser.set_defaults(func=setup)
 
     # Arguments for "run"
-    run_parser = subparsers.add_parser(
-        "run",
-        help="Run virtual machine after setup",
-        parents=[common_parser, setup_run_parser])
-    run_parser.add_argument("-k",
-                            "--kernel",
-                            type=str,
-                            help="Path to kernel sources to boot from")
+    run_parser = subparsers.add_parser("run",
+                                       help="Run virtual machine after setup",
+                                       parents=[common_parser, setup_run_parser])
+    run_parser.add_argument("-k", "--kernel", type=str, help="Path to kernel sources to boot from")
     run_parser.set_defaults(func=run)
 
     return parser.parse_args()
@@ -108,8 +103,7 @@ def get_efi_vars(args, vm_folder):
 def get_iso(args, vm_folder):
     if args.architecture == "x86_64":
         ver = "2022.04.01"
-        url = "https://mirror.arizona.edu/archlinux/iso/{0}/archlinux-{0}-x86_64.iso".format(
-            ver)
+        url = "https://mirror.arizona.edu/archlinux/iso/{0}/archlinux-{0}-x86_64.iso".format(ver)
 
     iso_dst = vm_folder.joinpath(url.split("/")[-1])
     if not iso_dst.exists():
@@ -222,8 +216,7 @@ def main():
         )
 
     if args.architecture != "x86_64":
-        raise RuntimeError("{} is not currently supported!".format(
-            args.architecture))
+        raise RuntimeError("{} is not currently supported!".format(args.architecture))
 
     args.func(args, get_vm_folder(args))
 
