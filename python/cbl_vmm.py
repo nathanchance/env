@@ -190,6 +190,10 @@ def default_qemu_arguments(args, vm_folder):
     # Number of processor cores
     qemu += ["-smp", str(args.cores)]
 
+    # RNG
+    qemu += ["-object", "rng-random,filename=/dev/urandom,id=rng0"]
+    qemu += ["-device", "virtio-rng-pci"]
+
     return qemu
 
 
