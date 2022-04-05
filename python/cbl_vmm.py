@@ -81,9 +81,13 @@ def get_efi_img(args, vm_folder):
     arch = args.architecture
 
     if arch == "aarch64":
+        # Fedora location
         src = Path("/usr/share/edk2/aarch64/QEMU_EFI.fd")
         if not src.exists():
-            raise RuntimeError("{} could not be found!".format(src.name))
+            # Arch Linux location
+            src = Path("/usr/share/edk2-armvirt/aarch64/QEMU_EFI.fd")
+            if not src.exists():
+                raise RuntimeError("{} could not be found!".format(src.name))
 
         dst = vm_folder.joinpath("efi.img")
         if not dst.exists():
@@ -177,8 +181,11 @@ def default_qemu_arguments(args, vm_folder):
         qemu += ["-M", "virt"]
 
     # KVM acceleration
-    qemu += ["-cpu", "host"]
-    qemu += ["-enable-kvm"]
+    if arch == platform.machine():
+        qemu += ["-cpu", "host"]
+        qemu += ["-enable-kvm"]
+    elif arch == "aarch64":
+        qemu += ["-cpu", "max"]
 
     # Memory
     qemu += ["-m", args.memory]
@@ -257,11 +264,6 @@ def run(args, vm_folder):
 
 def main():
     args = parse_parameters()
-
-    if args.architecture != platform.machine():
-        raise RuntimeError(
-            "Host architecture and target architecture don't match, this is not currently supported!"
-        )
 
     arch = args.architecture
     supported_arches = ["aarch64", "x86_64"]
