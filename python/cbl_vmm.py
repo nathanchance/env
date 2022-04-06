@@ -87,7 +87,7 @@ def get_efi_img(args, vm_folder):
 
         dst = vm_folder.joinpath("efi.img")
         if not dst.exists():
-            run_cmd(["truncate", "-s", "64m", efi_img_dst])
+            run_cmd(["truncate", "-s", "64m", dst])
             run_cmd(["dd", "if={}".format(src), "of={}".format(dst), "conv=notrunc"])
 
         return dst
@@ -116,7 +116,7 @@ def get_efi_vars(args, vm_folder):
         src = Path("/usr/share/OVMF/x64/OVMF_VARS.fd")
 
         if src.exists():
-            dst = vm_folder.joinpath(efivars_src.name)
+            dst = vm_folder.joinpath(src.name)
             if not dst.exists():
                 shutil.copyfile(src, dst)
             return dst
