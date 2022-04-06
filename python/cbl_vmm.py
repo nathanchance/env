@@ -22,46 +22,37 @@ def parse_parameters():
                                type=str,
                                default=platform.machine(),
                                help="Architecture of virtual machine")
+    common_parser.add_argument("-c",
+                               "--cores",
+                               type=int,
+                               default="8",
+                               help="Number of cores virtual machine has")
+    common_parser.add_argument("-m",
+                               "--memory",
+                               type=str,
+                               default="16G",
+                               help="Amount of memory virtual machine has")
     common_parser.add_argument("-n",
                                "--name",
                                type=str,
                                required=True,
                                help="Name of virtual machine")
 
-    # Arguments for "create"
-    create_parser = subparsers.add_parser("create",
-                                          help="Create virtual machine files",
-                                          parents=[common_parser])
-    create_parser.add_argument("-s",
-                               "--size",
-                               type=str,
-                               default="50G",
-                               help="Size of virtual machine disk image")
-    create_parser.set_defaults(func=create)
-
-    # Common arguments for "setup" and "run" subcommands
-    setup_run_parser = argparse.ArgumentParser(add_help=False)
-    setup_run_parser.add_argument("-c",
-                                  "--cores",
-                                  type=int,
-                                  default="8",
-                                  help="Number of cores virtual machine has")
-    setup_run_parser.add_argument("-m",
-                                  "--memory",
-                                  type=str,
-                                  default="16G",
-                                  help="Amount of memory virtual machine has")
-
     # Arguments for "setup"
     setup_parser = subparsers.add_parser("setup",
                                          help="Run virtual machine for first time",
-                                         parents=[common_parser, setup_run_parser])
+                                         parents=[common_parser])
+    setup_parser.add_argument("-s",
+                              "--size",
+                              type=str,
+                              default="50G",
+                              help="Size of virtual machine disk image")
     setup_parser.set_defaults(func=setup)
 
     # Arguments for "run"
     run_parser = subparsers.add_parser("run",
                                        help="Run virtual machine after setup",
-                                       parents=[common_parser, setup_run_parser])
+                                       parents=[common_parser])
     run_parser.add_argument("-k", "--kernel", type=str, help="Path to kernel sources to boot from")
     run_parser.set_defaults(func=run)
 
@@ -204,7 +195,7 @@ def default_qemu_arguments(args, vm_folder):
     return qemu
 
 
-def create(args, vm_folder):
+def setup(args, vm_folder):
     # Create folder
     if vm_folder.is_dir():
         shutil.rmtree(vm_folder)
@@ -220,11 +211,8 @@ def create(args, vm_folder):
     run_cmd(qemu_img)
 
     # Download ISO image
-    get_iso(args, vm_folder)
-
-
-def setup(args, vm_folder):
     iso = get_iso(args, vm_folder)
+
     qemu = default_qemu_arguments(args, vm_folder)
     qemu += ["-device", "virtio-scsi-pci,id=scsi0"]
     qemu += ["-device", "scsi-cd,drive=cd"]
