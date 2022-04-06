@@ -32,11 +32,6 @@ def parse_parameters():
                                type=str,
                                default="16G",
                                help="Amount of memory virtual machine has")
-    common_parser.add_argument("-n",
-                               "--name",
-                               type=str,
-                               required=True,
-                               help="Name of virtual machine")
 
     # Arguments for "setup"
     setup_parser = subparsers.add_parser("setup",
@@ -64,12 +59,13 @@ def run_cmd(cmd):
     subprocess.run(cmd, check=True)
 
 
-def get_disk_img(vm_folder):
-    return vm_folder.joinpath("disk.img")
+def get_disk_img(folder):
+    return folder.joinpath("disk.img")
 
 
-def get_efi_img(args, vm_folder):
-    arch = args.architecture
+def get_efi_img(cfg):
+    arch = cfg["architecture"]
+    folder = cfg["folder"]
 
     if arch == "aarch64":
         # Fedora location
@@ -80,7 +76,7 @@ def get_efi_img(args, vm_folder):
             if not src.exists():
                 raise RuntimeError("{} could not be found!".format(src.name))
 
-        dst = vm_folder.joinpath("efi.img")
+        dst = folder.joinpath("efi.img")
         if not dst.exists():
             run_cmd(["truncate", "-s", "64m", dst])
             run_cmd(["dd", "if={}".format(src), "of={}".format(dst), "conv=notrunc"])
@@ -98,11 +94,12 @@ def get_efi_img(args, vm_folder):
     raise RuntimeError("get_efi_img() is not implemented for {}".format(arch))
 
 
-def get_efi_vars(args, vm_folder):
-    arch = args.architecture
+def get_efi_vars(cfg):
+    arch = cfg["architecture"]
+    folder = cfg["folder"]
 
     if arch == "aarch64":
-        efivars = vm_folder.joinpath("efivars.img")
+        efivars = folder.joinpath("efivars.img")
         if not efivars.exists():
             run_cmd(["truncate", "-s", "64m", efivars])
         return efivars
@@ -111,7 +108,7 @@ def get_efi_vars(args, vm_folder):
         src = Path("/usr/share/OVMF/x64/OVMF_VARS.fd")
 
         if src.exists():
-            dst = vm_folder.joinpath(src.name)
+            dst = folder.joinpath(src.name)
             if not dst.exists():
                 shutil.copyfile(src, dst)
             return dst
@@ -121,33 +118,23 @@ def get_efi_vars(args, vm_folder):
     raise RuntimeError("get_efi_vars() is not implemented for {}".format(arch))
 
 
-def get_iso(args, vm_folder):
-    arch = args.architecture
-    if arch == "aarch64":
-        ver = 35
-        url = "https://download.fedoraproject.org/pub/fedora/linux/releases/{0}/Server/aarch64/iso/Fedora-Server-netinst-aarch64-{0}-1.2.iso".format(
-            ver)
-    elif arch == "x86_64":
-        ver = "2022.04.01"
-        url = "https://mirror.arizona.edu/archlinux/iso/{0}/archlinux-{0}-x86_64.iso".format(ver)
-    else:
-        raise RuntimeError("get_iso() is not implemented for {}".format(arch))
+def get_iso(cfg):
+    arch = cfg["architecture"]
+    folder = cfg["folder"]
+    iso = cfg["iso"]
 
-    dst = vm_folder.joinpath(url.split("/")[-1])
+    dst = folder.joinpath(iso.split("/")[-1])
     if not dst.exists():
-        run_cmd(["wget", "-c", "-O", dst, url])
+        run_cmd(["wget", "-c", "-O", dst, iso])
 
     return dst
 
 
-def get_vm_folder(args):
-    if not "VM_FOLDER" in os.environ:
-        raise RuntimeError("VM_FOLDER is undefined")
-    return Path(os.environ["VM_FOLDER"]).joinpath(args.architecture, args.name)
-
-
-def default_qemu_arguments(args, vm_folder):
-    arch = args.architecture
+def default_qemu_arguments(cfg):
+    arch = cfg["architecture"]
+    cores = cfg["cores"]
+    folder = cfg["folder"]
+    memory = cfg["memory"]
 
     # QEMU binary
     qemu = ["qemu-system-{}".format(arch)]
@@ -158,13 +145,13 @@ def default_qemu_arguments(args, vm_folder):
 
     # Firmware
     fw_str = "if=pflash,format=raw,file="
-    efi_img = get_efi_img(args, vm_folder)
-    efi_vars = get_efi_vars(args, vm_folder)
+    efi_img = get_efi_img(cfg)
+    efi_vars = get_efi_vars(cfg)
     qemu += ["-drive", "{}{},readonly=on".format(fw_str, efi_img)]
     qemu += ["-drive", "{}{}".format(fw_str, efi_vars)]
 
     # Hard drive
-    disk_img = get_disk_img(vm_folder)
+    disk_img = get_disk_img(folder)
     qemu += ["-drive", "if=virtio,format=qcow2,file={}".format(disk_img)]
 
     # Machine (AArch64 only)
@@ -179,14 +166,14 @@ def default_qemu_arguments(args, vm_folder):
         qemu += ["-cpu", "max"]
 
     # Memory
-    qemu += ["-m", args.memory]
+    qemu += ["-m", memory]
     qemu += ["-device", "virtio-balloon"]
 
     # Networking
     qemu += ["-nic", "user,model=virtio-net-pci,hostfwd=tcp::8022-:22"]
 
     # Number of processor cores
-    qemu += ["-smp", str(args.cores)]
+    qemu += ["-smp", cores]
 
     # RNG
     qemu += ["-object", "rng-random,filename=/dev/urandom,id=rng0"]
@@ -195,25 +182,26 @@ def default_qemu_arguments(args, vm_folder):
     return qemu
 
 
-def setup(args, vm_folder):
+def setup(cfg):
+    folder = cfg["folder"]
+    size = cfg["size"]
+
     # Create folder
-    if vm_folder.is_dir():
-        shutil.rmtree(vm_folder)
-    vm_folder.mkdir(parents=True, exist_ok=True)
+    if folder.is_dir():
+        shutil.rmtree(folder)
+    folder.mkdir(parents=True, exist_ok=True)
 
     # Create efivars image
-    get_efi_vars(args, vm_folder)
+    get_efi_vars(cfg)
 
     # Create disk image
-    qemu_img = ["qemu-img", "create", "-f", "qcow2"]
-    qemu_img += [get_disk_img(vm_folder)]
-    qemu_img += [args.size]
+    qemu_img = ["qemu-img", "create", "-f", "qcow2", get_disk_img(folder), size]
     run_cmd(qemu_img)
 
     # Download ISO image
-    iso = get_iso(args, vm_folder)
+    iso = get_iso(cfg)
 
-    qemu = default_qemu_arguments(args, vm_folder)
+    qemu = default_qemu_arguments(cfg)
     qemu += ["-device", "virtio-scsi-pci,id=scsi0"]
     qemu += ["-device", "scsi-cd,drive=cd"]
     qemu += ["-drive", "if=none,format=raw,id=cd,file={}".format(iso)]
@@ -221,12 +209,13 @@ def setup(args, vm_folder):
     run_cmd(qemu)
 
 
-def run(args, vm_folder):
-    arch = args.architecture
-    qemu = default_qemu_arguments(args, vm_folder)
+def run(cfg):
+    arch = cfg["architecture"]
+    kernel = cfg["kernel"]
+    qemu = default_qemu_arguments(cfg)
 
-    if args.kernel:
-        kernel_folder = Path(args.kernel)
+    if kernel:
+        kernel_folder = Path(kernel)
         if arch == "aarch64":
             cmdline = "root=/dev/vda3 ro rootflags=subvol=root rootfstype=btrfs console=ttyAMA0"
             kernel = kernel_folder.joinpath("arch/arm64/boot/Image")
@@ -250,15 +239,61 @@ def run(args, vm_folder):
     run_cmd(qemu)
 
 
+def set_cfg(args):
+    # Architecture
+    arch = args.architecture
+
+    # .iso for setup
+    if arch == "aarch64":
+        ver = 35
+        iso = "https://download.fedoraproject.org/pub/fedora/linux/releases/{0}/server/aarch64/iso/fedora-server-netinst-aarch64-{0}-1.2.iso".format(ver)
+        name = "fedora"
+    elif arch == "x86_64":
+        ver = "2022.04.05"
+        iso = "https://mirror.arizona.edu/archlinux/iso/{0}/archlinux-{0}-x86_64.iso".format(ver)
+        name = "arch"
+    else:
+        raise RuntimeError("Default .iso has not been defined for {}".format(arch))
+
+    # Folder for files
+    if "VM_FOLDER" in os.environ:
+        base_folder = Path(os.environ["VM_FOLDER"])
+    else:
+        base_folder = Path(__file__).resolve().parent
+    folder = base_folder.joinpath(arch, name)
+
+    # Handle 'kernel' and 'size', which may not exist depending on the subcommand
+    if hasattr(args, "kernel"):
+        kernel = args.kernel
+    else:
+        kernel = None
+    if hasattr(args, "size"):
+        size = args.size
+    else:
+        size = None
+
+    return {
+        "architecture": arch,
+        "cores": str(args.cores),
+        "folder": folder,
+        "iso": iso,
+        "kernel": kernel,
+        "memory": args.memory,
+        "name": name,
+        "size": size
+    }
+
+
 def main():
     args = parse_parameters()
+    cfg = set_cfg(args)
 
-    arch = args.architecture
+    arch = cfg["architecture"]
     supported_arches = ["aarch64", "x86_64"]
     if not arch in supported_arches:
         raise RuntimeError("{} is not currently supported!".format(arch))
 
-    args.func(args, get_vm_folder(args))
+    args.func(cfg)
 
 
 if __name__ == '__main__':
