@@ -32,11 +32,13 @@ def parse_parameters():
                                type=str,
                                default="16G",
                                help="Amount of memory virtual machine has")
+    common_parser.add_argument("-n", "--name", type=str, help="Name of virtual machine")
 
     # Arguments for "setup"
     setup_parser = subparsers.add_parser("setup",
                                          help="Run virtual machine for first time",
                                          parents=[common_parser])
+    setup_parser.add_argument("-i", "--iso", type=str, help="Path or URL of .iso to boot from")
     setup_parser.add_argument("-s",
                               "--size",
                               type=str,
@@ -59,13 +61,13 @@ def run_cmd(cmd):
     subprocess.run(cmd, check=True)
 
 
-def get_disk_img(folder):
-    return folder.joinpath("disk.img")
+def get_disk_img(vm_folder):
+    return vm_folder.joinpath("disk.img")
 
 
 def get_efi_img(cfg):
     arch = cfg["architecture"]
-    folder = cfg["folder"]
+    vm_folder = cfg["vm_folder"]
 
     if arch == "aarch64":
         # Fedora location
@@ -76,7 +78,7 @@ def get_efi_img(cfg):
             if not src.exists():
                 raise RuntimeError("{} could not be found!".format(src.name))
 
-        dst = folder.joinpath("efi.img")
+        dst = vm_folder.joinpath("efi.img")
         if not dst.exists():
             run_cmd(["truncate", "-s", "64m", dst])
             run_cmd(["dd", "if={}".format(src), "of={}".format(dst), "conv=notrunc"])
@@ -96,10 +98,10 @@ def get_efi_img(cfg):
 
 def get_efi_vars(cfg):
     arch = cfg["architecture"]
-    folder = cfg["folder"]
+    vm_folder = cfg["vm_folder"]
 
     if arch == "aarch64":
-        efivars = folder.joinpath("efivars.img")
+        efivars = vm_folder.joinpath("efivars.img")
         if not efivars.exists():
             run_cmd(["truncate", "-s", "64m", efivars])
         return efivars
@@ -108,7 +110,7 @@ def get_efi_vars(cfg):
         src = Path("/usr/share/OVMF/x64/OVMF_VARS.fd")
 
         if src.exists():
-            dst = folder.joinpath(src.name)
+            dst = vm_folder.joinpath(src.name)
             if not dst.exists():
                 shutil.copyfile(src, dst)
             return dst
@@ -120,12 +122,18 @@ def get_efi_vars(cfg):
 
 def get_iso(cfg):
     arch = cfg["architecture"]
-    folder = cfg["folder"]
+    iso_folder = cfg["iso_folder"]
     iso = cfg["iso"]
 
-    dst = folder.joinpath(iso.split("/")[-1])
-    if not dst.exists():
-        run_cmd(["wget", "-c", "-O", dst, iso])
+    if "http://" in iso or "https://" in iso:
+        dst = iso_folder.joinpath(iso.split("/")[-1])
+        if not dst.exists():
+            iso_folder.mkdir(parents=True, exist_ok=True)
+            run_cmd(["wget", "-c", "-O", dst, iso])
+    else:
+        dst = Path(iso)
+        if not dst.exists():
+            raise RuntimeError("{} specified but it is not found!".format(dst))
 
     return dst
 
@@ -133,8 +141,8 @@ def get_iso(cfg):
 def default_qemu_arguments(cfg):
     arch = cfg["architecture"]
     cores = cfg["cores"]
-    folder = cfg["folder"]
     memory = cfg["memory"]
+    vm_folder = cfg["vm_folder"]
 
     # QEMU binary
     qemu = ["qemu-system-{}".format(arch)]
@@ -151,7 +159,7 @@ def default_qemu_arguments(cfg):
     qemu += ["-drive", "{}{}".format(fw_str, efi_vars)]
 
     # Hard drive
-    disk_img = get_disk_img(folder)
+    disk_img = get_disk_img(vm_folder)
     qemu += ["-drive", "if=virtio,format=qcow2,file={}".format(disk_img)]
 
     # Machine (AArch64 only)
@@ -183,19 +191,19 @@ def default_qemu_arguments(cfg):
 
 
 def setup(cfg):
-    folder = cfg["folder"]
+    vm_folder = cfg["vm_folder"]
     size = cfg["size"]
 
     # Create folder
-    if folder.is_dir():
-        shutil.rmtree(folder)
-    folder.mkdir(parents=True, exist_ok=True)
+    if vm_folder.is_dir():
+        shutil.rmtree(vm_folder)
+    vm_folder.mkdir(parents=True, exist_ok=True)
 
     # Create efivars image
     get_efi_vars(cfg)
 
     # Create disk image
-    qemu_img = ["qemu-img", "create", "-f", "qcow2", get_disk_img(folder), size]
+    qemu_img = ["qemu-img", "create", "-f", "qcow2", get_disk_img(vm_folder), size]
     run_cmd(qemu_img)
 
     # Download ISO image
@@ -243,24 +251,39 @@ def set_cfg(args):
     # Architecture
     arch = args.architecture
 
-    # .iso for setup
-    if arch == "aarch64":
-        ver = 35
-        iso = "https://download.fedoraproject.org/pub/fedora/linux/releases/{0}/server/aarch64/iso/fedora-server-netinst-aarch64-{0}-1.2.iso".format(ver)
-        name = "fedora"
-    elif arch == "x86_64":
-        ver = "2022.04.05"
-        iso = "https://mirror.arizona.edu/archlinux/iso/{0}/archlinux-{0}-x86_64.iso".format(ver)
-        name = "arch"
+    # VM name
+    if args.name:
+        name = args.name
     else:
-        raise RuntimeError("Default .iso has not been defined for {}".format(arch))
+        if arch == "aarch64":
+            name = "fedora"
+        elif arch == "x86_64":
+            name = "arch"
+        else:
+            raise RuntimeError("Default VM name has not been defined for {}".format(arch))
+
+    # .iso for setup
+    if hasattr(args, "iso") and args.iso:
+        iso = args.iso
+    else:
+        if arch == "aarch64":
+            ver = 35
+            iso = "https://download.fedoraproject.org/pub/fedora/linux/releases/{0}/server/aarch64/iso/fedora-server-netinst-aarch64-{0}-1.2.iso".format(
+                ver)
+        elif arch == "x86_64":
+            ver = "2022.04.05"
+            iso = "https://mirror.arizona.edu/archlinux/iso/{0}/archlinux-{0}-x86_64.iso".format(
+                ver)
+        else:
+            raise RuntimeError("Default .iso has not been defined for {}".format(arch))
 
     # Folder for files
     if "VM_FOLDER" in os.environ:
         base_folder = Path(os.environ["VM_FOLDER"])
     else:
-        base_folder = Path(__file__).resolve().parent
-    folder = base_folder.joinpath(arch, name)
+        base_folder = Path(__file__).resolve().parent.joinpath("vm")
+    iso_folder = base_folder.joinpath("iso")
+    vm_folder = base_folder.joinpath(arch, name)
 
     # Handle 'kernel' and 'size', which may not exist depending on the subcommand
     if hasattr(args, "kernel"):
@@ -275,12 +298,13 @@ def set_cfg(args):
     return {
         "architecture": arch,
         "cores": str(args.cores),
-        "folder": folder,
+        "iso_folder": iso_folder,
         "iso": iso,
         "kernel": kernel,
         "memory": args.memory,
         "name": name,
-        "size": size
+        "size": size,
+        "vm_folder": vm_folder,
     }
 
 
