@@ -4,6 +4,7 @@
 # Description: Virtual machine manager for ClangBuiltLinux development
 
 import argparse
+import math
 from pathlib import Path
 import platform
 import os
@@ -25,12 +26,10 @@ def parse_parameters():
     common_parser.add_argument("-c",
                                "--cores",
                                type=int,
-                               default="8",
                                help="Number of cores virtual machine has")
     common_parser.add_argument("-m",
                                "--memory",
                                type=str,
-                               default="16G",
                                help="Amount of memory virtual machine has")
     common_parser.add_argument("-n", "--name", type=str, help="Name of virtual machine")
 
@@ -295,13 +294,51 @@ def set_cfg(args):
     else:
         size = None
 
+    # Number of cores
+    if args.cores:
+        cores = args.cores
+    else:
+        if arch == platform.machine():
+            # When using KVM, we cannot use more than the maximum number of
+            # cores. Default to either 8 cores or half the number of cores in
+            # the machine, whichever is smaller
+            cores = min(8, os.cpu_count() / 2)
+        else:
+            # For TCG, use 4 cores by default
+            cores = 4
+
+    # Amount of memory
+    if args.memory:
+        memory = args.memory
+    else:
+        # We consider half of the system's memory in gigabytes as available for
+        # the virtual machine
+
+        # Total amount of memory of a system in gigabytes (page size * pages / 1024^3)
+        total_mem = os.sysconf("SC_PAGE_SIZE") * os.sysconf("SC_PHYS_PAGES") / (1024.**3)
+
+        # Get the current exponent of the size of memory, as most computers
+        # have a power of 2 amount of memory; if it is not (like 12GB), then
+        # this calculation will just result in a slightly larger amount of
+        # memory being allocated to the VM. If this is a problem, the user can
+        # just specify the amount of memory.
+        exp = round(math.log2(total_mem))
+
+        # To get half of the amount of memory, shift by one less exponent
+        avail_mem_for_vm = 1 << (exp - 1)
+
+        # We cap the amount of memory at two times the number of cores (as that
+        # is sufficient for compiling) or total amount of available VM memory
+        # from the calculation above.
+        memory = "{}G".format(min(cores * 2, avail_mem_for_vm))
+
     return {
         "architecture": arch,
-        "cores": str(args.cores),
+        "cores": str(cores),
         "iso_folder": iso_folder,
         "iso": iso,
         "kernel": kernel,
-        "memory": args.memory,
+        "memory": memory,
         "name": name,
         "size": size,
         "vm_folder": vm_folder,
@@ -311,6 +348,8 @@ def set_cfg(args):
 def main():
     args = parse_parameters()
     cfg = set_cfg(args)
+    print(cfg["memory"])
+    exit(0)
 
     arch = cfg["architecture"]
     supported_arches = ["aarch64", "x86_64"]
