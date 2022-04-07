@@ -83,6 +83,7 @@ function install_packages() {
         openssl
         openssl-devel
         perl
+        qemu-img
         qemu-system-{aarch64,arm,mips,ppc,riscv,s390x,x86}
         rsync
         socat
