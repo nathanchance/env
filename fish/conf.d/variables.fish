@@ -11,23 +11,23 @@
 if test -z "$LOCATION"
     switch "$(id -un)@$hostname"
         case nathan@archlinux-'*' nathan@debian-'*' nathan@ubuntu-'*'
-            set -U LOCATION hetzner-server
+            set -Ux LOCATION hetzner-server
         case pi@raspberrypi
-            set -U LOCATION pi
+            set -Ux LOCATION pi
         case nathan@hp-amd-ryzen-4300G
-            set -U LOCATION test-desktop-amd
+            set -Ux LOCATION test-desktop-amd
         case nathan@asus-intel-core-11700
-            set -U LOCATION test-desktop-intel
+            set -Ux LOCATION test-desktop-intel
         case nathan@asus-intel-core-4210U
-            set -U LOCATION test-laptop-intel
+            set -Ux LOCATION test-laptop-intel
         case nathan@thelio-3990X
-            set -U LOCATION workstation
+            set -Ux LOCATION workstation
         case nathan@hyperv nathan@qemu nathan@vmware
-            set -U LOCATION vm
+            set -Ux LOCATION vm
         case nathan@MSI nathan@Ryzen-5-4500U nathan@Ryzen-9-3900X
-            set -U LOCATION wsl
+            set -Ux LOCATION wsl
         case '*'
-            set -U LOCATION generic
+            set -Ux LOCATION generic
     end
 end
 
