@@ -3,7 +3,7 @@
 _localversion=-llvm
 _pkgsuffix=-next$_localversion
 pkgbase=linux$_pkgsuffix
-_srctag=next-20220406
+_srctag=next-20220407
 pkgver=${_srctag//-/.}
 pkgrel=1
 pkgdesc='linux-next'
@@ -19,6 +19,7 @@ source=(
   "$_srcname::git+https://git.kernel.org/pub/scm/linux/kernel/git/next/linux-next.git?signed#tag=$_srctag"
   config
   20220201_lb_drm_i915_fix_null_pointer_dereference.patch
+  20220407_pkshih_rtw89_ser_fix_unannotated_fall_through.patch
 )
 
 validpgpkeys=(
@@ -26,8 +27,9 @@ validpgpkeys=(
   '3F2568AAC26998F9E813A1C5C3F436CA30F5D8EB'  # Mark Brown
 )
 sha256sums=('SKIP'
-            'a463019b349d347a96dd70b9b3cf8f7b4a4f7ef4b19b2127ecddd064cb1b16ba'
-            'b79f03f480e7c0571a31ebb68ff9b8c39bbc8f4e064499c0dadabdfde23c4cac')
+            'b460a1ac0f1f0ac24133b27d7cb3a23bf7ed93d35c7215b290e7f33d964661a8'
+            'b79f03f480e7c0571a31ebb68ff9b8c39bbc8f4e064499c0dadabdfde23c4cac'
+            'e7c09ee234297da7862fc8109046f39919b40561d5bd8d88a5d8c7c5a24eda81')
 
 _kmake() {
   set -x
