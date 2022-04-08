@@ -2,6 +2,11 @@
 # SPDX-License-Identifier: MIT
 # Copyright (C) 2022 Nathan Chancellor
 # Description: Virtual machine manager for ClangBuiltLinux development
+# Cobbled together from:
+# https://wiki.archlinux.org/title/QEMU
+# https://wiki.archlinux.org/title/Unified_Extensible_Firmware_Interface#Testing_UEFI_in_systems_without_native_support
+# https://mirrors.edge.kernel.org/pub/linux/kernel/people/will/docs/qemu/qemu-arm64-howto.html
+# https://wiki.qemu.org/Documentation/Networking
 
 import argparse
 import math
