@@ -348,6 +348,10 @@ def set_cfg(args):
         else:
             # For TCG, use 4 cores by default
             cores = 4
+    # cores might be a float due to the division above
+    # Convert it to an integer for QEMU:
+    # qemu-system-x86_64: Parameter 'smp.cpus' expects integer
+    cores = int(cores)
 
     # Amount of memory
     if args.memory:
@@ -372,12 +376,18 @@ def set_cfg(args):
         # We cap the amount of memory at two times the number of cores (as that
         # is sufficient for compiling) or total amount of available VM memory
         # from the calculation above.
-        memory = "{}G".format(min(cores * 2, avail_mem_for_vm))
+        memory = "{}G".format(int(min(cores * 2, avail_mem_for_vm)))
+
+    # subprocess.run() expects cores to be a string:
+    # TypeError: expected str, bytes or os.PathLike object, not int
+    # This needs to happen after the min() call above to avoid:
+    # TypeError: '<' not supported between instances of 'int' and 'str'
+    cores = str(cores)
 
     cfg = {
         "architecture": arch,
         "cmdline": cmdline,
-        "cores": str(cores),
+        "cores": cores,
         "initrd": initrd,
         "iso_folder": iso_folder,
         "iso": iso,
