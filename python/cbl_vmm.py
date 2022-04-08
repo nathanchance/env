@@ -49,7 +49,12 @@ def parse_parameters():
     run_parser = subparsers.add_parser("run",
                                        help="Run virtual machine after setup",
                                        parents=[common_parser])
-    run_parser.add_argument("-k", "--kernel", type=str, help="Path to kernel sources to boot from")
+    run_parser.add_argument("-C", "--cmdline", type=str, help="Kernel cmdline string")
+    run_parser.add_argument("-i", "--initrd", type=str, help="Path to initrd")
+    run_parser.add_argument("-k",
+                            "--kernel",
+                            type=str,
+                            help="Path to kernel image or kernel build directory")
     run_parser.set_defaults(func=run)
 
     return parser.parse_args()
@@ -218,29 +223,17 @@ def setup(cfg):
 
 def run(cfg):
     arch = cfg["architecture"]
+    cmdline = cfg["cmdline"]
+    initrd = cfg["initrd"]
     kernel = cfg["kernel"]
+
     qemu = default_qemu_arguments(cfg)
 
-    if kernel:
-        kernel_folder = Path(kernel)
-        if arch == "aarch64":
-            cmdline = "root=/dev/vda3 ro rootflags=subvol=root rootfstype=btrfs console=ttyAMA0"
-            kernel = kernel_folder.joinpath("arch/arm64/boot/Image")
-            initrd = kernel_folder.joinpath("initramfs.img")
-        elif arch == "x86_64":
-            cmdline = "root=/dev/vda2 rw rootfstype=ext4 console=ttyS0"
-            kernel = kernel_folder.joinpath("arch/x86/boot/bzImage")
-            initrd = kernel_folder.joinpath("rootfs/initramfs.img")
-        else:
-            raise RuntimeError("run() with a kernel is not implemented for {}".format(arch))
-
-        if not kernel.exists():
-            raise RuntimeError("{} could not be found!".format(kernel))
-        if not initrd.exists():
-            raise RuntimeError("{} could not be found!".format(initrd))
-
+    if cmdline:
         qemu += ["-append", cmdline]
+    if kernel:
         qemu += ["-kernel", kernel]
+    if initrd:
         qemu += ["-initrd", initrd]
 
     run_cmd(qemu)
@@ -261,7 +254,7 @@ def set_cfg(args):
         else:
             raise RuntimeError("Default VM name has not been defined for {}".format(arch))
 
-    # .iso for setup
+    # .iso for setup (so "iso" might not be in args)
     if hasattr(args, "iso") and args.iso:
         iso = args.iso
     else:
@@ -284,15 +277,57 @@ def set_cfg(args):
     iso_folder = base_folder.joinpath("iso")
     vm_folder = base_folder.joinpath(arch, name)
 
-    # Handle 'kernel' and 'size', which may not exist depending on the subcommand
-    if hasattr(args, "kernel"):
-        kernel = args.kernel
+    # Support for running custom kernel image (so "kernel" might not be in args)
+    if hasattr(args, "kernel") and args.kernel:
+        # Kernel is either a path or a kernel image
+        kernel = Path(args.kernel)
+        if kernel.is_dir():
+            kernel_dir = kernel
+            if arch == "aarch64":
+                kernel = kernel.joinpath("arch/arm64/boot/Image")
+            elif arch == "x86_64":
+                kernel = kernel.joinpath("arch/x86/boot/bzImage")
+            else:
+                raise RuntimeError("Default kernel has not been defined for {}".format(arch))
+        else:
+            kernel_dir = None
+
+        if not kernel.exists():
+            raise RuntimeError("{} could not be found!".format(kernel))
+
+        if args.cmdline:
+            cmdline = args.cmdline
+        else:
+            if arch == "aarch64":
+                cmdline = "console=ttyAMA0 root=/dev/vda3 ro"
+            elif arch == "x86_64":
+                cmdline = "console=ttyS0 root=/dev/vda2 rw rootfstype=ext4"
+            else:
+                raise RuntimeError("Default cmdline has not been defined for {}".format(arch))
+
+        if args.initrd:
+            initrd = Path(args.initrd)
+        else:
+            if not kernel_dir:
+                raise RuntimeError(
+                    "Kernel image was supplied without initrd, cannot guess initrd path!")
+
+            if arch == "aarch64":
+                initrd = kernel_dir.joinpath("initramfs.img")
+            elif arch == "x86_64":
+                initrd = kernel_dir.joinpath("rootfs/initramfs.img")
+            else:
+                raise RuntimeError("Default initrd has not been defined for {}".format(arch))
+
+        if not initrd.exists():
+            raise RuntimeError("{} could not be found!".format(initrd))
     else:
+        cmdline = None
+        initrd = None
         kernel = None
-    if hasattr(args, "size"):
-        size = args.size
-    else:
-        size = None
+
+    # Size of disk image (only used for setup, so "size" might not exist in args)
+    size = args.size if hasattr(args, "size") else None
 
     # Number of cores
     if args.cores:
@@ -334,7 +369,9 @@ def set_cfg(args):
 
     return {
         "architecture": arch,
+        "cmdline": cmdline,
         "cores": str(cores),
+        "initrd": initrd,
         "iso_folder": iso_folder,
         "iso": iso,
         "kernel": kernel,
@@ -348,8 +385,6 @@ def set_cfg(args):
 def main():
     args = parse_parameters()
     cfg = set_cfg(args)
-    print(cfg["memory"])
-    exit(0)
 
     arch = cfg["architecture"]
     supported_arches = ["aarch64", "x86_64"]
