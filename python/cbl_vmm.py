@@ -50,6 +50,10 @@ def parse_parameters():
                                        help="Run virtual machine after setup",
                                        parents=[common_parser])
     run_parser.add_argument("-C", "--cmdline", type=str, help="Kernel cmdline string")
+    run_parser.add_argument("-g",
+                            "--gdb",
+                            action="store_true",
+                            help="Start QEMU with '-s -S' for debugging with gdb")
     run_parser.add_argument("-i", "--initrd", type=str, help="Path to initrd")
     run_parser.add_argument("-k",
                             "--kernel",
@@ -224,6 +228,7 @@ def setup(cfg):
 def run(cfg):
     arch = cfg["architecture"]
     cmdline = cfg["cmdline"]
+    gdb = cfg["gdb"]
     initrd = cfg["initrd"]
     kernel = cfg["kernel"]
 
@@ -235,6 +240,8 @@ def run(cfg):
         qemu += ["-kernel", kernel]
     if initrd:
         qemu += ["-initrd", initrd]
+    if gdb:
+        qemu += ["-s", "-S"]
 
     run_cmd(qemu)
 
@@ -367,7 +374,7 @@ def set_cfg(args):
         # from the calculation above.
         memory = "{}G".format(min(cores * 2, avail_mem_for_vm))
 
-    return {
+    cfg = {
         "architecture": arch,
         "cmdline": cmdline,
         "cores": str(cores),
@@ -380,6 +387,9 @@ def set_cfg(args):
         "size": size,
         "vm_folder": vm_folder,
     }
+    if hasattr(args, "gdb"):
+        cfg["gdb"] = args.gdb
+    return cfg
 
 
 def main():
