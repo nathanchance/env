@@ -3,7 +3,7 @@
 _localversion=-llvm
 _pkgsuffix=-next$_localversion
 pkgbase=linux$_pkgsuffix
-_srctag=next-20220408
+_srctag=next-20220411
 pkgver=${_srctag//-/.}
 pkgrel=1
 pkgdesc='linux-next'
@@ -20,6 +20,8 @@ source=(
   config
   20220201_lb_drm_i915_fix_null_pointer_dereference.patch
   20220407_pkshih_rtw89_ser_fix_unannotated_fall_through.patch
+  fbcon-revert.patch
+  amdgpu-discovery-fix.patch
 )
 
 validpgpkeys=(
@@ -27,9 +29,11 @@ validpgpkeys=(
   '3F2568AAC26998F9E813A1C5C3F436CA30F5D8EB'  # Mark Brown
 )
 sha256sums=('SKIP'
-            '7617422ace2b26fdb3f7044ddd0f8095fba1891f936d62af2abb5109c0d7a5a2'
+            'f3c29d5ea61a4b2c925694095b5dac915b0656bf57c06a10f058165060006c9d'
             'b79f03f480e7c0571a31ebb68ff9b8c39bbc8f4e064499c0dadabdfde23c4cac'
-            'e7c09ee234297da7862fc8109046f39919b40561d5bd8d88a5d8c7c5a24eda81')
+            'e7c09ee234297da7862fc8109046f39919b40561d5bd8d88a5d8c7c5a24eda81'
+            '69f538a9e77665bdc6ee39eec440c07cee078d0da5e79b84863ae56ac68a30ac'
+            '4310d0a239b30a52400f8462b5206abaeebc482c07c12597ab89714ba37131a7')
 
 _kmake() {
   set -x
