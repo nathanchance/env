@@ -53,6 +53,7 @@ function install_packages() {
         fish
         fzf
         jq
+        python-unversioned-command
         openssh
         stow
         vim
