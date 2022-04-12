@@ -56,6 +56,12 @@ def parse_parameters():
                               help="Size of virtual machine disk image")
     setup_parser.set_defaults(func=setup)
 
+    # Arguments for "remove"
+    remove_parser = subparsers.add_parser("remove",
+                                          help="Remove virtual machine files",
+                                          parents=[common_parser])
+    remove_parser.set_defaults(func=remove)
+
     # Arguments for "run"
     run_parser = subparsers.add_parser("run",
                                        help="Run virtual machine after setup",
@@ -229,8 +235,7 @@ def setup(cfg):
     size = cfg["size"]
 
     # Create folder
-    if vm_folder.is_dir():
-        shutil.rmtree(vm_folder)
+    remove(cfg)
     vm_folder.mkdir(parents=True, exist_ok=True)
 
     # Create efivars image
@@ -249,6 +254,12 @@ def setup(cfg):
     qemu += ["-drive", "if=none,format=raw,id=cd,file={}".format(iso)]
 
     run_cmd(qemu)
+
+
+def remove(cfg):
+    vm_folder = cfg["vm_folder"]
+    if vm_folder.is_dir():
+        shutil.rmtree(vm_folder)
 
 
 def run(cfg):
