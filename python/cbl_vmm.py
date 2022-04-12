@@ -38,6 +38,12 @@ def parse_parameters():
                                help="Amount of memory virtual machine has")
     common_parser.add_argument("-n", "--name", type=str, help="Name of virtual machine")
 
+    # Arguments for "list"
+    list_parser = subparsers.add_parser("list",
+                                        help="List virtual machines that can be run",
+                                        parents=[common_parser])
+    list_parser.set_defaults(func=list)
+
     # Arguments for "setup"
     setup_parser = subparsers.add_parser("setup",
                                          help="Run virtual machine for first time",
@@ -203,6 +209,21 @@ def default_qemu_arguments(cfg):
     return qemu
 
 
+def list(cfg):
+    arch = cfg["architecture"]
+    arch_folder = cfg["arch_folder"]
+
+    print("\nAvailable VMs for {}:\n".format(arch))
+
+    if arch_folder.exists():
+        vm_list = os.listdir(arch_folder)
+        if vm_list:
+            print("\n".join(vm_list))
+            return
+
+    print("None")
+
+
 def setup(cfg):
     vm_folder = cfg["vm_folder"]
     size = cfg["size"]
@@ -286,8 +307,9 @@ def set_cfg(args):
         base_folder = Path(os.environ["VM_FOLDER"])
     else:
         base_folder = Path(__file__).resolve().parent.joinpath("vm")
+    arch_folder = base_folder.joinpath(arch)
     iso_folder = base_folder.joinpath("iso")
-    vm_folder = base_folder.joinpath(arch, name)
+    vm_folder = arch_folder.joinpath(name)
 
     # Support for running custom kernel image (so "kernel" might not be in args)
     if hasattr(args, "kernel") and args.kernel:
@@ -391,6 +413,7 @@ def set_cfg(args):
 
     cfg = {
         "architecture": arch,
+        "arch_folder": arch_folder,
         "cmdline": cmdline,
         "cores": cores,
         "initrd": initrd,
