@@ -82,7 +82,7 @@ def parse_parameters():
 
 
 def run_cmd(cmd):
-    print("$ %s" % " ".join([str(element) for element in cmd]))
+    print("$ {}".format(" ".join([str(element) for element in cmd])))
     subprocess.run(cmd, check=True)
 
 
