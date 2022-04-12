@@ -32,7 +32,7 @@ function cbl_rb_pi -d "Rebase Raspberry Pi kernel on latest linux-next"
             case arm64
                 set config defconfig
         end
-        kmake ARCH=$arch LLVM=1 O=.build/$arch $config savedefconfig
+        kmake ARCH=$arch HOSTLDFLAGS=-fuse-ld=lld LLVM=1 O=.build/$arch $config savedefconfig; or return
         mv -v .build/$arch/defconfig arch/$arch/configs/$config
     end
     git ac -m "ARM: configs: savedefconfig"
@@ -88,7 +88,7 @@ function cbl_rb_pi -d "Rebase Raspberry Pi kernel on latest linux-next"
             case arm64
                 set config defconfig
         end
-        kmake ARCH=$arch LLVM=1 O=.build/$arch $config savedefconfig
+        kmake ARCH=$arch HOSTLDFLAGS=-fuse-ld=lld LLVM=1 O=.build/$arch $config savedefconfig; or return
         mv -v .build/$arch/defconfig arch/$arch/configs/$config
     end
     git ac -m "ARM: configs: Update defconfigs"
