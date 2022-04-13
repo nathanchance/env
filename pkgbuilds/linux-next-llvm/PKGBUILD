@@ -3,7 +3,7 @@
 _localversion=-llvm
 _pkgsuffix=-next$_localversion
 pkgbase=linux$_pkgsuffix
-_srctag=next-20220412
+_srctag=next-20220413
 pkgver=${_srctag//-/.}
 pkgrel=1
 pkgdesc='linux-next'
@@ -19,8 +19,7 @@ source=(
   "$_srcname::git+https://git.kernel.org/pub/scm/linux/kernel/git/next/linux-next.git?signed#tag=$_srctag"
   config
   20220201_lb_drm_i915_fix_null_pointer_dereference.patch
-  20220407_pkshih_rtw89_ser_fix_unannotated_fall_through.patch
-  fbcon-revert.patch
+  20220413_daniel_vetter_fbcon_fix_delayed_takeover_locking.patch
 )
 
 validpgpkeys=(
@@ -28,10 +27,9 @@ validpgpkeys=(
   '3F2568AAC26998F9E813A1C5C3F436CA30F5D8EB'  # Mark Brown
 )
 sha256sums=('SKIP'
-            '1b88bbfdc429280dec3d78ac3e5c838527c0689f0b2fe30366ffaadff3da16fd'
+            '020da8369f268521d90a69f58235e7787d28bac4d29e6bee802462c3d7f5dcc4'
             'b79f03f480e7c0571a31ebb68ff9b8c39bbc8f4e064499c0dadabdfde23c4cac'
-            'e7c09ee234297da7862fc8109046f39919b40561d5bd8d88a5d8c7c5a24eda81'
-            '69f538a9e77665bdc6ee39eec440c07cee078d0da5e79b84863ae56ac68a30ac')
+            '8a9d5be4e1ace944867b433b72aae46c7a1b341be23a99f5b9684956ae86b3a5')
 
 _kmake() {
   set -x

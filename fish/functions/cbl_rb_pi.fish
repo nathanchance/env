@@ -24,6 +24,53 @@ function cbl_rb_pi -d "Rebase Raspberry Pi kernel on latest linux-next"
         b4 shazam -l -P _ -s $patch; or return
     end
 
+    git diff -R 4d32327e85b799c01e70b84e1ba999bfe48ecf56^..26d0c309d56750daa99059799b967f79712118bd | git ap --exclude mm/Kconfig; or return
+    echo 'diff --git a/mm/Kconfig b/mm/Kconfig
+index a126133a00a5..2c61c0b287d4 100644
+--- a/mm/Kconfig
++++ b/mm/Kconfig
+@@ -909,23 +909,6 @@ config ANON_VMA_NAME
+ 	  area from being merged with adjacent virtual memory areas due to the
+ 	  difference in their name.
+ 
+-config PTE_MARKER
+-	bool "Marker PTEs support"
+-	default y
+-
+-	help
+-	  Allows to create marker PTEs for file-backed memory.
+-
+-config PTE_MARKER_UFFD_WP
+-	bool "Marker PTEs support for userfaultfd write protection"
+-	default y
+-	depends on PTE_MARKER && HAVE_ARCH_USERFAULTFD_WP
+-
+-	help
+-	  Allows to create marker PTEs for userfaultfd write protection
+-	  purposes.  It is required to enable userfaultfd write protection on
+-	  file-backed memory types like shmem and hugetlbfs.
+-
+ # multi-gen LRU {
+ config LRU_GEN
+ 	bool "Multi-Gen LRU"
+' | git ap; or return
+    echo 'diff --git a/mm/rmap.c b/mm/rmap.c
+index 57e8e0223de3..628ac87807cb 100644
+--- a/mm/rmap.c
++++ b/mm/rmap.c
+@@ -73,6 +73,7 @@
+ #include <linux/page_idle.h>
+ #include <linux/memremap.h>
+ #include <linux/userfaultfd_k.h>
++#include <linux/mm_inline.h>
+ 
+ #include <asm/tlbflush.h>
+ 
+' | git ap; or return
+    git ac -m "mm: Revert 'userfaultfd-wp: Support shmem and hugetlbfs'
+
+Link: https://lore.kernel.org/710c48c9-406d-e4c5-a394-10501b951316@samsung.com/"; or return
+
     # Regenerate defconfigs
     for arch in arm arm64
         switch $arch
