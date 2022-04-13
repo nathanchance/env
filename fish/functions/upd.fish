@@ -122,6 +122,10 @@ function upd -d "Runs the update command for the current distro or downloads/upd
 
             switch $target
                 case bat diskus fd hyperfine
+                    if test (get_glibc_version) -lt 22900
+                        print_warning "$target requires glibc 2.29 or newer, skipping..."
+                        continue
+                    end
                     set repo sharkdp/$target
                     set ver (glr $repo)
 
