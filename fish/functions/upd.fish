@@ -242,6 +242,10 @@ function upd -d "Runs the update command for the current distro or downloads/upd
                     fc-cache -fv
 
                 case repo
+                    if not command -q python
+                        print_warning "$target requires an unversioned python binary, skipping..."
+                        continue
+                    end
                     mkdir -p (dirname $binary)
                     crl -o $binary https://storage.googleapis.com/git-repo-downloads/repo
                     chmod a+x $binary
