@@ -47,6 +47,9 @@ function install_packages() {
         cyrus-sasl-plain
         mutt
 
+        # extracting
+        unzip
+
         # env
         curl
         fish
