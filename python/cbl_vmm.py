@@ -268,6 +268,10 @@ def run(cfg):
     gdb = cfg["gdb"]
     initrd = cfg["initrd"]
     kernel = cfg["kernel"]
+    vm_folder = cfg["vm_folder"]
+
+    if not vm_folder.exists():
+        raise RuntimeError("{} does not exist, run 'setup' first?".format(vm_folder))
 
     qemu = default_qemu_arguments(cfg)
 
