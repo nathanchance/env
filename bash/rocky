@@ -66,6 +66,10 @@ function install_packages() {
     )
 
     dnf install -y "${packages[@]}" || exit
+
+    # Reinstall shadow-utils to properly set capabilities
+    # https://github.com/containers/podman/issues/2788
+    dnf reinstall -y shadow-utils || exit
 }
 
 set_global_variables
