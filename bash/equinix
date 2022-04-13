@@ -107,34 +107,58 @@ function partition_and_create_user() { (
     # User and password must be supplied
     : "${USER}" "${PASSWORD}"
 
-    # Always turn on '--no-install-recommends'
-    apt-config dump | grep -we Recommends -e Suggests | sed 's/1/0/g' | tee /etc/apt/apt.conf.d/999norecommend
+    # Figure out the package manager
+    source /usr/lib/os-release
+    case $ID in
+        rocky)
+            admin_group=wheel
+            pkg_mgr=dnf
+            ;;
+        debian | ubuntu)
+            admin_group=sudo
+            pkg_mgr=apt
+            ;;
+        *)
+            equinix_die "Unsupported OS: $ID"
+            ;;
+    esac
 
-    # Update the server
-    export APT_LISTCHANGES_FRONTEND=none
-    export DEBIAN_FRONTEND=noninteractive
-    export NEEDRESTART_SUSPEND=true
+    case $pkg_mgr in
+        apt)
+            # Always turn on '--no-install-recommends'
+            apt-config dump | grep -we Recommends -e Suggests | sed 's/1/0/g' | tee /etc/apt/apt.conf.d/999norecommend
 
-    apt update -y || exit ${?}
+            # Update the server
+            export APT_LISTCHANGES_FRONTEND=none
+            export DEBIAN_FRONTEND=noninteractive
+            export NEEDRESTART_SUSPEND=true
 
-    apt upgrade \
-        -o Dpkg::Options::='--force-confdef' \
-        -o Dpkg::Options::='--force-confold' \
-        -y || exit ${?}
+            apt update -y || exit ${?}
 
-    apt autoremove -y
+            apt upgrade \
+                -o Dpkg::Options::='--force-confdef' \
+                -o Dpkg::Options::='--force-confold' \
+                -y || exit ${?}
 
-    # Install tmux so that installation progress cannot be lost
-    apt install -y tmux
+            apt autoremove -y
+
+            # Install tmux so that installation progress cannot be lost
+            apt install -y tmux
+            ;;
+    esac
 
     # Install necessary files
     if [[ -n ${DRIVE:-} ]]; then
-        apt install -y parted
+        if ! command -v parted; then
+            "$pkg_mgr" install -y parted || exit
+        fi
         partition_drive -d "${DRIVE}" -f /home -u "${USER}"
     fi
 
     # Setup user account
-    [[ "$(uname -m)" = "x86_64" ]] && apt install -y qemu-kvm
+    case $pkg_mgr in
+        apt) [[ "$(uname -m)" = "x86_64" ]] && apt install -y qemu-kvm ;;
+    esac
     if getent passwd "${USER}" &>/dev/null; then
         set +x
         equinix_warn "${USER} already exists. If this is not expected, delete the user and re-run this function."
@@ -142,7 +166,7 @@ function partition_and_create_user() { (
         printf '\n'
         set -x
     else
-        USER_ADD_ARGS=(-m -G "kvm,sudo")
+        USER_ADD_ARGS=(-m -G "kvm,$admin_group")
         useradd "${USER_ADD_ARGS[@]}" "${USER}"
         echo "${USER}:${PASSWORD}" | chpasswd
         cp -rv /root/.ssh /home/"${USER}"
