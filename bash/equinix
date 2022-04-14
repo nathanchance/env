@@ -108,6 +108,7 @@ function partition_and_create_user() { (
     : "${USER}" "${PASSWORD}"
 
     # Figure out the package manager
+    # shellcheck disable=SC1091
     source /usr/lib/os-release
     case $ID in
         rocky)
