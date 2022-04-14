@@ -196,7 +196,9 @@ def default_qemu_arguments(cfg):
         qemu += ["-cpu", "host"]
         qemu += ["-enable-kvm"]
     elif arch == "aarch64":
-        qemu += ["-cpu", "max"]
+        # QEMU is horrifically slow with just '-cpu max'
+        # https://lore.kernel.org/YlgVa+AP0g4IYvzN@lakrids/
+        qemu += ["-cpu", "max,pauth-impdef=true"]
 
     # Memory
     qemu += ["-m", memory]
