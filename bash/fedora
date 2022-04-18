@@ -36,6 +36,7 @@ function setup_gh_repo() {
 function install_packages() {
     packages=(
         # administration
+        mosh
         opendoas
         util-linux-user
 
@@ -84,12 +85,21 @@ EOF
     setup_sudo_symlink
 }
 
+function setup_mosh() {
+    # mosh can use ports 60000 through 61000
+    if command -v firewall-cmd &>/dev/null; then
+        firewall-cmd --add-port=60000-61000/udp --permanent
+        firewall-cmd --reload
+    fi
+}
+
 set_global_variables
 reality_check
 install_initial_packages
 setup_gh_repo
 install_packages
 setup_doas
+setup_mosh
 chsh_fish
 clone_env
 setup_initial_fish_config
