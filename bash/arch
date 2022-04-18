@@ -60,6 +60,7 @@ function install_pkgs() {
         # Administration tools
         btop
         iputils
+        neofetch
         opendoas
 
         # arc
