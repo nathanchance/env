@@ -1,18 +1,11 @@
-FROM docker.io/fedora:latest
+FROM docker.io/fedora:rawhide
 
 ENV EDITOR=vim
 
 RUN dnf update -y && \
     dnf install -y \
-        dnf-plugins-core \
-        perl-Data-Dumper \
-        perl-Digest-SHA \
-        perl-Encode \
-        perl-IO-Compress \
-        perl-Storable \
-        perl-Text-ParseWords \
-        vim && \
-    dnf copr enable -y icon/b4 && \
-    dnf install -y lei
+        git \
+        lei \
+        vim
 
 ENTRYPOINT ["/usr/bin/lei"]
