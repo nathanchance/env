@@ -3,5 +3,5 @@
 # Copyright (C) 2022 Nathan Chancellor
 
 function vfunc -d "View function defintion in fish with a pager"
-    type $argv &| bat --color always --language fish
+    type $argv &| bat --color always --language fish --style plain
 end
