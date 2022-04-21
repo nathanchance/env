@@ -116,7 +116,6 @@ function cbl_bld_tot_tcs -d "Build LLVM and binutils from source for kernel deve
     end
 
     # Add patches to revert here
-    set -a reverts 610a0e8b5368853b0e67b16812c0fb61d8900356 # [ELF] Assert on invalid GOT or PLT relocations, https://reviews.llvm.org/D123985
     for revert in $reverts
         if not git -C $llvm_project rv -n $revert
             set message "Failed to revert $revert"
