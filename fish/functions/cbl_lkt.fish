@@ -197,8 +197,26 @@ function cbl_lkt -d "Tests a Linux kernel with llvm-kernel-testing"
     # llvm-objdump: error: 'vmlinux': not a dynamic object: https://github.com/ClangBuiltLinux/linux/issues/1427
     # warning: argument unused during compilation: '-march=arm: https://github.com/ClangBuiltLinux/linux/issues/1315
     # scripts/(extract-cert|sign-file).c: OpenSSL deprecation warnings, we do not care: https://github.com/ClangBuiltLinux/linux/issues/1555
-    set blocklist "objtool:|override: (CPU_BIG_ENDIAN|LTO_CLANG_THIN) changes choice state|info.log|success.log|failed.log|skipped.log|union jset::\(anonymous at ./usr/include/linux/bcache.h:|llvm-objdump: error: 'vmlinux': not a dynamic object|warning: argument unused during compilation: '-march=arm|scripts/(extract-cert|sign-file).c:[0-9]+:[0-9]+: warning: '(ENGINE|ERR)_.*' is deprecated \[-Wdeprecated-declarations\]"
-    set searchlist "error:|FATAL:|undefined|Unsupported relocation type:|warning:|WARNING:"
+    set blocklist_items \
+        "objtool:" \
+        "override: (CPU_BIG_ENDIAN|LTO_CLANG_THIN) changes choice state" \
+        "info.log" \
+        "success.log" \
+        "failed.log" \
+        "skipped.log" \
+        "union jset::\(anonymous at ./usr/include/linux/bcache.h:" \
+        "llvm-objdump: error: 'vmlinux': not a dynamic object" \
+        "warning: argument unused during compilation: '-march=arm" \
+        "scripts/(extract-cert|sign-file).c:[0-9]+:[0-9]+: warning: '(ENGINE|ERR)_.*' is deprecated \[-Wdeprecated-declarations\]"
+    set blocklist (string join "|" $blocklist_items)
+    set searchlist_items \
+        "error:" \
+        "FATAL:" \
+        undefined \
+        "Unsupported relocation type:" \
+        "warning:" \
+        "WARNING:"
+    set searchlist (string join "|" $searchlist_items)
 
     for file_path in $log_dir $linux_src $CBL_LKT/src/linux-clang-cfi
         set -a sed_args -e "s;$file_path/;;g"
