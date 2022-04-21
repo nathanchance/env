@@ -65,7 +65,7 @@ function kmake -d "Run make with all cores and adjust PATH temporarily"
             if test -n "$LLVM"; and test "$LLVM" = 1
                 set CC clang
             else
-                if test "$LLVM" != 1; and not rg -q LLVM_SUFFIX $lnx_src/Makefile
+                if test "$LLVM" != 1; and not rg -q LLVM_SUFFIX $lnx_dir/Makefile
                     print_error "\$LLVM is set to something other than 1 but this kernel does not support that!"
                     return 1
                 end
