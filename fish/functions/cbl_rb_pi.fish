@@ -24,10 +24,6 @@ function cbl_rb_pi -d "Rebase Raspberry Pi kernel on latest linux-next"
         b4 shazam -l -P _ -s $patch; or return
     end
 
-    # https://lore.kernel.org/710c48c9-406d-e4c5-a394-10501b951316@samsung.com/
-    git rv --no-edit a066bab3c0eb8f6155257f1345f07d1f6550bc4a; or return
-    crl https://lore.kernel.org/all/Ylb9rXJyPm8%2Fao8f@xz-m1.local/2-0001-mm-Check-against-orig_pte-for-finish_fault-when-prop.patch | git am; or return
-
     git rv --no-edit 3dd2f238a7b214e50840e3e439f73e82c9d0f41f; or return
 
     # Regenerate defconfigs
