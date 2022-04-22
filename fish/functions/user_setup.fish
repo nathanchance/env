@@ -202,6 +202,9 @@ out.*/
         end
     end
     updall --no-os; or return
+    if command -q podman; and test "$LOCATION" != wsl
+        dbxc --yes
+    end
 
     # Git config and aliases
     git_setup
