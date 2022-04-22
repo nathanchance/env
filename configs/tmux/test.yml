@@ -5,3 +5,7 @@ windows:
       - shell: /usr/bin/fish
         shell_command: btop --utf-force
       - shell: /usr/bin/fish -c dbxe
+  - window_name: host
+    focus: true
+    panes:
+      - shell: /usr/bin/fish
