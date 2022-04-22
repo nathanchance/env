@@ -12,7 +12,7 @@ function tmuxp -d "Runs tmuxp depending on how it is available"
         if test -x $tmuxp_bin
             PYTHONPATH=$tmuxp_prefix $tmuxp_bin $argv
         else
-            print_error "bat could not be found. Run 'upd bat' to install it."
+            print_error "tmuxp could not be found. Run 'upd tmuxp' to install it."
             return 1
         end
     end
