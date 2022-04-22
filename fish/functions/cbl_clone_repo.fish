@@ -18,6 +18,9 @@ function cbl_clone_repo -d "Clone certain repos for ClangBuiltLinux testing and 
                 set url https://git.kernel.org/pub/scm/linux/kernel/git/stable/linux.git/
             case llvm-project
                 set url https://github.com/llvm/llvm-project
+            case repro-scripts
+                set url https://github.com/nathanchance/$arg.git
+                set dest $CBL/$arg
             case wsl2
                 set url git@github.com:nathanchance/WSL2-Linux-Kernel
                 set dest $CBL_BLD/wsl2
