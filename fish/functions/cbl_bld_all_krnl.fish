@@ -41,7 +41,7 @@ function cbl_bld_all_krnl -d "Build all kernels for ClangBuiltLinux testing"
             end
 
         case test-desktop-amd test-laptop-intel
-            cbl_test_kvm
+            cbl_test_kvm build
 
             set lnx_src $CBL_SRC/linux
             echo CONFIG_WERROR=n >$lnx_src/allmod.config
