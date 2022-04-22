@@ -14,4 +14,4 @@ and not set -q TMUX
 and command -q tmux
 # attempt to attach to a session named "main" while detaching everyone
 # else or create a new session if one does not already exist
-and tmux new-session -AD -s main
+and tmxa

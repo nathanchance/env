@@ -104,7 +104,7 @@ function install_pkgs() {
         jq
         shfmt
         stow
-        tmux
+        tmux{,p}
         zoxide
 
         # git

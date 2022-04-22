@@ -33,6 +33,7 @@ function base_packages() {
         fish
         jq
         neofetch
+        python3-pip
         ripgrep
         stow
         tmux

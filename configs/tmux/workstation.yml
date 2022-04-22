@@ -1,0 +1,13 @@
+session_name: main
+windows:
+  - window_name: btop
+    panes:
+      - shell: /usr/bin/fish
+        shell_command: btop
+  - window_name: host
+    panes:
+      - shell: /usr/bin/fish
+  - window_name: distrobox
+    focus: true
+    panes:
+      - shell: /usr/bin/fish -c dbxe

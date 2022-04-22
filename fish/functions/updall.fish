@@ -30,6 +30,7 @@ function updall -d "Update binaries in $BIN_FOLDER"
         rg \
         shellcheck \
         shfmt \
+        tmuxp \
         tuxmake \
         yapf
 

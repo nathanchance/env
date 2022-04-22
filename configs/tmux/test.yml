@@ -1,0 +1,7 @@
+session_name: main
+windows:
+  - window_name: btop and distrobox
+    panes:
+      - shell: /usr/bin/fish
+        shell_command: btop --utf-force
+      - shell: /usr/bin/fish -c dbxe

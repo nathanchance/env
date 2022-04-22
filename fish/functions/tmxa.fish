@@ -4,6 +4,21 @@
 
 function tmxa -d "Attach to a tmux session if it exists, start a new one if not"
     if test -z "$TMUX"
-        tmux new-session -AD -s main
+        switch $LOCATION
+            case generic workstation
+                set tmuxp_cfg $LOCATION
+            case pi
+                # Only Raspberry Pi 4
+                if test (uname -m) = aarch64
+                    set tmuxp_cfg test
+                end
+            case test-{desktop-intel,desktop-amd,laptop-intel}
+                set tmuxp_cfg test
+        end
+        if set -q tmuxp_cfg
+            tmuxp load --yes $ENV_FOLDER/configs/tmux/$tmuxp_cfg.yml
+        else
+            tmux new-session -AD -s main
+        end
     end
 end

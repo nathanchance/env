@@ -40,6 +40,15 @@ function upd -d "Runs the update command for the current distro or downloads/upd
             git -C $ENV_FOLDER pull -qr; or return
             rld
             continue
+        else if test "$target" = tmuxp
+            if not in_container
+                if command -q tmuxp
+                    print_warning "tmuxp is installed through package manager, skipping..."
+                else
+                    python3 -m pip install --target $BIN_FOLDER/tmuxp --upgrade tmuxp
+                end
+            end
+            continue
         end
 
         # These need to be local to the loop so they are reset each invocation
