@@ -88,6 +88,11 @@ function install_pkgs() {
         patch
         vim
 
+        # Disk management utilities
+        nvme-cli
+        parted
+        smartmontools
+
         # Downloading and extracting utilities
         ca-certificates
         curl

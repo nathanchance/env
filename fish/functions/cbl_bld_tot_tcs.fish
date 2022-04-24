@@ -92,7 +92,10 @@ function cbl_bld_tot_tcs -d "Build LLVM and binutils from source for kernel deve
         git -C $bntls pull --rebase; or return
 
         set bntls_install $CBL_TC_STOW_BNTL/$date_time-(git -C $bntls sh -s --format=%H origin/master)
-        if not PATH="/usr/lib/ccache/bin:$PATH" $CBL_TC_BLD/build-binutils.py $bld_bntls_args --install-folder $bntls_install
+        if not PATH="/usr/lib/ccache/bin:$PATH" $CBL_TC_BLD/build-binutils.py \
+                $bld_bntls_args \
+                --build-folder $TMP_BUILD_FOLDER/binutils \
+                --install-folder $bntls_install
             set message "build-binutils.py failed"
             print_error "$message"
             tg_msg "$message"
@@ -139,6 +142,7 @@ function cbl_bld_tot_tcs -d "Build LLVM and binutils from source for kernel deve
     set llvm_install $CBL_TC_STOW_LLVM/$date_time-(git -C $llvm_project sh -s --format=%H origin/main)
     if not $CBL_TC_BLD/build-llvm.py \
             --assertions \
+            --build-folder $TMP_BUILD_FOLDER/llvm \
             --check-targets $check_targets \
             --install-folder $llvm_install \
             $bld_llvm_args \

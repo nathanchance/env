@@ -67,15 +67,28 @@ if not set -q MAIN_FOLDER
     set -gx MAIN_FOLDER $HOME
 end
 
-set -gx AUR_FOLDER $MAIN_FOLDER/aur
 set -gx BIN_FOLDER $MAIN_FOLDER/bin
 set -gx BIN_SRC_FOLDER $BIN_FOLDER/src
 set -gx CBL $MAIN_FOLDER/cbl
 set -gx GITHUB_FOLDER $MAIN_FOLDER/github
 set -gx KERNEL_FOLDER $MAIN_FOLDER/kernel
 set -gx SRC_FOLDER $MAIN_FOLDER/src
-set -gx TMP_FOLDER $MAIN_FOLDER/tmp
-set -gx VM_FOLDER $MAIN_FOLDER/vm
+
+set -gx NVME_FOLDER /mnt/nvme
+if test -d $NVME_FOLDER
+    set -gx AUR_FOLDER $NVME_FOLDER/aur
+    set -gx CCACHE_DIR $NVME_FOLDER/ccache
+    set -gx LEI_FOLDER $NVME_FOLDER/lei
+    set -gx MAIL_FOLDER $NVME_FOLDER/mail
+    set -gx TMP_FOLDER $NVME_FOLDER/tmp
+    set -gx VM_FOLDER $NVME_FOLDER/vm
+else
+    set -gx AUR_FOLDER $MAIN_FOLDER/aur
+    set -gx LEI_FOLDER $MAIN_FOLDER/lei
+    set -gx MAIL_FOLDER $MAIN_FOLDER/mail
+    set -gx TMP_FOLDER $MAIN_FOLDER/tmp
+    set -gx VM_FOLDER $MAIN_FOLDER/vm
+end
 
 set -gx CBL_BLD $CBL/build
 set -gx CBL_GIT $CBL/github
@@ -104,6 +117,7 @@ set -gx CBL_TC_LLVM $CBL_TC_STOW_LLVM-latest/bin
 
 set -gx ENV_FOLDER $GITHUB_FOLDER/env
 
+set -gx TMP_BUILD_FOLDER $TMP_FOLDER/build
 
 
 ############################

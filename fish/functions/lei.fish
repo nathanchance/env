@@ -6,14 +6,15 @@ function lei -d "Runs lei in a Podman container"
     in_container_msg -h; or return
 
     if command -q podman
+        set fish_trace 1
         podman run \
             --interactive \
             --rm \
             --tty \
-            --volume="$HOME/mail:/mail" \
-            --volume="$HOME/.cache/lei:/root/.cache/lei" \
-            --volume="$HOME/.config/lei:/root/.config/lei" \
-            --volume="$HOME/.local/share/lei:/root/.local/share/lei" \
+            --volume="$MAIL_FOLDER:/mail" \
+            --volume="$LEI_FOLDER/cache:/root/.cache/lei" \
+            --volume="$LEI_FOLDER/config:/root/.config/lei" \
+            --volume="$LEI_FOLDER/share:/root/.local/share/lei" \
             $GHCR/lei $argv; or print_error "lei failed to run, does 'boci lei' need to be run?"
     end
 end

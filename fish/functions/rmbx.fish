@@ -12,8 +12,9 @@ function rmbx -d "Read an mbox directory created by lei"
         end
     end
 
-    if not test -d $HOME$mbx
-        print_error "$HOME$mbx does not exist!"
+    set mail_root (dirname $MAIL_FOLDER)
+    if not test -d $mail_root$mbx
+        print_error "$mail_root$mbx does not exist!"
         return 1
     end
 
@@ -21,5 +22,5 @@ function rmbx -d "Read an mbox directory created by lei"
         lei up $mbx; or return
     end
 
-    mutt -f $HOME$mbx
+    mutt -f $mail_root$mbx
 end

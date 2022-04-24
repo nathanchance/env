@@ -171,7 +171,7 @@ function cbl_lkt -d "Tests a Linux kernel with llvm-kernel-testing"
     end
 
     if not string match -qr -- --out-dir $test_sh_args
-        set -a test_sh_args --out-dir $TMP_FOLDER/build
+        set -a test_sh_args --out-dir $TMP_BUILD_FOLDER/linux
     end
 
     set log_dir $CBL/build-logs/(basename $linux_src)-(date +%F-%T)
