@@ -41,11 +41,17 @@ function upd -d "Runs the update command for the current distro or downloads/upd
             rld
             continue
         else if test "$target" = tmuxp
-            if not in_container
+            if in_container
+                print_warning "tmuxp should be installed while in the host environment, skipping..."
+            else
                 if command -q tmuxp
                     print_warning "tmuxp is installed through package manager, skipping..."
                 else
-                    python3 -m pip install --target $BIN_FOLDER/tmuxp --upgrade tmuxp
+                    set -l tmuxp_tmp (mktemp -d)
+                    set -l tmuxp_prefix $BIN_FOLDER/tmuxp
+                    python3 -m pip install --target $tmuxp_tmp tmuxp
+                    rm -fr $tmuxp_prefix
+                    mv $tmuxp_tmp $tmuxp_prefix
                 end
             end
             continue
