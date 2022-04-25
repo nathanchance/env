@@ -53,5 +53,12 @@ function dbxc -d "Shorthand for 'distrobox create'"
         set -a add_args -e USE_CBL=1
     end
 
+    # If we are going to use an Arch Linux container and the host is using
+    # Reflector to update the mirrorlist, mount the mirrorlist into the
+    # container so it can enjoy quick updates
+    if test "$img" = $GHCR/dev/arch; and test -f /etc/xdg/reflector/reflector.conf
+        set -a add_args --volume /etc/pacman.d/mirrorlist:/etc/pacman.d/mirrorlist:ro
+    end
+
     dbx create -a "$add_args" $dbx_args $dbx_img
 end
