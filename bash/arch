@@ -62,6 +62,7 @@ function install_pkgs() {
         iputils
         neofetch
         opendoas
+        reflector
 
         # arc
         php
@@ -234,6 +235,19 @@ function wsl_tmpfs() {
     fi
 }
 
+function enable_reflector() {
+    if ! $wsl; then
+        cat <<'EOF' >/etc/xdg/reflector/reflector.conf
+--country "United States"
+--latest 15
+--protocol https
+--save /etc/pacman.d/mirrorlist
+--sort rate
+EOF
+        systemctl enable --now reflector.{service,timer}
+    fi
+}
+
 function enable_ssh() {
     if ! $wsl; then
         sed -i 's/#PermitRootLogin prohibit-password/PermitRootLogin prohibit-password/g' /etc/ssh/sshd_config
@@ -274,6 +288,7 @@ clone_env
 podman_setup
 vmware_adjustments
 wsl_tmpfs
+enable_reflector
 enable_ssh
 enable_tailscale
 fix_lightdm
