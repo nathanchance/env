@@ -16,6 +16,7 @@ function cbl_qualify_next -d "Run a series of checks to qualify new linux-next r
             cbl_check_cfi
         end
     else if test $LOCATION = pi
+        set -e fish_trace
         switch (uname -m)
             case aarch64
                 set arch arm64
