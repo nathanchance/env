@@ -3,7 +3,7 @@
 _localversion=-llvm
 _pkgsuffix=-next$_localversion
 pkgbase=linux$_pkgsuffix
-_srctag=next-20220426
+_srctag=next-20220427
 pkgver=${_srctag//-/.}
 pkgrel=1
 pkgdesc='linux-next'
@@ -19,7 +19,7 @@ source=(
   "$_srcname::git+https://git.kernel.org/pub/scm/linux/kernel/git/next/linux-next.git?signed#tag=$_srctag"
   config
   20220201_lb_drm_i915_fix_null_pointer_dereference.patch
-  20220425_daniel_starke_tty_n_gsm_fix_sometimes_uninitialized_warning_in_gsm_dlci_modem_output.patch
+  intel_runtime_pm_put.patch
 )
 
 validpgpkeys=(
@@ -27,9 +27,9 @@ validpgpkeys=(
   '3F2568AAC26998F9E813A1C5C3F436CA30F5D8EB'  # Mark Brown
 )
 sha256sums=('SKIP'
-            'f1d97ff418517af5b6b5716b99e506e685991d629fe4f447b6d0ac11bcbc174d'
+            '1f7515b7f4b424a62c83091aa13fb50c2e7f061c8ca951f6e35ec36be2baee11'
             'b79f03f480e7c0571a31ebb68ff9b8c39bbc8f4e064499c0dadabdfde23c4cac'
-            'dc220126d557dbfe65a3ca393db2bf44bc8a253f05341947b535fe9fada2a2b3')
+            'aab7b874ec07afc9f0cf1be3d8251c793636b6aa87806c1c2c0b3ac838fc4b00')
 
 _kmake() {
   set -x
