@@ -91,12 +91,13 @@ function install_packages() {
         uboot-tools
         wget
 
-        # LLVM/clang
+        # LLVM/clang + build-llvm.py
         binutils-devel
         clang
         cmake
         lld
         ninja-build
+        perf
         zlib-devel
 
         # locale

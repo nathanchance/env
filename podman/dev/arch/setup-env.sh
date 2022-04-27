@@ -97,12 +97,13 @@ function install_packages() {
         uboot-tools
         wget
 
-        # LLVM/clang
+        # LLVM/clang + build-llvm.py
         clang
         cmake
         lld
         llvm
         ninja
+        perf
 
         # package building
         dpkg
