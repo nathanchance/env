@@ -19,6 +19,7 @@ function cbl_bld_tot_tcs -d "Build LLVM and binutils from source for kernel deve
 
         case hetzner-server workstation
             set bld_llvm_args \
+                --bolt \
                 --pgo kernel-{allmod,def}config
 
         case pi
