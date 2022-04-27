@@ -85,6 +85,7 @@ function install_packages_apt() {
         libdw-dev
         libelf-dev
         libncurses5-dev
+        libsasl2-modules
         libssl-dev
         locales
         lzop
