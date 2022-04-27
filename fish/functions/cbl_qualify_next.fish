@@ -12,7 +12,9 @@ function cbl_qualify_next -d "Run a series of checks to qualify new linux-next r
     sleep 5
     if test (uname -m) = x86_64
         cbl_check_cfi &>/dev/null
-        if test $status -ne 0
+        if test $status -eq 0
+            sudo dmesg -l warn,err
+        else
             cbl_check_cfi
         end
     else if test $LOCATION = pi
