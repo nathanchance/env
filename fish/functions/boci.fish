@@ -41,14 +41,16 @@ function boci -d "Build an OCI container image"
                 set base debian:bullseye
             case gcc-11
                 set base ubuntu:impish
-            case llvm-1{1,2,3,4,5}
+            case llvm-1{1,2}
                 set base ubuntu:impish
+            case llvm-1{3,4,5}
+                set base ubuntu:jammy
             case llvm-android
                 if test (uname -m) != x86_64
                     print_error "$image cannot be build on non-x86_64 hosts"
                     continue
                 end
-                set base ubuntu:impish
+                set base ubuntu:jammy
         end
 
         switch $image

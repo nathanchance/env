@@ -60,19 +60,19 @@ jobs:
             compiler: llvm-12
             platforms: linux/amd64,linux/arm64
 
-          - base: ubuntu:impish
+          - base: ubuntu:jammy
             compiler: llvm-13
             platforms: linux/amd64,linux/arm64
 
-          - base: ubuntu:impish
+          - base: ubuntu:jammy
             compiler: llvm-14
             platforms: linux/amd64,linux/arm64
 
-          - base: ubuntu:impish
+          - base: ubuntu:jammy
             compiler: llvm-15
             platforms: linux/amd64,linux/arm64
 
-          - base: ubuntu:impish
+          - base: ubuntu:jammy
             compiler: llvm-android
             platforms: linux/amd64
 
