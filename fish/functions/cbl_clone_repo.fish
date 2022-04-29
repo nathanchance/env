@@ -5,6 +5,7 @@
 function cbl_clone_repo -d "Clone certain repos for ClangBuiltLinux testing and development"
     for arg in $argv
         set -l dest
+        set -l git_clone_args
 
         switch $arg
             case boot-utils tc-build
@@ -12,6 +13,9 @@ function cbl_clone_repo -d "Clone certain repos for ClangBuiltLinux testing and 
                 set dest $CBL_GIT/$arg
             case linux
                 set url https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/
+            case linux-fast-headers
+                set git_clone_args -b sched/headers
+                set url https://git.kernel.org/pub/scm/linux/kernel/git/mingo/tip.git/
             case linux-next
                 set url https://git.kernel.org/pub/scm/linux/kernel/git/next/linux-next.git/
             case linux-stable
@@ -24,6 +28,9 @@ function cbl_clone_repo -d "Clone certain repos for ClangBuiltLinux testing and 
             case wsl2
                 set url git@github.com:nathanchance/WSL2-Linux-Kernel
                 set dest $CBL_BLD/wsl2
+            case '*'
+                print_error "$arg not supported explicitly, skipping!"
+                continue
         end
 
         if test -z "$dest"
@@ -32,7 +39,7 @@ function cbl_clone_repo -d "Clone certain repos for ClangBuiltLinux testing and 
 
         if not test -d $dest
             mkdir -p (dirname $dest)
-            git clone $url $dest; or return
+            git clone $git_clone_args $url $dest; or return
             switch $arg
                 case llvm-project
                     switch $LOCATION
