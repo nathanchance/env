@@ -119,7 +119,8 @@ function install_packages() {
         edk2-ovmf
         libevent
         libutempter
-        qemu-headless-arch-extra
+        qemu-emulators-full
+        qemu-img
     )
     pacman -S --noconfirm "${packages[@]}"
 }
