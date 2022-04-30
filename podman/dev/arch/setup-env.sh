@@ -123,6 +123,9 @@ function install_packages() {
         qemu-img
     )
     pacman -S --noconfirm "${packages[@]}"
+
+    # https://bugs.archlinux.org/task/74591
+    rm -fr /etc/security/limits.d/95-qemu-system-ppc.conf
 }
 
 # Setup build user for AUR packages
