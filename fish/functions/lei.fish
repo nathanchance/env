@@ -8,7 +8,6 @@ function lei -d "Runs lei though system or podman, depending on how it is availa
     set -lx XDG_DATA_HOME $XDG_FOLDER/share
 
     if command -q lei
-        set fish_trace 1
         command lei $argv
     else
         in_container_msg -h; or return
