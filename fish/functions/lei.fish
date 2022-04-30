@@ -3,9 +3,9 @@
 # Copyright (C) 2021-2022 Nathan Chancellor
 
 function lei -d "Runs lei though system or podman, depending on how it is available"
-    set -lx XDG_CACHE_HOME $LEI_FOLDER/cache
-    set -lx XDG_CONFIG_HOME $LEI_FOLDER/config
-    set -lx XDG_DATA_HOME $LEI_FOLDER/share
+    set -lx XDG_CACHE_HOME $XDG_FOLDER/cache
+    set -lx XDG_CONFIG_HOME $XDG_FOLDER/config
+    set -lx XDG_DATA_HOME $XDG_FOLDER/share
 
     if command -q lei
         set fish_trace 1

@@ -4,6 +4,10 @@
 
 function tuxmake -d "Calls tuxmake from a git checkout if it is not available in PATH"
     in_container_msg -h; or return
+
+    set -lx XDG_CACHE_HOME $XDG_FOLDER/cache
+    set -lx XDG_CONFIG_HOME $XDG_FOLDER/config
+
     if command -q tuxmake
         command tuxmake $argv
     else

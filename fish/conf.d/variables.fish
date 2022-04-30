@@ -76,19 +76,16 @@ set -gx SRC_FOLDER $MAIN_FOLDER/src
 
 set -gx NVME_FOLDER /mnt/nvme
 if test -d $NVME_FOLDER
-    set -gx AUR_FOLDER $NVME_FOLDER/aur
-    set -gx CCACHE_DIR $NVME_FOLDER/ccache
-    set -gx LEI_FOLDER $NVME_FOLDER/lei
-    set -gx MAIL_FOLDER $NVME_FOLDER/mail
-    set -gx TMP_FOLDER $NVME_FOLDER/tmp
-    set -gx VM_FOLDER $NVME_FOLDER/vm
+    set -gx EXT_FOLDER $NVME_FOLDER
 else
-    set -gx AUR_FOLDER $MAIN_FOLDER/aur
-    set -gx LEI_FOLDER $MAIN_FOLDER/lei
-    set -gx MAIL_FOLDER $MAIN_FOLDER/mail
-    set -gx TMP_FOLDER $MAIN_FOLDER/tmp
-    set -gx VM_FOLDER $MAIN_FOLDER/vm
+    set -gx EXT_FOLDER $MAIN_FOLDER
 end
+set -gx AUR_FOLDER $EXT_FOLDER/aur
+set -gx CCACHE_DIR $EXT_FOLDER/ccache
+set -gx MAIL_FOLDER $EXT_FOLDER/mail
+set -gx TMP_FOLDER $EXT_FOLDER/tmp
+set -gx VM_FOLDER $EXT_FOLDER/vm
+set -gx XDG_FOLDER $EXT_FOLDER/xdg
 
 set -gx CBL_BLD $CBL/build
 set -gx CBL_GIT $CBL/github
