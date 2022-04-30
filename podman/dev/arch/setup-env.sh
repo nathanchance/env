@@ -8,6 +8,9 @@ function pacman_conf() {
     sed -i 's/#ParallelDownloads = 5/ParallelDownloads = 7/g' /etc/pacman.conf
     sed -i "/\[testing\]/,/Include/"'s/^#//' /etc/pacman.conf
     sed -i "/\[community-testing\]/,/Include/"'s/^#//' /etc/pacman.conf
+
+    # https://bugs.archlinux.org/task/74591
+    sed -i "s;#NoExtract   =;NoExtract   = etc/security/limits.d/95-qemu-system-ppc.conf;" /etc/pacman.conf
 }
 
 # Edit /etc/makepkg.conf to gain some speed up
@@ -124,9 +127,6 @@ function install_packages() {
         qemu-img
     )
     pacman -S --noconfirm "${packages[@]}"
-
-    # https://bugs.archlinux.org/task/74591
-    rm -fr /etc/security/limits.d/95-qemu-system-ppc.conf
 }
 
 # Setup build user for AUR packages
