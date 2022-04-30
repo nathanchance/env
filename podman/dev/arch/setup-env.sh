@@ -19,7 +19,7 @@ function makepkg_conf() {
 
 # Update and install packages
 function install_packages() {
-    pacman -Syyu --noconfirm
+    pacman -Syyuu --noconfirm
 
     packages=(
         # Nicer versions of certain GNU utilities
