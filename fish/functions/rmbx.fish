@@ -8,13 +8,12 @@ function rmbx -d "Read an mbox directory created by lei"
             case -u --update
                 set update true
             case '*'
-                set mbx /mail/$arg
+                set mbx $MAIL_FOLDER/$arg
         end
     end
 
-    set mail_root (dirname $MAIL_FOLDER)
-    if not test -d $mail_root$mbx
-        print_error "$mail_root$mbx does not exist!"
+    if not test -d $mbx
+        print_error "$mbx does not exist!"
         return 1
     end
 
@@ -22,5 +21,5 @@ function rmbx -d "Read an mbox directory created by lei"
         lei up $mbx; or return
     end
 
-    mutt -f $mail_root$mbx
+    mutt -f $mbx
 end

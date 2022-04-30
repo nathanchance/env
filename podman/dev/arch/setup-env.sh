@@ -58,6 +58,7 @@ function install_packages() {
         vte-common
 
         # email
+        lei
         mutt
 
         # env

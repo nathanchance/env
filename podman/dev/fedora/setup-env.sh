@@ -61,6 +61,7 @@ function install_packages() {
 
         # email
         cyrus-sasl-plain
+        lei
         mutt
 
         # git
