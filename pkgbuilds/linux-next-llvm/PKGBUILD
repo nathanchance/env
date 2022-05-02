@@ -3,7 +3,7 @@
 _localversion=-llvm
 _pkgsuffix=-next$_localversion
 pkgbase=linux$_pkgsuffix
-_srctag=next-20220429
+_srctag=next-20220502
 pkgver=${_srctag//-/.}
 pkgrel=1
 pkgdesc='linux-next'
@@ -19,7 +19,7 @@ source=(
   "$_srcname::git+https://git.kernel.org/pub/scm/linux/kernel/git/next/linux-next.git?signed#tag=$_srctag"
   config
   20220201_lb_drm_i915_fix_null_pointer_dereference.patch
-  intel_runtime_pm_put.patch
+  0001-Revert-interconnect-Restore-sync-state-by-ignoring-i.patch
 )
 
 validpgpkeys=(
@@ -27,9 +27,9 @@ validpgpkeys=(
   '3F2568AAC26998F9E813A1C5C3F436CA30F5D8EB'  # Mark Brown
 )
 sha256sums=('SKIP'
-            '864139c40c9d170df88f5bdb258ae9a224041537da206e7f78e0e5a168d383ad'
+            '6cfa8c6c586477008bda560b5848e82568c8fcb5d0f74ffdc48a0095b21fe5b6'
             'b79f03f480e7c0571a31ebb68ff9b8c39bbc8f4e064499c0dadabdfde23c4cac'
-            'aab7b874ec07afc9f0cf1be3d8251c793636b6aa87806c1c2c0b3ac838fc4b00')
+            'bc647b2c5b75256fe2e9805a90709e02c0cf4329d830996c6af9e477267d72e1')
 
 _kmake() {
   set -x

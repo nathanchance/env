@@ -1,0 +1,38 @@
+From 967477e65fd00019648e6904b5353944d0af8110 Mon Sep 17 00:00:00 2001
+From: Nathan Chancellor <nathan@kernel.org>
+Date: Mon, 2 May 2022 08:20:13 -0700
+Subject: [PATCH] Revert "interconnect: Restore sync state by ignoring ipa-virt
+ in provider count"
+
+This reverts commit ad3cc2f05fdaa2ef95ac538995ebfa60e273fdef.
+
+Link: https://lore.kernel.org/Ym%2F2QJeGHDoZSw8o@dev-arch.thelio-3990X/
+Signed-off-by: Nathan Chancellor <nathan@kernel.org>
+---
+ drivers/interconnect/core.c | 8 +-------
+ 1 file changed, 1 insertion(+), 7 deletions(-)
+
+diff --git a/drivers/interconnect/core.c b/drivers/interconnect/core.c
+index c52915a58b22..9050ca1f4285 100644
+--- a/drivers/interconnect/core.c
++++ b/drivers/interconnect/core.c
+@@ -1087,15 +1087,9 @@ static int of_count_icc_providers(struct device_node *np)
+ {
+ 	struct device_node *child;
+ 	int count = 0;
+-	const struct of_device_id ignore_list[] = {
+-		{ .compatible = "qcom,sc7180-ipa-virt" },
+-		{ .compatible = "qcom,sdx55-ipa-virt" },
+-		{}
+-	};
+ 
+ 	for_each_available_child_of_node(np, child) {
+-		if (of_property_read_bool(child, "#interconnect-cells") &&
+-		    likely(!of_match_node(ignore_list, child)))
++		if (of_property_read_bool(child, "#interconnect-cells"))
+ 			count++;
+ 		count += of_count_icc_providers(child);
+ 	}
+-- 
+2.36.0
+

@@ -52,11 +52,18 @@ function cbl_gen_archconfig -d "Generate a configuration file for Arch Linux"
         -e DEBUG_INFO_DWARF5 \
         -e WERROR \
         -m DRM
-    # https://git.kernel.org/next/linux-next/c/0177212e2789919be68c7922f33c71febc74842b
+    # https://git.kernel.org/broonie/spi/c/0177212e2789919be68c7922f33c71febc74842b
+    # Drop when 5.18 is in the Arch repos
     $src/scripts/config \
         --file $cfg \
         -m SPI_INTEL_PCI \
         -m SPI_INTEL_PLATFORM
+    # https://git.kernel.org/gregkh/driver-core/c/23cfbc6ec44e5e80d5522976ff45ffcdcddfb230
+    # Drop when 5.19 is in the Arch repos
+    $src/scripts/config \
+        --file $cfg \
+        -e FW_LOADER_COMPRESS_XZ \
+        -e FW_LOADER_COMPRESS_ZSTD
 
     # Step 3: Run olddefconfig
     kmake -C $src KCONFIG_CONFIG=$cfg olddefconfig
