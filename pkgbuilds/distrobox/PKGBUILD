@@ -1,0 +1,19 @@
+# Maintainer: Nathan Chancellor <nathan@kernel.org>
+pkgname=distrobox
+pkgver=1.2.15
+pkgrel=1
+pkgdesc="Use any Linux distribution inside your terminal"
+arch=('any')
+url="https://distrobox.privatedns.org/"
+license=('GPL3')
+depends=('sh')
+optdepends=('docker: Container manager'
+            'podman: Container manager')
+source=("$pkgname-$pkgver.tar.gz::https://github.com/89luca89/$pkgname/archive/refs/tags/$pkgver.tar.gz")
+sha256sums=('62a7ee779f605347919157fae947331042b771022c7d7d3169a2bd6ecc8589d7')
+
+package() {
+  cd "$pkgname-$pkgver"
+
+  ./install --prefix "$pkgdir/usr"
+}
