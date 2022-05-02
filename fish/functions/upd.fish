@@ -64,6 +64,16 @@ function upd -d "Runs the update command for the current distro or downloads/upd
         set -l submodules
 
         switch $target
+            case arc b4 bat btop diskus distrobox duf exa fd fzf hyperfine repo rg shellcheck shfmt tuxmake yapf
+                if command -q $target
+                    print_warning "$target is installed through package manager, skipping install..."
+                end
+        end
+
+        ########################
+        # SOURCE BASED INSTALL #
+        ########################
+        switch $target
             case arc
                 set git_urls https://github.com/phacility/arcanist https://github.com/phacility/libphutil
                 set subfolder arcanist
@@ -79,9 +89,6 @@ function upd -d "Runs the update command for the current distro or downloads/upd
                 set git_urls https://github.com/google/yapf
         end
 
-        ########################
-        # SOURCE BASED INSTALL #
-        ########################
         if test -n "$git_urls"
             for git_url in $git_urls
                 set src_base $BIN_SRC_FOLDER
