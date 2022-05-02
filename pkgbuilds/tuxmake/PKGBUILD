@@ -27,6 +27,7 @@ build() {
 check() {
   cd "$pkgname-v$pkgver"
 
+  # https://gitlab.com/Linaro/tuxmake/-/issues/177
   PYTHONDONTWRITEBYTECODE=1 pytest -k "not test_os" test/
 }
 
