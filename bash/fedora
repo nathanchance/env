@@ -43,6 +43,9 @@ function install_packages() {
         # b4
         python3-{dkimpy,dns,requests}
 
+        # distrobox
+        distrobox
+
         # email
         cyrus-sasl-plain
         mutt
