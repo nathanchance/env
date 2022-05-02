@@ -15,7 +15,7 @@ function install_packages() {
         php
 
         # b4
-        python3-{dkimpy,dns,requests}
+        b4
 
         # compression/decompression/extraction
         bzip2

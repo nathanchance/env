@@ -68,7 +68,9 @@ function install_pkgs() {
         php
 
         # b4
-        python-{dkim,requests}
+        b4
+        python-dkim
+        patatt
 
         # Container tools
         aardvark-dns

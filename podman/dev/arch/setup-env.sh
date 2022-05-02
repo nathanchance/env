@@ -36,8 +36,9 @@ function install_packages() {
         php
 
         # b4
+        b4
         python-dkim
-        python-requests
+        patatt
 
         # compression/decompression/extraction
         bzip2

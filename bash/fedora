@@ -41,7 +41,7 @@ function install_packages() {
         util-linux-user
 
         # b4
-        python3-{dkimpy,dns,requests}
+        b4
 
         # distrobox
         distrobox
