@@ -185,11 +185,20 @@ out.*/
         clone_aur_repos
         set aur_pkgs opendoas-sudo
         if test "$LOCATION" != wsl
-            set -a aur_pkgs modprobed-db
+            set -a aur_pkgs \
+                distrobox \
+                modprobed-db \
+                tuxmake
         end
         for aur_pkg in $aur_pkgs
             if not is_installed $aur_pkg
-                pushd $AUR_FOLDER/$aur_pkg; or return
+                switch $aur_pkg
+                    case distrobox tuxmake
+                        set aur_pkg_dir $ENV_FOLDER/pkgbuilds/$aur_pkg
+                    case '*'
+                        set aur_pkg_dir $AUR_FOLDER/$aur_pkg
+                end
+                pushd $aur_pkg_dir; or return
                 makepkg; or return
                 doas pacman -U --noconfirm $aur_pkg*.pkg.tar.zst; or return
                 popd
