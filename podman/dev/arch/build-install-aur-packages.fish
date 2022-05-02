@@ -20,14 +20,10 @@ function setup_gpg
 end
 
 function build_cvise
-    # First, build and install python-pebble
-    set python_pebble $HOME/python-pebble
-    git clone https://aur.archlinux.org/python-pebble.git $python_pebble; or exit
-    cd $python_pebble; or exit
+    cd $HOME/pkgbuilds/python-pebble; or exit
     makepkg -irs --noconfirm; or exit
 
-    # Next, build and install cvise
-    cd $HOME/cvise; or exit
+    cd $HOME/pkgbuilds/cvise; or exit
     makepkg -irs --noconfirm
 end
 

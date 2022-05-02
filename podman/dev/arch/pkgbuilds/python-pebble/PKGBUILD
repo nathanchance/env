@@ -1,0 +1,25 @@
+# Maintainer: Nathan Chancellor <nathan@kernel.org>
+pkgname=python-pebble
+_name=${pkgname#python-}
+pkgver=4.6.3
+pkgrel=1
+pkgdesc="A neat API to manage threads and processes within an application"
+arch=('any')
+url="https://github.com/noxdafox/pebble"
+license=('GPL3')
+depends=('python')
+makedepends=('python-setuptools')
+source=("$pkgname-$pkgver.tar.gz::https://github.com/noxdafox/${_name}/archive/refs/tags/$pkgver.tar.gz")
+sha256sums=('54694d24159feb08b967abff0d479d1571fc6f025d14b5c27647b7d2871dfae9')
+
+build() {
+  cd "${_name}-$pkgver"
+
+  python setup.py build
+}
+
+package() {
+  cd "${_name}-$pkgver"
+
+  python setup.py install --root="$pkgdir" --optimize=1
+}

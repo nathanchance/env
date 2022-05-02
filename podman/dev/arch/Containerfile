@@ -6,7 +6,7 @@ RUN bash /setup-env.sh && rm /setup-env.sh
 USER build
 WORKDIR /home/build
 COPY --chown=build:build build-install-aur-packages.fish build-install-aur-packages.fish
-COPY --chown=build:build cvise cvise/
+COPY --chown=build:build pkgbuilds pkgbuilds/
 RUN fish build-install-aur-packages.fish
 
 USER root
