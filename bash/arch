@@ -61,7 +61,6 @@ function install_pkgs() {
         btop
         iputils
         neofetch
-        opendoas
         reflector
 
         # arc
@@ -189,6 +188,11 @@ function install_pkgs() {
 }
 
 function setup_doas() {
+    # sudo is a little bit more functional. Keep it in virtual machines.
+    is_virtual_machine && return 0
+
+    pacman -S --noconfirm opendoas || exit
+
     cat <<EOF >/etc/doas.conf
 # Allow me to be root for 5 minutes at a time
 permit persist ${user_name} as root

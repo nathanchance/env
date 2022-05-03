@@ -50,6 +50,13 @@ function is_installed() {
     fi
 }
 
+function is_virtual_machine() {
+    case "$(uname -n)" in
+        hyperv | qemu | vmware) return 0 ;;
+        *) return 1 ;;
+    esac
+}
+
 function parse_parameters() {
     while (( $# )); do
         case $1 in
