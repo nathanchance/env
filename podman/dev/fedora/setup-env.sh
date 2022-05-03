@@ -105,6 +105,10 @@ function install_packages() {
         # locale
         glibc-langpack-en
 
+        # nicer GNU utilities
+        exa
+        ripgrep
+
         # package building
         dpkg-dev
         rpm-build

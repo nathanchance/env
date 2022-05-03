@@ -33,6 +33,18 @@ function setup_gh_repo() {
     dnf config-manager --add-repo https://cli.github.com/packages/rpm/gh-cli.repo || exit
 }
 
+function setup_tuxmake_repo() {
+    cat <<EOF >/etc/yum.repos.d/tuxmake.repo
+[tuxmake]
+name=tuxmake
+type=rpm-md
+baseurl=https://tuxmake.org/packages/
+gpgcheck=1
+gpgkey=https://tuxmake.org/packages/repodata/repomd.xml.key
+enabled=1
+EOF
+}
+
 function install_packages() {
     packages=(
         # administration
@@ -67,8 +79,16 @@ function install_packages() {
         gh
         git{,-email}
 
+        # nicer GNU utilities
+        duf
+        exa
+        ripgrep
+
         # repo
         python
+
+        # tuxmake
+        tuxmake
     )
 
     dnf install -y "${packages[@]}" || exit
@@ -101,6 +121,7 @@ set_global_variables
 reality_check
 install_initial_packages
 setup_gh_repo
+setup_tuxmake_repo
 install_packages
 setup_doas
 setup_mosh
