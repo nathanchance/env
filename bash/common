@@ -58,7 +58,7 @@ function is_virtual_machine() {
 }
 
 function parse_parameters() {
-    while (( $# )); do
+    while (($#)); do
         case $1 in
             -r | --root-password)
                 shift
