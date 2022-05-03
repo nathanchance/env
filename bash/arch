@@ -179,6 +179,8 @@ function install_pkgs() {
                 open-vm-tools
             )
         fi
+
+        is_virtual_machine && packages+=(devtools)
     fi
 
     pacman -S --needed --noconfirm "${packages[@]}" || exit
