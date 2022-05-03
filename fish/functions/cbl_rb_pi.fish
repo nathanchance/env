@@ -26,6 +26,8 @@ function cbl_rb_pi -d "Rebase Raspberry Pi kernel on latest linux-next"
 
     git rv --no-edit 3dd2f238a7b214e50840e3e439f73e82c9d0f41f; or return
 
+    git am $ENV_FOLDER/pkgbuilds/linux-next-llvm/0001-mm-shmem-Fix-uninitialized-variables.patch; or return
+
     # Regenerate defconfigs
     for arch in arm arm64
         switch $arch

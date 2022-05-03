@@ -1,0 +1,35 @@
+From c47716769bbe9ac1222eba2fcff51df4948def15 Mon Sep 17 00:00:00 2001
+From: Nathan Chancellor <nathan@kernel.org>
+Date: Tue, 3 May 2022 08:37:23 -0700
+Subject: [PATCH 1/4] mm/shmem: Fix uninitialized variables
+
+Link: https://lore.kernel.org/YnFGuPWgT7tT7iAV@dev-arch.thelio-3990X/
+Signed-off-by: Nathan Chancellor <nathan@kernel.org>
+---
+ mm/shmem.c | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+
+diff --git a/mm/shmem.c b/mm/shmem.c
+index 107f1e4dd0aa..a2234f19b711 100644
+--- a/mm/shmem.c
++++ b/mm/shmem.c
+@@ -1682,7 +1682,7 @@ static int shmem_swapin_folio(struct inode *inode, pgoff_t index,
+ 	struct shmem_inode_info *info = SHMEM_I(inode);
+ 	struct mm_struct *charge_mm = vma ? vma->vm_mm : NULL;
+ 	struct page *page;
+-	struct folio *folio;
++	struct folio *folio = NULL;
+ 	swp_entry_t swap;
+ 	int error;
+ 
+@@ -2334,6 +2334,7 @@ int shmem_mfill_atomic_pte(struct mm_struct *dst_mm,
+ 
+ 	if (!*pagep) {
+ 		ret = -ENOMEM;
++		page = &shmem_alloc_folio(gfp, info, pgoff)->page;
+ 		if (!page)
+ 			goto out_unacct_blocks;
+ 
+-- 
+2.36.0
+

@@ -1,16 +1,10 @@
-From git@z Thu Jan  1 00:00:00 1970
-Subject: [PATCH v1] drm/i915: fix null pointer dereference
-From: Lukasz Bartosik <lb@semihalf.com>
-Date: Tue, 01 Feb 2022 16:33:54 +0100
-Message-Id: <20220201153354.11971-1-lukasz.bartosik@semihalf.com>
-To: Jani Nikula <jani.nikula@linux.intel.com>, Joonas Lahtinen <joonas.lahtinen@linux.intel.com>, Rodrigo Vivi <rodrigo.vivi@intel.com>, Tvrtko Ursulin <tvrtko.ursulin@linux.intel.com>
-Cc: intel-gfx@lists.freedesktop.org, upstream@semihalf.com
-List-Id: Intel graphics driver community testing & development <intel-gfx.lists.freedesktop.org>
+From 958e4f328f033a798db79a642aecf204dfa3b86c Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?=C5=81ukasz=20Bartosik?= <lb@semihalf.com>
+Date: Tue, 1 Feb 2022 16:33:54 +0100
+Subject: [PATCH 4/4] drm/i915: fix null pointer dereference
 MIME-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
+Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
-
-From: Łukasz Bartosik <lb@semihalf.com>
 
 Asus chromebook CX550 crashes during boot on v5.17-rc1 kernel.
 The root cause is null pointer defeference of bi_next
@@ -64,7 +58,7 @@ Link: https://lore.kernel.org/r/20220201153354.11971-1-lukasz.bartosik@semihalf.
  1 file changed, 9 insertions(+), 7 deletions(-)
 
 diff --git a/drivers/gpu/drm/i915/display/intel_bw.c b/drivers/gpu/drm/i915/display/intel_bw.c
-index 2da4aacc956b..bd0ed68b7faa 100644
+index 37bd7b17f3d0..f2fad199e2e0 100644
 --- a/drivers/gpu/drm/i915/display/intel_bw.c
 +++ b/drivers/gpu/drm/i915/display/intel_bw.c
 @@ -404,15 +404,17 @@ static int tgl_get_bw_info(struct drm_i915_private *dev_priv, const struct intel
@@ -92,8 +86,6 @@ index 2da4aacc956b..bd0ed68b7faa 100644
  
  		bi->num_qgv_points = qi.num_points;
  		bi->num_psf_gv_points = qi.num_psf_points;
-
 -- 
-2.35.0.rc2.247.g8bbb082509-goog
-
+2.36.0
 
