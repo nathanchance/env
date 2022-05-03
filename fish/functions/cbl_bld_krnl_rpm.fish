@@ -36,7 +36,7 @@ function cbl_bld_krnl_rpm -d "Build a .rpm kernel package"
         HOSTCFLAGS=-Wno-deprecated-declarations \
         LLVM=1 \
         RPMOPTS="--define '_topdir $PWD/rpmbuild'" \
-        olddefconfig binrpm-pkg
+        olddefconfig binrpm-pkg; or return
 
     echo Run
     printf '\n\t$ sudo fish -c "dnf install %s; and reboot"\n\n' (realpath -- (fd -e rpm 'kernel-[0-9]+') | string replace $HOME \$HOME)

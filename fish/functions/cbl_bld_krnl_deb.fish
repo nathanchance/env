@@ -38,7 +38,7 @@ function cbl_bld_krnl_deb -d "Build a .deb kernel package"
         LLVM=1 \
         $KMAKE_DEB_ARGS \
         O=.build/$arch \
-        olddefconfig bindeb-pkg
+        olddefconfig bindeb-pkg; or return
 
     echo Run
     printf '\n\t$ sudo fish -c "dpkg -i %s; and reboot"\n\n' (realpath -- .build/linux-image-*.deb | string replace $HOME \$HOME)
