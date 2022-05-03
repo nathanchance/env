@@ -57,6 +57,7 @@ function install_packages() {
         python
         python-setuptools
         python-yaml
+        yapf
 
         # distrobox
         vte-common

@@ -42,6 +42,7 @@ function install_packages() {
         patch
         python2
         python3
+        python3-yapf
         texinfo-tex
 
         # distrobox
