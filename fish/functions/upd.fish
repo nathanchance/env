@@ -67,6 +67,7 @@ function upd -d "Runs the update command for the current distro or downloads/upd
             case arc b4 bat btop diskus distrobox duf exa fd fzf hyperfine repo rg shellcheck shfmt tuxmake yapf
                 if command -q $target
                     print_warning "$target is installed through package manager, skipping install..."
+                    continue
                 end
         end
 
