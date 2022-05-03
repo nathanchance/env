@@ -5,7 +5,7 @@
 function fdshfmt -d "Find and format all shell scripts ending with .{ba,}sh in a directory"
     switch (basename $PWD)
         case env
-            fd -t x -E{ bin,fish,windows} -X fish -c 'shfmt -ci -i 4 -w $argv'
+            fd -t x -E{ bin,fish,python,windows} -X fish -c 'shfmt -ci -i 4 -w $argv'
     end
     fd -e{ ba,}sh -X fish -c 'shfmt -ci -i 4 -w $argv'
 end
