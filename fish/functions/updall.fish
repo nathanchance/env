@@ -24,14 +24,10 @@ function updall -d "Update binaries in $BIN_FOLDER"
         exa \
         fd \
         fzf \
-        hyperfine \
         repo \
         rg \
-        shellcheck \
-        shfmt \
         tmuxp \
-        tuxmake \
-        yapf
+        tuxmake
 
     upd $targets
 end
