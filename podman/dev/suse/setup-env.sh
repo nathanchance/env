@@ -41,6 +41,7 @@ function install_packages() {
         # distrobox
         findutils
         libvte-2*
+        pinentry
         shadow
         sudo
         util-linux

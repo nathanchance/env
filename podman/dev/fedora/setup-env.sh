@@ -47,6 +47,7 @@ function install_packages() {
 
         # distrobox
         passwd
+        pinentry
         vte-profile
 
         # env

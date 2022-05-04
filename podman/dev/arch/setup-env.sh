@@ -60,6 +60,7 @@ function install_packages() {
         yapf
 
         # distrobox
+        pinentry
         vte-common
 
         # email

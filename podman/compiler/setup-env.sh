@@ -91,6 +91,7 @@ function install_packages_apt() {
         lzop
         mutt
         openssl
+        pinentry-curses
         python3
         qemu-system-arm
         qemu-system-mips

@@ -81,6 +81,7 @@ function install_packages() {
 
         # distrobox
         libvte-*-common
+        pinentry-curses
         sudo
 
         # env
