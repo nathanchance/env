@@ -4,7 +4,7 @@
 
 function yapf -d "Run yapf from a git checkout"
     if command -q yapf
-        command yapf $argv
+        command yapf -i -p $argv
     else
         set yapf $BIN_SRC_FOLDER/yapf/yapf
         if not test -d $yapf
