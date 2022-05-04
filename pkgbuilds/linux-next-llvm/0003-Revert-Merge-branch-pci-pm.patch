@@ -1,4 +1,4 @@
-From fc852a5551eb47205028bdb686c3f2aead884a9e Mon Sep 17 00:00:00 2001
+From 7c803679ca6d2a76bce527ba2b72afc7cb8b502d Mon Sep 17 00:00:00 2001
 From: Nathan Chancellor <nathan@kernel.org>
 Date: Tue, 3 May 2022 11:02:41 -0700
 Subject: [PATCH 3/4] Revert "Merge branch 'pci/pm'"
