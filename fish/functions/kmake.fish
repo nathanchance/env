@@ -58,6 +58,12 @@ function kmake -d "Run make with all cores and adjust PATH temporarily"
         set silent true
     end
 
+    # open-coded in_kernel_tree
+    if not test -f $lnx_dir/Makefile
+        print_error "$lnx_dir does not appear to be a kernel tree!"
+        return 1
+    end
+
     # Setup paths
     if test -n "$LLVM"; or string match -q -- "*clang" "$CC"
         set clang true
