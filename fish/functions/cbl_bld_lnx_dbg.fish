@@ -39,7 +39,21 @@ function cbl_bld_lnx_dbg -d "Build linux-debug Arch Linux package"
     echo -debug >localversion.10-pkgname
 
     crl -o .config https://github.com/archlinux/svntogit-packages/raw/packages/linux/trunk/config; or return
-    scripts/config $scripts_cfg_args -m DRM
+
+    # Keep in sync with cbl_gen_archconfig, step 2
+    scripts/config \
+        $scripts_cfg_args \
+        -m DRM
+    # https://git.kernel.org/broonie/spi/c/0177212e2789919be68c7922f33c71febc74842b
+    # Drop when 5.18 is in the Arch repos
+    scripts/config \
+        -m SPI_INTEL_PCI \
+        -m SPI_INTEL_PLATFORM
+    # https://git.kernel.org/gregkh/driver-core/c/23cfbc6ec44e5e80d5522976ff45ffcdcddfb230
+    # Drop when 5.19 is in the Arch repos
+    scripts/config \
+        -e FW_LOADER_COMPRESS_XZ \
+        -e FW_LOADER_COMPRESS_ZSTD
 
     kmake $kmake_args olddefconfig; or return
 
