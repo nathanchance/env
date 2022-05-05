@@ -80,6 +80,7 @@ function install_packages() {
         qemu-{arm,extra,ppc,s390x,x86}
         rsync
         socat
+        sparse
         u-boot-tools
         wget
 

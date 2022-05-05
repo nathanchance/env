@@ -91,6 +91,7 @@ function install_packages() {
         qemu-system-{aarch64,arm,mips,ppc,riscv,s390x,x86}
         rsync
         socat
+        sparse
         uboot-tools
         wget
 

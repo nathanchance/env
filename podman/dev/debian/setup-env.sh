@@ -117,6 +117,7 @@ function install_packages() {
         qemu-system-{arm,mips,misc,ppc,x86}
         rsync
         socat
+        sparse
         u-boot-tools
 
         # LLVM

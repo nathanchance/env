@@ -100,6 +100,7 @@ function install_packages_apt() {
         qemu-system-x86
         rsync
         socat
+        sparse
         sudo
         tar
         u-boot-tools

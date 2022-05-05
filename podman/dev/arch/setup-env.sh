@@ -101,6 +101,7 @@ function install_packages() {
         riscv64-linux-gnu-gcc
         rsync
         socat
+        sparse
         uboot-tools
         wget
 
