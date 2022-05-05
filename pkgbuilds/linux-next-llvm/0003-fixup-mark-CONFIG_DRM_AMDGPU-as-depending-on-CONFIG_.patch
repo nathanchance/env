@@ -1,0 +1,28 @@
+From 4dcb0d7b6e65289863762d38ba8d0b7e8ee049ee Mon Sep 17 00:00:00 2001
+From: Nathan Chancellor <nathan@kernel.org>
+Date: Thu, 5 May 2022 11:14:45 -0700
+Subject: [PATCH 3/7] fixup! mark CONFIG_DRM_AMDGPU as depending on
+ CONFIG_CPU_LITTLE_ENDIAN
+
+Link: https://lore.kernel.org/YnQToaOno0MZzJ5r@dev-arch.thelio-3990X/
+Signed-off-by: Nathan Chancellor <nathan@kernel.org>
+---
+ drivers/gpu/drm/Kconfig | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/drivers/gpu/drm/Kconfig b/drivers/gpu/drm/Kconfig
+index 2aaa9ef1168d..a57843733a96 100644
+--- a/drivers/gpu/drm/Kconfig
++++ b/drivers/gpu/drm/Kconfig
+@@ -244,7 +244,7 @@ source "drivers/gpu/drm/radeon/Kconfig"
+ config DRM_AMDGPU
+ 	tristate "AMD GPU"
+ 	depends on DRM && PCI && MMU
+-	depends on CPU_LITTLE_ENDIAN
++	depends on !CPU_BIG_ENDIAN
+ 	select FW_LOADER
+ 	select DRM_DISPLAY_DP_HELPER
+ 	select DRM_DISPLAY_HDMI_HELPER
+-- 
+2.36.0
+
