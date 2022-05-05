@@ -1,6 +1,6 @@
 # Maintainer: Nathan Chancellor <nathan@kernel.org>
 pkgname=tuxmake
-pkgver=1.3.0
+pkgver=1.4.0
 pkgrel=1
 pkgdesc='Thin wrapper to build Linux kernels'
 url='https://tuxmake.org/'
@@ -8,12 +8,12 @@ license=('MIT')
 arch=('any')
 depends=('perl' 'python')
 makedepends=('python-build' 'python-docutils' 'python-flit' 'python-installer' 'python-wheel')
-checkdepends=('clang' 'git' 'python-pytest' 'python-pytest-mock')
+checkdepends=('clang' 'git' 'lld' 'llvm' 'python-pytest' 'python-pytest-mock')
 optdepends=('docker: Container-based build support'
             'podman: Container-based build support'
             'socat: Offline build support')
 source=("$pkgname-v$pkgver.tar.gz::https://gitlab.com/Linaro/$pkgname/-/archive/v$pkgver/$pkgname-v$pkgver.tar.gz")
-sha256sums=('c1f47eba6c1ec786e859aaccb7ae891499d0a246d0b6f351d313ca0786b9f42a')
+sha256sums=('ceae8e1ec54245756ac0ca69e269345cac01f8421040a390d82bd5db46e05caf')
 
 build() {
   cd "$pkgname-v$pkgver"
@@ -27,8 +27,7 @@ build() {
 check() {
   cd "$pkgname-v$pkgver"
 
-  # https://gitlab.com/Linaro/tuxmake/-/issues/177
-  PYTHONDONTWRITEBYTECODE=1 pytest -k "not test_os" test/
+  PYTHONDONTWRITEBYTECODE=1 pytest
 }
 
 package() {
