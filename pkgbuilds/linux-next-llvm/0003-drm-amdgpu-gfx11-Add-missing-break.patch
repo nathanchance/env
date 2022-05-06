@@ -1,7 +1,7 @@
-From 05fe270b69c44e2cddd8bd7b84fcc5b9ed027c9f Mon Sep 17 00:00:00 2001
+From 9a41d1cd5134d48ab7a2506edf602f735f5fbaeb Mon Sep 17 00:00:00 2001
 From: Mike Lothian <mike@fireburn.co.uk>
 Date: Wed, 4 May 2022 17:50:09 +0100
-Subject: [PATCH 4/7] drm/amdgpu/gfx11: Add missing break
+Subject: [PATCH 3/7] drm/amdgpu/gfx11: Add missing break
 
 This stops clang complaining:
 

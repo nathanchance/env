@@ -1,4 +1,4 @@
-From 3eed9fa0ef04598a422353edc1903faf54530255 Mon Sep 17 00:00:00 2001
+From 41a1823cb86b738f762dbdd50d7c2a993451c542 Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?=C5=81ukasz=20Bartosik?= <lb@semihalf.com>
 Date: Tue, 1 Feb 2022 16:33:54 +0100
 Subject: [PATCH 7/7] drm/i915: fix null pointer dereference

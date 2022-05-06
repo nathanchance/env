@@ -1,7 +1,7 @@
-From 10a7297dfcde2949815b4577a0d8ff5349f828a9 Mon Sep 17 00:00:00 2001
+From c124ea3502f7fc21b4d5c93d228ef852165ade05 Mon Sep 17 00:00:00 2001
 From: Mike Lothian <mike@fireburn.co.uk>
 Date: Wed, 4 May 2022 23:24:13 +0100
-Subject: [PATCH 5/7] drm/amdgpu/gfx10: Avoid uninitialised variable 'index'
+Subject: [PATCH 4/7] drm/amdgpu/gfx10: Avoid uninitialised variable 'index'
 
 This stops clang complaining:
 
