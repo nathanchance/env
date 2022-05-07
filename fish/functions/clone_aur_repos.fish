@@ -8,6 +8,7 @@ function clone_aur_repos -d "Clone repos from AUR to build packages locally"
         modprobed-db \
         opendoas-sudo \
         slack-desktop \
+        shellcheck-bin \
         qemu-user-static-bin \
         visual-studio-code-bin
 

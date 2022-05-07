@@ -64,6 +64,8 @@ function install_packages() {
         python
         python-setuptools
         python-yaml
+        shellcheck-bin
+        shfmt
         yapf
 
         # distrobox
