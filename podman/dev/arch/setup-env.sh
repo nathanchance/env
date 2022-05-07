@@ -9,6 +9,13 @@ function pacman_conf() {
     sed -i "/\[testing\]/,/Include/"'s/^#//' /etc/pacman.conf
     sed -i "/\[community-testing\]/,/Include/"'s/^#//' /etc/pacman.conf
 
+    cat <<'EOF' >>/etc/pacman.conf
+
+[nathan]
+SigLevel = Optional TrustAll
+Server = https://raw.githubusercontent.com/nathanchance/arch-repo/main/$arch
+EOF
+
     # https://bugs.archlinux.org/task/74591
     sed -i "s;#NoExtract   =;NoExtract   = etc/security/limits.d/95-qemu-system-ppc.conf;" /etc/pacman.conf
 }
@@ -108,6 +115,7 @@ function install_packages() {
         # LLVM/clang + build-llvm.py
         clang
         cmake
+        cvise
         lld
         llvm
         ninja
@@ -133,13 +141,6 @@ function install_packages() {
     pacman -S --noconfirm "${packages[@]}"
 }
 
-# Setup build user for AUR packages
-function setup_build_user() {
-    useradd -m build
-    echo "build ALL=(ALL) NOPASSWD: ALL" >/etc/sudoers.d/build
-}
-
 pacman_conf
 makepkg_conf
 install_packages
-setup_build_user

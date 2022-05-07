@@ -33,6 +33,14 @@ function pacman_settings() {
 
     # Enable parallel downloads
     sed -i 's/#ParallelDownloads = 5/ParallelDownloads = 7/g' /etc/pacman.conf
+
+    # My personal repo of packages
+    cat <<'EOF' >>/etc/pacman.conf
+
+[nathan]
+SigLevel = Optional TrustAll
+Server = https://raw.githubusercontent.com/nathanchance/arch-repo/main/$arch
+EOF
 }
 
 function pacman_key_setup() {
@@ -147,7 +155,12 @@ function install_pkgs() {
     # This variable is assigned in bash/common
     # shellcheck disable=SC2154
     if ! $wsl; then
-        packages+=(tailscale)
+        packages+=(
+            distrobox
+            modprobed-db
+            tailscale
+            tuxmake
+        )
 
         if [[ -n $DISPLAY ]]; then
             packages+=(
@@ -212,6 +225,7 @@ session     include     system-auth
 EOF
 
     remove_if_installed sudo || exit
+    pacman -S --noconfirm opendoas-sudo || exit
 }
 
 function setup_user() {
