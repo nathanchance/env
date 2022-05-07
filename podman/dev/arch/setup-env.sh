@@ -15,9 +15,6 @@ function pacman_conf() {
 SigLevel = Optional TrustAll
 Server = https://raw.githubusercontent.com/nathanchance/arch-repo/main/$arch
 EOF
-
-    # https://bugs.archlinux.org/task/74591
-    sed -i "s;#NoExtract   =;NoExtract   = etc/security/limits.d/95-qemu-system-ppc.conf;" /etc/pacman.conf
 }
 
 # Edit /etc/makepkg.conf to gain some speed up
