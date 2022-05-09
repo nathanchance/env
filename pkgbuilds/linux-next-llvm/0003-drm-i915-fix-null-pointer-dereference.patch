@@ -1,7 +1,7 @@
-From 41a1823cb86b738f762dbdd50d7c2a993451c542 Mon Sep 17 00:00:00 2001
+From 3049b9a1c7370cce1356a80487935dee0afd16d2 Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?=C5=81ukasz=20Bartosik?= <lb@semihalf.com>
 Date: Tue, 1 Feb 2022 16:33:54 +0100
-Subject: [PATCH 7/7] drm/i915: fix null pointer dereference
+Subject: [PATCH 3/3] drm/i915: fix null pointer dereference
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
@@ -87,5 +87,5 @@ index 37bd7b17f3d0..f2fad199e2e0 100644
  		bi->num_qgv_points = qi.num_points;
  		bi->num_psf_gv_points = qi.num_psf_points;
 -- 
-2.36.0
+2.36.1
 
