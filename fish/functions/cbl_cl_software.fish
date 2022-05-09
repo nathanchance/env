@@ -3,6 +3,8 @@
 # Copyright (C) 2022 Nathan Chancellor
 
 function cbl_cl_software -d "Clean up old versions of managed software"
+    in_container_msg -c; or return
+
     if test (count $argv) -ne 1
         print_error "This function takes the tool whose versions will be cleaned up as an argument!"
         return 1
