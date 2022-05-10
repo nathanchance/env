@@ -17,9 +17,9 @@ options=('!strip')
 source=(
   "$pkgname::git+https://git.kernel.org/pub/scm/linux/kernel/git/next/linux-next.git?signed#tag=$_srctag"
   config
-  0001-fixup-mm-shmem-convert-shmem_swapin_page-to-shmem_sw.patch
-  0002-fixup-mm-shmem-turn-shmem_alloc_page-into-shmem_allo.patch
-  0003-fixup-libbpf-Automatically-fix-up-BPF_MAP_TYPE_RINGB.patch
+  0001-libbpf-clean-up-ringbuf-size-adjustment-implementati.patch
+  0002-fixup-mm-shmem-convert-shmem_swapin_page-to-shmem_sw.patch
+  0003-fixup-mm-shmem-turn-shmem_alloc_page-into-shmem_allo.patch
   0004-drm-i915-fix-null-pointer-dereference.patch
 )
 

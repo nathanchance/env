@@ -1,0 +1,43 @@
+From 38230740d092600e374517579cdd103f11c61ede Mon Sep 17 00:00:00 2001
+From: Andrii Nakryiko <andrii@kernel.org>
+Date: Tue, 10 May 2022 11:51:59 -0700
+Subject: [PATCH 1/4] libbpf: clean up ringbuf size adjustment implementation
+
+Drop unused iteration variable, move overflow prevention check into the
+for loop.
+
+Fixes: 0087a681fa8c ("libbpf: Automatically fix up BPF_MAP_TYPE_RINGBUF size, if necessary")
+Reported-by: Nathan Chancellor <nathan@kernel.org>
+Signed-off-by: Andrii Nakryiko <andrii@kernel.org>
+Link: https://lore.kernel.org/r/20220510185159.754299-1-andrii@kernel.org
+---
+ tools/lib/bpf/libbpf.c | 6 ++----
+ 1 file changed, 2 insertions(+), 4 deletions(-)
+
+diff --git a/tools/lib/bpf/libbpf.c b/tools/lib/bpf/libbpf.c
+index 15117b9a4d1e..eb4565a89eab 100644
+--- a/tools/lib/bpf/libbpf.c
++++ b/tools/lib/bpf/libbpf.c
+@@ -4951,7 +4951,7 @@ static bool is_pow_of_2(size_t x)
+ static size_t adjust_ringbuf_sz(size_t sz)
+ {
+ 	__u32 page_sz = sysconf(_SC_PAGE_SIZE);
+-	__u32 i, mul;
++	__u32 mul;
+ 
+ 	/* if user forgot to set any size, make sure they see error */
+ 	if (sz == 0)
+@@ -4967,9 +4967,7 @@ static size_t adjust_ringbuf_sz(size_t sz)
+ 	 * user-set size to satisfy both user size request and kernel
+ 	 * requirements and substitute correct max_entries for map creation.
+ 	 */
+-	for (i = 0, mul = 1; ; i++, mul <<= 1) {
+-		if (mul > UINT_MAX / page_sz) /* prevent __u32 overflow */
+-			break;
++	for (mul = 1; mul <= UINT_MAX / page_sz; mul <<= 1) {
+ 		if (mul * page_sz > sz)
+ 			return mul * page_sz;
+ 	}
+-- 
+2.36.1
+
