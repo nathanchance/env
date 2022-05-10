@@ -1,7 +1,7 @@
-From 375df7b6400e92ac40d96072f8ca86714ceaab92 Mon Sep 17 00:00:00 2001
+From 36d76951dd832cb0d8c32bef0051c99d25ba9ffe Mon Sep 17 00:00:00 2001
 From: Nathan Chancellor <nathan@kernel.org>
 Date: Tue, 3 May 2022 15:33:46 -0700
-Subject: [PATCH 2/3] fixup! mm/shmem: turn shmem_alloc_page() into
+Subject: [PATCH 2/4] fixup! mm/shmem: turn shmem_alloc_page() into
  shmem_alloc_folio()
 
 Link: https://lore.kernel.org/YnFGuPWgT7tT7iAV@dev-arch.thelio-3990X/
