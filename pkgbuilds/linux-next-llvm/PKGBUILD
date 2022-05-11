@@ -3,7 +3,7 @@
 
 _localversion=-llvm
 pkgname=linux-next$_localversion
-_srctag=next-20220510
+_srctag=next-20220511
 pkgver=${_srctag//-/.}
 pkgrel=1
 pkgdesc='linux-next'
@@ -18,9 +18,7 @@ source=(
   "$pkgname::git+https://git.kernel.org/pub/scm/linux/kernel/git/next/linux-next.git?signed#tag=$_srctag"
   config
   0001-libbpf-clean-up-ringbuf-size-adjustment-implementati.patch
-  0002-fixup-mm-shmem-convert-shmem_swapin_page-to-shmem_sw.patch
-  0003-fixup-mm-shmem-turn-shmem_alloc_page-into-shmem_allo.patch
-  0004-drm-i915-fix-null-pointer-dereference.patch
+  0002-drm-i915-fix-null-pointer-dereference.patch
 )
 
 validpgpkeys=(
@@ -28,11 +26,9 @@ validpgpkeys=(
   '3F2568AAC26998F9E813A1C5C3F436CA30F5D8EB'  # Mark Brown
 )
 sha256sums=('SKIP'
-            '2176d42239164ae42baec1185877e6bd6b8db041976c5c781478bf8f1166f20e'
-            'f61cdca9c8ace4da9f8a1ab8731cc3dafe8a274f61ca35519c74009ab9bac80d'
-            '7335d7e56e1d95f8e4a18f28771aaa4c87ab9925529ef5bb9cc52928666c7246'
-            'a39989ce16d75ba298bf7117d2ba50e8e021db9667d5db1d95c86abc18e676df'
-            'c7a0b32f85b68a012dffa998f3c3c1ff5b8522082accdc0e096b20b475de0030')
+            '0a330dab37070fefceba2896a61fdab9035a4a654e17bd49a4666bd87910ffef'
+            '4ec778f3e0a78c5913b05a270137cbcab5676d957cd14d2137083a58aa16616c'
+            '034f548ff164fbef797fe4dd4bad7c7466e45c0f8bc20376c8a75eaa2b27e5bf')
 
 # This obviously ties this PKGBUILD to my machine but that is kind of the point :)
 _kmake() {

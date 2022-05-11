@@ -26,10 +26,6 @@ function cbl_rb_pi -d "Rebase Raspberry Pi kernel on latest linux-next"
         b4 am -l -o - -P _ -s $patch | git am; or return
     end
 
-    # https://lore.kernel.org/YnFGuPWgT7tT7iAV@dev-arch.thelio-3990X/
-    git am $ENV_FOLDER/pkgbuilds/linux-next-llvm/0001-fixup-mm-shmem-convert-shmem_swapin_page-to-shmem_sw.patch; or return
-    git am $ENV_FOLDER/pkgbuilds/linux-next-llvm/0002-fixup-mm-shmem-turn-shmem_alloc_page-into-shmem_allo.patch; or return
-
     # Regenerate defconfigs
     for arch in arm arm64
         switch $arch

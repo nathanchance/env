@@ -1,7 +1,7 @@
-From 38230740d092600e374517579cdd103f11c61ede Mon Sep 17 00:00:00 2001
+From d8a8215eab0a14446f78e2a71a89b9d8b908bc9b Mon Sep 17 00:00:00 2001
 From: Andrii Nakryiko <andrii@kernel.org>
 Date: Tue, 10 May 2022 11:51:59 -0700
-Subject: [PATCH 1/4] libbpf: clean up ringbuf size adjustment implementation
+Subject: [PATCH 1/2] libbpf: clean up ringbuf size adjustment implementation
 
 Drop unused iteration variable, move overflow prevention check into the
 for loop.
