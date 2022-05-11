@@ -75,6 +75,7 @@ function install_packages_apt() {
         cmake
         cpio
         curl
+        diffutils
         fish
         flex
         git

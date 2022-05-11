@@ -66,6 +66,7 @@ function install_packages() {
         yapf
 
         # distrobox
+        diffutils
         pinentry
         vte-common
 

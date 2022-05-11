@@ -39,6 +39,7 @@ function install_packages() {
         texinfo
 
         # distrobox
+        diffutils
         findutils
         libvte-2*
         pinentry

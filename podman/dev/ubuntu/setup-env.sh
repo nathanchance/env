@@ -54,6 +54,7 @@ function install_packages() {
         ccache
 
         # distrobox
+        diffutils
         libvte-*-common
         pinentry-curses
         sudo

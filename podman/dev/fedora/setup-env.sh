@@ -46,6 +46,7 @@ function install_packages() {
         texinfo-tex
 
         # distrobox
+        diffutils
         passwd
         pinentry
         vte-profile
