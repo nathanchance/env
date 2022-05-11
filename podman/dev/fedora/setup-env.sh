@@ -46,13 +46,17 @@ function install_packages() {
         texinfo-tex
 
         # distrobox
+        bc
+        curl
         diffutils
+        less
         passwd
         pinentry
+        tree
         vte-profile
+        wget
 
         # env
-        curl
         fish
         fzf
         jq
@@ -73,7 +77,6 @@ function install_packages() {
         git-email
 
         # kernel / tuxmake
-        bc
         bison
         cpio
         {binutils,gcc}-{arm,mips64,powerpc64{,le},riscv64,s390x}-linux-gnu
@@ -94,7 +97,6 @@ function install_packages() {
         socat
         sparse
         uboot-tools
-        wget
 
         # LLVM/clang + build-llvm.py
         binutils-devel

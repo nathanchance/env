@@ -82,6 +82,7 @@ function install_packages_apt() {
         gzip
         iproute2
         kmod
+        less
         libc-dev
         libdw-dev
         libelf-dev
@@ -104,6 +105,7 @@ function install_packages_apt() {
         sparse
         sudo
         tar
+        tree
         u-boot-tools
         vim
         libvte-common

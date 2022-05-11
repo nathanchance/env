@@ -39,20 +39,24 @@ function install_packages() {
         texinfo
 
         # distrobox
+        bc
+        curl
         diffutils
         findutils
+        less
         libvte-2*
         pinentry
         shadow
         sudo
+        tree
         util-linux
+        wget
 
         # email
         cyrus-sasl-plain
         mutt
 
         # env
-        curl
         fish
         fzf
         jq
@@ -66,7 +70,6 @@ function install_packages() {
         git-email
 
         # kernel / tuxmake
-        bc
         bison
         cpio
         cross-{arm,mips,ppc64,s390x}-gcc11
@@ -83,7 +86,6 @@ function install_packages() {
         socat
         sparse
         u-boot-tools
-        wget
 
         # LLVM/clang
         clang

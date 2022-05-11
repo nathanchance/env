@@ -54,21 +54,24 @@ function install_packages() {
         ccache
 
         # distrobox
+        bc
+        curl
         diffutils
+        less
         libvte-*-common
         pinentry-curses
         sudo
+        tree
+        wget
 
         # env
         ca-certificates
-        curl
         fish
         fzf
         jq
         locales
         openssh-client
         stow
-        wget
         vim
         zoxide
 
@@ -80,7 +83,6 @@ function install_packages() {
         libio-socket-ssl-perl
 
         # kernel / tuxmake
-        bc
         {binutils,gcc}-{aarch64,mips{,el},riscv64,s390x}-linux-gnu
         {binutils,gcc}-arm-linux-gnueabi{,hf}
         bison

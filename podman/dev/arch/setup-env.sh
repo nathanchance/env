@@ -66,9 +66,14 @@ function install_packages() {
         yapf
 
         # distrobox
+        bc
+        curl
         diffutils
+        less
         pinentry
+        tree
         vte-common
+        wget
 
         # email
         lei
@@ -94,7 +99,6 @@ function install_packages() {
         # kernel / tuxmake
         aarch64-linux-gnu-gcc
         arm-none-eabi-gcc
-        bc
         bison
         cpio
         flex
@@ -110,7 +114,6 @@ function install_packages() {
         socat
         sparse
         uboot-tools
-        wget
 
         # LLVM/clang + build-llvm.py
         clang
