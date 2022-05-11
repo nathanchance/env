@@ -6,18 +6,23 @@ function cbl_qualify_next -d "Run a series of checks to qualify new linux-next r
     in_container_msg -h; or return
 
     set fish_trace 1
+
     uname -r
+
     systemctl --failed
+
     sudo dmesg -l warn,err
+
     sleep 5
-    if test (uname -m) = x86_64
-        cbl_check_cfi &>/dev/null
-        if test $status -eq 0
-            sudo dmesg -l warn,err
-        else
-            cbl_check_cfi
-        end
-    else if test $LOCATION = pi
+
+    cbl_check_cfi &>/dev/null
+    if test $status -eq 0
+        sudo dmesg -l warn,err
+    else
+        cbl_check_cfi
+    end
+
+    if test $LOCATION = pi
         set -e fish_trace
         switch (uname -m)
             case aarch64
