@@ -3,7 +3,7 @@
 
 _localversion=-llvm
 pkgname=linux-next$_localversion
-_srctag=next-20220511
+_srctag=next-20220512
 pkgver=${_srctag//-/.}
 pkgrel=1
 pkgdesc='linux-next'
@@ -17,8 +17,7 @@ options=('!strip')
 source=(
   "$pkgname::git+https://git.kernel.org/pub/scm/linux/kernel/git/next/linux-next.git?signed#tag=$_srctag"
   config
-  0001-libbpf-clean-up-ringbuf-size-adjustment-implementati.patch
-  0002-drm-i915-fix-null-pointer-dereference.patch
+  0001-drm-i915-fix-null-pointer-dereference.patch
 )
 
 validpgpkeys=(
@@ -26,9 +25,8 @@ validpgpkeys=(
   '3F2568AAC26998F9E813A1C5C3F436CA30F5D8EB'  # Mark Brown
 )
 sha256sums=('SKIP'
-            '0a330dab37070fefceba2896a61fdab9035a4a654e17bd49a4666bd87910ffef'
-            '4ec778f3e0a78c5913b05a270137cbcab5676d957cd14d2137083a58aa16616c'
-            '034f548ff164fbef797fe4dd4bad7c7466e45c0f8bc20376c8a75eaa2b27e5bf')
+            '872e82fa8980957cf243e9a5b9955b9c1c963e995c8b4e4adff0218b266c3720'
+            '014a620351276ee415dc41da38e67159cbc4cd361c5c84f293084a53c18792e3')
 
 # This obviously ties this PKGBUILD to my machine but that is kind of the point :)
 _kmake() {

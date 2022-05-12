@@ -1,5 +1,5 @@
 pkgname=linux-debug
-pkgver=
+pkgver=v5.18.rc6.31.ga703a7123765
 pkgrel=1
 arch=(x86_64)
 license=(GPL2)
