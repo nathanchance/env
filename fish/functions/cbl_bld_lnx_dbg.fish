@@ -15,13 +15,19 @@ function cbl_bld_lnx_dbg -d "Build linux-debug Arch Linux package"
                 set menuconfig true
             case -z --zero-call-used-regs
                 set -a scripts_cfg_args -e ZERO_CALL_USED_REGS
+            case '*'
+                set -a kmake_args $arg
         end
     end
 
     if test "$gcc" = true
-        set kmake_args PO=/usr/bin
+        if not string match -qr CROSS_COMPILE= $kmake_args
+            set kmake_args CROSS_COMPILE=/usr/bin/
+        end
     else
-        set kmake_args LLVM=1
+        if not string match -qr LLVM= $kmake_args
+            set kmake_args LLVM=1
+        end
     end
 
     set pkg linux-debug
