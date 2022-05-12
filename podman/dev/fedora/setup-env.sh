@@ -57,6 +57,8 @@ function install_packages() {
         wget
 
         # env
+        bat
+        fd-find
         fish
         fzf
         jq

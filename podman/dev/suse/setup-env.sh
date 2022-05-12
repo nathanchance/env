@@ -57,6 +57,8 @@ function install_packages() {
         mutt
 
         # env
+        bat
+        fd
         fish
         fzf
         jq
