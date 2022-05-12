@@ -30,6 +30,8 @@ jobs:
             platforms: linux/amd64,linux/arm64
           - os: fedora
             platforms: linux/amd64,linux/arm64
+          - os: suse
+            platforms: linux/amd64,linux/arm64
           - os: ubuntu
             platforms: linux/amd64,linux/arm64
 
