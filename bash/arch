@@ -200,6 +200,9 @@ function install_pkgs() {
 
     # Reinstall shadow to fix permissions with newuidmap
     pacman -S --noconfirm shadow
+
+    # Set the capability flag on ping in WSL to fix pinging without root
+    $wsl && setcap cap_net_raw+ep /usr/bin/ping
 }
 
 function setup_doas() {
