@@ -89,6 +89,9 @@ function install_packages() {
         vim
         zoxide
 
+        # frame-larger-than.py
+        python-pyelftools
+
         # git
         git
         github-cli
