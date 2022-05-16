@@ -20,8 +20,6 @@ function cbl_rb_pi -d "Rebase Raspberry Pi kernel on latest linux-next"
 
     git rh origin/master
 
-    set -a patches https://lore.kernel.org/r/20220505152738.1440249-1-nathan@kernel.org/ # [PATCH] i2c: at91: Initialize dma_buf in at91_twi_xfer()
-
     for patch in $patches
         b4 am -l -o - -P _ -s $patch | git am; or return
     end

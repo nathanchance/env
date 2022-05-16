@@ -3,7 +3,7 @@
 
 _localversion=-llvm
 pkgname=linux-next$_localversion
-_srctag=next-20220513
+_srctag=next-20220516
 pkgver=${_srctag//-/.}
 pkgrel=1
 pkgdesc='linux-next'
@@ -17,7 +17,8 @@ options=('!strip')
 source=(
   "$pkgname::git+https://git.kernel.org/pub/scm/linux/kernel/git/next/linux-next.git?signed#tag=$_srctag"
   config
-  0001-drm-i915-fix-null-pointer-dereference.patch
+  0001-misc-rtsx-Set-setting_reg2-before-use.patch
+  0002-drm-i915-fix-null-pointer-dereference.patch
 )
 
 validpgpkeys=(
@@ -25,8 +26,9 @@ validpgpkeys=(
   '3F2568AAC26998F9E813A1C5C3F436CA30F5D8EB'  # Mark Brown
 )
 sha256sums=('SKIP'
-            '69c1aba52917caac5736cbfaa00931640089b48b580d803265fc452791af3dbf'
-            '014a620351276ee415dc41da38e67159cbc4cd361c5c84f293084a53c18792e3')
+            'b11741ec13cb7bd0e019bc598863534bb111d20b3e312529506b28554a37e133'
+            'e568e6bf8d93ab7acad88943bf645e06149977efca4e626062165554db9ddf0a'
+            'a3a4c8d226b9af6c5d98199378c4166dfa63802e6f8b65a4973d7bb8ebdd3381')
 
 # This obviously ties this PKGBUILD to my machine but that is kind of the point :)
 _kmake() {
