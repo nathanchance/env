@@ -4,9 +4,10 @@ FROM ${BASE}
 COPY setup-env.sh /
 COPY dwarves-1.23.tar.xz /tmp
 COPY 2f7d61b2bfb59427926867c886595ff28dd50607.patch /tmp
+COPY distrobox-check.fish /
 
 ARG BASE
 ARG COMPILER
-RUN bash /setup-env.sh ${BASE} ${COMPILER} && rm -f /setup-env.sh
+RUN bash /setup-env.sh ${BASE} ${COMPILER} && fish /distrobox-check.fish && rm -f /distrobox-check.fish /setup-env.sh
 
 CMD ["/usr/bin/fish", "-l"]
