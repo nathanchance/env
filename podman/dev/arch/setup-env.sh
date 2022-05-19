@@ -4,8 +4,9 @@ set -eux
 
 # Edit /etc/pacman.conf
 function pacman_conf() {
-    sed -i 's/#Color/Color/g' /etc/pacman.conf
-    sed -i 's/#ParallelDownloads = 5/ParallelDownloads = 7/g' /etc/pacman.conf
+    sed -i 's/^#Color/Color/g' /etc/pacman.conf
+    sed -i 's/^NoProgressBar/#NoProgressBar/g' /etc/pacman.conf
+    sed -i 's/^#ParallelDownloads = 5/ParallelDownloads = 7/g' /etc/pacman.conf
     sed -i "/\[testing\]/,/Include/"'s/^#//' /etc/pacman.conf
     sed -i "/\[community-testing\]/,/Include/"'s/^#//' /etc/pacman.conf
 
@@ -15,13 +16,17 @@ function pacman_conf() {
 SigLevel = Optional TrustAll
 Server = https://raw.githubusercontent.com/nathanchance/arch-repo/main/$arch
 EOF
+
+    cat /etc/pacman.conf
 }
 
 # Edit /etc/makepkg.conf to gain some speed up
 function makepkg_conf() {
     # shellcheck disable=SC2016
-    sed -i 's/#MAKEFLAGS="-j2"/MAKEFLAGS="-j$(nproc)"/g' /etc/makepkg.conf
-    sed -i 's/!ccache/ccache/g' /etc/makepkg.conf
+    sed -i 's/^#MAKEFLAGS="-j2"/MAKEFLAGS="-j$(nproc)"/g' /etc/makepkg.conf
+    sed -i 's/^!ccache/ccache/g' /etc/makepkg.conf
+
+    cat /etc/makepkg.conf
 }
 
 # Update and install packages

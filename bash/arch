@@ -29,13 +29,16 @@ function pacman_settings() {
     [[ -f /etc/pacman.conf.pacnew ]] && mv -v /etc/pacman.conf{.pacnew,}
 
     # Enable colors for pacman
-    sed -i 's/#Color/Color/g' /etc/pacman.conf
+    sed -i 's/^#Color/Color/g' /etc/pacman.conf
 
     # Enable parallel downloads
-    sed -i 's/#ParallelDownloads = 5/ParallelDownloads = 7/g' /etc/pacman.conf
+    sed -i 's/^#ParallelDownloads = 5/ParallelDownloads = 7/g' /etc/pacman.conf
+
+    # Show verbose package information
+    sed -i 's/^#VerbosePkgLists/VerbosePkgLists/g' /etc/pacman.conf
 
     # My personal repo of packages
-    cat <<'EOF' >>/etc/pacman.conf
+    grep -Fq "[nathan]" /etc/pacman.conf || eat <<'EOF' >>/etc/pacman.conf
 
 [nathan]
 SigLevel = Optional TrustAll
