@@ -120,6 +120,7 @@ function cbl_bld_tot_tcs -d "Build LLVM and binutils from source for kernel deve
     end
 
     # Add patches to revert here
+    set -a reverts c35ca3a1c78f693b749ad11742350b7fc6c5cd89 # [PowerPC] Implement XL compat __fnabs and __fnabss builtins. (https://reviews.llvm.org/D125506)
     for revert in $reverts
         if not git -C $llvm_project rv -n $revert
             set message "Failed to revert $revert"
