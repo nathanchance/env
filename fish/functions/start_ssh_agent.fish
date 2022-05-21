@@ -3,7 +3,15 @@
 # Copyright (C) 2021-2022 Nathan Chancellor
 
 function start_ssh_agent -d "Launch an ssh agent only if it has not already been launched"
-    status is-interactive; or return 0
+    for arg in $argv
+        switch $arg
+            case -f --force
+                set force true
+        end
+    end
+    if not set -q force
+        status is-interactive; or return 0
+    end
     command -q ssh-add; or return 0
 
     set ssh_key $HOME/.ssh/id_ed25519
