@@ -121,6 +121,7 @@ function install_packages() {
         rsync
         socat
         sparse
+        tuxmake
         uboot-tools
 
         # LLVM/clang + build-llvm.py
