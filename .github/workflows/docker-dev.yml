@@ -2,9 +2,6 @@ name: Build development container images
 
 on:
   push:
-    branches:
-      - dev
-      - main
     paths:
       - .github/workflows/docker-dev.yml
       - podman/dev/**
