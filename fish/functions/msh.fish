@@ -41,7 +41,7 @@ function msh -d "Shorthand for mosh -o" -w mosh
             if test "$tailscale" = true
                 set ip 100.113.197.39
             else
-                set ip 192.168.4.89
+                set ip 192.168.4.199
             end
             set user_host pi@$ip
 
