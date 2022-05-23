@@ -7,6 +7,8 @@ function install_packages() {
 
     zypper -n -q --gpg-auto-import-keys dup
 
+    zypper -n -q rm busybox{,-findutils}
+
     packages=(
         # arc
         php
