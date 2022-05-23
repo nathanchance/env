@@ -278,8 +278,9 @@ function install_packages_apt() {
     rm -fr /var/lib/apt/lists/*
     if [[ $compiler =~ llvm ]]; then
         if [[ $compiler = "llvm-android" ]]; then
-            local android_clang=r445002
-            wget --output-document=/dev/stdout --progress=dot:giga https://android.googlesource.com/platform/prebuilts/clang/host/linux-x86/+archive/refs/heads/master/clang-$android_clang.tar.gz |
+            local android_clang
+            android_clang=$(curl -LSs 'https://android.googlesource.com/kernel/common/+/refs/heads/android-mainline/build.config.constants?format=TEXT' | base64 -d | grep "^CLANG_VERSION=" | cut -d = -f 2)
+            wget --output-document=/dev/stdout --progress=dot:giga https://android.googlesource.com/platform/prebuilts/clang/host/linux-x86/+archive/refs/heads/master/clang-"$android_clang".tar.gz |
                 tar -C /usr/local -xzf -
         else
             ln -fsv /usr/lib/llvm-*/bin/* /usr/local/bin
