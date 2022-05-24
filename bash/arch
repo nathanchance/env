@@ -38,7 +38,7 @@ function pacman_settings() {
     sed -i 's/^#VerbosePkgLists/VerbosePkgLists/g' /etc/pacman.conf
 
     # My personal repo of packages
-    grep -Fq "[nathan]" /etc/pacman.conf || eat <<'EOF' >>/etc/pacman.conf
+    grep -Fq "[nathan]" /etc/pacman.conf || cat <<'EOF' >>/etc/pacman.conf
 
 [nathan]
 SigLevel = Optional TrustAll
