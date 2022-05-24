@@ -185,6 +185,22 @@ EOF
     chown -R "$user_name:$user_name" /home/"$user_name"/.config
 }
 
+function setup_libvirt_common() {
+    # Add user to libvirt group for rootless access to system sessions.
+    usermod -aG libvirt "$user_name" || exit
+
+    # Enable libvirtd systemd service to ensure it is brought up on restart.
+    systemctl enable --now libvirtd.service || exit
+
+    # Make the default network come up automatically on restart.
+    virsh net-autostart default || exit
+
+    # Start network if it is not already started
+    if virsh net-info default | grep -q "Active:.*no"; then
+        virsh net-start default || exit
+    fi
+}
+
 function setup_sudo_symlink() {
     sudo_prefix=${PREFIX:-/usr/local}/stow/sudo
     sudo_bin=$sudo_prefix/bin/sudo

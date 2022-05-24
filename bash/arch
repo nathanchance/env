@@ -196,6 +196,20 @@ function install_pkgs() {
             )
         fi
 
+        # Install libvirt and virt-install for easy management of VMs on
+        # Equinix Metal servers; iptables-nft is also needed for networking but
+        # that will be installed later to avoid potential issues with replacing
+        # iptables.
+        if uname -n | grep -Pq "[a|c|f|g|m|n|s|t|x]{1}[1-3]{1}-.*"; then
+            packages+=(
+                dmidecode
+                dnsmasq
+                libvirt
+                qemu-desktop
+                virt-install
+            )
+        fi
+
         is_virtual_machine && packages+=(devtools)
     fi
 
@@ -253,6 +267,26 @@ function vmware_adjustments() {
         # https://wiki.archlinux.org/title/VMware/Install_Arch_Linux_as_a_guest#Installation
         systemctl enable vmtoolsd.service
         systemctl enable vmware-vmblock-fuse.service
+    fi
+}
+
+function setup_libvirt() {
+    is_installed libvirt || return 0
+
+    # The default network requires iptables-nft but iptables is installed by
+    # default due to systemd. Replace iptables with iptables-nft
+    # non-interactively:
+    # https://unix.stackexchange.com/questions/274727/how-to-force-pacman-to-answer-yes-to-all-questions
+    pacman -S --noconfirm --ask 4 iptables-nft || exit
+
+    setup_libvirt_common
+
+    # For domains with KVM to autostart, the kvm_<vendor> module needs to be
+    # loaded during init.
+    if grep -q svm /proc/cpuinfo; then
+        sed -i 's;MODULES=();MODULES=(kvm_amd);g' /etc/mkinitcpio.conf
+    elif grep -q vmx /proc/cpuinfo; then
+        sed -i 's;MODULES=();MODULES=(kvm_intel);g' /etc/mkinitcpio.conf
     fi
 }
 
@@ -315,6 +349,7 @@ setup_user
 clone_env
 podman_setup
 vmware_adjustments
+setup_libvirt
 wsl_tmpfs
 enable_reflector
 enable_ssh
