@@ -73,14 +73,17 @@ function cbl_qualify_tc_bld_uprev -d "Qualify a new known good revision for tc-b
         --lto thin \
         $pgo_arg; or return 125
 
-    # Check that PGO + ThinLTO with only ARM targets works okay (because some people are weird like that)
-    # Cannot build the tests because they assume the host (X86) is in the list of targets
-    $tc_bld/build-llvm.py \
-        --assertions \
-        --lto thin \
-        $pgo_arg \
-        --targets "AArch64;ARM" \
-        --use-good-revision; or return 125
+    # Check that PGO + ThinLTO with only ARM targets works okay (because some people are weird like that).
+    # Cannot build the tests because they assume the host (X86) is in the list of targets.
+    # This is only necessary on x86_64, as this will just work on aarch64.
+    if test (uname -n) = x86_64
+        $tc_bld/build-llvm.py \
+            --assertions \
+            --lto thin \
+            $pgo_arg \
+            --targets "AArch64;ARM" \
+            --use-good-revision; or return 125
+    end
 
     # Finally, build with PGO and full LTO
     $tc_bld/build-llvm.py \
@@ -102,9 +105,9 @@ function cbl_qualify_tc_bld_uprev -d "Qualify a new known good revision for tc-b
 
     header "Removing worktrees"
 
-    git -C $tc_bld_src worktree remove $tc_bld
+    git -C $tc_bld_src worktree remove --force $tc_bld
     for linux_src in $linux_srcs
-        git -C $lnx_stbl worktree remove $linux_src
+        git -C $lnx_stbl worktree remove --force $linux_src
     end
     rm -rf $work_dir
 end
