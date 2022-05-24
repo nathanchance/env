@@ -98,7 +98,7 @@ function kmake -d "Run make with all cores and adjust PATH temporarily"
     set cc_path (command -v $CC[-1])
     if not test -x "$cc_path"
         print_error "$CC[-1] could not be found or it is not executable!"
-        return
+        return 1
     end
 
     # Print information about CC
@@ -119,7 +119,7 @@ function kmake -d "Run make with all cores and adjust PATH temporarily"
         set as_path (command -v "$CROSS_COMPILE"as)
         if not test -x $as_path
             print_error "binutils could not be found or they are not executable!"
-            return
+            return 1
         end
         set as_location (dirname $as_path)
         if test "$as_location" != "$cc_location"
