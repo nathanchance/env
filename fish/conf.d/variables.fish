@@ -137,6 +137,9 @@ set -gx GHCR ghcr.io/nathanchance
 # For building .deb packages on distros other than Debian/Ubuntu
 set -gx KMAKE_DEB_ARGS DPKG_FLAGS=-d KDEB_CHANGELOG_DIST=unstable
 
+# Default to system session instead of user session for libvirt
+set -gx LIBVIRT_DEFAULT_URI qemu:///system
+
 # Always use blackbg for menuconfig
 set -gx MENUCONFIG_COLOR blackbg
 
