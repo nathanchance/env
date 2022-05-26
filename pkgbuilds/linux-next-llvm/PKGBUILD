@@ -3,7 +3,7 @@
 
 _localversion=-llvm
 pkgname=linux-next$_localversion
-_srctag=next-20220525
+_srctag=next-20220526
 pkgver=${_srctag//-/.}
 pkgrel=1
 pkgdesc='linux-next'
@@ -17,8 +17,9 @@ options=('!strip')
 source=(
   "$pkgname::git+https://git.kernel.org/pub/scm/linux/kernel/git/next/linux-next.git?signed#tag=$_srctag"
   config
-  0001-misc-rtsx-Fix-clang-Wsometimes-uninitialized-in-rts5.patch
-  0002-drm-i915-fix-null-pointer-dereference.patch
+  0001-cifs-set-length-when-cifs_copy_pages_to_iter-is-succ.patch
+  0002-misc-rtsx-Fix-clang-Wsometimes-uninitialized-in-rts5.patch
+  0003-drm-i915-fix-null-pointer-dereference.patch
 )
 
 validpgpkeys=(
@@ -26,9 +27,10 @@ validpgpkeys=(
   '3F2568AAC26998F9E813A1C5C3F436CA30F5D8EB'  # Mark Brown
 )
 sha256sums=('SKIP'
-            'ff0e398a288ec2eef43320ee9f570ed3fe94d481b6e5acf9038660aa64df024b'
-            'a73418ae4581e1aae83d63bca30b11ef69013a37ddbda9364c6f4bcb9f5471e2'
-            '68f9d7720bc02910cc8bb9baf68b2eb984c5ccf7280a81c7eafef0d2deaefdc3')
+            'dab102421f61cf82b52051d2dba5cbfd4e4d5246c26a86ef2f6289b6c2718c68'
+            '24307eea16308b6613fdb43c77e637e353950768776628cb48b3a9119568a1c4'
+            '33373a285375a557939bd12ccadffffd6391f8b4cadae6fee7799ec4796f9f03'
+            'f319dbbfd1d41ccc209b94f7a544eb4ad55f659eca598e9529d46cd703b1bf4c')
 
 # This obviously ties this PKGBUILD to my machine but that is kind of the point :)
 _kmake() {
