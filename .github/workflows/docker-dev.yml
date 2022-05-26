@@ -37,14 +37,14 @@ jobs:
         uses: actions/checkout@v3
 
       - name: Set up QEMU
-        uses: docker/setup-qemu-action@v1
+        uses: docker/setup-qemu-action@v2
 
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v1
+        uses: docker/setup-buildx-action@v2
 
       - name: Login to GitHub Container Registry
         if: ${{ github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && github.event.inputs.push_images == 'true') }}
-        uses: docker/login-action@v1
+        uses: docker/login-action@v2
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
@@ -57,7 +57,7 @@ jobs:
           echo "::set-output name=folder::./podman/dev"
 
       - name: Build
-        uses: docker/build-push-action@v2
+        uses: docker/build-push-action@v3
         with:
           context: ${{ steps.variables.outputs.folder }}/${{ matrix.os }}
           file: ${{ steps.variables.outputs.folder }}/${{ matrix.os }}/Containerfile
