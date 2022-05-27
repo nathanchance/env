@@ -18,7 +18,7 @@ function gh_run -d "Run GitHub Actions Workflow"
         $workflow
 
     # Make sure that 'gh run list' call succeeds
-    sleep 1
+    sleep 3
 
     set json_key databaseId
     set workflow_id (gh run list \
