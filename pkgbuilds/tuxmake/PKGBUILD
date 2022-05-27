@@ -1,6 +1,6 @@
 # Maintainer: Nathan Chancellor <nathan@kernel.org>
 pkgname=tuxmake
-pkgver=1.4.0
+pkgver=1.5.0
 pkgrel=1
 pkgdesc='Thin wrapper to build Linux kernels'
 url='https://tuxmake.org/'
@@ -12,19 +12,8 @@ checkdepends=('clang' 'git' 'lld' 'llvm' 'python-pytest' 'python-pytest-mock')
 optdepends=('docker: Container-based build support'
             'podman: Container-based build support'
             'socat: Offline build support')
-source=("$pkgname-v$pkgver.tar.gz::https://gitlab.com/Linaro/$pkgname/-/archive/v$pkgver/$pkgname-v$pkgver.tar.gz"
-        0001-metadata-os-Fallback-to-usr-lib-os-release.patch
-        0002-fakelinux-Don-t-let-CFLAGS-leak-in-from-environment.patch)
-sha256sums=('ceae8e1ec54245756ac0ca69e269345cac01f8421040a390d82bd5db46e05caf'
-            '5cf974728f37f02c3096a86dc869fddeda7e741a1d1932c1aef9897dd3a63458'
-            'a76107f09dde3e454ca408550ad5b1f20efa46c5c36b22011f9ae8dcfae33534')
-
-prepare() {
-  cd "$pkgname-v$pkgver"
-
-  patch -Np1 <../0001-metadata-os-Fallback-to-usr-lib-os-release.patch
-  patch -Np1 <../0002-fakelinux-Don-t-let-CFLAGS-leak-in-from-environment.patch
-}
+source=("$pkgname-v$pkgver.tar.gz::https://gitlab.com/Linaro/$pkgname/-/archive/v$pkgver/$pkgname-v$pkgver.tar.gz")
+sha256sums=('b5701f37179b09af2cda3842d776157ec333fde3553e615f5e48ef7e297df1c0')
 
 build() {
   cd "$pkgname-v$pkgver"
