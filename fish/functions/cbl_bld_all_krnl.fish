@@ -11,7 +11,6 @@ function cbl_bld_all_krnl -d "Build all kernels for ClangBuiltLinux testing"
 
             cbl_clone_repo linux
             git -C $lnx urh
-            b4 am -o - https://lore.kernel.org/all/814e20c19b110209ee12ecae7cb05f8a78d021c8.1653625820.git.baolin.wang@linux.alibaba.com | git -C $lnx ap; or return
 
             cbl_lkt --linux-src $lnx
         case pi
