@@ -215,6 +215,7 @@ function cbl_lkt -d "Tests a Linux kernel with llvm-kernel-testing"
     set blocklist (string join "|" $blocklist_items)
     set searchlist_items \
         "error:" \
+        "ERROR:" \
         "FATAL:" \
         undefined \
         "Unsupported relocation type:" \
