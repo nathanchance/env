@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: MIT
 # Copyright (C) 2021-2022 Nathan Chancellor
 
-function updoci -d "Downloads OCI container images from GitHub"
+function pulloci -d "Downloads OCI container images from GitHub"
     switch $LOCATION
         case hetzner-server workstation
             set images \
