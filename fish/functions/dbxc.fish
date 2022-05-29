@@ -24,7 +24,7 @@ function dbxc -d "Shorthand for 'distrobox create'"
                 set -a dbx_args $arg $argv[$next]
                 set i $next
 
-            case -y --yes
+            case -Y --yes
                 set -a dbx_args $arg
 
             case dev/'*' gcc-'*' llvm-'*'
