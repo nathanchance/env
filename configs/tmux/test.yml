@@ -8,6 +8,7 @@ windows:
     shell_command:
     - cmd: cbl_bld_all
       enter: false
+      sleep_before: 3
 - window_name: host and distrobox
   focus: true
   panes:
@@ -20,3 +21,4 @@ windows:
     shell_command:
     - cmd: cbl_vmm run
       enter: false
+    sleep_before: 3
