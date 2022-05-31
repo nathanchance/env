@@ -136,6 +136,7 @@ setup_gh_repo
 setup_tuxmake_repo
 install_packages
 setup_doas
+setup_libvirt
 setup_mosh
 chsh_fish
 clone_env
