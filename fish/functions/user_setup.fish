@@ -147,7 +147,8 @@ function user_setup -d "Setup a user account, downloading all files and placing 
         $ENV_FOLDER/fish \
         $hydro \
         PatrickF1/fzf.fish \
-        jorgebucaran/autopair.fish
+        jorgebucaran/autopair.fish \
+        wfxr/forgit
     if not command -q zoxide
         set -a fisher_plugins jethrokuan/z
     end
