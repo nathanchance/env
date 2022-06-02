@@ -134,6 +134,33 @@ set -gx EDITOR vim
 # Default fzf options
 set -gx FZF_DEFAULT_OPTS --layout=reverse
 
+# Default forgit fzf options
+# Done with individual variables because FORGIT_FZF_DEFAULT_OPTS
+# might already be defined due to shell start up order
+begin
+    set -l var
+    set -l vars \
+        FORGIT_ADD_FZF_OPTS \
+        FORGIT_BRANCH_DELETE_FZF_OPTS \
+        FORGIT_CHECKOUT_BRANCH_FZF_OPTS \
+        FORGIT_CHECKOUT_COMMIT_FZF_OPTS \
+        FORGIT_CHECKOUT_FILE_FZF_OPTS \
+        FORGIT_CHECKOUT_TAG_FZF_OPTS \
+        FORGIT_CLEAN_FZF_OPTS \
+        FORGIT_DIFF_FZF_OPTS \
+        FORGIT_FIXUP_FZF_OPTS \
+        FORGIT_IGNORE_FZF_OPTS \
+        FORGIT_LOG_FZF_OPTS \
+        FORGIT_REBASE_FZF_OPTS \
+        FORGIT_RESET_HEAD_FZF_OPTS \
+        FORGIT_REVERT_COMMIT_OPTS \
+        FORGIT_STASH_FZF_OPTS
+
+    for var in $vars
+        set -gx $var $FZF_DEFAULT_OPTS
+    end
+end
+
 # My GitHub Container Registry URL
 set -gx GHCR ghcr.io/nathanchance
 
