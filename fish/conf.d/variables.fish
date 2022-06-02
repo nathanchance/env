@@ -131,6 +131,9 @@ set -gx CCACHE_COMPRESSLEVEL 5
 # vim as editor
 set -gx EDITOR vim
 
+# Default fzf options
+set -gx FZF_DEFAULT_OPTS --layout=reverse
+
 # My GitHub Container Registry URL
 set -gx GHCR ghcr.io/nathanchance
 

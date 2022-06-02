@@ -21,7 +21,7 @@ end
 
 if command -q fd
     set -gx FZF_DEFAULT_COMMAND "fd --type file --follow --hidden --exclude .git --color always"
-    set -gx FZF_DEFAULT_OPTS --ansi
+    set -agx FZF_DEFAULT_OPTS --ansi
 end
 
 if command -q zoxide
