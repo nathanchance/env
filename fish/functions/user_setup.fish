@@ -185,6 +185,17 @@ out.*/
         podman system info
     end
 
+    # Set up libvirt storage pool
+    if command -q virsh; and mountpoint -q /home
+        set -l libvirt_pool $VM_FOLDER/libvirt
+
+        mkdir -p $libvirt_pool
+
+        virsh pool-define-as --name default --type dir --target $libvirt_pool
+        virsh pool-autostart default
+        virsh pool-start default
+    end
+
     # Binaries
     if test (get_distro) = arch
         clone_aur_repos
