@@ -37,8 +37,10 @@ function upd -d "Runs the update command for the current distro or downloads/upd
             end
             continue
         else if test "$target" = env
-            git -C $ENV_FOLDER pull -qr; or return
-            rld
+            if test "$LOCATION" != "$PRIMARY_LOCATION"
+                git -C $ENV_FOLDER pull -qr; or return
+                rld
+            end
             continue
         else if test "$target" = fisher
             fisher update 1>/dev/null; or return

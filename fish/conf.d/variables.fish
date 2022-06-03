@@ -173,6 +173,9 @@ set -gx LIBVIRT_DEFAULT_URI qemu:///system
 # Always use blackbg for menuconfig
 set -gx MENUCONFIG_COLOR blackbg
 
+# Primary location from list above
+set -gx PRIMARY_LOCATION workstation
+
 # My server IP address
 if test -f $HOME/.server_ip
     set -g SERVER_IP (cat $HOME/.server_ip)
