@@ -40,6 +40,9 @@ function upd -d "Runs the update command for the current distro or downloads/upd
             git -C $ENV_FOLDER pull -qr; or return
             rld
             continue
+        else if test "$target" = fisher
+            fisher update 1>/dev/null; or return
+            continue
         else if test "$target" = tmuxp
             if in_container
                 print_warning "tmuxp should be installed while in the host environment, skipping..."

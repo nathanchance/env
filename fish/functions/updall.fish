@@ -23,6 +23,7 @@ function updall -d "Update binaries in $BIN_FOLDER"
         duf \
         exa \
         fd \
+        fisher \
         fzf \
         repo \
         rg \
