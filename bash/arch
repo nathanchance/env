@@ -101,7 +101,7 @@ function install_pkgs() {
         hyperfine
         patch
         tuxmake
-        vim
+        vim{,-spell-en}
 
         # Disk management utilities
         nvme-cli

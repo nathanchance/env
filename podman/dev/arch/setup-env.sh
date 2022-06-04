@@ -91,7 +91,7 @@ function install_packages() {
         less
         openssh
         stow
-        vim
+        vim{,-spell-en}
         zoxide
 
         # frame-larger-than.py
