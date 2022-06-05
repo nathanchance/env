@@ -40,6 +40,7 @@ function upd -d "Runs the update command for the current distro or downloads/upd
 
                 set vim_plugins \
                     blankname/vim-fish \
+                    junegunn/fzf.vim \
                     tpope/vim-fugitive \
                     vivien/vim-linux-coding-style
 
@@ -95,6 +96,7 @@ function upd -d "Runs the update command for the current distro or downloads/upd
             case vim
                 set vim_plugins \
                     https://github.com/blankname/vim-fish \
+                    https://github.com/junegunn/fzf.vim \
                     https://github.com/tpope/vim-fugitive \
                     https://github.com/vivien/vim-linux-coding-style
 
