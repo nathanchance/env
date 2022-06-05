@@ -6,9 +6,6 @@ function git_sw -d "git switch with fzf"
     if test (count $argv) -gt 0
         git switch $argv
     else
-        set -l branch (git_bf)
-        if test -n "$branch"
-            git switch $branch
-        end
+        forgit::checkout::branch
     end
 end

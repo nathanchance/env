@@ -99,7 +99,6 @@ function git_aliases -d "Configure git aliases"
     git config --global alias.dhc 'rh HEAD^' # delete head commit
     git config --global alias.rh 'reset --hard'
     git config --global alias.rs 'reset --soft'
-    git config --global alias.us 'reset HEAD'
 
     # git revert
     git config --global alias.rv "revert$gpg_sign --signoff"
@@ -128,18 +127,30 @@ function git_aliases -d "Configure git aliases"
     git config --global alias.sf status
 
     # git switch
-    git config --global alias.swc 'sw -c'
+    git config --global alias.swc 'switch -c'
 
     # fish git aliases
     # no arguments
-    for alias in af bf dmb sync
+    for alias in bf dmb sync
         git config --global alias.$alias "!fish -c git_$alias"
     end
     # with arguments
-    for alias in rfl rn sw
+    for alias in rn sw
         git config --global alias.$alias '!f() { fish -c "'git_$alias' $*"; }; f'
     end
     git config --global alias.rf '!f() { fish -c "git_rf -q $*"; }; f'
     git config --global alias.urbi '!f() { fish -c "git_ua rbi $*"; }; f'
     git config --global alias.urh '!f() { fish -c "git_ua rh $*"; }; f'
+
+    # forgit aliases
+    git config --global alias.ai '!f() { fish -c "forgit::add $*"; }; f'
+    git config --global alias.bdi '!f() { fish -c "forgit::branch::delete $*"; }; f'
+    git config --global alias.di '!f() { fish -c "forgit::diff $*"; }; f'
+    git config --global alias.fu '!f() { fish -c "forgit::fixup $*"; }; f'
+    git config --global alias.li '!f() { fish -c "forgit::log $*"; }; f'
+    git config --global alias.ri '!f() { fish -c "forgit::checkout::file $*"; }; f'
+    git config --global alias.rbii '!f() { fish -c "forgit::rebase $*"; }; f'
+    git config --global alias.rvi '!f() { fish -c "forgit::revert $*"; }; f'
+    git config --global alias.st '!f() { fish -c "forgit::stash::show $*"; }; f'
+    git config --global alias.us '!f() { fish -c "forgit::reset::head $*"; }; f'
 end
