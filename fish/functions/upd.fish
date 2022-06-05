@@ -33,6 +33,33 @@ function upd -d "Runs the update command for the current distro or downloads/upd
                 fisher update 1>/dev/null; or return
                 continue
 
+            case forks
+                set fisher_plugins \
+                    jorgebucaran/autopair.fish \
+                    PatrickF1/fzf.fish
+
+                set vim_plugins \
+                    blankname/vim-fish \
+                    tpope/vim-fugitive \
+                    vivien/vim-linux-coding-style
+
+                set forked_repos \
+                    $fisher_plugins \
+                    $vim_plugins
+
+                for forked_repo in $forked_repos
+                    set -l repo_name (basename $forked_repo)
+                    set -l repo_path $FORKS_FOLDER/$repo_name
+                    if test -d $repo_path
+                        gh repo sync --force --source $forked_repo nathanchance/$repo_name
+                        git -C $repo_path urh
+                    else
+                        mkdir -p (dirname $forked_repo)
+                        gh repo fork --clone $forked_repo $repo_path
+                    end
+                end
+                continue
+
             case os
                 switch (get_distro)
                     case arch

@@ -113,6 +113,7 @@ set -gx CBL_TC_STOW_LLVM $CBL_TC_STOW/llvm
 set -gx CBL_TC_LLVM $CBL_TC_STOW_LLVM-latest/bin
 
 set -gx ENV_FOLDER $GITHUB_FOLDER/env
+set -gx FORKS_FOLDER $GITHUB_FOLDER/forks
 
 set -gx TMP_BUILD_FOLDER $TMP_FOLDER/build
 
