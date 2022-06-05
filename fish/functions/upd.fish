@@ -21,45 +21,49 @@ function upd -d "Runs the update command for the current distro or downloads/upd
     end
 
     for target in $targets
-        if test "$target" = os
-            switch (get_distro)
-                case arch
-                    sudo pacman -Syyu $yes
-                case debian raspbian ubuntu
-                    sudo sh -c "apt update $yes && apt full-upgrade $yes && apt autoremove -y"
-                case fedora
-                    sudo dnf update $yes
-                case opensuse
-                    sudo zypper dup $yes
-                case '*'
-                    print_error "Unknown OS! Cannot upgrade using 'upd'. Modify 'get_distro' to support this distro."
-                    return 1
-            end
-            continue
-        else if test "$target" = env
-            if test "$LOCATION" != "$PRIMARY_LOCATION"
-                git -C $ENV_FOLDER pull -qr; or return
-                rld
-            end
-            continue
-        else if test "$target" = fisher
-            fisher update 1>/dev/null; or return
-            continue
-        else if test "$target" = tmuxp
-            if in_container
-                print_warning "tmuxp should be installed while in the host environment, skipping..."
-            else
-                if command -q tmuxp
-                    print_warning "tmuxp is installed through package manager, skipping..."
-                else
-                    set -l tmuxp_tmp (mktemp -d)
-                    set -l tmuxp_prefix $BIN_FOLDER/tmuxp
-                    python3 -m pip install --target $tmuxp_tmp tmuxp
-                    rm -fr $tmuxp_prefix
-                    mv $tmuxp_tmp $tmuxp_prefix
+        switch $target
+            case env
+                if test "$LOCATION" != "$PRIMARY_LOCATION"
+                    git -C $ENV_FOLDER pull -qr; or return
+                    rld
                 end
-            end
-            continue
+                continue
+
+            case fisher
+                fisher update 1>/dev/null; or return
+                continue
+
+            case os
+                switch (get_distro)
+                    case arch
+                        sudo pacman -Syyu $yes
+                    case debian raspbian ubuntu
+                        sudo sh -c "apt update $yes && apt full-upgrade $yes && apt autoremove -y"
+                    case fedora
+                        sudo dnf update $yes
+                    case opensuse
+                        sudo zypper dup $yes
+                    case '*'
+                        print_error "Unknown OS! Cannot upgrade using 'upd'. Modify 'get_distro' to support this distro."
+                        return 1
+                end
+                continue
+
+            case tmuxp
+                if in_container
+                    print_warning "tmuxp should be installed while in the host environment, skipping..."
+                else
+                    if command -q tmuxp
+                        print_warning "tmuxp is installed through package manager, skipping..."
+                    else
+                        set -l tmuxp_tmp (mktemp -d)
+                        set -l tmuxp_prefix $BIN_FOLDER/tmuxp
+                        python3 -m pip install --target $tmuxp_tmp tmuxp
+                        rm -fr $tmuxp_prefix
+                        mv $tmuxp_tmp $tmuxp_prefix
+                    end
+                end
+                continue
         end
 
         # These need to be local to the loop so they are reset each invocation
