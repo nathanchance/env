@@ -68,8 +68,7 @@ function install_packages() {
 
         # git
         gh
-        git
-        git-email
+        git{,-delta,-email}
 
         # kernel / tuxmake
         bison

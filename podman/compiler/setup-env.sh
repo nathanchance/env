@@ -81,6 +81,7 @@ function install_packages_apt() {
         git
         gzip
         iproute2
+        jq
         kmod
         less
         libc-dev
@@ -286,6 +287,33 @@ function install_packages_apt() {
             ln -fsv /usr/lib/llvm-*/bin/* /usr/local/bin
         fi
     fi
+
+    # Install delta from GitHub
+    case "$(uname -m)" in
+        aarch64) delta_arch=arm64 ;;
+        x86_64) delta_arch=amd64 ;;
+    esac
+    work_dir=$(mktemp -d)
+    delta_repo=dandavison/delta
+    delta_version=$(curl -LSs https://api.github.com/repos/"$delta_repo"/releases/latest | jq -r .tag_name)
+    case "$(uname -m)" in
+        aarch64)
+            case "$base:$version" in
+                # glibc is too old for these distributions
+                debian:stretch | debian:buster | ubuntu:xenial | ubuntu:bionic) ;;
+                *) delta_deb=$work_dir/git-delta_"$delta_version"_"$delta_arch".deb ;;
+            esac
+            ;;
+        x86_64)
+            # musl binaries are statically linked so they can be used on any version
+            delta_deb=$work_dir/git-delta-musl_"$delta_version"_"$delta_arch".deb
+            ;;
+    esac
+    if [[ -n ${delta_deb:-} ]]; then
+        curl -LSso "$delta_deb" https://github.com/"$delta_repo"/releases/download/"$delta_version"/"${delta_deb##*/}"
+        apt install -y "$delta_deb"
+    fi
+    rm -fr "$work_dir"
 }
 
 function install_packages_dnf() {

@@ -98,7 +98,7 @@ function install_packages() {
         python-pyelftools
 
         # git
-        git
+        git{,-delta}
         github-cli
         perl-authen-sasl
         perl-mime-tools

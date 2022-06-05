@@ -78,7 +78,7 @@ function install_packages() {
 
         # git
         gh
-        git{,-email}
+        git{,-delta,-email}
 
         # nicer GNU utilities
         duf

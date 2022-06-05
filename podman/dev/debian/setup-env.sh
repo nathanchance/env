@@ -159,6 +159,18 @@ function install_packages() {
     rm -fr /var/lib/apt/lists/*
 
     ln -fsv /usr/lib/llvm-"$llvm_stable"/bin/* /usr/local/bin
+
+    # Install delta from GitHub
+    case "$(uname -m)" in
+        aarch64) delta_arch=arm64 ;;
+        x86_64) delta_arch=amd64 ;;
+    esac
+    delta_repo=dandavison/delta
+    delta_version=$(curl -LSs https://api.github.com/repos/"$delta_repo"/releases/latest | jq -r .tag_name)
+    delta_deb=/tmp/git-delta_"$delta_version"_"$delta_arch".deb
+    curl -LSso "$delta_deb" https://github.com/"$delta_repo"/releases/download/"$delta_version"/"${delta_deb##*/}"
+    apt install -y "$delta_deb"
+    rm -fr "$delta_deb"
 }
 
 function check_fish() {
