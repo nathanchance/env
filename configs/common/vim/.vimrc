@@ -22,8 +22,6 @@ set statusline+=\ \(%p%%\)                  " Show location of cursor location p
 
 " Ensure color scheme always works
 set background=dark
-" set t_Co=256
-" colorscheme one
 
 syntax enable                               " Enable syntax processing
 set tabstop=4                               " Show tabs as four spaces

@@ -91,6 +91,23 @@ function upd -d "Runs the update command for the current distro or downloads/upd
                     end
                 end
                 continue
+
+            case vim
+                set vim_plugins \
+                    https://github.com/blankname/vim-fish \
+                    https://github.com/tpope/vim-fugitive \
+                    https://github.com/vivien/vim-linux-coding-style
+
+                for vim_plugin in $vim_plugins
+                    set dest $HOME/.vim/pack/my-plugins/start/(basename $vim_plugin)
+                    if test -d $dest
+                        git -C $dest pull
+                    else
+                        mkdir -p (dirname dest)
+                        git clone $vim_plugin $dest
+                    end
+                end
+                continue
         end
 
         # These need to be local to the loop so they are reset each invocation

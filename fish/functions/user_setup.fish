@@ -221,8 +221,8 @@ out.*/
 
     # Configuration files (vim, tmux, etc)
     set configs $ENV_FOLDER/configs
-    bash $configs/common/vim/vim_setup.bash
     ln -fsv $configs/tmux/.tmux.conf $HOME/.tmux.conf
+    vim_setup
 
     # Terminal profiles
     if set -q DISPLAY
