@@ -28,7 +28,12 @@ function updall -d "Update binaries in $BIN_FOLDER"
         repo \
         rg \
         tmuxp \
-        tuxmake
+        tuxmake \
+        vim
+
+    if test "$LOCATION" = "$PRIMARY_LOCATION"
+        set -a targets forks
+    end
 
     upd $targets
 end
