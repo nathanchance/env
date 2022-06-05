@@ -121,7 +121,7 @@ Host sos.*.platformequinix.com
         rm -rf $keys_folder
     end
 
-    # Downloading/updating environment scripts and prompt
+    # Downloading/updating environment scripts
     if not test -d $ENV_FOLDER
         mkdir -p (dirname $ENV_FOLDER)
         if test "$use_gh" = true
@@ -131,17 +131,23 @@ Host sos.*.platformequinix.com
         end
     end
     git -C $ENV_FOLDER pull
-    set hydro $GITHUB_FOLDER/hydro
-    if not test -d $hydro
-        mkdir -p (dirname $hydro)
-        set -l clone_args -b personal
-        if test "$use_gh" = true
-            gh repo clone (basename $hydro) $hydro -- $clone_args
-        else
-            git clone $clone_args https://github.com/nathanchance/(basename $hydro).git $hydro; or return
+
+    # Download and update forked fisher plugins
+    set forked_fisher_plugins \
+        $GITHUB_FOLDER/forgit \
+        $GITHUB_FOLDER/hydro
+    for forked_fisher_plugin in $forked_fisher_plugins
+        if not test -d $forked_fisher_plugin
+            mkdir -p (dirname $forked_fisher_plugin)
+            set -l clone_args -b personal
+            if test "$use_gh" = true
+                gh repo clone (basename $forked_fisher_plugin) $forked_fisher_plugin -- $clone_args
+            else
+                git clone $clone_args https://github.com/nathanchance/(basename $forked_fisher_plugin).git $forked_fisher_plugin; or return
+            end
         end
+        git -C $forked_fisher_plugin remote update
     end
-    git -C $hydro remote update
 
     # Set up fish environment with fisher
     if fisher list &| grep -q /tmp/env/fish
@@ -149,10 +155,9 @@ Host sos.*.platformequinix.com
     end
     set fisher_plugins \
         $ENV_FOLDER/fish \
-        $hydro \
+        $forked_fisher_plugins \
         PatrickF1/fzf.fish \
-        jorgebucaran/autopair.fish \
-        wfxr/forgit
+        jorgebucaran/autopair.fish
     if not command -q zoxide
         set -a fisher_plugins jethrokuan/z
     end
