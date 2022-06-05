@@ -132,7 +132,7 @@ function set_global_variables() {
 function setup_initial_fish_config() {
     # Check that fish 3.4.0 or newer is available, which is needed for env to work
     # shellcheck disable=SC2016
-    fish_version=$(fish -c 'echo $version' | sed 's;\.;;g')
+    fish_version=$(fish -c 'echo $version' | sed -e 's;-.*$;;g' -e 's;\.;;g')
     if [[ $fish_version -lt 340 ]]; then
         print_error "$(fish --version) is too old!"
         exit 1
