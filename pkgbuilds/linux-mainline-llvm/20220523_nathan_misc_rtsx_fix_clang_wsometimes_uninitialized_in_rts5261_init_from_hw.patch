@@ -1,0 +1,59 @@
+From git@z Thu Jan  1 00:00:00 1970
+Subject: [PATCH] misc: rtsx: Fix clang -Wsometimes-uninitialized in rts5261_init_from_hw()
+From: Nathan Chancellor <nathan@kernel.org>
+Date: Mon, 23 May 2022 08:05:22 -0700
+Message-Id: <20220523150521.2947108-1-nathan@kernel.org>
+To: Arnd Bergmann <arnd@arndb.de>, Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Cc: Nick Desaulniers <ndesaulniers@google.com>, linux-kernel@vger.kernel.org, llvm@lists.linux.dev, patches@lists.linux.dev, Nathan Chancellor <nathan@kernel.org>, Dan Carpenter <dan.carpenter@oracle.com>, kernel test robot <lkp@intel.com>, Tom Rix <trix@redhat.com>, Ricky WU <ricky_wu@realtek.com>
+List-Id: <llvm.lists.linux.dev>
+MIME-Version: 1.0
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 7bit
+
+Clang warns:
+
+  drivers/misc/cardreader/rts5261.c:406:13: error: variable 'setting_reg2' is used uninitialized whenever 'if' condition is false [-Werror,-Wsometimes-uninitialized]
+          } else if (efuse_valid == 0) {
+                     ^~~~~~~~~~~~~~~~
+  drivers/misc/cardreader/rts5261.c:412:30: note: uninitialized use occurs here
+          pci_read_config_dword(pdev, setting_reg2, &lval2);
+                                      ^~~~~~~~~~~~
+
+efuse_valid == 1 is not a valid value so just return early from the
+function to avoid using setting_reg2 uninitialized.
+
+Fixes: b1c5f3085149 ("misc: rtsx: add rts5261 efuse function")
+Reported-by: Dan Carpenter <dan.carpenter@oracle.com>
+Reported-by: kernel test robot <lkp@intel.com>
+Reported-by: Tom Rix <trix@redhat.com>
+Suggested-by: Ricky WU <ricky_wu@realtek.com>
+Signed-off-by: Nathan Chancellor <nathan@kernel.org>
+Acked-by: Arnd Bergmann <arnd@arndb.de>
+Link: https://lore.kernel.org/r/20220523150521.2947108-1-nathan@kernel.org
+---
+
+This is basically a v2 of https://lore.kernel.org/20220516130047.3887590-1-trix@redhat.com/.
+
+ drivers/misc/cardreader/rts5261.c | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/drivers/misc/cardreader/rts5261.c b/drivers/misc/cardreader/rts5261.c
+index 749cc5a46d13..b1e76030cafd 100644
+--- a/drivers/misc/cardreader/rts5261.c
++++ b/drivers/misc/cardreader/rts5261.c
+@@ -407,6 +407,8 @@ static void rts5261_init_from_hw(struct rtsx_pcr *pcr)
+ 		// default
+ 		setting_reg1 = PCR_SETTING_REG1;
+ 		setting_reg2 = PCR_SETTING_REG2;
++	} else {
++		return;
+ 	}
+ 
+ 	pci_read_config_dword(pdev, setting_reg2, &lval2);
+
+base-commit: 90de6805267f8c79cd2b1a36805071e257c39b5c
+
+-- 
+2.36.1
+
+
