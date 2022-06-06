@@ -33,6 +33,28 @@ function upd -d "Runs the update command for the current distro or downloads/upd
                 fisher update 1>/dev/null; or return
                 continue
 
+            case forgit hydro
+                set repo $GITHUB_FOLDER/$target
+                if test "$LOCATION" = "$PRIMARY_LOCATION"
+                    switch $target
+                        case forgit
+                            set branch master
+                            set owner wfxr
+                        case hydro
+                            set branch main
+                            set owner jorgebucaran
+                    end
+                    gh repo sync --force --source $owner/$target nathanchance/$target; or return
+                    git -C $repo ru --prune; or return
+                    git -C $repo rb upstream/$branch; or return
+                else
+                    git -C $repo urh; or return
+                end
+                switch $target
+                    case forgit hydro
+                        fisher update $repo 1>/dev/null; or return
+                end
+
             case forks
                 set fisher_plugins \
                     jorgebucaran/autopair.fish \
