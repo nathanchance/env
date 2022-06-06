@@ -52,7 +52,7 @@ function cbl_upd_tc_bld_lnx -d "Update the version of Linux built for PGO in tc-
 
     gen_sha256sum $url/$tarball
 
-    sed -i "s/LINUX=.*/LINUX=linux-$kver/" $kernel/build.sh
+    sed -i 's/linux=.*/linux="linux-'$kver'"/g' $kernel/build.sh
 
     popd
 end
