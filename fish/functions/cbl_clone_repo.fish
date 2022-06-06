@@ -8,7 +8,7 @@ function cbl_clone_repo -d "Clone certain repos for ClangBuiltLinux testing and 
         set -l git_clone_args
 
         switch $arg
-            case boot-utils tc-build
+            case boot-utils containers tc-build
                 set url https://github.com/ClangBuiltLinux/$arg.git
                 set dest $CBL_GIT/$arg
             case linux
