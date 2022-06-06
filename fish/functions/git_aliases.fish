@@ -146,6 +146,7 @@ function git_aliases -d "Configure git aliases"
     git config --global alias.ai '!f() { fish -c "forgit::add $*"; }; f'
     git config --global alias.bdi '!f() { fish -c "forgit::branch::delete $*"; }; f'
     git config --global alias.di '!f() { fish -c "forgit::diff $*"; }; f'
+    git config --global alias.dhi '!f() { fish -c "forgit::diff HEAD"; }; f'
     git config --global alias.fu '!f() { fish -c "forgit::fixup $*"; }; f'
     git config --global alias.li '!f() { fish -c "forgit::log $*"; }; f'
     git config --global alias.ri '!f() { fish -c "forgit::checkout::file $*"; }; f'
