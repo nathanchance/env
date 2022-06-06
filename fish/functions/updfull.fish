@@ -7,6 +7,9 @@ function updfull -d "Update host machine, shell environment, and main distrobox 
         env \
         fisher \
         os \
-        vim
-    and dbxe -- "fish -c 'upd -y'"
+        vim; or return
+
+    if command -q podman; and dbx list &| grep -q (get_dev_img)
+        dbxe -- "fish -c 'upd -y'"
+    end
 end
