@@ -1,8 +1,8 @@
 #
 # Automatically generated file; DO NOT EDIT.
-# Linux/x86 5.18.0 Kernel Configuration
+# Linux/x86 5.19.0-rc1 Kernel Configuration
 #
-CONFIG_CC_VERSION_TEXT="ClangBuiltLinux clang version 15.0.0 (https://github.com/llvm/llvm-project 48d6a6c9add90f3684de362907d5f05a0988244a)"
+CONFIG_CC_VERSION_TEXT="ClangBuiltLinux clang version 15.0.0 (https://github.com/llvm/llvm-project fc1c160f73304d474198d9a21e857b47df2acd3a)"
 CONFIG_GCC_VERSION=0
 CONFIG_CC_IS_CLANG=y
 CONFIG_CLANG_VERSION=150000
@@ -827,6 +827,7 @@ CONFIG_HAVE_OBJTOOL=y
 CONFIG_HAVE_JUMP_LABEL_HACK=y
 CONFIG_HAVE_NOINSTR_HACK=y
 CONFIG_HAVE_NOINSTR_VALIDATION=y
+CONFIG_HAVE_UACCESS_VALIDATION=y
 CONFIG_HAVE_STACK_VALIDATION=y
 CONFIG_HAVE_RELIABLE_STACKTRACE=y
 CONFIG_ISA_BUS_API=y
