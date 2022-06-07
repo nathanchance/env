@@ -10,6 +10,9 @@ function pacman_conf() {
     sed -i "/\[testing\]/,/Include/"'s/^#//' /etc/pacman.conf
     sed -i "/\[community-testing\]/,/Include/"'s/^#//' /etc/pacman.conf
 
+    # Get rid of slimming Docker image changes
+    sed -e "/home\/custompkgs/,/\[options\]/"'s;\[options\];#\[options\];' -e 's;^NoExtract;#NoExtract;g' /etc/pacman.conf
+
     cat <<'EOF' >>/etc/pacman.conf
 
 [nathan]
@@ -35,7 +38,7 @@ function install_packages() {
 
     packages=(
         # Nicer versions of certain GNU utilities
-        bat
+        bat{,-extras}
         diskus
         exa
         fd
@@ -132,6 +135,9 @@ function install_packages() {
         llvm
         ninja
         perf
+
+        # man pages
+        mandoc
 
         # package building
         dpkg
