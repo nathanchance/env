@@ -138,10 +138,11 @@ function install_pkgs() {
         # Miscellaneous
         libxkbcommon
         lm_sensors
+        man-db
         which
 
         # Nicer versions of certain GNU utilities
-        bat
+        bat{,-extras}
         diskus
         duf
         dust

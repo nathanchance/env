@@ -137,7 +137,7 @@ function install_packages() {
         perf
 
         # man pages
-        mandoc
+        man-db
 
         # package building
         dpkg
