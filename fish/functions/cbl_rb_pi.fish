@@ -20,8 +20,7 @@ function cbl_rb_pi -d "Rebase Raspberry Pi kernel on latest linux-next"
 
     git rh origin/master
 
-    # https://lore.kernel.org/all/Yp4F6n2Ie32re7Ed@qian/
-    git rv --no-edit 19ee3818b7c62041b1466958d1a15c48d1fc28cc; or return
+    set -a patches 20220608152757.82529-1-nathan@kernel.org # [PATCH] mmc: sdhci-brcmstb: Initialize base_clk to NULL in sdhci_brcmstb_probe()
 
     for patch in $patches
         b4 am -l -o - -P _ -s $patch | git am; or return
