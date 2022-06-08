@@ -55,6 +55,9 @@ function install_packages() {
         # b4
         b4
 
+        # compression and decompression
+        zstd
+
         # distrobox
         distrobox
         podman
