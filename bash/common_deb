@@ -62,7 +62,7 @@ function base_packages() {
 
     if can_install_podman; then
         packages+=(
-            buildah
+            catatonit
             containernetworking-plugins
             fuse-overlayfs
             podman
@@ -134,11 +134,4 @@ function setup_locales() {
     echo "locales locales/locales_to_be_generated multiselect en_US.UTF-8 UTF-8" | debconf-set-selections
     rm -f /etc/locale.gen
     dpkg-reconfigure --frontend noninteractive locales
-}
-
-function setup_podman_repo() {
-    can_install_podman || return 0
-
-    curl -fLSs https://download.opensuse.org/repositories/devel:/kubic:/libcontainers:/stable/"${1:?}"/Release.key | gpg --dearmor | dd of=/etc/apt/trusted.gpg.d/devel_kubic_libcontainers_stable.gpg || exit
-    echo "deb https://download.opensuse.org/repositories/devel:/kubic:/libcontainers:/stable/$1/ /" | tee /etc/apt/sources.list.d/devel:kubic:libcontainers:stable.list
 }

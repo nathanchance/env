@@ -89,7 +89,6 @@ set_apt_variables
 install_initial_packages
 setup_fish_repo
 setup_gh_repo
-setup_podman_repo Debian_"$VERSION_ID"
 install_packages
 chsh_fish
 setup_doas
