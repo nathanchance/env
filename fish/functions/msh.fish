@@ -39,7 +39,7 @@ function msh -d "Shorthand for mosh -o" -w mosh
 
         case pi3
             if test "$tailscale" = true
-                set ip 100.113.197.39
+                set ip 100.105.238.125
             else
                 set ip 192.168.4.199
             end
@@ -47,9 +47,9 @@ function msh -d "Shorthand for mosh -o" -w mosh
 
         case pi4
             if test "$tailscale" = true
-                set ip 100.74.102.104
+                set ip 100.121.2.13
             else
-                set ip 192.168.4.104
+                set ip 192.168.4.205
             end
             set user_host pi@$ip
 
