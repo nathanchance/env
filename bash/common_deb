@@ -64,6 +64,7 @@ function base_packages() {
         packages+=(
             catatonit
             containernetworking-plugins
+            dbus-user-session
             fuse-overlayfs
             podman
             slirp4netns
