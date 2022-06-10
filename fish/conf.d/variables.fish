@@ -133,7 +133,9 @@ set -gx CCACHE_COMPRESSLEVEL 5
 set -gx EDITOR vim
 
 # Default fzf options
-set -gx FZF_DEFAULT_OPTS --layout=reverse
+set -gx FZF_DEFAULT_OPTS \
+    --layout=reverse \
+    --no-mouse
 
 # Default forgit fzf options
 # Done with individual variables because FORGIT_FZF_DEFAULT_OPTS
