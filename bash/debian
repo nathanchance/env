@@ -42,6 +42,13 @@ function install_initial_packages() {
         gnupg || exit
 }
 
+function setup_docker_repo() {
+    local docker_gpg_key=/etc/apt/trusted.gpg.d/docker.gpg
+
+    curl -fLSs https://download.docker.com/linux/debian/gpg | gpg --dearmor | dd of=$docker_gpg_key
+    echo "deb [arch=$dpkg_arch signed-by=$docker_gpg_key] https://download.docker.com/linux/debian $VERSION_CODENAME stable" | tee /etc/apt/sources.list.d/docker.list || exit
+}
+
 function setup_fish_repo() {
     curl -fLSs https://download.opensuse.org/repositories/shells:fish:release:3/Debian_"${VERSION_ID:?}"/Release.key | gpg --dearmor | dd of=/etc/apt/trusted.gpg.d/shells_fish_release_3.gpg || exit
     echo "deb http://download.opensuse.org/repositories/shells:/fish:/release:/3/Debian_$VERSION_ID/ /" | tee /etc/apt/sources.list.d/shells:fish:release:3.list || exit
@@ -72,6 +79,12 @@ function install_packages() {
 
         # doas
         libpam0g
+
+        # Docker
+        containerd.io
+        docker-ce
+        docker-ce-cli
+        docker-compose-plugin
 
         # Downloading/extracting utilities
         ca-certificates
@@ -129,6 +142,39 @@ function install_packages() {
         "${packages[@]}" || exit
 }
 
+function pi_setup() {
+    # Add user account to kvm group for /dev/kvm access
+    # shellcheck disable=SC2154
+    usermod -aG kvm "$user_name"
+
+    # Expand the rootfs to its full capacity
+    raspi-config --expand-rootfs
+
+    # Turn on the serial console by default
+    raspi-config nonint do_serial 0
+
+    # Update the pi account's password
+    # shellcheck disable=SC2154
+    echo "$user_name:$user_pass" | chpasswd
+
+    # If the Pi has an external hard drive attached to it, add it to the fstab
+    ssd_part=/dev/sda1
+    if [[ -b $ssd_part ]]; then
+        mnt_point=/mnt/ssd
+        mkdir -p "$mnt_point"
+        chown -R "$user_name:$user_name" "$mnt_point"
+        grep -q "$mnt_point" /etc/fstab || printf "PARTUUID=%s\t%s\text4\tdefaults,noatime\t0\t1\n" "$(blkid -o value -s PARTUUID $ssd_part)" "$mnt_point" | tee -a /etc/fstab
+
+        docker_json=/etc/docker/daemon.json
+        mkdir -p "${docker_json%/*}"
+        cat <<EOF >$docker_json
+{
+"data-root": "$mnt_point/docker"
+}
+EOF
+    fi
+}
+
 function setup_doas() {
     work_dir=$(mktemp -d)
 
@@ -155,6 +201,14 @@ EOF
     rm -fr "$work_dir"
 }
 
+function setup_docker() {
+    groupadd -f docker
+    usermod -aG docker "$user_name" || exit
+
+    # Pick up changes to daemon.json file
+    systemctl restart {containerd,docker}.service || exit
+}
+
 function setup_locales() {
     echo "locales locales/default_environment_locale select en_US.UTF-8" | debconf-set-selections
     echo "locales locales/locales_to_be_generated multiselect en_US.UTF-8 UTF-8" | debconf-set-selections
@@ -162,44 +216,21 @@ function setup_locales() {
     dpkg-reconfigure --frontend noninteractive locales
 }
 
-function pi_setup() {
-    # Add user account to kvm group for /dev/kvm access
-    # shellcheck disable=SC2154
-    usermod -aG kvm "$user_name"
-
-    # Expand the rootfs to its full capacity
-    raspi-config --expand-rootfs
-
-    # Turn on the serial console by default
-    raspi-config nonint do_serial 0
-
-    # Update the pi account's password
-    # shellcheck disable=SC2154
-    echo "$user_name:$user_pass" | chpasswd
-
-    # If the Pi has an external hard drive attached to it, add it to the fstab
-    ssd_part=/dev/sda1
-    if [[ -b $ssd_part ]]; then
-        mnt_point=/mnt/ssd
-        mkdir -p "$mnt_point"
-        chown -R "$user_name:$user_name" "$mnt_point"
-        grep -q "$mnt_point" /etc/fstab || printf "PARTUUID=%s\t%s\text4\tdefaults,noatime\t0\t1\n" "$(blkid -o value -s PARTUUID $ssd_part)" "$mnt_point" | tee -a /etc/fstab
-    fi
-}
-
 parse_parameters "$@"
 set_global_variables
 reality_check
 set_apt_variables
 install_initial_packages
+setup_docker_repo
 setup_fish_repo
 setup_gh_repo
 setup_tailscale_repo
 install_packages
 chsh_fish
+pi_setup
 setup_doas
+setup_docker
 setup_locales
 clone_env
-pi_setup
 set_date_time
 setup_initial_fish_config
