@@ -4,6 +4,7 @@
 # Copyright (C) 2021-2022 Nathan Chancellor
 
 bash_root=$(dirname "$0")
+dpkg_arch=$(dpkg --print-architecture)
 
 # Add common functions
 source "$bash_root"/common || exit
@@ -47,8 +48,10 @@ function setup_fish_repo() {
 }
 
 function setup_gh_repo() {
-    curl -fLSs https://cli.github.com/packages/githubcli-archive-keyring.gpg | dd of=/etc/apt/trusted.gpg.d/githubcli-archive-keyring.gpg || exit
-    echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/trusted.gpg.d/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | tee /etc/apt/sources.list.d/github-cli.list || exit
+    local gh_gpg_key=/etc/apt/trusted.gpg.d/githubcli-archive-keyring.gpg
+
+    curl -fLSs https://cli.github.com/packages/githubcli-archive-keyring.gpg | dd of=$gh_gpg_key || exit
+    echo "deb [arch=$dpkg_arch signed-by=$gh_gpg_key] https://cli.github.com/packages stable main" | tee /etc/apt/sources.list.d/github-cli.list || exit
 }
 
 function setup_tailscale_repo() {
@@ -130,7 +133,7 @@ function setup_doas() {
     work_dir=$(mktemp -d)
 
     doas_version=6.8.1-3
-    doas_deb="$work_dir"/doas_"$doas_version"_"$(dpkg --print-architecture)".deb
+    doas_deb="$work_dir"/doas_"$doas_version"_"$dpkg_arch".deb
 
     curl -LSso "$doas_deb" http://http.us.debian.org/debian/pool/main/d/doas/"${doas_deb##*/}" || exit
     dpkg -i "$doas_deb" || exit
@@ -175,11 +178,12 @@ function pi_setup() {
     echo "$user_name:$user_pass" | chpasswd
 
     # If the Pi has an external hard drive attached to it, add it to the fstab
-    if [[ -b /dev/sda1 ]]; then
+    ssd_part=/dev/sda1
+    if [[ -b $ssd_part ]]; then
         mnt_point=/mnt/ssd
         mkdir -p "$mnt_point"
         chown -R "$user_name:$user_name" "$mnt_point"
-        grep -q "$mnt_point" /etc/fstab || printf "PARTUUID=%s\t%s\text4\tdefaults,noatime\t0\t1\n" "$(blkid -o value -s PARTUUID /dev/sda1)" "$mnt_point" | tee -a /etc/fstab
+        grep -q "$mnt_point" /etc/fstab || printf "PARTUUID=%s\t%s\text4\tdefaults,noatime\t0\t1\n" "$(blkid -o value -s PARTUUID $ssd_part)" "$mnt_point" | tee -a /etc/fstab
     fi
 }
 
