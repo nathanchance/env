@@ -22,7 +22,7 @@ function cbl_upd_stbl_wrktrs -d "Update the worktrees for linux-stable"
             set stable_version (string split -f 3 '-' (basename $worktree))
             if not contains $stable_version $stable_versions
                 header "Removing $worktree"
-                git -C $folder worktree remove $worktree
+                git -C $folder worktree remove --force $worktree
                 git -C $folder bd linux-$stable_version.y
             end
         end
