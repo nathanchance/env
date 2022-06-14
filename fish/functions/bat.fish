@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: MIT
 # Copyright (C) 2021-2022 Nathan Chancellor
 
-function bat -d "Runs bat through the system or podman depending on how it is available"
+function bat -d "Runs bat through the system or a binary in $BIN_FOLDER"
     if command -q bat
         command bat $argv
     else if test -x $BIN_FOLDER/bat

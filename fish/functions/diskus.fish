@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: MIT
 # Copyright (C) 2021-2022 Nathan Chancellor
 
-function diskus -d "Runs diskus through the system or podman depending on how it is available"
+function diskus -d "Runs diskus through the system or a binary in $BIN_FOLDER"
     if command -q diskus
         command diskus $argv
     else if test -x $BIN_FOLDER/diskus
