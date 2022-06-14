@@ -1,5 +1,6 @@
 linux-mainline-llvm/linux-mainline-llvm
 linux-next-llvm/linux-next-llvm
+pkgbuilds/linux-*/config.old
 pkgbuilds/*/pkg
 pkgbuilds/*/src
 pkgbuilds/*/*.tar.*
