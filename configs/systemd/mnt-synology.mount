@@ -1,0 +1,12 @@
+[Unit]
+Description=Mount Synology NAS folder at boot
+
+[Mount]
+What=192.168.4.207:/volume1/Thelio
+Where=/mnt/synology
+Options=vers=4
+Type=nfs
+TimeoutSec=30
+
+[Install]
+WantedBy=multi-user.target
