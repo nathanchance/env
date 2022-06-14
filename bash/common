@@ -9,11 +9,6 @@ function assert_root() {
     fi
 }
 
-function can_install_podman() {
-    $pi && [[ $(dpkg --print-architecture) = "armhf" ]] && return 1
-    return 0
-}
-
 function chsh_fish() {
     fish_path=$(readlink -f "$(command -v fish)")
 
@@ -88,7 +83,6 @@ function print_error() {
 }
 
 function podman_setup() {
-    can_install_podman || return 0
     echo "${user_name:?}:100000:65536" | tee /etc/subgid /etc/subuid
     [[ -f /etc/containers/registries.conf ]] || cat <<EOF | tee /etc/containers/registries.conf
 [registries.search]
@@ -118,13 +112,8 @@ function set_date_time() {
 
 function set_global_variables() {
     uname -r | grep -iq microsoft && wsl=true
+    [[ $(uname -n) = "raspberrypi" ]] && user_name=pi
 
-    if [[ $(uname -n) = "raspberrypi" ]]; then
-        pi=true
-        user_name=pi
-    fi
-
-    [[ -z $pi ]] && pi=false
     [[ -z $user_name ]] && user_name=nathan
     [[ -z $wsl ]] && wsl=false
 }
