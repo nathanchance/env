@@ -190,6 +190,11 @@ out.*/
         podman system info
     end
 
+    # Show Docker information if it is installed
+    if command -q docker
+        docker system info
+    end
+
     # Set up libvirt storage pool
     if command -q virsh; and mountpoint -q /home
         set -l libvirt_pool $VM_FOLDER/libvirt
@@ -212,7 +217,7 @@ out.*/
         end
     end
     updall --no-os; or return
-    if command -q podman; and test "$LOCATION" != wsl
+    if command -q podman; or command -q docker; and test "$LOCATION" != wsl
         dbxc --yes
     end
 

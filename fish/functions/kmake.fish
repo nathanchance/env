@@ -3,7 +3,7 @@
 # Copyright (C) 2021-2022 Nathan Chancellor
 
 function kmake -d "Run make with all cores and adjust PATH temporarily"
-    if test -z "$container"; and test -z "$OVERRIDE_CONTAINER"
+    if not in_container; and test -z "$OVERRIDE_CONTAINER"
         print_error "This needs to be run in a container!"
         return 1
     end

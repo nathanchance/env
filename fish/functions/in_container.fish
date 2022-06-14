@@ -3,9 +3,9 @@
 # Copyright (C) 2022 Nathan Chancellor
 
 function in_container -d "Checks if command is being run in a container"
-    if test -z "$container"; or not test -f /run/.containerenv
-        return 1
+    if test -n "$container"; or test -f /run/.containerenv; or test -f /.dockerenv
+        return 0
     end
 
-    return 0
+    return 1
 end
