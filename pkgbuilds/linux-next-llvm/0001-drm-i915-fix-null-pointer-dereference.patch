@@ -1,7 +1,7 @@
-From f9b618611b2f025cd6295de509efaad774c5fa0a Mon Sep 17 00:00:00 2001
+From 2f9fd1ab6fafca6bd85013932393e79f7df9ca4e Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?=C5=81ukasz=20Bartosik?= <lb@semihalf.com>
 Date: Tue, 1 Feb 2022 16:33:54 +0100
-Subject: [PATCH 1/3] drm/i915: fix null pointer dereference
+Subject: [PATCH] drm/i915: fix null pointer dereference
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
@@ -58,7 +58,7 @@ Link: https://lore.kernel.org/r/20220201153354.11971-1-lukasz.bartosik@semihalf.
  1 file changed, 9 insertions(+), 7 deletions(-)
 
 diff --git a/drivers/gpu/drm/i915/display/intel_bw.c b/drivers/gpu/drm/i915/display/intel_bw.c
-index 37bd7b17f3d0..f2fad199e2e0 100644
+index 79269d2c476b..3699869ab2db 100644
 --- a/drivers/gpu/drm/i915/display/intel_bw.c
 +++ b/drivers/gpu/drm/i915/display/intel_bw.c
 @@ -404,15 +404,17 @@ static int tgl_get_bw_info(struct drm_i915_private *dev_priv, const struct intel
