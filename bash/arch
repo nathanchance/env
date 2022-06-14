@@ -104,6 +104,7 @@ function install_pkgs() {
         vim{,-spell-en}
 
         # Disk management utilities
+        nfs-utils
         nvme-cli
         parted
         smartmontools
