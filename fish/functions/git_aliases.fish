@@ -131,7 +131,7 @@ function git_aliases -d "Configure git aliases"
 
     # fish git aliases
     # no arguments
-    for alias in bf dmb sync
+    for alias in bf cpi dmb sync
         git config --global alias.$alias "!fish -c git_$alias"
     end
     # with arguments
