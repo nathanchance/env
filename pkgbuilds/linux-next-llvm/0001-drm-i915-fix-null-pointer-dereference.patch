@@ -1,7 +1,7 @@
-From 2f9fd1ab6fafca6bd85013932393e79f7df9ca4e Mon Sep 17 00:00:00 2001
+From 58c09564247a98ee5224e9c711f746f72a76af85 Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?=C5=81ukasz=20Bartosik?= <lb@semihalf.com>
 Date: Tue, 1 Feb 2022 16:33:54 +0100
-Subject: [PATCH] drm/i915: fix null pointer dereference
+Subject: [PATCH 1/2] drm/i915: fix null pointer dereference
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit

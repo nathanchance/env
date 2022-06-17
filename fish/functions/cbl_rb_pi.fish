@@ -20,16 +20,13 @@ function cbl_rb_pi -d "Rebase Raspberry Pi kernel on latest linux-next"
 
     git rh origin/master
 
-    set -a patches 20220608152757.82529-1-nathan@kernel.org # [PATCH] mmc: sdhci-brcmstb: Initialize base_clk to NULL in sdhci_brcmstb_probe()
     set -a patches 20220606140103.32779-1-vincenzo.frascino@arm.com # [PATCH] arm64: Enable docker support in defconfig
 
     for patch in $patches
         b4 am -l -o - -P _ -s $patch | git am; or return
     end
 
-    # Handle merge issue
-    sed -i -e 's;rcu_irq_enter;ct_irq_enter;g' -e 's;rcu_irq_exit;ct_irq_exit;g' kernel/cfi.c
-    git ac -m "kernel/cfi.c: Handle merge issue between e1d3373352077f3 and dcc0c11aa87b583"; or return
+    git am $ENV_FOLDER/pkgbuilds/linux-next-llvm/0002-io_uring-Silence-Wbitwise-instead-of-logical-in-io_p.patch; or return
 
     # Regenerate defconfigs
     for arch in arm arm64

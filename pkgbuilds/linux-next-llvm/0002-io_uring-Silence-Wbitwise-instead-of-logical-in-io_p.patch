@@ -1,0 +1,34 @@
+From cbc63a37dec627a84efd0068ca4e1899806f3573 Mon Sep 17 00:00:00 2001
+From: Nathan Chancellor <nathan@kernel.org>
+Date: Fri, 17 Jun 2022 08:35:56 -0700
+Subject: [PATCH 2/2] io_uring: Silence -Wbitwise-instead-of-logical in
+ io_poll_remove_all()
+
+Link: https://lore.kernel.org/YqyfK34NJakiLiVe@dev-arch.thelio-3990X/
+Signed-off-by: Nathan Chancellor <nathan@kernel.org>
+---
+ io_uring/poll.c | 8 ++++++--
+ 1 file changed, 6 insertions(+), 2 deletions(-)
+
+diff --git a/io_uring/poll.c b/io_uring/poll.c
+index 2e068e05732a..6a70bc220971 100644
+--- a/io_uring/poll.c
++++ b/io_uring/poll.c
+@@ -599,8 +599,12 @@ __cold bool io_poll_remove_all(struct io_ring_ctx *ctx, struct task_struct *tsk,
+ 			       bool cancel_all)
+ 	__must_hold(&ctx->uring_lock)
+ {
+-	return io_poll_remove_all_table(tsk, &ctx->cancel_table, cancel_all) |
+-	       io_poll_remove_all_table(tsk, &ctx->cancel_table_locked, cancel_all);
++	bool ret;
++
++	ret = io_poll_remove_all_table(tsk, &ctx->cancel_table, cancel_all);
++	ret |= io_poll_remove_all_table(tsk, &ctx->cancel_table_locked, cancel_all);
++
++	return ret;
+ }
+ 
+ static struct io_kiocb *io_poll_find(struct io_ring_ctx *ctx, bool poll_only,
+-- 
+2.36.1
+
