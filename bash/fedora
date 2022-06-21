@@ -24,6 +24,19 @@ function reality_check() {
     esac
 }
 
+function resize_rootfs() {
+    dev_mapper=$(df -T | grep /dev/mapper/)
+    if [[ -n $dev_mapper ]]; then
+        dev_mapper_path=$(echo "$dev_mapper" | cut -d ' ' -f 1)
+        lvextend -l +100%FREE "$dev_mapper_path"
+
+        dev_mapper_fs_type=$(echo "$dev_mapper" | cut -d ' ' -f 2)
+        if [[ $dev_mapper_fs_type = "xfs" ]]; then
+            xfs_growfs "$dev_mapper_path"
+        fi
+    fi
+}
+
 function install_initial_packages() {
     dnf update -y || exit
     dnf install -y dnf-plugins-core || exit
@@ -134,6 +147,7 @@ function setup_mosh() {
 
 set_global_variables
 reality_check
+resize_rootfs
 install_initial_packages
 setup_gh_repo
 setup_tuxmake_repo
