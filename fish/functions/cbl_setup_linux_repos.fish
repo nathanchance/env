@@ -67,4 +67,10 @@ function cbl_setup_linux_repos -d "Clone ClangBuiltLinux Linux repos into their 
         end
     end
     rm -rf $tmp_dir
+
+    # Set up Honeycomb source worktree
+    set honeycomb $CBL_BLD/honeycomb
+    if not test -d $honeycomb
+        git -C $CBL_SRC/linux-next worktree add -B honeycomb --no-track $honeycomb origin/master
+    end
 end
