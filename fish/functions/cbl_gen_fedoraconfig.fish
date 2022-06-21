@@ -25,6 +25,7 @@ function cbl_gen_fedoraconfig -d "Downloads and modifies Fedora's kernel configu
         -d DEBUG_INFO \
         -d DEBUG_INFO_DWARF_TOOLCHAIN_DEFAULT \
         -e LOCALVERSION_AUTO \
+        -e LTO_CLANG_THIN \
         -e WERROR \
         --set-val FRAME_WARN 1500 \
         --set-val NR_CPUS 256
