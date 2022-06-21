@@ -9,7 +9,7 @@ function cbl_setup_linux_repos -d "Clone ClangBuiltLinux Linux repos into their 
                 set pairs torvalds/linux:{$CBL_BLD_C,$CBL_BLD_P,$CBL_SRC}/$arg
 
             case linux-next
-                set pairs next/linux-next:{{$CBL_BLD_C,$CBL_BLD_P,$CBL_SRC}/$arg,$CBL_BLD/rpi,$CBL_SRC/linux-cfi}
+                set pairs next/linux-next:{{$CBL_BLD_C,$CBL_BLD_P,$CBL_SRC}/$arg,$CBL_BLD/rpi}
 
             case linux-stable
                 set pairs stable/linux:{$CBL_BLD_C,$CBL_BLD_P,$CBL_SRC}/$arg
@@ -49,10 +49,9 @@ function cbl_setup_linux_repos -d "Clone ClangBuiltLinux Linux repos into their 
         git -C $folder checkout master
 
         switch (basename $folder)
-            case linux-cfi rpi
+            case rpi
                 git -C $folder config rerere.enabled true
                 git -C $folder remote add -f --tags mainline https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git
-                git -C $folder remote add -f --tags sami https://github.com/samitolvanen/linux.git
             case '*'
                 git -C $folder branch --set-upstream-to=origin/master
                 git -C $folder reset --hard origin/master
