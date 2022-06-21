@@ -12,6 +12,8 @@ if test -z "$LOCATION"
     switch "$(id -un)@$hostname"
         case nathan@archlinux-'*' nathan@debian-'*' nathan@ubuntu-'*'
             set -Ux LOCATION hetzner-server
+        case nathan@honeycomb
+            set -Ux LOCATION honeycomb
         case pi@raspberrypi
             set -Ux LOCATION pi
         case nathan@hp-amd-ryzen-4300G
