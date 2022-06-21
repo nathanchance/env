@@ -17,6 +17,5 @@ function git_bf -d "Use fzf on git branch output"
 
     git branch --all --color=always | \
         LC_ALL=C sort -k1.1,1.1 -rs | \
-        FZF_DEFAULT_OPTS="$fzf_opts" fzf | \
-        awk '{print $1}'
+        FZF_DEFAULT_OPTS="$fzf_opts" fzf | awk '{print $1}'
 end
