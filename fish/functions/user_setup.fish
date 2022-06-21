@@ -174,12 +174,14 @@ Host sos.*.platformequinix.com
     git config --global core.excludesfile $gitignore
     crl -o $gitignore https://gist.githubusercontent.com/octocat/9257657/raw/3f9569e65df83a7b328b39a091f0ce9c6efc6429/.gitignore
     echo '
+
 # Personal exclusions #
 #######################
 build/
 .build/
 out.*/
-*.rej' >>$gitignore
+*.rej
+rpmbuild/' >>$gitignore
 
     # Ensure podman registers with correct options for environment
     if command -q podman
