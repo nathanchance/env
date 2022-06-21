@@ -26,8 +26,6 @@ function cbl_rb_pi -d "Rebase Raspberry Pi kernel on latest linux-next"
         b4 am -l -o - -P _ -s $patch | git am; or return
     end
 
-    git am $ENV_FOLDER/pkgbuilds/linux-next-llvm/0002-io_uring-Silence-Wbitwise-instead-of-logical-in-io_p.patch; or return
-
     # Regenerate defconfigs
     for arch in arm arm64
         switch $arch
