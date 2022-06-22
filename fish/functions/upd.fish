@@ -5,6 +5,8 @@
 function upd -d "Runs the update command for the current distro or downloads/updates requested binary"
     for arg in $argv
         switch $arg
+            case -f --force
+                set force true
             case -y --yes
                 if command -q pacman
                     set yes --noconfirm
@@ -103,7 +105,7 @@ function upd -d "Runs the update command for the current distro or downloads/upd
                 if in_container
                     print_warning "tmuxp should be installed while in the host environment, skipping..."
                 else
-                    if command -q tmuxp
+                    if command -q tmuxp; and test "$force" != true
                         print_warning "tmuxp is installed through package manager, skipping..."
                     else
                         set -l tmuxp_tmp (mktemp -d)
@@ -142,7 +144,7 @@ function upd -d "Runs the update command for the current distro or downloads/upd
 
         switch $target
             case b4 bat btop diskus distrobox duf exa fd fzf hyperfine repo rg shellcheck shfmt tuxmake yapf
-                if command -q $target
+                if command -q $target; and test "$force" != true
                     print_warning "$target is installed through package manager, skipping install..."
                     continue
                 end
