@@ -11,6 +11,19 @@ function cbl_upd_krnl -d "Update machine's kernel"
         case hetzner-server workstation
             cbl_upd_krnl_pkg $argv
 
+        case honeycomb
+            in_container_msg -h; or return
+
+            # Cache sudo/doas permissions
+            sudo true; or return
+
+            # Download .rpm package
+            set remote_build $CBL_BLD/honeycomb
+            set out rpmbuild/RPMS/aarch64
+            scp $remote_user@$remote_host:$remote_build/$out/'*'.rpm /tmp; or return
+
+            sudo dnf install -y /tmp/*.rpm; or return
+
         case pi
             in_container_msg -h; or return
 
