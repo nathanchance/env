@@ -22,6 +22,13 @@ function cbl_bld_tot_tcs -d "Build LLVM and binutils from source for kernel deve
                 --bolt \
                 --pgo kernel-{allmod,def}config
 
+        case honeycomb
+            set bld_bntls false
+
+            set bld_llvm_args \
+                --pgo kernel-defconfig \
+                --targets "AArch64;ARM;X86"
+
         case pi
             set bld_bntls false
 
