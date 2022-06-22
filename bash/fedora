@@ -86,7 +86,7 @@ function install_packages() {
         jq
         neofetch
         openssh
-        python-tmuxp
+        python-{pip,tmuxp}
         stow
         tmux
         vim
