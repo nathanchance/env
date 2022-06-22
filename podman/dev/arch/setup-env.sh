@@ -11,7 +11,7 @@ function pacman_conf() {
     sed -i "/\[community-testing\]/,/Include/"'s/^#//' /etc/pacman.conf
 
     # Get rid of slimming Docker image changes
-    sed -e "/home\/custompkgs/,/\[options\]/"'s;\[options\];#\[options\];' -e 's;^NoExtract;#NoExtract;g' /etc/pacman.conf
+    sed -i -e "/home\/custompkgs/,/\[options\]/"'s;\[options\];#\[options\];' -e 's;^NoExtract;#NoExtract;g' /etc/pacman.conf
 
     cat <<'EOF' >>/etc/pacman.conf
 
