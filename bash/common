@@ -111,10 +111,12 @@ function set_date_time() {
 }
 
 function set_global_variables() {
-    uname -r | grep -iq microsoft && wsl=true
-    [[ $(uname -n) = "raspberrypi" ]] && user_name=pi
+    uname -n | grep -Pq "[a|c|f|g|m|n|s|t|x]{1}[1-3]{1}-.*" && equinix=true
     [[ $(uname -n) = "honeycomb" ]] && honeycomb=true
+    [[ $(uname -n) = "raspberrypi" ]] && user_name=pi
+    uname -r | grep -iq microsoft && wsl=true
 
+    [[ -z $equinix ]] && equinix=false
     [[ -z $honeycomb ]] && honeycomb=false
     [[ -z $user_name ]] && user_name=nathan
     [[ -z $wsl ]] && wsl=false

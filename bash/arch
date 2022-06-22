@@ -202,7 +202,8 @@ function install_pkgs() {
         # Equinix Metal servers; iptables-nft is also needed for networking but
         # that will be installed later to avoid potential issues with replacing
         # iptables.
-        if uname -n | grep -Pq "[a|c|f|g|m|n|s|t|x]{1}[1-3]{1}-.*"; then
+        # shellcheck disable=SC2154
+        if $equinix; then
             packages+=(
                 dmidecode
                 dnsmasq
