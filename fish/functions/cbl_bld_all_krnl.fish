@@ -13,6 +13,14 @@ function cbl_bld_all_krnl -d "Build all kernels for ClangBuiltLinux testing"
             git -C $lnx urh
 
             cbl_lkt --linux-src $lnx
+
+        case honeycomb test-desktop-intel
+            cbl_clone_repo linux
+            git -C $CBL_SRC/linux urh
+            cbl_lkt \
+                --arches arm32,arm64,x86,x86_64 \
+                --linux-src $CBL_SRC/linux
+
         case pi
             # Update linux-next
             cbl_clone_repo linux-next; or return
@@ -58,13 +66,6 @@ function cbl_bld_all_krnl -d "Build all kernels for ClangBuiltLinux testing"
                 LLVM=1 \
                 O=.build/(uname -m) \
                 distclean allmodconfig all
-
-        case test-desktop-intel
-            cbl_clone_repo linux
-            git -C $CBL_SRC/linux urh
-            cbl_lkt \
-                --arches arm32,arm64,x86,x86_64 \
-                --linux-src $CBL_SRC/linux
 
         case '*'
             for arg in $argv
