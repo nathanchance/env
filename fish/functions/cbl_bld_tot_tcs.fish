@@ -127,7 +127,6 @@ function cbl_bld_tot_tcs -d "Build LLVM and binutils from source for kernel deve
     end
 
     # Add patches to revert here
-    set -a reverts b89bcefa6202e310eb3167dd1c37f1807377ec8d # Add an error message to the default SIGPIPE handler (https://github.com/ClangBuiltLinux/linux/issues/1651)
     for revert in $reverts
         if not git -C $llvm_project rv -n $revert
             set message "Failed to revert $revert"
