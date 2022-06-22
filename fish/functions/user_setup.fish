@@ -22,7 +22,7 @@ function user_setup -d "Setup a user account, downloading all files and placing 
         case hetzner-server workstation wsl
             set trusted_gpg true
             set trusted_ssh true
-        case pi test-desktop-amd test-desktop-intel test-laptop-intel
+        case honeycomb pi test-desktop-amd test-desktop-intel test-laptop-intel
             set trusted_ssh true
     end
 
