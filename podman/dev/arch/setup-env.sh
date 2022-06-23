@@ -106,6 +106,7 @@ function install_packages() {
         perl-authen-sasl
         perl-mime-tools
         perl-net-smtp-ssl
+        repo
 
         # kernel / tuxmake
         aarch64-linux-gnu-gcc
