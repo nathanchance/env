@@ -198,6 +198,7 @@ function cbl_lkt -d "Tests a Linux kernel with llvm-kernel-testing"
     # warning: argument unused during compilation: '-march=arm: https://github.com/ClangBuiltLinux/linux/issues/1315
     # scripts/(extract-cert|sign-file).c: OpenSSL deprecation warnings, we do not care: https://github.com/ClangBuiltLinux/linux/issues/1555
     # .note.GNU-stack, LOAD + RWX: New binutils warnings that are not clang specific: https://sourceware.org/bugzilla/show_bug.cgi?id=29072
+    # error: write on a pipe with no reader: https://github.com/ClangBuiltLinux/linux/issues/1651
     set blocklist_items \
         "objtool:" \
         "override: (CPU_BIG_ENDIAN|LTO_CLANG_THIN) changes choice state" \
@@ -211,7 +212,8 @@ function cbl_lkt -d "Tests a Linux kernel with llvm-kernel-testing"
         "scripts/(extract-cert|sign-file).c:[0-9]+:[0-9]+: warning: '(ENGINE|ERR)_.*' is deprecated \[-Wdeprecated-declarations\]" \
         "missing .note.GNU-stack section implies executable stack" \
         "requires executable stack \(because the .note.GNU-stack section is executable\)" \
-        "has a LOAD segment with RWX permissions"
+        "has a LOAD segment with RWX permissions" \
+        "error: write on a pipe with no reader"
     set blocklist (string join "|" $blocklist_items)
     set searchlist_items \
         "error:" \
