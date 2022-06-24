@@ -24,6 +24,7 @@ function cbl_gen_fedoraconfig -d "Downloads and modifies Fedora's kernel configu
     scripts/config \
         -d DEBUG_INFO \
         -d DEBUG_INFO_DWARF_TOOLCHAIN_DEFAULT \
+        -d LTO_NONE \
         -e LOCALVERSION_AUTO \
         -e LTO_CLANG_THIN \
         -e WERROR \
