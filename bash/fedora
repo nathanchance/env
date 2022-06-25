@@ -46,6 +46,13 @@ function setup_gh_repo() {
     dnf config-manager --add-repo https://cli.github.com/packages/rpm/gh-cli.repo || exit
 }
 
+function setup_tailscale_repo() {
+    # shellcheck disable=SC2154
+    $honeycomb || return 0
+
+    dnf config-manager --add-repo https://pkgs.tailscale.com/stable/fedora/tailscale.repo || exit
+}
+
 function setup_tuxmake_repo() {
     cat <<EOF >/etc/yum.repos.d/tuxmake.repo
 [tuxmake]
@@ -114,6 +121,10 @@ function install_packages() {
         packages+=(@virtualization)
     fi
 
+    if $honeycomb; then
+        packages+=(tailscale)
+    fi
+
     dnf install -y "${packages[@]}" || exit
 }
 
@@ -155,17 +166,25 @@ function setup_mosh() {
     fi
 }
 
+function setup_tailscale() {
+    is_installed tailscale || return 0
+
+    systemctl enable --now tailscaled || exit
+}
+
 set_global_variables
 reality_check
 resize_rootfs
 install_initial_packages
 setup_gh_repo
+setup_tailscale_repo
 setup_tuxmake_repo
 install_packages
 setup_doas
 setup_kernel_args
 setup_libvirt
 setup_mosh
+setup_tailscale
 chsh_fish
 clone_env
 setup_initial_fish_config
