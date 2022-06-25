@@ -22,7 +22,12 @@ function msh -d "Shorthand for mosh -o" -w mosh
             set user_host nathan@$ip
 
         case honeycomb
-            set user_host nathan@192.168.4.210
+            if test "$tailscale" = true
+                set ip 100.78.199.101
+            else
+                set ip 192.168.4.210
+            end
+            set user_host nathan@$ip
 
         case intel-desktop
             if test "$tailscale" = true
