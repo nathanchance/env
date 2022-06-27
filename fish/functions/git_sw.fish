@@ -4,8 +4,11 @@
 
 function git_sw -d "git switch with fzf"
     if test (count $argv) -gt 0
-        git switch $argv
+        set ref $argv
     else
-        forgit::checkout::branch
+        set ref (git bf)
+    end
+    if test -n "$ref"
+        git switch $ref
     end
 end
