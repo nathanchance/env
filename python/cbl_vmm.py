@@ -309,11 +309,11 @@ def set_cfg(args):
         iso = args.iso
     else:
         if arch == "aarch64":
-            ver = 35
-            iso = "https://download.fedoraproject.org/pub/fedora/linux/releases/{0}/server/aarch64/iso/fedora-server-netinst-aarch64-{0}-1.2.iso".format(
+            ver = 36
+            iso = "https://download.fedoraproject.org/pub/fedora/linux/releases/{0}/server/aarch64/iso/fedora-server-netinst-aarch64-{0}-1.5.iso".format(
                 ver)
         elif arch == "x86_64":
-            ver = "2022.04.05"
+            ver = "2022.06.01"
             iso = "https://mirror.arizona.edu/archlinux/iso/{0}/archlinux-{0}-x86_64.iso".format(
                 ver)
         else:
