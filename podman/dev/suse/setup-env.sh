@@ -112,10 +112,9 @@ function install_packages() {
     zypper -n -q in "${packages[@]}"
 
     # Install zoxide from GitHub
-    zoxide_repo=ajeetdsouza/zoxide
-    zoxide_ver=$(curl -fLSs https://api.github.com/repos/"$zoxide_repo"/releases/latest | jq -r .tag_name)
     tmp_dir=$(mktemp -d)
-    curl -fLSs https://github.com/"$zoxide_repo"/releases/download/"$zoxide_ver"/zoxide-"$zoxide_ver"-"$(uname -m)"-unknown-linux-musl.tar.gz | tar -C "$tmp_dir" -xzf -
+    zoxide_url=$(curl -LSs https://api.github.com/repos/ajeetdsouza/zoxide/releases/latest | grep -E "browser_download_url.*$(uname -m)-unknown-linux-musl" | cut -d\" -f4)
+    curl -fLSs "$zoxide_url" | tar -C "$tmp_dir" -xzf -
     install -Dvm755 "$tmp_dir"/zoxide /usr/local/bin/zoxide
     rm -fr "$tmp_dir"
 }
