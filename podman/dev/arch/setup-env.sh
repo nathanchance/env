@@ -32,6 +32,11 @@ function makepkg_conf() {
     cat /etc/makepkg.conf
 }
 
+function gen_locale() {
+    sed -i 's/^#en_US.UTF-8 UTF-8/en_US.UTF-8 UTF-8/g' /etc/locale.gen
+    locale-gen
+}
+
 # Update and install packages
 function install_packages() {
     pacman -Syyuu --noconfirm
@@ -162,4 +167,5 @@ function install_packages() {
 
 pacman_conf
 makepkg_conf
+gen_locale
 install_packages
