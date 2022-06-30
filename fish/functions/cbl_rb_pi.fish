@@ -26,12 +26,6 @@ function cbl_rb_pi -d "Rebase Raspberry Pi kernel on latest linux-next"
         b4 am -l -o - -P _ -s $patch | git am; or return
     end
 
-    git rv --no-commit 2258fe488a202c6393c23a21c92b6bc01950bb59; or return
-    b4 am -o - 20220627114119.110825-1-jonathanh@nvidia.com | git ap; or return
-    git ac -m 'v1 -> v2 diff of "soc/tegra: fuse: Expose Tegra production status"
-
-Link: https://lore.kernel.org/20220627091519.323d5a82@canb.auug.org.au/'; or return
-
     # Regenerate defconfigs
     for arch in arm arm64
         switch $arch
