@@ -5,7 +5,9 @@
 set -e fish_user_paths
 
 start_ssh_agent
-start_tmux
+if not string match -qr tty (tty)
+    start_tmux
+end
 
 if in_container
     if test "$USE_CBL" = 1
