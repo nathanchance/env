@@ -14,6 +14,13 @@ function cbl_upd_krnl -d "Update machine's kernel"
         case honeycomb
             in_container_msg -h; or return
 
+            for arg in $argv
+                switch $arg
+                    case -r --reboot
+                        set reboot true
+                end
+            end
+
             # Cache sudo/doas permissions
             sudo true; or return
 
@@ -23,6 +30,10 @@ function cbl_upd_krnl -d "Update machine's kernel"
             scp $remote_user@$remote_host:$krnl_rpm /tmp; or return
 
             sudo dnf install -y /tmp/(basename $krnl_rpm); or return
+
+            if test "$reboot" = true
+                sudo reboot
+            end
 
         case pi
             in_container_msg -h; or return
