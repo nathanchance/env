@@ -7,11 +7,13 @@ function cbl_bld_krnl_rpm -d "Build a .rpm kernel package"
     in_kernel_tree; or return
 
     # Effectively 'distclean'
-    git cl -q
+    git cl -e .config -q
 
     # Allow cross compiling
     for arg in $argv
         switch $arg
+            case -n --no-config
+                set config false
             case aarch64 arm64
                 set arch arm64
             case amd64 x86_64
@@ -29,7 +31,9 @@ function cbl_bld_krnl_rpm -d "Build a .rpm kernel package"
         end
     end
 
-    cbl_gen_fedoraconfig $arch
+    if test "$config" != false
+        cbl_gen_fedoraconfig $arch
+    end
 
     kmake \
         ARCH=$arch \
