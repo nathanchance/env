@@ -18,6 +18,7 @@ source=(
   "$pkgname::git+https://git.kernel.org/pub/scm/linux/kernel/git/next/linux-next.git?signed#tag=$_srctag"
   config
   0001-drm-i915-fix-null-pointer-dereference.patch
+  0002-af_unix-Put-a-named-socket-in-the-global-hash-table.patch
 )
 
 validpgpkeys=(
@@ -26,7 +27,8 @@ validpgpkeys=(
 )
 sha256sums=('SKIP'
             'cbf3b7456ab468fa3d39c756480239244441bcb197b9f7be8123f453521d1c55'
-            '4069681ab6554559ebe9f96e883f3c848be8ee15d48f4e553be35f37d351f9f8')
+            '97b0506a98c2bee3ec12e623a95ec10bd58e287f7f6a0d0a58b2e0f8957ec048'
+            '0184c78bfa910774e8e67457e1494a3c623d55437baadd4479b4e1ddd8c5fb82')
 
 # This obviously ties this PKGBUILD to my machine but that is kind of the point :)
 _kmake() {

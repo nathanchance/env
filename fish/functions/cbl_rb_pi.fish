@@ -21,6 +21,7 @@ function cbl_rb_pi -d "Rebase Raspberry Pi kernel on latest linux-next"
     git rh origin/master
 
     set -a patches 20220606140103.32779-1-vincenzo.frascino@arm.com # [PATCH] arm64: Enable docker support in defconfig
+    set -a patches 20220701072519.96097-1-kuniyu@amazon.com # [PATCH v1 net-next] af_unix: Put a named socket in the global hash table.
 
     for patch in $patches
         b4 am -l -o - -P _ -s $patch | git am; or return

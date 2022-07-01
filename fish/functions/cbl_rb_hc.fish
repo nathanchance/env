@@ -12,6 +12,7 @@ function cbl_rb_hc -d "Rebase Honeycomb kernel on latest linux-next"
     git ru --prune origin; or return
     git rh origin/master
 
+    set -a patches 20220701072519.96097-1-kuniyu@amazon.com # [PATCH v1 net-next] af_unix: Put a named socket in the global hash table.
     for patch in $patches
         b4 shazam -l -P _ -s $patch; or return
     end
