@@ -32,6 +32,9 @@ function cbl_bld_qemu -d "Build QEMU for use with ClangBuiltLinux"
             git -C $qemu_src submodule foreach git reset --hard
             git -C $qemu_src pull --rebase
             git -C $qemu_src submodule update --recursive
+
+            # [PATCH] ebpf: replace deprecated bpf_program__set_socket_filter
+            b4 am -o - 20220527190658.169439-1-i@hexchain.org | git -C $qemu_src ap; or return
         end
 
         set qemu_ver (git -C $qemu_src sh -s --format=%H)
