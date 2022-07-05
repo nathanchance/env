@@ -1,19 +1,19 @@
-From 9e5fab16d59fbffc116e1b3ad66077705cd8c918 Mon Sep 17 00:00:00 2001
+From eb80b9f219f4db99515d414933ea68c66b47d4cf Mon Sep 17 00:00:00 2001
 From: Kuniyuki Iwashima <kuniyu@amazon.com>
-Date: Fri, 1 Jul 2022 00:25:19 -0700
-Subject: [PATCH 2/2] af_unix: Put a named socket in the global hash table.
+Date: Sat, 2 Jul 2022 08:48:17 -0700
+Subject: [PATCH 2/2] af_unix: Put pathname sockets in the global hash table.
 
-Commit cf2f225e2653 ("af_unix: Put a socket into a per-netns hash
-table.") accidentally broke user API for named sockets.  A named
-socket was able to connect() to a peer in the same mount namespace
-even if they were in different network namespaces.
+Commit cf2f225e2653 ("af_unix: Put a socket into a per-netns hash table.")
+accidentally broke user API for pathname sockets.  A socket was able to
+connect() to a pathname socket whose file was visible even if they were in
+different network namespaces.
 
-The commit put all sockets into each per-netns hash table.  As a
-result, connect() to a socket in a different netns failed to find
-the peer and returned -ECONNREFUSED even when they had the same
-mount namespace.
+The commit puts all sockets into a per-netns hash table.  As a result,
+connect() to a pathname socket in a different netns fails to find it in the
+caller's per-netns hash table and returns -ECONNREFUSED even when the task
+can view the peer socket file.
 
-We can reproduce this issue by
+We can reproduce this issue by:
 
   Console A:
 
@@ -33,23 +33,26 @@ We can reproduce this issue by
     >>> s.connect('test')
 
 Note when dumping sockets by sock_diag, procfs, and bpf_iter, they are
-filtered only by netns.  In other words, sockets with different netns
-and the same mount ns are skipped while iterating sockets.  Thus, we
-need a fix only for finding a peer socket.
+filtered only by netns.  In other words, even if they are visible and
+connect()able, all sockets in different netns are skipped while iterating
+sockets.  Thus, we need a fix only for finding a peer pathname socket.
 
-This patch adds a global hash table for named sockets, links them with
-sk_bind_node, and uses it in unix_find_socket_byinode().  By doing so,
-we can keep all sockets in per-netns hash tables and dump them easily.
+This patch adds a global hash table for pathname sockets, links them with
+sk_bind_node, and uses it in unix_find_socket_byinode().  By doing so, we
+can keep sockets in per-netns hash tables and dump them easily.
 
-Thank Sachin Sant and Leonard Crestez for reports, logs and a reproducer.
+Thanks to Sachin Sant and Leonard Crestez for reports, logs and a reproducer.
 
 Fixes: cf2f225e2653 ("af_unix: Put a socket into a per-netns hash table.")
 Reported-by: Sachin Sant <sachinp@linux.ibm.com>
 Reported-by: Leonard Crestez <cdleonard@gmail.com>
-Signed-off-by: Kuniyuki Iwashima <kuniyu@amazon.com>
-Tested-by: Nathan Chancellor <nathan@kernel.org>
 Tested-by: Sachin Sant <sachinp@linux.ibm.com>
-Link: https://lore.kernel.org/r/20220701072519.96097-1-kuniyu@amazon.com
+Tested-by: Nathan Chancellor <nathan@kernel.org>
+Signed-off-by: Kuniyuki Iwashima <kuniyu@amazon.com>
+Tested-by: Leonard Crestez <cdleonard@gmail.com>
+Signed-off-by: Paolo Abeni <pabeni@redhat.com>
+Link: https://git.kernel.org/netdev/net-next/c/51bae889fe111e418321ff0e6bb5f67e64cb9042
+Signed-off-by: Nathan Chancellor <nathan@kernel.org>
 ---
  net/unix/af_unix.c | 47 ++++++++++++++++++++++++++++++++++++----------
  1 file changed, 37 insertions(+), 10 deletions(-)
