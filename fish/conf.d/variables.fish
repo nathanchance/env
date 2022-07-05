@@ -169,6 +169,10 @@ end
 # My GitHub Container Registry URL
 set -gx GHCR ghcr.io/nathanchance
 
+# Hydro prompt custom function
+set -g hydro_multiline true
+set -g hydro_prompt_addons nathan
+
 # For building .deb packages on distros other than Debian/Ubuntu
 set -gx KMAKE_DEB_ARGS DPKG_FLAGS=-d KDEB_CHANGELOG_DIST=unstable
 
