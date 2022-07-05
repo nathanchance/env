@@ -3,7 +3,7 @@
 
 _localversion=-llvm
 pkgname=linux-mainline$_localversion
-_srctag=v5.19-rc4
+_srctag=v5.19-rc5
 pkgver=${_srctag//-/.}
 pkgrel=1
 pkgdesc='Linux'
@@ -26,7 +26,7 @@ validpgpkeys=(
   'ABAF11C65A2970B130ABE3C479BE3E4300411886'  # Linus Torvalds
 )
 sha256sums=('SKIP'
-            '3fcc24d5a49324594f2ec1a6c2ff6490b9d1ba50706b1e756e93eeb718223d05'
+            'c565b944ed368cd1b13b0b00cd781c944d37da98ef508476bfd86a22394012a1'
             'd569ee2fbd072a09e89196779ccc0dfd008d5a79a0cec5fa80cc7ed99a3027fa'
             'a6f7a5eb3134269737b7790a6286dc671b491547d6c0b59e92959dca0b66cc20'
             '1739b36d09e3d555e1c1b1ef079160b808972f84fc40bd81476cbe3079cad54e'
