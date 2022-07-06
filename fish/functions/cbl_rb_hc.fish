@@ -16,7 +16,8 @@ function cbl_rb_hc -d "Rebase Honeycomb kernel on latest linux-next"
         b4 shazam -l -P _ -s $patch; or return
     end
 
-    crl https://git.kernel.org/netdev/net-next/p/51bae889fe111e418321ff0e6bb5f67e64cb9042 | git am; or return # af_unix: Put pathname sockets in the global hash table.
+    # [PATCH] drm/amd/display: fix non-x86/PPC64 compilation
+    crl https://lore.kernel.org/llvm/CADnq5_OO0m2jP_2EpOfmULM+s-WeWt3ND_Xt+yAOku669rf6pA@mail.gmail.com/2-0001-drm-amd-display-fix-non-x86-PPC64-compilation.patch | git am; or return
 
     # Download and modify configuration
     git cl -q

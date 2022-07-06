@@ -3,7 +3,7 @@
 
 _localversion=-llvm
 pkgname=linux-next$_localversion
-_srctag=next-20220705
+_srctag=next-20220706
 pkgver=${_srctag//-/.}
 pkgrel=1
 pkgdesc='linux-next'
@@ -18,7 +18,6 @@ source=(
   "$pkgname::git+https://git.kernel.org/pub/scm/linux/kernel/git/next/linux-next.git?signed#tag=$_srctag"
   config
   0001-drm-i915-fix-null-pointer-dereference.patch
-  0002-af_unix-Put-pathname-sockets-in-the-global-hash-tabl.patch
 )
 
 validpgpkeys=(
@@ -26,9 +25,8 @@ validpgpkeys=(
   '3F2568AAC26998F9E813A1C5C3F436CA30F5D8EB'  # Mark Brown
 )
 sha256sums=('SKIP'
-            'fb834e18ff864c51457d5b0a73baa17152578ac3ebf835313676d479f915b0f3'
-            '455b6f9f714e7c692a7cf6637bd8482b08ac7cfdb5c5c7242ce123b929a9cb05'
-            '197be639f04d44e81d8ee1ac1e137aea53ece6b48af90df4ab2be6c84f34d1c2')
+            '6973a7a1fe068b68eb666b8482f170dba0033c59e1de3bfe49e862dbce06e67e'
+            '455b6f9f714e7c692a7cf6637bd8482b08ac7cfdb5c5c7242ce123b929a9cb05')
 
 # This obviously ties this PKGBUILD to my machine but that is kind of the point :)
 _kmake() {

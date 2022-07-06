@@ -26,8 +26,6 @@ function cbl_rb_pi -d "Rebase Raspberry Pi kernel on latest linux-next"
         b4 am -l -o - -P _ -s $patch | git am; or return
     end
 
-    crl https://git.kernel.org/netdev/net-next/p/51bae889fe111e418321ff0e6bb5f67e64cb9042 | git am; or return # af_unix: Put pathname sockets in the global hash table.
-
     # Regenerate defconfigs
     for arch in arm arm64
         switch $arch
