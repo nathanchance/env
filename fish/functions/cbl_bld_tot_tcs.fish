@@ -137,13 +137,8 @@ function cbl_bld_tot_tcs -d "Build LLVM and binutils from source for kernel deve
     end
 
     # Add in-review patches here
-    set -a revisions D129297 # [LSR] Fix bug - check if loop has preheader before calling isInductionPHI
     for revision in $revisions
         set -l git_ap_args
-        switch $revision
-            case D129297
-                set -a git_ap_args -p0
-        end
         if not crl "https://reviews.llvm.org/$revision?download=true" | git -C $llvm_project ap $git_ap_args
             set message "Failed to apply $revision"
             print_error "$message"
