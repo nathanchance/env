@@ -17,7 +17,7 @@ function cbl_rb_hc -d "Rebase Honeycomb kernel on latest linux-next"
     end
 
     # [PATCH] drm/amd/display: fix non-x86/PPC64 compilation
-    crl https://lore.kernel.org/llvm/CADnq5_OO0m2jP_2EpOfmULM+s-WeWt3ND_Xt+yAOku669rf6pA@mail.gmail.com/2-0001-drm-amd-display-fix-non-x86-PPC64-compilation.patch | git am; or return
+    b4 shazam -l 20220706214203.555342-1-alexander.deucher@amd.com; or return
 
     # Download and modify configuration
     git cl -q
