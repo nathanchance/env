@@ -16,9 +16,6 @@ function cbl_rb_hc -d "Rebase Honeycomb kernel on latest linux-next"
         b4 shazam -l -P _ -s $patch; or return
     end
 
-    # [PATCH] drm/amd/display: fix non-x86/PPC64 compilation
-    b4 shazam -l 20220706214203.555342-1-alexander.deucher@amd.com; or return
-
     # Download and modify configuration
     git cl -q
     crl -o .config https://src.fedoraproject.org/rpms/kernel/raw/rawhide/f/kernel-aarch64-fedora.config
