@@ -5,7 +5,7 @@
 function dbxc -d "Shorthand for 'distrobox create'"
     in_container_msg -h; or return
 
-    set add_args --pids-limit -1
+    set add_args --pids-limit=-1
 
     set i 1
     while test $i -le (count $argv)
@@ -15,6 +15,9 @@ function dbxc -d "Shorthand for 'distrobox create'"
                 set next (math $i + 1)
                 set -a add_args $arg $argv[$next]
                 set i $next
+
+            case --ephemeral
+                set mode ephemeral
 
             case --env='*' --volume='*'
                 set -a add_args $arg
@@ -38,13 +41,21 @@ function dbxc -d "Shorthand for 'distrobox create'"
         set i (math $i + 1)
     end
 
+    # If not in ephemeral mode, use 'distrobox create'
+    if not set -q mode
+        set mode create
+    end
+
     # If no image was specified, default to the one for the architecture
     if not set -q img
         set img $GHCR/(get_dev_img)
         set name (string replace / - (get_dev_img))
     end
 
-    set -a dbx_args -i $img -n $name
+    set -a dbx_args -i $img
+    if test "$mode" = create
+        set -a dbx_args -n $name
+    end
 
     # If we are using a development image AND it is the default one for our
     # architecture (to avoid weird dynamic linking failures), use the binaries
@@ -60,5 +71,5 @@ function dbxc -d "Shorthand for 'distrobox create'"
         set -a add_args --volume /etc/pacman.d/mirrorlist:/etc/pacman.d/mirrorlist:ro
     end
 
-    dbx create -a "$add_args" $dbx_args $dbx_img
+    dbx $mode -a "$add_args" $dbx_args $dbx_img
 end
