@@ -31,6 +31,11 @@ function cbl_test_kvm -d "Test KVM against a Clang built kernel with QEMU"
         case nested
             in_container_msg -h; or return
 
+            # Start container before updating, as podman requires some kernel modules,
+            # which need to be loaded before updating, as an update to linux will
+            # remove the modules on disk for the current running kernel version.
+            dbxe -- true; or return
+
             updfull
             mkdir -p $TMP_FOLDER
             cp -v /boot/vmlinuz-linux $TMP_FOLDER/bzImage
