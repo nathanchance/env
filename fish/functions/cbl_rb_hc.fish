@@ -12,6 +12,7 @@ function cbl_rb_hc -d "Rebase Honeycomb kernel on latest linux-next"
     git ru --prune origin; or return
     git rh origin/master
 
+    # Patching
     for patch in $patches
         b4 shazam -l -P _ -s $patch; or return
     end
