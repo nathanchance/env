@@ -19,6 +19,6 @@ windows:
     focus: true
   - shell: /usr/bin/fish -c dbxe
     shell_command:
-    - cmd: cbl_vmm run
+    - cmd: cbl_vmm run; and exit
       enter: false
     sleep_before: 3
