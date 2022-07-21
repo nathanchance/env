@@ -94,7 +94,8 @@ function upd -d "Runs the update command for the current distro or downloads/upd
                     case fedora
                         sudo dnf update $yes
                     case macos
-                        brew upgrade
+                        brew update
+                        and brew upgrade
                         and brew upgrade \
                             --cask wezterm-nightly \
                             --no-quarantine \
