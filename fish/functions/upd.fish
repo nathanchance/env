@@ -93,6 +93,12 @@ function upd -d "Runs the update command for the current distro or downloads/upd
                         sudo sh -c "apt update $yes && apt full-upgrade $yes && apt autoremove -y"
                     case fedora
                         sudo dnf update $yes
+                    case macos
+                        brew upgrade
+                        and brew upgrade \
+                            --cask wezterm-nightly \
+                            --no-quarantine \
+                            --greedy-latest
                     case opensuse
                         sudo zypper dup $yes
                     case '*'
