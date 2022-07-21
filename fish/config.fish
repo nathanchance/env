@@ -9,7 +9,9 @@ start_ssh_agent
 if test "$LOCATION" = mac
     fish_add_path -m /opt/homebrew/bin
     fish_add_path -m /opt/homebrew/sbin
+
     set -gx MANPATH /opt/homebrew/share/man
+
     set -gx INFOPATH /opt/homebrew/share/info
 else
     if not string match -qr tty (tty)
