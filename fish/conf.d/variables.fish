@@ -9,27 +9,31 @@
 # This is the only variable that should be universal,
 # as it needs to exist in containers
 if test -z "$LOCATION"
-    switch "$(id -un)@$hostname"
-        case nathan@archlinux-'*' nathan@debian-'*' nathan@ubuntu-'*'
-            set -Ux LOCATION hetzner-server
-        case nathan@honeycomb
-            set -Ux LOCATION honeycomb
-        case pi@raspberrypi
-            set -Ux LOCATION pi
-        case nathan@hp-amd-ryzen-4300G
-            set -Ux LOCATION test-desktop-amd
-        case nathan@asus-intel-core-11700
-            set -Ux LOCATION test-desktop-intel
-        case nathan@asus-intel-core-4210U
-            set -Ux LOCATION test-laptop-intel
-        case nathan@thelio-3990X
-            set -Ux LOCATION workstation
-        case nathan@hyperv nathan@qemu nathan@vmware
-            set -Ux LOCATION vm
-        case nathan@MSI nathan@Ryzen-5-4500U nathan@Ryzen-9-3900X
-            set -Ux LOCATION wsl
-        case '*'
-            set -Ux LOCATION generic
+    if test (uname) = Darwin
+        set -Ux LOCATION mac
+    else
+        switch "$(id -un)@$hostname"
+            case nathan@archlinux-'*' nathan@debian-'*' nathan@ubuntu-'*'
+                set -Ux LOCATION hetzner-server
+            case nathan@honeycomb
+                set -Ux LOCATION honeycomb
+            case pi@raspberrypi
+                set -Ux LOCATION pi
+            case nathan@hp-amd-ryzen-4300G
+                set -Ux LOCATION test-desktop-amd
+            case nathan@asus-intel-core-11700
+                set -Ux LOCATION test-desktop-intel
+            case nathan@asus-intel-core-4210U
+                set -Ux LOCATION test-laptop-intel
+            case nathan@thelio-3990X
+                set -Ux LOCATION workstation
+            case nathan@hyperv nathan@qemu nathan@vmware
+                set -Ux LOCATION vm
+            case nathan@MSI nathan@Ryzen-5-4500U nathan@Ryzen-9-3900X
+                set -Ux LOCATION wsl
+            case '*'
+                set -Ux LOCATION generic
+        end
     end
 end
 

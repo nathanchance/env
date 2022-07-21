@@ -5,20 +5,30 @@
 set -e fish_user_paths
 
 start_ssh_agent
-if not string match -qr tty (tty)
-    start_tmux
-end
 
-if in_container
-    if test "$USE_CBL" = 1
-        set -l folder
-        for folder in $CBL_QEMU_BIN $CBL_TC_BNTL $CBL_TC_LLVM
-            fish_add_path -gm $folder
-        end
-    end
+if test "$LOCATION" = mac
+    fish_add_path -m /opt/homebrew/bin
+    fish_add_path -m /opt/homebrew/sbin
+    set -gx MANPATH /opt/homebrew/share/man
+    set -gx INFOPATH /opt/homebrew/share/info
 else
-    gpg_key_cache
-    tmux_ssh_fixup
+    if not string match -qr tty (tty)
+        start_tmux
+    end
+
+    if in_container
+        if test "$USE_CBL" = 1
+            set -l folder
+            for folder in $CBL_QEMU_BIN $CBL_TC_BNTL $CBL_TC_LLVM
+                fish_add_path -gm $folder
+            end
+        end
+    else
+        gpg_key_cache
+        tmux_ssh_fixup
+    end
+
+    fish_add_path -aP /usr/local/sbin /usr/sbin /sbin
 end
 
 if command -q fd
@@ -29,8 +39,6 @@ end
 if command -q zoxide
     zoxide init --hook prompt fish | source
 end
-
-fish_add_path -aP /usr/local/sbin /usr/sbin /sbin
 
 # Make sure that sourcing config.fish always returns 0
 true
