@@ -23,6 +23,8 @@ function setup_homebrew() {
 function install_packages() {
     # Core Formulae
     brew install \
+        bat \
+        fd \
         fish \
         fzf \
         gh \
