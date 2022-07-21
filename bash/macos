@@ -138,6 +138,7 @@ function env_setup
     end
 
     git_setup
+    vim_setup
 end
 EOF
     fi
