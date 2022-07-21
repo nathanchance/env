@@ -135,6 +135,8 @@ function env_setup
         mkdir -p (dirname $fish_cfg)
         ln -fsv $github_folder/env/fish/config.fish $fish_cfg
     end
+
+    git_setup
 end
 EOF
     fi
