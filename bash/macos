@@ -12,16 +12,15 @@ function reality_check() {
     fi
 }
 
-function install_homebrew() {
+function setup_homebrew() {
     brew=/opt/homebrew/bin/brew
     if [[ ! -x $brew ]]; then
         /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)" || exit
     fi
+    eval "$($brew shellenv)" || exit
 }
 
 function install_packages() {
-    eval "$($brew shellenv)" || exit
-
     # Core Formulae
     brew install \
         fish \
@@ -143,7 +142,7 @@ EOF
 }
 
 reality_check
-install_homebrew
+setup_homebrew
 install_packages
 setup_gh
 setup_ssh
