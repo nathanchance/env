@@ -31,13 +31,16 @@ function start_ssh_agent -d "Launch an ssh agent only if it has not already been
             end
 
             ssh-add -l &>/dev/null
-            if test $status -eq 2
-                begin
-                    umask 066
-                    ssh-agent -c >$ssh_agent_file
-                end
-                cat $ssh_agent_file | source >/dev/null
-                ssh-add $ssh_key
+            switch $status
+                case 1
+                    ssh-add $ssh_key
+                case 2
+                    begin
+                        umask 066
+                        ssh-agent -c >$ssh_agent_file
+                    end
+                    cat $ssh_agent_file | source >/dev/null
+                    ssh-add $ssh_key
             end
     end
 end
