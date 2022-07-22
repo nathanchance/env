@@ -13,7 +13,7 @@ function cbl_rb_hc -d "Rebase Honeycomb kernel on latest linux-next"
     git rh origin/master
 
     # Patching
-    set -a patches https://lore.kernel.org/all/20220721124244.903567-1-maz@kernel.org/ # [PATCH] arm64: Use mov_q to load KPTI_NG_PTE_FLAGS/SWAPPER_R*_MMUFLAGS
+    set -a patches https://lore.kernel.org/all/20220722163854.1189931-1-nathan@kernel.org/ # [PATCH] btrfs: Fix unused variable in load_free_space_cache()
     for patch in $patches
         b4 shazam -l -P _ -s $patch; or return
     end

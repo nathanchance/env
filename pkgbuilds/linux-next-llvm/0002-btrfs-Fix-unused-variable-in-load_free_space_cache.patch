@@ -1,0 +1,51 @@
+From b501a4f8c59589e3e6596008c512763130d943f0 Mon Sep 17 00:00:00 2001
+From: Nathan Chancellor <nathan@kernel.org>
+Date: Fri, 22 Jul 2022 09:38:54 -0700
+Subject: [PATCH 2/2] btrfs: Fix unused variable in load_free_space_cache()
+
+When CONFIG_LOCKDEP is unset, there is a warning about the mapping
+variable being unused:
+
+  fs/btrfs/free-space-cache.c:929:24: warning: variable 'mapping' set but not used [-Wunused-but-set-variable]
+          struct address_space *mapping;
+                                ^
+  1 warning generated.
+
+lockdep_set_class() does not do anything with the first parameter to the
+macro when CONFIG_LOCKDEP is not set so just eliminate the mapping
+variable and use inode instead, which is always used in the function.
+
+Fixes: 22d85ab1af7d ("btrfs: Change the lockdep class of struct inode's invalidate_lock")
+Link: https://github.com/ClangBuiltLinux/linux/issues/1672
+Signed-off-by: Nathan Chancellor <nathan@kernel.org>
+Link: https://lore.kernel.org/r/20220722163854.1189931-1-nathan@kernel.org
+---
+ fs/btrfs/free-space-cache.c | 5 ++---
+ 1 file changed, 2 insertions(+), 3 deletions(-)
+
+diff --git a/fs/btrfs/free-space-cache.c b/fs/btrfs/free-space-cache.c
+index a2b2329ae558..e8fce6b19559 100644
+--- a/fs/btrfs/free-space-cache.c
++++ b/fs/btrfs/free-space-cache.c
+@@ -926,7 +926,6 @@ int load_free_space_cache(struct btrfs_block_group *block_group)
+ 	int ret = 0;
+ 	bool matched;
+ 	u64 used = block_group->used;
+-	struct address_space *mapping;
+ 
+ 	/*
+ 	 * Because we could potentially discard our loaded free space, we want
+@@ -991,8 +990,8 @@ int load_free_space_cache(struct btrfs_block_group *block_group)
+ 	 * space inodes to prevent false positives related to locks for normal
+ 	 * inodes.
+ 	 */
+-	mapping = &inode->i_data;
+-	lockdep_set_class(&mapping->invalidate_lock, &btrfs_free_space_inode_key);
++	lockdep_set_class(&inode->i_data.invalidate_lock,
++			  &btrfs_free_space_inode_key);
+ 
+ 	ret = __load_free_space_cache(fs_info->tree_root, inode, &tmp_ctl,
+ 				      path, block_group->start);
+-- 
+2.37.1
+
