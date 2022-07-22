@@ -216,6 +216,10 @@ function setup_locales() {
     dpkg-reconfigure --frontend noninteractive locales
 }
 
+function disable_ssh_agent_x11() {
+    sed -i 's/^use-ssh-agent$/# use-ssh-agent/g' /etc/X11/Xsession.options
+}
+
 parse_parameters "$@"
 set_global_variables
 reality_check
@@ -231,6 +235,7 @@ pi_setup
 setup_doas
 setup_docker
 setup_locales
+disable_ssh_agent_x11
 clone_env
 set_date_time
 setup_initial_fish_config
