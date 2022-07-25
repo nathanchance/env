@@ -45,17 +45,17 @@ jobs:
             compiler: gcc-10
             platforms: linux/amd64,linux/arm64
 
-          - base: ubuntu:impish
+          - base: ubuntu:jammy
             compiler: gcc-11
             platforms: linux/amd64,linux/arm64
 
-          - base: ubuntu:impish
+          - base: ubuntu:focal
             compiler: llvm-11
-            platforms: linux/amd64,linux/arm64
+            platforms: linux/amd64
 
-          - base: ubuntu:impish
+          - base: ubuntu:focal
             compiler: llvm-12
-            platforms: linux/amd64,linux/arm64
+            platforms: linux/amd64
 
           - base: ubuntu:jammy
             compiler: llvm-13

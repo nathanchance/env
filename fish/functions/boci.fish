@@ -40,9 +40,9 @@ function boci -d "Build an OCI container image"
             case gcc-10
                 set base debian:bullseye
             case gcc-11
-                set base ubuntu:impish
+                set base ubuntu:jammy
             case llvm-1{1,2}
-                set base ubuntu:impish
+                set base ubuntu:focal
             case llvm-1{3,4,5}
                 set base ubuntu:jammy
             case llvm-android
