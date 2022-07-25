@@ -12,6 +12,8 @@ function cbl_bld_krnl_rpm -d "Build a .rpm kernel package"
     # Allow cross compiling
     for arg in $argv
         switch $arg
+            case -m --menuconfig
+                set -a kmake_targets menuconfig
             case -n --no-config
                 set config false
             case --no-werror
@@ -41,7 +43,7 @@ function cbl_bld_krnl_rpm -d "Build a .rpm kernel package"
         ARCH=$arch \
         LLVM=1 \
         RPMOPTS="--define '_topdir $PWD/rpmbuild'" \
-        olddefconfig binrpm-pkg; or return
+        olddefconfig $kmake_targets binrpm-pkg; or return
 
     echo Run
     printf '\n\t$ sudo fish -c "dnf install %s; and reboot"\n\n' (realpath -- (fd -e rpm 'kernel-[0-9]+' rpmbuild) | string replace $HOME \$HOME)
