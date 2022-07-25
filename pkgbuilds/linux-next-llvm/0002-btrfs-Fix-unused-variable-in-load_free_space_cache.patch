@@ -1,7 +1,7 @@
-From b501a4f8c59589e3e6596008c512763130d943f0 Mon Sep 17 00:00:00 2001
+From dee60749056494ac778b1677e0bc621c409fbd9c Mon Sep 17 00:00:00 2001
 From: Nathan Chancellor <nathan@kernel.org>
 Date: Fri, 22 Jul 2022 09:38:54 -0700
-Subject: [PATCH 2/2] btrfs: Fix unused variable in load_free_space_cache()
+Subject: [PATCH 2/3] btrfs: Fix unused variable in load_free_space_cache()
 
 When CONFIG_LOCKDEP is unset, there is a warning about the mapping
 variable being unused:
