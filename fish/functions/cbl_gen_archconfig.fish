@@ -58,6 +58,11 @@ function cbl_gen_archconfig -d "Generate a configuration file for Arch Linux"
         --file $cfg \
         -e FW_LOADER_COMPRESS_XZ \
         -e FW_LOADER_COMPRESS_ZSTD
+    # https://git.kernel.org/linus/41ef3c1a6bb0fd4a3f81170dd17de3adbff80783
+    # Drop when 5.19 is in the Arch repos
+    $src/scripts/config \
+        --file $cfg \
+        -e PINCTRL_AMD
 
     # Step 3: Run olddefconfig
     kmake -C $src KCONFIG_CONFIG=$cfg olddefconfig
