@@ -14,6 +14,8 @@ function cbl_bld_krnl_rpm -d "Build a .rpm kernel package"
         switch $arg
             case -n --no-config
                 set config false
+            case --no-werror
+                set -a gen_config_args $arg
             case aarch64 arm64
                 set arch arm64
             case amd64 x86_64
@@ -32,7 +34,7 @@ function cbl_bld_krnl_rpm -d "Build a .rpm kernel package"
     end
 
     if test "$config" != false
-        cbl_gen_fedoraconfig $arch
+        cbl_gen_fedoraconfig $gen_config_args $arch
     end
 
     kmake \
