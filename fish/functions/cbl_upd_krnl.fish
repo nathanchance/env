@@ -25,7 +25,7 @@ function cbl_upd_krnl -d "Update machine's kernel"
             sudo true; or return
 
             # Download .rpm package
-            set remote_rpm_folder $CBL_BLD/honeycomb/rpmbuild/RPMS/aarch64
+            set remote_rpm_folder $CBL_BLD/fedora/rpmbuild/RPMS/aarch64
             set krnl_rpm (ssh $remote_user@$remote_host fd -e rpm 'kernel-[0-9]+' $remote_rpm_folder)
             scp $remote_user@$remote_host:$krnl_rpm /tmp; or return
 
