@@ -2,18 +2,19 @@
 # SPDX-License-Identifier: MIT
 # Copyright (C) 2022 Nathan Chancellor
 
-function cbl_rb_hc -d "Rebase Honeycomb kernel on latest linux-next"
+function cbl_rb_fd -d "Rebase generic Fedora kernel on latest linux-next"
     in_container_msg -c; or return
 
-    set hc_src $CBL_BLD/honeycomb
-    pushd $hc_src; or return
+    set fd_src $CBL_BLD/fedora
+    pushd $fd_src; or return
 
     # Update and patch kernel
     git ru --prune origin; or return
     git rh origin/master
 
     # Patching
-    set -a patches https://lore.kernel.org/all/20220722163854.1189931-1-nathan@kernel.org/ # [PATCH] btrfs: Fix unused variable in load_free_space_cache()
+    set -a patches https://lore.kernel.org/all/20220725233629.223223-1-nathan@kernel.org/ # [PATCH] drm/simpledrm: Fix return type of simpledrm_simple_display_pipe_mode_valid()
+    set -a patches https://lore.kernel.org/all/20220724202452.61846-1-ammar.faizi@intel.com/ # [PATCH] wifi: wil6210: debugfs: fix uninitialized variable use in `wil_write_file_wmi()`
     for patch in $patches
         b4 shazam -l -P _ -s $patch; or return
     end
