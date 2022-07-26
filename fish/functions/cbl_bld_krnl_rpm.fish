@@ -12,6 +12,8 @@ function cbl_bld_krnl_rpm -d "Build a .rpm kernel package"
     # Allow cross compiling
     for arg in $argv
         switch $arg
+            case -g --gcc
+                set gcc true
             case -m --menuconfig
                 set -a kmake_targets menuconfig
             case -n --no-config
@@ -26,7 +28,10 @@ function cbl_bld_krnl_rpm -d "Build a .rpm kernel package"
     end
 
     # If no arch value specified, use host architecture
-    if not set -q arch
+    if set -q arch
+        set cross_compiling true
+    else
+        set cross_compiling false
         switch (uname -m)
             case aarch64
                 set arch arm64
@@ -39,9 +44,26 @@ function cbl_bld_krnl_rpm -d "Build a .rpm kernel package"
         cbl_gen_fedoraconfig $gen_config_args $arch
     end
 
+    if set -q gcc
+        switch "$arch:$cross_compiling"
+            case arm64:true
+                set -a kmake_args \
+                    CROSS_COMPILE=/usr/bin/aarch64-linux-gnu-
+            case arm64:false x86_64:false
+                set -a kmake_args \
+                    CROSS_COMPILE=/usr/bin/
+            case x86_64:true
+                set -a kmake_args \
+                    CROSS_COMPILE=/usr/bin/x86_64-linux-gnu-
+        end
+    else
+        set -a kmake_args \
+            LLVM=1
+    end
+
     kmake \
         ARCH=$arch \
-        LLVM=1 \
+        $kmake_args \
         RPMOPTS="--define '_topdir $PWD/rpmbuild'" \
         olddefconfig $kmake_targets binrpm-pkg; or return
 
