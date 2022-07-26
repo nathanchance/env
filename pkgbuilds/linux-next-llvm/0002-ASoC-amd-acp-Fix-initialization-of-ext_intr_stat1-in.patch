@@ -1,7 +1,7 @@
-From 5447db245375bb46916fa7e223d97e871140d0be Mon Sep 17 00:00:00 2001
+From aa5a1d2f91d4eeda4f5d64bede453f85526fa1aa Mon Sep 17 00:00:00 2001
 From: Nathan Chancellor <nathan@kernel.org>
 Date: Mon, 25 Jul 2022 11:05:39 -0700
-Subject: [PATCH 3/3] ASoC: amd: acp: Fix initialization of ext_intr_stat1 in
+Subject: [PATCH 2/3] ASoC: amd: acp: Fix initialization of ext_intr_stat1 in
  i2s_irq_handler()
 
 Clang warns:
