@@ -1,7 +1,7 @@
-From 05e7da482d872b298a87516e99f2a30a6042697e Mon Sep 17 00:00:00 2001
+From 37320eb295138c069c8a927b51c190680dcd6934 Mon Sep 17 00:00:00 2001
 From: Ammar Faizi <ammarfaizi2@gnuweeb.org>
 Date: Mon, 25 Jul 2022 03:26:18 +0700
-Subject: [PATCH 3/3] wifi: wil6210: debugfs: fix uninitialized variable use in
+Subject: [PATCH 2/2] wifi: wil6210: debugfs: fix uninitialized variable use in
  `wil_write_file_wmi()`
 
 Commit 7a4836560a61 changes simple_write_to_buffer() with memdup_user()
