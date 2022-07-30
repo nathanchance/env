@@ -23,7 +23,7 @@ function msh -d "Shorthand for mosh -o" -w mosh
 
         case honeycomb
             if test "$tailscale" = true
-                set ip 100.78.199.101
+                set ip 100.113.16.125
             else
                 set ip 192.168.4.210
             end
