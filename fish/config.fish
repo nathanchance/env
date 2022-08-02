@@ -13,6 +13,8 @@ if test "$LOCATION" = mac
     set -gx MANPATH /opt/homebrew/share/man
 
     set -gx INFOPATH /opt/homebrew/share/info
+
+    set -gx SHELL /opt/homebrew/bin/fish
 else
     if not string match -qr tty (tty)
         start_tmux
