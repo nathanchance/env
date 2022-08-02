@@ -42,5 +42,5 @@ function kboot -d "Boot a kernel in QEMU"
     end
 
     set fish_trace 1
-    $BOOT_UTILS/boot-qemu.sh $boot_qemu_args
+    $BOOT_UTILS/boot-qemu.py $boot_qemu_args
 end

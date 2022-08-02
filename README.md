@@ -35,7 +35,7 @@ $ podman run \
     --volume=...:/boot-utils \
     --volume=$PWD:/linux \
     ghcr.io/nathanchance/gcc-11 \
-    /boot-utils/boot-qemu.sh -a x86_64 -k /linux -t 30s
+    /boot-utils/boot-qemu.py -a x86_64 -k /linux -t 30s
 ...
 [    0.000000] Linux version 5.16.0-rc8 (root@a729a83685d2) (gcc (Ubuntu 11.2.0-7ubuntu2) 11.2.0, GNU ld (GNU Binutils for Ubuntu) 2.37) #1 SMP PREEMPT Wed Jan 5 23:36:38 UTC 2022
 ...
