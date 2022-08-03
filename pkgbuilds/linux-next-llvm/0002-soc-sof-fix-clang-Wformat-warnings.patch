@@ -1,0 +1,39 @@
+From b67ef4f512530c528bd5be6daeccd1f186731c82 Mon Sep 17 00:00:00 2001
+From: Justin Stitt <justinstitt@google.com>
+Date: Thu, 21 Jul 2022 14:12:18 -0700
+Subject: [PATCH 2/3] soc: sof: fix clang -Wformat warnings
+
+When building with Clang we encounter these warnings:
+| sound/soc/sof/ipc3-topology.c:2343:4: error: format specifies type
+| 'unsigned char' but the argument has type 'int' [-Werror,-Wformat]
+|                  SOF_ABI_MAJOR, SOF_ABI_MINOR, SOF_ABI_PATCH);
+|                  ^~~~~~~~~~~~~~~^~~~~~~~~~~~~~~^~~~~~~~~~~~~
+
+Use correct format specifier `%d` since args are of type int.
+
+Link: https://github.com/ClangBuiltLinux/linux/issues/378
+Reported-by: Nathan Chancellor <nathan@kernel.org>
+Suggested-by: Nathan Chancellor <nathan@kernel.org>
+Signed-off-by: Justin Stitt <justinstitt@google.com>
+Reviewed-by: Nathan Chancellor <nathan@kernel.org>
+Link: https://lore.kernel.org/r/20220721211218.4039288-1-justinstitt@google.com
+---
+ sound/soc/sof/ipc3-topology.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/sound/soc/sof/ipc3-topology.c b/sound/soc/sof/ipc3-topology.c
+index b2cc046b9f60..65923e7a5976 100644
+--- a/sound/soc/sof/ipc3-topology.c
++++ b/sound/soc/sof/ipc3-topology.c
+@@ -2338,7 +2338,7 @@ static int sof_ipc3_parse_manifest(struct snd_soc_component *scomp, int index,
+ 	}
+ 
+ 	dev_info(scomp->dev,
+-		 "Topology: ABI %d:%d:%d Kernel ABI %hhu:%hhu:%hhu\n",
++		 "Topology: ABI %d:%d:%d Kernel ABI %d:%d:%d\n",
+ 		 man->priv.data[0], man->priv.data[1], man->priv.data[2],
+ 		 SOF_ABI_MAJOR, SOF_ABI_MINOR, SOF_ABI_PATCH);
+ 
+-- 
+2.37.1
+

@@ -1,7 +1,7 @@
-From 6e8804c47d6cb805f62df0cdd8865ecc62c16dc8 Mon Sep 17 00:00:00 2001
+From d1bb8037904ca69be3f71f8524b14dc3c024eb36 Mon Sep 17 00:00:00 2001
 From: Nathan Chancellor <nathan@kernel.org>
 Date: Wed, 3 Aug 2022 09:24:22 -0700
-Subject: [PATCH 2/2] usb: cdns3: Don't use priv_dev uninitialized in
+Subject: [PATCH 3/3] usb: cdns3: Don't use priv_dev uninitialized in
  cdns3_gadget_ep_enable()
 
 Clang warns:
