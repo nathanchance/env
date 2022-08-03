@@ -8,7 +8,19 @@ function git_sw -d "git switch with fzf"
     else
         set ref (git bf)
     end
+
     if test -n "$ref"
-        git switch $ref
+        if string match -qr "^remotes/" $ref
+            for remote in (git remote)
+                set replace_string "^remotes/$remote/"
+                if string match -qr "$replace_string" $ref
+                    set -f git_switch_args \
+                        -c (string replace -r "$replace_string" "" $ref)
+                    break
+                end
+            end
+        end
+
+        git switch $git_switch_args $ref
     end
 end
