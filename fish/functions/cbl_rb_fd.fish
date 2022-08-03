@@ -13,8 +13,8 @@ function cbl_rb_fd -d "Rebase generic Fedora kernel on latest linux-next"
     git rh origin/master
 
     # Patching
-    set -a patches https://lore.kernel.org/all/20220724202452.61846-1-ammar.faizi@intel.com/ # [PATCH] wifi: wil6210: debugfs: fix uninitialized variable use in `wil_write_file_wmi()`
     set -a patches https://lore.kernel.org/all/20220727100018.3301470-1-alexandre.belloni@bootlin.com/ # [PATCH] rtc: zynqmp: initialize fract_tick
+    set -a patches https://lore.kernel.org/all/20220803162422.2981308-1-nathan@kernel.org/ # [PATCH] usb: cdns3: Don't use priv_dev uninitialized in cdns3_gadget_ep_enable()
     for patch in $patches
         b4 shazam -l -P _ -s $patch; or return
     end
