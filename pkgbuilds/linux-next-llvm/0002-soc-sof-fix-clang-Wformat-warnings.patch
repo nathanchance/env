@@ -1,7 +1,7 @@
-From b67ef4f512530c528bd5be6daeccd1f186731c82 Mon Sep 17 00:00:00 2001
+From 9e90f345d365aa122d3c727f6c96b8e109cf80ca Mon Sep 17 00:00:00 2001
 From: Justin Stitt <justinstitt@google.com>
 Date: Thu, 21 Jul 2022 14:12:18 -0700
-Subject: [PATCH 2/3] soc: sof: fix clang -Wformat warnings
+Subject: [PATCH 2/2] soc: sof: fix clang -Wformat warnings
 
 When building with Clang we encounter these warnings:
 | sound/soc/sof/ipc3-topology.c:2343:4: error: format specifies type
