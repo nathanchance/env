@@ -16,7 +16,7 @@ function boci -d "Build an OCI container image"
             case compilers
                 set -a images \
                     gcc-{5,6,7,8,9,10,11} \
-                    llvm-{1{0,1,2,3,4,5},android}
+                    llvm-{1{0,1,2,3,4,5,6},android}
 
             case dev dev/{arch,debian,fedora,suse,ubuntu} lei {gcc,llvm}-'*' makepkg
                 set -a images $arg
@@ -43,7 +43,7 @@ function boci -d "Build an OCI container image"
                 set base ubuntu:jammy
             case llvm-1{1,2}
                 set base ubuntu:focal
-            case llvm-1{3,4,5}
+            case llvm-1{3,4,5,6}
                 set base ubuntu:jammy
             case llvm-android
                 if test (uname -m) != x86_64
