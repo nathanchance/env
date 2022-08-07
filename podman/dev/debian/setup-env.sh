@@ -29,11 +29,12 @@ function setup_gh_repo() {
 function setup_llvm_repo() {
     curl -fLSs https://apt.llvm.org/llvm-snapshot.gpg.key | gpg --dearmor | dd of=/etc/apt/trusted.gpg.d/apt_llvm_org.gpg
 
-    llvm_main=15
-    llvm_stable=14
+    llvm_main=16
+    llvm_stable=15
     llvm_versions=(
         "$llvm_main"
         "$llvm_stable"
+        14
         13
         12
         11
