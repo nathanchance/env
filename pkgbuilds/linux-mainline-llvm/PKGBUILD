@@ -3,19 +3,24 @@
 
 _localversion=-llvm
 pkgname=linux-mainline$_localversion
-_srctag=v5.19
-pkgver=${_srctag//-/.}
+# _srctag=v5.19
+# pkgver=${_srctag//-/.}
+_srccommit=4e23eeebb2e57f5a28b36221aa776b5a1122dde5
+pkgver=v5.19.12716.g4e23eeebb2e5
 pkgrel=1
 pkgdesc='Linux'
-url="https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/log/?h=$_srctag"
+# url="https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/log/?h=$_srctag"
+url="https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/log/?h=$_srccommit"
+arch=(x86_64)
 arch=(x86_64)
 license=(GPL2)
 makedepends=(
   bc libelf pahole cpio perl tar xz
 )
 options=('!strip')
+#  "$pkgname::git+https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git?signed#tag=$_srctag"
 source=(
-  "$pkgname::git+https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git?signed#tag=$_srctag"
+  "$pkgname::git+https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git#commit=$_srccommit"
   config
   https://github.com/pop-os/system76-io-dkms/raw/master/system76-io.c
   https://github.com/pop-os/system76-io-dkms/raw/master/system76-io_dev.c
@@ -26,7 +31,7 @@ validpgpkeys=(
   'ABAF11C65A2970B130ABE3C479BE3E4300411886'  # Linus Torvalds
 )
 sha256sums=('SKIP'
-            '01e5faf96e12f12a783fd3fdd203cdcc6b637c4e9fab57417dffe510421d4d2e'
+            'a98f1e51695fbb9bca12aa241b7c01ebb13763220f677a1d77aa576712ff1e55'
             'd569ee2fbd072a09e89196779ccc0dfd008d5a79a0cec5fa80cc7ed99a3027fa'
             'a6f7a5eb3134269737b7790a6286dc671b491547d6c0b59e92959dca0b66cc20'
             '1739b36d09e3d555e1c1b1ef079160b808972f84fc40bd81476cbe3079cad54e'
