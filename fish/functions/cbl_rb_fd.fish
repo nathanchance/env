@@ -14,7 +14,6 @@ function cbl_rb_fd -d "Rebase generic Fedora kernel on latest linux-next"
 
     # Patching
     set -a patches https://lore.kernel.org/all/20220727100018.3301470-1-alexandre.belloni@bootlin.com/ # [PATCH] rtc: zynqmp: initialize fract_tick
-    set -a patches https://lore.kernel.org/all/20220721211218.4039288-1-justinstitt@google.com/ # [PATCH] soc: sof: fix clang -Wformat warnings
     for patch in $patches
         b4 shazam -l -P _ -s $patch; or return
     end
