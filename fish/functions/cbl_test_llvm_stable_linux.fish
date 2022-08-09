@@ -3,16 +3,18 @@
 # Copyright (C) 2021-2022 Nathan Chancellor
 
 function cbl_test_llvm_stable_linux -d "Test all current versions of stable Linux with all supported versions of LLVM"
+    in_container_msg -h; or return
+
     set base $CBL_BLD_C/linux-stable
     cbl_upd_stbl_wrktrs $base
-    set linux_srcs $base-$CBL_STABLE_VERSIONS
-    for linux_src in $linux_srcs
-        git -C $linux_src pull --rebase
+    set linux_folders $base-$CBL_STABLE_VERSIONS
+    for linux_folder in $linux_folders
+        git -C $linux_folder pull --rebase
     end
 
-    for podman_image in llvm-{11,12,13} dev
-        for linux_src in $linux_srcs
-            cbl_lkt --image $podman_image --linux-src $linux_src
+    for image in llvm-1{6,5,4,3,2,1}
+        for linux_folder in $linux_folders
+            dbxeph $image -- "fish -c 'cbl_lkt --linux-folder $linux_folder --system-binaries'"
         end
     end
 end

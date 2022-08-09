@@ -37,6 +37,9 @@ function dbxc -d "Shorthand for 'distrobox create'"
             case dev-'*'
                 set img $GHCR/(string replace - / $arg)
                 set name $arg
+
+            case '*'
+                set -a dbx_cmds $arg
         end
         set i (math $i + 1)
     end
@@ -71,5 +74,5 @@ function dbxc -d "Shorthand for 'distrobox create'"
         set -a add_args --volume /etc/pacman.d/mirrorlist:/etc/pacman.d/mirrorlist:ro
     end
 
-    dbx $mode -a "$add_args" $dbx_args $dbx_img
+    dbx $mode -a "$add_args" $dbx_args $dbx_img $dbx_cmds
 end
