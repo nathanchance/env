@@ -189,7 +189,9 @@ function cbl_lkt -d "Tests a Linux kernel with llvm-kernel-testing"
         mkdir -p (dirname $CBL_LKT)
         git clone https://github.com/nathanchance/llvm-kernel-testing $CBL_LKT
     end
-    git -C $CBL_LKT pull -qr
+    if not location_is_primary
+        git -C $CBL_LKT urh
+    end
 
     set fish_trace 1
     if not $CBL_LKT/main.py \
