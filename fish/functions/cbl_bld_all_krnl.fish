@@ -12,7 +12,7 @@ function cbl_bld_all_krnl -d "Build all kernels for ClangBuiltLinux testing"
             cbl_clone_repo linux
             git -C $lnx urh
 
-            cbl_lkt --linux-src $lnx
+            cbl_lkt --linux-folder $lnx
 
         case honeycomb
             set -l lnx $CBL_SRC/linux
@@ -21,9 +21,9 @@ function cbl_bld_all_krnl -d "Build all kernels for ClangBuiltLinux testing"
             git -C $lnx urh
 
             cbl_lkt \
-                --arches arm32,arm64,x86,x86_64 \
-                --defconfigs \
-                --linux-src $lnx
+                --architectures arm arm64 i386 x86_64 \
+                --linux-folder $lnx \
+                --targets def
 
         case pi
             # Update linux-next
@@ -78,8 +78,8 @@ function cbl_bld_all_krnl -d "Build all kernels for ClangBuiltLinux testing"
             git -C $lnx urh
 
             cbl_lkt \
-                --arches arm32,arm64,x86,x86_64 \
-                --linux-src $lnx
+                --architectures arm arm64 i386 x86_64 \
+                --linux-folder $lnx
 
         case '*'
             for arg in $argv

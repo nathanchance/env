@@ -6,12 +6,29 @@ function cbl_lkt -d "Tests a Linux kernel with llvm-kernel-testing"
     in_container_msg -c; or return
 
     set i 1
-    while test $i -le (count $argv)
+    set argc (count $argv)
+    while test $i -le $argc
         set arg $argv[$i]
         switch $arg
-            case --arches --boot-utils --out-dir
+            ##########################
+            # Arguments to 'main.py' #
+            ##########################
+            case -a --architectures -t --targets
+                set -a main_py_args $arg
+                set i (math $i + 1)
+                while test $i -le $argc
+                    set arg $argv[$i]
+                    if string match -qr '^-' -- $arg
+                        set i (math $i - 1)
+                        break
+                    end
+                    set -a main_py_args $arg
+                    set i (math $i + 1)
+                end
+
+            case -b --build-folder --boot-utils-folder
                 set next (math $i + 1)
-                set -a test_sh_args $arg $argv[$next]
+                set -a main_py_args $arg $argv[$next]
                 set i $next
 
             case --binutils-prefix
@@ -19,15 +36,9 @@ function cbl_lkt -d "Tests a Linux kernel with llvm-kernel-testing"
                 set binutils_prefix $argv[$next]
                 set i $next
 
-            case --ccache --defconfigs --no-ccache --save-objects
-                set -a test_sh_args $arg
-
-            case --cfi
-                set cfi true
-
-            case -l --linux-src
+            case -l --linux-folder
                 set next (math $i + 1)
-                set linux_src $argv[$next]
+                set linux_folder $argv[$next]
                 set i $next
 
             case --llvm-prefix
@@ -35,21 +46,24 @@ function cbl_lkt -d "Tests a Linux kernel with llvm-kernel-testing"
                 set llvm_prefix $argv[$next]
                 set i $next
 
-            case --no-cfi
-                set cfi false
-
-            case -q --qemu-prefix
+            case --qemu-prefix
                 set next (math $i + 1)
                 set qemu_prefix $argv[$next]
                 set i $next
 
-            case -s --system-binaries
-                set system_binaries true
+            case --save-objects --use-ccache
+                set -a main_py_args $arg
 
-            case -t --tc-prefix
+            case --tc-prefix
                 set next (math $i + 1)
                 set tc_prefix $argv[$next]
                 set i $next
+
+            ##########################
+            # Arguments to 'cbl_lkt' #
+            ##########################
+            case -s --system-binaries
+                set system_binaries true
 
             case --tree
                 set next (math $i + 1)
@@ -59,17 +73,11 @@ function cbl_lkt -d "Tests a Linux kernel with llvm-kernel-testing"
         set i (math $i + 1)
     end
 
-    if test -z "$linux_src"
+    if test -z "$linux_folder"
         if test -z "$tree"
             set tree linux-next
         end
-        set linux_src $CBL_BLD_P/$tree
-    end
-    if test -z "$cfi"
-        set cfi false
-    end
-    if test (basename $linux_src) = linux; and test "$cfi" != false
-        set -a test_sh_args --test-cfi-kernel
+        set linux_folder $CBL_BLD_P/$tree
     end
 
     # We assume that the dependencies are available in an image other than nathan/dev/arch
@@ -106,7 +114,7 @@ function cbl_lkt -d "Tests a Linux kernel with llvm-kernel-testing"
             return 1
         end
 
-        set -a test_sh_args --binutils-prefix $binutils_prefix
+        set -a main_py_args --binutils-prefix $binutils_prefix
     end
 
     if test -n "$llvm_prefix"
@@ -124,7 +132,7 @@ function cbl_lkt -d "Tests a Linux kernel with llvm-kernel-testing"
             return 1
         end
 
-        set -a test_sh_args --llvm-prefix $llvm_prefix
+        set -a main_py_args --llvm-prefix $llvm_prefix
     end
 
     if test -n "$tc_prefix"
@@ -154,7 +162,7 @@ function cbl_lkt -d "Tests a Linux kernel with llvm-kernel-testing"
             return 1
         end
 
-        set -a test_sh_args --tc-prefix $tc_prefix
+        set -a main_py_args --tc-prefix $tc_prefix
     end
 
     if test -n "$qemu_prefix"
@@ -167,15 +175,15 @@ function cbl_lkt -d "Tests a Linux kernel with llvm-kernel-testing"
             return 1
         end
 
-        set -a test_sh_args --qemu-prefix $qemu_prefix
+        set -a main_py_args --qemu-prefix $qemu_prefix
     end
 
-    if not string match -qr -- --out-dir $test_sh_args
-        set -a test_sh_args --out-dir $TMP_BUILD_FOLDER/linux
+    if not string match -qr -- --build-folder $main_py_args
+        set -a main_py_args --build-folder $TMP_BUILD_FOLDER/(basename $linux_folder)
     end
 
-    set log_dir $CBL/build-logs/(basename $linux_src)-(date +%F-%T)
-    mkdir -p $log_dir
+    set log_folder $CBL/build-logs/(basename $linux_folder)-(date +%F-%T)
+    mkdir -p $log_folder
 
     if not test -d $CBL_LKT
         mkdir -p (dirname $CBL_LKT)
@@ -184,10 +192,16 @@ function cbl_lkt -d "Tests a Linux kernel with llvm-kernel-testing"
     git -C $CBL_LKT pull -qr
 
     set fish_trace 1
-    $CBL_LKT/test.sh \
-        --linux-src $linux_src \
-        --log-dir $log_dir \
-        $test_sh_args; or return
+    if not $CBL_LKT/main.py \
+        --linux-folder $linux_folder \
+        --log-folder $log_folder \
+        $main_py_args
+        set -e fish_trace
+        set msg "main.py failed in $linux_folder"
+        print_error "$msg"
+        tg_msg "$msg"
+        return 1
+    end
     set -e fish_trace
 
     # objtool: Too many to deal with for now
@@ -195,10 +209,11 @@ function cbl_lkt -d "Tests a Linux kernel with llvm-kernel-testing"
     # *.log: Any warnings from this will be in the other logs
     # include/linux/bcache.h:3: https://github.com/ClangBuiltLinux/linux/issues/1065
     # llvm-objdump: error: 'vmlinux': not a dynamic object: https://github.com/ClangBuiltLinux/linux/issues/1427
-    # warning: argument unused during compilation: '-march=arm: https://github.com/ClangBuiltLinux/linux/issues/1315
+    # unused during compilation: '-march=arm: https://github.com/ClangBuiltLinux/linux/issues/1315
     # scripts/(extract-cert|sign-file).c: OpenSSL deprecation warnings, we do not care: https://github.com/ClangBuiltLinux/linux/issues/1555
     # .note.GNU-stack, LOAD + RWX: New binutils warnings that are not clang specific: https://sourceware.org/bugzilla/show_bug.cgi?id=29072
     # error: write on a pipe with no reader: https://github.com/ClangBuiltLinux/linux/issues/1651
+    # macro defined with named parameters / macro local_irq_enable reg=: https://github.com/ClangBuiltLinux/linux/issues/1415
     set blocklist_items \
         "objtool:" \
         "override: (CPU_BIG_ENDIAN|LTO_CLANG_THIN) changes choice state" \
@@ -208,12 +223,14 @@ function cbl_lkt -d "Tests a Linux kernel with llvm-kernel-testing"
         "skipped.log" \
         "union jset::\(anonymous at ./usr/include/linux/bcache.h:" \
         "llvm-objdump: error: 'vmlinux': not a dynamic object" \
-        "warning: argument unused during compilation: '-march=arm" \
+        "unused during compilation: '-march=arm" \
         "scripts/(extract-cert|sign-file).c:[0-9]+:[0-9]+: warning: '(ENGINE|ERR)_.*' is deprecated \[-Wdeprecated-declarations\]" \
         "missing .note.GNU-stack section implies executable stack" \
         "requires executable stack \(because the .note.GNU-stack section is executable\)" \
         "has a LOAD segment with RWX permissions" \
-        "error: write on a pipe with no reader"
+        "error: write on a pipe with no reader" \
+        "(asmmacro.h|genex.S|[0-9]+):.*macro defined with named parameters" \
+        "macro local_irq_enable reg="
     set blocklist (string join "|" $blocklist_items)
     set searchlist_items \
         "error:" \
@@ -225,29 +242,29 @@ function cbl_lkt -d "Tests a Linux kernel with llvm-kernel-testing"
         "WARNING:"
     set searchlist (string join "|" $searchlist_items)
 
-    for file_path in $log_dir $linux_src $CBL_LKT/src/linux-clang-cfi
+    for file_path in $log_folder $linux_folder $CBL_LKT/src/linux-clang-cfi
         set -a sed_args -e "s;$file_path/;;g"
     end
 
     set tmp_file (mktemp)
-    rg "$searchlist" $log_dir/*.log &| rg -v -- "$blocklist" &| sed $sed_args &| sort &| uniq >$tmp_file
+    rg "$searchlist" $log_folder/*.log &| rg -v -- "$blocklist" &| sed $sed_args &| sort &| uniq >$tmp_file
 
-    set mail_log $log_dir/mail.log
+    set mail_log $log_folder/mail.log
 
     begin
-        cat $log_dir/info.log
-        if test -f $log_dir/failed.log
+        cat $log_folder/info.log
+        if test -f $log_folder/failed.log
             echo
             echo "List of failed tests:"
             echo
-            cat $log_dir/failed.log
+            cat $log_folder/failed.log
         end
 
-        if test -f $log_dir/skipped.log
+        if test -f $log_folder/skipped.log
             echo
             echo "List of skipped tests:"
             echo
-            cat $log_dir/skipped.log
+            cat $log_folder/skipped.log
         end
 
         # Filter harder
@@ -270,9 +287,9 @@ function cbl_lkt -d "Tests a Linux kernel with llvm-kernel-testing"
         echo
         echo "List of successful tests:"
         echo
-        cat $log_dir/success.log
+        cat $log_folder/success.log
 
-        set full_warnings "$(rg "$searchlist" $log_dir/*.log &| sed $sed_args &| sort &| uniq)"
+        set full_warnings "$(rg "$searchlist" $log_folder/*.log &| sed $sed_args &| sort &| uniq)"
         if test -n "$full_warnings"
             echo
             echo "Full warning report:"
@@ -280,12 +297,12 @@ function cbl_lkt -d "Tests a Linux kernel with llvm-kernel-testing"
             echo "$full_warnings"
         end
 
-        set mfc (git -C $linux_src mfc)
+        set mfc (git -C $linux_folder mfc)
         if test -n "$mfc"
             echo
-            echo (basename $linux_src)" commit log:"
+            echo (basename $linux_folder)" commit log:"
             echo
-            git -C $linux_src l $mfc^^..HEAD
+            git -C $linux_folder l $mfc^^..HEAD
         end
     end >$mail_log
 
@@ -293,7 +310,7 @@ function cbl_lkt -d "Tests a Linux kernel with llvm-kernel-testing"
 
     mail_msg $mail_log
 
-    echo "Full logs available at: $log_dir"
+    echo "Full logs available at: $log_folder"
     echo
 
     rm $mail_log

@@ -100,7 +100,7 @@ function cbl_qualify_tc_bld_uprev -d "Qualify a new known good revision for tc-b
     header "Testing toolchain"
 
     for linux_src in $linux_srcs
-        cbl_lkt --linux-src $linux_src --tc-prefix $usr
+        cbl_lkt --linux-folder $linux_src --tc-prefix $usr
     end
 
     header "Removing worktrees"
