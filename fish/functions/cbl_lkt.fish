@@ -59,9 +59,9 @@ function cbl_lkt -d "Tests a Linux kernel with llvm-kernel-testing"
                 set tc_prefix $argv[$next]
                 set i $next
 
-            ##########################
-            # Arguments to 'cbl_lkt' #
-            ##########################
+                ##########################
+                # Arguments to 'cbl_lkt' #
+                ##########################
             case -s --system-binaries
                 set system_binaries true
 
@@ -193,9 +193,9 @@ function cbl_lkt -d "Tests a Linux kernel with llvm-kernel-testing"
 
     set fish_trace 1
     if not $CBL_LKT/main.py \
-        --linux-folder $linux_folder \
-        --log-folder $log_folder \
-        $main_py_args
+            --linux-folder $linux_folder \
+            --log-folder $log_folder \
+            $main_py_args
         set -e fish_trace
         set msg "main.py failed in $linux_folder"
         print_error "$msg"
