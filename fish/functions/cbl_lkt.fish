@@ -90,7 +90,7 @@ function cbl_lkt -d "Tests a Linux kernel with llvm-kernel-testing"
                 set llvm_prefix (dirname $CBL_TC_LLVM)
             end
         end
-        if test -z "$qemu_prefix"
+        if test -z "$qemu_prefix"; and test -e $CBL_QEMU
             set qemu_prefix $CBL_QEMU
         end
     end
