@@ -269,6 +269,7 @@ function install_packages_apt() {
                 clang-"$num"
                 lld-"$num"
                 llvm-"$num"
+                ripgrep
             )
             ;;
     esac
