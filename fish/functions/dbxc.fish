@@ -22,13 +22,13 @@ function dbxc -d "Shorthand for 'distrobox create'"
             case --env='*' --volume='*'
                 set -a add_args $arg
 
+            case --root -Y --yes
+                set -a dbx_args $arg
+
             case --volume
                 set next (math $i + 1)
                 set -a dbx_args $arg $argv[$next]
                 set i $next
-
-            case -Y --yes
-                set -a dbx_args $arg
 
             case dev/'*' gcc-'*' llvm-'*'
                 set img $GHCR/$arg
@@ -64,15 +64,21 @@ function dbxc -d "Shorthand for 'distrobox create'"
     # architecture (to avoid weird dynamic linking failures), use the binaries
     # in $CBL by default
     if test "$img" = $GHCR/(get_dev_img)
-        set -a add_args -e USE_CBL=1
+        set -a add_args --env=USE_CBL=1
     end
 
     # If we are going to use an Arch Linux container and the host is using
     # Reflector to update the mirrorlist, mount the mirrorlist into the
     # container so it can enjoy quick updates
     if test "$img" = $GHCR/dev/arch; and test -f /etc/xdg/reflector/reflector.conf
-        set -a add_args --volume /etc/pacman.d/mirrorlist:/etc/pacman.d/mirrorlist:ro
+        set -a add_args --volume=/etc/pacman.d/mirrorlist:/etc/pacman.d/mirrorlist:ro
     end
 
-    dbx $mode -a "$add_args" $dbx_args $dbx_img $dbx_cmds
+    if test "$mode" = create
+        set -p dbx_args -a "$add_args"
+    else
+        set -p dbx_args '-a "'$add_args'"'
+    end
+
+    dbx $mode $dbx_args $dbx_img $dbx_cmds
 end
