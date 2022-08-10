@@ -120,7 +120,7 @@ function install_packages_apt() {
     # Ubuntu has qemu-system-s390x in its own package, Debian has it in
     # qemu-system-misc
     if [[ $base = "ubuntu" ]]; then
-        packages+=(qemu-system-x86)
+        packages+=(qemu-system-s390x)
     fi
 
     # lz4 had a different name on different hosts
