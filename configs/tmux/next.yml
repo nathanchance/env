@@ -1,0 +1,21 @@
+session_name: linux-next updates
+windows:
+- window_name: main
+  layout: tiled
+  panes:
+  - shell: /usr/bin/fish -c dbxe
+    shell_command: cbl_upd_krnl next-llvm
+    start_directory: $ENV_FOLDER/pkgbuilds/linux-next-llvm
+    enter: false
+  - shell: /usr/bin/fish -c dbxe
+    shell_command: cbl_rb_fd
+    start_directory: $CBL_BLD/fedora
+    enter: false
+  - shell: /usr/bin/fish -c dbxe
+    shell_command: cbl_rb_pi
+    start_directory: $CBL_BLD/rpi
+    enter: false
+  - shell: /usr/bin/fish -c dbxe
+    shell_command: cbl_rb_wk
+    start_directory: $CBL_BLD/wsl2
+    enter: false
