@@ -99,6 +99,7 @@ function install_packages() {
         less
         openssh
         stow
+        tmuxp
         vim{,-spell-en}
         zoxide
 
