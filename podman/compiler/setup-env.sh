@@ -124,6 +124,24 @@ function install_packages_apt() {
         ubuntu:*) packages+=(qemu-system-s390x) ;;
     esac
 
+    # Install firmware needed for QEMU
+    case $version in
+        xenial) ;;
+
+        stretch | bionic)
+            packages+=(openbios-ppc)
+            ;;
+        buster | focal)
+            packages+=(
+                openbios-ppc
+                qemu-system-data
+            )
+            ;;
+        *)
+            packages+=(qemu-system-data)
+            ;;
+    esac
+
     # lz4 had a different name on different hosts
     case $version in
         xenial | stretch | bionic)
