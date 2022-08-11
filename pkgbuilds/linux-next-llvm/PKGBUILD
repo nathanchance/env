@@ -3,7 +3,7 @@
 
 _localversion=-llvm
 pkgname=linux-next$_localversion
-_srctag=next-20220810
+_srctag=next-20220811
 pkgver=${_srctag//-/.}
 pkgrel=1
 pkgdesc='linux-next'
@@ -18,6 +18,7 @@ source=(
   "$pkgname::git+https://git.kernel.org/pub/scm/linux/kernel/git/next/linux-next.git?signed#tag=$_srctag"
   config
   0001-drm-i915-fix-null-pointer-dereference.patch
+  vdpa_fix.patch::https://lore.kernel.org/all/YvVK+ZqO75QAYYnB@dev-arch.thelio-3990X/raw
 )
 
 validpgpkeys=(
@@ -25,8 +26,9 @@ validpgpkeys=(
   '3F2568AAC26998F9E813A1C5C3F436CA30F5D8EB'  # Mark Brown
 )
 sha256sums=('SKIP'
-            '5fbbe2ffa4f1ff8546ad712367082493b0f22ba3451137eb7815dbb4b2b77bac'
-            'd7ff98495c914fd6dcb56931f5ca3addfe98c62b4d2ca249c9a6c5fa32eb51df')
+            'b7e4db646c3aba20b6942dd15a84cfffc0abafc9581ac5c37353778c95eaf1e6'
+            'd7ff98495c914fd6dcb56931f5ca3addfe98c62b4d2ca249c9a6c5fa32eb51df'
+            'd738115c2a961eacc91ac99f886ee0e47b3c2956cae1dc1c0ff40e6afb551119')
 
 # This obviously ties this PKGBUILD to my machine but that is kind of the point :)
 _kmake() {

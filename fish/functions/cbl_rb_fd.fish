@@ -13,9 +13,11 @@ function cbl_rb_fd -d "Rebase generic Fedora kernel on latest linux-next"
     git rh origin/master
 
     # Patching
+    set -a patches https://lore.kernel.org/all/20220811175759.1518840-1-hamza.mahfooz@amd.com/ # [PATCH v2] drm/amd/display: fix DSC related non-x86/PPC64 compilation issue
     for patch in $patches
         b4 shazam -l -P _ -s $patch; or return
     end
+    crl https://lore.kernel.org/all/YvVK+ZqO75QAYYnB@dev-arch.thelio-3990X/raw | git ap; or return # vdpa_sim_blk fix
 
     # Download and modify configuration
     git cl -q
