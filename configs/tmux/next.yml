@@ -7,6 +7,7 @@ windows:
     shell_command: cbl_upd_krnl next-llvm
     start_directory: $ENV_FOLDER/pkgbuilds/linux-next-llvm
     enter: false
+    focus: true
   - shell: /usr/bin/fish -c dbxe
     shell_command: cbl_rb_fd
     start_directory: $CBL_BLD/fedora
