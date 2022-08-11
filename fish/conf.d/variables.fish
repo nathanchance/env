@@ -197,5 +197,8 @@ end
 # https://www.kernel.org/category/releases.html
 set -gx SUPPORTED_STABLE_VERSIONS 4.{14,{,1}9} 5.{4,1{0,5,8,9}}
 
+# Point tmuxp to configurations in env folder
+set -gx TMUXP_CONFIGDIR $ENV_FOLDER/configs/tmux
+
 # Allow an unlimited number of PIDs for tuxmake containers
 set -gx TUXMAKE_PODMAN_RUN --pids-limit=-1
