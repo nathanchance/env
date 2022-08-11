@@ -16,7 +16,7 @@ function tmxa -d "Attach to a tmux session if it exists, start a new one if not"
                 set tmuxp_cfg test
         end
         if set -q tmuxp_cfg
-            tmuxp load --yes $ENV_FOLDER/configs/tmux/$tmuxp_cfg.yml
+            tmuxp load --yes $tmuxp_cfg
         else
             tmux new-session -AD -s main
         end
