@@ -32,9 +32,6 @@ function cbl_bld_qemu -d "Build QEMU for use with ClangBuiltLinux"
             git -C $qemu_src submodule foreach git reset --hard
             git -C $qemu_src pull --rebase
             git -C $qemu_src submodule update --recursive
-
-            # [PATCH for 7.1] linux-user: fix compat with glibc >= 2.36 sys/mount.h
-            b4 am -o - 20220802164134.1851910-1-berrange@redhat.com | git -C $qemu_src ap; or return
         end
 
         set qemu_ver (git -C $qemu_src sh -s --format=%H)
