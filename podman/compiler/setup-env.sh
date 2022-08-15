@@ -136,6 +136,7 @@ function install_packages_apt() {
                 openbios-ppc
                 qemu-system-data
             )
+            [[ $version = "focal" ]] && packages+=(opensbi)
             ;;
         *)
             packages+=(qemu-system-data)
