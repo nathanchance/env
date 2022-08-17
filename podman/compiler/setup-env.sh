@@ -413,18 +413,38 @@ function check_fish() {
     fi
 }
 
-function install_zoxide() {
-    zoxide_workdir=/tmp/zoxide
-    zoxide_url=$(curl -LSs https://api.github.com/repos/ajeetdsouza/zoxide/releases/latest | grep -E "browser_download_url.*$(uname -m)-unknown-linux-musl" | cut -d\" -f4)
+function download_install_binary() {
+    local binary=$1
+    local url=$2
+    local workdir=/tmp/$binary
 
-    mkdir -p "$zoxide_workdir"
-    curl -LSs "$zoxide_url" | tar -C "$zoxide_workdir" -xzvf -
-    install -Dm0755 -t /usr/local/bin "$zoxide_workdir"/zoxide
+    mkdir -p "$workdir"
+    curl -LSs "$url" | tar -C "$workdir" -xzvf -
+    install -Dvm0755 -t /usr/local/bin "$workdir"/"$binary"
 
     cd
-    command -v zoxide
-    zoxide --version
-    rm -rf "$zoxide_workdir"
+    command -v "$binary"
+    "$binary" --version
+    rm -fr "$workdir"
+}
+
+function install_fzf() {
+    case "$(uname -m)" in
+        aarch64) fzf_arch=arm64 ;;
+        x86_64) fzf_arch=amd64 ;;
+    esac
+    fzf_url=$(curl -LSs https://api.github.com/repos/junegunn/fzf/releases/latest | grep -E "browser_download_url.*linux_$fzf_arch" | cut -d\" -f4)
+    download_install_binary fzf "$fzf_url"
+}
+
+function install_ripgrep() {
+    ripgrep_url=$(curl -LSs https://api.github.com/repos/microsoft/ripgrep-prebuilt/releases/latest | grep -E "browser_download_url.*$(uname -m)-unknown-linux-musl" | cut -d\" -f4)
+    download_install_binary rg "$ripgrep_url"
+}
+
+function install_zoxide() {
+    zoxide_url=$(curl -LSs https://api.github.com/repos/ajeetdsouza/zoxide/releases/latest | grep -E "browser_download_url.*$(uname -m)-unknown-linux-musl" | cut -d\" -f4)
+    download_install_binary zoxide "$zoxide_url"
 }
 
 function setup_locales() {
@@ -480,6 +500,8 @@ function setup_environment() {
         setup_apt_llvm_org
         install_packages_apt
         check_fish
+        install_fzf
+        install_ripgrep
         install_zoxide
         setup_locales
         build_pahole
