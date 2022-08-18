@@ -130,6 +130,7 @@ function cbl_bld_tot_tcs -d "Build LLVM and binutils from source for kernel deve
     end
 
     # Add patches to revert here
+    set -a reverts f7a33090a91015836497c75f173775392ab0304d # [cmake] Use CMAKE_INSTALL_LIBDIR too, https://reviews.llvm.org/D130586#3733542
     for revert in $reverts
         if not git -C $llvm_project rv -n $revert
             set message "Failed to revert $revert"
