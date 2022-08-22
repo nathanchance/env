@@ -20,9 +20,6 @@ function cbl_rb_pi -d "Rebase Raspberry Pi kernel on latest linux-next"
 
     git rh origin/master
 
-    # https://lore.kernel.org/1dbe63ff-5575-745b-653a-a992ae53e1aa@samsung.com/
-    git rv --no-edit 13b3b75248fe48b141ddfe849f8fe24d5da2de25; or return
-
     # Patching
     set -a patches https://lore.kernel.org/all/20220606140103.32779-1-vincenzo.frascino@arm.com/ # [PATCH] arm64: Enable docker support in defconfig
     for patch in $patches
