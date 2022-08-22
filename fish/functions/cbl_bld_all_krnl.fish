@@ -93,7 +93,7 @@ function cbl_bld_all_krnl -d "Build all kernels for ClangBuiltLinux testing"
                 set -a trees linux-stable-$CBL_STABLE_VERSIONS
             end
             for tree in $trees
-                cbl_lkt --tree $tree
+                cbl_lkt --tree $tree; or break
             end
     end
 end
