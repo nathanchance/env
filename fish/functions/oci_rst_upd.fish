@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: MIT
 # Copyright (C) 2022 Nathan Chancellor
 
-function rst_upd_oci -d "Reset container storage, download new images, and start new containers"
+function oci_rst_upd -d "Reset container storage, download new images, and start new containers"
     if command -q docker
         docker stop (docker ps -aq)
         docker rm (docker ps -aq)

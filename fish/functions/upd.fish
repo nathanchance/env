@@ -411,7 +411,7 @@ function upd -d "Runs the update command for the current distro or downloads/upd
                     chmod +x $binary
 
                 case dev lei
-                    boci $target
+                    oci_bld $target
             end
 
             popd

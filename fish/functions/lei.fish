@@ -22,7 +22,7 @@ function lei -d "Runs lei though system or podman, depending on how it is availa
                 --volume="$XDG_CACHE_HOME:/root/.cache" \
                 --volume="$XDG_CONFIG_HOME:/root/.config" \
                 --volume="$XDG_DATA_HOME:/root/.local/share" \
-                $GHCR/lei $argv; or print_error "lei failed to run, does 'boci lei' need to be run?"
+                $GHCR/lei $argv; or print_error "lei failed to run, does 'oci_bld lei' need to be run?"
         else
             print_error "Cannot run lei!"
             return 1
