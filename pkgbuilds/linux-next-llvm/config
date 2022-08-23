@@ -1,8 +1,8 @@
 #
 # Automatically generated file; DO NOT EDIT.
-# Linux/x86 6.0.0-rc1 Kernel Configuration
+# Linux/x86 6.0.0-rc2 Kernel Configuration
 #
-CONFIG_CC_VERSION_TEXT="ClangBuiltLinux clang version 16.0.0 (https://github.com/llvm/llvm-project cab58b7e5c5cbf4d1fe89fb8b9132308f6902cba)"
+CONFIG_CC_VERSION_TEXT="ClangBuiltLinux clang version 16.0.0 (https://github.com/llvm/llvm-project 9f6cb3e9fdb4f5255f78d77c0a537dc3cb50dc9d)"
 CONFIG_GCC_VERSION=0
 CONFIG_CC_IS_CLANG=y
 CONFIG_CLANG_VERSION=160000
@@ -1695,7 +1695,6 @@ CONFIG_NET_DSA_TAG_XRS700X=m
 CONFIG_VLAN_8021Q=m
 CONFIG_VLAN_8021Q_GVRP=y
 CONFIG_VLAN_8021Q_MVRP=y
-# CONFIG_DECNET is not set
 CONFIG_LLC=m
 CONFIG_LLC2=m
 CONFIG_ATALK=m
@@ -11011,6 +11010,7 @@ CONFIG_DEBUG_LIST=y
 # CONFIG_DEBUG_SG is not set
 # CONFIG_DEBUG_NOTIFIERS is not set
 # CONFIG_BUG_ON_DATA_CORRUPTION is not set
+# CONFIG_DEBUG_MAPLE_TREE is not set
 # end of Debug kernel data structures
 
 # CONFIG_DEBUG_CREDENTIALS is not set

@@ -3,7 +3,7 @@
 
 _localversion=-llvm
 pkgname=linux-next$_localversion
-_srctag=next-20220822
+_srctag=next-20220823
 pkgver=${_srctag//-/.}
 pkgrel=1
 pkgdesc='linux-next'
@@ -19,6 +19,7 @@ source=(
   config
   20220201_lb_drm_i915_fix_null_pointer_dereference.patch
   20220815_pkshih_wifi_rtw88_fix_uninitialized_use_of_primary_channel_index.patch
+  20220823_nathan_mm_pagewalk_restore_err_initialization_in_walk_hugetlb_range.patch
 )
 
 validpgpkeys=(
@@ -26,9 +27,10 @@ validpgpkeys=(
   '3F2568AAC26998F9E813A1C5C3F436CA30F5D8EB'  # Mark Brown
 )
 sha256sums=('SKIP'
-            'a0d79287e5e39c8a02c45c39d2aabf64fd3e76460d7ce39787af2eb8cc585e55'
+            '6f3e1fb715108872aa783057e8807b1e88b35bcef2f914e23ba5f23197cfaed6'
             'b79f03f480e7c0571a31ebb68ff9b8c39bbc8f4e064499c0dadabdfde23c4cac'
-            '11e03f21864e2a6d19e9f48098137e8c6236d5b669b63ad0563a869a857363cd')
+            '11e03f21864e2a6d19e9f48098137e8c6236d5b669b63ad0563a869a857363cd'
+            '18363fe241be768f94f7efbca4d0f916813e62681964d3e02be88b0a38848661')
 
 # This obviously ties this PKGBUILD to my machine but that is kind of the point :)
 _kmake() {

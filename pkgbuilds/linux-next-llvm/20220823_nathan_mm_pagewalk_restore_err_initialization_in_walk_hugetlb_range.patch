@@ -1,0 +1,64 @@
+From git@z Thu Jan  1 00:00:00 1970
+Subject: [PATCH] mm: pagewalk: Restore err initialization in walk_hugetlb_range()
+From: Nathan Chancellor <nathan@kernel.org>
+Date: Tue, 23 Aug 2022 08:30:56 -0700
+Message-Id: <20220823153055.2517764-1-nathan@kernel.org>
+To: Andrew Morton <akpm@linux-foundation.org>
+Cc: Nick Desaulniers <ndesaulniers@google.com>, Tom Rix <trix@redhat.com>, Rolf Eike Beer <eb@emlix.com>, linux-mm@kvack.org, linux-kernel@vger.kernel.org, llvm@lists.linux.dev, patches@lists.linux.dev, Nathan Chancellor <nathan@kernel.org>
+List-Id: <llvm.lists.linux.dev>
+MIME-Version: 1.0
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 7bit
+
+Clang warns:
+
+  mm/pagewalk.c:318:12: error: variable 'err' is used uninitialized whenever 'if' condition is false [-Werror,-Wsometimes-uninitialized]
+                  else if (ops->pte_hole)
+                          ^~~~~~~~~~~~~
+  mm/pagewalk.c:321:7: note: uninitialized use occurs here
+                  if (err)
+                      ^~~
+  mm/pagewalk.c:318:8: note: remove the 'if' if its condition is always true
+                  else if (ops->pte_hole)
+                      ^~~~~~~~~~~~~~~~~~
+  mm/pagewalk.c:311:10: note: initialize the variable 'err' to silence this warning
+                  int err;
+                        ^
+                          = 0
+  1 error generated.
+
+Restore the initialization of err to zero so that it cannot be used
+uninitialized.
+
+Fixes: 9ce1db56225a ("mm: pagewalk: make error checks more obvious")
+Link: https://github.com/ClangBuiltLinux/linux/issues/1694
+Signed-off-by: Nathan Chancellor <nathan@kernel.org>
+Link: https://lore.kernel.org/r/20220823153055.2517764-1-nathan@kernel.org
+---
+
+I am sure that SHA is not stable and I expect this to be squashed into
+the original change.
+
+ mm/pagewalk.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/mm/pagewalk.c b/mm/pagewalk.c
+index 54b2a1beeeb3..76e5ccda8c88 100644
+--- a/mm/pagewalk.c
++++ b/mm/pagewalk.c
+@@ -308,7 +308,7 @@ static int walk_hugetlb_range(unsigned long addr, unsigned long end,
+ 	const struct mm_walk_ops *ops = walk->ops;
+ 
+ 	for (; addr < end; addr = next) {
+-		int err;
++		int err = 0;
+ 		pte_t *pte = huge_pte_offset(walk->mm, addr & hmask, sz);
+ 
+ 		next = hugetlb_entry_end(h, addr, end);
+
+base-commit: d711de4adbec4cb0b8769bcae971b13293e6d311
+
+-- 
+2.37.2
+
+
