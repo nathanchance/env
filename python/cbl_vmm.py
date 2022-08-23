@@ -8,25 +8,25 @@
 # https://mirrors.edge.kernel.org/pub/linux/kernel/people/will/docs/qemu/qemu-arm64-howto.html
 # https://wiki.qemu.org/Documentation/Networking
 
-import argparse
-import math
+from argparse import ArgumentParser
+from math import log2
+from os import cpu_count, environ, listdir, sysconf
 from pathlib import Path
-import platform
-import os
-import shutil
-import subprocess
+from platform import machine
+from shutil import copyfile, rmtree
+from subprocess import run as run_
 
 
 def parse_parameters():
-    parser = argparse.ArgumentParser()
+    parser = ArgumentParser()
     subparsers = parser.add_subparsers(help="Action to perform", dest="action")
 
     # Common arguments for all subcommands
-    common_parser = argparse.ArgumentParser(add_help=False)
+    common_parser = ArgumentParser(add_help=False)
     common_parser.add_argument("-a",
                                "--architecture",
                                type=str,
-                               default=platform.machine(),
+                               default=machine(),
                                help="Architecture of virtual machine")
     common_parser.add_argument("-c",
                                "--cores",
@@ -83,7 +83,7 @@ def parse_parameters():
 
 def run_cmd(cmd):
     print("$ {}".format(" ".join([str(element) for element in cmd])))
-    subprocess.run(cmd, check=True)
+    run_(cmd, check=True)
 
 
 def get_disk_img(vm_folder):
@@ -137,7 +137,7 @@ def get_efi_vars(cfg):
         if src.exists():
             dst = vm_folder.joinpath(src.name)
             if not dst.exists():
-                shutil.copyfile(src, dst)
+                copyfile(src, dst)
             return dst
 
         raise RuntimeError("{} could not be found!".format(src.name))
@@ -192,7 +192,7 @@ def default_qemu_arguments(cfg):
         qemu += ["-M", "virt"]
 
     # KVM acceleration
-    if arch == platform.machine():
+    if arch == machine():
         qemu += ["-cpu", "host"]
         qemu += ["-enable-kvm"]
     elif arch == "aarch64":
@@ -224,7 +224,7 @@ def list(cfg):
     print("\nAvailable VMs for {}:\n".format(arch))
 
     if arch_folder.exists():
-        vm_list = os.listdir(arch_folder)
+        vm_list = listdir(arch_folder)
         if vm_list:
             print("\n".join(vm_list))
             return
@@ -261,7 +261,7 @@ def setup(cfg):
 def remove(cfg):
     vm_folder = cfg["vm_folder"]
     if vm_folder.is_dir():
-        shutil.rmtree(vm_folder)
+        rmtree(vm_folder)
 
 
 def run(cfg):
@@ -320,8 +320,8 @@ def set_cfg(args):
             raise RuntimeError("Default .iso has not been defined for {}".format(arch))
 
     # Folder for files
-    if "VM_FOLDER" in os.environ:
-        base_folder = Path(os.environ["VM_FOLDER"])
+    if "VM_FOLDER" in environ:
+        base_folder = Path(environ["VM_FOLDER"])
     else:
         base_folder = Path(__file__).resolve().parent.joinpath("vm")
     arch_folder = base_folder.joinpath(arch)
@@ -384,11 +384,11 @@ def set_cfg(args):
     if args.cores:
         cores = args.cores
     else:
-        if arch == platform.machine():
+        if arch == machine():
             # When using KVM, we cannot use more than the maximum number of
             # cores. Default to either 8 cores or half the number of cores in
             # the machine, whichever is smaller
-            cores = min(8, os.cpu_count() / 2)
+            cores = min(8, cpu_count() / 2)
         else:
             # For TCG, use 4 cores by default
             cores = 4
@@ -405,14 +405,14 @@ def set_cfg(args):
         # the virtual machine
 
         # Total amount of memory of a system in gigabytes (page size * pages / 1024^3)
-        total_mem = os.sysconf("SC_PAGE_SIZE") * os.sysconf("SC_PHYS_PAGES") / (1024.**3)
+        total_mem = sysconf("SC_PAGE_SIZE") * sysconf("SC_PHYS_PAGES") / (1024.**3)
 
         # Get the current exponent of the size of memory, as most computers
         # have a power of 2 amount of memory; if it is not (like 12GB), then
         # this calculation will just result in a slightly larger amount of
         # memory being allocated to the VM. If this is a problem, the user can
         # just specify the amount of memory.
-        exp = round(math.log2(total_mem))
+        exp = round(log2(total_mem))
 
         # To get half of the amount of memory, shift by one less exponent
         avail_mem_for_vm = 1 << (exp - 1)
