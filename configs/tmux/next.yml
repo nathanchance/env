@@ -1,6 +1,7 @@
 session_name: linux-next updates
 windows:
 - window_name: main
+  focus: true
   layout: tiled
   panes:
   - shell: /usr/bin/fish -c dbxe
