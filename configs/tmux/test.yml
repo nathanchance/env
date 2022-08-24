@@ -10,6 +10,7 @@ windows:
       enter: false
       sleep_before: 3
 - window_name: host and distrobox
+  layout: 775f,269x53,0,0[269x41,0,0,3,269x11,0,42,4]
   focus: true
   panes:
   - shell: /usr/bin/fish
