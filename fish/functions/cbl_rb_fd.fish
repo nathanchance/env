@@ -14,7 +14,7 @@ function cbl_rb_fd -d "Rebase generic Fedora kernel on latest linux-next"
 
     # Patching
     set -a patches https://lore.kernel.org/all/20220815062004.22920-1-pkshih@realtek.com/ # [PATCH] wifi: rtw88: fix uninitialized use of primary channel index
-    set -a patches https://lore.kernel.org/all/20220823153055.2517764-1-nathan@kernel.org/ # [PATCH -next] mm: pagewalk: Restore err initialization in walk_hugetlb_range()
+    set -a patches https://lore.kernel.org/all/2123960.ggj6I0NvhH@mobilepool36.emlix.com/ # [PATCH 7/6] mm: pagewalk: add back missing variable initializations
     for patch in $patches
         b4 shazam -l -P _ -s $patch; or return
     end
