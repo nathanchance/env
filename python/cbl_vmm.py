@@ -14,7 +14,7 @@ from os import cpu_count, environ, listdir, sysconf
 from pathlib import Path
 from platform import machine
 from shutil import copyfile, rmtree
-from subprocess import run as run_
+from subprocess import run
 
 
 def parse_parameters():
@@ -42,7 +42,7 @@ def parse_parameters():
     list_parser = subparsers.add_parser("list",
                                         help="List virtual machines that can be run",
                                         parents=[common_parser])
-    list_parser.set_defaults(func=list)
+    list_parser.set_defaults(func=list_vms)
 
     # Arguments for "setup"
     setup_parser = subparsers.add_parser("setup",
@@ -54,13 +54,13 @@ def parse_parameters():
                               type=str,
                               default="50G",
                               help="Size of virtual machine disk image")
-    setup_parser.set_defaults(func=setup)
+    setup_parser.set_defaults(func=setup_vm)
 
     # Arguments for "remove"
     remove_parser = subparsers.add_parser("remove",
                                           help="Remove virtual machine files",
                                           parents=[common_parser])
-    remove_parser.set_defaults(func=remove)
+    remove_parser.set_defaults(func=remove_vm)
 
     # Arguments for "run"
     run_parser = subparsers.add_parser("run",
@@ -76,14 +76,14 @@ def parse_parameters():
                             "--kernel",
                             type=str,
                             help="Path to kernel image or kernel build directory")
-    run_parser.set_defaults(func=run)
+    run_parser.set_defaults(func=run_vm)
 
     return parser.parse_args()
 
 
 def run_cmd(cmd):
     print("$ {}".format(" ".join([str(element) for element in cmd])))
-    run_(cmd, check=True)
+    run(cmd, check=True)
 
 
 def get_disk_img(vm_folder):
@@ -217,7 +217,7 @@ def default_qemu_arguments(cfg):
     return qemu
 
 
-def list(cfg):
+def list_vms(cfg):
     arch = cfg["architecture"]
     arch_folder = cfg["arch_folder"]
 
@@ -232,7 +232,7 @@ def list(cfg):
     print("None")
 
 
-def setup(cfg):
+def setup_vm(cfg):
     vm_folder = cfg["vm_folder"]
     size = cfg["size"]
 
@@ -258,13 +258,13 @@ def setup(cfg):
     run_cmd(qemu)
 
 
-def remove(cfg):
+def remove_vm(cfg):
     vm_folder = cfg["vm_folder"]
     if vm_folder.is_dir():
         rmtree(vm_folder)
 
 
-def run(cfg):
+def run_vm(cfg):
     arch = cfg["architecture"]
     cmdline = cfg["cmdline"]
     gdb = cfg["gdb"]
