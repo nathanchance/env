@@ -5,10 +5,19 @@ set -eux
 function install_packages() {
     dnf update -y
 
-    dnf install -y dnf-plugins-core
-    # Disabled for now
-    # dnf copr enable -y @fedora-llvm-team/llvm-snapshots
+    dnf install -y \
+        curl \
+        dnf-plugins-core
     dnf config-manager --add-repo https://cli.github.com/packages/rpm/gh-cli.repo
+    cat <<EOF >/etc/yum.repos.d/tuxmake.repo
+[tuxmake]
+name=tuxmake
+type=rpm-md
+baseurl=https://tuxmake.org/packages/
+gpgcheck=1
+gpgkey=https://tuxmake.org/packages/repodata/repomd.xml.key
+enabled=1
+EOF
 
     packages=(
         # arc
@@ -47,7 +56,6 @@ function install_packages() {
 
         # distrobox
         bc
-        curl
         diffutils
         less
         passwd
@@ -97,6 +105,7 @@ function install_packages() {
         rsync
         socat
         sparse
+        tuxmake
         uboot-tools
 
         # LLVM/clang + build-llvm.py
