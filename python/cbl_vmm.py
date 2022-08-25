@@ -13,6 +13,7 @@ from math import log2
 from os import cpu_count, environ, listdir, sysconf
 from pathlib import Path
 from platform import machine
+from shlex import quote
 from shutil import copyfile, rmtree
 from subprocess import run
 
@@ -81,8 +82,12 @@ def parse_parameters():
     return parser.parse_args()
 
 
+def quote_cmd(cmd):
+    return ' '.join([quote(str(elem)) for elem in cmd])
+
+
 def run_cmd(cmd):
-    print("$ {}".format(" ".join([str(element) for element in cmd])))
+    print("$ {}".format(quote_cmd(cmd)))
     run(cmd, check=True)
 
 
