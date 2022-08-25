@@ -69,6 +69,10 @@ function cbl_lkt -d "Tests a Linux kernel with llvm-kernel-testing"
                 set next (math $i + 1)
                 set tree $argv[$next]
                 set i $next
+
+            case '*'
+                print_error "Invalid argument: '$arg'"
+                return 1
         end
         set i (math $i + 1)
     end
