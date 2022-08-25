@@ -210,7 +210,7 @@ function cbl_lkt -d "Tests a Linux kernel with llvm-kernel-testing"
     end
     set -e fish_trace
 
-    # objtool: Too many to deal with for now
+    # objtool | -Wframe-larger-than: Too many to deal with for now
     # override: CPU_BIG_ENDIAN changes choice state | override: LTO_CLANG_THIN changes choice state: Warnings from merge_config that are harmless in this context
     # *.log: Any warnings from this will be in the other logs
     # include/linux/bcache.h:3: https://github.com/ClangBuiltLinux/linux/issues/1065
@@ -222,6 +222,7 @@ function cbl_lkt -d "Tests a Linux kernel with llvm-kernel-testing"
     # macro defined with named parameters / macro local_irq_enable reg=: https://github.com/ClangBuiltLinux/linux/issues/1415
     set blocklist_items \
         "objtool:" \
+        Wframe-larger-than \
         "override: (CPU_BIG_ENDIAN|LTO_CLANG_THIN) changes choice state" \
         "info.log" \
         "success.log" \
