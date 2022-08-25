@@ -234,10 +234,8 @@ function install_packages_apt() {
                 # RISC-V does not have gcc-5 or gcc-6 packages and the gcc-7
                 # package is not recommended:
                 # https://lore.kernel.org/r/mhng-d9c7d4ea-1842-41c9-90f0-a7324b883689@palmerdabbelt-glaptop/
-                # There is currently not a gcc-11 version of riscv64-linux-gnu-gcc
-                # in Ubuntu.
                 case $compiler in
-                    gcc-5 | gcc-6 | gcc-7 | gcc-11) ;;
+                    gcc-5 | gcc-6 | gcc-7) ;;
                     *)
                         packages+=(
                             binutils-riscv64-linux-gnu
