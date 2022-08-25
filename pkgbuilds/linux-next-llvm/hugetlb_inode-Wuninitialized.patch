@@ -1,0 +1,44 @@
+From 99aae359c3a744e6718045d2f24b55c84bed4d56 Mon Sep 17 00:00:00 2001
+From: Mike Kravetz <mike.kravetz@oracle.com>
+Date: Thu, 25 Aug 2022 09:49:08 -0700
+Subject: [PATCH] hugetlb: fix/remove uninitialized variable in
+ remove_inode_hugepages
+
+Code introduced for the routine remove_inode_hugepages by patch "hugetlb:
+handle truncate racing with page faults", incorrectly uses a variable
+m_index.  This is a remnant from a previous version of the code when
+under development.  Use the correct variable 'index' and remove
+'m_index' from the routine.
+
+Signed-off-by: Mike Kravetz <mike.kravetz@oracle.com>
+Link: https://lore.kernel.org/Ywepr7C2X20ZvLdn@monkey/
+---
+ fs/hugetlbfs/inode.c | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/fs/hugetlbfs/inode.c b/fs/hugetlbfs/inode.c
+index 52d9b390389b..2f1d6da1bafb 100644
+--- a/fs/hugetlbfs/inode.c
++++ b/fs/hugetlbfs/inode.c
+@@ -648,7 +648,7 @@ static void remove_inode_hugepages(struct inode *inode, loff_t lstart,
+ 	const pgoff_t start = lstart >> huge_page_shift(h);
+ 	const pgoff_t end = lend >> huge_page_shift(h);
+ 	pgoff_t m_end = lm_end >> huge_page_shift(h);
+-	pgoff_t m_start, m_index;
++	pgoff_t m_start;
+ 	struct folio_batch fbatch;
+ 	struct folio *folio;
+ 	pgoff_t next, index;
+@@ -670,7 +670,7 @@ static void remove_inode_hugepages(struct inode *inode, loff_t lstart,
+ 			 * due to a race with fault code.
+ 			 */
+ 			freed += fault_lock_inode_indicies(h, inode, mapping,
+-						m_start, m_index, truncate_op);
++						m_start, index, truncate_op);
+ 
+ 			/*
+ 			 * Remove folio that was part of folio_batch.
+-- 
+2.37.1
+
+

@@ -22,10 +22,12 @@ function cbl_rb_pi -d "Rebase Raspberry Pi kernel on latest linux-next"
 
     # Patching
     set -a patches https://lore.kernel.org/all/20220606140103.32779-1-vincenzo.frascino@arm.com/ # [PATCH] arm64: Enable docker support in defconfig
-    set -a patches https://lore.kernel.org/all/2123960.ggj6I0NvhH@mobilepool36.emlix.com/ # [PATCH 7/6] mm: pagewalk: add back missing variable initializations
+    set -a patches https://lore.kernel.org/all/20220825180607.2707947-1-nathan@kernel.org/ # [PATCH net-next] net/mlx5e: Do not use err uninitialized in mlx5e_rep_add_meta_tunnel_rule()
     for patch in $patches
         b4 am -l -o - -P _ -s $patch | git am; or return
     end
+    crl https://lore.kernel.org/all/CAFULd4bgdGosQ3byMW9S+ov0uDO9iK3jCmZ-fkZQbCGOpfUvXQ@mail.gmail.com/2-0001-smpboot-Fix-cpu_wait_death-for-early-cpu-death.patch | git am; or return # [PATCH] smpboot: Fix cpu_wait_death for early cpu death
+    crl https://lore.kernel.org/all/Ywepr7C2X20ZvLdn@monkey/raw | sed -n '/>From /,$p' | sed 's/^>From /From /' | git am; or return # [PATCH] hugetlb: fix/remove uninitialized variable in remove_inode_hugepages
 
     # Regenerate defconfigs
     for arch in arm arm64

@@ -14,10 +14,12 @@ function cbl_rb_fd -d "Rebase generic Fedora kernel on latest linux-next"
 
     # Patching
     set -a patches https://lore.kernel.org/all/20220815062004.22920-1-pkshih@realtek.com/ # [PATCH] wifi: rtw88: fix uninitialized use of primary channel index
-    set -a patches https://lore.kernel.org/all/2123960.ggj6I0NvhH@mobilepool36.emlix.com/ # [PATCH 7/6] mm: pagewalk: add back missing variable initializations
+    set -a patches https://lore.kernel.org/all/20220825180607.2707947-1-nathan@kernel.org/ # [PATCH net-next] net/mlx5e: Do not use err uninitialized in mlx5e_rep_add_meta_tunnel_rule()
     for patch in $patches
         b4 shazam -l -P _ -s $patch; or return
     end
+    crl https://lore.kernel.org/all/CAFULd4bgdGosQ3byMW9S+ov0uDO9iK3jCmZ-fkZQbCGOpfUvXQ@mail.gmail.com/2-0001-smpboot-Fix-cpu_wait_death-for-early-cpu-death.patch | git am; or return # [PATCH] smpboot: Fix cpu_wait_death for early cpu death
+    crl https://lore.kernel.org/all/Ywepr7C2X20ZvLdn@monkey/raw | sed -n '/>From /,$p' | sed 's/^>From /From /' | git am; or return # [PATCH] hugetlb: fix/remove uninitialized variable in remove_inode_hugepages
 
     # Download and modify configuration
     git cl -q
