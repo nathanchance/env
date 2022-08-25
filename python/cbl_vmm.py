@@ -87,7 +87,7 @@ def quote_cmd(cmd):
 
 
 def run_cmd(cmd):
-    print("$ {}".format(quote_cmd(cmd)))
+    print(f"$ {quote_cmd(cmd)}")
     run(cmd, check=True)
 
 
@@ -106,12 +106,12 @@ def get_efi_img(cfg):
             # Arch Linux location
             src = Path("/usr/share/edk2-armvirt/aarch64/QEMU_EFI.fd")
             if not src.exists():
-                raise FileNotFoundError("{} could not be found!".format(src.name))
+                raise FileNotFoundError(f"{src.name} could not be found!")
 
         dst = vm_folder.joinpath("efi.img")
         if not dst.exists():
             run_cmd(["truncate", "-s", "64m", dst])
-            run_cmd(["dd", "if={}".format(src), "of={}".format(dst), "conv=notrunc"])
+            run_cmd(["dd", f"if={src}", f"of={dst}", "conv=notrunc"])
 
         return dst
 
@@ -121,9 +121,9 @@ def get_efi_img(cfg):
         if src.exists():
             return src
 
-        raise FileNotFoundError("{} could not be found!".format(src.name))
+        raise FileNotFoundError(f"{src.name} could not be found!")
 
-    raise NotImplementedError("get_efi_img() is not implemented for {}".format(arch))
+    raise NotImplementedError(f"get_efi_img() is not implemented for {arch}")
 
 
 def get_efi_vars(cfg):
@@ -145,9 +145,9 @@ def get_efi_vars(cfg):
                 copyfile(src, dst)
             return dst
 
-        raise FileNotFoundError("{} could not be found!".format(src.name))
+        raise FileNotFoundError(f"{src.name} could not be found!")
 
-    raise NotImplementedError("get_efi_vars() is not implemented for {}".format(arch))
+    raise NotImplementedError(f"get_efi_vars() is not implemented for {arch}")
 
 
 def get_iso(cfg):
@@ -163,7 +163,7 @@ def get_iso(cfg):
     else:
         dst = Path(iso)
         if not dst.exists():
-            raise FileNotFoundError("{} specified but it is not found!".format(dst))
+            raise FileNotFoundError(f"{dst} specified but it is not found!")
 
     return dst
 
@@ -175,7 +175,7 @@ def default_qemu_arguments(cfg):
     vm_folder = cfg["vm_folder"]
 
     # QEMU binary
-    qemu = ["qemu-system-{}".format(arch)]
+    qemu = [f"qemu-system-{arch}"]
 
     # No display
     qemu += ["-display", "none"]
@@ -185,12 +185,12 @@ def default_qemu_arguments(cfg):
     fw_str = "if=pflash,format=raw,file="
     efi_img = get_efi_img(cfg)
     efi_vars = get_efi_vars(cfg)
-    qemu += ["-drive", "{}{},readonly=on".format(fw_str, efi_img)]
-    qemu += ["-drive", "{}{}".format(fw_str, efi_vars)]
+    qemu += ["-drive", f"{fw_str}{efi_img},readonly=on"]
+    qemu += ["-drive", f"{fw_str}{efi_vars}"]
 
     # Hard drive
     disk_img = get_disk_img(vm_folder)
-    qemu += ["-drive", "if=virtio,format=qcow2,file={}".format(disk_img)]
+    qemu += ["-drive", f"if=virtio,format=qcow2,file={disk_img}"]
 
     # Machine (AArch64 only)
     if arch == "aarch64":
@@ -226,7 +226,7 @@ def list_vms(cfg):
     arch = cfg["architecture"]
     arch_folder = cfg["arch_folder"]
 
-    print("\nAvailable VMs for {}:\n".format(arch))
+    print(f"\nAvailable VMs for {arch}:\n")
 
     if arch_folder.exists():
         vm_list = listdir(arch_folder)
@@ -258,7 +258,7 @@ def setup_vm(cfg):
     qemu = default_qemu_arguments(cfg)
     qemu += ["-device", "virtio-scsi-pci,id=scsi0"]
     qemu += ["-device", "scsi-cd,drive=cd"]
-    qemu += ["-drive", "if=none,format=raw,id=cd,file={}".format(iso)]
+    qemu += ["-drive", f"if=none,format=raw,id=cd,file={iso}"]
 
     run_cmd(qemu)
 
@@ -278,7 +278,7 @@ def run_vm(cfg):
     vm_folder = cfg["vm_folder"]
 
     if not vm_folder.exists():
-        raise FileNotFoundError("{} does not exist, run 'setup' first?".format(vm_folder))
+        raise FileNotFoundError(f"{vm_folder} does not exist, run 'setup' first?")
 
     qemu = default_qemu_arguments(cfg)
 
@@ -307,7 +307,7 @@ def set_cfg(args):
         elif arch == "x86_64":
             name = "arch"
         else:
-            raise NotImplementedError("Default VM name has not been defined for {}".format(arch))
+            raise NotImplementedError(f"Default VM name has not been defined for {arch}")
 
     # .iso for setup (so "iso" might not be in args)
     if hasattr(args, "iso") and args.iso:
@@ -315,14 +315,12 @@ def set_cfg(args):
     else:
         if arch == "aarch64":
             ver = 36
-            iso = "https://download.fedoraproject.org/pub/fedora/linux/releases/{0}/server/aarch64/iso/fedora-server-netinst-aarch64-{0}-1.5.iso".format(
-                ver)
+            iso = f"https://download.fedoraproject.org/pub/fedora/linux/releases/{ver}/server/aarch64/iso/fedora-server-netinst-aarch64-{ver}-1.5.iso"
         elif arch == "x86_64":
             ver = "2022.06.01"
-            iso = "https://mirror.arizona.edu/archlinux/iso/{0}/archlinux-{0}-x86_64.iso".format(
-                ver)
+            iso = f"https://mirror.arizona.edu/archlinux/iso/{ver}/archlinux-{ver}-x86_64.iso"
         else:
-            raise NotImplementedError("Default .iso has not been defined for {}".format(arch))
+            raise NotImplementedError(f"Default .iso has not been defined for {arch}")
 
     # Folder for files
     if "VM_FOLDER" in environ:
@@ -344,12 +342,12 @@ def set_cfg(args):
             elif arch == "x86_64":
                 kernel = kernel.joinpath("arch/x86/boot/bzImage")
             else:
-                raise NotImplementedError("Default kernel has not been defined for {}".format(arch))
+                raise NotImplementedError(f"Default kernel has not been defined for {arch}")
         else:
             kernel_dir = None
 
         if not kernel.exists():
-            raise FileNotFoundError("{} could not be found!".format(kernel))
+            raise FileNotFoundError(f"{kernel} could not be found!")
 
         if args.cmdline:
             cmdline = args.cmdline
@@ -359,8 +357,7 @@ def set_cfg(args):
             elif arch == "x86_64":
                 cmdline = "console=ttyS0 root=/dev/vda2 rw rootfstype=ext4"
             else:
-                raise NotImplementedError(
-                    "Default cmdline has not been defined for {}".format(arch))
+                raise NotImplementedError(f"Default cmdline has not been defined for {arch}")
 
         if args.initrd:
             initrd = Path(args.initrd)
@@ -374,10 +371,10 @@ def set_cfg(args):
             elif arch == "x86_64":
                 initrd = kernel_dir.joinpath("rootfs/initramfs.img")
             else:
-                raise NotImplementedError("Default initrd has not been defined for {}".format(arch))
+                raise NotImplementedError(f"Default initrd has not been defined for {arch}")
 
         if not initrd.exists():
-            raise FileNotFoundError("{} could not be found!".format(initrd))
+            raise FileNotFoundError(f"{initrd} could not be found!")
     else:
         cmdline = None
         initrd = None
@@ -426,7 +423,7 @@ def set_cfg(args):
         # We cap the amount of memory at two times the number of cores (as that
         # is sufficient for compiling) or total amount of available VM memory
         # from the calculation above.
-        memory = "{}G".format(int(min(cores * 2, avail_mem_for_vm)))
+        memory = f"{int(min(cores * 2, avail_mem_for_vm))}G"
 
     # subprocess.run() expects cores to be a string:
     # TypeError: expected str, bytes or os.PathLike object, not int
@@ -460,7 +457,7 @@ def main():
     arch = cfg["architecture"]
     supported_arches = ["aarch64", "x86_64"]
     if not arch in supported_arches:
-        raise NotImplementedError("{} is not currently supported!".format(arch))
+        raise NotImplementedError(f"{arch} is not currently supported!")
 
     args.func(cfg)
 
