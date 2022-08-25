@@ -157,20 +157,33 @@ function install_packages_apt() {
     if [[ $(uname -m) = "x86_64" ]]; then
         packages+=(
             binutils-aarch64-linux-gnu
-            binutils-powerpc-linux-gnu
-            binutils-powerpc64-linux-gnu
             binutils-powerpc64le-linux-gnu
             binutils-s390x-linux-gnu
         )
 
-        # There is currently no MIPS GCC 11 package so don't bother installing
-        # binutils
-        if [[ $compiler != "gcc-11" ]]; then
-            packages+=(
-                binutils-mips-linux-gnu
-                binutils-mipsel-linux-gnu
-            )
-        fi
+        # There is currently no MIPS GCC 11 or 12 packages so don't bother
+        # installing binutils.
+        case $compiler in
+            gcc-11 | gcc-12) ;;
+            *)
+                packages+=(
+                    binutils-mips-linux-gnu
+                    binutils-mipsel-linux-gnu
+                )
+                ;;
+        esac
+
+        # There is currently no powerpc or powerpc64 GCC 12 packages so don't
+        # bother installing binutils.
+        case $compiler in
+            gcc-12) ;;
+            *)
+                packages+=(
+                    binutils-powerpc-linux-gnu
+                    binutils-powerpc64-linux-gnu
+                )
+                ;;
+        esac
     else
         case "$base:$version" in
             debian:stretch | debian:buster | ubuntu:xenial) ;;
@@ -183,16 +196,21 @@ function install_packages_apt() {
 
             debian:* | ubuntu:*)
                 packages+=(
-                    binutils-riscv64-linux-gnu
                     binutils-s390x-linux-gnu
                     binutils-x86-64-linux-gnu
                 )
-                if [[ $compiler != "gcc-11" ]]; then
-                    packages+=(
-                        binutils-mips-linux-gnu
-                        binutils-mipsel-linux-gnu
-                    )
-                fi
+
+                # There is currently no MIPS GCC 11 or 12 packages so don't
+                # bother installing binutils.
+                case $compiler in
+                    gcc-11 | gcc-12) ;;
+                    *)
+                        packages+=(
+                            binutils-mips-linux-gnu
+                            binutils-mipsel-linux-gnu
+                        )
+                        ;;
+                esac
                 ;;
         esac
     fi
@@ -210,8 +228,6 @@ function install_packages_apt() {
             if [[ $(uname -m) = "x86_64" ]]; then
                 packages+=(
                     gcc-aarch64-linux-gnu
-                    gcc-powerpc-linux-gnu
-                    gcc-powerpc64-linux-gnu
                     gcc-powerpc64le-linux-gnu
                     gcc-s390x-linux-gnu
                     libc-dev-arm64-cross
@@ -221,21 +237,35 @@ function install_packages_apt() {
                     libc-dev-s390x-cross
                 )
 
-                # These packages do not have a GCC 11.x version
-                if [[ $compiler != "gcc-11" ]]; then
-                    packages+=(
-                        gcc-mips-linux-gnu
-                        gcc-mipsel-linux-gnu
-                        libc-dev-mips-cross
-                        libc-dev-mipsel-cross
-                    )
-                fi
+                # There is currently no MIPS GCC 11 or 12 packages.
+                case $compiler in
+                    gcc-11 | gcc-12) ;;
+                    *)
+                        packages+=(
+                            gcc-mips-linux-gnu
+                            gcc-mipsel-linux-gnu
+                            libc-dev-mips-cross
+                            libc-dev-mipsel-cross
+                        )
+                        ;;
+                esac
 
-                # RISC-V does not have gcc-5 or gcc-6 packages and the gcc-7
-                # package is not recommended:
+                # There is currently no powerpc or powerpc64 GCC 12 packages.
+                case $compiler in
+                    gcc-12) ;;
+                    *)
+                        packages+=(
+                            gcc-powerpc-linux-gnu
+                            gcc-powerpc64-linux-gnu
+                        )
+                        ;;
+                esac
+
+                # RISC-V does not have gcc-5, gcc-6, or gcc-12 packages and the
+                # gcc-7 package is not recommended:
                 # https://lore.kernel.org/r/mhng-d9c7d4ea-1842-41c9-90f0-a7324b883689@palmerdabbelt-glaptop/
                 case $compiler in
-                    gcc-5 | gcc-6 | gcc-7) ;;
+                    gcc-5 | gcc-6 | gcc-7 | gcc-12) ;;
                     *)
                         packages+=(
                             binutils-riscv64-linux-gnu
@@ -263,15 +293,18 @@ function install_packages_apt() {
                             libc-dev-riscv64-cross
                             libc-dev-s390x-cross
                         )
-                        # GCC 9 is amd64 only and GCC 11 does not exist for MIPS
-                        if [[ $compiler != "gcc-9" && $compiler != "gcc-11" ]]; then
-                            packages+=(
-                                gcc-mips-linux-gnu
-                                gcc-mipsel-linux-gnu
-                                libc-dev-mips-cross
-                                libc-dev-mipsel-cross
-                            )
-                        fi
+                        # GCC 9 is amd64 only and GCC 11 or 12 does not exist for MIPS
+                        case $compiler in
+                            gcc-9 | gcc-11 | gcc-12) ;;
+                            *)
+                                packages+=(
+                                    gcc-mips-linux-gnu
+                                    gcc-mipsel-linux-gnu
+                                    libc-dev-mips-cross
+                                    libc-dev-mipsel-cross
+                                )
+                                ;;
+                        esac
                         ;;
                 esac
             fi

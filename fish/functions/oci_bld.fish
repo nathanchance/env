@@ -15,8 +15,9 @@ function oci_bld -d "Build an OCI container image"
         switch $arg
             case compilers
                 set -a images \
-                    gcc-{5,6,7,8,9,10,11} \
-                    llvm-{1{1,2,3,4,5,6},android}
+                    gcc-(seq 5 12) \
+                    llvm-(seq 11 16) \
+                    llvm-android
 
             case dev dev/{arch,debian,fedora,suse,ubuntu} lei {gcc,llvm}-'*' makepkg
                 set -a images $arg
@@ -41,6 +42,8 @@ function oci_bld -d "Build an OCI container image"
                 set base debian:bullseye
             case gcc-11
                 set base ubuntu:jammy
+            case gcc-12
+                set base debian:sid
             case llvm-1{1,2}
                 set base ubuntu:focal
             case llvm-1{3,4,5,6}
