@@ -471,6 +471,9 @@ function build_pahole() {
 
     make -j"$(nproc)" install
 
+    command -v pahole
+    pahole --version
+
     cd
     rm -r "$pahole_src"{,.tar.xz} /tmp/2f7d61b2bfb59427926867c886595ff28dd50607.patch
 }

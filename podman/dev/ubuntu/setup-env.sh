@@ -175,6 +175,9 @@ function build_pahole() {
 
     make -j"$(nproc)" install
 
+    command -v pahole
+    pahole --version
+
     cd
     rm -r "$pahole_src"
 }
