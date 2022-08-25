@@ -101,7 +101,7 @@ def get_efi_img(cfg):
             # Arch Linux location
             src = Path("/usr/share/edk2-armvirt/aarch64/QEMU_EFI.fd")
             if not src.exists():
-                raise RuntimeError("{} could not be found!".format(src.name))
+                raise FileNotFoundError("{} could not be found!".format(src.name))
 
         dst = vm_folder.joinpath("efi.img")
         if not dst.exists():
@@ -116,9 +116,9 @@ def get_efi_img(cfg):
         if src.exists():
             return src
 
-        raise RuntimeError("{} could not be found!".format(src.name))
+        raise FileNotFoundError("{} could not be found!".format(src.name))
 
-    raise RuntimeError("get_efi_img() is not implemented for {}".format(arch))
+    raise NotImplementedError("get_efi_img() is not implemented for {}".format(arch))
 
 
 def get_efi_vars(cfg):
@@ -140,9 +140,9 @@ def get_efi_vars(cfg):
                 copyfile(src, dst)
             return dst
 
-        raise RuntimeError("{} could not be found!".format(src.name))
+        raise FileNotFoundError("{} could not be found!".format(src.name))
 
-    raise RuntimeError("get_efi_vars() is not implemented for {}".format(arch))
+    raise NotImplementedError("get_efi_vars() is not implemented for {}".format(arch))
 
 
 def get_iso(cfg):
@@ -158,7 +158,7 @@ def get_iso(cfg):
     else:
         dst = Path(iso)
         if not dst.exists():
-            raise RuntimeError("{} specified but it is not found!".format(dst))
+            raise FileNotFoundError("{} specified but it is not found!".format(dst))
 
     return dst
 
@@ -273,7 +273,7 @@ def run_vm(cfg):
     vm_folder = cfg["vm_folder"]
 
     if not vm_folder.exists():
-        raise RuntimeError("{} does not exist, run 'setup' first?".format(vm_folder))
+        raise FileNotFoundError("{} does not exist, run 'setup' first?".format(vm_folder))
 
     qemu = default_qemu_arguments(cfg)
 
@@ -302,7 +302,7 @@ def set_cfg(args):
         elif arch == "x86_64":
             name = "arch"
         else:
-            raise RuntimeError("Default VM name has not been defined for {}".format(arch))
+            raise NotImplementedError("Default VM name has not been defined for {}".format(arch))
 
     # .iso for setup (so "iso" might not be in args)
     if hasattr(args, "iso") and args.iso:
@@ -317,7 +317,7 @@ def set_cfg(args):
             iso = "https://mirror.arizona.edu/archlinux/iso/{0}/archlinux-{0}-x86_64.iso".format(
                 ver)
         else:
-            raise RuntimeError("Default .iso has not been defined for {}".format(arch))
+            raise NotImplementedError("Default .iso has not been defined for {}".format(arch))
 
     # Folder for files
     if "VM_FOLDER" in environ:
@@ -339,12 +339,12 @@ def set_cfg(args):
             elif arch == "x86_64":
                 kernel = kernel.joinpath("arch/x86/boot/bzImage")
             else:
-                raise RuntimeError("Default kernel has not been defined for {}".format(arch))
+                raise NotImplementedError("Default kernel has not been defined for {}".format(arch))
         else:
             kernel_dir = None
 
         if not kernel.exists():
-            raise RuntimeError("{} could not be found!".format(kernel))
+            raise FileNotFoundError("{} could not be found!".format(kernel))
 
         if args.cmdline:
             cmdline = args.cmdline
@@ -354,7 +354,8 @@ def set_cfg(args):
             elif arch == "x86_64":
                 cmdline = "console=ttyS0 root=/dev/vda2 rw rootfstype=ext4"
             else:
-                raise RuntimeError("Default cmdline has not been defined for {}".format(arch))
+                raise NotImplementedError(
+                    "Default cmdline has not been defined for {}".format(arch))
 
         if args.initrd:
             initrd = Path(args.initrd)
@@ -368,10 +369,10 @@ def set_cfg(args):
             elif arch == "x86_64":
                 initrd = kernel_dir.joinpath("rootfs/initramfs.img")
             else:
-                raise RuntimeError("Default initrd has not been defined for {}".format(arch))
+                raise NotImplementedError("Default initrd has not been defined for {}".format(arch))
 
         if not initrd.exists():
-            raise RuntimeError("{} could not be found!".format(initrd))
+            raise FileNotFoundError("{} could not be found!".format(initrd))
     else:
         cmdline = None
         initrd = None
@@ -454,7 +455,7 @@ def main():
     arch = cfg["architecture"]
     supported_arches = ["aarch64", "x86_64"]
     if not arch in supported_arches:
-        raise RuntimeError("{} is not currently supported!".format(arch))
+        raise NotImplementedError("{} is not currently supported!".format(arch))
 
     args.func(cfg)
 
