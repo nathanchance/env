@@ -158,17 +158,17 @@ function install_packages_apt() {
         packages+=(
             binutils-aarch64-linux-gnu
             binutils-powerpc-linux-gnu
+            binutils-powerpc64-linux-gnu
             binutils-powerpc64le-linux-gnu
             binutils-s390x-linux-gnu
         )
 
-        # There is currently no MIPS or powerpc64 GCC 11 package so don't
-        # bother installing binutils
+        # There is currently no MIPS GCC 11 package so don't bother installing
+        # binutils
         if [[ $compiler != "gcc-11" ]]; then
             packages+=(
                 binutils-mips-linux-gnu
                 binutils-mipsel-linux-gnu
-                binutils-powerpc64-linux-gnu
             )
         fi
     else
@@ -211,10 +211,12 @@ function install_packages_apt() {
                 packages+=(
                     gcc-aarch64-linux-gnu
                     gcc-powerpc-linux-gnu
+                    gcc-powerpc64-linux-gnu
                     gcc-powerpc64le-linux-gnu
                     gcc-s390x-linux-gnu
                     libc-dev-arm64-cross
                     libc-dev-powerpc-cross
+                    libc-dev-ppc64-cross
                     libc-dev-ppc64el-cross
                     libc-dev-s390x-cross
                 )
@@ -224,10 +226,8 @@ function install_packages_apt() {
                     packages+=(
                         gcc-mips-linux-gnu
                         gcc-mipsel-linux-gnu
-                        gcc-powerpc64-linux-gnu
                         libc-dev-mips-cross
                         libc-dev-mipsel-cross
-                        libc-dev-ppc64-cross
                     )
                 fi
 
