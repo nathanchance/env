@@ -26,8 +26,6 @@ function cbl_rb_pi -d "Rebase Raspberry Pi kernel on latest linux-next"
     for patch in $patches
         b4 am -l -o - -P _ -s $patch | git am; or return
     end
-    crl https://lore.kernel.org/all/CAFULd4bgdGosQ3byMW9S+ov0uDO9iK3jCmZ-fkZQbCGOpfUvXQ@mail.gmail.com/2-0001-smpboot-Fix-cpu_wait_death-for-early-cpu-death.patch | git am; or return # [PATCH] smpboot: Fix cpu_wait_death for early cpu death
-    crl https://lore.kernel.org/all/Ywepr7C2X20ZvLdn@monkey/raw | sed -n '/>From /,$p' | sed 's/^>From /From /' | git am; or return # [PATCH] hugetlb: fix/remove uninitialized variable in remove_inode_hugepages
 
     # Regenerate defconfigs
     for arch in arm arm64
