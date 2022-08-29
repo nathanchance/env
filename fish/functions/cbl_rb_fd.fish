@@ -13,8 +13,8 @@ function cbl_rb_fd -d "Rebase generic Fedora kernel on latest linux-next"
     git rh origin/master
 
     # Patching
-    set -a patches https://lore.kernel.org/all/20220815062004.22920-1-pkshih@realtek.com/ # [PATCH] wifi: rtw88: fix uninitialized use of primary channel index
     set -a patches https://lore.kernel.org/all/20220825180607.2707947-1-nathan@kernel.org/ # [PATCH net-next] net/mlx5e: Do not use err uninitialized in mlx5e_rep_add_meta_tunnel_rule()
+    set -a patches https://lore.kernel.org/all/20220829165450.217628-1-nathan@kernel.org/ # [PATCH] drm/msm/dsi: Remove use of device_node in dsi_host_parse_dt()
     for patch in $patches
         b4 shazam -l -P _ -s $patch; or return
     end
