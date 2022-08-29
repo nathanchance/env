@@ -3,7 +3,7 @@
 
 _localversion=-llvm
 pkgname=linux-mainline$_localversion
-_srctag=v6.0-rc2
+_srctag=v6.0-rc3
 pkgver=${_srctag//-/.}
 pkgrel=1
 pkgdesc='Linux'
@@ -27,7 +27,7 @@ validpgpkeys=(
   'ABAF11C65A2970B130ABE3C479BE3E4300411886'  # Linus Torvalds
 )
 sha256sums=('SKIP'
-            'c4b6d646dc994e3d3db6725c5beab456c3ed28b6de6cc5943d0055867ae74a47'
+            '876f48685efb205d5310c4f8c94cedb433c230cce85cb478b42f08a8e11efe66'
             'd569ee2fbd072a09e89196779ccc0dfd008d5a79a0cec5fa80cc7ed99a3027fa'
             'a6f7a5eb3134269737b7790a6286dc671b491547d6c0b59e92959dca0b66cc20'
             '1739b36d09e3d555e1c1b1ef079160b808972f84fc40bd81476cbe3079cad54e'
