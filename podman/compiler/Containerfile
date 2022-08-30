@@ -2,8 +2,8 @@ ARG BASE
 FROM ${BASE}
 
 COPY setup-env.sh /
-COPY dwarves-1.23.tar.xz /tmp
-COPY 2f7d61b2bfb59427926867c886595ff28dd50607.patch /tmp
+COPY dwarves-1.24.tar.xz /tmp
+COPY ea30d58a2329764b9515bbe671575260c76f8114.patch /tmp
 COPY distrobox-check.fish /
 
 ARG BASE

@@ -486,11 +486,11 @@ function setup_locales() {
 }
 
 function build_pahole() {
-    pahole_src=/tmp/dwarves-1.23
+    pahole_src=/tmp/dwarves-1.24
     pahole_build=$pahole_src/build
 
     tar -C "${pahole_src%/*}" -xJf "$pahole_src".tar.xz
-    patch -d "$pahole_src" -p1 </tmp/2f7d61b2bfb59427926867c886595ff28dd50607.patch
+    patch -d "$pahole_src" -p1 </tmp/ea30d58a2329764b9515bbe671575260c76f8114.patch
 
     mkdir "$pahole_build"
     cd "$pahole_build"
@@ -506,7 +506,7 @@ function build_pahole() {
     pahole --version
 
     cd
-    rm -r "$pahole_src"{,.tar.xz} /tmp/2f7d61b2bfb59427926867c886595ff28dd50607.patch
+    rm -r "$pahole_src"{,.tar.xz} /tmp/ea30d58a2329764b9515bbe671575260c76f8114.patch
 }
 
 function check_compilers() {
