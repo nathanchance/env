@@ -21,9 +21,9 @@ function cbl_rb_pi -d "Rebase Raspberry Pi kernel on latest linux-next"
     git rh origin/master
 
     # Patching
+    git revert --no-edit a76886d117cbe3a8e4ce2c041d54a420a646d3ba; or return # https://lore.kernel.org/9a425a51-9460-6c4d-e331-5cd5873f8a43@samsung.com/
     set -a patches https://lore.kernel.org/all/20220606140103.32779-1-vincenzo.frascino@arm.com/ # [PATCH] arm64: Enable docker support in defconfig
     set -a patches https://lore.kernel.org/all/20220825180607.2707947-1-nathan@kernel.org/ # [PATCH net-next] net/mlx5e: Do not use err uninitialized in mlx5e_rep_add_meta_tunnel_rule()
-    set -a patches https://lore.kernel.org/all/20220829165450.217628-1-nathan@kernel.org/ # [PATCH] drm/msm/dsi: Remove use of device_node in dsi_host_parse_dt()
     for patch in $patches
         b4 am -l -o - -P _ -s $patch | git am; or return
     end
