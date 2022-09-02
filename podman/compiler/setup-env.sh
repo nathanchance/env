@@ -2,12 +2,13 @@
 
 set -eu
 
+host_arch=$(uname -m)
+
 function parse_parameters() {
     while (($#)); do
         case $1 in
             docker.io/*)
                 image=${1##*/}
-                base=${image%:*}
                 version=${image##*:}
                 ;;
             gcc-* | llvm-*)
@@ -29,27 +30,15 @@ function setup_fish_repo() {
         ca-certificates
         curl
         gnupg
+        software-properties-common
     )
-    if [[ $base = "ubuntu" ]]; then
-        packages+=(software-properties-common)
-        apt-get install -y --no-install-recommends "${packages[@]}"
-        apt-add-repository -y ppa:fish-shell/release-3
-    elif [[ $base = "debian" ]]; then
-        apt-get install -y --no-install-recommends "${packages[@]}"
-        local num
-        case $version in
-            stretch) num=9.0 ;;
-            buster) num=10 ;;
-            bullseye) num=11 ;;
-        esac
-        if [[ -n ${num:-} ]]; then
-            echo "deb http://download.opensuse.org/repositories/shells:/fish:/release:/3/Debian_$num/ /" | tee /etc/apt/sources.list.d/shells:fish:release:3.list
-            get_apt_gpg_key http://download.opensuse.org/repositories/shells:fish:release:3/Debian_$num/Release.key shells_fish_release_3
-        fi
-    fi
+    apt-get install -y --no-install-recommends "${packages[@]}"
+    apt-add-repository -y ppa:fish-shell/release-3
 }
 
 function setup_apt_llvm_org() {
+    [[ $compiler =~ llvm ]] || return 0
+
     get_apt_gpg_key https://apt.llvm.org/llvm-snapshot.gpg.key apt_llvm_org
     case $compiler in
         llvm-11 | llvm-12 | llvm-14 | llvm-15) add-apt-repository "deb http://apt.llvm.org/$version/ llvm-toolchain-$version-${compiler##*-} main" ;;
@@ -57,17 +46,9 @@ function setup_apt_llvm_org() {
     esac
 }
 
-function setup_llvm_copr() {
-    dnf update -y
-    dnf install -y dnf-plugins-core
-    dnf copr enable -y @fedora-llvm-team/llvm-snapshots
-}
-
-function install_packages_apt() {
+function install_packages() {
     packages=(
         bc
-        binutils-arm-linux-gnueabi
-        binutils-arm-linux-gnueabihf
         bison
         build-essential
         bzip2
@@ -117,218 +98,118 @@ function install_packages_apt() {
         zstd
     )
 
-    # Ubuntu has qemu-system-s390x in its own package, Debian has it in
-    # qemu-system-misc
-    case "$base:$version" in
-        ubuntu:xenial) ;;
-        ubuntu:*) packages+=(qemu-system-s390x) ;;
-    esac
-
-    # Install firmware needed for QEMU
+    # Distribution version specific handling:
+    #   * lz4 has a different package name
+    #   * QEMU firmware is in a different package on later versions
+    #   * GCC 5 from kernel.org was linked against the system libraries of isl,
+    #     mpc, and mpfr
     case $version in
-        xenial) ;;
-
-        stretch | bionic)
-            packages+=(openbios-ppc)
-            ;;
-        buster | focal)
+        xenial)
             packages+=(
-                openbios-ppc
-                qemu-system-data
+                libisl15
+                liblz4-tool
+                libmpc3
+                libmpfr4
             )
-            [[ $version = "focal" ]] && packages+=(opensbi)
             ;;
         *)
-            packages+=(qemu-system-data)
+            packages+=(
+                lz4
+                qemu-system-data
+                qemu-system-s390x
+            )
             ;;
     esac
 
-    # lz4 had a different name on different hosts
-    case $version in
-        xenial | stretch | bionic)
-            packages+=(liblz4-tool)
-            ;;
-        *)
-            packages+=(lz4)
-            ;;
-    esac
+    if [[ $compiler =~ llvm ]]; then
+        local num=${compiler##*-}
 
-    # Certain packages are not available on non-x86_64 hosts in certain cases
-    if [[ $(uname -m) = "x86_64" ]]; then
         packages+=(
-            binutils-aarch64-linux-gnu
+            binutils-arm-linux-gnueabi
+            binutils-arm-linux-gnueabihf
+            binutils-mips-linux-gnu
+            binutils-mipsel-linux-gnu
             binutils-powerpc64le-linux-gnu
+            binutils-riscv64-linux-gnu
             binutils-s390x-linux-gnu
         )
-
-        # There is currently no MIPS GCC 11 or 12 packages so don't bother
-        # installing binutils.
-        case $compiler in
-            gcc-11 | gcc-12) ;;
-            *)
+        case "$host_arch" in
+            aarch64)
                 packages+=(
-                    binutils-mips-linux-gnu
-                    binutils-mipsel-linux-gnu
+                    binutils-x86-64-linux-gnu
                 )
                 ;;
-        esac
-
-        # There is currently no powerpc or powerpc64 GCC 12 packages so don't
-        # bother installing binutils.
-        case $compiler in
-            gcc-12) ;;
-            *)
+            x86_64)
                 packages+=(
+                    binutils-aarch64-linux-gnu
                     binutils-powerpc-linux-gnu
                     binutils-powerpc64-linux-gnu
                 )
                 ;;
         esac
-    else
-        case "$base:$version" in
-            debian:stretch | debian:buster | ubuntu:xenial) ;;
 
-            ubuntu:bionic)
-                packages+=(
-                    binutils-x86-64-linux-gnu
-                )
-                ;;
-
-            debian:* | ubuntu:*)
-                packages+=(
-                    binutils-s390x-linux-gnu
-                    binutils-x86-64-linux-gnu
-                )
-
-                # There is currently no MIPS GCC 11 or 12 packages so don't
-                # bother installing binutils.
-                case $compiler in
-                    gcc-11 | gcc-12) ;;
-                    *)
-                        packages+=(
-                            binutils-mips-linux-gnu
-                            binutils-mipsel-linux-gnu
-                        )
-                        ;;
-                esac
-                ;;
-        esac
-    fi
-
-    case $compiler in
-        gcc-*)
+        # AOSP LLVM is downloaded later
+        if [[ $num != "android" ]]; then
             packages+=(
-                gcc-arm-linux-gnueabi
-                gcc-arm-linux-gnueabihf
-                libc-dev-armel-cross
-                libc-dev-armhf-cross
-            )
-
-            # These packages are not available on non-x86_64 hosts in certain cases
-            if [[ $(uname -m) = "x86_64" ]]; then
-                packages+=(
-                    gcc-aarch64-linux-gnu
-                    gcc-powerpc64le-linux-gnu
-                    gcc-s390x-linux-gnu
-                    libc-dev-arm64-cross
-                    libc-dev-powerpc-cross
-                    libc-dev-ppc64-cross
-                    libc-dev-ppc64el-cross
-                    libc-dev-s390x-cross
-                )
-
-                # There is currently no MIPS GCC 11 or 12 packages.
-                case $compiler in
-                    gcc-11 | gcc-12) ;;
-                    *)
-                        packages+=(
-                            gcc-mips-linux-gnu
-                            gcc-mipsel-linux-gnu
-                            libc-dev-mips-cross
-                            libc-dev-mipsel-cross
-                        )
-                        ;;
-                esac
-
-                # There is currently no powerpc or powerpc64 GCC 12 packages.
-                case $compiler in
-                    gcc-12) ;;
-                    *)
-                        packages+=(
-                            gcc-powerpc-linux-gnu
-                            gcc-powerpc64-linux-gnu
-                        )
-                        ;;
-                esac
-
-                # RISC-V does not have gcc-5, gcc-6, or gcc-12 packages and the
-                # gcc-7 package is not recommended:
-                # https://lore.kernel.org/r/mhng-d9c7d4ea-1842-41c9-90f0-a7324b883689@palmerdabbelt-glaptop/
-                case $compiler in
-                    gcc-5 | gcc-6 | gcc-7 | gcc-12) ;;
-                    *)
-                        packages+=(
-                            binutils-riscv64-linux-gnu
-                            gcc-riscv64-linux-gnu
-                            libc-dev-riscv64-cross
-                        )
-                        ;;
-                esac
-            else
-                case "$base:$version" in
-                    debian:stretch | debian:buster | ubuntu:xenial) ;;
-
-                    ubuntu:bionic)
-                        packages+=(
-                            gcc-x86-64-linux-gnu
-                            libc-dev-amd64-cross
-                        )
-                        ;;
-                    debian:* | ubuntu:*)
-                        packages+=(
-                            gcc-riscv64-linux-gnu
-                            gcc-s390x-linux-gnu
-                            gcc-x86-64-linux-gnu
-                            libc-dev-amd64-cross
-                            libc-dev-riscv64-cross
-                            libc-dev-s390x-cross
-                        )
-                        # GCC 9 is amd64 only and GCC 11 or 12 does not exist for MIPS
-                        case $compiler in
-                            gcc-9 | gcc-11 | gcc-12) ;;
-                            *)
-                                packages+=(
-                                    gcc-mips-linux-gnu
-                                    gcc-mipsel-linux-gnu
-                                    libc-dev-mips-cross
-                                    libc-dev-mipsel-cross
-                                )
-                                ;;
-                        esac
-                        ;;
-                esac
-            fi
-            ;;
-
-        # Android's LLVM is downloaded from AOSP, not a distribution
-        llvm-android) ;;
-
-        llvm-*)
-            local num=${compiler##*-}
-            packages+=(
-                binutils-riscv64-linux-gnu
                 clang-"$num"
                 lld-"$num"
                 llvm-"$num"
-                ripgrep
             )
-            ;;
-    esac
+        fi
+    fi
 
     apt-get update -qq
     apt-get upgrade -y
     apt-get install -y --no-install-recommends "${packages[@]}"
     rm -fr /var/lib/apt/lists/*
+}
+
+function setup_gcc() {
+    local gcc_ver
+    case $compiler in
+        gcc-5 | gcc-6 | gcc-7 | gcc-8 | gcc-9) gcc_ver=${compiler##*-}.5.0 ;;
+        gcc-10) gcc_ver=10.4.0 ;;
+        gcc-11) gcc_ver=11.3.0 ;;
+        gcc-12) gcc_ver=12.2.0 ;;
+        llvm-*) return 0 ;;
+        *) echo "$compiler not added to setup_gcc!" && exit 1 ;;
+    esac
+
+    gcc_targets=(
+        arm-linux-gnueabi
+        m68k-linux
+        mips{,64}-linux
+        powerpc{,64}-linux
+        s390-linux
+        x86_64-linux
+    )
+    # No GCC 5.x aarch64-linux on arm64?
+    case "$host_arch:$compiler" in
+        aarch64:gcc-5) ;;
+        *) gcc_targets+=(aarch64-linux) ;;
+    esac
+    # No GCC 9.5.0 i386-linux on x86_64?
+    case "$host_arch:$compiler" in
+        x86_64:gcc-9) ;;
+        *) gcc_targets+=(i386-linux) ;;
+    esac
+    # RISC-V was not supported in GCC until 7.x
+    case $compiler in
+        gcc-5 | gcc-6) ;;
+        *) gcc_targets+=(riscv{32,64}-linux) ;;
+    esac
+
+    case $host_arch in
+        aarch64) gcc_host_arch=arm64 ;;
+        *) gcc_host_arch=$host_arch ;;
+    esac
+    for gcc_target in "${gcc_targets[@]}"; do
+        wget --output-document=/dev/stdout --progress=dot:giga https://mirrors.edge.kernel.org/pub/tools/crosstool/files/bin/"$gcc_host_arch"/"$gcc_ver"/"$gcc_host_arch"-gcc-"$gcc_ver"-nolibc-"$gcc_target".tar.xz |
+            tar -C /usr/local --strip-components=2 -xJf -
+    done
+}
+
+function setup_llvm() {
     if [[ $compiler =~ llvm ]]; then
         if [[ $compiler = "llvm-android" ]]; then
             local android_clang
@@ -339,100 +220,6 @@ function install_packages_apt() {
             ln -fsv /usr/lib/llvm-*/bin/* /usr/local/bin
         fi
     fi
-
-    # Install delta from GitHub
-    case "$(uname -m)" in
-        aarch64) delta_arch=arm64 ;;
-        x86_64) delta_arch=amd64 ;;
-    esac
-    work_dir=$(mktemp -d)
-    delta_repo=dandavison/delta
-    delta_version=$(curl -LSs https://api.github.com/repos/"$delta_repo"/releases/latest | jq -r .tag_name)
-    case "$(uname -m)" in
-        aarch64)
-            case "$base:$version" in
-                # glibc is too old for these distributions
-                debian:stretch | debian:buster | ubuntu:xenial | ubuntu:bionic) ;;
-                *) delta_deb=$work_dir/git-delta_"$delta_version"_"$delta_arch".deb ;;
-            esac
-            ;;
-        x86_64)
-            # musl binaries are statically linked so they can be used on any version
-            delta_deb=$work_dir/git-delta-musl_"$delta_version"_"$delta_arch".deb
-            ;;
-    esac
-    if [[ -n ${delta_deb:-} ]]; then
-        curl -LSso "$delta_deb" https://github.com/"$delta_repo"/releases/download/"$delta_version"/"${delta_deb##*/}"
-        apt install -y "$delta_deb"
-    fi
-    rm -fr "$work_dir"
-}
-
-function install_packages_dnf() {
-    packages=(
-        # Generic
-        ccache
-        curl
-        cvise
-        fish
-        git
-        make
-        patch
-        python2
-        python3
-        tar
-        texinfo-tex
-        vim
-
-        # Kernel
-        bc
-        bison
-        bzip2
-        cpio
-        binutils-arm-linux-gnu
-        binutils-mips64-linux-gnu
-        binutils-powerpc64-linux-gnu
-        binutils-powerpc64le-linux-gnu
-        binutils-riscv64-linux-gnu
-        binutils-s390x-linux-gnu
-        dpkg-dev
-        dwarves
-        elfutils-libelf-devel
-        flex
-        gzip
-        lz4
-        lzop
-        ncurses-devel
-        openssl
-        openssl-devel
-        perl
-        qemu-system-aarch64
-        qemu-system-arm
-        qemu-system-mips
-        qemu-system-ppc
-        qemu-system-riscv
-        qemu-system-s390x
-        qemu-system-x86
-        rpm-build
-        rsync
-        socat
-        uboot-tools
-        wget
-        xz
-        zstd
-
-        # LLVM/clang
-        clang
-        lld
-        llvm
-    )
-
-    case "$(uname -m)" in
-        aarch64) packages+=(binutils-x86_64-linux-gnu) ;;
-        x86_64) packages+=(binutils-aarch64-linux-gnu) ;;
-    esac
-
-    dnf install -y "${packages[@]}"
 }
 
 function check_fish() {
@@ -459,8 +246,37 @@ function download_install_binary() {
     rm -fr "$workdir"
 }
 
+function install_delta() {
+    # Install delta from GitHub
+    case "$host_arch" in
+        aarch64) delta_arch=arm64 ;;
+        x86_64) delta_arch=amd64 ;;
+    esac
+    work_dir=$(mktemp -d)
+    delta_repo=dandavison/delta
+    delta_version=$(curl -LSs https://api.github.com/repos/"$delta_repo"/releases/latest | jq -r .tag_name)
+    case "$host_arch" in
+        aarch64)
+            case $version in
+                # glibc is too old on Xenial
+                xenial) ;;
+                *) delta_deb=$work_dir/git-delta_"$delta_version"_"$delta_arch".deb ;;
+            esac
+            ;;
+        x86_64)
+            # musl binaries are statically linked so they can be used on any version
+            delta_deb=$work_dir/git-delta-musl_"$delta_version"_"$delta_arch".deb
+            ;;
+    esac
+    if [[ -n ${delta_deb:-} ]]; then
+        curl -LSso "$delta_deb" https://github.com/"$delta_repo"/releases/download/"$delta_version"/"${delta_deb##*/}"
+        apt install -y "$delta_deb"
+    fi
+    rm -fr "$work_dir"
+}
+
 function install_fzf() {
-    case "$(uname -m)" in
+    case "$host_arch" in
         aarch64) fzf_arch=arm64 ;;
         x86_64) fzf_arch=amd64 ;;
     esac
@@ -469,12 +285,12 @@ function install_fzf() {
 }
 
 function install_ripgrep() {
-    ripgrep_url=$(curl -LSs https://api.github.com/repos/microsoft/ripgrep-prebuilt/releases/latest | grep -E "browser_download_url.*$(uname -m)-unknown-linux-musl" | cut -d\" -f4)
+    ripgrep_url=$(curl -LSs https://api.github.com/repos/microsoft/ripgrep-prebuilt/releases/latest | grep -E "browser_download_url.*$host_arch-unknown-linux-musl" | cut -d\" -f4)
     download_install_binary rg "$ripgrep_url"
 }
 
 function install_zoxide() {
-    zoxide_url=$(curl -LSs https://api.github.com/repos/ajeetdsouza/zoxide/releases/latest | grep -E "browser_download_url.*$(uname -m)-unknown-linux-musl" | cut -d\" -f4)
+    zoxide_url=$(curl -LSs https://api.github.com/repos/ajeetdsouza/zoxide/releases/latest | grep -E "browser_download_url.*$host_arch-unknown-linux-musl" | cut -d\" -f4)
     download_install_binary zoxide "$zoxide_url"
 }
 
@@ -512,8 +328,10 @@ function build_pahole() {
 function check_compilers() {
     case $compiler in
         gcc-*)
-            for binary in /usr/bin/*gcc; do
+            for gcc_target in "${gcc_targets[@]}"; do
+                binary=$gcc_target-gcc
                 "$binary" --version | head -n1
+                echo "int main(void) { return 0; }" | "$binary" -x c -c -o /dev/null -
             done
             ;;
         llvm-*)
@@ -525,21 +343,18 @@ function check_compilers() {
 }
 
 function setup_environment() {
-    if command -v dnf &>/dev/null; then
-        setup_llvm_copr
-        install_packages_dnf
-        check_fish
-    elif command -v apt &>/dev/null; then
-        setup_fish_repo
-        setup_apt_llvm_org
-        install_packages_apt
-        check_fish
-        install_fzf
-        install_ripgrep
-        install_zoxide
-        setup_locales
-        build_pahole
-    fi
+    setup_fish_repo
+    setup_apt_llvm_org
+    install_packages
+    setup_gcc
+    setup_llvm
+    check_fish
+    install_delta
+    install_fzf
+    install_ripgrep
+    install_zoxide
+    setup_locales
+    build_pahole
     check_compilers
 }
 

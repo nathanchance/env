@@ -30,24 +30,10 @@ function oci_bld -d "Build an OCI container image"
         switch $image
             case gcc-5
                 set base ubuntu:xenial
-            case gcc-6
-                set base debian:stretch
-            case gcc-7
-                set base ubuntu:bionic
-            case gcc-8
-                set base debian:buster
-            case gcc-9
-                set base ubuntu:focal
-            case gcc-10
-                set base debian:bullseye
-            case gcc-11
+            case gcc-'*' llvm-1{3,4,5,6}
                 set base ubuntu:jammy
-            case gcc-12
-                set base debian:sid
             case llvm-1{1,2}
                 set base ubuntu:focal
-            case llvm-1{3,4,5,6}
-                set base ubuntu:jammy
             case llvm-android
                 if test (uname -m) != x86_64
                     print_error "$image cannot be build on non-x86_64 hosts"

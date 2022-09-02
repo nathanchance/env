@@ -10,7 +10,7 @@ This repository contains my shell environment scripts and configurations. The la
 
 ## Container packages
 
-I maintain [several container images](https://github.com/users/nathanchance/packages?repo_name=env) in this repo, mostly for my kernel development work, where I often need access to a wide variety of compilers. They include all the tools to build kernels for a variety of architectures and they should work with [tuxmake](https://tuxmake.org/) or just `podman`/`docker`.
+I maintain [several container images](https://github.com/users/nathanchance/packages?repo_name=env) in this repo, mostly for my kernel development work, where I often need access to a wide variety of compilers. They include all the tools to build kernels for a variety of architectures.
 
 A typical use case might look like:
 
@@ -22,7 +22,7 @@ $ podman run \
     --volume=$PWD:/linux \
     --workdir=/linux \
     ghcr.io/nathanchance/gcc-11 \
-    make -skj"$(nproc)" defconfig all
+    make -skj"$(nproc)" CROSS_COMPILE=x86_64-linux- defconfig all
 ```
 
 They generally include QEMU as well, so that kernels can be easily boot tested (such as with [boot-utils](https://github.com/ClangBuiltLinux/boot-utils)):
