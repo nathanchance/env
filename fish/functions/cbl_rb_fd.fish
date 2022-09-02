@@ -13,8 +13,8 @@ function cbl_rb_fd -d "Rebase generic Fedora kernel on latest linux-next"
     git rh origin/master
 
     # Patching
-    set -a patches https://lore.kernel.org/all/20220825180607.2707947-1-nathan@kernel.org/ # [PATCH net-next] net/mlx5e: Do not use err uninitialized in mlx5e_rep_add_meta_tunnel_rule()
     set -a patches https://lore.kernel.org/all/20220830101237.22782-1-gal@nvidia.com/ # [PATCH net-next] net: ieee802154: Fix compilation error when CONFIG_IEEE802154_NL802154_EXPERIMENTAL is disabled
+    set -a patches https://lore.kernel.org/all/20220901195055.1932340-1-nathan@kernel.org/ # [PATCH] coresight: cti-sysfs: Mark coresight_cti_reg_store() as __maybe_unused
     for patch in $patches
         b4 shazam -l -P _ -s $patch; or return
     end
