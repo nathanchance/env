@@ -7,6 +7,20 @@ function cbl_gen_ubuntuconfig -d "Generate a kernel .config from Ubuntu's config
         switch $arg
             case aarch64 amd64 arm64 x86_64
                 set arch $arg
+            case --cfi --cfi-permissive
+                set -a scripts_config_args \
+                    -e CFI_CLANG \
+                    -e SHADOW_CALL_STACK
+                if test $arg = --cfi-permissive
+                    set -a scripts_config_args \
+                        -e CFI_PERMISSIVE
+                end
+            case --lto
+                set -a scripts_config_args \
+                    -d LTO_NONE \
+                    -e LTO_CLANG_THIN
+            case --no-werror
+                set no_werror true
         end
     end
     if not set -q arch
@@ -16,6 +30,10 @@ function cbl_gen_ubuntuconfig -d "Generate a kernel .config from Ubuntu's config
             case '*'
                 set arch (uname -m)
         end
+    end
+    if not set -q no_werror
+        set -a scripts_config_args \
+            -e WERROR
     end
     switch $arch
         case aarch64
@@ -33,7 +51,7 @@ function cbl_gen_ubuntuconfig -d "Generate a kernel .config from Ubuntu's config
     mkdir -p $out
 
     for file in config.common.ubuntu $ubuntu_arch/config.{common.$ubuntu_arch,flavour.generic}
-        crl "https://git.launchpad.net/~ubuntu-kernel-test/ubuntu/+source/linux/+git/mainline-crack/plain/debian.master/config/$file?h=cod/mainline/v5.18-rc1"
+        crl "https://git.launchpad.net/~ubuntu-kernel-test/ubuntu/+source/linux/+git/mainline-crack/plain/debian.master/config/$file?h=cod/mainline/v6.0-rc3"
     end >$cfg
 
     scripts/config \
@@ -51,5 +69,5 @@ function cbl_gen_ubuntuconfig -d "Generate a kernel .config from Ubuntu's config
         -d UBSAN \
         -e DEBUG_INFO_NONE \
         -e LOCALVERSION_AUTO \
-        -e WERROR
+        $scripts_config_args
 end

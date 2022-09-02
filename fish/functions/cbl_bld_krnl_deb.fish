@@ -16,6 +16,8 @@ function cbl_bld_krnl_deb -d "Build a .deb kernel package"
                 set arch arm64
             case amd64 x86_64
                 set arch x86_64
+            case --cfi --cfi-permissive --lto
+                set -a config_args $arg
         end
     end
 
@@ -29,7 +31,7 @@ function cbl_bld_krnl_deb -d "Build a .deb kernel package"
         end
     end
 
-    cbl_gen_ubuntuconfig $arch
+    cbl_gen_ubuntuconfig $config_args $arch
 
     kmake \
         ARCH=$arch \

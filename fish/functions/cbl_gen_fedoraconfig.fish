@@ -7,6 +7,18 @@ function cbl_gen_fedoraconfig -d "Downloads and modifies Fedora's kernel configu
         switch $arg
             case aarch64 amd64 arm64 x86_64
                 set arch $arg
+            case --cfi --cfi-permissive
+                set -a scripts_config_args \
+                    -e CFI_CLANG \
+                    -e SHADOW_CALL_STACK
+                if test $arg = --cfi-permissive
+                    set -a scripts_config_args \
+                        -e CFI_PERMISSIVE
+                end
+            case --lto
+                set -a scripts_config_args \
+                    -d LTO_NONE \
+                    -e LTO_CLANG_THIN
             case --no-werror
                 set no_werror true
         end

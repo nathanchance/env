@@ -12,14 +12,14 @@ function cbl_bld_krnl_rpm -d "Build a .rpm kernel package"
     # Allow cross compiling
     for arg in $argv
         switch $arg
+            case --cfi --cfi-permissive --lto --no-werror
+                set -a gen_config_args $arg
             case -g --gcc
                 set gcc true
             case -m --menuconfig
                 set -a kmake_targets menuconfig
             case -n --no-config
                 set config false
-            case --no-werror
-                set -a gen_config_args $arg
             case aarch64 arm64
                 set arch arm64
             case amd64 x86_64

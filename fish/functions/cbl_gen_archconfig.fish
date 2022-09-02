@@ -16,6 +16,10 @@ function cbl_gen_archconfig -d "Generate a configuration file for Arch Linux"
                 set config full
             case -l --local
                 set config local
+            case --lto
+                set -a config_args \
+                    -d LTO_NONE \
+                    -e LTO_CLANG_THIN
             case -m --menuconfig
                 set menuconfig true
             case linux-cfi linux-debug linux-mainline-'*' linux-next-'*'
@@ -52,17 +56,6 @@ function cbl_gen_archconfig -d "Generate a configuration file for Arch Linux"
         -e DEBUG_INFO_DWARF5 \
         -e WERROR \
         -m DRM
-    # https://git.kernel.org/gregkh/driver-core/c/23cfbc6ec44e5e80d5522976ff45ffcdcddfb230
-    # Drop when 5.19 is in the Arch repos
-    $src/scripts/config \
-        --file $cfg \
-        -e FW_LOADER_COMPRESS_XZ \
-        -e FW_LOADER_COMPRESS_ZSTD
-    # https://git.kernel.org/linus/41ef3c1a6bb0fd4a3f81170dd17de3adbff80783
-    # Drop when 5.19 is in the Arch repos
-    $src/scripts/config \
-        --file $cfg \
-        -e PINCTRL_AMD
 
     # Step 3: Run olddefconfig
     kmake -C $src KCONFIG_CONFIG=$cfg olddefconfig
@@ -77,13 +70,13 @@ function cbl_gen_archconfig -d "Generate a configuration file for Arch Linux"
     # Step 5: Run through olddefconfig with Clang
     kmake -C $src KCONFIG_CONFIG=$cfg LLVM=1 LLVM_IAS=1 olddefconfig
 
-    # Step 6: Enable ThinLTO
-    $src/scripts/config \
-        --file $cfg \
-        -d LTO_NONE \
-        -e LTO_CLANG_THIN \
-        $config_args
-    kmake -C $src KCONFIG_CONFIG=$cfg LLVM=1 LLVM_IAS=1 olddefconfig
+    # Step 6: Enable ThinLTO or CFI
+    if test -n "$config_args"
+        $src/scripts/config \
+            --file $cfg \
+            $config_args
+        kmake -C $src KCONFIG_CONFIG=$cfg LLVM=1 LLVM_IAS=1 olddefconfig
+    end
 
     # Step 7: Run menuconfig if additional options are needed
     if test "$menuconfig" = true

@@ -21,6 +21,6 @@ function cbl_upd_krnl_pkg -d "Update Arch Linux ClangBuiltLinux kernels"
                 vim $pkgbuild; or return
         end
 
-        cbl_bld_krnl_pkg $krnl
+        cbl_bld_krnl_pkg --lto $krnl
     end
 end
