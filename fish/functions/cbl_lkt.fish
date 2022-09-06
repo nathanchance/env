@@ -189,16 +189,20 @@ function cbl_lkt -d "Tests a Linux kernel with llvm-kernel-testing"
     set log_folder $CBL/build-logs/(basename $linux_folder)-(date +%F-%T)
     mkdir -p $log_folder
 
-    if not test -d $CBL_LKT
-        mkdir -p (dirname $CBL_LKT)
-        git clone https://github.com/nathanchance/llvm-kernel-testing $CBL_LKT
-    end
-    if not location_is_primary
-        git -C $CBL_LKT urh
+    if is_github_actions
+        set lkt $GITHUB_WORKSPACE/lkt
+    else
+        if not test -d $CBL_LKT
+            mkdir -p (dirname $CBL_LKT)
+            git clone https://github.com/nathanchance/llvm-kernel-testing $CBL_LKT
+        end
+        if not location_is_primary
+            git -C $CBL_LKT urh
+        end
     end
 
     set fish_trace 1
-    if not $CBL_LKT/main.py \
+    if not $lkt/main.py \
             --linux-folder $linux_folder \
             --log-folder $log_folder \
             $main_py_args

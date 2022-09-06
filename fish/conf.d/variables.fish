@@ -68,6 +68,8 @@ if test -d /mnt/ssd
     set -gx CCACHE_DIR $MAIN_FOLDER/ccache
 else if test -d $HOME/Downloads
     set -gx MAIN_FOLDER $HOME/Dev
+else if set -q GITHUB_ACTIONS
+    set -gx MAIN_FOLDER $GITHUB_WORKSPACE
 end
 if not set -q MAIN_FOLDER
     set -gx MAIN_FOLDER $HOME
