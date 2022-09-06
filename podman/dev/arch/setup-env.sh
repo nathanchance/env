@@ -37,6 +37,20 @@ function gen_locale() {
     locale-gen
 }
 
+function add_grep_wrappers() {
+    cat <<'EOF' >/usr/local/bin/egrep
+#!/bin/sh
+
+exec grep -E "$@"
+EOF
+    cat <<'EOF' >/usr/local/bin/fgrep
+#!/bin/sh
+
+exec grep -F "$@"
+EOF
+    chmod 755 /usr/local/bin/{e,f}grep
+}
+
 # Update and install packages
 function install_packages() {
     pacman -Syyuu --noconfirm
@@ -169,4 +183,5 @@ function install_packages() {
 pacman_conf
 makepkg_conf
 gen_locale
+add_grep_wrappers
 install_packages
