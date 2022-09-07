@@ -3,7 +3,11 @@
 # Copyright (C) 2021-2022 Nathan Chancellor
 
 function mail_msg -d "Send myself an email"
-    set muttrc $HOME/.muttrc.notifier
+    if is_github_actions
+        set muttrc $GITHUB_WORKSPACE/muttrc.notifier
+    else
+        set muttrc $HOME/.muttrc.notifier
+    end
     if not test -f $muttrc
         print_error "$muttrc does not exist!"
         return 1

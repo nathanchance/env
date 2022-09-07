@@ -82,28 +82,35 @@ function cbl_bld_tot_tcs -d "Build LLVM and binutils from source for kernel deve
 
     set date_time (date +%F_%H-%M-%S)
 
-    if not test -d $CBL_TC_BLD
-        mkdir -p (dirname $CBL_TC_BLD)
-        set -l clone_args -b personal
-        if gh auth status
-            gh repo clone tc-build $CBL_TC_BLD -- $clone_args
-        else
-            git clone $clone_args https://github.com/nathanchance/tc-build.git $CBL_TC_BLD
+    if is_github_actions
+        set tc_bld $GITHUB_WORKSPACE/tc-build
+    else
+        set tc_bld $CBL_TC_BLD
+        if not test -d $tc_bld
+            mkdir -p (dirname $tc_bld)
+            set -l clone_args -b personal
+            if gh auth status
+                gh repo clone tc-build $tc_bld -- $clone_args
+            else
+                git clone $clone_args https://github.com/nathanchance/tc-build.git $tc_bld
+            end
         end
-    end
-    if not location_is_primary
-        git -C $CBL_TC_BLD urh
+        if not location_is_primary
+            git -C $tc_bld urh
+        end
     end
 
     if test "$bld_bntls" != false
-        set bntls $CBL_TC_BLD/binutils
+        set bntls $tc_bld/binutils
         if not test -d $bntls
             git clone https://sourceware.org/git/binutils-gdb.git "$bntls"
         end
-        git -C $bntls pull --rebase; or return
+        if not is_shallow_clone $bntls
+            git -C $bntls pull --rebase; or return
+        end
 
         set bntls_install $CBL_TC_STOW_BNTL/$date_time-(git -C $bntls sh -s --format=%H origin/master)
-        if not PATH="/usr/lib/ccache/bin:$PATH" $CBL_TC_BLD/build-binutils.py \
+        if not PATH="/usr/lib/ccache/bin:$PATH" $tc_bld/build-binutils.py \
                 $bld_bntls_args \
                 --build-folder $TMP_BUILD_FOLDER/binutils \
                 --install-folder $bntls_install
@@ -117,16 +124,18 @@ function cbl_bld_tot_tcs -d "Build LLVM and binutils from source for kernel deve
         cbl_upd_software_symlinks binutils $bntls_install; or return
     end
 
-    set llvm_project $CBL_TC_BLD/llvm-project
+    set llvm_project $tc_bld/llvm-project
     if not test -d $llvm_project
         git clone https://github.com/llvm/llvm-project $llvm_project
     end
-    git -C $llvm_project rh
-    if not git -C $llvm_project pull --rebase
-        set message "llvm-project failed to rebase/update"
-        print_error "$message"
-        tg_msg "$message"
-        return 1
+    if not is_shallow_clone $llvm_project
+        git -C $llvm_project rh
+        if not git -C $llvm_project pull --rebase
+            set message "llvm-project failed to rebase/update"
+            print_error "$message"
+            tg_msg "$message"
+            return 1
+        end
     end
 
     # Add patches to revert here
@@ -151,7 +160,7 @@ function cbl_bld_tot_tcs -d "Build LLVM and binutils from source for kernel deve
     end
 
     set llvm_install $CBL_TC_STOW_LLVM/$date_time-(git -C $llvm_project sh -s --format=%H origin/main)
-    if not $CBL_TC_BLD/build-llvm.py \
+    if not $tc_bld/build-llvm.py \
             --assertions \
             --build-folder $TMP_BUILD_FOLDER/llvm \
             --check-targets $check_targets \
