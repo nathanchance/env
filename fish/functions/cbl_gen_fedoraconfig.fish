@@ -39,6 +39,10 @@ function cbl_gen_fedoraconfig -d "Downloads and modifies Fedora's kernel configu
 
     crl -o .config https://src.fedoraproject.org/rpms/kernel/raw/rawhide/f/kernel-$arch-fedora.config
 
+    # Remove once Fedora has updated to 6.1
+    # https://git.kernel.org/soc/soc/c/566e373fe047f35be58d8a97061275be4dcb4132
+    set -a scripts_config_args -e ARCH_NXP
+
     scripts/config \
         -d DEBUG_INFO \
         -d DEBUG_INFO_DWARF_TOOLCHAIN_DEFAULT \
