@@ -1,0 +1,239 @@
+From 480177909f15a62b8efe5cfca75d681b4bf7ca2a Mon Sep 17 00:00:00 2001
+From: Nathan Chancellor <nathan@kernel.org>
+Date: Wed, 7 Sep 2022 12:17:06 -0700
+Subject: [PATCH] Revert "lib/find_bit: optimize find_next_bit() functions"
+
+This reverts commit e0c6e3024da0cd4a1dcb7611e529063f65cdb697.
+
+This causes issues with booting at least two of my test systems. Revert
+it until it can be fully investigated.
+
+Signed-off-by: Nathan Chancellor <nathan@kernel.org>
+---
+ include/linux/find.h |  23 +++------
+ lib/find_bit.c       | 119 ++++++++++++++++++-------------------------
+ 2 files changed, 57 insertions(+), 85 deletions(-)
+
+diff --git a/include/linux/find.h b/include/linux/find.h
+index 2e7f0d307c6f..b0d450be3a92 100644
+--- a/include/linux/find.h
++++ b/include/linux/find.h
+@@ -8,12 +8,9 @@
+ 
+ #include <linux/bitops.h>
+ 
+-unsigned long _find_next_bit(const unsigned long *addr1, unsigned long nbits,
+-				unsigned long start);
+-unsigned long _find_next_and_bit(const unsigned long *addr1, const unsigned long *addr2,
+-					unsigned long nbits, unsigned long start);
+-unsigned long _find_next_zero_bit(const unsigned long *addr, unsigned long nbits,
+-					 unsigned long start);
++extern unsigned long _find_next_bit(const unsigned long *addr1,
++		const unsigned long *addr2, unsigned long nbits,
++		unsigned long start, unsigned long invert, unsigned long le);
+ extern unsigned long _find_first_bit(const unsigned long *addr, unsigned long size);
+ extern unsigned long _find_first_and_bit(const unsigned long *addr1,
+ 					 const unsigned long *addr2, unsigned long size);
+@@ -22,10 +19,6 @@ extern unsigned long _find_last_bit(const unsigned long *addr, unsigned long siz
+ 
+ #ifdef __BIG_ENDIAN
+ unsigned long _find_first_zero_bit_le(const unsigned long *addr, unsigned long size);
+-unsigned long _find_next_zero_bit_le(const  unsigned long *addr, unsigned
+-					long size, unsigned long offset);
+-unsigned long _find_next_bit_le(const unsigned long *addr, unsigned
+-				long size, unsigned long offset);
+ #endif
+ 
+ #ifndef find_next_bit
+@@ -52,7 +45,7 @@ unsigned long find_next_bit(const unsigned long *addr, unsigned long size,
+ 		return val ? __ffs(val) : size;
+ 	}
+ 
+-	return _find_next_bit(addr, size, offset);
++	return _find_next_bit(addr, NULL, size, offset, 0UL, 0);
+ }
+ #endif
+ 
+@@ -82,7 +75,7 @@ unsigned long find_next_and_bit(const unsigned long *addr1,
+ 		return val ? __ffs(val) : size;
+ 	}
+ 
+-	return _find_next_and_bit(addr1, addr2, size, offset);
++	return _find_next_bit(addr1, addr2, size, offset, 0UL, 0);
+ }
+ #endif
+ 
+@@ -110,7 +103,7 @@ unsigned long find_next_zero_bit(const unsigned long *addr, unsigned long size,
+ 		return val == ~0UL ? size : ffz(val);
+ 	}
+ 
+-	return _find_next_zero_bit(addr, size, offset);
++	return _find_next_bit(addr, NULL, size, offset, ~0UL, 0);
+ }
+ #endif
+ 
+@@ -258,7 +251,7 @@ unsigned long find_next_zero_bit_le(const void *addr, unsigned
+ 		return val == ~0UL ? size : ffz(val);
+ 	}
+ 
+-	return _find_next_zero_bit_le(addr, size, offset);
++	return _find_next_bit(addr, NULL, size, offset, ~0UL, 1);
+ }
+ #endif
+ 
+@@ -291,7 +284,7 @@ unsigned long find_next_bit_le(const void *addr, unsigned
+ 		return val ? __ffs(val) : size;
+ 	}
+ 
+-	return _find_next_bit_le(addr, size, offset);
++	return _find_next_bit(addr, NULL, size, offset, 0UL, 1);
+ }
+ #endif
+ 
+diff --git a/lib/find_bit.c b/lib/find_bit.c
+index 8c6d79e4d43c..f4d9b9684811 100644
+--- a/lib/find_bit.c
++++ b/lib/find_bit.c
+@@ -40,33 +40,57 @@
+ 	sz;									\
+ })
+ 
++#if !defined(find_next_bit) || !defined(find_next_zero_bit) ||			\
++	!defined(find_next_bit_le) || !defined(find_next_zero_bit_le) ||	\
++	!defined(find_next_and_bit)
+ /*
+- * Common helper for find_next_bit() function family
+- * @FETCH: The expression that fetches and pre-processes each word of bitmap(s)
+- * @MUNGE: The expression that post-processes a word containing found bit (may be empty)
+- * @size: The bitmap size in bits
+- * @start: The bitnumber to start searching at
++ * This is a common helper function for find_next_bit, find_next_zero_bit, and
++ * find_next_and_bit. The differences are:
++ *  - The "invert" argument, which is XORed with each fetched word before
++ *    searching it for one bits.
++ *  - The optional "addr2", which is anded with "addr1" if present.
+  */
+-#define FIND_NEXT_BIT(FETCH, MUNGE, size, start)				\
+-({										\
+-	unsigned long mask, idx, tmp, sz = (size), __start = (start);		\
+-										\
+-	if (unlikely(__start >= sz))						\
+-		goto out;							\
+-										\
+-	mask = MUNGE(BITMAP_FIRST_WORD_MASK(__start));				\
+-	idx = __start / BITS_PER_LONG;						\
+-										\
+-	for (tmp = (FETCH) & mask; !tmp; tmp = (FETCH)) {			\
+-		if (idx >= sz / BITS_PER_LONG)					\
+-			goto out;						\
+-		idx++;								\
+-	}									\
+-										\
+-	sz = min(idx * BITS_PER_LONG + __ffs(MUNGE(tmp)), sz);			\
+-out:										\
+-	sz;									\
+-})
++unsigned long _find_next_bit(const unsigned long *addr1,
++		const unsigned long *addr2, unsigned long nbits,
++		unsigned long start, unsigned long invert, unsigned long le)
++{
++	unsigned long tmp, mask;
++
++	if (unlikely(start >= nbits))
++		return nbits;
++
++	tmp = addr1[start / BITS_PER_LONG];
++	if (addr2)
++		tmp &= addr2[start / BITS_PER_LONG];
++	tmp ^= invert;
++
++	/* Handle 1st word. */
++	mask = BITMAP_FIRST_WORD_MASK(start);
++	if (le)
++		mask = swab(mask);
++
++	tmp &= mask;
++
++	start = round_down(start, BITS_PER_LONG);
++
++	while (!tmp) {
++		start += BITS_PER_LONG;
++		if (start >= nbits)
++			return nbits;
++
++		tmp = addr1[start / BITS_PER_LONG];
++		if (addr2)
++			tmp &= addr2[start / BITS_PER_LONG];
++		tmp ^= invert;
++	}
++
++	if (le)
++		tmp = swab(tmp);
++
++	return min(start + __ffs(tmp), nbits);
++}
++EXPORT_SYMBOL(_find_next_bit);
++#endif
+ 
+ #ifndef find_first_bit
+ /*
+@@ -103,32 +127,6 @@ unsigned long _find_first_zero_bit(const unsigned long *addr, unsigned long size
+ EXPORT_SYMBOL(_find_first_zero_bit);
+ #endif
+ 
+-#ifndef find_next_bit
+-unsigned long _find_next_bit(const unsigned long *addr, unsigned long nbits, unsigned long start)
+-{
+-	return FIND_NEXT_BIT(addr[idx], /* nop */, nbits, start);
+-}
+-EXPORT_SYMBOL(_find_next_bit);
+-#endif
+-
+-#ifndef find_next_and_bit
+-unsigned long _find_next_and_bit(const unsigned long *addr1, const unsigned long *addr2,
+-					unsigned long nbits, unsigned long start)
+-{
+-	return FIND_NEXT_BIT(addr1[idx] & addr2[idx], /* nop */, nbits, start);
+-}
+-EXPORT_SYMBOL(_find_next_and_bit);
+-#endif
+-
+-#ifndef find_next_zero_bit
+-unsigned long _find_next_zero_bit(const unsigned long *addr, unsigned long nbits,
+-					 unsigned long start)
+-{
+-	return FIND_NEXT_BIT(~addr[idx], /* nop */, nbits, start);
+-}
+-EXPORT_SYMBOL(_find_next_zero_bit);
+-#endif
+-
+ #ifndef find_last_bit
+ unsigned long _find_last_bit(const unsigned long *addr, unsigned long size)
+ {
+@@ -175,23 +173,4 @@ unsigned long _find_first_zero_bit_le(const unsigned long *addr, unsigned long s
+ EXPORT_SYMBOL(_find_first_zero_bit_le);
+ #endif
+ 
+-#ifndef find_next_zero_bit_le
+-unsigned long _find_next_zero_bit_le(const unsigned long *addr, unsigned
+-		long size, unsigned long offset)
+-{
+-	return FIND_NEXT_BIT(~addr[idx], swab, size, offset);
+-}
+-EXPORT_SYMBOL(_find_next_zero_bit_le);
+-#endif
+-
+-#ifndef find_next_bit_le
+-unsigned long _find_next_bit_le(const unsigned long  *addr, unsigned
+-		long size, unsigned long offset)
+-{
+-	return FIND_NEXT_BIT(addr[idx], swab, size, offset);
+-}
+-EXPORT_SYMBOL(_find_next_bit_le);
+-
+-#endif
+-
+ #endif /* __BIG_ENDIAN */
+-- 
+2.37.3
+
