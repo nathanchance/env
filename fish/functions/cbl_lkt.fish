@@ -192,12 +192,13 @@ function cbl_lkt -d "Tests a Linux kernel with llvm-kernel-testing"
     if is_github_actions
         set lkt $GITHUB_WORKSPACE/lkt
     else
-        if not test -d $CBL_LKT
-            mkdir -p (dirname $CBL_LKT)
-            git clone https://github.com/nathanchance/llvm-kernel-testing $CBL_LKT
+        set lkt $CBL_LKT
+        if not test -d $lkt
+            mkdir -p (dirname $lkt)
+            git clone https://github.com/nathanchance/llvm-kernel-testing $lkt
         end
         if not location_is_primary
-            git -C $CBL_LKT urh
+            git -C $lkt urh
         end
     end
 
