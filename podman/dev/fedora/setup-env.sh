@@ -2,6 +2,20 @@
 
 set -eux
 
+function add_grep_wrappers() {
+    cat <<'EOF' >/usr/local/bin/egrep
+#!/bin/sh
+
+exec grep -E "$@"
+EOF
+    cat <<'EOF' >/usr/local/bin/fgrep
+#!/bin/sh
+
+exec grep -F "$@"
+EOF
+    chmod 755 /usr/local/bin/{e,f}grep
+}
+
 function install_packages() {
     dnf update -y
 
@@ -152,5 +166,6 @@ function check_fish() {
     fi
 }
 
+add_grep_wrappers
 install_packages
 check_fish
