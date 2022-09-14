@@ -3,6 +3,10 @@
 # Copyright (C) 2021-2022 Nathan Chancellor
 
 function tg_msg -d "Send a Telegram message to FlashBox Notifier"
+    if is_github_actions
+        return 0
+    end
+
     set botinfo $HOME/.botinfo
     if not test -f $botinfo
         print_error "$botinfo could not be found!"
