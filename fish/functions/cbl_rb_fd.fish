@@ -13,7 +13,7 @@ function cbl_rb_fd -d "Rebase generic Fedora kernel on latest linux-next"
     git rh origin/master
 
     # Patching
-    set -a patches https://lore.kernel.org/all/20220901195055.1932340-1-nathan@kernel.org/ # [PATCH] coresight: cti-sysfs: Mark coresight_cti_reg_store() as __maybe_unused
+    set -a patches https://lore.kernel.org/all/20220916110118.446132-1-michael@walle.cc/ # [PATCH] gpiolib: fix OOB access in quirk callbacks
     for patch in $patches
         b4 shazam -l -P _ -s $patch; or return
     end
