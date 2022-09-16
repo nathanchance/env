@@ -162,10 +162,7 @@ function install_pkgs() {
     # This variable is assigned in bash/common
     # shellcheck disable=SC2154
     if ! $wsl; then
-        packages+=(
-            modprobed-db
-            tailscale
-        )
+        packages+=(modprobed-db)
 
         if [[ -n $DISPLAY ]]; then
             packages+=(
@@ -213,7 +210,11 @@ function install_pkgs() {
             )
         fi
 
-        is_virtual_machine && packages+=(devtools)
+        if is_virtual_machine; then
+            packages+=(devtools)
+        else
+            packages+=(tailscale)
+        fi
     fi
 
     pacman -S --needed --noconfirm "${packages[@]}" || exit
