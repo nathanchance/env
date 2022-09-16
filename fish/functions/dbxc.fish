@@ -57,7 +57,9 @@ function dbxc -d "Shorthand for 'distrobox create'"
 
     set -a dbx_args -i $img
     if test "$mode" = create
-        set -a dbx_args -n $name
+        set -a dbx_args \
+            -n $name \
+            --no-entry
     end
 
     # If we are using a development image AND it is the default one for our
