@@ -86,9 +86,10 @@ function install_packages() {
         diffutils
         less
         libvte-*-common
+        lsof
         pinentry-curses
         sudo
-        tree
+        time
         wget
 
         # env

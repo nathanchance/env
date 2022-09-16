@@ -48,54 +48,70 @@ function setup_apt_llvm_org() {
 
 function install_packages() {
     packages=(
-        bc
+        # Building kernels
         bison
         build-essential
         bzip2
         ccache
-        cmake
         cpio
+        flex
+        gzip
+        kmod
+        libncurses5-dev
+        libssl-dev
+        lzop
+        openssl
+        python3
+        sparse
+        tar
+        u-boot-tools
+        xz-utils
+        zlib1g-dev
+        zstd
+
+        # distrobox
+        bc
         curl
         diffutils
-        fish
-        flex
-        git
-        gzip
-        iproute2
-        jq
-        kmod
         less
-        libc-dev
+        libvte-common
+        libvte-*-common
+        lsof
+        pinentry-curses
+        sudo
+        time
+        wget
+
+        # env
+        fish
+        jq
+        vim
+
+        # git + email
+        git
+        libsasl2-modules
+        mutt
+
+        # miscellaneous
+        locales
+
+        # pahole
+        cmake
         libdw-dev
         libelf-dev
-        libncurses5-dev
-        libsasl2-modules
-        libssl-dev
-        locales
-        lzop
-        mutt
-        openssl
-        pinentry-curses
-        python3
+
+        # qemu
         qemu-system-arm
         qemu-system-mips
         qemu-system-misc
         qemu-system-ppc
         qemu-system-x86
+
+        # tuxmake
+        iproute2
+        libc-dev
         rsync
         socat
-        sparse
-        sudo
-        tar
-        tree
-        u-boot-tools
-        vim
-        libvte-common
-        libvte-*-common
-        wget
-        xz-utils
-        zlib1g-dev
-        zstd
     )
 
     # Distribution version specific handling:

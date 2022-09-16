@@ -10,10 +10,12 @@ set distrobox_dependencies \
     find \
     fish \
     less \
+    lsof \
     mount \
     passwd \
     pinentry \
     sudo \
+    time \
     useradd \
     wget
 

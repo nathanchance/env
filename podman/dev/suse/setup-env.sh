@@ -47,10 +47,11 @@ function install_packages() {
         findutils
         less
         libvte-2*
+        lsof
         pinentry
         shadow
         sudo
-        tree
+        time
         util-linux
         wget
 

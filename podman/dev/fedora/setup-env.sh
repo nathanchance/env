@@ -74,9 +74,10 @@ EOF
         bc
         diffutils
         less
+        lsof
         passwd
         pinentry
-        tree
+        time
         vte-profile
         wget
 

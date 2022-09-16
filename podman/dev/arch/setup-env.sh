@@ -97,8 +97,9 @@ function install_packages() {
         curl
         diffutils
         less
+        lsof
         pinentry
-        tree
+        time
         vte-common
         wget
 
