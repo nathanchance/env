@@ -131,9 +131,11 @@ function install_packages() {
         *)
             packages+=(
                 lz4
+                opensbi
                 qemu-system-data
                 qemu-system-s390x
             )
+            [[ $version = "focal" ]] && packages+=(openbios-ppc)
             ;;
     esac
 
