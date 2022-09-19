@@ -247,6 +247,7 @@ function cbl_lkt -d "Tests a Linux kernel with llvm-kernel-testing"
     set searchlist_items \
         "error:" \
         "ERROR:" \
+        "FAILED:" \
         "FATAL:" \
         undefined \
         "Unsupported relocation type:" \
