@@ -6,7 +6,8 @@ function get_glibc_version -d "Get glibc version as a five or six digit number"
     set possible_libc_paths \
         /lib64/libc.so.6 \
         /usr/lib/aarch64-linux-gnu/libc.so.6 \
-        /usr/lib/arm-linux-gnueabihf/libc.so.6
+        /usr/lib/arm-linux-gnueabihf/libc.so.6 \
+        /usr/lib/x86_64-linux-gnu/libc.so.6
 
     for possible_libc_path in $possible_libc_paths
         if test -f $possible_libc_path
