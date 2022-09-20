@@ -23,43 +23,10 @@ function cbl_rb_pi -d "Rebase Raspberry Pi kernel on latest linux-next"
     # Patching
     set -a patches https://lore.kernel.org/all/20220606140103.32779-1-vincenzo.frascino@arm.com/ # [PATCH] arm64: Enable docker support in defconfig
     set -a patches https://lore.kernel.org/all/20220916110118.446132-1-michael@walle.cc/ # [PATCH] gpiolib: fix OOB access in quirk callbacks
+    set -a patches https://lore.kernel.org/all/20220920140044.1709073-1-mark.rutland@arm.com/ # [PATCH] arm64: avoid BUILD_BUG_ON() in alternative-macros
     for patch in $patches
         b4 am -l -o - -P _ -s $patch | git am; or return
     end
-
-    echo "From 057b431a130824d7866f85e91803d7acdb2613da Mon Sep 17 00:00:00 2001
-From: Nathan Chancellor <nathan@kernel.org>
-Date: Mon, 19 Sep 2022 10:08:55 -0700
-Subject: [PATCH] ata: libahci_platform: Remove unused 'dev' variable in
- st_ahci_probe()
-
-Signed-off-by: Nathan Chancellor <nathan@kernel.org>
----
- drivers/ata/ahci_st.c | 1 -
- 1 file changed, 1 deletion(-)
-
-diff --git a/drivers/ata/ahci_st.c b/drivers/ata/ahci_st.c
-index 068621099c00..5a2cac60a29a 100644
---- a/drivers/ata/ahci_st.c
-+++ b/drivers/ata/ahci_st.c
-@@ -144,7 +144,6 @@ static struct scsi_host_template ahci_platform_sht = {
- 
- static int st_ahci_probe(struct platform_device *pdev)
- {
--	struct device *dev = &pdev->dev;
- 	struct st_ahci_drv_data *drv_data;
- 	struct ahci_host_priv *hpriv;
- 	int err;
--- 
-2.37.3
-
-" | git am; or return
-
-    # https://github.com/ClangBuiltLinux/linux/issues/1712
-    crl https://lore.kernel.org/all/YyigTrxhE3IRPzjs@dev-arch.thelio-3990X/raw | git ap; or return
-    git ac -m "arm64: Move alternative_has_feature_{,un}likely() to their own header
-
-Link: https://lore.kernel.org/YyigTrxhE3IRPzjs@dev-arch.thelio-3990X/"; or return
 
     # Regenerate defconfigs
     for arch in arm arm64
