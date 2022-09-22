@@ -13,9 +13,7 @@ function cbl_rb_fd -d "Rebase generic Fedora kernel on latest linux-next"
     git rh origin/master
 
     # Patching
-    set -a patches https://lore.kernel.org/all/20220916110118.446132-1-michael@walle.cc/ # [PATCH] gpiolib: fix OOB access in quirk callbacks
     set -a patches https://lore.kernel.org/all/20220919160928.3905780-1-nathan@kernel.org/ # [PATCH -next] arm64/sysreg: Fix a few missed conversions
-    set -a patches https://lore.kernel.org/all/20220920121559.2815-1-christian.koenig@amd.com/ # [PATCH] drm/amdgpu: properly initialize return value during CS
     set -a patches https://lore.kernel.org/all/20220920140044.1709073-1-mark.rutland@arm.com/ # [PATCH] arm64: avoid BUILD_BUG_ON() in alternative-macros
     for patch in $patches
         b4 shazam -l -P _ -s $patch; or return
