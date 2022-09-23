@@ -23,8 +23,6 @@ function install_packages() {
         curl \
         dnf-plugins-core
     dnf config-manager --add-repo https://cli.github.com/packages/rpm/gh-cli.repo
-    # https://github.com/cli/cli/issues/6175
-    sed -i 's/0xc99b11deb97541f0/0x23F3D4EA75716059/g' /etc/yum.repos.d/gh-cli.repo
     cat <<EOF >/etc/yum.repos.d/tuxmake.repo
 [tuxmake]
 name=tuxmake

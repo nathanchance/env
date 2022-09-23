@@ -4,8 +4,6 @@ set -eux
 
 function install_packages() {
     zypper -n -q ar https://cli.github.com/packages/rpm/gh-cli.repo
-    # https://github.com/cli/cli/issues/6175
-    sed -i 's/0xc99b11deb97541f0/0x23F3D4EA75716059/g' /etc/zypp/repos.d/gh-cli.repo
 
     zypper -n -q --gpg-auto-import-keys dup
 
