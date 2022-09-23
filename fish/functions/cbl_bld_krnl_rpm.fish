@@ -16,6 +16,14 @@ function cbl_bld_krnl_rpm -d "Build a .rpm kernel package"
                 set -a gen_config_args $arg
             case -g --gcc
                 set gcc true
+            case -l --localmodconfig
+                set lsmod /tmp/lsmod.txt
+                if not test -f $lsmod
+                    print_error "$lsmod not found!"
+                    return 1
+                end
+                set -a kmake_args LSMOD=$lsmod
+                set -a kmake_targets localmodconfig
             case -m --menuconfig
                 set -a kmake_targets menuconfig
             case -n --no-config
@@ -59,6 +67,10 @@ function cbl_bld_krnl_rpm -d "Build a .rpm kernel package"
     else
         set -a kmake_args \
             LLVM=1
+    end
+
+    if grep -q RPM_SKIP_VMLINUX scripts/package/mkspec
+        set -a kmake_args RPM_SKIP_VMLINUX=y
     end
 
     kmake \
