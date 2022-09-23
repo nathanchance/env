@@ -1,0 +1,2533 @@
+From 83ea4c760719e504e5fe3af7eeb1f0f9a9a48512 Mon Sep 17 00:00:00 2001
+From: Nathan Chancellor <nathan@kernel.org>
+Date: Fri, 23 Sep 2022 12:54:37 -0700
+Subject: [PATCH] thermal: Revert "Rework the trip points creation"
+
+Link: https://lore.kernel.org/Yy4B+9yH8oT0F8nQ@zn.tnic/
+Signed-off-by: Nathan Chancellor <nathan@kernel.org>
+---
+ drivers/net/ethernet/chelsio/cxgb4/cxgb4.h    |   2 +
+ .../ethernet/chelsio/cxgb4/cxgb4_thermal.c    |  39 ++++-
+ drivers/platform/x86/acerhdf.c                |  73 +++++---
+ drivers/thermal/armada_thermal.c              |  37 ++--
+ drivers/thermal/broadcom/bcm2835_thermal.c    |   8 +-
+ drivers/thermal/da9062-thermal.c              |  52 +++++-
+ drivers/thermal/gov_bang_bang.c               |  23 ++-
+ drivers/thermal/gov_fair_share.c              |  18 +-
+ drivers/thermal/gov_power_allocator.c         |  51 +++---
+ drivers/thermal/gov_step_wise.c               |  22 +--
+ drivers/thermal/hisi_thermal.c                |  11 +-
+ drivers/thermal/imx_thermal.c                 |  72 +++++---
+ .../int340x_thermal/int340x_thermal_zone.c    |  31 ++--
+ .../int340x_thermal/int340x_thermal_zone.h    |   4 +-
+ .../processor_thermal_device.c                |  10 +-
+ drivers/thermal/intel/x86_pkg_temp_thermal.c  | 120 ++++++-------
+ drivers/thermal/qcom/qcom-spmi-temp-alarm.c   |  39 +++--
+ drivers/thermal/rcar_gen3_thermal.c           |   2 +-
+ drivers/thermal/rcar_thermal.c                |  53 +++++-
+ drivers/thermal/samsung/exynos_tmu.c          |  57 ++++---
+ drivers/thermal/st/st_thermal.c               |  47 +++++-
+ drivers/thermal/tegra/soctherm.c              |  33 ++--
+ drivers/thermal/tegra/tegra30-tsensor.c       |  17 +-
+ drivers/thermal/thermal_core.c                | 158 +++---------------
+ drivers/thermal/thermal_core.h                |  22 +++
+ drivers/thermal/thermal_helpers.c             |  28 ++--
+ drivers/thermal/thermal_netlink.c             |  21 ++-
+ drivers/thermal/thermal_of.c                  | 116 +++++++++++++
+ drivers/thermal/thermal_sysfs.c               | 133 +++++++++------
+ drivers/thermal/ti-soc-thermal/ti-thermal.h   |  15 ++
+ drivers/thermal/uniphier_thermal.c            |  27 +--
+ include/linux/thermal.h                       |  10 --
+ 32 files changed, 816 insertions(+), 535 deletions(-)
+
+diff --git a/drivers/net/ethernet/chelsio/cxgb4/cxgb4.h b/drivers/net/ethernet/chelsio/cxgb4/cxgb4.h
+index fca9533bc011..5657ac8cfca0 100644
+--- a/drivers/net/ethernet/chelsio/cxgb4/cxgb4.h
++++ b/drivers/net/ethernet/chelsio/cxgb4/cxgb4.h
+@@ -1079,6 +1079,8 @@ struct mbox_list {
+ #if IS_ENABLED(CONFIG_THERMAL)
+ struct ch_thermal {
+ 	struct thermal_zone_device *tzdev;
++	int trip_temp;
++	int trip_type;
+ };
+ #endif
+ 
+diff --git a/drivers/net/ethernet/chelsio/cxgb4/cxgb4_thermal.c b/drivers/net/ethernet/chelsio/cxgb4/cxgb4_thermal.c
+index 95e1b415ba13..9a6d65243334 100644
+--- a/drivers/net/ethernet/chelsio/cxgb4/cxgb4_thermal.c
++++ b/drivers/net/ethernet/chelsio/cxgb4/cxgb4_thermal.c
+@@ -29,12 +29,36 @@ static int cxgb4_thermal_get_temp(struct thermal_zone_device *tzdev,
+ 	return 0;
+ }
+ 
++static int cxgb4_thermal_get_trip_type(struct thermal_zone_device *tzdev,
++				       int trip, enum thermal_trip_type *type)
++{
++	struct adapter *adap = tzdev->devdata;
++
++	if (!adap->ch_thermal.trip_temp)
++		return -EINVAL;
++
++	*type = adap->ch_thermal.trip_type;
++	return 0;
++}
++
++static int cxgb4_thermal_get_trip_temp(struct thermal_zone_device *tzdev,
++				       int trip, int *temp)
++{
++	struct adapter *adap = tzdev->devdata;
++
++	if (!adap->ch_thermal.trip_temp)
++		return -EINVAL;
++
++	*temp = adap->ch_thermal.trip_temp;
++	return 0;
++}
++
+ static struct thermal_zone_device_ops cxgb4_thermal_ops = {
+ 	.get_temp = cxgb4_thermal_get_temp,
++	.get_trip_type = cxgb4_thermal_get_trip_type,
++	.get_trip_temp = cxgb4_thermal_get_trip_temp,
+ };
+ 
+-static struct thermal_trip trip = { .type = THERMAL_TRIP_CRITICAL } ;
+-
+ int cxgb4_thermal_init(struct adapter *adap)
+ {
+ 	struct ch_thermal *ch_thermal = &adap->ch_thermal;
+@@ -55,14 +79,15 @@ int cxgb4_thermal_init(struct adapter *adap)
+ 	if (ret < 0) {
+ 		num_trip = 0; /* could not get trip temperature */
+ 	} else {
+-		trip.temperature = val * 1000;
++		ch_thermal->trip_temp = val * 1000;
++		ch_thermal->trip_type = THERMAL_TRIP_CRITICAL;
+ 	}
+ 
+ 	snprintf(ch_tz_name, sizeof(ch_tz_name), "cxgb4_%s", adap->name);
+-	ch_thermal->tzdev = thermal_zone_device_register_with_trips(ch_tz_name, &trip, num_trip,
+-								    0, adap,
+-								    &cxgb4_thermal_ops,
+-								    NULL, 0, 0);
++	ch_thermal->tzdev = thermal_zone_device_register(ch_tz_name, num_trip,
++							 0, adap,
++							 &cxgb4_thermal_ops,
++							 NULL, 0, 0);
+ 	if (IS_ERR(ch_thermal->tzdev)) {
+ 		ret = PTR_ERR(ch_thermal->tzdev);
+ 		dev_err(adap->pdev_dev, "Failed to register thermal zone\n");
+diff --git a/drivers/platform/x86/acerhdf.c b/drivers/platform/x86/acerhdf.c
+index a7407aa032ba..3463629f8764 100644
+--- a/drivers/platform/x86/acerhdf.c
++++ b/drivers/platform/x86/acerhdf.c
+@@ -46,8 +46,6 @@
+  * measured by the on-die thermal monitor are within 0 <= Tj <= 90. So,
+  * assume 89°C is critical temperature.
+  */
+-#define ACERHDF_DEFAULT_TEMP_FANON 60000
+-#define ACERHDF_DEFAULT_TEMP_FANOFF 53000
+ #define ACERHDF_TEMP_CRIT 89000
+ #define ACERHDF_FAN_OFF 0
+ #define ACERHDF_FAN_AUTO 1
+@@ -72,8 +70,8 @@ static int kernelmode;
+ #endif
+ 
+ static unsigned int interval = 10;
+-static unsigned int fanon = ACERHDF_DEFAULT_TEMP_FANON;
+-static unsigned int fanoff = ACERHDF_DEFAULT_TEMP_FANOFF;
++static unsigned int fanon = 60000;
++static unsigned int fanoff = 53000;
+ static unsigned int verbose;
+ static unsigned int list_supported;
+ static unsigned int fanstate = ACERHDF_FAN_AUTO;
+@@ -139,15 +137,6 @@ struct ctrl_settings {
+ 	int mcmd_enable;
+ };
+ 
+-static struct thermal_trip trips[] = {
+-	[0] = { .temperature = ACERHDF_DEFAULT_TEMP_FANON,
+-		.hysteresis = ACERHDF_DEFAULT_TEMP_FANON - ACERHDF_DEFAULT_TEMP_FANOFF,
+-		.type = THERMAL_TRIP_ACTIVE },
+-
+-	[1] = { .temperature = ACERHDF_TEMP_CRIT,
+-		.type = THERMAL_TRIP_CRITICAL }
+-};
+-
+ static struct ctrl_settings ctrl_cfg __read_mostly;
+ 
+ /* Register addresses and values for different BIOS versions */
+@@ -337,15 +326,6 @@ static void acerhdf_check_param(struct thermal_zone_device *thermal)
+ 		fanon = ACERHDF_MAX_FANON;
+ 	}
+ 
+-	if (fanon < fanoff) {
+-		pr_err("fanoff temperature (%d) is above fanon temperature (%d), clamping to %d\n",
+-		       fanoff, fanon, fanon);
+-		fanoff = fanon;
+-	};
+-
+-	trips[0].temperature = fanon;
+-	trips[0].hysteresis  = fanon - fanoff;
+-
+ 	if (kernelmode && prev_interval != interval) {
+ 		if (interval > ACERHDF_MAX_INTERVAL) {
+ 			pr_err("interval too high, set to %d\n",
+@@ -444,6 +424,43 @@ static int acerhdf_change_mode(struct thermal_zone_device *thermal,
+ 	return 0;
+ }
+ 
++static int acerhdf_get_trip_type(struct thermal_zone_device *thermal, int trip,
++				 enum thermal_trip_type *type)
++{
++	if (trip == 0)
++		*type = THERMAL_TRIP_ACTIVE;
++	else if (trip == 1)
++		*type = THERMAL_TRIP_CRITICAL;
++	else
++		return -EINVAL;
++
++	return 0;
++}
++
++static int acerhdf_get_trip_hyst(struct thermal_zone_device *thermal, int trip,
++				 int *temp)
++{
++	if (trip != 0)
++		return -EINVAL;
++
++	*temp = fanon - fanoff;
++
++	return 0;
++}
++
++static int acerhdf_get_trip_temp(struct thermal_zone_device *thermal, int trip,
++				 int *temp)
++{
++	if (trip == 0)
++		*temp = fanon;
++	else if (trip == 1)
++		*temp = ACERHDF_TEMP_CRIT;
++	else
++		return -EINVAL;
++
++	return 0;
++}
++
+ static int acerhdf_get_crit_temp(struct thermal_zone_device *thermal,
+ 				 int *temperature)
+ {
+@@ -457,9 +474,13 @@ static struct thermal_zone_device_ops acerhdf_dev_ops = {
+ 	.unbind = acerhdf_unbind,
+ 	.get_temp = acerhdf_get_ec_temp,
+ 	.change_mode = acerhdf_change_mode,
++	.get_trip_type = acerhdf_get_trip_type,
++	.get_trip_hyst = acerhdf_get_trip_hyst,
++	.get_trip_temp = acerhdf_get_trip_temp,
+ 	.get_crit_temp = acerhdf_get_crit_temp,
+ };
+ 
++
+ /*
+  * cooling device callback functions
+  * get maximal fan cooling state
+@@ -689,10 +710,10 @@ static int __init acerhdf_register_thermal(void)
+ 	if (IS_ERR(cl_dev))
+ 		return -EINVAL;
+ 
+-	thz_dev = thermal_zone_device_register_with_trips("acerhdf", trips, ARRAY_SIZE(trips),
+-							  0, NULL, &acerhdf_dev_ops,
+-							  &acerhdf_zone_params, 0,
+-							  (kernelmode) ? interval*1000 : 0);
++	thz_dev = thermal_zone_device_register("acerhdf", 2, 0, NULL,
++					      &acerhdf_dev_ops,
++					      &acerhdf_zone_params, 0,
++					      (kernelmode) ? interval*1000 : 0);
+ 	if (IS_ERR(thz_dev))
+ 		return -EINVAL;
+ 
+diff --git a/drivers/thermal/armada_thermal.c b/drivers/thermal/armada_thermal.c
+index b28695a55eea..52d63b3997fe 100644
+--- a/drivers/thermal/armada_thermal.c
++++ b/drivers/thermal/armada_thermal.c
+@@ -785,34 +785,33 @@ static int armada_configure_overheat_int(struct armada_thermal_priv *priv,
+ 					 int sensor_id)
+ {
+ 	/* Retrieve the critical trip point to enable the overheat interrupt */
+-	struct thermal_trip trip;
++	const struct thermal_trip *trips = of_thermal_get_trip_points(tz);
+ 	int ret;
+ 	int i;
+ 
+-	for (i = 0; i < thermal_zone_get_num_trips(tz); i++) {
+-
+-		ret = thermal_zone_get_trip(tz, i, &trip);
+-		if (ret)
+-			return ret;
++	if (!trips)
++		return -EINVAL;
+ 
+-		if (trip.type != THERMAL_TRIP_CRITICAL)
+-			continue;
++	for (i = 0; i < of_thermal_get_ntrips(tz); i++)
++		if (trips[i].type == THERMAL_TRIP_CRITICAL)
++			break;
+ 
+-		ret = armada_select_channel(priv, sensor_id);
+-		if (ret)
+-			return ret;
++	if (i == of_thermal_get_ntrips(tz))
++		return -EINVAL;
+ 
+-		armada_set_overheat_thresholds(priv, trip.temperature,
+-					       trip.hysteresis);
+-		priv->overheat_sensor = tz;
+-		priv->interrupt_source = sensor_id;
++	ret = armada_select_channel(priv, sensor_id);
++	if (ret)
++		return ret;
+ 
+-		armada_enable_overheat_interrupt(priv);
++	armada_set_overheat_thresholds(priv,
++				       trips[i].temperature,
++				       trips[i].hysteresis);
++	priv->overheat_sensor = tz;
++	priv->interrupt_source = sensor_id;
+ 
+-		return 0;
+-	}
++	armada_enable_overheat_interrupt(priv);
+ 
+-	return -EINVAL;
++	return 0;
+ }
+ 
+ static int armada_thermal_probe(struct platform_device *pdev)
+diff --git a/drivers/thermal/broadcom/bcm2835_thermal.c b/drivers/thermal/broadcom/bcm2835_thermal.c
+index 5485e59d03a9..2c67841a1115 100644
+--- a/drivers/thermal/broadcom/bcm2835_thermal.c
++++ b/drivers/thermal/broadcom/bcm2835_thermal.c
+@@ -18,7 +18,6 @@
+ #include <linux/platform_device.h>
+ #include <linux/thermal.h>
+ 
+-#include "../thermal_core.h"
+ #include "../thermal_hwmon.h"
+ 
+ #define BCM2835_TS_TSENSCTL			0x00
+@@ -225,8 +224,7 @@ static int bcm2835_thermal_probe(struct platform_device *pdev)
+ 	 */
+ 	val = readl(data->regs + BCM2835_TS_TSENSCTL);
+ 	if (!(val & BCM2835_TS_TSENSCTL_RSTB)) {
+-		struct thermal_trip trip;
+-		int offset, slope;
++		int trip_temp, offset, slope;
+ 
+ 		slope = thermal_zone_get_slope(tz);
+ 		offset = thermal_zone_get_offset(tz);
+@@ -234,7 +232,7 @@ static int bcm2835_thermal_probe(struct platform_device *pdev)
+ 		 * For now we deal only with critical, otherwise
+ 		 * would need to iterate
+ 		 */
+-		err = thermal_zone_get_trip(tz, 0, &trip);
++		err = tz->ops->get_trip_temp(tz, 0, &trip_temp);
+ 		if (err < 0) {
+ 			dev_err(&pdev->dev,
+ 				"Not able to read trip_temp: %d\n",
+@@ -251,7 +249,7 @@ static int bcm2835_thermal_probe(struct platform_device *pdev)
+ 		val |= (0xFE << BCM2835_TS_TSENSCTL_RSTDELAY_SHIFT);
+ 
+ 		/*  trip_adc value from info */
+-		val |= bcm2835_thermal_temp2adc(trip.temperature,
++		val |= bcm2835_thermal_temp2adc(trip_temp,
+ 						offset,
+ 						slope)
+ 			<< BCM2835_TS_TSENSCTL_THOLD_SHIFT;
+diff --git a/drivers/thermal/da9062-thermal.c b/drivers/thermal/da9062-thermal.c
+index a805a6666c44..7dcfde7a9f2c 100644
+--- a/drivers/thermal/da9062-thermal.c
++++ b/drivers/thermal/da9062-thermal.c
+@@ -120,6 +120,44 @@ static irqreturn_t da9062_thermal_irq_handler(int irq, void *data)
+ 	return IRQ_HANDLED;
+ }
+ 
++static int da9062_thermal_get_trip_type(struct thermal_zone_device *z,
++					int trip,
++					enum thermal_trip_type *type)
++{
++	struct da9062_thermal *thermal = z->devdata;
++
++	switch (trip) {
++	case 0:
++		*type = THERMAL_TRIP_HOT;
++		break;
++	default:
++		dev_err(thermal->dev,
++			"Driver does not support more than 1 trip-wire\n");
++		return -EINVAL;
++	}
++
++	return 0;
++}
++
++static int da9062_thermal_get_trip_temp(struct thermal_zone_device *z,
++					int trip,
++					int *temp)
++{
++	struct da9062_thermal *thermal = z->devdata;
++
++	switch (trip) {
++	case 0:
++		*temp = DA9062_MILLI_CELSIUS(125);
++		break;
++	default:
++		dev_err(thermal->dev,
++			"Driver does not support more than 1 trip-wire\n");
++		return -EINVAL;
++	}
++
++	return 0;
++}
++
+ static int da9062_thermal_get_temp(struct thermal_zone_device *z,
+ 				   int *temp)
+ {
+@@ -134,10 +172,8 @@ static int da9062_thermal_get_temp(struct thermal_zone_device *z,
+ 
+ static struct thermal_zone_device_ops da9062_thermal_ops = {
+ 	.get_temp	= da9062_thermal_get_temp,
+-};
+-
+-static struct thermal_trip trips[] = {
+-	{ .temperature = DA9062_MILLI_CELSIUS(125), .type = THERMAL_TRIP_HOT },
++	.get_trip_type	= da9062_thermal_get_trip_type,
++	.get_trip_temp	= da9062_thermal_get_trip_temp,
+ };
+ 
+ static const struct da9062_thermal_config da9062_config = {
+@@ -192,10 +228,10 @@ static int da9062_thermal_probe(struct platform_device *pdev)
+ 	INIT_DELAYED_WORK(&thermal->work, da9062_thermal_poll_on);
+ 	mutex_init(&thermal->lock);
+ 
+-	thermal->zone = thermal_zone_device_register_with_trips(thermal->config->name,
+-								trips, ARRAY_SIZE(trips), 0, thermal,
+-								&da9062_thermal_ops, NULL, pp_tmp,
+-								0);
++	thermal->zone = thermal_zone_device_register(thermal->config->name,
++					1, 0, thermal,
++					&da9062_thermal_ops, NULL, pp_tmp,
++					0);
+ 	if (IS_ERR(thermal->zone)) {
+ 		dev_err(&pdev->dev, "Cannot register thermal zone device\n");
+ 		ret = PTR_ERR(thermal->zone);
+diff --git a/drivers/thermal/gov_bang_bang.c b/drivers/thermal/gov_bang_bang.c
+index 09234f3d2fb9..a08bbe33be96 100644
+--- a/drivers/thermal/gov_bang_bang.c
++++ b/drivers/thermal/gov_bang_bang.c
+@@ -13,19 +13,26 @@
+ 
+ #include "thermal_core.h"
+ 
+-static void thermal_zone_trip_update(struct thermal_zone_device *tz, int trip_id)
++static void thermal_zone_trip_update(struct thermal_zone_device *tz, int trip)
+ {
+-	struct thermal_trip trip;
++	int trip_temp, trip_hyst;
+ 	struct thermal_instance *instance;
+ 
+-	thermal_zone_get_trip(tz, trip_id, &trip);
++	tz->ops->get_trip_temp(tz, trip, &trip_temp);
++
++	if (!tz->ops->get_trip_hyst) {
++		pr_warn_once("Undefined get_trip_hyst for thermal zone %s - "
++				"running with default hysteresis zero\n", tz->type);
++		trip_hyst = 0;
++	} else
++		tz->ops->get_trip_hyst(tz, trip, &trip_hyst);
+ 
+ 	dev_dbg(&tz->device, "Trip%d[temp=%d]:temp=%d:hyst=%d\n",
+-				trip_id, trip.temperature, tz->temperature,
+-				trip.hysteresis);
++				trip, trip_temp, tz->temperature,
++				trip_hyst);
+ 
+ 	list_for_each_entry(instance, &tz->thermal_instances, tz_node) {
+-		if (instance->trip != trip_id)
++		if (instance->trip != trip)
+ 			continue;
+ 
+ 		/* in case fan is in initial state, switch the fan off */
+@@ -43,10 +50,10 @@ static void thermal_zone_trip_update(struct thermal_zone_device *tz, int trip_id
+ 		 * enable fan when temperature exceeds trip_temp and disable
+ 		 * the fan in case it falls below trip_temp minus hysteresis
+ 		 */
+-		if (instance->target == 0 && tz->temperature >= trip.temperature)
++		if (instance->target == 0 && tz->temperature >= trip_temp)
+ 			instance->target = 1;
+ 		else if (instance->target == 1 &&
+-			 tz->temperature <= trip.temperature - trip.hysteresis)
++				tz->temperature <= trip_temp - trip_hyst)
+ 			instance->target = 0;
+ 
+ 		dev_dbg(&instance->cdev->device, "target=%d\n",
+diff --git a/drivers/thermal/gov_fair_share.c b/drivers/thermal/gov_fair_share.c
+index c515e7a52294..a4ee4661e9cc 100644
+--- a/drivers/thermal/gov_fair_share.c
++++ b/drivers/thermal/gov_fair_share.c
+@@ -21,12 +21,16 @@
+  */
+ static int get_trip_level(struct thermal_zone_device *tz)
+ {
+-	struct thermal_trip trip;
+-	int count;
++	int count = 0;
++	int trip_temp;
++	enum thermal_trip_type trip_type;
++
++	if (tz->num_trips == 0 || !tz->ops->get_trip_temp)
++		return 0;
+ 
+ 	for (count = 0; count < tz->num_trips; count++) {
+-		thermal_zone_get_trip(tz, count, &trip);
+-		if (tz->temperature < trip.temperature)
++		tz->ops->get_trip_temp(tz, count, &trip_temp);
++		if (tz->temperature < trip_temp)
+ 			break;
+ 	}
+ 
+@@ -34,8 +38,10 @@ static int get_trip_level(struct thermal_zone_device *tz)
+ 	 * count > 0 only if temperature is greater than first trip
+ 	 * point, in which case, trip_point = count - 1
+ 	 */
+-	if (count > 0)
+-		trace_thermal_zone_trip(tz, count - 1, trip.type);
++	if (count > 0) {
++		tz->ops->get_trip_type(tz, count - 1, &trip_type);
++		trace_thermal_zone_trip(tz, count - 1, trip_type);
++	}
+ 
+ 	return count;
+ }
+diff --git a/drivers/thermal/gov_power_allocator.c b/drivers/thermal/gov_power_allocator.c
+index 2ef86ced4c7c..2d1aeaba38a8 100644
+--- a/drivers/thermal/gov_power_allocator.c
++++ b/drivers/thermal/gov_power_allocator.c
+@@ -125,15 +125,16 @@ static void estimate_pid_constants(struct thermal_zone_device *tz,
+ 				   u32 sustainable_power, int trip_switch_on,
+ 				   int control_temp)
+ {
+-	struct thermal_trip trip;
+-	u32 temperature_threshold = control_temp;
+ 	int ret;
++	int switch_on_temp;
++	u32 temperature_threshold;
+ 	s32 k_i;
+ 
+-	ret = thermal_zone_get_trip(tz, trip_switch_on, &trip);
+-	if (!ret)
+-		temperature_threshold -= trip.temperature;
++	ret = tz->ops->get_trip_temp(tz, trip_switch_on, &switch_on_temp);
++	if (ret)
++		switch_on_temp = 0;
+ 
++	temperature_threshold = control_temp - switch_on_temp;
+ 	/*
+ 	 * estimate_pid_constants() tries to find appropriate default
+ 	 * values for thermal zones that don't provide them. If a
+@@ -519,10 +520,10 @@ static void get_governor_trips(struct thermal_zone_device *tz,
+ 	last_passive = INVALID_TRIP;
+ 
+ 	for (i = 0; i < tz->num_trips; i++) {
+-		struct thermal_trip trip;
++		enum thermal_trip_type type;
+ 		int ret;
+ 
+-		ret = thermal_zone_get_trip(tz, i, &trip);
++		ret = tz->ops->get_trip_type(tz, i, &type);
+ 		if (ret) {
+ 			dev_warn(&tz->device,
+ 				 "Failed to get trip point %d type: %d\n", i,
+@@ -530,14 +531,14 @@ static void get_governor_trips(struct thermal_zone_device *tz,
+ 			continue;
+ 		}
+ 
+-		if (trip.type == THERMAL_TRIP_PASSIVE) {
++		if (type == THERMAL_TRIP_PASSIVE) {
+ 			if (!found_first_passive) {
+ 				params->trip_switch_on = i;
+ 				found_first_passive = true;
+ 			} else  {
+ 				last_passive = i;
+ 			}
+-		} else if (trip.type == THERMAL_TRIP_ACTIVE) {
++		} else if (type == THERMAL_TRIP_ACTIVE) {
+ 			last_active = i;
+ 		} else {
+ 			break;
+@@ -632,7 +633,7 @@ static int power_allocator_bind(struct thermal_zone_device *tz)
+ {
+ 	int ret;
+ 	struct power_allocator_params *params;
+-	struct thermal_trip trip;
++	int control_temp;
+ 
+ 	ret = check_power_actors(tz);
+ 	if (ret)
+@@ -658,12 +659,13 @@ static int power_allocator_bind(struct thermal_zone_device *tz)
+ 	get_governor_trips(tz, params);
+ 
+ 	if (tz->num_trips > 0) {
+-		ret = thermal_zone_get_trip(tz, params->trip_max_desired_temperature,
+-					    &trip);
++		ret = tz->ops->get_trip_temp(tz,
++					params->trip_max_desired_temperature,
++					&control_temp);
+ 		if (!ret)
+ 			estimate_pid_constants(tz, tz->tzp->sustainable_power,
+ 					       params->trip_switch_on,
+-					       trip.temperature);
++					       control_temp);
+ 	}
+ 
+ 	reset_pid_controller(params);
+@@ -693,11 +695,11 @@ static void power_allocator_unbind(struct thermal_zone_device *tz)
+ 	tz->governor_data = NULL;
+ }
+ 
+-static int power_allocator_throttle(struct thermal_zone_device *tz, int trip_id)
++static int power_allocator_throttle(struct thermal_zone_device *tz, int trip)
+ {
+-	struct power_allocator_params *params = tz->governor_data;
+-	struct thermal_trip trip;
+ 	int ret;
++	int switch_on_temp, control_temp;
++	struct power_allocator_params *params = tz->governor_data;
+ 	bool update;
+ 
+ 	lockdep_assert_held(&tz->lock);
+@@ -706,12 +708,13 @@ static int power_allocator_throttle(struct thermal_zone_device *tz, int trip_id)
+ 	 * We get called for every trip point but we only need to do
+ 	 * our calculations once
+ 	 */
+-	if (trip_id != params->trip_max_desired_temperature)
++	if (trip != params->trip_max_desired_temperature)
+ 		return 0;
+ 
+-	ret = thermal_zone_get_trip(tz, params->trip_switch_on, &trip);
+-	if (!ret && (tz->temperature < trip.temperature)) {
+-		update = (tz->last_temperature >= trip.temperature);
++	ret = tz->ops->get_trip_temp(tz, params->trip_switch_on,
++				     &switch_on_temp);
++	if (!ret && (tz->temperature < switch_on_temp)) {
++		update = (tz->last_temperature >= switch_on_temp);
+ 		tz->passive = 0;
+ 		reset_pid_controller(params);
+ 		allow_maximum_power(tz, update);
+@@ -720,14 +723,16 @@ static int power_allocator_throttle(struct thermal_zone_device *tz, int trip_id)
+ 
+ 	tz->passive = 1;
+ 
+-	ret = thermal_zone_get_trip(tz, params->trip_max_desired_temperature, &trip);
++	ret = tz->ops->get_trip_temp(tz, params->trip_max_desired_temperature,
++				&control_temp);
+ 	if (ret) {
+-		dev_warn(&tz->device, "Failed to get the maximum desired temperature: %d\n",
++		dev_warn(&tz->device,
++			 "Failed to get the maximum desired temperature: %d\n",
+ 			 ret);
+ 		return ret;
+ 	}
+ 
+-	return allocate_power(tz, trip.temperature);
++	return allocate_power(tz, control_temp);
+ }
+ 
+ static struct thermal_governor thermal_gov_power_allocator = {
+diff --git a/drivers/thermal/gov_step_wise.c b/drivers/thermal/gov_step_wise.c
+index 3cb16d7e65d1..cdd3354bc27f 100644
+--- a/drivers/thermal/gov_step_wise.c
++++ b/drivers/thermal/gov_step_wise.c
+@@ -95,28 +95,30 @@ static void update_passive_instance(struct thermal_zone_device *tz,
+ 		tz->passive += value;
+ }
+ 
+-static void thermal_zone_trip_update(struct thermal_zone_device *tz, int trip_id)
++static void thermal_zone_trip_update(struct thermal_zone_device *tz, int trip)
+ {
++	int trip_temp;
++	enum thermal_trip_type trip_type;
+ 	enum thermal_trend trend;
+ 	struct thermal_instance *instance;
+-	struct thermal_trip trip;
+ 	bool throttle = false;
+ 	int old_target;
+ 
+-	thermal_zone_get_trip(tz, trip_id, &trip);
++	tz->ops->get_trip_temp(tz, trip, &trip_temp);
++	tz->ops->get_trip_type(tz, trip, &trip_type);
+ 
+-	trend = get_tz_trend(tz, trip_id);
++	trend = get_tz_trend(tz, trip);
+ 
+-	if (tz->temperature >= trip.temperature) {
++	if (tz->temperature >= trip_temp) {
+ 		throttle = true;
+-		trace_thermal_zone_trip(tz, trip_id, trip.type);
++		trace_thermal_zone_trip(tz, trip, trip_type);
+ 	}
+ 
+ 	dev_dbg(&tz->device, "Trip%d[type=%d,temp=%d]:trend=%d,throttle=%d\n",
+-				trip_id, trip.type, trip.temperature, trend, throttle);
++				trip, trip_type, trip_temp, trend, throttle);
+ 
+ 	list_for_each_entry(instance, &tz->thermal_instances, tz_node) {
+-		if (instance->trip != trip_id)
++		if (instance->trip != trip)
+ 			continue;
+ 
+ 		old_target = instance->target;
+@@ -130,11 +132,11 @@ static void thermal_zone_trip_update(struct thermal_zone_device *tz, int trip_id
+ 		/* Activate a passive thermal instance */
+ 		if (old_target == THERMAL_NO_TARGET &&
+ 			instance->target != THERMAL_NO_TARGET)
+-			update_passive_instance(tz, trip.type, 1);
++			update_passive_instance(tz, trip_type, 1);
+ 		/* Deactivate a passive thermal instance */
+ 		else if (old_target != THERMAL_NO_TARGET &&
+ 			instance->target == THERMAL_NO_TARGET)
+-			update_passive_instance(tz, trip.type, -1);
++			update_passive_instance(tz, trip_type, -1);
+ 
+ 		instance->initialized = true;
+ 		mutex_lock(&instance->cdev->lock);
+diff --git a/drivers/thermal/hisi_thermal.c b/drivers/thermal/hisi_thermal.c
+index 45226cab466e..d6974db7aaf7 100644
+--- a/drivers/thermal/hisi_thermal.c
++++ b/drivers/thermal/hisi_thermal.c
+@@ -482,7 +482,7 @@ static int hisi_thermal_register_sensor(struct platform_device *pdev,
+ 					struct hisi_thermal_sensor *sensor)
+ {
+ 	int ret, i;
+-	struct thermal_trip trip;
++	const struct thermal_trip *trip;
+ 
+ 	sensor->tzd = devm_thermal_of_zone_register(&pdev->dev,
+ 						    sensor->id, sensor,
+@@ -495,12 +495,11 @@ static int hisi_thermal_register_sensor(struct platform_device *pdev,
+ 		return ret;
+ 	}
+ 
+-	for (i = 0; i < thermal_zone_get_num_trips(sensor->tzd); i++) {
++	trip = of_thermal_get_trip_points(sensor->tzd);
+ 
+-		thermal_zone_get_trip(sensor->tzd, i, &trip);
+-
+-		if (trip.type == THERMAL_TRIP_PASSIVE) {
+-			sensor->thres_temp = trip.temperature;
++	for (i = 0; i < of_thermal_get_ntrips(sensor->tzd); i++) {
++		if (trip[i].type == THERMAL_TRIP_PASSIVE) {
++			sensor->thres_temp = trip[i].temperature;
+ 			break;
+ 		}
+ 	}
+diff --git a/drivers/thermal/imx_thermal.c b/drivers/thermal/imx_thermal.c
+index fb0d5cab70af..16663373b682 100644
+--- a/drivers/thermal/imx_thermal.c
++++ b/drivers/thermal/imx_thermal.c
+@@ -76,6 +76,7 @@
+ enum imx_thermal_trip {
+ 	IMX_TRIP_PASSIVE,
+ 	IMX_TRIP_CRITICAL,
++	IMX_TRIP_NUM,
+ };
+ 
+ #define IMX_POLLING_DELAY		2000 /* millisecond */
+@@ -114,11 +115,6 @@ struct thermal_soc_data {
+ 	u32 low_alarm_shift;
+ };
+ 
+-static struct thermal_trip trips[] = {
+-	[IMX_TRIP_PASSIVE]  = { .type = THERMAL_TRIP_PASSIVE  },
+-	[IMX_TRIP_CRITICAL] = { .type = THERMAL_TRIP_CRITICAL },
+-};
+-
+ static struct thermal_soc_data thermal_imx6q_data = {
+ 	.version = TEMPMON_IMX6Q,
+ 
+@@ -205,6 +201,8 @@ struct imx_thermal_data {
+ 	struct thermal_cooling_device *cdev;
+ 	struct regmap *tempmon;
+ 	u32 c1, c2; /* See formula in imx_init_calib() */
++	int temp_passive;
++	int temp_critical;
+ 	int temp_max;
+ 	int alarm_temp;
+ 	int last_temp;
+@@ -281,12 +279,12 @@ static int imx_get_temp(struct thermal_zone_device *tz, int *temp)
+ 
+ 	/* Update alarm value to next higher trip point for TEMPMON_IMX6Q */
+ 	if (data->socdata->version == TEMPMON_IMX6Q) {
+-		if (data->alarm_temp == trips[IMX_TRIP_PASSIVE].temperature &&
+-			*temp >= trips[IMX_TRIP_PASSIVE].temperature)
+-			imx_set_alarm_temp(data, trips[IMX_TRIP_CRITICAL].temperature);
+-		if (data->alarm_temp == trips[IMX_TRIP_CRITICAL].temperature &&
+-			*temp < trips[IMX_TRIP_PASSIVE].temperature) {
+-			imx_set_alarm_temp(data, trips[IMX_TRIP_PASSIVE].temperature);
++		if (data->alarm_temp == data->temp_passive &&
++			*temp >= data->temp_passive)
++			imx_set_alarm_temp(data, data->temp_critical);
++		if (data->alarm_temp == data->temp_critical &&
++			*temp < data->temp_passive) {
++			imx_set_alarm_temp(data, data->temp_passive);
+ 			dev_dbg(&tz->device, "thermal alarm off: T < %d\n",
+ 				data->alarm_temp / 1000);
+ 		}
+@@ -332,10 +330,29 @@ static int imx_change_mode(struct thermal_zone_device *tz,
+ 	return 0;
+ }
+ 
++static int imx_get_trip_type(struct thermal_zone_device *tz, int trip,
++			     enum thermal_trip_type *type)
++{
++	*type = (trip == IMX_TRIP_PASSIVE) ? THERMAL_TRIP_PASSIVE :
++					     THERMAL_TRIP_CRITICAL;
++	return 0;
++}
++
+ static int imx_get_crit_temp(struct thermal_zone_device *tz, int *temp)
+ {
+-	*temp = trips[IMX_TRIP_CRITICAL].temperature;
++	struct imx_thermal_data *data = tz->devdata;
++
++	*temp = data->temp_critical;
++	return 0;
++}
++
++static int imx_get_trip_temp(struct thermal_zone_device *tz, int trip,
++			     int *temp)
++{
++	struct imx_thermal_data *data = tz->devdata;
+ 
++	*temp = (trip == IMX_TRIP_PASSIVE) ? data->temp_passive :
++					     data->temp_critical;
+ 	return 0;
+ }
+ 
+@@ -354,10 +371,10 @@ static int imx_set_trip_temp(struct thermal_zone_device *tz, int trip,
+ 		return -EPERM;
+ 
+ 	/* do not allow passive to be set higher than critical */
+-	if (temp < 0 || temp > trips[IMX_TRIP_CRITICAL].temperature)
++	if (temp < 0 || temp > data->temp_critical)
+ 		return -EINVAL;
+ 
+-	trips[IMX_TRIP_PASSIVE].temperature = temp;
++	data->temp_passive = temp;
+ 
+ 	imx_set_alarm_temp(data, temp);
+ 
+@@ -406,6 +423,8 @@ static struct thermal_zone_device_ops imx_tz_ops = {
+ 	.unbind = imx_unbind,
+ 	.get_temp = imx_get_temp,
+ 	.change_mode = imx_change_mode,
++	.get_trip_type = imx_get_trip_type,
++	.get_trip_temp = imx_get_trip_temp,
+ 	.get_crit_temp = imx_get_crit_temp,
+ 	.set_trip_temp = imx_set_trip_temp,
+ };
+@@ -488,8 +507,8 @@ static void imx_init_temp_grade(struct platform_device *pdev, u32 ocotp_mem0)
+ 	 * Set the critical trip point at 5 °C under max
+ 	 * Set the passive trip point at 10 °C under max (changeable via sysfs)
+ 	 */
+-	trips[IMX_TRIP_PASSIVE].temperature = data->temp_max - (1000 * 10);
+-	trips[IMX_TRIP_CRITICAL].temperature = data->temp_max - (1000 * 5);
++	data->temp_critical = data->temp_max - (1000 * 5);
++	data->temp_passive = data->temp_max - (1000 * 10);
+ }
+ 
+ static int imx_init_from_tempmon_data(struct platform_device *pdev)
+@@ -724,13 +743,12 @@ static int imx_thermal_probe(struct platform_device *pdev)
+ 		goto legacy_cleanup;
+ 	}
+ 
+-	data->tz = thermal_zone_device_register_with_trips("imx_thermal_zone",
+-							   trips,
+-							   ARRAY_SIZE(trips),
+-							   BIT(IMX_TRIP_PASSIVE), data,
+-							   &imx_tz_ops, NULL,
+-							   IMX_PASSIVE_DELAY,
+-							   IMX_POLLING_DELAY);
++	data->tz = thermal_zone_device_register("imx_thermal_zone",
++						IMX_TRIP_NUM,
++						BIT(IMX_TRIP_PASSIVE), data,
++						&imx_tz_ops, NULL,
++						IMX_PASSIVE_DELAY,
++						IMX_POLLING_DELAY);
+ 	if (IS_ERR(data->tz)) {
+ 		ret = PTR_ERR(data->tz);
+ 		dev_err(&pdev->dev,
+@@ -740,8 +758,8 @@ static int imx_thermal_probe(struct platform_device *pdev)
+ 
+ 	dev_info(&pdev->dev, "%s CPU temperature grade - max:%dC"
+ 		 " critical:%dC passive:%dC\n", data->temp_grade,
+-		 data->temp_max / 1000, trips[IMX_TRIP_CRITICAL].temperature / 1000,
+-		 trips[IMX_TRIP_PASSIVE].temperature / 1000);
++		 data->temp_max / 1000, data->temp_critical / 1000,
++		 data->temp_passive / 1000);
+ 
+ 	/* Enable measurements at ~ 10 Hz */
+ 	regmap_write(map, data->socdata->measure_freq_ctrl + REG_CLR,
+@@ -749,10 +767,10 @@ static int imx_thermal_probe(struct platform_device *pdev)
+ 	measure_freq = DIV_ROUND_UP(32768, 10); /* 10 Hz */
+ 	regmap_write(map, data->socdata->measure_freq_ctrl + REG_SET,
+ 		     measure_freq << data->socdata->measure_freq_shift);
+-	imx_set_alarm_temp(data, trips[IMX_TRIP_PASSIVE].temperature);
++	imx_set_alarm_temp(data, data->temp_passive);
+ 
+ 	if (data->socdata->version == TEMPMON_IMX6SX)
+-		imx_set_panic_temp(data, trips[IMX_TRIP_CRITICAL].temperature);
++		imx_set_panic_temp(data, data->temp_critical);
+ 
+ 	regmap_write(map, data->socdata->sensor_ctrl + REG_CLR,
+ 		     data->socdata->power_down_mask);
+diff --git a/drivers/thermal/intel/int340x_thermal/int340x_thermal_zone.c b/drivers/thermal/intel/int340x_thermal/int340x_thermal_zone.c
+index ea05be8c2834..62c0aa5d0783 100644
+--- a/drivers/thermal/intel/int340x_thermal/int340x_thermal_zone.c
++++ b/drivers/thermal/intel/int340x_thermal/int340x_thermal_zone.c
+@@ -18,6 +18,9 @@ static int int340x_thermal_get_zone_temp(struct thermal_zone_device *zone,
+ 	unsigned long long tmp;
+ 	acpi_status status;
+ 
++	if (d->override_ops && d->override_ops->get_temp)
++		return d->override_ops->get_temp(zone, temp);
++
+ 	status = acpi_evaluate_integer(d->adev->handle, "_TMP", NULL, &tmp);
+ 	if (ACPI_FAILURE(status))
+ 		return -EIO;
+@@ -43,6 +46,9 @@ static int int340x_thermal_get_trip_temp(struct thermal_zone_device *zone,
+ 	struct int34x_thermal_zone *d = zone->devdata;
+ 	int i;
+ 
++	if (d->override_ops && d->override_ops->get_trip_temp)
++		return d->override_ops->get_trip_temp(zone, trip, temp);
++
+ 	if (trip < d->aux_trip_nr)
+ 		*temp = d->aux_trips[trip];
+ 	else if (trip == d->crt_trip_id)
+@@ -73,6 +79,9 @@ static int int340x_thermal_get_trip_type(struct thermal_zone_device *zone,
+ 	struct int34x_thermal_zone *d = zone->devdata;
+ 	int i;
+ 
++	if (d->override_ops && d->override_ops->get_trip_type)
++		return d->override_ops->get_trip_type(zone, trip, type);
++
+ 	if (trip < d->aux_trip_nr)
+ 		*type = THERMAL_TRIP_PASSIVE;
+ 	else if (trip == d->crt_trip_id)
+@@ -103,6 +112,9 @@ static int int340x_thermal_set_trip_temp(struct thermal_zone_device *zone,
+ 	acpi_status status;
+ 	char name[10];
+ 
++	if (d->override_ops && d->override_ops->set_trip_temp)
++		return d->override_ops->set_trip_temp(zone, trip, temp);
++
+ 	snprintf(name, sizeof(name), "PAT%d", trip);
+ 	status = acpi_execute_simple_method(d->adev->handle, name,
+ 			millicelsius_to_deci_kelvin(temp));
+@@ -122,6 +134,9 @@ static int int340x_thermal_get_trip_hyst(struct thermal_zone_device *zone,
+ 	acpi_status status;
+ 	unsigned long long hyst;
+ 
++	if (d->override_ops && d->override_ops->get_trip_hyst)
++		return d->override_ops->get_trip_hyst(zone, trip, temp);
++
+ 	status = acpi_evaluate_integer(d->adev->handle, "GTSH", NULL, &hyst);
+ 	if (ACPI_FAILURE(status))
+ 		*temp = 0;
+@@ -202,7 +217,7 @@ static struct thermal_zone_params int340x_thermal_params = {
+ };
+ 
+ struct int34x_thermal_zone *int340x_thermal_zone_add(struct acpi_device *adev,
+-						     int (*get_temp) (struct thermal_zone_device *, int *))
++				struct thermal_zone_device_ops *override_ops)
+ {
+ 	struct int34x_thermal_zone *int34x_thermal_zone;
+ 	acpi_status status;
+@@ -216,14 +231,7 @@ struct int34x_thermal_zone *int340x_thermal_zone_add(struct acpi_device *adev,
+ 		return ERR_PTR(-ENOMEM);
+ 
+ 	int34x_thermal_zone->adev = adev;
+-
+-	int34x_thermal_zone->ops = kmemdup(&int340x_thermal_zone_ops,
+-					   sizeof(int340x_thermal_zone_ops), GFP_KERNEL);
+-	if (!int34x_thermal_zone->ops)
+-		goto err_ops_alloc;
+-
+-	if (get_temp)
+-		int34x_thermal_zone->ops->get_temp = get_temp;
++	int34x_thermal_zone->override_ops = override_ops;
+ 
+ 	status = acpi_evaluate_integer(adev->handle, "PATC", NULL, &trip_cnt);
+ 	if (ACPI_FAILURE(status))
+@@ -254,7 +262,7 @@ struct int34x_thermal_zone *int340x_thermal_zone_add(struct acpi_device *adev,
+ 						acpi_device_bid(adev),
+ 						trip_cnt,
+ 						trip_mask, int34x_thermal_zone,
+-						int34x_thermal_zone->ops,
++						&int340x_thermal_zone_ops,
+ 						&int340x_thermal_params,
+ 						0, 0);
+ 	if (IS_ERR(int34x_thermal_zone->zone)) {
+@@ -273,8 +281,6 @@ struct int34x_thermal_zone *int340x_thermal_zone_add(struct acpi_device *adev,
+ 	acpi_lpat_free_conversion_table(int34x_thermal_zone->lpat_table);
+ 	kfree(int34x_thermal_zone->aux_trips);
+ err_trip_alloc:
+-	kfree(int34x_thermal_zone->ops);
+-err_ops_alloc:
+ 	kfree(int34x_thermal_zone);
+ 	return ERR_PTR(ret);
+ }
+@@ -286,7 +292,6 @@ void int340x_thermal_zone_remove(struct int34x_thermal_zone
+ 	thermal_zone_device_unregister(int34x_thermal_zone->zone);
+ 	acpi_lpat_free_conversion_table(int34x_thermal_zone->lpat_table);
+ 	kfree(int34x_thermal_zone->aux_trips);
+-	kfree(int34x_thermal_zone->ops);
+ 	kfree(int34x_thermal_zone);
+ }
+ EXPORT_SYMBOL_GPL(int340x_thermal_zone_remove);
+diff --git a/drivers/thermal/intel/int340x_thermal/int340x_thermal_zone.h b/drivers/thermal/intel/int340x_thermal/int340x_thermal_zone.h
+index e28ab1ba5e06..3b4971df1b33 100644
+--- a/drivers/thermal/intel/int340x_thermal/int340x_thermal_zone.h
++++ b/drivers/thermal/intel/int340x_thermal/int340x_thermal_zone.h
+@@ -29,13 +29,13 @@ struct int34x_thermal_zone {
+ 	int hot_temp;
+ 	int hot_trip_id;
+ 	struct thermal_zone_device *zone;
+-	struct thermal_zone_device_ops *ops;
++	struct thermal_zone_device_ops *override_ops;
+ 	void *priv_data;
+ 	struct acpi_lpat_conversion_table *lpat_table;
+ };
+ 
+ struct int34x_thermal_zone *int340x_thermal_zone_add(struct acpi_device *,
+-				int (*get_temp) (struct thermal_zone_device *, int *));
++				struct thermal_zone_device_ops *override_ops);
+ void int340x_thermal_zone_remove(struct int34x_thermal_zone *);
+ int int340x_thermal_read_trips(struct int34x_thermal_zone *int34x_zone);
+ 
+diff --git a/drivers/thermal/intel/int340x_thermal/processor_thermal_device.c b/drivers/thermal/intel/int340x_thermal/processor_thermal_device.c
+index 317703027ce9..a8d98f1bd6c6 100644
+--- a/drivers/thermal/intel/int340x_thermal/processor_thermal_device.c
++++ b/drivers/thermal/intel/int340x_thermal/processor_thermal_device.c
+@@ -207,6 +207,10 @@ static int proc_thermal_get_zone_temp(struct thermal_zone_device *zone,
+ 	return ret;
+ }
+ 
++static struct thermal_zone_device_ops proc_thermal_local_ops = {
++	.get_temp       = proc_thermal_get_zone_temp,
++};
++
+ static int proc_thermal_read_ppcc(struct proc_thermal_device *proc_priv)
+ {
+ 	int i;
+@@ -281,7 +285,7 @@ int proc_thermal_add(struct device *dev, struct proc_thermal_device *proc_priv)
+ 	struct acpi_device *adev;
+ 	acpi_status status;
+ 	unsigned long long tmp;
+-	int (*get_temp) (struct thermal_zone_device *, int *) = NULL;
++	struct thermal_zone_device_ops *ops = NULL;
+ 	int ret;
+ 
+ 	adev = ACPI_COMPANION(dev);
+@@ -300,10 +304,10 @@ int proc_thermal_add(struct device *dev, struct proc_thermal_device *proc_priv)
+ 		/* there is no _TMP method, add local method */
+ 		stored_tjmax = get_tjmax();
+ 		if (stored_tjmax > 0)
+-			get_temp = proc_thermal_get_zone_temp;
++			ops = &proc_thermal_local_ops;
+ 	}
+ 
+-	proc_priv->int340x_zone = int340x_thermal_zone_add(adev, get_temp);
++	proc_priv->int340x_zone = int340x_thermal_zone_add(adev, ops);
+ 	if (IS_ERR(proc_priv->int340x_zone)) {
+ 		return PTR_ERR(proc_priv->int340x_zone);
+ 	} else
+diff --git a/drivers/thermal/intel/x86_pkg_temp_thermal.c b/drivers/thermal/intel/x86_pkg_temp_thermal.c
+index a2d1d562a6d0..a0e234fce71a 100644
+--- a/drivers/thermal/intel/x86_pkg_temp_thermal.c
++++ b/drivers/thermal/intel/x86_pkg_temp_thermal.c
+@@ -53,7 +53,6 @@ struct zone_device {
+ 	u32				msr_pkg_therm_high;
+ 	struct delayed_work		work;
+ 	struct thermal_zone_device	*tzone;
+-	struct thermal_trip		*trips;
+ 	struct cpumask			cpumask;
+ };
+ 
+@@ -139,6 +138,40 @@ static int sys_get_curr_temp(struct thermal_zone_device *tzd, int *temp)
+ 	return -EINVAL;
+ }
+ 
++static int sys_get_trip_temp(struct thermal_zone_device *tzd,
++			     int trip, int *temp)
++{
++	struct zone_device *zonedev = tzd->devdata;
++	unsigned long thres_reg_value;
++	u32 mask, shift, eax, edx;
++	int ret;
++
++	if (trip >= MAX_NUMBER_OF_TRIPS)
++		return -EINVAL;
++
++	if (trip) {
++		mask = THERM_MASK_THRESHOLD1;
++		shift = THERM_SHIFT_THRESHOLD1;
++	} else {
++		mask = THERM_MASK_THRESHOLD0;
++		shift = THERM_SHIFT_THRESHOLD0;
++	}
++
++	ret = rdmsr_on_cpu(zonedev->cpu, MSR_IA32_PACKAGE_THERM_INTERRUPT,
++			   &eax, &edx);
++	if (ret < 0)
++		return ret;
++
++	thres_reg_value = (eax & mask) >> shift;
++	if (thres_reg_value)
++		*temp = zonedev->tj_max - thres_reg_value * 1000;
++	else
++		*temp = THERMAL_TEMP_INVALID;
++	pr_debug("sys_get_trip_temp %d\n", *temp);
++
++	return 0;
++}
++
+ static int
+ sys_set_trip_temp(struct thermal_zone_device *tzd, int trip, int temp)
+ {
+@@ -179,9 +212,18 @@ sys_set_trip_temp(struct thermal_zone_device *tzd, int trip, int temp)
+ 			l, h);
+ }
+ 
++static int sys_get_trip_type(struct thermal_zone_device *thermal, int trip,
++			     enum thermal_trip_type *type)
++{
++	*type = THERMAL_TRIP_PASSIVE;
++	return 0;
++}
++
+ /* Thermal zone callback registry */
+ static struct thermal_zone_device_ops tzone_ops = {
+ 	.get_temp = sys_get_curr_temp,
++	.get_trip_temp = sys_get_trip_temp,
++	.get_trip_type = sys_get_trip_type,
+ 	.set_trip_temp = sys_set_trip_temp,
+ };
+ 
+@@ -286,48 +328,6 @@ static int pkg_thermal_notify(u64 msr_val)
+ 	return 0;
+ }
+ 
+-static struct thermal_trip *pkg_temp_thermal_trips_init(int cpu, int tj_max, int num_trips)
+-{
+-	struct thermal_trip *trips;
+-	unsigned long thres_reg_value;
+-	u32 mask, shift, eax, edx;
+-	int ret, i;
+-
+-	trips = kzalloc(sizeof(*trips) * num_trips, GFP_KERNEL);
+-	if (!trips)
+-		return ERR_PTR(-ENOMEM);
+-
+-	for (i = 0; i < num_trips; i++) {
+-
+-		if (i) {
+-			mask = THERM_MASK_THRESHOLD1;
+-			shift = THERM_SHIFT_THRESHOLD1;
+-		} else {
+-			mask = THERM_MASK_THRESHOLD0;
+-			shift = THERM_SHIFT_THRESHOLD0;
+-		}
+-
+-		ret = rdmsr_on_cpu(cpu, MSR_IA32_PACKAGE_THERM_INTERRUPT,
+-				   &eax, &edx);
+-		if (ret < 0) {
+-			kfree(trips);
+-			return ERR_PTR(ret);
+-		}
+-
+-		thres_reg_value = (eax & mask) >> shift;
+-
+-		trips[i].temperature = thres_reg_value ?
+-			tj_max - thres_reg_value * 1000 : THERMAL_TEMP_INVALID;
+-
+-		trips[i].type = THERMAL_TRIP_PASSIVE;
+-
+-		pr_debug("%s: cpu=%d, trip=%d, temp=%d\n",
+-			 __func__, cpu, i, trips[i].temperature);
+-	}
+-
+-	return trips;
+-}
+-
+ static int pkg_temp_thermal_device_add(unsigned int cpu)
+ {
+ 	int id = topology_logical_die_id(cpu);
+@@ -353,27 +353,24 @@ static int pkg_temp_thermal_device_add(unsigned int cpu)
+ 	if (!zonedev)
+ 		return -ENOMEM;
+ 
+-	zonedev->trips = pkg_temp_thermal_trips_init(cpu, tj_max, thres_count);
+-	if (IS_ERR(zonedev->trips)) {
+-		err = PTR_ERR(zonedev->trips);
+-		goto out_kfree_zonedev;
+-	}
+-
+ 	INIT_DELAYED_WORK(&zonedev->work, pkg_temp_thermal_threshold_work_fn);
+ 	zonedev->cpu = cpu;
+ 	zonedev->tj_max = tj_max;
+-	zonedev->tzone = thermal_zone_device_register_with_trips("x86_pkg_temp",
+-			zonedev->trips, thres_count,
++	zonedev->tzone = thermal_zone_device_register("x86_pkg_temp",
++			thres_count,
+ 			(thres_count == MAX_NUMBER_OF_TRIPS) ? 0x03 : 0x01,
+ 			zonedev, &tzone_ops, &pkg_temp_tz_params, 0, 0);
+ 	if (IS_ERR(zonedev->tzone)) {
+ 		err = PTR_ERR(zonedev->tzone);
+-		goto out_kfree_trips;
++		kfree(zonedev);
++		return err;
+ 	}
+ 	err = thermal_zone_device_enable(zonedev->tzone);
+-	if (err)
+-		goto out_unregister_tz;
+-
++	if (err) {
++		thermal_zone_device_unregister(zonedev->tzone);
++		kfree(zonedev);
++		return err;
++	}
+ 	/* Store MSR value for package thermal interrupt, to restore at exit */
+ 	rdmsr(MSR_IA32_PACKAGE_THERM_INTERRUPT, zonedev->msr_pkg_therm_low,
+ 	      zonedev->msr_pkg_therm_high);
+@@ -382,14 +379,7 @@ static int pkg_temp_thermal_device_add(unsigned int cpu)
+ 	raw_spin_lock_irq(&pkg_temp_lock);
+ 	zones[id] = zonedev;
+ 	raw_spin_unlock_irq(&pkg_temp_lock);
+-
+-out_unregister_tz:
+-	thermal_zone_device_unregister(zonedev->tzone);
+-out_kfree_trips:
+-	kfree(zonedev->trips);
+-out_kfree_zonedev:
+-	kfree(zonedev);
+-	return err;
++	return 0;
+ }
+ 
+ static int pkg_thermal_cpu_offline(unsigned int cpu)
+@@ -473,10 +463,8 @@ static int pkg_thermal_cpu_offline(unsigned int cpu)
+ 	raw_spin_unlock_irq(&pkg_temp_lock);
+ 
+ 	/* Final cleanup if this is the last cpu */
+-	if (lastcpu) {
+-		kfree(zonedev->trips);
++	if (lastcpu)
+ 		kfree(zonedev);
+-	}
+ 	return 0;
+ }
+ 
+diff --git a/drivers/thermal/qcom/qcom-spmi-temp-alarm.c b/drivers/thermal/qcom/qcom-spmi-temp-alarm.c
+index 127e8c90211c..be785ab37e53 100644
+--- a/drivers/thermal/qcom/qcom-spmi-temp-alarm.c
++++ b/drivers/thermal/qcom/qcom-spmi-temp-alarm.c
+@@ -263,17 +263,17 @@ static int qpnp_tm_update_critical_trip_temp(struct qpnp_tm_chip *chip,
+ 	return qpnp_tm_write(chip, QPNP_TM_REG_SHUTDOWN_CTRL1, reg);
+ }
+ 
+-static int qpnp_tm_set_trip_temp(struct thermal_zone_device *tz, int trip_id, int temp)
++static int qpnp_tm_set_trip_temp(struct thermal_zone_device *tz, int trip, int temp)
+ {
+ 	struct qpnp_tm_chip *chip = tz->devdata;
+-	struct thermal_trip trip;
++	const struct thermal_trip *trip_points;
+ 	int ret;
+ 
+-	ret = thermal_zone_get_trip(chip->tz_dev, trip_id, &trip);
+-	if (ret)
+-		return ret;
++	trip_points = of_thermal_get_trip_points(chip->tz_dev);
++	if (!trip_points)
++		return -EINVAL;
+ 
+-	if (trip.type != THERMAL_TRIP_CRITICAL)
++	if (trip_points[trip].type != THERMAL_TRIP_CRITICAL)
+ 		return 0;
+ 
+ 	mutex_lock(&chip->lock);
+@@ -299,17 +299,22 @@ static irqreturn_t qpnp_tm_isr(int irq, void *data)
+ 
+ static int qpnp_tm_get_critical_trip_temp(struct qpnp_tm_chip *chip)
+ {
+-	struct thermal_trip trip;
+-	int i, ret;
+-
+-	for (i = 0; i < thermal_zone_get_num_trips(chip->tz_dev); i++) {
+-
+-		ret = thermal_zone_get_trip(chip->tz_dev, i, &trip);
+-		if (ret)
+-			continue;
+-
+-		if (trip.type == THERMAL_TRIP_CRITICAL)
+-			return trip.temperature;
++	int ntrips;
++	const struct thermal_trip *trips;
++	int i;
++
++	ntrips = of_thermal_get_ntrips(chip->tz_dev);
++	if (ntrips <= 0)
++		return THERMAL_TEMP_INVALID;
++
++	trips = of_thermal_get_trip_points(chip->tz_dev);
++	if (!trips)
++		return THERMAL_TEMP_INVALID;
++
++	for (i = 0; i < ntrips; i++) {
++		if (of_thermal_is_trip_valid(chip->tz_dev, i) &&
++		    trips[i].type == THERMAL_TRIP_CRITICAL)
++			return trips[i].temperature;
+ 	}
+ 
+ 	return THERMAL_TEMP_INVALID;
+diff --git a/drivers/thermal/rcar_gen3_thermal.c b/drivers/thermal/rcar_gen3_thermal.c
+index 4ef927437842..4c1c6f89aa2f 100644
+--- a/drivers/thermal/rcar_gen3_thermal.c
++++ b/drivers/thermal/rcar_gen3_thermal.c
+@@ -529,7 +529,7 @@ static int rcar_gen3_thermal_probe(struct platform_device *pdev)
+ 		if (ret)
+ 			goto error_unregister;
+ 
+-		ret = thermal_zone_get_num_trips(tsc->zone);
++		ret = of_thermal_get_ntrips(tsc->zone);
+ 		if (ret < 0)
+ 			goto error_unregister;
+ 
+diff --git a/drivers/thermal/rcar_thermal.c b/drivers/thermal/rcar_thermal.c
+index 436f5f9cf729..61c2b8855cb8 100644
+--- a/drivers/thermal/rcar_thermal.c
++++ b/drivers/thermal/rcar_thermal.c
+@@ -278,12 +278,52 @@ static int rcar_thermal_get_temp(struct thermal_zone_device *zone, int *temp)
+ 	return rcar_thermal_get_current_temp(priv, temp);
+ }
+ 
+-static struct thermal_zone_device_ops rcar_thermal_zone_ops = {
++static int rcar_thermal_get_trip_type(struct thermal_zone_device *zone,
++				      int trip, enum thermal_trip_type *type)
++{
++	struct rcar_thermal_priv *priv = rcar_zone_to_priv(zone);
++	struct device *dev = rcar_priv_to_dev(priv);
++
++	/* see rcar_thermal_get_temp() */
++	switch (trip) {
++	case 0: /* +90 <= temp */
++		*type = THERMAL_TRIP_CRITICAL;
++		break;
++	default:
++		dev_err(dev, "rcar driver trip error\n");
++		return -EINVAL;
++	}
++
++	return 0;
++}
++
++static int rcar_thermal_get_trip_temp(struct thermal_zone_device *zone,
++				      int trip, int *temp)
++{
++	struct rcar_thermal_priv *priv = rcar_zone_to_priv(zone);
++	struct device *dev = rcar_priv_to_dev(priv);
++
++	/* see rcar_thermal_get_temp() */
++	switch (trip) {
++	case 0: /* +90 <= temp */
++		*temp = MCELSIUS(90);
++		break;
++	default:
++		dev_err(dev, "rcar driver trip error\n");
++		return -EINVAL;
++	}
++
++	return 0;
++}
++
++static const struct thermal_zone_device_ops rcar_thermal_zone_of_ops = {
+ 	.get_temp	= rcar_thermal_get_temp,
+ };
+ 
+-static struct thermal_trip trips[] = {
+-	{ .type = THERMAL_TRIP_CRITICAL, .temperature = 90000 }
++static struct thermal_zone_device_ops rcar_thermal_zone_ops = {
++	.get_temp	= rcar_thermal_get_temp,
++	.get_trip_type	= rcar_thermal_get_trip_type,
++	.get_trip_temp	= rcar_thermal_get_trip_temp,
+ };
+ 
+ /*
+@@ -489,10 +529,11 @@ static int rcar_thermal_probe(struct platform_device *pdev)
+ 		if (chip->use_of_thermal) {
+ 			priv->zone = devm_thermal_of_zone_register(
+ 						dev, i, priv,
+-						&rcar_thermal_zone_ops);
++						&rcar_thermal_zone_of_ops);
+ 		} else {
+-			priv->zone = thermal_zone_device_register_with_trips(
+-				"rcar_thermal", trips, ARRAY_SIZE(trips), 0, priv,
++			priv->zone = thermal_zone_device_register(
++						"rcar_thermal",
++						1, 0, priv,
+ 						&rcar_thermal_zone_ops, NULL, 0,
+ 						idle);
+ 
+diff --git a/drivers/thermal/samsung/exynos_tmu.c b/drivers/thermal/samsung/exynos_tmu.c
+index 5a1ffe2f3134..51874d0a284c 100644
+--- a/drivers/thermal/samsung/exynos_tmu.c
++++ b/drivers/thermal/samsung/exynos_tmu.c
+@@ -260,9 +260,16 @@ static int exynos_tmu_initialize(struct platform_device *pdev)
+ {
+ 	struct exynos_tmu_data *data = platform_get_drvdata(pdev);
+ 	struct thermal_zone_device *tzd = data->tzd;
+-	int num_trips = thermal_zone_get_num_trips(tzd);
++	const struct thermal_trip * const trips =
++		of_thermal_get_trip_points(tzd);
+ 	unsigned int status;
+-	int ret = 0, temp;
++	int ret = 0, temp, hyst;
++
++	if (!trips) {
++		dev_err(&pdev->dev,
++			"Cannot get trip points from device tree!\n");
++		return -ENODEV;
++	}
+ 
+ 	if (data->soc != SOC_ARCH_EXYNOS5433) /* FIXME */
+ 		ret = tzd->ops->get_crit_temp(tzd, &temp);
+@@ -272,12 +279,12 @@ static int exynos_tmu_initialize(struct platform_device *pdev)
+ 		goto out;
+ 	}
+ 
+-	if (num_trips > data->ntrip) {
++	if (of_thermal_get_ntrips(tzd) > data->ntrip) {
+ 		dev_info(&pdev->dev,
+ 			 "More trip points than supported by this TMU.\n");
+ 		dev_info(&pdev->dev,
+ 			 "%d trip points should be configured in polling mode.\n",
+-			 num_trips - data->ntrip);
++			 (of_thermal_get_ntrips(tzd) - data->ntrip));
+ 	}
+ 
+ 	mutex_lock(&data->lock);
+@@ -290,22 +297,25 @@ static int exynos_tmu_initialize(struct platform_device *pdev)
+ 		ret = -EBUSY;
+ 	} else {
+ 		int i, ntrips =
+-			min_t(int, num_trips, data->ntrip);
++			min_t(int, of_thermal_get_ntrips(tzd), data->ntrip);
+ 
+ 		data->tmu_initialize(pdev);
+ 
+ 		/* Write temperature code for rising and falling threshold */
+ 		for (i = 0; i < ntrips; i++) {
+-
+-			struct thermal_trip trip;
+-
+-			ret = thermal_zone_get_trip(tzd, i, &trip);
++			/* Write temperature code for rising threshold */
++			ret = tzd->ops->get_trip_temp(tzd, i, &temp);
+ 			if (ret)
+ 				goto err;
++			temp /= MCELSIUS;
++			data->tmu_set_trip_temp(data, i, temp);
+ 
+-			data->tmu_set_trip_temp(data, i, trip.temperature / MCELSIUS);
+-			data->tmu_set_trip_hyst(data, i, trip.temperature / MCELSIUS,
+-						trip.hysteresis / MCELSIUS);
++			/* Write temperature code for falling threshold */
++			ret = tzd->ops->get_trip_hyst(tzd, i, &hyst);
++			if (ret)
++				goto err;
++			hyst /= MCELSIUS;
++			data->tmu_set_trip_hyst(data, i, temp, hyst);
+ 		}
+ 
+ 		data->tmu_clear_irqs(data);
+@@ -350,23 +360,21 @@ static void exynos_tmu_control(struct platform_device *pdev, bool on)
+ }
+ 
+ static void exynos4210_tmu_set_trip_temp(struct exynos_tmu_data *data,
+-					 int trip_id, u8 temp)
++					 int trip, u8 temp)
+ {
+-	struct thermal_trip trip;
++	const struct thermal_trip * const trips =
++		of_thermal_get_trip_points(data->tzd);
+ 	u8 ref, th_code;
+ 
+-	if (thermal_zone_get_trip(data->tzd, 0, &trip))
+-		return;
+-
+-	ref = trip.temperature / MCELSIUS;
++	ref = trips[0].temperature / MCELSIUS;
+ 
+-	if (trip_id == 0) {
++	if (trip == 0) {
+ 		th_code = temp_to_code(data, ref);
+ 		writeb(th_code, data->base + EXYNOS4210_TMU_REG_THRESHOLD_TEMP);
+ 	}
+ 
+ 	temp -= ref;
+-	writeb(temp, data->base + EXYNOS4210_TMU_REG_TRIG_LEVEL0 + trip_id * 4);
++	writeb(temp, data->base + EXYNOS4210_TMU_REG_TRIG_LEVEL0 + trip * 4);
+ }
+ 
+ /* failing thresholds are not supported on Exynos4210 */
+@@ -554,14 +562,13 @@ static void exynos4210_tmu_control(struct platform_device *pdev, bool on)
+ {
+ 	struct exynos_tmu_data *data = platform_get_drvdata(pdev);
+ 	struct thermal_zone_device *tz = data->tzd;
+-	struct thermal_trip trip;
+ 	unsigned int con, interrupt_en = 0, i;
+ 
+ 	con = get_con_reg(data, readl(data->base + EXYNOS_TMU_REG_CONTROL));
+ 
+ 	if (on) {
+ 		for (i = 0; i < data->ntrip; i++) {
+-			if (thermal_zone_get_trip(tz, i, &trip))
++			if (!of_thermal_is_trip_valid(tz, i))
+ 				continue;
+ 
+ 			interrupt_en |=
+@@ -585,14 +592,13 @@ static void exynos5433_tmu_control(struct platform_device *pdev, bool on)
+ {
+ 	struct exynos_tmu_data *data = platform_get_drvdata(pdev);
+ 	struct thermal_zone_device *tz = data->tzd;
+-	struct thermal_trip trip;
+ 	unsigned int con, interrupt_en = 0, pd_det_en, i;
+ 
+ 	con = get_con_reg(data, readl(data->base + EXYNOS_TMU_REG_CONTROL));
+ 
+ 	if (on) {
+ 		for (i = 0; i < data->ntrip; i++) {
+-			if (thermal_zone_get_trip(tz, i, &trip))
++			if (!of_thermal_is_trip_valid(tz, i))
+ 				continue;
+ 
+ 			interrupt_en |=
+@@ -617,14 +623,13 @@ static void exynos7_tmu_control(struct platform_device *pdev, bool on)
+ {
+ 	struct exynos_tmu_data *data = platform_get_drvdata(pdev);
+ 	struct thermal_zone_device *tz = data->tzd;
+-	struct thermal_trip trip;
+ 	unsigned int con, interrupt_en = 0, i;
+ 
+ 	con = get_con_reg(data, readl(data->base + EXYNOS_TMU_REG_CONTROL));
+ 
+ 	if (on) {
+ 		for (i = 0; i < data->ntrip; i++) {
+-			if (thermal_zone_get_trip(tz, i, &trip))
++			if (!of_thermal_is_trip_valid(tz, i))
+ 				continue;
+ 
+ 			interrupt_en |=
+diff --git a/drivers/thermal/st/st_thermal.c b/drivers/thermal/st/st_thermal.c
+index 1009f08e64e3..1276b95604fe 100644
+--- a/drivers/thermal/st/st_thermal.c
++++ b/drivers/thermal/st/st_thermal.c
+@@ -134,12 +134,48 @@ static int st_thermal_get_temp(struct thermal_zone_device *th, int *temperature)
+ 	return 0;
+ }
+ 
++static int st_thermal_get_trip_type(struct thermal_zone_device *th,
++				int trip, enum thermal_trip_type *type)
++{
++	struct st_thermal_sensor *sensor = th->devdata;
++	struct device *dev = sensor->dev;
++
++	switch (trip) {
++	case 0:
++		*type = THERMAL_TRIP_CRITICAL;
++		break;
++	default:
++		dev_err(dev, "invalid trip point\n");
++		return -EINVAL;
++	}
++
++	return 0;
++}
++
++static int st_thermal_get_trip_temp(struct thermal_zone_device *th,
++				    int trip, int *temp)
++{
++	struct st_thermal_sensor *sensor = th->devdata;
++	struct device *dev = sensor->dev;
++
++	switch (trip) {
++	case 0:
++		*temp = mcelsius(sensor->cdata->crit_temp);
++		break;
++	default:
++		dev_err(dev, "Invalid trip point\n");
++		return -EINVAL;
++	}
++
++	return 0;
++}
++
+ static struct thermal_zone_device_ops st_tz_ops = {
+ 	.get_temp	= st_thermal_get_temp,
++	.get_trip_type	= st_thermal_get_trip_type,
++	.get_trip_temp	= st_thermal_get_trip_temp,
+ };
+ 
+-static struct thermal_trip trip;
+-
+ int st_thermal_register(struct platform_device *pdev,
+ 			const struct of_device_id *st_thermal_of_match)
+ {
+@@ -202,12 +238,9 @@ int st_thermal_register(struct platform_device *pdev,
+ 
+ 	polling_delay = sensor->ops->register_enable_irq ? 0 : 1000;
+ 
+-	trip.temperature = sensor->cdata->crit_temp;
+-	trip.type = THERMAL_TRIP_CRITICAL;
+-
+ 	sensor->thermal_dev =
+-		thermal_zone_device_register_with_trips(dev_name(dev), &trip, 1, 0, sensor,
+-							&st_tz_ops, NULL, 0, polling_delay);
++		thermal_zone_device_register(dev_name(dev), 1, 0, sensor,
++					     &st_tz_ops, NULL, 0, polling_delay);
+ 	if (IS_ERR(sensor->thermal_dev)) {
+ 		dev_err(dev, "failed to register thermal zone device\n");
+ 		ret = PTR_ERR(sensor->thermal_dev);
+diff --git a/drivers/thermal/tegra/soctherm.c b/drivers/thermal/tegra/soctherm.c
+index d2e454902689..1efe470f31e9 100644
+--- a/drivers/thermal/tegra/soctherm.c
++++ b/drivers/thermal/tegra/soctherm.c
+@@ -582,23 +582,23 @@ static int tsensor_group_thermtrip_get(struct tegra_soctherm *ts, int id)
+ 	return temp;
+ }
+ 
+-static int tegra_thermctl_set_trip_temp(struct thermal_zone_device *tz, int trip_id, int temp)
++static int tegra_thermctl_set_trip_temp(struct thermal_zone_device *tz, int trip, int temp)
+ {
+ 	struct tegra_thermctl_zone *zone = tz->devdata;
+ 	struct tegra_soctherm *ts = zone->ts;
+-	struct thermal_trip trip;
+ 	const struct tegra_tsensor_group *sg = zone->sg;
+ 	struct device *dev = zone->dev;
++	enum thermal_trip_type type;
+ 	int ret;
+ 
+ 	if (!tz)
+ 		return -EINVAL;
+ 
+-	ret = thermal_zone_get_trip(tz, trip_id, &trip);
++	ret = tz->ops->get_trip_type(tz, trip, &type);
+ 	if (ret)
+ 		return ret;
+ 
+-	if (trip.type == THERMAL_TRIP_CRITICAL) {
++	if (type == THERMAL_TRIP_CRITICAL) {
+ 		/*
+ 		 * If thermtrips property is set in DT,
+ 		 * doesn't need to program critical type trip to HW,
+@@ -609,7 +609,7 @@ static int tegra_thermctl_set_trip_temp(struct thermal_zone_device *tz, int trip
+ 		else
+ 			return 0;
+ 
+-	} else if (trip.type == THERMAL_TRIP_HOT) {
++	} else if (type == THERMAL_TRIP_HOT) {
+ 		int i;
+ 
+ 		for (i = 0; i < THROTTLE_SIZE; i++) {
+@@ -620,7 +620,7 @@ static int tegra_thermctl_set_trip_temp(struct thermal_zone_device *tz, int trip
+ 				continue;
+ 
+ 			cdev = ts->throt_cfgs[i].cdev;
+-			if (get_thermal_instance(tz, cdev, trip_id))
++			if (get_thermal_instance(tz, cdev, trip))
+ 				stc = find_throttle_cfg_by_name(ts, cdev->type);
+ 			else
+ 				continue;
+@@ -687,20 +687,25 @@ static const struct thermal_zone_device_ops tegra_of_thermal_ops = {
+ 	.set_trips = tegra_thermctl_set_trips,
+ };
+ 
+-static int get_hot_temp(struct thermal_zone_device *tz, int *trip_id, int *temp)
++static int get_hot_temp(struct thermal_zone_device *tz, int *trip, int *temp)
+ {
+-	int i, ret;
+-	struct thermal_trip trip;
++	int ntrips, i, ret;
++	enum thermal_trip_type type;
+ 
+-	for (i = 0; i < thermal_zone_get_num_trips(tz); i++) {
++	ntrips = of_thermal_get_ntrips(tz);
++	if (ntrips <= 0)
++		return -EINVAL;
+ 
+-		ret = thermal_zone_get_trip(tz, i, &trip);
++	for (i = 0; i < ntrips; i++) {
++		ret = tz->ops->get_trip_type(tz, i, &type);
+ 		if (ret)
+ 			return -EINVAL;
++		if (type == THERMAL_TRIP_HOT) {
++			ret = tz->ops->get_trip_temp(tz, i, temp);
++			if (!ret)
++				*trip = i;
+ 
+-		if (trip.type == THERMAL_TRIP_HOT) {
+-			*trip_id = i;
+-			return 0;
++			return ret;
+ 		}
+ 	}
+ 
+diff --git a/drivers/thermal/tegra/tegra30-tsensor.c b/drivers/thermal/tegra/tegra30-tsensor.c
+index 0ffe37ce7df7..c34501287e96 100644
+--- a/drivers/thermal/tegra/tegra30-tsensor.c
++++ b/drivers/thermal/tegra/tegra30-tsensor.c
+@@ -316,17 +316,18 @@ static void tegra_tsensor_get_hw_channel_trips(struct thermal_zone_device *tzd,
+ 	*hot_trip  = 85000;
+ 	*crit_trip = 90000;
+ 
+-	for (i = 0; i < thermal_zone_get_num_trips(tzd); i++) {
++	for (i = 0; i < tzd->num_trips; i++) {
++		enum thermal_trip_type type;
++		int trip_temp;
+ 
+-		struct thermal_trip trip;
++		tzd->ops->get_trip_temp(tzd, i, &trip_temp);
++		tzd->ops->get_trip_type(tzd, i, &type);
+ 
+-		thermal_zone_get_trip(tzd, i, &trip);
++		if (type == THERMAL_TRIP_HOT)
++			*hot_trip = trip_temp;
+ 
+-		if (trip.type == THERMAL_TRIP_HOT)
+-			*hot_trip = trip.temperature;
+-
+-		if (trip.type == THERMAL_TRIP_CRITICAL)
+-			*crit_trip = trip.temperature;
++		if (type == THERMAL_TRIP_CRITICAL)
++			*crit_trip = trip_temp;
+ 	}
+ 
+ 	/* clamp hardware trips to the calibration limits */
+diff --git a/drivers/thermal/thermal_core.c b/drivers/thermal/thermal_core.c
+index 9b27211b806f..e08dfa637087 100644
+--- a/drivers/thermal/thermal_core.c
++++ b/drivers/thermal/thermal_core.c
+@@ -341,31 +341,35 @@ static void handle_critical_trips(struct thermal_zone_device *tz,
+ 		tz->ops->critical(tz);
+ }
+ 
+-static void handle_thermal_trip(struct thermal_zone_device *tz, int trip_id)
++static void handle_thermal_trip(struct thermal_zone_device *tz, int trip)
+ {
+-	struct thermal_trip trip;
++	enum thermal_trip_type type;
++	int trip_temp, hyst = 0;
+ 
+ 	/* Ignore disabled trip points */
+-	if (test_bit(trip_id, &tz->trips_disabled))
++	if (test_bit(trip, &tz->trips_disabled))
+ 		return;
+ 
+-	thermal_zone_get_trip(tz, trip_id, &trip);
++	tz->ops->get_trip_temp(tz, trip, &trip_temp);
++	tz->ops->get_trip_type(tz, trip, &type);
++	if (tz->ops->get_trip_hyst)
++		tz->ops->get_trip_hyst(tz, trip, &hyst);
+ 
+ 	if (tz->last_temperature != THERMAL_TEMP_INVALID) {
+-		if (tz->last_temperature < trip.temperature &&
+-		    tz->temperature >= trip.temperature)
+-			thermal_notify_tz_trip_up(tz->id, trip_id,
++		if (tz->last_temperature < trip_temp &&
++		    tz->temperature >= trip_temp)
++			thermal_notify_tz_trip_up(tz->id, trip,
+ 						  tz->temperature);
+-		if (tz->last_temperature >= trip.temperature &&
+-		    tz->temperature < (trip.temperature - trip.hysteresis))
+-			thermal_notify_tz_trip_down(tz->id, trip_id,
++		if (tz->last_temperature >= trip_temp &&
++		    tz->temperature < (trip_temp - hyst))
++			thermal_notify_tz_trip_down(tz->id, trip,
+ 						    tz->temperature);
+ 	}
+ 
+-	if (trip.type == THERMAL_TRIP_CRITICAL || trip.type == THERMAL_TRIP_HOT)
+-		handle_critical_trips(tz, trip_id, trip.temperature, trip.type);
++	if (type == THERMAL_TRIP_CRITICAL || type == THERMAL_TRIP_HOT)
++		handle_critical_trips(tz, trip, trip_temp, type);
+ 	else
+-		handle_non_critical_trips(tz, trip_id);
++		handle_non_critical_trips(tz, trip);
+ }
+ 
+ static void update_temperature(struct thermal_zone_device *tz)
+@@ -1138,123 +1142,6 @@ static void thermal_set_delay_jiffies(unsigned long *delay_jiffies, int delay_ms
+ 		*delay_jiffies = round_jiffies(*delay_jiffies);
+ }
+ 
+-int thermal_zone_get_num_trips(struct thermal_zone_device *tz)
+-{
+-	return tz->num_trips;
+-}
+-EXPORT_SYMBOL_GPL(thermal_zone_get_num_trips);
+-
+-int thermal_zone_get_crit_temp(struct thermal_zone_device *tz, int *temp)
+-{
+-	int i, ret = 0;
+-
+-	if (tz->ops->get_crit_temp)
+-		return tz->ops->get_crit_temp(tz, temp);
+-
+-	if (!tz->trips)
+-		return -EINVAL;
+-
+-	mutex_lock(&tz->lock);
+-
+-	for (i = 0; i < tz->num_trips; i++) {
+-		if (tz->trips[i].type == THERMAL_TRIP_CRITICAL) {
+-			*temp = tz->trips[i].temperature;
+-			goto out;
+-		}
+-	}
+-
+-	ret = -EINVAL;
+-out:
+-	mutex_unlock(&tz->lock);
+-
+-	return ret;
+-}
+-EXPORT_SYMBOL_GPL(thermal_zone_get_crit_temp);
+-
+-static int __thermal_zone_get_trip(struct thermal_zone_device *tz, int trip_id,
+-				   struct thermal_trip *trip)
+-{
+-	int ret;
+-
+-	if (!tz || trip_id < 0 || trip_id >= tz->num_trips || !trip)
+-		return -EINVAL;
+-
+-	if (tz->trips) {
+-		*trip = tz->trips[trip_id];
+-		return 0;
+-	}
+-
+-	if (tz->ops->get_trip_hyst) {
+-		ret = tz->ops->get_trip_hyst(tz, trip_id, &trip->hysteresis);
+-		if (ret)
+-			return ret;
+-	} else trip->hysteresis = 0;
+-
+-	ret = tz->ops->get_trip_temp(tz, trip_id, &trip->temperature);
+-	if (ret)
+-		return ret;
+-
+-	return tz->ops->get_trip_type(tz, trip_id, &trip->type);
+-}
+-
+-int thermal_zone_get_trip(struct thermal_zone_device *tz, int trip_id,
+-			  struct thermal_trip *trip)
+-{
+-	int ret;
+-
+-	mutex_lock(&tz->lock);
+-	ret = __thermal_zone_get_trip(tz, trip_id, trip);
+-	mutex_unlock(&tz->lock);
+-
+-	return ret;
+-}
+-EXPORT_SYMBOL_GPL(thermal_zone_get_trip);
+-
+-int thermal_zone_set_trip(struct thermal_zone_device *tz, int trip_id,
+-			  const struct thermal_trip *trip)
+-{
+-	struct thermal_trip t;
+-	int ret = -EINVAL;
+-
+-	mutex_lock(&tz->lock);
+-
+-	if (!tz->ops->set_trip_temp && !tz->ops->set_trip_hyst && !tz->trips)
+-		goto out;
+-
+-	ret = __thermal_zone_get_trip(tz, trip_id, &t);
+-	if (ret)
+-		goto out;
+-
+-	if ((t.temperature != trip->temperature) && tz->ops->set_trip_temp) {
+-
+-		ret = tz->ops->set_trip_temp(tz, trip_id, trip->temperature);
+-		if (ret)
+-			goto out;
+-	}
+-
+-	if ((t.hysteresis != trip->hysteresis) && tz->ops->set_trip_hyst) {
+-
+-		ret = tz->ops->set_trip_hyst(tz, trip_id, trip->hysteresis);
+-		if (ret)
+-			goto out;
+-	}
+-
+-	if (((t.temperature != trip->temperature) ||
+-	     (t.hysteresis != trip->hysteresis)) && tz->trips)
+-		tz->trips[trip_id] = *trip;
+-
+-out:
+-	mutex_unlock(&tz->lock);
+-
+-	if (!ret) {
+-		thermal_notify_tz_trip_change(tz->id, trip_id, trip->type,
+-					      trip->temperature, trip->hysteresis);
+-		thermal_zone_device_update(tz, THERMAL_TRIP_CHANGED);
+-	}
+-	
+-	return ret;
+-}
+-
+ /**
+  * thermal_zone_device_register_with_trips() - register a new thermal zone device
+  * @type:	the thermal zone device type
+@@ -1287,6 +1174,8 @@ thermal_zone_device_register_with_trips(const char *type, struct thermal_trip *t
+ 					int polling_delay)
+ {
+ 	struct thermal_zone_device *tz;
++	enum thermal_trip_type trip_type;
++	int trip_temp;
+ 	int id;
+ 	int result;
+ 	int count;
+@@ -1313,7 +1202,7 @@ thermal_zone_device_register_with_trips(const char *type, struct thermal_trip *t
+ 		return ERR_PTR(-EINVAL);
+ 	}
+ 
+-	if (num_trips > 0 && (!ops->get_trip_type || !ops->get_trip_temp) && !trips)
++	if (num_trips > 0 && (!ops->get_trip_type || !ops->get_trip_temp))
+ 		return ERR_PTR(-EINVAL);
+ 
+ 	tz = kzalloc(sizeof(*tz), GFP_KERNEL);
+@@ -1363,10 +1252,9 @@ thermal_zone_device_register_with_trips(const char *type, struct thermal_trip *t
+ 		goto release_device;
+ 
+ 	for (count = 0; count < num_trips; count++) {
+-		struct thermal_trip trip;
+-
+-		result = thermal_zone_get_trip(tz, count, &trip);
+-		if (result)
++		if (tz->ops->get_trip_type(tz, count, &trip_type) ||
++		    tz->ops->get_trip_temp(tz, count, &trip_temp) ||
++		    !trip_temp)
+ 			set_bit(count, &tz->trips_disabled);
+ 	}
+ 
+diff --git a/drivers/thermal/thermal_core.h b/drivers/thermal/thermal_core.h
+index 4d1af11a6eb4..1571917bd3c8 100644
+--- a/drivers/thermal/thermal_core.h
++++ b/drivers/thermal/thermal_core.h
+@@ -136,6 +136,28 @@ thermal_cooling_device_stats_update(struct thermal_cooling_device *cdev,
+ #endif /* CONFIG_THERMAL_STATISTICS */
+ 
+ /* device tree support */
++#ifdef CONFIG_THERMAL_OF
++int of_thermal_get_ntrips(struct thermal_zone_device *);
++bool of_thermal_is_trip_valid(struct thermal_zone_device *, int);
++const struct thermal_trip *
++of_thermal_get_trip_points(struct thermal_zone_device *);
++#else
++static inline int of_thermal_get_ntrips(struct thermal_zone_device *tz)
++{
++	return 0;
++}
++static inline bool of_thermal_is_trip_valid(struct thermal_zone_device *tz,
++					    int trip)
++{
++	return false;
++}
++static inline const struct thermal_trip *
++of_thermal_get_trip_points(struct thermal_zone_device *tz)
++{
++	return NULL;
++}
++#endif
++
+ int thermal_zone_device_is_enabled(struct thermal_zone_device *tz);
+ 
+ #endif /* __THERMAL_CORE_H__ */
+diff --git a/drivers/thermal/thermal_helpers.c b/drivers/thermal/thermal_helpers.c
+index e1264940136a..c65cdce8f856 100644
+--- a/drivers/thermal/thermal_helpers.c
++++ b/drivers/thermal/thermal_helpers.c
+@@ -69,7 +69,7 @@ int __thermal_zone_get_temp(struct thermal_zone_device *tz, int *temp)
+ 	int ret = -EINVAL;
+ 	int count;
+ 	int crit_temp = INT_MAX;
+-	struct thermal_trip trip;
++	enum thermal_trip_type type;
+ 
+ 	lockdep_assert_held(&tz->lock);
+ 
+@@ -80,9 +80,10 @@ int __thermal_zone_get_temp(struct thermal_zone_device *tz, int *temp)
+ 
+ 	if (IS_ENABLED(CONFIG_THERMAL_EMULATION) && tz->emul_temperature) {
+ 		for (count = 0; count < tz->num_trips; count++) {
+-			ret = thermal_zone_get_trip(tz, count, &trip);
+-			if (!ret && trip.type == THERMAL_TRIP_CRITICAL) {
+-				crit_temp = trip.temperature;
++			ret = tz->ops->get_trip_type(tz, count, &type);
++			if (!ret && type == THERMAL_TRIP_CRITICAL) {
++				ret = tz->ops->get_trip_temp(tz, count,
++						&crit_temp);
+ 				break;
+ 			}
+ 		}
+@@ -123,30 +124,29 @@ EXPORT_SYMBOL_GPL(thermal_zone_get_temp);
+ 
+ void __thermal_zone_set_trips(struct thermal_zone_device *tz)
+ {
+-	struct thermal_trip trip;
+-	int low = -INT_MAX, high = INT_MAX;
++	int low = -INT_MAX;
++	int high = INT_MAX;
++	int trip_temp, hysteresis;
+ 	int i, ret;
+ 
+ 	lockdep_assert_held(&tz->lock);
+ 
+-	if (!tz->ops->set_trips)
++	if (!tz->ops->set_trips || !tz->ops->get_trip_hyst)
+ 		return;
+ 
+ 	for (i = 0; i < tz->num_trips; i++) {
+ 		int trip_low;
+ 
+-		ret = thermal_zone_get_trip(tz, i , &trip);
+-		if (ret)
+-			return;
++		tz->ops->get_trip_temp(tz, i, &trip_temp);
++		tz->ops->get_trip_hyst(tz, i, &hysteresis);
+ 
+-		trip_low = trip.temperature - trip.hysteresis;
++		trip_low = trip_temp - hysteresis;
+ 
+ 		if (trip_low < tz->temperature && trip_low > low)
+ 			low = trip_low;
+ 
+-		if (trip.temperature > tz->temperature &&
+-		    trip.temperature < high)
+-			high = trip.temperature;
++		if (trip_temp > tz->temperature && trip_temp < high)
++			high = trip_temp;
+ 	}
+ 
+ 	/* No need to change trip points */
+diff --git a/drivers/thermal/thermal_netlink.c b/drivers/thermal/thermal_netlink.c
+index 36cb2fd31e20..e2d78a996b5f 100644
+--- a/drivers/thermal/thermal_netlink.c
++++ b/drivers/thermal/thermal_netlink.c
+@@ -452,8 +452,7 @@ static int thermal_genl_cmd_tz_get_trip(struct param *p)
+ 	struct sk_buff *msg = p->msg;
+ 	struct thermal_zone_device *tz;
+ 	struct nlattr *start_trip;
+-	struct thermal_trip trip;
+-	int ret, i, id;
++	int i, id;
+ 
+ 	if (!p->attrs[THERMAL_GENL_ATTR_TZ_ID])
+ 		return -EINVAL;
+@@ -472,14 +471,18 @@ static int thermal_genl_cmd_tz_get_trip(struct param *p)
+ 
+ 	for (i = 0; i < tz->num_trips; i++) {
+ 
+-		ret = thermal_zone_get_trip(tz, i, &trip);
+-		if (ret)
+-			goto out_cancel_nest;
+-		
++		enum thermal_trip_type type;
++		int temp, hyst = 0;
++
++		tz->ops->get_trip_type(tz, i, &type);
++		tz->ops->get_trip_temp(tz, i, &temp);
++		if (tz->ops->get_trip_hyst)
++			tz->ops->get_trip_hyst(tz, i, &hyst);
++
+ 		if (nla_put_u32(msg, THERMAL_GENL_ATTR_TZ_TRIP_ID, i) ||
+-		    nla_put_u32(msg, THERMAL_GENL_ATTR_TZ_TRIP_TYPE, trip.type) ||
+-		    nla_put_u32(msg, THERMAL_GENL_ATTR_TZ_TRIP_TEMP, trip.temperature) ||
+-		    nla_put_u32(msg, THERMAL_GENL_ATTR_TZ_TRIP_HYST, trip.hysteresis))
++		    nla_put_u32(msg, THERMAL_GENL_ATTR_TZ_TRIP_TYPE, type) ||
++		    nla_put_u32(msg, THERMAL_GENL_ATTR_TZ_TRIP_TEMP, temp) ||
++		    nla_put_u32(msg, THERMAL_GENL_ATTR_TZ_TRIP_HYST, hyst))
+ 			goto out_cancel_nest;
+ 	}
+ 
+diff --git a/drivers/thermal/thermal_of.c b/drivers/thermal/thermal_of.c
+index bd872183e521..d4b6335ace15 100644
+--- a/drivers/thermal/thermal_of.c
++++ b/drivers/thermal/thermal_of.c
+@@ -19,6 +19,117 @@
+ 
+ #include "thermal_core.h"
+ 
++/**
++ * of_thermal_get_ntrips - function to export number of available trip
++ *			   points.
++ * @tz: pointer to a thermal zone
++ *
++ * This function is a globally visible wrapper to get number of trip points
++ * stored in the local struct __thermal_zone
++ *
++ * Return: number of available trip points, -ENODEV when data not available
++ */
++int of_thermal_get_ntrips(struct thermal_zone_device *tz)
++{
++	return tz->num_trips;
++}
++EXPORT_SYMBOL_GPL(of_thermal_get_ntrips);
++
++/**
++ * of_thermal_is_trip_valid - function to check if trip point is valid
++ *
++ * @tz:	pointer to a thermal zone
++ * @trip:	trip point to evaluate
++ *
++ * This function is responsible for checking if passed trip point is valid
++ *
++ * Return: true if trip point is valid, false otherwise
++ */
++bool of_thermal_is_trip_valid(struct thermal_zone_device *tz, int trip)
++{
++	if (trip >= tz->num_trips || trip < 0)
++		return false;
++
++	return true;
++}
++EXPORT_SYMBOL_GPL(of_thermal_is_trip_valid);
++
++/**
++ * of_thermal_get_trip_points - function to get access to a globally exported
++ *				trip points
++ *
++ * @tz:	pointer to a thermal zone
++ *
++ * This function provides a pointer to trip points table
++ *
++ * Return: pointer to trip points table, NULL otherwise
++ */
++const struct thermal_trip *
++of_thermal_get_trip_points(struct thermal_zone_device *tz)
++{
++	return tz->trips;
++}
++EXPORT_SYMBOL_GPL(of_thermal_get_trip_points);
++
++static int of_thermal_get_trip_type(struct thermal_zone_device *tz, int trip,
++				    enum thermal_trip_type *type)
++{
++	if (trip >= tz->num_trips || trip < 0)
++		return -EDOM;
++
++	*type = tz->trips[trip].type;
++
++	return 0;
++}
++
++static int of_thermal_get_trip_temp(struct thermal_zone_device *tz, int trip,
++				    int *temp)
++{
++	if (trip >= tz->num_trips || trip < 0)
++		return -EDOM;
++
++	*temp = tz->trips[trip].temperature;
++
++	return 0;
++}
++
++static int of_thermal_get_trip_hyst(struct thermal_zone_device *tz, int trip,
++				    int *hyst)
++{
++	if (trip >= tz->num_trips || trip < 0)
++		return -EDOM;
++
++	*hyst = tz->trips[trip].hysteresis;
++
++	return 0;
++}
++
++static int of_thermal_set_trip_hyst(struct thermal_zone_device *tz, int trip,
++				    int hyst)
++{
++	if (trip >= tz->num_trips || trip < 0)
++		return -EDOM;
++
++	/* thermal framework should take care of data->mask & (1 << trip) */
++	tz->trips[trip].hysteresis = hyst;
++
++	return 0;
++}
++
++static int of_thermal_get_crit_temp(struct thermal_zone_device *tz,
++				    int *temp)
++{
++	int i;
++
++	for (i = 0; i < tz->num_trips; i++)
++		if (tz->trips[i].type == THERMAL_TRIP_CRITICAL) {
++			*temp = tz->trips[i].temperature;
++			return 0;
++		}
++
++	return -EINVAL;
++}
++
+ /***   functions parsing device tree nodes   ***/
+ 
+ static int of_find_trip_id(struct device_node *np, struct device_node *trip)
+@@ -515,6 +626,11 @@ struct thermal_zone_device *thermal_of_zone_register(struct device_node *sensor,
+ 		goto out_kfree_trips;
+ 	}
+ 
++	of_ops->get_trip_type = of_ops->get_trip_type ? : of_thermal_get_trip_type;
++	of_ops->get_trip_temp = of_ops->get_trip_temp ? : of_thermal_get_trip_temp;
++	of_ops->get_trip_hyst = of_ops->get_trip_hyst ? : of_thermal_get_trip_hyst;
++	of_ops->set_trip_hyst = of_ops->set_trip_hyst ? : of_thermal_set_trip_hyst;
++	of_ops->get_crit_temp = of_ops->get_crit_temp ? : of_thermal_get_crit_temp;
+ 	of_ops->bind = thermal_of_bind;
+ 	of_ops->unbind = thermal_of_unbind;
+ 
+diff --git a/drivers/thermal/thermal_sysfs.c b/drivers/thermal/thermal_sysfs.c
+index 609b257fa107..ec495c7dff03 100644
+--- a/drivers/thermal/thermal_sysfs.c
++++ b/drivers/thermal/thermal_sysfs.c
+@@ -83,17 +83,20 @@ trip_point_type_show(struct device *dev, struct device_attribute *attr,
+ 		     char *buf)
+ {
+ 	struct thermal_zone_device *tz = to_thermal_zone(dev);
+-	struct thermal_trip trip;
+-	int trip_id, result;
++	enum thermal_trip_type type;
++	int trip, result;
+ 
+-	if (sscanf(attr->attr.name, "trip_point_%d_type", &trip_id) != 1)
++	if (!tz->ops->get_trip_type)
++		return -EPERM;
++
++	if (sscanf(attr->attr.name, "trip_point_%d_type", &trip) != 1)
+ 		return -EINVAL;
+ 
+-	result = thermal_zone_get_trip(tz, trip_id, &trip);
++	result = tz->ops->get_trip_type(tz, trip, &type);
+ 	if (result)
+ 		return result;
+ 
+-	switch (trip.type) {
++	switch (type) {
+ 	case THERMAL_TRIP_CRITICAL:
+ 		return sprintf(buf, "critical\n");
+ 	case THERMAL_TRIP_HOT:
+@@ -112,23 +115,42 @@ trip_point_temp_store(struct device *dev, struct device_attribute *attr,
+ 		      const char *buf, size_t count)
+ {
+ 	struct thermal_zone_device *tz = to_thermal_zone(dev);
+-	struct thermal_trip trip;
+-	int trip_id, ret;
++	int trip, ret;
++	int temperature, hyst = 0;
++	enum thermal_trip_type type;
+ 
+-	if (sscanf(attr->attr.name, "trip_point_%d_temp", &trip_id) != 1)
+-		return -EINVAL;
++	if (!tz->ops->set_trip_temp && !tz->trips)
++		return -EPERM;
+ 
+-	ret = thermal_zone_get_trip(tz, trip_id, &trip);
+- 	if (ret)
+- 		return ret;
++	if (sscanf(attr->attr.name, "trip_point_%d_temp", &trip) != 1)
++		return -EINVAL;
+ 
+-	if (kstrtoint(buf, 10, &trip.temperature))
++	if (kstrtoint(buf, 10, &temperature))
+ 		return -EINVAL;
+ 
+-	ret = thermal_zone_set_trip(tz, trip_id, &trip);
++	if (tz->ops->set_trip_temp) {
++		ret = tz->ops->set_trip_temp(tz, trip, temperature);
++		if (ret)
++			return ret;
++	}
++
++	if (tz->trips)
++		tz->trips[trip].temperature = temperature;
++
++	if (tz->ops->get_trip_hyst) {
++		ret = tz->ops->get_trip_hyst(tz, trip, &hyst);
++		if (ret)
++			return ret;
++	}
++
++	ret = tz->ops->get_trip_type(tz, trip, &type);
+ 	if (ret)
+ 		return ret;
+ 
++	thermal_notify_tz_trip_change(tz->id, trip, type, temperature, hyst);
++
++	thermal_zone_device_update(tz, THERMAL_EVENT_UNSPECIFIED);
++
+ 	return count;
+ }
+ 
+@@ -137,17 +159,21 @@ trip_point_temp_show(struct device *dev, struct device_attribute *attr,
+ 		     char *buf)
+ {
+ 	struct thermal_zone_device *tz = to_thermal_zone(dev);
+-	struct thermal_trip trip;
+-	int trip_id, ret;
++	int trip, ret;
++	int temperature;
++
++	if (!tz->ops->get_trip_temp)
++		return -EPERM;
+ 
+-	if (sscanf(attr->attr.name, "trip_point_%d_temp", &trip_id) != 1)
++	if (sscanf(attr->attr.name, "trip_point_%d_temp", &trip) != 1)
+ 		return -EINVAL;
+ 
+-	ret = thermal_zone_get_trip(tz, trip_id, &trip);
++	ret = tz->ops->get_trip_temp(tz, trip, &temperature);
++
+ 	if (ret)
+ 		return ret;
+ 
+-	return sprintf(buf, "%d\n", trip.temperature);
++	return sprintf(buf, "%d\n", temperature);
+ }
+ 
+ static ssize_t
+@@ -155,24 +181,29 @@ trip_point_hyst_store(struct device *dev, struct device_attribute *attr,
+ 		      const char *buf, size_t count)
+ {
+ 	struct thermal_zone_device *tz = to_thermal_zone(dev);
+-	struct thermal_trip trip;
+-	int trip_id, ret;
++	int trip, ret;
++	int temperature;
+ 
+-	if (sscanf(attr->attr.name, "trip_point_%d_hyst", &trip_id) != 1)
+-		return -EINVAL;
++	if (!tz->ops->set_trip_hyst)
++		return -EPERM;
+ 
+-	ret = thermal_zone_get_trip(tz, trip_id, &trip);
+-	if (ret)
+-		return ret;
++	if (sscanf(attr->attr.name, "trip_point_%d_hyst", &trip) != 1)
++		return -EINVAL;
+ 
+-	if (kstrtoint(buf, 10, &trip.hysteresis))
++	if (kstrtoint(buf, 10, &temperature))
+ 		return -EINVAL;
+ 
+-	ret = thermal_zone_set_trip(tz, trip_id, &trip);
+-	if (ret)
+-		return ret;
++	/*
++	 * We are not doing any check on the 'temperature' value
++	 * here. The driver implementing 'set_trip_hyst' has to
++	 * take care of this.
++	 */
++	ret = tz->ops->set_trip_hyst(tz, trip, temperature);
+ 
+-	return count;
++	if (!ret)
++		thermal_zone_set_trips(tz);
++
++	return ret ? ret : count;
+ }
+ 
+ static ssize_t
+@@ -180,17 +211,18 @@ trip_point_hyst_show(struct device *dev, struct device_attribute *attr,
+ 		     char *buf)
+ {
+ 	struct thermal_zone_device *tz = to_thermal_zone(dev);
+-	struct thermal_trip trip;
+-	int trip_id, ret;
++	int trip, ret;
++	int temperature;
++
++	if (!tz->ops->get_trip_hyst)
++		return -EPERM;
+ 
+-	if (sscanf(attr->attr.name, "trip_point_%d_hyst", &trip_id) != 1)
++	if (sscanf(attr->attr.name, "trip_point_%d_hyst", &trip) != 1)
+ 		return -EINVAL;
+ 
+-	ret = thermal_zone_get_trip(tz, trip_id, &trip);
+-	if (ret)
+-		return ret;
++	ret = tz->ops->get_trip_hyst(tz, trip, &temperature);
+ 
+-	return ret ? ret : sprintf(buf, "%d\n", trip.hysteresis);
++	return ret ? ret : sprintf(buf, "%d\n", temperature);
+ }
+ 
+ static ssize_t
+@@ -408,20 +440,23 @@ static int create_trip_attrs(struct thermal_zone_device *tz, int mask)
+ 		return -ENOMEM;
+ 	}
+ 
+-	tz->trip_hyst_attrs = kcalloc(tz->num_trips,
+-				      sizeof(*tz->trip_hyst_attrs),
+-				      GFP_KERNEL);
+-	if (!tz->trip_hyst_attrs) {
+-		kfree(tz->trip_type_attrs);
+-		kfree(tz->trip_temp_attrs);
+-		return -ENOMEM;
++	if (tz->ops->get_trip_hyst) {
++		tz->trip_hyst_attrs = kcalloc(tz->num_trips,
++					      sizeof(*tz->trip_hyst_attrs),
++					      GFP_KERNEL);
++		if (!tz->trip_hyst_attrs) {
++			kfree(tz->trip_type_attrs);
++			kfree(tz->trip_temp_attrs);
++			return -ENOMEM;
++		}
+ 	}
+ 
+ 	attrs = kcalloc(tz->num_trips * 3 + 1, sizeof(*attrs), GFP_KERNEL);
+ 	if (!attrs) {
+ 		kfree(tz->trip_type_attrs);
+ 		kfree(tz->trip_temp_attrs);
+-		kfree(tz->trip_hyst_attrs);
++		if (tz->ops->get_trip_hyst)
++			kfree(tz->trip_hyst_attrs);
+ 		return -ENOMEM;
+ 	}
+ 
+@@ -454,6 +489,9 @@ static int create_trip_attrs(struct thermal_zone_device *tz, int mask)
+ 		}
+ 		attrs[indx + tz->num_trips] = &tz->trip_temp_attrs[indx].attr.attr;
+ 
++		/* create Optional trip hyst attribute */
++		if (!tz->ops->get_trip_hyst)
++			continue;
+ 		snprintf(tz->trip_hyst_attrs[indx].name, THERMAL_NAME_LENGTH,
+ 			 "trip_point_%d_hyst", indx);
+ 
+@@ -490,7 +528,8 @@ static void destroy_trip_attrs(struct thermal_zone_device *tz)
+ 
+ 	kfree(tz->trip_type_attrs);
+ 	kfree(tz->trip_temp_attrs);
+-	kfree(tz->trip_hyst_attrs);
++	if (tz->ops->get_trip_hyst)
++		kfree(tz->trip_hyst_attrs);
+ 	kfree(tz->trips_attribute_group.attrs);
+ }
+ 
+diff --git a/drivers/thermal/ti-soc-thermal/ti-thermal.h b/drivers/thermal/ti-soc-thermal/ti-thermal.h
+index 4fd2c20182d7..c388ecf31834 100644
+--- a/drivers/thermal/ti-soc-thermal/ti-thermal.h
++++ b/drivers/thermal/ti-soc-thermal/ti-thermal.h
+@@ -38,6 +38,21 @@
+ /* Update rates */
+ #define FAST_TEMP_MONITORING_RATE				250
+ 
++/* helper macros */
++/**
++ * ti_thermal_get_trip_value - returns trip temperature based on index
++ * @i:	trip index
++ */
++#define ti_thermal_get_trip_value(i)					\
++	(OMAP_TRIP_HOT + ((i) * OMAP_TRIP_STEP))
++
++/**
++ * ti_thermal_is_valid_trip - check for trip index
++ * @i:	trip index
++ */
++#define ti_thermal_is_valid_trip(trip)				\
++	((trip) >= 0 && (trip) < OMAP_TRIP_NUMBER)
++
+ #ifdef CONFIG_TI_THERMAL
+ int ti_thermal_expose_sensor(struct ti_bandgap *bgp, int id, char *domain);
+ int ti_thermal_remove_sensor(struct ti_bandgap *bgp, int id);
+diff --git a/drivers/thermal/uniphier_thermal.c b/drivers/thermal/uniphier_thermal.c
+index 277ae300c5b1..4111d99ef50e 100644
+--- a/drivers/thermal/uniphier_thermal.c
++++ b/drivers/thermal/uniphier_thermal.c
+@@ -248,7 +248,8 @@ static int uniphier_tm_probe(struct platform_device *pdev)
+ 	struct regmap *regmap;
+ 	struct device_node *parent;
+ 	struct uniphier_tm_dev *tdev;
+-	int i, ret, irq, crit_temp = INT_MAX;
++	const struct thermal_trip *trips;
++	int i, ret, irq, ntrips, crit_temp = INT_MAX;
+ 
+ 	tdev = devm_kzalloc(dev, sizeof(*tdev), GFP_KERNEL);
+ 	if (!tdev)
+@@ -295,18 +296,20 @@ static int uniphier_tm_probe(struct platform_device *pdev)
+ 		return PTR_ERR(tdev->tz_dev);
+ 	}
+ 
+-	/* set alert temperatures */
+-	for (i = 0; i < thermal_zone_get_num_trips(tdev->tz_dev); i++) {
+-		struct thermal_trip trip;
+-
+-		ret = thermal_zone_get_trip(tdev->tz_dev, i, &trip);
+-		if (ret)
+-			return ret;
++	/* get trip points */
++	trips = of_thermal_get_trip_points(tdev->tz_dev);
++	ntrips = of_thermal_get_ntrips(tdev->tz_dev);
++	if (ntrips > ALERT_CH_NUM) {
++		dev_err(dev, "thermal zone has too many trips\n");
++		return -E2BIG;
++	}
+ 
+-		if (trip.type == THERMAL_TRIP_CRITICAL &&
+-		    trip.temperature < crit_temp)
+-			crit_temp = trip.temperature;
+-		uniphier_tm_set_alert(tdev, i, trip.temperature);
++	/* set alert temperatures */
++	for (i = 0; i < ntrips; i++) {
++		if (trips[i].type == THERMAL_TRIP_CRITICAL &&
++		    trips[i].temperature < crit_temp)
++			crit_temp = trips[i].temperature;
++		uniphier_tm_set_alert(tdev, i, trips[i].temperature);
+ 		tdev->alert_en[i] = true;
+ 	}
+ 	if (crit_temp > CRITICAL_TEMP_LIMIT) {
+diff --git a/include/linux/thermal.h b/include/linux/thermal.h
+index 66373f872237..a5a18351a898 100644
+--- a/include/linux/thermal.h
++++ b/include/linux/thermal.h
+@@ -335,16 +335,6 @@ static inline void devm_thermal_of_zone_unregister(struct device *dev,
+ }
+ #endif
+ 
+-int thermal_zone_get_trip(struct thermal_zone_device *tz, int trip_id,
+-			  struct thermal_trip *trip);
+-
+-int thermal_zone_set_trip(struct thermal_zone_device *tz, int trip_id,
+-			  const struct thermal_trip *trip);
+-
+-int thermal_zone_get_num_trips(struct thermal_zone_device *tz);
+-
+-int thermal_zone_get_crit_temp(struct thermal_zone_device *tz, int *temp);
+-
+ #ifdef CONFIG_THERMAL
+ struct thermal_zone_device *thermal_zone_device_register(const char *, int, int,
+ 		void *, struct thermal_zone_device_ops *,
+-- 
+2.37.3
+
