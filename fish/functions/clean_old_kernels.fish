@@ -6,7 +6,7 @@ function clean_old_kernels -d "Clean up old installed kernels"
     set distro (get_distro)
     switch $distro
         case fedora
-            set -l kernels (rpm -q kernel{,-{core,modules}} | fzf -m | sed "s;.$(uname -m);;g")
+            set -l kernels (rpm -q kernel{,-{core,modules}} | grep -v (uname -r | string replace -a - _) | string replace -a .(uname -m) "" | fzf -m)
             if test -n "$kernels"
                 sudo dnf remove -y $kernels
             end
