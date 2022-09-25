@@ -16,6 +16,9 @@ function dbxc -d "Shorthand for 'distrobox create'"
                 set -a add_args $arg $argv[$next]
                 set i $next
 
+            case -s --skip-cbl
+                set skip_cbl true
+
             case --ephemeral
                 set mode ephemeral
 
@@ -66,7 +69,7 @@ function dbxc -d "Shorthand for 'distrobox create'"
     # If we are using a development image AND it is the default one for our
     # architecture (to avoid weird dynamic linking failures), use the binaries
     # in $CBL by default
-    if test "$img" = $GHCR/(get_dev_img)
+    if test "$img" = $GHCR/(get_dev_img); and not set -q skip_cbl
         set -a add_args --env=USE_CBL=1
     end
 
