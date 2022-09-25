@@ -18,8 +18,8 @@ source=(
   "$pkgname::git+https://git.kernel.org/pub/scm/linux/kernel/git/next/linux-next.git?signed#tag=$_srctag"
   config
   20220922_nathan_asoc_intel_sof_da7219_mx98360a_access_num_codecs_through_dai_link.patch
+  20220925_lorenzo_net_netfilter_move_bpf_ct_set_nat_info_kfunc_in_nf_nat_bpf_c.patch
   thermal-Revert-Rework-the-trip-points-creation.patch
-  Revert-net-netfilter-add-bpf_ct_set_nat_info-kfunc-h.patch
 )
 
 validpgpkeys=(
