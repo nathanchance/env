@@ -193,10 +193,28 @@ function upd -d "Runs the update command for the current distro or downloads/upd
             ####################################
             # PREBUILT OR PODMAN BASED INSTALL #
             ####################################
+            if in_container
+                set binary /usr/local/bin/$target
+                set completions $__fish_sysconf_dir/completions
+
+                set chmod sudo chmod
+                set curl sudo curl -LSs
+                set install sudo install
+                set mkdir sudo mkdir
+
+                sudo true; or return
+            else
+                set binary $BIN_FOLDER/$target
+                set completions $__fish_config_dir/completions
+
+                set chmod chmod
+                set curl curl -LSs
+                set install install
+                set mkdir mkdir
+            end
+
             set work_dir (mktemp -d)
             pushd $work_dir; or return
-
-            set binary $BIN_FOLDER/$target
 
             switch (uname -m)
                 case aarch64
@@ -240,10 +258,10 @@ function upd -d "Runs the update command for the current distro or downloads/upd
                     crl $url | tar -xzf -; or return
                     cd (string replace ".tar.gz" "" (basename $url)); or return
 
-                    install -Dvm755 $target $binary
+                    $install -Dvm755 $target $binary
                     switch $target
                         case bat fd hyperfine
-                            install -Dvm644 autocomplete/$target.fish $__fish_config_dir/completions/$target.fish
+                            $install -Dvm644 autocomplete/$target.fish $completions/$target.fish
                     end
 
                 case btop
@@ -263,11 +281,15 @@ function upd -d "Runs the update command for the current distro or downloads/upd
 
                     crl $url | tar -xjf -; or return
 
-                    set -l prefix $BIN_FOLDER/btop
-                    rm -fr $prefix
-                    install -Dvm755 -t $prefix/bin bin/$target
+                    if in_container
+                        set -l prefix /usr/local
+                    else
+                        set -l prefix $BIN_FOLDER/btop
+                        rm -fr $prefix
+                    end
+                    $install -Dvm755 -t $prefix/bin bin/$target
                     for theme in themes/*
-                        install -Dvm755 -t $prefix/share/btop/themes $theme
+                        $install -Dvm755 -t $prefix/share/btop/themes $theme
                     end
                     set binary $prefix/bin/btop
 
@@ -283,7 +305,7 @@ function upd -d "Runs the update command for the current distro or downloads/upd
 
                     crl $url | tar -C $work_dir -xzf -; or return
 
-                    install -Dvm755 $work_dir/duf $binary
+                    $install -Dvm755 $work_dir/duf $binary
 
                 case exa
                     switch (uname -m)
@@ -295,8 +317,8 @@ function upd -d "Runs the update command for the current distro or downloads/upd
                             crl -O $url; or return
                             unzip (basename $url); or return
 
-                            install -Dvm755 bin/exa $binary
-                            install -Dvm644 completions/exa.fish $__fish_config_dir/completions/exa.fish
+                            $install -Dvm755 bin/exa $binary
+                            $install -Dvm644 completions/exa.fish $completions/exa.fish
                     end
 
                 case fzf
@@ -312,7 +334,7 @@ function upd -d "Runs the update command for the current distro or downloads/upd
                     set url https://github.com/$repo/releases/download/$ver/fzf-$ver-linux_$arch.tar.gz
 
                     crl $url | tar -xzf -
-                    install -Dvm755 fzf $binary
+                    $install -Dvm755 fzf $binary
 
                 case gh
                     switch $arch
@@ -329,7 +351,7 @@ function upd -d "Runs the update command for the current distro or downloads/upd
                     crl $url | tar -xzf -
                     cd (string replace ".tar.gz" "" (basename $url)); or return
 
-                    install -Dvm755 bin/gh $binary
+                    $install -Dvm755 bin/gh $binary
 
                 case iosevka
                     if in_container
@@ -352,9 +374,9 @@ function upd -d "Runs the update command for the current distro or downloads/upd
                         print_warning "$target requires an unversioned python binary, skipping..."
                         continue
                     end
-                    mkdir -p (dirname $binary)
-                    crl -o $binary https://storage.googleapis.com/git-repo-downloads/repo
-                    chmod a+x $binary
+                    $mkdir -p (dirname $binary)
+                    $curl -o $binary https://storage.googleapis.com/git-repo-downloads/repo
+                    $chmod a+x $binary
 
                 case rg
                     switch $arch
@@ -365,7 +387,7 @@ function upd -d "Runs the update command for the current distro or downloads/upd
 
                             crl $url | tar -xzf -; or return
 
-                            install -Dvm755 rg $binary
+                            $install -Dvm755 rg $binary
 
                         case x86_64
                             set repo BurntSushi/ripgrep
@@ -375,8 +397,8 @@ function upd -d "Runs the update command for the current distro or downloads/upd
                             crl $url | tar -xzf -; or return
                             cd (string replace '.tar.gz' '' (basename $url)); or return
 
-                            install -Dvm755 rg $binary
-                            install -Dvm644 complete/rg.fish $__fish_config_dir/completions/rg.fish
+                            $install -Dvm755 rg $binary
+                            $install -Dvm644 complete/rg.fish $completions/rg.fish
                     end
 
                 case shellcheck
@@ -394,7 +416,7 @@ function upd -d "Runs the update command for the current distro or downloads/upd
                     crl $url | tar -xJf -
                     cd shellcheck-$ver; or return
 
-                    install -Dvm755 shellcheck $binary
+                    $install -Dvm755 shellcheck $binary
 
                 case shfmt
                     switch $arch
@@ -406,9 +428,9 @@ function upd -d "Runs the update command for the current distro or downloads/upd
                     set ver (glr $repo)
                     set url https://github.com/$repo/releases/download/$ver/shfmt_"$ver"_linux_$arch
 
-                    mkdir -p (dirname $binary)
-                    crl -o $binary $url
-                    chmod +x $binary
+                    $mkdir -p (dirname $binary)
+                    $curl -o $binary $url
+                    $chmod +x $binary
 
                 case dev lei
                     oci_bld $target
