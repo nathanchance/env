@@ -75,9 +75,9 @@ function kmake -d "Run make with all cores and adjust PATH temporarily"
                     print_error "\$LLVM is set to something other than 1 but this kernel does not support that!"
                     return 1
                 end
-                if string match -qr / $LLVM
+                if string match -qr / -- $LLVM
                     set CC "$LLVM"clang
-                else if string match -qr - $LLVM
+                else if string match -qr - -- $LLVM
                     set CC clang$LLVM
                 end
             end
