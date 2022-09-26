@@ -17,9 +17,10 @@ options=('!strip')
 source=(
   "$pkgname::git+https://git.kernel.org/pub/scm/linux/kernel/git/next/linux-next.git?signed#tag=$_srctag"
   config
+  thermal-Diff-of-v4-v5-of-Rework-the-trip-points-crea.patch
   20220922_nathan_asoc_intel_sof_da7219_mx98360a_access_num_codecs_through_dai_link.patch
+  20220923_nathan_thermal_intel_int340x_initialized_ret_in_error_path_in_int340x_thermal_zone_add.patch
   20220925_lorenzo_net_netfilter_move_bpf_ct_set_nat_info_kfunc_in_nf_nat_bpf_c.patch
-  thermal-Revert-Rework-the-trip-points-creation.patch
 )
 
 validpgpkeys=(
@@ -27,10 +28,11 @@ validpgpkeys=(
   '3F2568AAC26998F9E813A1C5C3F436CA30F5D8EB'  # Mark Brown
 )
 sha256sums=('SKIP'
-            '7106a9a23f77c132b0595321bcf1f9fc66a5ffe7a1966adbba2bb82304a1b84f'
+            'e6436ed7cf2f16685e2696f6502ba3c8b33fa9c5a7e3dcb2d578304656ae6db0'
+            'ca1aea71b73b795106402fc3cbd1c18070cafe4674a39fd881e6da77dd164343'
             '47c702fa00720fab3f6aae036e146cc7f5cc8033661633b02b376c5632847382'
-            'b6d2d3e6f4376c8664bf8d0d760a4afe440827df7ae221c4596c9f6d2e25adcf'
-            'bf7c69080d7beb017cb9ee0f697b5e32a5594ac7c8ddd20eb71eef0c0d045a92')
+            'f14a81baba1ec4888f2fd30b0d107f36da1511d1e0c573e0971eed240b5ace7c'
+            'a8c532390c1c9c58dd5f96496480800a3cb6cbdca89b84328f5fcb5e3fd13ad8')
 
 # This obviously ties this PKGBUILD to my machine but that is kind of the point :)
 _kmake() {

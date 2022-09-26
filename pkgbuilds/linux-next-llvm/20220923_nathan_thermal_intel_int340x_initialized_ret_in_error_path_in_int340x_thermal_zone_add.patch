@@ -1,0 +1,62 @@
+From git@z Thu Jan  1 00:00:00 1970
+Subject: [PATCH] thermal/intel/int340x: Initialized ret in error path in int340x_thermal_zone_add()
+From: Nathan Chancellor <nathan@kernel.org>
+Date: Fri, 23 Sep 2022 08:20:09 -0700
+Message-Id: <20220923152009.1721739-1-nathan@kernel.org>
+To: "Rafael J. Wysocki" <rafael@kernel.org>, Daniel Lezcano <daniel.lezcano@linaro.org>
+Cc: Amit Kucheria <amitk@kernel.org>, Zhang Rui <rui.zhang@intel.com>, Srinivas Pandruvada <srinivas.pandruvada@linux.intel.com>, Nick Desaulniers <ndesaulniers@google.com>, Tom Rix <trix@redhat.com>, linux-pm@vger.kernel.org, linux-kernel@vger.kernel.org, llvm@lists.linux.dev, Nathan Chancellor <nathan@kernel.org>, "kernelci.org bot" <bot@kernelci.org>, "Sudip Mukherjee (Codethink)" <sudipm.mukherjee@gmail.com>
+List-Id: <llvm.lists.linux.dev>
+MIME-Version: 1.0
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 7bit
+
+Clang warns:
+
+  drivers/thermal/intel/int340x_thermal/int340x_thermal_zone.c:222:6: error: variable 'ret' is used uninitialized whenever 'if' condition is true [-Werror,-Wsometimes-uninitialized]
+          if (!int34x_thermal_zone->ops)
+              ^~~~~~~~~~~~~~~~~~~~~~~~~
+  drivers/thermal/intel/int340x_thermal/int340x_thermal_zone.c:279:17: note: uninitialized use occurs here
+          return ERR_PTR(ret);
+                        ^~~
+  drivers/thermal/intel/int340x_thermal/int340x_thermal_zone.c:222:2: note: remove the 'if' if its condition is always false
+          if (!int34x_thermal_zone->ops)
+          ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  drivers/thermal/intel/int340x_thermal/int340x_thermal_zone.c:211:9: note: initialize the variable 'ret' to silence this warning
+          int ret;
+                ^
+                  = 0
+  1 error generated.
+
+If kmemdup() fails, -ENOMEM should be returned.
+
+Fixes: f6f6f9a01374 ("thermal/intel/int340x: Replace parameter to simplify")
+Link: https://github.com/ClangBuiltLinux/linux/issues/1717
+Reported-by: "kernelci.org bot" <bot@kernelci.org>
+Reported-by: "Sudip Mukherjee (Codethink)" <sudipm.mukherjee@gmail.com>
+Link: https://lore.kernel.org/r/20220923152009.1721739-1-nathan@kernel.org
+Signed-off-by: Nathan Chancellor <nathan@kernel.org>
+---
+ drivers/thermal/intel/int340x_thermal/int340x_thermal_zone.c | 4 +++-
+ 1 file changed, 3 insertions(+), 1 deletion(-)
+
+diff --git a/drivers/thermal/intel/int340x_thermal/int340x_thermal_zone.c b/drivers/thermal/intel/int340x_thermal/int340x_thermal_zone.c
+index ea05be8c2834..228f44260b27 100644
+--- a/drivers/thermal/intel/int340x_thermal/int340x_thermal_zone.c
++++ b/drivers/thermal/intel/int340x_thermal/int340x_thermal_zone.c
+@@ -219,8 +219,10 @@ struct int34x_thermal_zone *int340x_thermal_zone_add(struct acpi_device *adev,
+ 
+ 	int34x_thermal_zone->ops = kmemdup(&int340x_thermal_zone_ops,
+ 					   sizeof(int340x_thermal_zone_ops), GFP_KERNEL);
+-	if (!int34x_thermal_zone->ops)
++	if (!int34x_thermal_zone->ops) {
++		ret = -ENOMEM;
+ 		goto err_ops_alloc;
++	}
+ 
+ 	if (get_temp)
+ 		int34x_thermal_zone->ops->get_temp = get_temp;
+
+base-commit: 2b109cffe6836f0bb464639cdcc59fc537e3ba41
+-- 
+2.37.3
+
