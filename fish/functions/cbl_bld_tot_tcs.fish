@@ -144,6 +144,14 @@ function cbl_bld_tot_tcs -d "Build LLVM and binutils from source for kernel deve
     set -a reverts e07ead85a368173a56e96a21d6841aa497ad80f8
     for revert in $reverts
         if not git -C $llvm_project rv -n $revert
+            switch $revert
+                case e07ead85a368173a56e96a21d6841aa497ad80f8
+                    git -C $llvm_project rf clang/docs/ReleaseNotes.rst
+                    set conflicts (git -C $llvm_project cf)
+                    if test -z "$conflicts"
+                        continue
+                    end
+            end
             set message "Failed to revert $revert"
             print_error "$message"
             tg_msg "$message"
