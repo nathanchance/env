@@ -22,7 +22,7 @@ function cbl_gen_archconfig -d "Generate a configuration file for Arch Linux"
                     -e LTO_CLANG_THIN
             case -m --menuconfig
                 set menuconfig true
-            case linux-cfi linux-debug linux-mainline-'*' linux-next-'*'
+            case linux-debug linux-mainline-'*' linux-next-'*'
                 set pkg $arg
         end
     end

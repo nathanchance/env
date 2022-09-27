@@ -11,7 +11,7 @@ function cbl_bld_krnl_pkg -d "Build ClangBuiltLinux Arch Linux kernel package"
                 set -a config_args $arg
             case -p --permissive
                 set -a config_args --cfi-permissive
-            case '*'cfi '*'debug '*'mainline'*' '*'next'*'
+            case '*'debug '*'mainline'*' '*'next'*'
                 set pkg linux-(string replace 'linux-' '' $arg)
         end
     end
@@ -27,9 +27,6 @@ function cbl_bld_krnl_pkg -d "Build ClangBuiltLinux Arch Linux kernel package"
     rm -- *.tar.zst
 
     # Generate .config
-    if test $pkg = linux-cfi
-        set -a config_args --cfi
-    end
     cbl_gen_archconfig $config_args $pkg; or return
 
     # Update the pkgver if using a local tree
