@@ -17,7 +17,6 @@ function cbl_rb_fd -d "Rebase generic Fedora kernel on latest linux-next"
     for patch in $patches
         b4 shazam -l -P _ -s $patch; or return
     end
-    git am $ENV_FOLDER/pkgbuilds/linux-next-llvm/thermal-Diff-of-v4-v5-of-Rework-the-trip-points-crea.patch; or return
 
     # Build kernel
     cbl_bld_krnl_rpm --cfi --lto arm64; or return
