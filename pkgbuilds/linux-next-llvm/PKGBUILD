@@ -17,6 +17,7 @@ options=('!strip')
 source=(
   "$pkgname::git+https://git.kernel.org/pub/scm/linux/kernel/git/next/linux-next.git?signed#tag=$_srctag"
   config
+  20220922_nathan_drm_i915_fix_cfi_violations_in_gt_sysfs.patch
   20220925_lorenzo_net_netfilter_move_bpf_ct_set_nat_info_kfunc_in_nf_nat_bpf_c.patch
 )
 
@@ -25,7 +26,8 @@ validpgpkeys=(
   '3F2568AAC26998F9E813A1C5C3F436CA30F5D8EB'  # Mark Brown
 )
 sha256sums=('SKIP'
-            '5629af5ef24d07d0aaf3705b6786a3fbf5ecf4e104971f496929d52f27e9f11c'
+            '43ffe09260aaf72bdd787926d70b67f9c05df886596d575773bfda3225391126'
+            '4b6d2684773d5df9281c4b020b78726bbe044c84a85bc608e69fd922e07b0945'
             'a8c532390c1c9c58dd5f96496480800a3cb6cbdca89b84328f5fcb5e3fd13ad8')
 
 # This obviously ties this PKGBUILD to my machine but that is kind of the point :)
