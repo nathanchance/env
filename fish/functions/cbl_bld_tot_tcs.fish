@@ -139,19 +139,8 @@ function cbl_bld_tot_tcs -d "Build LLVM and binutils from source for kernel deve
     end
 
     # Add patches to revert here
-    # Title: [Clang] Warn when trying to dereference void pointers in C
-    # Reason: https://github.com/ClangBuiltLinux/linux/issues/1720
-    set -a reverts e07ead85a368173a56e96a21d6841aa497ad80f8
     for revert in $reverts
         if not git -C $llvm_project rv -n $revert
-            switch $revert
-                case e07ead85a368173a56e96a21d6841aa497ad80f8
-                    git -C $llvm_project rf clang/docs/ReleaseNotes.rst
-                    set conflicts (git -C $llvm_project cf)
-                    if test -z "$conflicts"
-                        continue
-                    end
-            end
             set message "Failed to revert $revert"
             print_error "$message"
             tg_msg "$message"
@@ -160,6 +149,9 @@ function cbl_bld_tot_tcs -d "Build LLVM and binutils from source for kernel deve
     end
 
     # Add in-review patches here
+    # Title: [Clang] Don't warn if deferencing void pointers in unevaluated context
+    # Link: https://reviews.llvm.org/D134702
+    set -a revisions D134702
     for revision in $revisions
         set -l git_ap_args
         if not crl "https://reviews.llvm.org/$revision?download=true" | git -C $llvm_project ap $git_ap_args
