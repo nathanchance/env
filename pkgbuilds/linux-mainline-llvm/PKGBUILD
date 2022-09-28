@@ -18,6 +18,7 @@ options=('!strip')
 source=(
   "$pkgname::git+https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git?signed#tag=$_srctag"
   config
+  x86-Kconfig-Check-for-ms_abi-attribute-support-for-C.patch
   https://github.com/pop-os/system76-io-dkms/raw/master/system76-io.c
   https://github.com/pop-os/system76-io-dkms/raw/master/system76-io_dev.c
   https://github.com/pop-os/system76-io-dkms/raw/master/system76-io_hwmon.c
@@ -27,6 +28,7 @@ validpgpkeys=(
 )
 sha256sums=('SKIP'
             '015c4db00b72373438db6af2c022964c5368da65874aa464b275c189dc6bffb7'
+            'ff725793bb40b7603641b43dc33cf5dd64a82d330fc8fc9d8907ae2ef0257b3c'
             'd569ee2fbd072a09e89196779ccc0dfd008d5a79a0cec5fa80cc7ed99a3027fa'
             '7276b7fb345f6a5156c594969a01e1ab63e864e0b3ed646bf5132b8301fa4975'
             '26b42e2a48cc4666ad6f85eb4d0fe87f30ea0097d6c1cff4f45e0e3330382916')
