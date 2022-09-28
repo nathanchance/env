@@ -24,6 +24,11 @@ function cbl_rb_pi -d "Rebase Raspberry Pi kernel on latest linux-next"
     for patch in $patches
         b4 am -l -o - -P _ -s $patch | git am; or return
     end
+    sed -i 's;if (sc->gfp_mask \& __GFP_ATOMIC);if (!(sc->gfp_mask \& __GFP_DIRECT_RECLAIM));g' drivers/gpu/drm/msm/msm_gem_shrinker.c
+    git add drivers/gpu/drm/msm/msm_gem_shrinker.c
+    git c -m "drm/msm/gem: Account for 'mm: discard __GFP_ATOMIC'
+
+Link: https://lore.kernel.org/20220906210348.4744da42@canb.auug.org.au/"; or return
 
     # Regenerate defconfigs
     for arch in arm arm64
