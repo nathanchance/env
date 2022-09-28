@@ -149,9 +149,6 @@ function cbl_bld_tot_tcs -d "Build LLVM and binutils from source for kernel deve
     end
 
     # Add in-review patches here
-    # Title: [Clang] Don't warn if deferencing void pointers in unevaluated context
-    # Link: https://reviews.llvm.org/D134702
-    set -a revisions D134702
     for revision in $revisions
         set -l git_ap_args
         if not crl "https://reviews.llvm.org/$revision?download=true" | git -C $llvm_project ap $git_ap_args
