@@ -281,10 +281,11 @@ function upd -d "Runs the update command for the current distro or downloads/upd
 
                     crl $url | tar -xjf -; or return
 
+                    set -l prefix
                     if in_container
-                        set -l prefix /usr/local
+                        set prefix /usr/local
                     else
-                        set -l prefix $BIN_FOLDER/btop
+                        set prefix $BIN_FOLDER/btop
                         rm -fr $prefix
                     end
                     $install -Dvm755 -t $prefix/bin bin/$target
