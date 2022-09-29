@@ -1,10 +1,10 @@
 From git@z Thu Jan  1 00:00:00 1970
-Subject: [PATCH] net: netfilter: move bpf_ct_set_nat_info kfunc in nf_nat_bpf.c
+Subject: [PATCH v2] net: netfilter: move bpf_ct_set_nat_info kfunc in nf_nat_bpf.c
 From: Lorenzo Bianconi <lorenzo@kernel.org>
-Date: Sun, 25 Sep 2022 15:26:12 +0200
-Message-Id: <ddd17d808fe25917893eb035b20146479810124c.1664111646.git.lorenzo@kernel.org>
+Date: Fri, 30 Sep 2022 00:38:43 +0200
+Message-Id: <51a65513d2cda3eeb0754842e8025ab3966068d8.1664490511.git.lorenzo@kernel.org>
 To: bpf@vger.kernel.org
-Cc: netdev@vger.kernel.org, ast@kernel.org, daniel@iogearbox.net, andrii@kernel.org, davem@davemloft.net, kuba@kernel.org, edumazet@google.com, pabeni@redhat.com, pablo@netfilter.org, fw@strlen.de, netfilter-devel@vger.kernel.org, lorenzo.bianconi@redhat.com, brouer@redhat.com, toke@redhat.com, memxor@gmail.com, nathan@kernel.org
+Cc: netdev@vger.kernel.org, ast@kernel.org, daniel@iogearbox.net, andrii@kernel.org, davem@davemloft.net, kuba@kernel.org, edumazet@google.com, pabeni@redhat.com, pablo@netfilter.org, fw@strlen.de, netfilter-devel@vger.kernel.org, lorenzo.bianconi@redhat.com, brouer@redhat.com, toke@redhat.com, memxor@gmail.com, nathan@kernel.org, martin.lau@linux.dev, ykaliuta@redhat.com
 List-Id: <bpf.vger.kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
@@ -16,20 +16,23 @@ moving bpf_ct_set_nat_info kfunc in nf_nat_bpf.c
 Fixes: 0fabd2aa199f ("net: netfilter: add bpf_ct_set_nat_info kfunc helper")
 Suggested-by: Kumar Kartikeya Dwivedi <memxor@gmail.com>
 Tested-by: Nathan Chancellor <nathan@kernel.org>
+Tested-by: Yauheni Kaliuta <ykaliuta@redhat.com>
 Signed-off-by: Lorenzo Bianconi <lorenzo@kernel.org>
-Link: https://lore.kernel.org/r/ddd17d808fe25917893eb035b20146479810124c.1664111646.git.lorenzo@kernel.org
+Link: https://lore.kernel.org/r/51a65513d2cda3eeb0754842e8025ab3966068d8.1664490511.git.lorenzo@kernel.org
 ---
- include/net/netfilter/nf_conntrack_bpf.h |  5 ++
- include/net/netfilter/nf_nat.h           | 14 +++++
+Changes since v1:
+- move register_nf_nat_bpf declaration in nf_conntrack_bpf.h
+---
+ include/net/netfilter/nf_conntrack_bpf.h | 19 ++++++
  net/netfilter/Makefile                   |  6 ++
- net/netfilter/nf_conntrack_bpf.c         | 49 ---------------
+ net/netfilter/nf_conntrack_bpf.c         | 50 ---------------
  net/netfilter/nf_nat_bpf.c               | 79 ++++++++++++++++++++++++
- net/netfilter/nf_nat_core.c              |  2 +-
- 6 files changed, 105 insertions(+), 50 deletions(-)
+ net/netfilter/nf_nat_core.c              |  4 +-
+ 5 files changed, 106 insertions(+), 52 deletions(-)
  create mode 100644 net/netfilter/nf_nat_bpf.c
 
 diff --git a/include/net/netfilter/nf_conntrack_bpf.h b/include/net/netfilter/nf_conntrack_bpf.h
-index c8b80add1142..1ce46e406062 100644
+index c8b80add1142..2d0da478c8e0 100644
 --- a/include/net/netfilter/nf_conntrack_bpf.h
 +++ b/include/net/netfilter/nf_conntrack_bpf.h
 @@ -4,6 +4,11 @@
@@ -44,13 +47,9 @@ index c8b80add1142..1ce46e406062 100644
  
  #if (IS_BUILTIN(CONFIG_NF_CONNTRACK) && IS_ENABLED(CONFIG_DEBUG_INFO_BTF)) || \
      (IS_MODULE(CONFIG_NF_CONNTRACK) && IS_ENABLED(CONFIG_DEBUG_INFO_BTF_MODULES))
-diff --git a/include/net/netfilter/nf_nat.h b/include/net/netfilter/nf_nat.h
-index e9eb01e99d2f..cd084059a953 100644
---- a/include/net/netfilter/nf_nat.h
-+++ b/include/net/netfilter/nf_nat.h
-@@ -68,6 +68,20 @@ static inline bool nf_nat_oif_changed(unsigned int hooknum,
+@@ -24,4 +29,18 @@ static inline void cleanup_nf_conntrack_bpf(void)
+ 
  #endif
- }
  
 +#if (IS_BUILTIN(CONFIG_NF_NAT) && IS_ENABLED(CONFIG_DEBUG_INFO_BTF)) || \
 +    (IS_MODULE(CONFIG_NF_NAT) && IS_ENABLED(CONFIG_DEBUG_INFO_BTF_MODULES))
@@ -66,9 +65,7 @@ index e9eb01e99d2f..cd084059a953 100644
 +
 +#endif
 +
- int nf_nat_register_fn(struct net *net, u8 pf, const struct nf_hook_ops *ops,
- 		       const struct nf_hook_ops *nat_ops, unsigned int ops_count);
- void nf_nat_unregister_fn(struct net *net, u8 pf, const struct nf_hook_ops *ops,
+ #endif /* _NF_CONNTRACK_BPF_H */
 diff --git a/net/netfilter/Makefile b/net/netfilter/Makefile
 index 06df49ea6329..0f060d100880 100644
 --- a/net/netfilter/Makefile
@@ -87,18 +84,21 @@ index 06df49ea6329..0f060d100880 100644
  obj-$(CONFIG_NF_NAT_AMANDA) += nf_nat_amanda.o
  obj-$(CONFIG_NF_NAT_FTP) += nf_nat_ftp.o
 diff --git a/net/netfilter/nf_conntrack_bpf.c b/net/netfilter/nf_conntrack_bpf.c
-index 756ea818574e..f4ba4ff3a63b 100644
+index 756ea818574e..8639e7efd0e2 100644
 --- a/net/netfilter/nf_conntrack_bpf.c
 +++ b/net/netfilter/nf_conntrack_bpf.c
-@@ -14,7 +14,6 @@
+@@ -14,10 +14,8 @@
  #include <linux/types.h>
  #include <linux/btf_ids.h>
  #include <linux/net_namespace.h>
 -#include <net/netfilter/nf_conntrack.h>
  #include <net/netfilter/nf_conntrack_bpf.h>
  #include <net/netfilter/nf_conntrack_core.h>
- #include <net/netfilter/nf_nat.h>
-@@ -239,10 +238,6 @@ __diag_push();
+-#include <net/netfilter/nf_nat.h>
+ 
+ /* bpf_ct_opts - Options for CT lookup helpers
+  *
+@@ -239,10 +237,6 @@ __diag_push();
  __diag_ignore_all("-Wmissing-prototypes",
  		  "Global functions as their definitions will be in nf_conntrack BTF");
  
@@ -109,7 +109,7 @@ index 756ea818574e..f4ba4ff3a63b 100644
  /* bpf_xdp_ct_alloc - Allocate a new CT entry
   *
   * Parameters:
-@@ -476,49 +471,6 @@ int bpf_ct_change_status(struct nf_conn *nfct, u32 status)
+@@ -476,49 +470,6 @@ int bpf_ct_change_status(struct nf_conn *nfct, u32 status)
  	return nf_ct_change_status_common(nfct, status);
  }
  
@@ -159,7 +159,7 @@ index 756ea818574e..f4ba4ff3a63b 100644
  __diag_pop()
  
  BTF_SET8_START(nf_ct_kfunc_set)
-@@ -532,7 +484,6 @@ BTF_ID_FLAGS(func, bpf_ct_set_timeout, KF_TRUSTED_ARGS)
+@@ -532,7 +483,6 @@ BTF_ID_FLAGS(func, bpf_ct_set_timeout, KF_TRUSTED_ARGS)
  BTF_ID_FLAGS(func, bpf_ct_change_timeout, KF_TRUSTED_ARGS)
  BTF_ID_FLAGS(func, bpf_ct_set_status, KF_TRUSTED_ARGS)
  BTF_ID_FLAGS(func, bpf_ct_change_status, KF_TRUSTED_ARGS)
@@ -253,9 +253,18 @@ index 000000000000..0fa5a0bbb0ff
 +					 &nf_bpf_nat_kfunc_set);
 +}
 diff --git a/net/netfilter/nf_nat_core.c b/net/netfilter/nf_nat_core.c
-index 7981be526f26..1ed09c9af5e5 100644
+index 7981be526f26..d8e6380f6337 100644
 --- a/net/netfilter/nf_nat_core.c
 +++ b/net/netfilter/nf_nat_core.c
+@@ -16,7 +16,7 @@
+ #include <linux/siphash.h>
+ #include <linux/rtnetlink.h>
+ 
+-#include <net/netfilter/nf_conntrack.h>
++#include <net/netfilter/nf_conntrack_bpf.h>
+ #include <net/netfilter/nf_conntrack_core.h>
+ #include <net/netfilter/nf_conntrack_helper.h>
+ #include <net/netfilter/nf_conntrack_seqadj.h>
 @@ -1152,7 +1152,7 @@ static int __init nf_nat_init(void)
  	WARN_ON(nf_nat_hook != NULL);
  	RCU_INIT_POINTER(nf_nat_hook, &nat_hook);

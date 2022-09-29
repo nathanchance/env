@@ -18,8 +18,8 @@ source=(
   "$pkgname::git+https://git.kernel.org/pub/scm/linux/kernel/git/next/linux-next.git?signed#tag=$_srctag"
   config
   20220922_nathan_drm_i915_fix_cfi_violations_in_gt_sysfs.patch
-  20220925_lorenzo_net_netfilter_move_bpf_ct_set_nat_info_kfunc_in_nf_nat_bpf_c.patch
   20220929_nathan_x86_kconfig_drop_check_for_mabi_ms_for_config_efi_stub.patch
+  v2_20220930_lorenzo_net_netfilter_move_bpf_ct_set_nat_info_kfunc_in_nf_nat_bpf_c.patch
 )
 
 validpgpkeys=(
@@ -29,8 +29,8 @@ validpgpkeys=(
 sha256sums=('SKIP'
             '953823762e016f440cc909a403478721040d25a225a9fb04cb81524021414599'
             '5982f208f7206ef3fa5163ea9f27cf743051bcdb6bd8e8666182bc346b34cfe8'
-            'a8c532390c1c9c58dd5f96496480800a3cb6cbdca89b84328f5fcb5e3fd13ad8'
-            'd72923d6f0e80d8ada2cc167f2696a0eed34b105315b143be7dfe90cef6b53fe')
+            'd72923d6f0e80d8ada2cc167f2696a0eed34b105315b143be7dfe90cef6b53fe'
+            '6e00d7fb885d8af911c63b9ff4c42452a6fd9eadd2c1caa528d1946a631a779e')
 
 # This obviously ties this PKGBUILD to my machine but that is kind of the point :)
 _kmake() {
