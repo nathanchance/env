@@ -331,6 +331,7 @@ function build_pahole() {
 
     cmake \
         -DBUILD_SHARED_LIBS=OFF \
+        -DCMAKE_BUILD_TYPE=Release \
         -D__LIB=lib \
         "$pahole_src"
 
