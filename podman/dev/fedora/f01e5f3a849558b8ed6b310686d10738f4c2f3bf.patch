@@ -1,0 +1,98 @@
+From f01e5f3a849558b8ed6b310686d10738f4c2f3bf Mon Sep 17 00:00:00 2001
+From: Arnaldo Carvalho de Melo <acme@redhat.com>
+Date: Thu, 29 Sep 2022 09:43:16 -0300
+Subject: dwarf_loader: Support DW_TAG_label outside DW_TAG_lexblock
+
+This happens with asm CUs, noticed when building the Linux kernel with
+clang 15, where we have, for instance:
+
+  Contents of the .debug_info section:
+
+    Compilation Unit @ offset 0x0:
+     Length:        0x1df (32-bit)
+     Version:       5
+     Unit Type:     DW_UT_compile (1)
+     Abbrev Offset: 0x0
+     Pointer Size:  8
+   <0><c>: Abbrev Number: 1 (DW_TAG_compile_unit)
+      <d>   DW_AT_stmt_list   : 0x0
+      <11>   DW_AT_ranges      : 0xc
+      <15>   DW_AT_name        : arch/x86/kernel/verify_cpu.S
+      <32>   DW_AT_comp_dir    : /home/nathan/cbl/src/linux
+      <4d>   DW_AT_producer    : ClangBuiltLinux clang version 16.0.0 (https://github.com/llvm/llvm-project 7e22179d38c438fedb0d9bb0cff1585843bd7082)
+      <c2>   DW_AT_language    : 32769    (MIPS assembler)
+   <1><c4>: Abbrev Number: 2 (DW_TAG_label)
+      <c5>   DW_AT_name        : startup_64
+      <d0>   DW_AT_decl_file   : 0x0
+      <d4>   DW_AT_decl_line   : 0x364
+      <d8>   DW_AT_low_pc      : 0xffffffff81000000
+   <1><e0>: Abbrev Number: 2 (DW_TAG_label)
+      <e1>   DW_AT_name        : secondary_startup_64
+      <f6>   DW_AT_decl_file   : 0x0
+      <fa>   DW_AT_decl_line   : 0x399
+      <fe>   DW_AT_low_pc      : 0xffffffff81000060
+   <1><106>: Abbrev Number: 2 (DW_TAG_label)
+      <107>   DW_AT_name        : secondary_startup_64_no_verify
+      <126>   DW_AT_decl_file   : 0x0
+      <12a>   DW_AT_decl_line   : 0x39f
+      <12e>   DW_AT_low_pc      : 0xffffffff81000065
+   <1><136>: Abbrev Number: 2 (DW_TAG_label)
+      <137>   DW_AT_name        : verify_cpu
+      <142>   DW_AT_decl_file   : 0x0
+      <146>   DW_AT_decl_line   : 0x430
+      <14a>   DW_AT_low_pc      : 0xffffffff81000150
+  <SNIP>
+
+Reported-by: Nathan Chancellor <nathan@kernel.org>
+Cc: Nick Desaulniers <ndesaulniers@google.com>
+Cc: Yonghong Song <yhs@fb.com>
+Link: https://lore.kernel.org/dwarves/YzWSzXKcm6rSWOC5@kernel.org
+Signed-off-by: Arnaldo Carvalho de Melo <acme@redhat.com>
+---
+ dwarf_loader.c | 16 ++++++++++++++--
+ 1 file changed, 14 insertions(+), 2 deletions(-)
+
+diff --git a/dwarf_loader.c b/dwarf_loader.c
+index 631bbd4..28a912e 100644
+--- a/dwarf_loader.c
++++ b/dwarf_loader.c
+@@ -1485,7 +1485,12 @@ static struct tag *die__create_new_label(Dwarf_Die *die,
+ 	if (label == NULL)
+ 		return NULL;
+ 
+-	lexblock__add_label(lexblock, label);
++	if (lexblock != NULL) {
++		// asm CUs have labels and they will be in the cu top level tag list
++		// See die__process_unit()
++		lexblock__add_label(lexblock, label);
++	}
++
+ 	return &label->ip.tag;
+ }
+ 
+@@ -2037,6 +2042,12 @@ static struct tag *__die__process_tag(Dwarf_Die *die, struct cu *cu,
+ 		 */
+ 		tag = &unsupported_tag;
+ 		break;
++	case DW_TAG_label:
++		if (conf->ignore_labels)
++			tag = &unsupported_tag; // callers will assume conf->ignore_labels is true
++		else // We can have labels in asm CUs, no lexblock
++			tag = die__create_new_label(die, NULL, cu, conf);
++		break;
+ 	}
+ 
+ 	if (tag != NULL)
+@@ -2055,7 +2066,8 @@ static int die__process_unit(Dwarf_Die *die, struct cu *cu, struct conf_load *co
+ 		if (tag == &unsupported_tag) {
+ 			// XXX special case DW_TAG_dwarf_procedure, appears when looking at a recent ~/bin/perf
+ 			// Investigate later how to properly support this...
+-			if (dwarf_tag(die) != DW_TAG_dwarf_procedure)
++			if (dwarf_tag(die) != DW_TAG_dwarf_procedure &&
++			    dwarf_tag(die) != DW_TAG_label) // conf->ignore_labels == true, see die__process_tag()
+ 				tag__print_not_supported(dwarf_tag(die));
+ 			continue;
+ 		}
+-- 
+cgit 
+
