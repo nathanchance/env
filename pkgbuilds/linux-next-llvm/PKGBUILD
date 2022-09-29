@@ -19,7 +19,7 @@ source=(
   config
   20220922_nathan_drm_i915_fix_cfi_violations_in_gt_sysfs.patch
   20220925_lorenzo_net_netfilter_move_bpf_ct_set_nat_info_kfunc_in_nf_nat_bpf_c.patch
-  x86-Kconfig-Check-for-ms_abi-attribute-support-for-C.patch
+  20220929_nathan_x86_kconfig_drop_check_for_mabi_ms_for_config_efi_stub.patch
 )
 
 validpgpkeys=(
@@ -30,7 +30,7 @@ sha256sums=('SKIP'
             '22b21881ffb4324eaabd546c4ff9a615ea6b8c08e21f1b8fe3ff5122d625c55d'
             '4b6d2684773d5df9281c4b020b78726bbe044c84a85bc608e69fd922e07b0945'
             'a8c532390c1c9c58dd5f96496480800a3cb6cbdca89b84328f5fcb5e3fd13ad8'
-            'ff725793bb40b7603641b43dc33cf5dd64a82d330fc8fc9d8907ae2ef0257b3c')
+            'd72923d6f0e80d8ada2cc167f2696a0eed34b105315b143be7dfe90cef6b53fe')
 
 # This obviously ties this PKGBUILD to my machine but that is kind of the point :)
 _kmake() {

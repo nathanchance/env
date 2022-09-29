@@ -1,0 +1,57 @@
+From git@z Thu Jan  1 00:00:00 1970
+Subject: [PATCH] x86/Kconfig: Drop check for '-mabi=ms' for CONFIG_EFI_STUB
+From: Nathan Chancellor <nathan@kernel.org>
+Date: Thu, 29 Sep 2022 08:20:10 -0700
+Message-Id: <20220929152010.835906-1-nathan@kernel.org>
+To: Ard Biesheuvel <ardb@kernel.org>, Thomas Gleixner <tglx@linutronix.de>, Ingo Molnar <mingo@redhat.com>, Borislav Petkov <bp@alien8.de>, Dave Hansen <dave.hansen@linux.intel.com>, x86@kernel.org
+Cc: "H. Peter Anvin" <hpa@zytor.com>, Nick Desaulniers <ndesaulniers@google.com>, Tom Rix <trix@redhat.com>, linux-kernel@vger.kernel.org, llvm@lists.linux.dev, patches@lists.linux.dev, Nathan Chancellor <nathan@kernel.org>, stable@vger.kernel.org
+List-Id: <llvm.lists.linux.dev>
+MIME-Version: 1.0
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 7bit
+
+A recent change in LLVM made CONFIG_EFI_STUB unselectable because it no
+longer pretends to support '-mabi=ms', breaking the dependency in
+Kconfig. Lack of CONFIG_EFI_STUB can prevent kernels from booting via
+EFI in certain circumstances.
+
+This check was added by commit 8f24f8c2fc82 ("efi/libstub: Annotate
+firmware routines as __efiapi") to ensure that '__attribute__((ms_abi))'
+was available, as '-mabi=ms' is not actually used in any cflags.
+According to the GCC documentation, this attribute has been supported
+since GCC 4.4.7. The kernel currently requires GCC 5.1 so this check is
+not necessary; even when that change landed in 5.6, the kernel required
+GCC 4.9 so it was unnecessary then as well.  Clang supports
+'__attribute__((ms_abi))' for all versions that are supported for
+building the kernel so no additional check is needed. Remove the
+'depends on' line altogether to allow CONFIG_EFI_STUB to be selected
+when CONFIG_EFI is enabled, regardless of compiler.
+
+Cc: stable@vger.kernel.org
+Fixes: 8f24f8c2fc82 ("efi/libstub: Annotate firmware routines as __efiapi")
+Link: https://github.com/ClangBuiltLinux/linux/issues/1725
+Link: https://gcc.gnu.org/onlinedocs/gcc-4.4.7/gcc/Function-Attributes.html
+Link: https://github.com/llvm/llvm-project/commit/d1ad006a8f64bdc17f618deffa9e7c91d82c444d
+Link: https://lore.kernel.org/r/20220929152010.835906-1-nathan@kernel.org
+Signed-off-by: Nathan Chancellor <nathan@kernel.org>
+---
+ arch/x86/Kconfig | 1 -
+ 1 file changed, 1 deletion(-)
+
+diff --git a/arch/x86/Kconfig b/arch/x86/Kconfig
+index f9920f1341c8..81012154d9ed 100644
+--- a/arch/x86/Kconfig
++++ b/arch/x86/Kconfig
+@@ -1956,7 +1956,6 @@ config EFI
+ config EFI_STUB
+ 	bool "EFI stub support"
+ 	depends on EFI
+-	depends on $(cc-option,-mabi=ms) || X86_32
+ 	select RELOCATABLE
+ 	help
+ 	  This kernel feature allows a bzImage to be loaded directly
+
+base-commit: f76349cf41451c5c42a99f18a9163377e4b364ff
+-- 
+2.37.3
+
