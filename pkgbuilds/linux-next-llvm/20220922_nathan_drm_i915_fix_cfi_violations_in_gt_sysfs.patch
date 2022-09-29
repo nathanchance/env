@@ -155,7 +155,7 @@ index 6232923a420d..c3a123faee98 100644
  
  #endif /* SYSFS_GT_H */
 diff --git a/drivers/gpu/drm/i915/gt/intel_gt_sysfs_pm.c b/drivers/gpu/drm/i915/gt/intel_gt_sysfs_pm.c
-index e066cc33d9f2..ed19de8509a7 100644
+index 180dd6f3ef57..65842765d949 100644
 --- a/drivers/gpu/drm/i915/gt/intel_gt_sysfs_pm.c
 +++ b/drivers/gpu/drm/i915/gt/intel_gt_sysfs_pm.c
 @@ -24,14 +24,15 @@ enum intel_gt_sysfs_op {
@@ -768,16 +768,7 @@ index e066cc33d9f2..ed19de8509a7 100644
  static INTEL_GT_RPS_BOOL_ATTR_RO(throttle_reason_status, GT0_PERF_LIMIT_REASONS_MASK);
  static INTEL_GT_RPS_BOOL_ATTR_RO(throttle_reason_pl1, POWER_LIMIT_1_MASK);
  static INTEL_GT_RPS_BOOL_ATTR_RO(throttle_reason_pl2, POWER_LIMIT_2_MASK);
-@@ -546,7 +503,7 @@ static INTEL_GT_RPS_BOOL_ATTR_RO(throttle_reason_vr_thermalert, VR_THERMALERT_MA
- static INTEL_GT_RPS_BOOL_ATTR_RO(throttle_reason_vr_tdc, VR_TDC_MASK);
- 
- static const struct attribute *freq_attrs[] = {
--	&dev_attr_punit_req_freq_mhz.attr,
-+	&attr_punit_req_freq_mhz.attr,
- 	&attr_throttle_reason_status.attr,
- 	&attr_throttle_reason_pl1.attr,
- 	&attr_throttle_reason_pl2.attr,
-@@ -598,8 +555,8 @@ static const struct attribute *freq_attrs[] = {
+@@ -597,8 +554,8 @@ static const struct attribute *throttle_reason_attrs[] = {
  #define U8_8_VAL_MASK           0xffff
  #define U8_8_SCALE_TO_VALUE     "0.00390625"
  
@@ -788,7 +779,7 @@ index e066cc33d9f2..ed19de8509a7 100644
  				      char *buff)
  {
  	return sysfs_emit(buff, "%s\n", U8_8_SCALE_TO_VALUE);
-@@ -611,11 +568,11 @@ static u32 media_ratio_mode_to_factor(u32 mode)
+@@ -610,11 +567,11 @@ static u32 media_ratio_mode_to_factor(u32 mode)
  	return !mode ? mode : 256 / mode;
  }
  
@@ -803,7 +794,7 @@ index e066cc33d9f2..ed19de8509a7 100644
  	struct intel_guc_slpc *slpc = &gt->uc.guc.slpc;
  	intel_wakeref_t wakeref;
  	u32 mode;
-@@ -642,11 +599,11 @@ static ssize_t media_freq_factor_show(struct device *dev,
+@@ -641,11 +598,11 @@ static ssize_t media_freq_factor_show(struct device *dev,
  	return sysfs_emit(buff, "%u\n", media_ratio_mode_to_factor(mode));
  }
  
@@ -818,7 +809,7 @@ index e066cc33d9f2..ed19de8509a7 100644
  	struct intel_guc_slpc *slpc = &gt->uc.guc.slpc;
  	u32 factor, mode;
  	int err;
-@@ -671,11 +628,11 @@ static ssize_t media_freq_factor_store(struct device *dev,
+@@ -670,11 +627,11 @@ static ssize_t media_freq_factor_store(struct device *dev,
  	return err ?: count;
  }
  
@@ -833,7 +824,7 @@ index e066cc33d9f2..ed19de8509a7 100644
  	u32 val;
  	int err;
  
-@@ -692,11 +649,11 @@ static ssize_t media_RP0_freq_mhz_show(struct device *dev,
+@@ -691,11 +648,11 @@ static ssize_t media_RP0_freq_mhz_show(struct device *dev,
  	return sysfs_emit(buff, "%u\n", val);
  }
  
@@ -848,7 +839,7 @@ index e066cc33d9f2..ed19de8509a7 100644
  	u32 val;
  	int err;
  
-@@ -713,17 +670,17 @@ static ssize_t media_RPn_freq_mhz_show(struct device *dev,
+@@ -712,17 +669,17 @@ static ssize_t media_RPn_freq_mhz_show(struct device *dev,
  	return sysfs_emit(buff, "%u\n", val);
  }
  
@@ -874,7 +865,7 @@ index e066cc33d9f2..ed19de8509a7 100644
  	NULL
  };
  
-@@ -755,20 +712,29 @@ static const struct attribute * const rps_defaults_attrs[] = {
+@@ -754,20 +711,29 @@ static const struct attribute * const rps_defaults_attrs[] = {
  	NULL
  };
  
@@ -907,7 +898,7 @@ index e066cc33d9f2..ed19de8509a7 100644
  
  	return ret;
  }
-@@ -779,9 +745,7 @@ void intel_gt_sysfs_pm_init(struct intel_gt *gt, struct kobject *kobj)
+@@ -778,9 +744,7 @@ void intel_gt_sysfs_pm_init(struct intel_gt *gt, struct kobject *kobj)
  
  	intel_sysfs_rc6_init(gt, kobj);
  
@@ -918,6 +909,15 @@ index e066cc33d9f2..ed19de8509a7 100644
  	if (ret)
  		drm_warn(&gt->i915->drm,
  			 "failed to create gt%u RPS sysfs files (%pe)",
+@@ -790,7 +754,7 @@ void intel_gt_sysfs_pm_init(struct intel_gt *gt, struct kobject *kobj)
+ 	if (!is_object_gt(kobj))
+ 		return;
+ 
+-	ret = sysfs_create_file(kobj, &dev_attr_punit_req_freq_mhz.attr);
++	ret = sysfs_create_file(kobj, &attr_punit_req_freq_mhz.attr);
+ 	if (ret)
+ 		drm_warn(&gt->i915->drm,
+ 			 "failed to create gt%u punit_req_freq_mhz sysfs (%pe)",
 
 base-commit: 783f6f852cc061e59962e53aa9824aa785de0d8c
 -- 
