@@ -131,7 +131,7 @@ set -gx TMP_BUILD_FOLDER $TMP_FOLDER/build
 ############################
 
 # Versions of stable that I build locally
-set -gx CBL_STABLE_VERSIONS 5.{1{9,5,0},4}
+set -gx CBL_STABLE_VERSIONS 6.0 5.{1{9,5,0},4}
 
 # ccache compression level
 set -gx CCACHE_COMPRESS true
@@ -197,7 +197,7 @@ if test -f $HOME/.server_ip
 end
 
 # https://www.kernel.org/category/releases.html
-set -gx SUPPORTED_STABLE_VERSIONS 4.{14,{,1}9} 5.{4,1{0,5,9}}
+set -gx SUPPORTED_STABLE_VERSIONS 4.{14,{,1}9} 5.{4,1{0,5,9}} 6.0
 
 # Point tmuxp to configurations in env folder
 set -gx TMUXP_CONFIGDIR $ENV_FOLDER/configs/tmux
