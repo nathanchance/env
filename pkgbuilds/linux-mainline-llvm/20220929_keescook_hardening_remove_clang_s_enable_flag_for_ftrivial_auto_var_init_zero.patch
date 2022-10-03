@@ -1,0 +1,76 @@
+From git@z Thu Jan  1 00:00:00 1970
+Subject: [PATCH] hardening: Remove Clang's enable flag for -ftrivial-auto-var-init=zero
+From: Kees Cook <keescook@chromium.org>
+Date: Thu, 29 Sep 2022 23:06:24 -0700
+Message-Id: <20220930060624.2411883-1-keescook@chromium.org>
+To: Nathan Chancellor <nathan@kernel.org>
+Cc: Kees Cook <keescook@chromium.org>, Masahiro Yamada <masahiroy@kernel.org>, Nick Desaulniers <ndesaulniers@google.com>, linux-kbuild@vger.kernel.org, llvm@lists.linux.dev, stable@vger.kernel.org, linux-kernel@vger.kernel.org, linux-hardening@vger.kernel.org
+List-Id: <llvm.lists.linux.dev>
+MIME-Version: 1.0
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 7bit
+
+Now that Clang's -enable-trivial-auto-var-init-zero-knowing-it-will-be-removed-from-clang
+option is no longer required, remove it from the command line. Clang 16
+and later will warn when it is used, which will cause Kconfig to think
+it can't use -ftrivial-auto-var-init=zero at all. Check for whether it
+is required and only use it when so.
+
+Cc: Nathan Chancellor <nathan@kernel.org>
+Cc: Masahiro Yamada <masahiroy@kernel.org>
+Cc: Nick Desaulniers <ndesaulniers@google.com>
+Cc: linux-kbuild@vger.kernel.org
+Cc: llvm@lists.linux.dev
+Cc: stable@vger.kernel.org
+Fixes: f02003c860d9 ("hardening: Avoid harmless Clang option under CONFIG_INIT_STACK_ALL_ZERO")
+Signed-off-by: Kees Cook <keescook@chromium.org>
+Link: https://lore.kernel.org/r/20220930060624.2411883-1-keescook@chromium.org
+---
+ Makefile                   |  4 ++--
+ security/Kconfig.hardening | 14 ++++++++++----
+ 2 files changed, 12 insertions(+), 6 deletions(-)
+
+diff --git a/Makefile b/Makefile
+index c7705f749601..02c857e2243c 100644
+--- a/Makefile
++++ b/Makefile
+@@ -831,8 +831,8 @@ endif
+ # Initialize all stack variables with a zero value.
+ ifdef CONFIG_INIT_STACK_ALL_ZERO
+ KBUILD_CFLAGS	+= -ftrivial-auto-var-init=zero
+-ifdef CONFIG_CC_IS_CLANG
+-# https://bugs.llvm.org/show_bug.cgi?id=45497
++ifdef CONFIG_CC_HAS_AUTO_VAR_INIT_ZERO_ENABLER
++# https://github.com/llvm/llvm-project/issues/44842
+ KBUILD_CFLAGS	+= -enable-trivial-auto-var-init-zero-knowing-it-will-be-removed-from-clang
+ endif
+ endif
+diff --git a/security/Kconfig.hardening b/security/Kconfig.hardening
+index bd2aabb2c60f..995bc42003e6 100644
+--- a/security/Kconfig.hardening
++++ b/security/Kconfig.hardening
+@@ -22,11 +22,17 @@ menu "Memory initialization"
+ config CC_HAS_AUTO_VAR_INIT_PATTERN
+ 	def_bool $(cc-option,-ftrivial-auto-var-init=pattern)
+ 
+-config CC_HAS_AUTO_VAR_INIT_ZERO
+-	# GCC ignores the -enable flag, so we can test for the feature with
+-	# a single invocation using the flag, but drop it as appropriate in
+-	# the Makefile, depending on the presence of Clang.
++config CC_HAS_AUTO_VAR_INIT_ZERO_BARE
++	def_bool $(cc-option,-ftrivial-auto-var-init=zero)
++
++config CC_HAS_AUTO_VAR_INIT_ZERO_ENABLER
++	# Clang 16 and later warn about using the -enable flag, but it
++	# is required before then.
+ 	def_bool $(cc-option,-ftrivial-auto-var-init=zero -enable-trivial-auto-var-init-zero-knowing-it-will-be-removed-from-clang)
++	depends on !CC_HAS_AUTO_VAR_INIT_ZERO_BARE
++
++config CC_HAS_AUTO_VAR_INIT_ZERO
++	def_bool CC_HAS_AUTO_VAR_INIT_ZERO_BARE || CC_HAS_AUTO_VAR_INIT_ZERO_ENABLER
+ 
+ choice
+ 	prompt "Initialize kernel stack variables at function entry"
+-- 
+2.34.1
+
