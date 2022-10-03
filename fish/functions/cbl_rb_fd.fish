@@ -14,10 +14,16 @@ function cbl_rb_fd -d "Rebase generic Fedora kernel on latest linux-next"
 
     # Patching
     set -a patches https://lore.kernel.org/all/20220922184525.3021522-1-zack@kde.org/ # kbuild: Add an option to skip vmlinux.bz2 in the rpm's
-    set -a patches https://lore.kernel.org/all/20220929161404.2769414-1-robdclark@gmail.com/ # drm/msm: Fix build break with recent mm tree
+    set -a patches https://lore.kernel.org/all/20221003193759.1141709-1-nathan@kernel.org/ # arm64: alternatives: Use vdso/bits.h instead of linux/bits.h
     for patch in $patches
         b4 shazam -l -P _ -s $patch; or return
     end
+    begin
+        git rv -m1 -n 35ae225d987eda02b823073ed5eb2b70752e85d2
+        and git f https://git.kernel.org/pub/scm/linux/kernel/git/mic/linux.git next
+        and git cp -m1 -n 9f6e8014f86a114057acb4fc578a09e10509c474
+        and git ac -m 'landlock: Diff of v6 -> v8 of "landlock: truncate support"'
+    end; or return
 
     # Build kernel
     cbl_bld_krnl_rpm --cfi --lto arm64; or return
