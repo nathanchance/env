@@ -35,7 +35,7 @@ function cbl_upd_tc_bld_lnx -d "Update the version of Linux built for PGO in tc-
             set bprefix v$kver-pgo
             set kernel $CBL_GIT/tc-build/kernel
             set tar_ext xz
-            set url https://cdn.kernel.org/pub/linux/kernel/v5.x
+            set url https://cdn.kernel.org/pub/linux/kernel/v(string split -f 1 . $kver).x
     end
 
     rm -r $kernel/linux*
