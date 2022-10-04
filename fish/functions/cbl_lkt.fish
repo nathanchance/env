@@ -203,17 +203,23 @@ function cbl_lkt -d "Tests a Linux kernel with llvm-kernel-testing"
     end
 
     set fish_trace 1
-    if not $lkt/main.py \
-            --linux-folder $linux_folder \
-            --log-folder $log_folder \
-            $main_py_args
-        set -e fish_trace
-        set msg "main.py failed in $linux_folder"
-        print_error "$msg"
-        tg_msg "$msg"
-        return 1
-    end
+    $lkt/main.py \
+        --linux-folder $linux_folder \
+        --log-folder $log_folder \
+        $main_py_args
+    set lkt_ret $status
     set -e fish_trace
+
+    if test $lkt_ret -ne 0
+        if test $lkt_ret -eq 130
+            rm -fr $log_folder
+        else
+            set msg "main.py failed in $linux_folder"
+            print_error "$msg"
+            tg_msg "$msg"
+        end
+        return $lkt_ret
+    end
 
     # objtool | -Wframe-larger-than: Too many to deal with for now
     # override: CPU_BIG_ENDIAN changes choice state | override: LTO_CLANG_THIN changes choice state: Warnings from merge_config that are harmless in this context
