@@ -3,7 +3,7 @@
 
 _localversion=-llvm
 pkgname=linux-next$_localversion
-_srctag=next-20220930
+_srctag=next-20221004
 pkgver=${_srctag//-/.}
 pkgrel=1
 pkgdesc='linux-next'
@@ -19,7 +19,7 @@ source=(
   config
   20220922_nathan_drm_i915_fix_cfi_violations_in_gt_sysfs.patch
   20220929_nathan_x86_kconfig_drop_check_for_mabi_ms_for_config_efi_stub.patch
-  v2_20220930_lorenzo_net_netfilter_move_bpf_ct_set_nat_info_kfunc_in_nf_nat_bpf_c.patch
+  20221004_nathan_fs_ntfs3_don_t_use_uni1_uninitialized_in_ntfs_d_compare.patch
 )
 
 validpgpkeys=(
@@ -27,10 +27,10 @@ validpgpkeys=(
   '3F2568AAC26998F9E813A1C5C3F436CA30F5D8EB'  # Mark Brown
 )
 sha256sums=('SKIP'
-            '6fddd73b5c9639fde32937de4a72bbc8df22f8e6b3df07cd64a24eef4bf2ddbd'
+            'e67d1ca6ea034bbe59ee230fa0df5119a44afc76a899682ae74cf27ae39e790e'
             '5982f208f7206ef3fa5163ea9f27cf743051bcdb6bd8e8666182bc346b34cfe8'
             'd72923d6f0e80d8ada2cc167f2696a0eed34b105315b143be7dfe90cef6b53fe'
-            '6e00d7fb885d8af911c63b9ff4c42452a6fd9eadd2c1caa528d1946a631a779e')
+            '5284d49a3eeaa783f045acaeafae596c9bcb616241a7b85471b33db99754132a')
 
 # This obviously ties this PKGBUILD to my machine but that is kind of the point :)
 _kmake() {
