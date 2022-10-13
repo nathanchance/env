@@ -1,17 +1,17 @@
 From git@z Thu Jan  1 00:00:00 1970
-Subject: [PATCH] drm/i915: Fix CFI violations in gt_sysfs
+Subject: [PATCH v2] drm/i915: Fix CFI violations in gt_sysfs
 From: Nathan Chancellor <nathan@kernel.org>
-Date: Thu, 22 Sep 2022 12:51:27 -0700
-Message-Id: <20220922195127.2607496-1-nathan@kernel.org>
+Date: Thu, 13 Oct 2022 13:59:10 -0700
+Message-Id: <20221013205909.1282545-1-nathan@kernel.org>
 To: Jani Nikula <jani.nikula@linux.intel.com>, Joonas Lahtinen <joonas.lahtinen@linux.intel.com>, Rodrigo Vivi <rodrigo.vivi@intel.com>, Tvrtko Ursulin <tvrtko.ursulin@linux.intel.com>
-Cc: Nick Desaulniers <ndesaulniers@google.com>, Tom Rix <trix@redhat.com>, Sami Tolvanen <samitolvanen@google.com>, Kees Cook <keescook@chromium.org>, intel-gfx@lists.freedesktop.org, dri-devel@lists.freedesktop.org, llvm@lists.linux.dev, patches@lists.linux.dev, Nathan Chancellor <nathan@kernel.org>
+Cc: Nick Desaulniers <ndesaulniers@google.com>, Tom Rix <trix@redhat.com>, Sami Tolvanen <samitolvanen@google.com>, Kees Cook <keescook@chromium.org>, intel-gfx@lists.freedesktop.org, dri-devel@lists.freedesktop.org, llvm@lists.linux.dev, patches@lists.linux.dev, Nathan Chancellor <nathan@kernel.org>, Andi Shyti <andi.shyti@linux.intel.com>, Andrzej Hajda <andrzej.hajda@intel.com>
 List-Id: <llvm.lists.linux.dev>
 MIME-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 7bit
 
-When booting with clang's kernel control flow integrity series [1],
-there are numerous violations when accessing the files under
+When booting with CONFIG_CFI_CLANG, there are numerous violations when
+accessing the files under
 /sys/devices/pci0000:00/0000:00:02.0/drm/card0/gt/gt0:
 
   $ cd /sys/devices/pci0000:00/0000:00:02.0/drm/card0/gt/gt0
@@ -80,17 +80,30 @@ dev_attr_{show,store}() or kobj_attr_{show,store}() so that they can be
 called through both kobject locations without violating kCFI and adjust
 the attribute groups to account for this.
 
-[1]: https://lore.kernel.org/20220908215504.3686827-1-samitolvanen@google.com/
-
 Link: https://github.com/ClangBuiltLinux/linux/issues/1716
+Reviewed-by: Andi Shyti <andi.shyti@linux.intel.com>
+Reviewed-by: Andrzej Hajda <andrzej.hajda@intel.com>
 Reviewed-by: Kees Cook <keescook@chromium.org>
-Link: https://lore.kernel.org/r/20220922195127.2607496-1-nathan@kernel.org
+Link: https://lore.kernel.org/r/20221013205909.1282545-1-nathan@kernel.org
 Signed-off-by: Nathan Chancellor <nathan@kernel.org>
 ---
+
+v2:
+  - Rebase on latest drm-intel-gt-next.
+  - Pick up review tags from Andi, Andrzej, and Kees.
+  - Share more code in INTEL_GT_SYSFS_{SHOW,STORE}() using common
+    functions, as suggested by Andrzej. Adjust other paths to account
+    for this.
+  - Remove link to CFI series in commit message, as it is now merged
+    into mainline as of commit 865dad2022c5 ("Merge tag 'kcfi-v6.1-rc1'
+    of git://git.kernel.org/pub/scm/linux/kernel/git/kees/linux").
+
+v1: https://lore.kernel.org/20220922195127.2607496-1-nathan@kernel.org/
+
  drivers/gpu/drm/i915/gt/intel_gt_sysfs.c    |  15 +-
  drivers/gpu/drm/i915/gt/intel_gt_sysfs.h    |   2 +-
- drivers/gpu/drm/i915/gt/intel_gt_sysfs_pm.c | 462 +++++++++-----------
- 3 files changed, 221 insertions(+), 258 deletions(-)
+ drivers/gpu/drm/i915/gt/intel_gt_sysfs_pm.c | 461 +++++++++-----------
+ 3 files changed, 220 insertions(+), 258 deletions(-)
 
 diff --git a/drivers/gpu/drm/i915/gt/intel_gt_sysfs.c b/drivers/gpu/drm/i915/gt/intel_gt_sysfs.c
 index d651ccd0ab20..9486dd3bed99 100644
@@ -155,7 +168,7 @@ index 6232923a420d..c3a123faee98 100644
  
  #endif /* SYSFS_GT_H */
 diff --git a/drivers/gpu/drm/i915/gt/intel_gt_sysfs_pm.c b/drivers/gpu/drm/i915/gt/intel_gt_sysfs_pm.c
-index 180dd6f3ef57..65842765d949 100644
+index 180dd6f3ef57..b108f0a8a044 100644
 --- a/drivers/gpu/drm/i915/gt/intel_gt_sysfs_pm.c
 +++ b/drivers/gpu/drm/i915/gt/intel_gt_sysfs_pm.c
 @@ -24,14 +24,15 @@ enum intel_gt_sysfs_op {
@@ -163,7 +176,7 @@ index 180dd6f3ef57..65842765d949 100644
  
  static int
 -sysfs_gt_attribute_w_func(struct device *dev, struct device_attribute *attr,
-+sysfs_gt_attribute_w_func(struct kobject *kobj, struct attribute attr,
++sysfs_gt_attribute_w_func(struct kobject *kobj, struct attribute *attr,
  			  int (func)(struct intel_gt *gt, u32 val), u32 val)
  {
  	struct intel_gt *gt;
@@ -181,7 +194,7 @@ index 180dd6f3ef57..65842765d949 100644
  		}
  	} else {
 -		gt = intel_gt_sysfs_get_drvdata(dev, attr->attr.name);
-+		gt = intel_gt_sysfs_get_drvdata(kobj, attr.name);
++		gt = intel_gt_sysfs_get_drvdata(kobj, attr->name);
  		ret = func(gt, val);
  	}
  
@@ -190,7 +203,7 @@ index 180dd6f3ef57..65842765d949 100644
  
  static u32
 -sysfs_gt_attribute_r_func(struct device *dev, struct device_attribute *attr,
-+sysfs_gt_attribute_r_func(struct kobject *kobj, struct attribute attr,
++sysfs_gt_attribute_r_func(struct kobject *kobj, struct attribute *attr,
  			  u32 (func)(struct intel_gt *gt),
  			  enum intel_gt_sysfs_op op)
  {
@@ -210,36 +223,38 @@ index 180dd6f3ef57..65842765d949 100644
  		}
  	} else {
 -		gt = intel_gt_sysfs_get_drvdata(dev, attr->attr.name);
-+		gt = intel_gt_sysfs_get_drvdata(kobj, attr.name);
++		gt = intel_gt_sysfs_get_drvdata(kobj, attr->name);
  		ret = func(gt);
  	}
  
-@@ -92,6 +94,77 @@ sysfs_gt_attribute_r_func(struct device *dev, struct device_attribute *attr,
+@@ -92,6 +94,76 @@ sysfs_gt_attribute_r_func(struct device *dev, struct device_attribute *attr,
  #define sysfs_gt_attribute_r_max_func(d, a, f) \
  		sysfs_gt_attribute_r_func(d, a, f, INTEL_GT_SYSFS_MAX)
  
 +#define INTEL_GT_SYSFS_SHOW(_name, _attr_type)							\
-+	static ssize_t _name##_show(struct kobject *kobj,					\
-+				    struct kobj_attribute *attr, char *buff)			\
++	static ssize_t _name##_show_common(struct kobject *kobj,				\
++					   struct attribute *attr, char *buff)			\
 +	{											\
-+		u32 val = sysfs_gt_attribute_r_##_attr_type##_func(kobj, attr->attr,		\
++		u32 val = sysfs_gt_attribute_r_##_attr_type##_func(kobj, attr,			\
 +								   __##_name##_show);		\
 +												\
 +		return sysfs_emit(buff, "%u\n", val);						\
 +	}											\
++	static ssize_t _name##_show(struct kobject *kobj,					\
++				    struct kobj_attribute *attr, char *buff)			\
++	{											\
++		return _name ##_show_common(kobj, &attr->attr, buff);				\
++	}											\
 +	static ssize_t _name##_dev_show(struct device *dev,					\
 +					struct device_attribute *attr, char *buff)		\
 +	{											\
-+		u32 val = sysfs_gt_attribute_r_##_attr_type##_func(&dev->kobj, attr->attr,	\
-+								   __##_name##_show);		\
-+												\
-+		return sysfs_emit(buff, "%u\n", val);						\
++		return _name##_show_common(&dev->kobj, &attr->attr, buff);			\
 +	}
 +
 +#define INTEL_GT_SYSFS_STORE(_name, _func)						\
-+	static ssize_t _name##_store(struct kobject *kobj,				\
-+				     struct kobj_attribute *attr, const char *buff,	\
-+				     size_t count)					\
++	static ssize_t _name##_store_common(struct kobject *kobj,			\
++					    struct attribute *attr,			\
++					    const char *buff, size_t count)		\
 +	{										\
 +		int ret;								\
 +		u32 val;								\
@@ -248,24 +263,21 @@ index 180dd6f3ef57..65842765d949 100644
 +		if (ret)								\
 +			return ret;							\
 +											\
-+		ret = sysfs_gt_attribute_w_func(kobj, attr->attr, _func, val);		\
++		ret = sysfs_gt_attribute_w_func(kobj, attr, _func, val);		\
 +											\
 +		return ret ?: count;							\
++	}										\
++	static ssize_t _name##_store(struct kobject *kobj,				\
++				     struct kobj_attribute *attr, const char *buff,	\
++				     size_t count)					\
++	{										\
++		return _name##_store_common(kobj, &attr->attr, buff, count);		\
 +	}										\
 +	static ssize_t _name##_dev_store(struct device *dev,				\
 +					 struct device_attribute *attr,			\
 +					 const char *buff, size_t count)		\
 +	{										\
-+		int ret;								\
-+		u32 val;								\
-+											\
-+		ret = kstrtou32(buff, 0, &val);						\
-+		if (ret)								\
-+			return ret;							\
-+											\
-+		ret = sysfs_gt_attribute_w_func(&dev->kobj, attr->attr, _func, val);	\
-+											\
-+		return ret ?: count;							\
++		return _name##_store_common(&dev->kobj, &attr->attr, buff, count);	\
 +	}
 +
 +#define INTEL_GT_SYSFS_SHOW_MAX(_name) INTEL_GT_SYSFS_SHOW(_name, max)
@@ -292,7 +304,7 @@ index 180dd6f3ef57..65842765d949 100644
  #ifdef CONFIG_PM
  static u32 get_residency(struct intel_gt *gt, i915_reg_t reg)
  {
-@@ -104,11 +177,8 @@ static u32 get_residency(struct intel_gt *gt, i915_reg_t reg)
+@@ -104,11 +176,8 @@ static u32 get_residency(struct intel_gt *gt, i915_reg_t reg)
  	return DIV_ROUND_CLOSEST_ULL(res, 1000);
  }
  
@@ -305,7 +317,7 @@ index 180dd6f3ef57..65842765d949 100644
  	u8 mask = 0;
  
  	if (HAS_RC6(gt->i915))
-@@ -118,37 +188,35 @@ static ssize_t rc6_enable_show(struct device *dev,
+@@ -118,37 +187,35 @@ static ssize_t rc6_enable_show(struct device *dev,
  	if (HAS_RC6pp(gt->i915))
  		mask |= BIT(2);
  
@@ -359,7 +371,7 @@ index 180dd6f3ef57..65842765d949 100644
  }
  
  static u32 __rc6pp_residency_ms_show(struct intel_gt *gt)
-@@ -156,67 +224,69 @@ static u32 __rc6pp_residency_ms_show(struct intel_gt *gt)
+@@ -156,67 +223,69 @@ static u32 __rc6pp_residency_ms_show(struct intel_gt *gt)
  	return get_residency(gt, GEN6_GT_GFX_RC6pp);
  }
  
@@ -458,7 +470,7 @@ index 180dd6f3ef57..65842765d949 100644
  };
  
  static int __intel_gt_sysfs_create_group(struct kobject *kobj,
-@@ -271,104 +341,34 @@ static u32 __act_freq_mhz_show(struct intel_gt *gt)
+@@ -271,104 +340,34 @@ static u32 __act_freq_mhz_show(struct intel_gt *gt)
  	return intel_rps_read_actual_frequency(&gt->rps);
  }
  
@@ -567,7 +579,7 @@ index 180dd6f3ef57..65842765d949 100644
  }
  
  static u32 __max_freq_mhz_show(struct intel_gt *gt)
-@@ -376,71 +376,21 @@ static u32 __max_freq_mhz_show(struct intel_gt *gt)
+@@ -376,71 +375,21 @@ static u32 __max_freq_mhz_show(struct intel_gt *gt)
  	return intel_rps_get_max_frequency(&gt->rps);
  }
  
@@ -639,7 +651,7 @@ index 180dd6f3ef57..65842765d949 100644
  static u32 __vlv_rpe_freq_mhz_show(struct intel_gt *gt)
  {
  	struct intel_rps *rps = &gt->rps;
-@@ -448,23 +398,31 @@ static u32 __vlv_rpe_freq_mhz_show(struct intel_gt *gt)
+@@ -448,23 +397,31 @@ static u32 __vlv_rpe_freq_mhz_show(struct intel_gt *gt)
  	return intel_gpu_freq(rps, rps->efficient_freq);
  }
  
@@ -688,7 +700,7 @@ index 180dd6f3ef57..65842765d949 100644
  
  /* The below macros generate static structures */
  INTEL_GT_RPS_SYSFS_ATTR_RO(act_freq_mhz);
-@@ -475,32 +433,31 @@ INTEL_GT_RPS_SYSFS_ATTR_RO(RP1_freq_mhz);
+@@ -475,32 +432,31 @@ INTEL_GT_RPS_SYSFS_ATTR_RO(RP1_freq_mhz);
  INTEL_GT_RPS_SYSFS_ATTR_RO(RPn_freq_mhz);
  INTEL_GT_RPS_SYSFS_ATTR_RW(max_freq_mhz);
  INTEL_GT_RPS_SYSFS_ATTR_RW(min_freq_mhz);
@@ -737,7 +749,7 @@ index 180dd6f3ef57..65842765d949 100644
  	u32 preq = intel_rps_read_punit_req_frequency(&gt->rps);
  
  	return sysfs_emit(buff, "%u\n", preq);
-@@ -508,17 +465,17 @@ static ssize_t punit_req_freq_mhz_show(struct device *dev,
+@@ -508,17 +464,17 @@ static ssize_t punit_req_freq_mhz_show(struct device *dev,
  
  struct intel_gt_bool_throttle_attr {
  	struct attribute attr;
@@ -759,7 +771,7 @@ index 180dd6f3ef57..65842765d949 100644
  	struct intel_gt_bool_throttle_attr *t_attr =
  				(struct intel_gt_bool_throttle_attr *) attr;
  	bool val = rps_read_mask_mmio(&gt->rps, t_attr->reg32, t_attr->mask);
-@@ -534,7 +491,7 @@ struct intel_gt_bool_throttle_attr attr_##sysfs_func__ = { \
+@@ -534,7 +490,7 @@ struct intel_gt_bool_throttle_attr attr_##sysfs_func__ = { \
  	.mask = mask__, \
  }
  
@@ -768,7 +780,7 @@ index 180dd6f3ef57..65842765d949 100644
  static INTEL_GT_RPS_BOOL_ATTR_RO(throttle_reason_status, GT0_PERF_LIMIT_REASONS_MASK);
  static INTEL_GT_RPS_BOOL_ATTR_RO(throttle_reason_pl1, POWER_LIMIT_1_MASK);
  static INTEL_GT_RPS_BOOL_ATTR_RO(throttle_reason_pl2, POWER_LIMIT_2_MASK);
-@@ -597,8 +554,8 @@ static const struct attribute *throttle_reason_attrs[] = {
+@@ -597,8 +553,8 @@ static const struct attribute *throttle_reason_attrs[] = {
  #define U8_8_VAL_MASK           0xffff
  #define U8_8_SCALE_TO_VALUE     "0.00390625"
  
@@ -779,7 +791,7 @@ index 180dd6f3ef57..65842765d949 100644
  				      char *buff)
  {
  	return sysfs_emit(buff, "%s\n", U8_8_SCALE_TO_VALUE);
-@@ -610,11 +567,11 @@ static u32 media_ratio_mode_to_factor(u32 mode)
+@@ -610,11 +566,11 @@ static u32 media_ratio_mode_to_factor(u32 mode)
  	return !mode ? mode : 256 / mode;
  }
  
@@ -794,7 +806,7 @@ index 180dd6f3ef57..65842765d949 100644
  	struct intel_guc_slpc *slpc = &gt->uc.guc.slpc;
  	intel_wakeref_t wakeref;
  	u32 mode;
-@@ -641,11 +598,11 @@ static ssize_t media_freq_factor_show(struct device *dev,
+@@ -641,11 +597,11 @@ static ssize_t media_freq_factor_show(struct device *dev,
  	return sysfs_emit(buff, "%u\n", media_ratio_mode_to_factor(mode));
  }
  
@@ -809,7 +821,7 @@ index 180dd6f3ef57..65842765d949 100644
  	struct intel_guc_slpc *slpc = &gt->uc.guc.slpc;
  	u32 factor, mode;
  	int err;
-@@ -670,11 +627,11 @@ static ssize_t media_freq_factor_store(struct device *dev,
+@@ -670,11 +626,11 @@ static ssize_t media_freq_factor_store(struct device *dev,
  	return err ?: count;
  }
  
@@ -824,7 +836,7 @@ index 180dd6f3ef57..65842765d949 100644
  	u32 val;
  	int err;
  
-@@ -691,11 +648,11 @@ static ssize_t media_RP0_freq_mhz_show(struct device *dev,
+@@ -691,11 +647,11 @@ static ssize_t media_RP0_freq_mhz_show(struct device *dev,
  	return sysfs_emit(buff, "%u\n", val);
  }
  
@@ -839,7 +851,7 @@ index 180dd6f3ef57..65842765d949 100644
  	u32 val;
  	int err;
  
-@@ -712,17 +669,17 @@ static ssize_t media_RPn_freq_mhz_show(struct device *dev,
+@@ -712,17 +668,17 @@ static ssize_t media_RPn_freq_mhz_show(struct device *dev,
  	return sysfs_emit(buff, "%u\n", val);
  }
  
@@ -865,7 +877,7 @@ index 180dd6f3ef57..65842765d949 100644
  	NULL
  };
  
-@@ -754,20 +711,29 @@ static const struct attribute * const rps_defaults_attrs[] = {
+@@ -754,20 +710,29 @@ static const struct attribute * const rps_defaults_attrs[] = {
  	NULL
  };
  
@@ -898,7 +910,7 @@ index 180dd6f3ef57..65842765d949 100644
  
  	return ret;
  }
-@@ -778,9 +744,7 @@ void intel_gt_sysfs_pm_init(struct intel_gt *gt, struct kobject *kobj)
+@@ -778,9 +743,7 @@ void intel_gt_sysfs_pm_init(struct intel_gt *gt, struct kobject *kobj)
  
  	intel_sysfs_rc6_init(gt, kobj);
  
@@ -909,7 +921,7 @@ index 180dd6f3ef57..65842765d949 100644
  	if (ret)
  		drm_warn(&gt->i915->drm,
  			 "failed to create gt%u RPS sysfs files (%pe)",
-@@ -790,7 +754,7 @@ void intel_gt_sysfs_pm_init(struct intel_gt *gt, struct kobject *kobj)
+@@ -790,7 +753,7 @@ void intel_gt_sysfs_pm_init(struct intel_gt *gt, struct kobject *kobj)
  	if (!is_object_gt(kobj))
  		return;
  
@@ -918,8 +930,6 @@ index 180dd6f3ef57..65842765d949 100644
  	if (ret)
  		drm_warn(&gt->i915->drm,
  			 "failed to create gt%u punit_req_freq_mhz sysfs (%pe)",
-
-base-commit: 783f6f852cc061e59962e53aa9824aa785de0d8c
 -- 
-2.37.3
+2.38.0
 

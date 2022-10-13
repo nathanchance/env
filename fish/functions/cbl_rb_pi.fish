@@ -21,7 +21,6 @@ function cbl_rb_pi -d "Rebase Raspberry Pi kernel on latest linux-next"
     git rh origin/master
 
     # Patching
-    set -a patches https://lore.kernel.org/all/20221003193759.1141709-1-nathan@kernel.org/ # arm64: alternatives: Use vdso/bits.h instead of linux/bits.h
     for patch in $patches
         b4 am -l -o - -P _ -s $patch | git am; or return
     end
