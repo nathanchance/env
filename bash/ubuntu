@@ -85,6 +85,7 @@ function install_packages() {
         docker-compose-plugin
 
         # Downloading/extracting utilities
+        bzip2
         ca-certificates
         curl
         unzip
