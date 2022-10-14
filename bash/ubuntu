@@ -15,7 +15,7 @@ source /usr/lib/os-release || exit
 function reality_check() {
     assert_root
 
-    : "${root_pass:?}" "${user_pass:?}"
+    : "${root_pass:?}"
 
     # This setup script only supports Ubuntu 22.04
     case ${VERSION_CODENAME:?} in
@@ -50,8 +50,7 @@ function setup_docker_repo() {
 }
 
 function setup_fish_repo() {
-    curl -fLSs https://download.opensuse.org/repositories/shells:fish:release:3/Debian_"${VERSION_ID:?}"/Release.key | gpg --dearmor | dd of=/etc/apt/trusted.gpg.d/shells_fish_release_3.gpg || exit
-    echo "deb http://download.opensuse.org/repositories/shells:/fish:/release:/3/Debian_$VERSION_ID/ /" | tee /etc/apt/sources.list.d/shells:fish:release:3.list || exit
+    apt-add-repository -y ppa:fish-shell/release-3 || exit
 }
 
 function setup_gh_repo() {
@@ -59,6 +58,10 @@ function setup_gh_repo() {
 
     curl -fLSs https://cli.github.com/packages/githubcli-archive-keyring.gpg | dd of=$gh_gpg_key || exit
     echo "deb [arch=$dpkg_arch signed-by=$gh_gpg_key] https://cli.github.com/packages stable main" | tee /etc/apt/sources.list.d/github-cli.list || exit
+}
+
+function setup_git_repo() {
+    apt-add-repository -y ppa:git-core/ppa || exit
 }
 
 function install_packages() {
@@ -185,6 +188,7 @@ install_initial_packages
 setup_docker_repo
 setup_fish_repo
 setup_gh_repo
+setup_git_repo
 install_packages
 chsh_fish
 setup_doas
