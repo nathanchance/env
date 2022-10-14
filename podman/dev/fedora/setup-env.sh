@@ -173,7 +173,7 @@ function build_pahole() {
     pahole_build=$pahole_src/build
 
     tar -C "${pahole_src%/*}" -xJf "$pahole_src".tar.xz
-    patch -d "$pahole_src" -p1 </tmp/f01e5f3a849558b8ed6b310686d10738f4c2f3bf.patch
+    patch -d "$pahole_src" -p1 </tmp/dwarves.patch
 
     mkdir "$pahole_build"
     cd "$pahole_build"
@@ -190,7 +190,7 @@ function build_pahole() {
     pahole --version
 
     cd
-    rm -r "$pahole_src"{,.tar.xz} /tmp/f01e5f3a849558b8ed6b310686d10738f4c2f3bf.patch
+    rm -r "$pahole_src"{,.tar.xz} /tmp/*.patch
 }
 
 add_grep_wrappers
