@@ -18,7 +18,7 @@ function cbl_ptchmn -d "Quilt-like patch management function for Linux"
 
         case -s --sync
             switch $repo
-                case linux-next linux linux-stable-5.'*'
+                case linux-next linux linux-stable-'*'.'*'
                 case '*'
                     print_error "$repo not supported by cbl_ptchmn!"
                     return 1
