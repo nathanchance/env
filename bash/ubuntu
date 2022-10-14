@@ -142,7 +142,7 @@ function install_packages() {
 function setup_doas() {
     work_dir=$(mktemp -d)
 
-    doas_version=6.8.2-1
+    doas_version=6.8.2-1$([[ $dpkg_arch = "amd64" ]] && echo +b1)
     doas_deb="$work_dir"/opendoas_"$doas_version"_"$dpkg_arch".deb
 
     curl -LSso "$doas_deb" http://http.us.debian.org/debian/pool/main/o/opendoas/"${doas_deb##*/}" || exit
