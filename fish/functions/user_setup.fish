@@ -219,7 +219,7 @@ rpmbuild/' >>$gitignore
         end
     end
     updall --no-os; or return
-    if command -q podman; or command -q docker; and test "$LOCATION" != wsl
+    if has_container_manager; and test "$LOCATION" != wsl
         dbxc --yes
     end
 
