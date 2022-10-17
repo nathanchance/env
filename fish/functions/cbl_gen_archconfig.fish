@@ -56,6 +56,12 @@ function cbl_gen_archconfig -d "Generate a configuration file for Arch Linux"
         -e DEBUG_INFO_DWARF5 \
         -e WERROR \
         -m DRM
+    # Enable MGLRU. Remove when 6.1 is in the Arch Linux repos, as it will
+    # likely be enabled then.
+    $src/scripts/config \
+        --file $cfg \
+        -e LRU_GEN \
+        -e LRU_GEN_ENABLED
 
     # Step 3: Run olddefconfig
     kmake -C $src KCONFIG_CONFIG=$cfg olddefconfig
