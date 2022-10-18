@@ -158,7 +158,12 @@ function partition_and_create_user() { (
 
     # Setup user account
     case $pkg_mgr in
-        apt) [[ "$(uname -m)" = "x86_64" ]] && apt install -y qemu-kvm ;;
+        apt)
+            case "$(uname -m)" in
+                aarch64) apt install -y qemu-system-arm ;;
+                x86_64) apt install -y qemu-system-x86 ;;
+            esac
+            ;;
     esac
     if getent passwd "${USER}" &>/dev/null; then
         set +x

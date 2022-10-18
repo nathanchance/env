@@ -72,9 +72,6 @@ function install_packages() {
         # b4
         python3{,-{dkim,requests}}
 
-        # /dev/kvm
-        qemu-system-x86
-
         # doas
         libpam0g
 
@@ -126,6 +123,37 @@ function install_packages() {
         python-is-python3
     )
 
+    # Install libvirt and needed packages on Equinix Metal servers. Otherwise,
+    # just install QEMU to get /dev/kvm setup properly.
+    # shellcheck disable=SC2154
+    if $equinix; then
+        packages+=(
+            dnsmasq
+            libvirt-daemon-system
+            qemu-utils
+            virt-manager
+        )
+        case $dpkg_arch in
+            amd64)
+                packages+=(
+                    ovmf
+                    qemu-system-x86
+                )
+                ;;
+            arm64)
+                packages+=(
+                    qemu-efi-aarch64
+                    qemu-system-arm
+                )
+                ;;
+        esac
+    else
+        case $dpkg_arch in
+            amd64) packages+=(qemu-system-x86) ;;
+            arm64) packages+=(qemu-system-arm) ;;
+        esac
+    fi
+
     apt_args=(
         -o Dpkg::Options::='--force-confdef'
         -o Dpkg::Options::='--force-confold'
@@ -174,6 +202,12 @@ function setup_docker() {
     systemctl restart {containerd,docker}.service || exit
 }
 
+function setup_libvirt() {
+    is_installed virt-install || return 0
+
+    setup_libvirt_common
+}
+
 function setup_locales() {
     echo "locales locales/default_environment_locale select en_US.UTF-8" | debconf-set-selections
     echo "locales locales/locales_to_be_generated multiselect en_US.UTF-8 UTF-8" | debconf-set-selections
@@ -194,6 +228,7 @@ install_packages
 chsh_fish
 setup_doas
 setup_docker
+setup_libvirt
 setup_locales
 clone_env
 set_date_time
