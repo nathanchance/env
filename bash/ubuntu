@@ -203,7 +203,7 @@ function setup_docker() {
 }
 
 function setup_libvirt() {
-    is_installed virt-install || return 0
+    is_installed virt-manager || return 0
 
     setup_libvirt_common
 }

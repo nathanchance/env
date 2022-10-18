@@ -39,6 +39,8 @@ function is_installed() {
         dnf list --installed "${@:?}" &>/dev/null
     elif command -v pacman &>/dev/null; then
         pacman -Q "${@:?}" &>/dev/null
+    elif command -v dpkg &>/dev/null; then
+        dpkg -s "${@:?}" &>/dev/null
     else
         print_error "is_installed not implemented for current package manager."
         exit 1
