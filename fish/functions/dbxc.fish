@@ -94,5 +94,7 @@ function dbxc -d "Shorthand for 'distrobox create'"
         set -p dbx_args '-a "'$add_args'"'
     end
 
-    dbx $mode $dbx_args $dbx_img $dbx_cmds
+    set final_dbx_cmd dbx $mode $dbx_args $dbx_img $dbx_cmds
+    pretty_print_cmd $final_dbx_cmd
+    $final_dbx_cmd
 end

@@ -202,13 +202,14 @@ function cbl_lkt -d "Tests a Linux kernel with llvm-kernel-testing"
         end
     end
 
-    set fish_trace 1
-    $lkt/main.py \
+    set lkt_cmd \
+        $lkt/main.py \
         --linux-folder $linux_folder \
         --log-folder $log_folder \
         $main_py_args
+    pretty_print_cmd $lkt_cmd
+    $lkt_cmd
     set lkt_ret $status
-    set -e fish_trace
 
     if test $lkt_ret -ne 0
         if test $lkt_ret -eq 130

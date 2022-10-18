@@ -24,7 +24,9 @@ function cbl_cl_software -d "Clean up old versions of managed software"
 
     set folders_to_remove (fd -d 1 -t d . $folder -x basename | sort | fzf -m --preview="$folder/{}/bin/$binary --version")
     if test -n "$folders_to_remove"
-        set fish_trace 1
-        rm -fr $folder/$folders_to_remove
+        set rm_cmd \
+            rm -fr $folder/$folders_to_remove
+        pretty_print_cmd $rm_cmd
+        $rm_cmd
     end
 end

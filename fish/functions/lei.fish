@@ -13,7 +13,6 @@ function lei -d "Runs lei though system or podman, depending on how it is availa
         in_container_msg -h; or return
 
         if command -q podman
-            set fish_trace 1
             podman run \
                 --interactive \
                 --rm \

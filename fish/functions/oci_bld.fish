@@ -59,13 +59,14 @@ function oci_bld -d "Build an OCI container image"
 
         pushd $ENV_FOLDER/podman/$folder; or return
 
-        set fish_trace 1
-        podman build \
+        set podman_build_cmd \
+            podman build \
             $podman_args \
             --layers=false \
             --pull \
-            --tag $GHCR/$image .; or return
-        set -e fish_trace
+            --tag $GHCR/$image .
+        pretty_print_cmd $podman_build_cmd
+        $podman_build_cmd; or return
 
         popd; or return
     end

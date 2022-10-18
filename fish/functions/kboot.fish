@@ -41,6 +41,8 @@ function kboot -d "Boot a kernel in QEMU"
         set -p PATH $PO
     end
 
-    set fish_trace 1
-    $BOOT_UTILS/boot-qemu.py $boot_qemu_args
+    set boot_qemu_cmd \
+        $BOOT_UTILS/boot-qemu.py $boot_qemu_args
+    pretty_print_cmd $boot_qemu_cmd
+    $boot_qemu_cmd
 end
