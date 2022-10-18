@@ -202,6 +202,9 @@ rpmbuild/' >>$gitignore
         set -l libvirt_pool $VM_FOLDER/libvirt
 
         mkdir -p $libvirt_pool
+        if getent passwd libvirt-qemu &>/dev/null
+            setfacl -m u:libvirt-qemu:rx $HOME
+        end
 
         virsh pool-define-as --name default --type dir --target $libvirt_pool
         virsh pool-autostart default
