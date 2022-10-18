@@ -94,6 +94,7 @@ function install_packages() {
 
         # env
         fish
+        fzf
         jq
         neofetch
         python3-pip
