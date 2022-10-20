@@ -20,6 +20,7 @@ source=(
   config
   20220929_nathan_x86_kconfig_drop_check_for_mabi_ms_for_config_efi_stub.patch
   20221017_nathan_drm_amdkfd_fix_type_of_reset_type_parameter_in_hqd_destroy_callback.patch
+  0001-Revert-mm-align-larger-anonymous-mappings-on-THP-bou.patch
   https://github.com/pop-os/system76-io-dkms/raw/master/system76-io.c
   https://github.com/pop-os/system76-io-dkms/raw/master/system76-io_dev.c
   https://github.com/pop-os/system76-io-dkms/raw/master/system76-io_hwmon.c
@@ -28,9 +29,10 @@ validpgpkeys=(
   'ABAF11C65A2970B130ABE3C479BE3E4300411886'  # Linus Torvalds
 )
 sha256sums=('SKIP'
-            'a8f7948e2a1f5d701311d00d3400b9a1b4e832443758906a142a92444070111f'
+            '1640440298e7a8b58808f2ce8f0c417b69e94337f9399627da0f166afd93c84b'
             'd72923d6f0e80d8ada2cc167f2696a0eed34b105315b143be7dfe90cef6b53fe'
             'c0192ff535a16b39d5908f174ca35ab9d3464e96f1a5aca876c738e520debbc4'
+            '87a8d136b456ef70f9060a193835099631355a2b2d21df1653a37e7b178e7b93'
             'd569ee2fbd072a09e89196779ccc0dfd008d5a79a0cec5fa80cc7ed99a3027fa'
             '7276b7fb345f6a5156c594969a01e1ab63e864e0b3ed646bf5132b8301fa4975'
             '26b42e2a48cc4666ad6f85eb4d0fe87f30ea0097d6c1cff4f45e0e3330382916')
