@@ -112,6 +112,7 @@ function cbl_bld_tot_tcs -d "Build LLVM and binutils from source for kernel deve
         set bntls_install $CBL_TC_STOW_BNTL/$date_time-(git -C $bntls sh -s --format=%H origin/master)
         if not PATH="/usr/lib/ccache/bin:$PATH" $tc_bld/build-binutils.py \
                 $bld_bntls_args \
+                --binutils-folder $bntls \
                 --build-folder $TMP_BUILD_FOLDER/binutils \
                 --install-folder $bntls_install
             set message "build-binutils.py failed"
@@ -165,6 +166,7 @@ function cbl_bld_tot_tcs -d "Build LLVM and binutils from source for kernel deve
             --build-folder $TMP_BUILD_FOLDER/llvm \
             --check-targets $check_targets \
             --install-folder $llvm_install \
+            --llvm-folder $llvm_project \
             $bld_llvm_args \
             --no-ccache \
             --show-build-commands
