@@ -8,6 +8,8 @@ function cbl_clone_repo -d "Clone certain repos for ClangBuiltLinux testing and 
         set -l git_clone_args
 
         switch $arg
+            case binutils
+                set url https://sourceware.org/git/binutils-gdb.git
             case boot-utils containers continuous-integration2 tc-build
                 set url https://github.com/ClangBuiltLinux/$arg.git
                 set dest $CBL_GIT/$arg
@@ -48,6 +50,8 @@ function cbl_clone_repo -d "Clone certain repos for ClangBuiltLinux testing and 
                             git -C $dest remote add -f origin-ssh git@github.com:llvm/llvm-project.git
                             ln -frsv $dest/llvm/utils/git/pre-push.py $dest/.git/hooks/pre-push
                     end
+                case tc-build
+                    git -C $dest remote add -f nathanchance https://github.com/nathanchance/tc-build
                 case wsl2
                     git -C $dest remote add -f --tags mainline https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git
                     git -C $dest remote add -f --tags next https://git.kernel.org/pub/scm/linux/kernel/git/next/linux-next.git
