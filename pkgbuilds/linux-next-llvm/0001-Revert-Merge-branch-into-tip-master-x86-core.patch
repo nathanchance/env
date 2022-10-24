@@ -1,10 +1,10 @@
-From c92315ff277bf6338a2b65b7b1e5903d2b5933fe Mon Sep 17 00:00:00 2001
+From 868ba3b31e62919bef04f014831e70700d0f21f3 Mon Sep 17 00:00:00 2001
 From: Nathan Chancellor <nathan@kernel.org>
-Date: Fri, 21 Oct 2022 11:28:13 -0700
+Date: Mon, 24 Oct 2022 07:57:50 -0700
 Subject: [PATCH] Revert "Merge branch into tip/master: 'x86/core'"
 
-This reverts commit e3cd1071e42dcda2bdeb992936d18836c738940b, reversing
-changes made to 18661aea969817677806811bc7ff33ef594adb3f.
+This reverts commit 98231c2b61ccdb510f5ab910cae7ade8310ba41a, reversing
+changes made to b5d1a034f45120c1101c7cc712a2cf2fe5f2938b.
 
 Link: https://lore.kernel.org/Y1HVZKW4o0KRsMtq@dev-arch.thelio-3990X/
 Signed-off-by: Nathan Chancellor <nathan@kernel.org>
@@ -46,7 +46,7 @@ Signed-off-by: Nathan Chancellor <nathan@kernel.org>
  arch/x86/include/asm/linkage.h                |  63 +--
  arch/x86/include/asm/nospec-branch.h          | 176 +-------
  arch/x86/include/asm/paravirt.h               |   5 +-
- arch/x86/include/asm/paravirt_types.h         |  20 +-
+ arch/x86/include/asm/paravirt_types.h         |  34 +-
  arch/x86/include/asm/preempt.h                |  27 +-
  arch/x86/include/asm/processor.h              |  11 +-
  arch/x86/include/asm/qspinlock_paravirt.h     |   2 +-
@@ -63,7 +63,7 @@ Signed-off-by: Nathan Chancellor <nathan@kernel.org>
  arch/x86/kernel/dumpstack_32.c                |   4 +-
  arch/x86/kernel/dumpstack_64.c                |   2 +-
  arch/x86/kernel/ftrace.c                      |  20 +-
- arch/x86/kernel/ftrace_64.S                   |  52 +--
+ arch/x86/kernel/ftrace_64.S                   |  37 +-
  arch/x86/kernel/head_64.S                     |   1 -
  arch/x86/kernel/irq_32.c                      |  13 +-
  arch/x86/kernel/irq_64.c                      |   6 +-
@@ -111,12 +111,12 @@ Signed-off-by: Nathan Chancellor <nathan@kernel.org>
  tools/objtool/include/objtool/elf.h           |   5 +-
  tools/objtool/include/objtool/objtool.h       |   1 -
  tools/objtool/objtool.c                       |   1 -
- 102 files changed, 485 insertions(+), 1968 deletions(-)
+ 102 files changed, 479 insertions(+), 1973 deletions(-)
  delete mode 100644 arch/x86/kernel/callthunks.c
  delete mode 100644 tools/include/linux/interval_tree_generic.h
 
 diff --git a/Makefile b/Makefile
-index be3892c2218e..bbf376931899 100644
+index 9088b734345e..8e51e7d3fd95 100644
 --- a/Makefile
 +++ b/Makefile
 @@ -1004,8 +1004,8 @@ KBUILD_CFLAGS	+= $(CC_FLAGS_CFI)
@@ -1576,10 +1576,10 @@ index 2851bc2339d5..2a0b8dd4ec33 100644
  	    ASM_ENDBR							\
  	    FRAME_BEGIN							\
 diff --git a/arch/x86/include/asm/paravirt_types.h b/arch/x86/include/asm/paravirt_types.h
-index 3d2783db0be2..f72bf0f6ccf7 100644
+index 8c1da419260f..f72bf0f6ccf7 100644
 --- a/arch/x86/include/asm/paravirt_types.h
 +++ b/arch/x86/include/asm/paravirt_types.h
-@@ -2,17 +2,6 @@
+@@ -2,24 +2,6 @@
  #ifndef _ASM_X86_PARAVIRT_TYPES_H
  #define _ASM_X86_PARAVIRT_TYPES_H
  
@@ -1590,6 +1590,13 @@ index 3d2783db0be2..f72bf0f6ccf7 100644
 -	u8 type;		/* type of this instruction */
 -	u8 len;			/* length of original instruction */
 -};
+-
+-/* Lazy mode for batching updates / context switch */
+-enum paravirt_lazy_mode {
+-	PARAVIRT_LAZY_NONE,
+-	PARAVIRT_LAZY_MMU,
+-	PARAVIRT_LAZY_CPU,
+-};
 -#endif
 -
 -#ifdef CONFIG_PARAVIRT
@@ -1597,6 +1604,20 @@ index 3d2783db0be2..f72bf0f6ccf7 100644
  #ifndef __ASSEMBLY__
  
  #include <asm/desc_defs.h>
+@@ -552,6 +534,13 @@ int paravirt_disable_iospace(void);
+ 	__PVOP_VCALL(op, PVOP_CALL_ARG1(arg1), PVOP_CALL_ARG2(arg2),	\
+ 		     PVOP_CALL_ARG3(arg3), PVOP_CALL_ARG4(arg4))
+ 
++/* Lazy mode for batching updates / context switch */
++enum paravirt_lazy_mode {
++	PARAVIRT_LAZY_NONE,
++	PARAVIRT_LAZY_MMU,
++	PARAVIRT_LAZY_CPU,
++};
++
+ enum paravirt_lazy_mode paravirt_get_lazy_mode(void);
+ void paravirt_start_context_switch(struct task_struct *prev);
+ void paravirt_end_context_switch(struct task_struct *next);
 @@ -567,9 +556,16 @@ unsigned long paravirt_ret0(void);
  
  #define paravirt_nop	((void *)_paravirt_nop)
@@ -2811,18 +2832,33 @@ index cf15ef5aecff..bd165004776d 100644
  		set_memory_ro((unsigned long)trampoline, npages);
  	set_memory_x((unsigned long)trampoline, npages);
 diff --git a/arch/x86/kernel/ftrace_64.S b/arch/x86/kernel/ftrace_64.S
-index 6a7e6d666a12..dfeb227de561 100644
+index 1265ad519249..2a4be92fd144 100644
 --- a/arch/x86/kernel/ftrace_64.S
 +++ b/arch/x86/kernel/ftrace_64.S
-@@ -4,7 +4,6 @@
+@@ -3,9 +3,8 @@
+  *  Copyright (C) 2014  Steven Rostedt, Red Hat Inc
   */
  
+-#include <linux/cfi_types.h>
  #include <linux/linkage.h>
 -#include <asm/asm-offsets.h>
++#include <linux/cfi_types.h>
  #include <asm/ptrace.h>
  #include <asm/ftrace.h>
  #include <asm/export.h>
-@@ -133,7 +132,6 @@
+@@ -132,19 +131,16 @@
+ 	.endm
+ 
+ SYM_TYPED_FUNC_START(ftrace_stub)
+-	CALL_DEPTH_ACCOUNT
+ 	RET
+ SYM_FUNC_END(ftrace_stub)
+ 
+ SYM_TYPED_FUNC_START(ftrace_stub_graph)
+-	CALL_DEPTH_ACCOUNT
+ 	RET
+ SYM_FUNC_END(ftrace_stub_graph)
+ 
  #ifdef CONFIG_DYNAMIC_FTRACE
  
  SYM_FUNC_START(__fentry__)
@@ -2830,7 +2866,7 @@ index 6a7e6d666a12..dfeb227de561 100644
  	RET
  SYM_FUNC_END(__fentry__)
  EXPORT_SYMBOL(__fentry__)
-@@ -142,8 +140,6 @@ SYM_FUNC_START(ftrace_caller)
+@@ -153,8 +149,6 @@ SYM_FUNC_START(ftrace_caller)
  	/* save_mcount_regs fills in first two parameters */
  	save_mcount_regs
  
@@ -2839,7 +2875,7 @@ index 6a7e6d666a12..dfeb227de561 100644
  	/* Stack - skipping return address of ftrace_caller */
  	leaq MCOUNT_REG_SIZE+8(%rsp), %rcx
  	movq %rcx, RSP(%rsp)
-@@ -159,9 +155,6 @@ SYM_INNER_LABEL(ftrace_caller_op_ptr, SYM_L_GLOBAL)
+@@ -170,9 +164,6 @@ SYM_INNER_LABEL(ftrace_caller_op_ptr, SYM_L_GLOBAL)
  	/* Only ops with REGS flag set should have CS register set */
  	movq $0, CS(%rsp)
  
@@ -2849,31 +2885,7 @@ index 6a7e6d666a12..dfeb227de561 100644
  SYM_INNER_LABEL(ftrace_call, SYM_L_GLOBAL)
  	ANNOTATE_NOENDBR
  	call ftrace_stub
-@@ -179,14 +172,20 @@ SYM_INNER_LABEL(ftrace_call, SYM_L_GLOBAL)
- 	 */
- SYM_INNER_LABEL(ftrace_caller_end, SYM_L_GLOBAL)
- 	ANNOTATE_NOENDBR
--	RET
-+
-+	jmp ftrace_epilogue
- SYM_FUNC_END(ftrace_caller);
- STACK_FRAME_NON_STANDARD_FP(ftrace_caller)
- 
--SYM_FUNC_START(ftrace_stub)
-+SYM_FUNC_START(ftrace_epilogue)
-+/*
-+ * This is weak to keep gas from relaxing the jumps.
-+ */
-+SYM_INNER_LABEL_ALIGN(ftrace_stub, SYM_L_WEAK)
- 	UNWIND_HINT_FUNC
-+	ENDBR
- 	RET
--SYM_FUNC_END(ftrace_stub)
-+SYM_FUNC_END(ftrace_epilogue)
- 
- SYM_FUNC_START(ftrace_regs_caller)
- 	/* Save the current flags before any operations that can change them */
-@@ -196,8 +195,6 @@ SYM_FUNC_START(ftrace_regs_caller)
+@@ -202,8 +193,6 @@ SYM_FUNC_START(ftrace_regs_caller)
  	save_mcount_regs 8
  	/* save_mcount_regs fills in first two parameters */
  
@@ -2882,7 +2894,7 @@ index 6a7e6d666a12..dfeb227de561 100644
  SYM_INNER_LABEL(ftrace_regs_caller_op_ptr, SYM_L_GLOBAL)
  	ANNOTATE_NOENDBR
  	/* Load the ftrace_ops into the 3rd parameter */
-@@ -228,9 +225,6 @@ SYM_INNER_LABEL(ftrace_regs_caller_op_ptr, SYM_L_GLOBAL)
+@@ -234,9 +223,6 @@ SYM_INNER_LABEL(ftrace_regs_caller_op_ptr, SYM_L_GLOBAL)
  	/* regs go into 4th parameter */
  	leaq (%rsp), %rcx
  
@@ -2892,24 +2904,7 @@ index 6a7e6d666a12..dfeb227de561 100644
  SYM_INNER_LABEL(ftrace_regs_call, SYM_L_GLOBAL)
  	ANNOTATE_NOENDBR
  	call ftrace_stub
-@@ -268,11 +262,14 @@ SYM_INNER_LABEL(ftrace_regs_caller_jmp, SYM_L_GLOBAL)
- 	popfq
- 
- 	/*
--	 * The trampoline will add the return.
-+	 * As this jmp to ftrace_epilogue can be a short jump
-+	 * it must not be copied into the trampoline.
-+	 * The trampoline will add the code to jump
-+	 * to the return.
- 	 */
- SYM_INNER_LABEL(ftrace_regs_caller_end, SYM_L_GLOBAL)
- 	ANNOTATE_NOENDBR
--	RET
-+	jmp ftrace_epilogue
- 
- 	/* Swap the flags with orig_rax */
- 1:	movq MCOUNT_REG_SIZE(%rsp), %rdi
-@@ -283,20 +280,7 @@ SYM_INNER_LABEL(ftrace_regs_caller_end, SYM_L_GLOBAL)
+@@ -289,20 +275,7 @@ SYM_INNER_LABEL(ftrace_regs_caller_end, SYM_L_GLOBAL)
  	/* Restore flags */
  	popfq
  	UNWIND_HINT_FUNC
@@ -2927,11 +2922,11 @@ index 6a7e6d666a12..dfeb227de561 100644
 -	ALTERNATIVE __stringify(RET), \
 -		    __stringify(ANNOTATE_UNRET_SAFE; ret; int3), \
 -		    X86_FEATURE_CALL_DEPTH
-+	jmp	ftrace_epilogue
++	RET
  
  SYM_FUNC_END(ftrace_regs_caller)
  STACK_FRAME_NON_STANDARD_FP(ftrace_regs_caller)
-@@ -305,8 +289,6 @@ STACK_FRAME_NON_STANDARD_FP(ftrace_regs_caller)
+@@ -311,8 +284,6 @@ STACK_FRAME_NON_STANDARD_FP(ftrace_regs_caller)
  #else /* ! CONFIG_DYNAMIC_FTRACE */
  
  SYM_FUNC_START(__fentry__)
@@ -2939,8 +2934,8 @@ index 6a7e6d666a12..dfeb227de561 100644
 -
  	cmpq $ftrace_stub, ftrace_trace_function
  	jnz trace
- 
-@@ -363,8 +345,6 @@ SYM_CODE_START(return_to_handler)
+ 	RET
+@@ -366,8 +337,6 @@ SYM_CODE_START(return_to_handler)
  	int3
  .Ldo_rop:
  	mov %rdi, (%rsp)
@@ -3069,7 +3064,7 @@ index 95fb85bea111..d4e48b4a438b 100644
  ASM_ENDBR
  "movq	__per_cpu_offset(,%rdi,8), %rax;"
 diff --git a/arch/x86/kernel/module.c b/arch/x86/kernel/module.c
-index 2fb9de2cef40..c032edcd3d95 100644
+index 9afcc53042c5..9f74b7d71a50 100644
 --- a/arch/x86/kernel/module.c
 +++ b/arch/x86/kernel/module.c
 @@ -74,11 +74,10 @@ void *module_alloc(unsigned long size)
@@ -3333,7 +3328,7 @@ index 7ac19aba8983..178015a820f0 100644
  	}
  
 diff --git a/arch/x86/kernel/unwind_orc.c b/arch/x86/kernel/unwind_orc.c
-index cfac2b54b37b..0ea57da92940 100644
+index cdf6c6060170..c059820dfaea 100644
 --- a/arch/x86/kernel/unwind_orc.c
 +++ b/arch/x86/kernel/unwind_orc.c
 @@ -136,21 +136,6 @@ static struct orc_entry null_orc_entry = {
@@ -3727,18 +3722,18 @@ index 5f61c65322be..073289a55f84 100644
 -
 -#endif /* CONFIG_CALL_DEPTH_TRACKING */
 diff --git a/arch/x86/net/bpf_jit_comp.c b/arch/x86/net/bpf_jit_comp.c
-index 6017fa1689ca..d7dd8e0db8da 100644
+index 8dffe70bd6a4..b98df1bfac30 100644
 --- a/arch/x86/net/bpf_jit_comp.c
 +++ b/arch/x86/net/bpf_jit_comp.c
-@@ -12,7 +12,6 @@
- #include <linux/memory.h>
+@@ -13,7 +13,6 @@
  #include <linux/sort.h>
+ #include <linux/init.h>
  #include <asm/extable.h>
 -#include <asm/ftrace.h>
  #include <asm/set_memory.h>
  #include <asm/nospec-branch.h>
  #include <asm/text-patching.h>
-@@ -341,13 +340,6 @@ static int emit_call(u8 **pprog, void *func, void *ip)
+@@ -342,13 +341,6 @@ static int emit_call(u8 **pprog, void *func, void *ip)
  	return emit_patch(pprog, func, ip, 0xE8);
  }
  
@@ -3752,7 +3747,7 @@ index 6017fa1689ca..d7dd8e0db8da 100644
  static int emit_jump(u8 **pprog, void *func, void *ip)
  {
  	return emit_patch(pprog, func, ip, 0xE9);
-@@ -425,10 +417,7 @@ static void emit_indirect_jump(u8 **pprog, int reg, u8 *ip)
+@@ -438,10 +430,7 @@ static void emit_indirect_jump(u8 **pprog, int reg, u8 *ip)
  		EMIT2(0xFF, 0xE0 + reg);
  	} else if (cpu_feature_enabled(X86_FEATURE_RETPOLINE)) {
  		OPTIMIZER_HIDE_VAR(reg);
@@ -3764,7 +3759,7 @@ index 6017fa1689ca..d7dd8e0db8da 100644
  	} else {
  		EMIT2(0xFF, 0xE0 + reg);	/* jmp *%\reg */
  		if (IS_ENABLED(CONFIG_RETPOLINE) || IS_ENABLED(CONFIG_SLS))
-@@ -443,7 +432,7 @@ static void emit_return(u8 **pprog, u8 *ip)
+@@ -456,7 +445,7 @@ static void emit_return(u8 **pprog, u8 *ip)
  	u8 *prog = *pprog;
  
  	if (cpu_feature_enabled(X86_FEATURE_RETHUNK)) {
@@ -3773,7 +3768,7 @@ index 6017fa1689ca..d7dd8e0db8da 100644
  	} else {
  		EMIT1(0xC3);		/* ret */
  		if (IS_ENABLED(CONFIG_SLS))
-@@ -1525,26 +1514,19 @@ st:			if (is_imm8(insn->off))
+@@ -1538,26 +1527,19 @@ st:			if (is_imm8(insn->off))
  			break;
  
  			/* call */
@@ -3803,7 +3798,7 @@ index 6017fa1689ca..d7dd8e0db8da 100644
  
  		case BPF_JMP | BPF_TAIL_CALL:
  			if (imm32)
-@@ -1950,7 +1932,7 @@ static int invoke_bpf_prog(const struct btf_func_model *m, u8 **pprog,
+@@ -1963,7 +1945,7 @@ static int invoke_bpf_prog(const struct btf_func_model *m, u8 **pprog,
  	/* arg2: lea rsi, [rbp - ctx_cookie_off] */
  	EMIT4(0x48, 0x8D, 0x75, -run_ctx_off);
  
@@ -3812,7 +3807,7 @@ index 6017fa1689ca..d7dd8e0db8da 100644
  		return -EINVAL;
  	/* remember prog start time returned by __bpf_prog_enter */
  	emit_mov_reg(&prog, true, BPF_REG_6, BPF_REG_0);
-@@ -1971,7 +1953,7 @@ static int invoke_bpf_prog(const struct btf_func_model *m, u8 **pprog,
+@@ -1984,7 +1966,7 @@ static int invoke_bpf_prog(const struct btf_func_model *m, u8 **pprog,
  			       (long) p->insnsi >> 32,
  			       (u32) (long) p->insnsi);
  	/* call JITed bpf program or interpreter */
@@ -3821,7 +3816,7 @@ index 6017fa1689ca..d7dd8e0db8da 100644
  		return -EINVAL;
  
  	/*
-@@ -1995,7 +1977,7 @@ static int invoke_bpf_prog(const struct btf_func_model *m, u8 **pprog,
+@@ -2008,7 +1990,7 @@ static int invoke_bpf_prog(const struct btf_func_model *m, u8 **pprog,
  	emit_mov_reg(&prog, true, BPF_REG_2, BPF_REG_6);
  	/* arg3: lea rdx, [rbp - run_ctx_off] */
  	EMIT4(0x48, 0x8D, 0x55, -run_ctx_off);
@@ -3830,7 +3825,7 @@ index 6017fa1689ca..d7dd8e0db8da 100644
  		return -EINVAL;
  
  	*pprog = prog;
-@@ -2217,11 +2199,6 @@ int arch_prepare_bpf_trampoline(struct bpf_tramp_image *im, void *image, void *i
+@@ -2230,11 +2212,6 @@ int arch_prepare_bpf_trampoline(struct bpf_tramp_image *im, void *image, void *i
  	prog = image;
  
  	EMIT_ENDBR();
@@ -3842,7 +3837,7 @@ index 6017fa1689ca..d7dd8e0db8da 100644
  	EMIT1(0x55);		 /* push rbp */
  	EMIT3(0x48, 0x89, 0xE5); /* mov rbp, rsp */
  	EMIT4(0x48, 0x83, 0xEC, stack_size); /* sub rsp, stack_size */
-@@ -2248,7 +2225,7 @@ int arch_prepare_bpf_trampoline(struct bpf_tramp_image *im, void *image, void *i
+@@ -2261,7 +2238,7 @@ int arch_prepare_bpf_trampoline(struct bpf_tramp_image *im, void *image, void *i
  	if (flags & BPF_TRAMP_F_CALL_ORIG) {
  		/* arg1: mov rdi, im */
  		emit_mov_imm64(&prog, BPF_REG_1, (long) im >> 32, (u32) (long) im);
@@ -3851,7 +3846,7 @@ index 6017fa1689ca..d7dd8e0db8da 100644
  			ret = -EINVAL;
  			goto cleanup;
  		}
-@@ -2280,7 +2257,7 @@ int arch_prepare_bpf_trampoline(struct bpf_tramp_image *im, void *image, void *i
+@@ -2293,7 +2270,7 @@ int arch_prepare_bpf_trampoline(struct bpf_tramp_image *im, void *image, void *i
  			EMIT2(0xff, 0xd0); /* call *rax */
  		} else {
  			/* call original function */
@@ -3860,7 +3855,7 @@ index 6017fa1689ca..d7dd8e0db8da 100644
  				ret = -EINVAL;
  				goto cleanup;
  			}
-@@ -2324,7 +2301,7 @@ int arch_prepare_bpf_trampoline(struct bpf_tramp_image *im, void *image, void *i
+@@ -2337,7 +2314,7 @@ int arch_prepare_bpf_trampoline(struct bpf_tramp_image *im, void *image, void *i
  		im->ip_epilogue = prog;
  		/* arg1: mov rdi, im */
  		emit_mov_imm64(&prog, BPF_REG_1, (long) im >> 32, (u32) (long) im);
@@ -3883,7 +3878,7 @@ index 9b892079581b..f82857e48815 100644
  	pv_ops.cpu.write_gdt_entry = xen_write_gdt_entry;
  	pv_ops.cpu.load_gdt = xen_load_gdt;
 diff --git a/include/asm-generic/vmlinux.lds.h b/include/asm-generic/vmlinux.lds.h
-index 335b5711a7ed..c15de165ec8f 100644
+index 735c78114324..d06ada2341cb 100644
 --- a/include/asm-generic/vmlinux.lds.h
 +++ b/include/asm-generic/vmlinux.lds.h
 @@ -81,8 +81,8 @@
@@ -3898,11 +3893,11 @@ index 335b5711a7ed..c15de165ec8f 100644
  /*
   * LD_DEAD_CODE_DATA_ELIMINATION option enables -fdata-sections, which
 diff --git a/include/linux/bpf.h b/include/linux/bpf.h
-index 5296aea9b5b4..9e7d46d16032 100644
+index 300897c553eb..0566705c1d4e 100644
 --- a/include/linux/bpf.h
 +++ b/include/linux/bpf.h
-@@ -984,11 +984,7 @@ int arch_prepare_bpf_dispatcher(void *image, void *buf, s64 *funcs, int num_func
- }
+@@ -994,11 +994,7 @@ int __init bpf_arch_init_dispatcher_early(void *ip);
+ 	early_initcall(_name##_init)
  
  #ifdef CONFIG_X86_64
 -#ifdef CONFIG_CALL_THUNKS
@@ -4249,7 +4244,7 @@ index 1f769d0db20f..e8f1e440b9b8 100644
  "	call my_direct_func\n"
  "	popq %rdi\n"
 diff --git a/scripts/Makefile.lib b/scripts/Makefile.lib
-index 85f02756dc9c..3aa384cec76b 100644
+index e2b14c6f8b25..969de3b7bb30 100644
 --- a/scripts/Makefile.lib
 +++ b/scripts/Makefile.lib
 @@ -254,7 +254,6 @@ objtool := $(objtree)/tools/objtool/objtool
