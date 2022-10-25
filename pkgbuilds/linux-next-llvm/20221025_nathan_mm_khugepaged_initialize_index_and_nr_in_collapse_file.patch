@@ -1,0 +1,57 @@
+From git@z Thu Jan  1 00:00:00 1970
+Subject: [PATCH] mm/khugepaged: Initialize index and nr in collapse_file()
+From: Nathan Chancellor <nathan@kernel.org>
+Date: Tue, 25 Oct 2022 10:34:07 -0700
+Message-Id: <20221025173407.3423241-1-nathan@kernel.org>
+To: Andrew Morton <akpm@linux-foundation.org>
+Cc: Gautam Menghani <gautammenghani201@gmail.com>, Nick Desaulniers <ndesaulniers@google.com>, Tom Rix <trix@redhat.com>, linux-mm@kvack.org, linux-kernel@vger.kernel.org, llvm@lists.linux.dev, patches@lists.linux.dev, Nathan Chancellor <nathan@kernel.org>, kernel test robot <lkp@intel.com>
+List-Id: <llvm.lists.linux.dev>
+MIME-Version: 1.0
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 7bit
+
+Clang warns (trimmed for brevity):
+
+  mm/khugepaged.c:1729:7: warning: variable 'index' is used uninitialized whenever 'if' condition is true [-Wsometimes-uninitialized]
+  mm/khugepaged.c:1716:6: warning: variable 'index' is used uninitialized whenever 'if' condition is true [-Wsometimes-uninitialized]
+  mm/khugepaged.c:1729:7: warning: variable 'nr' is used uninitialized whenever 'if' condition is true [-Wsometimes-uninitialized]
+  mm/khugepaged.c:1716:6: warning: variable 'nr' is used uninitialized whenever 'if' condition is true [-Wsometimes-uninitialized]
+
+There are two goto statements that will use index and nr before they
+have been properly initialized. Zero initialize them so that they can be
+safely used by the tracepoint at the end of the function.
+
+Fixes: eae5270d3322 ("mm/khugepaged: add tracepoint to collapse_file()")
+Link: https://github.com/ClangBuiltLinux/linux/issues/1749
+Reported-by: kernel test robot <lkp@intel.com>
+Reviewed-by: Zach O'Keefe <zokeefe@google.com>
+Link: https://lore.kernel.org/r/20221025173407.3423241-1-nathan@kernel.org
+Signed-off-by: Nathan Chancellor <nathan@kernel.org>
+---
+ mm/khugepaged.c | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/mm/khugepaged.c b/mm/khugepaged.c
+index 977c0ff82c46..789db2f3fc06 100644
+--- a/mm/khugepaged.c
++++ b/mm/khugepaged.c
+@@ -1702,12 +1702,12 @@ static int collapse_file(struct mm_struct *mm, unsigned long addr,
+ {
+ 	struct address_space *mapping = file->f_mapping;
+ 	struct page *hpage;
+-	pgoff_t index, end = start + HPAGE_PMD_NR;
++	pgoff_t index = 0, end = start + HPAGE_PMD_NR;
+ 	LIST_HEAD(pagelist);
+ 	XA_STATE_ORDER(xas, &mapping->i_pages, start, HPAGE_PMD_ORDER);
+ 	int nr_none = 0, result = SCAN_SUCCEED;
+ 	bool is_shmem = shmem_file(file);
+-	int nr;
++	int nr = 0;
+ 
+ 	VM_BUG_ON(!IS_ENABLED(CONFIG_READ_ONLY_THP_FOR_FS) && !is_shmem);
+ 	VM_BUG_ON(start & (HPAGE_PMD_NR - 1));
+
+base-commit: ec24a700584c4df869282bcd92b6d88329afe395
+-- 
+2.38.1
+

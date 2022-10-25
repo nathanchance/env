@@ -14,8 +14,7 @@ function cbl_rb_fd -d "Rebase generic Fedora kernel on latest linux-next"
 
     # Patching
     set -a patches https://lore.kernel.org/all/20221004232359.285685-1-nathan@kernel.org/ # fs/ntfs3: Don't use uni1 uninitialized in ntfs_d_compare()
-    set -a patches https://lore.kernel.org/all/20221024151201.2215380-1-nathan@kernel.org/ # coresight: cti: Remove unused variables in cti_{dis,en}able_hw()
-    set -a patches https://lore.kernel.org/all/20221024151953.2238616-1-nathan@kernel.org/ # drm/amdgpu: Fix uninitialized warning in mmhub_v2_0_get_clockgating()
+    set -a patches https://lore.kernel.org/all/20221025173407.3423241-1-nathan@kernel.org/ # mm/khugepaged: Initialize index and nr in collapse_file()
     for patch in $patches
         b4 shazam -l -P _ -s $patch; or return
     end

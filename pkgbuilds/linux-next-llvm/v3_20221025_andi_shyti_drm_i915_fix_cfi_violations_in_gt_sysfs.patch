@@ -1,14 +1,16 @@
 From git@z Thu Jan  1 00:00:00 1970
-Subject: [PATCH v2] drm/i915: Fix CFI violations in gt_sysfs
-From: Nathan Chancellor <nathan@kernel.org>
-Date: Thu, 13 Oct 2022 13:59:10 -0700
-Message-Id: <20221013205909.1282545-1-nathan@kernel.org>
-To: Jani Nikula <jani.nikula@linux.intel.com>, Joonas Lahtinen <joonas.lahtinen@linux.intel.com>, Rodrigo Vivi <rodrigo.vivi@intel.com>, Tvrtko Ursulin <tvrtko.ursulin@linux.intel.com>
-Cc: Nick Desaulniers <ndesaulniers@google.com>, Tom Rix <trix@redhat.com>, Sami Tolvanen <samitolvanen@google.com>, Kees Cook <keescook@chromium.org>, intel-gfx@lists.freedesktop.org, dri-devel@lists.freedesktop.org, llvm@lists.linux.dev, patches@lists.linux.dev, Nathan Chancellor <nathan@kernel.org>, Andi Shyti <andi.shyti@linux.intel.com>, Andrzej Hajda <andrzej.hajda@intel.com>
-List-Id: <llvm.lists.linux.dev>
+Subject: [PATCH v3] drm/i915: Fix CFI violations in gt_sysfs
+From: Andi Shyti <andi.shyti@linux.intel.com>
+Date: Tue, 25 Oct 2022 21:50:15 +0200
+Message-Id: <20221025195015.1003517-1-andi.shyti@linux.intel.com>
+To: intel-gfx@lists.freedesktop.org, dri-devel@lists.freedesktop.org
+Cc: Nathan Chancellor <nathan@kernel.org>, Andrzej Hajda <andrzej.hajda@intel.com>, Andi Shyti <andi@etezian.org>, Andi Shyti <andi.shyti@linux.intel.com>, Kees Cook <keescook@chromium.org>
+List-Id: Direct Rendering Infrastructure - Development <dri-devel.lists.freedesktop.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 7bit
+
+From: Nathan Chancellor <nathan@kernel.org>
 
 When booting with CONFIG_CFI_CLANG, there are numerous violations when
 accessing the files under
@@ -84,21 +86,20 @@ Link: https://github.com/ClangBuiltLinux/linux/issues/1716
 Reviewed-by: Andi Shyti <andi.shyti@linux.intel.com>
 Reviewed-by: Andrzej Hajda <andrzej.hajda@intel.com>
 Reviewed-by: Kees Cook <keescook@chromium.org>
-Link: https://lore.kernel.org/r/20221013205909.1282545-1-nathan@kernel.org
+Signed-off-by: Andi Shyti <andi.shyti@linux.intel.com>
+Link: https://patchwork.freedesktop.org/patch/msgid/20221013205909.1282545-1-nathan@kernel.org
+Link: https://lore.kernel.org/r/20221025195015.1003517-1-andi.shyti@linux.intel.com
 Signed-off-by: Nathan Chancellor <nathan@kernel.org>
 ---
+Hi,
 
-v2:
-  - Rebase on latest drm-intel-gt-next.
-  - Pick up review tags from Andi, Andrzej, and Kees.
-  - Share more code in INTEL_GT_SYSFS_{SHOW,STORE}() using common
-    functions, as suggested by Andrzej. Adjust other paths to account
-    for this.
-  - Remove link to CFI series in commit message, as it is now merged
-    into mainline as of commit 865dad2022c5 ("Merge tag 'kcfi-v6.1-rc1'
-    of git://git.kernel.org/pub/scm/linux/kernel/git/kees/linux").
+just respinning this patch as we got a failure from CI and I wanted to
+be sure there are no failures.
 
-v1: https://lore.kernel.org/20220922195127.2607496-1-nathan@kernel.org/
+No changes to the original patch, just updated the tags.
+
+Thanks,
+Andi
 
  drivers/gpu/drm/i915/gt/intel_gt_sysfs.c    |  15 +-
  drivers/gpu/drm/i915/gt/intel_gt_sysfs.h    |   2 +-
@@ -931,5 +932,5 @@ index 180dd6f3ef57..b108f0a8a044 100644
  		drm_warn(&gt->i915->drm,
  			 "failed to create gt%u punit_req_freq_mhz sysfs (%pe)",
 -- 
-2.38.0
+2.37.2
 

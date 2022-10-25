@@ -3,7 +3,7 @@
 
 _localversion=-llvm
 pkgname=linux-next$_localversion
-_srctag=next-20221024
+_srctag=next-20221025
 pkgver=${_srctag//-/.}
 pkgrel=1
 pkgdesc='linux-next'
@@ -19,8 +19,8 @@ source=(
   config
   0001-Revert-Merge-branch-into-tip-master-x86-core.patch
   20221004_nathan_fs_ntfs3_don_t_use_uni1_uninitialized_in_ntfs_d_compare.patch
-  20221024_nathan_drm_amdgpu_fix_uninitialized_warning_in_mmhub_v2_0_get_clockgating.patch
-  v2_20221013_nathan_drm_i915_fix_cfi_violations_in_gt_sysfs.patch
+  20221025_nathan_mm_khugepaged_initialize_index_and_nr_in_collapse_file.patch
+  v3_20221025_andi_shyti_drm_i915_fix_cfi_violations_in_gt_sysfs.patch
 )
 
 validpgpkeys=(
@@ -28,11 +28,11 @@ validpgpkeys=(
   '3F2568AAC26998F9E813A1C5C3F436CA30F5D8EB'  # Mark Brown
 )
 sha256sums=('SKIP'
-            'd3e2d4b0d331e738c68dab845ab80564aa5db930d4274862d847b91b61964fcf'
+            '4bb454e1cf0e9bc5368f73f2f45f9ff48dddbce5c2158cda2bb8a2ff6a33f0ac'
             '51bce73f5fca1b5804ea2e807871408a24241b0b8da8007ac9807ea649cb61b9'
             '5284d49a3eeaa783f045acaeafae596c9bcb616241a7b85471b33db99754132a'
-            'ce7aad16c26fb593f5ee86da8e63ef526cc4a0a80b8dbe7845a265f04cd30787'
-            'be27a50fd5d26443ea51817f859e2b10e7b4550722967b5587065a98a8c3d56a')
+            '9907c29e8b68a8dda4a95e2b8903624fd1a330e6e7e59c794e6e88f1b57fc53f'
+            'a0f8abc59b648e78d2745759466017b2013ef2cb3aa840d1c62457550fe54799')
 
 # This obviously ties this PKGBUILD to my machine but that is kind of the point :)
 _kmake() {
