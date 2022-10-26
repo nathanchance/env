@@ -85,12 +85,24 @@ function dbxc -d "Shorthand for 'distrobox create'"
     # so that accelerated VMs work within a container. Do this with an init hook.
     if command -q docker; and test (get_distro) = ubuntu; and getent group kvm &>/dev/null
         set -l host_kvm_gid (getent group kvm | string split -f 3 :)
-        set -a dbx_args --init-hooks 'if getent group kvm &>/dev/null && [[ $(getent group kvm | cut -d : -f 3) != '"$host_kvm_gid"' ]]; then groupdel -f kvm && groupadd -g '"$host_kvm_gid"' kvm && usermod -aG kvm '"$USER"'; fi'
+        set init_hook 'if getent group kvm &>/dev/null && [[ $(getent group kvm | cut -d : -f 3) != '"$host_kvm_gid"' ]]; then groupdel -f kvm && groupadd -g '"$host_kvm_gid"' kvm && usermod -aG kvm '"$USER"'; fi'
     end
 
     if test "$mode" = create
+        if set -q init_hook
+            set -p dbx_args --init-hooks $init_hook
+        end
         set -p dbx_args -a "$add_args"
     else
+        if set -q init_hook
+            set init_hook_sh (mktemp --suffix=.sh)
+            chmod +x $init_hook_sh
+            echo '#!/bin/sh
+
+'"$init_hook"'
+rm "$0"' >$init_hook_sh
+            set -p dbx_args --init-hooks $init_hook_sh
+        end
         set -p dbx_args '-a "'$add_args'"'
     end
 
