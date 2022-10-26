@@ -242,7 +242,7 @@ def setup_vm(cfg):
     size = cfg["size"]
 
     # Create folder
-    remove(cfg)
+    remove_vm(cfg)
     vm_folder.mkdir(parents=True, exist_ok=True)
 
     # Create efivars image
@@ -317,7 +317,7 @@ def set_cfg(args):
             ver = 36
             iso = f"https://download.fedoraproject.org/pub/fedora/linux/releases/{ver}/server/aarch64/iso/fedora-server-netinst-aarch64-{ver}-1.5.iso"
         elif arch == "x86_64":
-            ver = "2022.06.01"
+            ver = "2022.10.01"
             iso = f"https://mirror.arizona.edu/archlinux/iso/{ver}/archlinux-{ver}-x86_64.iso"
         else:
             raise NotImplementedError(f"Default .iso has not been defined for {arch}")
