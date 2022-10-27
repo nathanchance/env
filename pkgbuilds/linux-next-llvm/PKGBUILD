@@ -3,7 +3,7 @@
 
 _localversion=-llvm
 pkgname=linux-next$_localversion
-_srctag=next-20221026
+_srctag=next-20221027
 pkgver=${_srctag//-/.}
 pkgrel=1
 pkgdesc='linux-next'
@@ -18,8 +18,6 @@ source=(
   "$pkgname::git+https://git.kernel.org/pub/scm/linux/kernel/git/next/linux-next.git?signed#tag=$_srctag"
   config
   0001-Revert-Merge-branch-into-tip-master-x86-core.patch
-  20221004_nathan_fs_ntfs3_don_t_use_uni1_uninitialized_in_ntfs_d_compare.patch
-  20221025_nathan_mm_khugepaged_initialize_index_and_nr_in_collapse_file.patch
   v3_20221025_andi_shyti_drm_i915_fix_cfi_violations_in_gt_sysfs.patch
 )
 
@@ -28,10 +26,8 @@ validpgpkeys=(
   '3F2568AAC26998F9E813A1C5C3F436CA30F5D8EB'  # Mark Brown
 )
 sha256sums=('SKIP'
-            '347412bef5b28fa719c498be2e5a23c4086242e2fa338f4725cb3f526282aed7'
-            '51bce73f5fca1b5804ea2e807871408a24241b0b8da8007ac9807ea649cb61b9'
-            '5284d49a3eeaa783f045acaeafae596c9bcb616241a7b85471b33db99754132a'
-            '9907c29e8b68a8dda4a95e2b8903624fd1a330e6e7e59c794e6e88f1b57fc53f'
+            '0609bb898ee11d1418208bf55e5cf77a84d39d3723f37d14c69283b032808ab9'
+            '92018cb0d560d5a22d15fe30a0e033c893ada5843ee36d33a0664ddf7c37d7b1'
             'a0f8abc59b648e78d2745759466017b2013ef2cb3aa840d1c62457550fe54799')
 
 # This obviously ties this PKGBUILD to my machine but that is kind of the point :)

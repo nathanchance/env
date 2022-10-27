@@ -13,8 +13,6 @@ function cbl_rb_fd -d "Rebase generic Fedora kernel on latest linux-next"
     git rh origin/master
 
     # Patching
-    set -a patches https://lore.kernel.org/all/20221004232359.285685-1-nathan@kernel.org/ # fs/ntfs3: Don't use uni1 uninitialized in ntfs_d_compare()
-    set -a patches https://lore.kernel.org/all/20221025173407.3423241-1-nathan@kernel.org/ # mm/khugepaged: Initialize index and nr in collapse_file()
     for patch in $patches
         b4 shazam -l -P _ -s $patch; or return
     end

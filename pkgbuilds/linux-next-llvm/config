@@ -2,7 +2,7 @@
 # Automatically generated file; DO NOT EDIT.
 # Linux/x86 6.1.0-rc2 Kernel Configuration
 #
-CONFIG_CC_VERSION_TEXT="ClangBuiltLinux clang version 16.0.0 (https://github.com/llvm/llvm-project d24c93cc4107dca68a2760199e970cb04cdeed90)"
+CONFIG_CC_VERSION_TEXT="ClangBuiltLinux clang version 16.0.0 (https://github.com/llvm/llvm-project b150d34c47efbd8fa09604bce805c0920360f8d7)"
 CONFIG_GCC_VERSION=0
 CONFIG_CC_IS_CLANG=y
 CONFIG_CLANG_VERSION=160000
@@ -5168,6 +5168,7 @@ CONFIG_SENSORS_NCT7904=m
 CONFIG_SENSORS_NPCM7XX=m
 CONFIG_SENSORS_NZXT_KRAKEN2=m
 CONFIG_SENSORS_NZXT_SMART2=m
+# CONFIG_SENSORS_OCC_P8_I2C is not set
 CONFIG_SENSORS_PCF8591=m
 CONFIG_PMBUS=m
 CONFIG_SENSORS_PMBUS=m

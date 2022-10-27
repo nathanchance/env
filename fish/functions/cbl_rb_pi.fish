@@ -25,7 +25,6 @@ function cbl_rb_pi -d "Rebase Raspberry Pi kernel on latest linux-next"
     set -a patches https://lore.kernel.org/all/20221014201354.3190007-3-ndesaulniers@google.com/ # ARM: use .arch directives instead of assembler command line flags
     set -a patches https://lore.kernel.org/all/20221014201354.3190007-4-ndesaulniers@google.com/ # ARM: only use -mtp=cp15 for the compiler
     set -a patches https://lore.kernel.org/all/20221014201354.3190007-5-ndesaulniers@google.com/ # ARM: pass -march= only to compiler
-    set -a patches https://lore.kernel.org/all/20221025173407.3423241-1-nathan@kernel.org/ # mm/khugepaged: Initialize index and nr in collapse_file()
     for patch in $patches
         b4 am -l -o - -P _ -s $patch | git am; or return
     end
