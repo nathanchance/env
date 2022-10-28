@@ -3,7 +3,7 @@
 
 _localversion=-llvm
 pkgname=linux-next$_localversion
-_srctag=next-20221027
+_srctag=next-20221028
 pkgver=${_srctag//-/.}
 pkgrel=1
 pkgdesc='linux-next'
@@ -17,7 +17,7 @@ options=('!strip')
 source=(
   "$pkgname::git+https://git.kernel.org/pub/scm/linux/kernel/git/next/linux-next.git?signed#tag=$_srctag"
   config
-  0001-Revert-Merge-branch-into-tip-master-x86-core.patch
+  0001-Revert-x86-retbleed-Call-depth-tracking-mitigation-a.patch
   v3_20221025_andi_shyti_drm_i915_fix_cfi_violations_in_gt_sysfs.patch
 )
 
@@ -26,8 +26,8 @@ validpgpkeys=(
   '3F2568AAC26998F9E813A1C5C3F436CA30F5D8EB'  # Mark Brown
 )
 sha256sums=('SKIP'
-            '0609bb898ee11d1418208bf55e5cf77a84d39d3723f37d14c69283b032808ab9'
-            '92018cb0d560d5a22d15fe30a0e033c893ada5843ee36d33a0664ddf7c37d7b1'
+            'd802c19c9d0a56196cde119ad8e065a4e7ccef290b45201ccce63f6e9a306dcf'
+            'b6e97f90de30a6fd9d51e15e70294ecbd5a2c5ca27b94d18b8ee929b3c9a38b4'
             'a0f8abc59b648e78d2745759466017b2013ef2cb3aa840d1c62457550fe54799')
 
 # This obviously ties this PKGBUILD to my machine but that is kind of the point :)

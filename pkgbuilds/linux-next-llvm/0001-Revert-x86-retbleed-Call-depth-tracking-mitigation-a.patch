@@ -1,10 +1,8 @@
-From f8a9db14d44de1d3f3d576d0e5bbe4ff1148375e Mon Sep 17 00:00:00 2001
+From bf328dfd2b9c484fdf62fbcc0a0427e9394d418b Mon Sep 17 00:00:00 2001
 From: Nathan Chancellor <nathan@kernel.org>
-Date: Thu, 27 Oct 2022 09:57:31 -0700
-Subject: [PATCH] Revert "Merge branch into tip/master: 'x86/core'"
-
-This reverts commit 9783753a67b599e99dbbec0c6cb1909d95c3eb82, reversing
-changes made to bc96be3805a98ef36d188843caa1636c716cae02.
+Date: Fri, 28 Oct 2022 09:20:46 -0700
+Subject: [PATCH] Revert 'x86/retbleed: Call depth tracking mitigation' and
+ fixes
 
 Link: https://lore.kernel.org/Y1HVZKW4o0KRsMtq@dev-arch.thelio-3990X/
 Signed-off-by: Nathan Chancellor <nathan@kernel.org>
@@ -1871,7 +1869,7 @@ index 96d51bbc2bd4..cceaafdd2d84 100644
  # 64 bit specific files
  ifeq ($(CONFIG_X86_64),y)
 diff --git a/arch/x86/kernel/alternative.c b/arch/x86/kernel/alternative.c
-index 19221d77dc27..5cadcea035e0 100644
+index b4ac4e58c010..5cadcea035e0 100644
 --- a/arch/x86/kernel/alternative.c
 +++ b/arch/x86/kernel/alternative.c
 @@ -377,56 +377,6 @@ static int emit_indirect(int op, int reg, u8 *bytes)
@@ -1919,7 +1917,7 @@ index 19221d77dc27..5cadcea035e0 100644
 -		break;
 -
 -	default:
--		WARN("%pS %px %*ph\n", addr, addr, 6, addr);
+-		WARN(1, "%pS %px %*ph\n", addr, addr, 6, addr);
 -		return -1;
 -	}
 -
@@ -4116,7 +4114,7 @@ index ff0536cea968..a2d301f58ced 100644
  
  /*
 diff --git a/lib/Kconfig.debug b/lib/Kconfig.debug
-index 3ff5fb841f3c..bd31b9341e1b 100644
+index fe79fab10d76..6534eabebcff 100644
 --- a/lib/Kconfig.debug
 +++ b/lib/Kconfig.debug
 @@ -468,7 +468,6 @@ config SECTION_MISMATCH_WARN_ONLY
