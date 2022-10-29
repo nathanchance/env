@@ -172,10 +172,18 @@ index daa8e3b..a5fa04a 100644
  }
  
 diff --git a/btf_loader.c b/btf_loader.c
-index 406a007..69b63a5 100644
+index 406a007..e579323 100644
 --- a/btf_loader.c
 +++ b/btf_loader.c
-@@ -312,6 +312,7 @@ out_free:
+@@ -108,6 +108,7 @@ static struct base_type *base_type__new(const char *name, uint32_t attrs,
+ 		bt->is_bool = attrs & BTF_INT_BOOL;
+ 		bt->name_has_encoding = false;
+ 		bt->float_type = float_type;
++		INIT_LIST_HEAD(&bt->node);
+ 	}
+ 	return bt;
+ }
+@@ -312,6 +313,7 @@ out_free:
  	return -ENOMEM;
  }
  
@@ -183,7 +191,7 @@ index 406a007..69b63a5 100644
  static struct enumerator *enumerator__new64(const char *name, uint64_t value)
  {
  	struct enumerator *en = tag__alloc(sizeof(*en));
-@@ -354,6 +355,12 @@ out_free:
+@@ -354,6 +356,12 @@ out_free:
  	enumeration__delete(enumeration);
  	return -ENOMEM;
  }
@@ -209,8 +217,20 @@ index 35aee3f..9e5c565 100644
  	printf("    %c%-26s %-21s /* %5u %5zd */\n",
  	       change, tag__name(type, cu, bf, sizeof(bf), NULL),
  	       class_member__name(member),
+diff --git a/ctf_loader.c b/ctf_loader.c
+index de6d4db..2570b09 100644
+--- a/ctf_loader.c
++++ b/ctf_loader.c
+@@ -157,6 +157,7 @@ static struct base_type *base_type__new(const char *name, uint32_t attrs,
+ 		bt->is_varargs = attrs & CTF_TYPE_INT_VARARGS;
+ 		bt->name_has_encoding = false;
+ 		bt->float_type = float_type;
++		INIT_LIST_HEAD(&bt->node);
+ 	}
+ 	return bt;
+ }
 diff --git a/ctracer.c b/ctracer.c
-index 1345946..8d6eac8 100644
+index 1345946..cb7e81f 100644
 --- a/ctracer.c
 +++ b/ctracer.c
 @@ -357,7 +357,7 @@ static struct class *class__clone_base_types(const struct tag *tag,
@@ -249,6 +269,15 @@ index 1345946..8d6eac8 100644
  		if (tag__is_pointer_to(ctype, target_type_id))
  			break;
  	}
+@@ -960,7 +960,7 @@ failure:
+ 		goto out;
+ 	}
+ 
+-	type_emissions__init(&emissions);
++	type_emissions__init(&emissions, NULL);
+ 
+         /*
+          * Create the methods_cus (Compilation Units) object where we will
 diff --git a/dutil.h b/dutil.h
 index e45bba0..335a17c 100644
 --- a/dutil.h
@@ -263,10 +292,18 @@ index e45bba0..335a17c 100644
 +
  #endif /* _DUTIL_H_ */
 diff --git a/dwarf_loader.c b/dwarf_loader.c
-index c2ad2a0..03ac871 100644
+index c2ad2a0..5a74035 100644
 --- a/dwarf_loader.c
 +++ b/dwarf_loader.c
-@@ -782,7 +782,8 @@ static int tag__recode_dwarf_bitfield(struct tag *tag, struct cu *cu, uint16_t b
+@@ -564,6 +564,7 @@ static struct base_type *base_type__new(Dwarf_Die *die, struct cu *cu, struct co
+ 		bt->is_varargs = false;
+ 		bt->name_has_encoding = true;
+ 		bt->float_type = encoding_to_float_type(encoding);
++		INIT_LIST_HEAD(&bt->node);
+ 	}
+ 
+ 	return bt;
+@@ -782,7 +783,8 @@ static int tag__recode_dwarf_bitfield(struct tag *tag, struct cu *cu, uint16_t b
  		break;
  
  	case DW_TAG_const_type:
@@ -276,7 +313,7 @@ index c2ad2a0..03ac871 100644
  		const struct dwarf_tag *dtag = tag->priv;
  		struct dwarf_tag *dtype = dwarf_cu__find_type_by_ref(cu->priv, &dtag->type);
  
-@@ -1484,7 +1485,12 @@ static struct tag *die__create_new_label(Dwarf_Die *die,
+@@ -1484,7 +1486,12 @@ static struct tag *die__create_new_label(Dwarf_Die *die,
  	if (label == NULL)
  		return NULL;
  
@@ -290,7 +327,7 @@ index c2ad2a0..03ac871 100644
  	return &label->ip.tag;
  }
  
-@@ -2000,9 +2006,12 @@ static struct tag *__die__process_tag(Dwarf_Die *die, struct cu *cu,
+@@ -2000,9 +2007,12 @@ static struct tag *__die__process_tag(Dwarf_Die *die, struct cu *cu,
  	case DW_TAG_imported_module:
  	case DW_TAG_reference_type:
  	case DW_TAG_restrict_type:
@@ -304,7 +341,7 @@ index c2ad2a0..03ac871 100644
  	case DW_TAG_pointer_type:
  		tag = die__create_new_pointer_tag(die, cu, conf);	break;
  	case DW_TAG_ptr_to_member_type:
-@@ -2035,6 +2044,12 @@ static struct tag *__die__process_tag(Dwarf_Die *die, struct cu *cu,
+@@ -2035,6 +2045,12 @@ static struct tag *__die__process_tag(Dwarf_Die *die, struct cu *cu,
  		 */
  		tag = &unsupported_tag;
  		break;
@@ -317,7 +354,7 @@ index c2ad2a0..03ac871 100644
  	}
  
  	if (tag != NULL)
-@@ -2053,7 +2068,8 @@ static int die__process_unit(Dwarf_Die *die, struct cu *cu, struct conf_load *co
+@@ -2053,7 +2069,8 @@ static int die__process_unit(Dwarf_Die *die, struct cu *cu, struct conf_load *co
  		if (tag == &unsupported_tag) {
  			// XXX special case DW_TAG_dwarf_procedure, appears when looking at a recent ~/bin/perf
  			// Investigate later how to properly support this...
@@ -327,7 +364,7 @@ index c2ad2a0..03ac871 100644
  				tag__print_not_supported(dwarf_tag(die));
  			continue;
  		}
-@@ -2063,6 +2079,8 @@ static int die__process_unit(Dwarf_Die *die, struct cu *cu, struct conf_load *co
+@@ -2063,6 +2080,8 @@ static int die__process_unit(Dwarf_Die *die, struct cu *cu, struct conf_load *co
  		cu__hash(cu, tag);
  		struct dwarf_tag *dtag = tag->priv;
  		dtag->small_id = id;
@@ -336,7 +373,7 @@ index c2ad2a0..03ac871 100644
  	} while (dwarf_siblingof(die, die) == 0);
  
  	return 0;
-@@ -2498,6 +2516,7 @@ static int cu__recode_dwarf_types_table(struct cu *cu,
+@@ -2498,6 +2517,7 @@ static int cu__recode_dwarf_types_table(struct cu *cu,
  			if (tag__recode_dwarf_type(tag, cu))
  				return -1;
  	}
@@ -345,7 +382,7 @@ index c2ad2a0..03ac871 100644
  }
  
 diff --git a/dwarves.c b/dwarves.c
-index db1dcf5..fbebc1d 100644
+index db1dcf5..95a3bac 100644
 --- a/dwarves.c
 +++ b/dwarves.c
 @@ -175,10 +175,10 @@ void tag__delete(struct tag *tag)
@@ -372,6 +409,15 @@ index db1dcf5..fbebc1d 100644
  			struct tag *tag = cu__type(cu, type->type);
  			if (tag == NULL) {
  				tag__id_not_found_fprintf(stderr, type->type);
+@@ -625,7 +626,7 @@ struct cu *cu__new(const char *name, uint8_t addr_size,
+ 		   const unsigned char *build_id, int build_id_len,
+ 		   const char *filename, bool use_obstack)
+ {
+-	struct cu *cu = malloc(sizeof(*cu) + build_id_len);
++	struct cu *cu = zalloc(sizeof(*cu) + build_id_len);
+ 
+ 	if (cu != NULL) {
+ 		uint32_t void_id;
 @@ -2085,6 +2086,118 @@ int cus__load_file(struct cus *cus, struct conf_load *conf,
  
  #define ARRAY_SIZE(arr) (sizeof(arr) / sizeof((arr)[0]) + __must_be_array(arr))
@@ -502,10 +548,26 @@ index db1dcf5..fbebc1d 100644
  	for (int id = DW_LANG_C89; id <= DW_LANG_BLISS; ++id)
  		if (languages[id] && strcasecmp(lang, languages[id]) == 0)
 diff --git a/dwarves.h b/dwarves.h
-index bec9f08..f8b1500 100644
+index bec9f08..589588e 100644
 --- a/dwarves.h
 +++ b/dwarves.h
-@@ -230,6 +230,10 @@ struct debug_fmt_ops {
+@@ -91,6 +91,7 @@ struct conf_load {
+  * @suppress_force_paddings: This makes sense only if the debugging format has struct alignment information,
+  *                           So allow for it to be disabled and disable it automatically for things like BTF,
+  *                           that don't have such info.
++ * @skip_emitting_atomic_typedefs: Allow not emitting "typedef _Atomic int atomic_int;" and friends
+  */
+ struct conf_fprintf {
+ 	const char *prefix;
+@@ -129,6 +130,7 @@ struct conf_fprintf {
+ 	uint8_t	   classes_as_structs:1;
+ 	uint8_t	   hex_fmt:1;
+ 	uint8_t	   strip_inline:1;
++	uint8_t	   skip_emitting_atomic_typedefs:1;
+ };
+ 
+ struct cus;
+@@ -230,6 +232,10 @@ struct debug_fmt_ops {
  	bool		   has_alignment_info;
  };
  
@@ -516,7 +578,7 @@ index bec9f08..f8b1500 100644
  struct cu {
  	struct list_head node;
  	struct list_head tags;
-@@ -238,6 +242,10 @@ struct cu {
+@@ -238,6 +244,10 @@ struct cu {
  	struct ptr_table functions_table;
  	struct ptr_table tags_table;
  	struct rb_root	 functions;
@@ -527,7 +589,7 @@ index bec9f08..f8b1500 100644
  	char		 *name;
  	char		 *filename;
  	void 		 *priv;
-@@ -488,6 +496,11 @@ static inline bool tag__is_volatile(const struct tag *tag)
+@@ -488,6 +498,11 @@ static inline bool tag__is_volatile(const struct tag *tag)
  	return tag->tag == DW_TAG_volatile_type;
  }
  
@@ -539,7 +601,7 @@ index bec9f08..f8b1500 100644
  static inline bool tag__is_restrict(const struct tag *tag)
  {
  	return tag->tag == DW_TAG_restrict_type;
-@@ -497,7 +510,8 @@ static inline int tag__is_modifier(const struct tag *tag)
+@@ -497,7 +512,8 @@ static inline int tag__is_modifier(const struct tag *tag)
  {
  	return tag__is_const(tag) ||
  	       tag__is_volatile(tag) ||
@@ -549,7 +611,7 @@ index bec9f08..f8b1500 100644
  }
  
  static inline bool tag__has_namespace(const struct tag *tag)
-@@ -540,6 +554,8 @@ static inline int tag__is_tag_type(const struct tag *tag)
+@@ -540,6 +556,8 @@ static inline int tag__is_tag_type(const struct tag *tag)
  	       tag->tag == DW_TAG_subroutine_type ||
  	       tag->tag == DW_TAG_unspecified_type ||
  	       tag->tag == DW_TAG_volatile_type ||
@@ -558,7 +620,7 @@ index bec9f08..f8b1500 100644
  	       tag->tag == DW_TAG_LLVM_annotation;
  }
  
-@@ -574,11 +590,11 @@ size_t tag__fprintf(struct tag *tag, const struct cu *cu,
+@@ -574,11 +592,11 @@ size_t tag__fprintf(struct tag *tag, const struct cu *cu,
  
  const char *tag__name(const struct tag *tag, const struct cu *cu,
  		      char *bf, size_t len, const struct conf_fprintf *conf);
@@ -574,7 +636,22 @@ index bec9f08..f8b1500 100644
  
  size_t tag__size(const struct tag *tag, const struct cu *cu);
  size_t tag__nr_cachelines(const struct conf_fprintf *conf, const struct tag *tag, const struct cu *cu);
-@@ -1398,6 +1414,10 @@ extern bool no_bitfield_type_recode;
+@@ -1318,12 +1336,14 @@ enum base_type_float_type {
+ struct base_type {
+ 	struct tag	tag;
+ 	const char	*name;
++	struct list_head node;
+ 	uint16_t	bit_size;
+ 	uint8_t		name_has_encoding:1;
+ 	uint8_t		is_signed:1;
+ 	uint8_t		is_bool:1;
+ 	uint8_t		is_varargs:1;
+ 	uint8_t		float_type:4;
++	uint8_t		definition_emitted:1;
+ };
+ 
+ static inline struct base_type *tag__base_type(const struct tag *tag)
+@@ -1398,6 +1418,10 @@ extern bool no_bitfield_type_recode;
  
  extern const char tabs[];
  
@@ -586,10 +663,24 @@ index bec9f08..f8b1500 100644
  #define DW_TAG_skeleton_unit 0x4a
  #endif
 diff --git a/dwarves_emit.c b/dwarves_emit.c
-index 910afb9..dec446d 100644
+index 910afb9..01b33b7 100644
 --- a/dwarves_emit.c
 +++ b/dwarves_emit.c
-@@ -121,7 +121,13 @@ static int enumeration__emit_definitions(struct tag *tag,
+@@ -13,10 +13,12 @@
+ #include "dwarves_emit.h"
+ #include "dwarves.h"
+ 
+-void type_emissions__init(struct type_emissions *emissions)
++void type_emissions__init(struct type_emissions *emissions, struct conf_fprintf *conf_fprintf)
+ {
++	INIT_LIST_HEAD(&emissions->base_type_definitions);
+ 	INIT_LIST_HEAD(&emissions->definitions);
+ 	INIT_LIST_HEAD(&emissions->fwd_decls);
++	emissions->conf_fprintf = conf_fprintf;
+ }
+ 
+ static void type_emissions__add_definition(struct type_emissions *emissions,
+@@ -121,7 +123,13 @@ static int enumeration__emit_definitions(struct tag *tag,
  
  	enumeration__fprintf(tag, conf, fp);
  	fputs(";\n", fp);
@@ -604,16 +695,137 @@ index 910afb9..dec446d 100644
  	return 1;
  }
  
-@@ -149,7 +155,7 @@ static int typedef__emit_definitions(struct tag *tdef, struct cu *cu,
+@@ -149,9 +157,17 @@ static int typedef__emit_definitions(struct tag *tdef, struct cu *cu,
  	}
  
  	type = cu__type(cu, tdef->type);
 -	tag__assert_search_result(type);
-+	tag__assert_search_result(type, tdef->tag, type__name(def));
++	if (type == NULL) // void
++		goto emit;
  
  	switch (type->tag) {
++	case DW_TAG_atomic_type:
++		type = cu__type(cu, tdef->type);
++		if (type)
++			tag__emit_definitions(type, cu, emissions, fp);
++		else
++			fprintf(stderr, "%s: couldn't find the type pointed from _Atomic for '%s'\n", __func__, type__name(def));
++		break;
  	case DW_TAG_array_type:
-@@ -262,6 +268,7 @@ next_indirection:
+ 		tag__emit_definitions(type, cu, emissions, fp);
+ 		break;
+@@ -209,6 +225,7 @@ static int typedef__emit_definitions(struct tag *tdef, struct cu *cu,
+ 	 * will thus be emitted before the function typedef, making a no go to
+ 	 * redefine the typedef after struct __wait_queue.
+ 	 */
++emit:
+ 	if (!def->definition_emitted) {
+ 		typedef__fprintf(tdef, cu, NULL, fp);
+ 		fputs(";\n", fp);
+@@ -245,6 +262,91 @@ static int type__emit_fwd_decl(struct type *ctype, struct type_emissions *emissi
+ 	return 1;
+ }
+ 
++static struct base_type *base_type_emissions__find_definition(const struct type_emissions *emissions, const char *name)
++{
++	struct base_type *pos;
++
++	if (name == NULL)
++		return NULL;
++
++	list_for_each_entry(pos, &emissions->base_type_definitions, node)
++		if (strcmp(__base_type__name(pos), name) == 0)
++			return pos;
++
++	return NULL;
++}
++
++static void base_type_emissions__add_definition(struct type_emissions *emissions, struct base_type *type)
++{
++	type->definition_emitted = 1;
++	if (!list_empty(&type->node))
++		list_del(&type->node);
++	list_add_tail(&type->node, &emissions->base_type_definitions);
++}
++
++static const char *base_type__stdint2simple(const char *name)
++{
++	if (strcmp(name, "int32_t") == 0)
++		return "int";
++	if (strcmp(name, "int16_t") == 0)
++		return "short";
++	if (strcmp(name, "int8_t") == 0)
++		return "char";
++	if (strcmp(name, "int64_t") == 0)
++		return "long";
++	return name;
++}
++
++static int base_type__emit_definitions(struct base_type *type, struct type_emissions *emissions, FILE *fp)
++{
++#define base_type__prefix "atomic_"
++	const size_t prefixlen = sizeof(base_type__prefix) - 1;
++	const char *name = __base_type__name(type);
++
++	// See if it was already emitted in this CU
++	if (type->definition_emitted)
++		return 0;
++
++	// We're only emitting for "atomic_" prefixed base types
++	if (strncmp(name, base_type__prefix, prefixlen) != 0)
++		return 0;
++
++	// See if it was already emitted in another CU
++	if (base_type_emissions__find_definition(emissions, name)) {
++		type->definition_emitted = 1;
++		return 0;
++	}
++
++	const char *non_atomic_name = name + prefixlen;
++
++	fputs("typedef _Atomic", fp);
++
++	if (non_atomic_name[0] == 's' &&
++	    non_atomic_name[1] != 'i' && non_atomic_name[1] != 'h') // exclude atomic_size_t and atomic_short
++		fprintf(fp, " signed %s", non_atomic_name + 1);
++	else if (non_atomic_name[0] == 'l' && non_atomic_name[1] == 'l')
++		fprintf(fp, " long long");
++	else if (non_atomic_name[0] == 'u') {
++		fprintf(fp, " unsigned");
++		if (non_atomic_name[1] == 'l') {
++			fprintf(fp, " long");
++			if (non_atomic_name[2] == 'l')
++				fprintf(fp, " long");
++		} else
++			fprintf(fp, " %s", base_type__stdint2simple(non_atomic_name + 1));
++	} else if (non_atomic_name[0] == 'b')
++		fprintf(fp, " _Bool");
++	else
++		fprintf(fp, " %s", base_type__stdint2simple(non_atomic_name));
++
++	fprintf(fp, " %s;\n", name);
++
++	base_type_emissions__add_definition(emissions, type);
++	return 1;
++
++#undef base_type__prefix
++}
++
+ static int tag__emit_definitions(struct tag *tag, struct cu *cu,
+ 				 struct type_emissions *emissions, FILE *fp)
+ {
+@@ -255,6 +357,10 @@ static int tag__emit_definitions(struct tag *tag, struct cu *cu,
+ 		return 0;
+ next_indirection:
+ 	switch (type->tag) {
++	case DW_TAG_base_type:
++		if (emissions->conf_fprintf && emissions->conf_fprintf->skip_emitting_atomic_typedefs)
++			return 0;
++		return base_type__emit_definitions(tag__base_type(type), emissions, fp);
+ 	case DW_TAG_pointer_type:
+ 	case DW_TAG_reference_type:
+ 		pointer = 1;
+@@ -262,6 +368,7 @@ next_indirection:
  	case DW_TAG_array_type:
  	case DW_TAG_const_type:
  	case DW_TAG_volatile_type:
@@ -621,7 +833,7 @@ index 910afb9..dec446d 100644
  		type = cu__type(cu, type->type);
  		if (type == NULL)
  			return 0;
-@@ -357,6 +364,12 @@ int type__emit_definitions(struct tag *tag, struct cu *cu,
+@@ -357,6 +464,12 @@ int type__emit_definitions(struct tag *tag, struct cu *cu,
  			} else {
  				// Will be deleted in type__delete() on noticing ctype->suffix_disambiguation != 0
  				tag__namespace(tag)->name = disambiguated_name;
@@ -634,8 +846,30 @@ index 910afb9..dec446d 100644
  			}
  
  		}
+diff --git a/dwarves_emit.h b/dwarves_emit.h
+index b153cdb..6022bee 100644
+--- a/dwarves_emit.h
++++ b/dwarves_emit.h
+@@ -16,13 +16,16 @@ struct cu;
+ struct ftype;
+ struct tag;
+ struct type;
++struct conf_fprintf;
+ 
+ struct type_emissions {
+ 	struct list_head definitions; /* struct type entries */
++	struct list_head base_type_definitions; /* struct base_type entries */
+ 	struct list_head fwd_decls;   /* struct class entries */
++	struct conf_fprintf *conf_fprintf;
+ };
+ 
+-void type_emissions__init(struct type_emissions *temissions);
++void type_emissions__init(struct type_emissions *temissions, struct conf_fprintf *conf_fprintf);
+ 
+ int ftype__emit_definitions(struct ftype *ftype, struct cu *cu,
+ 			    struct type_emissions *emissions, FILE *fp);
 diff --git a/dwarves_fprintf.c b/dwarves_fprintf.c
-index ce64c79..5035f55 100644
+index ce64c79..e62bce1 100644
 --- a/dwarves_fprintf.c
 +++ b/dwarves_fprintf.c
 @@ -93,6 +93,7 @@ static const char *dwarf_tag_names[] = {
@@ -646,6 +880,87 @@ index ce64c79..5035f55 100644
  };
  
  static const char *dwarf_gnu_tag_names[] = {
+@@ -302,32 +303,33 @@ size_t typedef__fprintf(const struct tag *tag, const struct cu *cu,
+ 	const struct tag *ptr_type;
+ 	char bf[512];
+ 	int is_pointer = 0;
+-	size_t printed;
++	size_t printed = fprintf(fp, "typedef ");
+ 
+ 	/*
+ 	 * Check for void (humm, perhaps we should have a fake void tag instance
+ 	 * to avoid all these checks?
+ 	 */
+ 	if (tag->type == 0)
+-		return fprintf(fp, "typedef void %s", type__name(type));
+-
++		return printed + fprintf(fp, "void %s", type__name(type));
++next_type:
+ 	tag_type = cu__type(cu, tag->type);
+ 	if (tag_type == NULL) {
+-		printed = fprintf(fp, "typedef ");
+ 		printed += tag__id_not_found_fprintf(fp, tag->type);
+ 		return printed + fprintf(fp, " %s", type__name(type));
+ 	}
+ 
+ 	switch (tag_type->tag) {
++	case DW_TAG_atomic_type:
++		printed += fprintf(fp, "_Atomic ");
++		tag = tag_type;
++		goto next_type;
+ 	case DW_TAG_array_type:
+-		printed = fprintf(fp, "typedef ");
+ 		return printed + array_type__fprintf(tag_type, cu, type__name(type), pconf, fp);
+ 	case DW_TAG_pointer_type:
+ 		if (tag_type->type == 0) /* void pointer */
+ 			break;
+ 		ptr_type = cu__type(cu, tag_type->type);
+ 		if (ptr_type == NULL) {
+-			printed = fprintf(fp, "typedef ");
+ 			printed += tag__id_not_found_fprintf(fp, tag_type->type);
+ 			return printed + fprintf(fp, " *%s", type__name(type));
+ 		}
+@@ -337,7 +339,6 @@ size_t typedef__fprintf(const struct tag *tag, const struct cu *cu,
+ 		is_pointer = 1;
+ 		/* Fall thru */
+ 	case DW_TAG_subroutine_type:
+-		printed = fprintf(fp, "typedef ");
+ 		return printed + ftype__fprintf(tag__ftype(tag_type), cu, type__name(type),
+ 						0, is_pointer, 0, true, pconf, fp);
+ 	case DW_TAG_class_type:
+@@ -345,27 +346,27 @@ size_t typedef__fprintf(const struct tag *tag, const struct cu *cu,
+ 		struct type *ctype = tag__type(tag_type);
+ 
+ 		if (type__name(ctype) != NULL)
+-			return fprintf(fp, "typedef struct %s %s", type__name(ctype), type__name(type));
++			return printed + fprintf(fp, "struct %s %s", type__name(ctype), type__name(type));
+ 
+ 		struct conf_fprintf tconf = *pconf;
+ 
+ 		tconf.suffix = type__name(type);
+-		return fprintf(fp, "typedef ") + __class__fprintf(tag__class(tag_type), cu, &tconf, fp);
++		return printed + __class__fprintf(tag__class(tag_type), cu, &tconf, fp);
+ 	}
+ 	case DW_TAG_enumeration_type: {
+ 		struct type *ctype = tag__type(tag_type);
+ 
+ 		if (type__name(ctype) != NULL)
+-			return fprintf(fp, "typedef enum %s %s", type__name(ctype), type__name(type));
++			return printed + fprintf(fp, "enum %s %s", type__name(ctype), type__name(type));
+ 
+ 		struct conf_fprintf tconf = *pconf;
+ 
+ 		tconf.suffix = type__name(type);
+-		return fprintf(fp, "typedef ") + enumeration__fprintf(tag_type, &tconf, fp);
++		return printed + enumeration__fprintf(tag_type, &tconf, fp);
+ 	}
+ 	}
+ 
+-	return fprintf(fp, "typedef %s %s",
++	return printed + fprintf(fp, "%s %s",
+ 		       tag__name(tag_type, cu, bf, sizeof(bf), pconf), type__name(type));
+ }
+ 
 @@ -566,6 +567,7 @@ static const char *__tag__name(const struct tag *tag, const struct cu *cu,
  	case DW_TAG_volatile_type:
  	case DW_TAG_const_type:
@@ -707,10 +1022,25 @@ index 79b159b..14f5e82 100644
  			if (verbose) {
  				char old_bf[64], new_bf[64];
 diff --git a/man-pages/pahole.1 b/man-pages/pahole.1
-index bb88e2f..45a21af 100644
+index bb88e2f..7460104 100644
 --- a/man-pages/pahole.1
 +++ b/man-pages/pahole.1
-@@ -137,8 +137,8 @@ offset from the beginning of a struct is.
+@@ -121,6 +121,14 @@ Produces a header that can be included in a C source file and built. In
+ the example provided it will use the BTF info if available, otherwise will
+ look for a DWARF file matching the running kernel build-id.
+ 
++.TP
++.B \-\-skip_emitting_atomic_typedefs
++Do not emit 'typedef _Atomic int atomic_int' & friends when used with options
++like --compile. Use it if the compiler provides these already, as of circa
++2022 with gcc 12.2.1 those are not encoded in DWARF so to generate compilable
++code we need emit those typedefs for the atomic types used in the data structures
++being emitted from debugging information.
++
+ .TP
+ .B \-\-count=COUNT
+ Pretty print the first COUNT records from input.
+@@ -137,8 +145,8 @@ offset from the beginning of a struct is.
  .TP
  .B \-F, \-\-format_path
  Allows specifying a list of debugging formats to try, in order. Right now this
@@ -721,7 +1051,7 @@ index bb88e2f..45a21af 100644
  
  .TP
  .B \-\-hashbits=BITS
-@@ -378,7 +378,7 @@ Only process compilation units built from source code written in the specified l
+@@ -378,7 +386,7 @@ Only process compilation units built from source code written in the specified l
  
  Supported languages:
  
@@ -731,7 +1061,7 @@ index bb88e2f..45a21af 100644
    go, haskell, java, julia, modula2, modula3, objc, objc++, ocaml, opencl,
    pascal83, pli, python, renderscript, rust, swift, upc
 diff --git a/pahole.c b/pahole.c
-index e87d9a4..4636f01 100644
+index e87d9a4..4ddf21f 100644
 --- a/pahole.c
 +++ b/pahole.c
 @@ -871,19 +871,19 @@ static void class__resize_LP(struct tag *tag, struct cu *cu)
@@ -775,7 +1105,45 @@ index e87d9a4..4636f01 100644
  			if (!tag__is_pointer_to(ctype, type))
  				continue;
  
-@@ -2999,11 +2999,6 @@ static enum load_steal_kind pahole_stealer(struct cu *cu,
+@@ -1221,6 +1221,7 @@ ARGP_PROGRAM_VERSION_HOOK_DEF = dwarves_print_version;
+ #define ARGP_languages		   335
+ #define ARGP_languages_exclude	   336
+ #define ARGP_skip_encoding_btf_enum64 337
++#define ARGP_skip_emitting_atomic_typedefs 338
+ 
+ static const struct argp_option pahole__options[] = {
+ 	{
+@@ -1628,6 +1629,11 @@ static const struct argp_option pahole__options[] = {
+ 		.key  = ARGP_skip_encoding_btf_enum64,
+ 		.doc  = "Do not encode ENUM64sin BTF."
+ 	},
++	{
++		.name = "skip_emitting_atomic_typedefs",
++		.key  = ARGP_skip_emitting_atomic_typedefs,
++		.doc  = "Do not emit 'typedef _Atomic int atomic_int' & friends."
++	},
+ 	{
+ 		.name = NULL,
+ 	}
+@@ -1716,7 +1722,7 @@ static error_t pahole__options_parser(int key, char *arg,
+ 	// case 'Z': ctf_encode = 1;			break; // FIXME: Disabled
+ 	case ARGP_compile:
+ 		  compilable = true;
+-                  type_emissions__init(&emissions);
++                  type_emissions__init(&emissions, &conf);
+                   conf.no_semicolon = true;
+                   conf.strip_inline = true;
+ 		  break;
+@@ -1795,6 +1801,8 @@ static error_t pahole__options_parser(int key, char *arg,
+ 		languages.str = arg;			break;
+ 	case ARGP_skip_encoding_btf_enum64:
+ 		conf_load.skip_encoding_btf_enum64 = true;	break;
++	case ARGP_skip_emitting_atomic_typedefs:
++		conf.skip_emitting_atomic_typedefs = true;	break;
+ 	default:
+ 		return ARGP_ERR_UNKNOWN;
+ 	}
+@@ -2999,11 +3007,6 @@ static enum load_steal_kind pahole_stealer(struct cu *cu,
  {
  	int ret = LSK__DELETE;
  
@@ -787,7 +1155,7 @@ index e87d9a4..4636f01 100644
  	if (!cu__filter(cu))
  		goto filter_it;
  
-@@ -3217,7 +3212,7 @@ out_btf:
+@@ -3217,7 +3220,7 @@ out_btf:
  			 * We don't need to print it for every compile unit
  			 * but the previous options need
  			 */
@@ -796,6 +1164,28 @@ index e87d9a4..4636f01 100644
  			putchar('\n');
  		}
  	}
+diff --git a/pfunct.c b/pfunct.c
+index 314915b..f42bdd1 100644
+--- a/pfunct.c
++++ b/pfunct.c
+@@ -658,7 +658,7 @@ static error_t pfunct__options_parser(int key, char *arg,
+ 	case 'a': addr = strtoull(arg, NULL, 0);
+ 		  conf_load.get_addr_info = true;	 break;
+ 	case 'b': expand_types = true;
+-		  type_emissions__init(&emissions);	 break;
++		  type_emissions__init(&emissions, &conf);	 break;
+ 	case 'c': class_name = arg;			 break;
+ 	case 'f': function_name = arg;			 break;
+ 	case 'F': conf_load.format_path = arg;		 break;
+@@ -689,7 +689,7 @@ static error_t pfunct__options_parser(int key, char *arg,
+ 	case ARGP_no_parm_names: conf.no_parm_names = 1; break;
+ 	case ARGP_compile:
+ 		  expand_types = true;
+-		  type_emissions__init(&emissions);
++		  type_emissions__init(&emissions, &conf);
+ 		  compilable_output = true;
+ 		  conf.no_semicolon = true;
+ 		  conf.strip_inline = true;
 diff --git a/syscse.c b/syscse.c
 index 67a6c52..4a5b199 100644
 --- a/syscse.c
