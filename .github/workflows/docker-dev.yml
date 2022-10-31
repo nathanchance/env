@@ -53,8 +53,8 @@ jobs:
       - name: Set variables
         id: variables
         run: |
-          echo "::set-output name=date::$(date +'%Y-%m-%d-%H-%M')"
-          echo "::set-output name=folder::./podman/dev"
+          echo "date=$(date +'%Y-%m-%d-%H-%M')" >> $GITHUB_OUTPUT
+          echo "folder=./podman/dev" >> $GITHUB_OUTPUT
 
       - name: Build
         uses: docker/build-push-action@v3

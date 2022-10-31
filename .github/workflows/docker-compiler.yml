@@ -102,8 +102,8 @@ jobs:
       - name: Set variables
         id: variables
         run: |
-          echo "::set-output name=date::$(date +'%Y-%m-%d-%H-%M')"
-          echo "::set-output name=folder::./podman/compiler"
+          echo "date=$(date +'%Y-%m-%d-%H-%M')" >> $GITHUB_OUTPUT
+          echo "folder=./podman/compiler" >> $GITHUB_OUTPUT
 
       - name: Build
         uses: docker/build-push-action@v3
