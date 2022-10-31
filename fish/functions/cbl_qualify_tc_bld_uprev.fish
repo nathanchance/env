@@ -38,10 +38,6 @@ function cbl_qualify_tc_bld_uprev -d "Qualify a new known good revision for tc-b
         git -C $lnx_stbl worktree add $linux_src origin/(string replace 'stable-' '' (basename $linux_src)).y; or return
     end
 
-    # Temporary Linux patches to fix pahole behavior
-    git -C $work_dir/linux-stable-5.19 cp b775fbf532dc01ae53a6fc56168fd30cb4b0c658; or return
-    git -C $work_dir/linux-stable-5.10 pull --no-{edit,ff} https://git.kernel.org/pub/scm/linux/kernel/git/jolsa/perf.git pahole_fix_5_10; or return
-
     header "Building toolchains"
 
     $tc_bld/build-binutils.py --install-folder $usr; or return
