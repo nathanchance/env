@@ -83,7 +83,7 @@ function dbxc -d "Shorthand for 'distrobox create'"
     # If we are on Ubuntu using docker, we need to set the container's
     # kvm group to the same group ID as the host's kvm group if it exists
     # so that accelerated VMs work within a container. Do this with an init hook.
-    if command -q docker; and test (get_distro) = ubuntu; and getent group kvm &>/dev/null
+    if command -q docker; and test (get_distro) = ubuntu; and group_exists kvm
         set -l host_kvm_gid (getent group kvm | string split -f 3 :)
         set init_hook 'if getent group kvm &>/dev/null && [[ $(getent group kvm | cut -d : -f 3) != '"$host_kvm_gid"' ]]; then groupdel -f kvm && groupadd -g '"$host_kvm_gid"' kvm && usermod -aG kvm '"$USER"'; fi'
     end

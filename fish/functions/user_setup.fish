@@ -202,7 +202,7 @@ rpmbuild/' >>$gitignore
         set -l libvirt_pool $VM_FOLDER/libvirt
 
         mkdir -p $libvirt_pool
-        if getent passwd libvirt-qemu &>/dev/null
+        if user_exists libvirt-qemu
             setfacl -m u:libvirt-qemu:rx $HOME
         end
 
