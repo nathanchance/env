@@ -111,3 +111,8 @@ autocmd BufReadPost *
   \ if line("'\"") >= 1 && line("'\"") <= line("$") && &ft !~# 'commit'
   \ |   exe "normal! g`\""
   \ | endif
+
+" Skeleton files
+ autocmd BufNewFile *.fish 0r $ENV_FOLDER/configs/common/vim/skeletons/fish.fish
+ autocmd BufNewFile *.py 0r $ENV_FOLDER/configs/common/vim/skeletons/python.py
+ autocmd BufNewFile *.sh 0r $ENV_FOLDER/configs/common/vim/skeletons/bash.sh
