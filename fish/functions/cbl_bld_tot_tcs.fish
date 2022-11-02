@@ -150,6 +150,9 @@ function cbl_bld_tot_tcs -d "Build LLVM and binutils from source for kernel deve
     end
 
     # Add in-review patches here
+    # Title: [Clang][Sema] Add -Wincompatible-function-pointer-types-strict
+    # Link: https://reviews.llvm.org/D136790
+    set -a revisions D136790
     for revision in $revisions
         set -l git_ap_args
         if not crl "https://reviews.llvm.org/$revision?download=true" | git -C $llvm_project ap $git_ap_args
