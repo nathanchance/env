@@ -33,6 +33,10 @@ else
     end
 
     fish_add_path -aP /usr/local/sbin /usr/sbin /sbin
+
+    if test -d $HOME/.cargo/bin
+        fish_add_path -ag $HOME/.cargo/bin
+    end
 end
 
 if command -q fd
