@@ -3,8 +3,8 @@ name: Linting
 on: [push, pull_request]
 jobs:
   fish_indent:
-    runs-on: ubuntu-latest
     name: 'fish_indent'
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
       - uses: fish-actions/install-fish@v1
@@ -14,4 +14,12 @@ jobs:
   shfmt:
     uses: ClangBuiltLinux/actions-workflows/.github/workflows/shfmt.yml@main
   yapf:
-    uses: ClangBuiltLinux/actions-workflows/.github/workflows/yapf.yml@main
+    name: 'yapf'
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout
+        uses: actions/checkout@v3
+      - name: yapf
+        uses: AlexanderMelde/yapf-action@v1.0
+        with:
+          args: --exclude '**/skeletons/**'
