@@ -1,0 +1,14 @@
+diff --git a/drivers/iommu/intel/irq_remapping.c b/drivers/iommu/intel/irq_remapping.c
+index 4216cafd67e7..5d176168bb76 100644
+--- a/drivers/iommu/intel/irq_remapping.c
++++ b/drivers/iommu/intel/irq_remapping.c
+@@ -186,6 +186,9 @@ static int modify_irte(struct irq_2_iommu *irq_iommu,
+ 		 * same as the old value.
+ 		 */
+ 		WARN_ON(!ret);
++	} else {
++		WRITE_ONCE(irte->low, irte_modified->low);
++		WRITE_ONCE(irte->high, irte_modified->high);
+ 	}
+ 	__iommu_flush_cache(iommu, irte, sizeof(*irte));
+ 

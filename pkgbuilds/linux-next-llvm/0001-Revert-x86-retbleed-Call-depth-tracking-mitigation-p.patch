@@ -1,17 +1,18 @@
-From bf328dfd2b9c484fdf62fbcc0a0427e9394d418b Mon Sep 17 00:00:00 2001
+From 3e0c4597fe46f8cc5dbea420ed142d52b2a8d855 Mon Sep 17 00:00:00 2001
 From: Nathan Chancellor <nathan@kernel.org>
-Date: Fri, 28 Oct 2022 09:20:46 -0700
-Subject: [PATCH] Revert 'x86/retbleed: Call depth tracking mitigation' and
- fixes
+Date: Thu, 3 Nov 2022 08:47:17 -0700
+Subject: [PATCH] Revert 'x86/retbleed: Call depth tracking mitigation' plus
+ follow ups
 
 Link: https://lore.kernel.org/Y1HVZKW4o0KRsMtq@dev-arch.thelio-3990X/
 Signed-off-by: Nathan Chancellor <nathan@kernel.org>
 ---
  Makefile                                      |   4 +-
- arch/Kconfig                                  |  24 --
+ arch/Kconfig                                  |  24 -
  arch/ia64/Kconfig                             |   1 -
  arch/ia64/Makefile                            |   2 +-
- arch/x86/Kconfig                              |  59 ---
+ arch/um/kernel/um_arch.c                      |   5 -
+ arch/x86/Kconfig                              |  73 ---
  arch/x86/Makefile                             |   6 -
  arch/x86/boot/compressed/head_64.S            |   8 -
  arch/x86/crypto/camellia-aesni-avx-asm_64.S   |   2 +
@@ -31,18 +32,18 @@ Signed-off-by: Nathan Chancellor <nathan@kernel.org>
  arch/x86/crypto/sm4-aesni-avx2-asm_64.S       |   6 +
  arch/x86/crypto/twofish-avx-x86_64-asm_64.S   |   2 +
  arch/x86/entry/entry_32.S                     |   4 +-
- arch/x86/entry/entry_64.S                     |  50 +--
+ arch/x86/entry/entry_64.S                     |  50 +-
  arch/x86/entry/entry_64_compat.S              |   7 +-
  arch/x86/entry/thunk_64.S                     |   4 +-
  arch/x86/entry/vdso/Makefile                  |  14 +-
- arch/x86/include/asm/alternative.h            |  66 +--
+ arch/x86/include/asm/alternative.h            |  68 +--
  arch/x86/include/asm/cpufeatures.h            |   1 -
  arch/x86/include/asm/current.h                |  32 +-
  arch/x86/include/asm/disabled-features.h      |   9 +-
  arch/x86/include/asm/hardirq.h                |   3 +-
  arch/x86/include/asm/irq_stack.h              |  12 +-
  arch/x86/include/asm/linkage.h                |  63 +--
- arch/x86/include/asm/nospec-branch.h          | 176 +-------
+ arch/x86/include/asm/nospec-branch.h          | 176 +-----
  arch/x86/include/asm/paravirt.h               |   5 +-
  arch/x86/include/asm/paravirt_types.h         |  34 +-
  arch/x86/include/asm/preempt.h                |  27 +-
@@ -51,13 +52,13 @@ Signed-off-by: Nathan Chancellor <nathan@kernel.org>
  arch/x86/include/asm/smp.h                    |  12 +-
  arch/x86/include/asm/text-patching.h          |   1 -
  arch/x86/kernel/Makefile                      |   2 -
- arch/x86/kernel/alternative.c                 | 119 +-----
+ arch/x86/kernel/alternative.c                 | 529 ++----------------
  arch/x86/kernel/asm-offsets.c                 |   5 -
  arch/x86/kernel/asm-offsets_64.c              |   2 +-
- arch/x86/kernel/callthunks.c                  | 388 ------------------
+ arch/x86/kernel/callthunks.c                  | 388 -------------
  arch/x86/kernel/cpu/Makefile                  |   3 +
  arch/x86/kernel/cpu/bugs.c                    |  34 +-
- arch/x86/kernel/cpu/common.c                  |  96 +++--
+ arch/x86/kernel/cpu/common.c                  |  97 ++--
  arch/x86/kernel/dumpstack_32.c                |   4 +-
  arch/x86/kernel/dumpstack_64.c                |   2 +-
  arch/x86/kernel/ftrace.c                      |  20 +-
@@ -67,7 +68,7 @@ Signed-off-by: Nathan Chancellor <nathan@kernel.org>
  arch/x86/kernel/irq_64.c                      |   6 +-
  arch/x86/kernel/kprobes/core.c                |   1 +
  arch/x86/kernel/kvm.c                         |   1 -
- arch/x86/kernel/module.c                      |  29 +-
+ arch/x86/kernel/module.c                      |  47 +-
  arch/x86/kernel/paravirt.c                    |   2 -
  arch/x86/kernel/process_32.c                  |   6 +-
  arch/x86/kernel/process_64.c                  |   6 +-
@@ -77,18 +78,17 @@ Signed-off-by: Nathan Chancellor <nathan@kernel.org>
  arch/x86/kernel/static_call.c                 |   3 +-
  arch/x86/kernel/traps.c                       |   4 +-
  arch/x86/kernel/unwind_orc.c                  |  21 +-
- arch/x86/kernel/vmlinux.lds.S                 |  28 +-
+ arch/x86/kernel/vmlinux.lds.S                 |  37 +-
  arch/x86/kvm/svm/vmenter.S                    |   1 -
  arch/x86/lib/error-inject.c                   |   1 -
- arch/x86/lib/putuser.S                        |  62 +--
- arch/x86/lib/retpoline.S                      | 107 +----
+ arch/x86/lib/putuser.S                        |  62 +-
+ arch/x86/lib/retpoline.S                      | 107 +---
  arch/x86/net/bpf_jit_comp.c                   |  45 +-
  arch/x86/xen/enlighten_pv.c                   |   2 +-
  include/asm-generic/vmlinux.lds.h             |   4 +-
  include/linux/bpf.h                           |   4 -
  include/linux/linkage.h                       |   4 +-
  include/linux/static_call.h                   |   2 -
- kernel/kallsyms.c                             |  45 +-
  kernel/static_call_inline.c                   |  23 +-
  kernel/trace/trace_selftest.c                 |   9 +-
  lib/Kconfig.debug                             |   1 -
@@ -97,24 +97,24 @@ Signed-off-by: Nathan Chancellor <nathan@kernel.org>
  samples/ftrace/ftrace-direct-multi.c          |   2 -
  samples/ftrace/ftrace-direct-too.c            |   2 -
  samples/ftrace/ftrace-direct.c                |   2 -
- scripts/Makefile.lib                          |   1 -
- tools/include/linux/interval_tree_generic.h   | 187 ---------
- tools/objtool/arch/x86/decode.c               |  24 --
- tools/objtool/builtin-check.c                 |   7 +-
- tools/objtool/check.c                         | 269 ++++--------
- tools/objtool/elf.c                           |  93 +++--
+ scripts/Makefile.lib                          |   3 -
+ tools/include/linux/interval_tree_generic.h   | 187 -------
+ tools/objtool/arch/x86/decode.c               |  24 -
+ tools/objtool/builtin-check.c                 |   9 +-
+ tools/objtool/check.c                         | 371 +++---------
+ tools/objtool/elf.c                           | 269 +++------
  tools/objtool/include/objtool/arch.h          |   2 -
- tools/objtool/include/objtool/builtin.h       |   1 -
+ tools/objtool/include/objtool/builtin.h       |   3 -
  tools/objtool/include/objtool/check.h         |  12 +-
- tools/objtool/include/objtool/elf.h           |   5 +-
+ tools/objtool/include/objtool/elf.h           |   7 +-
  tools/objtool/include/objtool/objtool.h       |   1 -
  tools/objtool/objtool.c                       |   1 -
- 102 files changed, 479 insertions(+), 1973 deletions(-)
+ 102 files changed, 514 insertions(+), 2638 deletions(-)
  delete mode 100644 arch/x86/kernel/callthunks.c
  delete mode 100644 tools/include/linux/interval_tree_generic.h
 
 diff --git a/Makefile b/Makefile
-index f0beeba6a4b8..02191af635c6 100644
+index 8ec5f806aafe..16f506432eed 100644
 --- a/Makefile
 +++ b/Makefile
 @@ -1004,8 +1004,8 @@ KBUILD_CFLAGS	+= $(CC_FLAGS_CFI)
@@ -186,8 +186,24 @@ index d553ab7022fe..56c4bb276b6e 100644
  KBUILD_CFLAGS_KERNEL := -mconstant-gp
  
  GAS_STATUS	= $(shell $(srctree)/arch/ia64/scripts/check-gas "$(CC)" "$(OBJDUMP)")
+diff --git a/arch/um/kernel/um_arch.c b/arch/um/kernel/um_arch.c
+index 786b44dc20c9..8adf8e89b255 100644
+--- a/arch/um/kernel/um_arch.c
++++ b/arch/um/kernel/um_arch.c
+@@ -444,11 +444,6 @@ void apply_returns(s32 *start, s32 *end)
+ {
+ }
+ 
+-void apply_fineibt(s32 *start_retpoline, s32 *end_retpoline,
+-		   s32 *start_cfi, s32 *end_cfi)
+-{
+-}
+-
+ void apply_alternatives(struct alt_instr *start, struct alt_instr *end)
+ {
+ }
 diff --git a/arch/x86/Kconfig b/arch/x86/Kconfig
-index 16f6f7a83e5e..945c8c58f56a 100644
+index 515a4f0482d4..6df9da980fd5 100644
 --- a/arch/x86/Kconfig
 +++ b/arch/x86/Kconfig
 @@ -291,8 +291,6 @@ config X86
@@ -199,7 +215,7 @@ index 16f6f7a83e5e..945c8c58f56a 100644
  	imply IMA_SECURE_AND_OR_TRUSTED_BOOT    if EFI
  	select HAVE_DYNAMIC_FTRACE_NO_PATCHABLE
  
-@@ -2461,32 +2459,6 @@ config CC_HAS_SLS
+@@ -2461,46 +2459,6 @@ config CC_HAS_SLS
  config CC_HAS_RETURN_THUNK
  	def_bool $(cc-option,-mfunction-return=thunk-extern)
  
@@ -221,18 +237,32 @@ index 16f6f7a83e5e..945c8c58f56a 100644
 -	default FUNCTION_PADDING_CFI if CFI_CLANG
 -	default FUNCTION_ALIGNMENT
 -
+-config CALL_PADDING
+-	def_bool n
+-	depends on CC_HAS_ENTRY_PADDING && OBJTOOL
+-	select FUNCTION_ALIGNMENT_16B
+-
+-config FINEIBT
+-	def_bool y
+-	depends on X86_KERNEL_IBT && CFI_CLANG && RETPOLINE
+-	select CALL_PADDING
+-
 -config HAVE_CALL_THUNKS
 -	def_bool y
 -	depends on CC_HAS_ENTRY_PADDING && RETHUNK && OBJTOOL
 -
 -config CALL_THUNKS
 -	def_bool n
--	select FUNCTION_ALIGNMENT_16B
+-	select CALL_PADDING
+-
+-config PREFIX_SYMBOLS
+-	def_bool y
+-	depends on CALL_PADDING && !CFI_CLANG
 -
  menuconfig SPECULATION_MITIGATIONS
  	bool "Mitigations for speculative execution vulnerabilities"
  	default y
-@@ -2538,37 +2510,6 @@ config CPU_UNRET_ENTRY
+@@ -2552,37 +2510,6 @@ config CPU_UNRET_ENTRY
  	help
  	  Compile the kernel with support for the retbleed=unret mitigation.
  
@@ -271,14 +301,14 @@ index 16f6f7a83e5e..945c8c58f56a 100644
  	bool "Enable IBPB on kernel entry"
  	depends on CPU_SUP_AMD && X86_64
 diff --git a/arch/x86/Makefile b/arch/x86/Makefile
-index 1640e005092b..415a5d138de4 100644
+index a3a07df8a609..415a5d138de4 100644
 --- a/arch/x86/Makefile
 +++ b/arch/x86/Makefile
 @@ -208,12 +208,6 @@ ifdef CONFIG_SLS
    KBUILD_CFLAGS += -mharden-sls=all
  endif
  
--ifdef CONFIG_CALL_THUNKS
+-ifdef CONFIG_CALL_PADDING
 -PADDING_CFLAGS := -fpatchable-function-entry=$(CONFIG_FUNCTION_PADDING_BYTES),$(CONFIG_FUNCTION_PADDING_BYTES)
 -KBUILD_CFLAGS += $(PADDING_CFLAGS)
 -export PADDING_CFLAGS
@@ -940,11 +970,15 @@ index 838613ac15b8..3e88b9df8c8f 100644
  KBUILD_CFLAGS_32 += -fno-stack-protector
  KBUILD_CFLAGS_32 += $(call cc-option, -foptimize-sibling-calls)
 diff --git a/arch/x86/include/asm/alternative.h b/arch/x86/include/asm/alternative.h
-index 664c0779375c..9542c582d546 100644
+index 7659217f4d49..9542c582d546 100644
 --- a/arch/x86/include/asm/alternative.h
 +++ b/arch/x86/include/asm/alternative.h
-@@ -80,39 +80,6 @@ extern void apply_returns(s32 *start, s32 *end);
+@@ -78,43 +78,8 @@ extern void apply_alternatives(struct alt_instr *start, struct alt_instr *end);
+ extern void apply_retpolines(s32 *start, s32 *end);
+ extern void apply_returns(s32 *start, s32 *end);
  extern void apply_ibt_endbr(s32 *start, s32 *end);
+-extern void apply_fineibt(s32 *start_retpoline, s32 *end_retpoine,
+-			  s32 *start_cfi, s32 *end_cfi);
  
  struct module;
 -struct paravirt_patch_site;
@@ -983,7 +1017,7 @@ index 664c0779375c..9542c582d546 100644
  
  #ifdef CONFIG_SMP
  extern void alternatives_smp_module_add(struct module *mod, char *name,
-@@ -380,7 +347,6 @@ static inline int alternatives_text_reserved(void *start, void *end)
+@@ -382,7 +347,6 @@ static inline int alternatives_text_reserved(void *start, void *end)
  #define old_len			141b-140b
  #define new_len1		144f-143f
  #define new_len2		145f-144f
@@ -991,7 +1025,7 @@ index 664c0779375c..9542c582d546 100644
  
  /*
   * gas compatible max based on the idea from:
-@@ -388,8 +354,7 @@ static inline int alternatives_text_reserved(void *start, void *end)
+@@ -390,8 +354,7 @@ static inline int alternatives_text_reserved(void *start, void *end)
   *
   * The additional "-" is needed because gas uses a "true" value of -1.
   */
@@ -1001,7 +1035,7 @@ index 664c0779375c..9542c582d546 100644
  
  
  /*
-@@ -401,36 +366,13 @@ static inline int alternatives_text_reserved(void *start, void *end)
+@@ -403,36 +366,13 @@ static inline int alternatives_text_reserved(void *start, void *end)
  140:
  	\oldinstr
  141:
@@ -1040,7 +1074,7 @@ index 664c0779375c..9542c582d546 100644
  	.popsection
  
  	.pushsection .altinstr_replacement,"ax"
-@@ -439,8 +381,6 @@ static inline int alternatives_text_reserved(void *start, void *end)
+@@ -441,8 +381,6 @@ static inline int alternatives_text_reserved(void *start, void *end)
  144:
  	\newinstr2
  145:
@@ -1208,7 +1242,7 @@ index 798183867d78..147cb8fdda92 100644
  
  #endif
 diff --git a/arch/x86/include/asm/linkage.h b/arch/x86/include/asm/linkage.h
-index 45e0df850645..f484d656d34e 100644
+index dd9b8118f784..f484d656d34e 100644
 --- a/arch/x86/include/asm/linkage.h
 +++ b/arch/x86/include/asm/linkage.h
 @@ -12,26 +12,13 @@
@@ -1218,7 +1252,7 @@ index 45e0df850645..f484d656d34e 100644
 -#define __ALIGN		.balign CONFIG_FUNCTION_ALIGNMENT, 0x90;
 -#define __ALIGN_STR	__stringify(__ALIGN)
 -
--#if defined(CONFIG_CALL_THUNKS) && !defined(__DISABLE_EXPORTS) && !defined(BUILD_VDSO)
+-#if defined(CONFIG_CALL_PADDING) && !defined(__DISABLE_EXPORTS) && !defined(BUILD_VDSO)
 -#define FUNCTION_PADDING	.skip CONFIG_FUNCTION_ALIGNMENT, 0x90;
 -#else
 -#define FUNCTION_PADDING
@@ -1247,7 +1281,7 @@ index 45e0df850645..f484d656d34e 100644
  #endif /* __ASSEMBLY__ */
  
 -/*
-- * Depending on -fpatchable-function-entry=N,N usage (CONFIG_CALL_THUNKS) the
+- * Depending on -fpatchable-function-entry=N,N usage (CONFIG_CALL_PADDING) the
 - * CFI symbol layout changes.
 - *
 - * Without CALL_THUNKS:
@@ -1271,7 +1305,7 @@ index 45e0df850645..f484d656d34e 100644
 - * In both cases the whole thing is FUNCTION_ALIGNMENT aligned and sized.
 - */
 -
--#ifdef CONFIG_CALL_THUNKS
+-#ifdef CONFIG_CALL_PADDING
 -#define CFI_PRE_PADDING
 -#define CFI_POST_PADDING	.skip	CONFIG_FUNCTION_PADDING_BYTES, 0x90;
 -#else
@@ -1317,7 +1351,7 @@ index 45e0df850645..f484d656d34e 100644
  
  /* SYM_FUNC_START_WEAK_NOALIGN -- use for weak functions, w/o alignment */
 diff --git a/arch/x86/include/asm/nospec-branch.h b/arch/x86/include/asm/nospec-branch.h
-index 82580adbca4b..c936ce9f0c47 100644
+index 3ab90f23e7f7..c936ce9f0c47 100644
 --- a/arch/x86/include/asm/nospec-branch.h
 +++ b/arch/x86/include/asm/nospec-branch.h
 @@ -12,104 +12,8 @@
@@ -1450,7 +1484,7 @@ index 82580adbca4b..c936ce9f0c47 100644
   */
  .macro UNTRAIN_RET
 -#if defined(CONFIG_CPU_UNRET_ENTRY) || defined(CONFIG_CPU_IBPB_ENTRY) || \
--	defined(CONFIG_X86_FEATURE_CALL_DEPTH)
+-	defined(CONFIG_CALL_DEPTH_TRACKING)
 +#if defined(CONFIG_CPU_UNRET_ENTRY) || defined(CONFIG_CPU_IBPB_ENTRY)
  	ANNOTATE_UNRET_END
 -	ALTERNATIVE_3 "",						\
@@ -1462,7 +1496,7 @@ index 82580adbca4b..c936ce9f0c47 100644
 -
 -.macro UNTRAIN_RET_FROM_CALL
 -#if defined(CONFIG_CPU_UNRET_ENTRY) || defined(CONFIG_CPU_IBPB_ENTRY) || \
--	defined(CONFIG_X86_FEATURE_CALL_DEPTH)
+-	defined(CONFIG_CALL_DEPTH_TRACKING)
 -	ANNOTATE_UNRET_END
 -	ALTERNATIVE_3 "",						\
 -		      CALL_ZEN_UNTRAIN_RET, X86_FEATURE_UNRET,		\
@@ -1869,10 +1903,18 @@ index 96d51bbc2bd4..cceaafdd2d84 100644
  # 64 bit specific files
  ifeq ($(CONFIG_X86_64),y)
 diff --git a/arch/x86/kernel/alternative.c b/arch/x86/kernel/alternative.c
-index b4ac4e58c010..5cadcea035e0 100644
+index 4cfe6e788883..e240351e0bc1 100644
 --- a/arch/x86/kernel/alternative.c
 +++ b/arch/x86/kernel/alternative.c
-@@ -377,56 +377,6 @@ static int emit_indirect(int op, int reg, u8 *bytes)
+@@ -116,7 +116,6 @@ static void __init_or_module add_nops(void *insns, unsigned int len)
+ 
+ extern s32 __retpoline_sites[], __retpoline_sites_end[];
+ extern s32 __return_sites[], __return_sites_end[];
+-extern s32 __cfi_sites[], __cfi_sites_end[];
+ extern s32 __ibt_endbr_seal[], __ibt_endbr_seal_end[];
+ extern struct alt_instr __alt_instructions[], __alt_instructions_end[];
+ extern s32 __smp_locks[], __smp_locks_end[];
+@@ -378,56 +377,6 @@ static int emit_indirect(int op, int reg, u8 *bytes)
  	return i;
  }
  
@@ -1929,7 +1971,7 @@ index b4ac4e58c010..5cadcea035e0 100644
  /*
   * Rewrite the compiler generated retpoline thunk calls.
   *
-@@ -459,12 +409,8 @@ static int patch_retpoline(void *addr, struct insn *insn, u8 *bytes)
+@@ -460,12 +409,8 @@ static int patch_retpoline(void *addr, struct insn *insn, u8 *bytes)
  	BUG_ON(reg == 4);
  
  	if (cpu_feature_enabled(X86_FEATURE_RETPOLINE) &&
@@ -1943,7 +1985,7 @@ index b4ac4e58c010..5cadcea035e0 100644
  
  	op = insn->opcode.bytes[0];
  
-@@ -481,7 +427,8 @@ static int patch_retpoline(void *addr, struct insn *insn, u8 *bytes)
+@@ -482,7 +427,8 @@ static int patch_retpoline(void *addr, struct insn *insn, u8 *bytes)
  	 *   [ NOP ]
  	 * 1:
  	 */
@@ -1953,7 +1995,7 @@ index b4ac4e58c010..5cadcea035e0 100644
  		cc = insn->opcode.bytes[1] & 0xf;
  		cc ^= 1; /* invert condition */
  
-@@ -571,11 +518,6 @@ void __init_or_module noinline apply_retpolines(s32 *start, s32 *end)
+@@ -572,11 +518,6 @@ void __init_or_module noinline apply_retpolines(s32 *start, s32 *end)
  }
  
  #ifdef CONFIG_RETHUNK
@@ -1965,7 +2007,7 @@ index b4ac4e58c010..5cadcea035e0 100644
  /*
   * Rewrite the compiler generated return thunk tail-calls.
   *
-@@ -591,18 +533,14 @@ static int patch_return(void *addr, struct insn *insn, u8 *bytes)
+@@ -592,18 +533,14 @@ static int patch_return(void *addr, struct insn *insn, u8 *bytes)
  {
  	int i = 0;
  
@@ -1988,7 +2030,450 @@ index b4ac4e58c010..5cadcea035e0 100644
  	return i;
  }
  
-@@ -1009,12 +947,6 @@ void __init alternative_instructions(void)
+@@ -657,28 +594,6 @@ void __init_or_module noinline apply_returns(s32 *start, s32 *end) { }
+ 
+ #ifdef CONFIG_X86_KERNEL_IBT
+ 
+-static void poison_endbr(void *addr, bool warn)
+-{
+-	u32 endbr, poison = gen_endbr_poison();
+-
+-	if (WARN_ON_ONCE(get_kernel_nofault(endbr, addr)))
+-		return;
+-
+-	if (!is_endbr(endbr)) {
+-		WARN_ON_ONCE(warn);
+-		return;
+-	}
+-
+-	DPRINTK("ENDBR at: %pS (%px)", addr, addr);
+-
+-	/*
+-	 * When we have IBT, the lack of ENDBR will trigger #CP
+-	 */
+-	DUMP_BYTES(((u8*)addr), 4, "%px: orig: ", addr);
+-	DUMP_BYTES(((u8*)&poison), 4, "%px: repl: ", addr);
+-	text_poke_early(addr, &poison, 4);
+-}
+-
+ /*
+  * Generated by: objtool --ibt
+  */
+@@ -687,391 +602,31 @@ void __init_or_module noinline apply_ibt_endbr(s32 *start, s32 *end)
+ 	s32 *s;
+ 
+ 	for (s = start; s < end; s++) {
++		u32 endbr, poison = gen_endbr_poison();
+ 		void *addr = (void *)s + *s;
+ 
+-		poison_endbr(addr, true);
+-		if (IS_ENABLED(CONFIG_FINEIBT))
+-			poison_endbr(addr - 16, false);
+-	}
+-}
+-
+-#else
+-
+-void __init_or_module noinline apply_ibt_endbr(s32 *start, s32 *end) { }
+-
+-#endif /* CONFIG_X86_KERNEL_IBT */
+-
+-#ifdef CONFIG_FINEIBT
+-
+-enum cfi_mode {
+-	CFI_DEFAULT,
+-	CFI_OFF,
+-	CFI_KCFI,
+-	CFI_FINEIBT,
+-};
+-
+-static enum cfi_mode cfi_mode __ro_after_init = CFI_DEFAULT;
+-static bool cfi_rand __ro_after_init = true;
+-static u32  cfi_seed __ro_after_init;
+-
+-/*
+- * Re-hash the CFI hash with a boot-time seed while making sure the result is
+- * not a valid ENDBR instruction.
+- */
+-static u32 cfi_rehash(u32 hash)
+-{
+-	hash ^= cfi_seed;
+-	while (unlikely(is_endbr(hash) || is_endbr(-hash))) {
+-		bool lsb = hash & 1;
+-		hash >>= 1;
+-		if (lsb)
+-			hash ^= 0x80200003;
+-	}
+-	return hash;
+-}
+-
+-static __init int cfi_parse_cmdline(char *str)
+-{
+-	if (!str)
+-		return -EINVAL;
+-
+-	while (str) {
+-		char *next = strchr(str, ',');
+-		if (next) {
+-			*next = 0;
+-			next++;
+-		}
+-
+-		if (!strcmp(str, "auto")) {
+-			cfi_mode = CFI_DEFAULT;
+-		} else if (!strcmp(str, "off")) {
+-			cfi_mode = CFI_OFF;
+-			cfi_rand = false;
+-		} else if (!strcmp(str, "kcfi")) {
+-			cfi_mode = CFI_KCFI;
+-		} else if (!strcmp(str, "fineibt")) {
+-			cfi_mode = CFI_FINEIBT;
+-		} else if (!strcmp(str, "norand")) {
+-			cfi_rand = false;
+-		} else {
+-			pr_err("Ignoring unknown cfi option (%s).", str);
+-		}
+-
+-		str = next;
+-	}
+-
+-	return 0;
+-}
+-early_param("cfi", cfi_parse_cmdline);
+-
+-/*
+- * kCFI						FineIBT
+- *
+- * __cfi_\func:					__cfi_\func:
+- *	movl   $0x12345678,%eax		// 5	     endbr64			// 4
+- *	nop					     subl   $0x12345678,%r10d   // 7
+- *	nop					     jz     1f			// 2
+- *	nop					     ud2			// 2
+- *	nop					1:   nop			// 1
+- *	nop
+- *	nop
+- *	nop
+- *	nop
+- *	nop
+- *	nop
+- *	nop
+- *
+- *
+- * caller:					caller:
+- *	movl	$(-0x12345678),%r10d	 // 6	     movl   $0x12345678,%r10d	// 6
+- *	addl	$-15(%r11),%r10d	 // 4	     sub    $16,%r11		// 4
+- *	je	1f			 // 2	     nop4			// 4
+- *	ud2				 // 2
+- * 1:	call	__x86_indirect_thunk_r11 // 5	     call   *%r11; nop2;	// 5
+- *
+- */
+-
+-asm(	".pushsection .rodata			\n"
+-	"fineibt_preamble_start:		\n"
+-	"	endbr64				\n"
+-	"	subl	$0x12345678, %r10d	\n"
+-	"	je	fineibt_preamble_end	\n"
+-	"	ud2				\n"
+-	"	nop				\n"
+-	"fineibt_preamble_end:			\n"
+-	".popsection\n"
+-);
+-
+-extern u8 fineibt_preamble_start[];
+-extern u8 fineibt_preamble_end[];
+-
+-#define fineibt_preamble_size (fineibt_preamble_end - fineibt_preamble_start)
+-#define fineibt_preamble_hash 7
+-
+-asm(	".pushsection .rodata			\n"
+-	"fineibt_caller_start:			\n"
+-	"	movl	$0x12345678, %r10d	\n"
+-	"	sub	$16, %r11		\n"
+-	ASM_NOP4
+-	"fineibt_caller_end:			\n"
+-	".popsection				\n"
+-);
+-
+-extern u8 fineibt_caller_start[];
+-extern u8 fineibt_caller_end[];
+-
+-#define fineibt_caller_size (fineibt_caller_end - fineibt_caller_start)
+-#define fineibt_caller_hash 2
+-
+-#define fineibt_caller_jmp (fineibt_caller_size - 2)
+-
+-static u32 decode_preamble_hash(void *addr)
+-{
+-	u8 *p = addr;
+-
+-	/* b8 78 56 34 12          mov    $0x12345678,%eax */
+-	if (p[0] == 0xb8)
+-		return *(u32 *)(addr + 1);
+-
+-	return 0; /* invalid hash value */
+-}
+-
+-static u32 decode_caller_hash(void *addr)
+-{
+-	u8 *p = addr;
+-
+-	/* 41 ba 78 56 34 12       mov    $0x12345678,%r10d */
+-	if (p[0] == 0x41 && p[1] == 0xba)
+-		return -*(u32 *)(addr + 2);
+-
+-	/* e8 0c 78 56 34 12	   jmp.d8  +12 */
+-	if (p[0] == JMP8_INSN_OPCODE && p[1] == fineibt_caller_jmp)
+-		return -*(u32 *)(addr + 2);
+-
+-	return 0; /* invalid hash value */
+-}
+-
+-/* .retpoline_sites */
+-static int cfi_disable_callers(s32 *start, s32 *end)
+-{
+-	/*
+-	 * Disable kCFI by patching in a JMP.d8, this leaves the hash immediate
+-	 * in tact for later usage. Also see decode_caller_hash() and
+-	 * cfi_rewrite_callers().
+-	 */
+-	const u8 jmp[] = { JMP8_INSN_OPCODE, fineibt_caller_jmp };
+-	s32 *s;
+-
+-	for (s = start; s < end; s++) {
+-		void *addr = (void *)s + *s;
+-		u32 hash;
+-
+-		addr -= fineibt_caller_size;
+-		hash = decode_caller_hash(addr);
+-		if (!hash) /* nocfi callers */
++		if (WARN_ON_ONCE(get_kernel_nofault(endbr, addr)))
+ 			continue;
+ 
+-		text_poke_early(addr, jmp, 2);
+-	}
+-
+-	return 0;
+-}
+-
+-static int cfi_enable_callers(s32 *start, s32 *end)
+-{
+-	/*
+-	 * Re-enable kCFI, undo what cfi_disable_callers() did.
+-	 */
+-	const u8 mov[] = { 0x41, 0xba };
+-	s32 *s;
+-
+-	for (s = start; s < end; s++) {
+-		void *addr = (void *)s + *s;
+-		u32 hash;
+-
+-		addr -= fineibt_caller_size;
+-		hash = decode_caller_hash(addr);
+-		if (!hash) /* nocfi callers */
++		if (WARN_ON_ONCE(!is_endbr(endbr)))
+ 			continue;
+ 
+-		text_poke_early(addr, mov, 2);
+-	}
+-
+-	return 0;
+-}
+-
+-/* .cfi_sites */
+-static int cfi_rand_preamble(s32 *start, s32 *end)
+-{
+-	s32 *s;
+-
+-	for (s = start; s < end; s++) {
+-		void *addr = (void *)s + *s;
+-		u32 hash;
+-
+-		hash = decode_preamble_hash(addr);
+-		if (WARN(!hash, "no CFI hash found at: %pS %px %*ph\n",
+-			 addr, addr, 5, addr))
+-			return -EINVAL;
+-
+-		hash = cfi_rehash(hash);
+-		text_poke_early(addr + 1, &hash, 4);
+-	}
+-
+-	return 0;
+-}
+-
+-static int cfi_rewrite_preamble(s32 *start, s32 *end)
+-{
+-	s32 *s;
+-
+-	for (s = start; s < end; s++) {
+-		void *addr = (void *)s + *s;
+-		u32 hash;
+-
+-		hash = decode_preamble_hash(addr);
+-		if (WARN(!hash, "no CFI hash found at: %pS %px %*ph\n",
+-			 addr, addr, 5, addr))
+-			return -EINVAL;
+-
+-		text_poke_early(addr, fineibt_preamble_start, fineibt_preamble_size);
+-		WARN_ON(*(u32 *)(addr + fineibt_preamble_hash) != 0x12345678);
+-		text_poke_early(addr + fineibt_preamble_hash, &hash, 4);
+-	}
+-
+-	return 0;
+-}
+-
+-/* .retpoline_sites */
+-static int cfi_rand_callers(s32 *start, s32 *end)
+-{
+-	s32 *s;
+-
+-	for (s = start; s < end; s++) {
+-		void *addr = (void *)s + *s;
+-		u32 hash;
+-
+-		addr -= fineibt_caller_size;
+-		hash = decode_caller_hash(addr);
+-		if (hash) {
+-			hash = -cfi_rehash(hash);
+-			text_poke_early(addr + 2, &hash, 4);
+-		}
+-	}
+-
+-	return 0;
+-}
+-
+-static int cfi_rewrite_callers(s32 *start, s32 *end)
+-{
+-	s32 *s;
+-
+-	for (s = start; s < end; s++) {
+-		void *addr = (void *)s + *s;
+-		u32 hash;
+-
+-		addr -= fineibt_caller_size;
+-		hash = decode_caller_hash(addr);
+-		if (hash) {
+-			text_poke_early(addr, fineibt_caller_start, fineibt_caller_size);
+-			WARN_ON(*(u32 *)(addr + fineibt_caller_hash) != 0x12345678);
+-			text_poke_early(addr + fineibt_caller_hash, &hash, 4);
+-		}
+-		/* rely on apply_retpolines() */
+-	}
+-
+-	return 0;
+-}
+-
+-static void __apply_fineibt(s32 *start_retpoline, s32 *end_retpoline,
+-			    s32 *start_cfi, s32 *end_cfi, bool builtin)
+-{
+-	int ret;
+-
+-	if (WARN_ONCE(fineibt_preamble_size != 16,
+-		      "FineIBT preamble wrong size: %ld", fineibt_preamble_size))
+-		return;
+-
+-	if (cfi_mode == CFI_DEFAULT) {
+-		cfi_mode = CFI_KCFI;
+-		if (HAS_KERNEL_IBT && cpu_feature_enabled(X86_FEATURE_IBT))
+-			cfi_mode = CFI_FINEIBT;
+-	}
+-
+-	/*
+-	 * Rewrite the callers to not use the __cfi_ stubs, such that we might
+-	 * rewrite them. This disables all CFI. If this succeeds but any of the
+-	 * later stages fails, we're without CFI.
+-	 */
+-	ret = cfi_disable_callers(start_retpoline, end_retpoline);
+-	if (ret)
+-		goto err;
+-
+-	if (cfi_rand) {
+-		if (builtin)
+-			cfi_seed = get_random_u32();
++		DPRINTK("ENDBR at: %pS (%px)", addr, addr);
+ 
+-		ret = cfi_rand_preamble(start_cfi, end_cfi);
+-		if (ret)
+-			goto err;
+-
+-		ret = cfi_rand_callers(start_retpoline, end_retpoline);
+-		if (ret)
+-			goto err;
+-	}
+-
+-	switch (cfi_mode) {
+-	case CFI_OFF:
+-		if (builtin)
+-			pr_info("Disabling CFI\n");
+-		return;
+-
+-	case CFI_KCFI:
+-		ret = cfi_enable_callers(start_retpoline, end_retpoline);
+-		if (ret)
+-			goto err;
+-
+-		if (builtin)
+-			pr_info("Using kCFI\n");
+-		return;
+-
+-	case CFI_FINEIBT:
+-		ret = cfi_rewrite_preamble(start_cfi, end_cfi);
+-		if (ret)
+-			goto err;
+-
+-		ret = cfi_rewrite_callers(start_retpoline, end_retpoline);
+-		if (ret)
+-			goto err;
+-
+-		if (builtin)
+-			pr_info("Using FineIBT CFI\n");
+-		return;
+-
+-	default:
+-		break;
++		/*
++		 * When we have IBT, the lack of ENDBR will trigger #CP
++		 */
++		DUMP_BYTES(((u8*)addr), 4, "%px: orig: ", addr);
++		DUMP_BYTES(((u8*)&poison), 4, "%px: repl: ", addr);
++		text_poke_early(addr, &poison, 4);
+ 	}
+-
+-err:
+-	pr_err("Something went horribly wrong trying to rewrite the CFI implementation.\n");
+ }
+ 
+ #else
+ 
+-static void __apply_fineibt(s32 *start_retpoline, s32 *end_retpoline,
+-			    s32 *start_cfi, s32 *end_cfi, bool builtin)
+-{
+-}
+-
+-#endif
++void __init_or_module noinline apply_ibt_endbr(s32 *start, s32 *end) { }
+ 
+-void apply_fineibt(s32 *start_retpoline, s32 *end_retpoline,
+-		   s32 *start_cfi, s32 *end_cfi)
+-{
+-	return __apply_fineibt(start_retpoline, end_retpoline,
+-			       start_cfi, end_cfi,
+-			       /* .builtin = */ false);
+-}
++#endif /* CONFIG_X86_KERNEL_IBT */
+ 
+ #ifdef CONFIG_SMP
+ static void alternatives_smp_lock(const s32 *start, const s32 *end,
+@@ -1379,9 +934,6 @@ void __init alternative_instructions(void)
+ 	 */
+ 	apply_paravirt(__parainstructions, __parainstructions_end);
+ 
+-	__apply_fineibt(__retpoline_sites, __retpoline_sites_end,
+-			__cfi_sites, __cfi_sites_end, true);
+-
+ 	/*
+ 	 * Rewrite the retpolines, must be done before alternatives since
+ 	 * those can rewrite the retpoline thunks.
+@@ -1395,12 +947,6 @@ void __init alternative_instructions(void)
  	 */
  	apply_alternatives(__alt_instructions, __alt_instructions_end);
  
@@ -2001,7 +2486,7 @@ index b4ac4e58c010..5cadcea035e0 100644
  	apply_ibt_endbr(__ibt_endbr_seal, __ibt_endbr_seal_end);
  
  #ifdef CONFIG_SMP
-@@ -1304,27 +1236,6 @@ void *text_poke_kgdb(void *addr, const void *opcode, size_t len)
+@@ -1690,27 +1236,6 @@ void *text_poke_kgdb(void *addr, const void *opcode, size_t len)
  	return __text_poke(text_poke_memcpy, addr, opcode, len);
  }
  
@@ -2029,7 +2514,7 @@ index b4ac4e58c010..5cadcea035e0 100644
  /**
   * text_poke_copy - Copy instructions into (an unused part of) RX memory
   * @addr: address to modify
-@@ -1339,8 +1250,22 @@ void *text_poke_copy_locked(void *addr, const void *opcode, size_t len,
+@@ -1725,8 +1250,22 @@ void *text_poke_copy_locked(void *addr, const void *opcode, size_t len,
   */
  void *text_poke_copy(void *addr, const void *opcode, size_t len)
  {
@@ -2594,10 +3079,18 @@ index 66d7addf1784..e254f07d5cb6 100644
  		    boot_cpu_data.x86_vendor == X86_VENDOR_INTEL) {
  			mode = SPECTRE_V2_IBRS;
 diff --git a/arch/x86/kernel/cpu/common.c b/arch/x86/kernel/cpu/common.c
-index c8a816d8766c..3f66dd03c091 100644
+index cd129481fa3c..3f66dd03c091 100644
 --- a/arch/x86/kernel/cpu/common.c
 +++ b/arch/x86/kernel/cpu/common.c
-@@ -701,6 +701,16 @@ static const char *table_lookup_model(struct cpuinfo_x86 *c)
+@@ -609,7 +609,6 @@ static __always_inline void setup_cet(struct cpuinfo_x86 *c)
+ 
+ 	if (!ibt_selftest()) {
+ 		pr_err("IBT selftest: Failed!\n");
+-		wrmsrl(MSR_IA32_S_CET, 0);
+ 		setup_clear_cpu_cap(X86_FEATURE_IBT);
+ 		return;
+ 	}
+@@ -702,6 +701,16 @@ static const char *table_lookup_model(struct cpuinfo_x86 *c)
  __u32 cpu_caps_cleared[NCAPINTS + NBUGINTS] __aligned(sizeof(unsigned long));
  __u32 cpu_caps_set[NCAPINTS + NBUGINTS] __aligned(sizeof(unsigned long));
  
@@ -2614,7 +3107,7 @@ index c8a816d8766c..3f66dd03c091 100644
  #ifdef CONFIG_X86_32
  /* The 32-bit entry code needs to find cpu_entry_area. */
  DEFINE_PER_CPU(struct cpu_entry_area *, cpu_entry_area);
-@@ -728,45 +738,16 @@ void load_fixmap_gdt(int cpu)
+@@ -729,45 +738,16 @@ void load_fixmap_gdt(int cpu)
  }
  EXPORT_SYMBOL_GPL(load_fixmap_gdt);
  
@@ -2667,7 +3160,7 @@ index c8a816d8766c..3f66dd03c091 100644
  }
  
  static const struct cpu_dev *cpu_devs[X86_VENDOR_NUM] = {};
-@@ -2012,18 +1993,27 @@ static __init int setup_clearcpuid(char *arg)
+@@ -2013,18 +1993,27 @@ static __init int setup_clearcpuid(char *arg)
  }
  __setup("clearcpuid=", setup_clearcpuid);
  
@@ -2702,7 +3195,7 @@ index c8a816d8766c..3f66dd03c091 100644
  static void wrmsrl_cstar(unsigned long val)
  {
  	/*
-@@ -2074,6 +2064,20 @@ void syscall_init(void)
+@@ -2075,6 +2064,20 @@ void syscall_init(void)
  
  #else	/* CONFIG_X86_64 */
  
@@ -2723,7 +3216,7 @@ index c8a816d8766c..3f66dd03c091 100644
  #ifdef CONFIG_STACKPROTECTOR
  DEFINE_PER_CPU(unsigned long, __stack_chk_guard);
  EXPORT_PER_CPU_SYMBOL(__stack_chk_guard);
-@@ -2244,6 +2248,12 @@ void cpu_init(void)
+@@ -2245,6 +2248,12 @@ void cpu_init(void)
  	    boot_cpu_has(X86_FEATURE_TSC) || boot_cpu_has(X86_FEATURE_DE))
  		cr4_clear_bits(X86_CR4_VME|X86_CR4_PVI|X86_CR4_TSD|X86_CR4_DE);
  
@@ -2772,7 +3265,7 @@ index f05339fee778..6c5defd6569a 100644
  
  	/*
 diff --git a/arch/x86/kernel/ftrace.c b/arch/x86/kernel/ftrace.c
-index cf15ef5aecff..bd165004776d 100644
+index facdfd455495..03579460d0ec 100644
 --- a/arch/x86/kernel/ftrace.c
 +++ b/arch/x86/kernel/ftrace.c
 @@ -69,10 +69,6 @@ static const char *ftrace_nop_replace(void)
@@ -2826,9 +3319,9 @@ index cf15ef5aecff..bd165004776d 100644
  
 +	set_vm_flush_reset_perms(trampoline);
 +
- 	if (likely(system_state != SYSTEM_BOOTING))
- 		set_memory_ro((unsigned long)trampoline, npages);
- 	set_memory_x((unsigned long)trampoline, npages);
+ 	set_memory_rox((unsigned long)trampoline, npages);
+ 	return (unsigned long)trampoline;
+ fail:
 diff --git a/arch/x86/kernel/ftrace_64.S b/arch/x86/kernel/ftrace_64.S
 index 1265ad519249..2a4be92fd144 100644
 --- a/arch/x86/kernel/ftrace_64.S
@@ -3038,7 +3531,7 @@ index fe0c859873d1..1c0fb96b9e39 100644
  	return map_irq_stack(cpu);
  }
 diff --git a/arch/x86/kernel/kprobes/core.c b/arch/x86/kernel/kprobes/core.c
-index 01b8d956aa76..eb8bc82846b9 100644
+index 89beb1ae016d..e7b7ca64acdf 100644
 --- a/arch/x86/kernel/kprobes/core.c
 +++ b/arch/x86/kernel/kprobes/core.c
 @@ -414,6 +414,7 @@ void *alloc_insn_page(void)
@@ -3046,9 +3539,9 @@ index 01b8d956aa76..eb8bc82846b9 100644
  		return NULL;
  
 +	set_vm_flush_reset_perms(page);
+ 
  	/*
- 	 * First make the page read-only, and only then make it executable to
- 	 * prevent it from being W+X in between.
+ 	 * TODO: Once additional kernel code protection mechanisms are set, ensure
 diff --git a/arch/x86/kernel/kvm.c b/arch/x86/kernel/kvm.c
 index 95fb85bea111..d4e48b4a438b 100644
 --- a/arch/x86/kernel/kvm.c
@@ -3062,7 +3555,7 @@ index 95fb85bea111..d4e48b4a438b 100644
  ASM_ENDBR
  "movq	__per_cpu_offset(,%rdi,8), %rax;"
 diff --git a/arch/x86/kernel/module.c b/arch/x86/kernel/module.c
-index 9afcc53042c5..9f74b7d71a50 100644
+index a3f8cdb80feb..9f74b7d71a50 100644
 --- a/arch/x86/kernel/module.c
 +++ b/arch/x86/kernel/module.c
 @@ -74,11 +74,10 @@ void *module_alloc(unsigned long size)
@@ -3086,21 +3579,46 @@ index 9afcc53042c5..9f74b7d71a50 100644
  	const Elf_Shdr *s, *text = NULL, *alt = NULL, *locks = NULL,
  		*para = NULL, *orc = NULL, *orc_ip = NULL,
 -		*retpolines = NULL, *returns = NULL, *ibt_endbr = NULL,
--		*calls = NULL;
+-		*calls = NULL, *cfi = NULL;
 +		*retpolines = NULL, *returns = NULL, *ibt_endbr = NULL;
  	char *secstrings = (void *)hdr + sechdrs[hdr->e_shstrndx].sh_offset;
  
  	for (s = sechdrs; s < sechdrs + hdr->e_shnum; s++) {
-@@ -275,8 +273,6 @@ int module_finalize(const Elf_Ehdr *hdr,
+@@ -275,10 +273,6 @@ int module_finalize(const Elf_Ehdr *hdr,
  			retpolines = s;
  		if (!strcmp(".return_sites", secstrings + s->sh_name))
  			returns = s;
 -		if (!strcmp(".call_sites", secstrings + s->sh_name))
 -			calls = s;
+-		if (!strcmp(".cfi_sites", secstrings + s->sh_name))
+-			cfi = s;
  		if (!strcmp(".ibt_endbr_seal", secstrings + s->sh_name))
  			ibt_endbr = s;
  	}
-@@ -302,21 +298,6 @@ int module_finalize(const Elf_Ehdr *hdr,
+@@ -291,22 +285,6 @@ int module_finalize(const Elf_Ehdr *hdr,
+ 		void *pseg = (void *)para->sh_addr;
+ 		apply_paravirt(pseg, pseg + para->sh_size);
+ 	}
+-	if (retpolines || cfi) {
+-		void *rseg = NULL, *cseg = NULL;
+-		unsigned int rsize = 0, csize = 0;
+-
+-		if (retpolines) {
+-			rseg = (void *)retpolines->sh_addr;
+-			rsize = retpolines->sh_size;
+-		}
+-
+-		if (cfi) {
+-			cseg = (void *)cfi->sh_addr;
+-			csize = cfi->sh_size;
+-		}
+-
+-		apply_fineibt(rseg, rseg + rsize, cseg, cseg + csize);
+-	}
+ 	if (retpolines) {
+ 		void *rseg = (void *)retpolines->sh_addr;
+ 		apply_retpolines(rseg, rseg + retpolines->sh_size);
+@@ -320,21 +298,6 @@ int module_finalize(const Elf_Ehdr *hdr,
  		void *aseg = (void *)alt->sh_addr;
  		apply_alternatives(aseg, aseg + alt->sh_size);
  	}
@@ -3304,10 +3822,10 @@ index 2ebc338980bc..aaaba85d6d7f 100644
  			code = &retinsn;
  		break;
 diff --git a/arch/x86/kernel/traps.c b/arch/x86/kernel/traps.c
-index 7ac19aba8983..178015a820f0 100644
+index c9499f86897d..d3fdec706f1d 100644
 --- a/arch/x86/kernel/traps.c
 +++ b/arch/x86/kernel/traps.c
-@@ -851,7 +851,7 @@ DEFINE_IDTENTRY_RAW(exc_int3)
+@@ -858,7 +858,7 @@ DEFINE_IDTENTRY_RAW(exc_int3)
   */
  asmlinkage __visible noinstr struct pt_regs *sync_regs(struct pt_regs *eregs)
  {
@@ -3316,7 +3834,7 @@ index 7ac19aba8983..178015a820f0 100644
  	if (regs != eregs)
  		*regs = *eregs;
  	return regs;
-@@ -869,7 +869,7 @@ asmlinkage __visible noinstr struct pt_regs *vc_switch_off_ist(struct pt_regs *r
+@@ -876,7 +876,7 @@ asmlinkage __visible noinstr struct pt_regs *vc_switch_off_ist(struct pt_regs *r
  	 * trust it and switch to the current kernel stack
  	 */
  	if (ip_within_syscall_gap(regs)) {
@@ -3365,7 +3883,7 @@ index cdf6c6060170..c059820dfaea 100644
  
  #ifdef CONFIG_MODULES
 diff --git a/arch/x86/kernel/vmlinux.lds.S b/arch/x86/kernel/vmlinux.lds.S
-index 49f3f86433c7..15f29053cec4 100644
+index 2e0ee14229bf..15f29053cec4 100644
 --- a/arch/x86/kernel/vmlinux.lds.S
 +++ b/arch/x86/kernel/vmlinux.lds.S
 @@ -132,19 +132,18 @@ SECTIONS
@@ -3408,7 +3926,23 @@ index 49f3f86433c7..15f29053cec4 100644
  #endif
  
  #ifdef CONFIG_X86_KERNEL_IBT
-@@ -501,3 +493,11 @@ INIT_PER_CPU(irq_stack_backing_store);
+@@ -309,15 +301,6 @@ SECTIONS
+ 	}
+ #endif
+ 
+-#ifdef CONFIG_FINEIBT
+-	. = ALIGN(8);
+-	.cfi_sites : AT(ADDR(.cfi_sites) - LOAD_OFFSET) {
+-		__cfi_sites = .;
+-		*(.cfi_sites)
+-		__cfi_sites_end = .;
+-	}
+-#endif
+-
+ 	/*
+ 	 * struct alt_inst entries. From the header (alternative.h):
+ 	 * "Alternative instructions for different CPU types or capabilities"
+@@ -510,3 +493,11 @@ INIT_PER_CPU(irq_stack_backing_store);
  #endif
  
  #endif /* CONFIG_X86_64 */
@@ -3891,14 +4425,14 @@ index 735c78114324..d06ada2341cb 100644
  /*
   * LD_DEAD_CODE_DATA_ELIMINATION option enables -fdata-sections, which
 diff --git a/include/linux/bpf.h b/include/linux/bpf.h
-index 489f1ce7e495..8d948bfcb984 100644
+index b63b1a35dd72..8d948bfcb984 100644
 --- a/include/linux/bpf.h
 +++ b/include/linux/bpf.h
 @@ -990,11 +990,7 @@ int __init bpf_arch_init_dispatcher_early(void *ip);
  	early_initcall(_name##_init)
  
  #ifdef CONFIG_X86_64
--#ifdef CONFIG_CALL_THUNKS
+-#ifdef CONFIG_CALL_PADDING
 -#define BPF_DISPATCHER_ATTRIBUTES __attribute__((patchable_function_entry(5+CONFIG_FUNCTION_PADDING_BYTES,CONFIG_FUNCTION_PADDING_BYTES)))
 -#else
  #define BPF_DISPATCHER_ATTRIBUTES __attribute__((patchable_function_entry(5)))
@@ -3934,115 +4468,6 @@ index 141e6b176a1b..df53bed9d71f 100644
  struct static_call_mod {
  	struct static_call_mod *next;
  	struct module *mod; /* for vmlinux, mod == NULL */
-diff --git a/kernel/kallsyms.c b/kernel/kallsyms.c
-index cc244c02b4cf..60c20f301a6b 100644
---- a/kernel/kallsyms.c
-+++ b/kernel/kallsyms.c
-@@ -293,12 +293,6 @@ static unsigned long get_symbol_pos(unsigned long addr,
- 	return low;
- }
- 
--#ifdef CONFIG_FUNCTION_PADDING_BYTES
--#define PADDING_BYTES	CONFIG_FUNCTION_PADDING_BYTES
--#else
--#define PADDING_BYTES	0
--#endif
--
- /*
-  * Lookup an address but don't bother to find any names.
-  */
-@@ -306,25 +300,13 @@ int kallsyms_lookup_size_offset(unsigned long addr, unsigned long *symbolsize,
- 				unsigned long *offset)
- {
- 	char namebuf[KSYM_NAME_LEN];
--	int ret;
--
--	addr += PADDING_BYTES;
- 
- 	if (is_ksym_addr(addr)) {
- 		get_symbol_pos(addr, symbolsize, offset);
--		ret = 1;
--		goto found;
--	}
--
--	ret = !!module_address_lookup(addr, symbolsize, offset, NULL, NULL, namebuf);
--	if (!ret) {
--		ret = !!__bpf_address_lookup(addr, symbolsize,
--					     offset, namebuf);
-+		return 1;
- 	}
--found:
--	if (ret && offset)
--		*offset -= PADDING_BYTES;
--	return ret;
-+	return !!module_address_lookup(addr, symbolsize, offset, NULL, NULL, namebuf) ||
-+	       !!__bpf_address_lookup(addr, symbolsize, offset, namebuf);
- }
- 
- static const char *kallsyms_lookup_buildid(unsigned long addr,
-@@ -337,8 +319,6 @@ static const char *kallsyms_lookup_buildid(unsigned long addr,
- 	namebuf[KSYM_NAME_LEN - 1] = 0;
- 	namebuf[0] = 0;
- 
--	addr += PADDING_BYTES;
--
- 	if (is_ksym_addr(addr)) {
- 		unsigned long pos;
- 
-@@ -368,8 +348,6 @@ static const char *kallsyms_lookup_buildid(unsigned long addr,
- 
- found:
- 	cleanup_symbol_name(namebuf);
--	if (ret && offset)
--		*offset -= PADDING_BYTES;
- 	return ret;
- }
- 
-@@ -396,8 +374,6 @@ int lookup_symbol_name(unsigned long addr, char *symname)
- 	symname[0] = '\0';
- 	symname[KSYM_NAME_LEN - 1] = '\0';
- 
--	addr += PADDING_BYTES;
--
- 	if (is_ksym_addr(addr)) {
- 		unsigned long pos;
- 
-@@ -425,8 +401,6 @@ int lookup_symbol_attrs(unsigned long addr, unsigned long *size,
- 	name[0] = '\0';
- 	name[KSYM_NAME_LEN - 1] = '\0';
- 
--	addr += PADDING_BYTES;
--
- 	if (is_ksym_addr(addr)) {
- 		unsigned long pos;
- 
-@@ -443,8 +417,6 @@ int lookup_symbol_attrs(unsigned long addr, unsigned long *size,
- 		return res;
- 
- found:
--	if (offset)
--		*offset -= PADDING_BYTES;
- 	cleanup_symbol_name(name);
- 	return 0;
- }
-@@ -470,15 +442,8 @@ static int __sprint_symbol(char *buffer, unsigned long address,
- 	len = strlen(buffer);
- 	offset -= symbol_offset;
- 
--	if (add_offset) {
--		char s = '+';
--
--		if ((long)offset < 0) {
--			s = '-';
--			offset = 0UL - offset;
--		}
--		len += sprintf(buffer + len, "%c%#lx/%#lx", s, offset, size);
--	}
-+	if (add_offset)
-+		len += sprintf(buffer + len, "+%#lx/%#lx", offset, size);
- 
- 	if (modname) {
- 		len += sprintf(buffer + len, " [%s", modname);
 diff --git a/kernel/static_call_inline.c b/kernel/static_call_inline.c
 index 639397b5491c..dc5665b62814 100644
 --- a/kernel/static_call_inline.c
@@ -4114,7 +4539,7 @@ index ff0536cea968..a2d301f58ced 100644
  
  /*
 diff --git a/lib/Kconfig.debug b/lib/Kconfig.debug
-index fe79fab10d76..6534eabebcff 100644
+index 9dac70df9ea1..5cd1a911629d 100644
 --- a/lib/Kconfig.debug
 +++ b/lib/Kconfig.debug
 @@ -468,7 +468,6 @@ config SECTION_MISMATCH_WARN_ONLY
@@ -4242,17 +4667,27 @@ index 1f769d0db20f..e8f1e440b9b8 100644
  "	call my_direct_func\n"
  "	popq %rdi\n"
 diff --git a/scripts/Makefile.lib b/scripts/Makefile.lib
-index ec391c6a2641..5f8e6a97bdf7 100644
+index b28ac83bd9f0..5f8e6a97bdf7 100644
 --- a/scripts/Makefile.lib
 +++ b/scripts/Makefile.lib
-@@ -254,7 +254,6 @@ objtool := $(objtree)/tools/objtool/objtool
+@@ -254,9 +254,7 @@ objtool := $(objtree)/tools/objtool/objtool
  
  objtool-args-$(CONFIG_HAVE_JUMP_LABEL_HACK)		+= --hacks=jump_label
  objtool-args-$(CONFIG_HAVE_NOINSTR_HACK)		+= --hacks=noinstr
 -objtool-args-$(CONFIG_CALL_DEPTH_TRACKING)		+= --hacks=skylake
  objtool-args-$(CONFIG_X86_KERNEL_IBT)			+= --ibt
+-objtool-args-$(CONFIG_FINEIBT)				+= --cfi
  objtool-args-$(CONFIG_FTRACE_MCOUNT_USE_OBJTOOL)	+= --mcount
  objtool-args-$(CONFIG_UNWINDER_ORC)			+= --orc
+ objtool-args-$(CONFIG_RETPOLINE)			+= --retpoline
+@@ -266,7 +264,6 @@ objtool-args-$(CONFIG_STACK_VALIDATION)			+= --stackval
+ objtool-args-$(CONFIG_HAVE_STATIC_CALL_INLINE)		+= --static-call
+ objtool-args-$(CONFIG_HAVE_UACCESS_VALIDATION)		+= --uaccess
+ objtool-args-$(CONFIG_GCOV_KERNEL)			+= --no-unreachable
+-objtool-args-$(CONFIG_PREFIX_SYMBOLS)			+= --prefix=$(CONFIG_FUNCTION_PADDING_BYTES)
+ 
+ objtool-args = $(objtool-args-y)					\
+ 	$(if $(delay-objtool), --link)					\
 diff --git a/tools/include/linux/interval_tree_generic.h b/tools/include/linux/interval_tree_generic.h
 deleted file mode 100644
 index aaa8a0767aa3..000000000000
@@ -4482,7 +4917,7 @@ index f0943830add7..1c253b4b7ce0 100644
  	if (!(op = calloc(1, sizeof(*op)))) \
  		return -1; \
 diff --git a/tools/objtool/builtin-check.c b/tools/objtool/builtin-check.c
-index 0a04f8ea4432..24fbe803a0d3 100644
+index 868e3e363786..24fbe803a0d3 100644
 --- a/tools/objtool/builtin-check.c
 +++ b/tools/objtool/builtin-check.c
 @@ -57,17 +57,12 @@ static int parse_hacks(const struct option *opt, const char *str, int unset)
@@ -4504,8 +4939,21 @@ index 0a04f8ea4432..24fbe803a0d3 100644
  	OPT_BOOLEAN('i', "ibt", &opts.ibt, "validate and annotate IBT"),
  	OPT_BOOLEAN('m', "mcount", &opts.mcount, "annotate mcount/fentry calls for ftrace"),
  	OPT_BOOLEAN('n', "noinstr", &opts.noinstr, "validate noinstr rules"),
+@@ -75,12 +70,10 @@ const struct option check_options[] = {
+ 	OPT_BOOLEAN('r', "retpoline", &opts.retpoline, "validate and annotate retpoline usage"),
+ 	OPT_BOOLEAN(0,   "rethunk", &opts.rethunk, "validate and annotate rethunk usage"),
+ 	OPT_BOOLEAN(0,   "unret", &opts.unret, "validate entry unret placement"),
+-	OPT_INTEGER(0,   "prefix", &opts.prefix, "generate prefix symbols"),
+ 	OPT_BOOLEAN('l', "sls", &opts.sls, "validate straight-line-speculation mitigations"),
+ 	OPT_BOOLEAN('s', "stackval", &opts.stackval, "validate frame pointer rules"),
+ 	OPT_BOOLEAN('t', "static-call", &opts.static_call, "annotate static calls"),
+ 	OPT_BOOLEAN('u', "uaccess", &opts.uaccess, "validate uaccess rules for SMAP"),
+-	OPT_BOOLEAN(0  , "cfi", &opts.cfi, "annotate kernel control flow integrity (kCFI) function preambles"),
+ 	OPT_CALLBACK_OPTARG(0, "dump", NULL, NULL, "orc", "dump metadata", parse_dump),
+ 
+ 	OPT_GROUP("Options:"),
 diff --git a/tools/objtool/check.c b/tools/objtool/check.c
-index 84762126caf0..a7f1e6c8bb0a 100644
+index b4b14be4e0ab..a7f1e6c8bb0a 100644
 --- a/tools/objtool/check.c
 +++ b/tools/objtool/check.c
 @@ -62,12 +62,12 @@ static struct instruction *next_insn_same_func(struct objtool_file *file,
@@ -4616,7 +5064,76 @@ index 84762126caf0..a7f1e6c8bb0a 100644
  						list_add_tail(&insn->call_node, &file->endbr_list);
  						file->nr_endbr++;
  					} else {
-@@ -904,49 +893,6 @@ static int create_mcount_loc_sections(struct objtool_file *file)
+@@ -861,68 +850,6 @@ static int create_ibt_endbr_seal_sections(struct objtool_file *file)
+ 	return 0;
+ }
+ 
+-static int create_cfi_sections(struct objtool_file *file)
+-{
+-	struct section *sec, *s;
+-	struct symbol *sym;
+-	unsigned int *loc;
+-	int idx;
+-
+-	sec = find_section_by_name(file->elf, ".cfi_sites");
+-	if (sec) {
+-		INIT_LIST_HEAD(&file->call_list);
+-		WARN("file already has .cfi_sites section, skipping");
+-		return 0;
+-	}
+-
+-	idx = 0;
+-	for_each_sec(file, s) {
+-		if (!s->text)
+-			continue;
+-
+-		list_for_each_entry(sym, &s->symbol_list, list) {
+-			if (sym->type != STT_FUNC)
+-				continue;
+-
+-			if (strncmp(sym->name, "__cfi_", 6))
+-				continue;
+-
+-			idx++;
+-		}
+-	}
+-
+-	sec = elf_create_section(file->elf, ".cfi_sites", 0, sizeof(unsigned int), idx);
+-	if (!sec)
+-		return -1;
+-
+-	idx = 0;
+-	for_each_sec(file, s) {
+-		if (!s->text)
+-			continue;
+-
+-		list_for_each_entry(sym, &s->symbol_list, list) {
+-			if (sym->type != STT_FUNC)
+-				continue;
+-
+-			if (strncmp(sym->name, "__cfi_", 6))
+-				continue;
+-
+-			loc = (unsigned int *)sec->data->d_buf + idx;
+-			memset(loc, 0, sizeof(unsigned int));
+-
+-			if (elf_add_reloc_to_insn(file->elf, sec,
+-						  idx * sizeof(unsigned int),
+-						  R_X86_64_PC32,
+-						  s, sym->offset))
+-				return -1;
+-
+-			idx++;
+-		}
+-	}
+-
+-	return 0;
+-}
+-
+ static int create_mcount_loc_sections(struct objtool_file *file)
+ {
+ 	struct section *sec;
+@@ -966,49 +893,6 @@ static int create_mcount_loc_sections(struct objtool_file *file)
  	return 0;
  }
  
@@ -4666,7 +5183,7 @@ index 84762126caf0..a7f1e6c8bb0a 100644
  /*
   * Warnings shouldn't be reported for ignored functions.
   */
-@@ -1334,9 +1280,6 @@ static void annotate_call_site(struct objtool_file *file,
+@@ -1396,9 +1280,6 @@ static void annotate_call_site(struct objtool_file *file,
  		return;
  	}
  
@@ -4676,7 +5193,7 @@ index 84762126caf0..a7f1e6c8bb0a 100644
  	if (!sibling && dead_end_function(file, sym))
  		insn->dead_end = true;
  }
-@@ -1407,50 +1350,27 @@ static void add_return_call(struct objtool_file *file, struct instruction *insn,
+@@ -1469,50 +1350,27 @@ static void add_return_call(struct objtool_file *file, struct instruction *insn,
  		list_add_tail(&insn->call_node, &file->return_thunk_list);
  }
  
@@ -4735,7 +5252,7 @@ index 84762126caf0..a7f1e6c8bb0a 100644
  /*
   * Find the destination instructions for all jumps.
   */
-@@ -1485,7 +1405,7 @@ static int add_jump_destinations(struct objtool_file *file)
+@@ -1547,7 +1405,7 @@ static int add_jump_destinations(struct objtool_file *file)
  		} else if (reloc->sym->return_thunk) {
  			add_return_call(file, insn, true);
  			continue;
@@ -4744,7 +5261,7 @@ index 84762126caf0..a7f1e6c8bb0a 100644
  			/*
  			 * External sibling call or internal sibling call with
  			 * STT_FUNC reloc.
-@@ -1527,8 +1447,8 @@ static int add_jump_destinations(struct objtool_file *file)
+@@ -1589,8 +1447,8 @@ static int add_jump_destinations(struct objtool_file *file)
  		/*
  		 * Cross-function jump.
  		 */
@@ -4755,7 +5272,7 @@ index 84762126caf0..a7f1e6c8bb0a 100644
  
  			/*
  			 * For GCC 8+, create parent/child links for any cold
-@@ -1545,20 +1465,20 @@ static int add_jump_destinations(struct objtool_file *file)
+@@ -1607,20 +1465,20 @@ static int add_jump_destinations(struct objtool_file *file)
  			 * case where the parent function's only reference to a
  			 * subfunction is through a jump table.
  			 */
@@ -4789,7 +5306,7 @@ index 84762126caf0..a7f1e6c8bb0a 100644
  		}
  
  		insn->jump_dest = jump_dest;
-@@ -1607,7 +1527,7 @@ static int add_call_destinations(struct objtool_file *file)
+@@ -1669,7 +1527,7 @@ static int add_call_destinations(struct objtool_file *file)
  				return -1;
  			}
  
@@ -4798,7 +5315,7 @@ index 84762126caf0..a7f1e6c8bb0a 100644
  				WARN_FUNC("unsupported call to non-function",
  					  insn->sec, insn->offset);
  				return -1;
-@@ -1703,7 +1623,7 @@ static int handle_group_alt(struct objtool_file *file,
+@@ -1765,7 +1623,7 @@ static int handle_group_alt(struct objtool_file *file,
  		nop->offset = special_alt->new_off + special_alt->new_len;
  		nop->len = special_alt->orig_len - special_alt->new_len;
  		nop->type = INSN_NOP;
@@ -4807,7 +5324,7 @@ index 84762126caf0..a7f1e6c8bb0a 100644
  		nop->alt_group = new_alt_group;
  		nop->ignore = orig_insn->ignore_alts;
  	}
-@@ -1723,7 +1643,7 @@ static int handle_group_alt(struct objtool_file *file,
+@@ -1785,7 +1643,7 @@ static int handle_group_alt(struct objtool_file *file,
  		last_new_insn = insn;
  
  		insn->ignore = orig_insn->ignore_alts;
@@ -4816,7 +5333,7 @@ index 84762126caf0..a7f1e6c8bb0a 100644
  		insn->alt_group = new_alt_group;
  
  		/*
-@@ -1735,7 +1655,7 @@ static int handle_group_alt(struct objtool_file *file,
+@@ -1797,7 +1655,7 @@ static int handle_group_alt(struct objtool_file *file,
  		 * accordingly.
  		 */
  		alt_reloc = insn_reloc(file, insn);
@@ -4825,7 +5342,7 @@ index 84762126caf0..a7f1e6c8bb0a 100644
  		    !arch_support_alt_relocation(special_alt, insn, alt_reloc)) {
  
  			WARN_FUNC("unsupported relocation in alternatives section",
-@@ -1917,7 +1837,7 @@ static int add_jump_table(struct objtool_file *file, struct instruction *insn,
+@@ -1979,7 +1837,7 @@ static int add_jump_table(struct objtool_file *file, struct instruction *insn,
  	struct reloc *reloc = table;
  	struct instruction *dest_insn;
  	struct alternative *alt;
@@ -4834,7 +5351,7 @@ index 84762126caf0..a7f1e6c8bb0a 100644
  	unsigned int prev_offset = 0;
  
  	/*
-@@ -1944,7 +1864,7 @@ static int add_jump_table(struct objtool_file *file, struct instruction *insn,
+@@ -2006,7 +1864,7 @@ static int add_jump_table(struct objtool_file *file, struct instruction *insn,
  			break;
  
  		/* Make sure the destination is in the same function: */
@@ -4843,7 +5360,7 @@ index 84762126caf0..a7f1e6c8bb0a 100644
  			break;
  
  		alt = malloc(sizeof(*alt));
-@@ -1984,7 +1904,7 @@ static struct reloc *find_jump_table(struct objtool_file *file,
+@@ -2046,7 +1904,7 @@ static struct reloc *find_jump_table(struct objtool_file *file,
  	 * it.
  	 */
  	for (;
@@ -4852,7 +5369,7 @@ index 84762126caf0..a7f1e6c8bb0a 100644
  	     insn = insn->first_jump_src ?: prev_insn_same_sym(file, insn)) {
  
  		if (insn != orig_insn && insn->type == INSN_JUMP_DYNAMIC)
-@@ -2001,7 +1921,7 @@ static struct reloc *find_jump_table(struct objtool_file *file,
+@@ -2063,7 +1921,7 @@ static struct reloc *find_jump_table(struct objtool_file *file,
  		if (!table_reloc)
  			continue;
  		dest_insn = find_insn(file, table_reloc->sym->sec, table_reloc->addend);
@@ -4861,7 +5378,7 @@ index 84762126caf0..a7f1e6c8bb0a 100644
  			continue;
  
  		return table_reloc;
-@@ -2450,13 +2370,6 @@ static int decode_sections(struct objtool_file *file)
+@@ -2512,13 +2370,6 @@ static int decode_sections(struct objtool_file *file)
  	if (ret)
  		return ret;
  
@@ -4875,7 +5392,7 @@ index 84762126caf0..a7f1e6c8bb0a 100644
  	ret = decode_instructions(file);
  	if (ret)
  		return ret;
-@@ -2475,6 +2388,13 @@ static int decode_sections(struct objtool_file *file)
+@@ -2537,6 +2388,13 @@ static int decode_sections(struct objtool_file *file)
  	if (ret)
  		return ret;
  
@@ -4889,7 +5406,7 @@ index 84762126caf0..a7f1e6c8bb0a 100644
  	/*
  	 * Must be before add_jump_destinations(), which depends on 'func'
  	 * being set for alternatives, to enable proper sibling call detection.
-@@ -2683,7 +2603,7 @@ static int update_cfi_state(struct instruction *insn,
+@@ -2745,7 +2603,7 @@ static int update_cfi_state(struct instruction *insn,
  
  	/* stack operations don't make sense with an undefined CFA */
  	if (cfa->base == CFI_UNDEFINED) {
@@ -4898,7 +5415,7 @@ index 84762126caf0..a7f1e6c8bb0a 100644
  			WARN_FUNC("undefined stack state", insn->sec, insn->offset);
  			return -1;
  		}
-@@ -3029,7 +2949,7 @@ static int update_cfi_state(struct instruction *insn,
+@@ -3091,7 +2949,7 @@ static int update_cfi_state(struct instruction *insn,
  		}
  
  		/* detect when asm code uses rbp as a scratch register */
@@ -4907,7 +5424,7 @@ index 84762126caf0..a7f1e6c8bb0a 100644
  		    cfa->base != CFI_BP)
  			cfi->bp_scratch = true;
  		break;
-@@ -3339,7 +3259,7 @@ static int validate_sibling_call(struct objtool_file *file,
+@@ -3401,7 +3259,7 @@ static int validate_sibling_call(struct objtool_file *file,
  				 struct instruction *insn,
  				 struct insn_state *state)
  {
@@ -4916,14 +5433,16 @@ index 84762126caf0..a7f1e6c8bb0a 100644
  		WARN_FUNC("sibling call from callable instruction with modified stack frame",
  				insn->sec, insn->offset);
  		return 1;
-@@ -3425,13 +3345,13 @@ static int validate_branch(struct objtool_file *file, struct symbol *func,
+@@ -3487,14 +3345,13 @@ static int validate_branch(struct objtool_file *file, struct symbol *func,
  	while (1) {
  		next_insn = next_insn_to_validate(file, insn);
  
 -		if (func && insn_func(insn) && func != insn_func(insn)->pfunc) {
 +		if (func && insn->func && func != insn->func->pfunc) {
  			/* Ignore KCFI type preambles, which always fall through */
- 			if (!strncmp(func->name, "__cfi_", 6))
+-			if (!strncmp(func->name, "__cfi_", 6) ||
+-			    !strncmp(func->name, "__pfx_", 6))
++			if (!strncmp(func->name, "__cfi_", 6))
  				return 0;
  
  			WARN("%s() falls through to next function %s()",
@@ -4932,7 +5451,7 @@ index 84762126caf0..a7f1e6c8bb0a 100644
  			return 1;
  		}
  
-@@ -3673,7 +3593,7 @@ static int validate_unwind_hints(struct objtool_file *file, struct section *sec)
+@@ -3736,7 +3593,7 @@ static int validate_unwind_hints(struct objtool_file *file, struct section *sec)
  
  	while (&insn->list != &file->insn_list && (!sec || insn->sec == sec)) {
  		if (insn->hint && !insn->visited && !insn->ignore) {
@@ -4941,7 +5460,7 @@ index 84762126caf0..a7f1e6c8bb0a 100644
  			if (ret && opts.backtrace)
  				BT_FUNC("<=== (hint)", insn);
  			warnings += ret;
-@@ -3838,7 +3758,13 @@ static int validate_retpoline(struct objtool_file *file)
+@@ -3901,7 +3758,13 @@ static int validate_retpoline(struct objtool_file *file)
  		if (insn->retpoline_safe)
  			continue;
  
@@ -4956,7 +5475,7 @@ index 84762126caf0..a7f1e6c8bb0a 100644
  			continue;
  
  		if (insn->type == INSN_RETURN) {
-@@ -3896,7 +3822,7 @@ static bool ignore_unreachable_insn(struct objtool_file *file, struct instructio
+@@ -3959,7 +3822,7 @@ static bool ignore_unreachable_insn(struct objtool_file *file, struct instructio
  	 * In this case we'll find a piece of code (whole function) that is not
  	 * covered by a !section symbol. Ignore them.
  	 */
@@ -4965,7 +5484,7 @@ index 84762126caf0..a7f1e6c8bb0a 100644
  		int size = find_symbol_hole_containing(insn->sec, insn->offset);
  		unsigned long end = insn->offset + size;
  
-@@ -3920,10 +3846,10 @@ static bool ignore_unreachable_insn(struct objtool_file *file, struct instructio
+@@ -3983,10 +3846,10 @@ static bool ignore_unreachable_insn(struct objtool_file *file, struct instructio
  			/*
  			 * If this hole jumps to a .cold function, mark it ignore too.
  			 */
@@ -4979,7 +5498,7 @@ index 84762126caf0..a7f1e6c8bb0a 100644
  					dest->ignore = true;
  			}
  		}
-@@ -3931,10 +3857,10 @@ static bool ignore_unreachable_insn(struct objtool_file *file, struct instructio
+@@ -3994,10 +3857,10 @@ static bool ignore_unreachable_insn(struct objtool_file *file, struct instructio
  		return false;
  	}
  
@@ -4992,7 +5511,7 @@ index 84762126caf0..a7f1e6c8bb0a 100644
  		return true;
  
  	/*
-@@ -3965,7 +3891,7 @@ static bool ignore_unreachable_insn(struct objtool_file *file, struct instructio
+@@ -4028,7 +3891,7 @@ static bool ignore_unreachable_insn(struct objtool_file *file, struct instructio
  
  		if (insn->type == INSN_JUMP_UNCONDITIONAL) {
  			if (insn->jump_dest &&
@@ -5001,7 +5520,7 @@ index 84762126caf0..a7f1e6c8bb0a 100644
  				insn = insn->jump_dest;
  				continue;
  			}
-@@ -3973,7 +3899,7 @@ static bool ignore_unreachable_insn(struct objtool_file *file, struct instructio
+@@ -4036,7 +3899,7 @@ static bool ignore_unreachable_insn(struct objtool_file *file, struct instructio
  			break;
  		}
  
@@ -5010,8 +5529,47 @@ index 84762126caf0..a7f1e6c8bb0a 100644
  			break;
  
  		insn = list_next_entry(insn, list);
-@@ -4002,7 +3928,7 @@ static int validate_symbol(struct objtool_file *file, struct section *sec,
+@@ -4045,34 +3908,6 @@ static bool ignore_unreachable_insn(struct objtool_file *file, struct instructio
+ 	return false;
+ }
  
+-static int add_prefix_symbol(struct objtool_file *file, struct symbol *func,
+-			     struct instruction *insn)
+-{
+-	if (!opts.prefix)
+-		return 0;
+-
+-	for (;;) {
+-		struct instruction *prev = list_prev_entry(insn, list);
+-		u64 offset;
+-
+-		if (&prev->list == &file->insn_list)
+-			break;
+-
+-		if (prev->type != INSN_NOP)
+-			break;
+-
+-		offset = func->offset - prev->offset;
+-		if (offset >= opts.prefix) {
+-			if (offset == opts.prefix)
+-				elf_create_prefix_symbol(file->elf, func, opts.prefix);
+-			break;
+-		}
+-		insn = prev;
+-	}
+-
+-	return 0;
+-}
+-
+ static int validate_symbol(struct objtool_file *file, struct section *sec,
+ 			   struct symbol *sym, struct insn_state *state)
+ {
+@@ -4091,11 +3926,9 @@ static int validate_symbol(struct objtool_file *file, struct section *sec,
+ 	if (!insn || insn->ignore || insn->visited)
+ 		return 0;
+ 
+-	add_prefix_symbol(file, sym, insn);
+-
  	state->uaccess = sym->uaccess_safe;
  
 -	ret = validate_branch(file, insn_func(insn), insn, *state);
@@ -5019,7 +5577,7 @@ index 84762126caf0..a7f1e6c8bb0a 100644
  	if (ret && opts.backtrace)
  		BT_FUNC("<=== (sym)", insn);
  	return ret;
-@@ -4068,24 +3994,6 @@ static void mark_endbr_used(struct instruction *insn)
+@@ -4161,24 +3994,6 @@ static void mark_endbr_used(struct instruction *insn)
  		list_del_init(&insn->call_node);
  }
  
@@ -5044,7 +5602,7 @@ index 84762126caf0..a7f1e6c8bb0a 100644
  static int validate_ibt_insn(struct objtool_file *file, struct instruction *insn)
  {
  	struct instruction *dest;
-@@ -4139,7 +4047,7 @@ static int validate_ibt_insn(struct objtool_file *file, struct instruction *insn
+@@ -4232,7 +4047,7 @@ static int validate_ibt_insn(struct objtool_file *file, struct instruction *insn
  			continue;
  		}
  
@@ -5053,7 +5611,7 @@ index 84762126caf0..a7f1e6c8bb0a 100644
  			/*
  			 * Anything from->to self is either _THIS_IP_ or
  			 * IRET-to-self.
-@@ -4158,19 +4066,9 @@ static int validate_ibt_insn(struct objtool_file *file, struct instruction *insn
+@@ -4251,19 +4066,9 @@ static int validate_ibt_insn(struct objtool_file *file, struct instruction *insn
  			continue;
  		}
  
@@ -5073,7 +5631,19 @@ index 84762126caf0..a7f1e6c8bb0a 100644
  		WARN_FUNC("relocation to !ENDBR: %s",
  			  insn->sec, insn->offset,
  			  offstr(dest->sec, dest->offset));
-@@ -4414,13 +4312,6 @@ int check(struct objtool_file *file)
+@@ -4502,25 +4307,11 @@ int check(struct objtool_file *file)
+ 		warnings += ret;
+ 	}
+ 
+-	if (opts.cfi) {
+-		ret = create_cfi_sections(file);
+-		if (ret < 0)
+-			goto out;
+-		warnings += ret;
+-	}
+-
+ 	if (opts.rethunk) {
+ 		ret = create_return_sites_sections(file);
  		if (ret < 0)
  			goto out;
  		warnings += ret;
@@ -5088,7 +5658,7 @@ index 84762126caf0..a7f1e6c8bb0a 100644
  
  	if (opts.mcount) {
 diff --git a/tools/objtool/elf.c b/tools/objtool/elf.c
-index 89b37cd4ab1d..7e24b09b1163 100644
+index 3d636d12d679..7e24b09b1163 100644
 --- a/tools/objtool/elf.c
 +++ b/tools/objtool/elf.c
 @@ -16,7 +16,6 @@
@@ -5155,13 +5725,13 @@ index 89b37cd4ab1d..7e24b09b1163 100644
 -	struct rb_root_cached *tree = (struct rb_root_cached *)&sec->symbol_tree;
 -	struct symbol *iter;
 +	struct rb_node *node;
-+
-+	rb_for_each(node, &offset, &sec->symbol_tree, symbol_by_offset) {
-+		struct symbol *s = rb_entry(node, struct symbol, node);
  
 -	__sym_for_each(iter, tree, offset, offset) {
 -		if (iter->offset == offset && iter->type != STT_SECTION)
 -			return iter;
++	rb_for_each(node, &offset, &sec->symbol_tree, symbol_by_offset) {
++		struct symbol *s = rb_entry(node, struct symbol, node);
++
 +		if (s->offset == offset && s->type != STT_SECTION)
 +			return s;
  	}
@@ -5174,13 +5744,13 @@ index 89b37cd4ab1d..7e24b09b1163 100644
 -	struct rb_root_cached *tree = (struct rb_root_cached *)&sec->symbol_tree;
 -	struct symbol *iter;
 +	struct rb_node *node;
++
++	rb_for_each(node, &offset, &sec->symbol_tree, symbol_by_offset) {
++		struct symbol *s = rb_entry(node, struct symbol, node);
  
 -	__sym_for_each(iter, tree, offset, offset) {
 -		if (iter->offset == offset && iter->type == STT_FUNC)
 -			return iter;
-+	rb_for_each(node, &offset, &sec->symbol_tree, symbol_by_offset) {
-+		struct symbol *s = rb_entry(node, struct symbol, node);
-+
 +		if (s->offset == offset && s->type == STT_FUNC)
 +			return s;
  	}
@@ -5193,13 +5763,13 @@ index 89b37cd4ab1d..7e24b09b1163 100644
 -	struct rb_root_cached *tree = (struct rb_root_cached *)&sec->symbol_tree;
 -	struct symbol *iter;
 +	struct rb_node *node;
-+
-+	rb_for_each(node, &offset, &sec->symbol_tree, symbol_by_offset) {
-+		struct symbol *s = rb_entry(node, struct symbol, node);
  
 -	__sym_for_each(iter, tree, offset, offset) {
 -		if (iter->type != STT_SECTION)
 -			return iter;
++	rb_for_each(node, &offset, &sec->symbol_tree, symbol_by_offset) {
++		struct symbol *s = rb_entry(node, struct symbol, node);
++
 +		if (s->type != STT_SECTION)
 +			return s;
  	}
@@ -5264,6 +5834,264 @@ index 89b37cd4ab1d..7e24b09b1163 100644
  }
  
  static int read_symbols(struct elf *elf)
+@@ -634,12 +647,6 @@ static int elf_update_symbol(struct elf *elf, struct section *symtab,
+ 
+ 		/* end-of-list */
+ 		if (!symtab_data) {
+-			/*
+-			 * Over-allocate to avoid O(n^2) symbol creation
+-			 * behaviour.  The down side is that libelf doesn't
+-			 * like this; see elf_truncate_section() for the fixup.
+-			 */
+-			int num = max(1U, sym->idx/3);
+ 			void *buf;
+ 
+ 			if (idx) {
+@@ -653,34 +660,28 @@ static int elf_update_symbol(struct elf *elf, struct section *symtab,
+ 			if (t)
+ 				shndx_data = elf_newdata(t);
+ 
+-			buf = calloc(num, entsize);
++			buf = calloc(1, entsize);
+ 			if (!buf) {
+ 				WARN("malloc");
+ 				return -1;
+ 			}
+ 
+ 			symtab_data->d_buf = buf;
+-			symtab_data->d_size = num * entsize;
++			symtab_data->d_size = entsize;
+ 			symtab_data->d_align = 1;
+ 			symtab_data->d_type = ELF_T_SYM;
+ 
++			symtab->sh.sh_size += entsize;
+ 			symtab->changed = true;
+-			symtab->truncate = true;
+ 
+ 			if (t) {
+-				buf = calloc(num, sizeof(Elf32_Word));
+-				if (!buf) {
+-					WARN("malloc");
+-					return -1;
+-				}
+-
+-				shndx_data->d_buf = buf;
+-				shndx_data->d_size = num * sizeof(Elf32_Word);
++				shndx_data->d_buf = &sym->sec->idx;
++				shndx_data->d_size = sizeof(Elf32_Word);
+ 				shndx_data->d_align = sizeof(Elf32_Word);
+ 				shndx_data->d_type = ELF_T_WORD;
+ 
++				symtab_shndx->sh.sh_size += sizeof(Elf32_Word);
+ 				symtab_shndx->changed = true;
+-				symtab_shndx->truncate = true;
+ 			}
+ 
+ 			break;
+@@ -729,11 +730,11 @@ static int elf_update_symbol(struct elf *elf, struct section *symtab,
+ }
+ 
+ static struct symbol *
+-__elf_create_symbol(struct elf *elf, struct symbol *sym)
++elf_create_section_symbol(struct elf *elf, struct section *sec)
+ {
+ 	struct section *symtab, *symtab_shndx;
+ 	Elf32_Word first_non_local, new_idx;
+-	struct symbol *old;
++	struct symbol *sym, *old;
+ 
+ 	symtab = find_section_by_name(elf, ".symtab");
+ 	if (symtab) {
+@@ -743,16 +744,27 @@ __elf_create_symbol(struct elf *elf, struct symbol *sym)
+ 		return NULL;
+ 	}
+ 
+-	new_idx = symtab->sh.sh_size / symtab->sh.sh_entsize;
++	sym = calloc(1, sizeof(*sym));
++	if (!sym) {
++		perror("malloc");
++		return NULL;
++	}
+ 
+-	if (GELF_ST_BIND(sym->sym.st_info) != STB_LOCAL)
+-		goto non_local;
++	sym->name = sec->name;
++	sym->sec = sec;
++
++	// st_name 0
++	sym->sym.st_info = GELF_ST_INFO(STB_LOCAL, STT_SECTION);
++	// st_other 0
++	// st_value 0
++	// st_size 0
+ 
+ 	/*
+ 	 * Move the first global symbol, as per sh_info, into a new, higher
+ 	 * symbol index. This fees up a spot for a new local symbol.
+ 	 */
+ 	first_non_local = symtab->sh.sh_info;
++	new_idx = symtab->sh.sh_size / symtab->sh.sh_entsize;
+ 	old = find_symbol_by_index(elf, first_non_local);
+ 	if (old) {
+ 		old->idx = new_idx;
+@@ -770,82 +782,18 @@ __elf_create_symbol(struct elf *elf, struct symbol *sym)
+ 		new_idx = first_non_local;
+ 	}
+ 
+-	/*
+-	 * Either way, we will add a LOCAL symbol.
+-	 */
+-	symtab->sh.sh_info += 1;
+-
+-non_local:
+ 	sym->idx = new_idx;
+ 	if (elf_update_symbol(elf, symtab, symtab_shndx, sym)) {
+ 		WARN("elf_update_symbol");
+ 		return NULL;
+ 	}
+ 
+-	symtab->sh.sh_size += symtab->sh.sh_entsize;
+-	symtab->changed = true;
+-
+-	if (symtab_shndx) {
+-		symtab_shndx->sh.sh_size += sizeof(Elf32_Word);
+-		symtab_shndx->changed = true;
+-	}
+-
+-	return sym;
+-}
+-
+-static struct symbol *
+-elf_create_section_symbol(struct elf *elf, struct section *sec)
+-{
+-	struct symbol *sym = calloc(1, sizeof(*sym));
+-
+-	if (!sym) {
+-		perror("malloc");
+-		return NULL;
+-	}
+-
+-	sym->name = sec->name;
+-	sym->sec = sec;
+-
+-	// st_name 0
+-	sym->sym.st_info = GELF_ST_INFO(STB_LOCAL, STT_SECTION);
+-	// st_other 0
+-	// st_value 0
+-	// st_size 0
+-
+-	sym = __elf_create_symbol(elf, sym);
+-	if (sym)
+-		elf_add_symbol(elf, sym);
+-
+-	return sym;
+-}
+-
+-static int elf_add_string(struct elf *elf, struct section *strtab, char *str);
+-
+-struct symbol *
+-elf_create_prefix_symbol(struct elf *elf, struct symbol *orig, long size)
+-{
+-	struct symbol *sym = calloc(1, sizeof(*sym));
+-	size_t namelen = strlen(orig->name) + sizeof("__pfx_");
+-	char *name = malloc(namelen);
+-
+-	if (!sym || !name) {
+-		perror("malloc");
+-		return NULL;
+-	}
+-
+-	snprintf(name, namelen, "__pfx_%s", orig->name);
+-
+-	sym->name = name;
+-	sym->sec = orig->sec;
+-
+-	sym->sym.st_name = elf_add_string(elf, NULL, name);
+-	sym->sym.st_info = orig->sym.st_info;
+-	sym->sym.st_value = orig->sym.st_value - size;
+-	sym->sym.st_size = size;
++	/*
++	 * Either way, we added a LOCAL symbol.
++	 */
++	symtab->sh.sh_info += 1;
+ 
+-	sym = __elf_create_symbol(elf, sym);
+-	if (sym)
+-		elf_add_symbol(elf, sym);
++	elf_add_symbol(elf, sym);
+ 
+ 	return sym;
+ }
+@@ -1337,60 +1285,6 @@ int elf_write_reloc(struct elf *elf, struct reloc *reloc)
+ 	return 0;
+ }
+ 
+-/*
+- * When Elf_Scn::sh_size is smaller than the combined Elf_Data::d_size
+- * do you:
+- *
+- *   A) adhere to the section header and truncate the data, or
+- *   B) ignore the section header and write out all the data you've got?
+- *
+- * Yes, libelf sucks and we need to manually truncate if we over-allocate data.
+- */
+-static int elf_truncate_section(struct elf *elf, struct section *sec)
+-{
+-	u64 size = sec->sh.sh_size;
+-	bool truncated = false;
+-	Elf_Data *data = NULL;
+-	Elf_Scn *s;
+-
+-	s = elf_getscn(elf->elf, sec->idx);
+-	if (!s) {
+-		WARN_ELF("elf_getscn");
+-		return -1;
+-	}
+-
+-	for (;;) {
+-		/* get next data descriptor for the relevant section */
+-		data = elf_getdata(s, data);
+-
+-		if (!data) {
+-			if (size) {
+-				WARN("end of section data but non-zero size left\n");
+-				return -1;
+-			}
+-			return 0;
+-		}
+-
+-		if (truncated) {
+-			/* when we remove symbols */
+-			WARN("truncated; but more data\n");
+-			return -1;
+-		}
+-
+-		if (!data->d_size) {
+-			WARN("zero size data");
+-			return -1;
+-		}
+-
+-		if (data->d_size > size) {
+-			truncated = true;
+-			data->d_size = size;
+-		}
+-
+-		size -= data->d_size;
+-	}
+-}
+-
+ int elf_write(struct elf *elf)
+ {
+ 	struct section *sec;
+@@ -1401,9 +1295,6 @@ int elf_write(struct elf *elf)
+ 
+ 	/* Update changed relocation sections and section headers: */
+ 	list_for_each_entry(sec, &elf->sections, list) {
+-		if (sec->truncate)
+-			elf_truncate_section(elf, sec);
+-
+ 		if (sec->changed) {
+ 			s = elf_getscn(elf->elf, sec->idx);
+ 			if (!s) {
 diff --git a/tools/objtool/include/objtool/arch.h b/tools/objtool/include/objtool/arch.h
 index fe2ea4b892c3..beb2f3aa94ff 100644
 --- a/tools/objtool/include/objtool/arch.h
@@ -5276,7 +6104,7 @@ index fe2ea4b892c3..beb2f3aa94ff 100644
 -
  #endif /* _ARCH_H */
 diff --git a/tools/objtool/include/objtool/builtin.h b/tools/objtool/include/objtool/builtin.h
-index 22092a9f3cf6..42a52f1a0add 100644
+index c44ff39df80c..42a52f1a0add 100644
 --- a/tools/objtool/include/objtool/builtin.h
 +++ b/tools/objtool/include/objtool/builtin.h
 @@ -14,7 +14,6 @@ struct opts {
@@ -5287,6 +6115,15 @@ index 22092a9f3cf6..42a52f1a0add 100644
  	bool ibt;
  	bool mcount;
  	bool noinstr;
+@@ -26,8 +25,6 @@ struct opts {
+ 	bool stackval;
+ 	bool static_call;
+ 	bool uaccess;
+-	int prefix;
+-	bool cfi;
+ 
+ 	/* options: */
+ 	bool backtrace;
 diff --git a/tools/objtool/include/objtool/check.h b/tools/objtool/include/objtool/check.h
 index acd7fae59348..036129cebeee 100644
 --- a/tools/objtool/include/objtool/check.h
@@ -5315,7 +6152,7 @@ index acd7fae59348..036129cebeee 100644
  #define VISITED_BRANCH_UACCESS	0x02
  #define VISITED_BRANCH_MASK	0x03
 diff --git a/tools/objtool/include/objtool/elf.h b/tools/objtool/include/objtool/elf.h
-index d28533106b78..16f4067b82ae 100644
+index b6974e3173aa..16f4067b82ae 100644
 --- a/tools/objtool/include/objtool/elf.h
 +++ b/tools/objtool/include/objtool/elf.h
 @@ -30,7 +30,7 @@ struct section {
@@ -5331,7 +6168,7 @@ index d28533106b78..16f4067b82ae 100644
  	Elf_Data *data;
  	char *name;
  	int idx;
--	bool changed, text, rodata, noinstr, init;
+-	bool changed, text, rodata, noinstr, init, truncate;
 +	bool changed, text, rodata, noinstr;
  };
  
@@ -5344,6 +6181,15 @@ index d28533106b78..16f4067b82ae 100644
  	struct symbol *pfunc, *cfunc, *alias;
  	u8 uaccess_safe      : 1;
  	u8 static_call_tramp : 1;
+@@ -146,8 +145,6 @@ static inline bool has_multiple_files(struct elf *elf)
+ struct elf *elf_open_read(const char *name, int flags);
+ struct section *elf_create_section(struct elf *elf, const char *name, unsigned int sh_flags, size_t entsize, int nr);
+ 
+-struct symbol *elf_create_prefix_symbol(struct elf *elf, struct symbol *orig, long size);
+-
+ int elf_add_reloc(struct elf *elf, struct section *sec, unsigned long offset,
+ 		  unsigned int type, struct symbol *sym, s64 addend);
+ int elf_add_reloc_to_insn(struct elf *elf, struct section *sec,
 diff --git a/tools/objtool/include/objtool/objtool.h b/tools/objtool/include/objtool/objtool.h
 index 6b40977bcdb1..7f2d1b095333 100644
 --- a/tools/objtool/include/objtool/objtool.h
