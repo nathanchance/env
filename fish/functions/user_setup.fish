@@ -212,14 +212,13 @@ rpmbuild/' >>$gitignore
     end
 
     # Binaries
-    if test (get_distro) = arch
+    if location_is_primary
         clone_aur_repos
-
-        if is_installed modprobed-db
-            modprobed-db
-            modprobed-db store
-            systemctl --user enable --now modprobed-db.service
-        end
+    end
+    if command -q modprobed-db
+        modprobed-db
+        modprobed-db store
+        systemctl --user enable --now modprobed-db.service
     end
     updall --no-os; or return
     if has_container_manager; and test "$LOCATION" != wsl

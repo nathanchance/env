@@ -4,13 +4,9 @@
 
 function clone_aur_repos -d "Clone repos from AUR to build packages locally"
     set packages \
-        binfmt-qemu-static \
         modprobed-db \
         opendoas-sudo \
-        slack-desktop \
-        shellcheck-bin \
-        qemu-user-static-bin \
-        visual-studio-code-bin
+        shellcheck-bin
 
     for package in $packages
         set repo $AUR_FOLDER/$package
