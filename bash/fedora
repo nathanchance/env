@@ -144,12 +144,12 @@ EOF
 }
 
 function setup_kernel_args() {
-    if $honeycomb; then
-        # Until firmware supports new IORT RMR patches?
-        grubby \
-            --args "arm-smmu.disable_bypass=0 iommu.passthrough=1" \
-            --update-kernel ALL
-    fi
+    $honeycomb || return 0
+
+    # Until firmware supports new IORT RMR patches?
+    grubby \
+        --args "arm-smmu.disable_bypass=0 iommu.passthrough=1" \
+        --update-kernel ALL
 }
 
 function setup_libvirt() {
@@ -159,11 +159,11 @@ function setup_libvirt() {
 }
 
 function setup_mosh() {
+    command -v firewall-cmd &>/dev/null || return 0
+
     # mosh can use ports 60000 through 61000
-    if command -v firewall-cmd &>/dev/null; then
-        firewall-cmd --add-port=60000-61000/udp --permanent
-        firewall-cmd --reload
-    fi
+    firewall-cmd --add-port=60000-61000/udp --permanent
+    firewall-cmd --reload
 }
 
 function setup_tailscale() {

@@ -257,15 +257,15 @@ function setup_user() {
 }
 
 function vmware_adjustments() {
-    if [[ $(uname -n) = "vmware" ]]; then
-        # https://wiki.archlinux.org/title/VMware/Install_Arch_Linux_as_a_guest#In-kernel_drivers
-        sed -i 's;MODULES=();MODULES=(vsock vmw_vsock_vmci_transport vmw_balloon vmw_vmci vmwgfx);g' /etc/mkinitcpio.conf
-        mkinitcpio -P
+    [[ $(uname -n) = "vmware" ]] || return 0
 
-        # https://wiki.archlinux.org/title/VMware/Install_Arch_Linux_as_a_guest#Installation
-        systemctl enable vmtoolsd.service
-        systemctl enable vmware-vmblock-fuse.service
-    fi
+    # https://wiki.archlinux.org/title/VMware/Install_Arch_Linux_as_a_guest#In-kernel_drivers
+    sed -i 's;MODULES=();MODULES=(vsock vmw_vsock_vmci_transport vmw_balloon vmw_vmci vmwgfx);g' /etc/mkinitcpio.conf
+    mkinitcpio -P
+
+    # https://wiki.archlinux.org/title/VMware/Install_Arch_Linux_as_a_guest#Installation
+    systemctl enable vmtoolsd.service
+    systemctl enable vmware-vmblock-fuse.service
 }
 
 function setup_libvirt() {
@@ -289,43 +289,43 @@ function setup_libvirt() {
 }
 
 function wsl_tmpfs() {
-    if $wsl; then
-        # Make /tmp a true tmpfs, needed for podman and avoiding stale sockets after a reboot
-        printf "tmpfs\t/tmp\ttmpfs\tdefaults\t0\t0\n" | tee -a /etc/fstab
-    fi
+    $wsl || return 0
+
+    # Make /tmp a true tmpfs, needed for podman and avoiding stale sockets after a reboot
+    printf "tmpfs\t/tmp\ttmpfs\tdefaults\t0\t0\n" | tee -a /etc/fstab
 }
 
 function enable_reflector() {
-    if ! $wsl; then
-        cat <<'EOF' >/etc/xdg/reflector/reflector.conf
+    $wsl && return 0
+
+    cat <<'EOF' >/etc/xdg/reflector/reflector.conf
 --country "United States"
 --latest 15
 --protocol https
 --save /etc/pacman.d/mirrorlist
 --sort rate
 EOF
-        systemctl enable --now reflector.{service,timer}
-    fi
+    systemctl enable --now reflector.{service,timer}
 }
 
 function enable_ssh() {
-    if ! $wsl; then
-        sed -i 's/#PermitRootLogin prohibit-password/PermitRootLogin prohibit-password/g' /etc/ssh/sshd_config
-        systemctl enable --now sshd.service
-    fi
+    $wsl && return 0
+
+    sed -i 's/#PermitRootLogin prohibit-password/PermitRootLogin prohibit-password/g' /etc/ssh/sshd_config
+    systemctl enable --now sshd.service
 }
 
 function enable_tailscale() {
-    if is_installed tailscale; then
-        systemctl enable --now tailscaled
-    fi
+    is_installed tailscale || return 0
+
+    systemctl enable --now tailscaled
 }
 
 function fix_lightdm() {
-    if is_installed lightdm; then
-        # https://wiki.archlinux.org/title/LightDM#LightDM_does_not_appear_or_monitor_only_displays_TTY_output
-        sed -i 's/#logind-check-graphical=false/logind-check-graphical=true/g' /etc/lightdm/lightdm.conf
-    fi
+    is_installed lightdm || return 0
+
+    # https://wiki.archlinux.org/title/LightDM#LightDM_does_not_appear_or_monitor_only_displays_TTY_output
+    sed -i 's/#logind-check-graphical=false/logind-check-graphical=true/g' /etc/lightdm/lightdm.conf
 }
 
 # For archinstall, which causes ^M in /etc/fstab

@@ -107,9 +107,9 @@ function remove_if_installed() {
 }
 
 function set_date_time() {
-    if ! $wsl; then
-        timedatectl set-timezone America/Phoenix
-    fi
+    $wsl && return 0
+
+    timedatectl set-timezone America/Phoenix
 }
 
 function set_global_variables() {

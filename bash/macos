@@ -42,10 +42,10 @@ function install_packages() {
 }
 
 function setup_gh() {
-    if ! gh auth status; then
-        gh auth login || exit
-        first_time_gh=true
-    fi
+    gh auth status && return 0
+
+    gh auth login || exit
+    first_time_gh=true
 }
 
 function setup_ssh() {
