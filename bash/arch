@@ -74,9 +74,6 @@ function install_pkgs() {
         neofetch
         reflector
 
-        # arc
-        php
-
         # b4
         b4
         python-dkim
@@ -92,9 +89,6 @@ function install_pkgs() {
 
         # continuous-integration2 (generate.sh)
         python-yaml
-
-        # debian.sh from boot-utils
-        debootstrap
 
         # Development tools
         dos2unix
