@@ -1,4 +1,5 @@
 #!/usr/bin/env fish
 
-dbxe -- true &>/dev/null
-return 0
+in_container_msg -h; or return
+dbx list &| grep -q (get_dev_img); or dbxc --yes; or return
+dbxe -- true
