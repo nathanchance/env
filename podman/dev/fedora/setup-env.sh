@@ -120,7 +120,6 @@ EOF
         rsync
         socat
         sparse
-        tuxmake
         uboot-tools
 
         # LLVM/clang + build-llvm.py
