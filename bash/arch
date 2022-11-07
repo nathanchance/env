@@ -72,7 +72,6 @@ function install_pkgs() {
         btop
         iputils
         neofetch
-        reflector
 
         # b4
         b4
@@ -156,7 +155,10 @@ function install_pkgs() {
     # This variable is assigned in bash/common
     # shellcheck disable=SC2154
     if ! $wsl; then
-        packages+=(modprobed-db)
+        packages+=(
+            modprobed-db
+            reflector
+        )
 
         if [[ -n $DISPLAY ]]; then
             packages+=(
@@ -288,15 +290,38 @@ function setup_libvirt() {
     fi
 }
 
-function wsl_tmpfs() {
+function wsl_setup() {
     $wsl || return 0
 
     # Make /tmp a true tmpfs, needed for podman and avoiding stale sockets after a reboot
     printf "tmpfs\t/tmp\ttmpfs\tdefaults\t0\t0\n" | tee -a /etc/fstab
+
+    # Add boot script to enable a few things that podman needs
+    cat <<'EOF' >/etc/wsl-init.sh
+#!/bin/sh
+
+set -e
+
+mount --make-rshared /
+
+if [[ -L /dev/shm ]]; then
+    rm /dev/shm
+    mkdir /dev/shm
+    umount /run/shm
+    rmdir /run/shm
+    mount -t tmpfs -o mode=1777,nosuid,nodev,strictatime tmpfs /dev/shm
+    ln -s /dev/shm /run/shm
+fi
+EOF
+    cat <<'EOF' >>/etc/wsl.conf
+
+[boot]
+command = "sh /etc/wsl-init.sh"
+EOF
 }
 
 function enable_reflector() {
-    $wsl && return 0
+    is_installed reflector || return 0
 
     cat <<'EOF' >/etc/xdg/reflector/reflector.conf
 --country "United States"
@@ -348,7 +373,7 @@ clone_env
 podman_setup
 vmware_adjustments
 setup_libvirt
-wsl_tmpfs
+wsl_setup
 enable_reflector
 enable_ssh
 enable_tailscale
