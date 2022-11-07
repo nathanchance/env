@@ -288,11 +288,11 @@ function upd -d "Runs the update command for the current distro or downloads/upd
                         set prefix $BIN_FOLDER/btop
                         rm -fr $prefix
                     end
-                    $install -Dvm755 -t $prefix/bin bin/$target
-                    for theme in themes/*
+                    $install -Dvm755 -t $prefix/bin $target/bin/$target
+                    for theme in $target/themes/*
                         $install -Dvm755 -t $prefix/share/btop/themes $theme
                     end
-                    set binary $prefix/bin/btop
+                    set binary $prefix/bin/$target
 
                 case duf
                     switch $arch
