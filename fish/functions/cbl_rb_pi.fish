@@ -21,13 +21,15 @@ function cbl_rb_pi -d "Rebase Raspberry Pi kernel on latest linux-next"
     git rh origin/master
 
     # Patching
-    set -a patches https://lore.kernel.org/all/20221014201354.3190007-2-ndesaulniers@google.com/ # ARM: remove lazy evaluation in Makefile
     set -a patches https://lore.kernel.org/all/20221014201354.3190007-3-ndesaulniers@google.com/ # ARM: use .arch directives instead of assembler command line flags
-    set -a patches https://lore.kernel.org/all/20221014201354.3190007-4-ndesaulniers@google.com/ # ARM: only use -mtp=cp15 for the compiler
-    set -a patches https://lore.kernel.org/all/20221014201354.3190007-5-ndesaulniers@google.com/ # ARM: pass -march= only to compiler
     for patch in $patches
         b4 am -l -o - -P _ -s $patch | git am; or return
     end
+    git rv -n e0a37003ff0beed62e85a00e313b21764c5f1d4f; or return
+    crl https://lore.kernel.org/all/20221108112413.199669-1-Jason@zx2c4.com/raw | git ap; or return
+    git ac -m "Diff of v3 and v4 of 'hw_random: use add_hwgenerator_randomness() for early entropy'
+
+Link: https://lore.kernel.org/1839f462-dccb-b926-1acd-f1bb5f5776ba@collabora.com/"; or return
 
     # Regenerate defconfigs
     for arch in arm arm64

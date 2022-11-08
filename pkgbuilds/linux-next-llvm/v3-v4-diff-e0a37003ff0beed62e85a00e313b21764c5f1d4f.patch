@@ -1,0 +1,13 @@
+diff --git a/drivers/char/random.c b/drivers/char/random.c
+index 70ecfcfdb1d7..6b7aca683b81 100644
+--- a/drivers/char/random.c
++++ b/drivers/char/random.c
+@@ -904,7 +904,7 @@ void add_hwgenerator_randomness(const void *buf, size_t len, size_t entropy, boo
+ 	 * Throttle writing to once every reseed interval, unless we're not yet
+ 	 * initialized or no entropy is credited.
+ 	 */
+-	if (!kthread_should_stop() && (crng_ready() || !entropy) && sleep_after)
++	if (sleep_after && !kthread_should_stop() && (crng_ready() || !entropy))
+ 		schedule_timeout_interruptible(crng_reseed_interval());
+ }
+ EXPORT_SYMBOL_GPL(add_hwgenerator_randomness);

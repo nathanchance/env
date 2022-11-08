@@ -1,0 +1,1285 @@
+From git@z Thu Jan  1 00:00:00 1970
+Subject: [PATCH v2 1/8] KVM: x86: use a separate asm-offsets.c file
+From: Paolo Bonzini <pbonzini@redhat.com>
+Date: Tue, 08 Nov 2022 10:15:25 -0500
+Message-Id: <20221108151532.1377783-2-pbonzini@redhat.com>
+To: linux-kernel@vger.kernel.org, kvm@vger.kernel.org
+Cc: nathan@kernel.org, thomas.lendacky@amd.com, andrew.cooper3@citrix.com, peterz@infradead.org, jmattson@google.com, seanjc@google.com
+In-Reply-To: <20221108151532.1377783-1-pbonzini@redhat.com>
+References: <20221108151532.1377783-1-pbonzini@redhat.com>
+List-Id: <linux-kernel.vger.kernel.org>
+MIME-Version: 1.0
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 7bit
+
+This already removes the ugly #includes from asm-offsets.c, but especially
+it avoids a future error when asm-offsets will try to include svm/svm.h.
+
+This would not work for kernel/asm-offsets.c, because svm/svm.h
+includes kvm_cache_regs.h which is not in the include path when
+compiling asm-offsets.c.  The problem is not there if the .c file is
+in arch/x86/kvm.
+
+Tested with both in-tree and separate-objtree compilation.
+
+Suggested-by: Sean Christopherson <seanjc@google.com>
+Signed-off-by: Paolo Bonzini <pbonzini@redhat.com>
+Link: https://lore.kernel.org/r/20221108151532.1377783-2-pbonzini@redhat.com
+---
+ arch/x86/kernel/asm-offsets.c  |  6 ------
+ arch/x86/kvm/Makefile          |  9 +++++++++
+ arch/x86/kvm/kvm-asm-offsets.c | 18 ++++++++++++++++++
+ arch/x86/kvm/vmx/vmenter.S     |  2 +-
+ 4 files changed, 28 insertions(+), 7 deletions(-)
+ create mode 100644 arch/x86/kvm/kvm-asm-offsets.c
+
+diff --git a/arch/x86/kernel/asm-offsets.c b/arch/x86/kernel/asm-offsets.c
+index 13afdbbee349..90442f59fba2 100644
+--- a/arch/x86/kernel/asm-offsets.c
++++ b/arch/x86/kernel/asm-offsets.c
+@@ -19,7 +19,6 @@
+ #include <asm/suspend.h>
+ #include <asm/tlbflush.h>
+ #include <asm/tdx.h>
+-#include "../kvm/vmx/vmx.h"
+ 
+ #ifdef CONFIG_XEN
+ #include <xen/interface/xen.h>
+@@ -113,9 +112,4 @@ static void __used common(void)
+ #ifdef CONFIG_CALL_DEPTH_TRACKING
+ 	OFFSET(X86_call_depth, pcpu_hot, call_depth);
+ #endif
+-
+-	if (IS_ENABLED(CONFIG_KVM_INTEL)) {
+-		BLANK();
+-		OFFSET(VMX_spec_ctrl, vcpu_vmx, spec_ctrl);
+-	}
+ }
+diff --git a/arch/x86/kvm/Makefile b/arch/x86/kvm/Makefile
+index 30f244b64523..a02cf9baacc8 100644
+--- a/arch/x86/kvm/Makefile
++++ b/arch/x86/kvm/Makefile
+@@ -34,3 +34,12 @@ endif
+ obj-$(CONFIG_KVM)	+= kvm.o
+ obj-$(CONFIG_KVM_INTEL)	+= kvm-intel.o
+ obj-$(CONFIG_KVM_AMD)	+= kvm-amd.o
++
++AFLAGS_vmx/vmenter.o    := -iquote $(obj)
++$(obj)/vmx/vmenter.o: $(obj)/kvm-asm-offsets.h
++
++$(obj)/kvm-asm-offsets.h: $(obj)/kvm-asm-offsets.s FORCE
++	$(call filechk,offsets,__KVM_ASM_OFFSETS_H__)
++
++targets += kvm-asm-offsets.s
++clean-files += kvm-asm-offsets.h
+diff --git a/arch/x86/kvm/kvm-asm-offsets.c b/arch/x86/kvm/kvm-asm-offsets.c
+new file mode 100644
+index 000000000000..9d84f2b32d7f
+--- /dev/null
++++ b/arch/x86/kvm/kvm-asm-offsets.c
+@@ -0,0 +1,18 @@
++// SPDX-License-Identifier: GPL-2.0
++/*
++ * Generate definitions needed by assembly language modules.
++ * This code generates raw asm output which is post-processed to extract
++ * and format the required data.
++ */
++#define COMPILE_OFFSETS
++
++#include <linux/kbuild.h>
++#include "vmx/vmx.h"
++
++static void __used common(void)
++{
++	if (IS_ENABLED(CONFIG_KVM_INTEL)) {
++		BLANK();
++		OFFSET(VMX_spec_ctrl, vcpu_vmx, spec_ctrl);
++	}
++}
+diff --git a/arch/x86/kvm/vmx/vmenter.S b/arch/x86/kvm/vmx/vmenter.S
+index 8477d8bdd69c..0b5db4de4d09 100644
+--- a/arch/x86/kvm/vmx/vmenter.S
++++ b/arch/x86/kvm/vmx/vmenter.S
+@@ -1,12 +1,12 @@
+ /* SPDX-License-Identifier: GPL-2.0 */
+ #include <linux/linkage.h>
+ #include <asm/asm.h>
+-#include <asm/asm-offsets.h>
+ #include <asm/bitsperlong.h>
+ #include <asm/kvm_vcpu_regs.h>
+ #include <asm/nospec-branch.h>
+ #include <asm/percpu.h>
+ #include <asm/segment.h>
++#include "kvm-asm-offsets.h"
+ #include "run_flags.h"
+ 
+ #define WORD_SIZE (BITS_PER_LONG / 8)
+-- 
+2.31.1
+
+From git@z Thu Jan  1 00:00:00 1970
+Subject: [PATCH v2 2/8] KVM: SVM: replace regs argument of __svm_vcpu_run with vcpu_svm
+From: Paolo Bonzini <pbonzini@redhat.com>
+Date: Tue, 08 Nov 2022 10:15:26 -0500
+Message-Id: <20221108151532.1377783-3-pbonzini@redhat.com>
+To: linux-kernel@vger.kernel.org, kvm@vger.kernel.org
+Cc: nathan@kernel.org, thomas.lendacky@amd.com, andrew.cooper3@citrix.com, peterz@infradead.org, jmattson@google.com, seanjc@google.com, stable@vger.kernel.org
+In-Reply-To: <20221108151532.1377783-1-pbonzini@redhat.com>
+References: <20221108151532.1377783-1-pbonzini@redhat.com>
+List-Id: <linux-kernel.vger.kernel.org>
+MIME-Version: 1.0
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 7bit
+
+Since registers are reachable through vcpu_svm, and we will
+need to access more fields of that struct, pass it instead
+of the regs[] array.
+
+No functional change intended.
+
+Cc: stable@vger.kernel.org
+Fixes: f14eec0a3203 ("KVM: SVM: move more vmentry code to assembly")
+Signed-off-by: Paolo Bonzini <pbonzini@redhat.com>
+Link: https://lore.kernel.org/r/20221108151532.1377783-3-pbonzini@redhat.com
+---
+ arch/x86/kvm/Makefile          |  3 +++
+ arch/x86/kvm/kvm-asm-offsets.c |  6 ++++++
+ arch/x86/kvm/svm/svm.c         |  2 +-
+ arch/x86/kvm/svm/svm.h         |  2 +-
+ arch/x86/kvm/svm/vmenter.S     | 37 +++++++++++++++++-----------------
+ 5 files changed, 30 insertions(+), 20 deletions(-)
+
+diff --git a/arch/x86/kvm/Makefile b/arch/x86/kvm/Makefile
+index a02cf9baacc8..f453a0f96e24 100644
+--- a/arch/x86/kvm/Makefile
++++ b/arch/x86/kvm/Makefile
+@@ -35,6 +35,9 @@ obj-$(CONFIG_KVM)	+= kvm.o
+ obj-$(CONFIG_KVM_INTEL)	+= kvm-intel.o
+ obj-$(CONFIG_KVM_AMD)	+= kvm-amd.o
+ 
++AFLAGS_svm/vmenter.o    := -iquote $(obj)
++$(obj)/svm/vmenter.o: $(obj)/kvm-asm-offsets.h
++
+ AFLAGS_vmx/vmenter.o    := -iquote $(obj)
+ $(obj)/vmx/vmenter.o: $(obj)/kvm-asm-offsets.h
+ 
+diff --git a/arch/x86/kvm/kvm-asm-offsets.c b/arch/x86/kvm/kvm-asm-offsets.c
+index 9d84f2b32d7f..30db96852e2d 100644
+--- a/arch/x86/kvm/kvm-asm-offsets.c
++++ b/arch/x86/kvm/kvm-asm-offsets.c
+@@ -8,9 +8,15 @@
+ 
+ #include <linux/kbuild.h>
+ #include "vmx/vmx.h"
++#include "svm/svm.h"
+ 
+ static void __used common(void)
+ {
++	if (IS_ENABLED(CONFIG_KVM_AMD)) {
++		BLANK();
++		OFFSET(SVM_vcpu_arch_regs, vcpu_svm, vcpu.arch.regs);
++	}
++
+ 	if (IS_ENABLED(CONFIG_KVM_INTEL)) {
+ 		BLANK();
+ 		OFFSET(VMX_spec_ctrl, vcpu_vmx, spec_ctrl);
+diff --git a/arch/x86/kvm/svm/svm.c b/arch/x86/kvm/svm/svm.c
+index 58f0077d9357..b412bc5773c5 100644
+--- a/arch/x86/kvm/svm/svm.c
++++ b/arch/x86/kvm/svm/svm.c
+@@ -3930,7 +3930,7 @@ static noinstr void svm_vcpu_enter_exit(struct kvm_vcpu *vcpu)
+ 		 * vmcb02 when switching vmcbs for nested virtualization.
+ 		 */
+ 		vmload(svm->vmcb01.pa);
+-		__svm_vcpu_run(vmcb_pa, (unsigned long *)&vcpu->arch.regs);
++		__svm_vcpu_run(vmcb_pa, svm);
+ 		vmsave(svm->vmcb01.pa);
+ 
+ 		vmload(__sme_page_pa(sd->save_area));
+diff --git a/arch/x86/kvm/svm/svm.h b/arch/x86/kvm/svm/svm.h
+index 6a7686bf6900..447e25c9101a 100644
+--- a/arch/x86/kvm/svm/svm.h
++++ b/arch/x86/kvm/svm/svm.h
+@@ -684,6 +684,6 @@ void sev_es_unmap_ghcb(struct vcpu_svm *svm);
+ /* vmenter.S */
+ 
+ void __svm_sev_es_vcpu_run(unsigned long vmcb_pa);
+-void __svm_vcpu_run(unsigned long vmcb_pa, unsigned long *regs);
++void __svm_vcpu_run(unsigned long vmcb_pa, struct vcpu_svm *svm);
+ 
+ #endif
+diff --git a/arch/x86/kvm/svm/vmenter.S b/arch/x86/kvm/svm/vmenter.S
+index 723f8534986c..f0ff41103e4c 100644
+--- a/arch/x86/kvm/svm/vmenter.S
++++ b/arch/x86/kvm/svm/vmenter.S
+@@ -4,27 +4,28 @@
+ #include <asm/bitsperlong.h>
+ #include <asm/kvm_vcpu_regs.h>
+ #include <asm/nospec-branch.h>
++#include "kvm-asm-offsets.h"
+ 
+ #define WORD_SIZE (BITS_PER_LONG / 8)
+ 
+ /* Intentionally omit RAX as it's context switched by hardware */
+-#define VCPU_RCX	__VCPU_REGS_RCX * WORD_SIZE
+-#define VCPU_RDX	__VCPU_REGS_RDX * WORD_SIZE
+-#define VCPU_RBX	__VCPU_REGS_RBX * WORD_SIZE
++#define VCPU_RCX	(SVM_vcpu_arch_regs + __VCPU_REGS_RCX * WORD_SIZE)
++#define VCPU_RDX	(SVM_vcpu_arch_regs + __VCPU_REGS_RDX * WORD_SIZE)
++#define VCPU_RBX	(SVM_vcpu_arch_regs + __VCPU_REGS_RBX * WORD_SIZE)
+ /* Intentionally omit RSP as it's context switched by hardware */
+-#define VCPU_RBP	__VCPU_REGS_RBP * WORD_SIZE
+-#define VCPU_RSI	__VCPU_REGS_RSI * WORD_SIZE
+-#define VCPU_RDI	__VCPU_REGS_RDI * WORD_SIZE
++#define VCPU_RBP	(SVM_vcpu_arch_regs + __VCPU_REGS_RBP * WORD_SIZE)
++#define VCPU_RSI	(SVM_vcpu_arch_regs + __VCPU_REGS_RSI * WORD_SIZE)
++#define VCPU_RDI	(SVM_vcpu_arch_regs + __VCPU_REGS_RDI * WORD_SIZE)
+ 
+ #ifdef CONFIG_X86_64
+-#define VCPU_R8		__VCPU_REGS_R8  * WORD_SIZE
+-#define VCPU_R9		__VCPU_REGS_R9  * WORD_SIZE
+-#define VCPU_R10	__VCPU_REGS_R10 * WORD_SIZE
+-#define VCPU_R11	__VCPU_REGS_R11 * WORD_SIZE
+-#define VCPU_R12	__VCPU_REGS_R12 * WORD_SIZE
+-#define VCPU_R13	__VCPU_REGS_R13 * WORD_SIZE
+-#define VCPU_R14	__VCPU_REGS_R14 * WORD_SIZE
+-#define VCPU_R15	__VCPU_REGS_R15 * WORD_SIZE
++#define VCPU_R8		(SVM_vcpu_arch_regs + __VCPU_REGS_R8  * WORD_SIZE)
++#define VCPU_R9		(SVM_vcpu_arch_regs + __VCPU_REGS_R9  * WORD_SIZE)
++#define VCPU_R10	(SVM_vcpu_arch_regs + __VCPU_REGS_R10 * WORD_SIZE)
++#define VCPU_R11	(SVM_vcpu_arch_regs + __VCPU_REGS_R11 * WORD_SIZE)
++#define VCPU_R12	(SVM_vcpu_arch_regs + __VCPU_REGS_R12 * WORD_SIZE)
++#define VCPU_R13	(SVM_vcpu_arch_regs + __VCPU_REGS_R13 * WORD_SIZE)
++#define VCPU_R14	(SVM_vcpu_arch_regs + __VCPU_REGS_R14 * WORD_SIZE)
++#define VCPU_R15	(SVM_vcpu_arch_regs + __VCPU_REGS_R15 * WORD_SIZE)
+ #endif
+ 
+ .section .noinstr.text, "ax"
+@@ -32,7 +33,7 @@
+ /**
+  * __svm_vcpu_run - Run a vCPU via a transition to SVM guest mode
+  * @vmcb_pa:	unsigned long
+- * @regs:	unsigned long * (to guest registers)
++ * @svm:	struct vcpu_svm *
+  */
+ SYM_FUNC_START(__svm_vcpu_run)
+ 	push %_ASM_BP
+@@ -47,13 +48,13 @@ SYM_FUNC_START(__svm_vcpu_run)
+ #endif
+ 	push %_ASM_BX
+ 
+-	/* Save @regs. */
++	/* Save @svm. */
+ 	push %_ASM_ARG2
+ 
+ 	/* Save @vmcb. */
+ 	push %_ASM_ARG1
+ 
+-	/* Move @regs to RAX. */
++	/* Move @svm to RAX. */
+ 	mov %_ASM_ARG2, %_ASM_AX
+ 
+ 	/* Load guest registers. */
+@@ -89,7 +90,7 @@ SYM_FUNC_START(__svm_vcpu_run)
+ 	FILL_RETURN_BUFFER %_ASM_AX, RSB_CLEAR_LOOPS, X86_FEATURE_RETPOLINE
+ #endif
+ 
+-	/* "POP" @regs to RAX. */
++	/* "POP" @svm to RAX. */
+ 	pop %_ASM_AX
+ 
+ 	/* Save all guest registers.  */
+-- 
+2.31.1
+
+From git@z Thu Jan  1 00:00:00 1970
+Subject: [PATCH v2 3/8] KVM: SVM: adjust register allocation for __svm_vcpu_run
+From: Paolo Bonzini <pbonzini@redhat.com>
+Date: Tue, 08 Nov 2022 10:15:27 -0500
+Message-Id: <20221108151532.1377783-4-pbonzini@redhat.com>
+To: linux-kernel@vger.kernel.org, kvm@vger.kernel.org
+Cc: nathan@kernel.org, thomas.lendacky@amd.com, andrew.cooper3@citrix.com, peterz@infradead.org, jmattson@google.com, seanjc@google.com, stable@vger.kernel.org
+In-Reply-To: <20221108151532.1377783-1-pbonzini@redhat.com>
+References: <20221108151532.1377783-1-pbonzini@redhat.com>
+List-Id: <linux-kernel.vger.kernel.org>
+MIME-Version: 1.0
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 7bit
+
+In preparation for moving vmload/vmsave to __svm_vcpu_run,
+keep the pointer to the struct vcpu_svm in %rdi.  This way
+it is possible to load svm->vmcb01.pa in %rax without
+clobbering the pointer to svm itself.
+
+No functional change intended.
+
+Cc: stable@vger.kernel.org
+Fixes: f14eec0a3203 ("KVM: SVM: move more vmentry code to assembly")
+Signed-off-by: Paolo Bonzini <pbonzini@redhat.com>
+Link: https://lore.kernel.org/r/20221108151532.1377783-4-pbonzini@redhat.com
+---
+ arch/x86/kvm/svm/vmenter.S | 38 +++++++++++++++++++-------------------
+ 1 file changed, 19 insertions(+), 19 deletions(-)
+
+diff --git a/arch/x86/kvm/svm/vmenter.S b/arch/x86/kvm/svm/vmenter.S
+index f0ff41103e4c..531510ab6072 100644
+--- a/arch/x86/kvm/svm/vmenter.S
++++ b/arch/x86/kvm/svm/vmenter.S
+@@ -54,29 +54,29 @@ SYM_FUNC_START(__svm_vcpu_run)
+ 	/* Save @vmcb. */
+ 	push %_ASM_ARG1
+ 
+-	/* Move @svm to RAX. */
+-	mov %_ASM_ARG2, %_ASM_AX
++	/* Move @svm to RDI. */
++	mov %_ASM_ARG2, %_ASM_DI
++
++	/* "POP" @vmcb to RAX. */
++	pop %_ASM_AX
+ 
+ 	/* Load guest registers. */
+-	mov VCPU_RCX(%_ASM_AX), %_ASM_CX
+-	mov VCPU_RDX(%_ASM_AX), %_ASM_DX
+-	mov VCPU_RBX(%_ASM_AX), %_ASM_BX
+-	mov VCPU_RBP(%_ASM_AX), %_ASM_BP
+-	mov VCPU_RSI(%_ASM_AX), %_ASM_SI
+-	mov VCPU_RDI(%_ASM_AX), %_ASM_DI
++	mov VCPU_RCX(%_ASM_DI), %_ASM_CX
++	mov VCPU_RDX(%_ASM_DI), %_ASM_DX
++	mov VCPU_RBX(%_ASM_DI), %_ASM_BX
++	mov VCPU_RBP(%_ASM_DI), %_ASM_BP
++	mov VCPU_RSI(%_ASM_DI), %_ASM_SI
+ #ifdef CONFIG_X86_64
+-	mov VCPU_R8 (%_ASM_AX),  %r8
+-	mov VCPU_R9 (%_ASM_AX),  %r9
+-	mov VCPU_R10(%_ASM_AX), %r10
+-	mov VCPU_R11(%_ASM_AX), %r11
+-	mov VCPU_R12(%_ASM_AX), %r12
+-	mov VCPU_R13(%_ASM_AX), %r13
+-	mov VCPU_R14(%_ASM_AX), %r14
+-	mov VCPU_R15(%_ASM_AX), %r15
++	mov VCPU_R8 (%_ASM_DI),  %r8
++	mov VCPU_R9 (%_ASM_DI),  %r9
++	mov VCPU_R10(%_ASM_DI), %r10
++	mov VCPU_R11(%_ASM_DI), %r11
++	mov VCPU_R12(%_ASM_DI), %r12
++	mov VCPU_R13(%_ASM_DI), %r13
++	mov VCPU_R14(%_ASM_DI), %r14
++	mov VCPU_R15(%_ASM_DI), %r15
+ #endif
+-
+-	/* "POP" @vmcb to RAX. */
+-	pop %_ASM_AX
++	mov VCPU_RDI(%_ASM_DI), %_ASM_DI
+ 
+ 	/* Enter guest mode */
+ 	sti
+-- 
+2.31.1
+
+From git@z Thu Jan  1 00:00:00 1970
+Subject: [PATCH v2 4/8] KVM: SVM: retrieve VMCB from assembly
+From: Paolo Bonzini <pbonzini@redhat.com>
+Date: Tue, 08 Nov 2022 10:15:28 -0500
+Message-Id: <20221108151532.1377783-5-pbonzini@redhat.com>
+To: linux-kernel@vger.kernel.org, kvm@vger.kernel.org
+Cc: nathan@kernel.org, thomas.lendacky@amd.com, andrew.cooper3@citrix.com, peterz@infradead.org, jmattson@google.com, seanjc@google.com, stable@vger.kernel.org
+In-Reply-To: <20221108151532.1377783-1-pbonzini@redhat.com>
+References: <20221108151532.1377783-1-pbonzini@redhat.com>
+List-Id: <linux-kernel.vger.kernel.org>
+MIME-Version: 1.0
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 7bit
+
+This is needed in order to keep the number of arguments to 3 or less,
+after adding hsave_pa and spec_ctrl_intercepted.  32-bit builds only
+support passing three arguments in registers, fortunately all other
+data is reachable from the vcpu_svm struct.
+
+It is not strictly necessary for __svm_sev_es_vcpu_run, but staying
+consistent is a good idea since it makes __svm_sev_es_vcpu_run a
+stripped version of _svm_vcpu_run.
+
+No functional change intended.
+
+Cc: stable@vger.kernel.org
+Fixes: f14eec0a3203 ("KVM: SVM: move more vmentry code to assembly")
+Signed-off-by: Paolo Bonzini <pbonzini@redhat.com>
+Link: https://lore.kernel.org/r/20221108151532.1377783-5-pbonzini@redhat.com
+---
+ arch/x86/kvm/kvm-asm-offsets.c |  2 ++
+ arch/x86/kvm/svm/svm.c         |  5 ++---
+ arch/x86/kvm/svm/svm.h         |  4 ++--
+ arch/x86/kvm/svm/vmenter.S     | 20 ++++++++++----------
+ 4 files changed, 16 insertions(+), 15 deletions(-)
+
+diff --git a/arch/x86/kvm/kvm-asm-offsets.c b/arch/x86/kvm/kvm-asm-offsets.c
+index 30db96852e2d..f1b694e431ae 100644
+--- a/arch/x86/kvm/kvm-asm-offsets.c
++++ b/arch/x86/kvm/kvm-asm-offsets.c
+@@ -15,6 +15,8 @@ static void __used common(void)
+ 	if (IS_ENABLED(CONFIG_KVM_AMD)) {
+ 		BLANK();
+ 		OFFSET(SVM_vcpu_arch_regs, vcpu_svm, vcpu.arch.regs);
++		OFFSET(SVM_current_vmcb, vcpu_svm, current_vmcb);
++		OFFSET(KVM_VMCB_pa, kvm_vmcb_info, pa);
+ 	}
+ 
+ 	if (IS_ENABLED(CONFIG_KVM_INTEL)) {
+diff --git a/arch/x86/kvm/svm/svm.c b/arch/x86/kvm/svm/svm.c
+index b412bc5773c5..0c86c435c51f 100644
+--- a/arch/x86/kvm/svm/svm.c
++++ b/arch/x86/kvm/svm/svm.c
+@@ -3914,12 +3914,11 @@ static fastpath_t svm_exit_handlers_fastpath(struct kvm_vcpu *vcpu)
+ static noinstr void svm_vcpu_enter_exit(struct kvm_vcpu *vcpu)
+ {
+ 	struct vcpu_svm *svm = to_svm(vcpu);
+-	unsigned long vmcb_pa = svm->current_vmcb->pa;
+ 
+ 	guest_state_enter_irqoff();
+ 
+ 	if (sev_es_guest(vcpu->kvm)) {
+-		__svm_sev_es_vcpu_run(vmcb_pa);
++		__svm_sev_es_vcpu_run(svm);
+ 	} else {
+ 		struct svm_cpu_data *sd = per_cpu(svm_data, vcpu->cpu);
+ 
+@@ -3930,7 +3929,7 @@ static noinstr void svm_vcpu_enter_exit(struct kvm_vcpu *vcpu)
+ 		 * vmcb02 when switching vmcbs for nested virtualization.
+ 		 */
+ 		vmload(svm->vmcb01.pa);
+-		__svm_vcpu_run(vmcb_pa, svm);
++		__svm_vcpu_run(svm);
+ 		vmsave(svm->vmcb01.pa);
+ 
+ 		vmload(__sme_page_pa(sd->save_area));
+diff --git a/arch/x86/kvm/svm/svm.h b/arch/x86/kvm/svm/svm.h
+index 447e25c9101a..7ff1879e73c5 100644
+--- a/arch/x86/kvm/svm/svm.h
++++ b/arch/x86/kvm/svm/svm.h
+@@ -683,7 +683,7 @@ void sev_es_unmap_ghcb(struct vcpu_svm *svm);
+ 
+ /* vmenter.S */
+ 
+-void __svm_sev_es_vcpu_run(unsigned long vmcb_pa);
+-void __svm_vcpu_run(unsigned long vmcb_pa, struct vcpu_svm *svm);
++void __svm_sev_es_vcpu_run(struct vcpu_svm *svm);
++void __svm_vcpu_run(struct vcpu_svm *svm);
+ 
+ #endif
+diff --git a/arch/x86/kvm/svm/vmenter.S b/arch/x86/kvm/svm/vmenter.S
+index 531510ab6072..d07bac1952c5 100644
+--- a/arch/x86/kvm/svm/vmenter.S
++++ b/arch/x86/kvm/svm/vmenter.S
+@@ -32,7 +32,6 @@
+ 
+ /**
+  * __svm_vcpu_run - Run a vCPU via a transition to SVM guest mode
+- * @vmcb_pa:	unsigned long
+  * @svm:	struct vcpu_svm *
+  */
+ SYM_FUNC_START(__svm_vcpu_run)
+@@ -49,16 +48,16 @@ SYM_FUNC_START(__svm_vcpu_run)
+ 	push %_ASM_BX
+ 
+ 	/* Save @svm. */
+-	push %_ASM_ARG2
+-
+-	/* Save @vmcb. */
+ 	push %_ASM_ARG1
+ 
++.ifnc _ASM_ARG1, _ASM_DI
+ 	/* Move @svm to RDI. */
+-	mov %_ASM_ARG2, %_ASM_DI
++	mov %_ASM_ARG1, %_ASM_DI
++.endif
+ 
+-	/* "POP" @vmcb to RAX. */
+-	pop %_ASM_AX
++	/* Get svm->current_vmcb->pa into RAX. */
++	mov SVM_current_vmcb(%_ASM_DI), %_ASM_AX
++	mov KVM_VMCB_pa(%_ASM_AX), %_ASM_AX
+ 
+ 	/* Load guest registers. */
+ 	mov VCPU_RCX(%_ASM_DI), %_ASM_CX
+@@ -170,7 +169,7 @@ SYM_FUNC_END(__svm_vcpu_run)
+ 
+ /**
+  * __svm_sev_es_vcpu_run - Run a SEV-ES vCPU via a transition to SVM guest mode
+- * @vmcb_pa:	unsigned long
++ * @svm:	struct vcpu_svm *
+  */
+ SYM_FUNC_START(__svm_sev_es_vcpu_run)
+ 	push %_ASM_BP
+@@ -185,8 +184,9 @@ SYM_FUNC_START(__svm_sev_es_vcpu_run)
+ #endif
+ 	push %_ASM_BX
+ 
+-	/* Move @vmcb to RAX. */
+-	mov %_ASM_ARG1, %_ASM_AX
++	/* Get svm->current_vmcb->pa into RAX. */
++	mov SVM_current_vmcb(%_ASM_ARG1), %_ASM_AX
++	mov KVM_VMCB_pa(%_ASM_AX), %_ASM_AX
+ 
+ 	/* Enter guest mode */
+ 	sti
+-- 
+2.31.1
+
+From git@z Thu Jan  1 00:00:00 1970
+Subject: [PATCH v2 5/8] KVM: SVM: move guest vmsave/vmload to assembly
+From: Paolo Bonzini <pbonzini@redhat.com>
+Date: Tue, 08 Nov 2022 10:15:29 -0500
+Message-Id: <20221108151532.1377783-6-pbonzini@redhat.com>
+To: linux-kernel@vger.kernel.org, kvm@vger.kernel.org
+Cc: nathan@kernel.org, thomas.lendacky@amd.com, andrew.cooper3@citrix.com, peterz@infradead.org, jmattson@google.com, seanjc@google.com, stable@vger.kernel.org
+In-Reply-To: <20221108151532.1377783-1-pbonzini@redhat.com>
+References: <20221108151532.1377783-1-pbonzini@redhat.com>
+List-Id: <linux-kernel.vger.kernel.org>
+MIME-Version: 1.0
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 7bit
+
+FILL_RETURN_BUFFER can access percpu data, therefore vmload of the
+host save area must be executed first.  First of all, move the
+VMCB vmsave/vmload to assembly.
+
+The idea on how to number the exception tables is stolen from
+a prototype patch by Peter Zijlstra.
+
+Cc: stable@vger.kernel.org
+Fixes: f14eec0a3203 ("KVM: SVM: move more vmentry code to assembly")
+Link: <https://lore.kernel.org/all/f571e404-e625-bae1-10e9-449b2eb4cbd8@citrix.com/>
+Signed-off-by: Paolo Bonzini <pbonzini@redhat.com>
+Link: https://lore.kernel.org/r/20221108151532.1377783-6-pbonzini@redhat.com
+---
+ arch/x86/kvm/kvm-asm-offsets.c |  1 +
+ arch/x86/kvm/svm/svm.c         |  9 -------
+ arch/x86/kvm/svm/vmenter.S     | 49 ++++++++++++++++++++++++++--------
+ 3 files changed, 39 insertions(+), 20 deletions(-)
+
+diff --git a/arch/x86/kvm/kvm-asm-offsets.c b/arch/x86/kvm/kvm-asm-offsets.c
+index f1b694e431ae..f83e88b85bf2 100644
+--- a/arch/x86/kvm/kvm-asm-offsets.c
++++ b/arch/x86/kvm/kvm-asm-offsets.c
+@@ -16,6 +16,7 @@ static void __used common(void)
+ 		BLANK();
+ 		OFFSET(SVM_vcpu_arch_regs, vcpu_svm, vcpu.arch.regs);
+ 		OFFSET(SVM_current_vmcb, vcpu_svm, current_vmcb);
++		OFFSET(SVM_vmcb01, vcpu_svm, vmcb01);
+ 		OFFSET(KVM_VMCB_pa, kvm_vmcb_info, pa);
+ 	}
+ 
+diff --git a/arch/x86/kvm/svm/svm.c b/arch/x86/kvm/svm/svm.c
+index 0c86c435c51f..0ba4feb19cb6 100644
+--- a/arch/x86/kvm/svm/svm.c
++++ b/arch/x86/kvm/svm/svm.c
+@@ -3922,16 +3922,7 @@ static noinstr void svm_vcpu_enter_exit(struct kvm_vcpu *vcpu)
+ 	} else {
+ 		struct svm_cpu_data *sd = per_cpu(svm_data, vcpu->cpu);
+ 
+-		/*
+-		 * Use a single vmcb (vmcb01 because it's always valid) for
+-		 * context switching guest state via VMLOAD/VMSAVE, that way
+-		 * the state doesn't need to be copied between vmcb01 and
+-		 * vmcb02 when switching vmcbs for nested virtualization.
+-		 */
+-		vmload(svm->vmcb01.pa);
+ 		__svm_vcpu_run(svm);
+-		vmsave(svm->vmcb01.pa);
+-
+ 		vmload(__sme_page_pa(sd->save_area));
+ 	}
+ 
+diff --git a/arch/x86/kvm/svm/vmenter.S b/arch/x86/kvm/svm/vmenter.S
+index d07bac1952c5..5bc2ed7d79c0 100644
+--- a/arch/x86/kvm/svm/vmenter.S
++++ b/arch/x86/kvm/svm/vmenter.S
+@@ -28,6 +28,8 @@
+ #define VCPU_R15	(SVM_vcpu_arch_regs + __VCPU_REGS_R15 * WORD_SIZE)
+ #endif
+ 
++#define SVM_vmcb01_pa	(SVM_vmcb01 + KVM_VMCB_pa)
++
+ .section .noinstr.text, "ax"
+ 
+ /**
+@@ -55,6 +57,16 @@ SYM_FUNC_START(__svm_vcpu_run)
+ 	mov %_ASM_ARG1, %_ASM_DI
+ .endif
+ 
++	/*
++	 * Use a single vmcb (vmcb01 because it's always valid) for
++	 * context switching guest state via VMLOAD/VMSAVE, that way
++	 * the state doesn't need to be copied between vmcb01 and
++	 * vmcb02 when switching vmcbs for nested virtualization.
++	 */
++	mov SVM_vmcb01_pa(%_ASM_DI), %_ASM_AX
++1:	vmload %_ASM_AX
++2:
++
+ 	/* Get svm->current_vmcb->pa into RAX. */
+ 	mov SVM_current_vmcb(%_ASM_DI), %_ASM_AX
+ 	mov KVM_VMCB_pa(%_ASM_AX), %_ASM_AX
+@@ -80,16 +92,11 @@ SYM_FUNC_START(__svm_vcpu_run)
+ 	/* Enter guest mode */
+ 	sti
+ 
+-1:	vmrun %_ASM_AX
+-
+-2:	cli
+-
+-#ifdef CONFIG_RETPOLINE
+-	/* IMPORTANT: Stuff the RSB immediately after VM-Exit, before RET! */
+-	FILL_RETURN_BUFFER %_ASM_AX, RSB_CLEAR_LOOPS, X86_FEATURE_RETPOLINE
+-#endif
++3:	vmrun %_ASM_AX
++4:
++	cli
+ 
+-	/* "POP" @svm to RAX. */
++	/* Pop @svm to RAX while it's the only available register. */
+ 	pop %_ASM_AX
+ 
+ 	/* Save all guest registers.  */
+@@ -110,6 +117,18 @@ SYM_FUNC_START(__svm_vcpu_run)
+ 	mov %r15, VCPU_R15(%_ASM_AX)
+ #endif
+ 
++	/* @svm can stay in RDI from now on.  */
++	mov %_ASM_AX, %_ASM_DI
++
++	mov SVM_vmcb01_pa(%_ASM_DI), %_ASM_AX
++5:	vmsave %_ASM_AX
++6:
++
++#ifdef CONFIG_RETPOLINE
++	/* IMPORTANT: Stuff the RSB immediately after VM-Exit, before RET! */
++	FILL_RETURN_BUFFER %_ASM_AX, RSB_CLEAR_LOOPS, X86_FEATURE_RETPOLINE
++#endif
++
+ 	/*
+ 	 * Mitigate RETBleed for AMD/Hygon Zen uarch. RET should be
+ 	 * untrained as soon as we exit the VM and are back to the
+@@ -159,11 +178,19 @@ SYM_FUNC_START(__svm_vcpu_run)
+ 	pop %_ASM_BP
+ 	RET
+ 
+-3:	cmpb $0, kvm_rebooting
++10:	cmpb $0, kvm_rebooting
+ 	jne 2b
+ 	ud2
++30:	cmpb $0, kvm_rebooting
++	jne 4b
++	ud2
++50:	cmpb $0, kvm_rebooting
++	jne 6b
++	ud2
+ 
+-	_ASM_EXTABLE(1b, 3b)
++	_ASM_EXTABLE(1b, 10b)
++	_ASM_EXTABLE(3b, 30b)
++	_ASM_EXTABLE(5b, 50b)
+ 
+ SYM_FUNC_END(__svm_vcpu_run)
+ 
+-- 
+2.31.1
+
+From git@z Thu Jan  1 00:00:00 1970
+Subject: [PATCH v2 6/8] KVM: SVM: restore host save area from assembly
+From: Paolo Bonzini <pbonzini@redhat.com>
+Date: Tue, 08 Nov 2022 10:15:30 -0500
+Message-Id: <20221108151532.1377783-7-pbonzini@redhat.com>
+To: linux-kernel@vger.kernel.org, kvm@vger.kernel.org
+Cc: nathan@kernel.org, thomas.lendacky@amd.com, andrew.cooper3@citrix.com, peterz@infradead.org, jmattson@google.com, seanjc@google.com, stable@vger.kernel.org
+In-Reply-To: <20221108151532.1377783-1-pbonzini@redhat.com>
+References: <20221108151532.1377783-1-pbonzini@redhat.com>
+List-Id: <linux-kernel.vger.kernel.org>
+MIME-Version: 1.0
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 7bit
+
+This is needed so that FILL_RETURN_BUFFER has access to the
+percpu area via the GS segment base.
+
+Cc: stable@vger.kernel.org
+Fixes: f14eec0a3203 ("KVM: SVM: move more vmentry code to assembly")
+Reported-by: Nathan Chancellor <nathan@kernel.org>
+Analyzed-by: Andrew Cooper <andrew.cooper3@citrix.com>
+Signed-off-by: Paolo Bonzini <pbonzini@redhat.com>
+Link: https://lore.kernel.org/r/20221108151532.1377783-7-pbonzini@redhat.com
+---
+ arch/x86/kvm/svm/svm.c     |  3 +--
+ arch/x86/kvm/svm/svm.h     |  2 +-
+ arch/x86/kvm/svm/svm_ops.h |  5 -----
+ arch/x86/kvm/svm/vmenter.S | 13 +++++++++++++
+ 4 files changed, 15 insertions(+), 8 deletions(-)
+
+diff --git a/arch/x86/kvm/svm/svm.c b/arch/x86/kvm/svm/svm.c
+index 0ba4feb19cb6..e15f6ea9e5cc 100644
+--- a/arch/x86/kvm/svm/svm.c
++++ b/arch/x86/kvm/svm/svm.c
+@@ -3922,8 +3922,7 @@ static noinstr void svm_vcpu_enter_exit(struct kvm_vcpu *vcpu)
+ 	} else {
+ 		struct svm_cpu_data *sd = per_cpu(svm_data, vcpu->cpu);
+ 
+-		__svm_vcpu_run(svm);
+-		vmload(__sme_page_pa(sd->save_area));
++		__svm_vcpu_run(svm, __sme_page_pa(sd->save_area));
+ 	}
+ 
+ 	guest_state_exit_irqoff();
+diff --git a/arch/x86/kvm/svm/svm.h b/arch/x86/kvm/svm/svm.h
+index 7ff1879e73c5..932f26be5675 100644
+--- a/arch/x86/kvm/svm/svm.h
++++ b/arch/x86/kvm/svm/svm.h
+@@ -684,6 +684,6 @@ void sev_es_unmap_ghcb(struct vcpu_svm *svm);
+ /* vmenter.S */
+ 
+ void __svm_sev_es_vcpu_run(struct vcpu_svm *svm);
+-void __svm_vcpu_run(struct vcpu_svm *svm);
++void __svm_vcpu_run(struct vcpu_svm *svm, unsigned long hsave_pa);
+ 
+ #endif
+diff --git a/arch/x86/kvm/svm/svm_ops.h b/arch/x86/kvm/svm/svm_ops.h
+index 9430d6437c9f..36c8af87a707 100644
+--- a/arch/x86/kvm/svm/svm_ops.h
++++ b/arch/x86/kvm/svm/svm_ops.h
+@@ -61,9 +61,4 @@ static __always_inline void vmsave(unsigned long pa)
+ 	svm_asm1(vmsave, "a" (pa), "memory");
+ }
+ 
+-static __always_inline void vmload(unsigned long pa)
+-{
+-	svm_asm1(vmload, "a" (pa), "memory");
+-}
+-
+ #endif /* __KVM_X86_SVM_OPS_H */
+diff --git a/arch/x86/kvm/svm/vmenter.S b/arch/x86/kvm/svm/vmenter.S
+index 5bc2ed7d79c0..0a4272faf80f 100644
+--- a/arch/x86/kvm/svm/vmenter.S
++++ b/arch/x86/kvm/svm/vmenter.S
+@@ -35,6 +35,7 @@
+ /**
+  * __svm_vcpu_run - Run a vCPU via a transition to SVM guest mode
+  * @svm:	struct vcpu_svm *
++ * @hsave_pa:	unsigned long
+  */
+ SYM_FUNC_START(__svm_vcpu_run)
+ 	push %_ASM_BP
+@@ -49,6 +50,9 @@ SYM_FUNC_START(__svm_vcpu_run)
+ #endif
+ 	push %_ASM_BX
+ 
++	/* @hsave_pa is needed last after vmexit, save it first.  */
++	push %_ASM_ARG2
++
+ 	/* Save @svm. */
+ 	push %_ASM_ARG1
+ 
+@@ -124,6 +128,11 @@ SYM_FUNC_START(__svm_vcpu_run)
+ 5:	vmsave %_ASM_AX
+ 6:
+ 
++	/* Pop @hsave_pa and restore GSBASE, allowing access to percpu data.  */
++	pop %_ASM_AX
++7:	vmload %_ASM_AX
++8:
++
+ #ifdef CONFIG_RETPOLINE
+ 	/* IMPORTANT: Stuff the RSB immediately after VM-Exit, before RET! */
+ 	FILL_RETURN_BUFFER %_ASM_AX, RSB_CLEAR_LOOPS, X86_FEATURE_RETPOLINE
+@@ -187,10 +196,14 @@ SYM_FUNC_START(__svm_vcpu_run)
+ 50:	cmpb $0, kvm_rebooting
+ 	jne 6b
+ 	ud2
++70:	cmpb $0, kvm_rebooting
++	jne 8b
++	ud2
+ 
+ 	_ASM_EXTABLE(1b, 10b)
+ 	_ASM_EXTABLE(3b, 30b)
+ 	_ASM_EXTABLE(5b, 50b)
++	_ASM_EXTABLE(7b, 70b)
+ 
+ SYM_FUNC_END(__svm_vcpu_run)
+ 
+-- 
+2.31.1
+
+From git@z Thu Jan  1 00:00:00 1970
+Subject: [PATCH v2 7/8] KVM: SVM: move MSR_IA32_SPEC_CTRL save/restore to assembly
+From: Paolo Bonzini <pbonzini@redhat.com>
+Date: Tue, 08 Nov 2022 10:15:31 -0500
+Message-Id: <20221108151532.1377783-8-pbonzini@redhat.com>
+To: linux-kernel@vger.kernel.org, kvm@vger.kernel.org
+Cc: nathan@kernel.org, thomas.lendacky@amd.com, andrew.cooper3@citrix.com, peterz@infradead.org, jmattson@google.com, seanjc@google.com, stable@vger.kernel.org
+In-Reply-To: <20221108151532.1377783-1-pbonzini@redhat.com>
+References: <20221108151532.1377783-1-pbonzini@redhat.com>
+List-Id: <linux-kernel.vger.kernel.org>
+MIME-Version: 1.0
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 7bit
+
+Restoration of the host IA32_SPEC_CTRL value is probably too late
+with respect to the return thunk training sequence.
+
+With respect to the user/kernel boundary, AMD says, "If software chooses
+to toggle STIBP (e.g., set STIBP on kernel entry, and clear it on kernel
+exit), software should set STIBP to 1 before executing the return thunk
+training sequence." I assume the same requirements apply to the guest/host
+boundary. The return thunk training sequence is in vmenter.S, quite close
+to the VM-exit. On hosts without V_SPEC_CTRL, however, the host's
+IA32_SPEC_CTRL value is not restored until much later.
+
+To avoid this, move the restoration of host SPEC_CTRL to assembly and,
+for consistency, move the restoration of the guest SPEC_CTRL as well.
+This is not particularly difficult, apart from some care to cover both
+32- and 64-bit, and to share code between SEV-ES and normal vmentry.
+
+Cc: stable@vger.kernel.org
+Fixes: a149180fbcf3 ("x86: Add magic AMD return-thunk")
+Suggested-by: Jim Mattson <jmattson@google.com>
+Signed-off-by: Paolo Bonzini <pbonzini@redhat.com>
+Link: https://lore.kernel.org/r/20221108151532.1377783-8-pbonzini@redhat.com
+---
+ arch/x86/kernel/cpu/bugs.c     |  13 +----
+ arch/x86/kvm/kvm-asm-offsets.c |   1 +
+ arch/x86/kvm/svm/svm.c         |  38 +++++-------
+ arch/x86/kvm/svm/svm.h         |   4 +-
+ arch/x86/kvm/svm/vmenter.S     | 102 ++++++++++++++++++++++++++++++++-
+ 5 files changed, 121 insertions(+), 37 deletions(-)
+
+diff --git a/arch/x86/kernel/cpu/bugs.c b/arch/x86/kernel/cpu/bugs.c
+index da7c361f47e0..6ec0b7ce7453 100644
+--- a/arch/x86/kernel/cpu/bugs.c
++++ b/arch/x86/kernel/cpu/bugs.c
+@@ -196,22 +196,15 @@ void __init check_bugs(void)
+ }
+ 
+ /*
+- * NOTE: This function is *only* called for SVM.  VMX spec_ctrl handling is
+- * done in vmenter.S.
++ * NOTE: This function is *only* called for SVM, since Intel uses
++ * MSR_IA32_SPEC_CTRL for SSBD.
+  */
+ void
+ x86_virt_spec_ctrl(u64 guest_spec_ctrl, u64 guest_virt_spec_ctrl, bool setguest)
+ {
+-	u64 msrval, guestval = guest_spec_ctrl, hostval = spec_ctrl_current();
++	u64 guestval, hostval;
+ 	struct thread_info *ti = current_thread_info();
+ 
+-	if (static_cpu_has(X86_FEATURE_MSR_SPEC_CTRL)) {
+-		if (hostval != guestval) {
+-			msrval = setguest ? guestval : hostval;
+-			wrmsrl(MSR_IA32_SPEC_CTRL, msrval);
+-		}
+-	}
+-
+ 	/*
+ 	 * If SSBD is not handled in MSR_SPEC_CTRL on AMD, update
+ 	 * MSR_AMD64_L2_CFG or MSR_VIRT_SPEC_CTRL if supported.
+diff --git a/arch/x86/kvm/kvm-asm-offsets.c b/arch/x86/kvm/kvm-asm-offsets.c
+index f83e88b85bf2..b2877c2c8df1 100644
+--- a/arch/x86/kvm/kvm-asm-offsets.c
++++ b/arch/x86/kvm/kvm-asm-offsets.c
+@@ -16,6 +16,7 @@ static void __used common(void)
+ 		BLANK();
+ 		OFFSET(SVM_vcpu_arch_regs, vcpu_svm, vcpu.arch.regs);
+ 		OFFSET(SVM_current_vmcb, vcpu_svm, current_vmcb);
++		OFFSET(SVM_spec_ctrl, vcpu_svm, spec_ctrl);
+ 		OFFSET(SVM_vmcb01, vcpu_svm, vmcb01);
+ 		OFFSET(KVM_VMCB_pa, kvm_vmcb_info, pa);
+ 	}
+diff --git a/arch/x86/kvm/svm/svm.c b/arch/x86/kvm/svm/svm.c
+index e15f6ea9e5cc..512bc06a4ba1 100644
+--- a/arch/x86/kvm/svm/svm.c
++++ b/arch/x86/kvm/svm/svm.c
+@@ -730,6 +730,15 @@ static bool msr_write_intercepted(struct kvm_vcpu *vcpu, u32 msr)
+ 	u32 offset;
+ 	u32 *msrpm;
+ 
++	/*
++	 * For non-nested case:
++	 * If the L01 MSR bitmap does not intercept the MSR, then we need to
++	 * save it.
++	 *
++	 * For nested case:
++	 * If the L02 MSR bitmap does not intercept the MSR, then we need to
++	 * save it.
++	 */
+ 	msrpm = is_guest_mode(vcpu) ? to_svm(vcpu)->nested.msrpm:
+ 				      to_svm(vcpu)->msrpm;
+ 
+@@ -3911,18 +3920,19 @@ static fastpath_t svm_exit_handlers_fastpath(struct kvm_vcpu *vcpu)
+ 	return EXIT_FASTPATH_NONE;
+ }
+ 
+-static noinstr void svm_vcpu_enter_exit(struct kvm_vcpu *vcpu)
++static noinstr void svm_vcpu_enter_exit(struct kvm_vcpu *vcpu, bool spec_ctrl_intercepted)
+ {
+ 	struct vcpu_svm *svm = to_svm(vcpu);
+ 
+ 	guest_state_enter_irqoff();
+ 
+ 	if (sev_es_guest(vcpu->kvm)) {
+-		__svm_sev_es_vcpu_run(svm);
++		__svm_sev_es_vcpu_run(svm, spec_ctrl_intercepted);
+ 	} else {
+ 		struct svm_cpu_data *sd = per_cpu(svm_data, vcpu->cpu);
+ 
+-		__svm_vcpu_run(svm, __sme_page_pa(sd->save_area));
++		__svm_vcpu_run(svm, __sme_page_pa(sd->save_area),
++			       spec_ctrl_intercepted);
+ 	}
+ 
+ 	guest_state_exit_irqoff();
+@@ -3931,6 +3941,7 @@ static noinstr void svm_vcpu_enter_exit(struct kvm_vcpu *vcpu)
+ static __no_kcsan fastpath_t svm_vcpu_run(struct kvm_vcpu *vcpu)
+ {
+ 	struct vcpu_svm *svm = to_svm(vcpu);
++	bool spec_ctrl_intercepted = msr_write_intercepted(vcpu, MSR_IA32_SPEC_CTRL);
+ 
+ 	trace_kvm_entry(vcpu);
+ 
+@@ -3989,26 +4000,7 @@ static __no_kcsan fastpath_t svm_vcpu_run(struct kvm_vcpu *vcpu)
+ 	if (!static_cpu_has(X86_FEATURE_V_SPEC_CTRL))
+ 		x86_spec_ctrl_set_guest(svm->spec_ctrl, svm->virt_spec_ctrl);
+ 
+-	svm_vcpu_enter_exit(vcpu);
+-
+-	/*
+-	 * We do not use IBRS in the kernel. If this vCPU has used the
+-	 * SPEC_CTRL MSR it may have left it on; save the value and
+-	 * turn it off. This is much more efficient than blindly adding
+-	 * it to the atomic save/restore list. Especially as the former
+-	 * (Saving guest MSRs on vmexit) doesn't even exist in KVM.
+-	 *
+-	 * For non-nested case:
+-	 * If the L01 MSR bitmap does not intercept the MSR, then we need to
+-	 * save it.
+-	 *
+-	 * For nested case:
+-	 * If the L02 MSR bitmap does not intercept the MSR, then we need to
+-	 * save it.
+-	 */
+-	if (!static_cpu_has(X86_FEATURE_V_SPEC_CTRL) &&
+-	    unlikely(!msr_write_intercepted(vcpu, MSR_IA32_SPEC_CTRL)))
+-		svm->spec_ctrl = native_read_msr(MSR_IA32_SPEC_CTRL);
++	svm_vcpu_enter_exit(vcpu, spec_ctrl_intercepted);
+ 
+ 	if (!sev_es_guest(vcpu->kvm))
+ 		reload_tss(vcpu);
+diff --git a/arch/x86/kvm/svm/svm.h b/arch/x86/kvm/svm/svm.h
+index 932f26be5675..bf9ff39dc420 100644
+--- a/arch/x86/kvm/svm/svm.h
++++ b/arch/x86/kvm/svm/svm.h
+@@ -683,7 +683,7 @@ void sev_es_unmap_ghcb(struct vcpu_svm *svm);
+ 
+ /* vmenter.S */
+ 
+-void __svm_sev_es_vcpu_run(struct vcpu_svm *svm);
+-void __svm_vcpu_run(struct vcpu_svm *svm, unsigned long hsave_pa);
++void __svm_sev_es_vcpu_run(struct vcpu_svm *svm, bool spec_ctrl_intercepted);
++void __svm_vcpu_run(struct vcpu_svm *svm, unsigned long hsave_pa, bool spec_ctrl_intercepted);
+ 
+ #endif
+diff --git a/arch/x86/kvm/svm/vmenter.S b/arch/x86/kvm/svm/vmenter.S
+index 0a4272faf80f..a02eef724379 100644
+--- a/arch/x86/kvm/svm/vmenter.S
++++ b/arch/x86/kvm/svm/vmenter.S
+@@ -32,10 +32,70 @@
+ 
+ .section .noinstr.text, "ax"
+ 
++.macro RESTORE_GUEST_SPEC_CTRL
++	/* No need to do anything if SPEC_CTRL is unset or V_SPEC_CTRL is set */
++	ALTERNATIVE_2 "", \
++		"jmp 800f", X86_FEATURE_MSR_SPEC_CTRL, \
++		"", X86_FEATURE_V_SPEC_CTRL
++801:
++.endm
++
++.macro RESTORE_HOST_SPEC_CTRL
++	/* No need to do anything if SPEC_CTRL is unset or V_SPEC_CTRL is set */
++	ALTERNATIVE_2 "", \
++		"jmp 900f", X86_FEATURE_MSR_SPEC_CTRL, \
++		"", X86_FEATURE_V_SPEC_CTRL
++901:
++.endm
++
++.macro RESTORE_SPEC_CTRL_BODY
++800:
++	/*
++	 * SPEC_CTRL handling: if the guest's SPEC_CTRL value differs from the
++	 * host's, write the MSR.  This is kept out-of-line so that the common
++	 * case does not have to jump.
++	 *
++	 * IMPORTANT: To avoid RSB underflow attacks and any other nastiness,
++	 * there must not be any returns or indirect branches between this code
++	 * and vmentry.
++	 */
++	movl SVM_spec_ctrl(%_ASM_DI), %eax
++	cmp PER_CPU_VAR(x86_spec_ctrl_current), %eax
++	je 801b
++	mov $MSR_IA32_SPEC_CTRL, %ecx
++	xor %edx, %edx
++	wrmsr
++	jmp 801b
++
++900:
++	/* Same for after vmexit.  */
++	mov $MSR_IA32_SPEC_CTRL, %ecx
++
++	/*
++	 * Load the value that the guest had written into MSR_IA32_SPEC_CTRL,
++	 * if it was not intercepted during guest execution.
++	 */
++	cmpb $0, (%_ASM_SP)
++	jnz 998f
++	rdmsr
++	movl %eax, SVM_spec_ctrl(%_ASM_DI)
++998:
++
++	/* Now restore the host value of the MSR if different from the guest's.  */
++	movl PER_CPU_VAR(x86_spec_ctrl_current), %eax
++	cmp SVM_spec_ctrl(%_ASM_DI), %eax
++	je 901b
++	xor %edx, %edx
++	wrmsr
++	jmp 901b
++.endm
++
++
+ /**
+  * __svm_vcpu_run - Run a vCPU via a transition to SVM guest mode
+  * @svm:	struct vcpu_svm *
+  * @hsave_pa:	unsigned long
++ * @spec_ctrl_intercepted: bool
+  */
+ SYM_FUNC_START(__svm_vcpu_run)
+ 	push %_ASM_BP
+@@ -50,7 +110,12 @@ SYM_FUNC_START(__svm_vcpu_run)
+ #endif
+ 	push %_ASM_BX
+ 
+-	/* @hsave_pa is needed last after vmexit, save it first.  */
++	/*
++	 * Both @spec_ctrl_intercepted and @hsave_pa are used only after vmexit.
++	 * @spec_ctrl_intercepted is needed later and accessed directly from
++	 * the stack in RESTORE_HOST_SPEC_CTRL, so save it first.
++	 */
++	push %_ASM_ARG3
+ 	push %_ASM_ARG2
+ 
+ 	/* Save @svm. */
+@@ -61,6 +126,8 @@ SYM_FUNC_START(__svm_vcpu_run)
+ 	mov %_ASM_ARG1, %_ASM_DI
+ .endif
+ 
++	RESTORE_GUEST_SPEC_CTRL
++
+ 	/*
+ 	 * Use a single vmcb (vmcb01 because it's always valid) for
+ 	 * context switching guest state via VMLOAD/VMSAVE, that way
+@@ -138,6 +205,8 @@ SYM_FUNC_START(__svm_vcpu_run)
+ 	FILL_RETURN_BUFFER %_ASM_AX, RSB_CLEAR_LOOPS, X86_FEATURE_RETPOLINE
+ #endif
+ 
++	RESTORE_HOST_SPEC_CTRL
++
+ 	/*
+ 	 * Mitigate RETBleed for AMD/Hygon Zen uarch. RET should be
+ 	 * untrained as soon as we exit the VM and are back to the
+@@ -173,6 +242,9 @@ SYM_FUNC_START(__svm_vcpu_run)
+ 	xor %r15d, %r15d
+ #endif
+ 
++	/* "Pop" @spec_ctrl_intercepted.  */
++	pop %_ASM_BX
++
+ 	pop %_ASM_BX
+ 
+ #ifdef CONFIG_X86_64
+@@ -187,6 +259,8 @@ SYM_FUNC_START(__svm_vcpu_run)
+ 	pop %_ASM_BP
+ 	RET
+ 
++	RESTORE_SPEC_CTRL_BODY
++
+ 10:	cmpb $0, kvm_rebooting
+ 	jne 2b
+ 	ud2
+@@ -210,6 +284,7 @@ SYM_FUNC_END(__svm_vcpu_run)
+ /**
+  * __svm_sev_es_vcpu_run - Run a SEV-ES vCPU via a transition to SVM guest mode
+  * @svm:	struct vcpu_svm *
++ * @spec_ctrl_intercepted: bool
+  */
+ SYM_FUNC_START(__svm_sev_es_vcpu_run)
+ 	push %_ASM_BP
+@@ -224,8 +299,21 @@ SYM_FUNC_START(__svm_sev_es_vcpu_run)
+ #endif
+ 	push %_ASM_BX
+ 
++	/* Save @spec_ctrl_intercepted for RESTORE_HOST_SPEC_CTRL. */
++	push %_ASM_ARG2
++
++	/* Save @svm. */
++	push %_ASM_ARG1
++
++.ifnc _ASM_ARG1, _ASM_DI
++	/* Move @svm to RDI for RESTORE_GUEST_SPEC_CTRL. */
++	mov %_ASM_ARG1, %_ASM_DI
++.endif
++
++	RESTORE_GUEST_SPEC_CTRL
++
+ 	/* Get svm->current_vmcb->pa into RAX. */
+-	mov SVM_current_vmcb(%_ASM_ARG1), %_ASM_AX
++	mov SVM_current_vmcb(%_ASM_DI), %_ASM_AX
+ 	mov KVM_VMCB_pa(%_ASM_AX), %_ASM_AX
+ 
+ 	/* Enter guest mode */
+@@ -235,11 +323,16 @@ SYM_FUNC_START(__svm_sev_es_vcpu_run)
+ 
+ 2:	cli
+ 
++	/* Pop @svm to RDI, guest registers have been saved already. */
++	pop %_ASM_DI
++
+ #ifdef CONFIG_RETPOLINE
+ 	/* IMPORTANT: Stuff the RSB immediately after VM-Exit, before RET! */
+ 	FILL_RETURN_BUFFER %_ASM_AX, RSB_CLEAR_LOOPS, X86_FEATURE_RETPOLINE
+ #endif
+ 
++	RESTORE_HOST_SPEC_CTRL
++
+ 	/*
+ 	 * Mitigate RETBleed for AMD/Hygon Zen uarch. RET should be
+ 	 * untrained as soon as we exit the VM and are back to the
+@@ -249,6 +342,9 @@ SYM_FUNC_START(__svm_sev_es_vcpu_run)
+ 	 */
+ 	UNTRAIN_RET
+ 
++	/* "Pop" @spec_ctrl_intercepted.  */
++	pop %_ASM_BX
++
+ 	pop %_ASM_BX
+ 
+ #ifdef CONFIG_X86_64
+@@ -263,6 +359,8 @@ SYM_FUNC_START(__svm_sev_es_vcpu_run)
+ 	pop %_ASM_BP
+ 	RET
+ 
++	RESTORE_SPEC_CTRL_BODY
++
+ 3:	cmpb $0, kvm_rebooting
+ 	jne 2b
+ 	ud2
+-- 
+2.31.1
+
+From git@z Thu Jan  1 00:00:00 1970
+Subject: [PATCH v2 8/8] x86, KVM: remove unnecessary argument to x86_virt_spec_ctrl and callers
+From: Paolo Bonzini <pbonzini@redhat.com>
+Date: Tue, 08 Nov 2022 10:15:32 -0500
+Message-Id: <20221108151532.1377783-9-pbonzini@redhat.com>
+To: linux-kernel@vger.kernel.org, kvm@vger.kernel.org
+Cc: nathan@kernel.org, thomas.lendacky@amd.com, andrew.cooper3@citrix.com, peterz@infradead.org, jmattson@google.com, seanjc@google.com
+In-Reply-To: <20221108151532.1377783-1-pbonzini@redhat.com>
+References: <20221108151532.1377783-1-pbonzini@redhat.com>
+List-Id: <linux-kernel.vger.kernel.org>
+MIME-Version: 1.0
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 7bit
+
+x86_virt_spec_ctrl only deals with the paravirtualized
+MSR_IA32_VIRT_SPEC_CTRL now and does not handle MSR_IA32_SPEC_CTRL
+anymore; remove the corresponding, unused argument.
+
+Signed-off-by: Paolo Bonzini <pbonzini@redhat.com>
+Link: https://lore.kernel.org/r/20221108151532.1377783-9-pbonzini@redhat.com
+---
+ arch/x86/include/asm/spec-ctrl.h | 10 +++++-----
+ arch/x86/kernel/cpu/bugs.c       |  2 +-
+ arch/x86/kvm/svm/svm.c           |  4 ++--
+ 3 files changed, 8 insertions(+), 8 deletions(-)
+
+diff --git a/arch/x86/include/asm/spec-ctrl.h b/arch/x86/include/asm/spec-ctrl.h
+index 5393babc0598..cb0386fc4dc3 100644
+--- a/arch/x86/include/asm/spec-ctrl.h
++++ b/arch/x86/include/asm/spec-ctrl.h
+@@ -13,7 +13,7 @@
+  * Takes the guest view of SPEC_CTRL MSR as a parameter and also
+  * the guest's version of VIRT_SPEC_CTRL, if emulated.
+  */
+-extern void x86_virt_spec_ctrl(u64 guest_spec_ctrl, u64 guest_virt_spec_ctrl, bool guest);
++extern void x86_virt_spec_ctrl(u64 guest_virt_spec_ctrl, bool guest);
+ 
+ /**
+  * x86_spec_ctrl_set_guest - Set speculation control registers for the guest
+@@ -24,9 +24,9 @@ extern void x86_virt_spec_ctrl(u64 guest_spec_ctrl, u64 guest_virt_spec_ctrl, bo
+  * Avoids writing to the MSR if the content/bits are the same
+  */
+ static inline
+-void x86_spec_ctrl_set_guest(u64 guest_spec_ctrl, u64 guest_virt_spec_ctrl)
++void x86_spec_ctrl_set_guest(u64 guest_virt_spec_ctrl)
+ {
+-	x86_virt_spec_ctrl(guest_spec_ctrl, guest_virt_spec_ctrl, true);
++	x86_virt_spec_ctrl(guest_virt_spec_ctrl, true);
+ }
+ 
+ /**
+@@ -38,9 +38,9 @@ void x86_spec_ctrl_set_guest(u64 guest_spec_ctrl, u64 guest_virt_spec_ctrl)
+  * Avoids writing to the MSR if the content/bits are the same
+  */
+ static inline
+-void x86_spec_ctrl_restore_host(u64 guest_spec_ctrl, u64 guest_virt_spec_ctrl)
++void x86_spec_ctrl_restore_host(u64 guest_virt_spec_ctrl)
+ {
+-	x86_virt_spec_ctrl(guest_spec_ctrl, guest_virt_spec_ctrl, false);
++	x86_virt_spec_ctrl(guest_virt_spec_ctrl, false);
+ }
+ 
+ /* AMD specific Speculative Store Bypass MSR data */
+diff --git a/arch/x86/kernel/cpu/bugs.c b/arch/x86/kernel/cpu/bugs.c
+index 6ec0b7ce7453..3e3230cccaa7 100644
+--- a/arch/x86/kernel/cpu/bugs.c
++++ b/arch/x86/kernel/cpu/bugs.c
+@@ -200,7 +200,7 @@ void __init check_bugs(void)
+  * MSR_IA32_SPEC_CTRL for SSBD.
+  */
+ void
+-x86_virt_spec_ctrl(u64 guest_spec_ctrl, u64 guest_virt_spec_ctrl, bool setguest)
++x86_virt_spec_ctrl(u64 guest_virt_spec_ctrl, bool setguest)
+ {
+ 	u64 guestval, hostval;
+ 	struct thread_info *ti = current_thread_info();
+diff --git a/arch/x86/kvm/svm/svm.c b/arch/x86/kvm/svm/svm.c
+index 512bc06a4ba1..e6706fd88cfa 100644
+--- a/arch/x86/kvm/svm/svm.c
++++ b/arch/x86/kvm/svm/svm.c
+@@ -3998,7 +3998,7 @@ static __no_kcsan fastpath_t svm_vcpu_run(struct kvm_vcpu *vcpu)
+ 	 * being speculatively taken.
+ 	 */
+ 	if (!static_cpu_has(X86_FEATURE_V_SPEC_CTRL))
+-		x86_spec_ctrl_set_guest(svm->spec_ctrl, svm->virt_spec_ctrl);
++		x86_spec_ctrl_set_guest(svm->virt_spec_ctrl);
+ 
+ 	svm_vcpu_enter_exit(vcpu, spec_ctrl_intercepted);
+ 
+@@ -4006,7 +4006,7 @@ static __no_kcsan fastpath_t svm_vcpu_run(struct kvm_vcpu *vcpu)
+ 		reload_tss(vcpu);
+ 
+ 	if (!static_cpu_has(X86_FEATURE_V_SPEC_CTRL))
+-		x86_spec_ctrl_restore_host(svm->spec_ctrl, svm->virt_spec_ctrl);
++		x86_spec_ctrl_restore_host(svm->virt_spec_ctrl);
+ 
+ 	if (!sev_es_guest(vcpu->kvm)) {
+ 		vcpu->arch.cr2 = svm->vmcb->save.cr2;
+-- 
+2.31.1
+
