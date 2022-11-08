@@ -312,6 +312,10 @@ if [[ -L /dev/shm ]]; then
     mount -t tmpfs -o mode=1777,nosuid,nodev,strictatime tmpfs /dev/shm
     ln -s /dev/shm /run/shm
 fi
+
+# https://github.com/systemd/systemd/blob/4dbcb5dc10fb8dd53202aa4ed3cff8c869ee3b4f/rules.d/50-udev-default.rules.in#L97
+chown root:kvm /dev/kvm
+chmod 660 /dev/kvm
 EOF
     cat <<'EOF' >>/etc/wsl.conf
 
