@@ -1,14 +1,7 @@
 #!/usr/bin/env fish
 # SPDX-License-Identifier: MIT
-# Copyright (C) 2021-2022 Nathan Chancellor
+# Copyright (C) 2022 Nathan Chancellor
 
-function shellcheck -d "Runs shellcheck depending on how it is available"
-    if command -q shellcheck
-        command shellcheck $argv
-    else if test -x $BIN_FOLDER/shellcheck
-        $BIN_FOLDER/shellcheck $argv
-    else
-        print_error "shellcheck could not be found. Run 'upd shellcheck' to install it."
-        return 1
-    end
+function shellcheck -d "Calls shellcheck based on how it is available"
+    run_cmd (status function) $argv
 end

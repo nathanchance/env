@@ -1,13 +1,7 @@
 #!/usr/bin/env fish
 # SPDX-License-Identifier: MIT
-# Copyright (C) 2021-2022 Nathan Chancellor
+# Copyright (C) 2022 Nathan Chancellor
 
-function exa -d "Runs exa depending on where it is available"
-    if command -q exa
-        command exa $argv
-    else if test -x $BIN_FOLDER/exa
-        $BIN_FOLDER/exa $argv
-    else
-        command ls --color=auto $argv
-    end
+function exa -d "Calls exa based on how it is available"
+    run_cmd (status function) $argv
 end

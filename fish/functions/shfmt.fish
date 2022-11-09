@@ -1,14 +1,7 @@
 #!/usr/bin/env fish
 # SPDX-License-Identifier: MIT
-# Copyright (C) 2021-2022 Nathan Chancellor
+# Copyright (C) 2022 Nathan Chancellor
 
-function shfmt -d "Runs shfmt depending on how it is available"
-    if command -q shfmt
-        command shfmt $argv
-    else if test -x $BIN_FOLDER/shfmt
-        $BIN_FOLDER/shfmt $argv
-    else
-        print_error "shfmt could not be found. Run 'upd shfmt' to install it."
-        return 1
-    end
+function shfmt -d "Calls shfmt based on how it is available"
+    run_cmd (status function) $argv
 end

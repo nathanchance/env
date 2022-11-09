@@ -1,15 +1,7 @@
 #!/usr/bin/env fish
 # SPDX-License-Identifier: MIT
-# Copyright (C) 2021-2022 Nathan Chancellor
+# Copyright (C) 2022 Nathan Chancellor
 
-function yapf -d "Run yapf from a git checkout"
-    if command -q yapf
-        command yapf -i -p $argv
-    else
-        set yapf $BIN_SRC_FOLDER/yapf/yapf
-        if not test -d $yapf
-            upd yapf; or return
-        end
-        PYTHONPATH=(dirname $yapf) python3 $yapf -i -p $argv
-    end
+function yapf -d "Calls yapf based on how it is available"
+    run_cmd (status function) $argv
 end
