@@ -3,8 +3,8 @@
 # Copyright (C) 2021-2022 Nathan Chancellor
 
 function kboot -d "Boot a kernel in QEMU"
-    if not in_container; and test -z "$OVERRIDE_CONTAINER"
-        print_error "This needs to be run in a container!"
+    if not in_container; and test -z "$OC"
+        print_error "This needs to be run in a container! Override this check with 'OC=1'."
         return 1
     end
 
@@ -26,14 +26,14 @@ function kboot -d "Boot a kernel in QEMU"
         set -a boot_qemu_args -k .
     end
 
-    if test -z "$BOOT_UTILS"
-        set BOOT_UTILS $CBL_GIT/boot-utils-ro
+    if test -z "$BU"
+        set BU $CBL_GIT/boot-utils-ro
     end
-    if not test -d "$BOOT_UTILS"
-        mkdir -p (dirname $BOOT_UTILS)
-        git clone https://github.com/ClangBuiltLinux/boot-utils $BOOT_UTILS; or return
+    if not test -d "$BU"
+        mkdir -p (dirname $BU)
+        git clone https://github.com/ClangBuiltLinux/boot-utils $BU; or return
     end
-    if test "$UPDATE" != false
+    if test "$U" != 0
         git -C $BOOT_UTILS pull -q -r; or return
     end
 
