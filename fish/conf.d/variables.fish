@@ -131,7 +131,11 @@ set -gx TMP_BUILD_FOLDER $TMP_FOLDER/build
 ############################
 
 # Versions of stable that I build locally
-set -gx CBL_STABLE_VERSIONS 6.0 5.{1{5,0},4}
+set -gx CBL_STABLE_VERSIONS \
+    6.0 \
+    5.15 \
+    5.10 \
+    5.4
 
 # ccache compression level
 set -gx CCACHE_COMPRESS true
@@ -180,7 +184,9 @@ set -g hydro_multiline true
 set -g hydro_prompt_addons nathan
 
 # For building .deb packages on distros other than Debian/Ubuntu
-set -gx KMAKE_DEB_ARGS DPKG_FLAGS=-d KDEB_CHANGELOG_DIST=unstable
+set -gx KMAKE_DEB_ARGS \
+    DPKG_FLAGS=-d \
+    KDEB_CHANGELOG_DIST=unstable
 
 # Default to system session instead of user session for libvirt
 set -gx LIBVIRT_DEFAULT_URI qemu:///system
@@ -197,7 +203,11 @@ if test -f $HOME/.server_ip
 end
 
 # https://www.kernel.org/category/releases.html
-set -gx SUPPORTED_STABLE_VERSIONS 4.{14,{,1}9} 5.{4,1{0,5}} 6.0
+set -gx SUPPORTED_STABLE_VERSIONS \
+    $CBL_STABLE_VERSIONS \
+    4.19 \
+    4.14 \
+    4.9
 
 # Point tmuxp to configurations in env folder
 set -gx TMUXP_CONFIGDIR $ENV_FOLDER/configs/tmux
