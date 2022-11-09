@@ -7,12 +7,10 @@ function oci_pull -d "Downloads OCI container images from GitHub"
         case hetzner-server workstation
             set images \
                 dev/{arch,fedora,ubuntu} \
-                gcc-{5,6,7,8,9,1{0,1}} \
-                lei \
-                llvm-1{1,2,3,4,5} \
-                makepkg
+                gcc-(seq 5 12) \
+                llvm-(seq 11 16)
         case '*'
-            set images (get_dev_img) llvm-15
+            set images (get_dev_img) llvm-1{5,6}
     end
 
     podman pull $GHCR/$images

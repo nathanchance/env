@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: MIT
 # Copyright (C) 2021-2022 Nathan Chancellor
 
-function rg -d "Runs ripgrep through the system or podman depending on how it is available"
+function rg -d "Runs ripgrep depending on how it is available"
     if command -q rg
         command rg $argv
     else if test -x $BIN_FOLDER/rg

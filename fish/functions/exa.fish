@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: MIT
 # Copyright (C) 2021-2022 Nathan Chancellor
 
-function exa -d "Runs exa through the system or podman depending on how it is available"
+function exa -d "Runs exa depending on where it is available"
     if command -q exa
         command exa $argv
     else if test -x $BIN_FOLDER/exa

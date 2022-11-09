@@ -35,7 +35,7 @@ function cbl_bld_krnl_pkg -d "Build ClangBuiltLinux Arch Linux kernel package"
     end
 
     # Build the kernel
-    command makepkg -C; or return
+    makepkg -C; or return
 
     echo Run
     printf '\n\t$ sudo fish -c "pacman -U %s; and bootctl set-oneshot %s.conf; and reboot"\n\n' (realpath -- *.tar.zst | string replace $ENV_FOLDER \$ENV_FOLDER) $pkg

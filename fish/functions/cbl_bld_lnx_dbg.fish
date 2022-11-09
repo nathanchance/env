@@ -81,7 +81,7 @@ function cbl_bld_lnx_dbg -d "Build linux-debug Arch Linux package"
     rm $modulesdir/{source,build}
 
     pushd $pkgroot
-    command makepkg -R; or return
+    makepkg -R; or return
     popd
 
     printf '\a'

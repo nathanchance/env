@@ -46,7 +46,7 @@ function cbl_gen_archconfig -d "Generate a configuration file for Arch Linux"
 
     # Step 1: Download and extract files
     touch $cfg
-    command makepkg -Cdo --skipchecksums; or return
+    makepkg -Cdo --skipchecksums; or return
     rm $src_cfg
 
     # Step 2: Copy default Arch configuration and set a few options

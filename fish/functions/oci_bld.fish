@@ -19,7 +19,7 @@ function oci_bld -d "Build an OCI container image"
                     llvm-(seq 11 16) \
                     llvm-android
 
-            case dev dev/{arch,debian,fedora,suse,ubuntu} lei {gcc,llvm}-'*' makepkg
+            case dev dev/{arch,debian,fedora,suse,ubuntu} {gcc,llvm}-'*'
                 set -a images $arg
         end
     end
