@@ -202,6 +202,16 @@ if test -f $HOME/.server_ip
     set -g SERVER_IP (cat $HOME/.server_ip)
 end
 
+# Current toolchain versions
+set -g GCC_VERSION_TOT 13
+set -g GCC_VERSION_STABLE 12
+set -g GCC_VERSION_MIN_KERNEL 5
+set -g GCC_VERSIONS_KERNEL (seq $GCC_VERSION_STABLE -1 $GCC_VERSION_MIN_KERNEL)
+set -g LLVM_VERSION_TOT 16
+set -g LLVM_VERSION_STABLE (math $LLVM_VERSION_TOT - 1)
+set -g LLVM_VERSION_MIN_KERNEL 11
+set -g LLVM_VERSIONS_KERNEL (seq $LLVM_VERSION_TOT -1 $LLVM_VERSION_MIN_KERNEL)
+
 # https://www.kernel.org/category/releases.html
 set -gx SUPPORTED_STABLE_VERSIONS \
     $CBL_STABLE_VERSIONS \

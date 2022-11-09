@@ -12,7 +12,7 @@ function cbl_test_llvm_mainline_linux -d "Test mainline Linux with all supported
     end
     git -C $linux_folder pull --rebase
 
-    for image in llvm-1{6,5,4,3,2,1}
+    for image in llvm-$LLVM_VERSIONS_KERNEL
         dbxeph $image -- "fish -c 'cbl_lkt --linux-folder $linux_folder --system-binaries'"; or return
     end
 end

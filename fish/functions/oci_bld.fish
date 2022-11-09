@@ -15,8 +15,8 @@ function oci_bld -d "Build an OCI container image"
         switch $arg
             case compilers
                 set -a images \
-                    gcc-(seq 5 12) \
-                    llvm-(seq 11 16) \
+                    gcc-$GCC_VERSIONS_KERNEL \
+                    llvm-$LLVM_VERSIONS_KERNEL \
                     llvm-android
 
             case dev dev/{arch,debian,fedora,suse,ubuntu} {gcc,llvm}-'*'
@@ -30,15 +30,15 @@ function oci_bld -d "Build an OCI container image"
         switch $image
             case gcc-5
                 set base ubuntu:xenial
-            case gcc-'*' llvm-1{3,4,5,6}
-                set base ubuntu:jammy
-            case llvm-1{1,2}
+            case llvm-12 llvm-11
                 set base ubuntu:focal
             case llvm-android
                 if test (uname -m) != x86_64
                     print_error "$image cannot be build on non-x86_64 hosts"
                     continue
                 end
+                set base ubuntu:jammy
+            case gcc-'*' llvm-'*'
                 set base ubuntu:jammy
         end
 

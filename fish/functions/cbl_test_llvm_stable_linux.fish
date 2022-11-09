@@ -12,7 +12,7 @@ function cbl_test_llvm_stable_linux -d "Test all current versions of stable Linu
         git -C $linux_folder pull --rebase
     end
 
-    for image in llvm-1{6,5,4,3,2,1}
+    for image in llvm-$LLVM_VERSIONS_KERNEL
         for linux_folder in $linux_folders
             dbxeph $image -- "fish -c 'cbl_lkt --linux-folder $linux_folder --system-binaries'"; or return
         end
