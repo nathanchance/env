@@ -16,11 +16,11 @@ function cbl_qualify_next -d "Run a series of checks to qualify new linux-next r
 
     sleep 5
 
-    cbl_check_cfi &>/dev/null
+    cbl_check_sysfs_cfi &>/dev/null
     if test $status -eq 0
         sudo dmesg -l warn,err
     else
-        cbl_check_cfi
+        cbl_check_sysfs_cfi
     end
 
     if test $LOCATION = pi
