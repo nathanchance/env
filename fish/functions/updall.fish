@@ -31,7 +31,7 @@ function updall -d "Update binaries in $BIN_FOLDER"
         tuxmake \
         vim
 
-    if location_is_primary
+    if is_location_primary
         set -a targets forks
     end
 

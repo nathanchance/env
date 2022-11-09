@@ -212,7 +212,7 @@ rpmbuild/' >>$gitignore
     end
 
     # Binaries
-    if location_is_primary
+    if is_location_primary
         clone_aur_repos
     end
     if command -q modprobed-db

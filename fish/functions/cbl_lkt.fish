@@ -197,7 +197,7 @@ function cbl_lkt -d "Tests a Linux kernel with llvm-kernel-testing"
             mkdir -p (dirname $lkt)
             git clone https://github.com/nathanchance/llvm-kernel-testing $lkt
         end
-        if not location_is_primary
+        if not is_location_primary
             git -C $lkt urh
         end
     end

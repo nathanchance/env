@@ -95,7 +95,7 @@ function cbl_bld_tot_tcs -d "Build LLVM and binutils from source for kernel deve
                 git clone $clone_args https://github.com/nathanchance/tc-build.git $tc_bld
             end
         end
-        if not location_is_primary
+        if not is_location_primary
             git -C $tc_bld urh
         end
     end

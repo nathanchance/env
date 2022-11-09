@@ -25,7 +25,7 @@ function upd -d "Runs the update command for the current distro or downloads/upd
     for target in $targets
         switch $target
             case env
-                if not location_is_primary
+                if not is_location_primary
                     git -C $ENV_FOLDER pull -qr; or return
                     rld
                 end
@@ -37,7 +37,7 @@ function upd -d "Runs the update command for the current distro or downloads/upd
 
             case forgit hydro
                 set repo $GITHUB_FOLDER/$target
-                if location_is_primary
+                if is_location_primary
                     switch $target
                         case forgit
                             set branch master
