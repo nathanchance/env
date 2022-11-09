@@ -65,7 +65,7 @@ function oci_bld -d "Build an OCI container image"
             --layers=false \
             --pull \
             --tag $GHCR/$image .
-        pretty_print_cmd $podman_build_cmd
+        print_cmd $podman_build_cmd
         $podman_build_cmd; or return
 
         popd; or return

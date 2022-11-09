@@ -43,6 +43,6 @@ function kboot -d "Boot a kernel in QEMU"
 
     set boot_qemu_cmd \
         $BOOT_UTILS/boot-qemu.py $boot_qemu_args
-    pretty_print_cmd $boot_qemu_cmd
+    print_cmd $boot_qemu_cmd
     $boot_qemu_cmd
 end

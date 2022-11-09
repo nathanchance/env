@@ -107,6 +107,6 @@ rm "$0"' >$init_hook_sh
     end
 
     set final_dbx_cmd dbx $mode $dbx_args $dbx_img $dbx_cmds
-    pretty_print_cmd $final_dbx_cmd
+    print_cmd $final_dbx_cmd
     $final_dbx_cmd
 end

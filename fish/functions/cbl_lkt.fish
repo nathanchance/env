@@ -207,7 +207,7 @@ function cbl_lkt -d "Tests a Linux kernel with llvm-kernel-testing"
         --linux-folder $linux_folder \
         --log-folder $log_folder \
         $main_py_args
-    pretty_print_cmd $lkt_cmd
+    print_cmd $lkt_cmd
     $lkt_cmd
     set lkt_ret $status
 

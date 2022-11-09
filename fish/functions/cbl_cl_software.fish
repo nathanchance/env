@@ -26,7 +26,7 @@ function cbl_cl_software -d "Clean up old versions of managed software"
     if test -n "$folders_to_remove"
         set rm_cmd \
             rm -fr $folder/$folders_to_remove
-        pretty_print_cmd $rm_cmd
+        print_cmd $rm_cmd
         $rm_cmd
     end
 end

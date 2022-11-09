@@ -10,6 +10,6 @@ function pi_clmods -d "Clean up old modules on Raspberry Pi"
 
     set rm_cmd \
         sudo rm -frv $folders
-    pretty_print_cmd $rm_cmd
+    print_cmd $rm_cmd
     $rm_cmd
 end
