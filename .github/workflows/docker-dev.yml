@@ -60,7 +60,7 @@ jobs:
         uses: docker/build-push-action@v3
         with:
           context: ${{ steps.variables.outputs.folder }}/${{ matrix.os }}
-          file: ${{ steps.variables.outputs.folder }}/${{ matrix.os }}/Containerfile
+          file: ${{ steps.variables.outputs.folder }}/${{ matrix.os }}/Dockerfile
           platforms: ${{ matrix.platforms }}
           push: ${{ github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && github.event.inputs.push_images == 'true') }}
           tags: |
