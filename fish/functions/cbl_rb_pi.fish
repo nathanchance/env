@@ -24,6 +24,23 @@ function cbl_rb_pi -d "Rebase Raspberry Pi kernel on latest linux-next"
     for patch in $patches
         b4 am -l -o - -P _ -s $patch | git am; or return
     end
+    echo 'diff --git a/drivers/gpio/gpiolib-of.c b/drivers/gpio/gpiolib-of.c
+index 4be3c21aa718..55c3712592db 100644
+--- a/drivers/gpio/gpiolib-of.c
++++ b/drivers/gpio/gpiolib-of.c
+@@ -1067,7 +1067,7 @@ int of_gpiochip_add(struct gpio_chip *chip)
+ 	struct device_node *np;
+ 	int ret;
+ 
+-	np = to_of_node(chip->fwnode);
++	np = to_of_node(dev_fwnode(&chip->gpiodev->dev));
+ 	if (!np)
+ 		return 0;
+ 
+' | git ap; or return
+    git ac -m "gpiolib: Unbreak boot
+
+Link: https://lore.kernel.org/Y20CZtHkaLmQj+IP@smile.fi.intel.com/"
 
     # Regenerate defconfigs
     for arch in arm arm64

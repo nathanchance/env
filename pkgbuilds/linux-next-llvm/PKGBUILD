@@ -3,7 +3,7 @@
 
 _localversion=-llvm
 pkgname=linux-next$_localversion
-_srctag=next-20221109
+_srctag=next-20221110
 pkgver=${_srctag//-/.}
 pkgrel=1
 pkgdesc='linux-next'
@@ -18,7 +18,7 @@ source=(
   "$pkgname::git+https://git.kernel.org/pub/scm/linux/kernel/git/next/linux-next.git?signed#tag=$_srctag"
   config
   20221108_nathan_cpufreq_acpi_remove_unused_variables_acpi_cpufreq_online_and_ret.patch
-  20221109_pbonzini_kvm_svm_fixes_for_vmentry_code.patch
+  20221110_senozhatsky_zram_we_should_always_zero_out_err_variable_in_recompress_loop.patch
 )
 
 validpgpkeys=(
@@ -26,9 +26,9 @@ validpgpkeys=(
   '3F2568AAC26998F9E813A1C5C3F436CA30F5D8EB'  # Mark Brown
 )
 sha256sums=('SKIP'
-            'cf384634a5a311b20e7fff9aa99c8069aa8163d2a33ac7710d9c243daa29062a'
+            'b3ca1c16ad7616903e1e6d5716b8129f27d3681cfef23778ac57dcaed06de8f3'
             'c52c34cd152caf4563592a39977c81f94cd15de59c6ebbb3f79775a2f12d6721'
-            'ce37b94ac8d233477c3fbfef50aad417ae2a370565439af9d6d2d9c84238ae30')
+            '750832a01768f4b3e3be0f6b98530335d08754fde70e92ec6144fc4f87eeb765')
 
 # This obviously ties this PKGBUILD to my machine but that is kind of the point :)
 _kmake() {
