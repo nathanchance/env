@@ -24,12 +24,19 @@ function run_cmd -d "Run specified command depending on where it is available"
         $cmd_def_args \
         $argv[2..-1]
 
+    set simple_cmd $BIN_FOLDER/$cmd
+    set nested_cmd $simple_cmd/bin/$cmd
+
     if command -q $cmd
         command $cmd $cmd_args
-    else if test -x $BIN_FOLDER/$cmd
-        $BIN_FOLDER/$cmd $cmd_args
-    else if test -x $BIN_FOLDER/$cmd/bin/$cmd
-        $BIN_FOLDER/$cmd/bin/$cmd $cmd_args
+    else if test -f $simple_cmd; and test -x $simple_cmd
+        $simple_cmd $cmd_args
+    else if test -f $nested_cmd; and test -x $nested_cmd
+        switch $cmd
+            case tmuxp
+                set -p nested_cmd PYTHONPATH=$simple_cmd
+        end
+        env $nested_cmd $cmd_args
     else
         switch $cmd
             case b4 distrobox tuxmake
@@ -57,11 +64,8 @@ function run_cmd -d "Run specified command depending on where it is available"
             case exa
                 command ls --color=auto $cmd_args
 
-            case tmuxp yapf
+            case yapf
                 switch $cmd
-                    case tmuxp
-                        set python_path $BIN_FOLDER/$cmd
-                        set cmd_path $python_path/bin/$cmd
                     case yapf
                         set python_path $BIN_SRC_FOLDER/$cmd
                         set cmd_path python3 $python_path/$cmd
