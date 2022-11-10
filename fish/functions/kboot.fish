@@ -34,7 +34,7 @@ function kboot -d "Boot a kernel in QEMU"
         git clone https://github.com/ClangBuiltLinux/boot-utils $BU; or return
     end
     if test "$U" != 0
-        git -C $BOOT_UTILS pull -q -r; or return
+        git -C $BU pull -q -r; or return
     end
 
     if set -q PO
@@ -42,7 +42,7 @@ function kboot -d "Boot a kernel in QEMU"
     end
 
     set boot_qemu_cmd \
-        $BOOT_UTILS/boot-qemu.py $boot_qemu_args
+        $BU/boot-qemu.py $boot_qemu_args
     print_cmd $boot_qemu_cmd
     $boot_qemu_cmd
 end
