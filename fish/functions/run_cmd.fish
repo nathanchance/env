@@ -6,9 +6,9 @@ function run_cmd -d "Run specified command depending on where it is available"
     set cmd $argv[1]
     switch $cmd
         case b4 lei tuxmake
-            set -lx XDG_CACHE_HOME $XDG_FOLDER/cache
-            set -lx XDG_CONFIG_HOME $XDG_FOLDER/config
-            set -lx XDG_DATA_HOME $XDG_FOLDER/share
+            set -fx XDG_CACHE_HOME $XDG_FOLDER/cache
+            set -fx XDG_CONFIG_HOME $XDG_FOLDER/config
+            set -fx XDG_DATA_HOME $XDG_FOLDER/share
 
         case duf
             set cmd_def_args \
