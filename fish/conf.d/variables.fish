@@ -101,11 +101,19 @@ set -gx CBL_GIT $CBL/github
 set -gx CBL_LKT $CBL/llvm-kernel-testing
 set -gx CBL_QEMU $CBL/qemu
 set -gx CBL_REPRO $CBL/repro-scripts
-set -gx CBL_SRC $CBL/src
 set -gx CBL_TC_BLD $CBL/tc-build
 set -gx CBL_TMP $CBL/tmp
-set -gx CBL_TC $CBL/toolchains
 set -gx CBL_WRKTR $CBL/worktrees
+
+set -gx SHARED_FOLDER /mnt/shared
+if test -d $SHARED_FOLDER
+    set -l CBL_SHARED (string replace $MAIN_FOLDER $SHARED_FOLDER $CBL)
+    set -gx CBL_SRC $CBL_SHARED/src
+    set -gx CBL_TC $CBL_SHARED/toolchains
+else
+    set -gx CBL_SRC $CBL/src
+    set -gx CBL_TC $CBL/toolchains
+end
 
 set -gx CBL_BLD_C $CBL_BLD/clean
 set -gx CBL_BLD_P $CBL_BLD/patched
@@ -126,7 +134,6 @@ set -gx FORKS_FOLDER $GITHUB_FOLDER/forks
 
 set -gx TMP_BUILD_FOLDER $TMP_FOLDER/build
 
-set -gx SHARED_FOLDER /mnt/shared
 
 ############################
 ## OTHER GLOBAL VARIABLES ##

@@ -11,7 +11,7 @@ function cbl_upd_software_symlinks -d "Update symlinks to a stow or QEMU folder"
     set pkg $argv[1]
     switch $pkg
         case binutils llvm
-            set stow_dir (get_shared_folder $CBL_TC_STOW)
+            set stow_dir $CBL_TC_STOW
 
             # source handling
             if test (count $argv) -eq 2
@@ -19,10 +19,10 @@ function cbl_upd_software_symlinks -d "Update symlinks to a stow or QEMU folder"
             else
                 switch $pkg
                     case binutils
-                        set src_stow (get_shared_folder $CBL_TC_STOW_BNTL)
+                        set src_stow $CBL_TC_STOW_BNTL
                         set binary as
                     case llvm
-                        set src_stow (get_shared_folder $CBL_TC_STOW_LLVM)
+                        set src_stow $CBL_TC_STOW_LLVM
                         set binary clang
                 end
 
@@ -37,9 +37,9 @@ function cbl_upd_software_symlinks -d "Update symlinks to a stow or QEMU folder"
             # destination handling
             switch $pkg
                 case binutils
-                    set dest (dirname (get_shared_folder $CBL_TC_BNTL))
+                    set dest (dirname $CBL_TC_BNTL)
                 case llvm
-                    set dest (dirname (get_shared_folder $CBL_TC_LLVM))
+                    set dest (dirname $CBL_TC_LLVM)
             end
 
             set stow_pkg (basename $dest)
