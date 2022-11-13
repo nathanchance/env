@@ -125,6 +125,7 @@ set -gx FORKS_FOLDER $GITHUB_FOLDER/forks
 
 set -gx TMP_BUILD_FOLDER $TMP_FOLDER/build
 
+set -gx SHARED_FOLDER /mnt/shared
 
 ############################
 ## OTHER GLOBAL VARIABLES ##

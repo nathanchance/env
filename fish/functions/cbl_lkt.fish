@@ -87,11 +87,13 @@ function cbl_lkt -d "Tests a Linux kernel with llvm-kernel-testing"
     # We assume that the dependencies are available in an image other than nathan/dev/arch
     if test "$system_binaries" != true
         if test -z "$llvm_prefix$binutils_prefix$tc_prefix"
-            if test -e $CBL_TC_BNTL
-                set binutils_prefix (dirname $CBL_TC_BNTL)
+            set lkt_tc_bntl (get_shared_folder $CBL_TC_BNTL)
+            if test -e $lkt_tc_bntl
+                set binutils_prefix (dirname $lkt_tc_bntl)
             end
-            if test -e $CBL_TC_LLVM
-                set llvm_prefix (dirname $CBL_TC_LLVM)
+            set lkt_tc_llvm (get_shared_folder $CBL_TC_LLVM)
+            if test -e $lkt_tc_llvm
+                set llvm_prefix (dirname $lkt_tc_llvm)
             end
         end
         if test -z "$qemu_prefix"; and test -e $CBL_QEMU
