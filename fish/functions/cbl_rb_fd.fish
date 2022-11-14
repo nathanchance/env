@@ -13,7 +13,6 @@ function cbl_rb_fd -d "Rebase generic Fedora kernel on latest linux-next"
     git rh origin/master
 
     # Patching
-    set -a patches https://lore.kernel.org/all/20221110143423.3250790-1-senozhatsky@chromium.org/ # zram: we should always zero out err variable in recompress loop
     for patch in $patches
         b4 shazam -l -P _ -s $patch; or return
     end
