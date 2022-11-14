@@ -2,7 +2,7 @@
 name: Linting
 on: [push, pull_request]
 jobs:
-  fish_format:
+  fish:
     uses: nathanchance/actions-workflows/.github/workflows/fish_format.yml@main
   shellcheck:
     uses: ClangBuiltLinux/actions-workflows/.github/workflows/shellcheck.yml@main
