@@ -2,13 +2,8 @@
 name: Linting
 on: [push, pull_request]
 jobs:
-  fish_indent:
-    name: 'fish_indent'
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - uses: fish-actions/install-fish@v1
-      - uses: fish-actions/format-check@v1
+  fish_format:
+    uses: nathanchance/actions-workflows/.github/workflows/fish_format.yml@main
   shellcheck:
     uses: ClangBuiltLinux/actions-workflows/.github/workflows/shellcheck.yml@main
   shfmt:
