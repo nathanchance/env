@@ -3,6 +3,8 @@
 # Copyright (C) 2021-2022 Nathan Chancellor
 
 function cbl_test_kvm -d "Test KVM against a Clang built kernel with QEMU"
+    test -c /dev/kvm; or return
+
     switch $argv
         case build
             in_container_msg -c; or return
@@ -34,11 +36,40 @@ function cbl_test_kvm -d "Test KVM against a Clang built kernel with QEMU"
             # Start container before updating, as podman requires some kernel modules,
             # which need to be loaded before updating, as an update to linux will
             # remove the modules on disk for the current running kernel version.
+            # It does not hurt wsl2 so just do it unconditionally.
             dbxe -- true; or return
 
-            updfull
-            mkdir -p $TMP_FOLDER
-            cp -v /boot/vmlinuz-linux $TMP_FOLDER/bzImage
-            dbxe -- "fish -c 'kboot -a x86_64 -k $TMP_FOLDER/bzImage -t 30s'"
+            switch $LOCATION
+                case wsl
+                    set arch x86_64 # for now?
+                    set src $CBL_SRC/linux
+                    cbl_clone_repo (basename $src)
+
+                    for toolchain in GCC LLVM
+                        set out $src/build/$arch/(string lower $toolchain)
+                        switch $arch
+                            case x86_64
+                                set kernel $out/arch/x86/boot/bzImage
+                            case '*'
+                                return 1
+                        end
+
+                        if not test -d $kernel
+                            set -l make_args
+                            switch $toolchain
+                                case LLVM
+                                    set -a make_args LLVM=1
+                            end
+                            dbxe -- "fish -c 'kmake -C $src ARCH=$arch $make_args O=$out defconfig all'"; or return
+                        end
+                        dbxe -- "fish -c 'kboot -a $arch -k $out'"; or return
+                    end
+
+                case vm
+                    updfull
+                    mkdir -p $TMP_FOLDER
+                    cp -v /boot/vmlinuz-linux $TMP_FOLDER/bzImage
+                    dbxe -- "fish -c 'kboot -a x86_64 -k $TMP_FOLDER/bzImage -t 30s'"
+            end
     end
 end
