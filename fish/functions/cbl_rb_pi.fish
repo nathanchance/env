@@ -21,7 +21,6 @@ function cbl_rb_pi -d "Rebase Raspberry Pi kernel on latest linux-next"
     git rh origin/master
 
     # Patching
-    set -a patches https://lore.kernel.org/all/20221111113732.461881-1-thierry.reding@gmail.com/ # gpiolib: of: Use correct fwnode for DT-probed chips
     for patch in $patches
         b4 am -l -o - -P _ -s $patch | git am; or return
     end
