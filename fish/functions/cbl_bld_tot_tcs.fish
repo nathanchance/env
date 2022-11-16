@@ -105,7 +105,7 @@ function cbl_bld_tot_tcs -d "Build LLVM and binutils from source for kernel deve
         if not test -d $bntls
             git clone https://sourceware.org/git/binutils-gdb.git "$bntls"
         end
-        if not is_shallow_clone $bntls
+        if not is_shallow_clone $bntls; and not has_detached_head $bntls
             git -C $bntls pull --rebase; or return
         end
 
@@ -129,7 +129,7 @@ function cbl_bld_tot_tcs -d "Build LLVM and binutils from source for kernel deve
     if not test -d $llvm_project
         git clone https://github.com/llvm/llvm-project $llvm_project
     end
-    if not is_shallow_clone $llvm_project
+    if not is_shallow_clone $llvm_project; and not has_detached_head $llvm_project
         git -C $llvm_project rh
         if not git -C $llvm_project pull --rebase
             set message "llvm-project failed to rebase/update"
