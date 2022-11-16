@@ -11,10 +11,12 @@ function gh_run -d "Run GitHub Actions Workflow"
     set repo $argv[1]
     set branch $argv[2]
     set workflow $argv[3]
+    set run_args $argv[4..-1]
 
     gh workflow run \
         --ref $branch \
         --repo $repo \
+        $run_args \
         $workflow
 
     # Make sure that 'gh run list' call succeeds
