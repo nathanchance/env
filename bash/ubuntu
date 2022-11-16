@@ -15,13 +15,12 @@ source /usr/lib/os-release || exit
 function reality_check() {
     assert_root
 
-    : "${root_pass:?}"
-
-    # This setup script only supports Ubuntu 22.04
+    # This setup script only supports Ubuntu 20.04 and 22.04
     case ${VERSION_CODENAME:?} in
-        jammy) ;;
+        focal) ;;
+        jammy) : "${root_pass:?}" ;; # for sudo removal
         *)
-            print_error "This script requires Ubuntu 22.04"
+            print_error "This script requires Ubuntu 20.04 or 22.04"
             exit 1
             ;;
     esac
@@ -170,6 +169,10 @@ function install_packages() {
 }
 
 function setup_doas() {
+    # This version of doas is only compatible with newer releases of glibc,
+    # which Ubuntu 20.04 does not have. Just stick with sudo.
+    [[ $VERSION_CODENAME = "focal" ]] && return 0
+
     work_dir=$(mktemp -d)
 
     doas_version=6.8.2-1$([[ $dpkg_arch = "amd64" ]] && echo +b1)
