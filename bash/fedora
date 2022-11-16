@@ -14,9 +14,9 @@ source /usr/lib/os-release || exit
 function reality_check() {
     assert_root
 
-    # This setup script only supports Fedora 35 and 36
+    # This setup script only supports Fedora 35+
     case $VERSION_ID in
-        35 | 36) ;;
+        35 | 36 | 37) ;;
         *)
             print_error "Fedora $VERSION_ID is not tested with this script, add support for it if it works."
             exit 1
