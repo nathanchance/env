@@ -38,6 +38,7 @@ set lazyredraw                              " Redraw only when we need to
 set modeline                                " For whatever reason, Ubuntu doesn't have this set by default
 set wrap                                    " Wrap lines over a certain length. This is on by default with Arch and I am used to it...
 set tabpagemax=100                          " Allow me to open up to 100 tabs
+set history=10000                           " Remember a large amount of commands
 
 highlight ColorColumn ctermbg=0 guibg=lightgrey
 
