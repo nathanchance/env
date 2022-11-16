@@ -54,7 +54,7 @@ function cbl_test_kvm -d "Test KVM against a Clang built kernel with QEMU"
                                 return 1
                         end
 
-                        if not test -d $kernel
+                        if not test -f $kernel
                             set -l make_args
                             switch $toolchain
                                 case LLVM
