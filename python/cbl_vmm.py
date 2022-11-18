@@ -8,26 +8,26 @@
 # https://mirrors.edge.kernel.org/pub/linux/kernel/people/will/docs/qemu/qemu-arm64-howto.html
 # https://wiki.qemu.org/Documentation/Networking
 
-from argparse import ArgumentParser
-from math import log2
-from os import cpu_count, environ, listdir, sysconf
-from pathlib import Path
-from platform import machine
-from shlex import quote
-from shutil import copyfile, rmtree
-from subprocess import run
+import argparse
+import math
+import os
+import pathlib
+import platform
+import shlex
+import shutil
+import subprocess
 
 
 def parse_parameters():
-    parser = ArgumentParser()
+    parser = argparse.ArgumentParser()
     subparsers = parser.add_subparsers(help='Action to perform', dest='action')
 
     # Common arguments for all subcommands
-    common_parser = ArgumentParser(add_help=False)
+    common_parser = argparse.ArgumentParser(add_help=False)
     common_parser.add_argument('-a',
                                '--architecture',
                                type=str,
-                               default=machine(),
+                               default=platform.machine(),
                                help='Architecture of virtual machine')
     common_parser.add_argument('-c',
                                '--cores',
@@ -83,12 +83,12 @@ def parse_parameters():
 
 
 def quote_cmd(cmd):
-    return ' '.join([quote(str(elem)) for elem in cmd])
+    return ' '.join([shlex.quote(str(elem)) for elem in cmd])
 
 
 def run_cmd(cmd):
     print(f"$ {quote_cmd(cmd)}")
-    run(cmd, check=True)
+    subprocess.run(cmd, check=True)
 
 
 def get_disk_img(vm_folder):
@@ -101,10 +101,10 @@ def get_efi_img(cfg):
 
     if arch == 'aarch64':
         # Fedora location
-        src = Path('/usr/share/edk2/aarch64/QEMU_EFI.fd')
+        src = pathlib.Path('/usr/share/edk2/aarch64/QEMU_EFI.fd')
         if not src.exists():
             # Arch Linux location
-            src = Path('/usr/share/edk2-armvirt/aarch64/QEMU_EFI.fd')
+            src = pathlib.Path('/usr/share/edk2-armvirt/aarch64/QEMU_EFI.fd')
             if not src.exists():
                 raise FileNotFoundError(f"{src.name} could not be found!")
 
@@ -116,7 +116,7 @@ def get_efi_img(cfg):
         return dst
 
     if arch == 'x86_64':
-        src = Path('/usr/share/edk2-ovmf/x64/OVMF_CODE.fd')
+        src = pathlib.Path('/usr/share/edk2-ovmf/x64/OVMF_CODE.fd')
 
         if src.exists():
             return src
@@ -137,12 +137,12 @@ def get_efi_vars(cfg):
         return efivars
 
     if arch == 'x86_64':
-        src = Path('/usr/share/OVMF/x64/OVMF_VARS.fd')
+        src = pathlib.Path('/usr/share/OVMF/x64/OVMF_VARS.fd')
 
         if src.exists():
             dst = vm_folder.joinpath(src.name)
             if not dst.exists():
-                copyfile(src, dst)
+                shutil.copyfile(src, dst)
             return dst
 
         raise FileNotFoundError(f"{src.name} could not be found!")
@@ -161,7 +161,7 @@ def get_iso(cfg):
             iso_folder.mkdir(parents=True, exist_ok=True)
             run_cmd(['wget', '-c', '-O', dst, iso])
     else:
-        dst = Path(iso)
+        dst = pathlib.Path(iso)
         if not dst.exists():
             raise FileNotFoundError(f"{dst} specified but it is not found!")
 
@@ -197,7 +197,7 @@ def default_qemu_arguments(cfg):
         qemu += ['-M', 'virt']
 
     # KVM acceleration
-    if arch == machine():
+    if arch == platform.machine():
         qemu += ['-cpu', 'host']
         qemu += ['-enable-kvm']
     elif arch == "aarch64":
@@ -229,7 +229,7 @@ def list_vms(cfg):
     print(f"\nAvailable VMs for {arch}:\n")
 
     if arch_folder.exists():
-        vm_list = listdir(arch_folder)
+        vm_list = os.listdir(arch_folder)
         if vm_list:
             print('\n'.join(vm_list))
             return
@@ -266,7 +266,7 @@ def setup_vm(cfg):
 def remove_vm(cfg):
     vm_folder = cfg['vm_folder']
     if vm_folder.is_dir():
-        rmtree(vm_folder)
+        shutil.rmtree(vm_folder)
 
 
 def run_vm(cfg):
@@ -324,9 +324,9 @@ def set_cfg(args):
 
     # Folder for files
     if 'VM_FOLDER' in environ:
-        base_folder = Path(environ['VM_FOLDER'])
+        base_folder = pathlib.Path(os.environ['VM_FOLDER'])
     else:
-        base_folder = Path(__file__).resolve().parent.joinpath('vm')
+        base_folder = pathlib.Path(__file__).resolve().parent.joinpath('vm')
     arch_folder = base_folder.joinpath(arch)
     iso_folder = base_folder.joinpath('iso')
     vm_folder = arch_folder.joinpath(name)
@@ -334,7 +334,7 @@ def set_cfg(args):
     # Support for running custom kernel image (so "kernel" might not be in args)
     if hasattr(args, 'kernel') and args.kernel:
         # Kernel is either a path or a kernel image
-        kernel = Path(args.kernel)
+        kernel = pathlib.Path(args.kernel)
         if kernel.is_dir():
             kernel_dir = kernel
             if arch == 'aarch64':
@@ -360,7 +360,7 @@ def set_cfg(args):
                 raise NotImplementedError(f"Default cmdline has not been defined for {arch}")
 
         if args.initrd:
-            initrd = Path(args.initrd)
+            initrd = pathlib.Path(args.initrd)
         else:
             if not kernel_dir:
                 raise RuntimeError(
@@ -387,11 +387,11 @@ def set_cfg(args):
     if args.cores:
         cores = args.cores
     else:
-        if arch == machine():
+        if arch == platform.machine():
             # When using KVM, we cannot use more than the maximum number of
             # cores. Default to either 8 cores or half the number of cores in
             # the machine, whichever is smaller
-            cores = min(8, cpu_count() / 2)
+            cores = min(8, os.cpu_count() / 2)
         else:
             # For TCG, use 4 cores by default
             cores = 4
@@ -408,14 +408,14 @@ def set_cfg(args):
         # the virtual machine
 
         # Total amount of memory of a system in gigabytes (page size * pages / 1024^3)
-        total_mem = sysconf('SC_PAGE_SIZE') * sysconf('SC_PHYS_PAGES') / (1024.**3)
+        total_mem = os.sysconf('SC_PAGE_SIZE') * os.sysconf('SC_PHYS_PAGES') / (1024.**3)
 
         # Get the current exponent of the size of memory, as most computers
         # have a power of 2 amount of memory; if it is not (like 12GB), then
         # this calculation will just result in a slightly larger amount of
         # memory being allocated to the VM. If this is a problem, the user can
         # just specify the amount of memory.
-        exp = round(log2(total_mem))
+        exp = round(math.log2(total_mem))
 
         # To get half of the amount of memory, shift by one less exponent
         avail_mem_for_vm = 1 << (exp - 1)
