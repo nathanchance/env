@@ -24,7 +24,6 @@ function cbl_rb_pi -d "Rebase Raspberry Pi kernel on latest linux-next"
     for patch in $patches
         b4 am -l -o - -P _ -s $patch | git am; or return
     end
-    git am $GITHUB_FOLDER/patches/linux-misc/0001-drm-vc4-Fix-Wuninitialized-in-vc4_hdmi_reset_link.patch; or return
 
     # Regenerate defconfigs
     for arch in arm arm64
