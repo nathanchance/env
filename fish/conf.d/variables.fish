@@ -70,6 +70,7 @@ else if test -d $HOME/Downloads
     set -gx MAIN_FOLDER $HOME/Dev
 else if set -q GITHUB_ACTIONS
     set -gx MAIN_FOLDER $GITHUB_WORKSPACE
+    set -gx ENV_FOLDER $MAIN_FOLDER/env
 end
 if not set -q MAIN_FOLDER
     set -gx MAIN_FOLDER $HOME
@@ -131,6 +132,8 @@ set -gx CBL_TC_LLVM $CBL_TC_STOW_LLVM-latest/bin
 
 set -gx ENV_FOLDER $GITHUB_FOLDER/env
 set -gx FORKS_FOLDER $GITHUB_FOLDER/forks
+
+set -gx PYTHON_FOLDER $ENV_FOLDER/python
 
 set -gx TMP_BUILD_FOLDER $TMP_FOLDER/build
 
