@@ -433,6 +433,15 @@ function upd -d "Runs the update command for the current distro or downloads/upd
                     $curl -o $binary $url
                     $chmod +x $binary
 
+                case wally-cli
+                    set repo zsa/wally-cli
+                    set ver (glr $repo)
+                    set url https://github.com/$repo/releases/download/$ver/wally-cli
+
+                    $mkdir -p (dirname $binary)
+                    $curl -o $binary $url
+                    $chmod +x $binary
+
                 case dev lei
                     oci_bld $target
             end

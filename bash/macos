@@ -29,6 +29,8 @@ function install_packages() {
         fzf \
         gh \
         git \
+        jq \
+        libusb \
         mosh \
         zoxide || exit
 
