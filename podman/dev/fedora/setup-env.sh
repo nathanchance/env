@@ -148,6 +148,10 @@ EOF
         # spdxcheck.py
         python3-GitPython
         python3-ply
+
+        # website management
+        hugo
+        iproute
     )
 
     case "$(uname -m)" in

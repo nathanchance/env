@@ -177,6 +177,10 @@ function install_packages() {
         libutempter
         qemu-emulators-full
         qemu-img
+
+        # website management
+        hugo
+        iproute2
     )
     pacman -S --noconfirm "${packages[@]}"
 }
