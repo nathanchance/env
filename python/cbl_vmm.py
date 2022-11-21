@@ -20,7 +20,7 @@ import subprocess
 
 def parse_parameters():
     parser = argparse.ArgumentParser()
-    subparsers = parser.add_subparsers(help='Action to perform', dest='action')
+    subparsers = parser.add_subparsers(help='Action to perform', required=True)
 
     # Common arguments for all subcommands
     common_parser = argparse.ArgumentParser(add_help=False)
@@ -323,7 +323,7 @@ def set_cfg(args):
             raise NotImplementedError(f"Default .iso has not been defined for {arch}")
 
     # Folder for files
-    if 'VM_FOLDER' in environ:
+    if 'VM_FOLDER' in os.environ:
         base_folder = pathlib.Path(os.environ['VM_FOLDER'])
     else:
         base_folder = pathlib.Path(__file__).resolve().parent.joinpath('vm')
