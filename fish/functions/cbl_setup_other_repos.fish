@@ -53,6 +53,4 @@ function cbl_setup_other_repos -d "Download other ClangBuiltLinux repos"
         mkdir -p (dirname $tuxmake)
         git clone https://gitlab.com/Linaro/tuxmake.git $tuxmake
     end
-
-    cbl_clone_repo wsl2
 end
