@@ -2,6 +2,6 @@
 # SPDX-License-Identifier: MIT
 # Copyright (C) 2021-2022 Nathan Chancellor
 
-function print_warning -d "Print a message in bold yellow"
-    printf '\n%bWARNING: %s%b\n\n' '\033[01;33m' $argv '\033[0m'
+function print_warning -d "Print a message with a WARNING tag in bold yellow"
+    print_yellow "\nWARNING: $argv\n"
 end

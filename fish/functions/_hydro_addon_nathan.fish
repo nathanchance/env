@@ -6,9 +6,14 @@ function _hydro_addon_nathan -d "Hydro prompt customizations"
     # New line to make prompt a little more spacious
     printf '\\\\n'
 
+    # Signal if we are in a Python virtual environment
+    if in_venv
+        printf '%b(%s) ' (set_color 4B8BBE) (basename $VIRTUAL_ENV)
+    end
+
     # Print symbol if we are in a container (like default toolbox prompt)
     if in_container
-        printf (set_color magenta)"§ "
+        printf '%b%s ' (set_color magenta) §
     end
 
     # SSH connection check
@@ -24,8 +29,8 @@ function _hydro_addon_nathan -d "Hydro prompt customizations"
 
     # Print user@host if we are in a container or a SSH session
     if in_container; or test "$in_ssh" = true
-        printf (set_color yellow; id -un)
-        printf (set_color green)"@$hostname "
+        printf '%b%s' (set_color yellow) (id -un)
+        printf '%b@%s ' (set_color green) $hostname
     end
 
     printf '\n'
