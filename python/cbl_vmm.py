@@ -151,7 +151,6 @@ def get_efi_vars(cfg):
 
 
 def get_iso(cfg):
-    arch = cfg['architecture']
     iso_folder = cfg['iso_folder']
     iso = cfg['iso']
 
@@ -270,7 +269,6 @@ def remove_vm(cfg):
 
 
 def run_vm(cfg):
-    arch = cfg['architecture']
     cmdline = cfg['cmdline']
     gdb = cfg['gdb']
     initrd = cfg['initrd']
@@ -295,6 +293,7 @@ def run_vm(cfg):
 
 
 def set_cfg(args):
+    # pylint: disable=too-many-branches,too-many-locals,too-many-statements
     # Architecture
     arch = args.architecture
 
