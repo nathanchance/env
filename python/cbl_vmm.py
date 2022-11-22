@@ -455,7 +455,7 @@ def main():
 
     arch = cfg['architecture']
     supported_arches = ['aarch64', 'x86_64']
-    if not arch in supported_arches:
+    if arch not in supported_arches:
         raise NotImplementedError(f"{arch} is not currently supported!")
 
     args.func(cfg)

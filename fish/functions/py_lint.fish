@@ -10,7 +10,7 @@ function py_lint -d "Lint Python files"
         test -z "$files"; and return 0
     end
 
-    for command in pylint vulture yapf
+    for command in flake8 pylint vulture yapf
         if not command -q $command
             if in_venv
                 pip install $command
@@ -19,6 +19,15 @@ function py_lint -d "Lint Python files"
                 return 1
             end
         end
+    end
+
+    set -a flake8_ignore E501 # line too long
+    if flake8 \
+            --extend-ignore (string join , $flake8_ignore) \
+            $files
+        print_green "\nflake8 clean"
+    else
+        print_red "\nnot flake8 clean"
     end
 
     set -a pylint_ignore C0114 # missing-module-docstring
