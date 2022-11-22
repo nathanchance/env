@@ -10,8 +10,9 @@ import subprocess
 
 def fzf(target, fzf_input):
     fzf_cmd = ['fzf', '--header', target.capitalize(), '--multi']
-    fzf_proc = subprocess.Popen(fzf_cmd, stdin=subprocess.PIPE, stdout=subprocess.PIPE, text=True)
-    return fzf_proc.communicate(fzf_input)[0].splitlines()
+    with subprocess.Popen(fzf_cmd, stdin=subprocess.PIPE, stdout=subprocess.PIPE,
+                          text=True) as fzf_proc:
+        return fzf_proc.communicate(fzf_input)[0].splitlines()
 
 
 def oci_json(target):
@@ -71,5 +72,5 @@ if __name__ == '__main__':
 
     args = parse_arguments()
 
-    for target in args.targets:
-        remove(target)
+    for podman_target in args.targets:
+        remove(podman_target)
