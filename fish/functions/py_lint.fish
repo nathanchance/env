@@ -32,9 +32,9 @@ function py_lint -d "Lint Python files"
     set -a pylint_ignore R0914 # too-many-locals
     set -a pylint_ignore R0915 # too-many-statements
     if pylint \
-        --disable (string join , $pylint_ignore) \
-        --jobs (nproc) \
-        $files
+            --disable (string join , $pylint_ignore) \
+            --jobs (nproc) \
+            $files
         print_green "pylint clean\n"
     else
         print_red "not pylint clean\n"
