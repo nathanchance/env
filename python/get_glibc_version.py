@@ -11,4 +11,4 @@ if __name__ == '__main__':
     if len(ldd_version) < 3:
         ldd_version += [0]
     ldd_version = [int(x) for x in ldd_version]
-    print(f'{ldd_version[0]:d}{ldd_version[1]:02d}{ldd_version[2]:03d}')
+    print(f'{ldd_version[0]:d}{ldd_version[1]:02d}{ldd_version[2]:02d}')

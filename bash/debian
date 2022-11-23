@@ -182,7 +182,7 @@ function setup_doas() {
     doas_deb="$work_dir"/opendoas_"$doas_version"_"$dpkg_arch".deb
 
     glibc_version=$(get_glibc_version)
-    if (( glibc_version < 233000 )); then
+    if (( glibc_version < 23300 )); then
         prebuilt_doas_deb="${bash_root%/*}"/bin/packages/"${doas_deb##*/}"
         cp -v "$prebuilt_doas_deb" "$doas_deb" || exit
     else
