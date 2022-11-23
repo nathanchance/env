@@ -3,7 +3,7 @@
 
 _localversion=-llvm
 pkgname=linux-next$_localversion
-_srctag=next-20221122
+_srctag=next-20221123
 pkgver=${_srctag//-/.}
 pkgrel=1
 pkgdesc='linux-next'
@@ -17,7 +17,7 @@ options=('!strip')
 source=(
   "$pkgname::git+https://git.kernel.org/pub/scm/linux/kernel/git/next/linux-next.git?signed#tag=$_srctag"
   config
-  0001-Revert-fs-dlm-parallelize-lowcomms-socket-handling.patch
+  20221123_void_bpf_don_t_use_idx_variable_when_registering_kfunc_dtors.patch
 )
 
 validpgpkeys=(
@@ -25,8 +25,8 @@ validpgpkeys=(
   '3F2568AAC26998F9E813A1C5C3F436CA30F5D8EB'  # Mark Brown
 )
 sha256sums=('SKIP'
-            '0d23323df4a54233836c937802efd0da2f48048b78cd111c03e7545fd8b0157f'
-            '889407a4c9d9d40e51472363093b02cbd604fad01fd241a214494c428bd6eba6')
+            'c2ca72ba0a235f701aafec286175cfd3377f0a3200c1a1046cb3988e1a67e2d4'
+            'ed4cff42451afac22bf87b486cd9b7d6ea0f9ae85a0393698675ee0f31ff9726')
 
 # This obviously ties this PKGBUILD to my machine but that is kind of the point :)
 _kmake() {

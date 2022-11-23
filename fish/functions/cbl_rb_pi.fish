@@ -21,11 +21,11 @@ function cbl_rb_pi -d "Rebase Raspberry Pi kernel on latest linux-next"
     git rh origin/master
 
     # Patching
+    set -a patches https://lore.kernel.org/all/20221123135253.637525-1-void@manifault.com/ # bpf: Don't use idx variable when registering kfunc dtors
+    set -a patches https://lore.kernel.org/all/20221123155759.2669749-1-yhs@fb.com/ # bpf: Fix a BTF_ID_LIST bug with CONFIG_DEBUG_INFO_BTF not set
     for patch in $patches
         b4 am -l -o - -P _ -s $patch | git am; or return
     end
-    crl https://git.kernel.org/arm64/p/32d495b0c3305546f4773b9aafcd4e90188ddb9e | git am; or return # Revert "arm64/mm: Drop redundant BUG_ON(!pgtable_alloc)"
-    set -a ln_commits 2b65267f70e18b00f7dcc0ec974464e44547d46c # btf_ids.h: Increase BTF_ID_LIST array size
     for hash in $ln_commits
         git -C $CBL_BLD_P/linux-next fp -1 --stdout $hash | git am; or return
     end
