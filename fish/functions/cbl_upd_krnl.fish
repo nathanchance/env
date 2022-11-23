@@ -11,11 +11,14 @@ function cbl_upd_krnl -d "Update machine's kernel"
         case hetzner-server workstation
             cbl_upd_krnl_pkg $argv
 
-        case honeycomb
+        case honeycomb vm
             in_container_msg -h; or return
+            test (get_distro) = fedora; or return
 
             for arg in $argv
                 switch $arg
+                    case '*/*'
+                        set krnl_bld $arg
                     case -r --reboot
                         set reboot true
                 end
@@ -25,7 +28,8 @@ function cbl_upd_krnl -d "Update machine's kernel"
             sudo true; or return
 
             # Download .rpm package
-            set remote_rpm_folder $CBL_BLD/fedora/rpmbuild/RPMS/aarch64
+            set -q krnl_bld; or set krnl_bld $CBL_BLD/fedora
+            set remote_rpm_folder (string replace $MAIN_FOLDER $remote_main_folder $krnl_bld)/rpmbuild/RPMS/aarch64
             set krnl_rpm (ssh $remote_user@$remote_host fd -e rpm 'kernel-[0-9]+' $remote_rpm_folder)
             scp $remote_user@$remote_host:$krnl_rpm /tmp; or return
 
