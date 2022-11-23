@@ -3,7 +3,7 @@
 # SPDX-License-Identifier: MIT
 # Copyright (C) 2021-2022 Nathan Chancellor
 
-bash_root=$(dirname "$0")
+bash_root=$(realpath "$(dirname "$0")")
 
 # Add common functions
 source "$bash_root"/common || exit

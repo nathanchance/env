@@ -34,6 +34,10 @@ function clone_env() {
     chown -R "$user_name:$user_name" "$env_folder" || exit
 }
 
+function get_glibc_version() {
+    "$(dirname "${bash_root:?}")"/python/get_glibc_version.py
+}
+
 function is_installed() {
     if command -v dnf &>/dev/null; then
         dnf list --installed "${@:?}" &>/dev/null

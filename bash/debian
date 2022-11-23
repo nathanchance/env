@@ -3,7 +3,7 @@
 # SPDX-License-Identifier: MIT
 # Copyright (C) 2021-2022 Nathan Chancellor
 
-bash_root=$(dirname "$0")
+bash_root=$(realpath "$(dirname "$0")")
 dpkg_arch=$(dpkg --print-architecture)
 
 # Add common functions
@@ -178,10 +178,16 @@ EOF
 function setup_doas() {
     work_dir=$(mktemp -d)
 
-    doas_version=6.8.1-3
-    doas_deb="$work_dir"/doas_"$doas_version"_"$dpkg_arch".deb
+    doas_version=6.8.2-1$([[ $dpkg_arch = "amd64" ]] && echo +b1)
+    doas_deb="$work_dir"/opendoas_"$doas_version"_"$dpkg_arch".deb
 
-    curl -LSso "$doas_deb" http://http.us.debian.org/debian/pool/main/d/doas/"${doas_deb##*/}" || exit
+    glibc_version=$(get_glibc_version)
+    if (( glibc_version < 233000 )); then
+        prebuilt_doas_deb="${bash_root%/*}"/bin/packages/"${doas_deb##*/}"
+        cp -v "$prebuilt_doas_deb" "$doas_deb" || exit
+    else
+        curl -LSso "$doas_deb" http://http.us.debian.org/debian/pool/main/o/opendoas/"${doas_deb##*/}" || exit
+    fi
     dpkg -i "$doas_deb" || exit
 
     cat <<EOF >/etc/doas.conf
