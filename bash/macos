@@ -32,6 +32,7 @@ function install_packages() {
         jq \
         libusb \
         mosh \
+        ripgrep \
         zoxide || exit
 
     # Iosevka and WezTerm nightly casks
