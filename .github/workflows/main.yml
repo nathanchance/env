@@ -1,20 +1,18 @@
-# Run shellcheck and shfmt on all shell files in this repository
+# Run a bunch of lint checks to keep me honest
 name: Linting
 on: [push, pull_request]
 jobs:
   fish:
     uses: nathanchance/actions-workflows/.github/workflows/fish_format.yml@main
+  python:
+    strategy:
+      fail-fast: false
+      matrix:
+        version: ['3.11', '3.10', '3.9'] # No 3.8 due to zoneinfo use
+    uses: nathanchance/actions-workflows/.github/workflows/python_lint.yml@main
+    with:
+      python_version: ${{ matrix.version }}
   shellcheck:
     uses: ClangBuiltLinux/actions-workflows/.github/workflows/shellcheck.yml@main
   shfmt:
     uses: ClangBuiltLinux/actions-workflows/.github/workflows/shfmt.yml@main
-  yapf:
-    name: 'yapf'
-    runs-on: ubuntu-latest
-    steps:
-      - name: checkout
-        uses: actions/checkout@v3
-      - name: yapf
-        uses: AlexanderMelde/yapf-action@v1.0
-        with:
-          args: --exclude '**/skeletons/**'
