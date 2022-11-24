@@ -8,10 +8,17 @@ function cbl_upd_krnl -d "Update machine's kernel"
     set remote_main_folder /home/$remote_user
 
     switch $LOCATION
+        case vm
+            set location vm-(uname -m)
+        case '*'
+            set location $LOCATION
+    end
+
+    switch $location
         case hetzner-server workstation
             cbl_upd_krnl_pkg $argv
 
-        case honeycomb vm
+        case honeycomb vm-aarch64
             in_container_msg -h; or return
             test (get_distro) = fedora; or return
 
@@ -72,7 +79,7 @@ function cbl_upd_krnl -d "Update machine's kernel"
             # Install kernel
             install_rpi_kernel $arch $ver $install_args /tmp/linux-*-$arch.tar.zst
 
-        case test-desktop-amd test-desktop-intel test-laptop-intel vm
+        case test-desktop-amd test-desktop-intel test-laptop-intel vm-x86_64
             in_container_msg -h; or return
 
             for arg in $argv
