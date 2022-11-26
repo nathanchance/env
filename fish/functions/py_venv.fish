@@ -5,7 +5,7 @@
 function py_venv -d "Manage Python virtual environment"
     for arg in $argv
         switch $arg
-            case c create e enter exit l ls list r rm remove x
+            case c create e enter exit i in install l ls list r rm remove u up update x
                 set -a actions $arg
             case '*'
                 set venv $arg
@@ -15,9 +15,12 @@ function py_venv -d "Manage Python virtual environment"
         print_error "no actions specified!"
         return 1
     end
-    if not set -q venv; and not string match -qr '(l|ls|list)' $actions
-        print_error "venv name not specified!"
-        return 1
+    if not set -q venv
+        switch $arg
+            case c create e enter r rm remove
+                print_error "venv name not specified!"
+                return 1
+        end
     end
     set venv_dir $MAIN_FOLDER/.venv
     set venv $venv_dir/$venv
@@ -42,6 +45,11 @@ function py_venv -d "Manage Python virtual environment"
                 end
                 source $activate
 
+            case i in install
+                if test -e requirements.txt
+                    pip install -r requirements.txt
+                end
+
             case l ls list
                 echo
                 echo "Available virtual environments:"
@@ -53,6 +61,17 @@ function py_venv -d "Manage Python virtual environment"
 
             case r rm remove
                 rm -fr $venv
+
+            case u up update
+                if not in_venv
+                    print_error "Not in a virtual environment?"
+                    return 1
+                end
+
+                set packages (pip list -o | string match -r '^.*[0-9]+\.[0-9]+\.[0-9]+' | string split -f 1 ' ')
+                if test -n "$packages"
+                    pip install --upgrade $packages
+                end
 
             case x exit
                 if not in_venv
