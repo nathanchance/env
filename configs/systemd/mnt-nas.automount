@@ -2,7 +2,7 @@
 Description=Automount Synology NAS folder at boot
 
 [Automount]
-Where=/mnt/synology
+Where=/mnt/nas
 
 [Install]
 WantedBy=multi-user.target

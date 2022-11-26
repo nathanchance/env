@@ -83,6 +83,8 @@ set -gx GITHUB_FOLDER $MAIN_FOLDER/github
 set -gx KERNEL_FOLDER $MAIN_FOLDER/kernel
 set -gx SRC_FOLDER $MAIN_FOLDER/src
 
+set -gx NAS_FOLDER /mnt/nas
+
 set -gx NVME_FOLDER /mnt/nvme
 if test -d $NVME_FOLDER
     set -gx EXT_FOLDER $NVME_FOLDER

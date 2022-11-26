@@ -2,8 +2,8 @@
 Description=Mount Synology NAS folder at boot
 
 [Mount]
-What=192.168.4.207:/volume1/Thelio
-Where=/mnt/synology
+What=192.168.4.207:/volume1/Storage
+Where=/mnt/nas
 Options=vers=4
 Type=nfs
 TimeoutSec=30
