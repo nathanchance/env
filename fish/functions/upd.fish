@@ -35,13 +35,10 @@ function upd -d "Runs the update command for the current distro or downloads/upd
                 fisher update 1>/dev/null; or return
                 continue
 
-            case forgit hydro
+            case hydro
                 set repo $GITHUB_FOLDER/$target
                 if is_location_primary
                     switch $target
-                        case forgit
-                            set branch master
-                            set owner wfxr
                         case hydro
                             set branch main
                             set owner jorgebucaran
@@ -53,15 +50,15 @@ function upd -d "Runs the update command for the current distro or downloads/upd
                     git -C $repo urh; or return
                 end
                 switch $target
-                    case forgit hydro
+                    case hydro
                         fisher update $repo 1>/dev/null; or return
                 end
 
             case forks
                 set fisher_plugins \
                     jorgebucaran/autopair.fish \
-                    PatrickF1/fzf.fish
-
+                    PatrickF1/fzf.fish \
+                    wfxr/forgit
                 set vim_plugins \
                     blankname/vim-fish \
                     junegunn/fzf.vim \

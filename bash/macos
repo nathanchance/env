@@ -89,7 +89,6 @@ function clone_env_plugins() {
     git -C "$env_folder" pull
 
     forked_fisher_plugins=(
-        "$github_folder"/forgit
         "$github_folder"/hydro
     )
     for forked_fisher_plugin in "${forked_fisher_plugins[@]}"; do
@@ -126,9 +125,10 @@ function env_setup
     set -l github_folder $HOME/Dev/github
     set -l fisher_plugins \
         jorgebucaran/fisher \
-        $github_folder/{env/fish,forgit,hydro} \
+        $github_folder/{env/fish,hydro} \
         PatrickF1/fzf.fish \
-        jorgebucaran/autopair.fish
+        jorgebucaran/autopair.fish \
+        wfxr/forgit
 
     curl -LSs https://git.io/fisher | source
     and fisher install $fisher_plugins
