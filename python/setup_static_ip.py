@@ -13,10 +13,6 @@ def parse_arguments():
         description='Sets a static IP address on the active Ethernet port')
 
     parser.add_argument('-i', '--ip-addr', help='IP address to assign', required=True)
-    parser.add_argument('-n',
-                        '--name',
-                        default='Wired connection 1',
-                        help='Name of connection to modify in NetworkManager')
 
     return parser.parse_args()
 
@@ -37,16 +33,16 @@ def initial_checks(ip_addr):
     check_ip(ip_addr)
 
 
-def get_active_interface(con_name):
+def get_active_ethernet_info():
     active_connections = subprocess.run(
-        ['nmcli', '-f', 'NAME,DEVICE', 'connection', 'show', '--active'],
+        ['nmcli', '-f', 'TYPE,NAME,DEVICE', '-t', 'connection', 'show', '--active'],
         capture_output=True,
         check=True,
         text=True).stdout.strip().split('\n')
     for line in active_connections:
         line = line.strip()
-        if re.search(con_name, line):
-            return line.split(' ')[-1]
+        if re.search('ethernet', line):
+            return line.split(':')[1:]
     return None
 
 
@@ -91,10 +87,9 @@ if __name__ == '__main__':
     args = parse_arguments()
 
     requested_ip = args.ip_addr
-    connection_name = args.name
 
     initial_checks(requested_ip)
 
-    interface = get_active_interface(connection_name)
+    connection_name, interface = get_active_ethernet_info()
 
     set_ip_addr_for_intf(connection_name, interface, requested_ip)
