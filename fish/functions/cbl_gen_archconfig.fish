@@ -62,6 +62,11 @@ function cbl_gen_archconfig -d "Generate a configuration file for Arch Linux"
         --file $cfg \
         -e LRU_GEN \
         -e LRU_GEN_ENABLED
+    # https://git.kernel.org/linus/456ca88d8a5258fc66edc42a10053ac8473de2b1
+    # Remove when 6.1 is in the Arch Linux repos.
+    $src/scripts/config \
+        --file $cfg \
+        -e X86_AMD_PSTATE
 
     # Step 3: Run olddefconfig
     kmake -C $src KCONFIG_CONFIG=$cfg olddefconfig
