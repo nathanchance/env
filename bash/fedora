@@ -166,6 +166,14 @@ function setup_mosh() {
     firewall-cmd --reload
 }
 
+function setup_static_ip() {
+    case "$(uname -n)" in
+        honeycomb) ip=192.168.4.210 ;;
+        *) return 0 ;;
+    esac
+    setup_static_ip_common "$ip"
+}
+
 function setup_tailscale() {
     is_installed tailscale || return 0
 
@@ -184,6 +192,7 @@ setup_doas
 setup_kernel_args
 setup_libvirt
 setup_mosh
+setup_static_ip
 setup_tailscale
 chsh_fish
 clone_env

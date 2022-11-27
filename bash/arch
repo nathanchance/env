@@ -248,6 +248,17 @@ EOF
     pacman -S --noconfirm opendoas-sudo || exit
 }
 
+function setup_static_ip() {
+    case "$(uname -n)" in
+        asus-intel-core-4210U) ip=192.168.4.137 ;;
+        asus-intel-core-11700) ip=192.168.4.189 ;;
+        hp-amd-ryzen-4300G) ip=192.168.4.177 ;;
+        thelio-3990X) ip=192.168.4.188 ;;
+        *) return 0 ;;
+    esac
+    setup_static_ip_common "$ip"
+}
+
 function setup_user() {
     if user_exists "$user_name"; then
         chsh_fish
@@ -377,6 +388,7 @@ clone_env
 podman_setup
 vmware_adjustments
 setup_libvirt
+setup_static_ip
 wsl_setup
 enable_reflector
 enable_ssh

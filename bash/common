@@ -200,6 +200,10 @@ function setup_libvirt_common() {
     fi
 }
 
+function setup_static_ip_common() {
+    "$(dirname "${bash_root:?}")"/python/setup_static_ip.py -i "$1"
+}
+
 function setup_sudo_symlink() {
     sudo_prefix=${PREFIX:-/usr/local}/stow/sudo
     sudo_bin=$sudo_prefix/bin/sudo
