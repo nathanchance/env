@@ -368,6 +368,15 @@ function fix_lightdm() {
     sed -i 's/#logind-check-graphical=false/logind-check-graphical=true/g' /etc/lightdm/lightdm.conf
 }
 
+function adjust_gnome_power_settings() {
+    user_exists gdm || return 0
+
+    cp -v /etc/doas.conf{,.bak}
+    echo "permit nopass root as gdm" >>/etc/doas.conf
+    doas -u gdm dbus-launch gsettings set org.gnome.settings-daemon.plugins.power sleep-inactive-ac-type 'nothing'
+    mv -v /etc/doas.conf{.bak,}
+}
+
 # For archinstall, which causes ^M in /etc/fstab
 function fix_fstab() {
     dos2unix /etc/fstab
@@ -394,6 +403,7 @@ enable_reflector
 enable_ssh
 enable_tailscale
 fix_lightdm
+adjust_gnome_power_settings
 fix_fstab
 set_date_time
 setup_initial_fish_config
