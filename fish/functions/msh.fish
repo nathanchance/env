@@ -39,7 +39,7 @@ function msh -d "Shorthand for mosh -o" -w mosh
 
         case intel-laptop
             if test "$tailscale" = true
-                set ip 100.85.161.103
+                set ip 100.71.203.25
             else
                 set ip 192.168.4.137
             end
