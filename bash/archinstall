@@ -1,0 +1,23 @@
+#!/usr/bin/env bash
+
+set -eux
+
+if ! command -v patch &>/dev/null; then
+    pacman -Sy --noconfirm patch
+fi
+
+site_packages=$(python3 -c 'import site; print(site.getsitepackages()[0])')
+
+sudo pacman -Sy --noconfirm archinstall
+
+# https://github.com/archlinux/archinstall/issues/1557
+major=$1
+shift
+find "$site_packages"/archinstall -type f -exec sed -i "s;lsblk --json;lsblk -a -e $major --json;g" {} \;
+
+# Double the size of the boot partition
+if ! grep -q '1025MiB' "$site_packages"/archinstall/lib/disk/user_guides.py; then
+    curl -LSs https://raw.githubusercontent.com/nathanchance/patches/main/archinstall/uefi-boot-size.patch | patch -d "$site_packages" -N -p1
+fi
+
+archinstall "$@"
