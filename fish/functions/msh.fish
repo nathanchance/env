@@ -15,7 +15,7 @@ function msh -d "Shorthand for mosh -o" -w mosh
     switch $msh_args
         case amd-desktop
             if test "$tailscale" = true
-                set ip 100.127.171.46
+                set ip 100.76.142.56
             else
                 set ip 192.168.4.177
             end
@@ -31,7 +31,7 @@ function msh -d "Shorthand for mosh -o" -w mosh
 
         case intel-desktop
             if test "$tailscale" = true
-                set ip 100.122.30.49
+                set ip 100.98.119.115
             else
                 set ip 192.168.4.189
             end
