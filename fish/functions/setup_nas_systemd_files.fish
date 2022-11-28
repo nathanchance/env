@@ -10,10 +10,7 @@ function setup_nas_systemd_files -d "Install systemd files for mounting NAS to a
         return 1
     end
 
-    # Cache sudo permissions
-    sudo true; or return
-
-    sudo cp -v $ENV_FOLDER/configs/systemd/mnt-nas.{auto,}mount /etc/systemd/system
-
-    sudo systemctl enable --now mnt-nas.automount
+    sudo fish -c "cp -v $ENV_FOLDER/configs/systemd/mnt-nas.{auto,}mount /etc/systemd/system
+and chmod 644 /etc/systemd/system/mnt-nas.{auto,}mount
+and systemctl enable --now mnt-nas.automount"
 end

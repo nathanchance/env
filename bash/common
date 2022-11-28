@@ -42,6 +42,7 @@ function install_mnt_nas_files() {
     systemd_configs=$(dirname "${bash_root:?}")/configs/systemd
 
     cp -v "$systemd_configs"/mnt-nas.{auto,}mount /etc/systemd/system
+    chmod 644 /etc/systemd/system/mnt-nas.{auto,}mount
     systemctl enable --now mnt-nas.automount
 }
 
