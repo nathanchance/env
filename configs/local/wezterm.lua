@@ -40,7 +40,8 @@ return {
      {key="RightArrow", mods="CMD", action={SendKey={key="End"}}},
      {key="UpArrow", mods="CMD", action={SendKey={key="PageUp"}}},
      {key="DownArrow", mods="CMD", action={SendKey={key="PageDown"}}},
-     {key="Enter", mods="ALT", action="DisableDefaultAssignment"}
+     {key="Enter", mods="ALT", action="DisableDefaultAssignment"},
+     {key="t", mods="ALT", action=wezterm.action.ShowTabNavigator},
   },
   window_padding = {
     left = 10,
