@@ -38,6 +38,13 @@ function get_glibc_version() {
     "$(dirname "${bash_root:?}")"/python/get_glibc_version.py
 }
 
+function install_mnt_nas_files() {
+    systemd_configs=$(dirname "${bash_root:?}")/configs/systemd
+
+    cp -v "$systemd_configs"/mnt-nas.{auto,}mount /etc/systemd/system
+    systemctl enable --now mnt-nas.automount
+}
+
 function is_installed() {
     if command -v dnf &>/dev/null; then
         dnf list --installed "${@:?}" &>/dev/null
@@ -200,7 +207,7 @@ function setup_libvirt_common() {
     fi
 }
 
-function setup_static_ip_common() {
+function setup_static_ip() {
     "$(dirname "${bash_root:?}")"/python/setup_static_ip.py -i "$1"
 }
 
