@@ -171,7 +171,7 @@ function install_packages() {
         python-ply
 
         # QEMU
-        edk2-armvirt
+        edk2-aarch64
         edk2-ovmf
         libevent
         libutempter

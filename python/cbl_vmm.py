@@ -99,31 +99,36 @@ def get_efi_img(cfg):
     arch = cfg['architecture']
     vm_folder = cfg['vm_folder']
 
+    share_folders = ['edk2']
     if arch == 'aarch64':
-        # Fedora location
-        src = pathlib.Path('/usr/share/edk2/aarch64/QEMU_EFI.fd')
-        if not src.exists():
-            # Arch Linux location
-            src = pathlib.Path('/usr/share/edk2-armvirt/aarch64/QEMU_EFI.fd')
-            if not src.exists():
-                raise FileNotFoundError(f"{src.name} could not be found!")
+        share_folders += ['edk2-armvirt']  # old Arch Linux location
+        efi_arch = arch
+        efi_img = 'QEMU_EFI.fd'
+    elif arch == 'x86_64':
+        share_folders += ['edk2-ovmf']  # old Arch Linux location
+        efi_arch = 'x64'
+        efi_img = 'OVMF_CODE.fd'
+    else:
+        raise NotImplementedError(f"get_efi_img() is not implemented for {arch}")
+    share_folders += [None]
 
+    for share_folder in share_folders:
+        if share_folder is None:
+            raise FileNotFoundError(f"{efi_img} could not be found!")
+        src = pathlib.Path(f"/usr/share/{share_folder}/{efi_arch}/{efi_img}")
+        if src.exists():
+            break
+
+    if arch == 'aarch64':
         dst = vm_folder.joinpath('efi.img')
         if not dst.exists():
             run_cmd(['truncate', '-s', '64m', dst])
             run_cmd(['dd', f"if={src}", f"of={dst}", 'conv=notrunc'])
+        ret = dst
+    elif arch == 'x86_64':
+        ret = src
 
-        return dst
-
-    if arch == 'x86_64':
-        src = pathlib.Path('/usr/share/edk2-ovmf/x64/OVMF_CODE.fd')
-
-        if src.exists():
-            return src
-
-        raise FileNotFoundError(f"{src.name} could not be found!")
-
-    raise NotImplementedError(f"get_efi_img() is not implemented for {arch}")
+    return ret
 
 
 def get_efi_vars(cfg):
@@ -137,15 +142,20 @@ def get_efi_vars(cfg):
         return efivars
 
     if arch == 'x86_64':
-        src = pathlib.Path('/usr/share/OVMF/x64/OVMF_VARS.fd')
+        efi_vars = 'OVMF_VARS.fd'
 
-        if src.exists():
-            dst = vm_folder.joinpath(src.name)
-            if not dst.exists():
-                shutil.copyfile(src, dst)
-            return dst
-
-        raise FileNotFoundError(f"{src.name} could not be found!")
+        dst = vm_folder.joinpath(efi_vars)
+        if not dst.exists():
+            share_folders = ['edk2', 'OVMF', None]
+            efi_arch = 'x64'
+            for share_folder in share_folders:
+                if share_folder is None:
+                    raise FileNotFoundError(f"{efi_vars} could not be found!")
+                src = pathlib.Path(f"/usr/share/{share_folder}/{efi_arch}/{efi_vars}")
+                if src.exists():
+                    break
+            shutil.copyfile(src, dst)
+        return dst
 
     raise NotImplementedError(f"get_efi_vars() is not implemented for {arch}")
 
