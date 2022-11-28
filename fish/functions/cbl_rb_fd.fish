@@ -13,8 +13,6 @@ function cbl_rb_fd -d "Rebase generic Fedora kernel on latest linux-next"
     git rh origin/master
 
     # Patching
-    set -a patches https://lore.kernel.org/all/20221123135253.637525-1-void@manifault.com/ # bpf: Don't use idx variable when registering kfunc dtors
-    set -a patches https://lore.kernel.org/all/20221123155759.2669749-1-yhs@fb.com/ # bpf: Fix a BTF_ID_LIST bug with CONFIG_DEBUG_INFO_BTF not set
     for patch in $patches
         b4 shazam -l -P _ -s $patch; or return
     end
