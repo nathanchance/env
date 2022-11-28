@@ -8,7 +8,7 @@ function cbl_rb_fd -d "Rebase generic Fedora kernel on latest linux-next"
     set fd_src $CBL_BLD/fedora
     pushd $fd_src; or return
 
-    # Update and patch kernel
+    # Update kernel
     git ru --prune origin; or return
     git rh origin/master
 
@@ -19,6 +19,8 @@ function cbl_rb_fd -d "Rebase generic Fedora kernel on latest linux-next"
     for hash in $ln_commits
         git -C $CBL_BLD_P/linux-next fp -1 --stdout $hash | git am; or return
     end
+    # https://lore.kernel.org/CA+QYu4oxiRKC6hJ7F27whXy-PRBx=Tvb+-7TQTONN8qTtV3aDA@mail.gmail.com/
+    git rv --no-edit dae590a6c96c799434e0ff8156ef29b88c257e60; or return
 
     # Build kernel
     cbl_bld_krnl_rpm --cfi --lto arm64; or return

@@ -27,6 +27,8 @@ function cbl_rb_pi -d "Rebase Raspberry Pi kernel on latest linux-next"
     for hash in $ln_commits
         git -C $CBL_BLD_P/linux-next fp -1 --stdout $hash | git am; or return
     end
+    # https://lore.kernel.org/CA+QYu4oxiRKC6hJ7F27whXy-PRBx=Tvb+-7TQTONN8qTtV3aDA@mail.gmail.com/
+    git rv --no-edit dae590a6c96c799434e0ff8156ef29b88c257e60; or return
 
     # Regenerate defconfigs
     for arch in arm arm64
