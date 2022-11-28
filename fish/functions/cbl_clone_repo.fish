@@ -4,8 +4,10 @@
 
 function cbl_clone_repo -d "Clone certain repos for ClangBuiltLinux testing and development"
     for arg in $argv
+        set -l bundle
         set -l dest
         set -l git_clone_args
+        set -l korg_bundle_folder $NAS_FOLDER/kernel.org_bundles/latest
 
         switch $arg
             case binutils
@@ -17,13 +19,16 @@ function cbl_clone_repo -d "Clone certain repos for ClangBuiltLinux testing and 
                 set url https://github.com/nathanchance/$arg.git
                 set dest $CBL/(string replace cbl- "" $arg)
             case linux
+                set bundle $korg_bundle_folder/clone.bundle-$arg
                 set url https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/
             case linux-fast-headers
                 set git_clone_args -b sched/headers
                 set url https://git.kernel.org/pub/scm/linux/kernel/git/mingo/tip.git/
             case linux-next
+                set bundle $korg_bundle_folder/clone.bundle-$arg
                 set url https://git.kernel.org/pub/scm/linux/kernel/git/next/linux-next.git/
             case linux-stable
+                set bundle $korg_bundle_folder/clone.bundle-$arg
                 set url https://git.kernel.org/pub/scm/linux/kernel/git/stable/linux.git/
             case llvm-project
                 set url https://github.com/llvm/llvm-project
@@ -41,7 +46,11 @@ function cbl_clone_repo -d "Clone certain repos for ClangBuiltLinux testing and 
 
         if not test -d $dest
             mkdir -p (dirname $dest)
-            git clone $git_clone_args $url $dest; or return
+            if test -n "$bundle"; and test -e $bundle
+                clone_from_bundle $bundle $dest $url master; or return
+            else
+                git clone $git_clone_args $url $dest; or return
+            end
             switch $arg
                 case llvm-project
                     switch $LOCATION

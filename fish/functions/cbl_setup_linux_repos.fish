@@ -21,32 +21,30 @@ function cbl_setup_linux_repos -d "Clone ClangBuiltLinux Linux repos into their 
         set url (string split -f1 ":" $pair)
         set folder (string split -f2 ":" $pair)
 
-        switch $url
-            case next/linux-next
-                set suffix next
-            case stable/linux
-                set suffix stable
-            case torvalds/linux
-                set suffix mainline
-        end
-        set cb $tmp_dir/clone.bundle-$suffix
-
         if test -d $folder
             continue
         end
+
+        set bundle_dir $NAS_FOLDER/kernel.org_bundles/latest
+        if test -d $bundle_dir
+            set cb_dir $bundle_dir
+        else
+            set cb_dir $tmp_dir
+        end
+        switch $url
+            case stable/linux
+                set suffix linux-stable
+            case '*'
+                set suffix (basename $url)
+        end
+        set cb $cb_dir/clone.bundle-$suffix
 
         mkdir -p (dirname $folder)
         if not test -f $cb
             wget -c -O $cb https://mirrors.kernel.org/pub/scm/.bundles/pub/scm/linux/kernel/git/$url/clone.bundle; or return
         end
 
-        git clone $cb $folder
-
-        git -C $folder remote remove origin
-        git -C $folder remote add origin https://git.kernel.org/pub/scm/linux/kernel/git/$url.git
-        git -C $folder remote update origin
-
-        git -C $folder checkout master
+        clone_from_bundle $cb $folder https://git.kernel.org/pub/scm/linux/kernel/git/$url.git master; or return
 
         switch (basename $folder)
             case rpi
