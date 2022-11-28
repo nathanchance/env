@@ -29,6 +29,7 @@ def parse_parameters():
         'arch',
         'fedora',
         'ipsw',
+        'korg',
         'rpios'
     ]  # yapf: disable
 
@@ -39,6 +40,16 @@ def parse_parameters():
                         help='Download targets')
 
     return parser.parse_args()
+
+
+def get_most_recent_sunday():
+    today = datetime.date.today()
+    sunday_offset = (today.weekday() + 1) % 7
+    return today - datetime.timedelta(sunday_offset)
+
+
+def get_sunday_as_folder():
+    return get_most_recent_sunday().strftime('%Y-%m-%d')
 
 
 def calculate_sha256(file_path):
@@ -56,6 +67,8 @@ def get_sha256_from_url(url, basename):
     response = requests.get(url, timeout=3600)
     response.raise_for_status()
     for line in response.content.decode('utf-8').split('\n'):
+        if 'clone.bundle' in basename:
+            basename = basename.split('-')[-1]
         if re.search(basename, line):
             sha256_match = re.search('[A-Fa-f0-9]{64}', line)
             if sha256_match:
@@ -65,13 +78,13 @@ def get_sha256_from_url(url, basename):
 
 def validate_sha256(file, url):
     computed_sha256 = calculate_sha256(file)
-    expected_sha256 = get_sha256_from_url(url, file.stem)
+    expected_sha256 = get_sha256_from_url(url, file.name)
 
     if computed_sha256 == expected_sha256:
-        print_green(f"SUCCESS: {file.stem} sha256 passed!")
+        print_green(f"SUCCESS: {file.name} sha256 passed!")
     else:
         raise Exception(
-            f"{file.stem} computed checksum ('{computed_sha256}') did not match expected checksum ('{expected_sha256}')!"
+            f"{file.name} computed checksum ('{computed_sha256}') did not match expected checksum ('{expected_sha256}')!"
         )
 
 
@@ -89,7 +102,7 @@ def get_latest_ipsw_url(identifier, version):
 
 
 def download_if_necessary(item):
-    base_file = item['file_url'].split('/')[-1]
+    base_file = item['base_file'] if 'base_file' in item else item['file_url'].split('/')[-1]
     target = item['containing_folder'].joinpath(base_file)
     target.parent.mkdir(exist_ok=True)
     if target.exists():
@@ -101,12 +114,25 @@ def download_if_necessary(item):
         with open(target, 'xb') as file:
             file.write(response.content)
 
-    sha_url = item['sha_url']
-    if sha_url:
-        validate_sha256(target, sha_url)
+    if 'sha_url' in item:
+        validate_sha256(target, item['sha_url'])
 
 
-def download_items(targets, containing_folder):
+def update_bundle_symlink(bundle_folder):
+    src = bundle_folder.joinpath(get_sunday_as_folder())
+    dest = bundle_folder.joinpath('latest')
+    dest.symlink_to(src)
+
+
+def download_items(targets, network_folder):
+    firmware_folder = network_folder.joinpath('Firmware_and_Images')
+    if not firmware_folder.exists():
+        raise Exception(f"{firmware_folder} does not exist, systemd automounting broken?")
+
+    bundle_folder = network_folder.joinpath('kernel.org_bundles')
+    if not bundle_folder.exists():
+        raise Exception(f"{bundle_folder} does not exist??")
+
     items = []
     for target in targets:
         if target == 'arch':
@@ -115,14 +141,14 @@ def download_items(targets, containing_folder):
 
             base_arch_url = f"https://mirrors.edge.kernel.org/archlinux/iso/{arch_date}"
             items += [{
-                'containing_folder': containing_folder.joinpath('Arch Linux'),
+                'containing_folder': firmware_folder.joinpath('Arch Linux'),
                 'file_url': f"{base_arch_url}/archlinux-{arch_date}-x86_64.iso",
                 'sha_url': f"{base_arch_url}/sha256sums.txt"
             }]
 
-        if target == 'fedora':
+        elif target == 'fedora':
             fedora_arches = ['aarch64', 'x86_64']
-            subfolder = containing_folder.joinpath(target.capitalize())
+            subfolder = firmware_folder.joinpath(target.capitalize())
 
             # Constants to update
             fedora_ver = 37
@@ -159,9 +185,25 @@ def download_items(targets, containing_folder):
 
             for mac_version in mac_versions:
                 items += [{
-                    'containing_folder': base_folder.joinpath('macOS', 'VM'),
-                    'file_url': get_latest_ipsw_url('VirtualMac2,1', mac_version),
-                    'sha_url': None
+                    'containing_folder': firmware_folder.joinpath('macOS', 'VM'),
+                    'file_url': get_latest_ipsw_url('VirtualMac2,1', mac_version)
+                }]
+
+        elif target == 'korg':
+            repos = [('torvalds/linux', 'linux'), ('next/linux-next', 'linux-next'),
+                     ('stable/linux', 'linux-stable')]
+
+            for repo in repos:
+                repo_remote = repo[0]
+                repo_local = repo[1]
+
+                base_korg_bundle_url = f"https://mirrors.kernel.org/pub/scm/.bundles/pub/scm/linux/kernel/git/{repo_remote}"
+                clone_bundle = 'clone.bundle'
+                items += [{
+                    'base_file': f"{clone_bundle}-{repo_local}",
+                    'containing_folder': bundle_folder.joinpath(get_sunday_as_folder()),
+                    'file_url': f"{base_korg_bundle_url}/{clone_bundle}",
+                    'sha_url': f"{base_korg_bundle_url}/sha256sums.asc"
                 }]
 
         elif target == 'rpios':
@@ -172,13 +214,15 @@ def download_items(targets, containing_folder):
             for rpi_arch in rpi_arches:
                 base_rpi_url = f"https://downloads.raspberrypi.org/raspios_lite_{rpi_arch}/images/raspios_lite_{rpi_arch}-{rpi_date}-raspios-{deb_ver}-{rpi_arch}-lite.img.xz"
                 items += [{
-                    'containing_folder': containing_folder.joinpath('Raspberry Pi OS'),
+                    'containing_folder': firmware_folder.joinpath('Raspberry Pi OS'),
                     'file_url': base_rpi_url,
                     'sha_url': base_rpi_url + '.sha256'
                 }]
 
     for item in items:
         download_if_necessary(item)
+    if 'korg' in targets:
+        update_bundle_symlink(bundle_folder)
 
 
 if __name__ == '__main__':
@@ -188,8 +232,4 @@ if __name__ == '__main__':
     if not nas_folder.exists():
         raise Exception(f"{nas_folder} does not exist, setup systemd automount files?")
 
-    base_folder = nas_folder.joinpath("Firmware_and_Images")
-    if not base_folder.exists():
-        raise Exception(f"{base_folder} does not exist, systemd automounting broken?")
-
-    download_items(args.targets, base_folder)
+    download_items(args.targets, nas_folder)
