@@ -10,4 +10,5 @@ function dbxr -d "Remove a distrobox container"
     end
 
     dbx rm -f $targets
+    rm -fr $ENV_FOLDER/.distrobox/$targets
 end

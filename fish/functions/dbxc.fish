@@ -80,36 +80,87 @@ function dbxc -d "Shorthand for 'distrobox create'"
         set -a add_args --volume=/etc/pacman.d/mirrorlist:/etc/pacman.d/mirrorlist:ro
     end
 
-    # If we are on Ubuntu using docker, we need to set the container's
+    # If we are using docker, we need to explicitly set the container's
     # kvm group to the same group ID as the host's kvm group if it exists
     # so that accelerated VMs work within a container. Do this with an init hook.
-    if command -q docker; and test (get_distro) = ubuntu; and group_exists kvm
+    if command -q docker; and group_exists kvm
         set -l host_kvm_gid (getent group kvm | string split -f 3 :)
 
-        set init_hook_sh (mktemp --suffix=.sh)
+        set env_dbx $ENV_FOLDER/.distrobox
+
+        if test "$mode" = create
+            set init_hook_sh $env_dbx/$name/init-hook.sh
+            mkdir -p (dirname $init_hook_sh)
+            touch $init_hook_sh
+        else
+            mkdir -p $env_dbx
+            set init_hook_sh (mktemp -p $env_dbx --suffix=.sh)
+        end
+
         chmod +x $init_hook_sh
         echo '#!/bin/sh
 
-kvm_group_exists() {
-    getent group kvm >/dev/null 2>&1
+user="'"$USER"'"
+target_gid="'"$host_kvm_gid"'"
+
+group() {
+    getent group "$@"
 }
 
-kvm_gid_mismatch() {
-    [ "$(kvm_gid)" != "'"$host_kvm_gid"'" ]
+group_quiet() {
+    group "$@" >/dev/null 2>&1
+}
+
+group_get_field() {
+    group "${@:2}" | cut -d : -f "$1"
+}
+
+kvm_group_exists() {
+    group_quiet kvm
 }
 
 kvm_gid() {
     kvm_group_exists || return
-    getent group kvm | cut -d: -f3
+    group_to_gid kvm
 }
 
-if kvm_gid_mismatch; then
-    kvm_group_exists && groupdel -f kvm
-    groupadd -g '"$host_kvm_gid"' kvm || exit
-    usermod -aG kvm '"$USER"' || exit
-fi
+target_gid_exists() {
+    group_quiet "$target_gid"
+}
 
-rm '"$init_hook_sh" >$init_hook_sh
+gid_to_group() {
+    group_get_field 1 "$@"
+}
+
+group_to_gid() {
+    group_get_field 3 "$@"
+}
+
+user_in_target_gid() {
+    target_gid_exists || return
+    group "$target_gid" | grep -qw "$user"
+}
+
+kvm_gid_mismatch() {
+    [ "$(kvm_gid)" != "$target_gid" ]
+}
+
+if ! user_in_target_gid; then
+    if target_gid_exists; then
+        group=$(gid_to_group "$target_gid")
+    else
+        group=kvm
+        if kvm_gid_mismatch; then
+            kvm_group_exists && groupdel -f "$group"
+            groupadd -g "$target_gid" "$group" || exit
+        fi
+    fi
+    usermod -aG "$group" "$user" || exit
+fi' >$init_hook_sh
+
+        if not string match -qr init-hook $init_hook_sh
+            printf '\nrm "%s"\n' $init_hook_sh >>$init_hook_sh
+        end
     end
 
     if set -q init_hook_sh
