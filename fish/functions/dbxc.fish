@@ -85,24 +85,40 @@ function dbxc -d "Shorthand for 'distrobox create'"
     # so that accelerated VMs work within a container. Do this with an init hook.
     if command -q docker; and test (get_distro) = ubuntu; and group_exists kvm
         set -l host_kvm_gid (getent group kvm | string split -f 3 :)
-        set init_hook 'if getent group kvm &>/dev/null && [[ $(getent group kvm | cut -d : -f 3) != '"$host_kvm_gid"' ]]; then groupdel -f kvm && groupadd -g '"$host_kvm_gid"' kvm && usermod -aG kvm '"$USER"'; fi'
+
+        set init_hook_sh (mktemp --suffix=.sh)
+        chmod +x $init_hook_sh
+        echo '#!/bin/sh
+
+kvm_group_exists() {
+    getent group kvm >/dev/null 2>&1
+}
+
+kvm_gid_mismatch() {
+    [ "$(kvm_gid)" != "'"$host_kvm_gid"'" ]
+}
+
+kvm_gid() {
+    kvm_group_exists || return
+    getent group kvm | cut -d: -f3
+}
+
+if kvm_gid_mismatch; then
+    kvm_group_exists && groupdel -f kvm
+    groupadd -g '"$host_kvm_gid"' kvm || exit
+    usermod -aG kvm '"$USER"' || exit
+fi
+
+rm '"$init_hook_sh" >$init_hook_sh
+    end
+
+    if set -q init_hook_sh
+        set -p dbx_args --init-hooks $init_hook_sh
     end
 
     if test "$mode" = create
-        if set -q init_hook
-            set -p dbx_args --init-hooks $init_hook
-        end
         set -p dbx_args -a "$add_args"
     else
-        if set -q init_hook
-            set init_hook_sh (mktemp --suffix=.sh)
-            chmod +x $init_hook_sh
-            echo '#!/bin/sh
-
-'"$init_hook"'
-rm "$0"' >$init_hook_sh
-            set -p dbx_args --init-hooks $init_hook_sh
-        end
         set -p dbx_args '-a "'$add_args'"'
     end
 
