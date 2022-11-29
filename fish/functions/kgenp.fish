@@ -7,5 +7,5 @@ function kgenp -d "Generate patches from a git tree to send via git send-email"
 
     set mfc (git mfc)
 
-    git fp --base $mfc^ $argv $mfc^..$mfc
+    git fp --base $mfc^ $argv $mfc^..
 end
