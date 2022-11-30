@@ -68,7 +68,7 @@ def get_sha256_from_url(url, basename):
     response.raise_for_status()
     for line in response.content.decode('utf-8').split('\n'):
         if 'clone.bundle' in basename:
-            basename = basename.split('-')[-1]
+            basename = basename.split('-')[0]
         if re.search(basename, line):
             sha256_match = re.search('[A-Fa-f0-9]{64}', line)
             if sha256_match:
@@ -151,9 +151,9 @@ def download_items(targets, network_folder):
             subfolder = firmware_folder.joinpath(target.capitalize())
 
             # Constants to update
-            fedora_ver = 37
-            server_iso_ver = 1.7
-            workstation_iso_ver = 1.7
+            fedora_ver = '37'
+            server_iso_ver = '1.7'
+            workstation_iso_ver = '1.7'
 
             # Base URLs
             base_fedora_file_url = f"https://download.fedoraproject.org/pub/fedora/linux/releases/{fedora_ver}"
@@ -161,24 +161,20 @@ def download_items(targets, network_folder):
 
             # Server
             for arch in fedora_arches:
-                items += [{
-                    'containing_folder':
-                    subfolder,
-                    'file_url':
-                    f"{base_fedora_file_url}/Server/{arch}/iso/Fedora-Server-netinst-{arch}-{fedora_ver}-{server_iso_ver}.iso",
-                    'sha_url':
-                    f"{base_fedora_checksum_url}/Fedora-Server-{fedora_ver}-{server_iso_ver}-{arch}-CHECKSUM"
-                }]
+                for flavor in ['dvd', 'netinst']:
+                    items += [{
+                        'containing_folder': subfolder.joinpath(fedora_ver, 'Server', arch),
+                        'file_url': f"{base_fedora_file_url}/Server/{arch}/iso/Fedora-Server-{flavor}-{arch}-{fedora_ver}-{server_iso_ver}.iso",
+                        'sha_url': f"{base_fedora_checksum_url}/Fedora-Server-{fedora_ver}-{server_iso_ver}-{arch}-CHECKSUM"
+                    }]  # yapf: disable
+
             # Workstation
             for arch in fedora_arches:
                 items += [{
-                    'containing_folder':
-                    subfolder,
-                    'file_url':
-                    f"{base_fedora_file_url}/Workstation/{arch}/iso/Fedora-Workstation-Live-{arch}-{fedora_ver}-{workstation_iso_ver}.iso",
-                    'sha_url':
-                    f"{base_fedora_checksum_url}/Fedora-Workstation-{fedora_ver}-{server_iso_ver}-{arch}-CHECKSUM"
-                }]
+                    'containing_folder': subfolder.joinpath(fedora_ver, 'Workstation', arch),
+                    'file_url': f"{base_fedora_file_url}/Workstation/{arch}/iso/Fedora-Workstation-Live-{arch}-{fedora_ver}-{workstation_iso_ver}.iso",
+                    'sha_url': f"{base_fedora_checksum_url}/Fedora-Workstation-{fedora_ver}-{server_iso_ver}-{arch}-CHECKSUM"
+                }]  # yapf: disable
 
         elif target == 'ipsw':
             mac_versions = ['13', '12']
