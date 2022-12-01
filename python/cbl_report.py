@@ -83,7 +83,7 @@ def parse_parameters():
 
     finalize_parser = subparsers.add_parser(
         'finalize', help='Merge report branch into main branch then delete branch and worktree')
-    finalize_parser.add_argument('-a', '--all', help='Do everything')
+    finalize_parser.add_argument('-a', '--all', action='store_true', help='Do everything')
     finalize_parser.add_argument('-d',
                                  '--delete-branch',
                                  action='store_true',
@@ -134,7 +134,7 @@ def parse_parameters():
 
     update_parser = subparsers.add_parser('update',
                                           help='Update current ClangBuiltLinux monthly report')
-    update_parser.add_argument('-a', '--all', help='Do everything')
+    update_parser.add_argument('-a', '--all', action='store_true', help='Do everything')
     update_parser.add_argument('-c', '--commit', help='Hash of commit to "fix up"', type=str)
     update_parser.add_argument('-e', '--edit', action='store_true', help='Edit report file')
     update_parser.add_argument('-p', '--push', action='store_true', help='Push update after commit')
