@@ -1,0 +1,154 @@
+#!/usr/bin/env python3
+# SPDX-License-Identifier: MIT
+# Copyright (C) 2022 Nathan Chancellor
+
+import argparse
+import pathlib
+import re
+import subprocess
+
+import deb
+import lib
+
+
+def machine_is_pi():
+    return lib.get_hostname() == 'raspberrypi'
+
+
+def machine_is_trusted():
+    return lib.get_hostname() in ('raspberrypi')
+
+
+def parse_arguments():
+    parser = argparse.ArgumentParser(description='Set up a Debian installation')
+
+    parser.add_argument('-r', '--root-password', help='Root password', required=True)
+    parser.add_argument('-u', '--user-password', help='User password', required=machine_is_pi())
+
+    return parser.parse_args()
+
+
+def pi_setup(user_name, user_password):
+    if not machine_is_pi():
+        return
+
+    subprocess.run(['raspi-config', '--expand-rootfs'], check=True)
+    subprocess.run(['raspi-config', 'nonint', 'do_serial', '0'], check=True)
+
+    lib.chpasswd(user_name, user_password)
+
+    ssd_partition = pathlib.Path('/dev/sda1')
+    if ssd_partition.is_block_device():
+        mnt_point = pathlib.Path('/mnt/ssd')
+        fstab = pathlib.Path('/etc/fstab')
+
+        mnt_point.mkdir(exist_ok=True, parents=True)
+        lib.chown(user_name, mnt_point)
+
+        fstab_text = fstab.read_text(encoding='utf-8')
+        if not re.search(str(mnt_point), fstab_text):
+            partuuid = subprocess.run(['blkid', '-o', 'value', '-s', 'PARTUUID', ssd_partition],
+                                      capture_output=True,
+                                      check=True,
+                                      text=True).stdout.strip()
+
+            fstab_line = f"PARTUUID={partuuid}\t{mnt_point}\text4\tdefaults,noatime\t0\t1\n"
+
+            fstab.write_text(fstab_text + fstab_line, encoding='utf-8')
+
+        docker_json = pathlib.Path('/etc/docker/daemon.json')
+        docker_json.parent.mkdir(exist_ok=True, parents=True)
+        docker_json_txt = ('{\n'
+                           f'"data-root": "{mnt_point}/docker"'
+                           '\n}\n')
+        docker_json.write_text(docker_json_txt, encoding='utf-8')
+
+    x11_opts = pathlib.Path('/etc/X11/Xsession.options')
+    x11_opts_txt = x11_opts.read_text(encoding='utf-8')
+    if re.search('^use-ssh-agent$', x11_opts_txt, flags=re.M):
+        x11_opts_txt = re.sub('use-ssh-agent', '# use-ssh-agent', x11_opts_txt)
+        x11_opts.write_text(x11_opts_txt, encoding='utf-8')
+
+
+def prechecks():
+    lib.check_root()
+
+    codename = lib.get_version_codename()
+    if codename not in ('bullseye'):
+        raise Exception(f"Debian {codename} is not supported by this script!")
+
+
+def setup_repos():
+    apt_gpg = pathlib.Path('/etc/apt/trusted.gpg.d')
+    apt_sources = pathlib.Path('/etc/apt/sources.list.d')
+    codename = lib.get_version_codename()
+    version_id = lib.get_os_rel_val('VERSION_ID')
+    dpkg_arch = deb.get_dpkg_arch()
+
+    # Docker
+    docker_gpg_key = apt_gpg.joinpath('docker.gpg')
+    lib.fetch_gpg_key('https://download.docker.com/linux/debian/gpg', docker_gpg_key)
+    docker_repo = apt_sources.joinpath('docker.list')
+    docker_repo.write_text(
+        f"deb [arch={dpkg_arch} signed-by={docker_gpg_key}] https://download.docker.com/linux/debian {codename} stable\n",
+        encoding='utf-8')
+
+    # fish
+    fish_repo_url = 'https://download.opensuse.org/repositories'
+    fish_gpg_key = apt_gpg.joinpath('shells_fish_release_3.gpg')
+    lib.fetch_gpg_key(f"{fish_repo_url}/shells:fish:release:3/Debian_{version_id}/Release.key",
+                      fish_gpg_key)
+    fish_repo = apt_sources.joinpath('shells:fish:release:3.list')
+    fish_repo.write_text(
+        f"deb {fish_repo_url.replace('https', 'http')}/shells:/fish:/release:/3/Debian_{version_id}/ /\n",
+        encoding='utf-8')
+
+    # gh
+    gh_packages = 'https://cli.github.com/packages'
+    gh_gpg_key = apt_gpg.joinpath('githubcli-archive-keyring.gpg')
+    lib.fetch_gpg_key(f"{gh_packages}/{gh_gpg_key.name}", gh_gpg_key)
+    gh_repo = apt_sources.joinpath('github-cli.list')
+    gh_repo.write_text(f"deb [arch={dpkg_arch} signed-by={gh_gpg_key}] {gh_packages} stable main\n",
+                       encoding='utf-8')
+
+    # Tailscale
+    if machine_is_trusted():
+        if machine_is_pi():
+            distro = 'raspbian'
+        else:
+            distro = 'debian'
+        base_tailscale_url = f"https://pkgs.tailscale.com/stable/{distro}/{codename}"
+        tailscale_gpg_key = pathlib.Path('/usr/share/keyrings/tailscale-archive-keyring.gpg')
+        lib.fetch_gpg_key(f"{base_tailscale_url}.noarmor.gpg", tailscale_gpg_key)
+        tailscale_repo = apt_sources.joinpath('tailscale.list')
+        tailscale_repo_txt = lib.curl([f"{base_tailscale_url}.tailscale-keyring.list"])
+        tailscale_repo.write_bytes(tailscale_repo_txt)
+
+
+def update_and_install_packages():
+    packages = []
+    if machine_is_trusted():
+        packages += ['tailscale']
+
+    deb.update_and_install_packages(packages)
+
+
+if __name__ == '__main__':
+    args = parse_arguments()
+    user = lib.get_user()
+
+    prechecks()
+    deb.set_apt_variables()
+    deb.install_initial_packages()
+    setup_repos()
+    deb.update_and_install_packages()
+    lib.chsh_fish(user)
+    lib.add_user_to_group_if_exists('kvm', user)
+    pi_setup(user, args.user_password)
+    deb.setup_doas(user, args.root_password)
+    deb.setup_docker(user)
+    deb.setup_libvirt(user)
+    deb.setup_locales()
+    lib.clone_env(user)
+    lib.set_date_time()
+    lib.setup_initial_fish_config(user)

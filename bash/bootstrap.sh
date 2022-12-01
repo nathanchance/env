@@ -1,8 +1,9 @@
 #!/usr/bin/env bash
 
-set -eux
+set -euxo pipefail
 
 tmp_dir=$(mktemp -d)
+
 curl -LSs https://github.com/nathanchance/env/tarball/main | tar -C "$tmp_dir" -xvzf - --strip-components=1
 
-bash "$tmp_dir"/bash/"$(grep ^ID= /usr/lib/os-release | cut -d= -f2 | sed 's/"//g')" "$@"
+"$tmp_dir"/python/root/"$(grep ^ID= /usr/lib/os-release | cut -d= -f2 | sed 's/"//g')".py "$@"

@@ -5,5 +5,5 @@
 function oci_rm -d "Remove OCI containers and images"
     in_container_msg -h; or return
 
-    $PYTHON_FOLDER/oci_rm.py $argv
+    $USER_PYTHON_FOLDER/oci_rm.py $argv
 end
