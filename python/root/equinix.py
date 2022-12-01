@@ -16,7 +16,9 @@ def check_install_parted():
     if shutil.which('parted'):
         return
 
-    if shutil.which('apt'):
+    if shutil.which('pacman'):
+        lib.pacman(['-Syyu', '--noconfirm', 'parted'])
+    elif shutil.which('apt'):
         deb.apt_update()
         deb.apt_install(['parted'])
 
@@ -90,7 +92,7 @@ def parse_arguments():
     parser.add_argument('-p',
                         '--password',
                         help='Password of user account (implies account creation)')
-    parser.add_argument('-u', '--user', default='nathan', help='Name of user account')
+    parser.add_argument('-u', '--user', default=lib.get_user(), help='Name of user account')
 
     return parser.parse_args()
 
