@@ -10,7 +10,7 @@ function create_repo_tar -d "Create a tarball of a git repo from just the tracke
             return 1
         end
     else
-        set repo (realpath $PWD)
+        set repo (git root)
     end
 
     set output $repo/dist/(basename $repo)-(date +%Y-%m-%d-%H-%M).tar.zst
@@ -22,6 +22,7 @@ function create_repo_tar -d "Create a tarball of a git repo from just the tracke
         --file $output \
         --zstd \
         (git -C $repo ls-files)
+    echo '*' >(dirname $output)/.gitignore
 
     echo "File is now available at: $output"
 end
