@@ -27,10 +27,12 @@ def parse_parameters():
 
     supported_images = [
         'arch',
+        'debian',
         'fedora',
         'ipsw',
         'korg',
-        'rpios'
+        'rpios',
+        'ubuntu'
     ]  # yapf: disable
 
     parser.add_argument('-t',
@@ -104,7 +106,7 @@ def get_latest_ipsw_url(identifier, version):
 def download_if_necessary(item):
     base_file = item['base_file'] if 'base_file' in item else item['file_url'].split('/')[-1]
     target = item['containing_folder'].joinpath(base_file)
-    target.parent.mkdir(exist_ok=True)
+    target.parent.mkdir(exist_ok=True, parents=True)
     if target.exists():
         print_yellow(f"SKIP: {base_file} already downloaded!")
     else:
@@ -121,6 +123,7 @@ def download_if_necessary(item):
 def update_bundle_symlink(bundle_folder):
     src = bundle_folder.joinpath(get_sunday_as_folder())
     dest = bundle_folder.joinpath('latest')
+    dest.unlink(missing_ok=True)
     dest.symlink_to(src)
 
 
@@ -145,6 +148,26 @@ def download_items(targets, network_folder):
                 'file_url': f"{base_arch_url}/archlinux-{arch_date}-x86_64.iso",
                 'sha_url': f"{base_arch_url}/sha256sums.txt"
             }]
+
+        elif target == 'debian':
+            debian_arches = ['amd64', 'arm64']
+            debian_ver = '11.5.0'
+
+            for arch in debian_arches:
+                arch_debian_folder = firmware_folder.joinpath(target.capitalize(), debian_ver, arch)
+                arch_debian_url = f"https://cdimage.debian.org/debian-cd/current/{arch}"
+                items += [
+                    {
+                        'containing_folder': arch_debian_folder,
+                        'file_url': f"{arch_debian_url}/iso-cd/debian-{debian_ver}-{arch}-netinst.iso",
+                        'sha_url': f"{arch_debian_url}/iso-cd/SHA256SUMS"
+                    },
+                    {
+                        'containing_folder': arch_debian_folder,
+                        'file_url': f"{arch_debian_url}/iso-dvd/debian-{debian_ver}-{arch}-DVD-1.iso",
+                        'sha_url': f"{arch_debian_url}/iso-dvd/SHA256SUMS"
+                    }
+                ]  # yapf: disable
 
         elif target == 'fedora':
             fedora_arches = ['aarch64', 'x86_64']
@@ -214,6 +237,28 @@ def download_items(targets, network_folder):
                     'file_url': base_rpi_url,
                     'sha_url': base_rpi_url + '.sha256'
                 }]
+
+        elif target == 'ubuntu':
+            ubuntu_arches = ['amd64', 'arm64']
+            ubuntu_vers = ['22.04', '22.10']
+
+            for ubuntu_ver in ubuntu_vers:
+                if ubuntu_ver == '22.04':
+                    ubuntu_subver = ubuntu_ver + '.1'
+                else:
+                    ubuntu_subver = ubuntu_ver
+
+                for arch in ubuntu_arches:
+                    if arch == 'amd64':
+                        base_ubuntu_url = f"https://releases.ubuntu.com/{ubuntu_subver}"
+                    elif arch == 'arm64':
+                        base_ubuntu_url = f"https://cdimage.ubuntu.com/releases/{ubuntu_ver}/release"
+
+                    items += [{
+                        'containing_folder': firmware_folder.joinpath('Ubuntu', ubuntu_ver, 'Server'),
+                        'file_url': f"{base_ubuntu_url}/ubuntu-{ubuntu_subver}-live-server-{arch}.iso",
+                        'sha_url': f"{base_ubuntu_url}/SHA256SUMS"
+                    }]    # yapf: disable
 
     for item in items:
         download_if_necessary(item)
