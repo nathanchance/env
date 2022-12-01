@@ -3,10 +3,13 @@
 # Copyright (C) 2022 Nathan Chancellor
 
 function wezterm_open_remotes -d "Open a new wezterm tab for each remote machine I regularly use"
-    set fish_exec (command -v fish)
+    set fish_path (command -v fish)
+    set wezterm_path (command -v wezterm)
+
     set hosts \
         thelio:Thelio \
         m3-large-x86:m3.large.x86 \
+        n3-xlarge-x86:n3.xlarge.x86 \
         c3-medium-x86:c3.medium.x86 \
         intel-desktop:"Intel desktop" \
         amd-desktop:"AMD desktop" \
@@ -17,6 +20,8 @@ function wezterm_open_remotes -d "Open a new wezterm tab for each remote machine
     for item in $hosts
         set host (string split -f 1 : $item)
         set title (string split -f 2 : $item)
-        wezterm cli spawn -- $fish_exec -c "wezterm_title $title; msh $host; exec $fish_exec -l"
+        $wezterm_path cli spawn -- $fish_path -c "wezterm_title $title; msh $host; exec $fish_path -l"
     end
+
+    $wezterm_path cli spawn -- $fish_path -c "wezterm_title macOS; exec $fish_path -l"
 end
