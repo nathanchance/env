@@ -103,19 +103,27 @@ def get_efi_img(cfg):
     if arch == 'aarch64':
         share_folders += ['edk2-armvirt']  # old Arch Linux location
         efi_arch = arch
-        efi_img = 'QEMU_EFI.fd'
+        efi_imgs = ['QEMU_EFI.silent.fd', 'QEMU_EFI.fd']
     elif arch == 'x86_64':
         share_folders += ['edk2-ovmf']  # old Arch Linux location
         efi_arch = 'x64'
-        efi_img = 'OVMF_CODE.fd'
+        efi_imgs = ['OVMF_CODE.fd']
     else:
         raise NotImplementedError(f"get_efi_img() is not implemented for {arch}")
     share_folders += [None]
+    efi_imgs += [None]
 
     for share_folder in share_folders:
         if share_folder is None:
-            raise FileNotFoundError(f"{efi_img} could not be found!")
-        src = pathlib.Path(f"/usr/share/{share_folder}/{efi_arch}/{efi_img}")
+            raise FileNotFoundError('edk2 could not be found!')
+        efi_share = pathlib.Path(f"/usr/share/{share_folder}/{efi_arch}")
+        if efi_share.exists():
+            break
+
+    for efi_img in efi_imgs:
+        if efi_img is None:
+            raise FileNotFoundError('EFI firmware image could not be found!')
+        src = efi_share.joinpath(efi_img)
         if src.exists():
             break
 
