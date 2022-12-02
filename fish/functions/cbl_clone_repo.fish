@@ -7,7 +7,7 @@ function cbl_clone_repo -d "Clone certain repos for ClangBuiltLinux testing and 
         set -l bundle
         set -l dest
         set -l git_clone_args
-        set -l korg_bundle_folder $NAS_FOLDER/kernel.org_bundles/latest
+        set -l korg_bundle_folder $NAS_FOLDER/kernel.org/bundles/latest
 
         switch $arg
             case binutils

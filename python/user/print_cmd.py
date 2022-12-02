@@ -2,8 +2,9 @@
 # SPDX-License-Identifier: MIT
 # Copyright (C) 2022 Nathan Chancellor
 
-import shlex
 import sys
 
+import lib_user
+
 if __name__ == '__main__':
-    print(' '.join([shlex.quote(arg) for arg in sys.argv[1:]]))
+    lib_user.print_cmd(sys.argv[1:])

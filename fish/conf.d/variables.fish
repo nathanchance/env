@@ -129,6 +129,7 @@ set -gx CBL_TC_BIN $CBL_TC/bin
 set -gx CBL_TC_STOW $CBL_TC/stow
 set -gx CBL_TC_STOW_BNTL $CBL_TC_STOW/binutils
 set -gx CBL_TC_BNTL $CBL_TC_STOW_BNTL-latest/bin
+set -gx CBL_TC_STOW_GCC $CBL_TC_STOW/gcc
 set -gx CBL_TC_STOW_LLVM $CBL_TC_STOW/llvm
 set -gx CBL_TC_LLVM $CBL_TC_STOW_LLVM-latest/bin
 

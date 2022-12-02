@@ -4,24 +4,13 @@
 
 import argparse
 import datetime
-import hashlib
 import json
 import os
 import pathlib
-import re
 import requests
 
-
-def print_color(color, string):
-    print(f"{color}{string}\033[0m", flush=True)
-
-
-def print_green(msg):
-    print_color('\033[01;32m', msg)
-
-
-def print_yellow(msg):
-    print_color('\033[01;33m', msg)
+import lib_user
+import lib_sha256
 
 
 def parse_parameters():
@@ -56,42 +45,6 @@ def get_sunday_as_folder():
     return get_most_recent_sunday().strftime('%Y-%m-%d')
 
 
-def calculate_sha256(file_path):
-    file_hash = hashlib.sha256()
-    with open(file_path, 'rb') as file:
-        while True:
-            chunk = file.read(1048576)  # 1MB at a time
-            if not chunk:
-                break
-            file_hash.update(chunk)
-    return file_hash.hexdigest()
-
-
-def get_sha256_from_url(url, basename):
-    response = requests.get(url, timeout=3600)
-    response.raise_for_status()
-    for line in response.content.decode('utf-8').split('\n'):
-        if 'clone.bundle' in basename:
-            basename = basename.split('-')[0]
-        if re.search(basename, line):
-            sha256_match = re.search('[A-Fa-f0-9]{64}', line)
-            if sha256_match:
-                return sha256_match.group(0)
-    return None
-
-
-def validate_sha256(file, url):
-    computed_sha256 = calculate_sha256(file)
-    expected_sha256 = get_sha256_from_url(url, file.name)
-
-    if computed_sha256 == expected_sha256:
-        print_green(f"SUCCESS: {file.name} sha256 passed!")
-    else:
-        raise Exception(
-            f"{file.name} computed checksum ('{computed_sha256}') did not match expected checksum ('{expected_sha256}')!"
-        )
-
-
 def get_latest_ipsw_url(identifier, version):
     # Query the endpoint for list of builds
     response = requests.get(f"https://api.ipsw.me/v4/device/{identifier}?type=ipsw",
@@ -110,16 +63,16 @@ def download_if_necessary(item):
     target = item['containing_folder'].joinpath(base_file)
     target.parent.mkdir(exist_ok=True, parents=True)
     if target.exists():
-        print_yellow(f"SKIP: {base_file} already downloaded!")
+        lib_user.print_yellow(f"SKIP: {base_file} already downloaded!")
     else:
-        print_green(f"INFO: {base_file} downloading...")
+        lib_user.print_green(f"INFO: {base_file} downloading...")
         response = requests.get(item['file_url'], timeout=3600)
         response.raise_for_status()
         with open(target, 'xb') as file:
             file.write(response.content)
 
     if 'sha_url' in item:
-        validate_sha256(target, item['sha_url'])
+        lib_sha256.validate_from_url(target, item['sha_url'])
 
 
 def update_bundle_symlink(bundle_folder):
@@ -134,7 +87,7 @@ def download_items(targets, network_folder):
     if not firmware_folder.exists():
         raise Exception(f"{firmware_folder} does not exist, systemd automounting broken?")
 
-    bundle_folder = network_folder.joinpath('kernel.org_bundles')
+    bundle_folder = network_folder.joinpath('kernel.org', 'bundles')
     if not bundle_folder.exists():
         raise Exception(f"{bundle_folder} does not exist??")
 
