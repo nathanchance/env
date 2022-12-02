@@ -7,16 +7,16 @@ import pathlib
 import re
 import subprocess
 
-import deb
-import lib
+import lib_deb
+import lib_root
 
 
 def machine_is_pi():
-    return lib.get_hostname() == 'raspberrypi'
+    return lib_root.get_hostname() == 'raspberrypi'
 
 
 def machine_is_trusted():
-    return lib.get_hostname() in ('raspberrypi')
+    return lib_root.get_hostname() in ('raspberrypi')
 
 
 def parse_arguments():
@@ -35,7 +35,7 @@ def pi_setup(user_name, user_password):
     subprocess.run(['raspi-config', '--expand-rootfs'], check=True)
     subprocess.run(['raspi-config', 'nonint', 'do_serial', '0'], check=True)
 
-    lib.chpasswd(user_name, user_password)
+    lib_root.chpasswd(user_name, user_password)
 
     ssd_partition = pathlib.Path('/dev/sda1')
     if ssd_partition.is_block_device():
@@ -43,7 +43,7 @@ def pi_setup(user_name, user_password):
         fstab = pathlib.Path('/etc/fstab')
 
         mnt_point.mkdir(exist_ok=True, parents=True)
-        lib.chown(user_name, mnt_point)
+        lib_root.chown(user_name, mnt_point)
 
         fstab_text = fstab.read_text(encoding='utf-8')
         if not re.search(str(mnt_point), fstab_text):
@@ -71,9 +71,9 @@ def pi_setup(user_name, user_password):
 
 
 def prechecks():
-    lib.check_root()
+    lib_root.check_root()
 
-    codename = lib.get_version_codename()
+    codename = lib_root.get_version_codename()
     if codename not in ('bullseye'):
         raise Exception(f"Debian {codename} is not supported by this script!")
 
@@ -81,13 +81,13 @@ def prechecks():
 def setup_repos():
     apt_gpg = pathlib.Path('/etc/apt/trusted.gpg.d')
     apt_sources = pathlib.Path('/etc/apt/sources.list.d')
-    codename = lib.get_version_codename()
-    version_id = lib.get_os_rel_val('VERSION_ID')
-    dpkg_arch = deb.get_dpkg_arch()
+    codename = lib_root.get_version_codename()
+    version_id = lib_root.get_os_rel_val('VERSION_ID')
+    dpkg_arch = lib_deb.get_dpkg_arch()
 
     # Docker
     docker_gpg_key = apt_gpg.joinpath('docker.gpg')
-    lib.fetch_gpg_key('https://download.docker.com/linux/debian/gpg', docker_gpg_key)
+    lib_root.fetch_gpg_key('https://download.docker.com/linux/debian/gpg', docker_gpg_key)
     docker_repo = apt_sources.joinpath('docker.list')
     docker_repo.write_text(
         f"deb [arch={dpkg_arch} signed-by={docker_gpg_key}] https://download.docker.com/linux/debian {codename} stable\n",
@@ -96,8 +96,8 @@ def setup_repos():
     # fish
     fish_repo_url = 'https://download.opensuse.org/repositories'
     fish_gpg_key = apt_gpg.joinpath('shells_fish_release_3.gpg')
-    lib.fetch_gpg_key(f"{fish_repo_url}/shells:fish:release:3/Debian_{version_id}/Release.key",
-                      fish_gpg_key)
+    lib_root.fetch_gpg_key(f"{fish_repo_url}/shells:fish:release:3/Debian_{version_id}/Release.key",
+                           fish_gpg_key)
     fish_repo = apt_sources.joinpath('shells:fish:release:3.list')
     fish_repo.write_text(
         f"deb {fish_repo_url.replace('https', 'http')}/shells:/fish:/release:/3/Debian_{version_id}/ /\n",
@@ -106,7 +106,7 @@ def setup_repos():
     # gh
     gh_packages = 'https://cli.github.com/packages'
     gh_gpg_key = apt_gpg.joinpath('githubcli-archive-keyring.gpg')
-    lib.fetch_gpg_key(f"{gh_packages}/{gh_gpg_key.name}", gh_gpg_key)
+    lib_root.fetch_gpg_key(f"{gh_packages}/{gh_gpg_key.name}", gh_gpg_key)
     gh_repo = apt_sources.joinpath('github-cli.list')
     gh_repo.write_text(f"deb [arch={dpkg_arch} signed-by={gh_gpg_key}] {gh_packages} stable main\n",
                        encoding='utf-8')
@@ -119,9 +119,9 @@ def setup_repos():
             distro = 'debian'
         base_tailscale_url = f"https://pkgs.tailscale.com/stable/{distro}/{codename}"
         tailscale_gpg_key = pathlib.Path('/usr/share/keyrings/tailscale-archive-keyring.gpg')
-        lib.fetch_gpg_key(f"{base_tailscale_url}.noarmor.gpg", tailscale_gpg_key)
+        lib_root.fetch_gpg_key(f"{base_tailscale_url}.noarmor.gpg", tailscale_gpg_key)
         tailscale_repo = apt_sources.joinpath('tailscale.list')
-        tailscale_repo_txt = lib.curl([f"{base_tailscale_url}.tailscale-keyring.list"])
+        tailscale_repo_txt = lib_root.curl([f"{base_tailscale_url}.tailscale-keyring.list"])
         tailscale_repo.write_bytes(tailscale_repo_txt)
 
 
@@ -130,25 +130,25 @@ def update_and_install_packages():
     if machine_is_trusted():
         packages += ['tailscale']
 
-    deb.update_and_install_packages(packages)
+    lib_deb.update_and_install_packages(packages)
 
 
 if __name__ == '__main__':
     args = parse_arguments()
-    user = lib.get_user()
+    user = lib_root.get_user()
 
     prechecks()
-    deb.set_apt_variables()
-    deb.install_initial_packages()
+    lib_deb.set_apt_variables()
+    lib_deb.install_initial_packages()
     setup_repos()
-    deb.update_and_install_packages()
-    lib.chsh_fish(user)
-    lib.add_user_to_group_if_exists('kvm', user)
+    lib_deb.update_and_install_packages()
+    lib_root.chsh_fish(user)
+    lib_root.add_user_to_group_if_exists('kvm', user)
     pi_setup(user, args.user_password)
-    deb.setup_doas(user, args.root_password)
-    deb.setup_docker(user)
-    deb.setup_libvirt(user)
-    deb.setup_locales()
-    lib.clone_env(user)
-    lib.set_date_time()
-    lib.setup_initial_fish_config(user)
+    lib_deb.setup_doas(user, args.root_password)
+    lib_deb.setup_docker(user)
+    lib_deb.setup_libvirt(user)
+    lib_deb.setup_locales()
+    lib_root.clone_env(user)
+    lib_root.set_date_time()
+    lib_root.setup_initial_fish_config(user)

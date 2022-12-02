@@ -8,22 +8,22 @@ import subprocess
 import shutil
 import tempfile
 
-import lib
+import lib_root
 
 
 def apt_install(install_args):
-    lib.apt(['install', '-y', '--no-install-recommends'] + install_args)
+    lib_root.apt(['install', '-y', '--no-install-recommends'] + install_args)
 
 
 def apt_update():
-    lib.apt(['update', '-qq'])
+    lib_root.apt(['update', '-qq'])
 
 
 def apt_upgrade(upgrade_args=None):
     cmd = ['upgrade', '-y']
     if upgrade_args:
         cmd += upgrade_args
-    lib.apt(cmd)
+    lib_root.apt(cmd)
 
 
 def get_dpkg_arch():
@@ -46,7 +46,7 @@ def set_apt_variables():
 
 def setup_doas(username, root_password):
     dpkg_arch = get_dpkg_arch()
-    env_folder = lib.get_env_root()
+    env_folder = lib_root.get_env_root()
     tmp_dir = None
 
     doas_ver = '6.8.2-1'
@@ -54,10 +54,10 @@ def setup_doas(username, root_password):
         doas_ver += '+b1'
     doas_deb_file = f"opendoas_{doas_ver}_{dpkg_arch}.deb"
 
-    if lib.get_glibc_version() > (2, 33, 0):
+    if lib_root.get_glibc_version() > (2, 33, 0):
         tmp_dir = pathlib.Path(tempfile.mkdtemp())
         doas_deb = tmp_dir.joinpath(doas_deb_file)
-        lib.curl([
+        lib_root.curl([
             '-o', doas_deb, f"http://http.us.debian.org/debian/pool/main/o/opendoas/{doas_deb_file}"
         ])
     else:
@@ -72,11 +72,11 @@ def setup_doas(username, root_password):
     doas_conf.write_text(doas_conf_text, encoding='utf-8')
 
     # Add a root password so that there is no warning about removing sudo
-    lib.chpasswd('root', root_password)
+    lib_root.chpasswd('root', root_password)
 
     # Uninstall sudo but create a symlink in case a program expects only sudo
-    lib.remove_if_installed('sudo')
-    lib.setup_sudo_symlink()
+    lib_root.remove_if_installed('sudo')
+    lib_root.setup_sudo_symlink()
 
     if tmp_dir:
         shutil.rmtree(tmp_dir)
@@ -84,7 +84,7 @@ def setup_doas(username, root_password):
 
 def setup_docker(username):
     subprocess.run(['groupadd', '-f', 'docker'], check=True)
-    lib.add_user_to_group('docker', username)
+    lib_root.add_user_to_group('docker', username)
 
     # Pick up potential previous changes to daemon.json file
     for service in ['containerd', 'docker']:
@@ -92,9 +92,9 @@ def setup_docker(username):
 
 
 def setup_libvirt(username):
-    if not lib.is_installed('virt-manager'):
+    if not lib_root.is_installed('virt-manager'):
         return
-    lib.setup_libvirt(username)
+    lib_root.setup_libvirt(username)
 
 
 def setup_locales():
@@ -185,7 +185,7 @@ def update_and_install_packages(additional_packages=None):
             'qemu': 'qemu-system-arm',
         },
     }
-    if lib.is_equinix():
+    if lib_root.is_equinix():
         packages += [
             'dnsmasq',
             'libvirt-daemon-system',

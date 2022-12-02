@@ -7,11 +7,11 @@ import re
 import shutil
 import subprocess
 
-import lib
+import lib_root
 
 
 def configure_networking():
-    hostname = lib.get_hostname()
+    hostname = lib_root.get_hostname()
 
     ips = {
         'honeycomb': '192.168.4.210',
@@ -20,28 +20,28 @@ def configure_networking():
     if hostname not in ips:
         return
 
-    lib.setup_static_ip(ips[hostname])
-    lib.setup_mnt_nas()
+    lib_root.setup_static_ip(ips[hostname])
+    lib_root.setup_mnt_nas()
 
 
 def dnf_add_repo(repo_url):
-    lib.dnf(['config-manager', '--add-repo', repo_url])
+    lib_root.dnf(['config-manager', '--add-repo', repo_url])
 
 
 def dnf_install(install_args):
-    lib.dnf(['install', '-y'] + install_args)
+    lib_root.dnf(['install', '-y'] + install_args)
 
 
 def get_fedora_version():
-    return int(lib.get_os_rel_val('VERSION_ID'))
+    return int(lib_root.get_os_rel_val('VERSION_ID'))
 
 
 def machine_is_trusted():
-    return lib.get_hostname() in ('honeycomb')
+    return lib_root.get_hostname() in ('honeycomb')
 
 
 def prechecks():
-    lib.check_root()
+    lib_root.check_root()
     fedora_version = get_fedora_version()
     if fedora_version not in (35, 36, 37):
         raise Exception(
@@ -66,7 +66,7 @@ def resize_rootfs():
 
 
 def install_initial_packages():
-    lib.dnf(['update', '-y'])
+    lib_root.dnf(['update', '-y'])
     dnf_install(['dnf-plugins-core'])
 
 
@@ -124,7 +124,7 @@ def install_packages():
     ]  # yapf: disable
 
     # Install Virtualization group on Equinix Metal servers or trusted machines
-    if lib.is_equinix() or machine_is_trusted():
+    if lib_root.is_equinix() or machine_is_trusted():
         packages += ['@virtualization']
 
     if machine_is_trusted():
@@ -147,12 +147,12 @@ def setup_doas():
 
     # Remove sudo but set up a symlink for compatibility
     pathlib.Path('/etc/dnf/protected.d/sudo.conf').unlink(missing_ok=True)
-    lib.remove_if_installed('sudo')
-    lib.setup_sudo_symlink()
+    lib_root.remove_if_installed('sudo')
+    lib_root.setup_sudo_symlink()
 
 
 def setup_kernel_args():
-    if lib.get_hostname() != 'honeycomb':
+    if lib_root.get_hostname() != 'honeycomb':
         return
 
     # Until firmware supports new IORT RMR patches
@@ -162,10 +162,10 @@ def setup_kernel_args():
 
 
 def setup_libvirt(username):
-    if not lib.is_installed('virt-install'):
+    if not lib_root.is_installed('virt-install'):
         return
 
-    lib.setup_libvirt(username)
+    lib_root.setup_libvirt(username)
 
 
 def setup_mosh():
@@ -193,7 +193,7 @@ def setup_repos():
 
 
 if __name__ == '__main__':
-    user = lib.get_user()
+    user = lib_root.get_user()
 
     prechecks()
     resize_rootfs()
@@ -205,7 +205,7 @@ if __name__ == '__main__':
     setup_libvirt(user)
     setup_mosh()
     configure_networking()
-    lib.enable_tailscale()
-    lib.chsh_fish(user)
-    lib.clone_env(user)
-    lib.setup_initial_fish_config(user)
+    lib_root.enable_tailscale()
+    lib_root.chsh_fish(user)
+    lib_root.clone_env(user)
+    lib_root.setup_initial_fish_config(user)

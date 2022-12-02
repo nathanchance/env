@@ -7,7 +7,7 @@ import re
 import shutil
 import subprocess
 
-import lib
+import lib_root
 
 
 def add_mods_to_mkinitcpio(modules):
@@ -26,7 +26,7 @@ def add_mods_to_mkinitcpio(modules):
 
 
 def adjust_gnome_power_settings():
-    if not lib.user_exists('gdm'):
+    if not lib_root.user_exists('gdm'):
         return
 
     doas_conf = pathlib.Path('/etc/doas.conf')
@@ -43,7 +43,7 @@ def adjust_gnome_power_settings():
 
 
 def configure_networking():
-    hostname = lib.get_hostname()
+    hostname = lib_root.get_hostname()
 
     ips = {
         'asus-intel-core-4210U': '192.168.4.137',
@@ -55,12 +55,12 @@ def configure_networking():
     if hostname not in ips:
         return
 
-    lib.setup_static_ip(ips[hostname])
-    lib.setup_mnt_nas()
+    lib_root.setup_static_ip(ips[hostname])
+    lib_root.setup_mnt_nas()
 
 
 def enable_reflector():
-    if not lib.is_installed('reflector'):
+    if not lib_root.is_installed('reflector'):
         return
 
     reflector_args = [
@@ -72,7 +72,7 @@ def enable_reflector():
     ]  # yapf: disable
     conf_text = '\n'.join(reflector_args) + '\n'
     pathlib.Path('/etc/xdg/reflector/reflector.conf').write_text(conf_text, encoding='utf-8')
-    lib.systemctl_enable([f"reflector.{x}" for x in ['service', 'timer']])
+    lib_root.systemctl_enable([f"reflector.{x}" for x in ['service', 'timer']])
 
 
 # For archinstall, which causes ^M in /etc/fstab
@@ -81,7 +81,7 @@ def fix_fstab():
 
 
 def pacman_install(subargs):
-    lib.pacman(['-S', '--noconfirm'] + subargs)
+    lib_root.pacman(['-S', '--noconfirm'] + subargs)
 
 
 def pacman_install_packages():
@@ -197,7 +197,7 @@ def pacman_install_packages():
         ]  # yapf: disable
 
     # https://wiki.archlinux.org/title/VMware/Install_Arch_Linux_as_a_guest
-    if lib.get_hostname() == 'vmware':
+    if lib_root.get_hostname() == 'vmware':
         # All of these are needed for autofit
         packages += [
             'gtkmm',
@@ -209,7 +209,7 @@ def pacman_install_packages():
     # Equinix Metal servers; iptables-nft is also needed for networking but
     # that will be installed later to avoid potential issues with replacing
     # iptables.
-    if lib.is_equinix() or lib.is_virtual_machine():
+    if lib_root.is_equinix() or lib_root.is_virtual_machine():
         packages += [
             'dmidecode',
             'dnsmasq',
@@ -218,7 +218,7 @@ def pacman_install_packages():
             'virt-install'
         ]  # yapf: disable
 
-    if lib.is_virtual_machine():
+    if lib_root.is_virtual_machine():
         packages += ['devtools']
     else:
         packages += ['tailscale']
@@ -270,7 +270,7 @@ def parse_arguments(username):
     # up the user account/password and root password, so the 'password'
     # argument is only required when the user is going to be created by
     # the script.
-    password_args_required = not lib.user_exists(username)
+    password_args_required = not lib_root.user_exists(username)
     parser.add_argument('-p',
                         '--password',
                         help='User password (only required if user does not exist already)',
@@ -280,12 +280,12 @@ def parse_arguments(username):
 
 
 def prechecks():
-    lib.check_root()
+    lib_root.check_root()
 
 
 def setup_doas(username):
     # sudo is a little bit more functional. Keep it in virtual machines.
-    if lib.is_virtual_machine():
+    if lib_root.is_virtual_machine():
         return
 
     doas_conf = pathlib.Path('/etc/doas.conf')
@@ -304,12 +304,12 @@ def setup_doas(username):
                      'session     include     system-auth\n')
     doas_pam.write_text(doas_pam_text, encoding='utf-8')
 
-    lib.remove_if_installed('sudo')
+    lib_root.remove_if_installed('sudo')
     pacman_install(['opendoas-sudo'])
 
 
 def setup_libvirt(username):
-    if not lib.is_installed('libvirt'):
+    if not lib_root.is_installed('libvirt'):
         return
 
     # The default network requires iptables-nft but iptables is installed by
@@ -318,7 +318,7 @@ def setup_libvirt(username):
     # https://unix.stackexchange.com/questions/274727/how-to-force-pacman-to-answer-yes-to-all-questions
     pacman_install(['--ask', '4', 'iptables-nft'])
 
-    lib.setup_libvirt(username)
+    lib_root.setup_libvirt(username)
 
     # For domains with KVM to autostart, the kvm_<vendor> module needs to be
     # loaded during init.
@@ -330,14 +330,14 @@ def setup_libvirt(username):
 
 
 def setup_user(username, password):
-    if lib.user_exists(username):
-        lib.chsh_fish(username)
-        lib.add_user_to_group('uucp', username)
+    if lib_root.user_exists(username):
+        lib_root.chsh_fish(username)
+        lib_root.add_user_to_group('uucp', username)
     else:
         fish = pathlib.Path(shutil.which('fish')).resolve()
         subprocess.run(['useradd', '-G', 'wheel,uucp', '-m', '-s', fish, username], check=True)
 
-        lib.chpasswd(username, password)
+        lib_root.chpasswd(username, password)
 
 
 def uncomment_pacman_option(conf, option, old_value=None, new_value=None):
@@ -349,7 +349,7 @@ def uncomment_pacman_option(conf, option, old_value=None, new_value=None):
 
 
 def vmware_adjustments():
-    if lib.get_hostname() != 'vmware':
+    if lib_root.get_hostname() != 'vmware':
         return
 
     # https://wiki.archlinux.org/title/VMware/Install_Arch_Linux_as_a_guest#In-kernel_drivers
@@ -363,11 +363,11 @@ def vmware_adjustments():
     add_mods_to_mkinitcpio(vmware_mods)
 
     # https://wiki.archlinux.org/title/VMware/Install_Arch_Linux_as_a_guest#Installation
-    lib.systemctl_enable(['vmtoolsd.service', 'vmware-vmblock-fuse.service'], now=False)
+    lib_root.systemctl_enable(['vmtoolsd.service', 'vmware-vmblock-fuse.service'], now=False)
 
 
 if __name__ == '__main__':
-    user = lib.get_user()
+    user = lib_root.get_user()
     arguments = parse_arguments(user)
 
     prechecks()
@@ -377,14 +377,14 @@ if __name__ == '__main__':
     pacman_install_packages()
     setup_doas(user)
     setup_user(user, arguments.password)
-    lib.clone_env(user)
-    lib.podman_setup(user)
+    lib_root.clone_env(user)
+    lib_root.podman_setup(user)
     vmware_adjustments()
     setup_libvirt(user)
     configure_networking()
     enable_reflector()
-    lib.systemctl_enable(['sshd.service'])
-    lib.enable_tailscale()
+    lib_root.systemctl_enable(['sshd.service'])
+    lib_root.enable_tailscale()
     fix_fstab()
-    lib.set_date_time()
-    lib.setup_initial_fish_config(user)
+    lib_root.set_date_time()
+    lib_root.setup_initial_fish_config(user)
