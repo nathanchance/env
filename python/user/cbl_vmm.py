@@ -99,44 +99,38 @@ def get_efi_img(cfg):
     arch = cfg['architecture']
     vm_folder = cfg['vm_folder']
 
-    share_folders = ['edk2']
-    if arch == 'aarch64':
-        share_folders += ['edk2-armvirt']  # old Arch Linux location
-        efi_arch = arch
-        efi_imgs = ['QEMU_EFI.silent.fd', 'QEMU_EFI.fd']
-    elif arch == 'x86_64':
-        share_folders += ['edk2-ovmf']  # old Arch Linux location
-        efi_arch = 'x64'
-        efi_imgs = ['OVMF_CODE.fd']
-    else:
-        raise NotImplementedError(f"get_efi_img() is not implemented for {arch}")
-    share_folders += [None]
-    efi_imgs += [None]
+    firmware_locations = {
+        'aarch64': [
+            pathlib.Path('edk2/aarch64/QEMU_EFI.silent.fd'),  # Fedora
+            pathlib.Path('edk2/aarch64/QEMU_EFI.fd'),  # Arch Linux (current)
+            pathlib.Path('edk2-armvirt/aarch64/QEMU_EFI.fd'),  # Arch Linux (old)
+            None  # Terminator
+        ],
+        'x86_64': [
+            pathlib.Path('edk2/x64/OVMF_CODE.fd'),  # Arch Linux (current), Fedora
+            pathlib.Path('edk2-ovmf/x64/OVMF_CODE.fd'),  # Arch Linux (old)
+            None  # Terminator
+        ]
+    }  # yapf: disable
 
-    for share_folder in share_folders:
-        if share_folder is None:
-            raise FileNotFoundError('edk2 could not be found!')
-        efi_share = pathlib.Path(f"/usr/share/{share_folder}/{efi_arch}")
-        if efi_share.exists():
-            break
+    if arch not in firmware_locations:
+        raise Exception(f"get_efi_img() not implemented for {arch}")
 
-    for efi_img in efi_imgs:
-        if efi_img is None:
-            raise FileNotFoundError('EFI firmware image could not be found!')
-        src = efi_share.joinpath(efi_img)
-        if src.exists():
+    for firmware_location in firmware_locations[arch]:
+        if firmware_location is None:
+            raise FileNotFoundError(f"edk2 could not be found for {arch}!")
+        efi_img_src = pathlib.Path('/usr/share', firmware_location)
+        if efi_img_src.exists():
             break
 
     if arch == 'aarch64':
-        dst = vm_folder.joinpath('efi.img')
-        if not dst.exists():
-            run_cmd(['truncate', '-s', '64m', dst])
-            run_cmd(['dd', f"if={src}", f"of={dst}", 'conv=notrunc'])
-        ret = dst
-    elif arch == 'x86_64':
-        ret = src
+        efi_img_dst = vm_folder.joinpath('efi.img')
+        if not efi_img_dst.exists():
+            run_cmd(['truncate', '-s', '64m', efi_img_dst])
+            run_cmd(['dd', f"if={efi_img_src}", f"of={efi_img_dst}", 'conv=notrunc'])
+        return efi_img_dst
 
-    return ret
+    return efi_img_src
 
 
 def get_efi_vars(cfg):
@@ -159,7 +153,7 @@ def get_efi_vars(cfg):
             for share_folder in share_folders:
                 if share_folder is None:
                     raise FileNotFoundError(f"{efi_vars} could not be found!")
-                src = pathlib.Path(f"/usr/share/{share_folder}/{efi_arch}/{efi_vars}")
+                src = pathlib.Path('/usr/share', share_folder, efi_arch, efi_vars)
                 if src.exists():
                     break
             shutil.copyfile(src, dst)
