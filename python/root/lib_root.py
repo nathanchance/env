@@ -259,7 +259,7 @@ def setup_initial_fish_config(username):
     if fish_ver_tup < (3, 4, 0):
         raise Exception(f"{fish_ver} is less than 3.4.0!")
 
-    user_cfg = Path(f"/home/{username}/.config")
+    user_cfg = Path('/home', username, '.config')
     fish_cfg = user_cfg.joinpath('fish', 'config.fish')
     if not fish_cfg.is_symlink():
         fish_cfg.parent.mkdir(mode=0o755, exist_ok=True, parents=True)
