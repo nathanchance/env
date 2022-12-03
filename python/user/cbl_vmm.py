@@ -8,7 +8,7 @@
 # https://mirrors.edge.kernel.org/pub/linux/kernel/people/will/docs/qemu/qemu-arm64-howto.html
 # https://wiki.qemu.org/Documentation/Networking
 
-import argparse
+from argparse import ArgumentParser
 import math
 import os
 import pathlib
@@ -19,11 +19,11 @@ import subprocess
 
 
 def parse_parameters():
-    parser = argparse.ArgumentParser()
+    parser = ArgumentParser()
     subparsers = parser.add_subparsers(help='Action to perform', required=True)
 
     # Common arguments for all subcommands
-    common_parser = argparse.ArgumentParser(add_help=False)
+    common_parser = ArgumentParser(add_help=False)
     common_parser.add_argument('-a',
                                '--architecture',
                                type=str,

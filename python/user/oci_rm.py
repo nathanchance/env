@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: MIT
 # Copyright (C) 2022 Nathan Chancellor
 
-import argparse
+from argparse import ArgumentParser
 import json
 import shutil
 import subprocess
@@ -22,7 +22,7 @@ def oci_json(target):
 
 
 def parse_arguments():
-    parser = argparse.ArgumentParser()
+    parser = ArgumentParser()
 
     target_choices = ['containers', 'images']
     parser.add_argument('-t',

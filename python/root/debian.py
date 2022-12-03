@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: MIT
 # Copyright (C) 2022 Nathan Chancellor
 
-import argparse
+from argparse import ArgumentParser
 import pathlib
 import re
 import subprocess
@@ -20,7 +20,7 @@ def machine_is_trusted():
 
 
 def parse_arguments():
-    parser = argparse.ArgumentParser(description='Set up a Debian installation')
+    parser = ArgumentParser(description='Set up a Debian installation')
 
     parser.add_argument('-r', '--root-password', help='Root password', required=True)
     parser.add_argument('-u', '--user-password', help='User password', required=machine_is_pi())

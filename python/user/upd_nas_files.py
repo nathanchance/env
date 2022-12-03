@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: MIT
 # Copyright (C) 2022 Nathan Chancellor
 
-import argparse
+from argparse import ArgumentParser
 import datetime
 import json
 import os
@@ -14,7 +14,7 @@ import lib_sha256
 
 
 def parse_parameters():
-    parser = argparse.ArgumentParser(description='Download certain firmare images to NAS')
+    parser = ArgumentParser(description='Download certain firmare images to NAS')
 
     supported_images = [
         'arch',

@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: MIT
 # Copyright (C) 2022 Nathan Chancellor
 
-import argparse
+from argparse import ArgumentParser
 import pathlib
 import subprocess
 
@@ -15,7 +15,7 @@ def apt_add_repo(repo_to_add):
 
 
 def parse_arguments():
-    parser = argparse.ArgumentParser(description='Set up an Ubuntu installation')
+    parser = ArgumentParser(description='Set up an Ubuntu installation')
 
     parser.add_argument('-r', '--root-password', help='Root password', required=True)
 

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-import argparse
+from argparse import ArgumentParser
 import os
 import pathlib
 import re
@@ -264,7 +264,7 @@ def pacman_update():
 
 
 def parse_arguments(username):
-    parser = argparse.ArgumentParser(description='Set up an Arch Linux installation')
+    parser = ArgumentParser(description='Set up an Arch Linux installation')
 
     # Most Arch Linux installs will be set up with archinstall, which sets
     # up the user account/password and root password, so the 'password'

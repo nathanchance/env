@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: MIT
 # Copyright (C) 2022 Nathan Chancellor
 
-import argparse
+from argparse import ArgumentParser
 import datetime
 import os
 import pathlib
@@ -80,7 +80,7 @@ def git_check_success(repo, cmd):
 
 
 def parse_parameters():
-    parser = argparse.ArgumentParser()
+    parser = ArgumentParser()
     subparsers = parser.add_subparsers(help='Action to perform', required=True)
 
     finalize_parser = subparsers.add_parser(

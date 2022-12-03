@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-import argparse
+from argparse import ArgumentParser
 import os
 import pathlib
 import platform
@@ -120,7 +120,7 @@ def get_toolchains_folder():
 
 
 def parse_arguments():
-    parser = argparse.ArgumentParser()
+    parser = ArgumentParser()
     subparsers = parser.add_subparsers(help='Action to perform', required=True)
 
     download_parser = subparsers.add_parser('download',

@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: MIT
 # Copyright (C) 2022 Nathan Chancellor
 
-import argparse
+from argparse import ArgumentParser
 import pathlib
 import shutil
 import subprocess
@@ -80,7 +80,7 @@ def partition_drive(drive_path, mountpoint, username):
 
 
 def parse_arguments():
-    parser = argparse.ArgumentParser(description='Perform initial setup on Equinix Metal servers')
+    parser = ArgumentParser(description='Perform initial setup on Equinix Metal servers')
 
     parser.add_argument('-d',
                         '--drive',
