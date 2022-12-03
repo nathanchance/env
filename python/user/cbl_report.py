@@ -5,7 +5,7 @@
 from argparse import ArgumentParser
 import datetime
 import os
-import pathlib
+from pathlib import Path
 import shutil
 import subprocess
 import zoneinfo
@@ -62,11 +62,11 @@ def get_report_path(date):
 
 
 def get_report_repo():
-    return pathlib.Path(os.environ['GITHUB_FOLDER']).joinpath('hugo-files')
+    return Path(os.environ['GITHUB_FOLDER']).joinpath('hugo-files')
 
 
 def get_report_worktree():
-    return pathlib.Path(os.environ['CBL']).joinpath('current-report')
+    return Path(os.environ['CBL']).joinpath('current-report')
 
 
 def git(repo, cmd, check=True):

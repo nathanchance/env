@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: MIT
 # Copyright (C) 2022 Nathan Chancellor
 
-import pathlib
+from pathlib import Path
 import re
 import shutil
 import subprocess
@@ -135,7 +135,7 @@ def install_packages():
 
 def setup_doas():
     # Fedora provides a doas.conf already, just modify it to suit our needs
-    doas_conf = pathlib.Path('/etc/doas.conf')
+    doas_conf = Path('/etc/doas.conf')
     conf_txt = doas_conf.read_text(encoding='utf-8')
 
     conf_txt = re.sub('permit :wheel', 'permit persist :wheel', conf_txt)
@@ -146,7 +146,7 @@ def setup_doas():
     doas_conf.write_text(conf_txt, encoding='utf-8')
 
     # Remove sudo but set up a symlink for compatibility
-    pathlib.Path('/etc/dnf/protected.d/sudo.conf').unlink(missing_ok=True)
+    Path('/etc/dnf/protected.d/sudo.conf').unlink(missing_ok=True)
     lib_root.remove_if_installed('sudo')
     lib_root.setup_sudo_symlink()
 
@@ -189,7 +189,7 @@ def setup_repos():
                          'gpgcheck=1\n'
                          'gpgkey=https://tuxmake.org/packages/repodata/repomd.xml.key\n'
                          'enabled=1\n')
-    pathlib.Path('/etc/yum.repos.d/tuxmake.repo').write_text(tuxmake_repo_text, encoding='utf-8')
+    Path('/etc/yum.repos.d/tuxmake.repo').write_text(tuxmake_repo_text, encoding='utf-8')
 
 
 if __name__ == '__main__':

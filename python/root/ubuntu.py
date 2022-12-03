@@ -3,7 +3,7 @@
 # Copyright (C) 2022 Nathan Chancellor
 
 from argparse import ArgumentParser
-import pathlib
+from pathlib import Path
 import subprocess
 
 import lib_deb
@@ -31,8 +31,8 @@ def prechecks():
 
 
 def setup_repos():
-    apt_gpg = pathlib.Path('/etc/apt/trusted.gpg.d')
-    apt_sources = pathlib.Path('/etc/apt/sources.list.d')
+    apt_gpg = Path('/etc/apt/trusted.gpg.d')
+    apt_sources = Path('/etc/apt/sources.list.d')
     codename = lib_root.get_version_codename()
     dpkg_arch = lib_deb.get_dpkg_arch()
 

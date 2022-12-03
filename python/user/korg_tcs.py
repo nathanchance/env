@@ -2,7 +2,7 @@
 
 from argparse import ArgumentParser
 import os
-import pathlib
+from pathlib import Path
 import platform
 import shutil
 import subprocess
@@ -56,7 +56,7 @@ def extract_tarballs():
         if not src_folder.exists():
             raise Exception(f"{src_folder} does not exist?")
 
-        dst_folder = pathlib.Path(os.environ['CBL_TC_STOW_GCC'], gcc_version)
+        dst_folder = Path(os.environ['CBL_TC_STOW_GCC'], gcc_version)
         if dst_folder.exists():
             shutil.rmtree(dst_folder)
         dst_folder.mkdir(parents=True)
@@ -87,7 +87,7 @@ def get_latest_gcc_version(major_version):
 
 
 def get_nas_folder():
-    return pathlib.Path(os.environ['NAS_FOLDER'])
+    return Path(os.environ['NAS_FOLDER'])
 
 
 def get_targets(architecture, gcc_version):

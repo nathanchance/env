@@ -11,7 +11,7 @@
 from argparse import ArgumentParser
 import math
 import os
-import pathlib
+from pathlib import Path
 import platform
 import shlex
 import shutil
@@ -101,14 +101,14 @@ def get_efi_img(cfg):
 
     firmware_locations = {
         'aarch64': [
-            pathlib.Path('edk2/aarch64/QEMU_EFI.silent.fd'),  # Fedora
-            pathlib.Path('edk2/aarch64/QEMU_EFI.fd'),  # Arch Linux (current)
-            pathlib.Path('edk2-armvirt/aarch64/QEMU_EFI.fd'),  # Arch Linux (old)
+            Path('edk2/aarch64/QEMU_EFI.silent.fd'),  # Fedora
+            Path('edk2/aarch64/QEMU_EFI.fd'),  # Arch Linux (current)
+            Path('edk2-armvirt/aarch64/QEMU_EFI.fd'),  # Arch Linux (old)
             None  # Terminator
         ],
         'x86_64': [
-            pathlib.Path('edk2/x64/OVMF_CODE.fd'),  # Arch Linux (current), Fedora
-            pathlib.Path('edk2-ovmf/x64/OVMF_CODE.fd'),  # Arch Linux (old)
+            Path('edk2/x64/OVMF_CODE.fd'),  # Arch Linux (current), Fedora
+            Path('edk2-ovmf/x64/OVMF_CODE.fd'),  # Arch Linux (old)
             None  # Terminator
         ]
     }  # yapf: disable
@@ -119,7 +119,7 @@ def get_efi_img(cfg):
     for firmware_location in firmware_locations[arch]:
         if firmware_location is None:
             raise FileNotFoundError(f"edk2 could not be found for {arch}!")
-        efi_img_src = pathlib.Path('/usr/share', firmware_location)
+        efi_img_src = Path('/usr/share', firmware_location)
         if efi_img_src.exists():
             break
 
@@ -153,7 +153,7 @@ def get_efi_vars(cfg):
             for share_folder in share_folders:
                 if share_folder is None:
                     raise FileNotFoundError(f"{efi_vars} could not be found!")
-                src = pathlib.Path('/usr/share', share_folder, efi_arch, efi_vars)
+                src = Path('/usr/share', share_folder, efi_arch, efi_vars)
                 if src.exists():
                     break
             shutil.copyfile(src, dst)
@@ -172,7 +172,7 @@ def get_iso(cfg):
             iso_folder.mkdir(parents=True, exist_ok=True)
             run_cmd(['wget', '-c', '-O', dst, iso])
     else:
-        dst = pathlib.Path(iso)
+        dst = Path(iso)
         if not dst.exists():
             raise FileNotFoundError(f"{dst} specified but it is not found!")
 
@@ -335,9 +335,9 @@ def set_cfg(args):
 
     # Folder for files
     if 'VM_FOLDER' in os.environ:
-        base_folder = pathlib.Path(os.environ['VM_FOLDER'])
+        base_folder = Path(os.environ['VM_FOLDER'])
     else:
-        base_folder = pathlib.Path(__file__).resolve().parent.joinpath('vm')
+        base_folder = Path(__file__).resolve().parent.joinpath('vm')
     arch_folder = base_folder.joinpath(arch)
     iso_folder = base_folder.joinpath('iso')
     vm_folder = arch_folder.joinpath(name)
@@ -345,7 +345,7 @@ def set_cfg(args):
     # Support for running custom kernel image (so "kernel" might not be in args)
     if hasattr(args, 'kernel') and args.kernel:
         # Kernel is either a path or a kernel image
-        kernel = pathlib.Path(args.kernel)
+        kernel = Path(args.kernel)
         if kernel.is_dir():
             kernel_dir = kernel
             if arch == 'aarch64':
@@ -371,7 +371,7 @@ def set_cfg(args):
                 raise NotImplementedError(f"Default cmdline has not been defined for {arch}")
 
         if args.initrd:
-            initrd = pathlib.Path(args.initrd)
+            initrd = Path(args.initrd)
         else:
             if not kernel_dir:
                 raise RuntimeError(

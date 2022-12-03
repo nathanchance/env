@@ -6,7 +6,7 @@ from argparse import ArgumentParser
 import datetime
 import json
 import os
-import pathlib
+from pathlib import Path
 import requests
 
 import lib_user
@@ -224,7 +224,7 @@ def download_items(targets, network_folder):
 if __name__ == '__main__':
     args = parse_parameters()
 
-    nas_folder = pathlib.Path(os.environ['NAS_FOLDER'])
+    nas_folder = Path(os.environ['NAS_FOLDER'])
     if not nas_folder.exists():
         raise Exception(f"{nas_folder} does not exist, setup systemd automount files?")
 

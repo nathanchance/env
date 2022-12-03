@@ -3,7 +3,7 @@
 # Copyright (C) 2022 Nathan Chancellor
 
 import os
-import pathlib
+from pathlib import Path
 import subprocess
 import shutil
 import tempfile
@@ -55,7 +55,7 @@ def setup_doas(username, root_password):
     doas_deb_file = f"opendoas_{doas_ver}_{dpkg_arch}.deb"
 
     if lib_root.get_glibc_version() > (2, 33, 0):
-        tmp_dir = pathlib.Path(tempfile.mkdtemp())
+        tmp_dir = Path(tempfile.mkdtemp())
         doas_deb = tmp_dir.joinpath(doas_deb_file)
         lib_root.curl([
             '-o', doas_deb, f"http://http.us.debian.org/debian/pool/main/o/opendoas/{doas_deb_file}"
@@ -64,7 +64,7 @@ def setup_doas(username, root_password):
         doas_deb = env_folder.joinpath('bin', 'packages', doas_deb_file)
     subprocess.run(['dpkg', '-i', doas_deb], check=True)
 
-    doas_conf = pathlib.Path('/etc/doas.conf')
+    doas_conf = Path('/etc/doas.conf')
     doas_conf_text = ('# Allow me to be root for 5 minutes at a time\n'
                       f"permit persist {username} as root\n"
                       '# Do not require root to put in a password (makes no sense)\n'
@@ -105,7 +105,7 @@ def setup_locales():
     for command in commands:
         subprocess.run(['debconf-set-selections'], check=True, input=command, text=True)
 
-    pathlib.Path('/etc/locale.gen').unlink(missing_ok=True)
+    Path('/etc/locale.gen').unlink(missing_ok=True)
 
     subprocess.run(['dpkg-reconfigure', '--frontend', 'noninteractive', 'locales'], check=True)
 

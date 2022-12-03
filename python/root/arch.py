@@ -2,7 +2,7 @@
 
 from argparse import ArgumentParser
 import os
-import pathlib
+from pathlib import Path
 import re
 import shutil
 import subprocess
@@ -11,7 +11,7 @@ import lib_root
 
 
 def add_mods_to_mkinitcpio(modules):
-    mkinitcpio_conf = pathlib.Path('/etc/mkinitcpio.conf')
+    mkinitcpio_conf = Path('/etc/mkinitcpio.conf')
     conf_text = mkinitcpio_conf.read_text(encoding='utf-8')
 
     orig_conf_line = re.search(r'^MODULES=\(.*\)$', conf_text, flags=re.M).group(0)
@@ -29,7 +29,7 @@ def adjust_gnome_power_settings():
     if not lib_root.user_exists('gdm'):
         return
 
-    doas_conf = pathlib.Path('/etc/doas.conf')
+    doas_conf = Path('/etc/doas.conf')
     doas_conf_text = doas_conf.read_text(encoding='utf-8')
 
     doas_conf.write_text(doas_conf_text + 'permit nopass root as gdm\n', encoding='utf-8')
@@ -71,7 +71,7 @@ def enable_reflector():
         '--sort rate'
     ]  # yapf: disable
     conf_text = '\n'.join(reflector_args) + '\n'
-    pathlib.Path('/etc/xdg/reflector/reflector.conf').write_text(conf_text, encoding='utf-8')
+    Path('/etc/xdg/reflector/reflector.conf').write_text(conf_text, encoding='utf-8')
     lib_root.systemctl_enable([f"reflector.{x}" for x in ['service', 'timer']])
 
 
@@ -236,7 +236,7 @@ def pacman_key_setup():
 
 
 def pacman_settings():
-    pacman_conf = pathlib.Path('/etc/pacman.conf')
+    pacman_conf = Path('/etc/pacman.conf')
 
     # Handle .pacnew file
     pacman_confnew = pacman_conf.with_suffix(f"{pacman_conf.suffix}.pacnew")
@@ -288,7 +288,7 @@ def setup_doas(username):
     if lib_root.is_virtual_machine():
         return
 
-    doas_conf = pathlib.Path('/etc/doas.conf')
+    doas_conf = Path('/etc/doas.conf')
     doas_conf_text = ('# Allow me to be root for 5 minutes at a time\n'
                       f"permit persist {username} as root\n"
                       '# Allow me to update or install packages without a password\n'
@@ -297,7 +297,7 @@ def setup_doas(username):
                       'permit nopass root\n')
     doas_conf.write_text(doas_conf_text, encoding='utf-8')
 
-    doas_pam = pathlib.Path('/etc/pam.d/doas')
+    doas_pam = Path('/etc/pam.d/doas')
     doas_pam_text = ('#%PAM-1.0\n'
                      'auth        include     system-auth\n'
                      'account     include     system-auth\n'
@@ -322,7 +322,7 @@ def setup_libvirt(username):
 
     # For domains with KVM to autostart, the kvm_<vendor> module needs to be
     # loaded during init.
-    cpuinfo = pathlib.Path('/proc/cpuinfo').read_text(encoding='utf-8')
+    cpuinfo = Path('/proc/cpuinfo').read_text(encoding='utf-8')
     if re.search('svm', cpuinfo):
         add_mods_to_mkinitcpio(['kvm_amd'])
     elif re.search('vmx', cpuinfo):
@@ -334,7 +334,7 @@ def setup_user(username, password):
         lib_root.chsh_fish(username)
         lib_root.add_user_to_group('uucp', username)
     else:
-        fish = pathlib.Path(shutil.which('fish')).resolve()
+        fish = Path(shutil.which('fish')).resolve()
         subprocess.run(['useradd', '-G', 'wheel,uucp', '-m', '-s', fish, username], check=True)
 
         lib_root.chpasswd(username, password)

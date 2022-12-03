@@ -3,7 +3,7 @@
 # Copyright (C) 2022 Nathan Chancellor
 
 from argparse import ArgumentParser
-import pathlib
+from pathlib import Path
 import shutil
 import subprocess
 import time
@@ -34,8 +34,8 @@ def create_user(user_name, user_password):
         check=True)
     lib_root.chpasswd(user_name, user_password)
 
-    root_ssh = pathlib.Path.home().joinpath('.ssh')
-    user_ssh = pathlib.Path('/home').joinpath(user_name, '.ssh')
+    root_ssh = Path.home().joinpath('.ssh')
+    user_ssh = Path('/home').joinpath(user_name, '.ssh')
     shutil.copytree(root_ssh, user_ssh)
     lib_root.chown(user_name, user_ssh)
 
@@ -46,7 +46,7 @@ def partition_drive(drive_path, mountpoint, username):
     elif '/dev/sd' in drive_path:
         part = '1'
 
-    volume = pathlib.Path(drive_path + part)
+    volume = Path(drive_path + part)
 
     if mountpoint.is_mount():
         raise Exception(f"mountpoint ('{mountpoint}') is already mounted?")
@@ -67,7 +67,7 @@ def partition_drive(drive_path, mountpoint, username):
                               check=True,
                               text=True).stdout.strip()
 
-    fstab = pathlib.Path('/etc/fstab')
+    fstab = Path('/etc/fstab')
     fstab_txt = fstab.read_text(encoding='utf-8')
     fstab_line = f"UUID={vol_uuid}\t{mountpoint}\text4\tnoatime\t0\t2\n"
     fstab.write_text(fstab_txt + fstab_line, encoding='utf-8')
@@ -75,7 +75,7 @@ def partition_drive(drive_path, mountpoint, username):
 
     mountpoint.mkdir(exist_ok=True, parents=True)
     subprocess.run(['mount', '-a'], check=True)
-    if mountpoint != pathlib.Path('/home'):
+    if mountpoint != Path('/home'):
         lib_root.chown(username, mountpoint)
 
 
@@ -103,7 +103,7 @@ if __name__ == '__main__':
     lib_root.check_root()
 
     drive = args.drive
-    folder = pathlib.Path(args.folder)
+    folder = Path(args.folder)
     password = args.password
     user = args.user
 

@@ -3,7 +3,7 @@
 # Copyright (C) 2022 Nathan Chancellor
 
 from argparse import ArgumentParser
-import pathlib
+from pathlib import Path
 import re
 import subprocess
 
@@ -37,10 +37,10 @@ def pi_setup(user_name, user_password):
 
     lib_root.chpasswd(user_name, user_password)
 
-    ssd_partition = pathlib.Path('/dev/sda1')
+    ssd_partition = Path('/dev/sda1')
     if ssd_partition.is_block_device():
-        mnt_point = pathlib.Path('/mnt/ssd')
-        fstab = pathlib.Path('/etc/fstab')
+        mnt_point = Path('/mnt/ssd')
+        fstab = Path('/etc/fstab')
 
         mnt_point.mkdir(exist_ok=True, parents=True)
         lib_root.chown(user_name, mnt_point)
@@ -56,14 +56,14 @@ def pi_setup(user_name, user_password):
 
             fstab.write_text(fstab_text + fstab_line, encoding='utf-8')
 
-        docker_json = pathlib.Path('/etc/docker/daemon.json')
+        docker_json = Path('/etc/docker/daemon.json')
         docker_json.parent.mkdir(exist_ok=True, parents=True)
         docker_json_txt = ('{\n'
                            f'"data-root": "{mnt_point}/docker"'
                            '\n}\n')
         docker_json.write_text(docker_json_txt, encoding='utf-8')
 
-    x11_opts = pathlib.Path('/etc/X11/Xsession.options')
+    x11_opts = Path('/etc/X11/Xsession.options')
     x11_opts_txt = x11_opts.read_text(encoding='utf-8')
     if re.search('^use-ssh-agent$', x11_opts_txt, flags=re.M):
         x11_opts_txt = re.sub('use-ssh-agent', '# use-ssh-agent', x11_opts_txt)
@@ -79,8 +79,8 @@ def prechecks():
 
 
 def setup_repos():
-    apt_gpg = pathlib.Path('/etc/apt/trusted.gpg.d')
-    apt_sources = pathlib.Path('/etc/apt/sources.list.d')
+    apt_gpg = Path('/etc/apt/trusted.gpg.d')
+    apt_sources = Path('/etc/apt/sources.list.d')
     codename = lib_root.get_version_codename()
     version_id = lib_root.get_os_rel_val('VERSION_ID')
     dpkg_arch = lib_deb.get_dpkg_arch()
@@ -118,7 +118,7 @@ def setup_repos():
         else:
             distro = 'debian'
         base_tailscale_url = f"https://pkgs.tailscale.com/stable/{distro}/{codename}"
-        tailscale_gpg_key = pathlib.Path('/usr/share/keyrings/tailscale-archive-keyring.gpg')
+        tailscale_gpg_key = Path('/usr/share/keyrings/tailscale-archive-keyring.gpg')
         lib_root.fetch_gpg_key(f"{base_tailscale_url}.noarmor.gpg", tailscale_gpg_key)
         tailscale_repo = apt_sources.joinpath('tailscale.list')
         tailscale_repo_txt = lib_root.curl([f"{base_tailscale_url}.tailscale-keyring.list"])

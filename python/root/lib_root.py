@@ -5,7 +5,7 @@
 import grp
 import ipaddress
 import os
-import pathlib
+from pathlib import Path
 import pwd
 import re
 import shutil
@@ -51,15 +51,15 @@ def chsh_fish(username):
     if not fish_path:
         raise Exception('fish not installed?')
 
-    fish = pathlib.Path(fish_path).resolve()
-    if not re.search(str(fish), pathlib.Path('/etc/shells').read_text(encoding='utf-8')):
+    fish = Path(fish_path).resolve()
+    if not re.search(str(fish), Path('/etc/shells').read_text(encoding='utf-8')):
         raise Exception(f"{fish} is not in /etc/shells?")
 
     subprocess.run(['chsh', '-s', fish, username], check=True)
 
 
 def clone_env(username):
-    env_tmp = pathlib.Path('/tmp/env')
+    env_tmp = Path('/tmp/env')
     if not env_tmp.exists():
         subprocess.run(['git', 'clone', 'https://github.com/nathanchance/env', env_tmp], check=True)
         chown(username, env_tmp)
@@ -108,7 +108,7 @@ def get_active_ethernet_info():
 
 
 def get_env_root():
-    env_root = pathlib.Path(__file__).resolve().parent.parent.parent
+    env_root = Path(__file__).resolve().parent.parent.parent
     if env_root.joinpath('README.md').exists():
         return env_root
     raise Exception(f"{env_root} does not seem correct?")
@@ -135,7 +135,7 @@ def get_ip_addr_for_intf(intf):
 
 
 def get_os_rel_val(variable):
-    os_rel = pathlib.Path('/usr/lib/os-release').read_text(encoding='utf-8')
+    os_rel = Path('/usr/lib/os-release').read_text(encoding='utf-8')
 
     version_id_var = re.search(f"^{variable}=.*$", os_rel, flags=re.M)
     if version_id_var:
@@ -200,9 +200,9 @@ def podman_setup(username):
     file_text = f"{username}:100000:65536\n"
 
     for letter in ['g', 'u']:
-        pathlib.Path(f"/etc/sub{letter}id").write_text(file_text, encoding='utf-8')
+        Path(f"/etc/sub{letter}id").write_text(file_text, encoding='utf-8')
 
-    registries_conf = pathlib.Path('/etc/containers/registries.conf')
+    registries_conf = Path('/etc/containers/registries.conf')
     if not registries_conf.exists():
         registries_conf.write_text(
             "[registries.search]\nregistries = ['docker.io', 'ghcr.io', 'quay.io']\n",
@@ -259,7 +259,7 @@ def setup_initial_fish_config(username):
     if fish_ver_tup < (3, 4, 0):
         raise Exception(f"{fish_ver} is less than 3.4.0!")
 
-    user_cfg = pathlib.Path(f"/home/{username}/.config")
+    user_cfg = Path(f"/home/{username}/.config")
     fish_cfg = user_cfg.joinpath('fish', 'config.fish')
     if not fish_cfg.is_symlink():
         fish_cfg.parent.mkdir(mode=0o755, exist_ok=True, parents=True)
@@ -325,7 +325,7 @@ def setup_mnt_nas():
 
     for file in ['mnt-nas.mount', 'mnt-nas.automount']:
         src = systemd_configs.joinpath(file)
-        dst = pathlib.Path('/etc/systemd/system').joinpath(file)
+        dst = Path('/etc/systemd/system').joinpath(file)
 
         shutil.copyfile(src, dst)
         dst.chmod(0o644)
@@ -348,9 +348,9 @@ def setup_static_ip(requested_ip):
 
 def setup_sudo_symlink():
     if 'PREFIX' in os.environ:
-        prefix = pathlib.Path(os.environ['PREFIX'])
+        prefix = Path(os.environ['PREFIX'])
     else:
-        prefix = pathlib.Path('/usr/local')
+        prefix = Path('/usr/local')
     sudo_prefix = prefix.joinpath('stow', 'sudo')
     sudo_bin = sudo_prefix.joinpath('bin', 'sudo')
 

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-import pathlib
+from pathlib import Path
 import os
 import re
 import shutil
@@ -29,7 +29,7 @@ def clone_env_plugins():
 
 
 def get_brew_bin():
-    return pathlib.Path('/opt/homebrew/bin')
+    return Path('/opt/homebrew/bin')
 
 
 def get_brew_path():
@@ -41,7 +41,7 @@ def get_env_folder():
 
 
 def get_home():
-    return pathlib.Path.home()
+    return Path.home()
 
 
 def brew_gh(gh_args):
@@ -101,7 +101,7 @@ def setup_ssh():
     if not ssh_key.exists():
         ssh_key.parent.mkdir(exist_ok=True, parents=True)
 
-        keys_folder = pathlib.Path('/tmp/keys')
+        keys_folder = Path('/tmp/keys')
         if not keys_folder.exists():
             gh_repo_clone([keys_folder.name, keys_folder])
 
