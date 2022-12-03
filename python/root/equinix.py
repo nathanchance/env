@@ -35,7 +35,7 @@ def create_user(user_name, user_password):
     lib_root.chpasswd(user_name, user_password)
 
     root_ssh = Path.home().joinpath('.ssh')
-    user_ssh = Path('/home').joinpath(user_name, '.ssh')
+    user_ssh = Path('/home', user_name, '.ssh')
     shutil.copytree(root_ssh, user_ssh)
     lib_root.chown(user_name, user_ssh)
 

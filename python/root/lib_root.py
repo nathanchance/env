@@ -325,7 +325,7 @@ def setup_mnt_nas():
 
     for file in ['mnt-nas.mount', 'mnt-nas.automount']:
         src = systemd_configs.joinpath(file)
-        dst = Path('/etc/systemd/system').joinpath(file)
+        dst = Path('/etc/systemd/system', file)
 
         shutil.copyfile(src, dst)
         dst.chmod(0o644)

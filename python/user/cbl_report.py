@@ -62,11 +62,11 @@ def get_report_path(date):
 
 
 def get_report_repo():
-    return Path(os.environ['GITHUB_FOLDER']).joinpath('hugo-files')
+    return Path(os.environ['GITHUB_FOLDER'], 'hugo-files')
 
 
 def get_report_worktree():
-    return Path(os.environ['CBL']).joinpath('current-report')
+    return Path(os.environ['CBL'], 'current-report')
 
 
 def git(repo, cmd, check=True):
