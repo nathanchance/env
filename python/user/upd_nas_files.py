@@ -68,8 +68,7 @@ def download_if_necessary(item):
         lib_user.print_green(f"INFO: {base_file} downloading...")
         response = requests.get(item['file_url'], timeout=3600)
         response.raise_for_status()
-        with open(target, 'xb') as file:
-            file.write(response.content)
+        target.write_bytes(response.content)
 
     if 'sha_url' in item:
         lib_sha256.validate_from_url(target, item['sha_url'])

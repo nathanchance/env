@@ -272,8 +272,8 @@ def create_report_file(report_file, report_date):
         f"{links['sponsor']}."                                             '\n'
     )
     # yapf: enable
-    with open(report_file, 'w', encoding="utf-8") as file:
-        file.write(template)
+
+    report_file.write_text(template, encoding='utf-8')
 
 
 def finalize_report(args):
