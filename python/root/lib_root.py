@@ -346,10 +346,7 @@ def setup_static_ip(requested_ip):
 
 
 def setup_sudo_symlink():
-    if 'PREFIX' in os.environ:
-        prefix = Path(os.environ['PREFIX'])
-    else:
-        prefix = Path('/usr/local')
+    prefix = Path(os.environ['PREFIX'] if 'PREFIX' in os.environ else '/usr/local')
     sudo_prefix = prefix.joinpath('stow', 'sudo')
     sudo_bin = sudo_prefix.joinpath('bin', 'sudo')
 
