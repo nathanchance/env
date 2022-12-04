@@ -34,10 +34,12 @@ function py_lint -d "Lint Python files"
     set -a pylint_ignore C0115 # missing-class-docstring
     set -a pylint_ignore C0116 # missing-function-docstring
     set -a pylint_ignore C0301 # line-too-long
+    set -a pylint_ignore C0302 # too-many-lines
     set -a pylint_ignore R0902 # too-many-instance-attributes
     set -a pylint_ignore R0903 # too-few-public-methods
     set -a pylint_ignore R0911 # too-many-returns
     set -a pylint_ignore R0912 # too-many-branches
+    set -a pylint_ignore R0913 # too-many-arguments
     set -a pylint_ignore R0914 # too-many-locals
     set -a pylint_ignore R0915 # too-many-statements
     if pylint \
