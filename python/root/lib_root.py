@@ -137,8 +137,7 @@ def get_ip_addr_for_intf(intf):
 def get_os_rel_val(variable):
     os_rel = Path('/usr/lib/os-release').read_text(encoding='utf-8')
 
-    version_id_var = re.search(f"^{variable}=.*$", os_rel, flags=re.M)
-    if version_id_var:
+    if (version_id_var := re.search(f"^{variable}=.*$", os_rel, flags=re.M)):
         return version_id_var.group(0).split('=')[1].replace('"', '')
 
     return None

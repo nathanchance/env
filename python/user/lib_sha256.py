@@ -10,10 +10,8 @@ import lib_user
 def calculate(file_path):
     file_hash = hashlib.sha256()
     with open(file_path, 'rb') as file:
-        while True:
-            chunk = file.read(1048576)  # 1MB at a time
-            if not chunk:
-                break
+        # 1MB at a time
+        while (chunk := file.read(1048576)):  # 1MB at a time
             file_hash.update(chunk)
     return file_hash.hexdigest()
 
@@ -25,8 +23,7 @@ def get_from_url(url, basename):
         if 'clone.bundle' in basename:
             basename = basename.split('-')[0]
         if re.search(basename, line):
-            sha256_match = re.search('[A-Fa-f0-9]{64}', line)
-            if sha256_match:
+            if (sha256_match := re.search('[A-Fa-f0-9]{64}', line)):
                 return sha256_match.group(0)
     return None
 
