@@ -3,7 +3,7 @@
 
 _localversion=-llvm
 pkgname=linux-next$_localversion
-_srctag=next-20221205
+_srctag=next-20221206
 pkgver=${_srctag//-/.}
 pkgrel=1
 pkgdesc='linux-next'
@@ -24,7 +24,7 @@ validpgpkeys=(
   '3F2568AAC26998F9E813A1C5C3F436CA30F5D8EB'  # Mark Brown
 )
 sha256sums=('SKIP'
-            'd869fbcd4b9d21cf00a9767ea40a3078666fe13c29b8d3960dea1783d21249f5')
+            '0de060feebd76907470158da7ae217652155948aa347a414ea55e1593f5a2b38')
 
 # This obviously ties this PKGBUILD to my machine but that is kind of the point :)
 _kmake() {
