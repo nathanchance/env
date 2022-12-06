@@ -9,16 +9,224 @@
 # https://wiki.qemu.org/Documentation/Networking
 
 from argparse import ArgumentParser
+import datetime
 import math
 import os
 from pathlib import Path
 import platform
-import shlex
 import shutil
 import subprocess
+import sys
+
+import lib_user
 
 
-def parse_parameters():
+def can_use_kvm(guest_arch):
+    if guest_arch == platform.machine():
+        return os.access('/dev/kvm', os.R_OK | os.W_OK)
+    return False
+
+
+def get_base_folder():
+    if 'VM_FOLDER' in os.environ:
+        return Path(os.environ['VM_FOLDER'])
+    return Path(__file__).resolve().parent.joinpath('vm')
+
+
+def iso_is_url(iso):
+    return 'http://' in iso or 'https://' in iso
+
+
+def run_cmd(cmd):
+    lib_user.print_cmd(cmd)
+    subprocess.run(cmd, check=True)
+
+
+def find_in_usr_share(sub_paths):
+    for sub_path in sub_paths:
+        if (full_path := Path('/usr/share', sub_path)).exists():
+            return full_path
+    raise Exception(
+        f"No subpaths from list ('{', '.join(sub_paths)}') could be found in '/usr/share', do you need to install a package?"
+    )
+
+
+class VirtualMachine:
+
+    def __init__(self, arch, cmdline, cores, gdb, initrd, iso, kernel, memory, name, size,
+                 ssh_port):
+        # External values
+        self.arch = arch
+        self.name = name
+        self.size = size
+
+        # Internal values
+        self.data_folder = get_base_folder().joinpath(self.arch, self.name)
+        self.disk_img = self.data_folder.joinpath('disk.img')
+        self.efi_img = self.data_folder.joinpath('efi.img')
+        self.efi_vars_img = self.data_folder.joinpath('efi_vars.img')
+
+        # QEMU configuration
+        self.qemu = 'qemu-system-' + self.arch
+        self.qemu_args = [
+            # No display
+            '-display', 'none',
+            '-serial', 'mon:stdio',
+
+            # Disk image
+            '-drive', f"if=virtio,format=qcow2,file={self.disk_img}",
+
+            # Networking
+            '-nic', f"user,model=virtio-net-pci,hostfwd=tcp::{ssh_port}-:22",
+
+            # RNG
+            '-object', 'rng-random,filename=/dev/urandom,id=rng0',
+            '-device', 'virtio-rng-pci',
+
+            # Statistics
+            '-m', memory,
+            '-device', 'virtio-balloon',
+            '-smp', str(cores),
+
+            # UEFI
+            '-drive', f"if=pflash,format=raw,file={self.efi_img},readonly=on",
+            '-drive', f"if=pflash,format=raw,file={self.efi_vars_img}",
+
+            # iso args if setting up machine for the first time
+            *self.get_iso_args(iso),
+        ]  # yapf: disable
+        if can_use_kvm(self.arch):
+            self.qemu_args += ['-cpu', 'host', '-enable-kvm']
+        if cmdline:
+            self.qemu_args += ['-append', cmdline]
+        if gdb:
+            self.qemu_args += ['-s', '-S']
+        if initrd:
+            self.qemu_args += ['-initrd', initrd]
+        if kernel:
+            self.qemu_args += ['-kernel', kernel]
+
+    def handle_action(self, action):
+        if action == 'setup':
+            return self.setup()
+        if action == 'remove':
+            return self.remove()
+        if action == 'run':
+            return self.run()
+        raise Exception(f"Unimplemented action ('{action}')?")
+
+    def create_disk_img(self):
+        self.disk_img.parent.mkdir(exist_ok=True, parents=True)
+        run_cmd(['qemu-img', 'create', '-f', 'qcow2', self.disk_img, self.size])
+
+    def get_iso_args(self, iso):
+        if iso is None:
+            return []
+
+        # Download iso if necessary
+        if iso_is_url(str(iso)):
+            iso_url = iso
+            iso = get_base_folder().joinpath('iso', iso_url.split('/')[-1])
+            if not iso.exists():
+                iso.parent.mkdir(exist_ok=True, parents=True)
+                run_cmd(['wget', '-c', '-O', iso, iso_url])
+
+        if not iso.exists():
+            raise Exception(
+                f"{iso.name} does not exist at {iso}, was the wrong path used or did the download fail?"
+            )
+
+        return [
+            '-device', 'virtio-scsi-pci,id=scsi0',
+            '-device', 'scsi-cd,drive=cd',
+            '-drive', f"if=none,format=raw,id=cd,file={iso}"
+        ]  # yapf: disable
+
+    def remove(self):
+        if self.data_folder.is_dir():
+            shutil.rmtree(self.data_folder)
+
+    def run(self):
+        if not shutil.which(self.qemu):
+            raise Exception(
+                f"Could not find QEMU ('{self.qemu}') on your system, install it first?")
+        if not self.disk_img.exists():
+            raise Exception(f"Disk image ('{self.disk_img}') does not exist, run 'setup' first?")
+        run_cmd([self.qemu, *self.qemu_args])
+
+    def setup(self):
+        self.remove()
+        self.create_disk_img()
+        self.run()
+
+
+class Arm64VirtualMachine(VirtualMachine):
+
+    def __init__(self, cmdline, cores, gdb, initrd, iso, kernel, memory, name, size, ssh_port):
+        super().__init__('aarch64', cmdline, cores, gdb, initrd, iso, kernel, memory, name, size,
+                         ssh_port)
+
+        self.qemu_args += ['-M', 'virt']
+
+        # If not running on KVM, use QEMU's max CPU emulation target
+        # Use impdef pointer auth, otherwise QEMU is just BRUTALLY slow:
+        # https://lore.kernel.org/YlgVa+AP0g4IYvzN@lakrids/
+        if '-cpu' not in self.qemu_args:
+            self.qemu_args += ['-cpu', 'max,pauth-impdef=true']
+
+    def run(self):
+        self.setup_efi_files()
+        super().run()
+
+    def setup_efi_files(self):
+        efi_img_size = 64 * 1024 * 1024  # 64M
+
+        self.efi_img.parent.mkdir(exist_ok=True, parents=True)
+
+        if not self.efi_img.exists():
+            possible_paths = [
+                Path('edk2/aarch64/QEMU_EFI.silent.fd'),  # Fedora
+                Path('edk2/aarch64/QEMU_EFI.fd'),  # Arch Linux (current)
+                Path('edk2-armvirt/aarch64/QEMU_EFI.fd'),  # Arch Linux (old),
+                Path("qemu-efi-aarch64/QEMU_EFI.fd"),  # Debian and Ubuntu
+            ]
+            shutil.copyfile(find_in_usr_share(possible_paths), self.efi_img)
+            self.efi_img.open(mode='r+b').truncate(efi_img_size)
+
+        if not self.efi_vars_img.exists():
+            self.efi_vars_img.open(mode='xb').truncate(efi_img_size)
+
+
+class X86VirtualMachine(VirtualMachine):
+
+    def __init__(self, cmdline, cores, gdb, initrd, iso, kernel, memory, name, size, ssh_port):
+        super().__init__('x86_64', cmdline, cores, gdb, initrd, iso, kernel, memory, name, size,
+                         ssh_port)
+
+    def run(self):
+        self.setup_efi_files()
+        super().run()
+
+    def setup_efi_files(self):
+        self.efi_img.parent.mkdir(exist_ok=True, parents=True)
+
+        if not self.efi_img.exists():
+            possible_paths = [
+                Path('edk2/x64/OVMF_CODE.fd'),  # Arch Linux (current), Fedora
+                Path('edk2-ovmf/x64/OVMF_CODE.fd'),  # Arch Linux (old)
+                Path("OVMF/OVMF_CODE.fd"),  # Debian and Ubuntu
+            ]
+            shutil.copyfile(find_in_usr_share(possible_paths), self.efi_img)
+
+        if not self.efi_vars_img.exists():
+            possible_paths = [
+                Path("edk2/x64/OVMF_VARS.fd"),  # Arch Linux and Fedora
+                Path("OVMF/OVMF_VARS.fd"),  # Debian and Ubuntu
+            ]
+            shutil.copyfile(find_in_usr_share(possible_paths), self.efi_vars_img)
+
+
+def parse_arguments():
     parser = ArgumentParser()
     subparsers = parser.add_subparsers(help='Action to perform', required=True)
 
@@ -38,12 +246,17 @@ def parse_parameters():
                                type=str,
                                help='Amount of memory virtual machine has')
     common_parser.add_argument('-n', '--name', type=str, help='Name of virtual machine')
+    common_parser.add_argument('-p',
+                               '--ssh-port',
+                               default=8022,
+                               type=int,
+                               help='Port to forward ssh on')
 
     # Arguments for "list"
     list_parser = subparsers.add_parser('list',
                                         help='List virtual machines that can be run',
                                         parents=[common_parser])
-    list_parser.set_defaults(func=list_vms)
+    list_parser.set_defaults(action='list')
 
     # Arguments for "setup"
     setup_parser = subparsers.add_parser('setup',
@@ -55,13 +268,13 @@ def parse_parameters():
                               type=str,
                               default='50G',
                               help='Size of virtual machine disk image')
-    setup_parser.set_defaults(func=setup_vm)
+    setup_parser.set_defaults(action='setup')
 
     # Arguments for "remove"
     remove_parser = subparsers.add_parser('remove',
                                           help='Remove virtual machine files',
                                           parents=[common_parser])
-    remove_parser.set_defaults(func=remove_vm)
+    remove_parser.set_defaults(action='remove')
 
     # Arguments for "run"
     run_parser = subparsers.add_parser('run',
@@ -77,401 +290,173 @@ def parse_parameters():
                             '--kernel',
                             type=str,
                             help='Path to kernel image or kernel build directory')
-    run_parser.set_defaults(func=run_vm)
+    run_parser.set_defaults(action='run')
 
     return parser.parse_args()
 
 
-def quote_cmd(cmd):
-    return ' '.join([shlex.quote(str(elem)) for elem in cmd])
+# We consider half of the system's memory in gigabytes as available for the
+# virtual machine
+def get_available_mem_for_vm():
+    # Total amount of memory of a system in gigabytes (page size * pages / 1024^3)
+    total_mem = os.sysconf('SC_PAGE_SIZE') * os.sysconf('SC_PHYS_PAGES') / (1024.**3)
+
+    # Get the current exponent of the size of memory, as most computers have a
+    # power of 2 amount of memory; if it is not (like 12GB), then this
+    # calculation will just result in a slightly larger amount of memory being
+    # allocated to the VM. If this is a problem, the user can just specify the
+    # amount of memory.
+    exp = round(math.log2(total_mem))
+
+    # To get half of the amount of memory, shift by one less exponent
+    return 1 << (exp - 1)
 
 
-def run_cmd(cmd):
-    print(f"$ {quote_cmd(cmd)}")
-    subprocess.run(cmd, check=True)
+def get_def_iso(arch):
+    arch_day = '.01'
+    arch_iso_ver = datetime.datetime.now(datetime.timezone.utc).strftime("%Y.%m") + arch_day
 
+    fedora_ver = '37'
+    fedora_iso_ver = '1.7'
 
-def get_disk_img(vm_folder):
-    return vm_folder.joinpath('disk.img')
-
-
-def get_efi_img(cfg):
-    arch = cfg['architecture']
-    vm_folder = cfg['vm_folder']
-
-    firmware_locations = {
-        'aarch64': [
-            Path('edk2/aarch64/QEMU_EFI.silent.fd'),  # Fedora
-            Path('edk2/aarch64/QEMU_EFI.fd'),  # Arch Linux (current)
-            Path('edk2-armvirt/aarch64/QEMU_EFI.fd'),  # Arch Linux (old)
-            None  # Terminator
-        ],
-        'x86_64': [
-            Path('edk2/x64/OVMF_CODE.fd'),  # Arch Linux (current), Fedora
-            Path('edk2-ovmf/x64/OVMF_CODE.fd'),  # Arch Linux (old)
-            None  # Terminator
-        ]
+    iso_info = {
+        'aarch64': {
+            'file': Path('Fedora', fedora_ver, 'Server', f"Fedora-Server-netinst-{arch}-{fedora_ver}-{fedora_iso_ver}.iso"),
+            'url': f"https://download.fedoraproject.org/pub/fedora/linux/releases/{fedora_ver}/Server/{arch}",
+        },
+        'x86_64': {
+            'file': Path('Arch Linux', f"archlinux-{arch_iso_ver}-x86_64.iso"),
+            'url': 'https://mirrors.edge.kernel.org/archlinux/iso/',
+        },
     }  # yapf: disable
 
-    if arch not in firmware_locations:
-        raise Exception(f"get_efi_img() not implemented for {arch}")
+    # Check to see if we have a local network version we can use
+    file = iso_info[arch]['file']
+    if 'NAS_FOLDER' in os.environ:
+        if (iso := Path(os.environ['NAS_FOLDER'], 'Firmware_and_Images', file)).exists():
+            return iso
 
-    for firmware_location in firmware_locations[arch]:
-        if firmware_location is None:
-            raise FileNotFoundError(f"edk2 could not be found for {arch}!")
-        efi_img_src = Path('/usr/share', firmware_location)
-        if efi_img_src.exists():
-            break
+    # Otherwise, return the URL so that it can be fetched and cached on the
+    # machine
+    return f"{iso_info[arch]['url']}/{file.name}"
 
+
+# We cap the default amount of memory at two times the number of cores (as that
+# is sufficient for compiling) or total amount of available VM memory.
+def get_def_mem(cores):
+    return f"{int(min(cores * 2, get_available_mem_for_vm()))}G"
+
+
+def create_vm_from_args(args):
+    # Simple configuration section with short one liners with no logic. Either
+    # it came from argparse (meaning the default was able to be set there or
+    # the user customized it) or we use a default from the dictionary below.
+    # Some options are dynamically calculated using the functions above.
+    # hasattr() is used to check if the option exists within argparse, as
+    # certain flags are only available for certain modes.
+    arch = args.architecture
+    static_defaults = {
+        'aarch64': {
+            'initrd': Path('initramfs.img'),
+            'kernel': Path('arch/arm64/boot/Image'),
+            'name': 'fedora',
+        },
+        'x86_64': {
+            'initrd': Path('rootfs/initramfs.img'),
+            'kernel': Path('arch/x86/boot/bzImage'),
+            'name': 'arch',
+        },
+        # When using KVM, we cannot use more than the maximum number of cores.
+        # Default to either 8 cores or half the number of cores in the
+        # machine, whichever is smaller. For TCG, use 4 cores by default.
+        'cores': min(8, int(os.cpu_count() / 2)) if can_use_kvm(arch) else 4,
+        'iso': get_def_iso(arch),
+    }
+    cores = args.cores if args.cores else static_defaults['cores']
+    gdb = args.gdb if hasattr(args, 'gdb') else False
+    # The amount of default memory depends on the actual amount of cores, not
+    # the default.
+    memory = args.memory if args.memory else get_def_mem(cores)
+    name = args.name if args.name else static_defaults[arch]['name']
+    size = args.size if hasattr(args, 'size') else None
+    ssh_port = args.ssh_port
+
+    # Default .iso
+    # Check if iso is even in the current args, as it is only required for
+    # 'setup'. If the user supplied one, check if it is a url; if not, it has
+    # to be a path. If the user did not supply an iso, get the default one.
+    iso = None
+    if hasattr(args, 'iso'):
+        if args.iso:
+            if iso_is_url(args.iso):
+                iso = args.iso
+            else:
+                iso = Path(args.iso)
+        else:
+            iso = get_def_iso(arch)
+
+    # Support for running custom kernel image (only available when actually
+    # running a machine). More windy logic due to implicit defaults.
+    cmdline = None
+    initrd = None
+    kernel = None
+    if hasattr(args, 'kernel') and args.kernel:
+        # Figure out whether kernel argument is build folder or kernel image
+        if (kernel_obj := Path(args.kernel)).is_dir():
+            kernel_folder = kernel_obj
+            kernel_img = kernel_folder.joinpath(static_defaults[arch]['kernel'])
+        else:
+            kernel_folder = None
+            kernel_img = kernel_obj
+        if not kernel_img.exists():
+            raise Exception(
+                f"Kernel image ('{kernel_img}'), derived from kernel argument ('{args.kernel}'), does not exist!"
+            )
+
+        # Handle command line; no default as it is specific to the VM
+        if args.cmdline:
+            cmdline = args.cmdline
+
+        # Handle initial ramdisk
+        if args.initrd:
+            initrd = Path(args.initrd)
+        else:
+            if not kernel_folder:
+                raise Exception('Full kernel image supplied without initrd path!')
+            initrd = kernel_folder.joinpath(static_defaults[arch]['initrd'])
+        if not initrd.exists():
+            raise Exception(
+                f"Initial ramdisk ('{initrd}'), derived from initrd argument ('{args.initrd}'), does not exist!"
+            )
+
+    # Create the VirtualMachine object for the particular architecture.
     if arch == 'aarch64':
-        efi_img_dst = vm_folder.joinpath('efi.img')
-        if not efi_img_dst.exists():
-            run_cmd(['truncate', '-s', '64m', efi_img_dst])
-            run_cmd(['dd', f"if={efi_img_src}", f"of={efi_img_dst}", 'conv=notrunc'])
-        return efi_img_dst
-
-    return efi_img_src
-
-
-def get_efi_vars(cfg):
-    arch = cfg['architecture']
-    vm_folder = cfg['vm_folder']
-
-    if arch == 'aarch64':
-        efivars = vm_folder.joinpath('efivars.img')
-        if not efivars.exists():
-            run_cmd(['truncate', '-s', '64m', efivars])
-        return efivars
-
+        return Arm64VirtualMachine(cmdline, cores, gdb, initrd, iso, kernel, memory, name, size,
+                                   ssh_port)
     if arch == 'x86_64':
-        efi_vars = 'OVMF_VARS.fd'
-
-        dst = vm_folder.joinpath(efi_vars)
-        if not dst.exists():
-            share_folders = ['edk2', 'OVMF', None]
-            efi_arch = 'x64'
-            for share_folder in share_folders:
-                if share_folder is None:
-                    raise FileNotFoundError(f"{efi_vars} could not be found!")
-                src = Path('/usr/share', share_folder, efi_arch, efi_vars)
-                if src.exists():
-                    break
-            shutil.copyfile(src, dst)
-        return dst
-
-    raise NotImplementedError(f"get_efi_vars() is not implemented for {arch}")
+        return X86VirtualMachine(cmdline, cores, gdb, initrd, iso, kernel, memory, name, size,
+                                 ssh_port)
+    raise Exception(f"Unimplemented architecture ('{arch}')?")
 
 
-def get_iso(cfg):
-    iso_folder = cfg['iso_folder']
-    iso = cfg['iso']
+def list_vms(arch):
+    print(f"\nAvailable virtual machines for {arch}:\n")
 
-    if 'http://' in iso or 'https://' in iso:
-        dst = iso_folder.joinpath(iso.split('/')[-1])
-        if not dst.exists():
-            iso_folder.mkdir(parents=True, exist_ok=True)
-            run_cmd(['wget', '-c', '-O', dst, iso])
-    else:
-        dst = Path(iso)
-        if not dst.exists():
-            raise FileNotFoundError(f"{dst} specified but it is not found!")
-
-    return dst
-
-
-def default_qemu_arguments(cfg):
-    arch = cfg['architecture']
-    cores = cfg['cores']
-    memory = cfg['memory']
-    vm_folder = cfg['vm_folder']
-
-    # QEMU binary
-    qemu = [f"qemu-system-{arch}"]
-
-    # No display
-    qemu += ['-display', 'none']
-    qemu += ['-serial', 'mon:stdio']
-
-    # Firmware
-    fw_str = 'if=pflash,format=raw,file='
-    efi_img = get_efi_img(cfg)
-    efi_vars = get_efi_vars(cfg)
-    qemu += ['-drive', f"{fw_str}{efi_img},readonly=on"]
-    qemu += ['-drive', f"{fw_str}{efi_vars}"]
-
-    # Hard drive
-    disk_img = get_disk_img(vm_folder)
-    qemu += ['-drive', f"if=virtio,format=qcow2,file={disk_img}"]
-
-    # Machine (AArch64 only)
-    if arch == 'aarch64':
-        qemu += ['-M', 'virt']
-
-    # KVM acceleration
-    if arch == platform.machine():
-        qemu += ['-cpu', 'host']
-        qemu += ['-enable-kvm']
-    elif arch == "aarch64":
-        # QEMU is horrifically slow with just '-cpu max'
-        # https://lore.kernel.org/YlgVa+AP0g4IYvzN@lakrids/
-        qemu += ['-cpu', 'max,pauth-impdef=true']
-
-    # Memory
-    qemu += ['-m', memory]
-    qemu += ['-device', 'virtio-balloon']
-
-    # Networking
-    qemu += ['-nic', 'user,model=virtio-net-pci,hostfwd=tcp::8022-:22']
-
-    # Number of processor cores
-    qemu += ['-smp', cores]
-
-    # RNG
-    qemu += ['-object', 'rng-random,filename=/dev/urandom,id=rng0']
-    qemu += ['-device', 'virtio-rng-pci']
-
-    return qemu
-
-
-def list_vms(cfg):
-    arch = cfg['architecture']
-    arch_folder = cfg['arch_folder']
-
-    print(f"\nAvailable VMs for {arch}:\n")
-
-    if arch_folder.exists():
-        vm_list = os.listdir(arch_folder)
-        if vm_list:
-            print('\n'.join(vm_list))
+    if (arch_folder := get_base_folder().joinpath(arch)).exists():
+        vms = sorted([elem.name for elem in arch_folder.iterdir() if elem.is_dir()])
+        if vms:
+            print('\n'.join(vms))
             return
 
     print('None')
 
 
-def setup_vm(cfg):
-    vm_folder = cfg['vm_folder']
-    size = cfg['size']
-
-    # Create folder
-    remove_vm(cfg)
-    vm_folder.mkdir(parents=True, exist_ok=True)
-
-    # Create efivars image
-    get_efi_vars(cfg)
-
-    # Create disk image
-    qemu_img = ['qemu-img', 'create', '-f', 'qcow2', get_disk_img(vm_folder), size]
-    run_cmd(qemu_img)
-
-    # Download ISO image
-    iso = get_iso(cfg)
-
-    qemu = default_qemu_arguments(cfg)
-    qemu += ['-device', 'virtio-scsi-pci,id=scsi0']
-    qemu += ['-device', 'scsi-cd,drive=cd']
-    qemu += ['-drive', f"if=none,format=raw,id=cd,file={iso}"]
-
-    run_cmd(qemu)
-
-
-def remove_vm(cfg):
-    vm_folder = cfg['vm_folder']
-    if vm_folder.is_dir():
-        shutil.rmtree(vm_folder)
-
-
-def run_vm(cfg):
-    cmdline = cfg['cmdline']
-    gdb = cfg['gdb']
-    initrd = cfg['initrd']
-    kernel = cfg['kernel']
-    vm_folder = cfg['vm_folder']
-
-    if not vm_folder.exists():
-        raise FileNotFoundError(f"{vm_folder} does not exist, run 'setup' first?")
-
-    qemu = default_qemu_arguments(cfg)
-
-    if cmdline:
-        qemu += ['-append', cmdline]
-    if kernel:
-        qemu += ['-kernel', kernel]
-    if initrd:
-        qemu += ['-initrd', initrd]
-    if gdb:
-        qemu += ['-s', '-S']
-
-    run_cmd(qemu)
-
-
-def set_cfg(args):
-    # pylint: disable=too-many-branches,too-many-locals,too-many-statements
-    # Architecture
-    arch = args.architecture
-
-    # VM name
-    if args.name:
-        name = args.name
-    else:
-        if arch == 'aarch64':
-            name = 'fedora'
-        elif arch == 'x86_64':
-            name = 'arch'
-        else:
-            raise NotImplementedError(f"Default VM name has not been defined for {arch}")
-
-    # .iso for setup (so "iso" might not be in args)
-    if hasattr(args, 'iso') and args.iso:
-        iso = args.iso
-    else:
-        if arch == 'aarch64':
-            ver = 37
-            iso = f"https://mirrors.kernel.org/fedora/releases/{ver}/Server/aarch64/iso/Fedora-Server-netinst-aarch64-{ver}-1.7.iso"
-        elif arch == 'x86_64':
-            ver = '2022.10.01'
-            iso = f"https://mirror.arizona.edu/archlinux/iso/{ver}/archlinux-{ver}-x86_64.iso"
-        else:
-            raise NotImplementedError(f"Default .iso has not been defined for {arch}")
-
-    # Folder for files
-    if 'VM_FOLDER' in os.environ:
-        base_folder = Path(os.environ['VM_FOLDER'])
-    else:
-        base_folder = Path(__file__).resolve().parent.joinpath('vm')
-    arch_folder = base_folder.joinpath(arch)
-    iso_folder = base_folder.joinpath('iso')
-    vm_folder = arch_folder.joinpath(name)
-
-    # Support for running custom kernel image (so "kernel" might not be in args)
-    if hasattr(args, 'kernel') and args.kernel:
-        # Kernel is either a path or a kernel image
-        kernel = Path(args.kernel)
-        if kernel.is_dir():
-            kernel_dir = kernel
-            if arch == 'aarch64':
-                kernel = kernel.joinpath('arch/arm64/boot/Image')
-            elif arch == 'x86_64':
-                kernel = kernel.joinpath('arch/x86/boot/bzImage')
-            else:
-                raise NotImplementedError(f"Default kernel has not been defined for {arch}")
-        else:
-            kernel_dir = None
-
-        if not kernel.exists():
-            raise FileNotFoundError(f"{kernel} could not be found!")
-
-        if args.cmdline:
-            cmdline = args.cmdline
-        else:
-            if arch == 'aarch64':
-                cmdline = 'console=ttyAMA0 root=/dev/vda3 ro'
-            elif arch == 'x86_64':
-                cmdline = 'console=ttyS0 root=/dev/vda2 rw rootfstype=ext4'
-            else:
-                raise NotImplementedError(f"Default cmdline has not been defined for {arch}")
-
-        if args.initrd:
-            initrd = Path(args.initrd)
-        else:
-            if not kernel_dir:
-                raise RuntimeError(
-                    'Kernel image was supplied without initrd, cannot guess initrd path!')
-
-            if arch == 'aarch64':
-                initrd = kernel_dir.joinpath('initramfs.img')
-            elif arch == 'x86_64':
-                initrd = kernel_dir.joinpath('rootfs/initramfs.img')
-            else:
-                raise NotImplementedError(f"Default initrd has not been defined for {arch}")
-
-        if not initrd.exists():
-            raise FileNotFoundError(f"{initrd} could not be found!")
-    else:
-        cmdline = None
-        initrd = None
-        kernel = None
-
-    # Size of disk image (only used for setup, so "size" might not exist in args)
-    size = args.size if hasattr(args, 'size') else None
-
-    # Number of cores
-    if args.cores:
-        cores = args.cores
-    else:
-        if arch == platform.machine():
-            # When using KVM, we cannot use more than the maximum number of
-            # cores. Default to either 8 cores or half the number of cores in
-            # the machine, whichever is smaller
-            cores = min(8, os.cpu_count() / 2)
-        else:
-            # For TCG, use 4 cores by default
-            cores = 4
-    # cores might be a float due to the division above
-    # Convert it to an integer for QEMU:
-    # qemu-system-x86_64: Parameter 'smp.cpus' expects integer
-    cores = int(cores)
-
-    # Amount of memory
-    if args.memory:
-        memory = args.memory
-    else:
-        # We consider half of the system's memory in gigabytes as available for
-        # the virtual machine
-
-        # Total amount of memory of a system in gigabytes (page size * pages / 1024^3)
-        total_mem = os.sysconf('SC_PAGE_SIZE') * os.sysconf('SC_PHYS_PAGES') / (1024.**3)
-
-        # Get the current exponent of the size of memory, as most computers
-        # have a power of 2 amount of memory; if it is not (like 12GB), then
-        # this calculation will just result in a slightly larger amount of
-        # memory being allocated to the VM. If this is a problem, the user can
-        # just specify the amount of memory.
-        exp = round(math.log2(total_mem))
-
-        # To get half of the amount of memory, shift by one less exponent
-        avail_mem_for_vm = 1 << (exp - 1)
-
-        # We cap the amount of memory at two times the number of cores (as that
-        # is sufficient for compiling) or total amount of available VM memory
-        # from the calculation above.
-        memory = f"{int(min(cores * 2, avail_mem_for_vm))}G"
-
-    # subprocess.run() expects cores to be a string:
-    # TypeError: expected str, bytes or os.PathLike object, not int
-    # This needs to happen after the min() call above to avoid:
-    # TypeError: '<' not supported between instances of 'int' and 'str'
-    cores = str(cores)
-
-    cfg = {
-        'architecture': arch,
-        'arch_folder': arch_folder,
-        'cmdline': cmdline,
-        'cores': cores,
-        'initrd': initrd,
-        'iso_folder': iso_folder,
-        'iso': iso,
-        'kernel': kernel,
-        'memory': memory,
-        'name': name,
-        'size': size,
-        'vm_folder': vm_folder,
-    }
-    if hasattr(args, 'gdb'):
-        cfg['gdb'] = args.gdb
-    return cfg
-
-
-def main():
-    args = parse_parameters()
-    cfg = set_cfg(args)
-
-    arch = cfg['architecture']
-    supported_arches = ['aarch64', 'x86_64']
-    if arch not in supported_arches:
-        raise NotImplementedError(f"{arch} is not currently supported!")
-
-    args.func(cfg)
-
-
 if __name__ == '__main__':
-    main()
+    # Get arguments
+    arguments = parse_arguments()
+
+    if arguments.action == 'list':
+        list_vms(arguments.architecture)
+        sys.exit(0)
+
+    create_vm_from_args(arguments).handle_action(arguments.action)
