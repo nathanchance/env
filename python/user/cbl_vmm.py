@@ -284,6 +284,50 @@ class ArmVirtualMachine(VirtualMachine):
             self.efi_vars_img.open(mode='xb').truncate(efi_img_size)
 
 
+class Arm32VirtualMachine(ArmVirtualMachine):
+
+    def __init__(self, cmdline, cores, gdb, initrd, iso, kernel, memory, name, size, ssh_port):
+        if memory and memory > self.get_available_mem_for_vm():
+            # See the comment above self.get_available_mem_for_vm() for more info
+            print("More than 2GB of RAM specified for 'highmem=off' machine, lowering to 2GB...")
+            memory = 2
+
+        super().__init__('arm', cmdline, cores, gdb, initrd, iso, kernel, 'host,aarch64=off',
+                         'virt,highmem=off', memory, name, size, ssh_port)
+
+        if self.use_kvm:
+            self.qemu = 'qemu-system-aarch64'
+
+    def can_use_kvm(self):
+        if platform.machine() == 'aarch64':
+            check_el1_32 = Path(get_base_folder(), 'utils', 'aarch64_32_bit_el1_supported')
+            if not check_el1_32.exists():
+                check_el1_32.parent.mkdir(exist_ok=False, parents=True)
+                wget(
+                    check_el1_32,
+                    f"https://github.com/ClangBuiltLinux/boot-utils/raw/main/utils/{check_el1_32.name}"
+                )
+                check_el1_32.chmod(0o755)
+            try:
+                subprocess.run(check_el1_32, check=True)
+            except subprocess.CalledProcessError:
+                pass  # we'll return false below
+            else:
+                return have_dev_kvm_access()
+        return False
+
+    # edk2 appears not to support highmem (or it is currently broken), so limit
+    # the virtual machine's memory to 2GB
+    def get_available_mem_for_vm(self):
+        return 2
+
+    def setup_efi_files(self, possible_efi_files=None):
+        possible_efi_files = [
+            Path('edk2/arm/QEMU_EFI.fd'),  # Arch Linux, Fedora
+        ]
+        super().setup_efi_files(possible_efi_files)
+
+
 class Arm64VirtualMachine(ArmVirtualMachine):
 
     def __init__(self, cmdline, cores, gdb, initrd, iso, kernel, memory, name, size, ssh_port):
@@ -408,10 +452,16 @@ def get_def_iso(arch):
     arch_day = '.01'
     arch_iso_ver = datetime.datetime.now(datetime.timezone.utc).strftime("%Y.%m") + arch_day
 
+    debian_ver = '11.5.0'
+
     fedora_ver = '37'
     fedora_iso_ver = '1.7'
 
     iso_info = {
+        'arm': {
+            'file': Path('Debian', debian_ver, 'armhf', f"debian-{debian_ver}-armhf-netinst.iso"),
+            'url': f"https://cdimage.debian.org/debian-cd/current/armhf/iso-cd/debian-{debian_ver}-armhf-netinst.iso",
+        },
         'aarch64': {
             'file': Path('Fedora', fedora_ver, 'Server', f"Fedora-Server-netinst-{arch}-{fedora_ver}-{fedora_iso_ver}.iso"),
             'url': f"https://download.fedoraproject.org/pub/fedora/linux/releases/{fedora_ver}/Server/{arch}",
@@ -442,6 +492,9 @@ def create_vm_from_args(args):
     # certain flags are only available for certain modes.
     arch = args.architecture
     static_defaults = {
+        'arm': {
+            'name': 'debian',
+        },
         'aarch64': {
             'initrd': Path('initramfs.img'),
             'kernel': Path('arch/arm64/boot/Image'),
@@ -511,6 +564,9 @@ def create_vm_from_args(args):
             )
 
     # Create the VirtualMachine object for the particular architecture.
+    if arch == 'arm':
+        return Arm32VirtualMachine(cmdline, cores, gdb, initrd, iso, kernel, memory, name, size,
+                                   ssh_port)
     if arch == 'aarch64':
         return Arm64VirtualMachine(cmdline, cores, gdb, initrd, iso, kernel, memory, name, size,
                                    ssh_port)
