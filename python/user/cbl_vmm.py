@@ -358,6 +358,8 @@ class X86VirtualMachine(VirtualMachine):
         super().__init__('x86_64', cmdline, cores, gdb, initrd, iso, kernel, 'host', memory, name,
                          size, ssh_port)
 
+        self.qemu_args += ['-M', 'q35']
+
     def run(self):
         self.setup_efi_files()
         super().run()
