@@ -10,6 +10,7 @@
 
 from argparse import ArgumentParser
 import datetime
+import grp
 import math
 import os
 from pathlib import Path
@@ -27,6 +28,15 @@ def can_use_kvm(guest_arch):
     return False
 
 
+def find_first_file(possible_files, relative_root=Path('/usr/share')):
+    for possible_file in possible_files:
+        if (full_path := relative_root.joinpath(possible_file)).exists():
+            return full_path
+    raise Exception(
+        f"No items from list ('{', '.join(possible_files)}') could be found in '{relative_root}', do you need to install a package?"
+    )
+
+
 def get_base_folder():
     if 'VM_FOLDER' in os.environ:
         return Path(os.environ['VM_FOLDER'])
@@ -40,15 +50,6 @@ def iso_is_url(iso):
 def run_cmd(cmd):
     lib_user.print_cmd(cmd)
     subprocess.run(cmd, check=True)
-
-
-def find_in_usr_share(sub_paths):
-    for sub_path in sub_paths:
-        if (full_path := Path('/usr/share', sub_path)).exists():
-            return full_path
-    raise Exception(
-        f"No subpaths from list ('{', '.join(sub_paths)}') could be found in '/usr/share', do you need to install a package?"
-    )
 
 
 class VirtualMachine:
@@ -65,6 +66,10 @@ class VirtualMachine:
         self.disk_img = self.data_folder.joinpath('disk.img')
         self.efi_img = self.data_folder.joinpath('efi.img')
         self.efi_vars_img = self.data_folder.joinpath('efi_vars.img')
+        self.shared_folder = self.data_folder.joinpath('shared')
+        self.vfsd_log = self.data_folder.joinpath('vfsd.log')
+        self.vfsd_sock = self.data_folder.joinpath('vfsd.sock')
+        self.vfsd_mem = self.data_folder.joinpath('vfsd.mem')
 
         # QEMU configuration
         self.qemu = 'qemu-system-' + self.arch
@@ -82,6 +87,12 @@ class VirtualMachine:
             # RNG
             '-object', 'rng-random,filename=/dev/urandom,id=rng0',
             '-device', 'virtio-rng-pci',
+
+            # Shared folder via virtiofs
+            '-chardev', f"socket,id=char0,path={self.vfsd_sock}",
+            '-device', 'vhost-user-fs-pci,queue-size=1024,chardev=char0,tag=host',
+            '-object', f"memory-backend-file,id=shm,mem-path={self.vfsd_mem},share=on,size={memory}",
+            '-numa', 'node,memdev=shm',
 
             # Statistics
             '-m', memory,
@@ -147,12 +158,61 @@ class VirtualMachine:
             shutil.rmtree(self.data_folder)
 
     def run(self):
-        if not shutil.which(self.qemu):
-            raise Exception(
-                f"Could not find QEMU ('{self.qemu}') on your system, install it first?")
         if not self.disk_img.exists():
-            raise Exception(f"Disk image ('{self.disk_img}') does not exist, run 'setup' first?")
-        run_cmd([self.qemu, *self.qemu_args])
+            raise Exception(
+                f"Disk image ('{self.disk_img}') for virtual machine ('{self.name}') does not exist, run 'setup' first?"
+            )
+
+        if not (qemu := shutil.which(self.qemu)):
+            raise Exception(
+                f"Could not find QEMU binary ('{self.qemu}') on your system (needed to run virtual machine)!"
+            )
+
+        if not (sudo := shutil.which('sudo')):
+            raise Exception(
+                'Could not find sudo on your system (needed for virtiofsd integration)!')
+
+        # Locate the QEMU prefix to search for virtiofsd
+        qemu_prefix = Path(qemu).resolve().parent.parent
+        possible_files = [
+            Path('libexec', 'virtiofsd'),  # Default QEMU installation, Fedora
+            Path('lib', 'qemu', 'virtiofsd'),  # Arch Linux
+        ]
+        virtiofsd = find_first_file(possible_files, relative_root=qemu_prefix)
+
+        # Ensure shared folder is created before sharing
+        self.shared_folder.mkdir(exist_ok=True, parents=True)
+
+        # Get access to sudo permission before opening virtiofsd in the background
+        print('Requesting sudo permission to run virtiofsd...')
+        run_cmd([sudo, 'true'])
+
+        # Python recommends full paths with subprocess.Popen() calls
+        virtiofsd_cmd = [
+            sudo,
+            virtiofsd,
+            f"--socket-group={grp.getgrgid(os.getgid()).gr_name}",
+            f"--socket-path={self.vfsd_sock}",
+            '-o', f"source={self.shared_folder}",
+            '-o', 'cache=always',
+        ]  # yapf: disable
+        lib_user.print_cmd(virtiofsd_cmd)
+        with open(self.vfsd_log, 'w', encoding='utf-8') as file, \
+             subprocess.Popen(virtiofsd_cmd, stderr=file, stdout=file) as vfsd:
+            try:
+                run_cmd([qemu, *self.qemu_args])
+            except subprocess.CalledProcessError as err:
+                # If virtiofsd is dead, it is pretty likely that it was the
+                # cause of QEMU failing so add to the existing exception using
+                # 'from'.
+                if vfsd.poll():
+                    vfsd_log_txt = self.vfsd_log.read_text(encoding='utf-8')
+                    raise Exception(f"virtiofsd failed with: {vfsd_log_txt}") from err
+                raise err
+            finally:
+                vfsd.kill()
+                # Delete the memory to save space, it does not have to be persistent
+                self.vfsd_mem.unlink(missing_ok=True)
 
     def setup(self):
         self.remove()
@@ -190,7 +250,7 @@ class Arm64VirtualMachine(VirtualMachine):
                 Path('edk2-armvirt/aarch64/QEMU_EFI.fd'),  # Arch Linux (old),
                 Path("qemu-efi-aarch64/QEMU_EFI.fd"),  # Debian and Ubuntu
             ]
-            shutil.copyfile(find_in_usr_share(possible_paths), self.efi_img)
+            shutil.copyfile(find_first_file(possible_paths), self.efi_img)
             self.efi_img.open(mode='r+b').truncate(efi_img_size)
 
         if not self.efi_vars_img.exists():
@@ -211,19 +271,19 @@ class X86VirtualMachine(VirtualMachine):
         self.efi_img.parent.mkdir(exist_ok=True, parents=True)
 
         if not self.efi_img.exists():
-            possible_paths = [
+            possible_files = [
                 Path('edk2/x64/OVMF_CODE.fd'),  # Arch Linux (current), Fedora
                 Path('edk2-ovmf/x64/OVMF_CODE.fd'),  # Arch Linux (old)
                 Path("OVMF/OVMF_CODE.fd"),  # Debian and Ubuntu
             ]
-            shutil.copyfile(find_in_usr_share(possible_paths), self.efi_img)
+            shutil.copyfile(find_first_file(possible_files), self.efi_img)
 
         if not self.efi_vars_img.exists():
-            possible_paths = [
+            possible_files = [
                 Path("edk2/x64/OVMF_VARS.fd"),  # Arch Linux and Fedora
                 Path("OVMF/OVMF_VARS.fd"),  # Debian and Ubuntu
             ]
-            shutil.copyfile(find_in_usr_share(possible_paths), self.efi_vars_img)
+            shutil.copyfile(find_first_file(possible_files), self.efi_vars_img)
 
 
 def parse_arguments():
