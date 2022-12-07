@@ -494,6 +494,8 @@ def create_vm_from_args(args):
     arch = args.architecture
     static_defaults = {
         'arm': {
+            'initrd': Path('initrd.img'),
+            'kernel': Path('arch/arm/boot/zImage'),
             'name': 'debian',
         },
         'aarch64': {
