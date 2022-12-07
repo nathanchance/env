@@ -462,15 +462,14 @@ def create_vm_from_args(args):
     kernel = None
     if hasattr(args, 'kernel') and args.kernel:
         # Figure out whether kernel argument is build folder or kernel image
-        if (kernel_obj := Path(args.kernel)).is_dir():
-            kernel_folder = kernel_obj
-            kernel_img = kernel_folder.joinpath(static_defaults[arch]['kernel'])
+        if (kernel := Path(args.kernel)).is_dir():
+            kernel_folder = kernel
+            kernel = kernel_folder.joinpath(static_defaults[arch]['kernel'])
         else:
             kernel_folder = None
-            kernel_img = kernel_obj
-        if not kernel_img.exists():
+        if not kernel.exists():
             raise Exception(
-                f"Kernel image ('{kernel_img}'), derived from kernel argument ('{args.kernel}'), does not exist!"
+                f"Kernel image ('{kernel}'), derived from kernel argument ('{args.kernel}'), does not exist!"
             )
 
         # Handle command line; no default as it is specific to the VM
