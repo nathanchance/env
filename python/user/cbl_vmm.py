@@ -287,10 +287,11 @@ class ArmVirtualMachine(VirtualMachine):
 class Arm32VirtualMachine(ArmVirtualMachine):
 
     def __init__(self, cmdline, cores, gdb, initrd, iso, kernel, memory, name, size, ssh_port):
-        if memory and memory > self.get_available_mem_for_vm():
+        max_mem = self.get_available_mem_for_vm()
+        if memory and memory > max_mem:
             # See the comment above self.get_available_mem_for_vm() for more info
             print("More than 2GB of RAM specified for 'highmem=off' machine, lowering to 2GB...")
-            memory = 2
+            memory = max_mem
 
         super().__init__('arm', cmdline, cores, gdb, initrd, iso, kernel, 'host,aarch64=off',
                          'virt,highmem=off', memory, name, size, ssh_port)
