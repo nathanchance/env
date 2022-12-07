@@ -74,7 +74,6 @@ function install_packages() {
         # kernel / tuxmake
         bison
         cpio
-        cross-{arm,mips,ppc64,s390x}-gcc11
         dwarves
         flex
         gcc
@@ -105,16 +104,25 @@ function install_packages() {
         python3-ply
     )
 
-    case "$(uname -m)" in
-        aarch64) packages+=(cross-x86_64-gcc11) ;;
-        x86_64) packages+=(cross-aarch64-gcc11) ;;
-    esac
+    host_arch=$(uname -m)
+    # No GCC for you!
+    if [[ ! $host_arch =~ arm ]]; then
+        packages+=(cross-{arm,mips,ppc64,s390x}-gcc11)
+        case "$host_arch" in
+            aarch64) packages+=(cross-x86_64-gcc11) ;;
+            x86_64) packages+=(cross-aarch64-gcc11) ;;
+        esac
+    fi
 
     zypper -n -q in "${packages[@]}"
 
     # Install zoxide from GitHub
     tmp_dir=$(mktemp -d)
-    zoxide_url=$(curl -LSs https://api.github.com/repos/ajeetdsouza/zoxide/releases/latest | grep -E "browser_download_url.*$(uname -m)-unknown-linux-musl" | cut -d\" -f4)
+    case "$host_arch" in
+        armv7*l) zoxide_triple=armv7-unknown-linux-musleabihf ;;
+        *) zoxide_triple=$(uname -m)-unknown-linux-musl ;;
+    esac
+    zoxide_url=$(curl -LSs https://api.github.com/repos/ajeetdsouza/zoxide/releases/latest | grep -E "browser_download_url.*$zoxide_triple" | cut -d\" -f4)
     curl -fLSs "$zoxide_url" | tar -C "$tmp_dir" -xzf -
     install -Dvm755 "$tmp_dir"/zoxide /usr/local/bin/zoxide
     rm -fr "$tmp_dir"
