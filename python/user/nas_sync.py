@@ -30,7 +30,8 @@ def parse_parameters():
                         '--targets',
                         choices=supported_images,
                         default=supported_images,
-                        help='Download targets')
+                        help='Download targets',
+                        nargs='+')
 
     return parser.parse_args()
 
@@ -104,7 +105,7 @@ def download_items(targets, network_folder):
             }]
 
         elif target == 'debian':
-            debian_arches = ['amd64', 'arm64']
+            debian_arches = ['amd64', 'arm64', 'armhf']
             debian_ver = '11.5.0'
 
             for arch in debian_arches:
