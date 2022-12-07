@@ -193,7 +193,8 @@ def update_and_install_packages(additional_packages=None):
             'virt-manager',
             arch_packages[dpkg_arch]['firmware']
         ]  # yapf: disable
-    packages += [arch_packages[dpkg_arch]['qemu']]
+    if dpkg_arch in arch_packages:
+        packages += [arch_packages[dpkg_arch]['qemu']]
 
     add_apt_args = [
         '-o', 'Dpkg::Options::=--force-confdef', '-o', 'Dpkg::Options::=--force-confold'
