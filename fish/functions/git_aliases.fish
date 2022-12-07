@@ -131,11 +131,11 @@ function git_aliases -d "Configure git aliases"
 
     # fish git aliases
     # no arguments
-    for alias in bf cpi dmb sync
+    for alias in bf cpi dmb
         git config --global alias.$alias "!fish -c git_$alias"
     end
     # with arguments
-    for alias in rn sw
+    for alias in rn sw sync
         git config --global alias.$alias '!f() { fish -c "'git_$alias' $*"; }; f'
     end
     git config --global alias.rf '!f() { fish -c "git_rf -q $*"; }; f'
