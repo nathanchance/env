@@ -22,12 +22,6 @@ import sys
 import lib_user
 
 
-def can_use_kvm(guest_arch):
-    if guest_arch == platform.machine():
-        return os.access('/dev/kvm', os.R_OK | os.W_OK)
-    return False
-
-
 def find_first_file(possible_files, relative_root=Path('/usr/share')):
     for possible_file in possible_files:
         if (full_path := relative_root.joinpath(possible_file)).exists():
@@ -43,6 +37,10 @@ def get_base_folder():
     return Path(__file__).resolve().parent.joinpath('vm')
 
 
+def have_dev_kvm_access():
+    return os.access('/dev/kvm', os.R_OK | os.W_OK)
+
+
 def iso_is_url(iso):
     return 'http://' in iso or 'https://' in iso
 
@@ -52,9 +50,13 @@ def run_cmd(cmd):
     subprocess.run(cmd, check=True)
 
 
+def wget(location, url):
+    run_cmd(['wget', '-c', '-O', location, url])
+
+
 class VirtualMachine:
 
-    def __init__(self, arch, cmdline, cores, gdb, initrd, iso, kernel, memory, name, size,
+    def __init__(self, arch, cmdline, cores, gdb, initrd, iso, kernel, kvm_cpu, memory, name, size,
                  ssh_port):
         # External values
         self.arch = arch
@@ -67,9 +69,21 @@ class VirtualMachine:
         self.efi_img = self.data_folder.joinpath('efi.img')
         self.efi_vars_img = self.data_folder.joinpath('efi_vars.img')
         self.shared_folder = self.data_folder.joinpath('shared')
+        self.use_kvm = self.can_use_kvm()
         self.vfsd_log = self.data_folder.joinpath('vfsd.log')
         self.vfsd_sock = self.data_folder.joinpath('vfsd.sock')
         self.vfsd_mem = self.data_folder.joinpath('vfsd.mem')
+
+        # When using KVM, we cannot use more than the maximum number of cores.
+        # Default to either 8 cores or half the number of cores in the machine,
+        # whichever is smaller. For TCG, use 4 cores by default.
+        if not cores:
+            cores = min(8, int(os.cpu_count() / 2)) if self.use_kvm else 4
+        # We cap the default amount of memory at two times the number of cores
+        # (as that is sufficient for compiling) or total amount of available VM
+        # memory.
+        if not memory:
+            memory = min(cores * 2, self.get_available_mem_for_vm())
 
         # QEMU configuration
         self.qemu = 'qemu-system-' + self.arch
@@ -91,11 +105,11 @@ class VirtualMachine:
             # Shared folder via virtiofs
             '-chardev', f"socket,id=char0,path={self.vfsd_sock}",
             '-device', 'vhost-user-fs-pci,queue-size=1024,chardev=char0,tag=host',
-            '-object', f"memory-backend-file,id=shm,mem-path={self.vfsd_mem},share=on,size={memory}",
+            '-object', f"memory-backend-file,id=shm,mem-path={self.vfsd_mem},share=on,size={memory}G",
             '-numa', 'node,memdev=shm',
 
             # Statistics
-            '-m', memory,
+            '-m', f"{memory}G",
             '-device', 'virtio-balloon',
             '-smp', str(cores),
 
@@ -106,8 +120,8 @@ class VirtualMachine:
             # iso args if setting up machine for the first time
             *self.get_iso_args(iso),
         ]  # yapf: disable
-        if can_use_kvm(self.arch):
-            self.qemu_args += ['-cpu', 'host', '-enable-kvm']
+        if self.use_kvm:
+            self.qemu_args += ['-cpu', kvm_cpu, '-enable-kvm']
         if cmdline:
             self.qemu_args += ['-append', cmdline]
         if gdb:
@@ -116,6 +130,27 @@ class VirtualMachine:
             self.qemu_args += ['-initrd', initrd]
         if kernel:
             self.qemu_args += ['-kernel', kernel]
+
+    def can_use_kvm(self):
+        if self.arch == platform.machine():
+            return have_dev_kvm_access()
+        return False
+
+    # We consider half of the host's memory in gigabytes as available for normal
+    # virtual machines. Certain ones might have other requirements.
+    def get_available_mem_for_vm(self):
+        # Total amount of memory of a system in gigabytes (page size * pages / 1024^3)
+        total_mem = os.sysconf('SC_PAGE_SIZE') * os.sysconf('SC_PHYS_PAGES') / (1024.**3)
+
+        # Get the current exponent of the size of memory, as most computers have a
+        # power of 2 amount of memory; if it is not (like 12GB), then this
+        # calculation will just result in a slightly larger amount of memory being
+        # allocated to the VM. If this is a problem, the user can just specify the
+        # amount of memory.
+        exp = round(math.log2(total_mem))
+
+        # To get half of the amount of memory, shift by one less exponent
+        return 1 << (exp - 1)
 
     def handle_action(self, action):
         if action == 'setup':
@@ -140,7 +175,7 @@ class VirtualMachine:
             iso = get_base_folder().joinpath('iso', iso_url.split('/')[-1])
             if not iso.exists():
                 iso.parent.mkdir(exist_ok=True, parents=True)
-                run_cmd(['wget', '-c', '-O', iso, iso_url])
+                wget(iso, iso_url)
 
         if not iso.exists():
             raise Exception(
@@ -220,13 +255,40 @@ class VirtualMachine:
         self.run()
 
 
-class Arm64VirtualMachine(VirtualMachine):
+class ArmVirtualMachine(VirtualMachine):
+
+    def __init__(self, arch, cmdline, cores, gdb, initrd, iso, kernel, kvm_cpu, machine, memory,
+                 name, size, ssh_port):
+        super().__init__(arch, cmdline, cores, gdb, initrd, iso, kernel, kvm_cpu, memory, name,
+                         size, ssh_port)
+
+        self.qemu_args += ['-M', machine]
+
+    def run(self):
+        self.setup_efi_files()
+        super().run()
+
+    def setup_efi_files(self, possible_efi_files=None):
+        if not possible_efi_files:
+            raise Exception('No EFI files provided?')
+
+        efi_img_size = 64 * 1024 * 1024  # 64M
+
+        self.efi_img.parent.mkdir(exist_ok=True, parents=True)
+
+        if not self.efi_img.exists():
+            shutil.copyfile(find_first_file(possible_efi_files), self.efi_img)
+            self.efi_img.open(mode='r+b').truncate(efi_img_size)
+
+        if not self.efi_vars_img.exists():
+            self.efi_vars_img.open(mode='xb').truncate(efi_img_size)
+
+
+class Arm64VirtualMachine(ArmVirtualMachine):
 
     def __init__(self, cmdline, cores, gdb, initrd, iso, kernel, memory, name, size, ssh_port):
-        super().__init__('aarch64', cmdline, cores, gdb, initrd, iso, kernel, memory, name, size,
-                         ssh_port)
-
-        self.qemu_args += ['-M', 'virt']
+        super().__init__('aarch64', cmdline, cores, gdb, initrd, iso, kernel, 'host', 'virt',
+                         memory, name, size, ssh_port)
 
         # If not running on KVM, use QEMU's max CPU emulation target
         # Use impdef pointer auth, otherwise QEMU is just BRUTALLY slow:
@@ -234,34 +296,21 @@ class Arm64VirtualMachine(VirtualMachine):
         if '-cpu' not in self.qemu_args:
             self.qemu_args += ['-cpu', 'max,pauth-impdef=true']
 
-    def run(self):
-        self.setup_efi_files()
-        super().run()
-
-    def setup_efi_files(self):
-        efi_img_size = 64 * 1024 * 1024  # 64M
-
-        self.efi_img.parent.mkdir(exist_ok=True, parents=True)
-
-        if not self.efi_img.exists():
-            possible_paths = [
-                Path('edk2/aarch64/QEMU_EFI.silent.fd'),  # Fedora
-                Path('edk2/aarch64/QEMU_EFI.fd'),  # Arch Linux (current)
-                Path('edk2-armvirt/aarch64/QEMU_EFI.fd'),  # Arch Linux (old),
-                Path("qemu-efi-aarch64/QEMU_EFI.fd"),  # Debian and Ubuntu
-            ]
-            shutil.copyfile(find_first_file(possible_paths), self.efi_img)
-            self.efi_img.open(mode='r+b').truncate(efi_img_size)
-
-        if not self.efi_vars_img.exists():
-            self.efi_vars_img.open(mode='xb').truncate(efi_img_size)
+    def setup_efi_files(self, possible_efi_files=None):
+        possible_efi_files = [
+            Path('edk2/aarch64/QEMU_EFI.silent.fd'),  # Fedora
+            Path('edk2/aarch64/QEMU_EFI.fd'),  # Arch Linux (current)
+            Path('edk2-armvirt/aarch64/QEMU_EFI.fd'),  # Arch Linux (old),
+            Path("qemu-efi-aarch64/QEMU_EFI.fd"),  # Debian and Ubuntu
+        ]
+        super().setup_efi_files(possible_efi_files)
 
 
 class X86VirtualMachine(VirtualMachine):
 
     def __init__(self, cmdline, cores, gdb, initrd, iso, kernel, memory, name, size, ssh_port):
-        super().__init__('x86_64', cmdline, cores, gdb, initrd, iso, kernel, memory, name, size,
-                         ssh_port)
+        super().__init__('x86_64', cmdline, cores, gdb, initrd, iso, kernel, 'host', memory, name,
+                         size, ssh_port)
 
     def run(self):
         self.setup_efi_files()
@@ -303,8 +352,8 @@ def parse_arguments():
                                help='Number of cores virtual machine has')
     common_parser.add_argument('-m',
                                '--memory',
-                               type=str,
-                               help='Amount of memory virtual machine has')
+                               type=int,
+                               help='Amount of memory in gigabytes to allocate to virtual machine')
     common_parser.add_argument('-n', '--name', type=str, help='Name of virtual machine')
     common_parser.add_argument('-p',
                                '--ssh-port',
@@ -355,23 +404,6 @@ def parse_arguments():
     return parser.parse_args()
 
 
-# We consider half of the system's memory in gigabytes as available for the
-# virtual machine
-def get_available_mem_for_vm():
-    # Total amount of memory of a system in gigabytes (page size * pages / 1024^3)
-    total_mem = os.sysconf('SC_PAGE_SIZE') * os.sysconf('SC_PHYS_PAGES') / (1024.**3)
-
-    # Get the current exponent of the size of memory, as most computers have a
-    # power of 2 amount of memory; if it is not (like 12GB), then this
-    # calculation will just result in a slightly larger amount of memory being
-    # allocated to the VM. If this is a problem, the user can just specify the
-    # amount of memory.
-    exp = round(math.log2(total_mem))
-
-    # To get half of the amount of memory, shift by one less exponent
-    return 1 << (exp - 1)
-
-
 def get_def_iso(arch):
     arch_day = '.01'
     arch_iso_ver = datetime.datetime.now(datetime.timezone.utc).strftime("%Y.%m") + arch_day
@@ -401,12 +433,6 @@ def get_def_iso(arch):
     return f"{iso_info[arch]['url']}/{file.name}"
 
 
-# We cap the default amount of memory at two times the number of cores (as that
-# is sufficient for compiling) or total amount of available VM memory.
-def get_def_mem(cores):
-    return f"{int(min(cores * 2, get_available_mem_for_vm()))}G"
-
-
 def create_vm_from_args(args):
     # Simple configuration section with short one liners with no logic. Either
     # it came from argparse (meaning the default was able to be set there or
@@ -426,20 +452,16 @@ def create_vm_from_args(args):
             'kernel': Path('arch/x86/boot/bzImage'),
             'name': 'arch',
         },
-        # When using KVM, we cannot use more than the maximum number of cores.
-        # Default to either 8 cores or half the number of cores in the
-        # machine, whichever is smaller. For TCG, use 4 cores by default.
-        'cores': min(8, int(os.cpu_count() / 2)) if can_use_kvm(arch) else 4,
         'iso': get_def_iso(arch),
     }
-    cores = args.cores if args.cores else static_defaults['cores']
-    gdb = args.gdb if hasattr(args, 'gdb') else False
-    # The amount of default memory depends on the actual amount of cores, not
-    # the default.
-    memory = args.memory if args.memory else get_def_mem(cores)
+    # Part of common parser, so present for all arguments
+    cores = args.cores
+    memory = args.memory
     name = args.name if args.name else static_defaults[arch]['name']
-    size = args.size if hasattr(args, 'size') else None
     ssh_port = args.ssh_port
+    # Not necessary for all invocations
+    gdb = args.gdb if hasattr(args, 'gdb') else False
+    size = args.size if hasattr(args, 'size') else None
 
     # Default .iso
     # Check if iso is even in the current args, as it is only required for
