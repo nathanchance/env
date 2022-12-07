@@ -26,8 +26,9 @@ def find_first_file(possible_files, relative_root=Path('/usr/share')):
     for possible_file in possible_files:
         if (full_path := relative_root.joinpath(possible_file)).exists():
             return full_path
+    files_str = "', '".join([str(elem) for elem in possible_files])
     raise Exception(
-        f"No items from list ('{', '.join(possible_files)}') could be found in '{relative_root}', do you need to install a package?"
+        f"No items from list ('{files_str}') could be found in '{relative_root}', do you need to install a package?"
     )
 
 
