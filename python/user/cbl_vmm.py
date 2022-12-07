@@ -354,9 +354,10 @@ class Arm64VirtualMachine(ArmVirtualMachine):
 
 class X86VirtualMachine(VirtualMachine):
 
-    def __init__(self, cmdline, cores, gdb, initrd, iso, kernel, memory, name, size, ssh_port):
-        super().__init__('x86_64', cmdline, cores, gdb, initrd, iso, kernel, 'host', memory, name,
-                         size, ssh_port)
+    def __init__(self, arch, cmdline, cores, gdb, initrd, iso, kernel, memory, name, size,
+                 ssh_port):
+        super().__init__(arch, cmdline, cores, gdb, initrd, iso, kernel, 'host', memory, name, size,
+                         ssh_port)
 
         self.qemu_args += ['-M', 'q35']
 
@@ -364,23 +365,37 @@ class X86VirtualMachine(VirtualMachine):
         self.setup_efi_files()
         super().run()
 
-    def setup_efi_files(self):
+    def setup_efi_files(self, possible_efi_files=None, possible_efi_vars_files=None):
+        if not possible_efi_files:
+            raise Exception('No EFI files provided?')
+        if not possible_efi_vars_files:
+            raise Exception('No EFI variable files provided?')
+
         self.efi_img.parent.mkdir(exist_ok=True, parents=True)
 
         if not self.efi_img.exists():
-            possible_files = [
-                Path('edk2/x64/OVMF_CODE.fd'),  # Arch Linux (current), Fedora
-                Path('edk2-ovmf/x64/OVMF_CODE.fd'),  # Arch Linux (old)
-                Path("OVMF/OVMF_CODE.fd"),  # Debian and Ubuntu
-            ]
-            shutil.copyfile(find_first_file(possible_files), self.efi_img)
+            shutil.copyfile(find_first_file(possible_efi_files), self.efi_img)
 
         if not self.efi_vars_img.exists():
-            possible_files = [
-                Path("edk2/x64/OVMF_VARS.fd"),  # Arch Linux and Fedora
-                Path("OVMF/OVMF_VARS.fd"),  # Debian and Ubuntu
-            ]
-            shutil.copyfile(find_first_file(possible_files), self.efi_vars_img)
+            shutil.copyfile(find_first_file(possible_efi_vars_files), self.efi_vars_img)
+
+
+class X8664VirtualMachine(X86VirtualMachine):
+
+    def __init__(self, cmdline, cores, gdb, initrd, iso, kernel, memory, name, size, ssh_port):
+        super().__init__('x86_64', cmdline, cores, gdb, initrd, iso, kernel, memory, name, size,
+                         ssh_port)
+
+    def setup_efi_files(self, possible_efi_files=None, possible_efi_vars_files=None):
+        possible_efi_files = [
+            Path('edk2/x64/OVMF_CODE.fd'),  # Arch Linux and Fedora
+            Path("OVMF/OVMF_CODE.fd"),  # Debian and Ubuntu
+        ]
+        possible_efi_vars_files = [
+            Path("edk2/x64/OVMF_VARS.fd"),  # Arch Linux and Fedora
+            Path("OVMF/OVMF_VARS.fd"),  # Debian and Ubuntu
+        ]
+        super().setup_efi_files(possible_efi_files, possible_efi_vars_files)
 
 
 def parse_arguments():
@@ -577,8 +592,8 @@ def create_vm_from_args(args):
         return Arm64VirtualMachine(cmdline, cores, gdb, initrd, iso, kernel, memory, name, size,
                                    ssh_port)
     if arch == 'x86_64':
-        return X86VirtualMachine(cmdline, cores, gdb, initrd, iso, kernel, memory, name, size,
-                                 ssh_port)
+        return X8664VirtualMachine(cmdline, cores, gdb, initrd, iso, kernel, memory, name, size,
+                                   ssh_port)
     raise Exception(f"Unimplemented architecture ('{arch}')?")
 
 
