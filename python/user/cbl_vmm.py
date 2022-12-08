@@ -288,14 +288,21 @@ class ArmVirtualMachine(VirtualMachine):
 class Arm32VirtualMachine(ArmVirtualMachine):
 
     def __init__(self, cmdline, cores, gdb, initrd, iso, kernel, memory, name, size, ssh_port):
-        max_mem = self.get_available_mem_for_vm()
-        if memory and memory > max_mem:
-            # See the comment above self.get_available_mem_for_vm() for more info
-            print("More than 2GB of RAM specified for 'highmem=off' machine, lowering to 2GB...")
-            memory = max_mem
+        self.highmem_firmware = self.get_highmem_firmware()
+        if self.highmem_firmware:
+            mach = 'virt'
+        else:
+            mach = 'virt,highmem=off'
 
-        super().__init__('arm', cmdline, cores, gdb, initrd, iso, kernel, 'host,aarch64=off',
-                         'virt,highmem=off', memory, name, size, ssh_port)
+            max_mem = self.get_available_mem_for_vm()
+            if memory and memory > max_mem:
+                # See the comment above self.get_available_mem_for_vm() for more info
+                print(
+                    "More than 2GB of RAM specified for 'highmem=off' machine, lowering to 2GB...")
+                memory = max_mem
+
+        super().__init__('arm', cmdline, cores, gdb, initrd, iso, kernel, 'host,aarch64=off', mach,
+                         memory, name, size, ssh_port)
 
         if self.use_kvm:
             self.qemu = 'qemu-system-aarch64'
@@ -318,13 +325,23 @@ class Arm32VirtualMachine(ArmVirtualMachine):
                 return have_dev_kvm_access()
         return False
 
-    # edk2 appears not to support highmem (or it is currently broken), so limit
-    # the virtual machine's memory to 2GB
+    # Recent released versions of edk2 have broken highmem support so machines
+    # with more than 2GB of RAM do not boot. Limit them in those cases. Once
+    # the fix (https://github.com/tianocore/edk2/pull/3738) is in released
+    # versions that I have access to, this can all be reverted.
     def get_available_mem_for_vm(self):
-        return 2
+        return super().get_available_mem_for_vm() if self.highmem_firmware else 2
+
+    def get_highmem_firmware(self):
+        if 'ENV_FOLDER' in os.environ:
+            if (firmware := Path(os.environ['ENV_FOLDER'], 'bin', 'armv7l',
+                                 'QEMU_EFI.fd')).exists():
+                return [firmware]
+        return []
 
     def setup_efi_files(self, possible_efi_files=None):
         possible_efi_files = [
+            *self.highmem_firmware,  # highmem supported firmware
             Path('edk2/arm/QEMU_EFI.fd'),  # Arch Linux, Fedora
         ]
         super().setup_efi_files(possible_efi_files)
