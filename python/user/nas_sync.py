@@ -17,6 +17,7 @@ def parse_parameters():
     parser = ArgumentParser(description='Download certain firmare images to NAS')
 
     supported_images = [
+        'alpine',
         'arch',
         'debian',
         'fedora',
@@ -93,7 +94,21 @@ def download_items(targets, network_folder):
 
     items = []
     for target in targets:
-        if target == 'arch':
+        if target == 'alpine':
+            alpine_arches = ['aarch64', 'armv7', 'x86', 'x86_64']
+            alpine_series = '3.17'
+            alpine_patch = '.0'
+            alpine_version = alpine_series + alpine_patch
+
+            for alpine_arch in alpine_arches:
+                file_url = f"https://dl-cdn.alpinelinux.org/alpine/v{alpine_series}/releases/{alpine_arch}/alpine-standard-{alpine_version}-{alpine_arch}.iso"
+                items += [{
+                    'containing_folder': firmware_folder.joinpath('Alpine', alpine_version),
+                    'file_url': file_url,
+                    'sha_url': file_url + '.sha256',
+                }]
+
+        elif target == 'arch':
             arch_day = '.01'
             arch_date = datetime.datetime.now(datetime.timezone.utc).strftime("%Y.%m") + arch_day
 
