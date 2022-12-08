@@ -1,0 +1,28 @@
+diff --git a/security/apparmor/include/policy_unpack.h b/security/apparmor/include/policy_unpack.h
+index 8fdf8f703bd0..dcf7d1bbf96b 100644
+--- a/security/apparmor/include/policy_unpack.h
++++ b/security/apparmor/include/policy_unpack.h
+@@ -165,6 +165,11 @@ static inline void aa_put_loaddata(struct aa_loaddata *data)
+ 		kref_put(&data->count, aa_loaddata_kref);
+ }
+ 
++#define tri int
++#define TRI_TRUE 1
++#define TRI_NONE 0
++#define TRI_FALSE -1
++
+ #if IS_ENABLED(CONFIG_KUNIT)
+ bool aa_inbounds(struct aa_ext *e, size_t size);
+ size_t aa_unpack_u16_chunk(struct aa_ext *e, char **chunk);
+@@ -173,11 +178,6 @@ bool aa_unpack_nameX(struct aa_ext *e, enum aa_code code, const char *name);
+ bool aa_unpack_u32(struct aa_ext *e, u32 *data, const char *name);
+ bool aa_unpack_u64(struct aa_ext *e, u64 *data, const char *name);
+ 
+-#define tri int
+-#define TRI_TRUE 1
+-#define TRI_NONE 0
+-#define TRI_FALSE -1
+-
+ tri aa_unpack_array(struct aa_ext *e, const char *name, u16 *size);
+ size_t aa_unpack_blob(struct aa_ext *e, char **blob, const char *name);
+ int aa_unpack_str(struct aa_ext *e, const char **string, const char *name);
