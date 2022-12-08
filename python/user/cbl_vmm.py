@@ -204,9 +204,11 @@ class VirtualMachine:
                 f"Could not find QEMU binary ('{self.qemu}') on your system (needed to run virtual machine)!"
             )
 
-        if not (sudo := shutil.which('sudo')):
-            raise Exception(
-                'Could not find sudo on your system (needed for virtiofsd integration)!')
+        if not (sudo := shutil.which('doas')):
+            if not (sudo := shutil.which('sudo')):
+                raise Exception(
+                    'Could not find doas or sudo on your system (needed for virtiofsd integration)!'
+                )
 
         # Locate the QEMU prefix to search for virtiofsd
         qemu_prefix = Path(qemu).resolve().parent.parent
@@ -219,8 +221,9 @@ class VirtualMachine:
         # Ensure shared folder is created before sharing
         self.shared_folder.mkdir(exist_ok=True, parents=True)
 
-        # Get access to sudo permission before opening virtiofsd in the background
-        print('Requesting sudo permission to run virtiofsd...')
+        # Get access to root privileges permission before opening virtiofsd in
+        # the background
+        print('Requesting root privileges to run virtiofsd...')
         run_cmd([sudo, 'true'])
 
         # Python recommends full paths with subprocess.Popen() calls
@@ -371,9 +374,10 @@ class Arm64VirtualMachine(ArmVirtualMachine):
 
 class X86VirtualMachine(VirtualMachine):
 
-    def __init__(self, cmdline, cores, gdb, initrd, iso, kernel, memory, name, size, ssh_port):
-        super().__init__('x86_64', cmdline, cores, gdb, initrd, iso, kernel, 'host', memory, name,
-                         size, ssh_port)
+    def __init__(self, arch, cmdline, cores, gdb, initrd, iso, kernel, memory, name, size,
+                 ssh_port):
+        super().__init__(arch, cmdline, cores, gdb, initrd, iso, kernel, 'host', memory, name, size,
+                         ssh_port)
 
         self.qemu_args += ['-M', 'q35']
 
@@ -381,23 +385,62 @@ class X86VirtualMachine(VirtualMachine):
         self.setup_efi_files()
         super().run()
 
-    def setup_efi_files(self):
+    def setup_efi_files(self, possible_efi_files=None, possible_efi_vars_files=None):
+        if not possible_efi_files:
+            raise Exception('No EFI files provided?')
+        if not possible_efi_vars_files:
+            raise Exception('No EFI variable files provided?')
+
         self.efi_img.parent.mkdir(exist_ok=True, parents=True)
 
         if not self.efi_img.exists():
-            possible_files = [
-                Path('edk2/x64/OVMF_CODE.fd'),  # Arch Linux (current), Fedora
-                Path('edk2-ovmf/x64/OVMF_CODE.fd'),  # Arch Linux (old)
-                Path("OVMF/OVMF_CODE.fd"),  # Debian and Ubuntu
-            ]
-            shutil.copyfile(find_first_file(possible_files), self.efi_img)
+            shutil.copyfile(find_first_file(possible_efi_files), self.efi_img)
 
         if not self.efi_vars_img.exists():
-            possible_files = [
-                Path("edk2/x64/OVMF_VARS.fd"),  # Arch Linux and Fedora
-                Path("OVMF/OVMF_VARS.fd"),  # Debian and Ubuntu
-            ]
-            shutil.copyfile(find_first_file(possible_files), self.efi_vars_img)
+            shutil.copyfile(find_first_file(possible_efi_vars_files), self.efi_vars_img)
+
+
+class X8632VirtualMachine(X86VirtualMachine):
+
+    def __init__(self, cmdline, cores, gdb, initrd, iso, kernel, memory, name, size, ssh_port):
+        super().__init__('i386', cmdline, cores, gdb, initrd, iso, kernel, memory, name, size,
+                         ssh_port)
+
+    def can_use_kvm(self):
+        if platform.machine() in ('i386', 'i686', 'x86_64'):
+            return have_dev_kvm_access()
+        return False
+
+    def setup_efi_files(self, possible_efi_files=None, possible_efi_vars_files=None):
+        possible_efi_files = [
+            Path('edk2/ia32/OVMF_CODE.fd'),  # Arch Linux
+            Path('edk2/ovmf-ia32/OVMF_CODE.fd'),  # Fedora
+            Path("OVMF/OVMF32_CODE_4M.secboot.fd"),  # Debian and Ubuntu
+        ]
+        possible_efi_vars_files = [
+            Path('edk2/ia32/OVMF_VARS.fd'),  # Arch Linux
+            Path('edk2/ovmf-ia32/OVMF_VARS.fd'),  # Fedora
+            Path("OVMF/OVMF32_VARS_4M.fd"),  # Debian and Ubuntu
+        ]
+        super().setup_efi_files(possible_efi_files, possible_efi_vars_files)
+
+
+class X8664VirtualMachine(X86VirtualMachine):
+
+    def __init__(self, cmdline, cores, gdb, initrd, iso, kernel, memory, name, size, ssh_port):
+        super().__init__('x86_64', cmdline, cores, gdb, initrd, iso, kernel, memory, name, size,
+                         ssh_port)
+
+    def setup_efi_files(self, possible_efi_files=None, possible_efi_vars_files=None):
+        possible_efi_files = [
+            Path('edk2/x64/OVMF_CODE.fd'),  # Arch Linux and Fedora
+            Path("OVMF/OVMF_CODE.fd"),  # Debian and Ubuntu
+        ]
+        possible_efi_vars_files = [
+            Path("edk2/x64/OVMF_VARS.fd"),  # Arch Linux and Fedora
+            Path("OVMF/OVMF_VARS.fd"),  # Debian and Ubuntu
+        ]
+        super().setup_efi_files(possible_efi_files, possible_efi_vars_files)
 
 
 def parse_arguments():
@@ -470,6 +513,8 @@ def parse_arguments():
 
 
 def get_def_iso(arch):
+    alpine_ver = '3.17.0'
+
     arch_day = '.01'
     arch_iso_ver = datetime.datetime.now(datetime.timezone.utc).strftime("%Y.%m") + arch_day
 
@@ -487,11 +532,16 @@ def get_def_iso(arch):
             'file': Path('Fedora', fedora_ver, 'Server', f"Fedora-Server-netinst-{arch}-{fedora_ver}-{fedora_iso_ver}.iso"),
             'url': f"https://download.fedoraproject.org/pub/fedora/linux/releases/{fedora_ver}/Server/{arch}",
         },
+        'i386': {
+            'file': Path('Alpine', alpine_ver, f"alpine-standard-{alpine_ver}-x86.iso"),
+            'url': f"https://dl-cdn.alpinelinux.org/alpine/v{'.'.join(alpine_ver.split('.')[0:2])}/releases/x86",
+        },
         'x86_64': {
             'file': Path('Arch Linux', f"archlinux-{arch_iso_ver}-x86_64.iso"),
             'url': 'https://mirrors.edge.kernel.org/archlinux/iso/',
         },
     }  # yapf: disable
+    iso_info['i686'] = iso_info['i386']
 
     # Check to see if we have a local network version we can use
     file = iso_info[arch]['file']
@@ -523,6 +573,10 @@ def create_vm_from_args(args):
             'kernel': Path('arch/arm64/boot/Image'),
             'name': 'fedora',
         },
+        'i386': {
+            'kernel': Path('arch/x86/boot/bzImage'),
+            'name': 'alpine',
+        },
         'x86_64': {
             'initrd': Path('rootfs/initramfs.img'),
             'kernel': Path('arch/x86/boot/bzImage'),
@@ -530,6 +584,8 @@ def create_vm_from_args(args):
         },
         'iso': get_def_iso(arch),
     }
+    # platform.machine() to QEMU mapping
+    static_defaults['i686'] = static_defaults['i386']
     # Part of common parser, so present for all arguments
     cores = args.cores
     memory = args.memory
@@ -593,9 +649,12 @@ def create_vm_from_args(args):
     if arch == 'aarch64':
         return Arm64VirtualMachine(cmdline, cores, gdb, initrd, iso, kernel, memory, name, size,
                                    ssh_port)
+    if arch in ('i386', 'i686'):
+        return X8632VirtualMachine(cmdline, cores, gdb, initrd, iso, kernel, memory, name, size,
+                                   ssh_port)
     if arch == 'x86_64':
-        return X86VirtualMachine(cmdline, cores, gdb, initrd, iso, kernel, memory, name, size,
-                                 ssh_port)
+        return X8664VirtualMachine(cmdline, cores, gdb, initrd, iso, kernel, memory, name, size,
+                                   ssh_port)
     raise Exception(f"Unimplemented architecture ('{arch}')?")
 
 

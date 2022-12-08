@@ -120,7 +120,7 @@ def download_items(targets, network_folder):
             }]
 
         elif target == 'debian':
-            debian_arches = ['amd64', 'arm64', 'armhf']
+            debian_arches = ['amd64', 'arm64', 'armhf', 'i386']
             debian_ver = '11.5.0'
 
             for arch in debian_arches:
