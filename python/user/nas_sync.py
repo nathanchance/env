@@ -114,7 +114,7 @@ def download_items(targets, network_folder):
 
             base_arch_url = f"https://mirrors.edge.kernel.org/archlinux/iso/{arch_date}"
             items += [{
-                'containing_folder': firmware_folder.joinpath('Arch Linux'),
+                'containing_folder': firmware_folder.joinpath('Arch Linux', arch_date),
                 'file_url': f"{base_arch_url}/archlinux-{arch_date}-x86_64.iso",
                 'sha_url': f"{base_arch_url}/sha256sums.txt"
             }]
