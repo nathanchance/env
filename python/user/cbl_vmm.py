@@ -553,7 +553,7 @@ def get_def_iso(arch):
             'url': f"https://dl-cdn.alpinelinux.org/alpine/v{'.'.join(alpine_ver.split('.')[0:2])}/releases/x86",
         },
         'x86_64': {
-            'file': Path('Arch Linux', f"archlinux-{arch_iso_ver}-x86_64.iso"),
+            'file': Path('Arch', arch_iso_ver, f"archlinux-{arch_iso_ver}-x86_64.iso"),
             'url': 'https://mirrors.edge.kernel.org/archlinux/iso/',
         },
     }  # yapf: disable
