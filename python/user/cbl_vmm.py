@@ -57,8 +57,8 @@ def wget(location, url):
 
 class VirtualMachine:
 
-    def __init__(self, arch, cmdline, cores, gdb, initrd, iso, kernel, kvm_cpu, memory, name, size,
-                 ssh_port):
+    def __init__(self, arch, cmdline, cores, gdb, graphical, initrd, iso, kernel, kvm_cpu, memory,
+                 name, size, ssh_port):
         # External values
         self.arch = arch
         self.name = name
@@ -89,9 +89,8 @@ class VirtualMachine:
         # QEMU configuration
         self.qemu = 'qemu-system-' + self.arch
         self.qemu_args = [
-            # No display
-            '-display', 'none',
-            '-serial', 'mon:stdio',
+            # Display
+            *self.get_display_args(graphical),
 
             # Disk image
             '-drive', f"if=virtio,format=qcow2,file={self.disk_img}",
@@ -165,6 +164,14 @@ class VirtualMachine:
     def create_disk_img(self):
         self.disk_img.parent.mkdir(exist_ok=True, parents=True)
         run_cmd(['qemu-img', 'create', '-f', 'qcow2', self.disk_img, self.size])
+
+    def get_display_args(self, graphical):
+        if graphical:
+            return []
+        return [
+            '-display', 'none',
+            '-serial', 'mon:stdio',
+        ]  # yapf: disable
 
     def get_iso_args(self, iso):
         if iso is None:
@@ -261,10 +268,10 @@ class VirtualMachine:
 
 class ArmVirtualMachine(VirtualMachine):
 
-    def __init__(self, arch, cmdline, cores, gdb, initrd, iso, kernel, kvm_cpu, machine, memory,
-                 name, size, ssh_port):
-        super().__init__(arch, cmdline, cores, gdb, initrd, iso, kernel, kvm_cpu, memory, name,
-                         size, ssh_port)
+    def __init__(self, arch, cmdline, cores, gdb, graphical, initrd, iso, kernel, kvm_cpu, machine,
+                 memory, name, size, ssh_port):
+        super().__init__(arch, cmdline, cores, gdb, graphical, initrd, iso, kernel, kvm_cpu, memory,
+                         name, size, ssh_port)
 
         self.qemu_args += ['-M', machine]
 
@@ -290,7 +297,8 @@ class ArmVirtualMachine(VirtualMachine):
 
 class Arm32VirtualMachine(ArmVirtualMachine):
 
-    def __init__(self, cmdline, cores, gdb, initrd, iso, kernel, memory, name, size, ssh_port):
+    def __init__(self, cmdline, cores, gdb, graphical, initrd, iso, kernel, memory, name, size,
+                 ssh_port):
         self.highmem_firmware = self.get_highmem_firmware()
         if self.highmem_firmware:
             mach = 'virt'
@@ -304,8 +312,8 @@ class Arm32VirtualMachine(ArmVirtualMachine):
                     "More than 2GB of RAM specified for 'highmem=off' machine, lowering to 2GB...")
                 memory = max_mem
 
-        super().__init__('arm', cmdline, cores, gdb, initrd, iso, kernel, 'host,aarch64=off', mach,
-                         memory, name, size, ssh_port)
+        super().__init__('arm', cmdline, cores, gdb, graphical, initrd, iso, kernel,
+                         'host,aarch64=off', mach, memory, name, size, ssh_port)
 
         if self.use_kvm:
             self.qemu = 'qemu-system-aarch64'
@@ -352,9 +360,10 @@ class Arm32VirtualMachine(ArmVirtualMachine):
 
 class Arm64VirtualMachine(ArmVirtualMachine):
 
-    def __init__(self, cmdline, cores, gdb, initrd, iso, kernel, memory, name, size, ssh_port):
-        super().__init__('aarch64', cmdline, cores, gdb, initrd, iso, kernel, 'host', 'virt',
-                         memory, name, size, ssh_port)
+    def __init__(self, cmdline, cores, gdb, graphical, initrd, iso, kernel, memory, name, size,
+                 ssh_port):
+        super().__init__('aarch64', cmdline, cores, gdb, graphical, initrd, iso, kernel, 'host',
+                         'virt', memory, name, size, ssh_port)
 
         # If not running on KVM, use QEMU's max CPU emulation target
         # Use impdef pointer auth, otherwise QEMU is just BRUTALLY slow:
@@ -374,10 +383,10 @@ class Arm64VirtualMachine(ArmVirtualMachine):
 
 class X86VirtualMachine(VirtualMachine):
 
-    def __init__(self, arch, cmdline, cores, gdb, initrd, iso, kernel, memory, name, size,
-                 ssh_port):
-        super().__init__(arch, cmdline, cores, gdb, initrd, iso, kernel, 'host', memory, name, size,
-                         ssh_port)
+    def __init__(self, arch, cmdline, cores, gdb, graphical, initrd, iso, kernel, memory, name,
+                 size, ssh_port):
+        super().__init__(arch, cmdline, cores, gdb, graphical, initrd, iso, kernel, 'host', memory,
+                         name, size, ssh_port)
 
         self.qemu_args += ['-M', 'q35']
 
@@ -402,9 +411,10 @@ class X86VirtualMachine(VirtualMachine):
 
 class X8632VirtualMachine(X86VirtualMachine):
 
-    def __init__(self, cmdline, cores, gdb, initrd, iso, kernel, memory, name, size, ssh_port):
-        super().__init__('i386', cmdline, cores, gdb, initrd, iso, kernel, memory, name, size,
-                         ssh_port)
+    def __init__(self, cmdline, cores, gdb, graphical, initrd, iso, kernel, memory, name, size,
+                 ssh_port):
+        super().__init__('i386', cmdline, cores, gdb, graphical, initrd, iso, kernel, memory, name,
+                         size, ssh_port)
 
     def can_use_kvm(self):
         if platform.machine() in ('i386', 'i686', 'x86_64'):
@@ -427,9 +437,10 @@ class X8632VirtualMachine(X86VirtualMachine):
 
 class X8664VirtualMachine(X86VirtualMachine):
 
-    def __init__(self, cmdline, cores, gdb, initrd, iso, kernel, memory, name, size, ssh_port):
-        super().__init__('x86_64', cmdline, cores, gdb, initrd, iso, kernel, memory, name, size,
-                         ssh_port)
+    def __init__(self, cmdline, cores, gdb, graphical, initrd, iso, kernel, memory, name, size,
+                 ssh_port):
+        super().__init__('x86_64', cmdline, cores, gdb, graphical, initrd, iso, kernel, memory,
+                         name, size, ssh_port)
 
     def setup_efi_files(self, possible_efi_files=None, possible_efi_vars_files=None):
         possible_efi_files = [
@@ -458,6 +469,11 @@ def parse_arguments():
                                '--cores',
                                type=int,
                                help='Number of cores virtual machine has')
+    if 'DISPLAY' in os.environ:
+        common_parser.add_argument('-G',
+                                   '--graphical',
+                                   action='store_true',
+                                   help='Run QEMU graphically')
     common_parser.add_argument('-m',
                                '--memory',
                                type=int,
@@ -592,6 +608,7 @@ def create_vm_from_args(args):
     name = args.name if args.name else static_defaults[arch]['name']
     ssh_port = args.ssh_port
     # Not necessary for all invocations
+    graphical = args.graphical if hasattr(args, 'graphical') else False
     gdb = args.gdb if hasattr(args, 'gdb') else False
     size = args.size if hasattr(args, 'size') else None
 
@@ -644,17 +661,17 @@ def create_vm_from_args(args):
 
     # Create the VirtualMachine object for the particular architecture.
     if arch == 'arm':
-        return Arm32VirtualMachine(cmdline, cores, gdb, initrd, iso, kernel, memory, name, size,
-                                   ssh_port)
+        return Arm32VirtualMachine(cmdline, cores, gdb, graphical, initrd, iso, kernel, memory,
+                                   name, size, ssh_port)
     if arch == 'aarch64':
-        return Arm64VirtualMachine(cmdline, cores, gdb, initrd, iso, kernel, memory, name, size,
-                                   ssh_port)
+        return Arm64VirtualMachine(cmdline, cores, gdb, graphical, initrd, iso, kernel, memory,
+                                   name, size, ssh_port)
     if arch in ('i386', 'i686'):
-        return X8632VirtualMachine(cmdline, cores, gdb, initrd, iso, kernel, memory, name, size,
-                                   ssh_port)
+        return X8632VirtualMachine(cmdline, cores, gdb, graphical, initrd, iso, kernel, memory,
+                                   name, size, ssh_port)
     if arch == 'x86_64':
-        return X8664VirtualMachine(cmdline, cores, gdb, initrd, iso, kernel, memory, name, size,
-                                   ssh_port)
+        return X8664VirtualMachine(cmdline, cores, gdb, graphical, initrd, iso, kernel, memory,
+                                   name, size, ssh_port)
     raise Exception(f"Unimplemented architecture ('{arch}')?")
 
 
