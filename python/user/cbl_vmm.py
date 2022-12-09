@@ -86,6 +86,10 @@ class VirtualMachine:
         if not memory:
             memory = min(cores * 2, self.get_available_mem_for_vm())
 
+        # Clear any previous hosts using the chosen SSH port.
+        run_cmd(['ssh-keygen', '-R', f"[localhost]:{ssh_port}"])
+        Path.home().joinpath('.ssh', 'known_hosts.old').unlink(missing_ok=True)
+
         # QEMU configuration
         self.qemu = 'qemu-system-' + self.arch
         self.qemu_args = [
