@@ -41,6 +41,39 @@ function cbl_rb_pi -d "Rebase Raspberry Pi kernel on latest linux-next"
     end
     git ac -m "ARM: configs: savedefconfig"
 
+    # Docker configuration for ARM
+    scripts/config \
+        --file arch/arm/configs/multi_v7_defconfig \
+        -e BLK_CGROUP \
+        -e BPF_SYSCALL \
+        -e BRIDGE_VLAN_FILTERING \
+        -e CGROUP_BPF \
+        -e CGROUP_CPUACCT \
+        -e CGROUP_DEVICE \
+        -e CGROUP_FREEZER \
+        -e CGROUP_PERF \
+        -e CGROUP_PIDS \
+        -e CGROUP_SCHED \
+        -e CPUSETS \
+        -e EXT4_FS_POSIX_ACL \
+        -e FAIR_GROUP_SCHED \
+        -e MEMCG \
+        -e NAMESPACES \
+        -e POSIX_MQUEUE \
+        -e USER_NS \
+        -e VLAN_8021Q \
+        -m BRIDGE \
+        -m BRIDGE_NETFILTER \
+        -m IP_NF_FILTER \
+        -m IP_NF_NAT \
+        -m IP_NF_TARGET_MASQUERADE \
+        -m IP_VS \
+        -m NETFILTER_XT_MATCH_ADDRTYPE \
+        -m NETFILTER_XT_MATCH_CONNTRACK \
+        -m NETFILTER_XT_MATCH_IPVS \
+        -m OVERLAY_FS \
+        -m VETH
+
     # Tailscale configs
     for cfg_file in arch/arm/configs/multi_v7_defconfig arch/arm64/configs/defconfig
         scripts/config \
