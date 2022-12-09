@@ -125,8 +125,8 @@ function install_packages() {
         armv7*l) zoxide_triple=armv7-unknown-linux-musleabihf ;;
         *) zoxide_triple=$(uname -m)-unknown-linux-musl ;;
     esac
-    zoxide_url=$(curl -fLSs https://api.github.com/repos/ajeetdsouza/zoxide/releases/latest | grep -E "browser_download_url.*$zoxide_triple" | cut -d\" -f4)
-    curl -fLSs "$zoxide_url" | tar -C "$tmp_dir" -xzf -
+    zoxide_url=$(curl -fkLSs https://api.github.com/repos/ajeetdsouza/zoxide/releases/latest | grep -E "browser_download_url.*$zoxide_triple" | cut -d\" -f4)
+    curl -fkLSs "$zoxide_url" | tar -C "$tmp_dir" -xzf -
     install -Dvm755 "$tmp_dir"/zoxide /usr/local/bin/zoxide
     rm -fr "$tmp_dir"
 }
