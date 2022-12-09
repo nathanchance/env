@@ -101,12 +101,13 @@ def download_items(targets, network_folder):
             alpine_version = alpine_series + alpine_patch
 
             for alpine_arch in alpine_arches:
-                file_url = f"https://dl-cdn.alpinelinux.org/alpine/v{alpine_series}/releases/{alpine_arch}/alpine-standard-{alpine_version}-{alpine_arch}.iso"
-                items += [{
-                    'containing_folder': firmware_folder.joinpath('Alpine', alpine_version),
-                    'file_url': file_url,
-                    'sha_url': file_url + '.sha256',
-                }]
+                for img_type in ['standard', 'virt']:
+                    file_url = f"https://dl-cdn.alpinelinux.org/alpine/v{alpine_series}/releases/{alpine_arch}/alpine-{img_type}-{alpine_version}-{alpine_arch}.iso"
+                    items += [{
+                        'containing_folder': firmware_folder.joinpath('Alpine', alpine_version),
+                        'file_url': file_url,
+                        'sha_url': file_url + '.sha256',
+                    }]  # yapf: disable
 
         elif target == 'arch':
             arch_day = '.01'
