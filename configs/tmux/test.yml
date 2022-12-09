@@ -18,7 +18,7 @@ windows:
     - cmd: cbl_qualify_next
       enter: false
     focus: true
-  - shell: /usr/bin/fish -c dbxe
+  - shell: /usr/bin/fish -c "have_dev_kvm_access; and dbxe"
     shell_command:
     - cmd: cbl_vmm run; and exit
       enter: false
