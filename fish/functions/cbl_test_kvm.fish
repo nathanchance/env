@@ -3,7 +3,7 @@
 # Copyright (C) 2021-2022 Nathan Chancellor
 
 function cbl_test_kvm -d "Test KVM against a Clang built kernel with QEMU"
-    test -c /dev/kvm; or return
+    have_dev_kvm_access; or return
 
     switch $argv
         case build
