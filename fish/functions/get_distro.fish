@@ -6,9 +6,12 @@ function get_distro -d "Prints a short name for the currently running distro"
     if test "$LOCATION" = mac
         echo macos
     else
-        set os_release_id (grep ^ID= /usr/lib/os-release | string split -f 2 = | string replace -a '"' "")
+        for file in /etc/os-release /usr/lib/os-release
+            test -e $file; and break
+        end
+        set os_release_id (grep ^ID= $file | string split -f 2 = | string replace -a '"' "")
         switch "$os_release_id"
-            case arch debian fedora ubuntu
+            case alpine arch debian fedora ubuntu
                 echo $os_release_id
             case opensuse-'*'
                 echo opensuse

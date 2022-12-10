@@ -9,6 +9,8 @@ function is_installed -d "Checks if a package is installed depending on the pack
         dnf list --installed $argv &>/dev/null
     else if command -q dpkg
         dpkg -s $argv &>/dev/null
+    else if command -q apk
+        apk info -e $argv &>/dev/null
     else
         print_error "is_installed() does not handle this package manager"
         return 1

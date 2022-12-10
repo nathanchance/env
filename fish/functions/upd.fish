@@ -84,6 +84,9 @@ function upd -d "Runs the update command for the current distro or downloads/upd
 
             case os
                 switch (get_distro)
+                    case alpine
+                        doas apk update
+                        doas apk upgrade
                     case arch
                         sudo pacman -Syyu $yes
                     case debian raspbian ubuntu

@@ -220,7 +220,11 @@ rpmbuild/' >>$gitignore
         modprobed-db store
         systemctl --user enable --now modprobed-db.service
     end
-    updall --no-os; or return
+    if test (get_distro) = alpine
+        upd fisher vim; or return
+    else
+        updall --no-os; or return
+    end
     if has_container_manager; and test "$LOCATION" != wsl
         dbxc --yes
     end
