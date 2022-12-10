@@ -8,7 +8,7 @@ import subprocess
 
 
 def brew(brew_args):
-    subprocess.run([get_brew_path()] + brew_args, check=True)
+    subprocess.run([get_brew_path(), *brew_args], check=True)
 
 
 def clone_env_plugins():
@@ -45,11 +45,11 @@ def get_home():
 
 
 def brew_gh(gh_args):
-    subprocess.run([get_brew_bin().joinpath('gh')] + gh_args, check=True)
+    subprocess.run([get_brew_bin().joinpath('gh'), *gh_args], check=True)
 
 
 def gh_repo_clone(clone_args):
-    brew_gh(['repo', 'clone'] + clone_args)
+    brew_gh(['repo', 'clone', *clone_args])
 
 
 def install_packages():
@@ -66,7 +66,7 @@ def install_packages():
         'ripgrep',
         'zoxide'
     ]  # yapf: disable
-    brew(['install'] + packages)
+    brew(['install', *packages])
 
     casks = [('homebrew/cask-fonts', ['font-iosevka-ss08']),
              ('wez/wezterm', ['wez/wezterm/wezterm-nightly'])]
@@ -75,7 +75,7 @@ def install_packages():
         packages = cask[1]
 
         brew(['tap', repo])
-        brew(['install', '--cask'] + packages)
+        brew(['install', '--cask', *packages])
 
 
 def setup_gh():

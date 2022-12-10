@@ -72,7 +72,7 @@ def get_report_worktree():
 def git(repo, cmd, check=True):
     if not shutil.which('git'):
         raise Exception('git could not be found!')
-    return subprocess.run(['git', '-C', repo] + cmd, capture_output=True, check=check, text=True)
+    return subprocess.run(['git', '-C', repo, *cmd], capture_output=True, check=check, text=True)
 
 
 def git_check_success(repo, cmd):

@@ -29,7 +29,7 @@ def dnf_add_repo(repo_url):
 
 
 def dnf_install(install_args):
-    lib_root.dnf(['install', '-y'] + install_args)
+    lib_root.dnf(['install', '-y', *install_args])
 
 
 def get_fedora_version():

@@ -12,7 +12,7 @@ import lib_root
 
 
 def apt_install(install_args):
-    lib_root.apt(['install', '-y', '--no-install-recommends'] + install_args)
+    lib_root.apt(['install', '-y', '--no-install-recommends', *install_args])
 
 
 def apt_update():

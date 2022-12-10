@@ -25,7 +25,7 @@ def add_user_to_group_if_exists(groupname, username):
 
 
 def apt(apt_arguments):
-    subprocess.run(['apt'] + apt_arguments, check=True)
+    subprocess.run(['apt', *apt_arguments], check=True)
 
 
 def check_ip(ip_to_check):
@@ -66,11 +66,11 @@ def clone_env(username):
 
 
 def curl(curl_args):
-    return subprocess.run(['curl', '-fLSs'] + curl_args, capture_output=True, check=True).stdout
+    return subprocess.run(['curl', '-fLSs', *curl_args], capture_output=True, check=True).stdout
 
 
 def dnf(dnf_arguments):
-    subprocess.run(['dnf'] + dnf_arguments, check=True)
+    subprocess.run(['dnf', *dnf_arguments], check=True)
 
 
 def enable_tailscale():
@@ -182,7 +182,7 @@ def is_installed(package_to_check):
         raise Exception('Not implemented for the current package manager!')
 
     try:
-        subprocess.run(cmd + [package_to_check], capture_output=True, check=True)
+        subprocess.run([*cmd, package_to_check], capture_output=True, check=True)
     except subprocess.CalledProcessError:
         return False
     return True
@@ -193,7 +193,7 @@ def is_virtual_machine():
 
 
 def pacman(args):
-    subprocess.run(['pacman'] + args, check=True)
+    subprocess.run(['pacman', *args], check=True)
 
 
 def podman_setup(username):
@@ -231,10 +231,10 @@ def set_ip_addr_for_intf(con_name, intf, ip_addr):
         raise Exception(f"{ip_addr} not supported by script!")
     dns = ['8.8.8.8', '8.8.4.4', '1.1.1.1', local_dns]
 
-    subprocess.run(nmcli_mod + ['ipv4.addresses', f"{ip_addr}/24"], check=True)
-    subprocess.run(nmcli_mod + ['ipv4.dns', ' '.join(dns)], check=True)
-    subprocess.run(nmcli_mod + ['ipv4.gateway', gateway], check=True)
-    subprocess.run(nmcli_mod + ['ipv4.method', 'manual'], check=True)
+    subprocess.run([*nmcli_mod, 'ipv4.addresses', f"{ip_addr}/24"], check=True)
+    subprocess.run([*nmcli_mod, 'ipv4.dns', ' '.join(dns)], check=True)
+    subprocess.run([*nmcli_mod, 'ipv4.gateway', gateway], check=True)
+    subprocess.run([*nmcli_mod, 'ipv4.method', 'manual'], check=True)
     subprocess.run(['nmcli', 'connection', 'reload'], check=True)
     subprocess.run(['nmcli', 'connection', 'down', con_name], check=True)
     subprocess.run(['nmcli', 'connection', 'up', con_name, 'ifname', intf], check=True)

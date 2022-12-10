@@ -83,7 +83,7 @@ def fix_fstab():
 
 
 def pacman_install(subargs):
-    lib_root.pacman(['-S', '--noconfirm'] + subargs)
+    lib_root.pacman(['-S', '--noconfirm', *subargs])
 
 
 def pacman_install_packages():
@@ -226,7 +226,7 @@ def pacman_install_packages():
         packages += ['tailscale']
 
     # Update and install packages
-    pacman_install(['--needed'] + packages)
+    pacman_install(['--needed', *packages])
 
     # Explicitly reinstall shadow to fix permissions with newuidmap
     pacman_install(['shadow'])

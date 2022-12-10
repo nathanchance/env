@@ -37,7 +37,7 @@ def parse_arguments():
 
 
 def podman_rm(target, items):
-    podman_cmd = ['podman', target, 'rm', '--force'] + items
+    podman_cmd = ['podman', target, 'rm', '--force', *items]
     print(f"$ {' '.join(podman_cmd)}")
     subprocess.run(podman_cmd, check=True)
     print()
