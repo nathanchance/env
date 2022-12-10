@@ -5,7 +5,7 @@
 function cbl_test_kvm -d "Test KVM against a Clang built kernel with QEMU"
     have_dev_kvm_access; or return
 
-    switch $argv
+    switch $argv[1]
         case build
             in_container_msg -c; or return
 
@@ -71,5 +71,15 @@ function cbl_test_kvm -d "Test KVM against a Clang built kernel with QEMU"
                     cp -v /boot/vmlinuz-linux $TMP_FOLDER/bzImage
                     dbxe -- "fish -c 'kboot -a x86_64 -k $TMP_FOLDER/bzImage -t 30s'"
             end
+
+        case vmm
+            cbl_vmm run; or return
+            if test (uname -m) = aarch64
+                cbl_clone_repo boot-utils; or return
+                if $CBL_GIT/boot-utils/utils/aarch64_32_bit_el1_supported
+                    cbl_vmm run -a arm; or return
+                end
+            end
+            exit
     end
 end
