@@ -24,6 +24,10 @@ def add_user_to_group_if_exists(groupname, username):
         add_user_to_group(groupname, username)
 
 
+def apk(apk_arguments):
+    subprocess.run(['apk', *apk_arguments], check=True)
+
+
 def apt(apt_arguments):
     subprocess.run(['apt', *apt_arguments], check=True)
 
