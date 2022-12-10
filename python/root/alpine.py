@@ -44,7 +44,14 @@ def enable_community_repo():
 def update_and_install_packages():
     packages = [
         # Development
+        'autoconf',
+        'automake',
+        'gcc',
         'hyperfine',
+        'linux-headers',
+        'make',
+        'musl-dev',
+        'pkgconf',
         'podman',
 
         # env
