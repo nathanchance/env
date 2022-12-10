@@ -1,4 +1,3 @@
 disable=SC1090
 disable=SC2030
 disable=SC2031
-shell=bash
