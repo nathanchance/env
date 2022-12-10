@@ -122,7 +122,7 @@ def setup_ssh():
 
     gh_conf = home.joinpath('.config', 'gh', 'config.yml')
     gh_conf_text = gh_conf.read_text(encoding='utf-8')
-    gh_proto = re.search(r'^git_protocol:.*$', gh_conf_text, flags=re.M).group(0).split(' ')[1]
+    gh_proto = re.search(r'^git_protocol:\s+(.*)$', gh_conf_text, flags=re.M).groups()[0]
     if gh_proto != 'ssh':
         brew_gh(['config', 'set', '-h', 'github.com', 'git_protocol', 'ssh'])
         brew_gh(['config', 'set', 'git_protocol', 'ssh'])

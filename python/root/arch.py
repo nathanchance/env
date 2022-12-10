@@ -14,12 +14,14 @@ def add_mods_to_mkinitcpio(modules):
     mkinitcpio_conf = Path('/etc/mkinitcpio.conf')
     conf_text = mkinitcpio_conf.read_text(encoding='utf-8')
 
-    orig_conf_line = re.search(r'^MODULES=\(.*\)$', conf_text, flags=re.M).group(0)
-    orig_conf_val = re.search(r'\(.*\)', orig_conf_line).group(0).replace('(', '').replace(')', '')
+    if not (match := re.search(r'^MODULES=\((.*)\)$', conf_text, flags=re.M)):
+        raise Exception(f"Could not find MODULES line in {mkinitcpio_conf}!")
+
+    orig_conf_val = match.groups()[0]
     new_conf_val = f"{orig_conf_val} {' '.join(modules)}"
     new_conf_line = f"MODULES=({new_conf_val.strip()})"
 
-    conf_text = re.sub(re.escape(orig_conf_line), new_conf_line, conf_text)
+    conf_text = re.sub(re.escape(match.group(0)), new_conf_line, conf_text)
     mkinitcpio_conf.write_text(conf_text, encoding='utf-8')
 
     subprocess.run(['mkinitcpio', '-P'], check=True)

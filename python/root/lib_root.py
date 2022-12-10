@@ -127,8 +127,9 @@ def get_ip_addr_for_intf(intf):
                             text=True).stdout.split('\n')
     ip_addr = None
     for line in ip_out:
-        if re.search(fr'inet.*\d{{1,3}}\.\d{{1,3}}\.\d{{1,3}}\.\d{{1,3}}.*{intf}', line):
-            ip_addr = re.search(r'\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}', line).group(0)
+        ip_a_regex = fr'inet\s+(\d{{1,3}}\.\d{{1,3}}\.\d{{1,3}}\.\d{{1,3}})/\d+\s+.*{intf}$'
+        if (match := re.search(ip_a_regex, line)):
+            ip_addr = match.groups()[0]
             break
     check_ip(ip_addr)
     return ip_addr
@@ -137,8 +138,8 @@ def get_ip_addr_for_intf(intf):
 def get_os_rel_val(variable):
     os_rel = Path('/usr/lib/os-release').read_text(encoding='utf-8')
 
-    if (version_id_var := re.search(f"^{variable}=.*$", os_rel, flags=re.M)):
-        return version_id_var.group(0).split('=')[1].replace('"', '')
+    if (match := re.search(f'^{variable}=(.*)$', os_rel, flags=re.M)):
+        return match.groups()[0].replace('"', '')
 
     return None
 
