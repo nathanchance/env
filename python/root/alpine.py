@@ -146,6 +146,11 @@ def setup_podman(user_name):
         with open(etc_modules, mode='a', encoding='utf-8') as file:
             file.write('tun\n')
 
+    if not (make_root_rshared := Path('/etc/local.d/make_root_rshared.start')).exists():
+        subprocess.run(['rc-update', 'add', 'local', 'default'], check=True)
+        make_root_rshared.write_text('#!/bin/sh\n\nmount --make-rshared /\n', encoding='utf-8')
+        make_root_rshared.chmod(0o755)
+
     lib_root.podman_setup(user_name)
 
 
