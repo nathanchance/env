@@ -46,6 +46,7 @@ def update_and_install_packages():
         # Development
         'autoconf',
         'automake',
+        'distrobox',
         'gcc',
         'hyperfine',
         'linux-headers',
