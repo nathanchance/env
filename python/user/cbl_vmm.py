@@ -553,7 +553,7 @@ def get_def_iso(arch):
             'url': f"https://download.fedoraproject.org/pub/fedora/linux/releases/{fedora_ver}/Server/{arch}",
         },
         'i386': {
-            'file': Path('Alpine', alpine_ver, f"alpine-standard-{alpine_ver}-x86.iso"),
+            'file': Path('Alpine', alpine_ver, f"alpine-virt-{alpine_ver}-x86.iso"),
             'url': f"https://dl-cdn.alpinelinux.org/alpine/v{'.'.join(alpine_ver.split('.')[0:2])}/releases/x86",
         },
         'x86_64': {
