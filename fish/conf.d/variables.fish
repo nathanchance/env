@@ -108,6 +108,8 @@ set -gx CBL_TC_BLD $CBL/tc-build
 set -gx CBL_TMP $CBL/tmp
 set -gx CBL_WRKTR $CBL/worktrees
 
+set -gx HOST_FOLDER /mnt/host
+
 set -gx SHARED_FOLDER /mnt/shared
 if test -d $SHARED_FOLDER
     set -l CBL_SHARED (string replace $MAIN_FOLDER $SHARED_FOLDER $CBL)
