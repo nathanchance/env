@@ -584,12 +584,10 @@ def create_vm_from_args(args):
     arch = args.architecture
     static_defaults = {
         'arm': {
-            'initrd': Path('initrd.img'),
             'kernel': Path('arch/arm/boot/zImage'),
             'name': 'debian',
         },
         'aarch64': {
-            'initrd': Path('initramfs.img'),
             'kernel': Path('arch/arm64/boot/Image'),
             'name': 'fedora',
         },
@@ -598,7 +596,6 @@ def create_vm_from_args(args):
             'name': 'alpine',
         },
         'x86_64': {
-            'initrd': Path('rootfs/initramfs.img'),
             'kernel': Path('arch/x86/boot/bzImage'),
             'name': 'arch',
         },
@@ -655,13 +652,7 @@ def create_vm_from_args(args):
         if args.initrd:
             initrd = Path(args.initrd)
         else:
-            if not kernel_folder:
-                raise Exception('Full kernel image supplied without initrd path!')
-            initrd = kernel_folder.joinpath(static_defaults[arch]['initrd'])
-        if not initrd.exists():
-            raise Exception(
-                f"Initial ramdisk ('{initrd}'), derived from initrd argument ('{args.initrd}'), does not exist!"
-            )
+            raise Exception("Kernel specified without initrd!")
 
     # Create the VirtualMachine object for the particular architecture.
     if arch == 'arm':
