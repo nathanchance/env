@@ -3,6 +3,8 @@
 # Copyright (C) 2022 Nathan Chancellor
 
 function gen_slim_initrd -d "Generate a slim initial ramdisk within a virtual machine"
+    in_container_msg -h; or return
+
     if test (count $argv) -eq 0
         set prefix /tmp
     else
@@ -16,6 +18,10 @@ function gen_slim_initrd -d "Generate a slim initial ramdisk within a virtual ma
             set src (realpath /boot/initrd.img)
     end
     if set -q src
+        if not test -e $src
+            print_error "src ('$src') could not be found?"
+            exit 1
+        end
         set dst $prefix/(basename $src)
     else
         set dst $prefix/initramfs.img
@@ -38,4 +44,6 @@ function gen_slim_initrd -d "Generate a slim initial ramdisk within a virtual ma
             exit 1
         end
     end
+
+    echo "Initial ramdisk is available at: $dst"
 end
