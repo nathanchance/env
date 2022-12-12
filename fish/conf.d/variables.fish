@@ -151,6 +151,7 @@ set -gx TMP_BUILD_FOLDER $TMP_FOLDER/build
 
 # Versions of stable that I build locally
 set -gx CBL_STABLE_VERSIONS \
+    6.1 \
     6.0 \
     5.15 \
     5.10 \
