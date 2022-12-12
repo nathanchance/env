@@ -4,7 +4,7 @@
 
 function get_dev_img -d "Print the default development container image for the host architecture"
     switch (uname -m)
-        case 'armv7*'
+        case 'armv7*' i686
             echo dev/suse
         case aarch64
             echo dev/fedora
