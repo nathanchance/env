@@ -85,8 +85,9 @@ EOF
         fish
         fzf
         jq
-        python-unversioned-command
+        neofetch
         openssh
+        python-unversioned-command
         stow
         vim
         zoxide

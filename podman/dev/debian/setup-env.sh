@@ -98,6 +98,7 @@ function install_packages() {
         fzf
         jq
         locales
+        neofetch
         openssh-client
         stow
         vim

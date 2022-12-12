@@ -63,6 +63,7 @@ function install_packages() {
         fish
         fzf
         jq
+        neofetch
         openssh
         stow
         vim

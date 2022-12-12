@@ -112,6 +112,7 @@ function install_packages() {
         fzf
         jq
         less
+        neofetch
         openssh
         stow
         tmuxp
