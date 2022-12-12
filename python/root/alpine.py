@@ -141,7 +141,6 @@ def setup_podman(user_name):
     subprocess.run(['rc-update', 'add', 'cgroups'], check=True)
     subprocess.run(['rc-service', 'cgroups', 'start'], check=True)
 
-    subprocess.run(['modprobe', 'tun'], check=True)
     etc_modules = Path('/etc/modules')
     if not re.search('tun', etc_modules.read_text(encoding='utf-8')):
         with open(etc_modules, mode='a', encoding='utf-8') as file:
