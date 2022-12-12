@@ -171,7 +171,10 @@ class VirtualMachine:
 
     def get_display_args(self, graphical):
         if graphical:
-            return []
+            return [
+                '-device', 'virtio-vga-gl',
+                '-display', 'gtk,gl=on'
+            ]  # yapf: disable
         return [
             '-display', 'none',
             '-serial', 'mon:stdio',
