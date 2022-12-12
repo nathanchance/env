@@ -18,7 +18,7 @@ function oci_bld -d "Build an OCI container image"
                 --no-cache
         case podman
             set base_mgr_args \
-                --layers false
+                --layers=false
         case none
             print_warning "oci_bld requires podman or docker, skipping..."
             return 0
