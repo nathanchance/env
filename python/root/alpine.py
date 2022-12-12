@@ -77,6 +77,7 @@ def update_and_install_packages():
         'ripgrep',
 
         # System management
+        'btop',
         'doas',
     ]
     lib_root.apk(['update'])
