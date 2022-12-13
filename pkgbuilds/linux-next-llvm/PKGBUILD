@@ -3,7 +3,7 @@
 
 _localversion=-llvm
 pkgname=linux-next$_localversion
-_srctag=next-20221208
+_srctag=next-20221213
 pkgver=${_srctag//-/.}
 pkgrel=1
 pkgdesc='linux-next'
@@ -17,7 +17,6 @@ options=('!strip')
 source=(
   "$pkgname::git+https://git.kernel.org/pub/scm/linux/kernel/git/next/linux-next.git?signed#tag=$_srctag"
   config
-  apparmor-fix.patch
 )
 
 validpgpkeys=(
@@ -25,8 +24,7 @@ validpgpkeys=(
   '3F2568AAC26998F9E813A1C5C3F436CA30F5D8EB'  # Mark Brown
 )
 sha256sums=('SKIP'
-            '966d6485631a2a0434096dd904737ac2dbe5e27f51fb9e649b8e0d2cc0b1b76a'
-            '52fd17834abb4c9bdd47262058c3c42db74e61e6b8a34fa4cb4d0e053cf0ae1c')
+            '0c257428b485e1e18839cea3f43cfb0420c638ae9ea6654c0ed86b6f00fea591')
 
 # This obviously ties this PKGBUILD to my machine but that is kind of the point :)
 _kmake() {
