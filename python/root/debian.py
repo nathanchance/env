@@ -4,6 +4,7 @@
 
 from argparse import ArgumentParser
 from pathlib import Path
+import platform
 import re
 import subprocess
 
@@ -34,6 +35,16 @@ def pi_setup(user_name, user_password):
 
     subprocess.run(['raspi-config', '--expand-rootfs'], check=True)
     subprocess.run(['raspi-config', 'nonint', 'do_serial', '0'], check=True)
+
+    dhcpcd_conf_txt = (dhcpcd_conf := Path('/etc/dhcpcd.conf')).read_text(encoding='utf-8')
+    if not re.search(r'^interface eth0\nstatic ip_address=192\.168', dhcpcd_conf_txt, flags=re.M):
+        dhcpcd_conf_txt += (
+            '\n'
+            'interface eth0\n'
+            f"static ip_address=192.168.4.{205 if platform.machine() == 'aarch64' else 199}/24\n"
+            'static routers=192.168.4.1\n'
+            'static domain_name_servers=8.8.8.8 8.8.4.4 1.1.1.1 192.168.0.1\n')
+        dhcpcd_conf.write_text(dhcpcd_conf_txt, encoding='utf-8')
 
     lib_root.chpasswd(user_name, user_password)
 
