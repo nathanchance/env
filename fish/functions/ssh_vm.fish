@@ -3,12 +3,20 @@
 # Copyright (C) 2022 Nathan Chancellor
 
 function ssh_vm -d "ssh into a VM running via cbl_vmm.py"
-    if test (count $argv) -eq 0
-        set port 8022
-    else
-        set port $argv[1]
-        set cmd $argv[2..-1]
+    for arg in $argv
+        if string match -qr '^\d+$' $arg
+            set port $arg
+        else
+            switch $arg
+                case nathan root
+                    set user $arg
+                case '*'
+                    set -a cmd $arg
+            end
+        end
     end
+    set -q user; or set user nathan
+    set -q port; or set port 8022
 
     if not grep -q "^\[localhost\]:$port" $HOME/.ssh/known_hosts
         set ssh_args \
@@ -16,7 +24,7 @@ function ssh_vm -d "ssh into a VM running via cbl_vmm.py"
     end
 
     set ssh_cmd \
-        ssh $ssh_args -p $port localhost $cmd
+        ssh $ssh_args -p $port $user@localhost $cmd
     print_cmd $ssh_cmd
     $ssh_cmd
 end
