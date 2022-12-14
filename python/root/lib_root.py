@@ -350,6 +350,24 @@ def setup_static_ip(requested_ip):
     set_ip_addr_for_intf(connection_name, interface, requested_ip)
 
 
+def setup_ssh_authorized_keys(user_name):
+    if not (ssh_authorized_keys := Path('/home', user_name, '.ssh', 'authorized_keys')).exists():
+        old_umask = os.umask(0o077)
+        ssh_authorized_keys.parent.mkdir(exist_ok=True, parents=True)
+        if shutil.which('curl'):
+            cmd = ['curl', '-fLSs']
+        elif shutil.which('wget'):
+            cmd = ['wget', '-q', '-O-']
+        else:
+            raise Exception('No suitable download command could be found for downloading SSH key!')
+        ssh_key = subprocess.run([*cmd, 'https://github.com/nathanchance.keys'],
+                                 capture_output=True,
+                                 check=True).stdout
+        ssh_authorized_keys.write_bytes(ssh_key)
+        os.umask(old_umask)
+        chown(user_name, ssh_authorized_keys.parent)
+
+
 def setup_sudo_symlink():
     prefix = Path(os.environ['PREFIX'] if 'PREFIX' in os.environ else '/usr/local')
     sudo_prefix = prefix.joinpath('stow', 'sudo')

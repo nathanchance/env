@@ -3,7 +3,6 @@
 # Copyright (C) 2022 Nathan Chancellor
 
 from argparse import ArgumentParser
-import os
 from pathlib import Path
 import re
 import shutil
@@ -117,15 +116,7 @@ def setup_user(user_name, user_password):
             file.write(doas_wheel + '\n')
 
     # Authorize my ssh key
-    if not (ssh_authorized_keys := Path('/home', user_name, '.ssh', 'authorized_keys')).exists():
-        old_umask = os.umask(0o077)
-        ssh_authorized_keys.parent.mkdir(exist_ok=True, parents=True)
-        ssh_key = subprocess.run(['wget', '-q', '-O-', 'https://github.com/nathanchance.keys'],
-                                 capture_output=True,
-                                 check=True).stdout
-        ssh_authorized_keys.write_bytes(ssh_key)
-        os.umask(old_umask)
-        lib_root.chown(user_name, ssh_authorized_keys.parent)
+    lib_root.setup_ssh_authorized_keys(user_name)
 
 
 # https://wiki.alpinelinux.org/wiki/Podman

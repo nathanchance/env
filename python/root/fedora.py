@@ -209,3 +209,4 @@ if __name__ == '__main__':
     lib_root.chsh_fish(user)
     lib_root.clone_env(user)
     lib_root.setup_initial_fish_config(user)
+    lib_root.setup_ssh_authorized_keys(user)

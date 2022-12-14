@@ -341,6 +341,8 @@ def setup_user(username, password):
 
         lib_root.chpasswd(username, password)
 
+    lib_root.setup_ssh_authorized_keys(username)
+
 
 def uncomment_pacman_option(conf, option, old_value=None, new_value=None):
     if old_value and new_value:
