@@ -32,7 +32,7 @@ function oci_bld -d "Build an OCI container image"
                     llvm-$LLVM_VERSIONS_KERNEL \
                     llvm-android
 
-            case dev dev/{arch,debian,fedora,suse,ubuntu} {gcc,llvm}-'*'
+            case dev dev/{alpine,arch,debian,fedora,suse,ubuntu} {gcc,llvm}-'*'
                 set -a images $arg
         end
     end

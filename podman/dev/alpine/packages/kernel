@@ -1,0 +1,16 @@
+bash
+bc
+bison
+build-base
+coreutils
+elfutils-dev
+flex
+gawk
+openssl
+openssl-dev
+perl
+sed
+tar
+u-boot-tools
+xz
+zstd

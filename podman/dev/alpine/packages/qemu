@@ -1,0 +1,14 @@
+glib-dev
+glib-static
+libslirp-dev
+pixman-dev
+qemu-system-aarch64
+qemu-system-arm
+qemu-system-i386
+qemu-system-mips
+qemu-system-mipsel
+qemu-system-ppc
+qemu-system-ppc64
+qemu-system-riscv64
+qemu-system-s390x
+qemu-system-x86_64
