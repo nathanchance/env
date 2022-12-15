@@ -25,7 +25,7 @@ function cbl_setup_linux_repos -d "Clone ClangBuiltLinux Linux repos into their 
             continue
         end
 
-        set bundle_dir $NAS_FOLDER/kernel.org_bundles/latest
+        set bundle_dir $NAS_FOLDER/kernel.org/bundles/latest
         if test -d $bundle_dir
             set cb_dir $bundle_dir
         else
