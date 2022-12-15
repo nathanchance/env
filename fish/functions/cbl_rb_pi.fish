@@ -21,7 +21,6 @@ function cbl_rb_pi -d "Rebase Raspberry Pi kernel on latest linux-next"
     git rh origin/master
 
     # Patching
-    set -a patches https://lore.kernel.org/all/20221212195845.101844-1-ja@ssi.bg/ # ipvs: use u64 to silence do_div warnings
     for patch in $patches
         b4 am -l -o - -P _ -s $patch | git am; or return
     end
