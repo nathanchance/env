@@ -190,6 +190,16 @@ rpmbuild/' >>$gitignore
             upd_strg_cfg
         end
         podman system info
+        # If we have access to the NAS, use it for pulling ghcr.io images
+        if test -d $NAS_FOLDER
+            set registries_conf $HOME/.config/containers/registries.conf
+            mkdir -p (dirname $registries_conf); or return
+            echo '[[registry]]
+location="ghcr.io"
+[[registry.mirror]]
+location="192.168.4.207:5002"
+insecure=true' >$registries_conf
+        end
     end
 
     # Show Docker information if it is installed
