@@ -1,0 +1,15 @@
+bc
+curl
+diffutils
+findutils
+gnupg
+less
+lsof
+ncurses
+pinentry
+procps
+shadow
+sudo
+util-linux
+wget
+vte3

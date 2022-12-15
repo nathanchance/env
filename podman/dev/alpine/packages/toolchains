@@ -1,0 +1,9 @@
+binutils-dev
+clang
+cmake
+linux-headers
+lld
+llvm
+musl-dev
+ninja
+texinfo
