@@ -53,6 +53,13 @@ EOF
 
 # Update and install packages
 function install_packages() {
+    # Update archlinux-keyring via partial upgrade and regenerate the keyring
+    # based on it, in case any new packages are signed with those new keys
+    pacman -Sy --noconfirm archlinux-keyring
+    rm -fr /etc/pacman.d/gnupg
+    pacman-key --init
+    pacman-key --populate
+
     pacman -Syyuu --noconfirm
 
     packages=(
