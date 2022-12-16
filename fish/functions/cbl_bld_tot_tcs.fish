@@ -140,6 +140,9 @@ function cbl_bld_tot_tcs -d "Build LLVM and binutils from source for kernel deve
     end
 
     # Add patches to revert here
+    # Patch: MIPS: fix build from IR files, nan2008 and FpAbi
+    # Revert reason: https://reviews.llvm.org/D138179#4002068
+    set -a reverts 9739bb81aed490bfcbcbbac6970da8fb7232fd34
     for revert in $reverts
         if not git -C $llvm_project rv -n $revert
             set message "Failed to revert $revert"
@@ -160,21 +163,6 @@ function cbl_bld_tot_tcs -d "Build LLVM and binutils from source for kernel deve
         end
     end
 
-    # https://reviews.llvm.org/D135402#3855607
-    echo 'diff --git a/llvm/cmake/modules/AddLLVM.cmake b/llvm/cmake/modules/AddLLVM.cmake
-index 428a22422e28..0be57bcae033 100644
---- a/llvm/cmake/modules/AddLLVM.cmake
-+++ b/llvm/cmake/modules/AddLLVM.cmake
-@@ -112,7 +112,7 @@ function(add_llvm_symbol_exports target_name export_file)
-                    LINK_FLAGS "  -Wl,-M,\"${CMAKE_CURRENT_BINARY_DIR}/${native_export_file}\"")
-     else()
-       set_property(TARGET ${target_name} APPEND_STRING PROPERTY
--                   LINK_FLAGS "  -Wl,--version-script,\"${CMAKE_CURRENT_BINARY_DIR}/${native_export_file}\"")
-+                   LINK_FLAGS "  -Wl,--version-script,\"${CMAKE_CURRENT_BINARY_DIR}/${native_export_file}\" -Wl,--undefined-version")
-     endif()
-   elseif(WIN32)
-     set(native_export_file "${target_name}.def")' | git -C $llvm_project ap
-
     set llvm_install $CBL_TC_STOW_LLVM/$date_time-(git -C $llvm_project sh -s --format=%H origin/main)
     if not $tc_bld/build-llvm.py \
             --assertions \
@@ -184,6 +172,7 @@ index 428a22422e28..0be57bcae033 100644
             --llvm-folder $llvm_project \
             $bld_llvm_args \
             --no-ccache \
+            --quiet-cmake \
             --show-build-commands
         set message "build-llvm.py failed"
         print_error "$message"
