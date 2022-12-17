@@ -52,7 +52,7 @@ def filter_warnings(log_folder, src_folder):
         with open(log, encoding='utf-8') as file:
             warnings[log.name] = set()
             for line in file:
-                if re.search(f"{'|'.join(searches)}", line):
+                if re.search('|'.join(searches), line):
                     warnings[log.name].add(re.sub(f"{src_folder}/", '', line))
     full = {key: value for key, value in warnings.items() if value}
 
