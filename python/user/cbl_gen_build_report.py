@@ -32,9 +32,9 @@ def filter_warnings(log_folder, src_folder):
     # Get full list of logs from folder, excluding internal logs for filtering sake
     internal_files = {elem + '.log' for elem in ['failed', 'info', 'skipped', 'success']}
     internal_files.add('report.txt')
-    logs = [elem for elem in log_folder.iterdir() if elem.name not in internal_files]
+    logs = sorted([elem for elem in log_folder.iterdir() if elem.name not in internal_files])
 
-    # Generate a full list of warnings across all builds
+    # Generate a full list of warnings across all builds, deduplicated per build
     searches = [
         'error:',
         'Error:',
@@ -47,17 +47,14 @@ def filter_warnings(log_folder, src_folder):
         'Warning:',
         'WARNING:',
     ]  # yapf: disable
+    prob_re = re.compile('|'.join(searches))
     warnings = {}
     for log in logs:
         with open(log, encoding='utf-8') as file:
-            warnings[log.name] = set()
-            for line in file:
-                if re.search('|'.join(searches), line):
-                    warnings[log.name].add(re.sub(f"{src_folder}/", '', line))
+            warnings[log.name] = sorted(
+                {re.sub(f"{src_folder}/", '', line)
+                 for line in file if prob_re.search(line)})
     full = {key: value for key, value in warnings.items() if value}
-
-    # Deduplicate warnings within files
-    dedup = sorted({(file, item) for file, value in full.items() for item in value})
 
     # Filter warnings based on priority to fix
     ignore = [
@@ -86,12 +83,14 @@ def filter_warnings(log_folder, src_folder):
         'macro local_irq_enable reg=',
     ]
     ignore_re = re.compile('|'.join(ignore))
-    filtered = sorted({item for item in dedup if not ignore_re.search(item[1])})
+    filtered = {}
+    for log, problems in full.items():
+        filtered[log] = sorted({item for item in problems if not ignore_re.search(item)})
 
     # Deduplicate warnings across all builds
-    unique = sorted({item[1] for item in filtered})
+    unique = sorted({item for problems in filtered.values() for item in problems})
 
-    return dedup, filtered, unique
+    return full, filtered, unique
 
 
 def generate_report(log_folder):
@@ -106,12 +105,14 @@ def generate_report(log_folder):
     src_folder = Path(match.groups()[0])
 
     # Next, generate three items:
-    # * dedup: A set of tuples of file name and warning.
-    # * filtered: A set of tuples of file name and warning, filted from
-    #             an ignore list (see above).
-    # * unique: A set of warnings (so warnings seen in multiple builds
-    #           are only seen once in the list).
-    dedup, filtered, unique = filter_warnings(log_folder, src_folder)
+    # * full: A dictionary of lists, with the log name as the key and a sorted
+    #         list of warnings in that file as the value.
+    # * filtered: A dictionary of lists (same as full), filtered from an ignore
+    #             list (see above).
+    # * unique: A sorted list of unique warnings across the series of builds
+    #           (so warnings seen in multiple builds are only seen once in the
+    #           list).
+    full, filtered, unique = filter_warnings(log_folder, src_folder)
 
     # Build report text based on log files and filtered warnings above.
     report_text = info_text
@@ -131,16 +132,18 @@ def generate_report(log_folder):
 
     if filtered:
         report_text += '\nFiltered warning report:\n\n'
-        for warning in filtered:
-            report_text += f"{warning[0]}:{warning[1]}"
+        for log, warnings in filtered.items():
+            for warning in warnings:
+                report_text += f"{log}:{warning}"
 
     report_text += '\nList of successful tests:\n\n'
     report_text += get_log(log_folder, 'success').read_text(encoding='utf-8')
 
-    if dedup:
+    if full:
         report_text += '\nFull warning report:\n\n'
-        for warning in dedup:
-            report_text += f"{warning[0]}:{warning[1]}"
+        for log, warnings in full.items():
+            for warning in warnings:
+                report_text += f"{log}:{warning}"
 
     if src_folder.exists():
         mfc = git_get(src_folder, ['mfc']).strip()
