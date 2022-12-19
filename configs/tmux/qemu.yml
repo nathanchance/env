@@ -11,7 +11,7 @@ windows:
       enter: false
   - shell: dbxe
     shell_command:
-    - cmd: cbl_test_kvm
+    - cmd: cbl_test_kvm vmm
       enter: false
     focus: true
   - shell: dbxe
