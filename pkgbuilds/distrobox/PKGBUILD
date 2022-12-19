@@ -1,6 +1,6 @@
 # Maintainer: Nathan Chancellor <nathan@kernel.org>
 pkgname=distrobox
-pkgver=1.4.1
+pkgver=1.4.2
 pkgrel=1
 pkgdesc="Use any Linux distribution inside your terminal"
 arch=('any')
@@ -10,7 +10,7 @@ depends=('sh')
 optdepends=('docker: Container manager'
             'podman: Container manager')
 source=("$pkgname-$pkgver.tar.gz::https://github.com/89luca89/$pkgname/archive/refs/tags/$pkgver.tar.gz")
-sha256sums=('be3266f77011b30da5d0035e246d4e4a9360b7c90fbd8b90ac581165a00217b8')
+sha256sums=('63a121076ff0a4382faabb544f5ef3cb10f5c400acfd4c53c844bf9e29e7f7e8')
 
 package() {
   cd "$pkgname-$pkgver"
