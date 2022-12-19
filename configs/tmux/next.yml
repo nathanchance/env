@@ -4,20 +4,20 @@ windows:
   focus: true
   layout: tiled
   panes:
-  - shell: /usr/bin/fish -c dbxe
+  - shell: dbxe
     shell_command: cbl_upd_krnl next-llvm
     start_directory: $ENV_FOLDER/pkgbuilds/linux-next-llvm
     enter: false
     focus: true
-  - shell: /usr/bin/fish -c dbxe
+  - shell: dbxe
     shell_command: cbl_rb_fd
     start_directory: $CBL_BLD/fedora
     enter: false
-  - shell: /usr/bin/fish -c dbxe
+  - shell: dbxe
     shell_command: cbl_rb_pi
     start_directory: $CBL_BLD/rpi
     enter: false
-  - shell: /usr/bin/fish -c dbxe
+  - shell: dbxe
     shell_command: git urbi
     start_directory: $CBL_BLD_P/linux-next
     enter: false

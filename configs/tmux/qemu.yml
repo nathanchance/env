@@ -5,13 +5,13 @@ windows:
   layout: 61d8,269x53,0,0[269x41,0,0,57,269x11,0,42{134x11,0,42,58,134x11,135,42,59}]
   start_directory: '~'
   panes:
-  - shell: /usr/bin/fish -c dbxe
+  - shell: dbxe
     shell_command:
-    - cmd: ssh -p 8022 localhost
+    - cmd: ssh_vm
       enter: false
-  - shell: /usr/bin/fish -c dbxe
+  - shell: dbxe
     shell_command:
-    - cmd: cbl_vmm run
+    - cmd: cbl_test_kvm
       enter: false
     focus: true
-  - shell: /usr/bin/fish -c dbxe
+  - shell: dbxe

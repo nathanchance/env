@@ -3,9 +3,9 @@ windows:
 - window_name: btop and host shell
   layout: 0d09,269x53,0,0[269x36,0,0,15,269x16,0,37,17]
   panes:
-  - shell: /usr/bin/fish -c btop
-  - shell: /usr/bin/fish
+  - btop
+  -
 - window_name: distrobox
   focus: true
   panes:
-  - shell: /usr/bin/fish -c dbxe
+  - shell: dbxe
