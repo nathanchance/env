@@ -28,7 +28,7 @@ def git_get(repo, cmd):
                           text=True).stdout
 
 
-def filter_warnings(log_folder, src_folder):
+def generate_warnings(log_folder, src_folder):
     # Get full list of logs from folder, excluding internal logs for filtering sake
     internal_files = {elem + '.log' for elem in ['failed', 'info', 'skipped', 'success']}
     internal_files.add('report.txt')
@@ -50,10 +50,10 @@ def filter_warnings(log_folder, src_folder):
     prob_re = re.compile('|'.join(searches))
     warnings = {}
     for log in logs:
-        with open(log, encoding='utf-8') as file:
-            warnings[log.name] = sorted(
-                {re.sub(f"{src_folder}/", '', line)
-                 for line in file if prob_re.search(line)})
+        lines = log.read_text(encoding='utf-8').splitlines()
+        warnings[log.name] = sorted(
+            {re.sub(f"{src_folder}/", '', line)
+             for line in lines if prob_re.search(line)})
     full = {key: value for key, value in warnings.items() if value}
 
     # Filter warnings based on priority to fix
@@ -83,9 +83,10 @@ def filter_warnings(log_folder, src_folder):
         'macro local_irq_enable reg=',
     ]
     ignore_re = re.compile('|'.join(ignore))
-    filtered = {}
+    warnings = {}
     for log, problems in full.items():
-        filtered[log] = sorted({item for item in problems if not ignore_re.search(item)})
+        warnings[log] = sorted({item for item in problems if not ignore_re.search(item)})
+    filtered = {key: value for key, value in warnings.items() if value}
 
     # Deduplicate warnings across all builds
     unique = sorted({item for problems in filtered.values() for item in problems})
@@ -112,7 +113,7 @@ def generate_report(log_folder):
     # * unique: A sorted list of unique warnings across the series of builds
     #           (so warnings seen in multiple builds are only seen once in the
     #           list).
-    full, filtered, unique = filter_warnings(log_folder, src_folder)
+    full, filtered, unique = generate_warnings(log_folder, src_folder)
 
     # Build report text based on log files and filtered warnings above.
     report_text = info_text
