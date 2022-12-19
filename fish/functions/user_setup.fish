@@ -200,13 +200,7 @@ rpmbuild/' >>$gitignore
         podman system info
         # If we have access to the NAS, use it for pulling ghcr.io images
         if test -d $NAS_FOLDER; or set -q pull_thru_cache
-            set registries_conf $HOME/.config/containers/registries.conf
-            mkdir -p (dirname $registries_conf); or return
-            echo '[[registry]]
-location="ghcr.io"
-[[registry.mirror]]
-location="192.168.4.207:5002"
-insecure=true' >$registries_conf
+            setup_registries_conf; or return
         end
     end
 
