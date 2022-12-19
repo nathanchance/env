@@ -3,6 +3,14 @@
 # Copyright (C) 2021-2022 Nathan Chancellor
 
 function user_setup -d "Setup a user account, downloading all files and placing them where they need to go"
+    # Get arguments
+    for arg in $argv
+        switch $arg
+            case -p --pull-thru-cache --pull-through-cache
+                set pull_thru_cache true
+        end
+    end
+
     # If we are using GNOME Terminal, the "Unnamed" profile needs to be set
     if is_installed gnome-terminal
         set gnome_prof_dir /org/gnome/terminal/legacy/profiles:/
@@ -191,7 +199,7 @@ rpmbuild/' >>$gitignore
         end
         podman system info
         # If we have access to the NAS, use it for pulling ghcr.io images
-        if test -d $NAS_FOLDER
+        if test -d $NAS_FOLDER; or set -q pull_thru_cache
             set registries_conf $HOME/.config/containers/registries.conf
             mkdir -p (dirname $registries_conf); or return
             echo '[[registry]]

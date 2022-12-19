@@ -299,7 +299,7 @@ def setup_initial_fish_config(username):
             '    curl -LSs https://git.io/fisher | source\n'
             '    and fisher install jorgebucaran/fisher 1>/dev/null\n'
             '    and fisher install /tmp/env/fish 1>/dev/null\n'
-            '    and user_setup\n'
+            '    and user_setup $argv\n'
             'end\n')
         fish_cfg.write_text(fish_cfg_txt, encoding='utf-8')
         chown(username, user_cfg)
