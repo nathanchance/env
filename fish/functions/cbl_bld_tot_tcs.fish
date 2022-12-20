@@ -148,6 +148,14 @@ function cbl_bld_tot_tcs -d "Build LLVM and binutils from source for kernel deve
     set -a reverts 428f36401b1b695fd501ebfdc8773bed8ced8d4e
     for revert in $reverts
         if not git -C $llvm_project rv -n $revert
+            if test $revert = 428f36401b1b695fd501ebfdc8773bed8ced8d4e
+                set range 428f36401b1b695fd501ebfdc8773bed8ced8d4e^..428f36401b1b695fd501ebfdc8773bed8ced8d4e
+                set conflicting_test llvm/test/CodeGen/AArch64/tailmerging_in_mbp.ll
+                if git -C $llvm_project diff -R $range | git -C $llvm_project ap --exclude $conflicting_test
+                    rm -f $llvm_project/$conflicting_test
+                    continue
+                end
+            end
             set message "Failed to revert $revert"
             print_error "$message"
             tg_msg "$message"
