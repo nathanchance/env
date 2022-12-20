@@ -17,9 +17,10 @@ def add_mods_to_mkinitcpio(modules):
     if not (match := re.search(r'^MODULES=\((.*)\)$', conf_text, flags=re.M)):
         raise Exception(f"Could not find MODULES line in {mkinitcpio_conf}!")
 
-    orig_conf_val = match.groups()[0]
-    new_conf_val = f"{orig_conf_val} {' '.join(modules)}"
-    new_conf_line = f"MODULES=({new_conf_val.strip()})"
+    conf_mods = set(match.groups()[0].split(' '))
+    for module in modules:
+        conf_mods.add(module)
+    new_conf_line = f"MODULES=({' '.join(sorted(conf_mods)).strip()})"
 
     conf_text = re.sub(re.escape(match.group(0)), new_conf_line, conf_text)
     mkinitcpio_conf.write_text(conf_text, encoding='utf-8')
