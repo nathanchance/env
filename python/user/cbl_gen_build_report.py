@@ -50,7 +50,7 @@ def generate_warnings(log_folder, src_folder):
     prob_re = re.compile('|'.join(searches))
     warnings = {}
     for log in logs:
-        lines = log.read_text(encoding='utf-8').splitlines()
+        lines = log.read_text(encoding='utf-8').splitlines(keepends=True)
         warnings[log.name] = sorted(
             {re.sub(f"{src_folder}/", '', line)
              for line in lines if prob_re.search(line)})
