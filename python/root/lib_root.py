@@ -177,8 +177,15 @@ def is_equinix():
 
 def is_installed(package_to_check):
     if shutil.which('pacman'):
-        cmd = ['pacman', '-Q']
-    elif shutil.which('dnf'):
+        pacman_packages = subprocess.run(['pacman', '-Qq'],
+                                         capture_output=True,
+                                         check=True,
+                                         text=True).stdout
+        if re.search(f"^{package_to_check}$", pacman_packages, flags=re.M):
+            return True
+        return False
+
+    if shutil.which('dnf'):
         cmd = ['dnf', 'list', '--installed']
     elif shutil.which('dpkg'):
         cmd = ['dpkg', '-s']
