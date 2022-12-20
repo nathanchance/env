@@ -9,8 +9,9 @@ function wezterm_open_remotes -d "Open a new wezterm tab for each remote machine
     set hosts \
         thelio:Thelio \
         m3-large-x86:m3.large.x86 \
-        n3-xlarge-x86:n3.xlarge.x86 \
         c3-medium-x86:c3.medium.x86 \
+        c2-medium-x86:c2.medium.x86 \
+        c3-large-arm64:c3.large.arm64 \
         intel-desktop:"Intel desktop" \
         amd-desktop:"AMD desktop" \
         intel-laptop:"Intel laptop" \
