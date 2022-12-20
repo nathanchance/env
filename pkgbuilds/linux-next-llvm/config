@@ -2,7 +2,7 @@
 # Automatically generated file; DO NOT EDIT.
 # Linux/x86 6.1.0 Kernel Configuration
 #
-CONFIG_CC_VERSION_TEXT="ClangBuiltLinux clang version 16.0.0 (https://github.com/llvm/llvm-project 8685445b3c9c6643432d24db6ffedddeb49ed8d2)"
+CONFIG_CC_VERSION_TEXT="ClangBuiltLinux clang version 16.0.0 (https://github.com/llvm/llvm-project d4f3d8212a063d1f7850809fc3e4864c8b6e54a9)"
 CONFIG_GCC_VERSION=0
 CONFIG_CC_IS_CLANG=y
 CONFIG_CLANG_VERSION=160000
@@ -8653,8 +8653,10 @@ CONFIG_VDPA_USER=m
 CONFIG_IFCVF=m
 CONFIG_MLX5_VDPA=y
 CONFIG_MLX5_VDPA_NET=m
+# CONFIG_MLX5_VDPA_STEERING_DEBUG is not set
 CONFIG_VP_VDPA=m
 CONFIG_ALIBABA_ENI_VDPA=m
+# CONFIG_SNET_VDPA is not set
 CONFIG_VHOST_IOTLB=m
 CONFIG_VHOST_RING=m
 CONFIG_VHOST=m
