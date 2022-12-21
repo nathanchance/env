@@ -12,9 +12,6 @@ function gen_slim_initrd -d "Generate a slim initial ramdisk within a virtual ma
     end
 
     switch (get_distro)
-        case arch
-            print_warning "Arch Linux's initramfs can be generated from a kernel build with cbl_gen_arch_initrd, skipping gen_slim_initrd..."
-            return 0
         case alpine
             set src /boot/initramfs-virt
         case debian
@@ -33,6 +30,8 @@ function gen_slim_initrd -d "Generate a slim initial ramdisk within a virtual ma
     if not test -f $dst
         if command -q dracut
             sudo fish -c "dracut --no-kernel $dst && chown $USER:$USER $dst"
+        else if command -q mkinitcpio
+            mkinitcpio -g $dst -k none
         else if set -q src
             pushd (mktemp -d)
             begin
@@ -44,7 +43,7 @@ function gen_slim_initrd -d "Generate a slim initial ramdisk within a virtual ma
             end; or return
         else
             print_error "No suitable way to generate initrd found?"
-            exit 1
+            return 1
         end
     end
 
