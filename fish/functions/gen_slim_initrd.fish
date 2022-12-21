@@ -12,6 +12,9 @@ function gen_slim_initrd -d "Generate a slim initial ramdisk within a virtual ma
     end
 
     switch (get_distro)
+        case arch
+            print_warning "Arch Linux's initramfs can be generated from a kernel build with cbl_gen_arch_initrd, skipping gen_slim_initrd..."
+            return 0
         case alpine
             set src /boot/initramfs-virt
         case debian
