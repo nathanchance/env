@@ -22,7 +22,7 @@ def add_mods_to_mkinitcpio(modules):
         conf_mods.add(module)
     new_conf_line = f"MODULES=({' '.join(sorted(conf_mods)).strip()})"
 
-    conf_text = re.sub(re.escape(match.group(0)), new_conf_line, conf_text)
+    conf_text = conf_text.replace(match.group(0), new_conf_line)
     mkinitcpio_conf.write_text(conf_text, encoding='utf-8')
 
     subprocess.run(['mkinitcpio', '-P'], check=True)
@@ -73,7 +73,7 @@ def configure_boot_entries():
         raise Exception(f"Could not find 'options' line in {linux_conf}?")
     if 'console=' not in (old_options := match.group(0)):
         new_options = old_options + ' console=ttyS0,115200n8'
-        linux_conf.write_text(re.sub(old_options, new_options, linux_conf_text), encoding='utf-8')
+        linux_conf.write_text(linux_conf_text.replace(old_options, new_options), encoding='utf-8')
 
 
 def configure_networking():

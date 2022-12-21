@@ -52,7 +52,7 @@ def generate_warnings(log_folder, src_folder):
     for log in logs:
         lines = log.read_text(encoding='utf-8').splitlines(keepends=True)
         warnings[log.name] = sorted(
-            {re.sub(f"{src_folder}/", '', line)
+            {line.replace(f"{src_folder}/", '')
              for line in lines if prob_re.search(line)})
     full = {key: value for key, value in warnings.items() if value}
 

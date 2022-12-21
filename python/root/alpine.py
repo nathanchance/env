@@ -37,7 +37,7 @@ def enable_community_repo():
     # If the community repo is already enabled (uncommented), we do not need to
     # do anything.
     if (match := re.search(f"^#{community_repo}$", repo_txt, flags=re.M)):
-        repo_conf.write_text(re.sub(match.group(0), community_repo, repo_txt), encoding='utf-8')
+        repo_conf.write_text(repo_txt.replace(match.group(0), community_repo), encoding='utf-8')
 
 
 def update_and_install_packages():
@@ -127,7 +127,7 @@ def setup_podman(user_name):
     rc_cgroup_mode = 'rc_cgroup_mode="unified"'
     if not re.search(f"^{rc_cgroup_mode}$", rc_conf_txt, flags=re.M):
         rc_cgroup_mode_line = re.search('^#?rc_cgroup_mode=.*$', rc_conf_txt, flags=re.M).group(0)
-        rc_conf.write_text(re.sub(rc_cgroup_mode_line, rc_cgroup_mode, rc_conf_txt),
+        rc_conf.write_text(rc_conf_txt.replace(rc_cgroup_mode_line, rc_cgroup_mode),
                            encoding='utf-8')
 
     subprocess.run(['rc-update', 'add', 'cgroups'], check=True)

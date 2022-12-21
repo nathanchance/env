@@ -73,9 +73,9 @@ def pi_setup(user_name):
 
     if (x11_opts := Path('/etc/X11/Xsession.options')).exists():
         x11_opts_txt = x11_opts.read_text(encoding='utf-8')
-        if re.search('^use-ssh-agent$', x11_opts_txt, flags=re.M):
-            x11_opts_txt = re.sub('use-ssh-agent', '# use-ssh-agent', x11_opts_txt)
-            x11_opts.write_text(x11_opts_txt, encoding='utf-8')
+        conf = 'use-ssh-agent'
+        if re.search(f"^{conf}$", x11_opts_txt, flags=re.M):
+            x11_opts.write_text(x11_opts_txt.replace(conf, f"# {conf}"), encoding='utf-8')
 
 
 def prechecks():

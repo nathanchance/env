@@ -3,7 +3,6 @@
 # Copyright (C) 2022 Nathan Chancellor
 
 from pathlib import Path
-import re
 import shutil
 import subprocess
 
@@ -138,7 +137,7 @@ def setup_doas():
     doas_conf = Path('/etc/doas.conf')
     conf_txt = doas_conf.read_text(encoding='utf-8')
 
-    conf_txt = re.sub('permit :wheel', 'permit persist :wheel', conf_txt)
+    conf_txt = conf_txt.replace('permit :wheel', 'permit persist :wheel')
     conf_txt += ('\n'
                  '# Do not require root to put in a password (makes no sense)\n'
                  'permit nopass root\n')
