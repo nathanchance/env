@@ -134,15 +134,13 @@ def install_packages():
 
 def setup_doas():
     # Fedora provides a doas.conf already, just modify it to suit our needs
-    doas_conf = Path('/etc/doas.conf')
-    conf_txt = doas_conf.read_text(encoding='utf-8')
-
-    conf_txt = conf_txt.replace('permit :wheel', 'permit persist :wheel')
-    conf_txt += ('\n'
-                 '# Do not require root to put in a password (makes no sense)\n'
-                 'permit nopass root\n')
-
-    doas_conf.write_text(conf_txt, encoding='utf-8')
+    doas_conf, conf_txt = lib_root.path_and_text('/etc/doas.conf')
+    if (persist := 'permit persist :wheel') not in conf_txt:
+        conf_txt = conf_txt.replace('permit :wheel', persist)
+        conf_txt += ('\n'
+                     '# Do not require root to put in a password (makes no sense)\n'
+                     'permit nopass root\n')
+        doas_conf.write_text(conf_txt, encoding='utf-8')
 
     # Remove sudo but set up a symlink for compatibility
     Path('/etc/dnf/protected.d/sudo.conf').unlink(missing_ok=True)

@@ -51,10 +51,9 @@ def chpasswd(user_name, new_password):
 
 
 def chsh_fish(username):
-    if not (fish_path := shutil.which('fish')):
+    if not (fish := shutil.which('fish')):
         raise Exception('fish not installed?')
 
-    fish = str(Path(fish_path).resolve())
     if fish not in Path('/etc/shells').read_text(encoding='utf-8'):
         raise Exception(f"{fish} is not in /etc/shells?")
 
@@ -134,7 +133,7 @@ def get_ip_addr_for_intf(intf):
 
 
 def get_os_rel_val(variable):
-    os_rel = Path('/usr/lib/os-release').read_text(encoding='utf-8')
+    _, os_rel = path_and_text('/usr/lib/os-release')
 
     if (match := re.search(f'^{variable}=(.*)$', os_rel, flags=re.M)):
         return match.groups()[0].replace('"', '')
@@ -199,6 +198,12 @@ def is_virtual_machine():
 
 def pacman(args):
     subprocess.run(['pacman', *args], check=True)
+
+
+def path_and_text(path_str):
+    if (path := Path(path_str)).exists():
+        return path, path.read_text(encoding='utf-8')
+    return path, None
 
 
 def podman_setup(username):

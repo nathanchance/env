@@ -35,7 +35,7 @@ def pi_setup(user_name):
     subprocess.run(['raspi-config', '--expand-rootfs'], check=True)
     subprocess.run(['raspi-config', 'nonint', 'do_serial', '0'], check=True)
 
-    dhcpcd_conf_txt = (dhcpcd_conf := Path('/etc/dhcpcd.conf')).read_text(encoding='utf-8')
+    dhcpcd_conf, dhcpcd_conf_txt = lib_root.path_and_text('/etc/dhcpcd.conf')
     if not re.search(r'^interface eth0\nstatic ip_address=192\.168', dhcpcd_conf_txt, flags=re.M):
         dhcpcd_conf_txt += (
             '\n'
@@ -48,12 +48,11 @@ def pi_setup(user_name):
     ssd_partition = Path('/dev/sda1')
     if ssd_partition.is_block_device():
         mnt_point = Path('/mnt/ssd')
-        fstab = Path('/etc/fstab')
 
         mnt_point.mkdir(exist_ok=True, parents=True)
         lib_root.chown(user_name, mnt_point)
 
-        fstab_text = fstab.read_text(encoding='utf-8')
+        fstab, fstab_text = lib_root.path_and_text('/etc/fstab')
         if str(mnt_point) not in fstab_text:
             partuuid = subprocess.run(['blkid', '-o', 'value', '-s', 'PARTUUID', ssd_partition],
                                       capture_output=True,
@@ -71,8 +70,8 @@ def pi_setup(user_name):
                            '\n}\n')
         docker_json.write_text(docker_json_txt, encoding='utf-8')
 
-    if (x11_opts := Path('/etc/X11/Xsession.options')).exists():
-        x11_opts_txt = x11_opts.read_text(encoding='utf-8')
+    x11_opts, x11_opts_txt = lib_root.path_and_text('/etc/X11/Xsession.options')
+    if x11_opts_txt:
         conf = 'use-ssh-agent'
         if re.search(f"^{conf}$", x11_opts_txt, flags=re.M):
             x11_opts.write_text(x11_opts_txt.replace(conf, f"# {conf}"), encoding='utf-8')

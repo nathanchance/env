@@ -67,8 +67,7 @@ def partition_drive(drive_path, mountpoint, username):
                               check=True,
                               text=True).stdout.strip()
 
-    fstab = Path('/etc/fstab')
-    fstab_txt = fstab.read_text(encoding='utf-8')
+    fstab, fstab_txt = lib_root.path_and_text('/etc/fstab')
     fstab_line = f"UUID={vol_uuid}\t{mountpoint}\text4\tnoatime\t0\t2\n"
     fstab.write_text(fstab_txt + fstab_line, encoding='utf-8')
     subprocess.run(['systemctl', 'daemon-reload'], check=True)

@@ -25,19 +25,18 @@ def parse_arguments():
 
 
 def enable_community_repo():
-    repo_conf = Path('/etc/apk/repositories')
-    repo_txt = repo_conf.read_text(encoding='utf-8')
+    conf, text = lib_root.path_and_text('/etc/apk/repositories')
 
     # Get the repository URL to create the community repo from (build from the
     # first uncommented line ending in main).
-    if not (repo_url := re.search('^([^#].*/)main$', repo_txt, flags=re.M).groups()[0]):
-        raise Exception(f"Could not find main repo in {repo_conf}?")
+    if not (repo_url := re.search('^([^#].*/)main$', text, flags=re.M).groups()[0]):
+        raise Exception(f"Could not find main repo in {conf}?")
     community_repo = repo_url + 'community'
 
     # If the community repo is already enabled (uncommented), we do not need to
     # do anything.
-    if (match := re.search(f"^#{community_repo}$", repo_txt, flags=re.M)):
-        repo_conf.write_text(repo_txt.replace(match.group(0), community_repo), encoding='utf-8')
+    if (match := re.search(f"^#{community_repo}$", text, flags=re.M)):
+        conf.write_text(text.replace(match.group(0), community_repo), encoding='utf-8')
 
 
 def update_and_install_packages():
@@ -109,11 +108,9 @@ def setup_user(user_name, user_password):
             subprocess.run(['addgroup', user_name, group], check=True)
 
     # Setup doas
-    doas_conf = Path('/etc/doas.d/doas.conf')
-    doas_wheel = 'permit persist :wheel'
-    if doas_wheel not in doas_conf.read_text(encoding='utf-8'):
-        with open(doas_conf, 'a', encoding='utf-8') as file:
-            file.write(doas_wheel + '\n')
+    doas_conf, doas_text = lib_root.path_and_text('/etc/doas.d/doas.conf')
+    if (doas_wheel := 'permit persist :wheel') not in doas_text:
+        doas_conf.write_text(f"{doas_conf}{doas_wheel}\n", encoding='utf-8')
 
     # Authorize my ssh key
     lib_root.setup_ssh_authorized_keys(user_name)
@@ -122,8 +119,7 @@ def setup_user(user_name, user_password):
 # https://wiki.alpinelinux.org/wiki/Podman
 def setup_podman(user_name):
     # Set up cgroupsv2
-    rc_conf = Path('/etc/rc.conf')
-    rc_conf_txt = rc_conf.read_text(encoding='utf-8')
+    rc_conf, rc_conf_txt = lib_root.path_and_text('/etc/rc.conf')
     rc_cgroup_mode = 'rc_cgroup_mode="unified"'
     if not re.search(f"^{rc_cgroup_mode}$", rc_conf_txt, flags=re.M):
         rc_cgroup_mode_line = re.search('^#?rc_cgroup_mode=.*$', rc_conf_txt, flags=re.M).group(0)
@@ -133,10 +129,9 @@ def setup_podman(user_name):
     subprocess.run(['rc-update', 'add', 'cgroups'], check=True)
     subprocess.run(['rc-service', 'cgroups', 'start'], check=True)
 
-    etc_modules = Path('/etc/modules')
-    if 'tun' not in etc_modules.read_text(encoding='utf-8'):
-        with open(etc_modules, mode='a', encoding='utf-8') as file:
-            file.write('tun\n')
+    modules, modules_text = lib_root.path_and_text('/etc/modules')
+    if 'tun' not in modules_text:
+        modules.write_text(f"{modules_text}tun\n", encoding='utf-8')
 
     if not (make_root_rshared := Path('/etc/local.d/make_root_rshared.start')).exists():
         subprocess.run(['rc-update', 'add', 'local', 'default'], check=True)
