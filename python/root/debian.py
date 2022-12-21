@@ -54,7 +54,7 @@ def pi_setup(user_name):
         lib_root.chown(user_name, mnt_point)
 
         fstab_text = fstab.read_text(encoding='utf-8')
-        if not re.search(str(mnt_point), fstab_text):
+        if str(mnt_point) not in fstab_text:
             partuuid = subprocess.run(['blkid', '-o', 'value', '-s', 'PARTUUID', ssd_partition],
                                       capture_output=True,
                                       check=True,

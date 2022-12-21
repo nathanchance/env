@@ -111,7 +111,7 @@ def setup_user(user_name, user_password):
     # Setup doas
     doas_conf = Path('/etc/doas.d/doas.conf')
     doas_wheel = 'permit persist :wheel'
-    if not re.search(doas_wheel, doas_conf.read_text(encoding='utf-8')):
+    if doas_wheel not in doas_conf.read_text(encoding='utf-8'):
         with open(doas_conf, 'a', encoding='utf-8') as file:
             file.write(doas_wheel + '\n')
 
@@ -134,7 +134,7 @@ def setup_podman(user_name):
     subprocess.run(['rc-service', 'cgroups', 'start'], check=True)
 
     etc_modules = Path('/etc/modules')
-    if not re.search('tun', etc_modules.read_text(encoding='utf-8')):
+    if 'tun' not in etc_modules.read_text(encoding='utf-8'):
         with open(etc_modules, mode='a', encoding='utf-8') as file:
             file.write('tun\n')
 

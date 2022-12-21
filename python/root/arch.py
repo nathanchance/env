@@ -286,7 +286,7 @@ def pacman_settings():
     conf_text = uncomment_pacman_option(conf_text, 'VerbosePkgLists')
     conf_text = uncomment_pacman_option(conf_text, 'ParallelDownloads', 5, 7)
 
-    if not re.search('nathan', conf_text):
+    if 'nathan' not in conf_text:
         conf_text += (
             '\n'
             '[nathan]\n'
@@ -362,9 +362,9 @@ def setup_libvirt(username):
     # For domains with KVM to autostart, the kvm_<vendor> module needs to be
     # loaded during init.
     cpuinfo = Path('/proc/cpuinfo').read_text(encoding='utf-8')
-    if re.search('svm', cpuinfo):
+    if 'svm' in cpuinfo:
         add_mods_to_mkinitcpio(['kvm_amd'])
-    elif re.search('vmx', cpuinfo):
+    elif 'vmx' in cpuinfo:
         add_mods_to_mkinitcpio(['kvm_intel'])
 
 

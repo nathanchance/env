@@ -97,14 +97,11 @@ def fetch_gpg_key(source_url, dest):
 
 
 def get_active_ethernet_info():
-    active_connections = subprocess.run(
-        ['nmcli', '-f', 'TYPE,NAME,DEVICE', '-t', 'connection', 'show', '--active'],
-        capture_output=True,
-        check=True,
-        text=True).stdout.strip().split('\n')
+    nmcli_cmd = ['nmcli', '-f', 'TYPE,NAME,DEVICE', '-t', 'connection', 'show', '--active']
+    active_connections = subprocess.run(nmcli_cmd, capture_output=True, check=True,
+                                        text=True).stdout.splitlines()
     for line in active_connections:
-        line = line.strip()
-        if re.search('ethernet', line):
+        if 'ethernet' in line:
             return line.split(':')[1:]
     return None
 

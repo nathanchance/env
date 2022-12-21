@@ -19,10 +19,10 @@ def calculate(file_path):
 def get_from_url(url, basename):
     response = requests.get(url, timeout=3600)
     response.raise_for_status()
-    for line in response.content.decode('utf-8').split('\n'):
+    for line in response.content.decode('utf-8').splitlines():
         if 'clone.bundle' in basename:
             basename = basename.split('-')[0]
-        if re.search(basename, line):
+        if basename in line:
             if (sha256_match := re.search('[A-Fa-f0-9]{64}', line)):
                 return sha256_match.group(0)
     return None
