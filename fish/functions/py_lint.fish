@@ -13,6 +13,7 @@ function py_lint -d "Lint Python files"
     for command in flake8 pylint vulture yapf
         if not command -q $command
             if in_venv
+                test $command = flake8; and set -a command flake8-bugbear
                 pip install $command
             else
                 print_error "$command could not be found and you are not in a virtual environment!"

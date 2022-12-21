@@ -21,8 +21,10 @@ import sys
 
 import lib_user
 
+usr_share = Path('/usr/share')
 
-def find_first_file(possible_files, relative_root=Path('/usr/share')):
+
+def find_first_file(possible_files, relative_root=usr_share):
     for possible_file in possible_files:
         if (full_path := relative_root.joinpath(possible_file)).exists():
             return full_path
