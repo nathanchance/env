@@ -40,4 +40,4 @@ if ! is_available python3; then
     fi
 fi
 
-"$python_root"/"$ID".py "$@"
+"$python_root"/"${ID_LIKE-$ID}".py "$@"
