@@ -65,11 +65,16 @@ function user_setup -d "Setup a user account, downloading all files and placing 
             end
 
             set ssh_keys $keys_folder/ssh
+
             cp -v $ssh_keys/id_ed25519{,.pub} $ssh_folder
-            cp -v $ssh_keys/korg-nathan $ssh_folder/id_korg
-            chmod 600 $ssh_folder/id_{ed25519,korg}
-            # https://korg.docs.kernel.org/access.html#if-you-received-a-ssh-private-key-from-kernel-org
-            echo 'Host gitolite.kernel.org
+            chmod 600 $ssh_folder/id_ed25519
+
+            if is_location_primary
+                cp -v $ssh_keys/korg-nathan $ssh_folder/id_korg
+                chmod 600 $ssh_folder/id_korg
+
+                # https://korg.docs.kernel.org/access.html#if-you-received-a-ssh-private-key-from-kernel-org
+                echo 'Host gitolite.kernel.org
   User git
   IdentityFile ~/.ssh/id_korg
   IdentitiesOnly yes
@@ -83,11 +88,14 @@ function user_setup -d "Setup a user account, downloading all files and placing 
   ControlMaster auto
   ControlPersist 30m
   # Helps behind some NAT-ing routers
-  ServerAliveInterval 60
+  ServerAliveInterval 60' >>$ssh_folder/config
+            end
 
-Host sos.*.platformequinix.com
+            if test $LOCATION = mac
+                echo 'Host sos.*.platformequinix.com
   HostkeyAlgorithms +ssh-rsa
   PubkeyAcceptedAlgorithms +ssh-rsa' >>$ssh_folder/config
+            end
         end
 
         if test -f $HOME/.ssh/.ssh-agent.fish
