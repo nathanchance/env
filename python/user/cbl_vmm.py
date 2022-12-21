@@ -88,6 +88,17 @@ class VirtualMachine:
         if not memory:
             memory = min(cores * 2, self.get_available_mem_for_vm())
 
+        # Attempt to locate static kernel files if only a kernel was passed
+        if kernel:
+            kernel_files = self.shared_folder.joinpath('kernel_files')
+            if not cmdline:
+                if not (cmdline_file := kernel_files.joinpath('cmdline')).exists():
+                    raise Exception('kernel passed without cmdline and one could not be found!')
+                cmdline = cmdline_file.read_text(encoding='utf-8')
+            if not initrd:
+                if not (initrd := kernel_files.joinpath('initramfs')).exists():
+                    raise Exception('kernel passed without initrd and one could not be found!')
+
         # Clear any previous hosts using the chosen SSH port.
         run_cmd(['ssh-keygen', '-R', f"[localhost]:{ssh_port}"])
         Path.home().joinpath('.ssh', 'known_hosts.old').unlink(missing_ok=True)
@@ -649,15 +660,11 @@ def create_vm_from_args(args):
                 f"Kernel image ('{kernel}'), derived from kernel argument ('{args.kernel}'), does not exist!"
             )
 
-        # Handle command line; no default as it is specific to the VM
+        # Handle command line and initial ramdisk
         if args.cmdline:
             cmdline = args.cmdline
-
-        # Handle initial ramdisk
         if args.initrd:
             initrd = Path(args.initrd)
-        else:
-            raise Exception("Kernel specified without initrd!")
 
     # Create the VirtualMachine object for the particular architecture.
     if arch == 'arm':

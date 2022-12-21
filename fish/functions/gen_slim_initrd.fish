@@ -17,15 +17,11 @@ function gen_slim_initrd -d "Generate a slim initial ramdisk within a virtual ma
         case debian
             set src (realpath /boot/initrd.img)
     end
-    if set -q src
-        if not test -e $src
-            print_error "src ('$src') could not be found?"
-            exit 1
-        end
-        set dst $prefix/(basename $src)
-    else
-        set dst $prefix/initramfs.img
+    if set -q src; and not test -e $src
+        print_error "src ('$src') could not be found?"
+        exit 1
     end
+    set dst $prefix/initramfs
 
     if not test -f $dst
         if command -q dracut
