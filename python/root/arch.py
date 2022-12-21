@@ -45,6 +45,37 @@ def adjust_gnome_power_settings():
     doas_conf.write_text(doas_conf_text, encoding='utf-8')
 
 
+def configure_boot_entries():
+    # Not using systemd-boot, bail out
+    if not (boot_entries := Path('/boot/loader/entries')).exists():
+        return
+
+    # If we already set up the configuration, no need to go through all this
+    # again
+    if (linux_conf := boot_entries.joinpath('linux.conf')).exists():
+        return
+
+    # Find the configuration with a regex in case we set up another linux.conf
+    linux_re = re.compile(r'[0-9a-z_]+linux\.conf')
+    linux_confs = [item for item in boot_entries.iterdir() if linux_re.search(item.name)]
+    if (num := len(linux_confs)) != 1:
+        raise Exception(f"Number of possible linux.conf entries ('{num}') is unexpected!")
+
+    # Move the configuration created by archinstall to a deterministic name
+    linux_confs[0].replace(linux_conf)
+    linux_conf_text = linux_conf.read_text(encoding='utf-8')
+
+    # Add 'console=' if necessary (when connected by serial console in a
+    # virtual machine)
+    if not (lib_root.is_virtual_machine() and 'DISPLAY' not in os.environ):
+        return
+    if not (match := re.search('^options.*$', linux_conf_text, flags=re.M)):
+        raise Exception(f"Could not find 'options' line in {linux_conf}?")
+    if 'console=' not in (old_options := match.group(0)):
+        new_options = old_options + ' console=ttyS0,115200n8'
+        linux_conf.write_text(re.sub(old_options, new_options, linux_conf_text), encoding='utf-8')
+
+
 def configure_networking():
     hostname = lib_root.get_hostname()
 
@@ -376,6 +407,7 @@ if __name__ == '__main__':
     arguments = parse_arguments(user)
 
     prechecks()
+    configure_boot_entries()
     pacman_settings()
     pacman_key_setup()
     pacman_update()
