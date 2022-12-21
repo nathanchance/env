@@ -216,6 +216,9 @@ def pacman_install_packages():
             'discord',
             'telegram-desktop',
 
+            # Clipboard in terminal
+            'wl-clipboard',
+
             # Fonts
             'cantarell-fonts',
             'ttc-iosevka-ss08',
