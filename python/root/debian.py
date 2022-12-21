@@ -24,12 +24,11 @@ def parse_arguments():
     parser = ArgumentParser(description='Set up a Debian installation')
 
     parser.add_argument('-r', '--root-password', help='Root password', required=True)
-    parser.add_argument('-u', '--user-password', help='User password', required=machine_is_pi())
 
     return parser.parse_args()
 
 
-def pi_setup(user_name, user_password):
+def pi_setup(user_name):
     if not machine_is_pi():
         return
 
@@ -45,8 +44,6 @@ def pi_setup(user_name, user_password):
             'static routers=192.168.4.1\n'
             'static domain_name_servers=8.8.8.8 8.8.4.4 1.1.1.1 192.168.0.1\n')
         dhcpcd_conf.write_text(dhcpcd_conf_txt, encoding='utf-8')
-
-    lib_root.chpasswd(user_name, user_password)
 
     ssd_partition = Path('/dev/sda1')
     if ssd_partition.is_block_device():
@@ -155,7 +152,7 @@ if __name__ == '__main__':
     lib_deb.update_and_install_packages()
     lib_root.chsh_fish(user)
     lib_root.add_user_to_group_if_exists('kvm', user)
-    pi_setup(user, args.user_password)
+    pi_setup(user)
     lib_deb.setup_doas(user, args.root_password)
     lib_deb.setup_docker(user)
     lib_deb.setup_libvirt(user)
