@@ -51,12 +51,11 @@ def chpasswd(user_name, new_password):
 
 
 def chsh_fish(username):
-    fish_path = shutil.which('fish')
-    if not fish_path:
+    if not (fish_path := shutil.which('fish')):
         raise Exception('fish not installed?')
 
-    fish = Path(fish_path).resolve()
-    if not re.search(str(fish), Path('/etc/shells').read_text(encoding='utf-8')):
+    fish = str(Path(fish_path).resolve())
+    if fish not in Path('/etc/shells').read_text(encoding='utf-8'):
         raise Exception(f"{fish} is not in /etc/shells?")
 
     subprocess.run(['chsh', '-s', fish, username], check=True)
