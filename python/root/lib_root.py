@@ -62,8 +62,7 @@ def chsh_fish(username):
 
 
 def clone_env(username):
-    env_tmp = Path('/tmp/env')
-    if not env_tmp.exists():
+    if not (env_tmp := Path('/tmp/env')).exists():
         subprocess.run(['git', 'clone', 'https://github.com/nathanchance/env', env_tmp], check=True)
         chown(username, env_tmp)
 
@@ -111,8 +110,7 @@ def get_active_ethernet_info():
 
 
 def get_env_root():
-    env_root = Path(__file__).resolve().parent.parent.parent
-    if env_root.joinpath('README.md').exists():
+    if (env_root := Path(__file__).resolve().parents[2]).joinpath('README.md').exists():
         return env_root
     raise Exception(f"{env_root} does not seem correct?")
 
@@ -212,8 +210,7 @@ def podman_setup(username):
     for letter in ['g', 'u']:
         Path(f"/etc/sub{letter}id").write_text(file_text, encoding='utf-8')
 
-    registries_conf = Path('/etc/containers/registries.conf')
-    if not registries_conf.exists():
+    if not (registries_conf := Path('/etc/containers/registries.conf')).exists():
         registries_conf.write_text(
             "[registries.search]\nregistries = ['docker.io', 'ghcr.io', 'quay.io']\n",
             encoding='utf-8')
@@ -265,8 +262,7 @@ def setup_initial_fish_config(username):
                               capture_output=True,
                               check=True,
                               text=True).stdout.strip()
-    fish_ver_tup = tuple(int(x) for x in fish_ver.split('.'))
-    if fish_ver_tup < (3, 4, 0):
+    if tuple(int(x) for x in fish_ver.split('.')) < (3, 4, 0):
         raise Exception(f"{fish_ver} is less than 3.4.0!")
 
     user_cfg = Path('/home', username, '.config')
