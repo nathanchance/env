@@ -325,6 +325,8 @@ def setup_doas(username):
     doas_conf = Path('/etc/doas.conf')
     doas_conf_text = ('# Allow me to be root for 5 minutes at a time\n'
                       f"permit persist {username} as root\n"
+                      '# Pass through environment variables to podman\n'
+                      f"permit keepenv persist {username} cmd podman\n"
                       '# Allow me to update or install packages without a password\n'
                       f"permit nopass {username} cmd pacman\n"
                       '# Do not require root to put in a password (makes no sense)\n'
