@@ -197,8 +197,8 @@ def pacman(args):
     subprocess.run(['pacman', *args], check=True)
 
 
-def path_and_text(path_str):
-    if (path := Path(path_str)).exists():
+def path_and_text(*args):
+    if (path := Path(*args)).exists():
         return path, path.read_text(encoding='utf-8')
     return path, None
 

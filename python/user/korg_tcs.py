@@ -23,7 +23,7 @@ def download_tarballs():
         raise Exception(f"{toolchains_folder} does not exist??")
 
     for major_version in supported_major_versions():
-        gcc_version = get_latest_gcc_version(major_version)
+        gcc_version = lib_user.get_latest_gcc_version(major_version)
 
         tarball_folder = toolchains_folder.joinpath(gcc_version)
         tarball_folder.mkdir(exist_ok=True, parents=True)
@@ -49,7 +49,7 @@ def download_tarballs():
 
 def extract_tarballs():
     for major_version in supported_major_versions():
-        gcc_version = get_latest_gcc_version(major_version)
+        gcc_version = lib_user.get_latest_gcc_version(major_version)
         host_arch = get_gcc_host_arch(platform.machine())
 
         src_folder = get_nas_folder().joinpath('kernel.org', 'toolchains', gcc_version)
@@ -72,18 +72,6 @@ def get_gcc_host_arch(uname_arch):
         'aarch64': 'arm64',
         'x86_64': 'x86_64',
     }[uname_arch]
-
-
-def get_latest_gcc_version(major_version):
-    return {
-        6: '6.5.0',
-        7: '7.5.0',
-        8: '8.5.0',
-        9: '9.5.0',
-        10: '10.4.0',
-        11: '11.3.0',
-        12: '12.2.0',
-    }[major_version]
 
 
 def get_nas_folder():
