@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: MIT
 # Copyright (C) 2022 Nathan Chancellor
 
-function gen_vm_kernel_files -d "Generate files needed to boot local compiled kernels with cbl_vmm.py"
+function cbl_gen_vm_boot_files -d "Generate files needed to boot local compiled kernels with cbl_vmm.py"
     # Make sure we are not running our own kernel, which might not have modules enabled
     if string match -qr '\(nathan@' (cat /proc/version)
         print_error "It seems like a non-stock kernel is booted?"
