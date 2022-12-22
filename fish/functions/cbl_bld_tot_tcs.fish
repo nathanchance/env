@@ -140,9 +140,6 @@ function cbl_bld_tot_tcs -d "Build LLVM and binutils from source for kernel deve
     end
 
     # Add patches to revert here
-    # Patch: MIPS: fix build from IR files, nan2008 and FpAbi
-    # Revert reason: https://reviews.llvm.org/D138179#4002068
-    set -a reverts 9739bb81aed490bfcbcbbac6970da8fb7232fd34
     for revert in $reverts
         if not git -C $llvm_project rv -n $revert
             set message "Failed to revert $revert"
