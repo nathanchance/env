@@ -144,11 +144,8 @@ def get_os_rel_val(variable):
 def get_user():
     if 'USERNAME' in os.environ:
         return os.environ['USERNAME']
-
-    hostname = get_hostname()
-    if hostname == 'raspberrypi':
+    if get_hostname() == 'raspberrypi':
         return 'pi'
-
     return 'nathan'
 
 
