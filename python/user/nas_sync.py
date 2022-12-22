@@ -122,7 +122,7 @@ def download_items(targets, network_folder):
 
         elif target == 'debian':
             debian_arches = ['amd64', 'arm64', 'armhf', 'i386']
-            debian_ver = '11.5.0'
+            debian_ver = '11.6.0'
 
             for arch in debian_arches:
                 arch_debian_folder = firmware_folder.joinpath(target.capitalize(), debian_ver, arch)
