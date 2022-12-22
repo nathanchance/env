@@ -32,11 +32,12 @@ function cbl_setup_reduction -d "Build good and bad versions of LLVM for cvise r
             --build-stage1-only \
             --install-folder $tmp_dir/install/llvm-$folder \
             --install-stage1-only \
-            --llvm-folder $PWD \
-            --projects 'clang;lld'; or return
+            --llvm-folder . \
+            --projects 'clang;lld' \
+            --quiet-cmake; or return
     end
 
-    set cvise $dest/cvise
+    set cvise $tmp_dir/cvise
     mkdir -p $cvise
 
     set cvise_test $cvise/test.fish
