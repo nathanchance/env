@@ -1,6 +1,6 @@
 # Maintainer: Nathan Chancellor <nathan@kernel.org>
 pkgname=cvise
-pkgver=2.6.0
+pkgver=2.7.0
 pkgrel=1
 pkgdesc="Super-parallel Python port of the C-Reduce"
 arch=('x86_64')
@@ -11,7 +11,7 @@ makedepends=('cmake' 'flex' 'llvm')
 checkdepends=('python-pytest' 'python-pytest-flake8')
 optdepends=('colordiff: Show diffs in color')
 source=("$pkgname-$pkgver.tar.gz::https://github.com/marxin/$pkgname/archive/refs/tags/v$pkgver.tar.gz")
-sha256sums=('770b88851901c8c7ce14c47809ba9989e99de35c564917cf2f686a7e48484b75')
+sha256sums=('a0468bb16b99c9bc67b7cdd6557a79d441e5e1f253fdf7d73f21c15f9dc3b444')
 
 build() {
   cd "$pkgname-$pkgver"
