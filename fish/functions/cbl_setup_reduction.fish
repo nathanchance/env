@@ -43,11 +43,22 @@ function cbl_setup_reduction -d "Build good and bad versions of LLVM for cvise r
     set cvise_test $cvise/test.fish
     echo '#!/usr/bin/env fish
 
-set install_folder (dirname (realpath (status dirname)))/install
+set tmp_dir (dirname (realpath (status dirname)))
+set install_folder $tmp_dir/install
 set bad_clang $install_folder/llvm-bad/bin/clang
 set good_clang $install_folder/llvm-good/bin/clang
 
-' >$cvise_test
+function build_kernel
+    set type $argv[1]
+    set clang_var "$type"_clang
+
+    kmake \
+        LLVM=(dirname $$clang_var)/ \
+        O=$tmp_dir/build/linux/$type \
+end
+
+build_kernel good; or return
+build_kernel bad' >$cvise_test
     chmod +x $cvise_test
 
     git -C $cvise init; or return
