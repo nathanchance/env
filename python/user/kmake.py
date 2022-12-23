@@ -17,6 +17,7 @@ def parse_arguments():
                         help='Prepend specified directories to PATH',
                         nargs='+')
     parser.add_argument('-j', '--jobs', default=os.cpu_count(), help='Number of jobs', type=int)
+    parser.add_argument('--use-time', action='store_true', help="Call 'time -v' for time tracking")
     parser.add_argument('-v', '--verbose', action='store_true', help='Do a more verbose build')
     parser.add_argument('make_args', help='Make variables and targets', nargs='*')
 
@@ -52,4 +53,5 @@ if __name__ == '__main__':
                      ccache=(not args.no_ccache),
                      directory=args.directory,
                      jobs=args.jobs,
-                     silent=(not args.verbose))
+                     silent=(not args.verbose),
+                     use_time=args.use_time)

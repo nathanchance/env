@@ -16,7 +16,7 @@ def get_tool_version(binary_path):
                           text=True).stdout.splitlines()[0]
 
 
-def kmake(variables, targets, ccache=True, directory=None, jobs=None, silent=True):
+def kmake(variables, targets, ccache=True, directory=None, jobs=None, silent=True, use_time=False):
     # Handle kernel directory right away
     if not (kernel_src := Path(directory) if directory else Path('.')).exists():
         raise Exception(f"Derived kernel source ('{kernel_src}') does not exist?")
@@ -100,7 +100,13 @@ def kmake(variables, targets, ccache=True, directory=None, jobs=None, silent=Tru
         'stdbuf', '-eL', '-oL', 'make', *flags,
         *[f"{key}={variables[key]}" for key in sorted(variables)], *targets
     ]
+    if use_time:
+        if not (gnu_time := shutil.which('time')):
+            raise Exception('Could not find time binary in PATH?')
+        make_cmd = [gnu_time, '-v'] + make_cmd
     lib_user.print_cmd(make_cmd)
-    start_time = time.time()
+    if not use_time:
+        start_time = time.time()
     subprocess.run(make_cmd, check=True)
-    print(f"\nTime: {datetime.timedelta(seconds=int(time.time() - start_time))}")
+    if not use_time:
+        print(f"\nTime: {datetime.timedelta(seconds=int(time.time() - start_time))}")
