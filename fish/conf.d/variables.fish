@@ -232,6 +232,11 @@ set -g LLVM_VERSION_STABLE (math $LLVM_VERSION_TOT - 1)
 set -g LLVM_VERSION_MIN_KERNEL 11
 set -g LLVM_VERSIONS_KERNEL (seq $LLVM_VERSION_TOT -1 $LLVM_VERSION_MIN_KERNEL)
 
+# Stock GCC arguments for make
+set -gx STOCK_GCC_VARS \
+    CROSS_COMPILE=/usr/bin/ \
+    K{A,C}FLAGS=-B/usr/bin
+
 # https://www.kernel.org/category/releases.html
 set -gx SUPPORTED_STABLE_VERSIONS \
     $CBL_STABLE_VERSIONS \
