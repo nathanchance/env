@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 
 from argparse import ArgumentParser
-import copy
 import os
 from pathlib import Path
 import platform
@@ -9,6 +8,7 @@ import subprocess
 
 import requests
 
+import lib_kernel
 import lib_sha256
 import lib_user
 
@@ -16,30 +16,18 @@ import lib_user
 def parse_arguments():
     parser = ArgumentParser(description='Easily download and extract kernel.org toolchains to disk')
 
-    supported_targets = [
-        'aarch64-linux',
-        'arm-linux-gnueabi',
-        'i386-linux',
-        'm68k-linux',
-        'mips-linux',
-        'mips64-linux',
-        'powerpc-linux',
-        'powerpc64-linux',
-        'riscv32-linux',
-        'riscv64-linux',
-        's390-linux',
-        'x86_64-linux'
-    ]  # yapf: disable
+    supported_arches = lib_kernel.supported_korg_gcc_arches()
+    supported_targets = lib_kernel.supported_korg_gcc_targets()
     parser.add_argument('-t',
                         '--targets',
-                        choices=supported_targets,
+                        choices=supported_arches + supported_targets,
                         default=supported_targets,
                         help='Toolchain targets to download (default: %(default)s)',
                         metavar='TARGETS',
                         nargs='+')
 
     # GCC 6 through 12
-    supported_versions = list(range(6, 13))
+    supported_versions = lib_kernel.supported_korg_gcc_versions()
     parser.add_argument('-v',
                         '--versions',
                         choices=supported_versions,
@@ -87,7 +75,11 @@ if __name__ == '__main__':
     }[host_arch]
 
     for major_version in args.versions:
-        targets = copy.copy(args.targets)
+        print(args.targets)
+        targets = sorted(
+            {lib_kernel.korg_gcc_canonicalize_target(target)
+             for target in args.targets})
+        print(targets)
         # No GCC 9.5.0 i386-linux on x86_64?
         if host_arch == 'x86_64' and major_version == 9:
             targets.remove('i386-linux')
