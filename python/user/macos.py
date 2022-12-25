@@ -68,13 +68,12 @@ def install_packages():
     ]  # yapf: disable
     brew(['install', *packages])
 
-    casks = [('homebrew/cask-fonts', ['font-iosevka-ss08']),
-             ('wez/wezterm', ['wez/wezterm/wezterm-nightly'])]
-    for cask in casks:
-        repo = cask[0]
-        packages = cask[1]
-
-        brew(['tap', repo])
+    casks = {
+        'homebrew/cask-fonts': ['font-iosevka-ss08'],
+        'wez/wezterm': ['wez/wezterm/wezterm-nightly'],
+    }
+    for cask, packages in casks.items():
+        brew(['tap', cask])
         brew(['install', '--cask', *packages])
 
 
