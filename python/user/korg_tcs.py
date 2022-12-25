@@ -1,82 +1,22 @@
 #!/usr/bin/env python3
 
 from argparse import ArgumentParser
+import copy
 import os
 from pathlib import Path
 import platform
-import shutil
 import subprocess
 
 import requests
 
-import lib_user
 import lib_sha256
+import lib_user
 
 
-def download_tarballs():
-    if not (nas_folder := get_nas_folder()).exists():
-        raise Exception(f"{nas_folder} does not exist, setup systemd automount files?")
+def parse_arguments():
+    parser = ArgumentParser(description='Easily download and extract kernel.org toolchains to disk')
 
-    if not (toolchains_folder := get_toolchains_folder()).exists():
-        raise Exception(f"{toolchains_folder} does not exist??")
-
-    for major_version in supported_major_versions():
-        gcc_version = lib_user.get_latest_gcc_version(major_version)
-
-        tarball_folder = Path(toolchains_folder, gcc_version)
-        tarball_folder.mkdir(exist_ok=True, parents=True)
-
-        for host_arch in ['aarch64', 'x86_64']:
-            gcc_host_arch = get_gcc_host_arch(host_arch)
-            base_url = f"https://mirrors.edge.kernel.org/pub/tools/crosstool/files/bin/{gcc_host_arch}/{gcc_version}"
-            shasums = f"{base_url}/sha256sums.asc"
-
-            for gcc_target in get_targets(host_arch, major_version):
-                tarball = Path(tarball_folder,
-                               f"{gcc_host_arch}-gcc-{gcc_version}-nolibc-{gcc_target}.tar.xz")
-                if tarball.exists():
-                    lib_user.print_yellow(f"SKIP: {tarball.name} is already downloaded!")
-                else:
-                    lib_user.print_green(f"INFO: Downloading {tarball.name}...")
-                    response = requests.get(f"{base_url}/{tarball.name}", timeout=3600)
-                    response.raise_for_status()
-                    tarball.write_bytes(response.content)
-
-                lib_sha256.validate_from_url(tarball, shasums)
-
-
-def extract_tarballs():
-    for major_version in supported_major_versions():
-        gcc_version = lib_user.get_latest_gcc_version(major_version)
-        host_arch = get_gcc_host_arch(platform.machine())
-
-        if not (src_folder := Path(get_toolchains_folder(), gcc_version)).exists():
-            raise Exception(f"{src_folder} does not exist?")
-
-        dst_folder = Path(os.environ['CBL_TC_STOW_GCC'], gcc_version)
-        if dst_folder.exists():
-            shutil.rmtree(dst_folder)
-        dst_folder.mkdir(parents=True)
-
-        for tarball in src_folder.glob(f"{host_arch}-*.tar.xz"):
-            tar_cmd = ['tar', '-C', dst_folder, '--strip-components=2', '-xJf', tarball]
-            lib_user.print_cmd(tar_cmd)
-            subprocess.run(tar_cmd, check=True)
-
-
-def get_gcc_host_arch(uname_arch):
-    return {
-        'aarch64': 'arm64',
-        'x86_64': 'x86_64',
-    }[uname_arch]
-
-
-def get_nas_folder():
-    return Path(os.environ['NAS_FOLDER'])
-
-
-def get_targets(architecture, gcc_version):
-    targets = [
+    supported_targets = [
         'aarch64-linux',
         'arm-linux-gnueabi',
         'i386-linux',
@@ -85,44 +25,109 @@ def get_targets(architecture, gcc_version):
         'mips64-linux',
         'powerpc-linux',
         'powerpc64-linux',
+        'riscv32-linux',
+        'riscv64-linux',
         's390-linux',
         'x86_64-linux'
     ]  # yapf: disable
+    parser.add_argument('-t',
+                        '--targets',
+                        choices=supported_targets,
+                        default=supported_targets,
+                        help='Toolchain targets to download (default: %(default)s)',
+                        metavar='TARGETS',
+                        nargs='+')
 
-    # No GCC 9.5.0 i386-linux on x86_64?
-    if architecture == 'x86_64' and gcc_version == 9:
-        targets.remove('i386-linux')
+    # GCC 6 through 12
+    supported_versions = list(range(6, 13))
+    parser.add_argument('-v',
+                        '--versions',
+                        choices=supported_versions,
+                        default=supported_versions,
+                        help='Toolchain versions to download (default: %(default)s)',
+                        metavar='TARGETS',
+                        nargs='+',
+                        type=int)
 
-    # RISC-V was not supported in GCC until 7.x
-    if gcc_version >= 7:
-        targets += ['riscv32-linux', 'riscv64-linux']
+    # Download and install locations for toolchains
+    download_folder_default = Path(os.environ['NAS_FOLDER'], 'kernel.org/toolchains')
+    install_folder_default = Path(os.environ['CBL_TC_STOW_GCC'])
+    parser.add_argument('--download-folder',
+                        default=download_folder_default,
+                        help='Folder to store downloaded tarballs (default: %(default)s)')
+    parser.add_argument('--install-folder',
+                        default=install_folder_default,
+                        help='Folder to store extracted toolchains for use (default: %(default)s)')
 
-    return targets
-
-
-def get_toolchains_folder():
-    return Path(get_nas_folder(), 'kernel.org/toolchains')
-
-
-def parse_arguments():
-    parser = ArgumentParser()
-    subparsers = parser.add_subparsers(help='Action to perform', required=True)
-
-    download_parser = subparsers.add_parser('download',
-                                            help='Download kernel.org toolchains to NAS')
-    download_parser.set_defaults(func=download_tarballs)
-
-    extract_parser = subparsers.add_parser(
-        'extract', help='Extract kernel.org toolchains from NAS to local hard drive')
-    extract_parser.set_defaults(func=extract_tarballs)
+    no_group = parser.add_mutually_exclusive_group()
+    no_group.add_argument('--no-cache',
+                          action='store_true',
+                          help='Do not save downloaded toolchain tarballs to disk')
+    no_group.add_argument('--no-extract',
+                          action='store_true',
+                          help='Do not unpack downloaded toolchain tarballs to disk')
 
     return parser.parse_args()
 
 
-def supported_major_versions():
-    return list(range(6, 13))
-
-
 if __name__ == '__main__':
     args = parse_arguments()
-    args.func()
+    cache = not args.no_cache
+    extract = not args.no_extract
+
+    if cache and not (download_folder := Path(args.download_folder)).exists():
+        raise Exception(
+            f"Download folder ('{download_folder}') does not exist, please create it before running this script!"
+        )
+
+    host_arch = platform.machine()
+    host_arch_gcc = {
+        'aarch64': 'arm64',
+        'x86_64': 'x86_64',
+    }[host_arch]
+
+    for major_version in args.versions:
+        targets = copy.copy(args.targets)
+        # No GCC 9.5.0 i386-linux on x86_64?
+        if host_arch == 'x86_64' and major_version == 9:
+            targets.remove('i386-linux')
+        # RISC-V was not supported in GCC until 7.x
+        if major_version < 7:
+            targets.remove('riscv32-linux')
+            targets.remove('riscv64-linux')
+
+        full_version = lib_user.get_latest_gcc_version(major_version)
+
+        for target in targets:
+            # If we are not saving the tarball to disk and GCC already exists
+            # in the expected location, there is nothing to do for this target.
+            gcc = Path(args.install_folder, full_version, 'bin', f"{target}-gcc")
+            if gcc.exists() and not cache:
+                continue
+
+            tarball = Path(args.download_folder, full_version,
+                           f"{host_arch_gcc}-gcc-{full_version}-nolibc-{target}.tar.xz")
+            if not tarball.exists():
+                lib_user.print_green(f"INFO: Downloading {tarball.name}...")
+
+                url = f"https://mirrors.edge.kernel.org/pub/tools/crosstool/files/bin/{host_arch_gcc}/{full_version}"
+                response = requests.get(f"{url}/{tarball.name}", timeout=3600)
+                response.raise_for_status()
+
+                if cache:
+                    tarball.parent.mkdir(exist_ok=True, parents=True)
+                    tarball.write_bytes(response.content)
+                    lib_sha256.validate_from_url(tarball, f"{url}/sha256sums.asc")
+
+            if extract and not gcc.exists():
+                (dest_folder := gcc.parents[1]).mkdir(exist_ok=True, parents=True)
+                tar_cmd = [
+                    'tar',
+                    '-C', dest_folder,
+                    '--strip-components=2',
+                    '-xJ',
+                    '-f', tarball if tarball.exists() else '-',
+                ]  # yapf: disable
+
+                tar_input = response.content if not tarball.exists() else None
+                subprocess.run(tar_cmd, check=True, input=tar_input)
