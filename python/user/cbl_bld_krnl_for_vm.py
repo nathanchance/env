@@ -1,4 +1,6 @@
 #!/usr/bin/env python3
+# SPDX-License-Identifier: MIT
+# Copyright (C) 2022 Nathan Chancellor
 
 from argparse import ArgumentParser
 import os
