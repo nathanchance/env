@@ -50,7 +50,7 @@ def configure_boot_entries():
 
     # If we already set up the configuration, no need to go through all this
     # again
-    if (linux_conf := boot_entries.joinpath('linux.conf')).exists():
+    if (linux_conf := Path(boot_entries, 'linux.conf')).exists():
         return
 
     # Find the configuration with a regex in case we set up another linux.conf

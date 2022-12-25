@@ -21,7 +21,7 @@ def clone_env_plugins():
     subprocess.run(['git', 'pull'], check=True, cwd=env_folder)
 
     forked_fisher_plugins = ['hydro']
-    for plugin in [github_folder.joinpath(elem) for elem in forked_fisher_plugins]:
+    for plugin in [Path(github_folder, elem) for elem in forked_fisher_plugins]:
         if not plugin.exists():
             plugin.parent.mkdir(exist_ok=True, parents=True)
             gh_repo_clone([plugin.name, plugin, '--', '-b', 'personal'])
@@ -33,11 +33,11 @@ def get_brew_bin():
 
 
 def get_brew_path():
-    return get_brew_bin().joinpath('brew')
+    return Path(get_brew_bin(), 'brew')
 
 
 def get_env_folder():
-    return get_home().joinpath('Dev', 'github', 'env')
+    return Path(get_home(), 'Dev/github/env')
 
 
 def get_home():
@@ -45,7 +45,7 @@ def get_home():
 
 
 def brew_gh(gh_args):
-    subprocess.run([get_brew_bin().joinpath('gh'), *gh_args], check=True)
+    subprocess.run([Path(get_brew_bin(), 'gh'), *gh_args], check=True)
 
 
 def gh_repo_clone(clone_args):
@@ -97,18 +97,16 @@ def setup_homebrew():
 
 def setup_ssh():
     home = get_home()
-    ssh_key = home.joinpath('.ssh', 'id_ed25519')
-    if not ssh_key.exists():
+    if not (ssh_key := Path(home, '.ssh/id_ed25519')).exists():
         ssh_key.parent.mkdir(exist_ok=True, parents=True)
 
-        keys_folder = Path('/tmp/keys')
-        if not keys_folder.exists():
+        if not (keys_folder := Path('/tmp/keys')).exists():
             gh_repo_clone([keys_folder.name, keys_folder])
 
-        keys_ssh = keys_folder.joinpath('ssh')
+        keys_ssh = Path(keys_folder, 'ssh')
         for file in [ssh_key.name, f"{ssh_key.name}.pub"]:
-            src = keys_ssh.joinpath(file)
-            dst = ssh_key.parent.joinpath(file)
+            src = Path(keys_ssh, file)
+            dst = Path(ssh_key.parent, file)
             shutil.copyfile(src, dst)
 
         ssh_key.chmod(0o600)
@@ -120,26 +118,22 @@ def setup_ssh():
     except subprocess.CalledProcessError:
         subprocess.run(['ssh-add', ssh_key], check=True)
 
-    gh_conf = home.joinpath('.config', 'gh', 'config.yml')
-    gh_conf_text = gh_conf.read_text(encoding='utf-8')
-    gh_proto = re.search(r'^git_protocol:\s+(.*)$', gh_conf_text, flags=re.M).groups()[0]
-    if gh_proto != 'ssh':
+    gh_conf_text = Path(home, '.config/gh/config.yml').read_text(encoding='utf-8')
+    if re.search(r'^git_protocol:\s+(.*)$', gh_conf_text, flags=re.M).groups()[0] != 'ssh':
         brew_gh(['config', 'set', '-h', 'github.com', 'git_protocol', 'ssh'])
         brew_gh(['config', 'set', 'git_protocol', 'ssh'])
-    home.joinpath('.gitconfig').unlink(missing_ok=True)
+    Path(home, '.gitconfig').unlink(missing_ok=True)
 
 
 def setup_wezterm_cfg():
-    wezterm_cfg = get_home().joinpath('.config', 'wezterm', 'wezterm.lua')
-    if not wezterm_cfg.is_symlink():
+    if not (wezterm_cfg := Path(get_home(), '.config/wezterm/wezterm.lua')).is_symlink():
         wezterm_cfg.unlink(missing_ok=True)
         wezterm_cfg.parent.mkdir(exist_ok=True, parents=True)
-        wezterm_cfg.symlink_to(get_env_folder().joinpath('configs', 'local', wezterm_cfg.name))
+        wezterm_cfg.symlink_to(Path(get_env_folder(), 'configs/local', wezterm_cfg.name))
 
 
 def setup_fish_cfg():
-    fish_cfg = get_home().joinpath('.config', 'fish', 'config.fish')
-    if not fish_cfg.is_symlink():
+    if not (fish_cfg := Path(get_home(), '.config/fish/config.fish')).is_symlink():
         fish_cfg.unlink(missing_ok=True)
         fish_cfg.parent.mkdir(exist_ok=True, parents=True)
         fish_cfg_txt = ('# Start an ssh-agent\n'
@@ -174,8 +168,7 @@ def setup_fish_cfg():
 
 
 if __name__ == '__main__':
-    user = get_home().name
-    if user != 'nathan':
+    if (user := get_home().name) != 'nathan':
         raise Exception(f"Current user ('{user}') is unexpected!")
 
     if os.uname().sysname != 'Darwin':

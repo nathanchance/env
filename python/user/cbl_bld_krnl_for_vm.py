@@ -49,10 +49,10 @@ def get_toolchain_vars(kernel_arch, toolchain):
         raise Exception(f"GCC {gcc_version} not found in {gcc_folder.parent}?")
 
     cross_compile = get_cross_compile(kernel_arch)
-    if not (gcc := gcc_folder.joinpath('bin', f"{cross_compile}gcc")).exists():
+    if not (gcc := Path(gcc_folder, 'bin', f"{cross_compile}gcc")).exists():
         raise Exception(f"{gcc.name} not found in {gcc.parent}?")
 
-    return {'CROSS_COMPILE': gcc.parent.joinpath(cross_compile)}
+    return {'CROSS_COMPILE': Path(gcc.parent, cross_compile)}
 
 
 def parse_arguments():
@@ -108,12 +108,12 @@ def build_kernel_for_vm(make_variables, menuconfig, vm_name):
             'x86_64': 'https://raw.githubusercontent.com/archlinux/svntogit-packages/packages/linux/trunk/config',
         }  # yapf: disable
     elif 'debian' in vm_name:
-        if not (configs := Path(os.environ['CBL_LKT'], 'configs', 'debian')).exists():
+        if not (configs := Path(os.environ['CBL_LKT'], 'configs/debian')).exists():
             raise Exception(f"{configs.parents[1]} is not downloaded?")
         configs = {
-            'arm': configs.joinpath('armmp.config'),
-            'arm64': configs.joinpath('arm64.config'),
-            'x86_64': configs.joinpath('amd64.config'),
+            'arm': Path(configs, 'armmp.config'),
+            'arm64': Path(configs, 'arm64.config'),
+            'x86_64': Path(configs, 'amd64.config'),
         }
     elif 'fedora' in vm_name:
         configs = {
@@ -122,7 +122,7 @@ def build_kernel_for_vm(make_variables, menuconfig, vm_name):
         }  # yapf: disable
 
     config_src = configs[make_variables['ARCH']]
-    config_dst = build.joinpath('.config')
+    config_dst = Path(build, '.config')
 
     if isinstance(config_src, Path):
         shutil.copyfile(config_src, config_dst)
@@ -150,7 +150,7 @@ if __name__ == '__main__':
     if not (vm_folder := Path(os.environ['VM_FOLDER'], arch, args.vm_name)).exists():
         raise Exception(f"{args.vm_name} not found in {vm_folder.parent}?")
 
-    if not (lsmod := vm_folder.joinpath('shared', 'kernel_files', 'lsmod')).exists():
+    if not (lsmod := Path(vm_folder, 'shared/kernel_files/lsmod')).exists():
         raise Exception(f"lsmod not found in {vm_folder}?")
 
     make_vars = {

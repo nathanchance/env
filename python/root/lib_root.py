@@ -265,7 +265,7 @@ def setup_initial_fish_config(username):
         raise Exception(f"{fish_ver} is less than 3.4.0!")
 
     user_cfg = Path('/home', username, '.config')
-    fish_cfg = user_cfg.joinpath('fish', 'config.fish')
+    fish_cfg = Path(user_cfg, 'fish/config.fish')
     if not fish_cfg.is_symlink():
         fish_cfg.parent.mkdir(mode=0o755, exist_ok=True, parents=True)
         fish_cfg_txt = (
@@ -326,10 +326,10 @@ def setup_libvirt(username):
 
 
 def setup_mnt_nas():
-    systemd_configs = get_env_root().joinpath('configs', 'systemd')
+    systemd_configs = Path(get_env_root(), 'configs/systemd')
 
     for file in ['mnt-nas.mount', 'mnt-nas.automount']:
-        src = systemd_configs.joinpath(file)
+        src = Path(systemd_configs, file)
         dst = Path('/etc/systemd/system', file)
 
         shutil.copyfile(src, dst)
@@ -352,7 +352,7 @@ def setup_static_ip(requested_ip):
 
 
 def setup_ssh_authorized_keys(user_name):
-    if not (ssh_authorized_keys := Path('/home', user_name, '.ssh', 'authorized_keys')).exists():
+    if not (ssh_authorized_keys := Path('/home', user_name, '.ssh/authorized_keys')).exists():
         old_umask = os.umask(0o077)
         ssh_authorized_keys.parent.mkdir(exist_ok=True, parents=True)
         if shutil.which('curl'):
@@ -371,8 +371,8 @@ def setup_ssh_authorized_keys(user_name):
 
 def setup_sudo_symlink():
     prefix = Path(os.environ['PREFIX'] if 'PREFIX' in os.environ else '/usr/local')
-    sudo_prefix = prefix.joinpath('stow', 'sudo')
-    sudo_bin = sudo_prefix.joinpath('bin', 'sudo')
+    sudo_prefix = Path(prefix, 'stow/sudo')
+    sudo_bin = Path(sudo_prefix, 'bin/sudo')
 
     sudo_bin.parent.mkdir(exist_ok=True, parents=True)
     try:

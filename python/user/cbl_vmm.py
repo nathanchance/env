@@ -26,7 +26,7 @@ usr_share = Path('/usr/share')
 
 def find_first_file(possible_files, relative_root=usr_share):
     for possible_file in possible_files:
-        if (full_path := relative_root.joinpath(possible_file)).exists():
+        if (full_path := Path(relative_root, possible_file)).exists():
             return full_path
     files_str = "', '".join([str(elem) for elem in possible_files])
     raise Exception(
@@ -67,15 +67,15 @@ class VirtualMachine:
         self.size = size
 
         # Internal values
-        self.data_folder = get_base_folder().joinpath(self.arch, self.name)
-        self.disk_img = self.data_folder.joinpath('disk.img')
-        self.efi_img = self.data_folder.joinpath('efi.img')
-        self.efi_vars_img = self.data_folder.joinpath('efi_vars.img')
-        self.shared_folder = self.data_folder.joinpath('shared')
+        self.data_folder = Path(get_base_folder(), self.arch, self.name)
+        self.disk_img = Path(self.data_folder, 'disk.img')
+        self.efi_img = Path(self.data_folder, 'efi.img')
+        self.efi_vars_img = Path(self.data_folder, 'efi_vars.img')
+        self.shared_folder = Path(self.data_folder, 'shared')
         self.use_kvm = self.can_use_kvm()
-        self.vfsd_log = self.data_folder.joinpath('vfsd.log')
-        self.vfsd_sock = self.data_folder.joinpath('vfsd.sock')
-        self.vfsd_mem = self.data_folder.joinpath('vfsd.mem')
+        self.vfsd_log = Path(self.data_folder, 'vfsd.log')
+        self.vfsd_sock = Path(self.data_folder, 'vfsd.sock')
+        self.vfsd_mem = Path(self.data_folder, 'vfsd.mem')
 
         # When using KVM, we cannot use more than the maximum number of cores.
         # Default to either 8 cores or half the number of cores in the machine,
@@ -90,18 +90,18 @@ class VirtualMachine:
 
         # Attempt to locate static kernel files if only a kernel was passed
         if kernel:
-            kernel_files = self.shared_folder.joinpath('kernel_files')
+            kernel_files = Path(self.shared_folder, 'kernel_files')
             if not cmdline:
-                if not (cmdline_file := kernel_files.joinpath('cmdline')).exists():
+                if not (cmdline_file := Path(kernel_files, 'cmdline')).exists():
                     raise Exception('kernel passed without cmdline and one could not be found!')
                 cmdline = cmdline_file.read_text(encoding='utf-8')
             if not initrd:
-                if not (initrd := kernel_files.joinpath('initramfs')).exists():
+                if not (initrd := Path(kernel_files, 'initramfs')).exists():
                     raise Exception('kernel passed without initrd and one could not be found!')
 
         # Clear any previous hosts using the chosen SSH port.
         run_cmd(['ssh-keygen', '-R', f"[localhost]:{ssh_port}"])
-        Path.home().joinpath('.ssh', 'known_hosts.old').unlink(missing_ok=True)
+        Path.home().joinpath('.ssh/known_hosts.old').unlink(missing_ok=True)
 
         # QEMU configuration
         self.qemu = 'qemu-system-' + self.arch
@@ -200,8 +200,7 @@ class VirtualMachine:
         # Download iso if necessary
         if iso_is_url(str(iso)):
             iso_url = iso
-            iso = get_base_folder().joinpath('iso', iso_url.split('/')[-1])
-            if not iso.exists():
+            if not (iso := Path(get_base_folder(), 'iso', iso_url.split('/')[-1])).exists():
                 iso.parent.mkdir(exist_ok=True, parents=True)
                 wget(iso, iso_url)
 
@@ -238,10 +237,10 @@ class VirtualMachine:
                 )
 
         # Locate the QEMU prefix to search for virtiofsd
-        qemu_prefix = Path(qemu).resolve().parent.parent
+        qemu_prefix = Path(qemu).resolve().parents[1]
         possible_files = [
-            Path('libexec', 'virtiofsd'),  # Default QEMU installation, Fedora
-            Path('lib', 'qemu', 'virtiofsd'),  # Arch Linux
+            Path('libexec/virtiofsd'),  # Default QEMU installation, Fedora
+            Path('lib/qemu/virtiofsd'),  # Arch Linux
         ]
         virtiofsd = find_first_file(possible_files, relative_root=qemu_prefix)
 
@@ -340,7 +339,7 @@ class Arm32VirtualMachine(ArmVirtualMachine):
 
     def can_use_kvm(self):
         if platform.machine() == 'aarch64':
-            check_el1_32 = Path(get_base_folder(), 'utils', 'aarch64_32_bit_el1_supported')
+            check_el1_32 = Path(get_base_folder(), 'utils/aarch64_32_bit_el1_supported')
             if not check_el1_32.exists():
                 check_el1_32.parent.mkdir(exist_ok=False, parents=True)
                 wget(
@@ -365,8 +364,7 @@ class Arm32VirtualMachine(ArmVirtualMachine):
 
     def get_highmem_firmware(self):
         if 'ENV_FOLDER' in os.environ:
-            if (firmware := Path(os.environ['ENV_FOLDER'], 'bin', 'armv7l',
-                                 'QEMU_EFI.fd')).exists():
+            if (firmware := Path(os.environ['ENV_FOLDER'], 'bin/armv7l/QEMU_EFI.fd')).exists():
                 return [firmware]
         return []
 
@@ -652,7 +650,7 @@ def create_vm_from_args(args):
         # Figure out whether kernel argument is build folder or kernel image
         if (kernel := Path(args.kernel)).is_dir():
             kernel_folder = kernel
-            kernel = kernel_folder.joinpath(static_defaults[arch]['kernel'])
+            kernel = Path(kernel_folder, static_defaults[arch]['kernel'])
         else:
             kernel_folder = None
         if not kernel.exists():
@@ -685,7 +683,7 @@ def create_vm_from_args(args):
 def list_vms(arch):
     print(f"\nAvailable virtual machines for {arch}:\n")
 
-    if (arch_folder := get_base_folder().joinpath(arch)).exists():
+    if (arch_folder := Path(get_base_folder(), arch)).exists():
         vms = sorted([elem.name for elem in arch_folder.iterdir() if elem.is_dir()])
         if vms:
             print('\n'.join(vms))

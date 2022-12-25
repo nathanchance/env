@@ -14,18 +14,16 @@ import lib_sha256
 
 
 def download_tarballs():
-    nas_folder = get_nas_folder()
-    if not nas_folder.exists():
+    if not (nas_folder := get_nas_folder()).exists():
         raise Exception(f"{nas_folder} does not exist, setup systemd automount files?")
 
-    toolchains_folder = get_toolchains_folder()
-    if not toolchains_folder.exists():
+    if not (toolchains_folder := get_toolchains_folder()).exists():
         raise Exception(f"{toolchains_folder} does not exist??")
 
     for major_version in supported_major_versions():
         gcc_version = lib_user.get_latest_gcc_version(major_version)
 
-        tarball_folder = toolchains_folder.joinpath(gcc_version)
+        tarball_folder = Path(toolchains_folder, gcc_version)
         tarball_folder.mkdir(exist_ok=True, parents=True)
 
         for host_arch in ['aarch64', 'x86_64']:
@@ -34,8 +32,8 @@ def download_tarballs():
             shasums = f"{base_url}/sha256sums.asc"
 
             for gcc_target in get_targets(host_arch, major_version):
-                tarball = tarball_folder.joinpath(
-                    f"{gcc_host_arch}-gcc-{gcc_version}-nolibc-{gcc_target}.tar.xz")
+                tarball = Path(tarball_folder,
+                               f"{gcc_host_arch}-gcc-{gcc_version}-nolibc-{gcc_target}.tar.xz")
                 if tarball.exists():
                     lib_user.print_yellow(f"SKIP: {tarball.name} is already downloaded!")
                 else:
@@ -52,8 +50,7 @@ def extract_tarballs():
         gcc_version = lib_user.get_latest_gcc_version(major_version)
         host_arch = get_gcc_host_arch(platform.machine())
 
-        src_folder = get_nas_folder().joinpath('kernel.org', 'toolchains', gcc_version)
-        if not src_folder.exists():
+        if not (src_folder := Path(get_toolchains_folder(), gcc_version)).exists():
             raise Exception(f"{src_folder} does not exist?")
 
         dst_folder = Path(os.environ['CBL_TC_STOW_GCC'], gcc_version)
@@ -104,7 +101,7 @@ def get_targets(architecture, gcc_version):
 
 
 def get_toolchains_folder():
-    return get_nas_folder().joinpath('kernel.org', 'toolchains')
+    return Path(get_nas_folder(), 'kernel.org/toolchains')
 
 
 def parse_arguments():

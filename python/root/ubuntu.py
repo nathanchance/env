@@ -25,8 +25,8 @@ def parse_arguments():
 def prechecks():
     lib_root.check_root()
 
-    codename = lib_root.get_version_codename()
-    if codename not in ('focal', 'jammy', 'kinetic'):
+    supported_versions = ('focal', 'jammy', 'kinetic')
+    if (codename := lib_root.get_version_codename()) not in supported_versions:
         raise Exception(f"Ubuntu {codename} is not supported by this script!")
 
 
@@ -37,10 +37,9 @@ def setup_repos():
     dpkg_arch = lib_deb.get_dpkg_arch()
 
     # Docker
-    docker_gpg_key = apt_gpg.joinpath('docker.gpg')
+    docker_gpg_key = Path(apt_gpg, 'docker.gpg')
     lib_root.fetch_gpg_key('https://download.docker.com/linux/ubuntu/gpg', docker_gpg_key)
-    docker_repo = apt_sources.joinpath('docker.list')
-    docker_repo.write_text(
+    Path(apt_sources, 'docker.list').write_text(
         f"deb [arch={dpkg_arch} signed-by={docker_gpg_key}] https://download.docker.com/linux/ubuntu {codename} stable\n",
         encoding='utf-8')
 
@@ -49,11 +48,11 @@ def setup_repos():
 
     # gh
     gh_packages = 'https://cli.github.com/packages'
-    gh_gpg_key = apt_gpg.joinpath('githubcli-archive-keyring.gpg')
+    gh_gpg_key = Path(apt_gpg, 'githubcli-archive-keyring.gpg')
     lib_root.fetch_gpg_key(f"{gh_packages}/{gh_gpg_key.name}", gh_gpg_key)
-    gh_repo = apt_sources.joinpath('github-cli.list')
-    gh_repo.write_text(f"deb [arch={dpkg_arch} signed-by={gh_gpg_key}] {gh_packages} stable main\n",
-                       encoding='utf-8')
+    Path(apt_sources, 'github-cli.list').write_text(
+        f"deb [arch={dpkg_arch} signed-by={gh_gpg_key}] {gh_packages} stable main\n",
+        encoding='utf-8')
 
     # git
     apt_add_repo('ppa:git-core/ppa')

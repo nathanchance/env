@@ -20,7 +20,7 @@ def kmake(variables, targets, ccache=True, directory=None, jobs=None, silent=Tru
     # Handle kernel directory right away
     if not (kernel_src := Path(directory) if directory else Path('.')).exists():
         raise Exception(f"Derived kernel source ('{kernel_src}') does not exist?")
-    if not (makefile := kernel_src.joinpath('Makefile')).exists():
+    if not (makefile := Path(kernel_src, 'Makefile')).exists():
         raise Exception(f"Derived kernel source ('{kernel_src}') is not a kernel tree?")
 
     # Get compiler related variables
@@ -84,7 +84,7 @@ def kmake(variables, targets, ccache=True, directory=None, jobs=None, silent=Tru
 
     # Print information about the binutils being used, if they are being used
     # Account for implicit LLVM_IAS change in f12b034afeb3 ("scripts/Makefile.clang: default to LLVM_IAS=1")
-    ias_def_on = kernel_src.joinpath('scripts', 'Makefile.clang').exists()
+    ias_def_on = Path(kernel_src, 'scripts/Makefile.clang').exists()
     ias_def_val = 1 if cc_is_clang and ias_def_on else 0
     if int(variables.get('LLVM_IAS', ias_def_val)) == 0:
         if not (gnu_as := shutil.which(f"{cross_compile}as")):

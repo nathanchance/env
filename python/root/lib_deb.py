@@ -56,12 +56,12 @@ def setup_doas(username, root_password):
 
     if lib_root.get_glibc_version() > (2, 33, 0):
         tmp_dir = Path(tempfile.mkdtemp())
-        doas_deb = tmp_dir.joinpath(doas_deb_file)
+        doas_deb = Path(tmp_dir, doas_deb_file)
         lib_root.curl([
             '-o', doas_deb, f"http://http.us.debian.org/debian/pool/main/o/opendoas/{doas_deb_file}"
         ])
     else:
-        doas_deb = env_folder.joinpath('bin', 'packages', doas_deb_file)
+        doas_deb = Path(env_folder, 'bin/packages', doas_deb_file)
     subprocess.run(['dpkg', '-i', doas_deb], check=True)
 
     doas_conf = Path('/etc/doas.conf')

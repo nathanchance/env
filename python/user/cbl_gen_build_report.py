@@ -20,7 +20,7 @@ def parse_arguments():
 
 
 def get_log(log_folder, key):
-    return log_folder.joinpath(key + '.log')
+    return Path(log_folder, key + '.log')
 
 
 def git_get(repo, cmd):
@@ -165,4 +165,4 @@ if __name__ == '__main__':
     if args.print_to_stdout:
         print(report, end='')  # report_text has '\n' at the end already
     else:
-        folder.joinpath('report.txt').write_text(report, encoding='utf-8')
+        Path(folder, 'report.txt').write_text(report, encoding='utf-8')

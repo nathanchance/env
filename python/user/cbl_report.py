@@ -58,7 +58,7 @@ def get_report_name(date):
 
 
 def get_report_path(date):
-    return get_report_worktree().joinpath('content', 'posts', get_report_file(date))
+    return Path(get_report_worktree(), 'content/posts', get_report_file(date))
 
 
 def get_report_repo():
@@ -279,9 +279,8 @@ def create_report_file(report_file, report_date):
 def finalize_report(args):
     # Get the source and destination paths and branch based on current time
     repo = get_report_repo()
-    worktree = get_report_worktree()
 
-    if not worktree.exists():
+    if not (worktree := get_report_worktree()).exists():
         raise Exception(f"{repo} does not exist when finalizing?")
 
     # Rebase changes if requested
@@ -367,17 +366,14 @@ def new_report(args):
 
 
 def update_report(args):
-    worktree = get_report_worktree()
-    if not worktree.exists():
+    if not (worktree := get_report_worktree()).exists():
         raise Exception(f"{worktree} does not exist when updating?")
 
-    report = get_report_path(get_current_datetime())
-    if not report.exists():
+    if not (report := get_report_path(get_current_datetime())).exists():
         raise Exception(f"{report} does not exist when updating?")
 
     if args.edit or args.all:
-        editor = shutil.which(os.environ['EDITOR'] if 'EDITOR' in os.environ else 'vim')
-        if not editor:
+        if not (editor := shutil.which(os.environ['EDITOR'] if 'EDITOR' in os.environ else 'vim')):
             raise Exception("$EDITOR not set or vim could not be found on your system!")
 
         subprocess.run([editor, report], check=True)

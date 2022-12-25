@@ -80,8 +80,8 @@ def pi_setup(user_name):
 def prechecks():
     lib_root.check_root()
 
-    codename = lib_root.get_version_codename()
-    if codename not in ('bullseye'):
+    supported_versions = ('bullseye')
+    if (codename := lib_root.get_version_codename()) not in supported_versions:
         raise Exception(f"Debian {codename} is not supported by this script!")
 
 
@@ -93,43 +93,38 @@ def setup_repos():
     dpkg_arch = lib_deb.get_dpkg_arch()
 
     # Docker
-    docker_gpg_key = apt_gpg.joinpath('docker.gpg')
+    docker_gpg_key = Path(apt_gpg, 'docker.gpg')
     lib_root.fetch_gpg_key('https://download.docker.com/linux/debian/gpg', docker_gpg_key)
-    docker_repo = apt_sources.joinpath('docker.list')
-    docker_repo.write_text(
+    Path(apt_sources, 'docker.list').write_text(
         f"deb [arch={dpkg_arch} signed-by={docker_gpg_key}] https://download.docker.com/linux/debian {codename} stable\n",
         encoding='utf-8')
 
     # fish
     fish_repo_url = 'https://download.opensuse.org/repositories'
-    fish_gpg_key = apt_gpg.joinpath('shells_fish_release_3.gpg')
     lib_root.fetch_gpg_key(f"{fish_repo_url}/shells:fish:release:3/Debian_{version_id}/Release.key",
-                           fish_gpg_key)
-    fish_repo = apt_sources.joinpath('shells:fish:release:3.list')
-    fish_repo.write_text(
+                           Path(apt_gpg, 'shells_fish_release_3.gpg'))
+    Path(apt_sources, 'shells:fish:release:3.list').write_text(
         f"deb {fish_repo_url.replace('https', 'http')}/shells:/fish:/release:/3/Debian_{version_id}/ /\n",
         encoding='utf-8')
 
     # gh
     gh_packages = 'https://cli.github.com/packages'
-    gh_gpg_key = apt_gpg.joinpath('githubcli-archive-keyring.gpg')
+    gh_gpg_key = Path(apt_gpg, 'githubcli-archive-keyring.gpg')
     lib_root.fetch_gpg_key(f"{gh_packages}/{gh_gpg_key.name}", gh_gpg_key)
-    gh_repo = apt_sources.joinpath('github-cli.list')
-    gh_repo.write_text(f"deb [arch={dpkg_arch} signed-by={gh_gpg_key}] {gh_packages} stable main\n",
-                       encoding='utf-8')
+    Path(apt_sources, 'github-cli.list').write_text(
+        f"deb [arch={dpkg_arch} signed-by={gh_gpg_key}] {gh_packages} stable main\n",
+        encoding='utf-8')
 
     # Tailscale
     if machine_is_trusted():
-        if machine_is_pi():
-            distro = 'raspbian'
-        else:
-            distro = 'debian'
+        distro = 'raspbian' if machine_is_pi() else 'debian'
         base_tailscale_url = f"https://pkgs.tailscale.com/stable/{distro}/{codename}"
+
         tailscale_gpg_key = Path('/usr/share/keyrings/tailscale-archive-keyring.gpg')
         lib_root.fetch_gpg_key(f"{base_tailscale_url}.noarmor.gpg", tailscale_gpg_key)
-        tailscale_repo = apt_sources.joinpath('tailscale.list')
+
         tailscale_repo_txt = lib_root.curl([f"{base_tailscale_url}.tailscale-keyring.list"])
-        tailscale_repo.write_bytes(tailscale_repo_txt)
+        Path(apt_sources, 'tailscale.list').write_bytes(tailscale_repo_txt)
 
 
 def update_and_install_packages():

@@ -62,7 +62,7 @@ def get_latest_ipsw_url(identifier, version):
 
 def download_if_necessary(item):
     base_file = item['base_file'] if 'base_file' in item else item['file_url'].split('/')[-1]
-    target = item['containing_folder'].joinpath(base_file)
+    target = Path(item['containing_folder'], base_file)
     target.parent.mkdir(exist_ok=True, parents=True)
     if target.exists():
         lib_user.print_yellow(f"SKIP: {base_file} already downloaded!")
@@ -77,19 +77,18 @@ def download_if_necessary(item):
 
 
 def update_bundle_symlink(bundle_folder):
-    src = bundle_folder.joinpath(get_sunday_as_folder())
-    dest = bundle_folder.joinpath('latest')
+    src = Path(bundle_folder, get_sunday_as_folder())
+    dest = Path(bundle_folder, 'latest')
+
     dest.unlink(missing_ok=True)
     dest.symlink_to(src)
 
 
 def download_items(targets, network_folder):
-    firmware_folder = network_folder.joinpath('Firmware_and_Images')
-    if not firmware_folder.exists():
+    if not (firmware_folder := Path(network_folder, 'Firmware_and_Images')).exists():
         raise Exception(f"{firmware_folder} does not exist, systemd automounting broken?")
 
-    bundle_folder = network_folder.joinpath('kernel.org', 'bundles')
-    if not bundle_folder.exists():
+    if not (bundle_folder := Path(network_folder, 'kernel.org/bundles')).exists():
         raise Exception(f"{bundle_folder} does not exist??")
 
     items = []
@@ -104,7 +103,7 @@ def download_items(targets, network_folder):
                 for img_type in ['standard', 'virt']:
                     file_url = f"https://dl-cdn.alpinelinux.org/alpine/v{alpine_series}/releases/{alpine_arch}/alpine-{img_type}-{alpine_version}-{alpine_arch}.iso"
                     items += [{
-                        'containing_folder': firmware_folder.joinpath('Alpine', alpine_version),
+                        'containing_folder': Path(firmware_folder, 'Alpine', alpine_version),
                         'file_url': file_url,
                         'sha_url': file_url + '.sha256',
                     }]  # yapf: disable
@@ -115,7 +114,7 @@ def download_items(targets, network_folder):
 
             base_arch_url = f"https://mirrors.edge.kernel.org/archlinux/iso/{arch_date}"
             items += [{
-                'containing_folder': firmware_folder.joinpath('Arch', arch_date),
+                'containing_folder': Path(firmware_folder, 'Arch', arch_date),
                 'file_url': f"{base_arch_url}/archlinux-{arch_date}-x86_64.iso",
                 'sha_url': f"{base_arch_url}/sha256sums.txt"
             }]
@@ -125,7 +124,7 @@ def download_items(targets, network_folder):
             debian_ver = '11.6.0'
 
             for arch in debian_arches:
-                arch_debian_folder = firmware_folder.joinpath(target.capitalize(), debian_ver, arch)
+                arch_debian_folder = Path(firmware_folder, target.capitalize(), debian_ver, arch)
                 arch_debian_url = f"https://cdimage.debian.org/debian-cd/current/{arch}"
                 items += [
                     {
@@ -142,7 +141,7 @@ def download_items(targets, network_folder):
 
         elif target == 'fedora':
             fedora_arches = ['aarch64', 'x86_64']
-            subfolder = firmware_folder.joinpath(target.capitalize())
+            subfolder = Path(firmware_folder, target.capitalize())
 
             # Constants to update
             fedora_ver = '37'
@@ -157,7 +156,7 @@ def download_items(targets, network_folder):
             for arch in fedora_arches:
                 for flavor in ['dvd', 'netinst']:
                     items += [{
-                        'containing_folder': subfolder.joinpath(fedora_ver, 'Server', arch),
+                        'containing_folder': Path(subfolder, fedora_ver, 'Server', arch),
                         'file_url': f"{base_fedora_file_url}/Server/{arch}/iso/Fedora-Server-{flavor}-{arch}-{fedora_ver}-{server_iso_ver}.iso",
                         'sha_url': f"{base_fedora_checksum_url}/Fedora-Server-{fedora_ver}-{server_iso_ver}-{arch}-CHECKSUM"
                     }]  # yapf: disable
@@ -165,7 +164,7 @@ def download_items(targets, network_folder):
             # Workstation
             for arch in fedora_arches:
                 items += [{
-                    'containing_folder': subfolder.joinpath(fedora_ver, 'Workstation', arch),
+                    'containing_folder': Path(subfolder, fedora_ver, 'Workstation', arch),
                     'file_url': f"{base_fedora_file_url}/Workstation/{arch}/iso/Fedora-Workstation-Live-{arch}-{fedora_ver}-{workstation_iso_ver}.iso",
                     'sha_url': f"{base_fedora_checksum_url}/Fedora-Workstation-{fedora_ver}-{server_iso_ver}-{arch}-CHECKSUM"
                 }]  # yapf: disable
@@ -175,7 +174,7 @@ def download_items(targets, network_folder):
 
             for mac_version in mac_versions:
                 items += [{
-                    'containing_folder': firmware_folder.joinpath('macOS', 'VM'),
+                    'containing_folder': Path(firmware_folder, 'macOS/VM'),
                     'file_url': get_latest_ipsw_url('VirtualMac2,1', mac_version)
                 }]
 
@@ -191,7 +190,7 @@ def download_items(targets, network_folder):
                 clone_bundle = 'clone.bundle'
                 items += [{
                     'base_file': f"{clone_bundle}-{repo_local}",
-                    'containing_folder': bundle_folder.joinpath(get_sunday_as_folder()),
+                    'containing_folder': Path(bundle_folder, get_sunday_as_folder()),
                     'file_url': f"{base_korg_bundle_url}/{clone_bundle}",
                     'sha_url': f"{base_korg_bundle_url}/sha256sums.asc"
                 }]
@@ -204,7 +203,7 @@ def download_items(targets, network_folder):
             for rpi_arch in rpi_arches:
                 base_rpi_url = f"https://downloads.raspberrypi.org/raspios_lite_{rpi_arch}/images/raspios_lite_{rpi_arch}-{rpi_date}-raspios-{deb_ver}-{rpi_arch}-lite.img.xz"
                 items += [{
-                    'containing_folder': firmware_folder.joinpath('Raspberry Pi OS'),
+                    'containing_folder': Path(firmware_folder, 'Raspberry Pi OS'),
                     'file_url': base_rpi_url,
                     'sha_url': base_rpi_url + '.sha256'
                 }]
@@ -226,7 +225,7 @@ def download_items(targets, network_folder):
                         base_ubuntu_url = f"https://cdimage.ubuntu.com/releases/{ubuntu_ver}/release"
 
                     items += [{
-                        'containing_folder': firmware_folder.joinpath('Ubuntu', ubuntu_ver, 'Server'),
+                        'containing_folder': Path(firmware_folder, 'Ubuntu', ubuntu_ver, 'Server'),
                         'file_url': f"{base_ubuntu_url}/ubuntu-{ubuntu_subver}-live-server-{arch}.iso",
                         'sha_url': f"{base_ubuntu_url}/SHA256SUMS"
                     }]    # yapf: disable
