@@ -64,7 +64,7 @@ def generate_warnings(log_folder, src_folder):
         'objtool:',
         '-Wframe-larger-than',
         # Warnings from merge_config that are harmless
-        'override: (CPU_BIG_ENDIAN|LTO_CLANG_THIN) changes choice state',
+        'override: (CPU_BIG_ENDIAN|LTO_CLANG_THIN|SQUASHFS_DECOMP_SINGLE) changes choice state',
         # https://github.com/ClangBuiltLinux/linux/issues/1065
         r'union jset::\(anonymous at ./usr/include/linux/bcache.h:',
         # https://github.com/ClangBuiltLinux/linux/issues/1427
