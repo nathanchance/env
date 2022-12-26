@@ -1,0 +1,305 @@
+From b2d02bdd18bd5c2dbd6c2471de4edae88e3cc3db Mon Sep 17 00:00:00 2001
+From: Nathan Chancellor <nathan@kernel.org>
+Date: Sun, 25 Dec 2022 21:30:19 -0700
+Subject: [PATCH 2/2] Revert "udf: Couple more fixes for extent and directory
+ handling"
+
+This reverts the following commits:
+
+5ec1bd594e72 ("udf: Keep i_lenExtents consistent with the total length of extents")
+ae9e9c7ff062 ("udf: Fix extension of the last extent in the file")
+6ffcf3bbe826 ("udf: Move setting of i_lenExtents into udf_do_extend_file()")
+869e9be21b1c ("udf: Allocate name buffer in directory iterator on heap")
+d8b39db5fab8 ("udf: Handle error when adding extent to a file")
+7793a7eba68a ("udf: Handle error when adding extent to symlink")
+1801b065f86c ("udf: Handle error when expanding directory")
+
+due to the linked clang warning.
+
+Link: https://lore.kernel.org/Y6ki+weNcHuyH7i1@dev-arch.thelio-3990X/
+Signed-off-by: Nathan Chancellor <nathan@kernel.org>
+---
+ fs/udf/directory.c | 23 ++++++++-------------
+ fs/udf/inode.c     | 51 +++++++++++++++-------------------------------
+ fs/udf/namei.c     | 14 ++-----------
+ fs/udf/udfdecl.h   |  2 +-
+ 4 files changed, 27 insertions(+), 63 deletions(-)
+
+diff --git a/fs/udf/directory.c b/fs/udf/directory.c
+index a4c91905b033..e7e8b30876d9 100644
+--- a/fs/udf/directory.c
++++ b/fs/udf/directory.c
+@@ -248,14 +248,9 @@ int udf_fiiter_init(struct udf_fileident_iter *iter, struct inode *dir,
+ 	iter->elen = 0;
+ 	iter->epos.bh = NULL;
+ 	iter->name = NULL;
+-	iter->namebuf = kmalloc(UDF_NAME_LEN_CS0, GFP_KERNEL);
+-	if (!iter->namebuf)
+-		return -ENOMEM;
+ 
+-	if (iinfo->i_alloc_type == ICBTAG_FLAG_AD_IN_ICB) {
+-		err = udf_copy_fi(iter);
+-		goto out;
+-	}
++	if (iinfo->i_alloc_type == ICBTAG_FLAG_AD_IN_ICB)
++		return udf_copy_fi(iter);
+ 
+ 	if (inode_bmap(dir, iter->pos >> dir->i_blkbits, &iter->epos,
+ 		       &iter->eloc, &iter->elen, &iter->loffset) !=
+@@ -265,17 +260,17 @@ int udf_fiiter_init(struct udf_fileident_iter *iter, struct inode *dir,
+ 		udf_err(dir->i_sb,
+ 			"position %llu not allocated in directory (ino %lu)\n",
+ 			(unsigned long long)pos, dir->i_ino);
+-		err = -EFSCORRUPTED;
+-		goto out;
++		return -EFSCORRUPTED;
+ 	}
+ 	err = udf_fiiter_load_bhs(iter);
+ 	if (err < 0)
+-		goto out;
++		return err;
+ 	err = udf_copy_fi(iter);
+-out:
+-	if (err < 0)
++	if (err < 0) {
+ 		udf_fiiter_release(iter);
+-	return err;
++		return err;
++	}
++	return 0;
+ }
+ 
+ int udf_fiiter_advance(struct udf_fileident_iter *iter)
+@@ -312,8 +307,6 @@ void udf_fiiter_release(struct udf_fileident_iter *iter)
+ 	brelse(iter->bh[0]);
+ 	brelse(iter->bh[1]);
+ 	iter->bh[0] = iter->bh[1] = NULL;
+-	kfree(iter->namebuf);
+-	iter->namebuf = NULL;
+ }
+ 
+ static void udf_copy_to_bufs(void *buf1, int len1, void *buf2, int len2,
+diff --git a/fs/udf/inode.c b/fs/udf/inode.c
+index 4a912e2edcec..09417342d8b6 100644
+--- a/fs/udf/inode.c
++++ b/fs/udf/inode.c
+@@ -57,15 +57,15 @@ static int udf_update_inode(struct inode *, int);
+ static int udf_sync_inode(struct inode *inode);
+ static int udf_alloc_i_data(struct inode *inode, size_t size);
+ static sector_t inode_getblk(struct inode *, sector_t, int *, int *);
+-static int udf_insert_aext(struct inode *, struct extent_position,
+-			   struct kernel_lb_addr, uint32_t);
++static int8_t udf_insert_aext(struct inode *, struct extent_position,
++			      struct kernel_lb_addr, uint32_t);
+ static void udf_split_extents(struct inode *, int *, int, udf_pblk_t,
+ 			      struct kernel_long_ad *, int *);
+ static void udf_prealloc_extents(struct inode *, int, int,
+ 				 struct kernel_long_ad *, int *);
+ static void udf_merge_extents(struct inode *, struct kernel_long_ad *, int *);
+-static int udf_update_extents(struct inode *, struct kernel_long_ad *, int,
+-			      int, struct extent_position *);
++static void udf_update_extents(struct inode *, struct kernel_long_ad *, int,
++			       int, struct extent_position *);
+ static int udf_get_block(struct inode *, sector_t, struct buffer_head *, int);
+ 
+ static void __udf_clear_extent_cache(struct inode *inode)
+@@ -419,7 +419,6 @@ static int udf_do_extend_file(struct inode *inode,
+ 			~(sb->s_blocksize - 1);
+ 	}
+ 
+-	add = 0;
+ 	/* Can we merge with the previous extent? */
+ 	if ((last_ext->extLength & UDF_EXTENT_FLAG_MASK) ==
+ 					EXT_NOT_RECORDED_NOT_ALLOCATED) {
+@@ -452,7 +451,6 @@ static int udf_do_extend_file(struct inode *inode,
+ 		if (new_block_bytes)
+ 			udf_next_aext(inode, last_pos, &tmploc, &tmplen, 0);
+ 	}
+-	iinfo->i_lenExtents += add;
+ 
+ 	/* Managed to do everything necessary? */
+ 	if (!new_block_bytes)
+@@ -471,7 +469,6 @@ static int udf_do_extend_file(struct inode *inode,
+ 				   last_ext->extLength, 1);
+ 		if (err)
+ 			goto out_err;
+-		iinfo->i_lenExtents += add;
+ 		count++;
+ 	}
+ 	if (new_block_bytes) {
+@@ -481,7 +478,6 @@ static int udf_do_extend_file(struct inode *inode,
+ 				   last_ext->extLength, 1);
+ 		if (err)
+ 			goto out_err;
+-		iinfo->i_lenExtents += new_block_bytes;
+ 		count++;
+ 	}
+ 
+@@ -516,7 +512,7 @@ static void udf_do_extend_final_block(struct inode *inode,
+ 	 */
+ 	if (new_elen <= (last_ext->extLength & UDF_EXTENT_LENGTH_MASK))
+ 		return;
+-	added_bytes = new_elen - (last_ext->extLength & UDF_EXTENT_LENGTH_MASK);
++	added_bytes = (last_ext->extLength & UDF_EXTENT_LENGTH_MASK) - new_elen;
+ 	last_ext->extLength += added_bytes;
+ 	UDF_I(inode)->i_lenExtents += added_bytes;
+ 
+@@ -589,6 +585,7 @@ static int udf_extend_file(struct inode *inode, loff_t newsize)
+ 	if (err < 0)
+ 		goto out;
+ 	err = 0;
++	iinfo->i_lenExtents = newsize;
+ out:
+ 	brelse(epos.bh);
+ 	return err;
+@@ -677,9 +674,6 @@ static sector_t inode_getblk(struct inode *inode, sector_t block,
+ 			elen = EXT_RECORDED_ALLOCATED |
+ 				((elen + inode->i_sb->s_blocksize - 1) &
+ 				 ~(inode->i_sb->s_blocksize - 1));
+-			iinfo->i_lenExtents =
+-				ALIGN(iinfo->i_lenExtents,
+-				      inode->i_sb->s_blocksize);
+ 			udf_write_aext(inode, &cur_epos, &eloc, elen, 1);
+ 		}
+ 		newblock = udf_get_lb_pblock(inode->i_sb, &eloc, offset);
+@@ -801,9 +795,7 @@ static sector_t inode_getblk(struct inode *inode, sector_t block,
+ 	/* write back the new extents, inserting new extents if the new number
+ 	 * of extents is greater than the old number, and deleting extents if
+ 	 * the new number of extents is less than the old number */
+-	*err = udf_update_extents(inode, laarr, startnum, endnum, &prev_epos);
+-	if (*err < 0)
+-		goto out_free;
++	udf_update_extents(inode, laarr, startnum, endnum, &prev_epos);
+ 
+ 	newblock = udf_get_pblock(inode->i_sb, newblocknum,
+ 				iinfo->i_location.partitionReferenceNum, 0);
+@@ -1071,30 +1063,21 @@ static void udf_merge_extents(struct inode *inode, struct kernel_long_ad *laarr,
+ 	}
+ }
+ 
+-static int udf_update_extents(struct inode *inode, struct kernel_long_ad *laarr,
+-			      int startnum, int endnum,
+-			      struct extent_position *epos)
++static void udf_update_extents(struct inode *inode, struct kernel_long_ad *laarr,
++			       int startnum, int endnum,
++			       struct extent_position *epos)
+ {
+ 	int start = 0, i;
+ 	struct kernel_lb_addr tmploc;
+ 	uint32_t tmplen;
+-	int err;
+ 
+ 	if (startnum > endnum) {
+ 		for (i = 0; i < (startnum - endnum); i++)
+ 			udf_delete_aext(inode, *epos);
+ 	} else if (startnum < endnum) {
+ 		for (i = 0; i < (endnum - startnum); i++) {
+-			err = udf_insert_aext(inode, *epos,
+-					      laarr[i].extLocation,
+-					      laarr[i].extLength);
+-			/*
+-			 * If we fail here, we are likely corrupting the extent
+-			 * list and leaking blocks. At least stop early to
+-			 * limit the damage.
+-			 */
+-			if (err < 0)
+-				return err;
++			udf_insert_aext(inode, *epos, laarr[i].extLocation,
++					laarr[i].extLength);
+ 			udf_next_aext(inode, epos, &laarr[i].extLocation,
+ 				      &laarr[i].extLength, 1);
+ 			start++;
+@@ -1106,7 +1089,6 @@ static int udf_update_extents(struct inode *inode, struct kernel_long_ad *laarr,
+ 		udf_write_aext(inode, epos, &laarr[i].extLocation,
+ 			       laarr[i].extLength, 1);
+ 	}
+-	return 0;
+ }
+ 
+ struct buffer_head *udf_bread(struct inode *inode, udf_pblk_t block,
+@@ -2125,13 +2107,12 @@ int8_t udf_current_aext(struct inode *inode, struct extent_position *epos,
+ 	return etype;
+ }
+ 
+-static int udf_insert_aext(struct inode *inode, struct extent_position epos,
+-			   struct kernel_lb_addr neloc, uint32_t nelen)
++static int8_t udf_insert_aext(struct inode *inode, struct extent_position epos,
++			      struct kernel_lb_addr neloc, uint32_t nelen)
+ {
+ 	struct kernel_lb_addr oeloc;
+ 	uint32_t oelen;
+ 	int8_t etype;
+-	int err;
+ 
+ 	if (epos.bh)
+ 		get_bh(epos.bh);
+@@ -2141,10 +2122,10 @@ static int udf_insert_aext(struct inode *inode, struct extent_position epos,
+ 		neloc = oeloc;
+ 		nelen = (etype << 30) | oelen;
+ 	}
+-	err = udf_add_aext(inode, &epos, &neloc, nelen, 1);
++	udf_add_aext(inode, &epos, &neloc, nelen, 1);
+ 	brelse(epos.bh);
+ 
+-	return err;
++	return (nelen >> 30);
+ }
+ 
+ int8_t udf_delete_aext(struct inode *inode, struct extent_position epos)
+diff --git a/fs/udf/namei.c b/fs/udf/namei.c
+index cea85ee21144..efa9f1bcebcd 100644
+--- a/fs/udf/namei.c
++++ b/fs/udf/namei.c
+@@ -192,13 +192,8 @@ static struct buffer_head *udf_expand_dir_adinicb(struct inode *inode,
+ 	epos.bh = NULL;
+ 	epos.block = iinfo->i_location;
+ 	epos.offset = udf_file_entry_alloc_offset(inode);
+-	ret = udf_add_aext(inode, &epos, &eloc, inode->i_size, 0);
++	udf_add_aext(inode, &epos, &eloc, inode->i_size, 0);
+ 	brelse(epos.bh);
+-	if (ret < 0) {
+-		*err = ret;
+-		udf_free_blocks(inode->i_sb, inode, &eloc, 0, 1);
+-		return NULL;
+-	}
+ 	mark_inode_dirty(inode);
+ 
+ 	/* Now fixup tags in moved directory entries */
+@@ -609,12 +604,8 @@ static int udf_symlink(struct user_namespace *mnt_userns, struct inode *dir,
+ 				iinfo->i_location.partitionReferenceNum;
+ 		bsize = sb->s_blocksize;
+ 		iinfo->i_lenExtents = bsize;
+-		err = udf_add_aext(inode, &epos, &eloc, bsize, 0);
++		udf_add_aext(inode, &epos, &eloc, bsize, 0);
+ 		brelse(epos.bh);
+-		if (err < 0) {
+-			udf_free_blocks(sb, inode, &eloc, 0, 1);
+-			goto out_no_entry;
+-		}
+ 
+ 		block = udf_get_pblock(sb, block,
+ 				iinfo->i_location.partitionReferenceNum,
+@@ -622,7 +613,6 @@ static int udf_symlink(struct user_namespace *mnt_userns, struct inode *dir,
+ 		epos.bh = udf_tgetblk(sb, block);
+ 		if (unlikely(!epos.bh)) {
+ 			err = -ENOMEM;
+-			udf_free_blocks(sb, inode, &eloc, 0, 1);
+ 			goto out_no_entry;
+ 		}
+ 		lock_buffer(epos.bh);
+diff --git a/fs/udf/udfdecl.h b/fs/udf/udfdecl.h
+index d35aa42bb577..f764b4d15094 100644
+--- a/fs/udf/udfdecl.h
++++ b/fs/udf/udfdecl.h
+@@ -99,7 +99,7 @@ struct udf_fileident_iter {
+ 	struct extent_position epos;	/* Position after the above extent */
+ 	struct fileIdentDesc fi;	/* Copied directory entry */
+ 	uint8_t *name;			/* Pointer to entry name */
+-	uint8_t *namebuf;		/* Storage for entry name in case
++	uint8_t namebuf[UDF_NAME_LEN_CS0]; /* Storage for entry name in case
+ 					 * the name is split between two blocks
+ 					 */
+ };
+-- 
+2.39.0
+
