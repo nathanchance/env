@@ -6,18 +6,6 @@ from pathlib import Path
 import shlex
 
 
-def get_latest_gcc_version(major_version):
-    return {
-        6: '6.5.0',
-        7: '7.5.0',
-        8: '8.5.0',
-        9: '9.5.0',
-        10: '10.4.0',
-        11: '11.3.0',
-        12: '12.2.0',
-    }[major_version]
-
-
 def path_and_text(*args):
     if (path := Path(*args)).exists():
         return path, path.read_text(encoding='utf-8')

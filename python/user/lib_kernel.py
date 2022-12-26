@@ -112,39 +112,3 @@ def kmake(variables, targets, ccache=True, directory=None, jobs=None, silent=Tru
     subprocess.run(make_cmd, check=True)
     if not use_time:
         print(f"\nTime: {datetime.timedelta(seconds=int(time.time() - start_time))}")
-
-
-def korg_gcc_canonicalize_target(value):
-    if 'linux' in value:
-        return value
-
-    suffix = ''
-    if value == 'arm':
-        suffix = '-gnueabi'
-    return f"{value}-linux{suffix}"
-
-
-# GCC 6 through 12, GCC 5 is run in a container
-def supported_korg_gcc_versions():
-    return list(range(6, 13))
-
-
-def supported_korg_gcc_arches():
-    return [
-        'aarch64',
-        'arm',
-        'i386',
-        'm68k',
-        'mips',
-        'mips64',
-        'powerpc',
-        'powerpc64',
-        'riscv32',
-        'riscv64',
-        's390',
-        'x86_64',
-    ]  # yapf: disable
-
-
-def supported_korg_gcc_targets():
-    return [korg_gcc_canonicalize_target(arch) for arch in supported_korg_gcc_arches()]

@@ -11,8 +11,8 @@ import subprocess
 
 import requests
 
+import korg_gcc
 import lib_kernel
-import lib_user
 
 
 def get_qemu_arch(key):
@@ -33,28 +33,12 @@ def qemu_arch_to_kernel_arch(key):
     }[key]
 
 
-def get_cross_compile(key):
-    return {
-        'arm': 'arm-linux-gnueabi-',
-        'arm64': 'aarch64-linux-',
-        'x86_64': 'x86_64-linux-',
-    }[key]
-
-
 def get_toolchain_vars(kernel_arch, toolchain):
     if toolchain == 'llvm':
         return {'LLVM': '1'}
 
-    gcc_version = lib_user.get_latest_gcc_version(int(toolchain.split('-')[1]))
-
-    if not (gcc_folder := Path(os.environ['CBL_TC_STOW_GCC'], gcc_version)).exists():
-        raise Exception(f"GCC {gcc_version} not found in {gcc_folder.parent}?")
-
-    cross_compile = get_cross_compile(kernel_arch)
-    if not (gcc := Path(gcc_folder, 'bin', f"{cross_compile}gcc")).exists():
-        raise Exception(f"{gcc.name} not found in {gcc.parent}?")
-
-    return {'CROSS_COMPILE': Path(gcc.parent, cross_compile)}
+    gcc_major_version = int(toolchain.split('-')[1])
+    return {'CROSS_COMPILE': korg_gcc.get_gcc_cross_compile(gcc_major_version, kernel_arch)}
 
 
 def parse_arguments():
@@ -83,7 +67,8 @@ def parse_arguments():
                         help='Name of virtual machine to build kernel for',
                         required=True)
 
-    supported_toolchains = [f"gcc-{ver}" for ver in range(6, 13)] + ['llvm']
+    supported_toolchains = [f"gcc-{ver}"
+                            for ver in korg_gcc.supported_korg_gcc_versions()] + ['llvm']
     parser.add_argument('-t',
                         '--toolchain',
                         choices=supported_toolchains,

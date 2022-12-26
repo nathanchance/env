@@ -11,15 +11,71 @@ import subprocess
 
 import requests
 
-import lib_kernel
 import lib_sha256
 import lib_user
 
 
+def korg_gcc_canonicalize_target(value):
+    if 'linux' in value:
+        return value
+
+    suffix = ''
+    if value == 'arm':
+        suffix = '-gnueabi'
+    elif value == 'arm64':  # in case the kernel ARCH value is passed in
+        value = 'aarch64'
+    return f"{value}-linux{suffix}"
+
+
+def supported_korg_gcc_arches():
+    return [
+        'aarch64',
+        'arm',
+        'i386',
+        'm68k',
+        'mips',
+        'mips64',
+        'powerpc',
+        'powerpc64',
+        'riscv32',
+        'riscv64',
+        's390',
+        'x86_64',
+    ]  # yapf: disable
+
+
+def supported_korg_gcc_targets():
+    return [korg_gcc_canonicalize_target(arch) for arch in supported_korg_gcc_arches()]
+
+
+# GCC 6 through 12, GCC 5 is run in a container
+def supported_korg_gcc_versions():
+    return list(range(6, 13))
+
+
+def get_gcc_cross_compile(major_version, arch_or_target):
+    version = get_latest_gcc_version(major_version)
+    target = korg_gcc_canonicalize_target(arch_or_target)
+
+    return f"{os.environ['CBL_TC_STOW_GCC']}/{version}/bin/{target}-"
+
+
+def get_latest_gcc_version(major_version):
+    return {
+        6: '6.5.0',
+        7: '7.5.0',
+        8: '8.5.0',
+        9: '9.5.0',
+        10: '10.4.0',
+        11: '11.3.0',
+        12: '12.2.0',
+    }[major_version]
+
+
 def parse_arguments():
-    supported_arches = lib_kernel.supported_korg_gcc_arches()
-    supported_targets = lib_kernel.supported_korg_gcc_targets()
-    supported_versions = lib_kernel.supported_korg_gcc_versions()
+    supported_arches = supported_korg_gcc_arches()
+    supported_targets = supported_korg_gcc_targets()
+    supported_versions = supported_korg_gcc_versions()
 
     parser = argparse.ArgumentParser()
     subparser = parser.add_subparsers(dest='subcommand', metavar='SUBCOMMAND', required=True)
@@ -87,9 +143,7 @@ def install(args):
 
     for major_version in args.versions:
         print(args.targets)
-        targets = sorted(
-            {lib_kernel.korg_gcc_canonicalize_target(target)
-             for target in args.targets})
+        targets = sorted({korg_gcc_canonicalize_target(target) for target in args.targets})
         print(targets)
         # No GCC 9.5.0 i386-linux on x86_64?
         if host_arch == 'x86_64' and major_version == 9:
@@ -99,7 +153,7 @@ def install(args):
             targets.remove('riscv32-linux')
             targets.remove('riscv64-linux')
 
-        full_version = lib_user.get_latest_gcc_version(major_version)
+        full_version = get_latest_gcc_version(major_version)
 
         for target in targets:
             # If we are not saving the tarball to disk and GCC already exists
@@ -134,13 +188,6 @@ def install(args):
 
                 tar_input = response.content if not tarball.exists() else None
                 subprocess.run(tar_cmd, check=True, input=tar_input)
-
-
-def get_gcc_cross_compile(major_version, arch_or_target):
-    version = lib_user.get_latest_gcc_version(major_version)
-    target = lib_kernel.korg_gcc_canonicalize_target(arch_or_target)
-
-    return f"{os.environ['CBL_TC_STOW_GCC']}/{version}/bin/{target}-"
 
 
 if __name__ == '__main__':
