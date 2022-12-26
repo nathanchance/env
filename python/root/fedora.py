@@ -72,6 +72,7 @@ def install_initial_packages():
 def install_packages():
     packages = [
         # administration
+        'btop',
         'mosh',
         'opendoas',
         'util-linux-user',
