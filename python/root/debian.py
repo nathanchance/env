@@ -143,7 +143,7 @@ if __name__ == '__main__':
     lib_deb.set_apt_variables()
     lib_deb.install_initial_packages()
     setup_repos()
-    lib_deb.update_and_install_packages()
+    update_and_install_packages()
     lib_root.chsh_fish(user)
     lib_root.add_user_to_group_if_exists('kvm', user)
     pi_setup(user)
