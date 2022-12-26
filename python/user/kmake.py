@@ -14,10 +14,11 @@ def parse_arguments():
 
     parser.add_argument('-C', '--directory', help='Mirrors the equivalent make argument')
     parser.add_argument('--no-ccache', action='store_true', help='Disable the use of ccache')
-    parser.add_argument('-p',
-                        '--prepend-to-path',
-                        help='Prepend specified directories to PATH',
-                        nargs='+')
+    parser.add_argument(
+        '-p',
+        '--prepend-to-path',
+        action='append',
+        help='Prepend specified directory to PATH (can be specified multiple times)')
     parser.add_argument('-j', '--jobs', default=os.cpu_count(), help='Number of jobs', type=int)
     parser.add_argument('--use-time', action='store_true', help="Call 'time -v' for time tracking")
     parser.add_argument('-v', '--verbose', action='store_true', help='Do a more verbose build')
