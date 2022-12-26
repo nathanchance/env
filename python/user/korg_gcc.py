@@ -2,10 +2,11 @@
 # SPDX-License-Identifier: MIT
 # Copyright (C) 2022 Nathan Chancellor
 
-from argparse import ArgumentParser
+import argparse
 import os
 from pathlib import Path
 import platform
+import shlex
 import subprocess
 
 import requests
@@ -16,40 +17,49 @@ import lib_user
 
 
 def parse_arguments():
-    parser = ArgumentParser(description='Easily download and extract kernel.org toolchains to disk')
-
     supported_arches = lib_kernel.supported_korg_gcc_arches()
     supported_targets = lib_kernel.supported_korg_gcc_targets()
-    parser.add_argument('-t',
-                        '--targets',
-                        choices=supported_arches + supported_targets,
-                        default=supported_targets,
-                        help='Toolchain targets to download (default: %(default)s)',
-                        metavar='TARGETS',
-                        nargs='+')
-
-    # GCC 6 through 12
     supported_versions = lib_kernel.supported_korg_gcc_versions()
-    parser.add_argument('-v',
-                        '--versions',
-                        choices=supported_versions,
-                        default=supported_versions,
-                        help='Toolchain versions to download (default: %(default)s)',
-                        metavar='TARGETS',
-                        nargs='+',
-                        type=int)
 
-    # Download and install locations for toolchains
+    parser = argparse.ArgumentParser()
+    subparser = parser.add_subparsers(dest='subcommand', metavar='SUBCOMMAND', required=True)
+
+    getvar_parser = subparser.add_parser('print',
+                                         help='Print CROSS_COMPILE variable for use with make')
+    getvar_parser.add_argument('version', choices=supported_versions, type=int)
+    getvar_parser.add_argument('arch', choices=supported_arches)
+
+    install_parser = subparser.add_parser(
+        'install', help='Download and/or extact kernel.org GCC tarballs to disk')
+
+    install_parser.add_argument('-t',
+                                '--targets',
+                                choices=supported_arches + supported_targets,
+                                default=supported_targets,
+                                help='Toolchain targets to download (default: %(default)s)',
+                                metavar='TARGETS',
+                                nargs='+')
+
+    install_parser.add_argument('-v',
+                                '--versions',
+                                choices=supported_versions,
+                                default=supported_versions,
+                                help='Toolchain versions to download (default: %(default)s)',
+                                metavar='TARGETS',
+                                nargs='+',
+                                type=int)
+
     download_folder_default = Path(os.environ['NAS_FOLDER'], 'kernel.org/toolchains')
     install_folder_default = Path(os.environ['CBL_TC_STOW_GCC'])
-    parser.add_argument('--download-folder',
-                        default=download_folder_default,
-                        help='Folder to store downloaded tarballs (default: %(default)s)')
-    parser.add_argument('--install-folder',
-                        default=install_folder_default,
-                        help='Folder to store extracted toolchains for use (default: %(default)s)')
+    install_parser.add_argument('--download-folder',
+                                default=download_folder_default,
+                                help='Folder to store downloaded tarballs (default: %(default)s)')
+    install_parser.add_argument(
+        '--install-folder',
+        default=install_folder_default,
+        help='Folder to store extracted toolchains for use (default: %(default)s)')
 
-    no_group = parser.add_mutually_exclusive_group()
+    no_group = install_parser.add_mutually_exclusive_group()
     no_group.add_argument('--no-cache',
                           action='store_true',
                           help='Do not save downloaded toolchain tarballs to disk')
@@ -60,8 +70,7 @@ def parse_arguments():
     return parser.parse_args()
 
 
-if __name__ == '__main__':
-    args = parse_arguments()
+def install(args):
     cache = not args.no_cache
     extract = not args.no_extract
 
@@ -125,3 +134,20 @@ if __name__ == '__main__':
 
                 tar_input = response.content if not tarball.exists() else None
                 subprocess.run(tar_cmd, check=True, input=tar_input)
+
+
+def get_gcc_cross_compile(major_version, arch_or_target):
+    version = lib_user.get_latest_gcc_version(major_version)
+    target = lib_kernel.korg_gcc_canonicalize_target(arch_or_target)
+
+    return f"{os.environ['CBL_TC_STOW_GCC']}/{version}/bin/{target}-"
+
+
+if __name__ == '__main__':
+    arguments = parse_arguments()
+
+    if arguments.subcommand == 'install':
+        install(arguments)
+    if arguments.subcommand == 'print':
+        cross_compile = get_gcc_cross_compile(arguments.version, arguments.arch)
+        print(f"CROSS_COMPILE={shlex.quote(cross_compile)}")
