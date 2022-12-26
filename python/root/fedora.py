@@ -99,7 +99,6 @@ def install_packages():
         'neofetch',
         'openssh',
         'python-pip',
-        'python-tmuxp',
         'stow',
         'tmux',
         'vim',
