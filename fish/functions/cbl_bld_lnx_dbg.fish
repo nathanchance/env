@@ -22,7 +22,7 @@ function cbl_bld_lnx_dbg -d "Build linux-debug Arch Linux package"
 
     if test "$gcc" = true
         if not string match -qr CROSS_COMPILE= $kmake_args
-            set kmake_args CROSS_COMPILE=/usr/bin/
+            set kmake_args $STOCK_GCC_VARS
         end
     else
         if not string match -qr LLVM= $kmake_args

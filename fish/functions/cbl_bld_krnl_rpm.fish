@@ -59,7 +59,7 @@ function cbl_bld_krnl_rpm -d "Build a .rpm kernel package"
                     CROSS_COMPILE=/usr/bin/aarch64-linux-gnu-
             case arm64:false x86_64:false
                 set -a kmake_args \
-                    CROSS_COMPILE=/usr/bin/
+                    $STOCK_GCC_VARS
             case x86_64:true
                 set -a kmake_args \
                     CROSS_COMPILE=/usr/bin/x86_64-linux-gnu-
