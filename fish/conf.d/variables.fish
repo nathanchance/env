@@ -144,6 +144,8 @@ set -gx USER_PYTHON_FOLDER $PYTHON_FOLDER/user
 
 set -gx TMP_BUILD_FOLDER $TMP_FOLDER/build
 
+set -gx ICLOUD_DOCS_FOLDER $HOME/Library/'Mobile Documents/com~apple~CloudDocs/'
+
 
 ############################
 ## OTHER GLOBAL VARIABLES ##

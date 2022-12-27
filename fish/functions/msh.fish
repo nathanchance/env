@@ -78,7 +78,12 @@ function msh -d "Shorthand for mosh -o" -w mosh
         case '*'
             # Equinix server, perform look up
             if string match -qr "[a|c|f|g|m|n|s|t|x]{1}[1-3]{1}-.*" $msh_args
-                set equinix_ips $HOME/.equinix_ips
+                switch $LOCATION
+                    case mac
+                        set equinix_ips $ICLOUD_DOCS_FOLDER/.equinix_ips
+                    case '*'
+                        set equinix_ips $HOME/.equinix_ips
+                end
                 if test -f $equinix_ips
                     set ip (grep $msh_args $equinix_ips | string split -f 2 ,)
                     if test -z "$ip"
