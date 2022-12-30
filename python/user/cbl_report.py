@@ -10,6 +10,8 @@ import shutil
 import subprocess
 import zoneinfo
 
+import lib_user
+
 
 # pylint: disable-next=invalid-name
 def get_current_datetime(tz=None):
@@ -69,14 +71,19 @@ def get_report_worktree():
     return Path(os.environ['CBL'], 'current-report')
 
 
-def git(repo, cmd, check=True):
+def git(repo, cmd, capture_output=True, check=True, env=None, show_command=True):
     if not shutil.which('git'):
         raise Exception('git could not be found!')
-    return subprocess.run(['git', '-C', repo, *cmd], capture_output=True, check=check, text=True)
+    command = ['git', '-C', repo, *cmd]
+    if show_command:
+        lib_user.print_cmd(command)
+    if env:
+        env = os.environ.copy() | env
+    return subprocess.run(command, capture_output=capture_output, check=check, env=env, text=True)
 
 
 def git_check_success(repo, cmd):
-    return git(repo, cmd, check=False).returncode == 0
+    return git(repo, cmd, check=False, show_command=False).returncode == 0
 
 
 def parse_parameters():
@@ -285,7 +292,8 @@ def finalize_report(args):
 
     # Rebase changes if requested
     if args.rebase or args.all:
-        git(worktree, ['rebase', '-i', '--autosquash', 'origin/main'])
+        git(worktree, ['rebase', '-i', '--autosquash', 'origin/main'],
+            env={'GIT_SEQUENCE_EDITOR': shutil.which('true')})
 
     # Merge branch into main
     branch = get_report_branch(get_current_datetime())
