@@ -152,7 +152,12 @@ def generate_report(log_folder):
         mfc = git_get(src_folder, ['mfc']).strip()
         if mfc:
             report_text += f"\n{src_folder.name} commit logs:\n\n"
-            report_text += git_get(src_folder, ['l', f"{mfc}^^.."])
+            branch = git_get(src_folder, ['bn']).strip()
+            if (remote := git_get(src_folder, ['rn', branch]).strip()):
+                since = f"{remote}/{branch}"
+            else:
+                since = f"{mfc}^"
+            report_text += git_get(src_folder, ['l', f"{since}^.."])
 
     return report_text
 
