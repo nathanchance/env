@@ -19,9 +19,9 @@ fi
 
 $dwnld_cmd https://github.com/nathanchance/env/tarball/main | tar -C "$tmp_dir" -xvzf - --strip-components=1
 
-python_root=$tmp_dir/python/root
-if [ ! -d "$python_root" ]; then
-    echo "[-] $python_root could not be found, did download command fail?" >&2
+python_setup=$tmp_dir/python/setup
+if [ ! -d "$python_setup" ]; then
+    echo "[-] $python_setup could not be found, did download command fail?" >&2
     exit 1
 fi
 
@@ -40,4 +40,4 @@ if ! is_available python3; then
     fi
 fi
 
-"$python_root"/"${ID_LIKE-$ID}".py "$@"
+"$python_setup"/"${ID_LIKE-$ID}".py "$@"
