@@ -8,11 +8,16 @@ from pathlib import Path
 import platform
 import shutil
 import subprocess
+import sys
 
 import requests
 
 import korg_gcc
-import lib_kernel
+
+sys.path.append(str(Path(__file__).resolve().parents[1]))
+# pylint: disable=wrong-import-position
+import lib.kernel  # noqa: E402
+# pylint: enable=wrong-import-position
 
 
 def get_qemu_arch(key):
@@ -123,7 +128,7 @@ def build_kernel_for_vm(make_variables, menuconfig, vm_name):
     make_targets = ['olddefconfig', 'localyesconfig', 'all']
     if menuconfig:
         make_targets.insert(-1, 'menuconfig')
-    lib_kernel.kmake(make_variables, make_targets)
+    lib.kernel.kmake(make_variables, make_targets)
 
 
 if __name__ == '__main__':

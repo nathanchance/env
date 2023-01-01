@@ -3,13 +3,13 @@
 # Copyright (C) 2022 Nathan Chancellor
 
 import datetime
-from pathlib import Path
 import os
+from pathlib import Path
 import shutil
 import subprocess
 import time
 
-import lib_user
+from . import utils
 
 
 # Basically '$binary --version | head -1'
@@ -69,7 +69,7 @@ def kmake(variables, targets, ccache=True, directory=None, jobs=None, silent=Tru
         if shutil.which('ccache'):
             variables['CC'] = f"ccache {compiler}"
         else:
-            lib_user.print_yellow('WARNING: ccache requested by it could not be found, ignoring...')
+            utils.print_yellow('WARNING: ccache requested by it could not be found, ignoring...')
 
     # V=1 or V=2 should imply '-v'
     if 'V' in variables:
@@ -81,8 +81,8 @@ def kmake(variables, targets, ccache=True, directory=None, jobs=None, silent=Tru
     flags += [f"-{'s' if silent else ''}kj{jobs if jobs else os.cpu_count()}"]
 
     # Print information about current compiler
-    lib_user.print_green(f"\nCompiler location:\033[0m {compiler_location}\n")
-    lib_user.print_green(f"Compiler version:\033[0m {get_tool_version(compiler)}\n")
+    utils.print_green(f"\nCompiler location:\033[0m {compiler_location}\n")
+    utils.print_green(f"Compiler version:\033[0m {get_tool_version(compiler)}\n")
 
     # Print information about the binutils being used, if they are being used
     # Account for implicit LLVM_IAS change in f12b034afeb3 ("scripts/Makefile.clang: default to LLVM_IAS=1")
@@ -94,8 +94,8 @@ def kmake(variables, targets, ccache=True, directory=None, jobs=None, silent=Tru
                 f"GNU as could not be found based on CROSS_COMPILE ('{cross_compile}')?")
         as_location = Path(gnu_as).parent
         if as_location != compiler_location:
-            lib_user.print_green(f"Binutils location:\033[0m {as_location}\n")
-        lib_user.print_green(f"Binutils version:\033[0m {get_tool_version(gnu_as)}\n")
+            utils.print_green(f"Binutils location:\033[0m {as_location}\n")
+        utils.print_green(f"Binutils version:\033[0m {get_tool_version(gnu_as)}\n")
 
     # Build and run make command
     make_cmd = [
@@ -106,7 +106,7 @@ def kmake(variables, targets, ccache=True, directory=None, jobs=None, silent=Tru
         if not (gnu_time := shutil.which('time')):
             raise Exception('Could not find time binary in PATH?')
         make_cmd = [gnu_time, '-v'] + make_cmd
-    lib_user.print_cmd(make_cmd)
+    utils.print_cmd(make_cmd)
     if not use_time:
         start_time = time.time()
     subprocess.run(make_cmd, check=True)

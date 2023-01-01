@@ -7,10 +7,15 @@ import datetime
 import json
 import os
 from pathlib import Path
+import sys
+
 import requests
 
-import lib_user
-import lib_sha256
+sys.path.append(str(Path(__file__).resolve().parents[1]))
+# pylint: disable=wrong-import-position
+import lib.sha256  # noqa: E402
+import lib.utils  # noqa: E402
+# pylint: enable=wrong-import-position
 
 
 def parse_parameters():
@@ -65,15 +70,15 @@ def download_if_necessary(item):
     target = Path(item['containing_folder'], base_file)
     target.parent.mkdir(exist_ok=True, parents=True)
     if target.exists():
-        lib_user.print_yellow(f"SKIP: {base_file} already downloaded!")
+        lib.utils.print_yellow(f"SKIP: {base_file} already downloaded!")
     else:
-        lib_user.print_green(f"INFO: {base_file} downloading...")
+        lib.utils.print_green(f"INFO: {base_file} downloading...")
         response = requests.get(item['file_url'], timeout=3600)
         response.raise_for_status()
         target.write_bytes(response.content)
 
     if 'sha_url' in item:
-        lib_sha256.validate_from_url(target, item['sha_url'])
+        lib.sha256.validate_from_url(target, item['sha_url'])
 
 
 def update_bundle_symlink(bundle_folder):

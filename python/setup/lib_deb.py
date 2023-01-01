@@ -4,26 +4,30 @@
 
 import os
 from pathlib import Path
-import subprocess
 import shutil
+import subprocess
+import sys
 import tempfile
 
-import lib_root
+sys.path.append(str(Path(__file__).resolve().parents[1]))
+# pylint: disable=wrong-import-position
+import lib.root  # noqa: E402
+# pylint: enable=wrong-import-position
 
 
 def apt_install(install_args):
-    lib_root.apt(['install', '-y', '--no-install-recommends', *install_args])
+    lib.root.apt(['install', '-y', '--no-install-recommends', *install_args])
 
 
 def apt_update():
-    lib_root.apt(['update', '-qq'])
+    lib.root.apt(['update', '-qq'])
 
 
 def apt_upgrade(upgrade_args=None):
     cmd = ['upgrade', '-y']
     if upgrade_args:
         cmd += upgrade_args
-    lib_root.apt(cmd)
+    lib.root.apt(cmd)
 
 
 def get_dpkg_arch():
@@ -46,7 +50,7 @@ def set_apt_variables():
 
 def setup_doas(username, root_password):
     dpkg_arch = get_dpkg_arch()
-    env_folder = lib_root.get_env_root()
+    env_folder = lib.root.get_env_root()
     tmp_dir = None
 
     doas_ver = '6.8.2-1'
@@ -54,10 +58,10 @@ def setup_doas(username, root_password):
         doas_ver += '+b1'
     doas_deb_file = f"opendoas_{doas_ver}_{dpkg_arch}.deb"
 
-    if lib_root.get_glibc_version() > (2, 33, 0):
+    if lib.root.get_glibc_version() > (2, 33, 0):
         tmp_dir = Path(tempfile.mkdtemp())
         doas_deb = Path(tmp_dir, doas_deb_file)
-        lib_root.curl([
+        lib.root.curl([
             '-o', doas_deb, f"http://http.us.debian.org/debian/pool/main/o/opendoas/{doas_deb_file}"
         ])
     else:
@@ -72,11 +76,11 @@ def setup_doas(username, root_password):
     doas_conf.write_text(doas_conf_text, encoding='utf-8')
 
     # Add a root password so that there is no warning about removing sudo
-    lib_root.chpasswd('root', root_password)
+    lib.root.chpasswd('root', root_password)
 
     # Uninstall sudo but create a symlink in case a program expects only sudo
-    lib_root.remove_if_installed('sudo')
-    lib_root.setup_sudo_symlink()
+    lib.root.remove_if_installed('sudo')
+    lib.root.setup_sudo_symlink()
 
     if tmp_dir:
         shutil.rmtree(tmp_dir)
@@ -84,7 +88,7 @@ def setup_doas(username, root_password):
 
 def setup_docker(username):
     subprocess.run(['groupadd', '-f', 'docker'], check=True)
-    lib_root.add_user_to_group('docker', username)
+    lib.root.add_user_to_group('docker', username)
 
     # Pick up potential previous changes to daemon.json file
     for service in ['containerd', 'docker']:
@@ -92,9 +96,9 @@ def setup_docker(username):
 
 
 def setup_libvirt(username):
-    if not lib_root.is_installed('virt-manager'):
+    if not lib.root.is_installed('virt-manager'):
         return
-    lib_root.setup_libvirt(username)
+    lib.root.setup_libvirt(username)
 
 
 def setup_locales():
@@ -185,7 +189,7 @@ def update_and_install_packages(additional_packages=None):
             'qemu': 'qemu-system-arm',
         },
     }
-    if lib_root.is_equinix():
+    if lib.root.is_equinix():
         packages += [
             'dnsmasq',
             'libvirt-daemon-system',

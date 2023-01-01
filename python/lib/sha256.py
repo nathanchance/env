@@ -4,9 +4,10 @@
 
 import hashlib
 import re
+
 import requests
 
-import lib_user
+from . import utils
 
 
 def calculate(file_path):
@@ -35,7 +36,7 @@ def validate_from_url(file, url):
     expected_sha256 = get_from_url(url, file.name)
 
     if computed_sha256 == expected_sha256:
-        lib_user.print_green(f"SUCCESS: {file.name} sha256 passed!")
+        utils.print_green(f"SUCCESS: {file.name} sha256 passed!")
     else:
         raise Exception(
             f"{file.name} computed checksum ('{computed_sha256}') did not match expected checksum ('{expected_sha256}')!"

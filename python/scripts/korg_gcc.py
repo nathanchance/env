@@ -8,11 +8,15 @@ from pathlib import Path
 import platform
 import shlex
 import subprocess
+import sys
 
 import requests
 
-import lib_sha256
-import lib_user
+sys.path.append(str(Path(__file__).resolve().parents[1]))
+# pylint: disable=wrong-import-position
+import lib.sha256  # noqa: E402
+import lib.utils  # noqa: E402
+# pylint: enable=wrong-import-position
 
 
 def korg_gcc_canonicalize_target(value):
@@ -165,7 +169,7 @@ def install(args):
             tarball = Path(args.download_folder, full_version,
                            f"{host_arch_gcc}-gcc-{full_version}-nolibc-{target}.tar.xz")
             if not tarball.exists():
-                lib_user.print_green(f"INFO: Downloading {tarball.name}...")
+                lib.utils.print_green(f"INFO: Downloading {tarball.name}...")
 
                 url = f"https://mirrors.edge.kernel.org/pub/tools/crosstool/files/bin/{host_arch_gcc}/{full_version}"
                 response = requests.get(f"{url}/{tarball.name}", timeout=3600)
@@ -174,7 +178,7 @@ def install(args):
                 if cache:
                     tarball.parent.mkdir(exist_ok=True, parents=True)
                     tarball.write_bytes(response.content)
-                    lib_sha256.validate_from_url(tarball, f"{url}/sha256sums.asc")
+                    lib.sha256.validate_from_url(tarball, f"{url}/sha256sums.asc")
 
             if extract and not gcc.exists():
                 (dest_folder := gcc.parents[1]).mkdir(exist_ok=True, parents=True)

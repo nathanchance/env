@@ -5,12 +5,16 @@
 from pathlib import Path
 import shutil
 import subprocess
+import sys
 
-import lib_root
+sys.path.append(str(Path(__file__).resolve().parents[1]))
+# pylint: disable=wrong-import-position
+import lib.root  # noqa: E402
+# pylint: enable=wrong-import-position
 
 
 def configure_networking():
-    hostname = lib_root.get_hostname()
+    hostname = lib.root.get_hostname()
 
     ips = {
         'honeycomb': '192.168.4.210',
@@ -19,28 +23,28 @@ def configure_networking():
     if hostname not in ips:
         return
 
-    lib_root.setup_static_ip(ips[hostname])
-    lib_root.setup_mnt_nas()
+    lib.root.setup_static_ip(ips[hostname])
+    lib.root.setup_mnt_nas()
 
 
 def dnf_add_repo(repo_url):
-    lib_root.dnf(['config-manager', '--add-repo', repo_url])
+    lib.root.dnf(['config-manager', '--add-repo', repo_url])
 
 
 def dnf_install(install_args):
-    lib_root.dnf(['install', '-y', *install_args])
+    lib.root.dnf(['install', '-y', *install_args])
 
 
 def get_fedora_version():
-    return int(lib_root.get_os_rel_val('VERSION_ID'))
+    return int(lib.root.get_os_rel_val('VERSION_ID'))
 
 
 def machine_is_trusted():
-    return lib_root.get_hostname() in ('honeycomb')
+    return lib.root.get_hostname() in ('honeycomb')
 
 
 def prechecks():
-    lib_root.check_root()
+    lib.root.check_root()
     fedora_version = get_fedora_version()
     if fedora_version not in (35, 36, 37):
         raise Exception(
@@ -65,7 +69,7 @@ def resize_rootfs():
 
 
 def install_initial_packages():
-    lib_root.dnf(['update', '-y'])
+    lib.root.dnf(['update', '-y'])
     dnf_install(['dnf-plugins-core'])
 
 
@@ -123,7 +127,7 @@ def install_packages():
     ]  # yapf: disable
 
     # Install Virtualization group on Equinix Metal servers or trusted machines
-    if lib_root.is_equinix() or machine_is_trusted():
+    if lib.root.is_equinix() or machine_is_trusted():
         packages += ['@virtualization']
 
     if machine_is_trusted():
@@ -134,7 +138,7 @@ def install_packages():
 
 def setup_doas():
     # Fedora provides a doas.conf already, just modify it to suit our needs
-    doas_conf, conf_txt = lib_root.path_and_text('/etc/doas.conf')
+    doas_conf, conf_txt = lib.root.path_and_text('/etc/doas.conf')
     if (persist := 'permit persist :wheel') not in conf_txt:
         conf_txt = conf_txt.replace('permit :wheel', persist)
         conf_txt += ('\n'
@@ -144,12 +148,12 @@ def setup_doas():
 
     # Remove sudo but set up a symlink for compatibility
     Path('/etc/dnf/protected.d/sudo.conf').unlink(missing_ok=True)
-    lib_root.remove_if_installed('sudo')
-    lib_root.setup_sudo_symlink()
+    lib.root.remove_if_installed('sudo')
+    lib.root.setup_sudo_symlink()
 
 
 def setup_kernel_args():
-    if lib_root.get_hostname() != 'honeycomb':
+    if lib.root.get_hostname() != 'honeycomb':
         return
 
     # Until firmware supports new IORT RMR patches
@@ -159,10 +163,10 @@ def setup_kernel_args():
 
 
 def setup_libvirt(username):
-    if not lib_root.is_installed('virt-install'):
+    if not lib.root.is_installed('virt-install'):
         return
 
-    lib_root.setup_libvirt(username)
+    lib.root.setup_libvirt(username)
 
 
 def setup_mosh():
@@ -190,7 +194,7 @@ def setup_repos():
 
 
 if __name__ == '__main__':
-    user = lib_root.get_user()
+    user = lib.root.get_user()
 
     prechecks()
     resize_rootfs()
@@ -202,8 +206,8 @@ if __name__ == '__main__':
     setup_libvirt(user)
     setup_mosh()
     configure_networking()
-    lib_root.enable_tailscale()
-    lib_root.chsh_fish(user)
-    lib_root.clone_env(user)
-    lib_root.setup_initial_fish_config(user)
-    lib_root.setup_ssh_authorized_keys(user)
+    lib.root.enable_tailscale()
+    lib.root.chsh_fish(user)
+    lib.root.clone_env(user)
+    lib.root.setup_initial_fish_config(user)
+    lib.root.setup_ssh_authorized_keys(user)
