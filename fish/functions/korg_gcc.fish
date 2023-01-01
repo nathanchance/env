@@ -2,6 +2,6 @@
 # SPDX-License-Identifier: MIT
 # Copyright (C) 2022 Nathan Chancellor
 
-function korg_gcc -d "Wrapper around $USER_PYTHON_FOLDER/korg_gcc.py"
-    $USER_PYTHON_FOLDER/korg_gcc.py $argv
+function korg_gcc -d "Wrapper around $PYTHON_SCRIPTS_FOLDER/korg_gcc.py"
+    $PYTHON_SCRIPTS_FOLDER/korg_gcc.py $argv
 end

@@ -5,8 +5,12 @@
 from argparse import ArgumentParser
 from pathlib import Path
 import os
+import sys
 
-import lib_kernel
+sys.path.append(str(Path(__file__).resolve().parents[1]))
+# pylint: disable=wrong-import-position
+import lib.kernel  # noqa: E402
+# pylint: enable=wrong-import-position
 
 
 def parse_arguments():
@@ -51,7 +55,7 @@ if __name__ == '__main__':
             if arg not in targets:
                 targets.append(arg)
 
-    lib_kernel.kmake(variables,
+    lib.kernel.kmake(variables,
                      targets,
                      ccache=(not args.no_ccache),
                      directory=args.directory,

@@ -8,9 +8,14 @@ import os
 from pathlib import Path
 import shutil
 import subprocess
+import sys
 import zoneinfo
 
-import lib_user
+sys.path.append(str(Path(__file__).resolve().parents[1]))
+# pylint: disable=wrong-import-position
+import lib.utils  # noqa: E402
+
+# pylint: enable=wrong-import-position
 
 
 # pylint: disable-next=invalid-name
@@ -76,7 +81,7 @@ def git(repo, cmd, capture_output=True, check=True, env=None, show_command=True)
         raise Exception('git could not be found!')
     command = ['git', '-C', repo, *cmd]
     if show_command:
-        lib_user.print_cmd(command)
+        lib.utils.print_cmd(command)
     if env:
         env = os.environ.copy() | env
     return subprocess.run(command, capture_output=capture_output, check=check, env=env, text=True)

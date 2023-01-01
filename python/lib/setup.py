@@ -12,8 +12,6 @@ import shutil
 import socket
 import subprocess
 
-import get_glibc_version as ggv
-
 
 def add_user_to_group(groupname, username):
     subprocess.run(['usermod', '-aG', groupname, username], check=True)
@@ -112,7 +110,14 @@ def get_env_root():
 
 
 def get_glibc_version():
-    return ggv.get_glibc_version()
+    ldd_version_out = subprocess.run(['ldd', '--version'],
+                                     capture_output=True,
+                                     check=True,
+                                     text=True).stdout
+    ldd_version = ldd_version_out.split('\n')[0].split(' ')[-1].split('.')
+    if len(ldd_version) < 3:
+        ldd_version += [0]
+    return tuple(int(x) for x in ldd_version)
 
 
 def get_hostname():

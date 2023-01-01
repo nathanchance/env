@@ -19,7 +19,10 @@ import shutil
 import subprocess
 import sys
 
-import lib_user
+sys.path.append(str(Path(__file__).resolve().parents[1]))
+# pylint: disable=wrong-import-position
+import lib.utils  # noqa: E402
+# pylint: enable=wrong-import-position
 
 usr_share = Path('/usr/share')
 
@@ -49,7 +52,7 @@ def iso_is_url(iso):
 
 
 def run_cmd(cmd):
-    lib_user.print_cmd(cmd)
+    lib.utils.print_cmd(cmd)
     subprocess.run(cmd, check=True)
 
 
@@ -261,7 +264,7 @@ class VirtualMachine:
             '-o', f"source={self.shared_folder}",
             '-o', 'cache=always',
         ]  # yapf: disable
-        lib_user.print_cmd(virtiofsd_cmd)
+        lib.utils.print_cmd(virtiofsd_cmd)
         with open(self.vfsd_log, 'w', encoding='utf-8') as file, \
              subprocess.Popen(virtiofsd_cmd, stderr=file, stdout=file) as vfsd:
             try:

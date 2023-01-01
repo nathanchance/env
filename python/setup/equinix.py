@@ -6,10 +6,15 @@ from argparse import ArgumentParser
 from pathlib import Path
 import shutil
 import subprocess
+import sys
 import time
 
-import lib_deb
-import lib_root
+import deb
+
+sys.path.append(str(Path(__file__).resolve().parents[1]))
+# pylint: disable=wrong-import-position
+import lib.setup  # noqa: E402
+# pylint: enable=wrong-import-position
 
 
 def check_install_parted():
@@ -17,27 +22,27 @@ def check_install_parted():
         return
 
     if shutil.which('pacman'):
-        lib_root.pacman(['-Syyu', '--noconfirm', 'parted'])
+        lib.setup.pacman(['-Syyu', '--noconfirm', 'parted'])
     elif shutil.which('apt'):
-        lib_deb.apt_update()
-        lib_deb.apt_install(['parted'])
+        deb.apt_update()
+        deb.apt_install(['parted'])
 
     raise Exception('parted is needed but it cannot be installed on the current OS!')
 
 
 def create_user(user_name, user_password):
-    if lib_root.user_exists(user_name):
+    if lib.setup.user_exists(user_name):
         raise Exception(f"user ('{user_name}') already exists?")
 
     subprocess.run(
-        ['useradd', '-m', '-G', 'sudo' if lib_root.group_exists('sudo') else 'wheel', user_name],
+        ['useradd', '-m', '-G', 'sudo' if lib.setup.group_exists('sudo') else 'wheel', user_name],
         check=True)
-    lib_root.chpasswd(user_name, user_password)
+    lib.setup.chpasswd(user_name, user_password)
 
     root_ssh = Path.home().joinpath('.ssh')
     user_ssh = Path('/home', user_name, '.ssh')
     shutil.copytree(root_ssh, user_ssh)
-    lib_root.chown(user_name, user_ssh)
+    lib.setup.chown(user_name, user_ssh)
 
 
 def partition_drive(drive_path, mountpoint, username):
@@ -67,7 +72,7 @@ def partition_drive(drive_path, mountpoint, username):
                               check=True,
                               text=True).stdout.strip()
 
-    fstab, fstab_txt = lib_root.path_and_text('/etc/fstab')
+    fstab, fstab_txt = lib.setup.path_and_text('/etc/fstab')
     fstab_line = f"UUID={vol_uuid}\t{mountpoint}\text4\tnoatime\t0\t2\n"
     fstab.write_text(fstab_txt + fstab_line, encoding='utf-8')
     subprocess.run(['systemctl', 'daemon-reload'], check=True)
@@ -75,7 +80,7 @@ def partition_drive(drive_path, mountpoint, username):
     mountpoint.mkdir(exist_ok=True, parents=True)
     subprocess.run(['mount', '-a'], check=True)
     if mountpoint != Path('/home'):
-        lib_root.chown(username, mountpoint)
+        lib.setup.chown(username, mountpoint)
 
 
 def parse_arguments():
@@ -91,7 +96,7 @@ def parse_arguments():
     parser.add_argument('-p',
                         '--password',
                         help='Password of user account (implies account creation)')
-    parser.add_argument('-u', '--user', default=lib_root.get_user(), help='Name of user account')
+    parser.add_argument('-u', '--user', default=lib.setup.get_user(), help='Name of user account')
 
     return parser.parse_args()
 
@@ -99,7 +104,7 @@ def parse_arguments():
 if __name__ == '__main__':
     args = parse_arguments()
 
-    lib_root.check_root()
+    lib.setup.check_root()
 
     drive = args.drive
     folder = Path(args.folder)
