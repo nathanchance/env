@@ -9,7 +9,7 @@ import re
 import subprocess
 import sys
 
-import lib_deb
+import deb
 
 sys.path.append(str(Path(__file__).resolve().parents[1]))
 # pylint: disable=wrong-import-position
@@ -95,7 +95,7 @@ def setup_repos():
     apt_sources = Path('/etc/apt/sources.list.d')
     codename = lib.root.get_version_codename()
     version_id = lib.root.get_os_rel_val('VERSION_ID')
-    dpkg_arch = lib_deb.get_dpkg_arch()
+    dpkg_arch = deb.get_dpkg_arch()
 
     # Docker
     docker_gpg_key = Path(apt_gpg, 'docker.gpg')
@@ -137,7 +137,7 @@ def update_and_install_packages():
     if machine_is_trusted():
         packages += ['tailscale']
 
-    lib_deb.update_and_install_packages(packages)
+    deb.update_and_install_packages(packages)
 
 
 if __name__ == '__main__':
@@ -145,17 +145,17 @@ if __name__ == '__main__':
     user = lib.root.get_user()
 
     prechecks()
-    lib_deb.set_apt_variables()
-    lib_deb.install_initial_packages()
+    deb.set_apt_variables()
+    deb.install_initial_packages()
     setup_repos()
     update_and_install_packages()
     lib.root.chsh_fish(user)
     lib.root.add_user_to_group_if_exists('kvm', user)
     pi_setup(user)
-    lib_deb.setup_doas(user, args.root_password)
-    lib_deb.setup_docker(user)
-    lib_deb.setup_libvirt(user)
-    lib_deb.setup_locales()
+    deb.setup_doas(user, args.root_password)
+    deb.setup_docker(user)
+    deb.setup_libvirt(user)
+    deb.setup_locales()
     lib.root.clone_env(user)
     lib.root.set_date_time()
     lib.root.setup_initial_fish_config(user)

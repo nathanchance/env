@@ -9,7 +9,7 @@ import subprocess
 import sys
 import time
 
-import lib_deb
+import deb
 
 sys.path.append(str(Path(__file__).resolve().parents[1]))
 # pylint: disable=wrong-import-position
@@ -24,8 +24,8 @@ def check_install_parted():
     if shutil.which('pacman'):
         lib.root.pacman(['-Syyu', '--noconfirm', 'parted'])
     elif shutil.which('apt'):
-        lib_deb.apt_update()
-        lib_deb.apt_install(['parted'])
+        deb.apt_update()
+        deb.apt_install(['parted'])
 
     raise Exception('parted is needed but it cannot be installed on the current OS!')
 
