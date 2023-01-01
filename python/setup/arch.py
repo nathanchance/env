@@ -12,12 +12,12 @@ import sys
 
 sys.path.append(str(Path(__file__).resolve().parents[1]))
 # pylint: disable=wrong-import-position
-import lib.root  # noqa: E402
+import lib.setup  # noqa: E402
 # pylint: enable=wrong-import-position
 
 
 def add_mods_to_mkinitcpio(modules):
-    mkinitcpio_conf, conf_text = lib.root.path_and_text('/etc/mkinitcpio.conf')
+    mkinitcpio_conf, conf_text = lib.setup.path_and_text('/etc/mkinitcpio.conf')
 
     if not (match := re.search(r'^MODULES=\((.*)\)$', conf_text, flags=re.M)):
         raise Exception(f"Could not find MODULES line in {mkinitcpio_conf}!")
@@ -34,10 +34,10 @@ def add_mods_to_mkinitcpio(modules):
 
 
 def adjust_gnome_power_settings():
-    if not lib.root.user_exists('gdm'):
+    if not lib.setup.user_exists('gdm'):
         return
 
-    doas_conf, doas_conf_text = lib.root.path_and_text('/etc/doas.conf')
+    doas_conf, doas_conf_text = lib.setup.path_and_text('/etc/doas.conf')
 
     doas_conf.write_text(doas_conf_text + 'permit nopass root as gdm\n', encoding='utf-8')
     gdm_cmd = [
@@ -71,7 +71,7 @@ def configure_boot_entries():
 
     # Add 'console=' if necessary (when connected by serial console in a
     # virtual machine)
-    if not (lib.root.is_virtual_machine() and 'DISPLAY' not in os.environ):
+    if not (lib.setup.is_virtual_machine() and 'DISPLAY' not in os.environ):
         return
     if not (match := re.search('^options.*$', linux_conf_text, flags=re.M)):
         raise Exception(f"Could not find 'options' line in {linux_conf}?")
@@ -81,7 +81,7 @@ def configure_boot_entries():
 
 
 def configure_networking():
-    hostname = lib.root.get_hostname()
+    hostname = lib.setup.get_hostname()
 
     ips = {
         'asus-intel-core-4210U': '192.168.4.137',
@@ -93,12 +93,12 @@ def configure_networking():
     if hostname not in ips:
         return
 
-    lib.root.setup_static_ip(ips[hostname])
-    lib.root.setup_mnt_nas()
+    lib.setup.setup_static_ip(ips[hostname])
+    lib.setup.setup_mnt_nas()
 
 
 def enable_reflector():
-    if not lib.root.is_installed('reflector'):
+    if not lib.setup.is_installed('reflector'):
         return
 
     reflector_args = [
@@ -110,7 +110,7 @@ def enable_reflector():
     ]  # yapf: disable
     conf_text = '\n'.join(reflector_args) + '\n'
     Path('/etc/xdg/reflector/reflector.conf').write_text(conf_text, encoding='utf-8')
-    lib.root.systemctl_enable([f"reflector.{x}" for x in ['service', 'timer']])
+    lib.setup.systemctl_enable([f"reflector.{x}" for x in ['service', 'timer']])
 
 
 # For archinstall, which causes ^M in /etc/fstab
@@ -119,7 +119,7 @@ def fix_fstab():
 
 
 def pacman_install(subargs):
-    lib.root.pacman(['-S', '--noconfirm', *subargs])
+    lib.setup.pacman(['-S', '--noconfirm', *subargs])
 
 
 def pacman_install_packages():
@@ -238,7 +238,7 @@ def pacman_install_packages():
         ]  # yapf: disable
 
     # https://wiki.archlinux.org/title/VMware/Install_Arch_Linux_as_a_guest
-    if lib.root.get_hostname() == 'vmware':
+    if lib.setup.get_hostname() == 'vmware':
         # All of these are needed for autofit
         packages += [
             'gtkmm',
@@ -250,7 +250,7 @@ def pacman_install_packages():
     # Equinix Metal servers; iptables-nft is also needed for networking but
     # that will be installed later to avoid potential issues with replacing
     # iptables.
-    if lib.root.is_equinix() or lib.root.is_virtual_machine():
+    if lib.setup.is_equinix() or lib.setup.is_virtual_machine():
         packages += [
             'dmidecode',
             'dnsmasq',
@@ -259,7 +259,7 @@ def pacman_install_packages():
             'virt-install'
         ]  # yapf: disable
 
-    if lib.root.is_virtual_machine():
+    if lib.setup.is_virtual_machine():
         packages += ['devtools']
     else:
         packages += ['tailscale']
@@ -311,7 +311,7 @@ def parse_arguments(username):
     # up the user account/password and root password, so the 'password'
     # argument is only required when the user is going to be created by
     # the script.
-    password_args_required = not lib.root.user_exists(username)
+    password_args_required = not lib.setup.user_exists(username)
     parser.add_argument('-p',
                         '--password',
                         help='User password (only required if user does not exist already)',
@@ -321,12 +321,12 @@ def parse_arguments(username):
 
 
 def prechecks():
-    lib.root.check_root()
+    lib.setup.check_root()
 
 
 def setup_doas(username):
     # sudo is a little bit more functional. Keep it in virtual machines.
-    if lib.root.is_virtual_machine():
+    if lib.setup.is_virtual_machine():
         return
 
     doas_conf = Path('/etc/doas.conf')
@@ -347,12 +347,12 @@ def setup_doas(username):
                      'session     include     system-auth\n')
     doas_pam.write_text(doas_pam_text, encoding='utf-8')
 
-    lib.root.remove_if_installed('sudo')
+    lib.setup.remove_if_installed('sudo')
     pacman_install(['opendoas-sudo'])
 
 
 def setup_libvirt(username):
-    if not lib.root.is_installed('libvirt'):
+    if not lib.setup.is_installed('libvirt'):
         return
 
     # The default network requires iptables-nft but iptables is installed by
@@ -361,7 +361,7 @@ def setup_libvirt(username):
     # https://unix.stackexchange.com/questions/274727/how-to-force-pacman-to-answer-yes-to-all-questions
     pacman_install(['--ask', '4', 'iptables-nft'])
 
-    lib.root.setup_libvirt(username)
+    lib.setup.setup_libvirt(username)
 
     # For domains with KVM to autostart, the kvm_<vendor> module needs to be
     # loaded during init.
@@ -373,16 +373,16 @@ def setup_libvirt(username):
 
 
 def setup_user(username, password):
-    if lib.root.user_exists(username):
-        lib.root.chsh_fish(username)
-        lib.root.add_user_to_group('uucp', username)
+    if lib.setup.user_exists(username):
+        lib.setup.chsh_fish(username)
+        lib.setup.add_user_to_group('uucp', username)
     else:
         fish = Path(shutil.which('fish')).resolve()
         subprocess.run(['useradd', '-G', 'wheel,uucp', '-m', '-s', fish, username], check=True)
 
-        lib.root.chpasswd(username, password)
+        lib.setup.chpasswd(username, password)
 
-    lib.root.setup_ssh_authorized_keys(username)
+    lib.setup.setup_ssh_authorized_keys(username)
 
 
 def uncomment_pacman_option(conf, option, old_value=None, new_value=None):
@@ -394,7 +394,7 @@ def uncomment_pacman_option(conf, option, old_value=None, new_value=None):
 
 
 def vmware_adjustments():
-    if lib.root.get_hostname() != 'vmware':
+    if lib.setup.get_hostname() != 'vmware':
         return
 
     # https://wiki.archlinux.org/title/VMware/Install_Arch_Linux_as_a_guest#In-kernel_drivers
@@ -408,11 +408,11 @@ def vmware_adjustments():
     add_mods_to_mkinitcpio(vmware_mods)
 
     # https://wiki.archlinux.org/title/VMware/Install_Arch_Linux_as_a_guest#Installation
-    lib.root.systemctl_enable(['vmtoolsd.service', 'vmware-vmblock-fuse.service'], now=False)
+    lib.setup.systemctl_enable(['vmtoolsd.service', 'vmware-vmblock-fuse.service'], now=False)
 
 
 if __name__ == '__main__':
-    user = lib.root.get_user()
+    user = lib.setup.get_user()
     arguments = parse_arguments(user)
 
     prechecks()
@@ -423,14 +423,14 @@ if __name__ == '__main__':
     pacman_install_packages()
     setup_doas(user)
     setup_user(user, arguments.password)
-    lib.root.clone_env(user)
-    lib.root.podman_setup(user)
+    lib.setup.clone_env(user)
+    lib.setup.podman_setup(user)
     vmware_adjustments()
     setup_libvirt(user)
     configure_networking()
     enable_reflector()
-    lib.root.systemctl_enable(['sshd.service'])
-    lib.root.enable_tailscale()
+    lib.setup.systemctl_enable(['sshd.service'])
+    lib.setup.enable_tailscale()
     fix_fstab()
-    lib.root.set_date_time()
-    lib.root.setup_initial_fish_config(user)
+    lib.setup.set_date_time()
+    lib.setup.setup_initial_fish_config(user)
