@@ -59,12 +59,19 @@ def generate_warnings(log_folder, src_folder):
     full = {key: value for key, value in warnings.items() if value}
 
     # Filter warnings based on priority to fix
+    merge_config_ignore = [
+        'CPU_BIG_ENDIAN',
+        'LTO_CLANG_THIN',
+        'SQUASHFS_DECOMP_SINGLE',
+        'SQUASHFS_DECOMP_MULTI',
+        'SQUASHFS_DECOMP_MULTI_PERCPU',
+    ]
     ignore = [
         # Too many to deal with for now
         'objtool:',
         '-Wframe-larger-than',
         # Warnings from merge_config that are harmless
-        'override: (CPU_BIG_ENDIAN|LTO_CLANG_THIN|SQUASHFS_DECOMP_SINGLE) changes choice state',
+        f"override: ({'|'.join(merge_config_ignore)}) changes choice state",
         # https://github.com/ClangBuiltLinux/linux/issues/1065
         r'union jset::\(anonymous at ./usr/include/linux/bcache.h:',
         # https://github.com/ClangBuiltLinux/linux/issues/1427
