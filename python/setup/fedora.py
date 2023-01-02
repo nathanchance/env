@@ -10,6 +10,7 @@ import sys
 sys.path.append(str(Path(__file__).resolve().parents[1]))
 # pylint: disable=wrong-import-position
 import lib.setup  # noqa: E402
+import lib.utils  # noqa: E402
 # pylint: enable=wrong-import-position
 
 
@@ -138,7 +139,7 @@ def install_packages():
 
 def setup_doas():
     # Fedora provides a doas.conf already, just modify it to suit our needs
-    doas_conf, conf_txt = lib.setup.path_and_text('/etc/doas.conf')
+    doas_conf, conf_txt = lib.utils.path_and_text('/etc/doas.conf')
     if (persist := 'permit persist :wheel') not in conf_txt:
         conf_txt = conf_txt.replace('permit :wheel', persist)
         conf_txt += ('\n'

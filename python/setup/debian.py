@@ -14,6 +14,7 @@ import deb
 sys.path.append(str(Path(__file__).resolve().parents[1]))
 # pylint: disable=wrong-import-position
 import lib.setup  # noqa: E402
+import lib.utils  # noqa: E402
 # pylint: enable=wrong-import-position
 
 
@@ -40,7 +41,7 @@ def pi_setup(user_name):
     subprocess.run(['raspi-config', '--expand-rootfs'], check=True)
     subprocess.run(['raspi-config', 'nonint', 'do_serial', '0'], check=True)
 
-    dhcpcd_conf, dhcpcd_conf_txt = lib.setup.path_and_text('/etc/dhcpcd.conf')
+    dhcpcd_conf, dhcpcd_conf_txt = lib.utils.path_and_text('/etc/dhcpcd.conf')
     if not re.search(r'^interface eth0\nstatic ip_address=192\.168', dhcpcd_conf_txt, flags=re.M):
         dhcpcd_conf_txt += (
             '\n'
@@ -57,7 +58,7 @@ def pi_setup(user_name):
         mnt_point.mkdir(exist_ok=True, parents=True)
         lib.setup.chown(user_name, mnt_point)
 
-        fstab, fstab_text = lib.setup.path_and_text('/etc/fstab')
+        fstab, fstab_text = lib.utils.path_and_text('/etc/fstab')
         if str(mnt_point) not in fstab_text:
             partuuid = subprocess.run(['blkid', '-o', 'value', '-s', 'PARTUUID', ssd_partition],
                                       capture_output=True,
@@ -75,7 +76,7 @@ def pi_setup(user_name):
                            '\n}\n')
         docker_json.write_text(docker_json_txt, encoding='utf-8')
 
-    x11_opts, x11_opts_txt = lib.setup.path_and_text('/etc/X11/Xsession.options')
+    x11_opts, x11_opts_txt = lib.utils.path_and_text('/etc/X11/Xsession.options')
     if x11_opts_txt:
         conf = 'use-ssh-agent'
         if re.search(f"^{conf}$", x11_opts_txt, flags=re.M):

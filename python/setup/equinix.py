@@ -14,6 +14,7 @@ import deb
 sys.path.append(str(Path(__file__).resolve().parents[1]))
 # pylint: disable=wrong-import-position
 import lib.setup  # noqa: E402
+import lib.utils  # noqa: E402
 # pylint: enable=wrong-import-position
 
 
@@ -72,7 +73,7 @@ def partition_drive(drive_path, mountpoint, username):
                               check=True,
                               text=True).stdout.strip()
 
-    fstab, fstab_txt = lib.setup.path_and_text('/etc/fstab')
+    fstab, fstab_txt = lib.utils.path_and_text('/etc/fstab')
     fstab_line = f"UUID={vol_uuid}\t{mountpoint}\text4\tnoatime\t0\t2\n"
     fstab.write_text(fstab_txt + fstab_line, encoding='utf-8')
     subprocess.run(['systemctl', 'daemon-reload'], check=True)

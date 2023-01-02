@@ -13,11 +13,12 @@ import sys
 sys.path.append(str(Path(__file__).resolve().parents[1]))
 # pylint: disable=wrong-import-position
 import lib.setup  # noqa: E402
+import lib.utils  # noqa: E402
 # pylint: enable=wrong-import-position
 
 
 def add_mods_to_mkinitcpio(modules):
-    mkinitcpio_conf, conf_text = lib.setup.path_and_text('/etc/mkinitcpio.conf')
+    mkinitcpio_conf, conf_text = lib.utils.path_and_text('/etc/mkinitcpio.conf')
 
     if not (match := re.search(r'^MODULES=\((.*)\)$', conf_text, flags=re.M)):
         raise Exception(f"Could not find MODULES line in {mkinitcpio_conf}!")
@@ -37,7 +38,7 @@ def adjust_gnome_power_settings():
     if not lib.setup.user_exists('gdm'):
         return
 
-    doas_conf, doas_conf_text = lib.setup.path_and_text('/etc/doas.conf')
+    doas_conf, doas_conf_text = lib.utils.path_and_text('/etc/doas.conf')
 
     doas_conf.write_text(doas_conf_text + 'permit nopass root as gdm\n', encoding='utf-8')
     gdm_cmd = [

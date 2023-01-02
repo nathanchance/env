@@ -12,6 +12,8 @@ import shutil
 import socket
 import subprocess
 
+from . import utils
+
 
 def add_user_to_group(groupname, username):
     subprocess.run(['usermod', '-aG', groupname, username], check=True)
@@ -138,7 +140,7 @@ def get_ip_addr_for_intf(intf):
 
 
 def get_os_rel_val(variable):
-    _, os_rel = path_and_text('/usr/lib/os-release')
+    _, os_rel = utils.path_and_text('/usr/lib/os-release')
 
     if (match := re.search(f'^{variable}=(.*)$', os_rel, flags=re.M)):
         return match.groups()[0].replace('"', '')
@@ -200,12 +202,6 @@ def is_virtual_machine():
 
 def pacman(args):
     subprocess.run(['pacman', *args], check=True)
-
-
-def path_and_text(*args):
-    if (path := Path(*args)).exists():
-        return path, path.read_text(encoding='utf-8')
-    return path, None
 
 
 def podman_setup(username):

@@ -13,6 +13,7 @@ import time
 sys.path.append(str(Path(__file__).resolve().parents[1]))
 # pylint: disable=wrong-import-position
 import lib.setup  # noqa: E402
+import lib.utils  # noqa: E402
 # pylint: enable=wrong-import-position
 
 
@@ -29,7 +30,7 @@ def parse_arguments():
 
 
 def enable_community_repo():
-    conf, text = lib.setup.path_and_text('/etc/apk/repositories')
+    conf, text = lib.utils.path_and_text('/etc/apk/repositories')
 
     # Get the repository URL to create the community repo from (build from the
     # first uncommented line ending in main).
@@ -112,7 +113,7 @@ def setup_user(user_name, user_password):
             subprocess.run(['addgroup', user_name, group], check=True)
 
     # Setup doas
-    doas_conf, doas_text = lib.setup.path_and_text('/etc/doas.d/doas.conf')
+    doas_conf, doas_text = lib.utils.path_and_text('/etc/doas.d/doas.conf')
     if (doas_wheel := 'permit persist :wheel') not in doas_text:
         doas_conf.write_text(f"{doas_conf}{doas_wheel}\n", encoding='utf-8')
 
@@ -123,7 +124,7 @@ def setup_user(user_name, user_password):
 # https://wiki.alpinelinux.org/wiki/Podman
 def setup_podman(user_name):
     # Set up cgroupsv2
-    rc_conf, rc_conf_txt = lib.setup.path_and_text('/etc/rc.conf')
+    rc_conf, rc_conf_txt = lib.utils.path_and_text('/etc/rc.conf')
     rc_cgroup_mode = 'rc_cgroup_mode="unified"'
     if not re.search(f"^{rc_cgroup_mode}$", rc_conf_txt, flags=re.M):
         rc_cgroup_mode_line = re.search('^#?rc_cgroup_mode=.*$', rc_conf_txt, flags=re.M).group(0)
@@ -133,7 +134,7 @@ def setup_podman(user_name):
     subprocess.run(['rc-update', 'add', 'cgroups'], check=True)
     subprocess.run(['rc-service', 'cgroups', 'start'], check=True)
 
-    modules, modules_text = lib.setup.path_and_text('/etc/modules')
+    modules, modules_text = lib.utils.path_and_text('/etc/modules')
     if 'tun' not in modules_text:
         modules.write_text(f"{modules_text}tun\n", encoding='utf-8')
 
