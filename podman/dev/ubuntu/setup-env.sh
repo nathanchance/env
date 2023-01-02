@@ -137,7 +137,14 @@ function install_packages() {
         x86_64) delta_arch=amd64 ;;
     esac
     delta_repo=dandavison/delta
-    delta_version=$(curl -LSs https://api.github.com/repos/"$delta_repo"/releases/latest | jq -r .tag_name)
+    api_args=()
+    if [[ -n ${GITHUB_TOKEN:-} ]]; then
+        api_args=(
+            -H "Authorization: Bearer $GITHUB_TOKEN"
+            -H "Content-Type: application/json"
+        )
+    fi
+    delta_version=$(curl "${api_args[@]}" -LSs https://api.github.com/repos/"$delta_repo"/releases/latest | jq -r .tag_name)
     delta_deb=/tmp/git-delta_"$delta_version"_"$delta_arch".deb
     curl -LSso "$delta_deb" https://github.com/"$delta_repo"/releases/download/"$delta_version"/"${delta_deb##*/}"
     apt install -y "$delta_deb"

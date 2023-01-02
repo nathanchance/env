@@ -272,7 +272,14 @@ function install_delta() {
     esac
     work_dir=$(mktemp -d)
     delta_repo=dandavison/delta
-    delta_version=$(curl -LSs https://api.github.com/repos/"$delta_repo"/releases/latest | jq -r .tag_name)
+    api_args=()
+    if [[ -n ${GITHUB_TOKEN:-} ]]; then
+        api_args=(
+            -H "Authorization: Bearer $GITHUB_TOKEN"
+            -H "Content-Type: application/json"
+        )
+    fi
+    delta_version=$(curl "${api_args[@]}" -LSs https://api.github.com/repos/"$delta_repo"/releases/latest | jq -r .tag_name)
     case "$host_arch" in
         aarch64)
             case $version in
@@ -287,7 +294,7 @@ function install_delta() {
             ;;
     esac
     if [[ -n ${delta_deb:-} ]]; then
-        curl -LSso "$delta_deb" https://github.com/"$delta_repo"/releases/download/"$delta_version"/"${delta_deb##*/}"
+        curl "${api_args[@]}" -LSso "$delta_deb" https://github.com/"$delta_repo"/releases/download/"$delta_version"/"${delta_deb##*/}"
         apt install -y "$delta_deb"
     fi
     rm -fr "$work_dir"
@@ -298,17 +305,17 @@ function install_fzf() {
         aarch64) fzf_arch=arm64 ;;
         x86_64) fzf_arch=amd64 ;;
     esac
-    fzf_url=$(curl -LSs https://api.github.com/repos/junegunn/fzf/releases/latest | grep -E "browser_download_url.*linux_$fzf_arch" | cut -d\" -f4)
+    fzf_url=$(curl "${api_args[@]}" -LSs https://api.github.com/repos/junegunn/fzf/releases/latest | grep -E "browser_download_url.*linux_$fzf_arch" | cut -d\" -f4)
     download_install_binary fzf "$fzf_url"
 }
 
 function install_ripgrep() {
-    ripgrep_url=$(curl -LSs https://api.github.com/repos/microsoft/ripgrep-prebuilt/releases/latest | grep -E "browser_download_url.*$host_arch-unknown-linux-musl" | cut -d\" -f4)
+    ripgrep_url=$(curl "${api_args[@]}" -LSs https://api.github.com/repos/microsoft/ripgrep-prebuilt/releases/latest | grep -E "browser_download_url.*$host_arch-unknown-linux-musl" | cut -d\" -f4)
     download_install_binary rg "$ripgrep_url"
 }
 
 function install_zoxide() {
-    zoxide_url=$(curl -LSs https://api.github.com/repos/ajeetdsouza/zoxide/releases/latest | grep -E "browser_download_url.*$host_arch-unknown-linux-musl" | cut -d\" -f4)
+    zoxide_url=$(curl "${api_args[@]}" -LSs https://api.github.com/repos/ajeetdsouza/zoxide/releases/latest | grep -E "browser_download_url.*$host_arch-unknown-linux-musl" | cut -d\" -f4)
     download_install_binary zoxide "$zoxide_url"
 }
 

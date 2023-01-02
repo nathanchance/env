@@ -61,6 +61,7 @@ jobs:
       - name: Build
         uses: docker/build-push-action@v3
         with:
+          build-args: GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }}
           context: ${{ steps.variables.outputs.folder }}/${{ matrix.os }}
           file: ${{ steps.variables.outputs.folder }}/${{ matrix.os }}/Dockerfile
           platforms: ${{ matrix.platforms }}

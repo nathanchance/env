@@ -170,7 +170,7 @@ function install_packages() {
     esac
     delta_repo=dandavison/delta
     # https://github.com/dandavison/delta/issues/1250
-    # delta_version=$(curl -LSs https://api.github.com/repos/"$delta_repo"/releases/latest | jq -r .tag_name)
+    # delta_version=$(curl "${api_args[@]}" -LSs https://api.github.com/repos/"$delta_repo"/releases/latest | jq -r .tag_name)
     delta_version=0.14.0
     delta_deb=/tmp/git-delta_"$delta_version"_"$delta_arch".deb
     curl -LSso "$delta_deb" https://github.com/"$delta_repo"/releases/download/"$delta_version"/"${delta_deb##*/}"

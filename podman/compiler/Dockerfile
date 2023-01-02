@@ -8,6 +8,7 @@ COPY distrobox-check.fish /
 
 ARG BASE
 ARG COMPILER
+ARG GITHUB_TOKEN
 RUN bash /setup-env.sh ${BASE} ${COMPILER} && fish /distrobox-check.fish && rm -f /distrobox-check.fish /setup-env.sh
 
 CMD ["/usr/bin/fish", "-l"]

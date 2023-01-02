@@ -83,6 +83,7 @@ jobs:
           build-args: |
             BASE=docker.io/${{ matrix.base }}
             COMPILER=${{ matrix.compiler }}
+            GITHUB_TOKEN=${{ secrets.GITHUB_TOKEN }}
           context: ${{ steps.variables.outputs.folder }}
           file: ${{ steps.variables.outputs.folder }}/Dockerfile
           platforms: ${{ matrix.platforms }}
