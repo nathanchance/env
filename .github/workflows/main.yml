@@ -1,6 +1,16 @@
 # Run a bunch of lint checks to keep me honest
 name: Linting
-on: [push, pull_request]
+on:
+  push:
+    paths:
+      - '**.fish'
+      - '**.py'
+      - '**.sh'
+  pull_request:
+    paths:
+      - '**.fish'
+      - '**.py'
+      - '**.sh'
 jobs:
   fish:
     uses: nathanchance/actions-workflows/.github/workflows/fish_format.yml@main
