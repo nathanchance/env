@@ -1,6 +1,6 @@
 #!/usr/bin/env fish
 # SPDX-License-Identifier: MIT
-# Copyright (C) 2022 Nathan Chancellor
+# Copyright (C) 2022-2023 Nathan Chancellor
 
 function setup_nas_systemd_files -d "Install systemd files for mounting NAS to a machine"
     # Couple of initial checks

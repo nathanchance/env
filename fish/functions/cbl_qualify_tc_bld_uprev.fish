@@ -1,6 +1,6 @@
 #!/usr/bin/env fish
 # SPDX-License-Identifier: MIT
-# Copyright (C) 2021-2022 Nathan Chancellor
+# Copyright (C) 2021-2023 Nathan Chancellor
 
 function cbl_qualify_tc_bld_uprev -d "Qualify a new known good revision for tc-build"
     in_container_msg -c; or return

@@ -1,6 +1,6 @@
 #!/usr/bin/env fish
 # SPDX-License-Identifier: MIT
-# Copyright (C) 2022 Nathan Chancellor
+# Copyright (C) 2022-2023 Nathan Chancellor
 
 function gh_run -d "Run GitHub Actions Workflow"
     if test (count $argv) -lt 3

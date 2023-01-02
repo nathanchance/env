@@ -1,6 +1,6 @@
 #!/usr/bin/env fish
 # SPDX-License-Identifier: MIT
-# Copyright (C) 2022 Nathan Chancellor
+# Copyright (C) 2022-2023 Nathan Chancellor
 
 function cbl_setup_reduction -d "Build good and bad versions of LLVM for cvise reductions"
     if not test -e llvm/CMakeLists.txt

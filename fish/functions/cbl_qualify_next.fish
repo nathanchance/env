@@ -1,6 +1,6 @@
 #!/usr/bin/env fish
 # SPDX-License-Identifier: MIT
-# Copyright (C) 2022 Nathan Chancellor
+# Copyright (C) 2022-2023 Nathan Chancellor
 
 function cbl_qualify_next -d "Run a series of checks to qualify new linux-next revisions"
     in_container_msg -h; or return

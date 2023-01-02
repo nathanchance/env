@@ -1,6 +1,6 @@
 #!/usr/bin/env fish
 # SPDX-License-Identifier: MIT
-# Copyright (C) 2021-2022 Nathan Chancellor
+# Copyright (C) 2021-2023 Nathan Chancellor
 
 function gpg_key_usable -d "Checks if GPG is installed and key is in keyring"
     command -q gpg; or return

@@ -1,6 +1,6 @@
 #!/usr/bin/env fish
 # SPDX-License-Identifier: MIT
-# Copyright (C) 2021-2022 Nathan Chancellor
+# Copyright (C) 2021-2023 Nathan Chancellor
 
 function cbl_upd_krnl_pkgver -d "Update the pkgver variable in a kernel PKGBUILD"
     for arg in $argv

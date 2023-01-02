@@ -1,6 +1,6 @@
 #!/usr/bin/env fish
 # SPDX-License-Identifier: MIT
-# Copyright (C) 2021-2022 Nathan Chancellor
+# Copyright (C) 2021-2023 Nathan Chancellor
 
 function header -d "Prints a formatter header to signal what is being done to the user"
     set border "===="(for i in (seq 1 (string length $argv)); printf "="; end)"===="

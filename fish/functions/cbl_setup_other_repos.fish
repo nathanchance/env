@@ -1,6 +1,6 @@
 #!/usr/bin/env fish
 # SPDX-License-Identifier: MIT
-# Copyright (C) 2021-2022 Nathan Chancellor
+# Copyright (C) 2021-2023 Nathan Chancellor
 
 function cbl_setup_other_repos -d "Download other ClangBuiltLinux repos"
     set repos_cbl_github \

@@ -1,6 +1,6 @@
 #!/usr/bin/env fish
 # SPDX-License-Identifier: MIT
-# Copyright (C) 2021-2022 Nathan Chancellor
+# Copyright (C) 2021-2023 Nathan Chancellor
 
 function cbl_lkt -d "Tests a Linux kernel with llvm-kernel-testing"
     in_container_msg -c; or return

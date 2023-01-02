@@ -1,6 +1,6 @@
 #!/usr/bin/env fish
 # SPDX-License-Identifier: MIT
-# Copyright (C) 2022 Nathan Chancellor
+# Copyright (C) 2022-2023 Nathan Chancellor
 
 function gen_slim_initrd -d "Generate a slim initial ramdisk within a virtual machine"
     in_container_msg -h; or return

@@ -1,6 +1,6 @@
 #!/usr/bin/env fish
 # SPDX-License-Identifier: MIT
-# Copyright (C) 2022 Nathan Chancellor
+# Copyright (C) 2022-2023 Nathan Chancellor
 
 function cbl_bld_lnx_dbg -d "Build linux-debug Arch Linux package"
     in_kernel_tree; or return

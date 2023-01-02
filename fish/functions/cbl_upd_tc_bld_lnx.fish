@@ -1,6 +1,6 @@
 #!/usr/bin/env fish
 # SPDX-License-Identifier: MIT
-# Copyright (C) 2021-2022 Nathan Chancellor
+# Copyright (C) 2021-2023 Nathan Chancellor
 
 function cbl_upd_tc_bld_lnx -d "Update the version of Linux built for PGO in tc-build"
     for arg in $argv

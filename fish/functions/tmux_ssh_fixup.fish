@@ -1,6 +1,6 @@
 #!/usr/bin/env fish
 # SPDX-License-Identifier: MIT
-# Copyright (C) 2021-2022 Nathan Chancellor
+# Copyright (C) 2021-2023 Nathan Chancellor
 
 function tmux_ssh_fixup -d "Fix up SSH_CONNECTION value in tmux"
     # For whatever reason, there are times where SSH_CONNECTION exists in the

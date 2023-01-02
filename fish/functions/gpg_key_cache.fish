@@ -1,6 +1,6 @@
 #!/usr/bin/env fish
 # SPDX-License-Identifier: MIT
-# Copyright (C) 2021-2022 Nathan Chancellor
+# Copyright (C) 2021-2023 Nathan Chancellor
 
 function gpg_key_cache -d "Prompt for GPG password so that it is cached by the agent"
     gpg_key_usable; or return 0

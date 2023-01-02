@@ -1,6 +1,6 @@
 #!/usr/bin/env fish
 # SPDX-License-Identifier: MIT
-# Copyright (C) 2021-2022 Nathan Chancellor
+# Copyright (C) 2021-2023 Nathan Chancellor
 
 function cbl_tst_tc_bld -d "Test build-llvm.py and build-binutils.py in Docker images"
     set ccache_folder $CBL/.config/ccache/cbl_lkt_tc_bld

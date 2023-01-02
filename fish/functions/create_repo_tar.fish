@@ -1,6 +1,6 @@
 #!/usr/bin/env fish
 # SPDX-License-Identifier: MIT
-# Copyright (C) 2022 Nathan Chancellor
+# Copyright (C) 2022-2023 Nathan Chancellor
 
 function create_repo_tar -d "Create a tarball of a git repo from just the tracked files"
     if test (count $argv) -gt 0

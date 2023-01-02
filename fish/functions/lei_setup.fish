@@ -1,6 +1,6 @@
 #!/usr/bin/env fish
 # SPDX-License-Identifier: MIT
-# Copyright (C) 2021-2022 Nathan Chancellor
+# Copyright (C) 2021-2023 Nathan Chancellor
 
 function lei_setup -d "Sets up local email interface for Linux kernel mailing lists"
     # Make sure that folders exists that will hold configuration files

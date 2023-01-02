@@ -1,6 +1,6 @@
 #!/usr/bin/env fish
 # SPDX-License-Identifier: MIT
-# Copyright (C) 2022 Nathan Chancellor
+# Copyright (C) 2022-2023 Nathan Chancellor
 
 function cbl_upd_software_symlinks -d "Update symlinks to a stow or QEMU folder"
     if test (count $argv) -lt 1

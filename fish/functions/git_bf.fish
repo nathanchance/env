@@ -1,6 +1,6 @@
 #!/usr/bin/env fish
 # SPDX-License-Identifier: MIT
-# Copyright (C) 2022 Nathan Chancellor
+# Copyright (C) 2022-2023 Nathan Chancellor
 # Portions taken from forgit::checkout::branch (https://github.com/wfxr/forgit)
 # Copyright (C) 2017-2022 Wenxuan Zhang <wenxuangm@gmail.com>
 

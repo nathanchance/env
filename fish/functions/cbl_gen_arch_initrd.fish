@@ -1,6 +1,6 @@
 #!/usr/bin/env fish
 # SPDX-License-Identifier: MIT
-# Copyright (C) 2022 Nathan Chancellor
+# Copyright (C) 2022-2023 Nathan Chancellor
 
 function cbl_gen_arch_initrd -d "Build initramfs with mkinitcpio for Arch Linux systems"
     in_kernel_tree; or return

@@ -1,6 +1,6 @@
 #!/usr/bin/env fish
 # SPDX-License-Identifier: MIT
-# Copyright (C) 2022 Nathan Chancellor
+# Copyright (C) 2022-2023 Nathan Chancellor
 
 function setup_registries_conf -d "Set up registries.conf for pull through ghcr.io cache"
     set registries_conf $HOME/.config/containers/registries.conf
