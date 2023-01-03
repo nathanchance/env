@@ -12,7 +12,10 @@ import shutil
 import socket
 import subprocess
 
-from . import utils
+try:
+    import utils
+except ModuleNotFoundError:
+    from . import utils
 
 
 def add_user_to_group(groupname, username):
