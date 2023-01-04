@@ -26,9 +26,14 @@ def korg_gcc_canonicalize_target(value):
     suffix = ''
     if value == 'arm':
         suffix = '-gnueabi'
-    elif value == 'arm64':  # in case the kernel ARCH value is passed in
-        value = 'aarch64'
-    return f"{value}-linux{suffix}"
+
+    # in case the kernel ARCH value is passed in, we make an educated guess as
+    # to what the user intended
+    kernel_to_gcc = {
+        'arm64': 'aarch64',
+        'riscv': 'riscv64',
+    }
+    return f"{kernel_to_gcc.get(value, value)}-linux{suffix}"
 
 
 def supported_korg_gcc_arches():

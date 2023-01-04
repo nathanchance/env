@@ -16,8 +16,34 @@ def print_cmd(command):
     print(f"$ {' '.join([shlex.quote(str(elem)) for elem in command])}")
 
 
+def print_duration(seconds):
+    days, seconds = divmod(int(seconds), 60 * 60 * 24)
+    hours, seconds = divmod(seconds, 60 * 60)
+    minutes, seconds = divmod(seconds, 60)
+
+    parts = []
+    if days:
+        parts += [f"{days}d"]
+    if hours:
+        parts += [f"{hours}h"]
+    if minutes:
+        parts += [f"{minutes}m"]
+    parts += [f"{seconds}s"]
+
+    return f"{' '.join(parts)}"
+
+
+def print_header(string):
+    border = ''.join(["=" for _ in range(0, len(string) + 6)])
+    print_cyan(f"\n{border}\n== {string} ==\n{border}\n")
+
+
 def print_color(color, string):
     print(f"{color}{string}\033[0m", flush=True)
+
+
+def print_cyan(msg):
+    print_color('\033[01;36m', msg)
 
 
 def print_green(msg):
