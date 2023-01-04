@@ -197,6 +197,7 @@ begin
         set -gx $var $FZF_DEFAULT_OPTS
     end
 end
+set -gx FORGIT_LOG_GRAPH_ENABLE false
 
 # My GitHub Container Registry URL
 set -gx GHCR ghcr.io/nathanchance
