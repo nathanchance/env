@@ -62,6 +62,11 @@ def parse_arguments():
                         default=platform.machine(),
                         help='Architecture to build and boot')
 
+    parser.add_argument(
+        '-c',
+        '--config',
+        help='Use this configuration instead of default configuration for virtual machine')
+
     parser.add_argument('-m',
                         '--menuconfig',
                         action='store_true',
@@ -80,12 +85,16 @@ def parse_arguments():
                         default='llvm',
                         help='Toolchain to build kernel with')
 
+    parser.add_argument('--additional-targets',
+                        action='append',
+                        help="Call target before 'all' target")
+
     parser.add_argument('make_args', nargs='*', help='Arguments to pass to make')
 
     return parser.parse_args()
 
 
-def build_kernel_for_vm(make_variables, menuconfig, vm_name):
+def build_kernel_for_vm(add_make_targets, make_variables, config, menuconfig, vm_name):
     subprocess.run(['git', 'cl', '-q'], check=True)
     (build := make_variables['O']).mkdir()
 
@@ -113,7 +122,10 @@ def build_kernel_for_vm(make_variables, menuconfig, vm_name):
             'x86_64': 'https://src.fedoraproject.org/rpms/kernel/raw/rawhide/f/kernel-x86_64-fedora.config',
         }  # yapf: disable
 
-    config_src = configs[make_variables['ARCH']]
+    if config:
+        config_src = config if 'http' in config else Path(config)
+    else:
+        config_src = configs[make_variables['ARCH']]
     config_dst = Path(build, '.config')
 
     if isinstance(config_src, Path):
@@ -128,6 +140,9 @@ def build_kernel_for_vm(make_variables, menuconfig, vm_name):
     make_targets = ['olddefconfig', 'localyesconfig', 'all']
     if menuconfig:
         make_targets.insert(-1, 'menuconfig')
+    if add_make_targets:
+        for target in add_make_targets:
+            make_targets.insert(-1, target)
     lib.kernel.kmake(make_variables, make_targets)
 
 
@@ -153,4 +168,5 @@ if __name__ == '__main__':
     make_vars.update(get_toolchain_vars(make_vars['ARCH'], args.toolchain))
     make_vars.update(dict(arg.split('=', 1) for arg in args.make_args))
 
-    build_kernel_for_vm(make_vars, args.menuconfig, args.vm_name)
+    build_kernel_for_vm(args.additional_targets, make_vars, args.config, args.menuconfig,
+                        args.vm_name)
