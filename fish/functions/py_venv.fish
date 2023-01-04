@@ -29,7 +29,7 @@ function py_venv -d "Manage Python virtual environment"
     for action in $actions
         switch $action
             case c create
-                python -m venv $venv
+                python3 -m venv $venv
 
             case e enter
                 if in_venv
