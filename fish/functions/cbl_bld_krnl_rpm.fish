@@ -80,6 +80,6 @@ function cbl_bld_krnl_rpm -d "Build a .rpm kernel package"
         olddefconfig $kmake_targets binrpm-pkg; or return
 
     echo Run
-    printf '\n\t$ sudo fish -c "dnf install %s; and reboot"\n\n' (realpath -- (fd -e rpm 'kernel-[0-9]+' rpmbuild) | string replace $HOME \$HOME)
+    printf '\n\t$ sudo fish -c "dnf install %s; and reboot"\n\n' (realpath -- (fd -e rpm -u 'kernel-[0-9]+' rpmbuild) | string replace $HOME \$HOME)
     echo "to install and use new kernel."
 end
