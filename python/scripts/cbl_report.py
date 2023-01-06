@@ -186,10 +186,10 @@ def create_report_file(report_file, report_date):
     links = {
         'aosp_llvm': "[AOSP's distribution of LLVM](https://android.googlesource.com/platform/prebuilts/clang/host/linux-x86/)",
         'google': '[Google](https://www.google.com/)',
-        'lf': '[the Linux Foundation](https://linuxfoundation.org/)',
+        'lf': '[the Linux Foundation](https://www.linuxfoundation.org)',
         'linux_next': '[linux-next](https://git.kernel.org/pub/scm/linux/kernel/git/next/linux-next.git/)',
         'lore': '[lore.kernel.org](https://lore.kernel.org/all/?q=f:nathan@kernel.org)',
-        'sponsor': '[sponsoring my work](https://linuxfoundation.org/en/press-release/google-funds-linux-kernel-developers-to-focus-exclusively-on-security/)',
+        'sponsor': '[sponsoring my work](https://www.linuxfoundation.org/press/press-release/google-funds-linux-kernel-developers-to-focus-exclusively-on-security)',
         'tuxmake': '[TuxMake](https://tuxmake.org)'
     }
     # Yes, this is Markdown in Python :)
