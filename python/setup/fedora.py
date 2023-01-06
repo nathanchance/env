@@ -18,6 +18,7 @@ def configure_networking():
     hostname = lib.setup.get_hostname()
 
     ips = {
+        'aadp': '192.168.4.234',
         'honeycomb': '192.168.4.210',
     }
 
@@ -41,7 +42,7 @@ def get_fedora_version():
 
 
 def machine_is_trusted():
-    return lib.setup.get_hostname() in ('honeycomb')
+    return lib.setup.get_hostname() in ('aadp', 'honeycomb')
 
 
 def prechecks():

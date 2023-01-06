@@ -6,7 +6,7 @@ function cbl_bld_all_krnl -d "Build all kernels for ClangBuiltLinux testing"
     in_container_msg -c; or return
 
     switch $LOCATION
-        case generic
+        case aadp generic
             set -l lnx $CBL_SRC/linux
 
             cbl_clone_repo linux

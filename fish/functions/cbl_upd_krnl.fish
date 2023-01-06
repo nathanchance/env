@@ -15,10 +15,7 @@ function cbl_upd_krnl -d "Update machine's kernel"
     end
 
     switch $location
-        case hetzner-server workstation
-            cbl_upd_krnl_pkg $argv
-
-        case honeycomb vm-aarch64
+        case aadp honeycomb vm-aarch64
             in_container_msg -h; or return
             test (get_distro) = fedora; or return
 
@@ -45,6 +42,9 @@ function cbl_upd_krnl -d "Update machine's kernel"
             if test "$reboot" = true
                 sudo reboot
             end
+
+        case hetzner-server workstation
+            cbl_upd_krnl_pkg $argv
 
         case pi
             in_container_msg -h; or return

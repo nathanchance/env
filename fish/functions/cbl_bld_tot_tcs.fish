@@ -13,7 +13,7 @@ function cbl_bld_tot_tcs -d "Build LLVM and binutils from source for kernel deve
     end
 
     switch $LOCATION
-        case generic wsl
+        case aadp generic wsl
             set bld_llvm_args \
                 --pgo kernel-defconfig
 

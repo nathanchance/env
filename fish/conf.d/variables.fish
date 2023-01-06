@@ -13,6 +13,8 @@ if test -z "$LOCATION"
         set -Ux LOCATION mac
     else
         switch "$(id -un)@$hostname"
+            case nathan@aadp
+                set -Ux LOCATION aadp
             case nathan@archlinux-'*' nathan@debian-'*' nathan@ubuntu-'*'
                 set -Ux LOCATION hetzner-server
             case nathan@honeycomb

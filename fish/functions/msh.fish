@@ -13,6 +13,14 @@ function msh -d "Shorthand for mosh -o" -w mosh
     end
 
     switch $msh_args
+        case aadp
+            if test "$tailscale" = true
+                set ip # will be setup in future
+            else
+                set ip 192.168.4.234
+            end
+            set user_host nathan@$ip
+
         case amd-desktop
             if test "$tailscale" = true
                 set ip 100.76.142.56
