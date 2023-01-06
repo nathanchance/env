@@ -28,7 +28,7 @@ def parse_arguments():
     parser.add_argument('-v', '--verbose', action='store_true', help='Do a more verbose build')
     parser.add_argument('make_args', help='Make variables and targets', nargs='*')
 
-    return parser.parse_args()
+    return parser.parse_intermixed_args()
 
 
 def prepend_to_path(paths):

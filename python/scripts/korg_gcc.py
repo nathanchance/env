@@ -89,10 +89,14 @@ def parse_arguments():
     parser = argparse.ArgumentParser()
     subparser = parser.add_subparsers(dest='subcommand', metavar='SUBCOMMAND', required=True)
 
-    getvar_parser = subparser.add_parser('print',
-                                         help='Print CROSS_COMPILE variable for use with make')
-    getvar_parser.add_argument('version', choices=supported_versions, type=int)
-    getvar_parser.add_argument('arch', choices=supported_arches)
+    print_parser = subparser.add_parser('print',
+                                        help='Print CROSS_COMPILE variable for use with make')
+    print_parser.add_argument('-s',
+                              '--split',
+                              action='store_true',
+                              help='Split CROSS_COMPILE for use with kmake')
+    print_parser.add_argument('version', choices=supported_versions, type=int)
+    print_parser.add_argument('arch', choices=supported_arches)
 
     install_parser = subparser.add_parser(
         'install', help='Download and/or extact kernel.org GCC tarballs to disk')
@@ -206,4 +210,10 @@ if __name__ == '__main__':
         install(arguments)
     if arguments.subcommand == 'print':
         cross_compile = get_gcc_cross_compile(arguments.version, arguments.arch)
-        print(f"CROSS_COMPILE={shlex.quote(cross_compile)}")
+        cc_args = []
+        if arguments.split:
+            cc_args += ['-p', f"{shlex.quote(str(Path(cross_compile).parent))}"]
+            cross_compile = Path(cross_compile).name
+        cc_args += [f"CROSS_COMPILE={shlex.quote(cross_compile)}"]
+        for arg in cc_args:
+            print(arg)
