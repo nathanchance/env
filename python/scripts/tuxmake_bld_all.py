@@ -12,12 +12,9 @@ import time
 
 import korg_gcc
 
-# Until https://gitlab.com/Linaro/tuxmake/-/merge_requests/283 is merged and released
+# Until https://gitlab.com/Linaro/tuxmake/-/merge_requests/283 is released
 if not (tuxmake_src := Path(__file__).resolve().parents[1].joinpath('tuxmake')).exists():
-    git_clone_cmd = [
-        'git', 'clone', '-b', 'allow-override-make-vars', 'https://gitlab.com/Linaro/tuxmake.git',
-        tuxmake_src
-    ]
+    git_clone_cmd = ['git', 'clone', 'https://gitlab.com/Linaro/tuxmake.git', tuxmake_src]
     subprocess.run(git_clone_cmd, capture_output=True, check=True)
 
 sys.path.insert(0, str(tuxmake_src.parent))
