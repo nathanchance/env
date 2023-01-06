@@ -90,6 +90,8 @@ def generate_warnings(log_folder, src_folder):
         # https://github.com/ClangBuiltLinux/linux/issues/1415
         '(asmmacro.h|genex.S|[0-9]+):.*macro defined with named parameters',
         'macro local_irq_enable reg=',
+        # I cannot consistently reproduce this one but it is harmless
+        'llvm-nm: error: arch/arm/boot/compressed/../../../../vmlinux: No such file or directory',
     ]
     ignore_re = re.compile('|'.join(ignore))
     warnings = {}
