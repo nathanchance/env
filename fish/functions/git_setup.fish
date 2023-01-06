@@ -68,4 +68,7 @@ function git_setup -d "Configure git"
             gh extension install gennaro-tedesco/gh-f
         end
     end
+
+    # b4 options
+    git config --global b4.send-hide-cover-to-cc yes
 end
