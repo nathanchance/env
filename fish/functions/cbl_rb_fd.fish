@@ -14,19 +14,13 @@ function cbl_rb_fd -d "Rebase generic Fedora kernel on latest linux-next"
 
     # Patching
     set -a patches https://lore.kernel.org/all/20221130070511.46558-1-vdasa@vmware.com/ # VMCI: Use threaded irqs instead of tasklets
+    set -a patches https://lore.kernel.org/all/20221231150343.146274-1-beanhuo@iokpp.de/ # scsi: ufs: core: bsg: Fix sometimes-uninitialized warnings
     for patch in $patches
         b4 shazam -l -P _ -s $patch; or return
     end
     for hash in $ln_commits
         git -C $CBL_BLD_P/linux-next fp -1 --stdout $hash | git am; or return
     end
-    # https://lore.kernel.org/Y6kgR4qnb23UdAEX@dev-arch.thelio-3990X/
-    git rv --no-edit 1b19c4c249a196301a2a3a69aeba2c6407dad25d; or return
-    # https://lore.kernel.org/Y6ki+weNcHuyH7i1@dev-arch.thelio-3990X/
-    git diff 1801b065f86c^..5ec1bd594e72 | git ap -R; or return
-    git ac -m 'Revert "udf: Couple more fixes for extent and directory handling"
-
-Link: https://lore.kernel.org/Y6ki+weNcHuyH7i1@dev-arch.thelio-3990X/'
 
     # Build kernel
     cbl_bld_krnl_rpm --cfi --lto arm64; or return
