@@ -2,7 +2,6 @@
 # SPDX-License-Identifier: MIT
 # Copyright (C) 2022-2023 Nathan Chancellor
 
-import datetime
 import os
 from pathlib import Path
 import shutil
@@ -111,4 +110,4 @@ def kmake(variables, targets, ccache=True, directory=None, jobs=None, silent=Tru
         start_time = time.time()
     subprocess.run(make_cmd, check=True)
     if not use_time:
-        print(f"\nTime: {datetime.timedelta(seconds=int(time.time() - start_time))}")
+        print(f"\nTime: {utils.print_duration(time.time() - start_time)}")
