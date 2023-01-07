@@ -15,7 +15,7 @@ function msh -d "Shorthand for mosh -o" -w mosh
     switch $msh_args
         case aadp
             if test "$tailscale" = true
-                set ip # will be setup in future
+                set ip 100.124.99.17
             else
                 set ip 192.168.4.234
             end
