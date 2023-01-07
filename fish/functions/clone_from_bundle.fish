@@ -19,5 +19,7 @@ function clone_from_bundle
         and git -C $folder remote add origin $url
         and git -C $folder remote update origin
         and git -C $folder checkout $branch
+        and git -C $folder branch --set-upstream-to origin/$branch
+        and git -C $folder reset --hard origin/$branch
     end
 end
