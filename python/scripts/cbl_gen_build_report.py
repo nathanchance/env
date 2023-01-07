@@ -90,7 +90,8 @@ def generate_warnings(log_folder, src_folder):
         # https://github.com/ClangBuiltLinux/linux/issues/1415
         '(asmmacro.h|genex.S|[0-9]+):.*macro defined with named parameters',
         'macro local_irq_enable reg=',
-        # I cannot consistently reproduce this one but it is harmless
+        # new warning present with make 4.4:
+        # https://lore.kernel.org/Y7i8+EjwdnhHtlrr@dev-arch.thelio-3990X/
         'llvm-nm: error: arch/arm/boot/compressed/../../../../vmlinux: No such file or directory',
     ]
     ignore_re = re.compile('|'.join(ignore))
