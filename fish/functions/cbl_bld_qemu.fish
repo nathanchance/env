@@ -47,7 +47,7 @@ function cbl_bld_qemu -d "Build QEMU for use with ClangBuiltLinux"
         mkdir -p $qemu_bld
         pushd $qemu_bld; or return
 
-        $qemu_src/configure --prefix=$PREFIX; or return
+        $qemu_src/configure --disable-curl --prefix=$PREFIX; or return
         make -skj(nproc) install; or return
         popd
     end
