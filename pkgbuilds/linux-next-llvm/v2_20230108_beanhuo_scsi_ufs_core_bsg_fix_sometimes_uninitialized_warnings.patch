@@ -1,8 +1,8 @@
 From git@z Thu Jan  1 00:00:00 1970
-Subject: [PATCH] scsi: ufs: core: bsg: Fix sometimes-uninitialized warnings
+Subject: [PATCH v2 1/3] scsi: ufs: core: bsg: Fix sometimes-uninitialized warnings
 From: Bean Huo <beanhuo@micron.com>
-Date: Sat, 31 Dec 2022 16:03:43 +0100
-Message-Id: <20221231150343.146274-1-beanhuo@iokpp.de>
+Date: Sun, 08 Jan 2023 23:40:55 +0100
+Message-Id: <20230108224057.354438-2-beanhuo@iokpp.de>
 MIME-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 7bit
@@ -20,15 +20,7 @@ Signed-off-by: Bean Huo <beanhuo@micron.com>
 Reported-by: kernel test robot <lkp@intel.com>
 Reported-by: Xiaosen He <quic_xiaosenh@quicinc.com>
 Reviewed-by: Alim Akhtar <alim.akhtar@samsung.com>
-Link: https://lore.kernel.org/r/20221231150343.146274-1-beanhuo@iokpp.de
----
-Hi Martin,
-
-This patch is to fix two compilation warnings introduced by my commit:
-6ff265fc5ef6 ("scsi: ufs: core: bsg: Add advanced RPMB support in ufs_bsg").
-
-Apologies for this.
-
+Link: https://lore.kernel.org/r/20230108224057.354438-2-beanhuo@iokpp.de
 ---
  drivers/ufs/core/ufs_bsg.c | 4 ++--
  1 file changed, 2 insertions(+), 2 deletions(-)

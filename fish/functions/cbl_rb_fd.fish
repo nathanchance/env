@@ -14,13 +14,14 @@ function cbl_rb_fd -d "Rebase generic Fedora kernel on latest linux-next"
 
     # Patching
     set -a patches https://lore.kernel.org/all/20221130070511.46558-1-vdasa@vmware.com/ # VMCI: Use threaded irqs instead of tasklets
-    set -a patches https://lore.kernel.org/all/20221231150343.146274-1-beanhuo@iokpp.de/ # scsi: ufs: core: bsg: Fix sometimes-uninitialized warnings
+    set -a patches https://lore.kernel.org/all/20230108224057.354438-2-beanhuo@iokpp.de/ # scsi: ufs: core: bsg: Fix sometimes-uninitialized warnings
     for patch in $patches
         b4 shazam -l -P _ -s $patch; or return
     end
     for hash in $ln_commits
         git -C $CBL_BLD_P/linux-next fp -1 --stdout $hash | git am; or return
     end
+    crl https://git.kernel.org/efi/efi/p/7b817a99509125ee1337888ec453a76ce5937ae8 | git am; or return
 
     # Build kernel
     cbl_bld_krnl_rpm --cfi --lto arm64; or return
