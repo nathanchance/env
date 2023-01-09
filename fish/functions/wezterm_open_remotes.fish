@@ -6,17 +6,27 @@ function wezterm_open_remotes -d "Open a new wezterm tab for each remote machine
     set fish_path (command -v fish)
     set wezterm_path (command -v wezterm)
 
-    set hosts \
-        thelio:Thelio \
-        m3-large-x86:m3.large.x86 \
-        c3-medium-x86:c3.medium.x86 \
-        c2-medium-x86:c2.medium.x86 \
+    set hosts thelio:Thelio
+
+    set equinix_ips $HOME/.equinix_ips
+    if test -f $equinix_ips
+        for line in (cat $equinix_ips)
+            set host (string split -f 1 , $line)
+            set title (string replace -a - . $host)
+
+            set -a hosts $host:$title
+        end
+    end
+
+    set -a hosts \
         intel-desktop:"Intel desktop" \
         amd-desktop:"AMD desktop" \
         intel-laptop:"Intel laptop" \
+        aadp:AADP \
         honeycomb:Honeycomb \
         pi4:"Pi 4" \
         pi3:"Pi 3"
+
     for item in $hosts
         set host (string split -f 1 : $item)
         set title (string split -f 2 : $item)
