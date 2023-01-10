@@ -8,7 +8,7 @@ function wezterm_open_remotes -d "Open a new wezterm tab for each remote machine
 
     set hosts thelio:Thelio
 
-    set equinix_ips $HOME/.equinix_ips
+    set equinix_ips $ICLOUD_DOCS_FOLDER/.equinix_ips
     if test -f $equinix_ips
         for line in (cat $equinix_ips)
             set host (string split -f 1 , $line)
