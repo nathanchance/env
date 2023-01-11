@@ -21,7 +21,11 @@ function cbl_rb_fd -d "Rebase generic Fedora kernel on latest linux-next"
     for hash in $ln_commits
         git -C $CBL_BLD_P/linux-next fp -1 --stdout $hash | git am; or return
     end
-    crl https://git.kernel.org/efi/efi/p/7b817a99509125ee1337888ec453a76ce5937ae8 | git am; or return
+    # https://lore.kernel.org/Y73PAtm6FPuT+1cM@dev-arch.thelio-3990X/
+    git fp -2 --stdout a7334dc70496bb0ce | git ap -R; or return
+    git f https://git.kernel.org/pub/scm/linux/kernel/git/efi/efi.git/ urgent; or return
+    git fp -2 --stdout b9c66533400fad0f31aed561bae92638986b6b28 | git ap; or return
+    git ac -m "Apply updated version of 'efi: Follow-up fixes for EFI runtime stack'"
 
     # Build kernel
     cbl_bld_krnl_rpm --cfi --lto arm64; or return
