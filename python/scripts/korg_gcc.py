@@ -156,6 +156,10 @@ def install(args):
 
     for major_version in args.versions:
         targets = sorted({korg_gcc_canonicalize_target(target) for target in args.targets})
+        # Ensure 'arm' gets downloaded with 'aarch64', so that compat vDSO can
+        # be built.
+        if 'aarch64-linux' in targets:
+            targets.add('arm-linux-gnueabi')
         # No GCC 9.5.0 i386-linux on x86_64?
         if host_arch == 'x86_64' and major_version == 9:
             targets.remove('i386-linux')
@@ -213,5 +217,11 @@ if __name__ == '__main__':
             cc_args += ['-p', f"{shlex.quote(str(Path(cross_compile).parent))}"]
             cross_compile = Path(cross_compile).name
         cc_args += [f"CROSS_COMPILE={shlex.quote(cross_compile)}"]
+        # Ensure compat vDSO gets built for all arm64 compiles
+        if arguments.arch == 'aarch64':
+            cross_compile_compat = get_gcc_cross_compile(arguments.version, 'arm')
+            if arguments.split:
+                cross_compile_compat = Path(cross_compile_compat).name
+            cc_args += [f"CROSS_COMPILE_COMPAT={shlex.quote(cross_compile_compat)}"]
         for arg in cc_args:
             print(arg)
