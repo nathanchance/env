@@ -155,9 +155,7 @@ def install(args):
     }[host_arch]
 
     for major_version in args.versions:
-        print(args.targets)
         targets = sorted({korg_gcc_canonicalize_target(target) for target in args.targets})
-        print(targets)
         # No GCC 9.5.0 i386-linux on x86_64?
         if host_arch == 'x86_64' and major_version == 9:
             targets.remove('i386-linux')
