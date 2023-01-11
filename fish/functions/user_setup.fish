@@ -150,7 +150,6 @@ function user_setup -d "Setup a user account, downloading all files and placing 
 
     # Download and update forked fisher plugins
     set forked_fisher_plugins \
-        $GITHUB_FOLDER/forgit \
         $GITHUB_FOLDER/hydro
     for forked_fisher_plugin in $forked_fisher_plugins
         if not test -d $forked_fisher_plugin
@@ -173,7 +172,8 @@ function user_setup -d "Setup a user account, downloading all files and placing 
         $ENV_FOLDER/fish \
         $forked_fisher_plugins \
         PatrickF1/fzf.fish \
-        jorgebucaran/autopair.fish
+        jorgebucaran/autopair.fish \
+        wfxr/forgit
     if not command -q zoxide
         set -a fisher_plugins jethrokuan/z
     end
