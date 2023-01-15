@@ -174,6 +174,8 @@ def build_all(linux_folder, out_folder, architectures, targets, toolchains, use_
               results_file):
     for toolchain in toolchains:
         for target_arch in architectures:
+            if int(toolchain.split('-')[1]) < 7 and target_arch == 'riscv':
+                continue
             for kconfig in get_kconfigs_for_target(targets):
                 build_one(tree=linux_folder,
                           output_dir=out_folder,
