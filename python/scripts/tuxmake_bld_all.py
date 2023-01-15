@@ -97,7 +97,8 @@ def get_kconfigs_for_target(targets):
     return [kconfig for target in targets for kconfig in kconfigs[target]]
 
 
-def get_make_variables(target_arch, toolchain):
+def get_env_make_variables(target_arch, toolchain):
+    environment = {}
     make_variables = {}
 
     if 'gcc' in toolchain:
@@ -105,8 +106,10 @@ def get_make_variables(target_arch, toolchain):
         make_variables['CROSS_COMPILE'] = korg_gcc.get_gcc_cross_compile(version, target_arch)
         if target_arch == 'arm64':
             make_variables['CROSS_COMPILE_COMPAT'] = korg_gcc.get_gcc_cross_compile(version, 'arm')
+        if version < 8:
+            environment['KCFLAGS'] = ''
 
-    return make_variables
+    return environment, make_variables
 
 
 def get_targets(kconfig):
@@ -124,13 +127,16 @@ def build_one(tree, output_dir, target_arch, toolchain, wrapper, kconfig, result
     config_output_dir = f"{output_dir}/{target_arch}/{kconfig}"
     Path(config_output_dir).mkdir(exist_ok=True, parents=True)
 
+    environment, make_variables = get_env_make_variables(target_arch, toolchain)
+
     # pylint: disable-next=c-extension-no-member
     result = tuxmake.build.build(tree=tree,
                                  output_dir=config_output_dir,
                                  target_arch=target_arch,
                                  wrapper=wrapper,
                                  kconfig=kconfig,
-                                 make_variables=get_make_variables(target_arch, toolchain),
+                                 environment=environment,
+                                 make_variables=make_variables,
                                  targets=get_targets(kconfig))
 
     duration = 0
