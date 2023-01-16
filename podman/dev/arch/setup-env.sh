@@ -195,34 +195,8 @@ function install_packages() {
     pacman -S --noconfirm "${packages[@]}"
 }
 
-function build_pahole() {
-    pahole_src=/tmp/dwarves-1.24
-    pahole_build=$pahole_src/build
-
-    tar -C "${pahole_src%/*}" -xJf "$pahole_src".tar.xz
-    patch -d "$pahole_src" -p1 </tmp/dwarves.patch
-
-    mkdir "$pahole_build"
-    cd "$pahole_build"
-
-    cmake \
-        -DBUILD_SHARED_LIBS=OFF \
-        -DCMAKE_BUILD_TYPE=Release \
-        -D__LIB=lib \
-        "$pahole_src"
-
-    make -j"$(nproc)" install
-
-    command -v pahole
-    pahole --version
-
-    cd
-    rm -r "$pahole_src"{,.tar.xz} /tmp/*.patch
-}
-
 pacman_conf
 makepkg_conf
 gen_locale
 add_grep_wrappers
 install_packages
-build_pahole
