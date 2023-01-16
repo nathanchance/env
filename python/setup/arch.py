@@ -3,6 +3,7 @@
 # Copyright (C) 2022-2023 Nathan Chancellor
 
 from argparse import ArgumentParser
+import getpass
 import os
 from pathlib import Path
 import re
@@ -305,18 +306,10 @@ def pacman_update():
     pacman_install(['-yyu'])
 
 
-def parse_arguments(username):
+def parse_arguments():
     parser = ArgumentParser(description='Set up an Arch Linux installation')
 
-    # Most Arch Linux installs will be set up with archinstall, which sets
-    # up the user account/password and root password, so the 'password'
-    # argument is only required when the user is going to be created by
-    # the script.
-    password_args_required = not lib.setup.user_exists(username)
-    parser.add_argument('-p',
-                        '--password',
-                        help='User password (only required if user does not exist already)',
-                        required=password_args_required)
+    parser.add_argument('-p', '--password', help='User password')
 
     return parser.parse_args()
 
@@ -373,7 +366,7 @@ def setup_libvirt(username):
         add_mods_to_mkinitcpio(['kvm_intel'])
 
 
-def setup_user(username, password):
+def setup_user(username, userpass):
     if lib.setup.user_exists(username):
         lib.setup.chsh_fish(username)
         lib.setup.add_user_to_group('uucp', username)
@@ -381,7 +374,7 @@ def setup_user(username, password):
         fish = Path(shutil.which('fish')).resolve()
         subprocess.run(['useradd', '-G', 'wheel,uucp', '-m', '-s', fish, username], check=True)
 
-        lib.setup.chpasswd(username, password)
+        lib.setup.chpasswd(username, userpass)
 
     lib.setup.setup_ssh_authorized_keys(username)
 
@@ -414,7 +407,13 @@ def vmware_adjustments():
 
 if __name__ == '__main__':
     user = lib.setup.get_user()
-    arguments = parse_arguments(user)
+    arguments = parse_arguments()
+    # Most Arch Linux installs will be set up with archinstall, which sets
+    # up the user account/password and root password, so the 'password'
+    # argument is only required when the user is going to be created by
+    # the script.
+    if not (password := arguments.password) and not lib.setup.user_exists(user):
+        password = getpass.getpass(prompt='Password for Arch Linux user account: ')
 
     prechecks()
     configure_boot_entries()
@@ -423,7 +422,7 @@ if __name__ == '__main__':
     pacman_update()
     pacman_install_packages()
     setup_doas(user)
-    setup_user(user, arguments.password)
+    setup_user(user, password)
     lib.setup.clone_env(user)
     lib.setup.podman_setup(user)
     vmware_adjustments()

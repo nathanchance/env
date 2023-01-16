@@ -3,6 +3,7 @@
 # Copyright (C) 2022-2023 Nathan Chancellor
 
 from argparse import ArgumentParser
+import getpass
 from pathlib import Path
 import platform
 import re
@@ -29,7 +30,7 @@ def machine_is_trusted():
 def parse_arguments():
     parser = ArgumentParser(description='Set up a Debian installation')
 
-    parser.add_argument('-r', '--root-password', help='Root password', required=True)
+    parser.add_argument('-r', '--root-password', help='Root password')
 
     return parser.parse_args()
 
@@ -144,6 +145,8 @@ def update_and_install_packages():
 
 if __name__ == '__main__':
     args = parse_arguments()
+    if not (root_password := args.root_password):
+        root_password = getpass.getpass(prompt='Password for Debian root account: ')
     user = lib.setup.get_user()
 
     prechecks()
@@ -154,7 +157,7 @@ if __name__ == '__main__':
     lib.setup.chsh_fish(user)
     lib.setup.add_user_to_group_if_exists('kvm', user)
     pi_setup(user)
-    deb.setup_doas(user, args.root_password)
+    deb.setup_doas(user, root_password)
     deb.setup_docker(user)
     deb.setup_libvirt(user)
     deb.setup_locales()

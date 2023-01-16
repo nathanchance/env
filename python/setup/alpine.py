@@ -3,6 +3,7 @@
 # Copyright (C) 2022-2023 Nathan Chancellor
 
 from argparse import ArgumentParser
+import getpass
 from pathlib import Path
 import re
 import shutil
@@ -24,7 +25,7 @@ def parse_arguments():
                         '--user-name',
                         default=lib.setup.get_user(),
                         help='Name of user account')
-    parser.add_argument('-p', '--user-password', help='Password for user account', required=True)
+    parser.add_argument('-p', '--user-password', help='Password for user account')
 
     return parser.parse_args()
 
@@ -148,11 +149,13 @@ def setup_podman(user_name):
 
 if __name__ == '__main__':
     args = parse_arguments()
+    if not (password := args.user_password):
+        password = getpass.getpass(prompt='Password for Alpine user account: ')
 
     lib.setup.check_root()
     enable_community_repo()
     update_and_install_packages()
-    setup_user(args.user_name, args.user_password)
+    setup_user(args.user_name, password)
     setup_podman(args.user_name)
     lib.setup.setup_sudo_symlink()
     lib.setup.setup_initial_fish_config(args.user_name)
