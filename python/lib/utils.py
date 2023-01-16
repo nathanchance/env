@@ -13,7 +13,7 @@ def path_and_text(*args):
 
 
 def print_cmd(command):
-    print(f"$ {' '.join([shlex.quote(str(elem)) for elem in command])}")
+    print(f"$ {' '.join([shlex.quote(str(elem)) for elem in command])}", flush=True)
 
 
 def print_duration(seconds):
