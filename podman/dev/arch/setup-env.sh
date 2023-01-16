@@ -139,8 +139,6 @@ function install_packages() {
         repo
 
         # kernel / tuxmake
-        aarch64-linux-gnu-gcc
-        arm-none-eabi-gcc
         bison
         cpio
         flex
@@ -151,7 +149,6 @@ function install_packages() {
         openssl
         pahole
         picocom
-        riscv64-linux-gnu-gcc
         rsync
         socat
         sparse
