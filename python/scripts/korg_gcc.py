@@ -40,12 +40,14 @@ def supported_korg_gcc_arches():
     return [
         'aarch64',
         'arm',
+        'arm64',  # accept kernel value for aarch64
         'i386',
         'm68k',
         'mips',
         'mips64',
         'powerpc',
         'powerpc64',
+        'riscv',  # accept kernel value for riscv64
         'riscv32',
         'riscv64',
         's390',
@@ -218,7 +220,7 @@ if __name__ == '__main__':
             cross_compile = Path(cross_compile).name
         cc_args += [f"CROSS_COMPILE={shlex.quote(cross_compile)}"]
         # Ensure compat vDSO gets built for all arm64 compiles
-        if arguments.arch == 'aarch64':
+        if arguments.arch in ('aarch64', 'arm64'):
             cross_compile_compat = get_gcc_cross_compile(arguments.version, 'arm')
             if arguments.split:
                 cross_compile_compat = Path(cross_compile_compat).name

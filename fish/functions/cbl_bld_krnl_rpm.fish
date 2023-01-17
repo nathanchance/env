@@ -36,10 +36,7 @@ function cbl_bld_krnl_rpm -d "Build a .rpm kernel package"
     end
 
     # If no arch value specified, use host architecture
-    if set -q arch
-        set cross_compiling true
-    else
-        set cross_compiling false
+    if not set -q arch
         switch (uname -m)
             case aarch64
                 set arch arm64
@@ -53,24 +50,11 @@ function cbl_bld_krnl_rpm -d "Build a .rpm kernel package"
     end
 
     if set -q gcc
-        switch "$arch:$cross_compiling"
-            case arm64:true
-                set -a kmake_args \
-                    CROSS_COMPILE=/usr/bin/aarch64-linux-gnu-
-            case arm64:false x86_64:false
-                set -a kmake_args \
-                    $STOCK_GCC_VARS
-            case x86_64:true
-                set -a kmake_args \
-                    CROSS_COMPILE=/usr/bin/x86_64-linux-gnu-
-        end
+        set -a kmake_args \
+            (korg_gcc print $GCC_VERSIONS_KERNEL[1] $arch)
     else
         set -a kmake_args \
             LLVM=1
-    end
-
-    if grep -q RPM_SKIP_VMLINUX scripts/package/mkspec
-        set -a kmake_args RPM_SKIP_VMLINUX=y
     end
 
     kmake \
