@@ -6,24 +6,17 @@ from argparse import ArgumentParser
 from pathlib import Path
 import shutil
 import signal
-import subprocess
 import sys
 import time
 
+# pylint: disable-next=import-error,no-name-in-module
+import tuxmake.build
+
 import korg_gcc
 
-# Until https://gitlab.com/Linaro/tuxmake/-/merge_requests/283 is released
-if not (tuxmake_src := Path(__file__).resolve().parents[1].joinpath('tuxmake')).exists():
-    git_clone_cmd = ['git', 'clone', 'https://gitlab.com/Linaro/tuxmake.git', tuxmake_src]
-    subprocess.run(git_clone_cmd, capture_output=True, check=True)
-
-sys.path.insert(0, str(tuxmake_src.parent))
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 # pylint: disable-next=wrong-import-position
 import lib.utils  # noqa: E402
-
-sys.path.insert(0, str(tuxmake_src))
-# pylint: disable-next=import-error,no-name-in-module,wrong-import-position
-import tuxmake.build  # noqa: E402
 
 
 def interrupt_handler(_signum, _frame):
