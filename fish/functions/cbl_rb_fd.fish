@@ -14,7 +14,6 @@ function cbl_rb_fd -d "Rebase generic Fedora kernel on latest linux-next"
 
     # Patching
     set -a patches https://lore.kernel.org/all/20221130070511.46558-1-vdasa@vmware.com/ # VMCI: Use threaded irqs instead of tasklets
-    set -a patches https://lore.kernel.org/all/20230118160722.289840-1-arnd@kernel.org/ # drm/amd/display: fix hdmi_encoded_link_bw definition
     for patch in $patches
         b4 shazam -l -P _ -s $patch; or return
     end
