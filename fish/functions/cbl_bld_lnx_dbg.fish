@@ -41,7 +41,6 @@ function cbl_bld_lnx_dbg -d "Build linux-debug Arch Linux package"
     #############
     git cl -q
 
-    scripts/setlocalversion --save-scmversion
     echo -debug >localversion.10-pkgname
 
     crl -o .config https://github.com/archlinux/svntogit-packages/raw/packages/linux/trunk/config; or return
