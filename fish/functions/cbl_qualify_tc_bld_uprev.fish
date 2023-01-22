@@ -45,6 +45,8 @@ function cbl_qualify_tc_bld_uprev -d "Qualify a new known good revision for tc-b
     set common_tc_bld_args \
         --assertions \
         --check-targets clang ll{d,vm{,-unit}} \
+        --quiet-cmake \
+        --show-build-commands \
         --use-good-revision
     set pgo_arg --pgo kernel-{def,allmod}config
     # LTO and ThinLTO can cause jobs to run out of memory on systems with a
