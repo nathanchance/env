@@ -24,7 +24,7 @@ validpgpkeys=(
   '3F2568AAC26998F9E813A1C5C3F436CA30F5D8EB'  # Mark Brown
 )
 sha256sums=('SKIP'
-            'c37b060fbe76166a2a1803bd0e78fcec397bd3a6ddb478611722c5f37f40f222')
+            'd679c5696a713fe4656055666155e221a17504b57cc36dcfb3a606dce0e5f3fa')
 
 # This obviously ties this PKGBUILD to my machine but that is kind of the point :)
 _kmake() {
@@ -37,7 +37,6 @@ prepare() {
   cd $pkgname
 
   echo "Setting version..."
-  scripts/setlocalversion --save-scmversion
   echo "${_localversion}" > localversion.10-pkgname
 
   local src

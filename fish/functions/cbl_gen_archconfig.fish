@@ -53,6 +53,7 @@ function cbl_gen_archconfig -d "Generate a configuration file for Arch Linux"
     crl https://github.com/archlinux/svntogit-packages/raw/packages/linux/trunk/config >$cfg
     $src/scripts/config \
         --file $cfg \
+        -d LOCALVERSION_AUTO \
         -e DEBUG_INFO_DWARF5 \
         -e WERROR \
         -m DRM
