@@ -47,6 +47,16 @@ function cbl_qualify_tc_bld_uprev -d "Qualify a new known good revision for tc-b
         --check-targets clang ll{d,vm{,-unit}} \
         --use-good-revision
     set pgo_arg --pgo kernel-{def,allmod}config
+    # LTO and ThinLTO can cause jobs to run out of memory on systems with a
+    # large number of cores and not so much RAM, like my 80-core, 128GB RAM
+    # Ampere system. Limit the number of link jobs with LTO to avoid this
+    # problem, as recommended in LLVM's cmake documentation:
+    # https://www.llvm.org/docs/CMake.html#frequently-used-llvm-related-variables
+    set lto_mem (python3 -c "import os
+gib = int(os.sysconf('SC_PAGE_SIZE') * os.sysconf('SC_PHYS_PAGES') / 1024**3)
+print(gib // 30, gib // 15)" | string split ' ')
+    set full_lto_def --defines LLVM_PARALLEL_LINK_JOBS=$lto_mem[1]
+    set thin_lto_def --defines LLVM_PARALLEL_LINK_JOBS=$lto_mem[2]
 
     # Check that two stage build works fine
     $tc_bld/build-llvm.py \
@@ -60,16 +70,19 @@ function cbl_qualify_tc_bld_uprev -d "Qualify a new known good revision for tc-b
     # Check that ThinLTO alone works okay
     $tc_bld/build-llvm.py \
         $common_tc_bld_args \
+        $thin_lto_def \
         --lto thin; or return 125
 
     # Check that full LTO alone works okay
     $tc_bld/build-llvm.py \
         $common_tc_bld_args \
+        $full_lto_def \
         --lto full; or return 125
 
     # Check that PGO + ThinLTO works okay
     $tc_bld/build-llvm.py \
         $common_tc_bld_args \
+        $thin_lto_def \
         --lto thin \
         $pgo_arg; or return 125
 
@@ -79,6 +92,7 @@ function cbl_qualify_tc_bld_uprev -d "Qualify a new known good revision for tc-b
     if test (uname -n) = x86_64
         $tc_bld/build-llvm.py \
             --assertions \
+            $thin_lto_def \
             --lto thin \
             $pgo_arg \
             --targets "AArch64;ARM" \
@@ -89,6 +103,7 @@ function cbl_qualify_tc_bld_uprev -d "Qualify a new known good revision for tc-b
     $tc_bld/build-llvm.py \
         $common_tc_bld_args \
         --install-folder $usr \
+        $full_lto_def \
         --lto full \
         $pgo_arg; or return 125
 
