@@ -21,6 +21,7 @@ function cbl_rb_pi -d "Rebase Raspberry Pi kernel on latest linux-next"
     git rh origin/master
 
     # Patching
+    set -a patches https://lore.kernel.org/all/20230123164700.1074064-1-suzuki.poulose@arm.com/ # coresight: Fix uninitialised variable use in coresight_disable
     for patch in $patches
         b4 am -l -o - -P _ -s $patch | git am; or return
     end
