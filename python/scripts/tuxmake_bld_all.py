@@ -139,7 +139,7 @@ def build_one(tree, output_dir, target_arch, toolchain, wrapper, kconfig, result
         passed &= info.passed
 
     res_str = 'PASS' if passed else 'FAIL'
-    duration_str = lib.utils.print_duration(duration)
+    duration_str = lib.utils.get_duration(0, duration)
     with results_file.open(encoding='utf-8', mode='a') as file:
         file.write(f"{bld_str}: {res_str} in {duration_str}\n")
 
@@ -160,7 +160,7 @@ def process_results(results_file, start_time):
         print('Failed builds:\n')
         print(''.join(failed))
 
-    print(f"Total build time: {lib.utils.print_duration(time.time() - start_time)}")
+    print(f"Total build time: {lib.utils.get_duration(start_time)}")
 
 
 def build_all(linux_folder, out_folder, architectures, targets, toolchains, use_ccache,

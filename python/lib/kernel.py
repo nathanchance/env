@@ -110,4 +110,4 @@ def kmake(variables, targets, ccache=True, directory=None, jobs=None, silent=Tru
         start_time = time.time()
     subprocess.run(make_cmd, check=True)
     if not use_time:
-        print(f"\nTime: {utils.print_duration(time.time() - start_time)}")
+        print(f"\nTime: {utils.get_duration(start_time)}")

@@ -4,6 +4,27 @@
 
 from pathlib import Path
 import shlex
+import time
+
+
+def get_duration(start_seconds, end_seconds=None):
+    if not end_seconds:
+        end_seconds = time.time()
+    seconds = int(end_seconds - start_seconds)
+    days, seconds = divmod(seconds, 60 * 60 * 24)
+    hours, seconds = divmod(seconds, 60 * 60)
+    minutes, seconds = divmod(seconds, 60)
+
+    parts = []
+    if days:
+        parts.append(f"{days}d")
+    if hours:
+        parts.append(f"{hours}h")
+    if minutes:
+        parts.append(f"{minutes}m")
+    parts.append(f"{seconds}s")
+
+    return ' '.join(parts)
 
 
 def path_and_text(*args):
@@ -14,23 +35,6 @@ def path_and_text(*args):
 
 def print_cmd(command):
     print(f"$ {' '.join([shlex.quote(str(elem)) for elem in command])}", flush=True)
-
-
-def print_duration(seconds):
-    days, seconds = divmod(int(seconds), 60 * 60 * 24)
-    hours, seconds = divmod(seconds, 60 * 60)
-    minutes, seconds = divmod(seconds, 60)
-
-    parts = []
-    if days:
-        parts += [f"{days}d"]
-    if hours:
-        parts += [f"{hours}h"]
-    if minutes:
-        parts += [f"{minutes}m"]
-    parts += [f"{seconds}s"]
-
-    return f"{' '.join(parts)}"
 
 
 def print_header(string):
