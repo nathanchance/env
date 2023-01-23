@@ -19,14 +19,14 @@ def clone_env_plugins():
 
     if not env_folder.exists():
         env_folder.parent.mkdir(exist_ok=True, parents=True)
-        gh_repo_clone([env_folder.name, env_folder])
+        repo_clone(env_folder)
     subprocess.run(['git', 'pull'], check=True, cwd=env_folder)
 
     forked_fisher_plugins = ['hydro']
     for plugin in [Path(github_folder, elem) for elem in forked_fisher_plugins]:
         if not plugin.exists():
             plugin.parent.mkdir(exist_ok=True, parents=True)
-            gh_repo_clone([plugin.name, plugin, '--', '-b', 'personal'])
+            repo_clone(plugin, 'personal')
         subprocess.run(['git', 'remote', 'update'], check=True, cwd=plugin)
 
 
@@ -50,8 +50,8 @@ def brew_gh(gh_args):
     subprocess.run([Path(get_brew_bin(), 'gh'), *gh_args], check=True)
 
 
-def gh_repo_clone(clone_args):
-    brew_gh(['repo', 'clone', *clone_args])
+def brew_git(git_args):
+    subprocess.run([Path(get_brew_bin(), 'git'), *git_args], check=True)
 
 
 def install_packages():
@@ -79,7 +79,27 @@ def install_packages():
         brew(['install', '--cask', *packages])
 
 
+def is_vm():
+    return 'Virtual-Machine' in os.uname().nodename
+
+
+def repo_clone(repo_dest, repo_branch=None):
+    # neither ssh nor gh will be set up in virtual machines, just use plain ol' git.
+    if is_vm():
+        clone_args = ['-b', repo_branch] if repo_branch else []
+        clone_args += [f"https://github.com/nathanchance/{repo_dest.name}.git", repo_dest]
+        brew_git(['clone', *clone_args])
+    else:
+        clone_args = [repo_dest.name, repo_dest]
+        if repo_branch:
+            clone_args += ['--', '-b', repo_branch]
+        brew_gh(['repo', 'clone', *clone_args])
+
+
 def setup_gh():
+    if is_vm():
+        return
+
     try:
         brew_gh(['auth', 'status'])
     except subprocess.CalledProcessError:
@@ -97,12 +117,15 @@ def setup_homebrew():
 
 
 def setup_ssh():
+    if is_vm():
+        return
+
     home = get_home()
     if not (ssh_key := Path(home, '.ssh/id_ed25519')).exists():
         ssh_key.parent.mkdir(exist_ok=True, parents=True)
 
         if not (keys_folder := Path('/tmp/keys')).exists():
-            gh_repo_clone([keys_folder.name, keys_folder])
+            repo_clone(keys_folder)
 
         keys_ssh = Path(keys_folder, 'ssh')
         for file in [ssh_key.name, f"{ssh_key.name}.pub"]:
