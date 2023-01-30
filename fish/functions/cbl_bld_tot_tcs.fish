@@ -27,7 +27,7 @@ function cbl_bld_tot_tcs -d "Build LLVM and binutils from source for kernel deve
 
             set bld_llvm_args \
                 --pgo kernel-defconfig \
-                --targets "AArch64;ARM;X86"
+                --targets AArch64 ARM X86
 
         case pi
             set bld_bntls false
@@ -36,9 +36,8 @@ function cbl_bld_tot_tcs -d "Build LLVM and binutils from source for kernel deve
                 --build-stage1-only \
                 --defines LLVM_PARALLEL_COMPILE_JOBS=(math (nproc) - 1) \
                 LLVM_PARALLEL_LINK_JOBS=1 \
-                --install-stage1-only \
-                --projects "clang;lld" \
-                --targets "AArch64;ARM;X86"
+                --projects clang lld \
+                --targets AArch64 ARM X86
 
             set check_targets clang llvm{,-unit}
 
@@ -54,15 +53,14 @@ function cbl_bld_tot_tcs -d "Build LLVM and binutils from source for kernel deve
 
             set bld_llvm_args \
                 --pgo kernel-{allmod,def}config \
-                --targets "AArch64;ARM;X86"
+                --targets AArch64 ARM X86
 
         case test-laptop-intel
             set bld_bntls false
 
             set bld_llvm_args \
                 --build-stage1-only \
-                --install-stage1-only \
-                --projects "clang;lld" \
+                --projects clang lld \
                 --targets X86
 
         case vm
@@ -101,7 +99,7 @@ function cbl_bld_tot_tcs -d "Build LLVM and binutils from source for kernel deve
     end
 
     if test "$bld_bntls" != false
-        set bntls $tc_bld/binutils
+        set bntls $tc_bld/src/binutils
         if not test -d $bntls
             git clone https://sourceware.org/git/binutils-gdb.git "$bntls"
         end
@@ -125,7 +123,7 @@ function cbl_bld_tot_tcs -d "Build LLVM and binutils from source for kernel deve
         cbl_upd_software_symlinks binutils $bntls_install; or return
     end
 
-    set llvm_project $tc_bld/llvm-project
+    set llvm_project $tc_bld/src/llvm-project
     if not test -d $llvm_project
         git clone https://github.com/llvm/llvm-project $llvm_project
     end
