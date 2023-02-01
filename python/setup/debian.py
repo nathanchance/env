@@ -87,9 +87,9 @@ def pi_setup(user_name):
 def prechecks():
     lib.setup.check_root()
 
-    supported_versions = ('bullseye')
+    supported_versions = ('bullseye', )
     if (codename := lib.setup.get_version_codename()) not in supported_versions:
-        raise Exception(f"Debian {codename} is not supported by this script!")
+        raise RuntimeError(f"Debian {codename} is not supported by this script!")
 
 
 def setup_repos():

@@ -28,12 +28,12 @@ def check_install_parted():
         deb.apt_update()
         deb.apt_install(['parted'])
 
-    raise Exception('parted is needed but it cannot be installed on the current OS!')
+    raise RuntimeError('parted is needed but it cannot be installed on the current OS!')
 
 
 def create_user(user_name, user_password):
     if lib.setup.user_exists(user_name):
-        raise Exception(f"user ('{user_name}') already exists?")
+        raise RuntimeError(f"user ('{user_name}') already exists?")
 
     subprocess.run(
         ['useradd', '-m', '-G', 'sudo' if lib.setup.group_exists('sudo') else 'wheel', user_name],
@@ -55,10 +55,10 @@ def partition_drive(drive_path, mountpoint, username):
     volume = Path(drive_path + part)
 
     if mountpoint.is_mount():
-        raise Exception(f"mountpoint ('{mountpoint}') is already mounted?")
+        raise RuntimeError(f"mountpoint ('{mountpoint}') is already mounted?")
 
     if volume.is_block_device():
-        raise Exception(f"volume ('{volume}') already exists?")
+        raise RuntimeError(f"volume ('{volume}') already exists?")
 
     subprocess.run(
         ['parted', '-s', drive_path, 'mklabel', 'gpt', 'mkpart', 'primary', 'ext4', '0%', '100%'],

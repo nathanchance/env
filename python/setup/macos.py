@@ -193,10 +193,10 @@ def setup_fish_cfg():
 
 if __name__ == '__main__':
     if (user := get_home().name) != 'nathan':
-        raise Exception(f"Current user ('{user}') is unexpected!")
+        raise RuntimeError(f"Current user ('{user}') is unexpected!")
 
     if os.uname().sysname != 'Darwin':
-        raise Exception('Not running on macOS?')
+        raise RuntimeError('Not running on macOS?')
 
     setup_homebrew()
     install_packages()

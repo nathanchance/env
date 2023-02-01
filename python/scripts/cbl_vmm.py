@@ -32,7 +32,7 @@ def find_first_file(possible_files, relative_root=usr_share):
         if (full_path := Path(relative_root, possible_file)).exists():
             return full_path
     files_str = "', '".join([str(elem) for elem in possible_files])
-    raise Exception(
+    raise RuntimeError(
         f"No items from list ('{files_str}') could be found in '{relative_root}', do you need to install a package?"
     )
 
@@ -96,11 +96,11 @@ class VirtualMachine:
             kernel_files = Path(self.shared_folder, 'kernel_files')
             if not cmdline:
                 if not (cmdline_file := Path(kernel_files, 'cmdline')).exists():
-                    raise Exception('kernel passed without cmdline and one could not be found!')
+                    raise RuntimeError('kernel passed without cmdline and one could not be found!')
                 cmdline = cmdline_file.read_text(encoding='utf-8')
             if not initrd:
                 if not (initrd := Path(kernel_files, 'initramfs')).exists():
-                    raise Exception('kernel passed without initrd and one could not be found!')
+                    raise RuntimeError('kernel passed without initrd and one could not be found!')
 
         # Clear any previous hosts using the chosen SSH port.
         run_cmd(['ssh-keygen', '-R', f"[localhost]:{ssh_port}"])
@@ -179,7 +179,7 @@ class VirtualMachine:
             return self.remove()
         if action == 'run':
             return self.run()
-        raise Exception(f"Unimplemented action ('{action}')?")
+        raise RuntimeError(f"Unimplemented action ('{action}')?")
 
     def create_disk_img(self):
         self.disk_img.parent.mkdir(exist_ok=True, parents=True)
@@ -208,7 +208,7 @@ class VirtualMachine:
                 wget(iso, iso_url)
 
         if not iso.exists():
-            raise Exception(
+            raise RuntimeError(
                 f"{iso.name} does not exist at {iso}, was the wrong path used or did the download fail?"
             )
 
@@ -224,18 +224,18 @@ class VirtualMachine:
 
     def run(self):
         if not self.disk_img.exists():
-            raise Exception(
+            raise RuntimeError(
                 f"Disk image ('{self.disk_img}') for virtual machine ('{self.name}') does not exist, run 'setup' first?"
             )
 
         if not (qemu := shutil.which(self.qemu)):
-            raise Exception(
+            raise RuntimeError(
                 f"Could not find QEMU binary ('{self.qemu}') on your system (needed to run virtual machine)!"
             )
 
         if not (sudo := shutil.which('doas')):
             if not (sudo := shutil.which('sudo')):
-                raise Exception(
+                raise RuntimeError(
                     'Could not find doas or sudo on your system (needed for virtiofsd integration)!'
                 )
 
@@ -275,7 +275,7 @@ class VirtualMachine:
                 # 'from'.
                 if vfsd.poll():
                     vfsd_log_txt = self.vfsd_log.read_text(encoding='utf-8')
-                    raise Exception(f"virtiofsd failed with: {vfsd_log_txt}") from err
+                    raise RuntimeError(f"virtiofsd failed with: {vfsd_log_txt}") from err
                 raise err
             finally:
                 vfsd.kill()
@@ -303,7 +303,7 @@ class ArmVirtualMachine(VirtualMachine):
 
     def setup_efi_files(self, possible_efi_files=None):
         if not possible_efi_files:
-            raise Exception('No EFI files provided?')
+            raise RuntimeError('No EFI files provided?')
 
         efi_img_size = 64 * 1024 * 1024  # 64M
 
@@ -311,10 +311,12 @@ class ArmVirtualMachine(VirtualMachine):
 
         if not self.efi_img.exists():
             shutil.copyfile(find_first_file(possible_efi_files), self.efi_img)
-            self.efi_img.open(mode='r+b').truncate(efi_img_size)
+            with self.efi_img.open(mode='r+b') as file:
+                file.truncate(efi_img_size)
 
         if not self.efi_vars_img.exists():
-            self.efi_vars_img.open(mode='xb').truncate(efi_img_size)
+            with self.efi_vars_img.open(mode='xb') as file:
+                file.truncate(efi_img_size)
 
 
 class Arm32VirtualMachine(ArmVirtualMachine):
@@ -417,9 +419,9 @@ class X86VirtualMachine(VirtualMachine):
 
     def setup_efi_files(self, possible_efi_files=None, possible_efi_vars_files=None):
         if not possible_efi_files:
-            raise Exception('No EFI files provided?')
+            raise RuntimeError('No EFI files provided?')
         if not possible_efi_vars_files:
-            raise Exception('No EFI variable files provided?')
+            raise RuntimeError('No EFI variable files provided?')
 
         self.efi_img.parent.mkdir(exist_ok=True, parents=True)
 
@@ -657,7 +659,7 @@ def create_vm_from_args(args):
         else:
             kernel_folder = None
         if not kernel.exists():
-            raise Exception(
+            raise RuntimeError(
                 f"Kernel image ('{kernel}'), derived from kernel argument ('{args.kernel}'), does not exist!"
             )
 
@@ -680,7 +682,7 @@ def create_vm_from_args(args):
     if arch == 'x86_64':
         return X8664VirtualMachine(cmdline, cores, gdb, graphical, initrd, iso, kernel, memory,
                                    name, size, ssh_port)
-    raise Exception(f"Unimplemented architecture ('{arch}')?")
+    raise RuntimeError(f"Unimplemented architecture ('{arch}')?")
 
 
 def list_vms(arch):

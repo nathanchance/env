@@ -91,10 +91,10 @@ def update_bundle_symlink(bundle_folder):
 
 def download_items(targets, network_folder):
     if not (firmware_folder := Path(network_folder, 'Firmware_and_Images')).exists():
-        raise Exception(f"{firmware_folder} does not exist, systemd automounting broken?")
+        raise RuntimeError(f"{firmware_folder} does not exist, systemd automounting broken?")
 
     if not (bundle_folder := Path(network_folder, 'kernel.org/bundles')).exists():
-        raise Exception(f"{bundle_folder} does not exist??")
+        raise RuntimeError(f"{bundle_folder} does not exist??")
 
     items = []
     for target in targets:
@@ -245,6 +245,6 @@ if __name__ == '__main__':
     args = parse_parameters()
 
     if not (nas_folder := Path(os.environ['NAS_FOLDER'])).exists():
-        raise Exception(f"{nas_folder} does not exist, setup systemd automount files?")
+        raise RuntimeError(f"{nas_folder} does not exist, setup systemd automount files?")
 
     download_items(args.targets, nas_folder)

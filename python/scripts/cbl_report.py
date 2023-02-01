@@ -78,7 +78,7 @@ def get_report_worktree():
 
 def git(repo, cmd, capture_output=True, check=True, env=None, show_command=True):
     if not shutil.which('git'):
-        raise Exception('git could not be found!')
+        raise RuntimeError('git could not be found!')
     command = ['git', '-C', repo, *cmd]
     if show_command:
         lib.utils.print_cmd(command)
@@ -294,7 +294,7 @@ def finalize_report(args):
     repo = get_report_repo()
 
     if not (worktree := get_report_worktree()).exists():
-        raise Exception(f"{repo} does not exist when finalizing?")
+        raise RuntimeError(f"{repo} does not exist when finalizing?")
 
     # Rebase changes if requested
     if args.rebase or args.all:
@@ -336,7 +336,7 @@ def new_report(args):
 
         # Check for an existing worktree
         if worktree.exists():
-            raise Exception(f"{worktree} already exists, run 'finalize' or 'new' without '-A'?")
+            raise RuntimeError(f"{worktree} already exists, run 'finalize' or 'new' without '-A'?")
 
         # Update source repo to ensure remote branch check is up to date
         if args.update or args.all:
@@ -366,7 +366,7 @@ def new_report(args):
     if args.create_report or args.all:
         # Make sure worktree exists in case I run 'new' without '-A'
         if not worktree.exists():
-            raise Exception(f"{worktree} does not exist when creating report file?")
+            raise RuntimeError(f"{worktree} does not exist when creating report file?")
 
         report = get_report_path(date)
         if not report.exists():
@@ -381,14 +381,14 @@ def new_report(args):
 
 def update_report(args):
     if not (worktree := get_report_worktree()).exists():
-        raise Exception(f"{worktree} does not exist when updating?")
+        raise RuntimeError(f"{worktree} does not exist when updating?")
 
     if not (report := get_report_path(get_current_datetime())).exists():
-        raise Exception(f"{report} does not exist when updating?")
+        raise RuntimeError(f"{report} does not exist when updating?")
 
     if args.edit or args.all:
         if not (editor := shutil.which(os.environ['EDITOR'] if 'EDITOR' in os.environ else 'vim')):
-            raise Exception("$EDITOR not set or vim could not be found on your system!")
+            raise RuntimeError("$EDITOR not set or vim could not be found on your system!")
 
         subprocess.run([editor, report], check=True)
 

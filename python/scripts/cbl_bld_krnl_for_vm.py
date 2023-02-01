@@ -110,7 +110,7 @@ def build_kernel_for_vm(add_make_targets, make_variables, config, menuconfig, vm
         }  # yapf: disable
     elif 'debian' in vm_name:
         if not (configs := Path(os.environ['CBL_LKT'], 'configs/debian')).exists():
-            raise Exception(f"{configs.parents[1]} is not downloaded?")
+            raise RuntimeError(f"{configs.parents[1]} is not downloaded?")
         configs = {
             'arm': Path(configs, 'armmp.config'),
             'arm64': Path(configs, 'arm64.config'),
@@ -135,7 +135,7 @@ def build_kernel_for_vm(add_make_targets, make_variables, config, menuconfig, vm
         response.raise_for_status()
         config_dst.write_bytes(response.content)
     else:
-        raise Exception(f"Don't know how to handle {config_src}!")
+        raise RuntimeError(f"Don't know how to handle {config_src}!")
 
     make_targets = ['olddefconfig', 'localyesconfig', 'all']
     if menuconfig:
@@ -148,17 +148,17 @@ def build_kernel_for_vm(add_make_targets, make_variables, config, menuconfig, vm
 
 if __name__ == '__main__':
     if not Path('Makefile').exists():
-        raise Exception('You do not appear to be in a kernel tree?')
+        raise RuntimeError('You do not appear to be in a kernel tree?')
 
     args = parse_arguments()
 
     arch = get_qemu_arch(args.arch)
 
     if not (vm_folder := Path(os.environ['VM_FOLDER'], arch, args.vm_name)).exists():
-        raise Exception(f"{args.vm_name} not found in {vm_folder.parent}?")
+        raise RuntimeError(f"{args.vm_name} not found in {vm_folder.parent}?")
 
     if not (lsmod := Path(vm_folder, 'shared/kernel_files/lsmod')).exists():
-        raise Exception(f"lsmod not found in {vm_folder}?")
+        raise RuntimeError(f"lsmod not found in {vm_folder}?")
 
     make_vars = {
         'ARCH': qemu_arch_to_kernel_arch(arch),

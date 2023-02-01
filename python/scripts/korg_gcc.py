@@ -146,7 +146,7 @@ def install(args):
     extract = not args.no_extract
 
     if cache and not (download_folder := Path(args.download_folder)).exists():
-        raise Exception(
+        raise RuntimeError(
             f"Download folder ('{download_folder}') does not exist, please create it before running this script!"
         )
 

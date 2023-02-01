@@ -36,7 +36,7 @@ def enable_community_repo():
     # Get the repository URL to create the community repo from (build from the
     # first uncommented line ending in main).
     if not (repo_url := re.search('^([^#].*/)main$', text, flags=re.M).groups()[0]):
-        raise Exception(f"Could not find main repo in {conf}?")
+        raise RuntimeError(f"Could not find main repo in {conf}?")
     community_repo = repo_url + 'community'
 
     # If the community repo is already enabled (uncommented), we do not need to

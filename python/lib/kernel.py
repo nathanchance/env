@@ -20,9 +20,9 @@ def get_tool_version(binary_path):
 def kmake(variables, targets, ccache=True, directory=None, jobs=None, silent=True, use_time=False):
     # Handle kernel directory right away
     if not (kernel_src := Path(directory) if directory else Path('.')).exists():
-        raise Exception(f"Derived kernel source ('{kernel_src}') does not exist?")
+        raise RuntimeError(f"Derived kernel source ('{kernel_src}') does not exist?")
     if not (makefile := Path(kernel_src, 'Makefile')).exists():
-        raise Exception(f"Derived kernel source ('{kernel_src}') is not a kernel tree?")
+        raise RuntimeError(f"Derived kernel source ('{kernel_src}') is not a kernel tree?")
 
     # Get compiler related variables
     cc_str = variables.get('CC', '')
@@ -42,7 +42,7 @@ def kmake(variables, targets, ccache=True, directory=None, jobs=None, silent=Tru
             # We always want to check that the tree in question supports an
             # LLVM value other than 1
             if 'LLVM_PREFIX' not in makefile.read_text(encoding='utf-8'):
-                raise Exception(
+                raise RuntimeError(
                     f"Derived kernel source ('{kernel_src}') does not support LLVM other than 1!")
             # We want to check that LLVM is a correct value but we do not want
             # to override the user's CC choice if there was one
@@ -53,13 +53,14 @@ def kmake(variables, targets, ccache=True, directory=None, jobs=None, silent=Tru
                 if not cc_str:
                     cc_str = f"{llvm}clang"
             else:
-                raise Exception(f"LLVM value ('{llvm}') neither begins with '-' nor ends with '/'!")
+                raise RuntimeError(
+                    f"LLVM value ('{llvm}') neither begins with '-' nor ends with '/'!")
     # If we are not using clang, we have to be using gcc
     if not cc_str:
         cc_str = f"{cross_compile}gcc"
 
     if not (compiler := shutil.which(cc_str)):
-        raise Exception(f"CC does not exist based on derived value ('{cc_str}')?")
+        raise RuntimeError(f"CC does not exist based on derived value ('{cc_str}')?")
     # Ensure compiler is a Path object for the .parent use below
     compiler_location = (compiler := Path(compiler)).parent
 
@@ -89,7 +90,7 @@ def kmake(variables, targets, ccache=True, directory=None, jobs=None, silent=Tru
     ias_def_val = 1 if cc_is_clang and ias_def_on else 0
     if int(variables.get('LLVM_IAS', ias_def_val)) == 0:
         if not (gnu_as := shutil.which(f"{cross_compile}as")):
-            raise Exception(
+            raise RuntimeError(
                 f"GNU as could not be found based on CROSS_COMPILE ('{cross_compile}')?")
         as_location = Path(gnu_as).parent
         if as_location != compiler_location:
@@ -103,7 +104,7 @@ def kmake(variables, targets, ccache=True, directory=None, jobs=None, silent=Tru
     ]
     if use_time:
         if not (gnu_time := shutil.which('time')):
-            raise Exception('Could not find time binary in PATH?')
+            raise RuntimeError('Could not find time binary in PATH?')
         make_cmd = [gnu_time, '-v'] + make_cmd
     utils.print_cmd(make_cmd)
     if not use_time:

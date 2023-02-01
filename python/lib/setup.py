@@ -41,7 +41,7 @@ def check_ip(ip_to_check):
 
 def check_root():
     if os.geteuid() != 0:
-        raise Exception("root access is required!")
+        raise RuntimeError("root access is required!")
 
 
 # Easier than os.walk() + shutil.chown()
@@ -55,10 +55,10 @@ def chpasswd(user_name, new_password):
 
 def chsh_fish(username):
     if not (fish := shutil.which('fish')):
-        raise Exception('fish not installed?')
+        raise RuntimeError('fish not installed?')
 
     if fish not in Path('/etc/shells').read_text(encoding='utf-8'):
-        raise Exception(f"{fish} is not in /etc/shells?")
+        raise RuntimeError(f"{fish} is not in /etc/shells?")
 
     subprocess.run(['chsh', '-s', fish, username], check=True)
 
@@ -111,7 +111,7 @@ def get_active_ethernet_info():
 def get_env_root():
     if (env_root := Path(__file__).resolve().parents[2]).joinpath('README.md').exists():
         return env_root
-    raise Exception(f"{env_root} does not seem correct?")
+    raise RuntimeError(f"{env_root} does not seem correct?")
 
 
 def get_glibc_version():
@@ -190,7 +190,7 @@ def is_installed(package_to_check):
     elif shutil.which('dpkg'):
         cmd = ['dpkg', '-s']
     else:
-        raise Exception('Not implemented for the current package manager!')
+        raise RuntimeError('Not implemented for the current package manager!')
 
     try:
         subprocess.run([*cmd, package_to_check], capture_output=True, check=True)
@@ -228,7 +228,7 @@ def remove_if_installed(package_to_remove):
         elif shutil.which('apt'):
             apt(['remove', '-y', package_to_remove])
         else:
-            raise Exception('Not implemented for the current package manager!')
+            raise RuntimeError('Not implemented for the current package manager!')
 
 
 def set_ip_addr_for_intf(con_name, intf, ip_addr):
@@ -238,7 +238,7 @@ def set_ip_addr_for_intf(con_name, intf, ip_addr):
         gateway = '192.168.4.1'
         local_dns = '192.168.0.1'
     else:
-        raise Exception(f"{ip_addr} not supported by script!")
+        raise RuntimeError(f"{ip_addr} not supported by script!")
     dns = ['8.8.8.8', '8.8.4.4', '1.1.1.1', local_dns]
 
     subprocess.run([*nmcli_mod, 'ipv4.addresses', f"{ip_addr}/24"], check=True)
@@ -251,7 +251,7 @@ def set_ip_addr_for_intf(con_name, intf, ip_addr):
 
     current_ip = get_ip_addr_for_intf(intf)
     if current_ip != ip_addr:
-        raise Exception(
+        raise RuntimeError(
             f"IP address of '{intf}' ('{current_ip}') did not change to requested IP address ('{ip_addr}')"
         )
 
@@ -266,7 +266,7 @@ def setup_initial_fish_config(username):
                               check=True,
                               text=True).stdout.strip()
     if tuple(int(x) for x in fish_ver.split('.')) < (3, 4, 0):
-        raise Exception(f"{fish_ver} is less than 3.4.0!")
+        raise RuntimeError(f"{fish_ver} is less than 3.4.0!")
 
     user_cfg = Path('/home', username, '.config')
     fish_cfg = Path(user_cfg, 'fish/config.fish')
@@ -345,7 +345,7 @@ def setup_mnt_nas():
 def setup_static_ip(requested_ip):
     for command in ['ip', 'nmcli']:
         if not shutil.which(command):
-            raise Exception(f"{command} could not be found")
+            raise RuntimeError(f"{command} could not be found")
 
     # Validate that the supplied IP address is valid
     check_ip(requested_ip)
@@ -364,7 +364,8 @@ def setup_ssh_authorized_keys(user_name):
         elif shutil.which('wget'):
             cmd = ['wget', '-q', '-O-']
         else:
-            raise Exception('No suitable download command could be found for downloading SSH key!')
+            raise RuntimeError(
+                'No suitable download command could be found for downloading SSH key!')
         ssh_key = subprocess.run([*cmd, 'https://github.com/nathanchance.keys'],
                                  capture_output=True,
                                  check=True).stdout

@@ -22,7 +22,7 @@ def add_mods_to_mkinitcpio(modules):
     mkinitcpio_conf, conf_text = lib.utils.path_and_text('/etc/mkinitcpio.conf')
 
     if not (match := re.search(r'^MODULES=\((.*)\)$', conf_text, flags=re.M)):
-        raise Exception(f"Could not find MODULES line in {mkinitcpio_conf}!")
+        raise RuntimeError(f"Could not find MODULES line in {mkinitcpio_conf}!")
 
     conf_mods = set(match.groups()[0].split(' '))
     for module in modules:
@@ -65,7 +65,7 @@ def configure_boot_entries():
     linux_re = re.compile(r'[0-9a-z_]+linux\.conf')
     linux_confs = [item for item in boot_entries.iterdir() if linux_re.search(item.name)]
     if (num := len(linux_confs)) != 1:
-        raise Exception(f"Number of possible linux.conf entries ('{num}') is unexpected!")
+        raise RuntimeError(f"Number of possible linux.conf entries ('{num}') is unexpected!")
 
     # Move the configuration created by archinstall to a deterministic name
     linux_confs[0].replace(linux_conf)
@@ -76,7 +76,7 @@ def configure_boot_entries():
     if not (lib.setup.is_virtual_machine() and 'DISPLAY' not in os.environ):
         return
     if not (match := re.search('^options.*$', linux_conf_text, flags=re.M)):
-        raise Exception(f"Could not find 'options' line in {linux_conf}?")
+        raise RuntimeError(f"Could not find 'options' line in {linux_conf}?")
     if 'console=' not in (old_options := match.group(0)):
         new_options = old_options + ' console=ttyS0,115200n8'
         linux_conf.write_text(linux_conf_text.replace(old_options, new_options), encoding='utf-8')
@@ -383,7 +383,7 @@ def uncomment_pacman_option(conf, option, old_value=None, new_value=None):
     if old_value and new_value:
         return re.sub(f"^#{option} = {old_value}", f"{option} = {new_value}", conf, flags=re.M)
     if old_value or new_value:
-        raise Exception(f"old_value is {old_value} and new_value is {new_value}??")
+        raise RuntimeError(f"old_value is {old_value} and new_value is {new_value}??")
     return re.sub(f"^#{option}", option, conf, flags=re.M)
 
 
