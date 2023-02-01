@@ -112,7 +112,8 @@ function cbl_bld_tot_tcs -d "Build LLVM and binutils from source for kernel deve
                 $bld_bntls_args \
                 --binutils-folder $bntls \
                 --build-folder $TMP_BUILD_FOLDER/binutils \
-                --install-folder $bntls_install
+                --install-folder $bntls_install \
+                --show-build-commands
             set message "build-binutils.py failed"
             print_error "$message"
             tg_msg "$message"
