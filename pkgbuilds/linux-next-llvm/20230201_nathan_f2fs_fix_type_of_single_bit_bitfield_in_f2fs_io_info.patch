@@ -1,0 +1,68 @@
+From git@z Thu Jan  1 00:00:00 1970
+Subject: [PATCH] f2fs: Fix type of single bit bitfield in f2fs_io_info
+From: Nathan Chancellor <nathan@kernel.org>
+Date: Wed, 01 Feb 2023 09:40:22 -0700
+Message-Id: <20230201-f2fs-fix-single-length-bitfields-v1-1-e386f7916b94@kernel.org>
+MIME-Version: 1.0
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 7bit
+
+Clang warns:
+
+  ../fs/f2fs/data.c:995:17: error: implicit truncation from 'int' to a one-bit wide bit-field changes value from 1 to -1 [-Werror,-Wsingle-bit-bitfield-constant-conversion]
+          fio->submitted = 1;
+                         ^ ~
+  ../fs/f2fs/data.c:1011:15: error: implicit truncation from 'int' to a one-bit wide bit-field changes value from 1 to -1 [-Werror,-Wsingle-bit-bitfield-constant-conversion]
+                          fio->retry = 1;
+                                     ^ ~
+
+  ../fs/f2fs/segment.c:3320:16: error: implicit truncation from 'int' to a one-bit wide bit-field changes value from 1 to -1 [-Werror,-Wsingle-bit-bitfield-constant-conversion]
+                  fio->in_list = 1;
+                               ^ ~
+
+There is not a bug here because the value of these fields is never
+explicitly compared against (just whether it is zero or non-zero) but
+it is easy to silence the warning by using an unsigned type to allow
+an assignment of 0 or 1 without implicit conversion.
+
+Fixes: 998863dadd2c ("f2fs: reduce stack memory cost by using bitfield in struct f2fs_io_info")
+Link: https://github.com/ClangBuiltLinux/linux/issues/1796
+Reported-by: kernel test robot <lkp@intel.com>
+Link: https://lore.kernel.org/r/20230201-f2fs-fix-single-length-bitfields-v1-1-e386f7916b94@kernel.org
+Signed-off-by: Nathan Chancellor <nathan@kernel.org>
+---
+ fs/f2fs/f2fs.h | 12 ++++++------
+ 1 file changed, 6 insertions(+), 6 deletions(-)
+
+diff --git a/fs/f2fs/f2fs.h b/fs/f2fs/f2fs.h
+index 08dc64c5050e..89f6fdfeed19 100644
+--- a/fs/f2fs/f2fs.h
++++ b/fs/f2fs/f2fs.h
+@@ -1213,12 +1213,12 @@ struct f2fs_io_info {
+ 	int compr_blocks;	/* # of compressed block addresses */
+ 	int need_lock:8;	/* indicate we need to lock cp_rwsem */
+ 	int version:8;		/* version of the node */
+-	int submitted:1;	/* indicate IO submission */
+-	int in_list:1;		/* indicate fio is in io_list */
+-	int is_por:1;		/* indicate IO is from recovery or not */
+-	int retry:1;		/* need to reallocate block address */
+-	int encrypted:1;	/* indicate file is encrypted */
+-	int post_read:1;	/* require post read */
++	unsigned int submitted:1;	/* indicate IO submission */
++	unsigned int in_list:1;		/* indicate fio is in io_list */
++	unsigned int is_por:1;		/* indicate IO is from recovery or not */
++	unsigned int retry:1;		/* need to reallocate block address */
++	unsigned int encrypted:1;	/* indicate file is encrypted */
++	unsigned int post_read:1;	/* require post read */
+ 	enum iostat_type io_type;	/* io type */
+ 	struct writeback_control *io_wbc; /* writeback control */
+ 	struct bio **bio;		/* bio for ipu */
+
+---
+base-commit: de6b3a5e09b29c014bd04044b023896107cfa2ee
+change-id: 20230201-f2fs-fix-single-length-bitfields-df8cc78e880a
+
+Best regards,
+-- 
+Nathan Chancellor <nathan@kernel.org>
+

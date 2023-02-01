@@ -3,7 +3,7 @@
 
 _localversion=-llvm
 pkgname=linux-next$_localversion
-_srctag=next-20230131
+_srctag=next-20230201
 pkgver=${_srctag//-/.}
 pkgrel=1
 pkgdesc='linux-next'
@@ -18,6 +18,7 @@ source=(
   "$pkgname::git+https://git.kernel.org/pub/scm/linux/kernel/git/next/linux-next.git?signed#tag=$_srctag"
   config
   20230127_trix_udf_remove_reporting_loc_in_debug_output.patch
+  20230201_nathan_f2fs_fix_type_of_single_bit_bitfield_in_f2fs_io_info.patch
 )
 
 validpgpkeys=(
@@ -25,8 +26,9 @@ validpgpkeys=(
   '3F2568AAC26998F9E813A1C5C3F436CA30F5D8EB'  # Mark Brown
 )
 sha256sums=('SKIP'
-            '97286bde15fbf5410acbd3cc0028c1c2b572c223117ebeb155d8522effd4b57a'
-            'fcadae281d7c71db47a2a35eda892ddec4387a4b251dcb06f6ac320a338356fc')
+            '8aab652203ec47a006ab729da30bacf6cd848656afddca1ef845468bb5f513d8'
+            'fcadae281d7c71db47a2a35eda892ddec4387a4b251dcb06f6ac320a338356fc'
+            '32b517fad06d56b93bbd9d82ad35cf0d991f7ea74216aac5d00862dc69c69fb7')
 
 # This obviously ties this PKGBUILD to my machine but that is kind of the point :)
 _kmake() {
