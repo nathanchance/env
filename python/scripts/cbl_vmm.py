@@ -143,7 +143,7 @@ class VirtualMachine:
         if self.use_kvm:
             self.qemu_args += ['-cpu', kvm_cpu, '-enable-kvm']
         if cmdline:
-            self.qemu_args += ['-append', cmdline]
+            self.qemu_args += ['-append', cmdline.strip()]
         if gdb:
             self.qemu_args += ['-s', '-S']
         if initrd:
