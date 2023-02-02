@@ -63,6 +63,7 @@ function install_packages() {
         fish
         fzf
         jq
+        moreutils
         neofetch
         openssh
         stow

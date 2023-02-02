@@ -120,6 +120,7 @@ function install_packages() {
         fzf
         jq
         less
+        moreutils
         neofetch
         openssh
         stow

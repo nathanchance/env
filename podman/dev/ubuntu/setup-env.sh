@@ -71,6 +71,7 @@ function install_packages() {
         fzf
         jq
         locales
+        moreutils
         neofetch
         openssh-client
         stow
