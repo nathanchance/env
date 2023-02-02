@@ -135,6 +135,7 @@ def pacman_install_packages():
 
         # b4
         'b4',
+        'git-filter-repo',
         'python-dkim',
         'patatt',
 
