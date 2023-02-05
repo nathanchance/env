@@ -41,8 +41,10 @@ function setup_apt_llvm_org() {
 
     get_apt_gpg_key https://apt.llvm.org/llvm-snapshot.gpg.key apt_llvm_org
     case $compiler in
-        llvm-11 | llvm-12 | llvm-14 | llvm-15) add-apt-repository "deb http://apt.llvm.org/$version/ llvm-toolchain-$version-${compiler##*-} main" ;;
-        llvm-16) add-apt-repository "deb http://apt.llvm.org/$version/ llvm-toolchain-$version main" ;;
+        llvm-android) ;; # handled later
+        llvm-13) ;;      # in bullseye repos by default
+        llvm-17) add-apt-repository "deb http://apt.llvm.org/$version/ llvm-toolchain-$version main" ;;
+        *) add-apt-repository "deb http://apt.llvm.org/$version/ llvm-toolchain-$version-${compiler##*-} main" ;;
     esac
 }
 

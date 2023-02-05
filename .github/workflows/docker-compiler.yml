@@ -50,6 +50,10 @@ jobs:
             platforms: linux/amd64,linux/arm64
 
           - base: ubuntu:jammy
+            compiler: llvm-17
+            platforms: linux/amd64,linux/arm64
+
+          - base: ubuntu:jammy
             compiler: llvm-android
             platforms: linux/amd64
 
