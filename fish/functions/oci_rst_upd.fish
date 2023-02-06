@@ -20,7 +20,7 @@ function oci_rst_upd -d "Reset container storage, download new images, and start
     dbxc --yes; or return
     dbxe -- 'fish -c "upd -y"'
 
-    if test "$LOCATION" = workstation
-        podman pull $GHCR/dev/fedora
+    if is_location_primary
+        podman pull $GHCR/dev/{debian,fedora}
     end
 end
