@@ -34,7 +34,9 @@ function cbl_bld_qemu -d "Build QEMU for use with ClangBuiltLinux"
             git -C $qemu_src submodule update --recursive
         end
         # https://lore.kernel.org/Y88BmxzRqtnpAsWG@dev-arch.thelio-3990X/
-        git -C $qemu_src revert --no-commit 145e2198d749ec09a405f1607a9932499b76f1eb; or return
+        pushd $qemu_src; or return
+        b4 shazam -l -P _ https://lore.kernel.org/all/20230118095751.49728-2-philmd@linaro.org/; or return
+        popd
 
         set qemu_ver (git -C $qemu_src sh -s --format=%H)
     end
