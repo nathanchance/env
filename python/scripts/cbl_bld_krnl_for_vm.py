@@ -147,10 +147,10 @@ def build_kernel_for_vm(add_make_targets, make_variables, config, menuconfig, vm
 
 
 if __name__ == '__main__':
+    args = parse_arguments()
+
     if not Path('Makefile').exists():
         raise RuntimeError('You do not appear to be in a kernel tree?')
-
-    args = parse_arguments()
 
     arch = get_qemu_arch(args.arch)
 
