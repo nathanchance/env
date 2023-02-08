@@ -28,15 +28,29 @@ function cbl_bld_qemu -d "Build QEMU for use with ClangBuiltLinux"
         git -C $qemu_src submodule foreach --recursive git clean -dfqx
 
         if test "$update" = true
-            git -C $qemu_src reset --hard
+            git -C $qemu_src remote update
+            git -C $qemu_src reset --hard origin/master
             git -C $qemu_src submodule foreach git reset --hard
-            git -C $qemu_src pull --rebase
             git -C $qemu_src submodule update --recursive
+
+            # Reverts
+            # https://lore.kernel.org/Y+Pf0q6LmQKN+FHo@dev-arch.thelio-3990X/
+            set -a reverts eac7a7791bb6d719233deed750034042318ffd56 # x86: don't let decompressed kernel image clobber setup_data
+            for revert in $reverts
+                git -C $qemu_src revert --no-edit $revert; or return
+            end
+
+            # Patches from mailing lists
+            # https://lore.kernel.org/Y88BmxzRqtnpAsWG@dev-arch.thelio-3990X/
+            set -a b4_patches https://lore.kernel.org/all/20230118095751.49728-2-philmd@linaro.org/ # hw/pci-host/gt64120: Fix PCI I/O config register endianness
+            if set -q b4_patches
+                pushd $qemu_src; or return
+                for patch in $b4_patches
+                    b4 shazam -l -P _ $patch; or return
+                end
+                popd
+            end
         end
-        # https://lore.kernel.org/Y88BmxzRqtnpAsWG@dev-arch.thelio-3990X/
-        pushd $qemu_src; or return
-        b4 shazam -l -P _ https://lore.kernel.org/all/20230118095751.49728-2-philmd@linaro.org/; or return
-        popd
 
         set qemu_ver (git -C $qemu_src sh -s --format=%H)
     end
