@@ -20,7 +20,7 @@ function cbl_bld_tot_tcs -d "Build LLVM and binutils from source for kernel deve
         case hetzner-server workstation
             set bld_llvm_args \
                 --bolt \
-                --pgo kernel-{allmod,def}config
+                --pgo kernel-defconfig
 
         case honeycomb
             set bld_bntls false
@@ -159,17 +159,70 @@ function cbl_bld_tot_tcs -d "Build LLVM and binutils from source for kernel deve
         end
     end
 
+    set bld_llvm $tc_bld
+    set llvm_bld $TMP_BUILD_FOLDER/llvm
+    set common_bld_llvm_args \
+        --assertions \
+        --build-folder $llvm_bld \
+        --check-targets $check_targets \
+        --llvm-folder $llvm_project \
+        --no-ccache \
+        --quiet-cmake \
+        --show-build-commands
+
+    # On my primary location, validate the toolchain upgrade ahead of time,
+    # which helps save time compared to using 'kernel-pgo-allmodconfig'
+    # for validation
+    if is_location_primary
+        if not $tc_bld/build-llvm.py \
+                $common_bld_llvm_args \
+                --build-stage1-only
+            set message "Validation of new LLVM revision failed: LLVM did not build or tests failed!"
+            print_error "$message"
+            tg_msg "$message"
+            return 1
+        end
+
+        set lsm_location (command grep -F 'lsm.location = Path(src_folder,' $tc_bld/build-llvm.py | string trim)
+        if not env PYTHONPATH=$tc_bld/tc_build python3 -c "from pathlib import Path
+
+import utils
+
+from kernel import LinuxSourceManager, LLVMKernelBuilder
+from llvm import LLVMSourceManager
+
+src_folder = Path('$tc_bld/src')
+
+lsm = LinuxSourceManager()
+$lsm_location
+lsm.patches = list(src_folder.glob('*.patch'))
+lsm.tarball.base_download_url = 'https://git.kernel.org/torvalds/t'
+lsm.tarball.local_location = lsm.location.with_name(f'{lsm.location.name}.tar.gz')
+
+utils.print_header('Preparing Linux source for profiling runs')
+lsm.prepare()
+
+kernel_builder = LLVMKernelBuilder()
+kernel_builder.folders.build = Path('$llvm_bld/linux')
+kernel_builder.folders.source = lsm.location
+kernel_builder.matrix = {
+    'defconfig': ['ARM', 'Mips', 'PowerPC'],
+    'allmodconfig': LLVMSourceManager(Path('$llvm_project')).default_targets(),
+}
+kernel_builder.toolchain_prefix = Path('$llvm_bld/final')
+kernel_builder.build()"
+            set message "Validation of new LLVM revision failed: Linux did not build!"
+            print_error "$message"
+            tg_msg "$message"
+            return 1
+        end
+    end
+
     set llvm_install $CBL_TC_STOW_LLVM/$date_time-(git -C $llvm_project sh -s --format=%H origin/main)
     if not $tc_bld/build-llvm.py \
-            --assertions \
-            --build-folder $TMP_BUILD_FOLDER/llvm \
-            --check-targets $check_targets \
-            --install-folder $llvm_install \
-            --llvm-folder $llvm_project \
+            $common_bld_llvm_args \
             $bld_llvm_args \
-            --no-ccache \
-            --quiet-cmake \
-            --show-build-commands
+            --install-folder $llvm_install
         set message "build-llvm.py failed"
         print_error "$message"
         tg_msg "$message"
