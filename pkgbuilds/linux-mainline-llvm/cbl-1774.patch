@@ -1,0 +1,457 @@
+From c95c354be9a9f714da18a37c24dbf7935dfe9fb1 Mon Sep 17 00:00:00 2001
+From: Peter Zijlstra <peterz@infradead.org>
+Date: Mon, 23 Jan 2023 21:59:16 +0100
+Subject: [PATCH 1/3] FROMGIT: x86/alternatives: Introduce int3_emulate_jcc()
+
+Move the kprobe Jcc emulation into int3_emulate_jcc() so it can be
+used by more code -- specifically static_call() will need this.
+
+Signed-off-by: Peter Zijlstra (Intel) <peterz@infradead.org>
+Signed-off-by: Ingo Molnar <mingo@kernel.org>
+Reviewed-by: Masami Hiramatsu (Google) <mhiramat@kernel.org>
+Link: https://lore.kernel.org/r/20230123210607.057678245@infradead.org
+Link: https://git.kernel.org/tip/db7adcfd1cec4e95155e37bc066fddab302c6340
+Signed-off-by: Nathan Chancellor <nathan@kernel.org>
+---
+ arch/x86/include/asm/text-patching.h | 31 +++++++++++++++++++++++
+ arch/x86/kernel/kprobes/core.c       | 38 ++++++----------------------
+ 2 files changed, 39 insertions(+), 30 deletions(-)
+
+diff --git a/arch/x86/include/asm/text-patching.h b/arch/x86/include/asm/text-patching.h
+index f4b87f08f5c5..29832c338cdc 100644
+--- a/arch/x86/include/asm/text-patching.h
++++ b/arch/x86/include/asm/text-patching.h
+@@ -184,6 +184,37 @@ void int3_emulate_ret(struct pt_regs *regs)
+ 	unsigned long ip = int3_emulate_pop(regs);
+ 	int3_emulate_jmp(regs, ip);
+ }
++
++static __always_inline
++void int3_emulate_jcc(struct pt_regs *regs, u8 cc, unsigned long ip, unsigned long disp)
++{
++	static const unsigned long jcc_mask[6] = {
++		[0] = X86_EFLAGS_OF,
++		[1] = X86_EFLAGS_CF,
++		[2] = X86_EFLAGS_ZF,
++		[3] = X86_EFLAGS_CF | X86_EFLAGS_ZF,
++		[4] = X86_EFLAGS_SF,
++		[5] = X86_EFLAGS_PF,
++	};
++
++	bool invert = cc & 1;
++	bool match;
++
++	if (cc < 0xc) {
++		match = regs->flags & jcc_mask[cc >> 1];
++	} else {
++		match = ((regs->flags & X86_EFLAGS_SF) >> X86_EFLAGS_SF_BIT) ^
++			((regs->flags & X86_EFLAGS_OF) >> X86_EFLAGS_OF_BIT);
++		if (cc >= 0xe)
++			match = match || (regs->flags & X86_EFLAGS_ZF);
++	}
++
++	if ((match && !invert) || (!match && invert))
++		ip += disp;
++
++	int3_emulate_jmp(regs, ip);
++}
++
+ #endif /* !CONFIG_UML_X86 */
+ 
+ #endif /* _ASM_X86_TEXT_PATCHING_H */
+diff --git a/arch/x86/kernel/kprobes/core.c b/arch/x86/kernel/kprobes/core.c
+index b36f3c367cb2..a170a520ac6d 100644
+--- a/arch/x86/kernel/kprobes/core.c
++++ b/arch/x86/kernel/kprobes/core.c
+@@ -464,50 +464,26 @@ static void kprobe_emulate_call(struct kprobe *p, struct pt_regs *regs)
+ }
+ NOKPROBE_SYMBOL(kprobe_emulate_call);
+ 
+-static nokprobe_inline
+-void __kprobe_emulate_jmp(struct kprobe *p, struct pt_regs *regs, bool cond)
++static void kprobe_emulate_jmp(struct kprobe *p, struct pt_regs *regs)
+ {
+ 	unsigned long ip = regs->ip - INT3_INSN_SIZE + p->ainsn.size;
+ 
+-	if (cond)
+-		ip += p->ainsn.rel32;
++	ip += p->ainsn.rel32;
+ 	int3_emulate_jmp(regs, ip);
+ }
+-
+-static void kprobe_emulate_jmp(struct kprobe *p, struct pt_regs *regs)
+-{
+-	__kprobe_emulate_jmp(p, regs, true);
+-}
+ NOKPROBE_SYMBOL(kprobe_emulate_jmp);
+ 
+-static const unsigned long jcc_mask[6] = {
+-	[0] = X86_EFLAGS_OF,
+-	[1] = X86_EFLAGS_CF,
+-	[2] = X86_EFLAGS_ZF,
+-	[3] = X86_EFLAGS_CF | X86_EFLAGS_ZF,
+-	[4] = X86_EFLAGS_SF,
+-	[5] = X86_EFLAGS_PF,
+-};
+-
+ static void kprobe_emulate_jcc(struct kprobe *p, struct pt_regs *regs)
+ {
+-	bool invert = p->ainsn.jcc.type & 1;
+-	bool match;
++	unsigned long ip = regs->ip - INT3_INSN_SIZE + p->ainsn.size;
+ 
+-	if (p->ainsn.jcc.type < 0xc) {
+-		match = regs->flags & jcc_mask[p->ainsn.jcc.type >> 1];
+-	} else {
+-		match = ((regs->flags & X86_EFLAGS_SF) >> X86_EFLAGS_SF_BIT) ^
+-			((regs->flags & X86_EFLAGS_OF) >> X86_EFLAGS_OF_BIT);
+-		if (p->ainsn.jcc.type >= 0xe)
+-			match = match || (regs->flags & X86_EFLAGS_ZF);
+-	}
+-	__kprobe_emulate_jmp(p, regs, (match && !invert) || (!match && invert));
++	int3_emulate_jcc(regs, p->ainsn.jcc.type, ip, p->ainsn.rel32);
+ }
+ NOKPROBE_SYMBOL(kprobe_emulate_jcc);
+ 
+ static void kprobe_emulate_loop(struct kprobe *p, struct pt_regs *regs)
+ {
++	unsigned long ip = regs->ip - INT3_INSN_SIZE + p->ainsn.size;
+ 	bool match;
+ 
+ 	if (p->ainsn.loop.type != 3) {	/* LOOP* */
+@@ -535,7 +511,9 @@ static void kprobe_emulate_loop(struct kprobe *p, struct pt_regs *regs)
+ 	else if (p->ainsn.loop.type == 1)	/* LOOPE */
+ 		match = match && (regs->flags & X86_EFLAGS_ZF);
+ 
+-	__kprobe_emulate_jmp(p, regs, match);
++	if (match)
++		ip += p->ainsn.rel32;
++	int3_emulate_jmp(regs, ip);
+ }
+ NOKPROBE_SYMBOL(kprobe_emulate_loop);
+ 
+-- 
+2.39.1
+
+
+From 168fe5e4e0ce88bf9b0c4baf58e84c2da5e3fb9f Mon Sep 17 00:00:00 2001
+From: Peter Zijlstra <peterz@infradead.org>
+Date: Mon, 23 Jan 2023 21:59:17 +0100
+Subject: [PATCH 2/3] FROMGIT: x86/alternatives: Teach text_poke_bp() to patch
+ Jcc.d32 instructions
+
+In order to re-write Jcc.d32 instructions text_poke_bp() needs to be
+taught about them.
+
+The biggest hurdle is that the whole machinery is currently made for 5
+byte instructions and extending this would grow struct text_poke_loc
+which is currently a nice 16 bytes and used in an array.
+
+However, since text_poke_loc contains a full copy of the (s32)
+displacement, it is possible to map the Jcc.d32 2 byte opcodes to
+Jcc.d8 1 byte opcode for the int3 emulation.
+
+This then leaves the replacement bytes; fudge that by only storing the
+last 5 bytes and adding the rule that 'length == 6' instruction will
+be prefixed with a 0x0f byte.
+
+Signed-off-by: Peter Zijlstra (Intel) <peterz@infradead.org>
+Signed-off-by: Ingo Molnar <mingo@kernel.org>
+Reviewed-by: Masami Hiramatsu (Google) <mhiramat@kernel.org>
+Link: https://lore.kernel.org/r/20230123210607.115718513@infradead.org
+Link: https://git.kernel.org/tip/ac0ee0a9560c97fa5fe1409e450c2425d4ebd17a
+Signed-off-by: Nathan Chancellor <nathan@kernel.org>
+---
+ arch/x86/kernel/alternative.c | 62 ++++++++++++++++++++++++++---------
+ 1 file changed, 47 insertions(+), 15 deletions(-)
+
+diff --git a/arch/x86/kernel/alternative.c b/arch/x86/kernel/alternative.c
+index 7d8c3cbde368..81381a0194f3 100644
+--- a/arch/x86/kernel/alternative.c
++++ b/arch/x86/kernel/alternative.c
+@@ -340,6 +340,12 @@ void __init_or_module noinline apply_alternatives(struct alt_instr *start,
+ 	}
+ }
+ 
++static inline bool is_jcc32(struct insn *insn)
++{
++	/* Jcc.d32 second opcode byte is in the range: 0x80-0x8f */
++	return insn->opcode.bytes[0] == 0x0f && (insn->opcode.bytes[1] & 0xf0) == 0x80;
++}
++
+ #if defined(CONFIG_RETPOLINE) && defined(CONFIG_OBJTOOL)
+ 
+ /*
+@@ -378,12 +384,6 @@ static int emit_indirect(int op, int reg, u8 *bytes)
+ 	return i;
+ }
+ 
+-static inline bool is_jcc32(struct insn *insn)
+-{
+-	/* Jcc.d32 second opcode byte is in the range: 0x80-0x8f */
+-	return insn->opcode.bytes[0] == 0x0f && (insn->opcode.bytes[1] & 0xf0) == 0x80;
+-}
+-
+ static int emit_call_track_retpoline(void *addr, struct insn *insn, int reg, u8 *bytes)
+ {
+ 	u8 op = insn->opcode.bytes[0];
+@@ -1772,6 +1772,11 @@ void text_poke_sync(void)
+ 	on_each_cpu(do_sync_core, NULL, 1);
+ }
+ 
++/*
++ * NOTE: crazy scheme to allow patching Jcc.d32 but not increase the size of
++ * this thing. When len == 6 everything is prefixed with 0x0f and we map
++ * opcode to Jcc.d8, using len to distinguish.
++ */
+ struct text_poke_loc {
+ 	/* addr := _stext + rel_addr */
+ 	s32 rel_addr;
+@@ -1893,6 +1898,10 @@ noinstr int poke_int3_handler(struct pt_regs *regs)
+ 		int3_emulate_jmp(regs, (long)ip + tp->disp);
+ 		break;
+ 
++	case 0x70 ... 0x7f: /* Jcc */
++		int3_emulate_jcc(regs, tp->opcode & 0xf, (long)ip, tp->disp);
++		break;
++
+ 	default:
+ 		BUG();
+ 	}
+@@ -1966,16 +1975,26 @@ static void text_poke_bp_batch(struct text_poke_loc *tp, unsigned int nr_entries
+ 	 * Second step: update all but the first byte of the patched range.
+ 	 */
+ 	for (do_sync = 0, i = 0; i < nr_entries; i++) {
+-		u8 old[POKE_MAX_OPCODE_SIZE] = { tp[i].old, };
++		u8 old[POKE_MAX_OPCODE_SIZE+1] = { tp[i].old, };
++		u8 _new[POKE_MAX_OPCODE_SIZE+1];
++		const u8 *new = tp[i].text;
+ 		int len = tp[i].len;
+ 
+ 		if (len - INT3_INSN_SIZE > 0) {
+ 			memcpy(old + INT3_INSN_SIZE,
+ 			       text_poke_addr(&tp[i]) + INT3_INSN_SIZE,
+ 			       len - INT3_INSN_SIZE);
++
++			if (len == 6) {
++				_new[0] = 0x0f;
++				memcpy(_new + 1, new, 5);
++				new = _new;
++			}
++
+ 			text_poke(text_poke_addr(&tp[i]) + INT3_INSN_SIZE,
+-				  (const char *)tp[i].text + INT3_INSN_SIZE,
++				  new + INT3_INSN_SIZE,
+ 				  len - INT3_INSN_SIZE);
++
+ 			do_sync++;
+ 		}
+ 
+@@ -2003,8 +2022,7 @@ static void text_poke_bp_batch(struct text_poke_loc *tp, unsigned int nr_entries
+ 		 * The old instruction is recorded so that the event can be
+ 		 * processed forwards or backwards.
+ 		 */
+-		perf_event_text_poke(text_poke_addr(&tp[i]), old, len,
+-				     tp[i].text, len);
++		perf_event_text_poke(text_poke_addr(&tp[i]), old, len, new, len);
+ 	}
+ 
+ 	if (do_sync) {
+@@ -2021,10 +2039,15 @@ static void text_poke_bp_batch(struct text_poke_loc *tp, unsigned int nr_entries
+ 	 * replacing opcode.
+ 	 */
+ 	for (do_sync = 0, i = 0; i < nr_entries; i++) {
+-		if (tp[i].text[0] == INT3_INSN_OPCODE)
++		u8 byte = tp[i].text[0];
++
++		if (tp[i].len == 6)
++			byte = 0x0f;
++
++		if (byte == INT3_INSN_OPCODE)
+ 			continue;
+ 
+-		text_poke(text_poke_addr(&tp[i]), tp[i].text, INT3_INSN_SIZE);
++		text_poke(text_poke_addr(&tp[i]), &byte, INT3_INSN_SIZE);
+ 		do_sync++;
+ 	}
+ 
+@@ -2042,9 +2065,11 @@ static void text_poke_loc_init(struct text_poke_loc *tp, void *addr,
+ 			       const void *opcode, size_t len, const void *emulate)
+ {
+ 	struct insn insn;
+-	int ret, i;
++	int ret, i = 0;
+ 
+-	memcpy((void *)tp->text, opcode, len);
++	if (len == 6)
++		i = 1;
++	memcpy((void *)tp->text, opcode+i, len-i);
+ 	if (!emulate)
+ 		emulate = opcode;
+ 
+@@ -2055,6 +2080,13 @@ static void text_poke_loc_init(struct text_poke_loc *tp, void *addr,
+ 	tp->len = len;
+ 	tp->opcode = insn.opcode.bytes[0];
+ 
++	if (is_jcc32(&insn)) {
++		/*
++		 * Map Jcc.d32 onto Jcc.d8 and use len to distinguish.
++		 */
++		tp->opcode = insn.opcode.bytes[1] - 0x10;
++	}
++
+ 	switch (tp->opcode) {
+ 	case RET_INSN_OPCODE:
+ 	case JMP32_INSN_OPCODE:
+@@ -2071,7 +2103,6 @@ static void text_poke_loc_init(struct text_poke_loc *tp, void *addr,
+ 		BUG_ON(len != insn.length);
+ 	}
+ 
+-
+ 	switch (tp->opcode) {
+ 	case INT3_INSN_OPCODE:
+ 	case RET_INSN_OPCODE:
+@@ -2080,6 +2111,7 @@ static void text_poke_loc_init(struct text_poke_loc *tp, void *addr,
+ 	case CALL_INSN_OPCODE:
+ 	case JMP32_INSN_OPCODE:
+ 	case JMP8_INSN_OPCODE:
++	case 0x70 ... 0x7f: /* Jcc */
+ 		tp->disp = insn.immediate.value;
+ 		break;
+ 
+-- 
+2.39.1
+
+
+From fd70a5f5c6bfdc52771f2a800337dcb997995122 Mon Sep 17 00:00:00 2001
+From: Peter Zijlstra <peterz@infradead.org>
+Date: Thu, 26 Jan 2023 16:34:27 +0100
+Subject: [PATCH 3/3] FROMGIT: x86/static_call: Add support for Jcc tail-calls
+
+Clang likes to create conditional tail calls like:
+
+  0000000000000350 <amd_pmu_add_event>:
+  350:       0f 1f 44 00 00          nopl   0x0(%rax,%rax,1) 351: R_X86_64_NONE      __fentry__-0x4
+  355:       48 83 bf 20 01 00 00 00         cmpq   $0x0,0x120(%rdi)
+  35d:       0f 85 00 00 00 00       jne    363 <amd_pmu_add_event+0x13>     35f: R_X86_64_PLT32     __SCT__amd_pmu_branch_add-0x4
+  363:       e9 00 00 00 00          jmp    368 <amd_pmu_add_event+0x18>     364: R_X86_64_PLT32     __x86_return_thunk-0x4
+
+Where 0x35d is a static call site that's turned into a conditional
+tail-call using the Jcc class of instructions.
+
+Teach the in-line static call text patching about this.
+
+Notably, since there is no conditional-ret, in that case patch the Jcc
+to point at an empty stub function that does the ret -- or the return
+thunk when needed.
+
+Reported-by: "Erhard F." <erhard_f@mailbox.org>
+Signed-off-by: Peter Zijlstra (Intel) <peterz@infradead.org>
+Signed-off-by: Ingo Molnar <mingo@kernel.org>
+Reviewed-by: Masami Hiramatsu (Google) <mhiramat@kernel.org>
+Link: https://lore.kernel.org/r/Y9Kdg9QjHkr9G5b5@hirez.programming.kicks-ass.net
+Link: https://git.kernel.org/tip/923510c88d2b7d947c4217835fd9ca6bd65cc56c
+Signed-off-by: Nathan Chancellor <nathan@kernel.org>
+---
+ arch/x86/kernel/static_call.c | 50 ++++++++++++++++++++++++++++++++---
+ 1 file changed, 47 insertions(+), 3 deletions(-)
+
+diff --git a/arch/x86/kernel/static_call.c b/arch/x86/kernel/static_call.c
+index 2ebc338980bc..b70670a98597 100644
+--- a/arch/x86/kernel/static_call.c
++++ b/arch/x86/kernel/static_call.c
+@@ -9,6 +9,7 @@ enum insn_type {
+ 	NOP = 1,  /* site cond-call */
+ 	JMP = 2,  /* tramp / site tail-call */
+ 	RET = 3,  /* tramp / site cond-tail-call */
++	JCC = 4,
+ };
+ 
+ /*
+@@ -25,12 +26,40 @@ static const u8 xor5rax[] = { 0x2e, 0x2e, 0x2e, 0x31, 0xc0 };
+ 
+ static const u8 retinsn[] = { RET_INSN_OPCODE, 0xcc, 0xcc, 0xcc, 0xcc };
+ 
++static u8 __is_Jcc(u8 *insn) /* Jcc.d32 */
++{
++	u8 ret = 0;
++
++	if (insn[0] == 0x0f) {
++		u8 tmp = insn[1];
++		if ((tmp & 0xf0) == 0x80)
++			ret = tmp;
++	}
++
++	return ret;
++}
++
++extern void __static_call_return(void);
++
++asm (".global __static_call_return\n\t"
++     ".type __static_call_return, @function\n\t"
++     ASM_FUNC_ALIGN "\n\t"
++     "__static_call_return:\n\t"
++     ANNOTATE_NOENDBR
++     ANNOTATE_RETPOLINE_SAFE
++     "ret; int3\n\t"
++     ".size __static_call_return, . - __static_call_return \n\t");
++
+ static void __ref __static_call_transform(void *insn, enum insn_type type,
+ 					  void *func, bool modinit)
+ {
+ 	const void *emulate = NULL;
+ 	int size = CALL_INSN_SIZE;
+ 	const void *code;
++	u8 op, buf[6];
++
++	if ((type == JMP || type == RET) && (op = __is_Jcc(insn)))
++		type = JCC;
+ 
+ 	switch (type) {
+ 	case CALL:
+@@ -57,6 +86,20 @@ static void __ref __static_call_transform(void *insn, enum insn_type type,
+ 		else
+ 			code = &retinsn;
+ 		break;
++
++	case JCC:
++		if (!func) {
++			func = __static_call_return;
++			if (cpu_feature_enabled(X86_FEATURE_RETHUNK))
++				func = x86_return_thunk;
++		}
++
++		buf[0] = 0x0f;
++		__text_gen_insn(buf+1, op, insn+1, func, 5);
++		code = buf;
++		size = 6;
++
++		break;
+ 	}
+ 
+ 	if (memcmp(insn, code, size) == 0)
+@@ -68,9 +111,9 @@ static void __ref __static_call_transform(void *insn, enum insn_type type,
+ 	text_poke_bp(insn, code, size, emulate);
+ }
+ 
+-static void __static_call_validate(void *insn, bool tail, bool tramp)
++static void __static_call_validate(u8 *insn, bool tail, bool tramp)
+ {
+-	u8 opcode = *(u8 *)insn;
++	u8 opcode = insn[0];
+ 
+ 	if (tramp && memcmp(insn+5, tramp_ud, 3)) {
+ 		pr_err("trampoline signature fail");
+@@ -79,7 +122,8 @@ static void __static_call_validate(void *insn, bool tail, bool tramp)
+ 
+ 	if (tail) {
+ 		if (opcode == JMP32_INSN_OPCODE ||
+-		    opcode == RET_INSN_OPCODE)
++		    opcode == RET_INSN_OPCODE ||
++		    __is_Jcc(insn))
+ 			return;
+ 	} else {
+ 		if (opcode == CALL_INSN_OPCODE ||
+-- 
+2.39.1
+

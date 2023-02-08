@@ -12,6 +12,10 @@ function cbl_bld_all_krnl -d "Build all kernels for ClangBuiltLinux testing"
             cbl_clone_repo linux
             git -C $lnx urh
 
+            # https://github.com/ClangBuiltLinux/linux/issues/1774
+            git -C $lnx fetch https://git.kernel.org/pub/scm/linux/kernel/git/tip/tip.git x86/alternatives
+            git -C $lnx format-patch --stdout db7adcfd1cec4e95155e37bc066fddab302c6340^..db7adcfd1cec4e95155e37bc066fddab302c6340 | git -C $lnx ap; or return
+
             cbl_lkt --linux-folder $lnx
 
         case honeycomb
