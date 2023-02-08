@@ -240,12 +240,13 @@ class VirtualMachine:
                 )
 
         # Locate the QEMU prefix to search for virtiofsd
-        qemu_prefix = Path(qemu).resolve().parents[1]
-        possible_files = [
-            Path('libexec/virtiofsd'),  # Default QEMU installation, Fedora
-            Path('lib/qemu/virtiofsd'),  # Arch Linux
-        ]
-        virtiofsd = find_first_file(possible_files, relative_root=qemu_prefix)
+        qemu = Path(qemu).resolve()
+        if not (virtiofsd := Path(qemu.parent, 'tools/virtiofsd/virtiofsd')).exists():
+            possible_files = [
+                Path('libexec/virtiofsd'),  # Default QEMU installation, Fedora
+                Path('lib/qemu/virtiofsd'),  # Arch Linux
+            ]
+            virtiofsd = find_first_file(possible_files, relative_root=qemu.parents[1])
 
         # Ensure shared folder is created before sharing
         self.shared_folder.mkdir(exist_ok=True, parents=True)
