@@ -13,7 +13,6 @@ function cbl_rb_fd -d "Rebase generic Fedora kernel on latest linux-next"
     git rh origin/master
 
     # Patching
-    set -a patches https://lore.kernel.org/all/20230127162906.872395-1-trix@redhat.com/ # udf: remove reporting loc in debug output
     for patch in $patches
         b4 shazam -l -P _ -s $patch; or return
     end
