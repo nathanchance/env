@@ -88,13 +88,13 @@ function cbl_bld_all_krnl -d "Build all kernels for ClangBuiltLinux testing"
         case '*'
             for arg in $argv
                 switch $arg
-                    case -s --stable
-                        set stable true
+                    case -l --lts
+                        set lts true
                 end
             end
-            set trees linux{-next,}
-            if test "$stable" = true
-                set -a trees linux-stable-$CBL_STABLE_VERSIONS
+            set trees linux{-next,,-stable-$CBL_STABLE_VERSIONS[1]}
+            if test "$lts" = true
+                set -a trees linux-stable-$CBL_STABLE_VERSIONS[2..-1]
             end
             for tree in $trees
                 cbl_lkt --tree $tree; or break
