@@ -71,15 +71,23 @@ def configure_boot_entries():
     linux_confs[0].replace(linux_conf)
     linux_conf_text = linux_conf.read_text(encoding='utf-8')
 
+    if not (match := re.search('^options (.*)$', linux_conf_text, flags=re.M)):
+        raise RuntimeError(f"Could not find 'options' line in {linux_conf}?")
+    current_options_str = match.groups()[0]
+    current_options = {opt for elem in current_options_str.split(' ') if (opt := elem.strip())}
+    new_options = current_options.copy()
+
     # Add 'console=' if necessary (when connected by serial console in a
     # virtual machine)
-    if not (lib.setup.is_virtual_machine() and 'DISPLAY' not in os.environ):
-        return
-    if not (match := re.search('^options.*$', linux_conf_text, flags=re.M)):
-        raise RuntimeError(f"Could not find 'options' line in {linux_conf}?")
-    if 'console=' not in (old_options := match.group(0)):
-        new_options = old_options + ' console=ttyS0,115200n8'
-        linux_conf.write_text(linux_conf_text.replace(old_options, new_options), encoding='utf-8')
+    if lib.setup.is_virtual_machine() and 'DISPLAY' not in os.environ:
+        new_options.add('console=ttyS0,115200n8')
+
+    # Enable the performance governor
+    new_options.add('cpufreq.default_governor=performance')
+
+    if current_options != new_options:
+        new_text = linux_conf_text.replace(current_options_str, ' '.join(sorted(new_options)))
+        linux_conf.write_text(new_text, encoding='utf-8')
 
 
 def configure_networking():
