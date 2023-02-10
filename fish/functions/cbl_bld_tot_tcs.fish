@@ -16,11 +16,13 @@ function cbl_bld_tot_tcs -d "Build LLVM and binutils from source for kernel deve
         case aadp generic wsl
             set bld_llvm_args \
                 --pgo kernel-defconfig
+            set validate_uprev llvm
 
         case hetzner-server workstation
             set bld_llvm_args \
                 --bolt \
                 --pgo kernel-defconfig
+            set validate_uprev kernel
 
         case honeycomb
             set bld_bntls false
@@ -170,10 +172,7 @@ function cbl_bld_tot_tcs -d "Build LLVM and binutils from source for kernel deve
         --quiet-cmake \
         --show-build-commands
 
-    # On my primary location, validate the toolchain upgrade ahead of time,
-    # which helps save time compared to using 'kernel-pgo-allmodconfig'
-    # for validation
-    if is_location_primary
+    if set -q validate_uprev
         if not $tc_bld/build-llvm.py \
                 $common_bld_llvm_args \
                 --build-stage1-only
@@ -183,8 +182,9 @@ function cbl_bld_tot_tcs -d "Build LLVM and binutils from source for kernel deve
             return 1
         end
 
-        set lsm_location (command grep -F 'lsm.location = Path(src_folder,' $tc_bld/build-llvm.py | string trim)
-        if not env PYTHONPATH=$tc_bld/tc_build python3 -c "from pathlib import Path
+        if test "$validate_uprev" = kernel
+            set lsm_location (command grep -F 'lsm.location = Path(src_folder,' $tc_bld/build-llvm.py | string trim)
+            if not env PYTHONPATH=$tc_bld/tc_build python3 -c "from pathlib import Path
 
 import utils
 
@@ -211,10 +211,11 @@ kernel_builder.matrix = {
 }
 kernel_builder.toolchain_prefix = Path('$llvm_bld/final')
 kernel_builder.build()"
-            set message "Validation of new LLVM revision failed: Linux did not build!"
-            print_error "$message"
-            tg_msg "$message"
-            return 1
+                set message "Validation of new LLVM revision failed: Linux did not build!"
+                print_error "$message"
+                tg_msg "$message"
+                return 1
+            end
         end
     end
 
