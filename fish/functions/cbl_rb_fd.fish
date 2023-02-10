@@ -13,8 +13,6 @@ function cbl_rb_fd -d "Rebase generic Fedora kernel on latest linux-next"
     git rh origin/master
 
     # Patching
-    set -a patches https://lore.kernel.org/all/20230209124513.1341645-1-arnd@kernel.org/ # drm/amd/display: fix link_validation build failure
-    set -a patches https://lore.kernel.org/all/20230208142508.3278406-1-edumazet@google.com/ # net: enable usercopy for skb_small_head_cache
     for patch in $patches
         b4 shazam -l -P _ -s $patch; or return
     end
