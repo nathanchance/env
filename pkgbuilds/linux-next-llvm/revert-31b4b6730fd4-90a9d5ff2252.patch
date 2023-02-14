@@ -1,33 +1,23 @@
-Link: https://lore.kernel.org/Y+rSXg14z1Myd8Px@dev-arch.thelio-3990X/
+From 48c9899affd51f7acfc07a3f4d777b6eeb73a451 Mon Sep 17 00:00:00 2001
+From: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Date: Tue, 14 Feb 2023 08:59:22 +0100
+Subject: [PATCH 1/2] Revert "devtmpfs: add debug info to handle()"
 
-diff --git b/drivers/base/core.c a/drivers/base/core.c
-index 4fc6f27641bf..f9297c68214a 100644
---- b/drivers/base/core.c
-+++ a/drivers/base/core.c
-@@ -3602,9 +3602,7 @@ int device_add(struct device *dev)
- 		if (error)
- 			goto SysEntryError;
- 
--		error = devtmpfs_create_node(dev);
--		if (error)
--			goto DevtmpfsError;
-+		devtmpfs_create_node(dev);
- 	}
- 
- 	/* Notify clients of device addition.  This call must come
-@@ -3660,8 +3658,6 @@ int device_add(struct device *dev)
- done:
- 	put_device(dev);
- 	return error;
-- DevtmpfsError:
--	device_remove_sys_dev_entry(dev);
-  SysEntryError:
- 	if (MAJOR(dev->devt))
- 		device_remove_file(dev, &dev_attr_dev);
-diff --git b/drivers/base/devtmpfs.c a/drivers/base/devtmpfs.c
+This reverts commit 90a9d5ff225267b3376f73c19f21174e3b6d7746 as it is
+reported to cause boot regressions.
+
+Link: https://lore.kernel.org/r/Y+rSXg14z1Myd8Px@dev-arch.thelio-3990X
+Reported-by: Nathan Chancellor <nathan@kernel.org>
+Cc: Longlong Xia <xialonglong1@huawei.com>
+Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+---
+ drivers/base/devtmpfs.c | 12 ++----------
+ 1 file changed, 2 insertions(+), 10 deletions(-)
+
+diff --git a/drivers/base/devtmpfs.c b/drivers/base/devtmpfs.c
 index f273bccd5494..95ebc18ded50 100644
---- b/drivers/base/devtmpfs.c
-+++ a/drivers/base/devtmpfs.c
+--- a/drivers/base/devtmpfs.c
++++ b/drivers/base/devtmpfs.c
 @@ -389,18 +389,10 @@ static __initdata DECLARE_COMPLETION(setup_done);
  static int handle(const char *name, umode_t mode, kuid_t uid, kgid_t gid,
  		  struct device *dev)
@@ -49,3 +39,51 @@ index f273bccd5494..95ebc18ded50 100644
  }
  
  static void __noreturn devtmpfs_work_loop(void)
+-- 
+2.39.1
+
+
+From 17c45768fdf970b8a2ea9745783ff6a0512fca11 Mon Sep 17 00:00:00 2001
+From: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+Date: Tue, 14 Feb 2023 08:59:33 +0100
+Subject: [PATCH 2/2] Revert "driver core: add error handling for
+ devtmpfs_create_node()"
+
+This reverts commit 31b4b6730fd4f5d503c9f23619c920ce7b794754 as it is
+reported to cause boot regressions.
+
+Link: https://lore.kernel.org/r/Y+rSXg14z1Myd8Px@dev-arch.thelio-3990X
+Reported-by: Nathan Chancellor <nathan@kernel.org>
+Cc: Longlong Xia <xialonglong1@huawei.com>
+Signed-off-by: Greg Kroah-Hartman <gregkh@linuxfoundation.org>
+---
+ drivers/base/core.c | 6 +-----
+ 1 file changed, 1 insertion(+), 5 deletions(-)
+
+diff --git a/drivers/base/core.c b/drivers/base/core.c
+index 4fc6f27641bf..f9297c68214a 100644
+--- a/drivers/base/core.c
++++ b/drivers/base/core.c
+@@ -3602,9 +3602,7 @@ int device_add(struct device *dev)
+ 		if (error)
+ 			goto SysEntryError;
+ 
+-		error = devtmpfs_create_node(dev);
+-		if (error)
+-			goto DevtmpfsError;
++		devtmpfs_create_node(dev);
+ 	}
+ 
+ 	/* Notify clients of device addition.  This call must come
+@@ -3660,8 +3658,6 @@ int device_add(struct device *dev)
+ done:
+ 	put_device(dev);
+ 	return error;
+- DevtmpfsError:
+-	device_remove_sys_dev_entry(dev);
+  SysEntryError:
+ 	if (MAJOR(dev->devt))
+ 		device_remove_file(dev, &dev_attr_dev);
+-- 
+2.39.1
+

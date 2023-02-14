@@ -21,11 +21,20 @@ function cbl_rb_pi -d "Rebase Raspberry Pi kernel on latest linux-next"
     git rh origin/master
 
     # Patching
-    for patch in $patches
-        b4 am -l -o - -P _ -s $patch | git am; or return
+    for patch in $b4_patches
+        b4 shazam -l -P _ -s $patch; or return
+    end
+    # https://lore.kernel.org/Y+rSXg14z1Myd8Px@dev-arch.thelio-3990X/
+    set -a crl_patches https://git.kernel.org/gregkh/driver-core/p/17c45768fdf970b8a2ea9745783ff6a0512fca11 # Revert "driver core: add error handling for devtmpfs_create_node()"
+    set -a crl_patches https://git.kernel.org/gregkh/driver-core/p/48c9899affd51f7acfc07a3f4d777b6eeb73a451 # Revert "devtmpfs: add debug info to handle()"
+    for patch in $crl_patches
+        crl $patch | git am -3; or return
     end
     for hash in $ln_commits
         git -C $CBL_BLD_P/linux-next fp -1 --stdout $hash | git am; or return
+    end
+    for revert in $reverts
+        git revert --no-edit $revert; or return
     end
 
     # Regenerate defconfigs
