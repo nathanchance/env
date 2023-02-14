@@ -71,9 +71,11 @@ class VirtualMachine:
 
         # Internal values
         self.data_folder = Path(get_base_folder(), self.arch, self.name)
-        self.disk_img = Path(self.data_folder, 'disk.img')
         self.efi_img = Path(self.data_folder, 'efi.img')
         self.efi_vars_img = Path(self.data_folder, 'efi_vars.img')
+        self.images_to_mount = (x for x in Path(self.data_folder).glob('*.img')
+                                if 'efi' not in x.name)
+        self.primary_disk_img = Path(self.data_folder, 'disk.img')
         self.shared_folder = Path(self.data_folder, 'shared')
         self.use_kvm = self.can_use_kvm()
         self.vfsd_log = Path(self.data_folder, 'vfsd.log')
@@ -111,9 +113,6 @@ class VirtualMachine:
         self.qemu_args = [
             # Display
             *self.get_display_args(graphical),
-
-            # Disk image
-            '-drive', f"if=virtio,format=qcow2,file={self.disk_img}",
 
             # Networking
             '-nic', f"user,model=virtio-net-pci,hostfwd=tcp::{ssh_port}-:22",
@@ -182,8 +181,8 @@ class VirtualMachine:
         raise RuntimeError(f"Unimplemented action ('{action}')?")
 
     def create_disk_img(self):
-        self.disk_img.parent.mkdir(exist_ok=True, parents=True)
-        run_cmd(['qemu-img', 'create', '-f', 'qcow2', self.disk_img, self.size])
+        self.primary_disk_img.parent.mkdir(exist_ok=True, parents=True)
+        run_cmd(['qemu-img', 'create', '-f', 'qcow2', self.primary_disk_img, self.size])
 
     def get_display_args(self, graphical):
         if graphical:
@@ -195,6 +194,12 @@ class VirtualMachine:
             '-display', 'none',
             '-serial', 'mon:stdio',
         ]  # yapf: disable
+
+    def get_drive_args(self):
+        drive_args = []
+        for image in self.images_to_mount:
+            drive_args += ['-drive', f"if=virtio,format=qcow2,file={image}"]
+        return drive_args
 
     def get_iso_args(self, iso):
         if iso is None:
@@ -223,9 +228,9 @@ class VirtualMachine:
             shutil.rmtree(self.data_folder)
 
     def run(self):
-        if not self.disk_img.exists():
+        if not self.primary_disk_img.exists():
             raise RuntimeError(
-                f"Disk image ('{self.disk_img}') for virtual machine ('{self.name}') does not exist, run 'setup' first?"
+                f"Disk image ('{self.primary_disk_img}') for virtual machine ('{self.name}') does not exist, run 'setup' first?"
             )
 
         if not (qemu := shutil.which(self.qemu)):
@@ -269,7 +274,7 @@ class VirtualMachine:
         with open(self.vfsd_log, 'w', encoding='utf-8') as file, \
              subprocess.Popen(virtiofsd_cmd, stderr=file, stdout=file) as vfsd:
             try:
-                run_cmd([qemu, *self.qemu_args])
+                run_cmd([qemu, *self.qemu_args, *self.get_drive_args()])
             except subprocess.CalledProcessError as err:
                 # If virtiofsd is dead, it is pretty likely that it was the
                 # cause of QEMU failing so add to the existing exception using
