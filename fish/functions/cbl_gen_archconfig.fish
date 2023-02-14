@@ -75,7 +75,7 @@ function cbl_gen_archconfig -d "Generate a configuration file for Arch Linux"
     # Step 4: Run localmodconfig if requested
     if test "$config" = local
         cp $cfg $src_cfg
-        kmake -C $src localmodconfig
+        yes "" | kmake -C $src localmodconfig
         cp $src_cfg $cfg
     end
 
