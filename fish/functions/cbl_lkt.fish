@@ -51,7 +51,7 @@ function cbl_lkt -d "Tests a Linux kernel with llvm-kernel-testing"
                 set qemu_prefix $argv[$next]
                 set i $next
 
-            case --save-objects --use-ccache
+            case --boot-testing-only --save-objects --use-ccache
                 set -a main_py_args $arg
 
             case --tc-prefix

@@ -4,5 +4,8 @@
 
 function cbl_upd_qemu -d "Update QEMU and boot kernels with it"
     cbl_bld_qemu -u; or return
-    cbl_lkt --linux-folder $CBL_BLD_P/linux --targets def
+    cbl_lkt \
+        --boot-testing-only \
+        --linux-folder $CBL_BLD_P/linux \
+        --targets def
 end
