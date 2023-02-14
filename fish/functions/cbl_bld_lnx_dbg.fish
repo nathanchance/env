@@ -22,7 +22,7 @@ function cbl_bld_lnx_dbg -d "Build linux-debug Arch Linux package"
 
     if test "$gcc" = true
         if not string match -qr CROSS_COMPILE= $kmake_args
-            set kmake_args $STOCK_GCC_VARS
+            set kmake_args (korg_gcc print $GCC_VERSION_STABLE x86_64)
         end
     else
         if not string match -qr LLVM= $kmake_args
@@ -53,7 +53,7 @@ function cbl_bld_lnx_dbg -d "Build linux-debug Arch Linux package"
     kmake $kmake_args olddefconfig; or return
 
     if test "$localmodconfig" = true
-        kmake $kmake_args LSMOD=/tmp/modprobed.db localmodconfig; or return
+        yes "" | kmake $kmake_args LSMOD=/tmp/modprobed.db localmodconfig; or return
     end
 
     if test "$menuconfig" = true
