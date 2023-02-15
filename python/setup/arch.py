@@ -51,26 +51,27 @@ def adjust_gnome_power_settings():
     doas_conf.write_text(doas_conf_text, encoding='utf-8')
 
 
-def configure_boot_entries():
+def configure_boot_entries(init=True, conf='linux.conf'):
     # Not using systemd-boot, bail out
     if not (boot_entries := Path('/boot/loader/entries')).exists():
         return
 
     # If we already set up the configuration, no need to go through all this
-    # again
-    if (linux_conf := Path(boot_entries, 'linux.conf')).exists():
+    # again, unless we are not doing the initial configuration
+    if (linux_conf := Path(boot_entries, conf)).exists() and init:
         return
 
     # Find the configuration with a regex in case we set up another linux.conf
-    linux_re = re.compile(r'[0-9a-z_]+linux\.conf')
-    linux_confs = [item for item in boot_entries.iterdir() if linux_re.search(item.name)]
-    if (num := len(linux_confs)) != 1:
-        raise RuntimeError(f"Number of possible linux.conf entries ('{num}') is unexpected!")
+    if init:
+        linux_re = re.compile(r'[0-9a-z_]+linux\.conf')
+        linux_confs = [item for item in boot_entries.iterdir() if linux_re.search(item.name)]
+        if (num := len(linux_confs)) != 1:
+            raise RuntimeError(f"Number of possible linux.conf entries ('{num}') is unexpected!")
 
-    # Move the configuration created by archinstall to a deterministic name
-    linux_confs[0].replace(linux_conf)
+        # Move the configuration created by archinstall to a deterministic name
+        linux_confs[0].replace(linux_conf)
+
     linux_conf_text = linux_conf.read_text(encoding='utf-8')
-
     if not (match := re.search('^options (.*)$', linux_conf_text, flags=re.M)):
         raise RuntimeError(f"Could not find 'options' line in {linux_conf}?")
     current_options_str = match.groups()[0]
@@ -84,6 +85,9 @@ def configure_boot_entries():
 
     # Enable the performance governor
     new_options.add('cpufreq.default_governor=performance')
+
+    # Mitigate SMT RSB vulnerability
+    new_options.add('kvm.mitigate_smt_rsb=1')
 
     if current_options != new_options:
         new_text = linux_conf_text.replace(current_options_str, ' '.join(sorted(new_options)))
