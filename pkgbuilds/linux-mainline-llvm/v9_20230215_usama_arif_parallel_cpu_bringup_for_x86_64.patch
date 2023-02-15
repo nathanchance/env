@@ -1,9 +1,9 @@
 From git@z Thu Jan  1 00:00:00 1970
-Subject: [PATCH v8 1/9] x86/apic/x2apic: Allow CPU cluster_mask to be
+Subject: [PATCH v9 1/8] x86/apic/x2apic: Allow CPU cluster_mask to be
  populated in parallel
 From: David Woodhouse <dwmw@amazon.co.uk>
-Date: Thu, 09 Feb 2023 15:41:48 +0000
-Message-Id: <20230209154156.266385-2-usama.arif@bytedance.com>
+Date: Wed, 15 Feb 2023 14:54:18 +0000
+Message-Id: <20230215145425.420125-2-usama.arif@bytedance.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 7bit
@@ -33,7 +33,7 @@ redundant, and it can become a simple struct cpumask instead.
 Suggested-by: Thomas Gleixner <tglx@linutronix.de>
 Signed-off-by: David Woodhouse <dwmw@amazon.co.uk>
 Signed-off-by: Usama Arif <usama.arif@bytedance.com>
-Link: https://lore.kernel.org/r/20230209154156.266385-2-usama.arif@bytedance.com
+Link: https://lore.kernel.org/r/20230215145425.420125-2-usama.arif@bytedance.com
 ---
  arch/x86/kernel/apic/x2apic_cluster.c | 130 +++++++++++++++++---------
  1 file changed, 84 insertions(+), 46 deletions(-)
@@ -237,11 +237,11 @@ index e696e22d0531..d8f513a2287b 100644
 2.25.1
 
 From git@z Thu Jan  1 00:00:00 1970
-Subject: [PATCH v8 2/9] cpu/hotplug: Move idle_thread_get() to
+Subject: [PATCH v9 2/8] cpu/hotplug: Move idle_thread_get() to
  <linux/smpboot.h>
 From: David Woodhouse <dwmw@amazon.co.uk>
-Date: Thu, 09 Feb 2023 15:41:49 +0000
-Message-Id: <20230209154156.266385-3-usama.arif@bytedance.com>
+Date: Wed, 15 Feb 2023 14:54:19 +0000
+Message-Id: <20230215145425.420125-3-usama.arif@bytedance.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 7bit
@@ -261,7 +261,7 @@ pointer to be invoked with the standard API.
 Signed-off-by: David Woodhouse <dwmw@amazon.co.uk>
 Reviewed-by: Thomas Gleixner <tglx@linutronix.de>
 Signed-off-by: Usama Arif <usama.arif@bytedance.com>
-Link: https://lore.kernel.org/r/20230209154156.266385-3-usama.arif@bytedance.com
+Link: https://lore.kernel.org/r/20230215145425.420125-3-usama.arif@bytedance.com
 ---
  include/linux/smpboot.h | 7 +++++++
  kernel/smpboot.h        | 2 --
@@ -305,11 +305,11 @@ index 34dd3d7ba40b..60c609318ad6 100644
 2.25.1
 
 From git@z Thu Jan  1 00:00:00 1970
-Subject: [PATCH v8 3/9] cpu/hotplug: Add dynamic parallel bringup states
+Subject: [PATCH v9 3/8] cpu/hotplug: Add dynamic parallel bringup states
  before CPUHP_BRINGUP_CPU
 From: David Woodhouse <dwmw@amazon.co.uk>
-Date: Thu, 09 Feb 2023 15:41:50 +0000
-Message-Id: <20230209154156.266385-4-usama.arif@bytedance.com>
+Date: Wed, 15 Feb 2023 14:54:20 +0000
+Message-Id: <20230215145425.420125-4-usama.arif@bytedance.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 7bit
@@ -352,7 +352,7 @@ and then waiting for them all is an exercise for the future.
 
 Signed-off-by: David Woodhouse <dwmw@amazon.co.uk>
 Signed-off-by: Usama Arif <usama.arif@bytedance.com>
-Link: https://lore.kernel.org/r/20230209154156.266385-4-usama.arif@bytedance.com
+Link: https://lore.kernel.org/r/20230215145425.420125-4-usama.arif@bytedance.com
 ---
  include/linux/cpuhotplug.h |  2 ++
  kernel/cpu.c               | 31 +++++++++++++++++++++++++++++--
@@ -439,11 +439,11 @@ index 6c0a92ca6bb5..fffb0da61ccc 100644
 2.25.1
 
 From git@z Thu Jan  1 00:00:00 1970
-Subject: [PATCH v8 4/9] x86/smpboot: Reference count on
+Subject: [PATCH v9 4/8] x86/smpboot: Reference count on
  smpboot_setup_warm_reset_vector()
 From: David Woodhouse <dwmw@amazon.co.uk>
-Date: Thu, 09 Feb 2023 15:41:51 +0000
-Message-Id: <20230209154156.266385-5-usama.arif@bytedance.com>
+Date: Wed, 15 Feb 2023 14:54:21 +0000
+Message-Id: <20230215145425.420125-5-usama.arif@bytedance.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 7bit
@@ -464,7 +464,7 @@ for mutual exclusion on the refcount too.
 
 Signed-off-by: David Woodhouse <dwmw@amazon.co.uk>
 Signed-off-by: Usama Arif <usama.arif@bytedance.com>
-Link: https://lore.kernel.org/r/20230209154156.266385-5-usama.arif@bytedance.com
+Link: https://lore.kernel.org/r/20230215145425.420125-5-usama.arif@bytedance.com
 ---
  arch/x86/kernel/smpboot.c | 19 ++++++++++++-------
  1 file changed, 12 insertions(+), 7 deletions(-)
@@ -518,11 +518,11 @@ index 55cad72715d9..3a793772a2aa 100644
 2.25.1
 
 From git@z Thu Jan  1 00:00:00 1970
-Subject: [PATCH v8 5/9] x86/smpboot: Split up native_cpu_up into separate
+Subject: [PATCH v9 5/8] x86/smpboot: Split up native_cpu_up into separate
  phases and document them
 From: David Woodhouse <dwmw@amazon.co.uk>
-Date: Thu, 09 Feb 2023 15:41:52 +0000
-Message-Id: <20230209154156.266385-6-usama.arif@bytedance.com>
+Date: Wed, 15 Feb 2023 14:54:22 +0000
+Message-Id: <20230215145425.420125-6-usama.arif@bytedance.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 7bit
@@ -552,7 +552,7 @@ No functional change intended.
 
 Signed-off-by: David Woodhouse <dwmw@amazon.co.uk>
 Signed-off-by: Usama Arif <usama.arif@bytedance.com>
-Link: https://lore.kernel.org/r/20230209154156.266385-6-usama.arif@bytedance.com
+Link: https://lore.kernel.org/r/20230215145425.420125-6-usama.arif@bytedance.com
 ---
  arch/x86/kernel/smpboot.c | 181 ++++++++++++++++++++++++++------------
  1 file changed, 127 insertions(+), 54 deletions(-)
@@ -815,11 +815,11 @@ index 3a793772a2aa..b9366f86c433 100644
 2.25.1
 
 From git@z Thu Jan  1 00:00:00 1970
-Subject: [PATCH v8 6/9] x86/smpboot: Support parallel startup of secondary
+Subject: [PATCH v9 6/8] x86/smpboot: Support parallel startup of secondary
  CPUs
 From: David Woodhouse <dwmw@amazon.co.uk>
-Date: Thu, 09 Feb 2023 15:41:53 +0000
-Message-Id: <20230209154156.266385-7-usama.arif@bytedance.com>
+Date: Wed, 15 Feb 2023 14:54:23 +0000
+Message-Id: <20230215145425.420125-7-usama.arif@bytedance.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 8bit
@@ -860,19 +860,34 @@ Co-developed-by: Thomas Gleixner <tglx@linutronix.de>
 Signed-off-by: Thomas Gleixner <tglx@linutronix.de>
 Signed-off-by: David Woodhouse <dwmw@amazon.co.uk>
 Signed-off-by: Usama Arif <usama.arif@bytedance.com>
-Link: https://lore.kernel.org/r/20230209154156.266385-7-usama.arif@bytedance.com
+Link: https://lore.kernel.org/r/20230215145425.420125-7-usama.arif@bytedance.com
 ---
- arch/x86/include/asm/realmode.h      |  3 +
- arch/x86/include/asm/smp.h           | 10 ++-
- arch/x86/kernel/acpi/sleep.c         |  1 +
- arch/x86/kernel/apic/apic.c          |  2 +-
- arch/x86/kernel/head_64.S            | 99 +++++++++++++++++++++++++++-
- arch/x86/kernel/smpboot.c            | 62 +++++++++++++++--
- arch/x86/realmode/init.c             |  3 +
- arch/x86/realmode/rm/trampoline_64.S | 14 ++++
- kernel/smpboot.c                     |  2 +-
- 9 files changed, 188 insertions(+), 8 deletions(-)
+ .../admin-guide/kernel-parameters.txt         |  3 +
+ arch/x86/include/asm/realmode.h               |  3 +
+ arch/x86/include/asm/smp.h                    | 10 +-
+ arch/x86/kernel/acpi/sleep.c                  |  1 +
+ arch/x86/kernel/apic/apic.c                   |  2 +-
+ arch/x86/kernel/head_64.S                     | 99 ++++++++++++++++++-
+ arch/x86/kernel/smpboot.c                     | 62 +++++++++++-
+ arch/x86/realmode/init.c                      |  3 +
+ arch/x86/realmode/rm/trampoline_64.S          | 14 +++
+ kernel/smpboot.c                              |  2 +-
+ 10 files changed, 191 insertions(+), 8 deletions(-)
 
+diff --git a/Documentation/admin-guide/kernel-parameters.txt b/Documentation/admin-guide/kernel-parameters.txt
+index 6cfa6e3996cf..ee099b8aac6d 100644
+--- a/Documentation/admin-guide/kernel-parameters.txt
++++ b/Documentation/admin-guide/kernel-parameters.txt
+@@ -3819,6 +3819,9 @@
+ 
+ 	nomodule	Disable module load
+ 
++	no_parallel_bringup
++			[X86,SMP] Disable parallel brinugp of secondary cores.
++
+ 	nopat		[X86] Disable PAT (page attribute table extension of
+ 			pagetables) support.
+ 
 diff --git a/arch/x86/include/asm/realmode.h b/arch/x86/include/asm/realmode.h
 index a336feef0af1..f0357cfe2fb0 100644
 --- a/arch/x86/include/asm/realmode.h
@@ -1084,14 +1099,14 @@ index 222efd4a09bc..0e4e53d231db 100644
  /* This must match the first entry in level2_kernel_pgt */
  SYM_DATA(phys_base, .quad 0x0)
 diff --git a/arch/x86/kernel/smpboot.c b/arch/x86/kernel/smpboot.c
-index b9366f86c433..50621793671d 100644
+index b9366f86c433..49d6563e4c23 100644
 --- a/arch/x86/kernel/smpboot.c
 +++ b/arch/x86/kernel/smpboot.c
 @@ -797,6 +797,16 @@ static int __init cpu_init_udelay(char *str)
  }
  early_param("cpu_init_udelay", cpu_init_udelay);
  
-+static bool do_parallel_bringup = true;
++static bool do_parallel_bringup __ro_after_init = true;
 +
 +static int __init no_parallel_bringup(char *str)
 +{
@@ -1241,11 +1256,11 @@ index 2c7396da470c..a18a21dff9bc 100644
 2.25.1
 
 From git@z Thu Jan  1 00:00:00 1970
-Subject: [PATCH v8 7/9] x86/smpboot: Send INIT/SIPI/SIPI to secondary CPUs
+Subject: [PATCH v9 7/8] x86/smpboot: Send INIT/SIPI/SIPI to secondary CPUs
  in parallel
 From: David Woodhouse <dwmw@amazon.co.uk>
-Date: Thu, 09 Feb 2023 15:41:54 +0000
-Message-Id: <20230209154156.266385-8-usama.arif@bytedance.com>
+Date: Wed, 15 Feb 2023 14:54:24 +0000
+Message-Id: <20230215145425.420125-8-usama.arif@bytedance.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 8bit
@@ -1288,13 +1303,13 @@ that far.
 
 Signed-off-by: David Woodhouse <dwmw@amazon.co.uk>
 Signed-off-by: Usama Arif <usama.arif@bytedance.com>
-Link: https://lore.kernel.org/r/20230209154156.266385-8-usama.arif@bytedance.com
+Link: https://lore.kernel.org/r/20230215145425.420125-8-usama.arif@bytedance.com
 ---
  arch/x86/kernel/smpboot.c | 21 ++++++++++++++++++---
  1 file changed, 18 insertions(+), 3 deletions(-)
 
 diff --git a/arch/x86/kernel/smpboot.c b/arch/x86/kernel/smpboot.c
-index 50621793671d..df839264266b 100644
+index 49d6563e4c23..4cea3a0ff503 100644
 --- a/arch/x86/kernel/smpboot.c
 +++ b/arch/x86/kernel/smpboot.c
 @@ -57,6 +57,7 @@
@@ -1350,60 +1365,11 @@ index 50621793671d..df839264266b 100644
 2.25.1
 
 From git@z Thu Jan  1 00:00:00 1970
-Subject: [PATCH v8 8/9] x86/mtrr: Avoid repeated save of MTRRs on boot-time
- CPU bringup
-From: David Woodhouse <dwmw@amazon.co.uk>
-Date: Thu, 09 Feb 2023 15:41:55 +0000
-Message-Id: <20230209154156.266385-9-usama.arif@bytedance.com>
-MIME-Version: 1.0
-Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 7bit
-
-There's no need to repeatedly save the BSP's MTRRs for each AP being
-brought up at boot time. And no need to use smp_call_function_single()
-even for the one time they do need to be saved.
-
-Signed-off-by: David Woodhouse <dwmw@amazon.co.uk>
-Signed-off-by: Usama Arif <usama.arif@bytedance.com>
-Link: https://lore.kernel.org/r/20230209154156.266385-9-usama.arif@bytedance.com
----
- arch/x86/kernel/cpu/mtrr/mtrr.c | 9 +++++++++
- 1 file changed, 9 insertions(+)
-
-diff --git a/arch/x86/kernel/cpu/mtrr/mtrr.c b/arch/x86/kernel/cpu/mtrr/mtrr.c
-index 783f3210d582..b6eae3ad4414 100644
---- a/arch/x86/kernel/cpu/mtrr/mtrr.c
-+++ b/arch/x86/kernel/cpu/mtrr/mtrr.c
-@@ -721,11 +721,20 @@ void __init mtrr_bp_init(void)
-  */
- void mtrr_save_state(void)
- {
-+	static bool mtrr_saved;
- 	int first_cpu;
- 
- 	if (!mtrr_enabled())
- 		return;
- 
-+	if (system_state < SYSTEM_RUNNING) {
-+		if (!mtrr_saved) {
-+			mtrr_save_fixed_ranges(NULL);
-+			mtrr_saved = true;
-+		}
-+		return;
-+	}
-+
- 	first_cpu = cpumask_first(cpu_online_mask);
- 	smp_call_function_single(first_cpu, mtrr_save_fixed_ranges, NULL, 1);
- }
--- 
-2.25.1
-
-From git@z Thu Jan  1 00:00:00 1970
-Subject: [PATCH v8 9/9] x86/smpboot: Serialize topology updates for
+Subject: [PATCH v9 8/8] x86/smpboot: Serialize topology updates for
  secondary bringup
 From: David Woodhouse <dwmw@amazon.co.uk>
-Date: Thu, 09 Feb 2023 15:41:56 +0000
-Message-Id: <20230209154156.266385-10-usama.arif@bytedance.com>
+Date: Wed, 15 Feb 2023 14:54:25 +0000
+Message-Id: <20230215145425.420125-9-usama.arif@bytedance.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 7bit
@@ -1440,7 +1406,7 @@ ensues:
 
 Signed-off-by: David Woodhouse <dwmw@amazon.co.uk>
 Signed-off-by: Usama Arif <usama.arif@bytedance.com>
-Link: https://lore.kernel.org/r/20230209154156.266385-10-usama.arif@bytedance.com
+Link: https://lore.kernel.org/r/20230215145425.420125-9-usama.arif@bytedance.com
 ---
  arch/x86/include/asm/smp.h      |  4 +-
  arch/x86/include/asm/topology.h |  2 -
@@ -1516,7 +1482,7 @@ index 9cfca3d7d0e2..cf1a4eff7a76 100644
  	update_srbds_msr();
  
 diff --git a/arch/x86/kernel/smpboot.c b/arch/x86/kernel/smpboot.c
-index df839264266b..3ec5182d9698 100644
+index 4cea3a0ff503..fecd934e72fb 100644
 --- a/arch/x86/kernel/smpboot.c
 +++ b/arch/x86/kernel/smpboot.c
 @@ -180,16 +180,12 @@ static void smp_callin(void)
