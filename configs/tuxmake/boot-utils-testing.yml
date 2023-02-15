@@ -1,0 +1,204 @@
+jobs:
+- name: clang
+  builds:
+  - target_arch: arm
+    toolchain: clang-nightly
+    kconfig: multi_v5_defconfig
+    targets:
+    - kernel
+    - dtbs
+    make_variables:
+      LLVM: 1
+      LLVM_IAS: 1
+  - target_arch: arm
+    toolchain: clang-nightly
+    kconfig: aspeed_g5_defconfig
+    targets:
+    - kernel
+    - dtbs
+    make_variables:
+      LLVM: 1
+      LLVM_IAS: 1
+  - target_arch: arm
+    toolchain: clang-nightly
+    kconfig: multi_v7_defconfig
+    targets:
+    - kernel
+    make_variables:
+      LLVM: 1
+      LLVM_IAS: 1
+  - target_arch: arm64
+    toolchain: clang-nightly
+    kconfig: defconfig
+    targets:
+    - kernel
+    make_variables:
+      LLVM: 1
+      LLVM_IAS: 1
+  - target_arch: arm64
+    toolchain: clang-nightly
+    kconfig:
+    - defconfig
+    - CONFIG_CPU_BIG_ENDIAN=y
+    targets:
+    - kernel
+    make_variables:
+      LLVM: 1
+      LLVM_IAS: 1
+  - target_arch: i386
+    toolchain: clang-nightly
+    kconfig: defconfig
+    targets:
+    - kernel
+    make_variables:
+      LLVM: 1
+      LLVM_IAS: 1
+  - target_arch: mips
+    toolchain: clang-nightly
+    kconfig:
+    - malta_defconfig
+    - CONFIG_BLK_DEV_INITRD=y
+    - CONFIG_CPU_BIG_ENDIAN=y
+    targets:
+    - kernel
+    kernel_image: vmlinux
+    make_variables:
+      LLVM: 1
+      LLVM_IAS: 1
+  - target_arch: mips
+    toolchain: clang-nightly
+    kconfig:
+    - malta_defconfig
+    - CONFIG_BLK_DEV_INITRD=y
+    targets:
+    - kernel
+    kernel_image: vmlinux
+    make_variables:
+      LLVM: 1
+      LLVM_IAS: 1
+  - target_arch: powerpc
+    toolchain: clang-nightly
+    kconfig:
+    - pseries_defconfig
+    targets:
+    - kernel
+    kernel_image: vmlinux
+    make_variables:
+      LD: powerpc64le-linux-gnu-ld
+      LLVM: 1
+      LLVM_IAS: 0
+  - target_arch: powerpc
+    toolchain: clang-nightly
+    kconfig: powernv_defconfig
+    targets:
+    - kernel
+    kernel_image: zImage.epapr
+    make_variables:
+      LLVM: 1
+      LLVM_IAS: 1
+  - target_arch: riscv
+    toolchain: clang-nightly
+    kconfig: defconfig
+    targets:
+    - kernel
+    kernel_image: Image
+    make_variables:
+      LLVM: 1
+      LLVM_IAS: 1
+  - target_arch: s390
+    toolchain: clang-nightly
+    kconfig: defconfig
+    targets:
+    - kernel
+    make_variables:
+      LLVM_IAS: 1
+  - target_arch: x86_64
+    toolchain: clang-nightly
+    kconfig: defconfig
+    targets:
+    - kernel
+    make_variables:
+      LLVM: 1
+      LLVM_IAS: 1
+- name: gcc
+  builds:
+  - target_arch: arm
+    toolchain: gcc-12
+    kconfig: multi_v5_defconfig
+    targets:
+    - kernel
+    - dtbs
+  - target_arch: arm
+    toolchain: gcc-12
+    kconfig: aspeed_g5_defconfig
+    targets:
+    - kernel
+    - dtbs
+  - target_arch: arm
+    toolchain: gcc-12
+    kconfig: multi_v7_defconfig
+    targets:
+    - kernel
+  - target_arch: arm64
+    toolchain: gcc-12
+    kconfig: defconfig
+    targets:
+    - kernel
+  - target_arch: arm64
+    toolchain: gcc-12
+    kconfig:
+    - defconfig
+    - CONFIG_CPU_BIG_ENDIAN=y
+    targets:
+    - kernel
+  - target_arch: i386
+    toolchain: gcc-12
+    kconfig: defconfig
+    targets:
+    - kernel
+  - target_arch: mips
+    toolchain: gcc-12
+    kconfig:
+    - malta_defconfig
+    - CONFIG_BLK_DEV_INITRD=y
+    - CONFIG_CPU_BIG_ENDIAN=y
+    targets:
+    - kernel
+    kernel_image: vmlinux
+  - target_arch: mips
+    toolchain: gcc-12
+    kconfig:
+    - malta_defconfig
+    - CONFIG_BLK_DEV_INITRD=y
+    targets:
+    - kernel
+    kernel_image: vmlinux
+  - target_arch: powerpc
+    toolchain: gcc-12
+    kconfig:
+    - pseries_defconfig
+    targets:
+    - kernel
+    kernel_image: vmlinux
+  - target_arch: powerpc
+    toolchain: gcc-12
+    kconfig: powernv_defconfig
+    targets:
+    - kernel
+    kernel_image: zImage.epapr
+  - target_arch: riscv
+    toolchain: gcc-12
+    kconfig: defconfig
+    targets:
+    - kernel
+    kernel_image: Image
+  - target_arch: s390
+    toolchain: gcc-12
+    kconfig: defconfig
+    targets:
+    - kernel
+  - target_arch: x86_64
+    toolchain: gcc-12
+    kconfig: defconfig
+    targets:
+    - kernel
