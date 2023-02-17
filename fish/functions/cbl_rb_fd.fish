@@ -13,7 +13,6 @@ function cbl_rb_fd -d "Rebase generic Fedora kernel on latest linux-next"
     git rh origin/master
 
     # Patching
-    set -a b4_patches https://lore.kernel.org/all/20230213101220.3821689-1-arnd@kernel.org/ # cxl: avoid returning uninitialized error code
     for patch in $b4_patches
         b4 shazam -l -P _ -s $patch; or return
     end
