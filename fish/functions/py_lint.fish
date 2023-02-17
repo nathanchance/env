@@ -10,25 +10,37 @@ function py_lint -d "Lint Python files"
         test -z "$files"; and return 0
     end
 
-    for command in flake8 pylint vulture yapf
+    if not in_venv
+        if not py_venv e main
+            print_error "$command could not be found and no suitable virtual environment found!"
+            return 1
+        end
+        set ephemeral true
+    end
+
+    for command in flake8 pylint ruff vulture yapf
         if not command -q $command
-            if in_venv
-                test $command = flake8; and set -a command flake8-bugbear
-                pip install $command
-            else
-                print_error "$command could not be found and you are not in a virtual environment!"
-                return 1
-            end
+            test $command = flake8; and set -a command flake8-bugbear
+            pip install $command
         end
     end
 
-    set -a flake8_ignore E501 # line too long
-    if flake8 \
-            --extend-ignore (string join , $flake8_ignore) \
-            $files
-        print_green "\nflake8 clean"
+    # ruff is faster than flake8 and provides many of the benefits so use it when possible
+    if git ls-files | grep -Fq ruff.toml
+        if ruff check $files
+            print_green "ruff clean"
+        else
+            print_red "\nnot ruff clean"
+        end
     else
-        print_red "\nnot flake8 clean"
+        set -a flake8_ignore E501 # line too long
+        if flake8 \
+                --extend-ignore (string join , $flake8_ignore) \
+                $files
+            print_green "\nflake8 clean"
+        else
+            print_red "\nnot flake8 clean"
+        end
     end
 
     set -a pylint_ignore C0114 # missing-module-docstring
@@ -65,4 +77,6 @@ function py_lint -d "Lint Python files"
             print_red "\nnot yapf clean"
         end
     end
+
+    set -q ephemeral; and py_venv x
 end
