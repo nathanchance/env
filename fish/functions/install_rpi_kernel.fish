@@ -42,7 +42,11 @@ function install_rpi_kernel -d "Install Raspberry Pi kernel from a tarball"
     pushd $workdir; or return
 
     # Extract .tar.zst
-    tar --zstd -xvf $krnl_pkg; or return
+    tar -atf $krnl_pkg | string match -qr '^lib/'
+    if test $pipestatus[2] -ne 0
+        set -a tar_args --strip-components=1
+    end
+    tar $tar_args -axvf $krnl_pkg; or return
 
     # Move modules into their place
     set mod_dir lib/modules/*
