@@ -96,7 +96,7 @@ def setup_user(user_name, user_password):
             '--disabled-password',
             '--gecos', 'Nathan Chancellor',
             '--shell', shutil.which('fish'),
-            user_name
+            user_name,
         ]  # yapf: disable
         subprocess.run(useradd_cmd, check=True)
         lib.setup.chpasswd(user_name, user_password)

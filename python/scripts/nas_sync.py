@@ -29,7 +29,7 @@ def parse_parameters():
         'ipsw',
         'korg',
         'rpios',
-        'ubuntu'
+        'ubuntu',
     ]  # yapf: disable
 
     parser.add_argument('-t',
@@ -121,7 +121,7 @@ def download_items(targets, network_folder):
             items += [{
                 'containing_folder': Path(firmware_folder, 'Arch', arch_date),
                 'file_url': f"{base_arch_url}/archlinux-{arch_date}-x86_64.iso",
-                'sha_url': f"{base_arch_url}/sha256sums.txt"
+                'sha_url': f"{base_arch_url}/sha256sums.txt",
             }]
 
         elif target == 'debian':
@@ -135,13 +135,13 @@ def download_items(targets, network_folder):
                     {
                         'containing_folder': arch_debian_folder,
                         'file_url': f"{arch_debian_url}/iso-cd/debian-{debian_ver}-{arch}-netinst.iso",
-                        'sha_url': f"{arch_debian_url}/iso-cd/SHA256SUMS"
+                        'sha_url': f"{arch_debian_url}/iso-cd/SHA256SUMS",
                     },
                     {
                         'containing_folder': arch_debian_folder,
                         'file_url': f"{arch_debian_url}/iso-dvd/debian-{debian_ver}-{arch}-DVD-1.iso",
-                        'sha_url': f"{arch_debian_url}/iso-dvd/SHA256SUMS"
-                    }
+                        'sha_url': f"{arch_debian_url}/iso-dvd/SHA256SUMS",
+                    },
                 ]  # yapf: disable
 
         elif target == 'fedora':
@@ -163,7 +163,7 @@ def download_items(targets, network_folder):
                     items += [{
                         'containing_folder': Path(subfolder, fedora_ver, 'Server', arch),
                         'file_url': f"{base_fedora_file_url}/Server/{arch}/iso/Fedora-Server-{flavor}-{arch}-{fedora_ver}-{server_iso_ver}.iso",
-                        'sha_url': f"{base_fedora_checksum_url}/Fedora-Server-{fedora_ver}-{server_iso_ver}-{arch}-CHECKSUM"
+                        'sha_url': f"{base_fedora_checksum_url}/Fedora-Server-{fedora_ver}-{server_iso_ver}-{arch}-CHECKSUM",
                     }]  # yapf: disable
 
             # Workstation
@@ -171,7 +171,7 @@ def download_items(targets, network_folder):
                 items += [{
                     'containing_folder': Path(subfolder, fedora_ver, 'Workstation', arch),
                     'file_url': f"{base_fedora_file_url}/Workstation/{arch}/iso/Fedora-Workstation-Live-{arch}-{fedora_ver}-{workstation_iso_ver}.iso",
-                    'sha_url': f"{base_fedora_checksum_url}/Fedora-Workstation-{fedora_ver}-{server_iso_ver}-{arch}-CHECKSUM"
+                    'sha_url': f"{base_fedora_checksum_url}/Fedora-Workstation-{fedora_ver}-{server_iso_ver}-{arch}-CHECKSUM",
                 }]  # yapf: disable
 
         elif target == 'ipsw':
@@ -180,7 +180,7 @@ def download_items(targets, network_folder):
             for mac_version in mac_versions:
                 items += [{
                     'containing_folder': Path(firmware_folder, 'macOS/VM'),
-                    'file_url': get_latest_ipsw_url('VirtualMac2,1', mac_version)
+                    'file_url': get_latest_ipsw_url('VirtualMac2,1', mac_version),
                 }]
 
         elif target == 'korg':
@@ -197,7 +197,7 @@ def download_items(targets, network_folder):
                     'base_file': f"{clone_bundle}-{repo_local}",
                     'containing_folder': Path(bundle_folder, get_sunday_as_folder()),
                     'file_url': f"{base_korg_bundle_url}/{clone_bundle}",
-                    'sha_url': f"{base_korg_bundle_url}/sha256sums.asc"
+                    'sha_url': f"{base_korg_bundle_url}/sha256sums.asc",
                 }]
 
         elif target == 'rpios':
@@ -210,7 +210,7 @@ def download_items(targets, network_folder):
                 items += [{
                     'containing_folder': Path(firmware_folder, 'Raspberry Pi OS'),
                     'file_url': base_rpi_url,
-                    'sha_url': base_rpi_url + '.sha256'
+                    'sha_url': base_rpi_url + '.sha256',
                 }]
 
         elif target == 'ubuntu':
@@ -232,7 +232,7 @@ def download_items(targets, network_folder):
                     items += [{
                         'containing_folder': Path(firmware_folder, 'Ubuntu', ubuntu_ver, 'Server'),
                         'file_url': f"{base_ubuntu_url}/ubuntu-{ubuntu_subver}-live-server-{arch}.iso",
-                        'sha_url': f"{base_ubuntu_url}/SHA256SUMS"
+                        'sha_url': f"{base_ubuntu_url}/SHA256SUMS",
                     }]    # yapf: disable
 
     for item in items:

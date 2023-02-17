@@ -62,7 +62,9 @@ def setup_doas(username, root_password):
         tmp_dir = Path(tempfile.mkdtemp())
         doas_deb = Path(tmp_dir, doas_deb_file)
         lib.setup.curl([
-            '-o', doas_deb, f"http://http.us.debian.org/debian/pool/main/o/opendoas/{doas_deb_file}"
+            '-o',
+            doas_deb,
+            f"http://http.us.debian.org/debian/pool/main/o/opendoas/{doas_deb_file}",
         ])
     else:
         doas_deb = Path(env_folder, 'bin/packages', doas_deb_file)
@@ -170,7 +172,7 @@ def update_and_install_packages(additional_packages=None):
         'ssh',
 
         # repo
-        'python-is-python3'
+        'python-is-python3',
     ]  # yapf: disable
 
     if additional_packages:
@@ -195,14 +197,15 @@ def update_and_install_packages(additional_packages=None):
             'libvirt-daemon-system',
             'qemu-utils',
             'virt-manager',
-            arch_packages[dpkg_arch]['firmware']
+            arch_packages[dpkg_arch]['firmware'],
         ]  # yapf: disable
     if dpkg_arch in arch_packages:
         packages += [arch_packages[dpkg_arch]['qemu']]
 
     add_apt_args = [
-        '-o', 'Dpkg::Options::=--force-confdef', '-o', 'Dpkg::Options::=--force-confold'
-    ]
+        '-o', 'Dpkg::Options::=--force-confdef',
+        '-o', 'Dpkg::Options::=--force-confold',
+    ]  # yapf: disable
 
     apt_update()
     apt_upgrade(add_apt_args)

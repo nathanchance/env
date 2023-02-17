@@ -44,8 +44,8 @@ def adjust_gnome_power_settings():
     doas_conf.write_text(doas_conf_text + 'permit nopass root as gdm\n', encoding='utf-8')
     gdm_cmd = [
         'doas', '-u', 'gdm', 'dbus-launch gsettings', 'set',
-        'org.gnome.settings-daemon.plugins.power', 'sleep-inactive-ac-type', 'nothing'
-    ]
+        'org.gnome.settings-daemon.plugins.power', 'sleep-inactive-ac-type', 'nothing',
+    ]  # yapf: disable
     subprocess.run(gdm_cmd, check=True)
 
     doas_conf.write_text(doas_conf_text, encoding='utf-8')
@@ -120,7 +120,7 @@ def enable_reflector():
         '--latest 15',
         '--protocol https',
         '--save /etc/pacman.d/mirrorlist',
-        '--sort rate'
+        '--sort rate',
     ]  # yapf: disable
     conf_text = '\n'.join(reflector_args) + '\n'
     Path('/etc/xdg/reflector/reflector.conf').write_text(conf_text, encoding='utf-8')
@@ -226,7 +226,7 @@ def pacman_install_packages():
 
         # Remote work
         'mosh',
-        'openssh'
+        'openssh',
     ]  # yapf: disable
 
     if 'DISPLAY' in os.environ:
@@ -249,7 +249,7 @@ def pacman_install_packages():
             'firefox',
 
             # Video viewing
-            'vlc'
+            'vlc',
         ]  # yapf: disable
 
     # https://wiki.archlinux.org/title/VMware/Install_Arch_Linux_as_a_guest
@@ -258,7 +258,7 @@ def pacman_install_packages():
         packages += [
             'gtkmm',
             'gtk2',
-            'open-vm-tools'
+            'open-vm-tools',
         ]  # yapf: disable
 
     # Install libvirt and virt-install for easy management of VMs on
@@ -271,7 +271,7 @@ def pacman_install_packages():
             'dnsmasq',
             'libvirt',
             'qemu-desktop',
-            'virt-install'
+            'virt-install',
         ]  # yapf: disable
 
     if lib.setup.is_virtual_machine():
@@ -410,7 +410,7 @@ def vmware_adjustments():
         'vmw_vsock_vmci_transport',
         'vmw_balloon',
         'vmw_vmci',
-        'vmwgfx'
+        'vmwgfx',
     ]  # yapf: disable
     add_mods_to_mkinitcpio(vmware_mods)
 

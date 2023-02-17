@@ -99,13 +99,15 @@ def kmake(variables, targets, ccache=True, directory=None, jobs=None, silent=Tru
 
     # Build and run make command
     make_cmd = [
-        'stdbuf', '-eL', '-oL', 'make', *flags,
-        *[f"{key}={variables[key]}" for key in sorted(variables)], *targets
-    ]
+        'stdbuf', '-eL', '-oL', 'make',
+        *flags,
+        *[f"{key}={variables[key]}" for key in sorted(variables)],
+        *targets,
+    ]  # yapf: disable
     if use_time:
         if not (gnu_time := shutil.which('time')):
             raise RuntimeError('Could not find time binary in PATH?')
-        make_cmd = [gnu_time, '-v'] + make_cmd
+        make_cmd = [gnu_time, '-v', *make_cmd]
     utils.print_cmd(make_cmd)
     if not use_time:
         start_time = time.time()

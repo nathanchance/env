@@ -2,6 +2,7 @@
 # SPDX-License-Identifier: MIT
 # Copyright (C) 2022-2023 Nathan Chancellor
 
+import contextlib
 import grp
 import ipaddress
 import os
@@ -252,7 +253,7 @@ def set_ip_addr_for_intf(con_name, intf, ip_addr):
     current_ip = get_ip_addr_for_intf(intf)
     if current_ip != ip_addr:
         raise RuntimeError(
-            f"IP address of '{intf}' ('{current_ip}') did not change to requested IP address ('{ip_addr}')"
+            f"IP address of '{intf}' ('{current_ip}') did not change to requested IP address ('{ip_addr}')",
         )
 
 
@@ -380,10 +381,8 @@ def setup_sudo_symlink():
     sudo_bin = Path(sudo_prefix, 'bin/sudo')
 
     sudo_bin.parent.mkdir(exist_ok=True, parents=True)
-    try:
+    with contextlib.suppress(FileExistsError):
         sudo_bin.symlink_to(shutil.which('doas'))
-    except FileExistsError:
-        pass
     subprocess.run(['stow', '-d', sudo_prefix.parent, '-R', sudo_prefix.name, '-v'], check=True)
 
 

@@ -182,7 +182,7 @@ def create_report_file(report_file, report_date):
         'an Ampere Altra Developer Platform',
         'an Intel-based desktop',
         'an AMD-based desktop',
-        'an Intel-based laptop'
+        'an Intel-based laptop',
     ]
     links = {
         'aosp_llvm': "[AOSP's distribution of LLVM](https://android.googlesource.com/platform/prebuilts/clang/host/linux-x86/)",
@@ -191,7 +191,7 @@ def create_report_file(report_file, report_date):
         'linux_next': '[linux-next](https://git.kernel.org/pub/scm/linux/kernel/git/next/linux-next.git/)',
         'lore': '[lore.kernel.org](https://lore.kernel.org/all/?q=f:nathan@kernel.org)',
         'sponsor': '[sponsoring my work](https://www.linuxfoundation.org/press/press-release/google-funds-linux-kernel-developers-to-focus-exclusively-on-security)',
-        'tuxmake': '[TuxMake](https://tuxmake.org)'
+        'tuxmake': '[TuxMake](https://tuxmake.org)',
     }
     # Yes, this is Markdown in Python :)
     template = (

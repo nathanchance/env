@@ -33,7 +33,7 @@ def find_first_file(possible_files, relative_root=usr_share):
             return full_path
     files_str = "', '".join([str(elem) for elem in possible_files])
     raise RuntimeError(
-        f"No items from list ('{files_str}') could be found in '{relative_root}', do you need to install a package?"
+        f"No items from list ('{files_str}') could be found in '{relative_root}', do you need to install a package?",
     )
 
 
@@ -100,9 +100,8 @@ class VirtualMachine:
                 if not (cmdline_file := Path(kernel_files, 'cmdline')).exists():
                     raise RuntimeError('kernel passed without cmdline and one could not be found!')
                 cmdline = cmdline_file.read_text(encoding='utf-8')
-            if not initrd:
-                if not (initrd := Path(kernel_files, 'initramfs')).exists():
-                    raise RuntimeError('kernel passed without initrd and one could not be found!')
+            if not (initrd or (initrd := Path(kernel_files, 'initramfs')).exists()):
+                raise RuntimeError('kernel passed without initrd and one could not be found!')
 
         # Clear any previous hosts using the chosen SSH port.
         run_cmd(['ssh-keygen', '-R', f"[localhost]:{ssh_port}"])
@@ -188,7 +187,7 @@ class VirtualMachine:
         if graphical:
             return [
                 '-device', 'virtio-vga-gl',
-                '-display', 'gtk,gl=on'
+                '-display', 'gtk,gl=on',
             ]  # yapf: disable
         return [
             '-display', 'none',
@@ -214,13 +213,13 @@ class VirtualMachine:
 
         if not iso.exists():
             raise RuntimeError(
-                f"{iso.name} does not exist at {iso}, was the wrong path used or did the download fail?"
+                f"{iso.name} does not exist at {iso}, was the wrong path used or did the download fail?",
             )
 
         return [
             '-device', 'virtio-scsi-pci,id=scsi0',
             '-device', 'scsi-cd,drive=cd',
-            '-drive', f"if=none,format=raw,id=cd,file={iso}"
+            '-drive', f"if=none,format=raw,id=cd,file={iso}",
         ]  # yapf: disable
 
     def remove(self):
@@ -230,19 +229,17 @@ class VirtualMachine:
     def run(self):
         if not self.primary_disk_img.exists():
             raise RuntimeError(
-                f"Disk image ('{self.primary_disk_img}') for virtual machine ('{self.name}') does not exist, run 'setup' first?"
+                f"Disk image ('{self.primary_disk_img}') for virtual machine ('{self.name}') does not exist, run 'setup' first?",
             )
 
         if not (qemu := shutil.which(self.qemu)):
             raise RuntimeError(
-                f"Could not find QEMU binary ('{self.qemu}') on your system (needed to run virtual machine)!"
+                f"Could not find QEMU binary ('{self.qemu}') on your system (needed to run virtual machine)!",
             )
 
-        if not (sudo := shutil.which('doas')):
-            if not (sudo := shutil.which('sudo')):
-                raise RuntimeError(
-                    'Could not find doas or sudo on your system (needed for virtiofsd integration)!'
-                )
+        if not (sudo := shutil.which('doas')) or (sudo := shutil.which('sudo')):
+            raise RuntimeError(
+                'Could not find doas or sudo on your system (needed for virtiofsd integration)!')
 
         # Locate the QEMU prefix to search for virtiofsd
         qemu = Path(qemu).resolve()
@@ -271,7 +268,7 @@ class VirtualMachine:
             '-o', 'cache=always',
         ]  # yapf: disable
         lib.utils.print_cmd(virtiofsd_cmd)
-        with open(self.vfsd_log, 'w', encoding='utf-8') as file, \
+        with self.vfsd_log.open('w', encoding='utf-8') as file, \
              subprocess.Popen(virtiofsd_cmd, stderr=file, stdout=file) as vfsd:
             try:
                 run_cmd([qemu, *self.qemu_args, *self.get_drive_args()])
@@ -355,7 +352,7 @@ class Arm32VirtualMachine(ArmVirtualMachine):
                 check_el1_32.parent.mkdir(exist_ok=False, parents=True)
                 wget(
                     check_el1_32,
-                    f"https://github.com/ClangBuiltLinux/boot-utils/raw/main/utils/{check_el1_32.name}"
+                    f"https://github.com/ClangBuiltLinux/boot-utils/raw/main/utils/{check_el1_32.name}",
                 )
                 check_el1_32.chmod(0o755)
             try:
@@ -374,9 +371,9 @@ class Arm32VirtualMachine(ArmVirtualMachine):
         return super().get_available_mem_for_vm() if self.highmem_firmware else 2
 
     def get_highmem_firmware(self):
-        if 'ENV_FOLDER' in os.environ:
-            if (firmware := Path(os.environ['ENV_FOLDER'], 'bin/armv7l/QEMU_EFI.fd')).exists():
-                return [firmware]
+        if 'ENV_FOLDER' in os.environ and (firmware := Path(os.environ['ENV_FOLDER'],
+                                                            'bin/armv7l/QEMU_EFI.fd')).exists():
+            return [firmware]
         return []
 
     def setup_efi_files(self, possible_efi_files=None):
@@ -590,9 +587,9 @@ def get_def_iso(arch):
 
     # Check to see if we have a local network version we can use
     file = iso_info[arch]['file']
-    if 'NAS_FOLDER' in os.environ:
-        if (iso := Path(os.environ['NAS_FOLDER'], 'Firmware_and_Images', file)).exists():
-            return iso
+    if 'NAS_FOLDER' in os.environ and (iso := Path(os.environ['NAS_FOLDER'], 'Firmware_and_Images',
+                                                   file)).exists():
+        return iso
 
     # Otherwise, return the URL so that it can be fetched and cached on the
     # machine
@@ -645,10 +642,7 @@ def create_vm_from_args(args):
     iso = None
     if hasattr(args, 'iso'):
         if args.iso:
-            if iso_is_url(args.iso):
-                iso = args.iso
-            else:
-                iso = Path(args.iso)
+            iso = args.iso if iso_is_url(args.iso) else Path(args.iso)
         else:
             iso = get_def_iso(arch)
 
@@ -666,7 +660,7 @@ def create_vm_from_args(args):
             kernel_folder = None
         if not kernel.exists():
             raise RuntimeError(
-                f"Kernel image ('{kernel}'), derived from kernel argument ('{args.kernel}'), does not exist!"
+                f"Kernel image ('{kernel}'), derived from kernel argument ('{args.kernel}'), does not exist!",
             )
 
         # Handle command line and initial ramdisk

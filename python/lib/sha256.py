@@ -3,6 +3,7 @@
 # Copyright (C) 2022-2023 Nathan Chancellor
 
 import hashlib
+from pathlib import Path
 import re
 
 import requests
@@ -12,7 +13,7 @@ from . import utils
 
 def calculate(file_path):
     file_hash = hashlib.sha256()
-    with open(file_path, 'rb') as file:
+    with Path(file_path).open('rb') as file:
         # 1MB at a time
         while (chunk := file.read(1048576)):  # 1MB at a time
             file_hash.update(chunk)
@@ -25,9 +26,8 @@ def get_from_url(url, basename):
     for line in response.content.decode('utf-8').splitlines():
         if 'clone.bundle' in basename:
             basename = basename.split('-')[0]
-        if basename in line:
-            if (sha256_match := re.search('[A-Fa-f0-9]{64}', line)):
-                return sha256_match.group(0)
+        if basename in line and (sha256_match := re.search('[A-Fa-f0-9]{64}', line)):
+            return sha256_match.group(0)
     return None
 
 
@@ -39,5 +39,5 @@ def validate_from_url(file, url):
         utils.print_green(f"SUCCESS: {file.name} sha256 passed!")
     else:
         raise RuntimeError(
-            f"{file.name} computed checksum ('{computed_sha256}') did not match expected checksum ('{expected_sha256}')!"
+            f"{file.name} computed checksum ('{computed_sha256}') did not match expected checksum ('{expected_sha256}')!",
         )

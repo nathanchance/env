@@ -50,7 +50,7 @@ def prechecks():
     fedora_version = get_fedora_version()
     if fedora_version not in (35, 36, 37):
         raise RuntimeError(
-            f"Fedora {fedora_version} is not tested with this script, add support for it if it works."
+            f"Fedora {fedora_version} is not tested with this script, add support for it if it works.",
         )
 
 
@@ -125,7 +125,7 @@ def install_packages():
         'python',
 
         # tuxmake
-        'tuxmake'
+        'tuxmake',
     ]  # yapf: disable
 
     # Install Virtualization group on Equinix Metal servers or trusted machines

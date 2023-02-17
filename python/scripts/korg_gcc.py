@@ -147,7 +147,7 @@ def install(args):
 
     if cache and not (download_folder := Path(args.download_folder)).exists():
         raise RuntimeError(
-            f"Download folder ('{download_folder}') does not exist, please create it before running this script!"
+            f"Download folder ('{download_folder}') does not exist, please create it before running this script!",
         )
 
     host_arch = platform.machine()
