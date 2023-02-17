@@ -1,2 +1,3 @@
 select = ['A', 'ARG', 'B', 'C4', 'COM', 'E', 'F', 'PIE', 'PL', 'PTH', 'RET', 'RUF', 'SIM', 'SLF', 'UP', 'W']
 ignore = ['E501', 'PLR0911', 'PLR0912', 'PLR0913', 'PLR0915', 'PLR2004']
+target-version = 'py39'
