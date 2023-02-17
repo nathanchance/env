@@ -124,7 +124,7 @@ def setup_ssh():
     if not (ssh_key := Path(home, '.ssh/id_ed25519')).exists():
         ssh_key.parent.mkdir(exist_ok=True, parents=True)
 
-        if not (keys_folder := Path('/tmp/keys')).exists():
+        if not (keys_folder := Path('/tmp/keys')).exists():  # noqa: S108
             repo_clone(keys_folder)
 
         keys_ssh = Path(keys_folder, 'ssh')

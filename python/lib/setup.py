@@ -65,7 +65,7 @@ def chsh_fish(username):
 
 
 def clone_env(username):
-    if not (env_tmp := Path('/tmp/env')).exists():
+    if not (env_tmp := Path('/tmp/env')).exists():  # noqa: S108
         subprocess.run(['git', 'clone', 'https://github.com/nathanchance/env', env_tmp], check=True)
         chown(username, env_tmp)
 
