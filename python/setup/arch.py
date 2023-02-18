@@ -166,6 +166,7 @@ def pacman_install_packages():
         'dos2unix',
         'hyperfine',
         'patch',
+        'ruff',
         'tuxmake',
         'vim',
         'vim-spell-en',

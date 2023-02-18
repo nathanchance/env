@@ -96,6 +96,7 @@ function install_packages() {
         python
         python-setuptools
         python-yaml
+        ruff
         shellcheck-bin
         shfmt
         yapf
