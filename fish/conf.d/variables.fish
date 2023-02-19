@@ -87,6 +87,8 @@ set -gx SRC_FOLDER $MAIN_FOLDER/src
 
 if test -d /mac/Volumes/Storage
     set -gx NAS_FOLDER /mac/Volumes/Storage
+else if test -d /Volumes/Storage
+    set -gx NAS_FOLDER /Volumes/Storage
 else
     set -gx NAS_FOLDER /mnt/nas
 end
