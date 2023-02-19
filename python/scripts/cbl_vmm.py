@@ -237,7 +237,7 @@ class VirtualMachine:
                 f"Could not find QEMU binary ('{self.qemu}') on your system (needed to run virtual machine)!",
             )
 
-        if not (sudo := shutil.which('doas')) or (sudo := shutil.which('sudo')):
+        if not ((sudo := shutil.which('doas')) or (sudo := shutil.which('sudo'))):
             raise RuntimeError(
                 'Could not find doas or sudo on your system (needed for virtiofsd integration)!')
 
