@@ -148,14 +148,23 @@ def install_packages():
     dnf_install(packages)
 
 
-def setup_doas():
+def setup_doas(username):
     # Fedora provides a doas.conf already, just modify it to suit our needs
     doas_conf, conf_txt = lib.utils.path_and_text('/etc/doas.conf')
     if (persist := 'permit persist :wheel') not in conf_txt:
         conf_txt = conf_txt.replace('permit :wheel', persist)
+
         conf_txt += ('\n'
                      '# Do not require root to put in a password (makes no sense)\n'
                      'permit nopass root\n')
+
+        # If we were already set up with passwordless sudo, carry it over to doas
+        _, sudoers_text = lib.utils.path_and_text('/etc/sudoers.d', username)
+        if sudoers_text and 'NOPASSWD:ALL' in sudoers_text:
+            conf_txt += ('\n'
+                         '# passwordless doas for my user\n'
+                         f"permit nopass {username}\n")
+
         doas_conf.write_text(conf_txt, encoding='utf-8')
 
     # Remove sudo but set up a symlink for compatibility
@@ -225,7 +234,7 @@ if __name__ == '__main__':
     install_initial_packages()
     setup_repos()
     install_packages()
-    setup_doas()
+    setup_doas(user)
     setup_docker(user)
     setup_kernel_args()
     setup_libvirt(user)
