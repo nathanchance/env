@@ -91,7 +91,6 @@ def install_packages():
 
         # distrobox
         'distrobox',
-        'podman',
 
         # email
         'cyrus-sasl-plain',
@@ -128,6 +127,17 @@ def install_packages():
         'tuxmake',
     ]  # yapf: disable
 
+    if lib.setup.is_lxc():
+        packages += [
+            'docker-ce',
+            'docker-ce-cli',
+            'containerd.io',
+            'docker-buildx-plugin',
+            'docker-compose-plugin',
+        ]
+    else:
+        packages.append('podman')
+
     # Install Virtualization group on Equinix Metal servers or trusted machines
     if lib.setup.is_equinix() or machine_is_trusted():
         packages += ['@virtualization']
@@ -152,6 +162,15 @@ def setup_doas():
     Path('/etc/dnf/protected.d/sudo.conf').unlink(missing_ok=True)
     lib.setup.remove_if_installed('sudo')
     lib.setup.setup_sudo_symlink()
+
+
+def setup_docker(username):
+    if not shutil.which('docker'):
+        return
+
+    subprocess.run(['groupadd', '-f', 'docker'], check=True)
+    lib.setup.add_user_to_group('docker', username)
+    lib.setup.systemctl_enable(['docker'])
 
 
 def setup_kernel_args():
@@ -182,6 +201,9 @@ def setup_mosh():
 def setup_repos():
     dnf_add_repo('https://cli.github.com/packages/rpm/gh-cli.repo')
 
+    if lib.setup.is_lxc():
+        dnf_add_repo('https://download.docker.com/linux/fedora/docker-ce.repo')
+
     if machine_is_trusted():
         dnf_add_repo('https://pkgs.tailscale.com/stable/fedora/tailscale.repo')
 
@@ -204,6 +226,7 @@ if __name__ == '__main__':
     setup_repos()
     install_packages()
     setup_doas()
+    setup_docker(user)
     setup_kernel_args()
     setup_libvirt(user)
     setup_mosh()
