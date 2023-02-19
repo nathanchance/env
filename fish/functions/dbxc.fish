@@ -65,6 +65,9 @@ function dbxc -d "Shorthand for 'distrobox create'"
             set -a dbx_args --no-entry
         end
     end
+    if test -d /mac
+        set -a dbx_args --volume /mac:/mac
+    end
 
     # If we are using a development image AND it is the default one for our
     # architecture (to avoid weird dynamic linking failures), use the binaries

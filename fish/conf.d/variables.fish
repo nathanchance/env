@@ -85,7 +85,11 @@ set -gx GITHUB_FOLDER $MAIN_FOLDER/github
 set -gx KERNEL_FOLDER $MAIN_FOLDER/kernel
 set -gx SRC_FOLDER $MAIN_FOLDER/src
 
-set -gx NAS_FOLDER /mnt/nas
+if test -d /mac/Volumes/Storage
+    set -gx NAS_FOLDER /mac/Volumes/Storage
+else
+    set -gx NAS_FOLDER /mnt/nas
+end
 
 set -gx NVME_FOLDER /mnt/nvme
 if test -d $NVME_FOLDER
