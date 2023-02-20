@@ -39,7 +39,11 @@ def get_brew_path():
 
 
 def get_env_folder():
-    return Path(get_home(), 'Dev/github/env')
+    return Path(get_main_folder(), 'github/env')
+
+
+def get_main_folder():
+    return Path('/Volumes/Dev')
 
 
 def get_home():
@@ -150,45 +154,40 @@ def setup_ssh():
 
 
 def setup_wezterm_cfg():
-    if not (wezterm_cfg := Path(get_home(), '.config/wezterm/wezterm.lua')).is_symlink():
-        wezterm_cfg.unlink(missing_ok=True)
-        wezterm_cfg.parent.mkdir(exist_ok=True, parents=True)
-        wezterm_cfg.symlink_to(Path(get_env_folder(), 'configs/local', wezterm_cfg.name))
+    (wezterm_cfg := Path(get_home(), '.config/wezterm/wezterm.lua')).unlink(missing_ok=True)
+    wezterm_cfg.parent.mkdir(exist_ok=True, parents=True)
+    wezterm_cfg.symlink_to(Path(get_env_folder(), 'configs/local', wezterm_cfg.name))
 
 
-def setup_fish_cfg():
-    if not (fish_cfg := Path(get_home(), '.config/fish/config.fish')).is_symlink():
-        fish_cfg.unlink(missing_ok=True)
-        fish_cfg.parent.mkdir(exist_ok=True, parents=True)
-        fish_cfg_txt = ('# Start an ssh-agent\n'
-                        'if not set -q SSH_AUTH_SOCK\n'
-                        '    eval (ssh-agent -c)\n'
-                        'end\n'
-                        '\n'
-                        '# Set up user environment wrapper\n'
-                        'function env_setup\n'
-                        '    set -l github_folder $HOME/Dev/github\n'
-                        '    set -l fisher_plugins \\\n'
-                        '        jorgebucaran/fisher \\\n'
-                        '        $github_folder/{env/fish,hydro} \\\n'
-                        '        PatrickF1/fzf.fish \\\n'
-                        '        jorgebucaran/autopair.fish \\\n'
-                        '        wfxr/forgit\n'
-                        '\n'
-                        '    curl -LSs https://git.io/fisher | source\n'
-                        '    and fisher install $fisher_plugins\n'
-                        '\n'
-                        '    set -l fish_cfg $__fish_config_dir/config.fish\n'
-                        '    if not test -L $fish_cfg\n'
-                        '        rm -fr $fish_cfg\n'
-                        '        mkdir -p (dirname $fish_cfg)\n'
-                        '        ln -fsv $github_folder/env/fish/config.fish $fish_cfg\n'
-                        '    end\n'
-                        '\n'
-                        '    git_setup\n'
-                        '    vim_setup\n'
-                        'end\n')
-        fish_cfg.write_text(fish_cfg_txt, encoding='utf-8')
+def setup_fish():
+    fish_script = ('# Start an ssh-agent\n'
+                   'if not set -q SSH_AUTH_SOCK\n'
+                   '    eval (ssh-agent -c)\n'
+                   'end\n'
+                   '\n'
+                   f"set github_folder {get_env_folder().parent}\n"
+                   'set fisher_plugins \\\n'
+                   '    jorgebucaran/fisher \\\n'
+                   '    $github_folder/{env/fish,hydro} \\\n'
+                   '    PatrickF1/fzf.fish \\\n'
+                   '    jorgebucaran/autopair.fish \\\n'
+                   '    wfxr/forgit\n'
+                   '\n'
+                   'curl -LSs https://git.io/fisher | source; or return\n'
+                   'set old_plugins (fisher list &| string match -er "hydro|env/fish")\n'
+                   'if test -z "$old_plugins"\n'
+                   '    fisher remove $old_plugins; or return\n'
+                   'end\n'
+                   'fisher install $fisher_plugins; or return\n'
+                   '\n'
+                   'set fish_cfg $__fish_config_dir/config.fish\n'
+                   'rm -fr $fish_cfg\n'
+                   'mkdir -p (dirname $fish_cfg)\n'
+                   'ln -fsv $github_folder/env/fish/config.fish $fish_cfg\n'
+                   '\n'
+                   'git_setup\n'
+                   'vim_setup\n')
+    subprocess.run([Path(get_brew_bin(), 'fish'), '-c', fish_script], check=True)
 
 
 if __name__ == '__main__':
@@ -204,4 +203,4 @@ if __name__ == '__main__':
     setup_ssh()
     clone_env_plugins()
     setup_wezterm_cfg()
-    setup_fish_cfg()
+    setup_fish()
