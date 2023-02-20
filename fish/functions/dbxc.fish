@@ -65,8 +65,8 @@ function dbxc -d "Shorthand for 'distrobox create'"
             set -a dbx_args --no-entry
         end
     end
-    if test -d /mac
-        set -a dbx_args --volume /mac:/mac
+    if set -q MAC_FOLDER
+        set -a dbx_args --volume $MAC_FOLDER:$MAC_FOLDER
     end
 
     # If we are using a development image AND it is the default one for our
