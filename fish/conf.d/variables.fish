@@ -65,15 +65,9 @@ end
 ##  GLOBAL FOLDER VARIABLES  ##
 ###############################
 
-if test -d /mac
-    set -gx MAC_FOLDER /mac
-end
-
 if test -d /mnt/ssd
     set -gx MAIN_FOLDER /mnt/ssd
     set -gx CCACHE_DIR $MAIN_FOLDER/ccache
-else if test -d "$MAC_FOLDER"/Volumes/Dev
-    set -gx MAIN_FOLDER "$MAC_FOLDER"/Volumes/Dev
 else if test -d $HOME/Downloads
     set -gx MAIN_FOLDER $HOME/Dev
 else if set -q GITHUB_ACTIONS
@@ -90,6 +84,10 @@ set -gx CBL $MAIN_FOLDER/cbl
 set -gx GITHUB_FOLDER $MAIN_FOLDER/github
 set -gx KERNEL_FOLDER $MAIN_FOLDER/kernel
 set -gx SRC_FOLDER $MAIN_FOLDER/src
+
+if test -d /mac
+    set -gx MAC_FOLDER /mac
+end
 
 if test -d "$MAC_FOLDER"/Volumes/Storage
     set -gx NAS_FOLDER "$MAC_FOLDER"/Volumes/Storage

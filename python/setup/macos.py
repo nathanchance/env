@@ -43,7 +43,7 @@ def get_env_folder():
 
 
 def get_main_folder():
-    return Path('/Volumes/Dev')
+    return Path(get_home(), 'Dev')
 
 
 def get_home():
