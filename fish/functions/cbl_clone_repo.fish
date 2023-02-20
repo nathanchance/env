@@ -3,11 +3,13 @@
 # Copyright (C) 2021-2023 Nathan Chancellor
 
 function cbl_clone_repo -d "Clone certain repos for ClangBuiltLinux testing and development"
+    set bundles_folder $NAS_FOLDER/bundles
+
     for arg in $argv
+        set -l branch
         set -l bundle
         set -l dest
         set -l git_clone_args
-        set -l korg_bundle_folder $NAS_FOLDER/kernel.org/bundles/latest
 
         switch $arg
             case binutils
@@ -19,18 +21,20 @@ function cbl_clone_repo -d "Clone certain repos for ClangBuiltLinux testing and 
                 set url https://github.com/nathanchance/$arg.git
                 set dest $CBL/(string replace cbl- "" $arg)
             case linux
-                set bundle $korg_bundle_folder/clone.bundle-$arg
+                set bundle $bundles_folder/$arg.bundle
                 set url https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/
             case linux-fast-headers
                 set git_clone_args -b sched/headers
                 set url https://git.kernel.org/pub/scm/linux/kernel/git/mingo/tip.git/
             case linux-next
-                set bundle $korg_bundle_folder/clone.bundle-$arg
+                set bundle $bundles_folder/$arg.bundle
                 set url https://git.kernel.org/pub/scm/linux/kernel/git/next/linux-next.git/
             case linux-stable
-                set bundle $korg_bundle_folder/clone.bundle-$arg
+                set bundle $bundles_folder/$arg.bundle
                 set url https://git.kernel.org/pub/scm/linux/kernel/git/stable/linux.git/
             case llvm-project
+                set branch main
+                set bundle $bundles_folder/$arg.bundle
                 set url https://github.com/llvm/llvm-project
             case wsl2
                 set url git@github.com:nathanchance/WSL2-Linux-Kernel
@@ -43,11 +47,14 @@ function cbl_clone_repo -d "Clone certain repos for ClangBuiltLinux testing and 
         if test -z "$dest"
             set dest $CBL_SRC/$arg
         end
+        if test -z "$branch"
+            set branch master
+        end
 
         if not test -d $dest
             mkdir -p (dirname $dest)
             if test -n "$bundle"; and test -e $bundle
-                clone_from_bundle $bundle $dest $url master; or return
+                clone_from_bundle $bundle $dest $url $branch; or return
             else
                 git clone $git_clone_args $url $dest; or return
             end

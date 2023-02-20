@@ -7,6 +7,7 @@ import datetime
 import json
 import os
 from pathlib import Path
+import subprocess
 import sys
 
 import requests
@@ -24,10 +25,10 @@ def parse_parameters():
     supported_images = [
         'alpine',
         'arch',
+        'bundles',
         'debian',
         'fedora',
         'ipsw',
-        'korg',
         'rpios',
         'ubuntu',
     ]  # yapf: disable
@@ -40,16 +41,6 @@ def parse_parameters():
                         nargs='+')
 
     return parser.parse_args()
-
-
-def get_most_recent_sunday():
-    today = datetime.date.today()
-    sunday_offset = (today.weekday() + 1) % 7
-    return today - datetime.timedelta(sunday_offset)
-
-
-def get_sunday_as_folder():
-    return get_most_recent_sunday().strftime('%Y-%m-%d')
 
 
 def get_latest_ipsw_url(identifier, version):
@@ -81,20 +72,12 @@ def download_if_necessary(item):
         lib.sha256.validate_from_url(target, item['sha_url'])
 
 
-def update_bundle_symlink(bundle_folder):
-    src = Path(bundle_folder, get_sunday_as_folder())
-    dest = Path(bundle_folder, 'latest')
-
-    dest.unlink(missing_ok=True)
-    dest.symlink_to(src)
-
-
 def download_items(targets, network_folder):
     if not (firmware_folder := Path(network_folder, 'Firmware_and_Images')).exists():
         raise RuntimeError(f"{firmware_folder} does not exist, systemd automounting broken?")
 
-    if not (bundle_folder := Path(network_folder, 'kernel.org/bundles')).exists():
-        raise RuntimeError(f"{bundle_folder} does not exist??")
+    if not (bundles_folder := Path(network_folder, 'bundles')).exists():
+        raise RuntimeError(f"{bundles_folder} does not exist??")
 
     items = []
     for target in targets:
@@ -123,6 +106,27 @@ def download_items(targets, network_folder):
                 'file_url': f"{base_arch_url}/archlinux-{arch_date}-x86_64.iso",
                 'sha_url': f"{base_arch_url}/sha256sums.txt",
             }]
+
+        elif target == 'bundles':
+            repos = {
+                'linux': 'https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/',
+                'linux-next':
+                'https://git.kernel.org/pub/scm/linux/kernel/git/next/linux-next.git/',
+                'linux-stable': 'https://git.kernel.org/pub/scm/linux/kernel/git/stable/linux.git/',
+                'llvm-project': 'https://github.com/llvm/llvm-project',
+            }
+            for repo_name, repo_url in repos.items():
+                # Download and update repo
+                if not (repo_path := Path(os.environ['CBL'], 'mirrors', repo_name)).exists():
+                    repo_path.parent.mkdir(exist_ok=True, parents=True)
+                    subprocess.run(['git', 'clone', '--mirror', repo_url, repo_path], check=True)
+                subprocess.run(['git', 'remote', 'update', '--prune'], check=True, cwd=repo_path)
+                # Create bundles
+                repo_bundle = Path(bundles_folder, f"{repo_name}.bundle")
+                repo_bundle.unlink(missing_ok=True)
+                subprocess.run(['git', 'bundle', 'create', repo_bundle, '--all'],
+                               check=True,
+                               cwd=repo_path)
 
         elif target == 'debian':
             debian_arches = ['amd64', 'arm64', 'armhf', 'i386']
@@ -183,23 +187,6 @@ def download_items(targets, network_folder):
                     'file_url': get_latest_ipsw_url('VirtualMac2,1', mac_version),
                 }]
 
-        elif target == 'korg':
-            repos = [('torvalds/linux', 'linux'), ('next/linux-next', 'linux-next'),
-                     ('stable/linux', 'linux-stable')]
-
-            for repo in repos:
-                repo_remote = repo[0]
-                repo_local = repo[1]
-
-                base_korg_bundle_url = f"https://mirrors.kernel.org/pub/scm/.bundles/pub/scm/linux/kernel/git/{repo_remote}"
-                clone_bundle = 'clone.bundle'
-                items += [{
-                    'base_file': f"{clone_bundle}-{repo_local}",
-                    'containing_folder': Path(bundle_folder, get_sunday_as_folder()),
-                    'file_url': f"{base_korg_bundle_url}/{clone_bundle}",
-                    'sha_url': f"{base_korg_bundle_url}/sha256sums.asc",
-                }]
-
         elif target == 'rpios':
             rpi_arches = ['armhf', 'arm64']
             rpi_date = '2022-09-26/2022-09-22'
@@ -237,8 +224,6 @@ def download_items(targets, network_folder):
 
     for item in items:
         download_if_necessary(item)
-    if 'korg' in targets:
-        update_bundle_symlink(bundle_folder)
 
 
 if __name__ == '__main__':
