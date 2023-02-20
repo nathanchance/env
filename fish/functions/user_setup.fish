@@ -33,6 +33,10 @@ function user_setup -d "Setup a user account, downloading all files and placing 
             set trusted_gpg true
             set trusted_ssh true
     end
+    if set -q MAC_FOLDER
+        set trusted_gpg true
+        set trusted_ssh true
+    end
 
     # Trusting an environment with GPG but not SSH makes little sense
     if test "$trusted_gpg" = true; and not test "$trusted_ssh" = true
