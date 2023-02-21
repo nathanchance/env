@@ -3,11 +3,14 @@
 
 _localversion=-llvm
 pkgname=linux-mainline$_localversion
-_srctag=v6.2
-pkgver=${_srctag//-/.}
+# _srctag=v6.2
+# pkgver=${_srctag//-/.}
+_srccommit=89f5349e0673322857bd432fa23113af56673739
+pkgver=v6.3.r0.2019.g89f5349e0673
 pkgrel=1
 pkgdesc='Linux'
-url="https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/log/?h=$_srctag"
+# url="https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/log/?h=$_srctag"
+url="https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/log/?h=$_srccommit"
 arch=(x86_64)
 arch=(x86_64)
 license=(GPL2)
@@ -15,8 +18,9 @@ makedepends=(
   bc libelf pahole cpio perl tar xz
 )
 options=('!strip')
+#  "$pkgname::git+https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git?signed#tag=$_srctag"
 source=(
-  "$pkgname::git+https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git?signed#tag=$_srctag"
+  "$pkgname::git+https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git#commit=$_srccommit"
   config
   cbl-1774.patch
   v9_20230215_usama_arif_parallel_cpu_bringup_for_x86_64.patch
@@ -28,7 +32,7 @@ validpgpkeys=(
   'ABAF11C65A2970B130ABE3C479BE3E4300411886'  # Linus Torvalds
 )
 sha256sums=('SKIP'
-            'c84499e108bba88613f6acfc8d87f49d2e7fe7b69c3833df8be1be0e406ad956'
+            '700166921387809b7dea65114e695659de5f75e08c468b2c54669fd814d4b810'
             '91f6adb7b36b5e1928081526c3ded19eb4769bc6c46a02a235b496b493f271aa'
             'd88aba173ff7c88ed65dd73d2603758eccd1d89122914da76745c50a9d8fde1d'
             'd569ee2fbd072a09e89196779ccc0dfd008d5a79a0cec5fa80cc7ed99a3027fa'
