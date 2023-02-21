@@ -13,6 +13,7 @@ function cbl_clone_repo -d "Clone certain repos for ClangBuiltLinux testing and 
 
         switch $arg
             case binutils
+                set bundle $bundles_folder/$arg.bundle
                 set url https://sourceware.org/git/binutils-gdb.git
             case boot-utils containers continuous-integration2 tc-build
                 set url https://github.com/ClangBuiltLinux/$arg.git

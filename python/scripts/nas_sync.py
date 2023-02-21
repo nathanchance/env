@@ -109,6 +109,7 @@ def download_items(targets, network_folder):
 
         elif target == 'bundles':
             repos = {
+                'binutils': 'https://sourceware.org/git/binutils-gdb.git',
                 'linux': 'https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/',
                 'linux-next':
                 'https://git.kernel.org/pub/scm/linux/kernel/git/next/linux-next.git/',
