@@ -16,7 +16,7 @@ if test "$LOCATION" = mac
 
     set -gx SHELL /opt/homebrew/bin/fish
 else
-    if not string match -qr tty (tty)
+    if not string match -qr tty (tty); and status is-interactive
         start_tmux
     end
 
