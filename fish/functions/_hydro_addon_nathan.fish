@@ -28,7 +28,7 @@ function _hydro_addon_nathan -d "Hydro prompt customizations"
     end
 
     # Print user@host if we are in a container or a SSH session
-    if in_container; or test "$in_ssh" = true
+    if in_container; or in_orb; or test "$in_ssh" = true
         printf '%b%s' (set_color yellow) (id -un)
         printf '%b@%s ' (set_color green) $hostname
     end
