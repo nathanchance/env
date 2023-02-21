@@ -65,8 +65,11 @@ function dbxc -d "Shorthand for 'distrobox create'"
             set -a dbx_args --no-entry
         end
     end
-    if set -q MAC_FOLDER
+    if in_orb
         set -a dbx_args --volume $MAC_FOLDER:$MAC_FOLDER
+    end
+    if test -d $OPT_ORB_GUEST
+        set -a dbx_args --volume $OPT_ORB_GUEST:$OPT_ORB_GUEST
     end
 
     # If we are using a development image AND it is the default one for our

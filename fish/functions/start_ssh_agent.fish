@@ -3,6 +3,11 @@
 # Copyright (C) 2021-2023 Nathan Chancellor
 
 function start_ssh_agent -d "Launch an ssh agent only if it has not already been launched"
+    if test -S $OPT_ORB_GUEST/run/host-ssh-agent.sock
+        set -q SSH_AUTH_SOCK; or set -gx SSH_AUTH_SOCK $OPT_ORB_GUEST/run/host-ssh-agent.sock
+        return 0
+    end
+
     for arg in $argv
         switch $arg
             case -f --force

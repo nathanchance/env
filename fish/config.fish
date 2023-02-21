@@ -20,6 +20,12 @@ else
         start_tmux
     end
 
+    if test -d $OPT_ORB_GUEST
+        fish_add_path -g $OPT_ORB_GUEST/bin-hiprio
+        fish_add_path -aP $OPT_ORB_GUEST/bin
+        fish_add_path -aP $OPT_ORB_GUEST/data/bin/cmdlinks
+    end
+
     if in_container
         if test "$USE_CBL" = 1
             set -l folder

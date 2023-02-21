@@ -33,9 +33,10 @@ function user_setup -d "Setup a user account, downloading all files and placing 
             set trusted_gpg true
             set trusted_ssh true
     end
-    if set -q MAC_FOLDER
+    if in_orb
         set trusted_gpg true
         set trusted_ssh true
+        set skip_install_ssh_keys true # orbstack passes along the macOS ssh-agent
     end
 
     # Trusting an environment with GPG but not SSH makes little sense
@@ -62,7 +63,7 @@ function user_setup -d "Setup a user account, downloading all files and placing 
         set use_gh true
 
         set ssh_folder $HOME/.ssh
-        if not test -f $ssh_folder/id_ed25519
+        if test "$skip_install_ssh_keys" != true; and not test -f $ssh_folder/id_ed25519
             mkdir -p $ssh_folder
             if not test -d $keys_folder
                 gh repo clone keys $keys_folder; or return
@@ -104,6 +105,8 @@ function user_setup -d "Setup a user account, downloading all files and placing 
 
         if test -f $HOME/.ssh/.ssh-agent.fish
             start_ssh_agent; or return
+        else if test -S $OPT_ORB_GUEST/run/host-ssh-agent.sock
+            set -gx SSH_AUTH_SOCK $OPT_ORB_GUEST/run/host-ssh-agent.sock
         else
             if not ssh-add -l
                 ssh-add $HOME/.ssh/id_ed25519; or return
