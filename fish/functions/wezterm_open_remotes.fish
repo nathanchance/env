@@ -38,4 +38,7 @@ function wezterm_open_remotes -d "Open a new wezterm tab for each remote machine
     end
 
     $wezterm_path cli spawn -- $fish_path -c "wezterm_title macOS; exec $fish_path -l"
+    if command -q orb; and orb list | rg -q fedora
+        $wezterm_path cli spawn -- $fish_path -c "wezterm_title Fedora; ssh orb; exec $fish_path -l"
+    end
 end
