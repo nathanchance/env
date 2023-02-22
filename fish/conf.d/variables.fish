@@ -216,6 +216,7 @@ set -gx GHCR ghcr.io/nathanchance
 # Hydro prompt custom function
 set -g hydro_multiline true
 set -g hydro_prompt_addons nathan
+set -g hydro_cmd_duration_threshold 5000
 
 # For building .deb packages on distros other than Debian/Ubuntu
 set -gx KMAKE_DEB_ARGS \
