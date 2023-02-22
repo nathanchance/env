@@ -21,6 +21,7 @@ function cbl_rb_pi -d "Rebase Raspberry Pi kernel on latest linux-next"
     git rh origin/master
 
     # Patching
+    set -a b4_patches https://lore.kernel.org/all/20230222123712.5049-1-tzimmermann@suse.de/ # drm/msm: Fix possible uninitialized access in fbdev
     for patch in $b4_patches
         b4 shazam -l -P _ -s $patch; or return
     end
