@@ -22,7 +22,7 @@ options=('!strip')
 source=(
   "$pkgname::git+https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git#commit=$_srccommit"
   config
-  v10_20230221_usama_arif_parallel_cpu_bringup_for_x86_64.patch
+  v11_20230223_usama_arif_parallel_cpu_bringup_for_x86_64.patch
   https://github.com/pop-os/system76-io-dkms/raw/master/system76-io.c
   https://github.com/pop-os/system76-io-dkms/raw/master/system76-io_dev.c
   https://github.com/pop-os/system76-io-dkms/raw/master/system76-io_hwmon.c
@@ -32,7 +32,7 @@ validpgpkeys=(
 )
 sha256sums=('SKIP'
             '4fc84ee656cf2d8edfc8dde9bc7135d10c9b3bebad815a767684198282f37ba9'
-            'f17c0cba04215a4387441ee2b7ec83d40a3578453decab78f57aa9248689f7ff'
+            '4c8f334fb87c560666c2afd7ebc812c74075c381de27a807f471d09d949fae24'
             'd569ee2fbd072a09e89196779ccc0dfd008d5a79a0cec5fa80cc7ed99a3027fa'
             '7276b7fb345f6a5156c594969a01e1ab63e864e0b3ed646bf5132b8301fa4975'
             '26b42e2a48cc4666ad6f85eb4d0fe87f30ea0097d6c1cff4f45e0e3330382916')
