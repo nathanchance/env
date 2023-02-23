@@ -2,7 +2,7 @@
 # Automatically generated file; DO NOT EDIT.
 # Linux/x86 6.2.0 Kernel Configuration
 #
-CONFIG_CC_VERSION_TEXT="ClangBuiltLinux clang version 17.0.0 (https://github.com/llvm/llvm-project 2ce96784ba2a9ac687125116b9bd4acaf020c67a)"
+CONFIG_CC_VERSION_TEXT="ClangBuiltLinux clang version 17.0.0 (https://github.com/llvm/llvm-project c7531a1be985b068a66d48806f13261cd8beed00)"
 CONFIG_GCC_VERSION=0
 CONFIG_CC_IS_CLANG=y
 CONFIG_CLANG_VERSION=170000
@@ -7738,7 +7738,7 @@ CONFIG_HID_MCP2221=m
 #
 # HID-BPF support
 #
-CONFIG_HID_BPF=y
+# CONFIG_HID_BPF is not set
 # end of HID-BPF support
 
 #
@@ -8234,7 +8234,6 @@ CONFIG_SCSI_UFSHCD_PCI=m
 # CONFIG_SCSI_UFS_DWC_TC_PCI is not set
 CONFIG_SCSI_UFSHCD_PLATFORM=m
 CONFIG_SCSI_UFS_CDNS_PLATFORM=m
-# CONFIG_SCSI_UFS_DWC_TC_PLATFORM is not set
 CONFIG_MEMSTICK=m
 # CONFIG_MEMSTICK_DEBUG is not set
 
