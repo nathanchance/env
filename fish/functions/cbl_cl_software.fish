@@ -12,10 +12,10 @@ function cbl_cl_software -d "Clean up old versions of managed software"
 
     switch $argv[1]
         case binutils
-            set folder $CBL_TC_STOW_BNTL
+            set folder $CBL_TC_BNTL_STORE
             set binary as
         case llvm
-            set folder $CBL_TC_STOW_LLVM
+            set folder $CBL_TC_LLVM_STORE
             set binary clang
         case qemu
             set folder $CBL_QEMU_INSTALL

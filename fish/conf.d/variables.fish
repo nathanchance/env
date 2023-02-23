@@ -138,13 +138,12 @@ set -gx CBL_QEMU_BIN $CBL_QEMU/bin
 set -gx CBL_QEMU_INSTALL $CBL_QEMU/install
 set -gx CBL_QEMU_SRC $CBL_QEMU/src
 
-set -gx CBL_TC_BIN $CBL_TC/bin
-set -gx CBL_TC_STOW $CBL_TC/stow
-set -gx CBL_TC_STOW_BNTL $CBL_TC_STOW/binutils
-set -gx CBL_TC_BNTL $CBL_TC_STOW_BNTL-latest/bin
-set -gx CBL_TC_STOW_GCC $CBL_TC_STOW/gcc
-set -gx CBL_TC_STOW_LLVM $CBL_TC_STOW/llvm
-set -gx CBL_TC_LLVM $CBL_TC_STOW_LLVM-latest/bin
+set -gx CBL_TC_BNTL_STORE $CBL_TC/binutils
+set -gx CBL_TC_GCC_STORE $CBL_TC/gcc
+set -gx CBL_TC_LLVM_STORE $CBL_TC/llvm
+
+set -gx CBL_TC_BNTL $CBL_TC_BNTL_STORE-latest/bin
+set -gx CBL_TC_LLVM $CBL_TC_LLVM_STORE-latest/bin
 
 set -gx ENV_FOLDER $GITHUB_FOLDER/env
 set -gx FORKS_FOLDER $GITHUB_FOLDER/forks

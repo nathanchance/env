@@ -17,9 +17,9 @@ print('\n'.join({
                   sys.stdin.read(),
                   flags=re.M)
 }))")
-    mkdir -p $CBL_TC_STOW
-    tar -C $CBL_TC_STOW -axf $tar
+    mkdir -p $CBL_TC
+    tar -C $CBL_TC -axf $tar
     for tc in $tcs
-        cbl_upd_software_symlinks (dirname $tc) $CBL_TC_STOW/$tc
+        cbl_upd_software_symlinks (dirname $tc) $CBL_TC/$tc
     end
 end

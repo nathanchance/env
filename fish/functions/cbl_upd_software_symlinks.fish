@@ -11,27 +11,25 @@ function cbl_upd_software_symlinks -d "Update symlinks to a stow or QEMU folder"
     set pkg $argv[1]
     switch $pkg
         case binutils llvm
-            set stow_dir $CBL_TC_STOW
-
             # source handling
             if test (count $argv) -eq 2
                 set src $argv[2]
             else
                 switch $pkg
                     case binutils
-                        set src_stow $CBL_TC_STOW_BNTL
+                        set src_store $CBL_TC_BNTL_STORE
                         set binary as
                     case llvm
-                        set src_stow $CBL_TC_STOW_LLVM
+                        set src_store $CBL_TC_LLVM_STORE
                         set binary clang
                 end
 
-                set src_version (fd -d 1 -t d . $src_stow -x basename | sort -r | fzf --preview="$src_stow/{}/bin/$binary --version")
+                set src_version (fd -d 1 -t d . $src_store -x basename | sort -r | fzf --preview="$src_store/{}/bin/$binary --version")
                 if test -z "$src_version"
                     return 0
                 end
 
-                set src $src_stow/$src_version
+                set src $src_store/$src_version
             end
 
             # destination handling
@@ -42,7 +40,7 @@ function cbl_upd_software_symlinks -d "Update symlinks to a stow or QEMU folder"
                     set dest (dirname $CBL_TC_LLVM)
             end
 
-            set stow_pkg (basename $dest)
+            ln -fnrsv $src $dest; or return
 
         case qemu
             if test (count $argv) -eq 2
@@ -62,10 +60,5 @@ function cbl_upd_software_symlinks -d "Update symlinks to a stow or QEMU folder"
                 ln -frsv $src/bin/qemu-system-$arch $CBL_QEMU_BIN; or return
             end
             ln -frsv $src/bin/qemu-img $CBL_QEMU_BIN; or return
-
-            return 0
     end
-
-    ln -fnrsv $src $dest; or return
-    stow -d $stow_dir -R $stow_pkg
 end

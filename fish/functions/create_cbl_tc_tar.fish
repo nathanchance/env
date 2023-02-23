@@ -2,18 +2,18 @@
 # SPDX-License-Identifier: MIT
 # Copyright (C) 2023 Nathan Chancellor
 
-function create_cbl_tc_tar -d "Create tarball with latest toolchains in $CBL_TC_STOW"
-    if test -L $CBL_TC_STOW_BINUTILS-latest; and test -L $CBL_TC_STOW_LLVM-latest
-        set tar_dst $CBL_TC_STOW/latest-cbl-tc.tar.zst
+function create_cbl_tc_tar -d "Create tarball with latest toolchains in $CBL_TC"
+    if test -L (dirname $CBL_TC_BNTL); and test -L (dirname $CBL_TC_LLVM)
+        set tar_dst $CBL_TC/latest-cbl-tc.tar.zst
         tar \
             --create \
-            --directory $CBL_TC_STOW \
+            --directory $CBL_TC \
             --file $tar_dst \
             --zstd \
-            (realpath {$CBL_TC_STOW_BNTL,$CBL_TC_STOW_LLVM}-latest | string replace $CBL_TC_STOW/ '')
+            (realpath {$CBL_TC_BNTL_STORE,$CBL_TC_LLVM_STORE}-latest | string replace $CBL_TC/ '')
         printf '\nTarball is available at: %s\n' $tar_dst
     else
-        print_error "Either binutils or LLVM is not built in $CBL_TC_STOW?"
+        print_error "Either binutils or LLVM is not built in $CBL_TC?"
         return 1
     end
 end

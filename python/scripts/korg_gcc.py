@@ -68,7 +68,7 @@ def get_gcc_cross_compile(major_version, arch_or_target):
     version = get_latest_gcc_version(major_version)
     target = korg_gcc_canonicalize_target(arch_or_target)
 
-    return f"{os.environ['CBL_TC_STOW_GCC']}/{version}/bin/{target}-"
+    return f"{os.environ['CBL_TC_GCC_STORE']}/{version}/bin/{target}-"
 
 
 def get_latest_gcc_version(major_version):
@@ -121,7 +121,7 @@ def parse_arguments():
                                 type=int)
 
     download_folder_default = Path(os.environ['NAS_FOLDER'], 'kernel.org/toolchains')
-    install_folder_default = Path(os.environ['CBL_TC_STOW_GCC'])
+    install_folder_default = Path(os.environ['CBL_TC_GCC_STORE'])
     install_parser.add_argument('--download-folder',
                                 default=download_folder_default,
                                 help='Folder to store downloaded tarballs (default: %(default)s)')

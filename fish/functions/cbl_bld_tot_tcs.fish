@@ -109,7 +109,7 @@ function cbl_bld_tot_tcs -d "Build LLVM and binutils from source for kernel deve
             git -C $bntls pull --rebase; or return
         end
 
-        set bntls_install $CBL_TC_STOW_BNTL/$date_time-(git -C $bntls sh -s --format=%H origin/master)
+        set bntls_install $CBL_TC_BNTL_STORE/$date_time-(git -C $bntls sh -s --format=%H origin/master)
         if not PATH="/usr/lib/ccache/bin:$PATH" $tc_bld/build-binutils.py \
                 $bld_bntls_args \
                 --binutils-folder $bntls \
@@ -219,7 +219,7 @@ kernel_builder.build()"
         end
     end
 
-    set llvm_install $CBL_TC_STOW_LLVM/$date_time-(git -C $llvm_project sh -s --format=%H origin/main)
+    set llvm_install $CBL_TC_LLVM_STORE/$date_time-(git -C $llvm_project sh -s --format=%H origin/main)
     if not $tc_bld/build-llvm.py \
             $common_bld_llvm_args \
             $bld_llvm_args \
