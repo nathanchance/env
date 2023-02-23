@@ -139,6 +139,12 @@ def enable_reflector():
 
     lib.setup.systemctl_enable(['reflector.timer'])
 
+    # If we are in a virtual machine, we should enable reflector so that it
+    # runs every time it is started up, in case it is not a constantly running
+    # virtual machine, which means the timer above will not do much.
+    if lib.setup.is_virtual_machine():
+        lib.setup.systemctl_enable(['reflector.service'])
+
 
 # For archinstall, which causes ^M in /etc/fstab
 def fix_fstab():
