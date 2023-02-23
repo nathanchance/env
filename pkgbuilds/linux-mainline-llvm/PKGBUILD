@@ -5,8 +5,8 @@ _localversion=-llvm
 pkgname=linux-mainline$_localversion
 # _srctag=v6.2
 # pkgver=${_srctag//-/.}
-_srccommit=5b7c4cabbb65f5c469464da6c5f614cbd7f730f2
-pkgver=v6.3.r0.5251.g5b7c4cabbb65
+_srccommit=a5c95ca18a98d742d0a4a04063c32556b5b66378
+pkgver=v6.3.rc0.8237.ga5c95ca18a98
 pkgrel=1
 pkgdesc='Linux'
 # url="https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/log/?h=$_srctag"
@@ -31,7 +31,7 @@ validpgpkeys=(
   'ABAF11C65A2970B130ABE3C479BE3E4300411886'  # Linus Torvalds
 )
 sha256sums=('SKIP'
-            'e84c378679e0b20923c0bb84a27df0ed084926c9ba321bfba424deba8cd5e582'
+            '4fc84ee656cf2d8edfc8dde9bc7135d10c9b3bebad815a767684198282f37ba9'
             'f17c0cba04215a4387441ee2b7ec83d40a3578453decab78f57aa9248689f7ff'
             'd569ee2fbd072a09e89196779ccc0dfd008d5a79a0cec5fa80cc7ed99a3027fa'
             '7276b7fb345f6a5156c594969a01e1ab63e864e0b3ed646bf5132b8301fa4975'
@@ -40,7 +40,12 @@ sha256sums=('SKIP'
 # This obviously ties this PKGBUILD to my machine but that is kind of the point :)
 _kmake() {
   set -x
-  make -skj"$(nproc)" HOSTLDFLAGS=-fuse-ld=lld LLVM=${LLVM:-$CBL_TC_LLVM/} "$@"
+  make \
+    -skj"$(nproc)" \
+    HOSTLDFLAGS=-fuse-ld=lld \
+    LLVM=${LLVM:-$CBL_TC_LLVM/} \
+    LOCALVERSION= \
+    "$@"
   set +x
 }
 
@@ -49,6 +54,17 @@ prepare() {
 
   echo "Setting version..."
   echo "${_localversion}" > localversion.10-pkgname
+  # Future versions of scripts/setlocalversion mess with this, so
+  # just do it here
+  if head=$(git rev-parse --verify HEAD 2>/dev/null); then
+    if [ -z "$(git describe --exact-match 2>/dev/null)" ]; then
+      if atag="$(git describe 2>/dev/null)"; then
+        echo "$atag" | awk -F- '{printf("-%05d", $(NF-1))}'
+      fi
+      # Add -g and exactly 12 hex chars.
+      printf '%s%s' -g "$(echo $head | cut -c1-12)"
+    fi >localversion.20-git
+  fi
 
   for file in system76-io{,_dev,_hwmon}.c; do
     cp -v "$(readlink -f ../$file)" drivers/hwmon
