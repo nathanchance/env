@@ -1,6 +1,6 @@
 # Maintainer: Nathan Chancellor <nathan@kernel.org>
 pkgname=tuxmake
-pkgver=1.10.0
+pkgver=1.11.0
 pkgrel=1
 pkgdesc='Thin wrapper to build Linux kernels'
 url='https://tuxmake.org/'
@@ -13,7 +13,7 @@ optdepends=('docker: Container-based build support'
             'podman: Container-based build support'
             'socat: Offline build support')
 source=("$pkgname-v$pkgver.tar.gz::https://gitlab.com/Linaro/$pkgname/-/archive/v$pkgver/$pkgname-v$pkgver.tar.gz")
-sha256sums=('8e3a025389a3d9ce4653faa842baa0d49d2d4b71bc125384987ab92ec3c85f69')
+sha256sums=('fa4b61e59a2a94443bf84663f91f68ba894b5c2e5a22d7dd89473642320f8003')
 
 build() {
   cd "$pkgname-v$pkgver"
