@@ -90,6 +90,7 @@ EOF
         openssh
         python-unversioned-command
         stow
+        tmux
         vim
         zoxide
 
