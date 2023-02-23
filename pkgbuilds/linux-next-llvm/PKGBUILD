@@ -29,7 +29,12 @@ sha256sums=('SKIP'
 # This obviously ties this PKGBUILD to my machine but that is kind of the point :)
 _kmake() {
   set -x
-  make -skj"$(nproc)" HOSTLDFLAGS=-fuse-ld=lld LLVM=${LLVM:-$CBL_TC_LLVM/} "$@"
+  make \
+    -skj"$(nproc)" \
+    HOSTLDFLAGS=-fuse-ld=lld \
+    LLVM=${LLVM:-$CBL_TC_LLVM/} \
+    LOCALVERSION= \
+    "$@"
   set +x
 }
 
