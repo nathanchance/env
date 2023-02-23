@@ -124,7 +124,20 @@ def enable_reflector():
     ]  # yapf: disable
     conf_text = '\n'.join(reflector_args) + '\n'
     Path('/etc/xdg/reflector/reflector.conf').write_text(conf_text, encoding='utf-8')
-    lib.setup.systemctl_enable([f"reflector.{x}" for x in ['service', 'timer']])
+
+    reflector_drop_in = Path('/etc/systemd/system/reflector.timer.d/00-twice-daily.conf')
+    reflector_drop_in_text = ('[Unit]\n'
+                              'Description=Refresh Pacman mirrorlist twice daily with Reflector.\n'
+                              '\n'
+                              '[Timer]\n'
+                              'OnCalendar=\n'
+                              'OnCalendar=*-*-* 06,18:00:00\n'
+                              'RandomizedDelaySec=1h\n')
+    reflector_drop_in.parent.mkdir(exist_ok=True)
+    reflector_drop_in.write_text(reflector_drop_in_text, encoding='utf-8')
+    subprocess.run(['systemctl', 'daemon-reload'], check=True)
+
+    lib.setup.systemctl_enable(['reflector.timer'])
 
 
 # For archinstall, which causes ^M in /etc/fstab
