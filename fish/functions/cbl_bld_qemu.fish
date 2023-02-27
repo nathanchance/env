@@ -40,7 +40,7 @@ function cbl_bld_qemu -d "Build QEMU for use with ClangBuiltLinux"
 
             # Patches from mailing lists
             # https://lore.kernel.org/Y88BmxzRqtnpAsWG@dev-arch.thelio-3990X/
-            set -a b4_patches https://lore.kernel.org/all/20230118095751.49728-2-philmd@linaro.org/ # hw/pci-host/gt64120: Fix PCI I/O config register endianness
+            set -a b4_patches https://lore.kernel.org/all/20230223161958.48696-1-jiaxun.yang@flygoat.com/ # hw/mips/gt64xxx_pci: Don't endian-swap GT_PCI0_CFGADDR
             # https://lore.kernel.org/Y+Pf0q6LmQKN+FHo@dev-arch.thelio-3990X/
             set -a b4_patches https://lore.kernel.org/all/20230208211212.41951-(seq 2 8)-mst@redhat.com # revert RNG seed mess
             if set -q b4_patches
