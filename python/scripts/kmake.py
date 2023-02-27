@@ -50,10 +50,9 @@ if __name__ == '__main__':
     for arg in args.make_args:
         if '=' in arg:
             variables.update([arg.split('=', 1)])
-        else:
-            # Basically an ordered set
-            if arg not in targets:
-                targets.append(arg)
+        # Basically an ordered set
+        elif arg not in targets:
+            targets.append(arg)
 
     lib.kernel.kmake(variables,
                      targets,
