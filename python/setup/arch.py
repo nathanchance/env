@@ -135,6 +135,7 @@ def enable_reflector():
                               'RandomizedDelaySec=1h\n')
     reflector_drop_in.parent.mkdir(exist_ok=True)
     reflector_drop_in.write_text(reflector_drop_in_text, encoding='utf-8')
+    reflector_drop_in.chmod(0o644)
     subprocess.run(['systemctl', 'daemon-reload'], check=True)
 
     lib.setup.systemctl_enable(['reflector.timer'])
