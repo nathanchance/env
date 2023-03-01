@@ -7,11 +7,11 @@ function vim_setup -d "Setup vim configuration files"
 
     # Install identification and plugin files
     for folder in ident plugin
-        set src $env_vim/$folder
         set dest $HOME/.vim/$folder
+        test -L $dest; and continue
 
         mkdir -p (dirname $dest)
-        ln -fsv $src $dest
+        ln -fsv $env_vim/$folder $dest
     end
 
     # Install .vimrc
