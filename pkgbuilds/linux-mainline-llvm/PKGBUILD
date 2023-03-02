@@ -5,8 +5,8 @@ _localversion=-llvm
 pkgname=linux-mainline$_localversion
 # _srctag=v6.2
 # pkgver=${_srctag//-/.}
-_srccommit=c0927a7a5391f7d8e593e5e50ead7505a23cadf9
-pkgver=v6.3.rc0.12998.gc0927a7a5391
+_srccommit=ee3f96b164688dae21e2466a57f2e806b64e8a37
+pkgver=v6.3.rc0.13115.gee3f96b16468
 pkgrel=1
 pkgdesc='Linux'
 # url="https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/log/?h=$_srctag"
@@ -22,7 +22,7 @@ options=('!strip')
 source=(
   "$pkgname::git+https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git#commit=$_srccommit"
   config
-  v12_20230226_usama_arif_parallel_cpu_bringup_for_x86_64.patch
+  v13_20230302_usama_arif_parallel_cpu_bringup_for_x86_64.patch
   https://github.com/pop-os/system76-io-dkms/raw/master/system76-io.c
   https://github.com/pop-os/system76-io-dkms/raw/master/system76-io_dev.c
   https://github.com/pop-os/system76-io-dkms/raw/master/system76-io_hwmon.c
@@ -31,8 +31,8 @@ validpgpkeys=(
   'ABAF11C65A2970B130ABE3C479BE3E4300411886'  # Linus Torvalds
 )
 sha256sums=('SKIP'
-            'fccc6d617efa7036ef8c7c95372fbfc136d6a9c689eed3a8db7f615cd6f9e422'
-            '3446f2cde431f35a8b475e3d7764fcd1c479f3ddb2286bb7fa0549824467ac3c'
+            '3029d5b3592732c6da91f95e424b1f622848697e5333829068246183423ff89a'
+            '8d95747debef564f588f798b421bc5d3ea88a4d5c98a73a72f16a2cbda80fc8e'
             'd569ee2fbd072a09e89196779ccc0dfd008d5a79a0cec5fa80cc7ed99a3027fa'
             '7276b7fb345f6a5156c594969a01e1ab63e864e0b3ed646bf5132b8301fa4975'
             '26b42e2a48cc4666ad6f85eb4d0fe87f30ea0097d6c1cff4f45e0e3330382916')
