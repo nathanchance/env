@@ -151,7 +151,6 @@ function cbl_bld_tot_tcs -d "Build LLVM and binutils from source for kernel deve
     end
 
     # Add in-review patches here
-    set -a revisions D144967 # [PowerPC] Recognize long CPU name for -mtune in Clang (https://reviews.llvm.org/D144967)
     for revision in $revisions
         set -l git_ap_args
         if not crl "https://reviews.llvm.org/$revision?download=true" | git -C $llvm_project ap $git_ap_args
