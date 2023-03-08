@@ -14,7 +14,7 @@ function cbl_test_llvm_stable_linux -d "Test all current versions of stable Linu
 
     for image in llvm-$LLVM_VERSIONS_KERNEL
         for linux_folder in $linux_folders
-            dbxeph $image -- "fish -c 'cbl_lkt --linux-folder $linux_folder --system-binaries'"; or return
+            dbxeph $image -- "fish -c 'upd -y; cbl_lkt --linux-folder $linux_folder --system-binaries'"; or return
         end
     end
 end
