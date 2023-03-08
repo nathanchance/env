@@ -22,6 +22,7 @@ function cbl_rb_fd -d "Rebase generic Fedora kernel on latest linux-next"
     for hash in $ln_commits
         git -C $CBL_BLD_P/linux-next fp -1 --stdout $hash | git am; or return
     end
+    set -a reverts 511a95552ec878fc59a294652ebbf73a0e8e0c76 # drm/amd/pm: Add SMU 13.0.6 support
     for revert in $reverts
         git revert --no-edit $revert; or return
     end
