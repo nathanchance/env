@@ -12,7 +12,22 @@ function cbl_test_llvm_mainline_linux -d "Test mainline Linux with all supported
     end
     git -C $linux_folder pull --rebase
 
+    set env_dbx $ENV_FOLDER/.distrobox
+    mkdir -p $env_dbx
     for image in llvm-$LLVM_VERSIONS_KERNEL
-        dbxeph $image -- "fish -c 'upd -y; cbl_lkt --linux-folder $linux_folder --system-binaries'"; or return
+        set script (mktemp -p $env_dbx --suffix=.fish)
+        echo "#!/usr/bin/env fish
+
+upd -y
+cbl_lkt \
+    --linux-folder $linux_folder \
+    --system-binaries" >$script
+        chmod +x $script
+
+        if not dbxeph $image -- $script
+            rm -f $script
+            return 1
+        end
+        rm -f $script
     end
 end
