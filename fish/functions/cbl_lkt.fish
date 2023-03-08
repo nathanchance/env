@@ -14,7 +14,7 @@ function cbl_lkt -d "Tests a Linux kernel with llvm-kernel-testing"
             # Arguments to 'main.py' #
             ##########################
             case -a --architectures -t --targets
-                set -a main_py_args $arg
+                set -a build_py_args $arg
                 set i (math $i + 1)
                 while test $i -le $argc
                     set arg $argv[$i]
@@ -22,13 +22,13 @@ function cbl_lkt -d "Tests a Linux kernel with llvm-kernel-testing"
                         set i (math $i - 1)
                         break
                     end
-                    set -a main_py_args $arg
+                    set -a build_py_args $arg
                     set i (math $i + 1)
                 end
 
             case -b --build-folder --boot-utils-folder
                 set next (math $i + 1)
-                set -a main_py_args $arg (realpath $argv[$next])
+                set -a build_py_args $arg (realpath $argv[$next])
                 set i $next
 
             case --binutils-prefix
@@ -51,8 +51,8 @@ function cbl_lkt -d "Tests a Linux kernel with llvm-kernel-testing"
                 set qemu_prefix $argv[$next]
                 set i $next
 
-            case --boot-testing-only --save-objects --use-ccache
-                set -a main_py_args $arg
+            case --only-test-boot --save-objects --use-ccache
+                set -a build_py_args $arg
 
             case --tc-prefix
                 set next (math $i + 1)
@@ -118,7 +118,7 @@ function cbl_lkt -d "Tests a Linux kernel with llvm-kernel-testing"
             return 1
         end
 
-        set -a main_py_args --binutils-prefix $binutils_prefix
+        set -a build_py_args --binutils-prefix $binutils_prefix
     end
 
     if test -n "$llvm_prefix"
@@ -136,7 +136,7 @@ function cbl_lkt -d "Tests a Linux kernel with llvm-kernel-testing"
             return 1
         end
 
-        set -a main_py_args --llvm-prefix $llvm_prefix
+        set -a build_py_args --llvm-prefix $llvm_prefix
     end
 
     if test -n "$tc_prefix"
@@ -166,7 +166,7 @@ function cbl_lkt -d "Tests a Linux kernel with llvm-kernel-testing"
             return 1
         end
 
-        set -a main_py_args --tc-prefix $tc_prefix
+        set -a build_py_args --tc-prefix $tc_prefix
     end
 
     if test -n "$qemu_prefix"
@@ -179,11 +179,11 @@ function cbl_lkt -d "Tests a Linux kernel with llvm-kernel-testing"
             return 1
         end
 
-        set -a main_py_args --qemu-prefix $qemu_prefix
+        set -a build_py_args --qemu-prefix $qemu_prefix
     end
 
-    if not string match -qr -- --build-folder $main_py_args
-        set -a main_py_args --build-folder $TMP_BUILD_FOLDER/(basename $linux_folder)
+    if not string match -qr -- --build-folder $build_py_args
+        set -a build_py_args --build-folder $TMP_BUILD_FOLDER/(basename $linux_folder)
     end
 
     set log_folder $CBL/build-logs/(basename $linux_folder)-(date +%F-%T)
@@ -203,10 +203,10 @@ function cbl_lkt -d "Tests a Linux kernel with llvm-kernel-testing"
     end
 
     set lkt_cmd \
-        $lkt/main.py \
+        $lkt/build.py \
         --linux-folder $linux_folder \
         --log-folder $log_folder \
-        $main_py_args
+        $build_py_args
     print_cmd $lkt_cmd
     $lkt_cmd
     set lkt_ret $status
@@ -215,7 +215,7 @@ function cbl_lkt -d "Tests a Linux kernel with llvm-kernel-testing"
         if test $lkt_ret -eq 130
             rm -fr $log_folder
         else
-            set msg "main.py failed in $linux_folder"
+            set msg "build.py failed in $linux_folder"
             print_error "$msg"
             tg_msg "$msg"
         end
