@@ -19,9 +19,7 @@ function cbl_test_llvm_mainline_linux -d "Test mainline Linux with all supported
         echo "#!/usr/bin/env fish
 
 upd -y
-cbl_lkt \
-    --linux-folder $linux_folder \
-    --system-binaries" >$script
+cbl_lkt --linux-folder $linux_folder --system-binaries" >$script
         chmod +x $script
 
         if not dbxeph $image -- $script

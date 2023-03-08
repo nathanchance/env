@@ -21,9 +21,7 @@ function cbl_test_llvm_stable_linux -d "Test all current versions of stable Linu
             echo "#!/usr/bin/env fish
 
 upd -y
-cbl_lkt \
-    --linux-folder $linux_folder \
-    --system-binaries" >$script
+cbl_lkt --linux-folder $linux_folder --system-binaries" >$script
             chmod +x $script
 
             if not dbxeph $image -- $script
