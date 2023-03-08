@@ -27,8 +27,8 @@ def check_install_parted():
     elif shutil.which('apt'):
         deb.apt_update()
         deb.apt_install(['parted'])
-
-    raise RuntimeError('parted is needed but it cannot be installed on the current OS!')
+    else:
+        raise RuntimeError('parted is needed but it cannot be installed on the current OS!')
 
 
 def create_user(user_name, user_password):
