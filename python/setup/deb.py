@@ -164,6 +164,7 @@ def update_and_install_packages(additional_packages=None):
         'libnet-smtp-ssl-perl',
 
         # Miscellaneous
+        'acl',
         'file',
         'locales',
 
