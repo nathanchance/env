@@ -18,20 +18,20 @@ options=('!strip')
 source=(
   "$pkgname::git+https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git?signed#tag=$_srctag"
   config
-  v13_20230302_usama_arif_parallel_cpu_bringup_for_x86_64.patch
   https://github.com/pop-os/system76-io-dkms/raw/master/system76-io.c
   https://github.com/pop-os/system76-io-dkms/raw/master/system76-io_dev.c
   https://github.com/pop-os/system76-io-dkms/raw/master/system76-io_hwmon.c
+  v14_20230308_usama_arif_parallel_cpu_bringup_for_x86_64.patch
 )
 validpgpkeys=(
   'ABAF11C65A2970B130ABE3C479BE3E4300411886'  # Linus Torvalds
 )
 sha256sums=('SKIP'
             'f99bd4448afe237fb87e8d77e45c5a879774b43096cbb4c73966e4be5a09e8cf'
-            '8d95747debef564f588f798b421bc5d3ea88a4d5c98a73a72f16a2cbda80fc8e'
             'd569ee2fbd072a09e89196779ccc0dfd008d5a79a0cec5fa80cc7ed99a3027fa'
             '7276b7fb345f6a5156c594969a01e1ab63e864e0b3ed646bf5132b8301fa4975'
-            '26b42e2a48cc4666ad6f85eb4d0fe87f30ea0097d6c1cff4f45e0e3330382916')
+            '26b42e2a48cc4666ad6f85eb4d0fe87f30ea0097d6c1cff4f45e0e3330382916'
+            'f2fbe3e2864c6c7c44ac29c8083317583b98709939b22034723f6f45a318f20d')
 
 # This obviously ties this PKGBUILD to my machine but that is kind of the point :)
 _kmake() {
