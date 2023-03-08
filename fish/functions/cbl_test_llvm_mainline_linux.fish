@@ -15,6 +15,12 @@ function cbl_test_llvm_mainline_linux -d "Test mainline Linux with all supported
     set env_dbx $ENV_FOLDER/.distrobox
     mkdir -p $env_dbx
     for image in llvm-$LLVM_VERSIONS_KERNEL
+        if test (uname -m) = aarch64
+            switch $image
+                case llvm-11 llvm-12 # no arm64 image
+                    continue
+            end
+        end
         set script (mktemp -p $env_dbx --suffix=.fish)
         echo "#!/usr/bin/env fish
 

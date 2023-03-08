@@ -16,6 +16,12 @@ function cbl_test_llvm_stable_linux -d "Test all current versions of stable Linu
     mkdir -p $env_dbx
 
     for image in llvm-$LLVM_VERSIONS_KERNEL
+        if test (uname -m) = aarch64
+            switch $image
+                case llvm-11 llvm-12 # no arm64 image
+                    continue
+            end
+        end
         for linux_folder in $linux_folders
             set script (mktemp -p $env_dbx --suffix=.fish)
             echo "#!/usr/bin/env fish
