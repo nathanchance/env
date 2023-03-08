@@ -6,12 +6,18 @@ function wezterm_open_remotes -d "Open a new wezterm tab for each remote machine
     set fish_path (command -v fish)
     set wezterm_path (command -v wezterm)
 
-    # Local powerful machines
+    # Local machines
     set hosts \
         thelio:Thelio \
-        aadp:AADP
+        aadp:AADP \
+        intel-desktop:"Intel desktop" \
+        amd-desktop:"AMD desktop" \
+        intel-laptop:"Intel laptop" \
+        honeycomb:Honeycomb \
+        pi4:"Pi 4" \
+        pi3:"Pi 3"
 
-    # Remote powerful and test machines
+    # Remote machines
     set equinix_ips $ICLOUD_DOCS_FOLDER/.equinix_ips
     if test -f $equinix_ips
         for line in (cat $equinix_ips)
@@ -21,15 +27,6 @@ function wezterm_open_remotes -d "Open a new wezterm tab for each remote machine
             set -a hosts $host:$title
         end
     end
-
-    # Local test machines
-    set -a hosts \
-        intel-desktop:"Intel desktop" \
-        amd-desktop:"AMD desktop" \
-        intel-laptop:"Intel laptop" \
-        honeycomb:Honeycomb \
-        pi4:"Pi 4" \
-        pi3:"Pi 3"
 
     for item in $hosts
         set host (string split -f 1 : $item)
