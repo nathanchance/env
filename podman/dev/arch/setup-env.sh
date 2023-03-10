@@ -141,6 +141,8 @@ function install_packages() {
         repo
 
         # kernel / tuxmake
+        {{aarch,powerpc,riscv}64,mips,s390x}-linux-gnu-binutils
+        arm-linux-gnueabi-binutils
         bison
         cpio
         flex
