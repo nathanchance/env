@@ -93,6 +93,8 @@ def generate_warnings(log_folder, src_folder):
         # new warning present with make 4.4:
         # https://lore.kernel.org/Y7i8+EjwdnhHtlrr@dev-arch.thelio-3990X/
         'llvm-nm: error: arch/arm/boot/compressed/../../../../vmlinux: No such file or directory',
+        # Ignore all objdump warnings, most are from tool incompatibilities like DWARF5 handling
+        'gnu-objdump: Warning:',
     ]
     ignore_re = re.compile('|'.join(ignore))
     warnings = {}
