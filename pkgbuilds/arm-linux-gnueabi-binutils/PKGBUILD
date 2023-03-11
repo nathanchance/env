@@ -1,0 +1,47 @@
+# Maintainer: Nathan Chancellor <nathan@kernel.org>
+
+_target=arm-linux-gnueabi
+pkgname=$_target-binutils
+pkgver=2.40
+pkgrel=1
+pkgdesc='A set of programs to assemble and manipulate binary and object files for the ARM EABI target'
+arch=(x86_64)
+url='https://gnu.org/software/binutils/'
+license=(GPL)
+depends=(glibc libelf zlib zstd)
+makedepends=(setconf)
+source=("https://ftp.gnu.org/gnu/binutils/binutils-$pkgver.tar.xz")
+sha512sums=('a37e042523bc46494d99d5637c3f3d8f9956d9477b748b3b1f6d7dfbb8d968ed52c932e88a4e946c6f77b8f48f1e1b360ca54c3d298f17193f3b4963472f6925')
+
+prepare() {
+  setconf binutils-$pkgver/libiberty/configure ac_cpp "'\$CPP \$CPPFLAGS -O2'"
+}
+
+build() {
+  cd "binutils-$pkgver"
+
+  unset CPPFLAGS
+  ./configure --disable-nls \
+              --enable-colored-disassembly \
+              --enable-deterministic-archives \
+              --enable-gold \
+              --enable-ld=default \
+              --enable-multilib \
+              --enable-plugins \
+              --prefix=/usr \
+              --target=$_target \
+              --with-gnu-as \
+              --with-gnu-ld \
+              --with-sysroot=/usr/$_target \
+              --with-system-zlib
+  make -O
+}
+
+package() {
+  make -C "binutils-$pkgver" DESTDIR="$pkgdir" install
+
+  # Remove info documents that conflict with host version
+  rm -r "$pkgdir/usr/share/info"
+
+  rm "$pkgdir"/usr/lib/bfd-plugins/libdep.so
+}
