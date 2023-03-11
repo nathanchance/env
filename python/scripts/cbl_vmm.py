@@ -242,13 +242,14 @@ class VirtualMachine:
                 'Could not find doas or sudo on your system (needed for virtiofsd integration)!')
 
         # Locate the QEMU prefix to search for virtiofsd
-        qemu = Path(qemu).resolve()
-        if not (virtiofsd := Path(qemu.parent, 'tools/virtiofsd/virtiofsd')).exists():
-            possible_files = [
-                Path('libexec/virtiofsd'),  # Default QEMU installation, Fedora
-                Path('lib/qemu/virtiofsd'),  # Arch Linux
-            ]
-            virtiofsd = find_first_file(possible_files, relative_root=qemu.parents[1])
+        if not (virtiofsd := shutil.which('virtiofsd')):
+            qemu = Path(qemu).resolve()
+            if not (virtiofsd := Path(qemu.parent, 'tools/virtiofsd/virtiofsd')).exists():
+                possible_files = [
+                    Path('libexec/virtiofsd'),  # Default QEMU installation, Fedora
+                    Path('lib/qemu/virtiofsd'),  # Arch Linux
+                ]
+                virtiofsd = find_first_file(possible_files, relative_root=qemu.parents[1])
 
         # Ensure shared folder is created before sharing
         self.shared_folder.mkdir(exist_ok=True, parents=True)
