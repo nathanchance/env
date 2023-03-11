@@ -187,7 +187,7 @@ function install_packages() {
         libutempter
         qemu-emulators-full
         qemu-img
-        qemu-virtiofsd
+        virtiofsd
 
         # website management
         hugo
