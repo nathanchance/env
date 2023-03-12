@@ -28,7 +28,7 @@ function cbl_lkt -d "Tests a Linux kernel with llvm-kernel-testing"
 
             case -b --build-folder --boot-utils-folder
                 set next (math $i + 1)
-                set -a build_py_args $arg (realpath $argv[$next])
+                set -a build_py_args $arg (realpath -m $argv[$next])
                 set i $next
 
             case --binutils-prefix
