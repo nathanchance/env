@@ -33,8 +33,7 @@ RUN dir=$(mktemp -d) && \
     url=https://www.python.org/ftp/python/$PYTHON_VERSION/Python-$PYTHON_VERSION.tar.xz && \
     wget -O - -q "$url" | tar -C "$dir" --strip-components=1 -xJvf - && \
     . /etc/os-release && \
-    src="deb-src http://deb.debian.org/debian $VERSION_CODENAME main" && \
-    grep -Pq "\$$src" /etc/apt/sources.list || echo "$src" >>/etc/apt/sources.list && \
+    echo "deb-src http://deb.debian.org/debian $VERSION_CODENAME main" >/etc/apt/sources.list.d/deb-src-$VERSION_CODENAME.list && \
     apt update && \
     apt build-dep -y python3 && \
     apt install -y --no-install-recommends \
