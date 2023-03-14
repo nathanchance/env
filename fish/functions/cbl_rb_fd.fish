@@ -13,13 +13,14 @@ function cbl_rb_fd -d "Rebase generic Fedora kernel on latest linux-next"
     git rh origin/master
 
     # Patching
-    set -a b4_patches https://lore.kernel.org/all/20230309095153.2304598-1-lijo.lazar@amd.com/ # drm/amd/pm: Remove unavailable temperature params
+    set -a b4_patches https://lore.kernel.org/all/20230314-vmware-wuninitialized-v1-1-1bb4b0989758@kernel.org/ # drm/vmwgfx: Fix uninitialized use of dst_pitch in vmw_stdu_bo_cpu_commit()
     for patch in $b4_patches
         b4 shazam -l -P _ -s $patch; or return
     end
     for patch in $crl_patches
         crl $patch | git am -3; or return
     end
+    set -a ln_commits 3140716495946840a03cf3e7674bde26ea3cf3a3 # REPORTED: drm/rockchip: Avoid uninitialized use of possible_crtcs in vop2_create_crtcs()
     for hash in $ln_commits
         git -C $CBL_BLD_P/linux-next fp -1 --stdout $hash | git am; or return
     end
