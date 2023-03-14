@@ -118,22 +118,52 @@ static_mounts = [
     },
 ]
 
+check_targets = [
+    'clang',
+    'lld',
+    'llvm',
+    'llvm-unit',
+]
+install_targets = [
+    'clang',
+    'clang-resource-headers',
+    'compiler-rt',
+    'lld',
+    'llvm-addr2line',
+    'llvm-ar',
+    'llvm-dwarfdump',
+    'llvm-nm',
+    'llvm-objcopy',
+    'llvm-objdump',
+    'llvm-ranlib',
+    'llvm-readelf',
+    'llvm-strings',
+    'llvm-strip',
+]
+projects = [
+    'clang',
+    'compiler-rt',
+    'lld',
+]
 build_llvm_py_cmd = [
     Path('/tc-build/build-llvm.py'),
     '--build-folder', '/build',
-    '--check-targets', 'clang', 'lld', 'llvm', 'llvm-unit',
+    '--check-targets', *check_targets,
     '--install-folder', '/install',
+    '--install-targets', *install_targets,
     '--llvm-folder', '/llvm',
     '--no-ccache',
     '--pgo', 'kernel-defconfig',
-    '--projects', 'clang', 'lld',
+    '--projects', *projects,
     '--quiet-cmake',
+    '--show-build-commands',
 ]  # yapf: disable
 
 podman_run_cmd = [
     'podman',
     'run',
     '--cap-drop=DAC_OVERRIDE',  # for ld.lld tests
+    '--env=DISTRIBUTING=1',  # for tc-build
     '--interactive',
     '--pids-limit=-1',  # to avoid running of PIDs when building
     '--rm',
@@ -198,7 +228,7 @@ for version in versions:
     ]
     subprocess.run(tar_cmd, check=True)
 
-    llvm_tarball_compressed = llvm_tarball.with_stem('.tar.zst')
+    llvm_tarball_compressed = llvm_tarball.with_suffix('.tar.zst')
     zstd_cmd = [
         'zstd',
         '-19',
