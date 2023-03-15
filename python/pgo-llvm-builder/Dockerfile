@@ -51,6 +51,15 @@ RUN dir=$(mktemp -d) && \
     make -C "$dir" -j"$(nproc)" install && \
     rm -fr "$dir"
 
+# Buster has libzstd 1.3.8, which has certain options that LLVM requires behind
+# an experimental flag. Install the latest so that compilation works as expected.
+ARG ZSTD_VERSION=1.5.4
+RUN dir=$(mktemp -d) && \
+    url=https://github.com/facebook/zstd/releases/download/v$ZSTD_VERSION/zstd-$ZSTD_VERSION.tar.gz && \
+    wget -O - -q "$url" | tar -C "$dir" --strip-components=1 -xzvf - && \
+    make -C "$dir"/lib -j"$(nproc)" install && \
+    rm -fr "$dir"
+
 # Install more binutils, kernel, and LLVM build dependencies
 RUN apt update && \
     apt install -y --no-install-recommends \
