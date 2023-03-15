@@ -185,7 +185,7 @@ for version in versions:
     ]
     subprocess.run(build_cmd, check=True)
 
-    tarball_name = f"{llvm_install.name}-{platform.machine()}.tar.zst"
+    tarball_name = f"{llvm_install.name}-{platform.machine()}.tar"
     llvm_tarball = Path(llvm_install.parent, tarball_name)
     tar_cmd = [
         'tar',
@@ -194,8 +194,22 @@ for version in versions:
         llvm_install.parent,
         '--file',
         llvm_tarball,
-        '--zstd',
         llvm_install.name,
     ]
-    subprocess.run(tar_cmd, check=True, env={'ZSTD_CLEVEL': '19', 'ZSTD_NBTHREADS': '0'})
-    print(f"\nTarball is available at: {llvm_tarball}")
+    subprocess.run(tar_cmd, check=True)
+
+    llvm_tarball_compressed = llvm_tarball.with_stem('.tar.zst')
+    zstd_cmd = [
+        'zstd',
+        '-19',
+        '-T0',
+        '-o',
+        llvm_tarball_compressed,
+        llvm_tarball,
+    ]
+    subprocess.run(zstd_cmd, check=True)
+
+    info_text = ('\n'
+                 f"Tarball is available at: {llvm_tarball}\n"
+                 f"Compressed tarball is available at: {llvm_tarball_compressed}")
+    print(info_text)
