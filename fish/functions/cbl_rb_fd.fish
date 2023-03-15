@@ -13,14 +13,14 @@ function cbl_rb_fd -d "Rebase generic Fedora kernel on latest linux-next"
     git rh origin/master
 
     # Patching
-    set -a b4_patches https://lore.kernel.org/all/20230314-vmware-wuninitialized-v1-1-1bb4b0989758@kernel.org/ # drm/vmwgfx: Fix uninitialized use of dst_pitch in vmw_stdu_bo_cpu_commit()
+    set -a b4_patches https://lore.kernel.org/all/20230314211445.1363828-1-zack@kde.org/ # drm/vmwgfx: Fix src/dst_pitch confusion
+    set -a b4_patches https://lore.kernel.org/all/20230315090158.2442771-1-michael.riesch@wolfvision.net/ # drm/rockchip: vop2: fix initialization of possible_crtcs variable
     for patch in $b4_patches
         b4 shazam -l -P _ -s $patch; or return
     end
     for patch in $crl_patches
         crl $patch | git am -3; or return
     end
-    set -a ln_commits 3140716495946840a03cf3e7674bde26ea3cf3a3 # REPORTED: drm/rockchip: Avoid uninitialized use of possible_crtcs in vop2_create_crtcs()
     for hash in $ln_commits
         git -C $CBL_BLD_P/linux-next fp -1 --stdout $hash | git am; or return
     end
