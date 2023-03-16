@@ -85,8 +85,8 @@ set -gx GITHUB_FOLDER $MAIN_FOLDER/github
 set -gx KERNEL_FOLDER $MAIN_FOLDER/kernel
 set -gx SRC_FOLDER $MAIN_FOLDER/src
 
-if test -d /mac
-    set -gx MAC_FOLDER /mac
+if test -d /mnt/mac
+    set -gx MAC_FOLDER /mnt/mac
 end
 set -gx OPT_ORB_GUEST /opt/orbstack-guest
 
