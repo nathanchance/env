@@ -154,7 +154,7 @@ set -gx PYTHON_SCRIPTS_FOLDER $PYTHON_FOLDER/scripts
 
 set -gx TMP_BUILD_FOLDER $TMP_FOLDER/build
 
-set -gx ICLOUD_DOCS_FOLDER $HOME/Library/'Mobile Documents/com~apple~CloudDocs/'
+set -gx ICLOUD_DOCS_FOLDER /Users/$USER/Library/'Mobile Documents/com~apple~CloudDocs/'
 
 
 ############################
