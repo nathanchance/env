@@ -13,8 +13,7 @@ function cbl_rb_fd -d "Rebase generic Fedora kernel on latest linux-next"
     git rh origin/master
 
     # Patching
-    set -a b4_patches https://lore.kernel.org/all/20230314211445.1363828-1-zack@kde.org/ # drm/vmwgfx: Fix src/dst_pitch confusion
-    set -a b4_patches https://lore.kernel.org/all/20230315090158.2442771-1-michael.riesch@wolfvision.net/ # drm/rockchip: vop2: fix initialization of possible_crtcs variable
+    set -a b4_patches https://lore.kernel.org/all/20230316132302.531724-1-trix@redhat.com/ # drm/rockchip: vop2: fix uninitialized variable possible_crtcs
     for patch in $b4_patches
         b4 shazam -l -P _ -s $patch; or return
     end
