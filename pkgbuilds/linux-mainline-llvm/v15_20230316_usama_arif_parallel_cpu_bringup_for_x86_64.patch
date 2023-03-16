@@ -1,9 +1,9 @@
 From git@z Thu Jan  1 00:00:00 1970
-Subject: [PATCH v14 1/12] x86/apic/x2apic: Allow CPU cluster_mask to be
+Subject: [PATCH v15 1/12] x86/apic/x2apic: Allow CPU cluster_mask to be
  populated in parallel
 From: David Woodhouse <dwmw@amazon.co.uk>
-Date: Wed, 08 Mar 2023 17:13:17 +0000
-Message-Id: <20230308171328.1562857-2-usama.arif@bytedance.com>
+Date: Thu, 16 Mar 2023 22:20:58 +0000
+Message-Id: <20230316222109.1940300-2-usama.arif@bytedance.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 7bit
@@ -37,7 +37,7 @@ Tested-by: Paul E. McKenney <paulmck@kernel.org>
 Tested-by: Kim Phillips <kim.phillips@amd.com>
 Tested-by: Oleksandr Natalenko <oleksandr@natalenko.name>
 Tested-by: Guilherme G. Piccoli <gpiccoli@igalia.com>
-Link: https://lore.kernel.org/r/20230308171328.1562857-2-usama.arif@bytedance.com
+Link: https://lore.kernel.org/r/20230316222109.1940300-2-usama.arif@bytedance.com
 ---
  arch/x86/kernel/apic/x2apic_cluster.c | 126 +++++++++++++++++---------
  1 file changed, 82 insertions(+), 44 deletions(-)
@@ -239,11 +239,11 @@ index e696e22d0531..b2b2b7f3e03f 100644
 2.25.1
 
 From git@z Thu Jan  1 00:00:00 1970
-Subject: [PATCH v14 2/12] cpu/hotplug: Move idle_thread_get() to
+Subject: [PATCH v15 2/12] cpu/hotplug: Move idle_thread_get() to
  <linux/smpboot.h>
 From: David Woodhouse <dwmw@amazon.co.uk>
-Date: Wed, 08 Mar 2023 17:13:18 +0000
-Message-Id: <20230308171328.1562857-3-usama.arif@bytedance.com>
+Date: Thu, 16 Mar 2023 22:20:59 +0000
+Message-Id: <20230316222109.1940300-3-usama.arif@bytedance.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 7bit
@@ -260,6 +260,9 @@ the cpuhp core, having a special-case wrapper to pass extra arguments is
 non-trivial and it's easier just to let the arch register its function
 pointer to be invoked with the standard API.
 
+To reduce duplication, move the shadow stack reset and kasan unpoisoning
+into idle_thread_get() too.
+
 Signed-off-by: David Woodhouse <dwmw@amazon.co.uk>
 Reviewed-by: Thomas Gleixner <tglx@linutronix.de>
 Signed-off-by: Usama Arif <usama.arif@bytedance.com>
@@ -267,29 +270,115 @@ Tested-by: Paul E. McKenney <paulmck@kernel.org>
 Tested-by: Kim Phillips <kim.phillips@amd.com>
 Tested-by: Oleksandr Natalenko <oleksandr@natalenko.name>
 Tested-by: Guilherme G. Piccoli <gpiccoli@igalia.com>
-Link: https://lore.kernel.org/r/20230308171328.1562857-3-usama.arif@bytedance.com
+Link: https://lore.kernel.org/r/20230316222109.1940300-3-usama.arif@bytedance.com
 ---
- include/linux/smpboot.h | 7 +++++++
- kernel/smpboot.h        | 2 --
- 2 files changed, 7 insertions(+), 2 deletions(-)
+ include/linux/smpboot.h | 10 ++++++++++
+ kernel/cpu.c            | 13 +++----------
+ kernel/smpboot.c        | 11 ++++++++++-
+ kernel/smpboot.h        |  2 --
+ 4 files changed, 23 insertions(+), 13 deletions(-)
 
 diff --git a/include/linux/smpboot.h b/include/linux/smpboot.h
-index 9d1bc65d226c..3862addcaa34 100644
+index 9d1bc65d226c..df6417703e4c 100644
 --- a/include/linux/smpboot.h
 +++ b/include/linux/smpboot.h
-@@ -5,6 +5,13 @@
+@@ -5,6 +5,16 @@
  #include <linux/types.h>
  
  struct task_struct;
 +
 +#ifdef CONFIG_GENERIC_SMP_IDLE_THREAD
-+struct task_struct *idle_thread_get(unsigned int cpu);
++struct task_struct *idle_thread_get(unsigned int cpu, bool unpoison);
 +#else
-+static inline struct task_struct *idle_thread_get(unsigned int cpu) { return NULL; }
++static inline struct task_struct *idle_thread_get(unsigned int cpu, bool unpoison)
++{
++	return NULL;
++}
 +#endif
 +
  /* Cookie handed to the thread_fn*/
  struct smpboot_thread_data;
+ 
+diff --git a/kernel/cpu.c b/kernel/cpu.c
+index 6c0a92ca6bb5..6b3dccb4a888 100644
+--- a/kernel/cpu.c
++++ b/kernel/cpu.c
+@@ -31,7 +31,6 @@
+ #include <linux/smpboot.h>
+ #include <linux/relay.h>
+ #include <linux/slab.h>
+-#include <linux/scs.h>
+ #include <linux/percpu-rwsem.h>
+ #include <linux/cpuset.h>
+ #include <linux/random.h>
+@@ -588,15 +587,9 @@ static int bringup_wait_for_ap(unsigned int cpu)
+ 
+ static int bringup_cpu(unsigned int cpu)
+ {
+-	struct task_struct *idle = idle_thread_get(cpu);
++	struct task_struct *idle = idle_thread_get(cpu, true);
+ 	int ret;
+ 
+-	/*
+-	 * Reset stale stack state from the last time this CPU was online.
+-	 */
+-	scs_task_reset(idle);
+-	kasan_unpoison_task_stack(idle);
+-
+ 	/*
+ 	 * Some architectures have to walk the irq descriptors to
+ 	 * setup the vector space for the cpu which comes online.
+@@ -614,7 +607,7 @@ static int bringup_cpu(unsigned int cpu)
+ 
+ static int finish_cpu(unsigned int cpu)
+ {
+-	struct task_struct *idle = idle_thread_get(cpu);
++	struct task_struct *idle = idle_thread_get(cpu, false);
+ 	struct mm_struct *mm = idle->active_mm;
+ 
+ 	/*
+@@ -1378,7 +1371,7 @@ static int _cpu_up(unsigned int cpu, int tasks_frozen, enum cpuhp_state target)
+ 
+ 	if (st->state == CPUHP_OFFLINE) {
+ 		/* Let it fail before we try to bring the cpu up */
+-		idle = idle_thread_get(cpu);
++		idle = idle_thread_get(cpu, false);
+ 		if (IS_ERR(idle)) {
+ 			ret = PTR_ERR(idle);
+ 			goto out;
+diff --git a/kernel/smpboot.c b/kernel/smpboot.c
+index 2c7396da470c..24e81c725e7b 100644
+--- a/kernel/smpboot.c
++++ b/kernel/smpboot.c
+@@ -11,6 +11,7 @@
+ #include <linux/slab.h>
+ #include <linux/sched.h>
+ #include <linux/sched/task.h>
++#include <linux/scs.h>
+ #include <linux/export.h>
+ #include <linux/percpu.h>
+ #include <linux/kthread.h>
+@@ -27,12 +28,20 @@
+  */
+ static DEFINE_PER_CPU(struct task_struct *, idle_threads);
+ 
+-struct task_struct *idle_thread_get(unsigned int cpu)
++struct task_struct *idle_thread_get(unsigned int cpu, bool unpoison)
+ {
+ 	struct task_struct *tsk = per_cpu(idle_threads, cpu);
+ 
+ 	if (!tsk)
+ 		return ERR_PTR(-ENOMEM);
++
++	if (unpoison) {
++		/*
++		 * Reset stale stack state from last time this CPU was online.
++		 */
++		scs_task_reset(tsk);
++		kasan_unpoison_task_stack(tsk);
++	}
+ 	return tsk;
+ }
  
 diff --git a/kernel/smpboot.h b/kernel/smpboot.h
 index 34dd3d7ba40b..60c609318ad6 100644
@@ -311,11 +400,11 @@ index 34dd3d7ba40b..60c609318ad6 100644
 2.25.1
 
 From git@z Thu Jan  1 00:00:00 1970
-Subject: [PATCH v14 3/12] cpu/hotplug: Add dynamic parallel bringup states
+Subject: [PATCH v15 3/12] cpu/hotplug: Add dynamic parallel bringup states
  before CPUHP_BRINGUP_CPU
 From: David Woodhouse <dwmw@amazon.co.uk>
-Date: Wed, 08 Mar 2023 17:13:19 +0000
-Message-Id: <20230308171328.1562857-4-usama.arif@bytedance.com>
+Date: Thu, 16 Mar 2023 22:21:00 +0000
+Message-Id: <20230316222109.1940300-4-usama.arif@bytedance.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 7bit
@@ -362,7 +451,7 @@ Tested-by: Paul E. McKenney <paulmck@kernel.org>
 Tested-by: Kim Phillips <kim.phillips@amd.com>
 Tested-by: Oleksandr Natalenko <oleksandr@natalenko.name>
 Tested-by: Guilherme G. Piccoli <gpiccoli@igalia.com>
-Link: https://lore.kernel.org/r/20230308171328.1562857-4-usama.arif@bytedance.com
+Link: https://lore.kernel.org/r/20230316222109.1940300-4-usama.arif@bytedance.com
 ---
  include/linux/cpuhotplug.h |  2 ++
  kernel/cpu.c               | 31 +++++++++++++++++++++++++++++--
@@ -382,10 +471,10 @@ index 6c6859bfc454..e5a73ae6ccc0 100644
  
  	/*
 diff --git a/kernel/cpu.c b/kernel/cpu.c
-index 6c0a92ca6bb5..fffb0da61ccc 100644
+index 6b3dccb4a888..6ccc64defd47 100644
 --- a/kernel/cpu.c
 +++ b/kernel/cpu.c
-@@ -1504,8 +1504,30 @@ int bringup_hibernate_cpu(unsigned int sleep_cpu)
+@@ -1497,8 +1497,30 @@ int bringup_hibernate_cpu(unsigned int sleep_cpu)
  
  void bringup_nonboot_cpus(unsigned int setup_max_cpus)
  {
@@ -416,7 +505,7 @@ index 6c0a92ca6bb5..fffb0da61ccc 100644
  	for_each_present_cpu(cpu) {
  		if (num_online_cpus() >= setup_max_cpus)
  			break;
-@@ -1882,6 +1904,10 @@ static int cpuhp_reserve_state(enum cpuhp_state state)
+@@ -1875,6 +1897,10 @@ static int cpuhp_reserve_state(enum cpuhp_state state)
  		step = cpuhp_hp_states + CPUHP_BP_PREPARE_DYN;
  		end = CPUHP_BP_PREPARE_DYN_END;
  		break;
@@ -427,7 +516,7 @@ index 6c0a92ca6bb5..fffb0da61ccc 100644
  	default:
  		return -EINVAL;
  	}
-@@ -1906,14 +1932,15 @@ static int cpuhp_store_callbacks(enum cpuhp_state state, const char *name,
+@@ -1899,14 +1925,15 @@ static int cpuhp_store_callbacks(enum cpuhp_state state, const char *name,
  	/*
  	 * If name is NULL, then the state gets removed.
  	 *
@@ -449,11 +538,11 @@ index 6c0a92ca6bb5..fffb0da61ccc 100644
 2.25.1
 
 From git@z Thu Jan  1 00:00:00 1970
-Subject: [PATCH v14 4/12] x86/smpboot: Reference count on
+Subject: [PATCH v15 4/12] x86/smpboot: Reference count on
  smpboot_setup_warm_reset_vector()
 From: David Woodhouse <dwmw@amazon.co.uk>
-Date: Wed, 08 Mar 2023 17:13:20 +0000
-Message-Id: <20230308171328.1562857-5-usama.arif@bytedance.com>
+Date: Thu, 16 Mar 2023 22:21:01 +0000
+Message-Id: <20230316222109.1940300-5-usama.arif@bytedance.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 7bit
@@ -476,7 +565,7 @@ Tested-by: Paul E. McKenney <paulmck@kernel.org>
 Tested-by: Kim Phillips <kim.phillips@amd.com>
 Tested-by: Oleksandr Natalenko <oleksandr@natalenko.name>
 Tested-by: Guilherme G. Piccoli <gpiccoli@igalia.com>
-Link: https://lore.kernel.org/r/20230308171328.1562857-5-usama.arif@bytedance.com
+Link: https://lore.kernel.org/r/20230316222109.1940300-5-usama.arif@bytedance.com
 ---
  arch/x86/kernel/smpboot.c | 19 ++++++++++++-------
  1 file changed, 12 insertions(+), 7 deletions(-)
@@ -530,11 +619,11 @@ index 55cad72715d9..3a793772a2aa 100644
 2.25.1
 
 From git@z Thu Jan  1 00:00:00 1970
-Subject: [PATCH v14 5/12] x86/smpboot: Split up native_cpu_up into separate
+Subject: [PATCH v15 5/12] x86/smpboot: Split up native_cpu_up into separate
  phases and document them
 From: David Woodhouse <dwmw@amazon.co.uk>
-Date: Wed, 08 Mar 2023 17:13:21 +0000
-Message-Id: <20230308171328.1562857-6-usama.arif@bytedance.com>
+Date: Thu, 16 Mar 2023 22:21:02 +0000
+Message-Id: <20230316222109.1940300-6-usama.arif@bytedance.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 7bit
@@ -566,13 +655,13 @@ Tested-by: Paul E. McKenney <paulmck@kernel.org>
 Tested-by: Kim Phillips <kim.phillips@amd.com>
 Tested-by: Oleksandr Natalenko <oleksandr@natalenko.name>
 Tested-by: Guilherme G. Piccoli <gpiccoli@igalia.com>
-Link: https://lore.kernel.org/r/20230308171328.1562857-6-usama.arif@bytedance.com
+Link: https://lore.kernel.org/r/20230316222109.1940300-6-usama.arif@bytedance.com
 ---
- arch/x86/kernel/smpboot.c | 181 ++++++++++++++++++++++++++------------
- 1 file changed, 127 insertions(+), 54 deletions(-)
+ arch/x86/kernel/smpboot.c | 179 ++++++++++++++++++++++++++------------
+ 1 file changed, 125 insertions(+), 54 deletions(-)
 
 diff --git a/arch/x86/kernel/smpboot.c b/arch/x86/kernel/smpboot.c
-index 3a793772a2aa..b18c1385e181 100644
+index 3a793772a2aa..fa1e35b0747c 100644
 --- a/arch/x86/kernel/smpboot.c
 +++ b/arch/x86/kernel/smpboot.c
 @@ -204,6 +204,10 @@ static void smp_callin(void)
@@ -790,7 +879,7 @@ index 3a793772a2aa..b18c1385e181 100644
  unreg_nmi:
  	/*
  	 * Clean up the nmi handler. Do this after the callin and callout sync
-@@ -1263,6 +1308,34 @@ int native_cpu_up(unsigned int cpu, struct task_struct *tidle)
+@@ -1263,6 +1308,32 @@ int native_cpu_up(unsigned int cpu, struct task_struct *tidle)
  	return ret;
  }
  
@@ -800,24 +889,22 @@ index 3a793772a2aa..b18c1385e181 100644
 +
 +	ret = do_cpu_up(cpu, tidle);
 +	if (ret)
-+		return ret;
++		goto out;
 +
 +	ret = do_wait_cpu_initialized(cpu);
 +	if (ret)
-+		return ret;
++		goto out;
 +
 +	ret = do_wait_cpu_callin(cpu);
 +	if (ret)
-+		return ret;
++		goto out;
 +
 +	ret = do_wait_cpu_online(cpu);
 +
-+	if (x86_platform.legacy.warm_reset) {
-+		/*
-+		 * Cleanup possible dangling ends...
-+		 */
++ out:
++	/* Cleanup possible dangling ends... */
++	if (x86_platform.legacy.warm_reset)
 +		smpboot_restore_warm_reset_vector();
-+	}
 +
 +	return ret;
 +}
@@ -829,10 +916,10 @@ index 3a793772a2aa..b18c1385e181 100644
 2.25.1
 
 From git@z Thu Jan  1 00:00:00 1970
-Subject: [PATCH v14 6/12] x86/smpboot: Remove initial_stack on 64-bit
+Subject: [PATCH v15 6/12] x86/smpboot: Remove initial_stack on 64-bit
 From: Brian Gerst <brgerst@gmail.com>
-Date: Wed, 08 Mar 2023 17:13:22 +0000
-Message-Id: <20230308171328.1562857-7-usama.arif@bytedance.com>
+Date: Thu, 16 Mar 2023 22:21:03 +0000
+Message-Id: <20230316222109.1940300-7-usama.arif@bytedance.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 7bit
@@ -864,7 +951,7 @@ Signed-off-by: David Woodhouse <dwmw@amazon.co.uk>
 Tested-by: Usama Arif <usama.arif@bytedance.com>
 Signed-off-by: Usama Arif <usama.arif@bytedance.com>
 Tested-by: Guilherme G. Piccoli <gpiccoli@igalia.com>
-Link: https://lore.kernel.org/r/20230308171328.1562857-7-usama.arif@bytedance.com
+Link: https://lore.kernel.org/r/20230316222109.1940300-7-usama.arif@bytedance.com
 ---
  arch/x86/include/asm/processor.h |  6 ++++-
  arch/x86/include/asm/smp.h       |  5 +++-
@@ -1044,7 +1131,7 @@ index 222efd4a09bc..cc1b145055ac 100644
  /* This must match the first entry in level2_kernel_pgt */
  SYM_DATA(phys_base, .quad 0x0)
 diff --git a/arch/x86/kernel/smpboot.c b/arch/x86/kernel/smpboot.c
-index b18c1385e181..62e3bf37f0b8 100644
+index fa1e35b0747c..ab8decac6294 100644
 --- a/arch/x86/kernel/smpboot.c
 +++ b/arch/x86/kernel/smpboot.c
 @@ -1112,7 +1112,12 @@ static int do_boot_cpu(int apicid, int cpu, struct task_struct *idle,
@@ -1078,10 +1165,10 @@ index ffaa62167f6e..6bd391476656 100644
 2.25.1
 
 From git@z Thu Jan  1 00:00:00 1970
-Subject: [PATCH v14 7/12] x86/smpboot: Remove early_gdt_descr on 64-bit
+Subject: [PATCH v15 7/12] x86/smpboot: Remove early_gdt_descr on 64-bit
 From: Brian Gerst <brgerst@gmail.com>
-Date: Wed, 08 Mar 2023 17:13:23 +0000
-Message-Id: <20230308171328.1562857-8-usama.arif@bytedance.com>
+Date: Thu, 16 Mar 2023 22:21:04 +0000
+Message-Id: <20230316222109.1940300-8-usama.arif@bytedance.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 7bit
@@ -1094,7 +1181,7 @@ Signed-off-by: David Woodhouse <dwmw@amazon.co.uk>
 Tested-by: Usama Arif <usama.arif@bytedance.com>
 Signed-off-by: Usama Arif <usama.arif@bytedance.com>
 Tested-by: Guilherme G. Piccoli <gpiccoli@igalia.com>
-Link: https://lore.kernel.org/r/20230308171328.1562857-8-usama.arif@bytedance.com
+Link: https://lore.kernel.org/r/20230316222109.1940300-8-usama.arif@bytedance.com
 ---
  arch/x86/kernel/acpi/sleep.c |  2 --
  arch/x86/kernel/head_64.S    | 11 ++++++-----
@@ -1144,7 +1231,7 @@ index cc1b145055ac..a5b46c2fba05 100644
  
  	.align 16
 diff --git a/arch/x86/kernel/smpboot.c b/arch/x86/kernel/smpboot.c
-index 62e3bf37f0b8..a22460a07cf8 100644
+index ab8decac6294..67224e61310c 100644
 --- a/arch/x86/kernel/smpboot.c
 +++ b/arch/x86/kernel/smpboot.c
 @@ -1110,10 +1110,10 @@ static int do_boot_cpu(int apicid, int cpu, struct task_struct *idle,
@@ -1163,10 +1250,10 @@ index 62e3bf37f0b8..a22460a07cf8 100644
 2.25.1
 
 From git@z Thu Jan  1 00:00:00 1970
-Subject: [PATCH v14 8/12] x86/smpboot: Remove initial_gs
+Subject: [PATCH v15 8/12] x86/smpboot: Remove initial_gs
 From: Brian Gerst <brgerst@gmail.com>
-Date: Wed, 08 Mar 2023 17:13:24 +0000
-Message-Id: <20230308171328.1562857-9-usama.arif@bytedance.com>
+Date: Thu, 16 Mar 2023 22:21:05 +0000
+Message-Id: <20230316222109.1940300-9-usama.arif@bytedance.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 7bit
@@ -1180,7 +1267,7 @@ Signed-off-by: David Woodhouse <dwmw@amazon.co.uk>
 Tested-by: Usama Arif <usama.arif@bytedance.com>
 Signed-off-by: Usama Arif <usama.arif@bytedance.com>
 Tested-by: Guilherme G. Piccoli <gpiccoli@igalia.com>
-Link: https://lore.kernel.org/r/20230308171328.1562857-9-usama.arif@bytedance.com
+Link: https://lore.kernel.org/r/20230316222109.1940300-9-usama.arif@bytedance.com
 ---
  arch/x86/include/asm/realmode.h |  1 -
  arch/x86/kernel/acpi/sleep.c    |  1 -
@@ -1261,7 +1348,7 @@ index a5b46c2fba05..6a8238702eab 100644
  SYM_DATA(initial_vc_handler,	.quad handle_vc_boot_ghcb)
  #endif
 diff --git a/arch/x86/kernel/smpboot.c b/arch/x86/kernel/smpboot.c
-index a22460a07cf8..b04520085582 100644
+index 67224e61310c..28d1643eee99 100644
 --- a/arch/x86/kernel/smpboot.c
 +++ b/arch/x86/kernel/smpboot.c
 @@ -1084,8 +1084,6 @@ int common_cpu_up(unsigned int cpu, struct task_struct *idle)
@@ -1277,11 +1364,11 @@ index a22460a07cf8..b04520085582 100644
 2.25.1
 
 From git@z Thu Jan  1 00:00:00 1970
-Subject: [PATCH v14 9/12] x86/smpboot: Support parallel startup of
+Subject: [PATCH v15 9/12] x86/smpboot: Support parallel startup of
  secondary CPUs
 From: David Woodhouse <dwmw@amazon.co.uk>
-Date: Wed, 08 Mar 2023 17:13:25 +0000
-Message-Id: <20230308171328.1562857-10-usama.arif@bytedance.com>
+Date: Thu, 16 Mar 2023 22:21:06 +0000
+Message-Id: <20230316222109.1940300-10-usama.arif@bytedance.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 8bit
@@ -1331,7 +1418,7 @@ Tested-by: Paul E. McKenney <paulmck@kernel.org>
 Tested-by: Kim Phillips <kim.phillips@amd.com>
 Tested-by: Oleksandr Natalenko <oleksandr@natalenko.name>
 Tested-by: Guilherme G. Piccoli <gpiccoli@igalia.com>
-Link: https://lore.kernel.org/r/20230308171328.1562857-10-usama.arif@bytedance.com
+Link: https://lore.kernel.org/r/20230316222109.1940300-10-usama.arif@bytedance.com
 ---
  .../admin-guide/kernel-parameters.txt         |  3 +
  arch/x86/include/asm/cpu.h                    |  1 +
@@ -1339,12 +1426,12 @@ Link: https://lore.kernel.org/r/20230308171328.1562857-10-usama.arif@bytedance.c
  arch/x86/include/asm/smp.h                    |  6 ++
  arch/x86/kernel/acpi/sleep.c                  |  9 ++-
  arch/x86/kernel/apic/apic.c                   |  2 +-
- arch/x86/kernel/cpu/topology.c                |  2 +-
- arch/x86/kernel/head_64.S                     | 64 +++++++++++++++++++
- arch/x86/kernel/smpboot.c                     | 50 ++++++++++++++-
+ arch/x86/kernel/cpu/topology.c                |  3 +-
+ arch/x86/kernel/head_64.S                     | 65 +++++++++++++++++++
+ arch/x86/kernel/smpboot.c                     | 50 +++++++++++++-
  arch/x86/realmode/init.c                      |  3 +
  arch/x86/realmode/rm/trampoline_64.S          | 27 ++++++--
- 11 files changed, 161 insertions(+), 9 deletions(-)
+ 11 files changed, 163 insertions(+), 9 deletions(-)
 
 diff --git a/Documentation/admin-guide/kernel-parameters.txt b/Documentation/admin-guide/kernel-parameters.txt
 index 6cfa6e3996cf..7bb7020f97e2 100644
@@ -1448,10 +1535,18 @@ index 20d9a604da7c..ac1d7e5da1f2 100644
  };
  
 diff --git a/arch/x86/kernel/cpu/topology.c b/arch/x86/kernel/cpu/topology.c
-index 5e868b62a7c4..1dc20f4dfa6e 100644
+index 5e868b62a7c4..4373442e500a 100644
 --- a/arch/x86/kernel/cpu/topology.c
 +++ b/arch/x86/kernel/cpu/topology.c
-@@ -32,7 +32,7 @@ EXPORT_SYMBOL(__max_die_per_package);
+@@ -9,6 +9,7 @@
+ #include <asm/apic.h>
+ #include <asm/memtype.h>
+ #include <asm/processor.h>
++#include <asm/cpu.h>
+ 
+ #include "cpu.h"
+ 
+@@ -32,7 +33,7 @@ EXPORT_SYMBOL(__max_die_per_package);
  /*
   * Check if given CPUID extended topology "leaf" is implemented
   */
@@ -1461,7 +1556,7 @@ index 5e868b62a7c4..1dc20f4dfa6e 100644
  	unsigned int eax, ebx, ecx, edx;
  
 diff --git a/arch/x86/kernel/head_64.S b/arch/x86/kernel/head_64.S
-index 6a8238702eab..c35f7c173832 100644
+index 6a8238702eab..65bca47d84a1 100644
 --- a/arch/x86/kernel/head_64.S
 +++ b/arch/x86/kernel/head_64.S
 @@ -25,6 +25,7 @@
@@ -1534,22 +1629,30 @@ index 6a8238702eab..c35f7c173832 100644
  	/* Get the per cpu offset for the given CPU# which is in ECX */
  	movq	__per_cpu_offset(,%rcx,8), %rdx
  #else
-@@ -293,6 +347,14 @@ SYM_INNER_LABEL(secondary_startup_64_no_verify, SYM_L_GLOBAL)
- 	shrq	$32, %rdx
- 	wrmsr
+@@ -264,6 +318,14 @@ SYM_INNER_LABEL(secondary_startup_64_no_verify, SYM_L_GLOBAL)
+ 	lgdt	(%rsp)
+ 	addq	$16, %rsp
  
 +	/* Drop the realmode protection. For the boot CPU the pointer is NULL! */
 +	movq	trampoline_lock(%rip), %rax
 +	testq	%rax, %rax
-+	jz	.Lsetup_idt
++	jz	.Lsetup_data_segments
 +	lock
 +	btrl	$0, (%rax)
 +
++.Lsetup_data_segments:
+ 	/* set up data segments */
+ 	xorl %eax,%eax
+ 	movl %eax,%ds
+@@ -293,6 +355,7 @@ SYM_INNER_LABEL(secondary_startup_64_no_verify, SYM_L_GLOBAL)
+ 	shrq	$32, %rdx
+ 	wrmsr
+ 
 +.Lsetup_idt:
  	/* Setup and Load IDT */
  	pushq	%rsi
  	call	early_setup_idt
-@@ -435,6 +497,8 @@ SYM_DATA(initial_code,	.quad x86_64_start_kernel)
+@@ -435,6 +498,8 @@ SYM_DATA(initial_code,	.quad x86_64_start_kernel)
  #ifdef CONFIG_AMD_MEM_ENCRYPT
  SYM_DATA(initial_vc_handler,	.quad handle_vc_boot_ghcb)
  #endif
@@ -1559,7 +1662,7 @@ index 6a8238702eab..c35f7c173832 100644
  
  	__INIT
 diff --git a/arch/x86/kernel/smpboot.c b/arch/x86/kernel/smpboot.c
-index b04520085582..fd4e678b6588 100644
+index 28d1643eee99..a9e48946fc89 100644
 --- a/arch/x86/kernel/smpboot.c
 +++ b/arch/x86/kernel/smpboot.c
 @@ -797,6 +797,16 @@ static int __init cpu_init_udelay(char *str)
@@ -1588,7 +1691,7 @@ index b04520085582..fd4e678b6588 100644
  		smpboot_control = cpu;
  	}
  
-@@ -1475,6 +1485,41 @@ void __init smp_prepare_cpus_common(void)
+@@ -1473,6 +1483,41 @@ void __init smp_prepare_cpus_common(void)
  	set_cpu_sibling_map(0);
  }
  
@@ -1630,7 +1733,7 @@ index b04520085582..fd4e678b6588 100644
  /*
   * Prepare for SMP bootup.
   * @max_cpus: configured maximum number of CPUs, It is a legacy parameter
-@@ -1515,6 +1560,9 @@ void __init native_smp_prepare_cpus(unsigned int max_cpus)
+@@ -1513,6 +1558,9 @@ void __init native_smp_prepare_cpus(unsigned int max_cpus)
  
  	speculative_store_bypass_ht_init();
  
@@ -1724,11 +1827,11 @@ index e38d61d6562e..2dfb1c400167 100644
 2.25.1
 
 From git@z Thu Jan  1 00:00:00 1970
-Subject: [PATCH v14 10/12] x86/smpboot: Send INIT/SIPI/SIPI to secondary
+Subject: [PATCH v15 10/12] x86/smpboot: Send INIT/SIPI/SIPI to secondary
  CPUs in parallel
 From: David Woodhouse <dwmw@amazon.co.uk>
-Date: Wed, 08 Mar 2023 17:13:26 +0000
-Message-Id: <20230308171328.1562857-11-usama.arif@bytedance.com>
+Date: Thu, 16 Mar 2023 22:21:07 +0000
+Message-Id: <20230316222109.1940300-11-usama.arif@bytedance.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 8bit
@@ -1773,13 +1876,13 @@ Tested-by: Paul E. McKenney <paulmck@kernel.org>
 Tested-by: Kim Phillips <kim.phillips@amd.com>
 Tested-by: Oleksandr Natalenko <oleksandr@natalenko.name>
 Tested-by: Guilherme G. Piccoli <gpiccoli@igalia.com>
-Link: https://lore.kernel.org/r/20230308171328.1562857-11-usama.arif@bytedance.com
+Link: https://lore.kernel.org/r/20230316222109.1940300-11-usama.arif@bytedance.com
 ---
  arch/x86/kernel/smpboot.c | 21 +++++++++++++++++----
  1 file changed, 17 insertions(+), 4 deletions(-)
 
 diff --git a/arch/x86/kernel/smpboot.c b/arch/x86/kernel/smpboot.c
-index fd4e678b6588..a3572b2ebfd3 100644
+index a9e48946fc89..69b56c597949 100644
 --- a/arch/x86/kernel/smpboot.c
 +++ b/arch/x86/kernel/smpboot.c
 @@ -57,6 +57,7 @@
@@ -1806,30 +1909,30 @@ index fd4e678b6588..a3572b2ebfd3 100644
  
 -	ret = do_cpu_up(cpu, tidle);
 -	if (ret)
--		return ret;
+-		goto out;
 +	/* If parallel AP bringup isn't enabled, perform the first steps now. */
 +	if (!do_parallel_bringup) {
 +		ret = do_cpu_up(cpu, tidle);
 +		if (ret)
-+			return ret;
++			goto out;
 +	}
  
  	ret = do_wait_cpu_initialized(cpu);
  	if (ret)
-@@ -1349,6 +1354,12 @@ int native_cpu_up(unsigned int cpu, struct task_struct *tidle)
+@@ -1347,6 +1352,12 @@ int native_cpu_up(unsigned int cpu, struct task_struct *tidle)
  	return ret;
  }
  
 +/* Bringup step one: Send INIT/SIPI to the target AP */
 +static int native_cpu_kick(unsigned int cpu)
 +{
-+	return do_cpu_up(cpu, idle_thread_get(cpu));
++	return do_cpu_up(cpu, idle_thread_get(cpu, true));
 +}
 +
  /**
   * arch_disable_smp_support() - disables SMP support for x86 at runtime
   */
-@@ -1517,6 +1528,8 @@ static bool prepare_parallel_bringup(void)
+@@ -1515,6 +1526,8 @@ static bool prepare_parallel_bringup(void)
  		smpboot_control = STARTUP_APICID_CPUID_01;
  	}
  
@@ -1842,11 +1945,11 @@ index fd4e678b6588..a3572b2ebfd3 100644
 2.25.1
 
 From git@z Thu Jan  1 00:00:00 1970
-Subject: [PATCH v14 11/12] x86/smpboot: Serialize topology updates for
+Subject: [PATCH v15 11/12] x86/smpboot: Serialize topology updates for
  secondary bringup
 From: David Woodhouse <dwmw@amazon.co.uk>
-Date: Wed, 08 Mar 2023 17:13:27 +0000
-Message-Id: <20230308171328.1562857-12-usama.arif@bytedance.com>
+Date: Thu, 16 Mar 2023 22:21:08 +0000
+Message-Id: <20230316222109.1940300-12-usama.arif@bytedance.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 7bit
@@ -1885,7 +1988,7 @@ Tested-by: Paul E. McKenney <paulmck@kernel.org>
 Tested-by: Kim Phillips <kim.phillips@amd.com>
 Tested-by: Oleksandr Natalenko <oleksandr@natalenko.name>
 Tested-by: Guilherme G. Piccoli <gpiccoli@igalia.com>
-Link: https://lore.kernel.org/r/20230308171328.1562857-12-usama.arif@bytedance.com
+Link: https://lore.kernel.org/r/20230316222109.1940300-12-usama.arif@bytedance.com
 ---
  arch/x86/include/asm/smp.h      |  4 +-
  arch/x86/include/asm/topology.h |  2 -
@@ -1961,7 +2064,7 @@ index f3cc7699e1e1..06d7f9e55d45 100644
  	update_srbds_msr();
  
 diff --git a/arch/x86/kernel/smpboot.c b/arch/x86/kernel/smpboot.c
-index a3572b2ebfd3..0dc123a536ab 100644
+index 69b56c597949..0960fdec43c2 100644
 --- a/arch/x86/kernel/smpboot.c
 +++ b/arch/x86/kernel/smpboot.c
 @@ -180,16 +180,12 @@ static void smp_callin(void)
@@ -2108,10 +2211,10 @@ index 6175f2c5c822..09f94f940689 100644
 2.25.1
 
 From git@z Thu Jan  1 00:00:00 1970
-Subject: [PATCH v14 12/12] x86/smpboot: Allow parallel bringup for SEV-ES
+Subject: [PATCH v15 12/12] x86/smpboot: Allow parallel bringup for SEV-ES
 From: David Woodhouse <dwmw@amazon.co.uk>
-Date: Wed, 08 Mar 2023 17:13:28 +0000
-Message-Id: <20230308171328.1562857-13-usama.arif@bytedance.com>
+Date: Thu, 16 Mar 2023 22:21:09 +0000
+Message-Id: <20230316222109.1940300-13-usama.arif@bytedance.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 7bit
@@ -2126,15 +2229,44 @@ Thanks to Sabin for talking me through the way this works.
 Suggested-by: Sabin Rapan <sabrapan@amazon.com>
 Signed-off-by: David Woodhouse <dwmw@amazon.co.uk>
 Signed-off-by: Usama Arif <usama.arif@bytedance.com>
-Link: https://lore.kernel.org/r/20230308171328.1562857-13-usama.arif@bytedance.com
+Link: https://lore.kernel.org/r/20230316222109.1940300-13-usama.arif@bytedance.com
 ---
+ arch/x86/coco/core.c              |  5 ++++
+ arch/x86/include/asm/coco.h       |  1 +
  arch/x86/include/asm/sev-common.h |  3 +++
- arch/x86/include/asm/sev.h        |  5 +++++
- arch/x86/include/asm/smp.h        |  5 ++++-
- arch/x86/kernel/head_64.S         | 30 ++++++++++++++++++++++++++++++
- arch/x86/kernel/smpboot.c         | 31 +++++++++++++++++++++++++------
- 5 files changed, 67 insertions(+), 7 deletions(-)
+ arch/x86/include/asm/smp.h        |  5 +++-
+ arch/x86/kernel/head_64.S         | 30 ++++++++++++++++++++++++
+ arch/x86/kernel/smpboot.c         | 39 ++++++++++++++++++++++++++-----
+ 6 files changed, 76 insertions(+), 7 deletions(-)
 
+diff --git a/arch/x86/coco/core.c b/arch/x86/coco/core.c
+index 49b44f881484..0bab38efb15a 100644
+--- a/arch/x86/coco/core.c
++++ b/arch/x86/coco/core.c
+@@ -129,6 +129,11 @@ u64 cc_mkdec(u64 val)
+ }
+ EXPORT_SYMBOL_GPL(cc_mkdec);
+ 
++enum cc_vendor cc_get_vendor(void)
++{
++	return vendor;
++}
++
+ __init void cc_set_vendor(enum cc_vendor v)
+ {
+ 	vendor = v;
+diff --git a/arch/x86/include/asm/coco.h b/arch/x86/include/asm/coco.h
+index 3d98c3a60d34..0428d9712c96 100644
+--- a/arch/x86/include/asm/coco.h
++++ b/arch/x86/include/asm/coco.h
+@@ -12,6 +12,7 @@ enum cc_vendor {
+ };
+ 
+ void cc_set_vendor(enum cc_vendor v);
++enum cc_vendor cc_get_vendor(void);
+ void cc_set_mask(u64 mask);
+ 
+ #ifdef CONFIG_ARCH_HAS_CC_PLATFORM
 diff --git a/arch/x86/include/asm/sev-common.h b/arch/x86/include/asm/sev-common.h
 index b8357d6ecd47..f25df4bd318e 100644
 --- a/arch/x86/include/asm/sev-common.h
@@ -2156,29 +2288,6 @@ index b8357d6ecd47..f25df4bd318e 100644
  /*
   * Error codes related to GHCB input that can be communicated back to the guest
   * by setting the lower 32-bits of the GHCB SW_EXITINFO1 field to 2.
-diff --git a/arch/x86/include/asm/sev.h b/arch/x86/include/asm/sev.h
-index ebc271bb6d8e..d687a586cafa 100644
---- a/arch/x86/include/asm/sev.h
-+++ b/arch/x86/include/asm/sev.h
-@@ -135,6 +135,10 @@ struct snp_secrets_page_layout {
- 
- #ifdef CONFIG_AMD_MEM_ENCRYPT
- extern struct static_key_false sev_es_enable_key;
-+static inline bool sev_es_active(void)
-+{
-+	return static_branch_unlikely(&sev_es_enable_key);
-+}
- extern void __sev_es_ist_enter(struct pt_regs *regs);
- extern void __sev_es_ist_exit(void);
- static __always_inline void sev_es_ist_enter(struct pt_regs *regs)
-@@ -198,6 +202,7 @@ bool snp_init(struct boot_params *bp);
- void __init __noreturn snp_abort(void);
- int snp_issue_guest_request(u64 exit_code, struct snp_req_data *input, unsigned long *fw_err);
- #else
-+static inline bool sev_es_active(void) { return false; }
- static inline void sev_es_ist_enter(struct pt_regs *regs) { }
- static inline void sev_es_ist_exit(void) { }
- static inline int sev_es_setup_ap_jump_table(struct real_mode_header *rmh) { return 0; }
 diff --git a/arch/x86/include/asm/smp.h b/arch/x86/include/asm/smp.h
 index defe76ee9e64..1584f04a7007 100644
 --- a/arch/x86/include/asm/smp.h
@@ -2196,7 +2305,7 @@ index defe76ee9e64..1584f04a7007 100644
  
  #endif /* _ASM_X86_SMP_H */
 diff --git a/arch/x86/kernel/head_64.S b/arch/x86/kernel/head_64.S
-index c35f7c173832..714c2afdbd9a 100644
+index 65bca47d84a1..79a17e705f4e 100644
 --- a/arch/x86/kernel/head_64.S
 +++ b/arch/x86/kernel/head_64.S
 @@ -26,6 +26,7 @@
@@ -2258,10 +2367,18 @@ index c35f7c173832..714c2afdbd9a 100644
  	mov	$0x0B, %eax
  	xorl	%ecx, %ecx
 diff --git a/arch/x86/kernel/smpboot.c b/arch/x86/kernel/smpboot.c
-index 0dc123a536ab..b4265c5b46da 100644
+index 0960fdec43c2..895395787afc 100644
 --- a/arch/x86/kernel/smpboot.c
 +++ b/arch/x86/kernel/smpboot.c
-@@ -1515,15 +1515,29 @@ void __init smp_prepare_cpus_common(void)
+@@ -85,6 +85,7 @@
+ #include <asm/hw_irq.h>
+ #include <asm/stackprotector.h>
+ #include <asm/sev.h>
++#include <asm/coco.h>
+ 
+ /* representing HT siblings of each logical CPU */
+ DEFINE_PER_CPU_READ_MOSTLY(cpumask_var_t, cpu_sibling_map);
+@@ -1513,15 +1514,36 @@ void __init smp_prepare_cpus_common(void)
   * We can do 64-bit AP bringup in parallel if the CPU reports its APIC
   * ID in CPUID (either leaf 0x0B if we need the full APIC ID in X2APIC
   * mode, or leaf 0x01 if 8 bits are sufficient). Otherwise it's too
@@ -2272,7 +2389,7 @@ index 0dc123a536ab..b4265c5b46da 100644
  static bool prepare_parallel_bringup(void)
  {
 -	if (IS_ENABLED(CONFIG_X86_32) || cc_platform_has(CC_ATTR_GUEST_STATE_ENCRYPT))
-+	bool has_sev_es = sev_es_active();
++	bool has_sev_es = false;
 +
 +	if (IS_ENABLED(CONFIG_X86_32))
  		return false;
@@ -2286,16 +2403,23 @@ index 0dc123a536ab..b4265c5b46da 100644
 +	 * startup doesn't have to be in the first round of enabling patches
 +	 * for any such technology.
 +	 */
-+	if (cc_platform_has(CC_ATTR_GUEST_STATE_ENCRYPT) && !has_sev_es) {
-+		pr_info("Disabling parallel bringup due to guest memory encryption\n");
-+		return false;
++	if (cc_platform_has(CC_ATTR_GUEST_STATE_ENCRYPT)) {
++		switch (cc_get_vendor()) {
++		case CC_VENDOR_AMD:
++			has_sev_es = true;
++			break;
++
++		default:
++			pr_info("Disabling parallel bringup due to guest state encryption\n");
++			return false;
++		}
 +	}
 +
 +	if (x2apic_mode || has_sev_es) {
  		if (boot_cpu_data.cpuid_level < 0x0b)
  			return false;
  
-@@ -1532,8 +1546,13 @@ static bool prepare_parallel_bringup(void)
+@@ -1530,8 +1552,13 @@ static bool prepare_parallel_bringup(void)
  			return false;
  		}
  
