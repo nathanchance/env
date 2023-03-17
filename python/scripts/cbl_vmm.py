@@ -246,8 +246,9 @@ class VirtualMachine:
             qemu = Path(qemu).resolve()
             if not (virtiofsd := Path(qemu.parent, 'tools/virtiofsd/virtiofsd')).exists():
                 possible_files = [
+                    Path('/usr/lib/virtiofsd'),  # Arch Linux (virtiofsd)
                     Path('libexec/virtiofsd'),  # Default QEMU installation, Fedora
-                    Path('lib/qemu/virtiofsd'),  # Arch Linux
+                    Path('lib/qemu/virtiofsd'),  # Arch Linux (qemu-virtiofsd)
                 ]
                 virtiofsd = find_first_file(possible_files, relative_root=qemu.parents[1])
 
