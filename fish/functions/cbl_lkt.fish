@@ -224,7 +224,7 @@ function cbl_lkt -d "Tests a Linux kernel with llvm-kernel-testing"
 
     set report $log_folder/report.txt
     cbl_gen_build_report $log_folder
-    mail_msg $report
+    mail_msg $report $log_folder/*.log
 
     echo "Full logs available at: $log_folder"
     echo

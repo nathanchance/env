@@ -8,28 +8,30 @@ function mail_msg -d "Send myself an email"
     else
         set muttrc $HOME/.muttrc.notifier
     end
+
     if not test -f $muttrc
         print_error "$muttrc does not exist!"
         return 1
     end
 
     if test (count $argv) -gt 0
-        set file $argv[1]
-        if test -f $file
-            set input $file
-        else
-            print_error "$file does not exist!"
-            return 1
+        for file in $argv
+            if test -f $file
+                set -a inputs $file
+            else
+                print_error "Input file '$file' does not exist!"
+                return 1
+            end
         end
     else
         set tmp_file (mktemp)
         cat /dev/stdin >$tmp_file
-        set input $tmp_file
+        set inputs $tmp_file
     end
 
     set -l date (date +%F-%T)
 
-    mutt -a $input -F $muttrc -s "$hostname: $date" <$input -- nathan@kernel.org
+    mutt -F $muttrc -s "$hostname: $date" -a $inputs -- nathan@kernel.org <$inputs[1]
     if set -q tmp_file
         rm -f $tmp_file
     end
