@@ -33,7 +33,7 @@ function dbxc -d "Shorthand for 'distrobox create'"
                 set -a dbx_args $arg $argv[$next]
                 set i $next
 
-            case dev/'*' gcc-'*' llvm-'*'
+            case dev/'*'
                 set img $GHCR/$arg
                 set name (string replace / - $arg)
 

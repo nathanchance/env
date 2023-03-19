@@ -14,10 +14,10 @@ function oci_bld -d "Build an OCI container image"
 
     switch $mgr
         case docker
-            set base_mgr_args \
+            set mgr_args \
                 --no-cache
         case podman
-            set base_mgr_args \
+            set mgr_args \
                 --layers=false
         case none
             print_warning "oci_bld requires podman or docker, skipping..."
@@ -26,45 +26,16 @@ function oci_bld -d "Build an OCI container image"
 
     for arg in $argv
         switch $arg
-            case compilers
-                set -a images \
-                    gcc-$GCC_VERSIONS_KERNEL \
-                    llvm-$LLVM_VERSIONS_KERNEL \
-                    llvm-android
-
-            case dev dev/{alpine,arch,debian,fedora,suse,ubuntu} {gcc,llvm}-'*'
+            case dev dev/{alpine,arch,debian,fedora,suse,ubuntu}
                 set -a images $arg
         end
     end
 
     for image in $images
-        set -l mgr_args
-
-        switch $image
-            case gcc-5
-                set base ubuntu:xenial
-            case llvm-12 llvm-11
-                set base ubuntu:focal
-            case llvm-android
-                if test (uname -m) != x86_64
-                    print_error "$image cannot be build on non-x86_64 hosts"
-                    continue
-                end
-                set base ubuntu:jammy
-            case gcc-'*' llvm-'*'
-                set base ubuntu:jammy
-        end
-
         switch $image
             case dev
                 set folder (get_dev_img)
                 set image $folder
-
-            case {gcc,llvm}-'*'
-                set mgr_args \
-                    --build-arg BASE=docker.io/$base \
-                    --build-arg COMPILER=$image
-                set folder compiler
 
             case '*'
                 set folder $image
@@ -74,7 +45,6 @@ function oci_bld -d "Build an OCI container image"
 
         set mgr_build_cmd \
             $mgr build \
-            $base_mgr_args \
             $mgr_args \
             --pull \
             --tag $GHCR/$image .

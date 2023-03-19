@@ -59,9 +59,9 @@ def supported_korg_gcc_targets():
     return [korg_gcc_canonicalize_target(arch) for arch in supported_korg_gcc_arches()]
 
 
-# GCC 6 through 12, GCC 5 is run in a container
+# GCC 5 through 12
 def supported_korg_gcc_versions():
-    return list(range(6, 13))
+    return list(range(5, 13))
 
 
 def get_gcc_cross_compile(major_version, arch_or_target):
@@ -73,6 +73,7 @@ def get_gcc_cross_compile(major_version, arch_or_target):
 
 def get_latest_gcc_version(major_version):
     return {
+        5: '5.5.0',
         6: '6.5.0',
         7: '7.5.0',
         8: '8.5.0',
@@ -161,7 +162,7 @@ def install(args):
         # Ensure 'arm' gets downloaded with 'aarch64', so that compat vDSO can
         # be built.
         if 'aarch64-linux' in targets:
-            targets.add('arm-linux-gnueabi')
+            targets.append('arm-linux-gnueabi')
         # No GCC 9.5.0 i386-linux on x86_64?
         if host_arch == 'x86_64' and major_version == 9:
             targets.remove('i386-linux')
