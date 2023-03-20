@@ -1,0 +1,26 @@
+diff --git a/arch/x86/kvm/svm/svm.c b/arch/x86/kvm/svm/svm.c
+index 70183d2271b5..c0cf20820e3a 100644
+--- a/arch/x86/kvm/svm/svm.c
++++ b/arch/x86/kvm/svm/svm.c
+@@ -2878,7 +2878,7 @@ static int svm_set_msr_ia32_cmd(struct kvm_vcpu *vcpu, struct msr_data *msr,
+ 	if (!msr->host_initiated && !guest_has_feat)
+ 		return 1;
+ 
+-	if (!(msr->data & ~cmd))
++	if (msr->data & ~cmd)
+ 		return 1;
+ 	if (!boot_cpu_has(x86_feature_bit))
+ 		return 1;
+diff --git a/arch/x86/kvm/vmx/vmx.c b/arch/x86/kvm/vmx/vmx.c
+index d7bf14abdba1..70a15999f187 100644
+--- a/arch/x86/kvm/vmx/vmx.c
++++ b/arch/x86/kvm/vmx/vmx.c
+@@ -2141,7 +2141,7 @@ static int vmx_set_msr_ia32_cmd(struct kvm_vcpu *vcpu,
+ 	if (!msr_info->host_initiated && !guest_has_feat)
+ 		return 1;
+ 
+-	if (!(msr_info->data & ~cmd))
++	if (msr_info->data & ~cmd)
+ 		return 1;
+ 	if (!boot_cpu_has(x86_feature_bit))
+ 		return 1;

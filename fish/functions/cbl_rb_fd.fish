@@ -13,7 +13,6 @@ function cbl_rb_fd -d "Rebase generic Fedora kernel on latest linux-next"
     git rh origin/master
 
     # Patching
-    set -a reverts ef3efc2af044f6da5bb8c55e99f2398081d99c09 # efi: libstub: Use relocated version of kernel's struct screen_info
     for revert in $reverts
         git revert --no-edit $revert; or return
     end
@@ -21,7 +20,6 @@ function cbl_rb_fd -d "Rebase generic Fedora kernel on latest linux-next"
     for patch in $b4_patches
         b4 shazam -l -P _ -s $patch; or return
     end
-    set -a crl_patches https://git.kernel.org/efi/efi/p/5a223eba53edf2a46c1ab1e790a142241af691aa # efi: libstub: Use relocated version of kernel's struct screen_info
     for patch in $crl_patches
         crl $patch | git am -3; or return
     end
