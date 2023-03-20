@@ -11,7 +11,7 @@ function get_distro -d "Prints a short name for the currently running distro"
         end
         set os_release_id (grep ^ID= $file | string split -f 2 = | string replace -a '"' "")
         switch "$os_release_id"
-            case alpine arch debian fedora ubuntu
+            case alpine arch debian fedora rocky ubuntu
                 echo $os_release_id
             case opensuse-'*'
                 echo opensuse

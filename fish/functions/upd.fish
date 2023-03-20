@@ -91,7 +91,7 @@ function upd -d "Runs the update command for the current distro or downloads/upd
                         sudo pacman -Syyu $yes
                     case debian raspbian ubuntu
                         sudo sh -c "apt update $yes && apt full-upgrade $yes && apt autoremove -y"
-                    case fedora
+                    case fedora rocky
                         sudo dnf update $yes
                     case macos
                         brew update
