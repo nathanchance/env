@@ -1,0 +1,12 @@
+diff --git a/mm/memory-failure.c b/mm/memory-failure.c
+index 6367714af61d..b2377f12f062 100644
+--- a/mm/memory-failure.c
++++ b/mm/memory-failure.c
+@@ -143,6 +143,7 @@ static struct ctl_table memory_failure_table[] = {
+ 		.extra1		= SYSCTL_ZERO,
+ 		.extra2		= SYSCTL_ONE,
+ 	},
++	{ }
+ };
+ 
+ static int __init memory_failure_sysctl_init(void)

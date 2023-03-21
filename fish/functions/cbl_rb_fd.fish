@@ -23,6 +23,7 @@ function cbl_rb_fd -d "Rebase generic Fedora kernel on latest linux-next"
     for patch in $crl_patches
         crl $patch | git am -3; or return
     end
+    set -a ln_commits d25f3892333fe47f75ce3a8170def85f2396e9cb # NOTCBL: REPORTED: mm: memory-failure: Fix missing sentinel
     for hash in $ln_commits
         git -C $CBL_BLD_P/linux-next fp -1 --stdout $hash | git am; or return
     end
