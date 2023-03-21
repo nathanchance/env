@@ -98,9 +98,7 @@ else:
         git_clone_cmd = [
             'git',
             'clone',
-            '-b',
-            'rewrite-personal',
-            'https://github.com/nathanchance/tc-build',
+            'https://github.com/ClangBuiltLinux/tc-build',
             tc_build_folder,
         ]
         subprocess.run(git_clone_cmd, check=True)

@@ -82,7 +82,7 @@ RUN apt update && \
 
 # Build and install newer versions of GNU binutils to avoid issues with
 # building the kernel.
-RUN git clone -b rewrite-personal https://github.com/nathanchance/tc-build /tc-build && \
+RUN git clone https://github.com/ClangBuiltLinux/tc-build /tc-build && \
     /tc-build/build-binutils.py \
         --install-folder /usr/local \
         --targets \
