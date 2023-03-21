@@ -224,7 +224,13 @@ function cbl_lkt -d "Tests a Linux kernel with llvm-kernel-testing"
 
     set report $log_folder/report.txt
     cbl_gen_build_report $log_folder
-    mail_msg $report $log_folder/*.log
+    # Only send log files that are not zero size
+    for log_file in $log_folder/*.log
+        if test -s $log_file
+            set -a log_files $log_file
+        end
+    end
+    mail_msg $report $log_files
 
     echo "Full logs available at: $log_folder"
     echo
