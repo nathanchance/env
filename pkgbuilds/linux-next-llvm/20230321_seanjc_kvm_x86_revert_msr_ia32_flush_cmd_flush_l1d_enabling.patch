@@ -1,0 +1,228 @@
+From git@z Thu Jan  1 00:00:00 1970
+Subject: [PATCH 1/6] KVM: x86: Revert MSR_IA32_FLUSH_CMD.FLUSH_L1D enabling
+From: Sean Christopherson <seanjc@google.com>
+Date: Tue, 21 Mar 2023 18:14:35 -0700
+Message-Id: <20230322011440.2195485-2-seanjc@google.com>
+MIME-Version: 1.0
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 7bit
+
+Revert the recently added virtualizing of MSR_IA32_FLUSH_CMD, as both
+the VMX and SVM are fatally buggy to guests that use MSR_IA32_FLUSH_CMD or
+MSR_IA32_PRED_CMD, and because the entire foundation of the logic is
+flawed.
+
+The most immediate problem is an inverted check on @cmd that results in
+rejecting legal values.  SVM doubles down on bugs and drops the error,
+i.e. silently breaks all guest mitigations based on the command MSRs.
+
+The next issue is that neither VMX nor SVM was updated to mark
+MSR_IA32_FLUSH_CMD as being a possible passthrough MSR,
+which isn't hugely problematic, but does break MSR filtering and triggers
+a WARN on VMX designed to catch this exact bug.
+
+The foundational issues stem from the MSR_IA32_FLUSH_CMD code reusing
+logic from MSR_IA32_PRED_CMD, which in turn was likely copied from KVM's
+support for MSR_IA32_SPEC_CTRL.  The copy+paste from MSR_IA32_SPEC_CTRL
+was misguided as MSR_IA32_PRED_CMD (and MSR_IA32_FLUSH_CMD) is a
+write-only MSR, i.e. doesn't need the same "deferred passthrough"
+shenanigans as MSR_IA32_SPEC_CTRL.
+
+Revert all MSR_IA32_FLUSH_CMD enabling in one fell swoop so that there is
+no point where KVM advertises, but does not support, L1D_FLUSH.
+
+This reverts commits 45cf86f26148e549c5ba4a8ab32a390e4bde216e,
+723d5fb0ffe4c02bd4edf47ea02c02e454719f28, and
+a807b78ad04b2eaa348f52f5cc7702385b6de1ee.
+
+Reported-by: Nathan Chancellor <nathan@kernel.org>
+Link: https://lkml.kernel.org/r/20230317190432.GA863767%40dev-arch.thelio-3990X
+Cc: Emanuele Giuseppe Esposito <eesposit@redhat.com>
+Cc: Pawan Gupta <pawan.kumar.gupta@linux.intel.com>
+Cc: Jim Mattson <jmattson@google.com>
+Signed-off-by: Sean Christopherson <seanjc@google.com>
+Link: https://lore.kernel.org/r/20230322011440.2195485-2-seanjc@google.com
+---
+ arch/x86/kvm/cpuid.c      |  2 +-
+ arch/x86/kvm/svm/svm.c    | 43 ++++++++-----------------
+ arch/x86/kvm/vmx/nested.c |  3 --
+ arch/x86/kvm/vmx/vmx.c    | 68 ++++++++++++++-------------------------
+ 4 files changed, 39 insertions(+), 77 deletions(-)
+
+diff --git a/arch/x86/kvm/cpuid.c b/arch/x86/kvm/cpuid.c
+index 9583a110cf5f..599aebec2d52 100644
+--- a/arch/x86/kvm/cpuid.c
++++ b/arch/x86/kvm/cpuid.c
+@@ -653,7 +653,7 @@ void kvm_set_cpu_caps(void)
+ 		F(SPEC_CTRL_SSBD) | F(ARCH_CAPABILITIES) | F(INTEL_STIBP) |
+ 		F(MD_CLEAR) | F(AVX512_VP2INTERSECT) | F(FSRM) |
+ 		F(SERIALIZE) | F(TSXLDTRK) | F(AVX512_FP16) |
+-		F(AMX_TILE) | F(AMX_INT8) | F(AMX_BF16) | F(FLUSH_L1D)
++		F(AMX_TILE) | F(AMX_INT8) | F(AMX_BF16)
+ 	);
+ 
+ 	/* TSC_ADJUST and ARCH_CAPABILITIES are emulated in software. */
+diff --git a/arch/x86/kvm/svm/svm.c b/arch/x86/kvm/svm/svm.c
+index 70183d2271b5..252e7f37e4e2 100644
+--- a/arch/x86/kvm/svm/svm.c
++++ b/arch/x86/kvm/svm/svm.c
+@@ -2869,28 +2869,6 @@ static int svm_set_vm_cr(struct kvm_vcpu *vcpu, u64 data)
+ 	return 0;
+ }
+ 
+-static int svm_set_msr_ia32_cmd(struct kvm_vcpu *vcpu, struct msr_data *msr,
+-				bool guest_has_feat, u64 cmd,
+-				int x86_feature_bit)
+-{
+-	struct vcpu_svm *svm = to_svm(vcpu);
+-
+-	if (!msr->host_initiated && !guest_has_feat)
+-		return 1;
+-
+-	if (!(msr->data & ~cmd))
+-		return 1;
+-	if (!boot_cpu_has(x86_feature_bit))
+-		return 1;
+-	if (!msr->data)
+-		return 0;
+-
+-	wrmsrl(msr->index, cmd);
+-	set_msr_interception(vcpu, svm->msrpm, msr->index, 0, 1);
+-
+-	return 0;
+-}
+-
+ static int svm_set_msr(struct kvm_vcpu *vcpu, struct msr_data *msr)
+ {
+ 	struct vcpu_svm *svm = to_svm(vcpu);
+@@ -2965,14 +2943,19 @@ static int svm_set_msr(struct kvm_vcpu *vcpu, struct msr_data *msr)
+ 		set_msr_interception(vcpu, svm->msrpm, MSR_IA32_SPEC_CTRL, 1, 1);
+ 		break;
+ 	case MSR_IA32_PRED_CMD:
+-		r = svm_set_msr_ia32_cmd(vcpu, msr,
+-					 guest_has_pred_cmd_msr(vcpu),
+-					 PRED_CMD_IBPB, X86_FEATURE_IBPB);
+-		break;
+-	case MSR_IA32_FLUSH_CMD:
+-		r = svm_set_msr_ia32_cmd(vcpu, msr,
+-					 guest_cpuid_has(vcpu, X86_FEATURE_FLUSH_L1D),
+-					 L1D_FLUSH, X86_FEATURE_FLUSH_L1D);
++		if (!msr->host_initiated &&
++		    !guest_has_pred_cmd_msr(vcpu))
++			return 1;
++
++		if (data & ~PRED_CMD_IBPB)
++			return 1;
++		if (!boot_cpu_has(X86_FEATURE_IBPB))
++			return 1;
++		if (!data)
++			break;
++
++		wrmsrl(MSR_IA32_PRED_CMD, PRED_CMD_IBPB);
++		set_msr_interception(vcpu, svm->msrpm, MSR_IA32_PRED_CMD, 0, 1);
+ 		break;
+ 	case MSR_AMD64_VIRT_SPEC_CTRL:
+ 		if (!msr->host_initiated &&
+diff --git a/arch/x86/kvm/vmx/nested.c b/arch/x86/kvm/vmx/nested.c
+index f63b28f46a71..1bc2b80273c9 100644
+--- a/arch/x86/kvm/vmx/nested.c
++++ b/arch/x86/kvm/vmx/nested.c
+@@ -654,9 +654,6 @@ static inline bool nested_vmx_prepare_msr_bitmap(struct kvm_vcpu *vcpu,
+ 	nested_vmx_set_intercept_for_msr(vmx, msr_bitmap_l1, msr_bitmap_l0,
+ 					 MSR_IA32_PRED_CMD, MSR_TYPE_W);
+ 
+-	nested_vmx_set_intercept_for_msr(vmx, msr_bitmap_l1, msr_bitmap_l0,
+-					 MSR_IA32_FLUSH_CMD, MSR_TYPE_W);
+-
+ 	kvm_vcpu_unmap(vcpu, &vmx->nested.msr_bitmap_map, false);
+ 
+ 	vmx->nested.force_msr_bitmap_recalc = false;
+diff --git a/arch/x86/kvm/vmx/vmx.c b/arch/x86/kvm/vmx/vmx.c
+index d7bf14abdba1..f777509ecf17 100644
+--- a/arch/x86/kvm/vmx/vmx.c
++++ b/arch/x86/kvm/vmx/vmx.c
+@@ -2133,39 +2133,6 @@ static u64 vmx_get_supported_debugctl(struct kvm_vcpu *vcpu, bool host_initiated
+ 	return debugctl;
+ }
+ 
+-static int vmx_set_msr_ia32_cmd(struct kvm_vcpu *vcpu,
+-				struct msr_data *msr_info,
+-				bool guest_has_feat, u64 cmd,
+-				int x86_feature_bit)
+-{
+-	if (!msr_info->host_initiated && !guest_has_feat)
+-		return 1;
+-
+-	if (!(msr_info->data & ~cmd))
+-		return 1;
+-	if (!boot_cpu_has(x86_feature_bit))
+-		return 1;
+-	if (!msr_info->data)
+-		return 0;
+-
+-	wrmsrl(msr_info->index, cmd);
+-
+-	/*
+-	 * For non-nested:
+-	 * When it's written (to non-zero) for the first time, pass
+-	 * it through.
+-	 *
+-	 * For nested:
+-	 * The handling of the MSR bitmap for L2 guests is done in
+-	 * nested_vmx_prepare_msr_bitmap. We should not touch the
+-	 * vmcs02.msr_bitmap here since it gets completely overwritten
+-	 * in the merging.
+-	 */
+-	vmx_disable_intercept_for_msr(vcpu, msr_info->index, MSR_TYPE_W);
+-
+-	return 0;
+-}
+-
+ /*
+  * Writes msr value into the appropriate "register".
+  * Returns 0 on success, non-0 otherwise.
+@@ -2319,16 +2286,31 @@ static int vmx_set_msr(struct kvm_vcpu *vcpu, struct msr_data *msr_info)
+ 			return 1;
+ 		goto find_uret_msr;
+ 	case MSR_IA32_PRED_CMD:
+-		ret = vmx_set_msr_ia32_cmd(vcpu, msr_info,
+-					   guest_has_pred_cmd_msr(vcpu),
+-					   PRED_CMD_IBPB,
+-					   X86_FEATURE_IBPB);
+-		break;
+-	case MSR_IA32_FLUSH_CMD:
+-		ret = vmx_set_msr_ia32_cmd(vcpu, msr_info,
+-					   guest_cpuid_has(vcpu, X86_FEATURE_FLUSH_L1D),
+-					   L1D_FLUSH,
+-					   X86_FEATURE_FLUSH_L1D);
++		if (!msr_info->host_initiated &&
++		    !guest_has_pred_cmd_msr(vcpu))
++			return 1;
++
++		if (data & ~PRED_CMD_IBPB)
++			return 1;
++		if (!boot_cpu_has(X86_FEATURE_IBPB))
++			return 1;
++		if (!data)
++			break;
++
++		wrmsrl(MSR_IA32_PRED_CMD, PRED_CMD_IBPB);
++
++		/*
++		 * For non-nested:
++		 * When it's written (to non-zero) for the first time, pass
++		 * it through.
++		 *
++		 * For nested:
++		 * The handling of the MSR bitmap for L2 guests is done in
++		 * nested_vmx_prepare_msr_bitmap. We should not touch the
++		 * vmcs02.msr_bitmap here since it gets completely overwritten
++		 * in the merging.
++		 */
++		vmx_disable_intercept_for_msr(vcpu, MSR_IA32_PRED_CMD, MSR_TYPE_W);
+ 		break;
+ 	case MSR_IA32_CR_PAT:
+ 		if (!kvm_pat_valid(data))
+-- 
+2.40.0.rc2.332.ga46443480c-goog
+

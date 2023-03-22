@@ -3,7 +3,7 @@
 
 _localversion=-llvm
 pkgname=linux-next$_localversion
-_srctag=next-20230321
+_srctag=next-20230322
 pkgver=${_srctag//-/.}
 pkgrel=1
 pkgdesc='linux-next'
@@ -17,8 +17,7 @@ options=('!strip')
 source=(
   "$pkgname::git+https://git.kernel.org/pub/scm/linux/kernel/git/next/linux-next.git?signed#tag=$_srctag"
   config
-  missing-sentinel-memory-failure.patch
-  wip-kvm-vmx-svm-fix.patch
+  20230321_seanjc_kvm_x86_revert_msr_ia32_flush_cmd_flush_l1d_enabling.patch
 )
 
 validpgpkeys=(
@@ -26,9 +25,8 @@ validpgpkeys=(
   '3F2568AAC26998F9E813A1C5C3F436CA30F5D8EB'  # Mark Brown
 )
 sha256sums=('SKIP'
-            '7edc52472cfb2dc00e3722255c734b6a2d6e0134e71f407eb785b58f8f3a3be1'
-            'bf6f21d83de7d3c606c36300055800fe1fddde943d7075b24781a7586dbec3bf'
-            '851eb90937506ed7ab1d5e114bcca5ed766a139fe0cc7d9b45beb3b6d9e8d6fc')
+            '2a65fcbf3d32b14eb622f68c46b26f04271692b7a9bca30f3ffb1dc1ce9d21ad'
+            '9b29d614dc0447b0a93d07dcd55f033dc73d7ddeaae4a820b7aee224f1bc79cb')
 
 # This obviously ties this PKGBUILD to my machine but that is kind of the point :)
 _kmake() {
