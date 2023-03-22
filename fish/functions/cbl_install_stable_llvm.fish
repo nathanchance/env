@@ -12,11 +12,20 @@ function cbl_install_stable_llvm -d "Download and unpack my LLVM toolchains from
 
         mkdir -p $dst
 
+        set tar_args \
+            --directory=$dst \
+            --extract \
+            --strip-components=1 \
+            --verbose
+
         set local_tarball $NAS_FOLDER/Toolchains/llvm-$llvm_version-(uname -m).tar.zst
         if test -e $local_tarball
-            tar -C $dst --strip-components=1 -axvf $local_tarball
+            tar \
+                $tar_args \
+                --auto-compress \
+                --file=$local_tarball
         else
-            crl https://kernel.org/pub/linux/kernel/people/nathan/llvm/(string replace zst xz (basename $local_tarball)) | tar -C $dst --strip-components=1 -xJvf -
+            crl https://kernel.org/pub/linux/kernel/people/nathan/llvm/(string replace zst xz (basename $local_tarball)) | tar $tar_args --file=- --xz
         end; or return
     end
 end
