@@ -171,7 +171,9 @@ selinux_enabled = (enforce := Path('/sys/fs/selinux/enforce')).exists() and \
                   int(enforce.read_text(encoding='utf-8')) == 1
 
 for version in versions:
-    if (llvm_install := Path(install_folder, f"llvm-{version}")).joinpath('bin/clang').exists():
+    if (llvm_install :=
+            Path(install_folder,
+                 f"llvm-{version}-{platform.machine()}")).joinpath('bin/clang').exists():
         print(
             f"LLVM {version} has already been built in {llvm_install}, remove installation to rebuild!",
         )
@@ -213,8 +215,7 @@ for version in versions:
     ]
     subprocess.run(build_cmd, check=True)
 
-    tarball_name = f"{llvm_install.name}-{platform.machine()}.tar"
-    llvm_tarball = Path(llvm_install.parent, tarball_name)
+    llvm_tarball = Path(llvm_install.parent, f"{llvm_install.name}.tar")
     tar_cmd = [
         'tar',
         '--create',
