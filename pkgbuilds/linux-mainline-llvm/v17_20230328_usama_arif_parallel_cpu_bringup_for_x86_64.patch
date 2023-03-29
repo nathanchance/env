@@ -1,9 +1,9 @@
 From git@z Thu Jan  1 00:00:00 1970
-Subject: [PATCH v16 1/8] cpu/hotplug: Move idle_thread_get() to
+Subject: [PATCH v17 1/8] cpu/hotplug: Move idle_thread_get() to
  <linux/smpboot.h>
 From: David Woodhouse <dwmw@amazon.co.uk>
-Date: Tue, 21 Mar 2023 19:40:01 +0000
-Message-Id: <20230321194008.785922-2-usama.arif@bytedance.com>
+Date: Tue, 28 Mar 2023 20:57:51 +0100
+Message-Id: <20230328195758.1049469-2-usama.arif@bytedance.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 7bit
@@ -27,7 +27,9 @@ Tested-by: Paul E. McKenney <paulmck@kernel.org>
 Tested-by: Kim Phillips <kim.phillips@amd.com>
 Tested-by: Oleksandr Natalenko <oleksandr@natalenko.name>
 Tested-by: Guilherme G. Piccoli <gpiccoli@igalia.com>
-Link: https://lore.kernel.org/r/20230321194008.785922-2-usama.arif@bytedance.com
+Reviewed-by: Mark Rutland <mark.rutland@arm.com>
+Tested-by: Mark Rutland <mark.rutland@arm.com> [arm64]
+Link: https://lore.kernel.org/r/20230328195758.1049469-2-usama.arif@bytedance.com
 ---
  include/linux/smpboot.h | 7 +++++++
  kernel/smpboot.h        | 2 --
@@ -71,17 +73,17 @@ index 34dd3d7ba40b..60c609318ad6 100644
 2.25.1
 
 From git@z Thu Jan  1 00:00:00 1970
-Subject: [PATCH v16 2/8] cpu/hotplug: Reset task stack state in _cpu_up()
+Subject: [PATCH v17 2/8] cpu/hotplug: Reset task stack state in _cpu_up()
 From: David Woodhouse <dwmw@amazon.co.uk>
-Date: Tue, 21 Mar 2023 19:40:02 +0000
-Message-Id: <20230321194008.785922-3-usama.arif@bytedance.com>
+Date: Tue, 28 Mar 2023 20:57:52 +0100
+Message-Id: <20230328195758.1049469-3-usama.arif@bytedance.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 7bit
 
 Commit dce1ca0525bf ("sched/scs: Reset task stack state in bringup_cpu()")
-ensured that the shadow call stack and KASAN poisoning were removed from
-a CPU's stack each time that CPU is brought up, not just once.
+ensured that the shadow call stack was reset and KASAN poisoning removed
+from a CPU's stack each time that CPU is brought up, not just once.
 
 This is not incorrect. However, with parallel bringup, an architecture
 may obtain the idle thread for a new CPU from a pre-bringup stage, by
@@ -95,7 +97,9 @@ in the CPUHP_OFFLINE state, which should correctly do the cleanup any
 time the CPU has been taken down to the point where such is needed.
 
 Signed-off-by: David Woodhouse <dwmw@amazon.co.uk>
-Link: https://lore.kernel.org/r/20230321194008.785922-3-usama.arif@bytedance.com
+Reviewed-by: Mark Rutland <mark.rutland@arm.com>
+Tested-by: Mark Rutland <mark.rutland@arm.com> [arm64]
+Link: https://lore.kernel.org/r/20230328195758.1049469-3-usama.arif@bytedance.com
 ---
  kernel/cpu.c | 12 ++++++------
  1 file changed, 6 insertions(+), 6 deletions(-)
@@ -134,50 +138,56 @@ index 6c0a92ca6bb5..43e0a77f21e8 100644
 2.25.1
 
 From git@z Thu Jan  1 00:00:00 1970
-Subject: [PATCH v16 3/8] cpu/hotplug: Add dynamic parallel bringup states
+Subject: [PATCH v17 3/8] cpu/hotplug: Add CPUHP_BP_PARALLEL_STARTUP state
  before CPUHP_BRINGUP_CPU
 From: David Woodhouse <dwmw@amazon.co.uk>
-Date: Tue, 21 Mar 2023 19:40:03 +0000
-Message-Id: <20230321194008.785922-4-usama.arif@bytedance.com>
+Date: Tue, 28 Mar 2023 20:57:53 +0100
+Message-Id: <20230328195758.1049469-4-usama.arif@bytedance.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 7bit
 
 There is often significant latency in the early stages of CPU bringup,
 and time is wasted by waking each CPU (e.g. with SIPI/INIT/INIT on x86)
-and then waiting for it to respond before moving on to the next.
+and then waiting for it to make its way through hardware powerup and
+through firmware before finally reaching the kernel entry point and
+moving on through its startup.
 
-Allow a platform to register a set of pre-bringup CPUHP states to which
-each CPU can be stepped in parallel, thus absorbing some of that latency.
+Allow a platform to register a pre-bringup CPUHP state to which each
+CPU can be stepped in parallel, thus absorbing some of that latency.
 
-There is a subtlety here: even with an empty CPUHP_BP_PARALLEL_DYN step,
-this means that *all* CPUs are brought through the prepare states and to
-CPUHP_BP_PREPARE_DYN before any of them are taken to CPUHP_BRINGUP_CPU
-and then are allowed to run for themselves to CPUHP_ONLINE.
+There is a subtlety here: even with an empty CPUHP_BP_PARALLEL_STARTUP
+step, this means that *all* CPUs are brought through the prepare states
+all the way to CPUHP_BP_PARALLEL_STARTUP before any of them are taken
+to CPUHP_BRINGUP_CPU and then are allowed to run for themselves to
+CPUHP_ONLINE.
 
 So any combination of prepare/start calls which depend on A-B ordering
-for each CPU in turn, such as the X2APIC code which used to allocate a
-cluster mask 'just in case' and store it in a global variable in the
-prep stage, then potentially consume that preallocated structure from
-the AP and set the global pointer to NULL to be reallocated in
-CPUHP_X2APIC_PREPARE for the next CPU... would explode horribly.
+for each CPU in turn would explore horribly. As an example, the X2APIC
+code prior to commit cefad862f238 ("x86/apic/x2apic: Allow CPU
+cluster_mask to be populated in parallel") would allocate a new cluster
+mask "just in case" and store it in a global variable in the prep stage,
+then the AP would potentially consume that preallocated structure and set
+the global pointer to NULL to be reallocated in CPUHP_X2APIC_PREPARE for
+the next CPU. Which doesn't work at all if the prepare step is run for
+all the CPUs first.
 
-Any platform enabling the CPUHP_BP_PARALLEL_DYN steps must be reviewed
-and tested to ensure that such issues do not exist, and the existing
-behaviour of bringing CPUs to CPUHP_BP_PREPARE_DYN and then immediately
-to CPUHP_BRINGUP_CPU and CPUHP_ONLINE only one at a time does not change
-unless such a state is registered.
+Any platform enabling the CPUHP_BP_PARALLEL_STARTUP step must be
+reviewed and tested to ensure that such issues do not exist, and the
+existing behaviour of each AP through to CPUHP_BP_PREPARE_DYN and then
+immediately to CPUHP_BRINGUP_CPU and CPUHP_ONLINE only one at a time
+does not change unless such a state is registered.
 
-Note that the new parallel stages do *not* yet bring each AP to the
-CPUHP_BRINGUP_CPU state at the same time, only to the new states which
-exist before it. The final loop in bringup_nonboot_cpus() is untouched,
-bringing each AP in turn from the final PARALLEL_DYN state (or all the
-way from CPUHP_OFFLINE) to CPUHP_BRINGUP_CPU and then waiting for that
-AP to do its own processing and reach CPUHP_ONLINE before releasing the
-next.
+Note that this does *not* yet bring each AP to the CPUHP_BRINGUP_CPU
+state at the same time, only to the new CPUHP_BP_PARALLEL_STARTUP state.
+The final loop in bringup_nonboot_cpus() remains the same, bringing each
+AP in turn from the CPUHP_BP_PARALLEL_STARTUP (or all the way from
+CPUHP_OFFLINE) to CPUHP_BRINGUP_CPU and then waiting for that AP to do
+its own processing and reach CPUHP_ONLINE before releasing the next.
 
-Parallelising that part by bringing them all to CPUHP_BRINGUP_CPU
-and then waiting for them all is an exercise for the future.
+Parallelising that part by bringing them all to CPUHP_BRINGUP_CPU and
+then waiting for them all to run to CPUHP_ONLINE at the same time is a
+more complicated exercise for the future.
 
 Signed-off-by: David Woodhouse <dwmw@amazon.co.uk>
 Signed-off-by: Usama Arif <usama.arif@bytedance.com>
@@ -185,119 +195,109 @@ Tested-by: Paul E. McKenney <paulmck@kernel.org>
 Tested-by: Kim Phillips <kim.phillips@amd.com>
 Tested-by: Oleksandr Natalenko <oleksandr@natalenko.name>
 Tested-by: Guilherme G. Piccoli <gpiccoli@igalia.com>
-Link: https://lore.kernel.org/r/20230321194008.785922-4-usama.arif@bytedance.com
+Reviewed-by: Mark Rutland <mark.rutland@arm.com>
+Tested-by: Mark Rutland <mark.rutland@arm.com> [arm64]
+Link: https://lore.kernel.org/r/20230328195758.1049469-4-usama.arif@bytedance.com
 ---
- include/linux/cpuhotplug.h |  2 ++
- kernel/cpu.c               | 49 ++++++++++++++++++++++++++++++++++----
- 2 files changed, 47 insertions(+), 4 deletions(-)
+ include/linux/cpuhotplug.h | 22 ++++++++++++++++++++++
+ kernel/cpu.c               | 38 +++++++++++++++++++++++++++++++++++---
+ 2 files changed, 57 insertions(+), 3 deletions(-)
 
 diff --git a/include/linux/cpuhotplug.h b/include/linux/cpuhotplug.h
-index c6fab004104a..ef3cf69a3d5b 100644
+index c6fab004104a..84efd33ed3a3 100644
 --- a/include/linux/cpuhotplug.h
 +++ b/include/linux/cpuhotplug.h
-@@ -133,6 +133,8 @@ enum cpuhp_state {
+@@ -133,6 +133,28 @@ enum cpuhp_state {
  	CPUHP_MIPS_SOC_PREPARE,
  	CPUHP_BP_PREPARE_DYN,
  	CPUHP_BP_PREPARE_DYN_END		= CPUHP_BP_PREPARE_DYN + 20,
-+	CPUHP_BP_PARALLEL_DYN,
-+	CPUHP_BP_PARALLEL_DYN_END		= CPUHP_BP_PARALLEL_DYN + 4,
++	/*
++	 * This is an optional state if the architecture supports parallel
++	 * startup. It's used to start bringing the CPU online (e.g. send
++	 * the startup IPI) so that the APs can run in parallel through
++	 * the low level startup code instead of waking them one by one in
++	 * CPUHP_BRINGUP_CPU. This avoids waiting for the AP to react and
++	 * shortens the serialized phase of the bringup.
++	 *
++	 * If the architecture registers this state, all APs will be taken
++	 * to it (and thus through all prior states) before any is taken
++	 * to the subsequent CPUHP_BRINGUP_CPU state.
++	 */
++	CPUHP_BP_PARALLEL_STARTUP,
++
++	/*
++	 * This step brings the AP online and takes it to the point where it
++	 * manages its own state from here on. For the time being, the rest
++	 * of the AP bringup is fully serialized despite running on the AP.
++	 * If the architecture doesn't use the CPUHP_BP_PARALLEL_STARTUP
++	 * state, this step also does all the work of bringing the CPU
++	 * online.
++	 */
  	CPUHP_BRINGUP_CPU,
  
  	/*
 diff --git a/kernel/cpu.c b/kernel/cpu.c
-index 43e0a77f21e8..cf3c1c6f0710 100644
+index 43e0a77f21e8..3382273ea3f4 100644
 --- a/kernel/cpu.c
 +++ b/kernel/cpu.c
-@@ -1504,13 +1504,49 @@ int bringup_hibernate_cpu(unsigned int sleep_cpu)
+@@ -1504,13 +1504,45 @@ int bringup_hibernate_cpu(unsigned int sleep_cpu)
  
  void bringup_nonboot_cpus(unsigned int setup_max_cpus)
  {
-+	unsigned int n = setup_max_cpus - num_online_cpus();
- 	unsigned int cpu;
+-	unsigned int cpu;
++	unsigned int cpu, n = num_online_cpus();
  
 +	/*
-+	 * An architecture may have registered parallel pre-bringup states to
-+	 * which each CPU may be brought in parallel. For each such state,
-+	 * bring N CPUs to it in turn before the final round of bringing them
-+	 * online.
++	 * On architectures which have setup the CPUHP_BP_PARALLEL_STARTUP
++	 * state, this invokes all BP prepare states and the parallel
++	 * startup state sends the startup IPI to each of the to be onlined
++	 * APs. This avoids waiting for each AP to respond to the startup
++	 * IPI in CPUHP_BRINGUP_CPU. The APs proceed through the low level
++	 * bringup code and then wait for the control CPU to release them
++	 * one by one for the final onlining procedure in the loop below.
++	 *
++	 * For architectures which do not support parallel bringup all
++	 * states are fully serialized in the loop below.
 +	 */
-+	if (n > 0) {
-+		enum cpuhp_state st = CPUHP_BP_PARALLEL_DYN;
-+
-+		while (st <= CPUHP_BP_PARALLEL_DYN_END && cpuhp_hp_states[st].name) {
-+			int i = n;
-+
-+			for_each_present_cpu(cpu) {
-+				cpu_up(cpu, st);
-+				if (!--i)
-+					break;
-+			}
-+			st++;
++	if (!cpuhp_step_empty(true, cpuhp_get_step(CPUHP_BP_PARALLEL_STARTUP))) {
++		for_each_present_cpu(cpu) {
++			if (n++ >= setup_max_cpus)
++				break;
++			cpu_up(cpu, CPUHP_BP_PARALLEL_STARTUP);
 +		}
 +	}
 +
++	/* Do the per CPU serialized bringup to ONLINE state */
  	for_each_present_cpu(cpu) {
  		if (num_online_cpus() >= setup_max_cpus)
  			break;
 -		if (!cpu_online(cpu))
 -			cpu_up(cpu, CPUHP_ONLINE);
++
 +		if (!cpu_online(cpu)) {
++			struct cpuhp_cpu_state *st = per_cpu_ptr(&cpuhp_state, cpu);
 +			int ret = cpu_up(cpu, CPUHP_ONLINE);
 +
 +			/*
-+			 * For the parallel bringup case, roll all the way back
-+			 * to CPUHP_OFFLINE on failure; don't leave them in the
-+			 * parallel stages. This happens in the nosmt case for
-+			 * non-primary threads.
++			 * Due to the above preparation loop a failed online attempt
++			 * might have only rolled back to CPUHP_BP_PARALLEL_STARTUP. Do the
++			 * remaining cleanups. NOOP for the non parallel case.
 +			 */
-+			if (ret && cpuhp_hp_states[CPUHP_BP_PARALLEL_DYN].name) {
-+				struct cpuhp_cpu_state *st = per_cpu_ptr(&cpuhp_state, cpu);
-+				if (can_rollback_cpu(st))
-+					WARN_ON(cpuhp_invoke_callback_range(false, cpu, st,
-+									    CPUHP_OFFLINE));
-+			}
++			if (ret && can_rollback_cpu(st))
++				WARN_ON(cpuhp_invoke_callback_range(false, cpu, st, CPUHP_OFFLINE));
 +		}
  	}
  }
  
-@@ -1882,6 +1918,10 @@ static int cpuhp_reserve_state(enum cpuhp_state state)
- 		step = cpuhp_hp_states + CPUHP_BP_PREPARE_DYN;
- 		end = CPUHP_BP_PREPARE_DYN_END;
- 		break;
-+	case CPUHP_BP_PARALLEL_DYN:
-+		step = cpuhp_hp_states + CPUHP_BP_PARALLEL_DYN;
-+		end = CPUHP_BP_PARALLEL_DYN_END;
-+		break;
- 	default:
- 		return -EINVAL;
- 	}
-@@ -1906,14 +1946,15 @@ static int cpuhp_store_callbacks(enum cpuhp_state state, const char *name,
- 	/*
- 	 * If name is NULL, then the state gets removed.
- 	 *
--	 * CPUHP_AP_ONLINE_DYN and CPUHP_BP_PREPARE_DYN are handed out on
-+	 * CPUHP_AP_ONLINE_DYN and CPUHP_BP_P*_DYN are handed out on
- 	 * the first allocation from these dynamic ranges, so the removal
- 	 * would trigger a new allocation and clear the wrong (already
- 	 * empty) state, leaving the callbacks of the to be cleared state
- 	 * dangling, which causes wreckage on the next hotplug operation.
- 	 */
- 	if (name && (state == CPUHP_AP_ONLINE_DYN ||
--		     state == CPUHP_BP_PREPARE_DYN)) {
-+		     state == CPUHP_BP_PREPARE_DYN ||
-+		     state == CPUHP_BP_PARALLEL_DYN)) {
- 		ret = cpuhp_reserve_state(state);
- 		if (ret < 0)
- 			return ret;
 -- 
 2.25.1
 
 From git@z Thu Jan  1 00:00:00 1970
-Subject: [PATCH v16 4/8] x86/smpboot: Split up native_cpu_up into separate
+Subject: [PATCH v17 4/8] x86/smpboot: Split up native_cpu_up into separate
  phases and document them
 From: David Woodhouse <dwmw@amazon.co.uk>
-Date: Tue, 21 Mar 2023 19:40:04 +0000
-Message-Id: <20230321194008.785922-5-usama.arif@bytedance.com>
+Date: Tue, 28 Mar 2023 20:57:54 +0100
+Message-Id: <20230328195758.1049469-5-usama.arif@bytedance.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 7bit
@@ -309,10 +309,14 @@ on the controlling CPU for a later hotplug):
 
  2) Wait for the AP to make it as far as wait_for_master_cpu() which
     sets that CPU's bit in cpu_initialized_mask, then sets the bit in
-    cpu_callout_mask to let the AP proceed through cpu_init().
+    cpu_callout_mask to let the AP proceed through cpu_init(). From
+    this point on, the AP is in control of its own CPUHP state, as it
+    will call notify_cpu_starting() from smp_callin() without waiting
+    in step 3 below.
 
- 3) Wait for the AP to finish cpu_init() and get as far as the
-    smp_callin() call, which sets that CPU's bit in cpu_callin_mask.
+ 3) Wait for the AP to reach CPUHP_AP_ONLINE state and get to the end
+    of the smp_callin() function, which sets that CPU's bit in
+    cpu_callin_mask.
 
  4) Perform the TSC synchronization and wait for the AP to actually
     mark itself online in cpu_online_mask.
@@ -329,13 +333,13 @@ Tested-by: Paul E. McKenney <paulmck@kernel.org>
 Tested-by: Kim Phillips <kim.phillips@amd.com>
 Tested-by: Oleksandr Natalenko <oleksandr@natalenko.name>
 Tested-by: Guilherme G. Piccoli <gpiccoli@igalia.com>
-Link: https://lore.kernel.org/r/20230321194008.785922-5-usama.arif@bytedance.com
+Link: https://lore.kernel.org/r/20230328195758.1049469-5-usama.arif@bytedance.com
 ---
- arch/x86/kernel/smpboot.c | 179 ++++++++++++++++++++++++++------------
- 1 file changed, 125 insertions(+), 54 deletions(-)
+ arch/x86/kernel/smpboot.c | 180 ++++++++++++++++++++++++++------------
+ 1 file changed, 126 insertions(+), 54 deletions(-)
 
 diff --git a/arch/x86/kernel/smpboot.c b/arch/x86/kernel/smpboot.c
-index 851477f7d728..2a8a18e23cc6 100644
+index 851477f7d728..177ac98f5721 100644
 --- a/arch/x86/kernel/smpboot.c
 +++ b/arch/x86/kernel/smpboot.c
 @@ -204,6 +204,10 @@ static void smp_callin(void)
@@ -349,7 +353,7 @@ index 851477f7d728..2a8a18e23cc6 100644
  	notify_cpu_starting(cpuid);
  
  	/*
-@@ -231,17 +235,32 @@ static void notrace start_secondary(void *unused)
+@@ -231,17 +235,33 @@ static void notrace start_secondary(void *unused)
  	load_cr3(swapper_pg_dir);
  	__flush_tlb_all();
  #endif
@@ -366,7 +370,8 @@ index 851477f7d728..2a8a18e23cc6 100644
 +	/*
 +	 * Sync point with do_wait_cpu_callin(). The AP doesn't wait here
 +	 * but just sets the bit to let the controlling CPU (BSP) know that
-+	 * it's got this far.
++	 * it's got this far. The notify_cpu_starting() function is called
++	 * from smp_callin(), which advances the AP state to CPUHP_AP_ONLINE.
 +	 */
  	smp_callin();
  
@@ -383,7 +388,7 @@ index 851477f7d728..2a8a18e23cc6 100644
  	 */
  	check_tsc_sync_target();
  
-@@ -254,6 +273,7 @@ static void notrace start_secondary(void *unused)
+@@ -254,6 +274,7 @@ static void notrace start_secondary(void *unused)
  	 * half valid vector space.
  	 */
  	lock_vector_lock();
@@ -391,7 +396,7 @@ index 851477f7d728..2a8a18e23cc6 100644
  	set_cpu_online(smp_processor_id(), true);
  	lapic_online();
  	unlock_vector_lock();
-@@ -1081,7 +1101,6 @@ static int do_boot_cpu(int apicid, int cpu, struct task_struct *idle,
+@@ -1081,7 +1102,6 @@ static int do_boot_cpu(int apicid, int cpu, struct task_struct *idle,
  	unsigned long start_ip = real_mode_header->trampoline_start;
  
  	unsigned long boot_error = 0;
@@ -399,7 +404,7 @@ index 851477f7d728..2a8a18e23cc6 100644
  
  #ifdef CONFIG_X86_64
  	/* If 64-bit wakeup method exists, use the 64-bit mode trampoline IP */
-@@ -1147,55 +1166,94 @@ static int do_boot_cpu(int apicid, int cpu, struct task_struct *idle,
+@@ -1147,55 +1167,94 @@ static int do_boot_cpu(int apicid, int cpu, struct task_struct *idle,
  		boot_error = wakeup_cpu_via_init_nmi(cpu, start_ip, apicid,
  						     cpu0_nmi_registered);
  
@@ -533,7 +538,7 @@ index 851477f7d728..2a8a18e23cc6 100644
  	int err, ret = 0;
  
  	lockdep_assert_irqs_enabled();
-@@ -1242,19 +1300,6 @@ int native_cpu_up(unsigned int cpu, struct task_struct *tidle)
+@@ -1242,19 +1301,6 @@ int native_cpu_up(unsigned int cpu, struct task_struct *tidle)
  		goto unreg_nmi;
  	}
  
@@ -553,7 +558,7 @@ index 851477f7d728..2a8a18e23cc6 100644
  unreg_nmi:
  	/*
  	 * Clean up the nmi handler. Do this after the callin and callout sync
-@@ -1266,6 +1311,32 @@ int native_cpu_up(unsigned int cpu, struct task_struct *tidle)
+@@ -1266,6 +1312,32 @@ int native_cpu_up(unsigned int cpu, struct task_struct *tidle)
  	return ret;
  }
  
@@ -590,11 +595,11 @@ index 851477f7d728..2a8a18e23cc6 100644
 2.25.1
 
 From git@z Thu Jan  1 00:00:00 1970
-Subject: [PATCH v16 5/8] x86/smpboot: Support parallel startup of secondary
+Subject: [PATCH v17 5/8] x86/smpboot: Support parallel startup of secondary
  CPUs
 From: David Woodhouse <dwmw@amazon.co.uk>
-Date: Tue, 21 Mar 2023 19:40:05 +0000
-Message-Id: <20230321194008.785922-6-usama.arif@bytedance.com>
+Date: Tue, 28 Mar 2023 20:57:55 +0100
+Message-Id: <20230328195758.1049469-6-usama.arif@bytedance.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 8bit
@@ -644,7 +649,7 @@ Tested-by: Paul E. McKenney <paulmck@kernel.org>
 Tested-by: Kim Phillips <kim.phillips@amd.com>
 Tested-by: Oleksandr Natalenko <oleksandr@natalenko.name>
 Tested-by: Guilherme G. Piccoli <gpiccoli@igalia.com>
-Link: https://lore.kernel.org/r/20230321194008.785922-6-usama.arif@bytedance.com
+Link: https://lore.kernel.org/r/20230328195758.1049469-6-usama.arif@bytedance.com
 ---
  .../admin-guide/kernel-parameters.txt         |  3 +
  arch/x86/include/asm/cpu.h                    |  1 +
@@ -883,10 +888,10 @@ index 6a8238702eab..ff3a5f008d8a 100644
  
  	__INIT
 diff --git a/arch/x86/kernel/smpboot.c b/arch/x86/kernel/smpboot.c
-index 2a8a18e23cc6..8f7f36721ea8 100644
+index 177ac98f5721..45f3d08321fe 100644
 --- a/arch/x86/kernel/smpboot.c
 +++ b/arch/x86/kernel/smpboot.c
-@@ -797,6 +797,16 @@ static int __init cpu_init_udelay(char *str)
+@@ -798,6 +798,16 @@ static int __init cpu_init_udelay(char *str)
  }
  early_param("cpu_init_udelay", cpu_init_udelay);
  
@@ -903,7 +908,7 @@ index 2a8a18e23cc6..8f7f36721ea8 100644
  static void __init smp_quirk_init_udelay(void)
  {
  	/* if cmdline changed it from default, leave it alone */
-@@ -1113,7 +1123,7 @@ static int do_boot_cpu(int apicid, int cpu, struct task_struct *idle,
+@@ -1114,7 +1124,7 @@ static int do_boot_cpu(int apicid, int cpu, struct task_struct *idle,
  	if (IS_ENABLED(CONFIG_X86_32)) {
  		early_gdt_descr.address = (unsigned long)get_cpu_gdt_rw(cpu);
  		initial_stack  = idle->thread.sp;
@@ -912,7 +917,7 @@ index 2a8a18e23cc6..8f7f36721ea8 100644
  		smpboot_control = cpu;
  	}
  
-@@ -1473,6 +1483,41 @@ void __init smp_prepare_cpus_common(void)
+@@ -1474,6 +1484,41 @@ void __init smp_prepare_cpus_common(void)
  	set_cpu_sibling_map(0);
  }
  
@@ -954,7 +959,7 @@ index 2a8a18e23cc6..8f7f36721ea8 100644
  /*
   * Prepare for SMP bootup.
   * @max_cpus: configured maximum number of CPUs, It is a legacy parameter
-@@ -1513,6 +1558,9 @@ void __init native_smp_prepare_cpus(unsigned int max_cpus)
+@@ -1514,6 +1559,9 @@ void __init native_smp_prepare_cpus(unsigned int max_cpus)
  
  	speculative_store_bypass_ht_init();
  
@@ -1048,21 +1053,21 @@ index e38d61d6562e..2dfb1c400167 100644
 2.25.1
 
 From git@z Thu Jan  1 00:00:00 1970
-Subject: [PATCH v16 6/8] x86/smpboot: Send INIT/SIPI/SIPI to secondary CPUs
+Subject: [PATCH v17 6/8] x86/smpboot: Send INIT/SIPI/SIPI to secondary CPUs
  in parallel
 From: David Woodhouse <dwmw@amazon.co.uk>
-Date: Tue, 21 Mar 2023 19:40:06 +0000
-Message-Id: <20230321194008.785922-7-usama.arif@bytedance.com>
+Date: Tue, 28 Mar 2023 20:57:56 +0100
+Message-Id: <20230328195758.1049469-7-usama.arif@bytedance.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
-Content-Transfer-Encoding: 8bit
+Content-Transfer-Encoding: 7bit
 
 When the APs can find their own APIC ID without assistance, perform the
 AP bringup in parallel.
 
-Register a CPUHP_BP_PARALLEL_DYN stage "x86/cpu:kick" which just calls
-do_boot_cpu() to deliver INIT/SIPI/SIPI to each AP in turn before the
-normal native_cpu_up() does the rest of the hand-holding.
+Register a CPUHP_BP_PARALLEL_STARTUP stage "x86/cpu:kick" which just
+calls do_boot_cpu() to deliver INIT/SIPI/SIPI to each AP in turn before
+the normal native_cpu_up() does the rest of the hand-holding.
 
 The APs will then take turns through the real mode code (which has its
 own bitlock for exclusion) until they make it to their own stack, then
@@ -1085,25 +1090,19 @@ This reduces the time taken for bringup on my 28-thread Haswell system
 from about 120ms to 80ms. On a socket 96-thread Skylake it takes the
 bringup time from 500ms to 100ms.
 
-There is more speedup to be had by doing the remaining parts in parallel
-too — especially notify_cpu_starting() in which the AP takes itself
-through all the stages from CPUHP_BRINGUP_CPU to CPUHP_ONLINE. But those
-require careful auditing to ensure they are reentrant, before we can go
-that far.
-
 Signed-off-by: David Woodhouse <dwmw@amazon.co.uk>
 Signed-off-by: Usama Arif <usama.arif@bytedance.com>
 Tested-by: Paul E. McKenney <paulmck@kernel.org>
 Tested-by: Kim Phillips <kim.phillips@amd.com>
 Tested-by: Oleksandr Natalenko <oleksandr@natalenko.name>
 Tested-by: Guilherme G. Piccoli <gpiccoli@igalia.com>
-Link: https://lore.kernel.org/r/20230321194008.785922-7-usama.arif@bytedance.com
+Link: https://lore.kernel.org/r/20230328195758.1049469-7-usama.arif@bytedance.com
 ---
  arch/x86/kernel/smpboot.c | 21 +++++++++++++++++----
  1 file changed, 17 insertions(+), 4 deletions(-)
 
 diff --git a/arch/x86/kernel/smpboot.c b/arch/x86/kernel/smpboot.c
-index 8f7f36721ea8..bb818e6d8701 100644
+index 45f3d08321fe..0003f5e1740c 100644
 --- a/arch/x86/kernel/smpboot.c
 +++ b/arch/x86/kernel/smpboot.c
 @@ -57,6 +57,7 @@
@@ -1114,7 +1113,7 @@ index 8f7f36721ea8..bb818e6d8701 100644
  
  #include <asm/acpi.h>
  #include <asm/cacheinfo.h>
-@@ -992,7 +993,8 @@ static void announce_cpu(int cpu, int apicid)
+@@ -993,7 +994,8 @@ static void announce_cpu(int cpu, int apicid)
  		node_width = num_digits(num_possible_nodes()) + 1; /* + '#' */
  
  	if (cpu == 1)
@@ -1124,7 +1123,7 @@ index 8f7f36721ea8..bb818e6d8701 100644
  
  	if (system_state < SYSTEM_RUNNING) {
  		if (node != current_node) {
-@@ -1325,9 +1327,12 @@ int native_cpu_up(unsigned int cpu, struct task_struct *tidle)
+@@ -1326,9 +1328,12 @@ int native_cpu_up(unsigned int cpu, struct task_struct *tidle)
  {
  	int ret;
  
@@ -1140,7 +1139,7 @@ index 8f7f36721ea8..bb818e6d8701 100644
  
  	ret = do_wait_cpu_initialized(cpu);
  	if (ret)
-@@ -1347,6 +1352,12 @@ int native_cpu_up(unsigned int cpu, struct task_struct *tidle)
+@@ -1348,6 +1353,12 @@ int native_cpu_up(unsigned int cpu, struct task_struct *tidle)
  	return ret;
  }
  
@@ -1153,11 +1152,11 @@ index 8f7f36721ea8..bb818e6d8701 100644
  /**
   * arch_disable_smp_support() - disables SMP support for x86 at runtime
   */
-@@ -1515,6 +1526,8 @@ static bool prepare_parallel_bringup(void)
+@@ -1516,6 +1527,8 @@ static bool prepare_parallel_bringup(void)
  		smpboot_control = STARTUP_APICID_CPUID_01;
  	}
  
-+	cpuhp_setup_state_nocalls(CPUHP_BP_PARALLEL_DYN, "x86/cpu:kick",
++	cpuhp_setup_state_nocalls(CPUHP_BP_PARALLEL_STARTUP, "x86/cpu:kick",
 +				  native_cpu_kick, NULL);
  	return true;
  }
@@ -1166,11 +1165,11 @@ index 8f7f36721ea8..bb818e6d8701 100644
 2.25.1
 
 From git@z Thu Jan  1 00:00:00 1970
-Subject: [PATCH v16 7/8] x86/smpboot: Serialize topology updates for
+Subject: [PATCH v17 7/8] x86/smpboot: Serialize topology updates for
  secondary bringup
 From: David Woodhouse <dwmw@amazon.co.uk>
-Date: Tue, 21 Mar 2023 19:40:07 +0000
-Message-Id: <20230321194008.785922-8-usama.arif@bytedance.com>
+Date: Tue, 28 Mar 2023 20:57:57 +0100
+Message-Id: <20230328195758.1049469-8-usama.arif@bytedance.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 7bit
@@ -1209,7 +1208,7 @@ Tested-by: Paul E. McKenney <paulmck@kernel.org>
 Tested-by: Kim Phillips <kim.phillips@amd.com>
 Tested-by: Oleksandr Natalenko <oleksandr@natalenko.name>
 Tested-by: Guilherme G. Piccoli <gpiccoli@igalia.com>
-Link: https://lore.kernel.org/r/20230321194008.785922-8-usama.arif@bytedance.com
+Link: https://lore.kernel.org/r/20230328195758.1049469-8-usama.arif@bytedance.com
 ---
  arch/x86/include/asm/smp.h      |  4 +-
  arch/x86/include/asm/topology.h |  2 -
@@ -1285,7 +1284,7 @@ index 8cd4126d8253..80a688295ffa 100644
  	update_srbds_msr();
  
 diff --git a/arch/x86/kernel/smpboot.c b/arch/x86/kernel/smpboot.c
-index bb818e6d8701..0dba5c247be0 100644
+index 0003f5e1740c..05d202b7dcaa 100644
 --- a/arch/x86/kernel/smpboot.c
 +++ b/arch/x86/kernel/smpboot.c
 @@ -180,16 +180,12 @@ static void smp_callin(void)
@@ -1321,7 +1320,7 @@ index bb818e6d8701..0dba5c247be0 100644
  	rcu_cpu_starting(raw_smp_processor_id());
  	x86_cpuinit.early_percpu_clock_init();
  
-@@ -351,7 +353,7 @@ EXPORT_SYMBOL(topology_phys_to_logical_die);
+@@ -352,7 +354,7 @@ EXPORT_SYMBOL(topology_phys_to_logical_die);
   * @pkg:	The physical package id as retrieved via CPUID
   * @cpu:	The cpu for which this is updated
   */
@@ -1330,7 +1329,7 @@ index bb818e6d8701..0dba5c247be0 100644
  {
  	int new;
  
-@@ -374,7 +376,7 @@ int topology_update_package_map(unsigned int pkg, unsigned int cpu)
+@@ -375,7 +377,7 @@ int topology_update_package_map(unsigned int pkg, unsigned int cpu)
   * @die:	The die id as retrieved via CPUID
   * @cpu:	The cpu for which this is updated
   */
@@ -1339,7 +1338,7 @@ index bb818e6d8701..0dba5c247be0 100644
  {
  	int new;
  
-@@ -405,25 +407,7 @@ void __init smp_store_boot_cpu_info(void)
+@@ -406,25 +408,7 @@ void __init smp_store_boot_cpu_info(void)
  	c->initialized = true;
  }
  
@@ -1366,7 +1365,7 @@ index bb818e6d8701..0dba5c247be0 100644
  
  static bool
  topology_same_node(struct cpuinfo_x86 *c, struct cpuinfo_x86 *o)
-@@ -629,7 +613,7 @@ static struct sched_domain_topology_level x86_topology[] = {
+@@ -630,7 +614,7 @@ static struct sched_domain_topology_level x86_topology[] = {
   */
  static bool x86_has_numa_in_package;
  
@@ -1375,7 +1374,7 @@ index bb818e6d8701..0dba5c247be0 100644
  {
  	bool has_smt = smp_num_siblings > 1;
  	bool has_mp = has_smt || boot_cpu_data.x86_max_cores > 1;
-@@ -708,6 +692,37 @@ void set_cpu_sibling_map(int cpu)
+@@ -709,6 +693,37 @@ void set_cpu_sibling_map(int cpu)
  	}
  }
  
@@ -1432,10 +1431,10 @@ index a9cf8c8fa074..ea6c60514092 100644
 2.25.1
 
 From git@z Thu Jan  1 00:00:00 1970
-Subject: [PATCH v16 8/8] x86/smpboot: Allow parallel bringup for SEV-ES
+Subject: [PATCH v17 8/8] x86/smpboot: Allow parallel bringup for SEV-ES
 From: David Woodhouse <dwmw@amazon.co.uk>
-Date: Tue, 21 Mar 2023 19:40:08 +0000
-Message-Id: <20230321194008.785922-9-usama.arif@bytedance.com>
+Date: Tue, 28 Mar 2023 20:57:58 +0100
+Message-Id: <20230328195758.1049469-9-usama.arif@bytedance.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 7bit
@@ -1451,7 +1450,7 @@ Suggested-by: Sabin Rapan <sabrapan@amazon.com>
 Signed-off-by: David Woodhouse <dwmw@amazon.co.uk>
 Signed-off-by: Usama Arif <usama.arif@bytedance.com>
 Reviewed-by: Tom Lendacky <thomas.lendacky@amd.com>
-Link: https://lore.kernel.org/r/20230321194008.785922-9-usama.arif@bytedance.com
+Link: https://lore.kernel.org/r/20230328195758.1049469-9-usama.arif@bytedance.com
 ---
  arch/x86/coco/core.c              |  5 ++++
  arch/x86/include/asm/coco.h       |  1 +
@@ -1589,7 +1588,7 @@ index ff3a5f008d8a..9c38849fcac8 100644
  	mov	$0x0B, %eax
  	xorl	%ecx, %ecx
 diff --git a/arch/x86/kernel/smpboot.c b/arch/x86/kernel/smpboot.c
-index 0dba5c247be0..ef37356ab695 100644
+index 05d202b7dcaa..6ef040fd28a0 100644
 --- a/arch/x86/kernel/smpboot.c
 +++ b/arch/x86/kernel/smpboot.c
 @@ -85,6 +85,7 @@
@@ -1600,7 +1599,7 @@ index 0dba5c247be0..ef37356ab695 100644
  
  /* representing HT siblings of each logical CPU */
  DEFINE_PER_CPU_READ_MOSTLY(cpumask_var_t, cpu_sibling_map);
-@@ -1513,15 +1514,36 @@ void __init smp_prepare_cpus_common(void)
+@@ -1514,15 +1515,36 @@ void __init smp_prepare_cpus_common(void)
   * We can do 64-bit AP bringup in parallel if the CPU reports its APIC
   * ID in CPUID (either leaf 0x0B if we need the full APIC ID in X2APIC
   * mode, or leaf 0x01 if 8 bits are sufficient). Otherwise it's too
@@ -1641,7 +1640,7 @@ index 0dba5c247be0..ef37356ab695 100644
  		if (boot_cpu_data.cpuid_level < 0x0b)
  			return false;
  
-@@ -1530,8 +1552,13 @@ static bool prepare_parallel_bringup(void)
+@@ -1531,8 +1553,13 @@ static bool prepare_parallel_bringup(void)
  			return false;
  		}
  

@@ -22,7 +22,7 @@ source=(
   https://github.com/pop-os/system76-io-dkms/raw/master/system76-io_dev.c
   https://github.com/pop-os/system76-io-dkms/raw/master/system76-io_hwmon.c
   tip-x86-apic.patch
-  v16_20230321_usama_arif_parallel_cpu_bringup_for_x86_64.patch
+  v17_20230328_usama_arif_parallel_cpu_bringup_for_x86_64.patch
 )
 validpgpkeys=(
   'ABAF11C65A2970B130ABE3C479BE3E4300411886'  # Linus Torvalds
@@ -33,7 +33,7 @@ sha256sums=('SKIP'
             '7276b7fb345f6a5156c594969a01e1ab63e864e0b3ed646bf5132b8301fa4975'
             '26b42e2a48cc4666ad6f85eb4d0fe87f30ea0097d6c1cff4f45e0e3330382916'
             'b7df28d604811640a1e1ff3118b5a7020359ab389022bb952bc64109c64ab569'
-            'bbf63a18c41588beb72d89f2f9a2e0014de685c0abedcb2eb35c10f4de4b1cd7')
+            'f6bba9fc2969d4fbb175d8421d4ce3920025de4a0b2272059d5c8bc47256470a')
 
 # This obviously ties this PKGBUILD to my machine but that is kind of the point :)
 _kmake() {
