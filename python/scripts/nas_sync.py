@@ -84,7 +84,7 @@ def download_items(targets, network_folder):
         if target == 'alpine':
             alpine_arches = ['aarch64', 'armv7', 'x86', 'x86_64']
             alpine_series = '3.17'
-            alpine_patch = '.1'
+            alpine_patch = '.3'
             alpine_version = alpine_series + alpine_patch
 
             for alpine_arch in alpine_arches:
@@ -190,7 +190,7 @@ def download_items(targets, network_folder):
 
         elif target == 'rpios':
             rpi_arches = ['armhf', 'arm64']
-            rpi_date = '2022-09-26/2022-09-22'
+            rpi_date = '2023-02-22/2023-02-21'
             deb_ver = 'bullseye'
 
             for rpi_arch in rpi_arches:
