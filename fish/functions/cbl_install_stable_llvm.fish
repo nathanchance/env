@@ -25,7 +25,7 @@ function cbl_install_stable_llvm -d "Download and unpack my LLVM toolchains from
                 --auto-compress \
                 --file=$local_tarball
         else
-            crl https://kernel.org/pub/linux/kernel/people/nathan/llvm/(string replace zst xz (basename $local_tarball)) | tar $tar_args --file=- --xz
+            crl https://kernel.org/pub/tools/llvm/(string replace zst xz (basename $local_tarball)) | tar $tar_args --file=- --xz
         end; or return
     end
 end
