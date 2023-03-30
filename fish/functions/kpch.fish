@@ -10,7 +10,12 @@ function kpch -d "Run checkpatch.pl and get_maintainer.pl on a patch"
 
     if test (count $argv) -eq 0
         if set -q b4_branch
-            kchp -g (b4 prep --show-info | string match -gr '(?:start|end)-commit:\s+([a-z0-9]{40})' | string join ..)
+            if b4 prep --help &| grep -Fq -- '--show-info [PARAM]'
+                set range (b4 prep --show-info series-range)
+            else
+                set range (b4 prep --show-info | string match -gr '(?:start|end)-commit:\s+([a-z0-9]{40})' | string join ..)
+            end
+            kchp -g $range
         else
             set rev HEAD~1..HEAD
         end
