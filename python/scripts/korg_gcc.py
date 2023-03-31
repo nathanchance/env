@@ -159,6 +159,9 @@ def install(args):
 
     for major_version in args.versions:
         targets = sorted({korg_gcc_canonicalize_target(target) for target in args.targets})
+        # No GCC 5.5.0 aarch64-linux on aarch64?
+        if host_arch == 'aarch64' and major_version == 5:
+            targets.remove('aarch64-linux')
         # Ensure 'arm' gets downloaded with 'aarch64', so that compat vDSO can
         # be built.
         if 'aarch64-linux' in targets:
