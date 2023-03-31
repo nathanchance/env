@@ -18,7 +18,8 @@ function cbl_setup_reduction -d "Build good and bad versions of LLVM for cvise r
 
     set -g tmp_dir (mktemp -d -p $TMP_FOLDER -t cvise.XXXXXXXXXX)
     for sha in $good_sha $bad_sha
-        git checkout $sha; or return
+        git worktree prune
+        git worktree add -d $tmp_dir/src $sha; or return
 
         if test $sha = $bad_sha
             set folder bad
@@ -26,9 +27,7 @@ function cbl_setup_reduction -d "Build good and bad versions of LLVM for cvise r
             set folder good
         end
 
-        if is_location_primary
-            set tc_bld $CBL_WRKTR/tc-build/rewrite
-        else if test -d $CBL_TC_BLD
+        if test -d $CBL_TC_BLD
             set tc_bld $CBL_TC_BLD
         else
             print_error "No suitable build-llvm.py location found?"
@@ -40,9 +39,11 @@ function cbl_setup_reduction -d "Build good and bad versions of LLVM for cvise r
             --build-folder $tmp_dir/build/llvm-$folder \
             --build-stage1-only \
             --install-folder $tmp_dir/install/llvm-$folder \
-            --llvm-folder . \
+            --llvm-folder $tmp_dir/src \
             --projects clang lld \
             --quiet-cmake; or return
+
+        rm -fr $tmp_dir/src
     end
 
     set cvise $tmp_dir/cvise
