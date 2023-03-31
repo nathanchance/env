@@ -69,8 +69,7 @@ function cbl_bld_tot_tcs -d "Build LLVM and binutils from source for kernel deve
             set bld_bntls false
 
             set bld_llvm_args \
-                --pgo kernel-defconfig \
-                --targets X86
+                --pgo kernel-defconfig-slim
 
     end
     if not set -q check_targets
