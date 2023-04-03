@@ -30,8 +30,8 @@ function cbl_setup_reduction -d "Build good and bad versions of LLVM for cvise r
         if test -d $CBL_TC_BLD
             set tc_bld $CBL_TC_BLD
         else
-            print_error "No suitable build-llvm.py location found?"
-            return 1
+            set tc_bld $CBL_GIT/tc-build
+            cbl_clone_repo (basename $tc_bld)
         end
 
         $tc_bld/build-llvm.py \
