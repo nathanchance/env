@@ -13,11 +13,10 @@ function cbl_rb_fd -d "Rebase generic Fedora kernel on latest linux-next"
     git rh origin/master
 
     # Patching
-    # https://lore.kernel.org/20230331204412.GA396777@dev-arch.thelio-3990X/
-    set -a reverts d39e48ca80c0960b039cb38633957f0040f63e1a # drm/atomic-helper: Set fence deadline for vblank
     for revert in $reverts
         git revert --no-edit $revert; or return
     end
+    set -a b4_patches https://lore.kernel.org/all/20230403160314.1210533-1-robdclark@gmail.com/ # drm/vblank: Fix for drivers that do not drm_vblank_init()
     for patch in $b4_patches
         b4 shazam -l -P _ -s $patch; or return
     end
