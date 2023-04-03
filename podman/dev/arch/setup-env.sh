@@ -152,10 +152,10 @@ function install_packages() {
         ncurses
         openssl
         pahole
-        picocom
         rsync
         socat
         sparse
+        tio
         tuxmake
         uboot-tools
 
