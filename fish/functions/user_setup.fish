@@ -262,6 +262,8 @@ rpmbuild/' >>$gitignore
     # Configuration files (vim, tmux, etc)
     set configs $ENV_FOLDER/configs
     ln -fsv $configs/tmux/.tmux.conf $HOME/.tmux.conf
+    mkdir -p $HOME/.config/tio
+    ln -fsv $configs/local/tio $HOME/.config/tio/config
     vim_setup
 
     # Terminal profiles
