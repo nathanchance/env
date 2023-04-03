@@ -39,8 +39,6 @@ function cbl_bld_qemu -d "Build QEMU for use with ClangBuiltLinux"
             end
 
             # Patches from mailing lists
-            # https://lore.kernel.org/Y88BmxzRqtnpAsWG@dev-arch.thelio-3990X/
-            set -a b4_patches https://lore.kernel.org/all/20230223161958.48696-1-jiaxun.yang@flygoat.com/ # hw/mips/gt64xxx_pci: Don't endian-swap GT_PCI0_CFGADDR
             if set -q b4_patches
                 pushd $qemu_src; or return
                 for patch in $b4_patches
