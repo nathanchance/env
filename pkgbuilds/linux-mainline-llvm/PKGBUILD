@@ -3,9 +3,9 @@
 
 _localversion=-llvm
 pkgname=linux-mainline$_localversion
-_srctag=v6.3-rc4
+_srctag=v6.3-rc5
 pkgver=${_srctag//-/.}
-pkgrel=2
+pkgrel=1
 pkgdesc='Linux'
 url="https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/log/?h=$_srctag"
 arch=(x86_64)
@@ -29,7 +29,7 @@ validpgpkeys=(
   'ABAF11C65A2970B130ABE3C479BE3E4300411886'  # Linus Torvalds
 )
 sha256sums=('SKIP'
-            '2a75c44757474cbe5fdb573eb7e5b6253514653ed6081b26d6088f6f6543a8b0'
+            'fda335c94be50320d3bcf9ae5747bcaaf0a0245784422adec0d0a11a1c9df4b2'
             'd569ee2fbd072a09e89196779ccc0dfd008d5a79a0cec5fa80cc7ed99a3027fa'
             '7276b7fb345f6a5156c594969a01e1ab63e864e0b3ed646bf5132b8301fa4975'
             '26b42e2a48cc4666ad6f85eb4d0fe87f30ea0097d6c1cff4f45e0e3330382916'
