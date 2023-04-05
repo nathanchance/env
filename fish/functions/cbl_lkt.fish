@@ -183,7 +183,7 @@ function cbl_lkt -d "Tests a Linux kernel with llvm-kernel-testing"
     end
 
     if not string match -qr -- --build-folder $build_py_args
-        set -a build_py_args --build-folder $TMP_BUILD_FOLDER/cbl_lkt/(basename $linux_folder)
+        set -a build_py_args --build-folder $TMP_BUILD_FOLDER/(status function)/(basename $linux_folder)
     end
 
     set log_folder $CBL/build-logs/(basename $linux_folder)-(date +%F-%T)
