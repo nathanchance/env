@@ -183,12 +183,12 @@ function cbl_bld_tot_tcs -d "Build LLVM and binutils from source for kernel deve
 
         if test "$validate_uprev" = kernel
             set lsm_location (command grep -F 'lsm.location = Path(src_folder,' $tc_bld/build-llvm.py | string trim)
-            if not env PYTHONPATH=$tc_bld/tc_build python3 -c "from pathlib import Path
+            if not env PYTHONPATH=$tc_bld python3 -c "from pathlib import Path
 
-import utils
+import tc_build.utils
 
-from kernel import LinuxSourceManager, LLVMKernelBuilder
-from llvm import LLVMSourceManager
+from tc_build.kernel import LinuxSourceManager, LLVMKernelBuilder
+from tc_build.llvm import LLVMSourceManager
 
 src_folder = Path('$tc_bld/src')
 
@@ -198,7 +198,7 @@ lsm.patches = list(src_folder.glob('*.patch'))
 lsm.tarball.base_download_url = 'https://git.kernel.org/torvalds/t'
 lsm.tarball.local_location = lsm.location.with_name(f'{lsm.location.name}.tar.gz')
 
-utils.print_header('Preparing Linux source for profiling runs')
+tc_build.utils.print_header('Preparing Linux source for profiling runs')
 lsm.prepare()
 
 kernel_builder = LLVMKernelBuilder()
