@@ -53,7 +53,7 @@ RUN dir=$(mktemp -d) && \
 
 # Buster has libzstd 1.3.8, which has certain options that LLVM requires behind
 # an experimental flag. Install the latest so that compilation works as expected.
-ARG ZSTD_VERSION=1.5.4
+ARG ZSTD_VERSION=1.5.5
 RUN dir=$(mktemp -d) && \
     url=https://github.com/facebook/zstd/releases/download/v$ZSTD_VERSION/zstd-$ZSTD_VERSION.tar.gz && \
     wget -O - -q "$url" | tar -C "$dir" --strip-components=1 -xzvf - && \
