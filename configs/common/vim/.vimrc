@@ -117,3 +117,8 @@ autocmd BufReadPost *
 autocmd BufNewFile *.fish 0r $ENV_FOLDER/configs/common/vim/skeletons/fish
 autocmd BufNewFile *.py 0r $ENV_FOLDER/configs/common/vim/skeletons/python
 autocmd BufNewFile *.sh 0r $ENV_FOLDER/configs/common/vim/skeletons/bash
+
+" Spell check certain files automatically
+autocmd FileType gitcommit setlocal spell
+autocmd FileType markdown setlocal spell
+autocmd FileType rst setlocal spell
