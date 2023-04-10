@@ -11,11 +11,10 @@ install_packages() {
 }
 
 build_pahole() {
-    pahole_src=/tmp/dwarves-1.24
+    pahole_src=/tmp/dwarves-1.25
     pahole_build=$pahole_src/build
 
     tar -C "${pahole_src%/*}" -xJf "$pahole_src".tar.xz
-    patch -d "$pahole_src" -p1 </tmp/dwarves.patch
 
     mkdir "$pahole_build"
     cd "$pahole_build"
@@ -45,8 +44,8 @@ cleanup() {
     rm -r \
         "$pahole_src" \
         "$pahole_src".tar.xz \
-        /tmp/packages \
-        /tmp/*.patch
+        /tmp/packages
+    rm -fr /tmp/*.patch
 }
 
 install_packages
