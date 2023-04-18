@@ -557,15 +557,15 @@ def parse_arguments():
 
 
 def get_def_iso(arch):
-    alpine_ver = '3.17.0'
+    alpine_ver = '3.17.3'
 
     arch_day = '.01'
     arch_iso_ver = datetime.datetime.now(datetime.timezone.utc).strftime("%Y.%m") + arch_day
 
-    debian_ver = '11.5.0'
+    debian_ver = '11.6.0'
 
-    fedora_ver = '37'
-    fedora_iso_ver = '1.7'
+    fedora_ver = '38'
+    fedora_iso_ver = '1.6'
 
     iso_info = {
         'arm': {
