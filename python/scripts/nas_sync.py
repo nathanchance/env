@@ -154,29 +154,30 @@ def download_items(targets, network_folder):
             subfolder = Path(firmware_folder, target.capitalize())
 
             # Constants to update
-            fedora_ver = '37'
-            server_iso_ver = '1.7'
-            workstation_iso_ver = '1.7'
+            fedora_ver = '38'
+            server_iso_ver = '1.6'
+            workstation_iso_ver = '1.6'
 
             # Base URLs
-            base_fedora_file_url = f"https://download.fedoraproject.org/pub/fedora/linux/releases/{fedora_ver}"
-            base_fedora_checksum_url = f"https://getfedora.org/static/checksums/{fedora_ver}/iso/"
+            base_fedora_url = f"https://download.fedoraproject.org/pub/fedora/linux/releases/{fedora_ver}"
 
             # Server
             for arch in fedora_arches:
+                base_url = f"{base_fedora_url}/Server/{arch}/iso"
                 for flavor in ['dvd', 'netinst']:
                     items += [{
                         'containing_folder': Path(subfolder, fedora_ver, 'Server', arch),
-                        'file_url': f"{base_fedora_file_url}/Server/{arch}/iso/Fedora-Server-{flavor}-{arch}-{fedora_ver}-{server_iso_ver}.iso",
-                        'sha_url': f"{base_fedora_checksum_url}/Fedora-Server-{fedora_ver}-{server_iso_ver}-{arch}-CHECKSUM",
+                        'file_url': f"{base_url}/Fedora-Server-{flavor}-{arch}-{fedora_ver}-{server_iso_ver}.iso",
+                        'sha_url': f"{base_url}/Fedora-Server-{fedora_ver}-{server_iso_ver}-{arch}-CHECKSUM",
                     }]  # yapf: disable
 
             # Workstation
             for arch in fedora_arches:
+                base_url = f"{base_fedora_url}/Workstation/{arch}/iso"
                 items += [{
                     'containing_folder': Path(subfolder, fedora_ver, 'Workstation', arch),
-                    'file_url': f"{base_fedora_file_url}/Workstation/{arch}/iso/Fedora-Workstation-Live-{arch}-{fedora_ver}-{workstation_iso_ver}.iso",
-                    'sha_url': f"{base_fedora_checksum_url}/Fedora-Workstation-{fedora_ver}-{server_iso_ver}-{arch}-CHECKSUM",
+                    'file_url': f"{base_url}/Fedora-Workstation-Live-{arch}-{fedora_ver}-{workstation_iso_ver}.iso",
+                    'sha_url': f"{base_url}/Fedora-Workstation-{fedora_ver}-{server_iso_ver}-{arch}-CHECKSUM",
                 }]  # yapf: disable
 
         elif target == 'ipsw':
