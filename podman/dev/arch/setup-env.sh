@@ -159,6 +159,9 @@ function install_packages() {
         tuxmake
         uboot-tools
 
+        # kup
+        perl-config-simple
+
         # LLVM/clang + build-llvm.py
         clang
         cmake
