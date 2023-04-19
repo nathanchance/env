@@ -3,7 +3,7 @@
 
 _localversion=-llvm
 pkgname=linux-next$_localversion
-_srctag=next-20230418
+_srctag=next-20230419
 pkgver=${_srctag//-/.}
 pkgrel=1
 pkgdesc='linux-next'
@@ -19,8 +19,7 @@ options=('!strip')
 source=(
   "$pkgname::git+https://git.kernel.org/pub/scm/linux/kernel/git/next/linux-next.git#tag=$_srctag"
   config
-  0001-drm-Fix-up-merge-issue.patch
-  20230418_trix_asoc_nau8825_fix_bounds_check_for_adc_delay.patch
+  20230419_srinivasan_shanmugam_drm_amd_display_remove_unused_variables_in_dcn21_hwseq_c.patch
 )
 
 validpgpkeys=(
@@ -28,9 +27,8 @@ validpgpkeys=(
   '3F2568AAC26998F9E813A1C5C3F436CA30F5D8EB'  # Mark Brown
 )
 sha256sums=('SKIP'
-            '7171bd1580c040e2e89301e8604264cf97532df997f9cc0f3022d947ccc1fe05'
-            'e87edfd9cba57f76f39d2fe917ac16e2f762ac9f4c9c5faf0a0b5eae8a22a6d3'
-            '5c67da687266ac74f4cb8b69bf9cfb1a88da478a4a90dc5a8400b607f3add304')
+            'adf7a2b7f8c67214b4a5032177e1088d868e92eda98f34acae9e0b767b354587'
+            '91ab081287264e19fdc22b3e6a5cc70e4d76dd1bb7d15e1bb7389ffe0c832611')
 
 # This obviously ties this PKGBUILD to my machine but that is kind of the point :)
 _kmake() {
