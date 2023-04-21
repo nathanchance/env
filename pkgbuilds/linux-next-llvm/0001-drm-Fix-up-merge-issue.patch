@@ -1,0 +1,26 @@
+From 41d8f240eed1fc4b7e3d7bc6a56d92b844ef0956 Mon Sep 17 00:00:00 2001
+From: Mark Brown <broonie@kernel.org>
+Date: Fri, 14 Apr 2023 17:54:12 +0100
+Subject: [PATCH] drm: Fix up merge issue
+
+Signed-off-by: Mark Brown <broonie@kernel.org>
+---
+ drivers/gpu/drm/amd/display/Kconfig | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/drivers/gpu/drm/amd/display/Kconfig b/drivers/gpu/drm/amd/display/Kconfig
+index b990ef80d686..2d8e55e29637 100644
+--- a/drivers/gpu/drm/amd/display/Kconfig
++++ b/drivers/gpu/drm/amd/display/Kconfig
+@@ -8,7 +8,7 @@ config DRM_AMD_DC
+ 	depends on BROKEN || !CC_IS_CLANG || X86_64 || SPARC64 || ARM64
+ 	select SND_HDA_COMPONENT if SND_HDA_CORE
+ 	# !CC_IS_CLANG: https://github.com/ClangBuiltLinux/linux/issues/1752
+-	select DRM_AMD_DC_DCN if (X86 || (PPC64 && ALTIVEC) || (ARM64 && KERNEL_MODE_NEON && !CC_IS_CLANG))
++	select DRM_AMD_DC_FP if (X86 || (PPC64 && ALTIVEC) || (ARM64 && KERNEL_MODE_NEON && !CC_IS_CLANG))
+ 	help
+ 	  Choose this option if you want to use the new display engine
+ 	  support for AMDGPU. This adds required support for Vega and
+-- 
+2.40.0
+
