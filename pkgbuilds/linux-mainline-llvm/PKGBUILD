@@ -3,11 +3,14 @@
 
 _localversion=-llvm
 pkgname=linux-mainline$_localversion
-_srctag=v6.3
-pkgver=${_srctag//-/.}
+# _srctag=v6.4-rc1
+# pkgver=${_srctag//-/.}
+_srccommit=173ea743bf7a9eef04460e03b00ba267cc52aee2
+pkgver=v6.4.rc0.436.g173ea743bf7a
 pkgrel=1
 pkgdesc='Linux'
-url="https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/log/?h=$_srctag"
+# url="https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/log/?h=$_srctag"
+url="https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/log/?h=$_srccomit"
 arch=(x86_64)
 arch=(x86_64)
 license=(GPL2)
@@ -15,8 +18,9 @@ makedepends=(
   bc libelf pahole cpio perl tar xz
 )
 options=('!strip')
+#   "$pkgname::git+https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git?signed#tag=$_srctag"
 source=(
-  "$pkgname::git+https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git?signed#tag=$_srctag"
+  "$pkgname::git+https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git#commit=$_srccommit"
   config
   https://github.com/pop-os/system76-io-dkms/raw/master/system76-io.c
   https://github.com/pop-os/system76-io-dkms/raw/master/system76-io_dev.c
