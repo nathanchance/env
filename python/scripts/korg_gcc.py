@@ -59,9 +59,9 @@ def supported_korg_gcc_targets():
     return [korg_gcc_canonicalize_target(arch) for arch in supported_korg_gcc_arches()]
 
 
-# GCC 5 through 12
+# GCC 5 through 13
 def supported_korg_gcc_versions():
-    return list(range(5, 13))
+    return list(range(5, 14))
 
 
 def get_gcc_cross_compile(major_version, arch_or_target):
@@ -81,6 +81,7 @@ def get_latest_gcc_version(major_version):
         10: '10.4.0',
         11: '11.3.0',
         12: '12.2.0',
+        13: '13.1.0',
     }[major_version]
 
 
