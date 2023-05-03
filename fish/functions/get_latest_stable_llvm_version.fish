@@ -14,7 +14,7 @@ function get_latest_stable_llvm_version -d 'Get the latest stable version for an
             case 15
                 echo $arg.0.7
             case 16
-                echo $arg.0.2
+                echo $arg.0.3
         end
     end
 end

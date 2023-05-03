@@ -15,7 +15,7 @@ INSTALL = Path(ROOT, 'install')
 SRC = Path(ROOT, 'src')
 
 SUPPORTED_LLVM_VERSIONS = [
-    '16.0.2',
+    '16.0.3',
     '15.0.7',
     '14.0.6',
     '13.0.1',
