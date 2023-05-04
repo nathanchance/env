@@ -1,7 +1,7 @@
 # Maintainer: Nathan Chancellor <nathan@kernel.org>
 pkgname=tuxmake
 pkgver=1.13.0
-pkgrel=1
+pkgrel=2
 pkgdesc='Thin wrapper to build Linux kernels'
 url='https://tuxmake.org/'
 license=(MIT)
@@ -9,6 +9,7 @@ arch=(any)
 depends=(
     perl
     python
+    sh
 )
 makedepends=(
     python-build
