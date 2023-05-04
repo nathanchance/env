@@ -191,7 +191,7 @@ def download_items(targets, network_folder):
 
         elif target == 'rpios':
             rpi_arches = ['armhf', 'arm64']
-            rpi_date = '2023-02-22/2023-02-21'
+            rpi_date = '2023-05-03/2023-05-03'
             deb_ver = 'bullseye'
 
             for rpi_arch in rpi_arches:
