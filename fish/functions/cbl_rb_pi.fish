@@ -25,8 +25,6 @@ function cbl_rb_pi -d "Rebase Raspberry Pi kernel on latest linux-next"
     for patch in $b4_patches
         b4 shazam -l -P _ -s $patch; or return
     end
-    crl https://lore.kernel.org/all/20230428162718.GA1099174@dev-arch.thelio-3990X/raw | git ap; or return
-    git ac -m "tty: Shuffle location of hung_up_tty_compat_ioctl()"; or return
     for patch in $crl_patches
         crl $patch | git am -3; or return
     end
