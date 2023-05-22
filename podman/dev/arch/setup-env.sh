@@ -4,11 +4,17 @@ set -eux
 
 # Edit /etc/pacman.conf
 function pacman_conf() {
+    # Handle git migration: https://archlinux.org/news/git-migration-completed/
+    pacman -Syyu --noconfirm "pacman>=6.0.2-7"
+    mv -v /etc/pacman.conf{.pacnew,}
+    sed -i 's/^CheckSpace/#CheckSpace/g' /etc/pacman.conf
+    sed -i 's/^#VerbosePkgLists/VerbosePkgLists/g' /etc/pacman.conf
+
     sed -i 's/^#Color/Color/g' /etc/pacman.conf
     sed -i 's/^NoProgressBar/#NoProgressBar/g' /etc/pacman.conf
     sed -i 's/^#ParallelDownloads = 5/ParallelDownloads = 7/g' /etc/pacman.conf
-    sed -i "/\[testing\]/,/Include/"'s/^#//' /etc/pacman.conf
-    sed -i "/\[community-testing\]/,/Include/"'s/^#//' /etc/pacman.conf
+    sed -i "/\[core-testing\]/,/Include/"'s/^#//' /etc/pacman.conf
+    sed -i "/\[extra-testing\]/,/Include/"'s/^#//' /etc/pacman.conf
 
     # Get rid of slimming Docker image changes
     sed -i -e "/home\/custompkgs/,/\[options\]/"'s;\[options\];#\[options\];' -e 's;^NoExtract;#NoExtract;g' /etc/pacman.conf
