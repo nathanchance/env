@@ -93,7 +93,7 @@ def install_packages():
 def setup_repos():
     fedora.dnf_add_repo('https://cli.github.com/packages/rpm/gh-cli.repo')
     fedora.dnf_add_repo(
-        'https://download.opensuse.org/repositories/shells:fish:release:3/CentOS_8/shells:fish:release:3.repo',
+        'https://download.opensuse.org/repositories/shells:/fish:/release:/3/CentOS_8/shells:fish:release:3.repo',
     )
 
     tuxmake_repo_text = ('[tuxmake]\n'
