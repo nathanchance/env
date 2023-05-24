@@ -21,6 +21,11 @@ function cbl_rb_pi -d "Rebase Raspberry Pi kernel on latest linux-next"
     git rh origin/master
 
     # Patching
+    set -a reverts 7eec88986dce2d85012fbe516def7a2d7d77735c # sysctl: Refactor base paths registrations (v3)
+    for revert in $reverts
+        git revert --no-edit $revert; or return
+    end
+    set -a b4_patches https://lore.kernel.org/all/20230523122220.1610825-8-j.granados@samsung.com/ # sysctl: Refactor base paths registrations (v4)
     for patch in $b4_patches
         b4 shazam -l -P _ -s $patch; or return
     end
@@ -29,9 +34,6 @@ function cbl_rb_pi -d "Rebase Raspberry Pi kernel on latest linux-next"
     end
     for hash in $ln_commits
         git -C $CBL_BLD_P/linux-next fp -1 --stdout $hash | git am; or return
-    end
-    for revert in $reverts
-        git revert --no-edit $revert; or return
     end
 
     # Regenerate defconfigs

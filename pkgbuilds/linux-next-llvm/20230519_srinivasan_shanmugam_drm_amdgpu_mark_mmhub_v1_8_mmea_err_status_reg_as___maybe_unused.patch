@@ -1,0 +1,45 @@
+From git@z Thu Jan  1 00:00:00 1970
+Subject: [PATCH] drm/amdgpu: Mark mmhub_v1_8_mmea_err_status_reg as
+ __maybe_unused
+From: Srinivasan Shanmugam <srinivasan.shanmugam@amd.com>
+Date: Fri, 19 May 2023 18:14:38 +0530
+Message-Id: <20230519124438.365184-1-srinivasan.shanmugam@amd.com>
+MIME-Version: 1.0
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 8bit
+
+Silencing the compiler from below compilation error:
+
+drivers/gpu/drm/amd/amdgpu/mmhub_v1_8.c:704:23: error: variable 'mmhub_v1_8_mmea_err_status_reg' is not needed and will not be emitted [-Werror,-Wunneeded-internal-declaration]
+static const uint32_t mmhub_v1_8_mmea_err_status_reg[] = {
+                      ^
+1 error generated.
+
+Mark the variable as __maybe_unused to make it clear to clang that this
+is expected, so there is no more warning.
+
+Cc: Christian König <christian.koenig@amd.com>
+Cc: Lijo Lazar <lijo.lazar@amd.com>
+Cc: Luben Tuikov <luben.tuikov@amd.com>
+Cc: Alex Deucher <alexander.deucher@amd.com>
+Signed-off-by: Srinivasan Shanmugam <srinivasan.shanmugam@amd.com>
+Link: https://lore.kernel.org/r/20230519124438.365184-1-srinivasan.shanmugam@amd.com
+---
+ drivers/gpu/drm/amd/amdgpu/mmhub_v1_8.c | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/drivers/gpu/drm/amd/amdgpu/mmhub_v1_8.c b/drivers/gpu/drm/amd/amdgpu/mmhub_v1_8.c
+index 3648994724c2..cba087e529c0 100644
+--- a/drivers/gpu/drm/amd/amdgpu/mmhub_v1_8.c
++++ b/drivers/gpu/drm/amd/amdgpu/mmhub_v1_8.c
+@@ -701,6 +701,7 @@ static void mmhub_v1_8_reset_ras_error_count(struct amdgpu_device *adev)
+ 		mmhub_v1_8_inst_reset_ras_error_count(adev, i);
+ }
+ 
++__maybe_unused
+ static const uint32_t mmhub_v1_8_mmea_err_status_reg[] = {
+ 	regMMEA0_ERR_STATUS,
+ 	regMMEA1_ERR_STATUS,
+-- 
+2.25.1
+
