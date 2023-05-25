@@ -13,13 +13,11 @@ function cbl_rb_fd -d "Rebase generic Fedora kernel on latest linux-next"
     git rh origin/master
 
     # Patching
-    set -a reverts 7eec88986dce2d85012fbe516def7a2d7d77735c # sysctl: Refactor base paths registrations (v3)
-    set -a reverts 9551fbb64d094cc105964716224adeb7765df8fd # perf/core: Remove pmu linear searching code
     for revert in $reverts
         git revert --no-edit $revert; or return
     end
     set -a b4_patches https://lore.kernel.org/all/20230519124438.365184-1-srinivasan.shanmugam@amd.com/ # drm/amdgpu: Mark mmhub_v1_8_mmea_err_status_reg as __maybe_unused
-    set -a b4_patches https://lore.kernel.org/all/20230523122220.1610825-8-j.granados@samsung.com/ # sysctl: Refactor base paths registrations (v4)
+    set -a b4_patches https://lore.kernel.org/all/20230525212723.3361524-2-oliver.upton@linux.dev/ # KVM: arm64: Iterate arm_pmus list to probe for default PMU
     for patch in $b4_patches
         b4 shazam -l -P _ -s $patch; or return
     end
