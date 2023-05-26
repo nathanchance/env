@@ -148,6 +148,9 @@ function cbl_bld_tot_tcs -d "Build LLVM and binutils from source for kernel deve
             return 1
         end
     end
+    # https://github.com/ClangBuiltLinux/linux/issues/1855
+    # https://reviews.llvm.org/D144654#4376428
+    git -C $llvm_project fp -1 --stdout 0123deb3a6f0a83095287f51b07c77b7b43ab847 | git -C $llvm_project ap --exclude clang/docs/ReleaseNotes.rst -R; or return
 
     # Add in-review patches here
     for revision in $revisions
