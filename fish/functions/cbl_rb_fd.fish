@@ -16,8 +16,8 @@ function cbl_rb_fd -d "Rebase generic Fedora kernel on latest linux-next"
     for revert in $reverts
         git revert --no-edit $revert; or return
     end
-    set -a b4_patches https://lore.kernel.org/all/20230519124438.365184-1-srinivasan.shanmugam@amd.com/ # drm/amdgpu: Mark mmhub_v1_8_mmea_err_status_reg as __maybe_unused
     set -a b4_patches https://lore.kernel.org/all/20230525212723.3361524-2-oliver.upton@linux.dev/ # KVM: arm64: Iterate arm_pmus list to probe for default PMU
+    set -a b4_patches https://lore.kernel.org/all/20230530142154.3341677-1-trix@redhat.com/ # btrfs: remove unused variable pages_processed
     for patch in $b4_patches
         b4 shazam -l -P _ -s $patch; or return
     end
