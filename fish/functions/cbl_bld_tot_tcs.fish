@@ -148,15 +148,18 @@ function cbl_bld_tot_tcs -d "Build LLVM and binutils from source for kernel deve
             return 1
         end
     end
-    # https://github.com/ClangBuiltLinux/linux/issues/1855
-    # https://reviews.llvm.org/D144654#4376428
-    git -C $llvm_project fp -1 --stdout 0123deb3a6f0a83095287f51b07c77b7b43ab847 | git -C $llvm_project ap --exclude clang/docs/ReleaseNotes.rst -R; or return
 
     # Add in-review patches here
+    set -a revisions https://reviews.llvm.org/D151741 # [Lex] Only warn on defining or undefining language-defined builtins
     for revision in $revisions
         set -l git_ap_args
-        if not crl "https://reviews.llvm.org/$revision?download=true" | git -C $llvm_project ap $git_ap_args
-            set message "Failed to apply $revision"
+        set -l base_rev (basename $revision)
+        switch $base_rev
+            case D151741
+                set -a git_ap_args -p0
+        end
+        if not crl "$revision?download=true" | git -C $llvm_project ap $git_ap_args
+            set message "Failed to apply $base_rev"
             print_error "$message"
             tg_msg "$message"
             return 1
