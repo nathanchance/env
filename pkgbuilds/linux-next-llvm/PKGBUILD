@@ -3,7 +3,7 @@
 
 _localversion=-llvm
 pkgname=linux-next$_localversion
-_srctag=next-20230530
+_srctag=next-20230531
 pkgver=${_srctag//-/.}
 pkgrel=1
 pkgdesc='linux-next'
@@ -24,7 +24,6 @@ source=(
   "$pkgname::git+https://git.kernel.org/pub/scm/linux/kernel/git/next/linux-next.git?signed#tag=$_srctag"
   config
   20220222_gustavoars_scsi_aacraid_replace_one_element_array_with_flexible_array_member_in_struct_aac_.patch
-  20230526_nathan_x86_csum_fix_clang_wuninitialized_in_csum_partial.patch
   20230530_nathan_drm_i915_gt_fix_second_parameter_type_of_pre_gen8_pte_encode_callbacks.patch
   20230530_trix_btrfs_remove_unused_variable_pages_processed.patch
 )
@@ -34,9 +33,8 @@ validpgpkeys=(
   '3F2568AAC26998F9E813A1C5C3F436CA30F5D8EB'  # Mark Brown
 )
 sha256sums=('SKIP'
-            'c5609790ed6abb819caa75666eeaffa09d9b9dfdb5eb6740e86e6858e3008d72'
+            '9d650cc40aac5dd2f7d0702c83fefbf8bc009bf9ff4fcba0ebc2729e162201c8'
             '6f36a23678f10c9c777820836dd41eefb02809cc74208a4ebfaaba39b088a816'
-            'cb9a2905522d51caa30139c1b318cb925494f62cd086b6f66c55f4165cf647b7'
             '7043651aa2544df70b41035f4899ef758358c190de03c58203276a63bb6ed606'
             'e7d047404f66b02175ec06d4807a27d4c9621ab6fe52d58af7af6234969bd3c3')
 
