@@ -192,6 +192,7 @@ def create_report_file(report_file, report_date):
         'lore': '[lore.kernel.org](https://lore.kernel.org/all/?q=f:nathan@kernel.org)',
         'sponsor': '[sponsoring my work](https://www.linuxfoundation.org/press/press-release/google-funds-linux-kernel-developers-to-focus-exclusively-on-security)',
         'tuxmake': '[TuxMake](https://tuxmake.org)',
+        'werror': '[all developers should be using `CONFIG_WERROR`](https://lore.kernel.org/r/CAHk-=wifoM9VOp-55OZCRcO9MnqQ109UTuCiXeZ-eyX_JcNVGg@mail.gmail.com/)',
     }
     # Yes, this is Markdown in Python :)
     template = (
@@ -213,7 +214,40 @@ def create_report_file(report_file, report_date):
                                                                            '\n'
         '## Linux kernel patches'                                          '\n'
                                                                            '\n'
-        '* ``:'                                                            '\n'
+        '* Build errors: These are patches to fix various build errors that'
+        ' I found through testing different configurations with LLVM or '
+        'were exposed by our continuous integration setup. The kernel needs'
+        ' to build in order to be run :)'                                  '\n'
+                                                                           '\n'
+        '  * `` ([`v1`]())'                                                '\n'
+                                                                           '\n'
+        '* Downstream fixes: These are fixes and improvements that occur in'
+        ' a downstream Linux tree, such as Android or ChromeOS, which our '
+        'continuous integration regularly tests.'                          '\n'
+                                                                           '\n'
+        '  * `` ([`v1`]())'                                                '\n'
+                                                                           '\n'
+        '* Miscellaneous fixes and improvements: These are fixes and '
+        "improvements that don't fit into a particular category but are "
+        'important to ClangBuiltLinux.'                                    '\n'
+                                                                           '\n'
+        '  * `` ([`v1`]())'                                                '\n'
+                                                                           '\n'
+        '* Stable backports: It is important to make sure that the stable '
+        'trees are as free from issues as possible, as those are the trees '
+        'that devices and users use; for example, Android and Chrome OS '
+        'regularly merge from stable, so if there is a problem that will '
+        'impact those trees that we fixed in mainline, it should be '
+        'backported.'                                                      '\n'
+                                                                           '\n'
+        '  * `` ([`v1`]())'                                                '\n'
+                                                                           '\n'
+        '* Warning fixes: These are patches to fix various warnings that '
+        'appear with LLVM. I used to go into detail about the different '
+        'warnings and what they mean, but the important takeaway for this '
+        'section is that the kernel should build warning free, as '
+        f"{links['werror']}, which will turn these all into failures. Maybe"
+        ' these should be in the build failures section...'                '\n'
                                                                            '\n'
         '  * `` ([`v1`]())'                                                '\n'
                                                                            '\n'
