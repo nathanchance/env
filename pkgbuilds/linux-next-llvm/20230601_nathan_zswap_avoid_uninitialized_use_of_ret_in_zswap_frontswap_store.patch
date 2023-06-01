@@ -1,0 +1,69 @@
+From git@z Thu Jan  1 00:00:00 1970
+Subject: [PATCH] zswap: Avoid uninitialized use of ret in
+ zswap_frontswap_store()
+From: Nathan Chancellor <nathan@kernel.org>
+Date: Thu, 01 Jun 2023 08:26:16 -0700
+Message-Id: <20230601-zswap-cgroup-wsometimes-uninitialized-v1-1-35debdd19293@kernel.org>
+MIME-Version: 1.0
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 7bit
+
+Clang warns:
+
+  mm/zswap.c:1183:6: error: variable 'ret' is used uninitialized whenever 'if' condition is true [-Werror,-Wsometimes-uninitialized]
+   1183 |         if (objcg && !obj_cgroup_may_zswap(objcg))
+        |             ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  mm/zswap.c:1327:9: note: uninitialized use occurs here
+   1327 |         return ret;
+        |                ^~~
+  mm/zswap.c:1183:2: note: remove the 'if' if its condition is always false
+   1183 |         if (objcg && !obj_cgroup_may_zswap(objcg))
+        |         ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+   1184 |                 goto reject;
+        | ~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  mm/zswap.c:1158:9: note: initialize the variable 'ret' to silence this warning
+   1158 |         int ret;
+        |                ^
+        |                 = 0
+  1 error generated.
+
+Set ret to -EINVAL, which seems to best match the situation the comment
+mentions and matches an earlier bailout due to an unsupported type or
+situation.
+
+Fixes: 6804144bf1cf ("zswap: do not shrink if cgroup may not zswap")
+Reported-by: kernel test robot <lkp@intel.com>
+Closes: https://lore.kernel.org/202306011435.2BxsHFUE-lkp@intel.com/
+Closes: https://lore.kernel.org/202306012152.o4FL7Y6J-lkp@intel.com/
+Closes: https://github.com/ClangBuiltLinux/linux/issues/1861
+Link: https://lore.kernel.org/r/20230601-zswap-cgroup-wsometimes-uninitialized-v1-1-35debdd19293@kernel.org
+Signed-off-by: Nathan Chancellor <nathan@kernel.org>
+---
+ mm/zswap.c | 4 +++-
+ 1 file changed, 3 insertions(+), 1 deletion(-)
+
+diff --git a/mm/zswap.c b/mm/zswap.c
+index cff93643a6ab..e8313e2f5807 100644
+--- a/mm/zswap.c
++++ b/mm/zswap.c
+@@ -1180,8 +1180,10 @@ static int zswap_frontswap_store(unsigned type, pgoff_t offset,
+ 	 * local cgroup limits.
+ 	 */
+ 	objcg = get_obj_cgroup_from_page(page);
+-	if (objcg && !obj_cgroup_may_zswap(objcg))
++	if (objcg && !obj_cgroup_may_zswap(objcg)) {
++		ret = -EINVAL;
+ 		goto reject;
++	}
+ 
+ 	/* reclaim space if needed */
+ 	if (zswap_is_full()) {
+
+---
+base-commit: b2424568bd9b947b2698b693ff24fec63bb4b36a
+change-id: 20230601-zswap-cgroup-wsometimes-uninitialized-b549ff4247ed
+
+Best regards,
+-- 
+Nathan Chancellor <nathan@kernel.org>
+
