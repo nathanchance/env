@@ -150,14 +150,9 @@ function cbl_bld_tot_tcs -d "Build LLVM and binutils from source for kernel deve
     end
 
     # Add in-review patches here
-    set -a revisions https://reviews.llvm.org/D151741 # [Lex] Only warn on defining or undefining language-defined builtins
     for revision in $revisions
         set -l git_ap_args
         set -l base_rev (basename $revision)
-        switch $base_rev
-            case D151741
-                set -a git_ap_args -p0
-        end
         if not crl "$revision?download=true" | git -C $llvm_project ap $git_ap_args
             set message "Failed to apply $base_rev"
             print_error "$message"
