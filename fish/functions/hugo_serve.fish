@@ -30,7 +30,7 @@ function hugo_serve -d "Runs 'hugo server' based on WSL's IP address"
     end
 
     set -a hugo_args \
-        --baseUrl=$ip \
+        --baseURL=$ip \
         --bind=0.0.0.0
 
     hugo server $hugo_args
