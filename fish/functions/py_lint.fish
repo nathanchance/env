@@ -88,5 +88,7 @@ function py_lint -d "Lint Python files"
         end
     end
 
-    set -q ephemeral; and py_venv x
+    if set -q ephemeral
+        py_venv x
+    end
 end
