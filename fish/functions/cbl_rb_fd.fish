@@ -16,16 +16,14 @@ function cbl_rb_fd -d "Rebase generic Fedora kernel on latest linux-next"
     for revert in $reverts
         git revert --no-edit $revert; or return
     end
-    set -a b4_patches https://lore.kernel.org/all/20230525212723.3361524-2-oliver.upton@linux.dev/ # KVM: arm64: Iterate arm_pmus list to probe for default PMU
     set -a b4_patches https://lore.kernel.org/all/20230530142154.3341677-1-trix@redhat.com/ # btrfs: remove unused variable pages_processed
-    set -a b4_patches https://lore.kernel.org/all/20230601-zswap-cgroup-wsometimes-uninitialized-v2-1-84912684ac35@kernel.org/ # zswap: avoid uninitialized use of ret in zswap_frontswap_store()
+    set -a b4_patches https://lore.kernel.org/all/20230605112025.80061-1-u.kleine-koenig@pengutronix.de/ # bus: fsl-mc: fsl-mc-allocator: Initialize mc_bus_dev before use
     for patch in $b4_patches
         b4 shazam -l -P _ -s $patch; or return
     end
     for patch in $crl_patches
         crl $patch | git am -3; or return
     end
-    set -a ln_commits d55b6ef146f1112ab2e2aca0a2e8fbf03de0daab # WIP: bus: fsl-mc: fsl-mc-allocator: Fix uninitialized use of mc_bus_dev
     for hash in $ln_commits
         git -C $CBL_BLD_P/linux-next fp -1 --stdout $hash | git am; or return
     end
