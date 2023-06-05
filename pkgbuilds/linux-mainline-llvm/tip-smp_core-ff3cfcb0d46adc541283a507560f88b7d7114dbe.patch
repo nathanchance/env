@@ -577,6 +577,27 @@ index 53bab123a8ee..953823fdf57b 100644
  config COMPAT_VDSO
  	def_bool n
  	prompt "Disable the 32-bit vDSO (needed for glibc 2.3.3)"
+diff --git a/arch/x86/coco/tdx/tdx.c b/arch/x86/coco/tdx/tdx.c
+index e146b599260f..27ce10c9ff61 100644
+--- a/arch/x86/coco/tdx/tdx.c
++++ b/arch/x86/coco/tdx/tdx.c
+@@ -871,5 +871,16 @@ void __init tdx_early_init(void)
+ 	x86_platform.guest.enc_tlb_flush_required   = tdx_tlb_flush_required;
+ 	x86_platform.guest.enc_status_change_finish = tdx_enc_status_changed;
+ 
++	/*
++	 * TDX intercepts the RDMSR to read the X2APIC ID in the parallel
++	 * bringup low level code. That raises #VE which cannot be handled
++	 * there.
++	 *
++	 * Intel-TDX has a secure RDMSR hypercall, but that needs to be
++	 * implemented seperately in the low level startup ASM code.
++	 * Until that is in place, disable parallel bringup for TDX.
++	 */
++	x86_cpuinit.parallel_bringup = false;
++
+ 	pr_info("Guest detected\n");
+ }
 diff --git a/arch/x86/include/asm/apic.h b/arch/x86/include/asm/apic.h
 index 3216da7074ba..98c32aa5963a 100644
 --- a/arch/x86/include/asm/apic.h
@@ -855,6 +876,25 @@ index fbdc3d951494..dc1b03be43eb 100644
  static inline void check_tsc_sync_target(void) { }
  #endif
  
+diff --git a/arch/x86/include/asm/x86_init.h b/arch/x86/include/asm/x86_init.h
+index 88085f369ff6..0bf4d735ff00 100644
+--- a/arch/x86/include/asm/x86_init.h
++++ b/arch/x86/include/asm/x86_init.h
+@@ -177,11 +177,14 @@ struct x86_init_ops {
+  * struct x86_cpuinit_ops - platform specific cpu hotplug setups
+  * @setup_percpu_clockev:	set up the per cpu clock event device
+  * @early_percpu_clock_init:	early init of the per cpu clock event device
++ * @fixup_cpu_id:		fixup function for cpuinfo_x86::phys_proc_id
++ * @parallel_bringup:		Parallel bringup control
+  */
+ struct x86_cpuinit_ops {
+ 	void (*setup_percpu_clockev)(void);
+ 	void (*early_percpu_clock_init)(void);
+ 	void (*fixup_cpu_id)(struct cpuinfo_x86 *c, int node);
++	bool parallel_bringup;
+ };
+ 
+ struct timespec64;
 diff --git a/arch/x86/kernel/acpi/sleep.c b/arch/x86/kernel/acpi/sleep.c
 index 1328c221af30..6dfecb27b846 100644
 --- a/arch/x86/kernel/acpi/sleep.c
@@ -883,7 +923,7 @@ index 1328c221af30..6dfecb27b846 100644
  	initial_code = (unsigned long)wakeup_long64;
  	saved_magic = 0x123456789abcdef0L;
 diff --git a/arch/x86/kernel/apic/apic.c b/arch/x86/kernel/apic/apic.c
-index 770557110051..209c5052556d 100644
+index 770557110051..af49e24b46a4 100644
 --- a/arch/x86/kernel/apic/apic.c
 +++ b/arch/x86/kernel/apic/apic.c
 @@ -101,6 +101,9 @@ static int apic_extnmi __ro_after_init = APIC_EXTNMI_BSP;
@@ -913,39 +953,54 @@ index 770557110051..209c5052556d 100644
  	[0 ... NR_CPUS - 1] = -1,
  };
  
-@@ -2386,20 +2390,16 @@ bool arch_match_cpu_phys_id(int cpu, u64 phys_id)
+@@ -2386,20 +2390,31 @@ bool arch_match_cpu_phys_id(int cpu, u64 phys_id)
  }
  
  #ifdef CONFIG_SMP
 -/**
 - * apic_id_is_primary_thread - Check whether APIC ID belongs to a primary thread
 - * @apicid: APIC ID to check
-- */
--bool apic_id_is_primary_thread(unsigned int apicid)
 +static void cpu_mark_primary_thread(unsigned int cpu, unsigned int apicid)
- {
--	u32 mask;
--
--	if (smp_num_siblings == 1)
--		return true;
- 	/* Isolate the SMT bit(s) in the APICID and check for 0 */
--	mask = (1U << (fls(smp_num_siblings) - 1)) - 1;
--	return !(apicid & mask);
++{
++	/* Isolate the SMT bit(s) in the APICID and check for 0 */
 +	u32 mask = (1U << (fls(smp_num_siblings) - 1)) - 1;
 +
 +	if (smp_num_siblings == 1 || !(apicid & mask))
 +		cpumask_set_cpu(cpu, &__cpu_primary_thread_mask);
++}
++
++/*
++ * Due to the utter mess of CPUID evaluation smp_num_siblings is not valid
++ * during early boot. Initialize the primary thread mask before SMP
++ * bringup.
+  */
+-bool apic_id_is_primary_thread(unsigned int apicid)
++static int __init smp_init_primary_thread_mask(void)
+ {
+-	u32 mask;
++	unsigned int cpu;
+ 
+-	if (smp_num_siblings == 1)
+-		return true;
+-	/* Isolate the SMT bit(s) in the APICID and check for 0 */
+-	mask = (1U << (fls(smp_num_siblings) - 1)) - 1;
+-	return !(apicid & mask);
++	for (cpu = 0; cpu < nr_logical_cpuids; cpu++)
++		cpu_mark_primary_thread(cpu, cpuid_to_apicid[cpu]);
++	return 0;
  }
++early_initcall(smp_init_primary_thread_mask);
 +#else
 +static inline void cpu_mark_primary_thread(unsigned int cpu, unsigned int apicid) { }
  #endif
  
  /*
-@@ -2544,6 +2544,8 @@ int generic_processor_info(int apicid, int version)
+@@ -2544,6 +2559,9 @@ int generic_processor_info(int apicid, int version)
  	set_cpu_present(cpu, true);
  	num_processors++;
  
-+	cpu_mark_primary_thread(cpu, apicid);
++	if (system_state != SYSTEM_BOOTING)
++		cpu_mark_primary_thread(cpu, apicid);
 +
  	return cpu;
  }
@@ -1309,7 +1364,7 @@ index 375b33ecafa2..0d54115c3859 100644
  	.play_dead		= native_play_dead,
  
 diff --git a/arch/x86/kernel/smpboot.c b/arch/x86/kernel/smpboot.c
-index 352f0ce1ece4..660709e94823 100644
+index 352f0ce1ece4..aaa876cfd9d9 100644
 --- a/arch/x86/kernel/smpboot.c
 +++ b/arch/x86/kernel/smpboot.c
 @@ -57,6 +57,8 @@
@@ -1840,8 +1895,7 @@ index 352f0ce1ece4..660709e94823 100644
  	else
 -		boot_error = wakeup_cpu_via_init_nmi(cpu, start_ip, apicid,
 -						     cpu0_nmi_registered);
-+		ret = wakeup_secondary_cpu_via_init(apicid, start_ip);
- 
+-
 -	if (!boot_error) {
 -		/*
 -		 * Wait 10s total for first sign of life from AP
@@ -1882,7 +1936,8 @@ index 352f0ce1ece4..660709e94823 100644
 -		 */
 -		smpboot_restore_warm_reset_vector();
 -	}
--
++		ret = wakeup_secondary_cpu_via_init(apicid, start_ip);
+ 
 -	return boot_error;
 +	/* If the wakeup mechanism failed, cleanup the warm reset vector */
 +	if (ret)
@@ -2021,7 +2076,7 @@ index 352f0ce1ece4..660709e94823 100644
  	mb();
  
  	for_each_possible_cpu(i) {
-@@ -1402,6 +1263,36 @@ void __init smp_prepare_cpus_common(void)
+@@ -1402,6 +1263,21 @@ void __init smp_prepare_cpus_common(void)
  	set_cpu_sibling_map(0);
  }
  
@@ -2029,23 +2084,8 @@ index 352f0ce1ece4..660709e94823 100644
 +/* Establish whether parallel bringup can be supported. */
 +bool __init arch_cpuhp_init_parallel_bringup(void)
 +{
-+	/*
-+	 * Encrypted guests require special handling. They enforce X2APIC
-+	 * mode but the RDMSR to read the APIC ID is intercepted and raises
-+	 * #VC or #VE which cannot be handled in the early startup code.
-+	 *
-+	 * AMD-SEV does not provide a RDMSR GHCB protocol so the early
-+	 * startup code cannot directly communicate with the secure
-+	 * firmware. The alternative solution to retrieve the APIC ID via
-+	 * CPUID(0xb), which is covered by the GHCB protocol, is not viable
-+	 * either because there is no enforcement of the CPUID(0xb)
-+	 * provided "initial" APIC ID to be the same as the real APIC ID.
-+	 *
-+	 * Intel-TDX has a secure RDMSR hypercall, but that needs to be
-+	 * implemented seperately in the low level startup ASM code.
-+	 */
-+	if (cc_platform_has(CC_ATTR_GUEST_STATE_ENCRYPT)) {
-+		pr_info("Parallel CPU startup disabled due to guest state encryption\n");
++	if (!x86_cpuinit.parallel_bringup) {
++		pr_info("Parallel CPU startup disabled by the platform\n");
 +		return false;
 +	}
 +
@@ -2058,7 +2098,7 @@ index 352f0ce1ece4..660709e94823 100644
  /*
   * Prepare for SMP bootup.
   * @max_cpus: configured maximum number of CPUs, It is a legacy parameter
-@@ -1431,8 +1322,6 @@ void __init native_smp_prepare_cpus(unsigned int max_cpus)
+@@ -1431,8 +1307,6 @@ void __init native_smp_prepare_cpus(unsigned int max_cpus)
  	/* Setup local timer */
  	x86_init.timers.setup_percpu_clockev();
  
@@ -2067,7 +2107,7 @@ index 352f0ce1ece4..660709e94823 100644
  	pr_info("CPU0: ");
  	print_cpu_info(&cpu_data(0));
  
-@@ -1466,9 +1355,6 @@ void __init native_smp_prepare_boot_cpu(void)
+@@ -1466,9 +1340,6 @@ void __init native_smp_prepare_boot_cpu(void)
  	if (!IS_ENABLED(CONFIG_SMP))
  		switch_gdt_and_percpu_base(me);
  
@@ -2077,7 +2117,7 @@ index 352f0ce1ece4..660709e94823 100644
  	native_pv_lock_init();
  }
  
-@@ -1592,6 +1478,12 @@ __init void prefill_possible_map(void)
+@@ -1592,6 +1463,12 @@ __init void prefill_possible_map(void)
  		set_cpu_possible(i, true);
  }
  
@@ -2090,7 +2130,7 @@ index 352f0ce1ece4..660709e94823 100644
  #ifdef CONFIG_HOTPLUG_CPU
  
  /* Recompute SMT state for all CPUs on offline */
-@@ -1650,10 +1542,6 @@ static void remove_siblinginfo(int cpu)
+@@ -1650,10 +1527,6 @@ static void remove_siblinginfo(int cpu)
  static void remove_cpu_from_maps(int cpu)
  {
  	set_cpu_online(cpu, false);
@@ -2101,7 +2141,7 @@ index 352f0ce1ece4..660709e94823 100644
  	numa_remove_cpu(cpu);
  }
  
-@@ -1704,54 +1592,17 @@ int native_cpu_disable(void)
+@@ -1704,54 +1577,17 @@ int native_cpu_disable(void)
  	return 0;
  }
  
@@ -2157,7 +2197,7 @@ index 352f0ce1ece4..660709e94823 100644
  /*
   * We need to flush the caches before going to sleep, lest we have
   * dirty data in our caches when we come back up.
-@@ -1819,8 +1670,6 @@ static inline void mwait_play_dead(void)
+@@ -1819,8 +1655,6 @@ static inline void mwait_play_dead(void)
  		__monitor(mwait_ptr, 0, 0);
  		mb();
  		__mwait(eax, 0);
@@ -2166,7 +2206,7 @@ index 352f0ce1ece4..660709e94823 100644
  	}
  }
  
-@@ -1829,11 +1678,8 @@ void __noreturn hlt_play_dead(void)
+@@ -1829,11 +1663,8 @@ void __noreturn hlt_play_dead(void)
  	if (__this_cpu_read(cpu_info.x86) >= 4)
  		wbinvd();
  
@@ -2179,7 +2219,7 @@ index 352f0ce1ece4..660709e94823 100644
  }
  
  void native_play_dead(void)
-@@ -1852,12 +1698,6 @@ int native_cpu_disable(void)
+@@ -1852,12 +1683,6 @@ int native_cpu_disable(void)
  	return -ENOSYS;
  }
  
@@ -2429,6 +2469,44 @@ index 9452dc9664b5..bbc440c93e08 100644
  retry:
  	/*
  	 * Register this CPU's participation and wait for the
+diff --git a/arch/x86/kernel/x86_init.c b/arch/x86/kernel/x86_init.c
+index d82f4fa2f1bf..1da4baa34d1b 100644
+--- a/arch/x86/kernel/x86_init.c
++++ b/arch/x86/kernel/x86_init.c
+@@ -126,6 +126,7 @@ struct x86_init_ops x86_init __initdata = {
+ struct x86_cpuinit_ops x86_cpuinit = {
+ 	.early_percpu_clock_init	= x86_init_noop,
+ 	.setup_percpu_clockev		= setup_secondary_APIC_clock,
++	.parallel_bringup		= true,
+ };
+ 
+ static void default_nmi_init(void) { };
+diff --git a/arch/x86/mm/mem_encrypt_amd.c b/arch/x86/mm/mem_encrypt_amd.c
+index e0b51c09109f..4855e5f92970 100644
+--- a/arch/x86/mm/mem_encrypt_amd.c
++++ b/arch/x86/mm/mem_encrypt_amd.c
+@@ -501,6 +501,21 @@ void __init sme_early_init(void)
+ 	x86_platform.guest.enc_status_change_finish  = amd_enc_status_change_finish;
+ 	x86_platform.guest.enc_tlb_flush_required    = amd_enc_tlb_flush_required;
+ 	x86_platform.guest.enc_cache_flush_required  = amd_enc_cache_flush_required;
++
++	/*
++	 * AMD-SEV-ES intercepts the RDMSR to read the X2APIC ID in the
++	 * parallel bringup low level code. That raises #VC which cannot be
++	 * handled there.
++	 * It does not provide a RDMSR GHCB protocol so the early startup
++	 * code cannot directly communicate with the secure firmware. The
++	 * alternative solution to retrieve the APIC ID via CPUID(0xb),
++	 * which is covered by the GHCB protocol, is not viable either
++	 * because there is no enforcement of the CPUID(0xb) provided
++	 * "initial" APIC ID to be the same as the real APIC ID.
++	 * Disable parallel bootup.
++	 */
++	if (sev_status & MSR_AMD64_SEV_ES_ENABLED)
++		x86_cpuinit.parallel_bringup = false;
+ }
+ 
+ void __init mem_encrypt_free_decrypted_mem(void)
 diff --git a/arch/x86/power/cpu.c b/arch/x86/power/cpu.c
 index 7a4d5e911415..63230ff8cf4f 100644
 --- a/arch/x86/power/cpu.c
@@ -2492,19 +2570,23 @@ index af565816d2ba..788e5559549f 100644
  
  	/* Map the real mode stub as virtual == physical */
 diff --git a/arch/x86/realmode/rm/trampoline_64.S b/arch/x86/realmode/rm/trampoline_64.S
-index e38d61d6562e..4822ad2a5e89 100644
+index e38d61d6562e..c9f76fae902e 100644
 --- a/arch/x86/realmode/rm/trampoline_64.S
 +++ b/arch/x86/realmode/rm/trampoline_64.S
-@@ -37,6 +37,20 @@
+@@ -37,6 +37,24 @@
  	.text
  	.code16
  
-+.macro LOAD_REALMODE_ESP
++.macro LOCK_AND_LOAD_REALMODE_ESP lock_pa=0
 +	/*
 +	 * Make sure only one CPU fiddles with the realmode stack
 +	 */
 +.Llock_rm\@:
++	.if \lock_pa
++        lock btsl       $0, pa_tr_lock
++	.else
 +        lock btsl       $0, tr_lock
++	.endif
 +        jnc             2f
 +        pause
 +        jmp             .Llock_rm\@
@@ -2516,36 +2598,36 @@ index e38d61d6562e..4822ad2a5e89 100644
  	.balign	PAGE_SIZE
  SYM_CODE_START(trampoline_start)
  	cli			# We should be safe anyway
-@@ -49,8 +63,7 @@ SYM_CODE_START(trampoline_start)
+@@ -49,8 +67,7 @@ SYM_CODE_START(trampoline_start)
  	mov	%ax, %es
  	mov	%ax, %ss
  
 -	# Setup stack
 -	movl	$rm_stack_end, %esp
-+	LOAD_REALMODE_ESP
++	LOCK_AND_LOAD_REALMODE_ESP
  
  	call	verify_cpu		# Verify the cpu supports long mode
  	testl   %eax, %eax		# Check for return code
-@@ -93,8 +106,7 @@ SYM_CODE_START(sev_es_trampoline_start)
+@@ -93,8 +110,7 @@ SYM_CODE_START(sev_es_trampoline_start)
  	mov	%ax, %es
  	mov	%ax, %ss
  
 -	# Setup stack
 -	movl	$rm_stack_end, %esp
-+	LOAD_REALMODE_ESP
++	LOCK_AND_LOAD_REALMODE_ESP
  
  	jmp	.Lswitch_to_protected
  SYM_CODE_END(sev_es_trampoline_start)
-@@ -177,7 +189,7 @@ SYM_CODE_START(pa_trampoline_compat)
+@@ -177,7 +193,7 @@ SYM_CODE_START(pa_trampoline_compat)
  	 * In compatibility mode.  Prep ESP and DX for startup_32, then disable
  	 * paging and complete the switch to legacy 32-bit mode.
  	 */
 -	movl	$rm_stack_end, %esp
-+	LOAD_REALMODE_ESP
++	LOCK_AND_LOAD_REALMODE_ESP lock_pa=1
  	movw	$__KERNEL_DS, %dx
  
  	movl	$(CR0_STATE & ~X86_CR0_PG), %eax
-@@ -241,6 +253,7 @@ SYM_DATA_START(trampoline_header)
+@@ -241,6 +257,7 @@ SYM_DATA_START(trampoline_header)
  	SYM_DATA(tr_efer,		.space 8)
  	SYM_DATA(tr_cr4,		.space 4)
  	SYM_DATA(tr_flags,		.space 4)
