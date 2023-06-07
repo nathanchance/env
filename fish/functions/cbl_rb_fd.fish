@@ -20,6 +20,7 @@ function cbl_rb_fd -d "Rebase generic Fedora kernel on latest linux-next"
     for patch in $b4_patches
         b4 shazam -l -P _ -s $patch; or return
     end
+    set -a crl_patches https://git.kernel.org/kvmarm/kvmarm/p/1caa71a7a600f7781ce05ef1e84701c459653663 # KVM: arm64: Restore GICv2-on-GICv3 functionality
     for patch in $crl_patches
         crl $patch | git am -3; or return
     end
