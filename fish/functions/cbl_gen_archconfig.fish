@@ -50,7 +50,7 @@ function cbl_gen_archconfig -d "Generate a configuration file for Arch Linux"
     rm $src_cfg
 
     # Step 2: Copy default Arch configuration and set a few options
-    crl https://github.com/archlinux/svntogit-packages/raw/packages/linux/trunk/config >$cfg
+    crl https://gitlab.archlinux.org/archlinux/packaging/packages/linux/-/raw/main/config >$cfg
     $src/scripts/config \
         --file $cfg \
         -d LOCALVERSION_AUTO \

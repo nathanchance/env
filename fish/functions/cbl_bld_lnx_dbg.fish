@@ -43,7 +43,7 @@ function cbl_bld_lnx_dbg -d "Build linux-debug Arch Linux package"
 
     echo -debug >localversion.10-pkgname
 
-    crl -o .config https://github.com/archlinux/svntogit-packages/raw/packages/linux/trunk/config; or return
+    crl -o .config https://gitlab.archlinux.org/archlinux/packaging/packages/linux/-/raw/main/config; or return
 
     # Keep in sync with cbl_gen_archconfig, step 2
     scripts/config \
