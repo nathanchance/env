@@ -110,10 +110,10 @@ function install_packages() {
     host_arch=$(uname -m)
     # No GCC for you!
     if [[ ! $host_arch =~ arm ]]; then
-        packages+=(cross-{arm,mips,ppc64,s390x}-gcc11)
+        packages+=(cross-{arm,mips,ppc64,s390x}-gcc13)
         case "$host_arch" in
-            aarch64) packages+=(cross-x86_64-gcc11) ;;
-            x86_64) packages+=(cross-aarch64-gcc11) ;;
+            aarch64) packages+=(cross-x86_64-gcc13) ;;
+            x86_64) packages+=(cross-aarch64-gcc13) ;;
         esac
     fi
 
