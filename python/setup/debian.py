@@ -107,12 +107,13 @@ def setup_repos():
         encoding='utf-8')
 
     # fish
+    fish_version_id = '11' if version_id == '12' else version_id
     fish_repo_url = 'https://download.opensuse.org/repositories'
     lib.setup.fetch_gpg_key(
-        f"{fish_repo_url}/shells:fish:release:3/Debian_{version_id}/Release.key",
+        f"{fish_repo_url}/shells:fish:release:3/Debian_{fish_version_id}/Release.key",
         Path(apt_gpg, 'shells_fish_release_3.gpg'))
     Path(apt_sources, 'shells:fish:release:3.list').write_text(
-        f"deb {fish_repo_url.replace('https', 'http')}/shells:/fish:/release:/3/Debian_{version_id}/ /\n",
+        f"deb {fish_repo_url.replace('https', 'http')}/shells:/fish:/release:/3/Debian_{fish_version_id}/ /\n",
         encoding='utf-8')
 
     # gh

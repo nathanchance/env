@@ -535,7 +535,7 @@ def get_def_iso(arch):
     arch_day = '.01'
     arch_iso_ver = datetime.datetime.now(datetime.timezone.utc).strftime("%Y.%m") + arch_day
 
-    debian_ver = '11.6.0'
+    debian_ver = '12.0.0'
 
     fedora_ver = '38'
     fedora_iso_ver = '1.6'
