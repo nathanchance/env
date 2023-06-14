@@ -9,12 +9,10 @@ function get_latest_stable_llvm_version -d 'Get the latest stable version for an
                 echo $arg.1.0
             case 12 13
                 echo $arg.0.1
-            case 14
+            case 14 16
                 echo $arg.0.6
             case 15
                 echo $arg.0.7
-            case 16
-                echo $arg.0.5
         end
     end
 end
