@@ -2,7 +2,7 @@
 # Automatically generated file; DO NOT EDIT.
 # Linux/x86 6.4.0-rc6 Kernel Configuration
 #
-CONFIG_CC_VERSION_TEXT="ClangBuiltLinux clang version 17.0.0 (https://github.com/llvm/llvm-project 0118a3f6c3c9bde9042f21b20a7a7131b942761c)"
+CONFIG_CC_VERSION_TEXT="ClangBuiltLinux clang version 17.0.0 (https://github.com/llvm/llvm-project e63e536044178cdd23ed8a82f35c42d394bb1dfa)"
 CONFIG_GCC_VERSION=0
 CONFIG_CC_IS_CLANG=y
 CONFIG_CLANG_VERSION=170000
@@ -8149,6 +8149,7 @@ CONFIG_USB_NET2280=m
 CONFIG_USB_GOKU=m
 CONFIG_USB_EG20T=m
 CONFIG_USB_MAX3420_UDC=m
+# CONFIG_USB_CDNS2_UDC is not set
 CONFIG_USB_DUMMY_HCD=m
 # end of USB Peripheral Controller
 
