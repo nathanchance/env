@@ -76,7 +76,7 @@ def install_packages():
 
     casks = {
         'homebrew/cask-fonts': ['font-iosevka-ss08'],
-        'wez/wezterm': ['wez/wezterm/wezterm-nightly'],
+        'homebrew/cask-versions': ['wezterm-nightly'],
     }
     for cask, packages in casks.items():
         brew(['tap', cask])
