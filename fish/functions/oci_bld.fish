@@ -24,6 +24,11 @@ function oci_bld -d "Build an OCI container image"
             return 0
     end
 
+    if set -q GITHUB_TOKEN
+        set mgr_args \
+            --build-arg=GITHUB_TOKEN=$GITHUB_TOKEN
+    end
+
     for arg in $argv
         switch $arg
             case dev dev/{alpine,arch,debian,fedora,suse,ubuntu}

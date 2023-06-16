@@ -17,8 +17,12 @@ function setup_fish_repo() {
 
     # shellcheck disable=SC1091
     source /usr/lib/os-release
-    curl -fLSs https://download.opensuse.org/repositories/shells:fish:release:3/Debian_"$VERSION_ID"/Release.key | gpg --dearmor | dd of=/etc/apt/trusted.gpg.d/shells_fish_release_3.gpg
-    echo "deb http://download.opensuse.org/repositories/shells:/fish:/release:/3/Debian_$VERSION_ID/ /" | tee /etc/apt/sources.list.d/shells:fish:release:3.list
+    # Until OBS supports Debian 12, dependencies should be fine
+    (
+        VERSION_ID=11
+        curl -fLSs https://download.opensuse.org/repositories/shells:fish:release:3/Debian_"$VERSION_ID"/Release.key | gpg --dearmor | dd of=/etc/apt/trusted.gpg.d/shells_fish_release_3.gpg
+        echo "deb http://download.opensuse.org/repositories/shells:/fish:/release:/3/Debian_$VERSION_ID/ /" | tee /etc/apt/sources.list.d/shells:fish:release:3.list
+    )
 }
 
 function setup_gh_repo() {
@@ -35,10 +39,6 @@ function setup_llvm_repo() {
         "$llvm_main"
         "$llvm_stable"
         15
-        14
-        13
-        12
-        11
     )
 
     for llvm_version in "${llvm_versions[@]}"; do
@@ -48,6 +48,17 @@ function setup_llvm_repo() {
         esac
         echo "deb http://apt.llvm.org/$VERSION_CODENAME/ llvm-toolchain-$VERSION_CODENAME${deb_suffix:-} main" | tee /etc/apt/sources.list.d/llvm-"$llvm_version".list
     done
+
+    # These are not in Bookworm, they should be safe through dependency checks
+    # though. 11 and 12 cannot be satisfied by the packages in Bookworm unfortunately.
+    old_llvm_versions=(
+        14
+        13
+    )
+    for old_llvm_version in "${old_llvm_versions[@]}"; do
+        echo "deb http://apt.llvm.org/bullseye/ llvm-toolchain-bullseye-$old_llvm_version main" | tee /etc/apt/sources.list.d/llvm-"$old_llvm_version".list
+    done
+    llvm_versions+=("${old_llvm_versions[@]}")
 }
 
 function install_packages() {
@@ -170,10 +181,15 @@ function install_packages() {
         aarch64) delta_arch=arm64 ;;
         x86_64) delta_arch=amd64 ;;
     esac
+    api_args=()
+    if [[ -n ${GITHUB_TOKEN:-} ]]; then
+        api_args=(
+            -H "Authorization: Bearer $GITHUB_TOKEN"
+            -H "Content-Type: application/json"
+        )
+    fi
     delta_repo=dandavison/delta
-    # https://github.com/dandavison/delta/issues/1250
-    # delta_version=$(curl "${api_args[@]}" -LSs https://api.github.com/repos/"$delta_repo"/releases/latest | jq -r .tag_name)
-    delta_version=0.14.0
+    delta_version=$(curl "${api_args[@]}" -LSs https://api.github.com/repos/"$delta_repo"/releases/latest | jq -r .tag_name)
     delta_deb=/tmp/git-delta_"$delta_version"_"$delta_arch".deb
     curl -LSso "$delta_deb" https://github.com/"$delta_repo"/releases/download/"$delta_version"/"${delta_deb##*/}"
     apt install -y "$delta_deb"
@@ -197,7 +213,7 @@ function setup_locales() {
 }
 
 function build_pahole() {
-    pahole_ver=1.24
+    pahole_ver=1.25
     pahole_src=/tmp/dwarves-$pahole_ver
     pahole_build=$pahole_src/build
 

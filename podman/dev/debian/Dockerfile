@@ -1,4 +1,4 @@
-FROM docker.io/debian:11
+FROM docker.io/debian:12
 
 COPY distrobox-check.fish /
 COPY setup-env.sh /
