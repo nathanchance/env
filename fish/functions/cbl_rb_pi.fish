@@ -33,6 +33,10 @@ function cbl_rb_pi -d "Rebase Raspberry Pi kernel on latest linux-next"
     for hash in $ln_commits
         git -C $CBL_BLD_P/linux-next fp -1 --stdout $hash | git am; or return
     end
+    git ap $ENV_FOLDER/pkgbuilds/linux-next-llvm/will-fix-mmap.c.patch; or return
+    git ac -m "mm/mmap.c: Apply Will's suggested fix
+
+Link: https://lore.kernel.org/20230620094314.GA14607@willie-the-truck/"; or return
 
     # Regenerate defconfigs
     for arch in arm arm64

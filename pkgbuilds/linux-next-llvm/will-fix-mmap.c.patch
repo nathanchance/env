@@ -1,0 +1,12 @@
+diff --git a/mm/mmap.c b/mm/mmap.c
+index 9a93b054148a..4c82e9b36fb3 100644
+--- a/mm/mmap.c
++++ b/mm/mmap.c
+@@ -2396,6 +2396,7 @@ do_vmi_align_munmap(struct vma_iterator *vmi, struct vm_area_struct *vma,
+ 			if (error)
+ 				goto end_split_failed;
+ 		}
++		mas_set(&mas_detach, count);
+ 		vma_start_write(next);
+ 		if (mas_store_gfp(&mas_detach, next, GFP_KERNEL))
+ 			goto munmap_gather_failed;
