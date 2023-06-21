@@ -21,8 +21,14 @@ function cbl_rb_pi -d "Rebase Raspberry Pi kernel on latest linux-next"
     git rh origin/master
 
     # Patching
+    # https://lore.kernel.org/CA+G9fYtKCZeAUTtwe69iK8Xcz1mOKQzwcy49wd+imZrfj6ifXA@mail.gmail.com/
+    # c3b60ab7a4dff6e6e608e685b70ddc3d6b2aca81 is the real problem but it is easier to just revert
+    # the merge that brought in the whole series.
+    set -a reverts 712557f210723101717570844c95ac0913af74d7 # Merge branch 'ptp-adjphase-cleanups'
+    # https://lore.kernel.org/ZJLzsWsIPD57pDgc@FVFF77S0Q05N/
+    set -a reverts 49703aa2adfaff2805dc08d3ce4ccb3e0056cb32 # bpf, arm64: use bpf_jit_binary_pack_alloc
     for revert in $reverts
-        git revert --no-edit $revert; or return
+        git revert --mainline 1 --no-edit $revert; or return
     end
     for patch in $b4_patches
         b4 shazam -l -P _ -s $patch; or return
@@ -33,10 +39,6 @@ function cbl_rb_pi -d "Rebase Raspberry Pi kernel on latest linux-next"
     for hash in $ln_commits
         git -C $CBL_BLD_P/linux-next fp -1 --stdout $hash | git am; or return
     end
-    git ap $ENV_FOLDER/pkgbuilds/linux-next-llvm/will-fix-mmap.c.patch; or return
-    git ac -m "mm/mmap.c: Apply Will's suggested fix
-
-Link: https://lore.kernel.org/20230620094314.GA14607@willie-the-truck/"; or return
 
     # Regenerate defconfigs
     for arch in arm arm64
