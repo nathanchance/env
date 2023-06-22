@@ -3,7 +3,7 @@
 
 _localversion=-llvm
 pkgname=linux-next$_localversion
-_srctag=next-20230621
+_srctag=next-20230622
 pkgver=${_srctag//-/.}
 pkgrel=1
 pkgdesc='linux-next'
@@ -24,7 +24,6 @@ source=(
   "$pkgname::git+https://git.kernel.org/pub/scm/linux/kernel/git/next/linux-next.git?signed#tag=$_srctag"
   config
   20220222_gustavoars_scsi_aacraid_replace_one_element_array_with_flexible_array_member_in_struct_aac_.patch
-  20230613_leon_rdma_bnxt_re_initialize_opcode_while_sending_message.patch
   revert-712557f210723101717570844c95ac0913af74d7.patch
 )
 
@@ -33,9 +32,8 @@ validpgpkeys=(
   '3F2568AAC26998F9E813A1C5C3F436CA30F5D8EB'  # Mark Brown
 )
 sha256sums=('SKIP'
-            'fa16a234dc4574b88b8c51eed9547b0e39d52921491d8bb96e3848761d14b89f'
+            'd090da6ec20fe7a555a8f6b8f30d72e99938504edf952f62d871b384675c718a'
             '6f36a23678f10c9c777820836dd41eefb02809cc74208a4ebfaaba39b088a816'
-            'ac276864ccb487d913f1f15d09910577f65e69f797b2519ad1eb0dc0bd62c2c2'
             'e523d55f1aff04aeb582717844f22bf0e8a4e69e273280d64738ae7f8e37c4db')
 
 # This obviously ties this PKGBUILD to my machine but that is kind of the point :)

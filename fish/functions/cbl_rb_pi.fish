@@ -25,8 +25,6 @@ function cbl_rb_pi -d "Rebase Raspberry Pi kernel on latest linux-next"
     # c3b60ab7a4dff6e6e608e685b70ddc3d6b2aca81 is the real problem but it is easier to just revert
     # the merge that brought in the whole series.
     set -a reverts 712557f210723101717570844c95ac0913af74d7 # Merge branch 'ptp-adjphase-cleanups'
-    # https://lore.kernel.org/ZJLzsWsIPD57pDgc@FVFF77S0Q05N/
-    set -a reverts 49703aa2adfaff2805dc08d3ce4ccb3e0056cb32 # bpf, arm64: use bpf_jit_binary_pack_alloc
     for revert in $reverts
         git revert --mainline 1 --no-edit $revert; or return
     end
