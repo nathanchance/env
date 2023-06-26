@@ -1,0 +1,13 @@
+diff --git b/net/unix/af_unix.c a/net/unix/af_unix.c
+index f9d196439b49..73c61a010b01 100644
+--- b/net/unix/af_unix.c
++++ a/net/unix/af_unix.c
+@@ -2826,7 +2826,7 @@ static int unix_stream_read_generic(struct unix_stream_read_state *state,
+ 	} while (size);
+ 
+ 	mutex_unlock(&u->iolock);
+-	if (state->msg && check_creds)
++	if (state->msg)
+ 		scm_recv(sock, state->msg, &scm, flags);
+ 	else
+ 		scm_destroy(&scm);

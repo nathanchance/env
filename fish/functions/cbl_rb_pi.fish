@@ -25,6 +25,8 @@ function cbl_rb_pi -d "Rebase Raspberry Pi kernel on latest linux-next"
     # c3b60ab7a4dff6e6e608e685b70ddc3d6b2aca81 is the real problem but it is easier to just revert
     # the merge that brought in the whole series.
     set -a reverts 712557f210723101717570844c95ac0913af74d7 # Merge branch 'ptp-adjphase-cleanups'
+    # https://lore.kernel.org/8c7f9abd-4f84-7296-2788-1e130d6304a0@kernel.org/
+    set -a reverts 3f5f118bb657f94641ea383c7c1b8c09a5d46ea2 # af_unix: Call scm_recv() only after scm_set_cred().
     for revert in $reverts
         git revert --mainline 1 --no-edit $revert; or return
     end
