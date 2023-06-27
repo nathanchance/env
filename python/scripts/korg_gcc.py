@@ -31,6 +31,7 @@ def korg_gcc_canonicalize_target(value):
     # to what the user intended
     kernel_to_gcc = {
         'arm64': 'aarch64',
+        'loongarch': 'loongarch64',
         'riscv': 'riscv64',
     }
     return f"{kernel_to_gcc.get(value, value)}-linux{suffix}"
@@ -42,6 +43,8 @@ def supported_korg_gcc_arches():
         'arm',
         'arm64',  # accept kernel value for aarch64
         'i386',
+        'loongarch',  # accept kernel value for loongarch64
+        'loongarch64',
         'm68k',
         'mips',
         'mips64',
@@ -174,6 +177,9 @@ def install(args):
         if major_version < 7:
             targets.remove('riscv32-linux')
             targets.remove('riscv64-linux')
+        # LoongArch was not supported in GCC until 12.x
+        if major_version < 12:
+            targets.remove('loongarch64-linux')
 
         full_version = get_latest_gcc_version(major_version)
 
