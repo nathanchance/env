@@ -76,7 +76,7 @@ function cbl_bld_lnx_dbg -d "Build linux-debug Arch Linux package"
     install -Dm644 (make -s image_name) $modulesdir/vmlinuz; or return
     echo "$pkg" | install -Dm644 /dev/stdin $modulesdir/pkgbase; or return
     cbl_upd_krnl_pkgver $pkg
-    kmake $kmake_args DEPMOD=/doesnt/exist INSTALL_MOD_PATH=$pkgdir/usr INSTALL_MOD_STRIP=1 modules_install; or return
+    ZSTD_CLEVEL=19 kmake $kmake_args DEPMOD=/doesnt/exist INSTALL_MOD_PATH=$pkgdir/usr INSTALL_MOD_STRIP=1 modules_install; or return
     rm $modulesdir/{source,build}
 
     pushd $pkgroot
