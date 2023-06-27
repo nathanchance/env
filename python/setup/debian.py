@@ -87,7 +87,10 @@ def pi_setup(user_name):
 def prechecks():
     lib.setup.check_root()
 
-    supported_versions = ('bullseye', )
+    supported_versions = (
+        'bullseye',
+        'bookworm',
+    )
     if (codename := lib.setup.get_version_codename()) not in supported_versions:
         raise RuntimeError(f"Debian {codename} is not supported by this script!")
 
@@ -107,13 +110,11 @@ def setup_repos():
         encoding='utf-8')
 
     # fish
-    fish_version_id = '11' if version_id == '12' else version_id
     fish_repo_url = 'https://download.opensuse.org/repositories'
-    lib.setup.fetch_gpg_key(
-        f"{fish_repo_url}/shells:fish:release:3/Debian_{fish_version_id}/Release.key",
-        Path(apt_gpg, 'shells_fish_release_3.gpg'))
-    Path(apt_sources, 'shells:fish:release:3.list').write_text(
-        f"deb {fish_repo_url.replace('https', 'http')}/shells:/fish:/release:/3/Debian_{fish_version_id}/ /\n",
+    lib.setup.fetch_gpg_key(f"{fish_repo_url}/shells:fish/Debian_{version_id}/Release.key",
+                            Path(apt_gpg, 'shells_fish.gpg'))
+    Path(apt_sources, 'shells:fish.list').write_text(
+        f"deb {fish_repo_url.replace('https', 'http')}/shells:/fish/Debian_{version_id}/ /\n",
         encoding='utf-8')
 
     # gh
