@@ -24,7 +24,8 @@ source=(
   "$pkgname::git+https://git.kernel.org/pub/scm/linux/kernel/git/next/linux-next.git?signed#tag=$_srctag"
   config
   20220222_gustavoars_scsi_aacraid_replace_one_element_array_with_flexible_array_member_in_struct_aac_.patch
-  revert-3f5f118bb657f94641ea383c7c1b8c09a5d46ea2.patch
+  20230626_kuniyu_revert_af_unix_call_scm_recv_only_after_scm_set_cred.patch
+  20230627_bcodding_nfs_don_t_cleanup_sysfs_superblock_entry_if_uninitialized.patch
   revert-712557f210723101717570844c95ac0913af74d7.patch
 )
 
@@ -33,9 +34,10 @@ validpgpkeys=(
   '3F2568AAC26998F9E813A1C5C3F436CA30F5D8EB'  # Mark Brown
 )
 sha256sums=('SKIP'
-            'd40b475cab421e978ba95369b128265951cb2dfa68aa7b0bf0ba4ea96244d999'
+            'c20b49f19f156cab6ff40afb10fade8a078acb82fa950088222d99f1b0607e67'
             '6f36a23678f10c9c777820836dd41eefb02809cc74208a4ebfaaba39b088a816'
-            '8710861c0a29c012176643c2b688e769f72f55341bb2fb4259232e5be023b9bc'
+            '0059c9aa56b177c80fb9a65d9fda1c89512dfbeff93fc3051134d2bb30c9c663'
+            '2350469cb3bd1dd3f91323863f74b1d3e9bdc30787e9a264e1dded2f1e5c3972'
             'e523d55f1aff04aeb582717844f22bf0e8a4e69e273280d64738ae7f8e37c4db')
 
 # This obviously ties this PKGBUILD to my machine but that is kind of the point :)
