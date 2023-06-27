@@ -3,12 +3,14 @@
 
 _localversion=-llvm
 pkgname=linux-mainline$_localversion
-_srctag=v6.4
-pkgver=${_srctag//-/.}
+### _srctag=v6.4
+### pkgver=${_srctag//-/.}
+_srccommit=1ef6663a587ba3e57dc5065a477db1c64481eedd
+pkgver=v6.5.rc0.1224.g1ef6663a587b
 pkgrel=1
 pkgdesc='Linux'
-url="https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/log/?h=$_srctag"
-arch=(x86_64)
+### url="https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/log/?h=$_srctag"
+url="https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/log/?h=$_srccommit"
 arch=(x86_64)
 license=(GPL2)
 makedepends=(
@@ -21,23 +23,22 @@ makedepends=(
   xz
 )
 options=('!strip')
+###  "$pkgname::git+https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git?signed#tag=$_srctag"
 source=(
-  "$pkgname::git+https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git?signed#tag=$_srctag"
+  "$pkgname::git+https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git#tag=$_srccommit"
   config
   https://github.com/pop-os/system76-io-dkms/raw/master/system76-io.c
   https://github.com/pop-os/system76-io-dkms/raw/master/system76-io_dev.c
   https://github.com/pop-os/system76-io-dkms/raw/master/system76-io_hwmon.c
-  tip-smp_core-ff3cfcb0d46adc541283a507560f88b7d7114dbe.patch
 )
 validpgpkeys=(
   'ABAF11C65A2970B130ABE3C479BE3E4300411886'  # Linus Torvalds
 )
 sha256sums=('SKIP'
-            'e4d41d24c1f418dd94ede2c864c3a14973ff6da2c198aadf4363842ffb16414e'
+            'f2b4a2391fd27a19c82798977cb1b52aff3a65392ecddada8fb809537ea16c66'
             'd569ee2fbd072a09e89196779ccc0dfd008d5a79a0cec5fa80cc7ed99a3027fa'
             '7276b7fb345f6a5156c594969a01e1ab63e864e0b3ed646bf5132b8301fa4975'
-            '26b42e2a48cc4666ad6f85eb4d0fe87f30ea0097d6c1cff4f45e0e3330382916'
-            'ae60bfa8b1c58d745684c2c45c94d91a1c4d71ffe7e5ef5438f9e2c497b70dfd')
+            '26b42e2a48cc4666ad6f85eb4d0fe87f30ea0097d6c1cff4f45e0e3330382916')
 
 # This obviously ties this PKGBUILD to my machine but that is kind of the point :)
 _kmake() {
