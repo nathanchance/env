@@ -21,15 +21,11 @@ function cbl_rb_pi -d "Rebase Raspberry Pi kernel on latest linux-next"
     git rh origin/master
 
     # Patching
-    # https://lore.kernel.org/CA+G9fYtKCZeAUTtwe69iK8Xcz1mOKQzwcy49wd+imZrfj6ifXA@mail.gmail.com/
-    # c3b60ab7a4dff6e6e608e685b70ddc3d6b2aca81 is the real problem but it is easier to just revert
-    # the merge that brought in the whole series.
-    set -a reverts 712557f210723101717570844c95ac0913af74d7 # Merge branch 'ptp-adjphase-cleanups'
     for revert in $reverts
         git revert --mainline 1 --no-edit $revert; or return
     end
-    set -a b4_patches https://lore.kernel.org/netdev/20230626205837.82086-1-kuniyu@amazon.com/ # Revert "af_unix: Call scm_recv() only after scm_set_cred()."
     set -a b4_patches https://lore.kernel.org/linux-nfs/47876afaea6c83f172bca3b1333989bbcca1aef9.1687860625.git.bcodding@redhat.com/ # NFS: Don't cleanup sysfs superblock entry if uninitialized
+    set -a b4_patches https://lore.kernel.org/netdev/20230627232139.213130-1-rrameshbabu@nvidia.com/ # ptp: Make max_phase_adjustment sysfs device attribute invisible when not supported
     for patch in $b4_patches
         b4 shazam -l -P _ -s $patch; or return
     end
