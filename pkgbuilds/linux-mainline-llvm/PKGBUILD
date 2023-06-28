@@ -5,8 +5,8 @@ _localversion=-llvm
 pkgname=linux-mainline$_localversion
 ### _srctag=v6.4
 ### pkgver=${_srctag//-/.}
-_srccommit=1ef6663a587ba3e57dc5065a477db1c64481eedd
-pkgver=v6.5.rc0.1224.g1ef6663a587b
+_srccommit=6aeadf7896bff4ca230702daba8788455e6b866e
+pkgver=v6.5.rc0.1761.g6aeadf7896bf
 pkgrel=1
 pkgdesc='Linux'
 ### url="https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/log/?h=$_srctag"
@@ -30,15 +30,19 @@ source=(
   https://github.com/pop-os/system76-io-dkms/raw/master/system76-io.c
   https://github.com/pop-os/system76-io-dkms/raw/master/system76-io_dev.c
   https://github.com/pop-os/system76-io-dkms/raw/master/system76-io_hwmon.c
+  20220222_gustavoars_scsi_aacraid_replace_one_element_array_with_flexible_array_member_in_struct_aac_.patch
+  40ca06d71d60677a8424798610c97a46e4140a21.patch
 )
 validpgpkeys=(
   'ABAF11C65A2970B130ABE3C479BE3E4300411886'  # Linus Torvalds
 )
 sha256sums=('SKIP'
-            'f2b4a2391fd27a19c82798977cb1b52aff3a65392ecddada8fb809537ea16c66'
+            '4bd35da7241bae6692b6f4042007659b88f18cbbe7a7a6e9a6256fd620f9e1e0'
             'd569ee2fbd072a09e89196779ccc0dfd008d5a79a0cec5fa80cc7ed99a3027fa'
             '7276b7fb345f6a5156c594969a01e1ab63e864e0b3ed646bf5132b8301fa4975'
-            '26b42e2a48cc4666ad6f85eb4d0fe87f30ea0097d6c1cff4f45e0e3330382916')
+            '26b42e2a48cc4666ad6f85eb4d0fe87f30ea0097d6c1cff4f45e0e3330382916'
+            '6f36a23678f10c9c777820836dd41eefb02809cc74208a4ebfaaba39b088a816'
+            'a14156060f917ffdf1ce16f68e909c6d11bc49095b2afe5c7d4ad51f5bc0ca94')
 
 # This obviously ties this PKGBUILD to my machine but that is kind of the point :)
 _kmake() {
