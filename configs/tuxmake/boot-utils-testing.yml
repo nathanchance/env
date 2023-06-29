@@ -1,8 +1,9 @@
 jobs:
 - name: clang
   builds:
+  # arm32_v5
   - target_arch: arm
-    toolchain: clang-nightly
+    toolchain: clang
     kconfig: multi_v5_defconfig
     targets:
     - kernel
@@ -10,8 +11,9 @@ jobs:
     make_variables:
       LLVM: 1
       LLVM_IAS: 1
+  # arm32_v6
   - target_arch: arm
-    toolchain: clang-nightly
+    toolchain: clang
     kconfig: aspeed_g5_defconfig
     targets:
     - kernel
@@ -19,24 +21,27 @@ jobs:
     make_variables:
       LLVM: 1
       LLVM_IAS: 1
+  # arm32_v7
   - target_arch: arm
-    toolchain: clang-nightly
+    toolchain: clang
     kconfig: multi_v7_defconfig
     targets:
     - kernel
     make_variables:
       LLVM: 1
       LLVM_IAS: 1
+  # arm64
   - target_arch: arm64
-    toolchain: clang-nightly
+    toolchain: clang
     kconfig: defconfig
     targets:
     - kernel
     make_variables:
       LLVM: 1
       LLVM_IAS: 1
+  # arm64be
   - target_arch: arm64
-    toolchain: clang-nightly
+    toolchain: clang
     kconfig:
     - defconfig
     - CONFIG_CPU_BIG_ENDIAN=y
@@ -45,19 +50,20 @@ jobs:
     make_variables:
       LLVM: 1
       LLVM_IAS: 1
+  # x86
   - target_arch: i386
-    toolchain: clang-nightly
+    toolchain: clang
     kconfig: defconfig
     targets:
     - kernel
     make_variables:
       LLVM: 1
       LLVM_IAS: 1
+  # mips
   - target_arch: mips
-    toolchain: clang-nightly
+    toolchain: clang
     kconfig:
     - malta_defconfig
-    - CONFIG_BLK_DEV_INITRD=y
     - CONFIG_CPU_BIG_ENDIAN=y
     targets:
     - kernel
@@ -65,30 +71,45 @@ jobs:
     make_variables:
       LLVM: 1
       LLVM_IAS: 1
+  # mipsel
   - target_arch: mips
-    toolchain: clang-nightly
+    toolchain: clang
     kconfig:
     - malta_defconfig
-    - CONFIG_BLK_DEV_INITRD=y
     targets:
     - kernel
     kernel_image: vmlinux
     make_variables:
       LLVM: 1
       LLVM_IAS: 1
+  # ppc32_mac
   - target_arch: powerpc
-    toolchain: clang-nightly
+    toolchain: clang
     kconfig:
-    - pseries_defconfig
+    - pmac32_defconfig
+    - CONFIG_SERIAL_PMACZILOG=y
+    - CONFIG_SERIAL_PMACZILOG_CONSOLE=y
+    - CONFIG_SERIAL_PMACZILOG_TTYS=n
     targets:
     - kernel
     kernel_image: vmlinux
     make_variables:
-      LD: powerpc64le-linux-gnu-ld
       LLVM: 1
       LLVM_IAS: 0
+  # ppc64
   - target_arch: powerpc
-    toolchain: clang-nightly
+    toolchain: clang
+    kconfig:
+    - ppc64_guest_defconfig
+    targets:
+    - kernel
+    kernel_image: vmlinux
+    make_variables:
+      LLVM: 1
+      LLVM_IAS: 1
+  # ppc64le
+  - target_arch: powerpc
+    toolchain: clang
     kconfig: powernv_defconfig
     targets:
     - kernel
@@ -96,8 +117,9 @@ jobs:
     make_variables:
       LLVM: 1
       LLVM_IAS: 1
+  # riscv
   - target_arch: riscv
-    toolchain: clang-nightly
+    toolchain: clang
     kconfig: defconfig
     targets:
     - kernel
@@ -105,15 +127,17 @@ jobs:
     make_variables:
       LLVM: 1
       LLVM_IAS: 1
+  # s390
   - target_arch: s390
-    toolchain: clang-nightly
+    toolchain: clang
     kconfig: defconfig
     targets:
     - kernel
     make_variables:
       LLVM_IAS: 1
+  # x86_64
   - target_arch: x86_64
-    toolchain: clang-nightly
+    toolchain: clang
     kconfig: defconfig
     targets:
     - kernel
@@ -122,83 +146,143 @@ jobs:
       LLVM_IAS: 1
 - name: gcc
   builds:
+  # arm32_v5
   - target_arch: arm
-    toolchain: gcc-12
+    toolchain: gcc
     kconfig: multi_v5_defconfig
+    make_variables:
+      CROSS_COMPILE: arm-linux-gnueabi-
     targets:
     - kernel
     - dtbs
+  # arm32_v6
   - target_arch: arm
-    toolchain: gcc-12
+    toolchain: gcc
     kconfig: aspeed_g5_defconfig
+    make_variables:
+      CROSS_COMPILE: arm-linux-gnueabi-
     targets:
     - kernel
     - dtbs
+  # arm32_v7
   - target_arch: arm
-    toolchain: gcc-12
+    toolchain: gcc
     kconfig: multi_v7_defconfig
+    make_variables:
+      CROSS_COMPILE: arm-linux-gnueabi-
     targets:
     - kernel
+  # arm64
   - target_arch: arm64
-    toolchain: gcc-12
+    toolchain: gcc
     kconfig: defconfig
+    make_variables:
+      CROSS_COMPILE: aarch64-linux-
     targets:
     - kernel
+  # arm64be
   - target_arch: arm64
-    toolchain: gcc-12
+    toolchain: gcc
     kconfig:
     - defconfig
     - CONFIG_CPU_BIG_ENDIAN=y
+    make_variables:
+      CROSS_COMPILE: aarch64-linux-
     targets:
     - kernel
+  # x86
   - target_arch: i386
-    toolchain: gcc-12
+    toolchain: gcc
     kconfig: defconfig
+    make_variables:
+      CROSS_COMPILE: x86_64-linux-
     targets:
     - kernel
+  # mips
   - target_arch: mips
-    toolchain: gcc-12
+    toolchain: gcc
     kconfig:
     - malta_defconfig
-    - CONFIG_BLK_DEV_INITRD=y
     - CONFIG_CPU_BIG_ENDIAN=y
+    make_variables:
+      CROSS_COMPILE: mips-linux-
     targets:
     - kernel
     kernel_image: vmlinux
+  # mipsel
   - target_arch: mips
-    toolchain: gcc-12
+    toolchain: gcc
     kconfig:
     - malta_defconfig
-    - CONFIG_BLK_DEV_INITRD=y
+    make_variables:
+      CROSS_COMPILE: mips-linux-
     targets:
     - kernel
     kernel_image: vmlinux
+  # ppc32
   - target_arch: powerpc
-    toolchain: gcc-12
+    toolchain: gcc
     kconfig:
-    - pseries_defconfig
+    - ppc44x_defconfig
+    make_variables:
+      CROSS_COMPILE: powerpc-linux-
+    targets:
+    - kernel
+    kernel_image: uImage
+  # ppc32_mac
+  - target_arch: powerpc
+    toolchain: gcc
+    kconfig:
+    - pmac32_defconfig
+    - CONFIG_SERIAL_PMACZILOG=y
+    - CONFIG_SERIAL_PMACZILOG_CONSOLE=y
+    - CONFIG_SERIAL_PMACZILOG_TTYS=n
+    make_variables:
+      CROSS_COMPILE: powerpc-linux-
     targets:
     - kernel
     kernel_image: vmlinux
+  # ppc64
   - target_arch: powerpc
-    toolchain: gcc-12
+    toolchain: gcc
+    kconfig:
+    - ppc64_guest_defconfig
+    make_variables:
+      CROSS_COMPILE: powerpc64-linux-
+    targets:
+    - kernel
+    kernel_image: vmlinux
+  # ppc64le
+  - target_arch: powerpc
+    toolchain: gcc
     kconfig: powernv_defconfig
+    make_variables:
+      CROSS_COMPILE: powerpc64-linux-
     targets:
     - kernel
     kernel_image: zImage.epapr
+  # riscv
   - target_arch: riscv
-    toolchain: gcc-12
+    toolchain: gcc
     kconfig: defconfig
+    make_variables:
+      CROSS_COMPILE: riscv64-linux-
     targets:
     - kernel
     kernel_image: Image
+  # s390
   - target_arch: s390
-    toolchain: gcc-12
+    toolchain: gcc
     kconfig: defconfig
+    make_variables:
+      CROSS_COMPILE: s390-linux-
     targets:
     - kernel
+  # x86_64
   - target_arch: x86_64
-    toolchain: gcc-12
+    toolchain: gcc
     kconfig: defconfig
+    make_variables:
+      CROSS_COMPILE: x86_64-linux-
     targets:
     - kernel
