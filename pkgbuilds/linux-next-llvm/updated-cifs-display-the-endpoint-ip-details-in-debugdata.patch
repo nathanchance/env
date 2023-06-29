@@ -1,0 +1,89 @@
+From 1423210893361490be2bb87003da27bbf05f633e Mon Sep 17 00:00:00 2001
+From: Nathan Chancellor <nathan@kernel.org>
+Date: Thu, 29 Jun 2023 09:58:17 -0700
+Subject: [PATCH] NOTCBL: FROMLIST: Updated version of 'cifs: display the
+ endpoint IP details in DebugData'
+
+  fs/smb/client/cifs_debug.c:183:1: error: label at end of compound statement is a C2x extension [-Werror,-Wc2x-extensions]
+    183 | }
+        | ^
+  1 error generated.
+
+Link: https://lore.kernel.org/CANT5p=rg7Q-z=9LSRjMvkBHkYk4X2t0eQCT04+myYgdGZeJP8w@mail.gmail.com/
+Link: https://lore.kernel.org/000000000000801b1a05ff3ebee0@google.com/
+Signed-off-by: Nathan Chancellor <nathan@kernel.org>
+---
+ fs/smb/client/cifs_debug.c | 22 +++++++++++++---------
+ 1 file changed, 13 insertions(+), 9 deletions(-)
+
+diff --git a/fs/smb/client/cifs_debug.c b/fs/smb/client/cifs_debug.c
+index 20aab6697107..dc942a1a9eda 100644
+--- a/fs/smb/client/cifs_debug.c
++++ b/fs/smb/client/cifs_debug.c
+@@ -167,18 +167,19 @@ cifs_dump_channel(struct seq_file *m, int i, struct cifs_chan *chan)
+ 	}
+ 
+ skip_rdma:
+-#else
++#endif
+ 	if (server->ssocket) {
+ 		struct sockaddr src;
+ 		int addrlen;
+ 
+ 		addrlen = kernel_getsockname(server->ssocket, &src);
+-		if (addrlen != sizeof(struct sockaddr_in) && addrlen != sizeof(struct sockaddr_in6))
++		if (addrlen != sizeof(struct sockaddr_in) &&
++		    addrlen != sizeof(struct sockaddr_in6))
+ 			return;
+ 
+-		seq_printf(m, "\n\t\tIP addr dst: %pISpc, src: %pISpc", &server->dstaddr, &src);
++		seq_printf(m, "\n\t\tIP addr: dst: %pISpc, src: %pISpc",
++			   &server->dstaddr, &src);
+ 	}
+-#endif
+ 
+ }
+ 
+@@ -432,11 +433,11 @@ static int cifs_debug_data_proc_show(struct seq_file *m, void *v)
+ 		if (server->smbd_conn->id) {
+ 			struct rdma_addr *addr =
+ 				&server->smbd_conn->id->route.addr;
+-			seq_printf(m, "\nIP addr dst: %pISpc, src: %pISpc",
++			seq_printf(m, "\nIP addr: dst: %pISpc, src: %pISpc",
+ 				   &addr->dst_addr, &addr->src_addr);
+ 		}
+ skip_rdma:
+-#else
++#endif
+ 		if (server->ssocket) {
+ 			struct sockaddr src;
+ 			int addrlen;
+@@ -446,19 +447,22 @@ static int cifs_debug_data_proc_show(struct seq_file *m, void *v)
+ 			spin_unlock(&cifs_tcp_ses_lock);
+ 
+ 			addrlen = kernel_getsockname(server->ssocket, &src);
+-			if (addrlen != sizeof(struct sockaddr_in) && addrlen != sizeof(struct sockaddr_in6)) {
++			if (addrlen != sizeof(struct sockaddr_in) &&
++			    addrlen != sizeof(struct sockaddr_in6)) {
++				cifs_put_tcp_session(server, 0);
+ 				spin_lock(&cifs_tcp_ses_lock);
++
+ 				goto skip_addr_details;
+ 			}
+ 
+-			seq_printf(m, "\nIP addr dst: %pISpc, src: %pISpc", &server->dstaddr, &src);
++			seq_printf(m, "\nIP addr: dst: %pISpc, src: %pISpc",
++				   &server->dstaddr, &src);
+ 
+ 			cifs_put_tcp_session(server, 0);
+ 			spin_lock(&cifs_tcp_ses_lock);
+ 		}
+ 
+ skip_addr_details:
+-#endif
+ 		seq_printf(m, "\nNumber of credits: %d,%d,%d Dialect 0x%x",
+ 			server->credits,
+ 			server->echo_credits,
+-- 
+2.41.0
+

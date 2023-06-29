@@ -13,6 +13,7 @@ function cbl_rb_fd -d "Rebase generic Fedora kernel on latest linux-next"
     git rh origin/master
 
     # Patching
+    set -a reverts 702bb06380f14c7e0b3c67db0a713478b826ec59 # cifs: display the endpoint IP details in DebugData
     for revert in $reverts
         git revert --mainline 1 --no-edit $revert; or return
     end
@@ -21,6 +22,7 @@ function cbl_rb_fd -d "Rebase generic Fedora kernel on latest linux-next"
     for patch in $b4_patches
         b4 shazam -l -P _ -s $patch; or return
     end
+    set -a crl_patches https://lore.kernel.org/linux-cifs/CANT5p=rg7Q-z=9LSRjMvkBHkYk4X2t0eQCT04+myYgdGZeJP8w@mail.gmail.com/2-0001-cifs-display-the-endpoint-IP-details-in-DebugData.patch # cifs: display the endpoint IP details in DebugData
     for patch in $crl_patches
         crl $patch | git am -3; or return
     end
