@@ -1,9 +1,9 @@
 From git@z Thu Jan  1 00:00:00 1970
-Subject: [PATCH 8/8] scsi: aacraid: Replace one-element array with
+Subject: [PATCH 3/10] scsi: aacraid: Replace one-element array with
  flexible-array member in struct aac_aifcmd
 From: "Gustavo A. R. Silva" <gustavoars@kernel.org>
-Date: Tue, 22 Feb 2022 01:31:07 -0600
-Message-Id: <7d0571ef5dc87904008c325a942cfed24dbbf42e.1645513670.git.gustavoars@kernel.org>
+Date: Wed, 28 Jun 2023 11:55:24 -0600
+Message-Id: <65907ee4083de62fbaadc5c2e6512e3828912d1b.1687974498.git.gustavoars@kernel.org>
 MIME-Version: 1.0
 Content-Type: text/plain; charset="utf-8"
 Content-Transfer-Encoding: 7bit
@@ -11,22 +11,25 @@ Content-Transfer-Encoding: 7bit
 Replace one-element array with flexible-array member in struct
 aac_aifcmd.
 
-This issue was found with the help of Coccinelle and audited and fixed,
+This results in no differences in binary output.
+
+Issue found with the help of Coccinelle and audited and fixed,
 manually.
 
-Link: https://www.kernel.org/doc/html/v5.16/process/deprecated.html#zero-length-and-one-element-arrays
 Link: https://github.com/KSPP/linux/issues/79
-Signed-off-by: Gustavo A. R. Silva <gustavoars@kernel.org>
-Link: https://lore.kernel.org/r/7d0571ef5dc87904008c325a942cfed24dbbf42e.1645513670.git.gustavoars@kernel.org
+Link: https://github.com/ClangBuiltLinux/linux/issues/1851
+Signed-off-by: "Gustavo A. R. Silva" <gustavoars@kernel.org>
+Reviewed-by: Kees Cook <keescook@chromium.org>
+Link: https://lore.kernel.org/r/65907ee4083de62fbaadc5c2e6512e3828912d1b.1687974498.git.gustavoars@kernel.org
 ---
  drivers/scsi/aacraid/aacraid.h | 2 +-
  1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/drivers/scsi/aacraid/aacraid.h b/drivers/scsi/aacraid/aacraid.h
-index 97948cd5f13c..447feabf5360 100644
+index 83fa890f28be..2e1623344327 100644
 --- a/drivers/scsi/aacraid/aacraid.h
 +++ b/drivers/scsi/aacraid/aacraid.h
-@@ -2616,7 +2616,7 @@ struct aac_hba_info {
+@@ -2618,7 +2618,7 @@ struct aac_hba_info {
  struct aac_aifcmd {
  	__le32 command;		/* Tell host what type of notify this is */
  	__le32 seqnum;		/* To allow ordering of reports (if necessary) */
@@ -36,5 +39,5 @@ index 97948cd5f13c..447feabf5360 100644
  
  /**
 -- 
-2.27.0
+2.34.1
 
