@@ -24,7 +24,6 @@ function cbl_rb_pi -d "Rebase Raspberry Pi kernel on latest linux-next"
     for revert in $reverts
         git revert --mainline 1 --no-edit $revert; or return
     end
-    set -a b4_patches https://lore.kernel.org/linux-nfs/47876afaea6c83f172bca3b1333989bbcca1aef9.1687860625.git.bcodding@redhat.com/ # NFS: Don't cleanup sysfs superblock entry if uninitialized
     set -a b4_patches https://lore.kernel.org/netdev/20230627232139.213130-1-rrameshbabu@nvidia.com/ # ptp: Make max_phase_adjustment sysfs device attribute invisible when not supported
     for patch in $b4_patches
         b4 shazam -l -P _ -s $patch; or return
