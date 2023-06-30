@@ -22,7 +22,11 @@ function install_packages() {
     dnf install -y \
         curl \
         dnf-plugins-core
-    dnf config-manager --add-repo https://cli.github.com/packages/rpm/gh-cli.repo
+
+    # https://github.com/rpm-software-management/dnf5/issues/405
+    # dnf config-manager --add-repo https://cli.github.com/packages/rpm/gh-cli.repo
+    curl -LSso /etc/yum.repos.d/gh-cli.repo https://cli.github.com/packages/rpm/gh-cli.repo
+
     cat <<EOF >/etc/yum.repos.d/tuxmake.repo
 [tuxmake]
 name=tuxmake
