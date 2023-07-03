@@ -158,9 +158,8 @@ def setup_doas(username):
                      '# Do not require root to put in a password (makes no sense)\n'
                      'permit nopass root\n')
 
-        # If we were already set up with passwordless sudo, carry it over to doas
-        _, sudoers_text = lib.utils.path_and_text('/etc/sudoers.d', username)
-        if sudoers_text and 'NOPASSWD:ALL' in sudoers_text:
+        # OrbStack sets up passwordless sudo, carry it over to doas
+        if Path('/etc/sudoers.d/orbstack').exists():
             conf_txt += ('\n'
                          '# passwordless doas for my user\n'
                          f"permit nopass {username}\n")
