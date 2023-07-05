@@ -16,7 +16,6 @@ function cbl_rb_fd -d "Rebase generic Fedora kernel on latest linux-next"
     for revert in $reverts
         git revert --mainline 1 --no-edit $revert; or return
     end
-    set -a b4_patches https://lore.kernel.org/netdev/20230627232139.213130-1-rrameshbabu@nvidia.com/ # ptp: Make max_phase_adjustment sysfs device attribute invisible when not supported
     for patch in $b4_patches
         b4 shazam -l -P _ -s $patch; or return
     end
