@@ -140,8 +140,6 @@ function cbl_bld_tot_tcs -d "Build LLVM and binutils from source for kernel deve
     end
 
     # Add patches to revert here
-    # https://reviews.llvm.org/D153989#4494012
-    set -a reverts https://github.com/llvm/llvm-project/commit/b47beecc817155fa065272ceecdf5486e2bef36e # [compiler-rt] Move crt into builtins
     for revert in $reverts
         set -l revert (basename $revert)
         if not git -C $llvm_project rv -n $revert
@@ -153,6 +151,8 @@ function cbl_bld_tot_tcs -d "Build LLVM and binutils from source for kernel deve
     end
 
     # Add in-review patches here
+    # https://reviews.llvm.org/D153989#4494012
+    set -a revisions https://reviews.llvm.org/D155126 # [CMake] Use COMPILER_RT_BUILD_CRT in the condition for test
     for revision in $revisions
         set -l git_ap_args
         set -l base_rev (basename $revision)
