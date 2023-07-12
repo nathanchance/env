@@ -151,8 +151,6 @@ function cbl_bld_tot_tcs -d "Build LLVM and binutils from source for kernel deve
     end
 
     # Add in-review patches here
-    # https://reviews.llvm.org/D153989#4494012
-    set -a revisions https://reviews.llvm.org/D155126 # [CMake] Use COMPILER_RT_BUILD_CRT in the condition for test
     for revision in $revisions
         set -l git_ap_args
         set -l base_rev (basename $revision)
