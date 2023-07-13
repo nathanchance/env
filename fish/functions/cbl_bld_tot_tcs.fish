@@ -140,8 +140,6 @@ function cbl_bld_tot_tcs -d "Build LLVM and binutils from source for kernel deve
     end
 
     # Add patches to revert here
-    # Need to revert for tests to pass with https://reviews.llvm.org/D155122
-    set -a reverts https://github.com/llvm/llvm-project/commit/210f61cbddeddac47b347db072d674ee142520f6 # [ARM] Correctly handle execute-only in EmitStructByval
     for revert in $reverts
         set -l revert (basename $revert)
         if not git -C $llvm_project rv -n $revert
@@ -151,12 +149,8 @@ function cbl_bld_tot_tcs -d "Build LLVM and binutils from source for kernel deve
             return 1
         end
     end
-    # https://reviews.llvm.org/D155122 applies the same diff, avoid conflicts
-    git -C $llvm_project rf llvm/test/CodeGen/ARM/execute-only.ll
 
     # Add in-review patches here
-    # https://github.com/llvm/llvm-project/issues/63831
-    set -a revisions https://reviews.llvm.org/D155122 # Revert "[ARM] Restructure MOVi32imm expansion to not do pointless instructions"
     for revision in $revisions
         set -l git_ap_args
         set -l base_rev (basename $revision)
