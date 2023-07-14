@@ -15,70 +15,70 @@ function msh -d "Shorthand for mosh -o" -w mosh
     switch $msh_args
         case aadp
             if test "$tailscale" = true
-                set ip 100.124.99.17
+                set host aadp
             else
-                set ip 192.168.4.234
+                set host 192.168.4.234
             end
-            set user_host nathan@$ip
+            set user_host nathan@$host
 
         case amd-desktop
             if test "$tailscale" = true
-                set ip 100.76.142.56
+                set host hp-amd-ryzen-4300g
             else
-                set ip 192.168.4.177
+                set host 192.168.4.177
             end
-            set user_host nathan@$ip
+            set user_host nathan@$host
 
         case honeycomb
             if test "$tailscale" = true
-                set ip 100.88.75.80
+                set host honeycomb
             else
-                set ip 192.168.4.210
+                set host 192.168.4.210
             end
-            set user_host nathan@$ip
+            set user_host nathan@$host
 
         case intel-desktop
             if test "$tailscale" = true
-                set ip 100.98.119.115
+                set host asus-intel-core-11700
             else
-                set ip 192.168.4.189
+                set host 192.168.4.189
             end
-            set user_host nathan@$ip
+            set user_host nathan@$host
 
         case intel-laptop
             if test "$tailscale" = true
-                set ip 100.71.203.25
+                set host asus-intel-core-4210u
             else
-                set ip 192.168.4.137
+                set host 192.168.4.137
             end
-            set user_host nathan@$ip
+            set user_host nathan@$host
 
         case pi3
             if test "$tailscale" = true
-                set ip 100.125.231.2
+                set host raspberrypi3
             else
-                set ip 192.168.4.199
+                set host 192.168.4.199
             end
-            set user_host pi@$ip
+            set user_host pi@$host
 
         case pi4
             if test "$tailscale" = true
-                set ip 100.77.101.110
+                set host raspberrypi4
             else
-                set ip 192.168.4.205
+                set host 192.168.4.205
             end
-            set user_host pi@$ip
+            set user_host pi@$host
 
         case hetzner-server
             set user_host nathan@$SERVER_IP
 
         case thelio
             if test "$tailscale" = true
-                set ip 100.108.36.65
+                set host thelio-3990x
             else
-                set ip 192.168.4.188
+                set host 192.168.4.188
             end
-            set user_host nathan@$ip
+            set user_host nathan@$host
 
         case '*@*'
             set user_host $argv[1]
