@@ -88,7 +88,9 @@ function upd -d "Runs the update command for the current distro or downloads/upd
                         doas apk update
                         doas apk upgrade
                     case arch
-                        sudo pacman -Syyu $yes
+                        if checkupdates
+                            sudo pacman -Syyu $yes
+                        end
                     case debian raspbian ubuntu
                         sudo sh -c "apt update $yes && apt full-upgrade $yes && apt autoremove -y"
                     case fedora rocky
