@@ -1,0 +1,26 @@
+name: Fedora development container image
+
+on:
+  push:
+    paths:
+      - .github/workflows/dev-fedora.yml
+      - podman/dev/fedora/*
+  schedule:
+    - cron: 0 0 * * 0
+  workflow_dispatch:
+    inputs:
+      push_image:
+        description: 'Push image to ghcr.io'
+        required: false
+        type: boolean
+
+jobs:
+  build_and_push:
+    name: Build and push Fedora container image
+    uses: ./.github/workflows/docker.yml
+    secrets: inherit
+    with:
+      context: ./podman/dev/fedora
+      image: dev/fedora
+      platforms: linux/amd64,linux/arm64
+      push: ${{ github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && github.event.inputs.push_image == 'true') }}

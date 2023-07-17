@@ -1,0 +1,26 @@
+name: Arch Linux development container image
+
+on:
+  push:
+    paths:
+      - .github/workflows/dev-arch.yml
+      - podman/dev/arch/*
+  schedule:
+    - cron: 0 0 * * 0
+  workflow_dispatch:
+    inputs:
+      push_image:
+        description: 'Push image to ghcr.io'
+        required: false
+        type: boolean
+
+jobs:
+  build_and_push:
+    name: Build and push Arch Linux container image
+    uses: ./.github/workflows/docker.yml
+    secrets: inherit
+    with:
+      context: ./podman/dev/arch
+      image: dev/arch
+      platforms: linux/amd64
+      push: ${{ github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && github.event.inputs.push_image == 'true') }}
