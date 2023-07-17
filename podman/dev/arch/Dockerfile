@@ -1,4 +1,4 @@
-FROM docker.io/archlinux:base-devel
+FROM ghcr.io/archlinux/archlinux:base-devel
 
 COPY distrobox-check.fish /
 COPY setup-env.sh /
