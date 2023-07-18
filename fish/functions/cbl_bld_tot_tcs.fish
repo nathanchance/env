@@ -140,8 +140,6 @@ function cbl_bld_tot_tcs -d "Build LLVM and binutils from source for kernel deve
     end
 
     # Add patches to revert here
-    # https://github.com/llvm/llvm-project/issues/63699
-    set -a reverts https://github.com/llvm/llvm-project/commit/9485d983ac0c56d412c958b40f4e150a3c30ca7c # [InstCombine] Disable generation of fshl/fshr for rotates
     for revert in $reverts
         set -l revert (basename $revert)
         if not git -C $llvm_project rv -n $revert
