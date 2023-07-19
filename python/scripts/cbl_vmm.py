@@ -264,10 +264,10 @@ class VirtualMachine:
         virtiofsd_cmd = [
             sudo,
             virtiofsd,
-            f"--socket-group={grp.getgrgid(os.getgid()).gr_name}",
-            f"--socket-path={self.vfsd_sock}",
-            '-o', f"source={self.shared_folder}",
-            '-o', 'cache=always',
+            '--cache', 'always',
+            '--shared-dir', self.shared_folder,
+            '--socket-group', grp.getgrgid(os.getgid()).gr_name,
+            '--socket-path', self.vfsd_sock,
         ]  # yapf: disable
         lib.utils.print_cmd(virtiofsd_cmd)
         with self.vfsd_log.open('w', encoding='utf-8') as file, \
