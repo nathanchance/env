@@ -57,13 +57,31 @@ set install_folder $tmp_dir/install
 set bad_clang $install_folder/llvm-bad/bin/clang
 set good_clang $install_folder/llvm-good/bin/clang
 
+set lnx_src
+set make_args
+
+if test -z "$lnx_src"
+    echo "No Linux source folder set?"
+    return 1
+end
+if not test -d $lnx_src
+    echo "Linux source does not exist?"
+    return 1
+end
+if test -z "$make_args"
+    echo "No make target set?"
+    return 1
+end
+
 function build_kernel
     set type $argv[1]
     set clang_var "$type"_clang
 
     kmake \
+        -C $lnx_src \
         LLVM=(dirname $$clang_var)/ \
         O=$tmp_dir/build/linux/$type \
+        mrproper $make_args
 end
 
 build_kernel good; or return
