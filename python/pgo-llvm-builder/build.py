@@ -15,7 +15,7 @@ INSTALL = Path(ROOT, 'install')
 SRC = Path(ROOT, 'src')
 MACHINE = platform.machine()
 
-SUPPORTED_LLVM_VERSIONS = [
+STABLE_LLVM_VERSIONS = [
     '16.0.6',
     '15.0.7',
     '14.0.6',
@@ -43,7 +43,7 @@ parser.add_argument('-t',
                     help='Location of tc-build. Omit for vendored version')
 parser.add_argument('-v',
                     '--versions',
-                    choices=[*SUPPORTED_LLVM_VERSIONS, 'all'],
+                    choices=['main', *STABLE_LLVM_VERSIONS, 'all', 'all-stable'],
                     help='LLVM versions to build',
                     metavar='LLVM_VERSION',
                     nargs='+',
@@ -53,7 +53,12 @@ args = parser.parse_args()
 if not shutil.which('podman'):
     raise RuntimeError('podman not found!')
 
-versions = SUPPORTED_LLVM_VERSIONS if 'all' in args.versions else args.versions
+if 'all-stable' in args.versions:
+    versions = STABLE_LLVM_VERSIONS
+elif 'all' in args.versions:
+    versions = ['main', *STABLE_LLVM_VERSIONS]
+else:
+    versions = args.versions
 
 # First, build container if necessary
 if not (build_container := args.force_build_container):
@@ -180,7 +185,20 @@ podman_run_cmd = [
 selinux_enabled = (enforce := Path('/sys/fs/selinux/enforce')).exists() and \
                   int(enforce.read_text(encoding='utf-8')) == 1
 
-for version in versions:
+for val in versions:
+    if val == 'main':
+        # pylint: disable-next=invalid-name
+        ref = 'origin/main'
+        version = subprocess.run(['git', 'show', '--format=%H', '-s', ref],
+                                 capture_output=True,
+                                 check=True,
+                                 cwd=llvm_folder,
+                                 text=True).stdout.strip()
+    else:
+        # pylint: disable-next=invalid-name
+        version = val
+        ref = f"llvmorg-{version}"
+
     if (llvm_install := Path(install_folder,
                              f"llvm-{version}-{MACHINE}")).joinpath('bin/clang').exists():
         print(
@@ -192,7 +210,7 @@ for version in versions:
     if (worktree := Path(SRC, 'llvm-project')).exists():
         shutil.rmtree(worktree)
         subprocess.run(['git', 'worktree', 'prune'], check=True, cwd=llvm_folder)
-    git_worktree_cmd = ['git', 'worktree', 'add', '--detach', worktree, f"llvmorg-{version}"]
+    git_worktree_cmd = ['git', 'worktree', 'add', '--detach', worktree, ref]
     subprocess.run(git_worktree_cmd, check=True, cwd=llvm_folder)
 
     shutil.rmtree(build_folder, ignore_errors=True)
@@ -225,7 +243,9 @@ for version in versions:
         IMAGE_TAG,
         *build_llvm_py_cmd,
     ]
-    maj_ver = int(version.split('.', 1)[0])
+    # We don't care what the actual LLVM main major version currently is
+    # because all that matters is main is newer than 14.
+    maj_ver = int(version.split('.', 1)[0]) if '.' in version else 99
     # Enable BOLT for more optimization if we are on x86_64 with LLVM greater
     # than or equal to 14.x.
     if maj_ver >= 14 and MACHINE == 'x86_64':
