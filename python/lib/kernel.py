@@ -19,7 +19,7 @@ def get_tool_version(binary_path):
 
 def kmake(variables, targets, ccache=True, directory=None, jobs=None, silent=True, use_time=False):
     # Handle kernel directory right away
-    if not (kernel_src := Path(directory) if directory else Path('.')).exists():
+    if not (kernel_src := Path(directory) if directory else Path()).exists():
         raise RuntimeError(f"Derived kernel source ('{kernel_src}') does not exist?")
     if not (makefile := Path(kernel_src, 'Makefile')).exists():
         raise RuntimeError(f"Derived kernel source ('{kernel_src}') is not a kernel tree?")
@@ -76,7 +76,7 @@ def kmake(variables, targets, ccache=True, directory=None, jobs=None, silent=Tru
         silent = False
     # Handle make flags
     flags = []
-    if kernel_src.resolve() != Path.cwd().resolve():
+    if kernel_src.resolve() != Path().resolve():
         flags += ['-C', kernel_src]
     flags += [f"-{'s' if silent else ''}kj{jobs if jobs else os.cpu_count()}"]
 

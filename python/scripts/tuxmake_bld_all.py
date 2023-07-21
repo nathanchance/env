@@ -62,7 +62,7 @@ def parse_arguments():
                         metavar='TARGETS',
                         nargs='+')
 
-    default_kernel_source = Path('.').resolve()
+    default_kernel_source = Path().resolve()
     parser.add_argument('-C',
                         '--directory',
                         default=default_kernel_source,
