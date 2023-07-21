@@ -78,6 +78,7 @@ RUN apt update && \
         u-boot-tools \
         xz-utils \
         && \
+    if [ "$(dpkg --print-architecture)" = "amd64" ]; then apt install -y --no-install-recommends libc6-dev-i386; fi && \
     rm -fr /var/lib/apt/lists/*
 
 # Build and install newer versions of GNU binutils to avoid issues with

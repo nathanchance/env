@@ -13,6 +13,7 @@ BUILD = Path(ROOT, 'build')
 GIT = Path(ROOT, 'git')
 INSTALL = Path(ROOT, 'install')
 SRC = Path(ROOT, 'src')
+MACHINE = platform.machine()
 
 SUPPORTED_LLVM_VERSIONS = [
     '16.0.6',
@@ -171,9 +172,8 @@ selinux_enabled = (enforce := Path('/sys/fs/selinux/enforce')).exists() and \
                   int(enforce.read_text(encoding='utf-8')) == 1
 
 for version in versions:
-    if (llvm_install :=
-            Path(install_folder,
-                 f"llvm-{version}-{platform.machine()}")).joinpath('bin/clang').exists():
+    if (llvm_install := Path(install_folder,
+                             f"llvm-{version}-{MACHINE}")).joinpath('bin/clang').exists():
         print(
             f"LLVM {version} has already been built in {llvm_install}, remove installation to rebuild!",
         )
@@ -213,6 +213,11 @@ for version in versions:
         IMAGE_TAG,
         *build_llvm_py_cmd,
     ]
+    maj_ver = int(version.split('.', 1)[0])
+    # Enable BOLT for more optimization if we are on x86_64 with LLVM greater
+    # than or equal to 14.x.
+    if maj_ver >= 14 and MACHINE == 'x86_64':
+        build_cmd += ['--bolt']
     subprocess.run(build_cmd, check=True)
 
     llvm_tarball = Path(llvm_install.parent, f"{llvm_install.name}.tar")
