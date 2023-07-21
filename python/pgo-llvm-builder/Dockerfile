@@ -2,7 +2,7 @@ FROM docker.io/debian:10-slim
 
 # LLVM may require an newer version of cmake, download and install the latest
 # prebuilt.
-ARG CMAKE_VERSION=3.26.4
+ARG CMAKE_VERSION=3.27.0
 RUN apt update && \
     apt upgrade -y && \
     apt install -y --no-install-recommends \
