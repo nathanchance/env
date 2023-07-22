@@ -106,6 +106,7 @@ else:
     subprocess.run(['git', 'remote', 'update'], check=True, cwd=tc_build_folder)
     subprocess.run(['git', 'reset', '--hard', '@{u}'], check=True, cwd=tc_build_folder)
 
+llvm_git_dir = Path(llvm_folder, '.git')
 static_mounts = [
     {
         'src': build_folder,
@@ -114,6 +115,14 @@ static_mounts = [
     {
         'src': tc_build_folder,
         'dst': '/tc-build',
+    },
+    # This has to be present for git operations to work in the worktree. It is
+    # marked read only so that any attempts to modify the user's repo rather
+    # than worktree will fail.
+    {
+        'src': llvm_git_dir,
+        'dst': llvm_git_dir,
+        'opts': ['ro'],
     },
 ]
 
@@ -202,7 +211,10 @@ for version in versions:
     ]
     if selinux_enabled:
         for mount in mounts:
-            mount['opts'] = ['z']
+            if 'opts' in mount:
+                mount['opts'].append('z')
+            else:
+                mount['opts'] = ['z']
 
     build_cmd = [
         *podman_run_cmd,
