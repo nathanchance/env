@@ -127,7 +127,7 @@ static_mounts = [
     {
         'src': llvm_git_dir,
         'dst': llvm_git_dir,
-        'opts': ['ro'],
+        'opts': {'ro'},
     },
 ]
 
@@ -230,9 +230,9 @@ for val in versions:
     if selinux_enabled:
         for mount in mounts:
             if 'opts' in mount:
-                mount['opts'].append('z')
+                mount['opts'].add('z')
             else:
-                mount['opts'] = ['z']
+                mount['opts'] = {'z'}
 
     build_cmd = [
         *podman_run_cmd,
