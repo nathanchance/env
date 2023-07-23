@@ -32,6 +32,8 @@ function cbl_bld_krnl_rpm -d "Build a .rpm kernel package"
                 set arch arm64
             case amd64 x86_64
                 set arch x86_64
+            case '*'
+                set -a kmake_args $arg
         end
     end
 
@@ -50,11 +52,13 @@ function cbl_bld_krnl_rpm -d "Build a .rpm kernel package"
     end
 
     if set -q gcc
-        set -a kmake_args \
-            (korg_gcc print $GCC_VERSIONS_KERNEL[1] $arch)
+        if not string match -qr CROSS_COMPILE= $kmake_args
+            set -a kmake_args (korg_gcc print $GCC_VERSION_STABLE $arch)
+        end
     else
-        set -a kmake_args \
-            LLVM=1
+        if not string match -qr LLVM= $kmake_args
+            set -a kmake_args LLVM=1
+        end
     end
 
     kmake \
