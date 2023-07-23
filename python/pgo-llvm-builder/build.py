@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 from argparse import ArgumentParser
+import datetime
 import json
 from pathlib import Path
 import platform
@@ -15,7 +16,12 @@ INSTALL = Path(ROOT, 'install')
 SRC = Path(ROOT, 'src')
 MACHINE = platform.machine()
 
-STABLE_LLVM_VERSIONS = [
+LLVM_REFS = {
+    '17.0.0': 'origin/main',
+}
+
+LLVM_VERSIONS = [
+    '17.0.0',
     '16.0.6',
     '15.0.7',
     '14.0.6',
@@ -43,7 +49,7 @@ parser.add_argument('-t',
                     help='Location of tc-build. Omit for vendored version')
 parser.add_argument('-v',
                     '--versions',
-                    choices=['main', *STABLE_LLVM_VERSIONS, 'all', 'all-stable'],
+                    choices=[*LLVM_VERSIONS, 'all', 'all-stable', 'main'],
                     help='LLVM versions to build',
                     metavar='LLVM_VERSION',
                     nargs='+',
@@ -54,9 +60,9 @@ if not shutil.which('podman'):
     raise RuntimeError('podman not found!')
 
 if 'all-stable' in args.versions:
-    versions = STABLE_LLVM_VERSIONS
+    versions = LLVM_VERSIONS[1:]
 elif 'all' in args.versions:
-    versions = ['main', *STABLE_LLVM_VERSIONS]
+    versions = LLVM_VERSIONS
 else:
     versions = args.versions
 
@@ -185,24 +191,23 @@ podman_run_cmd = [
 selinux_enabled = (enforce := Path('/sys/fs/selinux/enforce')).exists() and \
                   int(enforce.read_text(encoding='utf-8')) == 1
 
-for val in versions:
-    if val == 'main':
-        # pylint: disable-next=invalid-name
-        ref = 'origin/main'
-        version = subprocess.run(['git', 'show', '--format=%H', '-s', ref],
-                                 capture_output=True,
-                                 check=True,
-                                 cwd=llvm_folder,
-                                 text=True).stdout.strip()
-    else:
-        # pylint: disable-next=invalid-name
-        version = val
-        ref = f"llvmorg-{version}"
+for value in versions:
+    VERSION = LLVM_VERSIONS[0] if value == 'main' else value
+    ref = LLVM_REFS[VERSION] if VERSION in LLVM_REFS else f"llvmorg-{VERSION}"
+
+    if 'llvmorg' not in ref:
+        date_info = datetime.datetime.now(datetime.timezone.utc).strftime('%Y%m%d-%H%M%S')
+        ref_info = subprocess.run(['git', 'show', '--format=%H', '-s', ref],
+                                  capture_output=True,
+                                  check=True,
+                                  cwd=llvm_folder,
+                                  text=True).stdout.strip()
+        VERSION += f"-{ref_info}-{date_info}"
 
     if (llvm_install := Path(install_folder,
-                             f"llvm-{version}-{MACHINE}")).joinpath('bin/clang').exists():
+                             f"llvm-{VERSION}-{MACHINE}")).joinpath('bin/clang').exists():
         print(
-            f"LLVM {version} has already been built in {llvm_install}, remove installation to rebuild!",
+            f"LLVM {VERSION} has already been built in {llvm_install}, remove installation to rebuild!",
         )
         continue
     llvm_install.mkdir(exist_ok=True, parents=True)
@@ -243,13 +248,10 @@ for val in versions:
         IMAGE_TAG,
         *build_llvm_py_cmd,
     ]
-    # We don't care what the actual LLVM main major version currently is
-    # because all that matters is main is newer than 14.
-    maj_ver = int(version.split('.', 1)[0]) if '.' in version else 99
     # Enable BOLT for more optimization if we are on x86_64 with LLVM greater
     # than or equal to 14.x.
-    if maj_ver >= 14 and MACHINE == 'x86_64':
-        build_cmd += ['--bolt']
+    if (maj_ver := int(VERSION.split('.', 1)[0])) >= 14 and MACHINE == 'x86_64':
+        build_cmd.append('--bolt')
     subprocess.run(build_cmd, check=True)
 
     llvm_tarball = Path(llvm_install.parent, f"{llvm_install.name}.tar")
