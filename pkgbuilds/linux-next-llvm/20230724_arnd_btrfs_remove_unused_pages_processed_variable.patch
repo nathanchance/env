@@ -1,0 +1,47 @@
+From git@z Thu Jan  1 00:00:00 1970
+Subject: [PATCH] btrfs: remove unused pages_processed variable
+From: Arnd Bergmann <arnd@arndb.de>
+Date: Mon, 24 Jul 2023 14:19:15 +0200
+Message-Id: <20230724121934.1406807-1-arnd@kernel.org>
+MIME-Version: 1.0
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 7bit
+
+The only user of pages_processed was removed, so it's now a local write-only
+variable that can be eliminated as well:
+
+fs/btrfs/extent_io.c:214:16: error: variable 'pages_processed' set but not used [-Werror,-Wunused-but-set-variable]
+
+Fixes: 9480af8687200 ("btrfs: split page locking out of __process_pages_contig")
+Reported-by: kernel test robot <lkp@intel.com>
+Closes: https://lore.kernel.org/oe-kbuild-all/202307241541.8w52nEnt-lkp@intel.com/
+Signed-off-by: Arnd Bergmann <arnd@arndb.de>
+Reviewed-by: Christoph Hellwig <hch@lst.de>
+Link: https://lore.kernel.org/r/20230724121934.1406807-1-arnd@kernel.org
+---
+ fs/btrfs/extent_io.c | 2 --
+ 1 file changed, 2 deletions(-)
+
+diff --git a/fs/btrfs/extent_io.c b/fs/btrfs/extent_io.c
+index c0440a0988c9a..121edea2cfe85 100644
+--- a/fs/btrfs/extent_io.c
++++ b/fs/btrfs/extent_io.c
+@@ -211,7 +211,6 @@ static void __process_pages_contig(struct address_space *mapping,
+ 	pgoff_t start_index = start >> PAGE_SHIFT;
+ 	pgoff_t end_index = end >> PAGE_SHIFT;
+ 	pgoff_t index = start_index;
+-	unsigned long pages_processed = 0;
+ 	struct folio_batch fbatch;
+ 	int i;
+ 
+@@ -226,7 +225,6 @@ static void __process_pages_contig(struct address_space *mapping,
+ 
+ 			process_one_page(fs_info, &folio->page, locked_page,
+ 					 page_ops, start, end);
+-			pages_processed += folio_nr_pages(folio);
+ 		}
+ 		folio_batch_release(&fbatch);
+ 		cond_resched();
+-- 
+2.39.2
+
