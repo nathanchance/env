@@ -52,11 +52,18 @@ function cbl_setup_reduction -d "Build good and bad versions of LLVM for cvise r
     set cvise_test $cvise/test.fish
     echo '#!/usr/bin/env fish
 
-set tmp_dir (dirname (realpath (status dirname)))
-set install_folder $tmp_dir/install
-set bad_clang $install_folder/llvm-bad/bin/clang
-set good_clang $install_folder/llvm-good/bin/clang
+set cvise_dir (realpath (status dirname))
+set tmp_dir (dirname $cvise_dir)
+set install_dir $tmp_dir/install
 
+set bad_clang $install_dir/llvm-bad/bin/clang
+set good_clang $install_dir/llvm-good/bin/clang
+
+############
+# PART ONE #
+############
+
+set lnx_bld $tmp_dir/build/linux
 set lnx_src
 set make_args
 
@@ -72,6 +79,17 @@ if test -z "$make_args"
     echo "No make target set?"
     return 1
 end
+set i_target $make_args[-2]
+if not string match -qr "\.i$" $i_target
+    print_error ".i file is not the second to last target in make_args?"
+    return 1
+end
+set o_target $make_args[-1]
+if not string match -qr "\.o$" $o_target
+    print_error ".o file is not the last target in make_args?"
+    return 1
+end
+set o_cmd_file $lnx_bld/good/(dirname $o_target)/.(basename $o_target).cmd
 
 function build_kernel
     set type $argv[1]
@@ -80,17 +98,59 @@ function build_kernel
     kmake \
         -C $lnx_src \
         LLVM=(dirname $$clang_var)/ \
-        O=$tmp_dir/build/linux/$type \
+        O=$lnx_bld/$type \
         mrproper $make_args
 end
 
 build_kernel good; or return
-build_kernel bad' >$cvise_test
+if not test -f $o_cmd_file
+    print_error "$o_cmd_file does not exist?"
+    return 1
+end
+
+build_kernel bad
+set script_ret $status
+if test $script_ret -eq 0
+    print_error "Bad kernel built successfully? Remove this check if that is expected."
+    return 1
+end
+
+# Create flags file to minimize flags needed to reproduce issue
+head -1 $o_cmd_file | \
+    string match -gr -- "-D__KERNEL__ (.*) -c" | \
+    sed "s/ -I.*$//" | \
+    tr " " "\n" | \
+    sed "/\//d" >$cvise_dir/flags
+
+set i_file $lnx_bld/bad/$i_target
+if not test -f $i_file
+    print_error "$i_target could not be found in $lnx_bld/bad?"
+    return 1
+end
+cp -v $i_file $cvise_dir; or return
+
+exit $script_ret
+
+############
+# PART TWO #
+############
+
+set clang_flags (cat flags)
+set common_flags \
+    -Werror \
+    -Wfatal-errors \
+    -c \
+    -o /dev/null \
+    $cvise_dir/...
+
+$good_clang $clang_flags $common_flags; or return
+$bad_clang $clang_flags $common_flags &| ...
+test "$pipestatus" = "..."' >$cvise_test
     chmod +x $cvise_test
 
     git -C $cvise init; or return
     git -C $cvise add test.fish; or return
-    git -C $cvise commit -m "Initial commit"; or return
+    git -C $cvise commit -m "Initial interestingness test"; or return
 
     echo "cvise reduction has been prepared at: $tmp_dir"
 end
