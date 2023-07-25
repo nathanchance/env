@@ -17,10 +17,12 @@ SRC = Path(ROOT, 'src')
 MACHINE = platform.machine()
 
 LLVM_REFS = {
-    '17.0.0': 'origin/main',
+    '18.0.0': 'origin/main',
+    '17.0.0': 'release/17.x',
 }
 
 LLVM_VERSIONS = [
+    '18.0.0',
     '17.0.0',
     '16.0.6',
     '15.0.7',
