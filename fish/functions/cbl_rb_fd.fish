@@ -17,21 +17,17 @@ function cbl_rb_fd -d "Rebase generic Fedora kernel on latest linux-next"
         git revert --mainline 1 --no-edit $revert; or return
     end
     set -a b4_patches https://lore.kernel.org/all/20230724121934.1406807-1-arnd@kernel.org/ # btrfs: remove unused pages_processed variable
-    set -a b4_patches https://lore.kernel.org/all/20230724122029.1430482-1-arnd@kernel.org/ # scsi: ufs: qcom: remove unused variable
     for patch in $b4_patches
         b4 shazam -l -P _ -s $patch; or return
     end
     for patch in $crl_patches
         crl $patch | git am -3; or return
     end
+    # https://lore.kernel.org/20230722220637.GA138486@dev-arch.thelio-3990X/
+    set -a ln_commits (git -C $CBL_BLD_P/linux-next sha) # Revert "drm_exec context for amdgpu"
     for hash in $ln_commits
         git -C $CBL_BLD_P/linux-next fp -1 --stdout $hash | git am; or return
     end
-    set drm_exec_head ca6c1e210aa7d7629900a62f28b5090724054854
-    git diff -R $drm_exec_head~6..$drm_exec_head | git ap; or return
-    git ac -m 'Revert "drm_exec context for amdgpu"
-
-Link: https://lore.kernel.org/20230722220637.GA138486@dev-arch.thelio-3990X/'; or return
 
     # Build kernel
     cbl_bld_krnl_rpm --cfi --lto arm64; or return

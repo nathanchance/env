@@ -1,8 +1,8 @@
-diff --git b/Documentation/gpu/drm-mm.rst a/Documentation/gpu/drm-mm.rst
-index a52e6f4117d6..a79fd3549ff8 100644
---- b/Documentation/gpu/drm-mm.rst
-+++ a/Documentation/gpu/drm-mm.rst
-@@ -493,18 +493,6 @@ DRM Sync Objects
+diff --git a/Documentation/gpu/drm-mm.rst b/Documentation/gpu/drm-mm.rst
+index 3d5dc9dc1bfe..b21df6ce9fcb 100644
+--- a/Documentation/gpu/drm-mm.rst
++++ b/Documentation/gpu/drm-mm.rst
+@@ -529,18 +529,6 @@ DRM Sync Objects
  .. kernel-doc:: drivers/gpu/drm/drm_syncobj.c
     :export:
  
@@ -21,11 +21,11 @@ index a52e6f4117d6..a79fd3549ff8 100644
  GPU Scheduler
  =============
  
-diff --git b/drivers/gpu/drm/Kconfig a/drivers/gpu/drm/Kconfig
-index 22c1ba9ea28c..cc9c9947fdef 100644
---- b/drivers/gpu/drm/Kconfig
-+++ a/drivers/gpu/drm/Kconfig
-@@ -80,7 +80,6 @@ config DRM_KUNIT_TEST
+diff --git a/drivers/gpu/drm/Kconfig b/drivers/gpu/drm/Kconfig
+index 0d499669d653..3ff5bd5e6f2e 100644
+--- a/drivers/gpu/drm/Kconfig
++++ b/drivers/gpu/drm/Kconfig
+@@ -83,7 +83,6 @@ config DRM_KUNIT_TEST
  	select DRM_BUDDY
  	select DRM_EXPORT_FOR_TESTS if m
  	select DRM_KUNIT_TEST_HELPERS
@@ -33,7 +33,7 @@ index 22c1ba9ea28c..cc9c9947fdef 100644
  	default KUNIT_ALL_TESTS
  	help
  	  This builds unit tests for DRM. This option is not useful for
-@@ -195,12 +194,6 @@ config DRM_TTM
+@@ -196,12 +195,6 @@ config DRM_TTM
  	  GPU memory types. Will be enabled automatically if a device driver
  	  uses it.
  
@@ -46,11 +46,11 @@ index 22c1ba9ea28c..cc9c9947fdef 100644
  config DRM_BUDDY
  	tristate
  	depends on DRM
-diff --git b/drivers/gpu/drm/Makefile a/drivers/gpu/drm/Makefile
-index 021b3f0ac152..1c0f5204e47b 100644
---- b/drivers/gpu/drm/Makefile
-+++ a/drivers/gpu/drm/Makefile
-@@ -78,8 +78,6 @@ obj-$(CONFIG_DRM_PANEL_ORIENTATION_QUIRKS) += drm_panel_orientation_quirks.o
+diff --git a/drivers/gpu/drm/Makefile b/drivers/gpu/drm/Makefile
+index 215e78e79125..6a13f7bd9730 100644
+--- a/drivers/gpu/drm/Makefile
++++ b/drivers/gpu/drm/Makefile
+@@ -79,8 +79,6 @@ obj-$(CONFIG_DRM_PANEL_ORIENTATION_QUIRKS) += drm_panel_orientation_quirks.o
  #
  # Memory-management helpers
  #
@@ -59,10 +59,10 @@ index 021b3f0ac152..1c0f5204e47b 100644
  
  obj-$(CONFIG_DRM_BUDDY) += drm_buddy.o
  
-diff --git b/drivers/gpu/drm/amd/amdgpu/Kconfig a/drivers/gpu/drm/amd/amdgpu/Kconfig
+diff --git a/drivers/gpu/drm/amd/amdgpu/Kconfig b/drivers/gpu/drm/amd/amdgpu/Kconfig
 index 22d88f8ef527..b91e79c721e2 100644
---- b/drivers/gpu/drm/amd/amdgpu/Kconfig
-+++ a/drivers/gpu/drm/amd/amdgpu/Kconfig
+--- a/drivers/gpu/drm/amd/amdgpu/Kconfig
++++ b/drivers/gpu/drm/amd/amdgpu/Kconfig
 @@ -21,7 +21,6 @@ config DRM_AMDGPU
  	select INTERVAL_TREE
  	select DRM_BUDDY
@@ -71,10 +71,10 @@ index 22d88f8ef527..b91e79c721e2 100644
  	# amdgpu depends on ACPI_VIDEO when ACPI is enabled, for select to work
  	# ACPI_VIDEO's dependencies must also be selected.
  	select INPUT if ACPI
-diff --git b/drivers/gpu/drm/amd/amdgpu/amdgpu.h a/drivers/gpu/drm/amd/amdgpu/amdgpu.h
-index b49c34a5c04b..a84bd4a0c421 100644
---- b/drivers/gpu/drm/amd/amdgpu/amdgpu.h
-+++ a/drivers/gpu/drm/amd/amdgpu/amdgpu.h
+diff --git a/drivers/gpu/drm/amd/amdgpu/amdgpu.h b/drivers/gpu/drm/amd/amdgpu/amdgpu.h
+index 692f88bbfa16..43270613bbcb 100644
+--- a/drivers/gpu/drm/amd/amdgpu/amdgpu.h
++++ b/drivers/gpu/drm/amd/amdgpu/amdgpu.h
 @@ -53,6 +53,7 @@
  
  #include <drm/ttm/ttm_bo.h>
@@ -83,10 +83,10 @@ index b49c34a5c04b..a84bd4a0c421 100644
  
  #include <drm/amdgpu_drm.h>
  #include <drm/drm_gem.h>
-diff --git b/drivers/gpu/drm/amd/amdgpu/amdgpu_amdkfd.h a/drivers/gpu/drm/amd/amdgpu/amdgpu_amdkfd.h
-index 1e4cc1fe88fc..2d0406bff84e 100644
---- b/drivers/gpu/drm/amd/amdgpu/amdgpu_amdkfd.h
-+++ a/drivers/gpu/drm/amd/amdgpu/amdgpu_amdkfd.h
+diff --git a/drivers/gpu/drm/amd/amdgpu/amdgpu_amdkfd.h b/drivers/gpu/drm/amd/amdgpu/amdgpu_amdkfd.h
+index 082c9f4cfd34..b34418e3e006 100644
+--- a/drivers/gpu/drm/amd/amdgpu/amdgpu_amdkfd.h
++++ b/drivers/gpu/drm/amd/amdgpu/amdgpu_amdkfd.h
 @@ -25,7 +25,6 @@
  #ifndef AMDGPU_AMDKFD_H_INCLUDED
  #define AMDGPU_AMDKFD_H_INCLUDED
@@ -113,10 +113,10 @@ index 1e4cc1fe88fc..2d0406bff84e 100644
  	uint32_t domain;
  	unsigned int mapped_to_gpu_memory;
  	uint64_t va;
-diff --git b/drivers/gpu/drm/amd/amdgpu/amdgpu_amdkfd_gpuvm.c a/drivers/gpu/drm/amd/amdgpu/amdgpu_amdkfd_gpuvm.c
-index dedfee14acce..f61527b800e6 100644
---- b/drivers/gpu/drm/amd/amdgpu/amdgpu_amdkfd_gpuvm.c
-+++ a/drivers/gpu/drm/amd/amdgpu/amdgpu_amdkfd_gpuvm.c
+diff --git a/drivers/gpu/drm/amd/amdgpu/amdgpu_amdkfd_gpuvm.c b/drivers/gpu/drm/amd/amdgpu/amdgpu_amdkfd_gpuvm.c
+index a136fba9f29b..d34c3ef8f3ed 100644
+--- a/drivers/gpu/drm/amd/amdgpu/amdgpu_amdkfd_gpuvm.c
++++ b/drivers/gpu/drm/amd/amdgpu/amdgpu_amdkfd_gpuvm.c
 @@ -27,8 +27,6 @@
  #include <linux/sched/task.h>
  #include <drm/ttm/ttm_tt.h>
@@ -337,7 +337,7 @@ index dedfee14acce..f61527b800e6 100644
  	return ret;
  }
  
-@@ -1807,6 +1854,7 @@ int amdgpu_amdkfd_gpuvm_free_memory_of_gpu(
+@@ -1808,6 +1855,7 @@ int amdgpu_amdkfd_gpuvm_free_memory_of_gpu(
  	bool use_release_notifier = (mem->bo->kfd_bo == mem);
  	struct kfd_mem_attachment *entry, *tmp;
  	struct bo_vm_reservation_context ctx;
@@ -345,7 +345,7 @@ index dedfee14acce..f61527b800e6 100644
  	unsigned int mapped_to_gpu_memory;
  	int ret;
  	bool is_imported = false;
-@@ -1834,8 +1882,9 @@ int amdgpu_amdkfd_gpuvm_free_memory_of_gpu(
+@@ -1835,8 +1883,9 @@ int amdgpu_amdkfd_gpuvm_free_memory_of_gpu(
  	}
  
  	/* Make sure restore workers don't access the BO any more */
@@ -356,7 +356,7 @@ index dedfee14acce..f61527b800e6 100644
  	mutex_unlock(&process_info->lock);
  
  	/* Cleanup user pages and MMU notifiers */
-@@ -2402,14 +2451,14 @@ static int update_invalid_user_pages(struct amdkfd_process_info *process_info,
+@@ -2403,14 +2452,14 @@ static int update_invalid_user_pages(struct amdkfd_process_info *process_info,
  	/* Move all invalidated BOs to the userptr_inval_list */
  	list_for_each_entry_safe(mem, tmp_mem,
  				 &process_info->userptr_valid_list,
@@ -374,7 +374,7 @@ index dedfee14acce..f61527b800e6 100644
  		invalid = mem->invalid;
  		if (!invalid)
  			/* BO hasn't been invalidated since the last
-@@ -2489,42 +2538,51 @@ static int update_invalid_user_pages(struct amdkfd_process_info *process_info,
+@@ -2490,42 +2539,51 @@ static int update_invalid_user_pages(struct amdkfd_process_info *process_info,
   */
  static int validate_invalid_user_pages(struct amdkfd_process_info *process_info)
  {
@@ -452,7 +452,7 @@ index dedfee14acce..f61527b800e6 100644
  	ret = process_validate_vms(process_info);
  	if (ret)
  		goto unreserve_out;
-@@ -2532,7 +2590,7 @@ static int validate_invalid_user_pages(struct amdkfd_process_info *process_info)
+@@ -2533,7 +2591,7 @@ static int validate_invalid_user_pages(struct amdkfd_process_info *process_info)
  	/* Validate BOs and update GPUVM page tables */
  	list_for_each_entry_safe(mem, tmp_mem,
  				 &process_info->userptr_inval_list,
@@ -461,7 +461,7 @@ index dedfee14acce..f61527b800e6 100644
  		struct kfd_mem_attachment *attachment;
  
  		bo = mem->bo;
-@@ -2574,9 +2632,12 @@ static int validate_invalid_user_pages(struct amdkfd_process_info *process_info)
+@@ -2575,9 +2633,12 @@ static int validate_invalid_user_pages(struct amdkfd_process_info *process_info)
  	ret = process_update_pds(process_info, &sync);
  
  unreserve_out:
@@ -475,7 +475,7 @@ index dedfee14acce..f61527b800e6 100644
  
  	return ret;
  }
-@@ -2592,7 +2653,7 @@ static int confirm_valid_user_pages_locked(struct amdkfd_process_info *process_i
+@@ -2593,7 +2654,7 @@ static int confirm_valid_user_pages_locked(struct amdkfd_process_info *process_i
  
  	list_for_each_entry_safe(mem, tmp_mem,
  				 &process_info->userptr_inval_list,
@@ -484,7 +484,7 @@ index dedfee14acce..f61527b800e6 100644
  		bool valid;
  
  		/* keep mem without hmm range at userptr_inval_list */
-@@ -2616,7 +2677,7 @@ static int confirm_valid_user_pages_locked(struct amdkfd_process_info *process_i
+@@ -2617,7 +2678,7 @@ static int confirm_valid_user_pages_locked(struct amdkfd_process_info *process_i
  			continue;
  		}
  
@@ -493,7 +493,7 @@ index dedfee14acce..f61527b800e6 100644
  			       &process_info->userptr_valid_list);
  	}
  
-@@ -2726,44 +2787,50 @@ static void amdgpu_amdkfd_restore_userptr_worker(struct work_struct *work)
+@@ -2727,44 +2788,50 @@ static void amdgpu_amdkfd_restore_userptr_worker(struct work_struct *work)
   */
  int amdgpu_amdkfd_gpuvm_restore_process_bos(void *info, struct dma_fence **ef)
  {
@@ -568,7 +568,7 @@ index dedfee14acce..f61527b800e6 100644
  	}
  
  	amdgpu_sync_create(&sync_obj);
-@@ -2781,7 +2848,7 @@ int amdgpu_amdkfd_gpuvm_restore_process_bos(void *info, struct dma_fence **ef)
+@@ -2782,7 +2849,7 @@ int amdgpu_amdkfd_gpuvm_restore_process_bos(void *info, struct dma_fence **ef)
  
  	/* Validate BOs and map them to GPUVM (update VM page tables). */
  	list_for_each_entry(mem, &process_info->kfd_bo_list,
@@ -577,7 +577,7 @@ index dedfee14acce..f61527b800e6 100644
  
  		struct amdgpu_bo *bo = mem->bo;
  		uint32_t domain = mem->domain;
-@@ -2854,7 +2921,8 @@ int amdgpu_amdkfd_gpuvm_restore_process_bos(void *info, struct dma_fence **ef)
+@@ -2858,7 +2925,8 @@ int amdgpu_amdkfd_gpuvm_restore_process_bos(void *info, struct dma_fence **ef)
  	*ef = dma_fence_get(&new_fence->base);
  
  	/* Attach new eviction fence to all BOs except pinned ones */
@@ -587,7 +587,7 @@ index dedfee14acce..f61527b800e6 100644
  		if (mem->bo->tbo.pin_count)
  			continue;
  
-@@ -2873,10 +2941,11 @@ int amdgpu_amdkfd_gpuvm_restore_process_bos(void *info, struct dma_fence **ef)
+@@ -2877,10 +2945,11 @@ int amdgpu_amdkfd_gpuvm_restore_process_bos(void *info, struct dma_fence **ef)
  	}
  
  validate_map_fail:
@@ -600,10 +600,10 @@ index dedfee14acce..f61527b800e6 100644
  	return ret;
  }
  
-diff --git b/drivers/gpu/drm/amd/amdgpu/amdgpu_bo_list.c a/drivers/gpu/drm/amd/amdgpu/amdgpu_bo_list.c
+diff --git a/drivers/gpu/drm/amd/amdgpu/amdgpu_bo_list.c b/drivers/gpu/drm/amd/amdgpu/amdgpu_bo_list.c
 index b6298e901cbd..252a876b0725 100644
---- b/drivers/gpu/drm/amd/amdgpu/amdgpu_bo_list.c
-+++ a/drivers/gpu/drm/amd/amdgpu/amdgpu_bo_list.c
+--- a/drivers/gpu/drm/amd/amdgpu/amdgpu_bo_list.c
++++ b/drivers/gpu/drm/amd/amdgpu/amdgpu_bo_list.c
 @@ -28,7 +28,6 @@
   *    Christian König <deathsimple@vodafone.de>
   */
@@ -719,10 +719,10 @@ index b6298e901cbd..252a876b0725 100644
  void amdgpu_bo_list_put(struct amdgpu_bo_list *list)
  {
  	kref_put(&list->refcount, amdgpu_bo_list_free);
-diff --git b/drivers/gpu/drm/amd/amdgpu/amdgpu_bo_list.h a/drivers/gpu/drm/amd/amdgpu/amdgpu_bo_list.h
+diff --git a/drivers/gpu/drm/amd/amdgpu/amdgpu_bo_list.h b/drivers/gpu/drm/amd/amdgpu/amdgpu_bo_list.h
 index 26c01cb131f2..ededdc01ca28 100644
---- b/drivers/gpu/drm/amd/amdgpu/amdgpu_bo_list.h
-+++ a/drivers/gpu/drm/amd/amdgpu/amdgpu_bo_list.h
+--- a/drivers/gpu/drm/amd/amdgpu/amdgpu_bo_list.h
++++ b/drivers/gpu/drm/amd/amdgpu/amdgpu_bo_list.h
 @@ -23,6 +23,7 @@
  #ifndef __AMDGPU_BO_LIST_H__
  #define __AMDGPU_BO_LIST_H__
@@ -749,10 +749,10 @@ index 26c01cb131f2..ededdc01ca28 100644
  void amdgpu_bo_list_put(struct amdgpu_bo_list *list);
  int amdgpu_bo_create_list_entry_array(struct drm_amdgpu_bo_list_in *in,
  				      struct drm_amdgpu_bo_list_entry **info_param);
-diff --git b/drivers/gpu/drm/amd/amdgpu/amdgpu_cs.c a/drivers/gpu/drm/amd/amdgpu/amdgpu_cs.c
-index 41f1f7429dca..d9503882ea97 100644
---- b/drivers/gpu/drm/amd/amdgpu/amdgpu_cs.c
-+++ a/drivers/gpu/drm/amd/amdgpu/amdgpu_cs.c
+diff --git a/drivers/gpu/drm/amd/amdgpu/amdgpu_cs.c b/drivers/gpu/drm/amd/amdgpu/amdgpu_cs.c
+index 977e1804718d..e44c4c1e7b9e 100644
+--- a/drivers/gpu/drm/amd/amdgpu/amdgpu_cs.c
++++ b/drivers/gpu/drm/amd/amdgpu/amdgpu_cs.c
 @@ -65,7 +65,6 @@ static int amdgpu_cs_parser_init(struct amdgpu_cs_parser *p,
  	}
  
@@ -1180,10 +1180,10 @@ index 41f1f7429dca..d9503882ea97 100644
  		return -EINVAL;
  
  	if (!((*bo)->flags & AMDGPU_GEM_CREATE_VRAM_CONTIGUOUS)) {
-diff --git b/drivers/gpu/drm/amd/amdgpu/amdgpu_cs.h a/drivers/gpu/drm/amd/amdgpu/amdgpu_cs.h
+diff --git a/drivers/gpu/drm/amd/amdgpu/amdgpu_cs.h b/drivers/gpu/drm/amd/amdgpu/amdgpu_cs.h
 index 39c33ad100cb..fb3e3d56d427 100644
---- b/drivers/gpu/drm/amd/amdgpu/amdgpu_cs.h
-+++ a/drivers/gpu/drm/amd/amdgpu/amdgpu_cs.h
+--- a/drivers/gpu/drm/amd/amdgpu/amdgpu_cs.h
++++ b/drivers/gpu/drm/amd/amdgpu/amdgpu_cs.h
 @@ -24,7 +24,6 @@
  #define __AMDGPU_CS_H__
  
@@ -1214,10 +1214,10 @@ index 39c33ad100cb..fb3e3d56d427 100644
  
  	unsigned			num_post_deps;
  	struct amdgpu_cs_post_dep	*post_deps;
-diff --git b/drivers/gpu/drm/amd/amdgpu/amdgpu_csa.c a/drivers/gpu/drm/amd/amdgpu/amdgpu_csa.c
+diff --git a/drivers/gpu/drm/amd/amdgpu/amdgpu_csa.c b/drivers/gpu/drm/amd/amdgpu/amdgpu_csa.c
 index 720011019741..23d054526e7c 100644
---- b/drivers/gpu/drm/amd/amdgpu/amdgpu_csa.c
-+++ a/drivers/gpu/drm/amd/amdgpu/amdgpu_csa.c
+--- a/drivers/gpu/drm/amd/amdgpu/amdgpu_csa.c
++++ b/drivers/gpu/drm/amd/amdgpu/amdgpu_csa.c
 @@ -22,8 +22,6 @@
   * * Author: Monk.liu@amd.com
   */
@@ -1340,10 +1340,10 @@ index 720011019741..23d054526e7c 100644
 +
 +	return 0;
  }
-diff --git b/drivers/gpu/drm/amd/amdgpu/amdgpu_gem.c a/drivers/gpu/drm/amd/amdgpu/amdgpu_gem.c
-index 7da871972a8e..74055cba3dc9 100644
---- b/drivers/gpu/drm/amd/amdgpu/amdgpu_gem.c
-+++ a/drivers/gpu/drm/amd/amdgpu/amdgpu_gem.c
+diff --git a/drivers/gpu/drm/amd/amdgpu/amdgpu_gem.c b/drivers/gpu/drm/amd/amdgpu/amdgpu_gem.c
+index 89c5f5bdefe5..2c9f8e747788 100644
+--- a/drivers/gpu/drm/amd/amdgpu/amdgpu_gem.c
++++ b/drivers/gpu/drm/amd/amdgpu/amdgpu_gem.c
 @@ -33,7 +33,6 @@
  
  #include <drm/amdgpu_drm.h>
@@ -1352,7 +1352,7 @@ index 7da871972a8e..74055cba3dc9 100644
  #include <drm/drm_gem_ttm_helper.h>
  #include <drm/ttm/ttm_tt.h>
  
-@@ -199,24 +198,29 @@ static void amdgpu_gem_object_close(struct drm_gem_object *obj,
+@@ -198,24 +197,29 @@ static void amdgpu_gem_object_close(struct drm_gem_object *obj,
  	struct amdgpu_fpriv *fpriv = file_priv->driver_priv;
  	struct amdgpu_vm *vm = &fpriv->vm;
  
@@ -1395,17 +1395,17 @@ index 7da871972a8e..74055cba3dc9 100644
  	bo_va = amdgpu_vm_bo_find(vm, bo);
  	if (!bo_va || --bo_va->ref_count)
  		goto out_unlock;
-@@ -226,9 +230,6 @@ static void amdgpu_gem_object_close(struct drm_gem_object *obj,
+@@ -225,9 +229,6 @@ static void amdgpu_gem_object_close(struct drm_gem_object *obj,
  		goto out_unlock;
  
  	r = amdgpu_vm_clear_freed(adev, vm, &fence);
 -	if (unlikely(r < 0))
--		dev_err(adev->dev, "failed to clear page "
--			"tables on GEM object close (%ld)\n", r);
+-		dev_err(adev->dev, "failed to clear page tables on GEM object close (%ld)\n",
+-			r);
  	if (r || !fence)
  		goto out_unlock;
  
-@@ -236,9 +237,10 @@ static void amdgpu_gem_object_close(struct drm_gem_object *obj,
+@@ -235,9 +236,10 @@ static void amdgpu_gem_object_close(struct drm_gem_object *obj,
  	dma_fence_put(fence);
  
  out_unlock:
@@ -1413,8 +1413,8 @@ index 7da871972a8e..74055cba3dc9 100644
 -		dev_err(adev->dev, "leaking bo va (%ld)\n", r);
 -	drm_exec_fini(&exec);
 +	if (unlikely(r < 0))
-+		dev_err(adev->dev, "failed to clear page "
-+			"tables on GEM object close (%ld)\n", r);
++		dev_err(adev->dev, "failed to clear page tables on GEM object close (%ld)\n",
++			r);
 +	ttm_eu_backoff_reservation(&ticket, &list);
  }
  
@@ -1496,10 +1496,10 @@ index 7da871972a8e..74055cba3dc9 100644
  	drm_gem_object_put(gobj);
  	return r;
  }
-diff --git b/drivers/gpu/drm/amd/amdgpu/amdgpu_mes.c a/drivers/gpu/drm/amd/amdgpu/amdgpu_mes.c
-index 3e3dadd6d0f3..e9091ebfe230 100644
---- b/drivers/gpu/drm/amd/amdgpu/amdgpu_mes.c
-+++ a/drivers/gpu/drm/amd/amdgpu/amdgpu_mes.c
+diff --git a/drivers/gpu/drm/amd/amdgpu/amdgpu_mes.c b/drivers/gpu/drm/amd/amdgpu/amdgpu_mes.c
+index 37f15abf7543..72ab6a838bb6 100644
+--- a/drivers/gpu/drm/amd/amdgpu/amdgpu_mes.c
++++ b/drivers/gpu/drm/amd/amdgpu/amdgpu_mes.c
 @@ -22,7 +22,6 @@
   */
  
@@ -1508,7 +1508,7 @@ index 3e3dadd6d0f3..e9091ebfe230 100644
  
  #include "amdgpu_mes.h"
  #include "amdgpu.h"
-@@ -1169,31 +1168,34 @@ int amdgpu_mes_ctx_map_meta_data(struct amdgpu_device *adev,
+@@ -1171,31 +1170,34 @@ int amdgpu_mes_ctx_map_meta_data(struct amdgpu_device *adev,
  				 struct amdgpu_mes_ctx_data *ctx_data)
  {
  	struct amdgpu_bo_va *bo_va;
@@ -1558,7 +1558,7 @@ index 3e3dadd6d0f3..e9091ebfe230 100644
  	}
  
  	r = amdgpu_vm_bo_map(adev, bo_va, ctx_data->meta_data_gpu_addr, 0,
-@@ -1203,35 +1205,33 @@ int amdgpu_mes_ctx_map_meta_data(struct amdgpu_device *adev,
+@@ -1205,35 +1207,33 @@ int amdgpu_mes_ctx_map_meta_data(struct amdgpu_device *adev,
  
  	if (r) {
  		DRM_ERROR("failed to do bo_map on meta data, err=%d\n", r);
@@ -1600,7 +1600,7 @@ index 3e3dadd6d0f3..e9091ebfe230 100644
  	amdgpu_sync_free(&sync);
  	return r;
  }
-@@ -1242,30 +1242,34 @@ int amdgpu_mes_ctx_unmap_meta_data(struct amdgpu_device *adev,
+@@ -1244,30 +1244,34 @@ int amdgpu_mes_ctx_unmap_meta_data(struct amdgpu_device *adev,
  	struct amdgpu_bo_va *bo_va = ctx_data->meta_data_va;
  	struct amdgpu_bo *bo = ctx_data->meta_data_obj;
  	struct amdgpu_vm *vm = bo_va->base.vm;
@@ -1653,7 +1653,7 @@ index 3e3dadd6d0f3..e9091ebfe230 100644
  	if (r)
  		goto out_unlock;
  	if (fence) {
-@@ -1284,7 +1288,7 @@ int amdgpu_mes_ctx_unmap_meta_data(struct amdgpu_device *adev,
+@@ -1286,7 +1290,7 @@ int amdgpu_mes_ctx_unmap_meta_data(struct amdgpu_device *adev,
  out_unlock:
  	if (unlikely(r < 0))
  		dev_err(adev->dev, "failed to clear page tables (%ld)\n", r);
@@ -1662,10 +1662,10 @@ index 3e3dadd6d0f3..e9091ebfe230 100644
  
  	return r;
  }
-diff --git b/drivers/gpu/drm/amd/amdgpu/amdgpu_vm.c a/drivers/gpu/drm/amd/amdgpu/amdgpu_vm.c
-index 854260171dfd..143d11afe0e5 100644
---- b/drivers/gpu/drm/amd/amdgpu/amdgpu_vm.c
-+++ a/drivers/gpu/drm/amd/amdgpu/amdgpu_vm.c
+diff --git a/drivers/gpu/drm/amd/amdgpu/amdgpu_vm.c b/drivers/gpu/drm/amd/amdgpu/amdgpu_vm.c
+index f5daadcec865..74380b21e7a5 100644
+--- a/drivers/gpu/drm/amd/amdgpu/amdgpu_vm.c
++++ b/drivers/gpu/drm/amd/amdgpu/amdgpu_vm.c
 @@ -34,7 +34,6 @@
  #include <drm/amdgpu_drm.h>
  #include <drm/drm_drv.h>
@@ -1709,10 +1709,10 @@ index 854260171dfd..143d11afe0e5 100644
  }
  
  /**
-diff --git b/drivers/gpu/drm/amd/amdgpu/amdgpu_vm.h a/drivers/gpu/drm/amd/amdgpu/amdgpu_vm.h
-index 45bcf46c6f59..9c85d494f2a2 100644
---- b/drivers/gpu/drm/amd/amdgpu/amdgpu_vm.h
-+++ a/drivers/gpu/drm/amd/amdgpu/amdgpu_vm.h
+diff --git a/drivers/gpu/drm/amd/amdgpu/amdgpu_vm.h b/drivers/gpu/drm/amd/amdgpu/amdgpu_vm.h
+index 204ab13184ed..bca258c38919 100644
+--- a/drivers/gpu/drm/amd/amdgpu/amdgpu_vm.h
++++ b/drivers/gpu/drm/amd/amdgpu/amdgpu_vm.h
 @@ -36,8 +36,6 @@
  #include "amdgpu_ring.h"
  #include "amdgpu_ids.h"
@@ -1722,7 +1722,7 @@ index 45bcf46c6f59..9c85d494f2a2 100644
  struct amdgpu_bo_va;
  struct amdgpu_job;
  struct amdgpu_bo_list_entry;
-@@ -398,8 +396,9 @@ int amdgpu_vm_init(struct amdgpu_device *adev, struct amdgpu_vm *vm);
+@@ -404,8 +402,9 @@ int amdgpu_vm_init(struct amdgpu_device *adev, struct amdgpu_vm *vm, int32_t xcp
  int amdgpu_vm_make_compute(struct amdgpu_device *adev, struct amdgpu_vm *vm);
  void amdgpu_vm_release_compute(struct amdgpu_device *adev, struct amdgpu_vm *vm);
  void amdgpu_vm_fini(struct amdgpu_device *adev, struct amdgpu_vm *vm);
@@ -1734,10 +1734,10 @@ index 45bcf46c6f59..9c85d494f2a2 100644
  bool amdgpu_vm_ready(struct amdgpu_vm *vm);
  uint64_t amdgpu_vm_generation(struct amdgpu_device *adev, struct amdgpu_vm *vm);
  int amdgpu_vm_validate_pt_bos(struct amdgpu_device *adev, struct amdgpu_vm *vm,
-diff --git b/drivers/gpu/drm/amd/amdkfd/kfd_svm.c a/drivers/gpu/drm/amd/amdkfd/kfd_svm.c
-index aa32b06eea77..5ff1a5a89d96 100644
---- b/drivers/gpu/drm/amd/amdkfd/kfd_svm.c
-+++ a/drivers/gpu/drm/amd/amdkfd/kfd_svm.c
+diff --git a/drivers/gpu/drm/amd/amdkfd/kfd_svm.c b/drivers/gpu/drm/amd/amdkfd/kfd_svm.c
+index 01c7de2d6e19..1b50eae051a4 100644
+--- a/drivers/gpu/drm/amd/amdkfd/kfd_svm.c
++++ b/drivers/gpu/drm/amd/amdkfd/kfd_svm.c
 @@ -24,8 +24,6 @@
  #include <linux/types.h>
  #include <linux/sched/task.h>
@@ -1747,7 +1747,7 @@ index aa32b06eea77..5ff1a5a89d96 100644
  #include "amdgpu_sync.h"
  #include "amdgpu_object.h"
  #include "amdgpu_vm.h"
-@@ -1457,34 +1455,37 @@ struct svm_validate_context {
+@@ -1459,34 +1457,37 @@ struct svm_validate_context {
  	struct svm_range *prange;
  	bool intr;
  	DECLARE_BITMAP(bitmap, MAX_GPU_INSTANCE);
@@ -1804,7 +1804,7 @@ index aa32b06eea77..5ff1a5a89d96 100644
  	}
  
  	for_each_set_bit(gpuidx, ctx->bitmap, MAX_GPU_INSTANCE) {
-@@ -1507,13 +1508,13 @@ static int svm_range_reserve_bos(struct svm_validate_context *ctx, bool intr)
+@@ -1509,13 +1510,13 @@ static int svm_range_reserve_bos(struct svm_validate_context *ctx, bool intr)
  	return 0;
  
  unreserve_out:
@@ -1820,7 +1820,7 @@ index aa32b06eea77..5ff1a5a89d96 100644
  }
  
  static void *kfd_svm_page_owner(struct kfd_process *p, int32_t gpuidx)
-@@ -1612,7 +1613,7 @@ static int svm_range_validate_and_map(struct mm_struct *mm,
+@@ -1616,7 +1617,7 @@ static int svm_range_validate_and_map(struct mm_struct *mm,
  		goto free_ctx;
  	}
  
@@ -1829,10 +1829,10 @@ index aa32b06eea77..5ff1a5a89d96 100644
  
  	p = container_of(prange->svms, struct kfd_process, svms);
  	owner = kfd_svm_page_owner(p, find_first_bit(ctx->bitmap,
-diff --git b/drivers/gpu/drm/drm_exec.c a/drivers/gpu/drm/drm_exec.c
+diff --git a/drivers/gpu/drm/drm_exec.c b/drivers/gpu/drm/drm_exec.c
 deleted file mode 100644
 index ff69cf0fb42a..000000000000
---- b/drivers/gpu/drm/drm_exec.c
+--- a/drivers/gpu/drm/drm_exec.c
 +++ /dev/null
 @@ -1,333 +0,0 @@
 -// SPDX-License-Identifier: GPL-2.0 OR MIT
@@ -2168,10 +2168,10 @@ index ff69cf0fb42a..000000000000
 -
 -MODULE_DESCRIPTION("DRM execution context");
 -MODULE_LICENSE("Dual MIT/GPL");
-diff --git b/drivers/gpu/drm/tests/Makefile a/drivers/gpu/drm/tests/Makefile
+diff --git a/drivers/gpu/drm/tests/Makefile b/drivers/gpu/drm/tests/Makefile
 index ba7baa622675..bca726a8f483 100644
---- b/drivers/gpu/drm/tests/Makefile
-+++ a/drivers/gpu/drm/tests/Makefile
+--- a/drivers/gpu/drm/tests/Makefile
++++ b/drivers/gpu/drm/tests/Makefile
 @@ -17,7 +17,6 @@ obj-$(CONFIG_DRM_KUNIT_TEST) += \
  	drm_modes_test.o \
  	drm_plane_helper_test.o \
@@ -2181,10 +2181,10 @@ index ba7baa622675..bca726a8f483 100644
 +	drm_rect_test.o
  
  CFLAGS_drm_mm_test.o := $(DISABLE_STRUCTLEAK_PLUGIN)
-diff --git b/drivers/gpu/drm/tests/drm_exec_test.c a/drivers/gpu/drm/tests/drm_exec_test.c
+diff --git a/drivers/gpu/drm/tests/drm_exec_test.c b/drivers/gpu/drm/tests/drm_exec_test.c
 deleted file mode 100644
 index 727ac267682e..000000000000
---- b/drivers/gpu/drm/tests/drm_exec_test.c
+--- a/drivers/gpu/drm/tests/drm_exec_test.c
 +++ /dev/null
 @@ -1,159 +0,0 @@
 -// SPDX-License-Identifier: MIT
@@ -2346,10 +2346,10 @@ index 727ac267682e..000000000000
 -
 -MODULE_AUTHOR("AMD");
 -MODULE_LICENSE("GPL and additional rights");
-diff --git b/include/drm/drm_exec.h a/include/drm/drm_exec.h
+diff --git a/include/drm/drm_exec.h b/include/drm/drm_exec.h
 deleted file mode 100644
 index 73205afec162..000000000000
---- b/include/drm/drm_exec.h
+--- a/include/drm/drm_exec.h
 +++ /dev/null
 @@ -1,123 +0,0 @@
 -/* SPDX-License-Identifier: GPL-2.0 OR MIT */

@@ -25,7 +25,6 @@ function cbl_rb_pi -d "Rebase Raspberry Pi kernel on latest linux-next"
         git revert --mainline 1 --no-edit $revert; or return
     end
     set -a b4_patches https://lore.kernel.org/all/20230724121934.1406807-1-arnd@kernel.org/ # btrfs: remove unused pages_processed variable
-    set -a b4_patches https://lore.kernel.org/all/20230724122029.1430482-1-arnd@kernel.org/ # scsi: ufs: qcom: remove unused variable
     for patch in $b4_patches
         b4 shazam -l -P _ -s $patch; or return
     end
