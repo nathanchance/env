@@ -18,7 +18,7 @@ MACHINE = platform.machine()
 
 LLVM_REFS = {
     '18.0.0': 'origin/main',
-    '17.0.0': 'release/17.x',
+    '17.0.0': 'origin/release/17.x',
 }
 
 LLVM_VERSIONS = [
