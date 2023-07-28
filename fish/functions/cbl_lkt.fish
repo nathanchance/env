@@ -224,12 +224,45 @@ function cbl_lkt -d "Tests a Linux kernel with llvm-kernel-testing"
 
     set report $log_folder/report.txt
     cbl_gen_build_report $log_folder
-    # Only send log files that are not zero size
-    for log_file in $log_folder/*.log
-        if test -s $log_file
-            set -a log_files $log_file
-        end
-    end
+    set log_files (python3 -c "from pathlib import Path
+import subprocess
+
+# Gmail has a maximum attachment size of 25MB
+MAX_SIZE = 25000000
+
+total_size = 0
+files = []
+
+# Filter out zero sized files
+for file in (log_folder := Path('$log_folder')).glob('*.log'):
+    if (file_size := file.stat().st_size) > 0:
+        files.append(file)
+        total_size += file_size
+
+# Create a tarball of logs if attachment size is too large
+if total_size > MAX_SIZE:
+    if (tarball := Path(log_folder, 'logs.tar.zst')).exists():
+        tarball.unlink()
+
+    cmd = [
+        'tar',
+        '--create',
+        '--directory', log_folder,
+        '--file', tarball,
+        '--zstd',
+    ]
+    cmd += [str(file.relative_to(log_folder)) for file in files]
+    subprocess.run(cmd, check=True)
+
+    if tarball.stat().st_size > MAX_SIZE:
+        raise RuntimeError('Tarball is greater than 25MB??')
+
+    print(tarball)
+
+# Otherwise, just print the files for attaching via mail_msg
+else:
+    for file in files:
+        print(str(file))")
     mail_msg $report $log_files
 
     echo "Full logs available at: $log_folder"
