@@ -16,20 +16,28 @@ function cbl_bld_tot_tcs -d "Build LLVM and binutils from source for kernel deve
         case aadp generic wsl
             set bld_llvm_args \
                 --pgo kernel-defconfig
-            set validate_uprev llvm
+
+            if test $LOCATION = aadp
+                set validate_uprev kernel
+            else
+                set validate_uprev llvm
+            end
 
         case hetzner-server workstation
             set bld_llvm_args \
                 --bolt \
                 --pgo kernel-defconfig
+
             set validate_uprev kernel
 
-        case honeycomb
+        case honeycomb test-desktop-intel
             set bld_bntls false
 
             set bld_llvm_args \
                 --pgo kernel-defconfig \
                 --targets AArch64 ARM X86
+
+            set validate_uprev kernel
 
         case pi
             set bld_bntls false
@@ -49,13 +57,6 @@ function cbl_bld_tot_tcs -d "Build LLVM and binutils from source for kernel deve
             set bld_llvm_args \
                 --pgo kernel-{allmod,def}config \
                 --targets X86
-
-        case test-desktop-intel
-            set bld_bntls false
-
-            set bld_llvm_args \
-                --pgo kernel-{allmod,def}config \
-                --targets AArch64 ARM X86
 
         case test-laptop-intel
             set bld_bntls false
