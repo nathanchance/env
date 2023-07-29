@@ -95,6 +95,8 @@ def generate_warnings(log_folder, src_folder):
         'llvm-nm: error: arch/arm/boot/compressed/../../../../vmlinux: No such file or directory',
         # Ignore all objdump warnings, most are from tool incompatibilities like DWARF5 handling
         'gnu-objdump: Warning:',
+        # QEMU warnings, generally not useful
+        'qemu-system-[a-z0-9]+: warning:',
     ]
     ignore_re = re.compile('|'.join(ignore))
     warnings = {}
