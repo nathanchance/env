@@ -14,9 +14,7 @@ function cbl_bld_tot_tcs -d "Build LLVM and binutils from source for kernel deve
 
     switch $LOCATION
         case aadp generic wsl
-            set bld_llvm_args \
-                --pgo kernel-defconfig
-
+            set pgo kernel-defconfig
             if test $LOCATION = aadp
                 set validate_uprev kernel
             else
@@ -24,60 +22,49 @@ function cbl_bld_tot_tcs -d "Build LLVM and binutils from source for kernel deve
             end
 
         case hetzner-server workstation
-            set bld_llvm_args \
-                --bolt \
-                --pgo kernel-defconfig
-
+            set bolt true
+            set pgo kernel-defconfig
             set validate_uprev kernel
 
         case honeycomb test-desktop-intel
             set bld_bntls false
-
-            set bld_llvm_args \
-                --pgo kernel-defconfig \
-                --targets AArch64 ARM X86
-
+            set pgo kernel-defconfig
+            set targets AArch64 ARM X86
+            set validate_targets "    'defconfig': ['ARM'],
+    'allmodconfig': ['AArch64', 'ARM', 'X86'],"
             set validate_uprev kernel
 
         case pi
             set bld_bntls false
-
-            set bld_llvm_args \
-                --build-stage1-only \
-                --defines LLVM_PARALLEL_COMPILE_JOBS=(math (nproc) - 1) \
-                LLVM_PARALLEL_LINK_JOBS=1 \
-                --projects clang lld \
-                --targets AArch64 ARM X86
-
+            set bld_stage_one_only true
             set check_targets clang llvm{,-unit}
+            set defines \
+                LLVM_PARALLEL_COMPILE_JOBS=(math (nproc) - 1) \
+                LLVM_PARALLEL_LINK_JOBS=1
+            set projects clang lld
+            set targets AArch64 ARM X86
 
         case test-desktop-amd
             set bld_bntls false
-
-            set bld_llvm_args \
-                --pgo kernel-{allmod,def}config \
-                --targets X86
+            set pgo kernel-{allmod,def}config
+            set targets X86
 
         case test-laptop-intel
             set bld_bntls false
-
-            set bld_llvm_args \
-                --build-stage1-only \
-                --projects clang lld \
-                --targets X86
+            set bld_stage_one_only true
+            set projects clang lld
+            set targets X86
 
         case vm
             set bld_bntls false
 
-            set bld_llvm_args \
-                --pgo kernel-defconfig-slim
-
+            set pgo kernel-defconfig-slim
     end
     if not set -q check_targets
         set check_targets clang ll{d,vm{,-unit}}
     end
     if test "$lto" = true
-        set -a bld_llvm_args --lto=thin
+        set -a bld_llvm_args --lto thin
     end
 
     set date_time (date +%F_%H-%M-%S)
@@ -173,6 +160,12 @@ function cbl_bld_tot_tcs -d "Build LLVM and binutils from source for kernel deve
         --no-ccache \
         --quiet-cmake \
         --show-build-commands
+    if set -q projects
+        set -a common_bld_llvm_args --projects $projects
+    end
+    if set -q targets
+        set -a common_bld_llvm_args --targets $targets
+    end
 
     if set -q validate_uprev
         if not $tc_bld/build-llvm.py \
@@ -185,6 +178,16 @@ function cbl_bld_tot_tcs -d "Build LLVM and binutils from source for kernel deve
         end
 
         if test "$validate_uprev" = kernel
+            if not set -q validate_targets
+                if set -q targets
+                    print_error "Validate uprev target set to kernel with specific targets but no validation specific targets?"
+                    return 1
+                end
+
+                set validate_targets "    'defconfig': ['ARM', 'Mips', 'PowerPC'],
+    'allmodconfig': LLVMSourceManager(Path('$llvm_project')).default_targets(),"
+            end
+
             set lsm_location (command grep -F 'lsm.location = Path(src_folder,' $tc_bld/build-llvm.py | string trim)
             if not env PYTHONPATH=$tc_bld python3 -c "from pathlib import Path
 
@@ -208,8 +211,7 @@ kernel_builder = LLVMKernelBuilder()
 kernel_builder.folders.build = Path('$llvm_bld/linux')
 kernel_builder.folders.source = lsm.location
 kernel_builder.matrix = {
-    'defconfig': ['ARM', 'Mips', 'PowerPC'],
-    'allmodconfig': LLVMSourceManager(Path('$llvm_project')).default_targets(),
+$validate_targets
 }
 kernel_builder.toolchain_prefix = Path('$llvm_bld/final')
 kernel_builder.build()"
@@ -219,6 +221,19 @@ kernel_builder.build()"
                 return 1
             end
         end
+    end
+
+    if set -q bld_stage_one_only
+        set -a bld_llvm_args --build-stage1-only
+    end
+    if set -q bolt
+        set -a bld_llvm_args --bolt
+    end
+    if set -q defines
+        set -a defines --defines $defines
+    end
+    if set -q pgo
+        set -a bld_llvm_args --pgo $pgo
     end
 
     set llvm_install $CBL_TC_LLVM_STORE/$date_time-(git -C $llvm_project sh -s --format=%H origin/main)
