@@ -14,7 +14,7 @@ RUN apt update && \
     wget -O - -q "$url" | tar -C /usr/local --strip-components=1 -xzvf -
 
 # Download the latest stable version of clang from apt.llvm.org.
-ARG LLVM_VERSION=16
+ARG LLVM_VERSION=17
 RUN apt update && \
     apt install -y --no-install-recommends \
         gnupg \
