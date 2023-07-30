@@ -22,8 +22,9 @@ LLVM_REFS = {
 }
 
 LLVM_VERSIONS = [
-    '18.0.0',
-    '17.0.0',
+    '18.0.0',  # git
+    '17.0.0',  # latest branch
+    '17.0.0-rc1',  # latest tag
     '16.0.6',
     '15.0.7',
     '14.0.6',
