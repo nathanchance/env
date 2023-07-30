@@ -123,7 +123,7 @@ EOF
         openssl-devel
         perl
         qemu-img
-        qemu-system-{aarch64,arm,mips,ppc,riscv,s390x,x86}
+        qemu-system-{aarch64,arm,loongarch64,mips,ppc,riscv,s390x,x86}
         rsync
         socat
         sparse
