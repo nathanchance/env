@@ -97,6 +97,10 @@ def generate_warnings(log_folder, src_folder):
         'gnu-objdump: Warning:',
         # QEMU warnings, generally not useful
         'qemu-system-[a-z0-9]+: warning:',
+        # QEMU warning for PowerPC on kernels prior to e4bb64c7a42e ("powerpc:
+        # remove interrupt handler functions from the noinstr section") in
+        # 5.12, backport is too hairy, just ignore.
+        r"WARNING: CPU: [0-9]+ PID: [0-9]+ at arch/powerpc/kernel/optprobes.c:[0-9]+ kretprobe_trampoline\+",
     ]
     ignore_re = re.compile('|'.join(ignore))
     warnings = {}
