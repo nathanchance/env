@@ -101,7 +101,11 @@ function dbxc -d "Shorthand for 'distrobox create'"
     chmod +x $init_hook_sh
     echo '#!/bin/sh
 
-echo "permit nopass '"$USER"' as root" >>/etc/doas.conf' >$init_hook_sh
+user="'"$USER"'"
+
+if ! grep -q "$user" /etc/doas.conf 2>/dev/null; then
+    echo "permit nopass $user as root" >>/etc/doas.conf
+fi' >$init_hook_sh
 
     # If we are using docker, we need to explicitly set the container's
     # kvm group to the same group ID as the host's kvm group if it exists
@@ -110,7 +114,6 @@ echo "permit nopass '"$USER"' as root" >>/etc/doas.conf' >$init_hook_sh
         set -l host_kvm_gid (getent group kvm | string split -f 3 :)
 
         echo '
-user="'"$USER"'"
 target_gid="'"$host_kvm_gid"'"
 
 group() {
