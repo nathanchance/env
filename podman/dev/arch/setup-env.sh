@@ -64,6 +64,9 @@ function install_packages() {
 
     pacman -Syyuu --noconfirm
 
+    # Switch to doas over sudo for simplicity
+    pacman -S --ask 4 --noconfirm opendoas-sudo
+
     packages=(
         # Nicer versions of certain GNU utilities
         bat{,-extras}

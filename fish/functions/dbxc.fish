@@ -86,26 +86,30 @@ function dbxc -d "Shorthand for 'distrobox create'"
         set -a add_args --volume=/etc/pacman.d/mirrorlist:/etc/pacman.d/mirrorlist:ro
     end
 
+
+    set env_dbx $ENV_FOLDER/.distrobox
+
+    if test "$mode" = create
+        set init_hook_sh $env_dbx/$name/init-hook.sh
+        mkdir -p (dirname $init_hook_sh)
+        touch $init_hook_sh
+    else
+        mkdir -p $env_dbx
+        set init_hook_sh (mktemp -p $env_dbx --suffix=.sh)
+    end
+
+    chmod +x $init_hook_sh
+    echo '#!/bin/sh
+
+echo "permit nopass '"$USER"' as root" >>/etc/doas.conf' >$init_hook_sh
+
     # If we are using docker, we need to explicitly set the container's
     # kvm group to the same group ID as the host's kvm group if it exists
     # so that accelerated VMs work within a container. Do this with an init hook.
     if command -q docker; and group_exists kvm
         set -l host_kvm_gid (getent group kvm | string split -f 3 :)
 
-        set env_dbx $ENV_FOLDER/.distrobox
-
-        if test "$mode" = create
-            set init_hook_sh $env_dbx/$name/init-hook.sh
-            mkdir -p (dirname $init_hook_sh)
-            touch $init_hook_sh
-        else
-            mkdir -p $env_dbx
-            set init_hook_sh (mktemp -p $env_dbx --suffix=.sh)
-        end
-
-        chmod +x $init_hook_sh
-        echo '#!/bin/sh
-
+        echo '
 user="'"$USER"'"
 target_gid="'"$host_kvm_gid"'"
 
@@ -162,11 +166,11 @@ if ! user_in_target_gid; then
         fi
     fi
     usermod -aG "$group" "$user" || exit
-fi' >$init_hook_sh
+fi' >>$init_hook_sh
+    end
 
-        if not string match -qr init-hook $init_hook_sh
-            printf '\nrm "%s"\n' $init_hook_sh >>$init_hook_sh
-        end
+    if not string match -qr init-hook $init_hook_sh
+        printf '\nrm "%s"\n' $init_hook_sh >>$init_hook_sh
     end
 
     if set -q init_hook_sh
