@@ -260,15 +260,36 @@ class VirtualMachine:
         print('Requesting root privileges to run virtiofsd...')
         run_cmd([sudo, 'true'])
 
+        base_virtiofsd_cmd = [sudo, virtiofsd]
+        virtiofsd_version_text = subprocess.run([*base_virtiofsd_cmd, '--version'],
+                                                capture_output=True,
+                                                check=True,
+                                                text=True).stdout
+        group_name = grp.getgrgid(os.getgid()).gr_name
+
+        # Rust implementation
+        if 'virtiofsd backend' in virtiofsd_version_text:
+            virtiofsd_args = [
+                '--cache', 'always',
+                '--shared-dir', self.shared_folder,
+                '--socket-group', group_name,
+                '--socket-path', self.vfsd_sock,
+            ]  # yapf: disable
+        # C / QEMU / Reference implementation (deprecated)
+        elif 'virtiofsd version' in virtiofsd_version_text:
+            virtiofsd_args = [
+                f"--socket-group={group_name}",
+                f"--socket-path={self.vfsd_sock}",
+                '-o', 'cache=always',
+                '-o', f"source={self.shared_folder}",
+            ]  # yapf: disable
+        else:
+            raise RuntimeError(
+                f"Could not determine virtiofsd implementation details from version string ('{virtiofsd_version_text}')?",
+            )
+
         # Python recommends full paths with subprocess.Popen() calls
-        virtiofsd_cmd = [
-            sudo,
-            virtiofsd,
-            '--cache', 'always',
-            '--shared-dir', self.shared_folder,
-            '--socket-group', grp.getgrgid(os.getgid()).gr_name,
-            '--socket-path', self.vfsd_sock,
-        ]  # yapf: disable
+        virtiofsd_cmd = [*base_virtiofsd_cmd, *virtiofsd_args]
         lib.utils.print_cmd(virtiofsd_cmd)
         with self.vfsd_log.open('w', encoding='utf-8') as file, \
              subprocess.Popen(virtiofsd_cmd, stderr=file, stdout=file) as vfsd:
