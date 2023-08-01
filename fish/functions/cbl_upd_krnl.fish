@@ -6,6 +6,7 @@ function cbl_upd_krnl -d "Update machine's kernel"
     set remote_user nathan
     set remote_host 192.168.4.188
     set remote_main_folder /home/$remote_user
+    set remote_tmp_build_folder /mnt/nvme/tmp/build
 
     switch $LOCATION
         case vm
@@ -32,8 +33,8 @@ function cbl_upd_krnl -d "Update machine's kernel"
             sudo true; or return
 
             # Download .rpm package
-            set -q krnl_bld; or set krnl_bld $CBL_BLD/fedora
-            set remote_rpm_folder (string replace $MAIN_FOLDER $remote_main_folder $krnl_bld)/rpmbuild/RPMS/aarch64
+            set -q krnl_bld; or set krnl_bld $TMP_BUILD_FOLDER/fedora
+            set remote_rpm_folder (string replace $MAIN_FOLDER $remote_main_folder $krnl_bld | string replace $TMP_BUILD_FOLDER $remote_tmp_build_folder)/rpmbuild/RPMS/aarch64
             set krnl_rpm (ssh $remote_user@$remote_host fd -e rpm -u 'kernel-[0-9]+' $remote_rpm_folder)
             scp $remote_user@$remote_host:$krnl_rpm /tmp; or return
 

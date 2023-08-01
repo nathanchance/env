@@ -61,15 +61,18 @@ function cbl_bld_krnl_rpm -d "Build a .rpm kernel package"
         end
     end
 
+    set out (kbf)
+
     if not grep -q -- "--define='_topdir" scripts/Makefile.package
-        set -a kmake_args RPMOPTS="--define '_topdir $PWD/rpmbuild'"
+        set -a kmake_args RPMOPTS="--define '_topdir $out/rpmbuild'"
     end
     kmake \
         ARCH=$arch \
         $kmake_args \
+        O=$out \
         olddefconfig $kmake_targets binrpm-pkg; or return
 
     echo Run
-    printf '\n\t$ sudo fish -c "dnf install %s; and reboot"\n\n' (realpath -- (fd -e rpm -u 'kernel-[0-9]+' rpmbuild) | string replace $HOME \$HOME)
+    printf '\n\t$ sudo fish -c "dnf install %s; and reboot"\n\n' (realpath -- (fd -e rpm -u 'kernel-[0-9]+' $out/rpmbuild) | string replace $TMP_BUILD_FOLDER \$TMP_BUILD_FOLDER)
     echo "to install and use new kernel."
 end

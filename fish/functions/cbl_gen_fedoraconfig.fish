@@ -37,9 +37,14 @@ function cbl_gen_fedoraconfig -d "Downloads and modifies Fedora's kernel configu
             set arch aarch64
     end
 
-    crl -o .config https://src.fedoraproject.org/rpms/kernel/raw/rawhide/f/kernel-$arch-fedora.config
+    set out (kbf)
+    set cfg $out/.config
+
+    remkdir $out
+    crl -o $cfg https://src.fedoraproject.org/rpms/kernel/raw/rawhide/f/kernel-$arch-fedora.config
 
     scripts/config \
+        --file $cfg \
         -d DEBUG_INFO \
         -d DEBUG_INFO_DWARF_TOOLCHAIN_DEFAULT \
         -e LOCALVERSION_AUTO \
