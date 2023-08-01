@@ -39,10 +39,10 @@ function cbl_bld_krnl_deb -d "Build a .deb kernel package"
         KBUILD_BUILD_HOST=(uname -n) \
         LLVM=1 \
         $KMAKE_DEB_ARGS \
-        O=.build/$arch \
+        O=(kbf)/$arch \
         olddefconfig bindeb-pkg; or return
 
     echo Run
-    printf '\n\t$ sudo fish -c "dpkg -i %s; and reboot"\n\n' (realpath -- .build/linux-image-*.deb | string replace $HOME \$HOME)
+    printf '\n\t$ sudo fish -c "dpkg -i %s; and reboot"\n\n' (realpath -- (kbf)/linux-image-*.deb | string replace $TMP_BUILD_FOLDER \$TMP_BUILD_FOLDER)
     echo "to install and use new kernel."
 end

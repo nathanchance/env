@@ -44,15 +44,22 @@ function cbl_gen_ubuntuconfig -d "Generate a kernel .config from Ubuntu's config
             set ubuntu_arch $arch
     end
 
-    set out .build/$arch
+    set out (kbf)/$arch
     set cfg $out/.config
 
-    rm -fr $out
-    mkdir -p $out
+    remkdir $out
 
-    for file in config.common.ubuntu $ubuntu_arch/config.{common.$ubuntu_arch,flavour.generic}
-        crl "https://git.launchpad.net/~ubuntu-kernel-test/ubuntu/+source/linux/+git/mainline-crack/plain/debian.master/config/$file?h=cod/mainline/v6.0-rc3"
-    end >$cfg
+    set mainline_crack $NVME_FOLDER/data/mainline-crack
+    if not test -d $mainline_crack
+        git clone https://git.launchpad.net/~ubuntu-kernel-test/ubuntu/+source/linux/+git/mainline-crack $mainline_crack
+    end
+    git -C $mainline_crack ru -p; or return
+    git -C $mainline_crack checkout (git -C $mainline_crack tag --sort -creatordate -l cod/mainline/v'*' | head -1); or return
+
+    $mainline_crack/debian/scripts/misc/annotations \
+        --arch $ubuntu_arch \
+        --export \
+        --file $mainline_crack/debian.master/config/annotations >$cfg
 
     scripts/config \
         --file $cfg \
