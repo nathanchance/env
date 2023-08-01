@@ -180,6 +180,7 @@ function install_packages() {
         man-db
 
         # package building
+        debhelper
         dpkg
         pacman-contrib
         rpm-tools
