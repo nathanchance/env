@@ -96,7 +96,9 @@ def parse_arguments():
 
 def build_kernel_for_vm(add_make_targets, make_variables, config, menuconfig, vm_name):
     subprocess.run(['git', 'cl', '-q'], check=True)
-    (build := make_variables['O']).mkdir()
+    if (build := make_variables['O']).exists():
+        shutil.rmtree(build)
+    build.mkdir(parents=True)
 
     if 'alpine' in vm_name:
         configs = {
@@ -160,10 +162,15 @@ if __name__ == '__main__':
     if not (lsmod := Path(vm_folder, 'shared/kernel_files/lsmod')).exists():
         raise RuntimeError(f"lsmod not found in {vm_folder}?")
 
+    if 'TMP_BUILD_FOLDER' in os.environ:
+        out = Path(os.environ['TMP_BUILD_FOLDER'], Path.cwd().name)
+    else:
+        out = Path('build')
+
     make_vars = {
         'ARCH': qemu_arch_to_kernel_arch(arch),
         'LSMOD': lsmod,
-        'O': Path('build'),
+        'O': out,
     }
     make_vars.update(get_toolchain_vars(make_vars['ARCH'], args.toolchain))
     make_vars.update(dict(arg.split('=', 1) for arg in args.make_args))
