@@ -18,6 +18,7 @@ function cbl_rb_fd -d "Rebase generic Fedora kernel on latest linux-next"
     end
     set -a b4_patches https://lore.kernel.org/all/20230724121934.1406807-1-arnd@kernel.org/ # btrfs: remove unused pages_processed variable
     set -a b4_patches https://lore.kernel.org/all/20230731123625.3766-1-christian.koenig@amd.com/ # drm/exec: use unique instead of local label
+    set -a b4_patches https://lore.kernel.org/all/20230802114846.21899-1-tony@atomide.com/ # serial: core: Fix serial_base_match() after fixing controller port name
     for patch in $b4_patches
         b4 shazam -l -P _ -s $patch; or return
     end
