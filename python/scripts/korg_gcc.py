@@ -108,6 +108,13 @@ def parse_arguments():
     install_parser = subparser.add_parser(
         'install', help='Download and/or extact kernel.org GCC tarballs to disk')
 
+    install_parser.add_argument(
+        '-H',
+        '--host-arch',
+        choices=['aarch64', 'x86_64'],
+        default=platform.machine(),
+        help='The host architecture to download/install toolchains for (default: %(default)s)',
+        metavar='HOST_ARCH')
     install_parser.add_argument('-t',
                                 '--targets',
                                 choices=supported_arches + supported_targets,
@@ -155,7 +162,7 @@ def install(args):
             f"Download folder ('{download_folder}') does not exist, please create it before running this script!",
         )
 
-    host_arch = platform.machine()
+    host_arch = args.host_arch
     host_arch_gcc = {
         'aarch64': 'arm64',
         'x86_64': 'x86_64',
