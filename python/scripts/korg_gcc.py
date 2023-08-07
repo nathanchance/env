@@ -84,7 +84,7 @@ def get_latest_gcc_version(major_version):
         10: '10.4.0',
         11: '11.4.0',
         12: '12.3.0',
-        13: '13.1.0',
+        13: '13.2.0',
     }[major_version]
 
 
@@ -215,6 +215,7 @@ def install(args):
                 ]  # yapf: disable
 
                 tar_input = response.content if not tarball.exists() else None
+                lib.utils.print_cmd(tar_cmd)
                 subprocess.run(tar_cmd, check=True, input=tar_input)
 
 
