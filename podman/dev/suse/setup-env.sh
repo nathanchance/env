@@ -50,6 +50,7 @@ function install_packages() {
         shadow
         sudo
         time
+        timezone
         util-linux
         wget
 

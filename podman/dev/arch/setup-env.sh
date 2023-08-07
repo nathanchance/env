@@ -114,6 +114,7 @@ function install_packages() {
         lsof
         pinentry
         time
+        tzdata
         vte-common
         wget
 

@@ -63,6 +63,7 @@ function install_packages() {
         pinentry-curses
         sudo
         time
+        tzdata
         wget
 
         # env

@@ -26,5 +26,9 @@ for distrobox_dependency in $distrobox_dependencies
         set ret 1
     end
 end
+if not test -e /usr/share/zoneinfo/UTC
+    echo "UTC zoneinfo file not found, install tzdata?"
+    set ret 1
+end
 
 return $ret

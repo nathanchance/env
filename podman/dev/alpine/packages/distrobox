@@ -10,6 +10,7 @@ pinentry
 procps
 shadow
 sudo
+tzdata
 util-linux
 wget
 vte3

@@ -80,6 +80,7 @@ EOF
         passwd
         pinentry
         time
+        tzdata
         vte-profile
         wget
 
