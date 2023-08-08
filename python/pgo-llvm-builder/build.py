@@ -258,8 +258,8 @@ for value in versions:
         *build_llvm_py_cmd,
     ]
     # Enable BOLT for more optimization if we are on x86_64 with LLVM greater
-    # than or equal to 14.x.
-    if (maj_ver := int(VERSION.split('.', 1)[0])) >= 14 and MACHINE == 'x86_64':
+    # than or equal to 16.x (due to https://github.com/llvm/llvm-project/issues/55004).
+    if (maj_ver := int(VERSION.split('.', 1)[0])) >= 16 and MACHINE == 'x86_64':
         build_cmd.append('--bolt')
     subprocess.run(build_cmd, check=True)
 
