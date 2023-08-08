@@ -37,6 +37,11 @@ parser = ArgumentParser(description='Build LLVM with PGO in a container.')
 parser.add_argument('-b',
                     '--build-folder',
                     help='Location of build folder. Omit for build folder in repo')
+parser.add_argument('-B',
+                    '--build-args',
+                    default=[],
+                    help='Build arguments for Docker container build',
+                    nargs='+')
 parser.add_argument('-f',
                     '--force-build-container',
                     action='store_true',
@@ -81,6 +86,7 @@ if build_container:
     podman_build_cmd = [
         'podman',
         'build',
+        *[f"--build-arg={arg}" for arg in args.build_args],
         '--layers=false',
         '--pull=always',
         '--tag',
