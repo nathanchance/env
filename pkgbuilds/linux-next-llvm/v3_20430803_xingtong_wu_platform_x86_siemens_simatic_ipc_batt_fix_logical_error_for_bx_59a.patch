@@ -1,0 +1,40 @@
+From git@z Thu Jan  1 00:00:00 1970
+Subject: [PATCH v3 2/2] platform/x86/siemens: simatic-ipc-batt: fix logical
+ error for BX-59A
+From: "xingtong.wu" <xingtong.wu@siemens.com>
+Date: Mon, 03 Aug 2043 01:38:44 +0800
+Message-Id: <20430802173844.2483-1-xingtong_wu@163.com>
+MIME-Version: 1.0
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 8bit
+
+The variable "priv.devmode" is missing from if statement that leads
+to a logical error. Add the missing variable to the if condition.
+
+Fixes: c56beff20375 ("platform/x86/siemens: simatic-ipc-batt: add support for module BX-59A")
+Reported-by: kernel test robot <lkp@intel.com>
+Closes: https://lore.kernel.org/oe-kbuild-all/202308010001.BGYCSQrl-lkp@intel.com/
+Reviewed-by: Ilpo Järvinen <ilpo.jarvinen@linux.intel.com>
+Signed-off-by: "xingtong.wu" <xingtong.wu@siemens.com>
+Link: https://lore.kernel.org/r/20430802173844.2483-1-xingtong_wu@163.com
+---
+ drivers/platform/x86/siemens/simatic-ipc-batt.c | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+
+diff --git a/drivers/platform/x86/siemens/simatic-ipc-batt.c b/drivers/platform/x86/siemens/simatic-ipc-batt.c
+index d66b9969234b..e6c12c52843c 100644
+--- a/drivers/platform/x86/siemens/simatic-ipc-batt.c
++++ b/drivers/platform/x86/siemens/simatic-ipc-batt.c
+@@ -194,7 +194,8 @@ int simatic_ipc_batt_probe(struct platform_device *pdev, struct gpiod_lookup_tab
+ 
+ 	if (table->table[2].key) {
+ 		flags = GPIOD_OUT_HIGH;
+-		if (priv.devmode == SIMATIC_IPC_DEVICE_BX_21A || SIMATIC_IPC_DEVICE_BX_59A)
++		if (priv.devmode == SIMATIC_IPC_DEVICE_BX_21A ||
++		    priv.devmode == SIMATIC_IPC_DEVICE_BX_59A)
+ 			flags = GPIOD_OUT_LOW;
+ 		priv.gpios[2] = devm_gpiod_get_index(dev, "CMOSBattery meter", 2, flags);
+ 		if (IS_ERR(priv.gpios[2])) {
+-- 
+2.25.1
+
