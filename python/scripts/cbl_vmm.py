@@ -261,10 +261,17 @@ class VirtualMachine:
         run_cmd([sudo, 'true'])
 
         base_virtiofsd_cmd = [sudo, virtiofsd]
-        virtiofsd_version_text = subprocess.run([*base_virtiofsd_cmd, '--version'],
-                                                capture_output=True,
-                                                check=True,
-                                                text=True).stdout
+        # If there is no '--version' option, we should be using the Rust
+        # implementation of virtiofsd after
+        # https://gitlab.com/virtio-fs/virtiofsd/-/commit/9491f3d61df7316ded91be93da276b63571b973c.
+        # Just set the version text to 'virtiofsd backend' to make the next block work.
+        try:
+            virtiofsd_version_text = subprocess.run([*base_virtiofsd_cmd, '--version'],
+                                                    capture_output=True,
+                                                    check=True,
+                                                    text=True).stdout
+        except subprocess.CalledProcessError:
+            virtiofsd_version_text = 'virtiofsd backend'
         group_name = grp.getgrgid(os.getgid()).gr_name
 
         # Rust implementation
