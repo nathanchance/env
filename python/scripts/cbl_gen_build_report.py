@@ -101,6 +101,9 @@ def generate_warnings(log_folder, src_folder):
         # remove interrupt handler functions from the noinstr section") in
         # 5.12, backport is too hairy, just ignore.
         r"WARNING: CPU: [0-9]+ PID: [0-9]+ at arch/powerpc/kernel/optprobes.c:[0-9]+ kretprobe_trampoline\+",
+        # Warning on boot when SRSO is not set, which is not really a problem
+        # for our simple QEMU boots.
+        'kernel not compiled with CPU_SRSO',
     ]
     ignore_re = re.compile('|'.join(ignore))
     warnings = {}
