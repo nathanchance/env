@@ -27,7 +27,7 @@ source=(
   20230731_ckoenig_leichtzumerken_drm_exec_use_unique_instead_of_local_label.patch
   20230809_aweber_kernel_backlight_lp855x_drop_ret_variable_in_brightness_change_function.patch
   20230809_nathan_asoc_sof_intel_initialize_chip_in_hda_sdw_check_wakeen_irq.patch
-  20230809_ndesaulniers_x86_srso_fix_build_breakage_for_ld_ld_lld.patch
+  cbe8ded48b939b9d55d2c5589ab56caa7b530709.patch
   v3_20430803_xingtong_wu_platform_x86_siemens_simatic_ipc_batt_fix_logical_error_for_bx_59a.patch
   v3_20430803_xingtong_wu_platform_x86_siemens_simatic_ipc_fix_logical_error_for_bx_59a.patch
 )
@@ -42,7 +42,7 @@ sha256sums=('SKIP'
             '2b86f98bbd75daf3e6350281c2c6f225d8cabce5386adcdd1ad0babdecc7a8ef'
             '0112abfe98bc568c9f4e0637b25c523dffb9058f18ff886c79f71c2a87933de4'
             '9836a5fc6961de920f2d514f755aadd4448d975618a86b1ac79fb1185c342974'
-            '238ed3aaa0eaae9e0c771b2a52967d8b021de3fd6d72661f76b21caabeb21550'
+            '2823756823d9460d010d228615ac92bf82c702a105b0fa517c562a54fb5bffc3'
             '94be5b43886db3948a0119c9ef462462c6d5560b8ea576b83d2333f8ea3fa0e6'
             '1fc1e1bd8ac18bab80affd344df877876d96187af798219dc4b7744d5946e7ef')
 
