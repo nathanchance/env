@@ -5,8 +5,8 @@ _localversion=-llvm
 pkgname=linux-mainline$_localversion
 ### _srctag=v6.5-rc5
 ### pkgver=${_srctag//-/.}
-_srccommit=cacc6e22932f373a91d7be55a9b992dc77f4c59b
-pkgver=v6.5.rc5.56.gcacc6e22932f
+_srccommit=9106536c1aa37bcf60202ad93bb8b94bcd29f3f0
+pkgver=v6.5.rc5.243.g9106536c1aa3
 pkgrel=1
 pkgdesc='Linux'
 ### url="https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/log/?h=$_srctag"
@@ -30,21 +30,23 @@ source=(
   https://github.com/pop-os/system76-io-dkms/raw/master/system76-io.c
   https://github.com/pop-os/system76-io-dkms/raw/master/system76-io_dev.c
   https://github.com/pop-os/system76-io-dkms/raw/master/system76-io_hwmon.c
+  20230811_seanjc_x86_retpoline_don_t_clobber_rflags_during_srso_safe_ret.patch
+  973ab2d61f33dc85212c486e624af348c4eeb5c9.patch
   aeedd3a82678d89627bdd020a28e0af35ff45552.patch
   cbe8ded48b939b9d55d2c5589ab56caa7b530709.patch
-  srso-lto-fix.patch
 )
 validpgpkeys=(
   'ABAF11C65A2970B130ABE3C479BE3E4300411886'  # Linus Torvalds
 )
 sha256sums=('SKIP'
-            '4d49a091fe0c6d4e4a79c4d78210c055160b5fdef396b26806f35ad479a46641'
+            'baa654be6b018881429bbc1058c0820042fd2439bf438d63c82d2f333375cd5e'
             'd569ee2fbd072a09e89196779ccc0dfd008d5a79a0cec5fa80cc7ed99a3027fa'
             '7276b7fb345f6a5156c594969a01e1ab63e864e0b3ed646bf5132b8301fa4975'
             '26b42e2a48cc4666ad6f85eb4d0fe87f30ea0097d6c1cff4f45e0e3330382916'
+            '5ec651b2fd1f49aa71b047bc1e480633f1da2bf5ae73ecf3028203c2519905e0'
+            'bf0d110b4bd58378db797c3bc200b9b03e5bdaae9dd08f272c68791b0e37fff3'
             'd5fe1870892599763aa35a2aef56c0f465c758ca6ab2cc3b2f2d4a662ff5c6bf'
-            'bb1fd762c25e91ad8244dfa0d11760b563814a0ab2a10b63bcf6b2618dd36c43'
-            'f787ccc35e9182235a33e30dc2fdb5cf3733c646f81e9f4999e9050062ce5d91')
+            '2823756823d9460d010d228615ac92bf82c702a105b0fa517c562a54fb5bffc3')
 
 # This obviously ties this PKGBUILD to my machine but that is kind of the point :)
 _kmake() {
