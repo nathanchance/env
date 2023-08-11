@@ -62,6 +62,9 @@ function cbl_lkt -d "Tests a Linux kernel with llvm-kernel-testing"
                 ##########################
                 # Arguments to 'cbl_lkt' #
                 ##########################
+            case --no-timeout
+                set no_timeout true
+
             case -s --system-binaries
                 set system_binaries true
 
@@ -207,6 +210,32 @@ function cbl_lkt -d "Tests a Linux kernel with llvm-kernel-testing"
         --linux-folder $linux_folder \
         --log-folder $log_folder \
         $build_py_args
+
+    switch $LOCATION
+        case aadp
+            set average_duration 6
+        case generic
+            if test (nproc) -ge 80
+                set average_duration 5
+            else if test (nproc) -ge 64
+                set average_duration 6
+            else if test (nproc) -ge 32
+                set average_duration 7
+            else if test (nproc) -ge 16
+                set average_duration 8
+            end
+        case honeycomb
+            set average_duration 4
+        case test-desktop-intel
+            set average_duration 8
+        case workstation
+            set average_duration 4
+    end
+    if set -q average_duration; and not set -q no_timeout
+        set -p lkt_cmd \
+            timeout (math 1.5 x $average_duration)h
+    end
+
     print_cmd $lkt_cmd
     $lkt_cmd
     set lkt_ret $status
@@ -215,7 +244,7 @@ function cbl_lkt -d "Tests a Linux kernel with llvm-kernel-testing"
         if test $lkt_ret -eq 130
             rm -fr $log_folder
         else
-            set msg "build.py failed in $linux_folder"
+            set msg "build.py failed in $linux_folder (ret: $lkt_ret)"
             print_error "$msg"
             tg_msg "$msg"
         end
