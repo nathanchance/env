@@ -1,21 +1,21 @@
-From 150c42407f87463c27a2459e06845965291d9973 Mon Sep 17 00:00:00 2001
+From 79cd2a11224eab86d6673fe8a11d2046ae9d2757 Mon Sep 17 00:00:00 2001
 From: Petr Pavlu <petr.pavlu@suse.com>
 Date: Tue, 11 Jul 2023 11:19:51 +0200
-Subject: [PATCH] x86/retpoline,kprobes: Fix position of thunk sections with
+Subject: x86/retpoline,kprobes: Fix position of thunk sections with
  CONFIG_LTO_CLANG
 
-Linker script arch/x86/kernel/vmlinux.lds.S matches the thunk sections
-".text.__x86.*" from arch/x86/lib/retpoline.S as follows:
+The linker script arch/x86/kernel/vmlinux.lds.S matches the thunk
+sections ".text.__x86.*" from arch/x86/lib/retpoline.S as follows:
 
-.text {
-  [...]
-  TEXT_TEXT
-  [...]
-  __indirect_thunk_start = .;
-  *(.text.__x86.*)
-  __indirect_thunk_end = .;
-  [...]
-}
+  .text {
+    [...]
+    TEXT_TEXT
+    [...]
+    __indirect_thunk_start = .;
+    *(.text.__x86.*)
+    __indirect_thunk_end = .;
+    [...]
+  }
 
 Macro TEXT_TEXT references TEXT_MAIN which normally expands to only
 ".text". However, with CONFIG_LTO_CLANG, TEXT_MAIN becomes
@@ -30,15 +30,17 @@ explicit section names which start with one of the standard prefixes,
 such as ".text" or ".data", and that need to be individually selected in
 the linker script.
 
+  [ nathan: Fix conflicts with SRSO and fold in fix issue brought up by
+    Andrew Cooper in post-review:
+    https://lore.kernel.org/20230803230323.1478869-1-andrew.cooper3@citrix.com ]
+
 Fixes: dc5723b02e52 ("kbuild: add support for Clang LTO")
 Signed-off-by: Petr Pavlu <petr.pavlu@suse.com>
 Signed-off-by: Peter Zijlstra (Intel) <peterz@infradead.org>
-Link: https://lore.kernel.org/r/20230711091952.27944-2-petr.pavlu@suse.com
-[nathan: Fix conflicts with SRSO and fold in fix issue brought up by Andrew
-         Cooper in post-review:
-         https://lore.kernel.org/20230803230323.1478869-1-andrew.cooper3@citrix.com/]
-Link: https://git.kernel.org/tip/973ab2d61f33dc85212c486e624af348c4eeb5c9
 Signed-off-by: Nathan Chancellor <nathan@kernel.org>
+Signed-off-by: Borislav Petkov (AMD) <bp@alien8.de>
+Link: https://lore.kernel.org/r/20230711091952.27944-2-petr.pavlu@suse.com
+Link: https://git.kernel.org/tip/79cd2a11224eab86d6673fe8a11d2046ae9d2757
 ---
  arch/x86/kernel/vmlinux.lds.S | 8 ++++----
  arch/x86/lib/retpoline.S      | 8 ++++----
@@ -46,7 +48,7 @@ Signed-off-by: Nathan Chancellor <nathan@kernel.org>
  3 files changed, 9 insertions(+), 9 deletions(-)
 
 diff --git a/arch/x86/kernel/vmlinux.lds.S b/arch/x86/kernel/vmlinux.lds.S
-index ef06211bae4c..dfb8783cb4c7 100644
+index ef06211bae4cc..dfb8783cb4c76 100644
 --- a/arch/x86/kernel/vmlinux.lds.S
 +++ b/arch/x86/kernel/vmlinux.lds.S
 @@ -134,15 +134,15 @@ SECTIONS
@@ -78,7 +80,7 @@ index ef06211bae4c..dfb8783cb4c7 100644
  		ALIGN_ENTRY_TEXT_END
  		*(.gnu.warning)
 diff --git a/arch/x86/lib/retpoline.S b/arch/x86/lib/retpoline.S
-index 2cff585f22f2..5c43684ec982 100644
+index 132cedbf9e571..8db74d811ce2e 100644
 --- a/arch/x86/lib/retpoline.S
 +++ b/arch/x86/lib/retpoline.S
 @@ -13,7 +13,7 @@
@@ -118,7 +120,7 @@ index 2cff585f22f2..5c43684ec982 100644
  /*
   * Safety details here pertain to the AMD Zen{1,2} microarchitecture:
 diff --git a/tools/objtool/check.c b/tools/objtool/check.c
-index 8936a05f0e5a..e2ee10ce7703 100644
+index 8936a05f0e5ac..e2ee10ce7703f 100644
 --- a/tools/objtool/check.c
 +++ b/tools/objtool/check.c
 @@ -389,7 +389,7 @@ static int decode_instructions(struct objtool_file *file)
@@ -131,5 +133,5 @@ index 8936a05f0e5a..e2ee10ce7703 100644
  
  		/*
 -- 
-2.41.0
+cgit 
 

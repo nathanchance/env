@@ -3,14 +3,11 @@
 
 _localversion=-llvm
 pkgname=linux-mainline$_localversion
-### _srctag=v6.5-rc5
-### pkgver=${_srctag//-/.}
-_srccommit=9106536c1aa37bcf60202ad93bb8b94bcd29f3f0
-pkgver=v6.5.rc5.243.g9106536c1aa3
+_srctag=v6.5-rc6
+pkgver=${_srctag//-/.}
 pkgrel=1
 pkgdesc='Linux'
-### url="https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/log/?h=$_srctag"
-url="https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/log/?h=$_srccommit"
+url="https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/log/?h=$_srctag"
 arch=(x86_64)
 license=(GPL2)
 makedepends=(
@@ -23,30 +20,27 @@ makedepends=(
   xz
 )
 options=('!strip')
-###   "$pkgname::git+https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git?signed#tag=$_srctag"
 source=(
-  "$pkgname::git+https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git#commit=$_srccommit"
+  "$pkgname::git+https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git?signed#tag=$_srctag"
   config
   https://github.com/pop-os/system76-io-dkms/raw/master/system76-io.c
   https://github.com/pop-os/system76-io-dkms/raw/master/system76-io_dev.c
   https://github.com/pop-os/system76-io-dkms/raw/master/system76-io_hwmon.c
-  20230811_seanjc_x86_retpoline_don_t_clobber_rflags_during_srso_safe_ret.patch
-  973ab2d61f33dc85212c486e624af348c4eeb5c9.patch
+  79cd2a11224eab86d6673fe8a11d2046ae9d2757.patch
   aeedd3a82678d89627bdd020a28e0af35ff45552.patch
-  cbe8ded48b939b9d55d2c5589ab56caa7b530709.patch
+  ba5ca5e5e6a1d55923e88b4a83da452166f5560e.patch
 )
 validpgpkeys=(
   'ABAF11C65A2970B130ABE3C479BE3E4300411886'  # Linus Torvalds
 )
 sha256sums=('SKIP'
-            'baa654be6b018881429bbc1058c0820042fd2439bf438d63c82d2f333375cd5e'
+            'f6fcfb7cd84005b3b63e079979547076d2fab69999a7672b174f25bdbdeea330'
             'd569ee2fbd072a09e89196779ccc0dfd008d5a79a0cec5fa80cc7ed99a3027fa'
             '7276b7fb345f6a5156c594969a01e1ab63e864e0b3ed646bf5132b8301fa4975'
             '26b42e2a48cc4666ad6f85eb4d0fe87f30ea0097d6c1cff4f45e0e3330382916'
-            '5ec651b2fd1f49aa71b047bc1e480633f1da2bf5ae73ecf3028203c2519905e0'
-            'bf0d110b4bd58378db797c3bc200b9b03e5bdaae9dd08f272c68791b0e37fff3'
+            '4b7447ecf672b058bbd1687edd23310070bf73538e6d3f5153ed527c9c6f0db9'
             'd5fe1870892599763aa35a2aef56c0f465c758ca6ab2cc3b2f2d4a662ff5c6bf'
-            '2823756823d9460d010d228615ac92bf82c702a105b0fa517c562a54fb5bffc3')
+            '22c57e287ed8e76a41a15d14e291811d78dd906a6d9450dba5450ef0e7004fe4')
 
 # This obviously ties this PKGBUILD to my machine but that is kind of the point :)
 _kmake() {
