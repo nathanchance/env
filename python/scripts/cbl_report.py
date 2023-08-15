@@ -4,6 +4,7 @@
 
 from argparse import ArgumentParser
 import datetime
+import json
 import os
 from pathlib import Path
 import shutil
@@ -120,6 +121,10 @@ def parse_parameters():
                                  help='Remove worktree')
     finalize_parser.set_defaults(func=finalize_report)
 
+    generate_parser = subparsers.add_parser('generate', help='Generate line items automatically')
+    generate_parser.add_argument('type', choices=['patch', 'pr'], help='Type of item to generate')
+    generate_parser.set_defaults(func=generate_item)
+
     new_parser = subparsers.add_parser(
         'new',
         help='Create a new branch, worktree, and report file for ClangBuiltLinux monthly report')
@@ -169,6 +174,43 @@ def generate_devices(devices):
     delim = ', '
     replace = ', and '
     return replace.join(delim.join(devices).rsplit(delim, 1))
+
+
+def generate_item(args):
+    item_type = args.type
+
+    if item_type == 'patch':
+        if not Path('Makefile').exists():
+            raise RuntimeError('Not in a kernel tree?')
+
+        proc = subprocess.run(['b4', 'prep', '--show-info'],
+                              capture_output=True,
+                              check=True,
+                              text=True)
+        info = dict(map(str.strip, item.split(':', 1)) for item in proc.stdout.splitlines())
+        commits = [key for key in info if key.startswith('commit-')]
+        series = [key for key in info if key.startswith('series-v')]
+
+        title = info[commits[0] if len(commits) == 1 else 'cover-subject']
+        links = {
+            item.rsplit('-', 1)[-1]: f"https://lore.kernel.org/{info[item].rsplit(' ', 1)[-1]}/"
+            for item in series
+        }
+        md_links = [f"[`{key}`]({links[key]})" for key in sorted(links)]
+
+        print(f"* `{title}` ({', '.join(md_links)})")
+
+    elif item_type == 'pr':
+        proc = subprocess.run(['gh', 'pr', 'view', '--json', 'title,url'],
+                              capture_output=True,
+                              check=True,
+                              text=True)
+        gh_json = json.loads(proc.stdout)
+
+        print(f"* [`{gh_json['title']}`]({gh_json['url']})")
+
+    else:
+        raise ValueError(f"Unhandled item type ('{item_type}')")
 
 
 def create_report_file(report_file, report_date):
