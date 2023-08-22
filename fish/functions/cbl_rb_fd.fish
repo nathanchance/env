@@ -16,6 +16,7 @@ function cbl_rb_fd -d "Rebase generic Fedora kernel on latest linux-next"
     for revert in $reverts
         git revert --mainline 1 --no-edit $revert; or return
     end
+    set -a b4_patches https://lore.kernel.org/all/20230822-rtw89-tas-clang-implicit-fallthrough-v1-1-5cb73f0fa976@kernel.org/ # wifi: rtw89: Fix clang -Wimplicit-fallthrough in rtw89_query_sar()
     for patch in $b4_patches
         b4 shazam -l -P _ -s $patch; or return
     end
