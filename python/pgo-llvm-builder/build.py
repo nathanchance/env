@@ -52,6 +52,7 @@ parser.add_argument('-i',
 parser.add_argument('-l',
                     '--llvm-folder',
                     help='Location of llvm-project source. Omit for vendored version')
+parser.add_argument('-s', '--skip-tests', action='store_true', help='Skip running LLVM/Clang tests')
 parser.add_argument('-t',
                     '--tc-build-folder',
                     help='Location of tc-build. Omit for vendored version')
@@ -146,12 +147,16 @@ static_mounts = [
     },
 ]
 
-check_targets = [
-    'clang',
-    'lld',
-    'llvm',
-    'llvm-unit',
-]
+if args.skip_tests:
+    check_args = []
+else:
+    check_args = [
+        '--check-targets',
+        'clang',
+        'lld',
+        'llvm',
+        'llvm-unit',
+    ]
 install_targets = [
     'clang',
     'clang-resource-headers',
@@ -176,7 +181,7 @@ projects = [
 build_llvm_py_cmd = [
     Path('/tc-build/build-llvm.py'),
     '--build-folder', '/build',
-    '--check-targets', *check_targets,
+    *check_args,
     '--install-folder', '/install',
     '--install-targets', *install_targets,
     '--llvm-folder', '/llvm',
