@@ -16,7 +16,6 @@ function cbl_rb_fd -d "Rebase generic Fedora kernel on latest linux-next"
     for revert in $reverts
         git revert --mainline 1 --no-edit $revert; or return
     end
-    set -a b4_patches https://lore.kernel.org/all/20230809114216.4078-1-aweber.kernel@gmail.com/ # backlight: lp855x: Drop ret variable in brightness change function
     for patch in $b4_patches
         b4 shazam -l -P _ -s $patch; or return
     end
