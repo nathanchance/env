@@ -33,6 +33,11 @@ function cbl_rb_pi -d "Rebase Raspberry Pi kernel on latest linux-next"
     for hash in $ln_commits
         git -C $CBL_BLD_P/linux-next fp -1 --stdout $hash | git am; or return
     end
+    # https://github.com/ClangBuiltLinux/linux/issues/1923
+    set -a am_patches $GITHUB_FOLDER/patches/linux-next/cbl-1923/00{0{1,4,5},13}-*.patch
+    for patch in $am_patches
+        git am -3 $patch; or return
+    end
 
     # Regenerate defconfigs
     for arch in arm arm64
