@@ -261,39 +261,28 @@ class VirtualMachine:
         run_cmd([sudo, 'true'])
 
         base_virtiofsd_cmd = [sudo, virtiofsd]
-        # If there is no '--version' option, we should be using the Rust
-        # implementation of virtiofsd after
-        # https://gitlab.com/virtio-fs/virtiofsd/-/commit/9491f3d61df7316ded91be93da276b63571b973c.
-        # Just set the version text to 'virtiofsd backend' to make the next block work.
-        try:
-            virtiofsd_version_text = subprocess.run([*base_virtiofsd_cmd, '--version'],
-                                                    capture_output=True,
-                                                    check=True,
-                                                    text=True).stdout
-        except subprocess.CalledProcessError:
-            virtiofsd_version_text = 'virtiofsd backend'
+        virtiofsd_version_text = subprocess.run([*base_virtiofsd_cmd, '--version'],
+                                                capture_output=True,
+                                                check=True,
+                                                text=True).stdout
         group_name = grp.getgrgid(os.getgid()).gr_name
 
-        # Rust implementation
-        if 'virtiofsd backend' in virtiofsd_version_text:
-            virtiofsd_args = [
-                '--cache', 'always',
-                '--shared-dir', self.shared_folder,
-                '--socket-group', group_name,
-                '--socket-path', self.vfsd_sock,
-            ]  # yapf: disable
         # C / QEMU / Reference implementation (deprecated)
-        elif 'virtiofsd version' in virtiofsd_version_text:
+        if 'virtiofsd version' in virtiofsd_version_text:
             virtiofsd_args = [
                 f"--socket-group={group_name}",
                 f"--socket-path={self.vfsd_sock}",
                 '-o', 'cache=always',
                 '-o', f"source={self.shared_folder}",
             ]  # yapf: disable
+        # Rust implementation
         else:
-            raise RuntimeError(
-                f"Could not determine virtiofsd implementation details from version string ('{virtiofsd_version_text}')?",
-            )
+            virtiofsd_args = [
+                '--cache', 'always',
+                '--shared-dir', self.shared_folder,
+                '--socket-group', group_name,
+                '--socket-path', self.vfsd_sock,
+            ]  # yapf: disable
 
         # Python recommends full paths with subprocess.Popen() calls
         virtiofsd_cmd = [*base_virtiofsd_cmd, *virtiofsd_args]
