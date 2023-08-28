@@ -3,7 +3,7 @@
 
 _localversion=-llvm
 pkgname=linux-mainline$_localversion
-_srctag=v6.5-rc7
+_srctag=v6.5
 pkgver=${_srctag//-/.}
 pkgrel=1
 pkgdesc='Linux'
@@ -27,16 +27,18 @@ source=(
   https://github.com/pop-os/system76-io-dkms/raw/master/system76-io_dev.c
   https://github.com/pop-os/system76-io-dkms/raw/master/system76-io_hwmon.c
   aeedd3a82678d89627bdd020a28e0af35ff45552.patch
+  cbl-1923.patch
 )
 validpgpkeys=(
   'ABAF11C65A2970B130ABE3C479BE3E4300411886'  # Linus Torvalds
 )
 sha256sums=('SKIP'
-            '8d097d3244379b02419723ed7dcda10f6fda44b30b7decc0005259f72a6e2d0d'
+            'c276f4a6f945acb8cafebff371161dac0491d3811d232bcb426ab323d6a4859b'
             'd569ee2fbd072a09e89196779ccc0dfd008d5a79a0cec5fa80cc7ed99a3027fa'
             '7276b7fb345f6a5156c594969a01e1ab63e864e0b3ed646bf5132b8301fa4975'
             '26b42e2a48cc4666ad6f85eb4d0fe87f30ea0097d6c1cff4f45e0e3330382916'
-            'd5fe1870892599763aa35a2aef56c0f465c758ca6ab2cc3b2f2d4a662ff5c6bf')
+            'd5fe1870892599763aa35a2aef56c0f465c758ca6ab2cc3b2f2d4a662ff5c6bf'
+            '03001219319598d4b597e50989441f7564b33fba789f03444ce5aaaaa67133b3')
 
 # This obviously ties this PKGBUILD to my machine but that is kind of the point :)
 _kmake() {
