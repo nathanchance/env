@@ -38,7 +38,7 @@ def print_cmd(command):
 
 
 def print_header(string):
-    border = ''.join(["=" for _ in range(0, len(string) + 6)])
+    border = ''.join(["=" for _ in range(len(string) + 6)])
     print_cyan(f"\n{border}\n== {string} ==\n{border}\n")
 
 
