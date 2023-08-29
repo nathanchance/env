@@ -104,6 +104,12 @@ def generate_warnings(log_folder, src_folder):
         # Warning on boot when SRSO is not set, which is not really a problem
         # for our simple QEMU boots.
         'kernel not compiled with CPU_SRSO',
+        # Warning when SRSO is missing some option, harmless for our quick and
+        # simple QEMU boots.
+        'See https://kernel.org/doc/html/latest/admin-guide/hw-vuln/srso.html for mitigation options.',
+        # Warning when CONFIG_NTFS3_64BIT_CLUSTER is enabled, which we do not
+        # care about at all.
+        'Activated 64 bits per cluster. Windows does not support this',
     ]
     ignore_re = re.compile('|'.join(ignore))
     warnings = {}
