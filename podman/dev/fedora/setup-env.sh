@@ -19,6 +19,11 @@ EOF
 function install_packages() {
     dnf update -y
 
+    # https://lwn.net/ml/fedora-devel/CAPtvTsZMBi98PbpwR5NydijsfLAhoQ0GO890jzN4FPd66f0gBw@mail.gmail.com/
+    if ! command -q dnf; then
+        dnf5 install -y dnf
+    fi
+
     dnf install -y \
         curl \
         dnf-plugins-core
