@@ -1,4 +1,4 @@
-FROM docker.io/fedora:38
+FROM docker.io/fedora:rawhide
 
 COPY distrobox-check.fish /
 COPY setup-env.sh /
