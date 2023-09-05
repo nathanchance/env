@@ -6,7 +6,7 @@ function get_latest_stable_llvm_version -d 'Get the latest stable version for an
     for arg in $argv
         switch $arg
             case 17
-                echo $arg.0.0-rc3
+                echo $arg.0.0-rc4
             case 15
                 echo $arg.0.7
             case 14 16
