@@ -47,7 +47,7 @@ index 3b283f3c6726..0e8d2ea57365 100644
  	*p = '\0';
  	return buf;
 diff --git a/drivers/net/ethernet/mellanox/mlx5/core/esw/bridge.c b/drivers/net/ethernet/mellanox/mlx5/core/esw/bridge.c
-index f4fe1daa4afd..833c0a701e81 100644
+index e36294b7ade2..78e863a71243 100644
 --- a/drivers/net/ethernet/mellanox/mlx5/core/esw/bridge.c
 +++ b/drivers/net/ethernet/mellanox/mlx5/core/esw/bridge.c
 @@ -1850,9 +1850,12 @@ int mlx5_esw_bridge_port_mdb_add(struct net_device *dev, u16 vport_num, u16 esw_
@@ -81,10 +81,10 @@ index c278f8893042..c09edb24b92e 100644
  		hwfn->slowpath_wq = alloc_workqueue(name, 0, 0);
  		if (!hwfn->slowpath_wq) {
 diff --git a/drivers/net/ethernet/sfc/tc.c b/drivers/net/ethernet/sfc/tc.c
-index fe268b6c1cac..c19778ff6d54 100644
+index 047322b04d4f..a1d55380b2af 100644
 --- a/drivers/net/ethernet/sfc/tc.c
 +++ b/drivers/net/ethernet/sfc/tc.c
-@@ -518,17 +518,23 @@ static int efx_tc_flower_record_encap_match(struct efx_nic *efx,
+@@ -624,17 +624,23 @@ static int efx_tc_flower_record_encap_match(struct efx_nic *efx,
  				return -EEXIST;
  			}
  			if (child_ip_tos_mask != old->child_ip_tos_mask) {
@@ -108,6 +108,58 @@ index fe268b6c1cac..c19778ff6d54 100644
  				return -EEXIST;
  			}
  			break;
+@@ -1210,9 +1216,12 @@ static int efx_tc_mangle(struct efx_nic *efx, struct efx_tc_action_set *act,
+ 
+ 			/* check that pedit applies to ttl only */
+ 			if (fa->mangle.mask != ~EFX_TC_HDR_TYPE_TTL_MASK) {
++				__diag_push();
++				__diag_ignore(clang, 18, "-Wfortify-source", "https://github.com/ClangBuiltLinux/linux/issues/1923");
+ 				NL_SET_ERR_MSG_FMT_MOD(extack,
+ 						       "Unsupported: mask (%#x) out of range, only support mangle action on ipv4.ttl",
+ 						       fa->mangle.mask);
++				__diag_pop();
+ 				return -EOPNOTSUPP;
+ 			}
+ 
+@@ -1220,9 +1229,12 @@ static int efx_tc_mangle(struct efx_nic *efx, struct efx_tc_action_set *act,
+ 			 * exact match on the ttl field
+ 			 */
+ 			if (match->mask.ip_ttl != U8_MAX) {
++				__diag_push();
++				__diag_ignore(clang, 18, "-Wfortify-source", "https://github.com/ClangBuiltLinux/linux/issues/1923");
+ 				NL_SET_ERR_MSG_FMT_MOD(extack,
+ 						       "Unsupported: only support mangle ipv4.ttl when we have an exact match on ttl, mask used for match (%#x)",
+ 						       match->mask.ip_ttl);
++				__diag_pop();
+ 				return -EOPNOTSUPP;
+ 			}
+ 
+@@ -1268,9 +1280,12 @@ static int efx_tc_mangle(struct efx_nic *efx, struct efx_tc_action_set *act,
+ 
+ 			/* check that pedit applies to ttl only */
+ 			if (fa->mangle.mask != EFX_TC_HDR_TYPE_HLIMIT_MASK) {
++				__diag_push();
++				__diag_ignore(clang, 18, "-Wfortify-source", "https://github.com/ClangBuiltLinux/linux/issues/1923");
+ 				NL_SET_ERR_MSG_FMT_MOD(extack,
+ 						       "Unsupported: mask (%#x) out of range, only support mangle action on ipv6.hop_limit",
+ 						       fa->mangle.mask);
++				__diag_pop();
+ 
+ 				return -EOPNOTSUPP;
+ 			}
+@@ -1279,9 +1294,12 @@ static int efx_tc_mangle(struct efx_nic *efx, struct efx_tc_action_set *act,
+ 			 * exact match on the ttl field
+ 			 */
+ 			if (match->mask.ip_ttl != U8_MAX) {
++				__diag_push();
++				__diag_ignore(clang, 18, "-Wfortify-source", "https://github.com/ClangBuiltLinux/linux/issues/1923");
+ 				NL_SET_ERR_MSG_FMT_MOD(extack,
+ 						       "Unsupported: only support mangle ipv6.hop_limit when we have an exact match on ttl, mask used for match (%#x)",
+ 						       match->mask.ip_ttl);
++				__diag_pop();
+ 				return -EOPNOTSUPP;
+ 			}
+ 
 diff --git a/drivers/platform/surface/surface3_power.c b/drivers/platform/surface/surface3_power.c
 index 4c0f92562a79..ed370fc230d7 100644
 --- a/drivers/platform/surface/surface3_power.c

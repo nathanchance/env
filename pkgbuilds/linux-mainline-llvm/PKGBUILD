@@ -3,11 +3,14 @@
 
 _localversion=-llvm
 pkgname=linux-mainline$_localversion
-_srctag=v6.5
-pkgver=${_srctag//-/.}
+### _srctag=v6.5
+### pkgver=${_srctag//-/.}
+_srccommit=3f86ed6ec0b390c033eae7f9c487a3fea268e027
+pkgver=v6.6.rc0.11704.g3f86ed6ec0b3
 pkgrel=1
 pkgdesc='Linux'
-url="https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/log/?h=$_srctag"
+### url="https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/log/?h=$_srctag"
+url="https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/log/?h=$_srccommit"
 arch=(x86_64)
 license=(GPL2)
 makedepends=(
@@ -20,25 +23,24 @@ makedepends=(
   xz
 )
 options=('!strip')
+###  "$pkgname::git+https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git?signed#tag=$_srctag"
 source=(
-  "$pkgname::git+https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git?signed#tag=$_srctag"
+  "$pkgname::git+https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git?commit=$_srccommit"
   config
   https://github.com/pop-os/system76-io-dkms/raw/master/system76-io.c
   https://github.com/pop-os/system76-io-dkms/raw/master/system76-io_dev.c
   https://github.com/pop-os/system76-io-dkms/raw/master/system76-io_hwmon.c
-  aeedd3a82678d89627bdd020a28e0af35ff45552.patch
   cbl-1923.patch
 )
 validpgpkeys=(
   'ABAF11C65A2970B130ABE3C479BE3E4300411886'  # Linus Torvalds
 )
 sha256sums=('SKIP'
-            'c276f4a6f945acb8cafebff371161dac0491d3811d232bcb426ab323d6a4859b'
+            'ee395d6b27d40150e2178ae60fd53bd867da50100a19d5cd5ef5db3cba6c305a'
             'd569ee2fbd072a09e89196779ccc0dfd008d5a79a0cec5fa80cc7ed99a3027fa'
             '7276b7fb345f6a5156c594969a01e1ab63e864e0b3ed646bf5132b8301fa4975'
             '26b42e2a48cc4666ad6f85eb4d0fe87f30ea0097d6c1cff4f45e0e3330382916'
-            'd5fe1870892599763aa35a2aef56c0f465c758ca6ab2cc3b2f2d4a662ff5c6bf'
-            '03001219319598d4b597e50989441f7564b33fba789f03444ce5aaaaa67133b3')
+            'a17945f92aa6a79b2c3e3467a59f880d77785bf3fa9d8c18067b285e4d08592c')
 
 # This obviously ties this PKGBUILD to my machine but that is kind of the point :)
 _kmake() {
