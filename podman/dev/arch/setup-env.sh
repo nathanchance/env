@@ -71,7 +71,7 @@ function install_packages() {
         # Nicer versions of certain GNU utilities
         bat{,-extras}
         diskus
-        exa
+        eza
         fd
         ripgrep
 

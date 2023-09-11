@@ -238,7 +238,7 @@ def pacman_install_packages():
         'diskus',
         'duf',
         'dust',
-        'exa',
+        'eza',
         'fd',
         'ripgrep',
 
