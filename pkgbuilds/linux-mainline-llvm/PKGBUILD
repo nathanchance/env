@@ -3,14 +3,11 @@
 
 _localversion=-llvm
 pkgname=linux-mainline$_localversion
-### _srctag=v6.5
-### pkgver=${_srctag//-/.}
-_srccommit=3f86ed6ec0b390c033eae7f9c487a3fea268e027
-pkgver=v6.6.rc0.11704.g3f86ed6ec0b3
+_srctag=v6.6-rc1
+pkgver=${_srctag//-/.}
 pkgrel=1
 pkgdesc='Linux'
-### url="https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/log/?h=$_srctag"
-url="https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/log/?h=$_srccommit"
+url="https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/log/?h=$_srctag"
 arch=(x86_64)
 license=(GPL2)
 makedepends=(
@@ -23,9 +20,8 @@ makedepends=(
   xz
 )
 options=('!strip')
-###  "$pkgname::git+https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git?signed#tag=$_srctag"
 source=(
-  "$pkgname::git+https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git?commit=$_srccommit"
+ "$pkgname::git+https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git?signed#tag=$_srctag"
   config
   https://github.com/pop-os/system76-io-dkms/raw/master/system76-io.c
   https://github.com/pop-os/system76-io-dkms/raw/master/system76-io_dev.c
@@ -36,7 +32,7 @@ validpgpkeys=(
   'ABAF11C65A2970B130ABE3C479BE3E4300411886'  # Linus Torvalds
 )
 sha256sums=('SKIP'
-            'ee395d6b27d40150e2178ae60fd53bd867da50100a19d5cd5ef5db3cba6c305a'
+            '2f9664289214424d7c8c3cef81f04a42377df452b9bf16f7563682af3f83ea99'
             'd569ee2fbd072a09e89196779ccc0dfd008d5a79a0cec5fa80cc7ed99a3027fa'
             '7276b7fb345f6a5156c594969a01e1ab63e864e0b3ed646bf5132b8301fa4975'
             '26b42e2a48cc4666ad6f85eb4d0fe87f30ea0097d6c1cff4f45e0e3330382916'
@@ -124,7 +120,7 @@ package() {
     DEPMOD=/doesnt/exist modules_install  # Suppress depmod
 
   # remove build and source links
-  rm "$modulesdir"/{source,build}
+  rm -f "$modulesdir"/{source,build}
 }
 
 # vim:set ts=8 sts=2 sw=2 et:
