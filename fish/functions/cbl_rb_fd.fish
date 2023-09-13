@@ -16,6 +16,8 @@ function cbl_rb_fd -d "Rebase generic Fedora kernel on latest linux-next"
     for revert in $reverts
         git revert --mainline 1 --no-edit $revert; or return
     end
+    set -a b4_patches https://lore.kernel.org/all/20230913-ctime-v1-1-c6bc509cbc27@kernel.org/ # overlayfs: set ctime when setting mtime and atime
+    set -a b4_patches https://lore.kernel.org/all/20230913-fix-wuninitialized-dm_helpers_dp_mst_send_payload_allocation-v1-1-2d1b0a3ef16c@kernel.org/ # drm/amd/display: Fix -Wuninitialized in dm_helpers_dp_mst_send_payload_allocation()
     for patch in $b4_patches
         b4 shazam -l -P _ -s $patch; or return
     end

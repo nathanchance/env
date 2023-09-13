@@ -1,0 +1,67 @@
+From git@z Thu Jan  1 00:00:00 1970
+Subject: [PATCH] drm/amd/display: Fix -Wuninitialized in
+ dm_helpers_dp_mst_send_payload_allocation()
+From: Nathan Chancellor <nathan@kernel.org>
+Date: Wed, 13 Sep 2023 09:10:36 -0700
+Message-Id: <20230913-fix-wuninitialized-dm_helpers_dp_mst_send_payload_allocation-v1-1-2d1b0a3ef16c@kernel.org>
+MIME-Version: 1.0
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 7bit
+
+When building with clang, there is a warning (or error when
+CONFIG_WERROR is set):
+
+  drivers/gpu/drm/amd/amdgpu/../display/amdgpu_dm/amdgpu_dm_helpers.c:368:21: error: variable 'old_payload' is uninitialized when used here [-Werror,-Wuninitialized]
+    368 |                                                  new_payload, old_payload);
+        |                                                               ^~~~~~~~~~~
+  drivers/gpu/drm/amd/amdgpu/../display/amdgpu_dm/amdgpu_dm_helpers.c:344:61: note: initialize the variable 'old_payload' to silence this warning
+    344 |         struct drm_dp_mst_atomic_payload *new_payload, *old_payload;
+        |                                                                    ^
+        |                                                                     = NULL
+  1 error generated.
+
+This variable is not required outside of this function so allocate
+old_payload on the stack and pass it by reference to
+dm_helpers_construct_old_payload(), resolving the warning.
+
+Closes: https://github.com/ClangBuiltLinux/linux/issues/1931
+Fixes: 5aa1dfcdf0a4 ("drm/mst: Refactor the flow for payload allocation/removement")
+Link: https://lore.kernel.org/r/20230913-fix-wuninitialized-dm_helpers_dp_mst_send_payload_allocation-v1-1-2d1b0a3ef16c@kernel.org
+Signed-off-by: Nathan Chancellor <nathan@kernel.org>
+---
+ drivers/gpu/drm/amd/display/amdgpu_dm/amdgpu_dm_helpers.c | 6 +++---
+ 1 file changed, 3 insertions(+), 3 deletions(-)
+
+diff --git a/drivers/gpu/drm/amd/display/amdgpu_dm/amdgpu_dm_helpers.c b/drivers/gpu/drm/amd/display/amdgpu_dm/amdgpu_dm_helpers.c
+index 9ad509279b0a..c4c35f6844f4 100644
+--- a/drivers/gpu/drm/amd/display/amdgpu_dm/amdgpu_dm_helpers.c
++++ b/drivers/gpu/drm/amd/display/amdgpu_dm/amdgpu_dm_helpers.c
+@@ -341,7 +341,7 @@ bool dm_helpers_dp_mst_send_payload_allocation(
+ 	struct amdgpu_dm_connector *aconnector;
+ 	struct drm_dp_mst_topology_state *mst_state;
+ 	struct drm_dp_mst_topology_mgr *mst_mgr;
+-	struct drm_dp_mst_atomic_payload *new_payload, *old_payload;
++	struct drm_dp_mst_atomic_payload *new_payload, old_payload;
+ 	enum mst_progress_status set_flag = MST_ALLOCATE_NEW_PAYLOAD;
+ 	enum mst_progress_status clr_flag = MST_CLEAR_ALLOCATED_PAYLOAD;
+ 	int ret = 0;
+@@ -365,8 +365,8 @@ bool dm_helpers_dp_mst_send_payload_allocation(
+ 		ret = drm_dp_add_payload_part2(mst_mgr, mst_state->base.state, new_payload);
+ 	} else {
+ 		dm_helpers_construct_old_payload(stream->link, mst_state->pbn_div,
+-						 new_payload, old_payload);
+-		drm_dp_remove_payload_part2(mst_mgr, mst_state, old_payload, new_payload);
++						 new_payload, &old_payload);
++		drm_dp_remove_payload_part2(mst_mgr, mst_state, &old_payload, new_payload);
+ 	}
+ 
+ 	if (ret) {
+
+---
+base-commit: 8569c31545385195bdb0c021124e68336e91c693
+change-id: 20230913-fix-wuninitialized-dm_helpers_dp_mst_send_payload_allocation-c37b33aaad18
+
+Best regards,
+-- 
+Nathan Chancellor <nathan@kernel.org>
+
