@@ -25,7 +25,6 @@ source=(
   config
   20230913_jlayton_overlayfs_set_ctime_when_setting_mtime_and_atime.patch
   20230913_nathan_drm_amd_display_fix_wuninitialized_in_dm_helpers_dp_mst_send_payload_allocation.patch
-  cbl-1923.patch
 )
 
 validpgpkeys=(
@@ -35,8 +34,7 @@ validpgpkeys=(
 sha256sums=('SKIP'
             '626dd5e0d4929cf351bd816c92413bb5a1aecd957cd05fb2c052c90de7da78bf'
             '476042c1efbe3711cdb7095f8928c5f50b844ebc46c229e06b590e4cdb722f33'
-            '887b9a7c68382bf7461c11297e4b6010b27b2d3aa7e41d2a96b50e2b3361b2f4'
-            'a17945f92aa6a79b2c3e3467a59f880d77785bf3fa9d8c18067b285e4d08592c')
+            '887b9a7c68382bf7461c11297e4b6010b27b2d3aa7e41d2a96b50e2b3361b2f4')
 
 # This obviously ties this PKGBUILD to my machine but that is kind of the point :)
 _kmake() {
