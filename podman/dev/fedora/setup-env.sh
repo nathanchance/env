@@ -20,7 +20,7 @@ function install_packages() {
     dnf update -y
 
     # https://lwn.net/ml/fedora-devel/CAPtvTsZMBi98PbpwR5NydijsfLAhoQ0GO890jzN4FPd66f0gBw@mail.gmail.com/
-    if ! command -q dnf; then
+    if ! command dnf &>/dev/null; then
         dnf5 install -y dnf
     fi
 
