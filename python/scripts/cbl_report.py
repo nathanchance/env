@@ -24,14 +24,34 @@ def get_current_datetime(tz=None):
     return datetime.datetime.now(tz=tz)
 
 
-def get_next_datetime():
+def get_prev_or_next_datetime(val):
+    if val == 'prev':
+        pos = -1
+    elif val == 'next':
+        pos = 1
+    else:
+        raise RuntimeError(f"Invalid value in get_prev_or_next_datetime(): '{val}'")
+
     current = get_current_datetime()
-    month = current.month + 1
+    month = current.month + pos
     year = current.year
+
     if month > 12:
         month -= 12
         year += 1
+    elif month < 1:
+        month += 12
+        year -= 1
+
     return datetime.datetime.strptime(f"{month} {year}", '%m %Y')
+
+
+def get_next_datetime():
+    return get_prev_or_next_datetime('next')
+
+
+def get_prev_datetime():
+    return get_prev_or_next_datetime('prev')
 
 
 def get_month_year(date):
@@ -111,6 +131,10 @@ def parse_parameters():
                                  '--push',
                                  action='store_true',
                                  help='Push main branch after merge')
+    finalize_parser.add_argument('-P',
+                                 '--prev-month',
+                                 action='store_true',
+                                 help='Target previous month as opposed to current month')
     finalize_parser.add_argument('-r',
                                  '--rebase',
                                  action='store_true',
@@ -157,6 +181,10 @@ def parse_parameters():
     update_parser.add_argument('-c', '--commit', help='Hash of commit to "fix up"', type=str)
     update_parser.add_argument('-e', '--edit', action='store_true', help='Edit report file')
     update_parser.add_argument('-p', '--push', action='store_true', help='Push update after commit')
+    update_parser.add_argument('-P',
+                               '--prev-month',
+                               action='store_true',
+                               help='Target previous month as opposed to current month')
     update_parser.set_defaults(func=update_report)
 
     return parser.parse_args()
@@ -377,8 +405,11 @@ def finalize_report(args):
         git(worktree, ['rebase', '-i', '--autosquash', 'origin/main'],
             env={'GIT_SEQUENCE_EDITOR': shutil.which('true')})
 
+    # Get branch based on user's request
+    date = get_prev_datetime() if args.prev_month else get_current_datetime()
+
     # Merge branch into main
-    branch = get_report_branch(get_current_datetime())
+    branch = get_report_branch(date)
     if args.merge or args.all:
         git(repo, ['merge', branch])
 
@@ -459,7 +490,10 @@ def update_report(args):
     if not (worktree := get_report_worktree()).exists():
         raise RuntimeError(f"{worktree} does not exist when updating?")
 
-    if not (report := get_report_path(get_current_datetime())).exists():
+    # Get branch based on user's request
+    date = get_prev_datetime() if args.prev_month else get_current_datetime()
+
+    if not (report := get_report_path(date)).exists():
         raise RuntimeError(f"{report} does not exist when updating?")
 
     if args.edit or args.all:
