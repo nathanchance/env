@@ -16,7 +16,8 @@ function cbl_rb_fd -d "Rebase generic Fedora kernel on latest linux-next"
     for revert in $reverts
         git revert --mainline 1 --no-edit $revert; or return
     end
-    set -a b4_patches https://lore.kernel.org/all/20230913-ctime-v1-1-c6bc509cbc27@kernel.org/ # overlayfs: set ctime when setting mtime and atime
+    set -a b4_patches https://lore.kernel.org/all/20230920153819.2069869-1-andriy.shevchenko@linux.intel.com/ # device property: Replace custom implementation of COUNT_ARGS()
+    set -a b4_patches https://lore.kernel.org/all/20231002-vfio-cdx-logical-not-parentheses-v1-1-a8846c7adfb6@kernel.org/ # vfio/cdx: Add parentheses between bitwise AND expression and logical NOT
     for patch in $b4_patches
         b4 shazam -l -P _ -s $patch; or return
     end
@@ -26,8 +27,6 @@ function cbl_rb_fd -d "Rebase generic Fedora kernel on latest linux-next"
     for hash in $ln_commits
         git -C $CBL_BLD_P/linux-next fp -1 --stdout $hash | git am; or return
     end
-    # https://github.com/ClangBuiltLinux/linux/issues/1923
-    set -a am_patches $GITHUB_FOLDER/patches/linux-next/cbl-1923/00{0{1,3,4,5,6},1{0,1}}-*.patch
     for patch in $am_patches
         git am -3 $patch; or return
     end
