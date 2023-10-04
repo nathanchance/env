@@ -17,7 +17,6 @@ function cbl_rb_fd -d "Rebase generic Fedora kernel on latest linux-next"
         git revert --mainline 1 --no-edit $revert; or return
     end
     set -a b4_patches https://lore.kernel.org/all/20230920153819.2069869-1-andriy.shevchenko@linux.intel.com/ # device property: Replace custom implementation of COUNT_ARGS()
-    set -a b4_patches https://lore.kernel.org/all/20231002-vfio-cdx-logical-not-parentheses-v1-1-a8846c7adfb6@kernel.org/ # vfio/cdx: Add parentheses between bitwise AND expression and logical NOT
     for patch in $b4_patches
         b4 shazam -l -P _ -s $patch; or return
     end

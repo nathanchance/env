@@ -2,7 +2,7 @@
 # Automatically generated file; DO NOT EDIT.
 # Linux/x86 6.6.0-rc4 Kernel Configuration
 #
-CONFIG_CC_VERSION_TEXT="ClangBuiltLinux clang version 18.0.0 (https://github.com/llvm/llvm-project 57c639deb49c6cfe659e6551d15bef9151411a18)"
+CONFIG_CC_VERSION_TEXT="ClangBuiltLinux clang version 18.0.0 (https://github.com/llvm/llvm-project 1cfaa863bc36d25625114b432e2ddf35d2302452)"
 CONFIG_GCC_VERSION=0
 CONFIG_CC_IS_CLANG=y
 CONFIG_CLANG_VERSION=180000
