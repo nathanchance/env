@@ -24,6 +24,7 @@ function cbl_rb_pi -d "Rebase Raspberry Pi kernel on latest linux-next"
     for revert in $reverts
         git revert --mainline 1 --no-edit $revert; or return
     end
+    set -a b4_patches https://lore.kernel.org/all/20231005-opp-of-wunsequenced-v1-1-778815980a8d@kernel.org/ # OPP: Fix -Wunsequenced in _of_add_opp_table_v1()
     for patch in $b4_patches
         b4 shazam -l -P _ -s $patch; or return
     end
