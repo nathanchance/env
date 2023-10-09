@@ -128,8 +128,6 @@ function cbl_bld_tot_tcs -d "Build LLVM and binutils from source for kernel deve
     end
 
     # Add patches to revert here
-    # https://github.com/llvm/llvm-project/pull/67432
-    set -a reverts https://github.com/llvm/llvm-project/commit/a9d0ab2ee572f179f80483f3ebbbcdd03c3b4481 # [AArch64] Enable "sink-and-fold" in MachineSink by default (#67432)
     for revert in $reverts
         set -l revert (basename $revert)
         if not git -C $llvm_project rv -n $revert
@@ -138,10 +136,6 @@ function cbl_bld_tot_tcs -d "Build LLVM and binutils from source for kernel deve
             tg_msg "$message"
             return 1
         end
-    end
-    # Workaround change that was added after the change above
-    if test -f $llvm_project/llvm/test/CodeGen/AArch64/machine-sink-cache-invalidation.ll
-        sed -i 's;-mtriple=aarch64 -global-isel;-mtriple=aarch64 -global-isel -aarch64-enable-sink-fold=true;g' $llvm_project/llvm/test/CodeGen/AArch64/machine-sink-cache-invalidation.ll
     end
 
     # Add in-review patches here
