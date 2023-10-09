@@ -4,7 +4,7 @@
 
 function ls -d "Use exa instead of ls if it is available" -w exa
     if status is-interactive
-        exa $argv
+        eza $argv
     else
         command ls $argv
     end

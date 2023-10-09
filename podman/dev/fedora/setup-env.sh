@@ -148,7 +148,7 @@ EOF
         glibc-langpack-en
 
         # nicer GNU utilities
-        exa
+        eza
         ripgrep
 
         # package building

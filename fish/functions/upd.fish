@@ -330,6 +330,16 @@ function upd -d "Runs the update command for the current distro or downloads/upd
                             $install -Dvm644 completions/exa.fish $completions/exa.fish
                     end
 
+                case eza
+                    set repo eza-community/eza
+                    set ver (glr $repo)
+                    set url https://github.com/$repo/releases/download/$ver/eza_$rust_triple.zip
+
+                    crl -O $url; or return
+                    unzip (basename $url); or return
+
+                    $install -Dvm755 ./eza $binary
+
                 case fzf
                     switch $arch
                         case arm
