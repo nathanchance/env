@@ -42,15 +42,21 @@ def pi_setup(user_name):
     subprocess.run(['raspi-config', '--expand-rootfs'], check=True)
     subprocess.run(['raspi-config', 'nonint', 'do_serial', '0'], check=True)
 
+    ip_addr = f"192.168.4.{205 if platform.machine() == 'aarch64' else 199}"
     dhcpcd_conf, dhcpcd_conf_txt = lib.utils.path_and_text('/etc/dhcpcd.conf')
-    if not re.search(r'^interface eth0\nstatic ip_address=192\.168', dhcpcd_conf_txt, flags=re.M):
-        dhcpcd_conf_txt += (
-            '\n'
-            'interface eth0\n'
-            f"static ip_address=192.168.4.{205 if platform.machine() == 'aarch64' else 199}/24\n"
-            'static routers=192.168.4.1\n'
-            'static domain_name_servers=8.8.8.8 8.8.4.4 1.1.1.1 192.168.0.1\n')
-        dhcpcd_conf.write_text(dhcpcd_conf_txt, encoding='utf-8')
+    # Bullseye and older use dhcpcd
+    if dhcpcd_conf_txt:
+        if not re.search(
+                r'^interface eth0\nstatic ip_address=192\.168', dhcpcd_conf_txt, flags=re.M):
+            dhcpcd_conf_txt += ('\n'
+                                'interface eth0\n'
+                                f"static ip_address={ip_addr}/24\n"
+                                'static routers=192.168.4.1\n'
+                                'static domain_name_servers=8.8.8.8 8.8.4.4 1.1.1.1 192.168.0.1\n')
+            dhcpcd_conf.write_text(dhcpcd_conf_txt, encoding='utf-8')
+    # Bookworm and newer use NetworkManager
+    else:
+        lib.setup.setup_static_ip(ip_addr)
 
     ssd_partition = Path('/dev/sda1')
     if ssd_partition.is_block_device():
