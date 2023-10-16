@@ -24,9 +24,11 @@ function cbl_rb_pi -d "Rebase Raspberry Pi kernel on latest linux-next"
     for revert in $reverts
         git revert --mainline 1 --no-edit $revert; or return
     end
+    set -a b4_patches https://lore.kernel.org/all/20231012-st_remoteproc-fix-sometimes-uninit-v1-1-f64d0f2d5b37@kernel.org/ # remoteproc: st: Fix sometimes uninitialized ret in st_rproc_probe()
     for patch in $b4_patches
         b4 shazam -l -P _ -s $patch; or return
     end
+    set -a crl_patches https://lore.kernel.org/all/c9eb4cc6-7db4-4c2b-838d-43a0b319a4f0@lucifer.local/raw # fixup for "mm: perform the mapping_map_writable() check after call_mmap()"
     for patch in $crl_patches
         crl $patch | git am -3; or return
     end

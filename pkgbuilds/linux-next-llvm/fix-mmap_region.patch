@@ -1,0 +1,36 @@
+From 7feea6faada5b10a872c24755cc630220cba619a Mon Sep 17 00:00:00 2001
+From: Lorenzo Stoakes <lstoakes@gmail.com>
+Date: Mon, 16 Oct 2023 17:17:13 +0100
+Subject: [PATCH] mm: perform the mapping_map_writable() check after
+ call_mmap()
+
+Do not set writable_file_mapping in an instance where it is not appropriate
+to do so.
+
+Signed-off-by: Lorenzo Stoakes <lstoakes@gmail.com>
+---
+Link: https://lore.kernel.org/c9eb4cc6-7db4-4c2b-838d-43a0b319a4f0@lucifer.local/
+---
+ mm/mmap.c | 4 +---
+ 1 file changed, 1 insertion(+), 3 deletions(-)
+
+diff --git a/mm/mmap.c b/mm/mmap.c
+index 7f45a08e7973..8b57e42fd980 100644
+--- a/mm/mmap.c
++++ b/mm/mmap.c
+@@ -2923,10 +2923,8 @@ unsigned long mmap_region(struct file *file, unsigned long addr,
+ 	mm->map_count++;
+ 	if (vma->vm_file) {
+ 		i_mmap_lock_write(vma->vm_file->f_mapping);
+-		if (vma_is_shared_maywrite(vma)) {
++		if (vma_is_shared_maywrite(vma))
+ 			mapping_allow_writable(vma->vm_file->f_mapping);
+-			writable_file_mapping = true;
+-		}
+ 
+ 		flush_dcache_mmap_lock(vma->vm_file->f_mapping);
+ 		vma_interval_tree_insert(vma, &vma->vm_file->f_mapping->i_mmap);
+-- 
+2.42.0
+
+
