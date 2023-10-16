@@ -191,8 +191,8 @@ def download_items(targets, network_folder):
 
         elif target == 'rpios':
             rpi_arches = ['armhf', 'arm64']
-            rpi_date = '2023-05-03/2023-05-03'
-            deb_ver = 'bullseye'
+            rpi_date = '2023-10-10/2023-10-10'
+            deb_ver = 'bookworm'
 
             for rpi_arch in rpi_arches:
                 base_rpi_url = f"https://downloads.raspberrypi.org/raspios_lite_{rpi_arch}/images/raspios_lite_{rpi_arch}-{rpi_date}-raspios-{deb_ver}-{rpi_arch}-lite.img.xz"
