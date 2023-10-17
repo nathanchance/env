@@ -114,9 +114,12 @@ function install_packages() {
         lsof
         pinentry
         time
+        tree
         tzdata
         vte-common
         wget
+        xorg-xauth
+        zip
 
         # email
         lei

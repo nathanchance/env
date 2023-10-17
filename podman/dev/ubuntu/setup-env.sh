@@ -57,14 +57,18 @@ function install_packages() {
         bc
         curl
         diffutils
+        iputils
         less
         libvte-*-common
         lsof
         pinentry-curses
         sudo
         time
+        tree
         tzdata
         wget
+        xauth
+        zip
 
         # env
         ca-certificates

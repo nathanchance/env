@@ -43,6 +43,8 @@ function install_packages() {
         curl
         diffutils
         findutils
+        hostname
+        iputils
         less
         libvte-2*
         lsof
@@ -51,8 +53,11 @@ function install_packages() {
         sudo
         time
         timezone
-        util-linux
+        tree
+        util-linux{,-systemd}
         wget
+        xauth
+        zip
 
         # email
         cyrus-sasl-plain

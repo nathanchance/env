@@ -5,19 +5,37 @@
 # Keep this in sync with distrobox-init
 set distrobox_dependencies \
     bc \
+    bzip2 \
+    chpasswd \
     curl \
     diff \
     find \
+    findmnt \
     fish \
+    gpg \
+    hostname \
     less \
     lsof \
+    man \
     mount \
     passwd \
+    pigz \
     pinentry \
+    ping \
+    ps \
+    rsync \
+    script \
+    ssh \
     sudo \
     time \
+    tree \
+    umount \
+    unzip \
     useradd \
-    wget
+    wc \
+    wget \
+    xauth \
+    zip
 
 set ret 0
 for distrobox_dependency in $distrobox_dependencies

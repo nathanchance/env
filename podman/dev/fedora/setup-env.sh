@@ -80,14 +80,18 @@ EOF
         # distrobox
         bc
         diffutils
+        hostname
+        iputils
         less
         lsof
         passwd
         pinentry
         time
+        tree
         tzdata
         vte-profile
         wget
+        xorg-x11-xauth
 
         # env
         bat
