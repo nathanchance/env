@@ -3,9 +3,9 @@
 set -eux
 
 function install_packages() {
-    zypper -n -q ar https://cli.github.com/packages/rpm/gh-cli.repo
+    zypper -n ar https://cli.github.com/packages/rpm/gh-cli.repo
 
-    zypper -n -q --gpg-auto-import-keys dup
+    zypper -n --gpg-auto-import-keys dup
 
     packages=(
         # arc
@@ -123,10 +123,10 @@ function install_packages() {
         esac
     fi
 
-    zypper -n -q in "${packages[@]}"
+    zypper -n in "${packages[@]}"
     # Force reinstall ca-certificates and ca-certificates-mozilla, otherwise
     # curl barfs
-    zypper -n -q in -f ca-certificates{,-mozilla}
+    zypper -n in -f ca-certificates{,-mozilla}
 }
 
 function check_fish() {
