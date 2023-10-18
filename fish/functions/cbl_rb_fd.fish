@@ -19,7 +19,6 @@ function cbl_rb_fd -d "Rebase generic Fedora kernel on latest linux-next"
     for patch in $b4_patches
         b4 shazam -l -P _ -s $patch; or return
     end
-    set -a crl_patches https://lore.kernel.org/all/c9eb4cc6-7db4-4c2b-838d-43a0b319a4f0@lucifer.local/raw # fixup for "mm: perform the mapping_map_writable() check after call_mmap()"
     for patch in $crl_patches
         crl $patch | git am -3; or return
     end
