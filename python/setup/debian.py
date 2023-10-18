@@ -7,6 +7,7 @@ import getpass
 from pathlib import Path
 import platform
 import re
+import shutil
 import subprocess
 import sys
 
@@ -76,12 +77,13 @@ def pi_setup(user_name):
 
             fstab.write_text(fstab_text + fstab_line, encoding='utf-8')
 
-        docker_json = Path('/etc/docker/daemon.json')
-        docker_json.parent.mkdir(exist_ok=True, parents=True)
-        docker_json_txt = ('{\n'
-                           f'"data-root": "{mnt_point}/docker"'
-                           '\n}\n')
-        docker_json.write_text(docker_json_txt, encoding='utf-8')
+        if shutil.which('docker'):
+            docker_json = Path('/etc/docker/daemon.json')
+            docker_json.parent.mkdir(exist_ok=True, parents=True)
+            docker_json_txt = ('{\n'
+                               f'"data-root": "{mnt_point}/docker"'
+                               '\n}\n')
+            docker_json.write_text(docker_json_txt, encoding='utf-8')
 
     x11_opts, x11_opts_txt = lib.utils.path_and_text('/etc/X11/Xsession.options')
     if x11_opts_txt:
@@ -109,11 +111,12 @@ def setup_repos():
     dpkg_arch = deb.get_dpkg_arch()
 
     # Docker
-    docker_gpg_key = Path(apt_gpg, 'docker.gpg')
-    lib.setup.fetch_gpg_key('https://download.docker.com/linux/debian/gpg', docker_gpg_key)
-    Path(apt_sources, 'docker.list').write_text(
-        f"deb [arch={dpkg_arch} signed-by={docker_gpg_key}] https://download.docker.com/linux/debian {codename} stable\n",
-        encoding='utf-8')
+    if int(version_id) < 12:  # bullseye and earlier, bookworm's podman is not ancient
+        docker_gpg_key = Path(apt_gpg, 'docker.gpg')
+        lib.setup.fetch_gpg_key('https://download.docker.com/linux/debian/gpg', docker_gpg_key)
+        Path(apt_sources, 'docker.list').write_text(
+            f"deb [arch={dpkg_arch} signed-by={docker_gpg_key}] https://download.docker.com/linux/debian {codename} stable\n",
+            encoding='utf-8')
 
     # fish
     fish_repo_url = 'https://download.opensuse.org/repositories'
@@ -166,7 +169,10 @@ if __name__ == '__main__':
     lib.setup.add_user_to_group_if_exists('kvm', user)
     pi_setup(user)
     deb.setup_doas(user, root_password)
-    deb.setup_docker(user)
+    if shutil.which('docker'):
+        deb.setup_docker(user)
+    else:
+        lib.setup.podman_setup(user)
     deb.setup_libvirt(user)
     deb.setup_locales()
     lib.setup.clone_env(user)

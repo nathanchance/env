@@ -126,12 +126,6 @@ def update_and_install_packages(additional_packages=None):
         # doas
         'libpam0g',
 
-        # docker
-        'containerd.io',
-        'docker-ce',
-        'docker-ce-cli',
-        'docker-compose-plugin',
-
         # Downloading/extracting utilities
         'bzip2',
         'ca-certificates',
@@ -175,6 +169,25 @@ def update_and_install_packages(additional_packages=None):
         # repo
         'python-is-python3',
     ]  # yapf: disable
+
+    # Container manager
+    if Path('/etc/apt/sources.list.d/docker.list').exists():
+        packages += [
+            'containerd.io',
+            'docker-ce',
+            'docker-ce-cli',
+            'docker-compose-plugin',
+        ]
+    else:
+        packages += [
+            'aardvark-dns',
+            'buildah',
+            'catatonit',
+            'dbus-user-session',
+            'podman',
+            'slirp4netns',
+            'uidmap',
+        ]
 
     if additional_packages:
         packages += additional_packages

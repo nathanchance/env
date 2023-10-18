@@ -222,10 +222,14 @@ def pacman(args):
 
 
 def podman_setup(username):
-    file_text = f"{username}:100000:65536\n"
+    line = f"{username}:100000:65536\n"
 
     for letter in ['g', 'u']:
-        Path(f"/etc/sub{letter}id").write_text(file_text, encoding='utf-8')
+        if (file := Path(f"/etc/sub{letter}id")).exists():
+            if username not in (file_text := file.read_text(encoding='utf-8')):
+                file.write_text(f"{file_text}\n{line}", encoding='utf-8')
+        else:
+            file.write_text(line, encoding='utf-8')
 
     if not (registries_conf := Path('/etc/containers/registries.conf')).exists():
         registries_conf.write_text(
