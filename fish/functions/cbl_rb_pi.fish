@@ -84,7 +84,7 @@ function cbl_rb_pi -d "Rebase Raspberry Pi kernel on latest linux-next"
         -m OVERLAY_FS \
         -m VETH
 
-    # Tailscale configs
+    # Configs for binfmt_misc (Bookworm and newer) and Tailscale
     for cfg_file in arch/arm/configs/multi_v7_defconfig arch/arm64/configs/defconfig
         scripts/config \
             --file $cfg_file \
@@ -102,7 +102,8 @@ function cbl_rb_pi -d "Rebase Raspberry Pi kernel on latest linux-next"
             -e NF_TABLES_IPV6 \
             -e NFT_COMPAT \
             -e NFT_NAT \
-            -e TUN
+            -e TUN \
+            -m BINFMT_MISC
     end
 
     # arm64 hardening
