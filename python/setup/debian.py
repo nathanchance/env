@@ -152,7 +152,7 @@ def setup_repos():
 def update_and_install_packages():
     packages = []
     if machine_is_trusted():
-        packages += ['tailscale']
+        packages += ['iptables', 'tailscale']
 
     deb.update_and_install_packages(packages)
 
