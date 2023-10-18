@@ -77,6 +77,9 @@ def pi_setup(user_name):
 
             fstab.write_text(fstab_text + fstab_line, encoding='utf-8')
 
+        subprocess.run(['systemctl', 'daemon-reload'], check=True)
+        subprocess.run(['mount', '-a'], check=True)
+
         if shutil.which('docker'):
             docker_json = Path('/etc/docker/daemon.json')
             docker_json.parent.mkdir(exist_ok=True, parents=True)
