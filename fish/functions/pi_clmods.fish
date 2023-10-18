@@ -8,8 +8,10 @@ function pi_clmods -d "Clean up old modules on Raspberry Pi"
     end
     set folders (fd -d 1 $fd_args -E (uname -r) . /lib/modules)
 
-    set rm_cmd \
-        sudo rm -frv $folders
-    print_cmd $rm_cmd
-    $rm_cmd
+    if test -n "$folders"
+        set rm_cmd \
+            sudo rm -frv $folders
+        print_cmd $rm_cmd
+        $rm_cmd
+    end
 end
