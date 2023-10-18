@@ -80,12 +80,12 @@ if test -z "$make_args"
     return 1
 end
 set i_target $make_args[-2]
-if not string match -qr "\.i$" $i_target
+if not string match -qr \'\.i$\' $i_target
     print_error ".i file is not the second to last target in make_args?"
     return 1
 end
 set o_target $make_args[-1]
-if not string match -qr "\.o$" $o_target
+if not string match -qr \'\.o$\' $o_target
     print_error ".o file is not the last target in make_args?"
     return 1
 end
@@ -118,7 +118,7 @@ end
 # Create flags file to minimize flags needed to reproduce issue
 head -1 $o_cmd_file | \
     string match -gr -- "-D__KERNEL__ (.*) -c" | \
-    sed "s/ -I.*$//" | \
+    sed \'s/ -I.*$//\' | \
     tr " " "\n" | \
     sed "/\//d" >$cvise_dir/flags
 
