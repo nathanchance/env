@@ -139,6 +139,7 @@ function cbl_bld_tot_tcs -d "Build LLVM and binutils from source for kernel deve
     end
 
     # Add in-review patches here
+    set -a gh_prs https://github.com/llvm/llvm-project/pull/69511 # [Peephole] Check instructions from CopyMIs are still COPY
     for gh_pr in $gh_prs
         if not gh -R llvm/llvm-project pr diff (basename $gh_pr) | git -C $llvm_project ap
             set message "Failed to apply $gh_pr"
