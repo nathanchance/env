@@ -57,7 +57,7 @@ function install_packages() {
         bc
         curl
         diffutils
-        iputils
+        iputils-ping
         less
         libvte-*-common
         lsof
