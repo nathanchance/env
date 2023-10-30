@@ -3,7 +3,7 @@
 
 _localversion=-llvm
 pkgname=linux-next$_localversion
-_srctag=next-20231023
+_srctag=next-20231027
 pkgver=${_srctag//-/.}
 pkgrel=1
 pkgdesc='linux-next'
@@ -23,7 +23,7 @@ options=('!strip')
 source=(
   "$pkgname::git+https://git.kernel.org/pub/scm/linux/kernel/git/next/linux-next.git?signed#tag=$_srctag"
   config
-  20231020_nathan_rdma_bnxt_re_fix_clang_wimplicit_fallthrough_in_bnxt_re_handle_cq_async_error.patch
+  20231027_bob_zhou_drm_amdgpu_fix_check_order_ras_in_recovery_is_earlier_than_ras_feature.patch
 )
 
 validpgpkeys=(
@@ -31,8 +31,8 @@ validpgpkeys=(
   '3F2568AAC26998F9E813A1C5C3F436CA30F5D8EB'  # Mark Brown
 )
 sha256sums=('SKIP'
-            'f76c2237255f24da1883d83c9655a15327d78df1b0355d2a5396431481bd1d87'
-            'ca764f78bccc8ffc3a91233ee1877b65904a1bb0208ee9c5fcd84c5c4b5b0da8')
+            '53b6253d8433f1d661fdcf0c1edf84f6b7f95a4363010ada6772545119596055'
+            'd49f9ac746d82316095c3a20a0bea326ed1e927074edb849b4195da7ca70eeef')
 
 # This obviously ties this PKGBUILD to my machine but that is kind of the point :)
 _kmake() {
