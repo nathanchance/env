@@ -95,7 +95,8 @@ def parse_arguments():
 
 
 def build_kernel_for_vm(add_make_targets, make_variables, config, menuconfig, vm_name):
-    subprocess.run(['git', 'cl', '-q'], check=True)
+    if Path('.config').exists():
+        subprocess.run(['git', 'cl', '-q'], check=True)
     if (build := make_variables['O']).exists():
         shutil.rmtree(build)
     build.mkdir(parents=True)
