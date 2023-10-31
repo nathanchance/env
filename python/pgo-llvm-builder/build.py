@@ -18,13 +18,13 @@ MACHINE = platform.machine()
 
 LLVM_REFS = {
     '18.0.0': 'origin/main',
-    '17.0.4': 'origin/release/17.x',
+    '17.0.5': 'origin/release/17.x',
 }
 
 LLVM_VERSIONS = [
     '18.0.0',  # git
     '17.0.4',  # latest branch
-    '17.0.3',  # latest tag
+    '17.0.4',  # latest tag
     '16.0.6',
     '15.0.7',
     '14.0.6',
