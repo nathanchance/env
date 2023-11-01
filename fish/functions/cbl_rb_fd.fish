@@ -22,6 +22,7 @@ function cbl_rb_fd -d "Rebase generic Fedora kernel on latest linux-next"
     for patch in $crl_patches
         crl $patch | git am -3; or return
     end
+    set -a ln_commits 71542765211c8a4ecdf46d1b61b6fa435866eca6 # WIP: bcachefs: Initialized dst_done in bch2_remap_range()
     for hash in $ln_commits
         git -C $CBL_BLD_P/linux-next fp -1 --stdout $hash | git am; or return
     end
