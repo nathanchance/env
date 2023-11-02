@@ -93,6 +93,9 @@ def configure_boot_entries(init=True, conf='linux.conf'):
         new_text = linux_conf_text.replace(current_options_str, ' '.join(sorted(new_options)))
         linux_conf.write_text(new_text, encoding='utf-8')
 
+    # Ensure that the new configuration is the default on the machine.
+    subprocess.run(['bootctl', 'set-default', linux_conf.name], check=True)
+
 
 def configure_networking():
     hostname = lib.setup.get_hostname()
