@@ -128,6 +128,7 @@ function cbl_bld_tot_tcs -d "Build LLVM and binutils from source for kernel deve
     end
 
     # Add patches to revert here
+    set -a reverts https://github.com/llvm/llvm-project/commit/7c4180a36a905b7ed46c09df77af1b65e356f92a # Reland [SimplifyCFG] Delete the unnecessary range check for small mask operation (#70542)
     for revert in $reverts
         set -l revert (basename $revert)
         if not git -C $llvm_project rv -n $revert
@@ -139,6 +140,7 @@ function cbl_bld_tot_tcs -d "Build LLVM and binutils from source for kernel deve
     end
 
     # Add in-review patches here
+    set -a gh_prs https://github.com/llvm/llvm-project/pull/71351 # [SimplifyCFG] Fix the compile crash for invalid upper bound value
     for gh_pr in $gh_prs
         if not gh -R llvm/llvm-project pr diff (basename $gh_pr) | git -C $llvm_project ap
             set message "Failed to apply $gh_pr"
