@@ -128,7 +128,6 @@ function cbl_bld_tot_tcs -d "Build LLVM and binutils from source for kernel deve
     end
 
     # Add patches to revert here
-    set -a reverts https://github.com/llvm/llvm-project/commit/7c4180a36a905b7ed46c09df77af1b65e356f92a # Reland [SimplifyCFG] Delete the unnecessary range check for small mask operation (#70542)
     for revert in $reverts
         set -l revert (basename $revert)
         if not git -C $llvm_project rv -n $revert
