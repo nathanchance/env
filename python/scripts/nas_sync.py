@@ -84,7 +84,7 @@ def download_items(targets, network_folder):
         if target == 'alpine':
             alpine_arches = ['aarch64', 'armv7', 'x86', 'x86_64']
             alpine_series = '3.18'
-            alpine_patch = '.2'
+            alpine_patch = '.4'
             alpine_version = alpine_series + alpine_patch
 
             for alpine_arch in alpine_arches:
@@ -131,7 +131,7 @@ def download_items(targets, network_folder):
 
         elif target == 'debian':
             debian_arches = ['amd64', 'arm64', 'armhf', 'i386']
-            debian_ver = '12.1.0'
+            debian_ver = '12.2.0'
 
             for arch in debian_arches:
                 arch_debian_folder = Path(firmware_folder, target.capitalize(), debian_ver, arch)
@@ -181,7 +181,7 @@ def download_items(targets, network_folder):
                 }]  # yapf: disable
 
         elif target == 'ipsw':
-            mac_versions = ['13', '12']
+            mac_versions = ['14', '13', '12']
 
             for mac_version in mac_versions:
                 items += [{
@@ -204,11 +204,13 @@ def download_items(targets, network_folder):
 
         elif target == 'ubuntu':
             ubuntu_arches = ['amd64', 'arm64']
-            ubuntu_vers = ['22.04', '23.04']
+            ubuntu_vers = ['22.04', '23.10']
 
             for ubuntu_ver in ubuntu_vers:
                 if ubuntu_ver == '22.04':
-                    ubuntu_subver = ubuntu_ver + '.2'
+                    ubuntu_subver = ubuntu_ver + '.3'
+                elif ubuntu_ver == '23.10':
+                    ubuntu_subver = ubuntu_ver + '.1'
                 else:
                     ubuntu_subver = ubuntu_ver
 
@@ -218,9 +220,12 @@ def download_items(targets, network_folder):
                     elif arch == 'arm64':
                         base_ubuntu_url = f"https://cdimage.ubuntu.com/releases/{ubuntu_ver}/release"
 
+                    # For some unknown reason...
+                    ubuntu_file_subver = ubuntu_ver if ubuntu_subver == '23.10.1' else ubuntu_subver
+
                     items += [{
                         'containing_folder': Path(firmware_folder, 'Ubuntu', ubuntu_ver, 'Server'),
-                        'file_url': f"{base_ubuntu_url}/ubuntu-{ubuntu_subver}-live-server-{arch}.iso",
+                        'file_url': f"{base_ubuntu_url}/ubuntu-{ubuntu_file_subver}-live-server-{arch}.iso",
                         'sha_url': f"{base_ubuntu_url}/SHA256SUMS",
                     }]    # yapf: disable
 
