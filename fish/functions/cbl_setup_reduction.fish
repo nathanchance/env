@@ -14,7 +14,14 @@ function cbl_setup_reduction -d "Build good and bad versions of LLVM for cvise r
         return 1
     end
     set bad_sha (git sha $bad_sha)
-    set good_sha (git sha $bad_sha^)
+
+    set good_sha $argv[2]
+    if test -z "$good_sha"
+        set good_sha $bad_sha^
+    end
+    set good_sha (git sha $good_sha)
+
+    set bld_llvm_args $argv[3..]
 
     set -g tmp_dir (mktemp -d -p $TMP_FOLDER -t cvise.XXXXXXXXXX)
     for sha in $good_sha $bad_sha
@@ -41,7 +48,8 @@ function cbl_setup_reduction -d "Build good and bad versions of LLVM for cvise r
             --install-folder $tmp_dir/install/llvm-$folder \
             --llvm-folder $tmp_dir/src \
             --projects clang lld \
-            --quiet-cmake; or return
+            --quiet-cmake \
+            $bld_llvm_args; or return
 
         rm -fr $tmp_dir/src
     end
