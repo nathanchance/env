@@ -36,6 +36,6 @@ function git_ua -d "git remote update + action"
             return 1
     end
 
-    git ru $remote; or return
+    git ru --prune $remote; or return
     git $action $remote/$branch
 end
