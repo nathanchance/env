@@ -7,7 +7,7 @@ function cbl_bld_krnl_pkg -d "Build ClangBuiltLinux Arch Linux kernel package"
 
     for arg in $argv
         switch $arg
-            case --cfi --cfi-permissive -f --full -l --local --lto -m --menuconfig
+            case --cfi --cfi-permissive -f --full -l --local --lto -m --menuconfig -u --ubsan-bounds
                 set -a config_args $arg
             case -p --permissive
                 set -a config_args --cfi-permissive

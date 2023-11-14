@@ -22,6 +22,16 @@ function cbl_gen_archconfig -d "Generate a configuration file for Arch Linux"
                     -e LTO_CLANG_THIN
             case -m --menuconfig
                 set menuconfig true
+            case -u --ubsan-bounds
+                set -a config_args \
+                    -e UBSAN \
+                    -e UBSAN_BOUNDS \
+                    -d UBSAN_ALIGNMENT \
+                    -d UBSAN_BOOL \
+                    -d UBSAN_DIV_ZERO \
+                    -d UBSAN_ENUM \
+                    -d UBSAN_SHIFT \
+                    -d UBSAN_UNREACHABLE
             case linux-debug linux-mainline-'*' linux-next-'*'
                 set pkg $arg
         end
@@ -71,7 +81,7 @@ function cbl_gen_archconfig -d "Generate a configuration file for Arch Linux"
     # Step 5: Run through olddefconfig with Clang
     kmake -C $src KCONFIG_CONFIG=$cfg LLVM=1 LLVM_IAS=1 olddefconfig
 
-    # Step 6: Enable ThinLTO or CFI
+    # Step 6: Enable ThinLTO, CFI, or UBSAN
     if test -n "$config_args"
         $src/scripts/config \
             --file $cfg \
