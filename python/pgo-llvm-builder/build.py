@@ -262,9 +262,13 @@ for value in versions:
         IMAGE_TAG,
         *build_llvm_py_cmd,
     ]
-    # Enable BOLT for more optimization if we are on x86_64 with LLVM greater
-    # than or equal to 16.x (due to https://github.com/llvm/llvm-project/issues/55004).
-    if (maj_ver := int(VERSION.split('.', 1)[0])) >= 16 and MACHINE == 'x86_64':
+    # Enable BOLT for more optimization if:
+    # - We are on x86_64 with LLVM greater than or equal to 16.x (due to
+    #   https://github.com/llvm/llvm-project/issues/55004)
+    # - We are on aarch64 with LLVM greater than or equal to 18.x (due to
+    #   https://github.com/llvm/llvm-project/issues/71822)
+    maj_ver = int(VERSION.split('.', 1)[0])
+    if (maj_ver >= 16 and MACHINE == 'x86_64') or (maj_ver >= 18 and MACHINE == 'aarch64'):
         build_cmd.append('--bolt')
     subprocess.run(build_cmd, check=True)
 
