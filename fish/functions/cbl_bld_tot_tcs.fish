@@ -197,7 +197,7 @@ function cbl_bld_tot_tcs -d "Build LLVM and binutils from source for kernel deve
             end
 
             set lsm_location (command grep -F 'lsm.location = Path(src_folder,' $tc_bld/build-llvm.py | string trim)
-            if not env PYTHONPATH=$tc_bld python3 -c "from pathlib import Path
+            if not timeout 24h env PYTHONPATH=$tc_bld python3 -c "from pathlib import Path
 
 import tc_build.utils
 
