@@ -128,6 +128,8 @@ function cbl_bld_tot_tcs -d "Build LLVM and binutils from source for kernel deve
     end
 
     # Add patches to revert here
+    # https://github.com/llvm/llvm-project/pull/70606#issuecomment-1809250417
+    set -a reverts https://github.com/llvm/llvm-project/commit/bc09ec696209b3aea74d49767b15c2f34e363933 # [CodeGen] Revamp counted_by calculations (#70606)
     for revert in $reverts
         set -l revert (basename $revert)
         if not git -C $llvm_project rv -n $revert
@@ -139,6 +141,8 @@ function cbl_bld_tot_tcs -d "Build LLVM and binutils from source for kernel deve
     end
 
     # Add in-review patches here
+    # https://github.com/ClangBuiltLinux/linux/issues/1961
+    set -a gh_prs https://github.com/llvm/llvm-project/pull/72610 # [ELF] Support R_RISCV_SET_ULEB128/R_RISCV_SUB_ULEB128 in non-SHF_ALLOC sections
     for gh_pr in $gh_prs
         if not gh -R llvm/llvm-project pr diff (basename $gh_pr) | git -C $llvm_project ap
             set message "Failed to apply $gh_pr"
