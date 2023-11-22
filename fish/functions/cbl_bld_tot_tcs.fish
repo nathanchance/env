@@ -141,8 +141,6 @@ function cbl_bld_tot_tcs -d "Build LLVM and binutils from source for kernel deve
     end
 
     # Add in-review patches here
-    # https://github.com/ClangBuiltLinux/linux/issues/1961
-    set -a gh_prs https://github.com/llvm/llvm-project/pull/72610 # [ELF] Support R_RISCV_SET_ULEB128/R_RISCV_SUB_ULEB128 in non-SHF_ALLOC sections
     for gh_pr in $gh_prs
         if not gh -R llvm/llvm-project pr diff (basename $gh_pr) | git -C $llvm_project ap
             set message "Failed to apply $gh_pr"
