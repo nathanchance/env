@@ -24,7 +24,7 @@ function cbl_rb_pi -d "Rebase Raspberry Pi kernel on latest linux-next"
     for revert in $reverts
         git revert --mainline 1 --no-edit $revert; or return
     end
-    set -a b4_patches https://lore.kernel.org/all/20231116-sdhci-of-dwcmshc-fix-wbitwise-instead-of-logical-v1-1-7e1a7f4ccaab@kernel.org/ # mmc: sdhci-of-dwcmshc: Use logical OR instead of bitwise OR in dwcmshc_probe()
+    set -a b4_patches https://lore.kernel.org/all/20231128-arm64-vdso32-missing-prototypes-error-v1-1-0fdd403cea07@kernel.org/ # arm64: vdso32: Define BUILD_VDSO32_64 to correct prototypes
     for patch in $b4_patches
         b4 shazam -l -P _ -s $patch; or return
     end

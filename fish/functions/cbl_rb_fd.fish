@@ -16,7 +16,6 @@ function cbl_rb_fd -d "Rebase generic Fedora kernel on latest linux-next"
     for revert in $reverts
         git revert --mainline 1 --no-edit $revert; or return
     end
-    set -a b4_patches https://lore.kernel.org/all/20231116-sdhci-of-dwcmshc-fix-wbitwise-instead-of-logical-v1-1-7e1a7f4ccaab@kernel.org/ # mmc: sdhci-of-dwcmshc: Use logical OR instead of bitwise OR in dwcmshc_probe()
     for patch in $b4_patches
         b4 shazam -l -P _ -s $patch; or return
     end
@@ -27,6 +26,8 @@ function cbl_rb_fd -d "Rebase generic Fedora kernel on latest linux-next"
     for hash in $ln_commits
         git -C $CBL_BLD_P/linux-next fp -1 --stdout $hash | git am; or return
     end
+    # https://lore.kernel.org/20231128213344.GA3423530@dev-arch.thelio-3990X/
+    set -a am_patches $ENV_FOLDER/pkgbuilds/linux-next-llvm/btrfs-Mask-BLK_OPEN_RESTRICT_WRITES-from-sb_open_mod.patch
     for patch in $am_patches
         git am -3 $patch; or return
     end
