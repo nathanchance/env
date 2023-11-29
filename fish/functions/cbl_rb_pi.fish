@@ -24,14 +24,13 @@ function cbl_rb_pi -d "Rebase Raspberry Pi kernel on latest linux-next"
     for revert in $reverts
         git revert --mainline 1 --no-edit $revert; or return
     end
-    set -a b4_patches https://lore.kernel.org/all/20231128-arm64-vdso32-missing-prototypes-error-v1-1-0fdd403cea07@kernel.org/ # arm64: vdso32: Define BUILD_VDSO32_64 to correct prototypes
     for patch in $b4_patches
         b4 shazam -l -P _ -s $patch; or return
     end
+    set -a crl_patches https://git.kernel.org/akpm/mm/p/31710e6afbbe0138baa00bc0ee1f2607e120edc4 # buffer: add cast in grow_buffers() to avoid a multiplication libcall
     for patch in $crl_patches
         crl $patch | git am -3; or return
     end
-    set -a ln_commits d2b5fb34d3b9cebd98866a536ccf546004ca1d4c
     for hash in $ln_commits
         git -C $CBL_BLD_P/linux-next fp -1 --stdout $hash | git am; or return
     end

@@ -19,10 +19,10 @@ function cbl_rb_fd -d "Rebase generic Fedora kernel on latest linux-next"
     for patch in $b4_patches
         b4 shazam -l -P _ -s $patch; or return
     end
+    set -a crl_patches https://git.kernel.org/akpm/mm/p/31710e6afbbe0138baa00bc0ee1f2607e120edc4 # buffer: add cast in grow_buffers() to avoid a multiplication libcall
     for patch in $crl_patches
         crl $patch | git am -3; or return
     end
-    set -a ln_commits d2b5fb34d3b9cebd98866a536ccf546004ca1d4c
     for hash in $ln_commits
         git -C $CBL_BLD_P/linux-next fp -1 --stdout $hash | git am; or return
     end
