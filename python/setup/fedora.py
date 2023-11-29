@@ -48,7 +48,7 @@ def machine_is_trusted():
 def prechecks():
     lib.setup.check_root()
     fedora_version = get_fedora_version()
-    if fedora_version not in (35, 36, 37, 38):
+    if fedora_version not in (35, 36, 37, 38, 39):
         raise RuntimeError(
             f"Fedora {fedora_version} is not tested with this script, add support for it if it works.",
         )
@@ -76,6 +76,7 @@ def install_initial_packages():
 
 
 def install_packages():
+    fedora_version = get_fedora_version()
     packages = [
         # administration
         'btop',
@@ -117,7 +118,7 @@ def install_packages():
 
         # nicer GNU utilities
         'duf',
-        'exa',
+        'eza' if fedora_version >= 39 else 'exa',
         'ripgrep',
 
         # repo
