@@ -139,10 +139,8 @@ function cbl_bld_tot_tcs -d "Build LLVM and binutils from source for kernel deve
     end
 
     # Add in-review patches here
-    # Revert changes to clang/test/CodeGen/attr-counted-by.c to avoid conflicts with next application
-    git -C $llvm_project diff -R (string join '' b31cd07de5b7dfb435b062c80d85083e14f28321{^..,}) clang/test/CodeGen/attr-counted-by.c | git -C $llvm_project ap
     # https://github.com/llvm/llvm-project/issues/73168
-    set -a gh_prs https://github.com/llvm/llvm-project/pull/73465 # [Clang] Use correct base expression for counted_by field (#73168)
+    set -a gh_prs https://github.com/llvm/llvm-project/pull/73730 # [Clang] Generate the GEP instead of adding AST nodes
     for gh_pr in $gh_prs
         if not gh -R llvm/llvm-project pr diff (basename $gh_pr) | git -C $llvm_project ap
             set message "Failed to apply $gh_pr"
