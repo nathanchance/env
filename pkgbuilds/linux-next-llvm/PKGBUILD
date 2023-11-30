@@ -3,7 +3,7 @@
 
 _localversion=-llvm
 pkgname=linux-next$_localversion
-_srctag=next-20231129
+_srctag=next-20231130
 pkgver=${_srctag//-/.}
 pkgrel=1
 pkgdesc='linux-next'
@@ -23,7 +23,6 @@ options=('!strip')
 source=(
   "$pkgname::git+https://git.kernel.org/pub/scm/linux/kernel/git/next/linux-next.git?signed#tag=$_srctag"
   config
-  btrfs-Mask-BLK_OPEN_RESTRICT_WRITES-from-sb_open_mod.patch
 )
 
 validpgpkeys=(
@@ -31,8 +30,7 @@ validpgpkeys=(
   '3F2568AAC26998F9E813A1C5C3F436CA30F5D8EB'  # Mark Brown
 )
 sha256sums=('SKIP'
-            '26d59a05b943e77543301819377e1ce138fa599e0655b0b77e165b78bbf2d1aa'
-            '60497e772dac092274c623976a03e4ac6cd8aaf6e880179b869f920fc69ea7db')
+            'efdceabddf0bad7bb48fd14933e0b6ac26ebe83266de6bc369e6bcfa31eb76f8')
 
 # This obviously ties this PKGBUILD to my machine but that is kind of the point :)
 _kmake() {

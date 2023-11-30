@@ -27,7 +27,6 @@ function cbl_rb_pi -d "Rebase Raspberry Pi kernel on latest linux-next"
     for patch in $b4_patches
         b4 shazam -l -P _ -s $patch; or return
     end
-    set -a crl_patches https://git.kernel.org/akpm/mm/p/31710e6afbbe0138baa00bc0ee1f2607e120edc4 # buffer: add cast in grow_buffers() to avoid a multiplication libcall
     for patch in $crl_patches
         crl $patch | git am -3; or return
     end
