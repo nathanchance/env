@@ -129,6 +129,13 @@ function git_aliases -d "Configure git aliases"
     # git switch
     git config --global alias.swc 'switch -c'
 
+    # git worktree
+    git config --global alias.w worktree
+    git config --global alias.wa 'worktree add'
+    git config --global alias.wl 'worktree list'
+    git config --global alias.wm 'worktree move'
+    git config --global alias.wr 'worktree remove'
+
     # fish git aliases
     # no arguments
     for alias in bf cpi dmb
