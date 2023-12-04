@@ -84,7 +84,7 @@ def download_items(targets, network_folder):
         if target == 'alpine':
             alpine_arches = ['aarch64', 'armv7', 'x86', 'x86_64']
             alpine_series = '3.18'
-            alpine_patch = '.4'
+            alpine_patch = '.5'
             alpine_version = alpine_series + alpine_patch
 
             for alpine_arch in alpine_arches:
