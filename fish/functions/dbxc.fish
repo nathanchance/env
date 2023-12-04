@@ -67,6 +67,8 @@ function dbxc -d "Shorthand for 'distrobox create'"
     end
     if in_orb
         set -a dbx_args --volume $MAC_FOLDER:$MAC_FOLDER
+        # OrbStack has passwordless sudo, we don't need to bother with a password in distrobox
+        set -a dbx_args --absolutely-disable-root-password-i-am-really-positively-sure
     end
     if test -d $OPT_ORB_GUEST
         set -a dbx_args --volume $OPT_ORB_GUEST:$OPT_ORB_GUEST
@@ -85,7 +87,6 @@ function dbxc -d "Shorthand for 'distrobox create'"
     if test "$img" = $GHCR/dev/arch; and test -f /etc/xdg/reflector/reflector.conf
         set -a add_args --volume=/etc/pacman.d/mirrorlist:/etc/pacman.d/mirrorlist:ro
     end
-
 
     set env_dbx $ENV_FOLDER/.distrobox
 
