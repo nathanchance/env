@@ -1,8 +1,8 @@
 #
 # Automatically generated file; DO NOT EDIT.
-# Linux/x86 6.7.0-rc3 Kernel Configuration
+# Linux/x86 6.7.0-rc4 Kernel Configuration
 #
-CONFIG_CC_VERSION_TEXT="ClangBuiltLinux clang version 18.0.0 (https://github.com/llvm/llvm-project 7ae1b76ed7271b2e86a3cda72d9e1fc63f4e5c48)"
+CONFIG_CC_VERSION_TEXT="ClangBuiltLinux clang version 18.0.0 (https://github.com/llvm/llvm-project bc51a36fd67c9ef08259612a1a04db6be51a8b76)"
 CONFIG_GCC_VERSION=0
 CONFIG_CC_IS_CLANG=y
 CONFIG_CLANG_VERSION=180000
@@ -1082,6 +1082,7 @@ CONFIG_SWAP=y
 CONFIG_ZSWAP=y
 CONFIG_ZSWAP_DEFAULT_ON=y
 # CONFIG_ZSWAP_EXCLUSIVE_LOADS_DEFAULT_ON is not set
+# CONFIG_ZSWAP_SHRINKER_DEFAULT_ON is not set
 # CONFIG_ZSWAP_COMPRESSOR_DEFAULT_DEFLATE is not set
 # CONFIG_ZSWAP_COMPRESSOR_DEFAULT_LZO is not set
 # CONFIG_ZSWAP_COMPRESSOR_DEFAULT_842 is not set
