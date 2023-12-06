@@ -226,7 +226,7 @@ def generate_item(args):
         }
         md_links = [f"[`{key}`]({links[key]})" for key in sorted(links)]
 
-        print(f"* `{title}` ({', '.join(md_links)})")
+        print(f"  * `{title}` ({', '.join(md_links)})")
 
     elif item_type == 'pr':
         proc = subprocess.run(['gh', 'pr', 'view', '--json', 'title,url'],
