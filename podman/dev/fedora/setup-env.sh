@@ -86,6 +86,7 @@ EOF
         lsof
         passwd
         pinentry
+        procps-ng
         time
         tree
         tzdata
