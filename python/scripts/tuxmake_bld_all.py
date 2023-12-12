@@ -108,7 +108,7 @@ def get_env_make_variables(target_arch, toolchain):
 def get_targets(kconfig):
     targets = ['default']
     if kconfig == 'defconfig':
-        targets += ['kernel']
+        targets.append('kernel')
     return targets
 
 

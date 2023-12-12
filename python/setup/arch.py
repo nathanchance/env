@@ -299,9 +299,9 @@ def pacman_install_packages():
         ]  # yapf: disable
 
     if lib.setup.is_virtual_machine():
-        packages += ['devtools']
+        packages.append('devtools')
     else:
-        packages += ['tailscale']
+        packages.append('tailscale')
 
     # Update and install packages
     pacman_install(['--needed', *packages])

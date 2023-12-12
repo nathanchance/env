@@ -406,7 +406,7 @@ def setup_sudo_symlink():
 def systemctl_enable(items_to_enable, now=True):
     cmd = ['systemctl', 'enable']
     if now:
-        cmd += ['--now']
+        cmd.append('--now')
     cmd += items_to_enable
 
     subprocess.run(cmd, check=True)

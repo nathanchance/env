@@ -141,14 +141,14 @@ def install_packages():
 
     # Install Virtualization group on Equinix Metal servers or trusted machines
     if lib.setup.is_equinix() or machine_is_trusted():
-        packages += ['@virtualization']
+        packages.append('@virtualization')
 
     if machine_is_trusted():
-        packages += ['tailscale']
+        packages.append('tailscale')
 
     # Needed to occasionally upgrade the MMC firmware
     if lib.setup.get_hostname() == 'aadp':
-        packages += ['ipmitool']
+        packages.append('ipmitool')
 
     dnf_install(packages)
 
