@@ -146,6 +146,10 @@ def install_packages():
     if machine_is_trusted():
         packages += ['tailscale']
 
+    # Needed to occasionally upgrade the MMC firmware
+    if lib.setup.get_hostname() == 'aadp':
+        packages += ['ipmitool']
+
     dnf_install(packages)
 
 
