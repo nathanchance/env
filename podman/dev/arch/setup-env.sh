@@ -193,6 +193,9 @@ function install_packages() {
         python-gitpython
         python-ply
 
+        # system administration
+        ipmitool
+
         # QEMU
         edk2-aarch64
         edk2-ovmf
