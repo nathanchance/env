@@ -16,6 +16,8 @@ function cbl_rb_fd -d "Rebase generic Fedora kernel on latest linux-next"
     for revert in $reverts
         git revert --mainline 1 --no-edit $revert; or return
     end
+    set -a b4_patches https://lore.kernel.org/all/20231212104149.2388753-1-ckeepax@opensource.cirrus.com/ # ASoC: cs42l43: Add missing statics for hp_ilimit functions
+    set -a b4_patches https://lore.kernel.org/all/20231212171044.1108464-1-jtornosm@redhat.com/ # rpm-pkg: simplify installkernel %post
     for patch in $b4_patches
         b4 shazam -l -P _ -s $patch; or return
     end
