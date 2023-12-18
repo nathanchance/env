@@ -144,7 +144,7 @@ function cbl_bld_tot_tcs -d "Build LLVM and binutils from source for kernel deve
 
     # Add in-review patches here
     # https://github.com/llvm/llvm-project/issues/73168
-    set -a gh_prs https://github.com/llvm/llvm-project/pull/73730 # [Clang] Generate the GEP instead of adding AST nodes
+    set -a gh_prs https://github.com/llvm/llvm-project/pull/75857 # Revert counted_by attribute feature
     for gh_pr in $gh_prs
         if not gh -R llvm/llvm-project pr diff (basename $gh_pr) | git -C $llvm_project ap
             set message "Failed to apply $gh_pr"
