@@ -128,8 +128,6 @@ function cbl_bld_tot_tcs -d "Build LLVM and binutils from source for kernel deve
     end
 
     # Add patches to revert here
-    # https://github.com/ClangBuiltLinux/linux/issues/1965
-    set -a reverts https://github.com/llvm/llvm-project/commit/e87f33d9ce785668223c3bcc4e06956985cccda1 # [RISCV][MC] Pass MCSubtargetInfo down to shouldForceRelocation and evaluateTargetFixup. (#73721)
     for revert in $reverts
         set -l revert (basename $revert)
         if not git -C $llvm_project rv -n $revert
@@ -139,6 +137,10 @@ function cbl_bld_tot_tcs -d "Build LLVM and binutils from source for kernel deve
             return 1
         end
     end
+    # https://github.com/ClangBuiltLinux/linux/issues/1965
+    # [RISCV][MC] Pass MCSubtargetInfo down to shouldForceRelocation and evaluateTargetFixup. (#73721)
+    git -C $llvm_project show (basename https://github.com/llvm/llvm-project/commit/e87f33d9ce785668223c3bcc4e06956985cccda1) | git -C $llvm_project ap -R --exclude llvm/test/CodeGen/RISCV/relax-per-target-feature.ll
+    sed -i '/R_RISCV_RELAX \*ABS\*/d' $llvm_project/llvm/test/CodeGen/RISCV/relax-per-target-feature.ll
 
     # Add in-review patches here
     # https://github.com/llvm/llvm-project/issues/73168
