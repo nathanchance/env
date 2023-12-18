@@ -13,14 +13,15 @@ function cbl_rb_fd -d "Rebase generic Fedora kernel on latest linux-next"
     git rh origin/master
 
     # Patching
+    set -a reverts a8ffe235b11e8a7274c4aa848a1371c315924974 # bcachefs: trans_for_each_update() now declares loop iter
     for revert in $reverts
         git revert --mainline 1 --no-edit $revert; or return
     end
-    set -a b4_patches https://lore.kernel.org/all/20231212104149.2388753-1-ckeepax@opensource.cirrus.com/ # ASoC: cs42l43: Add missing statics for hp_ilimit functions
     set -a b4_patches https://lore.kernel.org/all/20231212171044.1108464-1-jtornosm@redhat.com/ # rpm-pkg: simplify installkernel %post
     for patch in $b4_patches
         b4 shazam -l -P _ -s $patch; or return
     end
+    set -a crl_patches 'https://evilpiepirate.org/git/bcachefs.git/patch/?id=caa480b52367442443e3acbab60c404254c333bb' # bcachefs: trans_for_each_update() now declares loop iter
     for patch in $crl_patches
         crl $patch | git am -3; or return
     end
