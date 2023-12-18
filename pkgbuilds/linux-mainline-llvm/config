@@ -1,8 +1,8 @@
 #
 # Automatically generated file; DO NOT EDIT.
-# Linux/x86 6.7.0-rc5 Kernel Configuration
+# Linux/x86 6.7.0-rc6 Kernel Configuration
 #
-CONFIG_CC_VERSION_TEXT="ClangBuiltLinux clang version 18.0.0git (https://github.com/llvm/llvm-project 13b88265088329decd15449e3b2461a6177174b2)"
+CONFIG_CC_VERSION_TEXT="ClangBuiltLinux clang version 18.0.0git (https://github.com/llvm/llvm-project 0523bf1eca4475edafc8aab830c2ce48b01900c3)"
 CONFIG_GCC_VERSION=0
 CONFIG_CC_IS_CLANG=y
 CONFIG_CLANG_VERSION=180000
@@ -11494,8 +11494,6 @@ CONFIG_DEBUG_LIST=y
 # CONFIG_DEBUG_CLOSURES is not set
 # CONFIG_DEBUG_MAPLE_TREE is not set
 # end of Debug kernel data structures
-
-# CONFIG_DEBUG_CREDENTIALS is not set
 
 #
 # RCU Debugging
