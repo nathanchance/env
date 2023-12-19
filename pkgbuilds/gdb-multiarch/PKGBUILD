@@ -1,0 +1,54 @@
+# Maintainer: Nathan Chancellor <nathan@kernel.org>
+# Contributor: Levente Polyak <anthraxx[at]archlinux[dot]org>
+# Contributor: Anatol Pomozov <anatol.pomozov@gmail.com>
+# Contributor: Allan McRae <allan@archlinux.org>
+# Contributor: Jan de Groot <jgc@archlinux.org>
+
+pkgname=gdb-multiarch
+pkgver=13.2
+pkgrel=1
+pkgdesc='The GNU Debugger'
+arch=(x86_64)
+url='https://www.gnu.org/software/gdb/'
+license=(GPL3)
+depends=(glibc ncurses libncursesw.so gcc-libs expat xz mpfr source-highlight
+         readline libreadline.so guile python libelf)
+makedepends=(texinfo boost)
+backup=(etc/gdb/gdbinit)
+source=(https://ftp.gnu.org/gnu/gdb/gdb-${pkgver}.tar.xz{,.sig})
+sha1sums=('bcd6b05a2565f4339e1187dae428fb58a000d690'
+          'SKIP')
+b2sums=('bf5216ba2286448a46f9e0a405367c5a678e6d7540204722d355b618018b7b75a2ebc5b51353304c5ded02a3979223a81781d305f5afa5be82516cdc2863d49f'
+        'SKIP')
+validpgpkeys=('F40ADB902B24264AA42E50BF92EDB04BFF325CF3') # Joel Brobecker
+
+build() {
+  cd gdb-$pkgver
+
+  mkdir -p build && cd build
+  ../configure \
+    --prefix=/usr \
+    --disable-nls \
+    --enable-languages=all \
+    --enable-source-highlight \
+    --enable-targets=all \
+    --enable-tui \
+    --with-system-readline \
+    --with-python=/usr/bin/python \
+    --with-system-gdbinit=/etc/gdb/gdbinit
+  make
+}
+
+package() {
+
+  cd gdb-$pkgver/build
+  make -C gdb DESTDIR="$pkgdir" install
+  make -C gdbserver DESTDIR="$pkgdir" install
+  make -C gdb/data-directory DESTDIR="$pkgdir" install
+
+  # install "custom" system gdbinit
+  install -dm 755 "$pkgdir/etc/gdb"
+  touch "$pkgdir/etc/gdb/gdbinit"
+}
+
+# vim: ts=2 sw=2 et:
