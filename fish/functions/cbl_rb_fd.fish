@@ -13,18 +13,22 @@ function cbl_rb_fd -d "Rebase generic Fedora kernel on latest linux-next"
     git rh origin/master
 
     # Patching
-    set -a reverts a8ffe235b11e8a7274c4aa848a1371c315924974 # bcachefs: trans_for_each_update() now declares loop iter
     for revert in $reverts
         git revert --mainline 1 --no-edit $revert; or return
     end
-    set -a b4_patches https://lore.kernel.org/all/20231212171044.1108464-1-jtornosm@redhat.com/ # rpm-pkg: simplify installkernel %post
+    git show 0df8e97085946dd79c06720678a845778b6d6bf8 scripts/package/kernel.spec | git ap -R
+    git ac -m 'Partially revert "scripts: clean up IA-64 code"
+
+To make the following patch apply cleanly'
+    or return
+    set -a b4_patches https://lore.kernel.org/all/20231219155659.1591792-1-jtornosm@redhat.com/ # rpm-pkg: simplify installkernel %post
     for patch in $b4_patches
         b4 shazam -l -P _ -s $patch; or return
     end
-    set -a crl_patches 'https://evilpiepirate.org/git/bcachefs.git/patch/?id=caa480b52367442443e3acbab60c404254c333bb' # bcachefs: trans_for_each_update() now declares loop iter
     for patch in $crl_patches
         crl $patch | git am -3; or return
     end
+    set -a ln_commits cce20159e877039e6cc1e8e12d1b05952c251a22 # NOTCBL: WIP: Add exports for generic out of line NUMA logging functions
     for hash in $ln_commits
         git -C $CBL_BLD_P/linux-next fp -1 --stdout $hash | git am; or return
     end

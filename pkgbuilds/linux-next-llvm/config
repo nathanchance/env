@@ -1,8 +1,8 @@
 #
 # Automatically generated file; DO NOT EDIT.
-# Linux/x86 6.7.0-rc5 Kernel Configuration
+# Linux/x86 6.7.0-rc6 Kernel Configuration
 #
-CONFIG_CC_VERSION_TEXT="ClangBuiltLinux clang version 18.0.0git (https://github.com/llvm/llvm-project 0523bf1eca4475edafc8aab830c2ce48b01900c3)"
+CONFIG_CC_VERSION_TEXT="ClangBuiltLinux clang version 18.0.0git (https://github.com/llvm/llvm-project cca4d6cfd2a3780bb432e4f8234704d920dcce50)"
 CONFIG_GCC_VERSION=0
 CONFIG_CC_IS_CLANG=y
 CONFIG_CLANG_VERSION=180000
@@ -9670,6 +9670,7 @@ CONFIG_AD7746=m
 #
 # Chemical Sensors
 #
+# CONFIG_AOSONG_AGS02MA is not set
 CONFIG_ATLAS_PH_SENSOR=m
 CONFIG_ATLAS_EZO_SENSOR=m
 CONFIG_BME680=m
