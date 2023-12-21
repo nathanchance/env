@@ -128,6 +128,8 @@ function cbl_bld_tot_tcs -d "Build LLVM and binutils from source for kernel deve
     end
 
     # Add patches to revert here
+    # https://github.com/llvm/llvm-project/pull/72960#issuecomment-1866844679
+    set -a reverts https://github.com/llvm/llvm-project/commit/a8081ed8ff0fd11fb8d5f4c83df49da909e49612 # [LoongArch] Allow delayed decision for ADD/SUB relocations (#72960)
     for revert in $reverts
         set -l revert (basename $revert)
         if not git -C $llvm_project rv -n $revert
