@@ -3,7 +3,7 @@
 
 _localversion=-llvm
 pkgname=linux-next$_localversion
-_srctag=next-20231221
+_srctag=next-20231222
 pkgver=${_srctag//-/.}
 pkgrel=1
 pkgdesc='linux-next'
@@ -23,6 +23,12 @@ options=('!strip')
 source=(
   "$pkgname::git+https://git.kernel.org/pub/scm/linux/kernel/git/next/linux-next.git?signed#tag=$_srctag"
   config
+  0001-dmaengine-xilinx-xdma-statify-xdma_prep_interleaved_.patch
+  20231222_nathan_dmaengine_xilinx_xdma_fix_initialization_location_of_desc_in_xdma_channel_isr.patch
+  20231222_nathan_dmaengine_xilinx_xdma_fix_operator_precedence_in_xdma_prep_interleaved_dma.patch
+  20231222_nathan_platform_x86_intel_pmc_mark_arl_d3_fixup_and_arl_resume_as_static.patch
+  20231222_nathan_platform_x86_intel_pmc_mark_lnl_d3_fixup_and_lnl_resume_as_static.patch
+  fix-oops-in-nfs.patch
 )
 
 validpgpkeys=(
@@ -30,7 +36,13 @@ validpgpkeys=(
   '3F2568AAC26998F9E813A1C5C3F436CA30F5D8EB'  # Mark Brown
 )
 sha256sums=('SKIP'
-            '0e43ab5f4df21f4b78ba4ca01c2374977207f401da564b1b25d7d2dbb34d837c')
+            'b54c641a1bd800da6af54028a4df62a1df6bb1b263079564d9389af4e8e15a4e'
+            'ec5bdc193356dfc56ad49642aa8ab41c8c5c65f3fe3386d725933e876bac6ddb'
+            '7f26fe51d8b6d1fe27defafb41bfbb2d09ed6fcfd0e75b1e50e56e3bdf01cc2b'
+            '284c768e567f1f860843fde9b4b3a7df9878a49c30b4647d3a79400ad266fd5e'
+            'f8ec6ed0bf3dec9193154188fb6ccc3e52c55369f516e1fc3872fe969d5efaf5'
+            'f6934b84fdc774962e88079d635f81b1b066cc04d17b632f64b0396989fcb2b7'
+            '6ffcf39e2779caf133aa71a4791eafcea02c71acb07314204315b86f2a5f2f4e')
 
 # This obviously ties this PKGBUILD to my machine but that is kind of the point :)
 _kmake() {

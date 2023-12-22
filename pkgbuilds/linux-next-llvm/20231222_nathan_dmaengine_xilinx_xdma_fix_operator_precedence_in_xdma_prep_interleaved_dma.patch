@@ -1,0 +1,75 @@
+From git@z Thu Jan  1 00:00:00 1970
+Subject: [PATCH 1/2] dmaengine: xilinx: xdma: Fix operator precedence in
+ xdma_prep_interleaved_dma()
+From: Nathan Chancellor <nathan@kernel.org>
+Date: Fri, 22 Dec 2023 11:06:44 -0700
+Message-Id: <20231222-dma-xilinx-xdma-clang-fixes-v1-1-84a18ff184d2@kernel.org>
+MIME-Version: 1.0
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 7bit
+
+Clang warns (or errors with CONFIG_WERROR=y):
+
+  drivers/dma/xilinx/xdma.c:757:68: error: operator '?:' has lower precedence than '+'; '+' will be evaluated first [-Werror,-Wparentheses]
+    757 |                 src_addr += dmaengine_get_src_icg(xt, &xt->sgl[i]) + xt->src_inc ?
+        |                             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ^
+  drivers/dma/xilinx/xdma.c:757:68: note: place parentheses around the '+' expression to silence this warning
+    757 |                 src_addr += dmaengine_get_src_icg(xt, &xt->sgl[i]) + xt->src_inc ?
+        |                                                                                  ^
+        |                             (                                                   )
+  drivers/dma/xilinx/xdma.c:757:68: note: place parentheses around the '?:' expression to evaluate it first
+    757 |                 src_addr += dmaengine_get_src_icg(xt, &xt->sgl[i]) + xt->src_inc ?
+        |                                                                                  ^
+        |                                                                      (
+    758 |                                                               xt->sgl[i].size : 0;
+        |
+        |                                                                                  )
+  drivers/dma/xilinx/xdma.c:759:68: error: operator '?:' has lower precedence than '+'; '+' will be evaluated first [-Werror,-Wparentheses]
+    759 |                 dst_addr += dmaengine_get_dst_icg(xt, &xt->sgl[i]) + xt->dst_inc ?
+        |                             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ^
+  drivers/dma/xilinx/xdma.c:759:68: note: place parentheses around the '+' expression to silence this warning
+    759 |                 dst_addr += dmaengine_get_dst_icg(xt, &xt->sgl[i]) + xt->dst_inc ?
+        |                                                                                  ^
+        |                             (                                                   )
+  drivers/dma/xilinx/xdma.c:759:68: note: place parentheses around the '?:' expression to evaluate it first
+    759 |                 dst_addr += dmaengine_get_dst_icg(xt, &xt->sgl[i]) + xt->dst_inc ?
+        |                                                                                  ^
+        |                                                                      (
+    760 |                                                               xt->sgl[i].size : 0;
+        |
+        |                                                                                  )
+
+The src_inc and dst_inc members of 'struct dma_interleaved_template' are
+booleans, so it does not make sense for the addition to happen first.
+Wrap the conditional operator in parantheses so it is evaluated first.
+
+Closes: https://github.com/ClangBuiltLinux/linux/issues/1971
+Fixes: 2f8f90cd2f8d ("dmaengine: xilinx: xdma: Implement interleaved DMA transfers")
+Link: https://lore.kernel.org/r/20231222-dma-xilinx-xdma-clang-fixes-v1-1-84a18ff184d2@kernel.org
+Signed-off-by: Nathan Chancellor <nathan@kernel.org>
+---
+ drivers/dma/xilinx/xdma.c | 8 ++++----
+ 1 file changed, 4 insertions(+), 4 deletions(-)
+
+diff --git a/drivers/dma/xilinx/xdma.c b/drivers/dma/xilinx/xdma.c
+index 4ebc90b41bdb..d5b9fc3fd955 100644
+--- a/drivers/dma/xilinx/xdma.c
++++ b/drivers/dma/xilinx/xdma.c
+@@ -754,10 +754,10 @@ xdma_prep_interleaved_dma(struct dma_chan *chan,
+ 	dst_addr = xt->dst_start;
+ 	for (i = 0; i < xt->frame_size; ++i) {
+ 		desc_num += xdma_fill_descs(sw_desc, src_addr, dst_addr, xt->sgl[i].size, desc_num);
+-		src_addr += dmaengine_get_src_icg(xt, &xt->sgl[i]) + xt->src_inc ?
+-							      xt->sgl[i].size : 0;
+-		dst_addr += dmaengine_get_dst_icg(xt, &xt->sgl[i]) + xt->dst_inc ?
+-							      xt->sgl[i].size : 0;
++		src_addr += dmaengine_get_src_icg(xt, &xt->sgl[i]) + (xt->src_inc ?
++							      xt->sgl[i].size : 0);
++		dst_addr += dmaengine_get_dst_icg(xt, &xt->sgl[i]) + (xt->dst_inc ?
++							      xt->sgl[i].size : 0);
+ 		period_size += xt->sgl[i].size;
+ 	}
+ 	sw_desc->period_size = period_size;
+-- 
+2.43.0
+

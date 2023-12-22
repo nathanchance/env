@@ -1,0 +1,52 @@
+From git@z Thu Jan  1 00:00:00 1970
+Subject: [PATCH 2/2] dmaengine: xilinx: xdma: Fix initialization location
+ of desc in xdma_channel_isr()
+From: Nathan Chancellor <nathan@kernel.org>
+Date: Fri, 22 Dec 2023 11:06:45 -0700
+Message-Id: <20231222-dma-xilinx-xdma-clang-fixes-v1-2-84a18ff184d2@kernel.org>
+MIME-Version: 1.0
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: 7bit
+
+Clang warns (or errors with CONFIG_WERROR=y):
+
+  drivers/dma/xilinx/xdma.c:894:3: error: variable 'desc' is uninitialized when used here [-Werror,-Wuninitialized]
+    894 |                 desc->error = true;
+        |                 ^~~~
+
+The initialization of desc was moved too far forward, move it back so
+that this assignment does not result in a potential crash at runtime
+while clearing up the warning.
+
+Closes: https://github.com/ClangBuiltLinux/linux/issues/1972
+Fixes: 2f8f90cd2f8d ("dmaengine: xilinx: xdma: Implement interleaved DMA transfers")
+Link: https://lore.kernel.org/r/20231222-dma-xilinx-xdma-clang-fixes-v1-2-84a18ff184d2@kernel.org
+Signed-off-by: Nathan Chancellor <nathan@kernel.org>
+---
+ drivers/dma/xilinx/xdma.c | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+
+diff --git a/drivers/dma/xilinx/xdma.c b/drivers/dma/xilinx/xdma.c
+index d5b9fc3fd955..ee595d1ebc63 100644
+--- a/drivers/dma/xilinx/xdma.c
++++ b/drivers/dma/xilinx/xdma.c
+@@ -888,6 +888,8 @@ static irqreturn_t xdma_channel_isr(int irq, void *dev_id)
+ 	if (ret)
+ 		goto out;
+ 
++	desc = to_xdma_desc(vd);
++
+ 	st &= XDMA_CHAN_STATUS_MASK;
+ 	if ((st & XDMA_CHAN_ERROR_MASK) ||
+ 	    !(st & (CHAN_CTRL_IE_DESC_COMPLETED | CHAN_CTRL_IE_DESC_STOPPED))) {
+@@ -901,7 +903,6 @@ static irqreturn_t xdma_channel_isr(int irq, void *dev_id)
+ 	if (ret)
+ 		goto out;
+ 
+-	desc = to_xdma_desc(vd);
+ 	if (desc->interleaved_dma) {
+ 		xchan->busy = false;
+ 		desc->completed_desc_num += complete_desc_num;
+-- 
+2.43.0
+
