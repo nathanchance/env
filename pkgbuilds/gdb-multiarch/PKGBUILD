@@ -15,6 +15,7 @@ depends=(glibc ncurses libncursesw.so gcc-libs expat xz mpfr source-highlight
          readline libreadline.so guile python libelf)
 makedepends=(texinfo boost)
 backup=(etc/gdb/gdbinit)
+options=(!lto) # too many errors at the moment
 source=(https://ftp.gnu.org/gnu/gdb/gdb-${pkgver}.tar.xz{,.sig})
 sha1sums=('bcd6b05a2565f4339e1187dae428fb58a000d690'
           'SKIP')
