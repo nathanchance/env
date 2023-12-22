@@ -108,7 +108,7 @@ function upd -d "Runs the update command for the current distro or downloads/upd
                         print_error "Unknown OS! Cannot upgrade using 'upd'. Modify 'get_distro' to support this distro."
                         return 1
                 end
-                if has_container_manager; and dbx list &| grep -q (get_dev_img)
+                if has_container_manager; and dbx list &| grep -q (get_dev_img_esc)
                     dbxe -- "fish -c 'upd -y'"
                 end
                 if command -q mac

@@ -55,7 +55,7 @@ function dbxc -d "Shorthand for 'distrobox create'"
     # If no image was specified, default to the one for the architecture
     if not set -q img
         set img $GHCR/(get_dev_img)
-        set name (string replace / - (get_dev_img))
+        set name (get_dev_img_esc)
     end
 
     set -a dbx_args -i $img
