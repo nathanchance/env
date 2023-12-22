@@ -16,7 +16,7 @@ function cbl_bld_krnl_deb -d "Build a .deb kernel package"
                 set arch arm64
             case amd64 x86_64
                 set arch x86_64
-            case --cfi --cfi-permissive --lto
+            case --cfi --cfi-permissive --lto --no-werror
                 set -a config_args $arg
         end
     end
