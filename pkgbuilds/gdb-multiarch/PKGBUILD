@@ -49,6 +49,9 @@ package() {
   # install "custom" system gdbinit
   install -dm 755 "$pkgdir/etc/gdb"
   touch "$pkgdir/etc/gdb/gdbinit"
+
+  # Symlink 'gdb' binary to 'gdb-multiarch' for interoperability purposes
+  ln -s gdb "$pkgdir/usr/bin/$pkgname"
 }
 
 # vim: ts=2 sw=2 et:
