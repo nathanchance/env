@@ -99,18 +99,24 @@ if not string match -qr \'\.o$\' $o_target
 end
 set o_cmd_file $lnx_bld/good/(dirname $o_target)/.(basename $o_target).cmd
 
+#####################################
+# BEWARE MODIFICATIONS TO THIS AREA #
+#####################################
+
 function build_kernel
     set type $argv[1]
     set clang_var "$type"_clang
 
     kmake \
         -C $lnx_src \
-        LLVM=(dirname $$clang_var)/ \
+        CC=$$clang_var \
+        LLVM=1 \
         O=$lnx_bld/$type \
         mrproper $make_args
 end
 
-build_kernel good; or return
+build_kernel good
+or return
 if not test -f $o_cmd_file
     print_error "$o_cmd_file does not exist?"
     return 1
@@ -143,17 +149,22 @@ exit $script_ret
 # PART TWO #
 ############
 
-set clang_flags (cat flags)
+set clang_flags \
+    (cat flags)
 set common_flags \
+    -Wall \
     -Werror \
     -Wfatal-errors \
     -c \
     -o /dev/null \
-    $cvise_dir/...
+    $cvise_dir/*.i
+set gcc_flags
 
-$good_clang $clang_flags $common_flags; or return
-$bad_clang $clang_flags $common_flags &| ...
-test "$pipestatus" = "..."' >$cvise_test
+$good_clang $clang_flags $common_flags
+or return
+
+$bad_clang $clang_flags $common_flags &| grep -F \'\'
+test "$pipestatus" = "1 0"' >$cvise_test
     chmod +x $cvise_test
 
     git -C $cvise init; or return
