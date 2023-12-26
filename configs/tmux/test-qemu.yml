@@ -1,0 +1,16 @@
+session_name: test-qemu
+windows:
+- window_name: distrobox and cbl_vmm
+  focus: true
+  layout: 26fc,271x54,0,0[271x42,0,0,8,271x11,0,43,9]
+  start_directory: '~'
+  panes:
+  - shell: dbxe
+    shell_command:
+    - cmd: ssh_vm
+      enter: false
+  - shell: dbxe
+    shell_command:
+    - cmd: cbl_test_kvm vmm
+      enter: false
+    focus: true
