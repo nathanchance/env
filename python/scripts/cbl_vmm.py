@@ -80,7 +80,6 @@ class VirtualMachine:
         self.use_kvm = self.can_use_kvm()
         self.vfsd_log = Path(self.data_folder, 'vfsd.log')
         self.vfsd_sock = Path(self.data_folder, 'vfsd.sock')
-        self.vfsd_mem = Path(self.data_folder, 'vfsd.mem')
 
         # When using KVM, we cannot use more than the maximum number of cores.
         # Default to either 8 cores or half the number of cores in the machine,
@@ -123,8 +122,8 @@ class VirtualMachine:
             # Shared folder via virtiofs
             '-chardev', f"socket,id=char0,path={self.vfsd_sock}",
             '-device', 'vhost-user-fs-pci,queue-size=1024,chardev=char0,tag=host',
-            '-object', f"memory-backend-file,id=shm,mem-path={self.vfsd_mem},share=on,size={memory}G",
-            '-numa', 'node,memdev=shm',
+            '-object', f"memory-backend-memfd,id=mem,share=on,size={memory}G",
+            '-numa', 'node,memdev=mem',
 
             # Statistics
             '-m', f"{memory}G",
@@ -301,8 +300,6 @@ class VirtualMachine:
                 raise err
             finally:
                 vfsd.kill()
-                # Delete the memory to save space, it does not have to be persistent
-                self.vfsd_mem.unlink(missing_ok=True)
 
     def setup(self):
         self.remove()
