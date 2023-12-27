@@ -3,6 +3,7 @@
 # Copyright (C) 2022-2023 Nathan Chancellor
 
 from argparse import ArgumentParser
+import calendar
 import datetime
 import json
 import os
@@ -85,8 +86,12 @@ def get_report_name(date):
     return get_month_year(date) + '-cbl-work'
 
 
-def get_report_path(date):
+def get_monthly_report_path(date):
     return Path(get_report_worktree(), 'content/posts', get_report_file(date))
+
+
+def get_yearly_report_path(year):
+    return Path(get_report_repo(), f"content/posts/{year}-cbl-retrospective.md")
 
 
 def get_report_repo():
@@ -187,6 +192,15 @@ def parse_parameters():
                                help='Target previous month as opposed to current month')
     update_parser.set_defaults(func=update_report)
 
+    yearly_parser = subparsers.add_parser('yearly',
+                                          help='Generate yearly ClangBuiltLinux retrospective')
+    yearly_parser.add_argument('-y',
+                               '--year',
+                               default=datetime.datetime.now().year,
+                               help='Year of report (default: current year)',
+                               type=int)
+    yearly_parser.set_defaults(func=yearly_report)
+
     return parser.parse_args()
 
 
@@ -241,7 +255,7 @@ def generate_item(args):
         raise ValueError(f"Unhandled item type ('{item_type}')")
 
 
-def create_report_file(report_file, report_date):
+def create_monthly_report_file(report_file, report_date):
     title = f"{report_date.strftime('%B %Y')} ClangBuiltLinux Work"
     date = report_date.strftime('%Y-%m-%dT%H:%M:%S%z')
     # yapf: disable
@@ -393,6 +407,318 @@ def create_report_file(report_file, report_date):
     report_file.write_text(template, encoding='utf-8')
 
 
+def get_yearly_commits(year, source, branch='main', git_log_args=None, update=True):
+    if update:
+        subprocess.run(['git', 'remote', 'update', '--prune', 'origin'],
+                       capture_output=True,
+                       check=True,
+                       cwd=source)
+    git_log_cmd = [
+        'git',
+        'log',
+        '--format=%H %s',
+        '--no-merges',
+        f"--since-as-filter=Jan 1, {year}",
+        f"--until=Jan 1, {year + 1}",
+        f"origin/{branch}",
+    ]
+    if git_log_args:
+        git_log_cmd += git_log_args
+    else:
+        git_log_cmd.append('--author=Nathan Chancellor')
+    git_log_output = subprocess.run(git_log_cmd,
+                                    capture_output=True,
+                                    check=True,
+                                    cwd=source,
+                                    text=True)
+
+    return dict(item.split(' ', 1) for item in git_log_output.stdout.splitlines())
+
+
+def generate_html_commit_section(commits, repo):
+    if 'github' in repo:
+        commits_view = 'commit/'
+    elif 'gitlab' in repo:
+        commits_view = '-/commit/'
+    elif 'kernel.org' in repo:
+        commits_view = ''
+    else:
+        raise RuntimeError(f"Don't know how to handle repo URL: {repo}")
+    return ''.join([
+        f'<a href="{repo}/{commits_view}{sha}">{sha[1:14]}</a> ("{title}")</br>\n'
+        for sha, title in commits.items()
+    ])
+
+
+def create_yearly_report_file(report_file, report_date, year):
+    title = f"{year} ClangBuiltLinux Retrospective"
+    date = report_date.strftime('%Y-%m-%dT%H:%M:%S%z')
+
+    # yapf: disable
+    linux_link = 'https://git.kernel.org/linus'
+    llvm_link = 'https://github.com/llvm/llvm-project'
+    boot_utils_link = 'https://github.com/ClangBuiltLinux/boot-utils'
+    ci_link = 'https://github.com/ClangBuiltLinux/continuous-integration2'
+    tc_build_link = 'https://github.com/ClangBuiltLinux/tc-build'
+    tuxmake_link = 'https://gitlab.com/Linaro/tuxmake'
+    links = {
+        'boot_utils_log': f'<a href="{boot_utils_link}/commits/main?author=nathanchance">GitHub</a>',
+        'ci_log': f'<a href="{ci_link}/commits/main?author=nathanchance">GitHub</a>',
+        'gh_org': '[our GitHub organization](https://github.com/ClangBuiltLinux)',
+        'google': '[Google](https://www.google.com/)',
+        'last_retro': f"[Just like I did last year](/posts/{year - 1}-cbl-retrospective/)",
+        'lf': '[the Linux Foundation](https://www.linuxfoundation.org)',
+        'linux_log': '<a href="https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/log/?qt=author&q=Nathan+Chancellor">git.kernel.org</a>',
+        'llvm_log': f'<a href="{llvm_link}/commits/main?author=nathanchance">GitHub</a>',
+        'sponsor': '[sponsoring my work](https://www.linuxfoundation.org/press/press-release/google-funds-linux-kernel-developers-to-focus-exclusively-on-security)',
+        'tc_build_log': f'<a href="{tc_build_link}/commits/main?author=nathanchance">GitHub</a>',
+        'testimonial': '[which developers do appreciate](https://lore.kernel.org/YtsY5xwmlQ6kFtUz@google.com/)',
+        'tuxmake': f"[TuxMake]({tuxmake_link})",
+        'tuxmake_log': f'<a href="{tuxmake_link}/-/commits/master?author=Nathan%20Chancellor">GitLab</a>',
+    }
+
+    linux_src = Path(os.environ['CBL_SRC'], 'linux-next')
+    linux_gyc_kwargs = {
+        'year': year,
+        'source': linux_src,
+        'branch': 'master',
+    }
+    linux_commits = get_yearly_commits(**linux_gyc_kwargs)
+    linux_commit_links = generate_html_commit_section(linux_commits, linux_link)
+    # Updating the Linux repo is no longer necessary after the initial update
+    linux_gyc_kwargs['update'] = False
+    # We could generate linux_rep_rev_tst from the combination of the other
+    # three but then the commits will not be in order as they would be from git
+    # log, so just generate a fourth dictionary *shrugs*
+    linux_rep_rev_tst = get_yearly_commits(**linux_gyc_kwargs, git_log_args=['--extended-regexp', '--grep=(Report|Review|Test)ed-by: Nathan Chancellor'])
+    linux_rep_rev_tst_links = generate_html_commit_section(linux_rep_rev_tst, linux_link)
+    linux_rep = get_yearly_commits(**linux_gyc_kwargs, git_log_args=['--grep=Reported-by: Nathan Chancellor'])
+    linux_rev = get_yearly_commits(**linux_gyc_kwargs, git_log_args=['--grep=Reviewed-by: Nathan Chancellor'])
+    linux_tst = get_yearly_commits(**linux_gyc_kwargs, git_log_args=['--grep=Tested-by: Nathan Chancellor'])
+
+    llvm_src = Path(os.environ['CBL_SRC'], 'llvm-project')
+    llvm_commits = get_yearly_commits(year, llvm_src)
+    llvm_links = generate_html_commit_section(llvm_commits, llvm_link)
+
+    boot_utils_src = Path(os.environ['CBL_GIT'], 'boot-utils')
+    boot_utils_commits = get_yearly_commits(year, boot_utils_src)
+    boot_utils_links = generate_html_commit_section(boot_utils_commits, boot_utils_link)
+
+    ci_src = Path(os.environ['CBL_GIT'], 'continuous-integration2')
+    ci_commits = get_yearly_commits(year, ci_src)
+    ci_links = generate_html_commit_section(ci_commits, ci_link)
+
+    tc_build_src = Path(os.environ['CBL_GIT'], 'tc-build')
+    tc_build_commits = get_yearly_commits(year, tc_build_src)
+    tc_build_links = generate_html_commit_section(tc_build_commits, tc_build_link)
+
+    tuxmake_src = Path(os.environ['CBL_SRC'], 'tuxmake')
+    tuxmake_commits = get_yearly_commits(year, tuxmake_src, branch='master')
+    tuxmake_links = generate_html_commit_section(tuxmake_commits, tuxmake_link)
+
+    report_links = [f"- [{month} {year}](/posts/{month.lower()}-{year}-cbl-work/)" for month in calendar.month_name if month]
+
+    # Yes, this is Markdown in Python :)
+    template = (
+        '---'                                                              '\n'
+        f"title: {title}"                                                  '\n'
+        f"date: {date}"                                                    '\n'
+        'toc: false'                                                       '\n'
+        'images:'                                                          '\n'
+        'tags:'                                                            '\n'
+        '  - clangbuiltlinux'                                              '\n'
+        '  - linux'                                                        '\n'
+        '  - linuxfoundation'                                              '\n'
+        '  - maintainer'                                                   '\n'
+        '---'                                                              '\n'
+                                                                           '\n'
+        f"{links['last_retro']}, I want to do a yearly report/retrospective"
+        f" for {year} to look at what I (and the whole ClangBuiltLinux team"
+        ' in some cases) accomplished. I do monthly reports but looking at '
+        'a high level across the year helps put things into perspective and'
+        ' drive improvements going into the new year.'                     '\n'
+                                                                           '\n'
+        '## Linux kernel'                                                  '\n'
+                                                                           '\n'
+        f"This year, I had {len(linux_commits)} commits accepted into "
+        f"maintainer trees (not all will be merged into mainline in {year} "
+        f"but they were written and added in maintainer trees in {year}). "
+        'They can be viewed on the web or by running the following command '
+        'in an up-to-date Linux repository locally:'                       '\n'
+                                                                           '\n'
+        '```'                                                              '\n'
+        '$ git log \\'                                                     '\n'
+        '    --author=\'Nathan Chancellor\' \\'                            '\n'
+        '    --oneline \\'                                                 '\n'
+        f"    --since-as-filter='Jan 1, {year}' \\"                        '\n'
+        f"    --until='Jan 1, {year + 1}' \\"                              '\n'
+        '    origin/master'                                                '\n'
+        '```'                                                              '\n'
+                                                                           '\n'
+        'A similar command will be used to generate all following commit '
+        'logs, which are included for convenience behind some collapsible '
+        'Markdown with links.'                                             '\n'
+                                                                           '\n'
+        '<details>'                                                        '\n'
+        '<summary>'
+        f"Kernel contributions in {year} ({links['linux_log']})"
+        '</summary>'                                                       '\n'
+        '<p><code>'                                                        '\n'
+        f"{linux_commit_links}"
+        '</code></p>'                                                      '\n'
+        '</details></br>'                                                  '\n'
+                                                                           '\n'
+        '<INSERT EXPLANATION HERE>'                                        '\n'
+                                                                           '\n'
+        'It is important to keep in mind that sending patches is only part'
+        ' of the development process. The others are reporting problems and'
+        ' testing and reviewing solutions to those problems. The kernel '
+        'keeps track of these through particular tags: `Reported-by`, '
+        f"`Reviewed-by`, and `Tested-by`. In {year}, I provided those tags "
+        f"on {len(linux_rep_rev_tst)} patches. The break down of patches "
+        'that contained:'                                                  '\n'
+                                                                           '\n'
+        f"- `Reported-by`: {len(linux_rep)}"                               '\n'
+        f"- `Reviewed-by`: {len(linux_rev)}"                               '\n'
+        f"- `Tested-by`: {len(linux_tst)}"                                 '\n'
+                                                                           '\n'
+        'A full list of those commits are below, generated with the '
+        'following command in an up-to-date Linux checkout:'               '\n'
+                                                                           '\n'
+        '```'                                                              '\n'
+        '$ git log \\'                                                     '\n'
+        '    --extended-regexp \\'                                         '\n'
+        '    --grep=\'(Report|Review|Test)ed-by: Nathan Chancellor\' \\'   '\n'
+        '    --oneline \\'                                                 '\n'
+        f"    --since-as-filter='Jan 1, {year}' \\"                        '\n'
+        f"    --until='Jan 1, {year + 1}' \\"                              '\n'
+        '    origin/master'                                                '\n'
+        '```'                                                              '\n'
+                                                                           '\n'
+        '<details>'                                                        '\n'
+        '<summary>'
+        f"<code>Reported-by, Reviewed-by, and Tested-by</code> in {year}"
+        '</summary>'                                                       '\n'
+        '<p><code>'                                                        '\n'
+        f"{linux_rep_rev_tst_links}"
+        '</code></p>'                                                      '\n'
+        '</details></br>'                                                  '\n'
+                                                                           '\n'
+                                                                           '\n'
+        '## LLVM'                                                          '\n'
+                                                                           '\n'
+        'I am far from a large LLVM contributor but I do have occasional '
+        'patches there as part of this work. This year, I had '
+        f"{len(llvm_commits)} patches to LLVM. <INSERT EXPLANATION HERE>"  '\n'
+                                                                           '\n'
+        '<details>'                                                        '\n'
+        '<summary>'
+        f"LLVM contributions in {year} ({links['llvm_log']})"
+        '</summary>'                                                       '\n'
+        '<p><code>'                                                        '\n'
+        f"{llvm_links}"
+        '</code></p>'                                                      '\n'
+        '</details></br>'                                                  '\n'
+                                                                           '\n'
+                                                                           '\n'
+        '## Tooling'                                                       '\n'
+                                                                           '\n'
+        f"We have a few different repositories in {links['gh_org']} that we"
+        ' use for testing and development, which I call "tooling". Tooling '
+        'is very important for repetitive tasks or tasks where you want to '
+        'take the human out of the equation so that mistakes are less '
+        'likely, such as a bisect. Additionally, there are some other '
+        f"repositories that we rely on, like {links['tuxmake']}, that I "
+        'consistently contribute to.'                                      '\n'
+                                                                           '\n'
+        '<INSERT EXPLANATION HERE>'                                        '\n'
+                                                                           '\n'
+        'Like previously, I have included the `git log` output with direct '
+        'links to commits, along with a web link to browse the history '
+        'there.'                                                           '\n'
+                                                                           '\n'
+        '<details>'                                                        '\n'
+        f"<summary>boot-utils ({links['boot_utils_log']})</summary>"       '\n'
+        '<p><code>'                                                        '\n'
+        f"{boot_utils_links}"
+        '</code></p>'                                                      '\n'
+        '</details></br>'                                                  '\n'
+                                                                           '\n'
+        '<details>'                                                        '\n'
+        f"<summary>continuous-integration2 ({links['ci_log']})</summary>"  '\n'
+        '<p><code>'                                                        '\n'
+        f"{ci_links}"
+        '</code></p>'                                                      '\n'
+        '</details></br>'                                                  '\n'
+                                                                           '\n'
+        '<details>'                                                        '\n'
+        f"<summary>tc-build ({links['tc_build_log']})</summary>"           '\n'
+        '<p><code>'                                                        '\n'
+        f"{tc_build_links}"
+        '</code></p>'                                                      '\n'
+        '</details></br>'                                                  '\n'
+                                                                           '\n'
+        '<details>'                                                        '\n'
+        f"<summary>TuxMake ({links['tuxmake_log']})</summary>"             '\n'
+        '<p><code>'                                                        '\n'
+        f"{tuxmake_links}"
+        '</code></p>'                                                      '\n'
+        '</details></br>'                                                  '\n'
+                                                                           '\n'
+        '## Behind the scenes'                                             '\n'
+                                                                           '\n'
+        'There are always things that require time but do not always show '
+        'tangible results. There are three things that I think fall under '
+        'this category:'                                                   '\n'
+                                                                           '\n'
+        '- __Issue tracker management:__ Keeping a clean and accurate issue'
+        ' tracker is critical for few reason.'                             '\n'
+        '  1. It gives a good high level overview of the "health" of the '
+        'project. We want our issue tracker to be an accurate '
+        'representation of how much help we need (since we always need '
+        'it...)'                                                           '\n'
+        '  2. It helps assign priority to certain issues. If we have a lot '
+        'of open but resolved issues, it can be hard to decide what needs '
+        'to be worked on next.'                                            '\n'
+        '  3. The issue tracker is a wonderful historical reference. We use'
+        ' the issue tracker to keep track of mailing list posts and such so'
+        ' it is important that those links are as acccurate as possible and'
+        ' have as much information as possible in case we have to look back'
+        ' five years later to wonder why we did something the way that we '
+        'did.'                                                             '\n'
+        "- __Mailing list reading:__ We are not Cc'd on every issue related"
+        " to `clang`, even though sometimes it is the compiler's problem or"
+        ' a known difference between the toolchains that we have already '
+        'figured out. By monitoring the mailing list for certain phrases, '
+        'we can provide assistance without being initially notified, '
+        f"{links['testimonial']}."'\n'
+        '- __Hardware testing:__ Every linux-next release, I built and boot'
+        ' kernels on a variety of hardware to test for issues, as some '
+        'problems only show up on bare metal or with a full distribution. '
+        'I wrote a script to drive a full distribution QEMU on a variety of'
+        ' architectures to make some of that testing and debugging easier '
+        'but bare metal is always an important testing target, since that '
+        'is where the kernel will run the majority of the time.'           '\n'
+                                                                           '\n'
+                                                                           '\n'
+        '## Special thanks'                                                '\n'
+                                                                           '\n'
+        f"Special thanks to {links['google']} and {links['lf']} for "
+        f"{links['sponsor']}. I am in a very fortunate position thanks to "
+        'the work of many great and suppportive folks at those '
+        'organizations and I look forward to continuing to contribute under'
+        f" this umbrella for {year + 1}!"                                  '\n'
+                                                                           '\n'
+        'To view individual monthly reports, click on one of the links '
+        'below:'                                                           '\n'
+                                                                           '\n'
+        + '\n'.join(report_links) +                                        '\n'
+    )
+    # yapf: enable
+
+    report_file.write_text(template, encoding='utf-8')
+
+
 def finalize_report(args):
     # Get the source and destination paths and branch based on current time
     repo = get_report_repo()
@@ -475,13 +801,13 @@ def new_report(args):
         if not worktree.exists():
             raise RuntimeError(f"{worktree} does not exist when creating report file?")
 
-        report = get_report_path(date)
+        report = get_monthly_report_path(date)
         if not report.exists():
             report_date = get_initial_report_date()
             commit_title = f"content/posts: ClangBuiltLinux work in {report_date.strftime('%B')} {report_date.year}"
             commit_date = report_date.strftime('%a %b %d %H:%M:%S %Y %z')
 
-            create_report_file(report, report_date)
+            create_monthly_report_file(report, report_date)
             git(worktree, ['add', report])
             git(worktree, ['commit', '-m', commit_title, '--date', commit_date])
 
@@ -493,7 +819,7 @@ def update_report(args):
     # Get branch based on user's request
     date = get_prev_datetime() if args.prev_month else get_current_datetime()
 
-    if not (report := get_report_path(date)).exists():
+    if not (report := get_monthly_report_path(date)).exists():
         raise RuntimeError(f"{report} does not exist when updating?")
 
     if args.edit or args.all:
@@ -507,6 +833,19 @@ def update_report(args):
         git(worktree, ['c', '--fixup', args.commit])
     if args.push or args.all:
         git(worktree, ['push'])
+
+
+def yearly_report(args):
+    repo = get_report_repo()
+    report = get_yearly_report_path(args.year)
+    if not report.exists():
+        report_date = get_initial_report_date()
+        commit_title = f"content/posts: {args.year} ClangBuiltLinux retrospective"
+        commit_date = report_date.strftime('%a %b %d %H:%M:%S %Y %z')
+
+        create_yearly_report_file(report, report_date, args.year)
+        git(repo, ['add', report])
+        git(repo, ['commit', '-m', commit_title, '--date', commit_date])
 
 
 if __name__ == '__main__':
