@@ -128,8 +128,6 @@ function cbl_bld_tot_tcs -d "Build LLVM and binutils from source for kernel deve
     end
 
     # Add patches to revert here
-    # https://github.com/llvm/llvm-project/pull/72960#issuecomment-1866844679
-    set -a reverts https://github.com/llvm/llvm-project/commit/a8081ed8ff0fd11fb8d5f4c83df49da909e49612 # [LoongArch] Allow delayed decision for ADD/SUB relocations (#72960)
     # Implicitly depends on the next change in the reverts list so revert it for clean test results
     set -a reverts https://github.com/llvm/llvm-project/commit/5cfc7b3342ce4de0bbe182b38baa8a71fc83f8f8 # [PowerPC] Add test after #75271 on PPC. NFC. (#75616)
     # https://github.com/llvm/llvm-project/issues/76416
@@ -149,6 +147,8 @@ function cbl_bld_tot_tcs -d "Build LLVM and binutils from source for kernel deve
     sed -i '/R_RISCV_RELAX \*ABS\*/d' $llvm_project/llvm/test/CodeGen/RISCV/relax-per-target-feature.ll
 
     # Add in-review patches here
+    # https://github.com/llvm/llvm-project/pull/72960#issuecomment-1866844679
+    set -a gh_prs https://github.com/llvm/llvm-project/pull/76433 # [LoongArch] Support R_LARCH_{ADD,SUB}_ULEB128 for .uleb128 and force relocs when sym is not in section
     for gh_pr in $gh_prs
         if not gh -R llvm/llvm-project pr diff (basename $gh_pr) | git -C $llvm_project ap
             set message "Failed to apply $gh_pr"
