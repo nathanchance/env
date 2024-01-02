@@ -22,9 +22,6 @@ function cbl_rb_fd -d "Rebase generic Fedora kernel on latest linux-next"
     for patch in $b4_patches
         b4 shazam -l -P _ -s $patch; or return
     end
-    # https://lore.kernel.org/20231221230153.GA1607352@dev-arch.thelio-3990X/
-    set -a crl_patches https://lore.kernel.org/all/2229136.1703246451@warthog.procyon.org.uk/raw # Fix oops in NFS
-    set -a crl_patches https://git.kernel.org/vkoul/dmaengine/p/3d0b2176e04261ab4ac095ff2a17db077fc1e46d # dmaengine: xilinx: xdma: statify xdma_prep_interleaved_dma
     for patch in $crl_patches
         crl $patch | git am -3; or return
     end
