@@ -128,10 +128,6 @@ function cbl_bld_tot_tcs -d "Build LLVM and binutils from source for kernel deve
     end
 
     # Add patches to revert here
-    # Implicitly depends on the next change in the reverts list so revert it for clean test results
-    set -a reverts https://github.com/llvm/llvm-project/commit/5cfc7b3342ce4de0bbe182b38baa8a71fc83f8f8 # [PowerPC] Add test after #75271 on PPC. NFC. (#75616)
-    # https://github.com/llvm/llvm-project/issues/76416
-    set -a reverts https://github.com/llvm/llvm-project/commit/0e46b49de43349f8cbb2a7d4c6badef6d16e31ae # Reapply "RegisterCoalescer: Add implicit-def of super register when coalescing SUBREG_TO_REG"
     for revert in $reverts
         set -l revert (basename $revert)
         if not git -C $llvm_project rv -n $revert
