@@ -7,6 +7,12 @@ function cbl_bld_lnx_dbg -d "Build linux-debug Arch Linux package"
 
     for arg in $argv
         switch $arg
+            case --cfi
+                set -a scripts_cfg_args -e CFI_CLANG
+            case --cfi-permissive
+                set -a scripts_cfg_args \
+                    -e CFI_CLANG \
+                    -e CFI_PERMISSIVE
             case -g --gcc
                 set gcc true
             case -l --localmodconfig
