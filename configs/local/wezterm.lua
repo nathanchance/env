@@ -11,6 +11,20 @@ wezterm.on("format-tab-title", function(tab, tabs, panes, config, hover, max_wid
     {Text=" " .. pane_title .. " "},
   }
 end)
+wezterm.on('bell', function(window, pane)
+  if window:active_pane():pane_id() == pane:pane_id() then
+    return
+  end
+
+  local pane_title = pane:get_title()
+  local user_title = pane:get_user_vars().panetitle
+
+  if user_title ~= nil and #user_title > 0 then
+    pane_title = user_title
+  end
+
+  window:toast_notification('wezterm', 'Bell rung in ' .. pane_title)
+end)
 local function get_hostname()
     local f = io.popen("/bin/hostname")
     local hostname = f:read("*a") or ""
@@ -48,5 +62,11 @@ return {
     right = 10,
     top = 5,
     bottom = 5,
+  },
+  visual_bell = {
+    fade_in_function = 'EaseIn',
+    fade_in_duration_ms = 150,
+    fade_out_function = 'EaseOut',
+    fade_out_duration_ms = 150,
   }
 }

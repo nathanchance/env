@@ -40,6 +40,10 @@ set wrap                                    " Wrap lines over a certain length. 
 set tabpagemax=100                          " Allow me to open up to 100 tabs
 set history=10000                           " Remember a large amount of commands
 
+" Shut up all bells
+set noerrorbells visualbell t_vb=
+autocmd GUIEnter * set visualbell t_vb=
+
 highlight ColorColumn ctermbg=0 guibg=lightgrey
 
 " Map Ctrl + left/right arrow keys to Home and End
