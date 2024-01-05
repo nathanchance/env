@@ -12,7 +12,7 @@ wezterm.on("format-tab-title", function(tab, tabs, panes, config, hover, max_wid
   }
 end)
 wezterm.on('bell', function(window, pane)
-  if window:active_pane():pane_id() == pane:pane_id() then
+  if window:is_focused() and window:active_pane():pane_id() == pane:pane_id() then
     return
   end
 
