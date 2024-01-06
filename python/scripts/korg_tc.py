@@ -205,21 +205,22 @@ class GCCManager(ToolchainManager):
             targets = sorted({self.canonicalize_target(val) for val in self.targets})
 
             # No GCC 5.5.0 aarch64-linux on aarch64?
-            if self.host_arch == 'aarch64' and major_version == 5:
+            if self.host_arch == 'aarch64' and 'aarch64-linux' in targets and major_version == 5:
                 targets.remove('aarch64-linux')
             # Ensure 'arm' gets downloaded with 'aarch64', so that compat vDSO can
             # be built.
             if 'aarch64-linux' in targets:
                 targets.append('arm-linux-gnueabi')
             # No GCC 9.5.0 i386-linux on x86_64?
-            if self.host_arch == 'x86_64' and major_version == 9:
+            if self.host_arch == 'x86_64' and 'i386-linux' in targets and major_version == 9:
                 targets.remove('i386-linux')
             # RISC-V was not supported in GCC until 7.x
             if major_version < 7:
-                targets.remove('riscv32-linux')
-                targets.remove('riscv64-linux')
+                for bits in ['32', '64']:
+                    if (rv_target := f"riscv{bits}-linux") in targets:
+                        targets.remove(rv_target)
             # LoongArch was not supported in GCC until 12.x
-            if major_version < 12:
+            if major_version < 12 and 'loongarch64-linux' in targets:
                 targets.remove('loongarch64-linux')
 
             full_version = self.latest_versions[major_version]
