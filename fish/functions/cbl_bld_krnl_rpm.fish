@@ -53,7 +53,7 @@ function cbl_bld_krnl_rpm -d "Build a .rpm kernel package"
 
     if set -q gcc
         if not string match -qr CROSS_COMPILE= $kmake_args
-            set -a kmake_args (korg_gcc print $GCC_VERSION_STABLE $arch)
+            set -a kmake_args (korg_gcc var $arch)
         end
     else
         if not string match -qr LLVM= $kmake_args

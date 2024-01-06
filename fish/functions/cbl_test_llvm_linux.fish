@@ -37,7 +37,7 @@ function cbl_test_llvm_linux -d "Test stable and mainline Linux with all support
     for linux_folder in $linux_folders
         git -C $linux_folder pull --rebase
 
-        for ver in (get_latest_stable_llvm_version $LLVM_VERSIONS_KERNEL)
+        for ver in (korg_llvm latest $LLVM_VERSIONS_KERNEL[2..])
             if not test -x $CBL_TC_LLVM_STORE/$ver/bin/clang-(string split -f 1 -m 1 . $ver)
                 print_error "LLVM $ver not available in $CBL_TC_LLVM_STORE!"
                 return 1

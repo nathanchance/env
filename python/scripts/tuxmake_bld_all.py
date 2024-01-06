@@ -12,7 +12,7 @@ import time
 # pylint: disable-next=import-error,no-name-in-module
 import tuxmake.build
 
-import korg_gcc
+import korg_tc
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 # pylint: disable-next=wrong-import-position
@@ -44,7 +44,7 @@ def parse_arguments():
                         metavar='TARGETS',
                         nargs='+')
 
-    suppported_toolchains = [f"gcc-{ver}" for ver in korg_gcc.supported_korg_gcc_versions()]
+    suppported_toolchains = [f"gcc-{ver}" for ver in korg_tc.GCCManager.VERSIONS]
     parser.add_argument('-t',
                         '--toolchains',
                         choices=suppported_toolchains,
@@ -96,9 +96,10 @@ def get_env_make_variables(target_arch, toolchain):
 
     if 'gcc' in toolchain:
         version = int(toolchain.split('-')[1])
-        make_variables['CROSS_COMPILE'] = korg_gcc.get_gcc_cross_compile(version, target_arch)
+        make_variables['CROSS_COMPILE'] = korg_tc.GCCManager().get_cc_as_path(version, target_arch)
         if target_arch == 'arm64':
-            make_variables['CROSS_COMPILE_COMPAT'] = korg_gcc.get_gcc_cross_compile(version, 'arm')
+            make_variables['CROSS_COMPILE_COMPAT'] = korg_tc.GCCManager().get_cc_as_path(
+                version, 'arm')
         if version < 8:
             environment['KCFLAGS'] = ''
 

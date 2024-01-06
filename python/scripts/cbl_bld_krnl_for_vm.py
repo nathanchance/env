@@ -12,7 +12,7 @@ import sys
 
 import requests
 
-import korg_gcc
+import korg_tc
 
 sys.path.append(str(Path(__file__).resolve().parents[1]))
 # pylint: disable=wrong-import-position
@@ -43,7 +43,7 @@ def get_toolchain_vars(kernel_arch, toolchain):
         return {'LLVM': '1'}
 
     gcc_major_version = int(toolchain.split('-')[1])
-    return {'CROSS_COMPILE': korg_gcc.get_gcc_cross_compile(gcc_major_version, kernel_arch)}
+    return {'CROSS_COMPILE': korg_tc.GCCManager().get_cc_as_path(gcc_major_version, kernel_arch)}
 
 
 def parse_arguments():
@@ -77,8 +77,7 @@ def parse_arguments():
                         help='Name of virtual machine to build kernel for',
                         required=True)
 
-    supported_toolchains = [f"gcc-{ver}"
-                            for ver in korg_gcc.supported_korg_gcc_versions()] + ['llvm']
+    supported_toolchains = [f"gcc-{ver}" for ver in korg_tc.GCCManager.VERSIONS] + ['llvm']
     parser.add_argument('-t',
                         '--toolchain',
                         choices=supported_toolchains,
