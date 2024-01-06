@@ -153,16 +153,6 @@ function cbl_bld_tot_tcs -d "Build LLVM and binutils from source for kernel deve
             return 1
         end
     end
-    for phab_revision in $phab_revisions
-        set -l git_ap_args
-        set -l base_rev (basename $phab_revision)
-        if not crl "$phab_revision?download=true" | git -C $llvm_project ap $git_ap_args
-            set message "Failed to apply $base_rev"
-            print_error "$message"
-            tg_msg "$message"
-            return 1
-        end
-    end
 
     set bld_llvm $tc_bld
     set llvm_bld $TMP_BUILD_FOLDER/(status function)/llvm
