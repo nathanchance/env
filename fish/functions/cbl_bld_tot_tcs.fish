@@ -145,6 +145,8 @@ function cbl_bld_tot_tcs -d "Build LLVM and binutils from source for kernel deve
     # Add in-review patches here
     # https://github.com/llvm/llvm-project/pull/72960#issuecomment-1866844679
     set -a gh_prs https://github.com/llvm/llvm-project/pull/76433 # [LoongArch] Support R_LARCH_{ADD,SUB}_ULEB128 for .uleb128 and force relocs when sym is not in section
+    # https://github.com/llvm/llvm-project/pull/76552#issuecomment-1878952480
+    set -a gh_prs https://github.com/llvm/llvm-project/pull/77236 # [MC][RISCV] Check hasEmitNops before call shouldInsertExtraNopBytesForCodeAlign
     for gh_pr in $gh_prs
         if not gh -R llvm/llvm-project pr diff (basename $gh_pr) | git -C $llvm_project ap
             set message "Failed to apply $gh_pr"
