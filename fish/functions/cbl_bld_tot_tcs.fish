@@ -137,17 +137,16 @@ function cbl_bld_tot_tcs -d "Build LLVM and binutils from source for kernel deve
             return 1
         end
     end
-    # https://github.com/ClangBuiltLinux/linux/issues/1965
-    # [RISCV][MC] Pass MCSubtargetInfo down to shouldForceRelocation and evaluateTargetFixup. (#73721)
-    git -C $llvm_project show (basename https://github.com/llvm/llvm-project/commit/e87f33d9ce785668223c3bcc4e06956985cccda1) | git -C $llvm_project ap -R --exclude llvm/test/CodeGen/RISCV/relax-per-target-feature.ll
-    sed -i '/R_RISCV_RELAX \*ABS\*/d' $llvm_project/llvm/test/CodeGen/RISCV/relax-per-target-feature.ll
 
     # Add in-review patches here
-    # https://github.com/llvm/llvm-project/pull/72960#issuecomment-1866844679
-    set -a gh_prs https://github.com/llvm/llvm-project/pull/76433 # [LoongArch] Support R_LARCH_{ADD,SUB}_ULEB128 for .uleb128 and force relocs when sym is not in section
-    # https://github.com/llvm/llvm-project/pull/76552#issuecomment-1878952480
-    set -a gh_prs https://github.com/llvm/llvm-project/pull/77236 # [MC][RISCV] Check hasEmitNops before call shouldInsertExtraNopBytesForCodeAlign
+    # https://github.com/ClangBuiltLinux/linux/issues/1965
+    set -a gh_prs https://github.com/llvm/llvm-project/pull/77436 # [RISCV] Force relocations if initial MCSubtargetInfo contains FeatureRelax
     for gh_pr in $gh_prs
+        if gh -R llvm/llvm-project pr view --json state (basename $gh_pr) | python3 -c "import json, sys; sys.exit(0 if json.load(sys.stdin)['state'] == 'MERGED' else 1)"
+            print_warning "$gh_pr has already been merged, skipping..."
+            continue
+        end
+
         if not gh -R llvm/llvm-project pr diff (basename $gh_pr) | git -C $llvm_project ap
             set message "Failed to apply $gh_pr"
             print_error "$message"
