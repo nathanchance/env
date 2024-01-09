@@ -13,6 +13,19 @@ function cbl_qualify_tc_bld_uprev -d "Qualify a new known good revision for tc-b
     set tc_bld_src $CBL_GIT/tc-build
     set lnx_stbl $CBL_SRC/linux-stable
 
+    begin
+        cbl_clone_repo (basename $tc_bld_src) (basename $lnx_stbl)
+        and git -C $tc_bld_src ru -p
+        and git -C $lnx_stbl ru -p
+    end
+    or return
+
+    if test -n "$argv[1]"
+        set tc_bld_branch $argv[1]
+    else
+        set tc_bld_branch (git -C $tc_bld_src rev-parse --abbrev-ref --symbolic-full-name @{u})
+    end
+
     mkdir -p $CBL_TMP
     set work_dir (mktemp -d -p $CBL_TMP)
     set tc_bld (mktemp -d -p $work_dir -u)
@@ -21,19 +34,7 @@ function cbl_qualify_tc_bld_uprev -d "Qualify a new known good revision for tc-b
 
     header "Setting up folders"
 
-    if not test -d $tc_bld_src
-        mkdir -p (dirname $tc_bld_src)
-        git clone https://github.com/ClangBuiltLinux/tc-build $tc_bld_src; or return
-    end
-    git -C $tc_bld_src pull -q -r; or return
-
-    if not test -d $lnx_stbl
-        mkdir -p (dirname $lnx_stbl)
-        git clone https://git.kernel.org/pub/scm/linux/kernel/git/stable/linux.git $lnx_stbl; or return
-    end
-    git -C $lnx_stbl ru; or return
-
-    git -C $tc_bld_src worktree add $tc_bld (git -C $tc_bld_src rev-parse --abbrev-ref --symbolic-full-name @{u}); or return
+    git -C $tc_bld_src worktree add $tc_bld $tc_bld_branch; or return
     for linux_src in $linux_srcs
         git -C $lnx_stbl worktree add $linux_src origin/(string replace 'stable-' '' (basename $linux_src)).y; or return
     end
@@ -60,54 +61,57 @@ print(gib // 30, gib // 15)" | string split ' ')
     set full_lto_def --defines LLVM_PARALLEL_LINK_JOBS=$lto_mem[1]
     set thin_lto_def --defines LLVM_PARALLEL_LINK_JOBS=$lto_mem[2]
 
-    # Check that two stage build works fine
-    $tc_bld/build-llvm.py \
-        $common_tc_bld_args; or return 125
-
-    # Check that kernel build works okay with PGO
-    $tc_bld/build-llvm.py \
-        $common_tc_bld_args \
-        $pgo_arg; or return 125
-
-    # Check that ThinLTO alone works okay
-    $tc_bld/build-llvm.py \
-        $common_tc_bld_args \
-        $thin_lto_def \
-        --lto thin; or return 125
-
-    # Check that full LTO alone works okay
-    $tc_bld/build-llvm.py \
-        $common_tc_bld_args \
-        $full_lto_def \
-        --lto full; or return 125
-
-    # Check that PGO + ThinLTO works okay
-    $tc_bld/build-llvm.py \
-        $common_tc_bld_args \
-        $thin_lto_def \
-        --lto thin \
-        $pgo_arg; or return 125
-
-    # Check that PGO + ThinLTO with only ARM targets works okay (because some people are weird like that).
-    # Cannot build the tests because they assume the host (X86) is in the list of targets.
-    # This is only necessary on x86_64, as this will just work on aarch64.
-    if test (uname -n) = x86_64
+    begin
+        # Check that two stage build works fine
         $tc_bld/build-llvm.py \
-            --assertions \
+            $common_tc_bld_args
+
+        # Check that kernel build works okay with PGO
+        and $tc_bld/build-llvm.py \
+            $common_tc_bld_args \
+            $pgo_arg
+
+        # Check that ThinLTO alone works okay
+        and $tc_bld/build-llvm.py \
+            $common_tc_bld_args \
+            $thin_lto_def \
+            --lto thin
+
+        # Check that full LTO alone works okay
+        and $tc_bld/build-llvm.py \
+            $common_tc_bld_args \
+            $full_lto_def \
+            --lto full
+
+        # Check that PGO + ThinLTO works okay
+        and $tc_bld/build-llvm.py \
+            $common_tc_bld_args \
             $thin_lto_def \
             --lto thin \
-            $pgo_arg \
-            --targets "AArch64;ARM" \
-            --use-good-revision; or return 125
-    end
+            $pgo_arg
 
-    # Finally, build with PGO and full LTO
-    $tc_bld/build-llvm.py \
-        $common_tc_bld_args \
-        --install-folder $usr \
-        $full_lto_def \
-        --lto full \
-        $pgo_arg; or return 125
+        # Check that PGO + ThinLTO with only ARM targets works okay (because some people are weird like that).
+        # Cannot build the tests because they assume the host (X86) is in the list of targets.
+        # This is only necessary on x86_64, as this will just work on aarch64.
+        and if test (uname -n) = x86_64
+            $tc_bld/build-llvm.py \
+                --assertions \
+                $thin_lto_def \
+                --lto thin \
+                $pgo_arg \
+                --targets "AArch64;ARM" \
+                --use-good-revision
+        end
+
+        # Finally, build with PGO and full LTO
+        and $tc_bld/build-llvm.py \
+            $common_tc_bld_args \
+            --install-folder $usr \
+            $full_lto_def \
+            --lto full \
+            $pgo_arg
+    end
+    or return 125
 
     header "Toolchain information"
 
