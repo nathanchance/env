@@ -18,7 +18,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        version: ['3.11', '3.10', '3.9'] # No 3.8 due to zoneinfo use
+        version: ['3.12', '3.11', '3.10', '3.9'] # No 3.8 due to zoneinfo use
     uses: nathanchance/actions-workflows/.github/workflows/python_lint.yml@main
     with:
       python_version: ${{ matrix.version }}
