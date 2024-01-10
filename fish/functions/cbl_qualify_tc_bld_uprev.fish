@@ -116,7 +116,7 @@ print(gib // 30, gib // 15)" | string split ' ')
     header "Toolchain information"
 
     $usr/bin/clang --version
-    git -C $tc_bld/llvm-project show -s
+    git -C $tc_bld/src/llvm-project show -s
 
     header "Testing toolchain"
 
