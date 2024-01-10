@@ -131,7 +131,8 @@ class ToolchainManager:
             print('Attempting to call print_latest_versions() with no versions?')
 
         for version in self.versions:
-            print(self.latest_versions[version])
+            if version in self.latest_versions:
+                print(self.latest_versions[version])
 
 
 class GCCManager(ToolchainManager):
