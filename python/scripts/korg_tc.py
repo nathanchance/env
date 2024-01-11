@@ -307,9 +307,7 @@ class LLVMManager(ToolchainManager):
 
             extraction_location = Path(self.install_folder, full_version)
             tarball.extracted_file = Path(extraction_location, 'bin/clang')
-
-            if extract:
-                tarball.extraction_location = extraction_location
+            tarball.extraction_location = extraction_location
 
             tarball.handle()
 
