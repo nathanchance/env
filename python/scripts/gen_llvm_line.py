@@ -19,16 +19,16 @@ def generate_pr_lines(args):
         result = subprocess.run(gh_pr_cmd, capture_output=True, check=True, text=True)
 
         info = json.loads(result.stdout)
-        print(f"set -a gh_prs {info['url']} # {info['title']}")
+        print(f"    set -a gh_prs {info['url']} # {info['title']}")
 
 
 def generate_revert_lines(args):
     if not args.no_update:
         lib.utils.call_git(args.directory, ['remote', 'update', '-p'])
-    show_format = 'set -a reverts %H # %s'
+    show_format = 'set -a reverts https://github.com/llvm/llvm-project/commit/%H # %s'
     for sha in args.shas:
         cmd = ['show', f"--format={show_format}", '--no-patch', sha]
-        print(lib.utils.get_git_output(args.directory, cmd))
+        print(f"    {lib.utils.get_git_output(args.directory, cmd)}")
 
 
 def parse_arguments():
