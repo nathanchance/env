@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: MIT
 # Copyright (C) 2021-2023 Nathan Chancellor
 
-function edfunc -d "Edit function file in $ENV_FOLDER"
+function edfunc -d "Edit function or script file in $ENV_FOLDER"
     for arg in $argv
         switch $arg
             case -f --fzf
@@ -23,7 +23,10 @@ function edfunc -d "Edit function file in $ENV_FOLDER"
         if test -f $func_to_edit
             set func_file $func_to_edit
         else
-            set func_file $ENV_FOLDER/fish/functions/$func_to_edit.fish
+            set func_file $PYTHON_SCRIPTS_FOLDER/$func_to_edit.py
+            if not test -f "$func_file"
+                set func_file $ENV_FOLDER/fish/functions/$func_to_edit.fish
+            end
             if not test -f "$func_file"
                 print_error "$func_file does not exist!"
                 return 1
