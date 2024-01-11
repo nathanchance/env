@@ -10,6 +10,7 @@ function cbl_clone_repo -d "Clone certain repos for ClangBuiltLinux testing and 
         set -l bundle
         set -l dest
         set -l git_clone_args
+        set -l use_repo
 
         switch $arg
             case binutils
@@ -21,6 +22,19 @@ function cbl_clone_repo -d "Clone certain repos for ClangBuiltLinux testing and 
             case cbl-ci-gh repro-scripts
                 set url https://github.com/nathanchance/$arg.git
                 set dest $CBL/(string replace cbl- "" $arg)
+            case common-android-multi
+                set use_repo true
+                set branch $arg
+                set url https://android.googlesource.com/kernel/manifest
+                set local_manifests $GITHUB_FOLDER/local_manifests/$arg.xml
+            case cros
+                set use_repo true
+                set branch stable
+                set url https://chromium.googlesource.com/chromiumos/manifest
+                if test -d $NVME_FOLDER
+                    set dest $NVME_FOLDER/data/$arg
+                end
+                set additional_repos https://chromium.googlesource.com/chromium/tools/depot_tools.git
             case linux
                 set bundle $bundles_folder/$arg.bundle
                 set url https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/
@@ -53,9 +67,40 @@ function cbl_clone_repo -d "Clone certain repos for ClangBuiltLinux testing and 
         end
 
         if not test -d $dest
-            mkdir -p (dirname $dest)
+            if test -n "$use_repo"
+                mkdir -p $dest
+            else
+                mkdir -p (dirname $dest)
+            end
+
             if test -n "$bundle"; and test -e $bundle
                 clone_from_bundle $bundle $dest $url $branch; or return
+            else if test -n "$use_repo"
+                pushd $dest
+
+                repo init -u $url -b $branch
+                and repo sync -c --force-sync -j4
+
+                if test -n "$local_manifests"
+                    mkdir .repo/local_manifests
+
+                    for local_manifest in $local_manifests
+                        if not test -e $local_manifest
+                            print_error "Supplied local manifest ('$local_manifest') does not exist!"
+                            return 1
+                        end
+                        ln -fsv $local_manifest .repo/local_manifests/(basename $local_manifest)
+                    end
+                end
+
+                if test -n "$additional_repos"
+                    for additional_repo in $additional_repos
+                        git clone $additional_repo
+                        or return
+                    end
+                end
+
+                popd
             else
                 git clone $git_clone_args $url $dest; or return
             end
