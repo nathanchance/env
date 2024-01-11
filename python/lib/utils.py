@@ -4,7 +4,12 @@
 
 from pathlib import Path
 import shlex
+import subprocess
 import time
+
+
+def call_git(directory, cmd):
+    return subprocess.run(['git', *cmd], capture_output=True, check=True, cwd=directory, text=True)
 
 
 def get_duration(start_seconds, end_seconds=None):
@@ -25,6 +30,10 @@ def get_duration(start_seconds, end_seconds=None):
     parts.append(f"{seconds}s")
 
     return ' '.join(parts)
+
+
+def get_git_output(directory, cmd):
+    return call_git(directory, cmd).stdout.strip()
 
 
 def path_and_text(*args):

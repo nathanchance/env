@@ -4,15 +4,12 @@ from argparse import ArgumentParser
 import os
 from pathlib import Path
 import re
-import subprocess
+import sys
 
-
-def call_git(directory, cmd):
-    return subprocess.run(['git', *cmd], capture_output=True, check=True, cwd=directory, text=True)
-
-
-def get_git_output(directory, cmd):
-    return call_git(directory, cmd).stdout.strip()
+sys.path.append(str(Path(__file__).resolve().parents[1]))
+# pylint: disable=wrong-import-position
+import lib.utils  # noqa: E402
+# pylint: enable=wrong-import-position
 
 
 def gen_linux_pkgver(args):
@@ -22,15 +19,15 @@ def gen_linux_pkgver(args):
         )
 
     if args.update:
-        call_git(args.directory, ['remote', 'update', '--prune', args.remote])
+        lib.utils.call_git(args.directory, ['remote', 'update', '--prune', args.remote])
 
     ref = f"{args.remote}/{args.branch}"
 
-    describe = get_git_output(args.directory, ['describe', ref]).replace('-', '.')
+    describe = lib.utils.get_git_output(args.directory, ['describe', ref]).replace('-', '.')
     if not (match := re.search(r'v([0-9]+)\.([0-9]+)\.', describe)):
         raise RuntimeError(f"Version regex did not work for '{describe}'?")
 
-    srccommit = get_git_output(args.directory, ['sha', ref])
+    srccommit = lib.utils.get_git_output(args.directory, ['sha', ref])
     print(f"_srccommit={srccommit}")
 
     # Transform
