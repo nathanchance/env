@@ -20,6 +20,7 @@ function cbl_rb_fd -d "Rebase generic Fedora kernel on latest linux-next"
     set -a b4_patches https://lore.kernel.org/all/20231222-dma-xilinx-xdma-clang-fixes-v1-1-84a18ff184d2@kernel.org/ # dmaengine: xilinx: xdma: Fix operator precedence in xdma_prep_interleaved_dma()
     set -a b4_patches https://lore.kernel.org/all/20231222-dma-xilinx-xdma-clang-fixes-v1-2-84a18ff184d2@kernel.org/ # dmaengine: xilinx: xdma: Fix initialization location of desc in xdma_channel_isr()
     set -a b4_patches https://lore.kernel.org/all/20240110-amdgpu-display-enum-enum-conversion-v1-1-953ae94fe15e@kernel.org/ # drm/amd/display: Avoid enum conversion warning
+    set -a b4_patches https://lore.kernel.org/all/20240111121104.180993-1-urezki@gmail.com/ # Fix a wrong value passed to __find_vmap_area()
     for patch in $b4_patches
         b4 shazam -l -P _ -s $patch; or return
     end
