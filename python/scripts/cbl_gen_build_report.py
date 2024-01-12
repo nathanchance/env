@@ -103,7 +103,7 @@ def generate_warnings(log_folder, src_folder):
         r"WARNING: CPU: [0-9]+ PID: [0-9]+ at arch/powerpc/kernel/optprobes.c:[0-9]+ kretprobe_trampoline\+",
         # Warning on boot when SRSO is not set, which is not really a problem
         # for our simple QEMU boots.
-        'kernel not compiled with CPU_SRSO',
+        'kernel not compiled with (CPU|MITIGATION)_SRSO',
         # Warning when SRSO is missing some option, harmless for our quick and
         # simple QEMU boots.
         'See https://kernel.org/doc/html/latest/admin-guide/hw-vuln/srso.html for mitigation options.',
