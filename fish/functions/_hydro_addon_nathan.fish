@@ -11,6 +11,10 @@ function _hydro_addon_nathan -d "Hydro prompt customizations"
         printf '%b(%s) ' (set_color 4B8BBE) (basename $VIRTUAL_ENV)
     end
 
+    if in_deb_chroot
+        printf '%b(chroot:%s) ' (set_color yellow) (cat /etc/debian_chroot)
+    end
+
     # Print symbol if we are in a container (like default toolbox prompt)
     if in_container
         printf '%b%s ' (set_color magenta) §
