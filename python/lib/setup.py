@@ -217,6 +217,13 @@ def is_virtual_machine():
     return get_hostname() in ('hyperv', 'qemu', 'vmware')
 
 
+def is_systemd_init():
+    if not shutil.which('systemctl'):
+        return False
+    res = subprocess.run(['systemctl', 'is-system-running', '--quiet'], check=False)
+    return res.returncode == 0
+
+
 def pacman(args):
     subprocess.run(['pacman', *args], check=True)
 
@@ -275,7 +282,8 @@ def set_ip_addr_for_intf(con_name, intf, ip_addr):
 
 
 def set_date_time():
-    subprocess.run(['timedatectl', 'set-timezone', 'America/Phoenix'], check=True)
+    if is_systemd_init():
+        subprocess.run(['timedatectl', 'set-timezone', 'America/Phoenix'], check=True)
 
 
 def setup_initial_fish_config(username):
