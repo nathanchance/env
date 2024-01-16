@@ -16,7 +16,8 @@ function cbl_rb_fd -d "Rebase generic Fedora kernel on latest linux-next"
     for revert in $reverts
         git revert --mainline 1 --no-edit $revert; or return
     end
-    set -a b4_patches https://lore.kernel.org/all/20231219201719.1967948-1-jtornosm@redhat.com/ # rpm-pkg: simplify installkernel %post
+    set -a b4_patches https://lore.kernel.org/all/20240114080644.5086-1-jtornosm@redhat.com/ # rpm-pkg: simplify installkernel %post
+    set -a b4_patches https://lore.kernel.org/all/20240114080711.5109-1-jtornosm@redhat.com/ # rpm-pkg: avoid install/remove the running kernel
     set -a b4_patches https://lore.kernel.org/all/20231222-dma-xilinx-xdma-clang-fixes-v1-1-84a18ff184d2@kernel.org/ # dmaengine: xilinx: xdma: Fix operator precedence in xdma_prep_interleaved_dma()
     set -a b4_patches https://lore.kernel.org/all/20231222-dma-xilinx-xdma-clang-fixes-v1-2-84a18ff184d2@kernel.org/ # dmaengine: xilinx: xdma: Fix initialization location of desc in xdma_channel_isr()
     set -a b4_patches https://lore.kernel.org/all/20240110-amdgpu-display-enum-enum-conversion-v1-1-953ae94fe15e@kernel.org/ # drm/amd/display: Avoid enum conversion warning
