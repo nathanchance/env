@@ -166,8 +166,9 @@ def generate_report(log_folder):
             for warning in warnings:
                 report_text += f"{log}:{warning}"
 
-    report_text += '\nList of successful tests:\n\n'
-    report_text += get_log(log_folder, 'success').read_text(encoding='utf-8')
+    if (success_log := get_log(log_folder, 'success')).exists():
+        report_text += '\nList of successful tests:\n\n'
+        report_text += success_log.read_text(encoding='utf-8')
 
     if full:
         report_text += '\nFull warning report:\n\n'
