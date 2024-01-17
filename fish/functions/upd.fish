@@ -82,7 +82,7 @@ function upd -d "Runs the update command for the current distro or downloads/upd
                 end
                 continue
 
-            case os
+            case os os-no-container
                 switch (get_distro)
                     case almalinux fedora rocky
                         sudo dnf update $yes
@@ -108,7 +108,7 @@ function upd -d "Runs the update command for the current distro or downloads/upd
                         print_error "Unknown OS! Cannot upgrade using 'upd'. Modify 'get_distro' to support this distro."
                         return 1
                 end
-                if has_container_manager; and dbx list &| grep -q (get_dev_img_esc)
+                if test "$target" != os-no-container; and has_container_manager; and dbx list &| grep -q (get_dev_img_esc)
                     dbxe -- "fish -c 'upd -y'"
                 end
                 if command -q mac
