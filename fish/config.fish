@@ -20,22 +20,33 @@ else
         start_tmux
     end
 
-    if test -d $OPT_ORB_GUEST
-        fish_add_path -g $OPT_ORB_GUEST/bin-hiprio
-        fish_add_path -aP $OPT_ORB_GUEST/bin
-        fish_add_path -aP $OPT_ORB_GUEST/data/bin/cmdlinks
-    end
-
     if in_container
+        # distrobox may add duplicates to PATH, clean it up :/
+        # https://github.com/89luca89/distrobox/issues/1145
+        set --local --path deduplicated_path
+        set --local item
+
+        for item in $PATH
+            if not contains $item $deduplicated_path
+                set -a deduplicated_path $item
+            end
+        end
+        set --export --global --path PATH $deduplicated_path
+
         if test "$USE_CBL" = 1
-            set -l folder
-            for folder in $CBL_QEMU_BIN $CBL_TC_BNTL $CBL_TC_LLVM
-                fish_add_path -gm $folder
+            for item in $CBL_QEMU_BIN $CBL_TC_BNTL $CBL_TC_LLVM
+                fish_add_path -gm $item
             end
         end
     else
         gpg_key_cache
         tmux_ssh_fixup
+    end
+
+    if test -d $OPT_ORB_GUEST
+        fish_add_path -g $OPT_ORB_GUEST/bin-hiprio
+        fish_add_path -aP $OPT_ORB_GUEST/bin
+        fish_add_path -aP $OPT_ORB_GUEST/data/bin/cmdlinks
     end
 
     fish_add_path -aP /usr/local/sbin /usr/sbin /sbin
