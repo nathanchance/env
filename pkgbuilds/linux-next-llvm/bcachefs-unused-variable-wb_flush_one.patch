@@ -1,0 +1,34 @@
+From 46288383a92f7f8aec60e35b4187987e1f4ec237 Mon Sep 17 00:00:00 2001
+From: Nathan Chancellor <nathan@kernel.org>
+Date: Tue, 16 Jan 2024 20:41:44 -0700
+Subject: [PATCH] bcachefs: Use trans->c directly in wb_flush_one()
+
+Link: https://lore.kernel.org/20240117132837.3b1d8caa@canb.auug.org.au/
+Signed-off-by: Nathan Chancellor <nathan@kernel.org>
+---
+ fs/bcachefs/btree_write_buffer.c | 5 ++---
+ 1 file changed, 2 insertions(+), 3 deletions(-)
+
+diff --git a/fs/bcachefs/btree_write_buffer.c b/fs/bcachefs/btree_write_buffer.c
+index e6fe01023299..ac7844861966 100644
+--- a/fs/bcachefs/btree_write_buffer.c
++++ b/fs/bcachefs/btree_write_buffer.c
+@@ -125,13 +125,12 @@ static inline int wb_flush_one(struct btree_trans *trans, struct btree_iter *ite
+ 			       struct btree_write_buffered_key *wb,
+ 			       bool *write_locked, size_t *fast)
+ {
+-	struct bch_fs *c = trans->c;
+ 	struct btree_path *path;
+ 	int ret;
+ 
+ 	EBUG_ON(!wb->journal_seq);
+-	EBUG_ON(!c->btree_write_buffer.flushing.pin.seq);
+-	EBUG_ON(c->btree_write_buffer.flushing.pin.seq > wb->journal_seq);
++	EBUG_ON(!trans->c->btree_write_buffer.flushing.pin.seq);
++	EBUG_ON(trans->c->btree_write_buffer.flushing.pin.seq > wb->journal_seq);
+ 
+ 	ret = bch2_btree_iter_traverse(iter);
+ 	if (ret)
+-- 
+2.43.0
+

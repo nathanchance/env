@@ -3,7 +3,7 @@
 
 _localversion=-llvm
 pkgname=linux-next$_localversion
-_srctag=next-20240112
+_srctag=next-20240117
 pkgver=${_srctag//-/.}
 pkgrel=1
 pkgdesc='linux-next'
@@ -26,7 +26,7 @@ source=(
   20231222_nathan_dmaengine_xilinx_xdma_fix_initialization_location_of_desc_in_xdma_channel_isr.patch
   20231222_nathan_dmaengine_xilinx_xdma_fix_operator_precedence_in_xdma_prep_interleaved_dma.patch
   20240104_nathan_platform_x86_intel_uncore_freq_fix_types_in_sysfs_callbacks.patch
-  20240110_nathan_drm_amd_display_avoid_enum_conversion_warning.patch
+  bcachefs-unused-variable-wb_flush_one.patch
 )
 
 validpgpkeys=(
@@ -34,11 +34,11 @@ validpgpkeys=(
   '3F2568AAC26998F9E813A1C5C3F436CA30F5D8EB'  # Mark Brown
 )
 sha256sums=('SKIP'
-            '32a3cc51ad2ea58ede4d8130d6ef23259f855a9ddf37da8b4912966c72dfad26'
+            'a02891f9e90cf2e81bcb42e70ea8c885edb2cf388b804fdbcea96d48009a4678'
             '7f26fe51d8b6d1fe27defafb41bfbb2d09ed6fcfd0e75b1e50e56e3bdf01cc2b'
             '284c768e567f1f860843fde9b4b3a7df9878a49c30b4647d3a79400ad266fd5e'
             '2cfa151befee20012cf1907c4dd7d7ff60d5aaab69e7c3559c1e047de832e711'
-            'fafd8b9d3dfe86e7d5f23d7f2bbaaba17b4169b7ff75e510a16ed61eaac934d9')
+            'c3bdb37e53a4ff31b76e4ce665925f5badf1972ee246dff9acc3d180fd44dc04')
 
 # This obviously ties this PKGBUILD to my machine but that is kind of the point :)
 _kmake() {
