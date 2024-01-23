@@ -15,28 +15,16 @@ function cbl_test_llvm_linux -d "Test stable and mainline Linux with all support
         set targets mainline stable
     end
 
-    for target in $targets
-        switch $target
-            case mainline
-                set folder $CBL_BLD_C/linux
-                if not test -d $folder
-                    mkdir -p (dirname $folder)
-                    git clone https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/ $folder
-                end
+    cbl_upd_lnx_c $targets
 
-                set -a linux_folders $folder
-
-            case stable
-                set base $CBL_BLD_C/linux-stable
-                cbl_upd_stbl_wrktrs $base
-
-                set -a linux_folders $base-$CBL_STABLE_VERSIONS
-        end
+    if contains mainline $targets
+        set -a linux_folders $CBL_BLD_C/linux
+    end
+    if contains stable $targets
+        set -a linux_folder $CBL_BLD_C/linux-stable-$CBL_STABLE_VERSIONS
     end
 
     for linux_folder in $linux_folders
-        git -C $linux_folder pull --rebase
-
         for ver in (korg_llvm latest $LLVM_VERSIONS_KERNEL_STABLE)
             if not test -x $CBL_TC_LLVM_STORE/$ver/bin/clang-(string split -f 1 -m 1 . $ver)
                 print_error "LLVM $ver not available in $CBL_TC_LLVM_STORE!"
