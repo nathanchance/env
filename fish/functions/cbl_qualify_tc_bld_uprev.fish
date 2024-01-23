@@ -36,7 +36,7 @@ function cbl_qualify_tc_bld_uprev -d "Qualify a new known good revision for tc-b
 
     git -C $tc_bld_src worktree add $tc_bld $tc_bld_branch; or return
     for linux_src in $linux_srcs
-        git -C $lnx_stbl worktree add $linux_src origin/(string replace 'stable-' '' (basename $linux_src)).y; or return
+        git -C $lnx_stbl worktree add $linux_src origin/(stable_folder_to_branch $linux_src); or return
     end
 
     header "Building toolchains"

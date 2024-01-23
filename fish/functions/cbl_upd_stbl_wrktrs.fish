@@ -30,7 +30,7 @@ function cbl_upd_stbl_wrktrs -d "Update the worktrees for linux-stable"
         for worktree in $folder-$stable_versions
             if not test -d $worktree
                 header "Creating $worktree"
-                set -l branch (string replace 'stable-' '' (basename $worktree)).y
+                set -l branch (stable_folder_to_branch $worktree)
                 git -C $folder worktree add --track -b $branch $worktree origin/$branch
             end
         end
