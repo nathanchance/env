@@ -62,6 +62,7 @@ function cbl_bld_qemu -d "Build QEMU for use with ClangBuiltLinux"
         pushd $qemu_bld; or return
 
         $qemu_src/configure \
+            --disable-af-xdp \
             --disable-alsa \
             --disable-bochs \
             --disable-bpf \
