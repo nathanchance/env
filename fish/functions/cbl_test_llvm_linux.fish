@@ -16,6 +16,7 @@ function cbl_test_llvm_linux -d "Test stable and mainline Linux with all support
     end
 
     cbl_upd_lnx_c $targets
+    korg_llvm install
 
     if contains mainline $targets
         set -a linux_folders $CBL_BLD_C/linux
@@ -26,11 +27,6 @@ function cbl_test_llvm_linux -d "Test stable and mainline Linux with all support
 
     for linux_folder in $linux_folders
         for ver in (korg_llvm latest $LLVM_VERSIONS_KERNEL_STABLE)
-            if not test -x $CBL_TC_LLVM_STORE/$ver/bin/clang-(string split -f 1 -m 1 . $ver)
-                print_error "LLVM $ver not available in $CBL_TC_LLVM_STORE!"
-                return 1
-            end
-
             cbl_lkt \
                 --build-folder $TMP_BUILD_FOLDER/cbl_test_llvm_linux \
                 --linux-folder $linux_folder \
