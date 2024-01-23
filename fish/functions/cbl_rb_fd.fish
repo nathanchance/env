@@ -16,19 +16,19 @@ function cbl_rb_fd -d "Rebase generic Fedora kernel on latest linux-next"
     for revert in $reverts
         git revert --mainline 1 --no-edit $revert; or return
     end
-    set -a b4_patches https://lore.kernel.org/all/20240114080644.5086-1-jtornosm@redhat.com/ # rpm-pkg: simplify installkernel %post
-    set -a b4_patches https://lore.kernel.org/all/20240114080711.5109-1-jtornosm@redhat.com/ # rpm-pkg: avoid install/remove the running kernel
-    set -a b4_patches https://lore.kernel.org/all/20231222-dma-xilinx-xdma-clang-fixes-v1-1-84a18ff184d2@kernel.org/ # dmaengine: xilinx: xdma: Fix operator precedence in xdma_prep_interleaved_dma()
-    set -a b4_patches https://lore.kernel.org/all/20231222-dma-xilinx-xdma-clang-fixes-v1-2-84a18ff184d2@kernel.org/ # dmaengine: xilinx: xdma: Fix initialization location of desc in xdma_channel_isr()
     for patch in $b4_patches
         b4 shazam -l -P _ -s $patch; or return
     end
+    set -a crl_patches https://git.kernel.org/torvalds/p/e01a83e12604aa2f8d4ab359ec44e341a2248b4a # Revert "btrfs: zstd: fix and simplify the inline extent decompression"
+    set -a crl_patches https://lore.kernel.org/all/20240122182253.17973-1-jtornosm@redhat.com/raw # rpm-pkg: simplify installkernel %posti
     for patch in $crl_patches
         crl $patch | git am -3; or return
     end
     for hash in $ln_commits
         git -C $CBL_BLD_P/linux-next fp -1 --stdout $hash | git am; or return
     end
+    # https://lore.kernel.org/all/CAK7LNAQCiBtQ3kQznPDKtkD83wpCzodPVDs8eFnfnx5=Y8E5Cw@mail.gmail.com/2-0001-kbuild-rpm-pkg-specify-more-files-as-ghost.patch
+    set -a am_patches $NVME_FOLDER/data/tmp-patches/0001-kbuild-rpm-pkg-specify-more-files-as-ghost.patch # kbuild: rpm-pkg: specify more files as %ghost
     for patch in $am_patches
         git am -3 $patch; or return
     end
