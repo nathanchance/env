@@ -19,8 +19,7 @@ function cbl_rb_fd -d "Rebase generic Fedora kernel on latest linux-next"
     for patch in $b4_patches
         b4 shazam -l -P _ -s $patch; or return
     end
-    set -a crl_patches https://git.kernel.org/torvalds/p/e01a83e12604aa2f8d4ab359ec44e341a2248b4a # Revert "btrfs: zstd: fix and simplify the inline extent decompression"
-    set -a crl_patches https://lore.kernel.org/all/20240122182253.17973-1-jtornosm@redhat.com/raw # rpm-pkg: simplify installkernel %posti
+    set -a crl_patches https://lore.kernel.org/all/20240122182253.17973-1-jtornosm@redhat.com/raw # rpm-pkg: simplify installkernel %post
     for patch in $crl_patches
         crl $patch | git am -3; or return
     end
