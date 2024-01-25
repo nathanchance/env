@@ -10,6 +10,10 @@ function run_cmd -d "Run specified command depending on where it is available"
             set -fx XDG_CONFIG_HOME $XDG_FOLDER/config
             set -fx XDG_DATA_HOME $XDG_FOLDER/share
 
+            if test $cmd = tuxmake
+                set -fx CONTAINERS_STORAGE_CONF $ENV_FOLDER/configs/tuxmake/storage.conf
+            end
+
         case duf
             set cmd_def_args \
                 -style ascii
