@@ -10,6 +10,9 @@ function cbl_cl_software -d "Clean up old versions of managed software"
             case binutils
                 set folder $CBL_TC_BNTL_STORE
                 set binary as
+            case gcc
+                set folder $CBL_TC_GCC_STORE
+                set binary aarch64-linux-gcc
             case llvm
                 set folder $CBL_TC_LLVM_STORE
                 set binary clang
