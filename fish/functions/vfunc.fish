@@ -3,5 +3,10 @@
 # Copyright (C) 2022-2023 Nathan Chancellor
 
 function vfunc -d "View function defintion in fish with a pager"
-    type $argv &| bat --color always --language fish --style plain
+    set func_file $PYTHON_SCRIPTS_FOLDER/$argv.py
+    if test -f "$func_file"
+        vw -c $func_file
+    else
+        type $argv &| bat --color always --language fish --style plain
+    end
 end
