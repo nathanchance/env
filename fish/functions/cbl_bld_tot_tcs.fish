@@ -96,7 +96,14 @@ function cbl_bld_tot_tcs -d "Build LLVM and binutils from source for kernel deve
             git -C $bntls pull --rebase; or return
         end
 
-        set bntls_install $CBL_TC_BNTL_STORE/$date_time-(git -C $bntls sh -s --format=%H origin/master)
+        string match -gr "PACKAGE_VERSION='(.*)'" <$bntls/binutils/configure | read bntls_ver
+        if test (count (string split . $bntls_ver)) != 3
+            set message "Malformed binutils version ('$bntls_ver')?"
+            print_error "$messsage"
+            tg_msg "$message"
+            return 1
+        end
+        set bntls_install $CBL_TC_BNTL_STORE/$bntls_ver-$date_time-(git -C $bntls sh -s --format=%H origin/master)
         if not PATH="/usr/lib/ccache/bin:$PATH" $tc_bld/build-binutils.py \
                 $bld_bntls_args \
                 --binutils-folder $bntls \
@@ -154,6 +161,14 @@ function cbl_bld_tot_tcs -d "Build LLVM and binutils from source for kernel deve
             tg_msg "$message"
             return 1
         end
+    end
+
+    string match -gr "\s+set\(LLVM_VERSION_[A-Z]+ ([0-9]+)\)" <$llvm_project/llvm/CMakeLists.txt | string join . | read llvm_ver
+    if test (count (string split . $llvm_ver)) != 3
+        set message "Malformed LLVM version ('$llvm_ver')?"
+        print_error "$messsage"
+        tg_msg "$message"
+        return 1
     end
 
     set bld_llvm $tc_bld
@@ -242,7 +257,7 @@ kernel_builder.build()"
         set -a bld_llvm_args --pgo $pgo
     end
 
-    set llvm_install $CBL_TC_LLVM_STORE/$date_time-(git -C $llvm_project sh -s --format=%H origin/main)
+    set llvm_install $CBL_TC_LLVM_STORE/$llvm_ver-$date_time-(git -C $llvm_project sh -s --format=%H origin/main)
     if not $tc_bld/build-llvm.py \
             $common_bld_llvm_args \
             $bld_llvm_args \
