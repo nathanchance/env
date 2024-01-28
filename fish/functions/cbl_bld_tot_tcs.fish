@@ -97,7 +97,7 @@ function cbl_bld_tot_tcs -d "Build LLVM and binutils from source for kernel deve
         end
 
         string match -gr "PACKAGE_VERSION='(.*)'" <$bntls/binutils/configure | read bntls_ver
-        if test (count (string split . $bntls_ver)) != 3
+        if test (string split . $bntls_ver | count) != 3
             set message "Malformed binutils version ('$bntls_ver')?"
             print_error "$messsage"
             tg_msg "$message"
@@ -164,7 +164,7 @@ function cbl_bld_tot_tcs -d "Build LLVM and binutils from source for kernel deve
     end
 
     string match -gr "\s+set\(LLVM_VERSION_[A-Z]+ ([0-9]+)\)" <$llvm_project/llvm/CMakeLists.txt | string join . | read llvm_ver
-    if test (count (string split . $llvm_ver)) != 3
+    if test (string split . $llvm_ver | count) != 3
         set message "Malformed LLVM version ('$llvm_ver')?"
         print_error "$messsage"
         tg_msg "$message"
