@@ -15,6 +15,13 @@ if test "$LOCATION" = mac
     set -gx INFOPATH /opt/homebrew/share/info
 
     set -gx SHELL /opt/homebrew/bin/fish
+
+    set -gx CARGO_HOME $HOME/.local/share/cargo
+    set -gx RUSTUP_HOME $HOME/.local/share/rustup
+
+    if test -d $CARGO_HOME/bin
+        fish_add_path -ag $CARGO_HOME/bin
+    end
 else
     if not string match -qr tty (tty); and status is-interactive
         start_tmux
