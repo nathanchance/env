@@ -46,6 +46,8 @@ return {
   default_cursor_style = 'BlinkingUnderline',
   font = wezterm.font_with_fallback({"Iosevka Term SS08", "SF Mono Regular"}),
   font_size = get_font_size(),
+  freetype_load_flags = 'DEFAULT',
+  front_end = 'WebGpu',
   initial_cols = 238,
   initial_rows = 51,
   keys = {
