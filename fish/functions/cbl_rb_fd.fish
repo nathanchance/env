@@ -16,10 +16,10 @@ function cbl_rb_fd -d "Rebase generic Fedora kernel on latest linux-next"
     for revert in $reverts
         git revert --mainline 1 --no-edit $revert; or return
     end
+    set -a b4_patches https://lore.kernel.org/all/20240129092819.10088-1-jtornosm@redhat.com/ # rpm-pkg: simplify installkernel %post
     for patch in $b4_patches
         b4 shazam -l -P _ -s $patch; or return
     end
-    set -a crl_patches https://lore.kernel.org/all/20240122182253.17973-1-jtornosm@redhat.com/raw # rpm-pkg: simplify installkernel %post
     for patch in $crl_patches
         crl $patch | git am -3; or return
     end
