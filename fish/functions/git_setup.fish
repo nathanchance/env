@@ -8,6 +8,8 @@ function git_setup -d "Configure git"
 
     git config --global core.editor vim
 
+    git config --global branch.sort -committerdate
+
     git config --global color.ui auto
 
     git config --global diff.renamelimit 0
