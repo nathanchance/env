@@ -42,7 +42,6 @@ local function get_font_size()
 end
 return {
   color_scheme = "Snazzy",
-  debug_key_events = true,
   default_prog = {"/opt/homebrew/bin/fish", "-l"},
   default_cursor_style = 'BlinkingUnderline',
   font = wezterm.font_with_fallback({"Iosevka Term SS08", "SF Mono Regular"}),
