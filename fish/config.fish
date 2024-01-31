@@ -15,13 +15,6 @@ if test "$LOCATION" = mac
     set -gx INFOPATH /opt/homebrew/share/info
 
     set -gx SHELL /opt/homebrew/bin/fish
-
-    set -gx CARGO_HOME $HOME/.local/share/cargo
-    set -gx RUSTUP_HOME $HOME/.local/share/rustup
-
-    if test -d $CARGO_HOME/bin
-        fish_add_path -ag $CARGO_HOME/bin
-    end
 else
     if not string match -qr tty (tty); and status is-interactive
         start_tmux
@@ -57,10 +50,6 @@ else
     end
 
     fish_add_path -aP /usr/local/sbin /usr/sbin /sbin
-
-    if test -d $HOME/.cargo/bin
-        fish_add_path -ag $HOME/.cargo/bin
-    end
 end
 
 if command -q fd
@@ -70,6 +59,10 @@ end
 
 if command -q zoxide
     zoxide init --hook prompt fish | source
+end
+
+if test -d $CARGO_HOME/bin
+    fish_add_path -ag $CARGO_HOME/bin
 end
 
 # Make sure that sourcing config.fish always returns 0

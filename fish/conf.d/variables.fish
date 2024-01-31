@@ -264,3 +264,7 @@ set -gx TMUXP_CONFIGDIR $ENV_FOLDER/configs/tmux
 
 # Allow an unlimited number of PIDs for tuxmake containers
 set -gx TUXMAKE_PODMAN_RUN --pids-limit=-1
+
+# Move Rust folders into XDG_DATA_HOME
+set -gx CARGO_HOME $HOME/.local/share/cargo
+set -gx RUSTUP_HOME $HOME/.local/share/rustup
