@@ -70,6 +70,7 @@ def install_packages():
         'libusb',
         'mosh',
         'ripgrep',
+        'rustup-init',
         'zoxide',
     ]  # yapf: disable
     brew(['install', *packages])
