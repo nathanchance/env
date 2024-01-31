@@ -16,7 +16,8 @@ function cbl_bld_qemu -d "Build QEMU for use with ClangBuiltLinux"
         set qemu_src $CBL_QEMU_SRC/qemu-$VERSION
         mkdir -p (dirname $qemu_src)
         crl https://download.qemu.org/(basename $qemu_src).tar.xz | tar -C (dirname $qemu_src) -xJf -
-        set qemu_ver $VERSION
+
+        set install_folder $VERSION
     else
         set qemu_src $CBL_QEMU_SRC/qemu
         if not test -d $qemu_src
@@ -48,11 +49,11 @@ function cbl_bld_qemu -d "Build QEMU for use with ClangBuiltLinux"
             end
         end
 
-        set qemu_ver (git -C $qemu_src sh -s --format=%H)
+        set install_folder (cat $qemu_src/VERSION)-(date +%F-%H-%M-%S)-(git -C $qemu_src sh -s --format=%H)
     end
 
     if test -z "$PREFIX"
-        set PREFIX $CBL_QEMU_INSTALL/(date +%F-%H-%M-%S)-$qemu_ver
+        set PREFIX $CBL_QEMU_INSTALL/$install_folder
     end
 
     if not test -x $PREFIX/bin/qemu-system-x86_64
