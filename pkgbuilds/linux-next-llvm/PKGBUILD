@@ -3,7 +3,7 @@
 
 _localversion=-llvm
 pkgname=linux-next$_localversion
-_srctag=next-20240129
+_srctag=next-20240130
 pkgver=${_srctag//-/.}
 pkgrel=1
 pkgdesc='linux-next'
@@ -23,6 +23,7 @@ options=('!strip')
 source=(
   "$pkgname::git+https://git.kernel.org/pub/scm/linux/kernel/git/next/linux-next.git?signed#tag=$_srctag"
   config
+  revert-5797b1c18919cd9c289ded7954383e499f729ce0.patch
 )
 
 validpgpkeys=(
@@ -30,7 +31,8 @@ validpgpkeys=(
   '3F2568AAC26998F9E813A1C5C3F436CA30F5D8EB'  # Mark Brown
 )
 sha256sums=('SKIP'
-            'ffad06dca9db13151d78a21f98ab6323d6196a9d3808f3c5a55bf2cea67cb8fc')
+            '7aa813491bf9dc2ddd663a3fe057dc867770179184f16fc08a9607bdc7bea463'
+            '7ba46fa98c3d906f5b5bb53becf5fc471f7e6e730364002d38ac7e94f4ac521e')
 
 # This obviously ties this PKGBUILD to my machine but that is kind of the point :)
 _kmake() {

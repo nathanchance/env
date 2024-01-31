@@ -21,6 +21,13 @@ function cbl_rb_pi -d "Rebase Raspberry Pi kernel on latest linux-next"
     git rh origin/master
 
     # Patching
+    # https://lore.kernel.org/20240130180010.GA2011608@dev-arch.thelio-3990X/
+    set -a reverts 5797b1c18919cd9c289ded7954383e499f729ce0 # workqueue: Implement system-wide nr_active enforcement for unbound workqueues
+    # https://lore.kernel.org/20240130170556.GA1125757@dev-arch.thelio-3990X/
+    set -a reverts 196f34af2bf4c87ac4299a9775503d81b446980c # tty: serial: amba-pl011: Remove QDF2xxx workarounds
+    # https://lore.kernel.org/20240130091626.GA3684878@google.com/
+    set -a reverts 65929884f868cd5ed4e715e55ca66183b538c11a # modules: Remove #ifdef CONFIG_STRICT_MODULE_RWX around rodata_enabled
+    set -a reverts 677bfb9db8a37a8e61d3e8f97bbfd43e89b98e92 # module: Don't ignore errors from set_memory_XX()
     for revert in $reverts
         git revert --mainline 1 --no-edit $revert; or return
     end
