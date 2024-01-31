@@ -76,7 +76,7 @@ function install_rpi_kernel -d "Install Raspberry Pi kernel from a tarball"
 
     # Copy cmdline.txt because we are modifying os_prefix
     set cmdline $prefix/cmdline.txt
-    sudo cp -v (realpath /boot/cmdline.txt) $cmdline; or return
+    sudo cp -v (dirname $prefix)/cmdline.txt $cmdline; or return
 
     # Ensure that there is always a serial console option
     if grep -q console= $cmdline
