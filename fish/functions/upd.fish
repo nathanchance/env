@@ -421,6 +421,13 @@ function upd -d "Runs the update command for the current distro or downloads/upd
                             $install -Dvm644 complete/rg.fish $completions/rg.fish
                     end
 
+                case rustup
+                    if test $LOCATION = mac
+                        print_error "$target should be installed via homebrew!"
+                        return 1
+                    end
+                    curl --proto '=https' --tlsv1.3 -sSf https://sh.rustup.rs | sh
+
                 case shellcheck
                     switch $arch
                         case arm
