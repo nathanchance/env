@@ -5,6 +5,7 @@
 from pathlib import Path
 import shlex
 import subprocess
+import sys
 import time
 
 
@@ -52,7 +53,7 @@ def print_header(string):
 
 
 def print_color(color, string):
-    print(f"{color}{string}\033[0m", flush=True)
+    print(f"{color}{string}\033[0m" if sys.stdout.isatty() else string, flush=True)
 
 
 def print_cyan(msg):
