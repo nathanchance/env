@@ -21,8 +21,6 @@ function cbl_rb_fd -d "Rebase generic Fedora kernel on latest linux-next"
     for patch in $b4_patches
         b4 shazam -l -P _ -s $patch; or return
     end
-    set -a crl_patches https://git.kernel.org/masahiroy/linux-kbuild/p/736aa206be27a86db657a383f1505737e03b5891 # rpm-pkg: simplify installkernel %post
-    set -a crl_patches https://git.kernel.org/tj/wq/p/15930da42f8981dc42c19038042947b475b19f47 # workqueue: Don't call cpumask_test_cpu() with -1 CPU in wq_update_node_max_active()
     for patch in $crl_patches
         crl $patch | git am -3; or return
     end
