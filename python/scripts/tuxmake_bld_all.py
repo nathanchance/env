@@ -16,7 +16,7 @@ import korg_tc
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 # pylint: disable-next=wrong-import-position
-import lib.utils  # noqa: E402
+import lib.utils
 
 
 def interrupt_handler(_signum, _frame):

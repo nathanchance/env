@@ -15,7 +15,7 @@ import zoneinfo
 
 sys.path.append(str(Path(__file__).resolve().parents[1]))
 # pylint: disable=wrong-import-position
-import lib.utils  # noqa: E402
+import lib.utils
 
 # pylint: enable=wrong-import-position
 
@@ -823,7 +823,7 @@ def update_report(args):
         raise RuntimeError(f"{report} does not exist when updating?")
 
     if args.edit or args.all:
-        if not (editor := shutil.which(os.environ['EDITOR'] if 'EDITOR' in os.environ else 'vim')):
+        if not (editor := shutil.which(os.environ.get('EDITOR', 'vim'))):
             raise RuntimeError("$EDITOR not set or vim could not be found on your system!")
 
         subprocess.run([editor, report], check=True)

@@ -208,7 +208,7 @@ selinux_enabled = (enforce := Path('/sys/fs/selinux/enforce')).exists() and \
 
 for value in versions:
     VERSION = LLVM_VERSIONS[0] if value == 'main' else value
-    ref = LLVM_REFS[VERSION] if VERSION in LLVM_REFS else f"llvmorg-{VERSION}"
+    ref = LLVM_REFS.get(VERSION, f"llvmorg-{VERSION}")
 
     if 'llvmorg' not in ref:
         date_info = datetime.datetime.now(datetime.timezone.utc).strftime('%Y%m%d-%H%M%S')

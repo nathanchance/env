@@ -401,7 +401,7 @@ def setup_ssh_authorized_keys(user_name):
 
 
 def setup_sudo_symlink():
-    prefix = Path(os.environ['PREFIX'] if 'PREFIX' in os.environ else '/usr/local')
+    prefix = Path(os.environ.get('PREFIX', '/usr/local'))
     sudo_prefix = Path(prefix, 'stow/sudo')
     sudo_bin = Path(sudo_prefix, 'bin/sudo')
 

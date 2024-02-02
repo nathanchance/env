@@ -8,7 +8,7 @@ import sys
 
 sys.path.append(str(Path(__file__).resolve().parents[1]))
 # pylint: disable=wrong-import-position
-import lib.utils  # noqa: E402
+import lib.utils
 # pylint: enable=wrong-import-position
 
 

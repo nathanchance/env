@@ -11,7 +11,7 @@ import tempfile
 
 sys.path.append(str(Path(__file__).resolve().parents[1]))
 # pylint: disable=wrong-import-position
-import lib.setup  # noqa: E402
+import lib.setup
 # pylint: enable=wrong-import-position
 
 
