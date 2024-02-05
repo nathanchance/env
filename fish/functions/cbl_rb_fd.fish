@@ -13,11 +13,13 @@ function cbl_rb_fd -d "Rebase generic Fedora kernel on latest linux-next"
     git rh origin/master
 
     # Patching
-    # https://lore.kernel.org/20240130170556.GA1125757@dev-arch.thelio-3990X/
-    set -a reverts 196f34af2bf4c87ac4299a9775503d81b446980c # tty: serial: amba-pl011: Remove QDF2xxx workarounds
     for revert in $reverts
         git revert --mainline 1 --no-edit $revert; or return
     end
+    set -a b4_patches https://lore.kernel.org/all/20240201-topic-qdf24xx_is_back_apparently-v1-1-edb112a2ef90@linaro.org/ # Revert "tty: serial: amba-pl011: Remove QDF2xxx workarounds"
+    set -a b4_patches https://lore.kernel.org/all/20240202133520.302738-1-masahiroy@kernel.org/ # kbuild: rpm-pkg: do not include depmod-generated files
+    set -a b4_patches https://lore.kernel.org/all/20240202133520.302738-2-masahiroy@kernel.org/ # kbuild: rpm-pkg: mark installed files in /boot as %ghost
+    set -a b4_patches https://lore.kernel.org/all/20240205-ath12k-mac-wuninitialized-v1-1-3fda7b17357f@kernel.org/ # wifi: ath12k: Fix uninitialized use of ret in ath12k_mac_allocate()
     for patch in $b4_patches
         b4 shazam -l -P _ -s $patch; or return
     end
@@ -27,8 +29,6 @@ function cbl_rb_fd -d "Rebase generic Fedora kernel on latest linux-next"
     for hash in $ln_commits
         git -C $CBL_BLD_P/linux-next fp -1 --stdout $hash | git am; or return
     end
-    # https://lore.kernel.org/all/CAK7LNAQCiBtQ3kQznPDKtkD83wpCzodPVDs8eFnfnx5=Y8E5Cw@mail.gmail.com/2-0001-kbuild-rpm-pkg-specify-more-files-as-ghost.patch
-    set -a am_patches $NVME_FOLDER/data/tmp-patches/0001-kbuild-rpm-pkg-specify-more-files-as-ghost.patch # kbuild: rpm-pkg: specify more files as %ghost
     for patch in $am_patches
         git am -3 $patch; or return
     end

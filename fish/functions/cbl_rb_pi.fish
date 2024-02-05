@@ -21,11 +21,10 @@ function cbl_rb_pi -d "Rebase Raspberry Pi kernel on latest linux-next"
     git rh origin/master
 
     # Patching
-    # https://lore.kernel.org/20240130170556.GA1125757@dev-arch.thelio-3990X/
-    set -a reverts 196f34af2bf4c87ac4299a9775503d81b446980c # tty: serial: amba-pl011: Remove QDF2xxx workarounds
     for revert in $reverts
         git revert --mainline 1 --no-edit $revert; or return
     end
+    set -a b4_patches https://lore.kernel.org/all/20240201-topic-qdf24xx_is_back_apparently-v1-1-edb112a2ef90@linaro.org/ # Revert "tty: serial: amba-pl011: Remove QDF2xxx workarounds"
     for patch in $b4_patches
         b4 shazam -l -P _ -s $patch; or return
     end
