@@ -134,9 +134,6 @@ function cbl_bld_tot_tcs -d "Build LLVM and binutils from source for kernel deve
         end
     end
 
-    # https://github.com/llvm/llvm-project/pull/79261#issuecomment-1909190463
-    rm -fv $llvm_project/clang/test/Interpreter/cxx20-modules.cppm
-
     # Add patches to revert here
     for revert in $reverts
         set -l revert (basename $revert)
