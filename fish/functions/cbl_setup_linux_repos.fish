@@ -6,13 +6,13 @@ function cbl_setup_linux_repos -d "Clone ClangBuiltLinux Linux repos into their 
     for arg in $argv
         switch $arg
             case linux
-                set pairs torvalds/linux:{$CBL_BLD_C,$CBL_BLD_P,$CBL_SRC_D}/$arg
+                set pairs torvalds/linux:{$CBL_SRC_C,$CBL_SRC_D,$CBL_SRC_P}/$arg
 
             case linux-next
-                set pairs next/linux-next:{{$CBL_BLD_C,$CBL_BLD_P,$CBL_SRC_D}/$arg,$CBL_BLD/rpi}
+                set pairs next/linux-next:{{$CBL_SRC_C,$CBL_SRC_D,$CBL_SRC_P}/$arg,$CBL_BLD/rpi}
 
             case linux-stable
-                set pairs stable/linux:{$CBL_BLD_C,$CBL_BLD_P,$CBL_SRC_D}/$arg
+                set pairs stable/linux:{$CBL_SRC_C,$CBL_SRC_D,$CBL_SRC_P}/$arg
         end
     end
 

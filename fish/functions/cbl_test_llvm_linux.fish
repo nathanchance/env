@@ -15,14 +15,14 @@ function cbl_test_llvm_linux -d "Test stable and mainline Linux with all support
         set targets mainline stable
     end
 
-    cbl_upd_lnx_c $targets
+    cbl_upd_src_c $targets
     korg_llvm install
 
     if contains mainline $targets
-        set -a linux_folders $CBL_BLD_C/linux
+        set -a linux_folders $CBL_SRC_C/linux
     end
     if contains stable $targets
-        set -a linux_folder $CBL_BLD_C/linux-stable-$CBL_STABLE_VERSIONS
+        set -a linux_folder $CBL_SRC_C/linux-stable-$CBL_STABLE_VERSIONS
     end
 
     for linux_folder in $linux_folders

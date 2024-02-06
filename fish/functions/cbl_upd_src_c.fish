@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: MIT
 # Copyright (C) 2024 Nathan Chancellor
 
-function cbl_upd_lnx_c -d "Update $CBL_BLD_C to the latest versions"
+function cbl_upd_src_c -d "Update $CBL_SRC_C to the latest versions"
     set targets $argv
     if test -z "$targets"
         set targets mainline stable
@@ -11,7 +11,7 @@ function cbl_upd_lnx_c -d "Update $CBL_BLD_C to the latest versions"
     for target in $targets
         switch $target
             case m mainline
-                set folder $CBL_BLD_C/linux
+                set folder $CBL_SRC_C/linux
 
                 if not test -d $folder
                     clone_lnx_repo (basename $folder) $folder
@@ -21,7 +21,7 @@ function cbl_upd_lnx_c -d "Update $CBL_BLD_C to the latest versions"
                 or return
 
             case n next
-                set folder $CBL_BLD_C/linux-next
+                set folder $CBL_SRC_C/linux-next
 
                 if not test -d $folder
                     clone_lnx_repo (basename $folder) $folder
@@ -31,11 +31,11 @@ function cbl_upd_lnx_c -d "Update $CBL_BLD_C to the latest versions"
                 or return
 
             case s stable
-                set folder $CBL_BLD_C/linux-stable
+                set folder $CBL_SRC_C/linux-stable
 
                 cbl_upd_stbl_wrktrs $folder
 
-                for folder in $CBL_BLD_C/linux-stable-$CBL_STABLE_VERSIONS
+                for folder in $CBL_SRC_C/linux-stable-$CBL_STABLE_VERSIONS
                     git -C $folder reset --hard @{u}
                 end
         end

@@ -20,10 +20,10 @@ function cbl_test_kvm -d "Test KVM against a Clang built kernel with QEMU"
                     return 1
             end
 
-            set src $CBL_BLD_C/linux
+            set src $CBL_SRC_C/linux
             set out (kbf $src)/$arch
 
-            cbl_upd_lnx_c m
+            cbl_upd_src_c m
 
             kmake -C $src LLVM=1 O=$out distclean defconfig all; or return
             kboot -a $arch -k $src/$out -t 45s
@@ -40,8 +40,8 @@ function cbl_test_kvm -d "Test KVM against a Clang built kernel with QEMU"
             switch $LOCATION
                 case wsl
                     set arch x86_64 # for now?
-                    set src $CBL_BLD_C/linux
-                    cbl_upd_lnx_c m
+                    set src $CBL_SRC_C/linux
+                    cbl_upd_src_c m
 
                     for toolchain in GCC LLVM
                         set out (kbf $src)/$arch/(string lower $toolchain)

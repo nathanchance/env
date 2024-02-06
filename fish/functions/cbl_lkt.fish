@@ -84,7 +84,7 @@ function cbl_lkt -d "Tests a Linux kernel with llvm-kernel-testing"
         if test -z "$tree"
             set tree linux-next
         end
-        set linux_folder $CBL_BLD_P/$tree
+        set linux_folder $CBL_SRC_P/$tree
     end
 
     # We assume that the dependencies are available in an image other than nathan/dev/arch

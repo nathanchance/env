@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: MIT
 # Copyright (C) 2021-2023 Nathan Chancellor
 
-function cbl_upd_lnx_p -d "Update $CBL_BLD_P to the latest versions"
+function cbl_upd_src_p -d "Update $CBL_SRC_P to the latest versions"
     set targets $argv
     if test -z "$targets"
         set targets next mainline stable
@@ -11,11 +11,11 @@ function cbl_upd_lnx_p -d "Update $CBL_BLD_P to the latest versions"
     for target in $targets
         switch $target
             case m mainline
-                set -a folders $CBL_BLD_P/linux
+                set -a folders $CBL_SRC_P/linux
             case n next
-                set -a folders $CBL_BLD_P/linux-next
+                set -a folders $CBL_SRC_P/linux-next
             case s stable
-                set -a folders $CBL_BLD_P/linux-stable-$CBL_STABLE_VERSIONS
+                set -a folders $CBL_SRC_P/linux-stable-$CBL_STABLE_VERSIONS
         end
     end
 
@@ -46,7 +46,7 @@ function cbl_upd_lnx_p -d "Update $CBL_BLD_P to the latest versions"
             end
         else
             if string match -qr linux-stable $folder
-                cbl_upd_stbl_wrktrs $CBL_BLD_P/linux-stable
+                cbl_upd_stbl_wrktrs $CBL_SRC_P/linux-stable
             else
                 clone_lnx_repo (basename $folder) $folder
             end

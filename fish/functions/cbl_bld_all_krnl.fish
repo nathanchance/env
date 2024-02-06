@@ -7,20 +7,20 @@ function cbl_bld_all_krnl -d "Build all kernels for ClangBuiltLinux testing"
 
     switch $LOCATION
         case aadp generic
-            cbl_upd_lnx_c m
+            cbl_upd_src_c m
 
-            cbl_lkt --linux-folder $CBL_BLD_C/linux
+            cbl_lkt --linux-folder $CBL_SRC_C/linux
 
         case honeycomb
-            cbl_upd_lnx_c m
+            cbl_upd_src_c m
 
             cbl_lkt \
                 --architectures arm arm64 i386 x86_64 \
-                --linux-folder $CBL_BLD_C/linux \
+                --linux-folder $CBL_SRC_C/linux \
                 --targets def
 
         case pi
-            cbl_upd_lnx_c n
+            cbl_upd_src_c n
 
             for arch in arm arm64 x86_64
                 switch $arch
@@ -33,7 +33,7 @@ function cbl_bld_all_krnl -d "Build all kernels for ClangBuiltLinux testing"
                 end
 
                 kmake \
-                    -C $CBL_BLD_C/linux-next \
+                    -C $CBL_SRC_C/linux-next \
                     ARCH=$arch \
                     HOSTCFLAGS=-Wno-deprecated-declarations \
                     LLVM=1 \
@@ -51,18 +51,18 @@ function cbl_bld_all_krnl -d "Build all kernels for ClangBuiltLinux testing"
             cbl_test_kvm build
 
             kmake \
-                -C $CBL_BLD_C/linux \
+                -C $CBL_SRC_C/linux \
                 KCONFIG_ALLCONFIG=(echo CONFIG_WERROR=n | psub) \
                 LLVM=1 \
                 O=(kbf linux)/(uname -m) \
                 distclean allmodconfig all
 
         case test-desktop-intel
-            cbl_upd_lnx_c m
+            cbl_upd_src_c m
 
             cbl_lkt \
                 --architectures arm arm64 i386 x86_64 \
-                --linux-folder $CBL_BLD_C/linux
+                --linux-folder $CBL_SRC_C/linux
 
         case '*'
             for arg in $argv

@@ -132,10 +132,9 @@ else
     set -gx CBL_TC $CBL/toolchains
 end
 
+set -gx CBL_SRC_C $CBL_SRC/clean
 set -gx CBL_SRC_D $CBL_SRC/dev
-
-set -gx CBL_BLD_C $CBL_BLD/clean
-set -gx CBL_BLD_P $CBL_BLD/patched
+set -gx CBL_SRC_P $CBL_SRC/patched
 
 set -gx CBL_QEMU_BIN $CBL_QEMU/bin
 set -gx CBL_QEMU_INSTALL $CBL_QEMU/install
