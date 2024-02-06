@@ -113,6 +113,7 @@ set -gx XDG_FOLDER $EXT_FOLDER/xdg
 set -gx CBL_CI_GH $CBL/ci-gh
 set -gx CBL_GIT $CBL/github
 set -gx CBL_LKT $CBL/llvm-kernel-testing
+set -gx CBL_LOGS $CBL/logs
 set -gx CBL_QEMU $CBL/qemu
 set -gx CBL_REPRO $CBL/repro-scripts
 set -gx CBL_TC_BLD $CBL/tc-build

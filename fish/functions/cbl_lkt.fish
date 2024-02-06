@@ -189,7 +189,7 @@ function cbl_lkt -d "Tests a Linux kernel with llvm-kernel-testing"
         set -a build_py_args --build-folder (tbf (status function))/(basename $linux_folder)
     end
 
-    set log_folder $CBL/build-logs/(basename $linux_folder)-(date +%F-%T)
+    set log_folder $CBL_LOGS/(basename $linux_folder)-(date +%F-%T)
     mkdir -p $log_folder
 
     if is_github_actions
