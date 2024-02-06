@@ -48,16 +48,7 @@ function cbl_upd_lnx_p -d "Update $CBL_BLD_P to the latest versions"
             if string match -qr linux-stable $folder
                 cbl_upd_stbl_wrktrs $CBL_BLD_P/linux-stable
             else
-                mkdir -p (dirname $folder)
-
-                switch $folder
-                    case '*'/linux
-                        set url https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/
-                    case '*'/linux-next
-                        set url https://git.kernel.org/pub/scm/linux/kernel/git/next/linux-next.git/
-                end
-
-                git clone $url $folder
+                clone_lnx_repo (basename $folder) $folder
             end
 
             cbl_ptchmn -C $folder -a

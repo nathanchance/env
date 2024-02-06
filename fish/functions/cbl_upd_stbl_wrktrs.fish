@@ -6,7 +6,7 @@ function cbl_upd_stbl_wrktrs -d "Update the worktrees for linux-stable"
     for folder in $argv
         if not test -d "$folder"
             header "Cloning $folder"
-            git clone https://git.kernel.org/pub/scm/linux/kernel/git/stable/linux.git $folder
+            clone_lnx_repo linux-stable $folder
         else
             header "Updating $folder"
             git -C $folder remote update

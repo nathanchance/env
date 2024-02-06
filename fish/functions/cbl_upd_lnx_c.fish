@@ -14,8 +14,7 @@ function cbl_upd_lnx_c -d "Update $CBL_BLD_C to the latest versions"
                 set folder $CBL_BLD_C/linux
 
                 if not test -d $folder
-                    mkdir -p (dirname $folder)
-                    git clone https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git $folder
+                    clone_lnx_repo (basename $folder) $folder
                 end
 
                 git -C $folder pull

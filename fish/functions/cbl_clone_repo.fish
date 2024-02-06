@@ -35,18 +35,13 @@ function cbl_clone_repo -d "Clone certain repos for ClangBuiltLinux testing and 
                     set dest $NVME_FOLDER/data/$arg
                 end
                 set additional_repos https://chromium.googlesource.com/chromium/tools/depot_tools.git
-            case linux
-                set bundle $bundles_folder/$arg.bundle
-                set url https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/
+            case linux linux-next linux-stable
+                clone_lnx_repo {,$CBL_SRC/}$arg
+                or return
+                continue
             case linux-fast-headers
                 set git_clone_args -b sched/headers
                 set url https://git.kernel.org/pub/scm/linux/kernel/git/mingo/tip.git/
-            case linux-next
-                set bundle $bundles_folder/$arg.bundle
-                set url https://git.kernel.org/pub/scm/linux/kernel/git/next/linux-next.git/
-            case linux-stable
-                set bundle $bundles_folder/$arg.bundle
-                set url https://git.kernel.org/pub/scm/linux/kernel/git/stable/linux.git/
             case llvm-project
                 set branch main
                 set bundle $bundles_folder/$arg.bundle
