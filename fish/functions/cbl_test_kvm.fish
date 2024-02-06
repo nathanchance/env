@@ -21,7 +21,7 @@ function cbl_test_kvm -d "Test KVM against a Clang built kernel with QEMU"
             end
 
             set src $CBL_SRC_C/linux
-            set out (kbf $src)/$arch
+            set out (tbf $src)/$arch
 
             cbl_upd_src_c m
 
@@ -44,7 +44,7 @@ function cbl_test_kvm -d "Test KVM against a Clang built kernel with QEMU"
                     cbl_upd_src_c m
 
                     for toolchain in GCC LLVM
-                        set out (kbf $src)/$arch/(string lower $toolchain)
+                        set out (tbf $src)/$arch/(string lower $toolchain)
                         switch $arch
                             case x86_64
                                 set kernel $out/arch/x86/boot/bzImage

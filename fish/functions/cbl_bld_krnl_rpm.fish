@@ -61,7 +61,7 @@ function cbl_bld_krnl_rpm -d "Build a .rpm kernel package"
         end
     end
 
-    set out (kbf)
+    set out (tbf)
 
     if not grep -q -- "--define='_topdir" scripts/Makefile.package
         set -a kmake_args RPMOPTS="--define '_topdir $out/rpmbuild'"

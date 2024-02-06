@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: MIT
 # Copyright (C) 2023 Nathan Chancellor
 
-function kbf -d "Prints a build folder specific to the current directory for use with O="
+function tbf -d "Prints a build folder specific to the current directory"
     if test (count $argv) -eq 0
         set src $PWD
     else

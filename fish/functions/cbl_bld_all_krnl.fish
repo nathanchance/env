@@ -37,13 +37,13 @@ function cbl_bld_all_krnl -d "Build all kernels for ClangBuiltLinux testing"
                     ARCH=$arch \
                     HOSTCFLAGS=-Wno-deprecated-declarations \
                     LLVM=1 \
-                    O=(kbf linux-next)/$arch \
+                    O=(tbf linux-next)/$arch \
                     distclean defconfig $image
                 or return
             end
 
             for arch in arm arm64 x86_64
-                kboot -a $arch -k (kbf linux-next)/$arch
+                kboot -a $arch -k (tbf linux-next)/$arch
                 or return
             end
 
@@ -54,7 +54,7 @@ function cbl_bld_all_krnl -d "Build all kernels for ClangBuiltLinux testing"
                 -C $CBL_SRC_C/linux \
                 KCONFIG_ALLCONFIG=(echo CONFIG_WERROR=n | psub) \
                 LLVM=1 \
-                O=(kbf linux)/(uname -m) \
+                O=(tbf linux)/(uname -m) \
                 distclean allmodconfig all
 
         case test-desktop-intel

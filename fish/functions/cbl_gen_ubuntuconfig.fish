@@ -44,7 +44,7 @@ function cbl_gen_ubuntuconfig -d "Generate a kernel .config from Ubuntu's config
             set ubuntu_arch $arch
     end
 
-    set out (kbf)/$arch
+    set out (tbf)/$arch
     set cfg $out/.config
 
     remkdir $out

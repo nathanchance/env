@@ -7,7 +7,7 @@ function prep_config -d "Prepare kernel configuration in build folder"
 
     set bld $argv[2]
     if test -z "$bld"
-        set bld (kbf)
+        set bld (tbf)
     end
     set dst_cfg $bld/.config
 

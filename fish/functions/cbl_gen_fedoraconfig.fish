@@ -47,7 +47,7 @@ function cbl_gen_fedoraconfig -d "Downloads and modifies Fedora's kernel configu
             set arch aarch64
     end
 
-    set out (kbf)
+    set out (tbf)
     set cfg $out/.config
 
     remkdir $out
