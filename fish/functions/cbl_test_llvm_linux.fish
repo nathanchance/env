@@ -28,7 +28,7 @@ function cbl_test_llvm_linux -d "Test stable and mainline Linux with all support
     for linux_folder in $linux_folders
         for ver in (korg_llvm latest $LLVM_VERSIONS_KERNEL_STABLE)
             cbl_lkt \
-                --build-folder $TMP_BUILD_FOLDER/cbl_test_llvm_linux \
+                --build-folder (tbf cbl_test_llvm_linux) \
                 --linux-folder $linux_folder \
                 --llvm-prefix $CBL_TC_LLVM_STORE/$ver; or return
         end

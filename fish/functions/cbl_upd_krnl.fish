@@ -33,7 +33,7 @@ function cbl_upd_krnl -d "Update machine's kernel"
             sudo true; or return
 
             # Download .rpm package
-            set -q krnl_bld; or set krnl_bld $TMP_BUILD_FOLDER/fedora
+            set -q krnl_bld; or set krnl_bld (tbf fedora)
             set remote_rpm_folder (string replace $MAIN_FOLDER $remote_main_folder $krnl_bld | string replace $TMP_BUILD_FOLDER $remote_tmp_build_folder)/rpmbuild/RPMS/aarch64
             set krnl_rpm (ssh $remote_user@$remote_host fd -e rpm -u 'kernel-[0-9]+' $remote_rpm_folder)
             scp $remote_user@$remote_host:$krnl_rpm /tmp; or return
@@ -73,8 +73,7 @@ function cbl_upd_krnl -d "Update machine's kernel"
             end
 
             # Grab .tar.zst package
-            set remote_build (string replace $MAIN_FOLDER $remote_main_folder $CBL_SRC_P)
-            set out $remote_build/rpi/.build/$arch
+            set out (tbf rpi | string replace $TMP_BUILD_FOLDER $remote_tmp_build_folder)/$arch
             scp $remote_user@$remote_host:$out/linux-'*'-$arch.tar.zst /tmp
 
             # Install kernel

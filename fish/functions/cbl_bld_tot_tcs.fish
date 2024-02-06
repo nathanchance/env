@@ -12,6 +12,8 @@ function cbl_bld_tot_tcs -d "Build LLVM and binutils from source for kernel deve
         end
     end
 
+    set func_bld (tbf (status function))
+
     switch $LOCATION
         case aadp generic wsl
             set pgo kernel-defconfig
@@ -107,7 +109,7 @@ function cbl_bld_tot_tcs -d "Build LLVM and binutils from source for kernel deve
         if not PATH="/usr/lib/ccache/bin:$PATH" $tc_bld/build-binutils.py \
                 $bld_bntls_args \
                 --binutils-folder $bntls \
-                --build-folder $TMP_BUILD_FOLDER/(status function)/binutils \
+                --build-folder $func_bld/binutils \
                 --install-folder $bntls_install \
                 --show-build-commands
             set message "build-binutils.py failed"
@@ -169,7 +171,7 @@ function cbl_bld_tot_tcs -d "Build LLVM and binutils from source for kernel deve
     end
 
     set bld_llvm $tc_bld
-    set llvm_bld $TMP_BUILD_FOLDER/(status function)/llvm
+    set llvm_bld $func_bld/llvm
     set common_bld_llvm_args \
         --assertions \
         --build-folder $llvm_bld \
