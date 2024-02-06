@@ -5,7 +5,7 @@
 function cbl_rb_fd -d "Rebase generic Fedora kernel on latest linux-next"
     in_container_msg -c; or return
 
-    set fd_src $CBL_BLD/fedora
+    set fd_src $CBL_SRC_P/fedora
     pushd $fd_src; or return
 
     # Update kernel

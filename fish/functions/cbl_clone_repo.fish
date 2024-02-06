@@ -56,7 +56,7 @@ function cbl_clone_repo -d "Clone certain repos for ClangBuiltLinux testing and 
 
             case wsl2
                 set url git@github.com:nathanchance/WSL2-Linux-Kernel
-                set dest $CBL_BLD/wsl2
+                set dest $CBL_SRC_P/wsl2
 
             case '*'
                 print_error "$arg not supported explicitly, skipping!"

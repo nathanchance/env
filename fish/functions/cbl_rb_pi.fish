@@ -5,7 +5,7 @@
 function cbl_rb_pi -d "Rebase Raspberry Pi kernel on latest linux-next"
     in_container_msg -c; or return
 
-    set pi_src $CBL_BLD/rpi
+    set pi_src $CBL_SRC_P/rpi
 
     for arg in $argv
         switch $arg
@@ -144,21 +144,21 @@ function cbl_rb_pi -d "Rebase Raspberry Pi kernel on latest linux-next"
     git am $GITHUB_FOLDER/patches/linux-misc/0001-ARM-dts-bcm2-711-837-Disable-the-display-pipeline.patch; or return
 
     for arch in arm arm64
-        ../pi-scripts/build.fish $arch; or return
+        $GITHUB_FOLDER/pi-scripts/build.fish $arch; or return
     end
 
     if test "$skip_mainline" != true
         if not git pll --no-edit mainline master
             rg "<<<<<<< HEAD"; and return
             for arch in arm arm64
-                ../pi-scripts/build.fish $arch; or return
+                $GITHUB_FOLDER/pi-scripts/build.fish $arch; or return
             end
             git aa
             git c --no-edit; or return
         end
 
         for arch in arm arm64
-            ../pi-scripts/build.fish $arch; or return
+            $GITHUB_FOLDER/pi-scripts/build.fish $arch; or return
         end
     end
 

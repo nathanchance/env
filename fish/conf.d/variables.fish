@@ -110,7 +110,6 @@ set -gx TMP_FOLDER $EXT_FOLDER/tmp
 set -gx VM_FOLDER $EXT_FOLDER/vm
 set -gx XDG_FOLDER $EXT_FOLDER/xdg
 
-set -gx CBL_BLD $CBL/build
 set -gx CBL_CI_GH $CBL/ci-gh
 set -gx CBL_GIT $CBL/github
 set -gx CBL_LKT $CBL/llvm-kernel-testing

@@ -73,7 +73,7 @@ function cbl_upd_krnl -d "Update machine's kernel"
             end
 
             # Grab .tar.zst package
-            set remote_build (string replace $MAIN_FOLDER $remote_main_folder $CBL_BLD)
+            set remote_build (string replace $MAIN_FOLDER $remote_main_folder $CBL_SRC_P)
             set out $remote_build/rpi/.build/$arch
             scp $remote_user@$remote_host:$out/linux-'*'-$arch.tar.zst /tmp
 
@@ -148,12 +148,12 @@ function cbl_upd_krnl -d "Update machine's kernel"
 
             switch $kernel_location
                 case local
-                    cp -v $CBL_BLD/wsl2/arch/x86/boot/bzImage $kernel
+                    cp -v $CBL_SRC_P/wsl2/arch/x86/boot/bzImage $kernel
                 case github
                     set repo nathanchance/WSL2-Linux-Kernel
                     crl -o $kernel https://github.com/$repo/releases/download/(glr $repo)/bzImage
                 case server
-                    set src (string replace $MAIN_FOLDER $remote_main_folder $CBL_BLD)/wsl2
+                    set src (string replace $MAIN_FOLDER $remote_main_folder $CBL_SRC_P)/wsl2
                     set image arch/x86/boot/bzImage
                     scp $remote_user@$remote_host:$src/$image $kernel
             end

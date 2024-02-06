@@ -42,7 +42,7 @@ function cbl_setup_other_repos -d "Download other ClangBuiltLinux repos"
         end
     end
 
-    set pi_scripts $CBL_BLD/pi-scripts
+    set pi_scripts $GITHUB_FOLDER/pi-scripts
     if not test -d $pi_scripts
         mkdir -p (dirname $pi_scripts)
         gh repo clone pi-scripts $pi_scripts

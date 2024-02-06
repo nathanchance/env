@@ -56,7 +56,7 @@ function cbl_setup_linux_repos -d "Clone ClangBuiltLinux Linux repos into their 
     rm -rf $tmp_dir
 
     # Set up Fedora and Raspberry Pi source worktrees
-    for worktree in $CBL_BLD/{fedora,rpi}
+    for worktree in $CBL_SRC_P/{fedora,rpi}
         if not test -d $worktree
             git -C $CBL_SRC_D/linux-next worktree add -B (basename $worktree) --no-track $worktree
             or return

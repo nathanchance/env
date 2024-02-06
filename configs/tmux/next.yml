@@ -11,11 +11,11 @@ windows:
     focus: true
   - shell: dbxe
     shell_command: cbl_rb_fd
-    start_directory: $CBL_BLD/fedora
+    start_directory: $CBL_SRC_P/fedora
     enter: false
   - shell: dbxe
     shell_command: cbl_rb_pi
-    start_directory: $CBL_BLD/rpi
+    start_directory: $CBL_SRC_P/rpi
     enter: false
   - shell: dbxe
     shell_command: cbl_upd_src_p n
