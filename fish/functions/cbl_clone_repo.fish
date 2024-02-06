@@ -26,13 +26,16 @@ function cbl_clone_repo -d "Clone certain repos for ClangBuiltLinux testing and 
                 set use_repo true
                 set branch $arg
                 set url https://android.googlesource.com/kernel/manifest
+                if test -d $NVME_FOLDER
+                    set dest $NVME_SRC_FOLDER/$arg
+                end
                 set local_manifests $GITHUB_FOLDER/local_manifests/$arg.xml
             case cros
                 set use_repo true
                 set branch stable
                 set url https://chromium.googlesource.com/chromiumos/manifest
                 if test -d $NVME_FOLDER
-                    set dest $NVME_FOLDER/data/$arg
+                    set dest $NVME_SRC_FOLDER/$arg
                 end
                 set additional_repos https://chromium.googlesource.com/chromium/tools/depot_tools.git
             case linux linux-next linux-stable
@@ -42,6 +45,13 @@ function cbl_clone_repo -d "Clone certain repos for ClangBuiltLinux testing and 
             case linux-fast-headers
                 set git_clone_args -b sched/headers
                 set url https://git.kernel.org/pub/scm/linux/kernel/git/mingo/tip.git/
+            case llvm-android
+                set use_repo true
+                set branch llvm-toolchain
+                set url https://android.googlesource.com/platform/manifest
+                if test -d $NVME_FOLDER
+                    set dest $NVME_SRC_FOLDER/$arg
+                end
             case llvm-project
                 set branch main
                 set bundle $bundles_folder/$arg.bundle

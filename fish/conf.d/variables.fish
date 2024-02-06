@@ -97,6 +97,7 @@ else
 end
 
 set -gx NVME_FOLDER /mnt/nvme
+set -gx NVME_SRC_FOLDER /mnt/nvme/src
 if test -d $NVME_FOLDER
     set -gx EXT_FOLDER $NVME_FOLDER
 else

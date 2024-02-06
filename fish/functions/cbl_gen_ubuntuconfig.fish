@@ -49,7 +49,7 @@ function cbl_gen_ubuntuconfig -d "Generate a kernel .config from Ubuntu's config
 
     remkdir $out
 
-    set mainline_crack $NVME_FOLDER/data/mainline-crack
+    set mainline_crack $NVME_SRC_FOLDER/mainline-crack
     if not test -d $mainline_crack
         git clone https://git.launchpad.net/~ubuntu-kernel-test/ubuntu/+source/linux/+git/mainline-crack $mainline_crack
     end
