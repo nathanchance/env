@@ -134,6 +134,7 @@ end
 
 set -gx CBL_SRC_C $CBL_SRC/clean
 set -gx CBL_SRC_D $CBL_SRC/dev
+set -gx CBL_SRC_M $CBL_SRC/mirrors
 set -gx CBL_SRC_P $CBL_SRC/patched
 
 set -gx CBL_QEMU_BIN $CBL_QEMU/bin

@@ -118,7 +118,7 @@ def download_items(targets, network_folder):
             }
             for repo_name, repo_url in repos.items():
                 # Download and update repo
-                if not (repo_path := Path(os.environ['CBL'], 'mirrors', repo_name)).exists():
+                if not (repo_path := Path(os.environ['CBL_SRC_M'], repo_name)).exists():
                     repo_path.parent.mkdir(exist_ok=True, parents=True)
                     subprocess.run(['git', 'clone', '--mirror', repo_url, repo_path], check=True)
                 subprocess.run(['git', 'remote', 'update', '--prune'], check=True, cwd=repo_path)
