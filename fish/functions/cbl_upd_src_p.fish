@@ -48,7 +48,7 @@ function cbl_upd_src_p -d "Update $CBL_SRC_P to the latest versions"
             if string match -qr linux-stable $folder
                 cbl_upd_stbl_wrktrs $CBL_SRC_P/linux-stable
             else
-                clone_lnx_repo (basename $folder) $folder
+                clone_repo_from_bundle (basename $folder) $folder
             end
 
             cbl_ptchmn -C $folder -a

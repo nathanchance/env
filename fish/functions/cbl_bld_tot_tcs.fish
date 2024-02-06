@@ -90,7 +90,7 @@ function cbl_bld_tot_tcs -d "Build LLVM and binutils from source for kernel deve
     if test "$bld_bntls" != false
         set bntls $tc_bld/src/binutils
         if not test -d $bntls
-            git clone https://sourceware.org/git/binutils-gdb.git "$bntls"
+            clone_repo_from_bundle (basename $bntls) "$bntls"
         end
         if not is_shallow_clone $bntls; and not has_detached_head $bntls
             git -C $bntls pull --rebase; or return
@@ -122,7 +122,7 @@ function cbl_bld_tot_tcs -d "Build LLVM and binutils from source for kernel deve
 
     set llvm_project $tc_bld/src/llvm-project
     if not test -d $llvm_project
-        git clone https://github.com/llvm/llvm-project $llvm_project
+        clone_repo_from_bundle (basename $llvm_project) $llvm_project
     end
     if not is_shallow_clone $llvm_project; and not has_detached_head $llvm_project
         git -C $llvm_project rh

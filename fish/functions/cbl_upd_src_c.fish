@@ -10,11 +10,21 @@ function cbl_upd_src_c -d "Update $CBL_SRC_C to the latest versions"
 
     for target in $targets
         switch $target
+            case l llvm
+                set folder $CBL_SRC_C/linux
+
+                if not test -d $folder
+                    clone_repo_from_bundle (basename $folder) $folder
+                end
+
+                git -C $folder pull
+                or return
+
             case m mainline
                 set folder $CBL_SRC_C/linux
 
                 if not test -d $folder
-                    clone_lnx_repo (basename $folder) $folder
+                    clone_repo_from_bundle (basename $folder) $folder
                 end
 
                 git -C $folder pull
@@ -24,7 +34,7 @@ function cbl_upd_src_c -d "Update $CBL_SRC_C to the latest versions"
                 set folder $CBL_SRC_C/linux-next
 
                 if not test -d $folder
-                    clone_lnx_repo (basename $folder) $folder
+                    clone_repo_from_bundle (basename $folder) $folder
                 end
 
                 git -C $folder urh

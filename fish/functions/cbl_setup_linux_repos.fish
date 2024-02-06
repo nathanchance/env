@@ -9,7 +9,7 @@ function cbl_setup_linux_repos -d "Clone ClangBuiltLinux Linux repos into their 
                 set pairs torvalds/linux:{$CBL_SRC_C,$CBL_SRC_D,$CBL_SRC_P}/$arg
 
             case linux-next
-                set pairs next/linux-next:{{$CBL_SRC_C,$CBL_SRC_D,$CBL_SRC_P}/$arg,$CBL_BLD/rpi}
+                set pairs next/linux-next:{$CBL_SRC_C,$CBL_SRC_D,$CBL_SRC_P}/$arg
 
             case linux-stable
                 set pairs stable/linux:{$CBL_SRC_C,$CBL_SRC_D,$CBL_SRC_P}/$arg
@@ -19,41 +19,30 @@ function cbl_setup_linux_repos -d "Clone ClangBuiltLinux Linux repos into their 
     set tmp_dir (mktemp -d)
     for pair in $pairs
         set url (string split -f1 ":" $pair)
-        set folder (string split -f2 ":" $pair)
 
+        set folder (string split -f2 ":" $pair)
         if test -d $folder
             continue
         end
 
-        set bundle_dir $NAS_FOLDER/kernel.org/bundles/latest
-        if test -d $bundle_dir
-            set cb_dir $bundle_dir
+        set bundle $NAS_FOLDER/bundles/$arg.bundle
+        if test -e $bundle
+            # Will be handled by clone_repo_from_bundle
+            set -e bundle
         else
-            set cb_dir $tmp_dir
-        end
-        switch $url
-            case stable/linux
-                set suffix linux-stable
-            case '*'
-                set suffix (basename $url)
-        end
-        set cb $cb_dir/clone.bundle-$suffix
+            switch $url
+                case stable/linux
+                    set suffix linux-stable
+                case '*'
+                    set suffix (basename $url)
+            end
+            set bundle $tmp_dir/clone.bundle-$suffix
 
-        mkdir -p (dirname $folder)
-        if not test -f $cb
-            wget -c -O $cb https://mirrors.kernel.org/pub/scm/.bundles/pub/scm/linux/kernel/git/$url/clone.bundle; or return
+            wget -c -O $bundle https://mirrors.kernel.org/pub/scm/.bundles/pub/scm/linux/kernel/git/$url/clone.bundle
         end
 
-        clone_from_bundle $cb $folder https://git.kernel.org/pub/scm/linux/kernel/git/$url.git master; or return
-
-        switch (basename $folder)
-            case rpi
-                git -C $folder config rerere.enabled true
-                git -C $folder remote add -f --tags mainline https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git
-            case '*'
-                git -C $folder branch --set-upstream-to=origin/master
-                git -C $folder reset --hard origin/master
-        end
+        clone_repo_from_bundle (basename $folder) $folder $bundle
+        or return
 
         if string match -qr linux-stable $folder
             cbl_upd_stbl_wrktrs $folder
@@ -66,9 +55,11 @@ function cbl_setup_linux_repos -d "Clone ClangBuiltLinux Linux repos into their 
     end
     rm -rf $tmp_dir
 
-    # Set up Fedora source worktree
-    set fedora $CBL_BLD/fedora
-    if not test -d $fedora
-        git -C $CBL_SRC_D/linux-next worktree add -B fedora --no-track $fedora origin/master
+    # Set up Fedora and Raspberry Pi source worktrees
+    for worktree in $CBL_BLD/{fedora,rpi}
+        if not test -d $worktree
+            git -C $CBL_SRC_D/linux-next worktree add -B (basename $worktree) --no-track $worktree
+            or return
+        end
     end
 end
