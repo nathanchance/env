@@ -19,6 +19,17 @@ function cbl_upd_lnx_c -d "Update $CBL_BLD_C to the latest versions"
 
                 git -C $folder pull
                 or return
+
+            case n next
+                set folder $CBL_BLD_C/linux-next
+
+                if not test -d $folder
+                    clone_lnx_repo (basename $folder) $folder
+                end
+
+                git -C $folder urh
+                or return
+
             case s stable
                 set folder $CBL_BLD_C/linux-stable
 

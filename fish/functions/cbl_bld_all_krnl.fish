@@ -7,28 +7,20 @@ function cbl_bld_all_krnl -d "Build all kernels for ClangBuiltLinux testing"
 
     switch $LOCATION
         case aadp generic
-            set -l lnx $CBL_SRC/linux
+            cbl_upd_lnx_c m
 
-            cbl_clone_repo linux
-            git -C $lnx urh
-
-            cbl_lkt --linux-folder $lnx
+            cbl_lkt --linux-folder $CBL_BLD_C/linux
 
         case honeycomb
-            set -l lnx $CBL_SRC/linux
-
-            cbl_clone_repo linux
-            git -C $lnx urh
+            cbl_upd_lnx_c m
 
             cbl_lkt \
                 --architectures arm arm64 i386 x86_64 \
-                --linux-folder $lnx \
+                --linux-folder $CBL_BLD_C/linux \
                 --targets def
 
         case pi
-            # Update linux-next
-            cbl_clone_repo linux-next; or return
-            git -C $CBL_SRC/linux-next urh; or return
+            cbl_upd_lnx_c n
 
             for arch in arm arm64 x86_64
                 switch $arch
@@ -41,45 +33,36 @@ function cbl_bld_all_krnl -d "Build all kernels for ClangBuiltLinux testing"
                 end
 
                 kmake \
-                    -C $CBL_SRC/linux-next \
+                    -C $CBL_BLD_C/linux-next \
                     ARCH=$arch \
                     HOSTCFLAGS=-Wno-deprecated-declarations \
                     LLVM=1 \
-                    O=.build/$arch \
-                    distclean defconfig $image; or return
+                    O=(kbf linux-next)/$arch \
+                    distclean defconfig $image
+                or return
             end
 
             for arch in arm arm64 x86_64
-                switch $arch
-                    case arm
-                        set kboot_arch arm32_v7
-                    case '*'
-                        set kboot_arch $arch
-                end
-                kboot -a $kboot_arch -k $CBL_SRC/linux-next/.build/$arch
+                kboot -a $arch -k (kbf linux-next)/$arch
+                or return
             end
 
         case test-desktop-amd test-laptop-intel
             cbl_test_kvm build
 
-            set lnx_src $CBL_SRC/linux
-            echo CONFIG_WERROR=n >$lnx_src/allmod.config
             kmake \
-                -C $lnx_src \
-                KCONFIG_ALLCONFIG=1 \
+                -C $CBL_BLD_C/linux \
+                KCONFIG_ALLCONFIG=(echo CONFIG_WERROR=n | psub) \
                 LLVM=1 \
-                O=.build/(uname -m) \
+                O=(kbf linux)/(uname -m) \
                 distclean allmodconfig all
 
         case test-desktop-intel
-            set -l lnx $CBL_SRC/linux
-
-            cbl_clone_repo linux
-            git -C $lnx urh
+            cbl_upd_lnx_c m
 
             cbl_lkt \
                 --architectures arm arm64 i386 x86_64 \
-                --linux-folder $lnx
+                --linux-folder $CBL_BLD_C/linux
 
         case '*'
             for arg in $argv
