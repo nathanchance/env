@@ -6,13 +6,13 @@ function cbl_setup_linux_repos -d "Clone ClangBuiltLinux Linux repos into their 
     for arg in $argv
         switch $arg
             case linux
-                set pairs torvalds/linux:{$CBL_BLD_C,$CBL_BLD_P,$CBL_SRC}/$arg
+                set pairs torvalds/linux:{$CBL_BLD_C,$CBL_BLD_P,$CBL_SRC_D}/$arg
 
             case linux-next
-                set pairs next/linux-next:{{$CBL_BLD_C,$CBL_BLD_P,$CBL_SRC}/$arg,$CBL_BLD/rpi}
+                set pairs next/linux-next:{{$CBL_BLD_C,$CBL_BLD_P,$CBL_SRC_D}/$arg,$CBL_BLD/rpi}
 
             case linux-stable
-                set pairs stable/linux:{$CBL_BLD_C,$CBL_BLD_P,$CBL_SRC}/$arg
+                set pairs stable/linux:{$CBL_BLD_C,$CBL_BLD_P,$CBL_SRC_D}/$arg
         end
     end
 
@@ -60,7 +60,7 @@ function cbl_setup_linux_repos -d "Clone ClangBuiltLinux Linux repos into their 
         end
 
         switch $folder
-            case $CBL_SRC/linux $CBL_SRC/linux-next
+            case $CBL_SRC_D/linux $CBL_SRC_D/linux-next
                 git -C $folder remote add -f korg git@gitolite.kernel.org:pub/scm/linux/kernel/git/nathan/linux
         end
     end
@@ -69,6 +69,6 @@ function cbl_setup_linux_repos -d "Clone ClangBuiltLinux Linux repos into their 
     # Set up Fedora source worktree
     set fedora $CBL_BLD/fedora
     if not test -d $fedora
-        git -C $CBL_SRC/linux-next worktree add -B fedora --no-track $fedora origin/master
+        git -C $CBL_SRC_D/linux-next worktree add -B fedora --no-track $fedora origin/master
     end
 end

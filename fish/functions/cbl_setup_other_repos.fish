@@ -48,7 +48,7 @@ function cbl_setup_other_repos -d "Download other ClangBuiltLinux repos"
         gh repo clone pi-scripts $pi_scripts
     end
 
-    set tuxmake $CBL_SRC/tuxmake
+    set tuxmake $CBL_SRC_D/tuxmake
     if not test -d $tumxake
         mkdir -p (dirname $tuxmake)
         git clone https://gitlab.com/Linaro/tuxmake.git $tuxmake

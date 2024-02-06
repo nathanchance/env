@@ -17,7 +17,7 @@ function cbl_upd_krnl_pkgver -d "Update the pkgver variable in a kernel PKGBUILD
     if test "$bisect" = true
         set src $pkgbuild/src/$krnl
     else
-        set src $CBL_SRC/$krnl
+        set src $CBL_SRC_D/$krnl
     end
 
     sed -i 's/pkgver=.*/pkgver='(git -C $src describe | string replace -a '-' '.')'/g' $pkgbuild/PKGBUILD

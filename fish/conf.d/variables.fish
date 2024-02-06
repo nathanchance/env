@@ -131,6 +131,8 @@ else
     set -gx CBL_TC $CBL/toolchains
 end
 
+set -gx CBL_SRC_D $CBL_SRC/dev
+
 set -gx CBL_BLD_C $CBL_BLD/clean
 set -gx CBL_BLD_P $CBL_BLD/patched
 

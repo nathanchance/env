@@ -36,7 +36,7 @@ function cbl_clone_repo -d "Clone certain repos for ClangBuiltLinux testing and 
                 end
                 set additional_repos https://chromium.googlesource.com/chromium/tools/depot_tools.git
             case linux linux-next linux-stable
-                clone_lnx_repo {,$CBL_SRC/}$arg
+                clone_lnx_repo {,$CBL_SRC_D/}$arg
                 or return
                 continue
             case linux-fast-headers
@@ -55,7 +55,7 @@ function cbl_clone_repo -d "Clone certain repos for ClangBuiltLinux testing and 
         end
 
         if test -z "$dest"
-            set dest $CBL_SRC/$arg
+            set dest $CBL_SRC_D/$arg
         end
         if test -z "$branch"
             set branch master
