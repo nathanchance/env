@@ -11,7 +11,7 @@ function cbl_upd_src_c -d "Update $CBL_SRC_C to the latest versions"
     for target in $targets
         switch $target
             case l llvm
-                set folder $CBL_SRC_C/linux
+                set folder $CBL_SRC_C/llvm-project
 
                 if not test -d $folder
                     clone_repo_from_bundle (basename $folder) $folder
