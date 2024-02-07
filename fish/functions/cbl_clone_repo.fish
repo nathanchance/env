@@ -16,7 +16,7 @@ function cbl_clone_repo -d "Clone certain repos for ClangBuiltLinux testing and 
 
             case cbl-ci-gh repro-scripts
                 set url https://github.com/nathanchance/$arg.git
-                set dest $CBL/(string replace cbl- "" $arg)
+                set dest $CBL_MISC/(string replace cbl- "" $arg)
 
             case common-android-multi
                 set use_repo true

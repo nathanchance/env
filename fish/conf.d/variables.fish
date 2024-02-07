@@ -110,13 +110,10 @@ set -gx TMP_FOLDER $EXT_FOLDER/tmp
 set -gx VM_FOLDER $EXT_FOLDER/vm
 set -gx XDG_FOLDER $EXT_FOLDER/xdg
 
-set -gx CBL_CI_GH $CBL/ci-gh
 set -gx CBL_GIT $CBL/github
-set -gx CBL_LKT $CBL/llvm-kernel-testing
 set -gx CBL_LOGS $CBL/logs
+set -gx CBL_MISC $CBL/misc
 set -gx CBL_QEMU $CBL/qemu
-set -gx CBL_REPRO $CBL/repro-scripts
-set -gx CBL_TC_BLD $CBL/tc-build
 set -gx CBL_TMP $CBL/tmp
 set -gx CBL_WRKTR $CBL/worktrees
 
@@ -136,6 +133,9 @@ set -gx CBL_SRC_C $CBL_SRC/clean
 set -gx CBL_SRC_D $CBL_SRC/dev
 set -gx CBL_SRC_M $CBL_SRC/mirrors
 set -gx CBL_SRC_P $CBL_SRC/patched
+
+set -gx CBL_LKT $CBL_SRC_D/llvm-kernel-testing
+set -gx CBL_TC_BLD $CBL_SRC_P/tc-build
 
 set -gx CBL_QEMU_BIN $CBL_QEMU/bin
 set -gx CBL_QEMU_INSTALL $CBL_QEMU/install

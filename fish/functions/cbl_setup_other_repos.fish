@@ -31,7 +31,14 @@ function cbl_setup_other_repos -d "Download other ClangBuiltLinux repos"
         repro-scripts \
         tc-build
     for repo in $repos_personal_github
-        set folder $CBL/$repo
+        switch $repo
+            case creduce-files repro-scripts
+                set folder $CBL_MISC/$repo
+            case llvm-kernel-testing
+                set folder $CBL_LKT
+            case tc-build
+                set folder $CBL_TC_BLD
+        end
         if not test -d $folder
             mkdir -p (dirname $folder)
             switch $repo
