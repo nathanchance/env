@@ -17,7 +17,7 @@ function cbl_rb_pi -d "Rebase Raspberry Pi kernel on latest linux-next"
 
     pushd $pi_src; or return
 
-    git ru; or return
+    git ru -p origin; or return
 
     git rh origin/master
 
@@ -25,7 +25,6 @@ function cbl_rb_pi -d "Rebase Raspberry Pi kernel on latest linux-next"
     for revert in $reverts
         git revert --mainline 1 --no-edit $revert; or return
     end
-    set -a b4_patches https://lore.kernel.org/all/20240201-topic-qdf24xx_is_back_apparently-v1-1-edb112a2ef90@linaro.org/ # Revert "tty: serial: amba-pl011: Remove QDF2xxx workarounds"
     for patch in $b4_patches
         b4 shazam -l -P _ -s $patch; or return
     end
@@ -48,7 +47,7 @@ function cbl_rb_pi -d "Rebase Raspberry Pi kernel on latest linux-next"
                 set config defconfig
         end
         kmake ARCH=$arch HOSTLDFLAGS=-fuse-ld=lld LLVM=1 O=$pi_out/$arch $config savedefconfig; or return
-        mv -v .build/$arch/defconfig arch/$arch/configs/$config
+        mv -v $pi_out/$arch/defconfig arch/$arch/configs/$config
     end
     git ac -m "ARM: configs: savedefconfig"
 
