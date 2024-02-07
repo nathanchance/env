@@ -115,7 +115,6 @@ set -gx CBL_LOGS $CBL/logs
 set -gx CBL_MISC $CBL/misc
 set -gx CBL_QEMU $CBL/qemu
 set -gx CBL_TMP $CBL/tmp
-set -gx CBL_WRKTR $CBL/worktrees
 
 set -gx HOST_FOLDER /mnt/host
 
@@ -133,6 +132,7 @@ set -gx CBL_SRC_C $CBL_SRC/clean
 set -gx CBL_SRC_D $CBL_SRC/dev
 set -gx CBL_SRC_M $CBL_SRC/mirrors
 set -gx CBL_SRC_P $CBL_SRC/patched
+set -gx CBL_SRC_W $CBL_SRC/worktrees
 
 set -gx CBL_LKT $CBL_SRC_D/llvm-kernel-testing
 set -gx CBL_TC_BLD $CBL_SRC_P/tc-build
