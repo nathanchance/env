@@ -16,6 +16,7 @@ function cbl_bld_tot_tcs -d "Build LLVM and binutils from source for kernel deve
 
     switch $LOCATION
         case aadp generic wsl
+            set bolt true
             set pgo kernel-defconfig
             if test $LOCATION = aadp
                 set validate_uprev kernel
