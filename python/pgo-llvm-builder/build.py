@@ -162,6 +162,8 @@ install_targets = [
     'clang',
     'clang-resource-headers',
     'compiler-rt',
+    'libclang',
+    'libclang-headers',
     'lld',
     'llvm-addr2line',
     'llvm-ar',
