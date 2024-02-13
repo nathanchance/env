@@ -146,6 +146,7 @@ EOF
         cmake
         lld
         ninja-build
+        perf
         zlib-devel
 
         # locale
