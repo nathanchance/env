@@ -25,6 +25,7 @@ function cbl_rb_fd -d "Rebase generic Fedora kernel on latest linux-next"
     for patch in $crl_patches
         crl $patch | git am -3; or return
     end
+    set -a ln_commits b6f3d5cbacc13d9ac934e7625e4ae280a5fa31f3 # Diff of new version of "bcachefs: Clamp replicas_required to replicas"
     for hash in $ln_commits
         git -C $CBL_SRC_P/linux-next fp -1 --stdout $hash | git am; or return
     end
