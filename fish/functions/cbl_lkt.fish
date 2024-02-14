@@ -263,7 +263,7 @@ total_size = 0
 files = []
 
 # Filter out zero sized files
-for file in (log_folder := Path('$log_folder')).glob('*.log'):
+for file in sorted((log_folder := Path('$log_folder')).glob('*.log')):
     if (file_size := file.stat().st_size) > 0:
         files.append(file)
         total_size += file_size
