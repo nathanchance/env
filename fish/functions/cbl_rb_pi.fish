@@ -15,9 +15,11 @@ function cbl_rb_pi -d "Rebase Raspberry Pi kernel on latest linux-next"
         end
     end
 
-    pushd $pi_src; or return
-
-    git ru -p origin; or return
+    begin
+        pushd $pi_src
+        and git ru -p origin
+    end
+    or return
 
     git rh origin/master
 
@@ -26,16 +28,37 @@ function cbl_rb_pi -d "Rebase Raspberry Pi kernel on latest linux-next"
         git revert --mainline 1 --no-edit $revert; or return
     end
     for patch in $b4_patches
-        b4 shazam -l -P _ -s $patch; or return
+        b4 shazam -l -P _ -s $patch
+        or begin
+            set ret $status
+            git ama
+            return $ret
+        end
     end
     for patch in $crl_patches
-        crl $patch | git am -3; or return
+        crl $patch | git am -3
+        or begin
+            set ret $status
+            git ama
+            return $ret
+        end
     end
     for hash in $ln_commits
-        git -C $CBL_SRC_P/linux-next fp -1 --stdout $hash | git am; or return
+        git -C $CBL_SRC_P/linux-next fp -1 --stdout $hash | git am
+        or begin
+            set ret $status
+            git ama
+            return $ret
+        end
     end
     for patch in $am_patches
-        git am -3 $patch; or return
+        git am -3 $patch
+        or begin
+            set ret $status
+            git ama
+            return $ret
+        end
+
     end
 
     # Regenerate defconfigs
@@ -46,7 +69,8 @@ function cbl_rb_pi -d "Rebase Raspberry Pi kernel on latest linux-next"
             case arm64
                 set config defconfig
         end
-        kmake ARCH=$arch HOSTLDFLAGS=-fuse-ld=lld LLVM=1 O=$pi_out/$arch $config savedefconfig; or return
+        kmake ARCH=$arch HOSTLDFLAGS=-fuse-ld=lld LLVM=1 O=$pi_out/$arch $config savedefconfig
+        or return
         mv -v $pi_out/$arch/defconfig arch/$arch/configs/$config
     end
     git ac -m "ARM: configs: savedefconfig"
@@ -136,29 +160,37 @@ function cbl_rb_pi -d "Rebase Raspberry Pi kernel on latest linux-next"
             case arm64
                 set config defconfig
         end
-        kmake ARCH=$arch HOSTLDFLAGS=-fuse-ld=lld LLVM=1 O=$pi_out/$arch $config savedefconfig; or return
+        kmake ARCH=$arch HOSTLDFLAGS=-fuse-ld=lld LLVM=1 O=$pi_out/$arch $config savedefconfig
+        or return
         mv -v $pi_out/$arch/defconfig arch/$arch/configs/$config
     end
     git ac -m "ARM: configs: Update defconfigs"
 
-    git am $GITHUB_FOLDER/patches/linux-misc/0001-ARM-dts-bcm2-711-837-Disable-the-display-pipeline.patch; or return
+    git am $GITHUB_FOLDER/patches/linux-misc/0001-ARM-dts-bcm2-711-837-Disable-the-display-pipeline.patch
+    or return
 
     for arch in arm arm64
-        $GITHUB_FOLDER/pi-scripts/build.fish $arch; or return
+        $GITHUB_FOLDER/pi-scripts/build.fish $arch
+        or return
     end
 
     if test "$skip_mainline" != true
         if not git pll --no-edit mainline master
-            rg "<<<<<<< HEAD"; and return
+            rg "<<<<<<< HEAD"
+            and return
+
             for arch in arm arm64
-                $GITHUB_FOLDER/pi-scripts/build.fish $arch; or return
+                $GITHUB_FOLDER/pi-scripts/build.fish $arch
+                or return
             end
             git aa
-            git c --no-edit; or return
+            git c --no-edit
+            or return
         end
 
         for arch in arm arm64
-            $GITHUB_FOLDER/pi-scripts/build.fish $arch; or return
+            $GITHUB_FOLDER/pi-scripts/build.fish $arch
+            or return
         end
     end
 
