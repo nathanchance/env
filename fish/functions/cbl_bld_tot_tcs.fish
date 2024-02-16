@@ -138,9 +138,6 @@ function cbl_bld_tot_tcs -d "Build LLVM and binutils from source for kernel deve
     end
 
     # Add patches to revert here
-    # https://github.com/llvm/llvm-project/pull/74460#issuecomment-1948882652
-    set -a reverts https://github.com/llvm/llvm-project/commit/5b8e7ed787f6e537876c4fdafd070eba9681f343 # [AArch64][Driver] Mark test as requiring AArch64 backend
-    set -a reverts https://github.com/llvm/llvm-project/commit/9cc98e336980f00cbafcbed8841344e6ac472bdc # [AArch64] Add soft-float ABI (#74460)
     for revert in $reverts
         set -l revert (basename $revert)
         if not git -C $llvm_project rv -n $revert
@@ -152,7 +149,8 @@ function cbl_bld_tot_tcs -d "Build LLVM and binutils from source for kernel deve
     end
 
     # Add in-review patches here
-    set -a gh_prs https://github.com/llvm/llvm-project/pull/81841 # [llvm-objcopy] Add SystemZ support
+    # https://github.com/llvm/llvm-project/pull/74460#issuecomment-1948882652
+    set -a gh_prs https://github.com/llvm/llvm-project/pull/82032 # Revert "[AArch64] Add soft-float ABI (#74460)"
     for gh_pr in $gh_prs
         if gh_llvm pr view --json state (basename $gh_pr) | python3 -c "import json, sys; sys.exit(0 if json.load(sys.stdin)['state'] == 'MERGED' else 1)"
             print_warning "$gh_pr has already been merged, skipping..."
