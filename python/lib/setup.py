@@ -160,7 +160,7 @@ def get_os_rel_val(variable):
 def get_user():
     if 'USERNAME' in os.environ:
         return os.environ['USERNAME']
-    if get_hostname() == 'raspberrypi':
+    if is_pi() and user_exists('pi'):
         return 'pi'
     return 'nathan'
 
@@ -209,6 +209,10 @@ def is_lxc():
     if shutil.which('systemd-detect-virt'):
         return detect_virt() == 'lxc'
     return 'container=lxc' in Path('/proc/1/environ').read_text(encoding='utf-8')
+
+
+def is_pi():
+    return get_hostname() == 'raspberrypi'
 
 
 def is_virtual_machine():
@@ -366,6 +370,34 @@ def setup_mnt_nas():
         dst.chmod(0o644)
 
     systemctl_enable([file])
+
+
+def setup_mnt_ssd(user_name):
+    if (ssd_partition := Path('/dev/sda1')).is_block_device():
+        (mnt_point := Path('/mnt/ssd')).mkdir(exist_ok=True, parents=True)
+        chown(user_name, mnt_point)
+
+        fstab, fstab_text = utils.path_and_text('/etc/fstab')
+        if str(mnt_point) not in fstab_text:
+            partuuid = subprocess.run(['blkid', '-o', 'value', '-s', 'PARTUUID', ssd_partition],
+                                      capture_output=True,
+                                      check=True,
+                                      text=True).stdout.strip()
+
+            fstab_line = f"PARTUUID={partuuid}\t{mnt_point}\text4\tdefaults,noatime\t0\t1\n"
+
+            fstab.write_text(fstab_text + fstab_line, encoding='utf-8')
+
+        subprocess.run(['systemctl', 'daemon-reload'], check=True)
+        subprocess.run(['mount', '-a'], check=True)
+
+        if shutil.which('docker'):
+            docker_json = Path('/etc/docker/daemon.json')
+            docker_json.parent.mkdir(exist_ok=True, parents=True)
+            docker_json_txt = ('{\n'
+                               f'"data-root": "{mnt_point}/docker"'
+                               '\n}\n')
+            docker_json.write_text(docker_json_txt, encoding='utf-8')
 
 
 def setup_static_ip(requested_ip):

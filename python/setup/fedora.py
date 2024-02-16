@@ -20,6 +20,7 @@ def configure_networking():
     ips = {
         'aadp': '192.168.4.234',
         'honeycomb': '192.168.4.210',
+        'raspberrypi': '192.168.4.205',
     }
 
     if hostname not in ips:
@@ -42,7 +43,7 @@ def get_fedora_version():
 
 
 def machine_is_trusted():
-    return lib.setup.get_hostname() in ('aadp', 'honeycomb')
+    return lib.setup.get_hostname() in ('aadp', 'honeycomb', 'raspberrypi')
 
 
 def prechecks():
@@ -55,6 +56,13 @@ def prechecks():
 
 
 def resize_rootfs():
+    # arm-setup-installer extends the size of the physical partition and LVM
+    # partition but not the XFS partition, so just do that and circumvent the
+    # rest of this function's logic.
+    if lib.setup.is_pi():
+        subprocess.run(['xfs_growfs', '-d', '/'], check=True)
+        return
+
     df_out = subprocess.run(['df', '-T'], capture_output=True, check=True, text=True).stdout
     for line in df_out.split('\n'):
         if '/dev/mapper/' in line:
@@ -211,6 +219,13 @@ def setup_mosh():
     subprocess.run(['firewall-cmd', '--reload'], check=True)
 
 
+def setup_pi(username):
+    if not lib.setup.is_pi():
+        return
+
+    lib.setup.setup_mnt_ssd(username)
+
+
 def setup_repos():
     dnf_add_repo('https://cli.github.com/packages/rpm/gh-cli.repo')
 
@@ -243,6 +258,7 @@ if __name__ == '__main__':
     setup_kernel_args()
     setup_libvirt(user)
     setup_mosh()
+    setup_pi(user)
     configure_networking()
     lib.setup.enable_tailscale()
     lib.setup.chsh_fish(user)

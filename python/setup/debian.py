@@ -20,10 +20,6 @@ import lib.utils
 # pylint: enable=wrong-import-position
 
 
-def machine_is_pi():
-    return lib.setup.get_hostname() == 'raspberrypi'
-
-
 def machine_is_trusted():
     return lib.setup.get_hostname() in ('raspberrypi')
 
@@ -37,7 +33,7 @@ def parse_arguments():
 
 
 def pi_setup(user_name):
-    if not machine_is_pi():
+    if not lib.setup.is_pi():
         return
 
     subprocess.run(['raspi-config', '--expand-rootfs'], check=True)
@@ -59,34 +55,7 @@ def pi_setup(user_name):
     else:
         lib.setup.setup_static_ip(ip_addr)
 
-    ssd_partition = Path('/dev/sda1')
-    if ssd_partition.is_block_device():
-        mnt_point = Path('/mnt/ssd')
-
-        mnt_point.mkdir(exist_ok=True, parents=True)
-        lib.setup.chown(user_name, mnt_point)
-
-        fstab, fstab_text = lib.utils.path_and_text('/etc/fstab')
-        if str(mnt_point) not in fstab_text:
-            partuuid = subprocess.run(['blkid', '-o', 'value', '-s', 'PARTUUID', ssd_partition],
-                                      capture_output=True,
-                                      check=True,
-                                      text=True).stdout.strip()
-
-            fstab_line = f"PARTUUID={partuuid}\t{mnt_point}\text4\tdefaults,noatime\t0\t1\n"
-
-            fstab.write_text(fstab_text + fstab_line, encoding='utf-8')
-
-        subprocess.run(['systemctl', 'daemon-reload'], check=True)
-        subprocess.run(['mount', '-a'], check=True)
-
-        if shutil.which('docker'):
-            docker_json = Path('/etc/docker/daemon.json')
-            docker_json.parent.mkdir(exist_ok=True, parents=True)
-            docker_json_txt = ('{\n'
-                               f'"data-root": "{mnt_point}/docker"'
-                               '\n}\n')
-            docker_json.write_text(docker_json_txt, encoding='utf-8')
+    lib.setup.setup_mnt_ssd(user_name)
 
     x11_opts, x11_opts_txt = lib.utils.path_and_text('/etc/X11/Xsession.options')
     if x11_opts_txt:
@@ -139,7 +108,7 @@ def setup_repos():
 
     # Tailscale
     if machine_is_trusted():
-        distro = 'raspbian' if machine_is_pi() else 'debian'
+        distro = 'raspbian' if lib.setup.is_pi() else 'debian'
         base_tailscale_url = f"https://pkgs.tailscale.com/stable/{distro}/{codename}"
 
         tailscale_gpg_key = Path('/usr/share/keyrings/tailscale-archive-keyring.gpg')
