@@ -163,21 +163,31 @@ def download_items(targets, network_folder):
 
             # Server
             for arch in fedora_arches:
-                base_url = f"{base_fedora_url}/Server/{arch}/iso"
+                iso_url = f"{base_fedora_url}/Server/{arch}/iso"
                 for flavor in ['dvd', 'netinst']:
                     items += [{
                         'containing_folder': Path(subfolder, fedora_ver, 'Server', arch),
-                        'file_url': f"{base_url}/Fedora-Server-{flavor}-{arch}-{fedora_ver}-{server_iso_ver}.iso",
-                        'sha_url': f"{base_url}/Fedora-Server-{fedora_ver}-{server_iso_ver}-{arch}-CHECKSUM",
+                        'file_url': f"{iso_url}/Fedora-Server-{flavor}-{arch}-{fedora_ver}-{server_iso_ver}.iso",
+                        'sha_url': f"{iso_url}/Fedora-Server-{fedora_ver}-{server_iso_ver}-{arch}-CHECKSUM",
                     }]  # yapf: disable
+
+            # Download raw aarch64 Server image for Raspberry Pi
+            arch = 'aarch64'
+            raw_url = f"{base_fedora_url}/Server/{arch}/images"
+            items += [{
+                'containing_folder': Path(subfolder, fedora_ver, 'Server', arch),
+                'file_url': f"{raw_url}/Fedora-Server-{fedora_ver}-{server_iso_ver}.{arch}.raw.xz",
+                'sha_url': f"{raw_url}/Fedora-Server-{fedora_ver}-{server_iso_ver}-{arch}-CHECKSUM",
+            }]  # yapf: disable
+
 
             # Workstation
             for arch in fedora_arches:
-                base_url = f"{base_fedora_url}/Workstation/{arch}/iso"
+                iso_url = f"{base_fedora_url}/Workstation/{arch}/iso"
                 items += [{
                     'containing_folder': Path(subfolder, fedora_ver, 'Workstation', arch),
-                    'file_url': f"{base_url}/Fedora-Workstation-Live-{arch}-{fedora_ver}-{workstation_iso_ver}.iso",
-                    'sha_url': f"{base_url}/Fedora-Workstation-{fedora_ver}-{server_iso_ver}-{arch}-CHECKSUM",
+                    'file_url': f"{iso_url}/Fedora-Workstation-Live-{arch}-{fedora_ver}-{workstation_iso_ver}.iso",
+                    'sha_url': f"{iso_url}/Fedora-Workstation-{fedora_ver}-{server_iso_ver}-{arch}-CHECKSUM",
                 }]  # yapf: disable
 
         elif target == 'ipsw':
