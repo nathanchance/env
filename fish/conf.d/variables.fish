@@ -19,7 +19,7 @@ if test -z "$LOCATION"
                 set -Ux LOCATION hetzner-server
             case nathan@honeycomb
                 set -Ux LOCATION honeycomb
-            case pi@raspberrypi
+            case nathan@raspberrypi pi@raspberrypi
                 set -Ux LOCATION pi
             case nathan@hp-amd-ryzen-4300G
                 set -Ux LOCATION test-desktop-amd

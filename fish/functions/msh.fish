@@ -67,7 +67,7 @@ function msh -d "Shorthand for mosh -o" -w mosh
             else
                 set host 192.168.4.205
             end
-            set user_host pi@$host
+            set user_host nathan@$host
 
         case hetzner-server
             set user_host nathan@$SERVER_IP

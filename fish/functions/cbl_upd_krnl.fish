@@ -9,6 +9,13 @@ function cbl_upd_krnl -d "Update machine's kernel"
     set remote_tmp_build_folder /mnt/nvme/tmp/build
 
     switch $LOCATION
+        case pi
+            # Pi 4 can run either Raspbian or Fedora, be more specific to allow the situation to change
+            if test (uname -m) = aarch64
+                set location pi4
+            else
+                set location pi3
+            end
         case vm
             set location vm-(uname -m)
         case '*'
@@ -16,7 +23,7 @@ function cbl_upd_krnl -d "Update machine's kernel"
     end
 
     switch $location
-        case aadp honeycomb vm-aarch64
+        case aadp honeycomb pi4 vm-aarch64
             in_container_msg -h; or return
             test (get_distro) = fedora; or return
 
@@ -47,7 +54,7 @@ function cbl_upd_krnl -d "Update machine's kernel"
         case hetzner-server workstation
             cbl_upd_krnl_pkg $argv
 
-        case pi
+        case pi3
             in_container_msg -h; or return
 
             # Cache sudo/doas permissions
