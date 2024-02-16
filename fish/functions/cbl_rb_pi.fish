@@ -31,6 +31,7 @@ function cbl_rb_pi -d "Rebase Raspberry Pi kernel on latest linux-next"
     for revert in $reverts
         git revert --mainline 1 --no-edit $revert; or return
     end
+    set -a b4_patches https://lore.kernel.org/all/20240216163259.1927967-1-arnd@kernel.org/ # firmware: arm_scmi: avoid returning uninialized data
     for patch in $b4_patches
         b4 shazam -l -P _ -s $patch
         or begin

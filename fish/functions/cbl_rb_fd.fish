@@ -20,6 +20,9 @@ function cbl_rb_fd -d "Rebase generic Fedora kernel on latest linux-next"
         git revert --mainline 1 --no-edit $revert
         or return
     end
+    set -a b4_patches https://lore.kernel.org/all/20240216105930.16265-1-brgl@bgdev.pl/ # gpio: cdev: fix a NULL-pointer dereference with DEBUG enabled
+    set -a b4_patches https://lore.kernel.org/all/20240216163259.1927967-1-arnd@kernel.org/ # firmware: arm_scmi: avoid returning uninialized data
+    set -a b4_patches https://lore.kernel.org/all/Zc+3PFCUvLoVlpg8@neat/ # wifi: brcmfmac: fweh: Fix boot crash on Raspberry Pi 4
     for patch in $b4_patches
         b4 shazam -l -P _ -s $patch
         or begin
