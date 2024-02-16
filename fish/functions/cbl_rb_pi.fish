@@ -7,6 +7,10 @@ function cbl_rb_pi -d "Rebase Raspberry Pi kernel on latest linux-next"
 
     set pi_src $CBL_SRC_P/rpi
     set pi_out (tbf $pi_src)
+    # Used to include arm64 but that has since been cut over to Fedora.
+    # arm64 support is left around in case a future reason to revert
+    # back to Debian is discovered.
+    set pi_arches arm
 
     for arg in $argv
         switch $arg
@@ -61,55 +65,62 @@ function cbl_rb_pi -d "Rebase Raspberry Pi kernel on latest linux-next"
 
     end
 
-    # Regenerate defconfigs
-    for arch in arm arm64
+    for arch in $pi_arches
         switch $arch
             case arm
                 set config multi_v7_defconfig
             case arm64
                 set config defconfig
         end
-        kmake ARCH=$arch HOSTLDFLAGS=-fuse-ld=lld LLVM=1 O=$pi_out/$arch $config savedefconfig
+        set -a cfg_files arch/$arch/configs/$config
+    end
+
+    # Regenerate defconfigs
+    for cfg_file in $cfg_files
+        string split -f 2 / $cfg_file | read -l arch
+        kmake ARCH=$arch HOSTLDFLAGS=-fuse-ld=lld LLVM=1 O=$pi_out/$arch (basename $cfg_file) savedefconfig
         or return
-        mv -v $pi_out/$arch/defconfig arch/$arch/configs/$config
+        mv -v $pi_out/$arch/defconfig $cfg_file
     end
     git ac -m "ARM: configs: savedefconfig"
 
     # Docker configuration for ARM
-    scripts/config \
-        --file arch/arm/configs/multi_v7_defconfig \
-        -e BLK_CGROUP \
-        -e BPF_SYSCALL \
-        -e BRIDGE_VLAN_FILTERING \
-        -e CGROUP_BPF \
-        -e CGROUP_CPUACCT \
-        -e CGROUP_DEVICE \
-        -e CGROUP_FREEZER \
-        -e CGROUP_PERF \
-        -e CGROUP_PIDS \
-        -e CGROUP_SCHED \
-        -e CPUSETS \
-        -e EXT4_FS_POSIX_ACL \
-        -e FAIR_GROUP_SCHED \
-        -e MEMCG \
-        -e NAMESPACES \
-        -e POSIX_MQUEUE \
-        -e USER_NS \
-        -e VLAN_8021Q \
-        -m BRIDGE \
-        -m BRIDGE_NETFILTER \
-        -m IP_NF_FILTER \
-        -m IP_NF_NAT \
-        -m IP_NF_TARGET_MASQUERADE \
-        -m IP_VS \
-        -m NETFILTER_XT_MATCH_ADDRTYPE \
-        -m NETFILTER_XT_MATCH_CONNTRACK \
-        -m NETFILTER_XT_MATCH_IPVS \
-        -m OVERLAY_FS \
-        -m VETH
+    if contains arm $pi_arches
+        scripts/config \
+            --file arch/arm/configs/multi_v7_defconfig \
+            -e BLK_CGROUP \
+            -e BPF_SYSCALL \
+            -e BRIDGE_VLAN_FILTERING \
+            -e CGROUP_BPF \
+            -e CGROUP_CPUACCT \
+            -e CGROUP_DEVICE \
+            -e CGROUP_FREEZER \
+            -e CGROUP_PERF \
+            -e CGROUP_PIDS \
+            -e CGROUP_SCHED \
+            -e CPUSETS \
+            -e EXT4_FS_POSIX_ACL \
+            -e FAIR_GROUP_SCHED \
+            -e MEMCG \
+            -e NAMESPACES \
+            -e POSIX_MQUEUE \
+            -e USER_NS \
+            -e VLAN_8021Q \
+            -m BRIDGE \
+            -m BRIDGE_NETFILTER \
+            -m IP_NF_FILTER \
+            -m IP_NF_NAT \
+            -m IP_NF_TARGET_MASQUERADE \
+            -m IP_VS \
+            -m NETFILTER_XT_MATCH_ADDRTYPE \
+            -m NETFILTER_XT_MATCH_CONNTRACK \
+            -m NETFILTER_XT_MATCH_IPVS \
+            -m OVERLAY_FS \
+            -m VETH
+    end
 
     # Configs for binfmt_misc (Bookworm and newer) and Tailscale
-    for cfg_file in arch/arm/configs/multi_v7_defconfig arch/arm64/configs/defconfig
+    for cfg_file in $cfg_files
         scripts/config \
             --file $cfg_file \
             -e IP_NF_IPTABLES \
@@ -131,12 +142,14 @@ function cbl_rb_pi -d "Rebase Raspberry Pi kernel on latest linux-next"
     end
 
     # arm64 hardening
-    scripts/config \
-        --file arch/arm64/configs/defconfig \
-        -d LTO_NONE \
-        -e CFI_CLANG \
-        -e LTO_CLANG_THIN \
-        -e SHADOW_CALL_STACK
+    if contains arm64 $pi_arches
+        scripts/config \
+            --file arch/arm64/configs/defconfig \
+            -d LTO_NONE \
+            -e CFI_CLANG \
+            -e LTO_CLANG_THIN \
+            -e SHADOW_CALL_STACK
+    end
 
     # Disable DEBUG_INFO for smaller builds
     if grep -q "config DEBUG_INFO_NONE" lib/Kconfig.debug
@@ -148,28 +161,23 @@ function cbl_rb_pi -d "Rebase Raspberry Pi kernel on latest linux-next"
     set -a sc_args -e WERROR
     # Shut up -Wframe-larger-than
     set -a sc_args --set-val FRAME_WARN 0
-    for cfg in arch/arm/configs/multi_v7_defconfig arch/arm64/configs/defconfig
+    for cfg in $cfg_files
         scripts/config --file $cfg $sc_args
     end
 
     # Ensure configs are run through savedefconfig before committing
-    for arch in arm arm64
-        switch $arch
-            case arm
-                set config multi_v7_defconfig
-            case arm64
-                set config defconfig
-        end
-        kmake ARCH=$arch HOSTLDFLAGS=-fuse-ld=lld LLVM=1 O=$pi_out/$arch $config savedefconfig
+    for cfg_file in $cfg_files
+        string split -f 2 / $cfg_file | read -l arch
+        kmake ARCH=$arch HOSTLDFLAGS=-fuse-ld=lld LLVM=1 O=$pi_out/$arch (basename $cfg_file) savedefconfig
         or return
-        mv -v $pi_out/$arch/defconfig arch/$arch/configs/$config
+        mv -v $pi_out/$arch/defconfig $cfg_file
     end
     git ac -m "ARM: configs: Update defconfigs"
 
     git am $GITHUB_FOLDER/patches/linux-misc/0001-ARM-dts-bcm2-711-837-Disable-the-display-pipeline.patch
     or return
 
-    for arch in arm arm64
+    for arch in $pi_arches
         $GITHUB_FOLDER/pi-scripts/build.fish $arch
         or return
     end
@@ -179,7 +187,7 @@ function cbl_rb_pi -d "Rebase Raspberry Pi kernel on latest linux-next"
             rg "<<<<<<< HEAD"
             and return
 
-            for arch in arm arm64
+            for arch in $pi_arches
                 $GITHUB_FOLDER/pi-scripts/build.fish $arch
                 or return
             end
@@ -188,7 +196,7 @@ function cbl_rb_pi -d "Rebase Raspberry Pi kernel on latest linux-next"
             or return
         end
 
-        for arch in arm arm64
+        for arch in $pi_arches
             $GITHUB_FOLDER/pi-scripts/build.fish $arch
             or return
         end
