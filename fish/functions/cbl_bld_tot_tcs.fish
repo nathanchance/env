@@ -138,6 +138,9 @@ function cbl_bld_tot_tcs -d "Build LLVM and binutils from source for kernel deve
     end
 
     # Add patches to revert here
+    # https://github.com/llvm/llvm-project/pull/74460#issuecomment-1948882652
+    set -a reverts https://github.com/llvm/llvm-project/commit/5b8e7ed787f6e537876c4fdafd070eba9681f343 # [AArch64][Driver] Mark test as requiring AArch64 backend
+    set -a reverts https://github.com/llvm/llvm-project/commit/9cc98e336980f00cbafcbed8841344e6ac472bdc # [AArch64] Add soft-float ABI (#74460)
     for revert in $reverts
         set -l revert (basename $revert)
         if not git -C $llvm_project rv -n $revert
