@@ -3,6 +3,7 @@
 # Copyright (C) 2022-2023 Nathan Chancellor
 
 from pathlib import Path
+import re
 import shutil
 import subprocess
 import sys
@@ -38,6 +39,49 @@ def dnf_install(install_args):
     lib.setup.dnf(['install', '-y', *install_args])
 
 
+def early_pi_fixups():
+    if not lib.setup.is_pi():
+        return
+
+    # There is an unfortunate bug with LVM and arm-image-installer that we
+    # need to check for.
+    # https://bugzilla.redhat.com/bugzilla/show_bug.cgi?id=2247872
+    # https://bugzilla.redhat.com/bugzilla/show_bug.cgi?id=2258764
+    lvmsysdev = Path('/etc/lvm/devices/system.devices')
+    if lvmsysdev.exists() and '/dev/mmcblk' not in lvmsysdev.read_text(encoding='utf-8'):
+        lvmsysdev.unlink()
+        subprocess.run(['vgimportdevices', '-a'], check=True)
+        subprocess.run(['vgchange', '-ay'], check=True)
+
+    # arm-setup-installer extends the size of the physical partition and
+    # LVM partition but not the XFS partition, so just do that and
+    # circumvent the rest of this function's logic.
+    subprocess.run(['xfs_growfs', '-d', '/'], check=True)
+
+    # Ensure 'rhgb quiet' is removed for all current and future kernels, as it
+    # hurts debugging early boot failures.
+    grubby_cmd = ['grubby', '--update-kernel', 'ALL', '--remove-args', 'rhgb quiet']
+
+    # arm-setup-installer may rename the logical volume and adjust the first
+    # bootloader entry but this does not appear to get updated for all future
+    # kernel installs.
+    grub_txt = Path('/etc/default/grub').read_text(encoding='utf-8')
+    if not (match := re.search(r'rd.lvm.lv=(.*)/root', grub_txt)):
+        raise RuntimeError('Cannot find rd.lvm.lv value in /etc/default/grub?')
+    grub_vg_name = match.groups()[0]
+    sys_vg_name = subprocess.run(['vgs', '--noheading', '-o', 'vg_name'],
+                                 capture_output=True,
+                                 check=True,
+                                 text=True).stdout.strip()
+    if len(sys_vg_name.split(' ')) != 1:
+        raise RuntimeError('More than one VG found?')
+
+    if grub_vg_name != sys_vg_name:
+        grubby_cmd += ['--args', f"rd.lvm.lv={sys_vg_name}/root"]
+
+    subprocess.run(grubby_cmd, check=True)
+
+
 def get_fedora_version():
     return int(lib.setup.get_os_rel_val('VERSION_ID'))
 
@@ -56,20 +100,8 @@ def prechecks():
 
 
 def resize_rootfs():
+    # This will be handled in early_pi_setup()
     if lib.setup.is_pi():
-        # There is an unfortunate bug with LVM and arm-image-installer that we
-        # need to check for.
-        # https://bugzilla.redhat.com/bugzilla/show_bug.cgi?id=2247872
-        # https://bugzilla.redhat.com/bugzilla/show_bug.cgi?id=2258764
-        if (lvmsysdev := Path('/etc/lvm/devices/system.devices')
-            ).exists() and '/dev/mmcblk' not in lvmsysdev.read_text(encoding='utf-8'):
-            lvmsysdev.unlink()
-            subprocess.run(['vgimportdevices', '-a'], check=True)
-            subprocess.run(['vgchange', '-ay'], check=True)
-        # arm-setup-installer extends the size of the physical partition and
-        # LVM partition but not the XFS partition, so just do that and
-        # circumvent the rest of this function's logic.
-        subprocess.run(['xfs_growfs', '-d', '/'], check=True)
         return
 
     df_out = subprocess.run(['df', '-T'], capture_output=True, check=True, text=True).stdout
@@ -258,6 +290,7 @@ if __name__ == '__main__':
     user = lib.setup.get_user()
 
     prechecks()
+    early_pi_fixups()
     resize_rootfs()
     install_initial_packages()
     setup_repos()
