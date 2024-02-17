@@ -56,10 +56,19 @@ def prechecks():
 
 
 def resize_rootfs():
-    # arm-setup-installer extends the size of the physical partition and LVM
-    # partition but not the XFS partition, so just do that and circumvent the
-    # rest of this function's logic.
     if lib.setup.is_pi():
+        # There is an unfortunate bug with LVM and arm-image-installer that we
+        # need to check for.
+        # https://bugzilla.redhat.com/bugzilla/show_bug.cgi?id=2247872
+        # https://bugzilla.redhat.com/bugzilla/show_bug.cgi?id=2258764
+        if (lvmsysdev := Path('/etc/lvm/devices/system.devices')
+            ).exists() and '/dev/mmcblk' not in lvmsysdev.read_text(encoding='utf-8'):
+            lvmsysdev.unlink()
+            subprocess.run(['vgimportdevices', '-a'], check=True)
+            subprocess.run(['vgchange', '-ay'], check=True)
+        # arm-setup-installer extends the size of the physical partition and
+        # LVM partition but not the XFS partition, so just do that and
+        # circumvent the rest of this function's logic.
         subprocess.run(['xfs_growfs', '-d', '/'], check=True)
         return
 
