@@ -59,8 +59,10 @@ def early_pi_fixups():
     subprocess.run(['xfs_growfs', '-d', '/'], check=True)
 
     # Ensure 'rhgb quiet' is removed for all current and future kernels, as it
-    # hurts debugging early boot failures.
-    grubby_cmd = ['grubby', '--update-kernel', 'ALL', '--remove-args', 'rhgb quiet']
+    # hurts debugging early boot failures. Make sure the serial console is set
+    # up properly as well.
+    args = ['console=ttyS0,115200', 'console=tty0']
+    remove_args = ['rhgb', 'quiet']
 
     # arm-setup-installer may rename the logical volume and adjust the first
     # bootloader entry but this does not appear to get updated for all future
@@ -75,10 +77,15 @@ def early_pi_fixups():
                                  text=True).stdout.strip()
     if len(sys_vg_name.split(' ')) != 1:
         raise RuntimeError('More than one VG found?')
-
     if grub_vg_name != sys_vg_name:
-        grubby_cmd += ['--args', f"rd.lvm.lv={sys_vg_name}/root"]
+        args.append(f"rd.lvm.lv={sys_vg_name}/root")
 
+    grubby_cmd = [
+        'grubby',
+        '--args', ' '.join(args),
+        '--remove-args', ' '.join(remove_args),
+        '--update-kernel', 'ALL',
+    ]  # yapf: disable
     subprocess.run(grubby_cmd, check=True)
 
 
