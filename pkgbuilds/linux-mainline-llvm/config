@@ -1,8 +1,8 @@
 #
 # Automatically generated file; DO NOT EDIT.
-# Linux/x86 6.8.0-rc4 Kernel Configuration
+# Linux/x86 6.8.0-rc5 Kernel Configuration
 #
-CONFIG_CC_VERSION_TEXT="ClangBuiltLinux clang version 19.0.0git (https://github.com/llvm/llvm-project 95a204cf34c410c2be5f152daec2d476f1e06d84)"
+CONFIG_CC_VERSION_TEXT="ClangBuiltLinux clang version 19.0.0git (https://github.com/llvm/llvm-project 9c4e2fe589bf732b9bd1b3919832fb5056f5611c)"
 CONFIG_GCC_VERSION=0
 CONFIG_CC_IS_CLANG=y
 CONFIG_CLANG_VERSION=190000
@@ -9864,6 +9864,7 @@ CONFIG_AM2315=m
 CONFIG_DHT11=m
 CONFIG_HDC100X=m
 CONFIG_HDC2010=m
+# CONFIG_HDC3020 is not set
 CONFIG_HID_SENSOR_HUMIDITY=m
 CONFIG_HTS221=m
 CONFIG_HTS221_I2C=m
