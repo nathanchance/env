@@ -78,7 +78,14 @@ def early_pi_fixups():
     if len(sys_vg_name.split(' ')) != 1:
         raise RuntimeError('More than one VG found?')
     if grub_vg_name != sys_vg_name:
-        args.append(f"rd.lvm.lv={sys_vg_name}/root")
+        dm_node_name = {
+            'fedora': 'fedora-root',
+            'fedora-server': 'fedora--server-root',
+        }[sys_vg_name]
+        args += [
+            f"root=/dev/mapper/{dm_node_name}",
+            f"rd.lvm.lv={sys_vg_name}/root",
+        ]
 
     grubby_cmd = [
         'grubby',
