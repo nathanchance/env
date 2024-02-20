@@ -163,7 +163,8 @@ def get_os_rel():
     # conversion
     os_rel_txt = file.read_text(encoding='utf-8').replace('"', '')
 
-    return dict(item.split('=', 1) for item in os_rel_txt.splitlines() if item)
+    return dict(
+        item.split('=', 1) for item in os_rel_txt.splitlines() if item and not item.startswith('#'))
 
 
 def get_user():
