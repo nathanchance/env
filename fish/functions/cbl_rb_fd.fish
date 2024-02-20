@@ -39,7 +39,6 @@ function cbl_rb_fd -d "Rebase generic Fedora kernel on latest linux-next"
             return $ret
         end
     end
-    set -a ln_commits eef3deb854d0f174de237ee5c26f64e1490c0f52 # arm64: Use Signed/Unsigned enums for TGRAN{4,16,64} and VARange
     for hash in $ln_commits
         git -C $CBL_SRC_P/linux-next fp -1 --stdout $hash | git am
         or begin
