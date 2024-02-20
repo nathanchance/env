@@ -11,12 +11,13 @@ import pwd
 import re
 import shutil
 import socket
+import sys
 import subprocess
 
-try:
-    import utils
-except ModuleNotFoundError:
-    from . import utils
+sys.path.append(str(Path(__file__).resolve().parents[1]))
+# pylint: disable=wrong-import-position
+import lib.utils
+# pylint: enable=wrong-import-position
 
 
 def add_user_to_group(groupname, username):
@@ -29,11 +30,11 @@ def add_user_to_group_if_exists(groupname, username):
 
 
 def apk(apk_arguments):
-    utils.run_as_root(['apk', *apk_arguments])
+    lib.utils.run_as_root(['apk', *apk_arguments])
 
 
 def apt(apt_arguments):
-    utils.run_as_root(['apt', *apt_arguments])
+    lib.utils.run_as_root(['apt', *apt_arguments])
 
 
 def check_ip(ip_to_check):
@@ -80,7 +81,7 @@ def detect_virt():
 
 
 def dnf(dnf_arguments):
-    utils.run_as_root(['dnf', *dnf_arguments])
+    lib.utils.run_as_root(['dnf', *dnf_arguments])
 
 
 def enable_tailscale():
@@ -239,7 +240,7 @@ def is_systemd_init():
 
 
 def pacman(args):
-    utils.run_as_root(['pacman', *args])
+    lib.utils.run_as_root(['pacman', *args])
 
 
 def podman_setup(username):
@@ -387,7 +388,7 @@ def setup_mnt_ssd(user_name):
         (mnt_point := Path('/mnt/ssd')).mkdir(exist_ok=True, parents=True)
         chown(user_name, mnt_point)
 
-        fstab, fstab_text = utils.path_and_text('/etc/fstab')
+        fstab, fstab_text = lib.utils.path_and_text('/etc/fstab')
         if str(mnt_point) not in fstab_text:
             partuuid = subprocess.run(['blkid', '-o', 'value', '-s', 'PARTUUID', ssd_partition],
                                       capture_output=True,
@@ -471,4 +472,4 @@ def user_exists(user):
 
 
 def zypper(zypper_args):
-    utils.run_as_root(['zypper', *zypper_args])
+    lib.utils.run_as_root(['zypper', *zypper_args])
