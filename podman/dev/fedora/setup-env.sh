@@ -81,6 +81,7 @@ EOF
         bc
         cracklib-dicts
         diffutils
+        doas
         hostname
         iputils
         less
@@ -179,6 +180,13 @@ EOF
     esac
 
     dnf install -y "${packages[@]}"
+
+    # Remove sudo in favor of doas but leave a symlink for compatibility
+    rm -f /etc/dnf/protected.d/sudo.conf
+    if dnf list --installed sudo &>/dev/null; then
+        dnf remove -y sudo
+    fi
+    ln -frsv /usr/{bin/doas,local/bin/sudo}
 }
 
 function check_fish() {
