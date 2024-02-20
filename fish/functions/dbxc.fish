@@ -88,15 +88,15 @@ function dbxc -d "Shorthand for 'distrobox create'"
         set -a add_args --volume=/etc/pacman.d/mirrorlist:/etc/pacman.d/mirrorlist:ro
     end
 
-    set env_dbx $ENV_FOLDER/.distrobox
+    set dbx_init_hooks $HOME/.local/share/distrobox/init-hooks
+    mkdir -p $dbx_init_hooks
 
     if test "$mode" = create
-        set init_hook_sh $env_dbx/$name/init-hook.sh
-        mkdir -p (dirname $init_hook_sh)
+        set init_hook_sh $dbx_init_hooks/$name.sh
+        # to ensure chmod succeeds
         touch $init_hook_sh
     else
-        mkdir -p $env_dbx
-        set init_hook_sh (mktemp -p $env_dbx --suffix=.sh)
+        set init_hook_sh (mktemp -p $dbx_init_hooks --suffix=.sh)
     end
 
     chmod +x $init_hook_sh
@@ -173,7 +173,7 @@ if ! user_in_target_gid; then
 fi' >>$init_hook_sh
     end
 
-    if not string match -qr init-hook $init_hook_sh
+    if test "$mode" = ephemeral
         printf '\nrm "%s"\n' $init_hook_sh >>$init_hook_sh
     end
 
