@@ -79,6 +79,7 @@ EOF
 
         # distrobox
         bc
+        cracklib-dicts
         diffutils
         hostname
         iputils
