@@ -5,5 +5,5 @@
 function dbxrc -d "Recreate a distrobox container"
     dbxr $argv
     and dbxc $argv
-    and dbxe $argv -- "fish -c 'upd -y'"
+    and dbxe $argv -- $PYTHON_SCRIPTS_FOLDER/upd_distro.py -y
 end

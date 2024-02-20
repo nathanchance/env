@@ -2,6 +2,7 @@
 # SPDX-License-Identifier: MIT
 # Copyright (C) 2022-2023 Nathan Chancellor
 
+import os
 from pathlib import Path
 import shlex
 import subprocess
@@ -66,3 +67,13 @@ def print_green(msg):
 
 def print_yellow(msg):
     print_color('\033[01;33m', msg)
+
+
+def run_as_root(full_cmd):
+    cmd_copy = full_cmd.copy()
+    # If we have to escalate via 'sudo', print the command so it can be audited
+    # if necessary.
+    if os.geteuid() != 0:
+        cmd_copy.insert(0, 'sudo')
+        print_cmd(cmd_copy)
+    subprocess.run(cmd_copy, check=True)

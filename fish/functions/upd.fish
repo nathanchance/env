@@ -8,11 +8,7 @@ function upd -d "Runs the update command for the current distro or downloads/upd
             case -f --force
                 set force true
             case -y --yes
-                if command -q pacman
-                    set yes --noconfirm
-                else
-                    set yes -y
-                end
+                set yes -y
             case '*'
                 set -a targets $arg
         end
@@ -83,33 +79,9 @@ function upd -d "Runs the update command for the current distro or downloads/upd
                 continue
 
             case os os-no-container
-                switch (get_distro)
-                    case almalinux fedora rocky
-                        sudo dnf update $yes
-                    case alpine
-                        doas apk update
-                        doas apk upgrade
-                    case arch
-                        if checkupdates
-                            sudo pacman -Syyu $yes
-                        end
-                    case debian raspbian ubuntu
-                        sudo sh -c "apt update $yes && apt full-upgrade $yes && apt autoremove -y"
-                    case macos
-                        brew update
-                        and brew upgrade
-                        and brew upgrade \
-                            --cask wezterm-nightly \
-                            --no-quarantine \
-                            --greedy-latest
-                    case opensuse
-                        sudo zypper dup $yes
-                    case '*'
-                        print_error "Unknown OS! Cannot upgrade using 'upd'. Modify 'get_distro' to support this distro."
-                        return 1
-                end
+                $PYTHON_SCRIPTS_FOLDER/upd_distro.py $yes
                 if test "$target" != os-no-container; and has_container_manager; and dbx list &| grep -q (get_dev_img_esc)
-                    dbxe -- "fish -c 'upd -y'"
+                    dbxe -- $PYTHON_SCRIPTS_FOLDER/upd_distro.py $yes
                 end
                 if command -q mac
                     mac orb update

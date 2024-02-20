@@ -18,7 +18,7 @@ function oci_rst_upd -d "Reset container storage, download new images, and start
     end
 
     dbxc --yes; or return
-    dbxe -- 'fish -c "upd -y"'
+    dbxe -- $PYTHON_SCRIPTS_FOLDER/upd_distro.py -y
 
     if is_location_primary
         podman pull $GHCR/dev/{debian,fedora}

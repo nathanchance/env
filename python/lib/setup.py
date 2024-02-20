@@ -29,11 +29,11 @@ def add_user_to_group_if_exists(groupname, username):
 
 
 def apk(apk_arguments):
-    subprocess.run(['apk', *apk_arguments], check=True)
+    utils.run_as_root(['apk', *apk_arguments])
 
 
 def apt(apt_arguments):
-    subprocess.run(['apt', *apt_arguments], check=True)
+    utils.run_as_root(['apt', *apt_arguments])
 
 
 def check_ip(ip_to_check):
@@ -80,7 +80,7 @@ def detect_virt():
 
 
 def dnf(dnf_arguments):
-    subprocess.run(['dnf', *dnf_arguments], check=True)
+    utils.run_as_root(['dnf', *dnf_arguments])
 
 
 def enable_tailscale():
@@ -149,12 +149,21 @@ def get_ip_addr_for_intf(intf):
 
 
 def get_os_rel_val(variable):
-    _, os_rel = utils.path_and_text('/usr/lib/os-release')
+    return get_os_rel()[variable]
 
-    if (match := re.search(f'^{variable}=(.*)$', os_rel, flags=re.M)):
-        return match.groups()[0].replace('"', '')
 
-    return None
+def get_os_rel():
+    for file_val in ['/etc/os-release', '/usr/lib/os-release']:
+        if (file := Path(file_val)).exists():
+            break
+    else:
+        return None
+
+    # Remove quotes now, as they are needed for shell but not for this
+    # conversion
+    os_rel_txt = file.read_text(encoding='utf-8').replace('"', '')
+
+    return dict(item.split('=', 1) for item in os_rel_txt.splitlines())
 
 
 def get_user():
@@ -229,7 +238,7 @@ def is_systemd_init():
 
 
 def pacman(args):
-    subprocess.run(['pacman', *args], check=True)
+    utils.run_as_root(['pacman', *args])
 
 
 def podman_setup(username):
@@ -458,3 +467,7 @@ def user_exists(user):
     except KeyError:
         return False
     return True
+
+
+def zypper(zypper_args):
+    utils.run_as_root(['zypper', *zypper_args])
