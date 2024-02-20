@@ -20,7 +20,6 @@ function cbl_rb_fd -d "Rebase generic Fedora kernel on latest linux-next"
         git revert --mainline 1 --no-edit $revert
         or return
     end
-    set -a b4_patches https://lore.kernel.org/all/20240216105930.16265-1-brgl@bgdev.pl/ # gpio: cdev: fix a NULL-pointer dereference with DEBUG enabled
     set -a b4_patches https://lore.kernel.org/all/20240216163259.1927967-1-arnd@kernel.org/ # firmware: arm_scmi: avoid returning uninialized data
     set -a b4_patches https://lore.kernel.org/all/Zc+3PFCUvLoVlpg8@neat/ # wifi: brcmfmac: fweh: Fix boot crash on Raspberry Pi 4
     for patch in $b4_patches
@@ -40,6 +39,7 @@ function cbl_rb_fd -d "Rebase generic Fedora kernel on latest linux-next"
             return $ret
         end
     end
+    set -a ln_commits eef3deb854d0f174de237ee5c26f64e1490c0f52 # arm64: Use Signed/Unsigned enums for TGRAN{4,16,64} and VARange
     for hash in $ln_commits
         git -C $CBL_SRC_P/linux-next fp -1 --stdout $hash | git am
         or begin
