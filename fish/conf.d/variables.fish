@@ -114,7 +114,6 @@ set -gx CBL_GIT $CBL/github
 set -gx CBL_LOGS $CBL/logs
 set -gx CBL_MISC $CBL/misc
 set -gx CBL_QEMU $CBL/qemu
-set -gx CBL_TMP $CBL/tmp
 
 set -gx HOST_FOLDER /mnt/host
 

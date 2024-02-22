@@ -3,11 +3,19 @@
 # Copyright (C) 2021-2023 Nathan Chancellor
 
 function cbl_qualify_tc_bld_uprev -d "Qualify a new known good revision for tc-build"
-    in_container_msg -c; or return
+    in_container_msg -c
+    or return
 
     if not test -f $HOME/.muttrc.notifier
         print_error "This function runs cbl_lkt, which requires the notifier!"
         return 1
+    end
+
+    for arg in $argv
+        switch $arg
+            case -r --reset
+                set reset true
+        end
     end
 
     set tc_bld_src $CBL_GIT/tc-build
@@ -16,6 +24,11 @@ function cbl_qualify_tc_bld_uprev -d "Qualify a new known good revision for tc-b
     begin
         cbl_upd_src_c s
         and cbl_clone_repo (basename $tc_bld_src)
+        and if set -q reset
+            rm -fr $TMP_FOLDER/(status function).*
+            and git -C $tc_bld_src worktree prune
+            and git -C $lnx_stbl worktree prune
+        end
         and git -C $tc_bld_src ru -p
     end
     or return
@@ -26,8 +39,8 @@ function cbl_qualify_tc_bld_uprev -d "Qualify a new known good revision for tc-b
         set tc_bld_branch (git -C $tc_bld_src rev-parse --abbrev-ref --symbolic-full-name @{u})
     end
 
-    mkdir -p $CBL_TMP
-    set work_dir (mktemp -d -p $CBL_TMP)
+    mkdir -p $TMP_FOLDER
+    set work_dir (mktemp -d -p $TMP_FOLDER -t (status function).XXXXXXXXXXXX)
     set tc_bld (mktemp -d -p $work_dir -u)
     set usr $work_dir/usr
     set linux_srcs $work_dir/linux-stable-$CBL_STABLE_VERSIONS
