@@ -1,6 +1,6 @@
 # Maintainer: Nathan Chancellor <nathan@kernel.org>
 pkgname=tuxmake
-pkgver=1.21.3
+pkgver=1.21.5
 pkgrel=1
 pkgdesc='Thin wrapper to build Linux kernels'
 url='https://tuxmake.org/'
@@ -32,7 +32,7 @@ optdepends=(
     'socat: Offline build support'
 )
 source=("$pkgname-v$pkgver.tar.gz::https://gitlab.com/Linaro/$pkgname/-/archive/v$pkgver/$pkgname-v$pkgver.tar.gz")
-sha256sums=('5398973a5b0372b8483ec8aa480ea0f1a66a69930822be31d04fcbb542eb8192')
+sha256sums=('3322b737f424bdb5358315107cdb3c37fd5fc13adbb84e2d046aebe33ba2d236')
 
 build() {
   cd "$pkgname-v$pkgver"
