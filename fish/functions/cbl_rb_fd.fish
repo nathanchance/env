@@ -20,7 +20,17 @@ function cbl_rb_fd -d "Rebase generic Fedora kernel on latest linux-next"
         git revert --mainline 1 --no-edit $revert
         or return
     end
-    set -a b4_patches https://lore.kernel.org/all/20240216163259.1927967-1-arnd@kernel.org/ # firmware: arm_scmi: avoid returning uninialized data
+    # https://lore.kernel.org/20240222190334.GA412503@dev-arch.thelio-3990X/
+    # Does not revert cleanly, do it manually
+    git revert --mainline 1 --no-edit 02cff930552c8a80633ac1a6c26a8f2f231474b2 # Merge branch 'vfs.pidfd' into vfs.all
+    begin
+        git rf init/main.c
+        and sed -i /pidfs/d init/main.c
+        and git add init/main.c
+        and git commit --no-edit
+    end
+    or return
+
     set -a b4_patches https://lore.kernel.org/all/Zc+3PFCUvLoVlpg8@neat/ # wifi: brcmfmac: fweh: Fix boot crash on Raspberry Pi 4
     for patch in $b4_patches
         b4 shazam -l -P _ -s $patch

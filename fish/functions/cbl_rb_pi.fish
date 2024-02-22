@@ -31,7 +31,6 @@ function cbl_rb_pi -d "Rebase Raspberry Pi kernel on latest linux-next"
     for revert in $reverts
         git revert --mainline 1 --no-edit $revert; or return
     end
-    set -a b4_patches https://lore.kernel.org/all/20240216163259.1927967-1-arnd@kernel.org/ # firmware: arm_scmi: avoid returning uninialized data
     for patch in $b4_patches
         b4 shazam -l -P _ -s $patch
         or begin
@@ -48,6 +47,8 @@ function cbl_rb_pi -d "Rebase Raspberry Pi kernel on latest linux-next"
             return $ret
         end
     end
+    # https://lore.kernel.org/19930c5a-f1ed-4b04-b69a-d7259966f020@app.fastmail.com/
+    set -a ln_commits 979f229cbd07 # diff of new HEAD of for-next/hardening
     for hash in $ln_commits
         git -C $CBL_SRC_P/linux-next fp -1 --stdout $hash | git am
         or begin
