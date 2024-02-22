@@ -27,7 +27,7 @@ function kboot -d "Boot a kernel in QEMU"
     end
 
     if test -z "$BU"
-        set BU $CBL_GIT/boot-utils-ro
+        set BU $CBL_SRC_C/boot-utils
     end
     if not test -d "$BU"
         mkdir -p (dirname $BU)
