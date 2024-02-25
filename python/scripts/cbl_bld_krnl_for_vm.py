@@ -139,6 +139,11 @@ def build_kernel_for_vm(add_make_targets, make_variables, config, menuconfig, vm
     else:
         raise RuntimeError(f"Don't know how to handle {config_src}!")
 
+    current_config_txt = config_dst.read_text(encoding='utf-8')
+    new_config_txt = current_config_txt.replace('# CONFIG_LOCALVERSION_AUTO is not set',
+                                                'CONFIG_LOCALVERSION_AUTO=y')
+    config_dst.write_text(new_config_txt, encoding='utf-8')
+
     make_targets = ['olddefconfig', 'localyesconfig', 'all']
     if menuconfig:
         make_targets.insert(-1, 'menuconfig')
