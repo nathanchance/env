@@ -47,8 +47,6 @@ function cbl_rb_pi -d "Rebase Raspberry Pi kernel on latest linux-next"
             return $ret
         end
     end
-    # https://lore.kernel.org/19930c5a-f1ed-4b04-b69a-d7259966f020@app.fastmail.com/
-    set -a ln_commits 979f229cbd07 # diff of new HEAD of for-next/hardening
     for hash in $ln_commits
         git -C $CBL_SRC_P/linux-next fp -1 --stdout $hash | git am
         or begin
