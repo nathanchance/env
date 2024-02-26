@@ -22,6 +22,7 @@ function cbl_rb_fd -d "Rebase generic Fedora kernel on latest linux-next"
     end
 
     set -a b4_patches https://lore.kernel.org/all/Zc+3PFCUvLoVlpg8@neat/ # wifi: brcmfmac: fweh: Fix boot crash on Raspberry Pi 4
+    set -a b4_patches https://lore.kernel.org/all/20240226-thermal-fix-fortify-panic-num_trips-v1-1-accc12a341d7@kernel.org/ # thermal: core: Move initial num_trips assignment before memcpy()
     for patch in $b4_patches
         b4 shazam -l -P _ -s $patch
         or begin
