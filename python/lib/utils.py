@@ -6,12 +6,20 @@ import os
 from pathlib import Path
 import shlex
 import subprocess
+import shutil
 import sys
 import time
 
 
 def call_git(directory, cmd):
     return subprocess.run(['git', *cmd], capture_output=True, check=True, cwd=directory, text=True)
+
+
+def detect_virt(*args):
+    return subprocess.run(['systemd-detect-virt', *args],
+                          capture_output=True,
+                          check=False,
+                          text=True).stdout.strip()
 
 
 def get_duration(start_seconds, end_seconds=None):
@@ -38,14 +46,32 @@ def get_git_output(directory, cmd):
     return call_git(directory, cmd).stdout.strip()
 
 
+def in_container():
+    if shutil.which('systemd-detect-virt'):
+        val = detect_virt('-c')
+        if val == 'lxc':
+            # If MAC_FOLDER is set and we are in lxc, we are in OrbStack, which
+            # is not really considered a container for the sake of this
+            # function.
+            return 'MAC_FOLDER' not in os.environ
+        return val != 'none'
+
+    return 'container' in os.environ or Path('/run/.containerenv').is_file() or Path(
+        '/.dockerenv').is_file()
+
+
 def path_and_text(*args):
     if (path := Path(*args)).exists():
         return path, path.read_text(encoding='utf-8')
     return path, None
 
 
-def print_cmd(command):
-    print(f"$ {' '.join([shlex.quote(str(elem)) for elem in command])}", flush=True)
+def print_cmd(command, show_cmd_location=False):
+    if show_cmd_location:
+        cmd_loc = '(container) ' if in_container() else '(host) '
+    else:
+        cmd_loc = ''
+    print(f"{cmd_loc}$ {' '.join([shlex.quote(str(elem)) for elem in command])}", flush=True)
 
 
 def print_header(string):
@@ -75,5 +101,5 @@ def run_as_root(full_cmd):
     # if necessary.
     if os.geteuid() != 0:
         cmd_copy.insert(0, 'sudo')
-        print_cmd(cmd_copy)
+        print_cmd(cmd_copy, show_cmd_location=True)
     subprocess.run(cmd_copy, check=True)

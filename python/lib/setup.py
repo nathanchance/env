@@ -75,11 +75,6 @@ def curl(curl_args):
     return subprocess.run(['curl', '-fLSs', *curl_args], capture_output=True, check=True).stdout
 
 
-def detect_virt():
-    return subprocess.run('systemd-detect-virt', capture_output=True, check=False,
-                          text=True).stdout.strip()
-
-
 def dnf(dnf_arguments):
     lib.utils.run_as_root(['dnf', *dnf_arguments])
 
@@ -218,7 +213,7 @@ def is_installed(package_to_check):
 
 def is_lxc():
     if shutil.which('systemd-detect-virt'):
-        return detect_virt() == 'lxc'
+        return lib.utils.detect_virt() == 'lxc'
     return 'container=lxc' in Path('/proc/1/environ').read_text(encoding='utf-8')
 
 
@@ -228,7 +223,7 @@ def is_pi():
 
 def is_virtual_machine():
     if shutil.which('systemd-detect-virt'):
-        return detect_virt() in ('qemu', 'kvm', 'vmware', 'microsoft', 'apple')
+        return lib.utils.detect_virt() in ('qemu', 'kvm', 'vmware', 'microsoft', 'apple')
     return get_hostname() in ('hyperv', 'qemu', 'vmware')
 
 
