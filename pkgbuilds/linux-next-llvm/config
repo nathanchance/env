@@ -1,8 +1,8 @@
 #
 # Automatically generated file; DO NOT EDIT.
-# Linux/x86 6.8.0-rc5 Kernel Configuration
+# Linux/x86 6.8.0-rc6 Kernel Configuration
 #
-CONFIG_CC_VERSION_TEXT="ClangBuiltLinux clang version 19.0.0git (https://github.com/llvm/llvm-project 0f02431273faa2cd001c59fd5de767659bc0c976)"
+CONFIG_CC_VERSION_TEXT="ClangBuiltLinux clang version 19.0.0git (https://github.com/llvm/llvm-project c11627c2f4d550613a3cb360c89a0cf52d2eb720)"
 CONFIG_GCC_VERSION=0
 CONFIG_CC_IS_CLANG=y
 CONFIG_CLANG_VERSION=190000
@@ -2501,7 +2501,6 @@ CONFIG_MTD_ROM=m
 #
 # CONFIG_MTD_COMPLEX_MAPPINGS is not set
 # CONFIG_MTD_PHYSMAP is not set
-# CONFIG_MTD_INTEL_VR_NOR is not set
 # CONFIG_MTD_PLATRAM is not set
 # end of Mapping drivers for chip access
 
@@ -10415,6 +10414,9 @@ CONFIG_XFS_QUOTA=y
 CONFIG_XFS_POSIX_ACL=y
 CONFIG_XFS_RT=y
 CONFIG_XFS_DRAIN_INTENTS=y
+CONFIG_XFS_LIVE_HOOKS=y
+CONFIG_XFS_MEMORY_BUFS=y
+CONFIG_XFS_BTREE_IN_MEM=y
 CONFIG_XFS_ONLINE_SCRUB=y
 # CONFIG_XFS_ONLINE_SCRUB_STATS is not set
 CONFIG_XFS_ONLINE_REPAIR=y

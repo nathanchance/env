@@ -20,9 +20,6 @@ function cbl_rb_fd -d "Rebase generic Fedora kernel on latest linux-next"
         git revert --mainline 1 --no-edit $revert
         or return
     end
-
-    set -a b4_patches https://lore.kernel.org/all/Zc+3PFCUvLoVlpg8@neat/ # wifi: brcmfmac: fweh: Fix boot crash on Raspberry Pi 4
-    set -a b4_patches https://lore.kernel.org/all/20240226-thermal-fix-fortify-panic-num_trips-v1-1-accc12a341d7@kernel.org/ # thermal: core: Move initial num_trips assignment before memcpy()
     for patch in $b4_patches
         b4 shazam -l -P _ -s $patch
         or begin
@@ -31,9 +28,11 @@ function cbl_rb_fd -d "Rebase generic Fedora kernel on latest linux-next"
             return $ret
         end
     end
-
     # https://lore.kernel.org/20240222190334.GA412503@dev-arch.thelio-3990X/
+    # https://lore.kernel.org/20240227192648.GA2621994@dev-arch.thelio-3990X/
     set -a crl_patches https://git.kernel.org/vfs/vfs/p/57a220844820980f8e3de1c1cd9d112e6e73da83 # pidfs: default to n for now
+    set -a crl_patches https://git.kernel.org/wireless/wireless-next/p/ec1aae190c7729ffdd3603de311dc00f7ff988f9 # wifi: brcmfmac: fweh: Fix boot crash on Raspberry Pi 4
+    set -a crl_patches https://git.kernel.org/rafael/linux-pm/p/da1983355ccefcfb3f8eb410fff82e250fa87e39 # thermal: core: Move initial num_trips assignment before memcpy()
     for patch in $crl_patches
         crl $patch | git am -3
         or begin
@@ -42,7 +41,6 @@ function cbl_rb_fd -d "Rebase generic Fedora kernel on latest linux-next"
             return $ret
         end
     end
-
     for hash in $ln_commits
         git -C $CBL_SRC_P/linux-next fp -1 --stdout $hash | git am
         or begin
@@ -51,7 +49,6 @@ function cbl_rb_fd -d "Rebase generic Fedora kernel on latest linux-next"
             return $ret
         end
     end
-
     for patch in $am_patches
         git am -3 $patch
         or begin
