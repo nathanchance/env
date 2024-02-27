@@ -31,7 +31,15 @@ function gen_slim_initrd -d "Generate a slim initial ramdisk within a virtual ma
         else if set -q src
             pushd (mktemp -d)
             begin
-                sudo gzip -c -d $src | cpio -i
+                set comp_prog (sudo python3 -c "from pathlib import Path
+initrd_bytes = Path('$src').read_bytes()
+if initrd_bytes.startswith(b'\x28\xb5\x2f\xfd'):
+    print('zstd')
+elif initrd_bytes.startswith(b'\x1f\x8b'):
+    print('gzip')
+else:
+    print('initrd_bytes_unhandled')")
+                sudo $comp_prog -c -d $src | cpio -i
                 and rm -fr etc/modprobe.d lib/modules usr/lib/modprobe.d usr/lib/modules
                 and find . | cpio -o -H newc | gzip -c >$dst
                 and rm -fr $PWD
