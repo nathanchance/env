@@ -232,8 +232,20 @@ for value in versions:
     if (worktree := Path(SRC, 'llvm-project')).exists():
         shutil.rmtree(worktree)
         subprocess.run(['git', 'worktree', 'prune'], check=True, cwd=llvm_folder)
+
     git_worktree_cmd = ['git', 'worktree', 'add', '--detach', worktree, ref]
     subprocess.run(git_worktree_cmd, check=True, cwd=llvm_folder)
+
+    # https://github.com/llvm/llvm-project/commit/015c43178f9d8531b6bcd1685dbf72b7d837cf5a
+    # is needed for the LLD tests to pass with Python 3.12. It is harmless to
+    # always apply it when needed.
+    if (gen_cfi_funcs := Path(worktree, 'lld/test/MachO/tools/generate-cfi-funcs.py')).exists():
+        gen_cfi_funcs_txt = gen_cfi_funcs.read_text(encoding='utf-8')
+        if 'frame_offset = -random.randint(0, (frame_size/16 - 4)) * 16' in gen_cfi_funcs_txt:
+            subprocess.run(
+                ['git', 'cherry-pick', '--no-commit', '015c43178f9d8531b6bcd1685dbf72b7d837cf5a'],
+                check=True,
+                cwd=worktree)
 
     shutil.rmtree(build_folder, ignore_errors=True)
     build_folder.mkdir(exist_ok=True, parents=True)
