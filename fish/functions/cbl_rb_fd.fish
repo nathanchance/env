@@ -31,8 +31,6 @@ function cbl_rb_fd -d "Rebase generic Fedora kernel on latest linux-next"
     # https://lore.kernel.org/20240222190334.GA412503@dev-arch.thelio-3990X/
     # https://lore.kernel.org/20240227192648.GA2621994@dev-arch.thelio-3990X/
     set -a crl_patches https://git.kernel.org/vfs/vfs/p/57a220844820980f8e3de1c1cd9d112e6e73da83 # pidfs: default to n for now
-    set -a crl_patches https://git.kernel.org/wireless/wireless-next/p/ec1aae190c7729ffdd3603de311dc00f7ff988f9 # wifi: brcmfmac: fweh: Fix boot crash on Raspberry Pi 4
-    set -a crl_patches https://git.kernel.org/rafael/linux-pm/p/da1983355ccefcfb3f8eb410fff82e250fa87e39 # thermal: core: Move initial num_trips assignment before memcpy()
     for patch in $crl_patches
         crl $patch | git am -3
         or begin
