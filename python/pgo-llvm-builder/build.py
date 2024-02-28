@@ -236,16 +236,34 @@ for value in versions:
     git_worktree_cmd = ['git', 'worktree', 'add', '--detach', worktree, ref]
     subprocess.run(git_worktree_cmd, check=True, cwd=llvm_folder)
 
-    # https://github.com/llvm/llvm-project/commit/015c43178f9d8531b6bcd1685dbf72b7d837cf5a
-    # is needed for the LLD tests to pass with Python 3.12. It is harmless to
-    # always apply it when needed.
-    if (gen_cfi_funcs := Path(worktree, 'lld/test/MachO/tools/generate-cfi-funcs.py')).exists():
-        gen_cfi_funcs_txt = gen_cfi_funcs.read_text(encoding='utf-8')
-        if 'frame_offset = -random.randint(0, (frame_size/16 - 4)) * 16' in gen_cfi_funcs_txt:
-            subprocess.run(
-                ['git', 'cherry-pick', '--no-commit', '015c43178f9d8531b6bcd1685dbf72b7d837cf5a'],
-                check=True,
-                cwd=worktree)
+    # Python 3.12 deprecates and changes a few things in the tests. If we are
+    # running the tests, make sure we have the fixes. It is safe to apply them
+    # even if we are not using Python 3.12.
+    if check_args:
+        # https://github.com/llvm/llvm-project/commit/015c43178f9d8531b6bcd1685dbf72b7d837cf5a
+        if (gen_cfi_funcs := Path(worktree, 'lld/test/MachO/tools/generate-cfi-funcs.py')).exists():
+            gen_cfi_funcs_txt = gen_cfi_funcs.read_text(encoding='utf-8')
+            if 'frame_offset = -random.randint(0, (frame_size/16 - 4)) * 16' in gen_cfi_funcs_txt:
+                subprocess.run([
+                    'git',
+                    'cherry-pick',
+                    '--no-commit',
+                    '015c43178f9d8531b6bcd1685dbf72b7d837cf5a',
+                ],
+                               check=True,
+                               cwd=worktree)
+        # https://github.com/llvm/llvm-project/commit/01fdc2a3c9e0df4e54bb9b88f385f68e7b0d808c
+        if (uctc := Path(worktree, 'llvm/utils/update_cc_test_checks.py')).exists():
+            uctc_txt = uctc.read_text(encoding='utf-8')
+            if 'distutils.spawn' in uctc_txt:
+                subprocess.run([
+                    'git',
+                    'cherry-pick',
+                    '--no-commit',
+                    '01fdc2a3c9e0df4e54bb9b88f385f68e7b0d808c',
+                ],
+                               check=True,
+                               cwd=worktree)
 
     shutil.rmtree(build_folder, ignore_errors=True)
     build_folder.mkdir(exist_ok=True, parents=True)
