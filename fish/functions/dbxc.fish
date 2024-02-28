@@ -106,6 +106,13 @@ user="'"$USER"'"
 
 if ! grep -q "$user" /etc/doas.conf 2>/dev/null; then
     echo "permit nopass $user as root" >>/etc/doas.conf
+fi
+
+# Unconditionally calling host-spawn is not acceptable in my environment
+# Should a use for a graphical distrobox container be discovered later,
+# a different compatible passthrough scheme can be created at that point.
+if grep -q host-spawn /etc/fish/conf.d/distrobox_config.fish; then
+    sed -i /host-spawn/d /etc/fish/conf.d/distrobox_config.fish
 fi' >$init_hook_sh
 
     # If we are using docker, we need to explicitly set the container's
