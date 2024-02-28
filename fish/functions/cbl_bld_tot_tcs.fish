@@ -138,6 +138,8 @@ function cbl_bld_tot_tcs -d "Build LLVM and binutils from source for kernel deve
     end
 
     # Add patches to revert here
+    # https://github.com/ClangBuiltLinux/linux/issues/2002
+    set -a reverts https://github.com/llvm/llvm-project/commit/8c2ae42b3e1c6aa7c18f873edcebff7c0b45a37e # [Clang][Sema] Fix missing warning when comparing mismatched enums in … (#81418)
     for revert in $reverts
         set -l revert (basename $revert)
         if not git -C $llvm_project rv -n $revert
