@@ -7,7 +7,7 @@ function cbl_lkt_for_all_llvm -d "Run cbl_lkt for all supported LLVM versions"
         set -l cbl_lkt_args $argv
         if test $idx -ne 1
             set -a cbl_lkt_args \
-                --llvm-prefix $CBL_TC_LLVM_STORE/(korg_llvm latest $LLVM_VERSIONS_KERNEL[$idx])
+                --llvm-prefix (korg_llvm prefix $LLVM_VERSIONS_KERNEL[$idx])
         end
         cbl_lkt $cbl_lkt_args; or return
     end

@@ -247,6 +247,13 @@ class GCCManager(ToolchainManager):
 
                 tarball.handle()
 
+    def print_prefix(self):
+        if len(self.versions) != 1:
+            raise RuntimeError('Asking for print_vars() other than with one version?')
+
+        prefix = self.get_cc_as_path(self.versions[0], 'x86_64').parents[1]
+        print(shell_quote(prefix))
+
     def print_vars(self, split):
         if len(self.targets) != 1:
             raise RuntimeError('Asking for print_vars() other than with one target architecture?')
@@ -312,6 +319,13 @@ class LLVMManager(ToolchainManager):
             tarball.extraction_location = extraction_location
 
             tarball.handle()
+
+    def print_prefix(self):
+        if len(self.versions) != 1:
+            raise RuntimeError('Asking for print_vars() other than with one version?')
+
+        llvm_prefix = Path(self.DEFAULT_INSTALL_FOLDER, LATEST_LLVM_VERSIONS[self.versions[0]])
+        print(shell_quote(llvm_prefix))
 
     def print_vars(self, split):
         if len(self.versions) != 1:
@@ -398,6 +412,14 @@ if __name__ == '__main__':
         'latest', help='Print the latest stable release of a particular toolchain major version')
     latest_parser.add_argument('versions', choices=supported_versions, nargs='+', type=int)
 
+    prefix_parser = subparser.add_parser(
+        'prefix', help='Print toolchain prefix value for use in other contexts')
+    prefix_parser.add_argument('version',
+                               choices=supported_versions,
+                               default=manager.VERSIONS[-1],
+                               nargs='?',
+                               type=int)
+
     var_parser = subparser.add_parser('var', help='Print toolchain variable for use with make')
     var_parser.add_argument('-s',
                             '--split',
@@ -431,6 +453,9 @@ if __name__ == '__main__':
 
     if args.subcommand == 'latest':
         manager.print_latest_versions()
+
+    if args.subcommand == 'prefix':
+        manager.print_prefix()
 
     if args.subcommand == 'var':
         manager.print_vars(args.split)
