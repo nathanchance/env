@@ -16,6 +16,9 @@ function cbl_rb_fd -d "Rebase generic Fedora kernel on latest linux-next"
     git rh origin/master
 
     # Patching
+    # https://lore.kernel.org/20240228043534.GG11972@google.com/
+    set -a reverts 0c2f314a62342898813d5434945920f2090f44c8 # mm/zsmalloc: remove the deferred free mechanism
+    set -a reverts 2258bdebb55e3ad3d30fd3849ddb955ff36825de # mm/zsmalloc: don't hold locks of all pages when free_zspage()
     for revert in $reverts
         git revert --mainline 1 --no-edit $revert
         or return
