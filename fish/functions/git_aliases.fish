@@ -112,8 +112,8 @@ function git_aliases -d "Configure git aliases"
     git config --global alias.send-rmk-email '!git send-email --add-header="KernelVersion: $(git describe --abbrev=0)" --no-thread --suppress-cc=all --to=patches@arm.linux.org.uk'
 
     # git show
+    git config --global alias.cite 'shm  --format="%h (\"%s\")"' # kernel format
     git config --global alias.fixes 'shm --format="Fixes: %h (\"%s\")"'
-    git config --global alias.kf 'shm  --format="%h (\"%s\")"' # kernel format
     git config --global alias.korg 'shm --format="Link: https://git.kernel.org/linus/%H"' # link to a kernel.org commit for cherry-picks
     git config --global alias.sh 'show --first-parent'
     git config --global alias.shf 'sh --format=fuller'

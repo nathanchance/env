@@ -25,7 +25,7 @@ function kpch -d "Run checkpatch.pl and get_maintainer.pl on a patch"
 
     if not set -q b4_branch
         for sha in (git log --format=%H --no-merges --reverse $rev)
-            set title Commit (git kf $sha)
+            set title Commit (git cite $sha)
             set header (for i in (seq 1 (string length "$title")); printf "-"; end)
             printf "\n%s\n%s\n%s\n\n" $header "$title" $header
 
