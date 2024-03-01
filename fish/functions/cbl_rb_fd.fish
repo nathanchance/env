@@ -20,6 +20,7 @@ function cbl_rb_fd -d "Rebase generic Fedora kernel on latest linux-next"
         git revert --mainline 1 --no-edit $revert
         or return
     end
+    set -a b4_patches https://lore.kernel.org/all/20240301-pci-imx6-fix-clang-implicit-fallthrough-v1-1-db78c7cbb384@kernel.org/ # PCI: imx6: Fix clang -Wimplicit-fallthrough in imx6_pcie_probe()
     for patch in $b4_patches
         b4 shazam -l -P _ -s $patch
         or begin
