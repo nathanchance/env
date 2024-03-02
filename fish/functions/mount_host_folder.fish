@@ -5,10 +5,13 @@
 function mount_host_folder -d "Mount host folder in virtual machine"
     sudo fish -c "
     if not test -d $HOST_FOLDER
-        mkdir $HOST_FOLDER; or return
-        chown -R $USER:$USER $HOST_FOLDER; or return
+        mkdir $HOST_FOLDER
+        and chown -R $USER:$USER $HOST_FOLDER
     end
-    if not mountpoint -q $HOST_FOLDER
-        mount -t virtiofs host $HOST_FOLDER; or return
-    end"
+    or return
+
+    if mountpoint -q $HOST_FOLDER
+        umount $HOST_FOLDER
+    end
+    mount -t virtiofs host $HOST_FOLDER"
 end
