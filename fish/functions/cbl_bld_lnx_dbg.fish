@@ -5,6 +5,8 @@
 function cbl_bld_lnx_dbg -d "Build linux-debug Arch Linux package"
     in_kernel_tree; or return
 
+    set bld (tbf)
+
     for arg in $argv
         switch $arg
             case --cfi
@@ -35,12 +37,12 @@ function cbl_bld_lnx_dbg -d "Build linux-debug Arch Linux package"
             set kmake_args LLVM=1
         end
     end
+    set -a kmake_args O=$bld
+    set make_args -s O=$bld
 
     set pkg linux-debug
-    set pkgroot $ENV_FOLDER/pkgbuilds/$pkg
-    set pkgdir $pkgroot/pkg-ext/$pkg
-
-    rm -fr $pkgroot/pkg{,-ext} $pkgroot/*.tar.zst
+    set pkgroot $bld/pkgbuild
+    set pkgdir $pkgroot/pkg-prepared/$pkg
 
     #############
     # prepare() #
@@ -49,10 +51,11 @@ function cbl_bld_lnx_dbg -d "Build linux-debug Arch Linux package"
 
     echo -debug >localversion.10-pkgname
 
-    crl -o .config https://gitlab.archlinux.org/archlinux/packaging/packages/linux/-/raw/main/config; or return
+    prep_config https://gitlab.archlinux.org/archlinux/packaging/packages/linux/-/raw/main/config $bld;or return
 
     # Keep in sync with cbl_gen_archconfig, step 2
     scripts/config \
+        --file $bld/.config \
         $scripts_cfg_args \
         -m DRM
 
@@ -66,7 +69,7 @@ function cbl_bld_lnx_dbg -d "Build linux-debug Arch Linux package"
         kmake $kmake_args menuconfig; or return
     end
 
-    make -s kernelrelease >version
+    make $make_args kernelrelease >version
 
     ###########
     # build() #
@@ -79,15 +82,34 @@ function cbl_bld_lnx_dbg -d "Build linux-debug Arch Linux package"
     set kernver (cat version)
     set modulesdir $pkgdir/usr/lib/modules/$kernver
 
-    install -Dm644 (make -s image_name) $modulesdir/vmlinuz; or return
+    install -Dm644 $bld/(make $make_args image_name) $modulesdir/vmlinuz; or return
     echo "$pkg" | install -Dm644 /dev/stdin $modulesdir/pkgbase; or return
-    cbl_upd_krnl_pkgver $pkg
     ZSTD_CLEVEL=19 kmake $kmake_args DEPMOD=/doesnt/exist INSTALL_MOD_PATH=$pkgdir/usr INSTALL_MOD_STRIP=1 modules_install; or return
-    rm $modulesdir/{source,build}
+    rm -f $modulesdir/{source,build}
 
-    pushd $pkgroot
-    makepkg -R; or return
-    popd
+    # Call makepkg with a dynamically generated PKGBUILD
+    echo 'pkgname='$pkg'
+pkgver='(git describe | string replace -a - .)'
+pkgrel=1
+arch=(x86_64)
+license=(GPL2)
+options=(\'!strip\')
+
+package() {
+  pkgdesc="The Linux kernel and modules"
+  depends=(coreutils kmod initramfs)
+  optdepends=(\'crda: to set the correct wireless channels of your country\'
+              \'linux-firmware: firmware images needed for some devices\')
+  provides=(VIRTUALBOX-GUEST-MODULES WIREGUARD-MODULE)
+  replaces=(virtualbox-guest-modules-arch wireguard-arch)
+
+  local pkgroot="${pkgdir//\\/pkg\\/$pkgname/}"
+  rm -fr "$pkgroot"/pkg
+  mv -v "$pkgroot"/pkg-prepared "$pkgroot"/pkg
+}' >$pkgroot/PKGBUILD
+    fish -c "cd $pkgroot; and makepkg -R"
+    set ret $status
 
     printf '\a'
+    return $ret
 end
