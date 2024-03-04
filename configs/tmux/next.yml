@@ -6,7 +6,7 @@ windows:
   panes:
   - shell: dbxe
     shell_command: cbl_upd_krnl next-llvm
-    start_directory: $ENV_FOLDER/pkgbuilds/linux-next-llvm
+    start_directory: $CBL_SRC_P/linux-next-llvm
     enter: false
     focus: true
   - shell: dbxe

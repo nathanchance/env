@@ -19,52 +19,10 @@ function cbl_rb_pi -d "Rebase Raspberry Pi kernel on latest linux-next"
         end
     end
 
-    begin
-        pushd $pi_src
-        and git ru -p origin
-    end
-    or return
+    # Prepare kernel source
+    PYTHONPATH=$PYTHON_FOLDER/lib python3 -c "import kernel; kernel.prepare_source('rpi')"
 
-    git rh origin/master
-
-    # Patching
-    for revert in $reverts
-        git revert --mainline 1 --no-edit $revert; or return
-    end
-    for patch in $b4_patches
-        b4 shazam -l -P _ -s $patch
-        or begin
-            set ret $status
-            git ama
-            return $ret
-        end
-    end
-    for patch in $crl_patches
-        crl $patch | git am -3
-        or begin
-            set ret $status
-            git ama
-            return $ret
-        end
-    end
-    for hash in $ln_commits
-        git -C $CBL_SRC_P/linux-next fp -1 --stdout $hash | git am
-        or begin
-            set ret $status
-            git ama
-            return $ret
-        end
-    end
-    for patch in $am_patches
-        git am -3 $patch
-        or begin
-            set ret $status
-            git ama
-            return $ret
-        end
-
-    end
-
+    pushd $pi_src
     for arch in $pi_arches
         switch $arch
             case arm

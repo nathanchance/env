@@ -6,9 +6,75 @@ import os
 from pathlib import Path
 import shutil
 import subprocess
+import sys
 import time
 
-from . import utils
+sys.path.append(str(Path(__file__).resolve().parents[1]))
+# pylint: disable=wrong-import-position
+import lib.utils
+# pylint: enable=wrong-import-position
+
+
+def prepare_source(base_name, base_ref='origin/master'):
+    if base_name == 'linux-debug':
+        return  # managed outside of the script
+    if base_name not in ('fedora', 'linux-next-llvm', 'linux-mainline-llvm', 'rpi'):
+        raise RuntimeError(f"Don't know how to handle provided base_name ('{base_name}')?")
+
+    reverts = []
+    b4_patches = []
+    crl_patches = []
+    ln_commits = []
+    am_patches = []
+
+    if base_name == 'fedora':
+        # PCI: imx6: Fix clang -Wimplicit-fallthrough in imx6_pcie_probe()
+        b4_patches.append('https://lore.kernel.org/all/20240301-pci-imx6-fix-clang-implicit-fallthrough-v1-1-db78c7cbb384@kernel.org/')  # yapf: disable
+    if base_name == 'linux-mainline-llvm':
+        # xfrm: Avoid clang fortify warning in copy_to_user_tmpl()
+        crl_patches.append('https://git.kernel.org/klassert/ipsec/p/1a807e46aa93ebad1dfbed4f82dc3bf779423a6e')  # yapf: disable
+    if base_name == 'rpi':
+        # drm/sun4i: hdmi: Fix u64 div on 32bit arch
+        b4_patches.append('https://lore.kernel.org/all/20240304091225.366325-1-mripard@kernel.org/')
+
+    source_folder = Path(os.environ['CBL_SRC_P'], base_name)
+
+    subprocess.run(['git', 'remote', 'update', '--prune', 'origin'], check=True, cwd=source_folder)
+    subprocess.run(['git', 'reset', '--hard', base_ref], check=True, cwd=source_folder)
+
+    # pylint: disable=subprocess-run-check
+    try:
+        common_kwargs = {'check': True, 'cwd': source_folder, 'text': True}
+
+        for revert in reverts:
+            subprocess.run(  # noqa: PLW1510
+                ['git', 'revert', '--mainline', '1', '--no-edit', revert], **common_kwargs)
+
+        for b4_patch in b4_patches:
+            subprocess.run(  # noqa: PLW1510
+                ['b4', 'shazam', '-l', '-P', '_', '-s', b4_patch], **common_kwargs)
+
+        for crl_patch in crl_patches:
+            patch_input = subprocess.run(['curl', '-LSs', crl_patch],
+                                         capture_output=True,
+                                         check=True,
+                                         text=True).stdout
+            subprocess.run(['git', 'am', '-3'], **common_kwargs, input=patch_input)  # noqa: PLW1510
+
+        for ln_commit in ln_commits:
+            patch_input = subprocess.run(['git', 'fp', '-1', '--stdout', ln_commit],
+                                         capture_output=True,
+                                         check=True,
+                                         cwd=Path(os.environ['CBL_SRC_P'], 'linux-next'),
+                                         text=True).stdout
+            subprocess.run(['git', 'am', '-3'], **common_kwargs, input=patch_input)  # noqa: PLW1510
+
+        for am_patch in am_patches:
+            subprocess.run(['git', 'am', '-3', am_patch], **common_kwargs)  # noqa: PLW1510
+    # pylint: enable=subprocess-run-check
+    except subprocess.CalledProcessError as err:
+        subprocess.run(['git', 'ama'], check=False, cwd=source_folder)
+        sys.exit(err.returncode)
 
 
 # Basically '$binary --version | head -1'
@@ -17,7 +83,15 @@ def get_tool_version(binary_path):
                           text=True).stdout.splitlines()[0]
 
 
-def kmake(variables, targets, ccache=True, directory=None, jobs=None, silent=True, use_time=False):
+def kmake(variables,
+          targets,
+          ccache=True,
+          directory=None,
+          env=None,
+          jobs=None,
+          silent=True,
+          stdin=None,
+          use_time=False):
     # Handle kernel directory right away
     if not (kernel_src := Path(directory) if directory else Path()).exists():
         raise RuntimeError(f"Derived kernel source ('{kernel_src}') does not exist?")
@@ -69,7 +143,8 @@ def kmake(variables, targets, ccache=True, directory=None, jobs=None, silent=Tru
         if shutil.which('ccache'):
             variables['CC'] = f"ccache {compiler}"
         else:
-            utils.print_yellow('WARNING: ccache requested by it could not be found, ignoring...')
+            lib.utils.print_yellow(
+                'WARNING: ccache requested by it could not be found, ignoring...')
 
     # V=1 or V=2 should imply '-v'
     if 'V' in variables:
@@ -81,8 +156,8 @@ def kmake(variables, targets, ccache=True, directory=None, jobs=None, silent=Tru
     flags += [f"-{'s' if silent else ''}kj{jobs if jobs else os.cpu_count()}"]
 
     # Print information about current compiler
-    utils.print_green(f"\nCompiler location:\033[0m {compiler_location}\n")
-    utils.print_green(f"Compiler version:\033[0m {get_tool_version(compiler)}\n")
+    lib.utils.print_green(f"\nCompiler location:\033[0m {compiler_location}\n")
+    lib.utils.print_green(f"Compiler version:\033[0m {get_tool_version(compiler)}\n")
 
     # Print information about the binutils being used, if they are being used
     # Account for implicit LLVM_IAS change in f12b034afeb3 ("scripts/Makefile.clang: default to LLVM_IAS=1")
@@ -94,8 +169,8 @@ def kmake(variables, targets, ccache=True, directory=None, jobs=None, silent=Tru
                 f"GNU as could not be found based on CROSS_COMPILE ('{cross_compile}')?")
         as_location = Path(gnu_as).parent
         if as_location != compiler_location:
-            utils.print_green(f"Binutils location:\033[0m {as_location}\n")
-        utils.print_green(f"Binutils version:\033[0m {get_tool_version(gnu_as)}\n")
+            lib.utils.print_green(f"Binutils location:\033[0m {as_location}\n")
+        lib.utils.print_green(f"Binutils version:\033[0m {get_tool_version(gnu_as)}\n")
 
     # Build and run make command
     make_cmd = [
@@ -108,9 +183,9 @@ def kmake(variables, targets, ccache=True, directory=None, jobs=None, silent=Tru
         if not (gnu_time := shutil.which('time')):
             raise RuntimeError('Could not find time binary in PATH?')
         make_cmd = [gnu_time, '-v', *make_cmd]
-    utils.print_cmd(make_cmd)
+    lib.utils.print_cmd(make_cmd)
     if not use_time:
         start_time = time.time()
-    subprocess.run(make_cmd, check=True)
+    subprocess.run(make_cmd, check=True, env=env, stdin=stdin)
     if not use_time:
-        print(f"\nTime: {utils.get_duration(start_time)}")
+        print(f"\nTime: {lib.utils.get_duration(start_time)}")

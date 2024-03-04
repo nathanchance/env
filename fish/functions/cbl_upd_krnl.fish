@@ -52,7 +52,7 @@ function cbl_upd_krnl -d "Update machine's kernel"
             end
 
         case hetzner-server workstation
-            cbl_upd_krnl_pkg $argv
+            cbl_bld_krnl_pkg --cfi --lto $argv
 
         case pi3
             in_container_msg -h; or return
@@ -109,7 +109,8 @@ function cbl_upd_krnl -d "Update machine's kernel"
 
             cd /tmp; or return
 
-            scp $remote_user@$remote_host:(string replace $MAIN_FOLDER $remote_main_folder $ENV_FOLDER)/pkgbuilds/$krnl/'*'.tar.zst .; or return
+            set remote_krnl_bld (tbf $krnl | string replace $TMP_BUILD_FOLDER $remote_tmp_build_folder)
+            scp $remote_user@$remote_host:$remote_krnl_bld/pkgbuild/$krnl-'*'.tar.zst .; or return
 
             sudo pacman -U --noconfirm *$krnl*.tar.zst
 
