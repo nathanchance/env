@@ -131,7 +131,7 @@ def download_items(targets, network_folder):
 
         elif target == 'debian':
             debian_arches = ['amd64', 'arm64', 'armhf', 'i386']
-            debian_ver = '12.4.0'
+            debian_ver = '12.5.0'
 
             for arch in debian_arches:
                 arch_debian_folder = Path(firmware_folder, target.capitalize(), debian_ver, arch)
@@ -201,7 +201,7 @@ def download_items(targets, network_folder):
 
         elif target == 'rpios':
             rpi_arches = ['armhf', 'arm64']
-            rpi_date = '2023-12-06/2023-12-05'
+            rpi_date = '2023-12-11/2023-12-11'
             deb_ver = 'bookworm'
 
             for rpi_arch in rpi_arches:
