@@ -5,6 +5,6 @@
 function git_cpi -d "Interactive git cherry-pick with forgit"
     set branch (git bf)
     if test -n "$branch"
-        forgit::cherry::pick $branch
+        git-forgit cherry_pick $branch
     end
 end
