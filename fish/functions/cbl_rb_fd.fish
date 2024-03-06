@@ -11,7 +11,4 @@ function cbl_rb_fd -d "Rebase generic Fedora kernel on latest linux-next"
 
     # Build kernel
     fish -c "cd $CBL_SRC_P/fedora; and cbl_bld_krnl_rpm --cfi --lto arm64"
-    or return
-
-    popd
 end
