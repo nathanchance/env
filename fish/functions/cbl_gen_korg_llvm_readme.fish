@@ -8,7 +8,7 @@ function cbl_gen_korg_llvm_readme -d "Generate kernel.org LLVM README"
         return 1
     end
     if not in_venv
-        pv_venv c e markdown
+        py_venv c e markdown
         and pip install --upgrade \
             markdown \
             pip \
@@ -52,7 +52,7 @@ function cbl_gen_korg_llvm_readme -d "Generate kernel.org LLVM README"
         read -l -P 'New version: ' new_ver
     end
     if set -q old_ver; and set -q new_ver
-        set -i "s;$old_ver;$new_ver;g" $md
+        sed -i "s;$old_ver;$new_ver;g" $md
     end
 
     python -m markdown \
