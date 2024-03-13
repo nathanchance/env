@@ -147,15 +147,6 @@ function cbl_bld_tot_tcs -d "Build LLVM and binutils from source for kernel deve
             return 1
         end
     end
-    # Hack to workaround https://github.com/ClangBuiltLinux/linux/issues/2002
-    # without handicapping toolchains for testing
-    crl https://github.com/nathanchance/llvm-project/commit/1f1c0866696bac448d8e6f741f93cd4b807db40f.patch | git -C $llvm_project ap
-    or begin
-        set message "Failed to apply -Wenum-conversion hack"
-        print_error "$message"
-        tg_msg "$message"
-        return 1
-    end
 
     # Add in-review patches here
     for gh_pr in $gh_prs
