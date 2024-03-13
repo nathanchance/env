@@ -163,7 +163,7 @@ function cbl_bld_tot_tcs -d "Build LLVM and binutils from source for kernel deve
         end
     end
 
-    string match -gr "\s+set\(LLVM_VERSION_[A-Z]+ ([0-9]+)\)" <$llvm_project/llvm/CMakeLists.txt | string join . | read llvm_ver
+    string match -gr "\s+set\(LLVM_VERSION_[A-Z]+ ([0-9]+)\)" <$llvm_project/cmake/Modules/LLVMVersion.cmake | string join . | read llvm_ver
     if test (string split . $llvm_ver | count) != 3
         set message "Malformed LLVM version ('$llvm_ver')?"
         print_error "$messsage"
