@@ -30,9 +30,6 @@ def prepare_source(base_name, base_ref='origin/master'):
     if base_name == 'fedora':
         # PCI: imx6: Fix clang -Wimplicit-fallthrough in imx6_pcie_probe()
         b4_patches.append('https://lore.kernel.org/all/20240301-pci-imx6-fix-clang-implicit-fallthrough-v1-1-db78c7cbb384@kernel.org/')  # yapf: disable
-    if base_name == 'linux-mainline-llvm':
-        # xfrm: Avoid clang fortify warning in copy_to_user_tmpl()
-        crl_patches.append('https://git.kernel.org/klassert/ipsec/p/1a807e46aa93ebad1dfbed4f82dc3bf779423a6e')  # yapf: disable
     if base_name == 'rpi':
         # drm/sun4i: hdmi: Fix u64 div on 32bit arch
         b4_patches.append('https://lore.kernel.org/all/20240304091225.366325-1-mripard@kernel.org/')
