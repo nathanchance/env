@@ -1,11 +1,11 @@
 # Maintainer: Nathan Chancellor <nathan@kernel.org>
 pkgname=cvise
-pkgver=2.9.0
+pkgver=2.10.0
 pkgrel=1
 pkgdesc="Super-parallel Python port of the C-Reduce"
 arch=(x86_64)
 url="https://github.com/marxin/cvise"
-license=('custom:University of Illinois Open Source License')
+license=('NCSA')
 depends=(
   clang
   llvm-libs
@@ -26,7 +26,7 @@ checkdepends=(
 )
 optdepends=('colordiff: Show diffs in color')
 source=("$pkgname-$pkgver.tar.gz::https://github.com/marxin/$pkgname/archive/refs/tags/v$pkgver.tar.gz")
-sha256sums=('e4acb8c4de9433766c4d6fc90e9dfb271a9b69a60f6118b00ae5218a8ce50366')
+sha256sums=('ee9bdfce6f139d0317c98d9c9b51cc68bcaead059de97aac2cf81d71f2215f54')
 
 build() {
   cd "$pkgname-$pkgver"
