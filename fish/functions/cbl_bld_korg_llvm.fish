@@ -57,7 +57,11 @@ function cbl_bld_korg_llvm
     if test "$test_linux" = y
         for tc in (fd -a -d 1 -t d . $tmp_llvm_install)
             for src in $CBL_SRC_C/linux $CBL_SRC_C/linux-stable-$CBL_STABLE_VERSIONS
-                dbxe -- "fish -c 'cbl_lkt --linux-folder $src --llvm-prefix $tc --no-timeout'"
+                if dbx_has_82a69f0
+                    dbxe -- fish -c "cbl_lkt --linux-folder $src --llvm-prefix $tc --no-timeout"
+                else
+                    dbxe -- "fish -c 'cbl_lkt --linux-folder $src --llvm-prefix $tc --no-timeout'"
+                end
                 or break
             end
             or break

@@ -58,16 +58,30 @@ function cbl_test_kvm -d "Test KVM against a Clang built kernel with QEMU"
                                 case LLVM
                                     set -a make_args LLVM=1
                             end
-                            dbxe -- "fish -c 'kmake -C $src ARCH=$arch $make_args O=$out defconfig all'"; or return
+                            if dbx_has_82a69f0
+                                dbxe -- fish -c "kmake -C $src ARCH=$arch $make_args O=$out defconfig all"
+                            else
+                                dbxe -- "fish -c 'kmake -C $src ARCH=$arch $make_args O=$out defconfig all'"
+                            end
+                            or return
                         end
-                        dbxe -- "fish -c 'kboot -a $arch -k $out'"; or return
+                        if dbx_has_82a69f0
+                            dbxe -- fish -c "kboot -a $arch -k $out"
+                        else
+                            dbxe -- "fish -c 'kboot -a $arch -k $out'"
+                        end
+                        or return
                     end
 
                 case vm
                     updfull
                     mkdir -p $TMP_FOLDER
                     cp -v /boot/vmlinuz-linux $TMP_FOLDER/bzImage
-                    dbxe -- "fish -c 'kboot -a x86_64 -k $TMP_FOLDER/bzImage -t 30s'"
+                    if dbx_has_82a69f0
+                        dbxe -- fish -c "kboot -a x86_64 -k $TMP_FOLDER/bzImage -t 30s"
+                    else
+                        dbxe -- "fish -c 'kboot -a x86_64 -k $TMP_FOLDER/bzImage -t 30s'"
+                    end
             end
 
         case vmm
