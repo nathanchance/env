@@ -11,7 +11,7 @@ windows:
       enter: false
   - shell: dbxe
     shell_command:
-    - cmd: cbl_test_kvm vmm
+    - cmd: cbl_vmm run -c (math (nproc) / 2) -m (math (nproc) x 0.75)
       enter: false
     focus: true
   - shell: dbxe
