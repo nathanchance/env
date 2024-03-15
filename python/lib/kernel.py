@@ -27,12 +27,13 @@ def prepare_source(base_name, base_ref='origin/master'):
     ln_commits = []
     am_patches = []
 
-    if base_name == 'fedora':
-        # PCI: imx6: Fix clang -Wimplicit-fallthrough in imx6_pcie_probe()
-        b4_patches.append('https://lore.kernel.org/all/20240301-pci-imx6-fix-clang-implicit-fallthrough-v1-1-db78c7cbb384@kernel.org/')  # yapf: disable
-    if base_name == 'rpi':
-        # drm/sun4i: hdmi: Fix u64 div on 32bit arch
-        b4_patches.append('https://lore.kernel.org/all/20240304091225.366325-1-mripard@kernel.org/')
+    if base_name == 'linux-mainline-llvm':
+        # kbuild: Move -Wenum-{compare-conditional,enum-conversion} into W=1
+        crl_patches.append('https://git.kernel.org/masahiroy/linux-kbuild/p/75b5ab134bb5f657ef7979a59106dce0657e8d87')  # yapf: disable
+
+    if base_name in ('fedora', 'linux-next-llvm'):
+        # speakup: devsynth: remove c23 label
+        b4_patches.append('https://lore.kernel.org/all/20240313100413.875280-1-arnd@kernel.org/')  # yapf: disable
 
     source_folder = Path(os.environ['CBL_SRC_P'], base_name)
 
