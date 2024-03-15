@@ -138,6 +138,8 @@ function cbl_bld_tot_tcs -d "Build LLVM and binutils from source for kernel deve
     end
 
     # Add patches to revert here
+    # https://github.com/ClangBuiltLinux/linux/issues/2007
+    set -a reverts https://github.com/llvm/llvm-project/commit/3589cacfa8da89b9b5051e4dba659caa575e6b3f # [ValueTracking] Handle `icmp pred (trunc X), C` in `computeKnownBitsFromCmp` (#82803)
     for revert in $reverts
         set -l revert (basename $revert)
         if not git -C $llvm_project rv -n $revert
