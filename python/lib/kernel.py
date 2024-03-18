@@ -27,13 +27,21 @@ def prepare_source(base_name, base_ref='origin/master'):
     ln_commits = []
     am_patches = []
 
+    # yapf: disable
     if base_name == 'linux-mainline-llvm':
         # kbuild: Move -Wenum-{compare-conditional,enum-conversion} into W=1
-        crl_patches.append('https://git.kernel.org/masahiroy/linux-kbuild/p/75b5ab134bb5f657ef7979a59106dce0657e8d87')  # yapf: disable
+        crl_patches.append('https://git.kernel.org/masahiroy/linux-kbuild/p/75b5ab134bb5f657ef7979a59106dce0657e8d87')
 
     if base_name in ('fedora', 'linux-next-llvm'):
         # speakup: devsynth: remove c23 label
-        b4_patches.append('https://lore.kernel.org/all/20240313100413.875280-1-arnd@kernel.org/')  # yapf: disable
+        b4_patches.append('https://lore.kernel.org/all/20240313100413.875280-1-arnd@kernel.org/')
+
+    if base_name in ('fedora', 'linux-next-llvm', 'rpi'):
+        # tracing: Use strcmp() in __assign_str() WARN_ON() check
+        b4_patches.append('https://lore.kernel.org/all/20240312113002.00031668@gandalf.local.home/')
+        # tracing: Ignore -Wstring-compare with diagnostic macros
+        am_patches.append(Path(os.environ['NVME_FOLDER'], 'data/tmp-patches/0001-tracing-Ignore-Wstring-compare-with-diagnostic-macro.patch'))
+    # yapf: enable
 
     source_folder = Path(os.environ['CBL_SRC_P'], base_name)
 
