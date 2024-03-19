@@ -22,23 +22,21 @@ def prepare_source(base_name, base_ref='origin/master'):
         raise RuntimeError(f"Don't know how to handle provided base_name ('{base_name}')?")
 
     reverts = []
-    b4_patches = []
-    crl_patches = []
-    ln_commits = []
-    am_patches = []
+    patches = []
+    commits = []
 
     # yapf: disable
     if base_name == 'linux-mainline-llvm':
         # kbuild: Move -Wenum-{compare-conditional,enum-conversion} into W=1
-        crl_patches.append('https://git.kernel.org/masahiroy/linux-kbuild/p/75b5ab134bb5f657ef7979a59106dce0657e8d87')
+        patches.append('https://git.kernel.org/masahiroy/linux-kbuild/p/75b5ab134bb5f657ef7979a59106dce0657e8d87')
 
     if base_name in ('fedora', 'linux-next-llvm'):
         # speakup: devsynth: remove c23 label
-        b4_patches.append('https://lore.kernel.org/all/20240313100413.875280-1-arnd@kernel.org/')
+        patches.append('https://lore.kernel.org/all/20240313100413.875280-1-arnd@kernel.org/')
 
     if base_name in ('fedora', 'linux-next-llvm', 'rpi'):
         # tracing: Ignore -Wstring-compare with diagnostic macros
-        b4_patches.append('https://lore.kernel.org/all/20240319-tracing-fully-silence-wstring-compare-v1-2-81adb44403f5@kernel.org/')
+        patches.append('https://lore.kernel.org/all/20240319-tracing-fully-silence-wstring-compare-v1-2-81adb44403f5@kernel.org/')
     # yapf: enable
 
     source_folder = Path(os.environ['CBL_SRC_P'], base_name)
@@ -54,27 +52,27 @@ def prepare_source(base_name, base_ref='origin/master'):
             subprocess.run(  # noqa: PLW1510
                 ['git', 'revert', '--mainline', '1', '--no-edit', revert], **common_kwargs)
 
-        for b4_patch in b4_patches:
-            subprocess.run(  # noqa: PLW1510
-                ['b4', 'shazam', '-l', '-P', '_', '-s', b4_patch], **common_kwargs)
+        for patch in patches:
+            if isinstance(patch, Path):
+                subprocess.run(['git', 'am', '-3', patch], **common_kwargs)  # noqa: PLW1510
+            elif patch.startswith('https://lore.kernel.org/'):
+                subprocess.run(  # noqa: PLW1510
+                    ['b4', 'shazam', '-l', '-P', '_', '-s', patch], **common_kwargs)
+            elif patch.startswith(('https://', 'http://')):
+                patch_input = subprocess.run(['curl', '-LSs', patch],
+                                             capture_output=True,
+                                             check=True,
+                                             text=True).stdout
+                subprocess.run(  # noqa: PLW1510
+                    ['git', 'am', '-3'], **common_kwargs, input=patch_input)
 
-        for crl_patch in crl_patches:
-            patch_input = subprocess.run(['curl', '-LSs', crl_patch],
-                                         capture_output=True,
-                                         check=True,
-                                         text=True).stdout
-            subprocess.run(['git', 'am', '-3'], **common_kwargs, input=patch_input)  # noqa: PLW1510
-
-        for ln_commit in ln_commits:
-            patch_input = subprocess.run(['git', 'fp', '-1', '--stdout', ln_commit],
+        for commit in commits:
+            patch_input = subprocess.run(['git', 'fp', '-1', '--stdout', commit],
                                          capture_output=True,
                                          check=True,
                                          cwd=Path(os.environ['CBL_SRC_P'], 'linux-next'),
                                          text=True).stdout
             subprocess.run(['git', 'am', '-3'], **common_kwargs, input=patch_input)  # noqa: PLW1510
-
-        for am_patch in am_patches:
-            subprocess.run(['git', 'am', '-3', am_patch], **common_kwargs)  # noqa: PLW1510
     # pylint: enable=subprocess-run-check
     except subprocess.CalledProcessError as err:
         subprocess.run(['git', 'ama'], check=False, cwd=source_folder)
