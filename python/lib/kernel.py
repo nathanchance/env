@@ -4,6 +4,7 @@
 
 import os
 from pathlib import Path
+import re
 import shutil
 import subprocess
 import sys
@@ -33,16 +34,23 @@ def prepare_source(base_name, base_ref='origin/master'):
     if base_name in ('fedora', 'linux-next-llvm'):
         # speakup: devsynth: remove c23 label
         patches.append('https://lore.kernel.org/all/20240313100413.875280-1-arnd@kernel.org/')
-
-    if base_name in ('fedora', 'linux-next-llvm', 'rpi'):
-        # tracing: Ignore -Wstring-compare with diagnostic macros
-        patches.append('https://lore.kernel.org/all/20240319-tracing-fully-silence-wstring-compare-v1-2-81adb44403f5@kernel.org/')
     # yapf: enable
 
     source_folder = Path(os.environ['CBL_SRC_P'], base_name)
 
     subprocess.run(['git', 'remote', 'update', '--prune', 'origin'], check=True, cwd=source_folder)
     subprocess.run(['git', 'reset', '--hard', base_ref], check=True, cwd=source_folder)
+
+    if re.search(
+            r'\(src\) != __data_offsets.dst##_ptr_',
+            source_folder.joinpath('include/trace/stages/stage6_event_callback.h').read_text(
+                encoding='utf-8')):
+        # tracing: Ignore -Wstring-compare with diagnostic macros
+        patches.append(
+            Path(
+                os.environ['NVME_FOLDER'],
+                'data/tmp-patches/20240319_nathan_tracing_ignore_wstring_compare_with_diagnostic_macros.patch',
+            ))
 
     # pylint: disable=subprocess-run-check
     try:
