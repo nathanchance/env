@@ -37,10 +37,8 @@ def prepare_source(base_name, base_ref='origin/master'):
         b4_patches.append('https://lore.kernel.org/all/20240313100413.875280-1-arnd@kernel.org/')
 
     if base_name in ('fedora', 'linux-next-llvm', 'rpi'):
-        # tracing: Use strcmp() in __assign_str() WARN_ON() check
-        b4_patches.append('https://lore.kernel.org/all/20240312113002.00031668@gandalf.local.home/')
         # tracing: Ignore -Wstring-compare with diagnostic macros
-        am_patches.append(Path(os.environ['NVME_FOLDER'], 'data/tmp-patches/0001-tracing-Ignore-Wstring-compare-with-diagnostic-macro.patch'))
+        b4_patches.append('https://lore.kernel.org/all/20240319-tracing-fully-silence-wstring-compare-v1-2-81adb44403f5@kernel.org/')
     # yapf: enable
 
     source_folder = Path(os.environ['CBL_SRC_P'], base_name)
