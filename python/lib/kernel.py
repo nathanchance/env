@@ -61,6 +61,8 @@ def prepare_source(base_name, base_ref='origin/master'):
                                              text=True).stdout
                 subprocess.run(  # noqa: PLW1510
                     ['git', 'am', '-3'], **common_kwargs, input=patch_input)
+            else:
+                raise RuntimeError(f"Can't handle {patch}?")
 
         for commit in commits:
             patch_input = subprocess.run(['git', 'fp', '-1', '--stdout', commit],
