@@ -26,13 +26,7 @@ def prepare_source(base_name, base_ref='origin/master'):
     commits = []
 
     # yapf: disable
-    if base_name == 'linux-mainline-llvm':
-        # kbuild: Move -Wenum-{compare-conditional,enum-conversion} into W=1
-        patches.append('https://git.kernel.org/masahiroy/linux-kbuild/p/75b5ab134bb5f657ef7979a59106dce0657e8d87')
-
-    if base_name in ('fedora', 'linux-next-llvm'):
-        # speakup: devsynth: remove c23 label
-        patches.append('https://lore.kernel.org/all/20240313100413.875280-1-arnd@kernel.org/')
+    # Patching section
     # yapf: enable
 
     source_folder = Path(os.environ['CBL_SRC_P'], base_name)
