@@ -27,6 +27,14 @@ def prepare_source(base_name, base_ref='origin/master'):
 
     # yapf: disable
     # Patching section
+    if base_name in ('fedora', 'linux-next-llvm'):
+        # drm/qxl: remove variable count
+        patches.append('https://lore.kernel.org/all/20230408165023.2706235-1-trix@redhat.com/')
+        # drm/qxl: remove unused variable num_relocs
+        patches.append('https://lore.kernel.org/all/20240307104119.1980621-1-colin.i.king@gmail.com/')
+    if base_name in ('fedora', 'rpi'):
+        # drm/msm: fix the `CRASHDUMP_READ` target of `a6xx_get_shader_block()`
+        patches.append('https://lore.kernel.org/all/20240326212324.185832-1-ojeda@kernel.org/')
     # yapf: enable
 
     source_folder = Path(os.environ['CBL_SRC_P'], base_name)
