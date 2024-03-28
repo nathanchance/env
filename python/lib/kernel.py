@@ -14,11 +14,13 @@ sys.path.append(str(Path(__file__).resolve().parents[1]))
 import lib.utils
 # pylint: enable=wrong-import-position
 
+NEXT_TREES = ('fedora', 'linux-next-llvm', 'rpi')
+
 
 def prepare_source(base_name, base_ref='origin/master'):
     if base_name == 'linux-debug':
         return  # managed outside of the script
-    if base_name not in ('fedora', 'linux-next-llvm', 'linux-mainline-llvm', 'rpi'):
+    if base_name not in (*NEXT_TREES, 'linux-mainline-llvm'):
         raise RuntimeError(f"Don't know how to handle provided base_name ('{base_name}')?")
 
     reverts = []
@@ -27,11 +29,15 @@ def prepare_source(base_name, base_ref='origin/master'):
 
     # yapf: disable
     # Patching section
+    if base_name in NEXT_TREES:
+        # mm: support multi-size THP numa balancing
+        # https://lore.kernel.org/202403280834.zWjRlaM9-lkp@intel.com/
+        reverts.append('0f47c75aeb7aae02c433e322ebbd4d6d757418d5')
     if base_name in ('fedora', 'linux-next-llvm'):
-        # drm/qxl: remove variable count
-        patches.append('https://lore.kernel.org/all/20230408165023.2706235-1-trix@redhat.com/')
-        # drm/qxl: remove unused variable num_relocs
-        patches.append('https://lore.kernel.org/all/20240307104119.1980621-1-colin.i.king@gmail.com/')
+        # drm/qxl: remove unused `count` variable from `qxl_surface_id_alloc()`
+        patches.append('https://gitlab.freedesktop.org/drm/misc/kernel/-/commit/7cd78fd7e29644641b848d69a585f2aea45f0991.patch')
+        # drm/qxl: remove unused variable from `qxl_process_single_command()`
+        patches.append('https://gitlab.freedesktop.org/drm/misc/kernel/-/commit/aba2a144c0bf1ecdcbc520525712fb661392e509.patch')
     if base_name in ('fedora', 'rpi'):
         # drm/msm: fix the `CRASHDUMP_READ` target of `a6xx_get_shader_block()`
         patches.append('https://lore.kernel.org/all/20240326212324.185832-1-ojeda@kernel.org/')
