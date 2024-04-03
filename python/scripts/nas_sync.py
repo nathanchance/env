@@ -201,7 +201,7 @@ def download_items(targets, network_folder):
 
         elif target == 'rpios':
             rpi_arches = ['armhf', 'arm64']
-            rpi_date = '2023-12-11/2023-12-11'
+            rpi_date = '2024-03-15/2024-03-15'
             deb_ver = 'bookworm'
 
             for rpi_arch in rpi_arches:
