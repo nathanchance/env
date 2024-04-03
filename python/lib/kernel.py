@@ -29,18 +29,14 @@ def prepare_source(base_name, base_ref='origin/master'):
 
     # yapf: disable
     # Patching section
-    if base_name in NEXT_TREES:
-        # mm: support multi-size THP numa balancing
-        # https://lore.kernel.org/202403280834.zWjRlaM9-lkp@intel.com/
-        reverts.append('0f47c75aeb7aae02c433e322ebbd4d6d757418d5')
     if base_name in ('fedora', 'linux-next-llvm'):
-        # drm/qxl: remove unused `count` variable from `qxl_surface_id_alloc()`
-        patches.append('https://gitlab.freedesktop.org/drm/misc/kernel/-/commit/7cd78fd7e29644641b848d69a585f2aea45f0991.patch')
-        # drm/qxl: remove unused variable from `qxl_process_single_command()`
-        patches.append('https://gitlab.freedesktop.org/drm/misc/kernel/-/commit/aba2a144c0bf1ecdcbc520525712fb661392e509.patch')
+        patches.append(Path(os.environ['NVME_FOLDER'], 'data/tmp-patches/smb-file.c-Wsometimes-uninitialized-workaround.patch'))
     if base_name in ('fedora', 'rpi'):
         # drm/msm: fix the `CRASHDUMP_READ` target of `a6xx_get_shader_block()`
         patches.append('https://lore.kernel.org/all/20240326212324.185832-1-ojeda@kernel.org/')
+    if base_name == 'linux-next-llvm':
+        # usb: typec: ptn36502: Only select DRM_AUX_BRIDGE with OF
+        patches.append('https://lore.kernel.org/all/20240328-fix-ptn36502-drm_aux_bridge-select-v1-1-85552117e26e@kernel.org/')
     # yapf: enable
 
     source_folder = Path(os.environ['CBL_SRC_P'], base_name)
