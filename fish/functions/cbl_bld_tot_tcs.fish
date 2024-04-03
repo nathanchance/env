@@ -138,21 +138,28 @@ function cbl_bld_tot_tcs -d "Build LLVM and binutils from source for kernel deve
     end
 
     # Add patches to revert here
-    # https://github.com/ClangBuiltLinux/linux/issues/2007
-    set -a reverts https://github.com/llvm/llvm-project/commit/3589cacfa8da89b9b5051e4dba659caa575e6b3f # [ValueTracking] Handle `icmp pred (trunc X), C` in `computeKnownBitsFromCmp` (#82803)
     for revert in $reverts
-        set -l revert (basename $revert)
-        if not git -C $llvm_project rv -n $revert
-            set message "Failed to revert $revert"
-            print_error "$message"
-            tg_msg "$message"
-            return 1
+        if string match -qr 'https?://' $revert
+            set -l revert (basename $revert)
+            if not git -C $llvm_project rv -n $revert
+                set message "Failed to revert $revert"
+                print_error "$message"
+                tg_msg "$message"
+                return 1
+            end
+        else
+            if not git -C $llvm_project ap $revert
+                set message "Failed to apply $revert"
+                print_error "$message"
+                tg_msg "$message"
+                return 1
+            end
         end
     end
 
     # Add in-review patches here
-    # https://github.com/llvm/llvm-project/pull/78000#issuecomment-2010269493
-    set -a gh_prs https://github.com/llvm/llvm-project/pull/86017 # Unwrap CountAttributed for debug info
+    # https://github.com/llvm/llvm-project/pull/85592#issuecomment-2027805325
+    set -a gh_prs https://github.com/llvm/llvm-project/pull/87169 # [IR] Fix crashes caused by #85592
     for gh_pr in $gh_prs
         if gh_llvm pr view --json state (basename $gh_pr) | python3 -c "import json, sys; sys.exit(0 if json.load(sys.stdin)['state'] == 'MERGED' else 1)"
             print_warning "$gh_pr has already been merged, skipping..."
