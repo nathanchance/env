@@ -166,7 +166,6 @@ set -gx ICLOUD_DOCS_FOLDER /Users/$USER/Library/'Mobile Documents/com~apple~Clou
 # Versions of stable that I build locally
 set -gx CBL_STABLE_VERSIONS \
     6.8 \
-    6.7 \
     6.6 \
     6.1 \
     5.15 \
