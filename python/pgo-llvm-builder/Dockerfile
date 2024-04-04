@@ -60,6 +60,21 @@ RUN dir=$(mktemp -d) && \
     make -C "$dir"/lib -j"$(nproc)" install && \
     rm -fr "$dir"
 
+# Buster has ninja 1.8.2, which may be lacking features that newer LLVM or
+# CMake releases may rely on when generating build files. Build the latest
+# because it is quite simple.
+ARG NINJA_VERSION=1.11.1
+RUN dir=$(mktemp -d) && \
+    url=https://github.com/ninja-build/ninja/archive/refs/tags/v$NINJA_VERSION.tar.gz && \
+    wget -O - -q "$url" | tar -C "$dir" --strip-components=1 -xzvf - && \
+    apt update && \
+    apt build-dep -y ninja-build && \
+    rm -fr /var/lib/apt/lists/* && \
+    ( cd "$dir" && \
+    ./configure.py --bootstrap ) && \
+    install -Dvm755 "$dir"/ninja /usr/local/bin/ninja && \
+    rm -fr "$dir"
+
 # Install more binutils, kernel, and LLVM build dependencies
 RUN apt update && \
     apt install -y --no-install-recommends \
@@ -73,7 +88,6 @@ RUN apt update && \
         git \
         libelf-dev \
         make \
-        ninja-build \
         texinfo \
         u-boot-tools \
         xz-utils \
