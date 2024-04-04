@@ -53,6 +53,7 @@ function cbl_bld_korg_llvm
         tg_msg "pgo-llvm-builder failed on $(uname -n) @ $(date) with return code '$ret'!"
         return 1
     end
+    bell
 
     if test "$test_linux" = y
         for tc in (fd -a -d 1 -t d . $tmp_llvm_install)

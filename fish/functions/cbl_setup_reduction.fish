@@ -172,4 +172,5 @@ test "$pipestatus" = "1 0"' >$cvise_test
     git -C $cvise commit -m "Initial interestingness test"; or return
 
     echo "cvise reduction has been prepared at: $tmp_dir"
+    bell
 end
