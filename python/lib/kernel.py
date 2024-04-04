@@ -29,8 +29,6 @@ def prepare_source(base_name, base_ref='origin/master'):
 
     # yapf: disable
     # Patching section
-    if base_name in ('fedora', 'linux-next-llvm'):
-        patches.append(Path(os.environ['NVME_FOLDER'], 'data/tmp-patches/smb-file.c-Wsometimes-uninitialized-workaround.patch'))
     if base_name in ('fedora', 'rpi'):
         # drm/msm: fix the `CRASHDUMP_READ` target of `a6xx_get_shader_block()`
         patches.append('https://lore.kernel.org/all/20240326212324.185832-1-ojeda@kernel.org/')
