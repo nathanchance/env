@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: MIT
 # Copyright (C) 2023 Nathan Chancellor
 
-function install_cbl_tc_tar -d "Install a toolchain tarball generated with create_cbl_tc_tar"
+function cbl_install_tc_tar -d "Install a toolchain tarball generated with create_cbl_tc_tar"
     if test (count $argv) -lt 1
         print_error "Provide toolchain tarball as argument!"
         return 1
