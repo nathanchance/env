@@ -2,7 +2,7 @@ FROM docker.io/debian:10-slim
 
 # LLVM may require an newer version of cmake, download and install the latest
 # prebuilt.
-ARG CMAKE_VERSION=3.29.0
+ARG CMAKE_VERSION=3.29.1
 RUN apt update && \
     apt upgrade -y && \
     apt install -y --no-install-recommends \
@@ -53,7 +53,7 @@ RUN dir=$(mktemp -d) && \
 
 # Buster has libzstd 1.3.8, which has certain options that LLVM requires behind
 # an experimental flag. Install the latest so that compilation works as expected.
-ARG ZSTD_VERSION=1.5.5
+ARG ZSTD_VERSION=1.5.6
 RUN dir=$(mktemp -d) && \
     url=https://github.com/facebook/zstd/releases/download/v$ZSTD_VERSION/zstd-$ZSTD_VERSION.tar.gz && \
     wget -O - -q "$url" | tar -C "$dir" --strip-components=1 -xzvf - && \
