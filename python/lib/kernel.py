@@ -32,9 +32,6 @@ def prepare_source(base_name, base_ref='origin/master'):
     if base_name in ('fedora', 'rpi'):
         # drm/msm: fix the `CRASHDUMP_READ` target of `a6xx_get_shader_block()`
         patches.append('https://lore.kernel.org/all/20240326212324.185832-1-ojeda@kernel.org/')
-    if base_name == 'linux-next-llvm':
-        # usb: typec: ptn36502: Only select DRM_AUX_BRIDGE with OF
-        patches.append('https://lore.kernel.org/all/20240328-fix-ptn36502-drm_aux_bridge-select-v1-1-85552117e26e@kernel.org/')
     # yapf: enable
 
     source_folder = Path(os.environ['CBL_SRC_P'], base_name)
