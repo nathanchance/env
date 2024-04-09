@@ -21,6 +21,7 @@ function cbl_rb_pi -d "Rebase Raspberry Pi kernel on latest linux-next"
 
     # Prepare kernel source
     PYTHONPATH=$PYTHON_FOLDER/lib python3 -c "import kernel; kernel.prepare_source('rpi')"
+    or return
 
     pushd $pi_src
     for arch in $pi_arches
