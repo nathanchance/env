@@ -200,6 +200,13 @@ class DebugPkgBuilder(KernelPkgBuilder):
         config = Path(self._build_folder, '.config')
         base_sc_cmd = [Path(self._source_folder, 'scripts/config'), '--file', config]
 
+        if self._build_folder.exists():
+            if self._build_folder.is_dir():
+                shutil.rmtree(self._build_folder)
+            else:
+                self._build_folder.unlink()
+        self._build_folder.mkdir(parents=True)
+
         crl_cmd = [
             'curl',
             '-LSs',
