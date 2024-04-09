@@ -29,6 +29,10 @@ def prepare_source(base_name, base_ref='origin/master'):
 
     # yapf: disable
     # Patching section
+    if base_name in NEXT_TREES:
+        # 267e31750ae8 ("Merge branch 'phy-listing-link_topology-tracking'")
+        # https://lore.kernel.org/20240409201553.GA4124869@dev-arch.thelio-3990X/
+        reverts.append('267e31750ae89f845cfe7df8f577b19482d9ef9b')
     if base_name in ('fedora', 'rpi'):
         # drm/msm: fix the `CRASHDUMP_READ` target of `a6xx_get_shader_block()`
         patches.append('https://lore.kernel.org/all/20240326212324.185832-1-ojeda@kernel.org/')
