@@ -30,9 +30,10 @@ def prepare_source(base_name, base_ref='origin/master'):
     # yapf: disable
     # Patching section
     if base_name in NEXT_TREES:
-        # 267e31750ae8 ("Merge branch 'phy-listing-link_topology-tracking'")
         # https://lore.kernel.org/20240409201553.GA4124869@dev-arch.thelio-3990X/
-        reverts.append('267e31750ae89f845cfe7df8f577b19482d9ef9b')
+        reverts.append('267e31750ae89f845cfe7df8f577b19482d9ef9b')  # 267e31750ae8 ("Merge branch 'phy-listing-link_topology-tracking'")
+    if base_name == 'linux-next-llvm':
+        patches.append('https://lore.kernel.org/all/20240410-drm-xe-fix-xe_guc_ads-using-xe_wa_oob-v1-1-441f2d8e5d83@kernel.org/')  # drm/xe: Add xe_guc_ads.c to uses_generated_oob
     # yapf: enable
 
     source_folder = Path(os.environ['CBL_SRC_P'], base_name)
