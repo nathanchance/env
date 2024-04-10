@@ -32,7 +32,7 @@ function git_setup -d "Configure git"
     git config --global url."https://git.kernel.org".insteadOf git://git.kernel.org
 
     if command -q delta
-        git config --global core.pager delta
+        git config --global core.pager "env LESS=RF delta"
 
         git config --global interactive.diffFilter "delta --color-only"
 
@@ -61,6 +61,8 @@ function git_setup -d "Configure git"
         git config --global diff.colorMoved true
 
         git config --global merge.conflictstyle diff3
+    else
+        git config --global core.pager "less -+X"
     end
 
     git_aliases
