@@ -27,7 +27,7 @@ function gen_slim_initrd -d "Generate a slim initial ramdisk within a virtual ma
         if command -q dracut
             sudo fish -c "dracut --no-kernel $dst && chown $USER:$USER $dst"
         else if command -q mkinitcpio
-            mkinitcpio -g $dst -k none
+            sudo fish -c "mkinitcpio -g $dst -k none && chown $USER:$USER $dst"
         else if set -q src
             pushd (mktemp -d)
             begin
