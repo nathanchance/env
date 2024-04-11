@@ -32,8 +32,10 @@ def prepare_source(base_name, base_ref='origin/master'):
     if base_name in NEXT_TREES:
         # https://lore.kernel.org/20240409201553.GA4124869@dev-arch.thelio-3990X/
         reverts.append('267e31750ae89f845cfe7df8f577b19482d9ef9b')  # 267e31750ae8 ("Merge branch 'phy-listing-link_topology-tracking'")
-    if base_name == 'linux-next-llvm':
-        patches.append('https://lore.kernel.org/all/20240410-drm-xe-fix-xe_guc_ads-using-xe_wa_oob-v1-1-441f2d8e5d83@kernel.org/')  # drm/xe: Add xe_guc_ads.c to uses_generated_oob
+        # https://lore.kernel.org/528e184b-9cb1-40a7-b757-db11a852dd59@samsung.com/
+        # New version of "timerfd: convert to ->read_iter()"
+        reverts.append('e57bf9cda9cd977b445aefe7edbe9505e0112d5f')
+        patches.append('https://git.kernel.org/axboe/linux-block/p/d94979904105a7ad8dca6fdcd8cb3fbecada22f1')
     # yapf: enable
 
     source_folder = Path(os.environ['CBL_SRC_P'], base_name)
