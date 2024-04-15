@@ -23,7 +23,7 @@ function kboot -d "Boot a kernel in QEMU"
     end
 
     if not set -q kernel
-        set -a boot_qemu_args -k .
+        set -a boot_qemu_args -k (tbf)
     end
 
     if test -z "$BU"
