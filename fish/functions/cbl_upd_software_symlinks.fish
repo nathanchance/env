@@ -59,6 +59,8 @@ function cbl_upd_software_symlinks -d "Update symlinks to a stow or QEMU folder"
             for arch in arm aarch64 i386 loongarch64 m68k mips mipsel ppc ppc64 riscv64 s390x x86_64
                 ln -frsv $src/bin/qemu-system-$arch $CBL_QEMU_BIN; or return
             end
-            ln -frsv $src/bin/qemu-img $CBL_QEMU_BIN; or return
+            for bin in qemu-{ga,img}
+                ln -frsv $src/bin/$bin $CBL_QEMU_BIN; or return
+            end
     end
 end
