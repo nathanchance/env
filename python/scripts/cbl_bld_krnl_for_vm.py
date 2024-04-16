@@ -67,6 +67,12 @@ def parse_arguments():
         '--config',
         help='Use this configuration instead of default configuration for virtual machine')
 
+    parser.add_argument('-C',
+                        '--directory',
+                        default=Path.cwd(),
+                        help='Path to kernel source (default: current working directory)',
+                        type=Path)
+
     parser.add_argument('-m',
                         '--menuconfig',
                         action='store_true',
@@ -93,9 +99,9 @@ def parse_arguments():
     return parser.parse_args()
 
 
-def build_kernel_for_vm(add_make_targets, make_variables, config, menuconfig, vm_name):
-    if Path('.config').exists():
-        subprocess.run(['git', 'cl', '-q'], check=True)
+def build_kernel_for_vm(kernel_src, add_make_targets, make_variables, config, menuconfig, vm_name):
+    if Path(kernel_src, '.config').exists():
+        subprocess.run(['git', '-C', src_folder, 'cl', '-q'], check=True)
     if (build := make_variables['O']).exists():
         shutil.rmtree(build)
     build.mkdir(parents=True)
@@ -150,14 +156,18 @@ def build_kernel_for_vm(add_make_targets, make_variables, config, menuconfig, vm
     if add_make_targets:
         for target in add_make_targets:
             make_targets.insert(-1, target)
-    lib.kernel.kmake(make_variables, make_targets)
+    lib.kernel.kmake(make_variables, make_targets, directory=kernel_src)
 
 
 if __name__ == '__main__':
     args = parse_arguments()
 
-    if not Path('Makefile').exists():
-        raise RuntimeError('You do not appear to be in a kernel tree?')
+    if not (src_folder := args.directory.resolve()).exists():
+        raise FileNotFoundError(f"Derived kernel source ('{src_folder}') does not exist?")
+
+    if not src_folder.joinpath('Makefile').exists():
+        raise RuntimeError(
+            f"Derived kernel source ('{src_folder}') does not appear to be a kernel tree?")
 
     arch = get_qemu_arch(args.arch)
 
@@ -168,9 +178,9 @@ if __name__ == '__main__':
         raise RuntimeError(f"lsmod not found in {vm_folder}?")
 
     if 'TMP_BUILD_FOLDER' in os.environ:
-        out = Path(os.environ['TMP_BUILD_FOLDER'], Path.cwd().name)
+        out = Path(os.environ['TMP_BUILD_FOLDER'], src_folder.name)
     else:
-        out = Path('build')
+        out = Path(src_folder, 'build')
 
     make_vars = {
         'ARCH': qemu_arch_to_kernel_arch(arch),
@@ -180,5 +190,5 @@ if __name__ == '__main__':
     make_vars.update(get_toolchain_vars(make_vars['ARCH'], args.toolchain))
     make_vars.update(dict(arg.split('=', 1) for arg in args.make_args))
 
-    build_kernel_for_vm(args.additional_targets, make_vars, args.config, args.menuconfig,
-                        args.vm_name)
+    build_kernel_for_vm(src_folder, args.additional_targets, make_vars, args.config,
+                        args.menuconfig, args.vm_name)
