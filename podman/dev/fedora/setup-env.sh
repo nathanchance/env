@@ -135,7 +135,7 @@ EOF
         openssl
         openssl-devel
         perl
-        qemu-img
+        qemu-{guest-agent,img}
         qemu-system-{aarch64,arm,loongarch64,mips,ppc,riscv,s390x,x86}
         rsync
         socat

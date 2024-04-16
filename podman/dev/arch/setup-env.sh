@@ -201,8 +201,7 @@ function install_packages() {
         edk2-ovmf
         libevent
         libutempter
-        qemu-emulators-full
-        qemu-img
+        qemu-{emulators-full,guest-agent,img}
         virtiofsd
 
         # website management
