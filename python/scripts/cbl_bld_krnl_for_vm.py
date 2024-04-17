@@ -102,7 +102,7 @@ def parse_arguments():
 def build_kernel_for_vm(kernel_src, add_make_targets, make_variables, config, menuconfig, vm_name):
     if Path(kernel_src, '.config').exists():
         subprocess.run(['git', '-C', src_folder, 'cl', '-q'], check=True)
-    if (build := make_variables['O']).exists():
+    if (build := Path(make_variables['O'])).exists():
         shutil.rmtree(build)
     build.mkdir(parents=True)
 
