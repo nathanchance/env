@@ -93,7 +93,7 @@ if test (string lower \$req) = y
     read -P 'lore.kernel.org Message-ID: ' msg_id
 
     if test -n \"\$gh_issue\"; and test -n \"\$msg_id\"
-        gh -R ClangBuiltLinux/linux issue comment \$gh_issue -b '$llvm_ver uploaded to kernel.org: https://lore.kernel.org/\$msg_id/'
+        gh -R ClangBuiltLinux/linux issue comment \$gh_issue -b \"$llvm_ver uploaded to kernel.org: https://lore.kernel.org/\$msg_id/\"
     end
 end" >announce
             chmod +x announce
