@@ -21,6 +21,41 @@ FAILED = '\033[01;31mFAILED\033[0m'
 SUCCESS = '\033[01;32mSUCCESS\033[0m'
 
 
+def run_cmd_print(cmd, **kwargs):
+    try:
+        subprocess.run(cmd, capture_output=True, check=True, text=True, **kwargs)
+    except subprocess.CalledProcessError as err:
+        print(f"{FAILED} ({cmd[0]} failed with '{err.stderr}')")
+        sys.exit(err.returncode)
+    print(SUCCESS)
+
+
+def download_and_verify(url, dst):
+    if dst.exists():
+        return
+
+    base_gpg_cmd = ['gpg', '--homedir', rust_gpg := Path(RUST, 'gpg')]
+    if not rust_gpg.is_dir():
+        if rust_gpg.exists():
+            rust_gpg.unlink()
+        rust_gpg.mkdir(parents=True)
+        print(f"Preparing GPG folder ('{rust_gpg}')... ", end='')
+        run_cmd_print([*base_gpg_cmd, '--recv-keys', '85AB96E6FA1BE5FE'])
+        print()
+
+    print(f"Downloading {url} to {dst}... ", end='')
+    run_cmd_print(['curl', '-LSs', '-o', dst, url])
+
+    print(f"Downloading GPG signature for {dst.name}... ", end='')
+    gpg_url = f"{url}.asc"
+    (gpg_dst := Path(dst.parent, f"{dst.name}.asc")).unlink(missing_ok=True)
+    run_cmd_print(['curl', '-LSs', '-o', gpg_dst, gpg_url])
+
+    print(f"Verifying {dst.name} with GPG signature... ", end='')
+    run_cmd_print([*base_gpg_cmd, '--verify', gpg_dst, dst])
+    gpg_dst.unlink()
+
+
 def prepare_rust_components(toml, target):
     pkgs = [
         'cargo',
@@ -32,8 +67,6 @@ def prepare_rust_components(toml, target):
     ]
     scripts = []
 
-    RUST.mkdir(exist_ok=True, parents=True)
-
     for pkg in pkgs:
         # rust-src is target-agnostic, so it uses '*'
         idx = target if target in (pkg_targets := toml['pkg'][pkg]['target']) else '*'
@@ -42,32 +75,20 @@ def prepare_rust_components(toml, target):
         pkg_name = pkg_url.rsplit('/', 1)[1]
 
         if not (dst := Path(RUST, pkg_name.rsplit('.', 2)[0])).exists():
-            print(f"Downloading {pkg_url}... ", end='')
-            try:
-                pkg_tarball = subprocess.run(['curl', '-LSs', pkg_url],
-                                             capture_output=True,
-                                             check=True).stdout
-            except subprocess.CalledProcessError as err:
-                print(f"{FAILED} (curl failed with '{err.stderr.decode('utf-8')}')")
-                sys.exit(err.returncode)
-            print(SUCCESS)
+            download_and_verify(pkg_url, pkg_tarball := Path(RUST, pkg_name))
 
             print(f"Validating {pkg_name} against hash ('{pkg_hash}')... ", end='')
-            if (calc_hash := hashlib.sha256(pkg_tarball).hexdigest()) != pkg_hash:
+            if (calc_hash := hashlib.sha256(pkg_tarball.read_bytes()).hexdigest()) != pkg_hash:
                 print(f"{FAILED} (calculated hash: '{calc_hash}')")
+                pkg_tarball.unlink()
                 sys.exit(1)
             print(SUCCESS)
 
             print(f"Extracting {pkg_name} to {dst}... ", end='')
-            try:
-                subprocess.run(['tar', '-C', RUST, '-xzf', '-'],
-                               capture_output=True,
-                               check=True,
-                               input=pkg_tarball)
-            except subprocess.CalledProcessError as err:
-                print(f"{FAILED} (curl failed with '{err.stderr.decode('utf-8')}')")
-                sys.exit(err.returncode)
-            print(SUCCESS)
+            run_cmd_print(['tar', '-C', RUST, '-xzf', pkg_tarball])
+
+            pkg_tarball.unlink()
+            print()
 
         scripts.append(Path(dst, 'install.sh'))
 
@@ -76,11 +97,11 @@ def prepare_rust_components(toml, target):
 
 def generate_rust_toml(version):
     toml_url = f"https://static.rust-lang.org/dist/channel-rust-{version}.toml"
-    toml_str = subprocess.run(['curl', '-LSs', toml_url],
-                              capture_output=True,
-                              check=True,
-                              text=True).stdout
-    return tomllib.loads(toml_str)
+    if not (toml_dst := Path(RUST, toml_url.rsplit('/', 1)[1])).exists():
+        download_and_verify(toml_url, toml_dst)
+        print()
+
+    return tomllib.loads(toml_dst.read_text(encoding='utf-8'))
 
 
 def get_rust_target_from_tarball(tarball):
@@ -174,6 +195,8 @@ def generate_llvm_rust_tarball(scripts, llvm_tarball, rust_version):
 
 if __name__ == '__main__':
     args = parse_arguments()
+
+    RUST.mkdir(exist_ok=True, parents=True)
 
     rust_toml = generate_rust_toml(args.version)
     rust_target = get_rust_target_from_tarball(args.llvm_tarball)
