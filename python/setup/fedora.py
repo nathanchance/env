@@ -145,6 +145,9 @@ def install_packages():
         'btop',
         'mosh',
         'opendoas',
+        'remove-retired-packages',
+        'rpmconf',
+        'symlinks',
         'util-linux-user',
 
         # b4
