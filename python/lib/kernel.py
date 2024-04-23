@@ -34,9 +34,12 @@ def prepare_source(base_name, base_ref='origin/master'):
         patches.append('https://lore.kernel.org/all/20240412104615.3779632-1-maxime.chevallier@bootlin.com/')  # net: phy: phy_link_topology: Handle NULL topologies
         # https://lore.kernel.org/20240422204224.GA770800@dev-arch.thelio-3990X/
         commits.append('a0bd9eadfefc4b210bbe9875dd098958eed732cf')  # REPORTED: Revert two recent ntfs3 commits
+    if base_name == 'fedora':
+        # https://lore.kernel.org/20240423160644.GA554932@dev-arch.thelio-3990X/
+        patches.append('https://lore.kernel.org/all/20240423170210.1035957-1-tanmay.shah@amd.com/')  # drivers: remoteproc: xlnx: fix uninitialize variable use
     if base_name == 'linux-next-llvm':
         # https://lore.kernel.org/20240422193728.GA44715@dev-arch.thelio-3990X/
-        commits.append('6d96e6bb01bf8a2e5a59fbea2ee541f35db67d13')  # REPORTED: RDMA/mana_ib: Ensure ret is always initialized in mana_ib_probe()
+        patches.append('https://lore.kernel.org/all/1713881751-21621-1-git-send-email-kotaranov@linux.microsoft.com/')  # RDMA/mana_ib: fix missing ret value
     # yapf: enable
 
     source_folder = Path(os.environ['CBL_SRC_P'], base_name)
