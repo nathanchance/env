@@ -107,7 +107,7 @@ def machine_is_trusted():
 def prechecks():
     lib.setup.check_root()
     fedora_version = get_fedora_version()
-    if fedora_version not in (35, 36, 37, 38, 39):
+    if fedora_version not in (35, 36, 37, 38, 39, 40):
         raise RuntimeError(
             f"Fedora {fedora_version} is not tested with this script, add support for it if it works.",
         )
