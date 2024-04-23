@@ -16,11 +16,32 @@ function py_venv -d "Manage Python virtual environment"
         return 1
     end
     if not set -q venv
-        switch $arg
-            case c create e enter r rm remove
-                print_error "venv name not specified!"
-                return 1
+        if in_venv
+            set venv (basename $VIRTUAL_ENV)
+        else
+            switch $arg
+                case c create e enter r rm remove
+                    print_error "venv name not specified!"
+                    return 1
+            end
         end
+    end
+    switch $venv
+        case continuous-integration2
+            set packages \
+                (cat $CBL_GIT/continuous-integration2/requirements.txt) \
+                pylint \
+                ruff \
+                yapf
+        case kernel-dev
+            set packages $SRC_FOLDER/b4
+        case main
+            set packages \
+                pylint \
+                requests \
+                ruff \
+                vulture \
+                yapf
     end
     set venv_dir $MAIN_FOLDER/.venv
     set venv $venv_dir/$venv
@@ -46,8 +67,19 @@ function py_venv -d "Manage Python virtual environment"
                 source $activate
 
             case i in install
-                if test -e requirements.txt
-                    pip install -r requirements.txt
+                switch (basename $venv)
+                    case continuous-integration2 kernel-dev main
+                        if contains $SRC_FOLDER/b4 $packages
+                            git -C $SRC_FOLDER/b4 urh
+                            or return
+                        end
+                        pip install --upgrade pip $packages
+                        or return
+                    case '*'
+                        if test -e requirements.txt
+                            pip install -r requirements.txt
+                            or return
+                        end
                 end
 
             case l ls list
@@ -68,9 +100,19 @@ function py_venv -d "Manage Python virtual environment"
                     return 1
                 end
 
-                set packages (pip list -o | string match -r '^.*[0-9]+\.[0-9]+\.[0-9]+' | string split -f 1 ' ')
-                if test -n "$packages"
-                    pip install --upgrade $packages
+                switch (basename $venv)
+                    case continuous-integration2 kernel-dev main
+                        if contains $SRC_FOLDER/b4 $packages
+                            git -C $SRC_FOLDER/b4 urh
+                            or return
+                        end
+                        pip install --upgrade pip $packages
+                        or return
+                    case '*'
+                        set packages_to_upgrade (pip list -o | string match -r '^.*[0-9]+\.[0-9]+\.[0-9]+' | string split -f 1 ' ')
+                        if test -n "$packages_to_upgrade"
+                            pip install --upgrade $packages_to_upgrade
+                        end
                 end
 
             case x exit
