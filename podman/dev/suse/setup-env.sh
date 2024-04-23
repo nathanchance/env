@@ -14,6 +14,12 @@ function install_packages() {
 
     zypper -n dup
 
+    # Uninstall busybox-diffutils if it was installed during the distribution
+    # upgrade, as it will conflict with diffutils below
+    if zypper search -i busybox-diffutils; then
+        zypper -n remove busybox-diffutils
+    fi
+
     packages=(
         # arc
         php
