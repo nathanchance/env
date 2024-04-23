@@ -5,7 +5,14 @@ set -eux
 function install_packages() {
     zypper -n ar https://cli.github.com/packages/rpm/gh-cli.repo
 
-    zypper -n --gpg-auto-import-keys dup
+    # Manually import GPG key, as it seems this no longer happens automatically?
+    gh_gpg_url=$(sed -n 's/^gpgkey=\(.*\)$/\1/p' /etc/zypp/repos.d/gh-cli.repo)
+    gh_gpg_dest=/tmp/gh-cli.asc
+    curl -LSso $gh_gpg_dest "$gh_gpg_url"
+    rpm --import $gh_gpg_dest
+    rm -f $gh_gpg_dest
+
+    zypper -n dup
 
     packages=(
         # arc
