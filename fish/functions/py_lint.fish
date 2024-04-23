@@ -24,7 +24,14 @@ function py_lint -d "Lint Python files"
         set ephemeral true
     end
 
-    for command in flake8 pylint ruff vulture yapf
+    set commands pylint vulture yapf
+    if git ls-files | grep -Fq ruff.toml
+        set -a commands ruff
+    else
+        set -a commands flake8
+    end
+
+    for command in $commands
         if not command -q $command
             test $command = flake8; and set -a command flake8-bugbear
             pip install $command
@@ -32,7 +39,7 @@ function py_lint -d "Lint Python files"
     end
 
     # ruff is faster than flake8 and provides many of the benefits so use it when possible
-    if git ls-files | grep -Fq ruff.toml
+    if contains ruff $commands
         if ruff check $files
             print_green "\nruff clean"
         else
