@@ -14,6 +14,9 @@ import lib.setup
 import lib.utils
 # pylint: enable=wrong-import-position
 
+MIN_FEDORA_VERSION = 35
+MAX_FEDORA_VERSION = 40
+
 
 def configure_networking():
     hostname = lib.setup.get_hostname()
@@ -106,8 +109,8 @@ def machine_is_trusted():
 
 def prechecks():
     lib.setup.check_root()
-    fedora_version = get_fedora_version()
-    if fedora_version not in (35, 36, 37, 38, 39, 40):
+    if (fedora_version := get_fedora_version()) not in range(MIN_FEDORA_VERSION,
+                                                             MAX_FEDORA_VERSION + 1):
         raise RuntimeError(
             f"Fedora {fedora_version} is not tested with this script, add support for it if it works.",
         )
