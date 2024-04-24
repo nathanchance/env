@@ -12,7 +12,7 @@ function cbl_qualify_next -d "Run a series of checks to qualify new linux-next r
 
     systemctl --failed
 
-    sudo dmesg -l warn,err
+    sudo dmesg -l warn+
 
     sleep 5
 
