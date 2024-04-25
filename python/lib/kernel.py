@@ -32,9 +32,17 @@ def prepare_source(base_name, base_ref='origin/master'):
     if base_name in NEXT_TREES:
         # https://lore.kernel.org/20240409201553.GA4124869@dev-arch.thelio-3990X/
         patches.append('https://lore.kernel.org/all/20240412104615.3779632-1-maxime.chevallier@bootlin.com/')  # net: phy: phy_link_topology: Handle NULL topologies
+
+    if base_name == 'fedora':
+        patches.append('https://lore.kernel.org/all/20240425-cbl-bcm-assign-counted-by-val-before-access-v1-1-e2db3b82d5ef@kernel.org/')  # clk: bcm: dvp: Assign ->num before accessing ->hws
+        patches.append('https://lore.kernel.org/all/20240425-cbl-bcm-assign-counted-by-val-before-access-v1-2-e2db3b82d5ef@kernel.org/')  # clk: bcm: rpi: Assign ->num before accessing ->hws
+
+        patches.append('https://lore.kernel.org/all/20240424220057.work.819-kees@kernel.org/')  # wifi: nl80211: Avoid address calculations via out of bounds array indexing
+
     if base_name == 'linux-next-llvm':
         # https://lore.kernel.org/20240422193728.GA44715@dev-arch.thelio-3990X/
         patches.append('https://lore.kernel.org/all/1713881751-21621-1-git-send-email-kotaranov@linux.microsoft.com/')  # RDMA/mana_ib: fix missing ret value
+
         patches.append('https://lore.kernel.org/all/20240424-amdgpu-display-dcn401-enum-float-conversion-v1-1-43a2b132ef44@kernel.org/')  # drm/amd/display: Avoid -Wenum-float-conversion in add_margin_and_round_to_dfs_grainularity()
     # yapf: enable
 
