@@ -40,9 +40,6 @@ def prepare_source(base_name, base_ref='origin/master'):
         patches.append('https://lore.kernel.org/all/20240424220057.work.819-kees@kernel.org/')  # wifi: nl80211: Avoid address calculations via out of bounds array indexing
 
     if base_name == 'linux-next-llvm':
-        # https://lore.kernel.org/20240422193728.GA44715@dev-arch.thelio-3990X/
-        patches.append('https://lore.kernel.org/all/1713881751-21621-1-git-send-email-kotaranov@linux.microsoft.com/')  # RDMA/mana_ib: fix missing ret value
-
         patches.append('https://lore.kernel.org/all/20240424-amdgpu-display-dcn401-enum-float-conversion-v1-1-43a2b132ef44@kernel.org/')  # drm/amd/display: Avoid -Wenum-float-conversion in add_margin_and_round_to_dfs_grainularity()
     # yapf: enable
 
