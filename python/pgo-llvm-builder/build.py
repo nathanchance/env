@@ -244,14 +244,20 @@ for value in versions:
         if (gen_cfi_funcs := Path(worktree, 'lld/test/MachO/tools/generate-cfi-funcs.py')).exists():
             gen_cfi_funcs_txt = gen_cfi_funcs.read_text(encoding='utf-8')
             if 'frame_offset = -random.randint(0, (frame_size/16 - 4)) * 16' in gen_cfi_funcs_txt:
-                subprocess.run([
-                    'git',
-                    'cherry-pick',
-                    '--no-commit',
-                    '015c43178f9d8531b6bcd1685dbf72b7d837cf5a',
-                ],
-                               check=True,
-                               cwd=worktree)
+                if 'regs_saved = saved_regs_combined[reg_count][reg_combo]' in gen_cfi_funcs_txt:
+                    # 015c43178f9d8531b6bcd1685dbf72b7d837cf5a won't pick cleanly, just do the replacement ourselves
+                    new_text = gen_cfi_funcs_txt.replace('(frame_size/16 - 4)) * 16',
+                                                         'int(frame_size/16 - 4)) * 16')
+                    gen_cfi_funcs.write_text(new_text, encoding='utf-8')
+                else:
+                    subprocess.run([
+                        'git',
+                        'cherry-pick',
+                        '--no-commit',
+                        '015c43178f9d8531b6bcd1685dbf72b7d837cf5a',
+                    ],
+                                   check=True,
+                                   cwd=worktree)
         # https://github.com/llvm/llvm-project/commit/01fdc2a3c9e0df4e54bb9b88f385f68e7b0d808c
         if (uctc := Path(worktree, 'llvm/utils/update_cc_test_checks.py')).exists():
             uctc_txt = uctc.read_text(encoding='utf-8')
