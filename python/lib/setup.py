@@ -2,7 +2,6 @@
 # SPDX-License-Identifier: MIT
 # Copyright (C) 2022-2023 Nathan Chancellor
 
-import contextlib
 import grp
 import ipaddress
 import os
@@ -444,8 +443,14 @@ def setup_sudo_symlink():
     sudo_bin = Path(sudo_prefix, 'bin/sudo')
 
     sudo_bin.parent.mkdir(exist_ok=True, parents=True)
-    with contextlib.suppress(FileExistsError):
-        sudo_bin.symlink_to(shutil.which('doas'))
+    sudo_bin.unlink(missing_ok=False)
+
+    if (doas := Path(shutil.which('doas')).resolve()) == Path('/usr/bin/doas'):
+        relative_doas = Path('../../../../bin/doas')
+    else:
+        raise RuntimeError(f"Can't handle doas location ('{doas}')?")
+    sudo_bin.symlink_to(relative_doas)
+
     subprocess.run(['stow', '-d', sudo_prefix.parent, '-R', sudo_prefix.name, '-v'], check=True)
 
 
