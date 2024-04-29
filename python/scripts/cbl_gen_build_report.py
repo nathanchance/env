@@ -110,6 +110,8 @@ def generate_warnings(log_folder, src_folder):
         # Warning when CONFIG_NTFS3_64BIT_CLUSTER is enabled, which we do not
         # care about at all.
         'Activated 64 bits per cluster. Windows does not support this',
+        # Python 3.12 warnings, not ClangBuiltLinux related
+        'SyntaxWarning: invalid escape sequence',
     ]
     ignore_re = re.compile('|'.join(ignore))
     warnings = {}
