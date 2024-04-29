@@ -164,6 +164,7 @@ def pacman_install_packages():
         # Administration tools
         'btop',
         'iputils',
+        'kexec-tools',
         'modprobed-db',
         'neofetch',
         'reflector',
