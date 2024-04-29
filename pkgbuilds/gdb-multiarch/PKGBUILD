@@ -10,7 +10,7 @@ pkgrel=1
 pkgdesc='The GNU Debugger'
 arch=(x86_64)
 url='https://www.gnu.org/software/gdb/'
-license=(GPL3)
+license=(GPL-3.0-or-later)
 depends=(glibc ncurses libncursesw.so gcc-libs expat xz mpfr source-highlight
          readline libreadline.so guile python libelf)
 makedepends=(texinfo boost)
