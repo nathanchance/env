@@ -52,7 +52,32 @@ function cbl_upd_krnl -d "Update machine's kernel"
             end
 
         case hetzner-server workstation
-            cbl_bld_krnl_pkg --cfi --lto $argv
+            for arg in $argv
+                switch $arg
+                    case -k --kexec -r --reboot
+                        set -a install_args $arg
+                    case '*'
+                        set krnl linux-(string replace 'linux-' '' $arg)
+                end
+            end
+            if not set -q krnl
+                print_error "Kernel is required!"
+                return 1
+            end
+
+            set bld_krnl_pkg_args \
+                --cfi \
+                --lto \
+                $krnl
+
+            if in_container
+                cbl_bld_krnl_pkg $bld_krnl_pkg_args
+            else
+                dbxe dev-arch -- $PYTHON_SCRIPTS_FOLDER/cbl_bld_krnl_pkg.py $bld_krnl_pkg_args
+                or return
+
+                install_arch_kernel $install_args $krnl
+            end
 
         case pi3
             in_container_msg -h; or return
@@ -87,11 +112,13 @@ function cbl_upd_krnl -d "Update machine's kernel"
             install_rpi_kernel $arch $ver $install_args /tmp/linux-*-$arch.tar.zst
 
         case test-desktop-amd test-desktop-intel test-laptop-intel vm-x86_64
-            in_container_msg -h; or return
+            in_container_msg -h
+            or return
 
             for arg in $argv
                 switch $arg
-                    case -r --reboot
+                    case -k --kexec -r --reboot
+                        set -a install_args $arg
                         set reboot true
                     case '*'
                         set krnl linux-(string replace 'linux-' '' $arg)
@@ -107,25 +134,13 @@ function cbl_upd_krnl -d "Update machine's kernel"
                 sudo true; or return
             end
 
-            cd /tmp; or return
-
+            # Download kernel
             set remote_krnl_bld (tbf $krnl | string replace $TMP_BUILD_FOLDER $remote_tmp_build_folder)
-            scp $remote_user@$remote_host:$remote_krnl_bld/pkgbuild/$krnl-'*'.tar.zst .; or return
+            scp $remote_user@$remote_host:$remote_krnl_bld/pkgbuild/$krnl-'*'.tar.zst /tmp
+            or return
 
-            sudo pacman -U --noconfirm *$krnl*.tar.zst
-
-            if test "$reboot" = true
-                if test -d /sys/firmware/efi
-                    set boot_conf /boot/loader/entries/$krnl.conf
-                    if test -f $boot_conf
-                        sudo bootctl set-oneshot $krnl.conf; or return
-                    else
-                        print_error "$boot_conf does not exist!"
-                        return 1
-                    end
-                end
-                sudo reboot
-            end
+            # Install kernel and reboot as asked
+            install_arch_kernel $install_args $krnl
 
         case wsl
             in_container_msg -h; or return
