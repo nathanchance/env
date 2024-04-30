@@ -264,7 +264,7 @@ def create_monthly_report_file(report_file, report_date):
         'a Raspberry Pi 3',
         'a SolidRun Honeycomb LX2',
         'an Ampere Altra Developer Platform',
-        'an Intel-based desktop',
+        'two Intel-based desktops',
         'an AMD-based desktop',
         'an Intel-based laptop',
     ]

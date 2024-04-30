@@ -47,7 +47,7 @@ function cbl_bld_all_krnl -d "Build all kernels for ClangBuiltLinux testing"
                 or return
             end
 
-        case test-desktop-amd test-laptop-intel
+        case test-desktop-amd test-desktop-intel-n100 test-laptop-intel
             cbl_test_kvm build
 
             kmake \

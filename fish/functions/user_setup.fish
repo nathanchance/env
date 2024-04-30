@@ -27,7 +27,7 @@ function user_setup -d "Setup a user account, downloading all files and placing 
 
     # Set "trusted environment" variable to make decisions later
     switch $LOCATION
-        case aadp honeycomb pi test-desktop-amd test-desktop-intel-11700 test-laptop-intel
+        case aadp honeycomb pi test-desktop-amd test-desktop-intel-{11700,n100} test-laptop-intel
             set trusted_ssh true
         case hetzner-server workstation wsl
             set trusted_gpg true
