@@ -64,7 +64,12 @@ function install_rpi_kernel -d "Install Raspberry Pi kernel from a tarball"
         case arm
             set dtbs boot/dtbs/*/bcm2{71,83}*
 
-            sudo install -Dvm755 boot/vmlinux-kbuild-* $prefix/zImage; or return
+            for image in boot/vmlinu{z,x-kbuild}
+                if test (count $image-*) -eq 1
+                    sudo install -Dvm755 $image-* $prefix/zImage
+                    or return
+                end
+            end
         case arm64
             set dtbs boot/dtbs/*/broadcom/bcm2{7,8}*
 
