@@ -226,7 +226,7 @@ function cbl_lkt -d "Tests a Linux kernel with llvm-kernel-testing"
             end
         case honeycomb
             set average_duration 4
-        case test-desktop-intel
+        case test-desktop-intel-11700
             set average_duration 8
         case workstation
             set average_duration 4

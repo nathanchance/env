@@ -57,7 +57,7 @@ function cbl_bld_all_krnl -d "Build all kernels for ClangBuiltLinux testing"
                 O=(tbf linux)/(uname -m) \
                 distclean allmodconfig all
 
-        case test-desktop-intel
+        case test-desktop-intel-11700
             cbl_upd_src_c m
 
             cbl_lkt \

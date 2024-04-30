@@ -24,7 +24,7 @@ if test -z "$LOCATION"
             case nathan@hp-amd-ryzen-4300G
                 set -Ux LOCATION test-desktop-amd
             case nathan@asus-intel-core-11700
-                set -Ux LOCATION test-desktop-intel
+                set -Ux LOCATION test-desktop-intel-11700
             case nathan@asus-intel-core-4210U
                 set -Ux LOCATION test-laptop-intel
             case nathan@thelio-3990X
@@ -53,7 +53,7 @@ switch $LOCATION
         set -gx CCACHE_MAXSIZE 200G
     case test-desktop-amd test-laptop-intel pi vm
         set -gx CCACHE_MAXSIZE 15G
-    case test-desktop-intel
+    case test-desktop-intel-11700
         set -gx CCACHE_MAXSIZE 50G
     case workstation
         set -gx CCACHE_MAXSIZE 100G
