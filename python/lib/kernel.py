@@ -31,7 +31,10 @@ def prepare_source(base_name, base_ref='origin/master'):
     # Patching section
     if base_name in NEXT_TREES:
         # https://lore.kernel.org/20240409201553.GA4124869@dev-arch.thelio-3990X/
-        patches.append('https://lore.kernel.org/all/20240412104615.3779632-1-maxime.chevallier@bootlin.com/')  # net: phy: phy_link_topology: Handle NULL topologies
+        patches.append('https://lore.kernel.org/all/20240429131008.439231-1-maxime.chevallier@bootlin.com/')  # net: phy: Don't conditionally compile the phy_link_topology creation
+
+        # https://lore.kernel.org/CA+G9fYu7Ug0K8h9QJT0WbtWh_LL9Juc+VC0WMU_Z_vSSPDNymg@mail.gmail.com/
+        commits.append('92af4d8fd64df10b571234b4966000df65146dc1')  # NOTCBL: REPORTED: nouveau/gsp: Add missing break in build_registry()
 
     if base_name == 'fedora':
         patches.append('https://lore.kernel.org/all/20240425-cbl-bcm-assign-counted-by-val-before-access-v1-1-e2db3b82d5ef@kernel.org/')  # clk: bcm: dvp: Assign ->num before accessing ->hws
@@ -41,6 +44,8 @@ def prepare_source(base_name, base_ref='origin/master'):
 
     if base_name == 'linux-next-llvm':
         patches.append('https://lore.kernel.org/all/20240424-amdgpu-display-dcn401-enum-float-conversion-v1-1-43a2b132ef44@kernel.org/')  # drm/amd/display: Avoid -Wenum-float-conversion in add_margin_and_round_to_dfs_grainularity()
+
+        patches.append('https://lore.kernel.org/all/20240429203039.26918-1-nirmoy.das@intel.com/')  # drm/xe: Remove uninitialized end var from xe_gt_tlb_invalidation_range()
     # yapf: enable
 
     source_folder = Path(os.environ['CBL_SRC_P'], base_name)
