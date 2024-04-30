@@ -34,7 +34,7 @@ def prepare_source(base_name, base_ref='origin/master'):
         patches.append('https://lore.kernel.org/all/20240429131008.439231-1-maxime.chevallier@bootlin.com/')  # net: phy: Don't conditionally compile the phy_link_topology creation
 
         # https://lore.kernel.org/CA+G9fYu7Ug0K8h9QJT0WbtWh_LL9Juc+VC0WMU_Z_vSSPDNymg@mail.gmail.com/
-        commits.append('92af4d8fd64df10b571234b4966000df65146dc1')  # NOTCBL: REPORTED: nouveau/gsp: Add missing break in build_registry()
+        patches.append('https://lore.kernel.org/all/20240430131840.742924-1-chaitanya.kumar.borah@intel.com/')  # nouveau: Add missing break statement
 
     if base_name == 'fedora':
         patches.append('https://lore.kernel.org/all/20240425-cbl-bcm-assign-counted-by-val-before-access-v1-1-e2db3b82d5ef@kernel.org/')  # clk: bcm: dvp: Assign ->num before accessing ->hws
