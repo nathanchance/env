@@ -7,6 +7,7 @@ import os
 from pathlib import Path
 import platform
 import shlex
+import shutil
 import subprocess
 import sys
 
@@ -124,6 +125,21 @@ class ToolchainManager:
 
         self.latest_versions = {}
         self.versions = []
+
+    def clean_up_old_versions(self):
+        if not self.latest_versions:
+            raise RuntimeError('Attempting to call clean_up_old_versions() without latest version?')
+        if not self.versions:
+            raise RuntimeError('Attempting to call clean_up_old_versions() with no versions?')
+
+        for version in self.versions:
+            latest_version = tuple(map(int, self.latest_versions[version].split('.')))
+
+            for install_prefix in self.install_folder.glob(f"{version}.*"):
+                found_version = tuple(map(int, install_prefix.name.split('.')))
+                if found_version < latest_version:
+                    lib.utils.print_green(f"INFO: Removing {install_prefix.name}...")
+                    shutil.rmtree(install_prefix)
 
     def print_latest_versions(self):
         if not self.latest_versions:
@@ -367,6 +383,10 @@ if __name__ == '__main__':
 
     install_parser = subparser.add_parser(
         'install', help='Download and/or extact kernel.org GCC tarballs to disk')
+    install_parser.add_argument('-c',
+                                '--clean-up-old-versions',
+                                action='store_true',
+                                help='Clean up older version of toolchains')
     install_parser.add_argument(
         '-H',
         '--host-arch',
@@ -450,6 +470,8 @@ if __name__ == '__main__':
         manager.install_folder = args.install_folder.resolve()
 
         manager.install(not args.no_cache, not args.no_extract)
+        if args.clean_up_old_versions:
+            manager.clean_up_old_versions()
 
     if args.subcommand == 'latest':
         manager.print_latest_versions()
