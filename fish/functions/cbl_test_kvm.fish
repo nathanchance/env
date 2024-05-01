@@ -21,7 +21,7 @@ function cbl_test_kvm -d "Test KVM against a Clang built kernel with QEMU"
             end
 
             set src $CBL_SRC_C/linux
-            set out (tbf $src)/$arch
+            set out (tbf $src)
 
             cbl_upd_src_c m
 
@@ -37,7 +37,7 @@ function cbl_test_kvm -d "Test KVM against a Clang built kernel with QEMU"
             kmake -C $src $tc_arg O=$out distclean defconfig all
             or return
 
-            kboot -a $arch -k $src/$out -t 45s
+            kboot -a $arch -k $out -t 45s
 
         case nested
             in_container_msg -h; or return

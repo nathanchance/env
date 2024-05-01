@@ -61,7 +61,7 @@ function cbl_bld_all_krnl -d "Build all kernels for ClangBuiltLinux testing"
                 -C $CBL_SRC_C/linux \
                 KCONFIG_ALLCONFIG=(echo CONFIG_WERROR=n | psub) \
                 $tc_arg \
-                O=(tbf linux)/(uname -m) \
+                O=(tbf linux) \
                 distclean allmodconfig all
 
         case test-desktop-intel-11700
