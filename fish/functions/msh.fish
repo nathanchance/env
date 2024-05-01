@@ -37,11 +37,19 @@ function msh -d "Shorthand for mosh -o" -w mosh
             end
             set user_host nathan@$host
 
-        case intel-desktop
+        case intel-desktop-11700
             if test "$tailscale" = true
                 set host asus-intel-core-11700
             else
                 set host 192.168.4.189
+            end
+            set user_host nathan@$host
+
+        case intel-desktop-n100
+            if test "$tailscale" = true
+                set host beelink-intel-n100
+            else
+                set host 192.168.4.190
             end
             set user_host nathan@$host
 
