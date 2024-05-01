@@ -25,7 +25,18 @@ function cbl_test_kvm -d "Test KVM against a Clang built kernel with QEMU"
 
             cbl_upd_src_c m
 
-            kmake -C $src LLVM=1 O=$out distclean defconfig all; or return
+            if test -e $CBL_TC_LLVM/clang
+                set tc_arg LLVM=1
+            else
+                korg_llvm install \
+                    --clean-up-old-versions \
+                    --versions $LLVM_VERSION_STABLE
+                set tc_arg (korg_llvm var)
+            end
+
+            kmake -C $src $tc_arg O=$out distclean defconfig all
+            or return
+
             kboot -a $arch -k $src/$out -t 45s
 
         case nested

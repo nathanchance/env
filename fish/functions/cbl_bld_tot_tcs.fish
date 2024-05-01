@@ -52,11 +52,11 @@ function cbl_bld_tot_tcs -d "Build LLVM and binutils from source for kernel deve
             set pgo kernel-{allmod,def}config
             set targets X86
 
-        case test-laptop-intel
+        case test-desktop-intel-n100 test-laptop-intel
             set bld_bntls false
             set bld_stage_one_only true
             set projects clang lld
-            set targets X86
+            set targets AArch64 ARM X86
 
         case vm
             set bld_bntls false

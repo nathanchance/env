@@ -50,10 +50,16 @@ function cbl_bld_all_krnl -d "Build all kernels for ClangBuiltLinux testing"
         case test-desktop-amd test-desktop-intel-n100 test-laptop-intel
             cbl_test_kvm build
 
+            if test -e $CBL_TC_LLVM/clang
+                set tc_arg LLVM=1
+            else
+                set tc_arg (korg_llvm var)
+            end
+
             kmake \
                 -C $CBL_SRC_C/linux \
                 KCONFIG_ALLCONFIG=(echo CONFIG_WERROR=n | psub) \
-                LLVM=1 \
+                $tc_arg \
                 O=(tbf linux)/(uname -m) \
                 distclean allmodconfig all
 
