@@ -33,19 +33,18 @@ def prepare_source(base_name, base_ref='origin/master'):
         # https://lore.kernel.org/20240409201553.GA4124869@dev-arch.thelio-3990X/
         patches.append('https://lore.kernel.org/all/20240429131008.439231-1-maxime.chevallier@bootlin.com/')  # net: phy: Don't conditionally compile the phy_link_topology creation
 
-        # https://lore.kernel.org/CA+G9fYu7Ug0K8h9QJT0WbtWh_LL9Juc+VC0WMU_Z_vSSPDNymg@mail.gmail.com/
-        patches.append('https://lore.kernel.org/all/20240430131840.742924-1-chaitanya.kumar.borah@intel.com/')  # nouveau: Add missing break statement
-
     if base_name == 'fedora':
         patches.append('https://lore.kernel.org/all/20240425-cbl-bcm-assign-counted-by-val-before-access-v1-1-e2db3b82d5ef@kernel.org/')  # clk: bcm: dvp: Assign ->num before accessing ->hws
         patches.append('https://lore.kernel.org/all/20240425-cbl-bcm-assign-counted-by-val-before-access-v1-2-e2db3b82d5ef@kernel.org/')  # clk: bcm: rpi: Assign ->num before accessing ->hws
 
         patches.append('https://lore.kernel.org/all/20240424220057.work.819-kees@kernel.org/')  # wifi: nl80211: Avoid address calculations via out of bounds array indexing
 
+    if base_name in ('fedora', 'rpi'):
+        # https://lore.kernel.org/202405012148.1dCXzomq-lkp@intel.com/
+        reverts.append('2acef04ad57cab44b33001542791fc93f81cadf1')  # of: reserved_mem: Remove the use of phandle from the reserved_mem APIs
+
     if base_name == 'linux-next-llvm':
         patches.append('https://lore.kernel.org/all/20240424-amdgpu-display-dcn401-enum-float-conversion-v1-1-43a2b132ef44@kernel.org/')  # drm/amd/display: Avoid -Wenum-float-conversion in add_margin_and_round_to_dfs_grainularity()
-
-        patches.append('https://lore.kernel.org/all/20240429203039.26918-1-nirmoy.das@intel.com/')  # drm/xe: Remove uninitialized end var from xe_gt_tlb_invalidation_range()
     # yapf: enable
 
     source_folder = Path(os.environ['CBL_SRC_P'], base_name)
