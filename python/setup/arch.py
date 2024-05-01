@@ -43,7 +43,7 @@ def adjust_gnome_power_settings():
 
     doas_conf.write_text(doas_conf_text + 'permit nopass root as gdm\n', encoding='utf-8')
     gdm_cmd = [
-        'doas', '-u', 'gdm', 'dbus-launch gsettings', 'set',
+        'doas', '-u', 'gdm', 'dbus-launch', 'gsettings', 'set',
         'org.gnome.settings-daemon.plugins.power', 'sleep-inactive-ac-type', 'nothing',
     ]  # yapf: disable
     subprocess.run(gdm_cmd, check=True)
