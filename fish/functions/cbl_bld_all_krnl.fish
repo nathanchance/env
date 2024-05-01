@@ -49,6 +49,7 @@ function cbl_bld_all_krnl -d "Build all kernels for ClangBuiltLinux testing"
 
         case test-desktop-amd test-desktop-intel-n100 test-laptop-intel
             cbl_test_kvm build
+            or return
 
             if test -e $CBL_TC_LLVM/clang
                 set tc_arg LLVM=1
