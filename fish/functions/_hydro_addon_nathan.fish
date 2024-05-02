@@ -17,7 +17,15 @@ function _hydro_addon_nathan -d "Hydro prompt customizations"
 
     # Print symbol if we are in a container (like default toolbox prompt)
     if in_container
-        printf '%b%s ' (set_color magenta) §
+        # If CONTAINER_ID is a part of the hostname (i.e., distrobox prior to
+        # https://github.com/89luca89/distrobox/commit/d626559baaa4e6ccb35b3bb0befc9d46b7aa837e),
+        # just show a symbol to know we are in a distrobox.
+        if string match -qr ^$CONTAINER_ID $hostname
+            set container_str §
+        else
+            set container_str "($CONTAINER_ID)"
+        end
+        printf '%b%s ' (set_color magenta) $container_str
     end
 
     # SSH connection check
@@ -33,7 +41,7 @@ function _hydro_addon_nathan -d "Hydro prompt customizations"
 
     # Print user@host if we are in a container or a SSH session
     if in_container; or in_orb; or test "$in_ssh" = true
-        printf '%b%s' (set_color yellow) (id -un)
+        printf '%b%s' (set_color yellow) $USER
         printf '%b@%s ' (set_color green) $hostname
     end
 

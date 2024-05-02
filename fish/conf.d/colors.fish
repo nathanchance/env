@@ -26,10 +26,6 @@ set -U fish_pager_color_prefix white --bold --underline
 set -U fish_pager_color_progress brwhite --background=cyan
 
 # hydro colors
-set -U hydro_color_container magenta
-set -U hydro_color_user yellow
-set -U hydro_color_at green
-set -U hydro_color_host green
 set -U hydro_color_pwd blue
 set -U hydro_color_git magenta
 set -U hydro_color_duration yellow
