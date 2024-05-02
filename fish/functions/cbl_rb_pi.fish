@@ -125,6 +125,8 @@ function cbl_rb_pi -d "Rebase Raspberry Pi kernel on latest linux-next"
     set -a sc_args -e WERROR
     # Shut up -Wframe-larger-than
     set -a sc_args --set-val FRAME_WARN 0
+    # Enable /proc/config.gz
+    set -a sc_args -e IKCONFIG -e IKCONFIG_PROC
     for cfg in $cfg_files
         scripts/config --file $cfg $sc_args
     end

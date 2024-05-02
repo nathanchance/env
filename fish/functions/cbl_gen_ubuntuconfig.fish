@@ -75,6 +75,8 @@ function cbl_gen_ubuntuconfig -d "Generate a kernel .config from Ubuntu's config
         -u SYSTEM_TRUSTED_KEYS \
         -d UBSAN \
         -e DEBUG_INFO_NONE \
+        -e IKCONFIG \
+        -e IKCONFIG_PROC \
         -e LOCALVERSION_AUTO \
         $scripts_config_args
 end
