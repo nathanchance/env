@@ -34,9 +34,6 @@ def prepare_source(base_name, base_ref='origin/master'):
         patches.append('https://lore.kernel.org/all/20240429131008.439231-1-maxime.chevallier@bootlin.com/')  # net: phy: Don't conditionally compile the phy_link_topology creation
 
     if base_name == 'fedora':
-        patches.append('https://lore.kernel.org/all/20240425-cbl-bcm-assign-counted-by-val-before-access-v1-1-e2db3b82d5ef@kernel.org/')  # clk: bcm: dvp: Assign ->num before accessing ->hws
-        patches.append('https://lore.kernel.org/all/20240425-cbl-bcm-assign-counted-by-val-before-access-v1-2-e2db3b82d5ef@kernel.org/')  # clk: bcm: rpi: Assign ->num before accessing ->hws
-
         patches.append('https://lore.kernel.org/all/20240424220057.work.819-kees@kernel.org/')  # wifi: nl80211: Avoid address calculations via out of bounds array indexing
 
     if base_name in ('fedora', 'rpi'):
