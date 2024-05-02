@@ -20,6 +20,8 @@ function cbl_upload_korg_llvm -d "Upload kernel.org toolchain releases with kup"
     for tar in *.tar
         if string match -qr -- '-[0-9a-f]{40}-' $tar
             set -a prerelease_tars $tar
+        else if string match -qr -- -rust- $tar
+            set -a rust_tars $tar
         else
             set -a release_tars $tar
         end
@@ -30,13 +32,17 @@ function cbl_upload_korg_llvm -d "Upload kernel.org toolchain releases with kup"
         or return
     end
 
-    if test -n "$release_tars"; and not test -f index.html
-        print_error 'No index.html generated?'
+    if test -n "$release_tars"; and not test -f llvm-index.html
+        print_error 'No index.html generated for LLVM?'
+        return 1
+    end
+    if test -n "$rust_tars"; and not test -f rust-index.html
+        print_error 'No index.html generated for Rust?'
         return 1
     end
 
     for tar in $release_tars
-        $kup put $tar $tar.asc /pub/tools/llvm/files/$tar.gz
+        $kup put $tar{,.asc} /pub/tools/llvm/files/$tar.gz
         or return
 
         set llvm_ver (string match -gr 'llvm-([0-9|.]+)' $tar)
@@ -48,8 +54,12 @@ function cbl_upload_korg_llvm -d "Upload kernel.org toolchain releases with kup"
             set -a llvm_vers $llvm_ver
         end
     end
+    for tar in $rust_tars
+        $kup put $tar{,.asc} /pub/tools/llvm/rust/files/$tar.gz
+        or return
+    end
     if test -n "$release_tars"
-        $kup put index.html{,.asc} /pub/tools/llvm/index.html
+        $kup put llvm-index.html{,.asc} /pub/tools/llvm/index.html
         or return
 
         if test (count $llvm_vers) = 1
@@ -99,9 +109,13 @@ end" >announce
             chmod +x announce
         end
     end
+    if test -n "$rust_tars"
+        $kup put rust-index.html{,.asc} /pub/tools/llvm/rust/index.html
+        or return
+    end
 
     for tar in $prerelease_tars
-        $kup put $tar $tar.asc /pub/tools/llvm/files/prerelease/$tar.gz
+        $kup put $tar{,.asc} /pub/tools/llvm/files/prerelease/$tar.gz
         or return
 
         set -l target_arch (string split -f 2 -m 1 -r - $tar)

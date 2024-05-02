@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: MIT
 # Copyright (C) 2024 Nathan Chancellor
 
-function cbl_gen_korg_llvm_readme -d "Generate kernel.org LLVM README"
+function cbl_gen_korg_readme -d "Generate kernel.org toolchains README"
     if not in_orb
         print_error "README should be generated from within OrbStack"
         return 1
@@ -19,6 +19,13 @@ function cbl_gen_korg_llvm_readme -d "Generate kernel.org LLVM README"
         switch $arg
             case -p --prompt-for-new-versions
                 set versions_prompt true
+            case llvm rust
+                if set -q tc
+                    print_error "Toolchain has already been specified ('$tc') but another one was supplied ('$arg')?"
+                    return 1
+                else
+                    set tc $arg
+                end
             case '*'
                 if set -q old_ver
                     if set -q new_ver
@@ -37,15 +44,21 @@ function cbl_gen_korg_llvm_readme -d "Generate kernel.org LLVM README"
         return 1
     end
 
-    set md $MAC_FOLDER(dirname $ICLOUD_DOCS_FOLDER)/iCloud~md~obsidian/Documents/Tech/Kernel/Work/'LLVM toolchains README.md'
+    switch $tc
+        case llvm
+            set md_base 'LLVM toolchains README.md'
+        case rust
+            set md_base 'LLVM+Rust toolchains README.md'
+    end
+
+    set md $MAC_FOLDER(dirname $ICLOUD_DOCS_FOLDER)/iCloud~md~obsidian/Documents/Tech/Kernel/Work/$md_base
     if not test -e $md
         print_error "$md does not exist?"
         return 1
     end
 
-    set mac_html /Users/$USER/Downloads/index.html
+    set mac_html /Users/$USER/Downloads/$tc-index.html
     set lnx_html $MAC_FOLDER$mac_html
-
 
     if set -q versions_prompt
         read -l -P 'Old version: ' old_ver
