@@ -186,7 +186,7 @@ def download_items(targets, network_folder):
                 iso_url = f"{base_fedora_url}/Workstation/{arch}/iso"
                 items += [{
                     'containing_folder': Path(subfolder, fedora_ver, 'Workstation', arch),
-                    'file_url': f"{iso_url}/Fedora-Workstation-Live-{arch}-{fedora_ver}-{workstation_iso_ver}.iso",
+                    'file_url': f"{iso_url}/Fedora-Workstation-Live-osb-{fedora_ver}-{workstation_iso_ver}.{arch}.iso",
                     'sha_url': f"{iso_url}/Fedora-Workstation-{fedora_ver}-{server_iso_ver}-{arch}-CHECKSUM",
                 }]  # yapf: disable
 
@@ -214,13 +214,11 @@ def download_items(targets, network_folder):
 
         elif target == 'ubuntu':
             ubuntu_arches = ['amd64', 'arm64']
-            ubuntu_vers = ['22.04', '23.10']
+            ubuntu_vers = ['22.04', '24.04']
 
             for ubuntu_ver in ubuntu_vers:
                 if ubuntu_ver == '22.04':
-                    ubuntu_subver = ubuntu_ver + '.3'
-                elif ubuntu_ver == '23.10':
-                    ubuntu_subver = ubuntu_ver + '.1'
+                    ubuntu_subver = ubuntu_ver + '.4'
                 else:
                     ubuntu_subver = ubuntu_ver
 
@@ -230,12 +228,9 @@ def download_items(targets, network_folder):
                     elif arch == 'arm64':
                         base_ubuntu_url = f"https://cdimage.ubuntu.com/releases/{ubuntu_ver}/release"
 
-                    # For some unknown reason...
-                    ubuntu_file_subver = ubuntu_ver if ubuntu_subver == '23.10.1' else ubuntu_subver
-
                     items += [{
                         'containing_folder': Path(firmware_folder, 'Ubuntu', ubuntu_ver, 'Server'),
-                        'file_url': f"{base_ubuntu_url}/ubuntu-{ubuntu_file_subver}-live-server-{arch}.iso",
+                        'file_url': f"{base_ubuntu_url}/ubuntu-{ubuntu_subver}-live-server-{arch}.iso",
                         'sha_url': f"{base_ubuntu_url}/SHA256SUMS",
                     }]    # yapf: disable
 
