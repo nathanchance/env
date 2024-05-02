@@ -100,7 +100,12 @@ function cbl_rb_pi -d "Rebase Raspberry Pi kernel on latest linux-next"
             -m BINFMT_MISC
     end
 
-    # arm64 hardening
+    # Hardening
+    if contains arm $pi_arches
+        scripts/config \
+            --file arch/arm/configs/multi_v7_defconfig \
+            -e CFI_CLANG
+    end
     if contains arm64 $pi_arches
         scripts/config \
             --file arch/arm64/configs/defconfig \
