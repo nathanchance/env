@@ -332,8 +332,8 @@ if __name__ == '__main__':
     for arg in args.pos_args:
         if '=' in arg:
             make_vars.update([arg.split('=', 1)])
-        elif arg in ('debug', 'mainline-llvm', 'next-llvm'):
-            pkgname = arg
+        elif (pkgname := arg.replace('linux-', '')) in ('debug', 'mainline-llvm', 'next-llvm'):
+            pass
         else:
             raise RuntimeError(f"Cannot handle positional argument ('{arg}')!")
 
