@@ -36,12 +36,17 @@ def prepare_source(base_name, base_ref='origin/master'):
     if base_name == 'fedora':
         patches.append('https://lore.kernel.org/all/20240424220057.work.819-kees@kernel.org/')  # wifi: nl80211: Avoid address calculations via out of bounds array indexing
 
-    if base_name in ('fedora', 'rpi'):
-        # https://lore.kernel.org/202405012148.1dCXzomq-lkp@intel.com/
-        reverts.append('2acef04ad57cab44b33001542791fc93f81cadf1')  # of: reserved_mem: Remove the use of phandle from the reserved_mem APIs
+        # This was in -next through drm-misc-next but for-linux-next in
+        # drm/misc/kernel is now pointed at drm-misc-next-fixes, which does not
+        # have this change: https://lore.kernel.org/all/20240503162733.GA4136865@thelio-3990X/
+        patches.append('https://gitlab.freedesktop.org/drm/misc/kernel/-/commit/c72211751870ffa2cff5d91834059456cfa7cbd5.patch')  # drm: xlnx: zynqmp_dpsub: Fix compilation error
 
-    if base_name == 'linux-next-llvm':
-        patches.append('https://lore.kernel.org/all/20240424-amdgpu-display-dcn401-enum-float-conversion-v1-1-43a2b132ef44@kernel.org/')  # drm/amd/display: Avoid -Wenum-float-conversion in add_margin_and_round_to_dfs_grainularity()
+    if base_name in ('fedora', 'rpi'):
+        # Revert v1 and apply v2 of "of: reserved_mem: Remove the use of
+        # phandle from the reserved_mem APIs" to resolve reported clang warning:
+        # https://lore.kernel.org/202405012148.1dCXzomq-lkp@intel.com/
+        reverts.append('2acef04ad57cab44b33001542791fc93f81cadf1')
+        patches.append('https://git.kernel.org/robh/p/c56436ef17520c5fb0f9c2fc47aa961a7946895f')
     # yapf: enable
 
     source_folder = Path(os.environ['CBL_SRC_P'], base_name)
