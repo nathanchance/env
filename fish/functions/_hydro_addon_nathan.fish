@@ -25,7 +25,7 @@ function _hydro_addon_nathan -d "Hydro prompt customizations"
         else
             set container_str "($CONTAINER_ID)"
         end
-        printf '%b%s ' (set_color magenta) $container_str
+        printf '%b%s ' (set_color AF8700) $container_str
     end
 
     # SSH connection check
