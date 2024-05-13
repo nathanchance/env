@@ -31,22 +31,14 @@ def prepare_source(base_name, base_ref='origin/master'):
     # Patching section
     if base_name in NEXT_TREES:
         # https://lore.kernel.org/20240409201553.GA4124869@dev-arch.thelio-3990X/
-        patches.append('https://lore.kernel.org/all/20240429131008.439231-1-maxime.chevallier@bootlin.com/')  # net: phy: Don't conditionally compile the phy_link_topology creation
+        patches.append('https://lore.kernel.org/all/20240507102822.2023826-2-maxime.chevallier@bootlin.com/')  # net: phy: phy_link_topology: Pass netdevice to phy_link_topo helpers
+        patches.append('https://lore.kernel.org/all/20240507102822.2023826-3-maxime.chevallier@bootlin.com/')  # net: phy: phy_link_topology: Lazy-initialize the link topology
 
-    if base_name == 'fedora':
-        patches.append('https://lore.kernel.org/all/20240424220057.work.819-kees@kernel.org/')  # wifi: nl80211: Avoid address calculations via out of bounds array indexing
+        patches.append('https://lore.kernel.org/all/20240513-f2fs-add-missing-inline-to-f2fs_build_fault_attr-v1-1-c3ce1c995fa2@kernel.org/')  # f2fs: Add inline to f2fs_build_fault_attr() stub
 
-        # This was in -next through drm-misc-next but for-linux-next in
-        # drm/misc/kernel is now pointed at drm-misc-next-fixes, which does not
-        # have this change: https://lore.kernel.org/all/20240503162733.GA4136865@thelio-3990X/
-        patches.append('https://gitlab.freedesktop.org/drm/misc/kernel/-/commit/c72211751870ffa2cff5d91834059456cfa7cbd5.patch')  # drm: xlnx: zynqmp_dpsub: Fix compilation error
-
-    if base_name in ('fedora', 'rpi'):
-        # Revert v1 and apply v2 of "of: reserved_mem: Remove the use of
-        # phandle from the reserved_mem APIs" to resolve reported clang warning:
-        # https://lore.kernel.org/202405012148.1dCXzomq-lkp@intel.com/
-        reverts.append('2acef04ad57cab44b33001542791fc93f81cadf1')
-        patches.append('https://git.kernel.org/robh/p/c56436ef17520c5fb0f9c2fc47aa961a7946895f')
+    if base_name == 'linux-next-llvm':
+        # https://lore.kernel.org/20240513151920.GA3061950@thelio-3990X/
+        reverts.append('32fde9e18b3f557ac2fd12a25fc91211105d3e1e')  # KVM: SEV: Provide support for SNP_EXTENDED_GUEST_REQUEST NAE event
     # yapf: enable
 
     source_folder = Path(os.environ['CBL_SRC_P'], base_name)
