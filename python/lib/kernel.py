@@ -32,6 +32,9 @@ def prepare_source(base_name, base_ref='origin/master'):
     if base_name in NEXT_TREES:
         patches.append('https://lore.kernel.org/all/20240513-f2fs-add-missing-inline-to-f2fs_build_fault_attr-v1-1-c3ce1c995fa2@kernel.org/')  # f2fs: Add inline to f2fs_build_fault_attr() stub
 
+    if base_name == 'fedora':
+        patches.append('https://lore.kernel.org/all/20240513154900.127612-1-manivannan.sadhasivam@linaro.org/')  # PCI: tegra194: Add check for host and endpoint modes
+
     if base_name == 'linux-next-llvm':
         # https://lore.kernel.org/20240513151920.GA3061950@thelio-3990X/
         patches.append('https://lore.kernel.org/all/20240513172704.718533-1-michael.roth@amd.com/')  # KVM: SEV: Fix uninitialized firmware error code
