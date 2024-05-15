@@ -227,6 +227,8 @@ def download_items(targets, network_folder):
                         base_ubuntu_url = f"https://releases.ubuntu.com/{ubuntu_subver}"
                     elif arch == 'arm64':
                         base_ubuntu_url = f"https://cdimage.ubuntu.com/releases/{ubuntu_ver}/release"
+                    else:
+                        raise RuntimeError(f"Cannot handle Ubuntu architecture '{arch}'?")
 
                     items += [{
                         'containing_folder': Path(firmware_folder, 'Ubuntu', ubuntu_ver, 'Server'),

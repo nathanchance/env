@@ -101,6 +101,9 @@ def generate_rust_toml(version):
         download_and_verify(toml_url, toml_dst)
         print()
 
+    # This pylint warning cannot tell that if we cannot import tomllib above,
+    # the script exits.
+    # pylint: disable-next=possibly-used-before-assignment
     return tomllib.loads(toml_dst.read_text(encoding='utf-8'))
 
 

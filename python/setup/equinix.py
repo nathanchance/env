@@ -51,6 +51,8 @@ def partition_drive(drive_path, mountpoint, username):
         part = 'p1'
     elif '/dev/sd' in drive_path:
         part = '1'
+    else:
+        raise RuntimeError(f"Cannot handle drive path '{drive_path}'?")
 
     volume = Path(drive_path + part)
 
