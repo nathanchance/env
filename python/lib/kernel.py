@@ -30,15 +30,11 @@ def prepare_source(base_name, base_ref='origin/master'):
     # yapf: disable
     # Patching section
     if base_name in NEXT_TREES:
-        # https://lore.kernel.org/20240409201553.GA4124869@dev-arch.thelio-3990X/
-        patches.append('https://lore.kernel.org/all/20240507102822.2023826-2-maxime.chevallier@bootlin.com/')  # net: phy: phy_link_topology: Pass netdevice to phy_link_topo helpers
-        patches.append('https://lore.kernel.org/all/20240507102822.2023826-3-maxime.chevallier@bootlin.com/')  # net: phy: phy_link_topology: Lazy-initialize the link topology
-
         patches.append('https://lore.kernel.org/all/20240513-f2fs-add-missing-inline-to-f2fs_build_fault_attr-v1-1-c3ce1c995fa2@kernel.org/')  # f2fs: Add inline to f2fs_build_fault_attr() stub
 
     if base_name == 'linux-next-llvm':
         # https://lore.kernel.org/20240513151920.GA3061950@thelio-3990X/
-        reverts.append('32fde9e18b3f557ac2fd12a25fc91211105d3e1e')  # KVM: SEV: Provide support for SNP_EXTENDED_GUEST_REQUEST NAE event
+        patches.append('https://lore.kernel.org/all/20240513172704.718533-1-michael.roth@amd.com/')  # KVM: SEV: Fix uninitialized firmware error code
     # yapf: enable
 
     source_folder = Path(os.environ['CBL_SRC_P'], base_name)
