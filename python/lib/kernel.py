@@ -27,10 +27,10 @@ def prepare_source(base_name, base_ref='origin/master'):
     patches = []
     commits = []
 
-    # yapf: disable
     # Patching section
-    if base_name == 'fedora':
-        patches.append('https://lore.kernel.org/all/20240513154900.127612-1-manivannan.sadhasivam@linaro.org/')  # PCI: tegra194: Add check for host and endpoint modes
+    # yapf: disable
+    if base_name == 'linux-next-llvm':
+        patches.append('https://git.kernel.org/tip/tip/p/82110ae235e0560d1f952f74f9fd991587b0e3a7')  # x86/boot: Address clang -Wimplicit-fallthrough in vsprintf()
     # yapf: enable
 
     source_folder = Path(os.environ['CBL_SRC_P'], base_name)
