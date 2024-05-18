@@ -2,7 +2,7 @@ FROM docker.io/debian:10-slim
 
 # LLVM may require an newer version of cmake, download and install the latest
 # prebuilt.
-ARG CMAKE_VERSION=3.29.2
+ARG CMAKE_VERSION=3.29.3
 RUN apt update && \
     apt upgrade -y && \
     apt install -y --no-install-recommends \
@@ -63,7 +63,7 @@ RUN dir=$(mktemp -d) && \
 # Buster has ninja 1.8.2, which may be lacking features that newer LLVM or
 # CMake releases may rely on when generating build files. Build the latest
 # because it is quite simple.
-ARG NINJA_VERSION=1.12.0
+ARG NINJA_VERSION=1.12.1
 RUN dir=$(mktemp -d) && \
     url=https://github.com/ninja-build/ninja/archive/refs/tags/v$NINJA_VERSION.tar.gz && \
     wget -O - -q "$url" | tar -C "$dir" --strip-components=1 -xzvf - && \
