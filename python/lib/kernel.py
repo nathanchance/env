@@ -29,8 +29,6 @@ def prepare_source(base_name, base_ref='origin/master'):
 
     # Patching section
     # yapf: disable
-    if base_name == 'linux-next-llvm':
-        patches.append('https://git.kernel.org/tip/tip/p/82110ae235e0560d1f952f74f9fd991587b0e3a7')  # x86/boot: Address clang -Wimplicit-fallthrough in vsprintf()
     # yapf: enable
 
     source_folder = Path(os.environ['CBL_SRC_P'], base_name)
