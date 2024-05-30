@@ -32,9 +32,6 @@ def prepare_source(base_name, base_ref='origin/master'):
     if base_name == 'linux-mainline-llvm':
         # -Wformat-truncation in drivers/input/misc/ims-pcu.c
         patches.append('https://git.kernel.org/dtor/input/p/bf32bceedd0453c70d9d022e2e29f98e446d7161')  # Input: ims-pcu - fix printf string overflow
-    if base_name == 'linux-next-llvm':
-        # -Wuninitialized in drivers/gpu/drm/xe/xe_guc.c
-        patches.append('https://lore.kernel.org/all/20240524202603.4011656-1-John.C.Harrison@Intel.com/')  # drm/xe/guc: Fix uninitialised count in GuC load debug prints
     # yapf: enable
 
     source_folder = Path(os.environ['CBL_SRC_P'], base_name)
