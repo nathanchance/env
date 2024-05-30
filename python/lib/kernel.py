@@ -29,9 +29,6 @@ def prepare_source(base_name, base_ref='origin/master'):
 
     # Patching section
     # yapf: disable
-    if base_name == 'linux-mainline-llvm':
-        # -Wformat-truncation in drivers/input/misc/ims-pcu.c
-        patches.append('https://git.kernel.org/dtor/input/p/bf32bceedd0453c70d9d022e2e29f98e446d7161')  # Input: ims-pcu - fix printf string overflow
     # yapf: enable
 
     source_folder = Path(os.environ['CBL_SRC_P'], base_name)
