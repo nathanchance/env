@@ -19,11 +19,13 @@ function updweb -d "Update my website with hugo"
         switch $arg
             case -p --push
                 set push true
+            case '*'
+                set -a hugo_args $arg
         end
     end
 
     fd -E CNAME . $website -x rm -rfv
-    hugo -d $website -s $hugo_files
+    hugo -d $website -s $hugo_files $hugo_args
 
     set url (git -C $hugo_files remote get-url origin | sed -e 's/git@github.com:/https:\/\/github.com\//' -e 's/.git$//')
     set hash (git -C $hugo_files show -s --format=%H)
