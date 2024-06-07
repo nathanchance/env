@@ -82,6 +82,7 @@ RUN apt update && \
         binutils-dev \
         bison \
         build-essential \
+        cpio \
         curl \
         file \
         flex \
