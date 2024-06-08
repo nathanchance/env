@@ -163,16 +163,10 @@ install_targets = [
     'libclang',
     'libclang-headers',
     'lld',
-    'llvm-addr2line',
-    'llvm-ar',
-    'llvm-dwarfdump',
-    'llvm-nm',
-    'llvm-objcopy',
-    'llvm-objdump',
-    'llvm-ranlib',
-    'llvm-readelf',
-    'llvm-strings',
-    'llvm-strip',
+    *[
+        f"llvm-{tool}" for tool in ('addr2line', 'ar', 'dwarfdump', 'nm', 'objcopy', 'objdump',
+                                    'ranlib', 'readelf', 'strings', 'strip')
+    ],
 ]
 projects = [
     'clang',
