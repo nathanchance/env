@@ -220,7 +220,7 @@ function setup_locales() {
 }
 
 function build_pahole() {
-    pahole_ver=1.25
+    pahole_ver=1.27
     pahole_src=/tmp/dwarves-$pahole_ver
     pahole_build=$pahole_src/build
 

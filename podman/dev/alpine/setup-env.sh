@@ -11,7 +11,7 @@ install_packages() {
 }
 
 build_pahole() {
-    pahole_src=/tmp/dwarves-1.25
+    pahole_src=/tmp/dwarves-1.27
     pahole_build=$pahole_src/build
 
     tar -C "${pahole_src%/*}" -xJf "$pahole_src".tar.xz
