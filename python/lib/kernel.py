@@ -31,7 +31,7 @@ def prepare_source(base_name, base_ref='origin/master'):
     # yapf: disable
     if base_name == 'fedora':
         # https://lore.kernel.org/de980a49-b802-417a-a57e-2c47f67b08e4@leemhuis.info/
-        commits.append('436886d73b8d525f4ecc3f30a7272a44171ea784')  # fixup! net: ti: icssg-prueth: Add helper functions to configure FDB
+        patches.append('https://lore.kernel.org/all/20240606073639.3299252-1-danishanwar@ti.com/')  # net: ti: icssg-prueth: Split out common object into module
     # yapf: enable
 
     source_folder = Path(os.environ['CBL_SRC_P'], base_name)
