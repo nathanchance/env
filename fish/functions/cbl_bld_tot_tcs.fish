@@ -138,6 +138,8 @@ function cbl_bld_tot_tcs -d "Build LLVM and binutils from source for kernel deve
     end
 
     # Add patches to revert here
+    # https://github.com/llvm/llvm-project/pull/84443#issuecomment-2168734476
+    set -a reverts https://github.com/llvm/llvm-project/commit/b6bf4024a031a5e7b58aff1425d94841a88002d6 # [llvm][CodeGen] Add a new software pipeliner 'Window Scheduler' (#84443)
     for revert in $reverts
         if string match -qr 'https?://' $revert
             set -l revert (basename $revert)
