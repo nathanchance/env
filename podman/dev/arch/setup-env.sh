@@ -11,6 +11,8 @@ function pacman_conf() {
     sed -i 's/^#ParallelDownloads = 5/ParallelDownloads = 7/g' /etc/pacman.conf
     sed -i "/\[core-testing\]/,/Include/"'s/^#//' /etc/pacman.conf
     sed -i "/\[extra-testing\]/,/Include/"'s/^#//' /etc/pacman.conf
+    # Temporarily avoid upgrades to pahole (https://github.com/ClangBuiltLinux/linux/issues/2032)
+    sed -i 's/^#IgnorePkg   =/IgnorePkg   = pahole/g' /etc/pacman.conf
 
     # Get rid of slimming Docker image changes
     sed -i -e "/home\/custompkgs/,/\[options\]/"'s;\[options\];#\[options\];' -e 's;^NoExtract;#NoExtract;g' /etc/pacman.conf
@@ -209,6 +211,12 @@ function install_packages() {
         iproute2
     )
     pacman -S --noconfirm "${packages[@]}"
+
+    # Downgrade to last good version of pahole
+    pahole_pkg=/tmp/pahole-1:1.26-2-x86_64.pkg.tar.zst
+    curl -LSso "$pahole_pkg" https://archive.archlinux.org/packages/p/pahole/"$(basename "$pahole_pkg")"
+    pacman -U --noconfirm "$pahole_pkg"
+    rm -fr "$pahole_pkg"
 }
 
 pacman_conf
