@@ -446,7 +446,11 @@ if __name__ == '__main__':
                             action='store_true',
                             help='Split toolchain variable for use with kmake.py')
     if supported_targets:
-        var_parser.add_argument('target', choices=supported_targets)
+        target_kwargs = {}
+        if (mach := platform.machine()) in supported_targets:
+            target_kwargs['default'] = mach
+            target_kwargs['nargs'] = '?'
+        var_parser.add_argument('target', choices=supported_targets, **target_kwargs)
     var_parser.add_argument('version',
                             choices=supported_versions,
                             default=manager.VERSIONS[-1],
