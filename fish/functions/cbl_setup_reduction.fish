@@ -149,6 +149,15 @@ exit $script_ret
 # PART TWO #
 ############
 
+set file
+if test -z "$file"
+    print_error "Reduction file not set?"
+    return 1
+end
+if not test -e $file
+    cp $cvise_dir/$file $file
+end
+
 set clang_flags \
     (cat flags)
 set common_flags \
@@ -157,7 +166,7 @@ set common_flags \
     -Wfatal-errors \
     -c \
     -o /dev/null \
-    $cvise_dir/*.i
+    $file
 set gcc_flags
 
 $good_clang $clang_flags $common_flags
