@@ -2,6 +2,20 @@
 
 set -eux
 
+function downgrade_pkg() {
+    local pkg="$1"
+    local ver="$2"
+
+    local tarball=/tmp/"$pkg"-"$ver"-x86_64.pkg.tar.zst
+    local url
+    url=https://archive.archlinux.org/packages/"$(printf '%.1s' "$pkg")"/"$pkg"/"$(basename "$tarball")"
+
+    curl -LSso "$tarball" "$url"
+    pacman -U --noconfirm "$tarball"
+    rm -fr "$tarball"
+
+}
+
 # Edit /etc/pacman.conf
 function pacman_conf() {
     sed -i 's/^CheckSpace/#CheckSpace/g' /etc/pacman.conf
@@ -11,6 +25,8 @@ function pacman_conf() {
     sed -i 's/^#ParallelDownloads = 5/ParallelDownloads = 7/g' /etc/pacman.conf
     sed -i "/\[core-testing\]/,/Include/"'s/^#//' /etc/pacman.conf
     sed -i "/\[extra-testing\]/,/Include/"'s/^#//' /etc/pacman.conf
+    # Temporarily avoid upgrades to virtiofsd (https://gitlab.com/virtio-fs/virtiofsd/-/issues/163)
+    sed -i 's/^#IgnorePkg   =/IgnorePkg   = virtiofsd/g' /etc/pacman.conf
 
     # Get rid of slimming Docker image changes
     sed -i -e "/home\/custompkgs/,/\[options\]/"'s;\[options\];#\[options\];' -e 's;^NoExtract;#NoExtract;g' /etc/pacman.conf
@@ -209,6 +225,8 @@ function install_packages() {
         iproute2
     )
     pacman -S --noconfirm "${packages[@]}"
+
+    downgrade_pkg virtiofsd 1.10.1-1
 }
 
 pacman_conf
