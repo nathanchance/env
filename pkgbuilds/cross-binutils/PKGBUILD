@@ -6,6 +6,7 @@ pkgname=(
   mips-linux-gnu-binutils
   powerpc-linux-gnu-binutils
   s390x-linux-gnu-binutils
+  sparc64-linux-gnu-binutils
 )
 pkgver=2.42
 pkgrel=1
@@ -67,6 +68,10 @@ build() {
   _build s390x-linux-gnu \
          "${_gold_opts[@]}" \
          --enable-targets=s390-linux-gnu
+
+  _build sparc64-linux-gnu \
+         "${_gold_opts[@]}" \
+         --enable-targets=sparc-linux-gnu
 }
 
 _package() {
@@ -100,4 +105,10 @@ package_s390x-linux-gnu-binutils() {
   pkgdesc='A set of programs to assemble and manipulate binary and object files for the SystemZ target'
 
   _package s390x-linux-gnu
+}
+
+package_sparc64-linux-gnu-binutils() {
+  pkgdesc='A set of programs to assemble and manipulate binary and object files for the SPARC (32-bit and 64-bit) target'
+
+  _package sparc64-linux-gnu
 }
