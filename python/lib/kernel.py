@@ -35,6 +35,9 @@ def prepare_source(base_name, base_ref='origin/master'):
     if base_name in NEXT_TREES:
         # -Wsingle-bit-bitfield-constant-conversion in tools/lib/bpf/btf_relocate.c
         patches.append('https://lore.kernel.org/all/20240624192903.854261-1-alan.maguire@oracle.com/')  # libbpf: fix clang compilation error in btf_relocate.c
+    if base_name in ('fedora', 'linux-next-llvm'):
+        # https://lore.kernel.org/202406260514.SLhNM9kQ-lkp@intel.com/
+        reverts.append('4627108658d68fad359600dbe667b88b501cee71')  # mm/vmscan: avoid split lazyfree THP during shrink_folio_list()
     # yapf: enable
 
     source_folder = Path(os.environ['CBL_SRC_P'], base_name)
