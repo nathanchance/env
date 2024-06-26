@@ -242,8 +242,8 @@ if test -f $HOME/.server_ip
 end
 
 # Current toolchain versions
-set -gx GCC_VERSION_TOT 14
-set -gx GCC_VERSION_STABLE 13
+set -gx GCC_VERSION_TOT 15
+set -gx GCC_VERSION_STABLE 14
 set -gx GCC_VERSION_MIN_KERNEL 5
 set -gx GCC_VERSIONS_KERNEL (seq $GCC_VERSION_STABLE -1 $GCC_VERSION_MIN_KERNEL)
 set -gx LLVM_VERSION_TOT 19
