@@ -192,9 +192,7 @@ def is_installed(package_to_check):
                                          capture_output=True,
                                          check=True,
                                          text=True).stdout
-        if re.search(f"^{package_to_check}$", pacman_packages, flags=re.M):
-            return True
-        return False
+        return bool(re.search(f"^{package_to_check}$", pacman_packages, flags=re.M))
 
     if shutil.which('dnf'):
         cmd = ['dnf', 'list', '--installed']
