@@ -32,9 +32,6 @@ def prepare_source(base_name, base_ref='origin/master'):
     if base_name == 'fedora':
         # https://lore.kernel.org/de980a49-b802-417a-a57e-2c47f67b08e4@leemhuis.info/
         patches.append('https://lore.kernel.org/all/20240606073639.3299252-1-danishanwar@ti.com/')  # net: ti: icssg-prueth: Split out common object into module
-    if base_name in NEXT_TREES:
-        # -Wsingle-bit-bitfield-constant-conversion in tools/lib/bpf/btf_relocate.c
-        patches.append('https://lore.kernel.org/all/20240624192903.854261-1-alan.maguire@oracle.com/')  # libbpf: fix clang compilation error in btf_relocate.c
     # yapf: enable
 
     source_folder = Path(os.environ['CBL_SRC_P'], base_name)
