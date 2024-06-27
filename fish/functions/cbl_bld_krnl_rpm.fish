@@ -63,13 +63,15 @@ function cbl_bld_krnl_rpm -d "Build a .rpm kernel package"
 
     set out (tbf)
 
+    set rpmopts '--without devel'
     if not grep -q -- "--define='_topdir" scripts/Makefile.package
-        set -a kmake_args RPMOPTS="--define '_topdir $out/rpmbuild'"
+        set -a rpmopts "--define '_topdir $out/rpmbuild'"
     end
     kmake \
         ARCH=$arch \
         $kmake_args \
         O=$out \
+        RPMOPTS="$rpmopts" \
         olddefconfig $kmake_targets binrpm-pkg; or return
 
     echo Run
