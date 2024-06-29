@@ -466,7 +466,7 @@ if __name__ == '__main__':
     configure_networking()
     enable_reflector()
     adjust_gnome_power_settings()
-    lib.setup.systemctl_enable(['sshd.service'])
+    lib.setup.systemctl_enable(['sshd.service', 'paccache.timer'])
     lib.setup.enable_tailscale()
     fix_fstab()
     lib.setup.set_date_time()
