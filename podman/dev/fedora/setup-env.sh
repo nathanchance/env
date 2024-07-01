@@ -103,7 +103,6 @@ EOF
         fzf
         jq
         moreutils
-        neofetch
         openssh
         python-unversioned-command
         stow
