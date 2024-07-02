@@ -29,9 +29,14 @@ def prepare_source(base_name, base_ref='origin/master'):
 
     # Patching section
     # yapf: disable
+    if base_name in ('fedora', 'linux-next-llvm'):
+        patches.append('https://lore.kernel.org/all/20240702-cros_charge-control-fix-clang-array-bounds-warning-v1-1-ae04d995cd1d@kernel.org/')  # power: supply: cros_charge-control: Avoid accessing attributes out of bounds
     if base_name == 'fedora':
         # https://lore.kernel.org/de980a49-b802-417a-a57e-2c47f67b08e4@leemhuis.info/
         patches.append('https://lore.kernel.org/all/20240606073639.3299252-1-danishanwar@ti.com/')  # net: ti: icssg-prueth: Split out common object into module
+    if base_name == 'linux-next-llvm':
+        # https://lore.kernel.org/20240702104128.26394-1-Alexander@wetzel-home.de/
+        reverts.append('5c38bedac16a946402b627621b3d4bfcc9952479')  # wifi: iwlwifi: mvm: unify and fix interface combinations
     # yapf: enable
 
     source_folder = Path(os.environ['CBL_SRC_P'], base_name)
