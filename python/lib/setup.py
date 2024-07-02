@@ -441,7 +441,7 @@ def setup_sudo_symlink():
     sudo_bin = Path(sudo_prefix, 'bin/sudo')
 
     sudo_bin.parent.mkdir(exist_ok=True, parents=True)
-    sudo_bin.unlink(missing_ok=False)
+    sudo_bin.unlink(missing_ok=True)
 
     if (doas := Path(shutil.which('doas')).resolve()) == Path('/usr/bin/doas'):
         relative_doas = Path('../../../../bin/doas')
