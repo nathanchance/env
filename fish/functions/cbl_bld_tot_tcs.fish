@@ -171,36 +171,6 @@ function cbl_bld_tot_tcs -d "Build LLVM and binutils from source for kernel deve
             return 1
         end
     end
-    # Hack to disable -Wbounds-safety-counted-by-elt-type-unknown-size
-    # by default while Linux issues are sorted out
-    if not echo 'diff --git a/clang/include/clang/Basic/DiagnosticSemaKinds.td b/clang/include/clang/Basic/DiagnosticSemaKinds.td
-index 270b0a1e0130..90b290e09fb1 100644
---- a/clang/include/clang/Basic/DiagnosticSemaKinds.td
-+++ b/clang/include/clang/Basic/DiagnosticSemaKinds.td
-@@ -6578,7 +6578,7 @@ def err_counted_by_attr_pointee_unknown_size : Error<
- 
- def warn_counted_by_attr_elt_type_unknown_size :
-   Warning<err_counted_by_attr_pointee_unknown_size.Summary>,
--  InGroup<BoundsSafetyCountedByEltTyUnknownSize>;
-+  InGroup<BoundsSafetyCountedByEltTyUnknownSize>, DefaultIgnore;
- 
- let CategoryName = "ARC Semantic Issue" in {
- 
-diff --git a/clang/test/Sema/attr-counted-by-vla.c b/clang/test/Sema/attr-counted-by-vla.c
-index b25f719f3b95..cd15250675f7 100644
---- a/clang/test/Sema/attr-counted-by-vla.c
-+++ b/clang/test/Sema/attr-counted-by-vla.c
-@@ -1,4 +1,4 @@
--// RUN: %clang_cc1 -fsyntax-only -verify %s
-+// RUN: %clang_cc1 -Wbounds-safety-counted-by-elt-type-unknown-size -fsyntax-only -verify %s
- 
- #define __counted_by(f)  __attribute__((counted_by(f)))
- ' | git -C $llvm_project ap
-        set message "Failed to apply hack for -Wbounds-safety-counted-by-elt-type-unknown-size"
-        print_error "$message"
-        tg_msg "$message"
-        return 1
-    end
 
     string match -gr "\s+set\(LLVM_VERSION_[A-Z]+ ([0-9]+)\)" <$llvm_project/cmake/Modules/LLVMVersion.cmake | string join . | read llvm_ver
     if test (string split . $llvm_ver | count) != 3
