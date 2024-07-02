@@ -359,6 +359,7 @@ if __name__ == '__main__':
         make_vars['CROSS_COMPILE'] = korg_tc.GCCManager().get_cc_as_path(
             korg_tc.GCCManager.VERSIONS[-1], 'x86_64')
     if 'CROSS_COMPILE' in make_vars:
+        del builder.make_variables['HOSTLDFLAGS']
         del builder.make_variables['LLVM']
     builder.make_variables.update(make_vars)
 
