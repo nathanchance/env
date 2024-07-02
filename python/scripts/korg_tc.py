@@ -155,7 +155,7 @@ class ToolchainManager:
 
 class GCCManager(ToolchainManager):
 
-    DEFAULT_DOWNLOAD_FOLDER = Path(os.environ['NAS_FOLDER'], 'kernel.org/toolchains')
+    DEFAULT_DOWNLOAD_FOLDER = Path(os.environ['NAS_FOLDER'], 'Toolchains/GCC')
     DEFAULT_INSTALL_FOLDER = Path(os.environ['CBL_TC_GCC_STORE'])
 
     TARGETS = (
@@ -302,7 +302,7 @@ class GCCManager(ToolchainManager):
 
 class LLVMManager(ToolchainManager):
 
-    DEFAULT_DOWNLOAD_FOLDER = Path(os.environ['NAS_FOLDER'], 'Toolchains')
+    DEFAULT_DOWNLOAD_FOLDER = Path(os.environ['NAS_FOLDER'], 'Toolchains/LLVM')
     DEFAULT_INSTALL_FOLDER = Path(os.environ['CBL_TC_LLVM_STORE'])
 
     VERSIONS = generate_versions('LLVM_VERSION_MIN_KERNEL', 'LLVM_VERSION_TOT')

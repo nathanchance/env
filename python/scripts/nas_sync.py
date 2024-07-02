@@ -84,7 +84,7 @@ def download_items(targets, network_folder):
         if target == 'alpine':
             alpine_arches = ['aarch64', 'armv7', 'x86', 'x86_64']
             alpine_series = '3.20'
-            alpine_patch = '.0'
+            alpine_patch = '.1'
             alpine_version = alpine_series + alpine_patch
 
             for alpine_arch in alpine_arches:
@@ -102,7 +102,7 @@ def download_items(targets, network_folder):
 
             base_arch_url = f"https://mirrors.edge.kernel.org/archlinux/iso/{arch_date}"
             items += [{
-                'containing_folder': Path(firmware_folder, 'Arch', arch_date),
+                'containing_folder': Path(firmware_folder, 'Arch'),
                 'file_url': f"{base_arch_url}/archlinux-{arch_date}-x86_64.iso",
                 'sha_url': f"{base_arch_url}/sha256sums.txt",
             }]
@@ -131,7 +131,7 @@ def download_items(targets, network_folder):
 
         elif target == 'debian':
             debian_arches = ['amd64', 'arm64', 'armhf', 'i386']
-            debian_ver = '12.5.0'
+            debian_ver = '12.6.0'
 
             for arch in debian_arches:
                 arch_debian_folder = Path(firmware_folder, target.capitalize(), debian_ver, arch)
