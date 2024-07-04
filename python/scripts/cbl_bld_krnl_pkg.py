@@ -158,7 +158,7 @@ pkgdesc='{self._pkgname}'
 url="https://kernel.org/"
 arch=(x86_64)
 license=(GPL2)
-options=('!strip')
+options=(!debug !strip)
 
 package() {{
   pkgdesc="$pkgdesc kernel and modules"
