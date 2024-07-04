@@ -149,7 +149,7 @@ class KernelPkgBuilder:
                                 capture_output=True,
                                 check=True,
                                 cwd=self._source_folder,
-                                text=True).stdout.strip().replace('-', '.')
+                                text=True).stdout.strip().replace('-', '_')
         pkgbuild_text = fr"""
 pkgname={self._pkgname}
 pkgver={pkgver}
