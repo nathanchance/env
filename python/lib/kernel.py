@@ -36,7 +36,7 @@ def prepare_source(base_name, base_ref='origin/master'):
         patches.append('https://lore.kernel.org/all/20240606073639.3299252-1-danishanwar@ti.com/')  # net: ti: icssg-prueth: Split out common object into module
     if base_name == 'linux-next-llvm':
         # https://lore.kernel.org/20240702104128.26394-1-Alexander@wetzel-home.de/
-        reverts.append('5c38bedac16a946402b627621b3d4bfcc9952479')  # wifi: iwlwifi: mvm: unify and fix interface combinations
+        patches.append('https://lore.kernel.org/all/20240702130001.8c871a3f0b5a.I08a6542f52f63c5bd66bf3feb09e1998ce7c60e5@changeid/')  # wifi: iwlwifi: mvm: fix interface combinations
     # yapf: enable
 
     source_folder = Path(os.environ['CBL_SRC_P'], base_name)
