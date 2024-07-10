@@ -29,14 +29,11 @@ def prepare_source(base_name, base_ref='origin/master'):
 
     # Patching section
     # yapf: disable
-    if base_name in ('fedora', 'linux-next-llvm'):
-        patches.append('https://lore.kernel.org/all/20240702-cros_charge-control-fix-clang-array-bounds-warning-v1-1-ae04d995cd1d@kernel.org/')  # power: supply: cros_charge-control: Avoid accessing attributes out of bounds
+    if base_name == 'linux-mainline-llvm':
+        patches.append('https://gitlab.freedesktop.org/agd5f/linux/-/commit/2bac084468847cfe5bbc7166082b2a208514bb1c.patch')  # drm/radeon: Remove __counted_by from StateArray.states[]
     if base_name == 'fedora':
         # https://lore.kernel.org/de980a49-b802-417a-a57e-2c47f67b08e4@leemhuis.info/
         patches.append('https://lore.kernel.org/all/20240606073639.3299252-1-danishanwar@ti.com/')  # net: ti: icssg-prueth: Split out common object into module
-    if base_name == 'linux-next-llvm':
-        # https://lore.kernel.org/20240702104128.26394-1-Alexander@wetzel-home.de/
-        patches.append('https://lore.kernel.org/all/20240702130001.8c871a3f0b5a.I08a6542f52f63c5bd66bf3feb09e1998ce7c60e5@changeid/')  # wifi: iwlwifi: mvm: fix interface combinations
     # yapf: enable
 
     source_folder = Path(os.environ['CBL_SRC_P'], base_name)
