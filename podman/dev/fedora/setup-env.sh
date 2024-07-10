@@ -131,8 +131,7 @@ EOF
         gmp-devel
         libmpc-devel
         ncurses-devel
-        openssl
-        openssl-devel
+        openssl{,-devel{,-engine}}
         perl
         qemu-{guest-agent,img}
         qemu-system-{aarch64,arm,loongarch64,mips,ppc,riscv,s390x,x86}
