@@ -312,6 +312,14 @@ class LLVMManager(ToolchainManager):
 
         self.latest_versions = LATEST_LLVM_VERSIONS
 
+    def get_prefix(self, version=None):
+        if not version:
+            if len(self.versions) != 1:
+                raise RuntimeError('Asking for print_vars() other than with one version?')
+            version = self.versions[0]
+
+        return Path(self.DEFAULT_INSTALL_FOLDER, LATEST_LLVM_VERSIONS[version])
+
     # pylint: disable-next=unused-argument
     def install(self, cache, extract):  # noqa: ARG002
         if not self.download_folder:
@@ -341,8 +349,7 @@ class LLVMManager(ToolchainManager):
         if len(self.versions) != 1:
             raise RuntimeError('Asking for print_vars() other than with one version?')
 
-        llvm_prefix = Path(self.DEFAULT_INSTALL_FOLDER, LATEST_LLVM_VERSIONS[self.versions[0]])
-        print(shell_quote(llvm_prefix))
+        print(shell_quote(self.get_prefix(self.versions[0])))
 
     def print_vars(self, split):
         if len(self.versions) != 1:

@@ -42,8 +42,14 @@ def get_toolchain_vars(kernel_arch, toolchain):
     if toolchain == 'llvm':
         return {'LLVM': '1'}
 
-    gcc_major_version = int(toolchain.split('-')[1])
-    return {'CROSS_COMPILE': korg_tc.GCCManager().get_cc_as_path(gcc_major_version, kernel_arch)}
+    base_tc, tc_version = toolchain.split('-')
+    tc_version = int(tc_version)
+
+    if base_tc == 'gcc':
+        return {'CROSS_COMPILE': korg_tc.GCCManager().get_cc_as_path(tc_version, kernel_arch)}
+    if base_tc == 'llvm':
+        return {'LLVM': f"{korg_tc.LLVMManager().get_prefix(tc_version)}/bin/"}
+    raise ValueError(f"Don't know how to handle toolchain value '{base_tc}'!")
 
 
 def parse_arguments():
@@ -83,7 +89,8 @@ def parse_arguments():
                         help='Name of virtual machine to build kernel for',
                         required=True)
 
-    supported_toolchains = [f"gcc-{ver}" for ver in korg_tc.GCCManager.VERSIONS] + ['llvm']
+    supported_toolchains = [f"gcc-{ver}" for ver in korg_tc.GCCManager.VERSIONS
+                            ] + ['llvm'] + [f"llvm-{ver}" for ver in korg_tc.LLVMManager.VERSIONS]
     parser.add_argument('-t',
                         '--toolchain',
                         choices=supported_toolchains,
