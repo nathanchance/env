@@ -142,6 +142,7 @@ function install_packages() {
         mutt
 
         # env
+        fastfetch
         fish
         fzf
         jq

@@ -146,6 +146,7 @@ def install_packages():
     packages = [
         # administration
         'btop',
+        'fastfetch',
         'mosh',
         'opendoas',
         'remove-retired-packages',

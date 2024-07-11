@@ -161,6 +161,7 @@ def pacman_install_packages():
     packages = [
         # Administration tools
         'btop',
+        'fastfetch',
         'iputils',
         'kexec-tools',
         'modprobed-db',

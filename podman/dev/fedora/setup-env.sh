@@ -98,6 +98,7 @@ EOF
 
         # env
         bat
+        fastfetch
         fd-find
         fish
         fzf
