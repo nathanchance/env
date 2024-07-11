@@ -164,7 +164,6 @@ def pacman_install_packages():
         'iputils',
         'kexec-tools',
         'modprobed-db',
-        'neofetch',
         'reflector',
 
         # b4

@@ -171,7 +171,6 @@ def install_packages():
         'fish',
         'fzf',
         'jq',
-        'neofetch',
         'openssh',
         'python-pip',
         'stow',

@@ -64,7 +64,6 @@ def update_and_install_packages():
         'fish',
         'fzf',
         'jq',
-        'neofetch',
         'stow',
         'tmux',
         'vim',

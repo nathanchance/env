@@ -118,7 +118,6 @@ function install_packages() {
         jq
         locales
         moreutils
-        neofetch
         openssh-client
         stow
         vim

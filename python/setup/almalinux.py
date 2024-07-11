@@ -56,7 +56,6 @@ def install_packages():
         'curl',
         'fish',
         'jq',
-        'neofetch',
         'python-pip',
         'openssh',
         'stow',

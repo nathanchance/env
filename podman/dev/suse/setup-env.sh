@@ -83,7 +83,6 @@ function install_packages() {
         fzf
         jq
         moreutils
-        neofetch
         openssh
         stow
         vim

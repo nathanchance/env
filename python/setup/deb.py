@@ -141,7 +141,6 @@ def update_and_install_packages(additional_packages=None):
         'fish',
         'fzf',
         'jq',
-        'neofetch',
         'python3-pip',
         'ripgrep',
         'stow',

@@ -147,7 +147,6 @@ function install_packages() {
         jq
         less
         moreutils
-        neofetch
         openssh
         stow
         tmuxp
