@@ -22,7 +22,6 @@ makedepends=(
 )
 checkdepends=(
   python-pytest
-  python-pytest-flake8
 )
 optdepends=('colordiff: Show diffs in color')
 source=("$pkgname-$pkgver.tar.gz::https://github.com/marxin/$pkgname/archive/refs/tags/v$pkgver.tar.gz")
