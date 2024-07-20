@@ -30,12 +30,6 @@ def prepare_source(base_name, base_ref='origin/master'):
     # Patching section
     # yapf: disable
     reverts.append('13cabc47f8ae69d24653f32c28399d493fde0a56')  # netdevice: define and allocate &net_device _properly_
-    if base_name == 'fedora':
-        # https://lore.kernel.org/de980a49-b802-417a-a57e-2c47f67b08e4@leemhuis.info/
-        patches.append('https://lore.kernel.org/all/20240606073639.3299252-1-danishanwar@ti.com/')  # net: ti: icssg-prueth: Split out common object into module
-        patches.append('https://lore.kernel.org/all/20240711164935.1369686-1-jtornosm@redhat.com/')  # kbuild: rpm-pkg: avoid the warnings with dtb's listed twice
-    if base_name in ('fedora', 'linux-next-llvm'):
-        patches.append('https://lore.kernel.org/all/20240711032252.3560262-1-luiz.dentz@gmail.com/')  # Bluetooth: hci_qca: Fix build error
     # yapf: enable
 
     source_folder = Path(os.environ['CBL_SRC_P'], base_name)
