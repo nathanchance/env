@@ -16,8 +16,18 @@ import lib.kernel
 def parse_arguments():
     parser = ArgumentParser(description='A make wrapper for building Linux kernels')
 
-    parser.add_argument('-C', '--directory', help='Mirrors the equivalent make argument')
+    parser.add_argument('-C',
+                        '--directory',
+                        default=Path(),
+                        help='Mirrors the equivalent make argument',
+                        type=Path)
     parser.add_argument('--no-ccache', action='store_true', help='Disable the use of ccache')
+    parser.add_argument(
+        '--omit-o-arg',
+        action='store_true',
+        help=
+        'By default, kmake uses an O= value if one is not present, overriding the default of building in tree. This option avoids that logic.',
+    )
     parser.add_argument(
         '-p',
         '--prepend-to-path',
@@ -53,6 +63,12 @@ if __name__ == '__main__':
         # Basically an ordered set
         elif arg not in targets:
             targets.append(arg)
+
+    if 'O' not in variables and not args.omit_o_arg:
+        if 'TMP_BUILD_FOLDER' in os.environ:
+            variables['O'] = Path(os.environ['TMP_BUILD_FOLDER'], args.directory.resolve().name)
+        else:
+            variables['O'] = Path('build')
 
     lib.kernel.kmake(variables,
                      targets,
