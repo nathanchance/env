@@ -29,8 +29,7 @@ def prepare_source(base_name, base_ref='origin/master'):
 
     # Patching section
     # yapf: disable
-    if base_name == 'linux-mainline-llvm':
-        patches.append('https://gitlab.freedesktop.org/agd5f/linux/-/commit/2bac084468847cfe5bbc7166082b2a208514bb1c.patch')  # drm/radeon: Remove __counted_by from StateArray.states[]
+    reverts.append('13cabc47f8ae69d24653f32c28399d493fde0a56')  # netdevice: define and allocate &net_device _properly_
     if base_name == 'fedora':
         # https://lore.kernel.org/de980a49-b802-417a-a57e-2c47f67b08e4@leemhuis.info/
         patches.append('https://lore.kernel.org/all/20240606073639.3299252-1-danishanwar@ti.com/')  # net: ti: icssg-prueth: Split out common object into module
