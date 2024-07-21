@@ -21,10 +21,12 @@ function install_arch_kernel -d "Install kernel for Arch Linux and reboot fully 
 
     # Attempt to look for kernel. If there is one in /tmp, use that, as it means
     # it has been downloaded from another machine. Otherwise, look if there is a
-    # package in the build folder of the package.
-    for search in /tmp (tbf $krnl)/pkgbuild
+    # package in the build folder or pkgbuild folder within the build folder.
+    for search in /tmp (tbf $krnl){,/pkgbuild}
         if test -d $search
-            fd -e tar.zst -u $krnl $search | read krnl_pkg
+            # Ignore packages for headers, we do not build out of tree kernel
+            # modules, so they are not needed.
+            fd -e tar.zst -u $krnl $search | string match -rv headers | read -a krnl_pkg
             if test -n "$krnl_pkg"
                 if test (count $krnl_pkg) = 1
                     break

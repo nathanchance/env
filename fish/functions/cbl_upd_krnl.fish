@@ -136,7 +136,10 @@ function cbl_upd_krnl -d "Update machine's kernel"
 
             # Download kernel
             set remote_krnl_bld (tbf $krnl | string replace $TMP_BUILD_FOLDER $remote_tmp_build_folder)
-            scp $remote_user@$remote_host:$remote_krnl_bld/pkgbuild/$krnl-'*'.tar.zst /tmp
+            if ssh $remote_user@$remote_host "test -d $remote_krnl_bld/pkgbuild"
+                set subdir pkgbuild/
+            end
+            scp $remote_user@$remote_host:$remote_krnl_bld/"$subdir"$krnl-'*'.tar.zst /tmp
             or return
 
             # Install kernel and reboot as asked

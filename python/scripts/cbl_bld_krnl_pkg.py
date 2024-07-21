@@ -99,9 +99,19 @@ class KernelPkgBuilder:
         Path(self._build_folder, 'localversion.10-pkgname').write_text('-llvm\n', encoding='utf-8')
 
     def build(self):
-        self._kmake(['all'])
+        # Use upstream 'pacman-pkg' target if it is available
+        if Path(self._source_folder, 'scripts/package/PKGBUILD').exists():
+            target = 'pacman-pkg'
+            self.make_variables['PACMAN_PKGBASE'] = self._pkgname
+        else:
+            target = 'all'
+        self._kmake([target])
 
     def package(self):
+        # If build was done with upstream 'pacman-pkg' target, no need to run package()
+        if Path(self._build_folder, 'pacman').exists():
+            return
+
         if (pkgroot := Path(self._build_folder, 'pkgbuild')).exists():
             shutil.rmtree(pkgroot)
         pkgroot.mkdir(parents=True)
