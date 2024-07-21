@@ -158,16 +158,23 @@ if not test -e $file
     cp $cvise_dir/$file $file
 end
 
+set no_werror_clang
+set no_werror_common
+set no_werror_gcc
+
 set clang_flags \
-    (cat flags)
+    (cat flags) \
+    -Wno-error=$no_werror_clang
 set common_flags \
     -Wall \
     -Werror \
     -Wfatal-errors \
+    -Wno-error=$no_werror_common \
     -c \
     -o /dev/null \
     $file
-set gcc_flags
+set gcc_flags \
+    -Wno-error=$no_werror_gcc
 
 $good_clang $clang_flags $common_flags
 or return
