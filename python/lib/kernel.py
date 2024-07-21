@@ -23,6 +23,11 @@ def prepare_source(base_name, base_ref='origin/master'):
     if base_name not in (*NEXT_TREES, 'linux-mainline-llvm'):
         raise RuntimeError(f"Don't know how to handle provided base_name ('{base_name}')?")
 
+    source_folder = Path(os.environ['CBL_SRC_P'], base_name)
+
+    subprocess.run(['git', 'remote', 'update', '--prune', 'origin'], check=True, cwd=source_folder)
+    subprocess.run(['git', 'reset', '--hard', base_ref], check=True, cwd=source_folder)
+
     reverts = []
     patches = []
     commits = []
@@ -30,16 +35,13 @@ def prepare_source(base_name, base_ref='origin/master'):
     # Patching section
     # yapf: disable
     if base_name in ('linux-mainline-llvm', 'linux-next-llvm'):
+        if Path(source_folder, 'init/build-version').exists():
+            patches.append('https://git.kernel.org/masahiroy/linux-kbuild/p/ae4c4cee8110a986f5a884c5d91d137e2b994303')  # kbuild: move init/build-version to scripts/
         patches.append('https://git.kernel.org/masahiroy/linux-kbuild/p/44ad2814ca58fc43ab473d8fbb3b46a2b39a0392')  # kbuild: clean up scripts/remove-stale-files
         patches.append('https://git.kernel.org/masahiroy/linux-kbuild/p/c8578539debaedfbb4671e1954be8ebbd1307c6f')  # kbuild: add script and target to generate pacman package
     if base_name == 'linux-next-llvm':
         patches.append('https://lore.kernel.org/all/20240719191534.3845469-1-lucas.demarchi@intel.com/')  # drm/xe: Fix warning on unreachable statement
     # yapf: enable
-
-    source_folder = Path(os.environ['CBL_SRC_P'], base_name)
-
-    subprocess.run(['git', 'remote', 'update', '--prune', 'origin'], check=True, cwd=source_folder)
-    subprocess.run(['git', 'reset', '--hard', base_ref], check=True, cwd=source_folder)
 
     # pylint: disable=subprocess-run-check
     try:
