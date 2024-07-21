@@ -29,6 +29,8 @@ def prepare_source(base_name, base_ref='origin/master'):
 
     # Patching section
     # yapf: disable
+    if base_name == 'linux-next-llvm':
+        patches.append('https://lore.kernel.org/all/20240719191534.3845469-1-lucas.demarchi@intel.com/')  # drm/xe: Fix warning on unreachable statement
     # yapf: enable
 
     source_folder = Path(os.environ['CBL_SRC_P'], base_name)
