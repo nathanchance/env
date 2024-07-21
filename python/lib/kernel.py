@@ -29,7 +29,6 @@ def prepare_source(base_name, base_ref='origin/master'):
 
     # Patching section
     # yapf: disable
-    reverts.append('13cabc47f8ae69d24653f32c28399d493fde0a56')  # netdevice: define and allocate &net_device _properly_
     # yapf: enable
 
     source_folder = Path(os.environ['CBL_SRC_P'], base_name)
