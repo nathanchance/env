@@ -34,13 +34,12 @@ def prepare_source(base_name, base_ref='origin/master'):
 
     # Patching section
     # yapf: disable
-    if base_name in ('linux-mainline-llvm', 'linux-next-llvm'):
-        if Path(source_folder, 'init/build-version').exists():
-            patches.append('https://git.kernel.org/masahiroy/linux-kbuild/p/ae4c4cee8110a986f5a884c5d91d137e2b994303')  # kbuild: move init/build-version to scripts/
+    if base_name == 'linux-mainline-llvm':
+        patches.append('https://git.kernel.org/masahiroy/linux-kbuild/p/ae4c4cee8110a986f5a884c5d91d137e2b994303')  # kbuild: move init/build-version to scripts/
         patches.append('https://git.kernel.org/masahiroy/linux-kbuild/p/44ad2814ca58fc43ab473d8fbb3b46a2b39a0392')  # kbuild: clean up scripts/remove-stale-files
         patches.append('https://git.kernel.org/masahiroy/linux-kbuild/p/c8578539debaedfbb4671e1954be8ebbd1307c6f')  # kbuild: add script and target to generate pacman package
-    if base_name == 'linux-next-llvm':
-        patches.append('https://lore.kernel.org/all/20240719191534.3845469-1-lucas.demarchi@intel.com/')  # drm/xe: Fix warning on unreachable statement
+    if base_name in NEXT_TREES:
+        patches.append('https://lore.kernel.org/all/Zp5bpLJHlYsZinGj@localhost.localdomain/raw')  # fixup for "timers/migration: Move hierarchy setup into cpuhotplug prepare callback"
     # yapf: enable
 
     # pylint: disable=subprocess-run-check
