@@ -34,10 +34,6 @@ def prepare_source(base_name, base_ref='origin/master'):
 
     # Patching section
     # yapf: disable
-    if base_name == 'linux-mainline-llvm':
-        patches.append('https://git.kernel.org/masahiroy/linux-kbuild/p/ae4c4cee8110a986f5a884c5d91d137e2b994303')  # kbuild: move init/build-version to scripts/
-        patches.append('https://git.kernel.org/masahiroy/linux-kbuild/p/44ad2814ca58fc43ab473d8fbb3b46a2b39a0392')  # kbuild: clean up scripts/remove-stale-files
-        patches.append('https://git.kernel.org/masahiroy/linux-kbuild/p/c8578539debaedfbb4671e1954be8ebbd1307c6f')  # kbuild: add script and target to generate pacman package
     if base_name in NEXT_TREES:
         patches.append('https://lore.kernel.org/all/Zp5bpLJHlYsZinGj@localhost.localdomain/raw')  # fixup for "timers/migration: Move hierarchy setup into cpuhotplug prepare callback"
     # yapf: enable
