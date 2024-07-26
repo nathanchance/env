@@ -39,6 +39,10 @@ function cbl_gen_korg_readme -d "Generate kernel.org toolchains README"
                 end
         end
     end
+    if not set -q tc
+        print_error "No toolchain set?"
+        return 1
+    end
     if set -q old_ver; and not set -q new_ver
         print_error "Old version supplied without new version?"
         return 1
