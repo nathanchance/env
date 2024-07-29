@@ -34,8 +34,6 @@ def prepare_source(base_name, base_ref='origin/master'):
 
     # Patching section
     # yapf: disable
-    if base_name == 'linux-next-llvm':
-        patches.append('https://lore.kernel.org/all/20240724-amdgpu-dml2-fix-float-enum-warning-again-v1-1-740e7946f77a@kernel.org/')  # drm/amd/display: Reapply 2fde4fdddc1f
     # yapf: enable
 
     # pylint: disable=subprocess-run-check
