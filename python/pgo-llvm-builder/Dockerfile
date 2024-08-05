@@ -2,7 +2,7 @@ FROM docker.io/debian:10-slim
 
 # LLVM may require an newer version of cmake, download and install the latest
 # prebuilt.
-ARG CMAKE_VERSION=3.30.1
+ARG CMAKE_VERSION=3.30.2
 RUN apt update && \
     apt upgrade -y && \
     apt install -y --no-install-recommends \
@@ -14,7 +14,7 @@ RUN apt update && \
     wget -O - -q "$url" | tar -C /usr/local --strip-components=1 -xzvf -
 
 # Download the latest stable version of clang from apt.llvm.org.
-ARG LLVM_VERSION=18
+ARG LLVM_VERSION=19
 RUN apt update && \
     apt install -y --no-install-recommends \
         gnupg \
