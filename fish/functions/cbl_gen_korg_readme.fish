@@ -88,5 +88,11 @@ function cbl_gen_korg_readme -d "Generate kernel.org toolchains README"
 
     py_venv x r markdown
 
-    rsync --progress $lnx_html* nathan@192.168.4.188:$NVME_FOLDER/tmp/pgo-llvm-builder-staging
+    set tailscale $MAC_FOLDER/Applications/Tailscale.app/Contents/MacOS/Tailscale
+    if test -e $tailscale; and $tailscale status &>/dev/null
+        set ip ($tailscale ip -4 thelio-3990X)
+    else
+        set ip 192.168.4.188
+    end
+    rsync --progress $lnx_html* nathan@$ip:$NVME_FOLDER/tmp/pgo-llvm-builder-staging
 end
