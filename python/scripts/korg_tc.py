@@ -53,6 +53,16 @@ def generate_versions(min_var, tot_var):
     return list(range(int(os.environ[min_var]), int(os.environ[tot_var])))
 
 
+def handle_rc_version(version):
+    major, minor, patch = version.split('.')
+    if '-' in patch:  # -rc version
+        patch, rc = patch.split('-')
+        rc = rc.replace('rc', '')
+    else:
+        rc = '99'  # make sure release versions outrank RC versions
+    return tuple(map(int, (major, minor, patch, rc)))
+
+
 def shell_quote(item):
     return shlex.quote(str(item))
 
@@ -135,10 +145,15 @@ class ToolchainManager:
             raise RuntimeError('Attempting to call clean_up_old_versions() with no versions?')
 
         for version in self.versions:
-            latest_version = tuple(map(int, self.latest_versions[version].split('.')))
+            latest_version = handle_rc_version(self.latest_versions[version])
 
             for install_prefix in self.install_folder.glob(f"{version}.*"):
-                found_version = tuple(map(int, install_prefix.name.split('.')))
+                # tip of tree builds have more than one hyphen, ignore them
+                # when cleaning up old versions
+                if install_prefix.name.count('-') > 1:
+                    continue
+
+                found_version = handle_rc_version(install_prefix.name)
                 if found_version < latest_version:
                     lib.utils.print_green(f"INFO: Removing {install_prefix.name}...")
                     shutil.rmtree(install_prefix)
