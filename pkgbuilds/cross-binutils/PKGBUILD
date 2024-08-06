@@ -8,7 +8,7 @@ pkgname=(
   s390x-linux-gnu-binutils
   sparc64-linux-gnu-binutils
 )
-pkgver=2.42
+pkgver=2.43
 pkgrel=1
 arch=(x86_64)
 url='https://gnu.org/software/binutils/'
@@ -16,7 +16,7 @@ license=(GPL-2.0-or-later GPL-3.0-or-later LGPL-2.0-or-later LGPL-3.0-or-later G
 depends=(glibc libelf zlib zstd)
 makedepends=(setconf)
 source=("https://ftp.gnu.org/gnu/binutils/binutils-$pkgver.tar.xz")
-sha512sums=('155f3ba14cd220102f4f29a4f1e5cfee3c48aa03b74603460d05afb73c70d6657a9d87eee6eb88bf13203fe6f31177a5c9addc04384e956e7da8069c8ecd20a6')
+sha512sums=('93e063163e54d6a6ee2bd48dc754270bf757a3635b49a702ed6b310e929e94063958512d191e66beaf44275f7ea60865dbde138b624626739679fcc306b133bb')
 
 prepare() {
   setconf binutils-$pkgver/libiberty/configure ac_cpp "'\$CPP \$CPPFLAGS -O2'"
