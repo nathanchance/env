@@ -25,6 +25,14 @@ function kboot -d "Boot a kernel in QEMU"
     if not set -q kernel
         set -a boot_qemu_args -k (tbf)
     end
+    if not string match -qr -- --gh-json-file $boot_qemu_args
+        set boot_utils_json /tmp/boot-utils.json
+        if not test -e $boot_utils_json
+            cbl_gen_boot_utils_json
+            or return
+        end
+        set -a boot_qemu_args --gh-json-file $boot_utils_json
+    end
 
     if test -z "$BU"
         set BU $CBL_SRC_C/boot-utils
