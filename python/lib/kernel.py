@@ -34,8 +34,6 @@ def prepare_source(base_name, base_ref='origin/master'):
 
     # Patching section
     # yapf: disable
-    if base_name in NEXT_TREES:
-        patches.append('https://lore.kernel.org/all/a936b991-e464-4bdf-94ab-08e25d364986@stanley.mountain/')  # sched/debug: Fix fair_server_period_max value
     # yapf: enable
 
     # pylint: disable=subprocess-run-check
