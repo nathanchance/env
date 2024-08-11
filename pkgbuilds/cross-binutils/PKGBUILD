@@ -4,7 +4,7 @@ pkgbase=cross-binutils
 pkgname=(
   arm-linux-gnueabi-binutils
   mips-linux-gnu-binutils
-  powerpc-linux-gnu-binutils
+  powerpc64-linux-gnu-binutils
   s390x-linux-gnu-binutils
   sparc64-linux-gnu-binutils
 )
@@ -61,9 +61,9 @@ build() {
   _build mips-linux-gnu \
          --enable-targets=mips64-linux-gnueabi64,mips64-linux-gnueabin32
 
-  _build powerpc-linux-gnu \
+  _build powerpc64-linux-gnu \
          "${_gold_opts[@]}" \
-         --enable-targets=powerpc64-linux-gnu
+         --enable-targets=powerpc-linux-gnu
 
   _build s390x-linux-gnu \
          "${_gold_opts[@]}" \
@@ -95,10 +95,10 @@ package_mips-linux-gnu-binutils() {
   _package mips-linux-gnu
 }
 
-package_powerpc-linux-gnu-binutils() {
+package_powerpc64-linux-gnu-binutils() {
   pkgdesc='A set of programs to assemble and manipulate binary and object files for the PowerPC (32-bit and 64-bit) target'
 
-  _package powerpc-linux-gnu
+  _package powerpc64-linux-gnu
 }
 
 package_s390x-linux-gnu-binutils() {
