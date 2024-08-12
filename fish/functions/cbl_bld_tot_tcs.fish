@@ -138,8 +138,6 @@ function cbl_bld_tot_tcs -d "Build LLVM and binutils from source for kernel deve
     end
 
     # Add patches to revert here
-    # https://github.com/llvm/llvm-project/pull/92365#issuecomment-2276056528
-    set -a reverts https://github.com/llvm/llvm-project/commit/c04857cb2c9f6f2e8add61192c62e48a83938efd # [HEXAGON] Utilize new mask instruction (#92365)
     for revert in $reverts
         if string match -qr 'https?://' $revert
             set -l revert (basename $revert)
@@ -160,6 +158,8 @@ function cbl_bld_tot_tcs -d "Build LLVM and binutils from source for kernel deve
     end
 
     # Add in-review patches here
+    # https://github.com/llvm/llvm-project/pull/92365#issuecomment-2276056528
+    set -a gh_prs https://github.com/llvm/llvm-project/pull/102880 # [HEXAGON] Enable Utilize Mask Instruction Pass only if the Arch
     for gh_pr in $gh_prs
         if gh_llvm pr view --json state (basename $gh_pr) | python3 -c "import json, sys; sys.exit(0 if json.load(sys.stdin)['state'] == 'MERGED' else 1)"
             print_warning "$gh_pr has already been merged, skipping..."
