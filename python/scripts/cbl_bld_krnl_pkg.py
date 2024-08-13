@@ -67,7 +67,6 @@ class KernelPkgBuilder:
             *base_sc_cmd,
             '-d', 'LOCALVERSION_AUTO',
             '-e', 'DEBUG_INFO_DWARF5',
-            '-e', 'WERROR',
             '-m', 'DRM',
         ]  # yapf: disable
         subprocess.run(sc_cmd, check=True)
@@ -324,6 +323,10 @@ def parse_arguments():
                         action='store_true',
                         help='Call menuconfig during configuration')
 
+    parser.add_argument('--no-werror',
+                        action='store_true',
+                        help='Disable CONFIG_WERROR (on by default)')
+
     parser.add_argument('-r',
                         '--ref',
                         default='origin/master',
@@ -365,6 +368,8 @@ if __name__ == '__main__':
             '-e',
             'LTO_CLANG_THIN',
         ]
+    if not args.no_werror:
+        builder.extra_sc_args += ['-e', 'WERROR']
 
     if args.gcc and 'CROSS_COMPILE' not in make_vars:
         make_vars['CROSS_COMPILE'] = korg_tc.GCCManager().get_cc_as_path(
