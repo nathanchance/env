@@ -15,6 +15,7 @@ import lib.utils
 # pylint: enable=wrong-import-position
 
 NEXT_TREES = ('fedora', 'linux-next-llvm', 'rpi')
+PACMAN_TREES = ('linux-mainline-llvm', 'linux-next-llvm')
 
 
 def prepare_source(base_name, base_ref='origin/master'):
@@ -34,6 +35,8 @@ def prepare_source(base_name, base_ref='origin/master'):
 
     # Patching section
     # yapf: disable
+    if base_name in PACMAN_TREES:
+        patches.append('https://lore.kernel.org/all/20240813011619.13857-1-jose.fernandez@linux.dev/')  # kbuild: control extra pacman packages with PACMAN_EXTRAPACKAGES
     # yapf: enable
 
     # pylint: disable=subprocess-run-check

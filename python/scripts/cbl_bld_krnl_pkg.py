@@ -102,6 +102,7 @@ class KernelPkgBuilder:
         # Use upstream 'pacman-pkg' target if it is available
         if Path(self._source_folder, 'scripts/package/PKGBUILD').exists():
             target = 'pacman-pkg'
+            self.make_variables['PACMAN_EXTRAPACKAGES'] = ''
             self.make_variables['PACMAN_PKGBASE'] = self._pkgname
         else:
             target = 'all'
