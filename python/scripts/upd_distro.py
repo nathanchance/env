@@ -30,7 +30,7 @@ if sys.platform == 'darwin':
     cmds = [
         ['update'],
         ['upgrade'],
-        ['upgrade', '--cask', 'wezterm-nightly', '--no-quarantine', '--greedy-latest'],
+        ['upgrade', '--cask', 'wezterm@nightly', '--no-quarantine', '--greedy-latest'],
     ]
     YES_ARG = None
 else:
