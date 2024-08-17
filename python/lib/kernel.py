@@ -37,6 +37,9 @@ def prepare_source(base_name, base_ref='origin/master'):
     # yapf: disable
     if base_name in PACMAN_TREES:
         patches.append('https://lore.kernel.org/all/20240813011619.13857-1-jose.fernandez@linux.dev/')  # kbuild: control extra pacman packages with PACMAN_EXTRAPACKAGES
+    if base_name in NEXT_TREES:
+        # https://lore.kernel.org/CA+G9fYuD4-qKAX9nDS-3cy+HwGbyJ6WoD7bZ_QL0J__A++P9aA@mail.gmail.com/
+        commits.append('0c34b855bec0a650d3d1e9ccaedad17b4a99333f')  # Fixes for "workqueue: Split alloc_workqueue into internal function and lockdep init"
     # yapf: enable
 
     # pylint: disable=subprocess-run-check
