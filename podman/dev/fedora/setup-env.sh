@@ -72,7 +72,6 @@ EOF
         libfl-devel
         make
         patch
-        python2
         python3
         python3-yapf
         texinfo-tex
