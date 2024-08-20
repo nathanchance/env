@@ -190,6 +190,8 @@ class GCCManager(ToolchainManager):
         'riscv32',
         'riscv64',
         's390',
+        'sparc',  # accept kernel value for sparc64
+        'sparc64',
         'x86_64',
     )
 
@@ -212,6 +214,7 @@ class GCCManager(ToolchainManager):
             'arm64': 'aarch64',
             'loongarch': 'loongarch64',
             'riscv': 'riscv64',
+            'sparc': 'sparc64',
         }
         return f"{kernel_to_gcc.get(value, value)}-linux{suffix}"
 
