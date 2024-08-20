@@ -28,7 +28,7 @@ RUN apt update && \
 # Buster has Python 3.7, tc-build requires at least Python 3.8 due to liberal
 # use of the walrus operator (':='), so build and install the latest stable
 # version.
-ARG PYTHON_VERSION=3.12.4
+ARG PYTHON_VERSION=3.12.5
 RUN dir=$(mktemp -d) && \
     url=https://www.python.org/ftp/python/$PYTHON_VERSION/Python-$PYTHON_VERSION.tar.xz && \
     wget -O - -q "$url" | tar -C "$dir" --strip-components=1 -xJvf - && \
