@@ -37,9 +37,6 @@ def prepare_source(base_name, base_ref='origin/master'):
     # yapf: disable
     if base_name in PACMAN_TREES:
         patches.append('https://lore.kernel.org/all/20240813011619.13857-1-jose.fernandez@linux.dev/')  # kbuild: control extra pacman packages with PACMAN_EXTRAPACKAGES
-    if base_name in NEXT_TREES:
-        # https://lore.kernel.org/CA+G9fYuD4-qKAX9nDS-3cy+HwGbyJ6WoD7bZ_QL0J__A++P9aA@mail.gmail.com/
-        patches.append('https://lore.kernel.org/all/20240820193808.1127501-1-matthew.brost@intel.com/')  # workqueue: Don't call va_start / va_end twice
     # yapf: enable
 
     # pylint: disable=subprocess-run-check
