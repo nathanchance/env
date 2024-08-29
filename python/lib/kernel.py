@@ -35,8 +35,8 @@ def prepare_source(base_name, base_ref='origin/master'):
 
     # Patching section
     # yapf: disable
-    if base_name in PACMAN_TREES:
-        patches.append('https://lore.kernel.org/all/20240813011619.13857-1-jose.fernandez@linux.dev/')  # kbuild: control extra pacman packages with PACMAN_EXTRAPACKAGES
+    if base_name == 'linux-next-llvm':
+        patches.append('https://lore.kernel.org/all/20240828-hwmon-oxp-sensors-fix-clang-implicit-fallthrough-v1-1-dc48496ac67a@kernel.org/')  # hwmon: (oxp-sensors) Add missing breaks to fix -Wimplicit-fallthrough with clang
     # yapf: enable
 
     # pylint: disable=subprocess-run-check
