@@ -84,7 +84,7 @@ def download_items(targets, network_folder):
         if target == 'alpine':
             alpine_arches = ['aarch64', 'armv7', 'x86', 'x86_64']
             alpine_series = '3.20'
-            alpine_patch = '.1'
+            alpine_patch = '.2'
             alpine_version = alpine_series + alpine_patch
 
             for alpine_arch in alpine_arches:
@@ -131,7 +131,7 @@ def download_items(targets, network_folder):
 
         elif target == 'debian':
             debian_arches = ['amd64', 'arm64', 'armhf', 'i386']
-            debian_ver = '12.6.0'
+            debian_ver = '12.7.0'
 
             for arch in debian_arches:
                 arch_debian_folder = Path(firmware_folder, target.capitalize(), debian_ver, arch)
@@ -201,7 +201,7 @@ def download_items(targets, network_folder):
 
         elif target == 'rpios':
             rpi_arches = ['armhf', 'arm64']
-            rpi_date = '2024-03-15/2024-03-15'
+            rpi_date = '2024-07-04/2024-07-04'
             deb_ver = 'bookworm'
 
             for rpi_arch in rpi_arches:
@@ -217,7 +217,9 @@ def download_items(targets, network_folder):
             ubuntu_vers = ['22.04', '24.04']
 
             for ubuntu_ver in ubuntu_vers:
-                if ubuntu_ver == '22.04':
+                if ubuntu_ver == '24.04':
+                    ubuntu_subver = ubuntu_ver + '.1'
+                elif ubuntu_ver == '22.04':
                     ubuntu_subver = ubuntu_ver + '.4'
                 else:
                     ubuntu_subver = ubuntu_ver
