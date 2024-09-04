@@ -35,8 +35,12 @@ def prepare_source(base_name, base_ref='origin/master'):
 
     # Patching section
     # yapf: disable
+    if base_name in NEXT_TREES:
+        patches.append('https://lore.kernel.org/all/20240829-xfrm-restore-dir-assign-xfrm_hash_rebuild-v2-1-1cf8958f6e8e@kernel.org/')  # xfrm: policy: Restore dir assignment in xfrm_hash_rebuild()
     if base_name == 'linux-next-llvm':
-        patches.append('https://lore.kernel.org/all/20240828-hwmon-oxp-sensors-fix-clang-implicit-fallthrough-v1-1-dc48496ac67a@kernel.org/')  # hwmon: (oxp-sensors) Add missing breaks to fix -Wimplicit-fallthrough with clang
+        patches.append('https://lore.kernel.org/all/20240902-spi-revert-8a0ec8c2d736-v1-1-928b829fed2b@kernel.org/')  # spi: Revert "spi: Insert the missing pci_dev_put()before return"
+    if base_name in ('fedora', 'linux-next-llvm'):
+        commits.append('65071a04c6e5df0f334d32d889713024a0b588d3')  # bcachefs: Add empty statement after label in bch2_sb_member_alloc()
     # yapf: enable
 
     # pylint: disable=subprocess-run-check
