@@ -105,7 +105,6 @@ if test -d $NVME_FOLDER
 else
     set -gx EXT_FOLDER $MAIN_FOLDER
 end
-set -gx AUR_FOLDER $EXT_FOLDER/aur
 set -gx CCACHE_DIR $EXT_FOLDER/ccache
 set -gx MAIL_FOLDER $EXT_FOLDER/mail
 set -gx TMP_FOLDER $EXT_FOLDER/tmp

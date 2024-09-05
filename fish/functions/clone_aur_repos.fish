@@ -9,7 +9,7 @@ function clone_aur_repos -d "Clone repos from AUR to build packages locally"
         shellcheck-bin
 
     for package in $packages
-        set repo $AUR_FOLDER/$package
+        set repo $SRC_FOLDER/packaging/pkg/$package
         if not test -d $repo
             mkdir -p (dirname $repo)
             git clone https://aur.archlinux.org/$package.git $repo
