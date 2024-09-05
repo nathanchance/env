@@ -38,9 +38,15 @@ def prepare_source(base_name, base_ref='origin/master'):
     if base_name in NEXT_TREES:
         patches.append('https://lore.kernel.org/all/20240829-xfrm-restore-dir-assign-xfrm_hash_rebuild-v2-1-1cf8958f6e8e@kernel.org/')  # xfrm: policy: Restore dir assignment in xfrm_hash_rebuild()
     if base_name == 'linux-next-llvm':
-        patches.append('https://lore.kernel.org/all/20240902-spi-revert-8a0ec8c2d736-v1-1-928b829fed2b@kernel.org/')  # spi: Revert "spi: Insert the missing pci_dev_put()before return"
-    if base_name in ('fedora', 'linux-next-llvm'):
-        commits.append('65071a04c6e5df0f334d32d889713024a0b588d3')  # bcachefs: Add empty statement after label in bch2_sb_member_alloc()
+        # https://lore.kernel.org/20240904210830.GA1229985@thelio-3990X/
+        reverts.append('44518120c4ca569cfb9c6199e94c312458dc1c07')  # KVM: nVMX: Detect nested posted interrupt NV at nested VM-Exit injection
+        reverts.append('be02aa1e52d2f43d2317a11f25ad63f63ae91da4')  # KVM: nVMX: Explicitly invalidate posted_intr_nv if PI is disabled at VM-Enter
+        reverts.append('ab9cbe044f83bf4e14185fe4a599fe50d49f8710')  # KVM: nVMX: Track nested_vmx.posted_intr_nv as a signed int
+        reverts.append('f729851189d5741e7d1059e250422611028657f8')  # KVM: x86: Don't move VMX's nested PI notification vector from IRR to ISR
+        reverts.append('cb14e454add0efc9bc461c1ad30d9c950c406fab')  # KVM: nVMX: Suppress external interrupt VM-Exit injection if there's no IRQ
+        reverts.append('6f373f4d941bf79f06e9abd4a827288ad1de6399')  # KVM: nVMX: Get to-be-acknowledge IRQ for nested VM-Exit at injection site
+
+        patches.append('https://lore.kernel.org/all/20240905-kvm-x86-avoid-clang-implicit-fallthrough-v1-1-f2e785f1aa45@kernel.org/')  # KVM: x86: Avoid clang -Wimplicit-fallthrough in kvm_vm_ioctl_check_extension()
     # yapf: enable
 
     # pylint: disable=subprocess-run-check
