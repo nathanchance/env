@@ -37,8 +37,8 @@ def prepare_source(base_name, base_ref='origin/master'):
     # yapf: disable
     if base_name in NEXT_TREES:
         patches.append('https://lore.kernel.org/all/20240829-xfrm-restore-dir-assign-xfrm_hash_rebuild-v2-1-1cf8958f6e8e@kernel.org/')  # xfrm: policy: Restore dir assignment in xfrm_hash_rebuild()
-    if base_name == 'linux-next-llvm':
-        patches.append('https://lore.kernel.org/all/20240905-kvm-x86-avoid-clang-implicit-fallthrough-v1-1-f2e785f1aa45@kernel.org/')  # KVM: x86: Avoid clang -Wimplicit-fallthrough in kvm_vm_ioctl_check_extension()
+    if base_name in ('fedora', 'linux-next-llvm'):
+        patches.append('https://lore.kernel.org/all/20240909-iio-bmi323-fix-array-ref-v1-1-51c220f22229@kernel.org/')  # iio: bmi323: Fix array reference in bmi323_core_runtime_suspend()
     # yapf: enable
 
     # pylint: disable=subprocess-run-check
