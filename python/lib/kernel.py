@@ -37,6 +37,7 @@ def prepare_source(base_name, base_ref='origin/master'):
     # yapf: disable
     if base_name in NEXT_TREES:
         patches.append('https://lore.kernel.org/all/20240829-xfrm-restore-dir-assign-xfrm_hash_rebuild-v2-1-1cf8958f6e8e@kernel.org/')  # xfrm: policy: Restore dir assignment in xfrm_hash_rebuild()
+        commits.append('365f7457c129dd1433cb0940d0574701e39015d3')  # NOTCBL: FROMLIST: Replace outdated "jump_label: Fix static_key_slow_dec() yet again"
     if base_name in ('fedora', 'linux-next-llvm'):
         patches.append('https://lore.kernel.org/all/20240909-iio-bmi323-fix-array-ref-v1-1-51c220f22229@kernel.org/')  # iio: bmi323: Fix array reference in bmi323_core_runtime_suspend()
     # yapf: enable
