@@ -327,7 +327,7 @@ def parse_arguments():
                         action='store_true',
                         help='Disable CONFIG_WERROR (on by default)')
 
-    parser.add_argument('-r',
+    parser.add_argument('-R',
                         '--ref',
                         default='origin/master',
                         help='Reference to base kernel tree on')

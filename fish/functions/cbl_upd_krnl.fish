@@ -8,6 +8,8 @@ function cbl_upd_krnl -d "Update machine's kernel"
     set remote_main_folder /home/$remote_user
     set remote_tmp_build_folder /mnt/nvme/tmp/build
 
+    set valid_arch_krnls {linux-,}{debug,{mainline,next}-llvm}
+
     switch $LOCATION
         case pi
             # Pi 4 can run either Raspbian or Fedora, be more specific to allow the situation to change
@@ -56,8 +58,10 @@ function cbl_upd_krnl -d "Update machine's kernel"
                 switch $arg
                     case -k --kexec -r --reboot
                         set -a install_args $arg
-                    case '*'
+                    case $valid_arch_krnls
                         set krnl linux-(string replace 'linux-' '' $arg)
+                    case '*'
+                        set -a bld_krnl_pkg_args $arg
                 end
             end
             if not set -q krnl
@@ -65,7 +69,7 @@ function cbl_upd_krnl -d "Update machine's kernel"
                 return 1
             end
 
-            set bld_krnl_pkg_args \
+            set -a bld_krnl_pkg_args \
                 --cfi \
                 --lto \
                 $krnl
@@ -120,7 +124,7 @@ function cbl_upd_krnl -d "Update machine's kernel"
                     case -k --kexec -r --reboot
                         set -a install_args $arg
                         set reboot true
-                    case '*'
+                    case $valid_arch_krnls
                         set krnl linux-(string replace 'linux-' '' $arg)
                 end
             end
