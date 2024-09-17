@@ -91,6 +91,7 @@ EOF
         time
         tree
         tzdata
+        util-linux-script
         vte-profile
         wget
         xorg-x11-xauth
