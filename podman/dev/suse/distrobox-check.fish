@@ -40,12 +40,12 @@ set distrobox_dependencies \
 set ret 0
 for distrobox_dependency in $distrobox_dependencies
     if not command -q $distrobox_dependency
-        echo "$distrobox_dependency could not be found!"
+        echo "distrobox-check.fish: $distrobox_dependency could not be found!"
         set ret 1
     end
 end
 if not test -e /usr/share/zoneinfo/UTC
-    echo "UTC zoneinfo file not found, install tzdata?"
+    echo "distrobox-check.fish: UTC zoneinfo file not found, install tzdata?"
     set ret 1
 end
 
