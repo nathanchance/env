@@ -38,6 +38,7 @@ RUN dir=$(mktemp -d) && \
     apt build-dep -y python3 && \
     apt install -y --no-install-recommends \
         libbz2-dev \
+        libffi-dev \
         libreadline-dev \
         libssl-dev \
         pkg-config \
