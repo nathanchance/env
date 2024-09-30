@@ -112,6 +112,8 @@ def generate_warnings(log_folder, src_folder):
         'Activated 64 bits per cluster. Windows does not support this',
         # Python 3.12 warnings, not ClangBuiltLinux related
         'SyntaxWarning: invalid escape sequence',
+        # Warning from LoongArch firmware, who cares?
+        'Error: Image at [0-9A-F]+ start failed: Not Found',
     ]
     ignore_re = re.compile('|'.join(ignore))
     warnings = {}
