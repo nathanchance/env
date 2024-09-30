@@ -202,6 +202,8 @@ if __name__ == '__main__':
     RUST.mkdir(exist_ok=True, parents=True)
 
     rust_toml = generate_rust_toml(args.version)
+    # pylint only flags this variable, which is dumb.
+    # pylint: disable-next=invalid-name
     rust_target = get_rust_target_from_tarball(args.llvm_tarball)
 
     install_scripts = prepare_rust_components(rust_toml, rust_target)

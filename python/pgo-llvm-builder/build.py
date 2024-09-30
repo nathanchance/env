@@ -331,7 +331,7 @@ for value in versions:
     ]
     subprocess.run(zstd_cmd, check=True)
 
-    info_text = ('\n'
+    INFO_TEXT = ('\n'
                  f"Tarball is available at: {llvm_tarball}\n"
                  f"Compressed tarball is available at: {llvm_tarball_compressed}")
-    print(info_text)
+    print(INFO_TEXT)
