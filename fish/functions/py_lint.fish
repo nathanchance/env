@@ -72,6 +72,7 @@ function py_lint -d "Lint Python files"
         set -a pylint_ignore R0913 # too-many-arguments
         set -a pylint_ignore R0914 # too-many-locals
         set -a pylint_ignore R0915 # too-many-statements
+        set -a pylint_ignore R0917 # too-many-positional-arguments
         set -a pylint_ignore W1509 # subprocess-popen-preexec-fn
         if pylint \
                 --disable (string join , $pylint_ignore) \
