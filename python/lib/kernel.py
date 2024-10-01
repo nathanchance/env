@@ -35,8 +35,8 @@ def prepare_source(base_name, base_ref='origin/master'):
 
     # Patching section
     # yapf: disable
-    if base_name in ('fedora', 'linux-next-llvm'):
-        patches.append('https://lore.kernel.org/all/20240909-iio-bmi323-fix-array-ref-v1-1-51c220f22229@kernel.org/')  # iio: bmi323: Fix array reference in bmi323_core_runtime_suspend()
+    if base_name in ('fedora', 'linux-mainline-llvm', 'linux-next-llvm'):
+        patches.append('https://git.kernel.org/jic23/iio/p/506a1ac4c4464a61e4336e135841067dbc040aaa')  # iio: bmi323: fix copy and paste bugs in suspend resume
     # yapf: enable
 
     # pylint: disable=subprocess-run-check

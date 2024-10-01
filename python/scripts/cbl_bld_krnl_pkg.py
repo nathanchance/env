@@ -68,6 +68,8 @@ class KernelPkgBuilder:
             '-d', 'LOCALVERSION_AUTO',
             '-e', 'DEBUG_INFO_DWARF5',
             '-m', 'DRM',
+            # until https://git.kernel.org/linus/c7ff693fa2094ba0a9d0a20feb4ab1658eff9c33 has been accounted for by Arch upstream
+            '-e', 'MODULE_COMPRESS',
         ]  # yapf: disable
         subprocess.run(sc_cmd, check=True)
 
