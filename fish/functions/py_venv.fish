@@ -7,6 +7,8 @@ function py_venv -d "Manage Python virtual environment"
         switch $arg
             case c create e enter exit i in install l ls list r rm remove u up update x
                 set -a actions $arg
+            case python'*'
+                set python $arg
             case '*'
                 set venv $arg
         end
@@ -14,6 +16,9 @@ function py_venv -d "Manage Python virtual environment"
     if not set -q actions
         print_error "no actions specified!"
         return 1
+    end
+    if not set -q python
+        set python python3
     end
     if not set -q venv
         if in_venv
@@ -50,7 +55,7 @@ function py_venv -d "Manage Python virtual environment"
     for action in $actions
         switch $action
             case c create
-                python3 -m venv $venv
+                $python -m venv $venv
 
             case e enter
                 if in_venv
