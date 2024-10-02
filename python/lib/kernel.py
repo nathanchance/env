@@ -35,8 +35,11 @@ def prepare_source(base_name, base_ref='origin/master'):
 
     # Patching section
     # yapf: disable
-    if base_name in ('fedora', 'linux-mainline-llvm', 'linux-next-llvm'):
+    if base_name == 'linux-mainline-llvm':
         patches.append('https://git.kernel.org/jic23/iio/p/506a1ac4c4464a61e4336e135841067dbc040aaa')  # iio: bmi323: fix copy and paste bugs in suspend resume
+    if base_name in NEXT_TREES:
+        # https://lore.kernel.org/202409260949.a1254989-oliver.sang@intel.com/
+        reverts.append('b0ab04a8ffd829c096a207327707f08bba462063')  # acl: Annotate struct posix_acl with __counted_by()
     # yapf: enable
 
     # pylint: disable=subprocess-run-check
