@@ -65,8 +65,13 @@ if __name__ == '__main__':
             targets.append(arg)
 
     if 'O' not in variables and not args.omit_o_arg:
+        # tbf implemented in Python
         if 'TMP_BUILD_FOLDER' in os.environ:
-            variables['O'] = Path(os.environ['TMP_BUILD_FOLDER'], args.directory.resolve().name)
+            if os.environ['CBL_SRC_W'] in (src := args.directory.resolve()).as_posix():
+                BASE = '-'.join(src.parts[-2:])
+            else:
+                BASE = src.name
+            variables['O'] = Path(os.environ['TMP_BUILD_FOLDER'], BASE)
         else:
             variables['O'] = Path('build')
 
