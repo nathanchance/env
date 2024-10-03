@@ -84,7 +84,7 @@ def download_items(targets, network_folder):
         if target == 'alpine':
             alpine_arches = ['aarch64', 'armv7', 'x86', 'x86_64']
             alpine_series = '3.20'
-            alpine_patch = '.2'
+            alpine_patch = '.3'
             alpine_version = alpine_series + alpine_patch
 
             for alpine_arch in alpine_arches:
@@ -191,7 +191,7 @@ def download_items(targets, network_folder):
                 }]  # yapf: disable
 
         elif target == 'ipsw':
-            mac_versions = ['14', '13', '12']
+            mac_versions = ('15', '14', '13', '12')
 
             for mac_version in mac_versions:
                 items += [{
