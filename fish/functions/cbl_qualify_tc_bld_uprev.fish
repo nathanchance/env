@@ -15,6 +15,8 @@ function cbl_qualify_tc_bld_uprev -d "Qualify a new known good revision for tc-b
         switch $arg
             case -r --reset
                 set reset true
+            case '*'
+                set tc_bld_branch $arg
         end
     end
 
@@ -33,9 +35,7 @@ function cbl_qualify_tc_bld_uprev -d "Qualify a new known good revision for tc-b
     end
     or return
 
-    if test -n "$argv[1]"
-        set tc_bld_branch $argv[1]
-    else
+    if not set -q tc_bld_branch
         set tc_bld_branch (git -C $tc_bld_src rev-parse --abbrev-ref --symbolic-full-name @{u})
     end
 
