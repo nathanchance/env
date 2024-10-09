@@ -38,8 +38,10 @@ def prepare_source(base_name, base_ref='origin/master'):
     if base_name == 'linux-mainline-llvm':
         patches.append('https://git.kernel.org/jic23/iio/p/506a1ac4c4464a61e4336e135841067dbc040aaa')  # iio: bmi323: fix copy and paste bugs in suspend resume
     if base_name in NEXT_TREES:
-        # https://lore.kernel.org/202409260949.a1254989-oliver.sang@intel.com/
-        reverts.append('b0ab04a8ffd829c096a207327707f08bba462063')  # acl: Annotate struct posix_acl with __counted_by()
+        # https://lore.kernel.org/20241009232216.6f0a28e5@canb.auug.org.au/
+        commits.append('4e8cdf9420fc40a48b52bdef8b90c3a2cae5b5ad')  # fs: Update to vfs.file @ e30211f27924d3107bd275cbc373c229d98397d3
+    if base_name == 'linux-next-llvm':
+        commits.append('04ec06d8460914d16b4d90b9b00612a00060b42b')  # HID: Do not use bare unreachable() in fetch_item()
     # yapf: enable
 
     # pylint: disable=subprocess-run-check
