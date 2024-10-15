@@ -39,10 +39,7 @@ def prepare_source(base_name, base_ref='origin/master'):
         patches.append('https://git.kernel.org/jic23/iio/p/506a1ac4c4464a61e4336e135841067dbc040aaa')  # iio: bmi323: fix copy and paste bugs in suspend resume
     if base_name == 'linux-next-llvm':
         # https://lore.kernel.org/20241010222451.GA3571761@thelio-3990X/
-        commits.append('04ec06d8460914d16b4d90b9b00612a00060b42b')  # HID: Do not use bare unreachable() in fetch_item()
-
-        # https://lore.kernel.org/20241010225411.GA922684@thelio-3990X/
-        commits.append('dfcddec6ea04cda9cfe252dce8e0119e539de7ab')  # Revert "x86/module: perpare module loading for ROX allocations of text" and dependencies
+        patches.append('https://lore.kernel.org/all/20241015-hid-fix-fetch_item-unreachable-v1-1-b131cd10dbd1@kernel.org/')  # HID: Remove default case statement in fetch_item()
     # yapf: enable
 
     # pylint: disable=subprocess-run-check
