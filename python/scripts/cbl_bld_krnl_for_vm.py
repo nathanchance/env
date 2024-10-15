@@ -121,7 +121,7 @@ def build_kernel_for_vm(kernel_src, add_make_targets, make_variables, config, me
         }
     elif 'arch' in vm_name:
         configs = {
-            'x86_64': 'https://raw.githubusercontent.com/archlinux/svntogit-packages/packages/linux/trunk/config',
+            'x86_64': 'https://gitlab.archlinux.org/archlinux/packaging/packages/linux/-/raw/main/config',
         }  # yapf: disable
     elif 'debian' in vm_name:
         if not (configs := Path(os.environ['CBL_LKT'], 'configs/debian')).exists():
