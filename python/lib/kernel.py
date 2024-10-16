@@ -39,7 +39,10 @@ def prepare_source(base_name, base_ref='origin/master'):
         patches.append('https://git.kernel.org/jic23/iio/p/506a1ac4c4464a61e4336e135841067dbc040aaa')  # iio: bmi323: fix copy and paste bugs in suspend resume
     if base_name == 'linux-next-llvm':
         # https://lore.kernel.org/20241010222451.GA3571761@thelio-3990X/
-        patches.append('https://lore.kernel.org/all/20241015-hid-fix-fetch_item-unreachable-v1-1-b131cd10dbd1@kernel.org/')  # HID: Remove default case statement in fetch_item()
+        patches.append('https://git.kernel.org/hid/hid/p/b2b8a75e1d88c551a0b30d44d0be552210219eea')  # HID: Remove default case statement in fetch_item()
+    if base_name in NEXT_TREES:
+        # https://lore.kernel.org/202410161847.oG293ywD-lkp@intel.com/
+        commits.append('092f7a5b12626f8dba2c937eb387d027e3a947d1')  # Apply diff of updated version of "fs: pass offset and result to backing_file end_write() callback"
     # yapf: enable
 
     # pylint: disable=subprocess-run-check
