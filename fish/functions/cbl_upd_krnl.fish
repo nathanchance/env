@@ -4,7 +4,7 @@
 
 function cbl_upd_krnl -d "Update machine's kernel"
     set remote_user nathan
-    set remote_host 192.168.4.188
+    set remote_host $MAIN_REMOTE_IP
     set remote_main_folder /home/$remote_user
     set remote_tmp_build_folder /mnt/nvme/tmp/build
 

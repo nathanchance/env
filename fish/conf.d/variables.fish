@@ -235,10 +235,8 @@ set -gx MENUCONFIG_COLOR blackbg
 # Primary location from list above
 set -gx PRIMARY_LOCATION workstation
 
-# My server IP address
-if test -f $HOME/.server_ip
-    set -g SERVER_IP (cat $HOME/.server_ip)
-end
+# My primary remote IP address
+set -gx MAIN_REMOTE_IP 192.168.4.188
 
 # Current toolchain versions
 set -gx GCC_VERSION_TOT 15

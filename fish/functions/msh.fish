@@ -77,14 +77,11 @@ function msh -d "Shorthand for mosh -o" -w mosh
             end
             set user_host nathan@$host
 
-        case hetzner-server
-            set user_host nathan@$SERVER_IP
-
-        case thelio
+        case thelio main
             if test "$tailscale" = true
                 set host thelio-3990x
             else
-                set host 192.168.4.188
+                set host $MAIN_REMOTE_IP
             end
             set user_host nathan@$host
 
