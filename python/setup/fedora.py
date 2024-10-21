@@ -15,7 +15,7 @@ import lib.utils
 # pylint: enable=wrong-import-position
 
 MIN_FEDORA_VERSION = 35
-MAX_FEDORA_VERSION = 40
+MAX_FEDORA_VERSION = 41
 
 
 def configure_networking():
@@ -35,7 +35,14 @@ def configure_networking():
 
 
 def dnf_add_repo(repo_url):
-    lib.setup.dnf(['config-manager', '--add-repo', repo_url])
+    # config-manager does not support --add-repo with dnf5, which is the
+    # default in Fedora 41 now.
+    # https://github.com/rpm-software-management/dnf5/issues/1537
+    if get_fedora_version() >= 41:
+        local_dst = Path('/etc/yum.repos.d', repo_url.rsplit('/', 1)[1])
+        subprocess.run(['curl', '-LSs', '-o', local_dst, repo_url], check=True)
+    else:
+        lib.setup.dnf(['config-manager', '--add-repo', repo_url])
 
 
 def dnf_install(install_args):
