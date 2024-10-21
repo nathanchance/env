@@ -35,6 +35,12 @@ def prepare_source(base_name, base_ref='origin/master'):
 
     # Patching section
     # yapf: disable
+    if base_name in ('fedora', 'linux-next-llvm'):
+        patches.append('https://lore.kernel.org/all/20241021103839.2828469-1-arnd@kernel.org/')  # Input: serio_raw - initialize serio_raw_write() the return code
+    if base_name == 'linux-next-llvm':
+        # Breaks CFI, pending report
+        reverts.append(('0d951a79991b0d070410305b988c696484f99324^..fdc087a355b235cd5b077bf31c9f74ca78a5e1d2',
+                        'Revert up to "x86/module: enable ROX caches for module text on 64 bit" in "x86/module: use large ROX pages for text allocations"'))
     # yapf: enable
 
     # pylint: disable=subprocess-run-check
@@ -42,8 +48,31 @@ def prepare_source(base_name, base_ref='origin/master'):
         common_kwargs = {'check': True, 'cwd': source_folder, 'text': True}
 
         for revert in reverts:
-            subprocess.run(  # noqa: PLW1510
-                ['git', 'revert', '--mainline', '1', '--no-edit', revert], **common_kwargs)
+            if isinstance(revert, tuple):
+                commit_range = revert[0]
+                commit_msg = revert[1]
+
+                if '..' not in commit_range:
+                    raise RuntimeError(f"No git range indicator in {commit_range}")
+
+                # generate diff from range
+                range_diff = subprocess.run(  # noqa: PLW1510
+                    ['git', 'diff', commit_range],
+                    **common_kwargs,
+                    capture_output=True).stdout
+
+                # apply diff in reverse
+                subprocess.run(  # noqa: PLW1510
+                    ['git', 'apply', '--3way', '--reverse'],
+                    **common_kwargs,
+                    input=range_diff)
+
+                # commit the result
+                subprocess.run(  # noqa: PLW1510
+                    ['git', 'commit', '-m', commit_msg], **common_kwargs)
+            else:
+                subprocess.run(  # noqa: PLW1510
+                    ['git', 'revert', '--mainline', '1', '--no-edit', revert], **common_kwargs)
 
         for patch in patches:
             if isinstance(patch, Path):
