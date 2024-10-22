@@ -35,6 +35,8 @@ def prepare_source(base_name, base_ref='origin/master'):
 
     # Patching section
     # yapf: disable
+    if base_name == 'fedora':
+        patches.append('https://lore.kernel.org/all/20241021164456.2275285-1-mark.rutland@arm.com/')  # arm64: preserve pt_regs::stackframe during exec*()
     if base_name in ('fedora', 'linux-next-llvm'):
         patches.append('https://lore.kernel.org/all/20241021103839.2828469-1-arnd@kernel.org/')  # Input: serio_raw - initialize serio_raw_write() the return code
     if base_name == 'linux-next-llvm':
