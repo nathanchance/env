@@ -48,7 +48,7 @@ class KernelPkgBuilder:
                          directory=self._source_folder,
                          **kwargs)
 
-    def _prepare_files(self, _localmodconfig=False, _menuconfig=False):
+    def _prepare_files(self, _localmodconfig=False, _menuconfig=False, _extra_config_targets=None):
         src_config_file = Path(os.environ['ENV_FOLDER'], f"configs/kernel/{self._pkgname}.config")
         dst_config_file = Path(self._build_folder, '.config')
         base_sc_cmd = [Path(self._source_folder, 'scripts/config'), '--file', src_config_file]
@@ -187,10 +187,10 @@ package() {{
         Path(pkgroot, 'PKGBUILD').write_text(pkgbuild_text, encoding='utf-8')
         subprocess.run(['makepkg', '-R'], check=True, cwd=pkgroot)
 
-    def prepare(self, base_ref, localmodconfig=False, menuconfig=False):
+    def prepare(self, base_ref, localmodconfig=False, menuconfig=False, extra_config_targets=None):
         lib.kernel.prepare_source(self._pkgname, base_ref)
 
-        self._prepare_files(localmodconfig, menuconfig)
+        self._prepare_files(localmodconfig, menuconfig, extra_config_targets)
 
         self._kernver = subprocess.run(
             ['make', '-s', 'LOCALVERSION=', f"O={self._build_folder}", 'kernelrelease'],
@@ -208,7 +208,7 @@ class DebugPkgBuilder(KernelPkgBuilder):
         super().__init__(Path(os.environ['CBL_SRC_D'], 'linux-debug'))
 
     # pylint: disable-next=signature-differs
-    def _prepare_files(self, localmodconfig, menuconfig):
+    def _prepare_files(self, localmodconfig, menuconfig, extra_config_targets=None):
         config = Path(self._build_folder, '.config')
         base_sc_cmd = [Path(self._source_folder, 'scripts/config'), '--file', config]
 
@@ -243,6 +243,8 @@ class DebugPkgBuilder(KernelPkgBuilder):
 
         if menuconfig:
             self._kmake(['menuconfig'])
+        if extra_config_targets:
+            self._kmake(extra_config_targets)
 
         self._kmake(['prepare'])
 
@@ -256,7 +258,7 @@ class MainlinePkgBuilder(KernelPkgBuilder):
 
         super().__init__(Path(os.environ['CBL_SRC_P'], 'linux-mainline-llvm'))
 
-    def _prepare_files(self, _localmodconfig=False, _menuconfig=False):
+    def _prepare_files(self, _localmodconfig=False, _menuconfig=False, _extra_config_targets=None):
         super()._prepare_files()
 
         git_add_files = ['drivers/hwmon/Makefile']
@@ -345,9 +347,12 @@ if __name__ == '__main__':
     args = parse_arguments()
 
     make_vars = {}
+    config_targets = []
     for arg in args.pos_args:
         if '=' in arg:
             make_vars.update([arg.split('=', 1)])
+        elif arg.endswith('config'):
+            config_targets.append(arg)
         elif (pkgname := arg.replace('linux-', '')) in ('debug', 'mainline-llvm', 'next-llvm'):
             pass
         else:
@@ -381,6 +386,6 @@ if __name__ == '__main__':
         del builder.make_variables['LLVM']
     builder.make_variables.update(make_vars)
 
-    builder.prepare(args.ref, args.localmodconfig, args.menuconfig)
+    builder.prepare(args.ref, args.localmodconfig, args.menuconfig, config_targets)
     builder.build()
     builder.package()
