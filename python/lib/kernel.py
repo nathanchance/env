@@ -36,11 +36,9 @@ def prepare_source(base_name, base_ref='origin/master'):
     # Patching section
     # yapf: disable
     if base_name == 'fedora':
-        patches.append('https://lore.kernel.org/all/20241021164456.2275285-1-mark.rutland@arm.com/')  # arm64: preserve pt_regs::stackframe during exec*()
-    if base_name in ('fedora', 'linux-next-llvm'):
-        patches.append('https://lore.kernel.org/all/20241021103839.2828469-1-arnd@kernel.org/')  # Input: serio_raw - initialize serio_raw_write() the return code
+        patches.append('https://git.kernel.org/arm64/p/f260c442676310329b8b4482d3be59fe0e742220')  # arm64: preserve pt_regs::stackframe during exec*()
     if base_name == 'linux-next-llvm':
-        # Breaks CFI, pending report
+        # Breaks CFI: https://lore.kernel.org/20241021221519.GA3567210@thelio-3990X/
         reverts.append(('0d951a79991b0d070410305b988c696484f99324^..fdc087a355b235cd5b077bf31c9f74ca78a5e1d2',
                         'Revert up to "x86/module: enable ROX caches for module text on 64 bit" in "x86/module: use large ROX pages for text allocations"'))
     # yapf: enable
