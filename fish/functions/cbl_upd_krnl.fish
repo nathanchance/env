@@ -3,10 +3,18 @@
 # Copyright (C) 2021-2023 Nathan Chancellor
 
 function cbl_upd_krnl -d "Update machine's kernel"
-    set remote_user nathan
-    set remote_host $MAIN_REMOTE_IP
-    set remote_main_folder /home/$remote_user
-    set remote_tmp_build_folder /mnt/nvme/tmp/build
+    if not set -q remote_user
+        set remote_user nathan
+    end
+    if not set -q remote_host
+        set remote_host $MAIN_REMOTE_IP
+    end
+    if not set -q remote_main_folder
+        set remote_main_folder /home/$remote_user
+    end
+    if not set -q remote_tmp_build_folder
+        set remote_tmp_build_folder /mnt/nvme/tmp/build
+    end
 
     set valid_arch_krnls {linux-,}{debug,{mainline,next}-llvm}
 
