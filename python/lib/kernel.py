@@ -36,12 +36,8 @@ def prepare_source(base_name, base_ref='origin/master'):
     # Patching section
     # yapf: disable
     if base_name in ('fedora', 'linux-next-llvm'):
-        # https://lore.kernel.org/CA+G9fYuVefYJx9JsVx1Wz5pV1jKCp9eCPtwZD+FVhdk841q1Zw@mail.gmail.com/
-        reverts.append('088984c8d54c0053fc4ae606981291d741c5924b')  # ACPI: PRM: Find EFI_MEMORY_RUNTIME block for PRM handler and context
-    if base_name == 'linux-next-llvm':
-        # Breaks CFI: https://lore.kernel.org/20241021221519.GA3567210@thelio-3990X/
-        reverts.append(('0d951a79991b0d070410305b988c696484f99324^..fdc087a355b235cd5b077bf31c9f74ca78a5e1d2',
-                        'Revert up to "x86/module: enable ROX caches for module text on 64 bit" in "x86/module: use large ROX pages for text allocations"'))
+        # https://github.com/llvm/llvm-project/pull/111434#issuecomment-2444585030
+        commits.append('e5f7b198ab2d676f6815ef2e89c5138eda67a74c')  # -Wnontrivial-memaccess in drivers/net/ethernet/netronome/nfp/nfdk/rings.c
     # yapf: enable
 
     # pylint: disable=subprocess-run-check
