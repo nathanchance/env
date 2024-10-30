@@ -60,6 +60,7 @@ def brew_git(git_args):
 
 def install_packages():
     packages = [
+        '1password-cli',
         'bat',
         'fd',
         'fish',
