@@ -35,9 +35,6 @@ def prepare_source(base_name, base_ref='origin/master'):
 
     # Patching section
     # yapf: disable
-    if base_name in ('fedora', 'linux-next-llvm'):
-        # https://github.com/llvm/llvm-project/pull/111434#issuecomment-2444585030
-        commits.append('e5f7b198ab2d676f6815ef2e89c5138eda67a74c')  # -Wnontrivial-memaccess in drivers/net/ethernet/netronome/nfp/nfdk/rings.c
     # yapf: enable
 
     # pylint: disable=subprocess-run-check
