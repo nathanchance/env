@@ -35,6 +35,13 @@ def prepare_source(base_name, base_ref='origin/master'):
 
     # Patching section
     # yapf: disable
+    if base_name in ('fedora', 'linux-next-llvm'):
+        # https://lore.kernel.org/20241031051822.GA2947788@thelio-3990X/
+        patches.append('https://lore.kernel.org/all/20241101164251.327884-3-andrealmeid@igalia.com/')  # tmpfs: Fix type for sysfs' casefold attribute
+
+        # https://lore.kernel.org/202411011845.Wwx4YZ8h-lkp@intel.com/
+        # https://lore.kernel.org/dd727620-9823-4701-aaf1-080b03fb6ccd@schaufler-ca.com/
+        commits.append('34935bc9ae1323ebd9fd782da7b68cfbec084fc2')  # netfilter: ctnetlink: Fix use of len in ctnetlink_secctx_size()
     # yapf: enable
 
     # pylint: disable=subprocess-run-check
