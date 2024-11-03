@@ -138,6 +138,8 @@ function cbl_bld_tot_tcs -d "Build LLVM and binutils from source for kernel deve
     end
 
     # Add patches to revert here
+    # https://github.com/llvm/llvm-project/pull/114539#issuecomment-2453008679
+    set -a reverts https://github.com/llvm/llvm-project/commit/3494ee95902cef62f767489802e469c58a13ea04  # Reapply [APInt] Enable APInt ctor assertion by default (#114539)
     for revert in $reverts
         if string match -qr 'https?://' $revert
             set -l revert (basename $revert)
