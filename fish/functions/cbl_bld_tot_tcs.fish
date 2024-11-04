@@ -140,6 +140,8 @@ function cbl_bld_tot_tcs -d "Build LLVM and binutils from source for kernel deve
     # Add patches to revert here
     # https://github.com/llvm/llvm-project/pull/114539#issuecomment-2453008679
     set -a reverts https://github.com/llvm/llvm-project/commit/3494ee95902cef62f767489802e469c58a13ea04  # Reapply [APInt] Enable APInt ctor assertion by default (#114539)
+    # https://github.com/llvm/llvm-project/pull/114195#issuecomment-2455173554
+    set -a reverts https://github.com/llvm/llvm-project/commit/4d3c427f339562b73938296d77103baf9ab9dc4b # [CodeGen] Use first EHLabel as a stop gate for live range shrinking (#114195)
     for revert in $reverts
         if string match -qr 'https?://' $revert
             set -l revert (basename $revert)
