@@ -35,6 +35,9 @@ def prepare_source(base_name, base_ref='origin/master'):
 
     # Patching section
     # yapf: disable
+    if base_name == 'linux-next-llvm':
+        # https://lore.kernel.org/20241104232741.GA3843610@thelio-3990X/
+        patches.append('https://lore.kernel.org/lkml/ZynDAhW0lKCfOqZl@kernel.org/raw')  # Fix up for "x86/module: prepare module loading for ROX allocations of text"
     if base_name in ('fedora', 'linux-next-llvm'):
         # https://lore.kernel.org/20241031051822.GA2947788@thelio-3990X/
         patches.append('https://lore.kernel.org/all/20241101164251.327884-3-andrealmeid@igalia.com/')  # tmpfs: Fix type for sysfs' casefold attribute
