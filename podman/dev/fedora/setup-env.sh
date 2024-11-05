@@ -146,6 +146,7 @@ EOF
         clang
         cmake
         lld
+        llvm
         ninja-build
         perf
         zlib-devel
