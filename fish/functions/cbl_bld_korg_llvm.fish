@@ -59,9 +59,9 @@ function cbl_bld_korg_llvm
         for tc in (fd -a -d 1 -t d . $tmp_llvm_install)
             for src in $CBL_SRC_C/linux $CBL_SRC_C/linux-stable-$CBL_STABLE_VERSIONS
                 if dbx_has_82a69f0
-                    dbxe -- fish -c "cbl_lkt --linux-folder $src --llvm-prefix $tc --no-timeout"
+                    dbxe -- fish -c "cbl_lkt --linux-folder $src --llvm-prefix $tc"
                 else
-                    dbxe -- "fish -c 'cbl_lkt --linux-folder $src --llvm-prefix $tc --no-timeout'"
+                    dbxe -- "fish -c 'cbl_lkt --linux-folder $src --llvm-prefix $tc'"
                 end
                 or break
             end

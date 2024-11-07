@@ -211,29 +211,32 @@ function cbl_lkt -d "Tests a Linux kernel with llvm-kernel-testing"
         --log-folder $log_folder \
         $build_py_args
 
-    switch $LOCATION
-        case aadp
-            set average_duration 6
-        case generic
-            if test (nproc) -ge 80
-                set average_duration 5
-            else if test (nproc) -ge 64
+    # Only apply timeout when running interactively, as timeout from boot-qemu.py can get wedged
+    if status is-interactive
+        switch $LOCATION
+            case aadp
                 set average_duration 6
-            else if test (nproc) -ge 32
-                set average_duration 7
-            else if test (nproc) -ge 16
+            case generic
+                if test (nproc) -ge 80
+                    set average_duration 5
+                else if test (nproc) -ge 64
+                    set average_duration 6
+                else if test (nproc) -ge 32
+                    set average_duration 7
+                else if test (nproc) -ge 16
+                    set average_duration 8
+                end
+            case honeycomb
+                set average_duration 4
+            case test-desktop-intel-11700
                 set average_duration 8
-            end
-        case honeycomb
-            set average_duration 4
-        case test-desktop-intel-11700
-            set average_duration 8
-        case workstation
-            set average_duration 4
-    end
-    if set -q average_duration; and not set -q no_timeout
-        set -p lkt_cmd \
-            timeout (math 1.5 x $average_duration)h
+            case workstation
+                set average_duration 4
+        end
+        if set -q average_duration; and not set -q no_timeout
+            set -p lkt_cmd \
+                timeout (math 1.5 x $average_duration)h
+        end
     end
 
     print_cmd $lkt_cmd
