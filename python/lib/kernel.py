@@ -35,9 +35,6 @@ def prepare_source(base_name, base_ref='origin/master'):
 
     # Patching section
     # yapf: disable
-    if base_name in ('fedora', 'linux-next-llvm'):
-        # https://lore.kernel.org/20241031051822.GA2947788@thelio-3990X/
-        patches.append('https://git.kernel.org/vfs/vfs/p/18d2f10f6284f5bb9c03a759044121c71e5b3b4c')  # tmpfs: Fix type for sysfs' casefold attribute
     if base_name == 'fedora':
         patches.append('https://lore.kernel.org/all/20241107-sysfs-const-mmap-fix-cdx-v1-1-2ed9b7cd5f8b@kernel.org/')  # cdx: Fix cdx_mmap_resource() after constifying attr in ->mmap()
     # yapf: enable
