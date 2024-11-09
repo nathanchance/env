@@ -158,8 +158,6 @@ function cbl_bld_tot_tcs -d "Build LLVM and binutils from source for kernel deve
     end
 
     # Add in-review patches here
-    # https://github.com/llvm/llvm-project/pull/114195#issuecomment-2455173554
-    set -a gh_prs https://github.com/llvm/llvm-project/pull/115276 # [CodeGen][X86] LiveRangeShrink: fix increment after end
     for gh_pr in $gh_prs
         if gh_llvm pr view --json state (basename $gh_pr) | python3 -c "import json, sys; sys.exit(0 if json.load(sys.stdin)['state'] == 'MERGED' else 1)"
             print_warning "$gh_pr has already been merged, skipping..."
