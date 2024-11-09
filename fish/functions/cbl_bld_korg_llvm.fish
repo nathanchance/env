@@ -31,7 +31,7 @@ function cbl_bld_korg_llvm
     begin
         header "Updating sources"
 
-        cbl_upd_src_c $repos_to_update
+        cbl_upd_src c $repos_to_update
         and if not test -d $CBL_TC_BLD
             git clone -b personal https://github.com/nathanchance/tc-build $CBL_TC_BLD
         end

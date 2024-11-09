@@ -15,7 +15,7 @@ function cbl_test_llvm_linux -d "Test stable and mainline Linux with all support
         set targets mainline stable
     end
 
-    cbl_upd_src_c $targets
+    cbl_upd_src c $targets
     korg_llvm install
 
     if contains mainline $targets

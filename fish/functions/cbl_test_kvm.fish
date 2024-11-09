@@ -23,7 +23,7 @@ function cbl_test_kvm -d "Test KVM against a Clang built kernel with QEMU"
             set src $CBL_SRC_C/linux
             set out (tbf $src)
 
-            cbl_upd_src_c m
+            cbl_upd_src c m
 
             if test -e $CBL_TC_LLVM/clang
                 set tc_arg LLVM=1
@@ -52,7 +52,7 @@ function cbl_test_kvm -d "Test KVM against a Clang built kernel with QEMU"
                 case wsl
                     set arch x86_64 # for now?
                     set src $CBL_SRC_C/linux
-                    cbl_upd_src_c m
+                    cbl_upd_src c m
 
                     for toolchain in GCC LLVM
                         set out (tbf $src)/$arch/(string lower $toolchain)

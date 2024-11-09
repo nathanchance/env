@@ -7,12 +7,12 @@ function cbl_bld_all_krnl -d "Build all kernels for ClangBuiltLinux testing"
 
     switch $LOCATION
         case aadp generic
-            cbl_upd_src_c m
+            cbl_upd_src c m
 
             cbl_lkt --linux-folder $CBL_SRC_C/linux
 
         case honeycomb
-            cbl_upd_src_c m
+            cbl_upd_src c m
 
             cbl_lkt \
                 --architectures arm arm64 i386 x86_64 \
@@ -20,7 +20,7 @@ function cbl_bld_all_krnl -d "Build all kernels for ClangBuiltLinux testing"
                 --targets def
 
         case pi
-            cbl_upd_src_c n
+            cbl_upd_src c n
 
             for arch in arm arm64 x86_64
                 switch $arch
@@ -65,7 +65,7 @@ function cbl_bld_all_krnl -d "Build all kernels for ClangBuiltLinux testing"
                 distclean allmodconfig all
 
         case test-desktop-intel-11700
-            cbl_upd_src_c m
+            cbl_upd_src c m
 
             cbl_lkt \
                 --architectures arm arm64 i386 x86_64 \

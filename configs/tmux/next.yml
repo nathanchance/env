@@ -18,6 +18,6 @@ windows:
     start_directory: $CBL_SRC_P/rpi
     enter: false
   - shell: dbxe
-    shell_command: cbl_upd_src_p n
+    shell_command: cbl_upd_src p n
     start_directory: $CBL_SRC_P/linux-next
     enter: false
