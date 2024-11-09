@@ -63,7 +63,9 @@ function cbl_upd_src -d "Update source trees in $CBL_SRC"
                 switch $tree
                     case l
                         set base llvm-project
-                        set -a remotes origin-ssh
+                        if is_location_primary
+                            set -a remotes origin-ssh
+                        end
                     case m
                         set base linux
                     case n
