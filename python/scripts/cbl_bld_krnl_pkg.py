@@ -15,6 +15,15 @@ import lib.kernel
 # pylint: enable=wrong-import-position
 
 
+def recreate_folder(folder):
+    if folder.exists():
+        try:
+            shutil.rmtree(folder) if folder.is_dir() else folder.unlink()
+        except PermissionError:
+            subprocess.run(['sudo', 'rm', '--recursive', folder], check=True)
+    folder.mkdir(parents=True)
+
+
 class KernelPkgBuilder:
 
     def __init__(self, source_folder=None):
@@ -87,8 +96,7 @@ class KernelPkgBuilder:
             self._kmake(['olddefconfig'], env=kconfig_env)
 
         # Copy new configuration into place
-        shutil.rmtree(self._build_folder)
-        self._build_folder.mkdir(parents=True)
+        recreate_folder(self._build_folder)
         shutil.copyfile(src_config_file, dst_config_file)
 
         self._kmake(['olddefconfig', 'prepare'])
@@ -212,12 +220,7 @@ class DebugPkgBuilder(KernelPkgBuilder):
         config = Path(self._build_folder, '.config')
         base_sc_cmd = [Path(self._source_folder, 'scripts/config'), '--file', config]
 
-        if self._build_folder.exists():
-            if self._build_folder.is_dir():
-                shutil.rmtree(self._build_folder)
-            else:
-                self._build_folder.unlink()
-        self._build_folder.mkdir(parents=True)
+        recreate_folder(self._build_folder)
 
         crl_cmd = [
             'curl',
