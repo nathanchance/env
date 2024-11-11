@@ -37,6 +37,9 @@ def prepare_source(base_name, base_ref='origin/master'):
     # yapf: disable
     if base_name == 'fedora':
         patches.append('https://lore.kernel.org/all/20241107-sysfs-const-mmap-fix-cdx-v1-1-2ed9b7cd5f8b@kernel.org/')  # cdx: Fix cdx_mmap_resource() after constifying attr in ->mmap()
+    if base_name in ('fedora', 'linux-next-llvm'):
+        patches.append('https://lore.kernel.org/all/20241111-apparmor-fix-label-declaration-warning-v1-1-adb64ab6482b@kernel.org/')  # apparmor: Add empty statement between label and declaration in profile_transition()
+        patches.append('https://lore.kernel.org/all/20241111-input-ads7846-increase-xfer-array-size-v1-1-06cd92e9f20f@kernel.org/')  # Input: ads7846 - Increase xfer array size in 'struct ser_req'
     # yapf: enable
 
     # pylint: disable=subprocess-run-check
