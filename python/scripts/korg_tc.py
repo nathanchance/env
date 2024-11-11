@@ -249,8 +249,9 @@ class GCCManager(ToolchainManager):
             # be built.
             if 'aarch64-linux' in targets:
                 targets.append('arm-linux-gnueabi')
-            # No GCC 9.5.0 i386-linux on x86_64?
-            if self.host_arch == 'x86_64' and 'i386-linux' in targets and major_version == 9:
+            # No GCC 9.5.0 i386-linux on x86_64 or GCC 14.2.0 i386-linux on aarch64?
+            if 'i386-linux' in targets and (self.host_arch, major_version) in (('x86_64', 9),
+                                                                               ('aarch64', 14)):
                 targets.remove('i386-linux')
             # RISC-V was not supported in GCC until 7.x
             if major_version < 7:
