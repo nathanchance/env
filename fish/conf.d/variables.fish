@@ -170,8 +170,7 @@ set -gx CBL_STABLE_VERSIONS \
     6.6 \
     6.1 \
     5.15 \
-    5.10 \
-    5.4
+    5.10
 
 # ccache compression level
 set -gx CCACHE_COMPRESS true
@@ -257,6 +256,7 @@ set -gx STOCK_GCC_VARS \
 # https://www.kernel.org/category/releases.html
 set -gx SUPPORTED_STABLE_VERSIONS \
     $CBL_STABLE_VERSIONS \
+    5.4 \
     4.19
 
 # Point tmuxp to configurations in env folder
