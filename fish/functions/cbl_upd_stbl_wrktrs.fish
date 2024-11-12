@@ -9,7 +9,7 @@ function cbl_upd_stbl_wrktrs -d "Update the worktrees for linux-stable"
             clone_repo_from_bundle linux-stable $folder
         else
             header "Updating $folder"
-            git -C $folder remote update
+            git -C $folder remote update origin
         end
 
         if test (dirname $folder) = $CBL_SRC_D
