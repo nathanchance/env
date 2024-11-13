@@ -35,6 +35,8 @@ done
 if ! is_available python3; then
     if is_available apk; then
         apk add python3
+    elif is_available dnf; then
+        dnf install -y python3
     else
         echo "[-] No suitable command could be found to install python3" >&2
     fi
