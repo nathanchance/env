@@ -12,18 +12,32 @@ function cbl_upd_stbl_wrktrs -d "Update the worktrees for linux-stable"
             git -C $folder remote update origin
         end
 
-        if test (dirname $folder) = $CBL_SRC_D
+        set dirname (dirname $folder)
+        if test $dirname = $CBL_SRC_D
             set stable_versions $SUPPORTED_STABLE_VERSIONS
         else
             set stable_versions $CBL_STABLE_VERSIONS
         end
 
         for worktree in $folder-*
-            set stable_version (string split -f 3 '-' (basename $worktree))
+            set basename (basename $worktree)
+            set stable_version (string split -f 3 '-' $basename)
             if not contains $stable_version $stable_versions
                 header "Removing $worktree"
                 git -C $folder worktree remove --force $worktree
                 git -C $folder bd linux-$stable_version.y
+
+                if test $dirname = $CBL_SRC_P
+                    set patches_repo $GITHUB_FOLDER/patches
+                    set patches_folder $patches_repo/$basename
+
+                    if test -d $patches_folder
+                        rm -r $patches_folder
+                        and git -C $patches_repo add $patches_folder
+                        and git -C $patches_repo c -m "patches: Remove $basename due to EOL"
+                    end
+                    or return
+                end
             end
         end
 
