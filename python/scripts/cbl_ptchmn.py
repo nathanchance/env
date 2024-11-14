@@ -67,9 +67,9 @@ def sync(repo, patches_output):
     fp_cmd = ['fp', f"--base={mfc}^", '-o', patches_output, f"{mfc}^..HEAD"]
     git_loud(repo, fp_cmd)
 
-    status_cmd = ['--no-optional-locks', 'status', '-u', '--porcelain']
+    status_cmd = ['--no-optional-locks', 'status', '-u', '--porcelain', patches_output]
     if git(patches_output, status_cmd).stdout.strip():
-        git(patches_output, ['aa'])
+        git(patches_output, ['add', patches_output])
 
         sha = git(repo, ['sha']).stdout.strip()
         cmt_msg = f"patches: {repo.name}: {patches_output.name}: sync as of {sha}"
