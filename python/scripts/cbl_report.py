@@ -5,6 +5,7 @@
 from argparse import ArgumentParser
 import calendar
 import datetime
+import email
 import json
 import os
 from pathlib import Path
@@ -151,7 +152,9 @@ def parse_parameters():
     finalize_parser.set_defaults(func=finalize_report)
 
     generate_parser = subparsers.add_parser('generate', help='Generate line items automatically')
-    generate_parser.add_argument('type', choices=['patch', 'pr'], help='Type of item to generate')
+    generate_parser.add_argument('type',
+                                 choices=['mail', 'patch', 'pr'],
+                                 help='Type of item to generate')
     generate_parser.set_defaults(func=generate_item)
 
     new_parser = subparsers.add_parser(
@@ -221,7 +224,24 @@ def generate_devices(devices):
 def generate_item(args):
     item_type = args.type
 
-    if item_type == 'patch':
+    if item_type == 'mail':
+        msg = email.message_from_string(sys.stdin.read())
+
+        if not (subject := msg.get('Subject')):
+            raise RuntimeError('Cannot find subject in headers?')
+        if not (msgid := msg.get('Message-ID')):
+            raise RuntimeError('Cannot find message-ID in headers?')
+
+        # Transform <message-id> into message-id
+        msgid = msgid.strip('<').rstrip('>')
+
+        # Unwrap subject if necessary
+        if '\n' in subject:
+            subject = ''.join(subject.splitlines())
+
+        print(f"* [`{subject}`](https://lore.kernel.org/{msgid}/)")
+
+    elif item_type == 'patch':
         if not Path('Makefile').exists():
             raise RuntimeError('Not in a kernel tree?')
 
