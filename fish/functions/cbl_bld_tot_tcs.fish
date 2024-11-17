@@ -221,7 +221,7 @@ function cbl_bld_tot_tcs -d "Build LLVM and binutils from source for kernel deve
             end
 
             set lsm_location (command grep -F 'lsm.location = Path(src_folder,' $tc_bld/build-llvm.py | string trim)
-            if not timeout 24h env PYTHONPATH=$tc_bld python3 -c "from pathlib import Path
+            timeout 24h env PYTHONPATH=$tc_bld python3 -c "from pathlib import Path
 
 import tc_build.utils
 
@@ -247,7 +247,15 @@ $validate_targets
 }
 kernel_builder.toolchain_prefix = Path('$llvm_bld/final')
 kernel_builder.build()"
-                set message "Validation of new LLVM revision failed: Linux did not build!"
+            switch $status
+                case 0 # ok
+                case 124
+                    set failure_reason "Building Linux timed out"
+                case '*'
+                    set failure_reason "Linux did not build"
+            end
+            if set -q failure_reason
+                set message "Validation of new LLVM revision failed: $failure_reason!"
                 print_error "$message"
                 tg_msg "$message"
                 return 1
