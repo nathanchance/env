@@ -3,7 +3,7 @@
 # Copyright (C) 2022-2023 Nathan Chancellor
 
 function cbl_gen_arch_initrd -d "Build initramfs with mkinitcpio for Arch Linux systems"
-    in_kernel_tree; or return
+    in_tree kernel; or return
 
     set rel_file include/config/kernel.release
     if not test -f $rel_file

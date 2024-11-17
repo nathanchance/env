@@ -12,7 +12,7 @@ function b4_prep -d "Wrapper around 'b4 prep'"
     set remote_branch $argv[2]
     set local_branch $argv[3]
 
-    in_kernel_tree; or return
+    in_tree kernel; or return
 
     git f $repo $remote_branch
     and b4 prep -f FETCH_HEAD -n $local_branch

@@ -4,7 +4,7 @@
 
 function cbl_bld_krnl_rpm -d "Build a .rpm kernel package"
     in_container_msg -c; or return
-    in_kernel_tree; or return
+    in_tree kernel; or return
 
     # Effectively 'distclean'
     git cl -e .config -q

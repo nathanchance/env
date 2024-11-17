@@ -4,7 +4,7 @@
 
 function cbl_bld_krnl_deb -d "Build a .deb kernel package"
     in_container_msg -c; or return
-    in_kernel_tree; or return
+    in_tree kernel; or return
 
     # Effectively 'distclean'
     git cl -q

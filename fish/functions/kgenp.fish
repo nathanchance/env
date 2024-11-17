@@ -3,7 +3,7 @@
 # Copyright (C) 2022-2023 Nathan Chancellor
 
 function kgenp -d "Generate patches from a git tree to send via git send-email"
-    in_kernel_tree; or return
+    in_tree kernel; or return
 
     set mfc (git mfc)
 

@@ -3,7 +3,7 @@
 # Copyright (C) 2021-2023 Nathan Chancellor
 
 function kpch -d "Run checkpatch.pl and get_maintainer.pl on a patch"
-    in_kernel_tree; or return
+    in_tree kernel; or return
     if string match -qr b4/ (git bn)
         set b4_branch true
     end
