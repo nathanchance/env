@@ -151,10 +151,14 @@ def parse_parameters():
                                  help='Remove worktree')
     finalize_parser.set_defaults(func=finalize_report)
 
-    generate_parser = subparsers.add_parser('generate', help='Generate line items automatically')
-    generate_parser.add_argument('type',
-                                 choices=['mail', 'patch', 'pr'],
-                                 help='Type of item to generate')
+    gen_help = 'Generate line items automatically'
+    gen_type_choices = ('mail', 'patch', 'pr')
+    gen_type_help = 'Type of item to generate'
+    gen_parser = subparsers.add_parser('gen', help=gen_help)
+    gen_parser.add_argument('type', choices=gen_type_choices, help=gen_type_help)
+    gen_parser.set_defaults(func=generate_item)
+    generate_parser = subparsers.add_parser('generate', help=gen_help)
+    generate_parser.add_argument('type', choices=gen_type_choices, help=gen_type_help)
     generate_parser.set_defaults(func=generate_item)
 
     new_parser = subparsers.add_parser(
