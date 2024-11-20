@@ -138,9 +138,6 @@ function cbl_bld_tot_tcs -d "Build LLVM and binutils from source for kernel deve
     end
 
     # Add patches to revert here
-    # https://github.com/llvm/llvm-project/pull/115504#issuecomment-2487257617
-    set -a reverts https://github.com/llvm/llvm-project/commit/02b8ee281947f6cb39c7eb3c4bbba59322e9015b # [llvm] Improve llvm.objectsize computation by computing GEP, alloca and malloc parameters bound (#115522)
-    set -a reverts https://github.com/llvm/llvm-project/commit/1dcb3db0ac1255bf556bf6b62d03a113bd5191d8 # [llvm] Fix behavior of llvm.objectsize in presence of negative / large offset (#115504)
     for revert in $reverts
         if string match -qr 'https?://' $revert
             set -l revert (basename $revert)
@@ -161,6 +158,8 @@ function cbl_bld_tot_tcs -d "Build LLVM and binutils from source for kernel deve
     end
 
     # Add in-review patches here
+    # https://github.com/llvm/llvm-project/pull/115504#issuecomment-2487257617
+    set -a gh_prs https://github.com/llvm/llvm-project/pull/116955 # [llvm] Fix ObjectSizeOffsetVisitor behavior in exact mode upon negative offset
     for gh_pr in $gh_prs
         if gh_llvm pr view --json state (basename $gh_pr) | python3 -c "import json, sys; sys.exit(0 if json.load(sys.stdin)['state'] == 'MERGED' else 1)"
             print_warning "$gh_pr has already been merged, skipping..."
