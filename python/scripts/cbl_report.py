@@ -835,7 +835,7 @@ def new_report(args):
 
             create_monthly_report_file(report, report_date)
             git(worktree, ['add', report])
-            git(worktree, ['commit', '-m', commit_title, '--date', commit_date])
+            git(worktree, ['commit', '-m', commit_title, '--date', commit_date, '--signoff'])
 
 
 def update_report(args):
