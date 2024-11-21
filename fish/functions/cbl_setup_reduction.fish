@@ -14,12 +14,14 @@ function cbl_setup_reduction -d "Build good and bad versions of LLVM for cvise r
         return 1
     end
     set bad_sha (git sha $bad_sha)
+    or return
 
     set good_sha $argv[2]
     if test -z "$good_sha"
         set good_sha $bad_sha^
     end
     set good_sha (git sha $good_sha)
+    or return
 
     set bld_llvm_args $argv[3..]
 
