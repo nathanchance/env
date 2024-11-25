@@ -36,9 +36,6 @@ def prepare_source(base_name, base_ref='origin/master'):
     # Patching section
     # yapf: disable
     if base_name in ('fedora', 'linux-next-llvm'):
-        patches.append('https://lore.kernel.org/all/20241111-apparmor-fix-label-declaration-warning-v1-1-adb64ab6482b@kernel.org/')  # apparmor: Add empty statement between label and declaration in profile_transition()
-        patches.append('https://lore.kernel.org/all/20241111-input-ads7846-increase-xfer-array-size-v1-1-06cd92e9f20f@kernel.org/')  # Input: ads7846 - Increase xfer array size in 'struct ser_req'
-
         # https://lore.kernel.org/20241114163931.GA1928968@thelio-3990X/
         reverts.append(('1bd9011ee163e11f186b72705978fd6b21bdc07b^..19375843912f6317ecf4dc922b660109ee1151a6',
                         'Revert up to "netfs: Change the read result collector to only use one work item"'))
