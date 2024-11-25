@@ -229,7 +229,10 @@ def generate_item(args):
     item_type = args.type
 
     if item_type == 'mail':
-        msg = email.message_from_string(sys.stdin.read())
+        with open(0, 'rb') as file:
+            raw_stdin = file.read()
+        stdin = raw_stdin.decode(encoding='utf-8', errors='ignore')
+        msg = email.message_from_string(stdin)
 
         if not (subject := msg.get('Subject')):
             raise RuntimeError('Cannot find subject in headers?')
