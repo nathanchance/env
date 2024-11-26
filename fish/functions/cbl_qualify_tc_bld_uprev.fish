@@ -27,7 +27,9 @@ function cbl_qualify_tc_bld_uprev -d "Qualify a new known good revision for tc-b
         cbl_upd_src c s
         and cbl_clone_repo (basename $tc_bld_src)
         and if set -q reset
-            rm -fr $TMP_FOLDER/(status function).*
+            for dir in $TMP_FOLDER/(status function).*
+                rm -fr $dir
+            end
             and git -C $tc_bld_src worktree prune
             and git -C $lnx_stbl worktree prune
         end
