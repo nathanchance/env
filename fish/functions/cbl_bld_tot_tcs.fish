@@ -138,6 +138,8 @@ function cbl_bld_tot_tcs -d "Build LLVM and binutils from source for kernel deve
     end
 
     # Add patches to revert here
+    # https://github.com/llvm/llvm-project/pull/117558#issuecomment-2502138759
+    set -a reverts https://github.com/llvm/llvm-project/commit/3e1b55cafc95d4ef46f302d0fcd695461e376958 # [SDAG] Don't allow implicit trunc in getConstant() (#117558)
     for revert in $reverts
         if string match -qr 'https?://' $revert
             set -l revert (basename $revert)
