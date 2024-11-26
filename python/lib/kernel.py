@@ -37,8 +37,7 @@ def prepare_source(base_name, base_ref='origin/master'):
     # yapf: disable
     if base_name in ('fedora', 'linux-next-llvm'):
         # https://lore.kernel.org/20241114163931.GA1928968@thelio-3990X/
-        reverts.append(('1bd9011ee163e11f186b72705978fd6b21bdc07b^..19375843912f6317ecf4dc922b660109ee1151a6',
-                        'Revert up to "netfs: Change the read result collector to only use one work item"'))
+        commits.append('77e7f92cf7ff5962360f767e92069fc25bbcdcac')  # fixup! netfs: Change the read result collector to only use one work item
     # yapf: enable
 
     # pylint: disable=subprocess-run-check
