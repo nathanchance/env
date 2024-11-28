@@ -3,10 +3,6 @@
 # Copyright (C) 2024 Nathan Chancellor
 
 function cbl_gen_korg_readme -d "Generate kernel.org toolchains README"
-    if not in_orb
-        print_error "README should be generated from within OrbStack"
-        return 1
-    end
     if not in_venv
         py_venv c e markdown
         and pip install --upgrade \
@@ -55,14 +51,20 @@ function cbl_gen_korg_readme -d "Generate kernel.org toolchains README"
             set md_base 'LLVM+Rust toolchains README.md'
     end
 
-    set md $MAC_FOLDER(dirname $ICLOUD_DOCS_FOLDER)/iCloud~md~obsidian/Documents/Tech/Kernel/Work/$md_base
+    if in_orb
+        set md $MAC_FOLDER(dirname $ICLOUD_DOCS_FOLDER)/iCloud~md~obsidian/Documents/Tech/Kernel/Work/$md_base
+
+        set mac_html /Users/$USER/Downloads/$tc-index.html
+        set lnx_html $MAC_FOLDER$mac_html
+    else
+        set md /tmp/$md_base
+
+        set lnx_html $TMP_FOLDER/pgo-llvm-builder-staging/$tc-index.html
+    end
     if not test -e $md
         print_error "$md does not exist?"
         return 1
     end
-
-    set mac_html /Users/$USER/Downloads/$tc-index.html
-    set lnx_html $MAC_FOLDER$mac_html
 
     if set -q versions_prompt
         read -l -P 'Old version: ' old_ver
@@ -83,16 +85,18 @@ function cbl_gen_korg_readme -d "Generate kernel.org toolchains README"
     gpg --detach-sign --armor $lnx_html
     or return
 
-    mac open $mac_html
-    or return
-
     py_venv x r markdown
 
-    set tailscale $MAC_FOLDER/Applications/Tailscale.app/Contents/MacOS/Tailscale
-    if test -e $tailscale; and $tailscale status &>/dev/null
-        set ip ($tailscale ip -4 thelio-3990X)
-    else
-        set ip $MAIN_REMOTE_IP
+    if set -q mac_html
+        mac open $mac_html
+        or return
+
+        set tailscale $MAC_FOLDER/Applications/Tailscale.app/Contents/MacOS/Tailscale
+        if test -e $tailscale; and $tailscale status &>/dev/null
+            set ip ($tailscale ip -4 thelio-3990X)
+        else
+            set ip $MAIN_REMOTE_IP
+        end
+        rsync --progress $lnx_html* nathan@$ip:$NVME_FOLDER/tmp/pgo-llvm-builder-staging
     end
-    rsync --progress $lnx_html* nathan@$ip:$NVME_FOLDER/tmp/pgo-llvm-builder-staging
 end
