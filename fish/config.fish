@@ -57,7 +57,7 @@ if command -q fd
     set -agx FZF_DEFAULT_OPTS --ansi
 end
 
-if command -q zoxide
+if command -q zoxide; and status is-interactive
     zoxide init --hook prompt fish | source
 end
 
