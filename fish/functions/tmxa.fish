@@ -7,12 +7,14 @@ function tmxa -d "Attach to a tmux session if it exists, start a new one if not"
         switch $LOCATION
             case aadp honeycomb pi test-{desktop-intel-{11700,n100},desktop-amd,laptop-intel}
                 set tmuxp_cfg test
-            case generic workstation
+            case generic
                 if in_orb
-                    set tmuxp_cfg workstation
+                    set tmuxp_cfg primary
                 else
-                    set tmuxp_cfg $LOCATION
+                    set tmuxp_cfg generic
                 end
+            case hetzner workstation
+                set tmuxp_cfg primary
         end
         if set -q tmuxp_cfg
             tmuxp load --yes $tmuxp_cfg
