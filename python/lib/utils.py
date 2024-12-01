@@ -95,6 +95,10 @@ def print_yellow(msg):
     print_color('\033[01;33m', msg)
 
 
+def print_red(msg):
+    print_color('\033[01;31m', msg)
+
+
 def run_as_root(full_cmd):
     cmd_copy = full_cmd.copy()
     # If we have to escalate via 'sudo', print the command so it can be audited

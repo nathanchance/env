@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: MIT
 # Copyright (C) 2024 Nathan Chancellor
 
-from argparse import ArgumentParser
+from argparse import ArgumentParser, BooleanOptionalAction
 import os
 from pathlib import Path
 import platform
@@ -448,13 +448,16 @@ if __name__ == '__main__':
         default=manager.DEFAULT_INSTALL_FOLDER,
         help='Folder to store extracted toolchains for use (default: %(default)s)',
         type=Path)
-    no_group = install_parser.add_mutually_exclusive_group()
-    no_group.add_argument('--no-cache',
-                          action='store_true',
-                          help='Do not save downloaded toolchain tarballs to disk')
-    no_group.add_argument('--no-extract',
-                          action='store_true',
-                          help='Do not unpack downloaded toolchain tarballs to disk')
+    install_parser.add_argument(
+        '--cache',
+        action=BooleanOptionalAction,
+        default=Path(os.environ['NAS_FOLDER']).exists(),
+        help='Save downloaded toolchain tarballs to disk (default: %(default)s)')
+    install_parser.add_argument(
+        '--extract',
+        action=BooleanOptionalAction,
+        default=True,
+        help='Unpack downloaded toolchain tarballs to disk (default: %(default)s)')
 
     latest_parser = subparser.add_parser(
         'latest', help='Print the latest stable release of a particular toolchain major version')
@@ -497,11 +500,15 @@ if __name__ == '__main__':
         manager.versions = dedup(args.versions)
 
     if args.subcommand == 'install':
+        if not args.cache and not args.extract:
+            lib.utils.print_red('ERR: --no-cache and --no-extract used together?')
+            sys.exit(128)
+
         manager.download_folder = args.download_folder.resolve()
         manager.host_arch = args.host_arch
         manager.install_folder = args.install_folder.resolve()
 
-        manager.install(not args.no_cache, not args.no_extract)
+        manager.install(args.cache, not args.no_extract)
         if args.clean_up_old_versions:
             manager.clean_up_old_versions()
 
