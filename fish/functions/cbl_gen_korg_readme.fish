@@ -97,6 +97,13 @@ function cbl_gen_korg_readme -d "Generate kernel.org toolchains README"
         else
             set ip $MAIN_REMOTE_IP
         end
-        rsync --progress $lnx_html* nathan@$ip:$NVME_FOLDER/tmp/pgo-llvm-builder-staging
+
+        if ssh nathan@$ip "fish -c 'test -d $NVME_FOLDER'"
+            set remote_prefix $NVME_FOLDER
+        else
+            set remote_prefix $HOME
+        end
+
+        rsync --progress $lnx_html* nathan@$ip:(string replace $EXT_FOLDER $remote_prefix $TMP_FOLDER)/pgo-llvm-builder-staging
     end
 end
