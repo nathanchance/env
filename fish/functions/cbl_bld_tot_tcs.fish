@@ -24,7 +24,7 @@ function cbl_bld_tot_tcs -d "Build LLVM and binutils from source for kernel deve
                 set validate_uprev llvm
             end
 
-        case hetzner-server workstation
+        case hetzner workstation
             set bolt true
             set pgo kernel-defconfig
             set validate_uprev kernel

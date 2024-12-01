@@ -61,7 +61,7 @@ function cbl_upd_krnl -d "Update machine's kernel"
                 sudo reboot
             end
 
-        case hetzner-server workstation
+        case hetzner workstation
             for arg in $argv
                 switch $arg
                     case -k --kexec -r --reboot

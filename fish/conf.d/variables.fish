@@ -16,7 +16,7 @@ if test -z "$LOCATION"
             case nathan@aadp
                 set -Ux LOCATION aadp
             case nathan@archlinux-'*' nathan@debian-'*' nathan@ubuntu-'*'
-                set -Ux LOCATION hetzner-server
+                set -Ux LOCATION hetzner
             case nathan@honeycomb
                 set -Ux LOCATION honeycomb
             case nathan@raspberrypi pi@raspberrypi
@@ -51,7 +51,7 @@ end
 switch $LOCATION
     case generic wsl
         set -gx CCACHE_MAXSIZE 25G
-    case hetzner-server
+    case hetzner
         set -gx CCACHE_MAXSIZE 200G
     case test-desktop-amd test-laptop-intel pi vm
         set -gx CCACHE_MAXSIZE 15G

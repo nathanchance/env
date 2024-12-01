@@ -29,7 +29,7 @@ function user_setup -d "Setup a user account, downloading all files and placing 
     switch $LOCATION
         case aadp honeycomb pi test-desktop-amd test-desktop-intel-{11700,n100} test-laptop-intel
             set trusted_ssh true
-        case hetzner-server workstation wsl
+        case hetzner workstation wsl
             set trusted_gpg true
             set trusted_ssh true
     end
@@ -301,7 +301,7 @@ rpmbuild/' >>$gitignore
 
     # git repos and source folders
     switch $LOCATION
-        case heztner-server workstation
+        case hetzner workstation
             mkdir -p $SRC_FOLDER
 
             set github_repos arch-repo bug-files hugo-files nathanchance.github.io patches
