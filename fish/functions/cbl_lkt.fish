@@ -226,6 +226,8 @@ function cbl_lkt -d "Tests a Linux kernel with llvm-kernel-testing"
                 else if test (nproc) -ge 16
                     set average_duration 8
                 end
+            case hetzner
+                set average_duration 5
             case honeycomb
                 set average_duration 4
             case test-desktop-intel-11700
