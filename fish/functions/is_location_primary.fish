@@ -2,6 +2,6 @@
 # SPDX-License-Identifier: MIT
 # Copyright (C) 2022-2023 Nathan Chancellor
 
-function is_location_primary -d "Checks if current machine is the primary machine (my workstation)"
-    test "$LOCATION" = "$PRIMARY_LOCATION"
+function is_location_primary -d "Checks if current machine is a primary machine (workstation, server)"
+    contains $LOCATION $PRIMARY_LOCATIONS
 end

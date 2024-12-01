@@ -232,8 +232,8 @@ set -gx LIBVIRT_DEFAULT_URI qemu:///system
 # Always use blackbg for menuconfig
 set -gx MENUCONFIG_COLOR blackbg
 
-# Primary location from list above
-set -gx PRIMARY_LOCATION workstation
+# Primary locations from list above
+set -gx PRIMARY_LOCATIONS workstation
 
 # My primary remote IP address
 set -gx MAIN_REMOTE_IP 192.168.4.188
