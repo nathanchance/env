@@ -69,7 +69,25 @@ def adjust_gnome_power_settings():
     subprocess.run(gdm_cmd, check=True)
 
 
-def configure_boot_entries(init=True, conf='linux.conf'):
+def configure_networking():
+    hostname = lib.setup.get_hostname()
+
+    ips = {
+        'asus-intel-core-4210U': '192.168.4.137',
+        'asus-intel-core-11700': '192.168.4.189',
+        'beelink-intel-n100': '192.168.4.190',
+        'hp-amd-ryzen-4300G': '192.168.4.177',
+        'thelio-3990X': '192.168.4.188',
+    }
+
+    if hostname not in ips:
+        return
+
+    lib.setup.setup_static_ip(ips[hostname])
+    lib.setup.setup_mnt_nas()
+
+
+def configure_systemd_boot(init=True, conf='linux.conf'):
     # Not using systemd-boot, bail out
     if not (boot_entries := Path('/boot/loader/entries')).exists():
         return
@@ -113,24 +131,6 @@ def configure_boot_entries(init=True, conf='linux.conf'):
 
     # Ensure that the new configuration is the default on the machine.
     subprocess.run(['bootctl', 'set-default', linux_conf.name], check=True)
-
-
-def configure_networking():
-    hostname = lib.setup.get_hostname()
-
-    ips = {
-        'asus-intel-core-4210U': '192.168.4.137',
-        'asus-intel-core-11700': '192.168.4.189',
-        'beelink-intel-n100': '192.168.4.190',
-        'hp-amd-ryzen-4300G': '192.168.4.177',
-        'thelio-3990X': '192.168.4.188',
-    }
-
-    if hostname not in ips:
-        return
-
-    lib.setup.setup_static_ip(ips[hostname])
-    lib.setup.setup_mnt_nas()
 
 
 def enable_reflector():
@@ -504,7 +504,7 @@ if __name__ == '__main__':
     prechecks()
     # pacman_settings() should always be run first so that is_hetzner() always works
     pacman_settings()
-    configure_boot_entries()
+    configure_systemd_boot()
     pacman_key_setup()
     pacman_update()
     pacman_install_packages()
