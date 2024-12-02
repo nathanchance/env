@@ -88,13 +88,13 @@ def configure_networking():
 
 
 def configure_systemd_boot(init=True, conf='linux.conf'):
-    # Not using systemd-boot, bail out
-    if not (boot_entries := Path('/boot/loader/entries')).exists():
+    # Not using systemd-boot, nothing to configure
+    if not lib.setup.using_systemd_boot():
         return
 
     # If we already set up the configuration, no need to go through all this
     # again, unless we are not doing the initial configuration
-    if (linux_conf := Path(boot_entries, conf)).exists() and init:
+    if (linux_conf := (boot_entries := Path('/boot/loader/entries')) / conf).exists() and init:
         return
 
     # Find the configuration with a regex in case we set up another linux.conf

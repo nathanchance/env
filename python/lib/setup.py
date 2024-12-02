@@ -469,5 +469,11 @@ def user_exists(user):
     return True
 
 
+def using_systemd_boot():
+    if not shutil.which('bootctl'):
+        return False
+    return subprocess.run(['bootctl', '--quiet', 'is-installed'], check=False).returncode == 0
+
+
 def zypper(zypper_args):
     lib.utils.run_as_root(['zypper', *zypper_args])
