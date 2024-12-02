@@ -92,6 +92,25 @@ def configure_systemd_boot(init=True, conf='linux.conf'):
     if not lib.setup.using_systemd_boot():
         return
 
+    # Ensure we update systemd-boot with systemd upgrades:
+    # https://wiki.archlinux.org/title/Systemd-boot#systemd_service
+    if not (systemd_boot_update_hook := Path('/etc/pacman.d/hooks/95-systemd-boot.hook')).exists():
+        if not (pacman_hooks := systemd_boot_update_hook.parent).exists():
+            pacman_hooks.mkdir()
+            pacman_hooks.chmod(0o755)
+        systemd_boot_update_hook_txt = (
+            '[Trigger]\n'
+            'Type = Package\n'
+            'Operation = Upgrade\n'
+            'Target = systemd\n'
+            '\n'
+            '[Action]\n'
+            'Description = Gracefully upgrading systemd-boot...\n'
+            'When = PostTransaction\n'
+            'Exec = /usr/bin/systemctl restart systemd-boot-update.service\n')
+        systemd_boot_update_hook.write_text(systemd_boot_update_hook_txt, encoding='utf-8')
+        systemd_boot_update_hook.chmod(0o644)
+
     # If we already set up the configuration, no need to go through all this
     # again, unless we are not doing the initial configuration
     if (linux_conf := (boot_entries := Path('/boot/loader/entries')) / conf).exists() and init:
