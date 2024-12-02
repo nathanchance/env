@@ -438,12 +438,14 @@ class X8632VirtualMachine(X86VirtualMachine):
 
     def setup_efi_files(self, possible_efi_files=None, possible_efi_vars_files=None):
         possible_efi_files = [
-            Path('edk2/ia32/OVMF_CODE.fd'),  # Arch Linux
+            Path('edk2/ia32/OVMF_CODE.4m.fd'),  # Arch Linux (4MB location)
+            Path('edk2/ia32/OVMF_CODE.fd'),  # Arch Linux (2MB location)
             Path('edk2/ovmf-ia32/OVMF_CODE.fd'),  # Fedora
             Path("OVMF/OVMF32_CODE_4M.secboot.fd"),  # Debian and Ubuntu
         ]
         possible_efi_vars_files = [
-            Path('edk2/ia32/OVMF_VARS.fd'),  # Arch Linux
+            Path('edk2/ia32/OVMF_VARS.4m.fd'),  # Arch Linux (4MB location)
+            Path('edk2/ia32/OVMF_VARS.fd'),  # Arch Linux (2MB location)
             Path('edk2/ovmf-ia32/OVMF_VARS.fd'),  # Fedora
             Path("OVMF/OVMF32_VARS_4M.fd"),  # Debian and Ubuntu
         ]
@@ -459,11 +461,13 @@ class X8664VirtualMachine(X86VirtualMachine):
 
     def setup_efi_files(self, possible_efi_files=None, possible_efi_vars_files=None):
         possible_efi_files = [
-            Path('edk2/x64/OVMF_CODE.fd'),  # Arch Linux and Fedora
+            Path('edk2/x64/OVMF_CODE.4m.fd'),  # Arch Linux (4MB location)
+            Path('edk2/x64/OVMF_CODE.fd'),  # Arch Linux (2MB location) and Fedora
             Path("OVMF/OVMF_CODE.fd"),  # Debian and Ubuntu
         ]
         possible_efi_vars_files = [
-            Path("edk2/x64/OVMF_VARS.fd"),  # Arch Linux and Fedora
+            Path("edk2/x64/OVMF_VARS.4m.fd"),  # Arch Linux (4MB location)
+            Path("edk2/x64/OVMF_VARS.fd"),  # Arch Linux (2MB location) and Fedora
             Path("OVMF/OVMF_VARS.fd"),  # Debian and Ubuntu
         ]
         super().setup_efi_files(possible_efi_files, possible_efi_vars_files)
