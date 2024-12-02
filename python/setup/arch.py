@@ -20,6 +20,15 @@ import lib.utils
 HETZNER_MIRROR = 'https://mirror.hetzner.com/archlinux/$repo/os/$arch'
 PACMAN_CONF = Path('/etc/pacman.conf')
 
+UCODE_VENDOR = None
+if (proc_cpuinfo := Path('/proc/cpuinfo')).exists():
+    proc_cpuinfo_txt = proc_cpuinfo.read_text(encoding='utf-8')
+    if vendor_match := re.search('vendor_id\t: ([a-zA-Z]+)\n', proc_cpuinfo_txt):
+        if (vendor_id := vendor_match.groups()[0]) == 'AuthenticAMD':
+            UCODE_VENDOR = 'amd'
+        elif vendor_id == 'GenuineIntel':
+            UCODE_VENDOR = 'intel'
+
 
 def add_hetzner_mirror_to_repos(config):
     if HETZNER_MIRROR in config:
@@ -271,6 +280,9 @@ def pacman_install_packages():
         'mosh',
         'openssh',
     ]  # yapf: disable
+
+    if UCODE_VENDOR:
+        packages.append(f"{UCODE_VENDOR}-ucode")
 
     if 'DISPLAY' in os.environ:
         packages += [
