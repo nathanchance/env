@@ -64,6 +64,7 @@ RUN dir=$(mktemp -d) && \
     url=https://github.com/facebook/zstd/releases/download/v$ZSTD_VERSION/zstd-$ZSTD_VERSION.tar.gz && \
     wget -O - -q "$url" | tar -C "$dir" --strip-components=1 -xzvf - && \
     make -C "$dir"/lib -j"$(nproc)" install && \
+    make -C "$dir"/programs -j"$(nproc)" install && \
     rm -fr "$dir"
 
 # Buster has ninja 1.8.2, which may be lacking features that newer LLVM or
