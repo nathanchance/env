@@ -107,3 +107,12 @@ def run_as_root(full_cmd):
         cmd_copy.insert(0, 'sudo')
         print_cmd(cmd_copy, show_cmd_location=True)
     subprocess.run(cmd_copy, check=True)
+
+
+def print_or_write_text(path, text, dryrun):
+    if dryrun:
+        print('Would write:\n')
+        print(''.join(f"| {line}\n" for line in text.splitlines()))
+        print(f"to {path}\n")
+    else:
+        path.write_text(text, encoding='utf-8')

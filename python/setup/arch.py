@@ -17,6 +17,18 @@ import lib.setup
 import lib.utils
 # pylint: enable=wrong-import-position
 
+HETZNER_MIRROR = 'https://mirror.hetzner.com/archlinux/$repo/os/$arch'
+PACMAN_CONF = Path('/etc/pacman.conf')
+
+
+def add_hetzner_mirror_to_repos(config):
+    if HETZNER_MIRROR in config:
+        return config
+
+    search = ']\nInclude = /etc/pacman.d/mirrorlist\n'
+    replace = search.replace(']\n', f"]\nServer = {HETZNER_MIRROR}\n")
+    return config.replace(search, replace)
+
 
 def add_mods_to_mkinitcpio(modules):
     mkinitcpio_conf, conf_text = lib.utils.path_and_text('/etc/mkinitcpio.conf')
@@ -116,8 +128,11 @@ def enable_reflector():
     if not lib.setup.is_installed('reflector'):
         return
 
+    # If on a Hetzner server, we should use a closer set of mirrors
+    countries = 'Finland,Germany' if is_hetzner() else 'United States'
+
     reflector_args = [
-        '--country "United States"',
+        f'--country "{countries}"',
         '--latest 15',
         '--protocol https',
         '--save /etc/pacman.d/mirrorlist',
@@ -151,6 +166,11 @@ def enable_reflector():
 # For archinstall, which causes ^M in /etc/fstab
 def fix_fstab():
     subprocess.run(['dos2unix', '/etc/fstab'], check=True)
+
+
+def is_hetzner():
+    # pacman_settings() ensures this is a permanent addition
+    return HETZNER_MIRROR in PACMAN_CONF.read_text(encoding='utf-8')
 
 
 def pacman_install(subargs):
@@ -314,28 +334,46 @@ def pacman_key_setup():
     subprocess.run(['pacman-key', '--populate', 'archlinux'], check=True)
 
 
-def pacman_settings():
-    pacman_conf = Path('/etc/pacman.conf')
+def pacman_settings(dryrun=False):
+    # The Hetzner mirror will be in mirrorlist if this is the first time
+    # running pacman_setting() after installimage.
+    hetzner_mirror_in_mirrorlist = (mirrorlist := Path('/etc/pacman.d/mirrorlist')).exists() and \
+                                   HETZNER_MIRROR in mirrorlist.read_text(encoding='utf-8')
+    # The Hetzner mirror will be in pacman.conf if pacman_settings() has
+    # already be run. This needs to be checked before we blow away pacman.conf
+    # with pacman.conf.pacnew below.
+    hetzner_mirror_in_pacman_conf = is_hetzner()
 
+    conf_text = None
     # Handle .pacnew file
-    pacman_confnew = pacman_conf.with_suffix(f"{pacman_conf.suffix}.pacnew")
-    if pacman_confnew.exists():
-        pacman_confnew.rename(pacman_conf)
-
-    conf_text = pacman_conf.read_text(encoding='utf-8')
+    new_pacman_conf = PACMAN_CONF.with_suffix(f"{PACMAN_CONF.suffix}.pacnew")
+    if new_pacman_conf.exists():
+        if dryrun:
+            conf_text = new_pacman_conf.read_text(encoding='utf-8')
+        else:
+            new_pacman_conf.rename(PACMAN_CONF)
+    if not conf_text:
+        conf_text = PACMAN_CONF.read_text(encoding='utf-8')
 
     conf_text = uncomment_pacman_option(conf_text, 'Color')
     conf_text = uncomment_pacman_option(conf_text, 'VerbosePkgLists')
     conf_text = uncomment_pacman_option(conf_text, 'ParallelDownloads', 5, 7)
 
-    if 'nathan' not in conf_text:
+    # If mirrorlist was generated with "installimage" from Hetzner, add the
+    # Hetzner mirror to pacman.conf directly so that mirrorlist can be
+    # generated with reflector but the Hetzner mirror can always have priority:
+    # https://wiki.archlinux.org/title/Mirrors#Enabling_a_specific_mirror
+    if hetzner_mirror_in_mirrorlist or hetzner_mirror_in_pacman_conf:
+        conf_text = add_hetzner_mirror_to_repos(conf_text)
+
+    if '[nathan]' not in conf_text:
         conf_text += (
             '\n'
             '[nathan]\n'
             'SigLevel = Optional TrustAll\n'
             'Server = https://raw.githubusercontent.com/nathanchance/arch-repo/main/$arch\n')
 
-    pacman_conf.write_text(conf_text, encoding='utf-8')
+    lib.utils.print_or_write_text(PACMAN_CONF, conf_text, dryrun)
 
 
 def pacman_update():
@@ -452,8 +490,9 @@ if __name__ == '__main__':
         password = getpass.getpass(prompt='Password for Arch Linux user account: ')
 
     prechecks()
-    configure_boot_entries()
+    # pacman_settings() should always be run first so that is_hetzner() always works
     pacman_settings()
+    configure_boot_entries()
     pacman_key_setup()
     pacman_update()
     pacman_install_packages()
