@@ -3,6 +3,7 @@
 # Copyright (C) 2022-2023 Nathan Chancellor
 
 from argparse import ArgumentParser
+from os import environ as env
 from pathlib import Path
 import shutil
 import subprocess
@@ -18,8 +19,8 @@ import lib.utils
 # pylint: enable=wrong-import-position
 
 
-def check_install_parted():
-    if shutil.which('parted'):
+def check_install():
+    if shutil.which('sgdisk') or shutil.which('parted'):
         return
 
     if shutil.which('pacman'):
@@ -47,14 +48,10 @@ def create_user(user_name, user_password):
 
 
 def partition_drive(drive_path, mountpoint, username):
-    if '/dev/nvme' in drive_path:
-        part = 'p1'
-    elif '/dev/sd' in drive_path:
-        part = '1'
-    else:
-        raise RuntimeError(f"Cannot handle drive path '{drive_path}'?")
+    if not drive_path.startswith(('/dev/nvme', '/dev/sd')):
+        raise RuntimeError(f"Cannot safely handle drive path '{drive_path}'?")
 
-    volume = Path(drive_path + part)
+    volume = Path(drive_path + 'p1' if '/dev/nvme' in drive_path else '1')
 
     if mountpoint.is_mount():
         raise RuntimeError(f"mountpoint ('{mountpoint}') is already mounted?")
@@ -62,13 +59,31 @@ def partition_drive(drive_path, mountpoint, username):
     if volume.is_block_device():
         raise RuntimeError(f"volume ('{volume}') already exists?")
 
-    subprocess.run(
-        ['parted', '-s', drive_path, 'mklabel', 'gpt', 'mkpart', 'primary', 'ext4', '0%', '100%'],
-        check=True)
-    # Let everything sync up
-    time.sleep(10)
+    if shutil.which('sgdisk'):
+        subprocess.run(['sgdisk', '-N', '1', '-t', '1:8300', drive_path], check=True)
+    else:
+        subprocess.run([
+            'parted',
+            '-s',
+            drive_path,
+            'mklabel',
+            'gpt',
+            'mkpart',
+            'primary',
+            'ext4',
+            '0%',
+            '100%',
+        ],
+                       check=True)
+        # Let everything sync up
+        time.sleep(10)
 
-    subprocess.run(['mkfs', '-t', 'ext4', volume], check=True)
+    subprocess.run(['mkfs', '-t', 'ext4', volume],
+                   check=True,
+                   env={
+                       **env,
+                       'E2FSPROGS_LIBMAGIC_SUPPRESS': '1',
+                   })
 
     vol_uuid = subprocess.run(['blkid', '-o', 'value', '-s', 'UUID', volume],
                               capture_output=True,
@@ -76,7 +91,7 @@ def partition_drive(drive_path, mountpoint, username):
                               text=True).stdout.strip()
 
     fstab = lib.setup.Fstab()
-    fstab[mountpoint] = lib.setup.FstabItem(f"UUID={vol_uuid}", mountpoint, 'ext4', 'noatime', '0',
+    fstab[mountpoint] = lib.setup.FstabItem(f"UUID={vol_uuid}", mountpoint, 'ext4', 'defaults', '0',
                                             '2')
     fstab.write()
 
@@ -115,7 +130,7 @@ if __name__ == '__main__':
     user = args.user
 
     if drive:
-        check_install_parted()
+        check_install()
         partition_drive(drive, folder, user)
 
     if password:
