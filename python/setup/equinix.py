@@ -75,10 +75,10 @@ def partition_drive(drive_path, mountpoint, username):
                               check=True,
                               text=True).stdout.strip()
 
-    fstab, fstab_txt = lib.utils.path_and_text('/etc/fstab')
-    fstab_line = f"UUID={vol_uuid}\t{mountpoint}\text4\tnoatime\t0\t2\n"
-    fstab.write_text(fstab_txt + fstab_line, encoding='utf-8')
-    subprocess.run(['systemctl', 'daemon-reload'], check=True)
+    fstab = lib.setup.Fstab()
+    fstab[mountpoint] = lib.setup.FstabItem(f"UUID={vol_uuid}", mountpoint, 'ext4', 'noatime', '0',
+                                            '2')
+    fstab.write()
 
     mountpoint.mkdir(exist_ok=True, parents=True)
     subprocess.run(['mount', '-a'], check=True)

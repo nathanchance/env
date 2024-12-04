@@ -487,18 +487,16 @@ def setup_mnt_ssd(user_name):
         (mnt_point := Path('/mnt/ssd')).mkdir(exist_ok=True, parents=True)
         chown(user_name, mnt_point)
 
-        fstab, fstab_text = lib.utils.path_and_text('/etc/fstab')
-        if str(mnt_point) not in fstab_text:
+        if mnt_point not in (fstab := Fstab()):
             partuuid = subprocess.run(['blkid', '-o', 'value', '-s', 'PARTUUID', ssd_partition],
                                       capture_output=True,
                                       check=True,
                                       text=True).stdout.strip()
 
-            fstab_line = f"PARTUUID={partuuid}\t{mnt_point}\text4\tdefaults,noatime\t0\t1\n"
+            fstab[mnt_point] = FstabItem(f"PARTUUID={partuuid}", mnt_point, 'ext4',
+                                         'defaults,noatime', '0', '1')
+            fstab.write()
 
-            fstab.write_text(fstab_text + fstab_line, encoding='utf-8')
-
-        subprocess.run(['systemctl', 'daemon-reload'], check=True)
         subprocess.run(['mount', '-a'], check=True)
 
         if shutil.which('docker'):
