@@ -66,12 +66,14 @@ def path_and_text(*args):
     return path, None
 
 
-def print_cmd(command, show_cmd_location=False):
+def print_cmd(command, show_cmd_location=False, end='\n'):
     if show_cmd_location:
         cmd_loc = '(container) ' if in_container() else '(host) '
     else:
         cmd_loc = ''
-    print(f"{cmd_loc}$ {' '.join([shlex.quote(str(elem)) for elem in command])}", flush=True)
+    print(f"{cmd_loc}$ {' '.join([shlex.quote(str(elem)) for elem in command])}",
+          end=end,
+          flush=True)
 
 
 def print_header(string):
@@ -107,6 +109,13 @@ def run_as_root(full_cmd):
         cmd_copy.insert(0, 'sudo')
         print_cmd(cmd_copy, show_cmd_location=True)
     subprocess.run(cmd_copy, check=True)
+
+
+def print_or_run_cmd(cmd, dryrun, end='\n\n'):
+    if dryrun:
+        print_cmd(cmd, end=end)
+    else:
+        subprocess.run(cmd, check=True)
 
 
 def print_or_write_text(path, text, dryrun):

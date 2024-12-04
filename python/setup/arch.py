@@ -3,13 +3,16 @@
 # Copyright (C) 2022-2023 Nathan Chancellor
 
 from argparse import ArgumentParser
+from collections import UserDict
 import getpass
+import json
 import os
 from pathlib import Path
 import re
 import shutil
 import subprocess
 import sys
+from tempfile import TemporaryDirectory
 
 sys.path.append(str(Path(__file__).resolve().parents[1]))
 # pylint: disable=wrong-import-position
@@ -28,6 +31,24 @@ if (proc_cpuinfo := Path('/proc/cpuinfo')).exists():
             UCODE_VENDOR = 'amd'
         elif vendor_id == 'GenuineIntel':
             UCODE_VENDOR = 'intel'
+
+
+class CmdlineOptions(UserDict):
+
+    def __init__(self, initial_argument):
+        if isinstance(initial_argument, str):
+            super().__init__()
+
+            for item in initial_argument.split(' '):
+                if item := item.strip():
+                    key, value = item.split('=', maxsplit=1) if '=' in item else (item, None)
+                    self.data[key] = value
+        else:
+            super().__init__(initial_argument)
+
+    def __str__(self):
+        return ' '.join(
+            sorted(f"{key}={value}" if value else key for key, value in self.data.items()))
 
 
 def add_hetzner_mirror_to_repos(config):
@@ -111,8 +132,10 @@ def configure_systemd_boot(init=True, conf='linux.conf'):
         systemd_boot_update_hook.write_text(systemd_boot_update_hook_txt, encoding='utf-8')
         systemd_boot_update_hook.chmod(0o644)
 
-    # If we already set up the configuration, no need to go through all this
-    # again, unless we are not doing the initial configuration
+    # If we already set up the configuration (either via this function or
+    # installimage_adjustments(), depending on what setup was installed prior
+    # to running this setup), no need to go through all this again, unless we
+    # are not doing the initial configuration
     if (linux_conf := (boot_entries := Path('/boot/loader/entries')) / conf).exists() and init:
         return
 
@@ -129,27 +152,76 @@ def configure_systemd_boot(init=True, conf='linux.conf'):
     linux_conf_text = linux_conf.read_text(encoding='utf-8')
     if not (match := re.search('^options (.*)$', linux_conf_text, flags=re.M)):
         raise RuntimeError(f"Could not find 'options' line in {linux_conf}?")
-    current_options_str = match.groups()[0]
-    current_options = {opt for elem in current_options_str.split(' ') if (opt := elem.strip())}
-    new_options = current_options.copy()
-
-    # Add 'console=' if necessary (when connected by serial console in a
-    # virtual machine)
-    if lib.setup.is_virtual_machine() and 'DISPLAY' not in os.environ:
-        new_options.add('console=ttyS0,115200n8')
-
-    # Enable the performance governor
-    new_options.add('cpufreq.default_governor=performance')
-
-    # Mitigate SMT RSB vulnerability
-    new_options.add('kvm.mitigate_smt_rsb=1')
+    original_options_str = match.groups()[0]
+    current_options = CmdlineOptions(original_options_str)
+    new_options = current_options | get_cmdline_additions()
 
     if current_options != new_options:
-        new_text = linux_conf_text.replace(current_options_str, ' '.join(sorted(new_options)))
+        new_text = linux_conf_text.replace(original_options_str, str(new_options))
         linux_conf.write_text(new_text, encoding='utf-8')
 
     # Ensure that the new configuration is the default on the machine.
     subprocess.run(['bootctl', 'set-default', linux_conf.name], check=True)
+
+
+def convert_boot_to_xbootldr(fstab, dryrun):
+    if fstab[(boot := '/boot')].type == 'vfat':
+        return
+
+    # umount /boot
+    if dryrun:
+        print(f"$ umount {boot}\n")
+    else:
+        lib.setup.umount_gracefully(boot)
+
+    # Wipe all signatures of the block device
+    if not (part_path := fstab[boot].get_dev()):
+        raise RuntimeError(f"Cannot find /dev for {boot}?")
+    lib.utils.print_or_run_cmd(['wipefs', '-af', part_path], dryrun)
+
+    # Use sfdisk to set /boot's partition type to "Linux extended boot"
+    if part_path.name.startswith('nvme'):
+        block, part = part_path.name.rsplit('p', maxsplit=1)
+    elif part_path.name.startswith(('sda', 'vda')):
+        block, part = part_path.name[0:-1], part_path.name[-1]
+    else:
+        raise RuntimeError(f"Cannot handle {part_path}?")
+    sfdisk_cmd = [
+        'sfdisk',
+        '--part-type',
+        part_path.with_name(block),
+        part,
+        'bc13c2ff-59e6-4262-a352-b275fd6f7172',
+    ]
+    lib.utils.print_or_run_cmd(sfdisk_cmd, dryrun)
+
+    # Format the partition to vFAT, which is guaranteed to allow
+    # systemd-boot to read the kernel and initramfs.
+    lib.utils.print_or_run_cmd(['mkfs', '-t', 'vfat', part_path], dryrun)
+
+    # Update fstab with the new UUID and filesystem type
+    if dryrun:
+        uuid = 'ABCD-1234'
+    else:
+        for item in Path('/dev/disk/by-uuid').iterdir():
+            if item.resolve() == part_path:
+                uuid = item.name
+                break
+        else:
+            raise RuntimeError(f"Could not find new UUID for {part_path}?")
+    fstab[boot].fs = f"UUID={uuid}"
+    fstab[boot].type = 'vfat'
+    fstab[boot].opts = lib.setup.Fstab.ARCH_VFAT_OPTS
+    fstab.write(dryrun=dryrun)
+
+    # Bring /boot online
+    lib.utils.print_or_run_cmd(['mount', boot], dryrun)
+
+    # Reinstall linux package, as we wiped /boot
+    if dryrun:
+        print('$ pacman -S --noconfirm linux\n')
+    else:
+        pacman_install(['linux'])
 
 
 def enable_reflector():
@@ -196,9 +268,91 @@ def fix_fstab():
     subprocess.run(['dos2unix', '/etc/fstab'], check=True)
 
 
+def get_cmdline_additions():
+    options = CmdlineOptions({
+        # Enable the performance governor
+        'cpufreq.default_governor': 'performance',
+        # Mitigate SMT RSB vulnerability
+        'kvm.mitigate_smt_rsb': '1',
+    })
+    # Add 'console=' if necessary (when connected by serial console in a
+    # virtual machine)
+    if lib.setup.is_virtual_machine() and 'DISPLAY' not in os.environ:
+        options['console'] = 'ttyS0,115200n8'
+    return options
+
+
+def get_findmnt_info(path=''):
+    fields = ('FSROOT', 'FSTYPE', 'OPTIONS', 'PARTUUID', 'SOURCE', 'UUID')
+    findmnt_cmd = ['findmnt', '-J', '-o', ','.join(fields)]
+    if path:
+        findmnt_cmd.append(path)
+    findmnt_proc = subprocess.run(findmnt_cmd, capture_output=True, check=True, text=True)
+    filesystems = json.loads(findmnt_proc.stdout)['filesystems']
+    if path:
+        return filesystems[0]
+    return filesystems
+
+
+def installimage_adjustments(conf='linux.conf', dryrun=False):
+    # Get the current fstab for adjustments
+    fstab = lib.setup.Fstab()
+    fstab.adjust_for_hetzner()
+    fstab.write(dryrun=dryrun)
+
+    # If we are not booted in UEFI mode, we cannot switch to systemd-boot, so
+    # do not bother messing with the partitions
+    if not Path('/sys/firmware/efi').exists():
+        return
+
+    # archinstall sets up /boot as the ESP but installimage requires /boot/efi
+    # to be the ESP and sets up /boot separately to hold the kernels. These
+    # partitions can be reused for systemd-boot but they need a little
+    # tweaking.
+
+    # While /boot/efi can be used with systemd-boot, it is discouraged. Use the
+    # more conventional /efi mountpoint so that bootctl automatically works.
+    move_boot_efi_to_efi(fstab, dryrun)
+
+    # In order for ESP and kernel images to be on separate partitions, such as
+    # '/boot' and '/efi' in our case, '/boot' must be an XBOOTLDR partition
+    # (see "Files" section in
+    # https://www.freedesktop.org/software/systemd/man/latest/systemd-boot.html).
+    # installimage does not allow us to do this automatically. If '/boot' is
+    # not a 'vfat' filesystem, it means we have not done this transformation.
+    convert_boot_to_xbootldr(fstab, dryrun)
+
+    # Switch to systemd-boot from grub, as my environment expects systemd-boot
+    # and it is simpler to configure and manipulate.
+    switch_from_grub_to_systemd_boot(conf, dryrun)
+
+
 def is_hetzner():
     # pacman_settings() ensures this is a permanent addition
     return HETZNER_MIRROR in PACMAN_CONF.read_text(encoding='utf-8')
+
+
+def move_boot_efi_to_efi(fstab, dryrun=False):
+    if (boot_esp := '/boot/efi') not in fstab:
+        return
+
+    root_esp = '/efi'
+
+    # umount /boot/efi
+    if dryrun:
+        print(f"$ umount {boot_esp}\n")
+    else:
+        lib.setup.umount_gracefully(boot_esp)
+
+    # Replace '/boot/efi' with '/efi' in /etc/stab
+    fstab[root_esp] = fstab[boot_esp]
+    del fstab[boot_esp]
+
+    # Update /etc/fstab
+    fstab.write(dryrun=dryrun)
+
+    # Mount /efi
+    lib.utils.print_or_run_cmd(['mount', '--mkdir', root_esp], dryrun)
 
 
 def pacman_install(subargs):
@@ -406,6 +560,15 @@ def pacman_settings(dryrun=False):
 
     lib.utils.print_or_write_text(PACMAN_CONF, conf_text, dryrun)
 
+    # Ensure that my database exists, as we may need to reinstall the linux
+    # package and that can fail if my database is not available. It is tempting
+    # to just 'pacman -Sy' here but we do not want to risk a partial upgrade...
+    if not (nathan_db := Path('/var/lib/pacman/sync/nathan.db')).exists():
+        with TemporaryDirectory() as tempdir:
+            Path(tempdir).chmod(0o755)  # avoid permission errors from pacman
+            subprocess.run(['pacman', '--dbpath', tempdir, '-Sy'], check=True)
+            shutil.move(Path(tempdir, *nathan_db.parts[-2:]), nathan_db)
+
 
 def pacman_update():
     pacman_install(['-yyu'])
@@ -484,6 +647,72 @@ def setup_user(username, userpass):
     lib.setup.setup_ssh_authorized_keys(username)
 
 
+def switch_from_grub_to_systemd_boot(conf='linux.conf', dryrun=False):
+    # If systemd-boot is already set up, we do not need to do anything further
+    if lib.setup.using_systemd_boot():
+        return
+
+    # Install systemd-boot to ESP, which will create /boot/loader and
+    # /boot/loader/entries.
+    lib.utils.print_or_run_cmd(['bootctl', 'install'], dryrun)
+
+    # Create initial loader.conf
+    loader_conf_txt = f"default {conf}\ntimeout 3\n"
+    lib.utils.print_or_write_text(Path('/boot/loader/loader.conf'), loader_conf_txt, dryrun)
+
+    # Default cmdline options
+    root_findmnt = get_findmnt_info('/')
+    cmdline_options = CmdlineOptions({
+        'root': f"PARTUUID={root_findmnt['partuuid']}",
+        'rootfstype': root_findmnt['fstype'],
+        'rw': None,
+    })
+    # grub adds this dynamically during grub-mkconfig, we need it to boot
+    if root_findmnt['fstype'] == 'btrfs' and (subvol := root_findmnt['fsroot'].strip('/')):
+        cmdline_options['rootflags'] = f"subvol={subvol}"
+    cmdline_options |= get_cmdline_additions()
+
+    # Copy over any cmdline options that we added in grub, as those might be
+    # necessary for the machine to work properly.
+    if (grub_default := Path('/etc/default/grub')).exists():
+        grub_default_txt = grub_default.read_text(encoding='utf-8')
+
+        # Filter the default values, as there may be some set that are harmful for debugging
+        if match := re.search('^GRUB_CMDLINE_LINUX_DEFAULT="(.*)"$', grub_default_txt, flags=re.M):
+            default_filter = ('loglevel=', 'quiet')
+            filtered_defaults = ' '.join(item for item in match.groups()[0].split(' ')
+                                         if not item.startswith(default_filter))
+            cmdline_options |= CmdlineOptions(filtered_defaults)
+
+        # Take the regular options wholesale
+        if match := re.search('^GRUB_CMDLINE_LINUX="(.*)"$', grub_default_txt, flags=re.M):
+            cmdline_options |= CmdlineOptions(match.groups()[0])
+
+    # We may have multiple initrds
+    initrds = ['initramfs-linux']
+    if not lib.setup.is_virtual_machine() and UCODE_VENDOR:
+        initrds.insert(0, f"{UCODE_VENDOR}-ucode")
+
+    # Easily generate the text for initial linux.conf
+    linux_conf_parts = [
+        'title Arch Linux (linux)',
+        'linux /vmlinuz-linux',
+        *[f"initrd /{initrd}.img" for initrd in initrds],
+        f"options {cmdline_options}",
+    ]
+    linux_conf_txt = ''.join(f"{item}\n" for item in linux_conf_parts)
+    lib.utils.print_or_write_text(Path('/boot/loader/entries/linux.conf'), linux_conf_txt, dryrun)
+
+    # Clean up grub
+    if dryrun:
+        print('$ rm -fr /boot/grub /efi/EFI/GRUB')
+    else:
+        lib.setup.remove_if_installed('grub')
+        for cleanup_path in ('/boot/grub', '/efi/EFI/GRUB'):
+            if Path(cleanup_path).exists():
+                shutil.rmtree(cleanup_path)
+
+
 def uncomment_pacman_option(conf, option, old_value=None, new_value=None):
     if old_value and new_value:
         return re.sub(f"^#{option} = {old_value}", f"{option} = {new_value}", conf, flags=re.M)
@@ -523,6 +752,7 @@ if __name__ == '__main__':
     prechecks()
     # pacman_settings() should always be run first so that is_hetzner() always works
     pacman_settings()
+    installimage_adjustments()
     configure_systemd_boot()
     pacman_key_setup()
     pacman_update()

@@ -2,6 +2,7 @@
 # SPDX-License-Identifier: MIT
 # Copyright (C) 2022-2023 Nathan Chancellor
 
+import copy
 import grp
 import ipaddress
 import os
@@ -17,6 +18,112 @@ sys.path.append(str(Path(__file__).resolve().parents[1]))
 # pylint: disable=wrong-import-position
 import lib.utils
 # pylint: enable=wrong-import-position
+
+
+class FstabItem:
+
+    def __init__(self, fs, directory, fstype, opts, dump, check):
+
+        self.fs = fs
+        self.dir = str(directory)  # in case Path was passed
+        self.type = fstype
+        self.opts = opts
+        self.dump = dump
+        self.check = check
+
+    def __str__(self):
+        order = ('fs', 'dir', 'type', 'opts', 'dump', 'check')
+        return ' '.join(getattr(self, attr) for attr in order)
+
+    def get_dev(self):
+        if (uuid := self.get_uuid()) and (uuid_path := Path('/dev/disk/by-uuid', uuid)).exists():
+            return uuid_path.resolve()
+        if self.fs.startswith('/dev'):
+            return Path(self.fs)
+        return None
+
+    def get_uuid(self):
+        if self.fs.startswith('UUID='):
+            return self.fs.split('=', maxsplit=1)[1]
+        return None
+
+
+class Fstab:
+
+    ARCH_VFAT_OPTS = 'rw,relatime,fmask=0022,dmask=0022,codepage=437,iocharset=ascii,shortname=mixed,utf8,errors=remount-ro'
+
+    def __init__(self, init_str=''):
+
+        self.entries = {}
+
+        if not init_str:
+            init_str = Path('/etc/fstab').read_text(encoding='utf-8')
+
+        for line in init_str.splitlines():
+            if line := line.strip():
+                if line.startswith('#'):
+                    continue
+
+                item = FstabItem(*line.split())
+                self.entries[item.dir] = item
+
+    def __contains__(self, item):
+        return str(item) in self.entries
+
+    def __delitem__(self, key):
+        del self.entries[str(key)]
+
+    def __getitem__(self, item):
+        return self.entries[str(item)]
+
+    def __setitem__(self, key, value):
+        if not isinstance(value, FstabItem):
+            raise TypeError
+        if isinstance(key, Path):
+            key = str(key)
+        if value.dir == key:
+            self.entries[key] = value
+        else:
+            self.entries[key] = copy.copy(value)
+            self.entries[key].dir = key
+
+    def _gen_str(self):
+        header = ('# Static information about the filesystems.\n'
+                  '# See fstab(5) for details.\n'
+                  '# <file system> <dir> <type> <options> <dump> <pass>\n')
+        lines = []
+
+        for item in self.entries.values():
+            # If we have a UUID, try to find the corresponding block device for
+            # a comment identifying it.
+            if dev := item.get_dev():
+                lines.append(f"# {dev}")
+            lines.append(str(item))
+
+        return header + '\n'.join(lines) + '\n'
+
+    def __str__(self):
+        return self._gen_str()
+
+    # Adjust the options for the ESP and ext partitions on Hetzner systems
+    def adjust_for_hetzner(self):
+        for item in self.entries.values():
+            if (item.type, item.opts) == ('vfat', 'umask=0077'):
+                item.opts = Fstab.ARCH_VFAT_OPTS
+
+            if item.type.startswith('ext'):
+                if item.dir == '/' and 'errors=remount-ro' not in item.opts:
+                    item.opts += ',errors=remount-ro'
+
+                if item.check == '0':
+                    item.check = '1' if item.dir == '/' else '2'
+
+    def write(self, path=None, dryrun=False):
+        if not path:
+            path = Path('/etc/fstab')
+        lib.utils.print_or_write_text(path, self._gen_str(), dryrun)
+        if not dryrun:
+            subprocess.run(['systemctl', 'daemon-reload'], check=True)
 
 
 def add_user_to_group(groupname, username):
@@ -473,6 +580,11 @@ def using_systemd_boot():
     if not shutil.which('bootctl'):
         return False
     return subprocess.run(['bootctl', '--quiet', 'is-installed'], check=False).returncode == 0
+
+
+def umount_gracefully(folder):
+    if subprocess.run(['mountpoint', '-q', folder], check=False).returncode == 0:
+        subprocess.run(['umount', folder], check=True)
 
 
 def zypper(zypper_args):
