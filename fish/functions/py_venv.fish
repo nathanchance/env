@@ -75,6 +75,12 @@ function py_venv -d "Manage Python virtual environment"
                 switch (basename $venv)
                     case continuous-integration2 kernel-dev main
                         if contains $SRC_FOLDER/b4 $packages
+                            if not test -d $SRC_FOLDER/b4
+                                mkdir -p $SRC_FOLDER
+                                and git clone https://git.kernel.org/pub/scm/utils/b4/b4.git/ $SRC_FOLDER/b4
+                            end
+                            or return
+
                             git -C $SRC_FOLDER/b4 urh
                             or return
                         end
@@ -108,6 +114,12 @@ function py_venv -d "Manage Python virtual environment"
                 switch (basename $venv)
                     case continuous-integration2 kernel-dev main
                         if contains $SRC_FOLDER/b4 $packages
+                            if not test -d $SRC_FOLDER/b4
+                                mkdir -p $SRC_FOLDER
+                                and git clone https://git.kernel.org/pub/scm/utils/b4/b4.git/ $SRC_FOLDER/b4
+                            end
+                            or return
+
                             git -C $SRC_FOLDER/b4 urh
                             or return
                         end
