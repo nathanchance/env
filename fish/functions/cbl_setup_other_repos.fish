@@ -3,6 +3,9 @@
 # Copyright (C) 2021-2023 Nathan Chancellor
 
 function cbl_setup_other_repos -d "Download other ClangBuiltLinux repos"
+    cbl_clone_repo llvm-project
+    or return
+
     set repos_cbl_github \
         actions-workflows \
         boot-utils \
