@@ -304,7 +304,16 @@ rpmbuild/' >>$gitignore
         case hetzner workstation
             mkdir -p $SRC_FOLDER
 
-            set github_repos arch-repo bug-files hugo-files nathanchance.github.io patches
+            set github_repos \
+                actions-playground \
+                actions-workflows \
+                arch-repo \
+                bug-files \
+                buildall \
+                hugo-files \
+                local_manifests \
+                nathanchance.github.io \
+                patches
 
             for linux_tree in linux linux-next linux-stable
                 tmux new-window fish -c "cbl_setup_linux_repos $linux_tree; or exec fish -l"
