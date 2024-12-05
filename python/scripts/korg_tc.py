@@ -508,7 +508,7 @@ if __name__ == '__main__':
         manager.host_arch = args.host_arch
         manager.install_folder = args.install_folder.resolve()
 
-        manager.install(args.cache, not args.no_extract)
+        manager.install(args.cache, args.extract)
         if args.clean_up_old_versions:
             manager.clean_up_old_versions()
 
