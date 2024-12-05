@@ -9,6 +9,7 @@ function wezterm_open_remotes -d "Open a new wezterm tab for each remote machine
 
     # Local machines
     set hosts \
+        hetzner:Hetzner \
         thelio:Thelio \
         aadp:AADP \
         intel-desktop-11700:"Intel full desktop" \
