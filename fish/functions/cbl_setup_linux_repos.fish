@@ -38,7 +38,9 @@ function cbl_setup_linux_repos -d "Clone ClangBuiltLinux Linux repos into their 
             end
             set bundle $tmp_dir/clone.bundle-$suffix
 
-            wget -c -O $bundle https://mirrors.kernel.org/pub/scm/.bundles/pub/scm/linux/kernel/git/$url/clone.bundle
+            if not test -e $bundle
+                wget -c -O $bundle https://mirrors.kernel.org/pub/scm/.bundles/pub/scm/linux/kernel/git/$url/clone.bundle
+            end
         end
 
         clone_repo_from_bundle (basename $folder) $folder $bundle
