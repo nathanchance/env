@@ -3,6 +3,7 @@
 # Copyright (C) 2022-2023 Nathan Chancellor
 
 from argparse import ArgumentParser
+import base64
 from collections import UserDict
 import getpass
 import json
@@ -20,6 +21,7 @@ import lib.setup
 import lib.utils
 # pylint: enable=wrong-import-position
 
+EDID_1280_1024 = b'BAAAACAAAAAFAAAAR05VAAIAAcAEAAAAAAAAAAAAAAABAAHABAAAAAEAAAAAAAAAAQEBAQEBMCoAmFEAKkAwcBMAvGMRAAAeAAAA/wBMaW51eCAjMAogICAgAAAA/QA7PT5ACwAKICAgICAgAAAA/ABMaW51eCBTWEdBCiAgAC4='
 HETZNER_MIRROR = 'https://mirror.hetzner.com/archlinux/$repo/os/$arch'
 PACMAN_CONF = Path('/etc/pacman.conf')
 
@@ -322,11 +324,33 @@ def get_findmnt_info(path=''):
     return filesystems
 
 
-def installimage_adjustments(conf='linux.conf', dryrun=False):
+def installimage_adjustments(mkinitcpio_conf, conf='linux.conf', dryrun=False):
     # Get the current fstab for adjustments
     fstab = lib.setup.Fstab()
     fstab.adjust_for_hetzner()
     fstab.write(dryrun=dryrun)
+
+    # Hetzner may have added edid_firmware for the drm module but on newer
+    # kernels, this is not available:
+    # https://git.kernel.org/linus/89ac522d4507126d353834973ddbbf7b6acfdeef
+    # Install tools/edid/1280x1024.bin at the parent of that change from a
+    # base64 encoded bytes string to ensure it is always available.
+    if (modprobe_conf := Path('/etc/modprobe.d/hetzner.conf')).exists():
+        modprobe_conf_txt = modprobe_conf.read_text(encoding='utf-8')
+
+        modprobe_conf_search = 'edid/1280x1024.bin'
+        firmware_location = Path('/usr/lib/firmware', modprobe_conf_search)
+
+        if modprobe_conf_search in modprobe_conf_txt:
+            if not firmware_location.exists():
+                if not firmware_location.parent.exists():
+                    firmware_location.parent.mkdir()
+                    firmware_location.parent.chmod(0o755)  # match rest of firmware
+
+                firmware_location.write_bytes(base64.b64decode(EDID_1280_1024))
+                firmware_location.chmod(0o644)
+
+            mkinitcpio_conf['FILES'].add(firmware_location)
 
     # If we are not booted in UEFI mode, we cannot switch to systemd-boot, so
     # do not bother messing with the partitions
@@ -784,7 +808,7 @@ if __name__ == '__main__':
     prechecks()
     # pacman_settings() should always be run first so that is_hetzner() always works
     pacman_settings()
-    installimage_adjustments()
+    installimage_adjustments(initcpio_conf)
     configure_systemd_boot()
     pacman_key_setup()
     pacman_update()
