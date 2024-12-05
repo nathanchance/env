@@ -47,7 +47,11 @@ def parse_arguments():
 
 
 def apply(repo, patches):
-    git(repo, ['am', *patches])
+    try:
+        git(repo, ['am', *patches])
+    except subprocess.CalledProcessError as err:
+        print(err.stderr)
+        raise err
 
 
 def sync(repo, patches_output):
