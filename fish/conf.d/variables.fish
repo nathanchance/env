@@ -15,7 +15,7 @@ if test -z "$LOCATION"
         switch "$(id -un)@$hostname"
             case nathan@aadp
                 set -Ux LOCATION aadp
-            case nathan@archlinux-'*' nathan@debian-'*' nathan@ubuntu-'*'
+            case nathan@ax162
                 set -Ux LOCATION hetzner
             case nathan@honeycomb
                 set -Ux LOCATION honeycomb
@@ -226,6 +226,12 @@ set -gx KMAKE_DEB_ARGS \
     DPKG_FLAGS=-d \
     KDEB_CHANGELOG_DIST=unstable
 
+# Hetzner IP address, slightly obsfucated
+begin
+    set -l parts 49 21 210 65
+    set -gx HETZNER_IP (string join . $parts[-1] $parts[2] $parts[-2] $parts[1])
+end
+
 # Default to system session instead of user session for libvirt
 set -gx LIBVIRT_DEFAULT_URI qemu:///system
 
@@ -233,10 +239,10 @@ set -gx LIBVIRT_DEFAULT_URI qemu:///system
 set -gx MENUCONFIG_COLOR blackbg
 
 # Primary locations from list above
-set -gx PRIMARY_LOCATIONS workstation
+set -gx PRIMARY_LOCATIONS hetzner workstation
 
 # My primary remote IP address
-set -gx MAIN_REMOTE_IP 192.168.4.188
+set -gx MAIN_REMOTE_IP $HETZNER_IP
 
 # Current toolchain versions
 set -gx GCC_VERSION_TOT 15
