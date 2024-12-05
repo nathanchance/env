@@ -307,10 +307,10 @@ rpmbuild/' >>$gitignore
             set github_repos arch-repo bug-files hugo-files nathanchance.github.io patches
 
             for linux_tree in linux linux-next linux-stable
-                tmux new-window fish -c "cbl_setup_linux_repos $linux_tree; sleep 180"
+                tmux new-window fish -c "cbl_setup_linux_repos $linux_tree; or exec fish -l"
             end
 
-            tmux new-window fish -c "start_ssh_agent; and cbl_setup_other_repos; sleep 180"
+            tmux new-window fish -c "begin; start_ssh_agent; and cbl_setup_other_repos; end; or exec fish -l"
 
         case wsl
             decrypt_gpg_file server_ip
