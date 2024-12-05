@@ -105,11 +105,12 @@ if test -d $NVME_FOLDER
 else
     set -gx EXT_FOLDER $MAIN_FOLDER
 end
-set -gx CCACHE_DIR $EXT_FOLDER/ccache
 set -gx MAIL_FOLDER $EXT_FOLDER/mail
 set -gx TMP_FOLDER $EXT_FOLDER/tmp
 set -gx VM_FOLDER $EXT_FOLDER/vm
 set -gx XDG_FOLDER $EXT_FOLDER/xdg
+
+set -gx CCACHE_DIR $XDG_FOLDER/config/ccache
 
 set -gx CBL_GIT $CBL/github
 set -gx CBL_LOGS $CBL/logs
