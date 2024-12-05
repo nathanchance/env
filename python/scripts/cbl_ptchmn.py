@@ -93,6 +93,6 @@ if __name__ == '__main__':
         raise RuntimeError(f"Derived patches folder ('{patches_folder}') does not exist!")
 
     if args.apply:
-        apply(args.directory, patches_folder.iterdir())
+        apply(args.directory, sorted(patches_folder.iterdir()))
     if args.sync:
         sync(args.directory, patches_folder)
