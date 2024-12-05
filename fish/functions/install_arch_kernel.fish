@@ -5,10 +5,8 @@
 function install_arch_kernel -d "Install kernel for Arch Linux and reboot fully or via kexec"
     for arg in $argv
         switch $arg
-            case -k --kexec
-                set reboot kexec
-            case -r --reboot
-                set reboot reboot
+            case -k --kexec -r --reboot
+                set sd_boot_arg $arg
             case '*'
                 set krnl linux-(string replace 'linux-' '' $arg)
         end
@@ -48,49 +46,7 @@ function install_arch_kernel -d "Install kernel for Arch Linux and reboot fully 
     sudo pacman -U --noconfirm $krnl_pkg
     or return
 
-    if set -q reboot
-        if test $reboot = kexec
-            switch $LOCATION
-                case test-laptop-intel
-                    print_warning "kexec is not safe on this platform, switching to full reboot..."
-                    set reboot reboot
-            end
-        end
-
-        switch $reboot
-            case kexec
-                if not command -q kexec
-                    print_error "Cannot kexec without kexec-tools"
-                    return 1
-                end
-
-                sudo kexec \
-                    --load \
-                    /boot/vmlinuz-$krnl \
-                    --initrd=/boot/initramfs-$krnl.img \
-                    --reuse-cmdline
-                or return
-
-            case reboot
-                if not test -d /sys/firmware/efi
-                    print_error "Expected to boot under UEFI?"
-                    return 1
-                end
-                if not test -d /boot/loader/entries
-                    print_error "Expected systemd-boot?"
-                    return 1
-                end
-
-                set boot_conf /boot/loader/entries/$krnl.conf
-                if not test -f $boot_conf
-                    print_error "$boot_conf does not exist!"
-                    return 1
-                end
-
-                sudo bootctl set-oneshot $krnl.conf
-                or return
-        end
-
-        sudo systemctl $reboot
+    if set -q sd_boot_arg
+        sd_boot_kernel $sd_boot_arg $krnl
     end
 end
