@@ -9,19 +9,30 @@ function mvfunc -d "Move function file in $ENV_FOLDER"
     end
 
     set src_name $argv[1]
-    set src $ENV_FOLDER/fish/functions/$src_name.fish
-    if not test -f $src
-        print_error "$src could not be found!"
+    set fish_src $ENV_FOLDER/fish/functions/$src_name.fish
+    if not test -f $fish_src
+        print_error "$fish_src could not be found!"
         return 1
     end
+    set py_src $PYTHON_SCRIPTS_FOLDER/$src_name.py
 
     set dst_name $argv[2]
-    set dst $ENV_FOLDER/fish/functions/$dst_name.fish
-    if test -f $dst
-        print_error "$dst exists, remove it manually to proceed!"
+    set fish_dst $ENV_FOLDER/fish/functions/$dst_name.fish
+    if test -f $fish_dst
+        print_error "$fish_dst exists, remove it manually to proceed!"
         return 1
     end
+    set py_dst $PYTHON_SCRIPTS_FOLDER/$dst_name.py
 
-    mv -v $src $dst
-    sed -i "s/$src_name/$dst_name/g" $dst
+    mv -v $fish_src $fish_dst
+    sed -i "s/$src_name/$dst_name/g" $fish_dst
+
+    if test -f $py_src
+        if test -f $py_dst
+            print_error "$py_dst already exists, manually move $py_src to it if that is expected!"
+            return 1
+        end
+
+        mv -v $py_src $py_dst
+    end
 end
