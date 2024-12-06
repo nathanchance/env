@@ -168,7 +168,6 @@ set -gx ICLOUD_DOCS_FOLDER /Users/$USER/Library/'Mobile Documents/com~apple~Clou
 # Versions of stable that I build locally
 set -gx CBL_STABLE_VERSIONS \
     6.12 \
-    6.11 \
     6.6 \
     6.1 \
     5.15 \
@@ -264,8 +263,7 @@ set -gx STOCK_GCC_VARS \
 # https://www.kernel.org/category/releases.html
 set -gx SUPPORTED_STABLE_VERSIONS \
     $CBL_STABLE_VERSIONS \
-    5.4 \
-    4.19
+    5.4
 
 # Point tmuxp to configurations in env folder
 set -gx TMUXP_CONFIGDIR $ENV_FOLDER/configs/tmux
