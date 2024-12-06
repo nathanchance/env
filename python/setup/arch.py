@@ -219,6 +219,8 @@ def configure_systemd_boot(init=True, conf='linux.conf'):
 
 
 def convert_boot_to_xbootldr(fstab, dryrun):
+    # If '/boot' is a 'vfat' filesystem, it means we have already done this
+    # transformation.
     if fstab[(boot := '/boot')].type == 'vfat':
         return
 
@@ -411,8 +413,7 @@ def installimage_adjustments(mkinitcpio_conf, conf='linux.conf', dryrun=False):
     # '/boot' and '/efi' in our case, '/boot' must be an XBOOTLDR partition
     # (see "Files" section in
     # https://www.freedesktop.org/software/systemd/man/latest/systemd-boot.html).
-    # installimage does not allow us to do this automatically. If '/boot' is
-    # not a 'vfat' filesystem, it means we have not done this transformation.
+    # installimage does not allow us to do this automatically.
     convert_boot_to_xbootldr(fstab, dryrun)
 
     # Switch to systemd-boot from grub, as my environment expects systemd-boot
