@@ -505,6 +505,7 @@ def pacman_install_packages():
         'ripgrep',
 
         # Package management
+        'fakeroot',  # optional dependency of checkupdates
         'pacman-contrib',
 
         # Remote work
