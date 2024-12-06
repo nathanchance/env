@@ -3,10 +3,8 @@
 # Copyright (C) 2022-2023 Nathan Chancellor
 
 function cbl_setup_reduction -d "Build good and bad versions of LLVM for cvise reductions"
-    if not test -e llvm/CMakeLists.txt
-        print_error "Not in an LLVM tree?"
-        return 1
-    end
+    in_tree llvm
+    or return 128
 
     set bad_sha $argv[1]
     if test -z "$bad_sha"
