@@ -51,6 +51,51 @@ class CmdlineOptions(UserDict):
             sorted(f"{key}={value}" if value else key for key, value in self.data.items()))
 
 
+class MkinitcpioConf(UserDict):
+
+    def __init__(self, init_arg='', path=None):
+        super().__init__()
+
+        self.path = path if path else Path('/etc/mkinitcpio.conf')
+
+        if init_arg and isinstance(init_arg, str):
+            self.text = init_arg
+        else:
+            self.text = self.path.read_text(encoding='utf-8')
+        self._reload_data_from_text()
+
+    def _generate_new_text(self):
+        new_text = self.text
+
+        for var, vals in self.data.items():
+            new_val_str = ' '.join(str(val) for val in sorted(vals))
+            if self.orig[var] != (new_str := f"{var}=({new_val_str})"):
+                new_text = new_text.replace(self.orig[var], new_str)
+
+        return new_text
+
+    def _reload_data_from_file(self):
+        self.text = self.path.read_text(encoding='utf-8')
+        self._reload_data_from_text()
+
+    def _reload_data_from_text(self):
+        if not (matches := re.findall(r'^([A-Z]+)=\((.*)\)$', self.text, flags=re.M)):
+            raise RuntimeError(f"Cannot find any variables in {self.text}?")
+
+        self.orig = {var: f"{var}=({val})" for var, val in matches}
+        self.data = {
+            var: set(map(Path if var == 'FILES' else str, val.split()))
+            for var, val in matches
+        }
+
+    def update_if_necessary(self):
+        if (new_text := self._generate_new_text()) != self.text:
+            self.path.write_text(new_text, encoding='utf-8')
+            self._reload_data_from_file()
+
+            subprocess.run(['mkinitcpio', '-P'], check=True)
+
+
 def add_hetzner_mirror_to_repos(config):
     if HETZNER_MIRROR in config:
         return config
@@ -58,23 +103,6 @@ def add_hetzner_mirror_to_repos(config):
     search = ']\nInclude = /etc/pacman.d/mirrorlist\n'
     replace = search.replace(']\n', f"]\nServer = {HETZNER_MIRROR}\n")
     return config.replace(search, replace)
-
-
-def add_mods_to_mkinitcpio(modules):
-    mkinitcpio_conf, conf_text = lib.utils.path_and_text('/etc/mkinitcpio.conf')
-
-    if not (match := re.search(r'^MODULES=\((.*)\)$', conf_text, flags=re.M)):
-        raise RuntimeError(f"Could not find MODULES line in {mkinitcpio_conf}!")
-
-    conf_mods = set(match.groups()[0].split(' '))
-    for module in modules:
-        conf_mods.add(module)
-    new_conf_line = f"MODULES=({' '.join(sorted(conf_mods)).strip()})"
-
-    conf_text = conf_text.replace(match.group(0), new_conf_line)
-    mkinitcpio_conf.write_text(conf_text, encoding='utf-8')
-
-    subprocess.run(['mkinitcpio', '-P'], check=True)
 
 
 def adjust_gnome_power_settings():
@@ -613,7 +641,7 @@ def setup_doas(username):
     pacman_install(['opendoas-sudo'])
 
 
-def setup_libvirt(username):
+def setup_libvirt(username, mkinitcpio_conf):
     if not lib.setup.is_installed('libvirt'):
         return
 
@@ -629,9 +657,9 @@ def setup_libvirt(username):
     # loaded during init.
     cpuinfo = Path('/proc/cpuinfo').read_text(encoding='utf-8')
     if 'svm' in cpuinfo:
-        add_mods_to_mkinitcpio(['kvm_amd'])
+        mkinitcpio_conf['MODULES'].add('kvm_amd')
     elif 'vmx' in cpuinfo:
-        add_mods_to_mkinitcpio(['kvm_intel'])
+        mkinitcpio_conf['MODULES'].add('kvm_intel')
 
 
 def setup_user(username, userpass):
@@ -721,19 +749,19 @@ def uncomment_pacman_option(conf, option, old_value=None, new_value=None):
     return re.sub(f"^#{option}", option, conf, flags=re.M)
 
 
-def vmware_adjustments():
+def vmware_adjustments(mkinitcpio_conf):
     if lib.setup.get_hostname() != 'vmware':
         return
 
     # https://wiki.archlinux.org/title/VMware/Install_Arch_Linux_as_a_guest#In-kernel_drivers
-    vmware_mods = [
+    vmware_mods = {
         'vsock',
         'vmw_vsock_vmci_transport',
         'vmw_balloon',
         'vmw_vmci',
         'vmwgfx',
-    ]  # yapf: disable
-    add_mods_to_mkinitcpio(vmware_mods)
+    }  # yapf: disable
+    mkinitcpio_conf['MODULES'].update(vmware_mods)
 
     # https://wiki.archlinux.org/title/VMware/Install_Arch_Linux_as_a_guest#Installation
     lib.setup.systemctl_enable(['vmtoolsd.service', 'vmware-vmblock-fuse.service'], now=False)
@@ -748,6 +776,10 @@ if __name__ == '__main__':
     # the script.
     if not (password := arguments.password) and not lib.setup.user_exists(user):
         password = getpass.getpass(prompt='Password for Arch Linux user account: ')
+    # It would be wasteful to update mkinitcpio.conf every time it was
+    # modified, so it is instantiated once here then passed along to all
+    # functions that modify it, so that it can be updated once at the end here.
+    initcpio_conf = MkinitcpioConf()
 
     prechecks()
     # pacman_settings() should always be run first so that is_hetzner() always works
@@ -761,8 +793,8 @@ if __name__ == '__main__':
     setup_user(user, password)
     lib.setup.clone_env(user)
     lib.setup.podman_setup(user)
-    vmware_adjustments()
-    setup_libvirt(user)
+    vmware_adjustments(initcpio_conf)
+    setup_libvirt(user, initcpio_conf)
     configure_networking()
     enable_reflector()
     adjust_gnome_power_settings()
@@ -771,3 +803,4 @@ if __name__ == '__main__':
     fix_fstab()
     lib.setup.set_date_time()
     lib.setup.setup_initial_fish_config(user)
+    initcpio_conf.update_if_necessary()
