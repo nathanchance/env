@@ -5,6 +5,7 @@
 from argparse import ArgumentParser
 import base64
 from collections import UserDict
+import contextlib
 import getpass
 import json
 import os
@@ -351,6 +352,11 @@ def installimage_adjustments(mkinitcpio_conf, conf='linux.conf', dryrun=False):
                 firmware_location.chmod(0o644)
 
             mkinitcpio_conf['FILES'].add(firmware_location)
+
+    # Drop the additions that Hetzner made to hooks because we do not need them
+    with contextlib.suppress(KeyError):
+        mkinitcpio_conf['HOOKS'].remove('lvm2')
+        mkinitcpio_conf['HOOKS'].remove('mdadm_udev')
 
     # If we are not booted in UEFI mode, we cannot switch to systemd-boot, so
     # do not bother messing with the partitions
