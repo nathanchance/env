@@ -326,6 +326,14 @@ def get_findmnt_info(path=''):
 
 
 def installimage_adjustments(mkinitcpio_conf, conf='linux.conf', dryrun=False):
+    # If we are not on a Hetzner machine, do not try to execute anything here,
+    # as it was written with primitives to be safe but it is better to be safer
+    # than sorry.
+    if not (is_hetzner() or dryrun):
+        lib.utils.print_yellow(
+            'Running installimage_adjustments() requires a Hetzner machine, skipping...')
+        return
+
     # Get the current fstab for adjustments
     fstab = lib.setup.Fstab()
     fstab.adjust_for_hetzner()
@@ -342,7 +350,7 @@ def installimage_adjustments(mkinitcpio_conf, conf='linux.conf', dryrun=False):
         modprobe_conf_search = 'edid/1280x1024.bin'
         firmware_location = Path('/usr/lib/firmware', modprobe_conf_search)
 
-        if modprobe_conf_search in modprobe_conf_txt:
+        if modprobe_conf_search in modprobe_conf_txt and not dryrun:
             if not firmware_location.exists():
                 if not firmware_location.parent.exists():
                     firmware_location.parent.mkdir()
@@ -354,14 +362,17 @@ def installimage_adjustments(mkinitcpio_conf, conf='linux.conf', dryrun=False):
             mkinitcpio_conf['FILES'].add(firmware_location)
 
     # Drop the additions that Hetzner made to hooks because we do not need them
-    with contextlib.suppress(KeyError):
-        mkinitcpio_conf['HOOKS'].remove('lvm2')
-        mkinitcpio_conf['HOOKS'].remove('mdadm_udev')
+    if not dryrun:
+        with contextlib.suppress(KeyError):
+            mkinitcpio_conf['HOOKS'].remove('lvm2')
+            mkinitcpio_conf['HOOKS'].remove('mdadm_udev')
 
-    # If we are not booted in UEFI mode, we cannot switch to systemd-boot, so
-    # do not bother messing with the partitions
-    if not Path('/sys/firmware/efi').exists():
-        return
+    # Hetzner machines should always be booted in UEFI mode now according to
+    # their documentation but the adjustments by this function will be fatal if
+    # it is not so just make sure...
+    # https://docs.hetzner.com/robot/dedicated-server/operating-systems/uefi
+    if not (Path('/sys/firmware/efi').exists() or dryrun):
+        raise RuntimeError('Hetzner machine not booted under UEFI?')
 
     # archinstall sets up /boot as the ESP but installimage requires /boot/efi
     # to be the ESP and sets up /boot separately to hold the kernels. These
