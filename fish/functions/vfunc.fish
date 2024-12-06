@@ -7,6 +7,10 @@ function vfunc -d "View function defintion in fish with a pager"
     if test -f "$func_file"
         vw -c $func_file
     else
-        type $argv &| bat --color always --language fish --style plain
+        type $argv &| bat \
+            --color always \
+            --language fish \
+            $BAT_PAGER_OPTS \
+            --style plain
     end
 end

@@ -165,6 +165,12 @@ set -gx ICLOUD_DOCS_FOLDER /Users/$USER/Library/'Mobile Documents/com~apple~Clou
 ## OTHER GLOBAL VARIABLES ##
 ############################
 
+# bat paging arguments to avoid the default behavior of passing '-F' to 'less',
+# which can be undesirable in certain contexts
+set -gx BAT_PAGER_OPTS \
+    --paging always \
+    --pager 'less -R'
+
 # Versions of stable that I build locally
 set -gx CBL_STABLE_VERSIONS \
     6.12 \

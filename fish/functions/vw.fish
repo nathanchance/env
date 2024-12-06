@@ -14,7 +14,7 @@ function vw -d "View file with bat"
 
     bat \
         --color always \
-        --paging always \
+        $BAT_PAGER_OPTS \
         $bat_args \
         $files
 end
