@@ -50,15 +50,17 @@ function cbl_setup_linux_repos -d "Clone ClangBuiltLinux Linux repos into their 
             cbl_upd_stbl_wrktrs $folder
         end
 
-        switch $folder
-            case $CBL_SRC_D/linux $CBL_SRC_D/linux-next
-                git -C $folder remote add -f korg git@gitolite.kernel.org:pub/scm/linux/kernel/git/nathan/linux
+        if contains $folder $CBL_SRC_D/linux $CBL_SRC_D/linux-next
+            git -C $folder remote add -f korg git@gitolite.kernel.org:pub/scm/linux/kernel/git/nathan/linux
+        end
+        if test $folder = $CBL_SRC_D/linux-next
+            git -C $folder remote add -f mainline https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git
         end
     end
     rm -rf $tmp_dir
 
-    # Set up Arch Linux, Fedora, and Raspberry Pi source worktrees
-    for worktree in $CBL_SRC_P/{fedora,linux-{mainline,next}-llvm,rpi}
+    # Set up Arch Linux (main and debug), Fedora, and Raspberry Pi source worktrees
+    for worktree in $CBL_SRC_D/linux-debug $CBL_SRC_P/{fedora,linux-{mainline,next}-llvm,rpi}
         if not test -d $worktree
             switch (basename $worktree)
                 case linux-mainline-llvm
@@ -66,7 +68,7 @@ function cbl_setup_linux_repos -d "Clone ClangBuiltLinux Linux repos into their 
                 case '*'
                     set src_tree $CBL_SRC_D/linux-next
             end
-            git -C $src_tree worktree add -B (basename $worktree) --no-track $worktree
+            git -C $src_tree worktree add -B (basename $worktree) --no-track $worktree origin/master
             or return
         end
     end
