@@ -108,6 +108,29 @@ def add_hetzner_mirror_to_repos(config):
     return config.replace(search, replace)
 
 
+def adjust_esp_mountpoint(fstab, dryrun=False):
+    if (boot_esp := '/boot/efi') not in fstab:
+        return
+
+    root_esp = '/efi'
+
+    # umount /boot/efi
+    if dryrun:
+        print(f"$ umount {boot_esp}\n")
+    else:
+        lib.setup.umount_gracefully(boot_esp)
+
+    # Replace '/boot/efi' with '/efi' in /etc/stab
+    fstab[root_esp] = fstab[boot_esp]
+    del fstab[boot_esp]
+
+    # Update /etc/fstab
+    fstab.write(dryrun=dryrun)
+
+    # Mount /efi
+    lib.utils.print_or_run_cmd(['mount', '--mkdir', root_esp], dryrun)
+
+
 def adjust_gnome_power_settings():
     if not lib.setup.user_exists('gdm'):
         return
@@ -379,9 +402,10 @@ def installimage_adjustments(mkinitcpio_conf, conf='linux.conf', dryrun=False):
     # partitions can be reused for systemd-boot but they need a little
     # tweaking.
 
-    # While /boot/efi can be used with systemd-boot, it is discouraged. Use the
-    # more conventional /efi mountpoint so that bootctl automatically works.
-    move_boot_efi_to_efi(fstab, dryrun)
+    # While ESP at /boot/efi can be used with systemd-boot, it is discouraged.
+    # Use the more conventional /efi mountpoint so that bootctl automatically
+    # works.
+    adjust_esp_mountpoint(fstab, dryrun)
 
     # In order for ESP and kernel images to be on separate partitions, such as
     # '/boot' and '/efi' in our case, '/boot' must be an XBOOTLDR partition
@@ -399,29 +423,6 @@ def installimage_adjustments(mkinitcpio_conf, conf='linux.conf', dryrun=False):
 def is_hetzner():
     # pacman_settings() ensures this is a permanent addition
     return HETZNER_MIRROR in PACMAN_CONF.read_text(encoding='utf-8')
-
-
-def move_boot_efi_to_efi(fstab, dryrun=False):
-    if (boot_esp := '/boot/efi') not in fstab:
-        return
-
-    root_esp = '/efi'
-
-    # umount /boot/efi
-    if dryrun:
-        print(f"$ umount {boot_esp}\n")
-    else:
-        lib.setup.umount_gracefully(boot_esp)
-
-    # Replace '/boot/efi' with '/efi' in /etc/stab
-    fstab[root_esp] = fstab[boot_esp]
-    del fstab[boot_esp]
-
-    # Update /etc/fstab
-    fstab.write(dryrun=dryrun)
-
-    # Mount /efi
-    lib.utils.print_or_run_cmd(['mount', '--mkdir', root_esp], dryrun)
 
 
 def pacman_install(subargs):
