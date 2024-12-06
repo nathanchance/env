@@ -24,35 +24,18 @@ function cbl_setup_reduction -d "Build good and bad versions of LLVM for cvise r
     set bld_llvm_args $argv[3..]
 
     set -g tmp_dir (mktemp -d -p $TMP_FOLDER -t cvise.XXXXXXXXXX)
-    for sha in $good_sha $bad_sha
-        git worktree prune
-        git worktree add -d $tmp_dir/src $sha; or return
 
-        if test $sha = $bad_sha
-            set folder bad
-        else
-            set folder good
-        end
+    cbl_bld_llvm_sbs \
+        $tmp_dir \
+        $bad_sha $good_sha \
+        $bld_llvm_args
+    or return
 
-        if test -d $CBL_TC_BLD
-            set tc_bld $CBL_TC_BLD
-        else
-            set tc_bld $CBL_GIT/tc-build
-            cbl_clone_repo (basename $tc_bld)
-        end
+    ln -fnrsv $tmp_dir/build/llvm-{$bad_sha,bad}
+    or return
 
-        $tc_bld/build-llvm.py \
-            --assertions \
-            --build-folder $tmp_dir/build/llvm-$folder \
-            --build-stage1-only \
-            --install-folder $tmp_dir/install/llvm-$folder \
-            --llvm-folder $tmp_dir/src \
-            --projects clang lld \
-            --quiet-cmake \
-            $bld_llvm_args; or return
-
-        rm -fr $tmp_dir/src
-    end
+    ln -fnrsv $tmp_dir/build/llvm-{$good_sha,good}
+    or return
 
     set cvise $tmp_dir/cvise
     mkdir -p $cvise
@@ -183,9 +166,12 @@ $bad_clang $clang_flags $common_flags &| grep -F \'\'
 test "$pipestatus" = "1 0"' >$cvise_test
     chmod +x $cvise_test
 
-    git -C $cvise init; or return
-    git -C $cvise add test.fish; or return
-    git -C $cvise commit -m "Initial interestingness test"; or return
+    begin
+        git -C $cvise init
+        and git -C $cvise add test.fish
+        and git -C $cvise commit -m "Initial interestingness test"
+    end
+    or return
 
     echo "cvise reduction has been prepared at: $tmp_dir"
     bell
