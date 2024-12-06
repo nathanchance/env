@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: MIT
 # Copyright (C) 2024 Nathan Chancellor
 
-function cbl_bld_llvm_korg
+function cbl_bld_llvm_korg -d "Build (and optionally test) LLVM for kernel.org"
     in_container_msg -h
     or return
 

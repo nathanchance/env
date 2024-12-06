@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: MIT
 # Copyright (C) 2024 Nathan Chancellor
 
-function b4_from_next
+function b4_from_next -d "Run b4_prep after interactively selecting a base from Next/Trees"
     if test -e Next/Trees
         set parts (fzf <Next/Trees | awk '{print $3}' | string split '#')
 
