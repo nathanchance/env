@@ -115,6 +115,10 @@ if grep -q host-spawn /etc/fish/conf.d/distrobox_config.fish; then
     sed -i /host-spawn/d /etc/fish/conf.d/distrobox_config.fish
 fi' >$init_hook_sh
 
+    if is_hetzner
+        add_hetzner_mirror_to_repos -p >>$init_hook_sh
+    end
+
     # If we are using docker, we need to explicitly set the container's
     # kvm group to the same group ID as the host's kvm group if it exists
     # so that accelerated VMs work within a container. Do this with an init hook.
