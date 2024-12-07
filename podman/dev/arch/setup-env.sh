@@ -199,6 +199,7 @@ function install_packages() {
 
         # package building
         debhelper
+        devtools
         dpkg
         pacman-contrib
         rpm-tools
