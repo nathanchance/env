@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: MIT
 # Copyright (C) 2021-2023 Nathan Chancellor
 
-function cltmp -d "Cleans /tmp and ~/tmp except for ssh, systemd, and tmux files"
+function cltmp -d "Cleans /tmp and $TMP_FOLDER except for ssh, systemd, and tmux files"
     fd -t f -E '*.fish' . /tmp -x rm
     fd -t d -d 1 -E 'tmux*' -E 'ssh-*' -E 'systemd*' . /tmp -x rm -r
     rm -rf $TMP_FOLDER
