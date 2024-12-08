@@ -284,12 +284,17 @@ class GCCManager(ToolchainManager):
 
                 tarball.handle()
 
-    def print_prefix(self):
+    def print_folder(self, folder):
         if len(self.versions) != 1:
-            raise RuntimeError('Asking for print_vars() other than with one version?')
+            raise RuntimeError('Asking for print_folder() with number of versions other than one?')
 
-        prefix = self.get_cc_as_path(self.versions[0], 'x86_64').parents[1]
-        print(shell_quote(prefix))
+        # Architecture does not matter because it will not be printed
+        cc = self.get_cc_as_path(self.versions[0], 'x86_64')
+
+        if folder not in ('bin', 'prefix'):
+            raise ValueError(f"Do not know how to handle {folder} in print_folder()?")
+
+        print(shell_quote(cc.parents[1 if folder == 'prefix' else 0]))
 
     def print_vars(self, split):
         if len(self.targets) != 1:
@@ -365,11 +370,16 @@ class LLVMManager(ToolchainManager):
 
             tarball.handle()
 
-    def print_prefix(self):
+    def print_folder(self, folder):
         if len(self.versions) != 1:
-            raise RuntimeError('Asking for print_vars() other than with one version?')
+            raise RuntimeError('Asking for print_folder() with number of versions other than one?')
 
-        print(shell_quote(self.get_prefix(self.versions[0])))
+        if folder not in ('bin', 'prefix'):
+            raise ValueError(f"Do not know how to handle {folder} in print_folder()?")
+
+        prefix = self.get_prefix(self.versions[0])
+
+        print(shell_quote(Path(prefix, 'bin') if folder == 'bin' else prefix))
 
     def print_vars(self, split):
         if len(self.versions) != 1:
@@ -463,9 +473,22 @@ if __name__ == '__main__':
         'latest', help='Print the latest stable release of a particular toolchain major version')
     latest_parser.add_argument('versions', choices=supported_versions, nargs='+', type=int)
 
-    prefix_parser = subparser.add_parser(
-        'prefix', help='Print toolchain prefix value for use in other contexts')
-    prefix_parser.add_argument('version',
+    folder_parser = subparser.add_parser(
+        'folder', help='Print toolchain folder values for use in other contexts')
+    folder_type = folder_parser.add_mutually_exclusive_group(required=True)
+    folder_type.add_argument('-b',
+                             '--bin',
+                             action='store_const',
+                             const='bin',
+                             dest='folder',
+                             help='Print {prefix}/bin')
+    folder_type.add_argument('-p',
+                             '--prefix',
+                             action='store_const',
+                             const='prefix',
+                             dest='folder',
+                             help='Print {prefix}')
+    folder_parser.add_argument('version',
                                choices=supported_versions,
                                default=manager.VERSIONS[-1],
                                nargs='?',
@@ -512,11 +535,11 @@ if __name__ == '__main__':
         if args.clean_up_old_versions:
             manager.clean_up_old_versions()
 
+    if args.subcommand == 'folder':
+        manager.print_folder(args.folder)
+
     if args.subcommand == 'latest':
         manager.print_latest_versions()
-
-    if args.subcommand == 'prefix':
-        manager.print_prefix()
 
     if args.subcommand == 'var':
         manager.print_vars(args.split)

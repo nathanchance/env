@@ -30,7 +30,7 @@ function cbl_test_llvm_linux -d "Test stable and mainline Linux with all support
             cbl_lkt \
                 --build-folder (tbf cbl_test_llvm_linux) \
                 --linux-folder $linux_folder \
-                --llvm-prefix (korg_llvm prefix $ver); or return
+                --llvm-prefix (korg_llvm folder -p $ver); or return
         end
     end
 end
