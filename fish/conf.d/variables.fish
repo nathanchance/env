@@ -156,6 +156,10 @@ set -gx PYTHON_FOLDER $ENV_FOLDER/python
 set -gx PYTHON_LIB_FOLDER $PYTHON_FOLDER/lib
 set -gx PYTHON_SCRIPTS_FOLDER $PYTHON_FOLDER/scripts
 set -gx PYTHON_SETUP_FOLDER $PYTHON_FOLDER/setup
+# shorthand version for use in interactive sessions or vim
+set -gx PY_L $PYTHON_LIB_FOLDER
+set -gx PY_S $PYTHON_SCRIPTS_FOLDER
+set -gx PY_ST $PYTHON_SETUP_FOLDER
 
 set -gx TMP_BUILD_FOLDER $TMP_FOLDER/build
 
