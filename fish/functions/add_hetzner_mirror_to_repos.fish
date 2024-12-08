@@ -18,7 +18,7 @@ if orig_pacman_conf_txt != new_pacman_conf_txt:
     pacman_conf.write_text(new_pacman_conf_txt, encoding='utf-8')"
 
     if test (count $argv) -eq 0
-        sudo env PYTHONPATH=$PYTHON_FOLDER/setup python -c "$program"
+        sudo env PYTHONPATH=$PYTHON_SETUP_FOLDER python -c "$program"
         return
     end
 
@@ -28,7 +28,7 @@ if orig_pacman_conf_txt != new_pacman_conf_txt:
                 printf '\n%s\n%s\n%s%s%s\n%s\n' \
                     '# Import Hetzner mirror from the host configuration if using pacman' \
                     'if command -v python3 >/dev/null 2>&1; then' \
-                    '    PYTHONPATH=/run/host'$PYTHON_FOLDER'/setup python3 -c "' \
+                    '    PYTHONPATH=/run/host'$PYTHON_SETUP_FOLDER' python3 -c "' \
                     "$program" \
                     '" || exit' \
                     fi
