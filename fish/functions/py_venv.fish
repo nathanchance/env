@@ -48,7 +48,7 @@ function py_venv -d "Manage Python virtual environment"
                 vulture \
                 yapf
     end
-    set venv_dir $MAIN_FOLDER/.venv
+    set venv_dir $XDG_FOLDER/share/py_venv
     set venv $venv_dir/$venv
     mkdir -p $venv_dir
 
