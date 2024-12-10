@@ -6,11 +6,17 @@ from pathlib import Path
 import os
 import re
 import shutil
-import subprocess
+from subprocess import CalledProcessError
+import sys
+
+sys.path.append(str(Path(__file__).resolve().parents[1]))
+# pylint: disable=wrong-import-position
+import lib.utils
+# pylint: enable=wrong-import-position
 
 
 def brew(brew_args):
-    subprocess.run([get_brew_path(), *brew_args], check=True)
+    lib.utils.run([get_brew_path(), *brew_args])
 
 
 def clone_env_plugins():
@@ -20,14 +26,14 @@ def clone_env_plugins():
     if not env_folder.exists():
         env_folder.parent.mkdir(exist_ok=True, parents=True)
         repo_clone(env_folder)
-    subprocess.run(['git', 'pull'], check=True, cwd=env_folder)
+    lib.utils.call_git_loud(env_folder, 'pull')
 
     forked_fisher_plugins = ['hydro']
     for plugin in [Path(github_folder, elem) for elem in forked_fisher_plugins]:
         if not plugin.exists():
             plugin.parent.mkdir(exist_ok=True, parents=True)
             repo_clone(plugin, 'personal')
-        subprocess.run(['git', 'remote', 'update'], check=True, cwd=plugin)
+        lib.utils.call_git_loud(plugin, ['remote', 'update'])
 
 
 def get_brew_bin():
@@ -51,11 +57,11 @@ def get_home():
 
 
 def brew_gh(gh_args):
-    subprocess.run([Path(get_brew_bin(), 'gh'), *gh_args], check=True)
+    lib.utils.run([Path(get_brew_bin(), 'gh'), *gh_args])
 
 
 def brew_git(git_args):
-    subprocess.run([Path(get_brew_bin(), 'git'), *git_args], check=True)
+    lib.utils.run([Path(get_brew_bin(), 'git'), *git_args])
 
 
 def install_packages():
@@ -110,18 +116,15 @@ def setup_gh():
 
     try:
         brew_gh(['auth', 'status'])
-    except subprocess.CalledProcessError:
+    except CalledProcessError:
         brew_gh(['auth', 'login'])
 
 
 def setup_homebrew():
     if not get_brew_path().exists():
-        install_sh = subprocess.run(
-            ['curl', '-fLSs', 'https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh'],
-            capture_output=True,
-            check=True,
-            text=True).stdout
-        subprocess.run(['/bin/bash', '-c', install_sh], check=True)
+        install_sh = lib.utils.curl(
+            ['https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh']).decode('utf-8')
+        lib.utils.run(['/bin/bash', '-c', install_sh])
 
 
 def setup_ssh():
@@ -146,9 +149,9 @@ def setup_ssh():
         shutil.rmtree(keys_folder)
 
     try:
-        subprocess.run(['ssh-add', '-l'], check=True)
-    except subprocess.CalledProcessError:
-        subprocess.run(['ssh-add', ssh_key], check=True)
+        lib.utils.run(['ssh-add', '-l'])
+    except CalledProcessError:
+        lib.utils.run(['ssh-add', ssh_key])
 
     gh_conf_text = Path(home, '.config/gh/config.yml').read_text(encoding='utf-8')
     if re.search(r'^git_protocol:\s+(.*)$', gh_conf_text, flags=re.M).groups()[0] != 'ssh':
@@ -189,7 +192,7 @@ def setup_fish():
                    '\n'
                    'git_setup\n'
                    'vim_setup\n')
-    subprocess.run([Path(get_brew_bin(), 'fish'), '-c', fish_script], check=True)
+    lib.utils.run([Path(get_brew_bin(), 'fish'), '-c', fish_script])
 
 
 if __name__ == '__main__':

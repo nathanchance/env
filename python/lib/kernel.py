@@ -5,7 +5,7 @@
 import os
 from pathlib import Path
 import shutil
-import subprocess
+from subprocess import CalledProcessError
 import sys
 import time
 
@@ -26,8 +26,8 @@ def prepare_source(base_name, base_ref='origin/master'):
 
     source_folder = Path(os.environ['CBL_SRC_P'], base_name)
 
-    subprocess.run(['git', 'remote', 'update', '--prune', 'origin'], check=True, cwd=source_folder)
-    subprocess.run(['git', 'reset', '--hard', base_ref], check=True, cwd=source_folder)
+    lib.utils.call_git(source_folder, ['remote', 'update', '--prune', 'origin'])
+    lib.utils.call_git_loud(source_folder, ['reset', '--hard', base_ref])
 
     reverts = []
     patches = []
@@ -42,10 +42,7 @@ def prepare_source(base_name, base_ref='origin/master'):
         patches.append('https://lore.kernel.org/all/20241210-bcachefs-fix-declaration-after-label-err-v1-1-22c705fc47e8@kernel.org/')  # bcachefs: Add empty statement between label and declaration in check_inode_hash_info_matches_root()
     # yapf: enable
 
-    # pylint: disable=subprocess-run-check
     try:
-        common_kwargs = {'check': True, 'cwd': source_folder, 'text': True}
-
         for revert in reverts:
             if isinstance(revert, tuple):
                 commit_range = revert[0]
@@ -55,57 +52,41 @@ def prepare_source(base_name, base_ref='origin/master'):
                     raise RuntimeError(f"No git range indicator in {commit_range}")
 
                 # generate diff from range
-                range_diff = subprocess.run(  # noqa: PLW1510
-                    ['git', 'diff', commit_range],
-                    **common_kwargs,
-                    capture_output=True).stdout
+                range_diff = lib.utils.call_git(source_folder, ['diff', commit_range]).stdout
 
                 # apply diff in reverse
-                subprocess.run(  # noqa: PLW1510
-                    ['git', 'apply', '--3way', '--reverse'],
-                    **common_kwargs,
-                    input=range_diff)
+                lib.utils.call_git_loud(source_folder, ['apply', '--3way', '--reverse'],
+                                        input=range_diff)
 
                 # commit the result
-                subprocess.run(  # noqa: PLW1510
-                    ['git', 'commit', '-m', commit_msg], **common_kwargs)
+                lib.utils.call_git_loud(source_folder, ['commit', '-m', commit_msg])
             else:
-                subprocess.run(  # noqa: PLW1510
-                    ['git', 'revert', '--mainline', '1', '--no-edit', revert], **common_kwargs)
+                lib.utils.call_git_loud(source_folder,
+                                        ['revert', '--mainline', '1', '--no-edit', revert])
 
         for patch in patches:
             if isinstance(patch, Path):
-                subprocess.run(['git', 'am', '-3', patch], **common_kwargs)  # noqa: PLW1510
+                lib.utils.call_git_loud(source_folder, ['am', '-3', patch])
             elif patch.startswith('https://lore.kernel.org/'):
-                subprocess.run(  # noqa: PLW1510
-                    ['b4', 'shazam', '-l', '-P', '_', '-s', patch], **common_kwargs)
+                lib.utils.run(['b4', 'shazam', '-l', '-P', '_', '-s', patch], cwd=source_folder)
             elif patch.startswith(('https://', 'http://')):
-                patch_input = subprocess.run(['curl', '-LSs', patch],
-                                             capture_output=True,
-                                             check=True,
-                                             text=True).stdout
-                subprocess.run(  # noqa: PLW1510
-                    ['git', 'am', '-3'], **common_kwargs, input=patch_input)
+                patch_input = lib.utils.curl([patch]).decode('utf-8')
+                lib.utils.call_git_loud(source_folder, ['am', '-3'], input=patch_input)
             else:
                 raise RuntimeError(f"Can't handle {patch}?")
 
         for commit in commits:
-            patch_input = subprocess.run(['git', 'fp', '-1', '--stdout', commit],
-                                         capture_output=True,
-                                         check=True,
-                                         cwd=Path(os.environ['CBL_SRC_P'], 'linux-next'),
-                                         text=True).stdout
-            subprocess.run(['git', 'am', '-3'], **common_kwargs, input=patch_input)  # noqa: PLW1510
-    # pylint: enable=subprocess-run-check
-    except subprocess.CalledProcessError as err:
-        subprocess.run(['git', 'ama'], check=False, cwd=source_folder)
+            patch_input = lib.utils.call_git(Path(os.environ['CBL_SRC_P'], 'linux-next'),
+                                             ['fp', '-1', '--stdout', commit]).stdout
+            lib.utils.call_git_loud(source_folder, ['am', '-3'], input=patch_input)
+    except CalledProcessError as err:
+        lib.utils.call_git(source_folder, 'ama', check=False)
         sys.exit(err.returncode)
 
 
 # Basically '$binary --version | head -1'
 def get_tool_version(binary_path):
-    return subprocess.run([binary_path, '--version'], capture_output=True, check=True,
-                          text=True).stdout.splitlines()[0]
+    return lib.utils.chronic([binary_path, '--version']).stdout.splitlines()[0]
 
 
 def kmake(variables,
@@ -208,9 +189,11 @@ def kmake(variables,
         if not (gnu_time := shutil.which('time')):
             raise RuntimeError('Could not find time binary in PATH?')
         make_cmd = [gnu_time, '-v', *make_cmd]
-    lib.utils.print_cmd(make_cmd)
-    if not use_time:
+    else:
         start_time = time.time()
-    subprocess.run(make_cmd, check=True, env=env, stdin=stdin)
-    if not use_time:
-        print(f"\nTime: {lib.utils.get_duration(start_time)}")
+    try:
+        lib.utils.run(make_cmd, env=env, stdin=stdin, show_cmd=True)
+    finally:
+        if not use_time:
+            # pylint: disable-next=possibly-used-before-assignment
+            print(f"\nTime: {lib.utils.get_duration(start_time)}")

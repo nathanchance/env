@@ -4,7 +4,12 @@
 
 from argparse import ArgumentParser
 from pathlib import Path
-import subprocess
+import sys
+
+sys.path.append(str(Path(__file__).resolve().parents[1]))
+# pylint: disable=wrong-import-position
+import lib.utils
+# pylint: enable=wrong-import-position
 
 parser = ArgumentParser(description='Generate Cc: lines for patch')
 parser.add_argument(
@@ -26,13 +31,9 @@ if not (path := Path(repo, args.path)).exists():
 
 # Show raw scripts/get_maintainer.pl output, which can help with trimming up or
 # modifying the list of addresses to send the patch to.
-subprocess.run([get_maint, path], check=True, cwd=repo)
+lib.utils.run([get_maint, path], cwd=repo)
 print()
 
-addrs = subprocess.run([get_maint, '--no-n', '--no-rolestats', path],
-                       capture_output=True,
-                       check=True,
-                       cwd=repo,
-                       text=True).stdout
-for addr in addrs.splitlines():
+for addr in lib.utils.chronic([get_maint, '--no-n', '--no-rolestats', path],
+                              cwd=repo).stdout.splitlines():
     print(f"Cc: {addr}")

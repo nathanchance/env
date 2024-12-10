@@ -7,7 +7,6 @@ import getpass
 from pathlib import Path
 import re
 import shutil
-import subprocess
 import sys
 import time
 
@@ -97,7 +96,7 @@ def setup_user(user_name, user_password):
             '--shell', shutil.which('fish'),
             user_name,
         ]  # yapf: disable
-        subprocess.run(useradd_cmd, check=True)
+        lib.utils.run(useradd_cmd)
         lib.setup.chpasswd(user_name, user_password)
 
         user_groups = [
@@ -110,7 +109,7 @@ def setup_user(user_name, user_password):
             'wheel',
         ]
         for group in user_groups:
-            subprocess.run(['addgroup', user_name, group], check=True)
+            lib.utils.run(['addgroup', user_name, group])
 
     # Setup doas
     doas_conf, doas_text = lib.utils.path_and_text('/etc/doas.d/doas.conf')
@@ -131,15 +130,15 @@ def setup_podman(user_name):
         rc_conf.write_text(rc_conf_txt.replace(rc_cgroup_mode_line, rc_cgroup_mode),
                            encoding='utf-8')
 
-    subprocess.run(['rc-update', 'add', 'cgroups'], check=True)
-    subprocess.run(['rc-service', 'cgroups', 'start'], check=True)
+    lib.utils.run(['rc-update', 'add', 'cgroups'])
+    lib.utils.run(['rc-service', 'cgroups', 'start'])
 
     modules, modules_text = lib.utils.path_and_text('/etc/modules')
     if 'tun' not in modules_text:
         modules.write_text(f"{modules_text}tun\n", encoding='utf-8')
 
     if not (make_root_rshared := Path('/etc/local.d/make_root_rshared.start')).exists():
-        subprocess.run(['rc-update', 'add', 'local', 'default'], check=True)
+        lib.utils.run(['rc-update', 'add', 'local', 'default'])
         make_root_rshared.write_text('#!/bin/sh\n\nmount --make-rshared /\n', encoding='utf-8')
         make_root_rshared.chmod(0o755)
 
@@ -161,4 +160,4 @@ if __name__ == '__main__':
 
     print("[INFO] Powering off machine in 10 seconds, hit Ctrl-C to cancel...")
     time.sleep(10)
-    subprocess.run('poweroff', check=True)
+    lib.utils.run('poweroff')

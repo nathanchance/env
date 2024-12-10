@@ -5,7 +5,6 @@
 from pathlib import Path
 import re
 import shutil
-import subprocess
 import sys
 
 sys.path.append(str(Path(__file__).resolve().parents[1]))
@@ -40,7 +39,7 @@ def dnf_add_repo(repo_url):
     # https://github.com/rpm-software-management/dnf5/issues/1537
     if get_fedora_version() >= 41:
         local_dst = Path('/etc/yum.repos.d', repo_url.rsplit('/', 1)[1])
-        subprocess.run(['curl', '-LSs', '-o', local_dst, repo_url], check=True)
+        lib.utils.curl(['-o', local_dst, repo_url])
     else:
         lib.setup.dnf(['config-manager', '--add-repo', repo_url])
 
@@ -60,13 +59,13 @@ def early_pi_fixups():
     lvmsysdev = Path('/etc/lvm/devices/system.devices')
     if lvmsysdev.exists() and '/dev/mmcblk' not in lvmsysdev.read_text(encoding='utf-8'):
         lvmsysdev.unlink()
-        subprocess.run(['vgimportdevices', '-a'], check=True)
-        subprocess.run(['vgchange', '-ay'], check=True)
+        lib.utils.run(['vgimportdevices', '-a'])
+        lib.utils.run(['vgchange', '-ay'])
 
     # arm-setup-installer extends the size of the physical partition and
     # LVM partition but not the XFS partition, so just do that and
     # circumvent the rest of this function's logic.
-    subprocess.run(['xfs_growfs', '-d', '/'], check=True)
+    lib.utils.run(['xfs_growfs', '-d', '/'])
 
     # Ensure 'rhgb quiet' is removed for all current and future kernels, as it
     # hurts debugging early boot failures. Make sure the serial console is set
@@ -81,10 +80,7 @@ def early_pi_fixups():
     if not (match := re.search(r'rd.lvm.lv=(.*)/root', grub_txt)):
         raise RuntimeError('Cannot find rd.lvm.lv value in /etc/default/grub?')
     grub_vg_name = match.groups()[0]
-    sys_vg_name = subprocess.run(['vgs', '--noheading', '-o', 'vg_name'],
-                                 capture_output=True,
-                                 check=True,
-                                 text=True).stdout.strip()
+    sys_vg_name = lib.utils.chronic(['vgs', '--noheading', '-o', 'vg_name']).stdout.strip()
     if len(sys_vg_name.split(' ')) != 1:
         raise RuntimeError('More than one VG found?')
     if grub_vg_name != sys_vg_name:
@@ -103,7 +99,7 @@ def early_pi_fixups():
         '--remove-args', ' '.join(remove_args),
         '--update-kernel', 'ALL',
     ]  # yapf: disable
-    subprocess.run(grubby_cmd, check=True)
+    lib.utils.run(grubby_cmd)
 
 
 def get_fedora_version():
@@ -128,17 +124,16 @@ def resize_rootfs():
     if lib.setup.is_pi():
         return
 
-    df_out = subprocess.run(['df', '-T'], capture_output=True, check=True, text=True).stdout
-    for line in df_out.split('\n'):
+    for line in lib.utils.chronic(['df', '-T']).stdout.splitlines():
         if '/dev/mapper/' in line:
             dev_mapper_path, dev_mapper_fs_type = line.split(' ')[0:2]
 
             # This can fail if it is already resized to max so don't bother
             # checking the return code.
-            subprocess.run(['lvextend', '-l', '+100%FREE', dev_mapper_path], check=False)
+            lib.utils.run(['lvextend', '-l', '+100%FREE', dev_mapper_path], check=False)
 
             if dev_mapper_fs_type == 'xfs':
-                subprocess.run(['xfs_growfs', dev_mapper_path], check=True)
+                lib.utils.run(['xfs_growfs', dev_mapper_path])
 
             break
 
@@ -257,7 +252,7 @@ def setup_docker(username):
     if not shutil.which('docker'):
         return
 
-    subprocess.run(['groupadd', '-f', 'docker'], check=True)
+    lib.utils.run(['groupadd', '-f', 'docker'])
     lib.setup.add_user_to_group('docker', username)
     lib.setup.systemctl_enable(['docker'])
 
@@ -269,7 +264,7 @@ def setup_kernel_args():
     # Until firmware supports new IORT RMR patches
     args = ['arm-smmu.disable_bypass=0', 'iommu.passthrough=1']
     grubby_cmd = ['grubby', '--args', ' '.join(args), '--update-kernel', 'ALL']
-    subprocess.run(grubby_cmd, check=True)
+    lib.utils.run(grubby_cmd)
 
 
 def setup_libvirt(username):
@@ -283,8 +278,8 @@ def setup_mosh():
     if not shutil.which('firewall-cmd'):
         return
 
-    subprocess.run(['firewall-cmd', '--add-port=60000-61000/udp', '--permanent'], check=True)
-    subprocess.run(['firewall-cmd', '--reload'], check=True)
+    lib.utils.run(['firewall-cmd', '--add-port=60000-61000/udp', '--permanent'])
+    lib.utils.run(['firewall-cmd', '--reload'])
 
 
 def setup_pi(username):

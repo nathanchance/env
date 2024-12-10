@@ -4,7 +4,6 @@
 
 from argparse import ArgumentParser
 from pathlib import Path
-import subprocess
 import sys
 
 sys.path.append(str(Path(__file__).resolve().parents[1]))
@@ -16,9 +15,7 @@ YES_ARG = '-y'
 
 
 def brew(brew_args):
-    brew_cmd = ['/opt/homebrew/bin/brew', *brew_args]
-    lib.utils.print_cmd(brew_cmd)
-    subprocess.run(brew_cmd, check=True)
+    lib.utils.run(['/opt/homebrew/bin/brew', *brew_args], show_cmd=True)
 
 
 parser = ArgumentParser(description='Update distribution')
@@ -37,9 +34,7 @@ else:
     os_rel = lib.setup.get_os_rel()
 
     if os_rel['ID'] == 'arch':
-        try:
-            subprocess.run(['checkupdates'], check=True)
-        except subprocess.CalledProcessError:
+        if not lib.utils.run_check_rc_zero(['checkupdates']):
             sys.exit(0)
 
         cmd_func = lib.setup.pacman

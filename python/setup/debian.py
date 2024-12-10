@@ -8,7 +8,6 @@ from pathlib import Path
 import platform
 import re
 import shutil
-import subprocess
 import sys
 
 import deb
@@ -36,8 +35,8 @@ def pi_setup(user_name):
     if not lib.setup.is_pi():
         return
 
-    subprocess.run(['raspi-config', '--expand-rootfs'], check=True)
-    subprocess.run(['raspi-config', 'nonint', 'do_serial', '0'], check=True)
+    lib.utils.run(['raspi-config', '--expand-rootfs'])
+    lib.utils.run(['raspi-config', 'nonint', 'do_serial', '0'])
 
     ip_addr = f"192.168.4.{205 if platform.machine() == 'aarch64' else 199}"
     dhcpcd_conf, dhcpcd_conf_txt = lib.utils.path_and_text('/etc/dhcpcd.conf')
@@ -114,7 +113,7 @@ def setup_repos():
         tailscale_gpg_key = Path('/usr/share/keyrings/tailscale-archive-keyring.gpg')
         lib.setup.fetch_gpg_key(f"{base_tailscale_url}.noarmor.gpg", tailscale_gpg_key)
 
-        tailscale_repo_txt = lib.setup.curl([f"{base_tailscale_url}.tailscale-keyring.list"])
+        tailscale_repo_txt = lib.utils.curl([f"{base_tailscale_url}.tailscale-keyring.list"])
         Path(apt_sources, 'tailscale.list').write_bytes(tailscale_repo_txt)
 
 

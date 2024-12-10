@@ -6,7 +6,12 @@ import json
 from pathlib import Path
 import platform
 import shutil
-import subprocess
+import sys
+
+sys.path.append(str(Path(__file__).resolve().parents[1]))
+# pylint: disable=wrong-import-position
+import lib.utils
+# pylint: enable=wrong-import-position
 
 IMAGE_TAG = 'pgo-llvm-builder'
 ROOT = Path(__file__).resolve().parent
@@ -79,14 +84,13 @@ else:
 
 # First, build container if necessary
 if not (build_container := args.force_build_container):
-    podman_image_cmd = ['podman', 'image', 'ls', '--format', 'json']
-    cmd_out = subprocess.run(podman_image_cmd, capture_output=True, check=True, text=True).stdout
+    cmd_out = lib.utils.chronic(['podman', 'image', 'ls', '--format', 'json']).stdout
     build_container = not [
         name for item in json.loads(cmd_out) if 'Names' in item
         for name in item['Names'] if 'pgo-llvm-builder' in name
     ]
 if build_container:
-    podman_build_cmd = [
+    lib.utils.run([
         'podman',
         'build',
         *[f"--build-arg={arg}" for arg in args.build_args],
@@ -95,8 +99,7 @@ if build_container:
         '--tag',
         IMAGE_TAG,
         ROOT,
-    ]
-    subprocess.run(podman_build_cmd, check=True)
+    ])
 
 build_folder = Path(args.build_folder).resolve() if args.build_folder else BUILD
 
@@ -108,9 +111,8 @@ if args.llvm_folder:
         raise FileNotFoundError('Invalid llvm-project provided, no llvm folder?')
 elif not (llvm_folder := Path(GIT, 'llvm-project')).exists():
     llvm_folder.parent.mkdir(exist_ok=True, parents=True)
-    git_clone_cmd = ['git', 'clone', 'https://github.com/llvm/llvm-project', llvm_folder]
-    subprocess.run(git_clone_cmd, check=True)
-subprocess.run(['git', 'remote', 'update'], check=True, cwd=llvm_folder)
+    lib.utils.call_git_loud(None, ['clone', 'https://github.com/llvm/llvm-project', llvm_folder])
+lib.utils.call_git_loud(llvm_folder, ['remote', 'update'])
 
 if args.tc_build_folder:
     tc_build_folder = Path(args.tc_build_folder).resolve()
@@ -119,15 +121,10 @@ if args.tc_build_folder:
 else:
     if not (tc_build_folder := Path(GIT, 'tc-build')).exists():
         tc_build_folder.parent.mkdir(exist_ok=True, parents=True)
-        git_clone_cmd = [
-            'git',
-            'clone',
-            'https://github.com/ClangBuiltLinux/tc-build',
-            tc_build_folder,
-        ]
-        subprocess.run(git_clone_cmd, check=True)
-    subprocess.run(['git', 'remote', 'update'], check=True, cwd=tc_build_folder)
-    subprocess.run(['git', 'reset', '--hard', '@{u}'], check=True, cwd=tc_build_folder)
+        lib.utils.call_git_loud(
+            None, ['clone', 'https://github.com/ClangBuiltLinux/tc-build', tc_build_folder])
+    lib.utils.call_git_loud(tc_build_folder, ['remote', 'update'])
+    lib.utils.call_git_loud(tc_build_folder, ['reset', '--hard', '@{u}'])
 
 llvm_git_dir = Path(llvm_folder, '.git')
 static_mounts = [
@@ -209,11 +206,7 @@ for value in versions:
 
     if 'llvmorg' not in ref:
         date_info = datetime.datetime.now(datetime.timezone.utc).strftime('%Y%m%d-%H%M%S')
-        ref_info = subprocess.run(['git', 'show', '--format=%H', '-s', ref],
-                                  capture_output=True,
-                                  check=True,
-                                  cwd=llvm_folder,
-                                  text=True).stdout.strip()
+        ref_info = lib.utils.get_git_output(llvm_folder, ['show', '--format=%H', '-s', ref])
         VERSION += f"-{ref_info}-{date_info}"
 
     if (llvm_install := Path(install_folder,
@@ -226,10 +219,9 @@ for value in versions:
 
     if (worktree := Path(SRC, 'llvm-project')).exists():
         shutil.rmtree(worktree)
-        subprocess.run(['git', 'worktree', 'prune'], check=True, cwd=llvm_folder)
+        lib.utils.call_git(llvm_folder, ['worktree', 'prune'])
 
-    git_worktree_cmd = ['git', 'worktree', 'add', '--detach', worktree, ref]
-    subprocess.run(git_worktree_cmd, check=True, cwd=llvm_folder)
+    lib.utils.call_git_loud(llvm_folder, ['worktree', 'add', '--detach', worktree, ref])
 
     # Python 3.12 deprecates and changes a few things in the tests. If we are
     # running the tests, make sure we have the fixes. It is safe to apply them
@@ -245,26 +237,20 @@ for value in versions:
                                                          'int(frame_size/16 - 4)) * 16')
                     gen_cfi_funcs.write_text(new_text, encoding='utf-8')
                 else:
-                    subprocess.run([
-                        'git',
+                    lib.utils.call_git_loud(worktree, [
                         'cherry-pick',
                         '--no-commit',
                         '015c43178f9d8531b6bcd1685dbf72b7d837cf5a',
-                    ],
-                                   check=True,
-                                   cwd=worktree)
+                    ])
         # https://github.com/llvm/llvm-project/commit/01fdc2a3c9e0df4e54bb9b88f385f68e7b0d808c
         if (uctc := Path(worktree, 'llvm/utils/update_cc_test_checks.py')).exists():
             uctc_txt = uctc.read_text(encoding='utf-8')
             if 'distutils.spawn' in uctc_txt:
-                subprocess.run([
-                    'git',
+                lib.utils.call_git_loud(worktree, [
                     'cherry-pick',
                     '--no-commit',
                     '01fdc2a3c9e0df4e54bb9b88f385f68e7b0d808c',
-                ],
-                               check=True,
-                               cwd=worktree)
+                ])
 
     shutil.rmtree(build_folder, ignore_errors=True)
     build_folder.mkdir(exist_ok=True, parents=True)
@@ -306,10 +292,10 @@ for value in versions:
     maj_ver = int(VERSION.split('.', 1)[0])
     if (maj_ver >= 16 and MACHINE == 'x86_64') or (maj_ver >= 18 and MACHINE == 'aarch64'):
         build_cmd += ['--bolt', '--lto', 'thin']
-    subprocess.run(build_cmd, check=True)
+    lib.utils.run(build_cmd)
 
     llvm_tarball = Path(llvm_install.parent, f"{llvm_install.name}.tar")
-    tar_cmd = [
+    lib.utils.run([
         'tar',
         '--create',
         '--directory',
@@ -317,19 +303,17 @@ for value in versions:
         '--file',
         llvm_tarball,
         llvm_install.name,
-    ]
-    subprocess.run(tar_cmd, check=True)
+    ])
 
     llvm_tarball_compressed = llvm_tarball.with_suffix('.tar.zst')
-    zstd_cmd = [
+    lib.utils.run([
         'zstd',
         '-19',
         '-T0',
         '-o',
         llvm_tarball_compressed,
         llvm_tarball,
-    ]
-    subprocess.run(zstd_cmd, check=True)
+    ])
 
     INFO_TEXT = ('\n'
                  f"Tarball is available at: {llvm_tarball}\n"

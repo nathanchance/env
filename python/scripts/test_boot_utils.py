@@ -3,8 +3,12 @@
 from argparse import ArgumentParser
 import os
 from pathlib import Path
-import subprocess
-import shlex
+import sys
+
+sys.path.append(str(Path(__file__).resolve().parents[1]))
+# pylint: disable=wrong-import-position
+import lib.utils
+# pylint: enable=wrong-import-position
 
 BOOT_QEMU = Path(os.environ['CBL_GIT'], 'boot-utils/boot-qemu.py')
 
@@ -59,5 +63,4 @@ for toolchain, builds in MATRIX.items():
             raise FileNotFoundError(f"{kernel_dir} does not exist?")
 
         boot_utils_cmd = [BOOT_QEMU, '-a', boot_utils_arch, '-k', kernel_dir, '-t', '90s']
-        print(f"\n$ {' '.join(shlex.quote(str(elem)) for elem in boot_utils_cmd)}", flush=True)
-        subprocess.run(boot_utils_cmd, check=True)
+        lib.utils.run(boot_utils_cmd, show_cmd=True)

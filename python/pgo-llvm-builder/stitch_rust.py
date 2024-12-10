@@ -4,7 +4,6 @@ from argparse import ArgumentParser
 import hashlib
 from pathlib import Path
 import shutil
-import subprocess
 import sys
 if sys.version_info >= (3, 11, 0):
     import tomllib
@@ -14,20 +13,16 @@ else:
     )
     sys.exit(1)
 
+sys.path.append(str(Path(__file__).resolve().parents[1]))
+# pylint: disable=wrong-import-position
+import lib.utils
+# pylint: enable=wrong-import-position
+
 ROOT = Path(__file__).resolve().parent
 RUST = Path(ROOT, 'rust')
 
 FAILED = '\033[01;31mFAILED\033[0m'
 SUCCESS = '\033[01;32mSUCCESS\033[0m'
-
-
-def run_cmd_print(cmd, **kwargs):
-    try:
-        subprocess.run(cmd, capture_output=True, check=True, text=True, **kwargs)
-    except subprocess.CalledProcessError as err:
-        print(f"{FAILED} ({cmd[0]} failed with '{err.stderr}')")
-        sys.exit(err.returncode)
-    print(SUCCESS)
 
 
 def download_and_verify(url, dst):
@@ -40,19 +35,22 @@ def download_and_verify(url, dst):
             rust_gpg.unlink()
         rust_gpg.mkdir(parents=True)
         print(f"Preparing GPG folder ('{rust_gpg}')... ", end='')
-        run_cmd_print([*base_gpg_cmd, '--recv-keys', '85AB96E6FA1BE5FE'])
-        print()
+        lib.utils.chronic([*base_gpg_cmd, '--recv-keys', '85AB96E6FA1BE5FE'])
+        print(SUCCESS, end='\n\n')
 
     print(f"Downloading {url} to {dst}... ", end='')
-    run_cmd_print(['curl', '-LSs', '-o', dst, url])
+    lib.utils.curl(['-o', dst, url])
+    print(SUCCESS, end='\n\n')
 
     print(f"Downloading GPG signature for {dst.name}... ", end='')
     gpg_url = f"{url}.asc"
     (gpg_dst := Path(dst.parent, f"{dst.name}.asc")).unlink(missing_ok=True)
-    run_cmd_print(['curl', '-LSs', '-o', gpg_dst, gpg_url])
+    lib.utils.curl(['-o', gpg_dst, gpg_url])
+    print(SUCCESS, end='\n\n')
 
     print(f"Verifying {dst.name} with GPG signature... ", end='')
-    run_cmd_print([*base_gpg_cmd, '--verify', gpg_dst, dst])
+    lib.utils.chronic([*base_gpg_cmd, '--verify', gpg_dst, dst])
+    print(SUCCESS, end='\n\n')
     gpg_dst.unlink()
 
 
@@ -85,7 +83,8 @@ def prepare_rust_components(toml, target):
             print(SUCCESS)
 
             print(f"Extracting {pkg_name} to {dst}... ", end='')
-            run_cmd_print(['tar', '-C', RUST, '-xzf', pkg_tarball])
+            lib.utils.chronic(['tar', '-C', RUST, '-xzf', pkg_tarball])
+            print(SUCCESS, end='\n\n')
 
             pkg_tarball.unlink()
             print()
@@ -164,7 +163,7 @@ def generate_llvm_rust_tarball(scripts, llvm_tarball, rust_version):
     prefix.mkdir(parents=True)
 
     # Extract LLVM tarball into prefix
-    subprocess.run([
+    lib.utils.run([
         *tar_cmd,
         '--directory',
         prefix,
@@ -172,16 +171,15 @@ def generate_llvm_rust_tarball(scripts, llvm_tarball, rust_version):
         '--file',
         llvm_tarball,
         '--strip-components=1',
-    ],
-                   check=True)
+    ])
 
     # Install Rust components into prefix
     for script in scripts:
         # Use '--disable-ldconfig' as the prefix is not '/usr/local'
-        subprocess.run([script, '--disable-ldconfig', f"--prefix={prefix}"], check=True)
+        lib.utils.run([script, '--disable-ldconfig', f"--prefix={prefix}"])
 
     # Repackage prefix into LLVM+Rust tarball
-    subprocess.run([
+    lib.utils.run([
         *tar_cmd,
         '--create',
         '--directory',
@@ -189,8 +187,7 @@ def generate_llvm_rust_tarball(scripts, llvm_tarball, rust_version):
         '--file',
         llvm_rust_tarball,
         prefix.name,
-    ],
-                   check=True)
+    ])
     shutil.rmtree(prefix)
 
     print(f"Modified tarball is now available at {llvm_rust_tarball}")

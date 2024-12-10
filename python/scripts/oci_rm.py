@@ -4,8 +4,15 @@
 
 from argparse import ArgumentParser
 import json
+from pathlib import Path
 import shutil
 import subprocess
+import sys
+
+sys.path.append(str(Path(__file__).resolve().parents[1]))
+# pylint: disable=wrong-import-position
+import lib.utils
+# pylint: enable=wrong-import-position
 
 
 def fzf(target, fzf_input):
@@ -16,8 +23,7 @@ def fzf(target, fzf_input):
 
 
 def oci_json(target):
-    podman_cmd = ['podman', target, 'ls', '--all', '--format', 'json']
-    podman_out = subprocess.run(podman_cmd, capture_output=True, check=True, text=True).stdout
+    podman_out = lib.utils.chronic(['podman', target, 'ls', '--all', '--format', 'json']).stdout
     return json.loads(podman_out)
 
 
@@ -37,9 +43,7 @@ def parse_arguments():
 
 
 def podman_rm(target, items):
-    podman_cmd = ['podman', target, 'rm', '--force', *items]
-    print(f"$ {' '.join(podman_cmd)}")
-    subprocess.run(podman_cmd, check=True)
+    lib.utils.run(['podman', target, 'rm', '--force', *items], show_cmd=True)
     print()
 
 

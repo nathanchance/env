@@ -51,13 +51,8 @@ def iso_is_url(iso):
     return 'http://' in iso or 'https://' in iso
 
 
-def run_cmd(cmd):
-    lib.utils.print_cmd(cmd)
-    subprocess.run(cmd, check=True)
-
-
 def wget(location, url):
-    run_cmd(['wget', '-c', '-O', location, url])
+    lib.utils.run(['wget', '-c', '-O', location, url], show_cmd=True)
 
 
 class VirtualMachine:
@@ -103,7 +98,7 @@ class VirtualMachine:
                 raise RuntimeError('kernel passed without initrd and one could not be found!')
 
         # Clear any previous hosts using the chosen SSH port.
-        run_cmd(['ssh-keygen', '-R', f"[localhost]:{ssh_port}"])
+        lib.utils.run(['ssh-keygen', '-R', f"[localhost]:{ssh_port}"], show_cmd=True)
         Path.home().joinpath('.ssh/known_hosts.old').unlink(missing_ok=True)
 
         # QEMU configuration
@@ -180,7 +175,8 @@ class VirtualMachine:
 
     def create_disk_img(self):
         self.primary_disk_img.parent.mkdir(exist_ok=True, parents=True)
-        run_cmd(['qemu-img', 'create', '-f', 'qcow2', self.primary_disk_img, self.size])
+        lib.utils.run(['qemu-img', 'create', '-f', 'qcow2', self.primary_disk_img, self.size],
+                      show_cmd=True)
 
     def get_display_args(self, graphical):
         if graphical:
@@ -257,13 +253,10 @@ class VirtualMachine:
         # Get access to root privileges permission before opening virtiofsd in
         # the background
         print('Requesting root privileges to run virtiofsd...')
-        run_cmd([sudo, 'true'])
+        lib.utils.run_as_root('true')
 
         base_virtiofsd_cmd = [sudo, virtiofsd]
-        virtiofsd_version_text = subprocess.run([*base_virtiofsd_cmd, '--version'],
-                                                capture_output=True,
-                                                check=True,
-                                                text=True).stdout
+        virtiofsd_version_text = lib.utils.chronic([*base_virtiofsd_cmd, '--version']).stdout
         group_name = grp.getgrgid(os.getgid()).gr_name
 
         # C / QEMU / Reference implementation (deprecated)
@@ -289,7 +282,7 @@ class VirtualMachine:
         with self.vfsd_log.open('w', encoding='utf-8') as file, \
              subprocess.Popen(virtiofsd_cmd, stderr=file, stdout=file) as vfsd:
             try:
-                run_cmd([qemu, *self.qemu_args, *self.get_drive_args()])
+                lib.utils.run([qemu, *self.qemu_args, *self.get_drive_args()], show_cmd=True)
             except subprocess.CalledProcessError as err:
                 # If virtiofsd is dead, it is pretty likely that it was the
                 # cause of QEMU failing so add to the existing exception using
@@ -359,7 +352,7 @@ class Arm32VirtualMachine(ArmVirtualMachine):
                 )
                 check_el1_32.chmod(0o755)
             try:
-                subprocess.run(check_el1_32, check=True)
+                lib.utils.run(check_el1_32)
             except subprocess.CalledProcessError:
                 pass  # we'll return false below
             else:

@@ -7,7 +7,6 @@ import datetime
 import json
 import os
 from pathlib import Path
-import subprocess
 import sys
 
 import requests
@@ -120,14 +119,12 @@ def download_items(targets, network_folder):
                 # Download and update repo
                 if not (repo_path := Path(os.environ['CBL_SRC_M'], repo_name)).exists():
                     repo_path.parent.mkdir(exist_ok=True, parents=True)
-                    subprocess.run(['git', 'clone', '--mirror', repo_url, repo_path], check=True)
-                subprocess.run(['git', 'remote', 'update', '--prune'], check=True, cwd=repo_path)
+                    lib.utils.call_git_loud(None, ['clone', '--mirror', repo_url, repo_path])
+                lib.utils.call_git_loud(repo_path, ['remote', 'update', '--prune'])
                 # Create bundles
                 repo_bundle = Path(bundles_folder, f"{repo_name}.bundle")
                 repo_bundle.unlink(missing_ok=True)
-                subprocess.run(['git', 'bundle', 'create', repo_bundle, '--all'],
-                               check=True,
-                               cwd=repo_path)
+                lib.utils.call_git_loud(repo_path, ['bundle', 'create', repo_bundle, '--all'])
 
         elif target == 'debian':
             debian_arches = ['amd64', 'arm64', 'armhf', 'i386']

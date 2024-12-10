@@ -8,7 +8,6 @@ from pathlib import Path
 import platform
 import shlex
 import shutil
-import subprocess
 import sys
 
 import requests
@@ -121,8 +120,7 @@ class Tarball:
                 raise RuntimeError(f"Compression extension ('{comp_ext}') not supported!")
 
             tar_input = response.content if not local_tarball.exists() else None
-            lib.utils.print_cmd(tar_cmd)
-            subprocess.run(tar_cmd, check=True, input=tar_input)
+            lib.utils.run(tar_cmd, input=tar_input, show_cmd=True)
 
 
 class ToolchainManager:
