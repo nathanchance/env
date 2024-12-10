@@ -38,6 +38,8 @@ def prepare_source(base_name, base_ref='origin/master'):
     if base_name in ('fedora', 'linux-next-llvm'):
         # https://lore.kernel.org/20241114163931.GA1928968@thelio-3990X/
         commits.append('bd0601e8f99ded716ae1341c39cf8cc30fc28466')  # fixup! netfs: Change the read result collector to only use one work item
+
+        patches.append('https://lore.kernel.org/all/20241210-bcachefs-fix-declaration-after-label-err-v1-1-22c705fc47e8@kernel.org/')  # bcachefs: Add empty statement between label and declaration in check_inode_hash_info_matches_root()
     # yapf: enable
 
     # pylint: disable=subprocess-run-check
