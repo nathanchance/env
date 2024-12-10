@@ -422,8 +422,11 @@ def installimage_adjustments(mkinitcpio_conf, conf='linux.conf', dryrun=False):
 
 
 def is_hetzner():
-    # pacman_settings() ensures this is a permanent addition
-    return HETZNER_MIRROR in PACMAN_CONF.read_text(encoding='utf-8')
+    # While this lives in arch.py because that is the only place within setup
+    # where it is relevant, it might be called on any platform from fish, so
+    # ensure it works when /etc/pacman.conf does not exists.
+    # pacman_settings() ensures that HETZNER_MIRROR is a permanent addition.
+    return PACMAN_CONF.exists() and HETZNER_MIRROR in PACMAN_CONF.read_text(encoding='utf-8')
 
 
 def pacman_install(subargs):
