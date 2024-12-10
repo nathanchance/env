@@ -6,7 +6,7 @@ function tmxrun -d "Wrapper for tmxrun.py"
     # The duplication is sad but it is so much better to handle adding -- in the wrapper function
     for arg in $argv
         switch $arg
-            case -c -d -H --container --detach --host
+            case -c -d -H -s -v --container --detach --host --split-horizontal --split-vertical
                 if not set -q pos_args
                     set -a py_args $arg
                 else
