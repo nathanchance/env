@@ -846,4 +846,6 @@ if __name__ == '__main__':
     fix_fstab()
     lib.setup.set_date_time()
     lib.setup.setup_initial_fish_config(user)
+    if lib.setup.is_virtual_machine():
+        initcpio_conf['HOOKS'].discard('keyboard')
     initcpio_conf.update_if_necessary()
