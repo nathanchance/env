@@ -40,6 +40,10 @@ def prepare_source(base_name, base_ref='origin/master'):
         commits.append('bd0601e8f99ded716ae1341c39cf8cc30fc28466')  # fixup! netfs: Change the read result collector to only use one work item
 
         patches.append('https://lore.kernel.org/all/20241210-bcachefs-fix-declaration-after-label-err-v1-1-22c705fc47e8@kernel.org/')  # bcachefs: Add empty statement between label and declaration in check_inode_hash_info_matches_root()
+
+    if base_name == 'linux-next-llvm':
+        # https://lore.kernel.org/20241212014418.GA532802@ax162/
+        reverts.append('5a82223e0743fb36bcb99657772513739d1a9936')  # x86/kexec: Mark relocate_kernel page as ROX instead of RWX
     # yapf: enable
 
     try:
