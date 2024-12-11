@@ -9,6 +9,8 @@ function sd_boot_kernel -d "Boot a kernel via full reboot or kexec using systemd
                 set reboot kexec
             case -r --reboot
                 set reboot reboot
+            case --when='*'
+                set -a systemctl_args $arg
             case '*'
                 set krnl linux-(string replace 'linux-' '' $arg)
         end
@@ -62,8 +64,8 @@ function sd_boot_kernel -d "Boot a kernel via full reboot or kexec using systemd
                 return 1
             end
 
-            set -a reboot --boot-loader-entry=$conf
+            set -a systemctl_args --boot-loader-entry=$conf
     end
 
-    sudo systemctl $reboot
+    sudo systemctl $reboot $systemctl_args
 end
