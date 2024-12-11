@@ -12,7 +12,6 @@ import os
 from pathlib import Path
 import re
 import shutil
-import subprocess
 import sys
 from tempfile import TemporaryDirectory
 
@@ -96,7 +95,7 @@ class MkinitcpioConf(UserDict):
             self.path.write_text(new_text, encoding='utf-8')
             self._reload_data_from_file()
 
-            subprocess.run(['mkinitcpio', '-P'], check=True)
+            lib.utils.run(['mkinitcpio', '-P'])
 
 
 def add_hetzner_mirror_to_repos(config):
@@ -141,7 +140,7 @@ def adjust_gnome_power_settings():
         'org.gnome.settings-daemon.plugins.power',
         'sleep-inactive-ac-type', 'nothing',
     ]  # yapf: disable
-    subprocess.run(gdm_cmd, check=True)
+    lib.utils.run(gdm_cmd)
 
 
 def configure_networking():
@@ -215,7 +214,7 @@ def configure_systemd_boot(init=True, conf='linux.conf'):
         linux_conf.write_text(new_text, encoding='utf-8')
 
     # Ensure that the new configuration is the default on the machine.
-    subprocess.run(['bootctl', 'set-default', linux_conf.name], check=True)
+    lib.utils.run(['bootctl', 'set-default', linux_conf.name])
 
 
 def convert_boot_to_xbootldr(fstab, dryrun):
@@ -308,7 +307,7 @@ def enable_reflector():
     reflector_drop_in.parent.mkdir(exist_ok=True)
     reflector_drop_in.write_text(reflector_drop_in_text, encoding='utf-8')
     reflector_drop_in.chmod(0o644)
-    subprocess.run(['systemctl', 'daemon-reload'], check=True)
+    lib.utils.run(['systemctl', 'daemon-reload'])
 
     lib.setup.systemctl_enable(['reflector.timer'])
 
@@ -321,7 +320,7 @@ def enable_reflector():
 
 # For archinstall, which causes ^M in /etc/fstab
 def fix_fstab():
-    subprocess.run(['dos2unix', '/etc/fstab'], check=True)
+    lib.utils.run(['dos2unix', '/etc/fstab'])
 
 
 def get_cmdline_additions():
@@ -343,8 +342,7 @@ def get_findmnt_info(path=''):
     findmnt_cmd = ['findmnt', '-J', '-o', ','.join(fields)]
     if path:
         findmnt_cmd.append(path)
-    findmnt_proc = subprocess.run(findmnt_cmd, capture_output=True, check=True, text=True)
-    filesystems = json.loads(findmnt_proc.stdout)['filesystems']
+    filesystems = json.loads(lib.utils.chronic(findmnt_cmd).stdout)['filesystems']
     if path:
         return filesystems[0]
     return filesystems
@@ -590,8 +588,8 @@ def pacman_install_packages():
 
 
 def pacman_key_setup():
-    subprocess.run(['pacman-key', '--init'], check=True)
-    subprocess.run(['pacman-key', '--populate', 'archlinux'], check=True)
+    lib.utils.run(['pacman-key', '--init'])
+    lib.utils.run(['pacman-key', '--populate', 'archlinux'])
 
 
 def pacman_settings(dryrun=False):
@@ -641,7 +639,7 @@ def pacman_settings(dryrun=False):
     if not (nathan_db := Path('/var/lib/pacman/sync/nathan.db')).exists():
         with TemporaryDirectory() as tempdir:
             Path(tempdir).chmod(0o755)  # avoid permission errors from pacman
-            subprocess.run(['pacman', '--dbpath', tempdir, '-Sy'], check=True)
+            lib.utils.run(['pacman', '--dbpath', tempdir, '-Sy'])
             shutil.move(Path(tempdir, *nathan_db.parts[-2:]), nathan_db)
 
 
@@ -715,7 +713,7 @@ def setup_user(username, userpass):
         lib.setup.add_user_to_group('uucp', username)
     else:
         fish = Path(shutil.which('fish')).resolve()
-        subprocess.run(['useradd', '-G', 'wheel,uucp', '-m', '-s', fish, username], check=True)
+        lib.utils.run(['useradd', '-G', 'wheel,uucp', '-m', '-s', fish, username])
 
         lib.setup.chpasswd(username, userpass)
 

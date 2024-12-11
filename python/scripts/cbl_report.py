@@ -10,7 +10,6 @@ import json
 import os
 from pathlib import Path
 import shutil
-import subprocess
 import sys
 import zoneinfo
 
@@ -101,21 +100,6 @@ def get_report_repo():
 
 def get_report_worktree():
     return Path(os.environ['CBL'], 'current-report')
-
-
-def git(repo, cmd, capture_output=True, check=True, env=None, show_command=True):
-    if not shutil.which('git'):
-        raise RuntimeError('git could not be found!')
-    command = ['git', '-C', repo, *cmd]
-    if show_command:
-        lib.utils.print_cmd(command)
-    if env:
-        env = os.environ.copy() | env
-    return subprocess.run(command, capture_output=capture_output, check=check, env=env, text=True)
-
-
-def git_check_success(repo, cmd):
-    return git(repo, cmd, check=False, show_command=False).returncode == 0
 
 
 def parse_parameters():
@@ -212,11 +196,12 @@ def parse_parameters():
 
 
 def local_branch_exists(repo, branch):
-    return git_check_success(repo, ['rev-parse', '--verify', branch])
+    return lib.utils.call_git(repo, ['rev-parse', '--verify', branch], check=False).returncode == 0
 
 
 def remote_branch_exists(repo, branch):
-    return git_check_success(repo, ['ls-remote', '--exit-code', '--heads', 'origin', branch])
+    return lib.utils.call_git(repo, ['ls-remote', '--exit-code', '--heads', 'origin', branch],
+                              check=False).returncode == 0
 
 
 def generate_devices(devices):
@@ -252,10 +237,7 @@ def generate_item(args):
         if not Path('Makefile').exists():
             raise RuntimeError('Not in a kernel tree?')
 
-        proc = subprocess.run(['b4', 'prep', '--show-info'],
-                              capture_output=True,
-                              check=True,
-                              text=True)
+        proc = lib.utils.chronic(['b4', 'prep', '--show-info'])
         info = dict(map(str.strip, item.split(':', 1)) for item in proc.stdout.splitlines())
         commits = [key for key in info if key.startswith('commit-')]
         series = [key for key in info if key.startswith('series-v')]
@@ -270,11 +252,7 @@ def generate_item(args):
         print(f"  * `{title}` ({', '.join(md_links)})")
 
     elif item_type == 'pr':
-        proc = subprocess.run(['gh', 'pr', 'view', '--json', 'title,url'],
-                              capture_output=True,
-                              check=True,
-                              text=True)
-        gh_json = json.loads(proc.stdout)
+        gh_json = json.loads(lib.utils.chronic(['gh', 'pr', 'view', '--json', 'title,url']).stdout)
 
         print(f"* [`{gh_json['title']}`]({gh_json['url']})")
 
@@ -438,12 +416,8 @@ def create_monthly_report_file(report_file, report_date):
 
 def get_yearly_commits(year, source, branch='main', git_log_args=None, update=True):
     if update:
-        subprocess.run(['git', 'remote', 'update', '--prune', 'origin'],
-                       capture_output=True,
-                       check=True,
-                       cwd=source)
+        lib.utils.call_git(source, ['remote', 'update', '--prune', 'origin'])
     git_log_cmd = [
-        'git',
         'log',
         '--format=%H %s',
         '--no-merges',
@@ -455,11 +429,7 @@ def get_yearly_commits(year, source, branch='main', git_log_args=None, update=Tr
         git_log_cmd += git_log_args
     else:
         git_log_cmd.append('--author=Nathan Chancellor')
-    git_log_output = subprocess.run(git_log_cmd,
-                                    capture_output=True,
-                                    check=True,
-                                    cwd=source,
-                                    text=True)
+    git_log_output = lib.utils.call_git(source, git_log_cmd)
 
     return dict(item.split(' ', 1) for item in git_log_output.stdout.splitlines())
 
@@ -757,8 +727,9 @@ def finalize_report(args):
 
     # Rebase changes if requested
     if args.rebase or args.all:
-        git(worktree, ['rebase', '-i', '--autosquash', 'origin/main'],
-            env={'GIT_SEQUENCE_EDITOR': shutil.which('true')})
+        lib.utils.call_git(worktree, ['rebase', '-i', '--autosquash', 'origin/main'],
+                           env={'GIT_SEQUENCE_EDITOR': shutil.which('true')},
+                           show_cmd=True)
 
     # Get branch based on user's request
     date = get_prev_datetime() if args.prev_month else get_current_datetime()
@@ -766,21 +737,21 @@ def finalize_report(args):
     # Merge branch into main
     branch = get_report_branch(date)
     if args.merge or args.all:
-        git(repo, ['merge', branch])
+        lib.utils.call_git(repo, ['merge', branch], show_cmd=True)
 
     # Remove worktree ('--force' due to submodules)
     if args.remove_worktree or args.all:
-        git(repo, ['worktree', 'remove', '--force', worktree])
+        lib.utils.call_git(repo, ['worktree', 'remove', '--force', worktree], show_cmd=True)
 
     # Delete branch locally and remotely if necessary
     if args.delete_branch or args.all:
-        git(repo, ['branch', '--delete', '--force', branch])
+        lib.utils.call_git(repo, ['branch', '--delete', '--force', branch], show_cmd=True)
         if remote_branch_exists(repo, branch):
-            git(repo, ['push', 'origin', f":{branch}"])
+            lib.utils.call_git(repo, ['push', 'origin', f":{branch}"], show_cmd=True)
 
     # Push main if requested
     if args.push or args.all:
-        git(repo, ['push'])
+        lib.utils.call_git(repo, 'push', show_cmd=True)
 
 
 def new_report(args):
@@ -802,7 +773,7 @@ def new_report(args):
 
         # Update source repo to ensure remote branch check is up to date
         if args.update or args.all:
-            git(repo, ['remote', 'update', '--prune', 'origin'])
+            lib.utils.call_git(repo, ['remote', 'update', '--prune', 'origin'], show_cmd=True)
 
         push_to_remote = False
         worktree_add = ['worktree', 'add']
@@ -815,14 +786,16 @@ def new_report(args):
             push_to_remote = True
 
         # Create worktree
-        git(repo, worktree_add)
+        lib.utils.call_git(repo, worktree_add, show_cmd=True)
 
         # Push new branch if needed
         if (args.push or args.all) and push_to_remote:
-            git(worktree, ['push', '--set-upstream', 'origin', branch])
+            lib.utils.call_git(worktree, ['push', '--set-upstream', 'origin', branch],
+                               show_cmd=True)
 
         # Update submodules, as that is how the theme is checked out
-        git(worktree, ['submodule', 'update', '--init', '--recursive'])
+        lib.utils.call_git(worktree, ['submodule', 'update', '--init', '--recursive'],
+                           show_cmd=True)
 
     # Create new report file if necessary
     if args.create_report or args.all:
@@ -837,8 +810,10 @@ def new_report(args):
             commit_date = report_date.strftime('%a %b %d %H:%M:%S %Y %z')
 
             create_monthly_report_file(report, report_date)
-            git(worktree, ['add', report])
-            git(worktree, ['commit', '-m', commit_title, '--date', commit_date, '--signoff'])
+            lib.utils.call_git(worktree, ['add', report], show_cmd=True)
+            lib.utils.call_git(worktree,
+                               ['commit', '-m', commit_title, '--date', commit_date, '--signoff'],
+                               show_cmd=True)
 
 
 def update_report(args):
@@ -855,13 +830,13 @@ def update_report(args):
         if not (editor := shutil.which(os.environ.get('EDITOR', 'vim'))):
             raise RuntimeError("$EDITOR not set or vim could not be found on your system!")
 
-        subprocess.run([editor, report], check=True)
+        lib.utils.run([editor, report])
 
     if args.commit or (args.all and args.commit):
-        git(worktree, ['add', report])
-        git(worktree, ['c', '--fixup', args.commit])
+        lib.utils.call_git(worktree, ['add', report], show_cmd=True)
+        lib.utils.call_git(worktree, ['c', '--fixup', args.commit], show_cmd=True)
     if args.push or args.all:
-        git(worktree, ['push'])
+        lib.utils.call_git(worktree, 'push', show_cmd=True)
 
 
 def yearly_report(args):
@@ -873,8 +848,9 @@ def yearly_report(args):
         commit_date = report_date.strftime('%a %b %d %H:%M:%S %Y %z')
 
         create_yearly_report_file(report, report_date, args.year)
-        git(repo, ['add', report])
-        git(repo, ['commit', '-m', commit_title, '--date', commit_date])
+        lib.utils.call_git(repo, ['add', report], show_cmd=True)
+        lib.utils.call_git(repo, ['commit', '-m', commit_title, '--date', commit_date],
+                           show_cmd=True)
 
 
 if __name__ == '__main__':

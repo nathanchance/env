@@ -5,7 +5,6 @@
 from argparse import ArgumentParser
 import getpass
 from pathlib import Path
-import subprocess
 import sys
 
 import deb
@@ -17,7 +16,7 @@ import lib.setup
 
 
 def apt_add_repo(repo_to_add):
-    subprocess.run(['apt-add-repository', '-y', repo_to_add], check=True)
+    lib.utils.run(['apt-add-repository', '-y', repo_to_add])
 
 
 def parse_arguments():

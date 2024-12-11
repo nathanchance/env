@@ -3,10 +3,8 @@
 # Copyright (C) 2022-2023 Nathan Chancellor
 
 from argparse import ArgumentParser
-from os import environ as env
 from pathlib import Path
 import shutil
-import subprocess
 import sys
 import time
 
@@ -36,9 +34,8 @@ def create_user(user_name, user_password):
     if lib.setup.user_exists(user_name):
         raise RuntimeError(f"user ('{user_name}') already exists?")
 
-    subprocess.run(
-        ['useradd', '-m', '-G', 'sudo' if lib.setup.group_exists('sudo') else 'wheel', user_name],
-        check=True)
+    lib.utils.run(
+        ['useradd', '-m', '-G', 'sudo' if lib.setup.group_exists('sudo') else 'wheel', user_name])
     lib.setup.chpasswd(user_name, user_password)
 
     root_ssh = Path.home().joinpath('.ssh')
@@ -60,9 +57,9 @@ def partition_drive(drive_path, mountpoint, username):
         raise RuntimeError(f"volume ('{volume}') already exists?")
 
     if shutil.which('sgdisk'):
-        subprocess.run(['sgdisk', '-N', '1', '-t', '1:8300', drive_path], check=True)
+        lib.utils.run(['sgdisk', '-N', '1', '-t', '1:8300', drive_path])
     else:
-        subprocess.run([
+        lib.utils.run([
             'parted',
             '-s',
             drive_path,
@@ -74,21 +71,13 @@ def partition_drive(drive_path, mountpoint, username):
             '0%',
             '100%',
         ],
-                       check=True)
+                      check=True)
         # Let everything sync up
         time.sleep(10)
 
-    subprocess.run(['mkfs', '-t', 'ext4', volume],
-                   check=True,
-                   env={
-                       **env,
-                       'E2FSPROGS_LIBMAGIC_SUPPRESS': '1',
-                   })
+    lib.utils.run(['mkfs', '-t', 'ext4', volume], env={'E2FSPROGS_LIBMAGIC_SUPPRESS': '1'})
 
-    vol_uuid = subprocess.run(['blkid', '-o', 'value', '-s', 'UUID', volume],
-                              capture_output=True,
-                              check=True,
-                              text=True).stdout.strip()
+    vol_uuid = lib.utils.chronic(['blkid', '-o', 'value', '-s', 'UUID', volume]).stdout.strip()
 
     fstab = lib.setup.Fstab()
     fstab[mountpoint] = lib.setup.FstabItem(f"UUID={vol_uuid}", mountpoint, 'ext4', 'defaults', '0',
@@ -96,7 +85,7 @@ def partition_drive(drive_path, mountpoint, username):
     fstab.write()
 
     mountpoint.mkdir(exist_ok=True, parents=True)
-    subprocess.run(['mount', '-a'], check=True)
+    lib.utils.run(['mount', '-a'])
     if mountpoint != Path('/home'):
         lib.setup.chown(username, mountpoint)
 

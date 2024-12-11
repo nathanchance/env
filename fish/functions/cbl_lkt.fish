@@ -258,8 +258,8 @@ function cbl_lkt -d "Tests a Linux kernel with llvm-kernel-testing"
 
     set report $log_folder/report.txt
     cbl_gen_build_report $log_folder
-    set log_files (python3 -c "from pathlib import Path
-import subprocess
+    set log_files (PYTHONPATH=$PYTHON_FOLDER python3 -c "from pathlib import Path
+import lib.utils
 
 # Gmail has a maximum attachment size of 25MB
 MAX_SIZE = 25000000
@@ -286,7 +286,7 @@ if total_size > MAX_SIZE:
         '--zstd',
     ]
     cmd += [str(file.relative_to(log_folder)) for file in files]
-    subprocess.run(cmd, check=True)
+    lib.utils.run(cmd)
 
     if tarball.stat().st_size > MAX_SIZE:
         raise RuntimeError('Tarball is greater than 25MB??')

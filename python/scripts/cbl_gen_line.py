@@ -4,7 +4,6 @@ from argparse import ArgumentParser
 import json
 import os
 from pathlib import Path
-import subprocess
 import sys
 
 sys.path.append(str(Path(__file__).resolve().parents[1]))
@@ -14,19 +13,11 @@ import lib.utils
 
 
 def generate_patch_lines(args):
-    try:
-        git_branch = lib.utils.get_git_output(args.directory, ['rev-parse', '--abbrev-ref', 'HEAD'])
-    except subprocess.CalledProcessError as err:
-        print(err.stderr)
-        raise err
+    git_branch = lib.utils.get_git_output(args.directory, ['rev-parse', '--abbrev-ref', 'HEAD'])
     if not git_branch.startswith('b4/'):
         raise RuntimeError(f"Not on a b4 managed branch? Have: {git_branch}")
 
-    b4_info_raw = subprocess.run(['b4', 'prep', '--show-info'],
-                                 capture_output=True,
-                                 check=True,
-                                 cwd=args.directory,
-                                 text=True).stdout
+    b4_info_raw = lib.utils.chronic(['b4', 'prep', '--show-info'], cwd=args.directory).stdout
     b4_info = dict(item.split(': ', 1) for item in b4_info_raw.splitlines())
 
     commit_keys = []
@@ -48,9 +39,7 @@ def generate_patch_lines(args):
 def generate_pr_lines(args):
     for pr in args.prs:
         gh_pr_cmd = ['gh', '-R', 'llvm/llvm-project', 'pr', 'view', '--json', 'title,url', pr]
-        result = subprocess.run(gh_pr_cmd, capture_output=True, check=True, text=True)
-
-        info = json.loads(result.stdout)
+        info = json.loads(lib.utils.chronic(gh_pr_cmd).stdout)
         print(f"    set -a gh_prs {info['url']} # {info['title']}")
 
 

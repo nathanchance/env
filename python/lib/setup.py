@@ -12,7 +12,6 @@ import re
 import shutil
 import socket
 import sys
-import subprocess
 
 sys.path.append(str(Path(__file__).resolve().parents[1]))
 # pylint: disable=wrong-import-position
@@ -123,11 +122,11 @@ class Fstab:
             path = Path('/etc/fstab')
         lib.utils.print_or_write_text(path, self._gen_str(), dryrun)
         if not dryrun:
-            subprocess.run(['systemctl', 'daemon-reload'], check=True)
+            lib.utils.run(['systemctl', 'daemon-reload'])
 
 
 def add_user_to_group(groupname, username):
-    subprocess.run(['usermod', '-aG', groupname, username], check=True)
+    lib.utils.run(['usermod', '-aG', groupname, username])
 
 
 def add_user_to_group_if_exists(groupname, username):
@@ -154,11 +153,11 @@ def check_root():
 
 # Easier than os.walk() + shutil.chown()
 def chown(new_user, folder):
-    subprocess.run(['chown', '-R', f"{new_user}:{new_user}", folder], check=True)
+    lib.utils.run(['chown', '-R', f"{new_user}:{new_user}", folder])
 
 
 def chpasswd(user_name, new_password):
-    subprocess.run(['chpasswd'], check=True, input=f"{user_name}:{new_password}", text=True)
+    lib.utils.run('chpasswd', input=f"{user_name}:{new_password}")
 
 
 def chsh_fish(username):
@@ -168,17 +167,13 @@ def chsh_fish(username):
     if fish not in Path('/etc/shells').read_text(encoding='utf-8'):
         raise RuntimeError(f"{fish} is not in /etc/shells?")
 
-    subprocess.run(['chsh', '-s', fish, username], check=True)
+    lib.utils.run(['chsh', '-s', fish, username])
 
 
 def clone_env(username):
     if not (env_tmp := Path('/tmp/env')).exists():  # noqa: S108
-        subprocess.run(['git', 'clone', 'https://github.com/nathanchance/env', env_tmp], check=True)
+        lib.utils.run(['git', 'clone', 'https://github.com/nathanchance/env', env_tmp])
         chown(username, env_tmp)
-
-
-def curl(curl_args):
-    return subprocess.run(['curl', '-fLSs', *curl_args], capture_output=True, check=True).stdout
 
 
 def dnf(dnf_arguments):
@@ -193,24 +188,16 @@ def enable_tailscale():
 
 
 def fetch_gpg_key(source_url, dest):
-    # Use curl to avoid requests
-    key_data = curl([source_url])
-
     # Dearmor if necessary
-    if key_data[0:2] != b'\x99\x02':
-        key_data = subprocess.run(['gpg', '--dearmor'],
-                                  capture_output=True,
-                                  check=True,
-                                  input=key_data).stdout
+    if (key_data := lib.utils.curl(source_url))[0:2] != b'\x99\x02':
+        key_data = lib.utils.chronic(['gpg', '--dearmor'], input=key_data).stdout
 
     dest.write_bytes(key_data)
 
 
 def get_active_ethernet_info():
     nmcli_cmd = ['nmcli', '-f', 'TYPE,NAME,DEVICE', '-t', 'connection', 'show', '--active']
-    active_connections = subprocess.run(nmcli_cmd, capture_output=True, check=True,
-                                        text=True).stdout.splitlines()
-    for line in active_connections:
+    for line in lib.utils.chronic(nmcli_cmd).stdout.splitlines():
         if 'ethernet' in line:
             return line.split(':')[1:]
     return None
@@ -223,10 +210,7 @@ def get_env_root():
 
 
 def get_glibc_version():
-    ldd_version_out = subprocess.run(['ldd', '--version'],
-                                     capture_output=True,
-                                     check=True,
-                                     text=True).stdout
+    ldd_version_out = lib.utils.chronic(['ldd', '--version']).stdout
     ldd_version = ldd_version_out.split('\n')[0].split(' ')[-1].split('.')
     if len(ldd_version) < 3:
         ldd_version += [0]
@@ -238,10 +222,8 @@ def get_hostname():
 
 
 def get_ip_addr_for_intf(intf):
-    ip_out = subprocess.run(['ip', 'addr'], capture_output=True, check=True,
-                            text=True).stdout.split('\n')
     ip_addr = None
-    for line in ip_out:
+    for line in lib.utils.chronic(['ip', 'addr']).stdout.split('\n'):
         ip_a_regex = fr'inet\s+(\d{{1,3}}\.\d{{1,3}}\.\d{{1,3}}\.\d{{1,3}})/\d+\s+.*{intf}$'
         if (match := re.search(ip_a_regex, line)):
             ip_addr = match.groups()[0]
@@ -295,10 +277,7 @@ def is_equinix():
 
 def is_installed(package_to_check):
     if shutil.which('pacman'):
-        pacman_packages = subprocess.run(['pacman', '-Qq'],
-                                         capture_output=True,
-                                         check=True,
-                                         text=True).stdout
+        pacman_packages = lib.utils.chronic(['pacman', '-Qq']).stdout
         return bool(re.search(f"^{package_to_check}$", pacman_packages, flags=re.M))
 
     if shutil.which('dnf'):
@@ -308,11 +287,7 @@ def is_installed(package_to_check):
     else:
         raise RuntimeError('Not implemented for the current package manager!')
 
-    try:
-        subprocess.run([*cmd, package_to_check], capture_output=True, check=True)
-    except subprocess.CalledProcessError:
-        return False
-    return True
+    return lib.utils.run_check_rc_zero([*cmd, package_to_check])
 
 
 def is_lxc():
@@ -334,8 +309,7 @@ def is_virtual_machine():
 def is_systemd_init():
     if not shutil.which('systemctl'):
         return False
-    res = subprocess.run(['systemctl', 'is-system-running', '--quiet'], check=False)
-    return res.returncode == 0
+    return lib.utils.run_check_rc_zero(['systemctl', 'is-system-running', '--quiet'])
 
 
 def pacman(args):
@@ -380,13 +354,13 @@ def set_ip_addr_for_intf(con_name, intf, ip_addr):
         raise RuntimeError(f"{ip_addr} not supported by script!")
     dns = ['8.8.8.8', '8.8.4.4', '1.1.1.1', local_dns]
 
-    subprocess.run([*nmcli_mod, 'ipv4.addresses', f"{ip_addr}/24"], check=True)
-    subprocess.run([*nmcli_mod, 'ipv4.dns', ' '.join(dns)], check=True)
-    subprocess.run([*nmcli_mod, 'ipv4.gateway', gateway], check=True)
-    subprocess.run([*nmcli_mod, 'ipv4.method', 'manual'], check=True)
-    subprocess.run(['nmcli', 'connection', 'reload'], check=True)
-    subprocess.run(['nmcli', 'connection', 'down', con_name], check=True)
-    subprocess.run(['nmcli', 'connection', 'up', con_name, 'ifname', intf], check=True)
+    lib.utils.run([*nmcli_mod, 'ipv4.addresses', f"{ip_addr}/24"])
+    lib.utils.run([*nmcli_mod, 'ipv4.dns', ' '.join(dns)])
+    lib.utils.run([*nmcli_mod, 'ipv4.gateway', gateway])
+    lib.utils.run([*nmcli_mod, 'ipv4.method', 'manual'])
+    lib.utils.run(['nmcli', 'connection', 'reload'])
+    lib.utils.run(['nmcli', 'connection', 'down', con_name])
+    lib.utils.run(['nmcli', 'connection', 'up', con_name, 'ifname', intf])
 
     current_ip = get_ip_addr_for_intf(intf)
     if current_ip != ip_addr:
@@ -397,14 +371,11 @@ def set_ip_addr_for_intf(con_name, intf, ip_addr):
 
 def set_date_time():
     if is_systemd_init():
-        subprocess.run(['timedatectl', 'set-timezone', 'America/Phoenix'], check=True)
+        lib.utils.run(['timedatectl', 'set-timezone', 'America/Phoenix'])
 
 
 def setup_initial_fish_config(username):
-    fish_ver = subprocess.run(['fish', '-c', 'echo $version'],
-                              capture_output=True,
-                              check=True,
-                              text=True).stdout.strip()
+    fish_ver = lib.utils.chronic(['fish', '-c', 'echo $version']).stdout.strip()
     if tuple(int(x) for x in fish_ver.split('.')) < (3, 4, 0):
         raise RuntimeError(f"{fish_ver} is less than 3.4.0!")
 
@@ -461,15 +432,12 @@ def setup_libvirt(username):
     systemctl_enable(['libvirtd.service'])
 
     # Make the default network come up automatically on restart.
-    subprocess.run(['virsh', 'net-autostart', 'default'], check=True)
+    lib.utils.run(['virsh', 'net-autostart', 'default'])
 
     # Start network if it is not already started
-    net_info = subprocess.run(['virsh', 'net-info', 'default'],
-                              capture_output=True,
-                              check=True,
-                              text=True).stdout
+    net_info = lib.utils.chronic(['virsh', 'net-info', 'default']).stdout
     if re.search('^Active.*no', net_info, flags=re.M):
-        subprocess.run(['virsh', 'net-start', 'default'], check=True)
+        lib.utils.run(['virsh', 'net-start', 'default'])
 
 
 def setup_mnt_nas():
@@ -491,16 +459,14 @@ def setup_mnt_ssd(user_name):
         chown(user_name, mnt_point)
 
         if mnt_point not in (fstab := Fstab()):
-            partuuid = subprocess.run(['blkid', '-o', 'value', '-s', 'PARTUUID', ssd_partition],
-                                      capture_output=True,
-                                      check=True,
-                                      text=True).stdout.strip()
+            partuuid = lib.utils.chronic(['blkid', '-o', 'value', '-s', 'PARTUUID',
+                                          ssd_partition]).stdout.strip()
 
             fstab[mnt_point] = FstabItem(f"PARTUUID={partuuid}", mnt_point, 'ext4',
                                          'defaults,noatime', '0', '1')
             fstab.write()
 
-        subprocess.run(['mount', '-a'], check=True)
+        lib.utils.run(['mount', '-a'])
 
         if shutil.which('docker'):
             docker_json = Path('/etc/docker/daemon.json')
@@ -535,9 +501,8 @@ def setup_ssh_authorized_keys(user_name):
         else:
             raise RuntimeError(
                 'No suitable download command could be found for downloading SSH key!')
-        ssh_key = subprocess.run([*cmd, 'https://github.com/nathanchance.keys'],
-                                 capture_output=True,
-                                 check=True).stdout
+        ssh_key = lib.utils.chronic([*cmd, 'https://github.com/nathanchance.keys'],
+                                    text=None).stdout
         ssh_authorized_keys.write_bytes(ssh_key)
         os.umask(old_umask)
         chown(user_name, ssh_authorized_keys.parent)
@@ -557,7 +522,7 @@ def setup_sudo_symlink():
         raise RuntimeError(f"Can't handle doas location ('{doas}')?")
     sudo_bin.symlink_to(relative_doas)
 
-    subprocess.run(['stow', '-d', sudo_prefix.parent, '-R', sudo_prefix.name, '-v'], check=True)
+    lib.utils.run(['stow', '-d', sudo_prefix.parent, '-R', sudo_prefix.name, '-v'])
 
 
 def systemctl_enable(items_to_enable, now=True):
@@ -566,7 +531,7 @@ def systemctl_enable(items_to_enable, now=True):
         cmd.append('--now')
     cmd += items_to_enable
 
-    subprocess.run(cmd, check=True)
+    lib.utils.run(cmd)
 
 
 def user_exists(user):
@@ -580,12 +545,12 @@ def user_exists(user):
 def using_systemd_boot():
     if not shutil.which('bootctl'):
         return False
-    return subprocess.run(['bootctl', '--quiet', 'is-installed'], check=False).returncode == 0
+    return lib.utils.run_check_rc_zero(['bootctl', '--quiet', 'is-installed'])
 
 
 def umount_gracefully(folder):
-    if subprocess.run(['mountpoint', '-q', folder], check=False).returncode == 0:
-        subprocess.run(['umount', folder], check=True)
+    if lib.utils.run_check_rc_zero(['mountpoint', '-q', folder]):
+        lib.utils.run(['umount', folder])
 
 
 def zypper(zypper_args):

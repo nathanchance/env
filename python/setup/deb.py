@@ -5,13 +5,13 @@
 import os
 from pathlib import Path
 import shutil
-import subprocess
 import sys
 import tempfile
 
 sys.path.append(str(Path(__file__).resolve().parents[1]))
 # pylint: disable=wrong-import-position
 import lib.setup
+import lib.utils
 # pylint: enable=wrong-import-position
 
 
@@ -31,10 +31,7 @@ def apt_upgrade(upgrade_args=None):
 
 
 def get_dpkg_arch():
-    return subprocess.run(['dpkg', '--print-architecture'],
-                          capture_output=True,
-                          check=True,
-                          text=True).stdout.strip()
+    return lib.utils.chronic(['dpkg', '--print-architecture']).stdout.strip()
 
 
 def install_initial_packages():
@@ -61,14 +58,14 @@ def setup_doas(username, root_password):
     if lib.setup.get_glibc_version() > (2, 33, 0):
         tmp_dir = Path(tempfile.mkdtemp())
         doas_deb = Path(tmp_dir, doas_deb_file)
-        lib.setup.curl([
+        lib.utils.curl([
             '-o',
             doas_deb,
             f"http://http.us.debian.org/debian/pool/main/o/opendoas/{doas_deb_file}",
         ])
     else:
         doas_deb = Path(env_folder, 'bin/packages', doas_deb_file)
-    subprocess.run(['dpkg', '-i', doas_deb], check=True)
+    lib.utils.run(['dpkg', '-i', doas_deb])
 
     doas_conf = Path('/etc/doas.conf')
     doas_conf_text = ('# Allow me to be root for 5 minutes at a time\n'
@@ -89,12 +86,12 @@ def setup_doas(username, root_password):
 
 
 def setup_docker(username):
-    subprocess.run(['groupadd', '-f', 'docker'], check=True)
+    lib.utils.run(['groupadd', '-f', 'docker'])
     lib.setup.add_user_to_group('docker', username)
 
     # Pick up potential previous changes to daemon.json file
     for service in ['containerd', 'docker']:
-        subprocess.run(['systemctl', 'restart', f"{service}.service"], check=True)
+        lib.utils.run(['systemctl', 'restart', f"{service}.service"])
 
 
 def setup_libvirt(username):
@@ -109,11 +106,11 @@ def setup_locales():
         'locales locales/locales_to_be_generated multiselect en_US.UTF-8 UTF-8',
     ]
     for command in commands:
-        subprocess.run(['debconf-set-selections'], check=True, input=command, text=True)
+        lib.utils.run('debconf-set-selections', input=command)
 
     Path('/etc/locale.gen').unlink(missing_ok=True)
 
-    subprocess.run(['dpkg-reconfigure', '--frontend', 'noninteractive', 'locales'], check=True)
+    lib.utils.run(['dpkg-reconfigure', '--frontend', 'noninteractive', 'locales'])
 
 
 def update_and_install_packages(additional_packages=None):

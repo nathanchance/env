@@ -7,7 +7,6 @@ import os
 from pathlib import Path
 import platform
 import shutil
-import subprocess
 import sys
 
 import requests
@@ -17,6 +16,7 @@ import korg_tc
 sys.path.append(str(Path(__file__).resolve().parents[1]))
 # pylint: disable=wrong-import-position
 import lib.kernel
+import lib.utils
 # pylint: enable=wrong-import-position
 
 
@@ -108,7 +108,7 @@ def parse_arguments():
 
 def build_kernel_for_vm(kernel_src, add_make_targets, make_variables, config, menuconfig, vm_name):
     if Path(kernel_src, '.config').exists():
-        subprocess.run(['git', '-C', src_folder, 'cl', '-q'], check=True)
+        lib.utils.call_git(src_folder, ['cl', '-q'])
     if (build := Path(make_variables['O'])).exists():
         shutil.rmtree(build)
     build.mkdir(parents=True)

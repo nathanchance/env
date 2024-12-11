@@ -2,7 +2,6 @@
 
 from argparse import ArgumentParser
 from pathlib import Path
-import subprocess
 import sys
 
 sys.path.append(str(Path(__file__).resolve().parents[1]))
@@ -55,4 +54,4 @@ if mode == 'container':
     CMD_STR = f"dbxe -- fish -c '{CMD_STR}'"
 tmx_cmd.append(CMD_STR)
 
-subprocess.run(tmx_cmd, check=True)
+lib.utils.run(tmx_cmd)

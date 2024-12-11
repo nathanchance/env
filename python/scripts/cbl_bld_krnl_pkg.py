@@ -4,7 +4,7 @@ from argparse import ArgumentParser
 import os
 from pathlib import Path
 import shutil
-import subprocess
+from subprocess import DEVNULL
 import sys
 
 import korg_tc
@@ -14,13 +14,15 @@ sys.path.append(str(Path(__file__).resolve().parents[1]))
 import lib.kernel
 # pylint: enable=wrong-import-position
 
+CONFIG_URL = 'https://gitlab.archlinux.org/archlinux/packaging/packages/linux/-/raw/main/config'
+
 
 def recreate_folder(folder):
     if folder.exists():
         try:
             shutil.rmtree(folder) if folder.is_dir() else folder.unlink()
         except PermissionError:
-            subprocess.run(['sudo', 'rm', '--recursive', folder], check=True)
+            lib.utils.run_as_root(['rm', '--recursive', folder])
     folder.mkdir(parents=True)
 
 
@@ -61,17 +63,11 @@ class KernelPkgBuilder:
         src_config_file = Path(os.environ['ENV_FOLDER'], f"configs/kernel/{self._pkgname}.config")
         dst_config_file = Path(self._build_folder, '.config')
         base_sc_cmd = [Path(self._source_folder, 'scripts/config'), '--file', src_config_file]
-        kconfig_env = {'KCONFIG_CONFIG': src_config_file, **os.environ}
+        kconfig_env = {'KCONFIG_CONFIG': src_config_file}
         plain_make_vars = {'ARCH': 'x86_64', 'LOCALVERSION': '', 'O': self._build_folder}
 
         # Step 1: Copy default Arch configuration and set a few options
-        crl_cmd = [
-            'curl',
-            '-LSs',
-            '-o', src_config_file,
-            'https://gitlab.archlinux.org/archlinux/packaging/packages/linux/-/raw/main/config',
-        ]  # yapf: disable
-        subprocess.run(crl_cmd, check=True)
+        lib.utils.curl(['-o', src_config_file, CONFIG_URL])
         sc_cmd = [
             *base_sc_cmd,
             '-d', 'LOCALVERSION_AUTO',
@@ -80,7 +76,7 @@ class KernelPkgBuilder:
             # until https://git.kernel.org/linus/c7ff693fa2094ba0a9d0a20feb4ab1658eff9c33 has been accounted for by Arch upstream
             '-e', 'MODULE_COMPRESS',
         ]  # yapf: disable
-        subprocess.run(sc_cmd, check=True)
+        lib.utils.run(sc_cmd)
 
         # Step 2: Run olddefconfig
         lib.kernel.kmake(plain_make_vars.copy(), ['olddefconfig'],
@@ -92,7 +88,7 @@ class KernelPkgBuilder:
 
         # Step 4: Enable ThinLTO, CFI, or UBSAN (and any other requested configurations)
         if self.extra_sc_args:
-            subprocess.run([*base_sc_cmd, *self.extra_sc_args], check=True)
+            lib.utils.run([*base_sc_cmd, *self.extra_sc_args])
             self._kmake(['olddefconfig'], env=kconfig_env)
 
         # Copy new configuration into place
@@ -100,9 +96,8 @@ class KernelPkgBuilder:
         shutil.copyfile(src_config_file, dst_config_file)
 
         self._kmake(['olddefconfig', 'prepare'])
-        subprocess.run(
-            ['git', '--no-pager', 'diff', '--no-index', src_config_file, dst_config_file],
-            check=False)
+        lib.utils.run(['git', '--no-pager', 'diff', '--no-index', src_config_file, dst_config_file],
+                      check=False)
 
         print('Setting version...')
         Path(self._build_folder, 'localversion.10-pkgname').write_text('-llvm\n', encoding='utf-8')
@@ -130,20 +125,16 @@ class KernelPkgBuilder:
         modulesdir = Path(pkgdir, 'usr/lib/modules', self._kernver)
 
         print('Installing boot image...')
-        kernel_image = subprocess.run(['make', '-s', f"O={self._build_folder}", 'image_name'],
-                                      capture_output=True,
-                                      cwd=self._source_folder,
-                                      text=True,
-                                      check=False).stdout.strip()
+        kernel_image = lib.utils.chronic(['make', '-s', f"O={self._build_folder}", 'image_name'],
+                                         cwd=self._source_folder).stdout.strip()
         # systemd expects to find the kernel here to allow hibernation
         # https://github.com/systemd/systemd/commit/edda44605f06a41fb86b7ab8128dcf99161d2344
-        subprocess.run([
+        lib.utils.run([
             'install',
             '-Dm644',
             Path(self._build_folder, kernel_image),
             Path(modulesdir, 'vmlinuz'),
-        ],
-                       check=True)
+        ])
 
         # Used by mkinitcpio to name the kernel
         (pkgbase := Path(modulesdir, 'pkgbase')).write_text(f"{self._pkgname}\n", encoding='utf-8')
@@ -165,11 +156,7 @@ class KernelPkgBuilder:
         for link in ['source', 'build']:
             Path(modulesdir, link).unlink(missing_ok=True)
 
-        pkgver = subprocess.run(['git', 'describe'],
-                                capture_output=True,
-                                check=True,
-                                cwd=self._source_folder,
-                                text=True).stdout.strip().replace('-', '_')
+        pkgver = lib.utils.get_git_output(self._source_folder, 'describe').replace('-', '_')
         pkgbuild_text = fr"""
 pkgname={self._pkgname}
 pkgver={pkgver}
@@ -193,19 +180,16 @@ package() {{
   mv -v "$pkgroot"/pkg-prepared "$pkgroot"/pkg
 }}"""
         Path(pkgroot, 'PKGBUILD').write_text(pkgbuild_text, encoding='utf-8')
-        subprocess.run(['makepkg', '-R'], check=True, cwd=pkgroot)
+        lib.utils.run(['makepkg', '-R'], cwd=pkgroot)
 
     def prepare(self, base_ref, localmodconfig=False, menuconfig=False, extra_config_targets=None):
         lib.kernel.prepare_source(self._pkgname, base_ref)
 
         self._prepare_files(localmodconfig, menuconfig, extra_config_targets)
 
-        self._kernver = subprocess.run(
+        self._kernver = lib.utils.chronic(
             ['make', '-s', 'LOCALVERSION=', f"O={self._build_folder}", 'kernelrelease'],
-            capture_output=True,
-            cwd=self._source_folder,
-            text=True,
-            check=False).stdout.strip()
+            cwd=self._source_folder).stdout.strip()
         print(f"Prepared {self._pkgname} version {self._kernver}")
 
 
@@ -222,27 +206,16 @@ class DebugPkgBuilder(KernelPkgBuilder):
 
         recreate_folder(self._build_folder)
 
-        crl_cmd = [
-            'curl',
-            '-LSs',
-            '-o', config,
-            'https://gitlab.archlinux.org/archlinux/packaging/packages/linux/-/raw/main/config',
-        ]  # yapf: disable
-        subprocess.run(crl_cmd, check=True)
+        lib.utils.curl(['-o', config, CONFIG_URL])
         sc_cmd = [*base_sc_cmd, '-m', 'DRM', *self.extra_sc_args]
-        subprocess.run(sc_cmd, check=True)
+        lib.utils.run(sc_cmd)
 
         self._kmake(['olddefconfig'])
 
         if localmodconfig:
             if not (modprobedb := Path('/tmp/modprobed.db')).exists():  # noqa: S108
                 raise RuntimeError(f"localmodconfig requested without {modprobedb}!")
-            self._kmake(['localmodconfig'],
-                        env={
-                            'LSMOD': modprobedb,
-                            **os.environ,
-                        },
-                        stdin=subprocess.DEVNULL)
+            self._kmake(['localmodconfig'], env={'LSMOD': modprobedb}, stdin=DEVNULL)
 
         if menuconfig:
             self._kmake(['menuconfig'])
@@ -268,34 +241,22 @@ class MainlinePkgBuilder(KernelPkgBuilder):
         for part in ['', '_dev', '_hwmon']:
             src_url = f"https://github.com/pop-os/system76-io-dkms/raw/master/system76-io{part}.c"
             dst_local = Path(self._source_folder, 'drivers/hwmon', src_url.rsplit('/', 1)[-1])
-            subprocess.run(['curl', '-LSs', '-o', dst_local, src_url], check=True)
+            lib.utils.curl(['-o', dst_local, src_url])
             git_add_files.append(dst_local.relative_to(self._source_folder))
         with Path(self._source_folder, git_add_files[0]).open('a', encoding='utf-8') as file:
             file.write('obj-m += system76-io.o\n')
-        subprocess.run(['git', 'add', *git_add_files], check=True, cwd=self._source_folder)
-        subprocess.run(['git', 'commit', '-m', 'Add system76-io driver'],
-                       check=True,
-                       cwd=self._source_folder)
+        lib.utils.call_git(self._source_folder, ['add', *git_add_files])
+        lib.utils.call_git_loud(self._source_folder, ['commit', '-m', 'Add system76-io driver'])
 
-        git_kwargs = {
-            'capture_output': True,
-            'check': False,
-            'cwd': self._source_folder,
-            'text': True,
-        }
         local_ver_parts = []
-
-        # pylint: disable=subprocess-run-check
-        head = subprocess.run(  # noqa: PLW1510
-            ['git', 'rev-parse', '--verify', 'HEAD'], **git_kwargs).stdout.strip()
-        exact_match = subprocess.run(  # noqa: PLW1510
-            ['git', 'describe', '--exact-match'], **git_kwargs).stdout.strip()
-        if head and exact_match == '':
-            if (atag := subprocess.run(  # noqa: PLW1510
-                ['git', 'describe'], **git_kwargs).stdout.strip()):
+        head = lib.utils.get_git_output(self._source_folder, ['rev-parse', '--verify', 'HEAD'],
+                                        check=False)
+        exact_match = lib.utils.get_git_output(self._source_folder, ['describe', '--exact-match'],
+                                               check=False)
+        if head and not exact_match:
+            if atag := lib.utils.get_git_output(self._source_folder, 'describe', check=False):
                 local_ver_parts.append(f"{int(atag.split('-')[-2]):05}")
             local_ver_parts.append(f"g{head[0:12]}")
-        # pylint: enable=subprocess-run-check
 
         if local_ver_parts:
             Path(self._build_folder,

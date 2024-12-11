@@ -5,7 +5,12 @@
 from argparse import ArgumentParser
 from pathlib import Path
 import re
-import subprocess
+import sys
+
+sys.path.append(str(Path(__file__).resolve().parents[1]))
+# pylint: disable=wrong-import-position
+import lib.utils
+# pylint: enable=wrong-import-position
 
 
 def parse_arguments():
@@ -23,11 +28,6 @@ def parse_arguments():
 
 def get_log(log_folder, key):
     return Path(log_folder, key + '.log')
-
-
-def git_get(repo, cmd):
-    return subprocess.run(['git', *cmd], capture_output=True, check=True, cwd=repo,
-                          text=True).stdout
 
 
 def generate_warnings(log_folder, src_folder):
@@ -180,16 +180,14 @@ def generate_report(log_folder):
             for warning in warnings:
                 report_text += f"{log}:{warning}"
 
-    if src_folder.exists():
-        mfc = git_get(src_folder, ['mfc']).strip()
-        if mfc:
-            report_text += f"\n{src_folder.name} commit logs:\n\n"
-            branch = git_get(src_folder, ['bn']).strip()
-            if (remote := git_get(src_folder, ['rn', branch]).strip()):
-                since = f"{remote}/{branch}"
-            else:
-                since = f"{mfc}^"
-            report_text += git_get(src_folder, ['l', f"{since}^.."])
+    if src_folder.exists() and (mfc := lib.utils.get_git_output(src_folder, 'mfc')):
+        report_text += f"\n{src_folder.name} commit logs:\n\n"
+        branch = lib.utils.get_git_output(src_folder, 'bn')
+        if remote := lib.utils.get_git_output(src_folder, ['rn', branch]):
+            since = f"{remote}/{branch}"
+        else:
+            since = f"{mfc}^"
+        report_text += lib.utils.call_git(src_folder, ['l', f"{since}^.."]).stdout
 
     return report_text
 
