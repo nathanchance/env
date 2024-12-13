@@ -98,7 +98,7 @@ def prepare_source(base_name, base_ref='origin/master'):
 
     if base_name == 'linux-next-llvm':
         # https://lore.kernel.org/20241212014418.GA532802@ax162/
-        reverts.append('5a82223e0743fb36bcb99657772513739d1a9936')  # x86/kexec: Mark relocate_kernel page as ROX instead of RWX
+        patches.append('https://lore.kernel.org/all/ed7dd45f89e8f286478791137447a21d53735dbd.camel@infradead.org/')  # [PATCH] x86/kexec: Disable global pages before writing to control page
     # yapf: enable
 
     try:
