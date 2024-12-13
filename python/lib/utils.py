@@ -37,13 +37,12 @@ def chronic(*args, **kwargs):
     return run(*args, **kwargs)
 
 
-def curl(cmd, **kwargs):
-    kwargs.setdefault('text', None)
+def curl(item_to_download, output=None):
+    curl_cmd = ['curl', '-LSs', item_to_download]
+    if output:
+        curl_cmd += ['-o', output]
 
-    curl_cmd = ['curl', '-LSs']
-    (curl_cmd.append if isinstance(cmd, str) else curl_cmd.extend)(cmd)
-
-    return chronic(curl_cmd, **kwargs).stdout
+    return chronic(curl_cmd, text=None).stdout
 
 
 def detect_virt(*args):

@@ -39,7 +39,7 @@ def dnf_add_repo(repo_url):
     # https://github.com/rpm-software-management/dnf5/issues/1537
     if get_fedora_version() >= 41:
         local_dst = Path('/etc/yum.repos.d', repo_url.rsplit('/', 1)[1])
-        lib.utils.curl(['-o', local_dst, repo_url])
+        lib.utils.curl(repo_url, output=local_dst)
     else:
         lib.setup.dnf(['config-manager', '--add-repo', repo_url])
 

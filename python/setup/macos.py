@@ -123,7 +123,7 @@ def setup_gh():
 def setup_homebrew():
     if not get_brew_path().exists():
         install_sh = lib.utils.curl(
-            ['https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh']).decode('utf-8')
+            'https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh').decode('utf-8')
         lib.utils.run(['/bin/bash', '-c', install_sh])
 
 

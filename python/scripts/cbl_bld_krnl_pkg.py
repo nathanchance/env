@@ -67,7 +67,7 @@ class KernelPkgBuilder:
         plain_make_vars = {'ARCH': 'x86_64', 'LOCALVERSION': '', 'O': self._build_folder}
 
         # Step 1: Copy default Arch configuration and set a few options
-        lib.utils.curl(['-o', src_config_file, CONFIG_URL])
+        lib.utils.curl(CONFIG_URL, output=src_config_file)
         sc_cmd = [
             *base_sc_cmd,
             '-d', 'LOCALVERSION_AUTO',
@@ -206,7 +206,7 @@ class DebugPkgBuilder(KernelPkgBuilder):
 
         recreate_folder(self._build_folder)
 
-        lib.utils.curl(['-o', config, CONFIG_URL])
+        lib.utils.curl(CONFIG_URL, output=config)
         sc_cmd = [*base_sc_cmd, '-m', 'DRM', *self.extra_sc_args]
         lib.utils.run(sc_cmd)
 
@@ -241,7 +241,7 @@ class MainlinePkgBuilder(KernelPkgBuilder):
         for part in ['', '_dev', '_hwmon']:
             src_url = f"https://github.com/pop-os/system76-io-dkms/raw/master/system76-io{part}.c"
             dst_local = Path(self._source_folder, 'drivers/hwmon', src_url.rsplit('/', 1)[-1])
-            lib.utils.curl(['-o', dst_local, src_url])
+            lib.utils.curl(src_url, output=dst_local)
             git_add_files.append(dst_local.relative_to(self._source_folder))
         with Path(self._source_folder, git_add_files[0]).open('a', encoding='utf-8') as file:
             file.write('obj-m += system76-io.o\n')

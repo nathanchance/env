@@ -39,13 +39,13 @@ def download_and_verify(url, dst):
         print(SUCCESS, end='\n\n')
 
     print(f"Downloading {url} to {dst}... ", end='')
-    lib.utils.curl(['-o', dst, url])
+    lib.utils.curl(url, output=dst)
     print(SUCCESS, end='\n\n')
 
     print(f"Downloading GPG signature for {dst.name}... ", end='')
     gpg_url = f"{url}.asc"
     (gpg_dst := Path(dst.parent, f"{dst.name}.asc")).unlink(missing_ok=True)
-    lib.utils.curl(['-o', gpg_dst, gpg_url])
+    lib.utils.curl(gpg_url, output=gpg_dst)
     print(SUCCESS, end='\n\n')
 
     print(f"Verifying {dst.name} with GPG signature... ", end='')

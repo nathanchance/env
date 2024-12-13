@@ -113,7 +113,7 @@ def setup_repos():
         tailscale_gpg_key = Path('/usr/share/keyrings/tailscale-archive-keyring.gpg')
         lib.setup.fetch_gpg_key(f"{base_tailscale_url}.noarmor.gpg", tailscale_gpg_key)
 
-        tailscale_repo_txt = lib.utils.curl([f"{base_tailscale_url}.tailscale-keyring.list"])
+        tailscale_repo_txt = lib.utils.curl(f"{base_tailscale_url}.tailscale-keyring.list")
         Path(apt_sources, 'tailscale.list').write_bytes(tailscale_repo_txt)
 
 
