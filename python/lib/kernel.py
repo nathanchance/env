@@ -124,15 +124,19 @@ def prepare_source(base_name, base_ref='origin/master'):
                                         ['revert', '--mainline', '1', '--no-edit', revert])
 
         for patch in patches:
+            am_cmd = ['am', '-3']
+            am_kwargs = {}
+
             if isinstance(patch, Path):
-                lib.utils.call_git_loud(source_folder, ['am', '-3', patch])
+                am_cmd.append(patch)
             elif patch.startswith('https://lore.kernel.org/'):
-                b4(['shazam', '-l', '-P', '_', '-s', patch], cwd=source_folder)
+                am_kwargs['input'] = b4_am_o(patch)
             elif patch.startswith(('https://', 'http://')):
-                patch_input = lib.utils.curl([patch]).decode('utf-8')
-                lib.utils.call_git_loud(source_folder, ['am', '-3'], input=patch_input)
+                am_kwargs['input'] = lib.utils.curl(patch).decode('utf-8')
             else:
                 raise RuntimeError(f"Can't handle {patch}?")
+
+            lib.utils.call_git_loud(source_folder, am_cmd, **am_kwargs)
 
         for commit in commits:
             patch_input = lib.utils.call_git(Path(os.environ['CBL_SRC_P'], 'linux-next'),
