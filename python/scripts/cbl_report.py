@@ -5,7 +5,6 @@
 from argparse import ArgumentParser
 import calendar
 import datetime
-import email
 import json
 import os
 from pathlib import Path
@@ -15,6 +14,7 @@ import zoneinfo
 
 sys.path.append(str(Path(__file__).resolve().parents[1]))
 # pylint: disable=wrong-import-position
+import lib.kernel
 import lib.utils
 
 # pylint: enable=wrong-import-position
@@ -215,39 +215,22 @@ def generate_item(args):
 
     if item_type == 'mail':
         with open(0, 'rb') as file:
-            raw_stdin = file.read()
-        stdin = raw_stdin.decode(encoding='utf-8', errors='ignore')
-        msg = email.message_from_string(stdin)
+            stdin = file.read().decode(encoding='utf-8', errors='ignore')
+        msg_id, subject = lib.kernel.get_msg_id_subject(stdin)
 
-        if not (subject := msg.get('Subject')):
-            raise RuntimeError('Cannot find subject in headers?')
-        if not (msgid := msg.get('Message-ID')):
-            raise RuntimeError('Cannot find message-ID in headers?')
-
-        # Transform <message-id> into message-id
-        msgid = msgid.strip('<').rstrip('>')
-
-        # Unwrap subject if necessary
-        if '\n' in subject:
-            subject = ''.join(subject.splitlines())
-
-        print(f"* [`{subject}`](https://lore.kernel.org/{msgid}/)")
+        print(f"* [`{subject}`](https://lore.kernel.org/{msg_id}/)")
 
     elif item_type == 'patch':
         if not Path('Makefile').exists():
             raise RuntimeError('Not in a kernel tree?')
 
-        proc = lib.utils.chronic(['b4', 'prep', '--show-info'])
-        info = dict(map(str.strip, item.split(':', 1)) for item in proc.stdout.splitlines())
-        commits = [key for key in info if key.startswith('commit-')]
-        series = [key for key in info if key.startswith('series-v')]
+        info = lib.kernel.b4_info()
+        series, commits = lib.kernel.b4_gen_series_commits(info)
 
-        title = info[commits[0] if len(commits) == 1 else 'cover-subject']
-        links = {
-            item.rsplit('-', 1)[-1]: f"https://lore.kernel.org/{info[item].rsplit(' ', 1)[-1]}/"
-            for item in series
-        }
-        md_links = [f"[`{key}`]({links[key]})" for key in sorted(links)]
+        title = commits[0]['title'] if len(commits) == 1 else info['cover-subject']
+        md_links = [
+            f"[`{ver}`](https://lore.kernel.org/{msg_id}/)" for ver, msg_id in series.items()
+        ]
 
         print(f"  * `{title}` ({', '.join(md_links)})")
 

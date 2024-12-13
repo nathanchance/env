@@ -8,31 +8,39 @@ import sys
 
 sys.path.append(str(Path(__file__).resolve().parents[1]))
 # pylint: disable=wrong-import-position
+import lib.kernel
 import lib.utils
 # pylint: enable=wrong-import-position
 
 
 def generate_patch_lines(args):
+    if args.message_ids:
+        for msg_id in args.message_ids:
+            patch_txt = lib.kernel.b4_am_o(msg_id)
+            _, subject = lib.kernel.get_msg_id_subject(patch_txt)
+
+            print(f"patches.append('https://lore.kernel.org/all/{msg_id}/')  # {subject}")
+
+        return
+
     git_branch = lib.utils.get_git_output(args.directory, ['rev-parse', '--abbrev-ref', 'HEAD'])
     if not git_branch.startswith('b4/'):
         raise RuntimeError(f"Not on a b4 managed branch? Have: {git_branch}")
 
-    b4_info_raw = lib.utils.chronic(['b4', 'prep', '--show-info'], cwd=args.directory).stdout
-    b4_info = dict(item.split(': ', 1) for item in b4_info_raw.splitlines())
+    series, commits = lib.kernel.b4_gen_series_commits(cwd=args.directory)
 
-    commit_keys = []
-    latest_series = 1
-    for key in b4_info:
-        if 'commit-' in key:
-            commit_keys.insert(0, key)  # to ensure the commits remain in order
-        if 'series-v' in key and (series_ver := int(key.replace('series-v', ''))) > latest_series:
-            latest_series = series_ver
+    # Get the message ID of the latest series
+    base_msg_id = list(series.values())[-1]
 
-    base_msg_id = b4_info[f"series-v{latest_series}"].split(' ', 1)[1]
-    for idx, commit in enumerate(commit_keys, 1):
+    # For each commit in the list, generate a link to lore.kernel.org
+    for idx, commit in enumerate(commits, 1):
+        # Replace the patch number in the message ID, which is in the second to
+        # last spot within the message ID when it is of the format in
+        # <date>-<branch>-<version>-<patch>-<hash>@<address>
+        # Convert to str to allow using join() below
         (new_msg_id := base_msg_id.rsplit('-', 2))[1] = str(idx)
         print(
-            f"patches.append('https://lore.kernel.org/all/{'-'.join(new_msg_id)}/')  # {b4_info[commit]}",
+            f"patches.append('https://lore.kernel.org/all/{'-'.join(new_msg_id)}/')  # {commit['title']}",
         )
 
 
@@ -68,6 +76,11 @@ def parse_arguments():
                               default=Path.cwd(),
                               help='Git repository to run commands in (default: %(default)s)',
                               type=Path)
+    patch_parser.add_argument(
+        '-m',
+        '--message-ids',
+        help='Message IDs to generate lines for. By default, the current branch is looked at',
+        nargs='*')
 
     pr_parser = subparser.add_parser('pr', help='Generate cbl_bld_tot_tcs gh_pr lines')
     pr_parser.add_argument('prs', help='Pull request numbers', nargs='*')

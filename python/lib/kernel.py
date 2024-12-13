@@ -2,11 +2,13 @@
 # SPDX-License-Identifier: MIT
 # Copyright (C) 2022-2023 Nathan Chancellor
 
+import email
 import os
 from pathlib import Path
 import shutil
 from subprocess import CalledProcessError
 import sys
+from tempfile import TemporaryDirectory
 import time
 
 sys.path.append(str(Path(__file__).resolve().parents[1]))
@@ -16,6 +18,59 @@ import lib.utils
 
 NEXT_TREES = ('fedora', 'linux-next-llvm', 'rpi')
 PACMAN_TREES = ('linux-mainline-llvm', 'linux-next-llvm')
+
+
+def b4(cmd, **kwargs):
+    b4_cmd = ['b4']
+    (b4_cmd.append if isinstance(cmd, str) else b4_cmd.extend)(cmd)
+
+    return lib.utils.run(b4_cmd, **kwargs)
+
+
+def b4_am_o(msg_id, **kwargs):
+    with TemporaryDirectory() as tmpdir:
+        b4(['am', '-o', tmpdir, '--no-parent', '-P', '_', msg_id], **kwargs, capture_output=True)
+        if len(patches := list(Path(tmpdir).iterdir())) != 1:
+            raise RuntimeError(f"More than one patch in {tmpdir}? Have: {patches}")
+        return patches[0].read_text(encoding='utf-8')
+
+
+def b4_info(**kwargs):
+    output = b4(['prep', '--show-info'], **kwargs, capture_output=True).stdout
+    return dict(map(str.strip, item.split(':', 1)) for item in output.splitlines())
+
+
+def b4_gen_series_commits(info=None, **kwargs):
+    if not info:
+        info = b4_info(**kwargs)
+
+    # Order series keys as 'series-v1', 'series-v2', so that the last entry is the latest version
+    series_keys = sorted(key for key in info if key.startswith('series-v'))
+    # Commit keys are normally in "git log" order; reverse them so they are in patch application order
+    (commit_keys := [key for key in info if key.startswith('commit-')]).reverse()
+
+    commits = [{'key': key, 'title': info[key]} for key in commit_keys]
+    series = {key.replace('series-', ''): info[key].rsplit(' ', 1)[1] for key in series_keys}
+
+    return series, commits
+
+
+def get_msg_id_subject(mail_str):
+    msg = email.message_from_string(mail_str)
+
+    if not (subject := msg.get('Subject')):
+        raise RuntimeError('Cannot find subject in headers?')
+    if not (msg_id := msg.get('Message-ID')):
+        raise RuntimeError('Cannot find message-ID in headers?')
+
+    # Transform <message-id> into message-id
+    msg_id = msg_id.strip('<').rstrip('>')
+
+    # Unwrap subject if necessary
+    if '\n' in subject:
+        subject = ''.join(subject.splitlines())
+
+    return msg_id, subject
 
 
 def prepare_source(base_name, base_ref='origin/master'):
@@ -72,7 +127,7 @@ def prepare_source(base_name, base_ref='origin/master'):
             if isinstance(patch, Path):
                 lib.utils.call_git_loud(source_folder, ['am', '-3', patch])
             elif patch.startswith('https://lore.kernel.org/'):
-                lib.utils.run(['b4', 'shazam', '-l', '-P', '_', '-s', patch], cwd=source_folder)
+                b4(['shazam', '-l', '-P', '_', '-s', patch], cwd=source_folder)
             elif patch.startswith(('https://', 'http://')):
                 patch_input = lib.utils.curl([patch]).decode('utf-8')
                 lib.utils.call_git_loud(source_folder, ['am', '-3'], input=patch_input)
