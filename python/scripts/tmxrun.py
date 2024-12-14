@@ -49,9 +49,9 @@ else:
 if args.detach:
     tmx_cmd.append('-d')
 
-CMD_STR = ' '.join(args.args)
+CMD_STR = f"begin; {' '.join(args.args)}; end; or exec fish -l"
 if mode == 'container':
-    CMD_STR = f"dbxe -- fish -c '{CMD_STR}'"
+    CMD_STR = f"dbxe -- fish -c '{CMD_STR}'; or exec fish -l"
 tmx_cmd.append(CMD_STR)
 
 lib.utils.run(tmx_cmd)
