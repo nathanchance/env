@@ -295,12 +295,13 @@ def enable_reflector():
     conf_text = '\n'.join(reflector_args) + '\n'
     Path('/etc/xdg/reflector/reflector.conf').write_text(conf_text, encoding='utf-8')
 
-    reflector_drop_in = Path('/etc/systemd/system/reflector.timer.d/00-twice-daily.conf')
+    reflector_drop_in = Path('/etc/systemd/system/reflector.timer.d/00-schedule.conf')
     reflector_drop_in_text = ('[Unit]\n'
-                              'Description=Refresh Pacman mirrorlist twice daily with Reflector.\n'
+                              'Description=Refresh Pacman mirrorlist with Reflector.\n'
                               '\n'
                               '[Timer]\n'
                               'OnCalendar=\n'
+                              'OnUnitInactiveSec=18h\n'
                               'OnCalendar=*-*-* 06,18:00:00\n'
                               'RandomizedDelaySec=1h\n')
     reflector_drop_in.parent.mkdir(exist_ok=True)
@@ -309,12 +310,6 @@ def enable_reflector():
     lib.utils.run(['systemctl', 'daemon-reload'])
 
     lib.setup.systemctl_enable(['reflector.timer'])
-
-    # If we are in a virtual machine, we should enable reflector so that it
-    # runs every time it is started up, in case it is not a constantly running
-    # virtual machine, which means the timer above will not do much.
-    if lib.setup.is_virtual_machine():
-        lib.setup.systemctl_enable(['reflector.service'])
 
 
 # For archinstall, which causes ^M in /etc/fstab
