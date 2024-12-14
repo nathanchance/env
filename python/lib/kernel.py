@@ -94,11 +94,10 @@ def prepare_source(base_name, base_ref='origin/master'):
         # https://lore.kernel.org/20241114163931.GA1928968@thelio-3990X/
         commits.append('bd0601e8f99ded716ae1341c39cf8cc30fc28466')  # fixup! netfs: Change the read result collector to only use one work item
 
-        patches.append('https://lore.kernel.org/all/20241210-bcachefs-fix-declaration-after-label-err-v1-1-22c705fc47e8@kernel.org/')  # bcachefs: Add empty statement between label and declaration in check_inode_hash_info_matches_root()
-
     if base_name == 'linux-next-llvm':
         # https://lore.kernel.org/20241212014418.GA532802@ax162/
         patches.append('https://lore.kernel.org/all/ed7dd45f89e8f286478791137447a21d53735dbd.camel@infradead.org/')  # [PATCH] x86/kexec: Disable global pages before writing to control page
+        patches.append('https://lore.kernel.org/all/20241213-kexec-fix-section-name-for-ffunction-sections-v1-1-1ae6050f6a15@kernel.org/')  # x86/kexec: Fix location of relocate_kernel with -ffunction-sections
     # yapf: enable
 
     try:
