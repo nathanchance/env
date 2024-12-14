@@ -63,9 +63,6 @@ function cbl_upd_src -d "Update source trees in $CBL_SRC"
                 switch $tree
                     case l
                         set base llvm-project
-                        if is_location_primary
-                            set -a remotes origin-ssh
-                        end
                     case m
                         set base linux
                     case n
@@ -79,6 +76,9 @@ function cbl_upd_src -d "Update source trees in $CBL_SRC"
                 header "Updating $folder"
 
                 if test -d $folder
+                    if git -C $folder remote &| grep -q origin-ssh
+                        set -a remotes origin-ssh
+                    end
                     git -C $folder remote update $remotes
                 else
                     if test "$base" = linux-stable
