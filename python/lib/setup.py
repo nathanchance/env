@@ -184,7 +184,7 @@ def enable_tailscale():
     if not is_installed('tailscale'):
         return
 
-    systemctl_enable(['tailscaled.service'])
+    systemctl_enable('tailscaled.service')
 
 
 def fetch_gpg_key(source_url, dest):
@@ -429,7 +429,7 @@ def setup_libvirt(username):
     add_user_to_group('libvirt', username)
 
     # Enable libvirtd systemd service to ensure it is brought up on restart.
-    systemctl_enable(['libvirtd.service'])
+    systemctl_enable('libvirtd.service')
 
     # Make the default network come up automatically on restart.
     lib.utils.run(['virsh', 'net-autostart', 'default'])
@@ -450,7 +450,7 @@ def setup_mnt_nas():
         shutil.copyfile(src, dst)
         dst.chmod(0o644)
 
-    systemctl_enable([file])
+    systemctl_enable(file)
 
 
 def setup_mnt_ssd(user_name):
@@ -529,7 +529,7 @@ def systemctl_enable(items_to_enable, now=True):
     cmd = ['systemctl', 'enable']
     if now:
         cmd.append('--now')
-    cmd += items_to_enable
+    (cmd.append if isinstance(items_to_enable, str) else cmd.extend)(items_to_enable)
 
     lib.utils.run(cmd)
 

@@ -254,7 +254,7 @@ def setup_docker(username):
 
     lib.utils.run(['groupadd', '-f', 'docker'])
     lib.setup.add_user_to_group('docker', username)
-    lib.setup.systemctl_enable(['docker'])
+    lib.setup.systemctl_enable('docker')
 
 
 def setup_kernel_args():

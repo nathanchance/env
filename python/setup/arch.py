@@ -309,7 +309,7 @@ def enable_reflector():
     reflector_drop_in.chmod(0o644)
     lib.utils.run(['systemctl', 'daemon-reload'])
 
-    lib.setup.systemctl_enable(['reflector.timer'])
+    lib.setup.systemctl_enable('reflector.timer')
 
 
 # For archinstall, which causes ^M in /etc/fstab
