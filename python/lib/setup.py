@@ -7,6 +7,7 @@ import grp
 import ipaddress
 import os
 from pathlib import Path
+import platform
 import pwd
 import re
 import shutil
@@ -438,6 +439,58 @@ def setup_libvirt(username):
     net_info = lib.utils.chronic(['virsh', 'net-info', 'default']).stdout
     if re.search('^Active.*no', net_info, flags=re.M):
         lib.utils.run(['virsh', 'net-start', 'default'])
+
+
+def setup_virtiofs_automount(mountpoint='/mnt/host'):
+    # If we are not in a virtual machine, there is no point to setting up a
+    # mount for virtiofs :)
+    if not is_virtual_machine():
+        return
+
+    # /sys/fs/virtiofs/*/tag is only available in Linux 6.9 and newer:
+    # https://git.kernel.org/linus/a8f62f50b4e4ea92a938fca2ec1bd108d7f210e9
+    # As automounting will fail gracefully if something is not configured
+    # correctly, we fallback to the known value from cbl_vmm.py.
+    host_kernel_ver = tuple(map(int, platform.uname().release.split('-', 1)[0].split('.')))
+    if host_kernel_ver >= (6, 9, 0):
+        tag_sysfs = list(Path('/sys/fs/virtiofs').glob('*/tag'))
+        if len(tag_sysfs) != 1:
+            raise RuntimeError('Multiple virtiofs tags found?')
+        tag = tag_sysfs[0].read_text(encoding='utf-8').strip()
+    else:
+        tag = 'host'
+
+    unit_name = mountpoint.strip('/').replace('/', '-')
+
+    mount_txt = ('[Unit]\n'
+                 f"Description=Mount {tag} virtiofs folder\n"
+                 '\n'
+                 '[Mount]\n'
+                 f"What={tag}\n"
+                 f"Where={mountpoint}\n"
+                 'Type=virtiofs\n'
+                 '\n'
+                 '[Install]\n'
+                 'WantedBy=multi-user.target\n')
+    mount_path = Path('/etc/systemd/system', f"{unit_name}.mount")
+    mount_path.write_text(mount_txt, encoding='utf-8')
+    mount_path.chmod(0o644)
+
+    automount_txt = ('[Unit]\n'
+                     f"Description=Automount {tag} virtiofs folder\n"
+                     '\n'
+                     '[Automount]\n'
+                     f"Where={mountpoint}\n"
+                     '\n'
+                     '[Install]\n'
+                     'WantedBy=multi-user.target\n')
+    automount_path = mount_path.with_suffix('.automount')
+    automount_path.write_text(automount_txt, encoding='utf-8')
+    automount_path.chmod(0o644)
+
+    lib.utils.run(['systemctl', 'daemon-reload'])
+
+    systemctl_enable(automount_path.name)
 
 
 def setup_mnt_nas():

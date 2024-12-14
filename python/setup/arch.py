@@ -844,3 +844,4 @@ if __name__ == '__main__':
     if lib.setup.is_virtual_machine():
         initcpio_conf['HOOKS'].discard('keyboard')
     initcpio_conf.update_if_necessary()
+    lib.setup.setup_virtiofs_automount()

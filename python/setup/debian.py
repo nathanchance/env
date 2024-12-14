@@ -150,3 +150,4 @@ if __name__ == '__main__':
     lib.setup.set_date_time()
     lib.setup.setup_initial_fish_config(user)
     lib.setup.setup_ssh_authorized_keys(user)
+    lib.setup.setup_virtiofs_automount()
