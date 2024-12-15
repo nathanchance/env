@@ -98,6 +98,7 @@ def prepare_source(base_name, base_ref='origin/master'):
         # https://lore.kernel.org/20241212014418.GA532802@ax162/
         patches.append('https://lore.kernel.org/all/ed7dd45f89e8f286478791137447a21d53735dbd.camel@infradead.org/')  # [PATCH] x86/kexec: Disable global pages before writing to control page
         patches.append('https://lore.kernel.org/all/20241213-kexec-fix-section-name-for-ffunction-sections-v1-1-1ae6050f6a15@kernel.org/')  # x86/kexec: Fix location of relocate_kernel with -ffunction-sections
+        patches.append('https://lore.kernel.org/all/20241214230818.GA677337@ax162/')  # possible fixup for "x86/kexec: Invoke copy of relocate_kernel() instead of the original"
     # yapf: enable
 
     try:
