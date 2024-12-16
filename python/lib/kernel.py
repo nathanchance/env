@@ -94,11 +94,26 @@ def prepare_source(base_name, base_ref='origin/master'):
         # https://lore.kernel.org/20241114163931.GA1928968@thelio-3990X/
         commits.append('bd0601e8f99ded716ae1341c39cf8cc30fc28466')  # fixup! netfs: Change the read result collector to only use one work item
 
+    if base_name in ('fedora', 'rpi'):
+        # https://lore.kernel.org/20241216180231.GA1069997@ax162/
+        reverts.append('ce8fd0500b741b3669c246cc604f1f2343cdd6fd')  # crypto: qce - use __free() for a buffer that's always freed
+
+    if base_name == 'fedora':
+        patches.append('https://lore.kernel.org/all/20241216093410.377112-1-arnd@kernel.org/')  # ALSA: compress_offload: import DMA_BUF namespace
+
     if base_name == 'linux-next-llvm':
         # https://lore.kernel.org/20241212014418.GA532802@ax162/
-        patches.append('https://lore.kernel.org/all/ed7dd45f89e8f286478791137447a21d53735dbd.camel@infradead.org/')  # [PATCH] x86/kexec: Disable global pages before writing to control page
-        patches.append('https://lore.kernel.org/all/20241213-kexec-fix-section-name-for-ffunction-sections-v1-1-1ae6050f6a15@kernel.org/')  # x86/kexec: Fix location of relocate_kernel with -ffunction-sections
-        patches.append('https://lore.kernel.org/all/20241214230818.GA677337@ax162/')  # possible fixup for "x86/kexec: Invoke copy of relocate_kernel() instead of the original"
+        # https://lore.kernel.org/all/20241213-kexec-fix-section-name-for-ffunction-sections-v1-1-1ae6050f6a15@kernel.org/
+        # https://lore.kernel.org/20241214230818.GA677337@ax162/
+        patches.append('https://git.infradead.org/?p=users/dwmw2/linux.git;a=patch;h=fb5545a138533a20272000e3c9f72d43bb84dc35')  # x86/kexec: Disable global pages before writing to control page
+        patches.append('https://git.infradead.org/?p=users/dwmw2/linux.git;a=patch;h=ee1699ce2970adcc6dd442508b58101fee57818f')  # x86/kexec: Ensure preserve_context flag is set on return to kernel
+        patches.append('https://git.infradead.org/?p=users/dwmw2/linux.git;a=patch;h=cf39347122d9a46bf6bd94d3dfec72f9711e96de')  # x86/kexec: Use correct swap page in swap_pages function
+        patches.append('https://git.infradead.org/?p=users/dwmw2/linux.git;a=patch;h=0d2acc7d17b140b3ed61c28f530fc110082b2963')  # x86/kexec: Fix stack and handling of re-entry point for ::preserve_context
+        patches.append('https://git.infradead.org/?p=users/dwmw2/linux.git;a=patch;h=a04ce0a6c84ce121b5a8dc4fc5340a0bc998cb24')  # x86/kexec: Fix location of relocate_kernel with -ffunction-sections
+        patches.append('https://git.infradead.org/?p=users/dwmw2/linux.git;a=patch;h=373fadb62a6c7d0c6d69cb19b35120ab539af2ef')  # x86/kexec: Cope with relocate_kernel() not being at the start of the page
+        patches.append('https://git.infradead.org/?p=users/dwmw2/linux.git;a=patch;h=0a5ebf841693b0b48d1012dc85d8f391815b72ea')  # x86/kexec: Add CFI type information to relocate_kernel()
+        patches.append('https://git.infradead.org/?p=users/dwmw2/linux.git;a=patch;h=759535da6ae8da013c2bb8b6ddebca84fa4f69d3')  # x86/kexec: Invalidate GDT/IDT from relocate_kernel() instead of earlier
+        patches.append('https://git.infradead.org/?p=users/dwmw2/linux.git;a=patch;h=39aa20cecfdc40f4c63d285227d139d1f314a43d')  # x86/kexec: Use typedef for relocate_kernel_fn function prototype
     # yapf: enable
 
     try:
