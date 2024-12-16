@@ -19,7 +19,9 @@ def generate_patch_lines(args):
             patch_txt = lib.kernel.b4_am_o(msg_id)
             _, subject = lib.kernel.get_msg_id_subject(patch_txt)
 
-            print(f"patches.append('https://lore.kernel.org/all/{msg_id}/')  # {subject}")
+            print(
+                f"patches.append('https://lore.kernel.org/all/{msg_id}/')  # {subject.split('] ', 1)[1]}",
+            )
 
         return
 
