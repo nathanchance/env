@@ -133,6 +133,8 @@ def prepare_source(base_name, base_ref='origin/master'):
                 am_kwargs['input'] = b4_am_o(patch)
             elif patch.startswith(('https://', 'http://')):
                 am_kwargs['input'] = lib.utils.curl(patch).decode('utf-8')
+            elif patch.startswith('From ') and 'diff --git' in patch:
+                am_kwargs['input'] = patch
             else:
                 raise RuntimeError(f"Can't handle {patch}?")
 
