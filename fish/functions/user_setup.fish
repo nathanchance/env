@@ -190,7 +190,7 @@ function user_setup -d "Setup a user account, downloading all files and placing 
 
     # config.fish
     rm -rf $__fish_config_dir/config.fish
-    ln -fsv $ENV_FOLDER/fish/config.fish $__fish_config_dir/config.fish
+    ln -frsv $ENV_FOLDER/fish/config.fish $__fish_config_dir/config.fish
 
     # Global .gitignore
     set gitignore $HOME/.gitignore_global
@@ -261,9 +261,9 @@ rpmbuild/' >>$gitignore
 
     # Configuration files (vim, tmux, etc)
     set configs $ENV_FOLDER/configs
-    ln -fsv $configs/tmux/.tmux.conf $HOME/.tmux.conf
+    ln -frsv $configs/tmux/.tmux.conf $HOME/.tmux.conf
     mkdir -p $HOME/.config/tio
-    ln -fsv $configs/local/tio $HOME/.config/tio/config
+    ln -frsv $configs/local/tio $HOME/.config/tio/config
     vim_setup
 
     # Terminal profiles
@@ -280,14 +280,14 @@ rpmbuild/' >>$gitignore
         if is_installed konsole
             set konsole_share $HOME/.local/share/konsole
             mkdir -p $konsole_share
-            ln -fsv $configs/local/Nathan.profile $konsole_share/Nathan.profile
-            ln -fsv $configs/local/snazzy.colorscheme $konsole_share/snazzy.colorscheme
+            ln -frsv $configs/local/Nathan.profile $konsole_share/Nathan.profile
+            ln -frsv $configs/local/snazzy.colorscheme $konsole_share/snazzy.colorscheme
         end
 
         if is_installed xfce4-terminal
             set xfce_share $HOME/.local/share/xfce4/terminal/colorschemes
             mkdir -p $xfce_share
-            ln -fsv $configs/local/snazzy.theme $xfce_share
+            ln -frsv $configs/local/snazzy.theme $xfce_share
         end
     end
 

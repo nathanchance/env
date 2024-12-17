@@ -5,17 +5,17 @@
 function vim_setup -d "Setup vim configuration files"
     set env_vim $ENV_FOLDER/configs/common/vim
 
-    # Install identification and plugin files
-    for folder in ident plugin
+    # Install indentation and plugin files
+    for folder in indent plugin
         set dest $HOME/.vim/$folder
         test -L $dest; and continue
 
         mkdir -p (dirname $dest)
-        ln -fsv $env_vim/$folder $dest
+        ln -frsv $env_vim/$folder $dest
     end
 
     # Install .vimrc
-    ln -fsv $env_vim/.vimrc $HOME/.vimrc
+    ln -frsv $env_vim/.vimrc $HOME/.vimrc
 
     # Download and update plugins
     upd vim
