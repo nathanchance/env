@@ -18,7 +18,7 @@ def get_rocky_version():
 
 
 def prechecks():
-    lib.setup.check_root()
+    lib.utils.check_root()
     rocky_version = get_rocky_version()
     if rocky_version not in (9, ):
         raise RuntimeError(

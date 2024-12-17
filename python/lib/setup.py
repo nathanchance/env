@@ -147,11 +147,6 @@ def check_ip(ip_to_check):
     ipaddress.ip_address(ip_to_check)
 
 
-def check_root():
-    if os.geteuid() != 0:
-        raise RuntimeError("root access is required!")
-
-
 # Easier than os.walk() + shutil.chown()
 def chown(new_user, folder):
     lib.utils.run(['chown', '-R', f"{new_user}:{new_user}", folder])

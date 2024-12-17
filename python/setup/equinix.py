@@ -111,7 +111,7 @@ def parse_arguments():
 if __name__ == '__main__':
     args = parse_arguments()
 
-    lib.setup.check_root()
+    lib.utils.check_root()
 
     drive = args.drive
     folder = Path(args.folder)

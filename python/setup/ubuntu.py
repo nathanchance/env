@@ -28,7 +28,7 @@ def parse_arguments():
 
 
 def prechecks():
-    lib.setup.check_root()
+    lib.utils.check_root()
 
     supported_versions = ('focal', 'jammy', 'kinetic')
     if (codename := lib.setup.get_version_codename()) not in supported_versions:

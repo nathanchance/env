@@ -18,7 +18,7 @@ def get_alma_version():
 
 
 def prechecks():
-    lib.setup.check_root()
+    lib.utils.check_root()
     alma_version = get_alma_version()
     if alma_version not in (9, ):
         raise RuntimeError(

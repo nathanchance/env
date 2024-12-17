@@ -111,7 +111,7 @@ def machine_is_trusted():
 
 
 def prechecks():
-    lib.setup.check_root()
+    lib.utils.check_root()
     if (fedora_version := get_fedora_version()) not in range(MIN_FEDORA_VERSION,
                                                              MAX_FEDORA_VERSION + 1):
         raise RuntimeError(

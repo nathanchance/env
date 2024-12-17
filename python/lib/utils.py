@@ -31,6 +31,11 @@ def call_git_loud(directory, cmd, **kwargs):
     return call_git(directory, cmd, **kwargs, capture_output=False)
 
 
+def check_root():
+    if os.geteuid() != 0:
+        raise RuntimeError("root access is required!")
+
+
 def chronic(*args, **kwargs):
     kwargs.setdefault('capture_output', True)
 

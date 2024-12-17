@@ -64,7 +64,7 @@ def pi_setup(user_name):
 
 
 def prechecks():
-    lib.setup.check_root()
+    lib.utils.check_root()
 
     supported_versions = (
         'bullseye',

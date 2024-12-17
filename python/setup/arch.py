@@ -649,7 +649,7 @@ def parse_arguments():
 
 
 def prechecks():
-    lib.setup.check_root()
+    lib.utils.check_root()
 
 
 def setup_doas(username):

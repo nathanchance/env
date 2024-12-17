@@ -150,7 +150,7 @@ if __name__ == '__main__':
     if not (password := args.user_password):
         password = getpass.getpass(prompt='Password for Alpine user account: ')
 
-    lib.setup.check_root()
+    lib.utils.check_root()
     enable_community_repo()
     update_and_install_packages()
     setup_user(args.user_name, password)
