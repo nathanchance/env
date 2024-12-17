@@ -2,7 +2,7 @@ FROM docker.io/debian:10-slim
 
 # LLVM may require an newer version of cmake, download and install the latest
 # prebuilt.
-ARG CMAKE_VERSION=3.31.1
+ARG CMAKE_VERSION=3.31.2
 RUN apt update && \
     apt upgrade -y && \
     apt install -y --no-install-recommends \
@@ -29,7 +29,7 @@ RUN apt update && \
 # Buster has Python 3.7, tc-build requires at least Python 3.8 due to liberal
 # use of the walrus operator (':='), so build and install the latest stable
 # version.
-ARG PYTHON_VERSION=3.13.0
+ARG PYTHON_VERSION=3.13.1
 RUN dir=$(mktemp -d) && \
     url=https://www.python.org/ftp/python/$PYTHON_VERSION/Python-$PYTHON_VERSION.tar.xz && \
     apt update && \
