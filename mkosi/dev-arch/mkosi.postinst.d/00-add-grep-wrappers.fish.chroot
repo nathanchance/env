@@ -1,0 +1,9 @@
+#!/usr/bin/env fish
+
+for char in e f
+    echo '#!/bin/sh
+
+exec grep -'(string upper $char)' "$@"' >/usr/local/bin/"$char"grep
+end
+
+chmod 755 /usr/local/bin/*grep
