@@ -6,20 +6,12 @@ from argparse import ArgumentParser
 import json
 from pathlib import Path
 import shutil
-import subprocess
 import sys
 
 sys.path.append(str(Path(__file__).resolve().parents[1]))
 # pylint: disable=wrong-import-position
 import lib.utils
 # pylint: enable=wrong-import-position
-
-
-def fzf(target, fzf_input):
-    fzf_cmd = ['fzf', '--header', target.capitalize(), '--multi']
-    with subprocess.Popen(fzf_cmd, stdin=subprocess.PIPE, stdout=subprocess.PIPE,
-                          text=True) as fzf_proc:
-        return fzf_proc.communicate(fzf_input)[0].splitlines()
 
 
 def oci_json(target):
@@ -65,7 +57,9 @@ def remove(target):
                 image_name = f"<none> (was: {json_item['History'][0]})"
             fzf_choices += [f"{item_id} | {image_name}"]
 
-    items_to_remove = [item.split(' ')[0] for item in fzf(target, '\n'.join(fzf_choices))]
+    items_to_remove = [
+        item.split(' ')[0] for item in lib.utils.fzf(target.capitalize(), '\n'.join(fzf_choices))
+    ]
     if items_to_remove:
         podman_rm(target_cmd, items_to_remove)
 

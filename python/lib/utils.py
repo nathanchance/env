@@ -54,6 +54,13 @@ def detect_virt(*args):
     return chronic(['systemd-detect-virt', *args], check=False).stdout.strip()
 
 
+def fzf(header, fzf_input):
+    fzf_cmd = ['fzf', '--header', header, '--multi']
+    with subprocess.Popen(fzf_cmd, stdin=subprocess.PIPE, stdout=subprocess.PIPE,
+                          text=True) as fzf_proc:
+        return fzf_proc.communicate(fzf_input)[0].splitlines()
+
+
 def get_duration(start_seconds, end_seconds=None):
     if not end_seconds:
         end_seconds = time.time()
