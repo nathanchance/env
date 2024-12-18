@@ -54,8 +54,10 @@ def detect_virt(*args):
     return chronic(['systemd-detect-virt', *args], check=False).stdout.strip()
 
 
-def fzf(header, fzf_input):
+def fzf(header, fzf_input, fzf_args=None):
     fzf_cmd = ['fzf', '--header', header, '--multi']
+    if fzf_args:
+        (fzf_cmd.append if isinstance(fzf_args, str) else fzf_cmd.extend)(fzf_args)
     with subprocess.Popen(fzf_cmd, stdin=subprocess.PIPE, stdout=subprocess.PIPE,
                           text=True) as fzf_proc:
         return fzf_proc.communicate(fzf_input)[0].splitlines()
