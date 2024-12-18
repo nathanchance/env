@@ -1,0 +1,54 @@
+#!/usr/bin/env fish
+
+function downgrade_pkg
+    set pkg $argv[1]
+    set ver $argv[2]
+
+    set tarball /tmp/$pkg-$ver-x86_64.pkg.tar.zst
+    set url https://archive.archlinux.org/packages/(string split -f 1 '' $pkg)/$pkg/(basename $tarball)
+
+    curl -LSso $tarball $url
+    and pacman -U --noconfirm $tarball
+    and rm -fr $tarball
+end
+
+
+reflector \
+    --country "United States" \
+    --latest 15 \
+    --protocol https \
+    --save /etc/pacman.d/mirrorlist \
+    --sort rate
+
+and cat /etc/pacman.d/mirrorlist
+
+and pacman-key --init
+and pacman-key --populate
+
+# This should not be necessary but testing is broken right now
+# Uninstall it before updating then install it after
+and pacman -R --noconfirm qemu-emulators-full (pactree -u qemu-emulators-full | string match -gr '(qemu-(?:system|user)-?.*)=')
+
+# Temporarily disable the pacman sandbox
+and sed -i 's/^DownloadUser/#DownloadUser/g' /etc/pacman.conf
+
+and pacman -Syyuu --noconfirm
+
+and pacman -S --noconfirm qemu-emulators-full
+
+# Switch to doas from sudo non-interatively
+and pacman -S --ask 4 --noconfirm opendoas-sudo
+
+and pacman -S --noconfirm \
+    arm-linux-gnueabi-binutils \
+    cvise \
+    debhelper \
+    mips-linux-gnu-binutils \
+    powerpc64-linux-gnu-binutils \
+    s390x-linux-gnu-binutils \
+    shellcheck-bin \
+    tio \
+    tuxmake
+
+# Turn the pacman sandbox back on
+and sed -i 's/^#DownloadUser/DownloadUser/g' /etc/pacman.conf
