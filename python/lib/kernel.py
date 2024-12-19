@@ -24,6 +24,15 @@ def b4(cmd, **kwargs):
     b4_cmd = ['b4']
     (b4_cmd.append if isinstance(cmd, str) else b4_cmd.extend)(cmd)
 
+    if 'XDG_FOLDER' in os.environ:
+        if 'env' not in kwargs:
+            kwargs['env'] = {}
+        kwargs['env'] |= {
+            'XDG_CACHE_HOME': Path(os.environ['XDG_FOLDER'], 'cache'),
+            'XDG_CONFIG_HOME': Path(os.environ['XDG_FOLDER'], 'config'),
+            'XDG_DATA_HOME': Path(os.environ['XDG_FOLDER'], 'share'),
+        }
+
     return lib.utils.run(b4_cmd, **kwargs)
 
 
