@@ -120,6 +120,8 @@ def prepare_source(base_name, base_ref='origin/master'):
         patches.append('https://lore.kernel.org/all/20241216233704.3208607-5-dwmw2@infradead.org/')  # x86/kexec: Fix stack and handling of re-entry point for ::preserve_context
         patches.append('https://lore.kernel.org/all/20241216233704.3208607-6-dwmw2@infradead.org/')  # x86/kexec: Fix location of relocate_kernel with -ffunction-sections
         patches.append('https://lore.kernel.org/all/20241216233704.3208607-7-dwmw2@infradead.org/')  # x86/kexec: Mark machine_kexec() with __nocfi
+
+        patches.append('https://lore.kernel.org/all/20241219-amdgpu-fix-enum-float-conversion-again-again-v1-1-ef2c619724b1@kernel.org/')  # drm/amd/display: Disable -Wenum-float-conversion for dml2_dpmm_dcn4.c
     # yapf: enable
 
     try:
