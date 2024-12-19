@@ -51,7 +51,9 @@ function cbl_setup_linux_repos -d "Clone ClangBuiltLinux Linux repos into their 
         end
 
         if contains $folder $CBL_SRC_D/linux $CBL_SRC_D/linux-next
-            git -C $folder remote add -f korg git@gitolite.kernel.org:pub/scm/linux/kernel/git/nathan/linux
+            # Add https:// remote first to be able to do an unauthenticated fetch
+            git -C $folder remote add -f korg https://git.kernel.org/pub/scm/linux/kernel/git/nathan/linux.git
+            git -C $folder remote set-url korg git@gitolite.kernel.org:pub/scm/linux/kernel/git/nathan/linux
         end
         if test $folder = $CBL_SRC_D/linux-next
             git -C $folder remote add -f mainline https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git
