@@ -16,6 +16,9 @@ function cbl_upload_korg_llvm -d "Upload kernel.org toolchain releases with kup"
         git clone https://git.kernel.org/pub/scm/utils/kup/kup.git $kup_src
         or return
     end
+    if not test -e $HOME/.kuprc
+        printf 'host = git@gitolite.kernel.org\nsubcmd = kup-server\n' >$HOME/.kuprc
+    end
 
     for tar in *.tar
         if string match -qr -- '-[0-9a-f]{40}-' $tar
