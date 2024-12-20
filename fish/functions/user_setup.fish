@@ -194,6 +194,19 @@ function user_setup -d "Setup a user account, downloading all files and placing 
     rm -rf $__fish_config_dir/config.fish
     ln -frsv $ENV_FOLDER/fish/config.fish $__fish_config_dir/config.fish
 
+    # Invoke fish by default in bash
+    # https://wiki.archlinux.org/title/Fish#Modify_.bashrc_to_drop_into_fish
+    if not begin
+            test -f $HOME/.bashrc
+            and string match -qr 'exec fish \$LOGIN_OPTION' <$HOME/.bashrc
+        end
+        echo '
+if [[ $(ps --no-header --pid=$PPID --format=comm) != "fish" && -z $BASH_EXECUTION_STRING && $SHLVL == 1 ]]; then
+    shopt -q login_shell && LOGIN_OPTION=\'--login\' || LOGIN_OPTION=\'\'
+    exec fish $LOGIN_OPTION
+fi' >>$HOME/.bashrc
+    end
+
     # Global .gitignore
     set gitignore $HOME/.gitignore_global
     git config --global core.excludesfile $gitignore
