@@ -371,8 +371,11 @@ def set_date_time():
 
 
 def setup_initial_fish_config(username):
-    fish_ver = lib.utils.chronic(['fish', '-c', 'echo $version']).stdout.strip()
-    if tuple(int(x) for x in fish_ver.split('.')) < (3, 4, 0):
+    fish_ver = lib.utils.chronic(['fish', '-c', 'echo $version']).stdout.strip().split('.')
+    # Certain 4.0 versions may have non-numeric charcters (like 4.0b1). We can
+    # just look at the major version in that case to know that this check will
+    # pass.
+    if int(fish_ver[0]) < 4 and tuple(map(int, fish_ver)) < (3, 4, 0):
         raise RuntimeError(f"{fish_ver} is less than 3.4.0!")
 
     user_cfg = Path('/home', username, '.config')
