@@ -109,6 +109,7 @@ def prepare_source(base_name, base_ref='origin/master'):
 
     if base_name == 'fedora':
         patches.append('https://lore.kernel.org/all/20241216093410.377112-1-arnd@kernel.org/')  # ALSA: compress_offload: import DMA_BUF namespace
+        reverts.append('32d053d6f5e92efd82349e7c481cba5a43dc1a22')  # arm64/mm: Drop configurable 48-bit physical address space limit
 
     if base_name == 'linux-next-llvm':
         # https://lore.kernel.org/20241212014418.GA532802@ax162/
