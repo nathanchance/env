@@ -313,28 +313,28 @@ def pacman(args):
     lib.utils.run_as_root(['pacman', *args])
 
 
-def partition_drive(drive_path, mountpoint, username=None):
+def partition_drive(device, mountpoint, username=None):
     if not username:
         username = get_user()
 
-    if not drive_path.startswith(('/dev/nvme', '/dev/sd')):
-        raise RuntimeError(f"Cannot safely handle drive path '{drive_path}'?")
+    if not device.startswith(('/dev/nvme', '/dev/sd')):
+        raise RuntimeError(f"Cannot safely handle device path '{device}'?")
 
-    volume = Path(drive_path + 'p1' if '/dev/nvme' in drive_path else '1')
+    partition = Path(device + 'p1' if '/dev/nvme' in device else '1')
 
     if mountpoint.is_mount():
         raise RuntimeError(f"mountpoint ('{mountpoint}') is already mounted?")
 
-    if volume.is_block_device():
-        raise RuntimeError(f"volume ('{volume}') already exists?")
+    if partition.is_block_device():
+        raise RuntimeError(f"partition ('{partition}') already exists?")
 
     if shutil.which('sgdisk'):
-        lib.utils.run(['sgdisk', '-N', '1', '-t', '1:8300', drive_path])
+        lib.utils.run(['sgdisk', '-N', '1', '-t', '1:8300', device])
     else:
         lib.utils.run([
             'parted',
             '-s',
-            drive_path,
+            device,
             'mklabel',
             'gpt',
             'mkpart',
@@ -347,12 +347,12 @@ def partition_drive(drive_path, mountpoint, username=None):
         # Let everything sync up
         time.sleep(10)
 
-    lib.utils.run(['mkfs', '-t', 'ext4', volume], env={'E2FSPROGS_LIBMAGIC_SUPPRESS': '1'})
+    lib.utils.run(['mkfs', '-t', 'ext4', partition], env={'E2FSPROGS_LIBMAGIC_SUPPRESS': '1'})
 
-    vol_uuid = lib.utils.chronic(['blkid', '-o', 'value', '-s', 'UUID', volume]).stdout.strip()
+    part_uuid = lib.utils.chronic(['blkid', '-o', 'value', '-s', 'UUID', partition]).stdout.strip()
 
     fstab = Fstab()
-    fstab[mountpoint] = FstabItem(f"UUID={vol_uuid}", mountpoint, 'ext4', 'defaults', '0', '2')
+    fstab[mountpoint] = FstabItem(f"UUID={part_uuid}", mountpoint, 'ext4', 'defaults', '0', '2')
     fstab.write()
 
     mountpoint.mkdir(exist_ok=True, parents=True)
