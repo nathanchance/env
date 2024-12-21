@@ -109,6 +109,7 @@ set -gx VM_FOLDER $EXT_FOLDER/vm
 set -gx XDG_FOLDER $EXT_FOLDER/xdg
 
 set -gx CCACHE_DIR $XDG_FOLDER/config/ccache
+set -gx PY_VENV_DIR $XDG_FOLDER/share/py_venv
 
 set -gx CBL_GIT $CBL/github
 set -gx CBL_LOGS $CBL/logs
