@@ -313,9 +313,13 @@ def pacman(args):
     lib.utils.run_as_root(['pacman', *args])
 
 
-def partition_drive(device, mountpoint, username=None):
+def partition_drive(device, mountpoint, username=None, fstype=None):
     if not username:
         username = get_user()
+    if not fstype:
+        fstype = 'ext4'
+    elif fstype not in ('btrfs', 'ext4'):
+        raise RuntimeError(f"Cannot safely handle filesytem type ('{fstype}')?")
 
     if not device.startswith(('/dev/nvme', '/dev/sd')):
         raise RuntimeError(f"Cannot safely handle device path '{device}'?")
@@ -340,7 +344,7 @@ def partition_drive(device, mountpoint, username=None):
             'gpt',
             'mkpart',
             'primary',
-            'ext4',
+            fstype,
             '0%',
             '100%',
         ],
@@ -349,13 +353,13 @@ def partition_drive(device, mountpoint, username=None):
         time.sleep(10)
 
     # Format partition
-    lib.utils.run(['mkfs', '-t', 'ext4', partition], env={'E2FSPROGS_LIBMAGIC_SUPPRESS': '1'})
+    lib.utils.run(['mkfs', '-t', fstype, partition], env={'E2FSPROGS_LIBMAGIC_SUPPRESS': '1'})
 
     # Add partition to fstab
     fstab = Fstab()
     part_uuid = lib.utils.chronic(['blkid', '-o', 'value', '-s', 'PARTUUID',
                                    partition]).stdout.strip()
-    fstab[mountpoint] = FstabItem(f"PARTUUID={part_uuid}", mountpoint, 'ext4', 'defaults', '0', '2')
+    fstab[mountpoint] = FstabItem(f"PARTUUID={part_uuid}", mountpoint, fstype, 'defaults', '0', '2')
     fstab.write()
 
     # Mount partition to its mountpoint
