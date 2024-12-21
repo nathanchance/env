@@ -328,6 +328,7 @@ def partition_drive(device, mountpoint, username=None):
     if partition.is_block_device():
         raise RuntimeError(f"partition ('{partition}') already exists?")
 
+    # Create partition on device
     if shutil.which('sgdisk'):
         lib.utils.run(['sgdisk', '-N', '1', '-t', '1:8300', device])
     else:
@@ -347,14 +348,17 @@ def partition_drive(device, mountpoint, username=None):
         # Let everything sync up
         time.sleep(10)
 
+    # Format partition
     lib.utils.run(['mkfs', '-t', 'ext4', partition], env={'E2FSPROGS_LIBMAGIC_SUPPRESS': '1'})
 
-    part_uuid = lib.utils.chronic(['blkid', '-o', 'value', '-s', 'UUID', partition]).stdout.strip()
-
+    # Add partition to fstab
     fstab = Fstab()
-    fstab[mountpoint] = FstabItem(f"UUID={part_uuid}", mountpoint, 'ext4', 'defaults', '0', '2')
+    part_uuid = lib.utils.chronic(['blkid', '-o', 'value', '-s', 'PARTUUID',
+                                   partition]).stdout.strip()
+    fstab[mountpoint] = FstabItem(f"PARTUUID={part_uuid}", mountpoint, 'ext4', 'defaults', '0', '2')
     fstab.write()
 
+    # Mount partition to its mountpoint
     mountpoint.mkdir(exist_ok=True, parents=True)
     lib.utils.run(['mount', '-a'])
     if mountpoint != Path('/home'):
