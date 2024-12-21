@@ -19,20 +19,12 @@ makedepends=('cmake' 'python-sphinx' 'jq')
 checkdepends=('expect' 'procps-ng')
 install=fish.install
 backup=(etc/fish/config.fish)
-source=(https://github.com/fish-shell/fish-shell/releases/download/${pkgver}/${pkgname}-${pkgver}.tar.xz{,.asc}
-        sphinx-no-parallel.patch)
+source=(https://github.com/fish-shell/fish-shell/releases/download/${pkgver}/${pkgname}-${pkgver}.tar.xz{,.asc})
 validpgpkeys=(003837986104878835FA516D7A67D962D88A709A) # David Adam <zanchey@gmail.com>
 sha256sums=('614c9f5643cd0799df391395fa6bbc3649427bb839722ce3b114d3bbc1a3b250'
-            'SKIP'
-            '16e15755ab363e1b9f04969091104c88c3cfc39a67621ad636419535e692874f')
+            'SKIP')
 sha512sums=('f1605c400c5d5494f37b92dd386963dba7a3f3c401c369aaf3ff616d9d94836a0138d26074be24c92d94d9d7b625513800899c9431f5e21be0757eb0a0bfd3fe'
-            'SKIP'
-            '3f9a0f53fa80bc1fa9ce1f66d230710d0b906bcc169dfef8fa68d194a1b29cc1cb194bd9db8ec1e682ba2393a474a000061e6ac12123b8b0baff1513d0f786c8')
-
-prepare() {
-  cd ${pkgname}-${pkgver}
-  patch -Np1 < "$srcdir/sphinx-no-parallel.patch" # can be removed when sphinx 7.3.0 releases
-}
+            'SKIP')
 
 build() {
   cd ${pkgname}-${pkgver}
