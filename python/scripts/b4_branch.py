@@ -120,25 +120,25 @@ def parse_arguments():
     return parser.parse_args()
 
 
-def push_branch(directory, branch, tags, dry_run):
+def push_branch(directory, branch, tags, arguments):
     remote_branches = get_remote_b4_branches()
 
     if branch in remote_branches:
         lib.utils.print_yellow(f"{branch} already exists on remote, skipping...")
     else:
         push_cmd = ['push', '--set-upstream', 'korg', f"{branch}:{branch}"]
-        if dry_run:
+        if arguments.dry_run:
             lib.utils.print_cmd(['git', '-C', directory, *push_cmd])
         else:
             lib.utils.call_git_loud(directory, push_cmd)
 
     for tag in tags:
-        if tag in remote_branches[branch]:
+        if tag in remote_branches.get(branch, []):
             lib.utils.print_yellow(f"{tag} already exists on remote, skipping...")
             continue
 
         push_cmd = ['push', 'korg', tag]
-        if dry_run:
+        if arguments.dry_run:
             lib.utils.print_cmd(['git', '-C', directory, *push_cmd])
         else:
             lib.utils.call_git_loud(directory, push_cmd)
