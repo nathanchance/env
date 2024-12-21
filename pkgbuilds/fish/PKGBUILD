@@ -6,6 +6,7 @@
 # Contributor: Jan Fader <jan.fader@web.de>
 
 pkgname=fish
+_repo=$pkgname-shell
 pkgver=4.0b1
 pkgrel=0
 pkgdesc='Smart and user friendly shell intended mostly for interactive use'
@@ -15,20 +16,22 @@ license=('GPL-2.0-only AND BSD-3-Clause AND ISC AND MIT AND PSF-2.0')
 depends=('glibc' 'gcc-libs' 'ncurses' 'pcre2')
 optdepends=('python: man page completion parser / web config tool'
             'pkgfile: command-not-found hook')
-makedepends=('cargo' 'cmake' 'python-sphinx' 'jq')
+makedepends=('cargo' 'cmake' 'git' 'python-sphinx' 'jq')
 checkdepends=('expect' 'procps-ng')
 install=fish.install
 options=(!lto) # breaks the build and it is not necessary
 backup=(etc/fish/config.fish)
-source=(https://github.com/fish-shell/fish-shell/releases/download/${pkgver}/${pkgname}-${pkgver}.tar.xz{,.asc})
-validpgpkeys=(003837986104878835FA516D7A67D962D88A709A) # David Adam <zanchey@gmail.com>
-sha256sums=('534334e10f85722214e9daff82a57cc3501235523f16f8f131c2344e4ec98da7'
-            'SKIP')
-sha512sums=('9f9740076e09e5b3487586be3e8572b42b8d2084b6616fb1792e94d24da8d46bc38f7d55b8728cfc0a3dc9820136de7608528c37dc6aaec474a208a663f07f3b'
-            'SKIP')
+source=("git+https://github.com/$_repo/$_repo#branch=Integration_4.0.0")
+sha256sums=('SKIP')
+sha512sums=('SKIP')
+
+pkgver() {
+  git -C $_repo describe --long | sed -r 's/([^-]*-g)/r\1/;s/-/./g'
+}
 
 build() {
-  cd ${pkgname}-${pkgver}
+  cd $_repo
+
   export CXXFLAGS+=" ${CPPFLAGS}"
   cmake \
     -B build \
@@ -41,12 +44,13 @@ build() {
 }
 
 check() {
-  cd ${pkgname}-${pkgver}
+  cd $_repo
+
   make -C build test
 }
 
 package() {
-  cd ${pkgname}-${pkgver}
+  cd $_repo
 
   make -C build DESTDIR="${pkgdir}" install
 }
