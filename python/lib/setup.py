@@ -13,6 +13,7 @@ import re
 import shutil
 import socket
 import sys
+import time
 
 sys.path.append(str(Path(__file__).resolve().parents[1]))
 # pylint: disable=wrong-import-position
@@ -310,6 +311,54 @@ def is_systemd_init():
 
 def pacman(args):
     lib.utils.run_as_root(['pacman', *args])
+
+
+def partition_drive(drive_path, mountpoint, username=None):
+    if not username:
+        username = get_user()
+
+    if not drive_path.startswith(('/dev/nvme', '/dev/sd')):
+        raise RuntimeError(f"Cannot safely handle drive path '{drive_path}'?")
+
+    volume = Path(drive_path + 'p1' if '/dev/nvme' in drive_path else '1')
+
+    if mountpoint.is_mount():
+        raise RuntimeError(f"mountpoint ('{mountpoint}') is already mounted?")
+
+    if volume.is_block_device():
+        raise RuntimeError(f"volume ('{volume}') already exists?")
+
+    if shutil.which('sgdisk'):
+        lib.utils.run(['sgdisk', '-N', '1', '-t', '1:8300', drive_path])
+    else:
+        lib.utils.run([
+            'parted',
+            '-s',
+            drive_path,
+            'mklabel',
+            'gpt',
+            'mkpart',
+            'primary',
+            'ext4',
+            '0%',
+            '100%',
+        ],
+                      check=True)
+        # Let everything sync up
+        time.sleep(10)
+
+    lib.utils.run(['mkfs', '-t', 'ext4', volume], env={'E2FSPROGS_LIBMAGIC_SUPPRESS': '1'})
+
+    vol_uuid = lib.utils.chronic(['blkid', '-o', 'value', '-s', 'UUID', volume]).stdout.strip()
+
+    fstab = Fstab()
+    fstab[mountpoint] = FstabItem(f"UUID={vol_uuid}", mountpoint, 'ext4', 'defaults', '0', '2')
+    fstab.write()
+
+    mountpoint.mkdir(exist_ok=True, parents=True)
+    lib.utils.run(['mount', '-a'])
+    if mountpoint != Path('/home'):
+        lib.setup.chown(username, mountpoint)
 
 
 def podman_setup(username):

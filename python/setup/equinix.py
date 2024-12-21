@@ -6,7 +6,6 @@ from argparse import ArgumentParser
 from pathlib import Path
 import shutil
 import sys
-import time
 
 import deb
 
@@ -44,52 +43,6 @@ def create_user(user_name, user_password):
     lib.setup.chown(user_name, user_ssh)
 
 
-def partition_drive(drive_path, mountpoint, username):
-    if not drive_path.startswith(('/dev/nvme', '/dev/sd')):
-        raise RuntimeError(f"Cannot safely handle drive path '{drive_path}'?")
-
-    volume = Path(drive_path + 'p1' if '/dev/nvme' in drive_path else '1')
-
-    if mountpoint.is_mount():
-        raise RuntimeError(f"mountpoint ('{mountpoint}') is already mounted?")
-
-    if volume.is_block_device():
-        raise RuntimeError(f"volume ('{volume}') already exists?")
-
-    if shutil.which('sgdisk'):
-        lib.utils.run(['sgdisk', '-N', '1', '-t', '1:8300', drive_path])
-    else:
-        lib.utils.run([
-            'parted',
-            '-s',
-            drive_path,
-            'mklabel',
-            'gpt',
-            'mkpart',
-            'primary',
-            'ext4',
-            '0%',
-            '100%',
-        ],
-                      check=True)
-        # Let everything sync up
-        time.sleep(10)
-
-    lib.utils.run(['mkfs', '-t', 'ext4', volume], env={'E2FSPROGS_LIBMAGIC_SUPPRESS': '1'})
-
-    vol_uuid = lib.utils.chronic(['blkid', '-o', 'value', '-s', 'UUID', volume]).stdout.strip()
-
-    fstab = lib.setup.Fstab()
-    fstab[mountpoint] = lib.setup.FstabItem(f"UUID={vol_uuid}", mountpoint, 'ext4', 'defaults', '0',
-                                            '2')
-    fstab.write()
-
-    mountpoint.mkdir(exist_ok=True, parents=True)
-    lib.utils.run(['mount', '-a'])
-    if mountpoint != Path('/home'):
-        lib.setup.chown(username, mountpoint)
-
-
 def parse_arguments():
     parser = ArgumentParser(description='Perform initial setup on Equinix Metal servers')
 
@@ -120,7 +73,7 @@ if __name__ == '__main__':
 
     if drive:
         check_install()
-        partition_drive(drive, folder, user)
+        lib.setup.partition_drive(drive, folder, user)
 
     if password:
         create_user(user, password)
