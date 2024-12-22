@@ -112,12 +112,11 @@ class Fstab:
             if (item.type, item.opts) == ('vfat', 'umask=0077'):
                 item.opts = Fstab.ARCH_VFAT_OPTS
 
-            if item.type.startswith('ext'):
-                if item.dir == '/' and 'errors=remount-ro' not in item.opts:
-                    item.opts += ',errors=remount-ro'
+            if (item.type, item.dir) == ('ext4', '/') and 'errors=remount-ro' not in item.opts:
+                item.opts += ',errors=remount-ro'
 
-                if item.check == '0':
-                    item.check = '1' if item.dir == '/' else '2'
+            if item.type.startswith(('ext', 'btrfs')) and item.check == '0':
+                item.check = '1' if item.dir == '/' else '2'
 
     def write(self, path=None, dryrun=False):
         if not path:
