@@ -2,13 +2,13 @@
 # SPDX-License-Identifier: MIT
 # Copyright (C) 2022-2023 Nathan Chancellor
 
-function get_dev_img -d "Print the default development container image for the host architecture"
+function dev_img -d "Print the default development container image for the host architecture"
     switch (uname -m)
         case 'armv7*' i686
-            echo dev/suse
+            echo dev-suse
         case aarch64
-            echo dev/fedora
+            echo dev-fedora
         case x86_64
-            echo dev/arch
+            echo dev-arch
     end
 end

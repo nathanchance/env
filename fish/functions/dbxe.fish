@@ -29,7 +29,7 @@ function dbxe -d "Shorthand for 'distrobox enter'"
     end
 
     if not set -q dbx_img
-        set dbx_img (get_dev_img_esc)
+        set dbx_img (dev_img)
     end
 
     if test (count $add_args) -gt 0

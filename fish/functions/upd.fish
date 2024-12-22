@@ -81,7 +81,7 @@ function upd -d "Runs the update command for the current distro or downloads/upd
 
             case os os-no-container
                 $PYTHON_SCRIPTS_FOLDER/upd_distro.py $yes
-                if test "$target" != os-no-container; and has_container_manager; and dbx list &| grep -q (get_dev_img_esc)
+                if test "$target" != os-no-container; and has_container_manager; and dbx list &| grep -q (dev_img)
                     dbxe -- $PYTHON_SCRIPTS_FOLDER/upd_distro.py $yes
                 end
                 if command -q mac

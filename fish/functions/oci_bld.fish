@@ -39,7 +39,7 @@ function oci_bld -d "Build an OCI container image"
     for image in $images
         switch $image
             case dev
-                set folder (get_dev_img)
+                set folder (dev_img | string replace - /)
                 set image $folder
 
             case '*'

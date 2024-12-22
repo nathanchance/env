@@ -54,8 +54,8 @@ function dbxc -d "Shorthand for 'distrobox create'"
 
     # If no image was specified, default to the one for the architecture
     if not set -q img
-        set img $GHCR/(get_dev_img)
-        set name (get_dev_img_esc)
+        set img (dev_img_gh)
+        set name (dev_img)
     end
 
     set -a dbx_args -i $img
@@ -77,7 +77,7 @@ function dbxc -d "Shorthand for 'distrobox create'"
     # If we are using a development image AND it is the default one for our
     # architecture (to avoid weird dynamic linking failures), use the binaries
     # in $CBL by default
-    if test "$img" = $GHCR/(get_dev_img); and not set -q skip_cbl
+    if test "$img" = (dev_img_gh); and not set -q skip_cbl
         set -a add_args --env=USE_CBL=1
     end
 
