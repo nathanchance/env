@@ -657,16 +657,25 @@ def setup_doas(username):
     if lib.setup.is_virtual_machine():
         return
 
-    doas_conf = Path('/etc/doas.conf')
-    doas_conf_text = ('# Allow me to be root for 5 minutes at a time\n'
-                      f"permit persist {username} as root\n"
-                      '# Pass through environment variables to podman\n'
-                      f"permit keepenv persist {username} cmd podman\n"
-                      '# Allow me to update or install packages without a password\n'
-                      f"permit nopass {username} cmd pacman\n"
-                      '# Do not require root to put in a password (makes no sense)\n'
-                      'permit nopass root\n')
+    if (doas_conf := Path('/etc/doas.conf')).exists():
+        # doas.conf is recommend to be read only to root but we need to write
+        # to the file. Temporarily adjust the permissions and put them back
+        # when we are done. https://wiki.archlinux.org/title/Doas#Configuration
+        doas_conf.chmod(0o600)
+    doas_conf_text = (
+        '# Allow me to be root for 5 minutes at a time\n'
+        f"permit persist {username} as root\n"
+        '# Pass through environment variables to podman\n'
+        f"permit keepenv persist {username} as root cmd podman\n"
+        '# Allow me to update packages without a password (arguments are matched exactly)\n'
+        f"permit nopass {username} as root cmd pacman args -Syu\n"
+        f"permit nopass {username} as root cmd pacman args -Syyu\n"
+        f"permit nopass {username} as root cmd pacman args -Syu --noconfirm\n"
+        f"permit nopass {username} as root cmd pacman args -Syyu --noconfirm\n"
+        '# Do not require root to put in a password (makes no sense)\n'
+        'permit nopass root\n')
     doas_conf.write_text(doas_conf_text, encoding='utf-8')
+    doas_conf.chmod(0o400)
 
     doas_pam = Path('/etc/pam.d/doas')
     doas_pam_text = ('#%PAM-1.0\n'
