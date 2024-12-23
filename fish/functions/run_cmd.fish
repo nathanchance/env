@@ -18,6 +18,9 @@ function run_cmd -d "Run specified command depending on where it is available"
             set cmd_def_args \
                 -style ascii
 
+        case fzf
+            set -fx TMPDIR /var/tmp/fzf
+
         case yapf
             set cmd_def_args \
                 --in-place \
