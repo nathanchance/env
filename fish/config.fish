@@ -32,15 +32,17 @@ else
     if in_container
         # distrobox may add duplicates to PATH, clean it up :/
         # https://github.com/89luca89/distrobox/issues/1145
-        set --local --path deduplicated_path
-        set --local item
+        if in_dbx
+            set --local --path deduplicated_path
+            set --local item
 
-        for item in $PATH
-            if not contains $item $deduplicated_path
-                set -a deduplicated_path $item
+            for item in $PATH
+                if not contains $item $deduplicated_path
+                    set -a deduplicated_path $item
+                end
             end
+            set --export --global --path PATH $deduplicated_path
         end
-        set --export --global --path PATH $deduplicated_path
 
         if test "$USE_CBL" = 1
             for item in $CBL_QEMU_BIN $CBL_TC_BNTL $CBL_TC_LLVM
