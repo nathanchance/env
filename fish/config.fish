@@ -16,6 +16,15 @@ if test "$LOCATION" = mac
 
     set -gx SHELL /opt/homebrew/bin/fish
 else
+    # If /var/tmp/tmux-1000 is a mountpoint, it means we are in a systemd-nspawn
+    # container. If TMUX is not already set, we should set it so that we can
+    # interact with the host's tmux server. This needs to be done before the
+    # call to start_tmux below so that a tmux session is not started in the
+    # container.
+    if mountpoint -q /var/tmp/tmux-1000; and not set -q TMUX
+        set -gx TMUX /var/tmp/tmux-1000/default
+    end
+
     if not string match -qr tty (tty); and status is-interactive
         start_tmux
     end
