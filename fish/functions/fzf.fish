@@ -3,7 +3,9 @@
 # Copyright (C) 2022-2023 Nathan Chancellor
 
 function fzf -d "Calls fzf based on how it is available"
-    set -q TMUX; and set cmd fzf-tmux
-    set -q cmd; or set cmd fzf
-    run_cmd $cmd $argv
+    set args $argv
+    if set -q TMUX
+        set -p args --tmux
+    end
+    run_cmd (status function) $argv
 end

@@ -327,7 +327,6 @@ function upd -d "Runs the update command for the current distro or downloads/upd
 
                     crl $url | tar -xzf -
                     $install -Dvm755 fzf $binary
-                    crl -o $binary-tmux https://github.com/$repo/raw/$ber/bin/fzf-tmux
 
                 case gh
                     switch $arch
