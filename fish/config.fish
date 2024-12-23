@@ -44,7 +44,8 @@ else
             set --export --global --path PATH $deduplicated_path
         end
 
-        if test "$USE_CBL" = 1
+        # distrobox uses $USE_CBL, systemd-nspawn uses /etc/use-cbl
+        if test -r /etc/use-cbl; or test "$USE_CBL" = 1
             for item in $CBL_QEMU_BIN $CBL_TC_BNTL $CBL_TC_LLVM
                 fish_add_path -gm $item
             end
