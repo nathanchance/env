@@ -275,6 +275,9 @@ set -gx SUPPORTED_STABLE_VERSIONS \
     5.10 \
     5.4
 
+# Ensure that tmux temporary directory persists across reboots so that we can pass it through via systemd-nspawn
+set -gx TMUX_TMPDIR /var/tmp
+
 # Point tmuxp to configurations in env folder
 set -gx TMUXP_CONFIGDIR $ENV_FOLDER/configs/tmux
 
