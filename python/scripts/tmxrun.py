@@ -16,7 +16,7 @@ parser.add_argument('-c',
                     action='store_const',
                     const='container',
                     dest='mode',
-                    help='Run command in default distrobox container')
+                    help='Run command in default development container')
 parser.add_argument('-H',
                     '--host',
                     action='store_const',
@@ -28,30 +28,37 @@ parser.add_argument('-s',
                     '--split-horizontal',
                     action='store_const',
                     const=['split-window', '-v'],
-                    dest='cmd',
+                    dest='tmux_cmd',
                     help='Split command in a horizontal pane')
 parser.add_argument('-v',
                     '--split-vertical',
                     action='store_const',
                     const=['split-window', '-H'],
-                    dest='cmd',
+                    dest='tmux_cmd',
                     help='Split command in a vertical pane')
-parser.add_argument('args', nargs='+', help='Command and any arguments to run')
+parser.add_argument('cmd', help='Command and any arguments to run')
 args = parser.parse_args()
+
+if "'" in args.cmd:
+    raise ValueError("Command cannot have ' in it!")
 
 mode = args.mode if args.mode else 'container' if lib.utils.in_container() else 'host'
 
 tmx_cmd = ['tmux']
-if args.cmd:
-    tmx_cmd += args.cmd
+if args.tmux_cmd:
+    tmx_cmd += args.tmux_cmd
 else:
     tmx_cmd.append('new-window')
 if args.detach:
     tmx_cmd.append('-d')
 
-CMD_STR = f"begin; {' '.join(args.args)}; end; or exec fish -l"
 if mode == 'container':
-    CMD_STR = f"dbxe -- fish -c '{CMD_STR}'; or exec fish -l"
+    if lib.utils.using_nspawn() or lib.utils.in_nspawn():
+        CMD_STR = f"sd_nspawn -r '{args.cmd}'; or exec fish -l"
+    else:
+        CMD_STR = f"dbxe -- fish -c '{args.cmd}'; or exec fish -l"
+else:
+    CMD_STR = f"begin; {args.cmd}; end; or exec fish -l"
 tmx_cmd.append(CMD_STR)
 
 lib.utils.run(tmx_cmd)
