@@ -343,8 +343,8 @@ rpmbuild/' >>$gitignore
         end
     end
 
-    switch $LOCATION
-        case hetzner workstation
+    switch $LOCATION-(uname -m)
+        case hetzner'*' workstation'*' vm-x86_64
             ln -fnrsv $configs/tmux/.tmux.conf.nspawn $HOME/.tmux.conf.container
 
             # These platforms are guaranteed to use tmux so ensure the tmux
