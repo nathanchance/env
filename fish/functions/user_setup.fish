@@ -357,8 +357,8 @@ rpmbuild/' >>$gitignore
         end
     end
 
-    switch $LOCATION
-        case hetzner workstation
+    switch $LOCATION-(uname -m)
+        case hetzner'*' workstation'*' vm-x86_64
             ln -fnrsv $configs/tmux/.tmux.conf.nspawn $HOME/.tmux.conf.container
 
             # Set up files first because that process is quicker than the build
@@ -368,7 +368,7 @@ rpmbuild/' >>$gitignore
 
             mkosi_bld
 
-        case wsl
+        case wsl'*'
             touch $HOME/.tmux.conf.container
 
         case '*'
