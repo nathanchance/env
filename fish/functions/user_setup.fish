@@ -267,9 +267,6 @@ rpmbuild/' >>$gitignore
     else
         updall --no-os; or return
     end
-    if has_container_manager; and test "$LOCATION" != wsl
-        dbxc --yes
-    end
 
     # Git config and aliases
     git_setup
@@ -340,19 +337,29 @@ rpmbuild/' >>$gitignore
             decrypt_gpg_file server_ip
 
             set github_repos hugo-files nathanchance.github.io
-
-        case '*'
-            return 0
     end
 
-    mkdir -p $GITHUB_FOLDER
-    for github_repo in $github_repos
-        set folder $GITHUB_FOLDER/$github_repo
-        if not test -d $folder
-            gh repo clone $github_repo $folder; or return
+    if set -q github_repos
+        mkdir -p $GITHUB_FOLDER
+        for github_repo in $github_repos
+            set folder $GITHUB_FOLDER/$github_repo
+            if not test -d $folder
+                gh repo clone $github_repo $folder; or return
+            end
+            if test "$github_repo" = hugo-files
+                git -C $folder submodule update --init --recursive
+            end
         end
-        if test "$github_repo" = hugo-files
-            git -C $folder submodule update --init --recursive
-        end
+    end
+
+    switch $LOCATION
+        case hetzner workstation
+            sd_nspawn -i
+
+        case wsl
+        case '*'
+            if has_container_manager
+                dbxc --yes
+            end
     end
 end
