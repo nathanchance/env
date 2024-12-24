@@ -360,13 +360,20 @@ rpmbuild/' >>$gitignore
     switch $LOCATION
         case hetzner workstation
             ln -fnrsv $configs/tmux/.tmux.conf.nspawn $HOME/.tmux.conf.container
+
+            # Set up files first because that process is quicker than the build
+            # process and doas/sudo authorization lasts at least five minutes
             sd_nspawn -i
+            or return
+
+            mkosi_bld
 
         case wsl
             touch $HOME/.tmux.conf.container
 
         case '*'
             ln -fnrsv $configs/tmux/.tmux.conf.dbx $HOME/.tmux.conf.container
+
             if has_container_manager
                 dbxc --yes
             end
