@@ -155,7 +155,9 @@ EOF
         glibc-langpack-en
 
         # nicer GNU utilities
-        eza
+        # retired, leaving around in case it comes back:
+        # https://bugzilla.redhat.com/show_bug.cgi?id=2262203
+        # eza
         ripgrep
 
         # package building
