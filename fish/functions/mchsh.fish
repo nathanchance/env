@@ -22,13 +22,8 @@ function mchsh -d "Wrapper around 'machinectl shell'"
         set mchsh_args -l
     end
 
-    # If the current working directory starts with '/home', it needs to be
-    # translated into a path that the container can use.
-    if string match -qr ^$HOME $PWD
-        set container_folder (string replace $HOME /run/host$HOME $PWD)
-    else
-        set container_folder $PWD
-    end
-
-    machinectl shell -q $user_host $SHELL -C "cd $container_folder" $mchsh_args
+    # Use fish's --init-commands to drop into the current working directory,
+    # instead of $HOME, which is not really useful if working on the host and
+    # wanting to drop into the guest to work.
+    machinectl shell -q $user_host $SHELL -C 'cd '(nspawn_adjust_path $PWD) $mchsh_args
 end
