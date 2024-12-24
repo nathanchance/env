@@ -4,20 +4,28 @@ windows:
   focus: true
   layout: tiled
   panes:
-  - shell: dbxe
-    shell_command: cbl_upd_krnl next-llvm
+  - shell: mchsh
+    shell_command:
+    - cmd: cbl_upd_krnl next-llvm
+      sleep_before: 1
     start_directory: $CBL_SRC_P/linux-next-llvm
     enter: false
     focus: true
-  - shell: dbxe
-    shell_command: cbl_rb_fd
+  - shell: mchsh
+    shell_command:
+    - cmd: cbl_rb_fd
+      sleep_before: 1
     start_directory: $CBL_SRC_P/fedora
     enter: false
-  - shell: dbxe
-    shell_command: cbl_rb_pi
+  - shell: mchsh
+    shell_command:
+    - cmd: cbl_rb_pi
+      sleep_before: 1
     start_directory: $CBL_SRC_P/rpi
     enter: false
-  - shell: dbxe
-    shell_command: cbl_upd_src p n
+  - shell: mchsh
+    shell_command:
+    - cmd: cbl_upd_src p n
+      sleep_before: 1
     start_directory: $CBL_SRC_P/linux-next
     enter: false

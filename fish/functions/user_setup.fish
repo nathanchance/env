@@ -258,16 +258,18 @@ rpmbuild/' >>$gitignore
     else
         updall --no-os; or return
     end
-    if has_container_manager
-        dbxc --yes
-    end
 
     # Git config and aliases
     git_setup
 
     # Configuration files (vim, tmux, etc)
     set configs $ENV_FOLDER/configs
-    ln -frsv $configs/tmux/.tmux.conf $HOME/.tmux.conf
+    ln -fnrsv $configs/tmux/.tmux.conf.common $HOME/.tmux.conf.common
+    if test "$LOCATION" = vm
+        ln -fnrsv $configs/tmux/.tmux.conf.vm $HOME/.tmux.conf
+    else
+        ln -fnrsv $configs/tmux/.tmux.conf.regular $HOME/.tmux.conf
+    end
     mkdir -p $HOME/.config/tio
     ln -frsv $configs/local/tio $HOME/.config/tio/config
     vim_setup
@@ -326,19 +328,46 @@ rpmbuild/' >>$gitignore
             end
 
             tmux new-window fish -c "begin; start_ssh_agent; and cbl_setup_other_repos; end; or exec fish -l"
-
-        case '*'
-            return 0
     end
 
-    mkdir -p $GITHUB_FOLDER
-    for github_repo in $github_repos
-        set folder $GITHUB_FOLDER/$github_repo
-        if not test -d $folder
-            gh repo clone $github_repo $folder; or return
+    if set -q github_repos
+        mkdir -p $GITHUB_FOLDER
+        for github_repo in $github_repos
+            set folder $GITHUB_FOLDER/$github_repo
+            if not test -d $folder
+                gh repo clone $github_repo $folder; or return
+            end
+            if test "$github_repo" = hugo-files
+                git -C $folder submodule update --init --recursive
+            end
         end
-        if test "$github_repo" = hugo-files
-            git -C $folder submodule update --init --recursive
-        end
+    end
+
+    switch $LOCATION
+        case hetzner workstation
+            ln -fnrsv $configs/tmux/.tmux.conf.nspawn $HOME/.tmux.conf.container
+
+            # These platforms are guaranteed to use tmux so ensure the tmux
+            # directory exists with the expected permissions so that sd_nspawn
+            # will find it and mount it into the container properly. This is
+            # not necessarily safe to do if the platform is not going to use tmux.
+            set tmux_tmp /var/tmp/tmux-(id -u)
+            mkdir -p $tmux_tmp
+            # tmux checks that the permissions are restrictive
+            chmod 700 $tmux_tmp
+
+            # Set up files first because that process is quicker than the build
+            # process and doas/sudo authorization lasts at least five minutes
+            sd_nspawn -i
+            or return
+
+            mkosi_bld
+
+        case '*'
+            ln -fnrsv $configs/tmux/.tmux.conf.dbx $HOME/.tmux.conf.container
+
+            if has_container_manager
+                dbxc --yes
+            end
     end
 end
