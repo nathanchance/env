@@ -153,7 +153,8 @@ function user_setup -d "Setup a user account, downloading all files and placing 
             git clone https://github.com/nathanchance/(basename $ENV_FOLDER).git $ENV_FOLDER; or return
         end
     end
-    git -C $ENV_FOLDER pull
+    git -C $ENV_FOLDER remote update origin
+    git -C $ENV_FOLDER reset --hard origin/nspawn
 
     # Download and update forked fisher plugins
     set forked_fisher_plugins \

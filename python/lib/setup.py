@@ -168,7 +168,7 @@ def chsh_fish(username):
 
 def clone_env(username):
     if not (env_tmp := Path('/tmp/env')).exists():  # noqa: S108
-        lib.utils.run(['git', 'clone', 'https://github.com/nathanchance/env', env_tmp])
+        lib.utils.run(['git', 'clone', '-b', 'nspawn', 'https://github.com/nathanchance/env', env_tmp])
         chown(username, env_tmp)
 
 
@@ -465,7 +465,7 @@ def setup_initial_fish_config(username):
             '            return 1\n'
             '        end\n'
             '        if not test -d /tmp/env\n'
-            '            git -C /tmp clone -q https://github.com/nathanchance/env\n'
+            '            git -C /tmp clone -b nspawn -q https://github.com/nathanchance/env\n'
             '            or return\n'
             '        end\n'
             '        git -C /tmp/env pull -qr\n'
