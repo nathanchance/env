@@ -1,0 +1,9 @@
+# Bind prefix to Ctrl-Space instead of Ctrl-Space on the host
+unbind C-b
+set-option -g prefix C-Space
+bind-key C-Space send-prefix
+
+set-window-option -g window-status-current-style fg=blue,bg=default,bold
+
+source ~/.tmux.conf.common
+source ~/.tmux.conf.container

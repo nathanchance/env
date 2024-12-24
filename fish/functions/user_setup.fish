@@ -273,7 +273,12 @@ rpmbuild/' >>$gitignore
 
     # Configuration files (vim, tmux, etc)
     set configs $ENV_FOLDER/configs
-    ln -frsv $configs/tmux/.tmux.conf $HOME/.tmux.conf
+    ln -fnrsv $configs/tmux/.tmux.conf.common $HOME/.tmux.conf.common
+    if test "$LOCATION" = vm
+        ln -fnrsv $configs/tmux/.tmux.conf.vm $HOME/.tmux.conf
+    else
+        ln -fnrsv $configs/tmux/.tmux.conf.regular $HOME/.tmux.conf
+    end
     mkdir -p $HOME/.config/tio
     ln -frsv $configs/local/tio $HOME/.config/tio/config
     vim_setup
@@ -354,10 +359,14 @@ rpmbuild/' >>$gitignore
 
     switch $LOCATION
         case hetzner workstation
+            ln -fnrsv $configs/tmux/.tmux.conf.nspawn $HOME/.tmux.conf.container
             sd_nspawn -i
 
         case wsl
+            touch $HOME/.tmux.conf.container
+
         case '*'
+            ln -fnrsv $configs/tmux/.tmux.conf.dbx $HOME/.tmux.conf.container
             if has_container_manager
                 dbxc --yes
             end

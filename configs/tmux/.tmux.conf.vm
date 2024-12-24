@@ -1,0 +1,4 @@
+set-window-option -g window-status-current-style fg=red,bg=default,bold
+
+source ~/.tmux.conf.common
+source ~/.tmux.conf.container

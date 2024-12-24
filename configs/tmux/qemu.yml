@@ -1,17 +1,19 @@
 session_name: qemu
 windows:
-- window_name: distrobox and cbl_vmm
+- window_name: nspawn and cbl_vmm
   focus: true
   layout: 61d8,269x53,0,0[269x41,0,0,57,269x11,0,42{134x11,0,42,58,134x11,135,42,59}]
   start_directory: '~'
   panes:
-  - shell: dbxe
+  - shell: mchsh
     shell_command:
     - cmd: ssh_vm
       enter: false
-  - shell: dbxe
+      sleep_before: 1
+  - shell: mchsh
     shell_command:
     - cmd: cbl_vmm run -c (math (nproc) / 2) -m (math (nproc) x 0.75)
       enter: false
+      sleep_before: 1
     focus: true
-  - shell: dbxe
+  - shell: mchsh
