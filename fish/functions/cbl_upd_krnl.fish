@@ -156,43 +156,5 @@ function cbl_upd_krnl -d "Update machine's kernel"
 
             # Install kernel and reboot as asked
             install_arch_kernel $install_args $krnl
-
-        case wsl
-            in_container_msg -h; or return
-
-            set i 1
-            while test $i -le (count $argv)
-                switch $argv[$i]
-                    case -g --github
-                        set kernel_location github
-                    case -k --kernel-suffix
-                        set next (math $i + 1)
-                        set kernel_suffix $argv[$next]
-                        set i $next
-                    case -l --local
-                        set kernel_location local
-                    case -s --server
-                        set kernel_location server
-                end
-                set i (math $i + 1)
-            end
-            if test -z "$kernel_location"
-                set kernel_location github
-            end
-
-            set kernel /mnt/c/Users/natec/Linux/kernel"$kernel_suffix"
-            rm -r $kernel
-
-            switch $kernel_location
-                case local
-                    cp -v $CBL_SRC_P/wsl2/arch/x86/boot/bzImage $kernel
-                case github
-                    set repo nathanchance/WSL2-Linux-Kernel
-                    crl -o $kernel https://github.com/$repo/releases/download/(glr $repo)/bzImage
-                case server
-                    set src (string replace $MAIN_FOLDER $remote_main_folder $CBL_SRC_P)/wsl2
-                    set image arch/x86/boot/bzImage
-                    scp $remote_user@$remote_host:$src/$image $kernel
-            end
     end
 end

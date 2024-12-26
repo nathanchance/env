@@ -45,45 +45,9 @@ function cbl_test_kvm -d "Test KVM against a Clang built kernel with QEMU"
             # Start container before updating, as podman requires some kernel modules,
             # which need to be loaded before updating, as an update to linux will
             # remove the modules on disk for the current running kernel version.
-            # It does not hurt wsl2 so just do it unconditionally.
             dbxe -- true; or return
 
             switch $LOCATION
-                case wsl
-                    set arch x86_64 # for now?
-                    set src $CBL_SRC_C/linux
-                    cbl_upd_src c m
-
-                    for toolchain in GCC LLVM
-                        set out (tbf $src)/$arch/(string lower $toolchain)
-                        switch $arch
-                            case x86_64
-                                set kernel $out/arch/x86/boot/bzImage
-                            case '*'
-                                return 1
-                        end
-
-                        if not test -f $kernel
-                            set -l make_args
-                            switch $toolchain
-                                case LLVM
-                                    set -a make_args LLVM=1
-                            end
-                            if dbx_has_82a69f0
-                                dbxe -- fish -c "kmake -C $src ARCH=$arch $make_args O=$out defconfig all"
-                            else
-                                dbxe -- "fish -c 'kmake -C $src ARCH=$arch $make_args O=$out defconfig all'"
-                            end
-                            or return
-                        end
-                        if dbx_has_82a69f0
-                            dbxe -- fish -c "kboot -a $arch -k $out"
-                        else
-                            dbxe -- "fish -c 'kboot -a $arch -k $out'"
-                        end
-                        or return
-                    end
-
                 case vm
                     updfull
                     mkdir -p $TMP_FOLDER

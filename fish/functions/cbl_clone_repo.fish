@@ -54,10 +54,6 @@ function cbl_clone_repo -d "Clone certain repos for ClangBuiltLinux testing and 
                     set dest $NVME_SRC_FOLDER/$arg
                 end
 
-            case wsl2
-                set url git@github.com:nathanchance/WSL2-Linux-Kernel
-                set dest $CBL_SRC_P/wsl2
-
             case '*'
                 print_error "$arg not supported explicitly, skipping!"
                 continue
@@ -109,13 +105,6 @@ function cbl_clone_repo -d "Clone certain repos for ClangBuiltLinux testing and 
             switch $arg
                 case tc-build
                     git -C $dest remote add -f nathanchance https://github.com/nathanchance/tc-build
-                case wsl2
-                    git -C $dest remote add -f --tags mainline https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git
-                    git -C $dest remote add -f --tags next https://git.kernel.org/pub/scm/linux/kernel/git/next/linux-next.git
-                    git -C $dest remote add -f --tags microsoft https://github.com/microsoft/WSL2-Linux-Kernel
-                    git -C $dest remote add -f --tags sami https://github.com/samitolvanen/linux
-                    git -C $dest config rerere.enabled true
-                    git -C $dest config status.aheadBehind false
             end
         end
     end

@@ -8,20 +8,16 @@ function hugo_serve -d "Runs 'hugo server' based on WSL's IP address"
         return 1
     end
 
-    if test $LOCATION = wsl
-        set intf eth0
-        set hugo_args $argv
-    else
-        for arg in $argv
-            switch $arg
-                case -t --tailscale
-                    set intf tailscale
-                case '*'
-                    set -a hugo_args $arg
-            end
+    for arg in $argv
+        switch $arg
+            case -t --tailscale
+                set intf tailscale
+            case '*'
+                set -a hugo_args $arg
         end
-        set -q intf; or set intf enp
     end
+    set -q intf
+    or set intf enp
 
     set ip (dirname (ip addr | grep $intf | grep inet | awk '{print $2}'))
     if test -z "$ip"

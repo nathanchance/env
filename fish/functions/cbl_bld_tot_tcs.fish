@@ -15,7 +15,7 @@ function cbl_bld_tot_tcs -d "Build LLVM and binutils from source for kernel deve
     set func_bld (tbf (status function))
 
     switch $LOCATION
-        case aadp generic wsl
+        case aadp generic
             set bolt true
             set pgo kernel-defconfig
             if test $LOCATION = aadp

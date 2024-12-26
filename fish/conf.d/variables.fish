@@ -33,8 +33,6 @@ if test -z "$LOCATION"
                 set -Ux LOCATION workstation
             case nathan@hyperv nathan@qemu nathan@vmware
                 set -Ux LOCATION vm
-            case nathan@MSI nathan@Ryzen-5-4500U nathan@Ryzen-9-3900X
-                set -Ux LOCATION wsl
             case '*'
                 set -Ux LOCATION generic
         end
@@ -49,7 +47,7 @@ end
 
 # CCACHE_SIZE
 switch $LOCATION
-    case generic wsl
+    case generic
         set -gx CCACHE_MAXSIZE 25G
     case hetzner
         set -gx CCACHE_MAXSIZE 200G

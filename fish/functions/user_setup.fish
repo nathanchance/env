@@ -29,7 +29,7 @@ function user_setup -d "Setup a user account, downloading all files and placing 
     switch $LOCATION
         case aadp honeycomb pi test-desktop-amd test-desktop-intel-{11700,n100} test-laptop-intel
             set trusted_ssh true
-        case hetzner workstation wsl
+        case hetzner workstation
             set trusted_gpg true
             set trusted_ssh true
     end
@@ -38,19 +38,12 @@ function user_setup -d "Setup a user account, downloading all files and placing 
         set trusted_ssh true
         set skip_install_ssh_keys true # orbstack passes along the macOS ssh-agent
     end
+    set keys_folder /tmp/keys
 
     # Trusting an environment with GPG but not SSH makes little sense
     if test "$trusted_gpg" = true; and not test "$trusted_ssh" = true
         print_error "This environment trusts GPG but not SSH?"
         return 1
-    end
-
-    # Set up where keys should be available
-    switch $LOCATION
-        case wsl
-            set keys_folder /mnt/c/Users/natec/Documents/Keys
-        case '*'
-            set keys_folder /tmp/keys
     end
 
     # Set up SSH keys if requested
@@ -140,9 +133,7 @@ function user_setup -d "Setup a user account, downloading all files and placing 
         gpg_key_cache; or return
     end
 
-    if test "$LOCATION" != wsl
-        rm -rf $keys_folder
-    end
+    rm -rf $keys_folder
 
     # Downloading/updating environment scripts
     if not test -d $ENV_FOLDER
@@ -267,7 +258,7 @@ rpmbuild/' >>$gitignore
     else
         updall --no-os; or return
     end
-    if has_container_manager; and test "$LOCATION" != wsl
+    if has_container_manager
         dbxc --yes
     end
 
@@ -335,11 +326,6 @@ rpmbuild/' >>$gitignore
             end
 
             tmux new-window fish -c "begin; start_ssh_agent; and cbl_setup_other_repos; end; or exec fish -l"
-
-        case wsl
-            decrypt_gpg_file server_ip
-
-            set github_repos hugo-files nathanchance.github.io
 
         case '*'
             return 0
