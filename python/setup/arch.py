@@ -432,6 +432,7 @@ def pacman_install_packages():
         'iputils',
         'kexec-tools',
         'modprobed-db',
+        'polkit',
         'reflector',
 
         # b4
