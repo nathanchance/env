@@ -680,9 +680,10 @@ def setup_doas(username):
 
     doas_pam = Path('/etc/pam.d/doas')
     doas_pam_text = ('#%PAM-1.0\n'
-                     'auth        include     system-auth\n'
-                     'account     include     system-auth\n'
-                     'session     include     system-auth\n')
+                     'auth            include         system-auth\n'
+                     'account         include         system-auth\n'
+                     'session         include         system-auth\n'
+                     'session         optional        pam_umask.so\n')
     doas_pam.write_text(doas_pam_text, encoding='utf-8')
 
     lib.setup.remove_if_installed('sudo')

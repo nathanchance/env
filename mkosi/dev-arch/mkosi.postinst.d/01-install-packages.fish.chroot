@@ -38,6 +38,7 @@ and pacman -S --noconfirm qemu-emulators-full
 
 # Switch to doas from sudo non-interatively
 and pacman -S --ask 4 --noconfirm opendoas-sudo
+and echo 'session         optional        pam_umask.so' | tee -a /etc/pam.d/doas
 
 and pacman -S --noconfirm \
     arm-linux-gnueabi-binutils \
