@@ -18,6 +18,8 @@ import platform
 import shutil
 import subprocess
 import sys
+from tempfile import TemporaryDirectory
+import time
 
 sys.path.append(str(Path(__file__).resolve().parents[1]))
 # pylint: disable=wrong-import-position
@@ -74,7 +76,6 @@ class VirtualMachine:
         self.shared_folder = Path(self.data_folder, 'shared')
         self.use_kvm = self.can_use_kvm()
         self.vfsd_log = Path(self.data_folder, 'vfsd.log')
-        self.vfsd_sock = Path(self.data_folder, 'vfsd.sock')
 
         # When using KVM, we cannot use more than the maximum number of cores.
         # Default to either 8 cores or half the number of cores in the machine,
@@ -114,8 +115,7 @@ class VirtualMachine:
             '-object', 'rng-random,filename=/dev/urandom,id=rng0',
             '-device', 'virtio-rng-pci',
 
-            # Shared folder via virtiofs
-            '-chardev', f"socket,id=char0,path={self.vfsd_sock}",
+            # Shared folder via virtiofs (socket is added transiently below)
             '-device', 'vhost-user-fs-pci,queue-size=1024,chardev=char0,tag=host',
             '-object', f"memory-backend-memfd,id=mem,share=on,size={memory}G",
             '-numa', 'node,memdev=mem',
@@ -259,11 +259,21 @@ class VirtualMachine:
         virtiofsd_version_text = lib.utils.chronic([*base_virtiofsd_cmd, '--version']).stdout
         group_name = grp.getgrgid(os.getgid()).gr_name
 
+        # Transiently create virtiofsd socket, as root might not have
+        # permission to write to $VM_FOLDER. We manually manage this instead of
+        # using a context manager because we have a finally clause below that
+        # allows us to guarantee it is always cleaned up and it allows us to
+        # avoid a level of indentation, which is precious at this point.
+        # pylint: disable-next=consider-using-with
+        tmpdir = TemporaryDirectory()
+        vfsd_sock = f"{tmpdir.name}/vfsd.sock"
+        self.qemu_args += ['-chardev', f"socket,id=char0,path={vfsd_sock}"]
+
         # C / QEMU / Reference implementation (deprecated)
         if 'virtiofsd version' in virtiofsd_version_text:
             virtiofsd_args = [
                 f"--socket-group={group_name}",
-                f"--socket-path={self.vfsd_sock}",
+                f"--socket-path={vfsd_sock}",
                 '-o', 'cache=always',
                 '-o', f"source={self.shared_folder}",
             ]  # yapf: disable
@@ -273,7 +283,7 @@ class VirtualMachine:
                 '--cache', 'always',
                 '--shared-dir', self.shared_folder,
                 '--socket-group', group_name,
-                '--socket-path', self.vfsd_sock,
+                '--socket-path', vfsd_sock,
             ]  # yapf: disable
 
         # Python recommends full paths with subprocess.Popen() calls
@@ -281,6 +291,9 @@ class VirtualMachine:
         lib.utils.print_cmd(virtiofsd_cmd)
         with self.vfsd_log.open('w', encoding='utf-8') as file, \
              subprocess.Popen(virtiofsd_cmd, stderr=file, stdout=file) as vfsd:
+            # Give virtiofsd a second to start up before calling connect() with
+            # QEMU, otherwise we may get weird 'Permission denied' errors
+            time.sleep(1)
             try:
                 lib.utils.run([qemu, *self.qemu_args, *self.get_drive_args()], show_cmd=True)
             except subprocess.CalledProcessError as err:
@@ -293,6 +306,7 @@ class VirtualMachine:
                 raise err
             finally:
                 vfsd.kill()
+                tmpdir.cleanup()
 
     def setup(self):
         self.remove()
