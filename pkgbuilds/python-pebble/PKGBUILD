@@ -7,16 +7,21 @@ pkgdesc="A neat API to manage threads and processes within an application"
 arch=('any')
 url="https://github.com/noxdafox/pebble"
 license=(LGPL-3.0-or-later)
-depends=('python')
-makedepends=('python-setuptools')
-checkdepends=('python-pytest')
+depends=(python)
+makedepends=(
+    python-build
+    python-installer
+    python-setuptools
+    python-wheel
+)
+checkdepends=(python-pytest)
 source=("$pkgname-$pkgver.tar.gz::https://github.com/noxdafox/${_name}/archive/refs/tags/$pkgver.tar.gz")
 sha256sums=('d4b9bd857fe34b287e522fd2f206e53b495b4650d57837fe4fa8c8c5b854c668')
 
 build() {
   cd "${_name}-$pkgver"
 
-  python setup.py build
+  python -m build --wheel --no-isolation
 }
 
 check() {
@@ -28,5 +33,5 @@ check() {
 package() {
   cd "${_name}-$pkgver"
 
-  python setup.py install --root="$pkgdir" --optimize=1
+  python -m installer --destdir="$pkgdir" dist/*.whl
 }
