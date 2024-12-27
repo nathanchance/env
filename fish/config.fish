@@ -54,6 +54,7 @@ else
 
         if in_nspawn; and not test -e /etc/ephemeral; and not set -q GPG_TTY
             set -gx GPG_TTY $tty
+            gpg_key_cache
         end
     else
         gpg_key_cache
