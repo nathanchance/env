@@ -29,7 +29,15 @@ function start_ssh_agent -d "Launch an ssh agent only if it has not already been
         case 1
             ssh-add $ssh_key
         case 2
-            set ssh_agent_file $HOME/.ssh/.ssh-agent.fish
+            if in_nspawn
+                if test -e /etc/ephemeral
+                    set ssh_agent_file /tmp/.ssh-agent.fish
+                else
+                    set ssh_agent_file $HOME/.ssh/.systemd-nspawn-ssh-agent.fish
+                end
+            else
+                set ssh_agent_file $HOME/.ssh/.ssh-agent.fish
+            end
 
             if test -r $ssh_agent_file
                 cat $ssh_agent_file | source >/dev/null
