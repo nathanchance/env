@@ -1,0 +1,7 @@
+#!/usr/bin/env fish
+
+# While it would be nice if everything worked fine without this symlink, there
+# is unfortunately some software that only uses and relies on absolute paths,
+# such as git worktrees. This environment will only be used with '--bind-user',
+# so there is no harm in unconditionally doing this.
+ln -fnrsv /run/host/home/nathan /home/nathan
