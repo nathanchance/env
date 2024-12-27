@@ -81,8 +81,12 @@ function upd -d "Runs the update command for the current distro or downloads/upd
 
             case os os-no-container
                 $PYTHON_SCRIPTS_FOLDER/upd_distro.py $yes
-                if test "$target" != os-no-container; and has_container_manager; and dbx list &| grep -q (dev_img)
-                    dbxe -- $PYTHON_SCRIPTS_FOLDER/upd_distro.py $yes
+                if test "$target" != os-no-container
+                    if using_nspawn
+                        sd_nspawn -r "$PYTHON_SCRIPTS_FOLDER/upd_distro.py $yes"
+                    else if has_container_manager; and dbx list &| grep -q (dev_img)
+                        dbxe -- $PYTHON_SCRIPTS_FOLDER/upd_distro.py $yes
+                    end
                 end
                 if command -q mac
                     mac orb update

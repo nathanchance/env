@@ -11,8 +11,10 @@ function cbl_gen_vm_boot_files -d "Generate files needed to boot local compiled 
 
     # Make sure all modules the virtual machine might need are loaded (virtiofs, tun, overlayfs, etc)
     ls $HOST_FOLDER 1>/dev/null; or return
-    # For some reason, container sometimes fails to enter on first try on Alpine.
-    dbxe -- true; or dbxe -- true; or return
+    if not using_nspawn
+        # For some reason, container sometimes fails to enter on first try on Alpine.
+        dbxe -- true; or dbxe -- true; or return
+    end
 
     # Create kernel_files folder
     set kernel_folder $HOST_FOLDER/kernel_files

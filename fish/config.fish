@@ -16,6 +16,15 @@ if test "$LOCATION" = mac
 
     set -gx SHELL /opt/homebrew/bin/fish
 else
+    # If /var/tmp/tmux-1000 is a mountpoint, it means we are in a systemd-nspawn
+    # container. If TMUX is not already set, we should set it so that we can
+    # interact with the host's tmux server. This needs to be done before the
+    # call to start_tmux below so that a tmux session is not started in the
+    # container.
+    if mountpoint -q /var/tmp/tmux-1000; and not set -q TMUX
+        set -gx TMUX /var/tmp/tmux-1000/default
+    end
+
     if not string match -qr tty (tty); and status is-interactive
         start_tmux
     end
@@ -23,17 +32,20 @@ else
     if in_container
         # distrobox may add duplicates to PATH, clean it up :/
         # https://github.com/89luca89/distrobox/issues/1145
-        set --local --path deduplicated_path
-        set --local item
+        if in_dbx
+            set --local --path deduplicated_path
+            set --local item
 
-        for item in $PATH
-            if not contains $item $deduplicated_path
-                set -a deduplicated_path $item
+            for item in $PATH
+                if not contains $item $deduplicated_path
+                    set -a deduplicated_path $item
+                end
             end
+            set --export --global --path PATH $deduplicated_path
         end
-        set --export --global --path PATH $deduplicated_path
 
-        if test "$USE_CBL" = 1
+        # distrobox uses $USE_CBL, systemd-nspawn uses /etc/use-cbl
+        if test -r /etc/use-cbl; or test "$USE_CBL" = 1
             for item in $CBL_QEMU_BIN $CBL_TC_BNTL $CBL_TC_LLVM
                 fish_add_path -gm $item
             end

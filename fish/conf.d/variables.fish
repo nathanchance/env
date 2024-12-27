@@ -109,6 +109,7 @@ set -gx VM_FOLDER $EXT_FOLDER/vm
 set -gx XDG_FOLDER $EXT_FOLDER/xdg
 
 set -gx CCACHE_DIR $XDG_FOLDER/config/ccache
+set -gx PY_VENV_DIR $XDG_FOLDER/share/py_venv
 
 set -gx CBL_GIT $CBL/github
 set -gx CBL_LOGS $CBL/logs
@@ -273,6 +274,9 @@ set -gx SUPPORTED_STABLE_VERSIONS \
     $CBL_STABLE_VERSIONS \
     5.10 \
     5.4
+
+# Ensure that tmux temporary directory persists across reboots so that we can pass it through via systemd-nspawn
+set -gx TMUX_TMPDIR /var/tmp
 
 # Point tmuxp to configurations in env folder
 set -gx TMUXP_CONFIGDIR $ENV_FOLDER/configs/tmux

@@ -101,6 +101,12 @@ def in_container():
         '/.dockerenv').is_file()
 
 
+def in_nspawn():
+    # An nspawn container has to have systemd-detect-virt but this may not
+    # always run where systemd-detect-virt exists.
+    return shutil.which('systemd-detect-virt') and detect_virt('-c') == 'systemd-nspawn'
+
+
 def path_and_text(*args):
     if (path := Path(*args)).exists():
         return path, path.read_text(encoding='utf-8')
@@ -169,7 +175,7 @@ def run(*args, **kwargs):
         raise err
 
 
-def run_as_root(full_cmd):
+def run_as_root(full_cmd, **kwargs):
     cmd_copy = [full_cmd] if isinstance(full_cmd, (str, os.PathLike)) else full_cmd.copy()
 
     if os.geteuid() != 0:
@@ -177,11 +183,16 @@ def run_as_root(full_cmd):
 
     # If we have to escalate via 'sudo', print the command so it can be audited
     # if necessary.
-    run(cmd_copy, show_cmd_location=cmd_copy[0] == 'sudo')
+    run(cmd_copy, show_cmd_location=cmd_copy[0] == 'sudo', **kwargs)
 
 
 def run_check_rc_zero(*args, **kwargs):
     return chronic(*args, **kwargs, check=False).returncode == 0
+
+
+def using_nspawn():
+    etc_nspawn = Path('/etc/systemd/nspawn')
+    return etc_nspawn.exists() and list(etc_nspawn.iterdir())
 
 
 def print_or_run_cmd(cmd, dryrun, end='\n\n'):

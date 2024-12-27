@@ -5,7 +5,7 @@ windows:
   panes:
   - shell: btop
   -
-- window_name: distrobox
+- window_name: nspawn
   focus: true
   panes:
-  - shell: dbxe
+  - shell: mchsh
