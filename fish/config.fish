@@ -25,7 +25,8 @@ else
         set -gx TMUX /var/tmp/tmux-1000/default
     end
 
-    if not string match -qr tty (tty); and status is-interactive
+    set -l tty (tty)
+    if not string match -qr tty $tty; and status is-interactive
         start_tmux
     end
 
@@ -49,6 +50,10 @@ else
             for item in $CBL_QEMU_BIN $CBL_TC_BNTL $CBL_TC_LLVM
                 fish_add_path -gm $item
             end
+        end
+
+        if in_nspawn; and not test -e /etc/ephemeral; and not set -q GPG_TTY
+            set -gx GPG_TTY $tty
         end
     else
         gpg_key_cache
