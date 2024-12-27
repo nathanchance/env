@@ -132,7 +132,7 @@ class NspawnConfig(UserDict):
                         parts.append(f"{subkey}={' '.join(subval)}")
                     # All other list configurations should be joined with the key
                     else:
-                        parts += [f"{subkey}={item}" for item in subval]
+                        parts += [f"{subkey}={item}" for item in sorted(subval)]
                 elif subval:
                     parts.append(f"{subkey}={subval}")
             parts.append('')
@@ -183,7 +183,7 @@ class NspawnConfig(UserDict):
                     if flag == '--system-call-filter':
                         nspawn_cmd.append(f"{flag}={' '.join(value)}")
                     else:
-                        nspawn_cmd += [f"{flag}={item}" for item in value]
+                        nspawn_cmd += [f"{flag}={item}" for item in sorted(value)]
                 # certain configuration options are booleans but the commmand
                 # line option is just a simple flag
                 elif flag in ('--boot', ) and value == 'yes':
