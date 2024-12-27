@@ -285,6 +285,10 @@ class VirtualMachine:
                 '--socket-group', group_name,
                 '--socket-path', vfsd_sock,
             ]  # yapf: disable
+            if lib.utils.in_nspawn():
+                # In systemd-nspawn, our host UID is different from the guest
+                # UID, so we need to map it to avoid permission errors.
+                virtiofsd_args += ['--translate-uid', f"map:1000:{os.getuid()}:1"]
 
         # Python recommends full paths with subprocess.Popen() calls
         virtiofsd_cmd = [*base_virtiofsd_cmd, *virtiofsd_args]
