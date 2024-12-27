@@ -225,9 +225,9 @@ class NspawnConfig(UserDict):
                                '        return polkit.Result.YES;\n'
                                '    }\n'
                                '});\n')
-            if not polkit_rule.parent.exists():
-                lib.utils.run_as_root(['mkdir', '-p', polkit_rule.parent])
             lib.utils.run_as_root(['tee', polkit_rule], input=polkit_rule_txt)
+            lib.utils.run_as_root(['chmod', '640', polkit_rule])
+            lib.utils.run_as_root(['chown', 'root:polkitd', polkit_rule])
 
         # Set up passwordless systemd-run for machines similar to 'machinectl
         # shell' above. While this may be considered a security risk, I think
