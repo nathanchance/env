@@ -68,6 +68,8 @@ else
     end
 
     fish_add_path -aP /usr/local/sbin /usr/sbin /sbin
+    # https://wiki.archlinux.org/index.php/Perl_Policy#Binaries_and_scripts
+    fish_add_path -aP /usr/bin/{site,vendor,core}_perl
 end
 
 if command -q fd
