@@ -51,14 +51,15 @@ class NspawnConfig(UserDict):
                 'VirtualEthernet': 'no',
             },
         })
+        self.name = name
 
         # Add dynamic bind mounts
-        self._add_dynamic_mounts(name)
+        self._add_dynamic_mounts()
 
         # Set machine path based on the name
-        self.machine_dir = Path('/var/lib/machines', name)
+        self.machine_dir = Path('/var/lib/machines', self.name)
 
-    def _add_dynamic_mounts(self, name):
+    def _add_dynamic_mounts(self):
         rw_mounts = {
             '/dev/kvm',
             # We may be in a virtual machine
@@ -72,7 +73,7 @@ class NspawnConfig(UserDict):
             f"/var/tmp/tmux-{os.getuid()}",
         }
 
-        if 'arch' in name:
+        if 'arch' in self.name:
             # Share the host's mirrorlist so that reflector does not have to be
             # run in the container (even if it could)
             ro_mounts.add('/etc/pacman.d/mirrorlist')
@@ -181,7 +182,7 @@ class NspawnConfig(UserDict):
     def _gen_run_cmd(self, cmd):
         return [
             SYSTEMD_RUN_M,
-            self.machine_dir.name,
+            self.name,
             # We do not need our units to remain in memory
             '--collect',
             # The shell will expand our environment
@@ -276,7 +277,7 @@ class NspawnConfig(UserDict):
 
         # Write configuration file. We allow the user to interactively remove
         # an old one if so desired.
-        if (nspawn_conf := Path('/etc/systemd/nspawn', f"{self.machine_dir.name}.nspawn")).exists():
+        if (nspawn_conf := Path('/etc/systemd/nspawn', f"{self.name}.nspawn")).exists():
             answer = input(f"\033[01;33m{nspawn_conf} already exists, remove it? [y/N]\033[0m ")
             if answer.lower() in ('y', 'yes'):
                 lib.utils.run_as_root(['rm', nspawn_conf])
@@ -294,7 +295,7 @@ class NspawnConfig(UserDict):
     def reset(self, mode):
         machine_files = {
             self.machine_dir,
-            Path('/etc/systemd/nspawn', self.machine_dir.name).with_suffix('.nspawn'),
+            Path('/etc/systemd/nspawn', self.name).with_suffix('.nspawn'),
         }
         setup_files = {
             SYSTEMD_RUN_M,
@@ -315,8 +316,8 @@ class NspawnConfig(UserDict):
         # should make sure it is disabled and stopped before removing the
         # files.
         if mode in ('machine', 'all') and lib.utils.run_check_rc_zero(
-            ['systemctl', 'is-enabled', f"systemd-nspawn@{self.machine_dir.name}"]):
-            lib.utils.run_as_root(['machinectl', 'disable', '--now', self.machine_dir.name])
+            ['systemctl', 'is-enabled', f"systemd-nspawn@{self.name}"]):
+            lib.utils.run_as_root(['machinectl', 'disable', '--now', self.name])
 
         lib.utils.run_as_root(['rm', '-r', *items_to_remove])
 
