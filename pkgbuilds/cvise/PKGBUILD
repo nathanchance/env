@@ -1,7 +1,7 @@
 # Maintainer: Nathan Chancellor <nathan@kernel.org>
 pkgname=cvise
 pkgver=2.11.0
-pkgrel=1
+pkgrel=2
 pkgdesc="Super-parallel Python port of the C-Reduce"
 arch=(x86_64)
 url="https://github.com/marxin/cvise"
