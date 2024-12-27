@@ -29,13 +29,20 @@ class NspawnConfig(UserDict):
         # Initial static defaults
         super().__init__({
             'Exec': {
-                'Boot': 'yes',
+                'Boot':
+                'yes',
                 # Machine name will be accessed via IMAGE_ID within the
                 # container, use the host's hostname for easy identification
-                'Hostname': platform.uname().node,
-                'PrivateUsers': 'pick',
-                # Necessary for 'perf record'
-                'SystemCallFilter': 'perf_event_open',
+                'Hostname':
+                platform.uname().node,
+                'PrivateUsers':
+                'pick',
+                'SystemCallFilter': [
+                    # Necessary to avoid 'gpg: Using insecure memory'
+                    'mlock',
+                    # Necessary for 'perf record'
+                    'perf_event_open',
+                ],
             },
             'Files': {
                 # Bind my /home directory and user into the container
@@ -120,8 +127,12 @@ class NspawnConfig(UserDict):
             parts.append(f"[{key}]")
             for subkey, subval in values.items():
                 if isinstance(subval, list):
-                    for item in subval:
-                        parts.append(f"{subkey}={item}")
+                    # SystemCallFilter takes a space separated list of values
+                    if subkey == 'SystemCallFilter':
+                        parts.append(f"{subkey}={' '.join(subval)}")
+                    # All other list configurations should be joined with the key
+                    else:
+                        parts += [f"{subkey}={item}" for item in subval]
                 elif subval:
                     parts.append(f"{subkey}={subval}")
             parts.append('')
@@ -169,7 +180,10 @@ class NspawnConfig(UserDict):
                     continue
 
                 if isinstance(value, list):
-                    nspawn_cmd += [f"{flag}={item}" for item in value]
+                    if flag == '--system-call-filter':
+                        nspawn_cmd.append(f"{flag}={' '.join(value)}")
+                    else:
+                        nspawn_cmd += [f"{flag}={item}" for item in value]
                 # certain configuration options are booleans but the commmand
                 # line option is just a simple flag
                 elif flag in ('--boot', ) and value == 'yes':
