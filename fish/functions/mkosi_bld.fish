@@ -42,8 +42,14 @@ function mkosi_bld -d "Build a distribution using mkosi"
         # We may need to look at the configuration of the host
         /etc:/etc
 
+    switch $image
+        case dev-arch
+            set cache_dir pacman
+    end
+
     sudo (command -v mkosi) \
         --build-sources (string join , $build_sources) \
         --directory $directory \
-        --force
+        --force \
+        --package-cache-dir $XDG_FOLDER/cache/mkosi/$cache_dir
 end
