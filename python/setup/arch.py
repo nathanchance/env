@@ -496,6 +496,10 @@ def pacman_install_packages():
         'perl-net-smtp-ssl',
         'repo',
 
+        # mkosi
+        'distribution-gpg-keys',
+        'dnf',
+
         # Miscellaneous
         'libxkbcommon',
         'lm_sensors',
