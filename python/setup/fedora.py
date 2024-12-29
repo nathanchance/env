@@ -242,6 +242,13 @@ def setup_doas(username):
 
         doas_conf.write_text(conf_txt, encoding='utf-8')
 
+    # Apply umask value from /etc/login.defs to doas sessions, which mirrors
+    # what sudo does
+    doas_pam, doas_pam_txt = lib.utils.path_and_text('/etc/pam.d/doas')
+    if (pam_umask := 'session    optional     pam_umask.so\n') not in doas_pam_txt:
+        with doas_pam.open('a', encoding='utf-8') as file:
+            file.write(pam_umask)
+
     # Remove sudo but set up a symlink for compatibility
     Path('/etc/dnf/protected.d/sudo.conf').unlink(missing_ok=True)
     lib.setup.remove_if_installed('sudo')
