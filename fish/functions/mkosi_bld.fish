@@ -45,6 +45,8 @@ function mkosi_bld -d "Build a distribution using mkosi"
     switch $image
         case dev-arch
             set cache_dir pacman
+        case dev-fedora
+            set cache_dir dnf
     end
 
     sudo (command -v mkosi) \

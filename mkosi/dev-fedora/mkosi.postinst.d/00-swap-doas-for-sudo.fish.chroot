@@ -1,0 +1,21 @@
+#!/usr/bin/env fish
+
+rm -f /etc/dnf/protected.d/sudo.conf
+
+if dnf list --installed sudo &>/dev/null
+    dnf remove -y sudo
+    or return
+end
+
+ln -frsv /usr/{bin/doas,local/bin/sudo}
+
+set doas_conf /etc/doas.conf
+echo 'permit nopass nathan as root' >$doas_conf
+chmod 600 $doas_conf
+git diff --no-index /dev/null $doas_conf
+
+set doas_pam /etc/pam.d/doas
+cp $doas_pam{,.new}
+echo 'session    optional     pam_umask.so' >>$doas_pam.new
+git diff --no-index $doas_pam{,.new}
+mv $doas_pam{.new,}
