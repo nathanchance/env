@@ -343,14 +343,15 @@ rpmbuild/' >>$gitignore
         end
     end
 
-    switch $LOCATION-(uname -m)
-        case hetzner'*' workstation'*' vm-x86_64
+    switch (uname -m)
+        case aarch64 x86_64
             ln -fnrsv $configs/tmux/.tmux.conf.nspawn $HOME/.tmux.conf.container
 
-            # These platforms are guaranteed to use tmux so ensure the tmux
+            # These platforms will more than likely use tmux so ensure the tmux
             # directory exists with the expected permissions so that sd_nspawn
-            # will find it and mount it into the container properly. This is
-            # not necessarily safe to do if the platform is not going to use tmux.
+            # will find it and mount it into the container properly. Even if they
+            # do not use tmux, creating the directory and passing it through to
+            # the container is not the end of the world, as no socket will exist.
             set tmux_tmp /var/tmp/tmux-(id -u)
             mkdir -p $tmux_tmp
             # tmux checks that the permissions are restrictive
