@@ -187,6 +187,10 @@ def install_packages():
         'git-delta',
         'git-email',
 
+        # mkosi / systemd-nspawn
+        'distribution-gpg-keys',
+        'systemd-container',
+
         # nicer GNU utilities
         'duf',
         'eza' if fedora_version >= 39 else 'exa',
