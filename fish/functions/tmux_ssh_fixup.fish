@@ -26,7 +26,7 @@ function tmux_ssh_fixup -d "Fix up SSH_CONNECTION value in tmux"
     # So we set it manually here
 
     if set -q TMUX
-        set tmux_ssh_con (tmux show-env | grep SSH_CONNECTION=)
+        set tmux_ssh_con (tmux show-env &| grep SSH_CONNECTION=)
         set fish_ssh_con $SSH_CONNECTION
 
         if test "$tmux_ssh_con" != "$fish_ssh_con"

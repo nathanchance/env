@@ -46,7 +46,7 @@ function _hydro_addon_nathan -d "Hydro prompt customizations"
     else if command -q tmux; and set -q TMUX
         # For whatever reason, there are times where SSH_CONNECTION does
         # not get updated in the environment by tmux so check that here
-        if tmux show-env | grep -q SSH_CONNECTION=
+        if tmux show-env &| grep -q SSH_CONNECTION=
             set in_ssh_true
         end
     end
