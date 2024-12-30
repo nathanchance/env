@@ -23,6 +23,8 @@ DEF_MACH = {
     'x86_64': 'dev-arch',
 }
 
+DEV_KVM_ACCESS = os.access('/dev/kvm', os.R_OK | os.W_OK)
+
 
 class NspawnConfig(UserDict):
 
@@ -223,8 +225,8 @@ class NspawnConfig(UserDict):
         # Allow containers started as services to access /dev/kvm to run
         # accelerated VMs, which allows avoiding installing QEMU in the host
         # environment.
-        if not (kvm_conf :=
-                Path('/etc/systemd/system/systemd-nspawn@.service.d/kvm.conf')).exists():
+        if DEV_KVM_ACCESS and not (kvm_conf := Path(
+                '/etc/systemd/system/systemd-nspawn@.service.d/kvm.conf')).exists():
             kvm_conf_txt = ('[Service]\n'
                             'DeviceAllow=/dev/kvm rw\n')
             if not kvm_conf.parent.exists():
@@ -315,8 +317,9 @@ class NspawnConfig(UserDict):
         setup_files = {
             SYSTEMD_RUN_M,
             Path('/etc/polkit-1/rules.d', f"50-permit-{USER}-machinectl-shell.rules"),
-            Path('/etc/systemd/system/systemd-nspawn@.service.d/kvm.conf'),
         }
+        if DEV_KVM_ACCESS:
+            setup_files.add(Path('/etc/systemd/system/systemd-nspawn@.service.d/kvm.conf'))
 
         if mode == 'machine':
             items_to_remove = machine_files
