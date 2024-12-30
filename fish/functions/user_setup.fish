@@ -357,6 +357,9 @@ rpmbuild/' >>$gitignore
             # tmux checks that the permissions are restrictive
             chmod 700 $tmux_tmp
 
+            sudo true
+            or return
+
             # Set up files first because that process is quicker than the build
             # process and doas/sudo authorization lasts at least five minutes
             sd_nspawn -i
