@@ -21,8 +21,13 @@ else
     # interact with the host's tmux server. This needs to be done before the
     # call to start_tmux below so that a tmux session is not started in the
     # container.
-    if mountpoint -q /var/tmp/tmux-1000; and not set -q TMUX
-        set -gx TMUX /var/tmp/tmux-1000/default
+    set -l tmux_sock_dir /var/tmp/tmux-1000
+    set -l tmux_sock $tmux_sock_dir/default
+    if mountpoint -q $tmux_sock_dir
+        and not set -q TMUX
+        and test -S $tmux_sock
+        and tmux -S $tmux_sock list-sessions &>/dev/null
+        set -gx TMUX $tmux_sock
     end
 
     set -l tty (tty)
