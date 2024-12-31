@@ -9,7 +9,6 @@
 # https://wiki.qemu.org/Documentation/Networking
 
 from argparse import ArgumentParser
-import datetime
 import grp
 import math
 import os
@@ -26,131 +25,106 @@ sys.path.append(str(Path(__file__).resolve().parents[1]))
 import lib.utils
 # pylint: enable=wrong-import-position
 
-usr_share = Path('/usr/share')
+# Static constants
+BASE_FOLDER = Path(os.environ['VM_FOLDER']) if 'VM_FOLDER' in os.environ else Path(
+    __file__).resolve().parent.joinpath('vm')
+DEFAULT_DISTRO = {
+    'aarch64': 'fedora',
+    'arm64': 'fedora',
+    'x86_64': 'arch',
+}
+DEFAULT_KERNEL_PATH = {
+    'aarch64': Path('arch/arm64/boot/Image'),
+    'arm': Path('arch/arm/boot/zImage'),
+    'i386': Path('arch/x86/boot/bzImage'),
+    'x86_64': Path('arch/x86/boot/bzImage'),
+}
+DEV_KVM_ACCESS = os.access('/dev/kvm', os.R_OK | os.W_OK)
+HOST_ARCH = platform.machine()
 
 
-def find_first_file(possible_files, relative_root=usr_share):
-    for possible_file in possible_files:
-        if (full_path := Path(relative_root, possible_file)).exists():
-            return full_path
-    files_str = "', '".join([str(elem) for elem in possible_files])
+def find_first_file(possible_files):
+    for file in possible_files:
+        if file.exists():
+            return file
+    files_str = "', '".join(str(elem) for elem in possible_files)
     raise RuntimeError(
-        f"No items from list ('{files_str}') could be found in '{relative_root}', do you need to install a package?",
-    )
-
-
-def get_base_folder():
-    if 'VM_FOLDER' in os.environ:
-        return Path(os.environ['VM_FOLDER'])
-    return Path(__file__).resolve().parent.joinpath('vm')
-
-
-def have_dev_kvm_access():
-    return os.access('/dev/kvm', os.R_OK | os.W_OK)
-
-
-def iso_is_url(iso):
-    return 'http://' in iso or 'https://' in iso
-
-
-def wget(location, url):
-    lib.utils.run(['wget', '-c', '-O', location, url], show_cmd=True)
+        f"No items from list ('{files_str}') could be found, do you need to install a package?")
 
 
 class VirtualMachine:
 
-    def __init__(self, arch, cmdline, cores, gdb, graphical, initrd, iso, kernel, kvm_cpu, memory,
-                 name, size, ssh_port):
-        # External values
+    def __init__(self, arch, name):
+        # External values (required explicitly for _data_folder assignment below)
         self.arch = arch
         self.name = name
-        self.size = size
 
         # Internal values
-        self.data_folder = Path(get_base_folder(), self.arch, self.name)
-        self.efi_img = Path(self.data_folder, 'efi.img')
-        self.efi_vars_img = Path(self.data_folder, 'efi_vars.img')
-        self.images_to_mount = (x for x in Path(self.data_folder).glob('*.img')
-                                if 'efi' not in x.name)
-        self.primary_disk_img = Path(self.data_folder, 'disk.img')
-        self.shared_folder = Path(self.data_folder, 'shared')
-        self.use_kvm = self.can_use_kvm()
-        self.vfsd_log = Path(self.data_folder, 'vfsd.log')
+        self._data_folder = Path(BASE_FOLDER, self.arch, self.name)
+        self._efi_img = Path(self._data_folder, 'efi.img')
+        self._efi_vars_img = Path(self._data_folder, 'efi_vars.img')
+        self._images_to_mount = (x for x in Path(self._data_folder).glob('*.img')
+                                 if 'efi' not in x.name)
+        self._primary_disk_img = Path(self._data_folder, 'disk.img')
+        self._qemu = 'qemu-system-' + self.arch
+        self._shared_folder = Path(self._data_folder, 'shared')
+        # This is good enough for most cases
+        self._use_kvm = self.arch == HOST_ARCH and DEV_KVM_ACCESS
+        self._kvm_cpu = 'host'
 
-        # When using KVM, we cannot use more than the maximum number of cores.
-        # Default to either 8 cores or half the number of cores in the machine,
-        # whichever is smaller. For TCG, use 4 cores by default.
-        if not cores:
-            cores = min(8, int(os.cpu_count() / 2)) if self.use_kvm else 4
-        # We cap the default amount of memory at two times the number of cores
-        # (as that is sufficient for compiling) or total amount of available VM
-        # memory.
-        if not memory:
-            memory = min(cores * 2, self.get_available_mem_for_vm())
-
-        # Attempt to locate static kernel files if only a kernel was passed
-        if kernel:
-            kernel_files = Path(self.shared_folder, 'kernel_files')
-            if not cmdline:
-                if not (cmdline_file := Path(kernel_files, 'cmdline')).exists():
-                    raise RuntimeError('kernel passed without cmdline and one could not be found!')
-                cmdline = cmdline_file.read_text(encoding='utf-8')
-            if not (initrd or (initrd := Path(kernel_files, 'initramfs')).exists()):
-                raise RuntimeError('kernel passed without initrd and one could not be found!')
-
-        # Clear any previous hosts using the chosen SSH port.
-        lib.utils.run(['ssh-keygen', '-R', f"[localhost]:{ssh_port}"], show_cmd=True)
-        Path.home().joinpath('.ssh/known_hosts.old').unlink(missing_ok=True)
-
-        # QEMU configuration
-        self.qemu = 'qemu-system-' + self.arch
+        # External values (can be calculated implicitly currently or later)
+        self.cmdline = ''
+        self.cores = 0
+        self.initrd = None
+        self.iso = None
+        self.kernel = None
+        self.memory = 0
+        self.profile = 'regular'
+        # At this stage, only completely static arguments should be added!
         self.qemu_args = [
-            # Display
-            *self.get_display_args(graphical),
-
-            # Networking
-            '-nic', f"user,model=virtio-net-pci,hostfwd=tcp::{ssh_port}-:22",
-
             # RNG
             '-object', 'rng-random,filename=/dev/urandom,id=rng0',
             '-device', 'virtio-rng-pci',
 
             # Shared folder via virtiofs (socket is added transiently below)
             '-device', 'vhost-user-fs-pci,queue-size=1024,chardev=char0,tag=host',
-            '-object', f"memory-backend-memfd,id=mem,share=on,size={memory}G",
             '-numa', 'node,memdev=mem',
 
             # Statistics
-            '-m', f"{memory}G",
             '-device', 'virtio-balloon',
-            '-smp', str(cores),
 
             # UEFI
-            '-drive', f"if=pflash,format=raw,file={self.efi_img},readonly=on",
-            '-drive', f"if=pflash,format=raw,file={self.efi_vars_img}",
-
-            # iso args if setting up machine for the first time
-            *self.get_iso_args(iso),
+            '-drive', f"if=pflash,format=raw,file={self._efi_img},readonly=on",
+            '-drive', f"if=pflash,format=raw,file={self._efi_vars_img}",
         ]  # yapf: disable
-        if self.use_kvm:
-            self.qemu_args += ['-cpu', kvm_cpu, '-enable-kvm']
-        if cmdline:
-            self.qemu_args += ['-append', cmdline.strip()]
-        if gdb:
-            self.qemu_args += ['-s', '-S']
-        if initrd:
-            self.qemu_args += ['-initrd', initrd]
-        if kernel:
-            self.qemu_args += ['-kernel', kernel]
+        self.size = 75
+        self.ssh_port = 8022
 
-    def can_use_kvm(self):
-        if self.arch == platform.machine():
-            return have_dev_kvm_access()
-        return False
+    def _calc_cpus(self):
+        # Respect the user's choice of number of cores
+        if self.cores:
+            return self.cores
 
-    # We consider half of the host's memory in gigabytes as available for normal
-    # virtual machines. Certain ones might have other requirements.
-    def get_available_mem_for_vm(self):
+        # If we are not using KVM (i.e., using TCG), use 4 cores by default
+        if not self._use_kvm:
+            return 4
+
+        # If we are using KVM and we are using the regular profile, we default to 8 CPUs or half the number of CPUs, whichever is smaller
+        half_num_cpus = int(os.cpu_count() / 2)
+        if self.profile == 'regular':
+            return min(8, half_num_cpus)
+
+        # If we are using KVM and we are using the build profile, we default to half the number of CPUs
+        if self.profile == 'build':
+            return half_num_cpus
+
+        raise RuntimeError('Did not return in _calc_cpus()?')
+
+    def _calc_mem(self, cpus):
+        # Respect the user's choice of memory
+        if self.memory:
+            return self.memory
+
         # Total amount of memory of a system in gigabytes (page size * pages / 1024^3)
         total_mem = os.sysconf('SC_PAGE_SIZE') * os.sysconf('SC_PHYS_PAGES') / (1024.**3)
 
@@ -162,102 +136,113 @@ class VirtualMachine:
         exp = round(math.log2(total_mem))
 
         # To get half of the amount of memory, shift by one less exponent
-        return 1 << (exp - 1)
+        avail_mem = 1 << (exp - 1)
 
-    def handle_action(self, action):
-        if action == 'setup':
-            return self.setup()
-        if action == 'remove':
-            return self.remove()
-        if action == 'run':
-            return self.run()
-        raise RuntimeError(f"Unimplemented action ('{action}')?")
+        # We cap the default amount of memory at two times the number of cores
+        # (as that is sufficient for compiling) or total amount of available VM
+        # memory.
+        return min(cpus * 2, avail_mem)
 
-    def create_disk_img(self):
-        self.primary_disk_img.parent.mkdir(exist_ok=True, parents=True)
-        lib.utils.run(['qemu-img', 'create', '-f', 'qcow2', self.primary_disk_img, self.size],
-                      show_cmd=True)
+    def _create_disk_img(self):
+        self._primary_disk_img.parent.mkdir(exist_ok=True, parents=True)
+        lib.utils.run(
+            ['qemu-img', 'create', '-f', 'qcow2', self._primary_disk_img, f"{self.size}G"],
+            show_cmd=True)
 
-    def get_display_args(self, graphical):
-        if graphical:
-            return [
-                '-device', 'virtio-vga-gl',
-                '-display', 'gtk,gl=on',
+    def _gen_dynamic_qemu_args(self):
+        cpu_val = self._calc_cpus()
+        mem_val = f"{self._calc_mem(cpu_val)}G"
+
+        args = [
+            # Memory
+            '-m', mem_val,
+
+            # Networking
+            '-nic', f"user,model=virtio-net-pci,hostfwd=tcp::{self.ssh_port}-:22",
+
+            # Remaining virtiofs argument
+            '-object', f"memory-backend-memfd,id=mem,share=on,size={mem_val}",
+
+            # Number of CPUs
+            '-smp', str(cpu_val),
+        ]  # yapf: disable
+        # If we are not already running graphically, display the serial console output
+        if '-display' not in self.qemu_args:
+            args += ['-display', 'none', '-serial', 'mon:stdio']
+
+        # Attempt to locate static kernel files if only a kernel was passed
+        if self.kernel:
+            args += ['-kernel', self.kernel]
+
+            kernel_files = Path(self._shared_folder, 'kernel_files')
+
+            if not (cmdline := self.cmdline):
+                if not (cmdline_file := Path(kernel_files, 'cmdline')).exists():
+                    raise RuntimeError('kernel passed without cmdline and one could not be found!')
+                cmdline = cmdline_file.read_text(encoding='utf-8').strip()
+            args += ['-append', cmdline]
+
+            if not (initrd := self.initrd) and not (initrd := Path(kernel_files,
+                                                                   'initramfs')).exists():
+                raise RuntimeError('kernel passed without initrd and one could not be found!')
+            args += ['-initrd', initrd]
+
+        # ISO, if setting up
+        if iso := self.iso:
+            if str(iso).startswith(('https://', 'http://')):
+                iso_url = iso
+                if not (iso := Path(BASE_FOLDER, 'iso', iso_url.rsplit('/', 1)[1])).exists():
+                    iso.parent.mkdir(exist_ok=True, parents=True)
+                    lib.utils.run(['wget', '-c', '-O', iso, iso_url], show_cmd=True)
+            if not iso.exists():
+                raise RuntimeError(
+                    f"{iso.name} does not exist at {iso}, was the wrong path used or did the download fail?",
+                )
+            args += [
+                '-device', 'virtio-scsi-pci,id=scsi0',
+                '-device', 'scsi-cd,drive=cd',
+                '-drive', f"if=none,format=raw,id=cd,file={iso}",
             ]  # yapf: disable
-        return [
-            '-display', 'none',
-            '-serial', 'mon:stdio',
-        ]  # yapf: disable
 
-    def get_drive_args(self):
-        drive_args = []
-        for image in self.images_to_mount:
-            drive_args += ['-drive', f"if=virtio,format=qcow2,file={image}"]
-        return drive_args
+        for image in self._images_to_mount:
+            args += ['-drive', f"if=virtio,format=qcow2,file={image}"]
 
-    def get_iso_args(self, iso):
-        if iso is None:
-            return []
+        if self._use_kvm:
+            args += ['-cpu', self._kvm_cpu, '-enable-kvm']
 
-        # Download iso if necessary
-        if iso_is_url(str(iso)):
-            iso_url = iso
-            if not (iso := Path(get_base_folder(), 'iso', iso_url.split('/')[-1])).exists():
-                iso.parent.mkdir(exist_ok=True, parents=True)
-                wget(iso, iso_url)
+        return args
 
-        if not iso.exists():
-            raise RuntimeError(
-                f"{iso.name} does not exist at {iso}, was the wrong path used or did the download fail?",
-            )
-
-        return [
-            '-device', 'virtio-scsi-pci,id=scsi0',
-            '-device', 'scsi-cd,drive=cd',
-            '-drive', f"if=none,format=raw,id=cd,file={iso}",
-        ]  # yapf: disable
-
+    # Public interfaces
     def remove(self):
-        if self.data_folder.is_dir():
-            shutil.rmtree(self.data_folder)
+        if self._data_folder.is_dir():
+            shutil.rmtree(self._data_folder)
 
     def run(self):
-        if not self.primary_disk_img.exists():
+        if not self._primary_disk_img.exists():
             raise RuntimeError(
-                f"Disk image ('{self.primary_disk_img}') for virtual machine ('{self.name}') does not exist, run 'setup' first?",
+                f"Disk image ('{self._primary_disk_img}') for virtual machine ('{self.name}') does not exist, run 'setup' first?",
             )
 
-        if not (qemu := shutil.which(self.qemu)):
+        # pylint: disable-next=superfluous-parens
+        if not (qemu := shutil.which(self._qemu)):
             raise RuntimeError(
-                f"Could not find QEMU binary ('{self.qemu}') on your system (needed to run virtual machine)!",
+                f"Could not find QEMU binary ('{self._qemu}') on your system (needed to run virtual machine)!",
             )
 
         if not ((sudo := shutil.which('doas')) or (sudo := shutil.which('sudo'))):
             raise RuntimeError(
                 'Could not find doas or sudo on your system (needed for virtiofsd integration)!')
 
-        # Locate the QEMU prefix to search for virtiofsd
-        if not (virtiofsd := shutil.which('virtiofsd')):
-            qemu = Path(qemu).resolve()
-            if not (virtiofsd := Path(qemu.parent, 'tools/virtiofsd/virtiofsd')).exists():
-                possible_files = [
-                    Path('/usr/lib/virtiofsd'),  # Arch Linux (virtiofsd)
-                    Path('libexec/virtiofsd'),  # Default QEMU installation, Fedora
-                    Path('lib/qemu/virtiofsd'),  # Arch Linux (qemu-virtiofsd)
-                ]
-                virtiofsd = find_first_file(possible_files, relative_root=qemu.parents[1])
-
-        # Ensure shared folder is created before sharing
-        self.shared_folder.mkdir(exist_ok=True, parents=True)
+        possible_vfsd_locations = [
+            Path('/usr/lib/virtiofsd'),  # Arch Linux
+            Path('/usr/libexec/virtiofsd'),  # Fedora
+        ]
+        virtiofsd = find_first_file(possible_vfsd_locations)
 
         # Get access to root privileges permission before opening virtiofsd in
         # the background
         print('Requesting root privileges to run virtiofsd...')
         lib.utils.run_as_root('true')
-
-        base_virtiofsd_cmd = [sudo, virtiofsd]
-        virtiofsd_version_text = lib.utils.chronic([*base_virtiofsd_cmd, '--version']).stdout
-        group_name = grp.getgrgid(os.getgid()).gr_name
 
         # Transiently create virtiofsd socket, as root might not have
         # permission to write to $VM_FOLDER. We manually manage this instead of
@@ -269,44 +254,44 @@ class VirtualMachine:
         vfsd_sock = f"{tmpdir.name}/vfsd.sock"
         self.qemu_args += ['-chardev', f"socket,id=char0,path={vfsd_sock}"]
 
-        # C / QEMU / Reference implementation (deprecated)
-        if 'virtiofsd version' in virtiofsd_version_text:
-            virtiofsd_args = [
-                f"--socket-group={group_name}",
-                f"--socket-path={vfsd_sock}",
-                '-o', 'cache=always',
-                '-o', f"source={self.shared_folder}",
-            ]  # yapf: disable
-        # Rust implementation
-        else:
-            virtiofsd_args = [
-                '--cache', 'always',
-                '--shared-dir', self.shared_folder,
-                '--socket-group', group_name,
-                '--socket-path', vfsd_sock,
-            ]  # yapf: disable
-            if lib.utils.in_nspawn():
-                # In systemd-nspawn, our host UID is different from the guest
-                # UID, so we need to map it to avoid permission errors.
-                virtiofsd_args += ['--translate-uid', f"map:1000:{os.getuid()}:1"]
+        # Only the Rust virtiofsd implementation is supported now
+        virtiofsd_cmd = [
+            sudo, virtiofsd,
+            '--cache', 'always',
+            '--shared-dir', self._shared_folder,
+            '--socket-group', grp.getgrgid(os.getgid()).gr_name,
+            '--socket-path', vfsd_sock,
+        ]  # yapf: disable
+        if lib.utils.in_nspawn():
+            # In systemd-nspawn, our host UID is different from the guest
+            # UID, so we need to map it to avoid permission errors.
+            virtiofsd_cmd += ['--translate-uid', f"map:1000:{os.getuid()}:1"]
+
+        # Ensure shared folder is created before sharing
+        self._shared_folder.mkdir(exist_ok=True, parents=True)
+
+        # Clear any previous hosts using the chosen SSH port.
+        lib.utils.run(['ssh-keygen', '-R', f"[localhost]:{self.ssh_port}"], show_cmd=True)
+        Path.home().joinpath('.ssh/known_hosts.old').unlink(missing_ok=True)
 
         # Python recommends full paths with subprocess.Popen() calls
-        virtiofsd_cmd = [*base_virtiofsd_cmd, *virtiofsd_args]
         lib.utils.print_cmd(virtiofsd_cmd)
-        with self.vfsd_log.open('w', encoding='utf-8') as file, \
+        with Path(self._data_folder, 'vfsd.log').open('w+', encoding='utf-8') as file, \
              subprocess.Popen(virtiofsd_cmd, stderr=file, stdout=file) as vfsd:
             # Give virtiofsd a second to start up before calling connect() with
             # QEMU, otherwise we may get weird 'Permission denied' errors
             time.sleep(1)
             try:
-                lib.utils.run([qemu, *self.qemu_args, *self.get_drive_args()], show_cmd=True)
+                qemu_cmd = [qemu, *self.qemu_args, *self._gen_dynamic_qemu_args()]
+                lib.utils.run(qemu_cmd, show_cmd=True)
             except subprocess.CalledProcessError as err:
                 # If virtiofsd is dead, it is pretty likely that it was the
                 # cause of QEMU failing so add to the existing exception using
                 # 'from'.
                 if vfsd.poll():
-                    vfsd_log_txt = self.vfsd_log.read_text(encoding='utf-8')
-                    raise RuntimeError(f"virtiofsd failed with: {vfsd_log_txt}") from err
+                    file.seek(0)
+                    raise RuntimeError(
+                        f"virtiofsd failed with: {file.read(encoding='utf-8')}") from err
                 raise err
             finally:
                 vfsd.kill()
@@ -314,174 +299,151 @@ class VirtualMachine:
 
     def setup(self):
         self.remove()
-        self.create_disk_img()
+        self._create_disk_img()
         self.run()
 
 
 class ArmVirtualMachine(VirtualMachine):
 
-    def __init__(self, arch, cmdline, cores, gdb, graphical, initrd, iso, kernel, kvm_cpu, memory,
-                 name, size, ssh_port):
-        super().__init__(arch, cmdline, cores, gdb, graphical, initrd, iso, kernel, kvm_cpu, memory,
-                         name, size, ssh_port)
+    def __init__(self, arch, name):
+        super().__init__(arch, name)
 
         self.qemu_args += ['-M', 'virt']
 
-    def run(self):
-        self.setup_efi_files()
-        super().run()
-
-    def setup_efi_files(self, possible_efi_files=None):
+    def _setup_efi_files(self, possible_efi_files=None):
         if not possible_efi_files:
             raise RuntimeError('No EFI files provided?')
 
         efi_img_size = 64 * 1024 * 1024  # 64M
 
-        self.efi_img.parent.mkdir(exist_ok=True, parents=True)
+        self._efi_img.parent.mkdir(exist_ok=True, parents=True)
 
-        if not self.efi_img.exists():
-            shutil.copyfile(find_first_file(possible_efi_files), self.efi_img)
-            with self.efi_img.open(mode='r+b') as file:
+        if not self._efi_img.exists():
+            shutil.copyfile(find_first_file(possible_efi_files), self._efi_img)
+            with self._efi_img.open(mode='r+b') as file:
                 file.truncate(efi_img_size)
 
-        if not self.efi_vars_img.exists():
-            with self.efi_vars_img.open(mode='xb') as file:
+        if not self._efi_vars_img.exists():
+            with self._efi_vars_img.open(mode='xb') as file:
                 file.truncate(efi_img_size)
+
+    def run(self):
+        self._setup_efi_files()
+        super().run()
 
 
 class Arm32VirtualMachine(ArmVirtualMachine):
 
-    def __init__(self, cmdline, cores, gdb, graphical, initrd, iso, kernel, memory, name, size,
-                 ssh_port):
-        super().__init__('arm', cmdline, cores, gdb, graphical, initrd, iso, kernel,
-                         'host,aarch64=off', memory, name, size, ssh_port)
+    def __init__(self, name):
+        super().__init__('arm', name)
 
-        if self.use_kvm:
-            self.qemu = 'qemu-system-aarch64'
-
-    def can_use_kvm(self):
-        if platform.machine() == 'aarch64':
-            check_el1_32 = Path(get_base_folder(), 'utils/aarch64_32_bit_el1_supported')
-            if not check_el1_32.exists():
+        if HOST_ARCH == 'aarch64':
+            if not (check_el1_32 := Path(BASE_FOLDER,
+                                         'utils/aarch64_32_bit_el1_supported')).exists():
                 check_el1_32.parent.mkdir(exist_ok=False, parents=True)
-                wget(
-                    check_el1_32,
+                lib.utils.curl(
                     f"https://github.com/ClangBuiltLinux/boot-utils/raw/main/utils/{check_el1_32.name}",
-                )
+                    check_el1_32)
                 check_el1_32.chmod(0o755)
-            try:
-                lib.utils.run(check_el1_32)
-            except subprocess.CalledProcessError:
-                pass  # we'll return false below
-            else:
-                return have_dev_kvm_access()
-        return False
 
-    def setup_efi_files(self, possible_efi_files=None):
+            self._use_kvm = DEV_KVM_ACCESS and lib.utils.run_check_rc_zero(check_el1_32)
+            if self._use_kvm:
+                self._kvm_cpu += ',aarch64=off'
+                self._qemu = 'qemu-system-aarch64'
+
+    def _setup_efi_files(self, possible_efi_files=None):
         possible_efi_files = [
-            Path('edk2/arm/QEMU_EFI.fd'),  # Arch Linux, Fedora
+            Path('/usr/share/edk2/arm/QEMU_EFI.fd'),  # Arch Linux, Fedora
         ]
-        super().setup_efi_files(possible_efi_files)
+        super()._setup_efi_files(possible_efi_files)
 
 
 class Arm64VirtualMachine(ArmVirtualMachine):
 
-    def __init__(self, cmdline, cores, gdb, graphical, initrd, iso, kernel, memory, name, size,
-                 ssh_port):
-        super().__init__('aarch64', cmdline, cores, gdb, graphical, initrd, iso, kernel, 'host',
-                         memory, name, size, ssh_port)
+    def __init__(self, name):
+        super().__init__('aarch64', name)
 
         # If not running on KVM, use QEMU's max CPU emulation target
         # Use impdef pointer auth, otherwise QEMU is just BRUTALLY slow:
         # https://lore.kernel.org/YlgVa+AP0g4IYvzN@lakrids/
-        if '-cpu' not in self.qemu_args:
+        if not self._use_kvm:
             self.qemu_args += ['-cpu', 'max,pauth-impdef=true']
 
-    def setup_efi_files(self, possible_efi_files=None):
+    def _setup_efi_files(self, possible_efi_files=None):
         possible_efi_files = [
-            Path('edk2/aarch64/QEMU_EFI.silent.fd'),  # Fedora
-            Path('edk2/aarch64/QEMU_EFI.fd'),  # Arch Linux (current)
-            Path('edk2-armvirt/aarch64/QEMU_EFI.fd'),  # Arch Linux (old),
-            Path("qemu-efi-aarch64/QEMU_EFI.fd"),  # Debian and Ubuntu
+            Path('/usr/share/edk2/aarch64/QEMU_EFI.silent.fd'),  # Fedora
+            Path('/usr/share/edk2/aarch64/QEMU_EFI.fd'),  # Arch Linux
+            Path("/usr/share/qemu-efi-aarch64/QEMU_EFI.fd"),  # Debian and Ubuntu
         ]
-        super().setup_efi_files(possible_efi_files)
+        super()._setup_efi_files(possible_efi_files)
 
 
 class X86VirtualMachine(VirtualMachine):
 
-    def __init__(self, arch, cmdline, cores, gdb, graphical, initrd, iso, kernel, memory, name,
-                 size, ssh_port):
-        super().__init__(arch, cmdline, cores, gdb, graphical, initrd, iso, kernel, 'host', memory,
-                         name, size, ssh_port)
+    def __init__(self, arch, name):
+        super().__init__(arch, name)
 
         self.qemu_args += ['-M', 'q35']
 
-    def run(self):
-        self.setup_efi_files()
-        super().run()
-
-    def setup_efi_files(self, possible_efi_files=None, possible_efi_vars_files=None):
+    def _setup_efi_files(self, possible_efi_files=None, possible_efi_vars_files=None):
         if not possible_efi_files:
             raise RuntimeError('No EFI files provided?')
         if not possible_efi_vars_files:
             raise RuntimeError('No EFI variable files provided?')
 
-        self.efi_img.parent.mkdir(exist_ok=True, parents=True)
+        self._efi_img.parent.mkdir(exist_ok=True, parents=True)
 
-        if not self.efi_img.exists():
-            shutil.copyfile(find_first_file(possible_efi_files), self.efi_img)
+        if not self._efi_img.exists():
+            shutil.copyfile(find_first_file(possible_efi_files), self._efi_img)
 
-        if not self.efi_vars_img.exists():
-            shutil.copyfile(find_first_file(possible_efi_vars_files), self.efi_vars_img)
+        if not self._efi_vars_img.exists():
+            shutil.copyfile(find_first_file(possible_efi_vars_files), self._efi_vars_img)
+
+    def run(self):
+        self._setup_efi_files()
+        super().run()
 
 
 class X8632VirtualMachine(X86VirtualMachine):
 
-    def __init__(self, cmdline, cores, gdb, graphical, initrd, iso, kernel, memory, name, size,
-                 ssh_port):
-        super().__init__('i386', cmdline, cores, gdb, graphical, initrd, iso, kernel, memory, name,
-                         size, ssh_port)
+    def __init__(self, name):
+        super().__init__('i386', name)
 
-    def can_use_kvm(self):
-        if platform.machine() in ('i386', 'i686', 'x86_64'):
-            return have_dev_kvm_access()
-        return False
+        self._use_kvm = DEV_KVM_ACCESS and HOST_ARCH == 'x86_64'
 
-    def setup_efi_files(self, possible_efi_files=None, possible_efi_vars_files=None):
+    def _setup_efi_files(self, possible_efi_files=None, possible_efi_vars_files=None):
         possible_efi_files = [
-            Path('edk2/ia32/OVMF_CODE.4m.fd'),  # Arch Linux (4MB location)
-            Path('edk2/ia32/OVMF_CODE.fd'),  # Arch Linux (2MB location)
-            Path('edk2/ovmf-ia32/OVMF_CODE.fd'),  # Fedora
-            Path("OVMF/OVMF32_CODE_4M.secboot.fd"),  # Debian and Ubuntu
+            Path('/usr/share/edk2/ia32/OVMF_CODE.4m.fd'),  # Arch Linux (4MB location)
+            Path('/usr/share/edk2/ia32/OVMF_CODE.fd'),  # Arch Linux (2MB location)
+            Path('/usr/share/edk2/ovmf-ia32/OVMF_CODE.fd'),  # Fedora
+            Path('/usr/share/OVMF/OVMF32_CODE_4M.secboot.fd'),  # Debian and Ubuntu
         ]
         possible_efi_vars_files = [
-            Path('edk2/ia32/OVMF_VARS.4m.fd'),  # Arch Linux (4MB location)
-            Path('edk2/ia32/OVMF_VARS.fd'),  # Arch Linux (2MB location)
-            Path('edk2/ovmf-ia32/OVMF_VARS.fd'),  # Fedora
-            Path("OVMF/OVMF32_VARS_4M.fd"),  # Debian and Ubuntu
+            Path('/usr/share/edk2/ia32/OVMF_VARS.4m.fd'),  # Arch Linux (4MB location)
+            Path('/usr/share/edk2/ia32/OVMF_VARS.fd'),  # Arch Linux (2MB location)
+            Path('/usr/share/edk2/ovmf-ia32/OVMF_VARS.fd'),  # Fedora
+            Path('/usr/share/OVMF/OVMF32_VARS_4M.fd'),  # Debian and Ubuntu
         ]
-        super().setup_efi_files(possible_efi_files, possible_efi_vars_files)
+        super()._setup_efi_files(possible_efi_files, possible_efi_vars_files)
 
 
 class X8664VirtualMachine(X86VirtualMachine):
 
-    def __init__(self, cmdline, cores, gdb, graphical, initrd, iso, kernel, memory, name, size,
-                 ssh_port):
-        super().__init__('x86_64', cmdline, cores, gdb, graphical, initrd, iso, kernel, memory,
-                         name, size, ssh_port)
+    def __init__(self, name):
+        super().__init__('x86_64', name)
 
-    def setup_efi_files(self, possible_efi_files=None, possible_efi_vars_files=None):
+    def _setup_efi_files(self, possible_efi_files=None, possible_efi_vars_files=None):
         possible_efi_files = [
-            Path('edk2/x64/OVMF_CODE.4m.fd'),  # Arch Linux (4MB location)
-            Path('edk2/x64/OVMF_CODE.fd'),  # Arch Linux (2MB location) and Fedora
-            Path("OVMF/OVMF_CODE.fd"),  # Debian and Ubuntu
+            Path('/usr/share/edk2/x64/OVMF_CODE.4m.fd'),  # Arch Linux (4MB location)
+            Path('/usr/share/edk2/x64/OVMF_CODE.fd'),  # Arch Linux (2MB location) and Fedora
+            Path("/usr/share/OVMF/OVMF_CODE.fd"),  # Debian and Ubuntu
         ]
         possible_efi_vars_files = [
-            Path("edk2/x64/OVMF_VARS.4m.fd"),  # Arch Linux (4MB location)
-            Path("edk2/x64/OVMF_VARS.fd"),  # Arch Linux (2MB location) and Fedora
-            Path("OVMF/OVMF_VARS.fd"),  # Debian and Ubuntu
+            Path('/usr/share/edk2/x64/OVMF_VARS.4m.fd'),  # Arch Linux (4MB location)
+            Path('/usr/share/edk2/x64/OVMF_VARS.fd'),  # Arch Linux (2MB location) and Fedora
+            Path('/usr/share/OVMF/OVMF_VARS.fd'),  # Debian and Ubuntu
         ]
-        super().setup_efi_files(possible_efi_files, possible_efi_vars_files)
+        super()._setup_efi_files(possible_efi_files, possible_efi_vars_files)
 
 
 def parse_arguments():
@@ -493,27 +455,39 @@ def parse_arguments():
     common_parser.add_argument('-a',
                                '--architecture',
                                type=str,
-                               default=platform.machine(),
-                               help='Architecture of virtual machine')
-    common_parser.add_argument('-c',
-                               '--cores',
-                               type=int,
-                               help='Number of cores virtual machine has')
+                               default=HOST_ARCH,
+                               help='Architecture of virtual machine (default: %(default)s)')
+    common_parser.add_argument(
+        '-c',
+        '--cores',
+        type=int,
+        help='Number of cores virtual machine has (default: based on profile)')
     if 'DISPLAY' in os.environ:
         common_parser.add_argument('-G',
                                    '--graphical',
                                    action='store_true',
-                                   help='Run QEMU graphically')
-    common_parser.add_argument('-m',
-                               '--memory',
-                               type=int,
-                               help='Amount of memory in gigabytes to allocate to virtual machine')
-    common_parser.add_argument('-n', '--name', type=str, help='Name of virtual machine')
+                                   help='Run QEMU graphically (default: False)')
+    common_parser.add_argument(
+        '-m',
+        '--memory',
+        type=int,
+        help=
+        'Amount of memory in gigabytes to allocate to virtual machine (default: based on profile)')
+    common_parser.add_argument(
+        '-n',
+        '--name',
+        type=str,
+        help=
+        'Name of virtual machine (default: chosen based on default distribution for architecture)')
     common_parser.add_argument('-p',
                                '--ssh-port',
-                               default=8022,
                                type=int,
-                               help='Port to forward ssh on')
+                               help='Port to forward ssh on (default: 8022)')
+    common_parser.add_argument(
+        '-P',
+        '--profile',
+        choices=['regular', 'build'],
+        help='Choose a specific profile, which customizes the default ratio of cores and memory')
 
     # Arguments for "list"
     list_parser = subparsers.add_parser('list',
@@ -525,12 +499,16 @@ def parse_arguments():
     setup_parser = subparsers.add_parser('setup',
                                          help='Run virtual machine for first time',
                                          parents=[common_parser])
-    setup_parser.add_argument('-i', '--iso', type=str, help='Path or URL of .iso to boot from')
-    setup_parser.add_argument('-s',
-                              '--size',
+    setup_parser.add_argument('-i',
+                              '--iso',
+                              required=True,
                               type=str,
-                              default='50G',
-                              help='Size of virtual machine disk image')
+                              help='Path or URL of .iso to boot from')
+    setup_parser.add_argument(
+        '-s',
+        '--size',
+        type=int,
+        help='Size of virtual machine disk image in gigabytes (default: 75GB)')
     setup_parser.set_defaults(action='setup')
 
     # Arguments for "remove"
@@ -548,165 +526,86 @@ def parse_arguments():
                             '--gdb',
                             action='store_true',
                             help="Start QEMU with '-s -S' for debugging with gdb")
-    run_parser.add_argument('-i', '--initrd', type=str, help='Path to initrd')
+    run_parser.add_argument('-i', '--initrd', type=Path, help='Path to initrd')
     run_parser.add_argument('-k',
                             '--kernel',
-                            type=str,
+                            type=Path,
                             help='Path to kernel image or kernel build directory')
     run_parser.set_defaults(action='run')
 
     return parser.parse_args()
 
 
-def get_def_iso(arch):
-    alpine_ver = '3.17.3'
-
-    arch_day = '.01'
-    arch_iso_ver = datetime.datetime.now(datetime.timezone.utc).strftime("%Y.%m") + arch_day
-
-    debian_ver = '12.0.0'
-
-    fedora_ver = '38'
-    fedora_iso_ver = '1.6'
-
-    iso_info = {
-        'arm': {
-            'file': Path('Debian', debian_ver, 'armhf', f"debian-{debian_ver}-armhf-netinst.iso"),
-            'url': f"https://cdimage.debian.org/debian-cd/current/armhf/iso-cd/debian-{debian_ver}-armhf-netinst.iso",
-        },
-        'aarch64': {
-            'file': Path('Fedora', fedora_ver, 'Server', f"Fedora-Server-netinst-{arch}-{fedora_ver}-{fedora_iso_ver}.iso"),
-            'url': f"https://download.fedoraproject.org/pub/fedora/linux/releases/{fedora_ver}/Server/{arch}",
-        },
-        'i386': {
-            'file': Path('Alpine', alpine_ver, f"alpine-virt-{alpine_ver}-x86.iso"),
-            'url': f"https://dl-cdn.alpinelinux.org/alpine/v{'.'.join(alpine_ver.split('.')[0:2])}/releases/x86",
-        },
-        'x86_64': {
-            'file': Path('Arch', arch_iso_ver, f"archlinux-{arch_iso_ver}-x86_64.iso"),
-            'url': 'https://mirrors.edge.kernel.org/archlinux/iso/',
-        },
-    }  # yapf: disable
-    iso_info['i686'] = iso_info['i386']
-
-    # Check to see if we have a local network version we can use
-    file = iso_info[arch]['file']
-    if 'NAS_FOLDER' in os.environ and (iso := Path(os.environ['NAS_FOLDER'], 'Firmware_and_Images',
-                                                   file)).exists():
-        return iso
-
-    # Otherwise, return the URL so that it can be fetched and cached on the
-    # machine
-    return f"{iso_info[arch]['url']}/{file.name}"
-
-
-def create_vm_from_args(args):
-    # Simple configuration section with short one liners with no logic. Either
-    # it came from argparse (meaning the default was able to be set there or
-    # the user customized it) or we use a default from the dictionary below.
-    # Some options are dynamically calculated using the functions above.
-    # hasattr() is used to check if the option exists within argparse, as
-    # certain flags are only available for certain modes.
+def main():
+    # Get arguments
+    args = parse_arguments()
     arch = args.architecture
-    static_defaults = {
-        'arm': {
-            'kernel': Path('arch/arm/boot/zImage'),
-            'name': 'debian',
-        },
-        'aarch64': {
-            'kernel': Path('arch/arm64/boot/Image'),
-            'name': 'fedora',
-        },
-        'i386': {
-            'kernel': Path('arch/x86/boot/bzImage'),
-            'name': 'alpine',
-        },
-        'x86_64': {
-            'kernel': Path('arch/x86/boot/bzImage'),
-            'name': 'arch',
-        },
-        'iso': get_def_iso(arch),
-    }
-    # platform.machine() to QEMU mapping
-    static_defaults['i686'] = static_defaults['i386']
-    # Part of common parser, so present for all arguments
-    cores = args.cores
-    memory = args.memory
-    name = args.name if args.name else static_defaults[arch]['name']
-    ssh_port = args.ssh_port
-    # Not necessary for all invocations
-    graphical = args.graphical if hasattr(args, 'graphical') else False
-    gdb = args.gdb if hasattr(args, 'gdb') else False
-    size = args.size if hasattr(args, 'size') else None
 
-    # Default .iso
-    # Check if iso is even in the current args, as it is only required for
-    # 'setup'. If the user supplied one, check if it is a url; if not, it has
-    # to be a path. If the user did not supply an iso, get the default one.
-    iso = None
-    if hasattr(args, 'iso'):
-        if args.iso:
-            iso = args.iso if iso_is_url(args.iso) else Path(args.iso)
-        else:
-            iso = get_def_iso(arch)
+    if args.action == 'list':
+        print(f"\nAvailable virtual machines for {arch}:\n")
 
-    # Support for running custom kernel image (only available when actually
-    # running a machine). More windy logic due to implicit defaults.
-    cmdline = None
-    initrd = None
-    kernel = None
-    if hasattr(args, 'kernel') and args.kernel:
-        # Figure out whether kernel argument is build folder or kernel image
-        if (kernel := Path(args.kernel)).is_dir():
-            kernel_folder = kernel
-            kernel = Path(kernel_folder, static_defaults[arch]['kernel'])
+        if (arch_folder := Path(BASE_FOLDER, arch)).exists() and (vms := sorted(
+                elem.name for elem in arch_folder.iterdir() if elem.is_dir())):
+            print('\n'.join(vms))
         else:
-            kernel_folder = None
+            print('None')
+        sys.exit(0)
+
+    if not (name := args.name):
+        name = DEFAULT_DISTRO[arch]
+
+    vm = {
+        'aarch64': Arm64VirtualMachine,
+        'arm64': Arm64VirtualMachine,
+        'arm': Arm32VirtualMachine,
+        'armv7l': Arm32VirtualMachine,
+        'i386': X8632VirtualMachine,
+        'i686': X8632VirtualMachine,
+        'x86_64': X8664VirtualMachine,
+    }[arch](name)
+
+    # Parse common arguments
+    if args.cores:
+        vm.cores = args.cores
+    if args.memory:
+        vm.memory = args.memory
+    if args.profile:
+        vm.profile = args.profile
+    if args.ssh_port:
+        vm.ssh_port = args.ssh_port
+
+    # Handle optional arguments
+    if getattr(args, 'gdb', False):
+        vm.qemu_args += ['-s', '-S']
+    if getattr(args, 'graphical', False):
+        vm.qemu_args += ['-device', 'virtio-vga-gl', '-display', 'gtk,gl=on']
+    if iso := getattr(args, 'iso', None):
+        vm.iso = iso
+    if size := getattr(args, 'size', 0):
+        vm.size = size
+
+    # cmdline and initrd are only handled when kernel is passed
+    if k_arg := getattr(args, 'kernel', None):
+        if (kernel := k_arg).is_dir():
+            kernel = Path(k_arg, DEFAULT_KERNEL_PATH[vm.arch])
         if not kernel.exists():
             raise RuntimeError(
-                f"Kernel image ('{kernel}'), derived from kernel argument ('{args.kernel}'), does not exist!",
+                f"Kernel image ('{kernel}'), derived from kernel argument ('{k_arg}'), does not exist!",
             )
-
-        # Handle command line and initial ramdisk
+        vm.kernel = kernel
         if args.cmdline:
-            cmdline = args.cmdline
+            vm.cmdline = args.cmdline
         if args.initrd:
-            initrd = Path(args.initrd)
+            vm.initrd = args.initrd
 
-    # Create the VirtualMachine object for the particular architecture.
-    if arch == 'arm':
-        return Arm32VirtualMachine(cmdline, cores, gdb, graphical, initrd, iso, kernel, memory,
-                                   name, size, ssh_port)
-    if arch == 'aarch64':
-        return Arm64VirtualMachine(cmdline, cores, gdb, graphical, initrd, iso, kernel, memory,
-                                   name, size, ssh_port)
-    if arch in ('i386', 'i686'):
-        return X8632VirtualMachine(cmdline, cores, gdb, graphical, initrd, iso, kernel, memory,
-                                   name, size, ssh_port)
-    if arch == 'x86_64':
-        return X8664VirtualMachine(cmdline, cores, gdb, graphical, initrd, iso, kernel, memory,
-                                   name, size, ssh_port)
-    raise RuntimeError(f"Unimplemented architecture ('{arch}')?")
-
-
-def list_vms(arch):
-    print(f"\nAvailable virtual machines for {arch}:\n")
-
-    if (arch_folder := Path(get_base_folder(), arch)).exists():
-        vms = sorted([elem.name for elem in arch_folder.iterdir() if elem.is_dir()])
-        if vms:
-            print('\n'.join(vms))
-            return
-
-    print('None')
+    if args.action == 'setup':
+        return vm.setup()
+    if args.action == 'remove':
+        return vm.remove()
+    if args.action == 'run':
+        return vm.run()
+    raise RuntimeError(f"Unimplemented action ('{args.action}')?")
 
 
 if __name__ == '__main__':
-    # Get arguments
-    arguments = parse_arguments()
-
-    if arguments.action == 'list':
-        list_vms(arguments.architecture)
-        sys.exit(0)
-
-    create_vm_from_args(arguments).handle_action(arguments.action)
+    main()
