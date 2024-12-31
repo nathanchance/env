@@ -24,7 +24,9 @@ function cbl_upd_stbl_wrktrs -d "Update the worktrees for linux-stable"
             set stable_version (string split -f 3 '-' $basename)
             if not contains $stable_version $stable_versions
                 header "Removing $worktree"
-                git -C $folder worktree remove --force $worktree
+                # Non-temporal git worktrees need to use the host path, as the
+                # have been converted to the host path below.
+                git -C $folder worktree remove --force (nspawn_path -H $worktree)
                 git -C $folder bd linux-$stable_version.y
 
                 if test $dirname = $CBL_SRC_P
@@ -48,5 +50,9 @@ function cbl_upd_stbl_wrktrs -d "Update the worktrees for linux-stable"
                 git -C $folder worktree add --track -b $branch $worktree origin/$branch
             end
         end
+
+        # We need to ensure the git worktree links are valid for both
+        # host and systemd-nspawn
+        fix_wrktrs_for_nspawn $folder
     end
 end

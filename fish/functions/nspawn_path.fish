@@ -19,7 +19,7 @@ function nspawn_path -d "Translate /home paths into systemd-nspawn or host"
                 end
                 printf '%s%s\n' $prefix $path
 
-            # In host mode, /run/host should be stripped from /home
+                # In host mode, /run/host should be stripped from /home
             case -H --host
                 if string match -qr ^/home $path
                     echo $path

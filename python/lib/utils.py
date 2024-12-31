@@ -54,6 +54,15 @@ def detect_virt(*args):
     return chronic(['systemd-detect-virt', *args], check=False).stdout.strip()
 
 
+def fix_wrktrs_for_nspawn(git_repo):
+    if not git_repo.joinpath('.git').is_dir():
+        raise RuntimeError(f"{git_repo} does not appear to be a git repository?")
+    for gitdir in git_repo.glob('.git/worktrees/*/gitdir'):
+        # Transform '/run/host/home/...' into '/home/...'
+        if (gitdir_txt := gitdir.read_text(encoding='utf-8')).startswith('/run/host/'):
+            gitdir.write_text(gitdir_txt[len('/run/host'):], encoding='utf-8')
+
+
 def fzf(header, fzf_input, fzf_args=None):
     fzf_cmd = ['fzf', '--header', header, '--multi']
     if fzf_args:

@@ -99,7 +99,7 @@ def get_report_repo():
 
 
 def get_report_worktree():
-    return Path(os.environ['CBL'], 'current-report')
+    return Path(os.environ['CBL'].removeprefix('/run/host'), 'current-report')
 
 
 def parse_parameters():
@@ -724,7 +724,10 @@ def finalize_report(args):
 
     # Remove worktree ('--force' due to submodules)
     if args.remove_worktree or args.all:
-        lib.utils.call_git(repo, ['worktree', 'remove', '--force', worktree], show_cmd=True)
+        lib.utils.call_git(
+            repo, ['worktree', 'remove', '--force',
+                   str(worktree).removeprefix('/run/host')],
+            show_cmd=True)
 
     # Delete branch locally and remotely if necessary
     if args.delete_branch or args.all:
@@ -770,6 +773,7 @@ def new_report(args):
 
         # Create worktree
         lib.utils.call_git(repo, worktree_add, show_cmd=True)
+        lib.utils.fix_wrktrs_for_nspawn(repo)
 
         # Push new branch if needed
         if (args.push or args.all) and push_to_remote:
