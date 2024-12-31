@@ -51,7 +51,7 @@ else
         end
 
         # distrobox uses $USE_CBL, systemd-nspawn uses /etc/use-cbl
-        if test (printf '%d' (cat /etc/use-cbl 2>/dev/null) 0) -eq 1; or test "$USE_CBL" = 1
+        if test (cat /etc/use-cbl 2>/dev/null; or echo 0) -eq 1; or test "$USE_CBL" = 1
             for item in $CBL_QEMU_BIN $CBL_TC_BNTL $CBL_TC_LLVM
                 fish_add_path -gm $item
             end
