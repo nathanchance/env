@@ -59,7 +59,7 @@ function cbl_bld_llvm_korg -d "Build (and optionally test) LLVM for kernel.org"
         for tc in (fd -a -d 1 -t d . $tmp_llvm_install)
             for src in $CBL_SRC_C/linux $CBL_SRC_C/linux-stable-$CBL_STABLE_VERSIONS
                 if using_nspawn
-                    sd_nspawn -r 'cbl_lkt --linux-folder '(nspawn_adjust_path $src)' --llvm-prefix '(nspawn_adjust_path $tc)
+                    sd_nspawn -r 'cbl_lkt --linux-folder '(nspawn_path -c $src)' --llvm-prefix '(nspawn_path -c $tc)
                 else if dbx_has_82a69f0
                     dbxe -- fish -c "cbl_lkt --linux-folder $src --llvm-prefix $tc"
                 else

@@ -25,5 +25,5 @@ function mchsh -d "Wrapper around 'machinectl shell'"
     # Use fish's --init-commands to drop into the current working directory,
     # instead of $HOME, which is not really useful if working on the host and
     # wanting to drop into the guest to work.
-    machinectl shell -q $user_host $SHELL -C 'cd '(nspawn_adjust_path $PWD) $mchsh_args
+    machinectl shell -q $user_host $SHELL -C 'cd '(nspawn_path -c $PWD) $mchsh_args
 end
