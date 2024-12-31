@@ -5,12 +5,14 @@
 function nspawn_path -d "Translate /home paths into systemd-nspawn or host"
     set mode $argv[1]
     set path $argv[2]
-    set run_host /run/host
 
-    # The path only needs to be adjusted when it actually starts with whatever
-    # the current $HOME value is, otherwise we assume that it is either already
-    # in the appropriate format or it does not need to be converted.
-    if string match -qr ^$HOME $path
+    # Constants
+    set run_host /run/host
+    set host_home /home/$USER
+    set guest_home $run_host$host_home
+
+    # The path only needs to be adjusted if it starts with one of the two possible home paths
+    if string match -qr '^('$host_home'|'$guest_home')' $path
         switch $mode
             # In container mode, the /home path should be prefixed with /run/host
             case -c --container
