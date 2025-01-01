@@ -12,7 +12,7 @@ windows:
       sleep_before: 1
   - shell: mchsh
     shell_command:
-    - cmd: cbl_vmm run -c (math (nproc) / 2) -m (math (nproc) x 0.75)
+    - cmd: cbl_vmm run -P build
       enter: false
       sleep_before: 1
     focus: true
