@@ -25,16 +25,10 @@ and cat /etc/pacman.d/mirrorlist
 and pacman-key --init
 and pacman-key --populate
 
-# This should not be necessary but testing is broken right now
-# Uninstall it before updating then install it after
-and pacman -R --noconfirm qemu-emulators-full (pactree -u qemu-emulators-full | string match -gr '(qemu-(?:system|user)-?.*)=')
-
 # Temporarily disable the pacman sandbox
 and sed -i 's/^DownloadUser/#DownloadUser/g' /etc/pacman.conf
 
 and pacman -Syyuu --noconfirm
-
-and pacman -S --noconfirm qemu-emulators-full
 
 # Switch to doas from sudo non-interatively
 and pacman -S --ask 4 --noconfirm opendoas-sudo
