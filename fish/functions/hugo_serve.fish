@@ -19,7 +19,7 @@ function hugo_serve -d "Runs 'hugo server' based on WSL's IP address"
     set -q intf
     or set intf enp
 
-    set ip (dirname (ip addr | grep $intf | grep inet | awk '{print $2}'))
+    set ip (ip addr | grep $intf | grep inet | awk '{print $2}' | string split -f 1 /)
     if test -z "$ip"
         print_error "ip not found?"
         return 1
