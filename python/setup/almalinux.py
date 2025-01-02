@@ -10,6 +10,7 @@ import fedora
 sys.path.append(str(Path(__file__).resolve().parents[1]))
 # pylint: disable=wrong-import-position
 import lib.setup
+import lib.utils
 # pylint: enable=wrong-import-position
 
 
@@ -92,6 +93,13 @@ def install_packages():
     lib.setup.dnf(['reinstall', '-y', 'shadow-utils'])
 
 
+def setup_sudo_umask():
+    sudo_pam, sudo_pam_txt = lib.utils.path_and_text('/etc/pam.d/sudo')
+    if sudo_pam_txt and 'pam_umask' not in sudo_pam_txt:
+        with sudo_pam.open('a', encoding='utf-8') as file:
+            file.write('session    optional     pam_umask.so\n')
+
+
 def setup_repos():
     fedora.dnf_add_repo('https://cli.github.com/packages/rpm/gh-cli.repo')
     fedora.dnf_add_repo(
@@ -118,6 +126,7 @@ if __name__ == '__main__':
     install_packages()
     fedora.setup_libvirt(user)
     fedora.setup_mosh()
+    setup_sudo_umask()
     lib.setup.chsh_fish(user)
     lib.setup.clone_env(user)
     lib.setup.setup_initial_fish_config(user)
