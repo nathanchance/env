@@ -67,6 +67,9 @@ def install_packages():
         'git',
         'git-email',
 
+        # mkosi
+        'distribution-gpg-keys',
+
         # repo
         'python',
 
