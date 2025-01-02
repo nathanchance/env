@@ -27,7 +27,7 @@ function _hydro_addon_nathan -d "Hydro prompt customizations"
         end
     end
     if in_nspawn
-        if set incoming (findmnt -n -o FSROOT /run/host/incoming)
+        if set incoming (findmnt -n -o FSROOT /run/host/incoming | sort -u)
             set container_str '('(string split -f 2 -m 1 -r / $incoming)')'
         else if set image_id (string match -gr 'IMAGE_ID="?([^"]+)' </usr/lib/os-release)
             if test -e /etc/ephemeral
