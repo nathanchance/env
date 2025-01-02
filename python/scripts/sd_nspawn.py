@@ -69,6 +69,12 @@ class NspawnConfig(UserDict):
         # Set machine path based on the name
         self.machine_dir = Path('/var/lib/machines', self.name)
 
+        # Set systemd version. If this fails, it means we do not have nspawn
+        # installed or the output has changed, both of which need to be dealt
+        # with.
+        self.systemd_version = int(
+            lib.utils.chronic(['systemd-nspawn', '--version']).stdout.splitlines()[0].split()[1])
+
     def _add_dynamic_mounts(self):
         rw_mounts = {
             '/dev/kvm',
@@ -197,13 +203,11 @@ class NspawnConfig(UserDict):
         return nspawn_cmd
 
     def _gen_run_cmd(self, cmd):
-        return [
+        args = [
             SYSTEMD_RUN_M,
             self.name,
             # We do not need our units to remain in memory
             '--collect',
-            # The shell will expand our environment
-            '--expand-environment=no',
             # Allowing interacting with stdin and seeing stdout/stderr
             '--pty',
             # Show no machinectl output
@@ -212,11 +216,17 @@ class NspawnConfig(UserDict):
             f"--uid={USER}",
             # Get return code of the process
             '--wait',
+        ]
+        # The shell will expand our environment
+        if self.systemd_version >= 254:
+            args.append('--expand-environment=no')
+        args += [
             # Use a qualified path
             '/usr/bin/fish',
             '-c',
             cmd,
         ]
+        return args
 
     def install_files(self):
         lib.utils.print_green('Requesting sudo permissions for file creation...')
@@ -370,7 +380,7 @@ def parse_arguments():
     return parser.parse_args()
 
 
-if __name__ == '__main__':
+def main():
     args = parse_arguments()
 
     if os.geteuid() == 0:
@@ -392,3 +402,7 @@ if __name__ == '__main__':
         config.reset(args.reset)
     if args.run:
         config.run_mach_cmd(args.run)
+
+
+if __name__ == '__main__':
+    main()
