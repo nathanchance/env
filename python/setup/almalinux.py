@@ -45,10 +45,6 @@ def install_packages():
         'unzip',
         'zstd',
 
-        # distrobox
-        'distrobox',
-        'podman',
-
         # email
         'cyrus-sasl-plain',
         'mutt',
@@ -70,6 +66,9 @@ def install_packages():
 
         # mkosi
         'distribution-gpg-keys',
+
+        # podman
+        'podman',
 
         # repo
         'python',
