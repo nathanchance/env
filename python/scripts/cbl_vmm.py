@@ -271,8 +271,9 @@ class VirtualMachine:
         self._shared_folder.mkdir(exist_ok=True, parents=True)
 
         # Clear any previous hosts using the chosen SSH port.
-        lib.utils.run(['ssh-keygen', '-R', f"[localhost]:{self.ssh_port}"], show_cmd=True)
-        Path.home().joinpath('.ssh/known_hosts.old').unlink(missing_ok=True)
+        if Path.home().joinpath('.ssh/known_hosts').exists():
+            lib.utils.run(['ssh-keygen', '-R', f"[localhost]:{self.ssh_port}"], show_cmd=True)
+            Path.home().joinpath('.ssh/known_hosts.old').unlink(missing_ok=True)
 
         # Python recommends full paths with subprocess.Popen() calls
         lib.utils.print_cmd(virtiofsd_cmd)
