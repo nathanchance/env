@@ -37,7 +37,8 @@ def dnf_add_repo(repo_url):
     # config-manager does not support --add-repo with dnf5, which is the
     # default in Fedora 41 now.
     # https://github.com/rpm-software-management/dnf5/issues/1537
-    if get_fedora_version() >= 41:
+    # Done in an agnostic way because this is shared with AlmaLinux.
+    if Path(shutil.which('dnf')).resolve().name.endswith('5'):
         local_dst = Path('/etc/yum.repos.d', repo_url.rsplit('/', 1)[1])
         lib.utils.curl(repo_url, output=local_dst)
     else:
