@@ -5,7 +5,7 @@ windows:
   panes:
   - btop
   -
-- window_name: distrobox
+- window_name: machinectl shell
   focus: true
   panes:
-  - shell: dbxe
+  - shell: mchsh
