@@ -29,31 +29,26 @@ function start_ssh_agent -d "Launch an ssh agent only if it has not already been
 
     ssh-add -l &>/dev/null
     switch $status
-        case 1
+        case 1 # Can connect to the ssh-agent, no identities yet
             ssh-add $ssh_key
-        case 2
-            if in_nspawn
-                if test -e /etc/ephemeral
-                    set ssh_agent_file /tmp/.ssh-agent.fish
-                else
-                    set ssh_agent_file $HOME/.ssh/.systemd-nspawn-ssh-agent.fish
-                end
-            else
-                set ssh_agent_file $HOME/.ssh/.ssh-agent.fish
-            end
+        case 2 # Cannot connect to the ssh-agent
+            set ssh_agent_file $HOME/.ssh/.ssh-agent.fish
 
+            # Attempt to read a previously started agent's file
             if test -r $ssh_agent_file
                 cat $ssh_agent_file | source >/dev/null
             end
 
             ssh-add -l &>/dev/null
             switch $status
-                case 1
+                case 1 # Can connect to ssh-agent now, no identities yet
                     ssh-add $ssh_key
-                case 2
+                case 2 # No ssh-agent, start a new one and add key
+                    set ssh_agent_sock $HOME/.ssh/.ssh-agent.sock
+                    rm -fr $ssh_agent_sock
                     begin
                         umask 066
-                        ssh-agent -c >$ssh_agent_file
+                        ssh-agent -a $ssh_agent_sock -c >$ssh_agent_file
                     end
                     cat $ssh_agent_file | source >/dev/null
                     ssh-add $ssh_key
