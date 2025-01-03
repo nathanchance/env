@@ -3,6 +3,7 @@
 # Copyright (C) 2022-2023 Nathan Chancellor
 
 from pathlib import Path
+import platform
 import sys
 
 import fedora
@@ -12,6 +13,8 @@ sys.path.append(str(Path(__file__).resolve().parents[1]))
 import lib.setup
 import lib.utils
 # pylint: enable=wrong-import-position
+
+HOST_ARCH = platform.machine()
 
 
 def get_alma_version():
@@ -84,6 +87,8 @@ def install_packages():
             'qemu-kvm',
             'virt-install',
         ]
+    if HOST_ARCH == 'x86_64':
+        packages.append('pacman')  # to build dev container image with mkosi
 
     fedora.dnf_install(packages)
 
