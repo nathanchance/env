@@ -19,7 +19,6 @@ function updall -d "Update binaries in $BIN_FOLDER"
         bat \
         btop \
         diskus \
-        distrobox \
         duf \
         exa \
         fd \

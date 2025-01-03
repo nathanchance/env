@@ -371,6 +371,8 @@ rpmbuild/' >>$gitignore
             ln -fnrsv $configs/tmux/.tmux.conf.dbx $HOME/.tmux.conf.container
 
             if has_container_manager
+                upd distrobox
+
                 dbxc --yes
             end
     end
