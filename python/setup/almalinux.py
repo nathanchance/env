@@ -92,11 +92,14 @@ def install_packages():
     lib.setup.dnf(['reinstall', '-y', 'shadow-utils'])
 
 
-def setup_sudo_umask():
+def setup_sudo(username):
     sudo_pam, sudo_pam_txt = lib.utils.path_and_text('/etc/pam.d/sudo')
     if sudo_pam_txt and 'pam_umask' not in sudo_pam_txt:
         with sudo_pam.open('a', encoding='utf-8') as file:
             file.write('session    optional     pam_umask.so\n')
+
+    # This is expected to exist by sd_nspawn when using sudo.
+    Path(f"/etc/sudoers.d/00_{username}").touch()
 
 
 def setup_repos():
@@ -125,7 +128,7 @@ if __name__ == '__main__':
     install_packages()
     fedora.setup_libvirt(user)
     fedora.setup_mosh()
-    setup_sudo_umask()
+    setup_sudo(user)
     lib.setup.chsh_fish(user)
     lib.setup.clone_env(user)
     lib.setup.setup_initial_fish_config(user)
