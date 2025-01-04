@@ -85,9 +85,13 @@ class NspawnConfig(UserDict):
             '/var/tmp/fzf',
         }
         ro_mounts = {
+            os.environ['OPT_ORB_GUEST'],
             # Allow interacting with the host tmux socket
             f"/var/tmp/tmux-{os.getuid()}",
         }
+
+        if mac_folder := os.environ.get('MAC_FOLDER'):
+            rw_mounts.add(mac_folder)
 
         if 'arch' in self.name:
             # Share the host's mirrorlist so that reflector does not have to be
