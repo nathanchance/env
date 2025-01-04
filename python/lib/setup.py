@@ -268,7 +268,7 @@ def group_exists(group):
 
 
 def is_equinix():
-    return re.search('[a|c|f|g|m|n|s|t|x]{1}[1-3]{1}-.*', get_hostname())
+    return re.search('^[a|c|f|g|m|n|s|t|x]{1}[1-3]{1}-.*', get_hostname())
 
 
 def is_installed(package_to_check):
