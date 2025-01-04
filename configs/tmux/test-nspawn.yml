@@ -1,0 +1,23 @@
+session_name: main
+windows:
+- window_name: btop and machinectl shell
+  panes:
+  - btop --utf-force
+  - shell: mchsh
+    shell_command:
+    - cmd: cbl_bld_all
+      enter: false
+      sleep_before: 1
+- window_name: host and machinectl shell
+  layout: 775f,269x53,0,0[269x41,0,0,3,269x11,0,42,4]
+  focus: true
+  panes:
+  - shell_command:
+    - cmd: cbl_qualify_next
+      enter: false
+    focus: true
+  - shell: have_dev_kvm_access; and mchsh
+    shell_command:
+    - cmd: cbl_test_kvm vmm
+      enter: false
+      sleep_before: 1
