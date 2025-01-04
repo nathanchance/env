@@ -166,10 +166,8 @@ function user_setup -d "Setup a user account, downloading all files and placing 
     if fisher list &| grep -q /tmp/env/fish
         fisher remove /tmp/env/fish
     end
-    # Install our functions first so that we can use esc_home in the loop below
-    fisher install (string replace ~ \~ $ENV_FOLDER)/fish
-    or return
     set fisher_plugins \
+        $ENV_FOLDER/fish \
         $forked_fisher_plugins \
         PatrickF1/fzf.fish \
         jorgebucaran/autopair.fish \
@@ -178,7 +176,7 @@ function user_setup -d "Setup a user account, downloading all files and placing 
         set -a fisher_plugins jethrokuan/z
     end
     for fisher_plugin in $fisher_plugins
-        fisher install (esc_home $fisher_plugin); or return
+        fisher install $fisher_plugin; or return
     end
 
     # config.fish

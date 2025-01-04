@@ -28,8 +28,7 @@ function upd -d "Runs the update command for the current distro or downloads/upd
                 continue
 
             case fisher
-                # Use output of 'fisher list' to ensure '~' stays escaped
-                fisher update (fisher list) 1>/dev/null; or return
+                fisher_update 1>/dev/null; or return
                 continue
 
             case hydro
@@ -48,7 +47,7 @@ function upd -d "Runs the update command for the current distro or downloads/upd
                 end
                 switch $target
                     case hydro
-                        fisher update (esc_home $repo) 1>/dev/null; or return
+                        fisher_update $repo 1>/dev/null; or return
                 end
 
             case forks
