@@ -229,7 +229,9 @@ def setup_doas(username):
                      'permit nopass root\n')
 
         # OrbStack sets up passwordless sudo, carry it over to doas
-        if Path('/etc/sudoers.d/orbstack').exists():
+        # If we created a user password, this file will not be set up
+        # but we still want this behavior, so check for /mnt/mac as well.
+        if Path('/etc/sudoers.d/orbstack').exists() or Path('/mnt/mac').is_dir():
             conf_txt += ('\n'
                          '# passwordless doas for my user\n'
                          f"permit nopass {username}\n")
