@@ -366,6 +366,15 @@ rpmbuild/' >>$gitignore
             or return
 
             mkosi_bld
+            or return
+
+            # '--now' is only supported with systemd 253 or newer but AlmaLinux 9 ships 252
+            if test (machinectl --version | string match -gr '^systemd (\d+) ') -ge 253
+                sudo machinectl enable --now (dev_img)
+            else
+                sudo machinectl enable (dev_img)
+                and sudo machinectl start (dev_img)
+            end
 
         case '*'
             ln -fnrsv $configs/tmux/.tmux.conf.dbx $HOME/.tmux.conf.container
