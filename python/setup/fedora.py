@@ -163,9 +163,6 @@ def install_packages():
         # compression and decompression
         'zstd',
 
-        # distrobox
-        'distrobox',
-
         # email
         'cyrus-sasl-plain',
         'mutt',
@@ -204,15 +201,7 @@ def install_packages():
         'tuxmake',
     ]  # yapf: disable
 
-    if lib.setup.is_lxc():
-        packages += [
-            'docker-ce',
-            'docker-ce-cli',
-            'containerd.io',
-            'docker-buildx-plugin',
-            'docker-compose-plugin',
-        ]
-    else:
+    if not lib.setup.is_lxc():
         packages.append('podman')
 
     # Install Virtualization group on Equinix Metal servers or trusted machines
@@ -260,15 +249,6 @@ def setup_doas(username):
     lib.setup.setup_sudo_symlink()
 
 
-def setup_docker(username):
-    if not shutil.which('docker'):
-        return
-
-    lib.utils.run(['groupadd', '-f', 'docker'])
-    lib.setup.add_user_to_group('docker', username)
-    lib.setup.systemctl_enable('docker')
-
-
 def setup_kernel_args():
     if lib.setup.get_hostname() != 'honeycomb':
         return
@@ -304,9 +284,6 @@ def setup_pi(username):
 def setup_repos():
     dnf_add_repo('https://cli.github.com/packages/rpm/gh-cli.repo')
 
-    if lib.setup.is_lxc():
-        dnf_add_repo('https://download.docker.com/linux/fedora/docker-ce.repo')
-
     if machine_is_trusted():
         dnf_add_repo('https://pkgs.tailscale.com/stable/fedora/tailscale.repo')
 
@@ -330,7 +307,6 @@ if __name__ == '__main__':
     setup_repos()
     install_packages()
     setup_doas(user)
-    setup_docker(user)
     setup_kernel_args()
     setup_libvirt(user)
     setup_mosh()
