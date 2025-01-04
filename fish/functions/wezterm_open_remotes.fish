@@ -10,15 +10,9 @@ function wezterm_open_remotes -d "Open a new wezterm tab for each remote machine
     # Local machines
     set hosts \
         hetzner:Hetzner \
-        thelio:Thelio \
         aadp:AADP \
-        intel-desktop-11700:"Intel full desktop" \
-        amd-desktop:"AMD desktop" \
         intel-desktop-n100:"Intel mini desktop" \
-        intel-laptop:"Intel laptop" \
-        honeycomb:Honeycomb \
-        pi4:"Pi 4" \
-        pi3:"Pi 3"
+        honeycomb:Honeycomb
 
     set msh_args $argv
 
