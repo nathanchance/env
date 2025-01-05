@@ -497,6 +497,8 @@ def pacman_install_packages():
         'repo',
 
         # mkosi
+        'apt',
+        'debian-archive-keyring',
         'distribution-gpg-keys',
         'dnf',
 

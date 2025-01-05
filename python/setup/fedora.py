@@ -186,6 +186,8 @@ def install_packages():
         'git-email',
 
         # mkosi / systemd-nspawn
+        'apt',
+        'debian-keyring',
         'distribution-gpg-keys',
         'systemd-container',
 

@@ -68,6 +68,8 @@ def install_packages():
         'git-email',
 
         # mkosi
+        'apt',
+        'debian-keyring',
         'distribution-gpg-keys',
 
         # podman
