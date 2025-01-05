@@ -6,7 +6,8 @@ function mkosi_bld -d "Build a distribution using mkosi"
     # Normally, we should just be able to use mkosi from our distribution
     # but we require some newer fixes and features at the moment
     if not in_venv
-        if not test -e $PY_VENV_DIR/mkosi
+        set venv_dir $PY_VENV_DIR/mkosi
+        if not test -e $venv_dir
             py_venv c mkosi
         end
 
@@ -18,6 +19,8 @@ function mkosi_bld -d "Build a distribution using mkosi"
 
             pip install git+https://github.com/systemd/mkosi
             or return
+
+            crl https://github.com/nathanchance/patches/raw/refs/heads/main/mkosi/buster-security.patch | patch -d $venv_dir/lib/python*/site-packages -N -p1
         end
     else if test (basename $VIRTUAL_ENV) != mkosi
         print_error "Already in a virtual environment?"
@@ -30,7 +33,11 @@ function mkosi_bld -d "Build a distribution using mkosi"
         set image $argv[1]
     end
 
-    set directory $ENV_FOLDER/mkosi/$image
+    if string match -qr ^/ $image
+        set directory $image
+    else
+        set directory $ENV_FOLDER/mkosi/$image
+    end
     if not test -e $directory/mkosi.conf
         print_error "No build files for $image?"
         return 1
@@ -42,11 +49,13 @@ function mkosi_bld -d "Build a distribution using mkosi"
         # We may need to look at the configuration of the host
         /etc:/etc
 
-    switch $image
+    switch (basename $directory)
         case dev-arch
             set cache_dir pacman
         case dev-fedora
             set cache_dir dnf
+        case pgo-llvm-builder
+            set cache_dir apt
     end
 
     sudo (command -v mkosi) \
