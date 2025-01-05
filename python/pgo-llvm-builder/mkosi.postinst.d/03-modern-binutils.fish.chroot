@@ -1,0 +1,19 @@
+#!/usr/bin/env fish
+
+git clone https://github.com/ClangBuiltLinux/tc-build /tc-build
+or return
+
+set targets \
+    arm \
+    powerpc \
+    powerpc64 \
+    powerpc64le \
+    riscv64 \
+    s390x
+
+PATH=/usr/local/bin:$PATH /tc-build/build-binutils.py \
+    --install-folder /usr/local \
+    --targets $targets
+or return
+
+rm -fr /tc-build

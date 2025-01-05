@@ -1,0 +1,23 @@
+#!/usr/bin/env fish
+# Description: Build and install a more modern version of ninja, which is required for newer LLVM and cmake releases
+
+set ninja_version 1.12.1
+set workdir (mktemp -d)
+
+begin
+    # Download source code
+    wget -O - -q https://github.com/ninja-build/ninja/archive/refs/tags/v$ninja_version.tar.gz | tar -C $workdir --strip-components=1 -xzvf -
+
+    # Download build dependencies
+    and apt update -y
+    and apt build-dep -y ninja-build
+
+    # Configure and build
+    and pushd $workdir
+    and ./configure.py --bootstrap
+    and install -Dvm755 ninja /usr/local/bin/ninja
+    and popd
+end
+or return
+
+rm -fr $workdir

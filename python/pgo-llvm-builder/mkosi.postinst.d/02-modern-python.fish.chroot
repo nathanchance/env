@@ -1,0 +1,22 @@
+#!/usr/bin/env fish
+# Description: Build and install a more modern version of Python
+
+set python_version 3.13.1
+set workdir (mktemp -d)
+
+begin
+    # Download source code
+    wget -O - -q https://www.python.org/ftp/python/$python_version/Python-$python_version.tar.xz | tar -C $workdir --strip-components=1 -xJvf -
+
+    # Download build dependencies
+    and apt update -y
+    and apt build-dep -y python3
+
+    # Configure and build
+    and fish -c "cd $workdir; and ./configure --enable-optimizations"
+    and make -C $workdir -j(nproc)
+    and make -C $workdir -j(nproc) install
+end
+or return
+
+rm -fr $workdir

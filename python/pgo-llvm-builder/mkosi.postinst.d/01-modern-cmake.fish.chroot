@@ -1,0 +1,12 @@
+#!/usr/bin/env fish
+# Description: Download and install a more modern version of cmake, which is required for newer LLVM releases
+
+set cmake_version 3.31.3
+
+switch $ARCHITECTURE
+    case arm64
+        set arch aarch64
+    case x86-64
+        set arch x86_64
+end
+wget -O - -q https://github.com/Kitware/CMake/releases/download/v$cmake_version/cmake-$cmake_version-linux-$arch.tar.gz | tar -C /usr/local --strip-components=1 -xzvf -

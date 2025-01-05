@@ -1,0 +1,8 @@
+#!/usr/bin/env fish
+# Description: Install dependencies that are only needed under certain conditions
+
+if test "$DISTRIBUTION_ARCHITECTURE" = amd64
+    apt update
+
+    and apt install -y --no-install-recommends libc6-dev-i386
+end
