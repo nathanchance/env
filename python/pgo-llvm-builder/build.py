@@ -2,7 +2,6 @@
 
 from argparse import ArgumentParser
 import datetime
-import json
 from pathlib import Path
 import platform
 import shutil
@@ -13,7 +12,7 @@ sys.path.append(str(Path(__file__).resolve().parents[1]))
 import lib.utils
 # pylint: enable=wrong-import-position
 
-IMAGE_TAG = 'pgo-llvm-builder'
+MACH_FOLDER = Path('/var/lib/machines/pgo-llvm-builder')
 ROOT = Path(__file__).resolve().parent
 BUILD = Path(ROOT, 'build')
 GIT = Path(ROOT, 'git')
@@ -44,15 +43,6 @@ parser = ArgumentParser(description='Build LLVM with PGO in a container.')
 parser.add_argument('-b',
                     '--build-folder',
                     help='Location of build folder. Omit for build folder in repo')
-parser.add_argument('-B',
-                    '--build-args',
-                    default=[],
-                    help='Build arguments for Docker container build',
-                    nargs='+')
-parser.add_argument('-f',
-                    '--force-build-container',
-                    action='store_true',
-                    help='Build container even if it exists')
 parser.add_argument('-i',
                     '--install-folder',
                     help='Location of install folder. Omit for install folder in repo')
@@ -72,8 +62,8 @@ parser.add_argument('-v',
                     required=True)
 args = parser.parse_args()
 
-if not shutil.which('podman'):
-    raise RuntimeError('podman not found!')
+if not shutil.which('systemd-nspawn'):
+    raise RuntimeError('systemd-nspawn not found!')
 
 if 'all-stable' in args.versions:
     versions = LLVM_VERSIONS[1:]
@@ -82,24 +72,10 @@ elif 'all' in args.versions:
 else:
     versions = args.versions
 
-# First, build container if necessary
-if not (build_container := args.force_build_container):
-    cmd_out = lib.utils.chronic(['podman', 'image', 'ls', '--format', 'json']).stdout
-    build_container = not [
-        name for item in json.loads(cmd_out) if 'Names' in item
-        for name in item['Names'] if 'pgo-llvm-builder' in name
-    ]
-if build_container:
-    lib.utils.run([
-        'podman',
-        'build',
-        *[f"--build-arg={arg}" for arg in args.build_args],
-        '--layers=false',
-        '--pull=always',
-        '--tag',
-        IMAGE_TAG,
-        ROOT,
-    ])
+# First, make sure environment exists. Check for this requires root because
+# /var/lib/machines can only be read by the root user but we need it for later
+# anyways.
+lib.utils.run_as_root(['test', '-e', MACH_FOLDER])
 
 build_folder = Path(args.build_folder).resolve() if args.build_folder else BUILD
 
@@ -127,24 +103,13 @@ else:
     lib.utils.call_git_loud(tc_build_folder, ['reset', '--hard', '@{u}'])
 
 llvm_git_dir = Path(llvm_folder, '.git')
-static_mounts = [
-    {
-        'src': build_folder,
-        'dst': '/build',
-    },
-    {
-        'src': tc_build_folder,
-        'dst': '/tc-build',
-    },
-    # This has to be present for git operations to work in the worktree. It is
-    # marked read only so that any attempts to modify the user's repo rather
-    # than worktree will fail.
-    {
-        'src': llvm_git_dir,
-        'dst': llvm_git_dir,
-        'opts': {'ro'},
-    },
-]
+rw_mounts = {
+    f"{build_folder}:/build",
+    f"{tc_build_folder}:/tc-build",
+}
+ro_mounts = {
+    llvm_git_dir,
+}
 
 if args.skip_tests:
     check_args = []
@@ -187,18 +152,20 @@ build_llvm_py_cmd = [
     '--show-build-commands',
 ]  # yapf: disable
 
-podman_run_cmd = [
-    'podman',
-    'run',
-    '--cap-drop=DAC_OVERRIDE',  # for ld.lld tests
-    '--env=DISTRIBUTING=1',  # for tc-build
-    '--interactive',
-    '--pids-limit=-1',  # to avoid running of PIDs when building
-    '--rm',
-    '--tty',
+systemd_nspawn_cmd = [
+    'systemd-nspawn',
+    '--as-pid2',
+    '--ephemeral',
+    f"--machine={MACH_FOLDER.name}",
+    '--private-users=pick',
+    '--private-users-ownership=auto',
+    '--quiet',
+    '--register=no',
+    '--setenv=DISTRIBUTING=1',
+    '--settings=no',
+    '--system-call-filter=perf_event_open',
+    '--user=builder',
 ]
-selinux_enabled = (enforce := Path('/sys/fs/selinux/enforce')).exists() and \
-                  int(enforce.read_text(encoding='utf-8')) == 1
 
 for value in versions:
     VERSION = LLVM_VERSIONS[0] if value == 'main' else value
@@ -255,31 +222,13 @@ for value in versions:
     shutil.rmtree(build_folder, ignore_errors=True)
     build_folder.mkdir(exist_ok=True, parents=True)
 
-    mounts = [
-        *static_mounts,
-        {
-            'src': llvm_install,
-            'dst': '/install',
-        },
-        {
-            'src': worktree,
-            'dst': '/llvm',
-        },
-    ]
-    if selinux_enabled:
-        for mount in mounts:
-            if 'opts' in mount:
-                mount['opts'].add('z')
-            else:
-                mount['opts'] = {'z'}
+    rw_mounts.add(f"{llvm_install}:/install")
+    rw_mounts.add(f"{worktree}:/llvm")
 
     build_cmd = [
-        *podman_run_cmd,
-        *[
-            f"--volume={d['src']}:{d['dst']}{(':' + ','.join(d['opts'])) if 'opts' in d else ''}"
-            for d in mounts
-        ],
-        IMAGE_TAG,
+        *systemd_nspawn_cmd,
+        *[f"--bind={val}:idmap" for val in rw_mounts],
+        *[f"--bind-ro={val}" for val in ro_mounts],
         *build_llvm_py_cmd,
     ]
     # Enable BOLT for more optimization if:
@@ -292,7 +241,7 @@ for value in versions:
     maj_ver = int(VERSION.split('.', 1)[0])
     if (maj_ver >= 16 and MACHINE == 'x86_64') or (maj_ver >= 18 and MACHINE == 'aarch64'):
         build_cmd += ['--bolt', '--lto', 'thin']
-    lib.utils.run(build_cmd)
+    lib.utils.run_as_root(build_cmd)
 
     llvm_tarball = Path(llvm_install.parent, f"{llvm_install.name}.tar")
     lib.utils.run([
