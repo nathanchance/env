@@ -99,18 +99,6 @@ def prepare_source(base_name, base_ref='origin/master'):
 
     # Patching section
     # yapf: disable
-    if base_name in ('fedora', 'linux-next-llvm'):
-        # https://lore.kernel.org/20241114163931.GA1928968@thelio-3990X/
-        commits.append('bd0601e8f99ded716ae1341c39cf8cc30fc28466')  # fixup! netfs: Change the read result collector to only use one work item
-
-    if base_name in ('fedora', 'rpi'):
-        # https://lore.kernel.org/20241216180231.GA1069997@ax162/
-        patches.append('https://lore.kernel.org/all/20241218-crypto-qce-sha-fix-clang-cleanup-error-v1-1-7e6c6dcca345@kernel.org/')  # crypto: qce - revert "use __free() for a buffer that's always freed"
-
-    if base_name == 'fedora':
-        patches.append('https://lore.kernel.org/all/20241216093410.377112-1-arnd@kernel.org/')  # ALSA: compress_offload: import DMA_BUF namespace
-        reverts.append('32d053d6f5e92efd82349e7c481cba5a43dc1a22')  # arm64/mm: Drop configurable 48-bit physical address space limit
-
     if base_name == 'linux-next-llvm':
         # https://lore.kernel.org/20241212014418.GA532802@ax162/
         # https://lore.kernel.org/all/20241213-kexec-fix-section-name-for-ffunction-sections-v1-1-1ae6050f6a15@kernel.org/
@@ -121,8 +109,6 @@ def prepare_source(base_name, base_ref='origin/master'):
         patches.append('https://lore.kernel.org/all/20241216233704.3208607-5-dwmw2@infradead.org/')  # x86/kexec: Fix stack and handling of re-entry point for ::preserve_context
         patches.append('https://lore.kernel.org/all/20241216233704.3208607-6-dwmw2@infradead.org/')  # x86/kexec: Fix location of relocate_kernel with -ffunction-sections
         patches.append('https://lore.kernel.org/all/20241216233704.3208607-7-dwmw2@infradead.org/')  # x86/kexec: Mark machine_kexec() with __nocfi
-
-        patches.append('https://lore.kernel.org/all/20241219-amdgpu-fix-enum-float-conversion-again-again-v1-1-ef2c619724b1@kernel.org/')  # drm/amd/display: Disable -Wenum-float-conversion for dml2_dpmm_dcn4.c
     # yapf: enable
 
     try:
