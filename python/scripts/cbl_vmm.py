@@ -189,12 +189,13 @@ class VirtualMachine:
             args += ['-initrd', initrd]
 
         # ISO, if setting up
-        if iso := self.iso:
-            if str(iso).startswith(('https://', 'http://')):
-                iso_url = iso
-                if not (iso := Path(BASE_FOLDER, 'iso', iso_url.rsplit('/', 1)[1])).exists():
+        if iso_val := self.iso:
+            if iso_val.startswith(('https://', 'http://')):
+                if not (iso := Path(BASE_FOLDER, 'iso', iso_val.rsplit('/', 1)[1])).exists():
                     iso.parent.mkdir(exist_ok=True, parents=True)
-                    lib.utils.run(['wget', '-c', '-O', iso, iso_url], show_cmd=True)
+                    lib.utils.run(['wget', '-c', '-O', iso, iso_val], show_cmd=True)
+            else:
+                iso = Path(iso_val)
             if not iso.exists():
                 raise RuntimeError(
                     f"{iso.name} does not exist at {iso}, was the wrong path used or did the download fail?",
