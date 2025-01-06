@@ -64,6 +64,10 @@ function cbl_bld_krnl_rpm -d "Build a .rpm kernel package"
     set out (tbf)
 
     set rpmopts '--without devel'
+    # /, which includes /var/tmp, is idmapped, which breaks writing to it with our user, so use /tmp.
+    if in_nspawn
+        set -a rpmopts "--define '_tmppath /tmp'"
+    end
     if not grep -q -- "--define='_topdir" scripts/Makefile.package
         set -a rpmopts "--define '_topdir $out/rpmbuild'"
     end
