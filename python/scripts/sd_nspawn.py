@@ -76,10 +76,14 @@ class NspawnConfig(UserDict):
             lib.utils.chronic(['systemd-nspawn', '--version']).stdout.splitlines()[0].split()[1])
 
     def _add_dynamic_mounts(self):
-        rw_mounts = {
-            '/dev/kvm',
+        automounted_mounts = {
             # We may be in a virtual machine
             os.environ['HOST_FOLDER'],
+            os.environ['NAS_FOLDER'],
+        }
+        rw_mounts = {
+            '/dev/kvm',
+            *automounted_mounts,
             os.environ['NVME_FOLDER'],
             # Allow 'fzf --tmux' to work properly
             '/var/tmp/fzf',
@@ -116,10 +120,10 @@ class NspawnConfig(UserDict):
             # which needs to be written to as the host root user by the
             # container root user. For mounts where the current user can read
             # and write to, the mapping mentioned earlier makes everything work
-            # as expeced without 'idmap'. We special case HOST_FOLDER because
-            # the os.access check may not pass if the folder has not been
-            # automounted yet.
-            if mount == os.environ['HOST_FOLDER'] or os.access(mount, os.R_OK | os.W_OK):
+            # as expeced without 'idmap'. We special case automounted mounts
+            # because the os.access check may not pass if the folder has not
+            # been automounted yet.
+            if mount in automounted_mounts or os.access(mount, os.R_OK | os.W_OK):
                 item = mount
             else:
                 item = f"{mount}:{mount}:idmap"
