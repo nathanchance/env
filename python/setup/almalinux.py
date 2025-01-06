@@ -71,6 +71,7 @@ def install_packages():
         'apt',
         'debian-keyring',
         'distribution-gpg-keys',
+        'patch',
 
         # podman
         'podman',
