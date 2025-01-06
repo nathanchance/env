@@ -155,6 +155,11 @@ def update_and_install_packages(additional_packages=None):
         'file',
         'locales',
 
+        # mkosi / systemd-nspawn
+        'patch',
+        'python3-venv',
+        'systemd-container',
+
         # Remote work
         'mosh',
         'ssh',

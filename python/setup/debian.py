@@ -9,6 +9,7 @@ import platform
 import re
 import shutil
 import sys
+from tempfile import NamedTemporaryFile
 
 import deb
 
@@ -17,6 +18,10 @@ sys.path.append(str(Path(__file__).resolve().parents[1]))
 import lib.setup
 import lib.utils
 # pylint: enable=wrong-import-position
+
+
+def get_version_id():
+    return int(lib.setup.get_os_rel_val('VERSION_ID'))
 
 
 def machine_is_trusted():
@@ -78,11 +83,11 @@ def setup_repos():
     apt_gpg = Path('/etc/apt/trusted.gpg.d')
     apt_sources = Path('/etc/apt/sources.list.d')
     codename = lib.setup.get_version_codename()
-    version_id = lib.setup.get_os_rel_val('VERSION_ID')
+    version_id = get_version_id()
     dpkg_arch = deb.get_dpkg_arch()
 
     # Docker
-    if int(version_id) < 12:  # bullseye and earlier, bookworm's podman is not ancient
+    if version_id < 12:  # bullseye and earlier, bookworm's podman is not ancient
         docker_gpg_key = Path(apt_gpg, 'docker.gpg')
         lib.setup.fetch_gpg_key('https://download.docker.com/linux/debian/gpg', docker_gpg_key)
         Path(apt_sources, 'docker.list').write_text(
@@ -121,8 +126,18 @@ def update_and_install_packages():
     packages = []
     if machine_is_trusted():
         packages += ['iptables', 'tailscale']
+    if get_version_id() >= 13:
+        # This is only in bookworm backports
+        packages.append('distribution-gpg-keys')
 
     deb.update_and_install_packages(packages)
+
+    if 'distribution-gpg-keys' not in packages:
+        with NamedTemporaryFile() as tmppkg:
+            url = 'http://ftp.us.debian.org/debian/pool/main/d/distribution-gpg-keys/distribution-gpg-keys_1.106+ds-1~bpo12+1_all.deb'
+            lib.utils.curl(url, tmppkg.name)
+
+            lib.utils.run(['dpkg', '-i', tmppkg.name])
 
 
 if __name__ == '__main__':
