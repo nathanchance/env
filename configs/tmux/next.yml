@@ -19,9 +19,8 @@ windows:
     enter: false
   - shell: mchsh
     shell_command:
-    - cmd: cbl_rb_pi
+    - cmd: vim $PY_L/kernel.py
       sleep_before: 1
-    start_directory: $CBL_SRC_P/rpi
     enter: false
   - shell: mchsh
     shell_command:
