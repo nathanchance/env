@@ -31,6 +31,7 @@ BASE_FOLDER = Path(os.environ['VM_FOLDER']) if 'VM_FOLDER' in os.environ else Pa
 DEFAULT_DISTRO = {
     'aarch64': 'fedora',
     'arm64': 'fedora',
+    'arm': 'debian',
     'x86_64': 'arch',
 }
 DEFAULT_KERNEL_PATH = {
