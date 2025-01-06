@@ -28,6 +28,13 @@ function cbl_bld_llvm_korg -d "Build (and optionally test) LLVM for kernel.org"
         set -a repos_to_update m s
     end
 
+    # Permission could be requested in build.py but downloading
+    # or updating the source may take a bit and sudo may time out
+    # waiting for authorization
+    echo 'Requesting sudo for systemd-nspawn...'
+    sudo true
+    or return
+
     begin
         header "Updating sources"
 
