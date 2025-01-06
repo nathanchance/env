@@ -6,11 +6,7 @@ function tmxa -d "Attach to a tmux session if it exists, start a new one if not"
     if test -z "$TMUX"
         switch $LOCATION
             case aadp honeycomb pi test-{desktop-intel-{11700,n100},desktop-amd,laptop-intel}
-                if using_nspawn
-                    set tmuxp_cfg test-nspawn
-                else
-                    set tmuxp_cfg test-dbx
-                end
+                set tmuxp_cfg test
             case generic
                 if in_orb
                     set tmuxp_cfg primary

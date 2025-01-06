@@ -5,8 +5,8 @@ This repository contains my shell environment scripts and configurations. The la
 * `bash/`: Files written for `bash`, mostly aimed at bootstrapping environments from the `root` user.
 * `configs/`: Configuration files, such as for terminal programs, editors, and `tmux`.
 * `fish/`: Files written for `fish`, my primary shell program.
+* `mkosi/`: Files for use with `mkosi` to generate chroots for development, intended to be run with `systemd-nspawn`.
 * `pkgbuilds/`: My collection of PKGBUILD files for Arch Linux.
-* `podman/`: My collection of container build files, mainly for use with `podman`.
 * `python/`: My collection of Python scripts and projects.
 
 ## Support

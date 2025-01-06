@@ -16,16 +16,6 @@ function _hydro_addon_nathan -d "Hydro prompt customizations"
     end
 
     # Print symbol if we are in a container (like default toolbox prompt)
-    if in_dbx
-        # If CONTAINER_ID is a part of the hostname (i.e., distrobox prior to
-        # https://github.com/89luca89/distrobox/commit/d626559baaa4e6ccb35b3bb0befc9d46b7aa837e),
-        # just show a symbol to know we are in a distrobox.
-        if string match -qr ^$CONTAINER_ID $hostname
-            set container_str §
-        else
-            set container_str "($CONTAINER_ID)"
-        end
-    end
     if in_nspawn
         if set incoming (findmnt -n -o FSROOT /run/host/incoming | sort -u)
             set container_str '('(string split -f 2 -m 1 -r / $incoming)')'

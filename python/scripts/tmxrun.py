@@ -53,10 +53,7 @@ if args.detach:
     tmx_cmd.append('-d')
 
 if mode == 'container':
-    if lib.utils.using_nspawn() or lib.utils.in_nspawn():
-        CMD_STR = f"sd_nspawn -r '{args.cmd}'; or exec fish -l"
-    else:
-        CMD_STR = f"dbxe -- fish -c '{args.cmd}'; or exec fish -l"
+    CMD_STR = f"sd_nspawn -r '{args.cmd}'; or exec fish -l"
 else:
     CMD_STR = f"begin; {args.cmd}; end; or exec fish -l"
 tmx_cmd.append(CMD_STR)

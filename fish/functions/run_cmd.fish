@@ -46,13 +46,11 @@ function run_cmd -d "Run specified command depending on where it is available"
         env $nested_cmd $cmd_args
     else
         switch $cmd
-            case b4 distrobox tuxmake
+            case b4 tuxmake
                 set git_repo $BIN_SRC_FOLDER/$cmd
                 switch $cmd
                     case b4
                         set cmd_path $git_repo/$cmd.sh
-                    case distrobox
-                        set cmd_path $git_repo/$cmd
                     case tuxmake
                         if string match -qr podman -- $cmd_argv
                             in_container_msg -h; or return

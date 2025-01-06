@@ -81,11 +81,7 @@ function upd -d "Runs the update command for the current distro or downloads/upd
             case os os-no-container
                 $PYTHON_SCRIPTS_FOLDER/upd_distro.py $yes
                 if test "$target" != os-no-container
-                    if using_nspawn
-                        sd_nspawn -r "$PYTHON_SCRIPTS_FOLDER/upd_distro.py $yes"
-                    else if has_container_manager; and dbx list &| grep -q (dev_img)
-                        dbxe -- $PYTHON_SCRIPTS_FOLDER/upd_distro.py $yes
-                    end
+                    sd_nspawn -r "$PYTHON_SCRIPTS_FOLDER/upd_distro.py $yes"
                 end
                 if command -q mac
                     mac orb update
@@ -134,7 +130,7 @@ function upd -d "Runs the update command for the current distro or downloads/upd
         set -l submodules
 
         switch $target
-            case b4 bat btop diskus distrobox duf exa fd fzf hyperfine repo rg shellcheck shfmt tuxmake yapf
+            case b4 bat btop diskus duf exa fd fzf hyperfine repo rg shellcheck shfmt tuxmake yapf
                 if command -q $target; and test "$force" != true
                     print_warning "$target is installed through package manager, skipping install..."
                     continue
@@ -149,8 +145,6 @@ function upd -d "Runs the update command for the current distro or downloads/upd
                 set git_clone_args --recursive
                 set git_urls https://git.kernel.org/pub/scm/utils/b4/b4.git
                 set submodules true
-            case distrobox
-                set git_urls https://github.com/89luca89/distrobox
             case tuxmake
                 set git_urls https://gitlab.com/Linaro/tuxmake.git
             case yapf

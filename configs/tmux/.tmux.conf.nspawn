@@ -1,17 +1,1 @@
-# new window using c
-unbind c
-bind-key c new-window mchsh
-
-# open ephemeral container using E
-bind-key E new-window 'sd_nspawn -e'
-
-# run commands in systemd-nspawn using r
-bind-key r {
-    command-prompt -p "run command (systemd-nspawn):" {
-        new-window "sd_nspawn -r '%1'; or exec fish -l"
-    }
-}
-
-# split panes into systemd-nspawn container using | and -
-bind-key | split-window -h mchsh
-bind-key - split-window -v mchsh
+.tmux.conf.container

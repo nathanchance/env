@@ -445,7 +445,6 @@ def pacman_install_packages():
         'aardvark-dns',
         'buildah',
         'catatonit',
-        'distrobox',
         'netavark',
         'podman',
 

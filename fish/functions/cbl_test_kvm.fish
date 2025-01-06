@@ -42,26 +42,12 @@ function cbl_test_kvm -d "Test KVM against a Clang built kernel with QEMU"
         case nested
             in_container_msg -h; or return
 
-            # Start container before updating, as podman requires some kernel modules,
-            # which need to be loaded before updating, as an update to linux will
-            # remove the modules on disk for the current running kernel version.
-            if not using_nspawn
-                dbxe -- true
-                or return
-            end
-
             switch $LOCATION
                 case vm
                     updfull
                     mkdir -p $TMP_FOLDER
                     cp -v /boot/vmlinuz-linux $TMP_FOLDER/bzImage
-                    if using_nspawn
-                        sd_nspawn -r 'kboot -a x86_64 -k '(nspawn_path -c $TMP_FOLDER)'/bzImage -t 30s'
-                    else if dbx_has_82a69f0
-                        dbxe -- fish -c "kboot -a x86_64 -k $TMP_FOLDER/bzImage -t 30s"
-                    else
-                        dbxe -- "fish -c 'kboot -a x86_64 -k $TMP_FOLDER/bzImage -t 30s'"
-                    end
+                    sd_nspawn -r 'kboot -a x86_64 -k '(nspawn_path -c $TMP_FOLDER)'/bzImage -t 30s'
             end
 
         case vmm
