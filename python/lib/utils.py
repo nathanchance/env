@@ -199,11 +199,6 @@ def run_check_rc_zero(*args, **kwargs):
     return chronic(*args, **kwargs, check=False).returncode == 0
 
 
-def using_nspawn():
-    etc_nspawn = Path('/etc/systemd/nspawn')
-    return etc_nspawn.exists() and list(etc_nspawn.iterdir())
-
-
 def print_or_run_cmd(cmd, dryrun, end='\n\n'):
     if dryrun:
         print_cmd(cmd, end=end)

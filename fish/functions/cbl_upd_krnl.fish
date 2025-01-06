@@ -85,11 +85,8 @@ function cbl_upd_krnl -d "Update machine's kernel"
             if in_container
                 cbl_bld_krnl_pkg $bld_krnl_pkg_args
                 return
-            else if using_nspawn
-                sd_nspawn -r "cbl_bld_krnl_pkg $bld_krnl_pkg_args"
-                or return
             else
-                dbxe dev-arch -- $PYTHON_SCRIPTS_FOLDER/cbl_bld_krnl_pkg.py $bld_krnl_pkg_args
+                sd_nspawn -r "cbl_bld_krnl_pkg $bld_krnl_pkg_args"
                 or return
             end
 

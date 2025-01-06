@@ -36,28 +36,13 @@ else
     end
 
     if in_container
-        # distrobox may add duplicates to PATH, clean it up :/
-        # https://github.com/89luca89/distrobox/issues/1145
-        if in_dbx
-            set --local --path deduplicated_path
-            set --local item
-
-            for item in $PATH
-                if not contains $item $deduplicated_path
-                    set -a deduplicated_path $item
-                end
-            end
-            set --export --global --path PATH $deduplicated_path
-        end
-
-        # distrobox uses $USE_CBL, systemd-nspawn uses /etc/use-cbl
-        if test (cat /etc/use-cbl 2>/dev/null; or echo 0) -eq 1; or test "$USE_CBL" = 1
+        if test (cat /etc/use-cbl 2>/dev/null; or echo 0) -eq 1
             for item in $CBL_QEMU_BIN $CBL_TC_BNTL $CBL_TC_LLVM
                 fish_add_path -gm $item
             end
         end
 
-        if in_nspawn; and not test -e /etc/ephemeral; and not set -q GPG_TTY
+        if not test -e /etc/ephemeral; and not set -q GPG_TTY
             set -gx GPG_TTY $tty
             gpg_key_cache
         end

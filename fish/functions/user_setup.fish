@@ -263,6 +263,7 @@ rpmbuild/' >>$gitignore
     # Configuration files (vim, tmux, etc)
     set configs $ENV_FOLDER/configs
     ln -fnrsv $configs/tmux/.tmux.conf.common $HOME/.tmux.conf.common
+    ln -fnrsv $configs/tmux/.tmux.conf.container $HOME/.tmux.conf.container
     if test "$LOCATION" = vm
         ln -fnrsv $configs/tmux/.tmux.conf.vm $HOME/.tmux.conf
     else
@@ -341,46 +342,32 @@ rpmbuild/' >>$gitignore
         end
     end
 
-    switch (uname -m)
-        case aarch64 x86_64
-            ln -fnrsv $configs/tmux/.tmux.conf.nspawn $HOME/.tmux.conf.container
+    # These platforms will more than likely use tmux so ensure the tmux
+    # directory exists with the expected permissions so that sd_nspawn
+    # will find it and mount it into the container properly. Even if they
+    # do not use tmux, creating the directory and passing it through to
+    # the container is not the end of the world, as no socket will exist.
+    set tmux_tmp /var/tmp/tmux-(id -u)
+    mkdir -p $tmux_tmp
+    # tmux checks that the permissions are restrictive
+    chmod 700 $tmux_tmp
 
-            # These platforms will more than likely use tmux so ensure the tmux
-            # directory exists with the expected permissions so that sd_nspawn
-            # will find it and mount it into the container properly. Even if they
-            # do not use tmux, creating the directory and passing it through to
-            # the container is not the end of the world, as no socket will exist.
-            set tmux_tmp /var/tmp/tmux-(id -u)
-            mkdir -p $tmux_tmp
-            # tmux checks that the permissions are restrictive
-            chmod 700 $tmux_tmp
+    sudo true
+    or return
 
-            sudo true
-            or return
+    # Set up files first because that process is quicker than the build
+    # process and doas/sudo authorization lasts at least five minutes
+    sd_nspawn -i
+    or return
 
-            # Set up files first because that process is quicker than the build
-            # process and doas/sudo authorization lasts at least five minutes
-            sd_nspawn -i
-            or return
+    mkosi_bld
+    or return
 
-            mkosi_bld
-            or return
-
-            # '--now' is only supported with systemd 253 or newer but AlmaLinux 9 ships 252
-            if test (machinectl --version | string match -gr '^systemd (\d+) ') -ge 253
-                sudo machinectl enable --now (dev_img)
-            else
-                sudo machinectl enable (dev_img)
-                and sudo machinectl start (dev_img)
-            end
-
-        case '*'
-            ln -fnrsv $configs/tmux/.tmux.conf.dbx $HOME/.tmux.conf.container
-
-            if has_container_manager
-                upd distrobox
-
-                dbxc --yes
-            end
+    # '--now' is only supported with systemd 253 or newer but AlmaLinux 9 ships 252
+    if test (machinectl --version | string match -gr '^systemd (\d+) ') -ge 253
+        sudo machinectl enable --now (dev_img)
+    else
+        sudo machinectl enable (dev_img)
+        and sudo machinectl start (dev_img)
     end
 end

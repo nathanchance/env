@@ -2,13 +2,13 @@
 # SPDX-License-Identifier: MIT
 # Copyright (C) 2022-2023 Nathan Chancellor
 
-function updfull -d "Update host machine, shell environment, and main distrobox container"
+function updfull -d "Update host machine, shell environment, and main development container"
     in_container_msg -h
     or return
 
     for arg in $argv
         switch $arg
-            case -s --skip-dbx
+            case -s --skip-container
                 set os_target os-no-container
         end
     end
