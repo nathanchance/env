@@ -10,6 +10,8 @@ function ssh_vm -d "ssh into a VM running via cbl_vmm.py"
             switch $arg
                 case nathan root
                     set user $arg
+                case copy-id
+                    set ssh_cmd ssh-copy-id
                 case scp transfer
                     set ssh_cmd scp
                 case '*'
@@ -67,6 +69,11 @@ function ssh_vm -d "ssh into a VM running via cbl_vmm.py"
                 -p $port \
                 $user_host \
                 $cmd
+
+        case ssh-copy-id
+            set -a cmd_args \
+                -p $port \
+                $user_host
     end
 
     set full_cmd \

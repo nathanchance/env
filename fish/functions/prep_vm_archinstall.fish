@@ -5,6 +5,9 @@
 function prep_vm_archinstall -d "Prepare archinstall files for virtual machine installation"
     read -P 'Password for virtual machine user: ' -s user_pass
 
+    ssh_vm root copy-id
+    or return
+
     set creds /tmp/creds.json
     echo '{
     "!root-password": null,
