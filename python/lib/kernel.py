@@ -99,6 +99,10 @@ def prepare_source(base_name, base_ref='origin/master'):
 
     # Patching section
     # yapf: disable
+    if base_name == 'fedora':
+        # https://lore.kernel.org/202501070836.Xd7wJiOd-lkp@intel.com/
+        commits.append('c526daa756dcd97664f776048300c49b7f20f68f')  # fixup! efi/libstub: Refactor and clean up GOP resolution picker code
+
     if base_name == 'linux-next-llvm':
         # https://lore.kernel.org/20241212014418.GA532802@ax162/
         # https://lore.kernel.org/all/20241213-kexec-fix-section-name-for-ffunction-sections-v1-1-1ae6050f6a15@kernel.org/
