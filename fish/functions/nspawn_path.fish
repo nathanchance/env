@@ -26,7 +26,7 @@ function nspawn_path -d "Translate /home paths into systemd-nspawn or host"
                 if string match -qr ^/home $path
                     echo $path
                 else
-                    string replace -m1 $run_host '' $path
+                    string replace $run_host '' $path
                 end
         end
     else
