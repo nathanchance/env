@@ -434,6 +434,7 @@ def pacman_install_packages():
         'modprobed-db',
         'polkit',
         'reflector',
+        'tio',
 
         # b4
         'b4',

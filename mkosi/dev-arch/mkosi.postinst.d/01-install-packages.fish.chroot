@@ -42,7 +42,6 @@ and pacman -S --noconfirm \
     powerpc64-linux-gnu-binutils \
     s390x-linux-gnu-binutils \
     shellcheck-bin \
-    tio \
     tuxmake
 
 # Turn the pacman sandbox back on
