@@ -157,6 +157,7 @@ def update_and_install_packages(additional_packages=None):
 
         # mkosi / systemd-nspawn
         'patch',
+        'polkitd',
         'python3-venv',
         'systemd-container',
 
