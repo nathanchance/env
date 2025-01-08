@@ -80,7 +80,7 @@ function upd -d "Runs the update command for the current distro or downloads/upd
 
             case os os-no-container
                 $PYTHON_SCRIPTS_FOLDER/upd_distro.py $yes
-                if test "$target" != os-no-container
+                if test "$target" != os-no-container; and test $LOCATION != mac
                     sd_nspawn -r "$PYTHON_SCRIPTS_FOLDER/upd_distro.py $yes"
                 end
                 if command -q mac
