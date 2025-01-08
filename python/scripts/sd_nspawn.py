@@ -20,6 +20,7 @@ SYSTEMD_RUN_M = Path('/usr/local/bin/systemd-run-m')
 # Default machine for a particular architecture
 DEF_MACH = {
     'aarch64': 'dev-fedora',
+    'armv7l': 'dev-debian',
     'x86_64': 'dev-arch',
 }
 
