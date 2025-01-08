@@ -2,6 +2,7 @@
 
 # Setup external repos
 curl -LSso /etc/yum.repos.d/gh-cli.repo https://cli.github.com/packages/rpm/gh-cli.repo
+or return
 
 echo '[tuxmake]
 name=tuxmake
@@ -14,15 +15,6 @@ enabled=1' >/etc/yum.repos.d/tuxmake.repo
 dnf update -y
 or return
 
-set packages \
+dnf install -y \
     gh \
     tuxmake
-switch $ARCHITECTURE
-    case arm64
-        set -a packages {binutils,gcc}-x86_64-linux-gnu
-    case x86-64
-        set -a packages {binutils,gcc}-aarch64-linux-gnu
-end
-
-dnf install -y $packages
-or return
