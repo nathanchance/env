@@ -3,8 +3,13 @@
 
 set -eux
 
-echo 'deb http://download.opensuse.org/repositories/shells:/fish/Debian_10/ /' >/etc/apt/sources.list.d/shells:fish.list
-wget -O - -q https://download.opensuse.org/repositories/shells:fish/Debian_10/Release.key | gpg --dearmor >/etc/apt/trusted.gpg.d/shells_fish.gpg
+case "$RELEASE" in
+    "buster") ver=10 ;;
+    "unstable") ver=12 ;;
+    *) echo "$RELEASE" is not supported 2>&1; false ;;
+esac
+echo "deb http://download.opensuse.org/repositories/shells:/fish/Debian_$ver/ /" >/etc/apt/sources.list.d/shells:fish.list
+wget -O - -q https://download.opensuse.org/repositories/shells:fish/Debian_"$ver"/Release.key | gpg --dearmor >/etc/apt/trusted.gpg.d/shells_fish.gpg
 
 apt update -y
 apt install -y fish

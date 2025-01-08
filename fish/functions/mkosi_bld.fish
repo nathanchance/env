@@ -52,10 +52,10 @@ function mkosi_bld -d "Build a distribution using mkosi"
     switch (basename $directory)
         case dev-arch
             set cache_dir pacman
+        case dev-debian pgo-llvm-builder
+            set cache_dir apt
         case dev-fedora
             set cache_dir dnf
-        case pgo-llvm-builder
-            set cache_dir apt
     end
 
     sudo (command -v mkosi) \

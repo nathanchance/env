@@ -1,0 +1,3 @@
+#!/usr/bin/env fish
+
+ln -fsv /usr/bin/fdfind /usr/local/bin/fd

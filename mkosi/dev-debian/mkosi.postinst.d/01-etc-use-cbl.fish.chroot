@@ -1,0 +1,10 @@
+#!/usr/bin/env fish
+
+# This image is the default development image on arm systems but it is not on
+# other systems so avoid using the toolchains by default there. They can still
+# be accessed via absolute paths if necessary.
+if test $ARCHITECTURE = arm
+    echo 1 >/etc/use-cbl
+else
+    echo 0 >/etc/use-cbl
+end

@@ -1,0 +1,22 @@
+#!/usr/bin/env fish
+
+# Setup gh repo
+set gh_gpg_key /etc/apt/trusted.gpg.d/githubcli-archive-keyring.gpg
+and curl -fLSs https://cli.github.com/packages/(basename $gh_gpg_key) | dd of=$gh_gpg_key
+and echo "deb [arch=$DISTRIBUTION_ARCHITECTURE signed-by=$gh_gpg_key] https://cli.github.com/packages stable main" | tee /etc/apt/sources.list.d/github-cli.list
+
+# Setup LLVM repo
+and set llvm_main_version (curl -fLSs https://raw.githubusercontent.com/llvm/llvm-project/main/cmake/Modules/LLVMVersion.cmake | string match -gr 'set\(LLVM_VERSION_MAJOR (\d+)\)'; or echo 20)
+and set llvm_stable_version (math $llvm_main_version - 1)
+and switch $ARCHITECTURE
+    case arm64 x86-64
+        curl -fLSs https://apt.llvm.org/llvm-snapshot.gpg.key | gpg --dearmor | dd of=/etc/apt/trusted.gpg.d/apt_llvm_org.gpg
+        and echo "deb https://apt.llvm.org/$RELEASE/ llvm-toolchain main" >/etc/apt/sources.list.d/llvm-main.list
+        and echo "deb https://apt.llvm.org/$RELEASE/ llvm-toolchain-$llvm_stable_version main" >/etc/apt/sources.list.d/llvm-stable.list
+end
+
+# Download packages from repos
+and apt update
+and apt install -y \
+    {clang,lld,llvm}-$llvm_stable_version \
+    gh
