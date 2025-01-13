@@ -235,17 +235,6 @@ class MainlinePkgBuilder(KernelPkgBuilder):
     def _prepare_files(self, _localmodconfig=False, _menuconfig=False, _extra_config_targets=None):
         super()._prepare_files()
 
-        git_add_files = ['drivers/hwmon/Makefile']
-        for part in ['', '_dev', '_hwmon']:
-            src_url = f"https://github.com/pop-os/system76-io-dkms/raw/master/system76-io{part}.c"
-            dst_local = Path(self._source_folder, 'drivers/hwmon', src_url.rsplit('/', 1)[-1])
-            lib.utils.curl(src_url, output=dst_local)
-            git_add_files.append(dst_local.relative_to(self._source_folder))
-        with Path(self._source_folder, git_add_files[0]).open('a', encoding='utf-8') as file:
-            file.write('obj-m += system76-io.o\n')
-        lib.utils.call_git(self._source_folder, ['add', *git_add_files])
-        lib.utils.call_git_loud(self._source_folder, ['commit', '-m', 'Add system76-io driver'])
-
         local_ver_parts = []
         head = lib.utils.get_git_output(self._source_folder, ['rev-parse', '--verify', 'HEAD'],
                                         check=False)
