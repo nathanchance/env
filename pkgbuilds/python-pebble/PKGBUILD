@@ -2,7 +2,7 @@
 pkgname=python-pebble
 _name=${pkgname#python-}
 pkgver=5.1.0
-pkgrel=2
+pkgrel=3
 pkgdesc="A neat API to manage threads and processes within an application"
 arch=('any')
 url="https://github.com/noxdafox/pebble"
@@ -15,8 +15,17 @@ makedepends=(
     python-wheel
 )
 checkdepends=(python-pytest)
-source=("$pkgname-$pkgver.tar.gz::https://github.com/noxdafox/${_name}/archive/refs/tags/$pkgver.tar.gz")
-sha256sums=('d4b9bd857fe34b287e522fd2f206e53b495b4650d57837fe4fa8c8c5b854c668')
+source=("$pkgname-$pkgver.tar.gz::https://github.com/noxdafox/${_name}/archive/refs/tags/$pkgver.tar.gz"
+        pr_148.patch)
+sha256sums=('d4b9bd857fe34b287e522fd2f206e53b495b4650d57837fe4fa8c8c5b854c668'
+            '99067f5bdc91952124630379fcad845a54dae8f83eca70522f75f7fe4b6448ef')
+
+prepare() {
+  cd "${_name}-$pkgver"
+
+  # https://github.com/noxdafox/pebble/pull/148
+  patch -Np1 -i ../pr_148.patch
+}
 
 build() {
   cd "${_name}-$pkgver"
