@@ -1,0 +1,4 @@
+#!/usr/bin/env fish
+
+# See comment in mkosi.conf as to why this is necessary
+update-crypto-policies --set FEDORA40
