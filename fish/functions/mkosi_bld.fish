@@ -31,6 +31,7 @@ function mkosi_bld -d "Build a distribution using mkosi"
         set image (dev_img)
     else
         set image $argv[1]
+        set mkosi_args $argv[2..]
     end
 
     if string match -qr ^/ $image
@@ -62,5 +63,6 @@ function mkosi_bld -d "Build a distribution using mkosi"
         --build-sources (string join , $build_sources) \
         --directory $directory \
         --force \
-        --package-cache-dir $XDG_FOLDER/cache/mkosi/$cache_dir
+        --package-cache-dir $XDG_FOLDER/cache/mkosi/$cache_dir \
+        $mkosi_args
 end
