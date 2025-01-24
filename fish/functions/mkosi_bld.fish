@@ -3,9 +3,10 @@
 # Copyright (C) 2024 Nathan Chancellor
 
 function mkosi_bld -d "Build a distribution using mkosi"
-    # Normally, we should just be able to use mkosi from our distribution
-    # but we require some newer fixes and features at the moment
-    if not in_venv
+    # If mkosi is major version 25 or greater, we can use it directly.
+    # If it is not, we use a virtual environment for simple access.
+    if command -q mkosi; and test (mkosi --version | string match -gr '^mkosi ([0-9]+)') -ge 25
+    else if not in_venv
         set venv_dir $PY_VENV_DIR/mkosi
         if not test -e $venv_dir
             py_venv c mkosi
