@@ -87,7 +87,7 @@ function cbl_clone_repo -d "Clone certain repos for ClangBuiltLinux testing and 
                             print_error "Supplied local manifest ('$local_manifest') does not exist!"
                             return 1
                         end
-                        ln -fsv $local_manifest .repo/local_manifests/(basename $local_manifest)
+                        ln -fsv $local_manifest .repo/local_manifests/(path basename $local_manifest)
                     end
                 end
 

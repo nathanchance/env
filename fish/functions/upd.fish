@@ -66,7 +66,7 @@ function upd -d "Runs the update command for the current distro or downloads/upd
                     $vim_plugins
 
                 for forked_repo in $forked_repos
-                    set -l repo_name (basename $forked_repo)
+                    set -l repo_name (path basename $forked_repo)
                     set -l repo_path $FORKS_FOLDER/$repo_name
                     if test -d $repo_path
                         gh repo sync --force --source $forked_repo nathanchance/$repo_name
@@ -112,7 +112,7 @@ function upd -d "Runs the update command for the current distro or downloads/upd
                     https://github.com/vivien/vim-linux-coding-style
 
                 for vim_plugin in $vim_plugins
-                    set dest $HOME/.vim/pack/my-plugins/start/(basename $vim_plugin)
+                    set dest $HOME/.vim/pack/my-plugins/start/(path basename $vim_plugin)
                     if test -d $dest
                         git -C $dest pull
                     else
@@ -157,7 +157,7 @@ function upd -d "Runs the update command for the current distro or downloads/upd
                 if test -n "$subfolder"
                     set src_base $BIN_SRC_FOLDER/$subfolder
                 end
-                set src $src_base/(string replace ".git" "" (basename $git_url))
+                set src $src_base/(string replace ".git" "" (path basename $git_url))
                 if not test -d $src
                     mkdir -p (dirname $src)
                     git clone $git_clone_args $git_url $src; or return
@@ -234,7 +234,7 @@ function upd -d "Runs the update command for the current distro or downloads/upd
                     set url https://github.com/$repo/releases/download/$ver/$target-$ver-$rust_triple.tar.gz
 
                     crl $url | tar -xzf -; or return
-                    cd (string replace ".tar.gz" "" (basename $url)); or return
+                    cd (string replace ".tar.gz" "" (path basename $url)); or return
 
                     $install -Dvm755 $target $binary
                     switch $target
@@ -294,7 +294,7 @@ function upd -d "Runs the update command for the current distro or downloads/upd
                             set url https://github.com/$repo/releases/download/$ver/exa-linux-x86_64-$ver.zip
 
                             crl -O $url; or return
-                            unzip (basename $url); or return
+                            unzip (path basename $url); or return
 
                             $install -Dvm755 bin/exa $binary
                             $install -Dvm644 completions/exa.fish $completions/exa.fish
@@ -306,7 +306,7 @@ function upd -d "Runs the update command for the current distro or downloads/upd
                     set url https://github.com/$repo/releases/download/$ver/eza_$rust_triple.zip
 
                     crl -O $url; or return
-                    unzip (basename $url); or return
+                    unzip (path basename $url); or return
 
                     $install -Dvm755 ./eza $binary
 
@@ -338,7 +338,7 @@ function upd -d "Runs the update command for the current distro or downloads/upd
                     set url https://github.com/$repo/releases/download/$ver/gh_(string replace "v" "" $ver)_linux_$arch.tar.gz
 
                     crl $url | tar -xzf -
-                    cd (string replace ".tar.gz" "" (basename $url)); or return
+                    cd (string replace ".tar.gz" "" (path basename $url)); or return
 
                     $install -Dvm755 bin/gh $binary
 
@@ -353,7 +353,7 @@ function upd -d "Runs the update command for the current distro or downloads/upd
                     set url https://github.com/$repo/releases/download/$ver/super-ttc-iosevka-ss08-(string replace "v" "" $ver).zip
 
                     crl -O $url; or return
-                    unzip (basename $url); or return
+                    unzip (path basename $url); or return
 
                     install -Dvm644 iosevka-ss08.ttc $HOME/.local/share/fonts/iosevka-ss08.ttc
                     fc-cache -fv
@@ -384,7 +384,7 @@ function upd -d "Runs the update command for the current distro or downloads/upd
                             set url https://github.com/$repo/releases/download/$ver/ripgrep-$ver-x86_64-unknown-linux-musl.tar.gz
 
                             crl $url | tar -xzf -; or return
-                            cd (string replace '.tar.gz' '' (basename $url)); or return
+                            cd (string replace '.tar.gz' '' (path basename $url)); or return
 
                             $install -Dvm755 rg $binary
                             $install -Dvm644 complete/rg.fish $completions/rg.fish

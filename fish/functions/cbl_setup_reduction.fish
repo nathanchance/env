@@ -80,7 +80,7 @@ if not string match -qr \'\.o$\' $o_target
     print_error ".o file is not the last target in make_args?"
     return 1
 end
-set o_cmd_file $lnx_bld/good/(dirname $o_target)/.(basename $o_target).cmd
+set o_cmd_file $lnx_bld/good/(dirname $o_target)/.(path basename $o_target).cmd
 
 #####################################
 # BEWARE MODIFICATIONS TO THIS AREA #

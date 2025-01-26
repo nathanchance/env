@@ -4,7 +4,7 @@
 
 function git_sync -d "Deletes merged branches and syncs fork with upstream"
     if test (count $argv) -eq 0
-        set repo (basename $PWD)
+        set repo (path basename $PWD)
     else
         set repo $argv[1]
     end

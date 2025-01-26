@@ -22,7 +22,7 @@ function newpywrapper -d "Generate Python wrapper fish function"
 # SPDX-License-Identifier: MIT
 # Copyright (C) "(date +%Y)" Nathan Chancellor
 
-function $func_name -d \"Wrapper for $(basename $python_file)\"
+function $func_name -d \"Wrapper for $(path basename $python_file)\"
     $escaped_file \$argv
 end" >$func_file
         echo "Generated $func_file"

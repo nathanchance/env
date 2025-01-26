@@ -26,7 +26,7 @@ function cbl_bld_llvm_sbs -d "Build identical copies of LLVM side by side from v
             set tc_bld $CBL_TC_BLD
         else
             set tc_bld $CBL_GIT/tc-build
-            cbl_clone_repo (basename $tc_bld)
+            cbl_clone_repo (path basename $tc_bld)
         end
 
         $tc_bld/build-llvm.py \

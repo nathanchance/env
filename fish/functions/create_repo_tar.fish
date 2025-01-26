@@ -13,7 +13,7 @@ function create_repo_tar -d "Create a tarball of a git repo from just the tracke
         set repo (git root)
     end
 
-    set output $repo/dist/(basename $repo)-(date +%Y-%m-%d-%H-%M).tar.zst
+    set output $repo/dist/(path basename $repo)-(date +%Y-%m-%d-%H-%M).tar.zst
 
     mkdir -p (dirname $output)
     tar \

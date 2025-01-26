@@ -139,9 +139,9 @@ function user_setup -d "Setup a user account, downloading all files and placing 
     if not test -d $ENV_FOLDER
         mkdir -p (dirname $ENV_FOLDER)
         if test "$use_gh" = true
-            gh repo clone (basename $ENV_FOLDER) $ENV_FOLDER; or return
+            gh repo clone (path basename $ENV_FOLDER) $ENV_FOLDER; or return
         else
-            git clone https://github.com/nathanchance/(basename $ENV_FOLDER).git $ENV_FOLDER; or return
+            git clone https://github.com/nathanchance/(path basename $ENV_FOLDER).git $ENV_FOLDER; or return
         end
     end
     git -C $ENV_FOLDER pull
@@ -154,9 +154,9 @@ function user_setup -d "Setup a user account, downloading all files and placing 
             mkdir -p (dirname $forked_fisher_plugin)
             set -l clone_args -b personal
             if test "$use_gh" = true
-                gh repo clone (basename $forked_fisher_plugin) $forked_fisher_plugin -- $clone_args
+                gh repo clone (path basename $forked_fisher_plugin) $forked_fisher_plugin -- $clone_args
             else
-                git clone $clone_args https://github.com/nathanchance/(basename $forked_fisher_plugin).git $forked_fisher_plugin; or return
+                git clone $clone_args https://github.com/nathanchance/(path basename $forked_fisher_plugin).git $forked_fisher_plugin; or return
             end
         end
         git -C $forked_fisher_plugin remote update

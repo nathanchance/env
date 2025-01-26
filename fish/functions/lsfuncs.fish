@@ -13,7 +13,7 @@ function lsfuncs -d "List function names and descriptions from $ENV_FOLDER/fish/
         printf '| %s | %s |\n' $border $border
 
         for func_file in $ENV_FOLDER/fish/functions/*.fish
-            set func (basename $func_file | string replace .fish '')
+            set func (path basename $func_file | string replace .fish '')
             set desc (functions -D -v $func | tail -1)
 
             printf '| %-'$column_width's | %s\n' $func $desc

@@ -8,7 +8,7 @@ function _hydro_addon_nathan -d "Hydro prompt customizations"
 
     # Signal if we are in a Python virtual environment
     if in_venv
-        printf '%b(%s) ' (set_color 4B8BBE) (basename $VIRTUAL_ENV)
+        printf '%b(%s) ' (set_color 4B8BBE) (path basename $VIRTUAL_ENV)
     end
 
     if in_deb_chroot

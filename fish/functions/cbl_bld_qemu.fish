@@ -15,7 +15,7 @@ function cbl_bld_qemu -d "Build QEMU for use with ClangBuiltLinux"
     if test -n "$VERSION"
         set qemu_src $CBL_QEMU_SRC/qemu-$VERSION
         mkdir -p (dirname $qemu_src)
-        crl https://download.qemu.org/(basename $qemu_src).tar.xz | tar -C (dirname $qemu_src) -xJf -
+        crl https://download.qemu.org/(path basename $qemu_src).tar.xz | tar -C (dirname $qemu_src) -xJf -
 
         set install_folder $VERSION
     else

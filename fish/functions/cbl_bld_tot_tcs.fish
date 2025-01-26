@@ -93,7 +93,7 @@ function cbl_bld_tot_tcs -d "Build LLVM and binutils from source for kernel deve
     if test "$bld_bntls" != false
         set bntls $tc_bld/src/binutils
         if not test -d $bntls
-            clone_repo_from_bundle (basename $bntls) "$bntls"
+            clone_repo_from_bundle (path basename $bntls) "$bntls"
         end
         if not is_shallow_clone $bntls; and not has_detached_head $bntls
             git -C $bntls pull --rebase; or return
@@ -125,7 +125,7 @@ function cbl_bld_tot_tcs -d "Build LLVM and binutils from source for kernel deve
 
     set llvm_project $tc_bld/src/llvm-project
     if not test -d $llvm_project
-        clone_repo_from_bundle (basename $llvm_project) $llvm_project
+        clone_repo_from_bundle (path basename $llvm_project) $llvm_project
     end
     if not is_shallow_clone $llvm_project; and not has_detached_head $llvm_project
         git -C $llvm_project rh
@@ -140,7 +140,7 @@ function cbl_bld_tot_tcs -d "Build LLVM and binutils from source for kernel deve
     # Add patches to revert here
     for revert in $reverts
         if string match -qr 'https?://' $revert
-            set -l revert (basename $revert)
+            set -l revert (path basename $revert)
             if not git -C $llvm_project rv -n $revert
                 set message "Failed to revert $revert"
                 print_error "$message"
@@ -159,12 +159,12 @@ function cbl_bld_tot_tcs -d "Build LLVM and binutils from source for kernel deve
 
     # Add in-review patches here
     for gh_pr in $gh_prs
-        if gh_llvm pr view --json state (basename $gh_pr) | python3 -c "import json, sys; sys.exit(0 if json.load(sys.stdin)['state'] == 'MERGED' else 1)"
+        if gh_llvm pr view --json state (path basename $gh_pr) | python3 -c "import json, sys; sys.exit(0 if json.load(sys.stdin)['state'] == 'MERGED' else 1)"
             print_warning "$gh_pr has already been merged, skipping..."
             continue
         end
 
-        if not gh_llvm pr diff (basename $gh_pr) | git -C $llvm_project ap
+        if not gh_llvm pr diff (path basename $gh_pr) | git -C $llvm_project ap
             set message "Failed to apply $gh_pr"
             print_error "$message"
             tg_msg "$message"

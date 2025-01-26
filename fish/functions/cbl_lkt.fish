@@ -110,7 +110,7 @@ function cbl_lkt -d "Tests a Linux kernel with llvm-kernel-testing"
 
         set -l as_found false
         for binutils_binary in $binutils_prefix/bin/*
-            switch (basename $binutils_binary)
+            switch (path basename $binutils_binary)
                 case as '*'-linux-gnu'*'-as
                     set as_found true
             end
@@ -151,7 +151,7 @@ function cbl_lkt -d "Tests a Linux kernel with llvm-kernel-testing"
         set -l as_found false
         set -l clang_found false
         for tc_binary in $tc_prefix/bin/*
-            switch (basename $tc_binary)
+            switch (path basename $tc_binary)
                 case as '*'-linux-gnu'*'-as
                     set as_found true
                 case clang
@@ -186,10 +186,10 @@ function cbl_lkt -d "Tests a Linux kernel with llvm-kernel-testing"
     end
 
     if not string match -qr -- --build-folder $build_py_args
-        set -a build_py_args --build-folder (tbf (status function))/(basename $linux_folder)
+        set -a build_py_args --build-folder (tbf (status function))/(path basename $linux_folder)
     end
 
-    set log_folder $CBL_LOGS/(basename $linux_folder)-(date +%F-%T)
+    set log_folder $CBL_LOGS/(path basename $linux_folder)-(date +%F-%T)
     mkdir -p $log_folder
 
     if is_github_actions

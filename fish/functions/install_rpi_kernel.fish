@@ -55,7 +55,7 @@ function install_rpi_kernel -d "Install Raspberry Pi kernel from a tarball"
     # Move modules into their place
     set mod_dir lib/modules/*
     rm $mod_dir/{build,source}
-    sudo rm -frv /lib/modules/(basename $mod_dir)
+    sudo rm -frv /lib/modules/(path basename $mod_dir)
     sudo mv -v $mod_dir /lib/modules; or return
 
     # Install image and dtbs
@@ -76,7 +76,7 @@ function install_rpi_kernel -d "Install Raspberry Pi kernel from a tarball"
             zcat boot/vmlinuz-* | sudo install -Dvm755 /dev/stdin $prefix/Image; or return
     end
     for dtb in $dtbs
-        sudo install -Dvm755 $dtb $prefix/(basename $dtb); or return
+        sudo install -Dvm755 $dtb $prefix/(path basename $dtb); or return
     end
 
     # Copy cmdline.txt because we are modifying os_prefix

@@ -9,7 +9,7 @@ function create_folder_tar -d "Create zstd compressed tarball of a folder"
         return 1
     end
 
-    set output $TMP_FOLDER/(basename $folder)-(date +%Y-%m-%d-%H-%M).tar.zst
+    set output $TMP_FOLDER/(path basename $folder)-(date +%Y-%m-%d-%H-%M).tar.zst
 
     tar \
         --create \
@@ -17,7 +17,7 @@ function create_folder_tar -d "Create zstd compressed tarball of a folder"
         --directory (dirname $folder) \
         --file $output \
         --zstd \
-        (basename $folder)
+        (path basename $folder)
 
     echo
     echo "File is now available at: "(string replace $TMP_FOLDER '$TMP_FOLDER' $output)

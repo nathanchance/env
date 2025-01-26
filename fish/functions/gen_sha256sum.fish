@@ -4,7 +4,7 @@
 
 function gen_sha256sum -d "Generate a .sha256 file for a file from the Internet"
     set url $argv[1]
-    set file (basename $url)
+    set file (path basename $url)
 
     crl -O $url; or return
     sha256sum $file >$file.sha256

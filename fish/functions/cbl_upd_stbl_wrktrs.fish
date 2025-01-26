@@ -20,7 +20,7 @@ function cbl_upd_stbl_wrktrs -d "Update the worktrees for linux-stable"
         end
 
         for worktree in $folder-*
-            set basename (basename $worktree)
+            set basename (path basename $worktree)
             set stable_version (string split -f 3 '-' $basename)
             if not contains $stable_version $stable_versions
                 header "Removing $worktree"

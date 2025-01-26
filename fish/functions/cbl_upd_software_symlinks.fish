@@ -24,7 +24,7 @@ function cbl_upd_software_symlinks -d "Update symlinks to a stow or QEMU folder"
                         set binary clang
                 end
 
-                set src_version (fd -d 1 -t d . $src_store -x basename | sort -r | fzf --preview="$src_store/{}/bin/$binary --version")
+                set src_version (fd -d 1 -t d . $src_store | path basename | sort -r | fzf --preview="$src_store/{}/bin/$binary --version")
                 if test -z "$src_version"
                     return 0
                 end
@@ -46,7 +46,7 @@ function cbl_upd_software_symlinks -d "Update symlinks to a stow or QEMU folder"
             if test (count $argv) -eq 2
                 set src $argv[2]
             else
-                set src_version (fd -d 1 -t d . $CBL_QEMU_INSTALL -x basename | sort -r | fzf --preview="$CBL_QEMU_INSTALL/{}/bin/qemu-system-x86_64 --version")
+                set src_version (fd -d 1 -t d . $CBL_QEMU_INSTALL | path basename | sort -r | fzf --preview="$CBL_QEMU_INSTALL/{}/bin/qemu-system-x86_64 --version")
                 if test -z "$src_version"
                     return 0
                 end

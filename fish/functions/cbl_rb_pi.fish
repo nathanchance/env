@@ -37,7 +37,7 @@ function cbl_rb_pi -d "Rebase Raspberry Pi kernel on latest linux-next"
     # Regenerate defconfigs
     for cfg_file in $cfg_files
         string split -f 2 / $cfg_file | read -l arch
-        kmake ARCH=$arch HOSTLDFLAGS=-fuse-ld=lld LLVM=1 O=$pi_out/$arch (basename $cfg_file) savedefconfig
+        kmake ARCH=$arch HOSTLDFLAGS=-fuse-ld=lld LLVM=1 O=$pi_out/$arch (path basename $cfg_file) savedefconfig
         or return
         mv -v $pi_out/$arch/defconfig $cfg_file
     end
@@ -134,7 +134,7 @@ function cbl_rb_pi -d "Rebase Raspberry Pi kernel on latest linux-next"
     # Ensure configs are run through savedefconfig before committing
     for cfg_file in $cfg_files
         string split -f 2 / $cfg_file | read -l arch
-        kmake ARCH=$arch HOSTLDFLAGS=-fuse-ld=lld LLVM=1 O=$pi_out/$arch (basename $cfg_file) savedefconfig
+        kmake ARCH=$arch HOSTLDFLAGS=-fuse-ld=lld LLVM=1 O=$pi_out/$arch (path basename $cfg_file) savedefconfig
         or return
         mv -v $pi_out/$arch/defconfig $cfg_file
     end

@@ -12,7 +12,7 @@ function tbf -d "Prints a build folder specific to the current directory"
     if string match -qr ^$CBL_SRC_W $src
         set base (string split -f 2,3 -m 2 -r / $src | string join -)
     else
-        set base (basename $src)
+        set base (path basename $src)
     end
 
     echo $TMP_BUILD_FOLDER/$base

@@ -23,7 +23,7 @@ function mkosi_bld -d "Build a distribution using mkosi"
 
             crl https://github.com/nathanchance/patches/raw/refs/heads/main/mkosi/buster-security.patch | patch -d $venv_dir/lib/python*/site-packages -N -p1
         end
-    else if test (basename $VIRTUAL_ENV) != mkosi
+    else if test (path basename $VIRTUAL_ENV) != mkosi
         print_error "Already in a virtual environment?"
         return 1
     end
@@ -51,7 +51,7 @@ function mkosi_bld -d "Build a distribution using mkosi"
         # We may need to look at the configuration of the host
         /etc:/etc
 
-    switch (basename $directory)
+    switch (path basename $directory)
         case dev-arch
             set cache_dir pacman
         case dev-debian pgo-llvm-builder

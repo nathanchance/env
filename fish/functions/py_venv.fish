@@ -22,7 +22,7 @@ function py_venv -d "Manage Python virtual environment"
     end
     if not set -q venv
         if in_venv
-            set venv (basename $VIRTUAL_ENV)
+            set venv (path basename $VIRTUAL_ENV)
         else
             switch $arg
                 case c create e enter r rm remove
@@ -71,7 +71,7 @@ function py_venv -d "Manage Python virtual environment"
                 source $activate
 
             case i in install
-                switch (basename $venv)
+                switch (path basename $venv)
                     case continuous-integration2 kernel-dev main
                         if contains $SRC_FOLDER/b4 $packages
                             if not test -d $SRC_FOLDER/b4
@@ -110,7 +110,7 @@ function py_venv -d "Manage Python virtual environment"
                     return 1
                 end
 
-                switch (basename $venv)
+                switch (path basename $venv)
                     case continuous-integration2 kernel-dev main
                         if contains $SRC_FOLDER/b4 $packages
                             if not test -d $SRC_FOLDER/b4
