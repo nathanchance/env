@@ -157,8 +157,8 @@ class NspawnConfig(UserDict):
 
         return '\n'.join(parts)
 
-    def _gen_eph_cmd(self):
-        cfg_to_cmd = {
+    def _cfg_to_args(self):
+        cfg_to_arg = {
             'Bind': '--bind',
             'BindReadOnly': '--bind-ro',
             'BindUser': '--bind-user',
@@ -168,16 +168,41 @@ class NspawnConfig(UserDict):
             'PrivateUsersOwnership': '--private-users-ownership',
             'SystemCallFilter': '--system-call-filter',
         }
-
-        # Generate our command line arguments
-        nspawn_cmd = [
-            'systemd-nspawn',
-            f"--directory={self.machine_dir}",
-            '--ephemeral',
+        nspawn_args = [
             # This script is the ultimate source of truth for arguments, not
             # our configuration files, which may be stale (but should still be
             # updated)
             '--settings=no',
+        ]
+
+        for values in self.data.values():
+            for key, value in values.items():
+                # If there is no corresponding command line flag, skip it
+                # This namely affects VirtualEthernet, as host networking is
+                # the default with systemd-nspawn but virtual networking is the
+                # default with systemd-nspawn@.service.
+                if not (flag := cfg_to_arg.get(key)):
+                    continue
+
+                if isinstance(value, list):
+                    if flag == '--system-call-filter':
+                        nspawn_args.append(f"{flag}={' '.join(value)}")
+                    else:
+                        nspawn_args += [f"{flag}={item}" for item in sorted(value)]
+                # boot is special
+                elif flag == '--boot':
+                    nspawn_args.append(flag if value == 'yes' else '--as-pid2')
+                else:
+                    nspawn_args.append(f"{flag}={value}")
+
+        return nspawn_args
+
+    def _gen_eph_cmd(self):
+        # Generate our command line arguments
+        return [
+            'systemd-nspawn',
+            f"--directory={self.machine_dir}",
+            '--ephemeral',
             # Bind mount an empty file to /etc/ephemeral to allow notating via
             # our prompt that we are in an ephemeral environment (so any
             # changes to /usr or other paths will not be persistent)
@@ -187,29 +212,8 @@ class NspawnConfig(UserDict):
             # added if needed). This allows config.fish to test if the file is
             # readable before adding the tools to the environment.
             '--inaccessible=/etc/use-cbl',
+            *self._cfg_to_args(),
         ]
-        for values in self.data.values():
-            for key, value in values.items():
-                # If there is no corresponding command line flag, skip it
-                # This namely affects VirtualEthernet, as host networking is
-                # the default with systemd-nspawn but virtual networking is the
-                # default with systemd-nspawn@.service.
-                if not (flag := cfg_to_cmd.get(key)):
-                    continue
-
-                if isinstance(value, list):
-                    if flag == '--system-call-filter':
-                        nspawn_cmd.append(f"{flag}={' '.join(value)}")
-                    else:
-                        nspawn_cmd += [f"{flag}={item}" for item in sorted(value)]
-                # certain configuration options are booleans but the commmand
-                # line option is just a simple flag
-                elif flag in ('--boot', ) and value == 'yes':
-                    nspawn_cmd.append(flag)
-                else:
-                    nspawn_cmd.append(f"{flag}={value}")
-
-        return nspawn_cmd
 
     def _gen_run_cmd(self, cmd):
         args = [
@@ -236,6 +240,20 @@ class NspawnConfig(UserDict):
             cmd,
         ]
         return args
+
+    def _gen_upd_cmd(self):
+        self.data['Exec']['Boot'] = 'no'
+        return [
+            'systemd-nspawn',
+            f"--machine={self.name}",
+            # We should only interact with this instance of the machine through this shell
+            '--register=no',
+            # Suppress the initial interaction message
+            '--quiet',
+            *self._cfg_to_args(),
+            '/usr/bin/fish',
+            '-l',
+        ]
 
     def install_files(self):
         lib.utils.print_green('Requesting sudo permissions for file creation...')
@@ -364,6 +382,17 @@ class NspawnConfig(UserDict):
     def run_eph_cmd(self):
         lib.utils.run_as_root(self._gen_eph_cmd())
 
+    def run_upd_cmd(self):
+        # First, we need to make sure this machine is not running via
+        # systemd-nspawn.service. If it is, the user should use 'machinectl
+        # shell' to enter the machine and update it directly, as there may be
+        # running services that need to be restarted.
+        if lib.utils.run_check_rc_zero(
+            ['systemctl', 'is-active', '-q', f"systemd-nspawn@{self.name}.service"]):
+            raise RuntimeError(
+                'Machine is running when trying to update, interact via "machinectl shell"')
+        lib.utils.run_as_root(self._gen_upd_cmd())
+
 
 def parse_arguments():
     parser = ArgumentParser(description='Manager and wrapper for systemd-spawn')
@@ -385,6 +414,10 @@ def parse_arguments():
                             choices=['machine', 'setup', 'all'],
                             metavar='TYPE',
                             help='Remove the requested files (machine, setup, or both)')
+    mode_group.add_argument('-u',
+                            '--update',
+                            action='store_true',
+                            help='Enter inactive machine to update')
 
     return parser.parse_args()
 
@@ -407,6 +440,8 @@ def main():
         config.run_eph_cmd()
     if args.install:
         config.install_files()
+    if args.update:
+        config.run_upd_cmd()
     if args.reset:
         config.reset(args.reset)
     if args.run:
