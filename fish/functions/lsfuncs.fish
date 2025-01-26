@@ -12,11 +12,8 @@ function lsfuncs -d "List function names and descriptions from $ENV_FOLDER/fish/
         printf '| %-'$column_width's | %-'$column_width's |\n' Function Description
         printf '| %s | %s |\n' $border $border
 
-        for func_file in $ENV_FOLDER/fish/functions/*.fish
-            set func (path basename $func_file | string replace .fish '')
-            set desc (functions -D -v $func | tail -1)
-
-            printf '| %-'$column_width's | %s\n' $func $desc
+        for func in (get_my_funcs)
+            printf '| %-'$column_width's | %s\n' $func (functions -D -v $func | tail -1)
         end
     end &| bat $BAT_PAGER_OPTS --style plain
 end
