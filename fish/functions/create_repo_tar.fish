@@ -15,14 +15,14 @@ function create_repo_tar -d "Create a tarball of a git repo from just the tracke
 
     set output $repo/dist/(path basename $repo)-(date +%Y-%m-%d-%H-%M).tar.zst
 
-    mkdir -p (dirname $output)
+    mkdir -p (path dirname $output)
     tar \
         --create \
         --directory $repo \
         --file $output \
         --zstd \
         (git -C $repo ls-files)
-    echo '*' >(dirname $output)/.gitignore
+    echo '*' >(path dirname $output)/.gitignore
 
     echo "File is now available at: $output"
 end

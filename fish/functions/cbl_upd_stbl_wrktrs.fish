@@ -12,7 +12,7 @@ function cbl_upd_stbl_wrktrs -d "Update the worktrees for linux-stable"
             git -C $folder remote update origin
         end
 
-        set dirname (dirname $folder)
+        set dirname (path dirname $folder)
         if test $dirname = $CBL_SRC_D
             set stable_versions $SUPPORTED_STABLE_VERSIONS
         else

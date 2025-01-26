@@ -137,7 +137,7 @@ function user_setup -d "Setup a user account, downloading all files and placing 
 
     # Downloading/updating environment scripts
     if not test -d $ENV_FOLDER
-        mkdir -p (dirname $ENV_FOLDER)
+        mkdir -p (path dirname $ENV_FOLDER)
         if test "$use_gh" = true
             gh repo clone (path basename $ENV_FOLDER) $ENV_FOLDER; or return
         else
@@ -151,7 +151,7 @@ function user_setup -d "Setup a user account, downloading all files and placing 
         $GITHUB_FOLDER/hydro
     for forked_fisher_plugin in $forked_fisher_plugins
         if not test -d $forked_fisher_plugin
-            mkdir -p (dirname $forked_fisher_plugin)
+            mkdir -p (path dirname $forked_fisher_plugin)
             set -l clone_args -b personal
             if test "$use_gh" = true
                 gh repo clone (path basename $forked_fisher_plugin) $forked_fisher_plugin -- $clone_args

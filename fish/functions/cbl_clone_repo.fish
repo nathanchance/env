@@ -70,7 +70,7 @@ function cbl_clone_repo -d "Clone certain repos for ClangBuiltLinux testing and 
             if test -n "$use_repo"
                 mkdir -p $dest
             else
-                mkdir -p (dirname $dest)
+                mkdir -p (path dirname $dest)
             end
 
             if test -n "$use_repo"

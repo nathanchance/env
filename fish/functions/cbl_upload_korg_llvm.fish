@@ -12,7 +12,7 @@ function cbl_upload_korg_llvm -d "Upload kernel.org toolchain releases with kup"
     set kup $kup_src/kup
 
     if not test -e $kup
-        mkdir -p (dirname $kup_src)
+        mkdir -p (path dirname $kup_src)
         git clone https://git.kernel.org/pub/scm/utils/kup/kup.git $kup_src
         or return
     end

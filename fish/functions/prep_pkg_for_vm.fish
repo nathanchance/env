@@ -44,7 +44,7 @@ function prep_pkg_for_vm -d "Prepare package building files for virtual machine 
         git -C $src_dir archive --format=tar HEAD | tar -C $dst_dir -vxf -
     else
         rm -fr $dst_dir
-        mkdir -p (dirname $dst_dir)
-        cp -rv $src_dir (dirname $dst_dir)
+        mkdir -p (path dirname $dst_dir)
+        cp -rv $src_dir (path dirname $dst_dir)
     end
 end

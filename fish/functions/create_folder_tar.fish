@@ -14,7 +14,7 @@ function create_folder_tar -d "Create zstd compressed tarball of a folder"
     tar \
         --create \
         --exclude-from $ENV_FOLDER/configs/common/tar-excludes \
-        --directory (dirname $folder) \
+        --directory (path dirname $folder) \
         --file $output \
         --zstd \
         (path basename $folder)

@@ -9,6 +9,6 @@ function decrypt_gpg_file -d "Decrypts a GPG file into a location"
     else
         set output $HOME/.$argv[1]
     end
-    mkdir -p (dirname $output)
+    mkdir -p (path dirname $output)
     gpg --batch --yes --pinentry-mode loopback --output $output --decrypt $ENV_FOLDER/configs/common/$argv[1].gpg
 end

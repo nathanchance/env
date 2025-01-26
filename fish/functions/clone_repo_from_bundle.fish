@@ -55,7 +55,7 @@ function clone_repo_from_bundle -d "Clone repo using a clone bundle if possible"
         set branch master
     end
 
-    mkdir -p (dirname $dest)
+    mkdir -p (path dirname $dest)
 
     if set -q bundle
         git clone $bundle $dest

@@ -14,14 +14,14 @@ function cbl_bld_qemu -d "Build QEMU for use with ClangBuiltLinux"
 
     if test -n "$VERSION"
         set qemu_src $CBL_QEMU_SRC/qemu-$VERSION
-        mkdir -p (dirname $qemu_src)
-        crl https://download.qemu.org/(path basename $qemu_src).tar.xz | tar -C (dirname $qemu_src) -xJf -
+        mkdir -p (path dirname $qemu_src)
+        crl https://download.qemu.org/(path basename $qemu_src).tar.xz | tar -C (path dirname $qemu_src) -xJf -
 
         set install_folder $VERSION
     else
         set qemu_src $CBL_QEMU_SRC/qemu
         if not test -d $qemu_src
-            mkdir -p (dirname $qemu_src)
+            mkdir -p (path dirname $qemu_src)
             git clone -j(nproc) --recurse-submodules https://gitlab.com/qemu-project/qemu.git $qemu_src
         end
 

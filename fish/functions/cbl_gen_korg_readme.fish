@@ -52,7 +52,7 @@ function cbl_gen_korg_readme -d "Generate kernel.org toolchains README"
     end
 
     if in_orb
-        set md $MAC_FOLDER(dirname $ICLOUD_DOCS_FOLDER)/iCloud~md~obsidian/Documents/Tech/Kernel/Work/$md_base
+        set md $MAC_FOLDER(path dirname $ICLOUD_DOCS_FOLDER)/iCloud~md~obsidian/Documents/Tech/Kernel/Work/$md_base
 
         set mac_html /Users/$USER/Downloads/$tc-index.html
         set lnx_html $MAC_FOLDER$mac_html

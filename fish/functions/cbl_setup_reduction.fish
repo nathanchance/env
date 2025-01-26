@@ -44,7 +44,7 @@ function cbl_setup_reduction -d "Build good and bad versions of LLVM for cvise r
     echo '#!/usr/bin/env fish
 
 set cvise_dir (realpath (status dirname))
-set tmp_dir (dirname $cvise_dir)
+set tmp_dir (path dirname $cvise_dir)
 set install_dir $tmp_dir/install
 
 set bad_clang $install_dir/llvm-bad/bin/clang
@@ -80,7 +80,7 @@ if not string match -qr \'\.o$\' $o_target
     print_error ".o file is not the last target in make_args?"
     return 1
 end
-set o_cmd_file $lnx_bld/good/(dirname $o_target)/.(path basename $o_target).cmd
+set o_cmd_file $lnx_bld/good/(path dirname $o_target)/.(path basename $o_target).cmd
 
 #####################################
 # BEWARE MODIFICATIONS TO THIS AREA #

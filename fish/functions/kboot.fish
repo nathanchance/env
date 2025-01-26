@@ -38,7 +38,7 @@ function kboot -d "Boot a kernel in QEMU"
         set BU $CBL_SRC_C/boot-utils
     end
     if not test -d "$BU"
-        mkdir -p (dirname $BU)
+        mkdir -p (path dirname $BU)
         git clone https://github.com/ClangBuiltLinux/boot-utils $BU; or return
     end
     if test "$U" != 0

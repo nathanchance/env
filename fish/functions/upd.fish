@@ -72,7 +72,7 @@ function upd -d "Runs the update command for the current distro or downloads/upd
                         gh repo sync --force --source $forked_repo nathanchance/$repo_name
                         git -C $repo_path urh
                     else
-                        mkdir -p (dirname $forked_repo)
+                        mkdir -p (path dirname $forked_repo)
                         gh repo fork --clone $forked_repo $repo_path
                     end
                 end
@@ -116,7 +116,7 @@ function upd -d "Runs the update command for the current distro or downloads/upd
                     if test -d $dest
                         git -C $dest pull
                     else
-                        mkdir -p (dirname dest)
+                        mkdir -p (path dirname dest)
                         git clone $vim_plugin $dest
                     end
                 end
@@ -159,7 +159,7 @@ function upd -d "Runs the update command for the current distro or downloads/upd
                 end
                 set src $src_base/(string replace ".git" "" (path basename $git_url))
                 if not test -d $src
-                    mkdir -p (dirname $src)
+                    mkdir -p (path dirname $src)
                     git clone $git_clone_args $git_url $src; or return
                 end
                 git -C $src pull -r; or return
@@ -363,7 +363,7 @@ function upd -d "Runs the update command for the current distro or downloads/upd
                         print_warning "$target requires an unversioned python binary, skipping..."
                         continue
                     end
-                    $mkdir -p (dirname $binary)
+                    $mkdir -p (path dirname $binary)
                     $curl -o $binary https://storage.googleapis.com/git-repo-downloads/repo
                     $chmod a+x $binary
 
@@ -424,7 +424,7 @@ function upd -d "Runs the update command for the current distro or downloads/upd
                     set ver (glr $repo)
                     set url https://github.com/$repo/releases/download/$ver/shfmt_"$ver"_linux_$arch
 
-                    $mkdir -p (dirname $binary)
+                    $mkdir -p (path dirname $binary)
                     $curl -o $binary $url
                     $chmod +x $binary
 
@@ -433,7 +433,7 @@ function upd -d "Runs the update command for the current distro or downloads/upd
                     set ver (glr $repo)
                     set url https://github.com/$repo/releases/download/$ver/wally-cli
 
-                    $mkdir -p (dirname $binary)
+                    $mkdir -p (path dirname $binary)
                     $curl -o $binary $url
                     $chmod +x $binary
 

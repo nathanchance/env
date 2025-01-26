@@ -28,7 +28,7 @@ function cbl_setup_other_repos -d "Download other ClangBuiltLinux repos"
     for repo in $repos_cbl_github
         set folder $CBL_GIT/$repo
         if not test -d $folder
-            mkdir -p (dirname $folder)
+            mkdir -p (path dirname $folder)
             gh repo clone ClangBuiltLinux/$repo $folder
             pushd $folder; or return
             gh repo fork --remote --remote-name nathanchance; or return
@@ -52,7 +52,7 @@ function cbl_setup_other_repos -d "Download other ClangBuiltLinux repos"
                 set folder $CBL_TC_BLD
         end
         if not test -d $folder
-            mkdir -p (dirname $folder)
+            mkdir -p (path dirname $folder)
             switch $repo
                 case tc-build
                     set clone_args -- -b personal
@@ -63,13 +63,13 @@ function cbl_setup_other_repos -d "Download other ClangBuiltLinux repos"
 
     set pi_scripts $GITHUB_FOLDER/pi-scripts
     if not test -d $pi_scripts
-        mkdir -p (dirname $pi_scripts)
+        mkdir -p (path dirname $pi_scripts)
         gh repo clone pi-scripts $pi_scripts
     end
 
     set tuxmake $CBL_SRC_D/tuxmake
     if not test -d $tumxake
-        mkdir -p (dirname $tuxmake)
+        mkdir -p (path dirname $tuxmake)
         git clone https://gitlab.com/Linaro/tuxmake.git $tuxmake
         and git -C $tuxmake remote add -f nathanchance git@gitlab.com:nathanchance/tuxmake.git
     end

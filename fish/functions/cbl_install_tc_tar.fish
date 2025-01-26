@@ -20,6 +20,6 @@ print('\n'.join({
     mkdir -p $CBL_TC
     tar -C $CBL_TC -axf $tar
     for tc in $tcs
-        cbl_upd_software_symlinks (dirname $tc) $CBL_TC/$tc
+        cbl_upd_software_symlinks (path dirname $tc) $CBL_TC/$tc
     end
 end

@@ -35,9 +35,9 @@ function cbl_upd_software_symlinks -d "Update symlinks to a stow or QEMU folder"
             # destination handling
             switch $pkg
                 case binutils
-                    set dest (dirname $CBL_TC_BNTL)
+                    set dest (path dirname $CBL_TC_BNTL)
                 case llvm
-                    set dest (dirname $CBL_TC_LLVM)
+                    set dest (path dirname $CBL_TC_LLVM)
             end
 
             ln -fnrsv $src $dest; or return

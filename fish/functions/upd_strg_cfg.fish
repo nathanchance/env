@@ -7,6 +7,6 @@ function upd_strg_cfg -d "Updates storage.conf for podman (primarily useful for 
     set new_strg_loc (string replace $HOME/.local/share $MAIN_FOLDER $cur_strg_loc)
     set strg_cfg $HOME/.config/containers/storage.conf
 
-    mkdir -p (dirname $strg_cfg)
+    mkdir -p (path dirname $strg_cfg)
     printf '[storage]\n\ndriver = "overlay"\n\ngraphroot = "%s"\n' $new_strg_loc >$strg_cfg
 end

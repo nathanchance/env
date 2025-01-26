@@ -10,7 +10,7 @@ function vim_setup -d "Setup vim configuration files"
         set dest $HOME/.vim/$folder
         test -L $dest; and continue
 
-        mkdir -p (dirname $dest)
+        mkdir -p (path dirname $dest)
         ln -frsv $env_vim/$folder $dest
     end
 
