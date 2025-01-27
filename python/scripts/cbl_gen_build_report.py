@@ -53,9 +53,14 @@ def generate_warnings(log_folder, src_folder):
     warnings = {}
     for log in logs:
         lines = log.read_text(encoding='utf-8').splitlines(keepends=True)
-        warnings[log.name] = sorted(
-            {line.replace(f"{src_folder}/", '')
-             for line in lines if prob_re.search(line)})
+        # We specifically check "dodgy linker" because this is known to be
+        # extremely noisy and will appear with most released versions of clang.
+        # They will still appear in the log files but they do not need to be
+        # logged in these reports.
+        warnings[log.name] = sorted({
+            line.replace(f"{src_folder}/", '')
+            for line in lines if prob_re.search(line) and 'dodgy linker' not in line
+        })
     full = {key: value for key, value in warnings.items() if value}
 
     # Filter warnings based on priority to fix
