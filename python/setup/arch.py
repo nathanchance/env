@@ -24,14 +24,14 @@ EDID_1280_1024 = b'BAAAACAAAAAFAAAAR05VAAIAAcAEAAAAAAAAAAAAAAABAAHABAAAAAEAAAAAA
 HETZNER_MIRROR = 'https://mirror.hetzner.com/archlinux/$repo/os/$arch'
 PACMAN_CONF = Path('/etc/pacman.conf')
 
-UCODE_VENDOR = None
+CPU_VENDOR = None
 if (proc_cpuinfo := Path('/proc/cpuinfo')).exists():
     proc_cpuinfo_txt = proc_cpuinfo.read_text(encoding='utf-8')
     if vendor_match := re.search('vendor_id\t: ([a-zA-Z]+)\n', proc_cpuinfo_txt):
         if (vendor_id := vendor_match.groups()[0]) == 'AuthenticAMD':
-            UCODE_VENDOR = 'amd'
+            CPU_VENDOR = 'amd'
         elif vendor_id == 'GenuineIntel':
-            UCODE_VENDOR = 'intel'
+            CPU_VENDOR = 'intel'
 
 
 class CmdlineOptions(UserDict):
@@ -527,8 +527,8 @@ def pacman_install_packages():
         'openssh',
     ]  # yapf: disable
 
-    if UCODE_VENDOR:
-        packages.append(f"{UCODE_VENDOR}-ucode")
+    if CPU_VENDOR:
+        packages.append(f"{CPU_VENDOR}-ucode")
 
     if 'DISPLAY' in os.environ:
         packages += [
@@ -773,8 +773,8 @@ def switch_from_grub_to_systemd_boot(conf='linux.conf', dryrun=False):
 
     # We may have multiple initrds
     initrds = ['initramfs-linux']
-    if not lib.setup.is_virtual_machine() and UCODE_VENDOR:
-        initrds.insert(0, f"{UCODE_VENDOR}-ucode")
+    if not lib.setup.is_virtual_machine() and CPU_VENDOR:
+        initrds.insert(0, f"{CPU_VENDOR}-ucode")
 
     # Easily generate the text for initial linux.conf
     linux_conf_parts = [
