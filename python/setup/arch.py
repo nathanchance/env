@@ -142,6 +142,24 @@ def adjust_gnome_power_settings():
     lib.utils.run(gdm_cmd)
 
 
+def can_use_amd_pstate():
+    return CPU_VENDOR == 'amd' and list(Path('/sys/devices/system/cpu').glob('cpu*/acpi_cppc'))
+
+
+def configure_amd_pstate():
+    if not can_use_amd_pstate():
+        return
+
+    # Implement amd_pstate_acpi_pm_profile_server() and
+    # amd_pstate_acpi_pm_profile_undefined() from drivers/cpufreq/amd-pstate.c
+    # to avoid attempting to configure amd_pstate when it is not possible.
+    pm_profile = int(Path('/sys/firmware/acpi/pm_profile').read_text(encoding='utf-8').strip())
+    if pm_profile in (0, 4, 5, 7) or pm_profile >= 9:
+        return
+
+    # WORK IN PROGRESS
+
+
 def configure_networking():
     hostname = lib.setup.get_hostname()
 
@@ -319,11 +337,13 @@ def fix_fstab():
 
 def get_cmdline_additions():
     options = CmdlineOptions({
-        # Enable the performance governor
-        'cpufreq.default_governor': 'performance',
         # Mitigate SMT RSB vulnerability
         'kvm.mitigate_smt_rsb': '1',
     })
+    if can_use_amd_pstate():
+        options['amd_pstate'] = 'active'
+    else:
+        options['cpufreq.default_governor'] = 'performance'
     # Add 'console=' if necessary (when connected by serial console in a
     # virtual machine)
     if lib.setup.is_virtual_machine() and 'DISPLAY' not in os.environ:
@@ -840,6 +860,7 @@ if __name__ == '__main__':
     # pacman_settings() should always be run first so that is_hetzner() always works
     pacman_settings()
     installimage_adjustments(initcpio_conf)
+    configure_amd_pstate()
     configure_systemd_boot()
     pacman_key_setup()
     pacman_update()
