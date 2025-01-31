@@ -21,13 +21,14 @@ SRC = Path(ROOT, 'src')
 MACHINE = platform.machine()
 
 LLVM_REFS = {
-    '20.0.0': 'origin/main',
-    '19.1.8': 'origin/release/19.x',
+    '21.0.0': 'origin/main',
+    '20.1.0': 'release/20.x',
 }
 
 LLVM_VERSIONS = [
-    '20.0.0',  # git
-    '19.1.8',  # release/19.x
+    '21.0.0',  # git
+    '20.1.0',  # release/20.x
+    '19.1.8',
     '19.1.7',
     '18.1.8',
     '17.0.6',
