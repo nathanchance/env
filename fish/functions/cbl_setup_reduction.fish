@@ -31,11 +31,13 @@ function cbl_setup_reduction -d "Build good and bad versions of LLVM for cvise r
         $bld_llvm_args
     or return
 
-    ln -fnrsv $tmp_dir/build/llvm-{$bad_sha,bad}
-    or return
+    for sub_dir in build install
+        ln -fnrsv $tmp_dir/$sub_dir/llvm-{$bad_sha,bad}
+        or return
 
-    ln -fnrsv $tmp_dir/build/llvm-{$good_sha,good}
-    or return
+        ln -fnrsv $tmp_dir/$sub_dir/llvm-{$good_sha,good}
+        or return
+    end
 
     set cvise $tmp_dir/cvise
     mkdir -p $cvise
