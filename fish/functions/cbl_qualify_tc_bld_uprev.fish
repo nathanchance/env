@@ -77,6 +77,8 @@ print(gib // 30, gib // 15)" | string split ' ')
     set thin_lto_def --defines LLVM_PARALLEL_LINK_JOBS=$lto_mem[2]
 
     begin
+        set -lx fish_trace 1
+
         # Check that two stage build works fine
         $tc_bld/build-llvm.py \
             $common_tc_bld_args
