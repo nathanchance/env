@@ -1,7 +1,7 @@
 #!/usr/bin/env fish
 # Description: Download and install a more modern version of cmake, which is required for newer LLVM releases
 
-set cmake_version 3.31.4
+set cmake_version 3.31.5
 
 switch $ARCHITECTURE
     case arm64
