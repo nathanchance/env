@@ -99,19 +99,10 @@ def prepare_source(base_name, base_ref='origin/master'):
 
     # Patching section
     # yapf: disable
+    if base_name == 'fedora':
+        patches.append('https://lore.kernel.org/all/20250204-arm64-handle-arm-attributes-in-linker-script-v2-1-d684097f5554@kernel.org/')  # arm64: Handle .ARM.attributes section in linker scripts
     if base_name == 'linux-next-llvm':
-        # https://lore.kernel.org/20241212014418.GA532802@ax162/
-        # https://lore.kernel.org/all/20241213-kexec-fix-section-name-for-ffunction-sections-v1-1-1ae6050f6a15@kernel.org/
-        # https://lore.kernel.org/20241214230818.GA677337@ax162/
-        patches.append('https://lore.kernel.org/all/20250109140757.2841269-2-dwmw2@infradead.org/')  # x86/kexec: Disable global pages before writing to control page
-        patches.append('https://lore.kernel.org/all/20250109140757.2841269-3-dwmw2@infradead.org/')  # x86/kexec: Ensure preserve_context flag is set on return to kernel
-        patches.append('https://lore.kernel.org/all/20250109140757.2841269-4-dwmw2@infradead.org/')  # x86/kexec: Use correct swap page in swap_pages function
-        patches.append('https://lore.kernel.org/all/20250109140757.2841269-5-dwmw2@infradead.org/')  # x86/kexec: Fix stack and handling of re-entry point for ::preserve_context
-        patches.append('https://lore.kernel.org/all/20250109140757.2841269-6-dwmw2@infradead.org/')  # x86/kexec: Fix location of relocate_kernel with -ffunction-sections
-        patches.append('https://lore.kernel.org/all/20250109140757.2841269-7-dwmw2@infradead.org/')  # x86/kexec: Mark machine_kexec() with __nocfi
-        patches.append('https://lore.kernel.org/all/20250109140757.2841269-8-dwmw2@infradead.org/')  # kexec_core: Add and update comments regarding the KEXEC_JUMP flow
-        patches.append('https://lore.kernel.org/all/20250109140757.2841269-9-dwmw2@infradead.org/')  # x86/kexec: Cope with relocate_kernel() not being at the start of the page
-        patches.append('https://lore.kernel.org/all/20250109140757.2841269-10-dwmw2@infradead.org/')  # x86/kexec: Use typedef for relocate_kernel_fn function prototype
+        patches.append('https://lore.kernel.org/all/20250120-apparmor-fix-unused-sock-__file_sock_perm-v1-1-8d17bd672c6a@kernel.org/')  # apparmor: Remove unused variable 'sock' in __file_sock_perm()
     # yapf: enable
 
     try:
