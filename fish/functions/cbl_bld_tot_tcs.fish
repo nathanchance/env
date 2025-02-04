@@ -158,7 +158,6 @@ function cbl_bld_tot_tcs -d "Build LLVM and binutils from source for kernel deve
     end
 
     # Add in-review patches here
-    set -a gh_prs https://github.com/llvm/llvm-project/pull/125298 # [Clang][counted_by] Don't treat a __bdos argument as an array if it isn't
     for gh_pr in $gh_prs
         if gh_llvm pr view --json state (path basename $gh_pr) | python3 -c "import json, sys; sys.exit(0 if json.load(sys.stdin)['state'] == 'MERGED' else 1)"
             print_warning "$gh_pr has already been merged, skipping..."
@@ -172,7 +171,6 @@ function cbl_bld_tot_tcs -d "Build LLVM and binutils from source for kernel deve
             return 1
         end
     end
-    sed -i 's;@falcon_reconfigure_xmac_core;@test2;g' $llvm_project/clang/test/CodeGen/attr-counted-by-bug.c
 
     string match -gr "\s+set\(LLVM_VERSION_[A-Z]+ ([0-9]+)\)" <$llvm_project/cmake/Modules/LLVMVersion.cmake | string join . | read llvm_ver
     if test (string split . $llvm_ver | count) != 3
