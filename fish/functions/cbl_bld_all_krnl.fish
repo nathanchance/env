@@ -47,7 +47,7 @@ function cbl_bld_all_krnl -d "Build all kernels for ClangBuiltLinux testing"
                 or return
             end
 
-        case test-desktop-amd-4300G test-desktop-intel-n100 test-laptop-intel
+        case test-desktop-amd-{4300G,8745HS} test-desktop-intel-n100 test-laptop-intel
             cbl_test_kvm build
             or return
 

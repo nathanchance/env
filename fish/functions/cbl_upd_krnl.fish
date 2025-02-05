@@ -124,7 +124,7 @@ function cbl_upd_krnl -d "Update machine's kernel"
             # Install kernel
             install_rpi_kernel $arch $ver $install_args /tmp/linux-*-$arch.tar.zst
 
-        case test-desktop-amd-4300G test-desktop-intel-{11700,n100} test-laptop-intel vm-x86_64
+        case test-desktop-amd-{4300G,8745HS} test-desktop-intel-{11700,n100} test-laptop-intel vm-x86_64
             in_container_msg -h
             or return
 

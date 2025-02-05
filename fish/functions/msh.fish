@@ -21,11 +21,19 @@ function msh -d "Shorthand for mosh -o" -w mosh
             end
             set user_host nathan@$host
 
-        case amd-desktop
+        case amd-desktop-4300G
             if test "$tailscale" = true
                 set host hp-amd-ryzen-4300g
             else
                 set host 192.168.4.177
+            end
+            set user_host nathan@$host
+
+        case amd-desktop-8745HS
+            if test "$tailscale" = true
+                set host beelink-amd-ryzen-8745hs
+            else
+                set host 192.168.4.192
             end
             set user_host nathan@$host
 

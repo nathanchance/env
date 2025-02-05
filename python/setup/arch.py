@@ -166,6 +166,7 @@ def configure_networking():
     ips = {
         'asus-intel-core-4210U': '192.168.4.137',
         'asus-intel-core-11700': '192.168.4.189',
+        'beelink-amd-ryzen-8745HS': '192.168.4.192',
         'beelink-intel-n100': '192.168.4.190',
         'hp-amd-ryzen-4300G': '192.168.4.177',
         'thelio-3990X': '192.168.4.188',

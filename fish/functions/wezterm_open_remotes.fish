@@ -11,6 +11,7 @@ function wezterm_open_remotes -d "Open a new wezterm tab for each remote machine
     set hosts \
         hetzner:Hetzner \
         aadp:AADP \
+        amd-desktop-8745HS:"AMD mini desktop" \
         intel-desktop-n100:"Intel mini desktop" \
         honeycomb:Honeycomb
 
