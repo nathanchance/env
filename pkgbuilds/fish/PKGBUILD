@@ -46,7 +46,7 @@ build() {
 check() {
   cd $_repo
 
-  make -C build test
+  make -C build fish_run_tests
 }
 
 package() {
