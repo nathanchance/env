@@ -75,10 +75,5 @@ if test -d $CARGO_HOME/bin
     fish_add_path -ag $CARGO_HOME/bin
 end
 
-# Undo fish 4.0 change to keybindings
-bind alt-backspace backward-kill-word
-bind alt-left backward-word
-bind alt-right forward-word
-
 # Make sure that sourcing config.fish always returns 0
 true
