@@ -8,7 +8,7 @@ pkgname=(
   s390x-linux-gnu-binutils
   sparc64-linux-gnu-binutils
 )
-pkgver=2.43
+pkgver=2.44
 pkgrel=1
 arch=(x86_64)
 url='https://gnu.org/software/binutils/'
@@ -16,7 +16,7 @@ license=(GPL-2.0-or-later GPL-3.0-or-later LGPL-2.0-or-later LGPL-3.0-or-later G
 depends=(glibc libelf zlib zstd)
 makedepends=(setconf)
 source=("https://ftp.gnu.org/gnu/binutils/binutils-$pkgver.tar.xz")
-sha512sums=('93e063163e54d6a6ee2bd48dc754270bf757a3635b49a702ed6b310e929e94063958512d191e66beaf44275f7ea60865dbde138b624626739679fcc306b133bb')
+sha512sums=('b85d3bbc0e334cf67a96219d3c7c65fbf3e832b2c98a7417bf131f3645a0307057ec81cd2b29ff2563cec53e3d42f73e2c60cc5708e80d4a730efdcc6ae14ad7')
 
 prepare() {
   setconf binutils-$pkgver/libiberty/configure ac_cpp "'\$CPP \$CPPFLAGS -O2'"
@@ -50,27 +50,18 @@ _build() {
 }
 
 build() {
-  local _gold_opts=(
-    --enable-gold
-    --enable-ld=default
-  )
-
-  _build arm-linux-gnueabi \
-         "${_gold_opts[@]}"
+  _build arm-linux-gnueabi
 
   _build mips-linux-gnu \
          --enable-targets=mips64-linux-gnueabi64,mips64-linux-gnueabin32
 
   _build powerpc64-linux-gnu \
-         "${_gold_opts[@]}" \
          --enable-targets=powerpc-linux-gnu
 
   _build s390x-linux-gnu \
-         "${_gold_opts[@]}" \
          --enable-targets=s390-linux-gnu
 
   _build sparc64-linux-gnu \
-         "${_gold_opts[@]}" \
          --enable-targets=sparc-linux-gnu
 }
 
