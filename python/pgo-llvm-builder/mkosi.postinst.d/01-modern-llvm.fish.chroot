@@ -1,7 +1,7 @@
 #!/usr/bin/env fish
 # Description: Download and install the latest version of LLVM from apt.llvm.org
 
-set llvm_version 19
+set llvm_version 20
 
 mkdir /etc/apt/trusted.gpg.d
 
