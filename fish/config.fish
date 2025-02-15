@@ -4,6 +4,8 @@
 
 set -e fish_user_paths
 
+fish_add_path -ag $PYTHON_BIN_FOLDER
+
 start_ssh_agent
 
 if test "$LOCATION" = mac
