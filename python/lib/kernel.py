@@ -99,6 +99,12 @@ def prepare_source(base_name, base_ref='origin/master'):
 
     # Patching section
     # yapf: disable
+    if base_name == 'linux-next-llvm':
+        # https://lore.kernel.org/20250214162813.GA3221808@ax162/
+        patches.append('https://lore.kernel.org/all/20240724-amdgpu-dml2-fix-float-enum-warning-again-v1-1-740e7946f77a@kernel.org/')  # drm/amd/display: Reapply 2fde4fdddc1f
+        # https://lore.kernel.org/20250214181401.4e7dd91d@canb.auug.org.au/
+        commits.append('b3b3c11796d75634209026381fa58bed2c79b2c0')  # kvm: Fix Kconfig type warning
+        patches.append('https://lore.kernel.org/all/20250212115952.2312444-1-andriy.shevchenko@linux.intel.com/')  # serial: 8250_dw: Call dw8250_quirks() conditionally
     # yapf: enable
 
     try:
