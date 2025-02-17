@@ -13,7 +13,12 @@ function lsfuncs -d "List function names and descriptions from $ENV_FOLDER/fish/
         printf '| %s | %s |\n' $border $border
 
         for func in (get_my_funcs)
-            printf '| %-'$column_width's | %s\n' $func (functions -D -v $func | tail -1)
+            if test -e $PYTHON_BIN_FOLDER/$func
+                set desc ($func -h | string match -er '^[A-Z].*$')
+            else
+                set desc (functions -D -v $func | tail -1)
+            end
+            printf '| %-'$column_width's | %s\n' $func $desc
         end
     end &| bat $BAT_PAGER_OPTS --style plain
 end

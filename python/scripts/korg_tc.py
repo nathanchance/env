@@ -402,14 +402,15 @@ class LLVMManager(ToolchainManager):
 
 
 if __name__ == '__main__':
-    prog = sys.argv[0].rsplit('/', 1)[1]
-    acceptable_progs = ('korg_gcc.py', 'korg_llvm.py')
-    if prog not in acceptable_progs:
+    if (prog := sys.argv[0].rsplit('/', 1)[1]).startswith('korg_gcc'):
+        manager = GCCManager()
+    elif prog.startswith('korg_llvm'):
+        manager = LLVMManager()
+    else:
+        acceptable_progs = ('korg_gcc', 'korg_gcc.py', 'korg_llvm', 'korg_llvm.py')
         raise RuntimeError(
             f"{prog} needs to be symlinked to either {' or '.join(acceptable_progs)} to function properly!",
         )
-
-    manager = GCCManager() if prog == 'korg_gcc.py' else LLVMManager()
 
     supported_versions = manager.VERSIONS
     supported_targets = getattr(manager, 'TARGETS', None)
