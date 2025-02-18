@@ -31,15 +31,15 @@ function cbl_bld_llvm_sbs -d "Build identical copies of LLVM side by side from v
 
         $tc_bld/build-llvm.py \
             --assertions \
-            --build-folder $tmp_dir/build/llvm-$sha \
+            --build-folder $prefix/build/llvm-$sha \
             --build-stage1-only \
-            --install-folder $tmp_dir/install/llvm-$sha \
-            --llvm-folder $tmp_dir/src \
+            --install-folder $prefix/install/llvm-$sha \
+            --llvm-folder $prefix/src \
             --projects clang lld \
             --quiet-cmake \
             $bld_llvm_args
         or return
 
-        rm -fr $tmp_dir/src
+        rm -fr $prefix/src
     end
 end
