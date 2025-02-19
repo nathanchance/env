@@ -124,6 +124,7 @@ function cbl_upd_src -d "Update source trees in $CBL_SRC"
                         case '*'/linux-next
                             git -C $folder urbi
                     end
+                    or return
 
                     if string match -qr linux-stable $folder
                         cbl_ptchmn -C $folder -s
