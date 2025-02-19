@@ -138,20 +138,10 @@ function cbl_bld_tot_tcs -d "Build LLVM and binutils from source for kernel deve
     end
 
     # Add patches to revert here
-    # https://github.com/ClangBuiltLinux/linux/issues/2070
-    # https://github.com/ClangBuiltLinux/linux/issues/2072
-    set -a reverts https://github.com/llvm/llvm-project/commit/7763119c6eb0976e4836f81c9876c49a36d46d73 # [PowerPC] Deprecate uses of ISD::ADDC/ISD::ADDE/ISD::SUBC/ISD::SUBE (#116984)
     for revert in $reverts
         if string match -qr 'https?://' $revert
             set -l revert (path basename $revert)
-            set -l failed false
-            if test "$revert" = 7763119c6eb0976e4836f81c9876c49a36d46d73
-                git -C $llvm_project diff -R $revert^..$revert | string replace 'DAG.getConstant(-1ULL, DL, MVT::i64)' 'DAG.getAllOnesConstant(DL, MVT::i64)' | git -C $llvm_project ap
-            else
-                git -C $llvm_project rv -n $revert
-            end
-            or set failed true
-            if test "$failed" = true
+            if not git -C $llvm_project rv -n $revert
                 set message "Failed to revert $revert"
                 print_error "$message"
                 tg_msg "$message"
