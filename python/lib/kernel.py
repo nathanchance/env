@@ -99,6 +99,9 @@ def prepare_source(base_name, base_ref='origin/master'):
 
     # Patching section
     # yapf: disable
+    if base_name == 'fedora':
+        # https://lore.kernel.org/all/Z7Xto0WZ-Crxunik@finisterre.sirena.org.uk/
+        patches.append('https://lore.kernel.org/all/87jz9kiuvu.ffs@tglx/raw')
     # yapf: enable
 
     try:
