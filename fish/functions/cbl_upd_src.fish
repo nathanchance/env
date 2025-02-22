@@ -122,7 +122,14 @@ function cbl_upd_src -d "Update source trees in $CBL_SRC"
                         case '*'/linux '*'/linux-stable'*'
                             git -C $folder pull -r
                         case '*'/linux-next
-                            git -C $folder urbi
+                            git -C $folder remote update --prune
+                            or return
+
+                            git -C $folder rebase \
+                                --interactive \
+                                --onto @{u} \
+                                (git -C $folder mfc)^ \
+                                (git -C $folder bn)
                     end
                     or return
 
