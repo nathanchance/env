@@ -99,9 +99,8 @@ def prepare_source(base_name, base_ref='origin/master'):
 
     # Patching section
     # yapf: disable
-    if base_name == 'fedora':
-        # https://lore.kernel.org/all/Z7Xto0WZ-Crxunik@finisterre.sirena.org.uk/
-        patches.append('https://lore.kernel.org/all/87jz9kiuvu.ffs@tglx/raw')
+    if base_name in ('fedora', 'linux-next-llvm'):
+        patches.append('https://lore.kernel.org/all/20250225095651.2636811-1-arnd@kernel.org/')  # scsi: scsi_debug: fix uninitialized variable use
     # yapf: enable
 
     try:
