@@ -3,9 +3,28 @@
 # Copyright (C) 2024 Nathan Chancellor
 
 function mkosi_bld -d "Build a distribution using mkosi"
+    if test (count $argv) -eq 0
+        set image (dev_img)
+    else
+        set image $argv[1]
+        set mkosi_args $argv[2..]
+    end
+
+    if string match -qr ^/ $image
+        set directory $image
+    else
+        set directory $ENV_FOLDER/mkosi/$image
+    end
+    if not test -e $directory/mkosi.conf
+        print_error "No build files for $image?"
+        return 1
+    end
+
     # If mkosi is major version 25 or greater, we can use it directly.
     # If it is not, we use a virtual environment for simple access.
-    if command -q mkosi; and test (mkosi --version | string match -gr '^mkosi ([0-9]+)') -ge 25
+    # pgo-llvm-builder requires a patched mkosi, so require the venv
+    # for that.
+    if command -q mkosi; and test (mkosi --version | string match -gr '^mkosi ([0-9]+)') -ge 25; and not test (path basename $directory) = pgo-llvm-builder
     else if not in_venv
         set venv_dir $PY_VENV_DIR/mkosi
         if not test -e $venv_dir
@@ -25,23 +44,6 @@ function mkosi_bld -d "Build a distribution using mkosi"
         end
     else if test (path basename $VIRTUAL_ENV) != mkosi
         print_error "Already in a virtual environment?"
-        return 1
-    end
-
-    if test (count $argv) -eq 0
-        set image (dev_img)
-    else
-        set image $argv[1]
-        set mkosi_args $argv[2..]
-    end
-
-    if string match -qr ^/ $image
-        set directory $image
-    else
-        set directory $ENV_FOLDER/mkosi/$image
-    end
-    if not test -e $directory/mkosi.conf
-        print_error "No build files for $image?"
         return 1
     end
 
