@@ -53,6 +53,11 @@ function mkosi_bld -d "Build a distribution using mkosi"
         # We may need to look at the configuration of the host
         /etc:/etc
 
+    set mkosi_cache $XDG_FOLDER/cache/mkosi
+    if not test -d $mkosi_cache
+        mkdir -p $mkosi_cache
+    end
+
     switch (path basename $directory)
         case dev-arch
             set cache_dir pacman
@@ -66,6 +71,6 @@ function mkosi_bld -d "Build a distribution using mkosi"
         --build-sources (string join , $build_sources) \
         --directory $directory \
         --force \
-        --package-cache-dir $XDG_FOLDER/cache/mkosi/$cache_dir \
+        --package-cache-dir $mkosi_cache/$cache_dir \
         $mkosi_args
 end
