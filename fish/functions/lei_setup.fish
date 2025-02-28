@@ -32,6 +32,7 @@ function lei_setup -d "Sets up local email interface for Linux kernel mailing li
     set -a lists_query l:workflows.vger.kernel.org
 
     lei q -I https://lore.kernel.org/all/ -o $MAIL_FOLDER/lists --dedupe=mid "($lists_query) AND rt:1.week.ago.."
+    or return
 
     # Setup query for LLVM mail that might not be CC'd to llvm@lists.linux.dev or me
     set -a lists_query OR l:netdev.vger.kernel.org
@@ -39,6 +40,7 @@ function lei_setup -d "Sets up local email interface for Linux kernel mailing li
     set llvm_inclusions {nq:c, OR nq:C}lang "OR nq:"{LLVM,llvm}
 
     lei q -I https://lore.kernel.org/all/ -o $MAIL_FOLDER/llvm --dedupe=mid "($lists_query) AND NOT ($llvm_exclusions) AND ($llvm_inclusions) AND rt:1.week.ago.."
+    or return
 
     lei q -I https://lore.kernel.org/all/ -o $MAIL_FOLDER/kvmarm --dedupe=mid "(l:kvmarm@lists.cs.columbia.edu OR l:kvmarm@lists.linux.dev) AND rt:1.week.ago.."
 end
