@@ -80,7 +80,7 @@ series is no longer supported.
 Cheers,
 Nathan" >msg
 
-            for korg_user in conor ojeda
+            for korg_user in ojeda
                 set -a mutt_args -c $korg_user@kernel.org
             end
             echo "#!/usr/bin/env fish
