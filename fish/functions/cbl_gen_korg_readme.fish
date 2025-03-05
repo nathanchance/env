@@ -91,13 +91,7 @@ function cbl_gen_korg_readme -d "Generate kernel.org toolchains README"
         mac open $mac_html
         or return
 
-        set tailscale $MAC_FOLDER/Applications/Tailscale.app/Contents/MacOS/Tailscale
-        if test -e $tailscale; and $tailscale status &>/dev/null
-            set ip ($tailscale ip -4 thelio-3990X)
-        else
-            set ip $MAIN_REMOTE_IP
-        end
-
+        set ip $MAIN_REMOTE_IP
         if ssh nathan@$ip "fish -c 'test -d $NVME_FOLDER'"
             set remote_prefix $NVME_FOLDER
         else
