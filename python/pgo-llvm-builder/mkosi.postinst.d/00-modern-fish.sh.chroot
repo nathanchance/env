@@ -16,6 +16,7 @@ if [ "$RELEASE" = "buster" ]; then
     # Install Rust into the root user's HOME directory
     export HOME=/root
     curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
+    # shellcheck disable=SC1091
     . /root/.cargo/env
     # We also need the newer cmake that this image has installed for LLVM
     export PATH="/usr/local/bin:$PATH"
@@ -26,14 +27,16 @@ if [ "$RELEASE" = "buster" ]; then
     fish_version=4.0.0
     curl -LSs https://github.com/fish-shell/fish-shell/releases/download/"$fish_version"/fish-"$fish_version".tar.xz | tar --strip-components=1 -Jxf-
 
+    mkdir build
+    cd build
     # We install to /usr because getting /usr/local/bin into PATH for the rest
     # of the build is not super easy because PATH comes from mkosi.
     cmake_args="-DBUILD_DOCS=OFF -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr"
     # For some inexplicable reason, the first cmake invocation fails to find
     # the version of rust that we just installed but it does the second time?
-    mkdir build
-    cd build
+    # shellcheck disable=SC2086
     if ! cmake $cmake_args ..; then
+        # shellcheck disable=SC2086
         cmake $cmake_args ..
     fi
     cmake --build .
