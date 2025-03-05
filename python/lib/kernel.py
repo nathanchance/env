@@ -99,6 +99,9 @@ def prepare_source(base_name, base_ref='origin/master'):
 
     # Patching section
     # yapf: disable
+    if base_name in ('fedora', 'linux-next-llvm'):
+        # https://lore.kernel.org/20250304231601.0C76DC4CEE8@smtp.kernel.org/
+        commits.append('077a875fd0bc45f6e1802ab108b9b8341afc8d8f')  # fixup! mm/mremap: initial refactor of move_vma()
     # yapf: enable
 
     try:
