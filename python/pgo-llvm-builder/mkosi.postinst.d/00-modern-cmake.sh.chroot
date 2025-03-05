@@ -1,0 +1,16 @@
+#!/bin/sh
+# Description: Download and install a more modern version of cmake, which is required for newer LLVM releases
+
+set -eux
+
+cmake_version=3.31.6
+
+case "$ARCHITECTURE" in
+    "arm64")
+        arch=aarch64
+        ;;
+    "x86-64")
+        arch=x86_64
+        ;;
+esac
+wget -O - -q https://github.com/Kitware/CMake/releases/download/v"$cmake_version"/cmake-"$cmake_version"-linux-"$arch".tar.gz | tar -C /usr/local --strip-components=1 -xzvf -

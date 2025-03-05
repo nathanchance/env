@@ -1,10 +1,48 @@
 #!/bin/sh
-# Description: Install a more modern version of fish for consistent access to newer pieces of the fish language
+# Description: Build/install a more modern version of fish for consistent access to newer pieces of the fish language
 
 set -eux
 
+# Binary packages of fish are no longer available for Debian 10 so we have to
+# build it from source
+if [ "$RELEASE" = "buster" ]; then
+    # rustup.rs may not be resolvable with the nameservers of the host
+    # Use Google's DNS for this step.
+    cp /etc/resolv.conf /etc/resolv.conf.new
+    umount /etc/resolv.conf
+    printf '8.8.%s\n' 8.8 4.4 >>/etc/resolv.conf.new
+    mv /etc/resolv.conf.new /etc/resolv.conf
+
+    # Install Rust into the root user's HOME directory
+    export HOME=/root
+    curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
+    . /root/.cargo/env
+    # We also need the newer cmake that this image has installed for LLVM
+    export PATH="/usr/local/bin:$PATH"
+
+    cd "$(mktemp -d)"
+
+    # Download and extract source code
+    fish_version=4.0.0
+    curl -LSs https://github.com/fish-shell/fish-shell/releases/download/"$fish_version"/fish-"$fish_version".tar.xz | tar --strip-components=1 -Jxf-
+
+    # We install to /usr because getting /usr/local/bin into PATH for the rest
+    # of the build is not super easy because PATH comes from mkosi.
+    cmake_args="-DBUILD_DOCS=OFF -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr"
+    # For some inexplicable reason, the first cmake invocation fails to find
+    # the version of rust that we just installed but it does the second time?
+    mkdir build
+    cd build
+    if ! cmake $cmake_args ..; then
+        cmake $cmake_args ..
+    fi
+    cmake --build .
+    cmake --install .
+
+    exit 0
+fi
+
 case "$RELEASE" in
-    "buster") ver=10 ;;
     "unstable") ver=12 ;;
     *) echo "$RELEASE" is not supported 2>&1; false ;;
 esac
