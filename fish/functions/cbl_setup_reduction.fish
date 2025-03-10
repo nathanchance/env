@@ -45,7 +45,7 @@ function cbl_setup_reduction -d "Build good and bad versions of LLVM for cvise r
     set cvise_test $cvise/test.fish
     echo '#!/usr/bin/env fish
 
-set cvise_dir (realpath (status dirname))
+set cvise_dir (status dirname | path resolve)
 set tmp_dir (path dirname $cvise_dir)
 set install_dir $tmp_dir/install
 
