@@ -21,16 +21,6 @@ function cbl_gen_fedoraconfig -d "Downloads and modifies Fedora's kernel configu
                     -e LTO_CLANG_THIN
             case --no-werror
                 set no_werror true
-            case -u --ubsan-bounds
-                set -a scripts_config_args \
-                    -e UBSAN \
-                    -e UBSAN_BOUNDS \
-                    -d UBSAN_ALIGNMENT \
-                    -d UBSAN_BOOL \
-                    -d UBSAN_DIV_ZERO \
-                    -d UBSAN_ENUM \
-                    -d UBSAN_SHIFT \
-                    -d UBSAN_UNREACHABLE
         end
     end
     if not set -q arch
