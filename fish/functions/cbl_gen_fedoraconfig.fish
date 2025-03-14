@@ -41,7 +41,8 @@ function cbl_gen_fedoraconfig -d "Downloads and modifies Fedora's kernel configu
     set cfg $out/.config
 
     remkdir $out
-    crl -o $cfg https://src.fedoraproject.org/rpms/kernel/raw/rawhide/f/kernel-$arch-fedora.config
+    # Until Fedora has caught up with https://git.kernel.org/kees/c/ed2b548f1017586c44f50654ef9febb42d491f31
+    crl https://src.fedoraproject.org/rpms/kernel/raw/rawhide/f/kernel-$arch-fedora.config | string replace CONFIG_UBSAN_SIGNED_WRAP CONFIG_UBSAN_INTEGER_WRAP >$cfg
 
     scripts/config \
         --file $cfg \
