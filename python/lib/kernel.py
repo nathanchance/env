@@ -99,6 +99,12 @@ def prepare_source(base_name, base_ref='origin/master'):
 
     # Patching section
     # yapf: disable
+    if base_name == 'fedora':
+        # https://lore.kernel.org/20250317174840.GA1451320@ax162/
+        commits.append('792b2809cfc22e27b4e6616a8bcfab017773de82')  # Partially revert "kunit/fortify: Replace "volatile" with OPTIMIZER_HIDE_VAR()"
+    if base_name in ('fedora', 'linux-next-llvm'):
+        # https://lore.kernel.org/CAMj1kXGqqW2UPvxB+o_LNSXb3CBk1QsQuCpmY=OsQPY=kWHFnw@mail.gmail.com/
+        commits.append('3cfa07c5ae861abd347cfb588a8fc1edbf2e28ec')  # fixup! kbuild: Create intermediate vmlinux build with relocations preserved
     # yapf: enable
 
     try:
