@@ -119,6 +119,8 @@ def generate_warnings(log_folder, src_folder):
         'SyntaxWarning: invalid escape sequence',
         # Warning from LoongArch firmware, who cares?
         'Error: Image at [0-9A-F]+ start failed: Not Found',
+        # Harmless warning from LoongArch with newer version of QEMU and old version of defconfig
+        'Warning: Processor Platform Limit event detected, but not handled',
     ]
     ignore_re = re.compile('|'.join(ignore))
     warnings = {}
