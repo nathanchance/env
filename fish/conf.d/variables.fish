@@ -41,8 +41,6 @@ if test -z "$LOCATION"
     end
 end
 
-
-
 ##########################################
 ##  LOCATION SPECIFIC FOLDER VARIABLES  ##
 ##########################################
@@ -60,8 +58,6 @@ switch $LOCATION
     case workstation
         set -gx CCACHE_MAXSIZE 100G
 end
-
-
 
 ###############################
 ##  GLOBAL FOLDER VARIABLES  ##
@@ -166,7 +162,6 @@ set -gx PY_ST $PYTHON_SETUP_FOLDER
 set -gx TMP_BUILD_FOLDER $TMP_FOLDER/build
 
 set -gx ICLOUD_DOCS_FOLDER /Users/$USER/Library/'Mobile Documents/com~apple~CloudDocs/'
-
 
 ############################
 ## OTHER GLOBAL VARIABLES ##
