@@ -103,7 +103,10 @@ def prepare_source(base_name, base_ref='origin/master'):
         # https://lore.kernel.org/20250317174840.GA1451320@ax162/
         commits.append('792b2809cfc22e27b4e6616a8bcfab017773de82')  # Partially revert "kunit/fortify: Replace "volatile" with OPTIMIZER_HIDE_VAR()"
 
-        patches.append('https://lore.kernel.org/all/20250319-i3c-fix-clang-fallthrough-v1-1-d8e02be1ef5c@kernel.org/')  # i3c: master: svc: Fix implicit fallthrough in svc_i3c_master_ibi_work()
+        patches.append('https://lore.kernel.org/all/20250321085315.915808-1-arnd@kernel.org/')  # platform: cznic: fix function parameter names
+
+    if base_name in ('fedora', 'linux-next-llvm'):
+        commits.append('fc24f866c94c5e9144e5cb13ab93bdc80771bb02')  # Updated version of "bcachefs: Kill BCH_DEV_OPT_SETTERS()"
     # yapf: enable
 
     try:
