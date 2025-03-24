@@ -105,8 +105,12 @@ def prepare_source(base_name, base_ref='origin/master'):
 
         patches.append('https://lore.kernel.org/all/20250321085315.915808-1-arnd@kernel.org/')  # platform: cznic: fix function parameter names
 
-    if base_name in ('fedora', 'linux-next-llvm'):
-        commits.append('fc24f866c94c5e9144e5cb13ab93bdc80771bb02')  # Updated version of "bcachefs: Kill BCH_DEV_OPT_SETTERS()"
+        # https://lore.kernel.org/20250324162558.GA198799@ax162/
+        reverts.append('e009e088d88e8402539f9595b10c0014125a70c1')  # iommu: Drop sw_msi from iommu_domain
+
+    if base_name == 'linux-next-llvm':
+        # https://lore.kernel.org/qn7fzggcj6qe6r6gdbwcz23pzdz2jx64aldccmsuheabhmjgrt@tawf5nfwuvw7/
+        reverts.append('d9f2164238d814d119e8c979a3579d1199e271bb')  # PCI/MSI: Convert pci_msi_ignore_mask to per MSI domain flag
     # yapf: enable
 
     try:
