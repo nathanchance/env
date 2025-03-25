@@ -111,6 +111,8 @@ def prepare_source(base_name, base_ref='origin/master'):
     if base_name == 'linux-next-llvm':
         # https://lore.kernel.org/qn7fzggcj6qe6r6gdbwcz23pzdz2jx64aldccmsuheabhmjgrt@tawf5nfwuvw7/
         reverts.append('d9f2164238d814d119e8c979a3579d1199e271bb')  # PCI/MSI: Convert pci_msi_ignore_mask to per MSI domain flag
+
+    patches.append('https://lore.kernel.org/all/20250325-string-add-wcslen-for-llvm-opt-v1-1-b8f1e2c17888@kernel.org/')  # lib/string.c: Add wcslen()
     # yapf: enable
 
     try:
