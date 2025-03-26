@@ -66,6 +66,8 @@ function cbl_upd_krnl -d "Update machine's kernel"
                 switch $arg
                     case -k --kexec -r --reboot
                         set -a install_args $arg
+                    case -p --plain
+                        set plain true
                     case $valid_arch_krnls
                         set krnl linux-(string replace 'linux-' '' $arg)
                     case '*'
@@ -77,10 +79,12 @@ function cbl_upd_krnl -d "Update machine's kernel"
                 return 1
             end
 
-            set -a bld_krnl_pkg_args \
-                --cfi \
-                --lto \
-                $krnl
+            if test "$plain" != true
+                set -a bld_krnl_pkg_args \
+                    --cfi \
+                    --lto
+            end
+            set -a bld_krnl_pkg_args $krnl
 
             if in_container
                 cbl_bld_krnl_pkg $bld_krnl_pkg_args
