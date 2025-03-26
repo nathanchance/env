@@ -103,16 +103,15 @@ def prepare_source(base_name, base_ref='origin/master'):
         # https://lore.kernel.org/20250317174840.GA1451320@ax162/
         commits.append('792b2809cfc22e27b4e6616a8bcfab017773de82')  # Partially revert "kunit/fortify: Replace "volatile" with OPTIMIZER_HIDE_VAR()"
 
-        patches.append('https://lore.kernel.org/all/20250321085315.915808-1-arnd@kernel.org/')  # platform: cznic: fix function parameter names
-
-        # https://lore.kernel.org/20250324162558.GA198799@ax162/
-        reverts.append('e009e088d88e8402539f9595b10c0014125a70c1')  # iommu: Drop sw_msi from iommu_domain
+        # https://lore.kernel.org/20250326203926.GA10484@ax162/
+        patches.append('https://lore.kernel.org/all/20250326-rwaat-fix-v1-1-600f411eaf23@google.com/')  # rwonce: fix crash by removing READ_ONCE() for unaligned read
 
     if base_name == 'linux-next-llvm':
         # https://lore.kernel.org/qn7fzggcj6qe6r6gdbwcz23pzdz2jx64aldccmsuheabhmjgrt@tawf5nfwuvw7/
-        reverts.append('d9f2164238d814d119e8c979a3579d1199e271bb')  # PCI/MSI: Convert pci_msi_ignore_mask to per MSI domain flag
+        patches.append('https://git.kernel.org/tip/tip/p/3ece3e8e5976c49c3f887e5923f998eabd54ff40')  # PCI/MSI: Handle the NOMASK flag correctly for all PCI/MSI backends
 
-    patches.append('https://lore.kernel.org/all/20250325-string-add-wcslen-for-llvm-opt-v1-1-b8f1e2c17888@kernel.org/')  # lib/string.c: Add wcslen()
+    patches.append('https://lore.kernel.org/all/20250326-string-add-wcslen-for-llvm-opt-v2-1-d864ab2cbfe4@kernel.org/')  # include: Move typedefs in nls.h to their own header
+    patches.append('https://lore.kernel.org/all/20250326-string-add-wcslen-for-llvm-opt-v2-2-d864ab2cbfe4@kernel.org/')  # lib/string.c: Add wcslen()
     # yapf: enable
 
     try:
