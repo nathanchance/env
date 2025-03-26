@@ -102,6 +102,7 @@ function cbl_bld_qemu -d "Build QEMU for use with ClangBuiltLinux"
             --disable-vdi \
             --disable-vnc \
             --disable-vvfat \
+            --disable-werror \
             --disable-zstd \
             --disable-xen \
             --prefix=$PREFIX; or return
