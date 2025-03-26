@@ -340,6 +340,7 @@ def get_cmdline_additions():
     options = CmdlineOptions({
         # Mitigate SMT RSB vulnerability
         'kvm.mitigate_smt_rsb': '1',
+        'module_blacklist': [],
     })
     if can_use_amd_pstate():
         options['amd_pstate'] = 'active'
@@ -349,6 +350,16 @@ def get_cmdline_additions():
     # virtual machine)
     if lib.setup.is_virtual_machine() and 'DISPLAY' not in os.environ:
         options['console'] = 'ttyS0,115200n8'
+    # The AE4DMA driver does not agree with my Hetzner machine and it is not
+    # obvious why because there is no serial access by default. Just blacklist
+    # it.
+    lspci_lines = lib.utils.chronic(['lspci', '-nn']).stdout.splitlines()
+    ae4dma_pci_matches = ('14c8', '14dc', '149b')
+    if any(line for line in lspci_lines if any(x in line for x in ae4dma_pci_matches)):
+        options['module_blacklist'].append('ae4dma')
+    options['module_blacklist'] = ','.join(options['module_blacklist'])
+    if not options['module_blacklist']:
+        del options['module_blacklist']
     return options
 
 
