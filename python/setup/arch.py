@@ -337,10 +337,10 @@ def fix_fstab():
 
 
 def get_cmdline_additions():
+    module_blacklist = []
     options = CmdlineOptions({
         # Mitigate SMT RSB vulnerability
         'kvm.mitigate_smt_rsb': '1',
-        'module_blacklist': [],
     })
     if can_use_amd_pstate():
         options['amd_pstate'] = 'active'
@@ -356,10 +356,9 @@ def get_cmdline_additions():
     lspci_lines = lib.utils.chronic(['lspci', '-nn']).stdout.splitlines()
     ae4dma_pci_matches = ('14c8', '14dc', '149b')
     if any(line for line in lspci_lines if any(x in line for x in ae4dma_pci_matches)):
-        options['module_blacklist'].append('ae4dma')
-    options['module_blacklist'] = ','.join(options['module_blacklist'])
-    if not options['module_blacklist']:
-        del options['module_blacklist']
+        module_blacklist.append('ae4dma')
+    if module_blacklist:
+        options['module_blacklist'] = ','.join(module_blacklist)
     return options
 
 
