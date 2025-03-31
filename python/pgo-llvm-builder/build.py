@@ -105,12 +105,10 @@ else:
     lib.utils.call_git_loud(tc_build_folder, ['reset', '--hard', '@{u}'])
 
 llvm_git_dir = Path(llvm_folder, '.git')
-rw_mounts = {
+mounts = {
     f"{build_folder}:/build",
     f"{tc_build_folder}:/tc-build",
-}
-ro_mounts = {
-    llvm_git_dir,
+    f"{llvm_git_dir}:{llvm_git_dir}",
 }
 
 if args.skip_tests:
@@ -224,13 +222,12 @@ for value in versions:
     shutil.rmtree(build_folder, ignore_errors=True)
     build_folder.mkdir(exist_ok=True, parents=True)
 
-    rw_mounts.add(f"{llvm_install}:/install")
-    rw_mounts.add(f"{worktree}:/llvm")
+    mounts.add(f"{llvm_install}:/install")
+    mounts.add(f"{worktree}:/llvm")
 
     build_cmd = [
         *systemd_nspawn_cmd,
-        *[f"--bind={val}:idmap" for val in rw_mounts],
-        *[f"--bind-ro={val}" for val in ro_mounts],
+        *[f"--bind={val}:idmap" for val in mounts],
         *build_llvm_py_cmd,
     ]
     # Enable BOLT for more optimization if:
