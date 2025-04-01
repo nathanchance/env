@@ -103,6 +103,9 @@ def prepare_source(base_name, base_ref='origin/master'):
         # https://lore.kernel.org/20250317174840.GA1451320@ax162/
         commits.append('792b2809cfc22e27b4e6616a8bcfab017773de82')  # Partially revert "kunit/fortify: Replace "volatile" with OPTIMIZER_HIDE_VAR()"
 
+    if base_name == 'linux-mainline-llvm':
+        patches.append('https://git.kernel.org/netdev/net/p/dd07df9ff3d148aee87fcbab99ff14f0727752f4')  # bnxt_en: bring back rtnl lock in bnxt_shutdown
+
     patches.append('https://lore.kernel.org/all/20250328-string-add-wcslen-for-llvm-opt-v3-1-a180b4c0c1c4@kernel.org/')  # include: Move typedefs in nls.h to their own header
     patches.append('https://lore.kernel.org/all/20250328-string-add-wcslen-for-llvm-opt-v3-2-a180b4c0c1c4@kernel.org/')  # lib/string.c: Add wcslen()
     # yapf: enable
