@@ -127,10 +127,12 @@ def prepare_source(base_name, base_ref='origin/master'):
                                         input=range_diff)
 
                 # commit the result
-                lib.utils.call_git_loud(source_folder, ['commit', '--no-gpg-sign', '-m', commit_msg])
-            else:
                 lib.utils.call_git_loud(source_folder,
-                                        ['revert', '--mainline', '1', '--no-edit', '--no-gpg-sign', revert])
+                                        ['commit', '--no-gpg-sign', '-m', commit_msg])
+            else:
+                lib.utils.call_git_loud(
+                    source_folder,
+                    ['revert', '--mainline', '1', '--no-edit', '--no-gpg-sign', revert])
 
         for patch in patches:
             am_cmd = ['am', '-3', '--no-gpg-sign']
