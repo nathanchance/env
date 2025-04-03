@@ -77,7 +77,7 @@ function cbl_clone_repo -d "Clone certain repos for ClangBuiltLinux testing and 
                 pushd $dest
 
                 repo init -u $url -b $branch
-                and repo sync -c --force-sync -j4
+                or return
 
                 if test -n "$local_manifests"
                     mkdir .repo/local_manifests
@@ -90,6 +90,9 @@ function cbl_clone_repo -d "Clone certain repos for ClangBuiltLinux testing and 
                         ln -fsv $local_manifest .repo/local_manifests/(path basename $local_manifest)
                     end
                 end
+
+                repo sync -c --force-sync -j4
+                or return
 
                 if test -n "$additional_repos"
                     for additional_repo in $additional_repos
