@@ -103,8 +103,11 @@ def prepare_source(base_name, base_ref='origin/master'):
         # https://lore.kernel.org/20250317174840.GA1451320@ax162/
         commits.append('792b2809cfc22e27b4e6616a8bcfab017773de82')  # Partially revert "kunit/fortify: Replace "volatile" with OPTIMIZER_HIDE_VAR()"
 
-    patches.append('https://lore.kernel.org/all/20250328-string-add-wcslen-for-llvm-opt-v3-1-a180b4c0c1c4@kernel.org/')  # include: Move typedefs in nls.h to their own header
-    patches.append('https://lore.kernel.org/all/20250328-string-add-wcslen-for-llvm-opt-v3-2-a180b4c0c1c4@kernel.org/')  # lib/string.c: Add wcslen()
+    if base_name == 'linux-next-llvm':
+        # https://lore.kernel.org/CA+G9fYt4VVa3kUDR+ze05xM+fRmMBVfbBTsypUq5oOpAfuzjfg@mail.gmail.com/
+        reverts.append('cc34e658c6db493c1524077e95b42d478de58f2b')  # x86/boot: Move the early GDT/IDT setup code into startup/
+
+    patches.append('https://lore.kernel.org/all/20250407-fno-builtin-wcslen-v1-1-6775ce759b15@kernel.org/')  # kbuild: Add '-fno-builtin-wcslen'
     # yapf: enable
 
     try:
