@@ -157,6 +157,7 @@ def prepare_source(base_name, base_ref='origin/master'):
             lib.utils.call_git_loud(source_folder, ['am', '-3'], input=patch_input)
     except CalledProcessError as err:
         lib.utils.call_git(source_folder, 'ama', check=False)
+        print(f"\n[FAILED] {' '.join(err.cmd)}")
         sys.exit(err.returncode)
 
 
