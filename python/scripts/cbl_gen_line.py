@@ -55,7 +55,7 @@ def generate_pr_lines(args):
 
 def generate_revert_lines(args):
     directory = args.directory if args.directory else Path(
-        os.environ['CBL_SRC_D'], 'linux' if args.type == 'kernel' else 'llvm-project')
+        os.environ['CBL_SRC_D'], 'linux-next' if args.type == 'kernel' else 'llvm-project')
     if not args.no_update:
         lib.utils.call_git(directory, ['remote', 'update', '-p', 'origin'])
     if args.type == 'kernel':
