@@ -102,10 +102,13 @@ def prepare_source(base_name, base_ref='origin/master'):
     if base_name == 'fedora':
         # https://lore.kernel.org/20250317174840.GA1451320@ax162/
         commits.append('792b2809cfc22e27b4e6616a8bcfab017773de82')  # Partially revert "kunit/fortify: Replace "volatile" with OPTIMIZER_HIDE_VAR()"
+        # https://lore.kernel.org/87bjt7asrn.wl-tiwai@suse.de/
+        reverts.append('5108e5eb9e15fce3087555c3b4b7198d41f94575')  # ALSA: kunit: fix build warning in test_card_set_id
 
-    if base_name == 'linux-next-llvm':
-        # https://lore.kernel.org/CA+G9fYt4VVa3kUDR+ze05xM+fRmMBVfbBTsypUq5oOpAfuzjfg@mail.gmail.com/
-        reverts.append('cc34e658c6db493c1524077e95b42d478de58f2b')  # x86/boot: Move the early GDT/IDT setup code into startup/
+    if base_name in NEXT_TREES:
+        # https://lore.kernel.org/20250408120446.3128-1-spasswolf@web.de/
+        reverts.append('0ee2572d7b843cd7015720eda2e876ecedcdb4bc')  # genirq/msi: Rename msi_[un]lock_descs()
+        reverts.append('7b025f3f85ed4283d5a414371bb2ffd38d19033f')  # PCI/MSI: Switch msix_capability_init() to guard(msi_desc_lock)
 
     patches.append('https://lore.kernel.org/all/20250407-fno-builtin-wcslen-v1-1-6775ce759b15@kernel.org/')  # kbuild: Add '-fno-builtin-wcslen'
     # yapf: enable
