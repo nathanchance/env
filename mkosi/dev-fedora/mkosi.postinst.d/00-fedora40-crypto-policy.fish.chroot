@@ -1,4 +1,15 @@
 #!/usr/bin/env fish
 
+set src /usr/share/crypto-policies/policies/DEFAULT.pol
+set dst /etc/crypto-policies/policies/MYDEFAULT.pol
+
+# FEDORA40 contains this change but it has been removed upstream
+# so append it to the default policy and use it.
+cp -v $src $dst
+echo '
+# Allow SHA1 for kernels that default to it for module signing
+# __openssl_block_sha1_signatures = 0' >>$dst
+git diff --no-index $src $dst
+
 # See comment in mkosi.conf as to why this is necessary
-update-crypto-policies --set FEDORA40
+update-crypto-policies --set (path basename $dst | path change-extension '')
