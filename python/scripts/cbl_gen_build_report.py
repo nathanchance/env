@@ -121,6 +121,8 @@ def generate_warnings(log_folder, src_folder):
         'Error: Image at [0-9A-F]+ start failed: Not Found',
         # Harmless warning from LoongArch with newer version of QEMU and old version of defconfig
         'Warning: Processor Platform Limit event detected, but not handled',
+        # New modpost warnings (may be upgraded to errors eventually)
+        'WARNING: modpost: missing MODULE_DESCRIPTION',
     ]
     ignore_re = re.compile('|'.join(ignore))
     warnings = {}
