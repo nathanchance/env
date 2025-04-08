@@ -138,6 +138,8 @@ function cbl_bld_tot_tcs -d "Build LLVM and binutils from source for kernel deve
     end
 
     # Add patches to revert here
+    # https://github.com/ClangBuiltLinux/linux/issues/2080
+    set -a reverts https://github.com/llvm/llvm-project/commit/1a540c3b8bcefaf6b36f261341ce55a1a24eca21 # [PowerPC] Deprecate uses of ISD::ADDC/ISD::ADDE/ISD::SUBC/ISD::SUBE  (#133155)
     for revert in $reverts
         if string match -qr 'https?://' $revert
             set -l revert (path basename $revert)
