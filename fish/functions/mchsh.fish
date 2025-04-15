@@ -16,7 +16,7 @@ function mchsh -d "Wrapper around 'machinectl shell'"
         end
     end
     if not set -q user_host
-        set user_host $USER@(dev_img)
+        set user_host $USER@$DEV_IMG
     end
     if not set -q mchsh_args
         set mchsh_args -l

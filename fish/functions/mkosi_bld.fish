@@ -4,7 +4,7 @@
 
 function mkosi_bld -d "Build a distribution using mkosi"
     if test (count $argv) -eq 0
-        set image (dev_img)
+        set image $DEV_IMG
     else
         set image $argv[1]
         set mkosi_args $argv[2..]

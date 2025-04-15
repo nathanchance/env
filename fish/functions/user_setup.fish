@@ -365,9 +365,9 @@ rpmbuild/' >>$gitignore
 
     # '--now' is only supported with systemd 253 or newer but AlmaLinux 9 ships 252
     if test (machinectl --version | string match -gr '^systemd (\d+) ') -ge 253
-        sudo machinectl enable --now (dev_img)
+        sudo machinectl enable --now $DEV_IMG
     else
-        sudo machinectl enable (dev_img)
-        and sudo machinectl start (dev_img)
+        sudo machinectl enable $DEV_IMG
+        and sudo machinectl start $DEV_IMG
     end
 end
