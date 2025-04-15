@@ -222,9 +222,6 @@ begin
 end
 set -gx FORGIT_LOG_GRAPH_ENABLE false
 
-# My GitHub Container Registry URL
-set -gx GHCR ghcr.io/nathanchance
-
 # Hydro prompt custom function
 set -g hydro_multiline true
 set -g hydro_prompt_addons nathan
