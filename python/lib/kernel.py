@@ -102,6 +102,10 @@ def prepare_source(base_name, base_ref='origin/master'):
     if base_name == 'fedora':
         # https://lore.kernel.org/20250317174840.GA1451320@ax162/
         commits.append('792b2809cfc22e27b4e6616a8bcfab017773de82')  # Partially revert "kunit/fortify: Replace "volatile" with OPTIMIZER_HIDE_VAR()"
+
+        # https://lore.kernel.org/20250415223454.GA1852104@ax162/
+        reverts.append('fc30fbf47830c20db22f220727a5a557411423d2')  # Merge branch 'vfs-6.16.pidfs' into vfs.all
+
     if base_name == 'linux-next-llvm':
         patches.append('https://lore.kernel.org/all/20250414-x86-boot-startup-lto-error-v1-1-7c8bed7c131c@kernel.org/')  # x86/boot/startup: Disable LTO
     # yapf: enable
