@@ -102,6 +102,8 @@ def prepare_source(base_name, base_ref='origin/master'):
     if base_name == 'fedora':
         # https://lore.kernel.org/20250317174840.GA1451320@ax162/
         commits.append('792b2809cfc22e27b4e6616a8bcfab017773de82')  # Partially revert "kunit/fortify: Replace "volatile" with OPTIMIZER_HIDE_VAR()"
+    if base_name == 'linux-next-llvm':
+        patches.append('https://lore.kernel.org/all/20250414-x86-boot-startup-lto-error-v1-1-7c8bed7c131c@kernel.org/')  # x86/boot/startup: Disable LTO
     # yapf: enable
 
     try:
@@ -138,7 +140,7 @@ def prepare_source(base_name, base_ref='origin/master'):
                 am_kwargs['input'] = b4_am_o(patch)
             elif patch.startswith(('https://', 'http://')):
                 am_kwargs['input'] = lib.utils.curl(patch).decode('utf-8')
-            elif patch.startswith('From ') and 'diff --git' in patch:
+            elif patch.lstrip().startswith('From ') and 'diff --git' in patch:
                 am_kwargs['input'] = patch
             else:
                 raise RuntimeError(f"Can't handle {patch}?")
