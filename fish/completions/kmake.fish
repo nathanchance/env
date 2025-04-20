@@ -1,6 +1,6 @@
 function __kmake_get_srctree
     set tokens (commandline -xpc)
-    if set index (contains -i -- -C $tokens)
+    if set index (contains -i -- -C $tokens) (contains -i -- --directory $tokens)
         echo $tokens[(math $index + 1)]
     else
         echo $PWD
@@ -9,8 +9,14 @@ end
 
 function __kmake_get_srcarch
     for token in (commandline -xpc)
-        if string match -qr '^ARCH=' $token
-            set srcarch (string split -f 2 = $token)
+        if string match -qr -- '^ARCH=' $token
+            set arch (string split -f 2 = $token)
+            switch $srcarch
+                case i386 x86_64
+                    set srcarch x86
+                case '*'
+                    set srcarch $arch
+            end
         end
     end
     if not set -q srcarch
@@ -25,7 +31,7 @@ function __kmake_get_srcarch
 end
 
 function __kmake_handle_make_var
-    string match -rq -- "(?<name>.+)=(?<value>.*)" (commandline -ct)
+    string match -qr -- "(?<name>.+)=(?<value>.*)" (commandline -ct)
     or return
 
     switch $name
@@ -57,6 +63,9 @@ function __kmake_handle_make_var
 end
 
 function __kmake_pos_args
+    set srctree (__kmake_get_srctree)
+    set srcarch (__kmake_get_srcarch)
+
     # Variables (not exhaustive)
     set vars \
         ARCH \
@@ -83,6 +92,17 @@ function __kmake_pos_args
         rust{available,fmt,fmtcheck} \
         kernel{version,release} image_name \
         kselftest{,-all,-install,-clean,-merge}
+    # Include common architecture image targets
+    switch $srcarch
+        case arm
+            set -a targets zImage
+        case arm64
+            set -a targets Image{.gz,}
+        case riscv
+            set -a targets Image
+        case s390 x86
+            set -a targets bzImage
+    end
 
     set configs \
         {,old,olddef,sync,def,savedef,rand,listnew,helpnew,test,tiny}config \
@@ -90,8 +110,6 @@ function __kmake_pos_args
         local{mod,yes}config \
         all{no,yes,mod,def}config \
         {yes2mod,mod2yes,mod2no}config
-    set srctree (__kmake_get_srctree)
-    set srcarch (__kmake_get_srcarch)
     for cfg in $srctree/{arch/$srcarch,kernel}/configs/*
         set val (path basename $cfg)
         if not contains $val $configs
