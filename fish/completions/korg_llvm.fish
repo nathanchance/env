@@ -7,7 +7,11 @@ end
 
 complete -f -c korg_llvm
 complete -f -c korg_llvm -s h -l help -d "Show help message and exit"
-complete -f -c korg_llvm -n "not __fish_seen_subcommand_from $commands" -a "$commands"
+complete -f -c korg_llvm -n "not __fish_seen_subcommand_from $commands" -d Subcommand -a "
+    install\t'Download and/or extact kernel.org LLVM tarballs to disk'
+    latest\t'Print the latest stable release of a particular toolchain major version'
+    folder\t'Print toolchain folder values for use in other contexts'
+    var\t'Print toolchain variable for use with make'"
 
 complete -f -c korg_llvm -n "__fish_seen_subcommand_from folder" -s b -l bin -d "Print {prefix}/bin"
 complete -f -c korg_llvm -n "__fish_seen_subcommand_from folder" -s p -l prefix -d "Print {prefix}"
