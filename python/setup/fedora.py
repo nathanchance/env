@@ -149,6 +149,7 @@ def install_packages():
     packages = [
         # administration
         'btop',
+        'clean-rpm-gpg-pubkey',
         'fastfetch',
         'mosh',
         'opendoas',
