@@ -38,11 +38,7 @@ function __kmake_handle_make_var
         case ARCH
             # sub-directories under arch/
             set srctree (__kmake_get_srctree)
-            for arch in $srctree/arch/*
-                if test -d $arch
-                    set -a vals (path basename $arch)
-                end
-            end
+            set -a vals (path filter -t dir $srctree/arch/* | path basename)
             # architectures hard-coded in the top Makefile
             set -a vals i386 x86_64 sparc32 sparc64 parisc64
 
@@ -110,10 +106,9 @@ function __kmake_pos_args
         local{mod,yes}config \
         all{no,yes,mod,def}config \
         {yes2mod,mod2yes,mod2no}config
-    for cfg in $srctree/{arch/$srcarch,kernel}/configs/*
-        set val (path basename $cfg)
-        if not contains $val $configs
-            set -a configs $val
+    for cfg in (path basename $srctree/{arch/$srcarch,kernel}/configs/*)
+        if not contains $cfg $configs
+            set -a configs $cfg
         end
     end
 
