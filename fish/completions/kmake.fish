@@ -44,7 +44,7 @@ function __kmake_handle_make_var
 
             # sub-directories under arch/
             set srctree (__kmake_get_srctree)
-            set -a vals (path filter -t dir $srctree/arch/* | path basename)
+            set -a vals (path filter -d $srctree/arch/* | path basename)
             # architectures hard-coded in the top Makefile
             set -a vals i386 x86_64 sparc32 sparc64 parisc64
 
@@ -136,8 +136,26 @@ function __kmake_pos_args
 
     string join \n -- \
         $vars=\t'make variable' \
-        $targets\t'build target' \
         $configs\t'config target' \
+        $targets\t'build target'
+
+    # directory targets
+    if test -e $srctree/Makefile
+        if command -q fd
+            fd -g Makefile (path filter -d $srctree/*) &| string replace $srctree/ ''
+        else
+            find $srctree -mindepth 2 -name Makefile -printf '%P\n'
+        end &| path dirname &| string match -evr '^(Documentation|scripts|tools)' &| string match -er "^(?:arch/$srcarch|(?!arch))" &| path sort --key basename &| path sort --key dirname &| string join /\t'directory target'\n
+
+        # object targets
+        if command -q fd
+            fd -e c . (path filter -d $srctree/*) &| string replace $srctree/ ''
+        else
+            find $srctree -mindepth 2 -name '*.c' -printf '%P\n'
+        end &| string match -evr '^(Documentation|scripts|tools)' &| string match -er "^(?:arch/$srcarch|(?!arch))" &| path sort --key basename &| path sort --key dirname &| path change-extension .o &| string join \t'object target'\n
+    end
+
+    string join \n -- \
         $docs\t'docs target' \
         $packages\t'package target'
 end
@@ -153,5 +171,5 @@ complete -c kmake -f -l use-time -d "Call 'time -v' for time tracking"
 complete -c kmake -x -s v -l verbose -d "Do a more verbose build"
 
 # Positional arguments
-complete -c kmake -n 'not string match -eq = -- (commandline -ct)' -a '(__kmake_pos_args)'
+complete -c kmake -n 'not string match -eq = -- (commandline -ct)' -f -k -a '(__kmake_pos_args)'
 complete -c kmake -n 'string match -eq = -- (commandline -ct)' -f -a '(__kmake_handle_make_var)'
