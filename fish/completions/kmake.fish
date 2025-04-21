@@ -75,8 +75,14 @@ function __kmake_pos_args
     set srctree (__kmake_get_srctree)
     set srcarch (__kmake_get_srcarch)
 
-    # Variables (not exhaustive)
-    set vars \
+    for token in (commandline -xpc)
+        if set var (string split -f 1 -- = $token)
+            set -a defined_vars $var
+        end
+    end
+
+    # Dynamic variables (not exhaustive)
+    set possible_dynamic_vars \
         ARCH \
         CROSS_COMPILE \
         KCONFIG_ALLCONFIG \
@@ -85,6 +91,29 @@ function __kmake_pos_args
         V \
         W \
         INSTALL{,_MOD,_HDR,_DTBS}_PATH
+    for var in $possible_dynamic_vars
+        if not contains $var $defined_vars
+            set -a dynamic_vars $var
+        end
+    end
+
+    # Static variables that only have one option
+    set possible_static_vars \
+        LLVM_IAS
+    for var in $possible_static_vars
+        if contains $var $defined_vars
+            continue
+        end
+
+        switch $var
+            case LLVM_IAS
+                if test -e $srctree/scripts/Makefile.clang
+                    set -a static_vars LLVM_IAS=0
+                else
+                    set -a static_vars LLVM_IAS=1
+                end
+        end
+    end
 
     # Targets
     set targets \
@@ -140,7 +169,8 @@ function __kmake_pos_args
         perf-tar{,gz,bz2,xz,zst}-src-pkg
 
     string join \n -- \
-        $vars=\t'make variable' \
+        $dynamic_vars=\t'make variable' \
+        $static_vars\t'make variable' \
         $configs\t'config target' \
         $targets\t'build target'
 
