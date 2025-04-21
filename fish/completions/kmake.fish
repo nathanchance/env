@@ -1,4 +1,5 @@
 function __kmake_get_srctree
+    # Check if '-C' / '--directory' was found on the command line
     set tokens (commandline -xpc)
     if set index (contains -i -- -C $tokens) (contains -i -- --directory $tokens)
         echo $tokens[(math $index + 1)]
@@ -8,17 +9,20 @@ function __kmake_get_srctree
 end
 
 function __kmake_get_srcarch
+    # Check if ARCH is already set from the command line
     for token in (commandline -xpc)
         if string match -qr -- '^ARCH=' $token
             set arch (string split -f 2 = $token)
-            switch $srcarch
+            switch $arch
                 case i386 x86_64
                     set srcarch x86
                 case '*'
                     set srcarch $arch
             end
+            break
         end
     end
+    # If ARCH= was not found, look at the host machine
     if not set -q srcarch
         switch (uname -m)
             case arm64 aarch64'*'
