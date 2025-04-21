@@ -1,7 +1,7 @@
 function __kmake_get_srctree
     # Check if '-C' / '--directory' was found on the command line
     set tokens (commandline -xpc)
-    if set index (contains -i -- -C $tokens) (contains -i -- --directory $tokens)
+    if set index (contains -i -- -C $tokens); or set index (contains -i -- --directory $tokens)
         echo $tokens[(math $index + 1)]
     else
         echo $PWD

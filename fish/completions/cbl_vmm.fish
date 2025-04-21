@@ -3,7 +3,7 @@ set -l valid_arches aarch64 arm64 arm armv7l i386 i686 x86_64
 
 function __cbl_vmm_get_arch
     set tokens (commandline -xpc) (commandline -ct)
-    if set index (contains -i -- -a $tokens) (contains -i -- --architecture $tokens)
+    if set index (contains -i -- -a $tokens); or set index (contains -i -- --architecture $tokens)
         echo $tokens[(math $index + 1)]
     else
         echo (uname -m)
