@@ -115,6 +115,11 @@ function __kmake_pos_args
             set -a configs $cfg
         end
     end
+    if test "$srcarch" = powerpc; and test -e $srctree/arch/powerpc/Makefile
+        # Account for https://git.kernel.org/linus/22db99d673641d37c4e184ca8cff95d8441986af
+        set -a configs (string match -gr 'generated_configs \+= (.*)$' <$srctree/arch/powerpc/Makefile
+                        or string match -gr 'PHONY \+= (.*config)$' <$srctree/arch/powerpc/Makefile)
+    end
 
     set docs \
         {html,textinfo,info,latex,pdf,epub,xml,linkcheck,refcheck,clean}docs
