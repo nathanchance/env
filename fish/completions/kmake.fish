@@ -40,6 +40,8 @@ function __kmake_handle_make_var
 
     switch $name
         case ARCH
+            set desc architecture
+
             # sub-directories under arch/
             set srctree (__kmake_get_srctree)
             set -a vals (path filter -t dir $srctree/arch/* | path basename)
@@ -47,6 +49,8 @@ function __kmake_handle_make_var
             set -a vals i386 x86_64 sparc32 sparc64 parisc64
 
         case LLVM
+            set desc toolchain
+
             set -a vals 1
             for val in $PATH/clang
                 if test -e $val
@@ -59,7 +63,7 @@ function __kmake_handle_make_var
     end
 
     set vals (string match -er -- "^$value" $vals)
-    string join \n -- $name=$vals
+    string join \n -- $name=$vals\t$desc
 end
 
 function __kmake_pos_args
@@ -130,7 +134,12 @@ function __kmake_pos_args
         tar{,gz,bz2,xz,zst}-pkg \
         perf-tar{,gz,bz2,xz,zst}-src-pkg
 
-    string join \n -- $vars= $targets $configs $docs $packages
+    string join \n -- \
+        $vars=\t'make variable' \
+        $targets\t'build target' \
+        $configs\t'config target' \
+        $docs\t'docs target' \
+        $packages\t'package target'
 end
 
 # Options
