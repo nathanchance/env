@@ -48,6 +48,11 @@ function __kmake_handle_make_var
             # architectures hard-coded in the top Makefile
             set -a vals i386 x86_64 sparc32 sparc64 parisc64
 
+        case CROSS_COMPILE
+            set desc toolchain
+
+            set -a vals (path filter -fx $PATH/*-elfedit | path basename | string replace elfedit '' | path sort -u)
+
         case LLVM
             set desc toolchain
 
