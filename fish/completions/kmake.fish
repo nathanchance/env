@@ -57,14 +57,7 @@ function __kmake_handle_make_var
             set desc toolchain
 
             set -a vals 1
-            for val in $PATH/clang
-                if test -e $val
-                    set val (path dirname $val | path resolve)/
-                    if not contains $val $vals
-                        set -a vals $val
-                    end
-                end
-            end
+            set -a vals (path filter -fx $PATH/clang | path resolve | path dirname | path sort -u)/
     end
 
     set vals (string match -er -- "^$value" $vals)
