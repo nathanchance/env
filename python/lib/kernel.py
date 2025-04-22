@@ -103,11 +103,15 @@ def prepare_source(base_name, base_ref='origin/master'):
         # https://lore.kernel.org/20250317174840.GA1451320@ax162/
         commits.append('792b2809cfc22e27b4e6616a8bcfab017773de82')  # Partially revert "kunit/fortify: Replace "volatile" with OPTIMIZER_HIDE_VAR()"
 
-        # https://lore.kernel.org/20250415223454.GA1852104@ax162/
-        patches.append('https://git.kernel.org/vfs/vfs/p/846e0653f594d09a5e9f1ae774ffad47fb19e817')  # net, pidfd: report EINVAL for ESRCH
+        # https://lore.kernel.org/aAeosU3V02vWxD7Z@LouisNoVo/
+        reverts.append('0fcad44a86bdc2b5f202d91ba1eeeee6fceb7b25')  # bnxt_en: Change FW message timeout warning
 
     if base_name == 'linux-next-llvm':
         patches.append('https://lore.kernel.org/all/20250414-x86-boot-startup-lto-error-v1-1-7c8bed7c131c@kernel.org/')  # x86/boot/startup: Disable LTO
+
+    if base_name in NEXT_TREES:
+        # https://lore.kernel.org/20250422201241.GA3761951@ax162/
+        commits.append('ccd1a88b54f698f5e930220fedc4e708b74e5c49')   # REPORTED: fixup! ocfs2: fix panic in failed foilio allocation
     # yapf: enable
 
     try:
