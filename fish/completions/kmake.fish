@@ -190,10 +190,10 @@ end
 
 # Options
 complete -c kmake -x -s h -l help -d "Show help message and exit"
-complete -c kmake -x -s C -l directory -d "Mirrors the equivalent make argument" -a '(__fish_complete_directories (commandline -ct))'
+complete -c kmake -x -s C -l directory -d "Mirrors the equivalent make argument" -a '(__fish_complete_directories)'
 complete -c kmake -f -l no-ccache -d "Disable the use of ccache"
 complete -c kmake -f -l omit-o-arg -d "Avoid default use of O="
-complete -c kmake -x -s p -l prepend-to-path -d "Prepend specified directory to PATH" -a '(__fish_complete_directories (commandline -ct))'
+complete -c kmake -x -s p -l prepend-to-path -d "Prepend specified directory to PATH" -a '(__fish_complete_directories)'
 complete -c kmake -x -s j -l jobs -d "Number of jobs"
 complete -c kmake -f -l use-time -d "Call 'time -v' for time tracking"
 complete -c kmake -x -s v -l verbose -d "Do a more verbose build"

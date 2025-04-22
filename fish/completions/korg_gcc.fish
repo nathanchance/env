@@ -35,8 +35,8 @@ complete -c korg_gcc -n "__fish_seen_subcommand_from install" -f -s c -l clean-u
 complete -c korg_gcc -n "__fish_seen_subcommand_from install" -x -s H -l host-arch -d "The host architecture to download/install toolchains for" -a 'aarch64 x86_64'
 complete -c korg_gcc -n "__fish_seen_subcommand_from install" -x -s t -l targets -d "Toolchain targets to download" -a '(__korg_gcc_get_targets)'
 complete -c korg_gcc -n "__fish_seen_subcommand_from install" -x -s v -l versions -d "Toolchain versions to download" -a '(__korg_gcc_get_versions)'
-complete -c korg_gcc -n "__fish_seen_subcommand_from install" -x -l download-folder -d "Folder to store downloaded tarballs" -a '(__fish_complete_directories (commandline -ct))'
-complete -c korg_gcc -n "__fish_seen_subcommand_from install" -x -l install-folder -d "Folder to store extracted toolchains for use" -a '(__fish_complete_directories (commandline -ct))'
+complete -c korg_gcc -n "__fish_seen_subcommand_from install" -x -l download-folder -d "Folder to store downloaded tarballs" -a '(__fish_complete_directories)'
+complete -c korg_gcc -n "__fish_seen_subcommand_from install" -x -l install-folder -d "Folder to store extracted toolchains for use" -a '(__fish_complete_directories)'
 complete -c korg_gcc -n "__fish_seen_subcommand_from install" -f -l cache -d "Save downloaded toolchain tarballs to disk"
 complete -c korg_gcc -n "__fish_seen_subcommand_from install" -f -l no-cache -d "Do not save downloaded toolchain tarballs to disk"
 complete -c korg_gcc -n "__fish_seen_subcommand_from install" -f -l extract -d "Unpack downloaded toolchain tarballs to disk"
