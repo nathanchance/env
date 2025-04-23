@@ -1,8 +1,32 @@
 set -l commands install latest folder var
 
+function __korg_gcc_get_kmake_arch
+    set tokens (commandline -cx)
+    if test "$tokens[1]" != kmake
+        return 1
+    end
+
+    for token in $tokens[2..]
+        if string match -qr -- '^ARCH=(?<value>.*)$' $token
+            echo $value
+            return 0
+        end
+    end
+
+    return 1
+end
+
 function __korg_gcc_get_targets
     PYTHONPATH=$PYTHON_SCRIPTS_FOLDER python3 -c "from korg_tc import GCCManager
 print('\n'.join(GCCManager.TARGETS))"
+end
+
+function __korg_gcc_get_targets_for_var
+    if set arch (__korg_gcc_get_kmake_arch)
+        echo $arch
+    else
+        __korg_gcc_get_targets
+    end
 end
 
 function __korg_gcc_get_versions
@@ -44,5 +68,5 @@ complete -c korg_gcc -n "__fish_seen_subcommand_from install" -f -l no-extract -
 
 complete -c korg_gcc -n "__fish_seen_subcommand_from latest" -f -d "Major version" -a '(__korg_gcc_get_versions)'
 
-complete -c korg_gcc -n "__fish_seen_subcommand_from var; and not __korg_gcc_seen_target" -f -d Target -a '(__korg_gcc_get_targets)'
+complete -c korg_gcc -n "__fish_seen_subcommand_from var; and not __korg_gcc_seen_target" -f -d Target -a '(__korg_gcc_get_targets_for_var)'
 complete -c korg_gcc -n "__fish_seen_subcommand_from var; and __korg_gcc_seen_target" -f -d Version -a '(__korg_gcc_get_versions)'
