@@ -14,7 +14,7 @@ import lib.utils
 # pylint: enable=wrong-import-position
 
 MIN_FEDORA_VERSION = 35
-MAX_FEDORA_VERSION = 41
+MAX_FEDORA_VERSION = 42
 
 
 def configure_networking():
@@ -195,7 +195,6 @@ def install_packages():
 
         # nicer GNU utilities
         'duf',
-        'eza' if fedora_version >= 39 else 'exa',
         'ripgrep',
 
         # repo
@@ -204,6 +203,11 @@ def install_packages():
         # tuxmake
         'tuxmake',
     ]  # yapf: disable
+
+    if fedora_version < 39:
+        packages.append('exa')
+    elif fedora_version < 42:
+        packages.append('eza')
 
     if not lib.setup.is_lxc():
         packages.append('podman')
