@@ -107,11 +107,41 @@ def prepare_source(base_name, base_ref='origin/master'):
         reverts.append('0fcad44a86bdc2b5f202d91ba1eeeee6fceb7b25')  # bnxt_en: Change FW message timeout warning
 
     if base_name == 'linux-next-llvm':
-        patches.append('https://lore.kernel.org/all/20250414-x86-boot-startup-lto-error-v1-1-7c8bed7c131c@kernel.org/')  # x86/boot/startup: Disable LTO
+        patches.append('https://git.kernel.org/tip/tip/p/498cb872a111e25021ca5e2d91af7b7a2e62630f')  # x86/boot/startup: Disable LTO
 
     if base_name in NEXT_TREES:
         # https://lore.kernel.org/20250422201241.GA3761951@ax162/
-        commits.append('ccd1a88b54f698f5e930220fedc4e708b74e5c49')   # REPORTED: fixup! ocfs2: fix panic in failed foilio allocation
+        commits.append('ccd1a88b54f698f5e930220fedc4e708b74e5c49')   # fixup! ocfs2: fix panic in failed foilio allocation
+
+        # https://lore.kernel.org/647b9aa4-f46e-4009-a223-78bfc6cc6768@amd.com/
+        patches.append('''\
+From 7d108a4cfec73985bf907558a0111fbbb7cc0c79 Mon Sep 17 00:00:00 2001
+From: Nathan Chancellor <nathan@kernel.org>
+Date: Wed, 23 Apr 2025 14:18:43 -0700
+Subject: [PATCH] fixup! ratelimit: Allow zero ->burst to disable ratelimiting
+
+Signed-off-by: Nathan Chancellor <nathan@kernel.org>
+---
+ lib/ratelimit.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/lib/ratelimit.c b/lib/ratelimit.c
+index b5c727e976d2..14dfada96a4a 100644
+--- a/lib/ratelimit.c
++++ b/lib/ratelimit.c
+@@ -40,7 +40,7 @@ int ___ratelimit(struct ratelimit_state *rs, const char *func)
+ 	 * interval says never limit.
+ 	 */
+ 	if (interval <= 0 || burst <= 0) {
+-		ret = burst > 0;
++		ret = interval == 0 || burst > 0;
+ 		if (!(READ_ONCE(rs->flags) & RATELIMIT_INITIALIZED) ||
+ 		    !raw_spin_trylock_irqsave(&rs->lock, flags))
+ 			return ret;
+-- 
+2.49.0
+
+''')  # noqa: E101, W291
     # yapf: enable
 
     try:
