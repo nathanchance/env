@@ -2,7 +2,7 @@ function __kmake_get_srctree
     # Check if '-C' / '--directory' was found on the command line
     set tokens (commandline -xpc)
     if set index (contains -i -- -C $tokens); or set index (contains -i -- --directory $tokens)
-        echo $tokens[(math $index + 1)]
+        path resolve $tokens[(math $index + 1)]
     else
         echo $PWD
     end
@@ -66,6 +66,10 @@ end
 
 function __kmake_pos_args
     set srctree (__kmake_get_srctree)
+    # obviously not in a kernel tree, do not suggest anything
+    if not test -e $srctree/Makefile
+        return 0
+    end
     set srcarch (__kmake_get_srcarch)
 
     for token in (commandline -xpc)
@@ -167,20 +171,47 @@ function __kmake_pos_args
         $configs\t'config target' \
         $targets\t'build target'
 
-    # directory targets
-    if test -e $srctree/Makefile
-        if command -q fd
-            fd -g Makefile (path filter -d $srctree/*) &| string replace $srctree/ ''
-        else
-            find $srctree -mindepth 2 -name Makefile -printf '%P\n'
-        end &| path dirname &| string match -evr '^(Documentation|scripts|tools)' &| string match -er "^(?:arch/$srcarch|(?!arch))" &| path sort --key basename &| path sort --key dirname &| string join /\t'directory target'\n
+    # We do not care about potential targets in:
+    #   Documentation
+    #   scripts
+    #   tools
+    # and we only care about targets for the current srcarch.
+    set top_level_dirs (path filter -f $srctree/*/Makefile | path dirname | path basename | string match -erv "^(?:Documentation|scripts|tools)") arch/$srcarch
 
-        # object targets
-        if command -q fd
-            fd -e c . (path filter -d $srctree/*) &| string replace $srctree/ ''
+    # First, see if we have started a token already
+    set token (commandline -ct)
+    if test -z "$token"
+        # If not, just show the available top level directories, as there
+        # is not much else that makes sense to suggest at this point.
+        string join \n -- $top_level_dirs/\t'directory target'
+    else
+        # If we have started a token, check to see if it contains a slash
+        # yet (implicitly through the return code of 'string split') and
+        # that the first part is a part of the valid top level directories,
+        # as we may be completing a configuration value.
+        if set base_top_level_dir (string split -f 1 -- / $token); and contains $base_top_level_dir $top_level_dirs arch
+            # If it does, only show the next level of directory options. More
+            # could produce too much output for little gain in selections.
+            set token_limit (math (string split -- / $token | count) + 1)
+
+            # fd to quickly find Makefiles in directories that could be reched
+            # with the current selection. By sorting by dirname, we can bail
+            # out of the for loop as soon as we encounter an item longer than
+            # our limit.
+            fd -g Makefile (path filter -d $srctree/$token*) | string replace $srctree/ '' | path dirname | path sort --key dirname | while read -l possible_folder
+                if test (string split -- / $possible_folder | count) -gt $token_limit
+                    break
+                end
+                echo $possible_folder/\t'directory target'
+            end
+
+            # Show any possible .o targets (typically from .c and .S files)
+            # that could be built with the current selection
+            string join \n -- (path filter -f $srctree/$token*.{c,S} | string replace $srctree/ '' | path change-extension .o)\t'object target'
         else
-            find $srctree -mindepth 2 -name '*.c' -printf '%P\n'
-        end &| string match -evr '^(Documentation|scripts|tools)' &| string match -er "^(?:arch/$srcarch|(?!arch))" &| path sort --key basename &| path sort --key dirname &| path change-extension .o &| string join \t'object target'\n
+            # Filter top level directories to only ones that can be matched with current selection
+            string join \n -- (string match -er -- "^$token" $top_level_dirs)/\t'directory target'
+        end
     end
 
     string join \n -- \
