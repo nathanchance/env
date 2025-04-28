@@ -105,10 +105,6 @@ def prepare_source(base_name, base_ref='origin/master'):
 
     if base_name == 'linux-next-llvm':
         patches.append('https://git.kernel.org/tip/tip/p/498cb872a111e25021ca5e2d91af7b7a2e62630f')  # x86/boot/startup: Disable LTO
-
-    if base_name in NEXT_TREES:
-        # https://lore.kernel.org/647b9aa4-f46e-4009-a223-78bfc6cc6768@amd.com/
-        reverts.append('13fa70e052ddc778ecf70db21a07d97c2487da90')  # ratelimit: Allow zero ->burst to disable ratelimiting
     # yapf: enable
 
     try:
