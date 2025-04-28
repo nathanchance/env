@@ -158,6 +158,13 @@ function cbl_bld_tot_tcs -d "Build LLVM and binutils from source for kernel deve
             end
         end
     end
+    # https://github.com/llvm/llvm-project/pull/137166#issuecomment-2831550023
+    if not crl https://github.com/nathanchance/llvm-project/commit/855b06ca137298042f0ef944f3fc5d61b575e324.patch | git -C $llvm_project ap
+        set message "Failed to apply patch to turn off -Wdefault-const-init-unsafe by default"
+        print_error "$message"
+        tg_msg "$message"
+        return 1
+    end
 
     # Add in-review patches here
     for gh_pr in $gh_prs
