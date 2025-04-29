@@ -160,6 +160,8 @@ def chsh_fish(username):
     if not (fish := shutil.which('fish')):
         raise RuntimeError('fish not installed?')
 
+    # normalize path
+    fish = Path(fish).resolve().as_posix()
     if fish not in Path('/etc/shells').read_text(encoding='utf-8'):
         raise RuntimeError(f"{fish} is not in /etc/shells?")
 
