@@ -357,7 +357,7 @@ rpmbuild/' >>$gitignore
 
     # Set up files first because that process is quicker than the build
     # process and doas/sudo authorization lasts at least five minutes
-    sd_nspawn -i
+    $PYTHON_BIN_FOLDER/sd_nspawn -i
     or return
 
     mkosi_bld
