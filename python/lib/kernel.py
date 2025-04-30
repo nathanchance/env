@@ -105,6 +105,9 @@ def prepare_source(base_name, base_ref='origin/master'):
 
     if base_name == 'linux-next-llvm':
         patches.append('https://git.kernel.org/tip/tip/p/498cb872a111e25021ca5e2d91af7b7a2e62630f')  # x86/boot/startup: Disable LTO
+
+    if base_name in NEXT_TREES:
+        patches.append('https://lore.kernel.org/all/20250429-scsi-dc395x-fix-uninit-var-v1-1-25215d481020@kernel.org/')  # scsi: dc395x: Remove leftover if statement in reselect()
     # yapf: enable
 
     try:
