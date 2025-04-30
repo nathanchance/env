@@ -138,8 +138,6 @@ function cbl_bld_tot_tcs -d "Build LLVM and binutils from source for kernel deve
     end
 
     # Add patches to revert here
-    # https://github.com/ClangBuiltLinux/linux/issues/2080
-    set -a reverts https://github.com/llvm/llvm-project/commit/1a540c3b8bcefaf6b36f261341ce55a1a24eca21 # [PowerPC] Deprecate uses of ISD::ADDC/ISD::ADDE/ISD::SUBC/ISD::SUBE  (#133155)
     for revert in $reverts
         if string match -qr 'https?://' $revert
             set -l revert (path basename $revert)
@@ -167,6 +165,7 @@ function cbl_bld_tot_tcs -d "Build LLVM and binutils from source for kernel deve
     end
 
     # Add in-review patches here
+    set -a gh_prs https://github.com/llvm/llvm-project/pull/137809 # [PowerPC] Fix an LowerADDSUBO_CARRY error when converting carry bit for usubo_carry
     for gh_pr in $gh_prs
         if gh_llvm pr view --json state (path basename $gh_pr) | python3 -c "import json, sys; sys.exit(0 if json.load(sys.stdin)['state'] == 'MERGED' else 1)"
             print_warning "$gh_pr has already been merged, skipping..."
