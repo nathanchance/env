@@ -17,6 +17,13 @@ import lib.utils
 HOST_ARCH = platform.machine()
 
 
+def disable_selinux():
+    if not lib.setup.is_virtual_machine():
+        return
+
+    lib.utils.run(['grubby', '--update-kernel', 'ALL', '--args', 'selinux=0'])
+
+
 def get_alma_version():
     return int(float(lib.setup.get_os_rel_val('VERSION_ID')))
 
@@ -137,6 +144,7 @@ if __name__ == '__main__':
     fedora.setup_libvirt(user)
     fedora.setup_mosh()
     setup_sudo(user)
+    disable_selinux()
     lib.setup.chsh_fish(user)
     lib.setup.clone_env(user)
     lib.setup.setup_initial_fish_config(user)
