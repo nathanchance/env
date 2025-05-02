@@ -274,10 +274,9 @@ def is_equinix():
 
 
 def is_installed(package_to_check):
-    if shutil.which('pacman'):
+    if using_pacman():
         pacman_packages = lib.utils.chronic(['pacman', '-Qq']).stdout
         return bool(re.search(f"^{package_to_check}$", pacman_packages, flags=re.M))
-
     if shutil.which('dnf'):
         cmd = ['dnf', 'list', '--installed']
     elif shutil.which('dpkg'):
@@ -388,7 +387,7 @@ def podman_setup(username):
 
 def remove_if_installed(package_to_remove):
     if is_installed(package_to_remove):
-        if shutil.which('pacman'):
+        if using_pacman():
             pacman(['-R', '--noconfirm', package_to_remove])
         elif shutil.which('dnf'):
             dnf(['remove', '-y', package_to_remove])
@@ -649,6 +648,13 @@ def user_exists(user):
     except KeyError:
         return False
     return True
+
+
+def using_pacman():
+    # pacman may be installed for compatibility with mkosi but we have to make
+    # sure that it is actually being used on Arch Linux so ensure that the core
+    # repository exists.
+    return shutil.which('pacman') and Path('/var/lib/pacman/sync/core.db').exists()
 
 
 def using_systemd_boot():
