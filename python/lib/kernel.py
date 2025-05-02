@@ -108,6 +108,8 @@ def prepare_source(base_name, base_ref='origin/master'):
 
     if base_name in NEXT_TREES:
         patches.append('https://lore.kernel.org/all/20250429-scsi-dc395x-fix-uninit-var-v1-1-25215d481020@kernel.org/')  # scsi: dc395x: Remove leftover if statement in reselect()
+        patches.append('https://git.kernel.org/torvalds/p/4f79eaa2ceac86a0e0f304b0bab556cca5bf4f30')  # kbuild: Properly disable -Wunterminated-string-initialization for clang
+    commits.append('9f99c09b8ebeb955ac33a82a4ab0e9d3e3d8e330')   # WIP: -Wdefault-const-init-unsafe
     # yapf: enable
 
     try:
