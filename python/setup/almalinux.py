@@ -119,9 +119,6 @@ def setup_sudo(username):
 
 def setup_repos():
     fedora.dnf_add_repo('https://cli.github.com/packages/rpm/gh-cli.repo')
-    fedora.dnf_add_repo(
-        'https://download.opensuse.org/repositories/shells:fish/CentOS_CentOS-9_Stream_appstream/shells:fish.repo',
-    )
 
     tuxmake_repo_text = ('[tuxmake]\n'
                          'name=tuxmake\n'
