@@ -194,6 +194,7 @@ for value in versions:
     # running the tests, make sure we have the fixes. It is safe to apply them
     # even if we are not using Python 3.12.
     if check_args:
+        base_cp_cmd = ['cherry-pick', '--no-commit']
         # https://github.com/llvm/llvm-project/commit/015c43178f9d8531b6bcd1685dbf72b7d837cf5a
         if (gen_cfi_funcs := Path(worktree, 'lld/test/MachO/tools/generate-cfi-funcs.py')).exists():
             gen_cfi_funcs_txt = gen_cfi_funcs.read_text(encoding='utf-8')
@@ -205,17 +206,20 @@ for value in versions:
                     gen_cfi_funcs.write_text(new_text, encoding='utf-8')
                 else:
                     lib.utils.call_git_loud(worktree, [
-                        'cherry-pick',
-                        '--no-commit',
+                        *base_cp_cmd,
                         '015c43178f9d8531b6bcd1685dbf72b7d837cf5a',
                     ])
         # https://github.com/llvm/llvm-project/commit/01fdc2a3c9e0df4e54bb9b88f385f68e7b0d808c
         if (uctc := Path(worktree, 'llvm/utils/update_cc_test_checks.py')).exists():
             uctc_txt = uctc.read_text(encoding='utf-8')
             if 'distutils.spawn' in uctc_txt:
+                # https://github.com/llvm/llvm-project/commit/d1007478f19d3ff19a2ecd5ecb04b467933041e6
+                # to make the following change apply cleanly
+                if 'infer_dependent_args' not in uctc_txt:
+                    lib.utils.call_git_loud(
+                        worktree, [*base_cp_cmd, 'd1007478f19d3ff19a2ecd5ecb04b467933041e6'])
                 lib.utils.call_git_loud(worktree, [
-                    'cherry-pick',
-                    '--no-commit',
+                    *base_cp_cmd,
                     '01fdc2a3c9e0df4e54bb9b88f385f68e7b0d808c',
                 ])
 
