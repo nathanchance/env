@@ -2,7 +2,7 @@ session_name: main
 windows:
 - window_name: btop and machinectl shell
   panes:
-  - btop --utf-force
+  - btop
   - shell: mchsh
     shell_command:
     - cmd: cbl_bld_all
