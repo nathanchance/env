@@ -217,6 +217,30 @@ for value in versions:
                     *base_cp_cmd,
                     '01fdc2a3c9e0df4e54bb9b88f385f68e7b0d808c',
                 ])
+        # https://github.com/llvm/llvm-project/commit/bc839b4b4e27b6e979dd38bcde51436d64bb3699
+        # Manually applied because it does not apply cleanly to any release
+        # that needs it.
+        if (go_bindings := Path(worktree, 'llvm/bindings/go')).is_dir():
+            rm_dirs = (go_bindings, Path(worktree, 'llvm/test/Bindings/Go'),
+                       Path(worktree, 'llvm/tools/llvm-go'))
+            for rm_dir in rm_dirs:
+                shutil.rmtree(rm_dir)
+
+            site_cfg_py = Path(worktree, 'llvm/test/lit.site.cfg.py.in')
+            LINE_TO_DELETE = 'config.go_executable = "@GO_EXECUTABLE@"\n'
+            new_site_cfg_py = site_cfg_py.read_text(encoding='utf-8').replace(LINE_TO_DELETE, '')
+            site_cfg_py.write_text(new_site_cfg_py, encoding='utf-8')
+
+            mod_files = ('.gitignore', 'cmake/config-ix.cmake', 'test/lit.cfg.py',
+                         'utils/lit/lit/llvm/subst.py')
+            fp_cmd = [
+                'format-patch',
+                '-1',
+                '--stdout',
+                'bc839b4b4e27b6e979dd38bcde51436d64bb3699',
+            ] + [Path(worktree, 'llvm', file) for file in mod_files]
+            mod_diff = lib.utils.call_git(worktree, fp_cmd).stdout
+            lib.utils.call_git_loud(worktree, ['ap'], input=mod_diff)
 
     shutil.rmtree(build_folder, ignore_errors=True)
     build_folder.mkdir(exist_ok=True, parents=True)
