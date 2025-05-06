@@ -266,6 +266,7 @@ for value in versions:
     maj_ver = int(VERSION.split('.', 1)[0])
     if (maj_ver >= 16 and MACHINE == 'x86_64') or (maj_ver >= 18 and MACHINE == 'aarch64'):
         build_cmd += ['--bolt', '--lto', 'thin']
+    lib.utils.tg_msg(f"sudo authorization needed to build LLVM {VERSION}")
     lib.utils.run_as_root(build_cmd)
 
     llvm_tarball = Path(llvm_install.parent, f"{llvm_install.name}.tar")

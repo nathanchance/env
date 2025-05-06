@@ -6,8 +6,9 @@ import copy
 import os
 from pathlib import Path
 import shlex
-import subprocess
 import shutil
+import socket
+import subprocess
 import sys
 import time
 
@@ -197,6 +198,19 @@ def run_as_root(full_cmd, **kwargs):
 
 def run_check_rc_zero(*args, **kwargs):
     return chronic(*args, **kwargs, check=False).returncode == 0
+
+
+def tg_msg(raw_msg):
+    if not (botinfo := Path.home().joinpath('.botinfo')).exists():
+        raise FileNotFoundError(f"{botinfo} could not be found!")
+    chat_id, token = botinfo.read_text(encoding='utf-8').splitlines()
+
+    msg = f"From {socket.gethostname()}:\n\n{raw_msg}"
+
+    curl_cmd = ('curl', '-s', '-X', 'POST', f"https://api.telegram.org/bot{token}/sendMessage",
+                '-d', f"chat_id={chat_id}", '-d', 'parse_mode=Markdown', '-d', f"text={msg}", '-o',
+                '/dev/null')
+    chronic(curl_cmd)
 
 
 def print_or_run_cmd(cmd, dryrun, end='\n\n'):
