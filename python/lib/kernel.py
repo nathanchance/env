@@ -104,11 +104,9 @@ def prepare_source(base_name, base_ref='origin/master'):
         commits.append('792b2809cfc22e27b4e6616a8bcfab017773de82')  # Partially revert "kunit/fortify: Replace "volatile" with OPTIMIZER_HIDE_VAR()"
 
     if base_name == 'linux-next-llvm':
-        patches.append('https://git.kernel.org/tip/tip/p/498cb872a111e25021ca5e2d91af7b7a2e62630f')  # x86/boot/startup: Disable LTO
+        patches.append('https://lore.kernel.org/all/20250508-mfd-fix-unused-node-variables-v1-1-df84d80cca55@kernel.org/')  # mfd: Remove node variables that are unused with CONFIG_OF=n
 
-    if base_name in NEXT_TREES:
-        patches.append('https://lore.kernel.org/all/20250429-scsi-dc395x-fix-uninit-var-v1-1-25215d481020@kernel.org/')  # scsi: dc395x: Remove leftover if statement in reselect()
-    commits.append('9f99c09b8ebeb955ac33a82a4ab0e9d3e3d8e330')   # WIP: -Wdefault-const-init-unsafe
+    patches.append('https://lore.kernel.org/all/20250506-default-const-init-clang-v2-1-fcfb69703264@kernel.org/')  # kbuild: Disable -Wdefault-const-init-unsafe
     # yapf: enable
 
     try:
