@@ -105,11 +105,6 @@ else:
     lib.utils.call_git_loud(tc_build_folder, ['reset', '--hard', '@{u}'])
 
 llvm_git_dir = Path(llvm_folder, '.git')
-mounts = {
-    f"{build_folder}:/build",
-    f"{tc_build_folder}:/tc-build",
-    f"{llvm_git_dir}:{llvm_git_dir}",
-}
 
 if args.skip_tests:
     check_args = []
@@ -226,9 +221,13 @@ for value in versions:
     shutil.rmtree(build_folder, ignore_errors=True)
     build_folder.mkdir(exist_ok=True, parents=True)
 
-    mounts.add(f"{llvm_install}:/install")
-    mounts.add(f"{worktree}:/llvm")
-
+    mounts = {
+        f"{build_folder}:/build",
+        f"{llvm_install}:/install",
+        f"{worktree}:/llvm",
+        f"{llvm_git_dir}:{llvm_git_dir}",
+        f"{tc_build_folder}:/tc-build",
+    }
     build_cmd = [
         *systemd_nspawn_cmd,
         *[f"--bind={val}:idmap" for val in mounts],
