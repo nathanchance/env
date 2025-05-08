@@ -57,6 +57,9 @@ def parse_args():
     schedule_parser.add_argument(
         'date_str',
         help="Date to perform timezone change at (in a format suitable for OnCalendar=)")
+    schedule_parser.add_argument(
+        'time_str',
+        help='Time to perform timezone change at (in a format suitable for OnCalendar=)')
     schedule_parser.add_argument('timezone', help="Timezone to change to")
 
     return parser.parse_args()
@@ -147,13 +150,14 @@ if __name__ == '__main__':
         lib.utils.run(list_cmd)
 
     elif args.subcommand == 'sch':
-        lib.utils.chronic(['systemd-analyze', 'calendar', args.date_str])
-
         if not Path('/usr/share/zoneinfo', args.timezone).exists():
             raise FileNotFoundError(f"{args.timezone} does not exist within /usr/share/zoneinfo?")
 
+        date_str = f"{args.date_str} {args.time_str} {args.timezone}"
+        lib.utils.chronic(['systemd-analyze', 'calendar', date_str])
+
         clean_timer_files()
-        schedule_tz_change(args.date_str, args.timezone)
+        schedule_tz_change(date_str, args.timezone)
 
     else:
         raise RuntimeError(f"Don't know how to handle subcommand '{args.subcommand}'?")
