@@ -106,6 +106,8 @@ def prepare_source(base_name, base_ref='origin/master'):
     if base_name == 'linux-next-llvm':
         patches.append('https://lore.kernel.org/all/20250508-mfd-fix-unused-node-variables-v1-1-df84d80cca55@kernel.org/')  # mfd: Remove node variables that are unused with CONFIG_OF=n
 
+        patches.append('https://lore.kernel.org/all/20250509-nvsw-sn2200-fix-items-busbar-hotplug-v1-1-8844fff38dc8@kernel.org/')  # platform: mellanox: nvsw-sn2200: Fix .items in nvsw_sn2201_busbar_hotplug
+
     patches.append('https://lore.kernel.org/all/20250506-default-const-init-clang-v2-1-fcfb69703264@kernel.org/')  # kbuild: Disable -Wdefault-const-init-unsafe
     # yapf: enable
 
