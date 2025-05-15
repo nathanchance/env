@@ -76,6 +76,7 @@ else:
 # First, make sure environment exists. Check for this requires root because
 # /var/lib/machines can only be read by the root user but we need it for later
 # anyways.
+lib.utils.tg_msg(f"sudo authorization needed to check for {MACH_FOLDER}")
 lib.utils.run_as_root(['test', '-e', MACH_FOLDER])
 
 build_folder = Path(args.build_folder).resolve() if args.build_folder else BUILD
