@@ -153,11 +153,11 @@ if __name__ == '__main__':
         if not Path('/usr/share/zoneinfo', args.timezone).exists():
             raise FileNotFoundError(f"{args.timezone} does not exist within /usr/share/zoneinfo?")
 
-        date_str = f"{args.date_str} {args.time_str} {args.timezone}"
-        lib.utils.chronic(['systemd-analyze', 'calendar', date_str])
+        DATE_STR = f"{args.date_str} {args.time_str} {args.timezone}"
+        lib.utils.chronic(['systemd-analyze', 'calendar', DATE_STR])
 
         clean_timer_files()
-        schedule_tz_change(date_str, args.timezone)
+        schedule_tz_change(DATE_STR, args.timezone)
 
     else:
         raise RuntimeError(f"Don't know how to handle subcommand '{args.subcommand}'?")
