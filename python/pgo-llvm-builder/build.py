@@ -242,6 +242,13 @@ for value in versions:
             mod_diff = lib.utils.call_git(worktree, fp_cmd).stdout
             lib.utils.call_git_loud(worktree, ['ap'], input=mod_diff)
 
+        # https://github.com/llvm/llvm-project/issues/140024
+        if VERSION == '20.1.5':
+            patch_text = lib.utils.curl(
+                'https://github.com/llvm/llvm-project/commit/340d19927571709999c006f13b648d3e632a79fa.patch',
+            )
+            lib.utils.call_git_loud(worktree, ['ap'], input=patch_text)
+
     shutil.rmtree(build_folder, ignore_errors=True)
     build_folder.mkdir(exist_ok=True, parents=True)
 
