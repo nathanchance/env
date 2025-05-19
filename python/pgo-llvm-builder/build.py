@@ -302,3 +302,4 @@ for value in versions:
                  f"Tarball is available at: {llvm_tarball}\n"
                  f"Compressed tarball is available at: {llvm_tarball_compressed}")
     print(INFO_TEXT)
+    lib.utils.tg_msg(f"LLVM {VERSION} finished building successfully")
