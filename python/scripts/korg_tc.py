@@ -19,6 +19,7 @@ import lib.utils
 # pylint: enable=wrong-import-position
 
 LATEST_GCC_VERSIONS = {
+    15: '15.1.0',
     14: '14.2.0',
     13: '13.3.0',
     12: '12.4.0',
