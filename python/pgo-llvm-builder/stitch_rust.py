@@ -106,10 +106,10 @@ def generate_rust_toml(version):
     return tomllib.loads(toml_dst.read_text(encoding='utf-8'))
 
 
-def get_rust_target_from_tarball(tarball):
+def get_rust_target_from_tarball(tarball_path):
     # "llvm-<version>-<arch>.tar.<suffix>" -> ["llvm", "<version>", "<arch>.tar.<suffix>"]
-    if len(name_parts := tarball.name.split('-')) != 3:
-        raise RuntimeError(f"Unexpected name ('{tarball.name}') for tarball?")
+    if len(name_parts := tarball_path.name.split('-')) != 3:
+        raise RuntimeError(f"Unexpected name ('{tarball_path.name}') for tarball?")
 
     # "<arch>.tar.<suffix>" -> ["<arch>", "tar.<suffix>"] -> "<arch>"
     if (arch := name_parts[2].split('.', 1)[0]) not in ('aarch64', 'x86_64'):
@@ -122,11 +122,14 @@ def parse_arguments():
     parser = ArgumentParser(description='Install Rust toolchain into an LLVM toolchain tarball')
 
     parser.add_argument('version', help='Rust version to install')
-    parser.add_argument('llvm_tarball', help='Toolchain tarball to install Rust into', type=Path)
+    parser.add_argument('llvm_tarballs',
+                        help='Toolchain tarball(s) to install Rust into',
+                        nargs='+',
+                        type=Path)
 
-    if not (arguments := parser.parse_args()).llvm_tarball.exists():
-        raise FileNotFoundError(
-            f"Provided LLVM tarball ('{arguments.llvm_tarball}') does not exist?")
+    for item in (arguments := parser.parse_args()).llvm_tarballs:
+        if not item.exists():
+            raise FileNotFoundError(f"Provided LLVM tarball ('{item}') does not exist?")
 
     return arguments
 
@@ -199,10 +202,12 @@ if __name__ == '__main__':
     RUST.mkdir(exist_ok=True, parents=True)
 
     rust_toml = generate_rust_toml(args.version)
-    # pylint only flags this variable, which is dumb.
-    # pylint: disable-next=invalid-name
-    rust_target = get_rust_target_from_tarball(args.llvm_tarball)
 
-    install_scripts = prepare_rust_components(rust_toml, rust_target)
+    for tarball in args.llvm_tarballs:
+        # pylint only flags this variable, which is dumb.
+        # pylint: disable-next=invalid-name
+        rust_target = get_rust_target_from_tarball(tarball)
 
-    generate_llvm_rust_tarball(install_scripts, args.llvm_tarball, args.version)
+        install_scripts = prepare_rust_components(rust_toml, rust_target)
+
+        generate_llvm_rust_tarball(install_scripts, tarball, args.version)
