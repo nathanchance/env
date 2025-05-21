@@ -105,10 +105,6 @@ def prepare_source(base_name, base_ref='origin/master'):
 
     if base_name == 'linux-next-llvm':
         patches.append('https://lore.kernel.org/all/20250508-mfd-fix-unused-node-variables-v1-1-df84d80cca55@kernel.org/')  # mfd: Remove node variables that are unused with CONFIG_OF=n
-
-        patches.append('https://lore.kernel.org/all/20250509-nvsw-sn2200-fix-items-busbar-hotplug-v1-1-8844fff38dc8@kernel.org/')  # platform: mellanox: nvsw-sn2200: Fix .items in nvsw_sn2201_busbar_hotplug
-
-        patches.append('https://lore.kernel.org/all/20250512-amd-pstate-ut-uninit-ret-v1-1-fcb4104f502e@kernel.org/')  # cpufreq/amd-pstate: Avoid shadowing ret in amd_pstate_ut_check_driver()
     # yapf: enable
 
     try:
