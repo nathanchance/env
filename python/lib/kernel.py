@@ -105,9 +105,6 @@ def prepare_source(base_name, base_ref='origin/master'):
 
     if base_name == 'linux-next-llvm':
         patches.append('https://lore.kernel.org/all/20250508-mfd-fix-unused-node-variables-v1-1-df84d80cca55@kernel.org/')  # mfd: Remove node variables that are unused with CONFIG_OF=n
-
-    if base_name in NEXT_TREES:
-        patches.append('https://git.kernel.org/tip/tip/p/a510bb87da72aa8d1504b0e4b343cfe013ee8a89')  # genirq/irqdesc: Remove double locking in hwirq_show()
     # yapf: enable
 
     try:
