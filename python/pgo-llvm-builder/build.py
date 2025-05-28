@@ -22,13 +22,13 @@ MACHINE = platform.machine()
 
 LLVM_REFS = {
     '21.0.0': 'origin/main',
-    '20.1.6': 'origin/release/20.x',
+    '20.1.7': 'origin/release/20.x',
 }
 
 LLVM_VERSIONS = [
     '21.0.0',  # git
-    '20.1.6',  # release/20.x
-    '20.1.5',
+    '20.1.7',  # release/20.x
+    '20.1.6',
     '19.1.7',
     '18.1.8',
     '17.0.6',
@@ -241,13 +241,6 @@ for value in versions:
             ] + [Path(worktree, 'llvm', file) for file in mod_files]
             mod_diff = lib.utils.call_git(worktree, fp_cmd).stdout
             lib.utils.call_git_loud(worktree, ['ap'], input=mod_diff)
-
-        # https://github.com/llvm/llvm-project/issues/140024
-        if VERSION == '20.1.5':
-            patch_text = lib.utils.curl(
-                'https://github.com/llvm/llvm-project/commit/340d19927571709999c006f13b648d3e632a79fa.patch',
-            )
-            lib.utils.call_git_loud(worktree, ['ap'], input=patch_text)
 
     shutil.rmtree(build_folder, ignore_errors=True)
     build_folder.mkdir(exist_ok=True, parents=True)
