@@ -145,7 +145,7 @@ index 29ffc62a71e3..1164223654ac 100644
 
 ''')  # noqa: E101, W291, W293
 
-    if base_name == 'linux-next-llvm':
+    if base_name in ('linux-mainline-llvm', 'linux-next-llvm'):
         patches.append('https://lore.kernel.org/all/20250508-mfd-fix-unused-node-variables-v1-1-df84d80cca55@kernel.org/')  # mfd: Remove node variables that are unused with CONFIG_OF=n
     # yapf: enable
 
