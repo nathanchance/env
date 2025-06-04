@@ -7,7 +7,7 @@ function cbl_bld_all -d "Build latest LLVM and test it against several Linux ker
 
     for arg in $argv
         switch $arg
-            case -l --lts
+            case -l --lts -s --short
                 set -a cbl_bld_all_krnl_args $arg
         end
     end
