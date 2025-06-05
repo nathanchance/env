@@ -147,9 +147,6 @@ index 29ffc62a71e3..1164223654ac 100644
 
     if base_name in PACMAN_TREES:
         patches.append('https://lore.kernel.org/all/20250508-mfd-fix-unused-node-variables-v1-1-df84d80cca55@kernel.org/')  # mfd: Remove node variables that are unused with CONFIG_OF=n
-
-    if base_name in NEXT_TREES:
-        patches.append('https://lore.kernel.org/all/20250604-bcachefs-fix-clang-label-followed-by-declaration-v1-1-68a8bce1d981@kernel.org/')  # bcachefs: Fix -Wc23-extensions in bch2_check_dirents()
     # yapf: enable
 
     try:
