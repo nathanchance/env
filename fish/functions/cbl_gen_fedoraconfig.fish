@@ -52,7 +52,6 @@ function cbl_gen_fedoraconfig -d "Downloads and modifies Fedora's kernel configu
 
     scripts/config \
         --file $cfg \
-        -d UBSAN_INTEGER_WRAP \
         -e IKCONFIG \
         -e IKCONFIG_PROC \
         -e LOCALVERSION_AUTO \
