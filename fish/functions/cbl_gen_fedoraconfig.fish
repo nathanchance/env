@@ -19,6 +19,13 @@ function cbl_gen_fedoraconfig -d "Downloads and modifies Fedora's kernel configu
                 set -a scripts_config_args \
                     -d LTO_NONE \
                     -e LTO_CLANG_THIN
+            case --no-debug
+                set -a scripts_config_args \
+                    -d DEBUG_INFO \
+                    -d DEBUG_INFO_DWARF4 \
+                    -d DEBUG_INFO_DWARF5 \
+                    -d DEBUG_INFO_DWARF_TOOLCHAIN_DEFAULT \
+                    -e DEBUG_INFO_NONE
             case --no-werror
                 set no_werror true
         end
@@ -45,12 +52,7 @@ function cbl_gen_fedoraconfig -d "Downloads and modifies Fedora's kernel configu
 
     scripts/config \
         --file $cfg \
-        -d DEBUG_INFO \
-        -d DEBUG_INFO_DWARF4 \
-        -d DEBUG_INFO_DWARF5 \
-        -d DEBUG_INFO_DWARF_TOOLCHAIN_DEFAULT \
         -d UBSAN_INTEGER_WRAP \
-        -e DEBUG_INFO_NONE \
         -e IKCONFIG \
         -e IKCONFIG_PROC \
         -e LOCALVERSION_AUTO \
