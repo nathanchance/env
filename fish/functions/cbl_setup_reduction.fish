@@ -23,6 +23,7 @@ function cbl_setup_reduction -d "Build good and bad versions of LLVM for cvise r
 
     set bld_llvm_args $argv[3..]
 
+    mkdir -p $TMP_FOLDER
     set -g tmp_dir (mktemp -d -p $TMP_FOLDER -t cvise.XXXXXXXXXX)
 
     cbl_bld_llvm_sbs \
