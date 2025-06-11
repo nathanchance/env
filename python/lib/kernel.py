@@ -147,10 +147,6 @@ index 29ffc62a71e3..1164223654ac 100644
 
     if base_name in PACMAN_TREES:
         patches.append('https://lore.kernel.org/all/20250508-mfd-fix-unused-node-variables-v1-1-df84d80cca55@kernel.org/')  # mfd: Remove node variables that are unused with CONFIG_OF=n
-
-    if base_name == 'fedora':
-        # https://lore.kernel.org/CA+G9fYuppX5LeRjOAZWsYRCs76PVbnv-TN_RrszhDsk=KregyA@mail.gmail.com/
-        reverts.append('49760b9f60528393cca3ea35c4d0719f84215a48')  # arm64: dts: rockchip: add overlay for RockPro64 screen
     # yapf: enable
 
     try:
