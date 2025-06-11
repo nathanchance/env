@@ -12,7 +12,7 @@ function cbl_bld_krnl_rpm -d "Build a .rpm kernel package"
     # Allow cross compiling
     for arg in $argv
         switch $arg
-            case --cfi --cfi-permissive --lto --no-werror -u --ubsan-bounds
+            case --cfi --cfi-permissive --debug --lto --no-debug --no-werror
                 set -a gen_config_args $arg
             case -g --gcc
                 set gcc true
