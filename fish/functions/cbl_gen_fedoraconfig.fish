@@ -15,17 +15,14 @@ function cbl_gen_fedoraconfig -d "Downloads and modifies Fedora's kernel configu
                     set -a scripts_config_args \
                         -e CFI_PERMISSIVE
                 end
+            case --debug
+                set debug true
             case --lto
                 set -a scripts_config_args \
                     -d LTO_NONE \
                     -e LTO_CLANG_THIN
             case --no-debug
-                set -a scripts_config_args \
-                    -d DEBUG_INFO \
-                    -d DEBUG_INFO_DWARF4 \
-                    -d DEBUG_INFO_DWARF5 \
-                    -d DEBUG_INFO_DWARF_TOOLCHAIN_DEFAULT \
-                    -e DEBUG_INFO_NONE
+                set debug false
             case --no-werror
                 set no_werror true
         end
@@ -42,6 +39,23 @@ function cbl_gen_fedoraconfig -d "Downloads and modifies Fedora's kernel configu
             set arch x86_64
         case arm64
             set arch aarch64
+    end
+    if not set -q debug
+        # BTF is unlikely to be useful in this scenario so disable it
+        # https://lore.kernel.org/CAADnVQ+jNQyC=RcoiwDXeHj9y6CGzr322scz_8uGwCDVx-Od4Q@mail.gmail.com/
+        if test "$arch" = aarch64; and contains CFI_CLANG $scripts_config_args
+            set debug false
+        else
+            set debug true
+        end
+    end
+    if test "$debug" = false # debug info is on by default in Fedora
+        set -a scripts_config_args \
+            -d DEBUG_INFO \
+            -d DEBUG_INFO_DWARF4 \
+            -d DEBUG_INFO_DWARF5 \
+            -d DEBUG_INFO_DWARF_TOOLCHAIN_DEFAULT \
+            -e DEBUG_INFO_NONE
     end
 
     set out (tbf)
