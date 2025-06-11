@@ -21,22 +21,7 @@ function cbl_bld_llvm_sbs -d "Build identical copies of LLVM side by side from v
         git worktree prune
         git worktree add -d $prefix/src $sha
         or return
-
-        # Avoid build issue with newer versions of libstdc++
-        if git merge-base --is-ancestor 7e44305041d96b064c197216b931ae3917a34ac1 $sha
-            if not git merge-base --is-ancestor 2222fddfc0a2ff02036542511597839856289094 $sha
-                git -C $prefix/src cherry-pick -n 2222fddfc0a2ff02036542511597839856289094
-                or return
-            end
-        else
-            git -C $prefix/src cherry-pick -n 7e44305041d96b064c197216b931ae3917a34ac1
-            or return
-
-            set tgt_desc_h $tmp_dir/src/llvm/lib/Target/X86/MCTargetDesc/X86MCTargetDesc.h
-            if not string match -qr '<cstdint>' <$tgt_desc_h
-                sed -i '/#include <memory>/i #include <cstdint>' $tgt_desc_h
-            end
-        end
+        cbl_patch_llvm $prefix/src
 
         if test -d $CBL_TC_BLD
             set tc_bld $CBL_TC_BLD
