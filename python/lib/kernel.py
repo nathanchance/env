@@ -99,54 +99,8 @@ def prepare_source(base_name, base_ref='origin/master'):
 
     # Patching section
     # yapf: disable
-    if base_name == 'fedora':
-        # https://lore.kernel.org/20250317174840.GA1451320@ax162/
-        patches.append('''\
-From a28daaf210bdcf874a9bd05985c218a28996c67d Mon Sep 17 00:00:00 2001
-From: Nathan Chancellor <nathan@kernel.org>
-Date: Mon, 17 Mar 2025 10:54:48 -0700
-Subject: [PATCH] Partially revert "kunit/fortify: Replace "volatile"
- with OPTIMIZER_HIDE_VAR()"
-
-Signed-off-by: Nathan Chancellor <nathan@kernel.org>
----
- lib/tests/fortify_kunit.c | 9 ++++-----
- 1 file changed, 4 insertions(+), 5 deletions(-)
-
-diff --git a/lib/tests/fortify_kunit.c b/lib/tests/fortify_kunit.c
-index 29ffc62a71e3..1164223654ac 100644
---- a/lib/tests/fortify_kunit.c
-+++ b/lib/tests/fortify_kunit.c
-@@ -411,6 +411,8 @@ struct fortify_padding {
- 	char buf[32];
- 	unsigned long bytes_after;
- };
-+/* Force compiler into not being able to resolve size at compile-time. */
-+static volatile int unconst;
- 
- static void fortify_test_strlen(struct kunit *test)
- {
-@@ -1003,11 +1005,8 @@ static void fortify_test_memcmp(struct kunit *test)
- {
- 	char one[] = "My mind is going ...";
- 	char two[] = "My mind is going ... I can feel it.";
--	size_t one_len = sizeof(one) - 1;
--	size_t two_len = sizeof(two) - 1;
--
--	OPTIMIZER_HIDE_VAR(one_len);
--	OPTIMIZER_HIDE_VAR(two_len);
-+	size_t one_len = sizeof(one) + unconst - 1;
-+	size_t two_len = sizeof(two) + unconst - 1;
- 
- 	/* We match the first string (ignoring the %NUL). */
- 	KUNIT_ASSERT_EQ(test, memcmp(one, two, one_len), 0);
--- 
-2.49.0
-
-''')  # noqa: E101, W291, W293
-
     if base_name in PACMAN_TREES:
-        patches.append('https://lore.kernel.org/all/20250508-mfd-fix-unused-node-variables-v1-1-df84d80cca55@kernel.org/')  # mfd: Remove node variables that are unused with CONFIG_OF=n
+        patches.append('https://lore.kernel.org/all/20250611104348.192092-1-jirislaby@kernel.org/raw')  # mfd: fix building without CONFIG_OF
     # yapf: enable
 
     try:
@@ -179,7 +133,7 @@ index 29ffc62a71e3..1164223654ac 100644
 
             if isinstance(patch, Path):
                 am_cmd.append(patch)
-            elif patch.startswith('https://lore.kernel.org/'):
+            elif patch.startswith('https://lore.kernel.org/') and not patch.endswith('/raw'):
                 am_kwargs['input'] = b4_am_o(patch)
             elif patch.startswith(('https://', 'http://')):
                 am_kwargs['input'] = lib.utils.curl(patch).decode('utf-8')
