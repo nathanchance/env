@@ -1,7 +1,7 @@
 #!/usr/bin/env fish
 # Description: Build and install a more modern version of Python
 
-set python_version 3.13.3
+set python_version 3.13.5
 set workdir (mktemp -d)
 
 begin
