@@ -99,8 +99,8 @@ def prepare_source(base_name, base_ref='origin/master'):
 
     # Patching section
     # yapf: disable
-    if base_name in PACMAN_TREES:
-        patches.append('https://lore.kernel.org/all/20250611104348.192092-1-jirislaby@kernel.org/raw')  # mfd: fix building without CONFIG_OF
+    if base_name == 'linux-mainline-llvm':
+        patches.append('https://git.kernel.org/lee/mfd/p/fc5f017a71d08eea3983762ce57d27e5bc300db1')  # mfd: fix building without CONFIG_OF
     # yapf: enable
 
     try:
