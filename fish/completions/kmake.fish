@@ -133,6 +133,8 @@ function __kmake_pos_args
             set -a targets zImage
         case arm64
             set -a targets Image{.gz,}
+        case loongarch
+            set -a targets vmlinuz.efi
         case powerpc
             set -a targets zImage.epapr
         case riscv
