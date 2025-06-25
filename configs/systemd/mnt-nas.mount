@@ -2,7 +2,7 @@
 Description=Mount Synology NAS folder at boot
 
 [Mount]
-What=192.168.4.207:/volume1/Storage
+What=192.168.1.193:/volume1/Storage
 Where=/mnt/nas
 Options=vers=4
 Type=nfs

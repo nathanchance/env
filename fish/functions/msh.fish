@@ -17,15 +17,7 @@ function msh -d "Shorthand for mosh -o" -w mosh
             if test "$tailscale" = true
                 set host aadp
             else
-                set host 192.168.4.234
-            end
-            set user_host nathan@$host
-
-        case amd-desktop-4300G
-            if test "$tailscale" = true
-                set host hp-amd-ryzen-4300g
-            else
-                set host 192.168.4.177
+                set host 192.168.1.143
             end
             set user_host nathan@$host
 
@@ -33,7 +25,7 @@ function msh -d "Shorthand for mosh -o" -w mosh
             if test "$tailscale" = true
                 set host beelink-amd-ryzen-8745hs
             else
-                set host 192.168.4.192
+                set host 192.168.1.242
             end
             set user_host nathan@$host
 
@@ -44,7 +36,7 @@ function msh -d "Shorthand for mosh -o" -w mosh
             if test "$tailscale" = true
                 set host honeycomb
             else
-                set host 192.168.4.210
+                set host 192.168.1.243
             end
             set user_host nathan@$host
 
@@ -52,7 +44,7 @@ function msh -d "Shorthand for mosh -o" -w mosh
             if test "$tailscale" = true
                 set host asus-intel-core-11700
             else
-                set host 192.168.4.189
+                set host 192.168.1.248
             end
             set user_host nathan@$host
 
@@ -60,41 +52,17 @@ function msh -d "Shorthand for mosh -o" -w mosh
             if test "$tailscale" = true
                 set host beelink-intel-n100
             else
-                set host 192.168.4.190
+                set host 192.168.1.231
             end
             set user_host nathan@$host
 
-        case intel-laptop
-            if test "$tailscale" = true
-                set host asus-intel-core-4210u
-            else
-                set host 192.168.4.137
-            end
-            set user_host nathan@$host
-
-        case pi3
-            if test "$tailscale" = true
-                set host raspberrypi3
-            else
-                set host 192.168.4.199
-            end
-            set user_host pi@$host
-
-        case pi4
-            if test "$tailscale" = true
-                set host raspberrypi4
-            else
-                set host 192.168.4.205
-            end
-            set user_host nathan@$host
-
-        case thelio
-            if test "$tailscale" = true
-                set host thelio-3990x
-            else
-                set host 192.168.4.188
-            end
-            set user_host nathan@$host
+            # case thelio
+            #     if test "$tailscale" = true
+            #         set host thelio-3990x
+            #     else
+            #         set host 192.168.4.188
+            #     end
+            #     set user_host nathan@$host
 
         case '*@*'
             set user_host $argv[1]

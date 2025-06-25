@@ -8,6 +8,6 @@ function setup_registries_conf -d "Set up registries.conf for pull through ghcr.
     echo '[[registry]]
 location="ghcr.io"
 [[registry.mirror]]
-location="192.168.4.207:5002"
+location="192.168.1.193:5002"
 insecure=true' >$registries_conf
 end
