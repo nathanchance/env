@@ -10,7 +10,7 @@ function cbl_bld_llvm_sbs -d "Build identical copies of LLVM side by side from v
 
     for arg in $argv[2..]
         # either short or full SHA
-        if string match -qr '[0-9a-f]{12}' $arg; or string match -qr '[0-9a-f]{40}' $arg
+        if string match -qr -- '[0-9a-f]{12}' $arg; or string match -qr -- '[0-9a-f]{40}' $arg
             set -a shas $arg
         else
             set -a bld_llvm_args $arg
