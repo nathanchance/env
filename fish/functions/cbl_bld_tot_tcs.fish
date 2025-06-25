@@ -138,6 +138,10 @@ function cbl_bld_tot_tcs -d "Build LLVM and binutils from source for kernel deve
     end
 
     # Add patches to revert here
+    # https://github.com/llvm/llvm-project/pull/144594#issuecomment-2993736654
+    set -a reverts https://github.com/llvm/llvm-project/commit/981f8e1380b63b5fc08ca71dc05615b439cb1bfe # [TableGen] Remove redundant control flow statements (NFC) (#145143)
+    set -a reverts https://github.com/llvm/llvm-project/commit/3de01d07c33c10dfefc753c87c0a926fd512425b # Fix bazel build after #144594, mark variable as potentially unused (#144910)
+    set -a reverts https://github.com/llvm/llvm-project/commit/bf79d4819edeb54c6cf528db63676110992908a8 # [Reland] [PowerPC] frontend get target feature from backend with cpu name (#144594)
     for revert in $reverts
         if string match -qr 'https?://' $revert
             set -l revert (path basename $revert)
