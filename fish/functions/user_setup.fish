@@ -270,7 +270,7 @@ rpmbuild/' >>$gitignore
         ln -fnrsv $configs/tmux/.tmux.conf.regular $HOME/.tmux.conf
     end
     mkdir -p $HOME/.config/tio
-    ln -frsv $configs/local/tio $HOME/.config/tio/config
+    ln -frsv $configs/local/tio.config $HOME/.config/tio/config
     vim_setup
 
     # Terminal profiles
