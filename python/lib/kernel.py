@@ -101,6 +101,8 @@ def prepare_source(base_name, base_ref='origin/master'):
     # yapf: disable
     if base_name == 'linux-mainline-llvm':
         patches.append('https://git.kernel.org/lee/mfd/p/fc5f017a71d08eea3983762ce57d27e5bc300db1')  # mfd: fix building without CONFIG_OF
+    if base_name in NEXT_TREES:
+        patches.append('https://lore.kernel.org/all/20250624202937.523013-1-colin.i.king@gmail.com/')  # ACPI: APEI: EINJ: Fix check and iounmap of uninitialized pointer p
     # yapf: enable
 
     try:
