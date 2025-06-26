@@ -138,10 +138,6 @@ function cbl_bld_tot_tcs -d "Build LLVM and binutils from source for kernel deve
     end
 
     # Add patches to revert here
-    # https://github.com/llvm/llvm-project/pull/144594#issuecomment-2993736654
-    set -a reverts https://github.com/llvm/llvm-project/commit/981f8e1380b63b5fc08ca71dc05615b439cb1bfe # [TableGen] Remove redundant control flow statements (NFC) (#145143)
-    set -a reverts https://github.com/llvm/llvm-project/commit/3de01d07c33c10dfefc753c87c0a926fd512425b # Fix bazel build after #144594, mark variable as potentially unused (#144910)
-    set -a reverts https://github.com/llvm/llvm-project/commit/bf79d4819edeb54c6cf528db63676110992908a8 # [Reland] [PowerPC] frontend get target feature from backend with cpu name (#144594)
     for revert in $reverts
         if string match -qr 'https?://' $revert
             set -l revert (path basename $revert)
@@ -159,6 +155,14 @@ function cbl_bld_tot_tcs -d "Build LLVM and binutils from source for kernel deve
                 return 1
             end
         end
+    end
+    # https://github.com/llvm/llvm-project/pull/144594#issuecomment-2993736654
+    crl https://github.com/nathanchance/llvm-project/commit/970b858ee689c154b793b6fe427029382450bfec.patch | git -C $llvm_project ap
+    or begin
+        set message "Failed to apply revert of bf79d4819edeb54c6cf528db63676110992908a8"
+        print_error "$message"
+        tg_msg "$message"
+        return 1
     end
     # clang unittests may fail non-deterministically right now
     # https://github.com/llvm/llvm-project/pull/134196#issuecomment-2970715875
