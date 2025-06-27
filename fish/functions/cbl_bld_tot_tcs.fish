@@ -138,6 +138,9 @@ function cbl_bld_tot_tcs -d "Build LLVM and binutils from source for kernel deve
     end
 
     # Add patches to revert here
+    # https://github.com/llvm/llvm-project/pull/141106#issuecomment-3010987379
+    set -a reverts https://github.com/llvm/llvm-project/commit/96ed2abadf90b22a0fa3ccabf7888445218b575e # [DebugInfo] Specify x86_64 triple for test (#145797)
+    set -a reverts https://github.com/llvm/llvm-project/commit/3b90597c2ceaae86608214f6b62b43e55823102b # Non constant size and offset in DWARF (#141106)
     for revert in $reverts
         if string match -qr 'https?://' $revert
             set -l revert (path basename $revert)
@@ -157,7 +160,7 @@ function cbl_bld_tot_tcs -d "Build LLVM and binutils from source for kernel deve
         end
     end
     # https://github.com/llvm/llvm-project/pull/144594#issuecomment-2993736654
-    crl https://github.com/nathanchance/llvm-project/commit/970b858ee689c154b793b6fe427029382450bfec.patch | git -C $llvm_project ap
+    crl https://github.com/nathanchance/llvm-project/commit/5299a5e550ef7ad31db5147dd417bb58881e3d7f.patch | git -C $llvm_project ap
     or begin
         set message "Failed to apply revert of bf79d4819edeb54c6cf528db63676110992908a8"
         print_error "$message"
