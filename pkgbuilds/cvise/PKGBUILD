@@ -1,7 +1,7 @@
 # Maintainer: Nathan Chancellor <nathan@kernel.org>
 pkgname=cvise
 pkgver=2.11.0
-pkgrel=3
+pkgrel=1
 pkgdesc="Super-parallel Python port of the C-Reduce"
 arch=(x86_64)
 url="https://github.com/marxin/cvise"
@@ -13,22 +13,32 @@ depends=(
   python-chardet
   python-pebble
   python-psutil
+  python-zstandard
   unifdef
 )
 makedepends=(
   cmake
+  git
   flex
   llvm
 )
 checkdepends=(
+  python-jsonschema
   python-pytest
 )
 optdepends=('colordiff: Show diffs in color')
-source=("$pkgname-$pkgver.tar.gz::https://github.com/marxin/$pkgname/archive/refs/tags/v$pkgver.tar.gz")
-sha256sums=('7e3e473843aa79afb98f581d2e100efa47db80df3a961565b691d7b4a4ebd14b')
+# source=("$pkgname-$pkgver.tar.gz::https://github.com/marxin/$pkgname/archive/refs/tags/v$pkgver.tar.gz")
+source=("git+$url.git")
+sha256sums=('SKIP')
+
+pkgver() {
+  cd "$pkgname"
+  git describe --long --abbrev=7 | sed 's/^v//;s/\([^-]*-g\)/r\1/;s/-/./g'
+}
 
 build() {
-  cd "$pkgname-$pkgver"
+  # cd "$pkgname-$pkgver"
+  cd "$pkgname"
 
   cmake \
     -B build \
@@ -42,13 +52,15 @@ build() {
 }
 
 check() {
-  cd "$pkgname-$pkgver"
+  # cd "$pkgname-$pkgver"
+  cd "$pkgname"
 
   make -C build test
 }
 
 package() {
-  cd "$pkgname-$pkgver"
+  # cd "$pkgname-$pkgver"
+  cd "$pkgname"
 
   make -C build DESTDIR="$pkgdir/" install
   install -Dm644 COPYING "$pkgdir/usr/share/licenses/$pkgname/LICENSE"
