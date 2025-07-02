@@ -102,7 +102,8 @@ def prepare_source(base_name, base_ref='origin/master'):
     if base_name == 'linux-mainline-llvm':
         patches.append('https://git.kernel.org/lee/mfd/p/fc5f017a71d08eea3983762ce57d27e5bc300db1')  # mfd: fix building without CONFIG_OF
     if base_name == 'fedora':
-        patches.append('https://lore.kernel.org/all/20250701-cxl-fix-struct-range-error-v1-1-1f199bddc7c9@kernel.org/')  # cxl: Include range.h in cxl.h
+        # https://lore.kernel.org/20250702182712.GA3453770@ax162/
+        reverts.append('d282edfe8850187165023c625ec694950c4f0098')  # btrfs: replace strcpy() with strscpy()
     # yapf: enable
 
     try:
