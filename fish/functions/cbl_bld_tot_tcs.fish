@@ -138,9 +138,6 @@ function cbl_bld_tot_tcs -d "Build LLVM and binutils from source for kernel deve
     end
 
     # Add patches to revert here
-    # https://github.com/llvm/llvm-project/pull/141106#issuecomment-3010987379
-    set -a reverts https://github.com/llvm/llvm-project/commit/96ed2abadf90b22a0fa3ccabf7888445218b575e # [DebugInfo] Specify x86_64 triple for test (#145797)
-    set -a reverts https://github.com/llvm/llvm-project/commit/3b90597c2ceaae86608214f6b62b43e55823102b # Non constant size and offset in DWARF (#141106)
     for revert in $reverts
         if string match -qr 'https?://' $revert
             set -l revert (path basename $revert)
