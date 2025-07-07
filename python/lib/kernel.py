@@ -104,6 +104,9 @@ def prepare_source(base_name, base_ref='origin/master'):
     if base_name == 'fedora':
         # https://lore.kernel.org/20250702182712.GA3453770@ax162/
         reverts.append('d282edfe8850187165023c625ec694950c4f0098')  # btrfs: replace strcpy() with strscpy()
+    if base_name == 'linux-next-llvm':
+        # https://lore.kernel.org/20250703115915.3096-1-spasswolf@web.de/
+        patches.append('https://lore.kernel.org/all/20250707131224.249496-1-tzimmermann@suse.de/')  # drm/framebuffer: Acquire internal references on GEM handles
     # yapf: enable
 
     try:
