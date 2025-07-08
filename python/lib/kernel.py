@@ -99,8 +99,6 @@ def prepare_source(base_name, base_ref='origin/master'):
 
     # Patching section
     # yapf: disable
-    if base_name == 'linux-mainline-llvm':
-        patches.append('https://git.kernel.org/lee/mfd/p/fc5f017a71d08eea3983762ce57d27e5bc300db1')  # mfd: fix building without CONFIG_OF
     if base_name == 'linux-next-llvm':
         # https://lore.kernel.org/20250703115915.3096-1-spasswolf@web.de/
         patches.append('https://lore.kernel.org/all/20250707131224.249496-1-tzimmermann@suse.de/')  # drm/framebuffer: Acquire internal references on GEM handles
