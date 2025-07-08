@@ -101,12 +101,11 @@ def prepare_source(base_name, base_ref='origin/master'):
     # yapf: disable
     if base_name == 'linux-mainline-llvm':
         patches.append('https://git.kernel.org/lee/mfd/p/fc5f017a71d08eea3983762ce57d27e5bc300db1')  # mfd: fix building without CONFIG_OF
-    if base_name == 'fedora':
-        # https://lore.kernel.org/20250702182712.GA3453770@ax162/
-        reverts.append('d282edfe8850187165023c625ec694950c4f0098')  # btrfs: replace strcpy() with strscpy()
     if base_name == 'linux-next-llvm':
         # https://lore.kernel.org/20250703115915.3096-1-spasswolf@web.de/
         patches.append('https://lore.kernel.org/all/20250707131224.249496-1-tzimmermann@suse.de/')  # drm/framebuffer: Acquire internal references on GEM handles
+    if base_name in NEXT_TREES:
+        patches.append('https://lore.kernel.org/all/20250708-fix-clang-sys_info_avail-warning-v1-1-60d239eacd64@kernel.org/')  # panic: Add __maybe_unused to sys_info_avail
     # yapf: enable
 
     try:
