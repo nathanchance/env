@@ -248,13 +248,10 @@ def create_monthly_report_file(report_file, report_date):
     date = report_date.strftime('%Y-%m-%dT%H:%M:%S%z')
     # yapf: disable
     devices = [
-        'a Raspberry Pi 4',
-        'a Raspberry Pi 3',
         'a SolidRun Honeycomb LX2',
         'an Ampere Altra Developer Platform',
         'two Intel-based desktops',
         'an AMD-based desktop',
-        'an Intel-based laptop',
     ]
     links = {
         'aosp_llvm': "[AOSP's distribution of LLVM](https://android.googlesource.com/platform/prebuilts/clang/host/linux-x86/)",
