@@ -99,11 +99,8 @@ def prepare_source(base_name, base_ref='origin/master'):
 
     # Patching section
     # yapf: disable
-    if base_name == 'linux-next-llvm':
-        # https://lore.kernel.org/20250703115915.3096-1-spasswolf@web.de/
-        patches.append('https://lore.kernel.org/all/20250707131224.249496-1-tzimmermann@suse.de/')  # drm/framebuffer: Acquire internal references on GEM handles
-    if base_name in NEXT_TREES:
-        patches.append('https://lore.kernel.org/all/20250708-fix-clang-sys_info_avail-warning-v1-1-60d239eacd64@kernel.org/')  # panic: Add __maybe_unused to sys_info_avail
+    if base_name == 'fedora':
+        patches.append('https://git.kernel.org/kvmarm/kvmarm/p/2265c08ec393ef1f5ef5019add0ab1e3a7ee0b79')  # KVM: arm64: Fix enforcement of upper bound on MDCR_EL2.HPMN
     if base_name == 'linux-mainline-llvm':
         patches.append('https://lore.kernel.org/all/20250708222530.1041477-1-himanshu.madhani@oracle.com/')  # PCI/THP: Fix hang due to incorrect guard lock
     # yapf: enable
