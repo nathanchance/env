@@ -74,6 +74,12 @@ class KernelPkgBuilder:
             '-e', 'DEBUG_INFO_DWARF5',
             '-m', 'DRM',
         ]  # yapf: disable
+        # Handle https://git.kernel.org/tiwai/sound/c/aeeb85f26c3bbef6f702ac20167c45812251501d
+        # until Arch is up to date with 6.17
+        if realtek_cfgs := lib.kernel.get_new_realtek_audio_cfgs(self._source_folder):
+            sc_cmd += ['-e', 'SND_HDA_CODEC_REALTEK']
+            for val in realtek_cfgs:
+                sc_cmd += ['-m', val]
         lib.utils.run(sc_cmd)
 
         # Step 2: Run olddefconfig

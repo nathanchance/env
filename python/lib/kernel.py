@@ -5,6 +5,7 @@
 import email
 import os
 from pathlib import Path
+import re
 import shutil
 from subprocess import CalledProcessError
 import sys
@@ -156,6 +157,13 @@ def prepare_source(base_name, base_ref='origin/master'):
         lib.utils.call_git(source_folder, 'ama', check=False)
         print(f"\n[FAILED] {' '.join(err.cmd)}")
         sys.exit(err.returncode)
+
+
+def get_new_realtek_audio_cfgs(source_folder):
+    if (realtek_kconfig := Path(source_folder, 'sound/hda/codecs/realtek/Kconfig')).exists():
+        return re.findall(r'config (\w+)\n\s+tristate "',
+                          realtek_kconfig.read_text(encoding='utf-8'))
+    return []
 
 
 # Basically '$binary --version | head -1'
