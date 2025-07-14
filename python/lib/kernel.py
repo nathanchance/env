@@ -101,6 +101,8 @@ def prepare_source(base_name, base_ref='origin/master'):
     # yapf: disable
     if base_name == 'fedora':
         patches.append('https://git.kernel.org/kvmarm/kvmarm/p/2265c08ec393ef1f5ef5019add0ab1e3a7ee0b79')  # KVM: arm64: Fix enforcement of upper bound on MDCR_EL2.HPMN
+
+        patches.append('https://lore.kernel.org/all/20250714101515.GCaHTYs-tZIBxGNfdf@fat_crate.local/raw')  # Fix for -Wsometimes-uninitialized in drivers/edac/synopsys_edac.c
     if base_name == 'linux-mainline-llvm':
         patches.append('https://lore.kernel.org/all/20250708222530.1041477-1-himanshu.madhani@oracle.com/')  # PCI/THP: Fix hang due to incorrect guard lock
     # yapf: enable
