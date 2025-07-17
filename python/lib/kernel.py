@@ -104,18 +104,17 @@ def prepare_source(base_name, base_ref='origin/master'):
         patches.append('https://git.kernel.org/kvmarm/kvmarm/p/2265c08ec393ef1f5ef5019add0ab1e3a7ee0b79')  # KVM: arm64: Fix enforcement of upper bound on MDCR_EL2.HPMN
 
     # New clang-21 warnings
-    patches.append('https://lore.kernel.org/all/20250715-ksm-fix-clang-21-uninit-warning-v1-1-f443feb4bfc4@kernel.org/')  # mm/ksm: Fix -Wsometimes-uninitialized from clang-21 in advisor_mode_show()
+    if base_name == 'linux-mainline-llvm':
+        patches.append('https://lore.kernel.org/all/20250715-ksm-fix-clang-21-uninit-warning-v1-1-f443feb4bfc4@kernel.org/')  # mm/ksm: Fix -Wsometimes-uninitialized from clang-21 in advisor_mode_show()
+        patches.append('https://lore.kernel.org/all/20250715-memstick-fix-uninit-const-pointer-v1-1-f6753829c27a@kernel.org/')  # memstick: core: Zero initialize id_reg in h_memstick_read_dev_id()
     patches.append('https://lore.kernel.org/all/20250715-brcmsmac-fix-uninit-const-pointer-v1-1-16e6a51a8ef4@kernel.org/')  # wifi: brcmsmac: Remove const from tbl_ptr parameter in wlc_lcnphy_common_read_table()
     patches.append('https://lore.kernel.org/all/20250715-usb-cxacru-fix-clang-21-uninit-warning-v1-1-de6c652c3079@kernel.org/')  # usb: atm: cxacru: Zero initialize bp in cxacru_heavy_init()
     patches.append('https://lore.kernel.org/all/20250715-mt7996-fix-uninit-const-pointer-v1-1-b5d8d11d7b78@kernel.org/')  # wifi: mt76: mt7996: Initialize hdr before passing to skb_put_data()
     patches.append('https://lore.kernel.org/all/20250715-trace_probe-fix-const-uninit-warning-v1-1-98960f91dd04@kernel.org/')  # tracing/probes: Avoid using params uninitialized in parse_btf_arg()
     patches.append('https://lore.kernel.org/all/20250715-net-phonet-fix-uninit-const-pointer-v1-1-8efd1bd188b3@kernel.org/')  # phonet/pep: Move call to pn_skb_get_dst_sockaddr() earlier in pep_sock_accept()
-    patches.append('https://lore.kernel.org/all/20250715-memstick-fix-uninit-const-pointer-v1-1-f6753829c27a@kernel.org/')  # memstick: core: Zero initialize id_reg in h_memstick_read_dev_id()
     patches.append('https://lore.kernel.org/all/20250715-drm-amdgpu-fix-const-uninit-warning-v1-1-9683661f3197@kernel.org/')  # drm/amdgpu: Initialize data to NULL in imu_v12_0_program_rlc_ram()
     if base_name == 'fedora':
         patches.append('https://lore.kernel.org/all/20250715-drm-msm-fix-const-uninit-warning-v1-1-d6a366fd9a32@kernel.org/')  # drm/msm/dpu: Initialize crtc_state to NULL in dpu_plane_virtual_atomic_check()
-    if base_name == 'linux-next-llvm':
-        patches.append('https://lore.kernel.org/all/20250715-sdca_interrupts-fix-const-uninit-warning-v1-1-cc031c913499@kernel.org/')  # ASoC: SDCA: Fix uninitialized use of name in sdca_irq_populate()
     # yapf: enable
 
     try:
