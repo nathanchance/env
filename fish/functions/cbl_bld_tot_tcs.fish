@@ -138,6 +138,10 @@ function cbl_bld_tot_tcs -d "Build LLVM and binutils from source for kernel deve
     end
 
     # Add patches to revert here
+    # https://github.com/llvm/llvm-project/pull/145878#issuecomment-3084401504
+    set -a reverts https://github.com/llvm/llvm-project/commit/c0b82df5f3484870d3728156da7d7e3720ef53ad # [MachinePipeliner] Add validation for missed loop-carried memory deps (#145878)
+    # https://github.com/llvm/llvm-project/pull/143667#issuecomment-3084709817
+    set -a reverts https://github.com/llvm/llvm-project/commit/9e5470e7d6ea1ad4fe25a9416706d769e41a03c1 # [Clang] Diagnose forming references to nullptr (#143667)
     for revert in $reverts
         if string match -qr 'https?://' $revert
             set -l revert (path basename $revert)
