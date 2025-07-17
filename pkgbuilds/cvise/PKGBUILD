@@ -63,5 +63,5 @@ package() {
   cd "$pkgname"
 
   make -C build DESTDIR="$pkgdir/" install
-  install -Dm644 COPYING "$pkgdir/usr/share/licenses/$pkgname/LICENSE"
+  install -Dm644 LICENSE "$pkgdir/usr/share/licenses/$pkgname/LICENSE"
 }
