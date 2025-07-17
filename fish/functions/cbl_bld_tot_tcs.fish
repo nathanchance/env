@@ -164,6 +164,30 @@ function cbl_bld_tot_tcs -d "Build LLVM and binutils from source for kernel deve
         tg_msg "$message"
         return 1
     end
+    # fixup for https://github.com/llvm/llvm-project/commit/d9e21a92a7b1b68bc61771c4a9320f879850ea90 with revert above
+    echo 'diff --git a/clang/lib/Basic/Targets/PPC.cpp b/clang/lib/Basic/Targets/PPC.cpp
+index a3e20d50dea7..72c1d109b2ea 100644
+--- a/clang/lib/Basic/Targets/PPC.cpp
++++ b/clang/lib/Basic/Targets/PPC.cpp
+@@ -724,7 +724,10 @@ void PPCTargetInfo::addP11SpecificFeatures(
+ 
+ // Add features specific to the "Future" CPU.
+ void PPCTargetInfo::addFutureSpecificFeatures(
+-    llvm::StringMap<bool> &Features) const {}
++    llvm::StringMap<bool> &Features) const {
++  Features["mma"] = true;
++  Features["isa-future-instructions"] = true;
++}
+ 
+ bool PPCTargetInfo::hasFeature(StringRef Feature) const {
+   return llvm::StringSwitch<bool>(Feature)
+' | git -C $llvm_project ap
+    or begin
+        set message "Failed to apply fixup of revert of bf79d4819edeb54c6cf528db63676110992908a8"
+        print_error "$message"
+        tg_msg "$message"
+        return 1
+    end
 
     # Add in-review patches here
     for gh_pr in $gh_prs
