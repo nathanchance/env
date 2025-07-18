@@ -138,8 +138,6 @@ function cbl_bld_tot_tcs -d "Build LLVM and binutils from source for kernel deve
     end
 
     # Add patches to revert here
-    # https://github.com/llvm/llvm-project/pull/145878#issuecomment-3084401504
-    set -a reverts https://github.com/llvm/llvm-project/commit/c0b82df5f3484870d3728156da7d7e3720ef53ad # [MachinePipeliner] Add validation for missed loop-carried memory deps (#145878)
     # https://github.com/llvm/llvm-project/pull/143667#issuecomment-3084709817
     set -a reverts https://github.com/llvm/llvm-project/commit/9e5470e7d6ea1ad4fe25a9416706d769e41a03c1 # [Clang] Diagnose forming references to nullptr (#143667)
     for revert in $reverts
@@ -194,6 +192,7 @@ index a3e20d50dea7..72c1d109b2ea 100644
     end
 
     # Add in-review patches here
+    set -a gh_prs https://github.com/llvm/llvm-project/pull/149436 # [MachinePipeliner] Fix incorrect dependency direction
     for gh_pr in $gh_prs
         if gh_llvm pr view --json state (path basename $gh_pr) | python3 -c "import json, sys; sys.exit(0 if json.load(sys.stdin)['state'] == 'MERGED' else 1)"
             print_warning "$gh_pr has already been merged, skipping..."
