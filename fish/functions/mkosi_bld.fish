@@ -40,7 +40,7 @@ function mkosi_bld -d "Build a distribution using mkosi"
             pip install git+https://github.com/systemd/mkosi
             or return
 
-            crl https://github.com/nathanchance/patches/raw/refs/heads/main/mkosi/buster-security.patch | patch -d $venv_dir/lib/python*/site-packages -N -p1
+            crl https://github.com/nathanchance/patches/raw/refs/heads/main/mkosi/buster.patch | patch -d $venv_dir/lib/python*/site-packages -N -p1
         end
     else if test (path basename $VIRTUAL_ENV) != mkosi
         print_error "Already in a virtual environment?"
