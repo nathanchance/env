@@ -138,8 +138,6 @@ function cbl_bld_tot_tcs -d "Build LLVM and binutils from source for kernel deve
     end
 
     # Add patches to revert here
-    # https://github.com/llvm/llvm-project/pull/143667#issuecomment-3084709817
-    set -a reverts https://github.com/llvm/llvm-project/commit/9e5470e7d6ea1ad4fe25a9416706d769e41a03c1 # [Clang] Diagnose forming references to nullptr (#143667)
     for revert in $reverts
         if string match -qr 'https?://' $revert
             set -l revert (path basename $revert)
@@ -186,6 +184,14 @@ index a3e20d50dea7..72c1d109b2ea 100644
 ' | git -C $llvm_project ap
     or begin
         set message "Failed to apply fixup of revert of bf79d4819edeb54c6cf528db63676110992908a8"
+        print_error "$message"
+        tg_msg "$message"
+        return 1
+    end
+    # https://github.com/llvm/llvm-project/pull/143667#issuecomment-3084709817
+    crl https://github.com/nathanchance/llvm-project/commit/960c0d36104dbbb4e1631f31fdeb0dd5e29989cc.patch | git -C $llvm_project ap
+    or begin
+        set message "Failed to apply revert of 9e5470e7d6ea1ad4fe25a9416706d769e41a03c1"
         print_error "$message"
         tg_msg "$message"
         return 1
