@@ -188,17 +188,10 @@ index a3e20d50dea7..72c1d109b2ea 100644
         tg_msg "$message"
         return 1
     end
-    # https://github.com/llvm/llvm-project/pull/143667#issuecomment-3084709817
-    crl https://github.com/nathanchance/llvm-project/commit/960c0d36104dbbb4e1631f31fdeb0dd5e29989cc.patch | git -C $llvm_project ap
-    or begin
-        set message "Failed to apply revert of 9e5470e7d6ea1ad4fe25a9416706d769e41a03c1"
-        print_error "$message"
-        tg_msg "$message"
-        return 1
-    end
 
     # Add in-review patches here
     set -a gh_prs https://github.com/llvm/llvm-project/pull/149436 # [MachinePipeliner] Fix incorrect dependency direction
+    set -a gh_prs https://github.com/llvm/llvm-project/pull/149648 # [Clang] Be less strict about diagnosing null pointer dereference.
     for gh_pr in $gh_prs
         if gh_llvm pr view --json state (path basename $gh_pr) | python3 -c "import json, sys; sys.exit(0 if json.load(sys.stdin)['state'] == 'MERGED' else 1)"
             print_warning "$gh_pr has already been merged, skipping..."
