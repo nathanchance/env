@@ -107,7 +107,7 @@ def prepare_source(base_name, base_ref='origin/master'):
         patches.append('https://git.kernel.org/wireless/wireless-next/p/81284e86bf8849f8e98e8ead3ff5811926b2107f')  # wifi: brcmsmac: Remove const from tbl_ptr parameter in wlc_lcnphy_common_read_table()
     patches.append('https://lore.kernel.org/all/20250715-mt7996-fix-uninit-const-pointer-v1-1-b5d8d11d7b78@kernel.org/')  # wifi: mt76: mt7996: Initialize hdr before passing to skb_put_data()
     patches.append('https://lore.kernel.org/all/20250715-drm-amdgpu-fix-const-uninit-warning-v1-1-9683661f3197@kernel.org/')  # drm/amdgpu: Initialize data to NULL in imu_v12_0_program_rlc_ram()
-    patches.append('https://lore.kernel.org/all/20250715-usb-cxacru-fix-clang-21-uninit-warning-v1-1-de6c652c3079@kernel.org/')  # usb: atm: cxacru: Zero initialize bp in cxacru_heavy_init()
+    patches.append('https://lore.kernel.org/all/20250722-usb-cxacru-fix-clang-21-uninit-warning-v2-1-6708a18decd2@kernel.org/')  # usb: atm: cxacru: Merge cxacru_upload_firmware() into cxacru_heavy_init()
     if base_name == 'fedora':
         patches.append('https://lore.kernel.org/all/20250715-drm-msm-fix-const-uninit-warning-v1-1-d6a366fd9a32@kernel.org/')  # drm/msm/dpu: Initialize crtc_state to NULL in dpu_plane_virtual_atomic_check()
     # yapf: enable
