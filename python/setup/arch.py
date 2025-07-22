@@ -167,6 +167,7 @@ def configure_networking():
         'asus-intel-core-11700': '192.168.1.248',
         'beelink-amd-ryzen-8745HS': '192.168.1.242',
         'beelink-intel-n100': '192.168.1.231',
+        'msi-intel-core-10210U': '192.168.1.55',
         # 'thelio-3990X': '192.168.4.188',
     }
 

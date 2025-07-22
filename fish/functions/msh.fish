@@ -56,6 +56,14 @@ function msh -d "Shorthand for mosh -o" -w mosh
             end
             set user_host nathan@$host
 
+        case intel-laptop
+            if test "$tailscale" = true
+                set host msi-intel-core-10210U
+            else
+                set host 192.168.1.55
+            end
+            set user_host nathan@$host
+
             # case thelio
             #     if test "$tailscale" = true
             #         set host thelio-3990x

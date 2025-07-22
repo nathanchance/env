@@ -21,14 +21,6 @@ function sd_boot_kernel -d "Boot a kernel via full reboot or kexec using systemd
         return 1
     end
 
-    if test $reboot = kexec
-        switch $LOCATION
-            case test-laptop-intel
-                print_warning "kexec is not safe on this platform, switching to full reboot..."
-                set reboot reboot
-        end
-    end
-
     sudo true
     or return
 
