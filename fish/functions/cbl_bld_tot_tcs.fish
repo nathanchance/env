@@ -138,6 +138,8 @@ function cbl_bld_tot_tcs -d "Build LLVM and binutils from source for kernel deve
     end
 
     # Add patches to revert here
+    # https://lore.kernel.org/20250724000219.GA2976491@ax162/
+    set -a reverts https://github.com/llvm/llvm-project/commit/9878ef3abd2a48fcfb81357d581dac292b52ddb3 # CodeGen: Respect function align attribute if less than preferred alignment.
     for revert in $reverts
         if string match -qr 'https?://' $revert
             set -l revert (path basename $revert)
