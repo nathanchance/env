@@ -105,11 +105,13 @@ def prepare_source(base_name, base_ref='origin/master'):
     if base_name == 'linux-mainline-llvm':
         patches.append('https://git.kernel.org/akpm/mm/p/6042781842cd0525546fd62ebde93a5a29267f2e')  # mm/ksm: Fix -Wsometimes-uninitialized from clang-21 in advisor_mode_show()
         patches.append('https://git.kernel.org/wireless/wireless-next/p/81284e86bf8849f8e98e8ead3ff5811926b2107f')  # wifi: brcmsmac: Remove const from tbl_ptr parameter in wlc_lcnphy_common_read_table()
+        patches.append('https://git.kernel.org/gregkh/usb/p/8d1b02e5d7e3a6d2acffb1f4c094678fda9e3456')  # usb: atm: cxacru: Merge cxacru_upload_firmware() into cxacru_heavy_init()
     patches.append('https://lore.kernel.org/all/20250715-mt7996-fix-uninit-const-pointer-v1-1-b5d8d11d7b78@kernel.org/')  # wifi: mt76: mt7996: Initialize hdr before passing to skb_put_data()
     patches.append('https://lore.kernel.org/all/20250715-drm-amdgpu-fix-const-uninit-warning-v1-1-9683661f3197@kernel.org/')  # drm/amdgpu: Initialize data to NULL in imu_v12_0_program_rlc_ram()
-    patches.append('https://lore.kernel.org/all/20250722-usb-cxacru-fix-clang-21-uninit-warning-v2-1-6708a18decd2@kernel.org/')  # usb: atm: cxacru: Merge cxacru_upload_firmware() into cxacru_heavy_init()
     if base_name == 'fedora':
         patches.append('https://lore.kernel.org/all/20250715-drm-msm-fix-const-uninit-warning-v1-1-d6a366fd9a32@kernel.org/')  # drm/msm/dpu: Initialize crtc_state to NULL in dpu_plane_virtual_atomic_check()
+    if base_name in NEXT_TREES:
+        patches.append('https://lore.kernel.org/all/20250725083635.73355-1-jasowang@redhat.com/')  # virtio_ring: fix uninitialized used value
     # yapf: enable
 
     try:
