@@ -192,8 +192,6 @@ index a3e20d50dea7..72c1d109b2ea 100644
     end
 
     # Add in-review patches here
-    set -a gh_prs https://github.com/llvm/llvm-project/pull/149436 # [MachinePipeliner] Fix incorrect dependency direction
-    set -a gh_prs https://github.com/llvm/llvm-project/pull/149648 # [Clang] Be less strict about diagnosing null pointer dereference.
     for gh_pr in $gh_prs
         if gh_llvm pr view --json state (path basename $gh_pr) | python3 -c "import json, sys; sys.exit(0 if json.load(sys.stdin)['state'] == 'MERGED' else 1)"
             print_warning "$gh_pr has already been merged, skipping..."
