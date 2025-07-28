@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: MIT
 # Copyright (C) 2025 Nathan Chancellor
 
-function prep_bisect -d "Prepare for an automated bisect"
+function cbl_prep_bisect -d "Prepare for an automated bisect"
     if test (count $argv) -ne 1
         print_error (status function)" <bisect_type>"
         return 1
