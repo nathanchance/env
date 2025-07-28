@@ -160,40 +160,10 @@ function cbl_bld_tot_tcs -d "Build LLVM and binutils from source for kernel deve
             end
         end
     end
-    # https://github.com/llvm/llvm-project/pull/144594#issuecomment-2993736654
-    crl https://github.com/nathanchance/llvm-project/commit/5299a5e550ef7ad31db5147dd417bb58881e3d7f.patch | git -C $llvm_project ap
-    or begin
-        set message "Failed to apply revert of bf79d4819edeb54c6cf528db63676110992908a8"
-        print_error "$message"
-        tg_msg "$message"
-        return 1
-    end
-    # fixup for https://github.com/llvm/llvm-project/commit/d9e21a92a7b1b68bc61771c4a9320f879850ea90 with revert above
-    echo 'diff --git a/clang/lib/Basic/Targets/PPC.cpp b/clang/lib/Basic/Targets/PPC.cpp
-index a3e20d50dea7..72c1d109b2ea 100644
---- a/clang/lib/Basic/Targets/PPC.cpp
-+++ b/clang/lib/Basic/Targets/PPC.cpp
-@@ -724,7 +724,10 @@ void PPCTargetInfo::addP11SpecificFeatures(
- 
- // Add features specific to the "Future" CPU.
- void PPCTargetInfo::addFutureSpecificFeatures(
--    llvm::StringMap<bool> &Features) const {}
-+    llvm::StringMap<bool> &Features) const {
-+  Features["mma"] = true;
-+  Features["isa-future-instructions"] = true;
-+}
- 
- bool PPCTargetInfo::hasFeature(StringRef Feature) const {
-   return llvm::StringSwitch<bool>(Feature)
-' | git -C $llvm_project ap
-    or begin
-        set message "Failed to apply fixup of revert of bf79d4819edeb54c6cf528db63676110992908a8"
-        print_error "$message"
-        tg_msg "$message"
-        return 1
-    end
 
     # Add in-review patches here
+    # https://github.com/llvm/llvm-project/pull/144594#issuecomment-2993736654
+    set -a gh_prs https://github.com/llvm/llvm-project/pull/151017 #  [PowerPC] need to set CallFrameSize for the pass  PPCReduceCRLogicals when insert a new block
     for gh_pr in $gh_prs
         if gh_llvm pr view --json state (path basename $gh_pr) | python3 -c "import json, sys; sys.exit(0 if json.load(sys.stdin)['state'] == 'MERGED' else 1)"
             print_warning "$gh_pr has already been merged, skipping..."
