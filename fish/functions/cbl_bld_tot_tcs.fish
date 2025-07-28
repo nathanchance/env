@@ -140,8 +140,6 @@ function cbl_bld_tot_tcs -d "Build LLVM and binutils from source for kernel deve
     # Add patches to revert here
     # https://lore.kernel.org/20250724000219.GA2976491@ax162/
     set -a reverts https://github.com/llvm/llvm-project/commit/9878ef3abd2a48fcfb81357d581dac292b52ddb3 # CodeGen: Respect function align attribute if less than preferred alignment.
-    # https://github.com/llvm/llvm-project/pull/147824#issuecomment-3124670997
-    set -a reverts https://github.com/llvm/llvm-project/commit/e21ee41be450f849f5247aafa07d7f4c3941bb9d # [SCEV] Try to re-use pointer LCSSA phis when expanding SCEVs. (#147824)
     for revert in $reverts
         if string match -qr 'https?://' $revert
             set -l revert (path basename $revert)
