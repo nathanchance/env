@@ -28,4 +28,11 @@ function cbl_patch_llvm -d "Apply fixes for known problems from newer environmen
     if not $git merge-base --is-ancestor 2222fddfc0a2ff02036542511597839856289094 $sha
         sed -i '/#include <memory>/i #include <cstdint>' $llvm_src/llvm/lib/Target/X86/MCTargetDesc/X86MCTargetDesc.h
     end
+
+    # https://github.com/llvm/llvm-project/issues/100296
+    if $git merge-base --is-ancestor d38c8a7a51227fecdb1f84160f5da4f89c3e25be $sha
+        and not $git merge-base --is-ancestor 40b4fd7a3e81d32b29364a1b15337bcf817659c0 $sha
+        $git cherry-pick -n 40b4fd7a3e81d32b29364a1b15337bcf817659c0
+        or return 128
+    end
 end
