@@ -80,6 +80,9 @@ class KernelPkgBuilder:
             sc_cmd += ['-e', 'SND_HDA_CODEC_REALTEK']
             for val in realtek_cfgs:
                 sc_cmd += ['-m', val]
+        # Handle https://git.kernel.org/linus/9fce66583f06c212e95e4b76dd61d8432ffa56b6
+        # until Arch is up to date with 6.18
+        sc_cmd += ['-e', 'NETFILTER_XTABLES_LEGACY']
         lib.utils.run(sc_cmd)
 
         # Step 2: Run olddefconfig

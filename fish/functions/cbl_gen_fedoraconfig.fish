@@ -72,6 +72,8 @@ for val in kernel.get_new_realtek_audio_cfgs(Path.cwd()):
             set -a scripts_config_args -m $val
         end
     end
+    # https://git.kernel.org/linus/9fce66583f06c212e95e4b76dd61d8432ffa56b6
+    set -a scripts_config_args -e NETFILTER_XTABLES_LEGACY
 
     set out (tbf)
     set cfg $out/.config
