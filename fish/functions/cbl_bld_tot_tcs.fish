@@ -266,31 +266,49 @@ index 11d0e9992992..000000000000
             end
 
             set lsm_location (command grep -F 'lsm.location = Path(src_folder,' $tc_bld/build-llvm.py | string trim)
-            timeout 24h env PYTHONPATH=$tc_bld python3 -c "from pathlib import Path
+            timeout 24h env PYTHONPATH=$tc_bld:$CBL_LKT python3 -c "from os import environ as e
+from pathlib import Path
 
+import lkt.source
+from lkt.runner import Folders
+from lkt.x86_64 import X8664LLVMKernelRunner
+
+import tc_build.kernel
 import tc_build.utils
-
-from tc_build.kernel import LinuxSourceManager, LLVMKernelBuilder
 from tc_build.llvm import LLVMSourceManager
 
 src_folder = Path('$tc_bld/src')
 
-lsm = LinuxSourceManager()
-$lsm_location
-lsm.patches = list(src_folder.glob('*.patch'))
-lsm.tarball.base_download_url = 'https://git.kernel.org/torvalds/t'
-lsm.tarball.local_location = lsm.location.with_name(f'{lsm.location.name}.tar.gz')
+tcb_lsm = tc_build.kernel.LinuxSourceManager()
+tcb_$lsm_location
+tcb_lsm.patches = list(src_folder.glob('*.patch'))
+tcb_lsm.tarball.base_download_url = 'https://git.kernel.org/torvalds/t'
+tcb_lsm.tarball.local_location = tcb_lsm.location.with_name(f'{tcb_lsm.location.name}.tar.gz')
 
 tc_build.utils.print_header('Preparing Linux source for profiling runs')
-lsm.prepare()
+tcb_lsm.prepare()
 
-kernel_builder = LLVMKernelBuilder()
-kernel_builder.folders.build = Path('$llvm_bld/linux')
-kernel_builder.folders.source = lsm.location
+folders = Folders()
+folders.source = tcb_lsm.location
+folders.build = Path('$llvm_bld/linux')
+folders.log = Path(e['CBL_LOGS'], 'cbl_bld_tot_tcs')
+
+runner = X8664LLVMKernelRunner()
+runner.configs = [Path(e['CBL_LKT'], 'configs/archlinux/x86_64.config')]
+runner.folders = folders
+runner.lsm = lkt.source.LinuxSourceManager(folders.source)
+runner.make_vars['ARCH'] = 'x86_64'
+
+kernel_builder = tc_build.kernel.LLVMKernelBuilder()
+kernel_builder.folders.build = folders.build
+kernel_builder.folders.source = folders.source
 kernel_builder.matrix = {
 $validate_targets
 }
 kernel_builder.toolchain_prefix = Path('$llvm_bld/final')
+
+folders.log.mkdir(parents=True, exist_ok=True)
+runner.run()
 kernel_builder.build()"
             switch $status
                 case 0 # ok
