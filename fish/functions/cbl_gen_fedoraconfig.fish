@@ -61,17 +61,6 @@ function cbl_gen_fedoraconfig -d "Downloads and modifies Fedora's kernel configu
     if contains LTO_CLANG_THIN $scripts_config_args; and git merge-base --is-ancestor 6ee149f61bcce39692f0335a01e99355d4cec8da HEAD
         set -a scripts_config_args -d FORTIFY_KUNIT_TEST
     end
-    # https://git.kernel.org/tiwai/sound/c/aeeb85f26c3bbef6f702ac20167c45812251501d
-    set realtek_vals (PYTHONPATH=$PYTHON_LIB_FOLDER python3 -c 'import kernel
-from pathlib import Path
-for val in kernel.get_new_realtek_audio_cfgs(Path.cwd()):
-    print(val)')
-    if test (count $realtek_vals) -gt 0
-        set -a scripts_config_args -e SND_HDA_CODEC_REALTEK
-        for val in $realtek_vals
-            set -a scripts_config_args -m $val
-        end
-    end
     # https://git.kernel.org/linus/9fce66583f06c212e95e4b76dd61d8432ffa56b6
     set -a scripts_config_args -e NETFILTER_XTABLES_LEGACY
 
