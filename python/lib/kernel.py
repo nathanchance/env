@@ -108,8 +108,6 @@ def prepare_source(base_name, base_ref='origin/master'):
     patches.append('https://lore.kernel.org/all/20250715-mt7996-fix-uninit-const-pointer-v1-1-b5d8d11d7b78@kernel.org/')  # wifi: mt76: mt7996: Initialize hdr before passing to skb_put_data()
     if base_name == 'fedora':
         patches.append('https://lore.kernel.org/all/20250715-drm-msm-fix-const-uninit-warning-v1-1-d6a366fd9a32@kernel.org/')  # drm/msm/dpu: Initialize crtc_state to NULL in dpu_plane_virtual_atomic_check()
-    if base_name in NEXT_TREES:
-        commits.append('5bfd9f10c127629ac57cc7199558025b3270946b')   # FROMGIT: bcachefs cleanup fixup
     # yapf: enable
 
     try:
