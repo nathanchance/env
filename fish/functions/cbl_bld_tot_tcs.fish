@@ -138,8 +138,6 @@ function cbl_bld_tot_tcs -d "Build LLVM and binutils from source for kernel deve
     end
 
     # Add patches to revert here
-    # https://github.com/llvm/llvm-project/pull/134408#issuecomment-3145468321
-    set -a reverts https://github.com/llvm/llvm-project/commit/bae8f1336db6a7f3288a7dcf253f2d484743b257 # Reland "RegisterCoalescer: Add implicit-def of super register when coalescing SUBREG_TO_REG" (#134408)
     for revert in $reverts
         if string match -qr 'https?://' $revert
             set -l revert (path basename $revert)
