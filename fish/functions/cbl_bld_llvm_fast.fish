@@ -22,10 +22,14 @@ function cbl_bld_llvm_fast -d "Quickly build a version of LLVM"
         set bld_folder (tbf)
     end
 
-    cbl_clone_repo tc-build
-    or return
+    if not set -q tc_bld
+        cbl_clone_repo tc-build
+        or return
 
-    $CBL_GIT/tc-build/build-llvm.py \
+        set tc_bld $CBL_GIT/tc-build
+    end
+
+    $tc_bld/build-llvm.py \
         --assertions \
         --build-folder $bld_folder \
         --build-stage1-only \
