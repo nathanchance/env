@@ -159,6 +159,7 @@ function git_aliases -d "Configure git aliases"
     git config --global alias.li '!f() { fish -c "git-forgit log $*"; }; f'
     git config --global alias.ri '!f() { fish -c "git-forgit checkout_file $*"; }; f'
     git config --global alias.rbii '!f() { fish -c "git-forgit rebase $*"; }; f'
+    git config --global alias.shi '!f() { fish -c "git-forgit show $*"; }; f'
     git config --global alias.rvi '!f() { fish -c "git-forgit revert_commit $*"; }; f'
     git config --global alias.st '!f() { fish -c "git-forgit stash_show $*"; }; f'
     git config --global alias.us '!f() { fish -c "git-forgit reset_head $*"; }; f'
