@@ -64,7 +64,9 @@ function cbl_gen_fedoraconfig -d "Downloads and modifies Fedora's kernel configu
     # https://git.kernel.org/linus/9fce66583f06c212e95e4b76dd61d8432ffa56b6
     set -a scripts_config_args -e NETFILTER_XTABLES_LEGACY
 
-    set out (tbf)
+    if not set -q out
+        set out (tbf)
+    end
     set cfg $out/.config
 
     remkdir $out

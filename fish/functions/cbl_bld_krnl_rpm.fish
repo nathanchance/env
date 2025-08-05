@@ -47,6 +47,10 @@ function cbl_bld_krnl_rpm -d "Build a .rpm kernel package"
         end
     end
 
+    if not set -q out
+        set out (tbf)
+    end
+
     if test "$config" != false
         cbl_gen_fedoraconfig $gen_config_args $arch
     end
@@ -60,8 +64,6 @@ function cbl_bld_krnl_rpm -d "Build a .rpm kernel package"
             set -a kmake_args LLVM=1
         end
     end
-
-    set out (tbf)
 
     set rpmopts '--without devel'
     # /, which includes /var/tmp, is idmapped, which breaks writing to it with our user, so use /tmp.
