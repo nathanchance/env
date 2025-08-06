@@ -13,9 +13,9 @@ function wezterm_open_remotes -d "Open a new wezterm tab for each remote machine
         aadp:AADP \
         intel-desktop-11700:"Intel i7-11700" \
         amd-desktop-8745HS:"AMD mini desktop" \
-        intel-desktop-n100:"Intel mini desktop" \
         intel-laptop:"Intel laptop" \
-        honeycomb:Honeycomb
+        honeycomb:Honeycomb \
+        intel-desktop-n100:"Intel mini desktop"
 
     set msh_args $argv
 
