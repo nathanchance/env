@@ -43,4 +43,7 @@ function lei_setup -d "Sets up local email interface for Linux kernel mailing li
     or return
 
     lei q -I https://lore.kernel.org/all/ -o $MAIL_FOLDER/kvmarm --dedupe=mid "(l:kvmarm@lists.cs.columbia.edu OR l:kvmarm@lists.linux.dev) AND rt:1.week.ago.."
+    or return
+
+    lei q -I https://lore.kernel.org/all/ -o $MAIL_FOLDER/kbuild --dedupe=mid "l:linux-kbuild.vger.kernel.org AND rt:2.week.ago.."
 end
