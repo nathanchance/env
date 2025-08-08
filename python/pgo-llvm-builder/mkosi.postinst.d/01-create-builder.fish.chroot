@@ -1,6 +1,6 @@
 #!/usr/bin/env fish
 # Description: Create a builder account with the same UID as the user on the host for idmapping
 
-useradd -m -u 1000 -U builder
+useradd -m -u $PYTHON_PGO_BUILDER_UID -U builder
 # ensure that git works in container at /llvm for git information in LLVM version string
 su builder -c 'git config --global --add safe.directory /llvm'
