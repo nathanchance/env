@@ -8,7 +8,13 @@ function cbl_prep_bisect -d "Prepare for an automated bisect"
         return 1
     end
 
-    set -g bisect_script (mktemp --suffix=.fish -p $CBL_MISC/repro-scripts)
+    set repro_scripts $CBL_MISC/repro-scripts
+    if not test -e $repro_scripts
+        mkdir -p (path dirname $repro_scripts)
+        git clone https://github.com/nathanchance/repro-scripts $repro_scripts
+    end
+
+    set -g bisect_script (mktemp --suffix=.fish -p $repro_scripts)
     chmod +x $bisect_script
 
     switch $argv[1]
