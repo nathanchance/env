@@ -143,6 +143,16 @@ def install_initial_packages():
     dnf_install(['dnf-plugins-core'])
 
 
+def install_local_packages(package_names):
+    packages_dir = Path(lib.setup.get_env_root(), 'bin/packages')
+
+    package_files = []
+    for package in package_names:
+        package_files += list(packages_dir.glob(f"{package}-*.rpm"))
+
+    dnf_install(package_files)
+
+
 def install_packages():
     fedora_version = get_fedora_version()
     packages = [
@@ -223,6 +233,10 @@ def install_packages():
         packages.append('ipmitool')
 
     dnf_install(packages)
+
+    # Install local packages
+    local_packages = ('modprobed-db', )
+    install_local_packages(local_packages)
 
 
 def setup_doas(username):
