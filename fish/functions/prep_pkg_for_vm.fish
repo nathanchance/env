@@ -24,7 +24,7 @@ function prep_pkg_for_vm -d "Prepare package building files for virtual machine 
         set package_dirs $ENV_FOLDER/pkgbuilds/$package $SRC_FOLDER/packaging/pkg/$package
     end
     if string match -qr fedora $vm
-        set package_dirs $SRC_FOLDER/packaging/rpm/$package
+        set package_dirs $ENV_FOLDER/specs/$package $SRC_FOLDER/packaging/rpm/$package
     end
     for item in $package_dirs
         if test -d $item
