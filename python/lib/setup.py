@@ -511,7 +511,11 @@ def setup_virtiofs_automount(mountpoint='/mnt/host'):
     host_kernel_ver = tuple(map(int, platform.uname().release.split('-', 1)[0].split('.')))
     if host_kernel_ver >= (6, 9, 0):
         tag_sysfs = list(Path('/sys/fs/virtiofs').glob('*/tag'))
-        if len(tag_sysfs) != 1:
+        if len(tag_sysfs) == 0:
+            lib.utils.print_yellow(
+                'Virtual machine has no virtiofs mounts, skipping setting up automounting...')
+            return
+        if len(tag_sysfs) > 1:
             raise RuntimeError('Multiple virtiofs tags found?')
         tag = tag_sysfs[0].read_text(encoding='utf-8').strip()
     else:
