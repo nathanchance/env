@@ -15,7 +15,8 @@ function mkosi_bld -d "Build a distribution using mkosi"
     else
         set directory $ENV_FOLDER/mkosi/$image
     end
-    if not test -e $directory/mkosi.conf
+    set mkosi_conf $directory/mkosi.conf
+    if not test -e $mkosi_conf
         print_error "No build files for $image?"
         return 1
     end
@@ -76,4 +77,14 @@ function mkosi_bld -d "Build a distribution using mkosi"
         --force \
         --package-cache-dir $mkosi_cache/$cache_dir \
         $mkosi_args
+
+    # selinux contexts may get messed up, fix them if necessary
+    if test -e /sys/fs/selinux; and test (cat /sys/fs/selinux/enforce) = 1
+        set machine_dir /var/lib/machines/(string match -gr '^ImageId=(.*)' <$mkosi_conf)
+        set context (sudo stat $machine_dir | string match -gr '^Context: (.*)$')
+        if test "$context" != "system_u:object_r:unlabeled_t:s0"; and test "$context" != "system_u:object_r:systemd_machined_var_lib_t:s0"
+            print_warning "$machine_dir context is unexpected ('$context'), running restorcecon..."
+            sudo restorecon -R $machine_dir
+        end
+    end
 end
