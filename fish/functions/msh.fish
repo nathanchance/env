@@ -17,7 +17,7 @@ function msh -d "Shorthand for mosh -o" -w mosh
             if test "$tailscale" = true
                 set host aadp
             else
-                set host 192.168.1.143
+                set host 10.0.1.143
             end
             set user_host nathan@$host
 
@@ -25,7 +25,7 @@ function msh -d "Shorthand for mosh -o" -w mosh
             if test "$tailscale" = true
                 set host beelink-amd-ryzen-8745hs
             else
-                set host 192.168.1.242
+                set host 10.0.1.242
             end
             set user_host nathan@$host
 
@@ -36,7 +36,7 @@ function msh -d "Shorthand for mosh -o" -w mosh
             if test "$tailscale" = true
                 set host honeycomb
             else
-                set host 192.168.1.243
+                set host 10.0.1.253
             end
             set user_host nathan@$host
 
@@ -44,7 +44,7 @@ function msh -d "Shorthand for mosh -o" -w mosh
             if test "$tailscale" = true
                 set host asus-intel-core-11700
             else
-                set host 192.168.1.248
+                set host 10.0.1.248
             end
             set user_host nathan@$host
 
@@ -52,7 +52,7 @@ function msh -d "Shorthand for mosh -o" -w mosh
             if test "$tailscale" = true
                 set host beelink-intel-n100
             else
-                set host 192.168.1.231
+                set host 10.0.1.231
             end
             set user_host nathan@$host
 
@@ -60,7 +60,7 @@ function msh -d "Shorthand for mosh -o" -w mosh
             if test "$tailscale" = true
                 set host msi-intel-core-10210U
             else
-                set host 192.168.1.55
+                set host 10.0.1.21
             end
             set user_host nathan@$host
 
@@ -68,7 +68,7 @@ function msh -d "Shorthand for mosh -o" -w mosh
             #     if test "$tailscale" = true
             #         set host thelio-3990x
             #     else
-            #         set host 192.168.4.188
+            #         set host
             #     end
             #     set user_host nathan@$host
 

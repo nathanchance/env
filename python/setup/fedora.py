@@ -21,8 +21,8 @@ def configure_networking():
     hostname = lib.setup.get_hostname()
 
     ips = {
-        'aadp': '192.168.1.143',
-        'honeycomb': '192.168.1.243',
+        'aadp': '10.0.1.143',
+        'honeycomb': '10.0.1.253',
     }
 
     if hostname not in ips:

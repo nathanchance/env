@@ -400,11 +400,8 @@ def remove_if_installed(package_to_remove):
 def set_ip_addr_for_intf(con_name, intf, ip_addr):
     nmcli_mod = ['nmcli', 'connection', 'modify', con_name]
 
-    if '192.168.4' in ip_addr:
-        gateway = '192.168.4.1'
-        local_dns = '192.168.0.1'
-    elif '192.168.1' in ip_addr:
-        gateway = local_dns = '192.168.1.1'
+    if '10.0.1' in ip_addr:
+        gateway = local_dns = '10.0.1.1'
     else:
         raise RuntimeError(f"{ip_addr} not supported by script!")
     dns = ['8.8.8.8', '8.8.4.4', '1.1.1.1', local_dns]
