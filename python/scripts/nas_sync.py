@@ -127,8 +127,8 @@ def download_items(targets, network_folder):
                 lib.utils.call_git_loud(repo_path, ['bundle', 'create', repo_bundle, '--all'])
 
         elif target == 'debian':
-            debian_arches = ['amd64', 'arm64', 'armhf', 'i386']
-            debian_ver = '12.7.0'
+            debian_arches = ['amd64', 'arm64', 'armhf']
+            debian_ver = '13.0.0'
 
             for arch in debian_arches:
                 arch_debian_folder = Path(firmware_folder, target.capitalize(), debian_ver, arch)
@@ -151,9 +151,9 @@ def download_items(targets, network_folder):
             subfolder = Path(firmware_folder, target.capitalize())
 
             # Constants to update
-            fedora_ver = '41'
-            server_iso_ver = '1.4'
-            workstation_iso_ver = '1.4'
+            fedora_ver = '42'
+            server_iso_ver = '1.1'
+            workstation_iso_ver = '1.1'
 
             # Base URLs
             base_fedora_url = f"https://mirrors.edge.kernel.org/fedora/releases/{fedora_ver}"
@@ -168,22 +168,12 @@ def download_items(targets, network_folder):
                         'sha_url': f"{iso_url}/Fedora-Server-{fedora_ver}-{server_iso_ver}-{arch}-CHECKSUM",
                     }]  # yapf: disable
 
-            # Download raw aarch64 Server image for Raspberry Pi
-            arch = 'aarch64'
-            raw_url = f"{base_fedora_url}/Server/{arch}/images"
-            items += [{
-                'containing_folder': Path(subfolder, fedora_ver, 'Server', arch),
-                'file_url': f"{raw_url}/Fedora-Server-{fedora_ver}-{server_iso_ver}.{arch}.raw.xz",
-                'sha_url': f"{raw_url}/Fedora-Server-{fedora_ver}-{server_iso_ver}-{arch}-CHECKSUM",
-            }]  # yapf: disable
-
-
             # Workstation
             for arch in fedora_arches:
                 iso_url = f"{base_fedora_url}/Workstation/{arch}/iso"
                 items += [{
                     'containing_folder': Path(subfolder, fedora_ver, 'Workstation', arch),
-                    'file_url': f"{iso_url}/Fedora-Workstation-Live-osb-{fedora_ver}-{workstation_iso_ver}.{arch}.iso",
+                    'file_url': f"{iso_url}/Fedora-Workstation-Live-{fedora_ver}-{workstation_iso_ver}.{arch}.iso",
                     'sha_url': f"{iso_url}/Fedora-Workstation-{fedora_ver}-{server_iso_ver}-{arch}-CHECKSUM",
                 }]  # yapf: disable
 
