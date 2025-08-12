@@ -104,6 +104,8 @@ def prepare_source(base_name, base_ref='origin/master'):
     patches.append('https://github.com/nbd168/wireless/commit/214e9e4d80cffd685daa108cb79f991e6ff25792.patch')  # wifi: mt76: mt7996: Initialize hdr before passing to skb_put_data()
     if base_name == 'fedora':
         patches.append('https://lore.kernel.org/all/20250715-drm-msm-fix-const-uninit-warning-v1-1-d6a366fd9a32@kernel.org/')  # drm/msm/dpu: Initialize crtc_state to NULL in dpu_plane_virtual_atomic_check()
+    if base_name in NEXT_TREES:
+        patches.append('https://lore.kernel.org/all/20250812-bcachefs-fix-switch-check_bch_counter_ids_unique-v1-1-def262fd6574@kernel.org/')  # bcachefs: Add statement to switch in check_bch_counter_ids_unique()
     # yapf: enable
 
     try:
