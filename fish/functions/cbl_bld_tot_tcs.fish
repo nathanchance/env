@@ -138,9 +138,6 @@ function cbl_bld_tot_tcs -d "Build LLVM and binutils from source for kernel deve
     end
 
     # Add patches to revert here
-    # https://github.com/llvm/llvm-project/pull/151639#issuecomment-3172332391
-    set -a reverts https://github.com/llvm/llvm-project/commit/d1827f040f6e056e62cf4158bdf90d0acdf3d287 # Add `REQUIRES: riscv` to test added in 151639 to skip the test when riscv is not built. (#152858)
-    set -a reverts https://github.com/llvm/llvm-project/commit/6f53f1c8d2bdd13e30da7d1b85ed6a3ae4c4a856 # [ELF] -r: Synthesize R_RISCV_ALIGN at input section start
     for revert in $reverts
         if string match -qr 'https?://' $revert
             set -l revert (path basename $revert)
