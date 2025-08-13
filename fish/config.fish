@@ -70,6 +70,15 @@ if command -q fd
 end
 
 if command -q zoxide; and status is-interactive
+    # Maintain separate databases for host and container so that
+    # there are not duplicate paths from /run/host/home and /home
+    set -l zo_cfg $HOME/.local/share/zoxide
+    if in_container
+        set -gx _ZO_DATA_DIR $zo_cfg/container
+    else
+        set -gx _ZO_DATA_DIR $zo_cfg/host
+    end
+
     zoxide init --hook prompt fish | source
 end
 
