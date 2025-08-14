@@ -202,8 +202,6 @@ index 11d0e9992992..000000000000
     end
 
     # Add in-review patches here
-    # https://github.com/llvm/llvm-project/pull/144594#issuecomment-2993736654
-    set -a gh_prs https://github.com/llvm/llvm-project/pull/151017 #  [PowerPC] need to set CallFrameSize for the pass  PPCReduceCRLogicals when insert a new block
     for gh_pr in $gh_prs
         if gh_llvm pr view --json state (path basename $gh_pr) | python3 -c "import json, sys; sys.exit(0 if json.load(sys.stdin)['state'] == 'MERGED' else 1)"
             print_warning "$gh_pr has already been merged, skipping..."
