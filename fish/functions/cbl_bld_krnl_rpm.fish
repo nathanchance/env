@@ -53,6 +53,7 @@ function cbl_bld_krnl_rpm -d "Build a .rpm kernel package"
 
     if test "$config" != false
         cbl_gen_fedoraconfig $gen_config_args $arch
+        or return
     end
 
     if set -q gcc
