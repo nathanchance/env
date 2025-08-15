@@ -120,7 +120,7 @@ complete -c b4 -n "__fish_seen_subcommand_from ty" -x -s b -l branch -d "The bra
 complete -c b4 -n "__fish_seen_subcommand_from ty" -f -l since -d "The --since option to use when auto-matching patches"
 complete -c b4 -n "__fish_seen_subcommand_from ty" -f -s S -l sendemail -d "Send email instead of writing out .thanks files"
 complete -c b4 -n "__fish_seen_subcommand_from ty" -l dry-run -d "Print out emails instead of sending them"
-complete -c b4 -n "__fish_seen_subcommand_from ty; and __fish_seen_argument -s a -l auto -s d -l discard -s t -l thank-for -s" -x -l pw-set-state -d "Set this patchwork state instead of default"
+complete -c b4 -n "__fish_seen_subcommand_from ty; and __fish_seen_argument -s a -l auto -s d -l discard -s t -l thank-for" -x -l pw-set-state -d "Set this patchwork state instead of default"
 
 # b4 diff
 complete -c b4 -n "__fish_seen_subcommand_from diff" -f -s C -l no-cache -d "Do not use local cache"
