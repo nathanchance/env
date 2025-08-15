@@ -102,12 +102,49 @@ def prepare_source(base_name, base_ref='origin/master'):
 
     # New clang-21 warnings
     patches.append('https://github.com/nbd168/wireless/commit/214e9e4d80cffd685daa108cb79f991e6ff25792.patch')  # wifi: mt76: mt7996: Initialize hdr before passing to skb_put_data()
-    if base_name == 'fedora':
-        patches.append('https://lore.kernel.org/all/20250715-drm-msm-fix-const-uninit-warning-v1-1-d6a366fd9a32@kernel.org/')  # drm/msm/dpu: Initialize crtc_state to NULL in dpu_plane_virtual_atomic_check()
 
-    if base_name in NEXT_TREES:
-        reverts.append('eacecdbf2789ca7ef688b3cb4955bbdde1c499bf')  # iov_iter: iterate_folioq: fix handling of offset >= folio size
-        patches.append('https://lore.kernel.org/all/20250812-iot_iter_folio-v2-1-f99423309478@codewreck.org/')  # iov_iter: iterate_folioq: fix handling of offset >= folio size
+    if base_name == 'linux-next-llvm':
+        patches.append('''\
+From 70346577a6e92c0f385679772ede0e81671e064c Mon Sep 17 00:00:00 2001
+From: Nathan Chancellor <nathan@kernel.org>
+Date: Fri, 15 Aug 2025 11:40:00 -0700
+Subject: [PATCH] HACK: Ignore two drm/amd/display/dc linker warnings
+
+---
+ drivers/gpu/drm/amd/display/dc/dml/Makefile  | 2 +-
+ drivers/gpu/drm/amd/display/dc/dml2/Makefile | 2 +-
+ 2 files changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/drivers/gpu/drm/amd/display/dc/dml/Makefile b/drivers/gpu/drm/amd/display/dc/dml/Makefile
+index b357683b4255..134ad2d7fc2f 100644
+--- a/drivers/gpu/drm/amd/display/dc/dml/Makefile
++++ b/drivers/gpu/drm/amd/display/dc/dml/Makefile
+@@ -50,7 +50,7 @@ CFLAGS_$(AMDDALPATH)/dc/dml/dcn20/display_mode_vba_20v2.o := $(dml_ccflags) $(fr
+ CFLAGS_$(AMDDALPATH)/dc/dml/dcn20/display_rq_dlg_calc_20v2.o := $(dml_ccflags)
+ CFLAGS_$(AMDDALPATH)/dc/dml/dcn21/display_mode_vba_21.o := $(dml_ccflags) $(frame_warn_flag)
+ CFLAGS_$(AMDDALPATH)/dc/dml/dcn21/display_rq_dlg_calc_21.o := $(dml_ccflags)
+-CFLAGS_$(AMDDALPATH)/dc/dml/dcn30/display_mode_vba_30.o := $(dml_ccflags) $(frame_warn_flag)
++CFLAGS_$(AMDDALPATH)/dc/dml/dcn30/display_mode_vba_30.o := $(dml_ccflags) $(frame_warn_flag) -Wframe-larger-than=2200
+ CFLAGS_$(AMDDALPATH)/dc/dml/dcn30/display_rq_dlg_calc_30.o := $(dml_ccflags)
+ CFLAGS_$(AMDDALPATH)/dc/dml/dcn31/display_mode_vba_31.o := $(dml_ccflags) $(frame_warn_flag)
+ CFLAGS_$(AMDDALPATH)/dc/dml/dcn31/display_rq_dlg_calc_31.o := $(dml_ccflags)
+diff --git a/drivers/gpu/drm/amd/display/dc/dml2/Makefile b/drivers/gpu/drm/amd/display/dc/dml2/Makefile
+index 4c21ce42054c..212cca7b349d 100644
+--- a/drivers/gpu/drm/amd/display/dc/dml2/Makefile
++++ b/drivers/gpu/drm/amd/display/dc/dml2/Makefile
+@@ -53,7 +53,7 @@ subdir-ccflags-y += -I$(FULL_AMD_DISPLAY_PATH)/dc/dml2/dml21/src/inc
+ subdir-ccflags-y += -I$(FULL_AMD_DISPLAY_PATH)/dc/dml2/dml21/inc
+ subdir-ccflags-y += -I$(FULL_AMD_DISPLAY_PATH)/dc/dml2/dml21/
+ 
+-CFLAGS_$(AMDDALPATH)/dc/dml2/display_mode_core.o := $(dml2_ccflags) $(frame_warn_flag)
++CFLAGS_$(AMDDALPATH)/dc/dml2/display_mode_core.o := $(dml2_ccflags) $(frame_warn_flag) -Wframe-larger-than=3200
+ CFLAGS_$(AMDDALPATH)/dc/dml2/display_mode_util.o := $(dml2_ccflags)
+ CFLAGS_$(AMDDALPATH)/dc/dml2/dml2_wrapper.o := $(dml2_ccflags)
+ CFLAGS_$(AMDDALPATH)/dc/dml2/dml2_utils.o := $(dml2_ccflags)
+-- 
+2.50.1
+
+''')  # noqa: W291,W293
     # yapf: enable
 
     try:
