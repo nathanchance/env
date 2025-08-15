@@ -81,6 +81,7 @@ function cbl_gen_fedoraconfig -d "Downloads and modifies Fedora's kernel configu
         -e IKCONFIG \
         -e IKCONFIG_PROC \
         -e LOCALVERSION_AUTO \
+        --set-str CONFIG_EFI_SBAT_FILE '' \
         --set-val FRAME_WARN 1500 \
         --set-val NR_CPUS 256 \
         $scripts_config_args
