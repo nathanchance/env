@@ -35,9 +35,6 @@ def sync(repo, patches_output):
     if repo.name not in ('linux', 'linux-next') and 'linux-stable' not in repo.name:
         raise RuntimeError(f"Supplied repo ('{repo}, {repo.name}') is not supported by cbl_ptchmn!")
 
-    if not (mfc := lib.utils.get_git_output(repo, 'mfc')):
-        raise RuntimeError('My first commit could not be found?')
-
     # Generate a list of patches to remove. The Python documentation states
     # that it is unspecified to change the contents of a directory when using
     # Path.iterdir() to iterate over it.
@@ -45,7 +42,7 @@ def sync(repo, patches_output):
     for item in patches_to_remove:
         item.unlink()
 
-    fp_cmd = ['fp', f"--base={mfc}^", '-o', patches_output, f"{mfc}^..HEAD"]
+    fp_cmd = ['fp', '--base=auto', '-o', patches_output, '@{u}..HEAD']
     lib.utils.call_git(repo, fp_cmd, show_cmd=True)
 
     status_cmd = ['--no-optional-locks', 'status', '-u', '--porcelain', patches_output]

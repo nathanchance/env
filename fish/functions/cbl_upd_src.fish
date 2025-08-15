@@ -111,25 +111,32 @@ function cbl_upd_src -d "Update source trees in $CBL_SRC"
                 header "Updating $folder"
 
                 if test -d $folder
+                    set git \
+                        git -C $folder
+
                     if is_tree_dirty $folder
-                        git -C $folder stash
+                        $git stash
                         set pop true
                     else
                         set -e pop
                     end
 
                     switch $folder
+                        # These trees never rebase so we can just 'pull -r'
                         case '*'/linux '*'/linux-stable'*'
-                            git -C $folder pull -r
+                            $git pull -r
+
                         case '*'/linux-next
-                            git -C $folder remote update --prune
+                            set prior_upstream ($git sha @{u})
+
+                            $git remote update --prune
                             or return
 
-                            git -C $folder rebase \
-                                --interactive \
-                                --onto @{u} \
-                                (git -C $folder mfc)^ \
-                                (git -C $folder bn)
+                            set current_upstream ($git sha @{u})
+
+                            if test $prior_upstream != $current_upstream; or not $git merge-base --is-ancestor $current_upstream HEAD
+                                $git rebase --interactive --onto $current_upstream $prior_upstream ($git bn)
+                            end
                     end
                     or return
 
@@ -138,7 +145,7 @@ function cbl_upd_src -d "Update source trees in $CBL_SRC"
                     end
 
                     if set -q pop
-                        git -C $folder stash pop
+                        $git stash pop
                     end
                 else
                     if string match -qr linux-stable $folder

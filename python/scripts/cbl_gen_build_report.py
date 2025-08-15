@@ -136,6 +136,27 @@ def generate_warnings(log_folder, src_folder):
     return full, filtered, unique
 
 
+def generate_git_log(src_folder):
+    # Either source directory does not exist or it is not a git repository
+    if not Path(src_folder, '.git').exists():
+        return ''
+
+    # Find first commit that is not mine
+    log_cmd = ['log', '-350', '--format=%H %cn']
+    for line in lib.utils.get_git_output(src_folder, log_cmd).splitlines():
+        sha, name = line.split(' ', 1)
+        if name != "Nathan Chancellor":
+            break
+    # If the first commit that is not mine is the current HEAD, there was
+    # nothing applied on top.
+    if lib.utils.get_git_output(src_folder, 'sha') == sha:
+        return ''
+
+    report_text = f"\n{src_folder.name} commit logs:\n\n"
+    report_text += lib.utils.call_git(src_folder, ['l', f"{sha}^.."]).stdout
+    return report_text
+
+
 def generate_report(log_folder):
     # First, we need to figure out the source directory, so we can eliminate
     # its path from all the warnings, which makes the report a little easier to
@@ -189,14 +210,7 @@ def generate_report(log_folder):
             for warning in warnings:
                 report_text += f"{log}:{warning}"
 
-    if src_folder.exists() and (mfc := lib.utils.get_git_output(src_folder, 'mfc')):
-        report_text += f"\n{src_folder.name} commit logs:\n\n"
-        branch = lib.utils.get_git_output(src_folder, 'bn')
-        if remote := lib.utils.get_git_output(src_folder, ['rn', branch]):
-            since = f"{remote}/{branch}"
-        else:
-            since = f"{mfc}^"
-        report_text += lib.utils.call_git(src_folder, ['l', f"{since}^.."]).stdout
+    report_text += generate_git_log(src_folder)
 
     return report_text
 

@@ -66,8 +66,6 @@ function git_aliases -d "Configure git aliases"
     # git log
     git config --global alias.l 'log --oneline'
     git config --global alias.lp 'log --patch'
-    # shellcheck disable=SC2016
-    git config --global alias.mfc '!git log --format=%H --committer="$(git config --get user.name) <$(git config --get user.email)>" "$(git log --format=%H -n 150 | tail -n1)".. | tail -n1'
 
     # git merge
     git config --global alias.m "merge$gpg_sign --signoff"
