@@ -209,6 +209,9 @@ class DebugPkgBuilder(KernelPkgBuilder):
 
         lib.utils.curl(CONFIG_URL, output=config)
         sc_cmd = [*base_sc_cmd, '-m', 'DRM', *self.extra_sc_args]
+        # Handle https://git.kernel.org/linus/9fce66583f06c212e95e4b76dd61d8432ffa56b6
+        # until Arch is up to date with 6.18
+        sc_cmd += ['-e', 'NETFILTER_XTABLES_LEGACY']
         lib.utils.run(sc_cmd)
 
         self._kmake(['olddefconfig'])
