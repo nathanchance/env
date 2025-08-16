@@ -17,6 +17,8 @@ if test -z "$LOCATION"
                 set -Ux LOCATION aadp
             case nathan@ax162
                 set -Ux LOCATION hetzner
+            case nathan@chromebox3
+                set -Ux LOCATION chromebox
             case nathan@honeycomb
                 set -Ux LOCATION honeycomb
             case nathan@raspberrypi pi@raspberrypi
@@ -47,6 +49,8 @@ end
 
 # CCACHE_SIZE
 switch $LOCATION
+    case chromebox
+        set -gx CCACHE_MAXSIZE 5G
     case generic test-laptop-intel
         set -gx CCACHE_MAXSIZE 25G
     case hetzner

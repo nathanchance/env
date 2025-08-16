@@ -11,6 +11,23 @@ function cbl_bld_all_krnl -d "Build all kernels for ClangBuiltLinux testing"
 
             cbl_lkt --linux-folder $CBL_SRC_C/linux
 
+        case chromebox
+            cbl_test_kvm build
+            or return
+
+            if test -e $CBL_TC_LLVM/clang
+                set tc_arg LLVM=1
+            else
+                set tc_arg (korg_llvm var)
+            end
+
+            kmake \
+                -C $CBL_SRC_C/linux \
+                KCONFIG_ALLCONFIG=(echo CONFIG_WERROR=n | psub) \
+                $tc_arg \
+                O=(tbf linux) \
+                distclean defconfig all
+
         case honeycomb
             cbl_upd_src c m
 

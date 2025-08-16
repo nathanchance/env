@@ -29,6 +29,14 @@ function msh -d "Shorthand for mosh -o" -w mosh
             end
             set user_host nathan@$host
 
+        case chromebox
+            if test "$tailscale" = true
+                set host chromebox3
+            else
+                set host 10.0.1.135
+            end
+            set user_host nathan@$host
+
         case hetzner main
             set user_host nathan@$HETZNER_IP
 

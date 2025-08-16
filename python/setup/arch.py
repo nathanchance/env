@@ -167,6 +167,7 @@ def configure_networking():
         'asus-intel-core-11700': '10.0.1.248',
         'beelink-amd-ryzen-8745HS': '10.0.1.242',
         'beelink-intel-n100': '10.0.1.231',
+        'chromebox3': '10.0.1.135',
         'msi-intel-core-10210U': '10.0.1.21',
         # 'thelio-3990X': '',
     }

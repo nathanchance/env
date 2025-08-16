@@ -61,6 +61,40 @@ function cbl_upd_krnl -d "Update machine's kernel"
                 sudo reboot
             end
 
+        case chromebox test-desktop-amd-{4300G,8745HS} test-desktop-intel-{11700,n100} test-laptop-intel vm-x86_64
+            in_container_msg -h
+            or return
+
+            for arg in $argv
+                switch $arg
+                    case -k --kexec -r --reboot
+                        set -a install_args $arg
+                        set reboot true
+                    case $valid_arch_krnls
+                        set krnl linux-(string replace 'linux-' '' $arg)
+                end
+            end
+            if not set -q krnl
+                print_error "Kernel is required!"
+                return 1
+            end
+
+            # Cache sudo/doas permissions
+            if test "$reboot" = true
+                sudo true; or return
+            end
+
+            # Download kernel
+            set remote_krnl_bld (tbf $krnl | string replace $TMP_BUILD_FOLDER $remote_tmp_build_folder)
+            if ssh $remote_user@$remote_host "test -d $remote_krnl_bld/pkgbuild"
+                set subdir pkgbuild/
+            end
+            scp $remote_user@$remote_host:$remote_krnl_bld/"$subdir"$krnl-'*'.tar.zst /tmp
+            or return
+
+            # Install kernel and reboot as asked
+            install_arch_kernel $install_args $krnl
+
         case hetzner workstation
             for arg in $argv
                 switch $arg
@@ -127,39 +161,5 @@ function cbl_upd_krnl -d "Update machine's kernel"
 
             # Install kernel
             install_rpi_kernel $arch $ver $install_args /tmp/linux-*-$arch.tar.zst
-
-        case test-desktop-amd-{4300G,8745HS} test-desktop-intel-{11700,n100} test-laptop-intel vm-x86_64
-            in_container_msg -h
-            or return
-
-            for arg in $argv
-                switch $arg
-                    case -k --kexec -r --reboot
-                        set -a install_args $arg
-                        set reboot true
-                    case $valid_arch_krnls
-                        set krnl linux-(string replace 'linux-' '' $arg)
-                end
-            end
-            if not set -q krnl
-                print_error "Kernel is required!"
-                return 1
-            end
-
-            # Cache sudo/doas permissions
-            if test "$reboot" = true
-                sudo true; or return
-            end
-
-            # Download kernel
-            set remote_krnl_bld (tbf $krnl | string replace $TMP_BUILD_FOLDER $remote_tmp_build_folder)
-            if ssh $remote_user@$remote_host "test -d $remote_krnl_bld/pkgbuild"
-                set subdir pkgbuild/
-            end
-            scp $remote_user@$remote_host:$remote_krnl_bld/"$subdir"$krnl-'*'.tar.zst /tmp
-            or return
-
-            # Install kernel and reboot as asked
-            install_arch_kernel $install_args $krnl
     end
 end
