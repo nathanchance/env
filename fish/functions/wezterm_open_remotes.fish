@@ -15,7 +15,8 @@ function wezterm_open_remotes -d "Open a new wezterm tab for each remote machine
         amd-desktop-8745HS:"AMD mini desktop" \
         intel-laptop:"Intel laptop" \
         honeycomb:Honeycomb \
-        intel-desktop-n100:"Intel mini desktop"
+        intel-desktop-n100:"Intel mini desktop" \
+        chromebox:Chromebox
 
     set msh_args $argv
 
