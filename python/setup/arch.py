@@ -459,6 +459,7 @@ def pacman_install_packages():
     packages = [
         # Administration tools
         'btop',
+        'ethtool',
         'fastfetch',
         'iputils',
         'kexec-tools',

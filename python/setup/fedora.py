@@ -159,6 +159,7 @@ def install_packages():
         # administration
         'btop',
         'clean-rpm-gpg-pubkey',
+        'ethtool',
         'fastfetch',
         'mosh',
         'opendoas',
