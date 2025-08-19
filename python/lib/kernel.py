@@ -145,6 +145,11 @@ index 4c21ce42054c..212cca7b349d 100644
 2.50.1
 
 ''')  # noqa: W291,W293
+    if base_name == 'fedora':
+        patches.append('https://lore.kernel.org/all/20250819-mmc-sdhci-cadence-fix-uninit-hrs37_mode-v1-1-94aa2d0c438a@kernel.org/')  # mmc: sdhci-cadence: Fix -Wuninitialized in sdhci_cdns_tune_blkgap()
+    if base_name in NEXT_TREES:
+        # https://github.com/llvm/llvm-project/commit/29fa5b72e99dc2b3e229592446c43914ece90370
+        commits.append('d9cfa05f126f7c9be0e72630496e617fac4bcada')   # HACK: TEMPORARY: Work around -Wstring-concatenation
     # yapf: enable
 
     try:
