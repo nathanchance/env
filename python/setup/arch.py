@@ -175,7 +175,7 @@ def configure_networking():
     if hostname not in ips:
         return
 
-    lib.setup.setup_static_ip(ips[hostname])
+    lib.setup.setup_networking(ips[hostname])
     lib.setup.setup_mnt_nas()
 
 

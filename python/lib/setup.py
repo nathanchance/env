@@ -249,6 +249,15 @@ def get_os_rel():
         item.split('=', 1) for item in os_rel_txt.splitlines() if item and not item.startswith('#'))
 
 
+def get_udevadm_properties(sysfs_path):
+    udevadm_info = {}
+    udevadm_info_cmd = ['udevadm', 'info', '-q', 'property', sysfs_path]
+    for line in lib.utils.chronic(udevadm_info_cmd).stdout.splitlines():
+        key, value = line.split('=', 1)
+        udevadm_info[key] = value
+    return udevadm_info
+
+
 def get_user():
     if 'USERNAME' in os.environ:
         return os.environ['USERNAME']
@@ -588,7 +597,7 @@ def setup_mnt_ssd(user_name):
             docker_json.write_text(docker_json_txt, encoding='utf-8')
 
 
-def setup_static_ip(requested_ip):
+def setup_networking(requested_ip):
     for command in ['ip', 'nmcli']:
         if not shutil.which(command):
             raise RuntimeError(f"{command} could not be found")
@@ -599,6 +608,8 @@ def setup_static_ip(requested_ip):
     connection_name, interface = get_active_ethernet_info()
 
     set_ip_addr_for_intf(connection_name, interface, requested_ip)
+
+    setup_x550_link_speeds(interface)
 
 
 def setup_ssh_authorized_keys(user_name):
@@ -634,6 +645,38 @@ def setup_sudo_symlink():
     sudo_bin.symlink_to(relative_doas)
 
     lib.utils.run(['stow', '-d', sudo_prefix.parent, '-R', sudo_prefix.name, '-v'])
+
+
+def setup_x550_link_speeds(intf):
+    udevadm_props = get_udevadm_properties(f"/sys/class/net/{intf}")
+    if 'Ethernet Controller X550' not in udevadm_props['ID_MODEL_FROM_DATABASE']:
+        return
+
+    valid_macs = (
+        'b4:96:91:a5:92:34',
+        'b4:96:91:a5:92:36',
+        'b4:96:91:b8:3e:9a',
+        'b4:96:91:b8:3e:98',
+    )
+    valid_speeds = (
+        '100baset-full',
+        '1000baset-full',
+        '2500baset-full',
+        '5000baset-full',
+        '10000baset-full',
+    )
+
+    rates_conf = Path('/etc/systemd/network/99-default.link.d/x550-t2-rates.conf')
+    if not rates_conf.exists():
+        if not rates_conf.parent.exists():
+            rates_conf.parent.mkdir(mode=0o755)
+        rates_conf_txt = ('[Match]\n'
+                          f"PermanentMACAddress={' '.join(valid_macs)}\n"
+                          '\n'
+                          '[Link]\n'
+                          f"Advertise={' '.join(valid_speeds)}\n")
+        rates_conf.write_text(rates_conf_txt, encoding='utf-8')
+        rates_conf.chmod(0o644)
 
 
 def systemctl_enable(items_to_enable, now=True):

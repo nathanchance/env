@@ -57,7 +57,7 @@ def pi_setup(user_name):
             dhcpcd_conf.write_text(dhcpcd_conf_txt, encoding='utf-8')
     # Bookworm and newer use NetworkManager
     else:
-        lib.setup.setup_static_ip(ip_addr)
+        lib.setup.setup_networking(ip_addr)
 
     lib.setup.setup_mnt_ssd(user_name)
 
