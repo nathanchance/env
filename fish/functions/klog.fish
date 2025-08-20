@@ -6,9 +6,22 @@ function klog -d "View kernel log with bat"
     in_container_msg -h
     or return
 
-    # Ask for password first to avoid messing up bat
-    sudo true
-    or return
+    if contains -- --follow-new $argv
+        set provides_pager true
+    end
+    set dmesg_cmd \
+        sudo dmesg \
+        --human \
+        --color=always \
+        $argv
 
-    sudo dmesg --human --color=always $argv &| bat --style plain
+    if set -q provides_pager
+        $dmesg_cmd
+    else
+        # Ask for password first to avoid messing up bat
+        sudo true
+        or return
+
+        $dmesg_cmd &| bat --style plain
+    end
 end
