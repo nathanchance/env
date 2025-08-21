@@ -145,8 +145,6 @@ index 4c21ce42054c..212cca7b349d 100644
 2.50.1
 
 ''')  # noqa: W291,W293
-    if base_name == 'fedora':
-        patches.append('https://lore.kernel.org/all/20250819-mmc-sdhci-cadence-fix-uninit-hrs37_mode-v1-1-94aa2d0c438a@kernel.org/')  # mmc: sdhci-cadence: Fix -Wuninitialized in sdhci_cdns_tune_blkgap()
     # yapf: enable
 
     try:
