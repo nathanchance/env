@@ -13,7 +13,7 @@ function cbl_rb_fd -d "Rebase generic Fedora kernel on latest linux-next"
     # Build kernel
     set lnx_src $CBL_SRC_P/fedora
     set lnx_bld (tbf $lnx_src)
-    fish -c "cd $lnx_src; and cbl_bld_krnl_rpm --cfi --lto arm64"
+    fish -c "cd $lnx_src; and cbl_bld_krnl_rpm --cfi --lto --slim-arm64-platforms arm64"
     or return
 
     # Copy kernel configuration to easily see changes from Fedora or Linux upstream

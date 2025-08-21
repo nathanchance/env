@@ -25,6 +25,8 @@ function cbl_gen_fedoraconfig -d "Downloads and modifies Fedora's kernel configu
                 set debug false
             case --no-werror
                 set no_werror true
+            case --slim-arm64-platforms
+                set slim_arm64_platforms true
         end
     end
     if not set -q arch
@@ -56,6 +58,19 @@ function cbl_gen_fedoraconfig -d "Downloads and modifies Fedora's kernel configu
             -d DEBUG_INFO_DWARF5 \
             -d DEBUG_INFO_DWARF_TOOLCHAIN_DEFAULT \
             -e DEBUG_INFO_NONE
+    end
+    if test "$arch" = aarch64; and set -q slim_arm64_platforms
+        string match -gr '^config (.*)$' <arch/arm64/Kconfig.platforms | while read -l val
+            # While Honeycomb does not currently use device tree, we cannot nix
+            # Layerscape support for two reasons:
+            # 1. Honeycomb may get updated firmware that uses device tree
+            #    instead of ACPI
+            # 2. Several drivers that it uses depend on this configuration
+            if test "$val" = ARCH_LAYERSCAPE
+                continue
+            end
+            set -a scripts_config_args -d $val
+        end
     end
     # https://lore.kernel.org/20250317174840.GA1451320@ax162/
     if contains LTO_CLANG_THIN $scripts_config_args; and git merge-base --is-ancestor 6ee149f61bcce39692f0335a01e99355d4cec8da HEAD
