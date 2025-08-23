@@ -274,11 +274,15 @@ def setup_doas(username):
 
 
 def setup_kernel_args():
-    if lib.setup.get_hostname() != 'honeycomb':
+    if (hostname := lib.setup.get_hostname()) == 'aadp':
+        # Intel X550-T2 spews correctable errors about timeouts :(
+        args = ['pcie_aspm=off']
+    elif hostname == 'honeycomb':
+        # Until firmware supports new IORT RMR patches
+        args = ['arm-smmu.disable_bypass=0', 'iommu.passthrough=1']
+    else:
         return
 
-    # Until firmware supports new IORT RMR patches
-    args = ['arm-smmu.disable_bypass=0', 'iommu.passthrough=1']
     grubby_cmd = ['grubby', '--args', ' '.join(args), '--update-kernel', 'ALL']
     lib.utils.run(grubby_cmd)
 
