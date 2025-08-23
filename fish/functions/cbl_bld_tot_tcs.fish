@@ -156,50 +156,6 @@ function cbl_bld_tot_tcs -d "Build LLVM and binutils from source for kernel deve
             end
         end
     end
-    # https://lore.kernel.org/20250724000219.GA2976491@ax162/
-    if not echo 'diff --git a/llvm/lib/CodeGen/MachineFunction.cpp b/llvm/lib/CodeGen/MachineFunction.cpp
-index 60d42e0c0cb0..e6e05e6c2ba4 100644
---- a/llvm/lib/CodeGen/MachineFunction.cpp
-+++ b/llvm/lib/CodeGen/MachineFunction.cpp
-@@ -211,7 +211,7 @@ void MachineFunction::init() {
-   ConstantPool = new (Allocator) MachineConstantPool(getDataLayout());
-   Alignment = STI->getTargetLowering()->getMinFunctionAlignment();
- 
--  if (!F.getAlign() && !F.hasOptSize())
-+  if (!F.hasOptSize())
-     Alignment = std::max(Alignment,
-                          STI->getTargetLowering()->getPrefFunctionAlignment());
- 
-diff --git a/llvm/test/CodeGen/X86/function-align.ll b/llvm/test/CodeGen/X86/function-align.ll
-deleted file mode 100644
-index 11d0e9992992..000000000000
---- a/llvm/test/CodeGen/X86/function-align.ll
-+++ /dev/null
-@@ -1,18 +0,0 @@
--; RUN: llc -function-sections < %s | FileCheck %s
--
--target datalayout = "e-m:e-i64:64-f80:128-n8:16:32:64-S128"
--target triple = "x86_64-unknown-linux-gnu"
--
--; CHECK: .section .text.f1
--; CHECK-NOT: .p2align
--; CHECK: f1:
--define void @f1() align 1 {
--  ret void
--}
--
--; CHECK: .section .text.f2
--; CHECK-NEXT: .globl f2
--; CHECK-NEXT: .p2align 1
--define void @f2() align 2 {
--  ret void
--}
-' | git -C $llvm_project ap
-        set message "Failed to manually revert 9878ef3abd2a48fcfb81357d581dac292b52ddb3"
-        print_error "$message"
-        tg_msg "$message"
-        return 1
-    end
 
     # Add in-review patches here
     for gh_pr in $gh_prs
