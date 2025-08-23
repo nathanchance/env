@@ -514,7 +514,10 @@ def setup_virtiofs_automount(mountpoint='/mnt/host'):
     # https://git.kernel.org/linus/a8f62f50b4e4ea92a938fca2ec1bd108d7f210e9
     # As automounting will fail gracefully if something is not configured
     # correctly, we fallback to the known value from cbl_vmm.py.
-    host_kernel_ver = tuple(map(int, platform.uname().release.split('-', 1)[0].split('.')))
+    host_kernel_rel = platform.uname().release
+    if not (match := re.search(r"^\d+\.\d+\.\d+", host_kernel_rel)):
+        raise RuntimeError(f"Unable to match kernel version in '{host_kernel_rel}'??")
+    host_kernel_ver = tuple(map(int, match.group().split('.')))
     if host_kernel_ver >= (6, 9, 0):
         tag_sysfs = list(Path('/sys/fs/virtiofs').glob('*/tag'))
         if len(tag_sysfs) == 0:
