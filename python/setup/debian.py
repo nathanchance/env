@@ -74,6 +74,7 @@ def prechecks():
     supported_versions = (
         'bullseye',
         'bookworm',
+        'trixie',
     )
     if (codename := lib.setup.get_version_codename()) not in supported_versions:
         raise RuntimeError(f"Debian {codename} is not supported by this script!")
