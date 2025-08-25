@@ -145,10 +145,6 @@ index 4c21ce42054c..212cca7b349d 100644
 2.50.1
 
 ''')  # noqa: W291,W293
-
-    if base_name in NEXT_TREES:
-        # https://lore.kernel.org/20250822192437.GA458494@ax162/
-        reverts.append('48d06e78b7cba941e991da71ca351f5104ea927e')  # ftrace: Also allocate and copy hash for reading of filter files
     # yapf: enable
 
     try:
