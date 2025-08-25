@@ -51,13 +51,7 @@ function cbl_upd_krnl -d "Update machine's kernel"
 
             # Download .rpm package
             set -q krnl_bld; or set krnl_bld (tbf fedora | string replace $TMP_BUILD_FOLDER $remote_tmp_build_folder)
-            set remote_rpm_folder (string replace $MAIN_FOLDER $remote_main_folder $krnl_bld)/rpmbuild/RPMS/aarch64
-            set remote_krnl_rpm (ssh $remote_user@$remote_host fd -e rpm -u 'kernel-[0-9]+' $remote_rpm_folder)
-            if test -z "$remote_krnl_rpm"
-                print_error "No remote kernel package found?"
-                return 1
-            end
-            set remote_krnl_rpm_sha (ssh $remote_user@$remote_host sha512sum $remote_krnl_rpm | string split -f 1 ' ')
+            ssh $remote_user@$remote_host cat $krnl_bld/sha512sum | string match -rq '^(?<remote_krnl_rpm_sha>[0-9a-f]+)\s+(?<remote_krnl_rpm>.*)$'
             set base_krnl_rpm (path basename $remote_krnl_rpm)
             # If we have the kernel we are planning to download already, no need to redownload
             set cached_krnl_rpm $NAS_FOLDER/Kernels/rpm/$base_krnl_rpm
@@ -106,15 +100,7 @@ function cbl_upd_krnl -d "Update machine's kernel"
 
             # Download kernel
             set remote_krnl_bld (tbf $krnl | string replace $TMP_BUILD_FOLDER $remote_tmp_build_folder)
-            if ssh $remote_user@$remote_host "test -d $remote_krnl_bld/pkgbuild"
-                set subdir pkgbuild/
-            end
-            set remote_krnl_pkg (ssh $remote_user@$remote_host ls $remote_krnl_bld/"$subdir"$krnl-'*'.tar.zst)
-            if test -z "$remote_krnl_pkg"
-                print_error "No remote kernel package found?"
-                return 1
-            end
-            set remote_krnl_pkg_sha (ssh $remote_user@$remote_host sha512sum $remote_krnl_pkg | string split -f 1 ' ')
+            ssh $remote_user@$remote_host cat $remote_krnl_bld/sha512sum | string match -rq '^(?<remote_krnl_pkg_sha>[0-9a-f]+)\s+(?<remote_krnl_pkg>.*)$'
             set base_krnl_pkg (path basename $remote_krnl_pkg)
             set cached_krnl_pkg $NAS_FOLDER/Kernels/pkg/$base_krnl_pkg
             if test -e $cached_krnl_pkg; and test (sha512sum $cached_krnl_pkg | string split -f 1 ' ') = "$remote_krnl_pkg_sha"

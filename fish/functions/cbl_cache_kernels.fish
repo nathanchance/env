@@ -37,25 +37,19 @@ function cbl_cache_kernels -d "Download kernels to $NAS_FOLDER for local consump
     # Download linux-next-llvm package
     set krnl linux-next-llvm
     set remote_krnl_bld (tbf $krnl | string replace $TMP_BUILD_FOLDER $remote_tmp_build_folder)
-    if ssh $remote_user@$remote_host "test -d $remote_krnl_bld/pkgbuild"
-        set subdir pkgbuild/
-    end
-    set remote_krnl_pkg (ssh $remote_user@$remote_host ls $remote_krnl_bld/"$subdir"$krnl-'*'.tar.zst)
-    set remote_krnl_pkg_sha (ssh $remote_user@$remote_host sha512sum $remote_krnl_pkg | string split -f 1 ' ')
+    ssh $remote_user@$remote_host cat $remote_krnl_bld/sha512sum | string match -rq '^(?<remote_krnl_pkg_sha>[0-9a-f]+)\s+(?<remote_krnl_pkg>.*)$'
 
     set cached_krnl_pkg $kernel_folder/pkg/(path basename $remote_krnl_pkg)
     if test -e $cached_krnl_pkg; and test (sha512sum $cached_krnl_pkg | string split -f 1 ' ') = "$remote_krnl_pkg_sha"
         print_green "$remote_krnl_pkg already downloaded @ $cached_krnl_pkg"
     else
-        $rsync_cmd $remote_user@$remote_host:$remote_krnl_bld/"$subdir"$krnl-'*'.tar.zst $kernel_folder/pkg
+        $rsync_cmd $remote_user@$remote_host:$remote_krnl_pkg (path dirname $cached_krnl_pkg)
         or return
     end
 
     # Download Fedora package
-    set -q krnl_bld; or set krnl_bld (tbf fedora | string replace $TMP_BUILD_FOLDER $remote_tmp_build_folder)
-    set remote_rpm_folder (string replace $MAIN_FOLDER $remote_main_folder $krnl_bld)/rpmbuild/RPMS/aarch64
-    set remote_krnl_rpm (ssh $remote_user@$remote_host fd -e rpm -u 'kernel-[0-9]+' $remote_rpm_folder)
-    set remote_krnl_rpm_sha (ssh $remote_user@$remote_host sha512sum $remote_krnl_rpm | string split -f 1 ' ')
+    set remote_krnl_bld (tbf fedora | string replace $TMP_BUILD_FOLDER $remote_tmp_build_folder)
+    ssh $remote_user@$remote_host cat $remote_krnl_bld/sha512sum | string match -rq '^(?<remote_krnl_rpm_sha>[0-9a-f]+)\s+(?<remote_krnl_rpm>.*)$'
 
     set cached_krnl_rpm $kernel_folder/rpm/(path basename $remote_krnl_rpm)
     if test -e $cached_krnl_rpm; and test (sha512sum $cached_krnl_rpm | string split -f 1 ' ') = "$remote_krnl_rpm_sha"
