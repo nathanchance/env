@@ -275,6 +275,14 @@ for value in versions:
     maj_ver = int(VERSION.split('.', 1)[0])
     if (maj_ver >= 16 and MACHINE == 'x86_64') or (maj_ver >= 18 and MACHINE == 'aarch64'):
         build_cmd += ['--bolt', '--lto', 'thin']
+
+        # https://github.com/llvm/llvm-project/issues/153492
+        if maj_ver >= 20 and MACHINE == 'aarch64':
+            patch_txt = lib.utils.curl(
+                'https://github.com/llvm/llvm-project/pull/154734/commits/2bef8a986f26c5aad8e6756899ebd4cf62081120.patch',
+            )
+            lib.utils.call_git_loud(worktree, ['ap'], input=patch_txt)
+
     lib.utils.tg_msg(f"sudo authorization needed to build LLVM {VERSION}")
     lib.utils.run_as_root(build_cmd)
 
