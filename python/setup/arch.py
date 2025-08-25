@@ -6,7 +6,6 @@ from argparse import ArgumentParser
 import base64
 from collections import UserDict
 import getpass
-import json
 import os
 from pathlib import Path
 import re
@@ -360,17 +359,6 @@ def get_cmdline_additions():
     if module_blacklist:
         options['module_blacklist'] = ','.join(module_blacklist)
     return options
-
-
-def get_findmnt_info(path=''):
-    fields = ('FSROOT', 'FSTYPE', 'OPTIONS', 'PARTUUID', 'SOURCE', 'UUID')
-    findmnt_cmd = ['findmnt', '-J', '-o', ','.join(fields)]
-    if path:
-        findmnt_cmd.append(path)
-    filesystems = json.loads(lib.utils.chronic(findmnt_cmd).stdout)['filesystems']
-    if path:
-        return filesystems[0]
-    return filesystems
 
 
 def installimage_adjustments(mkinitcpio_conf, conf='linux.conf', dryrun=False):
@@ -776,7 +764,7 @@ def switch_from_grub_to_systemd_boot(conf='linux.conf', dryrun=False):
     lib.utils.print_or_write_text(Path('/boot/loader/loader.conf'), loader_conf_txt, dryrun)
 
     # Default cmdline options
-    root_findmnt = get_findmnt_info('/')
+    root_findmnt = lib.utils.get_findmnt_info('/')
     cmdline_options = CmdlineOptions({
         'root': f"PARTUUID={root_findmnt['partuuid']}",
         'rootfstype': root_findmnt['fstype'],

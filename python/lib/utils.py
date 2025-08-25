@@ -3,6 +3,7 @@
 # Copyright (C) 2022-2023 Nathan Chancellor
 
 import copy
+import json
 import os
 from pathlib import Path
 import shlex
@@ -91,6 +92,17 @@ def get_duration(start_seconds, end_seconds=None):
     parts.append(f"{seconds}s")
 
     return ' '.join(parts)
+
+
+def get_findmnt_info(path=''):
+    fields = ('FSROOT', 'FSTYPE', 'OPTIONS', 'PARTUUID', 'SOURCE', 'UUID')
+    findmnt_cmd = ['findmnt', '-J', '-o', ','.join(fields)]
+    if path:
+        findmnt_cmd.append(path)
+    filesystems = json.loads(chronic(findmnt_cmd).stdout)['filesystems']
+    if path:
+        return filesystems[0]
+    return filesystems
 
 
 def get_git_output(directory, cmd, **kwargs):
