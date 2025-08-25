@@ -69,8 +69,12 @@ function cbl_bld_llvm_korg -d "Build (and optionally test) LLVM for kernel.org"
     mkdir -p $TMP_FOLDER
     set -g tmp_llvm_install (mktemp -d -p $TMP_FOLDER -t pgo-llvm-builder.XXXXXXXXXXXX)
 
+    if not set -q llvm_bld
+        set llvm_bld (tbf pgo-llvm-builder)
+    end
+
     if not $PYTHON_FOLDER/pgo-llvm-builder/build.py \
-            --build-folder (tbf pgo-llvm-builder) \
+            --build-folder $llvm_bld \
             --install-folder $tmp_llvm_install \
             --llvm-folder $CBL_SRC_C/llvm-project \
             --tc-build-folder $CBL_TC_BLD \
