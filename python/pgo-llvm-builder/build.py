@@ -246,16 +246,23 @@ for value in versions:
     shutil.rmtree(build_folder, ignore_errors=True)
     build_folder.mkdir(exist_ok=True, parents=True)
 
-    mounts = {
-        f"{build_folder}:/build",
-        f"{llvm_install}:/install",
-        f"{worktree}:/llvm",
-        f"{llvm_git_dir}:{llvm_git_dir}",
-        f"{tc_build_folder}:/tc-build",
-    }
+    mounts = (
+        (build_folder, '/build'),
+        (llvm_install, '/install'),
+        (worktree, '/llvm'),
+        (llvm_git_dir, llvm_git_dir),
+        (tc_build_folder, '/tc-build'),
+    )
+    mount_args = []
+    for src, dst in mounts:
+        mountpoint = lib.utils.chronic(['stat', '-c', '%m', src]).stdout.strip()
+        mountinfo = lib.utils.get_findmnt_info(mountpoint)
+        # virtiofs does not support idmapping
+        OPTS = '' if mountinfo['fstype'] == 'virtiofs' else ':idmap'
+        mount_args.append(f"--bind={src}:{dst}{OPTS}")
     build_cmd = [
         *systemd_nspawn_cmd,
-        *[f"--bind={val}:idmap" for val in mounts],
+        *mount_args,
         *build_llvm_py_cmd,
     ]
     # Enable BOLT for more optimization if:
