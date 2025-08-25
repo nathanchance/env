@@ -79,9 +79,19 @@ function cbl_bld_krnl_rpm -d "Build a .rpm kernel package"
         $kmake_args \
         O=$out \
         RPMOPTS="$rpmopts" \
-        olddefconfig $kmake_targets binrpm-pkg; or return
+        olddefconfig $kmake_targets binrpm-pkg
+    or return
+
+    set rpm (fd -e rpm -u 'kernel-[0-9]+' $out/rpmbuild | path resolve)
+    if test (count $rpm) -ne 1
+        print_error "More than one .rpm found? $rpm"
+        return 1
+    end
+
+    rm -f $out/sha512sum
+    sha512sum $rpm >$out/sha512sum
 
     echo Run
-    printf '\n\t$ sudo fish -c "dnf install %s; and reboot"\n\n' (realpath -- (fd -e rpm -u 'kernel-[0-9]+' $out/rpmbuild) | string replace $TMP_BUILD_FOLDER \$TMP_BUILD_FOLDER)
+    printf '\n\t$ sudo fish -c "dnf install %s; and reboot"\n\n' (string replace $TMP_BUILD_FOLDER \$TMP_BUILD_FOLDER $rpm)
     echo "to install and use new kernel."
 end

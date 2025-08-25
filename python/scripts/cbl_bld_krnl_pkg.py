@@ -113,6 +113,18 @@ class KernelPkgBuilder:
             target = 'all'
         self._kmake([target])
 
+    def gen_sha512sum(self):
+        for possible_dir in (self._build_folder, Path(self._build_folder, 'pkgbuild')):
+            if pkg_tar_zst := list(possible_dir.glob('*.tar.zst')):
+                break
+        else:
+            raise RuntimeError('No .tar.zst could be found to generate sha512sum!')
+        if len(pkg_tar_zst) != 1:
+            raise RuntimeError(f"More than one .tar.zst found? {pkg_tar_zst}")
+        (sha512sum_file := Path(self._build_folder, 'sha512sum')).unlink(missing_ok=True)
+        with sha512sum_file.open('x', encoding='utf-8') as file:
+            lib.utils.run(['sha512sum', pkg_tar_zst[0].resolve()], stdout=file)
+
     def package(self):
         # If build was done with upstream 'pacman-pkg' target, no need to run package()
         if Path(self._build_folder, 'pacman').exists():
@@ -346,3 +358,4 @@ if __name__ == '__main__':
     builder.prepare(args.ref, args.localmodconfig, args.menuconfig, config_targets)
     builder.build()
     builder.package()
+    builder.gen_sha512sum()
