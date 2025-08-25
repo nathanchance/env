@@ -1,0 +1,8 @@
+[Unit]
+Description=Generate git bundles on NAS
+
+[Service]
+ExecStart=:/bin/sh -c '$PYTHON_SCRIPTS_FOLDER/nas_sync.py -t bundles'
+
+[Install]
+WantedBy=default.target
