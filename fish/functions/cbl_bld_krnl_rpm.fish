@@ -17,7 +17,7 @@ function cbl_bld_krnl_rpm -d "Build a .rpm kernel package"
             case -g --gcc
                 set gcc true
             case -l --localmodconfig
-                set lsmod /tmp/lsmod.txt
+                set lsmod /tmp/modprobed.db
                 if not test -f $lsmod
                     print_error "$lsmod not found!"
                     return 1
