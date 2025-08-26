@@ -46,7 +46,7 @@ if [ "$RELEASE" = "buster" ]; then
 fi
 
 case "$RELEASE" in
-    "unstable") ver=12 ;;
+    "unstable") ver=13 ;;
     *) echo "$RELEASE" is not supported 2>&1; false ;;
 esac
 echo "deb http://download.opensuse.org/repositories/shells:/fish/Debian_$ver/ /" >/etc/apt/sources.list.d/shells:fish.list
