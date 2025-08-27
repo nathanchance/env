@@ -146,10 +146,9 @@ index 4c21ce42054c..212cca7b349d 100644
 
 ''')  # noqa: W291,W293
 
-    if base_name == 'fedora':
+    if base_name in NEXT_TREES:
         # https://lore.kernel.org/20250826220959.GA4119563@ax162/
-        reverts.append(('54f45a30c0d0153d2be091ba2d683ab6db6d1d5b^..7ee4a5a2ec3748facfb4ca96e4cce6cabbdecab2',
-                        'Revert "PCI/MSI: Add startup/shutdown for per device domains" and dependent changes'))
+        patches.append('https://lore.kernel.org/all/20250827062911.203106-1-inochiama@gmail.com/')  # PCI/MSI: Check MSI_FLAG_PCI_MSI_MASK_PARENT in cond_[startup|shutdown]_parent()
     # yapf: enable
 
     try:
