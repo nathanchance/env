@@ -250,8 +250,8 @@ def create_monthly_report_file(report_file, report_date):
     devices = [
         'a SolidRun Honeycomb LX2',
         'an Ampere Altra Developer Platform',
-        'two Intel-based desktops',
-        'an AMD-based desktop',
+        'four Intel-based devices',
+        'an AMD-based device',
     ]
     links = {
         'aosp_llvm': "[AOSP's distribution of LLVM](https://android.googlesource.com/platform/prebuilts/clang/host/linux-x86/)",
