@@ -5,25 +5,31 @@
 function cbl_bld_all_krnl -d "Build all kernels for ClangBuiltLinux testing"
     in_container_msg -c; or return
 
+    set lnx_src $CBL_SRC_C/linux
+
     switch $LOCATION
-        case aadp generic
+        case aadp generic honeycomb test-desktop-amd-8745HS test-desktop-intel-11700
             cbl_upd_src c m
 
-            cbl_lkt --linux-folder $CBL_SRC_C/linux
+            set slim architectures --architectures arm arm64 i386 x86_64
+            switch $LOCATION
+                case honeycomb
+                    # Fewer architectures and only defconfigs
+                    set -a cbl_lkt_args \
+                        $slim_architectures \
+                        --targets def
 
-        case chromebox
-            cbl_test_kvm build
-            or return
-
-        case honeycomb
-            cbl_upd_src c m
+                case test-desktop-amd-8745HS test-desktop-intel-11700
+                    # Fewer architectures
+                    set -a cbl_lkt_args \
+                        $slim_architectures
+            end
 
             cbl_lkt \
-                --architectures arm arm64 i386 x86_64 \
-                --linux-folder $CBL_SRC_C/linux \
-                --targets def
+                --linux-folder $lnx_src \
+                $cbl_lkt_args
 
-        case test-desktop-amd-8745HS test-desktop-intel-n100 test-laptop-intel
+        case chromebox test-desktop-intel-n100 test-laptop-intel
             cbl_test_kvm build
             or return
 
@@ -34,18 +40,11 @@ function cbl_bld_all_krnl -d "Build all kernels for ClangBuiltLinux testing"
             end
 
             kmake \
-                -C $CBL_SRC_C/linux \
-                KCONFIG_ALLCONFIG=(echo CONFIG_WERROR=n | psub) \
+                -C $lnx_src \
+                KCONFIG_ALLCONFIG=(print_no_werror_cfgs | psub) \
                 $tc_arg \
-                O=(tbf linux) \
+                O=(tbf $lnx_src) \
                 distclean allmodconfig all
-
-        case test-desktop-intel-11700
-            cbl_upd_src c m
-
-            cbl_lkt \
-                --architectures arm arm64 i386 x86_64 \
-                --linux-folder $CBL_SRC_C/linux
 
         case '*'
             for arg in $argv

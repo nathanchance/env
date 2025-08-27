@@ -29,8 +29,12 @@ function cbl_bld_tot_tcs -d "Build LLVM and binutils from source for kernel deve
             set bld_bntls false
             set pgo kernel-defconfig
             set targets AArch64 ARM X86
-            set validate_targets "    'defconfig': ['ARM'],
+            if test $LOCATION = honeycomb
+                set validate_targets "    'defconfig': ['AArch64', 'ARM', 'X86'],"
+            else
+                set validate_targets "    'defconfig': ['ARM'],
     'allmodconfig': ['AArch64', 'ARM', 'X86'],"
+            end
             set validate_uprev kernel
 
         case test-desktop-intel-n100 test-laptop-intel
