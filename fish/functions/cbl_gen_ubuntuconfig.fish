@@ -9,6 +9,7 @@ function cbl_gen_ubuntuconfig -d "Generate a kernel .config from Ubuntu's config
                 set arch $arg
             case --cfi --cfi-permissive
                 set -a scripts_config_args \
+                    -e CFI \
                     -e CFI_CLANG \
                     -e SHADOW_CALL_STACK
                 if test $arg = --cfi-permissive

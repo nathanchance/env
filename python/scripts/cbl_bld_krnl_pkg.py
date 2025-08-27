@@ -334,7 +334,7 @@ if __name__ == '__main__':
     }[pkgname]()
 
     if args.cfi or args.cfi_permissive:
-        builder.extra_sc_args += ['-e', 'CFI_CLANG']
+        builder.extra_sc_args += ['-e', 'CFI', '-e', 'CFI_CLANG']
     if args.cfi_permissive:
         builder.extra_sc_args += ['-e', 'CFI_PERMISSIVE']
     if args.lto:

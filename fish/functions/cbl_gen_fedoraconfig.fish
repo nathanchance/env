@@ -9,6 +9,7 @@ function cbl_gen_fedoraconfig -d "Downloads and modifies Fedora's kernel configu
                 set arch $arg
             case --cfi --cfi-permissive
                 set -a scripts_config_args \
+                    -e CFI \
                     -e CFI_CLANG \
                     -e SHADOW_CALL_STACK
                 if test $arg = --cfi-permissive
@@ -45,7 +46,7 @@ function cbl_gen_fedoraconfig -d "Downloads and modifies Fedora's kernel configu
     if not set -q debug
         # BTF is unlikely to be useful in this scenario so disable it
         # https://lore.kernel.org/CAADnVQ+jNQyC=RcoiwDXeHj9y6CGzr322scz_8uGwCDVx-Od4Q@mail.gmail.com/
-        if test "$arch" = aarch64; and contains CFI_CLANG $scripts_config_args
+        if test "$arch" = aarch64; and contains CFI $scripts_config_args
             set debug false
         else
             set debug true
