@@ -26,10 +26,14 @@ URIs: https://apt.llvm.org/$RELEASE/
 Suites: llvm-toolchain-$llvm_stable_version
 Components: main
 Signed-By: $llvm_gpg_key" >/etc/apt/sources.list.d/llvm-stable.sources
+        and set tc_packages {clang,lld,llvm}-$llvm_stable_version
+
+    case '*'
+        set tc_packages clang ll{d,vm}
 end
 
 # Download packages from repos
 and apt update
 and apt install -y \
-    {clang,lld,llvm}-$llvm_stable_version \
+    $tc_packages \
     gh
