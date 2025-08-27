@@ -15,19 +15,15 @@ function cbl_bld_tot_tcs -d "Build LLVM and binutils from source for kernel deve
     set func_bld (tbf (status function))
 
     switch $LOCATION
-        case aadp generic
-            set bolt true
-            set pgo kernel-defconfig
-            if test $LOCATION = aadp
-                set validate_uprev kernel
-            else
-                set validate_uprev llvm
-            end
-
-        case hetzner workstation
+        case aadp hetzner workstation
             set bolt true
             set pgo kernel-defconfig
             set validate_uprev kernel
+
+        case generic
+            set bolt true
+            set pgo kernel-defconfig
+            set validate_uprev llvm
 
         case honeycomb test-desktop-amd-8745HS test-desktop-intel-11700
             set bld_bntls false
