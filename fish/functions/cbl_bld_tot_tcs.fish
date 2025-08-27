@@ -33,16 +33,6 @@ function cbl_bld_tot_tcs -d "Build LLVM and binutils from source for kernel deve
     'allmodconfig': ['AArch64', 'ARM', 'X86'],"
             set validate_uprev kernel
 
-        case pi
-            set bld_bntls false
-            set bld_stage_one_only true
-            set check_targets clang llvm{,-unit}
-            set defines \
-                LLVM_PARALLEL_COMPILE_JOBS=(math (nproc) - 1) \
-                LLVM_PARALLEL_LINK_JOBS=1
-            set projects clang lld
-            set targets AArch64 ARM X86
-
         case test-desktop-intel-n100 test-laptop-intel
             set bld_bntls false
             set bld_stage_one_only true

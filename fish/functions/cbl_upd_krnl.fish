@@ -19,13 +19,6 @@ function cbl_upd_krnl -d "Update machine's kernel"
     set valid_arch_krnls {linux-,}{debug,{mainline,next}-llvm}
 
     switch $LOCATION
-        case pi
-            # Pi 4 can run either Raspbian or Fedora, be more specific to allow the situation to change
-            if test (uname -m) = aarch64
-                set location pi4
-            else
-                set location pi3
-            end
         case vm
             set location vm-(uname -m)
         case '*'
@@ -33,7 +26,7 @@ function cbl_upd_krnl -d "Update machine's kernel"
     end
 
     switch $location
-        case aadp honeycomb pi4 vm-aarch64
+        case aadp honeycomb vm-aarch64
             in_container_msg -h; or return
             test (get_distro) = fedora; or return
 
@@ -153,37 +146,5 @@ function cbl_upd_krnl -d "Update machine's kernel"
             end
 
             install_arch_kernel $install_args $krnl
-
-        case pi3
-            in_container_msg -h; or return
-
-            # Cache sudo/doas permissions
-            sudo true; or return
-
-            for arg in $argv
-                switch $arg
-                    case arm arm64
-                        set arch $arg
-                    case 'mainline*' 'next*'
-                        set ver $arg
-                    case -r --reboot
-                        set -a install_args $arg
-                end
-            end
-            if not set -q arch
-                print_error "\$arch must be set (arm or arm64)"
-                return 1
-            end
-            if not set -q ver
-                print_error "\$ver must be set"
-                return 1
-            end
-
-            # Grab .tar.zst package
-            set out (tbf rpi | string replace $TMP_BUILD_FOLDER $remote_tmp_build_folder)/$arch
-            scp $remote_user@$remote_host:$out/linux-'*'-$arch.tar.zst /tmp
-
-            # Install kernel
-            install_rpi_kernel $arch $ver $install_args /tmp/linux-*-$arch.tar.zst
     end
 end

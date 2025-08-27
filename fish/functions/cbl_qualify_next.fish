@@ -22,16 +22,4 @@ function cbl_qualify_next -d "Run a series of checks to qualify new linux-next r
     else
         cbl_check_sysfs_cfi
     end
-
-    if test $LOCATION = pi; and test (get_distro) = debian
-        set -e fish_trace
-        switch (uname -m)
-            case aarch64
-                set arch arm64
-            case armv7l
-                set arch arm
-        end
-        cbl_upd_krnl $arch next
-        and pi_clmods
-    end
 end

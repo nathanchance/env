@@ -23,34 +23,6 @@ function cbl_bld_all_krnl -d "Build all kernels for ClangBuiltLinux testing"
                 --linux-folder $CBL_SRC_C/linux \
                 --targets def
 
-        case pi
-            cbl_upd_src c n
-
-            for arch in arm arm64 x86_64
-                switch $arch
-                    case arm
-                        set image zImage
-                    case arm64
-                        set image Image.gz
-                    case x86_64
-                        set image bzImage
-                end
-
-                kmake \
-                    -C $CBL_SRC_C/linux-next \
-                    ARCH=$arch \
-                    HOSTCFLAGS=-Wno-deprecated-declarations \
-                    LLVM=1 \
-                    O=(tbf linux-next)/$arch \
-                    distclean defconfig $image
-                or return
-            end
-
-            for arch in arm arm64 x86_64
-                kboot -a $arch -k (tbf linux-next)/$arch
-                or return
-            end
-
         case test-desktop-amd-8745HS test-desktop-intel-n100 test-laptop-intel
             cbl_test_kvm build
             or return

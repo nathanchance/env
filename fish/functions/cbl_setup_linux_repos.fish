@@ -62,7 +62,7 @@ function cbl_setup_linux_repos -d "Clone ClangBuiltLinux Linux repos into their 
     rm -rf $tmp_dir
 
     # Set up Arch Linux (main and debug), Fedora, and Raspberry Pi source worktrees
-    for worktree in $CBL_SRC_D/linux-debug $CBL_SRC_P/{fedora,linux-{mainline,next}-llvm,rpi}
+    for worktree in $CBL_SRC_D/linux-debug $CBL_SRC_P/{fedora,linux-{mainline,next}-llvm}
         if not test -d $worktree
             switch (path basename $worktree)
                 case linux-mainline-llvm

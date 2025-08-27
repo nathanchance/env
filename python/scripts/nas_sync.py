@@ -28,7 +28,6 @@ def parse_parameters():
         'debian',
         'fedora',
         'ipsw',
-        'rpios',
         'ubuntu',
     ]  # yapf: disable
 
@@ -184,19 +183,6 @@ def download_items(targets, network_folder):
                 items += [{
                     'containing_folder': Path(firmware_folder, 'macOS/VM'),
                     'file_url': get_latest_ipsw_url('VirtualMac2,1', mac_version),
-                }]
-
-        elif target == 'rpios':
-            rpi_arches = ['armhf', 'arm64']
-            rpi_date = '2024-07-04/2024-07-04'
-            deb_ver = 'bookworm'
-
-            for rpi_arch in rpi_arches:
-                base_rpi_url = f"https://downloads.raspberrypi.org/raspios_lite_{rpi_arch}/images/raspios_lite_{rpi_arch}-{rpi_date}-raspios-{deb_ver}-{rpi_arch}-lite.img.xz"
-                items += [{
-                    'containing_folder': Path(firmware_folder, 'Raspberry Pi OS'),
-                    'file_url': base_rpi_url,
-                    'sha_url': base_rpi_url + '.sha256',
                 }]
 
         elif target == 'ubuntu':

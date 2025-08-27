@@ -261,8 +261,6 @@ def get_udevadm_properties(sysfs_path):
 def get_user():
     if 'USERNAME' in os.environ:
         return os.environ['USERNAME']
-    if is_pi() and user_exists('pi'):
-        return 'pi'
     return 'nathan'
 
 
@@ -300,10 +298,6 @@ def is_lxc():
     if shutil.which('systemd-detect-virt'):
         return lib.utils.detect_virt() == 'lxc'
     return 'container=lxc' in Path('/proc/1/environ').read_text(encoding='utf-8')
-
-
-def is_pi():
-    return get_hostname() == 'raspberrypi'
 
 
 def is_virtual_machine():
@@ -574,30 +568,6 @@ def setup_mnt_nas():
         dst.chmod(0o644)
 
     systemctl_enable(file)
-
-
-def setup_mnt_ssd(user_name):
-    if (ssd_partition := Path('/dev/sda1')).is_block_device():
-        (mnt_point := Path('/mnt/ssd')).mkdir(exist_ok=True, parents=True)
-        chown(user_name, mnt_point)
-
-        if mnt_point not in (fstab := Fstab()):
-            partuuid = lib.utils.chronic(['blkid', '-o', 'value', '-s', 'PARTUUID',
-                                          ssd_partition]).stdout.strip()
-
-            fstab[mnt_point] = FstabItem(f"PARTUUID={partuuid}", mnt_point, 'ext4',
-                                         'defaults,noatime', '0', '1')
-            fstab.write()
-
-        lib.utils.run(['mount', '-a'])
-
-        if shutil.which('docker'):
-            docker_json = Path('/etc/docker/daemon.json')
-            docker_json.parent.mkdir(exist_ok=True, parents=True)
-            docker_json_txt = ('{\n'
-                               f'"data-root": "{mnt_point}/docker"'
-                               '\n}\n')
-            docker_json.write_text(docker_json_txt, encoding='utf-8')
 
 
 def setup_networking(requested_ip):

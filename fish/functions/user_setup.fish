@@ -27,7 +27,7 @@ function user_setup -d "Setup a user account, downloading all files and placing 
 
     # Set "trusted environment" variable to make decisions later
     switch $LOCATION
-        case aadp chromebox honeycomb pi test-desktop-amd-8745HS test-desktop-intel-{11700,n100} test-laptop-intel
+        case aadp chromebox honeycomb test-desktop-amd-8745HS test-desktop-intel-{11700,n100} test-laptop-intel
             set trusted_ssh true
         case hetzner workstation
             set trusted_gpg true
@@ -212,10 +212,6 @@ rpmbuild/' >>$gitignore
 
     # Ensure podman registers with correct options for environment
     if command -q podman
-        # Use SSD for container storage on Raspberry Pi
-        if test "$LOCATION" = pi; and test "$MAIN_FOLDER" != "$HOME"
-            upd_strg_cfg
-        end
         podman system info
         # If we have access to the NAS, use it for pulling ghcr.io images
         if test -d $NAS_FOLDER; or set -q pull_thru_cache

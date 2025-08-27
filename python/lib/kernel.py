@@ -16,7 +16,7 @@ sys.path.append(str(Path(__file__).resolve().parents[1]))
 import lib.utils
 # pylint: enable=wrong-import-position
 
-NEXT_TREES = ('fedora', 'linux-next-llvm', 'rpi')
+NEXT_TREES = ('fedora', 'linux-next-llvm')
 PACMAN_TREES = ('linux-mainline-llvm', 'linux-next-llvm')
 
 

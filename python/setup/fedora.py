@@ -3,7 +3,6 @@
 # Copyright (C) 2022-2023 Nathan Chancellor
 
 from pathlib import Path
-import re
 import shutil
 import sys
 
@@ -48,66 +47,12 @@ def dnf_install(install_args):
     lib.setup.dnf(['install', '-y', *install_args])
 
 
-def early_pi_fixups():
-    if not lib.setup.is_pi():
-        return
-
-    # There is an unfortunate bug with LVM and arm-image-installer that we
-    # need to check for.
-    # https://bugzilla.redhat.com/bugzilla/show_bug.cgi?id=2247872
-    # https://bugzilla.redhat.com/bugzilla/show_bug.cgi?id=2258764
-    lvmsysdev = Path('/etc/lvm/devices/system.devices')
-    if lvmsysdev.exists() and '/dev/mmcblk' not in lvmsysdev.read_text(encoding='utf-8'):
-        lvmsysdev.unlink()
-        lib.utils.run(['vgimportdevices', '-a'])
-        lib.utils.run(['vgchange', '-ay'])
-
-    # arm-setup-installer extends the size of the physical partition and
-    # LVM partition but not the XFS partition, so just do that and
-    # circumvent the rest of this function's logic.
-    lib.utils.run(['xfs_growfs', '-d', '/'])
-
-    # Ensure 'rhgb quiet' is removed for all current and future kernels, as it
-    # hurts debugging early boot failures. Make sure the serial console is set
-    # up properly as well.
-    args = ['console=ttyS0,115200', 'console=tty0']
-    remove_args = ['rhgb', 'quiet']
-
-    # arm-setup-installer may rename the logical volume and adjust the first
-    # bootloader entry but this does not appear to get updated for all future
-    # kernel installs.
-    grub_txt = Path('/etc/default/grub').read_text(encoding='utf-8')
-    if not (match := re.search(r'rd.lvm.lv=(.*)/root', grub_txt)):
-        raise RuntimeError('Cannot find rd.lvm.lv value in /etc/default/grub?')
-    grub_vg_name = match.groups()[0]
-    sys_vg_name = lib.utils.chronic(['vgs', '--noheading', '-o', 'vg_name']).stdout.strip()
-    if len(sys_vg_name.split(' ')) != 1:
-        raise RuntimeError('More than one VG found?')
-    if grub_vg_name != sys_vg_name:
-        dm_node_name = {
-            'fedora': 'fedora-root',
-            'fedora-server': 'fedora--server-root',
-        }[sys_vg_name]
-        args += [
-            f"root=/dev/mapper/{dm_node_name}",
-            f"rd.lvm.lv={sys_vg_name}/root",
-        ]
-
-    grubby_cmd = [
-        'grubby',
-        '--args', ' '.join(args),
-        '--remove-args', ' '.join(remove_args),
-        '--update-kernel', 'ALL',
-    ]  # yapf: disable
-    lib.utils.run(grubby_cmd)
-
-
 def get_fedora_version():
     return int(lib.setup.get_os_rel_val('VERSION_ID'))
 
 
 def machine_is_trusted():
-    return lib.setup.get_hostname() in ('aadp', 'honeycomb', 'raspberrypi')
+    return lib.setup.get_hostname() in ('aadp', 'honeycomb')
 
 
 def prechecks():
@@ -120,10 +65,6 @@ def prechecks():
 
 
 def resize_rootfs():
-    # This will be handled in early_pi_setup()
-    if lib.setup.is_pi():
-        return
-
     for line in lib.utils.chronic(['df', '-T']).stdout.splitlines():
         if '/dev/mapper/' in line:
             dev_mapper_path, dev_mapper_fs_type = line.split(' ')[0:2]
@@ -302,13 +243,6 @@ def setup_mosh():
     lib.utils.run(['firewall-cmd', '--reload'])
 
 
-def setup_pi(username):
-    if not lib.setup.is_pi():
-        return
-
-    lib.setup.setup_mnt_ssd(username)
-
-
 def setup_repos():
     dnf_add_repo('https://cli.github.com/packages/rpm/gh-cli.repo')
 
@@ -329,7 +263,6 @@ if __name__ == '__main__':
     user = lib.setup.get_user()
 
     prechecks()
-    early_pi_fixups()
     resize_rootfs()
     install_initial_packages()
     setup_repos()
@@ -338,7 +271,6 @@ if __name__ == '__main__':
     setup_kernel_args()
     setup_libvirt(user)
     setup_mosh()
-    setup_pi(user)
     configure_networking()
     lib.setup.enable_tailscale()
     lib.setup.chsh_fish(user)

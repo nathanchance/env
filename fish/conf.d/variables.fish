@@ -21,8 +21,6 @@ if test -z "$LOCATION"
                 set -Ux LOCATION chromebox
             case nathan@honeycomb
                 set -Ux LOCATION honeycomb
-            case nathan@raspberrypi pi@raspberrypi
-                set -Ux LOCATION pi
             case nathan@beelink-amd-ryzen-8745HS
                 set -Ux LOCATION test-desktop-amd-8745HS
             case nathan@asus-intel-core-11700
