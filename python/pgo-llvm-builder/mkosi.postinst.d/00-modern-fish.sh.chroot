@@ -46,11 +46,22 @@ if [ "$RELEASE" = "buster" ]; then
 fi
 
 case "$RELEASE" in
-    "unstable") ver=13 ;;
+    "unstable")
+        case "$ARCHITECTURE" in
+            # Debian_13 only has x86_64 packages for now?
+            "x86-64") ver=13 ;;
+            *) ver=12 ;;
+        esac
+        ;;
     *) echo "$RELEASE" is not supported 2>&1; false ;;
 esac
-echo "deb http://download.opensuse.org/repositories/shells:/fish/Debian_$ver/ /" >/etc/apt/sources.list.d/shells:fish.list
-wget -O - -q https://download.opensuse.org/repositories/shells:fish/Debian_"$ver"/Release.key | gpg --dearmor >/etc/apt/trusted.gpg.d/shells_fish.gpg
+fish_gpg_key=/etc/apt/keyrings/shells_fish.gpg
+echo "Types: deb
+URIs: http://download.opensuse.org/repositories/shells:/fish/Debian_$ver/
+Suites: /
+Components:
+Signed-By: $fish_gpg_key" >/etc/apt/sources.list.d/shells:fish.sources
+wget -O - -q https://download.opensuse.org/repositories/shells:fish/Debian_"$ver"/Release.key | gpg --dearmor -o "$fish_gpg_key"
 
 apt update -y
 apt install -y fish
