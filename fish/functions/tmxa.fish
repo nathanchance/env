@@ -5,7 +5,7 @@
 function tmxa -d "Attach to a tmux session if it exists, start a new one if not"
     if test -z "$TMUX"
         switch $LOCATION
-            case aadp chromebox honeycomb pi test-{desktop-intel-{11700,n100},desktop-amd-{4300G,8745HS},laptop-intel}
+            case aadp chromebox honeycomb pi test-{desktop-intel-{11700,n100},desktop-amd-8745HS,laptop-intel}
                 set tmuxp_cfg test
             case generic
                 if in_orb

@@ -23,8 +23,6 @@ if test -z "$LOCATION"
                 set -Ux LOCATION honeycomb
             case nathan@raspberrypi pi@raspberrypi
                 set -Ux LOCATION pi
-            case nathan@hp-amd-ryzen-4300G
-                set -Ux LOCATION test-desktop-amd-4300G
             case nathan@beelink-amd-ryzen-8745HS
                 set -Ux LOCATION test-desktop-amd-8745HS
             case nathan@asus-intel-core-11700
@@ -55,7 +53,7 @@ switch $LOCATION
         set -gx CCACHE_MAXSIZE 25G
     case hetzner
         set -gx CCACHE_MAXSIZE 200G
-    case test-desktop-amd-4300G pi vm
+    case pi vm
         set -gx CCACHE_MAXSIZE 15G
     case test-desktop-amd-8745HS test-desktop-intel-11700
         set -gx CCACHE_MAXSIZE 50G

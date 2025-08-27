@@ -75,7 +75,7 @@ function cbl_upd_krnl -d "Update machine's kernel"
                 sudo reboot
             end
 
-        case chromebox test-desktop-amd-{4300G,8745HS} test-desktop-intel-{11700,n100} test-laptop-intel vm-x86_64
+        case chromebox test-desktop-amd-8745HS test-desktop-intel-{11700,n100} test-laptop-intel vm-x86_64
             in_container_msg -h
             or return
 
