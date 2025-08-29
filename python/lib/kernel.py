@@ -101,7 +101,8 @@ def prepare_source(base_name, base_ref='origin/master'):
     # yapf: disable
 
     # New clang-21 warnings
-    patches.append('https://github.com/nbd168/wireless/commit/214e9e4d80cffd685daa108cb79f991e6ff25792.patch')  # wifi: mt76: mt7996: Initialize hdr before passing to skb_put_data()
+    if base_name == 'linux-mainline-llvm':
+        patches.append('https://git.kernel.org/wireless/wireless/p/87b07a1fbc6b5c23d3b3584ab4288bc9106d3274')  # wifi: mt76: mt7996: Initialize hdr before passing to skb_put_data()
 
     if base_name == 'linux-next-llvm':
         patches.append('''\
@@ -145,6 +146,10 @@ index 4c21ce42054c..212cca7b349d 100644
 2.50.1
 
 ''')  # noqa: W291,W293
+
+        # https://lore.kernel.org/20250829225532.GA400117@ax162/
+        reverts.append(('6acfaee44cbe9364a91dcc373fb4e6e395c5b20b^..a37280daa4d583c7212681c49b285de9464a5200',
+                        'Revert "ASoC: Intel: avs: Cleanup duplicate members" and dependent changes'))
 
     if base_name in NEXT_TREES:
         # https://lore.kernel.org/20250826220959.GA4119563@ax162/
