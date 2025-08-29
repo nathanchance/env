@@ -170,7 +170,7 @@ def update_and_install_packages(additional_packages=None):
     ]  # yapf: disable
 
     # Container manager
-    if Path('/etc/apt/sources.list.d/docker.list').exists():
+    if Path('/etc/apt/sources.list.d/docker.sources').exists():
         packages += [
             'containerd.io',
             'docker-ce',

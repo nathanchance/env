@@ -47,7 +47,7 @@ def prechecks():
 
 
 def setup_repos():
-    apt_gpg = Path('/etc/apt/trusted.gpg.d')
+    apt_gpg = Path('/etc/apt/keyrings')
     apt_sources = Path('/etc/apt/sources.list.d')
     codename = lib.setup.get_version_codename()
     version_id = get_version_id()
@@ -55,38 +55,61 @@ def setup_repos():
 
     # Docker
     if version_id < 12:  # bullseye and earlier, bookworm's podman is not ancient
+        docker_repo_url = 'https://download.docker.com/linux/debian'
         docker_gpg_key = Path(apt_gpg, 'docker.gpg')
-        lib.setup.fetch_gpg_key('https://download.docker.com/linux/debian/gpg', docker_gpg_key)
-        Path(apt_sources, 'docker.list').write_text(
-            f"deb [arch={dpkg_arch} signed-by={docker_gpg_key}] https://download.docker.com/linux/debian {codename} stable\n",
-            encoding='utf-8')
+        docker_sources_txt = f"""\
+Types: deb
+URIs: {docker_repo_url}
+Suites: {codename}
+Components: stable
+Signed-By: {docker_gpg_key}
+Architectures: {dpkg_arch}
+"""
+        lib.setup.fetch_gpg_key(f"{docker_repo_url}/gpg", docker_gpg_key)
+        Path(apt_sources, 'docker.sources').write_text(docker_sources_txt, encoding='utf-8')
 
     # fish
+    # only x86_64 is supported in Debian_13 right now?
+    fish_deb_ver = 'Debian_12' if version_id == 13 and dpkg_arch != 'amd64' else f"Debian_{version_id}"
     fish_repo_url = 'https://download.opensuse.org/repositories'
-    lib.setup.fetch_gpg_key(f"{fish_repo_url}/shells:fish/Debian_{version_id}/Release.key",
-                            Path(apt_gpg, 'shells_fish.gpg'))
-    Path(apt_sources, 'shells:fish.list').write_text(
-        f"deb {fish_repo_url.replace('https', 'http')}/shells:/fish/Debian_{version_id}/ /\n",
-        encoding='utf-8')
+    fish_gpg_key = Path(apt_gpg, 'shells_fish.gpg')
+    fish_sources_txt = f"""\
+Types: deb
+URIs: {fish_repo_url.replace('https', 'http')}/shells:/fish/{fish_deb_ver}/
+Suites: /
+Components:
+Signed-By: {fish_gpg_key}
+"""
+    lib.setup.fetch_gpg_key(f"{fish_repo_url}/shells:fish/{fish_deb_ver}/Release.key", fish_gpg_key)
+    Path(apt_sources, 'shells:fish.sources').write_text(fish_sources_txt, encoding='utf-8')
 
     # gh
     gh_packages = 'https://cli.github.com/packages'
     gh_gpg_key = Path(apt_gpg, 'githubcli-archive-keyring.gpg')
+    gh_sources_txt = f"""\
+Types: deb
+URIs: {gh_packages}
+Suites: stable
+Components: main
+Signed-By: {gh_gpg_key}
+Architectures: {dpkg_arch}
+"""
     lib.setup.fetch_gpg_key(f"{gh_packages}/{gh_gpg_key.name}", gh_gpg_key)
-    Path(apt_sources, 'github-cli.list').write_text(
-        f"deb [arch={dpkg_arch} signed-by={gh_gpg_key}] {gh_packages} stable main\n",
-        encoding='utf-8')
+    Path(apt_sources, 'github-cli.sources').write_text(gh_sources_txt, encoding='utf-8')
 
     # Tailscale
     if machine_is_trusted():
-        distro = 'raspbian' if lib.setup.is_pi() else 'debian'
-        base_tailscale_url = f"https://pkgs.tailscale.com/stable/{distro}/{codename}"
-
-        tailscale_gpg_key = Path('/usr/share/keyrings/tailscale-archive-keyring.gpg')
-        lib.setup.fetch_gpg_key(f"{base_tailscale_url}.noarmor.gpg", tailscale_gpg_key)
-
-        tailscale_repo_txt = lib.utils.curl(f"{base_tailscale_url}.tailscale-keyring.list")
-        Path(apt_sources, 'tailscale.list').write_bytes(tailscale_repo_txt)
+        tailscale_packages = 'https://pkgs.tailscale.com/stable/debian'
+        tailscale_gpg_key = Path(apt_gpg, 'tailscale-archive-keyring.gpg')
+        tailscale_sources_txt = f"""\
+Types: deb
+URIs: {tailscale_packages}
+Suites: {codename}
+Components: main
+Signed-By: {tailscale_gpg_key}
+"""
+        lib.setup.fetch_gpg_key(f"{tailscale_packages}/{codename}.noarmor.gpg", tailscale_gpg_key)
+        Path(apt_sources, 'tailscale.sources').write_text(tailscale_sources_txt, encoding='utf-8')
 
 
 def update_and_install_packages():
