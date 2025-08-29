@@ -112,6 +112,33 @@ Signed-By: {tailscale_gpg_key}
         Path(apt_sources, 'tailscale.sources').write_text(tailscale_sources_txt, encoding='utf-8')
 
 
+def switch_to_systemd_networking():
+    # Not necessary on older than Trixie?
+    if get_version_id() < 13:
+        return
+
+    # Back up old networking files
+    for path in (Path('/etc/network/interfaces'), Path('/etc/network/interfaces.d')):
+        if not path.exists():
+            continue
+        lib.utils.run(['mv', '-v', path, f"{path}.save"])
+
+    # Download Arch Linux's default networking files from the ISO, which should
+    # work for most situations
+    for connect_type in ('ethernet', 'wlan', 'wwan'):
+        dest = Path(f"/etc/systemd/network/20-{connect_type}.network")
+        lib.utils.curl(
+            f"https://gitlab.archlinux.org/archlinux/archiso/-/raw/a16a81ae8d08d5dc0ec576e3a427b11cbaa3a8bb/configs/releng/airootfs/etc/systemd/network/{dest.name}",
+            output=dest)
+
+    # Install systemd-resolved, which will kill DNS, so it should happen as
+    # late as possible
+    deb.apt_install(['systemd-resolved'])
+
+    # Enable systemd-networkd and systemd-resovled
+    lib.setup.systemctl_enable(['systemd-networkd', 'systemd-resolved'], now=False)
+
+
 def update_and_install_packages():
     packages = []
     if machine_is_trusted():
@@ -155,3 +182,5 @@ if __name__ == '__main__':
     lib.setup.setup_initial_fish_config(user)
     lib.setup.setup_ssh_authorized_keys(user)
     lib.setup.setup_virtiofs_automount()
+    # This must come last because installing systemd-resolved kills DNS until reboot
+    switch_to_systemd_networking()
