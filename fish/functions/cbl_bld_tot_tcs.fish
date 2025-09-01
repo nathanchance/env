@@ -20,6 +20,12 @@ function cbl_bld_tot_tcs -d "Build LLVM and binutils from source for kernel deve
             set pgo kernel-defconfig
             set validate_uprev kernel
 
+        case chromebox test-desktop-intel-n100 test-laptop-intel
+            set bld_bntls false
+            set bld_stage_one_only true
+            set projects clang lld
+            set targets AArch64 ARM X86
+
         case generic
             set bolt true
             set pgo kernel-defconfig
@@ -36,12 +42,6 @@ function cbl_bld_tot_tcs -d "Build LLVM and binutils from source for kernel deve
     'allmodconfig': ['AArch64', 'ARM', 'X86'],"
             end
             set validate_uprev kernel
-
-        case test-desktop-intel-n100 test-laptop-intel
-            set bld_bntls false
-            set bld_stage_one_only true
-            set projects clang lld
-            set targets AArch64 ARM X86
 
         case vm
             set bld_bntls false
