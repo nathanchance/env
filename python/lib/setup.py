@@ -187,22 +187,25 @@ def configure_trusted_networking():
     }
     if (hostname := get_hostname()) not in static_ips:
         return
-    requested_ip = static_ips[hostname]
-
-    for command in ('ip', 'nmcli'):
-        if not shutil.which(command):
-            raise RuntimeError(f"{command} could not be found")
-
     # Validate that the supplied IP address is valid
-    check_ip(requested_ip)
+    check_ip(requested_ip := static_ips[hostname])
 
+    # Configure static IP address on the active interface
     connection_name, interface = get_active_ethernet_info()
-
     set_ip_addr_for_intf(connection_name, interface, requested_ip)
 
+    # Adjust advertised auto negotiation speeds on X550-T2 NICs
+    # to allow 2.5GbE
     setup_x550_link_speeds(interface)
 
-    setup_mnt_nas()
+    # Setup /mnt/nas files
+    for file in ('mnt-nas.mount', 'mnt-nas.automount'):
+        src = Path(get_env_root(), 'configs/systemd', file)
+        dst = Path('/etc/systemd/system', file)
+
+        shutil.copyfile(src, dst)
+        dst.chmod(0o644)
+    systemctl_enable(file)
 
 
 def dnf(dnf_arguments):
@@ -225,6 +228,8 @@ def fetch_gpg_key(source_url, dest):
 
 
 def get_active_ethernet_info():
+    if not shutil.which('nmcli'):
+        raise RuntimeError('Cannot get active Ethernet information without nmcli!')
     nmcli_cmd = ['nmcli', '-f', 'TYPE,NAME,DEVICE', '-t', 'connection', 'show', '--active']
     for line in lib.utils.chronic(nmcli_cmd).stdout.splitlines():
         if 'ethernet' in line:
@@ -251,6 +256,8 @@ def get_hostname():
 
 
 def get_ip_addr_for_intf(intf):
+    if not shutil.which('ip'):
+        raise RuntimeError(f"Cannot get IP address for {intf} without ip!")
     ip_addr = None
     for line in lib.utils.chronic(['ip', 'addr']).stdout.split('\n'):
         ip_a_regex = fr'inet\s+(\d{{1,3}}\.\d{{1,3}}\.\d{{1,3}}\.\d{{1,3}})/\d+\s+.*{intf}$'
@@ -586,19 +593,6 @@ def setup_virtiofs_automount(mountpoint='/mnt/host'):
     lib.utils.run(['systemctl', 'daemon-reload'])
 
     systemctl_enable(automount_path.name)
-
-
-def setup_mnt_nas():
-    systemd_configs = Path(get_env_root(), 'configs/systemd')
-
-    for file in ['mnt-nas.mount', 'mnt-nas.automount']:
-        src = Path(systemd_configs, file)
-        dst = Path('/etc/systemd/system', file)
-
-        shutil.copyfile(src, dst)
-        dst.chmod(0o644)
-
-    systemctl_enable(file)
 
 
 def setup_ssh_authorized_keys(user_name):
