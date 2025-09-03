@@ -8,16 +8,17 @@ function msh -d "Shorthand for mosh -o" -w mosh
             case -t --tailscale
                 set tailscale true
             case '*'
-                set msh_args $arg
+                set target $arg
         end
     end
 
-    switch $msh_args
+
+    switch $target
         case aadp
             if test "$tailscale" = true
                 set host aadp
             else
-                set host (get_ip $msh_args)
+                set host (get_ip $target)
             end
             set user_host nathan@$host
 
@@ -25,7 +26,7 @@ function msh -d "Shorthand for mosh -o" -w mosh
             if test "$tailscale" = true
                 set host beelink-amd-ryzen-8745hs
             else
-                set host (get_ip $msh_args)
+                set host (get_ip $target)
             end
             set user_host nathan@$host
 
@@ -33,7 +34,7 @@ function msh -d "Shorthand for mosh -o" -w mosh
             if test "$tailscale" = true
                 set host chromebox3
             else
-                set host (get_ip $msh_args)
+                set host (get_ip $target)
             end
             set user_host nathan@$host
 
@@ -44,7 +45,7 @@ function msh -d "Shorthand for mosh -o" -w mosh
             if test "$tailscale" = true
                 set host honeycomb
             else
-                set host (get_ip $msh_args)
+                set host (get_ip $target)
             end
             set user_host nathan@$host
 
@@ -52,7 +53,7 @@ function msh -d "Shorthand for mosh -o" -w mosh
             if test "$tailscale" = true
                 set host asus-intel-core-11700
             else
-                set host (get_ip $msh_args)
+                set host (get_ip $target)
             end
             set user_host nathan@$host
 
@@ -60,7 +61,7 @@ function msh -d "Shorthand for mosh -o" -w mosh
             if test "$tailscale" = true
                 set host beelink-intel-n100
             else
-                set host (get_ip $msh_args)
+                set host (get_ip $target)
             end
             set user_host nathan@$host
 
@@ -68,7 +69,7 @@ function msh -d "Shorthand for mosh -o" -w mosh
             if test "$tailscale" = true
                 set host msi-intel-core-10210U
             else
-                set host (get_ip $msh_args)
+                set host (get_ip $target)
             end
             set user_host nathan@$host
 
