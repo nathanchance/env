@@ -174,6 +174,37 @@ def clone_env(username):
         chown(username, env_tmp)
 
 
+def configure_trusted_networking():
+    static_ips = {
+        'aadp': '10.0.1.143',
+        'asus-intel-core-11700': '10.0.1.248',
+        'beelink-amd-ryzen-8745HS': '10.0.1.242',
+        'beelink-intel-n100': '10.0.1.231',
+        'chromebox3': '10.0.1.135',
+        'honeycomb': '10.0.1.253',
+        'msi-intel-core-10210U': '10.0.1.21',
+        # 'thelio-3990X': '',
+    }
+    if (hostname := get_hostname()) not in static_ips:
+        return
+    requested_ip = static_ips[hostname]
+
+    for command in ('ip', 'nmcli'):
+        if not shutil.which(command):
+            raise RuntimeError(f"{command} could not be found")
+
+    # Validate that the supplied IP address is valid
+    check_ip(requested_ip)
+
+    connection_name, interface = get_active_ethernet_info()
+
+    set_ip_addr_for_intf(connection_name, interface, requested_ip)
+
+    setup_x550_link_speeds(interface)
+
+    setup_mnt_nas()
+
+
 def dnf(dnf_arguments):
     lib.utils.run_as_root(['dnf', *dnf_arguments])
 
@@ -568,21 +599,6 @@ def setup_mnt_nas():
         dst.chmod(0o644)
 
     systemctl_enable(file)
-
-
-def setup_networking(requested_ip):
-    for command in ['ip', 'nmcli']:
-        if not shutil.which(command):
-            raise RuntimeError(f"{command} could not be found")
-
-    # Validate that the supplied IP address is valid
-    check_ip(requested_ip)
-
-    connection_name, interface = get_active_ethernet_info()
-
-    set_ip_addr_for_intf(connection_name, interface, requested_ip)
-
-    setup_x550_link_speeds(interface)
 
 
 def setup_ssh_authorized_keys(user_name):

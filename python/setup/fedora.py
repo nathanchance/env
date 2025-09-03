@@ -16,21 +16,6 @@ MIN_FEDORA_VERSION = 35
 MAX_FEDORA_VERSION = 42
 
 
-def configure_networking():
-    hostname = lib.setup.get_hostname()
-
-    ips = {
-        'aadp': '10.0.1.143',
-        'honeycomb': '10.0.1.253',
-    }
-
-    if hostname not in ips:
-        return
-
-    lib.setup.setup_networking(ips[hostname])
-    lib.setup.setup_mnt_nas()
-
-
 def dnf_add_repo(repo_url):
     # config-manager does not support --add-repo with dnf5, which is the
     # default in Fedora 41 now.
@@ -271,7 +256,7 @@ if __name__ == '__main__':
     setup_kernel_args()
     setup_libvirt(user)
     setup_mosh()
-    configure_networking()
+    lib.setup.configure_trusted_networking()
     lib.setup.enable_tailscale()
     lib.setup.chsh_fish(user)
     lib.setup.clone_env(user)

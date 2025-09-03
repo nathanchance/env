@@ -159,25 +159,6 @@ def configure_amd_pstate():
     # WORK IN PROGRESS
 
 
-def configure_networking():
-    hostname = lib.setup.get_hostname()
-
-    ips = {
-        'asus-intel-core-11700': '10.0.1.248',
-        'beelink-amd-ryzen-8745HS': '10.0.1.242',
-        'beelink-intel-n100': '10.0.1.231',
-        'chromebox3': '10.0.1.135',
-        'msi-intel-core-10210U': '10.0.1.21',
-        # 'thelio-3990X': '',
-    }
-
-    if hostname not in ips:
-        return
-
-    lib.setup.setup_networking(ips[hostname])
-    lib.setup.setup_mnt_nas()
-
-
 def configure_systemd_boot(init=True, conf='linux.conf'):
     # Not using systemd-boot, nothing to configure
     if not lib.setup.using_systemd_boot():
@@ -871,7 +852,7 @@ if __name__ == '__main__':
     lib.setup.podman_setup(user)
     vmware_adjustments(initcpio_conf)
     setup_libvirt(user, initcpio_conf)
-    configure_networking()
+    lib.setup.configure_trusted_networking()
     enable_reflector()
     adjust_gnome_power_settings()
     lib.setup.systemctl_enable(['sshd.service', 'paccache.timer'])
