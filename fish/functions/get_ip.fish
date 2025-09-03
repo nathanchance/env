@@ -6,21 +6,21 @@ function get_ip -d "Get a particular machine's IP address via short name or host
     set device $argv[1]
     switch $device
         case aadp
-            echo 10.0.1.143
+            echo 10.0.1.2
         case amd-desktop-8745HS beelink-amd-ryzen-8745hs
-            echo 10.0.1.242
+            echo 10.0.1.8
         case chromebox chromebox3
-            echo 10.0.1.135
+            echo 10.0.1.14
         case hetzner main
             echo $HETZNER_IP
         case honeycomb
-            echo 10.0.1.253
+            echo 10.0.1.17
         case intel-desktop-11700 asus-intel-core-11700
-            echo 10.0.1.248
+            echo 10.0.1.5
         case intel-desktop-n100 beelink-intel-n100
-            echo 10.0.1.231
+            echo 10.0.1.11
         case intel-laptop msi-intel-core-10210U
-            echo 10.0.1.21
+            echo 10.0.1.20
         case '*'
             print_error "Unrecognized device name: $device"
             return 1

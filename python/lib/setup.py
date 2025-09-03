@@ -176,13 +176,13 @@ def clone_env(username):
 
 def configure_trusted_networking():
     static_ips = {
-        'aadp': '10.0.1.143',
-        'asus-intel-core-11700': '10.0.1.248',
-        'beelink-amd-ryzen-8745HS': '10.0.1.242',
-        'beelink-intel-n100': '10.0.1.231',
-        'chromebox3': '10.0.1.135',
-        'honeycomb': '10.0.1.253',
-        'msi-intel-core-10210U': '10.0.1.21',
+        'aadp': '10.0.1.2',
+        'asus-intel-core-11700': '10.0.1.5',
+        'beelink-amd-ryzen-8745HS': '10.0.1.8',
+        'beelink-intel-n100': '10.0.1.11',
+        'chromebox3': '10.0.1.14',
+        'honeycomb': '10.0.1.17',
+        'msi-intel-core-10210U': '10.0.1.20',
         # 'thelio-3990X': '',
     }
     if (hostname := get_hostname()) not in static_ips:
