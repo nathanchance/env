@@ -436,9 +436,6 @@ function upd -d "Runs the update command for the current distro or downloads/upd
                     $mkdir -p (path dirname $binary)
                     $curl -o $binary $url
                     $chmod +x $binary
-
-                case dev lei
-                    oci_bld $target
             end
 
             popd
