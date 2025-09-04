@@ -436,6 +436,21 @@ function upd -d "Runs the update command for the current distro or downloads/upd
                     $mkdir -p (path dirname $binary)
                     $curl -o $binary $url
                     $chmod +x $binary
+
+                case vmtest
+                    switch $arch
+                        case aarch64 x86_64
+                            # pass
+                        case '*'
+                            print_warning "$target is only available for x86_64, build from source if required..."
+                            continue
+                    end
+
+                    set repo danobi/vmtest
+                    set ver (glr $repo)
+                    set url https://github.com/$repo/releases/download/$ver/vmtest-$arch
+
+                    crl $url | $install -Dvm755 /dev/stdin $binary
             end
 
             popd
