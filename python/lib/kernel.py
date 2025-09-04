@@ -146,29 +146,6 @@ index 4c21ce42054c..212cca7b349d 100644
 2.50.1
 
 ''')  # noqa: W291,W293
-
-        # https://lore.kernel.org/20250829225532.GA400117@ax162/
-        patches.append('https://lore.kernel.org/all/20250902094853.1231842-2-cezary.rojewski@intel.com/')  # ASoC: Intel: avs: hda: Adjust platform name
-        patches.append('https://lore.kernel.org/all/20250902094853.1231842-3-cezary.rojewski@intel.com/')  # ASoC: Intel: avs: da7219: Adjust platform name
-        patches.append('https://lore.kernel.org/all/20250902094853.1231842-4-cezary.rojewski@intel.com/')  # ASoC: Intel: avs: dmic: Refactor dai_link creation
-        patches.append('https://lore.kernel.org/all/20250902094853.1231842-5-cezary.rojewski@intel.com/')  # ASoC: Intel: avs: es8336: Adjust platform name
-        patches.append('https://lore.kernel.org/all/20250902094853.1231842-6-cezary.rojewski@intel.com/')  # ASoC: Intel: avs: i2stest: Adjust platform name
-        patches.append('https://lore.kernel.org/all/20250902094853.1231842-7-cezary.rojewski@intel.com/')  # ASoC: Intel: avs: max98357a: Adjust platform name
-        patches.append('https://lore.kernel.org/all/20250902094853.1231842-8-cezary.rojewski@intel.com/')  # ASoC: Intel: avs: max98373: Adjust platform name
-        patches.append('https://lore.kernel.org/all/20250902094853.1231842-9-cezary.rojewski@intel.com/')  # ASoC: Intel: avs: max98927: Adjust platform name
-        patches.append('https://lore.kernel.org/all/20250902094853.1231842-10-cezary.rojewski@intel.com/')  # ASoC: Intel: avs: nau8825: Adjust platform name
-        patches.append('https://lore.kernel.org/all/20250902094853.1231842-11-cezary.rojewski@intel.com/')  # ASoC: Intel: avs: probe: Refactor dai_link creation
-        patches.append('https://lore.kernel.org/all/20250902094853.1231842-12-cezary.rojewski@intel.com/')  # ASoC: Intel: avs: rt274: Adjust platform name
-        patches.append('https://lore.kernel.org/all/20250902094853.1231842-13-cezary.rojewski@intel.com/')  # ASoC: Intel: avs: rt286: Adjust platform name
-        patches.append('https://lore.kernel.org/all/20250902094853.1231842-14-cezary.rojewski@intel.com/')  # ASoC: Intel: avs: rt298: Adjust platform name
-        patches.append('https://lore.kernel.org/all/20250902094853.1231842-15-cezary.rojewski@intel.com/')  # ASoC: Intel: avs: rt5514: Adjust platform name
-        patches.append('https://lore.kernel.org/all/20250902094853.1231842-16-cezary.rojewski@intel.com/')  # ASoC: Intel: avs: rt5663: Adjust platform name
-        patches.append('https://lore.kernel.org/all/20250902094853.1231842-17-cezary.rojewski@intel.com/')  # ASoC: Intel: avs: rt5682: Adjust platform name
-        patches.append('https://lore.kernel.org/all/20250902094853.1231842-18-cezary.rojewski@intel.com/')  # ASoC: Intel: avs: ssm4567: Adjust platform name
-
-    if base_name in NEXT_TREES:
-        # https://lore.kernel.org/20250826220959.GA4119563@ax162/
-        patches.append('https://git.kernel.org/tip/tip/p/727e914bbfbbda9e6efa5cb1abe4e96a949d576f')  # PCI/MSI: Check MSI_FLAG_PCI_MSI_MASK_PARENT in cond_[startup|shutdown]_parent()
     # yapf: enable
 
     try:
