@@ -15,12 +15,11 @@ function tg_msg -d "Send a Telegram message to FlashBox Notifier"
 
     set chat_id (head -1 $botinfo)
     set token (tail -1 $botinfo)
-    set host (uname -n)
 
     curl -s -X POST https://api.telegram.org/bot$token/sendMessage \
         -d chat_id=$chat_id \
         -d parse_mode=Markdown \
-        -d text="From $host:
+        -d text="From $hostname:
 
 $argv" \
         -o /dev/null
