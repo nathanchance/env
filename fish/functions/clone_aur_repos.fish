@@ -4,6 +4,7 @@
 
 function clone_aur_repos -d "Clone repos from AUR to build packages locally"
     set packages \
+        debhelper \
         modprobed-db \
         opendoas-sudo \
         shellcheck-bin
