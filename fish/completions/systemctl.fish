@@ -3,8 +3,8 @@ set -l commands list-units list-sockets start stop reload restart try-restart re
     isolate kill is-active is-failed status show get-cgroup-attr set-cgroup-attr unset-cgroup-attr set-cgroup help \
     reset-failed list-unit-files enable disable is-enabled reenable preset mask unmask link load list-jobs cancel dump \
     list-dependencies snapshot delete daemon-reload daemon-reexec show-environment set-environment unset-environment \
-    default rescue emergency halt poweroff reboot kexec exit suspend hibernate hybrid-sleep switch-root list-timers \
-    set-property import-environment get-default list-automounts is-system-running try-reload-or-restart freeze \
+    default rescue emergency halt poweroff reboot kexec exit suspend suspend-then-hibernate hibernate hybrid-sleep switch-root \
+    list-timers set-property import-environment get-default list-automounts is-system-running try-reload-or-restart freeze \
     thaw mount-image bind clean
 if test $systemd_version -gt 208 2>/dev/null
     set commands $commands cat
@@ -97,6 +97,6 @@ end
 
 # New options since systemd 242
 if test $systemd_version -ge 242 2>/dev/null
-    complete -x -c systemctl -l boot-loader-entry -n '__fish_seen_subcommand_from halt poweroff reboot' -d 'Boot into a specific boot loader entry on next boot' -a '(systemctl --boot-loader-entry=help --no-legend --no-pager)'
-    complete -x -c systemctl -l boot-loader-menu -n '__fish_seen_subcommand_from halt poweroff reboot' -d 'Boot into boot loader menu on next boot'
+    complete -x -c systemctl -l boot-loader-entry -n "__fish_seen_subcommand_from halt poweroff reboot" -d "Boot into a specific boot loader entry on next boot" -a "(systemctl --boot-loader-entry=help --no-legend --no-pager 2>/dev/null)"
+    complete -x -c systemctl -l boot-loader-menu -n "__fish_seen_subcommand_from halt poweroff reboot" -d "Boot into boot loader menu on next boot"
 end
