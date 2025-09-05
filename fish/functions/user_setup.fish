@@ -14,7 +14,7 @@ function user_setup -d "Setup a user account, downloading all files and placing 
     # If we are using GNOME Terminal, the "Unnamed" profile needs to be set
     if is_installed gnome-terminal
         set gnome_prof_dir /org/gnome/terminal/legacy/profiles:/
-        set gnome_prof_base :(dconf dump $gnome_prof_dir | grep "list=" | cut -d \' -f 2)
+        set gnome_prof_base :(dconf dump $gnome_prof_dir | string match -er "list=" | cut -d \' -f 2)
         if test "$gnome_prof_base" = ""
             set gnome_prof_base (dconf dump $gnome_prof_dir | head -1 | awk -F '[][]' '{print $2}')
             if test "$gnome_prof_base" = ""
@@ -163,7 +163,7 @@ function user_setup -d "Setup a user account, downloading all files and placing 
     end
 
     # Set up fish environment with fisher
-    if fisher list &| grep -q /tmp/env/fish
+    if fisher list &| string match -qr /tmp/env/fish
         fisher remove /tmp/env/fish
     end
     set fisher_plugins \

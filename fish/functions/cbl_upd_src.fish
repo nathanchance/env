@@ -76,7 +76,7 @@ function cbl_upd_src -d "Update source trees in $CBL_SRC"
                 header "Updating $folder"
 
                 if test -d $folder
-                    if git -C $folder remote &| grep -q origin-ssh
+                    if git -C $folder remote &| string match -qr origin-ssh
                         set -a remotes origin-ssh
                     end
                     git -C $folder remote update $remotes

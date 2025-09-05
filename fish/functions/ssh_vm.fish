@@ -33,7 +33,7 @@ function ssh_vm -d "ssh into a VM running via cbl_vmm.py"
 
     set user_host $user@localhost
 
-    if not grep -q "^\[localhost\]:$port" $HOME/.ssh/known_hosts
+    if not string match -qr "^\[localhost\]:$port" <$HOME/.ssh/known_hosts
         set -a cmd_args \
             -o "StrictHostKeyChecking no"
     end

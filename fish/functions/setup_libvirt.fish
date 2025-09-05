@@ -43,7 +43,7 @@ function setup_libvirt -d "Setup libvirt for current user"
     sudo fish -c "usermod -aG libvirt $user
 and systemctl enable --now libvirtd.service
 and virsh net-autostart default
-and if virsh net-info default | grep -q 'Active:.*no'
+and if virsh net-info default | string match -qr 'Active:\s+no'
     virsh net-start default
 end"
 end

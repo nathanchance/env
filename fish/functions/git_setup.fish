@@ -68,7 +68,7 @@ function git_setup -d "Configure git"
     git_aliases
 
     if command -q gh; and gh auth status &>/dev/null
-        if not gh extension list &| grep -q gennaro-tedesco/gh-f
+        if not gh extension list &| string match -qr gennaro-tedesco/gh-f
             gh extension install gennaro-tedesco/gh-f
         end
     end

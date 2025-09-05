@@ -9,7 +9,7 @@ function get_distro -d "Prints a short name for the currently running distro"
         for file in /etc/os-release /usr/lib/os-release
             test -e $file; and break
         end
-        set os_release_id (grep ^ID= $file | string split -f 2 = | string replace -a '"' "")
+        set os_release_id (string match -gr '^ID="?([^"]+)"?$' </etc/os-release)
         switch "$os_release_id"
             case almalinux alpine arch debian fedora rocky ubuntu
                 echo $os_release_id

@@ -17,7 +17,7 @@ function _hydro_addon_nathan -d "Hydro prompt customizations"
 
     # Print symbol if we are in a container (like default toolbox prompt)
     if in_nspawn
-        if set incoming (findmnt -n -o FSROOT /run/host/incoming | sort -u)
+        if set incoming (findmnt -n -o FSROOT /run/host/incoming | path sort -u)
             set container_str '('(string split -f 2 -m 1 -r / $incoming)')'
         else if set image_id (string match -gr 'IMAGE_ID="?([^"]+)' </usr/lib/os-release)
             if test -e /etc/ephemeral
@@ -36,7 +36,7 @@ function _hydro_addon_nathan -d "Hydro prompt customizations"
     else if command -q tmux; and set -q TMUX
         # For whatever reason, there are times where SSH_CONNECTION does
         # not get updated in the environment by tmux so check that here
-        if tmux show-env &| grep -q SSH_CONNECTION=
+        if tmux show-env &| string match -qr SSH_CONNECTION=
             set in_ssh_true
         end
     end

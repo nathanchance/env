@@ -165,7 +165,7 @@ set gcc_flags \
 $good_clang $clang_flags $common_flags
 or return
 
-$bad_clang $clang_flags $common_flags &| grep -F \'\'
+$bad_clang $clang_flags $common_flags &| string match -er \'\'
 test "$pipestatus" = "1 0"' >$cvise_test
     chmod +x $cvise_test
 

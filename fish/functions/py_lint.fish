@@ -25,7 +25,7 @@ function py_lint -d "Lint Python files"
     end
 
     set commands pylint vulture yapf
-    if git ls-files | grep -Fq ruff.toml
+    if git ls-files | string match -qr 'ruff\.toml'
         set -a commands ruff
     else
         set -a commands flake8
