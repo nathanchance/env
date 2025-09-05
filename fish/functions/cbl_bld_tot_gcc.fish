@@ -11,7 +11,7 @@ function cbl_bld_tot_gcc -d "Build tip of tree GCC (often for comparison against
 
     set binutils_src $CBL_SRC_C/binutils
     if not test -d $binutils_src
-        git clone https://sourceware.org/git/binutils-gdb.git $binutils_src
+        clone_repo_from_bundle (path basename $binutils_src) $binutils_src
         python3 -c (string match -er '^LATEST_BINUTILS_RELEASE =' <$CBL_GIT/tc-build/build-binutils.py)"; print('binutils-' + '_'.join(str(x) for x in LATEST_BINUTILS_RELEASE if x))" | read binutils_tag
         git -C $binutils_src switch -d $binutils_tag
     end
