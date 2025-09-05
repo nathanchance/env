@@ -1,1 +1,1 @@
-complete -c edfunc -x -a "(get_my_funcs)"
+complete -c edfunc -x -a "(__gen_func_completions)"

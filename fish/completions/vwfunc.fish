@@ -1,1 +1,1 @@
-complete -c vwfunc -x -a "(get_my_funcs)"
+complete -c vwfunc -x -a "(__gen_func_completions)"
