@@ -9,6 +9,12 @@ function cbl_clone_repo -d "Clone certain repos for ClangBuiltLinux testing and 
         set -l git_clone_args
         set -l use_repo
 
+        # Some arguments may have shorthands, expand them before handling
+        switch $arg
+            case lkt
+                set arg llvm-kernel-testing
+        end
+
         switch $arg
             case boot-utils containers continuous-integration2 tc-build
                 set url https://github.com/ClangBuiltLinux/$arg.git
@@ -45,6 +51,9 @@ function cbl_clone_repo -d "Clone certain repos for ClangBuiltLinux testing and 
             case linux-fast-headers
                 set git_clone_args -b sched/headers
                 set url https://git.kernel.org/pub/scm/linux/kernel/git/mingo/tip.git/
+
+            case llvm-kernel-testing
+                set url https://github.com/nathanchance/$arg.git
 
             case llvm-android
                 set use_repo true
