@@ -21,6 +21,6 @@ function b4_patch -d "Download a b4 .mbx and rename the extension to .patch"
     end
 
     if test -f series; or string match -qr $CBL_GIT/continuous-integration2/patches $PWD
-        ls -1 *.patch >series
+        path sort *.patch >series
     end
 end
