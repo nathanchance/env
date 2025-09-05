@@ -15,8 +15,7 @@ function edfunc -d "Edit function or script file in $ENV_FOLDER"
     end
 
     if test "$fzf" = true
-        set func_dir $ENV_FOLDER/fish/functions
-        set -a funcs_to_edit (fd . $func_dir | sed -e "s;$func_dir/;;g" -e "s;.fish;;" | fzf -m)
+        set -a funcs_to_edit (get_my_funcs | fzf -m)
     end
 
     for func_to_edit in $funcs_to_edit
