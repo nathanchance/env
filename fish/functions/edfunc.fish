@@ -34,8 +34,10 @@ function edfunc -d "Edit function or script file in $ENV_FOLDER"
         set -a files_to_edit $func_file
     end
 
-    vim -p $files_to_edit
-    if test "$reload" = true
-        rld
+    if test -n "$files_to_edit"
+        vim -p $files_to_edit
+        if test "$reload" = true
+            rld
+        end
     end
 end
