@@ -140,9 +140,7 @@ def install_packages():
         'tuxmake',
     ]  # yapf: disable
 
-    if fedora_version < 39:
-        packages.append('exa')
-    elif fedora_version < 42:
+    if fedora_version < 42:
         packages.append('eza')
 
     if not lib.setup.is_lxc():

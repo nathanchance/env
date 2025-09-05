@@ -3,8 +3,8 @@
 # Copyright (C) 2022-2023 Nathan Chancellor
 
 function cdf -d "cd + fzf"
-    if command -q exa
-        set ls_cmd exa
+    if command -q eza
+        set ls_cmd eza
     else
         set ls_cmd ls
     end

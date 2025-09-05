@@ -73,7 +73,7 @@ def update_and_install_packages():
 
         # Nicer GNU utilities
         'bat',
-        'exa',
+        'eza',
         'fd',
         'ripgrep',
 

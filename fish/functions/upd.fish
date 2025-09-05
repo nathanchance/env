@@ -130,7 +130,7 @@ function upd -d "Runs the update command for the current distro or downloads/upd
         set -l submodules
 
         switch $target
-            case b4 bat btop diskus duf exa fd fzf hyperfine repo rg shellcheck shfmt tuxmake yapf
+            case b4 bat btop diskus duf eza fd fzf hyperfine repo rg shellcheck shfmt tuxmake yapf
                 if command -q $target; and test "$force" != true
                     print_warning "$target is installed through package manager, skipping install..."
                     continue
@@ -285,20 +285,6 @@ function upd -d "Runs the update command for the current distro or downloads/upd
                     crl $url | tar -C $work_dir -xzf -; or return
 
                     $install -Dvm755 $work_dir/duf $binary
-
-                case exa
-                    switch (uname -m)
-                        case x86_64
-                            set repo ogham/exa
-                            set ver (glr $repo)
-                            set url https://github.com/$repo/releases/download/$ver/exa-linux-x86_64-$ver.zip
-
-                            crl -O $url; or return
-                            unzip (path basename $url); or return
-
-                            $install -Dvm755 bin/exa $binary
-                            $install -Dvm644 completions/exa.fish $completions/exa.fish
-                    end
 
                 case eza
                     set repo eza-community/eza

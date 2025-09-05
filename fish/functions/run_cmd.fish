@@ -66,7 +66,7 @@ function run_cmd -d "Run specified command depending on where it is available"
             case duf
                 df -hT
 
-            case exa eza
+            case eza
                 command ls --color=auto $cmd_args
 
             case yapf

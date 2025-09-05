@@ -20,7 +20,7 @@ function updall -d "Update binaries in $BIN_FOLDER"
         btop \
         diskus \
         duf \
-        exa \
+        eza \
         fd \
         fisher \
         fzf \
