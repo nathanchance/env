@@ -47,7 +47,8 @@ function cbl_bld_tot_gcc -d "Build tip of tree GCC (often for comparison against
         begin
             echo "BINUTILS_SRC=$binutils_src
 CHECKING=release
-ECHO=/bin/echo"
+ECHO=/bin/echo
+EXTRA_BINUTILS_CONF=--disable-gprofng"
             if test -n "$extra_conf"
                 echo $extra_conf
             end
