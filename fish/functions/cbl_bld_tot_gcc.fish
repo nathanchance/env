@@ -3,7 +3,9 @@
 # Copyright (C) 2025 Nathan Chancellor
 
 function cbl_bld_tot_gcc -d "Build tip of tree GCC (often for comparison against clang)"
-    set gcc_src $CBL_SRC_C/gcc
+    if not set -q gcc_src
+        set gcc_src $CBL_SRC_C/gcc
+    end
     if not test -d $gcc_src
         git clone https://gcc.gnu.org/git/gcc.git $gcc_src
         or return
@@ -12,9 +14,14 @@ function cbl_bld_tot_gcc -d "Build tip of tree GCC (often for comparison against
     set binutils_src $CBL_SRC_C/binutils
     if not test -d $binutils_src
         clone_repo_from_bundle (path basename $binutils_src) $binutils_src
-        python3 -c (string match -er '^LATEST_BINUTILS_RELEASE =' <$CBL_GIT/tc-build/build-binutils.py)"; print('binutils-' + '_'.join(str(x) for x in LATEST_BINUTILS_RELEASE if x))" | read binutils_tag
-        git -C $binutils_src switch -d $binutils_tag
+        or return
     end
+    begin
+        python3 -c (string match -er '^LATEST_BINUTILS_RELEASE =' <$CBL_GIT/tc-build/build-binutils.py)"; print('binutils-' + '_'.join(str(x) for x in LATEST_BINUTILS_RELEASE if x))" | read binutils_tag
+        and git -C $binutils_src remote update -p
+        and git -C $binutils_src switch -d $binutils_tag
+    end
+    or return
 
     set date_time (date +%F_%H-%M-%S)
     set gcc_base_ver (cat $gcc_src/gcc/BASE-VER)
