@@ -157,7 +157,7 @@ function upd -d "Runs the update command for the current distro or downloads/upd
                 if test -n "$subfolder"
                     set src_base $BIN_SRC_FOLDER/$subfolder
                 end
-                set src $src_base/(string replace ".git" "" (path basename $git_url))
+                set src $src_base/(path basename $git_url | string replace ".git" "")
                 if not test -d $src
                     mkdir -p (path dirname $src)
                     git clone $git_clone_args $git_url $src; or return
@@ -175,20 +175,14 @@ function upd -d "Runs the update command for the current distro or downloads/upd
                 set binary /usr/local/bin/$target
                 set completions $__fish_sysconf_dir/completions
 
-                set chmod sudo chmod
-                set curl sudo curl -LSs
                 set install sudo install
-                set mkdir sudo mkdir
 
                 sudo true; or return
             else
                 set binary $BIN_FOLDER/$target
                 set completions $__fish_config_dir/completions
 
-                set chmod chmod
-                set curl curl -LSs
                 set install install
-                set mkdir mkdir
             end
 
             set work_dir (mktemp -d)
@@ -234,7 +228,7 @@ function upd -d "Runs the update command for the current distro or downloads/upd
                     set url https://github.com/$repo/releases/download/$ver/$target-$ver-$rust_triple.tar.gz
 
                     crl $url | tar -xzf -; or return
-                    cd (string replace ".tar.gz" "" (path basename $url)); or return
+                    cd (path basename $url | string replace ".tar.gz" ""); or return
 
                     $install -Dvm755 $target $binary
                     switch $target
@@ -324,7 +318,7 @@ function upd -d "Runs the update command for the current distro or downloads/upd
                     set url https://github.com/$repo/releases/download/$ver/gh_(string replace "v" "" $ver)_linux_$arch.tar.gz
 
                     crl $url | tar -xzf -
-                    cd (string replace ".tar.gz" "" (path basename $url)); or return
+                    cd (path basename $url | string replace ".tar.gz" ""); or return
 
                     $install -Dvm755 bin/gh $binary
 
@@ -349,9 +343,7 @@ function upd -d "Runs the update command for the current distro or downloads/upd
                         print_warning "$target requires an unversioned python binary, skipping..."
                         continue
                     end
-                    $mkdir -p (path dirname $binary)
-                    $curl -o $binary https://storage.googleapis.com/git-repo-downloads/repo
-                    $chmod a+x $binary
+                    crl https://storage.googleapis.com/git-repo-downloads/repo | $install -Dvm755 /dev/stdin $binary
 
                 case rg
                     switch $arch
@@ -370,7 +362,7 @@ function upd -d "Runs the update command for the current distro or downloads/upd
                             set url https://github.com/$repo/releases/download/$ver/ripgrep-$ver-x86_64-unknown-linux-musl.tar.gz
 
                             crl $url | tar -xzf -; or return
-                            cd (string replace '.tar.gz' '' (path basename $url)); or return
+                            cd (path basename $url | string replace '.tar.gz' ''); or return
 
                             $install -Dvm755 rg $binary
                             $install -Dvm644 complete/rg.fish $completions/rg.fish
@@ -408,11 +400,8 @@ function upd -d "Runs the update command for the current distro or downloads/upd
 
                     set repo mvdan/sh
                     set ver (glr $repo)
-                    set url https://github.com/$repo/releases/download/$ver/shfmt_"$ver"_linux_$arch
 
-                    $mkdir -p (path dirname $binary)
-                    $curl -o $binary $url
-                    $chmod +x $binary
+                    crl https://github.com/$repo/releases/download/$ver/shfmt_"$ver"_linux_$arch | $install -Dvm755 /dev/stdin $binary
 
                 case vmtest
                     switch $arch
@@ -425,9 +414,8 @@ function upd -d "Runs the update command for the current distro or downloads/upd
 
                     set repo danobi/vmtest
                     set ver (glr $repo)
-                    set url https://github.com/$repo/releases/download/$ver/vmtest-$arch
 
-                    crl $url | $install -Dvm755 /dev/stdin $binary
+                    crl https://github.com/$repo/releases/download/$ver/vmtest-$arch | $install -Dvm755 /dev/stdin $binary
             end
 
             popd
