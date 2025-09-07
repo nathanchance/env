@@ -5,7 +5,7 @@
 function cbl_gen_vm_boot_files -d "Generate files needed to boot local compiled kernels with cbl_vmm.py"
     # Make sure we are not running our own kernel, which might not have modules enabled
     if string match -qr '\(nathan@' (cat /proc/version)
-        print_error "It seems like a non-stock kernel is booted?"
+        __print_error "It seems like a non-stock kernel is booted?"
         return 1
     end
 
@@ -21,5 +21,5 @@ function cbl_gen_vm_boot_files -d "Generate files needed to boot local compiled 
     lsmod >$kernel_folder/lsmod
 
     # Generate initrd
-    gen_slim_initrd $kernel_folder
+    __gen_slim_initrd $kernel_folder
 end

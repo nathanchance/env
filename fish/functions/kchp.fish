@@ -10,7 +10,7 @@ function kchp -d "Shorthand for scripts/checkpatch.pl"
     end
 
     if not test -x $checkpatch
-        print_error "$checkpatch does not exist or is not executable?"
+        __print_error "$checkpatch does not exist or is not executable?"
         return 1
     end
 

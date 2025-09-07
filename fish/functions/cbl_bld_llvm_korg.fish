@@ -3,7 +3,7 @@
 # Copyright (C) 2024 Nathan Chancellor
 
 function cbl_bld_llvm_korg -d "Build (and optionally test) LLVM for kernel.org"
-    in_container_msg -h
+    __in_container_msg -h
     or return
 
     # Just LLVM is required, Linux will be added if needed.
@@ -60,7 +60,7 @@ function cbl_bld_llvm_korg -d "Build (and optionally test) LLVM for kernel.org"
         and if not test -d $CBL_TC_BLD
             git clone -b personal https://github.com/nathanchance/tc-build $CBL_TC_BLD
         end
-        and if not is_location_primary
+        and if not __is_location_primary
             git -C $CBL_TC_BLD urh
         end
     end
@@ -79,7 +79,7 @@ function cbl_bld_llvm_korg -d "Build (and optionally test) LLVM for kernel.org"
             --llvm-folder $CBL_SRC_C/llvm-project \
             --tc-build-folder $CBL_TC_BLD \
             --versions $llvm_vers
-        tg_msg "pgo-llvm-builder failed!"
+        __tg_msg "pgo-llvm-builder failed!"
         return 1
     end
     bell

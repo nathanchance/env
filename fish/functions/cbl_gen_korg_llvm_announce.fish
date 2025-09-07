@@ -4,12 +4,12 @@
 
 function cbl_gen_korg_llvm_announce -d "Generate kernel.org LLVM release announcement"
     if test $PWD != $TMP_FOLDER/pgo-llvm-builder-staging
-        print_error "Not in $TMP_FOLDER/pgo-llvm-builder-staging?"
+        __print_error "Not in $TMP_FOLDER/pgo-llvm-builder-staging?"
         return 1
     end
 
     if not test (count $argv) -eq 1
-        print_error (status function)' <ver>'
+        __print_error (status function)' <ver>'
         return 1
     end
 

@@ -3,7 +3,7 @@
 # Copyright (C) 2022-2023 Nathan Chancellor
 
 function cbl_install_vm -d "Wrapper for install-vm.py"
-    in_container_msg -h; or return
+    __in_container_msg -h; or return
 
     set install_vm_py $CBL_GIT/containers/ci/install-vm.py
 

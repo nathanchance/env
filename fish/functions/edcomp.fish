@@ -25,7 +25,7 @@ function edcomp -d "Edit completions in $ENV_FOLDER"
         else
             set comp_file $comp_dir/$comp_to_edit.fish
             if not test -f "$comp_file"
-                print_error "$comp_file does not exist!"
+                __print_error "$comp_file does not exist!"
                 return 1
             end
         end

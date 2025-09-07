@@ -11,7 +11,7 @@ function prep_pkg_for_vm -d "Prepare package building files for virtual machine 
     set arch (uname -m)
     set vm $argv[2]
     if test -z "$vm"
-        print_warning "No virtual machine, assuming default for $arch..."
+        __print_warning "No virtual machine, assuming default for $arch..."
         switch $arch
             case aarch64
                 set vm fedora
@@ -32,7 +32,7 @@ function prep_pkg_for_vm -d "Prepare package building files for virtual machine 
         end
     end
     if not set -q src_dir
-        print_error "Could not find source for package '$package' in possible locations '$package_dirs'!"
+        __print_error "Could not find source for package '$package' in possible locations '$package_dirs'!"
         return 1
     end
 

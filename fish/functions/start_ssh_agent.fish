@@ -14,7 +14,7 @@ function start_ssh_agent -d "Launch an ssh agent only if it has not already been
                 set force true
         end
     end
-    if in_nspawn
+    if __in_nspawn
         set force true
     end
     if not set -q force

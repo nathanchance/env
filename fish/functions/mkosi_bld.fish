@@ -17,7 +17,7 @@ function mkosi_bld -d "Build a distribution using mkosi"
     end
     set mkosi_conf $directory/mkosi.conf
     if not test -e $mkosi_conf
-        print_error "No build files for $image?"
+        __print_error "No build files for $image?"
         return 1
     end
 
@@ -26,7 +26,7 @@ function mkosi_bld -d "Build a distribution using mkosi"
     # pgo-llvm-builder requires a patched mkosi, so require the venv
     # for that.
     if command -q mkosi; and test (mkosi --version | string match -gr '^mkosi ([0-9]+)') -ge 25; and not test (path basename $directory) = pgo-llvm-builder
-    else if not in_venv
+    else if not __in_venv
         set venv_dir $PY_VENV_DIR/mkosi
         if not test -e $venv_dir
             py_venv c mkosi
@@ -44,7 +44,7 @@ function mkosi_bld -d "Build a distribution using mkosi"
             crl https://github.com/nathanchance/patches/raw/refs/heads/main/mkosi/buster.patch | patch -d $venv_dir/lib/python*/site-packages -N -p1
         end
     else if test (path basename $VIRTUAL_ENV) != mkosi
-        print_error "Already in a virtual environment?"
+        __print_error "Already in a virtual environment?"
         return 1
     end
 
@@ -83,7 +83,7 @@ function mkosi_bld -d "Build a distribution using mkosi"
         set machine_dir /var/lib/machines/(string match -gr '^ImageId=(.*)' <$mkosi_conf)
         set context (sudo stat $machine_dir | string match -gr '^Context: (.*)$')
         if test "$context" != "system_u:object_r:unlabeled_t:s0"; and test "$context" != "system_u:object_r:systemd_machined_var_lib_t:s0"
-            print_warning "$machine_dir context is unexpected ('$context'), running restorcecon..."
+            __print_warning "$machine_dir context is unexpected ('$context'), running restorcecon..."
             sudo restorecon -R $machine_dir
         end
     end

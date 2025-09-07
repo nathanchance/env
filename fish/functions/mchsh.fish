@@ -4,7 +4,7 @@
 
 # 'machinectl shell' does not return the error code of the called process, so this should only be used interactively.
 function mchsh -d "Wrapper around 'machinectl shell'"
-    in_container_msg -h
+    __in_container_msg -h
     or return
 
     for arg in $argv

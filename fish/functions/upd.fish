@@ -21,7 +21,7 @@ function upd -d "Runs the update command for the current distro or downloads/upd
     for target in $targets
         switch $target
             case env
-                if not is_location_primary
+                if not __is_location_primary
                     git -C $ENV_FOLDER pull -qr; or return
                     rld
                 end
@@ -33,7 +33,7 @@ function upd -d "Runs the update command for the current distro or downloads/upd
 
             case hydro
                 set repo $GITHUB_FOLDER/$target
-                if is_location_primary
+                if __is_location_primary
                     switch $target
                         case hydro
                             set branch main
@@ -80,7 +80,7 @@ function upd -d "Runs the update command for the current distro or downloads/upd
 
             case os os-no-container
                 $PYTHON_SCRIPTS_FOLDER/upd_distro.py $yes
-                if test "$target" != os-no-container; and not in_container; and test $LOCATION != mac
+                if test "$target" != os-no-container; and not __in_container; and test $LOCATION != mac
                     sd_nspawn -r "$PYTHON_SCRIPTS_FOLDER/upd_distro.py $yes"
                 end
                 if command -q mac
@@ -89,11 +89,11 @@ function upd -d "Runs the update command for the current distro or downloads/upd
                 continue
 
             case tmuxp
-                if in_container
-                    print_warning "tmuxp should be installed while in the host environment, skipping..."
+                if __in_container
+                    __print_warning "tmuxp should be installed while in the host environment, skipping..."
                 else
                     if command -q tmuxp; and test "$force" != true
-                        print_warning "tmuxp is installed through package manager, skipping..."
+                        __print_warning "tmuxp is installed through package manager, skipping..."
                     else
                         set -l tmuxp_tmp (mktemp -d)
                         set -l tmuxp_prefix $BIN_FOLDER/tmuxp
@@ -132,7 +132,7 @@ function upd -d "Runs the update command for the current distro or downloads/upd
         switch $target
             case b4 bat btop diskus duf eza fd fzf hyperfine repo rg shellcheck shfmt tuxmake yapf
                 if command -q $target; and test "$force" != true
-                    print_warning "$target is installed through package manager, skipping install..."
+                    __print_warning "$target is installed through package manager, skipping install..."
                     continue
                 end
         end
@@ -171,7 +171,7 @@ function upd -d "Runs the update command for the current distro or downloads/upd
             ####################################
             # PREBUILT OR PODMAN BASED INSTALL #
             ####################################
-            if in_container
+            if __in_container
                 set binary /usr/local/bin/$target
                 set completions $__fish_sysconf_dir/completions
 
@@ -218,8 +218,8 @@ function upd -d "Runs the update command for the current distro or downloads/upd
 
             switch $target
                 case bat diskus fd hyperfine
-                    if test (get_glibc_version) -lt 22900
-                        print_warning "$target requires glibc 2.29 or newer, skipping..."
+                    if test (__get_glibc_version) -lt 22900
+                        __print_warning "$target requires glibc 2.29 or newer, skipping..."
                         continue
                     end
                     set repo sharkdp/$target
@@ -254,7 +254,7 @@ function upd -d "Runs the update command for the current distro or downloads/upd
                     crl $url | tar -xjf -; or return
 
                     set -l prefix
-                    if in_container
+                    if __in_container
                         set prefix /usr/local
                     else
                         set prefix $BIN_FOLDER/btop
@@ -323,8 +323,8 @@ function upd -d "Runs the update command for the current distro or downloads/upd
                     $install -Dvm755 bin/gh $binary
 
                 case iosevka
-                    if in_container
-                        print_error "Iosevka should be installed on the host, not the container!"
+                    if __in_container
+                        __print_error "Iosevka should be installed on the host, not the container!"
                         continue
                     end
 
@@ -340,7 +340,7 @@ function upd -d "Runs the update command for the current distro or downloads/upd
 
                 case repo
                     if not command -q python
-                        print_warning "$target requires an unversioned python binary, skipping..."
+                        __print_warning "$target requires an unversioned python binary, skipping..."
                         continue
                     end
                     crl https://storage.googleapis.com/git-repo-downloads/repo | $install -Dvm755 /dev/stdin $binary
@@ -370,7 +370,7 @@ function upd -d "Runs the update command for the current distro or downloads/upd
 
                 case rustup
                     if test $LOCATION = mac
-                        print_error "$target should be installed via homebrew!"
+                        __print_error "$target should be installed via homebrew!"
                         return 1
                     end
                     curl --proto '=https' --tlsv1.3 -sSf https://sh.rustup.rs | sh
@@ -408,7 +408,7 @@ function upd -d "Runs the update command for the current distro or downloads/upd
                         case aarch64 x86_64
                             # pass
                         case '*'
-                            print_warning "$target is only available for x86_64, build from source if required..."
+                            __print_warning "$target is only available for x86_64, build from source if required..."
                             continue
                     end
 

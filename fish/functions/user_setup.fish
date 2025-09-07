@@ -12,13 +12,13 @@ function user_setup -d "Setup a user account, downloading all files and placing 
     end
 
     # If we are using GNOME Terminal, the "Unnamed" profile needs to be set
-    if is_installed gnome-terminal
+    if __is_installed gnome-terminal
         set gnome_prof_dir /org/gnome/terminal/legacy/profiles:/
         set gnome_prof_base :(dconf dump $gnome_prof_dir | string match -er "list=" | cut -d \' -f 2)
         if test "$gnome_prof_base" = ""
             set gnome_prof_base (dconf dump $gnome_prof_dir | head -1 | awk -F '[][]' '{print $2}')
             if test "$gnome_prof_base" = ""
-                print_error "Rename 'Unnamed' profile in GNOME Terminal before running this function"
+                __print_error "Rename 'Unnamed' profile in GNOME Terminal before running this function"
                 return 1
             end
         end
@@ -33,7 +33,7 @@ function user_setup -d "Setup a user account, downloading all files and placing 
             set trusted_gpg true
             set trusted_ssh true
     end
-    if in_orb
+    if __in_orb
         set trusted_gpg true
         set trusted_ssh true
         set skip_install_ssh_keys true # orbstack passes along the macOS ssh-agent
@@ -42,7 +42,7 @@ function user_setup -d "Setup a user account, downloading all files and placing 
 
     # Trusting an environment with GPG but not SSH makes little sense
     if test "$trusted_gpg" = true; and not test "$trusted_ssh" = true
-        print_error "This environment trusts GPG but not SSH?"
+        __print_error "This environment trusts GPG but not SSH?"
         return 1
     end
 
@@ -67,7 +67,7 @@ function user_setup -d "Setup a user account, downloading all files and placing 
             cp -v $ssh_keys/id_ed25519{,.pub} $ssh_folder
             chmod 600 $ssh_folder/id_ed25519
 
-            if is_location_primary
+            if __is_location_primary
                 cp -v $ssh_keys/korg-nathan $ssh_folder/id_korg
                 chmod 600 $ssh_folder/id_korg
 
@@ -231,7 +231,7 @@ rpmbuild/' >>$gitignore
         set -l libvirt_pool $VM_FOLDER/libvirt
 
         mkdir -p $libvirt_pool
-        if user_exists libvirt-qemu
+        if __user_exists libvirt-qemu
             setfacl -m u:libvirt-qemu:rx $HOME
         end
 
@@ -241,7 +241,7 @@ rpmbuild/' >>$gitignore
     end
 
     # Binaries
-    if is_location_primary
+    if __is_location_primary
         clone_aur_repos
     end
     if command -q modprobed-db
@@ -249,7 +249,7 @@ rpmbuild/' >>$gitignore
         modprobed-db store
         systemctl --user enable --now modprobed-db.service
     end
-    if test (get_distro) = alpine
+    if test (__get_distro) = alpine
         upd fisher vim; or return
     else
         updall --no-os; or return
@@ -273,23 +273,23 @@ rpmbuild/' >>$gitignore
 
     # Terminal profiles
     if set -q DISPLAY
-        if is_installed gnome-terminal
+        if __is_installed gnome-terminal
             dconf load $gnome_prof <$configs/local/Nathan.dconf
         end
 
-        if is_installed google-chrome
+        if __is_installed google-chrome
             echo "--enable-features=WebUIDarkMode
 --force-dark-mode" >$HOME/.config/chrome-flags.conf
         end
 
-        if is_installed konsole
+        if __is_installed konsole
             set konsole_share $HOME/.local/share/konsole
             mkdir -p $konsole_share
             ln -frsv $configs/local/Nathan.profile $konsole_share/Nathan.profile
             ln -frsv $configs/local/snazzy.colorscheme $konsole_share/snazzy.colorscheme
         end
 
-        if is_installed xfce4-terminal
+        if __is_installed xfce4-terminal
             set xfce_share $HOME/.local/share/xfce4/terminal/colorschemes
             mkdir -p $xfce_share
             ln -frsv $configs/local/snazzy.theme $xfce_share

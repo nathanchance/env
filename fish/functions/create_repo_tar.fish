@@ -6,7 +6,7 @@ function create_repo_tar -d "Create a tarball of a git repo from just the tracke
     if test (count $argv) -gt 0
         set repo $argv[1]
         if not test -d $repo
-            print_error "$repo does not exist?"
+            __print_error "$repo does not exist?"
             return 1
         end
     else

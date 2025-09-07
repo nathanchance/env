@@ -1,6 +1,6 @@
 complete -c cbl_upd_krnl -f
 complete -c cbl_upd_krnl -f -s r -l reboot -d "Reboot system after updating kernel"
-if test (get_distro) = arch
+if test (__get_distro) = arch
     complete -c cbl_upd_krnl -f -s k -l kexec -d "Kexec system after updating kernel"
 
     set -l valid_arch_krnls {linux-,}{debug,{mainline,next}-llvm}

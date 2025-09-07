@@ -3,7 +3,7 @@
 # Copyright (C) 2021-2023 Nathan Chancellor
 
 function cbl_lkt -d "Tests a Linux kernel with llvm-kernel-testing"
-    in_container_msg -c; or return
+    __in_container_msg -c; or return
 
     set i 1
     set argc (count $argv)
@@ -74,7 +74,7 @@ function cbl_lkt -d "Tests a Linux kernel with llvm-kernel-testing"
                 set i $next
 
             case '*'
-                print_error "Invalid argument: '$arg'"
+                __print_error "Invalid argument: '$arg'"
                 return 1
         end
         set i (math $i + 1)
@@ -104,7 +104,7 @@ function cbl_lkt -d "Tests a Linux kernel with llvm-kernel-testing"
 
     if test -n "$binutils_prefix"
         if not test -d $binutils_prefix/bin
-            print_error "$binutils_prefix value is wrong, no bin folder"
+            __print_error "$binutils_prefix value is wrong, no bin folder"
             return 1
         end
 
@@ -117,7 +117,7 @@ function cbl_lkt -d "Tests a Linux kernel with llvm-kernel-testing"
         end
 
         if test "$as_found" != true
-            print_error "GNU as could not be found in $binutils_prefix/bin"
+            __print_error "GNU as could not be found in $binutils_prefix/bin"
             return 1
         end
 
@@ -126,7 +126,7 @@ function cbl_lkt -d "Tests a Linux kernel with llvm-kernel-testing"
 
     if test -n "$llvm_prefix"
         if not test -d $llvm_prefix/bin
-            print_error "$llvm_prefix value is wrong, no bin folder"
+            __print_error "$llvm_prefix value is wrong, no bin folder"
             return 1
         end
 
@@ -135,7 +135,7 @@ function cbl_lkt -d "Tests a Linux kernel with llvm-kernel-testing"
         end
 
         if test -z "$clang_binary"
-            print_error "clang could not be found in $tc_prefix/bin"
+            __print_error "clang could not be found in $tc_prefix/bin"
             return 1
         end
 
@@ -144,7 +144,7 @@ function cbl_lkt -d "Tests a Linux kernel with llvm-kernel-testing"
 
     if test -n "$tc_prefix"
         if not test -d $tc_prefix/bin
-            print_error "$tc_prefix value is wrong, no bin folder"
+            __print_error "$tc_prefix value is wrong, no bin folder"
             return 1
         end
 
@@ -160,12 +160,12 @@ function cbl_lkt -d "Tests a Linux kernel with llvm-kernel-testing"
         end
 
         if test "$as_found" != true
-            print_error "GNU as could not be found in $tc_prefix/bin"
+            __print_error "GNU as could not be found in $tc_prefix/bin"
             return 1
         end
 
         if test "$clang_found" != true
-            print_error "clang could not be found in $tc_prefix/bin"
+            __print_error "clang could not be found in $tc_prefix/bin"
             return 1
         end
 
@@ -178,7 +178,7 @@ function cbl_lkt -d "Tests a Linux kernel with llvm-kernel-testing"
         end
 
         if test -z "$qemu_binary"
-            print_error "QEMU could not be found in $qemu_prefix/bin"
+            __print_error "QEMU could not be found in $qemu_prefix/bin"
             return 1
         end
 
@@ -192,12 +192,12 @@ function cbl_lkt -d "Tests a Linux kernel with llvm-kernel-testing"
     set log_folder $CBL_LOGS/(path basename $linux_folder)-(date +%F-%T)
     mkdir -p $log_folder
 
-    if is_github_actions
+    if __is_github_actions
         set lkt $GITHUB_WORKSPACE/lkt
     else
         set lkt $CBL_LKT
         cbl_clone_repo (path basename $lkt)
-        if not is_location_primary
+        if not __is_location_primary
             git -C $lkt urh
         end
     end
@@ -247,8 +247,8 @@ function cbl_lkt -d "Tests a Linux kernel with llvm-kernel-testing"
             rm -fr $log_folder
         else
             set msg "build.py failed in $linux_folder (ret: $lkt_ret)"
-            print_error "$msg"
-            tg_msg "$msg"
+            __print_error "$msg"
+            __tg_msg "$msg"
         end
         return $lkt_ret
     end
@@ -290,11 +290,11 @@ if total_size > MAX_SIZE:
 
     print(tarball)
 
-# Otherwise, just print the files for attaching via mail_msg
+# Otherwise, just print the files for attaching via __mail_msg
 else:
     for file in files:
         print(str(file))")
-    mail_msg $report $log_files
+    __mail_msg $report $log_files
 
     echo "Full logs available at: $log_folder"
     echo

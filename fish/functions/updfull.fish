@@ -3,7 +3,7 @@
 # Copyright (C) 2022-2023 Nathan Chancellor
 
 function updfull -d "Update host machine, shell environment, and main development container"
-    in_container_msg -h
+    __in_container_msg -h
     or return
 
     for arg in $argv

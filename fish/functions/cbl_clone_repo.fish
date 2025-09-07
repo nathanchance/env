@@ -43,7 +43,7 @@ function cbl_clone_repo -d "Clone certain repos for ClangBuiltLinux testing and 
                 set additional_repos https://chromium.googlesource.com/chromium/tools/depot_tools.git
 
             case binutils linux linux-next linux-stable llvm-project
-                clone_repo_from_bundle {,$CBL_SRC_D/}$arg
+                __clone_repo_from_bundle {,$CBL_SRC_D/}$arg
                 or return
 
                 continue
@@ -64,7 +64,7 @@ function cbl_clone_repo -d "Clone certain repos for ClangBuiltLinux testing and 
                 end
 
             case '*'
-                print_error "$arg not supported explicitly, skipping!"
+                __print_error "$arg not supported explicitly, skipping!"
                 continue
         end
 
@@ -93,7 +93,7 @@ function cbl_clone_repo -d "Clone certain repos for ClangBuiltLinux testing and 
 
                     for local_manifest in $local_manifests
                         if not test -e $local_manifest
-                            print_error "Supplied local manifest ('$local_manifest') does not exist!"
+                            __print_error "Supplied local manifest ('$local_manifest') does not exist!"
                             return 1
                         end
                         ln -fsv $local_manifest .repo/local_manifests/(path basename $local_manifest)

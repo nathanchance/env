@@ -3,7 +3,7 @@
 # Copyright (C) 2022-2023 Nathan Chancellor
 
 function clean_old_kernels -d "Clean up old installed kernels"
-    set distro (get_distro)
+    set distro (__get_distro)
     switch $distro
         case almalinux fedora rocky
             set -l kernels (rpm -q kernel{,-{core,modules}} | string match -rv (uname -r | string replace -a - _) | string replace -a .(uname -m) "" | fzf -m)
@@ -11,7 +11,7 @@ function clean_old_kernels -d "Clean up old installed kernels"
                 sudo dnf remove -y $kernels
             end
         case '*'
-            print_error "No support for '$distro'!"
+            __print_error "No support for '$distro'!"
             return 1
     end
 end

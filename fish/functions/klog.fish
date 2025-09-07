@@ -3,7 +3,7 @@
 # Copyright (C) 2024 Nathan Chancellor
 
 function klog -d "View kernel log with bat" -w dmesg
-    in_container_msg -h
+    __in_container_msg -h
     or return
 
     for arg in $argv

@@ -5,7 +5,7 @@
 function create_folder_tar -d "Create zstd compressed tarball of a folder"
     set folder $argv[1]
     if not test -d $folder
-        print_error "$folder could not be found or is not a folder!"
+        __print_error "$folder could not be found or is not a folder!"
         return 1
     end
 

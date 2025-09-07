@@ -3,7 +3,7 @@
 # Copyright (C) 2022-2023 Nathan Chancellor
 
 function cbl_rb_fd -d "Rebase generic Fedora kernel on latest linux-next"
-    in_container_msg -c
+    __in_container_msg -c
     or return
 
     # Prepare kernel source

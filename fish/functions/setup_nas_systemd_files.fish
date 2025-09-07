@@ -4,9 +4,9 @@
 
 function setup_nas_systemd_files -d "Install systemd files for mounting NAS to a machine"
     # Couple of initial checks
-    in_container_msg -h; or return
+    __in_container_msg -h; or return
     if not command -q mount.nfs
-        print_error "mount.nfs could not be found, install it!"
+        __print_error "mount.nfs could not be found, install it!"
         return 1
     end
 

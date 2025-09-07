@@ -4,7 +4,7 @@
 
 function cbl_patch_llvm -d "Apply fixes for known problems from newer environments to LLVM"
     if test (count $argv) -eq 0
-        in_tree llvm
+        __in_tree llvm
         or return 128
 
         set llvm_src $PWD
@@ -15,7 +15,7 @@ function cbl_patch_llvm -d "Apply fixes for known problems from newer environmen
     set git git -C $llvm_src
 
     if not set sha ($git sha)
-        print_error "$llvm_src not a git repository??"
+        __print_error "$llvm_src not a git repository??"
         return 128
     end
 

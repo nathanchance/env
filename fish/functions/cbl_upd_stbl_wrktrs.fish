@@ -6,7 +6,7 @@ function cbl_upd_stbl_wrktrs -d "Update the worktrees for linux-stable"
     for folder in $argv
         if not test -d "$folder"
             header "Cloning $folder"
-            clone_repo_from_bundle linux-stable $folder
+            __clone_repo_from_bundle linux-stable $folder
         else
             header "Updating $folder"
             git -C $folder remote update origin
@@ -46,7 +46,7 @@ function cbl_upd_stbl_wrktrs -d "Update the worktrees for linux-stable"
         for worktree in $folder-$stable_versions
             if not test -d $worktree
                 header "Creating $worktree"
-                set -l branch (stable_folder_to_branch $worktree)
+                set -l branch (__stable_folder_to_branch $worktree)
                 git -C $folder worktree add --track -b $branch $worktree origin/$branch
             end
         end

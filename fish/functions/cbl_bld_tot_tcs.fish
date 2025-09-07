@@ -3,7 +3,7 @@
 # Copyright (C) 2021-2023 Nathan Chancellor
 
 function cbl_bld_tot_tcs -d "Build LLVM and binutils from source for kernel development"
-    in_container_msg -c; or return
+    __in_container_msg -c; or return
 
     for arg in $argv
         switch $arg
@@ -57,7 +57,7 @@ function cbl_bld_tot_tcs -d "Build LLVM and binutils from source for kernel deve
 
     set date_time (date +%F_%H-%M-%S)
 
-    if is_github_actions
+    if __is_github_actions
         set tc_bld $GITHUB_WORKSPACE/tc-build
     else
         set tc_bld $CBL_TC_BLD
@@ -70,7 +70,7 @@ function cbl_bld_tot_tcs -d "Build LLVM and binutils from source for kernel deve
                 git clone $clone_args https://github.com/nathanchance/tc-build.git $tc_bld
             end
         end
-        if not is_location_primary
+        if not __is_location_primary
             git -C $tc_bld urh
         end
     end
@@ -78,17 +78,17 @@ function cbl_bld_tot_tcs -d "Build LLVM and binutils from source for kernel deve
     if test "$bld_bntls" != false
         set bntls $tc_bld/src/binutils
         if not test -d $bntls
-            clone_repo_from_bundle (path basename $bntls) "$bntls"
+            __clone_repo_from_bundle (path basename $bntls) "$bntls"
         end
-        if not is_shallow_clone $bntls; and not has_detached_head $bntls
+        if not __is_shallow_clone $bntls; and not __has_detached_head $bntls
             git -C $bntls pull --rebase; or return
         end
 
         string match -gr "PACKAGE_VERSION='(.*)'" <$bntls/binutils/configure | read bntls_ver
         if test (string split . $bntls_ver | count) != 3
             set message "Malformed binutils version ('$bntls_ver')?"
-            print_error "$messsage"
-            tg_msg "$message"
+            __print_error "$messsage"
+            __tg_msg "$message"
             return 1
         end
         set bntls_install $CBL_TC_BNTL_STORE/$bntls_ver-$date_time-(git -C $bntls sh -s --format=%H origin/master)
@@ -99,25 +99,25 @@ function cbl_bld_tot_tcs -d "Build LLVM and binutils from source for kernel deve
                 --install-folder $bntls_install \
                 --show-build-commands
             set message "build-binutils.py failed"
-            print_error "$message"
-            tg_msg "$message"
+            __print_error "$message"
+            __tg_msg "$message"
             return 1
         end
 
-        stripall $bntls_install
+        __stripall $bntls_install
         cbl_upd_software_symlinks binutils $bntls_install; or return
     end
 
     set llvm_project $tc_bld/src/llvm-project
     if not test -d $llvm_project
-        clone_repo_from_bundle (path basename $llvm_project) $llvm_project
+        __clone_repo_from_bundle (path basename $llvm_project) $llvm_project
     end
-    if not is_shallow_clone $llvm_project; and not has_detached_head $llvm_project
+    if not __is_shallow_clone $llvm_project; and not __has_detached_head $llvm_project
         git -C $llvm_project rh
         if not git -C $llvm_project pull --rebase
             set message "llvm-project failed to rebase/update"
-            print_error "$message"
-            tg_msg "$message"
+            __print_error "$message"
+            __tg_msg "$message"
             return 1
         end
     end
@@ -128,15 +128,15 @@ function cbl_bld_tot_tcs -d "Build LLVM and binutils from source for kernel deve
             set -l revert (path basename $revert)
             if not git -C $llvm_project rv -n $revert
                 set message "Failed to revert $revert"
-                print_error "$message"
-                tg_msg "$message"
+                __print_error "$message"
+                __tg_msg "$message"
                 return 1
             end
         else
             if not git -C $llvm_project ap $revert
                 set message "Failed to apply $revert"
-                print_error "$message"
-                tg_msg "$message"
+                __print_error "$message"
+                __tg_msg "$message"
                 return 1
             end
         end
@@ -145,14 +145,14 @@ function cbl_bld_tot_tcs -d "Build LLVM and binutils from source for kernel deve
     # Add in-review patches here
     for gh_pr in $gh_prs
         if gh_llvm pr view --json state (path basename $gh_pr) | python3 -c "import json, sys; sys.exit(0 if json.load(sys.stdin)['state'] == 'MERGED' else 1)"
-            print_warning "$gh_pr has already been merged, skipping..."
+            __print_warning "$gh_pr has already been merged, skipping..."
             continue
         end
 
         if not gh_llvm pr diff (path basename $gh_pr) | git -C $llvm_project ap
             set message "Failed to apply $gh_pr"
-            print_error "$message"
-            tg_msg "$message"
+            __print_error "$message"
+            __tg_msg "$message"
             return 1
         end
     end
@@ -160,8 +160,8 @@ function cbl_bld_tot_tcs -d "Build LLVM and binutils from source for kernel deve
     string match -gr "\s+set\(LLVM_VERSION_[A-Z]+ ([0-9]+)\)" <$llvm_project/cmake/Modules/LLVMVersion.cmake | string join . | read llvm_ver
     if test (string split . $llvm_ver | count) != 3
         set message "Malformed LLVM version ('$llvm_ver')?"
-        print_error "$messsage"
-        tg_msg "$message"
+        __print_error "$messsage"
+        __tg_msg "$message"
         return 1
     end
 
@@ -187,15 +187,15 @@ function cbl_bld_tot_tcs -d "Build LLVM and binutils from source for kernel deve
                 $common_bld_llvm_args \
                 --build-stage1-only
             set message "Validation of new LLVM revision failed: LLVM did not build or tests failed!"
-            print_error "$message"
-            tg_msg "$message"
+            __print_error "$message"
+            __tg_msg "$message"
             return 1
         end
 
         if test "$validate_uprev" = kernel
             if not set -q validate_targets
                 if set -q targets
-                    print_error "Validate uprev target set to kernel with specific targets but no validation specific targets?"
+                    __print_error "Validate uprev target set to kernel with specific targets but no validation specific targets?"
                     return 1
                 end
 
@@ -257,8 +257,8 @@ kernel_builder.build()"
             end
             if set -q failure_reason
                 set message "Validation of new LLVM revision failed: $failure_reason!"
-                print_error "$message"
-                tg_msg "$message"
+                __print_error "$message"
+                __tg_msg "$message"
                 return 1
             end
         end
@@ -283,11 +283,11 @@ kernel_builder.build()"
             $bld_llvm_args \
             --install-folder $llvm_install
         set message "build-llvm.py failed"
-        print_error "$message"
-        tg_msg "$message"
+        __print_error "$message"
+        __tg_msg "$message"
         return 1
     end
 
-    stripall $llvm_install
+    __stripall $llvm_install
     cbl_upd_software_symlinks llvm $llvm_install
 end

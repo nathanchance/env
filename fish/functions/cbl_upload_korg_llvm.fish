@@ -4,7 +4,7 @@
 
 function cbl_upload_korg_llvm -d "Upload kernel.org toolchain releases with kup"
     if test $PWD != $TMP_FOLDER/pgo-llvm-builder-staging
-        print_error "Not in $TMP_FOLDER/pgo-llvm-builder-staging?"
+        __print_error "Not in $TMP_FOLDER/pgo-llvm-builder-staging?"
         return 1
     end
 
@@ -36,11 +36,11 @@ function cbl_upload_korg_llvm -d "Upload kernel.org toolchain releases with kup"
     end
 
     if test -n "$release_tars"; and not test -f llvm-index.html
-        print_error 'No index.html generated for LLVM?'
+        __print_error 'No index.html generated for LLVM?'
         return 1
     end
     if test -n "$rust_tars"; and not test -f rust-index.html
-        print_error 'No index.html generated for Rust?'
+        __print_error 'No index.html generated for Rust?'
         return 1
     end
 
@@ -50,7 +50,7 @@ function cbl_upload_korg_llvm -d "Upload kernel.org toolchain releases with kup"
 
         set llvm_ver (string match -gr 'llvm-([0-9|.]+)' $tar)
         if test (string split . $llvm_ver | count) != 3
-            print_error "Malformed LLVM version found ('$llvm_ver')?"
+            __print_error "Malformed LLVM version found ('$llvm_ver')?"
             return 1
         end
         if not contains $llvm_ver $llvm_vers

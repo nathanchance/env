@@ -3,7 +3,7 @@
 # Copyright (C) 2022-2023 Nathan Chancellor
 
 function setup_libvirt -d "Setup libvirt for current user"
-    in_container_msg -h; or return
+    __in_container_msg -h; or return
 
     # Cache sudo permissions
     sudo true; or return
@@ -11,7 +11,7 @@ function setup_libvirt -d "Setup libvirt for current user"
     if not command -q virsh
         upd -y; or return
 
-        set distro (get_distro)
+        set distro (__get_distro)
         switch $distro
             case arch
                 sudo pacman \
@@ -33,7 +33,7 @@ function setup_libvirt -d "Setup libvirt for current user"
                 sudo dnf install -y @virtualization; or return
 
             case '*'
-                print_error "$distro is not supported by setup_libvirt!"
+                __print_error "$distro is not supported by setup_libvirt!"
                 return 1
         end
     end

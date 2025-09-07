@@ -4,7 +4,7 @@
 
 function gh_run -d "Run GitHub Actions Workflow"
     if test (count $argv) -lt 3
-        print_error "Expected repo, branch name, and workflow as arguments, in that order!"
+        __print_error "Expected repo, branch name, and workflow as arguments, in that order!"
         return 1
     end
 

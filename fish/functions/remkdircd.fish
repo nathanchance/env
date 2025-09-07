@@ -4,7 +4,7 @@
 
 function remkdircd -d "Recreate a folder and cd into it"
     if test (count $argv) -ne 1
-        print_error "remkdircd only takes one argument!"
+        __print_error "remkdircd only takes one argument!"
         return 1
     end
 

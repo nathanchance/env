@@ -3,8 +3,8 @@
 # Copyright (C) 2022-2023 Nathan Chancellor
 
 function cbl_bld_krnl_rpm -d "Build a .rpm kernel package"
-    in_container_msg -c; or return
-    in_tree kernel; or return
+    __in_container_msg -c; or return
+    __in_tree kernel; or return
 
     # Effectively 'distclean'
     git cl -e .config -q
@@ -19,7 +19,7 @@ function cbl_bld_krnl_rpm -d "Build a .rpm kernel package"
             case -l --localmodconfig
                 set lsmod /tmp/modprobed.db
                 if not test -f $lsmod
-                    print_error "$lsmod not found!"
+                    __print_error "$lsmod not found!"
                     return 1
                 end
                 set -a kmake_args LSMOD=$lsmod
@@ -68,7 +68,7 @@ function cbl_bld_krnl_rpm -d "Build a .rpm kernel package"
 
     set rpmopts '--without devel'
     # /, which includes /var/tmp, is idmapped, which breaks writing to it with our user, so use /tmp.
-    if in_nspawn
+    if __in_nspawn
         set -a rpmopts "--define '_tmppath /tmp'"
     end
     if not string match -qr -- "--define='_topdir" <scripts/Makefile.package
@@ -84,7 +84,7 @@ function cbl_bld_krnl_rpm -d "Build a .rpm kernel package"
 
     set rpm (fd -e rpm -u 'kernel-[0-9]+' $out/rpmbuild | path resolve)
     if test (count $rpm) -ne 1
-        print_error "More than one .rpm found? $rpm"
+        __print_error "More than one .rpm found? $rpm"
         return 1
     end
 

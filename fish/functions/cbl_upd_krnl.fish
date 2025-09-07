@@ -27,8 +27,8 @@ function cbl_upd_krnl -d "Update machine's kernel"
 
     switch $location
         case aadp honeycomb vm-aarch64
-            in_container_msg -h; or return
-            test (get_distro) = fedora; or return
+            __in_container_msg -h; or return
+            test (__get_distro) = fedora; or return
 
             for arg in $argv
                 switch $arg
@@ -51,9 +51,9 @@ function cbl_upd_krnl -d "Update machine's kernel"
             if test -e $cached_krnl_rpm; and test (sha512sum $cached_krnl_rpm | string split -f 1 ' ') = "$remote_krnl_rpm_sha"
                 set krnl_rpm $cached_krnl_rpm
 
-                print_green "INFO: Installing cached kernel from $krnl_rpm"
+                __print_green "INFO: Installing cached kernel from $krnl_rpm"
             else
-                print_warning "$base_krnl_rpm is not cached, downloading..."
+                __print_warning "$base_krnl_rpm is not cached, downloading..."
 
                 scp $remote_user@$remote_host:$remote_krnl_rpm /tmp
                 or return
@@ -69,7 +69,7 @@ function cbl_upd_krnl -d "Update machine's kernel"
             end
 
         case chromebox test-desktop-amd-8745HS test-desktop-intel-{11700,n100} test-laptop-intel vm-x86_64
-            in_container_msg -h
+            __in_container_msg -h
             or return
 
             for arg in $argv
@@ -82,7 +82,7 @@ function cbl_upd_krnl -d "Update machine's kernel"
                 end
             end
             if not set -q krnl
-                print_error "Kernel is required!"
+                __print_error "Kernel is required!"
                 return 1
             end
 
@@ -99,9 +99,9 @@ function cbl_upd_krnl -d "Update machine's kernel"
             if test -e $cached_krnl_pkg; and test (sha512sum $cached_krnl_pkg | string split -f 1 ' ') = "$remote_krnl_pkg_sha"
                 set krnl_pkg $cached_krnl_pkg
 
-                print_green "INFO: Installing cached kernel from $krnl_pkg"
+                __print_green "INFO: Installing cached kernel from $krnl_pkg"
             else
-                print_warning "$base_krnl_pkg is not cached, downloading..."
+                __print_warning "$base_krnl_pkg is not cached, downloading..."
 
                 scp $remote_user@$remote_host:$remote_krnl_pkg /tmp
                 or return
@@ -126,7 +126,7 @@ function cbl_upd_krnl -d "Update machine's kernel"
                 end
             end
             if not set -q krnl
-                print_error "Kernel is required!"
+                __print_error "Kernel is required!"
                 return 1
             end
 
@@ -137,7 +137,7 @@ function cbl_upd_krnl -d "Update machine's kernel"
             end
             set -a bld_krnl_pkg_args $krnl
 
-            if in_container
+            if __in_container
                 cbl_bld_krnl_pkg $bld_krnl_pkg_args
                 return
             else

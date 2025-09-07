@@ -48,7 +48,7 @@ function cbl_upd_src -d "Update source trees in $CBL_SRC"
                     header "Updating $folder"
 
                     if not test -d $folder
-                        clone_repo_from_bundle (path basename $folder) $folder
+                        __clone_repo_from_bundle (path basename $folder) $folder
                     end
 
                     git -C $folder urh
@@ -84,7 +84,7 @@ function cbl_upd_src -d "Update source trees in $CBL_SRC"
                     if test "$base" = linux-stable
                         cbl_upd_stbl_wrktrs $folder
                     else
-                        clone_repo_from_bundle (path basename $folder) $folder
+                        __clone_repo_from_bundle (path basename $folder) $folder
                     end
                 end
                 or return
@@ -114,7 +114,7 @@ function cbl_upd_src -d "Update source trees in $CBL_SRC"
                     set git \
                         git -C $folder
 
-                    if is_tree_dirty $folder
+                    if __is_tree_dirty $folder
                         $git stash
                         set pop true
                     else
@@ -151,7 +151,7 @@ function cbl_upd_src -d "Update source trees in $CBL_SRC"
                     if string match -qr linux-stable $folder
                         cbl_upd_stbl_wrktrs $CBL_SRC_P/linux-stable
                     else
-                        clone_repo_from_bundle (path basename $folder) $folder
+                        __clone_repo_from_bundle (path basename $folder) $folder
                     end
 
                     cbl_ptchmn -C $folder -a
@@ -159,7 +159,7 @@ function cbl_upd_src -d "Update source trees in $CBL_SRC"
             end
 
         else
-            print_error "Unhandled value: $value!"
+            __print_error "Unhandled value: $value!"
             return 1
 
         end

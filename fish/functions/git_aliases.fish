@@ -138,15 +138,15 @@ function git_aliases -d "Configure git aliases"
     # fish git aliases
     # no arguments
     for alias in bf cpi dmb
-        git config --global alias.$alias "!fish -c git_$alias"
+        git config --global alias.$alias "!fish -c __git_$alias"
     end
     # with arguments
     for alias in rn sw sync
-        git config --global alias.$alias '!f() { fish -c "'git_$alias' $*"; }; f'
+        git config --global alias.$alias '!f() { fish -c "'__git_$alias' $*"; }; f'
     end
-    git config --global alias.rf '!f() { fish -c "git_rf -q $*"; }; f'
-    git config --global alias.urbi '!f() { fish -c "git_ua rbi $*"; }; f'
-    git config --global alias.urh '!f() { fish -c "git_ua rh $*"; }; f'
+    git config --global alias.rf '!f() { fish -c "__git_rf -q $*"; }; f'
+    git config --global alias.urbi '!f() { fish -c "__git_ua rbi $*"; }; f'
+    git config --global alias.urh '!f() { fish -c "__git_ua rh $*"; }; f'
 
     # forgit aliases
     git config --global alias.ai '!f() { fish -c "git-forgit add $*"; }; f'

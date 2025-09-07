@@ -4,7 +4,7 @@
 
 function kgtm -d "Shorthand for scripts/get_maintainer.pl"
     if not test -x scripts/get_maintainer.pl
-        print_error "get_maintainer.pl does not exist"
+        __print_error "get_maintainer.pl does not exist"
         return 1
     end
     scripts/get_maintainer.pl --scm $argv

@@ -3,7 +3,7 @@
 # Copyright (C) 2021-2023 Nathan Chancellor
 
 function cbl_bld_qemu -d "Build QEMU for use with ClangBuiltLinux"
-    in_container_msg -c; or return
+    __in_container_msg -c; or return
 
     for arg in $argv
         switch $arg

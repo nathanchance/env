@@ -53,12 +53,12 @@ function run_cmd -d "Run specified command depending on where it is available"
                         set cmd_path $git_repo/$cmd.sh
                     case tuxmake
                         if string match -qr podman -- $cmd_argv
-                            in_container_msg -h; or return
+                            __in_container_msg -h; or return
                         end
                         set cmd_path $git_repo/run
                 end
                 if not test -e $cmd_path
-                    print_error "$cmd checkout could not be found, download it with 'upd $cmd'."
+                    __print_error "$cmd checkout could not be found, download it with 'upd $cmd'."
                     return 1
                 end
                 $cmd_path $cmd_args
@@ -76,13 +76,13 @@ function run_cmd -d "Run specified command depending on where it is available"
                         set cmd_path python3 $python_path/$cmd
                 end
                 if not test -d $python_path
-                    print_error "$cmd package could not be found, download it with 'upd $cmd'."
+                    __print_error "$cmd package could not be found, download it with 'upd $cmd'."
                     return 1
                 end
                 PYTHONPATH=$python_path $cmd_path $cmd_args
 
             case '*'
-                print_error "$cmd could not be found, it might be installable via 'upd $cmd'."
+                __print_error "$cmd could not be found, it might be installable via 'upd $cmd'."
                 return 1
         end
     end

@@ -4,7 +4,7 @@
 
 function cbl_prep_bisect -d "Prepare for an automated bisect"
     if test (count $argv) -ne 1
-        print_error (status function)" <bisect_type>"
+        __print_error (status function)" <bisect_type>"
         return 1
     end
 
@@ -21,7 +21,7 @@ function cbl_prep_bisect -d "Prepare for an automated bisect"
         case llvm
             echo '#!/usr/bin/env fish
 
-in_tree llvm
+__in_tree llvm
 or return 128
 
 set llvm_bld (tbf)-testing

@@ -41,11 +41,11 @@ function ssh_vm -d "ssh into a VM running via cbl_vmm.py"
     switch $ssh_cmd
         case scp
             if not set -q src
-                print_error "No source and destination provided?"
+                __print_error "No source and destination provided?"
                 return 1
             end
             if not set -q dst
-                print_error "No destination provided?"
+                __print_error "No destination provided?"
                 return 1
             end
 
@@ -54,7 +54,7 @@ function ssh_vm -d "ssh into a VM running via cbl_vmm.py"
             else if string match -qr ^: $dst
                 set dst $user_host$dst
             else
-                print_error "Neither source nor destination have a colon to mark remote file?"
+                __print_error "Neither source nor destination have a colon to mark remote file?"
                 return 1
             end
 

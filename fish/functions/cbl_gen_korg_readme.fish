@@ -3,7 +3,7 @@
 # Copyright (C) 2024 Nathan Chancellor
 
 function cbl_gen_korg_readme -d "Generate kernel.org toolchains README"
-    if not in_venv
+    if not __in_venv
         py_venv c e markdown
         and pip install --upgrade \
             markdown \
@@ -17,7 +17,7 @@ function cbl_gen_korg_readme -d "Generate kernel.org toolchains README"
                 set versions_prompt true
             case llvm rust
                 if set -q tc
-                    print_error "Toolchain has already been specified ('$tc') but another one was supplied ('$arg')?"
+                    __print_error "Toolchain has already been specified ('$tc') but another one was supplied ('$arg')?"
                     return 1
                 else
                     set tc $arg
@@ -25,7 +25,7 @@ function cbl_gen_korg_readme -d "Generate kernel.org toolchains README"
             case '*'
                 if set -q old_ver
                     if set -q new_ver
-                        print_error "Unexpected argument ('$arg') found?"
+                        __print_error "Unexpected argument ('$arg') found?"
                         return 1
                     else
                         set new_ver $arg
@@ -36,11 +36,11 @@ function cbl_gen_korg_readme -d "Generate kernel.org toolchains README"
         end
     end
     if not set -q tc
-        print_error "No toolchain set?"
+        __print_error "No toolchain set?"
         return 1
     end
     if set -q old_ver; and not set -q new_ver
-        print_error "Old version supplied without new version?"
+        __print_error "Old version supplied without new version?"
         return 1
     end
 
@@ -51,7 +51,7 @@ function cbl_gen_korg_readme -d "Generate kernel.org toolchains README"
             set md_base 'LLVM+Rust toolchains README.md'
     end
 
-    if in_orb
+    if __in_orb
         set md $MAC_FOLDER(path dirname $ICLOUD_DOCS_FOLDER)/iCloud~md~obsidian/Documents/Tech/Kernel/Work/$md_base
 
         set mac_html /Users/$USER/Downloads/$tc-index.html
@@ -62,7 +62,7 @@ function cbl_gen_korg_readme -d "Generate kernel.org toolchains README"
         set lnx_html $TMP_FOLDER/pgo-llvm-builder-staging/$tc-index.html
     end
     if not test -e $md
-        print_error "$md does not exist?"
+        __print_error "$md does not exist?"
         return 1
     end
 

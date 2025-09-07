@@ -13,7 +13,7 @@ function cbl_create_tc_tar -d "Create tarball with latest toolchains in $CBL_TC"
             (realpath {$CBL_TC_BNTL_STORE,$CBL_TC_LLVM_STORE}-latest | string replace $CBL_TC/ '')
         printf '\nTarball is available at: %s\n' $tar_dst
     else
-        print_error "Either binutils or LLVM is not built in $CBL_TC?"
+        __print_error "Either binutils or LLVM is not built in $CBL_TC?"
         return 1
     end
 end

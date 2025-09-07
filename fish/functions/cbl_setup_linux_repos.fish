@@ -27,7 +27,7 @@ function cbl_setup_linux_repos -d "Clone ClangBuiltLinux Linux repos into their 
 
         set bundle $NAS_FOLDER/bundles/$arg.bundle
         if test -e $bundle
-            # Will be handled by clone_repo_from_bundle
+            # Will be handled by __clone_repo_from_bundle
             set -e bundle
         else
             switch $url
@@ -43,7 +43,7 @@ function cbl_setup_linux_repos -d "Clone ClangBuiltLinux Linux repos into their 
             end
         end
 
-        clone_repo_from_bundle (path basename $folder) $folder $bundle
+        __clone_repo_from_bundle (path basename $folder) $folder $bundle
         or return
 
         if string match -qr linux-stable $folder

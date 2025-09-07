@@ -15,7 +15,7 @@ function cbl_bld_llvm_fast -d "Quickly build a version of LLVM"
         set bld_folder (tbf $llvm_folder)
     end
     if not set -q llvm_folder
-        in_tree llvm
+        __in_tree llvm
         or return 128
 
         set llvm_folder .

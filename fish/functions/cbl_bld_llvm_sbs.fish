@@ -3,7 +3,7 @@
 # Copyright (C) 2024 Nathan Chancellor
 
 function cbl_bld_llvm_sbs -d "Build identical copies of LLVM side by side from various revisions"
-    in_tree llvm
+    __in_tree llvm
     or return 128
 
     set prefix $argv[1]

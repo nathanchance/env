@@ -3,10 +3,10 @@
 # Copyright (C) 2021-2023 Nathan Chancellor
 
 function cbl_test_llvm_linux -d "Test stable and mainline Linux with all supported versions of LLVM"
-    in_container_msg -c; or return
+    __in_container_msg -c; or return
 
     if not test -f $HOME/.muttrc.notifier
-        print_error "This function runs cbl_lkt, which requires the notifier!"
+        __print_error "This function runs cbl_lkt, which requires the notifier!"
         return 1
     end
 

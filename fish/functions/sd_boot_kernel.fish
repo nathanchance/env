@@ -17,7 +17,7 @@ function sd_boot_kernel -d "Boot a kernel via full reboot or kexec using systemd
     end
 
     if not set -q krnl
-        print_error "Kernel is required!"
+        __print_error "Kernel is required!"
         return 1
     end
 
@@ -27,7 +27,7 @@ function sd_boot_kernel -d "Boot a kernel via full reboot or kexec using systemd
     switch $reboot
         case kexec
             if not command -q kexec
-                print_error "Cannot kexec without kexec-tools"
+                __print_error "Cannot kexec without kexec-tools"
                 return 1
             end
 
@@ -40,19 +40,19 @@ function sd_boot_kernel -d "Boot a kernel via full reboot or kexec using systemd
 
         case reboot
             if not test -d /sys/firmware/efi
-                print_error "Not booted under UEFI?"
+                __print_error "Not booted under UEFI?"
                 return 1
             end
 
             set entries /boot/loader/entries
             if not test -d $entries
-                print_error "$entries not found, not using systemd-boot?"
+                __print_error "$entries not found, not using systemd-boot?"
                 return 1
             end
 
             set conf $krnl.conf
             if not test -f $entries/$conf
-                print_error "$entries/$conf does not exist!"
+                __print_error "$entries/$conf does not exist!"
                 return 1
             end
 

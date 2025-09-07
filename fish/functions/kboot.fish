@@ -3,8 +3,8 @@
 # Copyright (C) 2021-2023 Nathan Chancellor
 
 function kboot -d "Boot a kernel in QEMU"
-    if not in_container; and test -z "$OC"
-        print_error "This needs to be run in a container! Override this check with 'OC=1'."
+    if not __in_container; and test -z "$OC"
+        __print_error "This needs to be run in a container! Override this check with 'OC=1'."
         return 1
     end
 
@@ -28,7 +28,7 @@ function kboot -d "Boot a kernel in QEMU"
     if not string match -qr -- --gh-json-file $boot_qemu_args
         set boot_utils_json /tmp/boot-utils.json
         if not test -e $boot_utils_json
-            cbl_gen_boot_utils_json
+            __gen_boot_utils_json
             or return
         end
         set -a boot_qemu_args --gh-json-file $boot_utils_json

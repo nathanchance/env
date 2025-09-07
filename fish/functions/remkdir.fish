@@ -4,7 +4,7 @@
 
 function remkdir -d "Recreate a folder"
     if test (count $argv) -ne 1
-        print_error "remkdir only takes one argument!"
+        __print_error "remkdir only takes one argument!"
         return 1
     end
 

@@ -7,7 +7,7 @@ function newfunc -d "Generate and edit new function fish"
         set func_file $ENV_FOLDER/fish/functions/$func_name.fish
 
         if test -f $func_file
-            print_error "$func_name already exists!"
+            __print_error "$func_name already exists!"
             return 1
         end
 

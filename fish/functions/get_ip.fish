@@ -22,7 +22,7 @@ function get_ip -d "Get a particular machine's IP address via short name or host
         case intel-laptop msi-intel-core-10210U
             echo 10.0.1.20
         case '*'
-            print_error "Unrecognized device name: $device"
+            __print_error "Unrecognized device name: $device"
             return 1
     end
 end

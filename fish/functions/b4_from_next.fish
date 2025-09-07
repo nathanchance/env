@@ -4,13 +4,13 @@
 
 function b4_from_next -d "Run b4_prep after interactively selecting a base from Next/Trees"
     if not test -e Next/Trees
-        print_error "Not in a -next tree?"
+        __print_error "Not in a -next tree?"
         return 1
     end
 
     set parts (fzf <Next/Trees | awk '{print $2}' | string split '#')
     if test (count $parts) -ne 2
-        print_error "Malformed parts?"
+        __print_error "Malformed parts?"
         echo "parts: $parts"
         return 1
     end

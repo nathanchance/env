@@ -4,7 +4,7 @@
 
 function hugo_serve -d "Runs 'hugo server' based on WSL's IP address" -w hugo
     if not command -q ip
-        print_error "ip could not be found, please install it!"
+        __print_error "ip could not be found, please install it!"
         return 1
     end
 
@@ -21,7 +21,7 @@ function hugo_serve -d "Runs 'hugo server' based on WSL's IP address" -w hugo
 
     set ip (ip addr | string match -er $intf | string match -er inet | string match -gr '\d+\.\d+.\d+\.\d+')
     if test -z "$ip"
-        print_error "ip not found?"
+        __print_error "ip not found?"
         return 1
     end
 

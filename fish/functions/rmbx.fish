@@ -13,7 +13,7 @@ function rmbx -d "Read an mbox directory created by lei"
     end
 
     if not test -d $mbx
-        print_error "$mbx does not exist!"
+        __print_error "$mbx does not exist!"
         return 1
     end
 

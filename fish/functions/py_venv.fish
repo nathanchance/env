@@ -14,19 +14,19 @@ function py_venv -d "Manage Python virtual environment"
         end
     end
     if not set -q actions
-        print_error "no actions specified!"
+        __print_error "no actions specified!"
         return 1
     end
     if not set -q python
         set python python3
     end
     if not set -q venv
-        if in_venv
+        if __in_venv
             set venv (path basename $VIRTUAL_ENV)
         else
             switch $arg
                 case c create e enter r rm remove
-                    print_error "venv name not specified!"
+                    __print_error "venv name not specified!"
                     return 1
             end
         end
@@ -57,15 +57,15 @@ function py_venv -d "Manage Python virtual environment"
                 $python -m venv $venv
 
             case e enter
-                if in_venv
-                    print_error "Already in a virtual environment?"
+                if __in_venv
+                    __print_error "Already in a virtual environment?"
                     return 1
                 end
 
                 set VIRTUAL_ENV_DISABLE_PROMPT 1
                 set activate $venv/bin/activate.fish
                 if not test -f $activate
-                    print_error "$venv does not exist, run 'create'?"
+                    __print_error "$venv does not exist, run 'create'?"
                     return 1
                 end
                 source $activate
@@ -105,8 +105,8 @@ function py_venv -d "Manage Python virtual environment"
                 rm -fr $venv
 
             case u up update
-                if not in_venv
-                    print_error "Not in a virtual environment?"
+                if not __in_venv
+                    __print_error "Not in a virtual environment?"
                     return 1
                 end
 
@@ -132,8 +132,8 @@ function py_venv -d "Manage Python virtual environment"
                 end
 
             case x exit
-                if not in_venv
-                    print_error "Not in a virtual environment?"
+                if not __in_venv
+                    __print_error "Not in a virtual environment?"
                     return 1
                 end
                 deactivate

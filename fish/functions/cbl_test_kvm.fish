@@ -7,7 +7,7 @@ function cbl_test_kvm -d "Test KVM against a Clang built kernel with QEMU"
 
     switch $argv[1]
         case build
-            in_container_msg -c; or return
+            __in_container_msg -c; or return
 
             set arch (uname -m)
             switch $arch
@@ -16,7 +16,7 @@ function cbl_test_kvm -d "Test KVM against a Clang built kernel with QEMU"
                 case x86_64
                     :
                 case '*'
-                    print_error "cbl_test_kvm does not support $arch!"
+                    __print_error "cbl_test_kvm does not support $arch!"
                     return 1
             end
 
@@ -40,7 +40,7 @@ function cbl_test_kvm -d "Test KVM against a Clang built kernel with QEMU"
             kboot -a $arch -k $out -t 45s
 
         case nested
-            in_container_msg -h; or return
+            __in_container_msg -h; or return
 
             switch $LOCATION
                 case vm

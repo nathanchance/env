@@ -8,12 +8,12 @@ function newpylink -d "Generate symlink in $PYTHON_BIN_FOLDER"
         set symlink $PYTHON_BIN_FOLDER/$func_name
 
         if not test -f $script
-            print_error "$script does not exist?"
+            __print_error "$script does not exist?"
             return 1
         end
 
         if test -e $symlink; and not test -L $symlink
-            print_error "$func_name already exists in $PYTHON_BIN_FOLDER!"
+            __print_error "$func_name already exists in $PYTHON_BIN_FOLDER!"
             return 1
         end
 

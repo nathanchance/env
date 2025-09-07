@@ -16,9 +16,9 @@ function py_lint -d "Lint Python files"
         test -z "$files"; and return 0
     end
 
-    if not in_venv
+    if not __in_venv
         if not py_venv e main
-            print_error "$command could not be found and no suitable virtual environment found!"
+            __print_error "$command could not be found and no suitable virtual environment found!"
             return 1
         end
         set ephemeral true
@@ -41,18 +41,18 @@ function py_lint -d "Lint Python files"
     # ruff is faster than flake8 and provides many of the benefits so use it when possible
     if contains ruff $commands
         if ruff check $files
-            print_green "\nruff clean"
+            __print_green "\nruff clean"
         else
-            print_red "\nnot ruff clean"
+            __print_red "\nnot ruff clean"
         end
     else
         set -a flake8_ignore E501 # line too long
         if flake8 \
                 --extend-ignore (string join , $flake8_ignore) \
                 $files
-            print_green "\nflake8 clean"
+            __print_green "\nflake8 clean"
         else
-            print_red "\nnot flake8 clean"
+            __print_red "\nnot flake8 clean"
         end
     end
 
@@ -78,22 +78,22 @@ function py_lint -d "Lint Python files"
                 --disable (string join , $pylint_ignore) \
                 --jobs (nproc) \
                 $files
-            print_green "pylint clean\n"
+            __print_green "pylint clean\n"
         else
-            print_red "not pylint clean\n"
+            __print_red "not pylint clean\n"
         end
     end
     if vulture --min-confidence 80 $files
-        print_green "vulture clean\n"
+        __print_green "vulture clean\n"
     else
-        print_red "\nnot vulture clean\n"
+        __print_red "\nnot vulture clean\n"
     end
     if command -q yapf
         # Purposefully avoid 'yapf' wrapper
         if command yapf --diff --parallel $files
-            print_green "yapf clean"
+            __print_green "yapf clean"
         else
-            print_red "\nnot yapf clean"
+            __print_red "\nnot yapf clean"
         end
     end
 

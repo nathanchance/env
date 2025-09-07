@@ -5,7 +5,7 @@
 function upd_repo_pkg -d "Update package in personal Arch Linux repo"
     set database nathan.db.tar.gz
     if not test -f $database
-        print_error "Working directory should have $database!"
+        __print_error "Working directory should have $database!"
         return 1
     end
 

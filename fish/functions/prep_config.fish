@@ -16,7 +16,7 @@ function prep_config -d "Prepare kernel configuration in build folder"
     else if test -e $src_cfg
         set local true
     else
-        print_error "Could not handle $src_cfg?"
+        __print_error "Could not handle $src_cfg?"
         return 1
     end
 

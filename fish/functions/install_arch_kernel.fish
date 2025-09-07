@@ -16,11 +16,11 @@ function install_arch_kernel -d "Install kernel for Arch Linux and reboot fully 
 
     if not set -q krnl
         if set -q sd_boot_arg
-            print_error "Kernel is required when performing reboot action!"
+            __print_error "Kernel is required when performing reboot action!"
             return 1
         end
         if not set -q krnl_pkg
-            print_error "Kernel is required when locating kernel package!"
+            __print_error "Kernel is required when locating kernel package!"
             return 1
         end
     end
@@ -38,14 +38,14 @@ function install_arch_kernel -d "Install kernel for Arch Linux and reboot fully 
                     if test (count $krnl_pkg) = 1
                         break
                     else
-                        print_error "Ambiguous kernels found: $krnl_pkg"
+                        __print_error "Ambiguous kernels found: $krnl_pkg"
                         return 1
                     end
                 end
             end
         end
         if test -z "$krnl_pkg"
-            print_error "Could not find kernel package for $krnl!"
+            __print_error "Could not find kernel package for $krnl!"
             return 1
         end
     end

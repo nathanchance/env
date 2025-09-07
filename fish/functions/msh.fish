@@ -27,7 +27,7 @@ function msh -d "Shorthand for mosh -o" -w mosh
             case intel-laptop
                 set host msi-intel-core-10210U
             case '*'
-                print_error "Unsupported target device for Tailscale: $target"
+                __print_error "Unsupported target device for Tailscale: $target"
                 return 1
         end
         set user_host nathan@$host
@@ -40,7 +40,7 @@ function msh -d "Shorthand for mosh -o" -w mosh
                 set user_host $target
 
             case '*'
-                print_error "Please specify a valid shorthand or user@host combination!"
+                __print_error "Please specify a valid shorthand or user@host combination!"
                 return 1
         end
     end

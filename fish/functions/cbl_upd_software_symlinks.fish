@@ -4,7 +4,7 @@
 
 function cbl_upd_software_symlinks -d "Update symlinks to a stow or QEMU folder"
     if test (count $argv) -lt 1
-        print_error "This function requires the sofware as the first argument!"
+        __print_error "This function requires the sofware as the first argument!"
         return 1
     end
 

@@ -13,7 +13,7 @@ function cbl_bld_tot_gcc -d "Build tip of tree GCC (often for comparison against
 
     set binutils_src $CBL_SRC_C/binutils
     if not test -d $binutils_src
-        clone_repo_from_bundle (path basename $binutils_src) $binutils_src
+        __clone_repo_from_bundle (path basename $binutils_src) $binutils_src
         or return
     end
     begin

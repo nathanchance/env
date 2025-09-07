@@ -7,16 +7,16 @@ function _hydro_addon_nathan -d "Hydro prompt customizations"
     printf '\\\\n'
 
     # Signal if we are in a Python virtual environment
-    if in_venv
+    if __in_venv
         printf '%b(%s) ' (set_color 4B8BBE) (path basename $VIRTUAL_ENV)
     end
 
-    if in_deb_chroot
+    if __in_deb_chroot
         printf '%b(chroot:%s) ' (set_color yellow) (cat /etc/debian_chroot)
     end
 
     # Print symbol if we are in a container (like default toolbox prompt)
-    if in_nspawn
+    if __in_nspawn
         if set incoming (findmnt -n -o FSROOT /run/host/incoming | path sort -u)
             set container_str '('(string split -f 2 -m 1 -r / $incoming)')'
         else if set image_id (string match -gr 'IMAGE_ID="?([^"]+)' </usr/lib/os-release)
@@ -42,7 +42,7 @@ function _hydro_addon_nathan -d "Hydro prompt customizations"
     end
 
     # Print user@host if we are in a container or a SSH session
-    if in_container; or in_orb; or test "$in_ssh" = true
+    if __in_container; or __in_orb; or test "$in_ssh" = true
         printf '%b%s' (set_color yellow) $USER
         printf '%b@%s ' (set_color green) $hostname
     end

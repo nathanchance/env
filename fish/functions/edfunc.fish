@@ -15,7 +15,7 @@ function edfunc -d "Edit function or script file in $ENV_FOLDER"
     end
 
     if test "$fzf" = true
-        set -a funcs_to_edit (get_my_funcs | fzf -m)
+        set -a funcs_to_edit (__get_my_funcs | fzf -m)
     end
 
     for func_to_edit in $funcs_to_edit
@@ -27,7 +27,7 @@ function edfunc -d "Edit function or script file in $ENV_FOLDER"
                 set func_file $ENV_FOLDER/fish/functions/$func_to_edit.fish
             end
             if not test -f "$func_file"
-                print_error "$func_file does not exist!"
+                __print_error "$func_file does not exist!"
                 return 1
             end
         end

@@ -3,12 +3,12 @@
 # Copyright (C) 2022-2023 Nathan Chancellor
 
 function cbl_setup_reduction -d "Build good and bad versions of LLVM for cvise reductions"
-    in_tree llvm
+    __in_tree llvm
     or return 128
 
     set bad_sha $argv[1]
     if test -z "$bad_sha"
-        print_error "No bad sha provided?"
+        __print_error "No bad sha provided?"
         return 1
     end
     set bad_sha (git sha $bad_sha)
@@ -75,12 +75,12 @@ if test -z "$make_args"
 end
 set i_target $make_args[-2]
 if not string match -qr \'\.i$\' $i_target
-    print_error ".i file is not the second to last target in make_args?"
+    __print_error ".i file is not the second to last target in make_args?"
     return 1
 end
 set o_target $make_args[-1]
 if not string match -qr \'\.o$\' $o_target
-    print_error ".o file is not the last target in make_args?"
+    __print_error ".o file is not the last target in make_args?"
     return 1
 end
 set o_cmd_file $lnx_bld/good/(path dirname $o_target)/.(path basename $o_target).cmd
@@ -104,14 +104,14 @@ end
 build_kernel good
 or return
 if not test -f $o_cmd_file
-    print_error "$o_cmd_file does not exist?"
+    __print_error "$o_cmd_file does not exist?"
     return 1
 end
 
 build_kernel bad
 set script_ret $status
 if test $script_ret -eq 0
-    print_error "Bad kernel built successfully? Remove this check if that is expected."
+    __print_error "Bad kernel built successfully? Remove this check if that is expected."
     return 1
 end
 
@@ -124,7 +124,7 @@ head -1 $o_cmd_file | \
 
 set i_file $lnx_bld/bad/$i_target
 if not test -f $i_file
-    print_error "$i_target could not be found in $lnx_bld/bad?"
+    __print_error "$i_target could not be found in $lnx_bld/bad?"
     return 1
 end
 cp -v $i_file $cvise_dir; or return
@@ -137,7 +137,7 @@ exit $script_ret
 
 set file
 if test -z "$file"
-    print_error "Reduction file not set?"
+    __print_error "Reduction file not set?"
     return 1
 end
 if not test -e $file

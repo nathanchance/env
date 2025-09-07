@@ -21,7 +21,7 @@ switch $LOCATION
         # If /var/tmp/tmux-1000 is a mountpoint, it means we are in a systemd-nspawn
         # container. If TMUX is not already set, we should set it so that we can
         # interact with the host's tmux server. This needs to be done before the
-        # call to start_tmux below so that a tmux session is not started in the
+        # call to __start_tmux below so that a tmux session is not started in the
         # container.
         set -l tmux_sock_dir /var/tmp/tmux-1000
         set -l tmux_sock $tmux_sock_dir/default
@@ -34,10 +34,10 @@ switch $LOCATION
 
         set -l tty (tty)
         if not string match -qr tty $tty; and status is-interactive
-            start_tmux
+            __start_tmux
         end
 
-        if in_container
+        if __in_container
             if test (cat /etc/use-cbl 2>/dev/null; or echo 0) -eq 1
                 for item in $CBL_QEMU_BIN $CBL_TC_BNTL $CBL_TC_LLVM
                     fish_add_path -gm $item
@@ -50,7 +50,7 @@ switch $LOCATION
             end
         else
             gpg_key_cache
-            tmux_ssh_fixup
+            __tmux_ssh_fixup
         end
 
         if test -d $OPT_ORB_GUEST
@@ -73,7 +73,7 @@ if command -q zoxide; and status is-interactive
     # Maintain separate databases for host and container so that
     # there are not duplicate paths from /run/host/home and /home
     set -l zo_cfg $HOME/.local/share/zoxide
-    if in_container
+    if __in_container
         set -gx _ZO_DATA_DIR $zo_cfg/container
     else
         set -gx _ZO_DATA_DIR $zo_cfg/host

@@ -4,7 +4,7 @@
 
 function cbl_install_tc_tar -d "Install a toolchain tarball generated with create_cbl_tc_tar"
     if test (count $argv) -lt 1
-        print_error "Provide toolchain tarball as argument!"
+        __print_error "Provide toolchain tarball as argument!"
         return 1
     end
     set tar $argv[1]

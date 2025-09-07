@@ -3,8 +3,8 @@
 # Copyright (C) 2021-2023 Nathan Chancellor
 
 function cbl_bld_krnl_deb -d "Build a .deb kernel package"
-    in_container_msg -c; or return
-    in_tree kernel; or return
+    __in_container_msg -c; or return
+    __in_tree kernel; or return
 
     # Effectively 'distclean'
     git cl -q

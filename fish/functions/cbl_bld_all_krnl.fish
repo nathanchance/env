@@ -3,7 +3,7 @@
 # Copyright (C) 2021-2023 Nathan Chancellor
 
 function cbl_bld_all_krnl -d "Build all kernels for ClangBuiltLinux testing"
-    in_container_msg -c; or return
+    __in_container_msg -c; or return
 
     set lnx_src $CBL_SRC_C/linux
 
