@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: MIT
 # Copyright (C) 2021-2023 Nathan Chancellor
 
-function hugo_serve -d "Runs 'hugo server' based on WSL's IP address"
+function hugo_serve -d "Runs 'hugo server' based on WSL's IP address" -w hugo
     if not command -q ip
         print_error "ip could not be found, please install it!"
         return 1
