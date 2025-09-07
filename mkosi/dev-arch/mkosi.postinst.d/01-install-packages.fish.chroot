@@ -41,8 +41,7 @@ and pacman -S --noconfirm \
     mips-linux-gnu-binutils \
     powerpc64-linux-gnu-binutils \
     s390x-linux-gnu-binutils \
-    shellcheck-bin \
-    tuxmake
+    shellcheck-bin
 
 # Turn the pacman sandbox back on
 and sed -i 's/^#DownloadUser/DownloadUser/g' /etc/pacman.conf

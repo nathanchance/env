@@ -27,7 +27,6 @@ function updall -d "Update binaries in $BIN_FOLDER"
         repo \
         rg \
         tmuxp \
-        tuxmake \
         vim
 
     if __is_location_primary

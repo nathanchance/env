@@ -47,6 +47,8 @@ function py_venv -d "Manage Python virtual environment"
                 ruff \
                 vulture \
                 yapf
+        case tuxmake
+            set packages tuxmake
     end
     set venv $PY_VENV_DIR/$venv
     mkdir -p $PY_VENV_DIR
@@ -108,7 +110,7 @@ function py_venv -d "Manage Python virtual environment"
                 end
 
                 switch (path basename $venv)
-                    case continuous-integration2 kernel-dev main
+                    case continuous-integration2 kernel-dev main tuxmake
                         if contains $SRC_FOLDER/b4 $packages
                             if not test -d $SRC_FOLDER/b4
                                 mkdir -p $SRC_FOLDER

@@ -130,7 +130,7 @@ function upd -d "Runs the update command for the current distro or downloads/upd
         set -l submodules
 
         switch $target
-            case b4 bat btop diskus duf eza fd fzf hyperfine repo rg shellcheck shfmt tuxmake yapf
+            case b4 bat btop diskus duf eza fd fzf hyperfine repo rg shellcheck shfmt yapf
                 if command -q $target; and test "$force" != true
                     __print_warning "$target is installed through package manager, skipping install..."
                     continue
@@ -145,8 +145,6 @@ function upd -d "Runs the update command for the current distro or downloads/upd
                 set git_clone_args --recursive
                 set git_urls https://git.kernel.org/pub/scm/utils/b4/b4.git
                 set submodules true
-            case tuxmake
-                set git_urls https://gitlab.com/Linaro/tuxmake.git
             case yapf
                 set git_urls https://github.com/google/yapf
         end
