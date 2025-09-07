@@ -96,10 +96,7 @@ function py_venv -d "Manage Python virtual environment"
                 echo
                 echo "Available virtual environments:"
                 echo
-                fd \
-                    --base-directory $venv_dir \
-                    --maxdepth 1 \
-                    --type directory
+                path filter -d $PY_VENV_DIR/* | path basename
 
             case r rm remove
                 rm -fr $venv
