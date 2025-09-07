@@ -293,3 +293,6 @@ set -gx TUXMAKE_PODMAN_RUN --pids-limit=-1
 # Move Rust folders into XDG_DATA_HOME
 set -gx CARGO_HOME $HOME/.local/share/cargo
 set -gx RUSTUP_HOME $HOME/.local/share/rustup
+
+# Valid arguments for cbl_bld_krnl_pkg
+set -gx VALID_ARCH_KRNLS {linux-,}{debug,{mainline,next}-llvm}

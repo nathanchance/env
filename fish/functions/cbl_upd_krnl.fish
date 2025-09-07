@@ -16,8 +16,6 @@ function cbl_upd_krnl -d "Update machine's kernel"
         set remote_tmp_build_folder /mnt/nvme/tmp/build
     end
 
-    set valid_arch_krnls {linux-,}{debug,{mainline,next}-llvm}
-
     switch $LOCATION
         case vm
             set location vm-(uname -m)
@@ -77,7 +75,7 @@ function cbl_upd_krnl -d "Update machine's kernel"
                     case -k --kexec -r --reboot
                         set -a install_args $arg
                         set reboot true
-                    case $valid_arch_krnls
+                    case $VALID_ARCH_KRNLS
                         set krnl linux-(string replace 'linux-' '' $arg)
                 end
             end
@@ -119,7 +117,7 @@ function cbl_upd_krnl -d "Update machine's kernel"
                         set -a install_args $arg
                     case -p --plain
                         set plain true
-                    case $valid_arch_krnls
+                    case $VALID_ARCH_KRNLS
                         set krnl linux-(string replace 'linux-' '' $arg)
                     case '*'
                         set -a bld_krnl_pkg_args $arg
