@@ -77,7 +77,6 @@ if not set -q MAIN_FOLDER
 end
 
 set -gx BIN_FOLDER $MAIN_FOLDER/bin
-set -gx BIN_SRC_FOLDER $BIN_FOLDER/src
 set -gx CBL $MAIN_FOLDER/cbl
 set -gx GITHUB_FOLDER $MAIN_FOLDER/github
 set -gx KERNEL_FOLDER $MAIN_FOLDER/kernel
