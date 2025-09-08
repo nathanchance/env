@@ -178,7 +178,7 @@ function upd -d "Runs the update command for the current distro or downloads/upd
                 sudo true; or return
             else
                 set binary $BIN_FOLDER/$target
-                set completions $__fish_config_dir/completions
+                set completions $__fish_user_data_dir/vendor_completions.d
 
                 set install install
             end
