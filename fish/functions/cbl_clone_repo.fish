@@ -3,16 +3,24 @@
 # Copyright (C) 2021-2023 Nathan Chancellor
 
 function cbl_clone_repo -d "Clone certain repos for ClangBuiltLinux testing and development"
+    if gh auth status &>/dev/null
+        set can_use_gh true
+    end
+
     for arg in $argv
         set -l branch
         set -l dest
         set -l git_clone_args
+        set -l gh_repo_clone_args
+        set -l use_gh
         set -l use_repo
 
         # Some arguments may have shorthands, expand them before handling
         switch $arg
             case lkt
                 set arg llvm-kernel-testing
+            case $CBL_TC_BLD
+                set arg nathanchance/tc-build
         end
 
         switch $arg
@@ -63,6 +71,18 @@ function cbl_clone_repo -d "Clone certain repos for ClangBuiltLinux testing and 
                     set dest $NVME_SRC_FOLDER/$arg
                 end
 
+            case nathanchance/tc-build
+                set dest $CBL_TC_BLD
+                set git_clone_args -b personal
+
+                if set -q can_use_gh
+                    set use_gh true
+                    set url (path basename $arg)
+                    set gh_repo_clone_args -- $git_clone_args
+                else
+                    set url https://github.com/$arg.git
+                end
+
             case '*'
                 __print_error "$arg not supported explicitly, skipping!"
                 continue
@@ -111,6 +131,9 @@ function cbl_clone_repo -d "Clone certain repos for ClangBuiltLinux testing and 
                 end
 
                 popd
+            else if test -n "$use_gh"
+                gh repo clone $url $dest $gh_repo_clone_args
+                or return
             else
                 git clone $git_clone_args $url $dest; or return
             end

@@ -57,9 +57,7 @@ function cbl_bld_llvm_korg -d "Build (and optionally test) LLVM for kernel.org"
         header "Updating sources"
 
         cbl_upd_src c $repos_to_update
-        and if not test -d $CBL_TC_BLD
-            git clone -b personal https://github.com/nathanchance/tc-build $CBL_TC_BLD
-        end
+        and cbl_clone_repo $CBL_TC_BLD
         and if not __is_location_primary
             git -C $CBL_TC_BLD urh
         end

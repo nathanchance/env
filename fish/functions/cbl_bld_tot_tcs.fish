@@ -61,15 +61,7 @@ function cbl_bld_tot_tcs -d "Build LLVM and binutils from source for kernel deve
         set tc_bld $GITHUB_WORKSPACE/tc-build
     else
         set tc_bld $CBL_TC_BLD
-        if not test -d $tc_bld
-            mkdir -p (path dirname $tc_bld)
-            set -l clone_args -b personal
-            if gh auth status
-                gh repo clone tc-build $tc_bld -- $clone_args
-            else
-                git clone $clone_args https://github.com/nathanchance/tc-build.git $tc_bld
-            end
-        end
+        cbl_clone_repo $tc_bld
         if not __is_location_primary
             git -C $tc_bld urh
         end

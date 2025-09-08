@@ -17,20 +17,16 @@ function cbl_bld_llvm_sbs -d "Build identical copies of LLVM side by side from v
         end
     end
 
+    cbl_clone_repo $CBL_TC_BLD
+    or return
+
     for sha in $shas
         git worktree prune
         git worktree add -d $prefix/src $sha
         or return
         cbl_patch_llvm $prefix/src
 
-        if test -d $CBL_TC_BLD
-            set tc_bld $CBL_TC_BLD
-        else
-            set tc_bld $CBL_GIT/tc-build
-            cbl_clone_repo (path basename $tc_bld)
-        end
-
-        $tc_bld/build-llvm.py \
+        $CBL_TC_BLD/build-llvm.py \
             --assertions \
             --build-folder $prefix/build/llvm-$sha \
             --build-stage1-only \
