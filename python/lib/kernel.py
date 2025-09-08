@@ -101,9 +101,6 @@ def prepare_source(base_name, base_ref='origin/master'):
     # yapf: disable
 
     # New clang-21 warnings
-    if base_name == 'linux-mainline-llvm':
-        patches.append('https://git.kernel.org/wireless/wireless/p/87b07a1fbc6b5c23d3b3584ab4288bc9106d3274')  # wifi: mt76: mt7996: Initialize hdr before passing to skb_put_data()
-
     if base_name == 'linux-next-llvm':
         patches.append('''\
 From 70346577a6e92c0f385679772ede0e81671e064c Mon Sep 17 00:00:00 2001
