@@ -76,10 +76,7 @@ function py_venv -d "Manage Python virtual environment"
                 switch (path basename $venv)
                     case continuous-integration2 kernel-dev main
                         if contains $SRC_FOLDER/b4 $packages
-                            if not test -d $SRC_FOLDER/b4
-                                mkdir -p $SRC_FOLDER
-                                and git clone https://git.kernel.org/pub/scm/utils/b4/b4.git/ $SRC_FOLDER/b4
-                            end
+                            cbl_clone_repo b4
                             or return
 
                             git -C $SRC_FOLDER/b4 urh
@@ -112,10 +109,7 @@ function py_venv -d "Manage Python virtual environment"
                 switch (path basename $venv)
                     case continuous-integration2 kernel-dev main tuxmake
                         if contains $SRC_FOLDER/b4 $packages
-                            if not test -d $SRC_FOLDER/b4
-                                mkdir -p $SRC_FOLDER
-                                and git clone https://git.kernel.org/pub/scm/utils/b4/b4.git/ $SRC_FOLDER/b4
-                            end
+                            cbl_clone_repo b4
                             or return
 
                             git -C $SRC_FOLDER/b4 urh

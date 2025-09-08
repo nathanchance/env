@@ -8,14 +8,9 @@ function cbl_upload_korg_llvm -d "Upload kernel.org toolchain releases with kup"
         return 1
     end
 
-    set kup_src $SRC_FOLDER/kup
-    set kup $kup_src/kup
+    set kup $SRC_FOLDER/kup/kup
+    cbl_clone_repo (path basename $kup)
 
-    if not test -e $kup
-        mkdir -p (path dirname $kup_src)
-        git clone https://git.kernel.org/pub/scm/utils/kup/kup.git $kup_src
-        or return
-    end
     if not test -e $HOME/.kuprc
         printf 'host = git@gitolite.kernel.org\nsubcmd = kup-server\n' >$HOME/.kuprc
     end

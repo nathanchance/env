@@ -24,6 +24,10 @@ function cbl_clone_repo -d "Clone certain repos for ClangBuiltLinux testing and 
         end
 
         switch $arg
+            case b4 kup
+                set url https://git.kernel.org/pub/scm/utils/$arg/$arg.git
+                set dest $SRC_FOLDER/$arg
+
             case boot-utils containers continuous-integration2 tc-build
                 set url https://github.com/ClangBuiltLinux/$arg.git
                 set dest $CBL_GIT/$arg
