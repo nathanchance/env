@@ -20,6 +20,14 @@ function upd -d "Runs the update command for the current distro or downloads/upd
 
     for target in $targets
         switch $target
+            case bat btop diskus duf eza fd fzf hyperfine repo rg shellcheck shfmt tmuxp
+                if command -q $target; and command -v $target | string match -qr ^/usr/s?bin/; and test "$force" != true
+                    __print_warning "$target is installed through package manager, skipping install..."
+                    continue
+                end
+        end
+
+        switch $target
             case env
                 if not __is_location_primary
                     git -C $ENV_FOLDER pull -qr
@@ -100,20 +108,21 @@ function upd -d "Runs the update command for the current distro or downloads/upd
             case tmuxp
                 if __in_container
                     __print_warning "tmuxp should be installed while in the host environment, skipping..."
-                else
-                    if command -q tmuxp; and test "$force" != true
-                        __print_warning "tmuxp is installed through package manager, skipping..."
-                    else
-                        set -l tmuxp_tmp (mktemp -d)
-                        python3 -m pip install --target $tmuxp_tmp tmuxp
-                        or return
-
-                        set -l tmuxp_prefix $BIN_FOLDER/tmuxp
-                        rm -fr $tmuxp_prefix
-                        mv -v $tmuxp_tmp $tmuxp_prefix
-                        or return
-                    end
+                    continue
                 end
+
+                set -l tmuxp_tmp (mktemp -d)
+                python3 -m pip install --target $tmuxp_tmp tmuxp
+                or return
+
+                set -l tmuxp_prefix $BIN_FOLDER/tmuxp
+                rm -fr $tmuxp_prefix
+                mv -v $tmuxp_tmp $tmuxp_prefix
+                or return
+
+                env PYTHONPATH=$tmuxp_prefix $tmuxp_prefix/bin/tmuxp --version
+                or return
+
                 continue
 
             case vim
@@ -137,14 +146,6 @@ function upd -d "Runs the update command for the current distro or downloads/upd
 
         # These need to be local to the loop so they are reset each invocation
         set -l subfolder
-
-        switch $target
-            case bat btop diskus duf eza fd fzf hyperfine repo rg shellcheck shfmt
-                if command -q $target; and command -v $target | string match -qr ^/usr/s?bin/; and test "$force" != true
-                    __print_warning "$target is installed through package manager, skipping install..."
-                    continue
-                end
-        end
 
         if __in_container
             set binary /usr/local/bin/$target
