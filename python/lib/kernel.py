@@ -99,8 +99,11 @@ def prepare_source(base_name, base_ref='origin/master'):
 
     # Patching section
     # yapf: disable
+    if base_name == 'fedora':
+        # https://lore.kernel.org/1a248f14-60f2-4f8f-8b4d-3c63e602fd54@sirena.org.uk/
+        reverts.append(('d1891fa127c32b32f133b80b7496d075d79d1ef7^..ebe37eefb309cdd23edc131901ffce75cbcb3541',
+                       'Revert "KVM: arm64: Reserve pKVM VM handle during initial VM setup"'))
 
-    # New clang-21 warnings
     if base_name == 'linux-next-llvm':
         patches.append('''\
 From 70346577a6e92c0f385679772ede0e81671e064c Mon Sep 17 00:00:00 2001
