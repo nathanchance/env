@@ -64,6 +64,12 @@ switch $LOCATION
         fish_add_path -aP /usr/bin/{site,vendor,core}_perl
 end
 
+# This needs to come before any uses of 'command' to ensure commands are found.
+# They also need to come after the system's bin folders so that they do not
+# override distribution packages, which get continuous updates, unlike upd,
+# which just happen "whenever I remember".
+fish_add_path -aP (path filter -d $BIN_FOLDER{,/*/bin})
+
 if command -q fd
     set -gx FZF_DEFAULT_COMMAND "fd --type file --follow --hidden --exclude .git --color always"
     set -agx FZF_DEFAULT_OPTS --ansi
