@@ -21,7 +21,7 @@ function cbl_cl_software -d "Clean up old versions of managed software"
                 set binary qemu-system-x86_64
         end
 
-        set folders_to_remove (path filter -d $folder/* | path basename | path sort | run_cmd fzf -m --preview="$folder/{}/bin/$binary --version")
+        set folders_to_remove (path filter -d $folder/* | path basename | path sort | command fzf -m --preview="$folder/{}/bin/$binary --version")
         if test -n "$folders_to_remove"
             set rm_cmd \
                 sudo rm -fr $folder/$folders_to_remove

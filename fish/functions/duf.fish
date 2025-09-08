@@ -2,6 +2,10 @@
 # SPDX-License-Identifier: MIT
 # Copyright (C) 2022-2023 Nathan Chancellor
 
-function duf -d "Calls duf based on how it is available"
-    run_cmd (status function) $argv
+function duf -d "Call duf with default arguments when available"
+    if command -q duf
+        command duf -style ascii $argv
+    else
+        df -hT $argv
+    end
 end

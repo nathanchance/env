@@ -4,7 +4,11 @@
 
 function ls -d "Use eza instead of ls if it is available" -w eza
     if status is-interactive
-        eza $argv
+        if command -q eza
+            eza $argv
+        else
+            command ls --colors=auto $argv
+        end
     else
         command ls $argv
     end

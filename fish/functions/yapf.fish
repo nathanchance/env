@@ -2,6 +2,9 @@
 # SPDX-License-Identifier: MIT
 # Copyright (C) 2022-2023 Nathan Chancellor
 
-function yapf -d "Calls yapf based on how it is available"
-    run_cmd (status function) $argv
+function yapf -d "Call yapf with additional default arguments"
+    command yapf \
+        --in-place \
+        --parallel \
+        $argv
 end
