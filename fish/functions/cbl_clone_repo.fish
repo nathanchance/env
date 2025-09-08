@@ -61,7 +61,12 @@ function cbl_clone_repo -d "Clone certain repos for ClangBuiltLinux testing and 
                 set url https://git.kernel.org/pub/scm/linux/kernel/git/mingo/tip.git/
 
             case llvm-kernel-testing
-                set url https://github.com/nathanchance/$arg.git
+                if set -q can_use_gh
+                    set use_gh true
+                    set url (path basename $arg)
+                else
+                    set url https://github.com/nathanchance/$arg.git
+                end
 
             case llvm-android
                 set use_repo true
