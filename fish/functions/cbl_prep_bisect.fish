@@ -10,7 +10,10 @@ function cbl_prep_bisect -d "Prepare for an automated bisect"
 
     cbl_clone_repo repro-scripts
 
-    set -g bisect_script (mktemp --suffix=.fish -p $repro_scripts)
+    if not set -g bisect_script (mktemp --suffix=.fish -p $CBL_MISC/repro-scripts)
+        print_error "Unable to create bisect script?"
+        return 1
+    end
     chmod +x $bisect_script
 
     switch $argv[1]
