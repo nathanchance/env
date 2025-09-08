@@ -22,13 +22,16 @@ function upd -d "Runs the update command for the current distro or downloads/upd
         switch $target
             case env
                 if not __is_location_primary
-                    git -C $ENV_FOLDER pull -qr; or return
+                    git -C $ENV_FOLDER pull -qr
+                    or return
+
                     rld
                 end
                 continue
 
             case fisher
-                fisher_update 1>/dev/null; or return
+                fisher_update 1>/dev/null
+                or return
                 continue
 
             case hydro
@@ -39,15 +42,20 @@ function upd -d "Runs the update command for the current distro or downloads/upd
                             set branch main
                             set owner jorgebucaran
                     end
-                    gh repo sync --force --source $owner/$target nathanchance/$target; or return
-                    git -C $repo ru --prune; or return
-                    git -C $repo rb upstream/$branch; or return
+                    begin
+                        gh repo sync --force --source $owner/$target nathanchance/$target
+                        and git -C $repo ru --prune
+                        and git -C $repo rb upstream/$branch
+                    end
+                    or return
                 else
-                    git -C $repo urh; or return
+                    git -C $repo urh
+                    or return
                 end
                 switch $target
                     case hydro
-                        fisher_update $repo 1>/dev/null; or return
+                        fisher_update $repo 1>/dev/null
+                        or return
                 end
 
             case forks
@@ -80,12 +88,13 @@ function upd -d "Runs the update command for the current distro or downloads/upd
 
             case os os-no-container
                 $PYTHON_SCRIPTS_FOLDER/upd_distro.py $yes
+                or return
+
                 if test "$target" != os-no-container; and not __in_container; and test $LOCATION != mac
                     sd_nspawn -r "$PYTHON_SCRIPTS_FOLDER/upd_distro.py $yes"
+                    or return
                 end
-                if command -q mac
-                    mac orb update
-                end
+
                 continue
 
             case tmuxp
@@ -96,10 +105,13 @@ function upd -d "Runs the update command for the current distro or downloads/upd
                         __print_warning "tmuxp is installed through package manager, skipping..."
                     else
                         set -l tmuxp_tmp (mktemp -d)
-                        set -l tmuxp_prefix $BIN_FOLDER/tmuxp
                         python3 -m pip install --target $tmuxp_tmp tmuxp
+                        or return
+
+                        set -l tmuxp_prefix $BIN_FOLDER/tmuxp
                         rm -fr $tmuxp_prefix
-                        mv $tmuxp_tmp $tmuxp_prefix
+                        mv -v $tmuxp_tmp $tmuxp_prefix
+                        or return
                     end
                 end
                 continue
@@ -140,7 +152,8 @@ function upd -d "Runs the update command for the current distro or downloads/upd
 
             set install sudo install
 
-            sudo true; or return
+            sudo true
+            or return
         else
             set binary $BIN_FOLDER/$target
             set completions $__fish_user_data_dir/vendor_completions.d
@@ -149,7 +162,8 @@ function upd -d "Runs the update command for the current distro or downloads/upd
         end
 
         set work_dir (mktemp -d)
-        pushd $work_dir; or return
+        pushd $work_dir
+        or return
 
         switch (uname -m)
             case aarch64
@@ -190,13 +204,17 @@ function upd -d "Runs the update command for the current distro or downloads/upd
 
                 set url https://github.com/$repo/releases/download/$ver/$target-$ver-$rust_triple.tar.gz
 
-                crl $url | tar -xzf -; or return
-                cd (path basename $url | string replace ".tar.gz" ""); or return
+                begin
+                    crl $url | tar -xzf -
+                    and cd (path basename $url | string replace ".tar.gz" "")
+                    and $install -Dvm755 $target $binary
+                end
+                or return
 
-                $install -Dvm755 $target $binary
                 switch $target
                     case bat fd hyperfine
                         $install -Dvm644 autocomplete/$target.fish $completions/$target.fish
+                        or return
                 end
 
             case btop
@@ -214,7 +232,8 @@ function upd -d "Runs the update command for the current distro or downloads/upd
 
                 set url https://github.com/$repo/releases/download/$ver/btop-$btop_triple.tbz
 
-                crl $url | tar -xjf -; or return
+                crl $url | tar -xjf -
+                or return
 
                 set -l prefix
                 if __in_container
@@ -223,10 +242,15 @@ function upd -d "Runs the update command for the current distro or downloads/upd
                     set prefix $BIN_FOLDER/btop
                     rm -fr $prefix
                 end
+
                 $install -Dvm755 -t $prefix/bin $target/bin/$target
+                or return
+
                 for theme in $target/themes/*
                     $install -Dvm755 -t $prefix/share/btop/themes $theme
+                    or return
                 end
+
                 set binary $prefix/bin/$target
 
             case duf
@@ -239,19 +263,23 @@ function upd -d "Runs the update command for the current distro or downloads/upd
                 set ver (glr $repo)
                 set url https://github.com/$repo/releases/download/$ver/duf_(string replace "v" "" $ver)_linux_$arch.tar.gz
 
-                crl $url | tar -C $work_dir -xzf -; or return
+                crl $url | tar -C $work_dir -xzf -
+                or return
 
                 $install -Dvm755 $work_dir/duf $binary
+                or return
 
             case eza
                 set repo eza-community/eza
                 set ver (glr $repo)
                 set url https://github.com/$repo/releases/download/$ver/eza_$rust_triple.zip
 
-                crl -O $url; or return
-                unzip (path basename $url); or return
-
-                $install -Dvm755 ./eza $binary
+                begin
+                    crl -O $url
+                    and unzip (path basename $url)
+                    and $install -Dvm755 ./eza $binary
+                end
+                or return
 
             case fzf
                 switch $arch
@@ -266,7 +294,10 @@ function upd -d "Runs the update command for the current distro or downloads/upd
                 set url https://github.com/$repo/releases/download/$ver/fzf-$ver-linux_$arch.tar.gz
 
                 crl $url | tar -xzf -
+                or return
+
                 $install -Dvm755 fzf $binary
+                or return
 
             case gh
                 switch $arch
@@ -280,10 +311,12 @@ function upd -d "Runs the update command for the current distro or downloads/upd
                 set ver (glr $repo)
                 set url https://github.com/$repo/releases/download/$ver/gh_(string replace "v" "" $ver)_linux_$arch.tar.gz
 
-                crl $url | tar -xzf -
-                cd (path basename $url | string replace ".tar.gz" ""); or return
-
-                $install -Dvm755 bin/gh $binary
+                begin
+                    crl $url | tar -xzf -
+                    and cd (path basename $url | string replace ".tar.gz" "")
+                    and $install -Dvm755 bin/gh $binary
+                end
+                or return
 
             case iosevka
                 if __in_container
@@ -295,11 +328,14 @@ function upd -d "Runs the update command for the current distro or downloads/upd
                 set ver (glr $repo)
                 set url https://github.com/$repo/releases/download/$ver/super-ttc-iosevka-ss08-(string replace "v" "" $ver).zip
 
-                crl -O $url; or return
-                unzip (path basename $url); or return
+                begin
+                    crl -O $url
+                    and unzip (path basename $url)
 
-                install -Dvm644 iosevka-ss08.ttc $HOME/.local/share/fonts/iosevka-ss08.ttc
-                fc-cache -fv
+                    and install -Dvm644 iosevka-ss08.ttc $HOME/.local/share/fonts/iosevka-ss08.ttc
+                    and fc-cache -fv
+                end
+                or return
 
             case repo
                 if not command -q python
@@ -315,20 +351,25 @@ function upd -d "Runs the update command for the current distro or downloads/upd
                         set ver (glr $repo)
                         set url https://github.com/$repo/releases/download/$ver/ripgrep-$ver-$rust_triple.tar.gz
 
-                        crl $url | tar -xzf -; or return
+                        crl $url | tar -xzf -
+                        or return
 
                         $install -Dvm755 rg $binary
+                        or return
 
                     case x86_64
                         set repo BurntSushi/ripgrep
                         set ver (glr $repo)
                         set url https://github.com/$repo/releases/download/$ver/ripgrep-$ver-x86_64-unknown-linux-musl.tar.gz
 
-                        crl $url | tar -xzf -; or return
-                        cd (path basename $url | string replace '.tar.gz' ''); or return
+                        begin
+                            crl $url | tar -xzf -
+                            and cd (path basename $url | string replace '.tar.gz' '')
 
-                        $install -Dvm755 rg $binary
-                        $install -Dvm644 complete/rg.fish $completions/rg.fish
+                            and $install -Dvm755 rg $binary
+                            and $install -Dvm644 complete/rg.fish $completions/rg.fish
+                        end
+                        or return
                 end
 
             case rustup
@@ -337,6 +378,7 @@ function upd -d "Runs the update command for the current distro or downloads/upd
                     return 1
                 end
                 curl --proto '=https' --tlsv1.3 -sSf https://sh.rustup.rs | sh
+                or return
 
             case shellcheck
                 switch $arch
@@ -350,10 +392,12 @@ function upd -d "Runs the update command for the current distro or downloads/upd
                 set ver (glr $repo)
                 set url https://github.com/$repo/releases/download/$ver/shellcheck-$ver.linux.$arch.tar.xz
 
-                crl $url | tar -xJf -
-                cd shellcheck-$ver; or return
-
-                $install -Dvm755 shellcheck $binary
+                begin
+                    crl $url | tar -xJf -
+                    and cd shellcheck-$ver
+                    and $install -Dvm755 shellcheck $binary
+                end
+                or return
 
             case shfmt
                 switch $arch
@@ -365,6 +409,7 @@ function upd -d "Runs the update command for the current distro or downloads/upd
                 set ver (glr $repo)
 
                 crl https://github.com/$repo/releases/download/$ver/shfmt_"$ver"_linux_$arch | $install -Dvm755 /dev/stdin $binary
+                or return
 
             case vmtest
                 switch $arch
@@ -379,13 +424,15 @@ function upd -d "Runs the update command for the current distro or downloads/upd
                 set ver (glr $repo)
 
                 crl https://github.com/$repo/releases/download/$ver/vmtest-$arch | $install -Dvm755 /dev/stdin $binary
+                or return
         end
 
         popd
         rm -rf $work_dir
 
         if test -x $binary
-            $binary --version; or return
+            $binary --version
+            or return
         end
     end
 end
