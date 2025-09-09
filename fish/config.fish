@@ -18,6 +18,16 @@ switch $LOCATION
         set -gx SHELL /opt/homebrew/bin/fish
 
     case '*'
+        fish_add_path -aP /usr/local/sbin /usr/sbin /sbin
+        # https://wiki.archlinux.org/index.php/Perl_Policy#Binaries_and_scripts
+        fish_add_path -aP /usr/bin/{site,vendor,core}_perl
+
+        # This needs to come before any uses of 'command' to ensure commands are found.
+        # They also need to come after the system's bin folders so that they do not
+        # override distribution packages, which get continuous updates, unlike upd,
+        # which just happen "whenever I remember".
+        fish_add_path -aP (path filter -d $BIN_FOLDER{,/*/bin})
+
         # If /var/tmp/tmux-1000 is a mountpoint, it means we are in a systemd-nspawn
         # container. If TMUX is not already set, we should set it so that we can
         # interact with the host's tmux server. This needs to be done before the
@@ -58,17 +68,7 @@ switch $LOCATION
             fish_add_path -aP $OPT_ORB_GUEST/bin
             fish_add_path -aP $OPT_ORB_GUEST/data/bin/cmdlinks
         end
-
-        fish_add_path -aP /usr/local/sbin /usr/sbin /sbin
-        # https://wiki.archlinux.org/index.php/Perl_Policy#Binaries_and_scripts
-        fish_add_path -aP /usr/bin/{site,vendor,core}_perl
 end
-
-# This needs to come before any uses of 'command' to ensure commands are found.
-# They also need to come after the system's bin folders so that they do not
-# override distribution packages, which get continuous updates, unlike upd,
-# which just happen "whenever I remember".
-fish_add_path -aP (path filter -d $BIN_FOLDER{,/*/bin})
 
 if command -q fd
     set -gx FZF_DEFAULT_COMMAND "fd --type file --follow --hidden --exclude .git --color always"
