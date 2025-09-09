@@ -10,5 +10,10 @@ function __is_system_binary -d "Checks if command is a system binary (installed 
     end
 
     # This is not foolproof but it will cover a good number of cases
-    command -v $binary | string match -qr ^/usr/s?bin/
+    if test $LOCATION = mac
+        set regex /opt/homebrew/bin/
+    else
+        set regex /usr/s?bin/
+    end
+    command -v $binary | string match -qr ^$regex
 end
