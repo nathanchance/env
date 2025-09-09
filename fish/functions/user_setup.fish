@@ -172,9 +172,6 @@ function user_setup -d "Setup a user account, downloading all files and placing 
         PatrickF1/fzf.fish \
         jorgebucaran/autopair.fish \
         wfxr/forgit
-    if not command -q zoxide
-        set -a fisher_plugins jethrokuan/z
-    end
     for fisher_plugin in $fisher_plugins
         fisher install $fisher_plugin; or return
     end

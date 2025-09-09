@@ -20,7 +20,7 @@ function upd -d "Runs the update command for the current distro or downloads/upd
 
     for target in $targets
         switch $target
-            case bat btop diskus duf eza fd fzf hyperfine repo rg shellcheck shfmt tmuxp
+            case bat btop diskus duf eza fd fzf hyperfine repo rg shellcheck shfmt tmuxp zoxide
                 if command -q $target; and command -v $target | string match -qr ^/usr/s?bin/; and test "$force" != true
                     __print_warning "$target is installed through package manager, skipping..."
                     continue
@@ -150,6 +150,7 @@ function upd -d "Runs the update command for the current distro or downloads/upd
         if __in_container
             set binary /usr/local/bin/$target
             set completions $__fish_sysconf_dir/completions
+            set man /usr/local/man
 
             set install sudo install
 
@@ -158,6 +159,7 @@ function upd -d "Runs the update command for the current distro or downloads/upd
         else
             set binary $BIN_FOLDER/$target
             set completions $__fish_user_data_dir/vendor_completions.d
+            set man $HOME/.local/share/man
 
             set install install
         end
@@ -425,6 +427,27 @@ function upd -d "Runs the update command for the current distro or downloads/upd
                 set ver (glr $repo)
 
                 crl https://github.com/$repo/releases/download/$ver/vmtest-$arch | $install -Dvm755 /dev/stdin $binary
+                or return
+
+            case zoxide
+                switch $arch
+                    case arm
+                        set arch armv7
+                        set triple_os musleabihf
+                    case '*'
+                        set triple_os musl
+                end
+
+                set repo ajeetdsouza/zoxide
+                set ver (glr $repo)
+                set url https://github.com/$repo/releases/download/$ver/zoxide-(string replace v '' $ver)-$arch-unknown-linux-$triple_os.tar.gz
+
+                begin
+                    crl $url | tar -xzf -
+                    and $install -Dvm755 zoxide $binary
+                    and $install -Dvm644 -t $man/man1 man/man1/*.1
+                    and $install -Dvm644 {completions,$completions}/zoxide.fish
+                end
                 or return
         end
 

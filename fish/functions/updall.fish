@@ -26,7 +26,8 @@ function updall -d "Update binaries in $BIN_FOLDER"
         repo \
         rg \
         tmuxp \
-        vim
+        vim \
+        zoxide
 
     if __is_location_primary
         set -a targets forks
