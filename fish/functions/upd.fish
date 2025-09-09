@@ -21,6 +21,10 @@ function upd -d "Runs the update command for the current distro or downloads/upd
     for target in $targets
         switch $target
             case bat btop diskus duf eza fd fzf hyperfine repo rg shellcheck shfmt tmuxp zoxide
+                if test $LOCATION = mac
+                    __print_warning "$target should be installed and updated via Homebrew, skipping..."
+                    continue
+                end
                 if __is_system_binary $target; and test "$force" != true
                     __print_warning "$target is installed through package manager, skipping..."
                     continue
