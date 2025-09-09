@@ -68,6 +68,7 @@ def install_packages():
     packages = [
         '1password-cli',
         'bat',
+        'eza',
         'fd',
         'fish',
         'fzf',
