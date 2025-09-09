@@ -22,7 +22,7 @@ function upd -d "Runs the update command for the current distro or downloads/upd
         switch $target
             case bat btop diskus duf eza fd fzf hyperfine repo rg shellcheck shfmt tmuxp
                 if command -q $target; and command -v $target | string match -qr ^/usr/s?bin/; and test "$force" != true
-                    __print_warning "$target is installed through package manager, skipping install..."
+                    __print_warning "$target is installed through package manager, skipping..."
                     continue
                 end
         end
@@ -321,7 +321,7 @@ function upd -d "Runs the update command for the current distro or downloads/upd
 
             case iosevka
                 if __in_container
-                    __print_error "Iosevka should be installed on the host, not the container!"
+                    __print_warning "Iosevka should be installed on the host, not the container, skipping..."
                     continue
                 end
 
