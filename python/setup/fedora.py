@@ -98,6 +98,7 @@ def install_packages():
         'b4',
 
         # compression and decompression
+        'unzip',
         'zstd',
 
         # email
