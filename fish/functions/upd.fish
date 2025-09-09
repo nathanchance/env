@@ -128,7 +128,7 @@ function upd -d "Runs the update command for the current distro or downloads/upd
 
         switch $target
             case bat btop diskus duf eza fd fzf hyperfine repo rg shellcheck shfmt
-                if command -q $target; and test "$force" != true
+                if command -q $target; and command -v $target | string match -qr ^/usr/s?bin/; and test "$force" != true
                     __print_warning "$target is installed through package manager, skipping install..."
                     continue
                 end
