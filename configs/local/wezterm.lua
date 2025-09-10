@@ -42,6 +42,25 @@ local function get_font_size()
 end
 return {
   color_scheme = "Snazzy",
+  colors = {
+    tab_bar = {
+      background = "#1e1f29",
+      active_tab = {
+        bg_color = "#282a36",
+        fg_color = "#eff0eb",
+        intensity = "Bold",
+        underline = "Double",
+      },
+      inactive_tab = {
+        bg_color = "#1e1f29",
+        fg_color = "#ebece6",
+      },
+      new_tab = {
+        bg_color = "#1e1f29",
+        fg_color = "#ebece6",
+      },
+    },
+  },
   default_prog = {"/opt/homebrew/bin/fish", "-l"},
   default_cursor_style = 'BlinkingUnderline',
   font = wezterm.font_with_fallback({"Iosevka Term SS08", "SF Mono Regular"}),
@@ -58,6 +77,9 @@ return {
      {key="Enter", mods="ALT", action="DisableDefaultAssignment"},
      {key="t", mods="ALT", action=wezterm.action.ShowTabNavigator},
   },
+  tab_max_width = 25,
+  use_fancy_tab_bar = false,
+  window_decorations = "MACOS_USE_BACKGROUND_COLOR_AS_TITLEBAR_COLOR|RESIZE|TITLE",
   window_padding = {
     left = 10,
     right = 10,
