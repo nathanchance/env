@@ -9,14 +9,14 @@ function wezterm_open_remotes -d "Open a new wezterm tab for each remote machine
 
     # Local machines
     set hosts \
-        hetzner:Hetzner \
-        aadp:AADP \
-        intel-desktop-11700:"Intel i7-11700" \
-        amd-desktop-8745HS:"AMD mini desktop" \
-        intel-laptop:"Intel laptop" \
-        honeycomb:Honeycomb \
-        intel-desktop-n100:"Intel mini desktop" \
-        chromebox:Chromebox
+        hetzner:"🌎 Hetzner" \
+        aadp:"🟪 AADP" \
+        intel-desktop-11700:"🟦 Intel i7-11700" \
+        amd-desktop-8745HS:"🟥 AMD mini desktop" \
+        intel-laptop:"🟦 Intel laptop" \
+        honeycomb:"🟪 Honeycomb" \
+        intel-desktop-n100:"🟦 Intel mini desktop" \
+        chromebox:"🟦 Chromebox"
 
     set msh_args $argv
 
@@ -26,8 +26,15 @@ function wezterm_open_remotes -d "Open a new wezterm tab for each remote machine
         $wezterm_path cli spawn -- $fish_path -c "__wezterm_title $title; msh $msh_args $host; exec $fish_path -l"
     end
 
-    $wezterm_path cli spawn -- $fish_path -c "__wezterm_title macOS; exec $fish_path -l"
+    set mac_model (sysctl hw.model | string split -f2 ': ')
+    switch $mac_model
+        case Mac13,1
+            set icon 🖥️
+        case Mac14,2
+            set icon 💻
+    end
+    $wezterm_path cli spawn -- $fish_path -c "__wezterm_title '$icon macOS'; exec $fish_path -l"
     if command -q orb; and orb list | $rg_path -q fedora
-        $wezterm_path cli spawn -- $fish_path -c "__wezterm_title Fedora; ssh orb; exec $fish_path -l"
+        $wezterm_path cli spawn -- $fish_path -c "__wezterm_title '$icon Fedora'; ssh orb; exec $fish_path -l"
     end
 end
