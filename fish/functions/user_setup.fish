@@ -88,12 +88,6 @@ function user_setup -d "Setup a user account, downloading all files and placing 
   # Helps behind some NAT-ing routers
   ServerAliveInterval 60' >>$ssh_folder/config
             end
-
-            if test $LOCATION = mac
-                echo 'Host sos.*.platformequinix.com
-  HostkeyAlgorithms +ssh-rsa
-  PubkeyAcceptedAlgorithms +ssh-rsa' >>$ssh_folder/config
-            end
         end
 
         if test -f $HOME/.ssh/.ssh-agent.fish

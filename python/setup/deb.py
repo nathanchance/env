@@ -191,7 +191,6 @@ def update_and_install_packages(additional_packages=None):
     if additional_packages:
         packages += additional_packages
 
-    # Install libvirt and needed packages on Equinix Metal servers.
     # Unconditionally install QEMU to get /dev/kvm setup properly.
     dpkg_arch = get_dpkg_arch()
     arch_packages = {
@@ -204,14 +203,6 @@ def update_and_install_packages(additional_packages=None):
             'qemu': 'qemu-system-arm',
         },
     }
-    if lib.setup.is_equinix():
-        packages += [
-            'dnsmasq',
-            'libvirt-daemon-system',
-            'qemu-utils',
-            'virt-manager',
-            arch_packages[dpkg_arch]['firmware'],
-        ]  # yapf: disable
     if dpkg_arch in arch_packages:
         packages += [arch_packages[dpkg_arch]['qemu']]
 

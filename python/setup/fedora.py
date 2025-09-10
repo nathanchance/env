@@ -147,12 +147,8 @@ def install_packages():
     if not lib.setup.is_lxc():
         packages.append('podman')
 
-    # Install Virtualization group on Equinix Metal servers or trusted machines
-    if lib.setup.is_equinix() or machine_is_trusted():
-        packages.append('@virtualization')
-
     if machine_is_trusted():
-        packages.append('tailscale')
+        packages += ['@virtualization', 'tailscale']
 
     # Needed to occasionally upgrade the MMC firmware
     if lib.setup.get_hostname() == 'aadp':

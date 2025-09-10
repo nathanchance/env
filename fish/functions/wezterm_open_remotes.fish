@@ -20,17 +20,6 @@ function wezterm_open_remotes -d "Open a new wezterm tab for each remote machine
 
     set msh_args $argv
 
-    # Remote machines
-    set equinix_ips $ICLOUD_DOCS_FOLDER/.equinix_ips
-    if test -f $equinix_ips
-        for line in (cat $equinix_ips)
-            set host (string split -f 1 , $line)
-            set title (string replace -a - . $host)
-
-            set -a hosts $host:$title
-        end
-    end
-
     for item in $hosts
         set host (string split -f 1 : $item)
         set title (string split -f 2 : $item)

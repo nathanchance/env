@@ -44,7 +44,7 @@ def create_user(user_name, user_password):
 
 
 def parse_arguments():
-    parser = ArgumentParser(description='Perform initial setup on Equinix Metal servers')
+    parser = ArgumentParser(description='Perform initial setup on certain servers')
 
     parser.add_argument('-d',
                         '--drive',

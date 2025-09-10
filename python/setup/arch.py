@@ -562,11 +562,10 @@ def pacman_install_packages():
             'open-vm-tools',
         ]  # yapf: disable
 
-    # Install libvirt and virt-install for easy management of VMs on
-    # Equinix Metal servers; iptables-nft is also needed for networking but
-    # that will be installed later to avoid potential issues with replacing
-    # iptables.
-    if lib.setup.is_equinix() or lib.setup.is_virtual_machine():
+    # Install libvirt and virt-install for easy management of VMs; iptables-nft
+    # is also needed for networking but that will be installed later to avoid
+    # potential issues with replacing iptables.
+    if lib.setup.is_virtual_machine():
         packages += [
             'dmidecode',
             'dnsmasq',

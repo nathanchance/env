@@ -314,10 +314,6 @@ def group_exists(group):
     return True
 
 
-def is_equinix():
-    return re.search('^[a|c|f|g|m|n|s|t|x]{1}[1-3]{1}-.*', get_hostname())
-
-
 def is_installed(package_to_check):
     if using_pacman():
         pacman_packages = lib.utils.chronic(['pacman', '-Qq']).stdout

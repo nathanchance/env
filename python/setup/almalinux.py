@@ -90,13 +90,6 @@ def install_packages():
         'tuxmake',
     ]  # yapf: disable
 
-    if lib.setup.is_equinix():
-        packages += [
-            'libvirt',
-            'qemu-img',
-            'qemu-kvm',
-            'virt-install',
-        ]
     if HOST_ARCH == 'x86_64':
         packages.append('pacman')  # to build dev container image with mkosi
 
