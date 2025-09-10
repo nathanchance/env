@@ -49,7 +49,7 @@ return {
         bg_color = "#282a36",
         fg_color = "#eff0eb",
         intensity = "Bold",
-        underline = "Double",
+        underline = "Single",
       },
       inactive_tab = {
         bg_color = "#1e1f29",
