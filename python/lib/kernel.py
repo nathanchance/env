@@ -99,6 +99,12 @@ def prepare_source(base_name, base_ref='origin/master'):
 
     # Patching section
     # yapf: disable
+    if base_name in NEXT_TREES:
+        # https://lore.kernel.org/fa727f7b-92d5-4fd2-b9cf-a19b27303a22@suse.cz/
+        commits.append('e0f358bd8f3cea12ad7e9422afa0c16d7aab3271')   # NOTCBL: FROMGIT: Forward fix for "slab: add sheaf support for batching kfree_rcu() operations
+
+        patches.append('https://lore.kernel.org/all/20250910151128.49693-1-thomas.hellstrom@linux.intel.com/')  # drm/xe: Fix uninitialized return values
+
     if base_name == 'linux-next-llvm':
         patches.append('''\
 From 70346577a6e92c0f385679772ede0e81671e064c Mon Sep 17 00:00:00 2001
