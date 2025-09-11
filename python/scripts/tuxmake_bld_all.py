@@ -3,14 +3,17 @@
 # Copyright (C) 2023 Nathan Chancellor
 
 from argparse import ArgumentParser
+import contextlib
 from pathlib import Path
 import shutil
 import signal
 import sys
 import time
 
-# pylint: disable-next=import-error,no-name-in-module
-import tuxmake.build
+# we might be running '-h', just crash and burn later
+with contextlib.suppress(ImportError):
+    # pylint: disable-next=import-error,no-name-in-module
+    import tuxmake.build
 
 import korg_tc
 
