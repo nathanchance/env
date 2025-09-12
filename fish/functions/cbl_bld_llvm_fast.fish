@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: MIT
 # Copyright (C) 2024 Nathan Chancellor
 
-function cbl_bld_llvm_fast -d "Quickly build a version of LLVM"
+function cbl_bld_llvm_fast -d "Quickly build a version of LLVM" -w build-llvm.py
     set bld_llvm_args $argv
     if contains -- -l $bld_llvm_args
         set llvm_flag -l
