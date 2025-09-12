@@ -260,6 +260,13 @@ kernel_builder.build()"
         set -a bld_llvm_args --build-stage1-only
     end
     if set -q bolt
+        # If /tmp size is less than 10GB, define TMPDIR within the build folder
+        # so that we do not potentially error when working with large perf
+        # profiles.
+        if test (findmnt -n -o OPTIONS /tmp | string match -gr 'size=(\d+)k') -lt 10000000
+            set -fx TMPDIR $llvm_bld/tmp
+            remkdir $TMPDIR
+        end
         set -a bld_llvm_args --bolt
     end
     if set -q defines

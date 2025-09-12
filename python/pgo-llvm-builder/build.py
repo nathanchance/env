@@ -164,6 +164,7 @@ if __name__ == '__main__':
         '--quiet',
         '--register=no',
         '--setenv=DISTRIBUTING=1',
+        '--setenv=TMPDIR=/build/tmp',
         '--settings=no',
         '--system-call-filter=perf_event_open',
         '--user=builder',
@@ -252,7 +253,7 @@ if __name__ == '__main__':
                 lib.utils.call_git_loud(worktree, ['ap'], input=mod_diff)
 
         shutil.rmtree(build_folder, ignore_errors=True)
-        build_folder.mkdir(exist_ok=True, parents=True)
+        Path(build_folder, 'tmp').mkdir(exist_ok=True, parents=True)
 
         mounts = (
             (build_folder, '/build'),
