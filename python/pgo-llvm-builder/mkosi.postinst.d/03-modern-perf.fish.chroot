@@ -1,0 +1,55 @@
+#!/usr/bin/env fish
+# Description: Build and install a version of perf that matches the host machine's kernel version
+
+set workdir (mktemp -d)
+
+# Get host's kernel version
+if not set kernel_version (uname -r)
+    echo "Failed to get host's kernel version!"
+    return 1
+end
+
+if not string match -qr '^(?<maj>\d+)\.(?<min>\d+)\.(?<patch>\d+)(?<rc>-rc\d+)?' $kernel_version
+    echo "Did not find a kernel version match for host's kernel version: $kernel_version"
+    return 1
+end
+
+if test -z "$rc"; or test $patch -gt 0
+    set url https://cdn.kernel.org/pub/linux/kernel/v$maj.x/linux-$maj.$min.$patch.tar.xz
+else
+    set url https://git.kernel.org/torvalds/t/linux-"$maj.$min$rc".tar.gz
+end
+switch (string match -gr '\.(\w+)$' $url)
+    case gz
+        set tar_comp_arg -z
+    case xz
+        set tar_comp_arg -J
+    case '*'
+        echo "Unhandled compression algorithm: $comp"
+        return 1
+end
+
+curl -LSs $url | tar -C $workdir --strip-components=1 -xf - $tar_comp_arg
+or return
+
+pushd $workdir/tools/perf
+or return
+
+fish_add_path -P /usr/local/bin
+
+make \
+    -f Makefile.perf \
+    -j(nproc) \
+    prefix=/usr/local \
+    LIBPFM4=1 \
+    NO_LIBLLVM=1 \
+    NO_LIBTRACEEVENT=1 \
+    NO_SDT=1 \
+    PYTHON=(command -v python3) \
+    PYTHON_CONFIG=(command -v python3-config) \
+    VF=0 \
+    install
+or return
+
+popd
+rm -fr $workdir
