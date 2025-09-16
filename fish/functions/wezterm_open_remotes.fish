@@ -7,6 +7,11 @@ function wezterm_open_remotes -d "Open a new wezterm tab for each remote machine
     set rg_path (command -v rg)
     set wezterm_path (command -v wezterm)
 
+    if test ($wezterm_path cli list | count) != 2
+        __print_error "wezterm appears to have more than one tab open?"
+        return 1
+    end
+
     # Local machines
     set hosts \
         hetzner:"🌎 Hetzner" \
