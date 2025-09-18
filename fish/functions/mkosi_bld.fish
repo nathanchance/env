@@ -27,22 +27,12 @@ function mkosi_bld -d "Build a distribution using mkosi"
     # for that.
     if command -q mkosi; and test (mkosi --version | string match -gr '^mkosi ([0-9]+)') -ge 25; and not test (path basename $directory) = pgo-llvm-builder
     else if not __in_venv
-        set venv_dir $PY_VENV_DIR/mkosi
-        if not test -e $venv_dir
-            py_venv c mkosi
+        set venv_args e u
+        if not test -e $PY_VENV_DIR/mkosi
+            set -p venv_args c
         end
-
-        py_venv e mkosi
+        py_venv $venv_args mkosi
         or return
-
-        if not command -q mkosi
-            pip install --upgrade pip
-
-            pip install git+https://github.com/systemd/mkosi
-            or return
-
-            crl https://github.com/nathanchance/patches/raw/refs/heads/main/mkosi/buster.patch | patch -d $venv_dir/lib/python*/site-packages -N -p1
-        end
     else if test (path basename $VIRTUAL_ENV) != mkosi
         __print_error "Already in a virtual environment?"
         return 1

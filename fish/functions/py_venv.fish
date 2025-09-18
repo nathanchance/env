@@ -47,6 +47,8 @@ function py_venv -d "Manage Python virtual environment"
                 ruff \
                 vulture \
                 yapf
+        case mkosi
+            set packages git+https://github.com/systemd/mkosi
         case tuxmake
             set packages tuxmake
     end
@@ -72,9 +74,15 @@ function py_venv -d "Manage Python virtual environment"
                 end
                 source $activate
 
-            case i in install
-                switch (path basename $venv)
-                    case continuous-integration2 kernel-dev main
+            case i in install u up update
+                if not __in_venv
+                    __print_error "Not in a virtual environment?"
+                    return 1
+                end
+
+                set venv_name (path basename $venv)
+                switch $venv_name
+                    case continuous-integration2 kernel-dev main mkosi tuxmake
                         if contains $SRC_FOLDER/b4 $packages
                             cbl_clone_repo b4
                             or return
@@ -82,13 +90,26 @@ function py_venv -d "Manage Python virtual environment"
                             git -C $SRC_FOLDER/b4 urh
                             or return
                         end
+
                         pip install --upgrade pip $packages
                         or return
-                    case '*'
-                        if test -e requirements.txt
-                            pip install -r requirements.txt
-                            or return
+
+                        if test $venv_name = mkosi
+                            sed -i "s;suite=f\"{context.config.release}-security\";suite=f\"{context.config.release}{'/updates' if context.config.release == 'buster' else '-security'}\";g" $venv/lib/python*/site-packages/mkosi/distributions/debian.py
                         end
+
+                    case '*'
+                        if string match -qr '^u' $action
+                            set packages_to_upgrade (pip list -o | string match -r '^.*[0-9]+\.[0-9]+\.[0-9]+' | string split -f 1 ' ')
+                            if test -n "$packages_to_upgrade"
+                                pip install --upgrade $packages_to_upgrade
+                            end
+                        else
+                            if test -e requirements.txt
+                                pip install -r requirements.txt
+                            end
+                        end
+                        or return
                 end
 
             case l ls list
@@ -99,30 +120,6 @@ function py_venv -d "Manage Python virtual environment"
 
             case r rm remove
                 rm -fr $venv
-
-            case u up update
-                if not __in_venv
-                    __print_error "Not in a virtual environment?"
-                    return 1
-                end
-
-                switch (path basename $venv)
-                    case continuous-integration2 kernel-dev main tuxmake
-                        if contains $SRC_FOLDER/b4 $packages
-                            cbl_clone_repo b4
-                            or return
-
-                            git -C $SRC_FOLDER/b4 urh
-                            or return
-                        end
-                        pip install --upgrade pip $packages
-                        or return
-                    case '*'
-                        set packages_to_upgrade (pip list -o | string match -r '^.*[0-9]+\.[0-9]+\.[0-9]+' | string split -f 1 ' ')
-                        if test -n "$packages_to_upgrade"
-                            pip install --upgrade $packages_to_upgrade
-                        end
-                end
 
             case x exit
                 if not __in_venv
