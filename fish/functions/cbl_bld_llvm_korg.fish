@@ -17,6 +17,8 @@ function cbl_bld_llvm_korg -d "Build (and optionally test) LLVM for kernel.org"
                 set reset y
             case -t --test-linux
                 set test_linux y
+            case -s --skip-tests --slim-pgo
+                set -a build_py_args $arg
             case '*'
                 set -a llvm_vers $arg
         end
@@ -76,7 +78,8 @@ function cbl_bld_llvm_korg -d "Build (and optionally test) LLVM for kernel.org"
             --install-folder $tmp_llvm_install \
             --llvm-folder $CBL_SRC_C/llvm-project \
             --tc-build-folder $CBL_TC_BLD \
-            --versions $llvm_vers
+            --versions $llvm_vers \
+            $build_py_args
         __tg_msg "pgo-llvm-builder failed!"
         return 1
     end

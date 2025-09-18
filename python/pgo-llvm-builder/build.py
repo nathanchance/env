@@ -56,6 +56,9 @@ if __name__ == '__main__':
                         '--skip-tests',
                         action='store_true',
                         help='Skip running LLVM/Clang tests')
+    parser.add_argument('--slim-pgo',
+                        action='store_true',
+                        help='Perform slim PGO instead of full PGO')
     parser.add_argument('-t',
                         '--tc-build-folder',
                         help='Location of tc-build. Omit for vendored version')
@@ -148,7 +151,7 @@ if __name__ == '__main__':
         '--install-targets', *install_targets,
         '--llvm-folder', '/llvm',
         '--no-ccache',
-        '--pgo', 'kernel-defconfig',
+        '--pgo', f"kernel-defconfig{'-slim' if args.slim_pgo else ''}",
         '--projects', *projects,
         '--quiet-cmake',
         '--show-build-commands',
