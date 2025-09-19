@@ -80,7 +80,6 @@ class NspawnConfig(UserDict):
         automounted_mounts = {
             # We may be in a virtual machine
             os.environ['HOST_FOLDER'],
-            os.environ['NAS_FOLDER'],
         }
         rw_mounts = {
             '/dev/kvm',
@@ -97,6 +96,8 @@ class NspawnConfig(UserDict):
 
         if mac_folder := os.environ.get('MAC_FOLDER'):
             rw_mounts.add(mac_folder)
+        else:
+            automounted_mounts.add(os.environ['NAS_FOLDER'])
 
         if 'arch' in self.name:
             # Share the host's mirrorlist so that reflector does not have to be
