@@ -24,7 +24,7 @@ if [ "$RELEASE" = "buster" ]; then
     cd "$(mktemp -d)"
 
     # Download and extract source code
-    fish_version=4.0.6
+    fish_version=4.0.8
     curl -LSs https://github.com/fish-shell/fish-shell/releases/download/"$fish_version"/fish-"$fish_version".tar.xz | tar --strip-components=1 -Jxf-
 
     mkdir build
