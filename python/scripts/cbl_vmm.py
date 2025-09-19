@@ -188,7 +188,7 @@ class VirtualMachine:
                 raise RuntimeError('kernel passed without initrd and one could not be found!')
             args += ['-initrd', initrd]
 
-        # ISO, if setting up
+        # ISO
         if iso_val := self.iso:
             if iso_val.startswith(('https://', 'http://')):
                 if not (iso := Path(BASE_FOLDER, 'iso', iso_val.rsplit('/', 1)[1])).exists():
@@ -530,6 +530,7 @@ def parse_arguments():
                             action='store_true',
                             help="Start QEMU with '-s -S' for debugging with gdb")
     run_parser.add_argument('-i', '--initrd', type=Path, help='Path to initrd')
+    run_parser.add_argument('-I', '--iso', type=str, help='Path or URL of .iso to boot from')
     run_parser.add_argument('-k',
                             '--kernel',
                             type=Path,
