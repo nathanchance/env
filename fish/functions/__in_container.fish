@@ -9,7 +9,7 @@ function __in_container -d "Checks if command is being run in a container"
             case none
                 return 1
             case '*'
-                if test $virt = lxc; and set -q MAC_FOLDER
+                if test $virt = lxc; and __in_orb
                     return 1
                 end
                 return 0
