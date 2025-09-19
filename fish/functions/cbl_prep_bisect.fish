@@ -17,6 +17,26 @@ function cbl_prep_bisect -d "Prepare for an automated bisect"
     chmod +x $bisect_script
 
     switch $argv[1]
+        case kernel
+            echo '#!/usr/bin/env fish
+
+__in_tree kernel
+or return 128
+
+set lnx_bld (tbf)-testing
+
+kmake \
+    (korg_llvm var) \
+    O=$lnx_bld \
+    mrproper &| string match -er \'\'
+switch "$pipestatus"
+    case \'0 1\'
+        return 0
+    case \'1 0\'
+        return 1
+end
+return 125' >$bisect_script
+
         case llvm
             echo '#!/usr/bin/env fish
 
