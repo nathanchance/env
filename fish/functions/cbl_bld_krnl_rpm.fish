@@ -89,7 +89,7 @@ function cbl_bld_krnl_rpm -d "Build a .rpm kernel package"
     end
 
     rm -f $out/sha512sum
-    sha512sum $rpm >$out/sha512sum
+    sha512sum $rpm | string replace /run/host '' >$out/sha512sum
 
     echo Run
     printf '\n\t$ sudo fish -c "dnf install %s; and reboot"\n\n' (string replace $TMP_BUILD_FOLDER \$TMP_BUILD_FOLDER $rpm)

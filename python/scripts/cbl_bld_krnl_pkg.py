@@ -122,8 +122,11 @@ class KernelPkgBuilder:
         if len(pkg_tar_zst) != 1:
             raise RuntimeError(f"More than one .tar.zst found? {pkg_tar_zst}")
         (sha512sum_file := Path(self._build_folder, 'sha512sum')).unlink(missing_ok=True)
-        with sha512sum_file.open('x', encoding='utf-8') as file:
-            lib.utils.run(['sha512sum', pkg_tar_zst[0].resolve()], stdout=file)
+        sha512sum_txt = lib.utils.chronic([
+            'sha512sum',
+            pkg_tar_zst[0].resolve(),
+        ]).stdout.replace('/run/host', '')
+        sha512sum_file.write_text(sha512sum_txt, encoding='utf-8')
 
     def package(self):
         # If build was done with upstream 'pacman-pkg' target, no need to run package()
