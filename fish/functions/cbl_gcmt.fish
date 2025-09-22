@@ -44,6 +44,14 @@ function cbl_gcmt -d "Run git commit with preset commit message"
                     git c -m "configs: kernel: Update for $ver"
                 end
 
+            case configs
+                if not test $PWD = $CBL_LKT
+                    __print_error "Argument ('$arg') expects to be within $ENV_FOLDER"
+                    return 1
+                end
+
+                git c -m "configs: Weekly update"
+
             case '*'
                 __print_error "Unhandled argument: $arg"
                 return 1
