@@ -7,6 +7,8 @@ function cbl_bld_qemu -d "Build QEMU for use with ClangBuiltLinux"
 
     for arg in $argv
         switch $arg
+            case -i --install
+                set install true
             case -u --update
                 set update true
         end
@@ -62,7 +64,7 @@ function cbl_bld_qemu -d "Build QEMU for use with ClangBuiltLinux"
         mkdir -p $qemu_bld
         pushd $qemu_bld; or return
 
-        $qemu_src/configure \
+        set configure_args \
             --disable-af-xdp \
             --disable-alsa \
             --disable-bochs \
@@ -104,11 +106,23 @@ function cbl_bld_qemu -d "Build QEMU for use with ClangBuiltLinux"
             --disable-vvfat \
             --disable-werror \
             --disable-zstd \
-            --disable-xen \
-            --prefix=$PREFIX; or return
-        make -skj(nproc) install; or return
+            --disable-xen
+
+        if test "$install" = true
+            set -a configure_args --prefix=$PREFIX
+            set make_target install
+        end
+
+        $qemu_src/configure $configure_args
+        or return
+
+        make -skj(nproc) $make_target
+        or return
+
         popd
     end
 
-    cbl_upd_software_symlinks qemu $PREFIX
+    if test "$install" = true
+        cbl_upd_software_symlinks qemu $PREFIX
+    end
 end
