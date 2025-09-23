@@ -113,20 +113,20 @@ class KernelPkgBuilder:
             target = 'all'
         self._kmake([target])
 
-    def gen_sha512sum(self):
+    def gen_b2sum(self):
         for possible_dir in (self._build_folder, Path(self._build_folder, 'pkgbuild')):
             if pkg_tar_zst := list(possible_dir.glob('*.tar.zst')):
                 break
         else:
-            raise RuntimeError('No .tar.zst could be found to generate sha512sum!')
+            raise RuntimeError('No .tar.zst could be found to generate b2sum!')
         if len(pkg_tar_zst) != 1:
             raise RuntimeError(f"More than one .tar.zst found? {pkg_tar_zst}")
-        (sha512sum_file := Path(self._build_folder, 'sha512sum')).unlink(missing_ok=True)
-        sha512sum_txt = lib.utils.chronic([
-            'sha512sum',
+        (b2sum_file := Path(self._build_folder, 'b2sum')).unlink(missing_ok=True)
+        b2sum_txt = lib.utils.chronic([
+            'b2sum',
             pkg_tar_zst[0].resolve(),
         ]).stdout.replace('/run/host', '')
-        sha512sum_file.write_text(sha512sum_txt, encoding='utf-8')
+        b2sum_file.write_text(b2sum_txt, encoding='utf-8')
 
     def package(self):
         # If build was done with upstream 'pacman-pkg' target, no need to run package()
@@ -361,4 +361,4 @@ if __name__ == '__main__':
     builder.prepare(args.ref, args.localmodconfig, args.menuconfig, config_targets)
     builder.build()
     builder.package()
-    builder.gen_sha512sum()
+    builder.gen_b2sum()

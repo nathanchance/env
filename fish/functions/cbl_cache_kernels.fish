@@ -37,10 +37,10 @@ function cbl_cache_kernels -d "Download kernels to $NAS_FOLDER for local consump
     # Download linux-next-llvm package
     set krnl linux-next-llvm
     set remote_krnl_bld (tbf $krnl | string replace $TMP_BUILD_FOLDER $remote_tmp_build_folder)
-    ssh $remote_user@$remote_host cat $remote_krnl_bld/sha512sum | string match -rq '^(?<remote_krnl_pkg_sha>[0-9a-f]+)\s+(?<remote_krnl_pkg>.*)$'
+    ssh $remote_user@$remote_host cat $remote_krnl_bld/b2sum | string match -rq '^(?<remote_krnl_pkg_sha>[0-9a-f]+)\s+(?<remote_krnl_pkg>.*)$'
 
     set cached_krnl_pkg $kernel_folder/pkg/(path basename $remote_krnl_pkg)
-    if test -e $cached_krnl_pkg; and test (sha512sum $cached_krnl_pkg | string split -f 1 ' ') = "$remote_krnl_pkg_sha"
+    if test -e $cached_krnl_pkg; and test (b2sum $cached_krnl_pkg | string split -f 1 ' ') = "$remote_krnl_pkg_sha"
         __print_green "$remote_krnl_pkg already downloaded @ $cached_krnl_pkg"
     else
         $rsync_cmd $remote_user@$remote_host:$remote_krnl_pkg (path dirname $cached_krnl_pkg)
@@ -49,10 +49,10 @@ function cbl_cache_kernels -d "Download kernels to $NAS_FOLDER for local consump
 
     # Download Fedora package
     set remote_krnl_bld (tbf fedora | string replace $TMP_BUILD_FOLDER $remote_tmp_build_folder)
-    ssh $remote_user@$remote_host cat $remote_krnl_bld/sha512sum | string match -rq '^(?<remote_krnl_rpm_sha>[0-9a-f]+)\s+(?<remote_krnl_rpm>.*)$'
+    ssh $remote_user@$remote_host cat $remote_krnl_bld/b2sum | string match -rq '^(?<remote_krnl_rpm_sha>[0-9a-f]+)\s+(?<remote_krnl_rpm>.*)$'
 
     set cached_krnl_rpm $kernel_folder/rpm/(path basename $remote_krnl_rpm)
-    if test -e $cached_krnl_rpm; and test (sha512sum $cached_krnl_rpm | string split -f 1 ' ') = "$remote_krnl_rpm_sha"
+    if test -e $cached_krnl_rpm; and test (b2sum $cached_krnl_rpm | string split -f 1 ' ') = "$remote_krnl_rpm_sha"
         __print_green "$remote_krnl_rpm already downloaded @ $cached_krnl_rpm"
     else
         $rsync_cmd $remote_user@$remote_host:$remote_krnl_rpm (path dirname $cached_krnl_rpm)
