@@ -59,7 +59,7 @@ function cbl_bld_qemu -d "Build QEMU for use with ClangBuiltLinux"
     end
 
     if not test -x $PREFIX/bin/qemu-system-x86_64
-        set qemu_bld $qemu_src/build
+        set qemu_bld (tbf $qemu_src)
         rm -rf $qemu_bld
         mkdir -p $qemu_bld
         pushd $qemu_bld; or return
