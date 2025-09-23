@@ -83,15 +83,20 @@ function py_venv -d "Manage Python virtual environment"
                 set venv_name (path basename $venv)
                 switch $venv_name
                     case continuous-integration2 kernel-dev main mkosi tuxmake
+                        set -l pip_install_args --upgrade
+
                         if contains $SRC_FOLDER/b4 $packages
                             cbl_clone_repo b4
                             or return
 
                             git -C $SRC_FOLDER/b4 urh
                             or return
+                        else if test "$venv_name" = mkosi
+                            # Since we modify this below, we need to force a reinstall to ensure a consistent state
+                            set -a pip_install_args --force-reinstall
                         end
 
-                        pip install --upgrade pip $packages
+                        pip install $pip_install_args pip $packages
                         or return
 
                         if test $venv_name = mkosi
