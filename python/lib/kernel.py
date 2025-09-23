@@ -142,19 +142,9 @@ index 4c21ce42054c..212cca7b349d 100644
 
 ''')  # noqa: W291,W293
 
-        # https://lore.kernel.org/409d5703-ca0b-4b4b-a221-4e38ea92ae9a@amd.com/
-        patches.append('https://lore.kernel.org/all/aNFXgq3SkvemIlv1@google.com/raw')
-
-    if base_name in NEXT_TREES:
-        # https://lore.kernel.org/CA+CK2bDFScwAwyKA2NNkQhvhrj5OsmHm4eTshw2B9e2muqBcvg@mail.gmail.com/
-        reverts.append('a0ddd1ee80a030a26c0ff600485c6c6fa288c106')   # kho-add-support-for-preserving-vmalloc-allocations-checkpatch-fixes
-        reverts.append('faccf4f8536bbd064a1d25fde98da1c5a25474a2')   # kho: add support for preserving vmalloc allocations
-
-        # https://lore.kernel.org/20250922182832.GA1542561@ax162/
-        commits.append('83511195167e01c64885ca9ecd34ca3844da6d0c')   # fixup! Merge branch 'drm-xe-next' of https://gitlab.freedesktop.org/drm/xe/kernel.git
-
-        # https://gitlab.freedesktop.org/drm/i915/kernel/-/issues/15020
-        patches.append('https://lore.kernel.org/all/20250922134619.257684-1-tzimmermann@suse.de/')  # fbcon: Fix OOB access in font allocation
+    if base_name == 'fedora':
+        # https://lore.kernel.org/20250923002004.GA2836051@ax162/
+        patches.append('https://lore.kernel.org/all/87tt0t4u19.fsf@yellow.woof/raw')   # fixup for "rv: Fix wrong type cast in enabled_monitors_next()"
     # yapf: enable
 
     try:
