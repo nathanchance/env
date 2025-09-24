@@ -52,6 +52,19 @@ function cbl_gcmt -d "Run git commit with preset commit message"
 
                 git c -m "configs: Weekly update"
 
+            case tuxmake-korg-bump
+                if test $PWD != $CBL_SRC_D/tuxmake
+                    __print_error "Argument ('$arg') expects to be within $CBL_SRC_D/tuxmake"
+                    return 1
+                end
+
+                python3 -c "from configparser import ConfigParser
+(config := ConfigParser()).read('tuxmake/runtime/docker.ini')
+latest_clang_key = sorted(item for item in config.sections() if 'korg-clang-' in item)[-1]
+print(config[latest_clang_key]['tc_full_version'])" | read -l clang_ver
+
+                git c -m 'Update korg-clang-'(string split -f 1 . $clang_ver)' to '$clang_ver
+
             case '*'
                 __print_error "Unhandled argument: $arg"
                 return 1
