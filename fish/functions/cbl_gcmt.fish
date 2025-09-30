@@ -5,6 +5,13 @@
 function cbl_gcmt -d "Run git commit with preset commit message"
     for arg in $argv
         switch $arg
+            case cigen
+                if test $PWD != $CBL_GIT/continuous-integration2
+                    __print_error "Argument ('$arg') expects to be within $CBL_GIT/continuous-integration2"
+                    return 1
+                end
+                git c -m 'ci: Regenerate GitHub Actions workflow and TuxSuite files'
+
             case envk
                 if not test $PWD = $ENV_FOLDER
                     __print_error "Argument ('$arg') expects to be within $ENV_FOLDER"
