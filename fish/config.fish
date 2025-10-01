@@ -92,5 +92,11 @@ if test -d $CARGO_HOME/bin
     fish_add_path -ag $CARGO_HOME/bin
 end
 
+# Undo fish 4.1 change to keybindings
+# https://github.com/fish-shell/fish-shell/commit/2bb5cbc95943b0168c8ceb5b639391299e767e72
+bind alt-backspace backward-kill-word
+bind alt-left backward-word
+bind alt-right forward-word
+
 # Make sure that sourcing config.fish always returns 0
 true
