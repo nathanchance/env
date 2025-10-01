@@ -14,10 +14,14 @@ if not string match -qr '^(?<maj>\d+)\.(?<min>\d+)\.(?<patch>\d+)(?<rc>-rc\d+)?'
     return 1
 end
 
-if test -z "$rc"; or test $patch -gt 0
-    set url https://cdn.kernel.org/pub/linux/kernel/v$maj.x/linux-$maj.$min.$patch.tar.xz
+if test -n "$rc"
+    set url https://git.kernel.org/torvalds/t/linux-$maj.$min$rc.tar.gz
 else
-    set url https://git.kernel.org/torvalds/t/linux-"$maj.$min$rc".tar.gz
+    set ver $maj.$min
+    if test $patch -gt 0
+        set ver $ver.$patch
+    end
+    set url https://cdn.kernel.org/pub/linux/kernel/v$maj.x/linux-$ver.tar.xz
 end
 switch (string match -gr '\.(\w+)$' $url)
     case gz
