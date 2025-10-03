@@ -73,10 +73,6 @@ function cbl_gen_fedoraconfig -d "Downloads and modifies Fedora's kernel configu
             set -a scripts_config_args -d $val
         end
     end
-    # https://lore.kernel.org/20250317174840.GA1451320@ax162/
-    if contains LTO_CLANG_THIN $scripts_config_args; and git merge-base --is-ancestor 6ee149f61bcce39692f0335a01e99355d4cec8da HEAD
-        set -a scripts_config_args -d FORTIFY_KUNIT_TEST
-    end
 
     if not set -q out
         set out (tbf)
