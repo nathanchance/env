@@ -145,6 +145,9 @@ index 4c21ce42054c..212cca7b349d 100644
     if base_name == 'fedora':
         # https://lore.kernel.org/20250923002004.GA2836051@ax162/
         patches.append('https://lore.kernel.org/all/20251002082235.973099-1-namcao@linutronix.de/')  # rv: Fully convert enabled_monitors to use list_head as iterator
+
+    if base_name in NEXT_TREES:
+        patches.append('https://lore.kernel.org/all/20251003221030.GA1162775@ax162/')  # Semantic conflict around CONFIG_CFI_CLANG between Linus's tree and x86/core
     # yapf: enable
 
     try:
