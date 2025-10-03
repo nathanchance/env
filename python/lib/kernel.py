@@ -144,7 +144,7 @@ index 4c21ce42054c..212cca7b349d 100644
 
     if base_name == 'fedora':
         # https://lore.kernel.org/20250923002004.GA2836051@ax162/
-        patches.append('https://lore.kernel.org/all/87tt0t4u19.fsf@yellow.woof/raw')   # fixup for "rv: Fix wrong type cast in enabled_monitors_next()"
+        patches.append('https://lore.kernel.org/all/20251002082235.973099-1-namcao@linutronix.de/')  # rv: Fully convert enabled_monitors to use list_head as iterator
     # yapf: enable
 
     try:
