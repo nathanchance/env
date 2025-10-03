@@ -74,6 +74,10 @@ function cbl_gen_fedoraconfig -d "Downloads and modifies Fedora's kernel configu
         end
     end
 
+    # Handle https://git.kernel.org/next/linux-next/c/e3ec97c3abaf2fb68cc755cae3229288696b9f3d
+    # until addressed in the upstream Fedora configuration
+    set -a scripts_config_args -e HYPERV
+
     if not set -q out
         set out (tbf)
     end

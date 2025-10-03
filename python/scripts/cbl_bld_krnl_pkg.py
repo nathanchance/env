@@ -74,6 +74,9 @@ class KernelPkgBuilder:
             '-e', 'DEBUG_INFO_DWARF5',
             '-m', 'DRM',
         ]  # yapf: disable
+        # Handle https://git.kernel.org/next/linux-next/c/e3ec97c3abaf2fb68cc755cae3229288696b9f3d
+        # until Arch is up to date with 6.18
+        sc_cmd += ['-e', 'HYPERV']
         lib.utils.run(sc_cmd)
 
         # Step 2: Run olddefconfig
