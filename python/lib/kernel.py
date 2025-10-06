@@ -99,7 +99,7 @@ def prepare_source(base_name, base_ref='origin/master'):
 
     # Patching section
     # yapf: disable
-    if base_name == 'linux-next-llvm':
+    if base_name in PACMAN_TREES:
         patches.append('''\
 From 70346577a6e92c0f385679772ede0e81671e064c Mon Sep 17 00:00:00 2001
 From: Nathan Chancellor <nathan@kernel.org>
