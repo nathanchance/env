@@ -148,6 +148,9 @@ index 4c21ce42054c..212cca7b349d 100644
 
     if base_name in NEXT_TREES:
         patches.append('https://lore.kernel.org/all/20251003221030.GA1162775@ax162/')  # Semantic conflict around CONFIG_CFI_CLANG between Linus's tree and x86/core
+
+        # https://lore.kernel.org/CAH2r5mvg=kqPyA2nYF=Nhjr3vkt4dT1R4p-Bk_MBQtddjx_EhA@mail.gmail.com/
+        reverts.append('e3699346828bf78aaacdae52356c69c1ab0f8cd6')  # smb: client: Simplify a return statement in get_smb2_acl_by_path()
     # yapf: enable
 
     try:
