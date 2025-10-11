@@ -22,12 +22,16 @@ function kcheck_commits -d "Check commits in a pull request for several potentia
         return 1
     end
 
+    set ret 0
+
     header "Checking $commit_range..."
     git log --no-walk --format='%h ("%s")' $commits
 
     header "Checking fixes"
     if kcheck_fixes $commit_range
         echo "No problems found with Fixes"
+    else
+        set ret 1
     end
 
     for commit in $commits
@@ -54,19 +58,25 @@ function kcheck_commits -d "Check commits in a pull request for several potentia
             git log --no-walk --format='  %h ("%s")' $commit
             printf '\nadded unexpected files:\n\n'
             printf '  %s\n' $files_added
+            set ret 1
         end
     end
 
     if test (count $authors_missing) -gt 0
         header "Commits with missing author SOB"
         git log --no-walk --format='  %h ("%s")' $authors_missing
+        set ret 1
     end
     if test (count $committers_missing) -gt 0
         header "Commits with missing committer SOB"
         git log --no-walk --format='  %h ("%s")' $committers_missing
+        set ret 1
     end
     if test (count $sep_exists) -gt 0
         header "Commits with ---"
         git log --no-walk --format='  %h ("%s")' $sep_exists
+        set ret 1
     end
+
+    return $ret
 end
