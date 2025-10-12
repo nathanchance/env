@@ -16,6 +16,11 @@ function git_setup -d "Configure git"
 
     git config --global init.defaultBranch main
 
+    git config --global pretty.fixes 'format:Fixes %h ("%s")'
+    git config --global pretty.kernel 'format:%h ("%s")'
+    git config --global pretty.kernelmd 'format:[%h](https://git.kernel.org/linus/%H) ("%s")'
+    git config --global pretty.korglink 'format:Link: https://git.kernel.org/linus/%H'
+
     git config --global pull.rebase false
 
     git config --global sendemail.smtpEncryption tls
