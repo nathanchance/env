@@ -116,9 +116,9 @@ if __name__ == '__main__':
     llvm_git_dir = Path(llvm_folder, '.git')
 
     if args.skip_tests:
-        check_args = []
+        CHECK_ARGS = []
     else:
-        check_args = [
+        CHECK_ARGS = [
             '--check-targets',
             'clang',
             'lld',
@@ -146,7 +146,7 @@ if __name__ == '__main__':
     build_llvm_py_cmd = [
         Path('/tc-build/build-llvm.py'),
         '--build-folder', '/build',
-        *check_args,
+        *CHECK_ARGS,
         '--install-folder', '/install',
         '--install-targets', *install_targets,
         '--llvm-folder', '/llvm',
@@ -199,7 +199,7 @@ if __name__ == '__main__':
         # Python 3.12 deprecates and changes a few things in the tests. If we are
         # running the tests, make sure we have the fixes. It is safe to apply them
         # even if we are not using Python 3.12.
-        if check_args:
+        if CHECK_ARGS:
             base_cp_cmd = ['cherry-pick', '--no-commit']
             # https://github.com/llvm/llvm-project/commit/015c43178f9d8531b6bcd1685dbf72b7d837cf5a
             if (gen_cfi_funcs := Path(worktree,
