@@ -68,10 +68,10 @@ if __name__ == '__main__':
         # tbf implemented in Python
         if 'TMP_BUILD_FOLDER' in os.environ:
             if os.environ['CBL_SRC_W'] in (src := args.directory.resolve()).as_posix():
-                BASE = '-'.join(src.parts[-2:])
+                base = '-'.join(src.parts[-2:])
             else:
-                BASE = src.name
-            variables['O'] = Path(os.environ['TMP_BUILD_FOLDER'], BASE)
+                base = src.name
+            variables['O'] = Path(os.environ['TMP_BUILD_FOLDER'], base)
         else:
             variables['O'] = Path('build')
 
