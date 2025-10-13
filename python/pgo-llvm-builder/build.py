@@ -174,18 +174,18 @@ if __name__ == '__main__':
     ]
 
     for value in versions:
-        VERSION = LLVM_VERSIONS[0] if value == 'main' else value
-        ref = LLVM_REFS.get(VERSION, f"llvmorg-{VERSION}")
+        version = LLVM_VERSIONS[0] if value == 'main' else value
+        ref = LLVM_REFS.get(version, f"llvmorg-{version}")
 
         if 'llvmorg' not in ref:
             date_info = datetime.datetime.now(datetime.timezone.utc).strftime('%Y%m%d-%H%M%S')
             ref_info = lib.utils.get_git_output(llvm_folder, ['show', '--format=%H', '-s', ref])
-            VERSION += f"-{ref_info}-{date_info}"
+            version += f"-{ref_info}-{date_info}"
 
         if (llvm_install := Path(install_folder,
-                                 f"llvm-{VERSION}-{MACHINE}")).joinpath('bin/clang').exists():
+                                 f"llvm-{version}-{MACHINE}")).joinpath('bin/clang').exists():
             print(
-                f"LLVM {VERSION} has already been built in {llvm_install}, remove installation to rebuild!",
+                f"LLVM {version} has already been built in {llvm_install}, remove installation to rebuild!",
             )
             continue
         llvm_install.mkdir(exist_ok=True, parents=True)
@@ -239,9 +239,9 @@ if __name__ == '__main__':
                     shutil.rmtree(rm_dir)
 
                 site_cfg_py = Path(worktree, 'llvm/test/lit.site.cfg.py.in')
-                LINE_TO_DELETE = 'config.go_executable = "@GO_EXECUTABLE@"\n'
+                line_to_delete = 'config.go_executable = "@GO_EXECUTABLE@"\n'
                 new_site_cfg_py = site_cfg_py.read_text(encoding='utf-8').replace(
-                    LINE_TO_DELETE, '')
+                    line_to_delete, '')
                 site_cfg_py.write_text(new_site_cfg_py, encoding='utf-8')
 
                 mod_files = ('.gitignore', 'cmake/config-ix.cmake', 'test/lit.cfg.py',
@@ -270,8 +270,8 @@ if __name__ == '__main__':
             mountpoint = lib.utils.chronic(['stat', '-c', '%m', src]).stdout.strip()
             mountinfo = lib.utils.get_findmnt_info(mountpoint)
             # virtiofs does not support idmapping
-            OPTS = '' if mountinfo['fstype'] == 'virtiofs' else ':idmap'
-            mount_args.append(f"--bind={src}:{dst}{OPTS}")
+            opts = '' if mountinfo['fstype'] == 'virtiofs' else ':idmap'
+            mount_args.append(f"--bind={src}:{dst}{opts}")
         build_cmd = [
             *systemd_nspawn_cmd,
             *mount_args,
@@ -284,11 +284,11 @@ if __name__ == '__main__':
         #   https://github.com/llvm/llvm-project/issues/71822)
         # Enable ThinLTO if BOLT is enabled, as it adds more speed gains (but it
         # appears to regress PGO's wins without BOLT)
-        maj_ver = int(VERSION.split('.', 1)[0])
+        maj_ver = int(version.split('.', 1)[0])
         if (maj_ver >= 16 and MACHINE == 'x86_64') or (maj_ver >= 18 and MACHINE == 'aarch64'):
             build_cmd += ['--bolt', '--lto', 'thin']
 
-        lib.utils.tg_msg(f"sudo authorization needed to build LLVM {VERSION}")
+        lib.utils.tg_msg(f"sudo authorization needed to build LLVM {version}")
         lib.utils.run_as_root(build_cmd)
 
         llvm_tarball = Path(llvm_install.parent, f"{llvm_install.name}.tar")
@@ -312,8 +312,8 @@ if __name__ == '__main__':
             llvm_tarball,
         ])
 
-        INFO_TEXT = ('\n'
+        info_text = ('\n'
                      f"Tarball is available at: {llvm_tarball}\n"
                      f"Compressed tarball is available at: {llvm_tarball_compressed}")
-        print(INFO_TEXT)
-        lib.utils.tg_msg(f"LLVM {VERSION} finished building successfully")
+        print(info_text)
+        lib.utils.tg_msg(f"LLVM {version} finished building successfully")
