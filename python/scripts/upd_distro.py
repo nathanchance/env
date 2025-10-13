@@ -11,7 +11,7 @@ sys.path.append(str(Path(__file__).resolve().parents[1]))
 import lib.setup
 import lib.utils
 
-YES_ARG = '-y'
+yes_arg = '-y'
 
 
 def brew(brew_args):
@@ -19,7 +19,7 @@ def brew(brew_args):
 
 
 parser = ArgumentParser(description='Update distribution')
-parser.add_argument(YES_ARG, '--yes', action='store_true', help='Run noninteratively')
+parser.add_argument(yes_arg, '--yes', action='store_true', help='Run noninteratively')
 args = parser.parse_args()
 
 if sys.platform == 'darwin':
@@ -29,7 +29,7 @@ if sys.platform == 'darwin':
         ['upgrade'],
         ['upgrade', '--cask', 'wezterm@nightly', '--no-quarantine', '--greedy-latest'],
     ]
-    YES_ARG = None
+    yes_arg = None
 else:
     os_rel = lib.setup.get_os_rel()
 
@@ -39,7 +39,7 @@ else:
 
         cmd_func = lib.setup.pacman
         cmds = [['-Syyu']]
-        YES_ARG = '--noconfirm'
+        yes_arg = '--noconfirm'
 
     elif os_rel['ID'] in ('almalinux', 'fedora', 'rocky'):
         cmd_func = lib.setup.dnf
@@ -51,7 +51,7 @@ else:
             ['update'],
             ['upgrade'],
         ]
-        YES_ARG = None
+        yes_arg = None
 
     elif os_rel['ID'] in ('debian', 'raspbian', 'ubuntu'):
         cmd_func = lib.setup.apt
@@ -69,6 +69,6 @@ else:
         raise RuntimeError(f"Don't know how to handle '{os_rel['ID']}'?")
 
 for cmd in cmds:
-    if args.yes and YES_ARG and YES_ARG not in cmd:
-        cmd.append(YES_ARG)
+    if args.yes and yes_arg and yes_arg not in cmd:
+        cmd.append(yes_arg)
     cmd_func(cmd)
