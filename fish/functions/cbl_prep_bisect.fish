@@ -17,6 +17,25 @@ function cbl_prep_bisect -d "Prepare for an automated bisect"
     chmod +x $bisect_script
 
     switch $argv[1]
+        case config
+            echo '#!/usr/bin/env fish
+
+__in_tree kernel
+or return 128
+
+set lnx_bld (tbf)-testing
+
+set common_make_flags
+
+set j_flag -j(nproc)
+
+set fish_trace 1
+
+MAKEFLAGS="$j_flag $common_make_flags" tools/testing/ktest/config-bisect.pl -b $lnx_bld /config-{good,bad} $argv[1]
+or return 128
+
+kmake $common_make_flags O=$lnx_bld' >$bisect_script
+
         case kernel
             echo '#!/usr/bin/env fish
 
