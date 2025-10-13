@@ -53,9 +53,9 @@ if args.detach:
     tmx_cmd.append('-d')
 
 if mode == 'container':
-    CMD_STR = f"sd_nspawn -r '{args.cmd}'; or exec fish -l"
+    cmd_str = f"sd_nspawn -r '{args.cmd}'; or exec fish -l"
 else:
-    CMD_STR = f"begin; {args.cmd}; end; or exec fish -l"
-tmx_cmd.append(CMD_STR)
+    cmd_str = f"begin; {args.cmd}; end; or exec fish -l"
+tmx_cmd.append(cmd_str)
 
 lib.utils.run(tmx_cmd)
