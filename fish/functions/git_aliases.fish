@@ -111,9 +111,9 @@ function git_aliases -d "Configure git aliases"
 
     # git show
     git config --global alias.cite 'shm --pretty=kernel'
-    git config --global alias.citemd 'shm --pretty=kernelmd'
+    git config --global alias.citemd 'shm --pretty=linusmd'
     git config --global alias.fixes 'shm --pretty=fixes'
-    git config --global alias.korg 'shm --pretty=korglink'
+    git config --global alias.korg 'shm --pretty=linuslink'
     git config --global alias.sh 'show --first-parent'
     git config --global alias.shf 'sh --format=fuller'
     git config --global alias.shm 'sh --no-patch'
