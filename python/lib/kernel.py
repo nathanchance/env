@@ -100,16 +100,18 @@ def prepare_source(base_name, base_ref='origin/master'):
     # Patching section
     # yapf: disable
     if base_name in PACMAN_TREES:
-        patches.append('''\
-From 70346577a6e92c0f385679772ede0e81671e064c Mon Sep 17 00:00:00 2001
-From: Nathan Chancellor <nathan@kernel.org>
-Date: Fri, 15 Aug 2025 11:40:00 -0700
-Subject: [PATCH] HACK: Ignore two drm/amd/display/dc linker warnings
+        patches.append('https://lore.kernel.org/all/20251013-dw_i2c_plat_remove-avoid-objtool-no-cfi-warning-v1-1-8cc4842967bf@kernel.org/')  # i2c: designware: Remove i2c_dw_remove_lock_support()
 
+        patches.append('''\
+From 664b8b10038333eefe121d82f68397bcf583aa8a Mon Sep 17 00:00:00 2001
+From: Nathan Chancellor <nathan@kernel.org>
+Date: Tue, 14 Oct 2025 09:58:57 -0700
+Subject: [PATCH] HACK: Ignore a drm/amd/display/dc linker warning
+
+Signed-off-by: Nathan Chancellor <nathan@kernel.org>
 ---
- drivers/gpu/drm/amd/display/dc/dml/Makefile  | 2 +-
- drivers/gpu/drm/amd/display/dc/dml2/Makefile | 2 +-
- 2 files changed, 2 insertions(+), 2 deletions(-)
+ drivers/gpu/drm/amd/display/dc/dml/Makefile | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/drivers/gpu/drm/amd/display/dc/dml/Makefile b/drivers/gpu/drm/amd/display/dc/dml/Makefile
 index b357683b4255..134ad2d7fc2f 100644
@@ -124,27 +126,17 @@ index b357683b4255..134ad2d7fc2f 100644
  CFLAGS_$(AMDDALPATH)/dc/dml/dcn30/display_rq_dlg_calc_30.o := $(dml_ccflags)
  CFLAGS_$(AMDDALPATH)/dc/dml/dcn31/display_mode_vba_31.o := $(dml_ccflags) $(frame_warn_flag)
  CFLAGS_$(AMDDALPATH)/dc/dml/dcn31/display_rq_dlg_calc_31.o := $(dml_ccflags)
-diff --git a/drivers/gpu/drm/amd/display/dc/dml2/Makefile b/drivers/gpu/drm/amd/display/dc/dml2/Makefile
-index 4c21ce42054c..212cca7b349d 100644
---- a/drivers/gpu/drm/amd/display/dc/dml2/Makefile
-+++ b/drivers/gpu/drm/amd/display/dc/dml2/Makefile
-@@ -53,7 +53,7 @@ subdir-ccflags-y += -I$(FULL_AMD_DISPLAY_PATH)/dc/dml2/dml21/src/inc
- subdir-ccflags-y += -I$(FULL_AMD_DISPLAY_PATH)/dc/dml2/dml21/inc
- subdir-ccflags-y += -I$(FULL_AMD_DISPLAY_PATH)/dc/dml2/dml21/
- 
--CFLAGS_$(AMDDALPATH)/dc/dml2/display_mode_core.o := $(dml2_ccflags) $(frame_warn_flag)
-+CFLAGS_$(AMDDALPATH)/dc/dml2/display_mode_core.o := $(dml2_ccflags) $(frame_warn_flag) -Wframe-larger-than=3200
- CFLAGS_$(AMDDALPATH)/dc/dml2/display_mode_util.o := $(dml2_ccflags)
- CFLAGS_$(AMDDALPATH)/dc/dml2/dml2_wrapper.o := $(dml2_ccflags)
- CFLAGS_$(AMDDALPATH)/dc/dml2/dml2_utils.o := $(dml2_ccflags)
 -- 
-2.50.1
+2.51.0
 
 ''')  # noqa: W291,W293
 
     if base_name == 'fedora':
         # https://lore.kernel.org/20250923002004.GA2836051@ax162/
         patches.append('https://lore.kernel.org/all/20251002082235.973099-1-namcao@linutronix.de/')  # rv: Fully convert enabled_monitors to use list_head as iterator
+
+    if base_name == 'linux-next-llvm':
+        patches.append('https://lore.kernel.org/all/20251013193003.36215-1-arighi@nvidia.com/')  # sched_ext: Fix build error in cgroup_set_idle()
     # yapf: enable
 
     try:
