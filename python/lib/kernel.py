@@ -134,9 +134,6 @@ index b357683b4255..134ad2d7fc2f 100644
     if base_name == 'fedora':
         # https://lore.kernel.org/20250923002004.GA2836051@ax162/
         patches.append('https://lore.kernel.org/all/20251002082235.973099-1-namcao@linutronix.de/')  # rv: Fully convert enabled_monitors to use list_head as iterator
-
-    if base_name == 'linux-next-llvm':
-        patches.append('https://lore.kernel.org/all/20251013193003.36215-1-arighi@nvidia.com/')  # sched_ext: Fix build error in cgroup_set_idle()
     # yapf: enable
 
     try:
