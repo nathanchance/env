@@ -52,13 +52,14 @@ set install_dir $tmp_dir/install
 
 set bad_clang $install_dir/llvm-bad/bin/clang
 set good_clang $install_dir/llvm-good/bin/clang
+set gcc (korg_gcc folder -b)/gcc
 
 ############
 # PART ONE #
 ############
 
 set lnx_bld $tmp_dir/build/linux
-set lnx_src
+set lnx_src $CBL_SRC_C/linux
 set make_args
 
 if test -z "$lnx_src"
@@ -144,7 +145,8 @@ if not test -e $file
     cp $cvise_dir/$file $file
 end
 
-set no_werror_clang
+set no_werror_clang \
+    unused-value
 set no_werror_common
 set no_werror_gcc
 
@@ -160,6 +162,7 @@ set common_flags \
     -o /dev/null \
     $file
 set gcc_flags \
+    -std=gnu11
     -Wno-error=$no_werror_gcc
 
 $good_clang $clang_flags $common_flags
