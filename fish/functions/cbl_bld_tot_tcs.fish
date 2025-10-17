@@ -115,6 +115,8 @@ function cbl_bld_tot_tcs -d "Build LLVM and binutils from source for kernel deve
     end
 
     # Add patches to revert here
+    # https://github.com/llvm/llvm-project/pull/125970#issuecomment-3407355089
+    set -a reverts https://github.com/llvm/llvm-project/commit/6712e20c5261376a6b0015fb3c8d15124757d47d # Add support for flag output operand "=@cc" for SystemZ. (#125970)
     for revert in $reverts
         if string match -qr 'https?://' $revert
             set -l revert (path basename $revert)
