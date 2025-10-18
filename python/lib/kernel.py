@@ -129,7 +129,7 @@ index b357683b4255..134ad2d7fc2f 100644
 -- 
 2.51.0
 
-''')  # noqa: W291,W293
+''')  # noqa: W291
 
     if base_name == 'fedora':
         # https://lore.kernel.org/20250923002004.GA2836051@ax162/
