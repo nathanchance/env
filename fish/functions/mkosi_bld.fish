@@ -67,6 +67,7 @@ function mkosi_bld -d "Build a distribution using mkosi"
         --force \
         --package-cache-dir $mkosi_cache/$cache_dir \
         $mkosi_args
+    or return
 
     # selinux contexts may get messed up, fix them if necessary
     if test -e /sys/fs/selinux; and test (cat /sys/fs/selinux/enforce) = 1
