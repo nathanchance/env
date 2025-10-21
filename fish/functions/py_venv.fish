@@ -100,7 +100,10 @@ function py_venv -d "Manage Python virtual environment"
                         or return
 
                         if test $venv_name = mkosi
-                            sed -i "s;suite=f\"{context.config.release}-security\";suite=f\"{context.config.release}{'/updates' if context.config.release == 'buster' else '-security'}\";g" $venv/lib/python*/site-packages/mkosi/distribution/debian.py
+                            sed -i \
+                                -e "s;suite=f\"{context.config.release}-security\";suite=f\"{context.config.release}{'/updates' if context.config.release == 'buster' else '-security'}\";g" \
+                                -e "s;install_apt_sources(context, cls.repositories(context, for_image=True));install_apt_sources(context, cls.repositories(context));g" \
+                                $venv/lib/python*/site-packages/mkosi/distribution/debian.py
                         end
 
                     case '*'
