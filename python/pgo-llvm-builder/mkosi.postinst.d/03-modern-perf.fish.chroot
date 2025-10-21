@@ -36,6 +36,31 @@ end
 curl -LSs $url | tar -C $workdir --strip-components=1 -xf - $tar_comp_arg
 or return
 
+if test -e $workdir/tools/bpf/bpftool/sign.c
+    echo 'diff --git a/tools/bpf/bpftool/sign.c b/tools/bpf/bpftool/sign.c
+index b34f74d210e9..9be9f1190d15 100644
+--- a/tools/bpf/bpftool/sign.c
++++ b/tools/bpf/bpftool/sign.c
+@@ -30,6 +30,7 @@
+ 
+ static void display_openssl_errors(int l)
+ {
++#if 0
+ 	char buf[OPEN_SSL_ERR_BUF_LEN];
+ 	const char *file;
+ 	const char *data;
+@@ -45,6 +46,7 @@ static void display_openssl_errors(int l)
+ 			p_err("OpenSSL %s: %s:%d", buf, file, line);
+ 		}
+ 	}
++#endif
+ }
+ 
+ #define DISPLAY_OSSL_ERR(cond)				 \
+' | patch -d $workdir -p1
+    or return
+end
+
 pushd $workdir/tools/perf
 or return
 
