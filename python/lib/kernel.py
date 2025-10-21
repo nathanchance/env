@@ -100,8 +100,6 @@ def prepare_source(base_name, base_ref='origin/master'):
     # Patching section
     # yapf: disable
     if base_name in PACMAN_TREES:
-        patches.append('https://lore.kernel.org/all/20251013-dw_i2c_plat_remove-avoid-objtool-no-cfi-warning-v1-1-8cc4842967bf@kernel.org/')  # i2c: designware: Remove i2c_dw_remove_lock_support()
-
         patches.append('''\
 From 664b8b10038333eefe121d82f68397bcf583aa8a Mon Sep 17 00:00:00 2001
 From: Nathan Chancellor <nathan@kernel.org>
@@ -134,6 +132,9 @@ index b357683b4255..134ad2d7fc2f 100644
     if base_name == 'fedora':
         # https://lore.kernel.org/20250923002004.GA2836051@ax162/
         patches.append('https://lore.kernel.org/all/20251002082235.973099-1-namcao@linutronix.de/')  # rv: Fully convert enabled_monitors to use list_head as iterator
+
+    if base_name == 'linux-next-llvm':
+        patches.append('https://lore.kernel.org/all/20251022-ishtp-fix-function-cast-warn-v1-1-bfb06464f8ca@kernel.org/')  # HID: intel-ish-hid: Fix -Wcast-function-type-strict in devm_ishtp_alloc_workqueue()
     # yapf: enable
 
     try:
