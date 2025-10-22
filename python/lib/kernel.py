@@ -135,6 +135,9 @@ index b357683b4255..134ad2d7fc2f 100644
 
     if base_name == 'linux-next-llvm':
         patches.append('https://lore.kernel.org/all/20251022-ishtp-fix-function-cast-warn-v1-1-bfb06464f8ca@kernel.org/')  # HID: intel-ish-hid: Fix -Wcast-function-type-strict in devm_ishtp_alloc_workqueue()
+
+    if base_name in NEXT_TREES:
+        patches.append('https://lore.kernel.org/all/20251022120030.GA148714@ax162/raw')  # fixup! io_uring: add support for IORING_SETUP_SQE_MIXED
     # yapf: enable
 
     try:
