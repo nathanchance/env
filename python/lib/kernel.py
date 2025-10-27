@@ -128,13 +128,6 @@ index b357683b4255..134ad2d7fc2f 100644
 2.51.0
 
 ''')  # noqa: W291
-
-    if base_name == 'fedora':
-        # https://lore.kernel.org/20250923002004.GA2836051@ax162/
-        patches.append('https://lore.kernel.org/all/20251002082235.973099-1-namcao@linutronix.de/')  # rv: Fully convert enabled_monitors to use list_head as iterator
-
-    if base_name == 'linux-next-llvm':
-        patches.append('https://lore.kernel.org/all/20251022-ishtp-fix-function-cast-warn-v1-1-bfb06464f8ca@kernel.org/')  # HID: intel-ish-hid: Fix -Wcast-function-type-strict in devm_ishtp_alloc_workqueue()
     # yapf: enable
 
     try:
