@@ -128,6 +128,17 @@ index b357683b4255..134ad2d7fc2f 100644
 2.51.0
 
 ''')  # noqa: W291
+
+    if base_name in NEXT_TREES:
+        # https://lore.kernel.org/aQjJNmwniQwwjeBR@finisterre.sirena.org.uk/
+        reverts.append(('6a011a22829362bfee8ff9fc1212f803c18af5f2^..4c6736970fbf35aa65512ce7f82abd970f133c8e',
+                        'Revert "vdso/datastore: Map pages through struct page" and dependent changes\n'
+                        '\n'
+                        'Link: https://lore.kernel.org/aQjJNmwniQwwjeBR@finisterre.sirena.org.uk/\n'))
+
+    if base_name == 'fedora':
+        # https://lore.kernel.org/202511041749.ok8zDP6u-lkp@intel.com/
+        commits.append('f59e8f76d91a69f4b42c43307a4467b029de8112')   # fixup! perf/arm-ni: Add NoC S3 support
     # yapf: enable
 
     try:
