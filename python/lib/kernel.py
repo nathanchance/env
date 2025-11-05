@@ -136,9 +136,11 @@ index b357683b4255..134ad2d7fc2f 100644
                         '\n'
                         'Link: https://lore.kernel.org/aQjJNmwniQwwjeBR@finisterre.sirena.org.uk/\n'))
 
+        patches.append('https://lore.kernel.org/all/20251105011311.3177875-1-gwan-gyeong.mun@intel.com/')  # drm/xe: Remove never used code in xe_vm_create()
+
     if base_name == 'fedora':
         # https://lore.kernel.org/202511041749.ok8zDP6u-lkp@intel.com/
-        commits.append('f59e8f76d91a69f4b42c43307a4467b029de8112')   # fixup! perf/arm-ni: Add NoC S3 support
+        patches.append('https://lore.kernel.org/all/5db610facd51b81af04b1afee53191836315b17a.1762264719.git.robin.murphy@arm.com/')  # perf/arm-ni: Fix and optimise register offset calculation
     # yapf: enable
 
     try:
