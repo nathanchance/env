@@ -131,16 +131,15 @@ index b357683b4255..134ad2d7fc2f 100644
 
     if base_name in NEXT_TREES:
         # https://lore.kernel.org/aQjJNmwniQwwjeBR@finisterre.sirena.org.uk/
-        reverts.append(('6a011a22829362bfee8ff9fc1212f803c18af5f2^..4c6736970fbf35aa65512ce7f82abd970f133c8e',
-                        'Revert "vdso/datastore: Map pages through struct page" and dependent changes\n'
-                        '\n'
-                        'Link: https://lore.kernel.org/aQjJNmwniQwwjeBR@finisterre.sirena.org.uk/\n'))
-
-        patches.append('https://lore.kernel.org/all/20251105011311.3177875-1-gwan-gyeong.mun@intel.com/')  # drm/xe: Remove never used code in xe_vm_create()
+        commits.append('deaccd3fc32ae5856ca68f2bd07932ab60ec7f4d')   # v4 → v5 of "sparc64: vdso: Switch to the generic vDSO library"
 
     if base_name == 'fedora':
         # https://lore.kernel.org/202511041749.ok8zDP6u-lkp@intel.com/
         patches.append('https://lore.kernel.org/all/5db610facd51b81af04b1afee53191836315b17a.1762264719.git.robin.murphy@arm.com/')  # perf/arm-ni: Fix and optimise register offset calculation
+
+    if base_name == 'linux-next-llvm':
+        # https://lore.kernel.org/202511060427.k5gEuYdp-lkp@intel.com/
+        commits.append('88590953a39081992a26f19b3284aa6fec8d8fc9')   # v2 → v3 of "EDAC/ie31200: Fix error handling in ie31200_register_mci"
     # yapf: enable
 
     try:
