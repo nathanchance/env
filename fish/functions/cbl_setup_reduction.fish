@@ -162,7 +162,7 @@ set common_flags \
     -o /dev/null \
     $file
 set gcc_flags \
-    -std=gnu11
+    -std=gnu11 \
     -Wno-error=$no_werror_gcc
 
 $good_clang $clang_flags $common_flags
