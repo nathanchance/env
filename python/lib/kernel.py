@@ -128,18 +128,6 @@ index b357683b4255..134ad2d7fc2f 100644
 2.51.0
 
 ''')  # noqa: W291
-
-    if base_name in NEXT_TREES:
-        # https://lore.kernel.org/aQjJNmwniQwwjeBR@finisterre.sirena.org.uk/
-        commits.append('deaccd3fc32ae5856ca68f2bd07932ab60ec7f4d')   # v4 → v5 of "sparc64: vdso: Switch to the generic vDSO library"
-
-    if base_name == 'fedora':
-        # https://lore.kernel.org/202511041749.ok8zDP6u-lkp@intel.com/
-        patches.append('https://lore.kernel.org/all/5db610facd51b81af04b1afee53191836315b17a.1762264719.git.robin.murphy@arm.com/')  # perf/arm-ni: Fix and optimise register offset calculation
-
-    if base_name == 'linux-next-llvm':
-        # https://lore.kernel.org/202511060427.k5gEuYdp-lkp@intel.com/
-        commits.append('88590953a39081992a26f19b3284aa6fec8d8fc9')   # v2 → v3 of "EDAC/ie31200: Fix error handling in ie31200_register_mci"
     # yapf: enable
 
     try:
