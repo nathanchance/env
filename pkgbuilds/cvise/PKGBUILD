@@ -11,6 +11,7 @@ depends=(
   llvm-libs
   python
   python-chardet
+  python-msgspec
   python-pebble
   python-psutil
   python-zstandard
@@ -25,6 +26,8 @@ makedepends=(
 checkdepends=(
   python-jsonschema
   python-pytest
+  python-pytest-mock
+  python-pytest-subprocess
 )
 optdepends=('colordiff: Show diffs in color')
 # source=("$pkgname-$pkgver.tar.gz::https://github.com/marxin/$pkgname/archive/refs/tags/v$pkgver.tar.gz")
