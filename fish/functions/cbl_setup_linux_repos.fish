@@ -74,4 +74,20 @@ function cbl_setup_linux_repos -d "Clone ClangBuiltLinux Linux repos into their 
             or return
         end
     end
+
+    # Set up kbuild tree
+    set kbuild $CBL_SRC_D/kbuild
+    if not test -d $kbuild
+        set kbuild_https_url https://git.kernel.org/pub/scm/linux/kernel/git/kbuild/linux.git
+
+        # Clone with HTTPS and switch to SSH after to avoid needing to unlock kernel.org SSH key
+        git clone $kbuild_https_url $kbuild
+        or return
+
+        git -C $kbuild config b4.thanks-am-template $ENV_FOLDER/configs/b4/kbuild-am.template
+        git -C $kbuild config b4.thanks-commit-url-mask 'https://git.kernel.org/kbuild/c/%.13s'
+        git -C $kbuild config b4.thanks-treename $kbuild_https_url
+        git -C $kbuild remote set-url origin (string replace https://git.kernel.org/ git@gitolite.kernel.org: $kbuild_https_url)
+        git -C $kbuild remote add -f --tags linus https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git
+    end
 end
