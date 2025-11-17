@@ -12,7 +12,11 @@ function sd_boot_kernel -d "Boot a kernel via full reboot or kexec using systemd
             case --when='*'
                 set -a systemctl_args $arg
             case '*'
-                set krnl linux-(string replace 'linux-' '' $arg)
+                if test $arg = linux
+                    set krnl linux
+                else
+                    set krnl linux-(string replace 'linux-' '' $arg)
+                end
         end
     end
 
