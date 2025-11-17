@@ -99,6 +99,10 @@ def prepare_source(base_name, base_ref='origin/master'):
 
     # Patching section
     # yapf: disable
+    # https://lore.kernel.org/20251117082023.90176-1-00107082@163.com/
+    # https://lore.kernel.org/0b7d3e02-0609-410e-a221-8e68a0bd89b0@gmx.com/
+    patches.append('https://github.com/davidhildenbrand/linux/commit/58e62699f77738188730d489accd01ad8e3cdeeb.patch')  # mm/huge_memory: fix __GFP_ZEROTAGS on architectures without memory tags
+
     if base_name in PACMAN_TREES:
         patches.append('''\
 From 664b8b10038333eefe121d82f68397bcf583aa8a Mon Sep 17 00:00:00 2001
