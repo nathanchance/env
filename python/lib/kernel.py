@@ -103,6 +103,10 @@ def prepare_source(base_name, base_ref='origin/master'):
     # https://lore.kernel.org/0b7d3e02-0609-410e-a221-8e68a0bd89b0@gmx.com/
     patches.append('https://github.com/davidhildenbrand/linux/commit/58e62699f77738188730d489accd01ad8e3cdeeb.patch')  # mm/huge_memory: fix __GFP_ZEROTAGS on architectures without memory tags
 
+    if base_name in NEXT_TREES:
+        # https://lore.kernel.org/dbe42ce9543dbc3af95f95d6a6d9540b@linux.ibm.com/
+        commits.append('30e0624ea68dcf1748cd3d1b61f3d75940685f30')   # v3 → v4 of "make vmalloc gfp flags usage more apparent"
+
     if base_name in PACMAN_TREES:
         patches.append('''\
 From 664b8b10038333eefe121d82f68397bcf583aa8a Mon Sep 17 00:00:00 2001
