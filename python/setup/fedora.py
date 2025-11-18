@@ -128,6 +128,7 @@ def install_packages():
         'debian-keyring',
         'distribution-gpg-keys',
         'patch',
+        'polkit',
         'systemd-container',
 
         # nicer GNU utilities
