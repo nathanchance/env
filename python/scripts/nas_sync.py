@@ -150,9 +150,9 @@ def download_items(targets, network_folder):
             subfolder = Path(firmware_folder, target.capitalize())
 
             # Constants to update
-            fedora_ver = '42'
-            server_iso_ver = '1.1'
-            workstation_iso_ver = '1.1'
+            fedora_ver = '43'
+            server_iso_ver = '1.6'
+            workstation_iso_ver = '1.6'
 
             # Base URLs
             base_fedora_url = f"https://mirrors.edge.kernel.org/fedora/releases/{fedora_ver}"
