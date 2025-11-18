@@ -182,7 +182,7 @@ function user_setup -d "Setup a user account, downloading all files and placing 
 fi'
     if test -f $HOME/.bashrc
         if string match -qr '\.bashrc\.d' <$HOME/.bashrc
-            mkdir $HOME/.bashrc.d
+            mkdir -p $HOME/.bashrc.d
             echo $bash_to_fish >$HOME/.bashrc.d/fish
         else if not string match -qr 'exec fish \$LOGIN_OPTION' <$HOME/.bashrc
             printf '\n%s\n' $bash_to_fish >$HOME/.bashrc
