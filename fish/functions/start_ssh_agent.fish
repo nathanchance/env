@@ -49,7 +49,7 @@ function start_ssh_agent -d "Launch an ssh agent only if it has not already been
         # https://github.com/systemd/systemd/issues/39037
         if test (__get_systemd_version) -ge 258; and test (__get_distro) != arch
             set need_separate_ssh_agents true
-        else
+        else if test (uname) != Darwin
             ln -fnrs $ssh_agent_file $container_ssh_agent_file
         end
     end
