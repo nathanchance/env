@@ -3,7 +3,7 @@
 
 set -eux
 
-cmake_version=4.1.3
+cmake_version=4.2.0
 
 case "$ARCHITECTURE" in
     "arm64")
