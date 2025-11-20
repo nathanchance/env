@@ -99,10 +99,6 @@ def prepare_source(base_name, base_ref='origin/master'):
 
     # Patching section
     # yapf: disable
-    if base_name == 'fedora':
-        # https://lore.kernel.org/20251118224448.GA998046@ax162/
-        patches.append('https://lore.kernel.org/all/20251119093822.2513142-2-oupton@kernel.org/')  # KVM: arm64: Drop useless __GFP_HIGHMEM from kvm struct allocation
-
     if base_name in PACMAN_TREES:
         patches.append('''\
 From 664b8b10038333eefe121d82f68397bcf583aa8a Mon Sep 17 00:00:00 2001
