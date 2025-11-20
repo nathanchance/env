@@ -1,7 +1,7 @@
 #!/usr/bin/env fish
 # Description: Build and install a more modern version of ninja, which is required for newer LLVM and cmake releases
 
-set ninja_version 1.13.1
+set ninja_version 1.13.2
 set workdir (mktemp -d)
 
 begin
