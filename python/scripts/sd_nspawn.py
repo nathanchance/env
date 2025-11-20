@@ -347,6 +347,10 @@ class NspawnConfig(UserDict):
             lib.utils.print_yellow(
                 f"WARNING: {self.machine_dir} does not exist, machine will not start without it")
 
+    def is_running(self):
+        is_active_cmd = ['systemctl', 'is-active', '-q', f"systemd-nspawn@{self.name}.service"]
+        return lib.utils.run_check_rc_zero(is_active_cmd)
+
     def reset(self, mode):
         machine_files = {
             self.machine_dir,
@@ -388,8 +392,7 @@ class NspawnConfig(UserDict):
         # systemd-nspawn.service. If it is, the user should use 'machinectl
         # shell' to enter the machine and update it directly, as there may be
         # running services that need to be restarted.
-        if lib.utils.run_check_rc_zero(
-            ['systemctl', 'is-active', '-q', f"systemd-nspawn@{self.name}.service"]):
+        if self.is_running():
             raise RuntimeError(
                 'Machine is running when trying to update, interact via "machinectl shell"')
         lib.utils.run_as_root(self._gen_upd_cmd())
@@ -409,6 +412,7 @@ def parse_arguments():
                             action='store_true',
                             help='Run "systemd-nspawn -x" command')
     mode_group.add_argument('-i', '--install', action='store_true', help='Install .nspawn files')
+    mode_group.add_argument('--is-running', action='store_true', help='Check if machine is running')
     mode_group.add_argument('-r', '--run', metavar='CMD', help='Run command in nspawn machine')
     mode_group.add_argument('-R',
                             '--reset',
@@ -441,6 +445,8 @@ def main():
         config.run_eph_cmd()
     if args.install:
         config.install_files()
+    if args.is_running:
+        sys.exit(0 if config.is_running() else 1)
     if args.update:
         config.run_upd_cmd()
     if args.reset:
