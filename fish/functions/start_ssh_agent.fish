@@ -4,7 +4,8 @@
 
 function start_ssh_agent -d "Launch an ssh agent only if it has not already been launched"
     if test -S $OPT_ORB_GUEST/run/host-ssh-agent.sock
-        set -q SSH_AUTH_SOCK; or set -gx SSH_AUTH_SOCK $OPT_ORB_GUEST/run/host-ssh-agent.sock
+        set -q SSH_AUTH_SOCK
+        or set -gx SSH_AUTH_SOCK $OPT_ORB_GUEST/run/host-ssh-agent.sock
         return 0
     end
 
@@ -18,9 +19,11 @@ function start_ssh_agent -d "Launch an ssh agent only if it has not already been
         set force true
     end
     if not set -q force
-        status is-interactive; or return 0
+        status is-interactive
+        or return 0
     end
-    command -q ssh-add; or return 0
+    command -q ssh-add
+    or return 0
 
     set ssh_key $HOME/.ssh/id_ed25519
     if not test -r "$ssh_key"
