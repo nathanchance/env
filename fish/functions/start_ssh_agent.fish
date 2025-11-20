@@ -3,10 +3,12 @@
 # Copyright (C) 2021-2023 Nathan Chancellor
 
 function start_ssh_agent -d "Launch an ssh agent only if it has not already been launched"
-    if test -S $OPT_ORB_GUEST/run/host-ssh-agent.sock
+    set orb_ssh_agent $OPT_ORB_GUEST/run/host-ssh-agent.sock
+    # Check that the socket exists and that it is accessible,
+    # otherwise we will need to start a new agent
+    if test -S $orb_ssh_agent; and test (stat -c %u $orb_ssh_agent) = (id -u)
         set -q SSH_AUTH_SOCK
-        or set -gx SSH_AUTH_SOCK $OPT_ORB_GUEST/run/host-ssh-agent.sock
-        return 0
+        or set -gx SSH_AUTH_SOCK $orb_ssh_agent
     end
 
     for arg in $argv
@@ -54,29 +56,31 @@ function start_ssh_agent -d "Launch an ssh agent only if it has not already been
         end
     end
 
-    ssh-add -l &>/dev/null
-    switch $status
-        case 1 # Can connect to the ssh-agent, no identities yet
-            ssh-add $ssh_key
-        case 2 # Cannot connect to the ssh-agent
-            # Attempt to read a previously started agent's file
-            if test -r $ssh_agent_file
-                cat $ssh_agent_file | source >/dev/null
-            end
-
-            ssh-add -l &>/dev/null
-            switch $status
-                case 1 # Can connect to ssh-agent now, no identities yet
-                    ssh-add $ssh_key
-                case 2 # No ssh-agent, start a new one and add key
-                    rm -fr $ssh_agent_sock
-                    begin
-                        umask 066
-                        ssh-agent -a $ssh_agent_sock -c >$ssh_agent_file
-                    end
+    if not set -q SSH_AUTH_SOCK
+        ssh-add -l &>/dev/null
+        switch $status
+            case 1 # Can connect to the ssh-agent, no identities yet
+                ssh-add $ssh_key
+            case 2 # Cannot connect to the ssh-agent
+                # Attempt to read a previously started agent's file
+                if test -r $ssh_agent_file
                     cat $ssh_agent_file | source >/dev/null
-                    ssh-add $ssh_key
-            end
+                end
+
+                ssh-add -l &>/dev/null
+                switch $status
+                    case 1 # Can connect to ssh-agent now, no identities yet
+                        ssh-add $ssh_key
+                    case 2 # No ssh-agent, start a new one and add key
+                        rm -fr $ssh_agent_sock
+                        begin
+                            umask 066
+                            ssh-agent -a $ssh_agent_sock -c >$ssh_agent_file
+                        end
+                        cat $ssh_agent_file | source >/dev/null
+                        ssh-add $ssh_key
+                end
+        end
     end
 
     if set -q need_separate_ssh_agents; and not set -q TMUX; and sd_nspawn --is-running
