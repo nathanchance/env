@@ -99,6 +99,10 @@ def prepare_source(base_name, base_ref='origin/master'):
 
     # Patching section
     # yapf: disable
+    if base_name in NEXT_TREES:
+        # https://lore.kernel.org/89c7106e-a431-443a-9527-3d5fbce77fe1@samsung.com/
+        reverts.append('d0f23ccf6ba9e2cc202e9ad25a427b8e5ea3ca1e')  # cpumask: Cache num_possible_cpus()
+
     if base_name in PACMAN_TREES:
         patches.append('''\
 From 664b8b10038333eefe121d82f68397bcf583aa8a Mon Sep 17 00:00:00 2001
