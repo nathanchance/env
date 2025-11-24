@@ -101,7 +101,7 @@ def prepare_source(base_name, base_ref='origin/master'):
     # yapf: disable
     if base_name in NEXT_TREES:
         # https://lore.kernel.org/89c7106e-a431-443a-9527-3d5fbce77fe1@samsung.com/
-        reverts.append('d0f23ccf6ba9e2cc202e9ad25a427b8e5ea3ca1e')  # cpumask: Cache num_possible_cpus()
+        patches.append('https://git.kernel.org/tip/tip/p/21782b3a5cd40892cb2995aa1ec3e74dd1112f1d')  # cpu: Initialize __num_possible_cpus correctly
 
     if base_name in PACMAN_TREES:
         patches.append('''\
