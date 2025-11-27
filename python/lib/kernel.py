@@ -99,9 +99,8 @@ def prepare_source(base_name, base_ref='origin/master'):
 
     # Patching section
     # yapf: disable
-    if base_name in NEXT_TREES:
-        # https://lore.kernel.org/89c7106e-a431-443a-9527-3d5fbce77fe1@samsung.com/
-        patches.append('https://git.kernel.org/tip/tip/p/21782b3a5cd40892cb2995aa1ec3e74dd1112f1d')  # cpu: Initialize __num_possible_cpus correctly
+    if base_name == 'linux-next-llvm':
+        patches.append('https://git.kernel.org/tip/tip/p/59bfa6408214b6533d8691715cf5459e89b45b89')  # objtool: Build with disassembly can fail when including bdf.h
 
     if base_name in PACMAN_TREES:
         patches.append('''\
