@@ -99,8 +99,12 @@ def prepare_source(base_name, base_ref='origin/master'):
 
     # Patching section
     # yapf: disable
-    if base_name == 'linux-next-llvm':
-        patches.append('https://git.kernel.org/tip/tip/p/59bfa6408214b6533d8691715cf5459e89b45b89')  # objtool: Build with disassembly can fail when including bdf.h
+    if base_name in NEXT_TREES:
+        # https://lore.kernel.org/20251201224238.GA604467@ax162/
+        reverts.append('17e9f841dd227a4dc976b22d000d5f669bc14493')  # r8169: add DASH support for RTL8127AP
+
+        # https://lore.kernel.org/8c2a2753-145e-4de5-84fe-9a900af6a2ee@sirena.org.uk/
+        commits.append('798157e6e041af59bf430363475280e3761d5172')   # fixup! debugfs: Remove broken no-mount mode
 
     if base_name in PACMAN_TREES:
         patches.append('''\
