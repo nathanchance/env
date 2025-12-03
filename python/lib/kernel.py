@@ -100,8 +100,8 @@ def prepare_source(base_name, base_ref='origin/master'):
     # Patching section
     # yapf: disable
     if base_name in NEXT_TREES:
-        # https://lore.kernel.org/8c2a2753-145e-4de5-84fe-9a900af6a2ee@sirena.org.uk/
-        commits.append('798157e6e041af59bf430363475280e3761d5172')   # fixup! debugfs: Remove broken no-mount mode
+        patches.append('https://lore.kernel.org/all/20251028182822.3210436-2-xur@google.com/')  # kbuild: move vmlinux.a build rule to scripts/Makefile.vmlinux_a
+        patches.append('https://lore.kernel.org/all/20251028182822.3210436-3-xur@google.com/')  # kbuild: distributed build support for Clang ThinLTO
 
     if base_name in PACMAN_TREES:
         patches.append('''\
