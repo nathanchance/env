@@ -19,9 +19,14 @@ function cbl_gen_fedoraconfig -d "Downloads and modifies Fedora's kernel configu
             case --debug
                 set debug true
             case --lto
+                if string match -qr LTO_CLANG_THIN_DIST <arch/Kconfig
+                    set thin_lto_cfg LTO_CLANG_THIN_DIST
+                else
+                    set thin_lto_cfg LTO_CLANG_THIN
+                end
                 set -a scripts_config_args \
                     -d LTO_NONE \
-                    -e LTO_CLANG_THIN
+                    -e $thin_lto_cfg
             case --no-debug
                 set debug false
             case --no-werror

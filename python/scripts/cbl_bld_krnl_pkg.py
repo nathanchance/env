@@ -89,7 +89,15 @@ class KernelPkgBuilder:
 
         # Step 4: Enable ThinLTO, CFI, or UBSAN (and any other requested configurations)
         if self.extra_sc_args:
-            lib.utils.run([*base_sc_cmd, *self.extra_sc_args])
+            sc_args = self.extra_sc_args.copy()
+
+            # See if regular ThinLTO can be upgraded to distributed ThinLTO
+            if 'LTO_CLANG_THIN' in sc_args:
+                arch_cfg_txt  = Path(self._source_folder, 'arch/Kconfig').read_text(encoding='utf-8')
+                if 'LTO_CLANG_THIN_DIST' in arch_cfg_txt:
+                    sc_args = ['LTO_CLANG_THIN_DIST' if item == 'LTO_CLANG_THIN' else item for item in sc_args]
+
+            lib.utils.run([*base_sc_cmd, *sc_args])
             self._kmake(['olddefconfig'], env=kconfig_env)
 
         # Copy new configuration into place
