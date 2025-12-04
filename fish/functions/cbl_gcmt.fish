@@ -24,7 +24,7 @@ function cbl_gcmt -d "Run git commit with preset commit message"
                     return 1
                 end
 
-                if string match -qr next $modified_files
+                if string match -qr next $modified_files; or string match -qr fedora $modified_files
                     set next true
                 end
                 if string match -qr mainline $modified_files
