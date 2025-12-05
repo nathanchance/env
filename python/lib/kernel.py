@@ -99,6 +99,37 @@ def prepare_source(base_name, base_ref='origin/master'):
 
     # Patching section
     # yapf: disable
+    if base_name == 'fedora':
+        patches.append('''\
+From b5dd8a17d7c483d1aca31e710d1f5a3ebc940c79 Mon Sep 17 00:00:00 2001
+From: Nathan Chancellor <nathan@kernel.org>
+Date: Fri, 5 Dec 2025 13:13:42 -0700
+Subject: [PATCH] fixup! bus: fsl-mc: Convert to bus callbacks
+
+Link: https://lore.kernel.org/l3rm6hpfco7oterr3xfmlvvjr35ypirt5mfecrk4fn4golpm5l@rorig6egruji/
+Signed-off-by: Nathan Chancellor <nathan@kernel.org>
+---
+ drivers/bus/fsl-mc/fsl-mc-bus.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/drivers/bus/fsl-mc/fsl-mc-bus.c b/drivers/bus/fsl-mc/fsl-mc-bus.c
+index 6bc163d2ca49..c08c04047ae2 100644
+--- a/drivers/bus/fsl-mc/fsl-mc-bus.c
++++ b/drivers/bus/fsl-mc/fsl-mc-bus.c
+@@ -162,7 +162,7 @@ static void fsl_mc_shutdown(struct device *dev)
+ 	struct fsl_mc_driver *mc_drv = to_fsl_mc_driver(dev->driver);
+ 	struct fsl_mc_device *mc_dev = to_fsl_mc_device(dev);
+ 
+-	if (mc_drv->shutdown)
++	if (dev->driver && mc_drv->shutdown)
+ 		mc_drv->shutdown(mc_dev);
+ }
+ 
+-- 
+2.52.0
+
+''')  # noqa: W291
+
     if base_name in NEXT_TREES:
         patches.append('https://lore.kernel.org/all/20251028182822.3210436-2-xur@google.com/')  # kbuild: move vmlinux.a build rule to scripts/Makefile.vmlinux_a
         patches.append('https://lore.kernel.org/all/20251028182822.3210436-3-xur@google.com/')  # kbuild: distributed build support for Clang ThinLTO
