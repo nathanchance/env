@@ -74,6 +74,7 @@ def install_packages():
         'eza',
         'fd',
         'fish',
+        'font-iosevka-ss08',
         'fzf',
         'gh',
         'git',
@@ -87,15 +88,10 @@ def install_packages():
     ]  # yapf: disable
     brew(['install', *packages])
 
-    casks = {
-        # No tap needed
-        '': ['wezterm@nightly'],
-        'homebrew/cask-fonts': ['font-iosevka-ss08'],
-    }
-    for cask, packages in casks.items():
-        if cask:
-            brew(['tap', cask])
-        brew(['install', '--cask', *packages])
+    casks = [
+        'wezterm@nightly',
+    ]
+    brew(['install', '--cask', *casks])
 
 
 def is_vm():
