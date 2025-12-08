@@ -72,6 +72,7 @@ class KernelPkgBuilder:
             *base_sc_cmd,
             '-d', 'LOCALVERSION_AUTO',
             '-e', 'DEBUG_INFO_DWARF5',
+            '-e', 'MODULE_COMPRESS_ALL',
             '-m', 'DRM',
         ]  # yapf: disable
         # Handle https://git.kernel.org/next/linux-next/c/e3ec97c3abaf2fb68cc755cae3229288696b9f3d
