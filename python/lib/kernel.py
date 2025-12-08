@@ -128,7 +128,7 @@ index 6bc163d2ca49..c08c04047ae2 100644
 -- 
 2.52.0
 
-''')  # noqa: W291
+''')  # noqa: E101,W291,W293
 
     if base_name in NEXT_TREES:
         patches.append('https://lore.kernel.org/all/20251028182822.3210436-2-xur@google.com/')  # kbuild: move vmlinux.a build rule to scripts/Makefile.vmlinux_a
