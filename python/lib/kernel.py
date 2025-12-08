@@ -99,6 +99,10 @@ def prepare_source(base_name, base_ref='origin/master'):
 
     # Patching section
     # yapf: disable
+    if base_name == 'linux-next-llvm':
+        # https://lore.kernel.org/20251108044822.GA3262936@ax162/
+        patches.append('https://lore.kernel.org/all/20251204123204.9316-1-ziyao@disroot.org/')  # wifi: iwlwifi: Implement settime64 as stub for MVM/MLD PTP
+
     if base_name == 'fedora':
         patches.append('''\
 From b5dd8a17d7c483d1aca31e710d1f5a3ebc940c79 Mon Sep 17 00:00:00 2001
