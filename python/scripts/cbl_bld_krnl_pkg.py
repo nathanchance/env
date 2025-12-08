@@ -93,9 +93,12 @@ class KernelPkgBuilder:
 
             # See if regular ThinLTO can be upgraded to distributed ThinLTO
             if 'LTO_CLANG_THIN' in sc_args:
-                arch_cfg_txt  = Path(self._source_folder, 'arch/Kconfig').read_text(encoding='utf-8')
+                arch_cfg_txt = Path(self._source_folder, 'arch/Kconfig').read_text(encoding='utf-8')
                 if 'LTO_CLANG_THIN_DIST' in arch_cfg_txt:
-                    sc_args = ['LTO_CLANG_THIN_DIST' if item == 'LTO_CLANG_THIN' else item for item in sc_args]
+                    sc_args = [
+                        'LTO_CLANG_THIN_DIST' if item == 'LTO_CLANG_THIN' else item
+                        for item in sc_args
+                    ]
 
             lib.utils.run([*base_sc_cmd, *sc_args])
             self._kmake(['olddefconfig'], env=kconfig_env)
