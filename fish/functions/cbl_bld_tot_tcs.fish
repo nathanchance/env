@@ -115,10 +115,6 @@ function cbl_bld_tot_tcs -d "Build LLVM and binutils from source for kernel deve
     end
 
     # Add patches to revert here
-    # https://github.com/llvm/llvm-project/pull/169559#issuecomment-3634867412
-    set -a reverts https://github.com/llvm/llvm-project/commit/f49504a9cfcd18d35b1ba2c6f3f55ccca31f7faa # [Hexagon] Fix assignment (#170646)
-    set -a reverts https://github.com/llvm/llvm-project/commit/9a64c9f89514b8e7fad4b7dba16a4e34c19336dc # [Hexagon] Fix assert: = -> == (#170643)
-    set -a reverts https://github.com/llvm/llvm-project/commit/4da31b6f579925e17314ad2de2826dc171cd95f4 # [Hexagon] Passes for widening vector operations and shuffle opt (#169559)
     for revert in $reverts
         if string match -qr 'https?://' $revert
             set -l revert (path basename $revert)
