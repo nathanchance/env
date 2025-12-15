@@ -100,11 +100,8 @@ def prepare_source(base_name, base_ref='origin/master'):
     # Patching section
     # yapf: disable
     if base_name == 'linux-next-llvm':
-        # https://lore.kernel.org/20251108044822.GA3262936@ax162/
-        patches.append('https://lore.kernel.org/all/20251204123204.9316-1-ziyao@disroot.org/')  # wifi: iwlwifi: Implement settime64 as stub for MVM/MLD PTP
-
-    if base_name == 'fedora':
-        patches.append('https://lore.kernel.org/all/20251209115950.3382308-2-u.kleine-koenig@baylibre.com/')  # bus: fsl-mc: Cope for unbound devices in fsl_mc_shutdown
+        # https://lore.kernel.org/3dd19f67-1132-41b3-bf6a-ec9a430424e6@leemhuis.info/
+        reverts.append('31ab17f00c810076333c26cb485ec4d778829a76')  # sched/core: Rework sched_class::wakeup_preempt() and rq_modified_*()
 
     if base_name in NEXT_TREES:
         # https://lore.kernel.org/20251210075757.GA1206705@ax162/
