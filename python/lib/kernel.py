@@ -101,12 +101,14 @@ def prepare_source(base_name, base_ref='origin/master'):
     # yapf: disable
     if base_name == 'linux-next-llvm':
         # https://lore.kernel.org/3dd19f67-1132-41b3-bf6a-ec9a430424e6@leemhuis.info/
-        reverts.append('31ab17f00c810076333c26cb485ec4d778829a76')  # sched/core: Rework sched_class::wakeup_preempt() and rq_modified_*()
+        reverts.append('5d1f0b2f278eb55aebe29210fbc8f352c53497d6')  # sched/core: Rework sched_class::wakeup_preempt() and rq_modified_*()
 
     if base_name in NEXT_TREES:
         # https://lore.kernel.org/20251210075757.GA1206705@ax162/
-        reverts.append('1987ea95ac37ea3f9299d220974676207d5262f6')  # drm/xe/xe_survivability: Add support for survivability mode v2
-        reverts.append('f4e9fc967afdb53b1203f894fb4b68451a7fe202')  # drm/xe/xe_survivability: Redesign survivability mode
+        patches.append('https://lore.kernel.org/all/20251216101159.332558-5-riana.tauro@intel.com/')  # drm/xe/xe_survivability: remove unused index
+
+        # https://lore.kernel.org/CAADnVQKB1Ubr8ntTAb0Q6D1ek+2tLk1yJucLOXouaF_vMqP3GA@mail.gmail.com/
+        reverts.append('ba34388912b5326aac591508c953a0be67a15d5a')  # bpf: Disable false positive -Wsuggest-attribute=format warning
 
         patches.append('https://lore.kernel.org/all/20251028182822.3210436-2-xur@google.com/')  # kbuild: move vmlinux.a build rule to scripts/Makefile.vmlinux_a
         patches.append('https://lore.kernel.org/all/20251028182822.3210436-3-xur@google.com/')  # kbuild: distributed build support for Clang ThinLTO
