@@ -115,6 +115,8 @@ function cbl_bld_tot_tcs -d "Build LLVM and binutils from source for kernel deve
     end
 
     # Add patches to revert here
+    # https://github.com/llvm/llvm-project/pull/171935#issuecomment-3668579694
+    set -a reverts https://github.com/llvm/llvm-project/commit/f83de973a5daab2181442071d34758a0b413b6f2 # [llvm][clang] Enable IO sandbox for assert builds (#171935)
     for revert in $reverts
         if string match -qr 'https?://' $revert
             set -l revert (path basename $revert)
