@@ -107,9 +107,6 @@ def prepare_source(base_name, base_ref='origin/master'):
         # https://lore.kernel.org/20251210075757.GA1206705@ax162/
         patches.append('https://lore.kernel.org/all/20251216101159.332558-5-riana.tauro@intel.com/')  # drm/xe/xe_survivability: remove unused index
 
-        # https://lore.kernel.org/CAADnVQKB1Ubr8ntTAb0Q6D1ek+2tLk1yJucLOXouaF_vMqP3GA@mail.gmail.com/
-        reverts.append('ba34388912b5326aac591508c953a0be67a15d5a')  # bpf: Disable false positive -Wsuggest-attribute=format warning
-
         patches.append('https://lore.kernel.org/all/20251028182822.3210436-2-xur@google.com/')  # kbuild: move vmlinux.a build rule to scripts/Makefile.vmlinux_a
         patches.append('https://lore.kernel.org/all/20251028182822.3210436-3-xur@google.com/')  # kbuild: distributed build support for Clang ThinLTO
 
