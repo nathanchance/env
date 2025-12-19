@@ -91,7 +91,7 @@ function cbl_gen_fedoraconfig -d "Downloads and modifies Fedora's kernel configu
     remkdir $out
     crl -o $cfg https://src.fedoraproject.org/rpms/kernel/raw/rawhide/f/kernel-$arch-fedora.config
     # sanity check configuration and fallback to local copy if it is not valid
-    if string match -qr '<!DOCTYPE html>' <$cfg
+    if string match -qr '<!DOCTYPE html>' <$cfg; or string match -qr '<html>' <$cfg
         cp -v $CBL_LKT/configs/fedora/$arch.config $cfg
     end
 
