@@ -99,20 +99,26 @@ def prepare_source(base_name, base_ref='origin/master'):
 
     # Patching section
     # yapf: disable
+    if base_name in PACMAN_TREES:
+        patches.append('https://lore.kernel.org/all/20251213-dml-dcn30-avoid-clang-frame-larger-than-v1-1-dd3d74b76a17@kernel.org/')  # drm/amd/display: Reduce number of arguments of dcn30's CalculatePrefetchSchedule()
+        patches.append('https://lore.kernel.org/all/20251213-dml-dcn30-avoid-clang-frame-larger-than-v1-2-dd3d74b76a17@kernel.org/')  # drm/amd/display: Reduce number of arguments of dcn30's CalculateWatermarksAndDRAMSpeedChangeSupport()
+
     if base_name == 'linux-next-llvm':
         # https://lore.kernel.org/3dd19f67-1132-41b3-bf6a-ec9a430424e6@leemhuis.info/
         reverts.append('5d1f0b2f278eb55aebe29210fbc8f352c53497d6')  # sched/core: Rework sched_class::wakeup_preempt() and rq_modified_*()
 
     if base_name in NEXT_TREES:
-        # https://lore.kernel.org/20251210075757.GA1206705@ax162/
-        patches.append('https://lore.kernel.org/all/20251216101159.332558-5-riana.tauro@intel.com/')  # drm/xe/xe_survivability: remove unused index
+        # https://lore.kernel.org/265b9083-d744-4438-b539-9e001f2138ba@samsung.com/
+        reverts.append('24ec03cc55126b7b3adf102f4b3d9f716532b329')  # serial: core: Restore sysfs fwnode information
+
+        # https://lore.kernel.org/c8acf650-ef96-4449-ba85-557dedba0ffc@sirena.org.uk/
+        reverts.append('d70090581c46c001d0886afbaf08bcbc85a5e8bc')  # mm: implement precise OOM killer task selection
+        reverts.append('240587b6cca2822dd579caa0ff05a7f5e459c597')  # mm: fix OOM killer inaccuracy on large many-core systems
+
+        patches.append('https://lore.kernel.org/all/20251219-rt1320-sdw-avoid-uninit-ret-v1-1-faa3e250ebc4@kernel.org/')  # ASoC: rt1320: Change return type of rt1320_t0_load() to void
 
         patches.append('https://lore.kernel.org/all/20251028182822.3210436-2-xur@google.com/')  # kbuild: move vmlinux.a build rule to scripts/Makefile.vmlinux_a
         patches.append('https://lore.kernel.org/all/20251028182822.3210436-3-xur@google.com/')  # kbuild: distributed build support for Clang ThinLTO
-
-    if base_name in PACMAN_TREES:
-        patches.append('https://lore.kernel.org/all/20251213-dml-dcn30-avoid-clang-frame-larger-than-v1-1-dd3d74b76a17@kernel.org/')  # drm/amd/display: Reduce number of arguments of dcn30's CalculatePrefetchSchedule()
-        patches.append('https://lore.kernel.org/all/20251213-dml-dcn30-avoid-clang-frame-larger-than-v1-2-dd3d74b76a17@kernel.org/')  # drm/amd/display: Reduce number of arguments of dcn30's CalculateWatermarksAndDRAMSpeedChangeSupport()
     # yapf: enable
 
     try:
