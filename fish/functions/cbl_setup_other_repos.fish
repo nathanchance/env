@@ -64,7 +64,7 @@ function cbl_setup_other_repos -d "Download other ClangBuiltLinux repos"
     set tuxmake $CBL_SRC_D/tuxmake
     if not test -d $tumxake
         mkdir -p (path dirname $tuxmake)
-        git clone https://gitlab.com/Linaro/tuxmake.git $tuxmake
-        and git -C $tuxmake remote add -f nathanchance git@gitlab.com:nathanchance/tuxmake.git
+        git clone https://github.com/kernelci/tuxmake.git $tuxmake
+        and git -C $tuxmake remote add -f nathanchance git@github.com:nathanchance/tuxmake.git
     end
 end

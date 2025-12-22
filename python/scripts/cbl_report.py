@@ -439,7 +439,7 @@ def create_yearly_report_file(report_file, report_date, year):
     boot_utils_link = 'https://github.com/ClangBuiltLinux/boot-utils'
     ci_link = 'https://github.com/ClangBuiltLinux/continuous-integration2'
     tc_build_link = 'https://github.com/ClangBuiltLinux/tc-build'
-    tuxmake_link = 'https://gitlab.com/Linaro/tuxmake'
+    tuxmake_link = 'https://github.com/kernelci/tuxmake'
     links = {
         'boot_utils_log': f'<a href="{boot_utils_link}/commits/main?author=nathanchance">GitHub</a>',
         'ci_log': f'<a href="{ci_link}/commits/main?author=nathanchance">GitHub</a>',
