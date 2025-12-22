@@ -89,7 +89,8 @@ class NspawnConfig(UserDict):
             '/var/tmp/fzf',
         }
         ro_mounts = {
-            os.environ['OPT_ORB_GUEST'],
+            # Broken in 258: https://github.com/systemd/systemd/issues/39037
+            # os.environ['OPT_ORB_GUEST'],
             # Allow interacting with the host tmux socket
             f"/var/tmp/tmux-{os.getuid()}",
         }
