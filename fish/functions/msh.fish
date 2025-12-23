@@ -21,7 +21,7 @@ function msh -d "Shorthand for mosh -o" -w mosh
             case chromebox
                 set host chromebox3
             case framework-desktop
-                set host framework-amd-ryzen-max-395plus
+                set host framework-amd-ryzen-maxplus-395
             case intel-desktop-11700
                 set host asus-intel-core-11700
             case intel-desktop-n100

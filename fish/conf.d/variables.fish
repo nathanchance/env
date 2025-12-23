@@ -19,7 +19,7 @@ if test -z "$LOCATION"
                 set -Ux LOCATION hetzner
             case nathan@chromebox3
                 set -Ux LOCATION chromebox
-            case nathan@framework-amd-ryzen-max-395plus
+            case nathan@framework-amd-ryzen-maxplus-395
                 set -Ux LOCATION framework-desktop
             case nathan@honeycomb
                 set -Ux LOCATION honeycomb
