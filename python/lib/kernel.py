@@ -103,6 +103,9 @@ def prepare_source(base_name, base_ref='origin/master'):
         patches.append('https://lore.kernel.org/all/20251213-dml-dcn30-avoid-clang-frame-larger-than-v1-1-dd3d74b76a17@kernel.org/')  # drm/amd/display: Reduce number of arguments of dcn30's CalculatePrefetchSchedule()
         patches.append('https://lore.kernel.org/all/20251213-dml-dcn30-avoid-clang-frame-larger-than-v1-2-dd3d74b76a17@kernel.org/')  # drm/amd/display: Reduce number of arguments of dcn30's CalculateWatermarksAndDRAMSpeedChangeSupport()
 
+        # https://lore.kernel.org/20251223215431.GA3327658@ax162/
+        patches.append('https://lore.kernel.org/all/20251205161202.48409-1-mikhail.v.gavrilov@gmail.com/')  # wifi: mt76: Fix strscpy buffer overflow in mt76_connac2_load_patch
+
     if base_name == 'linux-next-llvm':
         # https://lore.kernel.org/3dd19f67-1132-41b3-bf6a-ec9a430424e6@leemhuis.info/
         reverts.append('5d1f0b2f278eb55aebe29210fbc8f352c53497d6')  # sched/core: Rework sched_class::wakeup_preempt() and rq_modified_*()
