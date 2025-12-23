@@ -132,6 +132,14 @@ def adjust_gnome_power_settings():
     if not lib.setup.user_exists('gdm'):
         return
 
+    # Ensure that folders that may be needed for dconf exist
+    conf_folders = tuple(Path('/var/lib/gdm', base) for base in ('.cache', '.config', '.local'))
+    for conf_folder in conf_folders:
+        if conf_folder.exists():
+            continue
+        conf_folder.mkdir(mode=0o700)
+        lib.setup.chown('gdm', conf_folder)
+
     gdm_cmd = [
         'doas', '-u', 'gdm',
         'dbus-launch', 'gsettings', 'set',
