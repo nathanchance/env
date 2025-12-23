@@ -60,7 +60,7 @@ function wezterm_open_remotes -d "Open a new wezterm tab for each remote machine
     switch $mac_model
         case Mac13,1
             set icon 🖥️
-        case Mac14,2
+        case Mac1{4,7},2
             set icon 💻
     end
     $wezterm_path cli spawn -- $fish_path -c "__wezterm_title '$icon macOS'; exec $fish_path -l"
