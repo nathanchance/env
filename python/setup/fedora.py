@@ -112,6 +112,7 @@ def install_packages():
         'jq',
         'openssh',
         'python-pip',
+        'rsync',
         'stow',
         'tmux',
         'vim',

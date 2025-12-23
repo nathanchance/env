@@ -478,6 +478,7 @@ def pacman_install_packages():
         # Downloading and extracting utilities
         'ca-certificates',
         'curl',
+        'rsync',
         'unzip',
         'wget',
 
