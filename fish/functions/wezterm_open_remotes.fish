@@ -29,6 +29,7 @@ function wezterm_open_remotes -d "Open a new wezterm tab for each remote machine
     if not set -q no_local_remotes
         set -a hosts \
             aadp:"🟪 AADP" \
+            framework:"🟥 Framework Desktop" \
             amd-desktop-8745HS:"🟥 AMD mini desktop" \
             intel-desktop-11700:"🟦 Intel i7-11700" \
             intel-laptop:"🟦 Intel laptop" \

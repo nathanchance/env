@@ -8,21 +8,21 @@ function cbl_bld_all_krnl -d "Build all kernels for ClangBuiltLinux testing"
     set lnx_src $CBL_SRC_C/linux
 
     switch $LOCATION
-        case aadp generic honeycomb test-desktop-amd-8745HS test-desktop-intel-11700
+        case aadp framework-desktop generic honeycomb test-desktop-amd-8745HS test-desktop-intel-11700
             cbl_upd_src c m
 
             set slim architectures --architectures arm arm64 i386 x86_64
             switch $LOCATION
+                case framework-desktop test-desktop-amd-8745HS test-desktop-intel-11700
+                    # Fewer architectures
+                    set -a cbl_lkt_args \
+                        $slim_architectures
+
                 case honeycomb
                     # Fewer architectures and only defconfigs
                     set -a cbl_lkt_args \
                         $slim_architectures \
                         --targets def
-
-                case test-desktop-amd-8745HS test-desktop-intel-11700
-                    # Fewer architectures
-                    set -a cbl_lkt_args \
-                        $slim_architectures
             end
 
             cbl_lkt \

@@ -181,6 +181,7 @@ def configure_trusted_networking():
         'beelink-amd-ryzen-8745HS': '10.0.1.8',
         'beelink-intel-n100': '10.0.1.11',
         'chromebox3': '10.0.1.14',
+        'framework-amd-ryzen-max-395plus': '10.0.1.23',
         'honeycomb': '10.0.1.17',
         'msi-intel-core-10210U': '10.0.1.20',
         # 'thelio-3990X': '',

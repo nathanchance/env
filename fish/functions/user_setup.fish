@@ -27,7 +27,7 @@ function user_setup -d "Setup a user account, downloading all files and placing 
 
     # Set "trusted environment" variable to make decisions later
     switch $LOCATION
-        case aadp chromebox honeycomb test-desktop-amd-8745HS test-desktop-intel-{11700,n100} test-laptop-intel
+        case aadp chromebox framework-desktop honeycomb test-desktop-amd-8745HS test-desktop-intel-{11700,n100} test-laptop-intel
             set trusted_ssh true
         case hetzner workstation
             set trusted_gpg true

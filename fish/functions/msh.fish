@@ -20,6 +20,8 @@ function msh -d "Shorthand for mosh -o" -w mosh
                 set host beelink-amd-ryzen-8745hs
             case chromebox
                 set host chromebox3
+            case framework-desktop
+                set host framework-amd-ryzen-max-395plus
             case intel-desktop-11700
                 set host asus-intel-core-11700
             case intel-desktop-n100
@@ -33,7 +35,7 @@ function msh -d "Shorthand for mosh -o" -w mosh
         set user_host nathan@$host
     else
         switch $target
-            case aadp amd-desktop-8745HS chromebox hetzner honeycomb intel-desktop-11700 intel-desktop-n100 intel-laptop main
+            case aadp amd-desktop-8745HS chromebox framework-desktop hetzner honeycomb intel-desktop-11700 intel-desktop-n100 intel-laptop main
                 set user_host nathan@(get_ip $target)
 
             case '*@*'

@@ -11,6 +11,8 @@ function get_ip -d "Get a particular machine's IP address via short name or host
             echo 10.0.1.8
         case chromebox chromebox3
             echo 10.0.1.14
+        case framework framework-desktop framework-amd-ryzen-max-395plus
+            echo 10.0.1.23
         case hetzner main
             echo $HETZNER_IP
         case honeycomb

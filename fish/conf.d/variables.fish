@@ -19,6 +19,8 @@ if test -z "$LOCATION"
                 set -Ux LOCATION hetzner
             case nathan@chromebox3
                 set -Ux LOCATION chromebox
+            case nathan@framework-amd-ryzen-max-395plus
+                set -Ux LOCATION framework-desktop
             case nathan@honeycomb
                 set -Ux LOCATION honeycomb
             case nathan@beelink-amd-ryzen-8745HS
@@ -47,6 +49,8 @@ end
 switch $LOCATION
     case chromebox
         set -gx CCACHE_MAXSIZE 5G
+    case framework-desktop workstation
+        set -gx CCACHE_MAXSIZE 100G
     case generic test-laptop-intel
         set -gx CCACHE_MAXSIZE 25G
     case hetzner
@@ -55,8 +59,6 @@ switch $LOCATION
         set -gx CCACHE_MAXSIZE 15G
     case test-desktop-amd-8745HS test-desktop-intel-11700
         set -gx CCACHE_MAXSIZE 50G
-    case workstation
-        set -gx CCACHE_MAXSIZE 100G
 end
 
 ###############################
