@@ -195,6 +195,12 @@ function cbl_bld_tot_tcs -d "Build LLVM and binutils from source for kernel deve
     'allmodconfig': LLVMSourceManager(Path('$llvm_project')).default_targets(),"
             end
 
+            cbl_clone_repo $CBL_LKT
+            or return
+            if not __is_location_primary
+                git -C $CBL_LKT urh
+            end
+
             set lsm_location (string match -er 'lsm\.location = Path\(src_folder,' <$tc_bld/build-llvm.py | string trim)
             timeout 24h env PYTHONPATH=$tc_bld:$CBL_LKT python3 -c "from os import environ as e
 from pathlib import Path

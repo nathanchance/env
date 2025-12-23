@@ -17,7 +17,7 @@ function cbl_clone_repo -d "Clone certain repos for ClangBuiltLinux testing and 
 
         # Some arguments may have shorthands, expand them before handling
         switch $arg
-            case lkt
+            case lkt $CBL_LKT
                 set arg llvm-kernel-testing
             case $CBL_TC_BLD
                 set arg nathanchance/tc-build
