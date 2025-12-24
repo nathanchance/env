@@ -11,7 +11,7 @@ function cbl_bld_all_krnl -d "Build all kernels for ClangBuiltLinux testing"
         case aadp framework-desktop generic honeycomb test-desktop-amd-8745HS test-desktop-intel-11700
             cbl_upd_src c m
 
-            set slim architectures --architectures arm arm64 i386 x86_64
+            set slim_architectures --architectures arm arm64 i386 x86_64
             switch $LOCATION
                 case framework-desktop test-desktop-amd-8745HS test-desktop-intel-11700
                     # Fewer architectures
