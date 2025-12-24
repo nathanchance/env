@@ -128,25 +128,21 @@ def adjust_esp_mountpoint(fstab, dryrun=False):
     lib.utils.print_or_run_cmd(['mount', '--mkdir', root_esp], dryrun)
 
 
-def adjust_gnome_power_settings():
-    if not lib.setup.user_exists('gdm'):
+def disable_suspend():
+    # If machine has a battery, the power profile should be customized manually
+    if len(list(Path('/sys/class/power_supply').glob('BAT*'))) > 0:
         return
 
-    # Ensure that folders that may be needed for dconf exist
-    conf_folders = tuple(Path('/var/lib/gdm', base) for base in ('.cache', '.config', '.local'))
-    for conf_folder in conf_folders:
-        if conf_folder.exists():
-            continue
-        conf_folder.mkdir(mode=0o700)
-        lib.setup.chown('gdm', conf_folder)
-
-    gdm_cmd = [
-        'doas', '-u', 'gdm',
-        'dbus-launch', 'gsettings', 'set',
-        'org.gnome.settings-daemon.plugins.power',
-        'sleep-inactive-ac-type', 'nothing',
-    ]  # yapf: disable
-    lib.utils.run(gdm_cmd)
+    # https://wiki.archlinux.org/title/Power_management/Suspend_and_hibernate#Disable_sleep_completely
+    if not (sleep_drop_in := Path('/etc/systemd/sleep.conf.d/disable-sleep.conf')).exists():
+        file_text = ('[Sleep]\n'
+                     'AllowSuspend=no\n'
+                     'AllowHibernation=no\n'
+                     'AllowHybridSleep=no\n'
+                     'AllowSuspendThenHibernate=no\n')
+        sleep_drop_in.parent.mkdir(exist_ok=True)
+        sleep_drop_in.write_text(file_text, encoding='utf-8')
+        sleep_drop_in.chmod(0o644)
 
 
 def can_use_amd_pstate():
@@ -861,7 +857,7 @@ if __name__ == '__main__':
     setup_libvirt(user, initcpio_conf)
     lib.setup.configure_trusted_networking()
     enable_reflector()
-    adjust_gnome_power_settings()
+    disable_suspend()
     lib.setup.systemctl_enable(['sshd.service', 'paccache.timer'])
     lib.setup.enable_tailscale()
     fix_fstab()
