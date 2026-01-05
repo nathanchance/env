@@ -83,7 +83,6 @@ class NspawnConfig(UserDict):
         }
         rw_mounts = {
             '/dev/kvm',
-            *automounted_mounts,
             os.environ['NVME_FOLDER'],
             # Allow 'fzf --tmux' to work properly
             '/var/tmp/fzf',
@@ -95,10 +94,16 @@ class NspawnConfig(UserDict):
             f"/var/tmp/tmux-{os.getuid()}",
         }
 
+        # If MAC_FOLDER is set in the environment, our NAS can be accessed from
+        # there
         if mac_folder := os.environ.get('MAC_FOLDER'):
             rw_mounts.add(mac_folder)
         else:
             automounted_mounts.add(os.environ['NAS_FOLDER'])
+
+        # This must be done after the if block above to ensure NAS_FOLDER is
+        # properly added.
+        rw_mounts.update(automounted_mounts)
 
         if 'arch' in self.name:
             # Share the host's mirrorlist so that reflector does not have to be
