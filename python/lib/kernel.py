@@ -99,11 +99,12 @@ def prepare_source(base_name, base_ref='origin/master'):
 
     # Patching section
     # yapf: disable
+    if base_name == 'linux-mainline-llvm':
+        patches.append('https://gitlab.freedesktop.org/agd5f/linux/-/commit/b20b3fc4210f83089f835cdb91deec4b0778761a.patch')  # drm/amd/display: Reduce number of arguments of dcn30's CalculatePrefetchSchedule()
+        patches.append('https://gitlab.freedesktop.org/agd5f/linux/-/commit/563dfbefdf633c8d958398ddfa3955f9f40e47d9.patch')  # drm/amd/display: Reduce number of arguments of dcn30's CalculateWatermarksAndDRAMSpeedChangeSupport()
+
     if base_name in PACMAN_TREES:
         patches.append('https://lore.kernel.org/all/20251124230045.3188417-1-sakari.ailus@linux.intel.com/')  # media: ccs: Avoid possible division by zero
-
-        patches.append('https://lore.kernel.org/all/20251213-dml-dcn30-avoid-clang-frame-larger-than-v1-1-dd3d74b76a17@kernel.org/')  # drm/amd/display: Reduce number of arguments of dcn30's CalculatePrefetchSchedule()
-        patches.append('https://lore.kernel.org/all/20251213-dml-dcn30-avoid-clang-frame-larger-than-v1-2-dd3d74b76a17@kernel.org/')  # drm/amd/display: Reduce number of arguments of dcn30's CalculateWatermarksAndDRAMSpeedChangeSupport()
 
     if base_name in NEXT_TREES:
         patches.append('https://lore.kernel.org/all/20260105-ntfs3-restore-null-folio-init-v1-1-432093703dfd@kernel.org/')  # ntfs3: Restore NULL folio initialization in ntfs_writepages()
