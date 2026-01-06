@@ -1,29 +1,40 @@
 # fish colors
-set -g fish_color_normal normal
+set -g fish_color_autosuggestion 97979b
+set -g fish_color_cancel normal
 set -g fish_color_command blue
-set -g fish_color_quote yellow
-set -g fish_color_redirection green
-set -g fish_color_end green
-set -g fish_color_error red
-set -g fish_color_param cyan
 set -g fish_color_comment brblack
-set -g fish_color_match normal
-set -g fish_color_selection 97979b
-set -g fish_color_search_match yellow
-set -g fish_color_history_current normal
-set -g fish_color_operator magenta
-set -g fish_color_escape magenta
 set -g fish_color_cwd blue
 set -g fish_color_cwd_root blue
-set -g fish_color_valid_path normal
-set -g fish_color_autosuggestion 97979b
-set -g fish_color_user yellow
+set -g fish_color_end green
+set -g fish_color_error red
+set -g fish_color_escape magenta
+set -g fish_color_history_current normal
 set -g fish_color_host green
-set -g fish_color_cancel normal
+set -g fish_color_host_remote yellow
+set -g fish_color_match normal
+set -g fish_color_normal normal
+set -g fish_color_operator magenta
+set -g fish_color_param cyan
+set -g fish_color_quote yellow
+set -g fish_color_redirection green
+set -g fish_color_search_match yellow
+set -g fish_color_selection 97979b
+set -g fish_color_status red
+set -g fish_color_user yellow
+set -g fish_color_valid_path normal
+set -g fish_pager_color_background
 set -g fish_pager_color_completion normal
 set -g fish_pager_color_description B3A06D yellow
 set -g fish_pager_color_prefix white --bold --underline
 set -g fish_pager_color_progress brwhite --background=cyan
+set -g fish_pager_color_secondary_background
+set -g fish_pager_color_secondary_completion
+set -g fish_pager_color_secondary_description
+set -g fish_pager_color_secondary_prefix
+set -g fish_pager_color_selected_background -r
+set -g fish_pager_color_selected_completion
+set -g fish_pager_color_selected_description
+set -g fish_pager_color_selected_prefix
 
 # hydro colors
 set -g hydro_color_pwd blue
