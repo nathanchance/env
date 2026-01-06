@@ -11,7 +11,9 @@ ${summary}
 
 Please look out for regression or issue reports or other follow up
 comments, as they may result in the patch/series getting dropped or
-reverted.
+reverted. Patches applied to an "unstable" branch are accepted pending
+wider testing in -next and any post-commit review; they will generally
+be moved to the main branch in a week if no issues are found.
 
 Best regards,
 -- 
