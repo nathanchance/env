@@ -26,7 +26,7 @@ set -g fish_pager_color_background
 set -g fish_pager_color_completion normal
 set -g fish_pager_color_description B3A06D yellow
 set -g fish_pager_color_prefix white --bold --underline
-set -g fish_pager_color_progress brwhite --background=cyan
+set -g fish_pager_color_progress brblack --background=cyan
 set -g fish_pager_color_secondary_background
 set -g fish_pager_color_secondary_completion
 set -g fish_pager_color_secondary_description
