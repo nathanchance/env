@@ -360,7 +360,7 @@ if __name__ == '__main__':
             'LTO_CLANG_THIN',
         ]
     if not args.no_werror:
-        builder.extra_sc_args += ['-e', 'WERROR']
+        builder.extra_sc_args += ['-e', 'OBJTOOL_WERROR', '-e', 'WERROR']
 
     if args.gcc and 'CROSS_COMPILE' not in make_vars:
         make_vars['CROSS_COMPILE'] = korg_tc.GCCManager().get_cc_as_path(
