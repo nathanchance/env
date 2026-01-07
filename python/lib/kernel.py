@@ -110,7 +110,7 @@ def prepare_source(base_name, base_ref='origin/master'):
         patches.append('https://lore.kernel.org/all/20260105-ntfs3-restore-null-folio-init-v1-1-432093703dfd@kernel.org/')  # ntfs3: Restore NULL folio initialization in ntfs_writepages()
 
     if base_name == 'linux-next-llvm':
-        patches.append('https://lore.kernel.org/all/20260105-fix-gen-btf-sh-lto-v1-1-18052ea055a9@kernel.org/')  # scripts/gen-btf.sh: Disable LTO when generating initial .o file
+        patches.append('https://git.kernel.org/bpf/bpf-next/p/2421649778dca8fe6e7b166905e97278aa0fdf58')  # scripts/gen-btf.sh: Ensure initial object in gen_btf_o is ELF with correct endianness
 
         patches.append('https://lore.kernel.org/all/20260105-drm_panic-handle-invalid-drm_panic_screen-v1-1-55228bd4b0f8@kernel.org/')  # drm/panic: Ensure drm_panic_type is initialized to a valid value
         patches.append('https://lore.kernel.org/all/20260105-drm_panic-handle-invalid-drm_panic_screen-v1-2-55228bd4b0f8@kernel.org/')  # drm/panic: Fix expected string for QR_CODE in drm_panic_type_map
