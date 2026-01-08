@@ -1,7 +1,7 @@
 # Maintainer: Nathan Chancellor <nathan@kernel.org>
 pkgname=python-msgspec
 _name=${pkgname#python-}
-pkgver=0.19.0
+pkgver=0.20.0
 pkgrel=1
 pkgdesc="A fast serialization and validation library, with builtin support for JSON, MessagePack, YAML, and TOML"
 arch=(x86_64)
@@ -14,7 +14,7 @@ depends=(
     python-typing_extensions
 )
 makedepends=(
-    git
+    # git
     python-build
     python-installer
     python-setuptools
@@ -31,26 +31,26 @@ optdepends=(
   'python-tomli: for TOML support'
   'python-yaml: for YAML support'
 )
-#source=("$pkgname-$pkgver.tar.gz::$url/archive/refs/tags/$pkgver.tar.gz")
-source=("git+$url.git")
-sha256sums=('SKIP')
+source=("$pkgname-$pkgver.tar.gz::$url/archive/refs/tags/$pkgver.tar.gz")
+#source=("git+$url.git")
+sha256sums=('fd1f5aa07501516720bfaa3f7cbcb7170a0b944d3f49ee107caf0fa56d056d9c')
 
-pkgver() {
-  cd "${_name}"
-
-  git describe --abbrev=7 --long --tags | sed 's/\([^-]*-g\)/r\1/;s/-/./g'
-}
+#pkgver() {
+#  cd "${_name}"
+#
+#  git describe --abbrev=7 --long --tags | sed 's/\([^-]*-g\)/r\1/;s/-/./g'
+#}
 
 build() {
-  cd "${_name}"
-  # cd "${_name}-$pkgver"
+  # cd "${_name}"
+  cd "${_name}-$pkgver"
 
   python -m build --wheel --no-isolation
 }
 
 check() {
-  cd "${_name}"
-  # cd "${_name}-$pkgver"
+  # cd "${_name}"
+  cd "${_name}-$pkgver"
   local python_version=$(python -c 'import sys; print("".join(map(str, sys.version_info[:2])))')
 
   # Error on 'import pyright' even with pyright in checkdepends
@@ -60,8 +60,8 @@ check() {
 }
 
 package() {
-  cd "${_name}"
-  # cd "${_name}-$pkgver"
+  # cd "${_name}"
+  cd "${_name}-$pkgver"
 
   python -m installer --destdir="$pkgdir" dist/*.whl
 
