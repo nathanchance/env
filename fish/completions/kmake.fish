@@ -51,16 +51,36 @@ function __kmake_handle_make_var
         case CROSS_COMPILE
             set desc toolchain
 
-            set -a vals (path filter -fx $PATH/*-elfedit | path basename | string replace elfedit '' | path sort -u)
+            set -a vals (path filter -x $PATH/*elfedit | path basename | string replace elfedit '' | path sort -u)
+
+            if test -n "$value"
+                set file_comps (complete -C "__fish_command_without_completions $value")
+                set possible_vals (string match -er 'elfedit$' $file_comps | string replace elfedit '' | path sort -u)
+                if test -n "$possible_vals"
+                    set -a vals $possible_vals
+                else
+                    set -a vals $file_comps
+                end
+            end
 
         case LLVM
             set desc toolchain
 
-            set -a vals 1
-            set -a vals (path filter -fx $PATH/clang | path resolve | path dirname | path sort -u)/
+            set dash_vals -(path filter -x $PATH/ld.lld-* | path basename | path sort -u | string replace ld.lld- '')
+
+            if test -n "$value"
+                if string match -qr '^-' -- $value
+                    set -a vals $dash_vals
+                else
+                    set -a vals (complete -C "__fish_command_without_completions $value")
+                end
+            else
+                set -a vals 1
+                set -a vals (path filter -x $PATH/clang | path resolve | path dirname | path sort -u)/
+                set -a vals $dash_vals
+            end
     end
 
-    set vals (string match -er -- "^$value" $vals)
     string join \n -- $name=$vals\t$desc
 end
 
