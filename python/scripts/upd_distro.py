@@ -34,8 +34,20 @@ else:
     os_rel = lib.setup.get_os_rel()
 
     if os_rel['ID'] == 'arch':
-        if not lib.utils.run_check_rc_zero(['checkupdates']):
+        checkupdates = lib.utils.chronic(['checkupdates'], check=False)
+        if (cu_ret := checkupdates.returncode) == 2:
             sys.exit(0)
+        elif cu_ret == 1:
+            print("checkupdates failed with:")
+            if checkupdates.stderr:
+                print(checkupdates.stderr, end='')
+            if checkupdates.stdout:
+                print(checkupdates.stdout, end='')
+            sys.exit(1)
+        elif cu_ret == 0:
+            pass
+        else:
+            raise RuntimeError(f"Unhandled checkupdates return code: {cu_ret}")
 
         cmd_func = lib.setup.pacman
         cmds = [['-Syyu']]
