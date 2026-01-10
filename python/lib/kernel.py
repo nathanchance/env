@@ -110,8 +110,8 @@ def prepare_source(base_name, base_ref='origin/master'):
         patches.append('https://lore.kernel.org/all/20260105-ntfs3-restore-null-folio-init-v1-1-432093703dfd@kernel.org/')  # ntfs3: Restore NULL folio initialization in ntfs_writepages()
 
     if base_name == 'linux-next-llvm':
-        patches.append('https://lore.kernel.org/all/20260105-drm_panic-handle-invalid-drm_panic_screen-v1-1-55228bd4b0f8@kernel.org/')  # drm/panic: Ensure drm_panic_type is initialized to a valid value
-        patches.append('https://lore.kernel.org/all/20260105-drm_panic-handle-invalid-drm_panic_screen-v1-2-55228bd4b0f8@kernel.org/')  # drm/panic: Fix expected string for QR_CODE in drm_panic_type_map
+        patches.append('https://gitlab.freedesktop.org/drm/misc/kernel/-/commit/6419fc157e55665dc8680deb1737dc4c53c33f94.patch')  # drm/panic: Ensure drm_panic_type is initialized to a valid value
+        patches.append('https://gitlab.freedesktop.org/drm/misc/kernel/-/commit/6abb6a0e1104279763d1561b8110c1db442c5fac.patch')  # drm/panic: Fix expected string for QR_CODE in drm_panic_type_map
 
     # Distributed ThinLTO support ahead of acceptance in kbuild tree
     if base_name in NEXT_TREES:
