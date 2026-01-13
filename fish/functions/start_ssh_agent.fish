@@ -32,6 +32,20 @@ function start_ssh_agent -d "Launch an ssh agent only if it has not already been
         return
     end
 
+    if test (uname) = Darwin
+        ssh-add -l &>/dev/null
+        switch $status
+            case 0
+                return 0
+            case 1
+                ssh-add $ssh_key
+                return
+            case '*'
+                ssh-add -l
+                return
+        end
+    end
+
     set host_ssh_agent_file $HOME/.ssh/.host-ssh-agent.fish
     set host_ssh_agent_sock $HOME/.ssh/.host-ssh-agent.sock
     set container_ssh_agent_file (string replace .host .container $host_ssh_agent_file)
@@ -51,7 +65,7 @@ function start_ssh_agent -d "Launch an ssh agent only if it has not already been
         # https://github.com/systemd/systemd/issues/39037
         if test (__get_systemd_version) -ge 258; and test (__get_distro) != arch
             set need_separate_ssh_agents true
-        else if test (uname) != Darwin
+        else
             ln -fnrs $ssh_agent_file $container_ssh_agent_file
         end
     end
