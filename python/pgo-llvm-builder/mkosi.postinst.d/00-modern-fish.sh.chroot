@@ -31,7 +31,7 @@ if [ "$RELEASE" = "buster" ]; then
     cd build
     # We install to /usr because getting /usr/local/bin into PATH for the rest
     # of the build is not super easy because PATH comes from mkosi.
-    cmake_args="-DBUILD_DOCS=OFF -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr"
+    cmake_args="-DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr -DWITH_DOCS=OFF"
     # For some inexplicable reason, the first cmake invocation fails to find
     # the version of rust that we just installed but it does the second time?
     # shellcheck disable=SC2086
