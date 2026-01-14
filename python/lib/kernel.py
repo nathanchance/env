@@ -105,6 +105,9 @@ def prepare_source(base_name, base_ref='origin/master'):
     if base_name in NEXT_TREES:
         patches.append('https://lore.kernel.org/all/20260105-ntfs3-restore-null-folio-init-v1-1-432093703dfd@kernel.org/')  # ntfs3: Restore NULL folio initialization in ntfs_writepages()
 
+    if base_name == 'fedora':
+        patches.append('https://lore.kernel.org/all/20260114-panel-ilitek-ili9882t-fix-override-init-v1-1-1d69a2b096df@kernel.org/')  # drm/panel: ilitek-ili9882t: Remove duplicate initializers in tianma_il79900a_dsc
+
     # Distributed ThinLTO support ahead of acceptance in kbuild tree
     if base_name in NEXT_TREES:
         patches.append('https://lore.kernel.org/all/20251028182822.3210436-2-xur@google.com/')  # kbuild: move vmlinux.a build rule to scripts/Makefile.vmlinux_a
