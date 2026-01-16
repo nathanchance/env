@@ -103,7 +103,7 @@ def prepare_source(base_name, base_ref='origin/master'):
         patches.append('https://lore.kernel.org/all/20251124230045.3188417-1-sakari.ailus@linux.intel.com/')  # media: ccs: Avoid possible division by zero
 
     if base_name in NEXT_TREES:
-        patches.append('https://lore.kernel.org/all/20260105-ntfs3-restore-null-folio-init-v1-1-432093703dfd@kernel.org/')  # ntfs3: Restore NULL folio initialization in ntfs_writepages()
+        patches.append('https://github.com/Paragon-Software-Group/linux-ntfs3/commit/ca1ceddfaa99e91da8b7ac24785b27d400b88309.patch')  # ntfs3: Restore NULL folio initialization in ntfs_writepages()
 
     if base_name == 'fedora':
         patches.append('https://lore.kernel.org/all/20260114-panel-ilitek-ili9882t-fix-override-init-v1-1-1d69a2b096df@kernel.org/')  # drm/panel: ilitek-ili9882t: Remove duplicate initializers in tianma_il79900a_dsc
