@@ -20,18 +20,28 @@ function cbl_gen_korg_llvm_announce -d "Generate kernel.org LLVM release announc
         set -a mutt_args -c $korg_user@kernel.org
     end
 
-    echo "Hi all,
+    begin
+        echo "Hi all,
 
 I have built and uploaded LLVM $llvm_ver to
 https://mirrors.edge.kernel.org/pub/tools/llvm/.
-
-If there are any issues found, please let us know via email or
+"
+        if string match -qr -- -rc $llvm_ver
+            echo "This is a prerelease version of LLVM, similar to how the Linux kernel
+release candidates work. If there are any issues found, please let us
+know via email or https://github.com/ClangBuiltLinux/linux/issues/new,
+so that we have an opportunity to get them fixed in main and backported
+to the $llvm_maj.x branch before $llvm_maj.1.0 is officially released."
+        else
+            echo "If there are any issues found, please let us know via email or
 https://github.com/ClangBuiltLinux/linux/issues/new, so that we have an
 opportunity to get them fixed in main and backported before the $llvm_maj.x
-series is no longer supported.
-
+series is no longer supported."
+        end
+        echo "
 Cheers,
-Nathan" >msg
+Nathan"
+    end >msg
 
     echo "#!/usr/bin/env fish
 

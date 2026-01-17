@@ -43,7 +43,7 @@ function cbl_upload_korg_llvm -d "Upload kernel.org toolchain releases with kup"
         $kup put $tar{,.asc} /pub/tools/llvm/files/$tar.gz
         or return
 
-        set llvm_ver (string match -gr 'llvm-([0-9|.]+)' $tar)
+        set llvm_ver (string match -gr 'llvm-([0-9|.]+(?:-rc\d)?)' $tar)
         if test (string split . $llvm_ver | count) != 3
             __print_error "Malformed LLVM version found ('$llvm_ver')?"
             return 1
