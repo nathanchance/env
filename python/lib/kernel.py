@@ -99,14 +99,8 @@ def prepare_source(base_name, base_ref='origin/master'):
 
     # Patching section
     # yapf: disable
-    if base_name in PACMAN_TREES:
-        patches.append('https://lore.kernel.org/all/20251124230045.3188417-1-sakari.ailus@linux.intel.com/')  # media: ccs: Avoid possible division by zero
-
-    if base_name in NEXT_TREES:
-        patches.append('https://github.com/Paragon-Software-Group/linux-ntfs3/commit/ca1ceddfaa99e91da8b7ac24785b27d400b88309.patch')  # ntfs3: Restore NULL folio initialization in ntfs_writepages()
-
-    if base_name == 'fedora':
-        patches.append('https://lore.kernel.org/all/20260114-panel-ilitek-ili9882t-fix-override-init-v1-1-1d69a2b096df@kernel.org/')  # drm/panel: ilitek-ili9882t: Remove duplicate initializers in tianma_il79900a_dsc
+    if base_name == 'linux-mainline-llvm':
+        patches.append('https://git.linuxtv.org/media-ci/media-pending.git/patch/?id=679f0b7b6a409750a25754c8833e268e5fdde742')  # media: ccs: Avoid possible division by zero
 
     # Distributed ThinLTO support ahead of acceptance in kbuild tree
     if base_name in NEXT_TREES:
