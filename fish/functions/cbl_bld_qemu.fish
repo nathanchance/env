@@ -110,6 +110,10 @@ function cbl_bld_qemu -d "Build QEMU for use with ClangBuiltLinux"
             --disable-zstd \
             --disable-xen
 
+        if ld --help &| string match -qr discard-sframe
+            set -a configure_args --extra-ldflags=-Wl,--discard-sframe
+        end
+
         if test "$install" = true
             set -a configure_args --prefix=$PREFIX
             set make_target install
