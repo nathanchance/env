@@ -239,3 +239,8 @@ def print_or_write_text(path, text, dryrun):
         print(f"to {path}\n")
     else:
         path.write_text(text, encoding='utf-8')
+
+
+def wget(item_to_download, output=None):
+    wget_cmd = ['wget', '-q', '-O', output if output else '-', item_to_download]
+    return chronic(wget_cmd, text=None).stdout
