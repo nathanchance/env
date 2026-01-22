@@ -212,7 +212,7 @@ function cbl_lkt -d "Tests a Linux kernel with llvm-kernel-testing"
     if status is-interactive
         switch $LOCATION
             case aadp
-                set average_duration 6
+                set average_duration 10
             case generic
                 if test (nproc) -ge 80
                     set average_duration 5
