@@ -69,8 +69,7 @@ Architectures: {dpkg_arch}
         Path(apt_sources, 'docker.sources').write_text(docker_sources_txt, encoding='utf-8')
 
     # fish
-    # only x86_64 is supported in Debian_13 right now?
-    fish_deb_ver = 'Debian_12' if version_id == 13 and dpkg_arch != 'amd64' else f"Debian_{version_id}"
+    fish_deb_ver = f"Debian_{version_id}"
     fish_repo_url = 'https://download.opensuse.org/repositories'
     fish_gpg_key = Path(apt_gpg, 'shells_fish.gpg')
     fish_sources_txt = f"""\

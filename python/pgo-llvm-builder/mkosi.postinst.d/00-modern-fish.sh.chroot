@@ -46,13 +46,7 @@ if [ "$RELEASE" = "buster" ]; then
 fi
 
 case "$RELEASE" in
-    "unstable")
-        case "$ARCHITECTURE" in
-            # Debian_13 only has x86_64 packages for now?
-            "x86-64") ver=13 ;;
-            *) ver=12 ;;
-        esac
-        ;;
+    "unstable") ver=13 ;;
     *) echo "$RELEASE" is not supported 2>&1; false ;;
 esac
 fish_gpg_key=/etc/apt/keyrings/shells_fish.gpg
