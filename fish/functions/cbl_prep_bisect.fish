@@ -43,12 +43,21 @@ __in_tree kernel
 or return 128
 
 set lnx_bld (tbf)-testing
+remkdir $lnx_bld
+
+set lnx_bld_log (mktemp -p $lnx_bld --suffix=.log)
 
 kmake \
+    ARCH= \
     (korg_llvm var) \
     O=$lnx_bld \
-    mrproper &| string match -er \'\'
-switch "$pipestatus"
+    &| tee $lnx_bld_log
+set krnl_ret $pipestatus[1]
+
+string match -er \'\' <$lnx_bld_log
+set strm_ret $status
+
+switch "$krnl_ret $strm_ret"
     case \'0 1\'
         return 0
     case \'1 0\'
@@ -70,13 +79,22 @@ or return 125
 
 set lnx_src $CBL_SRC_C/linux
 set lnx_bld (tbf $lnx_src)-testing
+remkdir $lnx_bld
+
+set lnx_bld_log (mktemp -p $lnx_bld --suffix=.log)
 
 kmake \
     -C $lnx_src \
+    ARCH= \
     LLVM=$llvm_bld/final/bin/ \
     O=$lnx_bld \
-    mrproper &| string match -er \'\'
-switch "$pipestatus"
+    &| tee $lnx_bld_log
+set krnl_ret $pipestatus[1]
+
+string match -er \'\' <$lnx_bld_log
+set strm_ret $status
+
+switch "$krnl_ret $strm_ret"
     case \'0 1\'
         return 0
     case \'1 0\'
