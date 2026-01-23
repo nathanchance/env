@@ -5,13 +5,13 @@
 import copy
 import json
 import os
-from pathlib import Path
 import shlex
 import shutil
 import socket
 import subprocess
 import sys
 import time
+from pathlib import Path
 
 
 def call_git(directory, cmd, **kwargs):

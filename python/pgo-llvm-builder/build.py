@@ -1,15 +1,16 @@
 #!/usr/bin/env python3
 
-from argparse import ArgumentParser
 import datetime
-from pathlib import Path
 import platform
 import shutil
 import sys
+from argparse import ArgumentParser
+from pathlib import Path
 
 sys.path.append(str(Path(__file__).resolve().parents[1]))
 # pylint: disable=wrong-import-position
 import lib.utils
+
 # pylint: enable=wrong-import-position
 
 MACH_FOLDER = Path('/var/lib/machines/pgo-llvm-builder')

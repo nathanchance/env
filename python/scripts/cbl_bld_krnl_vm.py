@@ -2,21 +2,21 @@
 # SPDX-License-Identifier: MIT
 # Copyright (C) 2022-2023 Nathan Chancellor
 
-from argparse import ArgumentParser
 import os
-from pathlib import Path
 import platform
 import shutil
 import sys
-
-import requests
+from argparse import ArgumentParser
+from pathlib import Path
 
 import korg_tc
+import requests
 
 sys.path.append(str(Path(__file__).resolve().parents[1]))
 # pylint: disable=wrong-import-position
 import lib.kernel
 import lib.utils
+
 # pylint: enable=wrong-import-position
 
 

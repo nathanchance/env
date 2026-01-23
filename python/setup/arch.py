@@ -2,21 +2,22 @@
 # SPDX-License-Identifier: MIT
 # Copyright (C) 2022-2023 Nathan Chancellor
 
-from argparse import ArgumentParser
 import base64
-from collections import UserDict
 import getpass
 import os
-from pathlib import Path
 import re
 import shutil
 import sys
+from argparse import ArgumentParser
+from collections import UserDict
+from pathlib import Path
 from tempfile import TemporaryDirectory
 
 sys.path.append(str(Path(__file__).resolve().parents[1]))
 # pylint: disable=wrong-import-position
 import lib.setup
 import lib.utils
+
 # pylint: enable=wrong-import-position
 
 EDID_1280_1024 = b'BAAAACAAAAAFAAAAR05VAAIAAcAEAAAAAAAAAAAAAAABAAHABAAAAAEAAAAAAAAAAQEBAQEBMCoAmFEAKkAwcBMAvGMRAAAeAAAA/wBMaW51eCAjMAogICAgAAAA/QA7PT5ACwAKICAgICAgAAAA/ABMaW51eCBTWEdBCiAgAC4='

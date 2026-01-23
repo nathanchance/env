@@ -1,15 +1,16 @@
 #!/usr/bin/env python3
 
+import re
+import sys
 from argparse import ArgumentParser
 from pathlib import Path
-import re
-from subprocess import Popen, PIPE
-import sys
+from subprocess import PIPE, Popen
 
 sys.path.append(str(Path(__file__).resolve().parents[1]))
 # pylint: disable=wrong-import-position
 import lib.kernel
 import lib.utils
+
 # pylint: enable=wrong-import-position
 
 

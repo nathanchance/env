@@ -1,16 +1,17 @@
 #!/usr/bin/env python3
 # ruff: noqa: S108
 
-from argparse import ArgumentParser
-from collections import UserDict
 import os
-from pathlib import Path
 import platform
 import sys
+from argparse import ArgumentParser
+from collections import UserDict
+from pathlib import Path
 
 sys.path.append(str(Path(__file__).resolve().parents[1]))
 # pylint: disable=wrong-import-position
 import lib.utils
+
 # pylint: enable=wrong-import-position
 
 # This should not change after import

@@ -4,16 +4,17 @@
 
 import email
 import os
-from pathlib import Path
 import shutil
-from subprocess import CalledProcessError
 import sys
-from tempfile import TemporaryDirectory
 import time
+from pathlib import Path
+from subprocess import CalledProcessError
+from tempfile import TemporaryDirectory
 
 sys.path.append(str(Path(__file__).resolve().parents[1]))
 # pylint: disable=wrong-import-position
 import lib.utils
+
 # pylint: enable=wrong-import-position
 
 NEXT_TREES = ('fedora', 'linux-next-llvm')

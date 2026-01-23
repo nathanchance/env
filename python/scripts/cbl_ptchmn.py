@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 
-from argparse import ArgumentParser
-from pathlib import Path
 import os
 import sys
+from argparse import ArgumentParser
+from pathlib import Path
 
 sys.path.append(str(Path(__file__).resolve().parents[1]))
 # pylint: disable-next=wrong-import-position

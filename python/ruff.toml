@@ -9,6 +9,7 @@ select = [
     'COM', # flake8-commas
     'E', # pycodestyle
     'F', # pyflakes
+    'I', # isort
     'PIE', # flake8-pie
     'PL', # pylint
     'PTH', # flake8-use-pathlib

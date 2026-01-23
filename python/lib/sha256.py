@@ -3,8 +3,8 @@
 # Copyright (C) 2022-2023 Nathan Chancellor
 
 import hashlib
-from pathlib import Path
 import re
+from pathlib import Path
 
 import requests
 

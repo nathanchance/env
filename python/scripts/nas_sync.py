@@ -2,12 +2,12 @@
 # SPDX-License-Identifier: MIT
 # Copyright (C) 2022-2023 Nathan Chancellor
 
-from argparse import ArgumentParser
 import datetime
 import json
 import os
-from pathlib import Path
 import sys
+from argparse import ArgumentParser
+from pathlib import Path
 
 import requests
 
@@ -15,6 +15,7 @@ sys.path.append(str(Path(__file__).resolve().parents[1]))
 # pylint: disable=wrong-import-position
 import lib.sha256
 import lib.utils
+
 # pylint: enable=wrong-import-position
 
 

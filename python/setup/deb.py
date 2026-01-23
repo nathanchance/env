@@ -3,15 +3,16 @@
 # Copyright (C) 2022-2023 Nathan Chancellor
 
 import os
-from pathlib import Path
 import shutil
 import sys
 import tempfile
+from pathlib import Path
 
 sys.path.append(str(Path(__file__).resolve().parents[1]))
 # pylint: disable=wrong-import-position
 import lib.setup
 import lib.utils
+
 # pylint: enable=wrong-import-position
 
 

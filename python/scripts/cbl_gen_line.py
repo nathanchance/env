@@ -1,15 +1,16 @@
 #!/usr/bin/env python3
 
-from argparse import ArgumentParser
 import json
 import os
-from pathlib import Path
 import sys
+from argparse import ArgumentParser
+from pathlib import Path
 
 sys.path.append(str(Path(__file__).resolve().parents[1]))
 # pylint: disable=wrong-import-position
 import lib.kernel
 import lib.utils
+
 # pylint: enable=wrong-import-position
 
 

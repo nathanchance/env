@@ -2,13 +2,13 @@
 # SPDX-License-Identifier: MIT
 # Copyright (C) 2023 Nathan Chancellor
 
-from argparse import ArgumentParser
 import contextlib
-from pathlib import Path
 import shutil
 import signal
 import sys
 import time
+from argparse import ArgumentParser
+from pathlib import Path
 
 # we might be running '-h', just crash and burn later
 with contextlib.suppress(ImportError):

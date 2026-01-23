@@ -1,17 +1,18 @@
 #!/usr/bin/env python3
 
-from argparse import ArgumentParser
 import os
-from pathlib import Path
 import shutil
-from subprocess import DEVNULL
 import sys
+from argparse import ArgumentParser
+from pathlib import Path
+from subprocess import DEVNULL
 
 import korg_tc
 
 sys.path.append(str(Path(__file__).resolve().parents[1]))
 # pylint: disable=wrong-import-position
 import lib.kernel
+
 # pylint: enable=wrong-import-position
 
 CONFIG_URL = 'https://gitlab.archlinux.org/archlinux/packaging/packages/linux/-/raw/main/config'

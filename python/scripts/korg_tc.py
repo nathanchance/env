@@ -2,13 +2,13 @@
 # SPDX-License-Identifier: MIT
 # Copyright (C) 2024 Nathan Chancellor
 
-from argparse import ArgumentParser, BooleanOptionalAction
 import os
-from pathlib import Path
 import platform
 import shlex
 import shutil
 import sys
+from argparse import ArgumentParser, BooleanOptionalAction
+from pathlib import Path
 
 import requests
 
@@ -16,6 +16,7 @@ sys.path.append(str(Path(__file__).resolve().parents[1]))
 # pylint: disable=wrong-import-position
 import lib.sha256
 import lib.utils
+
 # pylint: enable=wrong-import-position
 
 LATEST_GCC_VERSIONS = {

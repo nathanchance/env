@@ -8,21 +8,22 @@
 # https://mirrors.edge.kernel.org/pub/linux/kernel/people/will/docs/qemu/qemu-arm64-howto.html
 # https://wiki.qemu.org/Documentation/Networking
 
-from argparse import ArgumentParser
 import grp
 import math
 import os
-from pathlib import Path
 import platform
 import shutil
 import subprocess
 import sys
-from tempfile import TemporaryDirectory
 import time
+from argparse import ArgumentParser
+from pathlib import Path
+from tempfile import TemporaryDirectory
 
 sys.path.append(str(Path(__file__).resolve().parents[1]))
 # pylint: disable=wrong-import-position
 import lib.utils
+
 # pylint: enable=wrong-import-position
 
 # Static constants
