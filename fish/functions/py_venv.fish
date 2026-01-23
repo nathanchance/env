@@ -130,11 +130,11 @@ function py_venv -d "Manage Python virtual environment"
                 rm -fr $venv
 
             case x exit
-                if not __in_venv
-                    __print_error "Not in a virtual environment?"
-                    return 1
+                if __in_venv
+                    deactivate
+                else
+                    __print_warning "Not in a virtual environment?"
                 end
-                deactivate
         end
     end
 end
