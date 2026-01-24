@@ -106,9 +106,6 @@ def prepare_source(base_name, base_ref='origin/master'):
     if base_name == 'fedora':
         patches.append('https://lore.kernel.org/all/20260114-panel-ilitek-ili9882t-fix-override-init-v1-1-1d69a2b096df@kernel.org/')  # drm/panel: ilitek-ili9882t: Remove duplicate initializers in tianma_il79900a_dsc
 
-        # https://lore.kernel.org/kvmarm/86zf67b5oa.wl-maz@kernel.org/T/#mec328f99ad66bc575bc0200bc7ce5840d181e629
-        patches.append('https://lore.kernel.org/all/20260122085153.535538-1-maz@kernel.org/')  # KVM: arm64: Always populate FGT masks at boot time
-
         # https://lore.kernel.org/202601221843.kS9IMZ0E-lkp@intel.com/
         commits.append('940e24f6858861ee452548ef43b6117b9f9b3325')   # fixup! ASoC: cs35l56: Add KUnit testing of cs35l56_set_fw_suffix()
 
