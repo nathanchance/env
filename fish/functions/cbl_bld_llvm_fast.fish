@@ -29,10 +29,13 @@ function cbl_bld_llvm_fast -d "Quickly build a version of LLVM" -w build-llvm.py
         set tc_bld $CBL_GIT/tc-build
     end
 
+    if not contains -- --pgo $bld_llvm_args
+        set -a bld_llvm_args --build-stage1-only
+    end
+
     $tc_bld/build-llvm.py \
         --assertions \
         --build-folder $bld_folder \
-        --build-stage1-only \
         --build-targets distribution \
         --llvm-folder $llvm_folder \
         --projects clang lld \
