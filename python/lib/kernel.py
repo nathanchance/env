@@ -106,9 +106,6 @@ def prepare_source(base_name, base_ref='origin/master'):
     if base_name == 'fedora':
         patches.append('https://lore.kernel.org/all/20260114-panel-ilitek-ili9882t-fix-override-init-v1-1-1d69a2b096df@kernel.org/')  # drm/panel: ilitek-ili9882t: Remove duplicate initializers in tianma_il79900a_dsc
 
-        # https://lore.kernel.org/202601221843.kS9IMZ0E-lkp@intel.com/
-        commits.append('940e24f6858861ee452548ef43b6117b9f9b3325')   # fixup! ASoC: cs35l56: Add KUnit testing of cs35l56_set_fw_suffix()
-
     # Distributed ThinLTO support ahead of acceptance in kbuild tree
     if base_name in NEXT_TREES:
         patches.append('https://lore.kernel.org/all/20251028182822.3210436-2-xur@google.com/')  # kbuild: move vmlinux.a build rule to scripts/Makefile.vmlinux_a
