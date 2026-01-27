@@ -83,6 +83,7 @@ def install_packages():
         'jq',
         'libusb',
         'mosh',
+        'python',
         'ripgrep',
         'rustup-init',
         'zoxide',
