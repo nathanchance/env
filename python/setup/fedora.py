@@ -181,6 +181,12 @@ def setup_doas(username):
             conf_txt += ('\n'
                          '# passwordless doas for my user\n'
                          f"permit nopass {username}\n")
+        else:
+            conf_txt += (
+                '\n'
+                '# Allow me to update packages without a password (arguments are matched exactly)\n'
+                f"permit nopass {username} as root cmd dnf args update\n"
+                f"permit nopass {username} as root cmd dnf args update -y\n")
 
         doas_conf.write_text(conf_txt, encoding='utf-8')
 
