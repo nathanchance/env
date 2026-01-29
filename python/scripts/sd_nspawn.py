@@ -305,7 +305,8 @@ class NspawnConfig(UserDict):
                     'path':
                     Path('/etc/doas.conf'),
                     'cfg':
-                    ('# Allow me to run commands in nspawn machines without a password via a wrapper\n'
+                    ('\n'
+                     '# Allow me to run commands in nspawn machines without a password via a wrapper\n'
                      f"permit nopass {USER} as root cmd {SYSTEMD_RUN_M}\n"),
                     'rw':
                     '0600',
