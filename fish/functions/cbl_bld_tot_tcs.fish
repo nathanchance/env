@@ -17,12 +17,12 @@ function cbl_bld_tot_tcs -d "Build LLVM and binutils from source for kernel deve
     switch $LOCATION
         case aadp hetzner workstation
             set bolt true
-            set pgo kernel-defconfig
+            set pgo kernel-defconfig-slim
             set validate_uprev kernel
 
         case framework-desktop honeycomb test-desktop-amd-8745HS test-desktop-intel-11700
             set bld_bntls false
-            set pgo kernel-defconfig
+            set pgo kernel-defconfig-slim
             set targets AArch64 ARM X86
             if test $LOCATION = honeycomb
                 set validate_targets "    'defconfig': ['AArch64', 'ARM', 'X86'],"
@@ -40,7 +40,7 @@ function cbl_bld_tot_tcs -d "Build LLVM and binutils from source for kernel deve
 
         case generic
             set bolt true
-            set pgo kernel-defconfig
+            set pgo kernel-defconfig-slim
             set validate_uprev llvm
 
         case vm

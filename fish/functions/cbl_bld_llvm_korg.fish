@@ -13,6 +13,8 @@ function cbl_bld_llvm_korg -d "Build (and optionally test) LLVM for kernel.org"
         switch $arg
             case -b --build-env
                 set build_env y
+            case --no-slim-pgo
+                set full_pgo y
             case -r --reset
                 set reset y
             case -t --test-linux
@@ -28,6 +30,10 @@ function cbl_bld_llvm_korg -d "Build (and optionally test) LLVM for kernel.org"
     end
     if test (count $argv) -eq 0
         read -P 'Test Linux afterwards (y/n): ' test_linux
+    end
+
+    if test "$full_pgo" != y; and not contains -- --slim-pgo $build_py_args
+        set -a build_py_args --slim-pgo
     end
 
     if test "$test_linux" = y
