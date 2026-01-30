@@ -3,6 +3,7 @@
 # Copyright (C) 2022-2023 Nathan Chancellor
 
 import os
+import shutil
 import sys
 from argparse import ArgumentParser
 from pathlib import Path
@@ -23,6 +24,12 @@ def parse_arguments():
                         help='Mirrors the equivalent make argument',
                         type=Path)
     parser.add_argument('--no-ccache', action='store_true', help='Disable the use of ccache')
+    parser.add_argument(
+        '--omit-hostldflags',
+        action='store_true',
+        help=
+        'By default, kmake will manipulate HOSTLDFLAGS in certain cases. This option avoids that logic.',
+    )
     parser.add_argument(
         '--omit-o-arg',
         action='store_true',
@@ -64,6 +71,29 @@ if __name__ == '__main__':
         # Basically an ordered set
         elif arg not in targets:
             targets.append(arg)
+
+    if not args.omit_hostldflags:
+        hostldflags = hostldflags_var.split(' ') if (hostldflags_var := variables.get(
+            'HOSTLDFLAGS', '')) else []
+        if (llvm := variables.get('LLVM', '')):
+            # Use ld.lld as the host linker by default with LLVM=
+            if llvm == '1':
+                LLD = 'ld.lld'
+            elif llvm.startswith('-'):
+                LLD = f"ld.lld{llvm}"
+            elif llvm.endswith('/'):
+                LLD = f"{llvm}ld.lld"
+            else:
+                LLD = None  # invalid LLVM value, we'll fail later
+            specified_ld = '-fuse-ld=' in hostldflags_var or '--ld-path=' in hostldflags_var
+            if LLD and not specified_ld and (lld_path := shutil.which(LLD)):
+                hostldflags.append(f"--ld-path={lld_path}")
+        # Avoid .sframe mismatch error
+        # https://lore.kernel.org/59805735-5e41-44b7-a250-5bedcb80a75e@oracle.com/
+        elif '--discard-sframe' in lib.utils.chronic(['ld', '--help']).stdout:
+            hostldflags.append('-Wl,--discard-sframe')
+        if hostldflags:
+            variables['HOSTLDFLAGS'] = ' '.join(hostldflags)
 
     if 'O' not in variables and not args.omit_o_arg:
         # tbf implemented in Python
