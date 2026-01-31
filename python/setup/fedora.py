@@ -197,12 +197,14 @@ def setup_doas(username):
         with doas_pam.open('a', encoding='utf-8') as file:
             file.write(pam_umask)
 
-    # Remove sudo but set up a symlink for compatibility
-    Path('/etc/dnf/protected.d/sudo.conf').unlink(missing_ok=True)
-    # https://src.fedoraproject.org/rpms/sudo/c/770b8e2647c61512b8508c61bb3a55318f31d9b1
-    Path('/usr/share/dnf5/libdnf.conf.d/protect-sudo.conf').unlink(missing_ok=True)
-    lib.setup.remove_if_installed('sudo')
-    lib.setup.setup_sudo_symlink()
+    # Remove sudo but set up a symlink for compatibility. Only do this if kdesu
+    # is not installed, as it has a dependency on sudo.
+    if not lib.setup.is_installed('kf6-kdesu'):
+        Path('/etc/dnf/protected.d/sudo.conf').unlink(missing_ok=True)
+        # https://src.fedoraproject.org/rpms/sudo/c/770b8e2647c61512b8508c61bb3a55318f31d9b1
+        Path('/usr/share/dnf5/libdnf.conf.d/protect-sudo.conf').unlink(missing_ok=True)
+        lib.setup.remove_if_installed('sudo')
+        lib.setup.setup_sudo_symlink()
 
 
 def setup_kernel_args():
