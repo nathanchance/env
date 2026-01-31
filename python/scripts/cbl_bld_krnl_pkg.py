@@ -23,7 +23,7 @@ def recreate_folder(folder):
         try:
             shutil.rmtree(folder) if folder.is_dir() else folder.unlink()
         except PermissionError:
-            lib.utils.run_as_root(['rm', '--recursive', folder])
+            lib.utils.run0(['rm', '--recursive', folder])
     folder.mkdir(parents=True)
 
 

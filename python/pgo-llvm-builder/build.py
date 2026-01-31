@@ -87,7 +87,7 @@ if __name__ == '__main__':
     # /var/lib/machines can only be read by the root user but we need it for later
     # anyways.
     lib.utils.tg_msg(f"sudo authorization needed to check for {MACH_FOLDER}")
-    lib.utils.run_as_root(['test', '-e', MACH_FOLDER])
+    lib.utils.run0(['test', '-e', MACH_FOLDER])
 
     build_folder = Path(args.build_folder).resolve() if args.build_folder else BUILD
 
@@ -291,7 +291,7 @@ if __name__ == '__main__':
             build_cmd += ['--bolt', '--lto', 'thin']
 
         lib.utils.tg_msg(f"sudo authorization needed to build LLVM {version}")
-        lib.utils.run_as_root(build_cmd)
+        lib.utils.run0(build_cmd)
 
         llvm_tarball = Path(llvm_install.parent, f"{llvm_install.name}.tar")
         lib.utils.run([

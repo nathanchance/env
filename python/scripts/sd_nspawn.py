@@ -265,7 +265,7 @@ class NspawnConfig(UserDict):
 
     def install_files(self):
         lib.utils.print_green('Requesting sudo permissions for file creation...')
-        lib.utils.run_as_root('true')
+        lib.utils.run0('true')
 
         # Allow containers started as services to access /dev/kvm to run
         # accelerated VMs, which allows avoiding installing QEMU in the host
@@ -275,8 +275,8 @@ class NspawnConfig(UserDict):
             kvm_conf_txt = ('[Service]\n'
                             'DeviceAllow=/dev/kvm rw\n')
             if not kvm_conf.parent.exists():
-                lib.utils.run_as_root(['mkdir', '-p', kvm_conf.parent])
-            lib.utils.run_as_root(['tee', kvm_conf], input=kvm_conf_txt)
+                lib.utils.run0(['mkdir', '-p', kvm_conf.parent])
+            lib.utils.run0(['tee', kvm_conf], input=kvm_conf_txt)
 
         # Allow my user to access 'machinectl shell' without authentication
         # rules.d can only be read by root so we need to use sudo to test
@@ -288,9 +288,9 @@ class NspawnConfig(UserDict):
                                '        return polkit.Result.YES;\n'
                                '    }\n'
                                '});\n')
-            lib.utils.run_as_root(['tee', polkit_rule], input=polkit_rule_txt)
-            lib.utils.run_as_root(['chmod', '640', polkit_rule])
-            lib.utils.run_as_root(['chown', 'root:polkitd', polkit_rule])
+            lib.utils.run0(['tee', polkit_rule], input=polkit_rule_txt)
+            lib.utils.run0(['chmod', '640', polkit_rule])
+            lib.utils.run0(['chown', 'root:polkitd', polkit_rule])
 
         # Set up passwordless systemd-run for machines similar to 'machinectl
         # shell' above. While this may be considered a security risk, I think
@@ -326,28 +326,28 @@ class NspawnConfig(UserDict):
 
                 conf_txt = lib.utils.chronic(['sudo', 'cat', root_conf['path']]).stdout
                 if str(SYSTEMD_RUN_M) not in conf_txt:
-                    lib.utils.run_as_root(['chmod', root_conf['rw'], root_conf['path']])
-                    lib.utils.run_as_root(['tee', '-a', root_conf['path']], input=root_conf['cfg'])
-                    lib.utils.run_as_root(['chmod', root_conf['ro'], root_conf['path']])
+                    lib.utils.run0(['chmod', root_conf['rw'], root_conf['path']])
+                    lib.utils.run0(['tee', '-a', root_conf['path']], input=root_conf['cfg'])
+                    lib.utils.run0(['chmod', root_conf['ro'], root_conf['path']])
 
                 break
             else:
                 raise RuntimeError('Cannot find a privilege escalation configuration?')
 
             systemd_run_m_txt = '#!/bin/sh\n\nexec systemd-run -M "$@"\n'
-            lib.utils.run_as_root(['tee', SYSTEMD_RUN_M], input=systemd_run_m_txt)
-            lib.utils.run_as_root(['chmod', '0755', SYSTEMD_RUN_M])
+            lib.utils.run0(['tee', SYSTEMD_RUN_M], input=systemd_run_m_txt)
+            lib.utils.run0(['chmod', '0755', SYSTEMD_RUN_M])
 
         # Write configuration file. We allow the user to interactively remove
         # an old one if so desired.
         if (nspawn_conf := Path('/etc/systemd/nspawn', f"{self.name}.nspawn")).exists():
             answer = input(f"\033[01;33m{nspawn_conf} already exists, remove it? [y/N]\033[0m ")
             if answer.lower() in ('y', 'yes'):
-                lib.utils.run_as_root(['rm', nspawn_conf])
+                lib.utils.run0(['rm', nspawn_conf])
         if not nspawn_conf.exists():
             if not nspawn_conf.parent.exists():
-                lib.utils.run_as_root(['mkdir', '-p', nspawn_conf.parent])
-            lib.utils.run_as_root(['tee', nspawn_conf], input=self._gen_cfg_str())
+                lib.utils.run0(['mkdir', '-p', nspawn_conf.parent])
+            lib.utils.run0(['tee', nspawn_conf], input=self._gen_cfg_str())
 
         # Print a warning if the machine does not already exist
         # /var/lib/machines can only be read by root so we need to use sudo to test
@@ -385,15 +385,15 @@ class NspawnConfig(UserDict):
         # files.
         if mode in ('machine', 'all') and lib.utils.run_check_rc_zero(
             ['systemctl', 'is-enabled', f"systemd-nspawn@{self.name}"]):
-            lib.utils.run_as_root(['machinectl', 'disable', '--now', self.name])
+            lib.utils.run0(['machinectl', 'disable', '--now', self.name])
 
-        lib.utils.run_as_root(['rm', '-r', *items_to_remove])
+        lib.utils.run0(['rm', '-r', *items_to_remove])
 
     def run_mach_cmd(self, cmd):
-        lib.utils.run_as_root(self._gen_run_cmd(cmd))
+        lib.utils.run0(self._gen_run_cmd(cmd))
 
     def run_eph_cmd(self):
-        lib.utils.run_as_root(self._gen_eph_cmd())
+        lib.utils.run0(self._gen_eph_cmd())
 
     def run_upd_cmd(self):
         # First, we need to make sure this machine is not running via
@@ -403,7 +403,7 @@ class NspawnConfig(UserDict):
         if self.is_running():
             raise RuntimeError(
                 'Machine is running when trying to update, interact via "machinectl shell"')
-        lib.utils.run_as_root(self._gen_upd_cmd())
+        lib.utils.run0(self._gen_upd_cmd())
 
 
 def parse_arguments():

@@ -137,11 +137,11 @@ def add_user_to_group_if_exists(groupname, username):
 
 
 def apk(apk_arguments):
-    lib.utils.run_as_root(['apk', *apk_arguments])
+    lib.utils.run0(['apk', *apk_arguments])
 
 
 def apt(apt_arguments):
-    lib.utils.run_as_root(['apt', *apt_arguments])
+    lib.utils.run0(['apt', *apt_arguments])
 
 
 def check_ip(ip_to_check):
@@ -211,7 +211,7 @@ def configure_trusted_networking():
 
 
 def dnf(dnf_arguments):
-    lib.utils.run_as_root(['dnf', *dnf_arguments])
+    lib.utils.run0(['dnf', *dnf_arguments])
 
 
 def enable_tailscale():
@@ -349,7 +349,7 @@ def is_systemd_init():
 
 
 def pacman(args):
-    lib.utils.run_as_root(['pacman', *args])
+    lib.utils.run0(['pacman', *args])
 
 
 def partition_drive(device, mountpoint, username=None, fstype=None):
@@ -696,4 +696,4 @@ def umount_gracefully(folder):
 
 
 def zypper(zypper_args):
-    lib.utils.run_as_root(['zypper', *zypper_args])
+    lib.utils.run0(['zypper', *zypper_args])

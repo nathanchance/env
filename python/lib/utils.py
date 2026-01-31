@@ -197,7 +197,7 @@ def run(*args, **kwargs):
         raise err
 
 
-def run_as_root(full_cmd, **kwargs):
+def run0(full_cmd, **kwargs):
     cmd_copy = [full_cmd] if isinstance(full_cmd, (str, os.PathLike)) else full_cmd.copy()
 
     if os.geteuid() != 0:

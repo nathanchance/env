@@ -31,7 +31,7 @@ def disable_and_rm_timers(timers):
     disable_cmd = ['disable', '--now'] + [item.name for item in timers]
     systemctl_host_mach(disable_cmd)
 
-    lib.utils.run_as_root(rm_cmd := ['/usr/bin/rm', *timers])
+    lib.utils.run0(rm_cmd := ['/usr/bin/rm', *timers])
     run_mach(rm_cmd)
 
 
@@ -80,7 +80,7 @@ def run_mach(cmd, **kwargs):
         '--wait',
         *cmd,
     ]
-    lib.utils.run_as_root(sd_run_cmd, **kwargs)
+    lib.utils.run0(sd_run_cmd, **kwargs)
 
 
 def schedule_tz_change(date_str, timezone):
@@ -116,7 +116,7 @@ WantedBy=timers.target
 
 def systemctl_host_mach(cmd, **kwargs):
     systemctl_cmd = ['/usr/bin/systemctl', *cmd]
-    lib.utils.run_as_root(systemctl_cmd, **kwargs)
+    lib.utils.run0(systemctl_cmd, **kwargs)
     run_mach(systemctl_cmd, **kwargs)
 
 
