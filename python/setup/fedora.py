@@ -2,6 +2,7 @@
 # SPDX-License-Identifier: MIT
 # Copyright (C) 2022-2023 Nathan Chancellor
 
+import re
 import shutil
 import sys
 from pathlib import Path
@@ -15,6 +16,12 @@ import lib.utils
 
 MIN_FEDORA_VERSION = 35
 MAX_FEDORA_VERSION = 43
+
+machine_is_apple_silicon = False
+cpuinfo = Path('/proc/cpuinfo').read_text(encoding='utf-8')
+if match := re.search(r"implementer\s+:\s+(\w+)", cpuinfo):
+    # https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/tree/arch/arm64/include/asm/cputype.h?h=v6.17-rc4#n62
+    machine_is_apple_silicon = match.groups()[0] == '0x61'
 
 
 def dnf_add_repo(repo_url):
@@ -38,7 +45,7 @@ def get_fedora_version():
 
 
 def machine_is_trusted():
-    return lib.setup.get_hostname() in ('aadp', 'honeycomb')
+    return lib.setup.get_hostname() in ('aadp', 'honeycomb', 'mac-studio-m1-max')
 
 
 def prechecks():
@@ -151,7 +158,11 @@ def install_packages():
         packages.append('podman')
 
     if machine_is_trusted():
-        packages += ['@virtualization', 'tailscale']
+        packages.append('tailscale')
+        # libvirt is not supported on Apple Silicon right now:
+        # https://github.com/AsahiLinux/docs/pull/206#issuecomment-3274648383
+        if not machine_is_apple_silicon:
+            packages.append('@virtualization')
 
     # Needed to occasionally upgrade the MMC firmware
     if lib.setup.get_hostname() == 'aadp':
@@ -264,6 +275,11 @@ if __name__ == '__main__':
     setup_kernel_args()
     setup_libvirt(user)
     setup_mosh()
+    # My Mac Studio is run headlessly but uses a desktop version of Asahi
+    # Fedora Remix for easier management. Disable suspend so it is always
+    # accessible.
+    if machine_is_apple_silicon:
+        lib.setup.disable_suspend()
     lib.setup.configure_trusted_networking()
     lib.setup.enable_tailscale()
     lib.setup.chsh_fish(user)

@@ -184,6 +184,7 @@ def configure_trusted_networking():
         'chromebox3': '10.0.1.14',
         'framework-amd-ryzen-maxplus-395': '10.0.1.23',
         'honeycomb': '10.0.1.17',
+        'mac-studio-m1-max': '10.0.1.33',
         'msi-intel-core-10210U': '10.0.1.20',
         # 'thelio-3990X': '',
     }
