@@ -6,9 +6,7 @@ if test "$ARCHITECTURE" != arm64
     return 0
 end
 
-set edk2_ver (curl -fLSs 'https://salsa.debian.org/qemu-team/edk2/-/raw/debian/latest/debian/changelog?ref_type=heads' | string match -gr '^edk2 \((.*)\) unstable;' | head -1)
-or return
-set edk2_deb qemu-efi-arm_"$edk2_ver"_all.deb
+set edk2_deb qemu-efi-arm_2025.02-9_all.deb
 
 set workdir (mktemp -d)
 and curl -fLSso $workdir/$edk2_deb http://http.us.debian.org/debian/pool/main/e/edk2/$edk2_deb
