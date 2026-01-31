@@ -201,11 +201,11 @@ def run_as_root(full_cmd, **kwargs):
     cmd_copy = [full_cmd] if isinstance(full_cmd, (str, os.PathLike)) else full_cmd.copy()
 
     if os.geteuid() != 0:
-        cmd_copy.insert(0, 'sudo')
+        cmd_copy.insert(0, 'doas' if shutil.which('doas') else 'sudo')
 
-    # If we have to escalate via 'sudo', print the command so it can be audited
-    # if necessary.
-    run(cmd_copy, show_cmd_location=cmd_copy[0] == 'sudo', **kwargs)
+    # If we have to escalate via 'doas' or 'sudo', print the command so it can
+    # be audited if necessary.
+    run(cmd_copy, show_cmd_location=cmd_copy[0] in ('doas', 'sudo'), **kwargs)
 
 
 def run_check_rc_zero(*args, **kwargs):
