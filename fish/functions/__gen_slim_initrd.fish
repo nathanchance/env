@@ -25,13 +25,13 @@ function __gen_slim_initrd -d "Generate a slim initial ramdisk within a virtual 
 
     if not test -f $dst
         if command -q dracut
-            sudo fish -c "dracut --no-kernel $dst && chown $USER:$USER $dst"
+            run0 fish -c "dracut --no-kernel $dst && chown $USER:$USER $dst"
         else if command -q mkinitcpio
-            sudo fish -c "mkinitcpio -g $dst -k none && chown $USER:$USER $dst"
+            run0 fish -c "mkinitcpio -g $dst -k none && chown $USER:$USER $dst"
         else if set -q src
             pushd (mktemp -d)
             begin
-                set comp_prog (sudo python3 -c "from pathlib import Path
+                set comp_prog (run0 python3 -c "from pathlib import Path
 initrd_bytes = Path('$src').read_bytes()
 if initrd_bytes.startswith(b'\x28\xb5\x2f\xfd'):
     print('zstd')
@@ -39,7 +39,7 @@ elif initrd_bytes.startswith(b'\x1f\x8b'):
     print('gzip')
 else:
     print('initrd_bytes_unhandled')")
-                sudo $comp_prog -c -d $src | cpio -i
+                run0 $comp_prog -c -d $src | cpio -i
                 and rm -fr etc/modprobe.d lib/modules usr/lib/modprobe.d usr/lib/modules
                 and find . | cpio -o -H newc | gzip -c >$dst
                 and rm -fr $PWD

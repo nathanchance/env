@@ -156,9 +156,9 @@ function upd -d "Runs the update command for the current distro or downloads/upd
             set completions $__fish_sysconf_dir/completions
             set man /usr/local/man
 
-            set install sudo install
+            set install run0 install
 
-            sudo true
+            request_root "Installing software within container"
             or return
         else
             set binary $BIN_FOLDER/$target

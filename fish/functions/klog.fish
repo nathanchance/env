@@ -15,18 +15,18 @@ function klog -d "View kernel log with bat" -w dmesg
     end
 
     set dmesg_cmd \
-        sudo dmesg \
+        run0 dmesg \
         --human \
         --color=always \
         $dmesg_args
 
+    # Ask for password first to avoid messing up bat
+    request_root "dmesg access"
+    or return
+
     if set -q provides_pager
         $dmesg_cmd
     else
-        # Ask for password first to avoid messing up bat
-        sudo true
-        or return
-
         $dmesg_cmd &| bat --style plain
     end
 end

@@ -31,7 +31,7 @@ function setup_systemd_files -d "Set up various systemd files"
                 end >$env_file
 
             case nas
-                sudo fish -c "cp -v $systemd_configs/mnt-nas.{auto,}mount /etc/systemd/system
+                run0 fish -c "cp -v $systemd_configs/mnt-nas.{auto,}mount /etc/systemd/system
 and chmod 644 /etc/systemd/system/mnt-nas.{auto,}mount
 and systemctl enable --now mnt-nas.automount"
 

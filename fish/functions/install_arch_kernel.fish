@@ -50,10 +50,10 @@ function install_arch_kernel -d "Install kernel for Arch Linux and reboot fully 
         end
     end
 
-    sudo true
+    request_root "Updating kernel"
     or return
 
-    sudo pacman -U --noconfirm $krnl_pkg
+    run0 pacman -U --noconfirm $krnl_pkg
     or return
 
     if set -q sd_boot_arg

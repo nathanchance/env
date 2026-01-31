@@ -37,8 +37,8 @@ function cbl_upd_krnl -d "Update machine's kernel"
                 end
             end
 
-            # Cache sudo/doas permissions
-            sudo true; or return
+            request_root "Updating kernel"
+            or return
 
             # Download .rpm package
             set -q krnl_bld; or set krnl_bld (tbf fedora | string replace $TMP_BUILD_FOLDER $remote_tmp_build_folder)
@@ -59,11 +59,11 @@ function cbl_upd_krnl -d "Update machine's kernel"
                 set krnl_rpm /tmp/$base_krnl_rpm
             end
 
-            sudo dnf install -y $krnl_rpm
+            run0 dnf install -y $krnl_rpm
             or return
 
             if test "$reboot" = true
-                sudo reboot
+                run0 reboot
             end
 
         case chromebox framework-desktop test-desktop-amd-8745HS test-desktop-intel-{11700,n100} test-laptop-intel vm-x86_64
@@ -84,9 +84,9 @@ function cbl_upd_krnl -d "Update machine's kernel"
                 return 1
             end
 
-            # Cache sudo/doas permissions
             if test "$reboot" = true
-                sudo true; or return
+                request_root "Rebooting machine after kernel install"
+                or return
             end
 
             # Download kernel

@@ -25,7 +25,7 @@ function sd_boot_kernel -d "Boot a kernel via full reboot or kexec using systemd
         return 1
     end
 
-    sudo true
+    request_root "running 'systemctl $reboot'"
     or return
 
     switch $reboot
@@ -35,7 +35,7 @@ function sd_boot_kernel -d "Boot a kernel via full reboot or kexec using systemd
                 return 1
             end
 
-            sudo kexec \
+            run0 kexec \
                 --load \
                 /boot/vmlinuz-$krnl \
                 --initrd=/boot/initramfs-$krnl.img \
@@ -63,5 +63,5 @@ function sd_boot_kernel -d "Boot a kernel via full reboot or kexec using systemd
             set -a systemctl_args --boot-loader-entry=$conf
     end
 
-    sudo systemctl $reboot $systemctl_args
+    run0 systemctl $reboot $systemctl_args
 end

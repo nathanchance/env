@@ -61,7 +61,7 @@ function mkosi_bld -d "Build a distribution using mkosi"
             set cache_dir dnf
     end
 
-    sudo (command -v mkosi) \
+    run0 (command -v mkosi) \
         --build-sources (string join , $build_sources) \
         --directory $directory \
         --force \
@@ -72,11 +72,11 @@ function mkosi_bld -d "Build a distribution using mkosi"
     # selinux contexts may get messed up, fix them if necessary
     if test -e /sys/fs/selinux; and test (cat /sys/fs/selinux/enforce) = 1
         set machine_dir /var/lib/machines/(string match -gr '^ImageId=(.*)' <$mkosi_conf)
-        __tg_msg "sudo authorization needed to check SELinux context of $machine_dir"
-        set context (sudo stat $machine_dir | string match -gr '^Context: (.*)$')
+        __tg_msg "root authorization needed to check SELinux context of $machine_dir"
+        set context (run0 stat $machine_dir | string match -gr '^Context: (.*)$')
         if test "$context" != "system_u:object_r:unlabeled_t:s0"; and test "$context" != "system_u:object_r:systemd_machined_var_lib_t:s0"
             __print_warning "$machine_dir context is unexpected ('$context'), running restorcecon..."
-            sudo restorecon -R $machine_dir
+            run0 restorecon -R $machine_dir
         end
     end
 end

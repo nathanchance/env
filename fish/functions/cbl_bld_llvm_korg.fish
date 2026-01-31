@@ -47,13 +47,12 @@ function cbl_bld_llvm_korg -d "Build (and optionally test) LLVM for kernel.org"
     end
 
     if test "$build_env" = y
-        echo 'Requesting sudo for mkosi...'
-        sudo true
+        request_root mkosi
         or return
 
         set mach_dir /var/lib/machines/pgo-llvm-builder
-        if sudo test -e $mach_dir
-            sudo rm -r $mach_dir
+        if run0 test -e $mach_dir
+            run0 rm -r $mach_dir
             or return
         end
 

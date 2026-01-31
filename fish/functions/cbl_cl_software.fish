@@ -24,7 +24,7 @@ function cbl_cl_software -d "Clean up old versions of managed software"
         set folders_to_remove (path filter -d $folder/* | path basename | path sort | command fzf -m --preview="$folder/{}/bin/$binary --version")
         if test -n "$folders_to_remove"
             set rm_cmd \
-                sudo rm -fr $folder/$folders_to_remove
+                run0 rm -fr $folder/$folders_to_remove
             print_cmd $rm_cmd
             $rm_cmd
         end

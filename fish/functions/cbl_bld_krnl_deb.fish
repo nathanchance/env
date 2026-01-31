@@ -42,6 +42,6 @@ function cbl_bld_krnl_deb -d "Build a .deb kernel package"
         olddefconfig bindeb-pkg; or return
 
     echo Run
-    printf '\n\t$ sudo fish -c "dpkg -i %s; and reboot"\n\n' (realpath -- (tbf)/linux-image-*.deb | string replace $TMP_BUILD_FOLDER \$TMP_BUILD_FOLDER)
+    printf '\n\t$ run0 fish -c "dpkg -i %s; and reboot"\n\n' (realpath -- (tbf)/linux-image-*.deb | string replace $TMP_BUILD_FOLDER \$TMP_BUILD_FOLDER)
     echo "to install and use new kernel."
 end
