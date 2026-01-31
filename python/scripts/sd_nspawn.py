@@ -264,8 +264,7 @@ class NspawnConfig(UserDict):
         ]
 
     def install_files(self):
-        lib.utils.print_green('Requesting sudo permissions for file creation...')
-        lib.utils.run0('true')
+        lib.utils.request_root('file creation')
 
         # Allow containers started as services to access /dev/kvm to run
         # accelerated VMs, which allows avoiding installing QEMU in the host

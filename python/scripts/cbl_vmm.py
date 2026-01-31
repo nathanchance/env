@@ -244,8 +244,7 @@ class VirtualMachine:
 
         # Get access to root privileges permission before opening virtiofsd in
         # the background
-        print('Requesting root privileges to run virtiofsd...')
-        lib.utils.run0('true')
+        lib.utils.request_root('run virtiofsd')
 
         # Transiently create virtiofsd socket, as root might not have
         # permission to write to $VM_FOLDER. We manually manage this instead of

@@ -172,6 +172,11 @@ def print_red(msg):
     print_color('\033[01;31m', msg)
 
 
+def request_root(msg):
+    print_green(f"Requesting root access for {msg}\n")
+    run0('true')
+
+
 def run(*args, **kwargs):
     kwargs.setdefault('check', True)
 
