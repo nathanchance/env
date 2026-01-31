@@ -129,23 +129,6 @@ def adjust_esp_mountpoint(fstab, dryrun=False):
     lib.utils.print_or_run_cmd(['mount', '--mkdir', root_esp], dryrun)
 
 
-def disable_suspend():
-    # If machine has a battery, the power profile should be customized manually
-    if len(list(Path('/sys/class/power_supply').glob('BAT*'))) > 0:
-        return
-
-    # https://wiki.archlinux.org/title/Power_management/Suspend_and_hibernate#Disable_sleep_completely
-    if not (sleep_drop_in := Path('/etc/systemd/sleep.conf.d/disable-sleep.conf')).exists():
-        file_text = ('[Sleep]\n'
-                     'AllowSuspend=no\n'
-                     'AllowHibernation=no\n'
-                     'AllowHybridSleep=no\n'
-                     'AllowSuspendThenHibernate=no\n')
-        sleep_drop_in.parent.mkdir(exist_ok=True)
-        sleep_drop_in.write_text(file_text, encoding='utf-8')
-        sleep_drop_in.chmod(0o644)
-
-
 def can_use_amd_pstate():
     return cpu_vendor == 'amd' and list(Path('/sys/devices/system/cpu').glob('cpu*/acpi_cppc'))
 
@@ -861,7 +844,7 @@ if __name__ == '__main__':
     setup_libvirt(user, initcpio_conf)
     lib.setup.configure_trusted_networking()
     enable_reflector()
-    disable_suspend()
+    lib.setup.disable_suspend()
     lib.setup.systemctl_enable(['sshd.service', 'paccache.timer'])
     lib.setup.enable_tailscale()
     fix_fstab()

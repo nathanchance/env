@@ -210,6 +210,23 @@ def configure_trusted_networking():
     systemctl_enable(file)
 
 
+def disable_suspend():
+    # If machine has a battery, the power profile should be customized manually
+    if len(list(Path('/sys/class/power_supply').glob('BAT*'))) > 0:
+        return
+
+    # https://wiki.archlinux.org/title/Power_management/Suspend_and_hibernate#Disable_sleep_completely
+    if not (sleep_drop_in := Path('/etc/systemd/sleep.conf.d/disable-sleep.conf')).exists():
+        file_text = ('[Sleep]\n'
+                     'AllowSuspend=no\n'
+                     'AllowHibernation=no\n'
+                     'AllowHybridSleep=no\n'
+                     'AllowSuspendThenHibernate=no\n')
+        sleep_drop_in.parent.mkdir(exist_ok=True)
+        sleep_drop_in.write_text(file_text, encoding='utf-8')
+        sleep_drop_in.chmod(0o644)
+
+
 def dnf(dnf_arguments):
     lib.utils.run0(['dnf', *dnf_arguments])
 
