@@ -9,7 +9,7 @@ function cbl_test_kvm -d "Test KVM against a Clang built kernel with QEMU"
         case build
             __in_container_msg -c; or return
 
-            set arch (uname -m)
+            set arch $UTS_MACH
             switch $arch
                 case aarch64
                     set arch arm64
@@ -52,7 +52,7 @@ function cbl_test_kvm -d "Test KVM against a Clang built kernel with QEMU"
 
         case vmm
             cbl_vmm run; or return
-            if test (uname -m) = aarch64
+            if test $UTS_MACH = aarch64
                 cbl_clone_repo boot-utils; or return
                 if $CBL_GIT/boot-utils/utils/aarch64_32_bit_el1_supported
                     cbl_vmm run -a arm; or return

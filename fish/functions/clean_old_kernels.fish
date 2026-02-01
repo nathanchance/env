@@ -6,7 +6,7 @@ function clean_old_kernels -d "Clean up old installed kernels"
     set distro (__get_distro)
     switch $distro
         case almalinux fedora rocky
-            set -l kernels (rpm -q kernel{,-{core,modules}} | string match -rv (uname -r | string replace -a - _) | string replace -a .(uname -m) "" | fzf -m)
+            set -l kernels (rpm -q kernel{,-{core,modules}} | string match -rv (uname -r | string replace -a - _) | string replace -a .$UTS_MACH "" | fzf -m)
             if test -n "$kernels"
                 run0 dnf remove -y $kernels
             end

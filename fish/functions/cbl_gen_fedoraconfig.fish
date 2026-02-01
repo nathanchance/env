@@ -36,7 +36,7 @@ function cbl_gen_fedoraconfig -d "Downloads and modifies Fedora's kernel configu
         end
     end
     if not set -q arch
-        set arch (uname -m)
+        set arch $UTS_MACH
     end
     if not set -q no_werror
         set -a scripts_config_args \

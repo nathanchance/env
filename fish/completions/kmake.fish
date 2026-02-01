@@ -24,7 +24,7 @@ function __kmake_get_srcarch
     end
     # If ARCH= was not found, look at the host machine
     if not set -q srcarch
-        switch (uname -m)
+        switch $UTS_MACH
             case arm64 aarch64'*'
                 set srcarch arm64
             case x86_64

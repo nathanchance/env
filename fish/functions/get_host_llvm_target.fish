@@ -3,7 +3,7 @@
 # Copyright (C) 2023 Nathan Chancellor
 
 function get_host_llvm_target -d "Get the current host architecture as an LLVM target"
-    switch (uname -m)
+    switch $UTS_MACH
         case aarch64
             echo AArch64
         case x86_64

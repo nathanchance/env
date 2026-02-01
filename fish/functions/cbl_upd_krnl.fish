@@ -18,7 +18,7 @@ function cbl_upd_krnl -d "Update machine's kernel"
 
     switch $LOCATION
         case vm
-            set location vm-(uname -m)
+            set location vm-$UTS_MACH
         case '*'
             set location $LOCATION
     end

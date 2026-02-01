@@ -186,8 +186,11 @@ set -gx CBL_STABLE_VERSIONS \
 set -gx CCACHE_COMPRESS true
 set -gx CCACHE_COMPRESSLEVEL 5
 
+# Host architecture
+set -gx UTS_MACH (uname -m)
+
 # default development image
-switch (uname -m)
+switch $UTS_MACH
     case 'armv7*'
         set -gx DEV_IMG dev-debian
     case aarch64

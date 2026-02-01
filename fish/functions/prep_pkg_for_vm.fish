@@ -8,7 +8,7 @@ function prep_pkg_for_vm -d "Prepare package building files for virtual machine 
         read -P 'Package to build: ' package
     end
 
-    set arch (uname -m)
+    set arch $UTS_MACH
     set vm $argv[2]
     if test -z "$vm"
         __print_warning "No virtual machine, assuming default for $arch..."

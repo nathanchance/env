@@ -172,7 +172,7 @@ function upd -d "Runs the update command for the current distro or downloads/upd
         pushd $work_dir
         or return
 
-        switch (uname -m)
+        switch $UTS_MACH
             case aarch64
                 if command -q dpkg
                     # Because 32-bit Raspberry Pi OS with a 64-bit kernel...

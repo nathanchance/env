@@ -39,11 +39,11 @@ function cbl_bld_krnl_rpm -d "Build a .rpm kernel package"
 
     # If no arch value specified, use host architecture
     if not set -q arch
-        switch (uname -m)
+        switch $UTS_MACH
             case aarch64
                 set arch arm64
             case '*'
-                set arch (uname -m)
+                set arch $UTS_MACH
         end
     end
 

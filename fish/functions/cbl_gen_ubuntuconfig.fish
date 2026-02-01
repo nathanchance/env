@@ -25,11 +25,11 @@ function cbl_gen_ubuntuconfig -d "Generate a kernel .config from Ubuntu's config
         end
     end
     if not set -q arch
-        switch (uname -m)
+        switch $UTS_MACH
             case aarch64
                 set arch arm64
             case '*'
-                set arch (uname -m)
+                set arch $UTS_MACH
         end
     end
     if not set -q no_werror

@@ -6,7 +6,7 @@ function __cbl_vmm_get_arch
     if set index (contains -i -- -a $tokens); or set index (contains -i -- --architecture $tokens)
         echo $tokens[(math $index + 1)]
     else
-        echo (uname -m)
+        echo $UTS_MACH
     end
 end
 

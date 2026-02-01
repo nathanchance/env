@@ -4,7 +4,7 @@ function __cbl_bld_krnl_vm_get_arch
     if set index (contains -i -- -a $tokens); or set index (contains -i -- --arch $tokens)
         set arch $tokens[(math $index + 1)]
     else
-        set arch (uname -m)
+        set arch $UTS_MACH
     end
     switch $arch
         case arm64

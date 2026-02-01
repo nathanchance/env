@@ -23,7 +23,7 @@ function cbl_bld_krnl_deb -d "Build a .deb kernel package"
 
     # If no arch value specified, use host architecture
     if not set -q arch
-        set arch (uname -m)
+        set arch $UTS_MACH
         switch $arch
             case aarch64
                 set arch arm64
