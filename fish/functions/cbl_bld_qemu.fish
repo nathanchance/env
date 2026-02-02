@@ -42,8 +42,6 @@ function cbl_bld_qemu -d "Build QEMU for use with ClangBuiltLinux"
             end
 
             # Patches from mailing lists
-            # https://lore.kernel.org/20250920234836.GA3857420@ax162/
-            set -a b4_patches https://lore.kernel.org/qemu-devel/20250923143542.2391576-3-chenhuacai@kernel.org # hw/loongarch/virt: Align VIRT_GED_CPUHP_ADDR to 4 bytes
             if set -q b4_patches
                 pushd $qemu_src; or return
                 for patch in $b4_patches
