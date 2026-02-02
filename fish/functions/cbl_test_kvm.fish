@@ -3,11 +3,13 @@
 # Copyright (C) 2021-2023 Nathan Chancellor
 
 function cbl_test_kvm -d "Test KVM against a Clang built kernel with QEMU"
-    have_dev_kvm_access; or return
+    have_dev_kvm_access
+    or return
 
     switch $argv[1]
         case build
-            __in_container_msg -c; or return
+            __in_container_msg -c
+            or return
 
             set arch $UTS_MACH
             switch $arch
@@ -40,22 +42,31 @@ function cbl_test_kvm -d "Test KVM against a Clang built kernel with QEMU"
             kboot -a $arch -k $out -t 45s
 
         case nested
-            __in_container_msg -h; or return
+            __in_container_msg -h
+            or return
 
             switch $LOCATION
                 case vm
-                    updfull
-                    mkdir -p $TMP_FOLDER
-                    cp -v /boot/vmlinuz-linux $TMP_FOLDER/bzImage
-                    sd_nspawn -r 'kboot -a x86_64 -k '(nspawn_path -c $TMP_FOLDER)'/bzImage -t 30s'
+                    begin
+                        updfull
+                        and mkdir -p $TMP_FOLDER
+                        and cp -v /boot/vmlinuz-linux $TMP_FOLDER/bzImage
+                        and sd_nspawn -r 'kboot -a x86_64 -k '(nspawn_path -c $TMP_FOLDER)'/bzImage -t 30s'
+                    end
+                    or return
             end
 
         case vmm
-            cbl_vmm run; or return
+            cbl_vmm run
+            or return
+
             if test $UTS_MACH = aarch64
-                cbl_clone_repo boot-utils; or return
+                cbl_clone_repo boot-utils
+                or return
+
                 if $CBL_GIT/boot-utils/utils/aarch64_32_bit_el1_supported
-                    cbl_vmm run -a arm; or return
+                    cbl_vmm run -a arm
+                    or return
                 end
             end
             exit
