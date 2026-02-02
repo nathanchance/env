@@ -69,6 +69,5 @@ function cbl_test_kvm -d "Test KVM against a Clang built kernel with QEMU"
                     or return
                 end
             end
-            exit
     end
 end

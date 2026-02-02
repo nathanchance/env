@@ -18,6 +18,6 @@ windows:
     focus: true
   - shell: have_dev_kvm_access; and mchsh
     shell_command:
-    - cmd: cbl_test_kvm vmm
+    - cmd: cbl_test_kvm vmm; and exit
       enter: false
       sleep_before: 1
