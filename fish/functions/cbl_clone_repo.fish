@@ -38,7 +38,10 @@ function cbl_clone_repo -d "Clone certain repos for ClangBuiltLinux testing and 
 
             case common-android-multi
                 set use_repo true
-                set branch $arg
+                # The common-android-multi branch has long been dead. Use
+                # common-android-mainline as a base to ensure updates to
+                # other projects are done properly.
+                set branch common-android-mainline
                 set url https://android.googlesource.com/kernel/manifest
                 if test -d $NVME_FOLDER
                     set dest $NVME_SRC_FOLDER/$arg
