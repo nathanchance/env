@@ -149,9 +149,8 @@ function cbl_bld_tot_tcs -d "Build LLVM and binutils from source for kernel deve
         end
     end
 
-    string match -gr "\s+set\(LLVM_VERSION_[A-Z]+ ([0-9]+)\)" <$llvm_project/cmake/Modules/LLVMVersion.cmake | string join . | read llvm_ver
-    if test (string split . $llvm_ver | count) != 3
-        set message "Malformed LLVM version ('$llvm_ver')?"
+    if not set llvm_install $CBL_TC_LLVM_STORE/(date_time=$date_time ref=origin/main __get_llvm_install_path $llvm_project)
+        set message "Error creating llvm_install variable"
         __print_error "$messsage"
         __tg_msg "$message"
         return 1
@@ -282,7 +281,6 @@ kernel_builder.build()"
         set -a bld_llvm_args --pgo $pgo
     end
 
-    set llvm_install $CBL_TC_LLVM_STORE/$llvm_ver-$date_time-(git -C $llvm_project sh -s --format=%H origin/main)
     if not $tc_bld/build-llvm.py \
             $common_bld_llvm_args \
             $bld_llvm_args \
