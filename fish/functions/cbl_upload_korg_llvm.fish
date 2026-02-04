@@ -73,8 +73,8 @@ function cbl_upload_korg_llvm -d "Upload kernel.org toolchain releases with kup"
         $kup put $tar{,.asc} /pub/tools/llvm/files/prerelease/$tar.gz
         or return
 
-        set -l target_arch (string split -f 2 -m 1 -r - $tar)
-        $kup ln /pub/tools/llvm/files/prerelease/{$tar,llvm-main-latest-$target_arch.tar}.gz
+        set -l target_arch_ext (string split -f 2 -m 1 -r - $tar)
+        $kup ln /pub/tools/llvm/files/prerelease/{$tar,llvm-main-latest-$target_arch_ext}.gz
         or return
     end
     bell
