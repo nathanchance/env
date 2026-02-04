@@ -198,6 +198,15 @@ if __name__ == '__main__':
 
         lib.utils.call_git_loud(llvm_folder, ['worktree', 'add', '--detach', worktree, ref])
 
+        # Reverts for various versions
+        reverts = {
+            LLVM_VERSIONS[0]: [],
+        }
+        if revlist := reverts.get(version):
+            base_rv_cmd = ['revert', '--no-commit']
+            for revert in revlist:
+                lib.utils.call_git_loud(worktree, [*base_rv_cmd, revert.split('/')[-1]])
+
         # Python 3.12 deprecates and changes a few things in the tests. If we are
         # running the tests, make sure we have the fixes. It is safe to apply them
         # even if we are not using Python 3.12.
