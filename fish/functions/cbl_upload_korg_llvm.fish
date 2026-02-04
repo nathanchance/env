@@ -76,7 +76,7 @@ function cbl_upload_korg_llvm -d "Upload kernel.org toolchain releases with kup"
         $kup put $tar{,.asc} $remote_tar
         or return
 
-        $kup rm $link_tar
+        $kup rm $link_tar &>/dev/null
         $kup ln $remote_tar $link_tar &| string match -er 'FATAL: LINK of compressed file failed'
         and return
     end
