@@ -163,6 +163,7 @@ function cbl_bld_tot_tcs -d "Build LLVM and binutils from source for kernel deve
         --build-folder $llvm_bld \
         --check-targets $check_targets \
         --llvm-folder $llvm_project \
+        --multicall \
         --no-ccache \
         --quiet-cmake \
         --show-build-commands

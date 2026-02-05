@@ -54,6 +54,9 @@ if __name__ == '__main__':
     parser.add_argument('-l',
                         '--llvm-folder',
                         help='Location of llvm-project source. Omit for vendored version')
+    parser.add_argument('--no-multicall',
+                        action='store_true',
+                        help='Avoid default use of --multicall to build-llvm.py')
     parser.add_argument('-s',
                         '--skip-tests',
                         action='store_true',
@@ -75,6 +78,8 @@ if __name__ == '__main__':
 
     if not shutil.which('systemd-nspawn'):
         raise RuntimeError('systemd-nspawn not found!')
+
+    multicall = not args.no_multicall
 
     if 'all-stable' in args.versions:
         versions = LLVM_VERSIONS[1:]
@@ -128,18 +133,26 @@ if __name__ == '__main__':
             'llvm-unit',
         ]
     install_targets = [
-        'clang',
         'clang-resource-headers',
         'compiler-rt',
         'libclang',
         'libclang-headers',
-        'lld',
-        *[
-            f"llvm-{tool}"
-            for tool in ('addr2line', 'ar', 'as', 'dwarfdump', 'link', 'nm', 'objcopy', 'objdump',
-                         'ranlib', 'readelf', 'strings', 'strip')
-        ],
+        'llvm-as',
+        'llvm-dwarfdump',
+        'llvm-link',
+        'llvm-strings',
     ]
+    if multicall:
+        install_targets.append('llvm-driver')
+    else:
+        install_targets += [
+            'clang',
+            'lld',
+            *[
+                f"llvm-{tool}" for tool in ('addr2line', 'ar', 'nm', 'objcopy', 'objdump', 'ranlib',
+                                            'readelf', 'strip')
+            ],
+        ]
     projects = [
         'clang',
         'compiler-rt',
@@ -298,6 +311,10 @@ if __name__ == '__main__':
         maj_ver = int(version.split('.', 1)[0])
         if (maj_ver >= 16 and MACHINE == 'x86_64') or (maj_ver >= 18 and MACHINE == 'aarch64'):
             build_cmd += ['--bolt', '--lto', 'thin']
+        # Use multicall binary by default with LLVM 22.x or newer (just to
+        # avoid uncovering weird incompatibilities).
+        if multicall and maj_ver >= 22:
+            build_cmd.append('--multicall')
 
         lib.utils.tg_msg(f"sudo authorization needed to build LLVM {version}")
         lib.utils.run0(build_cmd)

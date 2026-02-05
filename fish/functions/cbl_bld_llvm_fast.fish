@@ -3,7 +3,14 @@
 # Copyright (C) 2024 Nathan Chancellor
 
 function cbl_bld_llvm_fast -d "Quickly build a version of LLVM" -w build-llvm.py
-    set bld_llvm_args $argv
+    for arg in $argv
+        switch $arg
+            case --no-multicall
+                set no_multicall true
+            case '*'
+                set -a bld_llvm_args $arg
+        end
+    end
     if contains -- -l $bld_llvm_args
         set llvm_flag -l
     end
@@ -31,6 +38,9 @@ function cbl_bld_llvm_fast -d "Quickly build a version of LLVM" -w build-llvm.py
 
     if not contains -- --pgo $bld_llvm_args
         set -a bld_llvm_args --build-stage1-only
+    end
+    if not set -q no_multicall
+        set -a bld_llvm_args --multicall
     end
 
     $tc_bld/build-llvm.py \
