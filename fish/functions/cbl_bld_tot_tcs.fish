@@ -9,6 +9,12 @@ function cbl_bld_tot_tcs -d "Build LLVM and binutils from source for kernel deve
         switch $arg
             case --lto
                 set lto true
+            case --skip-binutils
+                set bld_bntls false
+            case --skip-uprev
+                set skip_uprev true
+            case --skip-validation
+                set skip_validation true
         end
     end
 
@@ -54,6 +60,9 @@ function cbl_bld_tot_tcs -d "Build LLVM and binutils from source for kernel deve
     if test "$lto" = true
         set -a bld_llvm_args --lto thin
     end
+    if test "$skip_validation" = true
+        set -e validate_uprev
+    end
 
     set date_time (date +%F_%H-%M-%S)
 
@@ -72,7 +81,7 @@ function cbl_bld_tot_tcs -d "Build LLVM and binutils from source for kernel deve
         if not test -d $bntls
             __clone_repo_from_bundle (path basename $bntls) "$bntls"
         end
-        if not __is_shallow_clone $bntls; and not __has_detached_head $bntls
+        if test "$skip_uprev" != true; and not __is_shallow_clone $bntls; and not __has_detached_head $bntls
             git -C $bntls pull --rebase; or return
         end
 
@@ -106,7 +115,7 @@ function cbl_bld_tot_tcs -d "Build LLVM and binutils from source for kernel deve
     end
     if not __is_shallow_clone $llvm_project; and not __has_detached_head $llvm_project
         git -C $llvm_project rh
-        if not git -C $llvm_project pull --rebase
+        if test "$skip_uprev" != true; and not git -C $llvm_project pull --rebase
             set message "llvm-project failed to rebase/update"
             __print_error "$message"
             __tg_msg "$message"
