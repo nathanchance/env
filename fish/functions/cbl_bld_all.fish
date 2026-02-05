@@ -7,13 +7,16 @@ function cbl_bld_all -d "Build latest LLVM and test it against several Linux ker
 
     for arg in $argv
         switch $arg
+            case --lto --skip-{binutils,uprev,validation}
+                set -a cbl_bld_tot_tcs_args $arg
             case -l --lts -s --short
                 set -a cbl_bld_all_krnl_args $arg
         end
     end
 
     # Build new LLVM and binutils
-    cbl_bld_tot_tcs; or return
+    cbl_bld_tot_tcs $cbl_bld_tot_tcs_args
+    or return
 
     # Build and boot kernels
     cbl_bld_all_krnl $cbl_bld_all_krnl_args
