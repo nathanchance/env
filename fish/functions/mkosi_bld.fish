@@ -59,6 +59,8 @@ function mkosi_bld -d "Build a distribution using mkosi"
             set -a mkosi_args --environment PYTHON_PGO_BUILDER_UID=(id -u)
         case dev-fedora
             set cache_dir dnf
+        case '*'
+            set cache_dir generic
     end
 
     run0 (command -v mkosi) \
