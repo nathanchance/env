@@ -2,8 +2,14 @@
 
 rm -f /etc/dnf/protected.d/sudo.conf
 
-if dnf list --installed sudo &>/dev/null
-    dnf remove -y sudo
+if command -q dnf5
+    set dnf dnf5
+else
+    set dnf dnf
+end
+
+if $dnf list --installed sudo &>/dev/null
+    $dnf remove -y sudo
     or return
 end
 

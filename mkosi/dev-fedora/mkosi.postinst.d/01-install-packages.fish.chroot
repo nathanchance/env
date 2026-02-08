@@ -12,9 +12,15 @@ gpgcheck=1
 gpgkey=https://tuxmake.org/packages/repodata/repomd.xml.key
 enabled=1' >/etc/yum.repos.d/tuxmake.repo
 
-dnf update -y
+if command -q dnf5
+    set dnf dnf5
+else
+    set dnf dnf
+end
+
+$dnf update -y
 or return
 
-dnf install -y \
+$dnf install -y \
     gh \
     tuxmake
