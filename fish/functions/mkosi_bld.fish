@@ -10,10 +10,11 @@ function mkosi_bld -d "Build a distribution using mkosi"
         set mkosi_args $argv[2..]
     end
 
+    set env_mkosi $ENV_FOLDER/mkosi
     if string match -qr ^/ $image
         set directory $image
     else
-        set directory $ENV_FOLDER/mkosi/$image
+        set directory $env_mkosi/$image
     end
     set mkosi_conf $directory/mkosi.conf
     if not test -e $mkosi_conf
@@ -63,11 +64,31 @@ function mkosi_bld -d "Build a distribution using mkosi"
             set cache_dir generic
     end
 
-    run0 (command -v mkosi) \
+    set mkosi (command -v mkosi)
+
+    request_root "Running mkosi"
+    or return
+
+    set tools_tree $env_mkosi/tools
+    if not test -e $tools_tree/etc/resolv.conf
+        run0 $mkosi \
+            --directory (path dirname $mkosi)/../lib/python*/site-packages/mkosi/resources/mkosi-tools \
+            --format directory \
+            --output (path basename $tools_tree) \
+            --output-directory (path dirname $tools_tree) \
+            --profile misc,package-manager,runtime
+        or return
+
+        run0 chown -R $USER:$USER $tools_tree
+        or return
+    end
+
+    run0 $mkosi \
         --build-sources (string join , $build_sources) \
         --directory $directory \
         --force \
         --package-cache-dir $mkosi_cache/$cache_dir \
+        --tools-tree $tools_tree \
         $mkosi_args
     or return
 
