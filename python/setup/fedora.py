@@ -133,9 +133,6 @@ def install_packages():
         'git-email',
 
         # mkosi / systemd-nspawn
-        'apt',
-        'debian-keyring',
-        'distribution-gpg-keys',
         'patch',
         'polkit',
         'systemd-container',

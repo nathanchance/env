@@ -485,12 +485,6 @@ def pacman_install_packages():
         'perl-net-smtp-ssl',
         'repo',
 
-        # mkosi
-        'apt',
-        'debian-archive-keyring',
-        'distribution-gpg-keys',
-        'dnf',
-
         # Miscellaneous
         'libxkbcommon',
         'lm_sensors',

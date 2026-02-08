@@ -7,7 +7,6 @@ import shutil
 import sys
 from argparse import ArgumentParser
 from pathlib import Path
-from tempfile import NamedTemporaryFile
 
 import deb
 
@@ -143,18 +142,8 @@ def update_and_install_packages():
     packages = []
     if machine_is_trusted():
         packages += ['iptables', 'tailscale']
-    if get_version_id() >= 13:
-        # This is only in bookworm backports
-        packages.append('distribution-gpg-keys')
 
     deb.update_and_install_packages(packages)
-
-    if 'distribution-gpg-keys' not in packages:
-        with NamedTemporaryFile() as tmppkg:
-            url = 'http://ftp.us.debian.org/debian/pool/main/d/distribution-gpg-keys/distribution-gpg-keys_1.106+ds-1~bpo12+1_all.deb'
-            lib.utils.curl(url, tmppkg.name)
-
-            lib.utils.run(['dpkg', '-i', tmppkg.name])
 
 
 if __name__ == '__main__':
