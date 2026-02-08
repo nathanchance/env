@@ -50,14 +50,14 @@ function mkosi_bld -d "Build a distribution using mkosi"
     end
 
     switch (path basename $directory)
-        case dev-arch
+        case '*'arch'*'
             set cache_dir pacman
-        case dev-debian
+        case '*'debian'*'
             set cache_dir apt
         case pgo-llvm-builder
             set cache_dir apt
             set -a mkosi_args --environment PYTHON_PGO_BUILDER_UID=(id -u)
-        case dev-fedora
+        case '*'fedora'*'
             set cache_dir dnf
         case '*'
             set cache_dir generic
