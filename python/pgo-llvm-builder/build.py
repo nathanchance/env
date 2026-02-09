@@ -2,6 +2,7 @@
 
 import datetime
 import platform
+import re
 import shutil
 import sys
 from argparse import ArgumentParser
@@ -69,7 +70,7 @@ if __name__ == '__main__':
                         help='Location of tc-build. Omit for vendored version')
     parser.add_argument('-v',
                         '--versions',
-                        choices=[*LLVM_VERSIONS, 'all', 'all-stable', 'main'],
+                        choices=[*LLVM_VERSIONS, 'all', 'all-stable', 'main', 'kgr'],
                         help='LLVM versions to build',
                         metavar='LLVM_VERSION',
                         nargs='+',
@@ -189,8 +190,26 @@ if __name__ == '__main__':
     ]
 
     for value in versions:
-        version = LLVM_VERSIONS[0] if value == 'main' else value
-        ref = LLVM_REFS.get(version, f"llvmorg-{version}")
+        ref = None
+        if value == 'main':
+            version = LLVM_VERSIONS[0]
+        elif value == 'kgr':
+            # First, we need to find out what the current known good revision is in tc-build
+            bld_llvm_py_txt = Path(tc_build_folder, 'build-llvm.py').read_text(encoding='utf-8')
+            if not (match := re.search(r"GOOD_REVISION = '([A-Fa-f0-9]+)'", bld_llvm_py_txt)):
+                raise RuntimeError('Known good revision could not be found?')
+            ref = match.groups()[0]
+            # Next, we need to see what version this actually is
+            show_cmd = ['show', f"{ref}:cmake/Modules/LLVMVersion.cmake"]
+            llvm_version_cmake_txt = lib.utils.call_git(llvm_folder, show_cmd).stdout
+            if len(matches := re.findall(r"\s+set\(LLVM_VERSION_[A-Z]+ ([0-9]+)\)",
+                                         llvm_version_cmake_txt)) != 3:
+                raise RuntimeError(f"Unexpected match to LLVM version regex? {matches}")
+            version = '.'.join(matches)
+        else:
+            version = value
+        if not ref:
+            ref = LLVM_REFS.get(version, f"llvmorg-{version}")
 
         if 'llvmorg' not in ref:
             date_info = datetime.datetime.now(datetime.timezone.utc).strftime('%Y%m%d-%H%M%S')
