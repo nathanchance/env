@@ -3,6 +3,9 @@
 # Copyright (C) 2022-2023 Nathan Chancellor
 
 function __in_container_msg -d "Reports an error based on where command is attempting to be run"
+    if set -q SKIP_CONTAINER_CHECK
+        return 0
+    end
     for arg in $argv
         switch $arg
             case -c --container
