@@ -8,25 +8,27 @@ pkgname=(
   s390x-linux-gnu-binutils
   sparc64-linux-gnu-binutils
 )
-pkgver=2.45
+pkgver=2.46
+# https://inbox.sourceware.org/binutils/b30e780b-abc4-437b-bdcf-bb743a1c9eea@redhat.com/
+_tar_pkgver=$pkgver.0
 pkgrel=1
 arch=(x86_64)
 url='https://gnu.org/software/binutils/'
 license=(GPL-2.0-or-later GPL-3.0-or-later LGPL-2.0-or-later LGPL-3.0-or-later GFDL-1.3 FSFAP)
 depends=(glibc libelf zlib zstd)
 makedepends=(setconf)
-source=("https://mirrors.kernel.org/sourceware/binutils/releases/binutils-$pkgver.tar.xz")
-sha512sums=('c7b10a7466d9fd398d7a0b3f2a43318432668d714f2ec70069a31bdc93c86d28e0fe83792195727167743707fbae45337c0873a0786416db53bbf22860c16ce7')
+source=("https://mirrors.kernel.org/sourceware/binutils/releases/binutils-$_tar_pkgver.tar.xz")
+sha512sums=('32f880bb4f69351f4ae54a5d00359625c6c49d8e76624fb5cffdf174c79c8d3212f66225b81c12933c6ed59604ab652560773dd92fab384b930c97a9d4e1fdf2')
 
 prepare() {
-  setconf binutils-$pkgver/libiberty/configure ac_cpp "'\$CPP \$CPPFLAGS -O2'"
+  setconf binutils-$_tar_pkgver/libiberty/configure ac_cpp "'\$CPP \$CPPFLAGS -O2'"
 }
 
 _build() {
   local _target="$1"
   shift
 
-  local _build="binutils-$pkgver/build/$_target"
+  local _build="binutils-$_tar_pkgver/build/$_target"
   mkdir -p "$_build"
 
   (
@@ -34,6 +36,7 @@ _build() {
 
     unset CPPFLAGS
     ../../configure --disable-nls \
+                    --disable-werror \
                     --enable-colored-disassembly \
                     --enable-deterministic-archives \
                     --enable-multilib \
@@ -66,7 +69,7 @@ build() {
 }
 
 _package() {
-  make -C "binutils-$pkgver/build/$1" DESTDIR="$pkgdir" install
+  make -C "binutils-$_tar_pkgver/build/$1" DESTDIR="$pkgdir" install
 
   # Remove info documents that conflict with host version
   rm -r "$pkgdir/usr/share/info"
