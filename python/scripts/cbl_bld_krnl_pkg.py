@@ -15,7 +15,7 @@ import lib.kernel
 
 # pylint: enable=wrong-import-position
 
-CONFIG_URL = 'https://gitlab.archlinux.org/archlinux/packaging/packages/linux/-/raw/main/config'
+CONFIG_URL = 'https://gitlab.archlinux.org/archlinux/packaging/packages/linux/-/raw/main/config.x86_64'
 
 
 def recreate_folder(folder):
