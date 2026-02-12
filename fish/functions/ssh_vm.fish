@@ -4,7 +4,7 @@
 
 function ssh_vm -d "ssh into a VM running via cbl_vmm.py"
     for arg in $argv
-        if string match -qr '^\d+$' $arg
+        if string match -qr '^\d+$' -- $arg
             set port $arg
         else
             switch $arg
