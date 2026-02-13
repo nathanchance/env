@@ -7,10 +7,18 @@ function klog -d "View kernel log with bat" -w dmesg
     or return
 
     for arg in $argv
-        set -a dmesg_args $arg
         switch $arg
+            case --filter
+                set filter true
+            case --no-bat
+                set no_bat true
+            case --skip-root
+                set skip_root true
             case -w --follow -W --follow-new
                 set provides_pager true
+                set -a dmesg_args $arg
+            case '*'
+                set -a dmesg_args $arg
         end
     end
 
@@ -19,14 +27,25 @@ function klog -d "View kernel log with bat" -w dmesg
         --human \
         --color=always \
         $dmesg_args
+    set bat_cmd \
+        bat \
+        --style plain
 
     # Ask for password first to avoid messing up bat
-    request_root "dmesg access"
-    or return
+    if not set -q skip_root
+        request_root "dmesg access"
+        or return
+    end
 
-    if set -q provides_pager
+    if set -q filter
+        if set -q no_bat
+            $dmesg_cmd &| filter_dmesg
+        else
+            $dmesg_cmd &| filter_dmesg &| $bat_cmd
+        end
+    else if set -q provides_pager; or set -q no_bat
         $dmesg_cmd
     else
-        $dmesg_cmd &| bat --style plain
+        $dmesg_cmd &| $bat_cmd
     end
 end
