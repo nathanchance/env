@@ -196,6 +196,14 @@ def setup_doas(username):
                 f"permit nopass {username} as root cmd dnf args update\n"
                 f"permit nopass {username} as root cmd dnf args update -y\n")
 
+        if lib.setup.is_virtual_machine():
+            conf_txt += ('\n'
+                         '# Allow me to passwordlessly reboot and poweroff virtual machine\n'
+                         f"permit nopass {username} as root cmd poweroff\n"
+                         f"permit nopass {username} as root cmd systemctl args poweroff\n"
+                         f"permit nopass {username} as root cmd reboot\n"
+                         f"permit nopass {username} as root cmd systemctl args reboot\n")
+
         doas_conf.write_text(conf_txt, encoding='utf-8')
 
     # Apply umask value from /etc/login.defs to doas sessions, which mirrors

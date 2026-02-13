@@ -80,6 +80,13 @@ def setup_doas(username, root_password):
         f"permit nopass {username} as root cmd apt args full-upgrade -y\n"
         f"permit nopass {username} as root cmd apt args autoremove\n"
         f"permit nopass {username} as root cmd apt args autoremove -y\n")
+    if lib.setup.is_virtual_machine():
+        doas_conf_text += ('\n'
+                           '# Allow me to passwordlessly reboot and poweroff virtual machine\n'
+                           f"permit nopass {username} as root cmd poweroff\n"
+                           f"permit nopass {username} as root cmd systemctl args poweroff\n"
+                           f"permit nopass {username} as root cmd reboot\n"
+                           f"permit nopass {username} as root cmd systemctl args reboot\n")
     doas_conf.write_text(doas_conf_text, encoding='utf-8')
 
     # Add a root password so that there is no warning about removing sudo

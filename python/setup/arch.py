@@ -716,6 +716,12 @@ def setup_sudo(username):
                         f"{username} ALL = NOPASSWD: /usr/bin/pacman -Syu --noconfirm\n"
                         f"{username} ALL = NOPASSWD: /usr/bin/pacman -Syyu --noconfirm\n")
 
+    if '/usr/bin/poweroff' not in sudoers_txt:
+        sudoers_txt += (f"{username} ALL = NOPASSWD: /usr/bin/poweroff\n"
+                        f"{username} ALL = NOPASSWD: /usr/bin/systemctl poweroff\n"
+                        f"{username} ALL = NOPASSWD: /usr/bin/reboot\n"
+                        f"{username} ALL = NOPASSWD: /usr/bin/systemctl reboot\n")
+
     sudoers.chmod(0o640)
     sudoers.write_text(sudoers_txt, encoding='utf-8')
     sudoers.chmod(0o440)
