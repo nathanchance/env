@@ -702,6 +702,25 @@ def setup_libvirt(username, mkinitcpio_conf):
         mkinitcpio_conf['MODULES'].add('kvm_intel')
 
 
+def setup_sudo(username):
+    if not lib.setup.is_virtual_machine():
+        return
+
+    if not (sudoers := Path(f"/etc/sudoers.d/00_{username}")).exists():
+        raise RuntimeError(f"{sudoers} could not be found?")
+
+    sudoers_txt = sudoers.read_text(encoding='utf-8')
+    if '/usr/bin/pacman' not in sudoers_txt:
+        sudoers_txt += (f"{username} ALL = NOPASSWD: /usr/bin/pacman -Syu\n"
+                        f"{username} ALL = NOPASSWD: /usr/bin/pacman -Syyu\n"
+                        f"{username} ALL = NOPASSWD: /usr/bin/pacman -Syu --noconfirm\n"
+                        f"{username} ALL = NOPASSWD: /usr/bin/pacman -Syyu --noconfirm\n")
+
+    sudoers.chmod(0o640)
+    sudoers.write_text(sudoers_txt, encoding='utf-8')
+    sudoers.chmod(0o440)
+
+
 def setup_user(username, userpass):
     if lib.setup.user_exists(username):
         lib.setup.chsh_fish(username)
@@ -831,6 +850,7 @@ if __name__ == '__main__':
     pacman_update()
     pacman_install_packages()
     setup_doas(user)
+    setup_sudo(user)
     setup_user(user, password)
     lib.setup.clone_env(user)
     lib.setup.podman_setup(user)
