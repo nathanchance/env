@@ -66,10 +66,20 @@ def setup_doas(username, root_password):
     lib.utils.run(['dpkg', '-i', doas_deb])
 
     doas_conf = Path('/etc/doas.conf')
-    doas_conf_text = ('# Allow me to be root for 5 minutes at a time\n'
-                      f"permit persist {username} as root\n"
-                      '# Do not require root to put in a password (makes no sense)\n'
-                      'permit nopass root\n')
+    doas_conf_text = (
+        '# Allow me to be root for 5 minutes at a time\n'
+        f"permit persist {username} as root\n"
+        '\n'
+        '# Do not require root to put in a password (makes no sense)\n'
+        'permit nopass root\n'
+        '\n'
+        '# Allow me to update packages without a password (arguments are matched exactly)\n'
+        f"permit nopass {username} as root cmd apt args update\n"
+        f"permit nopass {username} as root cmd apt args update -y\n"
+        f"permit nopass {username} as root cmd apt args full-upgrade\n"
+        f"permit nopass {username} as root cmd apt args full-upgrade -y\n"
+        f"permit nopass {username} as root cmd apt args autoremove\n"
+        f"permit nopass {username} as root cmd apt args autoremove -y\n")
     doas_conf.write_text(doas_conf_text, encoding='utf-8')
 
     # Add a root password so that there is no warning about removing sudo
