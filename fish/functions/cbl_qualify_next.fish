@@ -14,13 +14,19 @@ function cbl_qualify_next -d "Run a series of checks to qualify new linux-next r
 
     systemctl --failed
 
-    run0 dmesg -l warn+
+    set dmesg_cmd \
+        klog \
+        --filter \
+        --level=warn+ \
+        --no-bat \
+        --skip-root
+    $dmesg_cmd
 
     sleep 5
 
     cbl_check_sysfs_cfi &>/dev/null
     if test $status -eq 0
-        run0 dmesg -l warn,err
+        $dmesg_cmd
     else
         cbl_check_sysfs_cfi
     end
