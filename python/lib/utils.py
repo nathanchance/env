@@ -210,7 +210,7 @@ def run0(full_cmd, **kwargs):
 
     # If we have to escalate via 'doas' or 'sudo', print the command so it can
     # be audited if necessary.
-    run(cmd_copy, show_cmd_location=cmd_copy[0] in ('doas', 'sudo'), **kwargs)
+    return run(cmd_copy, show_cmd_location=cmd_copy[0] in ('doas', 'sudo'), **kwargs)
 
 
 def run_check_rc_zero(*args, **kwargs):
