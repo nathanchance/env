@@ -1,4 +1,0 @@
-#!/usr/bin/env fish
-
-ln -fsv /usr/bin/batcat /usr/local/bin/bat
-ln -fsv /usr/bin/fdfind /usr/local/bin/fd

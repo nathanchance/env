@@ -10,6 +10,14 @@ function mkosi_bld -d "Build a distribution using mkosi"
         set mkosi_args $argv[2..]
     end
 
+    if string match -qr ^dev- $image
+        set distro (string split -f 2 - $image)
+        if not string match -qr -- --distribution $mkosi_args
+            set -a mkosi_args --distribution $distro
+        end
+        set image dev
+    end
+
     set env_mkosi $ENV_FOLDER/mkosi
     if string match -qr ^/ $image
         set directory $image
@@ -51,6 +59,15 @@ function mkosi_bld -d "Build a distribution using mkosi"
     end
 
     switch (path basename $directory)
+        case dev
+            switch $distro
+                case arch
+                    set cache_dir pacman
+                case debian
+                    set cache_dir apt
+                case fedora
+                    set cache_dir dnf
+            end
         case '*'arch'*'
             set cache_dir pacman
         case '*'debian'*'

@@ -3,6 +3,11 @@
 
 set -eux
 
+if [ "$DISTRIBUTION" != debian ]; then
+    echo Only relevant for Debian, skipping...
+    exit 0
+fi
+
 # Binary packages of fish are no longer available for Debian 10 so we have to
 # build it from source
 if [ "$RELEASE" = "buster" ]; then

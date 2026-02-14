@@ -1,0 +1,31 @@
+#!/usr/bin/env python3
+
+from os import environ as env
+from pathlib import Path
+import sys
+
+if env['DISTRIBUTION'] != 'arch':
+    sys.exit(0)
+
+EXPECTED_MOUNTS = (
+    ((PYTHON_FOLDER := Path(env['SRCDIR'], 'python')), 'PYTHON_FOLDER'),
+    ((ETC := Path(env['SRCDIR'], 'etc')), '/etc'),
+)
+for expected_path, host_value in EXPECTED_MOUNTS:
+    if not expected_path.exists():
+        raise RuntimeError(f"{host_value} not passed into build environment?")
+
+sys.path.append(str(PYTHON_FOLDER))
+# pylint: disable-next=wrong-import-position
+from setup.arch import HETZNER_MIRROR, add_hetzner_mirror_to_repos  # noqa: E402
+
+if not (host_pacman_conf := Path(ETC, 'pacman.conf')).exists():
+    sys.exit(0)  # host is not Arch, cannot be Hetzner
+
+if HETZNER_MIRROR not in host_pacman_conf.read_text(encoding='utf-8'):
+    sys.exit(0)  # host is Arch but still not Hetzner
+
+guest_pacman_conf = Path('/etc/pacman.conf')
+guest_pacman_conf_txt = add_hetzner_mirror_to_repos(
+    guest_pacman_conf.read_text(encoding='utf-8'))
+guest_pacman_conf.write_text(guest_pacman_conf_txt, encoding='utf-8')

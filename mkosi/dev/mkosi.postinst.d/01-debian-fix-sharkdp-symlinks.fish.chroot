@@ -1,0 +1,9 @@
+#!/usr/bin/env fish
+
+if test "$DISTRIBUTION" != debian
+    echo Only relevant to Debian, skipping...
+    exit 0
+end
+
+ln -fsv /usr/bin/batcat /usr/local/bin/bat
+ln -fsv /usr/bin/fdfind /usr/local/bin/fd
