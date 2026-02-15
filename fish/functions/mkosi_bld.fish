@@ -100,13 +100,17 @@ function mkosi_bld -d "Build a distribution using mkosi"
         or return
     end
 
-    run0 $mkosi \
+
+    set mkosi_cmd \
+        $mkosi \
         --build-sources (string join , $build_sources) \
         --directory $directory \
         --force \
         --package-cache-dir $mkosi_cache/$cache_dir \
         --tools-tree $tools_tree \
         $mkosi_args
+
+    run0 $mkosi_cmd
     or return
 
     # selinux contexts may get messed up, fix them if necessary
