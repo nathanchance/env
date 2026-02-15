@@ -2,14 +2,30 @@
 # SPDX-License-Identifier: MIT
 # Copyright (C) 2024 Nathan Chancellor
 
-function mkosi_bld -d "Build a distribution using mkosi"
-    if test (count $argv) -eq 0
-        set image $DEV_IMG
-    else
-        set image $argv[1]
-        set mkosi_args $argv[2..]
+function run_mkosi -d "Run mkosi with various arguments"
+    # Handle initial arguments
+    switch (count $argv)
+        case 0
+            set verb build
+            set image $DEV_IMG
+        case 1
+            set verb $argv[1]
+            set image $DEV_IMG
+        case '*'
+            set verb $argv[1]
+            set image $argv[2]
+            set mkosi_args $argv[3..]
     end
 
+    # Validate verb argument
+    switch $verb
+        case build ssh summary vm
+        case '*'
+            __print_error "Unhandled verb: $verb"
+            return 1
+    end
+
+    # dev-* images share a single directory, switching on '--distribution'
     if string match -qr ^dev- $image
         set distro (string split -f 2 - $image)
         if not string match -qr -- --distribution $mkosi_args
@@ -18,8 +34,9 @@ function mkosi_bld -d "Build a distribution using mkosi"
         set image dev
     end
 
+    # Validate mkosi.conf exists
     set env_mkosi $ENV_FOLDER/mkosi
-    if string match -qr ^/ $image
+    if string match -qr ^/ $image # absolute path
         set directory $image
     else
         set directory $env_mkosi/$image
@@ -43,21 +60,23 @@ function mkosi_bld -d "Build a distribution using mkosi"
         py_venv $venv_args mkosi
         or return
     else if test (path basename $VIRTUAL_ENV) != mkosi
-        __print_error "Already in a virtual environment?"
+        __print_error "Already in a virtual environment that is not mkosi?"
         return 1
     end
+    set mkosi (command -v mkosi)
 
+    # Sources to mount for the build process
     set build_sources \
         # We may need to use custom functions from our Python framework
         $PYTHON_FOLDER:/python \
         # We may need to look at the configuration of the host
         /etc:/etc
 
+    # Cache package downloads
     set mkosi_cache $XDG_FOLDER/cache/mkosi
     if not test -d $mkosi_cache
         mkdir -p $mkosi_cache
     end
-
     switch (path basename $directory)
         case dev
             switch $distro
@@ -81,11 +100,10 @@ function mkosi_bld -d "Build a distribution using mkosi"
             set cache_dir generic
     end
 
-    set mkosi (command -v mkosi)
-
     request_root "Running mkosi"
     or return
 
+    # Use common tools tree based on mkosi default value
     set tools_tree $env_mkosi/tools
     if not test -e $tools_tree/etc/resolv.conf
         run0 $mkosi \
@@ -104,14 +122,17 @@ function mkosi_bld -d "Build a distribution using mkosi"
         set bootable true
     end
 
+    # Only truly dynamic arguments (namely from fish variables) should be added here.
     set mkosi_cmd \
         $mkosi \
         --build-sources (string join , $build_sources) \
         --directory $directory \
-        --force \
         --package-cache-dir $mkosi_cache/$cache_dir \
         --tools-tree $tools_tree \
         $mkosi_args
+    if test "$verb" = build
+        set -a mkosi_cmd --force
+    end
 
     if not set image_id ($mkosi_cmd summary --json | python3 -c "import json, sys
 mkosi_json = json.load(sys.stdin)
@@ -133,21 +154,23 @@ print(image_id)")
         set -a mkosi_cmd --output-directory $bootable_output
     end
 
-    run0 $mkosi_cmd
+    run0 $mkosi_cmd $verb
     or return
 
-    if set -q bootable_output
-        run0 chown -R $USER:$USER $bootable_output
-    end
+    if test "$verb" = build
+        if set -q bootable_output
+            run0 chown -R $USER:$USER $bootable_output
+        end
 
-    # selinux contexts may get messed up, fix them if necessary
-    if test -e /sys/fs/selinux; and test (cat /sys/fs/selinux/enforce) = 1; and not set -q bootable
-        set machine_dir /var/lib/machines/$image_id
-        __tg_msg "root authorization needed to check SELinux context of $machine_dir"
-        set context (run0 stat $machine_dir | string match -gr '^Context: (.*)$')
-        if test "$context" != "system_u:object_r:unlabeled_t:s0"; and test "$context" != "system_u:object_r:systemd_machined_var_lib_t:s0"
-            __print_warning "$machine_dir context is unexpected ('$context'), running restorcecon..."
-            run0 restorecon -R $machine_dir
+        # selinux contexts may get messed up, fix them if necessary
+        if test -e /sys/fs/selinux; and test (cat /sys/fs/selinux/enforce) = 1; and not set -q bootable
+            set machine_dir /var/lib/machines/$image_id
+            __tg_msg "root authorization needed to check SELinux context of $machine_dir"
+            set context (run0 stat $machine_dir | string match -gr '^Context: (.*)$')
+            if test "$context" != "system_u:object_r:unlabeled_t:s0"; and test "$context" != "system_u:object_r:systemd_machined_var_lib_t:s0"
+                __print_warning "$machine_dir context is unexpected ('$context'), running restorcecon..."
+                run0 restorecon -R $machine_dir
+            end
         end
     end
 end

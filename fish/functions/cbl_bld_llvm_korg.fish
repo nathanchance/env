@@ -56,7 +56,7 @@ function cbl_bld_llvm_korg -d "Build (and optionally test) LLVM for kernel.org"
             or return
         end
 
-        mkosi_bld $PYTHON_FOLDER/(path basename $mach_dir)
+        run_mkosi build $PYTHON_FOLDER/(path basename $mach_dir)
         or return
     end
 

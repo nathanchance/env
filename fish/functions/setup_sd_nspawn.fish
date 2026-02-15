@@ -21,7 +21,7 @@ function setup_sd_nspawn -d "Perform initial systemd-nspawn setup"
     $PYTHON_BIN_FOLDER/sd_nspawn -i
     or return
 
-    mkosi_bld
+    run_mkosi
     or return
 
     # '--now' is only supported with systemd 253 or newer but AlmaLinux 9 ships 252
