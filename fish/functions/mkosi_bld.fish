@@ -100,6 +100,10 @@ function mkosi_bld -d "Build a distribution using mkosi"
         or return
     end
 
+    if contains -- bootable $mkosi_args
+        set bootable true
+    end
+
     set mkosi_cmd \
         $mkosi \
         --build-sources (string join , $build_sources) \
@@ -109,9 +113,7 @@ function mkosi_bld -d "Build a distribution using mkosi"
         --tools-tree $tools_tree \
         $mkosi_args
 
-    # If we are using a bootable image, output to $VM_FOLDER/mkosi/<image_id> by default
-    if contains -- bootable $mkosi_args; and not contains -- --output-directory $mkosi_args
-        if set image_id ($mkosi_cmd summary --json | python3 -c "import json, sys
+    if not set image_id ($mkosi_cmd summary --json | python3 -c "import json, sys
 mkosi_json = json.load(sys.stdin)
 for image in mkosi_json['Images']:
     if image['Image'] == 'main':
@@ -120,12 +122,15 @@ for image in mkosi_json['Images']:
 else:
     raise RuntimeError('No main image?')
 print(image_id)")
-            set bootable_output $VM_FOLDER/mkosi/$image_id
-            mkdir -p (path dirname $bootable_output)
-            set -a mkosi_cmd --output-directory $bootable_output
-        else
-            __print_warning "Cannot find image ID in mkosi summary output..."
-        end
+        __print_error "Cannot get image ID from 'mkosi summary'?"
+        return 1
+    end
+
+    # If we are using a bootable image, output to $VM_FOLDER/mkosi/<image_id> by default
+    if set -q bootable; and not contains -- --output-directory $mkosi_args
+        set bootable_output $VM_FOLDER/mkosi/$image_id
+        mkdir -p (path dirname $bootable_output)
+        set -a mkosi_cmd --output-directory $bootable_output
     end
 
     run0 $mkosi_cmd
@@ -136,8 +141,8 @@ print(image_id)")
     end
 
     # selinux contexts may get messed up, fix them if necessary
-    if test -e /sys/fs/selinux; and test (cat /sys/fs/selinux/enforce) = 1
-        set machine_dir /var/lib/machines/(string match -gr '^ImageId=(.*)' <$mkosi_conf)
+    if test -e /sys/fs/selinux; and test (cat /sys/fs/selinux/enforce) = 1; and not set -q bootable
+        set machine_dir /var/lib/machines/$image_id
         __tg_msg "root authorization needed to check SELinux context of $machine_dir"
         set context (run0 stat $machine_dir | string match -gr '^Context: (.*)$')
         if test "$context" != "system_u:object_r:unlabeled_t:s0"; and test "$context" != "system_u:object_r:systemd_machined_var_lib_t:s0"
