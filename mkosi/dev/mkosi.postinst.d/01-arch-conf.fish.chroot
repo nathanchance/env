@@ -44,6 +44,3 @@ Server = https://raw.githubusercontent.com/nathanchance/arch-repo/main/$arch' >>
 
     mv -v $new $old
 end
-
-echo 'permit nopass nathan as root' >/etc/doas.conf
-chmod 600 /etc/doas.conf
