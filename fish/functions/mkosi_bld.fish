@@ -100,7 +100,6 @@ function mkosi_bld -d "Build a distribution using mkosi"
         or return
     end
 
-
     set mkosi_cmd \
         $mkosi \
         --build-sources (string join , $build_sources) \
@@ -110,8 +109,31 @@ function mkosi_bld -d "Build a distribution using mkosi"
         --tools-tree $tools_tree \
         $mkosi_args
 
+    # If we are using a bootable image, output to $VM_FOLDER/mkosi/<image_id> by default
+    if contains -- bootable $mkosi_args; and not contains -- --output-directory $mkosi_args
+        if set image_id ($mkosi_cmd summary --json | python3 -c "import json, sys
+mkosi_json = json.load(sys.stdin)
+for image in mkosi_json['Images']:
+    if image['Image'] == 'main':
+        image_id = image['ImageId']
+        break
+else:
+    raise RuntimeError('No main image?')
+print(image_id)")
+            set bootable_output $VM_FOLDER/mkosi/$image_id
+            mkdir -p (path dirname $bootable_output)
+            set -a mkosi_cmd --output-directory $bootable_output
+        else
+            __print_warning "Cannot find image ID in mkosi summary output..."
+        end
+    end
+
     run0 $mkosi_cmd
     or return
+
+    if set -q bootable_output
+        run0 chown -R $USER:$USER $bootable_output
+    end
 
     # selinux contexts may get messed up, fix them if necessary
     if test -e /sys/fs/selinux; and test (cat /sys/fs/selinux/enforce) = 1
