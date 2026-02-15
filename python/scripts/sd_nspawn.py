@@ -25,7 +25,9 @@ DEF_MACH = {
     'x86_64': 'dev-arch',
 }
 
-DEV_KVM_ACCESS = os.access('/dev/kvm', os.R_OK | os.W_OK)
+
+def have_rw_access(path):
+    return os.access(path, os.R_OK | os.W_OK)
 
 
 class NspawnConfig(UserDict):
@@ -84,6 +86,9 @@ class NspawnConfig(UserDict):
         }
         rw_mounts = {
             '/dev/kvm',
+            '/dev/vhost-net',
+            '/dev/vhost-vsock',
+            '/dev/vsock',
             os.environ['NVME_FOLDER'],
             # Allow 'fzf --tmux' to work properly
             '/var/tmp/fzf',
@@ -268,14 +273,24 @@ class NspawnConfig(UserDict):
 
         # Allow containers started as services to access /dev/kvm to run
         # accelerated VMs, which allows avoiding installing QEMU in the host
-        # environment.
-        if DEV_KVM_ACCESS and not (kvm_conf := Path(
-                '/etc/systemd/system/systemd-nspawn@.service.d/kvm.conf')).exists():
-            kvm_conf_txt = ('[Service]\n'
-                            'DeviceAllow=/dev/kvm rw\n')
-            if not kvm_conf.parent.exists():
-                lib.utils.run0(['mkdir', '-p', kvm_conf.parent])
-            lib.utils.run0(['tee', kvm_conf], input=kvm_conf_txt)
+        # environment. Add /dev/vhost-vsock, /dev/vhost-net, and /dev/vsock if
+        # they exist and are readable/writable so that 'mkosi vm' works.
+        if not (kvm_conf :=
+                Path('/etc/systemd/system/systemd-nspawn@.service.d/kvm.conf')).exists():
+            needed_dev_mounts = (
+                '/dev/kvm',
+                '/dev/vhost-net',
+                '/dev/vhost-vsock',
+                '/dev/vsock',
+            )
+            available_dev_mounts = [mount for mount in needed_dev_mounts if have_rw_access(mount)]
+            if available_dev_mounts:
+                kvm_conf_txt_parts = ['[Service]\n'] + [
+                    f"DeviceAllow={mount} rw\n" for mount in available_dev_mounts
+                ]
+                if not kvm_conf.parent.exists():
+                    lib.utils.run0(['mkdir', '-p', kvm_conf.parent])
+                lib.utils.run0(['tee', kvm_conf], input=''.join(kvm_conf_txt_parts))
 
         # Allow my user to access 'machinectl shell' without authentication
         # rules.d can only be read by root so we need to use sudo to test
@@ -367,7 +382,7 @@ class NspawnConfig(UserDict):
             SYSTEMD_RUN_M,
             Path('/etc/polkit-1/rules.d', f"50-permit-{USER}-machinectl-shell.rules"),
         }
-        if DEV_KVM_ACCESS:
+        if have_rw_access('/dev/kvm'):
             setup_files.add(Path('/etc/systemd/system/systemd-nspawn@.service.d/kvm.conf'))
 
         if mode == 'machine':
