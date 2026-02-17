@@ -28,7 +28,7 @@ function run_mkosi -d "Run mkosi with various arguments"
     # dev-* images share a single directory, switching on '--distribution'
     if string match -qr ^dev- $image
         set distro (string split -f 2 - $image)
-        if not string match -qr -- --distribution $mkosi_args
+        if not contains -- --distribution $mkosi_args; and not contains -- -d $mkosi_args
             set -a mkosi_args --distribution $distro
         end
         set image dev
