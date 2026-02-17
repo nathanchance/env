@@ -702,6 +702,12 @@ def setup_libvirt(username, mkinitcpio_conf):
         mkinitcpio_conf['MODULES'].add('kvm_intel')
 
 
+def setup_modules_load_d():
+    if not (vsock_conf := Path('/etc/modules-load.d/vsock.conf')).exists():
+        vsock_conf.parent.mkdir(exist_ok=True)
+        vsock_conf.write_text("# Needed for 'mkosi ssh' and 'mkosi vm'\nvsock\n", encoding='utf-8')
+
+
 def setup_sudo(username):
     if not lib.setup.is_virtual_machine():
         return
@@ -874,3 +880,4 @@ if __name__ == '__main__':
         initcpio_conf['HOOKS'].discard('keyboard')
     initcpio_conf.update_if_necessary()
     lib.setup.setup_virtiofs_automount()
+    setup_modules_load_d()
