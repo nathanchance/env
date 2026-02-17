@@ -44,6 +44,14 @@ ALLOWLIST = {
         # Appears to be something with the particular NVMe used in this machine
         r"nvme nvme0: using unchecked data buffer",
     ],
+    'asus-intel-core-11700': [
+        # This is not a shared client machine and I prefer having SMT on
+        'MMIO Stale Data CPU bug present and SMT on, data leak possible',
+        # Firmware bug according to intel_epb_restore()?
+        "ENERGY_PERF_BIAS: Set to 'normal', was 'performance'",
+        # ?
+        r'spi-nor spi\d\.\d: supply vcc not found, using dummy regulator',
+    ],
     'framework-amd-ryzen-maxplus-395': [
         # The Framework Desktop does not have a PS2 port
         "i8042: Can't read CTR while initializing i8042",
