@@ -9,6 +9,7 @@
 # https://wiki.qemu.org/Documentation/Networking
 
 import grp
+import json
 import math
 import os
 import platform
@@ -208,12 +209,20 @@ class VirtualMachine:
             ]  # yapf: disable
 
         for image in self._images_to_mount:
-            args += ['-drive', f"if=virtio,format=qcow2,file={image}"]
+            args += ['-drive', f"if=virtio,format={self._get_image_format(image)},file={image}"]
 
         if self._use_kvm:
             args += ['-cpu', self._kvm_cpu, '-enable-kvm']
 
         return args
+
+    def _get_image_format(self, image):
+        qemu_img_cmd = ['qemu-img', 'info', '--output', 'json', image]
+        json_output = json.loads(lib.utils.chronic(qemu_img_cmd).stdout)
+
+        if (img_format := json_output['format']) in ('qcow2', 'raw'):
+            return img_format
+        raise ValueError(f"Unhandled image format: {img_format}")
 
     # Public interfaces
     def remove(self):
