@@ -14,6 +14,8 @@ function cbl_qualify_next -d "Run a series of checks to qualify new linux-next r
 
     systemctl --failed
 
+    set -e fish_trace
+
     set dmesg_cmd \
         klog \
         --filter \
