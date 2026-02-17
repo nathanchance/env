@@ -12,6 +12,11 @@ import lib.utils
 # pylint: enable=wrong-import-position
 
 BT_LE_CODED_PHY = r"Bluetooth: hci0: HCI LE Coded PHY feature bit is set, but its usage is not supported\."
+PCI_OF_ROOT_NODE = 'PCI: OF: of_root node is NULL, cannot create PCI host bridge node'
+AMDGPU_KVM_ERRORS = [
+    r"amdgpu [0-9a-f:.]+ \[drm\] Failed to setup vendor infoframe on connector HDMI\-A\-1: \-22",
+    r"amdgpu [0-9a-f:.]+ \[drm\] REG_WAIT timeout 1us \* 100000 tries \- optc\d+_disable_crtc line:\d+",
+]
 ALLOWLIST = {
     'common': [
         # Happens when using Arch's default configuration with LTO enabled
@@ -27,9 +32,6 @@ ALLOWLIST = {
         r"r8169 [0-9a-f:.]+ can't disable ASPM; OS doesn't have ASPM control",
         # Occasionally shows up under load
         r"hrtimer: interrupt took \d+ ns",
-        # Happens when using a KVM
-        r"amdgpu [0-9a-f:.]+ \[drm\] Failed to setup vendor infoframe on connector HDMI\-A\-1: \-22",
-        r"amdgpu [0-9a-f:.]+ \[drm\] REG_WAIT timeout 1us \* 100000 tries \- optc\d+_disable_crtc line:\d+",
         # Firmware bug according to intel_epb_restore()?
         "ENERGY_PERF_BIAS: Set to 'normal', was 'performance'",
         # ?
@@ -40,12 +42,13 @@ ALLOWLIST = {
         'hpet_acpi_add: no address or irqs in _CRS',
         # NVMe firmware issue?
         r"nvme nvme0: missing or invalid SUBNQN field\.",
-        # Both machines that have this message do not use OF as far as I understand
-        'PCI: OF: of_root node is NULL, cannot create PCI host bridge node',
         # Don't use IMA
         r"device\-mapper: core: CONFIG_IMA_DISABLE_HTABLE is disabled\. Duplicate IMA measurements will not be recorded in the IMA log\.",
     ],
     'aadp': [
+        # This machine does not use OF as far as I understand
+        PCI_OF_ROOT_NODE,
+        'PCI: OF: of_root node is NULL, cannot create PCI host bridge node',
         # Benign hardware warning?
         r"gpio-dwapb [A-Z0-9:]+ no IRQ for port0",
         # Expected given KPTI is on by default
@@ -63,6 +66,8 @@ ALLOWLIST = {
         'MMIO Stale Data CPU bug present and SMT on, data leak possible',
     ],
     'beelink-amd-ryzen-8745HS': [
+        # Happens when using a KVM
+        *AMDGPU_KVM_ERRORS,
         # BIOS bugs more than likely, don't care
         r"ACPI BIOS Error \(bug\): Failure creating named object \[\\_SB\.PCI0\.GPP5\.RTL8\._S0W\], AE_ALREADY_EXISTS \(20251212/dswload2\-327\)",
         r"ACPI Error: AE_ALREADY_EXISTS, During name lookup/catalog \(20251212/psobject\-220\)",
@@ -99,6 +104,8 @@ ALLOWLIST = {
         r"avs_(hdaudio|rt5663) avs_(hdaudio|rt5663)\.\d+\.auto: ASoC: Parent card not yet available, widget card binding deferred",
     ],
     'framework-amd-ryzen-maxplus-395': [
+        # Happens when using a KVM
+        *AMDGPU_KVM_ERRORS,
         # The Framework Desktop does not have a PS2 port
         "i8042: Can't read CTR while initializing i8042",
         'i8042 i8042: probe with driver i8042 failed with error -5',
@@ -106,6 +113,8 @@ ALLOWLIST = {
         r"Bluetooth: hci0: HCI Enhanced Setup Synchronous Connection command is advertised, but not supported\.",
     ],
     'honeycomb': [
+        # This machine does not use OF as far as I understand
+        PCI_OF_ROOT_NODE,
         # Firmware problem?
         r"arm\-smmu arm\-smmu\.\d\.auto: Failed to disable prefetcher for errata workarounds, check SACR\.CACHE_LOCK",
         # ?
