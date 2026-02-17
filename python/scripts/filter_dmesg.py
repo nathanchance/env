@@ -33,6 +33,12 @@ ALLOWLIST = {
         "ENERGY_PERF_BIAS: Set to 'normal', was 'performance'",
         # ?
         r'spi-nor spi\d\.\d: supply vcc not found, using dummy regulator',
+        # Don't care, I don't use SGX
+        r"x86/cpu: SGX disabled or unsupported by BIOS\.",
+        # BIOS issue?
+        'hpet_acpi_add: no address or irqs in _CRS',
+        # NVMe firmware issue?
+        r"nvme nvme0: missing or invalid SUBNQN field\.",
     ],
     'aadp': [
         # This machine does not use OF as far as I understand
@@ -68,15 +74,28 @@ ALLOWLIST = {
         r"ACPI BIOS Error \(bug\): Could not resolve symbol \[\\_SB\.PC00\.TXHC\.RHUB\.SS0\d\], AE_NOT_FOUND \(20251212/dswload2\-163\)",
         r"ACPI Error: AE_NOT_FOUND, During name lookup/catalog \(20251212/psobject\-220\)",
         r"ACPI: thermal: \[Firmware Bug\]: No valid trip points!",
-        'hpet_acpi_add: no address or irqs in _CRS',
         r"resource: resource sanity check: requesting \[mem 0x00000000fe000000\-0x00000000fe001fff\], which spans more than INTC1023:00 \[mem 0xfe001210\-0xfe001247\]",
         r"resource: resource sanity check: requesting \[mem 0x00000000fedc0000\-0x00000000fedcffff\], which spans more than PNP0C02:02 \[mem 0xfedc0000\-0xfedc7fff\]",
         r"caller generic_core_init\+[0-9a-f/x]+ \[intel_pmc_core\] mapping multiple BARs",
         r"caller igen6_probe\+[0-9a-f/x]+ \[igen6_edac\] mapping multiple BARs",
         r"ACPI Warning: \\_SB\.PC00\.CNVW\._DSM: Argument #4 type mismatch \- Found \[Buffer\], ACPI requires \[Package\] \(20251212/nsarguments\-61\)",
         r"ACPI Warning: \\_SB\.PC00\.XHCI\.RHUB\.HS10\._DSM: Argument #4 type mismatch \- Found \[Integer\], ACPI requires \[Package\] \(20251212/nsarguments\-61\)",
-        # NVMe firmware issue?
-        r"nvme nvme0: missing or invalid SUBNQN field\.",
+    ],
+    'chromebox3': [
+        # This machine is riddled with vulnerabilities because it is Kaby Lake, don't care
+        r"MDS CPU bug present and SMT on, data leak possible\. See https://www\.kernel\.org/doc/html/latest/admin\-guide/hw\-vuln/mds\.html for more details\.",
+        r"MMIO Stale Data CPU bug present and SMT on, data leak possible\. See https://www\.kernel\.org/doc/html/latest/admin\-guide/hw\-vuln/processor_mmio_stale_data\.html for more details\.",
+        r"VMSCAPE: SMT on, STIBP is required for full protection\. See https://www\.kernel\.org/doc/html/latest/admin\-guide/hw\-vuln/vmscape\.html for more details\.",
+        # Don't have any USB devices plugged into this machine on the regular
+        'usb: port power management may be unreliable',
+        # ?
+        r"cros\-ec\-cec cros\-ec\-cec\.\d\.auto: CEC notifier not configured for this hardware",
+        # Audio configuration problems but don't care because audio is not used on this machine
+        r"rt5663 i2c-[0-9A-F:]+ supply (?:a|cp)vdd not found, using dummy regulator",
+        r"rt5663 i2c-[0-9A-F:]+ sysclk < 384 x fs, disable i2s asrc",
+        r"snd_soc_avs [0-9a-z:.]+ Direct firmware load for intel/avs/hda\-8086280b\-tplg\.bin failed with error \-2",
+        r'snd_soc_avs [0-9a-z:.]+ request topology "intel/avs/hda\-8086280b\-tplg\.bin" failed: \-2',
+        r"avs_(hdaudio|rt5663) avs_(hdaudio|rt5663)\.\d+\.auto: ASoC: Parent card not yet available, widget card binding deferred",
     ],
     'framework-amd-ryzen-maxplus-395': [
         # The Framework Desktop does not have a PS2 port
