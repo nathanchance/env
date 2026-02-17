@@ -11,6 +11,7 @@ import lib.utils
 
 # pylint: enable=wrong-import-position
 
+BT_LE_CODED_PHY = r"Bluetooth: hci0: HCI LE Coded PHY feature bit is set, but its usage is not supported\."
 ALLOWLIST = {
     'common': [
         # Happens when using Arch's default configuration with LTO enabled
@@ -67,7 +68,7 @@ ALLOWLIST = {
         r"ACPI Error: AE_ALREADY_EXISTS, During name lookup/catalog \(20251212/psobject\-220\)",
         r"kvm_amd: \[Firmware Bug\]: Cannot enable x2AVIC, AVIC is unsupported",
         # Don't care, I don't use Bluetooth on this machine
-        r"Bluetooth: hci0: HCI LE Coded PHY feature bit is set, but its usage is not supported\.",
+        BT_LE_CODED_PHY,
     ],
     'beelink-intel-n100': [
         # Holy BIOS issues Batman!
@@ -115,6 +116,20 @@ ALLOWLIST = {
         r"fsl_mc_dpio dpio\.\d+: unknown SoC version",
         # Appears to be something with the particular NVMe used in this machine
         'nvme nvme0: using unchecked data buffer',
+    ],
+    'msi-intel-core-10210U': [
+        # Older Intel chip vulnerability
+        r"MMIO Stale Data CPU bug present and SMT on, data leak possible\. See https://www\.kernel\.org/doc/html/latest/admin\-guide/hw\-vuln/processor_mmio_stale_data\.html for more details\.",
+        # Old firmware with no upgrade path likely
+        r"msi_ec: Firmware version is not supported: '1551EMS1\.104'",
+        # Don't care, I don't use Bluetooth on this machine
+        BT_LE_CODED_PHY,
+        # Firmware issues, cannot care
+        r"ACPI BIOS Error \(bug\): Could not resolve symbol \[\^\^\^RP05\.PEGP\], AE_NOT_FOUND \(20251212/psargs\-332\)",
+        r"ACPI Error: Aborting method \\_SB\.PCI0\.LPCB\.EC\._QD1 due to previous error \(AE_NOT_FOUND\) \(20251212/psparse\-531\)",
+        r"ACPI Error: No handler for Region \[VRTC\] \(00000000aea3fc42\) \[SystemCMOS\] \(20251212/evregion\-131\)",
+        r"ACPI Error: Region SystemCMOS \(ID=5\) has no handler \(20251212/exfldio\-261\)",
+        r"ACPI Error: Aborting method \\_SB\.PCI0\.LPCB\.EC\._Q9A due to previous error \(AE_NOT_EXIST\) \(20251212/psparse\-531\)",
     ],
 }
 ANSI_STRIP = re.compile(r'(?:\x1B[@-_]|[\x80-\x9F])[0-?]*[ -/]*[@-~]')
