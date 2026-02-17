@@ -29,6 +29,10 @@ ALLOWLIST = {
         # Happens when using a KVM
         r"amdgpu [0-9a-f:.]+ \[drm\] Failed to setup vendor infoframe on connector HDMI\-A\-1: \-22",
         r"amdgpu [0-9a-f:.]+ \[drm\] REG_WAIT timeout 1us \* 100000 tries \- optc\d+_disable_crtc line:\d+",
+        # Firmware bug according to intel_epb_restore()?
+        "ENERGY_PERF_BIAS: Set to 'normal', was 'performance'",
+        # ?
+        r'spi-nor spi\d\.\d: supply vcc not found, using dummy regulator',
     ],
     'aadp': [
         # This machine does not use OF as far as I understand
@@ -50,10 +54,6 @@ ALLOWLIST = {
     'asus-intel-core-11700': [
         # This is not a shared client machine and I prefer having SMT on
         'MMIO Stale Data CPU bug present and SMT on, data leak possible',
-        # Firmware bug according to intel_epb_restore()?
-        "ENERGY_PERF_BIAS: Set to 'normal', was 'performance'",
-        # ?
-        r'spi-nor spi\d\.\d: supply vcc not found, using dummy regulator',
     ],
     'beelink-amd-ryzen-8745HS': [
         # BIOS bugs more than likely, don't care
@@ -62,6 +62,21 @@ ALLOWLIST = {
         r"kvm_amd: \[Firmware Bug\]: Cannot enable x2AVIC, AVIC is unsupported",
         # Don't care, I don't use Bluetooth on this machine
         r"Bluetooth: hci0: HCI LE Coded PHY feature bit is set, but its usage is not supported\.",
+    ],
+    'beelink-intel-n100': [
+        # Holy BIOS issues Batman!
+        r"ACPI BIOS Error \(bug\): Could not resolve symbol \[\\_SB\.PC00\.TXHC\.RHUB\.SS0\d\], AE_NOT_FOUND \(20251212/dswload2\-163\)",
+        r"ACPI Error: AE_NOT_FOUND, During name lookup/catalog \(20251212/psobject\-220\)",
+        r"ACPI: thermal: \[Firmware Bug\]: No valid trip points!",
+        'hpet_acpi_add: no address or irqs in _CRS',
+        r"resource: resource sanity check: requesting \[mem 0x00000000fe000000\-0x00000000fe001fff\], which spans more than INTC1023:00 \[mem 0xfe001210\-0xfe001247\]",
+        r"resource: resource sanity check: requesting \[mem 0x00000000fedc0000\-0x00000000fedcffff\], which spans more than PNP0C02:02 \[mem 0xfedc0000\-0xfedc7fff\]",
+        r"caller generic_core_init\+[0-9a-f/x]+ \[intel_pmc_core\] mapping multiple BARs",
+        r"caller igen6_probe\+[0-9a-f/x]+ \[igen6_edac\] mapping multiple BARs",
+        r"ACPI Warning: \\_SB\.PC00\.CNVW\._DSM: Argument #4 type mismatch \- Found \[Buffer\], ACPI requires \[Package\] \(20251212/nsarguments\-61\)",
+        r"ACPI Warning: \\_SB\.PC00\.XHCI\.RHUB\.HS10\._DSM: Argument #4 type mismatch \- Found \[Integer\], ACPI requires \[Package\] \(20251212/nsarguments\-61\)",
+        # NVMe firmware issue?
+        r"nvme nvme0: missing or invalid SUBNQN field\.",
     ],
     'framework-amd-ryzen-maxplus-395': [
         # The Framework Desktop does not have a PS2 port
