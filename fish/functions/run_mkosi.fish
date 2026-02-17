@@ -118,6 +118,7 @@ function run_mkosi -d "Run mkosi with various arguments"
         or return
     end
 
+    # Using a bootable profile
     if contains -- bootable $mkosi_args
         set bootable true
     end
