@@ -100,11 +100,8 @@ def prepare_source(base_name, base_ref='origin/master'):
 
     # Patching section
     # yapf: disable
-    if base_name == 'linux-mainline-llvm':
-        patches.append('https://git.linuxtv.org/media-ci/media-pending.git/patch/?id=679f0b7b6a409750a25754c8833e268e5fdde742')  # media: ccs: Avoid possible division by zero
-
-    # Distributed ThinLTO support ahead of acceptance in kbuild tree
     if base_name in NEXT_TREES:
+        # Distributed ThinLTO support ahead of acceptance in kbuild tree
         patches.append('https://lore.kernel.org/all/20251028182822.3210436-2-xur@google.com/')  # kbuild: move vmlinux.a build rule to scripts/Makefile.vmlinux_a
         patches.append('https://lore.kernel.org/all/20251028182822.3210436-3-xur@google.com/')  # kbuild: distributed build support for Clang ThinLTO
     # yapf: enable
