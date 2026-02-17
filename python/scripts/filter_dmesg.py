@@ -26,6 +26,9 @@ ALLOWLIST = {
         r"r8169 [0-9a-f:.]+ can't disable ASPM; OS doesn't have ASPM control",
         # Occasionally shows up under load
         r"hrtimer: interrupt took \d+ ns",
+        # Happens when using a KVM
+        r"amdgpu [0-9a-f:.]+ \[drm\] Failed to setup vendor infoframe on connector HDMI\-A\-1: \-22",
+        r"amdgpu [0-9a-f:.]+ \[drm\] REG_WAIT timeout 1us \* 100000 tries \- optc\d+_disable_crtc line:\d+",
     ],
     'aadp': [
         # This machine does not use OF as far as I understand
@@ -52,13 +55,18 @@ ALLOWLIST = {
         # ?
         r'spi-nor spi\d\.\d: supply vcc not found, using dummy regulator',
     ],
+    'beelink-amd-ryzen-8745HS': [
+        # BIOS bugs more than likely, don't care
+        r"ACPI BIOS Error \(bug\): Failure creating named object \[\\_SB\.PCI0\.GPP5\.RTL8\._S0W\], AE_ALREADY_EXISTS \(20251212/dswload2\-327\)",
+        r"ACPI Error: AE_ALREADY_EXISTS, During name lookup/catalog \(20251212/psobject\-220\)",
+        r"kvm_amd: \[Firmware Bug\]: Cannot enable x2AVIC, AVIC is unsupported",
+        # Don't care, I don't use Bluetooth on this machine
+        r"Bluetooth: hci0: HCI LE Coded PHY feature bit is set, but its usage is not supported\.",
+    ],
     'framework-amd-ryzen-maxplus-395': [
         # The Framework Desktop does not have a PS2 port
         "i8042: Can't read CTR while initializing i8042",
         'i8042 i8042: probe with driver i8042 failed with error -5',
-        # Happens when using a KVM
-        r"amdgpu [0-9a-f:.]+ \[drm\] Failed to setup vendor infoframe on connector HDMI\-A\-1: \-22",
-        r"amdgpu [0-9a-f:.]+ \[drm\] REG_WAIT timeout 1us \* 100000 tries \- optc35_disable_crtc line:\d+",
         # Don't care, I don't use Bluetooth on this machine
         r"Bluetooth: hci0: HCI Enhanced Setup Synchronous Connection command is advertised, but not supported\.",
     ],
