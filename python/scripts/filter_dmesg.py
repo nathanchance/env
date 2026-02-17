@@ -39,12 +39,12 @@ ALLOWLIST = {
         'hpet_acpi_add: no address or irqs in _CRS',
         # NVMe firmware issue?
         r"nvme nvme0: missing or invalid SUBNQN field\.",
-    ],
-    'aadp': [
-        # This machine does not use OF as far as I understand
+        # Both machines that have this message do not use OF as far as I understand
         'PCI: OF: of_root node is NULL, cannot create PCI host bridge node',
         # Don't use IMA
         r"device\-mapper: core: CONFIG_IMA_DISABLE_HTABLE is disabled\. Duplicate IMA measurements will not be recorded in the IMA log\.",
+    ],
+    'aadp': [
         # Benign hardware warning?
         r"gpio-dwapb [A-Z0-9:]+ no IRQ for port0",
         # Expected given KPTI is on by default
@@ -103,6 +103,18 @@ ALLOWLIST = {
         'i8042 i8042: probe with driver i8042 failed with error -5',
         # Don't care, I don't use Bluetooth on this machine
         r"Bluetooth: hci0: HCI Enhanced Setup Synchronous Connection command is advertised, but not supported\.",
+    ],
+    'honeycomb': [
+        # Firmware problem?
+        r"arm\-smmu arm\-smmu\.\d\.auto: Failed to disable prefetcher for errata workarounds, check SACR\.CACHE_LOCK",
+        # ?
+        r"fsl-mc dprc\.\d: DMA mask not set",
+        # Should not matter for my usage of this machine
+        r"ahci NXP[0-9:]+ supply (ahci|phy|target) not found, using dummy regulator",
+        # Needs fix upstream from downstream driver?
+        r"fsl_mc_dpio dpio\.\d+: unknown SoC version",
+        # Appears to be something with the particular NVMe used in this machine
+        'nvme nvme0: using unchecked data buffer',
     ],
 }
 ANSI_STRIP = re.compile(r'(?:\x1B[@-_]|[\x80-\x9F])[0-?]*[ -/]*[@-~]')
