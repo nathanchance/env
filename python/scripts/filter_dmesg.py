@@ -17,6 +17,15 @@ AMDGPU_KVM_ERRORS = [
     r"amdgpu [0-9a-f:.]+ \[drm\] Failed to setup vendor infoframe on connector HDMI\-A\-1: \-22",
     r"amdgpu [0-9a-f:.]+ \[drm\] REG_WAIT timeout 1us \* 100000 tries \- optc\d+_disable_crtc line:\d+",
 ]
+SYSTEMD_BPF_RESTRICT_FS = r"systemd\[1\]: bpf\-restrict\-fs: Failed to load BPF object: No such process"
+READ_ALL_WARNINGS = [
+    r"ICMPv6: process `read_all' is using deprecated sysctl \(syscall\) net\.ipv6\.neigh\.default\.base_reachable_time \- use net\.ipv6\.neigh\.default\.base_reachable_time_ms instead",
+    'NOTICE: Automounting of tracing to debugfs is deprecated and will be removed in 2030',
+    'WARNING! power/level is deprecated; use power/control instead',
+    r"block [a-z0-9]+: the capability attribute has been deprecated\.",
+    r"bdi [0-9a-f:]+ the stable_pages_required attribute has been removed\. Use the stable_writes queue attribute instead\.",
+    r"warning: `read_all' uses wireless extensions which will stop working for Wi\-Fi 7 hardware; use nl80211",
+]
 ALLOWLIST = {
     'common': [
         # Happens when using Arch's default configuration with LTO enabled
@@ -44,11 +53,12 @@ ALLOWLIST = {
         r"nvme nvme0: missing or invalid SUBNQN field\.",
         # Don't use IMA
         r"device\-mapper: core: CONFIG_IMA_DISABLE_HTABLE is disabled\. Duplicate IMA measurements will not be recorded in the IMA log\.",
+        # Warnings that appear when using read_all to read /sys and /proc
+        *READ_ALL_WARNINGS,
     ],
     'aadp': [
         # This machine does not use OF as far as I understand
         PCI_OF_ROOT_NODE,
-        'PCI: OF: of_root node is NULL, cannot create PCI host bridge node',
         # Benign hardware warning?
         r"gpio-dwapb [A-Z0-9:]+ no IRQ for port0",
         # Expected given KPTI is on by default
@@ -60,6 +70,16 @@ ALLOWLIST = {
         r"ipmi_ssif i2c-[A-Z0-9:]+ ipmi_ssif: Unable to start IPMI SSIF: \-19",
         # Appears to be something with the particular NVMe used in this machine
         r"nvme nvme0: using unchecked data buffer",
+        # New warning in 7.0, needs a bisect
+        r"ACPI: CPU\d+: Invalid FFH LPI data",
+        # BTF debug information is disabled because it takes extra time to build
+        # and even if it were present, my configuration does not have support for it:
+        # https://lore.kernel.org/20250610232418.GA3544567@ax162/
+        SYSTEMD_BPF_RESTRICT_FS,
+        # PCIe on this machine is wildly unreliable :/
+        r"nvme [0-9a-f:.]+ PCIe Bus Error: severity=Correctable, type=Physical Layer, \(Receiver ID\)",
+        r"nvme [0-9a-f:.]+\s+device \[[0-9a-f:]+\] error status/mask=00000001/0000e000",
+        r"nvme [0-9a-f:.]+\s+\[ 0\] RxErr\s+\(First\)",
     ],
     'asus-intel-core-11700': [
         # This is not a shared client machine and I prefer having SMT on
@@ -125,6 +145,10 @@ ALLOWLIST = {
         r"fsl_mc_dpio dpio\.\d+: unknown SoC version",
         # Appears to be something with the particular NVMe used in this machine
         'nvme nvme0: using unchecked data buffer',
+        # BTF debug information is disabled because it takes extra time to build
+        # and even if it were present, my configuration does not have support for it:
+        # https://lore.kernel.org/20250610232418.GA3544567@ax162/
+        SYSTEMD_BPF_RESTRICT_FS,
     ],
     'msi-intel-core-10210U': [
         # Older Intel chip vulnerability
@@ -136,7 +160,7 @@ ALLOWLIST = {
         # Firmware issues, cannot care
         r"ACPI BIOS Error \(bug\): Could not resolve symbol \[\^\^\^RP05\.PEGP\], AE_NOT_FOUND \(20251212/psargs\-332\)",
         r"ACPI Error: Aborting method \\_SB\.PCI0\.LPCB\.EC\._QD1 due to previous error \(AE_NOT_FOUND\) \(20251212/psparse\-531\)",
-        r"ACPI Error: No handler for Region \[VRTC\] \(00000000aea3fc42\) \[SystemCMOS\] \(20251212/evregion\-131\)",
+        r"ACPI Error: No handler for Region \[VRTC\] \([0-9a-f]+\) \[SystemCMOS\] \(20251212/evregion\-131\)",
         r"ACPI Error: Region SystemCMOS \(ID=5\) has no handler \(20251212/exfldio\-261\)",
         r"ACPI Error: Aborting method \\_SB\.PCI0\.LPCB\.EC\._Q9A due to previous error \(AE_NOT_EXIST\) \(20251212/psparse\-531\)",
     ],
