@@ -26,6 +26,11 @@ READ_ALL_WARNINGS = [
     r"bdi [0-9a-f:]+ the stable_pages_required attribute has been removed\. Use the stable_writes queue attribute instead\.",
     r"warning: `read_all' uses wireless extensions which will stop working for Wi\-Fi 7 hardware; use nl80211",
 ]
+NVME_WARNINGS = [
+    r"block nvme\dn\d: No UUID available providing old NGUID",
+    r"nvme nvme\d: missing or invalid SUBNQN field\.",
+    r"nvme nvme\d: using unchecked data buffer",
+]
 ALLOWLIST = {
     'common': [
         # Happens when using Arch's default configuration with LTO enabled
@@ -49,8 +54,8 @@ ALLOWLIST = {
         r"x86/cpu: SGX disabled or unsupported by BIOS\.",
         # BIOS issue?
         'hpet_acpi_add: no address or irqs in _CRS',
-        # NVMe firmware issue?
-        r"nvme nvme0: missing or invalid SUBNQN field\.",
+        # NVMe firmware issues?
+        *NVME_WARNINGS,
         # Don't use IMA
         r"device\-mapper: core: CONFIG_IMA_DISABLE_HTABLE is disabled\. Duplicate IMA measurements will not be recorded in the IMA log\.",
         # Warnings that appear when using read_all to read /sys and /proc
@@ -69,7 +74,6 @@ ALLOWLIST = {
         r"ipmi_ssif i2c-[A-Z0-9:]+ ipmi_ssif: Not present",
         r"ipmi_ssif i2c-[A-Z0-9:]+ ipmi_ssif: Unable to start IPMI SSIF: \-19",
         # Appears to be something with the particular NVMe used in this machine
-        r"nvme nvme0: using unchecked data buffer",
         # New warning in 7.0, needs a bisect
         r"ACPI: CPU\d+: Invalid FFH LPI data",
         # BTF debug information is disabled because it takes extra time to build
@@ -143,8 +147,6 @@ ALLOWLIST = {
         r"ahci NXP[0-9:]+ supply (ahci|phy|target) not found, using dummy regulator",
         # Needs fix upstream from downstream driver?
         r"fsl_mc_dpio dpio\.\d+: unknown SoC version",
-        # Appears to be something with the particular NVMe used in this machine
-        'nvme nvme0: using unchecked data buffer',
         # BTF debug information is disabled because it takes extra time to build
         # and even if it were present, my configuration does not have support for it:
         # https://lore.kernel.org/20250610232418.GA3544567@ax162/
