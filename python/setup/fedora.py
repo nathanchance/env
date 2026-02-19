@@ -102,6 +102,9 @@ def install_packages():
         'symlinks',
         'util-linux-user',
 
+        # b4
+        'git-filter-repo',
+
         # compression and decompression
         'unzip',
         'zstd',
