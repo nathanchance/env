@@ -16,14 +16,6 @@ function py_lint -d "Lint Python files"
         test -z "$files"; and return 0
     end
 
-    if not __in_venv
-        if not py_venv e main
-            __print_error "$command could not be found and no suitable virtual environment found!"
-            return 1
-        end
-        set ephemeral true
-    end
-
     set commands pylint vulture yapf
     if git ls-files | string match -qr 'ruff\.toml'
         set -a commands ruff
@@ -31,23 +23,16 @@ function py_lint -d "Lint Python files"
         set -a commands flake8
     end
 
-    for command in $commands
-        if not command -q $command
-            test $command = flake8; and set -a command flake8-bugbear
-            pip install $command
-        end
-    end
-
     # ruff is faster than flake8 and provides many of the benefits so use it when possible
     if contains ruff $commands
-        if ruff check $files
+        if uvx ruff check $files
             __print_green "\nruff clean"
         else
             __print_red "\nnot ruff clean"
         end
     else
         set -a flake8_ignore E501 # line too long
-        if flake8 \
+        if uvx flake8 \
                 --extend-ignore (string join , $flake8_ignore) \
                 $files
             __print_green "\nflake8 clean"
@@ -74,7 +59,7 @@ function py_lint -d "Lint Python files"
         set -a pylint_ignore R0915 # too-many-statements
         set -a pylint_ignore R0917 # too-many-positional-arguments
         set -a pylint_ignore W1509 # subprocess-popen-preexec-fn
-        if pylint \
+        if uvx pylint \
                 --disable (string join , $pylint_ignore) \
                 --jobs (nproc) \
                 $files
@@ -83,21 +68,14 @@ function py_lint -d "Lint Python files"
             __print_red "not pylint clean\n"
         end
     end
-    if vulture --min-confidence 80 $files
+    if uvx vulture --min-confidence 80 $files
         __print_green "vulture clean\n"
     else
         __print_red "\nnot vulture clean\n"
     end
-    if command -q yapf
-        # Purposefully avoid 'yapf' wrapper
-        if command yapf --diff --parallel $files
-            __print_green "yapf clean"
-        else
-            __print_red "\nnot yapf clean"
-        end
-    end
-
-    if set -q ephemeral
-        py_venv x
+    if uvx yapf --diff --parallel $files
+        __print_green "yapf clean"
+    else
+        __print_red "\nnot yapf clean"
     end
 end

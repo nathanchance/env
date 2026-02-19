@@ -6,6 +6,8 @@ import hashlib
 import re
 from pathlib import Path
 
+# Anything that imports this will need to use uv
+# pylint: disable-next=import-error
 import requests
 
 from . import utils

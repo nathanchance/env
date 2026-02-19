@@ -105,10 +105,14 @@ end
 set -gx MAIL_FOLDER $EXT_FOLDER/mail
 set -gx TMP_FOLDER $EXT_FOLDER/tmp
 set -gx VM_FOLDER $EXT_FOLDER/vm
-set -gx XDG_FOLDER $EXT_FOLDER/xdg
 
-set -gx CCACHE_DIR $XDG_FOLDER/config/ccache
-set -gx PY_VENV_DIR $XDG_FOLDER/share/py_venv
+set -gx XDG_FOLDER $EXT_FOLDER/xdg
+set -gx XDG_BIN_FOLDER $XDG_FOLDER/bin
+set -gx XDG_CACHE_FOLDER $XDG_FOLDER/cache
+set -gx XDG_CONFIG_FOLDER $XDG_FOLDER/config
+set -gx XDG_DATA_FOLDER $XDG_FOLDER/share
+
+set -gx CCACHE_DIR $XDG_CONFIG_FOLDER/ccache
 
 set -gx CBL_GIT $CBL/github
 set -gx CBL_LOGS $CBL/logs
@@ -298,6 +302,21 @@ set -gx TUXMAKE_PODMAN_RUN --pids-limit=-1
 # Move Rust folders into XDG_DATA_HOME
 set -gx CARGO_HOME $HOME/.local/share/cargo
 set -gx RUSTUP_HOME $HOME/.local/share/rustup
+
+# Customize uv
+set -l uv_root_dir $XDG_FOLDER/uv/$USER
+set -l uv_bin_dir $uv_root_dir/bin
+set -l uv_data_dir $uv_root_dir/share
+set -gx UV_CACHE_DIR $uv_root_dir/cache
+set -gx UV_INSTALL_DIR $uv_bin_dir/uv
+set -gx UV_NO_MODIFY_PATH 1 # handled by config.fish
+set -gx UV_PYTHON 3.14 # latest stable release
+set -gx UV_PYTHON_BIN_DIR $uv_bin_dir/python
+set -gx UV_PYTHON_CACHE_DIR $UV_CACHE_DIR
+set -gx UV_PYTHON_INSTALL_DIR $uv_data_dir/python
+set -gx UV_TOOL_BIN_DIR $uv_bin_dir/tools
+set -gx UV_TOOL_DIR $uv_data_dir/tools
+set -gx VIRTUAL_ENV_DISABLE_PROMPT 1 # _hydro_addon_nathan handles this gracefully
 
 # Valid arguments for cbl_bld_krnl_pkg
 set -gx VALID_ARCH_KRNLS {linux-,}{debug,{mainline,next}-llvm}

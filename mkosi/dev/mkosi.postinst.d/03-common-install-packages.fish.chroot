@@ -101,14 +101,6 @@ Signed-By: $llvm_gpg_key" >/etc/apt/sources.list.d/llvm-stable.sources
         curl -LSso /etc/yum.repos.d/gh-cli.repo https://cli.github.com/packages/rpm/gh-cli.repo
         or return
 
-        echo '[tuxmake]
-name=tuxmake
-type=rpm-md
-baseurl=https://tuxmake.org/packages/
-gpgcheck=1
-gpgkey=https://tuxmake.org/packages/repodata/repomd.xml.key
-enabled=1' >/etc/yum.repos.d/tuxmake.repo
-
         if command -q dnf5
             set dnf dnf5
         else
@@ -119,6 +111,5 @@ enabled=1' >/etc/yum.repos.d/tuxmake.repo
         or return
 
         $dnf install -y \
-            gh \
-            tuxmake
+            gh
 end

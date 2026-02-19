@@ -86,9 +86,6 @@ def install_packages():
 
         # repo
         'python',
-
-        # tuxmake
-        'tuxmake',
     ]  # yapf: disable
 
     if HOST_ARCH == 'x86_64':
@@ -113,15 +110,6 @@ def setup_sudo(username):
 
 def setup_repos():
     fedora.dnf_add_repo('https://cli.github.com/packages/rpm/gh-cli.repo')
-
-    tuxmake_repo_text = ('[tuxmake]\n'
-                         'name=tuxmake\n'
-                         'type=rpm-md\n'
-                         'baseurl=https://tuxmake.org/packages/\n'
-                         'gpgcheck=1\n'
-                         'gpgkey=https://tuxmake.org/packages/repodata/repomd.xml.key\n'
-                         'enabled=1\n')
-    Path('/etc/yum.repos.d/tuxmake.repo').write_text(tuxmake_repo_text, encoding='utf-8')
 
 
 if __name__ == '__main__':

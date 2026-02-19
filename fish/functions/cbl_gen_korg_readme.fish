@@ -3,14 +3,6 @@
 # Copyright (C) 2024 Nathan Chancellor
 
 function cbl_gen_korg_readme -d "Generate kernel.org toolchains README"
-    if not __in_venv
-        py_venv c e markdown
-        and pip install --upgrade \
-            markdown \
-            pip \
-            pymdown-extensions
-    end
-
     for arg in $argv
         switch $arg
             case -p --prompt-for-new-versions
@@ -74,7 +66,7 @@ function cbl_gen_korg_readme -d "Generate kernel.org toolchains README"
         sed -i "s;$old_ver;$new_ver;g" $md
     end
 
-    python -m markdown \
+    uvx --from markdown --with pymdown-extensions markdown_py \
         -f $lnx_html \
         -x pymdownx.superfences \
         -x tables \
@@ -84,8 +76,6 @@ function cbl_gen_korg_readme -d "Generate kernel.org toolchains README"
     rm -f $lnx_html.asc
     gpg --detach-sign --armor $lnx_html
     or return
-
-    py_venv x r markdown
 
     if set -q mac_html
         mac open $mac_html

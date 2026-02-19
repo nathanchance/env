@@ -7,5 +7,5 @@ function tuxmake -d "Call tuxmake with custom environment"
     set -fx XDG_CACHE_HOME $XDG_FOLDER/cache
     set -fx XDG_CONFIG_HOME $XDG_FOLDER/config
     set -fx XDG_DATA_HOME $XDG_FOLDER/share
-    command tuxmake $argv
+    uvx tuxmake $argv
 end

@@ -15,6 +15,7 @@ function updall -d "Update binaries in $BIN_FOLDER"
     end
 
     set -a targets \
+        b4 \
         bat \
         btop \
         diskus \
@@ -25,7 +26,7 @@ function updall -d "Update binaries in $BIN_FOLDER"
         fzf \
         repo \
         rg \
-        tmuxp \
+        uv \
         vim \
         zoxide
 

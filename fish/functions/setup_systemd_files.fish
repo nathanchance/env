@@ -26,7 +26,18 @@ function setup_systemd_files -d "Set up various systemd files"
                 set env_file $HOME/.config/environment.d/50-personal-env.conf
                 mkdir -p (path dirname $env_file)
 
-                for var in CBL_SRC_M NAS_FOLDER PYTHON_SCRIPTS_FOLDER
+                set passthrough_vars \
+                    CBL_SRC_M \
+                    NAS_FOLDER \
+                    PYTHON_SCRIPTS_FOLDER \
+                    UV_CACHE_DIR \
+                    UV_PYTHON_BIN_DIR \
+                    UV_PYTHON_CACHE_DIR \
+                    UV_PYTHON_INSTALL_DIR \
+                    UV_TOOL_BIN_DIR \
+                    UV_TOOL_DIR
+
+                for var in $passthrough_vars
                     printf "%s=%s\n" $var (nspawn_path -H $$var)
                 end >$env_file
 

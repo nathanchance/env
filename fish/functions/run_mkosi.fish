@@ -14,7 +14,7 @@ function run_mkosi -d "Run mkosi with various arguments"
         case '*'
             set verb $argv[1]
             set image $argv[2]
-            set mkosi_args $argv[3..]
+            set mkosi_user_args $argv[3..]
     end
 
     # Validate verb argument
@@ -28,7 +28,7 @@ function run_mkosi -d "Run mkosi with various arguments"
     # dev-* images share a single directory, switching on '--distribution'
     if string match -qr ^dev- $image
         set distro (string split -f 2 - $image)
-        if not contains -- --distribution $mkosi_args; and not contains -- -d $mkosi_args
+        if not contains -- --distribution $mkosi_user_args; and not contains -- -d $mkosi_user_args
             set -a mkosi_args --distribution $distro
         end
         set image dev
@@ -47,23 +47,77 @@ function run_mkosi -d "Run mkosi with various arguments"
         return 1
     end
 
-    # If mkosi is major version 25 or greater, we can use it directly.
-    # If it is not, we use a virtual environment for simple access.
-    # pgo-llvm-builder requires a patched mkosi, so require the venv
-    # for that.
-    if command -q mkosi; and test (mkosi --version | string match -gr '^mkosi ([0-9]+)') -ge 25; and not test (path basename $directory) = pgo-llvm-builder
-    else if not __in_venv
-        set venv_args e u
-        if not test -e $PY_VENV_DIR/mkosi
-            set -p venv_args c
-        end
-        py_venv $venv_args mkosi
+    # Download source code to use resources without consistent virtual environment
+    set mkosi_src $SRC_FOLDER/run_mkosi
+    if test -d $mkosi_src
+        set mkosi_src_old_sha (git -C $mkosi_src sha @{u})
+        git -C $mkosi_src urh &>/dev/null
+        set mkosi_src_new_sha (git -C $mkosi_src sha @{u})
+    else
+        mkdir -p (path dirname $mkosi_src)
+        git clone https://github.com/systemd/mkosi $mkosi_src
         or return
-    else if test (path basename $VIRTUAL_ENV) != mkosi
-        __print_error "Already in a virtual environment that is not mkosi?"
-        return 1
+        set mkosi_fresh_clone true
     end
-    set mkosi (command -v mkosi)
+
+    # Use a different uv prefix for root commands
+    set uv_default_root_dst $XDG_FOLDER/uv/root
+    set uv_default_root_env_cmd \
+        env \
+        UV_CACHE_DIR=$uv_default_root_dst/cache \
+        UV_PYTHON_BIN_DIR=$uv_default_root_dst/bin \
+        UV_PYTHON_CACHE_DIR=$uv_default_root_dst/cache \
+        UV_PYTHON_INSTALL_DIR=$uv_default_root_dst/python \
+        UV_TOOL_BIN_DIR=$uv_default_root_dst/bin \
+        UV_TOOL_DIR=$uv_default_root_dst/tools
+    # pgo-llvm-builder requires a patched mkosi because it is based on Debian Buster
+    if test (path basename $directory) = pgo-llvm-builder
+        set uv_proj_user_dst $XDG_FOLDER/uv/$USER/pgo-llvm-builder
+        set uv_proj_root_dst $XDG_FOLDER/uv/root/pgo-llvm-builder
+
+        set uv_user_env_cmd (string replace $uv_default_root_dst $uv_proj_user_dst $uv_default_root_env_cmd)
+        set uv_root_env_cmd (string replace $uv_default_root_dst $uv_proj_root_dst $uv_default_root_env_cmd)
+
+        if set -q mkosi_fresh_clone
+            or test $mkosi_src_old_sha != $mkosi_src_new_sha
+            or not test -x $uv_root_dst/bin/mkosi
+            or not test -x $uv_user_dst/bin/mkosi
+            set install_mkosi true
+        end
+
+        if set -q install_mkosi
+            begin
+                sed -i \
+                    -e "s;suite=f\"{context.config.release}-security\";suite=f\"{context.config.release}{'/updates' if context.config.release == 'buster' else '-security'}\";g" \
+                    -e "s;install_apt_sources(context, cls.repositories(context, for_image=True));install_apt_sources(context, cls.repositories(context));g" \
+                    $mkosi_src/mkosi/distribution/debian.py
+                and git -C $mkosi_src --no-pager diff HEAD
+                and $uv_user_env_cmd uv tool install --reinstall $mkosi_src
+                and $uv_root_env_cmd uv tool install --reinstall $mkosi_src
+                and git -C $mkosi_src reset --hard
+            end
+            or return
+        end
+    else
+        # user uses default environment values
+        set uv_root_env_cmd $uv_default_root_env_cmd
+        set uvx_args \
+            # not available on pypi
+            --from git+https://github.com/systemd/mkosi.git
+    end
+    set mkosi_user \
+        $uv_user_env_cmd \
+        uvx $uvx_args \
+        mkosi
+    set mkosi_root \
+        run0 \
+        $uv_root_env_cmd \
+        # 'command -v' as uvx may not be in root's PATH
+        (command -v uvx) $uvx_args \
+        mkosi
+
+    # ensure mkosi does not create root folders initially, as that might mess with permissions
+    mkdir -p (string match -er = $uv_root_env_cmd | string split -f 2 =)
 
     # Sources to mount for the build process
     set build_sources \
@@ -106,8 +160,8 @@ function run_mkosi -d "Run mkosi with various arguments"
     # Use common tools tree based on mkosi default value
     set tools_tree $env_mkosi/tools
     if not test -e $tools_tree/etc/resolv.conf
-        run0 $mkosi \
-            --directory (path dirname $mkosi)/../lib/python*/site-packages/mkosi/resources/mkosi-tools \
+        $mkosi_root \
+            --directory $mkosi_src/mkosi/resources/mkosi-tools \
             --format directory \
             --output (path basename $tools_tree) \
             --output-directory (path dirname $tools_tree) \
@@ -119,23 +173,29 @@ function run_mkosi -d "Run mkosi with various arguments"
     end
 
     # Using a bootable profile
-    if contains -- bootable $mkosi_args
+    if contains -- bootable $mkosi_user_args
         set bootable true
     end
 
     # Only truly dynamic arguments (namely from fish variables) should be added here.
-    set mkosi_cmd \
-        $mkosi \
+    set -a mkosi_args \
         --build-sources (string join , $build_sources) \
         --directory $directory \
         --package-cache-dir $mkosi_cache/$cache_dir \
         --tools-tree $tools_tree \
-        $mkosi_args
+        $mkosi_user_args
     if test "$verb" = build
-        set -a mkosi_cmd --force
+        set -a mkosi_args --force
     end
 
-    if not set image_id ($mkosi_cmd summary --json | python3 -c "import json, sys
+    set mkosi_user_cmd \
+        $mkosi_user \
+        $mkosi_args
+    set mkosi_root_cmd \
+        $mkosi_root \
+        $mkosi_args
+
+    if not set image_id ($mkosi_user_cmd summary --json | python3 -c "import json, sys
 mkosi_json = json.load(sys.stdin)
 for image in mkosi_json['Images']:
     if image['Image'] == 'main':
@@ -150,21 +210,21 @@ print(image_id)")
 
     if set -q bootable
         # Output to $VM_FOLDER/mkosi/<image_id> by default
-        if not contains -- --output-directory $mkosi_args
+        if not contains -- --output-directory $mkosi_user_args
             set bootable_output $VM_FOLDER/mkosi/$image_id
             mkdir -p (path dirname $bootable_output)
             set -a mkosi_root_cmd --output-directory $bootable_output
         end
         # Generate keys if they do not exit
         if not test -e $directory/mkosi.crt; or not test -e $directory/mkosi.key
-            $mkosi_cmd genkey
+            $mkosi_user_cmd genkey
             or return
 
             chmod 600 $directory/mkosi.{crt,key}
         end
     end
 
-    run0 $mkosi_cmd $verb
+    $mkosi_root_cmd $verb
     or return
 
     if test "$verb" = build

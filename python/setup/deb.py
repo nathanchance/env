@@ -130,11 +130,6 @@ def setup_locales():
 
 def update_and_install_packages(additional_packages=None):
     packages = [
-        # b4
-        'python3',
-        'python3-dkim',
-        'python3-requests',
-
         # doas
         'libpam0g',
 
@@ -153,7 +148,7 @@ def update_and_install_packages(additional_packages=None):
         'fish',
         'fzf',
         'jq',
-        'python3-pip',
+        'python3',
         'ripgrep',
         'stow',
         'tmux',
@@ -176,7 +171,6 @@ def update_and_install_packages(additional_packages=None):
         # mkosi / systemd-nspawn
         'patch',
         'polkitd',
-        'python3-venv',
         'systemd-container',
 
         # Remote work

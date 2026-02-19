@@ -426,10 +426,7 @@ def pacman_install_packages():
         'tio',
 
         # b4
-        'b4',
         'git-filter-repo',
-        'python-dkim',
-        'patatt',
 
         # Container tools
         'aardvark-dns',
@@ -438,14 +435,10 @@ def pacman_install_packages():
         'netavark',
         'podman',
 
-        # continuous-integration2 (generate.sh)
-        'python-yaml',
-
         # Development tools
         'dos2unix',
         'hyperfine',
         'patch',
-        'ruff',
         'vim',
         'vim-spell-en',
 
@@ -474,6 +467,7 @@ def pacman_install_packages():
         'stow',
         'tmux',
         'tmuxp',
+        'uv',
         'zoxide',
 
         # git

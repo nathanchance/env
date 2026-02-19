@@ -1,8 +1,15 @@
-#!/usr/bin/env python3
+#!/usr/bin/env -S uv run --script
+# /// script
+# requires-python = ">=3.9"
+# dependencies = [
+#     "requests>=2.32.5",
+#     "tuxmake>=1.36.0",
+# ]
+# ///
+
 # SPDX-License-Identifier: MIT
 # Copyright (C) 2023 Nathan Chancellor
 
-import contextlib
 import shutil
 import signal
 import sys
@@ -10,12 +17,11 @@ import time
 from argparse import ArgumentParser
 from pathlib import Path
 
-# we might be running '-h', just crash and burn later
-with contextlib.suppress(ImportError):
-    # pylint: disable-next=import-error,no-name-in-module
-    import tuxmake.build
-
 import korg_tc
+
+# uv ensures that this will always be present
+# pylint: disable-next=import-error,no-name-in-module
+import tuxmake.build
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 # pylint: disable-next=wrong-import-position

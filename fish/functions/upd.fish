@@ -9,6 +9,9 @@ function upd -d "Runs the update command for the current distro or downloads/upd
                 set force true
             case -y --yes
                 set yes -y
+            case uv
+                # ensure uv gets installed first because other things depend on it
+                set -p targets $arg
             case '*'
                 set -a targets $arg
         end
@@ -20,7 +23,7 @@ function upd -d "Runs the update command for the current distro or downloads/upd
 
     for target in $targets
         switch $target
-            case bat btop diskus duf eza fd fzf hyperfine repo rg shellcheck shfmt tmuxp zoxide
+            case b4 bat btop diskus duf eza fd fzf hyperfine repo rg shellcheck shfmt tmuxp uv zoxide
                 if test $LOCATION = mac
                     __print_warning "$target should be installed and updated via Homebrew, skipping..."
                     continue
@@ -32,6 +35,34 @@ function upd -d "Runs the update command for the current distro or downloads/upd
         end
 
         switch $target
+            case b4
+                if not __is_location_primary
+                    uv tool install --reinstall b4
+                    or return
+                    continue
+                end
+
+                set b4_src $SRC_FOLDER/b4
+                if test -d $b4_src
+                    set current_sha (git -C $b4_src sha @{u})
+                    git -C $b4_src urh &>/dev/null
+                    set updated_sha (git -C $b4_src sha @{u})
+                    set b4_bin (uv tool dir --bin)/b4
+                    if test $current_sha != $updated_sha; or not test -x $b4_bin
+                        set install_b4 true
+                    end
+                else
+                    mkdir -p (path dirname $b4_src)
+                    git clone https://git.kernel.org/pub/scm/utils/b4/b4.git/ $b4_src
+                    or return
+                    set install_b4 true
+                end
+                if set -q install_b4
+                    uv tool install --reinstall $b4_src
+                    or return
+                end
+                continue
+
             case env
                 if not __is_location_primary
                     git -C $ENV_FOLDER pull -qr
@@ -109,26 +140,6 @@ function upd -d "Runs the update command for the current distro or downloads/upd
 
                 continue
 
-            case tmuxp
-                if __in_container
-                    __print_warning "tmuxp should be installed while in the host environment, skipping..."
-                    continue
-                end
-
-                set -l tmuxp_tmp (mktemp -d)
-                python3 -m pip install --target $tmuxp_tmp tmuxp
-                or return
-
-                set -l tmuxp_prefix $BIN_FOLDER/tmuxp
-                rm -fr $tmuxp_prefix
-                mv -v $tmuxp_tmp $tmuxp_prefix
-                or return
-
-                env PYTHONPATH=$tmuxp_prefix $tmuxp_prefix/bin/tmuxp --version
-                or return
-
-                continue
-
             case vim
                 set vim_plugins \
                     https://github.com/blankname/vim-fish \
@@ -157,9 +168,6 @@ function upd -d "Runs the update command for the current distro or downloads/upd
             set man /usr/local/man
 
             set install run0 install
-
-            request_root "Installing software within container"
-            or return
         else
             set binary $BIN_FOLDER/$target
             set completions $__fish_user_data_dir/vendor_completions.d
@@ -417,6 +425,14 @@ function upd -d "Runs the update command for the current distro or downloads/upd
 
                 crl https://github.com/$repo/releases/download/$ver/shfmt_"$ver"_linux_$arch | $install -Dvm755 /dev/stdin $binary
                 or return
+
+            case uv
+                if command -q uv
+                    uv self update
+                else
+                    crl https://astral.sh/uv/install.sh | env UV_INSTALL_DIR=$UV_INSTALL_DIR UV_NO_MODIFY_PATH=1 sh
+                    fish_add_path -ag $UV_INSTALL_DIR
+                end
 
             case vmtest
                 switch $arch

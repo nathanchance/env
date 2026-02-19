@@ -1,4 +1,8 @@
-#!/usr/bin/env python3
+#!/usr/bin/env -S uv run --script
+# /// script
+# requires-python = ">=3.11"
+# dependencies = []
+# ///
 
 import hashlib
 import shutil
@@ -6,13 +10,9 @@ import sys
 from argparse import ArgumentParser
 from pathlib import Path
 
-if sys.version_info >= (3, 11, 0):
-    import tomllib
-else:
-    print(
-        f"{Path(sys.argv[0]).name} requires Python 3.11.0 or newer for tomllib (running {'.'.join(map(str, sys.version_info[0:3]))})",
-    )
-    sys.exit(1)
+# This will fail to import when linted with Python 3.10
+# pylint: disable-next=import-error
+import tomllib
 
 sys.path.append(str(Path(__file__).resolve().parents[1]))
 # pylint: disable=wrong-import-position

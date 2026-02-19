@@ -7,7 +7,6 @@ function tmuxp -d "Calls tmuxp based on how it is available"
         # installed via distro, just call directly
         command tmuxp $argv
     else
-        # installed in $BIN_FOLDER, need to point PYTHONPATH to it
-        env PYTHONPATH=$BIN_FOLDER/tmuxp tmuxp $argv
+        uvx tmuxp $argv
     end
 end

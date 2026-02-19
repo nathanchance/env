@@ -10,5 +10,5 @@ function git_py_files -d "Get Python files checked into current repository for l
     set files (git ls-files | string match -rv (status function).fish | path resolve | uniq | string replace "$PWD/" '')
 
     # Sort after ripgrep because sorting within ripgrep reduces parallelism
-    rg -l '#!/usr/bin/env python' $files | sort
+    rg -l '#!/usr/bin/(env )?(python|-S uv)' $files 2>/dev/null | path sort
 end

@@ -4,6 +4,14 @@
 
 set -e fish_user_paths
 
+# Only add uv installation folder to PATH if it was not present as a system binary
+if not command -q uv
+    fish_add_path -ag $UV_INSTALL_DIR
+    command -q uv
+    and uv generate-shell-completion fish | source
+end
+fish_add_path -ag $UV_PYTHON_BIN_DIR $UV_TOOL_BIN_DIR
+
 fish_add_path -ag $PYTHON_BIN_FOLDER
 
 start_ssh_agent

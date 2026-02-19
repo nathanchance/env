@@ -1,4 +1,11 @@
-#!/usr/bin/env python3
+#!/usr/bin/env -S uv run --script
+# /// script
+# requires-python = ">=3.9"
+# dependencies = [
+#     "requests>=2.32.5",
+# ]
+# ///
+
 # SPDX-License-Identifier: MIT
 # Copyright (C) 2024 Nathan Chancellor
 
@@ -10,6 +17,8 @@ import sys
 from argparse import ArgumentParser, BooleanOptionalAction
 from pathlib import Path
 
+# uv handles this for us
+# pylint: disable-next=import-error
 import requests
 
 sys.path.append(str(Path(__file__).resolve().parents[1]))
