@@ -148,11 +148,20 @@ print(image_id)")
         return 1
     end
 
-    # If we are using a bootable image, output to $VM_FOLDER/mkosi/<image_id> by default
-    if set -q bootable; and not contains -- --output-directory $mkosi_args
-        set bootable_output $VM_FOLDER/mkosi/$image_id
-        mkdir -p (path dirname $bootable_output)
-        set -a mkosi_cmd --output-directory $bootable_output
+    if set -q bootable
+        # Output to $VM_FOLDER/mkosi/<image_id> by default
+        if not contains -- --output-directory $mkosi_args
+            set bootable_output $VM_FOLDER/mkosi/$image_id
+            mkdir -p (path dirname $bootable_output)
+            set -a mkosi_root_cmd --output-directory $bootable_output
+        end
+        # Generate keys if they do not exit
+        if not test -e $directory/mkosi.crt; or not test -e $directory/mkosi.key
+            $mkosi_cmd genkey
+            or return
+
+            chmod 600 $directory/mkosi.{crt,key}
+        end
     end
 
     run0 $mkosi_cmd $verb

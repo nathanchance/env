@@ -1,1 +1,3 @@
 tools/
+*.crt
+*.key
