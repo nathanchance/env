@@ -90,15 +90,8 @@ function user_setup -d "Setup a user account, downloading all files and placing 
             end
         end
 
-        if test -f $HOME/.ssh/.ssh-agent.fish
-            start_ssh_agent; or return
-        else if test -S $OPT_ORB_GUEST/run/host-ssh-agent.sock
-            set -gx SSH_AUTH_SOCK $OPT_ORB_GUEST/run/host-ssh-agent.sock
-        else
-            if not ssh-add -l
-                ssh-add $HOME/.ssh/id_ed25519; or return
-            end
-        end
+        __connect_to_ssh_agent
+        or return
 
         # Switch back to SSH protocol for GitHub CLI
         if test "$first_time_gh" = true
@@ -315,7 +308,7 @@ rpmbuild/' >>$gitignore
                 tmux new-window fish -c "cbl_setup_linux_repos $linux_tree; or exec fish -l"
             end
 
-            tmux new-window fish -c "begin; start_ssh_agent; and cbl_setup_other_repos; end; or exec fish -l"
+            tmux new-window fish -c "begin; __connect_to_ssh_agent; and cbl_setup_other_repos; end; or exec fish -l"
     end
 
     if set -q github_repos

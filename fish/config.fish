@@ -14,7 +14,7 @@ fish_add_path -ag $UV_PYTHON_BIN_DIR $UV_TOOL_BIN_DIR
 
 fish_add_path -ag $PYTHON_BIN_FOLDER
 
-start_ssh_agent
+__connect_to_ssh_agent
 
 switch $LOCATION
     case mac
