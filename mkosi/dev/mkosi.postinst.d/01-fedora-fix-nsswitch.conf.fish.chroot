@@ -1,14 +1,20 @@
 #!/usr/bin/env fish
 # This script enables the nss-systemd plugin for the shadow and gshadow
 # databases, which allows systemd-nspawn's '--bind-user' to passthrough
-# the host user's login information to the container. This really should
-# be done in authselect upstream but there were some regressions that
-# should not really apply to my usage.
-# https://github.com/authselect/authselect/pull/380
-# https://github.com/authselect/authselect/issues/385
+# the host user's login information to the container. This has been done
+# in authselect upstream
+#
+#   https://github.com/authselect/authselect/commit/50b659f408ae8a6f87e066a7aef5685a1e3e7d10
+#
+# but that may not be present so do it manually if it is not.
 
 if test "$DISTRIBUTION" != fedora
     echo Only relevant for Fedora, skipping...
+    exit 0
+end
+
+if string match -qr '^shadow:.*systemd' </usr/share/authselect/default/local/nsswitch.conf
+    echo https://github.com/authselect/authselect/commit/50b659f408ae8a6f87e066a7aef5685a1e3e7d10 present already, skipping...
     exit 0
 end
 
