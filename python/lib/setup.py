@@ -611,6 +611,22 @@ def setup_virtiofs_automount(mountpoint='/mnt/host'):
     systemctl_enable(automount_path.name)
 
 
+def setup_ssh_agent(user_name):
+    if not Path('/usr/lib/systemd/user/ssh-agent.socket').exists():
+        return
+
+    systemctl_cmd = ['systemctl', '--global', 'is-enabled', '--quiet', 'ssh-agent.socket']
+    if not lib.utils.run_check_rc_zero(systemctl_cmd):
+        lib.utils.run(['systemctl', '--global', 'enable', 'ssh-agent.socket'])
+
+    if not (ssh_config := Path('/home', user_name, '.ssh/config')).exists():
+        old_umask = os.umask(0o077)
+        ssh_config.parent.mkdir(exist_ok=True, parents=True)
+        ssh_config.write_text('AddKeysToAgent yes\n', encoding='utf-8')
+        os.umask(old_umask)
+        chown(user_name, ssh_config.parent)
+
+
 def setup_ssh_authorized_keys(user_name):
     if not (ssh_authorized_keys := Path('/home', user_name, '.ssh/authorized_keys')).exists():
         old_umask = os.umask(0o077)

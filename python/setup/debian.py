@@ -169,6 +169,7 @@ if __name__ == '__main__':
     lib.setup.clone_env(user)
     lib.setup.set_date_time()
     lib.setup.setup_initial_fish_config(user)
+    lib.setup.setup_ssh_agent(user)
     lib.setup.setup_ssh_authorized_keys(user)
     lib.setup.setup_virtiofs_automount()
     # This must come last because installing systemd-resolved kills DNS until reboot

@@ -737,6 +737,7 @@ def setup_user(username, userpass):
 
         lib.setup.chpasswd(username, userpass)
 
+    lib.setup.setup_ssh_agent(username)
     lib.setup.setup_ssh_authorized_keys(username)
 
 
