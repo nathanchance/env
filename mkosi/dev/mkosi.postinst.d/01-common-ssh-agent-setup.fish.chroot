@@ -1,0 +1,17 @@
+#!/usr/bin/env fish
+
+set ssh_agent_socket /usr/lib/systemd/user/ssh-agent.socket
+if test -e $ssh_agent_socket
+    set ssh_agent_preset /etc/systemd/user-preset/00-ssh-agent.preset
+
+    mkdir -p (path dirname $ssh_agent_preset)
+    or return
+
+    echo 'enable '(path basename $ssh_agent_socket) >$ssh_agent_preset
+    or return
+
+    if git --no-pager diff --no-index /dev/null $ssh_agent_preset
+        echo "$ssh_agent_preset produced no diff?"
+        return 1
+    end
+end
