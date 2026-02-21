@@ -229,17 +229,21 @@ class NspawnConfig(UserDict):
         ]
 
     def _gen_run_cmd(self, cmd):
+        if self.systemd_version >= 258:  # https://github.com/systemd/systemd/issues/32997
+            # https://github.com/systemd/systemd/issues/34635#issuecomment-2394328990
+            machine_user_args = (f"{USER}@{self.name}", '--user')
+        else:
+            machine_user_args = (self.name, f"--uid={USER}")
         args = [
             SYSTEMD_RUN_M,
-            self.name,
+            # Run command as our user in the container
+            *machine_user_args,
             # We do not need our units to remain in memory
             '--collect',
             # Allowing interacting with stdin and seeing stdout/stderr
             '--pty',
             # Show no machinectl output
             '--quiet',
-            # Run command as our user
-            f"--uid={USER}",
             # Get return code of the process
             '--wait',
         ]
