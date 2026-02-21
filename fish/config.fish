@@ -106,5 +106,9 @@ bind alt-backspace backward-kill-word
 bind alt-left backward-word
 bind alt-right forward-word
 
+# Keep consistent behaviour between fish versions
+set -eU fish_key_bindings
+set -g fish_key_bindings fish_default_key_bindings
+
 # Make sure that sourcing config.fish always returns 0
 true
