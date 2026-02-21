@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# ruff: noqa: S108
 
 import os
 import platform
@@ -33,6 +32,12 @@ def have_rw_access(path):
 class NspawnConfig(UserDict):
 
     def __init__(self, name):
+        # Set systemd version. If this fails, it means we do not have nspawn
+        # installed or the output has changed, both of which need to be dealt
+        # with.
+        self.systemd_version = int(
+            lib.utils.chronic(['systemd-nspawn', '--version']).stdout.splitlines()[0].split()[1])
+
         # Initial static defaults
         super().__init__({
             'Exec': {
@@ -73,12 +78,6 @@ class NspawnConfig(UserDict):
         # Set machine path based on the name
         self.machine_dir = Path('/var/lib/machines', self.name)
 
-        # Set systemd version. If this fails, it means we do not have nspawn
-        # installed or the output has changed, both of which need to be dealt
-        # with.
-        self.systemd_version = int(
-            lib.utils.chronic(['systemd-nspawn', '--version']).stdout.splitlines()[0].split()[1])
-
     def _add_dynamic_mounts(self):
         automounted_mounts = {
             # We may be in a virtual machine
@@ -90,15 +89,8 @@ class NspawnConfig(UserDict):
             '/dev/vhost-vsock',
             '/dev/vsock',
             os.environ['NVME_FOLDER'],
-            # Allow 'fzf --tmux' to work properly
-            '/var/tmp/fzf',
         }
-        ro_mounts = {
-            # Broken in 258: https://github.com/systemd/systemd/issues/39037
-            # os.environ['OPT_ORB_GUEST'],
-            # Allow interacting with the host tmux socket
-            f"/var/tmp/tmux-{os.getuid()}",
-        }
+        ro_mounts = set()
 
         # If MAC_FOLDER is set in the environment, our NAS can be accessed from
         # there
@@ -121,26 +113,29 @@ class NspawnConfig(UserDict):
             # allows idmapping? https://github.com/systemd/systemd/issues/25886
             rw_mounts.add('/var/cache/pacman/pkg')
 
+        # '--bind-user' used to create a specific uid_map entry for the
+        # host user to the container user until systemd 258:
+        #
+        #   https://github.com/systemd/systemd/commit/852de7ed703655ad39321188fb3e8941a7fb8e0d
+        #
+        # Consequences of this change:
+        #
+        # - Sockets cannot be shared between host and container because
+        #   container's UID is different from the host's UID
+        #   https://github.com/systemd/systemd/issues/39037
+        # - certain shared mounts need to be owner idmapped
+        have_uid_map = self.systemd_version < 258
         for mount in rw_mounts:
-            # If it is a temporary directory that does not exist already, just
-            # created it so that the next checks passes.
-            if mount.startswith('/var/tmp'):
-                Path(mount).mkdir(exist_ok=True)
-
-            # '--bind-user' creates a specific uid_map entry for the host user
-            # to the container user, so idmapping is only necessary when a
-            # mount that is expected to be written to is not readable and
-            # writeable by the current user, such as '/var/cache/pacman/pkg',
-            # which needs to be written to as the host root user by the
-            # container root user. For mounts where the current user can read
-            # and write to, the mapping mentioned earlier makes everything work
-            # as expeced without 'idmap'. We special case automounted mounts
-            # because the os.access check may not pass if the folder has not
-            # been automounted yet.
-            if mount in automounted_mounts or os.access(mount, os.R_OK | os.W_OK):
+            # automounted mounts are special cased for idmapping purposes because
+            # they might not be mounted yet and they typically use file systems
+            # that might not use idmapping such as NFS or virtiofs.
+            # /dev mounts are special cased because they are marked rw by kvm.conf
+            # in install_files().
+            if mount in automounted_mounts or mount.startswith('/dev') or (
+                    have_uid_map and os.access(mount, os.R_OK | os.W_OK)):
                 item = mount
             else:
-                item = f"{mount}:{mount}:idmap"
+                item = f"{mount}:{mount}:owneridmap"
 
             # The mount must exist on the host otherwise the container will not
             # start
