@@ -61,7 +61,7 @@ function run_mkosi -d "Run mkosi with various arguments"
     end
 
     # Use a different uv prefix for root commands
-    set uv_default_root_dst $XDG_FOLDER/uv/root
+    set uv_default_root_dst $XDG_FOLDER/uv/run_mkosi
     set uv_default_root_env_cmd \
         env \
         UV_CACHE_DIR=$uv_default_root_dst/cache \
@@ -73,7 +73,7 @@ function run_mkosi -d "Run mkosi with various arguments"
     # pgo-llvm-builder requires a patched mkosi because it is based on Debian Buster
     if test (path basename $directory) = pgo-llvm-builder
         set uv_proj_user_dst $XDG_FOLDER/uv/$USER/pgo-llvm-builder
-        set uv_proj_root_dst $XDG_FOLDER/uv/root/pgo-llvm-builder
+        set uv_proj_root_dst $uv_default_root_dst/pgo-llvm-builder
 
         set uv_user_env_cmd (string replace $uv_default_root_dst $uv_proj_user_dst $uv_default_root_env_cmd)
         set uv_root_env_cmd (string replace $uv_default_root_dst $uv_proj_root_dst $uv_default_root_env_cmd)
