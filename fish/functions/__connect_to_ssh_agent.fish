@@ -40,10 +40,7 @@ function __connect_to_ssh_agent -d "Connect to an ssh-agent and load my SSH key"
     end
 
     if not set -q TMUX; and not __in_nspawn; and sd_nspawn --is-running
-        # This should really be sd_nspawn but for some reason, starting an agent
-        # with systemd-run and trying to access it with 'machinectl shell' does
-        # not work... oh well, this does :)
-        mchsh -c /bin/true
+        sd_nspawn -r /bin/true
     end
 
     if not test -e /etc/ephemeral
