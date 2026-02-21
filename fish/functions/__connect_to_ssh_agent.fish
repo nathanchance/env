@@ -13,13 +13,20 @@ function __connect_to_ssh_agent -d "Connect to an ssh-agent and load my SSH key"
     end
     or return 0
 
+    if set -q XDG_RUNTIME_DIR
+        set xdg_runtime_folder $XDG_RUNTIME_DIR
+    else
+        # This should only happen when using 'sd_nspawn -r' with systemd 257
+        # or older
+        set xdg_runtime_folder /run/user/(id -u)
+    end
     set possible_ssh_agent_sockets \
         # orbstack
         $OPT_ORB_GUEST/run/host-ssh-agent.sock \
         # Arch / Fedora
-        $XDG_RUNTIME_DIR/ssh-agent.socket \
+        $xdg_runtime_folder/ssh-agent.socket \
         # Debian
-        $XDG_RUNTIME_DIR/openssh_agent
+        $xdg_runtime_folder/openssh_agent
 
     for ssh_agent_socket in $possible_ssh_agent_sockets
         if test -S $ssh_agent_socket; and test (stat -c %u $ssh_agent_socket) = (id -u)
