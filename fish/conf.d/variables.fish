@@ -314,6 +314,7 @@ set -gx UV_PYTHON 3.14 # latest stable release
 set -gx UV_PYTHON_BIN_DIR $uv_bin_dir/python
 set -gx UV_PYTHON_CACHE_DIR $UV_CACHE_DIR
 set -gx UV_PYTHON_INSTALL_DIR $uv_data_dir/python
+set -gx UV_PYTHON_PREFERENCE only-managed
 set -gx UV_TOOL_BIN_DIR $uv_bin_dir/tools
 set -gx UV_TOOL_DIR $uv_data_dir/tools
 set -gx VIRTUAL_ENV_DISABLE_PROMPT 1 # _hydro_addon_nathan handles this gracefully
