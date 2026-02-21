@@ -186,6 +186,9 @@ function run_mkosi -d "Run mkosi with various arguments"
         $mkosi_user_args
     if test "$verb" = build
         set -a mkosi_args --force
+        if test -d $NVME_FOLDER
+            set -a mkosi_args --environment NVME_FOLDER=$NVME_FOLDER
+        end
     end
 
     set mkosi_user_cmd \

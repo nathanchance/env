@@ -1,0 +1,19 @@
+#!/usr/bin/env fish
+# Ensure the $NVME_FOLDER can be owneridmapped into a container by
+# creating the mountpoint in the container and making the owner be
+# the mounted user's UID, which we know will be 65014 per systemd's
+# documentation:
+# https://github.com/systemd/systemd/blob/v259/docs/UIDS-GIDS.md#summary
+
+if not set -q NVME_FOLDER
+    echo NVME_FOLDER not set, skipping...
+    return 0
+end
+if string match -qr bootable $PROFILES
+    echo Not relevant for bootable profile, skipping...
+    return 0
+end
+
+mkdir $NVME_FOLDER
+chown 60514 $NVME_FOLDER
+ls -l /mnt
