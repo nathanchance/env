@@ -62,7 +62,7 @@ ALLOWLIST = {
         *READ_ALL_WARNINGS,
     ],
     'aadp': [
-        # This machine does not use OF as far as I understand
+        # This machine uses ACPI so no of_root is expected
         PCI_OF_ROOT_NODE,
         # Benign hardware warning?
         r"gpio-dwapb [A-Z0-9:]+ no IRQ for port0",
@@ -137,7 +137,7 @@ ALLOWLIST = {
         r"Bluetooth: hci0: HCI Enhanced Setup Synchronous Connection command is advertised, but not supported\.",
     ],
     'honeycomb': [
-        # This machine does not use OF as far as I understand
+        # This machine uses ACPI so no of_root is expected
         PCI_OF_ROOT_NODE,
         # Firmware problem?
         r"arm\-smmu arm\-smmu\.\d\.auto: Failed to disable prefetcher for errata workarounds, check SACR\.CACHE_LOCK",
