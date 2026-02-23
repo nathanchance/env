@@ -198,16 +198,20 @@ function run_mkosi -d "Run mkosi with various arguments"
         $mkosi_root \
         $mkosi_args
 
-    if not set image_id ($mkosi_user_cmd summary --json | python3 -c "import json, sys
+    $mkosi_user_cmd summary --json | python3 -c "import json, sys
 mkosi_json = json.load(sys.stdin)
 for image in mkosi_json['Images']:
     if image['Image'] == 'main':
         image_id = image['ImageId']
+        distribution = image['Distribution']
         break
 else:
     raise RuntimeError('No main image?')
-print(image_id)")
-        __print_error "Cannot get image ID from 'mkosi summary'?"
+print(image_id)
+print(distribution)" | read -L image_id distribution
+    set ret $pipestatus
+    if test $ret[2] -ne 0
+        __print_error "Error trying to parse output from 'mkosi summary'?"
         return 1
     end
 
@@ -227,8 +231,29 @@ print(image_id)")
         end
     end
 
+    # If running Arch on Arch, we need the alpm system user to have the same
+    # UID as the one on the host to ensure idmapping works. Do this with a
+    # sysusers.d override via a skeleton tree.
+    if test (__get_distro) = arch; and test "$distribution" = arch
+        if test -e $directory/mkosi.skeleton
+            set default_skeleton_dir $directory/mkosi.skeleton
+        end
+        set src_alpm_conf /usr/lib/sysusers.d/alpm.conf
+        set arch_skeleton_dir $directory/mkosi.skeleton.arch
+        set dst_alpm_conf $arch_skeleton_dir(string replace /usr/lib /etc $src_alpm_conf)
+
+        # create directory fresh each invocation to ensure it is always up to date
+        rm -fr $arch_skeleton_dir
+        mkdir -p (path dirname $dst_alpm_conf)
+        string replace 'u alpm -' 'u alpm '(id -u alpm) <$src_alpm_conf >$dst_alpm_conf
+
+        set -a mkosi_root_cmd --skeleton-tree (string join , $default_skeleton_dir $arch_skeleton_dir)
+    end
+
+    set fish_trace 1
     $mkosi_root_cmd $verb
     or return
+    set -e fish_trace
 
     if test "$verb" = build
         if set -q bootable_output

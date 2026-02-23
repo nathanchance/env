@@ -123,19 +123,25 @@ class NspawnConfig(UserDict):
         # - Sockets cannot be shared between host and container because
         #   container's UID is different from the host's UID
         #   https://github.com/systemd/systemd/issues/39037
-        # - certain shared mounts need to be owner idmapped
+        # - certain shared mounts need to be idmapped
         have_uid_map = self.systemd_version < 258
         for mount in rw_mounts:
-            # automounted mounts are special cased for idmapping purposes because
-            # they might not be mounted yet and they typically use file systems
-            # that might not use idmapping such as NFS or virtiofs.
-            # /dev mounts are special cased because they are marked rw by kvm.conf
-            # in install_files().
+            # automounted mounts are special cased for idmapping purposes
+            # because they might not be mounted yet and they typically use file
+            # systems that might not use idmapping such as NFS or virtiofs.
+            # /dev mounts are special cased because they are marked rw by
+            # kvm.conf in install_files().
             if mount in automounted_mounts or mount.startswith('/dev') or (
                     have_uid_map and os.access(mount, os.R_OK | os.W_OK)):
                 item = mount
-            else:
+            elif mount == os.environ['NVME_FOLDER']:
+                # The host user owns this mount and a script in
+                # mkosi/dev/mkosi.postinst.d ensures that the mountpoint is
+                # owned by the host user's '--bind-user' UID, so it needs to be
+                # owner idmapped for proper permissions.
                 item = f"{mount}:{mount}:owneridmap"
+            else:
+                item = f"{mount}:{mount}:idmap"
 
             # The mount must exist on the host otherwise the container will not
             # start

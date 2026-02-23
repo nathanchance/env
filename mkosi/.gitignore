@@ -1,3 +1,4 @@
+mkosi.skeleton.arch/
 tools/
 *.crt
 *.key
