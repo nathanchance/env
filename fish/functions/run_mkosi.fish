@@ -108,6 +108,11 @@ function run_mkosi -d "Run mkosi with various arguments"
             end
             or return
         end
+
+        # Mount previously downloaded Linux tarballs into the container to help
+        # speed up builds
+        set -a build_sources \
+            $CBL_TC_BLD/src:/tc-build-src
     else
         # user uses default environment values
         set uv_root_env_cmd $uv_default_root_env_cmd
@@ -134,7 +139,7 @@ function run_mkosi -d "Run mkosi with various arguments"
     end
 
     # Sources to mount for the build process
-    set build_sources \
+    set -a build_sources \
         # We may need to use custom functions from our Python framework
         $PYTHON_FOLDER:/python \
         # We may need to look at the configuration of the host

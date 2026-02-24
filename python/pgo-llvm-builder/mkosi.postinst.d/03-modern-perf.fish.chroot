@@ -33,7 +33,13 @@ switch (string match -gr '\.(\w+)$' $url)
         return 1
 end
 
-curl -LSs $url | tar -C $workdir --strip-components=1 -xf - $tar_comp_arg
+set local_tar $SRCDIR/tc-build-src/(path basename $url)
+if test -e $local_tar
+    set get_tar_cmd cat $local_tar
+else
+    set get_tar_cmd curl -LSs $url
+end
+$get_tar_cmd | tar -C $workdir --strip-components=1 -xf - $tar_comp_arg
 or return
 
 if test -e $workdir/tools/bpf/bpftool/sign.c
