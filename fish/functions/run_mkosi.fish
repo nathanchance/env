@@ -60,8 +60,16 @@ function run_mkosi -d "Run mkosi with various arguments"
         set mkosi_fresh_clone true
     end
 
+    # Contain everything related to mkosi to a single folder for easy auditing and reset
+    set xdg_uv_run_mkosi $XDG_FOLDER/uv/run_mkosi
     # Use a different uv prefix for root commands
-    set uv_default_root_dst $XDG_FOLDER/uv/run_mkosi
+    if __in_container
+        # $XDG_FOLDER may be on an idmapped mount where root in the container
+        # may not equal root on the host so use /var/cache in this case.
+        set uv_default_root_dst /var/cache/run_mkosi/uv
+    else
+        set uv_default_root_dst $xdg_uv_run_mkosi/host
+    end
     set uv_default_root_env_cmd \
         env \
         UV_CACHE_DIR=$uv_default_root_dst/cache \
@@ -72,16 +80,16 @@ function run_mkosi -d "Run mkosi with various arguments"
         UV_TOOL_DIR=$uv_default_root_dst/tools
     # pgo-llvm-builder requires a patched mkosi because it is based on Debian Buster
     if test (path basename $directory) = pgo-llvm-builder
-        set uv_proj_user_dst $XDG_FOLDER/uv/$USER/pgo-llvm-builder
-        set uv_proj_root_dst $uv_default_root_dst/pgo-llvm-builder
+        set uv_proj_user_dst $xdg_uv_run_mkosi/pgo-llvm-builder/$USER
+        set uv_proj_root_dst $xdg_uv_run_mkosi/pgo-llvm-builder/root
 
         set uv_user_env_cmd (string replace $uv_default_root_dst $uv_proj_user_dst $uv_default_root_env_cmd)
         set uv_root_env_cmd (string replace $uv_default_root_dst $uv_proj_root_dst $uv_default_root_env_cmd)
 
         if set -q mkosi_fresh_clone
             or test $mkosi_src_old_sha != $mkosi_src_new_sha
-            or not test -x $uv_root_dst/bin/mkosi
-            or not test -x $uv_user_dst/bin/mkosi
+            or not test -x $uv_proj_root_dst/bin/mkosi
+            or not test -x $uv_proj_user_dst/bin/mkosi
             set install_mkosi true
         end
 
@@ -92,6 +100,8 @@ function run_mkosi -d "Run mkosi with various arguments"
                     -e "s;install_apt_sources(context, cls.repositories(context, for_image=True));install_apt_sources(context, cls.repositories(context));g" \
                     $mkosi_src/mkosi/distribution/debian.py
                 and git -C $mkosi_src --no-pager diff HEAD
+                # user must come first in case directories are created for the
+                # first time so that they have proper permissions
                 and $uv_user_env_cmd uv tool install --reinstall $mkosi_src
                 and $uv_root_env_cmd uv tool install --reinstall $mkosi_src
                 and git -C $mkosi_src reset --hard
@@ -116,8 +126,12 @@ function run_mkosi -d "Run mkosi with various arguments"
         (command -v uvx) $uvx_args \
         mkosi
 
-    # ensure mkosi does not create root folders initially, as that might mess with permissions
-    mkdir -p (string match -er = $uv_root_env_cmd | string split -f 2 =)
+    if not __in_container
+        # ensure mkosi does not create root folders initially when running on
+        # the host, as it may cause $XDG_FOLDER/uv to have root ownership,
+        # messing with regular user operation
+        mkdir -p (string match -er = $uv_root_env_cmd | string split -f 2 =)
+    end
 
     # Sources to mount for the build process
     set build_sources \
