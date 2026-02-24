@@ -208,6 +208,9 @@ function run_mkosi -d "Run mkosi with various arguments"
         if test -d $NVME_FOLDER
             set -a mkosi_args --environment NVME_FOLDER=$NVME_FOLDER
         end
+        if test -d $HOST_FOLDER
+            set -a mkosi_args --environment HOST_FOLDER=$HOST_FOLDER
+        end
     end
 
     set mkosi_user_cmd \

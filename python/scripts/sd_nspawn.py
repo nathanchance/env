@@ -79,16 +79,15 @@ class NspawnConfig(UserDict):
         self.machine_dir = Path('/var/lib/machines', self.name)
 
     def _add_dynamic_mounts(self):
-        automounted_mounts = {
-            # We may be in a virtual machine
-            os.environ['HOST_FOLDER'],
-        }
+        automounted_mounts = set()
         rw_mounts = {
             '/dev/kvm',
             '/dev/vhost-net',
             '/dev/vhost-vsock',
             '/dev/vsock',
             os.environ['NVME_FOLDER'],
+            # We may be in a virtual machine
+            os.environ['HOST_FOLDER'],
         }
         ro_mounts = set()
 
@@ -134,9 +133,9 @@ class NspawnConfig(UserDict):
             if mount in automounted_mounts or mount.startswith('/dev') or (
                     have_uid_map and os.access(mount, os.R_OK | os.W_OK)):
                 item = mount
-            elif mount == os.environ['NVME_FOLDER']:
-                # The host user owns this mount and a script in
-                # mkosi/dev/mkosi.postinst.d ensures that the mountpoint is
+            elif mount in (os.environ['NVME_FOLDER'], os.environ['HOST_FOLDER']):
+                # The host user owns these mounts and a script in
+                # mkosi/dev/mkosi.postinst.d ensures that the mountpoints are
                 # owned by the host user's '--bind-user' UID, so it needs to be
                 # owner idmapped for proper permissions.
                 item = f"{mount}:{mount}:owneridmap"

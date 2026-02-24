@@ -1,0 +1,22 @@
+#!/usr/bin/env fish
+# Ensure that folders can be owneridmapped into a container by
+# creating the mountpoints in the container and making the owner be
+# the mounted user's UID, which we know will be 65014 per systemd's
+# documentation:
+# https://github.com/systemd/systemd/blob/v259/docs/UIDS-GIDS.md#summary
+
+if string match -qr bootable $PROFILES
+    echo Not relevant for bootable profile, skipping...
+    return 0
+end
+for folder_var in NVME_FOLDER HOST_FOLDER
+    if not set -q $folder_var
+        echo $folder_var not set, skipping...
+        continue
+    end
+
+    set folder $$folder_var
+    mkdir $folder
+    chown 60514:60514 $folder
+    ls -l /mnt
+end
