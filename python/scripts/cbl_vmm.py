@@ -275,8 +275,16 @@ class VirtualMachine:
         ]  # yapf: disable
         if lib.utils.in_nspawn():
             # In systemd-nspawn, our host UID is different from the guest
-            # UID, so we need to map it to avoid permission errors.
-            virtiofsd_cmd += ['--translate-uid', f"map:1000:{os.getuid()}:1"]
+            # UID, so we need to translate it to avoid permission errors.
+            host_uid = 1000  # this should be generally true
+            nspawn_uid = os.getuid()
+            nspawn_gid = os.getgid()
+            virtiofsd_cmd += [
+                '--translate-gid', f"squash-guest:0:{nspawn_gid}:4294967295",
+                '--translate-gid', f"host:{nspawn_gid}:{host_uid}:1",
+                '--translate-uid', f"squash-guest:0:{nspawn_uid}:4294967295",
+                '--translate-uid', f"host:{nspawn_uid}:{host_uid}:1",
+            ]  # yapf: disable
 
         # Ensure shared folder is created before sharing
         self._shared_folder.mkdir(exist_ok=True, parents=True)
