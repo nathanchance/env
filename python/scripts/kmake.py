@@ -90,8 +90,8 @@ if __name__ == '__main__':
                 hostldflags.append(f"--ld-path={lld_path}")
         # Avoid .sframe mismatch error
         # https://lore.kernel.org/59805735-5e41-44b7-a250-5bedcb80a75e@oracle.com/
-        elif '--discard-sframe' in lib.utils.chronic(['ld', '--help']).stdout:
-            hostldflags.append('-Wl,--discard-sframe')
+        # elif '--discard-sframe' in lib.utils.chronic(['ld', '--help']).stdout:
+        #     hostldflags.append('-Wl,--discard-sframe')
         if hostldflags:
             variables['HOSTLDFLAGS'] = ' '.join(hostldflags)
 
