@@ -53,7 +53,7 @@ else:
         cmds = [['-Syyu']]
         yes_arg = '--noconfirm'
 
-    elif os_rel['ID'] in ('almalinux', 'fedora', 'rocky'):
+    elif os_rel['ID'] in ('almalinux', 'fedora', 'fedora-asahi-remix', 'rocky'):
         cmd_func = lib.setup.dnf
         cmds = [['update']]
 
