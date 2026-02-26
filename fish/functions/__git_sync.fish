@@ -9,7 +9,11 @@ function __git_sync -d "Deletes merged branches and syncs fork with upstream"
         set repo $argv[1]
     end
 
-    git sw main; or return
+    if not set main_branch (git symbolic-ref refs/remotes/origin/HEAD)
+        __print_error "Could not get main branch?"
+        return 1
+    end
+    git sw (string replace 'refs/remotes/origin/' '' $main_branch); or return
     git pull; or return
     git dmb
     gh repo sync --force nathanchance/$repo
