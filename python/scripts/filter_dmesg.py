@@ -116,6 +116,7 @@ ALLOWLIST = {
         r"MDS CPU bug present and SMT on, data leak possible\. See https://www\.kernel\.org/doc/html/latest/admin\-guide/hw\-vuln/mds\.html for more details\.",
         r"MMIO Stale Data CPU bug present and SMT on, data leak possible\. See https://www\.kernel\.org/doc/html/latest/admin\-guide/hw\-vuln/processor_mmio_stale_data\.html for more details\.",
         r"VMSCAPE: SMT on, STIBP is required for full protection\. See https://www\.kernel\.org/doc/html/latest/admin\-guide/hw\-vuln/vmscape\.html for more details\.",
+        r"L1TF CPU bug present and SMT on, data leak possible\. See CVE\-2018\-3646 and https://www\.kernel\.org/doc/html/latest/admin\-guide/hw\-vuln/l1tf\.html for details\.",
         # Don't have any USB devices plugged into this machine on the regular
         'usb: port power management may be unreliable',
         # ?
