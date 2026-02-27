@@ -8,11 +8,6 @@
 #
 # but that may not be present so do it manually if it is not.
 
-if test "$DISTRIBUTION" != fedora
-    echo Only relevant for Fedora, skipping...
-    exit 0
-end
-
 if string match -qr '^shadow:.*systemd' </usr/share/authselect/default/local/nsswitch.conf
     echo https://github.com/authselect/authselect/commit/50b659f408ae8a6f87e066a7aef5685a1e3e7d10 present already, skipping...
     exit 0
