@@ -4,9 +4,6 @@ from os import environ as env
 from pathlib import Path
 import sys
 
-if env['DISTRIBUTION'] != 'arch':
-    sys.exit(0)
-
 EXPECTED_MOUNTS = (
     ((PYTHON_FOLDER := Path(env['SRCDIR'], 'python')), 'PYTHON_FOLDER'),
     ((ETC := Path(env['SRCDIR'], 'etc')), '/etc'),

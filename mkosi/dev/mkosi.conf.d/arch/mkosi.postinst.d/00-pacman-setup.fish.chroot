@@ -1,10 +1,5 @@
 #!/usr/bin/env fish
 
-if test "$DISTRIBUTION" != arch
-    echo Only relevant for Arch Linux, skipping...
-    exit 0
-end
-
 # Fetch a mirrorlist
 curl -LSs https://archlinux.org/mirrorlist/?country=FI&country=DE&country=US&protocol=http&protocol=https&ip_version=4 &| string replace -r '^#' '' >/etc/pacman.d/mirrorlist
 
