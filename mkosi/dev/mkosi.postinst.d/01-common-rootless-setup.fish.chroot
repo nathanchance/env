@@ -5,6 +5,8 @@ switch $DISTRIBUTION
         echo 'permit nopass nathan as root' >/etc/doas.conf
         chmod 600 /etc/doas.conf
 
+        echo 'session         optional        pam_umask.so' | tee -a /etc/pam.d/doas
+
     case debian
         echo 'nathan ALL=(ALL) NOPASSWD: ALL' >/etc/sudoers.d/00_nathan
 
