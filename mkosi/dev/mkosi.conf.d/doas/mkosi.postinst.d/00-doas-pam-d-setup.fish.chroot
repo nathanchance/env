@@ -1,0 +1,14 @@
+#!/usr/bin/env fish
+
+string match -qr 'session(?<first>\s+)include(?<second>\s+)' </etc/pam.d/doas
+or begin
+    cat /etc/pam.d/doas
+    echo Cannot find session include in /etc/pam.d/doas?
+    return 1
+end
+
+set doas_pam /etc/pam.d/doas
+cp $doas_pam{,.new}
+echo session"$first"optional(string replace -r '^ ' '' $second)pam_umask.so >>$doas_pam.new
+git --no-pager diff --no-index $doas_pam{,.new}
+mv $doas_pam{.new,}
