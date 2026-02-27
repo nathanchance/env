@@ -68,6 +68,7 @@ def generate_warnings(log_folder, src_folder):
     merge_config_ignore = [
         'CPU_BIG_ENDIAN',
         'LTO_CLANG_THIN',
+        'PREEMPT',
         'SQUASHFS_DECOMP_SINGLE',
         'SQUASHFS_DECOMP_MULTI',
         'SQUASHFS_DECOMP_MULTI_PERCPU',
