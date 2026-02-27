@@ -3,5 +3,7 @@
 # Copyright (C) 2021-2023 Nathan Chancellor
 
 function fish_format -d "Format all fish files in directory with fish_indent"
-    fd -e fish -x fish_indent -w
+    rg -l '#!/usr/bin/(env )?fish' | while read -l file
+        fish_indent -w $file
+    end
 end
