@@ -2,13 +2,7 @@
 
 switch $DISTRIBUTION
     case arch
-        echo 'permit nopass nathan as root' >/etc/doas.conf
-        chmod 600 /etc/doas.conf
-
         echo 'session         optional        pam_umask.so' | tee -a /etc/pam.d/doas
-
-    case debian
-        echo 'nathan ALL=(ALL) NOPASSWD: ALL' >/etc/sudoers.d/00_nathan
 
     case fedora
         rm -f /etc/dnf/protected.d/sudo.conf
@@ -25,11 +19,6 @@ switch $DISTRIBUTION
         end
 
         ln -frsv /usr/{bin/doas,local/bin/sudo}
-
-        set doas_conf /etc/doas.conf
-        echo 'permit nopass nathan as root' >$doas_conf
-        chmod 600 $doas_conf
-        git --no-pager diff --no-index /dev/null $doas_conf
 
         set doas_pam /etc/pam.d/doas
         cp $doas_pam{,.new}
