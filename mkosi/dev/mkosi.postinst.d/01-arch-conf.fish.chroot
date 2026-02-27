@@ -5,7 +5,7 @@ if test "$DISTRIBUTION" != arch
     exit 0
 end
 
-for conf in makepkg pacman
+for conf in pacman
     set old /etc/$conf.conf
     set pacnew /etc/$conf.conf.pacnew
     set new /etc/$conf.conf.new
@@ -17,10 +17,6 @@ for conf in makepkg pacman
     end
 
     switch $conf
-        case makepkg
-            sed -i 's/^#MAKEFLAGS="-j2"/MAKEFLAGS="-j$(nproc)"/g' $new
-            sed -i 's/^!ccache/ccache/g' $new
-
         case pacman
             sed -i 's/^CheckSpace/#CheckSpace/g' $new
             sed -i 's/^#VerbosePkgLists/VerbosePkgLists/g' $new
