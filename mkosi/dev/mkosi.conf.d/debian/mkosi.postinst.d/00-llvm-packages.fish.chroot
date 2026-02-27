@@ -1,10 +1,5 @@
 #!/usr/bin/env fish
 
-if test "$DISTRIBUTION" != debian
-    echo Only relevant for Debian, skipping...
-    return 0
-end
-
 set llvm_main_version (curl -fLSs https://raw.githubusercontent.com/llvm/llvm-project/main/cmake/Modules/LLVMVersion.cmake | string match -gr 'set\(LLVM_VERSION_MAJOR (\d+)\)'; or echo 20)
 and set llvm_stable_version (math $llvm_main_version - 1)
 and switch $ARCHITECTURE
