@@ -37,7 +37,7 @@ Server = https://raw.githubusercontent.com/nathanchance/arch-repo/main/$arch' >>
     end
 
     if command -q git
-        git diff --no-index $old $new
+        git --no-pager diff --no-index $old $new
     else
         diff -Naur $old $new
     end
