@@ -4,7 +4,7 @@
 set zstd_version 1.5.7
 set workdir (mktemp -d)
 
-wget -O - -q https://github.com/facebook/zstd/releases/download/v$zstd_version/zstd-$zstd_version.tar.gz | tar -C $workdir  --strip-components=1 -xzvf -
+wget -O - -q https://github.com/facebook/zstd/releases/download/v$zstd_version/zstd-$zstd_version.tar.gz | tar -C $workdir --strip-components=1 -xzvf -
 or return
 
 for subdir in lib programs
