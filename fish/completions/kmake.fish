@@ -185,7 +185,7 @@ function __kmake_pos_args
 
     set packages \
         {,bin,src}{rpm,deb}-pkg \
-        {pacman,dir,tar}-pkg \
+        {pacman,dir,tar,modules-cpio}-pkg \
         tar{,gz,bz2,xz,zst}-pkg \
         perf-tar{,gz,bz2,xz,zst}-src-pkg
 
