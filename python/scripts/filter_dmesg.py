@@ -93,7 +93,7 @@ ALLOWLIST = {
         # Happens when using a KVM
         *AMDGPU_KVM_ERRORS,
         # BIOS bugs more than likely, don't care
-        r"ACPI BIOS Error \(bug\): Failure creating named object \[\\_SB\.PCI0\.GPP5\.RTL8\._S0W\], AE_ALREADY_EXISTS \(20251212/dswload2\-327\)",
+        r"ACPI BIOS Error \(bug\): Failure creating named object \[\\_SB\.PCI0\.GPP5\.RTL8\._S0W\], AE_ALREADY_EXISTS \(20251212/dswload2\-\d+\)",
         r"ACPI Error: AE_ALREADY_EXISTS, During name lookup/catalog \(20251212/psobject\-220\)",
         r"kvm_amd: \[Firmware Bug\]: Cannot enable x2AVIC, AVIC is unsupported",
         # Don't care, I don't use Bluetooth on this machine
