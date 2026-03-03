@@ -107,6 +107,80 @@ def prepare_source(base_name, base_ref='origin/master'):
     # yapf: enable
 
     try:
+        # Manually revert f246ec3478cf ("x86/apic: Enable TSC coupled
+        # programming mode") due to conflicts with 4c652a47722f ("rseq: Mark
+        # rseq_arm_slice_extension_timer() __always_inline")
+        # https://lore.kernel.org/20260303012905.GA978396@ax162/
+        if base_name == 'linux-next-llvm':
+            commit_range = 'f246ec3478cfdab830ee0815209f48923e7ee5e2^..9213aa4784cf4e63e6d8d30ba71fd61c3d110247'
+            range_diff = lib.utils.call_git(source_folder, ['diff', commit_range]).stdout
+
+            apply_cmd = ['apply', '--3way', '--reverse', '--exclude', 'include/linux/rseq_entry.h']
+            lib.utils.call_git_loud(source_folder, apply_cmd, input=range_diff)
+
+            rseq_entry_h_diff = '''\
+diff --git a/include/linux/rseq_entry.h b/include/linux/rseq_entry.h
+index f11ebd34f8b9..c6831c93cd6e 100644
+--- a/include/linux/rseq_entry.h
++++ b/include/linux/rseq_entry.h
+@@ -40,7 +40,6 @@ DECLARE_PER_CPU(struct rseq_stats, rseq_stats);
+ #endif /* !CONFIG_RSEQ_STATS */
+ 
+ #ifdef CONFIG_RSEQ
+-#include <linux/hrtimer_rearm.h>
+ #include <linux/jump_label.h>
+ #include <linux/rseq.h>
+ #include <linux/sched/signal.h>
+@@ -111,7 +110,7 @@ static __always_inline void rseq_slice_clear_grant(struct task_struct *t)
+ 	t->rseq.slice.state.granted = false;
+ }
+ 
+-static __always_inline bool __rseq_grant_slice_extension(bool work_pending)
++static __always_inline bool rseq_grant_slice_extension(bool work_pending)
+ {
+ 	struct task_struct *curr = current;
+ 	struct rseq_slice_ctrl usr_ctrl;
+@@ -216,20 +215,11 @@ static __always_inline bool __rseq_grant_slice_extension(bool work_pending)
+ 	return false;
+ }
+ 
+-static __always_inline bool rseq_grant_slice_extension(unsigned long ti_work, unsigned long mask)
+-{
+-	if (unlikely(__rseq_grant_slice_extension(ti_work & mask))) {
+-		hrtimer_rearm_deferred_tif(ti_work);
+-		return true;
+-	}
+-	return false;
+-}
+-
+ #else /* CONFIG_RSEQ_SLICE_EXTENSION */
+ static __always_inline bool rseq_slice_extension_enabled(void) { return false; }
+ static __always_inline bool rseq_arm_slice_extension_timer(void) { return false; }
+ static __always_inline void rseq_slice_clear_grant(struct task_struct *t) { }
+-static __always_inline bool rseq_grant_slice_extension(unsigned long ti_work, unsigned long mask) { return false; }
++static __always_inline bool rseq_grant_slice_extension(bool work_pending) { return false; }
+ #endif /* !CONFIG_RSEQ_SLICE_EXTENSION */
+ 
+ bool rseq_debug_update_user_cs(struct task_struct *t, struct pt_regs *regs, unsigned long csaddr);
+@@ -788,7 +778,7 @@ static inline void rseq_syscall_exit_to_user_mode(void) { }
+ static inline void rseq_irqentry_exit_to_user_mode(void) { }
+ static inline void rseq_exit_to_user_mode_legacy(void) { }
+ static inline void rseq_debug_syscall_return(struct pt_regs *regs) { }
+-static inline bool rseq_grant_slice_extension(unsigned long ti_work, unsigned long mask) { return false; }
++static inline bool rseq_grant_slice_extension(bool work_pending) { return false; }
+ #endif /* !CONFIG_RSEQ */
+ 
+ #endif /* _LINUX_RSEQ_ENTRY_H */
+'''  # noqa: E101,W293
+            lib.utils.call_git_loud(source_folder, ['apply', '--3way'], input=rseq_entry_h_diff)
+
+            commit_msg = '''\
+Revert 'x86/apic: Enable TSC coupled programming mode' and dependent changes
+
+Link: https://lore.kernel.org/20260303012905.GA978396@ax162/
+'''
+            lib.utils.call_git_loud(source_folder, ['commit', '--no-gpg-sign', '-m', commit_msg])
+
         for revert in reverts:
             if isinstance(revert, tuple):
                 commit_range = revert[0]
