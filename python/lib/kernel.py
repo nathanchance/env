@@ -100,7 +100,14 @@ def prepare_source(base_name, base_ref='origin/master'):
 
     # Patching section
     # yapf: disable
+    if base_name == 'linux-next-llvm':
+        # https://lore.kernel.org/20260303060752.GA2749263@ax162/
+        patches.append('https://lore.kernel.org/all/5087839.31r3eYUQgx@rafael.j.wysocki/raw')  # rtc: cmos: Use platform_get_irq_optional() in cmos_platform_probe()
+
     if base_name in NEXT_TREES:
+        # https://lore.kernel.org/CAJnrk1Zj=U7DkaQRRfbqqAUQ3+3R2hS6agtj5iOLKO5+ucBRmg@mail.gmail.com/
+        commits.append('c97997de00edcc805958688437bf7212a5d46544')   # REPORTED: fixup! fuse: simplify logic in fuse_notify_store() and fuse_retrieve()
+
         # Distributed ThinLTO support ahead of acceptance in kbuild tree
         patches.append('https://lore.kernel.org/all/20251028182822.3210436-2-xur@google.com/')  # kbuild: move vmlinux.a build rule to scripts/Makefile.vmlinux_a
         patches.append('https://lore.kernel.org/all/20251028182822.3210436-3-xur@google.com/')  # kbuild: distributed build support for Clang ThinLTO
