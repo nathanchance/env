@@ -109,7 +109,7 @@ ALLOWLIST = {
         r"ACPI: thermal: \[Firmware Bug\]: No valid trip points!",
         r"resource: resource sanity check: requesting \[mem 0x00000000fe000000\-0x00000000fe001fff\], which spans more than INTC1023:00 \[mem 0xfe001210\-0xfe001247\]",
         r"resource: resource sanity check: requesting \[mem 0x00000000fedc0000\-0x00000000fedcffff\], which spans more than PNP0C02:02 \[mem 0xfedc0000\-0xfedc7fff\]",
-        r"caller generic_core_init\+[0-9a-f/x]+ \[intel_pmc_core\] mapping multiple BARs",
+        r"caller (?:generic_core_init|get_primary_reg_base)\+[0-9a-f/x]+ \[intel_pmc_core\] mapping multiple BARs",
         r"caller igen6_probe\+[0-9a-f/x]+ \[igen6_edac\] mapping multiple BARs",
         r"ACPI Warning: \\_SB\.PC00\.CNVW\._DSM: Argument #4 type mismatch \- Found \[Buffer\], ACPI requires \[Package\] \(\d+/nsarguments\-\d+\)",
         r"ACPI Warning: \\_SB\.PC00\.XHCI\.RHUB\.HS10\._DSM: Argument #4 type mismatch \- Found \[Integer\], ACPI requires \[Package\] \(\d+/nsarguments\-\d+\)",
