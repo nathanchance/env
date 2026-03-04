@@ -152,6 +152,8 @@ ALLOWLIST = {
         # and even if it were present, my configuration does not have support for it:
         # https://lore.kernel.org/20250610232418.GA3544567@ax162/
         SYSTEMD_BPF_RESTRICT_FS,
+        # ?
+        'driver: Idle state 1 target residency too low',
     ],
     'msi-intel-core-10210U': [
         # Older Intel chip vulnerability
