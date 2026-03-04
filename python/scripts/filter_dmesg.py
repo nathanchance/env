@@ -96,23 +96,23 @@ ALLOWLIST = {
         # Happens when using a KVM
         *AMDGPU_KVM_ERRORS,
         # BIOS bugs more than likely, don't care
-        r"ACPI BIOS Error \(bug\): Failure creating named object \[\\_SB\.PCI0\.GPP5\.RTL8\._S0W\], AE_ALREADY_EXISTS \(20251212/dswload2\-\d+\)",
-        r"ACPI Error: AE_ALREADY_EXISTS, During name lookup/catalog \(20251212/psobject\-220\)",
+        r"ACPI BIOS Error \(bug\): Failure creating named object \[\\_SB\.PCI0\.GPP5\.RTL8\._S0W\], AE_ALREADY_EXISTS \(\d+/dswload2\-\d+\)",
+        r"ACPI Error: AE_ALREADY_EXISTS, During name lookup/catalog \(\d+/psobject\-\d+\)",
         r"kvm_amd: \[Firmware Bug\]: Cannot enable x2AVIC, AVIC is unsupported",
         # Don't care, I don't use Bluetooth on this machine
         BT_LE_CODED_PHY,
     ],
     'beelink-intel-n100': [
         # Holy BIOS issues Batman!
-        r"ACPI BIOS Error \(bug\): Could not resolve symbol \[\\_SB\.PC00\.TXHC\.RHUB\.SS0\d\], AE_NOT_FOUND \(20251212/dswload2\-163\)",
+        r"ACPI BIOS Error \(bug\): Could not resolve symbol \[\\_SB\.PC00\.TXHC\.RHUB\.SS0\d\], AE_NOT_FOUND \(\d+/dswload2\-\d+\)",
         r"ACPI Error: AE_NOT_FOUND, During name lookup/catalog \(20251212/psobject\-220\)",
         r"ACPI: thermal: \[Firmware Bug\]: No valid trip points!",
         r"resource: resource sanity check: requesting \[mem 0x00000000fe000000\-0x00000000fe001fff\], which spans more than INTC1023:00 \[mem 0xfe001210\-0xfe001247\]",
         r"resource: resource sanity check: requesting \[mem 0x00000000fedc0000\-0x00000000fedcffff\], which spans more than PNP0C02:02 \[mem 0xfedc0000\-0xfedc7fff\]",
         r"caller generic_core_init\+[0-9a-f/x]+ \[intel_pmc_core\] mapping multiple BARs",
         r"caller igen6_probe\+[0-9a-f/x]+ \[igen6_edac\] mapping multiple BARs",
-        r"ACPI Warning: \\_SB\.PC00\.CNVW\._DSM: Argument #4 type mismatch \- Found \[Buffer\], ACPI requires \[Package\] \(20251212/nsarguments\-61\)",
-        r"ACPI Warning: \\_SB\.PC00\.XHCI\.RHUB\.HS10\._DSM: Argument #4 type mismatch \- Found \[Integer\], ACPI requires \[Package\] \(20251212/nsarguments\-61\)",
+        r"ACPI Warning: \\_SB\.PC00\.CNVW\._DSM: Argument #4 type mismatch \- Found \[Buffer\], ACPI requires \[Package\] \(\d+/nsarguments\-\d+\)",
+        r"ACPI Warning: \\_SB\.PC00\.XHCI\.RHUB\.HS10\._DSM: Argument #4 type mismatch \- Found \[Integer\], ACPI requires \[Package\] \(\d+/nsarguments\-\d+\)",
     ],
     'chromebox3': [
         # This machine is riddled with vulnerabilities because it is Kaby Lake, don't care
@@ -166,11 +166,11 @@ ALLOWLIST = {
         # Don't care, I don't use Bluetooth on this machine
         BT_LE_CODED_PHY,
         # Firmware issues, cannot care
-        r"ACPI BIOS Error \(bug\): Could not resolve symbol \[\^\^\^RP05\.PEGP\], AE_NOT_FOUND \(20251212/psargs\-332\)",
-        r"ACPI Error: Aborting method \\_SB\.PCI0\.LPCB\.EC\._QD1 due to previous error \(AE_NOT_FOUND\) \(20251212/psparse\-531\)",
-        r"ACPI Error: No handler for Region \[VRTC\] \([0-9a-f]+\) \[SystemCMOS\] \(20251212/evregion\-131\)",
-        r"ACPI Error: Region SystemCMOS \(ID=5\) has no handler \(20251212/exfldio\-261\)",
-        r"ACPI Error: Aborting method \\_SB\.PCI0\.LPCB\.EC\._Q9A due to previous error \(AE_NOT_EXIST\) \(20251212/psparse\-531\)",
+        r"ACPI BIOS Error \(bug\): Could not resolve symbol \[\^\^\^RP05\.PEGP\], AE_NOT_FOUND \(\d+/psargs\-\d+\)",
+        r"ACPI Error: Aborting method \\_SB\.PCI0\.LPCB\.EC\._QD1 due to previous error \(AE_NOT_FOUND\) \(\d+/psparse\-\d+\)",
+        r"ACPI Error: No handler for Region \[VRTC\] \([0-9a-f]+\) \[SystemCMOS\] \(\d+/evregion\-\d+\)",
+        r"ACPI Error: Region SystemCMOS \(ID=5\) has no handler \(\d+/exfldio\-\d+\)",
+        r"ACPI Error: Aborting method \\_SB\.PCI0\.LPCB\.EC\._Q9A due to previous error \(AE_NOT_EXIST\) \(\d+/psparse\-\d+\)",
     ],
 }
 ANSI_STRIP = re.compile(r'(?:\x1B[@-_]|[\x80-\x9F])[0-?]*[ -/]*[@-~]')
