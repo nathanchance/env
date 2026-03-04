@@ -60,6 +60,9 @@ ALLOWLIST = {
         r"device\-mapper: core: CONFIG_IMA_DISABLE_HTABLE is disabled\. Duplicate IMA measurements will not be recorded in the IMA log\.",
         # Warnings that appear when using read_all to read /sys and /proc
         *READ_ALL_WARNINGS,
+        # New warning after https://lore.kernel.org/20260214012702.2368778-12-seanjc@google.com/
+        # but don't care because it is expected with all of my test machines
+        'virt/tdx: TDX not supported by the host platform',
     ],
     'aadp': [
         # This machine uses ACPI so no of_root is expected
