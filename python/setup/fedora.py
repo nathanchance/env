@@ -241,6 +241,17 @@ def setup_libvirt(username):
     lib.setup.setup_libvirt(username)
 
 
+def setup_modprobe_d():
+    if not machine_is_apple_silicon:
+        return
+
+    # Disable Wi-Fi driver on Mac Studio because it spams dmesg and I only use
+    # the ethernet port on it
+    if not (no_wifi_conf := Path('/etc/modprobe.d/nathan-no-wifi.conf')).exists():
+        no_wifi_conf.parent.mkdir(exist_ok=True)
+        no_wifi_conf.write_text('blacklist brcmfmac\n', encoding='utf-8')
+
+
 def setup_mosh():
     if not shutil.which('firewall-cmd'):
         return
@@ -267,6 +278,7 @@ if __name__ == '__main__':
     setup_doas(user)
     setup_kernel_args()
     setup_libvirt(user)
+    setup_modprobe_d()
     setup_mosh()
     # My Mac Studio is run headlessly but uses a desktop version of Asahi
     # Fedora Remix for easier management. Disable suspend so it is always
