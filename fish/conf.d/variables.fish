@@ -29,6 +29,8 @@ if test -z "$LOCATION"
                 set -Ux LOCATION test-desktop-intel-11700
             case nathan@beelink-intel-n100
                 set -Ux LOCATION test-desktop-intel-n100
+            case nathan@mac-studio-m1-max
+                set -Ux LOCATION mac-studio
             case nathan@msi-intel-core-10210U
                 set -Ux LOCATION test-laptop-intel
             case nathan@thelio-3990X

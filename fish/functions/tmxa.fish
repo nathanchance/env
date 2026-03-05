@@ -7,7 +7,7 @@ function tmxa -d "Attach to a tmux session if it exists, start a new one if not"
         switch $LOCATION
             case aadp chromebox framework-desktop honeycomb test-{desktop-intel-{11700,n100},desktop-amd-8745HS,laptop-intel}
                 set tmuxp_cfg test
-            case generic
+            case generic mac-studio
                 if __in_orb
                     set tmuxp_cfg primary
                 else

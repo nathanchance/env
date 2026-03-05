@@ -23,6 +23,8 @@ function get_ip -d "Get a particular machine's IP address via short name or host
             echo 10.0.1.11
         case intel-laptop msi-intel-core-10210U
             echo 10.0.1.20
+        case mac-studio mac-studio-m1-max
+            echo 10.0.1.33
         case '*'
             __print_error "Unrecognized device name: $device"
             return 1

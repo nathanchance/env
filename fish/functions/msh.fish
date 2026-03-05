@@ -14,7 +14,7 @@ function msh -d "Shorthand for mosh -o" -w mosh
 
     if test "$tailscale" = true
         switch $target
-            case aadp honeycomb
+            case aadp honeycomb mac-studio
                 set host $target
             case amd-desktop-8745HS
                 set host beelink-amd-ryzen-8745hs
@@ -35,7 +35,7 @@ function msh -d "Shorthand for mosh -o" -w mosh
         set user_host nathan@$host
     else
         switch $target
-            case aadp amd-desktop-8745HS chromebox framework-desktop hetzner honeycomb intel-desktop-11700 intel-desktop-n100 intel-laptop main
+            case aadp amd-desktop-8745HS chromebox framework-desktop hetzner honeycomb intel-desktop-11700 intel-desktop-n100 intel-laptop mac-studio main
                 set user_host nathan@(get_ip $target)
 
             case '*@*'

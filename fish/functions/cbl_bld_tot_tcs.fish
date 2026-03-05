@@ -26,7 +26,7 @@ function cbl_bld_tot_tcs -d "Build LLVM and binutils from source for kernel deve
             set pgo kernel-defconfig-slim
             set validate_uprev kernel
 
-        case framework-desktop honeycomb test-desktop-amd-8745HS test-desktop-intel-11700
+        case framework-desktop honeycomb mac-studio test-desktop-amd-8745HS test-desktop-intel-11700
             set bld_bntls false
             set pgo kernel-defconfig-slim
             set targets AArch64 ARM X86

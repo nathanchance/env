@@ -35,7 +35,8 @@ function wezterm_open_remotes -d "Open a new wezterm tab for each remote machine
             intel-laptop:"🟦 Intel laptop" \
             honeycomb:"🟪 Honeycomb" \
             intel-desktop-n100:"🟦 Intel mini desktop" \
-            chromebox:"🟦 Chromebox"
+            chromebox:"🟦 Chromebox" \
+            mac-studio:"🟪 Mac Studio"
     end
 
     for item in $hosts
@@ -58,7 +59,7 @@ function wezterm_open_remotes -d "Open a new wezterm tab for each remote machine
 
     set mac_model (sysctl hw.model | string split -f2 ': ')
     switch $mac_model
-        case Mac13,1
+        case Mac13,1 Mac16,9
             set icon 🖥️
         case Mac1{4,7},2
             set icon 💻
