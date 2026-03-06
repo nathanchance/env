@@ -72,11 +72,11 @@ ALLOWLIST = {
         # Expected given KPTI is on by default
         r'arm_spe_pmu arm,spe\-v1: profiling buffer inaccessible\. Try passing "kpti=off" on the kernel command line',
         r"arm_spe_pmu arm,spe\-v1: probe with driver arm_spe_pmu failed with error \-1",
-        # The BMC in my AADP has been out of commission for a bit :(
+        # BMC is accessed via ipmi_ssif
         r"ipmi_si: Unable to find any System Interface\(s\)",
-        r"ipmi_ssif i2c-[A-Z0-9:]+ ipmi_ssif: Not present",
-        r"ipmi_ssif i2c-[A-Z0-9:]+ ipmi_ssif: Unable to start IPMI SSIF: \-19",
-        # Appears to be something with the particular NVMe used in this machine
+        # Benign warnings as the drivers probe on another interface (OpenBMC related?)
+        r"cdc_subset [0-9|\-|:|.]+ probe with driver cdc_subset failed with error -22",
+        r"cdc_ether [0-9|\-|:|.]+ probe with driver cdc_ether failed with error -16",
         # New warning in 7.0, needs a bisect
         r"ACPI: CPU\d+: Invalid FFH LPI data",
         # BTF debug information is disabled because it takes extra time to build
