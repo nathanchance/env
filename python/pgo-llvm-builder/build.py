@@ -14,7 +14,7 @@ import lib.utils
 
 # pylint: enable=wrong-import-position
 
-MACH_FOLDER = Path('/var/lib/machines/pgo-llvm-builder')
+NSPAWN_MACH_NAME = 'pgo-llvm-builder'
 ROOT = Path(__file__).resolve().parent
 BUILD = Path(ROOT, 'build')
 GIT = Path(ROOT, 'git')
@@ -89,11 +89,10 @@ if __name__ == '__main__':
     else:
         versions = args.versions
 
-    # First, make sure environment exists. Check for this requires root because
-    # /var/lib/machines can only be read by the root user but we need it for later
-    # anyways.
-    lib.utils.tg_msg(f"sudo authorization needed to check for {MACH_FOLDER}")
-    lib.utils.run0(['test', '-e', MACH_FOLDER])
+    # First, make sure environment exists
+    if NSPAWN_MACH_NAME not in lib.utils.chronic(['machinectl', '--no-legend',
+                                                  'list-images']).stdout:
+        raise RuntimeError(f"/var/lib/machines/{NSPAWN_MACH_NAME} does not exist?")
 
     build_folder = Path(args.build_folder).resolve() if args.build_folder else BUILD
 
@@ -177,7 +176,7 @@ if __name__ == '__main__':
         'systemd-nspawn',
         '--as-pid2',
         '--ephemeral',
-        f"--machine={MACH_FOLDER.name}",
+        f"--machine={NSPAWN_MACH_NAME}",
         '--private-users=pick',
         '--private-users-ownership=auto',
         '--quiet',
