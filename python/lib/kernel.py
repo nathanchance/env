@@ -100,12 +100,6 @@ def prepare_source(base_name, base_ref='origin/master'):
 
     # Patching section
     # yapf: disable
-    if base_name == 'linux-next-llvm':
-        # https://lore.kernel.org/20260303012905.GA978396@ax162/
-        # https://lore.kernel.org/20260303213027.GA2168957@ax162/
-        patches.append('https://git.kernel.org/tip/tip/p/9d5e25b361b7228b422fd32bd1c327fd7fb919b4')  # timekeeping: Initialize the coupled clocksource conversion completely
-        patches.append('https://git.kernel.org/tip/tip/p/53007d526e17d29f0e5b81c07eb594a93bc4d29c')  # clocksource: Update clocksource::freq_khz on registration
-
     if base_name in NEXT_TREES:
         # Distributed ThinLTO support ahead of acceptance in kbuild tree
         patches.append('https://lore.kernel.org/all/20251028182822.3210436-2-xur@google.com/')  # kbuild: move vmlinux.a build rule to scripts/Makefile.vmlinux_a
@@ -145,7 +139,7 @@ def prepare_source(base_name, base_ref='origin/master'):
             elif patch.startswith('https://lore.kernel.org/') and not patch.endswith('/raw'):
                 am_kwargs['input'] = b4_am_o(patch)
             elif patch.startswith(('https://', 'http://')):
-                am_kwargs['input'] = lib.utils.wget(patch).decode('utf-8')
+                am_kwargs['input'] = lib.utils.curl(patch).decode('utf-8')
             elif patch.lstrip().startswith('From ') and 'diff --git' in patch:
                 am_kwargs['input'] = patch
             else:
