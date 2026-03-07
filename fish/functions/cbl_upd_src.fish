@@ -7,7 +7,7 @@ function cbl_upd_src -d "Update source trees in $CBL_SRC"
         switch $arg
             case c clean d dev p patched
                 set -a types (string sub -l 1 $arg)
-            case l llvm m mainline n next s stable
+            case l llvm m mainline n next r rust s stable
                 set -a trees (string sub -l 1 $arg)
             case sync
                 set sync true
@@ -30,6 +30,8 @@ function cbl_upd_src -d "Update source trees in $CBL_SRC"
                         set base linux
                     case n
                         set base linux-next
+                    case r
+                        set base rust
                     case s
                         set base linux-stable
                 end

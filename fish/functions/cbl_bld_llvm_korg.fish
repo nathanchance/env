@@ -13,20 +13,19 @@ function cbl_bld_llvm_korg -d "Build (and optionally test) LLVM for kernel.org"
         switch $arg
             case -b --build-env
                 set build_env y
+            case -c --cleanup
+                set cleanup y
             case --no-slim-pgo
                 set full_pgo y
-            case -r --reset
-                set reset y
             case -t --test-linux
                 set test_linux y
-            case -s --skip-tests --slim-pgo
-                set -a build_py_args $arg
             case '*'
-                set -a llvm_vers $arg
+                set -a build_py_args $arg
         end
     end
-    if not set -q llvm_vers
+    if not contains -- -v $build_py_args; and not contains -- --versions $build_py_args
         read -a -P 'LLVM versions: ' llvm_vers
+        set -a build_py_args --versions $llvm_vers
     end
     if test (count $argv) -eq 0
         read -P 'Test Linux afterwards (y/n): ' test_linux
@@ -39,8 +38,14 @@ function cbl_bld_llvm_korg -d "Build (and optionally test) LLVM for kernel.org"
     if test "$test_linux" = y
         set -a repos_to_update m s
     end
+    if contains -- -r $build_py_args; or contains -- --rust $build_py_args
+        set -a repos_to_update r
+        if not contains -- -R $build_py_args; and not contains -- --rust-folder $build_py_args
+            set -a build_py_args --rust-folder $CBL_SRC_C/rust
+        end
+    end
 
-    if test "$reset" = y
+    if test "$cleanup" = y
         for old_dir in $TMP_FOLDER/pgo-llvm-builder.*
             rm -fr $old_dir
         end
@@ -83,7 +88,6 @@ function cbl_bld_llvm_korg -d "Build (and optionally test) LLVM for kernel.org"
             --install-folder $tmp_llvm_install \
             --llvm-folder $CBL_SRC_C/llvm-project \
             --tc-build-folder $CBL_TC_BLD \
-            --versions $llvm_vers \
             $build_py_args
         __tg_msg "pgo-llvm-builder failed!"
         return 1

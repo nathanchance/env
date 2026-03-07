@@ -22,6 +22,9 @@ function __clone_repo_from_bundle -d "Clone repo using a clone bundle if possibl
         case llvm-project
             set branch main
             set url https://github.com/llvm/llvm-project.git
+        case rust
+            set branch main
+            set url https://github.com/rust-lang/rust.git
         case '*'
             __print_error "Unsupported repo ('$repo') provided!"
             return 1
