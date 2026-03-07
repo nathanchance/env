@@ -589,10 +589,6 @@ def pacman_settings(dryrun=False):
     if not conf_text:
         conf_text = PACMAN_CONF.read_text(encoding='utf-8')
 
-    conf_text = uncomment_pacman_option(conf_text, 'Color')
-    conf_text = uncomment_pacman_option(conf_text, 'VerbosePkgLists')
-    conf_text = uncomment_pacman_option(conf_text, 'ParallelDownloads', 5, 7)
-
     # If mirrorlist was generated with "installimage" from Hetzner, add the
     # Hetzner mirror to pacman.conf directly so that mirrorlist can be
     # generated with reflector but the Hetzner mirror can always have priority:
@@ -600,12 +596,25 @@ def pacman_settings(dryrun=False):
     if hetzner_mirror_in_mirrorlist or hetzner_mirror_in_pacman_conf:
         conf_text = add_hetzner_mirror_to_repos(conf_text)
 
-    if '[nathan]' not in conf_text:
-        conf_text += (
+    # Maintain separate pacman.d configuration. Inclusion must happen after
+    # stock options.
+    pacman_conf_marker = '# packagers with `pacman-key --populate archlinux`.\n\n'
+    pacman_conf_inclusion = 'Include = /etc/pacman.d/nathan.conf\n\n'
+    if pacman_conf_marker not in conf_text:
+        raise RuntimeError('Format of /etc/pacman.conf changed?')
+    conf_text = conf_text.replace(pacman_conf_marker,
+                                  f"{pacman_conf_marker}{pacman_conf_inclusion}")
+    if not (personal_pacman_conf := Path('/etc/pacman.d/nathan.conf')).exists():
+        personal_pacman_conf_text = (
+            '[options]\n'
+            'VerbosePkgLists\n'
+            'Color\n'
+            'ParallelDownloads = 7\n'
             '\n'
             '[nathan]\n'
             'SigLevel = Optional TrustAll\n'
             'Server = https://raw.githubusercontent.com/nathanchance/arch-repo/main/$arch\n')
+        personal_pacman_conf.write_text(personal_pacman_conf_text, encoding='utf-8')
 
     lib.utils.print_or_write_text(PACMAN_CONF, conf_text, dryrun)
 
@@ -805,14 +814,6 @@ def switch_from_grub_to_systemd_boot(conf='linux.conf', dryrun=False):
         for cleanup_path in ('/boot/grub', '/efi/EFI/GRUB'):
             if Path(cleanup_path).exists():
                 shutil.rmtree(cleanup_path)
-
-
-def uncomment_pacman_option(conf, option, old_value=None, new_value=None):
-    if old_value and new_value:
-        return re.sub(f"^#{option} = {old_value}", f"{option} = {new_value}", conf, flags=re.M)
-    if old_value or new_value:
-        raise RuntimeError(f"old_value is {old_value} and new_value is {new_value}??")
-    return re.sub(f"^#{option}", option, conf, flags=re.M)
 
 
 def vmware_adjustments(mkinitcpio_conf):
