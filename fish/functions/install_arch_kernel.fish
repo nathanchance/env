@@ -3,6 +3,9 @@
 # Copyright (C) 2024 Nathan Chancellor
 
 function install_arch_kernel -d "Install kernel for Arch Linux and reboot fully or via kexec"
+    __in_container_msg -h
+    or return
+
     for arg in $argv
         switch $arg
             case -k --kexec -r --reboot
