@@ -1,8 +1,8 @@
 set -l commands install latest folder var
 
 function __korg_llvm_get_versions
-    PYTHONPATH=$PYTHON_SCRIPTS_FOLDER python3 -c "from korg_tc import LLVMManager
-print('\n'.join(map(str, LLVMManager.VERSIONS)))"
+    echo "from korg_tc import LLVMManager
+print('\n'.join(map(str, LLVMManager.VERSIONS)))" | env PYTHONPATH=$PYTHON_SCRIPTS_FOLDER uv run --no-progress -w requests -
 end
 
 complete -c korg_llvm -f
