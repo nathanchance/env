@@ -100,6 +100,10 @@ def prepare_source(base_name, base_ref='origin/master'):
 
     # Patching section
     # yapf: disable
+    if base_name == 'linux-next-llvm':
+        # https://lore.kernel.org/20260310003026.GA2639793@ax162/
+        reverts.append('8505bfb4e4eca28ef1b20d3369435ec2d6a125c6')  # ACPI: CPPC: Move reference performance to capabilities
+
     if base_name in NEXT_TREES:
         # Distributed ThinLTO support ahead of acceptance in kbuild tree
         patches.append('https://lore.kernel.org/all/20251028182822.3210436-2-xur@google.com/')  # kbuild: move vmlinux.a build rule to scripts/Makefile.vmlinux_a
