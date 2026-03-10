@@ -7,7 +7,7 @@ windows:
     shell_command:
     - cmd: cbl_bld_all
       enter: false
-      sleep_before: 1
+      sleep_before: 0.5
 - window_name: host and machinectl shell
   layout: 775f,269x53,0,0[269x41,0,0,3,269x11,0,42,4]
   focus: true
@@ -20,4 +20,4 @@ windows:
     shell_command:
     - cmd: cbl_test_kvm vmm; and exit
       enter: false
-      sleep_before: 1
+      sleep_before: 0.5

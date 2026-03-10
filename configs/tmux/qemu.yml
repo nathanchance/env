@@ -9,11 +9,11 @@ windows:
     shell_command:
     - cmd: ssh_vm
       enter: false
-      sleep_before: 1
+      sleep_before: 0.5
   - shell: mchsh
     shell_command:
     - cmd: cbl_vmm run -P build
       enter: false
-      sleep_before: 1
+      sleep_before: 0.5
     focus: true
   - shell: mchsh

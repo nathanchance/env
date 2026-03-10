@@ -7,24 +7,24 @@ windows:
   - shell: mchsh
     shell_command:
     - cmd: cbl_upd_krnl next-llvm
-      sleep_before: 1
+      sleep_before: 0.5
     start_directory: $CBL_SRC_P/linux-next-llvm
     enter: false
     focus: true
   - shell: mchsh
     shell_command:
     - cmd: cbl_rb_fd
-      sleep_before: 1
+      sleep_before: 0.5
     start_directory: $CBL_SRC_P/fedora
     enter: false
   - shell: mchsh
     shell_command:
     - cmd: vim $PY_L/kernel.py
-      sleep_before: 1
+      sleep_before: 0.5
     enter: false
   - shell: mchsh
     shell_command:
     - cmd: cbl_upd_src p n
-      sleep_before: 1
+      sleep_before: 0.5
     start_directory: $CBL_SRC_P/linux-next
     enter: false
