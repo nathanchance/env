@@ -102,12 +102,15 @@ def prepare_source(base_name, base_ref='origin/master'):
     # yapf: disable
     if base_name == 'linux-next-llvm':
         # https://lore.kernel.org/20260310003026.GA2639793@ax162/
-        reverts.append('8505bfb4e4eca28ef1b20d3369435ec2d6a125c6')  # ACPI: CPPC: Move reference performance to capabilities
+        patches.append('https://lore.kernel.org/all/20260310212936.GA2143491@ax162/raw')  # fixup! ACPI: CPPC: Move reference performance to capabilities
 
     if base_name in NEXT_TREES:
         # Distributed ThinLTO support ahead of acceptance in kbuild tree
         patches.append('https://lore.kernel.org/all/20251028182822.3210436-2-xur@google.com/')  # kbuild: move vmlinux.a build rule to scripts/Makefile.vmlinux_a
-        patches.append('https://lore.kernel.org/all/20251028182822.3210436-3-xur@google.com/')  # kbuild: distributed build support for Clang ThinLTO
+        distributed_thinlto_patch = lib.utils.wget('https://lore.kernel.org/all/20251028182822.3210436-3-xur@google.com/raw').decode('utf-8')  # kbuild: distributed build support for Clang ThinLTO
+        # help 'git am -3' work properly
+        distributed_thinlto_patch = distributed_thinlto_patch.replace('.builtin-dtb.S', '.builtin-dtbs.S')
+        patches.append(distributed_thinlto_patch)
     # yapf: enable
 
     try:
@@ -143,7 +146,9 @@ def prepare_source(base_name, base_ref='origin/master'):
             elif patch.startswith('https://lore.kernel.org/') and not patch.endswith('/raw'):
                 am_kwargs['input'] = b4_am_o(patch)
             elif patch.startswith(('https://', 'http://')):
-                am_kwargs['input'] = lib.utils.curl(patch).decode('utf-8')
+                # curl is banned due to bot attacks
+                fetch_func = lib.utils.wget if 'lore.kernel.org' in patch else lib.utils.curl
+                am_kwargs['input'] = fetch_func(patch).decode('utf-8', 'ignore')
             elif patch.lstrip().startswith('From ') and 'diff --git' in patch:
                 am_kwargs['input'] = patch
             else:
