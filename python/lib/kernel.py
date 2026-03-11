@@ -102,7 +102,7 @@ def prepare_source(base_name, base_ref='origin/master'):
     # yapf: disable
     if base_name == 'linux-next-llvm':
         # https://lore.kernel.org/20260310003026.GA2639793@ax162/
-        patches.append('https://lore.kernel.org/all/20260310212936.GA2143491@ax162/raw')  # fixup! ACPI: CPPC: Move reference performance to capabilities
+        patches.append('https://lore.kernel.org/all/20260311071334.1494960-1-zhangpengjie2@huawei.com/')  # ACPI: CPPC: Fix uninitialized ref variable in cppc_get_perf_caps
 
     if base_name in NEXT_TREES:
         # Distributed ThinLTO support ahead of acceptance in kbuild tree
