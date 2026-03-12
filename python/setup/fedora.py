@@ -133,6 +133,7 @@ def install_packages():
         'git-email',
 
         # mkosi / systemd-nspawn
+        'distribution-gpg-keys',
         'patch',
         'polkit',
         'systemd-container',
