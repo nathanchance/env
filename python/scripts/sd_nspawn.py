@@ -92,9 +92,10 @@ class NspawnConfig(UserDict):
         ro_mounts = set()
 
         # If MAC_FOLDER is set in the environment, our NAS can be accessed from
-        # there
+        # there. While it is not technically an automount, we consider it one
+        # for simplification of the idmapping logic below.
         if mac_folder := os.environ.get('MAC_FOLDER'):
-            rw_mounts.add(mac_folder)
+            automounted_mounts.add(mac_folder)
         else:
             automounted_mounts.add(os.environ['NAS_FOLDER'])
 
