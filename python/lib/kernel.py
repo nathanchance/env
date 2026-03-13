@@ -100,17 +100,8 @@ def prepare_source(base_name, base_ref='origin/master'):
 
     # Patching section
     # yapf: disable
-    if base_name == 'linux-next-llvm':
-        # https://lore.kernel.org/20260310003026.GA2639793@ax162/
-        patches.append('https://lore.kernel.org/all/20260311071334.1494960-1-zhangpengjie2@huawei.com/')  # ACPI: CPPC: Fix uninitialized ref variable in cppc_get_perf_caps
-
     if base_name in NEXT_TREES:
-        # Distributed ThinLTO support ahead of acceptance in kbuild tree
-        patches.append('https://lore.kernel.org/all/20251028182822.3210436-2-xur@google.com/')  # kbuild: move vmlinux.a build rule to scripts/Makefile.vmlinux_a
-        distributed_thinlto_patch = lib.utils.wget('https://lore.kernel.org/all/20251028182822.3210436-3-xur@google.com/raw').decode('utf-8')  # kbuild: distributed build support for Clang ThinLTO
-        # help 'git am -3' work properly
-        distributed_thinlto_patch = distributed_thinlto_patch.replace('.builtin-dtb.S', '.builtin-dtbs.S')
-        patches.append(distributed_thinlto_patch)
+        patches.append('https://lore.kernel.org/all/20260312-amdgpu-fix-clang-c23-extensions-v1-1-59883120a451@kernel.org')  # drm/amdgpu/discovery: Add braces to case statements in amdgpu_discovery_table_check()
     # yapf: enable
 
     try:
