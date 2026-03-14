@@ -297,6 +297,14 @@ class NspawnConfig(UserDict):
             lib.utils.run0([*systemctl_edit_cmd, '--drop-in=kvm', 'systemd-nspawn@.service'],
                            input=''.join(kvm_conf_txt_parts))
 
+        # For Mac Studio, ensure the container only starts once the network is online
+        if lib.utils.get_hostname() == 'mac-studio-m1-max':
+            network_conf_txt = ('[Unit]\n'
+                                'After=network-online.target\n'
+                                'Wants=network-online.target\n')
+            lib.utils.run0([*systemctl_edit_cmd, '--drop-in=network', 'systemd-nspawn@.service'],
+                           input=network_conf_txt)
+
         # Allow my user to access 'machinectl shell' without authentication
         # rules.d can only be read by root so we need to use sudo to test
         polkit_rule = Path('/etc/polkit-1/rules.d', f"50-permit-{USER}-machinectl-shell.rules")
