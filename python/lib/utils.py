@@ -105,6 +105,10 @@ def get_findmnt_info(path=''):
     return filesystems
 
 
+def get_hostname():
+    return socket.gethostname()
+
+
 def get_git_output(directory, cmd, **kwargs):
     return call_git(directory, cmd, **kwargs).stdout.strip()
 
@@ -222,7 +226,7 @@ def tg_msg(raw_msg):
         raise FileNotFoundError(f"{botinfo} could not be found!")
     chat_id, token = botinfo.read_text(encoding='utf-8').splitlines()
 
-    msg = f"From {socket.gethostname()}:\n\n{raw_msg}"
+    msg = f"From {get_hostname()}:\n\n{raw_msg}"
 
     curl_cmd = ('curl', '-s', '-X', 'POST', f"https://api.telegram.org/bot{token}/sendMessage",
                 '-d', f"chat_id={chat_id}", '-d', 'parse_mode=Markdown', '-d', f"text={msg}", '-o',

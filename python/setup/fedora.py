@@ -45,7 +45,7 @@ def get_fedora_version():
 
 
 def machine_is_trusted():
-    return lib.setup.get_hostname() in ('aadp', 'honeycomb', 'mac-studio-m1-max')
+    return lib.utils.get_hostname() in ('aadp', 'honeycomb', 'mac-studio-m1-max')
 
 
 def prechecks():
@@ -160,7 +160,7 @@ def install_packages():
             packages.append('@virtualization')
 
     # Needed to occasionally upgrade the MMC firmware
-    if lib.setup.get_hostname() == 'aadp':
+    if lib.utils.get_hostname() == 'aadp':
         packages.append('ipmitool')
 
     dnf_install(packages)
@@ -222,7 +222,7 @@ def setup_doas(username):
 
 
 def setup_kernel_args():
-    if (hostname := lib.setup.get_hostname()) == 'aadp':
+    if (hostname := lib.utils.get_hostname()) == 'aadp':
         # Intel X550-T2 spews correctable errors about timeouts :(
         args = ['pcie_aspm=off']
     elif hostname == 'honeycomb':

@@ -10,7 +10,6 @@ import platform
 import pwd
 import re
 import shutil
-import socket
 import sys
 import time
 from pathlib import Path
@@ -188,7 +187,7 @@ def configure_trusted_networking():
         'msi-intel-core-10210U': '10.0.1.20',
         # 'thelio-3990X': '',
     }
-    if (hostname := get_hostname()) not in static_ips:
+    if (hostname := lib.utils.get_hostname()) not in static_ips:
         return
     # Validate that the supplied IP address is valid
     check_ip(requested_ip := static_ips[hostname])
@@ -269,10 +268,6 @@ def get_glibc_version():
     if len(ldd_version) < 3:
         ldd_version += [0]
     return tuple(int(x) for x in ldd_version)
-
-
-def get_hostname():
-    return socket.gethostname()
 
 
 def get_ip_addr_for_intf(intf):
@@ -357,7 +352,7 @@ def is_lxc():
 def is_virtual_machine():
     if shutil.which('systemd-detect-virt'):
         return lib.utils.detect_virt() in ('qemu', 'kvm', 'vmware', 'microsoft', 'apple')
-    return get_hostname() in ('hyperv', 'qemu', 'vmware')
+    return lib.utils.get_hostname() in ('hyperv', 'qemu', 'vmware')
 
 
 def is_systemd_init():

@@ -531,7 +531,7 @@ def pacman_install_packages():
         ]  # yapf: disable
 
     # https://wiki.archlinux.org/title/VMware/Install_Arch_Linux_as_a_guest
-    if lib.setup.get_hostname() == 'vmware':
+    if lib.utils.get_hostname() == 'vmware':
         # All of these are needed for autofit
         packages += [
             'gtkmm',
@@ -817,7 +817,7 @@ def switch_from_grub_to_systemd_boot(conf='linux.conf', dryrun=False):
 
 
 def vmware_adjustments(mkinitcpio_conf):
-    if lib.setup.get_hostname() != 'vmware':
+    if lib.utils.get_hostname() != 'vmware':
         return
 
     # https://wiki.archlinux.org/title/VMware/Install_Arch_Linux_as_a_guest#In-kernel_drivers
