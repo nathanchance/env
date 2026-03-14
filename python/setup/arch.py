@@ -290,8 +290,7 @@ def enable_reflector():
                               'OnUnitInactiveSec=18h\n'
                               'OnCalendar=*-*-* 06,18:00:00\n'
                               'RandomizedDelaySec=1h\n')
-    lib.utils.run(['systemctl', 'edit', '--stdin', '--drop-in=00-schedule', 'reflector.timer'],
-                  input=reflector_drop_in_text)
+    lib.utils.systemd_drop_in('reflector.timer', '00-schedule', reflector_drop_in_text)
     lib.utils.run(['systemctl', 'daemon-reload'])
 
     lib.setup.systemctl_enable('reflector.timer')

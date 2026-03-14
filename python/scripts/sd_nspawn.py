@@ -276,8 +276,6 @@ class NspawnConfig(UserDict):
     def install_files(self):
         lib.utils.request_root('file creation')
 
-        systemctl_edit_cmd = ['systemctl', 'edit', '--stdin']
-
         # Allow containers started as services to access /dev/kvm to run
         # accelerated VMs, which allows avoiding installing QEMU in the host
         # environment. Add /dev/vhost-vsock, /dev/vhost-net, and /dev/vsock if
@@ -293,17 +291,14 @@ class NspawnConfig(UserDict):
             kvm_conf_txt_parts = ['[Service]\n'] + [
                 f"DeviceAllow={mount} rw\n" for mount in available_dev_mounts
             ]
-
-            lib.utils.run0([*systemctl_edit_cmd, '--drop-in=kvm', 'systemd-nspawn@.service'],
-                           input=''.join(kvm_conf_txt_parts))
+            lib.utils.systemd_drop_in('systemd-nspawn@.service', 'kvm', ''.join(kvm_conf_txt_parts))
 
         # For Mac Studio, ensure the container only starts once the network is online
         if lib.utils.get_hostname() == 'mac-studio-m1-max':
             network_conf_txt = ('[Unit]\n'
                                 'After=network-online.target\n'
                                 'Wants=network-online.target\n')
-            lib.utils.run0([*systemctl_edit_cmd, '--drop-in=network', 'systemd-nspawn@.service'],
-                           input=network_conf_txt)
+            lib.utils.systemd_drop_in('systemd-nspawn@.service', 'network', network_conf_txt)
 
         # Allow my user to access 'machinectl shell' without authentication
         # rules.d can only be read by root so we need to use sudo to test

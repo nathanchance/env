@@ -216,11 +216,8 @@ def configure_trusted_networking():
         no_s_flag_conf_txt = ('[Service]\n'
                               'ExecStart=\n'
                               'ExecStart=/usr/bin/nm-online -q\n')
-        lib.utils.run([
-            'systemctl', 'edit', '--stdin', '--drop-in', 'no-s-flag',
-            'NetworkManager-wait-online.service'
-        ],
-                      input=no_s_flag_conf_txt)
+        lib.utils.systemd_drop_in('NetworkManager-wait-online.service', 'no-s-flag',
+                                  no_s_flag_conf_txt)
 
 
 def disable_suspend():

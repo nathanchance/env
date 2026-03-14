@@ -221,6 +221,11 @@ def run_check_rc_zero(*args, **kwargs):
     return chronic(*args, **kwargs, check=False).returncode == 0
 
 
+def systemd_drop_in(service, drop_in_name, conf_txt):
+    return run0(['systemctl', 'edit', '--stdin', '--drop-in', drop_in_name, service],
+                input=conf_txt)
+
+
 def tg_msg(raw_msg):
     if not (botinfo := Path.home().joinpath('.botinfo')).exists():
         raise FileNotFoundError(f"{botinfo} could not be found!")
