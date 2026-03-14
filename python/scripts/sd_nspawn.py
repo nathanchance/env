@@ -276,26 +276,26 @@ class NspawnConfig(UserDict):
     def install_files(self):
         lib.utils.request_root('file creation')
 
+        systemctl_edit_cmd = ['systemctl', 'edit', '--stdin']
+
         # Allow containers started as services to access /dev/kvm to run
         # accelerated VMs, which allows avoiding installing QEMU in the host
         # environment. Add /dev/vhost-vsock, /dev/vhost-net, and /dev/vsock if
         # they exist and are readable/writable so that 'mkosi vm' works.
-        if not (kvm_conf :=
-                Path('/etc/systemd/system/systemd-nspawn@.service.d/kvm.conf')).exists():
-            needed_dev_mounts = (
-                '/dev/kvm',
-                '/dev/vhost-net',
-                '/dev/vhost-vsock',
-                '/dev/vsock',
-            )
-            available_dev_mounts = [mount for mount in needed_dev_mounts if have_rw_access(mount)]
-            if available_dev_mounts:
-                kvm_conf_txt_parts = ['[Service]\n'] + [
-                    f"DeviceAllow={mount} rw\n" for mount in available_dev_mounts
-                ]
-                if not kvm_conf.parent.exists():
-                    lib.utils.run0(['mkdir', '-p', kvm_conf.parent])
-                lib.utils.run0(['tee', kvm_conf], input=''.join(kvm_conf_txt_parts))
+        needed_dev_mounts = (
+            '/dev/kvm',
+            '/dev/vhost-net',
+            '/dev/vhost-vsock',
+            '/dev/vsock',
+        )
+        available_dev_mounts = [mount for mount in needed_dev_mounts if have_rw_access(mount)]
+        if available_dev_mounts:
+            kvm_conf_txt_parts = ['[Service]\n'] + [
+                f"DeviceAllow={mount} rw\n" for mount in available_dev_mounts
+            ]
+
+            lib.utils.run0([*systemctl_edit_cmd, '--drop-in=kvm', 'systemd-nspawn@.service'],
+                           input=''.join(kvm_conf_txt_parts))
 
         # Allow my user to access 'machinectl shell' without authentication
         # rules.d can only be read by root so we need to use sudo to test
