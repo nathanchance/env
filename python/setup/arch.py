@@ -282,7 +282,6 @@ def enable_reflector():
     conf_text = '\n'.join(reflector_args) + '\n'
     Path('/etc/xdg/reflector/reflector.conf').write_text(conf_text, encoding='utf-8')
 
-    reflector_drop_in = Path('/etc/systemd/system/reflector.timer.d/00-schedule.conf')
     reflector_drop_in_text = ('[Unit]\n'
                               'Description=Refresh Pacman mirrorlist with Reflector.\n'
                               '\n'
@@ -291,9 +290,8 @@ def enable_reflector():
                               'OnUnitInactiveSec=18h\n'
                               'OnCalendar=*-*-* 06,18:00:00\n'
                               'RandomizedDelaySec=1h\n')
-    reflector_drop_in.parent.mkdir(exist_ok=True)
-    reflector_drop_in.write_text(reflector_drop_in_text, encoding='utf-8')
-    reflector_drop_in.chmod(0o644)
+    lib.utils.run(['systemctl', 'edit', '--stdin', '--drop-in=00-schedule', 'reflector.timer'],
+                  input=reflector_drop_in_text)
     lib.utils.run(['systemctl', 'daemon-reload'])
 
     lib.setup.systemctl_enable('reflector.timer')
