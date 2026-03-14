@@ -394,9 +394,9 @@ class NspawnConfig(UserDict):
         setup_files = {
             SYSTEMD_RUN_M,
             Path('/etc/polkit-1/rules.d', f"50-permit-{USER}-machinectl-shell.rules"),
+            Path('/etc/systemd/system/systemd-nspawn@.service.d/kvm.conf'),
+            Path('/etc/systemd/system/systemd-nspawn@.service.d/network.conf'),
         }
-        if have_rw_access('/dev/kvm'):
-            setup_files.add(Path('/etc/systemd/system/systemd-nspawn@.service.d/kvm.conf'))
 
         if mode == 'machine':
             items_to_remove = machine_files
@@ -414,7 +414,7 @@ class NspawnConfig(UserDict):
             ['systemctl', 'is-enabled', f"systemd-nspawn@{self.name}"]):
             lib.utils.run0(['machinectl', 'disable', '--now', self.name])
 
-        lib.utils.run0(['rm', '-r', *items_to_remove])
+        lib.utils.run0(['rm', '-fr', *items_to_remove])
 
     def run_mach_cmd(self, cmd):
         lib.utils.run0(self._gen_run_cmd(cmd))

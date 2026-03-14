@@ -209,6 +209,19 @@ def configure_trusted_networking():
         dst.chmod(0o644)
     systemctl_enable(file)
 
+    # On Mac Studio, remove '-s' flag from nm-online commmand, otherwise
+    # network-online.target may be reached without the network actually being
+    # active (slow NIC?)
+    if hostname == 'mac-studio-m1-max':
+        no_s_flag_conf_txt = ('[Service]\n'
+                              'ExecStart=\n'
+                              'ExecStart=/usr/bin/nm-online -q\n')
+        lib.utils.run([
+            'systemctl', 'edit', '--stdin', '--drop-in', 'no-s-flag',
+            'NetworkManager-wait-online.service'
+        ],
+                      input=no_s_flag_conf_txt)
+
 
 def disable_suspend():
     # If machine has a battery, the power profile should be customized manually
