@@ -2,12 +2,12 @@ set -l commands install latest folder var
 
 function __korg_gcc_get_targets
     echo "from korg_tc import GCCManager
-print('\n'.join(GCCManager.TARGETS))" | env PYTHONPATH=$PYTHON_SCRIPTS_FOLDER uv run --no-progress -w requests -
+print('\n'.join(GCCManager.TARGETS))" | env PYTHONPATH=$PYTHON_SCRIPTS_FOLDER uv --no-progress --quiet run -w requests -
 end
 
 function __korg_gcc_get_versions
     echo "from korg_tc import GCCManager
-print('\n'.join(map(str, GCCManager.VERSIONS)))" | env PYTHONPATH=$PYTHON_SCRIPTS_FOLDER uv run --no-progress -w requests -
+print('\n'.join(map(str, GCCManager.VERSIONS)))" | env PYTHONPATH=$PYTHON_SCRIPTS_FOLDER uv --no-progress --quiet run -w requests -
 end
 
 function __korg_gcc_seen_target
