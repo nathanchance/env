@@ -21,7 +21,7 @@ function send_pkg_to_vm -d "Send package source files to virtual machine"
 
     switch $distro
         case arch
-            set package_dirs $ENV_FOLDER/pkgbuilds/$package $SRC_FOLDER/packaging/pkg/$package
+            set package_dirs $ENV_FOLDER/pkgbuilds/{,aur/}$package $SRC_FOLDER/packaging/pkg/$package
         case fedora
             set package_dirs $ENV_FOLDER/specs/$package $SRC_FOLDER/packaging/rpm/$package
         case '*'
@@ -31,6 +31,7 @@ function send_pkg_to_vm -d "Send package source files to virtual machine"
     for item in $package_dirs
         if test -d $item
             set src_dir $item
+            break
         end
     end
     if not set -q src_dir
@@ -53,6 +54,7 @@ function send_pkg_to_vm -d "Send package source files to virtual machine"
             set -a ssh_cmd \
                 -o "StrictHostKeyChecking no"
         end
-        rsync --progress --recursive --rsh "$ssh_cmd" $src_dir nathan@localhost:(path dirname $dst_dir)
+        echo "Copying $src_dir to $dst_dir via 'rsync'..."
+        rsync --links --progress --recursive --rsh "$ssh_cmd" $src_dir nathan@localhost:(path dirname $dst_dir)
     end
 end
