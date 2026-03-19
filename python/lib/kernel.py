@@ -100,8 +100,6 @@ def prepare_source(base_name, base_ref='origin/master'):
 
     # Patching section
     # yapf: disable
-    if base_name == 'linux-next-llvm':
-        patches.append('https://lore.kernel.org/all/20260313-lenovo-wmi-gamezone-remove-gz_chain_head-v1-1-ce5231f0c6fa@kernel.org/')  # platform/x86: lenovo: wmi-gamezone: Drop gz_chain_head
     # yapf: enable
 
     try:
