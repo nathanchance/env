@@ -101,6 +101,47 @@ switch "$krnl_ret $strm_ret"
         return 1
 end
 return 125' >$bisect_script
+
+        case qemu
+            echo '#!/usr/bin/env fish
+
+__in_tree qemu
+or return 128
+
+set qemu_bld (tbf)-testing
+
+set lnx_src $CBL_SRC_C/linux
+set lnx_bld (tbf $lnx_src)
+set lnx_img
+if test -z "$lnx_img"
+    __print_error "No Linux kernel image set?"
+    return 128
+end
+if not test -e $lnx_bld/$image
+    kmake \
+        -C $lnx_src \
+        ARCH= \
+        (korg_gcc var) \
+        O=$lnx_bld \
+    or return 128
+end
+
+remkdircd $qemu_bld
+
+qemu_bld=$qemu_bld qemu_src=$PWD cbl_bld_qemu
+or return 125
+
+PO=$qemu_bld U=0 kboot \
+    -a \
+    -k $lnx_bld \
+    -t 45s
+switch $status
+    case 0
+        return 0
+    case 124
+        return 1
+end
+return 125' >$bisect_script
     end
 
     vim $bisect_script
