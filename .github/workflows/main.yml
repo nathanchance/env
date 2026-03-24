@@ -11,6 +11,7 @@ on:
       - '**.fish'
       - '**.py'
       - '**.sh'
+  workflow_dispatch:
 jobs:
   fish:
     uses: nathanchance/actions-workflows/.github/workflows/fish_format.yml@main
