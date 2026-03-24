@@ -16,6 +16,9 @@ function __in_tree -d "Checks if we are in a particular source tree"
         case llvm
             set file llvm/CMakeLists.txt
             set msg "an "(string upper $type)
+        case qemu
+            set file qemu-img.c
+            set msg "a "(string upper $type)
     end
 
     if not test -f $file
