@@ -51,7 +51,8 @@ def filter_branches(desired_branches, possible_branches):
     for branch in desired_branches:
         if branch not in possible_branches:
             raise RuntimeError(
-                f"Requested branch ('{branch}') is not in the list of b4-managed branches?")
+                f"Requested branch ('{branch}') is not in the list of b4-managed branches?"
+            )
         filtered_branches[branch] = possible_branches[branch]
 
     return filtered_branches
@@ -66,9 +67,11 @@ def gen_b4_branches(b4_branches, b4_tags):
 
 def get_b4_branches(directory):
     b4_branches = lib.utils.get_git_output(
-        directory, ['for-each-ref', '--format=%(refname:short)', 'refs/heads/b4/']).splitlines()
+        directory, ['for-each-ref', '--format=%(refname:short)', 'refs/heads/b4/']
+    ).splitlines()
     b4_tags = lib.utils.get_git_output(
-        directory, ['for-each-ref', '--format=%(refname:short)', 'refs/tags/sent/']).splitlines()
+        directory, ['for-each-ref', '--format=%(refname:short)', 'refs/tags/sent/']
+    ).splitlines()
     return gen_b4_branches(b4_branches, b4_tags)
 
 
@@ -88,33 +91,41 @@ def parse_arguments():
     subparser = parser.add_subparsers(dest='subcommand', metavar='SUBCOMMAND', required=True)
 
     common_parser = ArgumentParser(add_help=False)
-    common_parser.add_argument('-a',
-                               '--all',
-                               action='store_true',
-                               help='Use all branches instead of prompting for branches via fzf')
+    common_parser.add_argument(
+        '-a',
+        '--all',
+        action='store_true',
+        help='Use all branches instead of prompting for branches via fzf',
+    )
     common_parser.add_argument(
         '-b',
         '--branches',
         nargs='+',
-        help='List of branches to use instead of prompting for branches via fzf')
-    common_parser.add_argument('-C',
-                               '--directory',
-                               default=Path.cwd(),
-                               help=f"Directory to run commands in (default: {Path.cwd()})",
-                               type=Path)
-    common_parser.add_argument('-d',
-                               '--dry-run',
-                               action='store_true',
-                               help='Only print what would be done')
-    common_parser.add_argument('--no-tags',
-                               action='store_true',
-                               help='Do not work on tags in addition to branches')
+        help='List of branches to use instead of prompting for branches via fzf',
+    )
+    common_parser.add_argument(
+        '-C',
+        '--directory',
+        default=Path.cwd(),
+        help=f"Directory to run commands in (default: {Path.cwd()})",
+        type=Path,
+    )
+    common_parser.add_argument(
+        '-d', '--dry-run', action='store_true', help='Only print what would be done'
+    )
+    common_parser.add_argument(
+        '--no-tags',
+        action='store_true',
+        help='Do not work on tags in addition to branches',
+    )
 
     clean_parser = subparser.add_parser('clean', help='Clean b4 branches', parents=[common_parser])
-    clean_parser.add_argument('-r',
-                              '--remote-only',
-                              action='store_true',
-                              help='Only consider remote branches when selecting and cleaning')
+    clean_parser.add_argument(
+        '-r',
+        '--remote-only',
+        action='store_true',
+        help='Only consider remote branches when selecting and cleaning',
+    )
 
     subparser.add_parser('push', help='Push b4 branches to kernel.org', parents=[common_parser])
 
@@ -153,8 +164,9 @@ if __name__ == '__main__':
     if not Path(repo, 'Makefile').exists():
         raise RuntimeError(f"Derived directory ('{repo}') does not look like a Linux kernel tree?")
 
-    all_branches = get_remote_b4_branches() if getattr(args, 'remote_only',
-                                                       False) else get_b4_branches(repo)
+    all_branches = (
+        get_remote_b4_branches() if getattr(args, 'remote_only', False) else get_b4_branches(repo)
+    )
 
     if args.all:
         selected_branches = all_branches

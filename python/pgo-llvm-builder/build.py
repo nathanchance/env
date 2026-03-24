@@ -47,46 +47,56 @@ RUST_VERSION_STABLE = '1.94.0'
 
 if __name__ == '__main__':
     parser = ArgumentParser(description='Build LLVM with PGO in a container.')
-    parser.add_argument('-b',
-                        '--build-folder',
-                        help='Location of build folder. Omit for build folder in repo')
-    parser.add_argument('-i',
-                        '--install-folder',
-                        help='Location of install folder. Omit for install folder in repo')
-    parser.add_argument('-l',
-                        '--llvm-folder',
-                        help='Location of llvm-project source. Omit for vendored version')
-    parser.add_argument('--no-multicall',
-                        action='store_true',
-                        help='Avoid default use of --multicall to build-llvm.py')
+    parser.add_argument(
+        '-b',
+        '--build-folder',
+        help='Location of build folder. Omit for build folder in repo',
+    )
+    parser.add_argument(
+        '-i',
+        '--install-folder',
+        help='Location of install folder. Omit for install folder in repo',
+    )
+    parser.add_argument(
+        '-l',
+        '--llvm-folder',
+        help='Location of llvm-project source. Omit for vendored version',
+    )
+    parser.add_argument(
+        '--no-multicall',
+        action='store_true',
+        help='Avoid default use of --multicall to build-llvm.py',
+    )
     parser.add_argument(
         '-r',
         '--rust',
         nargs='?',
         const=RUST_VERSION_STABLE,
-        help=
-        'Build Rust from resulting LLVM toolchain (default: no Rust). Omit argument for latest stable Rust version',
+        help='Build Rust from resulting LLVM toolchain (default: no Rust). Omit argument for latest stable Rust version',
     )
-    parser.add_argument('-R',
-                        '--rust-folder',
-                        help='Location of rust source. Omit for vendored version')
-    parser.add_argument('-s',
-                        '--skip-tests',
-                        action='store_true',
-                        help='Skip running LLVM/Clang tests')
-    parser.add_argument('--slim-pgo',
-                        action='store_true',
-                        help='Perform slim PGO instead of full PGO')
-    parser.add_argument('-t',
-                        '--tc-build-folder',
-                        help='Location of tc-build. Omit for vendored version')
-    parser.add_argument('-v',
-                        '--versions',
-                        choices=[*LLVM_VERSIONS, 'all', 'all-stable', 'main', 'kgr'],
-                        help='LLVM versions to build',
-                        metavar='LLVM_VERSION',
-                        nargs='+',
-                        required=True)
+    parser.add_argument(
+        '-R', '--rust-folder', help='Location of rust source. Omit for vendored version'
+    )
+    parser.add_argument(
+        '-s', '--skip-tests', action='store_true', help='Skip running LLVM/Clang tests'
+    )
+    parser.add_argument(
+        '--slim-pgo', action='store_true', help='Perform slim PGO instead of full PGO'
+    )
+    parser.add_argument(
+        '-t',
+        '--tc-build-folder',
+        help='Location of tc-build. Omit for vendored version',
+    )
+    parser.add_argument(
+        '-v',
+        '--versions',
+        choices=[*LLVM_VERSIONS, 'all', 'all-stable', 'main', 'kgr'],
+        help='LLVM versions to build',
+        metavar='LLVM_VERSION',
+        nargs='+',
+        required=True,
+    )
     args = parser.parse_args()
 
     if not shutil.which('systemd-nspawn'):
@@ -102,8 +112,10 @@ if __name__ == '__main__':
         versions = args.versions
 
     # First, make sure environment exists
-    if NSPAWN_MACH_NAME not in lib.utils.chronic(['machinectl', '--no-legend',
-                                                  'list-images']).stdout:
+    if (
+        NSPAWN_MACH_NAME
+        not in lib.utils.chronic(['machinectl', '--no-legend', 'list-images']).stdout
+    ):
         raise RuntimeError(f"/var/lib/machines/{NSPAWN_MACH_NAME} does not exist?")
 
     build_folder = Path(args.build_folder).resolve() if args.build_folder else BUILD
@@ -116,8 +128,9 @@ if __name__ == '__main__':
             raise FileNotFoundError('Invalid llvm-project provided, no llvm folder?')
     elif not (llvm_folder := Path(GIT, 'llvm-project')).exists():
         llvm_folder.parent.mkdir(exist_ok=True, parents=True)
-        lib.utils.call_git_loud(None,
-                                ['clone', 'https://github.com/llvm/llvm-project', llvm_folder])
+        lib.utils.call_git_loud(
+            None, ['clone', 'https://github.com/llvm/llvm-project', llvm_folder]
+        )
     lib.utils.call_git_loud(llvm_folder, ['remote', 'update'])
 
     if args.tc_build_folder:
@@ -128,7 +141,13 @@ if __name__ == '__main__':
         if not (tc_build_folder := Path(GIT, 'tc-build')).exists():
             tc_build_folder.parent.mkdir(exist_ok=True, parents=True)
             lib.utils.call_git_loud(
-                None, ['clone', 'https://github.com/ClangBuiltLinux/tc-build', tc_build_folder])
+                None,
+                [
+                    'clone',
+                    'https://github.com/ClangBuiltLinux/tc-build',
+                    tc_build_folder,
+                ],
+            )
         lib.utils.call_git_loud(tc_build_folder, ['remote', 'update'])
         lib.utils.call_git_loud(tc_build_folder, ['reset', '--hard', '@{u}'])
 
@@ -141,22 +160,24 @@ if __name__ == '__main__':
                 raise FileNotFoundError('Invalid rust folder provided, no Cargo.lock?')
         elif not (rust_folder := Path(GIT, 'rust')).exists():
             rust_folder.parent.mkdir(exist_ok=True, parents=True)
-            lib.utils.call_git_loud(None,
-                                    ['clone', 'https://github.com/rust-lang/rust', rust_folder])
+            lib.utils.call_git_loud(
+                None, ['clone', 'https://github.com/rust-lang/rust', rust_folder]
+            )
         lib.utils.call_git_loud(rust_folder, ['remote', 'update'])
 
     llvm_git_dir = Path(llvm_folder, '.git')
 
-    if args.skip_tests:
-        CHECK_ARGS = []
-    else:
-        CHECK_ARGS = [
+    CHECK_ARGS = (
+        []
+        if args.skip_tests
+        else [
             '--check-targets',
             'clang',
             'lld',
             'llvm',
             'llvm-unit',
         ]
+    )
     llvm_install_targets = [
         'clang-resource-headers',
         'compiler-rt',
@@ -174,8 +195,17 @@ if __name__ == '__main__':
             'clang',
             'lld',
             *[
-                f"llvm-{tool}" for tool in ('addr2line', 'ar', 'nm', 'objcopy', 'objdump', 'ranlib',
-                                            'readelf', 'strip')
+                f"llvm-{tool}"
+                for tool in (
+                    'addr2line',
+                    'ar',
+                    'nm',
+                    'objcopy',
+                    'objdump',
+                    'ranlib',
+                    'readelf',
+                    'strip',
+                )
             ],
         ]
     llvm_rust_install_targets = [
@@ -208,7 +238,7 @@ if __name__ == '__main__':
         '--projects', *build_llvm_projects,
         '--quiet-cmake',
         '--show-build-commands',
-    ]  # yapf: disable
+    ]  # fmt: off
 
     base_systemd_nspawn_cmd = [
         'systemd-nspawn',
@@ -239,8 +269,15 @@ if __name__ == '__main__':
             # Next, we need to see what version this actually is
             show_cmd = ['show', f"{llvm_ref}:cmake/Modules/LLVMVersion.cmake"]
             llvm_version_cmake_txt = lib.utils.call_git(llvm_folder, show_cmd).stdout
-            if len(matches := re.findall(r"\s+set\(LLVM_VERSION_[A-Z]+ ([0-9]+)\)",
-                                         llvm_version_cmake_txt)) != 3:
+            if (
+                len(
+                    matches := re.findall(
+                        r"\s+set\(LLVM_VERSION_[A-Z]+ ([0-9]+)\)",
+                        llvm_version_cmake_txt,
+                    )
+                )
+                != 3
+            ):
                 raise RuntimeError(f"Unexpected match to LLVM version regex? {matches}")
             llvm_version = '.'.join(matches)
         else:
@@ -250,12 +287,16 @@ if __name__ == '__main__':
 
         if 'llvmorg' not in llvm_ref:
             date_info = datetime.datetime.now(datetime.timezone.utc).strftime('%Y%m%d-%H%M%S')
-            llvm_ref_info = lib.utils.get_git_output(llvm_folder,
-                                                     ['show', '--format=%H', '-s', llvm_ref])
+            llvm_ref_info = lib.utils.get_git_output(
+                llvm_folder, ['show', '--format=%H', '-s', llvm_ref]
+            )
             llvm_version += f"-{llvm_ref_info}-{date_info}"
 
-        if (llvm_install := Path(install_folder,
-                                 f"llvm-{llvm_version}-{MACHINE}")).joinpath('bin/clang').exists():
+        if (
+            (llvm_install := Path(install_folder, f"llvm-{llvm_version}-{MACHINE}"))
+            .joinpath('bin/clang')
+            .exists()
+        ):
             print(
                 f"LLVM {llvm_version} has already been built in {llvm_install}, remove installation to rebuild!",
             )
@@ -274,8 +315,9 @@ if __name__ == '__main__':
             if worktree_folder.exists():
                 shutil.rmtree(worktree_folder)
                 lib.utils.call_git(git_folder, ['worktree', 'prune'])
-            lib.utils.call_git_loud(git_folder,
-                                    ['worktree', 'add', '--detach', worktree_folder, git_ref])
+            lib.utils.call_git_loud(
+                git_folder, ['worktree', 'add', '--detach', worktree_folder, git_ref]
+            )
             if worktree_folder.name == 'rust':
                 needed_submodules = (
                     'library/backtrace',
@@ -286,7 +328,8 @@ if __name__ == '__main__':
                 )
                 lib.utils.call_git_loud(
                     worktree_folder,
-                    ['submodule', 'update', '--init', '--depth=1', *needed_submodules])
+                    ['submodule', 'update', '--init', '--depth=1', *needed_submodules],
+                )
 
         # Reverts for various versions
         reverts = {
@@ -303,20 +346,31 @@ if __name__ == '__main__':
         if CHECK_ARGS:
             base_cp_cmd = ['cherry-pick', '--no-commit']
             # https://github.com/llvm/llvm-project/commit/015c43178f9d8531b6bcd1685dbf72b7d837cf5a
-            if (gen_cfi_funcs := Path(llvm_worktree,
-                                      'lld/test/MachO/tools/generate-cfi-funcs.py')).exists():
+            if (
+                gen_cfi_funcs := Path(llvm_worktree, 'lld/test/MachO/tools/generate-cfi-funcs.py')
+            ).exists():
                 gen_cfi_funcs_txt = gen_cfi_funcs.read_text(encoding='utf-8')
-                if 'frame_offset = -random.randint(0, (frame_size/16 - 4)) * 16' in gen_cfi_funcs_txt:
-                    if 'regs_saved = saved_regs_combined[reg_count][reg_combo]' in gen_cfi_funcs_txt:
+                if (
+                    'frame_offset = -random.randint(0, (frame_size/16 - 4)) * 16'
+                    in gen_cfi_funcs_txt
+                ):
+                    if (
+                        'regs_saved = saved_regs_combined[reg_count][reg_combo]'
+                        in gen_cfi_funcs_txt
+                    ):
                         # 015c43178f9d8531b6bcd1685dbf72b7d837cf5a won't pick cleanly, just do the replacement ourselves
-                        new_text = gen_cfi_funcs_txt.replace('(frame_size/16 - 4)) * 16',
-                                                             'int(frame_size/16 - 4)) * 16')
+                        new_text = gen_cfi_funcs_txt.replace(
+                            '(frame_size/16 - 4)) * 16', 'int(frame_size/16 - 4)) * 16'
+                        )
                         gen_cfi_funcs.write_text(new_text, encoding='utf-8')
                     else:
-                        lib.utils.call_git_loud(llvm_worktree, [
-                            *base_cp_cmd,
-                            '015c43178f9d8531b6bcd1685dbf72b7d837cf5a',
-                        ])
+                        lib.utils.call_git_loud(
+                            llvm_worktree,
+                            [
+                                *base_cp_cmd,
+                                '015c43178f9d8531b6bcd1685dbf72b7d837cf5a',
+                            ],
+                        )
             # https://github.com/llvm/llvm-project/commit/01fdc2a3c9e0df4e54bb9b88f385f68e7b0d808c
             if (uctc := Path(llvm_worktree, 'llvm/utils/update_cc_test_checks.py')).exists():
                 uctc_txt = uctc.read_text(encoding='utf-8')
@@ -326,28 +380,40 @@ if __name__ == '__main__':
                     if 'infer_dependent_args' not in uctc_txt:
                         lib.utils.call_git_loud(
                             llvm_worktree,
-                            [*base_cp_cmd, 'd1007478f19d3ff19a2ecd5ecb04b467933041e6'])
-                    lib.utils.call_git_loud(llvm_worktree, [
-                        *base_cp_cmd,
-                        '01fdc2a3c9e0df4e54bb9b88f385f68e7b0d808c',
-                    ])
+                            [*base_cp_cmd, 'd1007478f19d3ff19a2ecd5ecb04b467933041e6'],
+                        )
+                    lib.utils.call_git_loud(
+                        llvm_worktree,
+                        [
+                            *base_cp_cmd,
+                            '01fdc2a3c9e0df4e54bb9b88f385f68e7b0d808c',
+                        ],
+                    )
             # https://github.com/llvm/llvm-project/commit/bc839b4b4e27b6e979dd38bcde51436d64bb3699
             # Manually applied because it does not apply cleanly to any release
             # that needs it.
             if (go_bindings := Path(llvm_worktree, 'llvm/bindings/go')).is_dir():
-                rm_dirs = (go_bindings, Path(llvm_worktree, 'llvm/test/Bindings/Go'),
-                           Path(llvm_worktree, 'llvm/tools/llvm-go'))
+                rm_dirs = (
+                    go_bindings,
+                    Path(llvm_worktree, 'llvm/test/Bindings/Go'),
+                    Path(llvm_worktree, 'llvm/tools/llvm-go'),
+                )
                 for rm_dir in rm_dirs:
                     shutil.rmtree(rm_dir)
 
                 site_cfg_py = Path(llvm_worktree, 'llvm/test/lit.site.cfg.py.in')
                 line_to_delete = 'config.go_executable = "@GO_EXECUTABLE@"\n'
                 new_site_cfg_py = site_cfg_py.read_text(encoding='utf-8').replace(
-                    line_to_delete, '')
+                    line_to_delete, ''
+                )
                 site_cfg_py.write_text(new_site_cfg_py, encoding='utf-8')
 
-                mod_files = ('.gitignore', 'cmake/config-ix.cmake', 'test/lit.cfg.py',
-                             'utils/lit/lit/llvm/subst.py')
+                mod_files = (
+                    '.gitignore',
+                    'cmake/config-ix.cmake',
+                    'test/lit.cfg.py',
+                    'utils/lit/lit/llvm/subst.py',
+                )
                 fp_cmd = [
                     'format-patch',
                     '-1',
@@ -380,7 +446,7 @@ if __name__ == '__main__':
         build_llvm_py_cmd = [
             *base_build_llvm_py_cmd,
             '--install-folder', llvm_install_nspawn := Path('/install', llvm_install.name),
-        ]  # yapf: disable
+        ]  # fmt: off
         # Enable BOLT for more optimization if:
         # - We are on x86_64 with LLVM greater than or equal to 16.x (due to
         #   https://github.com/llvm/llvm-project/issues/55004)
@@ -430,7 +496,7 @@ if __name__ == '__main__':
                 '--llvm-install-folder', rust_llvm_install_nspawn := Path('/install/llvm-for-build-rust.py'),
                 '--rust-folder', '/rust',
                 '--show-build-commands',
-            ]  # yapf: disable
+            ]  # fmt: off
             fish_cmds += [
                 # Use our copy of llvm-project for Rust
                 ['rm', '-fr', '/rust/src/llvm-project'],
@@ -449,7 +515,7 @@ if __name__ == '__main__':
                 build_rust_py_cmd,
                 # Clean up temporary LLVM installation for Rust build
                 ['rm', '-fr', rust_llvm_install_nspawn],
-            ]  # yapf: disable
+            ]  # fmt: off
         systemd_nspawn_cmd.append(' && '.join([' '.join(map(str, cmd)) for cmd in fish_cmds]))
 
         lib.utils.tg_msg(f"sudo authorization needed to build LLVM {llvm_version}")
@@ -462,29 +528,35 @@ if __name__ == '__main__':
             directories_to_tarball.append(rust_install)
         for item in directories_to_tarball:
             tarball = Path(item.parent, f"{item.name}.tar")
-            lib.utils.run([
-                'tar',
-                '--create',
-                '--directory',
-                item.parent,
-                '--file',
-                tarball,
-                item.name,
-            ])
+            lib.utils.run(
+                [
+                    'tar',
+                    '--create',
+                    '--directory',
+                    item.parent,
+                    '--file',
+                    tarball,
+                    item.name,
+                ]
+            )
 
             compressed_tarball = tarball.with_suffix('.tar.zst')
-            lib.utils.run([
-                'zstd',
-                '-19',
-                '-T0',
-                '-o',
-                compressed_tarball,
-                tarball,
-            ])
+            lib.utils.run(
+                [
+                    'zstd',
+                    '-19',
+                    '-T0',
+                    '-o',
+                    compressed_tarball,
+                    tarball,
+                ]
+            )
 
-            info_text = ('\n'
-                         f"Tarball is available at: {tarball}\n"
-                         f"Compressed tarball is available at: {compressed_tarball}")
+            info_text = (
+                '\n'
+                f"Tarball is available at: {tarball}\n"
+                f"Compressed tarball is available at: {compressed_tarball}"
+            )
             print(info_text, end='')
 
         lib.utils.tg_msg(f"LLVM {llvm_version} finished building successfully")

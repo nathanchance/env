@@ -50,8 +50,9 @@ def machine_is_trusted():
 
 def prechecks():
     lib.utils.check_root()
-    if (fedora_version := get_fedora_version()) not in range(MIN_FEDORA_VERSION,
-                                                             MAX_FEDORA_VERSION + 1):
+    if (fedora_version := get_fedora_version()) not in range(
+        MIN_FEDORA_VERSION, MAX_FEDORA_VERSION + 1
+    ):
         raise RuntimeError(
             f"Fedora {fedora_version} is not tested with this script, add support for it if it works.",
         )
@@ -144,7 +145,7 @@ def install_packages():
 
         # repo
         'python',
-    ]  # yapf: disable
+    ]  # fmt: off
 
     if fedora_version < 42:
         packages.append('eza')
@@ -166,7 +167,7 @@ def install_packages():
     dnf_install(packages)
 
     # Install local packages
-    local_packages = ('modprobed-db', )
+    local_packages = ('modprobed-db',)
     install_local_packages(local_packages)
 
 
@@ -176,31 +177,32 @@ def setup_doas(username):
     if (persist := 'permit persist :wheel') not in conf_txt:
         conf_txt = conf_txt.replace('permit :wheel', persist)
 
-        conf_txt += ('\n'
-                     '# Do not require root to put in a password (makes no sense)\n'
-                     'permit nopass root\n')
+        conf_txt += (
+            '\n# Do not require root to put in a password (makes no sense)\npermit nopass root\n'
+        )
 
         # OrbStack sets up passwordless sudo, carry it over to doas
         # If we created a user password, this file will not be set up
         # but we still want this behavior, so check for /mnt/mac as well.
         if Path('/etc/sudoers.d/orbstack').exists() or Path('/mnt/mac').is_dir():
-            conf_txt += ('\n'
-                         '# passwordless doas for my user\n'
-                         f"permit nopass {username}\n")
+            conf_txt += f'\n# passwordless doas for my user\npermit nopass {username}\n'
         else:
             conf_txt += (
                 '\n'
                 '# Allow me to update packages without a password (arguments are matched exactly)\n'
                 f"permit nopass {username} as root cmd dnf args update\n"
-                f"permit nopass {username} as root cmd dnf args update -y\n")
+                f"permit nopass {username} as root cmd dnf args update -y\n"
+            )
 
         if lib.setup.is_virtual_machine():
-            conf_txt += ('\n'
-                         '# Allow me to passwordlessly reboot and poweroff virtual machine\n'
-                         f"permit nopass {username} as root cmd poweroff\n"
-                         f"permit nopass {username} as root cmd systemctl args poweroff\n"
-                         f"permit nopass {username} as root cmd reboot\n"
-                         f"permit nopass {username} as root cmd systemctl args reboot\n")
+            conf_txt += (
+                '\n'
+                '# Allow me to passwordlessly reboot and poweroff virtual machine\n'
+                f"permit nopass {username} as root cmd poweroff\n"
+                f"permit nopass {username} as root cmd systemctl args poweroff\n"
+                f"permit nopass {username} as root cmd reboot\n"
+                f"permit nopass {username} as root cmd systemctl args reboot\n"
+            )
 
         doas_conf.write_text(conf_txt, encoding='utf-8')
 

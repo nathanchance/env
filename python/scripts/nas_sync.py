@@ -39,23 +39,27 @@ def parse_parameters():
         'fedora',
         'ipsw',
         'ubuntu',
-    ]  # yapf: disable
+    ]  # fmt: off
 
-    parser.add_argument('-t',
-                        '--targets',
-                        choices=supported_images,
-                        default=supported_images,
-                        help='Download targets',
-                        nargs='+')
+    parser.add_argument(
+        '-t',
+        '--targets',
+        choices=supported_images,
+        default=supported_images,
+        help='Download targets',
+        nargs='+',
+    )
 
     return parser.parse_args()
 
 
 def get_latest_ipsw_url(identifier, version):
     # Query the endpoint for list of builds
-    response = requests.get(f"https://api.ipsw.me/v4/device/{identifier}?type=ipsw",
-                            params={'Accept': 'application/json'},
-                            timeout=3600)
+    response = requests.get(
+        f"https://api.ipsw.me/v4/device/{identifier}?type=ipsw",
+        params={'Accept': 'application/json'},
+        timeout=3600,
+    )
     response.raise_for_status()
     firmwares = json.loads(response.content)['firmwares']
     # Eliminate builds that are not for the requested versions
@@ -102,25 +106,26 @@ def download_items(targets, network_folder):
                         'containing_folder': Path(firmware_folder, 'Alpine', alpine_version),
                         'file_url': file_url,
                         'sha_url': file_url + '.sha256',
-                    }]  # yapf: disable
+                    }]  # fmt: off
 
         elif target == 'arch':
             arch_day = '.01'
             arch_date = datetime.datetime.now(datetime.timezone.utc).strftime("%Y.%m") + arch_day
 
             base_arch_url = f"https://mirrors.edge.kernel.org/archlinux/iso/{arch_date}"
-            items += [{
-                'containing_folder': Path(firmware_folder, 'Arch'),
-                'file_url': f"{base_arch_url}/archlinux-{arch_date}-x86_64.iso",
-                'sha_url': f"{base_arch_url}/sha256sums.txt",
-            }]
+            items += [
+                {
+                    'containing_folder': Path(firmware_folder, 'Arch'),
+                    'file_url': f"{base_arch_url}/archlinux-{arch_date}-x86_64.iso",
+                    'sha_url': f"{base_arch_url}/sha256sums.txt",
+                }
+            ]
 
         elif target == 'bundles':
             repos = {
                 'binutils': 'https://sourceware.org/git/binutils-gdb.git',
                 'linux': 'https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/',
-                'linux-next':
-                'https://git.kernel.org/pub/scm/linux/kernel/git/next/linux-next.git/',
+                'linux-next': 'https://git.kernel.org/pub/scm/linux/kernel/git/next/linux-next.git/',
                 'linux-stable': 'https://git.kernel.org/pub/scm/linux/kernel/git/stable/linux.git/',
                 'llvm-project': 'https://github.com/llvm/llvm-project',
             }
@@ -153,7 +158,7 @@ def download_items(targets, network_folder):
                         'file_url': f"{arch_debian_url}/iso-dvd/debian-{debian_ver}-{arch}-DVD-1.iso",
                         'sha_url': f"{arch_debian_url}/iso-dvd/SHA256SUMS",
                     },
-                ]  # yapf: disable
+                ]  # fmt: off
 
         elif target == 'fedora':
             fedora_arches = ['aarch64', 'x86_64']
@@ -175,7 +180,7 @@ def download_items(targets, network_folder):
                         'containing_folder': Path(subfolder, fedora_ver, 'Server', arch),
                         'file_url': f"{iso_url}/Fedora-Server-{flavor}-{arch}-{fedora_ver}-{server_iso_ver}.iso",
                         'sha_url': f"{iso_url}/Fedora-Server-{fedora_ver}-{server_iso_ver}-{arch}-CHECKSUM",
-                    }]  # yapf: disable
+                    }]  # fmt: off
 
             # Workstation
             for arch in fedora_arches:
@@ -184,16 +189,18 @@ def download_items(targets, network_folder):
                     'containing_folder': Path(subfolder, fedora_ver, 'Workstation', arch),
                     'file_url': f"{iso_url}/Fedora-Workstation-Live-{fedora_ver}-{workstation_iso_ver}.{arch}.iso",
                     'sha_url': f"{iso_url}/Fedora-Workstation-{fedora_ver}-{server_iso_ver}-{arch}-CHECKSUM",
-                }]  # yapf: disable
+                }]  # fmt: off
 
         elif target == 'ipsw':
             mac_versions = ('15', '14', '13', '12')
 
             for mac_version in mac_versions:
-                items += [{
-                    'containing_folder': Path(firmware_folder, 'macOS/VM'),
-                    'file_url': get_latest_ipsw_url('VirtualMac2,1', mac_version),
-                }]
+                items += [
+                    {
+                        'containing_folder': Path(firmware_folder, 'macOS/VM'),
+                        'file_url': get_latest_ipsw_url('VirtualMac2,1', mac_version),
+                    }
+                ]
 
         elif target == 'ubuntu':
             ubuntu_arches = ['amd64', 'arm64']
@@ -211,7 +218,9 @@ def download_items(targets, network_folder):
                     if arch == 'amd64':
                         base_ubuntu_url = f"https://releases.ubuntu.com/{ubuntu_subver}"
                     elif arch == 'arm64':
-                        base_ubuntu_url = f"https://cdimage.ubuntu.com/releases/{ubuntu_ver}/release"
+                        base_ubuntu_url = (
+                            f"https://cdimage.ubuntu.com/releases/{ubuntu_ver}/release"
+                        )
                     else:
                         raise RuntimeError(f"Cannot handle Ubuntu architecture '{arch}'?")
 
@@ -219,7 +228,7 @@ def download_items(targets, network_folder):
                         'containing_folder': Path(firmware_folder, 'Ubuntu', ubuntu_ver, 'Server'),
                         'file_url': f"{base_ubuntu_url}/ubuntu-{ubuntu_subver}-live-server-{arch}.iso",
                         'sha_url': f"{base_ubuntu_url}/SHA256SUMS",
-                    }]    # yapf: disable
+                    }]  # fmt: off
 
     for item in items:
         download_if_necessary(item)

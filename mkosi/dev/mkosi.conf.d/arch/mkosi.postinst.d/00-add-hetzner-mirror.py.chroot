@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 
+import sys
 from os import environ as env
 from pathlib import Path
-import sys
 
 EXPECTED_MOUNTS = (
     ((PYTHON_FOLDER := Path(env['SRCDIR'], 'python')), 'PYTHON_FOLDER'),
@@ -23,6 +23,5 @@ if HETZNER_MIRROR not in host_pacman_conf.read_text(encoding='utf-8'):
     sys.exit(0)  # host is Arch but still not Hetzner
 
 guest_pacman_conf = Path('/etc/pacman.conf')
-guest_pacman_conf_txt = add_hetzner_mirror_to_repos(
-    guest_pacman_conf.read_text(encoding='utf-8'))
+guest_pacman_conf_txt = add_hetzner_mirror_to_repos(guest_pacman_conf.read_text(encoding='utf-8'))
 guest_pacman_conf.write_text(guest_pacman_conf_txt, encoding='utf-8')

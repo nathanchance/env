@@ -35,7 +35,14 @@ def create_user(user_name, user_password):
         raise RuntimeError(f"user ('{user_name}') already exists?")
 
     lib.utils.run(
-        ['useradd', '-m', '-G', 'sudo' if lib.setup.group_exists('sudo') else 'wheel', user_name])
+        [
+            'useradd',
+            '-m',
+            '-G',
+            'sudo' if lib.setup.group_exists('sudo') else 'wheel',
+            user_name,
+        ]
+    )
     lib.setup.chpasswd(user_name, user_password)
 
     root_ssh = Path.home().joinpath('.ssh')
@@ -47,16 +54,18 @@ def create_user(user_name, user_password):
 def parse_arguments():
     parser = ArgumentParser(description='Perform initial setup on certain servers')
 
-    parser.add_argument('-d',
-                        '--drive',
-                        help='Drive to create folder on (default: no partitioning)')
-    parser.add_argument('-f',
-                        '--folder',
-                        default='/home',
-                        help='Mountpoint of partiton (default: /home)')
-    parser.add_argument('-p',
-                        '--password',
-                        help='Password of user account (implies account creation)')
+    parser.add_argument(
+        '-d', '--drive', help='Drive to create folder on (default: no partitioning)'
+    )
+    parser.add_argument(
+        '-f',
+        '--folder',
+        default='/home',
+        help='Mountpoint of partiton (default: /home)',
+    )
+    parser.add_argument(
+        '-p', '--password', help='Password of user account (implies account creation)'
+    )
     parser.add_argument('-u', '--user', default=lib.setup.get_user(), help='Name of user account')
 
     return parser.parse_args()

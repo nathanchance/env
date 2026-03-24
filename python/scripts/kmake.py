@@ -18,29 +18,30 @@ import lib.kernel
 def parse_arguments():
     parser = ArgumentParser(description='A make wrapper for building Linux kernels')
 
-    parser.add_argument('-C',
-                        '--directory',
-                        default=Path(),
-                        help='Mirrors the equivalent make argument',
-                        type=Path)
+    parser.add_argument(
+        '-C',
+        '--directory',
+        default=Path(),
+        help='Mirrors the equivalent make argument',
+        type=Path,
+    )
     parser.add_argument('--no-ccache', action='store_true', help='Disable the use of ccache')
     parser.add_argument(
         '--omit-hostldflags',
         action='store_true',
-        help=
-        'By default, kmake will manipulate HOSTLDFLAGS in certain cases. This option avoids that logic.',
+        help='By default, kmake will manipulate HOSTLDFLAGS in certain cases. This option avoids that logic.',
     )
     parser.add_argument(
         '--omit-o-arg',
         action='store_true',
-        help=
-        'By default, kmake uses an O= value if one is not present, overriding the default of building in tree. This option avoids that logic.',
+        help='By default, kmake uses an O= value if one is not present, overriding the default of building in tree. This option avoids that logic.',
     )
     parser.add_argument(
         '-p',
         '--prepend-to-path',
         action='append',
-        help='Prepend specified directory to PATH (can be specified multiple times)')
+        help='Prepend specified directory to PATH (can be specified multiple times)',
+    )
     parser.add_argument('-j', '--jobs', default=os.cpu_count(), help='Number of jobs', type=int)
     parser.add_argument('--use-time', action='store_true', help="Call 'time -v' for time tracking")
     parser.add_argument('-v', '--verbose', action='store_true', help='Do a more verbose build')
@@ -73,9 +74,12 @@ if __name__ == '__main__':
             targets.append(arg)
 
     if not args.omit_hostldflags:
-        hostldflags = hostldflags_var.split(' ') if (hostldflags_var := variables.get(
-            'HOSTLDFLAGS', '')) else []
-        if (llvm := variables.get('LLVM', '')):
+        hostldflags = (
+            hostldflags_var.split(' ')
+            if (hostldflags_var := variables.get('HOSTLDFLAGS', ''))
+            else []
+        )
+        if llvm := variables.get('LLVM', ''):
             # Use ld.lld as the host linker by default with LLVM=
             if llvm == '1':
                 LLD = 'ld.lld'
@@ -106,10 +110,12 @@ if __name__ == '__main__':
         else:
             variables['O'] = Path('build')
 
-    lib.kernel.kmake(variables,
-                     targets,
-                     ccache=(not args.no_ccache),
-                     directory=args.directory,
-                     jobs=args.jobs,
-                     silent=(not args.verbose),
-                     use_time=args.use_time)
+    lib.kernel.kmake(
+        variables,
+        targets,
+        ccache=(not args.no_ccache),
+        directory=args.directory,
+        jobs=args.jobs,
+        silent=(not args.verbose),
+        use_time=args.use_time,
+    )

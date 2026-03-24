@@ -47,7 +47,8 @@ def setup_repos():
     lib.setup.fetch_gpg_key('https://download.docker.com/linux/ubuntu/gpg', docker_gpg_key)
     Path(apt_sources, 'docker.list').write_text(
         f"deb [arch={dpkg_arch} signed-by={docker_gpg_key}] https://download.docker.com/linux/ubuntu {codename} stable\n",
-        encoding='utf-8')
+        encoding='utf-8',
+    )
 
     # fish
     apt_add_repo('ppa:fish-shell/release-3')
@@ -58,7 +59,8 @@ def setup_repos():
     lib.setup.fetch_gpg_key(f"{gh_packages}/{gh_gpg_key.name}", gh_gpg_key)
     Path(apt_sources, 'github-cli.list').write_text(
         f"deb [arch={dpkg_arch} signed-by={gh_gpg_key}] {gh_packages} stable main\n",
-        encoding='utf-8')
+        encoding='utf-8',
+    )
 
     # git
     apt_add_repo('ppa:git-core/ppa')

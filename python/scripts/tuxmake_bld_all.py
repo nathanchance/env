@@ -45,54 +45,68 @@ def parse_arguments():
         'riscv',
         'x86_64',
     ]
-    parser.add_argument('-a',
-                        '--architectures',
-                        choices=supported_architectures,
-                        default=supported_architectures,
-                        help='Architectures to build (default: all supported architectures)',
-                        metavar='TARGETS',
-                        nargs='+')
+    parser.add_argument(
+        '-a',
+        '--architectures',
+        choices=supported_architectures,
+        default=supported_architectures,
+        help='Architectures to build (default: all supported architectures)',
+        metavar='TARGETS',
+        nargs='+',
+    )
 
     suppported_toolchains = [f"gcc-{ver}" for ver in korg_tc.GCCManager.VERSIONS]
-    parser.add_argument('-t',
-                        '--toolchains',
-                        choices=suppported_toolchains,
-                        default=[suppported_toolchains[-1]],
-                        help='Toolchains to build kernels with (default: latest GCC release)',
-                        metavar='TOOLCHAINS',
-                        nargs='+')
+    parser.add_argument(
+        '-t',
+        '--toolchains',
+        choices=suppported_toolchains,
+        default=[suppported_toolchains[-1]],
+        help='Toolchains to build kernels with (default: latest GCC release)',
+        metavar='TOOLCHAINS',
+        nargs='+',
+    )
 
     supported_targets = ['def', 'all']
-    parser.add_argument('-T',
-                        '--targets',
-                        choices=supported_targets,
-                        default=supported_targets,
-                        help='Targets to build (default: all supported targets)',
-                        metavar='TARGETS',
-                        nargs='+')
+    parser.add_argument(
+        '-T',
+        '--targets',
+        choices=supported_targets,
+        default=supported_targets,
+        help='Targets to build (default: all supported targets)',
+        metavar='TARGETS',
+        nargs='+',
+    )
 
     default_kernel_source = Path().resolve()
-    parser.add_argument('-C',
-                        '--directory',
-                        default=default_kernel_source,
-                        help='Kernel source to build (default: current working directory)',
-                        metavar='SOURCE')
+    parser.add_argument(
+        '-C',
+        '--directory',
+        default=default_kernel_source,
+        help='Kernel source to build (default: current working directory)',
+        metavar='SOURCE',
+    )
 
     parser.add_argument(
         '-o',
         '--output-dir',
-        help='Output folder for build artifacts (default: build folder in kernel source)')
+        help='Output folder for build artifacts (default: build folder in kernel source)',
+    )
 
-    parser.add_argument('--use-ccache',
-                        action='store_true',
-                        help='Use ccache for builds (default: no caching)')
+    parser.add_argument(
+        '--use-ccache',
+        action='store_true',
+        help='Use ccache for builds (default: no caching)',
+    )
 
     return parser.parse_args()
 
 
 def get_kconfigs_for_target(targets):
     kconfigs = {
-        'all': ['allmodconfig', 'allnoconfig'],  # allyesconfig is not super useful and slow
+        'all': [
+            'allmodconfig',
+            'allnoconfig',
+        ],  # allyesconfig is not super useful and slow
         'def': ['defconfig'],
     }
 
@@ -108,7 +122,8 @@ def get_env_make_variables(target_arch, toolchain):
         make_variables['CROSS_COMPILE'] = korg_tc.GCCManager().get_cc_as_path(version, target_arch)
         if target_arch == 'arm64':
             make_variables['CROSS_COMPILE_COMPAT'] = korg_tc.GCCManager().get_cc_as_path(
-                version, 'arm')
+                version, 'arm'
+            )
         if version < 8:
             environment['KCFLAGS'] = ''
 
@@ -133,14 +148,16 @@ def build_one(tree, output_dir, target_arch, toolchain, wrapper, kconfig, result
     environment, make_variables = get_env_make_variables(target_arch, toolchain)
 
     # pylint: disable-next=c-extension-no-member
-    result = tuxmake.build.build(tree=tree,
-                                 output_dir=config_output_dir,
-                                 target_arch=target_arch,
-                                 wrapper=wrapper,
-                                 kconfig=kconfig,
-                                 environment=environment,
-                                 make_variables=make_variables,
-                                 targets=get_targets(kconfig))
+    result = tuxmake.build.build(
+        tree=tree,
+        output_dir=config_output_dir,
+        target_arch=target_arch,
+        wrapper=wrapper,
+        kconfig=kconfig,
+        environment=environment,
+        make_variables=make_variables,
+        targets=get_targets(kconfig),
+    )
 
     duration = 0
     passed = True
@@ -173,20 +190,29 @@ def process_results(results_file, start_time):
     print(f"Total build time: {lib.utils.get_duration(start_time)}")
 
 
-def build_all(linux_folder, out_folder, architectures, targets, toolchains, use_ccache,
-              results_file):
+def build_all(
+    linux_folder,
+    out_folder,
+    architectures,
+    targets,
+    toolchains,
+    use_ccache,
+    results_file,
+):
     for toolchain in toolchains:
         for target_arch in architectures:
             if int(toolchain.split('-')[1]) < 7 and target_arch == 'riscv':
                 continue
             for kconfig in get_kconfigs_for_target(targets):
-                build_one(tree=linux_folder,
-                          output_dir=out_folder,
-                          target_arch=target_arch,
-                          toolchain=toolchain,
-                          wrapper='ccache' if use_ccache and shutil.which('ccache') else None,
-                          kconfig=kconfig,
-                          results_file=results_file)
+                build_one(
+                    tree=linux_folder,
+                    output_dir=out_folder,
+                    target_arch=target_arch,
+                    toolchain=toolchain,
+                    wrapper='ccache' if use_ccache and shutil.which('ccache') else None,
+                    kconfig=kconfig,
+                    results_file=results_file,
+                )
 
 
 if __name__ == '__main__':
@@ -203,12 +229,14 @@ if __name__ == '__main__':
     results = Path(output, 'results.log')
     start = time.time()
 
-    build_all(linux_folder=Path(args.directory).resolve(),
-              out_folder=output,
-              architectures=args.architectures,
-              targets=args.targets,
-              toolchains=args.toolchains,
-              use_ccache=args.use_ccache,
-              results_file=results)
+    build_all(
+        linux_folder=Path(args.directory).resolve(),
+        out_folder=output,
+        architectures=args.architectures,
+        targets=args.targets,
+        toolchains=args.toolchains,
+        use_ccache=args.use_ccache,
+        results_file=results,
+    )
 
     process_results(results, start)

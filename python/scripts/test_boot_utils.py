@@ -31,7 +31,7 @@ MATRIX = {
         'x86': 'defconfig',
         'x86_64': 'defconfig',
     },
-}  # yapf: disable
+}  # fmt: off
 MATRIX['clang'] = MATRIX['gcc'].copy()
 # https://github.com/ClangBuiltLinux/linux/issues/1814
 del MATRIX['clang']['ppc32']
@@ -63,5 +63,13 @@ for toolchain, builds in MATRIX.items():
         if not (kernel_dir := Path(directory, toolchain, kernel_arch, config)).exists():
             raise FileNotFoundError(f"{kernel_dir} does not exist?")
 
-        boot_utils_cmd = [BOOT_QEMU, '-a', boot_utils_arch, '-k', kernel_dir, '-t', '90s']
+        boot_utils_cmd = [
+            BOOT_QEMU,
+            '-a',
+            boot_utils_arch,
+            '-k',
+            kernel_dir,
+            '-t',
+            '90s',
+        ]
         lib.utils.run(boot_utils_cmd, show_cmd=True)

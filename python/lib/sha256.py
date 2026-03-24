@@ -17,7 +17,7 @@ def calculate(file_path):
     file_hash = hashlib.sha256()
     with Path(file_path).open('rb') as file:
         # 1MB at a time
-        while (chunk := file.read(1048576)):  # 1MB at a time
+        while chunk := file.read(1048576):  # 1MB at a time
             file_hash.update(chunk)
     return file_hash.hexdigest()
 

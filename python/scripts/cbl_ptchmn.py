@@ -18,11 +18,13 @@ def get_patches_folder(repo):
 def parse_arguments():
     parser = ArgumentParser(description='Quilt-like patch management function for Linux')
 
-    parser.add_argument('-C',
-                        '--directory',
-                        default=Path.cwd().resolve(),
-                        help='Directory to run git commands in',
-                        type=Path)
+    parser.add_argument(
+        '-C',
+        '--directory',
+        default=Path.cwd().resolve(),
+        help='Directory to run git commands in',
+        type=Path,
+    )
 
     mode_parser = parser.add_mutually_exclusive_group(required=True)
     mode_parser.add_argument('-s', '--sync', action='store_true', help='Sync patches to repo')
@@ -61,7 +63,8 @@ if __name__ == '__main__':
 
     if not Path(args.directory, 'Makefile').exists():
         raise RuntimeError(
-            f"Supplied repository ('{args.directory}') does not appear to be a Linux kernel tree?")
+            f"Supplied repository ('{args.directory}') does not appear to be a Linux kernel tree?"
+        )
 
     if not (patches_folder := get_patches_folder(args.directory)).exists():
         raise RuntimeError(f"Derived patches folder ('{patches_folder}') does not exist!")

@@ -11,13 +11,17 @@ import lib.utils
 
 # pylint: enable=wrong-import-position
 
-BT_LE_CODED_PHY = r"Bluetooth: hci0: HCI LE Coded PHY feature bit is set, but its usage is not supported\."
+BT_LE_CODED_PHY = (
+    r"Bluetooth: hci0: HCI LE Coded PHY feature bit is set, but its usage is not supported\."
+)
 PCI_OF_ROOT_NODE = 'PCI: OF: of_root node is NULL, cannot create PCI host bridge node'
 AMDGPU_KVM_ERRORS = [
     r"amdgpu [0-9a-f:.]+ \[drm\] Failed to setup vendor infoframe on connector HDMI\-A\-1: \-22",
     r"amdgpu [0-9a-f:.]+ \[drm\] REG_WAIT timeout 1us \* 100000 tries \- optc\d+_disable_crtc line:\d+",
 ]
-SYSTEMD_BPF_RESTRICT_FS = r"systemd\[1\]: bpf\-restrict\-fs: Failed to load BPF object: No such process"
+SYSTEMD_BPF_RESTRICT_FS = (
+    r"systemd\[1\]: bpf\-restrict\-fs: Failed to load BPF object: No such process"
+)
 READ_ALL_WARNINGS = [
     r"ICMPv6: process `read_all' is using deprecated sysctl \(syscall\) net\.ipv6\.neigh\.default\.base_reachable_time \- use net\.ipv6\.neigh\.default\.base_reachable_time_ms instead",
     'NOTICE: Automounting of tracing to debugfs is deprecated and will be removed in 2030',

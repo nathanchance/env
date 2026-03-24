@@ -35,7 +35,6 @@ if (proc_cpuinfo := Path('/proc/cpuinfo')).exists():
 
 
 class CmdlineOptions(UserDict):
-
     def __init__(self, initial_argument):
         if isinstance(initial_argument, str):
             super().__init__()
@@ -49,11 +48,11 @@ class CmdlineOptions(UserDict):
 
     def __str__(self):
         return ' '.join(
-            sorted(f"{key}={value}" if value else key for key, value in self.data.items()))
+            sorted(f"{key}={value}" if value else key for key, value in self.data.items())
+        )
 
 
 class MkinitcpioConf(UserDict):
-
     def __init__(self, init_arg='', path=None):
         super().__init__()
 
@@ -85,8 +84,7 @@ class MkinitcpioConf(UserDict):
 
         self.orig = {var: f"{var}=({val})" for var, val in matches}
         self.data = {
-            var: set(map(Path if var == 'FILES' else str, val.split()))
-            for var, val in matches
+            var: set(map(Path if var == 'FILES' else str, val.split())) for var, val in matches
         }
 
     def update_if_necessary(self):
@@ -167,7 +165,8 @@ def configure_systemd_boot(init=True, conf='linux.conf'):
             '[Action]\n'
             'Description = Gracefully upgrading systemd-boot...\n'
             'When = PostTransaction\n'
-            'Exec = /usr/bin/systemctl restart systemd-boot-update.service\n')
+            'Exec = /usr/bin/systemctl restart systemd-boot-update.service\n'
+        )
         systemd_boot_update_hook.write_text(systemd_boot_update_hook_txt, encoding='utf-8')
         systemd_boot_update_hook.chmod(0o644)
 
@@ -278,18 +277,20 @@ def enable_reflector():
         '--protocol https',
         '--save /etc/pacman.d/mirrorlist',
         '--sort rate',
-    ]  # yapf: disable
+    ]  # fmt: off
     conf_text = '\n'.join(reflector_args) + '\n'
     Path('/etc/xdg/reflector/reflector.conf').write_text(conf_text, encoding='utf-8')
 
-    reflector_drop_in_text = ('[Unit]\n'
-                              'Description=Refresh Pacman mirrorlist with Reflector.\n'
-                              '\n'
-                              '[Timer]\n'
-                              'OnCalendar=\n'
-                              'OnUnitInactiveSec=18h\n'
-                              'OnCalendar=*-*-* 06,18:00:00\n'
-                              'RandomizedDelaySec=1h\n')
+    reflector_drop_in_text = (
+        '[Unit]\n'
+        'Description=Refresh Pacman mirrorlist with Reflector.\n'
+        '\n'
+        '[Timer]\n'
+        'OnCalendar=\n'
+        'OnUnitInactiveSec=18h\n'
+        'OnCalendar=*-*-* 06,18:00:00\n'
+        'RandomizedDelaySec=1h\n'
+    )
     lib.utils.systemd_drop_in('reflector.timer', '00-schedule', reflector_drop_in_text)
     lib.utils.run(['systemctl', 'daemon-reload'])
 
@@ -303,10 +304,12 @@ def fix_fstab():
 
 def get_cmdline_additions():
     module_blacklist = []
-    options = CmdlineOptions({
-        # Mitigate SMT RSB vulnerability
-        'kvm.mitigate_smt_rsb': '1',
-    })
+    options = CmdlineOptions(
+        {
+            # Mitigate SMT RSB vulnerability
+            'kvm.mitigate_smt_rsb': '1',
+        }
+    )
     if can_use_amd_pstate():
         options['amd_pstate'] = 'active'
     else:
@@ -333,7 +336,8 @@ def installimage_adjustments(mkinitcpio_conf, conf='linux.conf', dryrun=False):
     # than sorry.
     if not (is_hetzner() or dryrun):
         lib.utils.print_yellow(
-            'Running installimage_adjustments() requires a Hetzner machine, skipping...')
+            'Running installimage_adjustments() requires a Hetzner machine, skipping...'
+        )
         return
 
     # Get the current fstab for adjustments
@@ -499,7 +503,7 @@ def pacman_install_packages():
         # Remote work
         'mosh',
         'openssh',
-    ]  # yapf: disable
+    ]  # fmt: off
 
     if cpu_vendor:
         packages.append(f"{cpu_vendor}-ucode")
@@ -525,7 +529,7 @@ def pacman_install_packages():
 
             # Video viewing
             'vlc',
-        ]  # yapf: disable
+        ]  # fmt: off
 
     # https://wiki.archlinux.org/title/VMware/Install_Arch_Linux_as_a_guest
     if lib.utils.get_hostname() == 'vmware':
@@ -534,7 +538,7 @@ def pacman_install_packages():
             'gtkmm',
             'gtk2',
             'open-vm-tools',
-        ]  # yapf: disable
+        ]  # fmt: off
 
     # Install libvirt and virt-install for easy management of VMs; iptables-nft
     # is also needed for networking but that will be installed later to avoid
@@ -546,7 +550,7 @@ def pacman_install_packages():
             'libvirt',
             'qemu-desktop',
             'virt-install',
-        ]  # yapf: disable
+        ]  # fmt: off
 
     if lib.setup.is_virtual_machine():
         packages.append('devtools')
@@ -568,8 +572,9 @@ def pacman_key_setup():
 def pacman_settings(dryrun=False):
     # The Hetzner mirror will be in mirrorlist if this is the first time
     # running pacman_setting() after installimage.
-    hetzner_mirror_in_mirrorlist = (mirrorlist := Path('/etc/pacman.d/mirrorlist')).exists() and \
-                                   HETZNER_MIRROR in mirrorlist.read_text(encoding='utf-8')
+    hetzner_mirror_in_mirrorlist = (
+        mirrorlist := Path('/etc/pacman.d/mirrorlist')
+    ).exists() and HETZNER_MIRROR in mirrorlist.read_text(encoding='utf-8')
     # The Hetzner mirror will be in pacman.conf if pacman_settings() has
     # already be run. This needs to be checked before we blow away pacman.conf
     # with pacman.conf.pacnew below.
@@ -599,8 +604,9 @@ def pacman_settings(dryrun=False):
     pacman_conf_inclusion = 'Include = /etc/pacman.d/nathan.conf\n\n'
     if pacman_conf_marker not in conf_text:
         raise RuntimeError('Format of /etc/pacman.conf changed?')
-    conf_text = conf_text.replace(pacman_conf_marker,
-                                  f"{pacman_conf_marker}{pacman_conf_inclusion}")
+    conf_text = conf_text.replace(
+        pacman_conf_marker, f"{pacman_conf_marker}{pacman_conf_inclusion}"
+    )
     if not (personal_pacman_conf := Path('/etc/pacman.d/nathan.conf')).exists():
         personal_pacman_conf_text = (
             '[options]\n'
@@ -610,7 +616,8 @@ def pacman_settings(dryrun=False):
             '\n'
             '[nathan]\n'
             'SigLevel = Optional TrustAll\n'
-            'Server = https://raw.githubusercontent.com/nathanchance/arch-repo/main/$arch\n')
+            'Server = https://raw.githubusercontent.com/nathanchance/arch-repo/main/$arch\n'
+        )
         personal_pacman_conf.write_text(personal_pacman_conf_text, encoding='utf-8')
 
     lib.utils.print_or_write_text(PACMAN_CONF, conf_text, dryrun)
@@ -665,16 +672,19 @@ def setup_doas(username):
         f"permit nopass {username} as root cmd pacman args -Syyu --noconfirm\n"
         '\n'
         '# Do not require root to put in a password (makes no sense)\n'
-        'permit nopass root\n')
+        'permit nopass root\n'
+    )
     doas_conf.write_text(doas_conf_text, encoding='utf-8')
     doas_conf.chmod(0o400)
 
     doas_pam = Path('/etc/pam.d/doas')
-    doas_pam_text = ('#%PAM-1.0\n'
-                     'auth            include         system-auth\n'
-                     'account         include         system-auth\n'
-                     'session         include         system-auth\n'
-                     'session         optional        pam_umask.so\n')
+    doas_pam_text = (
+        '#%PAM-1.0\n'
+        'auth            include         system-auth\n'
+        'account         include         system-auth\n'
+        'session         include         system-auth\n'
+        'session         optional        pam_umask.so\n'
+    )
     doas_pam.write_text(doas_pam_text, encoding='utf-8')
 
     lib.setup.remove_if_installed('sudo')
@@ -717,16 +727,20 @@ def setup_sudo(username):
 
     sudoers_txt = sudoers.read_text(encoding='utf-8')
     if '/usr/bin/pacman' not in sudoers_txt:
-        sudoers_txt += (f"{username} ALL = NOPASSWD: /usr/bin/pacman -Syu\n"
-                        f"{username} ALL = NOPASSWD: /usr/bin/pacman -Syyu\n"
-                        f"{username} ALL = NOPASSWD: /usr/bin/pacman -Syu --noconfirm\n"
-                        f"{username} ALL = NOPASSWD: /usr/bin/pacman -Syyu --noconfirm\n")
+        sudoers_txt += (
+            f"{username} ALL = NOPASSWD: /usr/bin/pacman -Syu\n"
+            f"{username} ALL = NOPASSWD: /usr/bin/pacman -Syyu\n"
+            f"{username} ALL = NOPASSWD: /usr/bin/pacman -Syu --noconfirm\n"
+            f"{username} ALL = NOPASSWD: /usr/bin/pacman -Syyu --noconfirm\n"
+        )
 
     if '/usr/bin/poweroff' not in sudoers_txt:
-        sudoers_txt += (f"{username} ALL = NOPASSWD: /usr/bin/poweroff\n"
-                        f"{username} ALL = NOPASSWD: /usr/bin/systemctl poweroff\n"
-                        f"{username} ALL = NOPASSWD: /usr/bin/reboot\n"
-                        f"{username} ALL = NOPASSWD: /usr/bin/systemctl reboot\n")
+        sudoers_txt += (
+            f"{username} ALL = NOPASSWD: /usr/bin/poweroff\n"
+            f"{username} ALL = NOPASSWD: /usr/bin/systemctl poweroff\n"
+            f"{username} ALL = NOPASSWD: /usr/bin/reboot\n"
+            f"{username} ALL = NOPASSWD: /usr/bin/systemctl reboot\n"
+        )
 
     sudoers.chmod(0o640)
     sudoers.write_text(sudoers_txt, encoding='utf-8')
@@ -762,11 +776,13 @@ def switch_from_grub_to_systemd_boot(conf='linux.conf', dryrun=False):
 
     # Default cmdline options
     root_findmnt = lib.utils.get_findmnt_info('/')
-    cmdline_options = CmdlineOptions({
-        'root': f"PARTUUID={root_findmnt['partuuid']}",
-        'rootfstype': root_findmnt['fstype'],
-        'rw': None,
-    })
+    cmdline_options = CmdlineOptions(
+        {
+            'root': f"PARTUUID={root_findmnt['partuuid']}",
+            'rootfstype': root_findmnt['fstype'],
+            'rw': None,
+        }
+    )
     # grub adds this dynamically during grub-mkconfig, we need it to boot
     if root_findmnt['fstype'] == 'btrfs' and (subvol := root_findmnt['fsroot'].strip('/')):
         cmdline_options['rootflags'] = f"subvol={subvol}"
@@ -780,8 +796,9 @@ def switch_from_grub_to_systemd_boot(conf='linux.conf', dryrun=False):
         # Filter the default values, as there may be some set that are harmful for debugging
         if match := re.search('^GRUB_CMDLINE_LINUX_DEFAULT="(.*)"$', grub_default_txt, flags=re.M):
             default_filter = ('loglevel=', 'quiet')
-            filtered_defaults = ' '.join(item for item in match.groups()[0].split(' ')
-                                         if not item.startswith(default_filter))
+            filtered_defaults = ' '.join(
+                item for item in match.groups()[0].split(' ') if not item.startswith(default_filter)
+            )
             cmdline_options |= CmdlineOptions(filtered_defaults)
 
         # Take the regular options wholesale
@@ -824,7 +841,7 @@ def vmware_adjustments(mkinitcpio_conf):
         'vmw_balloon',
         'vmw_vmci',
         'vmwgfx',
-    }  # yapf: disable
+    }  # fmt: off
     mkinitcpio_conf['MODULES'].update(vmware_mods)
 
     # https://wiki.archlinux.org/title/VMware/Install_Arch_Linux_as_a_guest#Installation

@@ -16,12 +16,15 @@ import lib.utils
 
 def parse_arguments():
     parser = ArgumentParser(
-        description='Prepare an email build report from build logs generated with cbl_lkt')
+        description='Prepare an email build report from build logs generated with cbl_lkt'
+    )
 
-    parser.add_argument('-p',
-                        '--print-to-stdout',
-                        action='store_true',
-                        help='Print to stdout instead of writing to report.txt in log folder')
+    parser.add_argument(
+        '-p',
+        '--print-to-stdout',
+        action='store_true',
+        help='Print to stdout instead of writing to report.txt in log folder',
+    )
     parser.add_argument('folder', type=str, help='Path to build logs')
 
     return parser.parse_args()
@@ -49,7 +52,7 @@ def generate_warnings(log_folder, src_folder):
         'warning:',
         'Warning:',
         'WARNING:',
-    ]  # yapf: disable
+    ]  # fmt: off
     prob_re = re.compile('|'.join(searches))
     warnings = {}
     for log in logs:
@@ -58,10 +61,13 @@ def generate_warnings(log_folder, src_folder):
         # extremely noisy and will appear with most released versions of clang.
         # They will still appear in the log files but they do not need to be
         # logged in these reports.
-        warnings[log.name] = sorted({
-            line.replace(f"{src_folder}/", '')
-            for line in lines if prob_re.search(line) and 'dodgy linker' not in line
-        })
+        warnings[log.name] = sorted(
+            {
+                line.replace(f"{src_folder}/", '')
+                for line in lines
+                if prob_re.search(line) and 'dodgy linker' not in line
+            }
+        )
     full = {key: value for key, value in warnings.items() if value}
 
     # Filter warnings based on priority to fix

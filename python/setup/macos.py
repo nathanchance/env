@@ -87,7 +87,7 @@ def install_packages():
         'ripgrep',
         'rustup-init',
         'zoxide',
-    ]  # yapf: disable
+    ]  # fmt: off
     brew(['install', *packages])
 
     casks = [
@@ -104,7 +104,10 @@ def repo_clone(repo_dest, repo_branch=None):
     # neither ssh nor gh will be set up in virtual machines, just use plain ol' git.
     if is_vm():
         clone_args = ['-b', repo_branch] if repo_branch else []
-        clone_args += [f"https://github.com/nathanchance/{repo_dest.name}.git", repo_dest]
+        clone_args += [
+            f"https://github.com/nathanchance/{repo_dest.name}.git",
+            repo_dest,
+        ]
         brew_git(['clone', *clone_args])
     else:
         clone_args = [repo_dest.name, repo_dest]
@@ -126,7 +129,8 @@ def setup_gh():
 def setup_homebrew():
     if not get_brew_path().exists():
         install_sh = lib.utils.curl(
-            'https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh').decode('utf-8')
+            'https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh'
+        ).decode('utf-8')
         lib.utils.run(['/bin/bash', '-c', install_sh])
 
 
@@ -170,31 +174,33 @@ def setup_wezterm_cfg():
 
 
 def setup_fish():
-    fish_script = ('# Start an ssh-agent\n'
-                   'if not set -q SSH_AUTH_SOCK\n'
-                   '    eval (ssh-agent -c)\n'
-                   'end\n'
-                   '\n'
-                   f"set github_folder {get_env_folder().parent}\n"
-                   'set fisher_plugins \\\n'
-                   '    jorgebucaran/fisher \\\n'
-                   '    $github_folder/{env/fish,hydro} \\\n'
-                   '    PatrickF1/fzf.fish \\\n'
-                   '    jorgebucaran/autopair.fish \\\n'
-                   '    wfxr/forgit\n'
-                   '\n'
-                   'fisher list | fisher remove\n'
-                   'curl -LSs https://git.io/fisher | source\n'
-                   'and fisher install $fisher_plugins\n'
-                   'or return\n'
-                   '\n'
-                   'set fish_cfg $__fish_config_dir/config.fish\n'
-                   'rm -fr $fish_cfg\n'
-                   'mkdir -p (dirname $fish_cfg)\n'
-                   'ln -fsv $github_folder/env/fish/config.fish $fish_cfg\n'
-                   '\n'
-                   'git_setup\n'
-                   'vim_setup\n')
+    fish_script = (
+        '# Start an ssh-agent\n'
+        'if not set -q SSH_AUTH_SOCK\n'
+        '    eval (ssh-agent -c)\n'
+        'end\n'
+        '\n'
+        f"set github_folder {get_env_folder().parent}\n"
+        'set fisher_plugins \\\n'
+        '    jorgebucaran/fisher \\\n'
+        '    $github_folder/{env/fish,hydro} \\\n'
+        '    PatrickF1/fzf.fish \\\n'
+        '    jorgebucaran/autopair.fish \\\n'
+        '    wfxr/forgit\n'
+        '\n'
+        'fisher list | fisher remove\n'
+        'curl -LSs https://git.io/fisher | source\n'
+        'and fisher install $fisher_plugins\n'
+        'or return\n'
+        '\n'
+        'set fish_cfg $__fish_config_dir/config.fish\n'
+        'rm -fr $fish_cfg\n'
+        'mkdir -p (dirname $fish_cfg)\n'
+        'ln -fsv $github_folder/env/fish/config.fish $fish_cfg\n'
+        '\n'
+        'git_setup\n'
+        'vim_setup\n'
+    )
     lib.utils.run([Path(get_brew_bin(), 'fish'), '-c', fish_script])
 
 

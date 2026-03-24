@@ -22,7 +22,6 @@ import lib.utils
 
 
 class FstabItem:
-
     def __init__(self, fs, directory, fstype, opts, dump, check):
 
         self.fs = fs
@@ -50,7 +49,6 @@ class FstabItem:
 
 
 class Fstab:
-
     ARCH_VFAT_OPTS = 'rw,relatime,fmask=0022,dmask=0022,codepage=437,iocharset=ascii,shortname=mixed,utf8,errors=remount-ro'
 
     def __init__(self, init_str=''):
@@ -89,9 +87,11 @@ class Fstab:
             self.entries[key].dir = key
 
     def _gen_str(self):
-        header = ('# Static information about the filesystems.\n'
-                  '# See fstab(5) for details.\n'
-                  '# <file system> <dir> <type> <options> <dump> <pass>\n')
+        header = (
+            '# Static information about the filesystems.\n'
+            '# See fstab(5) for details.\n'
+            '# <file system> <dir> <type> <options> <dump> <pass>\n'
+        )
         lines = []
 
         for item in self.entries.values():
@@ -112,7 +112,10 @@ class Fstab:
             if (item.type, item.opts) == ('vfat', 'umask=0077'):
                 item.opts = Fstab.ARCH_VFAT_OPTS
 
-            if (item.type, item.dir) == ('ext4', '/') and 'errors=remount-ro' not in item.opts:
+            if (item.type, item.dir) == (
+                'ext4',
+                '/',
+            ) and 'errors=remount-ro' not in item.opts:
                 item.opts += ',errors=remount-ro'
 
             if item.type.startswith(('ext', 'btrfs')) and item.check == '0':
@@ -213,11 +216,10 @@ def configure_trusted_networking():
     # network-online.target may be reached without the network actually being
     # active (slow NIC?)
     if hostname == 'mac-studio-m1-max':
-        no_s_flag_conf_txt = ('[Service]\n'
-                              'ExecStart=\n'
-                              'ExecStart=/usr/bin/nm-online -q\n')
-        lib.utils.systemd_drop_in('NetworkManager-wait-online.service', 'no-s-flag',
-                                  no_s_flag_conf_txt)
+        no_s_flag_conf_txt = '[Service]\nExecStart=\nExecStart=/usr/bin/nm-online -q\n'
+        lib.utils.systemd_drop_in(
+            'NetworkManager-wait-online.service', 'no-s-flag', no_s_flag_conf_txt
+        )
 
 
 def disable_suspend():
@@ -227,11 +229,13 @@ def disable_suspend():
 
     # https://wiki.archlinux.org/title/Power_management/Suspend_and_hibernate#Disable_sleep_completely
     if not (sleep_drop_in := Path('/etc/systemd/sleep.conf.d/disable-sleep.conf')).exists():
-        file_text = ('[Sleep]\n'
-                     'AllowSuspend=no\n'
-                     'AllowHibernation=no\n'
-                     'AllowHybridSleep=no\n'
-                     'AllowSuspendThenHibernate=no\n')
+        file_text = (
+            '[Sleep]\n'
+            'AllowSuspend=no\n'
+            'AllowHibernation=no\n'
+            'AllowHybridSleep=no\n'
+            'AllowSuspendThenHibernate=no\n'
+        )
         sleep_drop_in.parent.mkdir(exist_ok=True)
         sleep_drop_in.write_text(file_text, encoding='utf-8')
         sleep_drop_in.chmod(0o644)
@@ -259,7 +263,15 @@ def fetch_gpg_key(source_url, dest):
 def get_active_ethernet_info():
     if not shutil.which('nmcli'):
         raise RuntimeError('Cannot get active Ethernet information without nmcli!')
-    nmcli_cmd = ['nmcli', '-f', 'TYPE,NAME,DEVICE', '-t', 'connection', 'show', '--active']
+    nmcli_cmd = [
+        'nmcli',
+        '-f',
+        'TYPE,NAME,DEVICE',
+        '-t',
+        'connection',
+        'show',
+        '--active',
+    ]
     for line in lib.utils.chronic(nmcli_cmd).stdout.splitlines():
         if 'ethernet' in line:
             return line.split(':')[1:]
@@ -285,8 +297,8 @@ def get_ip_addr_for_intf(intf):
         raise RuntimeError(f"Cannot get IP address for {intf} without ip!")
     ip_addr = None
     for line in lib.utils.chronic(['ip', 'addr']).stdout.split('\n'):
-        ip_a_regex = fr'inet\s+(\d{{1,3}}\.\d{{1,3}}\.\d{{1,3}}\.\d{{1,3}})/\d+\s+.*{intf}$'
-        if (match := re.search(ip_a_regex, line)):
+        ip_a_regex = rf'inet\s+(\d{{1,3}}\.\d{{1,3}}\.\d{{1,3}}\.\d{{1,3}})/\d+\s+.*{intf}$'
+        if match := re.search(ip_a_regex, line):
             ip_addr = match.groups()[0]
             break
     check_ip(ip_addr)
@@ -309,7 +321,8 @@ def get_os_rel():
     os_rel_txt = file.read_text(encoding='utf-8').replace('"', '')
 
     return dict(
-        item.split('=', 1) for item in os_rel_txt.splitlines() if item and not item.startswith('#'))
+        item.split('=', 1) for item in os_rel_txt.splitlines() if item and not item.startswith('#')
+    )
 
 
 def get_udevadm_properties(sysfs_path):
@@ -361,7 +374,13 @@ def is_lxc():
 
 def is_virtual_machine():
     if shutil.which('systemd-detect-virt'):
-        return lib.utils.detect_virt() in ('qemu', 'kvm', 'vmware', 'microsoft', 'apple')
+        return lib.utils.detect_virt() in (
+            'qemu',
+            'kvm',
+            'vmware',
+            'microsoft',
+            'apple',
+        )
     return lib.utils.get_hostname() in ('hyperv', 'qemu', 'vmware')
 
 
@@ -398,19 +417,21 @@ def partition_drive(device, mountpoint, username=None, fstype=None):
     if shutil.which('sgdisk'):
         lib.utils.run(['sgdisk', '-N', '1', '-t', '1:8300', device])
     else:
-        lib.utils.run([
-            'parted',
-            '-s',
-            device,
-            'mklabel',
-            'gpt',
-            'mkpart',
-            'primary',
-            fstype,
-            '0%',
-            '100%',
-        ],
-                      check=True)
+        lib.utils.run(
+            [
+                'parted',
+                '-s',
+                device,
+                'mklabel',
+                'gpt',
+                'mkpart',
+                'primary',
+                fstype,
+                '0%',
+                '100%',
+            ],
+            check=True,
+        )
         # Let everything sync up
         time.sleep(10)
 
@@ -419,8 +440,9 @@ def partition_drive(device, mountpoint, username=None, fstype=None):
 
     # Add partition to fstab
     fstab = Fstab()
-    part_uuid = lib.utils.chronic(['blkid', '-o', 'value', '-s', 'PARTUUID',
-                                   partition]).stdout.strip()
+    part_uuid = lib.utils.chronic(
+        ['blkid', '-o', 'value', '-s', 'PARTUUID', partition]
+    ).stdout.strip()
     fstab[mountpoint] = FstabItem(f"PARTUUID={part_uuid}", mountpoint, fstype, 'defaults', '0', '2')
     fstab.write()
 
@@ -444,7 +466,8 @@ def podman_setup(username):
     if not (registries_conf := Path('/etc/containers/registries.conf')).exists():
         registries_conf.write_text(
             "[registries.search]\nregistries = ['docker.io', 'ghcr.io', 'quay.io']\n",
-            encoding='utf-8')
+            encoding='utf-8',
+        )
 
 
 def remove_if_installed(package_to_remove):
@@ -536,7 +559,8 @@ def setup_initial_fish_config(username):
             '        and fisher install /tmp/env/fish 1>/dev/null\n'
             '        and user_setup $argv\n'
             '   end\n'
-            'end\n')
+            'end\n'
+        )
         fish_cfg.write_text(fish_cfg_txt, encoding='utf-8')
         chown(username, user_cfg)
 
@@ -575,7 +599,8 @@ def setup_virtiofs_automount(mountpoint='/mnt/host'):
         tag_sysfs = list(Path('/sys/fs/virtiofs').glob('*/tag'))
         if len(tag_sysfs) == 0:
             lib.utils.print_yellow(
-                'Virtual machine has no virtiofs mounts, skipping setting up automounting...')
+                'Virtual machine has no virtiofs mounts, skipping setting up automounting...'
+            )
             return
         if len(tag_sysfs) > 1:
             raise RuntimeError('Multiple virtiofs tags found?')
@@ -585,28 +610,32 @@ def setup_virtiofs_automount(mountpoint='/mnt/host'):
 
     unit_name = mountpoint.strip('/').replace('/', '-')
 
-    mount_txt = ('[Unit]\n'
-                 f"Description=Mount {tag} virtiofs folder\n"
-                 '\n'
-                 '[Mount]\n'
-                 f"What={tag}\n"
-                 f"Where={mountpoint}\n"
-                 'Type=virtiofs\n'
-                 '\n'
-                 '[Install]\n'
-                 'WantedBy=multi-user.target\n')
+    mount_txt = (
+        '[Unit]\n'
+        f"Description=Mount {tag} virtiofs folder\n"
+        '\n'
+        '[Mount]\n'
+        f"What={tag}\n"
+        f"Where={mountpoint}\n"
+        'Type=virtiofs\n'
+        '\n'
+        '[Install]\n'
+        'WantedBy=multi-user.target\n'
+    )
     mount_path = Path('/etc/systemd/system', f"{unit_name}.mount")
     mount_path.write_text(mount_txt, encoding='utf-8')
     mount_path.chmod(0o644)
 
-    automount_txt = ('[Unit]\n'
-                     f"Description=Automount {tag} virtiofs folder\n"
-                     '\n'
-                     '[Automount]\n'
-                     f"Where={mountpoint}\n"
-                     '\n'
-                     '[Install]\n'
-                     'WantedBy=multi-user.target\n')
+    automount_txt = (
+        '[Unit]\n'
+        f"Description=Automount {tag} virtiofs folder\n"
+        '\n'
+        '[Automount]\n'
+        f"Where={mountpoint}\n"
+        '\n'
+        '[Install]\n'
+        'WantedBy=multi-user.target\n'
+    )
     automount_path = mount_path.with_suffix('.automount')
     automount_path.write_text(automount_txt, encoding='utf-8')
     automount_path.chmod(0o644)
@@ -620,7 +649,13 @@ def setup_ssh_agent(user_name):
     if not Path('/usr/lib/systemd/user/ssh-agent.socket').exists():
         return
 
-    systemctl_cmd = ['systemctl', '--global', 'is-enabled', '--quiet', 'ssh-agent.socket']
+    systemctl_cmd = [
+        'systemctl',
+        '--global',
+        'is-enabled',
+        '--quiet',
+        'ssh-agent.socket',
+    ]
     if not lib.utils.run_check_rc_zero(systemctl_cmd):
         lib.utils.run(['systemctl', '--global', 'enable', 'ssh-agent.socket'])
 
@@ -642,9 +677,11 @@ def setup_ssh_authorized_keys(user_name):
             cmd = ['wget', '-q', '-O-']
         else:
             raise RuntimeError(
-                'No suitable download command could be found for downloading SSH key!')
-        ssh_key = lib.utils.chronic([*cmd, 'https://github.com/nathanchance.keys'],
-                                    text=None).stdout
+                'No suitable download command could be found for downloading SSH key!'
+            )
+        ssh_key = lib.utils.chronic(
+            [*cmd, 'https://github.com/nathanchance.keys'], text=None
+        ).stdout
         ssh_authorized_keys.write_bytes(ssh_key)
         os.umask(old_umask)
         chown(user_name, ssh_authorized_keys.parent)
@@ -690,11 +727,13 @@ def setup_x550_link_speeds(intf):
     if not rates_conf.exists():
         if not rates_conf.parent.exists():
             rates_conf.parent.mkdir(mode=0o755)
-        rates_conf_txt = ('[Match]\n'
-                          f"PermanentMACAddress={' '.join(valid_macs)}\n"
-                          '\n'
-                          '[Link]\n'
-                          f"Advertise={' '.join(valid_speeds)}\n")
+        rates_conf_txt = (
+            '[Match]\n'
+            f"PermanentMACAddress={' '.join(valid_macs)}\n"
+            '\n'
+            '[Link]\n'
+            f"Advertise={' '.join(valid_speeds)}\n"
+        )
         rates_conf.write_text(rates_conf_txt, encoding='utf-8')
         rates_conf.chmod(0o644)
 

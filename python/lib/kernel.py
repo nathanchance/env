@@ -39,7 +39,11 @@ def b4(cmd, **kwargs):
 
 def b4_am_o(msg_id, **kwargs):
     with TemporaryDirectory() as tmpdir:
-        b4(['am', '-o', tmpdir, '--no-parent', '-P', '_', msg_id], **kwargs, capture_output=True)
+        b4(
+            ['am', '-o', tmpdir, '--no-parent', '-P', '_', msg_id],
+            **kwargs,
+            capture_output=True,
+        )
         if len(patches := list(Path(tmpdir).iterdir())) != 1:
             raise RuntimeError(f"More than one patch in {tmpdir}? Have: {patches}")
         return patches[0].read_text(encoding='utf-8')
@@ -99,8 +103,8 @@ def prepare_source(base_name, base_ref='origin/master'):
     commits = []
 
     # Patching section
-    # yapf: disable
-    # yapf: enable
+    # fmt: off
+    # fmt: on
 
     try:
         for revert in reverts:
@@ -115,16 +119,19 @@ def prepare_source(base_name, base_ref='origin/master'):
                 range_diff = lib.utils.call_git(source_folder, ['diff', commit_range]).stdout
 
                 # apply diff in reverse
-                lib.utils.call_git_loud(source_folder, ['apply', '--3way', '--reverse'],
-                                        input=range_diff)
+                lib.utils.call_git_loud(
+                    source_folder, ['apply', '--3way', '--reverse'], input=range_diff
+                )
 
                 # commit the result
-                lib.utils.call_git_loud(source_folder,
-                                        ['commit', '--no-gpg-sign', '-m', commit_msg])
+                lib.utils.call_git_loud(
+                    source_folder, ['commit', '--no-gpg-sign', '-m', commit_msg]
+                )
             else:
                 lib.utils.call_git_loud(
                     source_folder,
-                    ['revert', '--mainline', '1', '--no-edit', '--no-gpg-sign', revert])
+                    ['revert', '--mainline', '1', '--no-edit', '--no-gpg-sign', revert],
+                )
 
         for patch in patches:
             am_cmd = ['am', '-3', '--no-gpg-sign']
@@ -146,8 +153,10 @@ def prepare_source(base_name, base_ref='origin/master'):
             lib.utils.call_git_loud(source_folder, am_cmd, **am_kwargs)
 
         for commit in commits:
-            patch_input = lib.utils.call_git(Path(os.environ['CBL_SRC_P'], 'linux-next'),
-                                             ['fp', '-1', '--stdout', commit]).stdout
+            patch_input = lib.utils.call_git(
+                Path(os.environ['CBL_SRC_P'], 'linux-next'),
+                ['fp', '-1', '--stdout', commit],
+            ).stdout
             lib.utils.call_git_loud(source_folder, ['am', '-3'], input=patch_input)
     except CalledProcessError as err:
         lib.utils.call_git(source_folder, 'ama', check=False)
@@ -160,15 +169,17 @@ def get_tool_version(binary_path):
     return lib.utils.chronic([binary_path, '--version']).stdout.splitlines()[0]
 
 
-def kmake(variables,
-          targets,
-          ccache=True,
-          directory=None,
-          env=None,
-          jobs=None,
-          silent=True,
-          stdin=None,
-          use_time=False):
+def kmake(
+    variables,
+    targets,
+    ccache=True,
+    directory=None,
+    env=None,
+    jobs=None,
+    silent=True,
+    stdin=None,
+    use_time=False,
+):
     # Handle kernel directory right away
     if not (kernel_src := Path(directory) if directory else Path()).exists():
         raise RuntimeError(f"Derived kernel source ('{kernel_src}') does not exist?")
@@ -183,7 +194,7 @@ def kmake(variables,
     # We want to check certain conditions but we do not want override the
     # user's CC choice if there was one, hence the 'if not cc_str' sprinked
     # throughout this block.
-    if (cc_is_clang := llvm or 'clang' in cc_str):
+    if cc_is_clang := llvm or 'clang' in cc_str:
         # If CC was not explicitly specified, we need to figure out what it is
         # to print the location and version information
         if llvm == '1':
@@ -194,7 +205,8 @@ def kmake(variables,
             # LLVM value other than 1
             if 'LLVM_PREFIX' not in makefile.read_text(encoding='utf-8'):
                 raise RuntimeError(
-                    f"Derived kernel source ('{kernel_src}') does not support LLVM other than 1!")
+                    f"Derived kernel source ('{kernel_src}') does not support LLVM other than 1!"
+                )
             # We want to check that LLVM is a correct value but we do not want
             # to override the user's CC choice if there was one
             if llvm[0] == '-':
@@ -205,7 +217,8 @@ def kmake(variables,
                     cc_str = f"{llvm}clang"
             else:
                 raise RuntimeError(
-                    f"LLVM value ('{llvm}') neither begins with '-' nor ends with '/'!")
+                    f"LLVM value ('{llvm}') neither begins with '-' nor ends with '/'!"
+                )
     # If we are not using clang, we have to be using gcc
     if not cc_str:
         cc_str = f"{cross_compile}gcc"
@@ -221,7 +234,8 @@ def kmake(variables,
             variables['CC'] = f"ccache {compiler}"
         else:
             lib.utils.print_yellow(
-                'WARNING: ccache requested by it could not be found, ignoring...')
+                'WARNING: ccache requested by it could not be found, ignoring...'
+            )
 
     # V=1 or V=2 should imply '-v'
     if 'V' in variables:
@@ -243,7 +257,8 @@ def kmake(variables,
     if int(variables.get('LLVM_IAS', ias_def_val)) == 0:
         if not (gnu_as := shutil.which(f"{cross_compile}as")):
             raise RuntimeError(
-                f"GNU as could not be found based on CROSS_COMPILE ('{cross_compile}')?")
+                f"GNU as could not be found based on CROSS_COMPILE ('{cross_compile}')?"
+            )
         as_location = Path(gnu_as).parent
         if as_location != compiler_location:
             lib.utils.print_green(f"Binutils location:\033[0m {as_location}\n")
@@ -255,7 +270,7 @@ def kmake(variables,
         *flags,
         *[f"{key}={variables[key]}" for key in sorted(variables)],
         *targets,
-    ]  # yapf: disable
+    ]  # fmt: off
     if use_time:
         if not (gnu_time := shutil.which('time')):
             raise RuntimeError('Could not find time binary in PATH?')

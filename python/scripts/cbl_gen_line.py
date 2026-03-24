@@ -49,14 +49,29 @@ def generate_patch_lines(args):
 
 def generate_pr_lines(args):
     for pr in args.prs:
-        gh_pr_cmd = ['gh', '-R', 'llvm/llvm-project', 'pr', 'view', '--json', 'title,url', pr]
+        gh_pr_cmd = [
+            'gh',
+            '-R',
+            'llvm/llvm-project',
+            'pr',
+            'view',
+            '--json',
+            'title,url',
+            pr,
+        ]
         info = json.loads(lib.utils.chronic(gh_pr_cmd).stdout)
         print(f"    set -a gh_prs {info['url']} # {info['title']}")
 
 
 def generate_revert_lines(args):
-    directory = args.directory if args.directory else Path(
-        os.environ['CBL_SRC_D'], 'linux-next' if args.type == 'kernel' else 'llvm-project')
+    directory = (
+        args.directory
+        if args.directory
+        else Path(
+            os.environ['CBL_SRC_D'],
+            'linux-next' if args.type == 'kernel' else 'llvm-project',
+        )
+    )
     if not args.no_update:
         lib.utils.call_git(directory, ['remote', 'update', '-p', 'origin'])
     if args.type == 'kernel':
@@ -69,46 +84,52 @@ def generate_revert_lines(args):
 
 def parse_arguments():
     parser = ArgumentParser(
-        description='Automatically generate variables for cbl_bld_tot_tcs and python/lib/kernel.py')
+        description='Automatically generate variables for cbl_bld_tot_tcs and python/lib/kernel.py'
+    )
 
     subparser = parser.add_subparsers(dest='subcommand', metavar='SUBCOMMAND', required=True)
 
     patch_parser = subparser.add_parser('patch', help='Generate python/lib/kernel.py patch lines')
-    patch_parser.add_argument('-C',
-                              '--directory',
-                              default=Path.cwd(),
-                              help='Git repository to run commands in (default: %(default)s)',
-                              type=Path)
+    patch_parser.add_argument(
+        '-C',
+        '--directory',
+        default=Path.cwd(),
+        help='Git repository to run commands in (default: %(default)s)',
+        type=Path,
+    )
     patch_parser.add_argument(
         '-m',
         '--message-ids',
         help='Message IDs to generate lines for. By default, the current branch is looked at',
-        nargs='*')
+        nargs='*',
+    )
 
     pr_parser = subparser.add_parser('pr', help='Generate cbl_bld_tot_tcs gh_pr lines')
     pr_parser.add_argument('prs', help='Pull request numbers', nargs='*')
 
     revert_parser = subparser.add_parser('revert', help='Generate cbl_bld_tot_tcs revert lines')
-    revert_parser.add_argument('-C',
-                               '--directory',
-                               help='Git repository to run commands in',
-                               type=Path)
-    revert_parser.add_argument('-k',
-                               '--kernel',
-                               action='store_const',
-                               const='kernel',
-                               dest='type',
-                               help='Generate items in kernel format')
-    revert_parser.add_argument('-l',
-                               '--llvm',
-                               action='store_const',
-                               const='llvm',
-                               dest='type',
-                               help='Generate items in LLVM format')
-    revert_parser.add_argument('-n',
-                               '--no-update',
-                               action='store_true',
-                               help='Do not update remotes in repo')
+    revert_parser.add_argument(
+        '-C', '--directory', help='Git repository to run commands in', type=Path
+    )
+    revert_parser.add_argument(
+        '-k',
+        '--kernel',
+        action='store_const',
+        const='kernel',
+        dest='type',
+        help='Generate items in kernel format',
+    )
+    revert_parser.add_argument(
+        '-l',
+        '--llvm',
+        action='store_const',
+        const='llvm',
+        dest='type',
+        help='Generate items in LLVM format',
+    )
+    revert_parser.add_argument(
+        '-n', '--no-update', action='store_true', help='Do not update remotes in repo'
+    )
     revert_parser.add_argument('shas', help='SHAs of commits to revert', nargs='*')
 
     return parser.parse_args()

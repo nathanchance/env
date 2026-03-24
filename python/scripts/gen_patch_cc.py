@@ -17,7 +17,8 @@ parser.add_argument(
     '-C',
     '--directory',
     default='.',
-    help='Change into directory for operations (default: current working directory)')
+    help='Change into directory for operations (default: current working directory)',
+)
 parser.add_argument('path', help='Path to generate Cc: list for')
 args = parser.parse_args()
 
@@ -35,6 +36,7 @@ if not (path := Path(repo, args.path)).exists():
 lib.utils.run([get_maint, path], cwd=repo)
 print()
 
-for addr in lib.utils.chronic([get_maint, '--no-n', '--no-rolestats', path],
-                              cwd=repo).stdout.splitlines():
+for addr in lib.utils.chronic(
+    [get_maint, '--no-n', '--no-rolestats', path], cwd=repo
+).stdout.splitlines():
     print(f"Cc: {addr}")

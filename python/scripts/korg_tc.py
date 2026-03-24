@@ -81,7 +81,6 @@ def shell_quote(item):
 
 
 class Tarball:
-
     def __init__(self):
         self.base_download_url = ''
         self.extraction_location = None
@@ -112,7 +111,9 @@ class Tarball:
                 local_tarball.parent.mkdir(exist_ok=True, parents=True)
                 local_tarball.write_bytes(response.content)
                 lib.sha256.validate_from_url(
-                    local_tarball, f"{self.base_download_url}/{self.remote_checksum_name}")
+                    local_tarball,
+                    f"{self.base_download_url}/{self.remote_checksum_name}",
+                )
 
         if self.extraction_location and not self.extracted_file.exists():
             self.extraction_location.mkdir(exist_ok=True, parents=True)
@@ -123,7 +124,7 @@ class Tarball:
                 f"--strip-components={self.strip_components}",
                 '-x',
                 '-f', local_tarball if local_tarball.exists() else '-',
-            ]  # yapf: disable
+            ]  # fmt: off
 
             comp_ext = local_tarball.suffix
             if comp_ext == '.xz':
@@ -138,7 +139,6 @@ class Tarball:
 
 
 class ToolchainManager:
-
     def __init__(self):
         self.download_folder = None
         self.install_folder = None
@@ -182,7 +182,6 @@ class ToolchainManager:
 
 
 class GCCManager(ToolchainManager):
-
     DEFAULT_DOWNLOAD_FOLDER = Path(os.environ['NAS_FOLDER'], 'Toolchains/GCC')
     DEFAULT_INSTALL_FOLDER = Path(os.environ['CBL_TC_GCC_STORE'])
 
@@ -262,8 +261,10 @@ class GCCManager(ToolchainManager):
             if 'aarch64-linux' in targets:
                 targets.append('arm-linux-gnueabi')
             # No GCC 9.5.0 i386-linux on x86_64 or GCC 14.2.0 i386-linux on aarch64?
-            if 'i386-linux' in targets and (self.host_arch, major_version) in (('x86_64', 9),
-                                                                               ('aarch64', 14)):
+            if 'i386-linux' in targets and (self.host_arch, major_version) in (
+                ('x86_64', 9),
+                ('aarch64', 14),
+            ):
                 targets.remove('i386-linux')
             # RISC-V was not supported in GCC until 7.x
             if major_version < 7:
@@ -282,7 +283,9 @@ class GCCManager(ToolchainManager):
                 tarball.strip_components = 2
 
                 tarball.base_download_url = f"https://mirrors.edge.kernel.org/pub/tools/crosstool/files/bin/{host_arch_gcc}/{full_version}"
-                tarball.remote_tarball_name = f"{host_arch_gcc}-gcc-{full_version}-nolibc-{target}.tar.xz"
+                tarball.remote_tarball_name = (
+                    f"{host_arch_gcc}-gcc-{full_version}-nolibc-{target}.tar.xz"
+                )
 
                 tarball.local_location = Path(self.download_folder, full_version)
                 extraction_location = Path(self.install_folder, full_version)
@@ -338,7 +341,6 @@ class GCCManager(ToolchainManager):
 
 
 class LLVMManager(ToolchainManager):
-
     DEFAULT_DOWNLOAD_FOLDER = Path(os.environ['NAS_FOLDER'], 'Toolchains/LLVM')
     DEFAULT_INSTALL_FOLDER = Path(os.environ['CBL_TC_LLVM_STORE'])
 
@@ -374,7 +376,8 @@ class LLVMManager(ToolchainManager):
             if not Path(tarball.local_location, tarball.remote_tarball_name).exists():
                 tarball.base_download_url = 'https://mirrors.edge.kernel.org/pub/tools/llvm/files/'
                 tarball.remote_tarball_name = tarball.remote_tarball_name.replace(
-                    '.tar.zst', '.tar.xz')
+                    '.tar.zst', '.tar.xz'
+                )
 
             extraction_location = Path(self.install_folder, full_version)
             tarball.extracted_file = Path(extraction_location, 'bin/clang')
@@ -433,96 +436,122 @@ if __name__ == '__main__':
     subparser = parser.add_subparsers(dest='subcommand', metavar='SUBCOMMAND', required=True)
 
     install_parser = subparser.add_parser(
-        'install', help='Download and/or extact kernel.org GCC tarballs to disk')
-    install_parser.add_argument('-c',
-                                '--clean-up-old-versions',
-                                action='store_true',
-                                help='Clean up older version of toolchains')
+        'install', help='Download and/or extact kernel.org GCC tarballs to disk'
+    )
+    install_parser.add_argument(
+        '-c',
+        '--clean-up-old-versions',
+        action='store_true',
+        help='Clean up older version of toolchains',
+    )
     install_parser.add_argument(
         '-H',
         '--host-arch',
         choices=['aarch64', 'x86_64'],
         default=platform.machine(),
         help='The host architecture to download/install toolchains for (default: %(default)s)',
-        metavar='HOST_ARCH')
+        metavar='HOST_ARCH',
+    )
     if supported_targets:
-        install_parser.add_argument('-t',
-                                    '--targets',
-                                    choices=supported_targets,
-                                    default=supported_targets,
-                                    help='Toolchain targets to download (default: %(default)s)',
-                                    metavar='TARGETS',
-                                    nargs='+')
-    install_parser.add_argument('-v',
-                                '--versions',
-                                choices=supported_versions,
-                                default=supported_versions,
-                                help='Toolchain versions to download (default: %(default)s)',
-                                metavar='TARGETS',
-                                nargs='+',
-                                type=int)
+        install_parser.add_argument(
+            '-t',
+            '--targets',
+            choices=supported_targets,
+            default=supported_targets,
+            help='Toolchain targets to download (default: %(default)s)',
+            metavar='TARGETS',
+            nargs='+',
+        )
+    install_parser.add_argument(
+        '-v',
+        '--versions',
+        choices=supported_versions,
+        default=supported_versions,
+        help='Toolchain versions to download (default: %(default)s)',
+        metavar='TARGETS',
+        nargs='+',
+        type=int,
+    )
 
-    install_parser.add_argument('--download-folder',
-                                default=manager.DEFAULT_DOWNLOAD_FOLDER,
-                                help='Folder to store downloaded tarballs (default: %(default)s)',
-                                type=Path)
+    install_parser.add_argument(
+        '--download-folder',
+        default=manager.DEFAULT_DOWNLOAD_FOLDER,
+        help='Folder to store downloaded tarballs (default: %(default)s)',
+        type=Path,
+    )
     install_parser.add_argument(
         '--install-folder',
         default=manager.DEFAULT_INSTALL_FOLDER,
         help='Folder to store extracted toolchains for use (default: %(default)s)',
-        type=Path)
+        type=Path,
+    )
     install_parser.add_argument(
         '--cache',
         action=BooleanOptionalAction,
         default=Path(os.environ['NAS_FOLDER']).exists(),
-        help='Save downloaded toolchain tarballs to disk (default: %(default)s)')
+        help='Save downloaded toolchain tarballs to disk (default: %(default)s)',
+    )
     install_parser.add_argument(
         '--extract',
         action=BooleanOptionalAction,
         default=True,
-        help='Unpack downloaded toolchain tarballs to disk (default: %(default)s)')
+        help='Unpack downloaded toolchain tarballs to disk (default: %(default)s)',
+    )
 
     latest_parser = subparser.add_parser(
-        'latest', help='Print the latest stable release of a particular toolchain major version')
+        'latest',
+        help='Print the latest stable release of a particular toolchain major version',
+    )
     latest_parser.add_argument('versions', choices=supported_versions, nargs='+', type=int)
 
     folder_parser = subparser.add_parser(
-        'folder', help='Print toolchain folder values for use in other contexts')
+        'folder', help='Print toolchain folder values for use in other contexts'
+    )
     folder_type = folder_parser.add_mutually_exclusive_group(required=True)
-    folder_type.add_argument('-b',
-                             '--bin',
-                             action='store_const',
-                             const='bin',
-                             dest='folder',
-                             help='Print {prefix}/bin')
-    folder_type.add_argument('-p',
-                             '--prefix',
-                             action='store_const',
-                             const='prefix',
-                             dest='folder',
-                             help='Print {prefix}')
-    folder_parser.add_argument('version',
-                               choices=supported_versions,
-                               default=manager.VERSIONS[-1],
-                               nargs='?',
-                               type=int)
+    folder_type.add_argument(
+        '-b',
+        '--bin',
+        action='store_const',
+        const='bin',
+        dest='folder',
+        help='Print {prefix}/bin',
+    )
+    folder_type.add_argument(
+        '-p',
+        '--prefix',
+        action='store_const',
+        const='prefix',
+        dest='folder',
+        help='Print {prefix}',
+    )
+    folder_parser.add_argument(
+        'version',
+        choices=supported_versions,
+        default=manager.VERSIONS[-1],
+        nargs='?',
+        type=int,
+    )
 
     var_parser = subparser.add_parser('var', help='Print toolchain variable for use with make')
-    var_parser.add_argument('-s',
-                            '--split',
-                            action='store_true',
-                            help='Split toolchain variable for use with kmake.py')
+    var_parser.add_argument(
+        '-s',
+        '--split',
+        action='store_true',
+        help='Split toolchain variable for use with kmake.py',
+    )
     if supported_targets:
         target_kwargs = {}
         if (mach := platform.machine()) in supported_targets:
             target_kwargs['default'] = mach
             target_kwargs['nargs'] = '?'
         var_parser.add_argument('target', choices=supported_targets, **target_kwargs)
-    var_parser.add_argument('version',
-                            choices=supported_versions,
-                            default=manager.VERSIONS[-1],
-                            nargs='?',
-                            type=int)
+    var_parser.add_argument(
+        'version',
+        choices=supported_versions,
+        default=manager.VERSIONS[-1],
+        nargs='?',
+        type=int,
+    )
 
     args = parser.parse_args()
 

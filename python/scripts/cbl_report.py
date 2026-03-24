@@ -68,12 +68,9 @@ def get_initial_report_date():
     month = int(input("Input initial report month (MM): "))
     day = int(input("Input initial report day (DD): "))
 
-    date = datetime.datetime(year,
-                             month,
-                             day,
-                             hour=19,
-                             minute=30,
-                             tzinfo=zoneinfo.ZoneInfo('US/Eastern'))
+    date = datetime.datetime(
+        year, month, day, hour=19, minute=30, tzinfo=zoneinfo.ZoneInfo('US/Eastern')
+    )
 
     return date.astimezone(zoneinfo.ZoneInfo('US/Arizona'))
 
@@ -107,32 +104,31 @@ def parse_parameters():
     subparsers = parser.add_subparsers(help='Action to perform', required=True)
 
     finalize_parser = subparsers.add_parser(
-        'finalize', help='Merge report branch into main branch then delete branch and worktree')
+        'finalize',
+        help='Merge report branch into main branch then delete branch and worktree',
+    )
     finalize_parser.add_argument('-a', '--all', action='store_true', help='Do everything')
-    finalize_parser.add_argument('-d',
-                                 '--delete-branch',
-                                 action='store_true',
-                                 help='Delete report branch')
-    finalize_parser.add_argument('-m',
-                                 '--merge',
-                                 action='store_true',
-                                 help='Merge report branch in main branch')
-    finalize_parser.add_argument('-p',
-                                 '--push',
-                                 action='store_true',
-                                 help='Push main branch after merge')
-    finalize_parser.add_argument('-P',
-                                 '--prev-month',
-                                 action='store_true',
-                                 help='Target previous month as opposed to current month')
-    finalize_parser.add_argument('-r',
-                                 '--rebase',
-                                 action='store_true',
-                                 help='Rebase feature branch before merge')
-    finalize_parser.add_argument('-R',
-                                 '--remove-worktree',
-                                 action='store_true',
-                                 help='Remove worktree')
+    finalize_parser.add_argument(
+        '-d', '--delete-branch', action='store_true', help='Delete report branch'
+    )
+    finalize_parser.add_argument(
+        '-m', '--merge', action='store_true', help='Merge report branch in main branch'
+    )
+    finalize_parser.add_argument(
+        '-p', '--push', action='store_true', help='Push main branch after merge'
+    )
+    finalize_parser.add_argument(
+        '-P',
+        '--prev-month',
+        action='store_true',
+        help='Target previous month as opposed to current month',
+    )
+    finalize_parser.add_argument(
+        '-r', '--rebase', action='store_true', help='Rebase feature branch before merge'
+    )
+    finalize_parser.add_argument(
+        '-R', '--remove-worktree', action='store_true', help='Remove worktree'
+    )
     finalize_parser.set_defaults(func=finalize_report)
 
     gen_help = 'Generate line items automatically'
@@ -147,49 +143,63 @@ def parse_parameters():
 
     new_parser = subparsers.add_parser(
         'new',
-        help='Create a new branch, worktree, and report file for ClangBuiltLinux monthly report')
+        help='Create a new branch, worktree, and report file for ClangBuiltLinux monthly report',
+    )
     new_parser.add_argument('-a', '--all', action='store_true', help='Do everything')
-    new_parser.add_argument('-A',
-                            '--add-worktree',
-                            action='store_true',
-                            help='Create a new branch and worktree')
-    new_parser.add_argument('-c',
-                            '--create-report',
-                            action='store_true',
-                            help='Create a new report file')
-    new_parser.add_argument('-n',
-                            '--next-month',
-                            action='store_true',
-                            help='Target next month as opposed to current month')
-    new_parser.add_argument('-p',
-                            '--push',
-                            action='store_true',
-                            help='Push report branch if it does not exist remotely')
-    new_parser.add_argument('-u',
-                            '--update',
-                            action='store_true',
-                            help='Update repository before checking for remote branch')
+    new_parser.add_argument(
+        '-A',
+        '--add-worktree',
+        action='store_true',
+        help='Create a new branch and worktree',
+    )
+    new_parser.add_argument(
+        '-c', '--create-report', action='store_true', help='Create a new report file'
+    )
+    new_parser.add_argument(
+        '-n',
+        '--next-month',
+        action='store_true',
+        help='Target next month as opposed to current month',
+    )
+    new_parser.add_argument(
+        '-p',
+        '--push',
+        action='store_true',
+        help='Push report branch if it does not exist remotely',
+    )
+    new_parser.add_argument(
+        '-u',
+        '--update',
+        action='store_true',
+        help='Update repository before checking for remote branch',
+    )
     new_parser.set_defaults(func=new_report)
 
-    update_parser = subparsers.add_parser('update',
-                                          help='Update current ClangBuiltLinux monthly report')
+    update_parser = subparsers.add_parser(
+        'update', help='Update current ClangBuiltLinux monthly report'
+    )
     update_parser.add_argument('-a', '--all', action='store_true', help='Do everything')
     update_parser.add_argument('-c', '--commit', help='Hash of commit to "fix up"', type=str)
     update_parser.add_argument('-e', '--edit', action='store_true', help='Edit report file')
     update_parser.add_argument('-p', '--push', action='store_true', help='Push update after commit')
-    update_parser.add_argument('-P',
-                               '--prev-month',
-                               action='store_true',
-                               help='Target previous month as opposed to current month')
+    update_parser.add_argument(
+        '-P',
+        '--prev-month',
+        action='store_true',
+        help='Target previous month as opposed to current month',
+    )
     update_parser.set_defaults(func=update_report)
 
-    yearly_parser = subparsers.add_parser('yearly',
-                                          help='Generate yearly ClangBuiltLinux retrospective')
-    yearly_parser.add_argument('-y',
-                               '--year',
-                               default=datetime.datetime.now().year,
-                               help='Year of report (default: current year)',
-                               type=int)
+    yearly_parser = subparsers.add_parser(
+        'yearly', help='Generate yearly ClangBuiltLinux retrospective'
+    )
+    yearly_parser.add_argument(
+        '-y',
+        '--year',
+        default=datetime.datetime.now().year,
+        help='Year of report (default: current year)',
+        type=int,
+    )
     yearly_parser.set_defaults(func=yearly_report)
 
     return parser.parse_args()
@@ -200,8 +210,12 @@ def local_branch_exists(repo, branch):
 
 
 def remote_branch_exists(repo, branch):
-    return lib.utils.call_git(repo, ['ls-remote', '--exit-code', '--heads', 'origin', branch],
-                              check=False).returncode == 0
+    return (
+        lib.utils.call_git(
+            repo, ['ls-remote', '--exit-code', '--heads', 'origin', branch], check=False
+        ).returncode
+        == 0
+    )
 
 
 def generate_devices(devices):
@@ -246,7 +260,7 @@ def generate_item(args):
 def create_monthly_report_file(report_file, report_date):
     title = f"{report_date.strftime('%B %Y')} ClangBuiltLinux Work"
     date = report_date.strftime('%Y-%m-%dT%H:%M:%S%z')
-    # yapf: disable
+    # fmt: off
     devices = [
         'a SolidRun Honeycomb LX2',
         'an Ampere Altra Developer Platform',
@@ -394,7 +408,7 @@ def create_monthly_report_file(report_file, report_date):
         f"Special thanks to {links['google']} and {links['lf']} for "
         f"{links['sponsor']}."                                             '\n'
     )
-    # yapf: enable
+    # fmt: on
 
     report_file.write_text(template, encoding='utf-8')
 
@@ -428,17 +442,19 @@ def generate_html_commit_section(commits, repo):
         commits_view = ''
     else:
         raise RuntimeError(f"Don't know how to handle repo URL: {repo}")
-    return ''.join([
-        f'<a href="{repo}/{commits_view}{sha}">{sha[1:14]}</a> ("{title}")</br>\n'
-        for sha, title in commits.items()
-    ])
+    return ''.join(
+        [
+            f'<a href="{repo}/{commits_view}{sha}">{sha[1:14]}</a> ("{title}")</br>\n'
+            for sha, title in commits.items()
+        ]
+    )
 
 
 def create_yearly_report_file(report_file, report_date, year):
     title = f"{year} ClangBuiltLinux Retrospective"
     date = report_date.strftime('%Y-%m-%dT%H:%M:%S%z')
 
-    # yapf: disable
+    # fmt: off
     linux_link = 'https://git.kernel.org/linus'
     llvm_link = 'https://github.com/llvm/llvm-project'
     boot_utils_link = 'https://github.com/ClangBuiltLinux/boot-utils'
@@ -698,7 +714,7 @@ def create_yearly_report_file(report_file, report_date, year):
                                                                            '\n'
         + '\n'.join(report_links) +                                        '\n'
     )
-    # yapf: enable
+    # fmt: on
 
     report_file.write_text(template, encoding='utf-8')
 
@@ -712,9 +728,12 @@ def finalize_report(args):
 
     # Rebase changes if requested
     if args.rebase or args.all:
-        lib.utils.call_git(worktree, ['rebase', '-i', '--autosquash', 'origin/main'],
-                           env={'GIT_SEQUENCE_EDITOR': shutil.which('true')},
-                           show_cmd=True)
+        lib.utils.call_git(
+            worktree,
+            ['rebase', '-i', '--autosquash', 'origin/main'],
+            env={'GIT_SEQUENCE_EDITOR': shutil.which('true')},
+            show_cmd=True,
+        )
 
     # Get branch based on user's request
     date = get_prev_datetime() if args.prev_month else get_current_datetime()
@@ -727,9 +746,10 @@ def finalize_report(args):
     # Remove worktree ('--force' due to submodules)
     if args.remove_worktree or args.all:
         lib.utils.call_git(
-            repo, ['worktree', 'remove', '--force',
-                   str(worktree).removeprefix('/run/host')],
-            show_cmd=True)
+            repo,
+            ['worktree', 'remove', '--force', str(worktree).removeprefix('/run/host')],
+            show_cmd=True,
+        )
 
     # Delete branch locally and remotely if necessary
     if args.delete_branch or args.all:
@@ -779,12 +799,14 @@ def new_report(args):
 
         # Push new branch if needed
         if (args.push or args.all) and push_to_remote:
-            lib.utils.call_git(worktree, ['push', '--set-upstream', 'origin', branch],
-                               show_cmd=True)
+            lib.utils.call_git(
+                worktree, ['push', '--set-upstream', 'origin', branch], show_cmd=True
+            )
 
         # Update submodules, as that is how the theme is checked out
-        lib.utils.call_git(worktree, ['submodule', 'update', '--init', '--recursive'],
-                           show_cmd=True)
+        lib.utils.call_git(
+            worktree, ['submodule', 'update', '--init', '--recursive'], show_cmd=True
+        )
 
     # Create new report file if necessary
     if args.create_report or args.all:
@@ -800,9 +822,11 @@ def new_report(args):
 
             create_monthly_report_file(report, report_date)
             lib.utils.call_git(worktree, ['add', report], show_cmd=True)
-            lib.utils.call_git(worktree,
-                               ['commit', '-m', commit_title, '--date', commit_date, '--signoff'],
-                               show_cmd=True)
+            lib.utils.call_git(
+                worktree,
+                ['commit', '-m', commit_title, '--date', commit_date, '--signoff'],
+                show_cmd=True,
+            )
 
 
 def update_report(args):
@@ -838,8 +862,9 @@ def yearly_report(args):
 
         create_yearly_report_file(report, report_date, args.year)
         lib.utils.call_git(repo, ['add', report], show_cmd=True)
-        lib.utils.call_git(repo, ['commit', '-m', commit_title, '--date', commit_date],
-                           show_cmd=True)
+        lib.utils.call_git(
+            repo, ['commit', '-m', commit_title, '--date', commit_date], show_cmd=True
+        )
 
 
 if __name__ == '__main__':

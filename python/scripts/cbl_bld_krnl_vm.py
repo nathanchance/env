@@ -72,44 +72,58 @@ def parse_arguments():
         'arm64',  # to match the kernel, we'll normalize it later
         'x86_64',
     ]
-    parser.add_argument('-a',
-                        '--arch',
-                        choices=supported_arches,
-                        default=platform.machine(),
-                        help='Architecture to build and boot')
+    parser.add_argument(
+        '-a',
+        '--arch',
+        choices=supported_arches,
+        default=platform.machine(),
+        help='Architecture to build and boot',
+    )
 
     parser.add_argument(
         '-c',
         '--config',
-        help='Use this configuration instead of default configuration for virtual machine')
+        help='Use this configuration instead of default configuration for virtual machine',
+    )
 
-    parser.add_argument('-C',
-                        '--directory',
-                        default=Path.cwd(),
-                        help='Path to kernel source (default: current working directory)',
-                        type=Path)
+    parser.add_argument(
+        '-C',
+        '--directory',
+        default=Path.cwd(),
+        help='Path to kernel source (default: current working directory)',
+        type=Path,
+    )
 
-    parser.add_argument('-m',
-                        '--menuconfig',
-                        action='store_true',
-                        help='Run menuconfig after localyesconfig')
+    parser.add_argument(
+        '-m',
+        '--menuconfig',
+        action='store_true',
+        help='Run menuconfig after localyesconfig',
+    )
 
-    parser.add_argument('-n',
-                        '--vm-name',
-                        help='Name of virtual machine to build kernel for',
-                        required=True)
+    parser.add_argument(
+        '-n',
+        '--vm-name',
+        help='Name of virtual machine to build kernel for',
+        required=True,
+    )
 
-    supported_toolchains = [f"gcc-{ver}" for ver in korg_tc.GCCManager.VERSIONS
-                            ] + ['llvm'] + [f"llvm-{ver}" for ver in korg_tc.LLVMManager.VERSIONS]
-    parser.add_argument('-t',
-                        '--toolchain',
-                        choices=supported_toolchains,
-                        default='llvm',
-                        help='Toolchain to build kernel with')
+    supported_toolchains = (
+        [f"gcc-{ver}" for ver in korg_tc.GCCManager.VERSIONS]
+        + ['llvm']
+        + [f"llvm-{ver}" for ver in korg_tc.LLVMManager.VERSIONS]
+    )
+    parser.add_argument(
+        '-t',
+        '--toolchain',
+        choices=supported_toolchains,
+        default='llvm',
+        help='Toolchain to build kernel with',
+    )
 
-    parser.add_argument('--additional-targets',
-                        action='append',
-                        help="Call target before 'all' target")
+    parser.add_argument(
+        '--additional-targets', action='append', help="Call target before 'all' target"
+    )
 
     parser.add_argument('make_args', nargs='*', help='Arguments to pass to make')
 
@@ -132,7 +146,7 @@ def build_kernel_for_vm(kernel_src, add_make_targets, make_variables, config, me
     elif 'arch' in vm_name:
         configs = {
             'x86_64': 'https://gitlab.archlinux.org/archlinux/packaging/packages/linux/-/raw/main/config.x86_64',
-        }  # yapf: disable
+        }  # fmt: off
     elif 'debian' in vm_name:
         if not (configs := Path(os.environ['CBL_LKT'], 'configs/debian')).exists():
             raise RuntimeError(f"{configs.parents[1]} is not downloaded?")
@@ -145,7 +159,7 @@ def build_kernel_for_vm(kernel_src, add_make_targets, make_variables, config, me
         configs = {
             'arm64': 'https://src.fedoraproject.org/rpms/kernel/raw/rawhide/f/kernel-aarch64-fedora.config',
             'x86_64': 'https://src.fedoraproject.org/rpms/kernel/raw/rawhide/f/kernel-x86_64-fedora.config',
-        }  # yapf: disable
+        }  # fmt: off
 
     if config:
         config_src = config if 'http' in config else Path(config)
@@ -163,8 +177,9 @@ def build_kernel_for_vm(kernel_src, add_make_targets, make_variables, config, me
         raise RuntimeError(f"Don't know how to handle {config_src}!")
 
     current_config_txt = config_dst.read_text(encoding='utf-8')
-    new_config_txt = current_config_txt.replace('# CONFIG_LOCALVERSION_AUTO is not set',
-                                                'CONFIG_LOCALVERSION_AUTO=y')
+    new_config_txt = current_config_txt.replace(
+        '# CONFIG_LOCALVERSION_AUTO is not set', 'CONFIG_LOCALVERSION_AUTO=y'
+    )
     config_dst.write_text(new_config_txt, encoding='utf-8')
 
     make_targets = ['olddefconfig', 'localyesconfig', 'all']
@@ -184,7 +199,8 @@ if __name__ == '__main__':
 
     if not src_folder.joinpath('Makefile').exists():
         raise RuntimeError(
-            f"Derived kernel source ('{src_folder}') does not appear to be a kernel tree?")
+            f"Derived kernel source ('{src_folder}') does not appear to be a kernel tree?"
+        )
 
     arch = get_qemu_arch(args.arch)
 
@@ -207,5 +223,11 @@ if __name__ == '__main__':
     make_vars.update(get_toolchain_vars(make_vars['ARCH'], args.toolchain))
     make_vars.update(dict(arg.split('=', 1) for arg in args.make_args))
 
-    build_kernel_for_vm(src_folder, args.additional_targets, make_vars, args.config,
-                        args.menuconfig, args.vm_name)
+    build_kernel_for_vm(
+        src_folder,
+        args.additional_targets,
+        make_vars,
+        args.config,
+        args.menuconfig,
+        args.vm_name,
+    )

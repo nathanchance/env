@@ -30,46 +30,45 @@ def have_rw_access(path):
 
 
 class NspawnConfig(UserDict):
-
     def __init__(self, name):
         # Set systemd version. If this fails, it means we do not have nspawn
         # installed or the output has changed, both of which need to be dealt
         # with.
         self.systemd_version = int(
-            lib.utils.chronic(['systemd-nspawn', '--version']).stdout.splitlines()[0].split()[1])
+            lib.utils.chronic(['systemd-nspawn', '--version']).stdout.splitlines()[0].split()[1]
+        )
 
         # Initial static defaults
-        super().__init__({
-            'Exec': {
-                'Boot':
-                'yes',
-                # Machine name will be accessed via IMAGE_ID within the
-                # container, use the host's hostname for easy identification
-                'Hostname':
-                platform.uname().node,
-                'PrivateUsers':
-                'pick',
-                'SystemCallFilter': [
-                    # Necessary to avoid 'gpg: Using insecure memory'
-                    'mlock',
-                    # Necessary for 'perf record'
-                    'perf_event_open',
-                ],
-            },
-            'Files': {
-                # Bind my /home directory and user into the container
-                'BindUser': USER,
-                # Mounts will be added dynamically
-                'Bind': [],
-                'BindReadOnly': [],
-                'PrivateUsersOwnership': 'auto',
-            },
-            'Network': {
-                # Use host networking, as my use of nspawn is not around
-                # isolation
-                'VirtualEthernet': 'no',
-            },
-        })
+        super().__init__(
+            {
+                'Exec': {
+                    'Boot': 'yes',
+                    # Machine name will be accessed via IMAGE_ID within the
+                    # container, use the host's hostname for easy identification
+                    'Hostname': platform.uname().node,
+                    'PrivateUsers': 'pick',
+                    'SystemCallFilter': [
+                        # Necessary to avoid 'gpg: Using insecure memory'
+                        'mlock',
+                        # Necessary for 'perf record'
+                        'perf_event_open',
+                    ],
+                },
+                'Files': {
+                    # Bind my /home directory and user into the container
+                    'BindUser': USER,
+                    # Mounts will be added dynamically
+                    'Bind': [],
+                    'BindReadOnly': [],
+                    'PrivateUsersOwnership': 'auto',
+                },
+                'Network': {
+                    # Use host networking, as my use of nspawn is not around
+                    # isolation
+                    'VirtualEthernet': 'no',
+                },
+            }
+        )
         self.name = name
 
         # Add dynamic bind mounts
@@ -131,8 +130,11 @@ class NspawnConfig(UserDict):
             # systems that might not use idmapping such as NFS or virtiofs.
             # /dev mounts are special cased because they are marked rw by
             # kvm.conf in install_files().
-            if mount in automounted_mounts or mount.startswith('/dev') or (
-                    have_uid_map and os.access(mount, os.R_OK | os.W_OK)):
+            if (
+                mount in automounted_mounts
+                or mount.startswith('/dev')
+                or (have_uid_map and os.access(mount, os.R_OK | os.W_OK))
+            ):
                 item = mount
             elif mount in (os.environ['NVME_FOLDER'], os.environ['HOST_FOLDER']):
                 # The host user owns these mounts and a script in
@@ -295,21 +297,21 @@ class NspawnConfig(UserDict):
 
         # For Mac Studio, ensure the container only starts once the network is online
         if lib.utils.get_hostname() == 'mac-studio-m1-max':
-            network_conf_txt = ('[Unit]\n'
-                                'After=network-online.target\n'
-                                'Wants=network-online.target\n')
+            network_conf_txt = '[Unit]\nAfter=network-online.target\nWants=network-online.target\n'
             lib.utils.systemd_drop_in('systemd-nspawn@.service', 'network', network_conf_txt)
 
         # Allow my user to access 'machinectl shell' without authentication
         # rules.d can only be read by root so we need to use sudo to test
         polkit_rule = Path('/etc/polkit-1/rules.d', f"50-permit-{USER}-machinectl-shell.rules")
         if not lib.utils.run_check_rc_zero(['sudo', 'test', '-e', polkit_rule]):
-            polkit_rule_txt = ('polkit.addRule(function(action, subject) {\n'
-                               '    if (action.id == "org.freedesktop.machine1.shell" &&\n'
-                               f'        subject.user == "{USER}") {{\n'
-                               '        return polkit.Result.YES;\n'
-                               '    }\n'
-                               '});\n')
+            polkit_rule_txt = (
+                'polkit.addRule(function(action, subject) {\n'
+                '    if (action.id == "org.freedesktop.machine1.shell" &&\n'
+                f'        subject.user == "{USER}") {{\n'
+                '        return polkit.Result.YES;\n'
+                '    }\n'
+                '});\n'
+            )
             lib.utils.run0(['tee', polkit_rule], input=polkit_rule_txt)
             lib.utils.run0(['chmod', '640', polkit_rule])
             lib.utils.run0(['chown', 'root:polkitd', polkit_rule])
@@ -324,16 +326,14 @@ class NspawnConfig(UserDict):
         if not SYSTEMD_RUN_M.exists():
             root_confs = [
                 {
-                    'path':
-                    Path('/etc/doas.conf'),
-                    'cfg':
-                    ('\n'
-                     '# Allow me to run commands in nspawn machines without a password via a wrapper\n'
-                     f"permit nopass {USER} as root cmd {SYSTEMD_RUN_M}\n"),
-                    'rw':
-                    '0600',
-                    'ro':
-                    '0400',
+                    'path': Path('/etc/doas.conf'),
+                    'cfg': (
+                        '\n'
+                        '# Allow me to run commands in nspawn machines without a password via a wrapper\n'
+                        f"permit nopass {USER} as root cmd {SYSTEMD_RUN_M}\n"
+                    ),
+                    'rw': '0600',
+                    'ro': '0400',
                 },
                 {
                     'path': Path(f"/etc/sudoers.d/00_{USER}"),
@@ -375,10 +375,16 @@ class NspawnConfig(UserDict):
         # /var/lib/machines can only be read by root so we need to use sudo to test
         if not lib.utils.run_check_rc_zero(['sudo', 'test', '-e', self.machine_dir]):
             lib.utils.print_yellow(
-                f"WARNING: {self.machine_dir} does not exist, machine will not start without it")
+                f"WARNING: {self.machine_dir} does not exist, machine will not start without it"
+            )
 
     def is_running(self):
-        is_active_cmd = ['systemctl', 'is-active', '-q', f"systemd-nspawn@{self.name}.service"]
+        is_active_cmd = [
+            'systemctl',
+            'is-active',
+            '-q',
+            f"systemd-nspawn@{self.name}.service",
+        ]
         return lib.utils.run_check_rc_zero(is_active_cmd)
 
     def reset(self, mode):
@@ -406,7 +412,8 @@ class NspawnConfig(UserDict):
         # should make sure it is disabled and stopped before removing the
         # files.
         if mode in ('machine', 'all') and lib.utils.run_check_rc_zero(
-            ['systemctl', 'is-enabled', f"systemd-nspawn@{self.name}"]):
+            ['systemctl', 'is-enabled', f"systemd-nspawn@{self.name}"]
+        ):
             lib.utils.run0(['machinectl', 'disable', '--now', self.name])
 
         lib.utils.run0(['rm', '-fr', *items_to_remove])
@@ -424,35 +431,38 @@ class NspawnConfig(UserDict):
         # running services that need to be restarted.
         if self.is_running():
             raise RuntimeError(
-                'Machine is running when trying to update, interact via "machinectl shell"')
+                'Machine is running when trying to update, interact via "machinectl shell"'
+            )
         lib.utils.run0(self._gen_upd_cmd())
 
 
 def parse_arguments():
     parser = ArgumentParser(description='Manager and wrapper for systemd-spawn')
 
-    parser.add_argument('-n',
-                        '--name',
-                        default=DEF_MACH.get(platform.machine()),
-                        help='Name of machine (default: %(default)s)')
+    parser.add_argument(
+        '-n',
+        '--name',
+        default=DEF_MACH.get(platform.machine()),
+        help='Name of machine (default: %(default)s)',
+    )
 
     mode_group = parser.add_mutually_exclusive_group(required=True)
-    mode_group.add_argument('-e',
-                            '--ephemeral',
-                            action='store_true',
-                            help='Run "systemd-nspawn -x" command')
+    mode_group.add_argument(
+        '-e', '--ephemeral', action='store_true', help='Run "systemd-nspawn -x" command'
+    )
     mode_group.add_argument('-i', '--install', action='store_true', help='Install .nspawn files')
     mode_group.add_argument('--is-running', action='store_true', help='Check if machine is running')
     mode_group.add_argument('-r', '--run', metavar='CMD', help='Run command in nspawn machine')
-    mode_group.add_argument('-R',
-                            '--reset',
-                            choices=['machine', 'setup', 'all'],
-                            metavar='TYPE',
-                            help='Remove the requested files (machine, setup, or both)')
-    mode_group.add_argument('-u',
-                            '--update',
-                            action='store_true',
-                            help='Enter inactive machine to update')
+    mode_group.add_argument(
+        '-R',
+        '--reset',
+        choices=['machine', 'setup', 'all'],
+        metavar='TYPE',
+        help='Remove the requested files (machine, setup, or both)',
+    )
+    mode_group.add_argument(
+        '-u', '--update', action='store_true', help='Enter inactive machine to update'
+    )
 
     return parser.parse_args()
 

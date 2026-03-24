@@ -59,8 +59,10 @@ def setup_doas(username, root_password):
     if lib.setup.get_glibc_version() > (2, 33, 0):
         tmp_dir = Path(tempfile.mkdtemp())
         doas_deb = Path(tmp_dir, doas_deb_file)
-        lib.utils.curl(f"http://http.us.debian.org/debian/pool/main/o/opendoas/{doas_deb_file}",
-                       output=doas_deb)
+        lib.utils.curl(
+            f"http://http.us.debian.org/debian/pool/main/o/opendoas/{doas_deb_file}",
+            output=doas_deb,
+        )
     else:
         doas_deb = Path(env_folder, 'bin/packages', doas_deb_file)
     lib.utils.run(['dpkg', '-i', doas_deb])
@@ -79,14 +81,17 @@ def setup_doas(username, root_password):
         f"permit nopass {username} as root cmd apt args full-upgrade\n"
         f"permit nopass {username} as root cmd apt args full-upgrade -y\n"
         f"permit nopass {username} as root cmd apt args autoremove\n"
-        f"permit nopass {username} as root cmd apt args autoremove -y\n")
+        f"permit nopass {username} as root cmd apt args autoremove -y\n"
+    )
     if lib.setup.is_virtual_machine():
-        doas_conf_text += ('\n'
-                           '# Allow me to passwordlessly reboot and poweroff virtual machine\n'
-                           f"permit nopass {username} as root cmd poweroff\n"
-                           f"permit nopass {username} as root cmd systemctl args poweroff\n"
-                           f"permit nopass {username} as root cmd reboot\n"
-                           f"permit nopass {username} as root cmd systemctl args reboot\n")
+        doas_conf_text += (
+            '\n'
+            '# Allow me to passwordlessly reboot and poweroff virtual machine\n'
+            f"permit nopass {username} as root cmd poweroff\n"
+            f"permit nopass {username} as root cmd systemctl args poweroff\n"
+            f"permit nopass {username} as root cmd reboot\n"
+            f"permit nopass {username} as root cmd systemctl args reboot\n"
+        )
     doas_conf.write_text(doas_conf_text, encoding='utf-8')
 
     # Add a root password so that there is no warning about removing sudo
@@ -179,7 +184,7 @@ def update_and_install_packages(additional_packages=None):
 
         # repo
         'python-is-python3',
-    ]  # yapf: disable
+    ]  # fmt: off
 
     # Container manager
     if Path('/etc/apt/sources.list.d/docker.sources').exists():
@@ -221,7 +226,7 @@ def update_and_install_packages(additional_packages=None):
     add_apt_args = [
         '-o', 'Dpkg::Options::=--force-confdef',
         '-o', 'Dpkg::Options::=--force-confold',
-    ]  # yapf: disable
+    ]  # fmt: off
 
     apt_update()
     apt_upgrade(add_apt_args)

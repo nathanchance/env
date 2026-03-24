@@ -62,15 +62,16 @@ def fix_wrktrs_for_nspawn(git_repo):
     for gitdir in git_repo.glob('.git/worktrees/*/gitdir'):
         # Transform '/run/host/home/...' into '/home/...'
         if (gitdir_txt := gitdir.read_text(encoding='utf-8')).startswith('/run/host/'):
-            gitdir.write_text(gitdir_txt[len('/run/host'):], encoding='utf-8')
+            gitdir.write_text(gitdir_txt[len('/run/host') :], encoding='utf-8')
 
 
 def fzf(header, fzf_input, fzf_args=None):
     fzf_cmd = ['fzf', '--header', header, '--multi']
     if fzf_args:
         (fzf_cmd.append if isinstance(fzf_args, str) else fzf_cmd.extend)(fzf_args)
-    with subprocess.Popen(fzf_cmd, stdin=subprocess.PIPE, stdout=subprocess.PIPE,
-                          text=True) as fzf_proc:
+    with subprocess.Popen(
+        fzf_cmd, stdin=subprocess.PIPE, stdout=subprocess.PIPE, text=True
+    ) as fzf_proc:
         return fzf_proc.communicate(fzf_input)[0].splitlines()
 
 
@@ -123,8 +124,11 @@ def in_container():
             return 'MAC_FOLDER' not in os.environ
         return val != 'none'
 
-    return 'container' in os.environ or Path('/run/.containerenv').is_file() or Path(
-        '/.dockerenv').is_file()
+    return (
+        'container' in os.environ
+        or Path('/run/.containerenv').is_file()
+        or Path('/.dockerenv').is_file()
+    )
 
 
 def in_nspawn():
@@ -140,10 +144,7 @@ def path_and_text(*args):
 
 
 def print_cmd(cmd, show_cmd_location=False, end='\n'):
-    if show_cmd_location:
-        cmd_loc = '(container) ' if in_container() else '(host) '
-    else:
-        cmd_loc = ''
+    cmd_loc = ('(container) ' if in_container() else '(host) ') if show_cmd_location else ''
     if isinstance(cmd, (str, os.PathLike)):
         cmd_str = cmd
     else:
@@ -189,7 +190,8 @@ def run(*args, **kwargs):
         kwargs['text'] = None
 
     if (show_cmd_location := kwargs.pop('show_cmd_location', False)) or kwargs.pop(
-            'show_cmd', False):
+        'show_cmd', False
+    ):
         print_cmd(*args, show_cmd_location=show_cmd_location)
 
     if env := kwargs.pop('env', None):
@@ -222,8 +224,10 @@ def run_check_rc_zero(*args, **kwargs):
 
 
 def systemd_drop_in(service, drop_in_name, conf_txt):
-    return run0(['systemctl', 'edit', '--stdin', '--drop-in', drop_in_name, service],
-                input=conf_txt)
+    return run0(
+        ['systemctl', 'edit', '--stdin', '--drop-in', drop_in_name, service],
+        input=conf_txt,
+    )
 
 
 def tg_msg(raw_msg):
@@ -233,9 +237,21 @@ def tg_msg(raw_msg):
 
     msg = f"From {get_hostname()}:\n\n{raw_msg}"
 
-    curl_cmd = ('curl', '-s', '-X', 'POST', f"https://api.telegram.org/bot{token}/sendMessage",
-                '-d', f"chat_id={chat_id}", '-d', 'parse_mode=Markdown', '-d', f"text={msg}", '-o',
-                '/dev/null')
+    curl_cmd = (
+        'curl',
+        '-s',
+        '-X',
+        'POST',
+        f"https://api.telegram.org/bot{token}/sendMessage",
+        '-d',
+        f"chat_id={chat_id}",
+        '-d',
+        'parse_mode=Markdown',
+        '-d',
+        f"text={msg}",
+        '-o',
+        '/dev/null',
+    )
     chronic(curl_cmd)
 
 

@@ -21,10 +21,9 @@ import lib.utils
 def parse_arguments():
     parser = ArgumentParser(description='Set up an Alpine installation')
 
-    parser.add_argument('-n',
-                        '--user-name',
-                        default=lib.setup.get_user(),
-                        help='Name of user account')
+    parser.add_argument(
+        '-n', '--user-name', default=lib.setup.get_user(), help='Name of user account'
+    )
     parser.add_argument('-p', '--user-password', help='Password for user account')
 
     return parser.parse_args()
@@ -41,7 +40,7 @@ def enable_community_repo():
 
     # If the community repo is already enabled (uncommented), we do not need to
     # do anything.
-    if (match := re.search(f"^#{community_repo}$", text, flags=re.M)):
+    if match := re.search(f"^#{community_repo}$", text, flags=re.M):
         conf.write_text(text.replace(match.group(0), community_repo), encoding='utf-8')
 
 
@@ -57,7 +56,6 @@ def update_and_install_packages():
         'musl-dev',
         'pkgconf',
         'podman',
-
         # env
         'curl',
         'fish',
@@ -67,17 +65,14 @@ def update_and_install_packages():
         'tmux',
         'vim',
         'zoxide',
-
         # git
         'delta',
         'git',
-
         # Nicer GNU utilities
         'bat',
         'eza',
         'fd',
         'ripgrep',
-
         # System management
         'btop',
         'doas',
@@ -95,7 +90,7 @@ def setup_user(user_name, user_password):
             '--gecos', 'Nathan Chancellor',
             '--shell', shutil.which('fish'),
             user_name,
-        ]  # yapf: disable
+        ]  # fmt: off
         lib.utils.run(useradd_cmd)
         lib.setup.chpasswd(user_name, user_password)
 
@@ -127,8 +122,9 @@ def setup_podman(user_name):
     rc_cgroup_mode = 'rc_cgroup_mode="unified"'
     if not re.search(f"^{rc_cgroup_mode}$", rc_conf_txt, flags=re.M):
         rc_cgroup_mode_line = re.search('^#?rc_cgroup_mode=.*$', rc_conf_txt, flags=re.M).group(0)
-        rc_conf.write_text(rc_conf_txt.replace(rc_cgroup_mode_line, rc_cgroup_mode),
-                           encoding='utf-8')
+        rc_conf.write_text(
+            rc_conf_txt.replace(rc_cgroup_mode_line, rc_cgroup_mode), encoding='utf-8'
+        )
 
     lib.utils.run(['rc-update', 'add', 'cgroups'])
     lib.utils.run(['rc-service', 'cgroups', 'start'])

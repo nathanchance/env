@@ -128,7 +128,8 @@ def switch_to_systemd_networking():
         dest = Path(f"/etc/systemd/network/20-{connect_type}.network")
         lib.utils.curl(
             f"https://gitlab.archlinux.org/archlinux/archiso/-/raw/a16a81ae8d08d5dc0ec576e3a427b11cbaa3a8bb/configs/releng/airootfs/etc/systemd/network/{dest.name}",
-            output=dest)
+            output=dest,
+        )
 
     # Install systemd-resolved, which will kill DNS, so it should happen as
     # late as possible

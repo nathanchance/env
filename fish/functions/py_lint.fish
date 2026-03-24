@@ -16,19 +16,24 @@ function py_lint -d "Lint Python files"
         test -z "$files"; and return 0
     end
 
-    set commands pylint vulture yapf
+    set commands pylint vulture
     if git ls-files | string match -qr 'ruff\.toml'
         set -a commands ruff
     else
-        set -a commands flake8
+        set -a commands flake8 yapf
     end
 
     # ruff is faster than flake8 and provides many of the benefits so use it when possible
     if contains ruff $commands
         if uvx ruff check $files
-            __print_green "\nruff clean"
+            __print_green "\nruff check clean"
         else
-            __print_red "\nnot ruff clean"
+            __print_red "\nnot ruff check clean"
+        end
+        if uvx ruff format --diff $files
+            __print_green "\nruff format clean"
+        else
+            __print_red "\nnot ruff format clean"
         end
     else
         set -a flake8_ignore E501 # line too long
@@ -38,6 +43,11 @@ function py_lint -d "Lint Python files"
             __print_green "\nflake8 clean"
         else
             __print_red "\nnot flake8 clean"
+        end
+        if uvx yapf --diff --parallel $files
+            __print_green "yapf clean"
+        else
+            __print_red "\nnot yapf clean"
         end
     end
 
@@ -72,10 +82,5 @@ function py_lint -d "Lint Python files"
         __print_green "vulture clean\n"
     else
         __print_red "\nnot vulture clean\n"
-    end
-    if uvx yapf --diff --parallel $files
-        __print_green "yapf clean"
-    else
-        __print_red "\nnot yapf clean"
     end
 end

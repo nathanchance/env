@@ -32,7 +32,7 @@ def get_alma_version():
 def prechecks():
     lib.utils.check_root()
     alma_version = get_alma_version()
-    if alma_version not in (9, ):
+    if alma_version not in (9,):
         raise RuntimeError(
             f"AlmaLinux {alma_version} is not tested with this script, add support for it if it works.",
         )
@@ -86,7 +86,7 @@ def install_packages():
 
         # repo
         'python',
-    ]  # yapf: disable
+    ]  # fmt: off
 
     if HOST_ARCH == 'x86_64':
         packages.append('pacman')  # to build dev container image with mkosi

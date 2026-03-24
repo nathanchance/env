@@ -11,32 +11,41 @@ import lib.utils
 # pylint: enable=wrong-import-position
 
 parser = ArgumentParser(
-    description='Run command in tmux with proper quoting to run in either host or container')
-parser.add_argument('-c',
-                    '--container',
-                    action='store_const',
-                    const='container',
-                    dest='mode',
-                    help='Run command in default development container')
-parser.add_argument('-H',
-                    '--host',
-                    action='store_const',
-                    const='host',
-                    dest='mode',
-                    help='Run command on the host')
+    description='Run command in tmux with proper quoting to run in either host or container'
+)
+parser.add_argument(
+    '-c',
+    '--container',
+    action='store_const',
+    const='container',
+    dest='mode',
+    help='Run command in default development container',
+)
+parser.add_argument(
+    '-H',
+    '--host',
+    action='store_const',
+    const='host',
+    dest='mode',
+    help='Run command on the host',
+)
 parser.add_argument('-d', '--detach', action='store_true', help='Do not switch to created window')
-parser.add_argument('-s',
-                    '--split-horizontal',
-                    action='store_const',
-                    const=['split-window', '-v'],
-                    dest='tmux_cmd',
-                    help='Split command in a horizontal pane')
-parser.add_argument('-v',
-                    '--split-vertical',
-                    action='store_const',
-                    const=['split-window', '-H'],
-                    dest='tmux_cmd',
-                    help='Split command in a vertical pane')
+parser.add_argument(
+    '-s',
+    '--split-horizontal',
+    action='store_const',
+    const=['split-window', '-v'],
+    dest='tmux_cmd',
+    help='Split command in a horizontal pane',
+)
+parser.add_argument(
+    '-v',
+    '--split-vertical',
+    action='store_const',
+    const=['split-window', '-H'],
+    dest='tmux_cmd',
+    help='Split command in a vertical pane',
+)
 parser.add_argument('cmd', help='Command and any arguments to run')
 args = parser.parse_args()
 

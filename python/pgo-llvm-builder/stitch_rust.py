@@ -124,10 +124,12 @@ def parse_arguments():
     parser = ArgumentParser(description='Install Rust toolchain into an LLVM toolchain tarball')
 
     parser.add_argument('version', help='Rust version to install')
-    parser.add_argument('llvm_tarballs',
-                        help='Toolchain tarball(s) to install Rust into',
-                        nargs='+',
-                        type=Path)
+    parser.add_argument(
+        'llvm_tarballs',
+        help='Toolchain tarball(s) to install Rust into',
+        nargs='+',
+        type=Path,
+    )
 
     for item in (arguments := parser.parse_args()).llvm_tarballs:
         if not item.exists():
@@ -168,15 +170,17 @@ def generate_llvm_rust_tarball(scripts, llvm_tarball, rust_version):
     prefix.mkdir(parents=True)
 
     # Extract LLVM tarball into prefix
-    lib.utils.run([
-        *tar_cmd,
-        '--directory',
-        prefix,
-        '--extract',
-        '--file',
-        llvm_tarball,
-        '--strip-components=1',
-    ])
+    lib.utils.run(
+        [
+            *tar_cmd,
+            '--directory',
+            prefix,
+            '--extract',
+            '--file',
+            llvm_tarball,
+            '--strip-components=1',
+        ]
+    )
 
     # Install Rust components into prefix
     for script in scripts:
@@ -184,15 +188,17 @@ def generate_llvm_rust_tarball(scripts, llvm_tarball, rust_version):
         lib.utils.run([script, '--disable-ldconfig', f"--prefix={prefix}"])
 
     # Repackage prefix into LLVM+Rust tarball
-    lib.utils.run([
-        *tar_cmd,
-        '--create',
-        '--directory',
-        prefix.parent,
-        '--file',
-        llvm_rust_tarball,
-        prefix.name,
-    ])
+    lib.utils.run(
+        [
+            *tar_cmd,
+            '--create',
+            '--directory',
+            prefix.parent,
+            '--file',
+            llvm_rust_tarball,
+            prefix.name,
+        ]
+    )
     shutil.rmtree(prefix)
 
     print(f"Modified tarball is now available at {llvm_rust_tarball}")

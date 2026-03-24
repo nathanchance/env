@@ -42,25 +42,28 @@ def parse_args():
     subparser.add_parser('clean', help='Clean up stale timer files')
 
     cancel_parser = subparser.add_parser('cancel', help='Cancel active timers')
-    cancel_parser.add_argument('files',
-                               help='Full path to timer files to cancel',
-                               nargs='*',
-                               type=Path)
+    cancel_parser.add_argument(
+        'files', help='Full path to timer files to cancel', nargs='*', type=Path
+    )
 
     list_parser = subparser.add_parser('list', help='List scheduled timers')
-    list_parser.add_argument('-a',
-                             '--all',
-                             action='store_const',
-                             const='--all',
-                             help="Pass '--all' to 'systemctl list-timers'")
+    list_parser.add_argument(
+        '-a',
+        '--all',
+        action='store_const',
+        const='--all',
+        help="Pass '--all' to 'systemctl list-timers'",
+    )
 
     schedule_parser = subparser.add_parser('sch', help='Schedule a timezone change')
     schedule_parser.add_argument(
         'date_str',
-        help="Date to perform timezone change at (in a format suitable for OnCalendar=)")
+        help="Date to perform timezone change at (in a format suitable for OnCalendar=)",
+    )
     schedule_parser.add_argument(
         'time_str',
-        help='Time to perform timezone change at (in a format suitable for OnCalendar=)')
+        help='Time to perform timezone change at (in a format suitable for OnCalendar=)',
+    )
     schedule_parser.add_argument('timezone', help="Timezone to change to")
 
     return parser.parse_args()
@@ -135,8 +138,9 @@ if __name__ == '__main__':
                     raise FileNotFoundError(f"Provided file ('{file}') could not be found?")
         else:
             all_timers = list(map(str, Path('/etc/systemd/system').glob('sch_tz_chg-*.timer')))
-            if files := lib.utils.fzf('timers to cancel', '\n'.join(all_timers),
-                                      ['--preview', 'cat {}']):
+            if files := lib.utils.fzf(
+                'timers to cancel', '\n'.join(all_timers), ['--preview', 'cat {}']
+            ):
                 files = list(map(Path, files))
 
         disable_and_rm_timers(files)
