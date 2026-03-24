@@ -14,7 +14,7 @@ function msh -d "Shorthand for mosh -o" -w mosh
 
     if test "$tailscale" = true
         switch $target
-            case aadp honeycomb mac-studio
+            case aadp honeycomb
                 set host $target
             case amd-desktop-8745HS
                 set host beelink-amd-ryzen-8745hs
@@ -28,6 +28,8 @@ function msh -d "Shorthand for mosh -o" -w mosh
                 set host beelink-intel-n100
             case intel-laptop
                 set host msi-intel-core-10210U
+            case mac-studio
+                set host mac-studio-m1-max
             case '*'
                 __print_error "Unsupported target device for Tailscale: $target"
                 return 1
