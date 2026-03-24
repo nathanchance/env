@@ -42,6 +42,7 @@ function cbl_bld_qemu -d "Build QEMU for use with ClangBuiltLinux"
             end
 
             # Patches from mailing lists
+            set -a b4_patches https://lore.kernel.org/all/20260324135026.247418-1-shivangu@linux.ibm.com/ # ppc/pnv: generate dtb after machine initialization is complete
             if set -q b4_patches
                 pushd $qemu_src; or return
                 for patch in $b4_patches
