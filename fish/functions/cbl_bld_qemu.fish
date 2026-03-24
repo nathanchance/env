@@ -21,7 +21,9 @@ function cbl_bld_qemu -d "Build QEMU for use with ClangBuiltLinux"
 
         set install_folder $VERSION
     else
-        set qemu_src $CBL_QEMU_SRC/qemu
+        if not set -q qemu_src
+            set qemu_src $CBL_QEMU_SRC/qemu
+        end
         if not test -d $qemu_src
             mkdir -p (path dirname $qemu_src)
             git clone -j(nproc) --recurse-submodules https://gitlab.com/qemu-project/qemu.git $qemu_src
@@ -33,8 +35,6 @@ function cbl_bld_qemu -d "Build QEMU for use with ClangBuiltLinux"
         if test "$update" = true
             git -C $qemu_src remote update
             git -C $qemu_src reset --hard origin/master
-            git -C $qemu_src submodule foreach git reset --hard
-            git -C $qemu_src submodule update --recursive
 
             # Reverts
             for revert in $reverts
@@ -50,6 +50,8 @@ function cbl_bld_qemu -d "Build QEMU for use with ClangBuiltLinux"
                 popd
             end
         end
+        git -C $qemu_src submodule foreach git reset --hard
+        git -C $qemu_src submodule update --recursive
 
         set install_folder (cat $qemu_src/VERSION)-(date +%F-%H-%M-%S)-(git -C $qemu_src sh -s --format=%H)
     end
@@ -59,7 +61,9 @@ function cbl_bld_qemu -d "Build QEMU for use with ClangBuiltLinux"
     end
 
     if not test -x $PREFIX/bin/qemu-system-x86_64
-        set qemu_bld (tbf $qemu_src)
+        if not set -q qemu_bld
+            set qemu_bld (tbf $qemu_src)
+        end
         rm -rf $qemu_bld
         mkdir -p $qemu_bld
         pushd $qemu_bld; or return
