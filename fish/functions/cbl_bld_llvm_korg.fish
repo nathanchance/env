@@ -51,6 +51,17 @@ function cbl_bld_llvm_korg -d "Build (and optionally test) LLVM for kernel.org"
         end
     end
 
+    begin
+        header "Updating sources"
+
+        cbl_upd_src c $repos_to_update
+        and cbl_clone_repo $CBL_TC_BLD
+        and if not __is_location_primary
+            git -C $CBL_TC_BLD urh
+        end
+    end
+    or return
+
     if test "$build_env" = y
         request_root mkosi
         or return
@@ -64,17 +75,6 @@ function cbl_bld_llvm_korg -d "Build (and optionally test) LLVM for kernel.org"
         run_mkosi build $PYTHON_FOLDER/(path basename $mach_dir)
         or return
     end
-
-    begin
-        header "Updating sources"
-
-        cbl_upd_src c $repos_to_update
-        and cbl_clone_repo $CBL_TC_BLD
-        and if not __is_location_primary
-            git -C $CBL_TC_BLD urh
-        end
-    end
-    or return
 
     mkdir -p $TMP_FOLDER
     set -g tmp_llvm_install (mktemp -d -p $TMP_FOLDER -t pgo-llvm-builder.XXXXXXXXXXXX)
