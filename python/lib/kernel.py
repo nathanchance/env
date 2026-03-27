@@ -111,8 +111,8 @@ def prepare_source(base_name, base_ref='origin/master'):
     )  # extract-cert: Wrap key_pass with '#ifdef USE_PKCS11_ENGINE'
     if base_name == 'fedora':
         patches.append(
-            'https://lore.kernel.org/all/20260325-dtc-lexer-remove-dts_version-v1-1-0b5d64903bbb@kernel.org/'
-        )  # dtc: Remove unused dts_version in dtc-lexer.l
+            'https://lore.kernel.org/all/20260327-dtc-drop-dts_version-v1-1-41066690aefd@kernel.org/'
+        )  # scripts/dtc: Remove unused dts_version in dtc-lexer.l
 
     try:
         for revert in reverts:
@@ -149,10 +149,6 @@ def prepare_source(base_name, base_ref='origin/master'):
                 am_cmd.append(patch)
             elif patch.startswith('https://lore.kernel.org/') and not patch.endswith('/raw'):
                 am_kwargs['input'] = b4_am_o(patch)
-                if 'dtc-lexer-remove-dts_version' in patch:
-                    # the patch is against upstream dtc, ensure it is applied
-                    # to the vendored path in the kernel
-                    am_cmd += ['--directory', 'scripts/dtc']
             elif patch.startswith(('https://', 'http://')):
                 # curl is banned due to bot attacks
                 fetch_func = lib.utils.wget if 'lore.kernel.org' in patch else lib.utils.curl
