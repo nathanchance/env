@@ -695,11 +695,12 @@ def setup_libvirt(username, mkinitcpio_conf):
     if not lib.setup.is_installed('libvirt'):
         return
 
-    # The default network requires iptables-nft but iptables is installed by
-    # default due to systemd. Replace iptables with iptables-nft
-    # non-interactively:
-    # https://unix.stackexchange.com/questions/274727/how-to-force-pacman-to-answer-yes-to-all-questions
-    pacman_install(['--ask', '4', 'iptables-nft'])
+    # Use iptables backend by default because iptables is already installed
+    libvirt_network_conf = Path('/etc/libvirt/network.conf')
+    firewall_backend = 'firewall_backend = "iptables"\n'
+    if firewall_backend not in libvirt_network_conf.read_text(encoding='utf-8'):
+        with libvirt_network_conf.open('a', encoding='utf-8') as file:
+            file.write(firewall_backend)
 
     lib.setup.setup_libvirt(username)
 
