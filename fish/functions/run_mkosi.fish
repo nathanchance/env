@@ -25,27 +25,41 @@ function run_mkosi -d "Run mkosi with various arguments"
             return 1
     end
 
-    # dev-* images share a single directory, switching on '--distribution'
-    if string match -qr ^dev- $image
-        set distro (string split -f 2 - $image)
-        if not contains -- --distribution $mkosi_user_args; and not contains -- -d $mkosi_user_args
-            set -a mkosi_args --distribution $distro
-        end
-        set image dev
+    # Handle image shorthands
+    if not contains -- --distribution $mkosi_user_args; and not contains -- -d $mkosi_user_args
+        set no_distro_flag true
     end
-
-    # Validate mkosi.conf exists
     set env_mkosi $ENV_FOLDER/mkosi
-    if string match -qr ^/ $image # absolute path
-        set directory $image
-    else
-        set directory $env_mkosi/$image
+    switch $image
+        case dev-'*'
+            # dev-* images share a single directory, switching on '--distribution'
+            set -a mkosi_user_args \
+                --distribution (string split -f 2 - $image)
+            set directory $env_mkosi
+        case env
+            if set -q no_distro_flag
+                __print_error "env image specified but no --distribution flag?"
+                return 1
+            end
+            set directory $env_mkosi
     end
-    set mkosi_conf $directory/mkosi.conf
-    if not test -e $mkosi_conf
-        __print_error "No build files for $image?"
+    if not set -q directory
+        set directory $image
+    end
+    if not string match -qr ^/ $directory
+        __print_error "$directory is not absolute by now?"
         return 1
     end
+    if not test -e $directory/mkosi.conf
+        __print_error "No build files for $directory?"
+        return 1
+    end
+    if contains -- --distribution $mkosi_user_args
+        set distro_flag --distribution
+    else
+        set distro_flag -d
+    end
+    set distro $mkosi_user_args[(math 1 + (contains -i -- $distro_flag $mkosi_user_args))]
 
     # Download source code to use resources without consistent virtual environment
     set mkosi_src $SRC_FOLDER/run_mkosi
@@ -151,7 +165,7 @@ function run_mkosi -d "Run mkosi with various arguments"
         mkdir -p $mkosi_cache
     end
     switch (path basename $directory)
-        case dev
+        case env
             switch $distro
                 case arch
                     set cache_dir pacman
@@ -177,7 +191,7 @@ function run_mkosi -d "Run mkosi with various arguments"
     or return
 
     # Use common tools tree based on mkosi default value
-    set tools_tree $env_mkosi/tools
+    set tools_tree $env_mkosi/mkosi.tools
     if not test -e $tools_tree/etc/resolv.conf
         $mkosi_root \
             --directory $mkosi_src/mkosi/resources/mkosi-tools \
