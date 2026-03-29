@@ -1,0 +1,33 @@
+# Run a bunch of lint checks to keep me honest
+name: Linting
+on:
+  push:
+    paths:
+      - '**.fish'
+      - '**.py'
+      - '**.sh'
+  pull_request:
+    paths:
+      - '**.fish'
+      - '**.py'
+      - '**.sh'
+  workflow_dispatch:
+jobs:
+  fish:
+    runs-on: docker
+    uses: https://codeberg.org/nathanchance/actions-workflows/.forgejo/workflows/fish_format.yml@main
+  python:
+    runs-on: docker
+    strategy:
+      fail-fast: false
+      matrix:
+        version: ['3.14', '3.13', '3.12', '3.11', '3.10']
+    uses: https://codeberg.org/nathanchance/actions-workflows/.forgejo/workflows/python_lint.yml@main
+    with:
+      python_version: ${{ matrix.version }}
+  shellcheck:
+    runs-on: docker
+    uses: https://codeberg.org/nathanchance/actions-workflows/.forgejo/workflows/shellcheck.yml@main
+  shfmt:
+    runs-on: docker
+    uses: https://codeberg.org/nathanchance/actions-workflows/.forgejo/workflows/shfmt.yml@main
