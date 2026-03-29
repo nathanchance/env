@@ -6,11 +6,13 @@ on:
       - '**.fish'
       - '**.py'
       - '**.sh'
+      - '.forgejo/workflows/main.yml'
   pull_request:
     paths:
       - '**.fish'
       - '**.py'
       - '**.sh'
+      - '.forgejo/workflows/main.yml'
   workflow_dispatch:
 jobs:
   fish:
