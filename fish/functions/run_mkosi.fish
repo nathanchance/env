@@ -192,8 +192,11 @@ function run_mkosi -d "Run mkosi with various arguments"
     end
 
     # Using a bootable profile
-    if contains -- bootable $mkosi_user_args
-        set bootable true
+    if set profile_index (contains -i -- --profile $mkosi_user_args)
+        set profiles (string split , $mkosi_user_args[(math 1 + $profile_index)])
+        if contains bootable $profiles
+            set bootable true
+        end
     end
 
     # Only truly dynamic arguments (namely from fish variables) should be added here.
