@@ -29,12 +29,29 @@ function run_mkosi -d "Run mkosi with various arguments"
     if not contains -- --distribution $mkosi_user_args; and not contains -- -d $mkosi_user_args
         set no_distro_flag true
     end
+    if set profile_index (contains -i -- --profile $mkosi_user_args)
+        set profile_val_index (math 1 + $profile_index)
+        set profiles (string split , $mkosi_user_args[$profile_val_index])
+        # Using a bootable profile
+        if contains bootable $profiles
+            set bootable true
+        end
+    end
     set env_mkosi $ENV_FOLDER/mkosi
     switch $image
         case dev-'*'
             # dev-* images share a single directory, switching on '--distribution'
             set -a mkosi_user_args \
                 --distribution (string split -f 2 - $image)
+            if set -q profiles
+                if not contains dev $profiles
+                    set -a profiles dev
+                    set mkosi_user_args[$profile_val_index] (string join , $profiles)
+                end
+            else
+                set -a mkosi_user_args \
+                    --profile dev
+            end
             set directory $env_mkosi
         case env
             if set -q no_distro_flag
@@ -203,14 +220,6 @@ function run_mkosi -d "Run mkosi with various arguments"
 
         run0 chown -R $USER:$USER $tools_tree
         or return
-    end
-
-    # Using a bootable profile
-    if set profile_index (contains -i -- --profile $mkosi_user_args)
-        set profiles (string split , $mkosi_user_args[(math 1 + $profile_index)])
-        if contains bootable $profiles
-            set bootable true
-        end
     end
 
     # Only truly dynamic arguments (namely from fish variables) should be added here.
