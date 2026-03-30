@@ -37,7 +37,7 @@ function upd -d "Runs the update command for the current distro or downloads/upd
         switch $target
             case b4
                 if not __is_location_primary
-                    uv tool install --reinstall b4
+                    uv tool install --reinstall --with b4[tui] b4
                     or return
                     continue
                 end
@@ -58,7 +58,7 @@ function upd -d "Runs the update command for the current distro or downloads/upd
                     set install_b4 true
                 end
                 if set -q install_b4
-                    uv tool install --reinstall $b4_src
+                    uv tool install --from $b4_src --reinstall --with b4[tui] b4
                     or return
                 end
                 continue
