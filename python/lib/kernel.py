@@ -103,9 +103,10 @@ def prepare_source(base_name, base_ref='origin/master'):
     commits = []
 
     # Patching section
-    patches.append(
-        'https://lore.kernel.org/all/20260325-modpost-extra_warn-unused-but-set-global-v1-1-2e84003b7e81@kernel.org/'
-    )  # modpost: Declare extra_warn with unused attribute
+    if base_name == 'linux-mainline-llvm':
+        patches.append(
+            'https://lore.kernel.org/all/20260325-modpost-extra_warn-unused-but-set-global-v1-1-2e84003b7e81@kernel.org/'
+        )  # modpost: Declare extra_warn with unused attribute
     patches.append(
         'https://lore.kernel.org/all/20260325-certs-extract-cert-key_pass-unused-but-set-global-v1-1-ecf94326d532@kernel.org/'
     )  # extract-cert: Wrap key_pass with '#ifdef USE_PKCS11_ENGINE'
@@ -113,6 +114,13 @@ def prepare_source(base_name, base_ref='origin/master'):
         patches.append(
             'https://lore.kernel.org/all/20260327-dtc-drop-dts_version-v1-1-41066690aefd@kernel.org/'
         )  # scripts/dtc: Remove unused dts_version in dtc-lexer.l
+    if base_name == 'linux-next-llvm':
+        patches.append(
+            'https://lore.kernel.org/all/20260330-overture-cactus-c8eb7b9cbecc@spud/'
+        )  # net: macb: fix use of at91_default_usrio without CONFIG_OF
+        patches.append(
+            'https://lore.kernel.org/all/20260330210344.3073712-1-jolsa@kernel.org/'
+        )  # bpf: Fix block device hooks names
 
     try:
         for revert in reverts:
