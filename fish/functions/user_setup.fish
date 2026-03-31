@@ -303,7 +303,6 @@ rpmbuild/' >>$gitignore
                 buildall \
                 hugo-files \
                 local_manifests \
-                nathanchance.github.io \
                 patches
 
             for linux_tree in linux linux-next linux-stable
