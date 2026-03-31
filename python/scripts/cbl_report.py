@@ -92,7 +92,7 @@ def get_yearly_report_path(year):
 
 
 def get_report_repo():
-    return Path(os.environ['GITHUB_FOLDER'], 'hugo-files')
+    return Path(os.environ['CODEBERG_FOLDER'], 'hugo-files')
 
 
 def get_report_worktree():

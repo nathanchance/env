@@ -295,13 +295,15 @@ rpmbuild/' >>$gitignore
         case hetzner workstation
             mkdir -p $SRC_FOLDER
 
+            set codeberg_repos \
+                hugo-files
+
             set github_repos \
                 actions-playground \
                 actions-workflows \
                 arch-repo \
                 bug-files \
                 buildall \
-                hugo-files \
                 local_manifests \
                 patches
 
@@ -312,15 +314,25 @@ rpmbuild/' >>$gitignore
             tmux new-window fish -c "begin; __connect_to_ssh_agent; and cbl_setup_other_repos; end; or exec fish -l"
     end
 
+    if set -q codeberg_repos
+        mkdir -p $CODEBERG_FOLDER
+        for codeberg_repo in $codeberg_repos
+            set folder $CODEBERG_FOLDER/$codeberg_repo
+            if not test -d $folder
+                git clone ssh://git@codeberg.org/nathanchance/$codeberg_repo.git $folder
+                or return
+            end
+            if test "$codeberg_repo" = hugo-files
+                git -C $folder submodule update --init --recursive
+            end
+        end
+    end
     if set -q github_repos
         mkdir -p $GITHUB_FOLDER
         for github_repo in $github_repos
             set folder $GITHUB_FOLDER/$github_repo
             if not test -d $folder
                 gh repo clone $github_repo $folder; or return
-            end
-            if test "$github_repo" = hugo-files
-                git -C $folder submodule update --init --recursive
             end
         end
     end
