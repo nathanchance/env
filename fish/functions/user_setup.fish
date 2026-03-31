@@ -216,7 +216,12 @@ rpmbuild/' >>$gitignore
 
         mkdir -p $libvirt_pool
         if __user_exists libvirt-qemu
-            setfacl -m u:libvirt-qemu:rx $HOME
+            set libvirt_user libvirt-qemu
+        else if __user_exists qemu
+            set libvirt_user qemu
+        end
+        if set -q libvirt_user
+            setfacl -m u:$libvirt_user:rx $HOME
         end
 
         virsh pool-define-as --name default --type dir --target $libvirt_pool
