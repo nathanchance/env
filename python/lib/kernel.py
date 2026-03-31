@@ -118,9 +118,6 @@ def prepare_source(base_name, base_ref='origin/master'):
         patches.append(
             'https://lore.kernel.org/all/20260330-overture-cactus-c8eb7b9cbecc@spud/'
         )  # net: macb: fix use of at91_default_usrio without CONFIG_OF
-        patches.append(
-            'https://lore.kernel.org/all/20260330210344.3073712-1-jolsa@kernel.org/'
-        )  # bpf: Fix block device hooks names
 
     try:
         for revert in reverts:
