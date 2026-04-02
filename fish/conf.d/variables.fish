@@ -154,7 +154,7 @@ set -gx CBL_TC_LLVM_STORE $CBL_TC/llvm
 set -gx CBL_TC_BNTL $CBL_TC_BNTL_STORE-latest/bin
 set -gx CBL_TC_LLVM $CBL_TC_LLVM_STORE-latest/bin
 
-set -gx ENV_FOLDER $GITHUB_FOLDER/env
+set -gx ENV_FOLDER $CODEBERG_FOLDER/env
 set -gx FORKS_FOLDER $GITHUB_FOLDER/forks
 
 set -gx PYTHON_FOLDER $ENV_FOLDER/python

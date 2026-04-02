@@ -37,29 +37,10 @@ function cbl_setup_other_repos -d "Download other ClangBuiltLinux repos"
         end
     end
 
-    set repos_personal_github \
-        creduce-files \
+    cbl_clone_repo \
         llvm-kernel-testing \
         repro-scripts \
-        tc-build
-    for repo in $repos_personal_github
-        switch $repo
-            case creduce-files repro-scripts
-                set folder $CBL_MISC/$repo
-            case llvm-kernel-testing
-                set folder $CBL_LKT
-            case tc-build
-                set folder $CBL_TC_BLD
-        end
-        if not test -d $folder
-            mkdir -p (path dirname $folder)
-            switch $repo
-                case tc-build
-                    set clone_args -- -b personal
-            end
-            gh repo clone $repo $folder $clone_args
-        end
-    end
+        nathanchance/tc-build
 
     set tuxmake $CBL_SRC_D/tuxmake
     if not test -d $tumxake

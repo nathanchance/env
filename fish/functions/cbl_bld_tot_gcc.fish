@@ -30,9 +30,9 @@ function cbl_bld_tot_gcc -d "Build tip of tree GCC (often for comparison against
 
     set make_flags -j(nproc)
 
-    set buildall $GITHUB_FOLDER/buildall
+    set buildall $CODEBERG_FOLDER/buildall
     if not test -d $buildall
-        git clone https://github.com/nathanchance/buildall $buildall
+        git clone https://codeberg.org/nathanchance/buildall $buildall
         or return
     end
 

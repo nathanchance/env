@@ -30,7 +30,7 @@ function cbl_upd_stbl_wrktrs -d "Update the worktrees for linux-stable"
                 git -C $folder bd linux-$stable_version.y
 
                 if test $dirname = $CBL_SRC_P
-                    set patches_repo $GITHUB_FOLDER/patches
+                    set patches_repo $CODEBERG_FOLDER/patches
                     set patches_folder $patches_repo/$basename
 
                     if test -d $patches_folder

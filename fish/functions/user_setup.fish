@@ -48,18 +48,12 @@ function user_setup -d "Setup a user account, downloading all files and placing 
 
     # Set up SSH keys if requested
     if test "$trusted_ssh" = true
-        # Set up gh
-        if not gh auth status
-            gh auth login; or return
-            set first_time_gh true
-        end
-        set use_gh true
-
         set ssh_folder $HOME/.ssh
         if test "$skip_install_ssh_keys" != true; and not test -f $ssh_folder/id_ed25519
             mkdir -p $ssh_folder
             if not test -d $keys_folder
-                gh repo clone keys $keys_folder; or return
+                git clone https://codeberg.org/nathanchance/keys.git $keys_folder
+                or return
             end
 
             set ssh_keys $keys_folder/ssh
@@ -93,19 +87,19 @@ function user_setup -d "Setup a user account, downloading all files and placing 
         __connect_to_ssh_agent
         or return
 
-        # Switch back to SSH protocol for GitHub CLI
-        if test "$first_time_gh" = true
-            gh config set -h github.com git_protocol ssh
-            gh config set git_protocol ssh
-            # This contains the credential helper configs; it will be properly recreated below
-            rm -fr $HOME/.gitconfig
+        # Set up gh
+        if not gh auth status
+            gh auth login
+            or return
         end
+        set use_gh true
     end
 
     if test "$trusted_gpg" = true
         if not gpg_key_usable
             if not test -d $keys_folder
-                gh repo clone keys $keys_folder; or return
+                git clone ssh://git@codeberg.org/nathanchance/keys.git $keys_folder
+                or return
             end
 
             gpg --pinentry-mode loopback --import $keys_folder/encryption/private.asc; or return
@@ -125,11 +119,13 @@ function user_setup -d "Setup a user account, downloading all files and placing 
     # Downloading/updating environment scripts
     if not test -d $ENV_FOLDER
         mkdir -p (path dirname $ENV_FOLDER)
-        if test "$use_gh" = true
-            gh repo clone (path basename $ENV_FOLDER) $ENV_FOLDER; or return
+        if test "$trusted_ssh" = true
+            set codeberg_url ssh://git@codberg.org
         else
-            git clone https://github.com/nathanchance/(path basename $ENV_FOLDER).git $ENV_FOLDER; or return
+            set codeberg_url https://codeberg.org
         end
+        git clone $codeberg_url/nathanchance/(path basename $ENV_FOLDER).git $ENV_FOLDER
+        or return
     end
     git -C $ENV_FOLDER pull
 
@@ -296,16 +292,17 @@ rpmbuild/' >>$gitignore
             mkdir -p $SRC_FOLDER
 
             set codeberg_repos \
-                hugo-files
-
-            set github_repos \
                 actions-playground \
                 actions-workflows \
-                arch-repo \
-                bug-files \
                 buildall \
+                hugo-files \
                 local_manifests \
                 patches
+
+            # These mostly host binary files, which could bog down Codeberg
+            set github_repos \
+                arch-repo \
+                bug-files
 
             for linux_tree in linux linux-next linux-stable
                 tmux new-window fish -c "cbl_setup_linux_repos $linux_tree; or exec fish -l"

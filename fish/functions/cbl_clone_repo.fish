@@ -3,16 +3,16 @@
 # Copyright (C) 2021-2023 Nathan Chancellor
 
 function cbl_clone_repo -d "Clone certain repos for ClangBuiltLinux testing and development"
-    if gh auth status &>/dev/null
-        set can_use_gh true
+    if test -e $HOME/.ssh/id_ed25519
+        set codeberg_url ssh://git@codeberg.org
+    else
+        set codeberg_url https://codeberg.org
     end
 
     for arg in $argv
         set -l branch
         set -l dest
         set -l git_clone_args
-        set -l gh_repo_clone_args
-        set -l use_gh
         set -l use_repo
 
         # Some arguments may have shorthands, expand them before handling
@@ -32,10 +32,6 @@ function cbl_clone_repo -d "Clone certain repos for ClangBuiltLinux testing and 
                 set url https://github.com/ClangBuiltLinux/$arg.git
                 set dest $CBL_GIT/$arg
 
-            case cbl-ci-gh repro-scripts
-                set url https://github.com/nathanchance/$arg.git
-                set dest $CBL_MISC/(string replace cbl- "" $arg)
-
             case common-android-multi
                 set use_repo true
                 # The common-android-multi branch has long been dead. Use
@@ -46,7 +42,7 @@ function cbl_clone_repo -d "Clone certain repos for ClangBuiltLinux testing and 
                 if test -d $NVME_FOLDER
                     set dest $NVME_SRC_FOLDER/$arg
                 end
-                set local_manifests $GITHUB_FOLDER/local_manifests/$arg.xml
+                set local_manifests $CODEBERG_FOLDER/local_manifests/$arg.xml
 
             case cros
                 set use_repo true
@@ -68,12 +64,7 @@ function cbl_clone_repo -d "Clone certain repos for ClangBuiltLinux testing and 
                 set url https://git.kernel.org/pub/scm/linux/kernel/git/mingo/tip.git/
 
             case llvm-kernel-testing
-                if set -q can_use_gh
-                    set use_gh true
-                    set url (path basename $arg)
-                else
-                    set url https://github.com/nathanchance/$arg.git
-                end
+                set url $codeberg_url/nathanchance/$arg.git
 
             case llvm-android
                 set use_repo true
@@ -86,14 +77,11 @@ function cbl_clone_repo -d "Clone certain repos for ClangBuiltLinux testing and 
             case nathanchance/tc-build
                 set dest $CBL_TC_BLD
                 set git_clone_args -b personal
+                set url $codeberg_url/$arg.git
 
-                if set -q can_use_gh
-                    set use_gh true
-                    set url (path basename $arg)
-                    set gh_repo_clone_args -- $git_clone_args
-                else
-                    set url https://github.com/$arg.git
-                end
+            case repro-scripts
+                set url $codeberg_url/nathanchance/$arg.git
+                set dest $CBL_MISC/$arg
 
             case '*'
                 __print_error "$arg not supported explicitly, skipping!"
@@ -143,15 +131,14 @@ function cbl_clone_repo -d "Clone certain repos for ClangBuiltLinux testing and 
                 end
 
                 popd
-            else if test -n "$use_gh"
-                gh repo clone $url $dest $gh_repo_clone_args
-                or return
             else
                 git clone $git_clone_args $url $dest; or return
             end
             switch $arg
+                case nathanchance/tc-build
+                    git -C $dest remote add -f upstream https://github.com/ClangBuiltLinux/tc-build.git
                 case tc-build
-                    git -C $dest remote add -f nathanchance https://github.com/nathanchance/tc-build
+                    git -C $dest remote add -f codeberg $codeberg_url/nathanchance/tc-build.git
             end
         end
     end

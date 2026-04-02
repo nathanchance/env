@@ -12,7 +12,7 @@ import lib.utils
 
 def get_patches_folder(repo):
     branch = lib.utils.get_git_output(repo, 'bn')
-    return Path(os.environ['GITHUB_FOLDER'], 'patches', repo.name, branch)
+    return Path(os.environ['CODEBERG_FOLDER'], 'patches', repo.name, branch)
 
 
 def parse_arguments():
