@@ -3,7 +3,9 @@
 import platform
 import sys
 from argparse import ArgumentParser
+from collections.abc import Iterator
 from pathlib import Path
+from subprocess import CalledProcessError
 
 sys.path.append(str(Path(__file__).resolve().parents[1]))
 # pylint: disable=wrong-import-position
@@ -16,12 +18,25 @@ DEV_IMG = DEF_MACH[platform.machine()]
 
 
 def clean_timer_files() -> None:
-    timers_to_clean = []
-    for timer in Path('/etc/systemd/system').glob('sch_tz_chg-*.timer'):
-        cmd = ['systemctl', 'list-timers', '--all', '--legend=no', timer.name]
-        if lib.utils.chronic(cmd).stdout.startswith('-'):  # not going to run again
-            timers_to_clean.append(timer)
+    active_timers = get_active_timers()
+    timers_to_clean = [timer for timer in get_timers() if timer not in active_timers]
     disable_and_rm_timers(timers_to_clean)
+
+
+def create_service_file() -> None:
+    service_name = 'chg_tz@.service'
+
+    try:
+        systemctl_host_mach(['list-unit-files', '--quiet', service_name])
+    except CalledProcessError:
+        service_txt = '''[Unit]
+Description=Change system timezone to %I
+CollectMode=inactive-or-failed
+
+[Service]
+ExecStart=/usr/bin/timedatectl set-timezone %I
+'''
+        systemctl_create_file(service_name, service_txt)
 
 
 def disable_and_rm_timers(timers: list[Path]) -> None:
@@ -29,10 +44,24 @@ def disable_and_rm_timers(timers: list[Path]) -> None:
         return
 
     disable_cmd = ['disable', '--now'] + [item.name for item in timers]
-    systemctl_host_mach(disable_cmd)
+    systemctl_host(disable_cmd)
+    systemctl_mach(disable_cmd, check=False)  # files may not exist in machine
 
-    lib.utils.run0(rm_cmd := ['/usr/bin/rm', *timers])
+    lib.utils.run0(rm_cmd := ['/usr/bin/rm', '-f', *timers])
     run_mach(rm_cmd)
+
+
+def get_active_timers() -> list[Path]:
+    base_systemctl_cmd = ['systemctl', 'list-timers', '--all', '--legend=no']
+    return [
+        timer
+        for timer in get_timers()
+        if not lib.utils.chronic([*base_systemctl_cmd, timer.name]).stdout.startswith('-')
+    ]
+
+
+def get_timers() -> Iterator[Path]:
+    return Path('/etc/systemd/system').glob('sch_tz_chg-*.timer')
 
 
 def parse_args():
@@ -66,6 +95,8 @@ def parse_args():
     )
     schedule_parser.add_argument('timezone', help="Timezone to change to")
 
+    subparser.add_parser('sync', help='Sync host timezone changes to container')
+
     return parser.parse_args()
 
 
@@ -87,18 +118,6 @@ def run_mach(cmd: list, **kwargs) -> None:
 
 
 def schedule_tz_change(date_str: str, timezone: str) -> None:
-    systemctl_cmd = ['edit', '--force', '--full', '--stdin']
-
-    if not (service := Path('/etc/systemd/system/chg_tz@.service')).exists():
-        service_txt = '''[Unit]
-Description=Change system timezone to %I
-CollectMode=inactive-or-failed
-
-[Service]
-ExecStart=/usr/bin/timedatectl set-timezone %I
-'''
-        systemctl_host_mach([*systemctl_cmd, service.name], input=service_txt)
-
     timer_name = f"sch_tz_chg-{date_str.replace(' ', '-').replace('/', '-')}.timer"
     timer_txt = f"""[Unit]
 Description=Change system timezone to {timezone} @ {date_str}
@@ -112,15 +131,32 @@ Unit=chg_tz@{timezone.replace('/', '-')}.service
 [Install]
 WantedBy=timers.target
 """
-    systemctl_host_mach([*systemctl_cmd, timer_name], input=timer_txt)
 
+    systemctl_create_file(timer_name, timer_txt)
     systemctl_host_mach(['enable', '--now', timer_name])
 
 
-def systemctl_host_mach(cmd: list, **kwargs) -> None:
-    systemctl_cmd = ['/usr/bin/systemctl', *cmd]
-    lib.utils.run0(systemctl_cmd, **kwargs)
-    run_mach(systemctl_cmd, **kwargs)
+def systemctl_create_file(
+    file_name: str, file_txt: str, host: bool = True, container: bool = True
+) -> None:
+    systemctl_cmd = ['edit', '--force', '--full', '--stdin']
+    if host:
+        systemctl_host([*systemctl_cmd, file_name], input=file_txt)
+    if container:
+        systemctl_mach([*systemctl_cmd, file_name], input=file_txt)
+
+
+def systemctl_host(cmd: list, **kwargs):
+    return lib.utils.run0(['/usr/bin/systemctl', *cmd], **kwargs)
+
+
+def systemctl_mach(cmd: list, **kwargs):
+    return run_mach(['/usr/bin/systemctl', *cmd], **kwargs)
+
+
+def systemctl_host_mach(cmd: list, **kwargs):
+    systemctl_host(cmd, **kwargs)
+    systemctl_mach(cmd, **kwargs)
 
 
 if __name__ == '__main__':
@@ -162,7 +198,15 @@ if __name__ == '__main__':
         lib.utils.chronic(['systemd-analyze', 'calendar', DATE_STR])
 
         clean_timer_files()
+        create_service_file()
         schedule_tz_change(DATE_STR, args.timezone)
+
+    elif args.subcommand == 'sync':
+        clean_timer_files()
+        create_service_file()
+        for timer in get_active_timers():
+            systemctl_create_file(timer.name, timer.read_text(encoding='utf-8'), host=False)
+            systemctl_mach(['enable', '--now', timer.name])
 
     else:
         raise RuntimeError(f"Don't know how to handle subcommand '{args.subcommand}'?")
