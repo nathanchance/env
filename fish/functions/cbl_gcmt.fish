@@ -59,6 +59,14 @@ function cbl_gcmt -d "Run git commit with preset commit message"
 
                 git c -m "configs: Weekly update"
 
+            case repro-scripts
+                if test $PWD != $CBL_MISC/repro-scripts
+                    __print_error "Argument ('$arg') expects to be within $CBL_MISC/repro-scripts"
+                    return 1
+                end
+
+                git c -m "repro-scripts: Update"
+
             case tuxmake-korg-bump
                 if test $PWD != $CBL_SRC_D/tuxmake
                     __print_error "Argument ('$arg') expects to be within $CBL_SRC_D/tuxmake"
