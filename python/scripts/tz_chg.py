@@ -15,7 +15,7 @@ from scripts.sd_nspawn import DEF_MACH
 DEV_IMG = DEF_MACH[platform.machine()]
 
 
-def clean_timer_files():
+def clean_timer_files() -> None:
     timers_to_clean = []
     for timer in Path('/etc/systemd/system').glob('sch_tz_chg-*.timer'):
         cmd = ['systemctl', 'list-timers', '--all', '--legend=no', timer.name]
@@ -24,7 +24,7 @@ def clean_timer_files():
     disable_and_rm_timers(timers_to_clean)
 
 
-def disable_and_rm_timers(timers):
+def disable_and_rm_timers(timers: list[Path]) -> None:
     if not timers:
         return
 
@@ -69,7 +69,7 @@ def parse_args():
     return parser.parse_args()
 
 
-def run_mach(cmd, **kwargs):
+def run_mach(cmd: list, **kwargs) -> None:
     if lib.utils.in_container():
         return
 
@@ -86,7 +86,7 @@ def run_mach(cmd, **kwargs):
     lib.utils.run0(sd_run_cmd, **kwargs)
 
 
-def schedule_tz_change(date_str, timezone):
+def schedule_tz_change(date_str: str, timezone: str) -> None:
     systemctl_cmd = ['edit', '--force', '--full', '--stdin']
 
     if not (service := Path('/etc/systemd/system/chg_tz@.service')).exists():
@@ -117,7 +117,7 @@ WantedBy=timers.target
     systemctl_host_mach(['enable', '--now', timer_name])
 
 
-def systemctl_host_mach(cmd, **kwargs):
+def systemctl_host_mach(cmd: list, **kwargs) -> None:
     systemctl_cmd = ['/usr/bin/systemctl', *cmd]
     lib.utils.run0(systemctl_cmd, **kwargs)
     run_mach(systemctl_cmd, **kwargs)
