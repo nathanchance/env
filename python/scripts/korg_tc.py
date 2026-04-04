@@ -155,6 +155,8 @@ class ToolchainManager:
             raise RuntimeError('Attempting to call clean_up_old_versions() without latest version?')
         if not self.versions:
             raise RuntimeError('Attempting to call clean_up_old_versions() with no versions?')
+        if not self.install_folder:
+            raise RuntimeError('Install folder not set up?')
 
         for version in self.versions:
             latest_version = handle_rc_version(self.latest_versions[version])

@@ -82,7 +82,7 @@ class VirtualMachine:
         # External values (can be calculated implicitly currently or later)
         self.cmdline = ''
         self.cores = 0
-        self.initrd = None
+        self.initrd: Path = Path('/initramfs')
         self.iso = None
         self.kernel = None
         self.memory = 0
@@ -116,8 +116,12 @@ class VirtualMachine:
         if not self._use_kvm:
             return 4
 
+        # If cpu_count returns None, conservatively use 2 cores by default
+        if not (num_cpus := os.cpu_count()):
+            return 2
+
         # If we are using KVM and we are using the regular profile, we default to 8 CPUs or half the number of CPUs, whichever is smaller
-        half_num_cpus = int(os.cpu_count() / 2)
+        half_num_cpus = int(num_cpus / 2)
         if self.profile == 'regular':
             return min(8, half_num_cpus)
 
@@ -168,7 +172,7 @@ class VirtualMachine:
         cpu_val = self._calc_cpus()
         mem_val = f"{self._calc_mem(cpu_val)}G"
 
-        args = [
+        args: list[Path | str] = [
             # Memory
             '-m', mem_val,
 
@@ -330,9 +334,7 @@ class VirtualMachine:
                 # 'from'.
                 if vfsd.poll():
                     file.seek(0)
-                    raise RuntimeError(
-                        f"virtiofsd failed with: {file.read(encoding='utf-8')}"
-                    ) from err
+                    raise RuntimeError(f"virtiofsd failed with: {file.read()}") from err
                 raise err
             finally:
                 vfsd.kill()

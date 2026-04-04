@@ -450,7 +450,7 @@ def partition_drive(device, mountpoint, username=None, fstype=None):
     mountpoint.mkdir(exist_ok=True, parents=True)
     lib.utils.run(['mount', '-a'])
     if mountpoint != Path('/home'):
-        lib.setup.chown(username, mountpoint)
+        chown(username, mountpoint)
 
 
 def podman_setup(username):
@@ -695,7 +695,10 @@ def setup_sudo_symlink():
     sudo_bin.parent.mkdir(exist_ok=True, parents=True)
     sudo_bin.unlink(missing_ok=True)
 
-    if (doas := Path(shutil.which('doas')).resolve()) == Path('/usr/bin/doas'):
+    if not (doas_path := shutil.which('doas')):
+        raise RuntimeError('doas not found in PATH?')
+
+    if (doas := Path(doas_path).resolve()) == Path('/usr/bin/doas'):
         relative_doas = Path('../../../../bin/doas')
     else:
         raise RuntimeError(f"Can't handle doas location ('{doas}')?")

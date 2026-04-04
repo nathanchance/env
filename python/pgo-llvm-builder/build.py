@@ -469,12 +469,12 @@ if __name__ == '__main__':
             '-c',
         ]
 
-        fish_cmds = [
+        fish_cmds: list[list[Path | str]] = [
             ['set', 'fish_trace', '1'],
             build_llvm_py_cmd,
         ]
         if args.rust:
-            rust_configure_vals = {
+            rust_configure_vals: dict[str, str] = {
                 # We want to use our copy of LLVM to ensure full bitcode
                 # compatibility
                 'llvm.download-ci-llvm': 'false',

@@ -29,7 +29,9 @@ def dnf_add_repo(repo_url):
     # default in Fedora 41 now.
     # https://github.com/rpm-software-management/dnf5/issues/1537
     # Done in an agnostic way because this is shared with AlmaLinux.
-    if Path(shutil.which('dnf')).resolve().name.endswith('5'):
+    if not (dnf_path := shutil.which('dnf')):
+        raise RuntimeError('dnf not found in PATH?')
+    if Path(dnf_path).resolve().name.endswith('5'):
         local_dst = Path('/etc/yum.repos.d', repo_url.rsplit('/', 1)[1])
         lib.utils.curl(repo_url, output=local_dst)
     else:

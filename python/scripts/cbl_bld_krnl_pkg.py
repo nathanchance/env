@@ -18,6 +18,7 @@ import korg_tc
 sys.path.append(str(Path(__file__).resolve().parents[1]))
 # pylint: disable=wrong-import-position
 import lib.kernel
+import lib.utils
 
 # pylint: enable=wrong-import-position
 
@@ -272,7 +273,7 @@ class DebugPkgBuilder(KernelPkgBuilder):
         super().__init__(Path(os.environ['CBL_SRC_D'], 'linux-debug'))
 
     # pylint: disable-next=signature-differs
-    def _prepare_files(self, localmodconfig, menuconfig, extra_config_targets=None):
+    def _prepare_files(self, localmodconfig, menuconfig, extra_config_targets=None):  # ty: ignore[invalid-method-override]
         config = Path(self._build_folder, '.config')
         base_sc_cmd = [Path(self._source_folder, 'scripts/config'), '--file', config]
 

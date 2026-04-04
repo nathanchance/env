@@ -51,7 +51,11 @@ def b4_am_o(msg_id, **kwargs):
 
 def b4_info(**kwargs):
     output = b4(['prep', '--show-info'], **kwargs, capture_output=True).stdout
-    return dict(map(str.strip, item.split(':', 1)) for item in output.splitlines())
+    return {
+        key.strip(): value.strip()
+        for item in output.splitlines()
+        for key, value in item.split(':', 1)
+    }
 
 
 def b4_gen_series_commits(info=None, **kwargs):

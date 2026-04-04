@@ -161,7 +161,9 @@ def setup_ssh():
         lib.utils.run(['ssh-add', ssh_key])
 
     gh_conf_text = Path(home, '.config/gh/config.yml').read_text(encoding='utf-8')
-    if re.search(r'^git_protocol:\s+(.*)$', gh_conf_text, flags=re.M).groups()[0] != 'ssh':
+    if not (match := re.search(r'^git_protocol:\s+(.*)$', gh_conf_text, flags=re.M)):
+        raise RuntimeError('Cannot find git_protocol in gh configuration?')
+    if match.groups()[0] != 'ssh':
         brew_gh(['config', 'set', '-h', 'github.com', 'git_protocol', 'ssh'])
         brew_gh(['config', 'set', 'git_protocol', 'ssh'])
     Path(home, '.gitconfig').unlink(missing_ok=True)

@@ -84,7 +84,8 @@ class MkinitcpioConf(UserDict):
 
         self.orig = {var: f"{var}=({val})" for var, val in matches}
         self.data = {
-            var: set(map(Path if var == 'FILES' else str, val.split())) for var, val in matches
+            var: set(map(Path if var == 'FILES' else str, val.split()))  # ty: ignore[invalid-argument-type]
+            for var, val in matches
         }
 
     def update_if_necessary(self):
@@ -753,7 +754,9 @@ def setup_user(username, userpass):
         lib.setup.chsh_fish(username)
         lib.setup.add_user_to_group('uucp', username)
     else:
-        fish = Path(shutil.which('fish')).resolve()
+        if not (fish_path := shutil.which('fish')):
+            raise RuntimeError('fish not found in PATH?')
+        fish = Path(fish_path).resolve()
         lib.utils.run(['useradd', '-G', 'wheel,uucp', '-m', '-s', fish, username])
 
         lib.setup.chpasswd(username, userpass)
