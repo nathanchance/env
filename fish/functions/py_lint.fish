@@ -35,6 +35,14 @@ function py_lint -d "Lint Python files"
         else
             __print_red "\nnot ruff format clean"
         end
+        if set requirements (git ls-files | string match -er 'requirements\.txt')
+            set ty_uvx_flags --with-requirements $requirements
+        end
+        if uvx $ty_uvx_flags ty check $files
+            __print_green "\nty check clean"
+        else
+            __print_red "\nnot ty check clean"
+        end
     else
         set -a flake8_ignore E501 # line too long
         if uvx flake8 \
