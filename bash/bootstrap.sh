@@ -34,7 +34,7 @@ else
     exit 1
 fi
 
-$dwnld_cmd https://github.com/nathanchance/env/tarball/main | tar -C "$tmp_dir" -xvzf - --strip-components=1
+$dwnld_cmd https://codeberg.org/nathanchance/env/archive/main.tar.gz | tar -C "$tmp_dir" -xvzf - --strip-components=1
 
 python_setup=$tmp_dir/python/setup
 if [ ! -d "$python_setup" ]; then
