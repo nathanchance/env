@@ -23,7 +23,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        version: ['3.14', '3.13', '3.12', '3.11', '3.10']
+        version: ['3.14', '3.13', '3.12', '3.11']
     uses: https://codeberg.org/nathanchance/actions-workflows/.forgejo/workflows/python_lint.yml@main
     with:
       python_version: ${{ matrix.version }}
