@@ -22,12 +22,12 @@ INSTALL = Path(ROOT, 'install')
 SRC = Path(ROOT, 'src')
 MACHINE = platform.machine()
 
-LLVM_REFS = {
+LLVM_REFS: dict[str, str] = {
     '23.0.0': 'origin/main',
     '22.1.4': 'origin/release/22.x',
 }
 
-LLVM_VERSIONS = [
+LLVM_VERSIONS: list[str] = [
     '23.0.0',  # git
     '22.1.4',  # release/22.x
     '22.1.3',
@@ -227,7 +227,7 @@ if __name__ == '__main__':
         'compiler-rt',
         'lld',
     ]
-    base_build_llvm_py_cmd = [
+    base_build_llvm_py_cmd: lib.utils.CmdList = [
         Path('/tc-build/build-llvm.py'),
         '--build-folder', '/build/llvm',
         *CHECK_ARGS,
@@ -240,7 +240,7 @@ if __name__ == '__main__':
         '--show-build-commands',
     ]  # fmt: off
 
-    base_systemd_nspawn_cmd = [
+    base_systemd_nspawn_cmd: lib.utils.CmdList = [
         'systemd-nspawn',
         '--as-pid2',
         '--ephemeral',
@@ -306,7 +306,7 @@ if __name__ == '__main__':
 
         llvm_install.mkdir(exist_ok=True, parents=True)
 
-        worktrees = [
+        worktrees: list[tuple[Path, Path, str]] = [
             (llvm_folder, llvm_worktree := Path(SRC, 'llvm-project'), llvm_ref),
         ]
         if args.rust:
@@ -332,7 +332,7 @@ if __name__ == '__main__':
                 )
 
         # Reverts for various versions
-        reverts = {
+        reverts: dict[str, list[str]] = {
             LLVM_VERSIONS[0]: [],
         }
         if revlist := reverts.get(llvm_version):
@@ -426,7 +426,7 @@ if __name__ == '__main__':
         shutil.rmtree(build_folder, ignore_errors=True)
         Path(build_folder, 'tmp').mkdir(exist_ok=True, parents=True)
 
-        mounts = [
+        mounts: list[tuple[Path, Path | str]] = [
             (build_folder, '/build'),
             (install_folder, '/install'),
             (llvm_worktree, '/llvm'),
@@ -443,7 +443,7 @@ if __name__ == '__main__':
             opts = '' if mountinfo['fstype'] == 'virtiofs' else ':idmap'
             mount_args.append(f"--bind={src}:{dst}{opts}")
 
-        build_llvm_py_cmd = [
+        build_llvm_py_cmd: lib.utils.CmdList = [
             *base_build_llvm_py_cmd,
             '--install-folder', llvm_install_nspawn := Path('/install', llvm_install.name),
         ]  # fmt: off
@@ -462,14 +462,14 @@ if __name__ == '__main__':
         if multicall and maj_ver >= 22:
             build_llvm_py_cmd.append('--multicall')
 
-        systemd_nspawn_cmd = [
+        systemd_nspawn_cmd: lib.utils.CmdList = [
             *base_systemd_nspawn_cmd,
             *mount_args,
             '/usr/bin/fish',
             '-c',
         ]
 
-        fish_cmds: list[list[Path | str]] = [
+        fish_cmds: list[lib.utils.CmdList] = [
             ['set', 'fish_trace', '1'],
             build_llvm_py_cmd,
         ]
@@ -486,7 +486,7 @@ if __name__ == '__main__':
                 'llvm.link-shared': 'false',
                 'build.cargo-native-static': 'true',
             }
-            build_rust_py_cmd = [
+            build_rust_py_cmd: lib.utils.CmdList = [
                 'env',
                 'RUSTFLAGS=-Clink-arg=-L/usr/local/lib',
                 Path('/tc-build/build-rust.py'),
@@ -521,7 +521,7 @@ if __name__ == '__main__':
         lib.utils.tg_msg(f"sudo authorization needed to build LLVM {llvm_version}")
         lib.utils.run0(systemd_nspawn_cmd)
 
-        directories_to_tarball = [
+        directories_to_tarball: list[Path] = [
             llvm_install,
         ]
         if args.rust:
