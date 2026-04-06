@@ -26,14 +26,14 @@ function py_lint -d "Lint Python files"
     # ruff is faster than flake8 and provides many of the benefits so use it when possible
     if contains ruff $commands
         if uvx ruff check $files
-            __print_green "\nruff check clean"
+            __print_green "\nruff check clean\n"
         else
-            __print_red "\nnot ruff check clean"
+            __print_red "\nnot ruff check clean\n"
         end
         if uvx ruff format --diff $files
-            __print_green "\nruff format clean"
+            __print_green "\nruff format clean\n"
         else
-            __print_red "\nnot ruff format clean"
+            __print_red "\nnot ruff format clean\n"
         end
         if set requirements (git ls-files | string match -er 'requirements\.txt')
             set ty_uvx_flags --with-requirements $requirements
@@ -87,7 +87,7 @@ function py_lint -d "Lint Python files"
         end
     end
     if uvx vulture --min-confidence 80 $files
-        __print_green "vulture clean\n"
+        __print_green "vulture clean"
     else
         __print_red "\nnot vulture clean\n"
     end
