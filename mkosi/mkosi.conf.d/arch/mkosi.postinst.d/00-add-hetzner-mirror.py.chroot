@@ -4,7 +4,7 @@ import sys
 from os import environ as env
 from pathlib import Path
 
-EXPECTED_MOUNTS = (
+EXPECTED_MOUNTS: tuple[tuple[Path, str], ...] = (
     ((PYTHON_FOLDER := Path(env['SRCDIR'], 'python')), 'PYTHON_FOLDER'),
     ((ETC := Path(env['SRCDIR'], 'etc')), '/etc'),
 )
