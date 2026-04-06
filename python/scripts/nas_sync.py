@@ -165,12 +165,12 @@ def download_items(targets, network_folder):
             subfolder = Path(firmware_folder, target.capitalize())
 
             # Constants to update
-            fedora_ver = '43'
-            server_iso_ver = '1.6'
-            workstation_iso_ver = '1.6'
+            fedora_ver = '44_Beta'
+            server_iso_ver = '1.2'
+            workstation_iso_ver = '1.2'
 
             # Base URLs
-            base_fedora_url = f"https://mirrors.edge.kernel.org/fedora/releases/{fedora_ver}"
+            base_fedora_url = f"https://mirrors.edge.kernel.org/fedora/releases/{'test/' if '_Beta' in fedora_ver else ''}{fedora_ver}"
 
             # Server
             for arch in fedora_arches:
@@ -179,7 +179,7 @@ def download_items(targets, network_folder):
                     items += [{
                         'containing_folder': Path(subfolder, fedora_ver, 'Server', arch),
                         'file_url': f"{iso_url}/Fedora-Server-{flavor}-{arch}-{fedora_ver}-{server_iso_ver}.iso",
-                        'sha_url': f"{iso_url}/Fedora-Server-{fedora_ver}-{server_iso_ver}-{arch}-CHECKSUM",
+                        'sha_url': f"{iso_url}/Fedora-Server-iso-{fedora_ver}-{server_iso_ver}-{arch}-CHECKSUM",
                     }]  # fmt: off
 
             # Workstation
@@ -188,7 +188,7 @@ def download_items(targets, network_folder):
                 items += [{
                     'containing_folder': Path(subfolder, fedora_ver, 'Workstation', arch),
                     'file_url': f"{iso_url}/Fedora-Workstation-Live-{fedora_ver}-{workstation_iso_ver}.{arch}.iso",
-                    'sha_url': f"{iso_url}/Fedora-Workstation-{fedora_ver}-{server_iso_ver}-{arch}-CHECKSUM",
+                    'sha_url': f"{iso_url}/Fedora-Workstation-iso-{fedora_ver}-{server_iso_ver}-{arch}-CHECKSUM",
                 }]  # fmt: off
 
         elif target == 'ipsw':
