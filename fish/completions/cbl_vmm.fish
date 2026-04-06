@@ -51,10 +51,10 @@ complete -c cbl_vmm -n "__fish_seen_subcommand_from $run_commands" -x -s m -l me
 complete -c cbl_vmm -n "__fish_seen_subcommand_from $run_commands" -x -s p -l ssh-port -d "Port to forward ssh on" -a '(__cbl_vmm_ssh_ports)'
 complete -c cbl_vmm -n "__fish_seen_subcommand_from $run_commands" -x -s P -l profile -d "Choose a specific profile, which customizes the default ratio of cores and memory" -a "regular build"
 
-complete -c cbl_vmm -n "__fish_seen_subcommand_from setup" -x -s i -l iso -d "Path or URL of .iso to boot from"
+complete -c cbl_vmm -n "__fish_seen_subcommand_from setup" -r -s i -l iso -d "Path or URL of .iso to boot from"
 complete -c cbl_vmm -n "__fish_seen_subcommand_from setup" -x -s s -l size -d "Size of virtual machine disk image in gigabytes"
 
 complete -c cbl_vmm -n "__fish_seen_subcommand_from run" -x -s C -l cmdline -d "Kernel cmdline string"
 complete -c cbl_vmm -n "__fish_seen_subcommand_from run" -f -s g -l gdb -d "Start QEMU with '-s -S' for debugging with gdb"
-complete -c cbl_vmm -n "__fish_seen_subcommand_from run" -x -s i -l initrd -d "Path to initrd"
-complete -c cbl_vmm -n "__fish_seen_subcommand_from run" -x -s k -l kernel -d "Path to kernel image or kernel build directory"
+complete -c cbl_vmm -n "__fish_seen_subcommand_from run" -r -s i -l initrd -d "Path to initrd"
+complete -c cbl_vmm -n "__fish_seen_subcommand_from run" -r -s k -l kernel -d "Path to kernel image or kernel build directory"
