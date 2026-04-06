@@ -118,10 +118,6 @@ def prepare_source(base_name, base_ref='origin/master'):
         patches.append(
             'https://lore.kernel.org/all/20260327-dtc-drop-dts_version-v1-1-41066690aefd@kernel.org/'
         )  # scripts/dtc: Remove unused dts_version in dtc-lexer.l
-    if base_name == 'linux-next-llvm':
-        patches.append(
-            'https://lore.kernel.org/all/20260330-overture-cactus-c8eb7b9cbecc@spud/'
-        )  # net: macb: fix use of at91_default_usrio without CONFIG_OF
 
     try:
         for revert in reverts:
