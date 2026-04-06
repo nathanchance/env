@@ -15,7 +15,7 @@ import lib.utils
 # pylint: enable=wrong-import-position
 
 MIN_FEDORA_VERSION = 35
-MAX_FEDORA_VERSION = 43
+MAX_FEDORA_VERSION = 44
 
 machine_is_apple_silicon = False
 cpuinfo = Path('/proc/cpuinfo').read_text(encoding='utf-8')
