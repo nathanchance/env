@@ -84,11 +84,13 @@ def update_and_install_packages():
 
 def setup_user(user_name, user_password):
     if not lib.setup.user_exists(user_name):
+        if not (fish := shutil.which('fish')):
+            raise RuntimeError('fish is not installed?')
         useradd_cmd = [
             'adduser',
             '--disabled-password',
             '--gecos', 'Nathan Chancellor',
-            '--shell', shutil.which('fish'),
+            '--shell', fish,
             user_name,
         ]  # fmt: off
         lib.utils.run(useradd_cmd)

@@ -168,16 +168,18 @@ if __name__ == '__main__':
     lib.utils.chronic(['systemctl', 'is-active', f"systemd-nspawn@{DEV_IMG}.service"])
 
     if args.subcommand == 'cancel':
+        files: list[Path] = []
         if files := args.files:
             for file in files:
                 if not file.exists():
                     raise FileNotFoundError(f"Provided file ('{file}') could not be found?")
+            files += args.files
         else:
             all_timers = list(map(str, Path('/etc/systemd/system').glob('sch_tz_chg-*.timer')))
-            if files := lib.utils.fzf(
+            if selected_files := lib.utils.fzf(
                 'timers to cancel', '\n'.join(all_timers), ['--preview', 'cat {}']
             ):
-                files = list(map(Path, files))
+                files += [Path(file) for file in selected_files]
 
         disable_and_rm_timers(files)
 

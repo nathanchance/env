@@ -37,7 +37,7 @@ def recreate_folder(folder):
 
 
 class KernelPkgBuilder:
-    def __init__(self, source_folder=None):
+    def __init__(self, source_folder: Path | None = None):
 
         if not source_folder:
             source_folder = Path.cwd()
@@ -51,13 +51,13 @@ class KernelPkgBuilder:
             os.environ['TMP_BUILD_FOLDER'], self._source_folder.name
         )  # same as tbf
 
-        self.extra_sc_args = []
-        self.make_variables = {
+        self.extra_sc_args: list[str] = []
+        self.make_variables: dict[str, str] = {
             'ARCH': 'x86_64',
             'HOSTLDFLAGS': '-fuse-ld=lld',
             'LLVM': os.environ.get('LLVM', f"{os.environ['CBL_TC_LLVM']}/"),
             'LOCALVERSION': '',
-            'O': self._build_folder,
+            'O': self._build_folder.as_posix(),
         }
 
         self._kernver = ''
@@ -76,11 +76,11 @@ class KernelPkgBuilder:
             '--file',
             src_config_file,
         ]
-        kconfig_env = {'KCONFIG_CONFIG': src_config_file}
-        plain_make_vars = {
+        kconfig_env: dict[str, str] = {'KCONFIG_CONFIG': src_config_file.as_posix()}
+        plain_make_vars: dict[str, str] = {
             'ARCH': 'x86_64',
             'LOCALVERSION': '',
-            'O': self._build_folder,
+            'O': self._build_folder.as_posix(),
         }
 
         # Step 1: Copy default Arch configuration and set a few options
@@ -205,12 +205,12 @@ class KernelPkgBuilder:
         pkgbase.chmod(0o644)
 
         print('Installing modules...')
-        modules_env = {'ZSTD_CLEVEL': '19', **os.environ}
-        modules_vars = {
+        modules_env: dict[str, str] = {'ZSTD_CLEVEL': '19', **os.environ}
+        modules_vars: dict[str, str] = {
             **self.make_variables,
             'DEPMOD': '/doesnt/exist',
-            'INSTALL_MOD_PATH': Path(pkgdir, 'usr'),
-            'INSTALL_MOD_STRIP': 1,
+            'INSTALL_MOD_PATH': Path(pkgdir, 'usr').as_posix(),
+            'INSTALL_MOD_STRIP': '1',
         }
         lib.kernel.kmake(
             modules_vars,

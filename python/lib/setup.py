@@ -22,27 +22,35 @@ import lib.utils
 
 
 class FstabItem:
-    def __init__(self, fs, directory, fstype, opts, dump, check):
+    def __init__(
+        self,
+        fs: str,
+        directory: lib.utils.PathString,
+        fstype: str,
+        opts: str,
+        dump: str,
+        check: str,
+    ) -> None:
 
-        self.fs = fs
-        self.dir = str(directory)  # in case Path was passed
-        self.type = fstype
-        self.opts = opts
-        self.dump = dump
-        self.check = check
+        self.fs: str = fs
+        self.dir: str = str(directory)  # in case Path was passed
+        self.type: str = fstype
+        self.opts: str = opts
+        self.dump: str = dump
+        self.check: str = check
 
-    def __str__(self):
+    def __str__(self) -> str:
         order = ('fs', 'dir', 'type', 'opts', 'dump', 'check')
         return ' '.join(getattr(self, attr) for attr in order)
 
-    def get_dev(self):
+    def get_dev(self) -> Path | None:
         if (uuid := self.get_uuid()) and (uuid_path := Path('/dev/disk/by-uuid', uuid)).exists():
             return uuid_path.resolve()
         if self.fs.startswith('/dev'):
             return Path(self.fs)
         return None
 
-    def get_uuid(self):
+    def get_uuid(self) -> str | None:
         if self.fs.startswith('UUID='):
             return self.fs.split('=', maxsplit=1)[1]
         return None
@@ -51,9 +59,9 @@ class FstabItem:
 class Fstab:
     ARCH_VFAT_OPTS = 'rw,relatime,fmask=0022,dmask=0022,codepage=437,iocharset=ascii,shortname=mixed,utf8,errors=remount-ro'
 
-    def __init__(self, init_str=''):
+    def __init__(self, init_str: str = '') -> None:
 
-        self.entries = {}
+        self.entries: dict[str, FstabItem] = {}
 
         if not init_str:
             init_str = Path('/etc/fstab').read_text(encoding='utf-8')
@@ -66,16 +74,16 @@ class Fstab:
                 item = FstabItem(*line.split())
                 self.entries[item.dir] = item
 
-    def __contains__(self, item):
+    def __contains__(self, item: lib.utils.PathString) -> bool:
         return str(item) in self.entries
 
-    def __delitem__(self, key):
+    def __delitem__(self, key: object) -> None:
         del self.entries[str(key)]
 
-    def __getitem__(self, item):
+    def __getitem__(self, item: lib.utils.PathString) -> FstabItem:
         return self.entries[str(item)]
 
-    def __setitem__(self, key, value):
+    def __setitem__(self, key: lib.utils.PathString, value: FstabItem) -> None:
         if not isinstance(value, FstabItem):
             raise TypeError
         if isinstance(key, Path):
@@ -86,13 +94,13 @@ class Fstab:
             self.entries[key] = copy.copy(value)
             self.entries[key].dir = key
 
-    def _gen_str(self):
+    def _gen_str(self) -> str:
         header = (
             '# Static information about the filesystems.\n'
             '# See fstab(5) for details.\n'
             '# <file system> <dir> <type> <options> <dump> <pass>\n'
         )
-        lines = []
+        lines: list[str] = []
 
         for item in self.entries.values():
             # If we have a UUID, try to find the corresponding block device for
@@ -103,11 +111,11 @@ class Fstab:
 
         return header + '\n'.join(lines) + '\n'
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self._gen_str()
 
     # Adjust the options for the ESP and ext partitions on Hetzner systems
-    def adjust_for_hetzner(self):
+    def adjust_for_hetzner(self) -> None:
         for item in self.entries.values():
             if (item.type, item.opts) == ('vfat', 'umask=0077'):
                 item.opts = Fstab.ARCH_VFAT_OPTS
@@ -121,7 +129,7 @@ class Fstab:
             if item.type.startswith(('ext', 'btrfs')) and item.check == '0':
                 item.check = '1' if item.dir == '/' else '2'
 
-    def write(self, path=None, dryrun=False):
+    def write(self, path: Path | None = None, dryrun: bool = False) -> None:
         if not path:
             path = Path('/etc/fstab')
         lib.utils.print_or_write_text(path, self._gen_str(), dryrun)
@@ -129,37 +137,39 @@ class Fstab:
             lib.utils.run(['systemctl', 'daemon-reload'])
 
 
-def add_user_to_group(groupname, username):
+def add_user_to_group(groupname: str, username: str) -> None:
     lib.utils.run(['usermod', '-aG', groupname, username])
 
 
-def add_user_to_group_if_exists(groupname, username):
+def add_user_to_group_if_exists(groupname: str, username: str) -> None:
     if group_exists(groupname):
         add_user_to_group(groupname, username)
 
 
-def apk(apk_arguments):
+def apk(apk_arguments: lib.utils.PackageSequence) -> None:
     lib.utils.run0(['apk', *apk_arguments])
 
 
-def apt(apt_arguments):
+def apt(apt_arguments: lib.utils.PackageSequence) -> None:
     lib.utils.run0(['apt', *apt_arguments])
 
 
-def check_ip(ip_to_check):
+def check_ip(ip_to_check: str | None) -> None:
+    if not ip_to_check:
+        raise RuntimeError('No IP address provided?')
     ipaddress.ip_address(ip_to_check)
 
 
 # Easier than os.walk() + shutil.chown()
-def chown(new_user, folder):
+def chown(new_user: str, folder: Path) -> None:
     lib.utils.run(['chown', '-R', f"{new_user}:{new_user}", folder])
 
 
-def chpasswd(user_name, new_password):
+def chpasswd(user_name: str, new_password: str) -> None:
     lib.utils.run('chpasswd', input=f"{user_name}:{new_password}")
 
 
-def chsh_fish(username):
+def chsh_fish(username: str) -> None:
     if not (fish := shutil.which('fish')):
         raise RuntimeError('fish not installed?')
 
@@ -171,14 +181,14 @@ def chsh_fish(username):
     lib.utils.run(['chsh', '-s', fish, username])
 
 
-def clone_env(username):
+def clone_env(username: str) -> None:
     if not (env_tmp := Path('/tmp/env')).exists():  # noqa: S108
         lib.utils.run(['git', 'clone', 'https://codeberg.org/nathanchance/env.git', env_tmp])
         chown(username, env_tmp)
 
 
-def configure_trusted_networking():
-    static_ips = {
+def configure_trusted_networking() -> None:
+    static_ips: dict[str, str] = {
         'aadp': '10.0.1.2',
         'asus-intel-core-11700': '10.0.1.5',
         'beelink-amd-ryzen-8745HS': '10.0.1.8',
@@ -222,7 +232,7 @@ def configure_trusted_networking():
         )
 
 
-def disable_suspend():
+def disable_suspend() -> None:
     # If machine has a battery, the power profile should be customized manually
     if len(list(Path('/sys/class/power_supply').glob('BAT*'))) > 0:
         return
@@ -241,18 +251,18 @@ def disable_suspend():
         sleep_drop_in.chmod(0o644)
 
 
-def dnf(dnf_arguments):
+def dnf(dnf_arguments: lib.utils.PackageSequence) -> None:
     lib.utils.run0(['dnf', *dnf_arguments])
 
 
-def enable_tailscale():
+def enable_tailscale() -> None:
     if not is_installed('tailscale'):
         return
 
     systemctl_enable('tailscaled.service')
 
 
-def fetch_gpg_key(source_url, dest):
+def fetch_gpg_key(source_url: str, dest: Path) -> None:
     # Dearmor if necessary
     if (key_data := lib.utils.curl(source_url))[0:2] != b'\x99\x02':
         key_data = lib.utils.chronic(['gpg', '--dearmor'], input=key_data).stdout
@@ -260,7 +270,7 @@ def fetch_gpg_key(source_url, dest):
     dest.write_bytes(key_data)
 
 
-def get_active_ethernet_info():
+def get_active_ethernet_info() -> tuple[str, str]:
     if not shutil.which('nmcli'):
         raise RuntimeError('Cannot get active Ethernet information without nmcli!')
     nmcli_cmd = [
@@ -275,16 +285,16 @@ def get_active_ethernet_info():
     for line in lib.utils.chronic(nmcli_cmd).stdout.splitlines():
         if 'ethernet' in line:
             return line.split(':')[1:]
-    return None
+    return '', ''
 
 
-def get_env_root():
+def get_env_root() -> Path:
     if (env_root := Path(__file__).resolve().parents[2]).joinpath('README.md').exists():
         return env_root
     raise RuntimeError(f"{env_root} does not seem correct?")
 
 
-def get_glibc_version():
+def get_glibc_version() -> tuple[int, ...]:
     ldd_version_out = lib.utils.chronic(['ldd', '--version']).stdout
     ldd_version = ldd_version_out.split('\n')[0].split(' ')[-1].split('.')
     if len(ldd_version) < 3:
@@ -292,7 +302,7 @@ def get_glibc_version():
     return tuple(int(x) for x in ldd_version)
 
 
-def get_ip_addr_for_intf(intf):
+def get_ip_addr_for_intf(intf: str) -> str | None:
     if not shutil.which('ip'):
         raise RuntimeError(f"Cannot get IP address for {intf} without ip!")
     ip_addr = None
@@ -305,16 +315,16 @@ def get_ip_addr_for_intf(intf):
     return ip_addr
 
 
-def get_os_rel_val(variable):
+def get_os_rel_val(variable: str) -> str:
     return get_os_rel()[variable]
 
 
-def get_os_rel():
+def get_os_rel() -> dict[str, str]:
     for file_val in ['/etc/os-release', '/usr/lib/os-release']:
         if (file := Path(file_val)).exists():
             break
     else:
-        return None
+        raise RuntimeError('os-release file could not be found?')
 
     # Remove quotes now, as they are needed for shell but not for this
     # conversion
@@ -325,7 +335,7 @@ def get_os_rel():
     )
 
 
-def get_udevadm_properties(sysfs_path):
+def get_udevadm_properties(sysfs_path: str) -> dict[str, str]:
     udevadm_info = {}
     udevadm_info_cmd = ['udevadm', 'info', '-q', 'property', sysfs_path]
     for line in lib.utils.chronic(udevadm_info_cmd).stdout.splitlines():
@@ -334,17 +344,17 @@ def get_udevadm_properties(sysfs_path):
     return udevadm_info
 
 
-def get_user():
+def get_user() -> str:
     if 'USERNAME' in os.environ:
         return os.environ['USERNAME']
     return 'nathan'
 
 
-def get_version_codename():
+def get_version_codename() -> str:
     return get_os_rel_val('VERSION_CODENAME')
 
 
-def group_exists(group):
+def group_exists(group: str) -> bool:
     try:
         grp.getgrnam(group)
     except KeyError:
@@ -352,7 +362,7 @@ def group_exists(group):
     return True
 
 
-def is_installed(package_to_check):
+def is_installed(package_to_check: str) -> bool:
     if using_pacman():
         pacman_packages = lib.utils.chronic(['pacman', '-Qq']).stdout
         return bool(re.search(f"^{package_to_check}$", pacman_packages, flags=re.M))
@@ -366,13 +376,13 @@ def is_installed(package_to_check):
     return lib.utils.run_check_rc_zero([*cmd, package_to_check])
 
 
-def is_lxc():
+def is_lxc() -> bool:
     if shutil.which('systemd-detect-virt'):
         return lib.utils.detect_virt() == 'lxc'
     return 'container=lxc' in Path('/proc/1/environ').read_text(encoding='utf-8')
 
 
-def is_virtual_machine():
+def is_virtual_machine() -> bool:
     if shutil.which('systemd-detect-virt'):
         return lib.utils.detect_virt() in (
             'qemu',
@@ -384,17 +394,19 @@ def is_virtual_machine():
     return lib.utils.get_hostname() in ('hyperv', 'qemu', 'vmware')
 
 
-def is_systemd_init():
+def is_systemd_init() -> bool:
     if not shutil.which('systemctl'):
         return False
     return lib.utils.run_check_rc_zero(['systemctl', 'is-system-running', '--quiet'])
 
 
-def pacman(args):
+def pacman(args: lib.utils.PackageSequence) -> None:
     lib.utils.run0(['pacman', *args])
 
 
-def partition_drive(device, mountpoint, username=None, fstype=None):
+def partition_drive(
+    device: str, mountpoint: Path, username: str | None = None, fstype: str | None = None
+) -> None:
     if not username:
         username = get_user()
     if not fstype:
@@ -453,7 +465,7 @@ def partition_drive(device, mountpoint, username=None, fstype=None):
         chown(username, mountpoint)
 
 
-def podman_setup(username):
+def podman_setup(username: str) -> None:
     line = f"{username}:100000:65536\n"
 
     for letter in ['g', 'u']:
@@ -470,7 +482,7 @@ def podman_setup(username):
         )
 
 
-def remove_if_installed(package_to_remove):
+def remove_if_installed(package_to_remove: str) -> None:
     if is_installed(package_to_remove):
         if using_pacman():
             pacman(['-R', '--noconfirm', package_to_remove])
@@ -482,7 +494,7 @@ def remove_if_installed(package_to_remove):
             raise RuntimeError('Not implemented for the current package manager!')
 
 
-def set_ip_addr_for_intf(con_name, intf, ip_addr):
+def set_ip_addr_for_intf(con_name: str, intf: str, ip_addr: str) -> None:
     nmcli_mod = ['nmcli', 'connection', 'modify', con_name]
 
     if '10.0.1' in ip_addr:
@@ -506,13 +518,15 @@ def set_ip_addr_for_intf(con_name, intf, ip_addr):
         )
 
 
-def set_date_time():
+def set_date_time() -> None:
     if is_systemd_init():
         lib.utils.run(['timedatectl', 'set-timezone', 'America/Phoenix'])
 
 
-def setup_initial_fish_config(username):
-    fish_ver = lib.utils.chronic(['fish', '-c', 'echo $version']).stdout.strip().split('.')
+def setup_initial_fish_config(username: str) -> None:
+    fish_ver: list[str] = (
+        lib.utils.chronic(['fish', '-c', 'echo $version']).stdout.strip().split('.')
+    )
     # Certain 4.0 versions may have non-numeric charcters (like 4.0b1). We can
     # just look at the major version in that case to know that this check will
     # pass.
@@ -565,7 +579,7 @@ def setup_initial_fish_config(username):
         chown(username, user_cfg)
 
 
-def setup_libvirt(username):
+def setup_libvirt(username: str) -> None:
     # Add user to libvirt group for rootless access to system sessions.
     add_user_to_group('libvirt', username)
 
@@ -581,7 +595,7 @@ def setup_libvirt(username):
         lib.utils.run(['virsh', 'net-start', 'default'])
 
 
-def setup_virtiofs_automount(mountpoint='/mnt/host'):
+def setup_virtiofs_automount(mountpoint: str = '/mnt/host') -> None:
     # If we are not in a virtual machine, there is no point to setting up a
     # mount for virtiofs :)
     if not is_virtual_machine():
@@ -645,7 +659,7 @@ def setup_virtiofs_automount(mountpoint='/mnt/host'):
     systemctl_enable(automount_path.name)
 
 
-def setup_ssh_agent(user_name):
+def setup_ssh_agent(user_name: str) -> None:
     if not Path('/usr/lib/systemd/user/ssh-agent.socket').exists():
         return
 
@@ -667,7 +681,7 @@ def setup_ssh_agent(user_name):
         chown(user_name, ssh_config.parent)
 
 
-def setup_ssh_authorized_keys(user_name):
+def setup_ssh_authorized_keys(user_name: str) -> None:
     if not (ssh_authorized_keys := Path('/home', user_name, '.ssh/authorized_keys')).exists():
         old_umask = os.umask(0o077)
         ssh_authorized_keys.parent.mkdir(exist_ok=True, parents=True)
@@ -687,7 +701,7 @@ def setup_ssh_authorized_keys(user_name):
         chown(user_name, ssh_authorized_keys.parent)
 
 
-def setup_sudo_symlink():
+def setup_sudo_symlink() -> None:
     prefix = Path(os.environ.get('PREFIX', '/usr/local'))
     sudo_prefix = Path(prefix, 'stow/sudo')
     sudo_bin = Path(sudo_prefix, 'bin/sudo')
@@ -707,7 +721,7 @@ def setup_sudo_symlink():
     lib.utils.run(['stow', '-d', sudo_prefix.parent, '-R', sudo_prefix.name, '-v'])
 
 
-def setup_x550_link_speeds(intf):
+def setup_x550_link_speeds(intf: str) -> None:
     udevadm_props = get_udevadm_properties(f"/sys/class/net/{intf}")
     if 'Ethernet Controller X550' not in udevadm_props['ID_MODEL_FROM_DATABASE']:
         return
@@ -741,16 +755,19 @@ def setup_x550_link_speeds(intf):
         rates_conf.chmod(0o644)
 
 
-def systemctl_enable(items_to_enable, now=True):
+def systemctl_enable(items_to_enable: str | list[str], now: bool = True) -> None:
     cmd = ['systemctl', 'enable']
     if now:
         cmd.append('--now')
-    (cmd.append if isinstance(items_to_enable, str) else cmd.extend)(items_to_enable)
+    if isinstance(items_to_enable, str):
+        cmd.append(items_to_enable)
+    else:
+        cmd.extend(items_to_enable)
 
     lib.utils.run(cmd)
 
 
-def user_exists(user):
+def user_exists(user: str) -> bool:
     try:
         pwd.getpwnam(user)
     except KeyError:
@@ -758,23 +775,23 @@ def user_exists(user):
     return True
 
 
-def using_pacman():
+def using_pacman() -> bool:
     # pacman may be installed for compatibility with mkosi but we have to make
     # sure that it is actually being used on Arch Linux so ensure that the core
     # repository exists.
-    return shutil.which('pacman') and Path('/var/lib/pacman/sync/core.db').exists()
+    return shutil.which('pacman') is not None and Path('/var/lib/pacman/sync/core.db').exists()
 
 
-def using_systemd_boot():
+def using_systemd_boot() -> bool:
     if not shutil.which('bootctl'):
         return False
     return lib.utils.run_check_rc_zero(['bootctl', '--quiet', 'is-installed'])
 
 
-def umount_gracefully(folder):
+def umount_gracefully(folder: lib.utils.PathString) -> None:
     if lib.utils.run_check_rc_zero(['mountpoint', '-q', folder]):
         lib.utils.run(['umount', folder])
 
 
-def zypper(zypper_args):
+def zypper(zypper_args: lib.utils.PackageSequence) -> None:
     lib.utils.run0(['zypper', *zypper_args])

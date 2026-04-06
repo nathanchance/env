@@ -11,14 +11,25 @@ import socket
 import subprocess
 import sys
 import time
+from collections.abc import Sequence
 from pathlib import Path
 
+PathString = Path | str
+ValidSingleCmd = str | bytes | os.PathLike
+ValidCmd = ValidSingleCmd | Sequence[ValidSingleCmd]
+CmdList = list[ValidSingleCmd]
+PackageSequence = Sequence[PathString]
+EnvVars = dict[str, str]
 
-def call_git(directory, cmd, **kwargs):
+
+def call_git(directory: Path | None, cmd: ValidCmd, **kwargs) -> subprocess.CompletedProcess:
     kwargs.setdefault('cwd', directory)
 
-    git_cmd = ['git']
-    (git_cmd.append if isinstance(cmd, (str, os.PathLike)) else git_cmd.extend)(cmd)
+    git_cmd: CmdList = ['git']
+    if isinstance(cmd, ValidSingleCmd):
+        git_cmd.append(cmd)
+    else:
+        git_cmd.extend(cmd)
 
     if kwargs.pop('show_cmd', False):
         cmd_to_print = git_cmd.copy()
@@ -29,34 +40,40 @@ def call_git(directory, cmd, **kwargs):
     return chronic(git_cmd, **kwargs)
 
 
-def call_git_loud(directory, cmd, **kwargs):
+def call_git_loud(directory: Path | None, cmd: ValidCmd, **kwargs) -> subprocess.CompletedProcess:
     return call_git(directory, cmd, **kwargs, capture_output=False)
 
 
-def check_root():
+def check_root() -> None:
     if os.geteuid() != 0:
         raise RuntimeError("root access is required!")
 
 
-def chronic(*args, **kwargs):
+def chronic(args: ValidCmd, **kwargs) -> subprocess.CompletedProcess:
     kwargs.setdefault('capture_output', True)
 
-    return run(*args, **kwargs)
+    return run(args, **kwargs)
 
 
-def curl(item_to_download, output=None):
-    curl_cmd = ['curl', '-LSs', item_to_download]
+def curl(item_to_download: str, output: PathString | None = None) -> bytes:
+    curl_cmd: CmdList = ['curl', '-LSs', item_to_download]
     if output:
         curl_cmd += ['-o', output]
 
     return chronic(curl_cmd, text=None).stdout
 
 
-def detect_virt(*args):
-    return chronic(['systemd-detect-virt', *args], check=False).stdout.strip()
+def detect_virt(args: ValidCmd | None = None) -> str:
+    sdv_cmd: CmdList = ['systemd-detect-virt']
+    if args:
+        if isinstance(args, ValidSingleCmd):
+            sdv_cmd.append(args)
+        else:
+            sdv_cmd.extend(args)
+    return chronic(sdv_cmd, check=False).stdout.strip()
 
 
-def fix_wrktrs_for_nspawn(git_repo):
+def fix_wrktrs_for_nspawn(git_repo: Path) -> None:
     if not git_repo.joinpath('.git').is_dir():
         raise RuntimeError(f"{git_repo} does not appear to be a git repository?")
     for gitdir in git_repo.glob('.git/worktrees/*/gitdir'):
@@ -65,17 +82,20 @@ def fix_wrktrs_for_nspawn(git_repo):
             gitdir.write_text(gitdir_txt[len('/run/host') :], encoding='utf-8')
 
 
-def fzf(header, fzf_input, fzf_args=None):
-    fzf_cmd = ['fzf', '--header', header, '--multi']
+def fzf(header: str, fzf_input: str, fzf_args: ValidCmd | None = None) -> list[str]:
+    fzf_cmd: CmdList = ['fzf', '--header', header, '--multi']
     if fzf_args:
-        (fzf_cmd.append if isinstance(fzf_args, str) else fzf_cmd.extend)(fzf_args)
+        if isinstance(fzf_args, ValidSingleCmd):
+            fzf_cmd.append(fzf_args)
+        else:
+            fzf_cmd.extend(fzf_args)
     with subprocess.Popen(
         fzf_cmd, stdin=subprocess.PIPE, stdout=subprocess.PIPE, text=True
     ) as fzf_proc:
         return fzf_proc.communicate(fzf_input)[0].splitlines()
 
 
-def get_duration(start_seconds, end_seconds=None):
+def get_duration(start_seconds: float, end_seconds: float | None = None) -> str:
     if not end_seconds:
         end_seconds = time.time()
     seconds = int(end_seconds - start_seconds)
@@ -95,7 +115,7 @@ def get_duration(start_seconds, end_seconds=None):
     return ' '.join(parts)
 
 
-def get_findmnt_info(path=''):
+def get_findmnt_info(path: str = '') -> dict[str, str]:
     fields = ('FSROOT', 'FSTYPE', 'OPTIONS', 'PARTUUID', 'SOURCE', 'UUID')
     findmnt_cmd = ['findmnt', '-J', '-o', ','.join(fields)]
     if path:
@@ -106,15 +126,15 @@ def get_findmnt_info(path=''):
     return filesystems
 
 
-def get_hostname():
+def get_hostname() -> str:
     return socket.gethostname()
 
 
-def get_git_output(directory, cmd, **kwargs):
+def get_git_output(directory: Path | None, cmd: ValidCmd, **kwargs):
     return call_git(directory, cmd, **kwargs).stdout.strip()
 
 
-def in_container():
+def in_container() -> bool:
     if shutil.which('systemd-detect-virt'):
         val = detect_virt('-c')
         if val == 'lxc':
@@ -131,58 +151,58 @@ def in_container():
     )
 
 
-def in_nspawn():
+def in_nspawn() -> bool:
     # An nspawn container has to have systemd-detect-virt but this may not
     # always run where systemd-detect-virt exists.
-    return shutil.which('systemd-detect-virt') and detect_virt('-c') == 'systemd-nspawn'
+    return shutil.which('systemd-detect-virt') is not None and detect_virt('-c') == 'systemd-nspawn'
 
 
-def path_and_text(*args):
+def path_and_text(*args) -> tuple[Path, str]:
     if (path := Path(*args)).exists():
         return path, path.read_text(encoding='utf-8')
-    return path, None
+    return path, ''
 
 
-def print_cmd(cmd, show_cmd_location=False, end='\n'):
+def print_cmd(cmd: ValidCmd, show_cmd_location: bool = False, end: str = '\n') -> None:
     cmd_loc = ('(container) ' if in_container() else '(host) ') if show_cmd_location else ''
-    if isinstance(cmd, (str, os.PathLike)):
+    if isinstance(cmd, ValidSingleCmd):
         cmd_str = cmd
     else:
         cmd_str = ' '.join(shlex.quote(str(elem)) for elem in cmd)
     print(f"{cmd_loc}$ {cmd_str}", end=end, flush=True)
 
 
-def print_header(string):
+def print_header(string: str) -> None:
     border = ''.join(["=" for _ in range(len(string) + 6)])
     print_cyan(f"\n{border}\n== {string} ==\n{border}\n")
 
 
-def print_color(color, string):
+def print_color(color: str, string: str) -> None:
     print(f"{color}{string}\033[0m" if sys.stdout.isatty() else string, flush=True)
 
 
-def print_cyan(msg):
+def print_cyan(msg: str) -> None:
     print_color('\033[01;36m', msg)
 
 
-def print_green(msg):
+def print_green(msg: str) -> None:
     print_color('\033[01;32m', msg)
 
 
-def print_yellow(msg):
+def print_yellow(msg: str) -> None:
     print_color('\033[01;33m', msg)
 
 
-def print_red(msg):
+def print_red(msg: str) -> None:
     print_color('\033[01;31m', msg)
 
 
-def request_root(msg):
+def request_root(msg: str) -> None:
     print_green(f"Requesting root access for {msg}\n")
     run0('true')
 
 
-def run(*args, **kwargs):
+def run(args: ValidCmd, **kwargs) -> subprocess.CompletedProcess:
     kwargs.setdefault('check', True)
 
     kwargs.setdefault('text', True)
@@ -192,7 +212,7 @@ def run(*args, **kwargs):
     if (show_cmd_location := kwargs.pop('show_cmd_location', False)) or kwargs.pop(
         'show_cmd', False
     ):
-        print_cmd(*args, show_cmd_location=show_cmd_location)
+        print_cmd(args, show_cmd_location=show_cmd_location)
 
     if env := kwargs.pop('env', None):
         kwargs['env'] = os.environ | copy.deepcopy(env)
@@ -200,7 +220,7 @@ def run(*args, **kwargs):
     try:
         # This function defaults check=True so if check=False here, it is explicit
         # pylint: disable-next=subprocess-run-check
-        return subprocess.run(*args, **kwargs)  # noqa: PLW1510
+        return subprocess.run(args, **kwargs)  # noqa: PLW1510
     except subprocess.CalledProcessError as err:
         if kwargs.get('capture_output'):
             print(err.stdout)
@@ -208,8 +228,11 @@ def run(*args, **kwargs):
         raise err
 
 
-def run0(full_cmd, **kwargs):
-    cmd_copy = [full_cmd] if isinstance(full_cmd, (str, os.PathLike)) else full_cmd.copy()
+def run0(full_cmd: ValidCmd, **kwargs) -> subprocess.CompletedProcess:
+    if isinstance(full_cmd, ValidSingleCmd):
+        cmd_copy: CmdList = [full_cmd]
+    else:
+        cmd_copy: CmdList = list(copy.deepcopy(full_cmd))
 
     if os.geteuid() != 0:
         cmd_copy.insert(0, 'doas' if shutil.which('doas') else 'sudo')
@@ -219,18 +242,18 @@ def run0(full_cmd, **kwargs):
     return run(cmd_copy, show_cmd_location=cmd_copy[0] in ('doas', 'sudo'), **kwargs)
 
 
-def run_check_rc_zero(*args, **kwargs):
-    return chronic(*args, **kwargs, check=False).returncode == 0
+def run_check_rc_zero(args: ValidCmd, **kwargs) -> bool:
+    return chronic(args, **kwargs, check=False).returncode == 0
 
 
-def systemd_drop_in(service, drop_in_name, conf_txt):
+def systemd_drop_in(service: str, drop_in_name: str, conf_txt: str) -> subprocess.CompletedProcess:
     return run0(
         ['systemctl', 'edit', '--stdin', '--drop-in', drop_in_name, service],
         input=conf_txt,
     )
 
 
-def tg_msg(raw_msg):
+def tg_msg(raw_msg: str) -> None:
     if not (botinfo := Path.home().joinpath('.botinfo')).exists():
         raise FileNotFoundError(f"{botinfo} could not be found!")
     chat_id, token = botinfo.read_text(encoding='utf-8').splitlines()
@@ -255,14 +278,14 @@ def tg_msg(raw_msg):
     chronic(curl_cmd)
 
 
-def print_or_run_cmd(cmd, dryrun, end='\n\n'):
+def print_or_run_cmd(cmd, dryrun, end='\n\n') -> None:
     if dryrun:
         print_cmd(cmd, end=end)
     else:
         run(cmd)
 
 
-def print_or_write_text(path, text, dryrun):
+def print_or_write_text(path: Path, text: str, dryrun: bool) -> None:
     if dryrun:
         print('Would write:\n')
         print(''.join(f"| {line}\n" for line in text.splitlines()))
@@ -271,6 +294,12 @@ def print_or_write_text(path, text, dryrun):
         path.write_text(text, encoding='utf-8')
 
 
-def wget(item_to_download, output=None):
-    wget_cmd = ['wget', '-q', '-O', output if output else '-', item_to_download]
+def wget(item_to_download, output=None) -> bytes:
+    wget_cmd: CmdList = [
+        'wget',
+        '-q',
+        '-O',
+        output if output else '-',
+        item_to_download,
+    ]
     return chronic(wget_cmd, text=None).stdout
