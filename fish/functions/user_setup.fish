@@ -207,23 +207,7 @@ rpmbuild/' >>$gitignore
     end
 
     # Set up libvirt storage pool
-    if command -q virsh; and mountpoint -q /home
-        set -l libvirt_pool $VM_FOLDER/libvirt
-
-        mkdir -p $libvirt_pool
-        if __user_exists libvirt-qemu
-            set libvirt_user libvirt-qemu
-        else if __user_exists qemu
-            set libvirt_user qemu
-        end
-        if set -q libvirt_user
-            setfacl -m u:$libvirt_user:rx $HOME
-        end
-
-        virsh pool-define-as --name default --type dir --target $libvirt_pool
-        virsh pool-autostart default
-        virsh pool-start default
-    end
+    setup_libvirt_pool
 
     # Binaries
     if command -q modprobed-db
