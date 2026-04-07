@@ -541,10 +541,8 @@ def pacman_install_packages():
             'open-vm-tools',
         ]  # fmt: off
 
-    # Install libvirt and virt-install for easy management of VMs; iptables-nft
-    # is also needed for networking but that will be installed later to avoid
-    # potential issues with replacing iptables.
-    if lib.setup.is_virtual_machine():
+    # Install libvirt and virt-install for easy management of VMs
+    if will_run_forgejo_actions() or lib.setup.is_virtual_machine():
         packages += [
             'dmidecode',
             'dnsmasq',
@@ -843,6 +841,14 @@ def vmware_adjustments(mkinitcpio_conf):
 
     # https://wiki.archlinux.org/title/VMware/Install_Arch_Linux_as_a_guest#Installation
     lib.setup.systemctl_enable(['vmtoolsd.service', 'vmware-vmblock-fuse.service'], now=False)
+
+
+def will_run_forgejo_actions():
+    return lib.utils.get_hostname() in (
+        'asus-intel-core-11700',
+        'beelink-amd-ryzen-8745HS',
+        'msi-intel-core-10210U',
+    )
 
 
 if __name__ == '__main__':
