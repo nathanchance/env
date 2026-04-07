@@ -24,7 +24,7 @@ if match := re.search(r"implementer\s+:\s+(\w+)", cpuinfo):
     machine_is_apple_silicon = match.groups()[0] == '0x61'
 
 
-def dnf_add_repo(repo_url):
+def dnf_add_repo(repo_url: str) -> None:
     # config-manager does not support --add-repo with dnf5, which is the
     # default in Fedora 41 now.
     # https://github.com/rpm-software-management/dnf5/issues/1537
@@ -38,19 +38,19 @@ def dnf_add_repo(repo_url):
         lib.setup.dnf(['config-manager', '--add-repo', repo_url])
 
 
-def dnf_install(install_args):
+def dnf_install(install_args: lib.utils.PackageSequence) -> None:
     lib.setup.dnf(['install', '-y', *install_args])
 
 
-def get_fedora_version():
+def get_fedora_version() -> int:
     return int(lib.setup.get_os_rel_val('VERSION_ID'))
 
 
-def machine_is_trusted():
+def machine_is_trusted() -> bool:
     return lib.utils.get_hostname() in ('aadp', 'honeycomb', 'mac-studio-m1-max')
 
 
-def prechecks():
+def prechecks() -> None:
     lib.utils.check_root()
     if (fedora_version := get_fedora_version()) not in range(
         MIN_FEDORA_VERSION, MAX_FEDORA_VERSION + 1
@@ -60,7 +60,7 @@ def prechecks():
         )
 
 
-def resize_rootfs():
+def resize_rootfs() -> None:
     for line in lib.utils.chronic(['df', '-T']).stdout.splitlines():
         if '/dev/mapper/' in line:
             dev_mapper_path, dev_mapper_fs_type = line.split(' ')[0:2]
@@ -75,24 +75,24 @@ def resize_rootfs():
             break
 
 
-def install_initial_packages():
+def install_initial_packages() -> None:
     lib.setup.dnf(['update', '-y'])
     dnf_install(['dnf-plugins-core'])
 
 
-def install_local_packages(package_names):
+def install_local_packages(package_names: lib.utils.PackageSequence) -> None:
     packages_dir = Path(lib.setup.get_env_root(), 'bin/packages')
 
-    package_files = []
+    package_files: list[Path] = []
     for package in package_names:
         package_files += list(packages_dir.glob(f"{package}-*.rpm"))
 
     dnf_install(package_files)
 
 
-def install_packages():
+def install_packages() -> None:
     fedora_version = get_fedora_version()
-    packages = [
+    packages: list[str] = [
         # administration
         'btop',
         'clean-rpm-gpg-pubkey',
@@ -173,7 +173,7 @@ def install_packages():
     install_local_packages(local_packages)
 
 
-def setup_doas(username):
+def setup_doas(username: str) -> None:
     # Fedora provides a doas.conf already, just modify it to suit our needs
     doas_conf, conf_txt = lib.utils.path_and_text('/etc/doas.conf')
     if (persist := 'permit persist :wheel') not in conf_txt:
@@ -225,7 +225,8 @@ def setup_doas(username):
         lib.setup.setup_sudo_symlink()
 
 
-def setup_kernel_args():
+def setup_kernel_args() -> None:
+    args: list[str]
     if (hostname := lib.utils.get_hostname()) == 'aadp':
         # Intel X550-T2 spews correctable errors about timeouts :(
         args = ['pcie_aspm=off']
@@ -239,14 +240,14 @@ def setup_kernel_args():
     lib.utils.run(grubby_cmd)
 
 
-def setup_libvirt(username):
+def setup_libvirt(username: str) -> None:
     if not lib.setup.is_installed('virt-install'):
         return
 
     lib.setup.setup_libvirt(username)
 
 
-def setup_modprobe_d():
+def setup_modprobe_d() -> None:
     if not machine_is_apple_silicon:
         return
 
@@ -257,7 +258,7 @@ def setup_modprobe_d():
         no_wifi_conf.write_text('blacklist brcmfmac\n', encoding='utf-8')
 
 
-def setup_mosh():
+def setup_mosh() -> None:
     if not shutil.which('firewall-cmd'):
         return
 
@@ -265,7 +266,7 @@ def setup_mosh():
     lib.utils.run(['firewall-cmd', '--reload'])
 
 
-def setup_repos():
+def setup_repos() -> None:
     dnf_add_repo('https://cli.github.com/packages/rpm/gh-cli.repo')
 
     if machine_is_trusted():
