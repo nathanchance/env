@@ -16,6 +16,9 @@ function create_forgejo_runner_vm -d "Easily create and deploy a Forgejo runner 
             set osinfo archlinux
     end
     set vcpus (math (nproc) / 8)
+    if test $vcpus -lt 2
+        set vcpus 2
+    end
     set memory (math $vcpus x 2048) # 2GB for each core
 
     set libvirt_store $VM_FOLDER/libvirt
