@@ -3,6 +3,7 @@
 import re
 import sys
 from argparse import ArgumentParser
+from collections.abc import Iterable
 from pathlib import Path
 from subprocess import PIPE, Popen
 
@@ -13,8 +14,10 @@ import lib.utils
 
 # pylint: enable=wrong-import-position
 
+Branches = dict[str, Iterable[str]]
 
-def clean_branch(directory, branch, tags, arguments):
+
+def clean_branch(directory: Path, branch: str, tags: Iterable[str], arguments) -> None:
     # Figure out what remote items we have to clean up if we are not in remote only mode
     if arguments.remote_only:
         remote_items = [f":{branch}"]
@@ -28,7 +31,7 @@ def clean_branch(directory, branch, tags, arguments):
 
     # Clean remote branch first in case it fails, there is still local copy
     if remote_items:
-        git_push_cmd = ['push', 'korg', *remote_items]
+        git_push_cmd: lib.utils.CmdList = ['push', 'korg', *remote_items]
         if arguments.dry_run:
             lib.utils.print_cmd(['git', '-C', directory, *git_push_cmd])
         else:
@@ -37,7 +40,7 @@ def clean_branch(directory, branch, tags, arguments):
     # Clean up local branches and tags
     # Not using b4() because of the pipe from yes for non-interactivity
     if not arguments.remote_only:
-        b4_cmd = ['prep', '--cleanup', branch]
+        b4_cmd: lib.utils.CmdList = ['prep', '--cleanup', branch]
         if arguments.dry_run:
             lib.utils.print_cmd(b4_cmd)
         else:
@@ -45,7 +48,7 @@ def clean_branch(directory, branch, tags, arguments):
                 lib.kernel.b4(b4_cmd, cwd=directory, stdin=yes_proc.stdout)
 
 
-def filter_branches(desired_branches, possible_branches):
+def filter_branches(desired_branches: Iterable[str], possible_branches: Branches) -> Branches:
     filtered_branches = {}
 
     for branch in desired_branches:
@@ -58,14 +61,14 @@ def filter_branches(desired_branches, possible_branches):
     return filtered_branches
 
 
-def gen_b4_branches(b4_branches, b4_tags):
+def gen_b4_branches(b4_branches: Iterable[str], b4_tags: Iterable[str]) -> Branches:
     return {
         branch: tuple(tag for tag in b4_tags if branch.strip('b4/') in tag)
         for branch in b4_branches
     }
 
 
-def get_b4_branches(directory):
+def get_b4_branches(directory: Path) -> Branches:
     b4_branches = lib.utils.get_git_output(
         directory, ['for-each-ref', '--format=%(refname:short)', 'refs/heads/b4/']
     ).splitlines()
@@ -75,7 +78,7 @@ def get_b4_branches(directory):
     return gen_b4_branches(b4_branches, b4_tags)
 
 
-def get_remote_b4_branches():
+def get_remote_b4_branches() -> Branches:
     korg_repo = 'https://git.kernel.org/pub/scm/linux/kernel/git/nathan/linux.git/'
     git_ls_remote_cmd = ['ls-remote', '--heads', '--tags', korg_repo]
     git_ls_remote_output = lib.utils.get_git_output(None, git_ls_remote_cmd)
@@ -132,13 +135,13 @@ def parse_arguments():
     return parser.parse_args()
 
 
-def push_branch(directory, branch, tags, arguments):
+def push_branch(directory: Path, branch: str, tags: Iterable[str], arguments) -> None:
     remote_branches = get_remote_b4_branches()
 
     if branch in remote_branches:
         lib.utils.print_yellow(f"{branch} already exists on remote, skipping...")
     else:
-        push_cmd = ['push', '--set-upstream', 'korg', f"{branch}:{branch}"]
+        push_cmd: lib.utils.CmdList = ['push', '--set-upstream', 'korg', f"{branch}:{branch}"]
         if arguments.dry_run:
             lib.utils.print_cmd(['git', '-C', directory, *push_cmd])
         else:
@@ -149,7 +152,7 @@ def push_branch(directory, branch, tags, arguments):
             lib.utils.print_yellow(f"{tag} already exists on remote, skipping...")
             continue
 
-        push_cmd = ['push', 'korg', tag]
+        push_cmd: lib.utils.CmdList = ['push', 'korg', tag]
         if arguments.dry_run:
             lib.utils.print_cmd(['git', '-C', directory, *push_cmd])
         else:
@@ -173,7 +176,7 @@ if __name__ == '__main__':
     elif args.branches:
         selected_branches = filter_branches(args.branches, all_branches)
     else:
-        preview_cmd = [
+        preview_cmd: list[str] = [
             'git',
             '-C',
             str(repo),
