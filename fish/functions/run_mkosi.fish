@@ -59,6 +59,12 @@ function run_mkosi -d "Run mkosi with various arguments"
                 return 1
             end
             set directory $env_mkosi
+            if contains -- --distribution $mkosi_user_args
+                set distro_flag --distribution
+            else
+                set distro_flag -d
+            end
+            set distro $mkosi_user_args[(math 1 + (contains -i -- $distro_flag $mkosi_user_args))]
     end
     if not set -q directory
         set directory $image
@@ -71,12 +77,6 @@ function run_mkosi -d "Run mkosi with various arguments"
         __print_error "No build files for $directory?"
         return 1
     end
-    if contains -- --distribution $mkosi_user_args
-        set distro_flag --distribution
-    else
-        set distro_flag -d
-    end
-    set distro $mkosi_user_args[(math 1 + (contains -i -- $distro_flag $mkosi_user_args))]
 
     # Download source code to use resources without consistent virtual environment
     set mkosi_src $SRC_FOLDER/run_mkosi
