@@ -696,13 +696,6 @@ def setup_libvirt(username, mkinitcpio_conf):
     if not lib.setup.is_installed('libvirt'):
         return
 
-    # Use iptables backend by default because iptables is already installed
-    libvirt_network_conf = Path('/etc/libvirt/network.conf')
-    firewall_backend = 'firewall_backend = "iptables"\n'
-    if firewall_backend not in libvirt_network_conf.read_text(encoding='utf-8'):
-        with libvirt_network_conf.open('a', encoding='utf-8') as file:
-            file.write(firewall_backend)
-
     lib.setup.setup_libvirt(username)
 
     # For domains with KVM to autostart, the kvm_<vendor> module needs to be
