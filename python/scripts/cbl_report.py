@@ -11,6 +11,7 @@ import sys
 import zoneinfo
 from argparse import ArgumentParser
 from pathlib import Path
+from typing import Any
 
 sys.path.append(str(Path(__file__).resolve().parents[1]))
 # pylint: disable=wrong-import-position
@@ -21,11 +22,11 @@ import lib.utils
 
 
 # pylint: disable-next=invalid-name
-def get_current_datetime(tz=None):
+def get_current_datetime(tz: datetime.tzinfo | None = None) -> datetime.datetime:
     return datetime.datetime.now(tz=tz)
 
 
-def get_prev_or_next_datetime(val):
+def get_prev_or_next_datetime(val: str) -> datetime.datetime:
     if val == 'prev':
         pos = -1
     elif val == 'next':
@@ -47,23 +48,23 @@ def get_prev_or_next_datetime(val):
     return datetime.datetime.strptime(f"{month} {year}", '%m %Y')
 
 
-def get_next_datetime():
+def get_next_datetime() -> datetime.datetime:
     return get_prev_or_next_datetime('next')
 
 
-def get_prev_datetime():
+def get_prev_datetime() -> datetime.datetime:
     return get_prev_or_next_datetime('prev')
 
 
-def get_month_year(date):
+def get_month_year(date: datetime.datetime) -> str:
     return date.strftime('%B-%Y').lower()
 
 
-def get_report_branch(date):
+def get_report_branch(date: datetime.datetime) -> str:
     return 'cbl-' + get_month_year(date)
 
 
-def get_initial_report_date():
+def get_initial_report_date() -> datetime.datetime:
     year = int(input("Input initial report year (YYYY): "))
     month = int(input("Input initial report month (MM): "))
     day = int(input("Input initial report day (DD): "))
@@ -75,27 +76,27 @@ def get_initial_report_date():
     return date.astimezone(zoneinfo.ZoneInfo('US/Arizona'))
 
 
-def get_report_file(date):
+def get_report_file(date: datetime.datetime) -> str:
     return get_report_name(date) + '.md'
 
 
-def get_report_name(date):
+def get_report_name(date: datetime.datetime) -> str:
     return get_month_year(date) + '-cbl-work'
 
 
-def get_monthly_report_path(date):
+def get_monthly_report_path(date: datetime.datetime) -> Path:
     return Path(get_report_worktree(), 'content/posts', get_report_file(date))
 
 
-def get_yearly_report_path(year):
+def get_yearly_report_path(year: str) -> Path:
     return Path(get_report_repo(), f"content/posts/{year}-cbl-retrospective.md")
 
 
-def get_report_repo():
+def get_report_repo() -> Path:
     return Path(os.environ['CODEBERG_FOLDER'], 'hugo-files')
 
 
-def get_report_worktree():
+def get_report_worktree() -> Path:
     return Path(os.environ['CBL'].removeprefix('/run/host'), 'current-report')
 
 
@@ -205,11 +206,11 @@ def parse_parameters():
     return parser.parse_args()
 
 
-def local_branch_exists(repo, branch):
+def local_branch_exists(repo: Path, branch: str) -> bool:
     return lib.utils.call_git(repo, ['rev-parse', '--verify', branch], check=False).returncode == 0
 
 
-def remote_branch_exists(repo, branch):
+def remote_branch_exists(repo: Path, branch: str) -> bool:
     return (
         lib.utils.call_git(
             repo, ['ls-remote', '--exit-code', '--heads', 'origin', branch], check=False
@@ -218,13 +219,13 @@ def remote_branch_exists(repo, branch):
     )
 
 
-def generate_devices(devices):
+def generate_devices(devices: list[str]) -> str:
     delim = ', '
     replace = ', and '
     return replace.join(delim.join(devices).rsplit(delim, 1))
 
 
-def generate_item(args):
+def generate_item(args) -> None:
     item_type = args.type
 
     if item_type == 'mail':
@@ -257,7 +258,7 @@ def generate_item(args):
         raise ValueError(f"Unhandled item type ('{item_type}')")
 
 
-def create_monthly_report_file(report_file, report_date):
+def create_monthly_report_file(report_file: Path, report_date: datetime.datetime) -> None:
     title = f"{report_date.strftime('%B %Y')} ClangBuiltLinux Work"
     date = report_date.strftime('%Y-%m-%dT%H:%M:%S%z')
     # fmt: off
@@ -413,10 +414,16 @@ def create_monthly_report_file(report_file, report_date):
     report_file.write_text(template, encoding='utf-8')
 
 
-def get_yearly_commits(year, source, branch='main', git_log_args=None, update=True):
+def get_yearly_commits(
+    year: int,
+    source: Path,
+    branch: str = 'main',
+    git_log_args: lib.utils.CmdList | None = None,
+    update: bool = True,
+) -> dict[str, str]:
     if update:
         lib.utils.call_git(source, ['remote', 'update', '--prune', 'origin'])
-    git_log_cmd = [
+    git_log_cmd: lib.utils.CmdList = [
         'log',
         '--format=%H %s',
         '--no-merges',
@@ -450,7 +457,7 @@ def generate_html_commit_section(commits, repo):
     )
 
 
-def create_yearly_report_file(report_file, report_date, year):
+def create_yearly_report_file(report_file, report_date, year: int) -> None:
     title = f"{year} ClangBuiltLinux Retrospective"
     date = report_date.strftime('%Y-%m-%dT%H:%M:%S%z')
 
@@ -478,7 +485,7 @@ def create_yearly_report_file(report_file, report_date, year):
     }
 
     linux_src = Path(os.environ['CBL_SRC'], 'linux-next')
-    linux_gyc_kwargs = {
+    linux_gyc_kwargs: dict[str, Any] = {
         'year': year,
         'source': linux_src,
         'branch': 'master',
@@ -719,7 +726,7 @@ def create_yearly_report_file(report_file, report_date, year):
     report_file.write_text(template, encoding='utf-8')
 
 
-def finalize_report(args):
+def finalize_report(args) -> None:
     # Get the source and destination paths and branch based on current time
     repo = get_report_repo()
 
@@ -784,7 +791,7 @@ def new_report(args):
             lib.utils.call_git(repo, ['remote', 'update', '--prune', 'origin'], show_cmd=True)
 
         push_to_remote = False
-        worktree_add = ['worktree', 'add']
+        worktree_add: lib.utils.CmdList = ['worktree', 'add']
         if local_branch_exists(repo, branch):
             worktree_add += [worktree, branch]
         elif remote_branch_exists(repo, branch):
@@ -829,7 +836,7 @@ def new_report(args):
             )
 
 
-def update_report(args):
+def update_report(args) -> None:
     if not (worktree := get_report_worktree()).exists():
         raise RuntimeError(f"{worktree} does not exist when updating?")
 
@@ -852,7 +859,7 @@ def update_report(args):
         lib.utils.call_git(worktree, 'push', show_cmd=True)
 
 
-def yearly_report(args):
+def yearly_report(args) -> None:
     repo = get_report_repo()
     report = get_yearly_report_path(args.year)
     if not report.exists():
