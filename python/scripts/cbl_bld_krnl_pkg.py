@@ -429,8 +429,10 @@ if __name__ == '__main__':
         builder.extra_sc_args += ['-e', 'OBJTOOL_WERROR', '-e', 'WERROR']
 
     if args.gcc and 'CROSS_COMPILE' not in make_vars:
-        make_vars['CROSS_COMPILE'] = korg_tc.GCCManager().get_cc_as_path(
-            korg_tc.GCCManager.VERSIONS[-1], 'x86_64'
+        make_vars['CROSS_COMPILE'] = (
+            korg_tc.GCCManager()
+            .get_cc_as_path(korg_tc.GCCManager.VERSIONS[-1], 'x86_64')
+            .as_posix()
         )
     if 'CROSS_COMPILE' in make_vars:
         del builder.make_variables['HOSTLDFLAGS']
