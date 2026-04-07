@@ -72,6 +72,8 @@ or return
 
 fish_add_path -P /usr/local/bin
 
+set python (uv python find)
+
 make \
     -f Makefile.perf \
     -j(nproc) \
@@ -80,8 +82,8 @@ make \
     NO_LIBLLVM=1 \
     NO_LIBTRACEEVENT=1 \
     NO_SDT=1 \
-    PYTHON=(command -v python3) \
-    PYTHON_CONFIG=(command -v python3-config) \
+    PYTHON=$python \
+    PYTHON_CONFIG=$python3-config \
     VF=0 \
     install
 or return

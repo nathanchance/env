@@ -1,22 +1,33 @@
 #!/usr/bin/env fish
-# Description: Build and install a more modern version of Python
+# Description: Download and install Python using uv
 
-set python_version 3.14.3
-set workdir (mktemp -d)
+set python_version 3.14
 
-begin
-    # Download source code
-    wget -O - -q https://www.python.org/ftp/python/$python_version/Python-$python_version.tar.xz | tar -C $workdir --strip-components=1 -xJvf -
-
-    # Download build dependencies
-    and apt update -y
-    and apt build-dep -y python3
-
-    # Configure and build
-    and fish -c "cd $workdir; and ./configure --enable-optimizations"
-    and make -C $workdir -j(nproc)
-    and make -C $workdir -j(nproc) install
-end
+# Download and install uv
+wget -O - -q https://astral.sh/uv/install.sh | sh
 or return
 
-rm -fr $workdir
+# Set up PATH (only needed for this script, as the uv installer adds a script
+# to conf.d to make this permanent)
+source $HOME/.local/bin/env.fish
+
+# Pin Python version to latest stable release
+uv python pin --global $python_version
+or return
+
+# Install python and python3 symlinks
+uv python install --default
+or return
+
+# Perform same exact steps in the builder user
+su builder \
+    -s /usr/bin/fish \
+    -c 'wget -O - -q https://astral.sh/uv/install.sh | sh
+or return
+
+source $HOME/.local/bin/env.fish
+
+uv python pin --global '$python_version'
+or return
+
+uv python install --default'
