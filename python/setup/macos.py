@@ -83,9 +83,9 @@ def install_packages() -> None:
         'jq',
         'libusb',
         'mosh',
-        'python',
         'ripgrep',
         'rustup-init',
+        'uv',
         'zoxide',
     ]  # fmt: off
     brew(['install', *packages])
