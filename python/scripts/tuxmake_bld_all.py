@@ -101,7 +101,7 @@ def parse_arguments():
     return parser.parse_args()
 
 
-def get_kconfigs_for_target(targets):
+def get_kconfigs_for_target(targets: list[str]) -> list[str]:
     kconfigs = {
         'all': [
             'allmodconfig',
@@ -113,16 +113,20 @@ def get_kconfigs_for_target(targets):
     return [kconfig for target in targets for kconfig in kconfigs[target]]
 
 
-def get_env_make_variables(target_arch, toolchain):
-    environment = {}
-    make_variables = {}
+def get_env_make_variables(
+    target_arch: str, toolchain: str
+) -> tuple[lib.utils.EnvVars, lib.utils.EnvVars]:
+    environment: lib.utils.EnvVars = {}
+    make_variables: lib.utils.EnvVars = {}
 
     if 'gcc' in toolchain:
         version = int(toolchain.split('-')[1])
-        make_variables['CROSS_COMPILE'] = korg_tc.GCCManager().get_cc_as_path(version, target_arch)
+        make_variables['CROSS_COMPILE'] = (
+            korg_tc.GCCManager().get_cc_as_path(version, target_arch).as_posix()
+        )
         if target_arch == 'arm64':
-            make_variables['CROSS_COMPILE_COMPAT'] = korg_tc.GCCManager().get_cc_as_path(
-                version, 'arm'
+            make_variables['CROSS_COMPILE_COMPAT'] = (
+                korg_tc.GCCManager().get_cc_as_path(version, 'arm').as_posix()
             )
         if version < 8:
             environment['KCFLAGS'] = ''
@@ -130,14 +134,22 @@ def get_env_make_variables(target_arch, toolchain):
     return environment, make_variables
 
 
-def get_targets(kconfig):
+def get_targets(kconfig: str) -> list[str]:
     targets = ['default']
     if kconfig == 'defconfig':
         targets.append('kernel')
     return targets
 
 
-def build_one(tree, output_dir, target_arch, toolchain, wrapper, kconfig, results_file):
+def build_one(
+    tree: Path,
+    output_dir: Path,
+    target_arch: str,
+    toolchain: str,
+    wrapper: str | None,
+    kconfig: str,
+    results_file: Path,
+) -> None:
     bld_str = f"ARCH={target_arch} {kconfig} {toolchain}"
 
     lib.utils.print_header(bld_str)
@@ -171,7 +183,7 @@ def build_one(tree, output_dir, target_arch, toolchain, wrapper, kconfig, result
         file.write(f"{bld_str}: {res_str} in {duration_str}\n")
 
 
-def process_results(results_file, start_time):
+def process_results(results_file: Path, start_time: float) -> None:
     print()
 
     failed = []
@@ -191,14 +203,14 @@ def process_results(results_file, start_time):
 
 
 def build_all(
-    linux_folder,
-    out_folder,
-    architectures,
-    targets,
-    toolchains,
-    use_ccache,
-    results_file,
-):
+    linux_folder: Path,
+    out_folder: Path,
+    architectures: list[str],
+    targets: list[str],
+    toolchains: list[str],
+    use_ccache: bool,
+    results_file: Path,
+) -> None:
     for toolchain in toolchains:
         for target_arch in architectures:
             if int(toolchain.split('-')[1]) < 7 and target_arch == 'riscv':
