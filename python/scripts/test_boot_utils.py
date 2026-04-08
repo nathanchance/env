@@ -28,6 +28,7 @@ MATRIX: dict[str, dict[str, str]] = {
         'ppc64': 'ppc64_guest_defconfig',
         'ppc64le': 'powernv_defconfig',
         'riscv': 'defconfig',
+        'sparc64': 'sparc64_defconfig',
         's390': 'defconfig',
         'x86': 'defconfig',
         'x86_64': 'defconfig',
@@ -49,6 +50,7 @@ BOOT_UTILS_TO_KERNEL_ROSETTA: dict[str, str] = {
     'ppc32_mac': 'powerpc',
     'ppc64': 'powerpc',
     'ppc64le': 'powerpc',
+    'sparc64': 'sparc',
     'x86': 'i386',
 }
 

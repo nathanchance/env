@@ -130,6 +130,16 @@ jobs:
     - kernel
     make_variables:
       LLVM_IAS: 1
+  # sparc64
+  - target_arch: sparc
+    toolchain: clang
+    kconfig: sparc64_defconfig
+    targets:
+    - kernel
+    kernel_image: image
+    make_variables:
+      CROSS_COMPILE: sparc64-linux-
+      LLVM_IAS: 0
   # x86_64
   - target_arch: x86_64
     toolchain: clang
@@ -270,6 +280,15 @@ jobs:
     targets:
     - kernel
     kernel_image: Image
+  # sparc64
+  - target_arch: sparc
+    toolchain: gcc
+    kconfig: sparc64_defconfig
+    targets:
+    - kernel
+    kernel_image: image
+    make_variables:
+      CROSS_COMPILE: sparc64-linux-
   # s390
   - target_arch: s390
     toolchain: gcc
