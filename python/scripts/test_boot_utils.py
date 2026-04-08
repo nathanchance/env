@@ -13,7 +13,7 @@ import lib.utils
 
 BOOT_QEMU = Path(os.environ['CBL_GIT'], 'boot-utils/boot-qemu.py')
 
-MATRIX = {
+MATRIX: dict[str, dict[str, str]] = {
     'gcc': {
         'arm32_v5': 'multi_v5_defconfig',
         'arm32_v6': 'aspeed_g5_defconfig',
@@ -36,7 +36,7 @@ MATRIX['clang'] = MATRIX['gcc'].copy()
 # https://github.com/ClangBuiltLinux/linux/issues/1814
 del MATRIX['clang']['ppc32']
 
-BOOT_UTILS_TO_KERNEL_ROSETTA = {
+BOOT_UTILS_TO_KERNEL_ROSETTA: dict[str, str] = {
     'arm32_v5': 'arm',
     'arm32_v6': 'arm',
     'arm32_v7': 'arm',
@@ -63,7 +63,7 @@ for toolchain, builds in MATRIX.items():
         if not (kernel_dir := Path(directory, toolchain, kernel_arch, config)).exists():
             raise FileNotFoundError(f"{kernel_dir} does not exist?")
 
-        boot_utils_cmd = [
+        boot_utils_cmd: lib.utils.CmdList = [
             BOOT_QEMU,
             '-a',
             boot_utils_arch,
