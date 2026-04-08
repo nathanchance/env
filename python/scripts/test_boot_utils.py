@@ -61,6 +61,11 @@ args = parser.parse_args()
 if not (directory := Path(args.directory)).exists():
     raise FileNotFoundError(f"Supplied directory ('{directory}') does not exist?")
 
+if not (boot_utils_json := Path('/tmp/boot-utils.json')).exists():  # noqa: S108
+    lib.utils.curl(
+        'https://api.github.com/repos/ClangBuiltLinux/boot-utils/releases/latest', boot_utils_json
+    )
+
 for toolchain, builds in MATRIX.items():
     for boot_utils_arch, config in builds.items():
         kernel_arch = BOOT_UTILS_TO_KERNEL_ROSETTA.get(boot_utils_arch, boot_utils_arch)
@@ -72,6 +77,8 @@ for toolchain, builds in MATRIX.items():
             BOOT_QEMU,
             '-a',
             boot_utils_arch,
+            '--gh-json-file',
+            boot_utils_json,
             '-k',
             kernel_dir,
             '-t',
