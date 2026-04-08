@@ -3,7 +3,6 @@
 # Copyright (C) 2022-2023 Nathan Chancellor
 
 import os
-import re
 import shutil
 import sys
 from pathlib import Path
@@ -22,7 +21,8 @@ def brew(brew_args: lib.utils.PackageSequence) -> None:
 
 def clone_env_plugins() -> None:
     env_folder = get_env_folder()
-    github_folder = env_folder.parent
+    codeberg_folder = env_folder.parent
+    github_folder = codeberg_folder.parent.joinpath('github')
 
     if not env_folder.exists():
         env_folder.parent.mkdir(exist_ok=True, parents=True)
@@ -46,7 +46,7 @@ def get_brew_path() -> Path:
 
 
 def get_env_folder() -> Path:
-    return Path(get_main_folder(), 'github/env')
+    return Path(get_main_folder(), 'codeberg/env')
 
 
 def get_main_folder() -> Path:
@@ -101,14 +101,19 @@ def is_vm() -> bool:
 
 
 def repo_clone(repo_dest: Path, repo_branch: str | None = None) -> None:
+    use_codeberg = repo_dest.name in ('env', 'keys')
     # neither ssh nor gh will be set up in virtual machines, just use plain ol' git.
     if is_vm():
         clone_args: list[lib.utils.PathString] = ['-b', repo_branch] if repo_branch else []
+        git_site = 'codeberg.org' if use_codeberg else 'github.com'
         clone_args += [
-            f"https://github.com/nathanchance/{repo_dest.name}.git",
+            f"https://{git_site}/nathanchance/{repo_dest.name}.git",
             repo_dest,
         ]
         brew_git(['clone', *clone_args])
+    elif use_codeberg:
+        git_proto = 'https://' if repo_dest.name == 'keys' else 'ssh://git@'
+        brew_git(['clone', f"{git_proto}codeberg.org/nathanchance/{repo_dest.name}.git", repo_dest])
     else:
         clone_args = [repo_dest.name, repo_dest]
         if repo_branch:
@@ -160,14 +165,6 @@ def setup_ssh() -> None:
     except CalledProcessError:
         lib.utils.run(['ssh-add', ssh_key])
 
-    gh_conf_text = Path(home, '.config/gh/config.yml').read_text(encoding='utf-8')
-    if not (match := re.search(r'^git_protocol:\s+(.*)$', gh_conf_text, flags=re.M)):
-        raise RuntimeError('Cannot find git_protocol in gh configuration?')
-    if match.groups()[0] != 'ssh':
-        brew_gh(['config', 'set', '-h', 'github.com', 'git_protocol', 'ssh'])
-        brew_gh(['config', 'set', 'git_protocol', 'ssh'])
-    Path(home, '.gitconfig').unlink(missing_ok=True)
-
 
 def setup_wezterm_cfg() -> None:
     (wezterm_cfg := Path(get_home(), '.config/wezterm/wezterm.lua')).unlink(missing_ok=True)
@@ -215,8 +212,8 @@ if __name__ == '__main__':
 
     setup_homebrew()
     install_packages()
-    setup_gh()
     setup_ssh()
+    setup_gh()
     clone_env_plugins()
     setup_wezterm_cfg()
     setup_fish()
