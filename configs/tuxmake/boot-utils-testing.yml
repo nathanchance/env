@@ -89,6 +89,7 @@ jobs:
     - kernel
     kernel_image: vmlinux
     make_variables:
+      CROSS_COMPILE: powerpc-linux-
       LLVM: '1'
       LLVM_IAS: '0'
   # ppc64
@@ -100,6 +101,7 @@ jobs:
     - kernel
     kernel_image: vmlinux
     make_variables:
+      CROSS_COMPILE: powerpc64-linux-
       LLVM: '1'
       LLVM_IAS: '1'
   # ppc64le
@@ -110,6 +112,7 @@ jobs:
     - kernel
     kernel_image: zImage.epapr
     make_variables:
+      CROSS_COMPILE: powerpc64-linux-
       LLVM: '1'
       LLVM_IAS: '1'
   # riscv
