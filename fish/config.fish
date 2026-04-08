@@ -18,8 +18,8 @@ __connect_to_ssh_agent
 
 switch $LOCATION
     case mac
-        fish_add_path -m /opt/homebrew/bin
-        fish_add_path -m /opt/homebrew/sbin
+        fish_add_path -ag /opt/homebrew/sbin
+        fish_add_path -ag /opt/homebrew/bin
 
         set -gx MANPATH /opt/homebrew/share/man
         set -gx INFOPATH /opt/homebrew/share/info
