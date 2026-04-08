@@ -18,11 +18,11 @@ import lib.utils
 # pylint: enable=wrong-import-position
 
 
-def get_version_id():
+def get_version_id() -> int:
     return int(lib.setup.get_os_rel_val('VERSION_ID'))
 
 
-def machine_is_trusted():
+def machine_is_trusted() -> bool:
     return False  # none at the moment but maybe in the future?
 
 
@@ -34,7 +34,7 @@ def parse_arguments():
     return parser.parse_args()
 
 
-def prechecks():
+def prechecks() -> None:
     lib.utils.check_root()
 
     supported_versions = (
@@ -46,7 +46,7 @@ def prechecks():
         raise RuntimeError(f"Debian {codename} is not supported by this script!")
 
 
-def setup_repos():
+def setup_repos() -> None:
     apt_gpg = Path('/etc/apt/keyrings')
     apt_sources = Path('/etc/apt/sources.list.d')
     codename = lib.setup.get_version_codename()
@@ -111,7 +111,7 @@ Signed-By: {tailscale_gpg_key}
         Path(apt_sources, 'tailscale.sources').write_text(tailscale_sources_txt, encoding='utf-8')
 
 
-def switch_to_systemd_networking():
+def switch_to_systemd_networking() -> None:
     # Not necessary on older than Trixie?
     if get_version_id() < 13:
         return
@@ -139,8 +139,8 @@ def switch_to_systemd_networking():
     lib.setup.systemctl_enable(['systemd-networkd', 'systemd-resolved'], now=False)
 
 
-def update_and_install_packages():
-    packages = []
+def update_and_install_packages() -> None:
+    packages: list[str] = []
     if machine_is_trusted():
         packages += ['iptables', 'tailscale']
 

@@ -16,37 +16,37 @@ import lib.utils
 # pylint: enable=wrong-import-position
 
 
-def apt_install(install_args):
+def apt_install(install_args: lib.utils.PackageSequence) -> None:
     lib.setup.apt(['install', '-y', '--no-install-recommends', *install_args])
 
 
-def apt_update():
+def apt_update() -> None:
     lib.setup.apt(['update', '-qq'])
 
 
-def apt_upgrade(upgrade_args=None):
-    cmd = ['upgrade', '-y']
+def apt_upgrade(upgrade_args: lib.utils.PackageSequence | None = None) -> None:
+    cmd: list[lib.utils.PathString] = ['upgrade', '-y']
     if upgrade_args:
         cmd += upgrade_args
     lib.setup.apt(cmd)
 
 
-def get_dpkg_arch():
+def get_dpkg_arch() -> str:
     return lib.utils.chronic(['dpkg', '--print-architecture']).stdout.strip()
 
 
-def install_initial_packages():
+def install_initial_packages() -> None:
     apt_update()
     apt_install(['apt-transport-https', 'ca-certificates', 'curl', 'gnupg'])
 
 
-def set_apt_variables():
+def set_apt_variables() -> None:
     os.environ['APT_LISTCHANGES_FRONTEND'] = 'none'
     os.environ['DEBIAN_FRONTEND'] = 'noninteractive'
     os.environ['NEEDRESTART_SUSPEND'] = 'true'
 
 
-def setup_doas(username, root_password):
+def setup_doas(username: str, root_password: str) -> None:
     dpkg_arch = get_dpkg_arch()
     env_folder = lib.setup.get_env_root()
     tmp_dir = None
@@ -105,7 +105,7 @@ def setup_doas(username, root_password):
         shutil.rmtree(tmp_dir)
 
 
-def setup_docker(username):
+def setup_docker(username: str) -> None:
     lib.utils.run(['groupadd', '-f', 'docker'])
     lib.setup.add_user_to_group('docker', username)
 
@@ -114,13 +114,13 @@ def setup_docker(username):
         lib.utils.run(['systemctl', 'restart', f"{service}.service"])
 
 
-def setup_libvirt(username):
+def setup_libvirt(username: str) -> None:
     if not lib.setup.is_installed('virt-manager'):
         return
     lib.setup.setup_libvirt(username)
 
 
-def setup_locales():
+def setup_locales() -> None:
     commands = [
         'locales locales/default_environment_locale select en_US.UTF-8',
         'locales locales/locales_to_be_generated multiselect en_US.UTF-8 UTF-8',
@@ -133,8 +133,8 @@ def setup_locales():
     lib.utils.run(['dpkg-reconfigure', '--frontend', 'noninteractive', 'locales'])
 
 
-def update_and_install_packages(additional_packages=None):
-    packages = [
+def update_and_install_packages(additional_packages: list[str] | None = None):
+    packages: list[str] = [
         # doas
         'libpam0g',
 
@@ -210,7 +210,7 @@ def update_and_install_packages(additional_packages=None):
 
     # Unconditionally install QEMU to get /dev/kvm setup properly.
     dpkg_arch = get_dpkg_arch()
-    arch_packages = {
+    arch_packages: dict[str, dict[str, str]] = {
         'amd64': {
             'firmware': 'ovmf',
             'qemu': 'qemu-system-x86',
@@ -221,9 +221,9 @@ def update_and_install_packages(additional_packages=None):
         },
     }
     if dpkg_arch in arch_packages:
-        packages += [arch_packages[dpkg_arch]['qemu']]
+        packages.append(arch_packages[dpkg_arch]['qemu'])
 
-    add_apt_args = [
+    add_apt_args: list[str] = [
         '-o', 'Dpkg::Options::=--force-confdef',
         '-o', 'Dpkg::Options::=--force-confold',
     ]  # fmt: off
