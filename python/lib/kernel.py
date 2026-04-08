@@ -116,10 +116,6 @@ def prepare_source(base_name: str, base_ref: str = 'origin/master') -> None:
     patches.append(
         'https://lore.kernel.org/all/20260325-certs-extract-cert-key_pass-unused-but-set-global-v1-1-ecf94326d532@kernel.org/'
     )  # extract-cert: Wrap key_pass with '#ifdef USE_PKCS11_ENGINE'
-    if base_name == 'fedora':
-        patches.append(
-            'https://lore.kernel.org/all/20260327-dtc-drop-dts_version-v1-1-41066690aefd@kernel.org/'
-        )  # scripts/dtc: Remove unused dts_version in dtc-lexer.l
 
     try:
         for revert in reverts:
