@@ -191,6 +191,16 @@ jobs:
     - kernel
     make_variables:
       CROSS_COMPILE: loongarch64-linux-
+  # m68k
+  - target_arch: m68k
+    toolchain: gcc
+    kconfig:
+    - mac_defconfig
+    make_variables:
+      CROSS_COMPILE: m68k-linux-
+    targets:
+    - kernel
+    kernel_image: vmlinux
   # mips
   - target_arch: mips
     toolchain: gcc

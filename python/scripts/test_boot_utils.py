@@ -20,6 +20,7 @@ MATRIX: dict[str, dict[str, str]] = {
         'arm32_v7': 'multi_v7_defconfig',
         'arm64': 'defconfig',
         'loongarch': 'defconfig',
+        'm68k': 'mac_defconfig',
         'mips': 'malta_defconfig+CONFIG_CPU_BIG_ENDIAN=y',
         'mipsel': 'malta_defconfig',
         'ppc32': 'ppc44x_defconfig',
@@ -35,6 +36,8 @@ MATRIX: dict[str, dict[str, str]] = {
 MATRIX['clang'] = MATRIX['gcc'].copy()
 # https://github.com/ClangBuiltLinux/linux/issues/1814
 del MATRIX['clang']['ppc32']
+# needs lots of work
+del MATRIX['clang']['m68k']
 
 BOOT_UTILS_TO_KERNEL_ROSETTA: dict[str, str] = {
     'arm32_v5': 'arm',
