@@ -10,7 +10,7 @@ sys.path.append(str(Path(__file__).resolve().parents[1]))
 import lib.utils
 
 
-def get_patches_folder(repo):
+def get_patches_folder(repo: Path) -> Path:
     branch = lib.utils.get_git_output(repo, 'bn')
     return Path(os.environ['CODEBERG_FOLDER'], 'patches', repo.name, branch)
 
@@ -33,7 +33,7 @@ def parse_arguments():
     return parser.parse_args()
 
 
-def sync(repo, patches_output):
+def sync(repo: Path, patches_output: Path) -> None:
     if repo.name not in ('linux', 'linux-next') and 'linux-stable' not in repo.name:
         raise RuntimeError(f"Supplied repo ('{repo}, {repo.name}') is not supported by cbl_ptchmn!")
 

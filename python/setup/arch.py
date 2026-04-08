@@ -24,7 +24,7 @@ EDID_1280_1024 = b'BAAAACAAAAAFAAAAR05VAAIAAcAEAAAAAAAAAAAAAAABAAHABAAAAAEAAAAAA
 HETZNER_MIRROR = 'https://mirror.hetzner.com/archlinux/$repo/os/$arch'
 PACMAN_CONF = Path('/etc/pacman.conf')
 
-cpu_vendor = None
+cpu_vendor: str | None = None
 if (proc_cpuinfo := Path('/proc/cpuinfo')).exists():
     proc_cpuinfo_txt = proc_cpuinfo.read_text(encoding='utf-8')
     if vendor_match := re.search('vendor_id\t: ([a-zA-Z]+)\n', proc_cpuinfo_txt):
@@ -35,7 +35,7 @@ if (proc_cpuinfo := Path('/proc/cpuinfo')).exists():
 
 
 class CmdlineOptions(UserDict):
-    def __init__(self, initial_argument):
+    def __init__(self, initial_argument: str | dict[str, str | None]) -> None:
         if isinstance(initial_argument, str):
             super().__init__()
 
@@ -46,25 +46,25 @@ class CmdlineOptions(UserDict):
         else:
             super().__init__(initial_argument)
 
-    def __str__(self):
+    def __str__(self) -> str:
         return ' '.join(
             sorted(f"{key}={value}" if value else key for key, value in self.data.items())
         )
 
 
 class MkinitcpioConf(UserDict):
-    def __init__(self, init_arg='', path=None):
+    def __init__(self, init_arg: str = '', path: Path | None = None) -> None:
         super().__init__()
 
-        self.path = path if path else Path('/etc/mkinitcpio.conf')
+        self.path: Path = path if path else Path('/etc/mkinitcpio.conf')
 
         if init_arg and isinstance(init_arg, str):
-            self.text = init_arg
+            self.text: str = init_arg
         else:
-            self.text = self.path.read_text(encoding='utf-8')
+            self.text: str = self.path.read_text(encoding='utf-8')
         self._reload_data_from_text()
 
-    def _generate_new_text(self):
+    def _generate_new_text(self) -> str:
         new_text = self.text
 
         for var, vals in self.data.items():
@@ -74,11 +74,11 @@ class MkinitcpioConf(UserDict):
 
         return new_text
 
-    def _reload_data_from_file(self):
+    def _reload_data_from_file(self) -> None:
         self.text = self.path.read_text(encoding='utf-8')
         self._reload_data_from_text()
 
-    def _reload_data_from_text(self):
+    def _reload_data_from_text(self) -> None:
         if not (matches := re.findall(r'^([A-Z]+)=\((.*)\)$', self.text, flags=re.M)):
             raise RuntimeError(f"Cannot find any variables in {self.text}?")
 
@@ -88,7 +88,7 @@ class MkinitcpioConf(UserDict):
             for var, val in matches
         }
 
-    def update_if_necessary(self):
+    def update_if_necessary(self) -> None:
         if (new_text := self._generate_new_text()) != self.text:
             self.path.write_text(new_text, encoding='utf-8')
             self._reload_data_from_file()
@@ -96,7 +96,7 @@ class MkinitcpioConf(UserDict):
             lib.utils.run(['mkinitcpio', '-P'])
 
 
-def add_hetzner_mirror_to_repos(config):
+def add_hetzner_mirror_to_repos(config: str) -> str:
     if HETZNER_MIRROR in config:
         return config
 
@@ -105,7 +105,7 @@ def add_hetzner_mirror_to_repos(config):
     return config.replace(search, replace)
 
 
-def adjust_esp_mountpoint(fstab, dryrun=False):
+def adjust_esp_mountpoint(fstab: lib.setup.Fstab, dryrun: bool = False) -> None:
     if (boot_esp := '/boot/efi') not in fstab:
         return
 
@@ -128,11 +128,13 @@ def adjust_esp_mountpoint(fstab, dryrun=False):
     lib.utils.print_or_run_cmd(['mount', '--mkdir', root_esp], dryrun)
 
 
-def can_use_amd_pstate():
-    return cpu_vendor == 'amd' and list(Path('/sys/devices/system/cpu').glob('cpu*/acpi_cppc'))
+def can_use_amd_pstate() -> bool:
+    return cpu_vendor == 'amd' and bool(
+        list(Path('/sys/devices/system/cpu').glob('cpu*/acpi_cppc'))
+    )
 
 
-def configure_amd_pstate():
+def configure_amd_pstate() -> None:
     if not can_use_amd_pstate():
         return
 
@@ -146,7 +148,7 @@ def configure_amd_pstate():
     # WORK IN PROGRESS
 
 
-def configure_systemd_boot(init=True, conf='linux.conf'):
+def configure_systemd_boot(init: bool = True, conf: str = 'linux.conf') -> None:
     # Not using systemd-boot, nothing to configure
     if not lib.setup.using_systemd_boot():
         return
@@ -203,7 +205,7 @@ def configure_systemd_boot(init=True, conf='linux.conf'):
     lib.utils.run(['bootctl', 'set-default', linux_conf.name])
 
 
-def convert_boot_to_xbootldr(fstab, dryrun):
+def convert_boot_to_xbootldr(fstab: lib.setup.Fstab, dryrun: bool) -> None:
     # If '/boot' is a 'vfat' filesystem, it means we have already done this
     # transformation.
     if fstab[(boot := '/boot')].type == 'vfat':
@@ -265,7 +267,7 @@ def convert_boot_to_xbootldr(fstab, dryrun):
         pacman_install(['linux'])
 
 
-def enable_reflector():
+def enable_reflector() -> None:
     if not lib.setup.is_installed('reflector'):
         return
 
@@ -299,12 +301,12 @@ def enable_reflector():
 
 
 # For archinstall, which causes ^M in /etc/fstab
-def fix_fstab():
+def fix_fstab() -> None:
     lib.utils.run(['dos2unix', '/etc/fstab'])
 
 
-def get_cmdline_additions():
-    module_blacklist = []
+def get_cmdline_additions() -> CmdlineOptions:
+    module_blacklist: list[str] = []
     options = CmdlineOptions(
         {
             # Mitigate SMT RSB vulnerability
@@ -331,7 +333,9 @@ def get_cmdline_additions():
     return options
 
 
-def installimage_adjustments(mkinitcpio_conf, conf='linux.conf', dryrun=False):
+def installimage_adjustments(
+    mkinitcpio_conf: MkinitcpioConf, conf: str = 'linux.conf', dryrun: bool = False
+) -> None:
     # If we are not on a Hetzner machine, do not try to execute anything here,
     # as it was written with primitives to be safe but it is better to be safer
     # than sorry.
@@ -402,7 +406,7 @@ def installimage_adjustments(mkinitcpio_conf, conf='linux.conf', dryrun=False):
     switch_from_grub_to_systemd_boot(conf, dryrun)
 
 
-def is_hetzner():
+def is_hetzner() -> bool:
     # While this lives in arch.py because that is the only place within setup
     # where it is relevant, it might be called on any platform from fish, so
     # ensure it works when /etc/pacman.conf does not exists.
@@ -410,12 +414,12 @@ def is_hetzner():
     return PACMAN_CONF.exists() and HETZNER_MIRROR in PACMAN_CONF.read_text(encoding='utf-8')
 
 
-def pacman_install(subargs):
+def pacman_install(subargs: list[str]) -> None:
     lib.setup.pacman(['-S', '--noconfirm', *subargs])
 
 
-def pacman_install_packages():
-    packages = [
+def pacman_install_packages() -> None:
+    packages: list[str] = [
         # Administration tools
         'btop',
         'ethtool',
@@ -563,12 +567,12 @@ def pacman_install_packages():
     pacman_install(['shadow'])
 
 
-def pacman_key_setup():
+def pacman_key_setup() -> None:
     lib.utils.run(['pacman-key', '--init'])
     lib.utils.run(['pacman-key', '--populate', 'archlinux'])
 
 
-def pacman_settings(dryrun=False):
+def pacman_settings(dryrun: bool = False) -> None:
     # The Hetzner mirror will be in mirrorlist if this is the first time
     # running pacman_setting() after installimage.
     hetzner_mirror_in_mirrorlist = (
@@ -579,7 +583,7 @@ def pacman_settings(dryrun=False):
     # with pacman.conf.pacnew below.
     hetzner_mirror_in_pacman_conf = is_hetzner()
 
-    conf_text = None
+    conf_text: str | None = None
     # Handle .pacnew file
     new_pacman_conf = PACMAN_CONF.with_suffix(f"{PACMAN_CONF.suffix}.pacnew")
     if new_pacman_conf.exists():
@@ -631,7 +635,7 @@ def pacman_settings(dryrun=False):
             shutil.move(Path(tempdir, *nathan_db.parts[-2:]), nathan_db)
 
 
-def pacman_update():
+def pacman_update() -> None:
     pacman_install(['-yyu'])
 
 
@@ -643,11 +647,11 @@ def parse_arguments():
     return parser.parse_args()
 
 
-def prechecks():
+def prechecks() -> None:
     lib.utils.check_root()
 
 
-def setup_doas(username):
+def setup_doas(username: str) -> None:
     # sudo is a little bit more functional. Keep it in virtual machines.
     if lib.setup.is_virtual_machine():
         return
@@ -690,7 +694,7 @@ def setup_doas(username):
     pacman_install(['opendoas-sudo'])
 
 
-def setup_libvirt(username, mkinitcpio_conf):
+def setup_libvirt(username: str, mkinitcpio_conf: MkinitcpioConf) -> None:
     if not lib.setup.is_installed('libvirt'):
         return
 
@@ -705,13 +709,13 @@ def setup_libvirt(username, mkinitcpio_conf):
         mkinitcpio_conf['MODULES'].add('kvm_intel')
 
 
-def setup_modules_load_d():
+def setup_modules_load_d() -> None:
     if not (vsock_conf := Path('/etc/modules-load.d/vsock.conf')).exists():
         vsock_conf.parent.mkdir(exist_ok=True)
         vsock_conf.write_text("# Needed for 'mkosi ssh' and 'mkosi vm'\nvsock\n", encoding='utf-8')
 
 
-def setup_sudo(username):
+def setup_sudo(username: str) -> None:
     if not lib.setup.is_virtual_machine():
         return
 
@@ -740,7 +744,7 @@ def setup_sudo(username):
     sudoers.chmod(0o440)
 
 
-def setup_user(username, userpass):
+def setup_user(username: str, userpass: str) -> None:
     if lib.setup.user_exists(username):
         lib.setup.chsh_fish(username)
         lib.setup.add_user_to_group('uucp', username)
@@ -756,7 +760,7 @@ def setup_user(username, userpass):
     lib.setup.setup_ssh_authorized_keys(username)
 
 
-def switch_from_grub_to_systemd_boot(conf='linux.conf', dryrun=False):
+def switch_from_grub_to_systemd_boot(conf: str = 'linux.conf', dryrun: bool = False) -> None:
     # If systemd-boot is already set up, we do not need to do anything further
     if lib.setup.using_systemd_boot():
         return
@@ -801,12 +805,12 @@ def switch_from_grub_to_systemd_boot(conf='linux.conf', dryrun=False):
             cmdline_options |= CmdlineOptions(match.groups()[0])
 
     # We may have multiple initrds
-    initrds = ['initramfs-linux']
+    initrds: list[str] = ['initramfs-linux']
     if not lib.setup.is_virtual_machine() and cpu_vendor:
         initrds.insert(0, f"{cpu_vendor}-ucode")
 
     # Easily generate the text for initial linux.conf
-    linux_conf_parts = [
+    linux_conf_parts: list[str] = [
         'title Arch Linux (linux)',
         'linux /vmlinuz-linux',
         *[f"initrd /{initrd}.img" for initrd in initrds],
@@ -825,12 +829,12 @@ def switch_from_grub_to_systemd_boot(conf='linux.conf', dryrun=False):
                 shutil.rmtree(cleanup_path)
 
 
-def vmware_adjustments(mkinitcpio_conf):
+def vmware_adjustments(mkinitcpio_conf: MkinitcpioConf) -> None:
     if lib.utils.get_hostname() != 'vmware':
         return
 
     # https://wiki.archlinux.org/title/VMware/Install_Arch_Linux_as_a_guest#In-kernel_drivers
-    vmware_mods = {
+    vmware_mods: set[str] = {
         'vsock',
         'vmw_vsock_vmci_transport',
         'vmw_balloon',

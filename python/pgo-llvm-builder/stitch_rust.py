@@ -9,6 +9,7 @@ import shutil
 import sys
 from argparse import ArgumentParser
 from pathlib import Path
+from typing import Any
 
 # This will fail to import when linted with Python 3.10
 # pylint: disable-next=import-error
@@ -27,11 +28,11 @@ FAILED = '\033[01;31mFAILED\033[0m'
 SUCCESS = '\033[01;32mSUCCESS\033[0m'
 
 
-def download_and_verify(url, dst):
+def download_and_verify(url: str, dst: Path) -> None:
     if dst.exists():
         return
 
-    base_gpg_cmd = ['gpg', '--homedir', rust_gpg := Path(RUST, 'gpg')]
+    base_gpg_cmd: lib.utils.CmdList = ['gpg', '--homedir', rust_gpg := Path(RUST, 'gpg')]
     if not rust_gpg.is_dir():
         if rust_gpg.exists():
             rust_gpg.unlink()
@@ -56,7 +57,7 @@ def download_and_verify(url, dst):
     gpg_dst.unlink()
 
 
-def prepare_rust_components(toml, target):
+def prepare_rust_components(toml: dict[str, Any], target: str) -> list[Path]:
     pkgs = [
         'cargo',
         'clippy-preview',
@@ -65,7 +66,7 @@ def prepare_rust_components(toml, target):
         'rust-std',
         'rust-src',
     ]
-    scripts = []
+    scripts: list[Path] = []
 
     for pkg in pkgs:
         # rust-src is target-agnostic, so it uses '*'
@@ -96,7 +97,7 @@ def prepare_rust_components(toml, target):
     return scripts
 
 
-def generate_rust_toml(version):
+def generate_rust_toml(version: str) -> dict[str, Any]:
     toml_url = f"https://static.rust-lang.org/dist/channel-rust-{version}.toml"
     if not (toml_dst := Path(RUST, toml_url.rsplit('/', 1)[1])).exists():
         download_and_verify(toml_url, toml_dst)
@@ -108,7 +109,7 @@ def generate_rust_toml(version):
     return tomllib.loads(toml_dst.read_text(encoding='utf-8'))
 
 
-def get_rust_target_from_tarball(tarball_path):
+def get_rust_target_from_tarball(tarball_path: Path) -> str:
     # "llvm-<version>-<arch>.tar.<suffix>" -> ["llvm", "<version>", "<arch>.tar.<suffix>"]
     if len(name_parts := tarball_path.name.split('-')) != 3:
         raise RuntimeError(f"Unexpected name ('{tarball_path.name}') for tarball?")
@@ -138,14 +139,14 @@ def parse_arguments():
     return arguments
 
 
-def generate_llvm_rust_tarball(scripts, llvm_tarball, rust_version):
+def generate_llvm_rust_tarball(scripts: list[Path], llvm_tarball: Path, rust_version: str) -> None:
     # "llvm-<llvm_version>-<arch>.<ext>" -> ["llvm", "<llvm_version>", "<arch>.<ext>"]
     tarball_parts = llvm_tarball.name.split('-')
     # ["llvm", "<llvm_version>", "<arch>.<ext>"] -> ["llvm", "<llvm_version>", "rust", "<rust_version>", "<arch>.<ext>"]
     tarball_parts[-1:-1] = ['rust', rust_version]
     llvm_rust_tarball = llvm_tarball.resolve().parent.joinpath('-'.join(tarball_parts))
 
-    tar_cmd = ['tar']
+    tar_cmd: lib.utils.CmdList = ['tar']
     # If original LLVM tarball is compressed, we will need to pass in the
     # compression flag into both the extract command and the repackage command
     if (suffix := llvm_tarball.suffix) in ('.gz', '.xz', '.zstd'):

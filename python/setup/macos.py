@@ -16,11 +16,11 @@ import lib.utils
 # pylint: enable=wrong-import-position
 
 
-def brew(brew_args):
+def brew(brew_args: lib.utils.PackageSequence) -> None:
     lib.utils.run([get_brew_path(), *brew_args])
 
 
-def clone_env_plugins():
+def clone_env_plugins() -> None:
     env_folder = get_env_folder()
     github_folder = env_folder.parent
 
@@ -37,36 +37,36 @@ def clone_env_plugins():
         lib.utils.call_git_loud(plugin, ['remote', 'update'])
 
 
-def get_brew_bin():
+def get_brew_bin() -> Path:
     return Path('/opt/homebrew/bin')
 
 
-def get_brew_path():
+def get_brew_path() -> Path:
     return Path(get_brew_bin(), 'brew')
 
 
-def get_env_folder():
+def get_env_folder() -> Path:
     return Path(get_main_folder(), 'github/env')
 
 
-def get_main_folder():
+def get_main_folder() -> Path:
     return Path(get_home(), 'Dev')
 
 
-def get_home():
+def get_home() -> Path:
     return Path.home()
 
 
-def brew_gh(gh_args):
+def brew_gh(gh_args: list[lib.utils.PathString]) -> None:
     lib.utils.run([Path(get_brew_bin(), 'gh'), *gh_args])
 
 
-def brew_git(git_args):
+def brew_git(git_args: list[lib.utils.PathString]) -> None:
     lib.utils.run([Path(get_brew_bin(), 'git'), *git_args])
 
 
-def install_packages():
-    packages = [
+def install_packages() -> None:
+    packages: list[str] = [
         '1password-cli',
         'bat',
         'btop',
@@ -90,20 +90,20 @@ def install_packages():
     ]  # fmt: off
     brew(['install', *packages])
 
-    casks = [
+    casks: list[str] = [
         'wezterm@nightly',
     ]
     brew(['install', '--cask', *casks])
 
 
-def is_vm():
+def is_vm() -> bool:
     return 'Virtual-Machine' in os.uname().nodename
 
 
-def repo_clone(repo_dest, repo_branch=None):
+def repo_clone(repo_dest: Path, repo_branch: str | None = None) -> None:
     # neither ssh nor gh will be set up in virtual machines, just use plain ol' git.
     if is_vm():
-        clone_args = ['-b', repo_branch] if repo_branch else []
+        clone_args: list[lib.utils.PathString] = ['-b', repo_branch] if repo_branch else []
         clone_args += [
             f"https://github.com/nathanchance/{repo_dest.name}.git",
             repo_dest,
@@ -116,7 +116,7 @@ def repo_clone(repo_dest, repo_branch=None):
         brew_gh(['repo', 'clone', *clone_args])
 
 
-def setup_gh():
+def setup_gh() -> None:
     if is_vm():
         return
 
@@ -126,7 +126,7 @@ def setup_gh():
         brew_gh(['auth', 'login'])
 
 
-def setup_homebrew():
+def setup_homebrew() -> None:
     if not get_brew_path().exists():
         install_sh = lib.utils.curl(
             'https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh'
@@ -134,7 +134,7 @@ def setup_homebrew():
         lib.utils.run(['/bin/bash', '-c', install_sh])
 
 
-def setup_ssh():
+def setup_ssh() -> None:
     if is_vm():
         return
 
@@ -169,13 +169,13 @@ def setup_ssh():
     Path(home, '.gitconfig').unlink(missing_ok=True)
 
 
-def setup_wezterm_cfg():
+def setup_wezterm_cfg() -> None:
     (wezterm_cfg := Path(get_home(), '.config/wezterm/wezterm.lua')).unlink(missing_ok=True)
     wezterm_cfg.parent.mkdir(exist_ok=True, parents=True)
     wezterm_cfg.symlink_to(Path(get_env_folder(), 'configs/local', wezterm_cfg.name))
 
 
-def setup_fish():
+def setup_fish() -> None:
     fish_script = (
         '# Start an ssh-agent\n'
         'if not set -q SSH_AUTH_SOCK\n'

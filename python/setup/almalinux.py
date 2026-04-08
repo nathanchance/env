@@ -18,18 +18,18 @@ import lib.utils
 HOST_ARCH = platform.machine()
 
 
-def disable_selinux():
+def disable_selinux() -> None:
     if not lib.setup.is_virtual_machine():
         return
 
     lib.utils.run(['grubby', '--update-kernel', 'ALL', '--args', 'selinux=0'])
 
 
-def get_alma_version():
+def get_alma_version() -> int:
     return int(float(lib.setup.get_os_rel_val('VERSION_ID')))
 
 
-def prechecks():
+def prechecks() -> None:
     lib.utils.check_root()
     alma_version = get_alma_version()
     if alma_version not in (9,):
@@ -38,15 +38,15 @@ def prechecks():
         )
 
 
-def install_initial_packages():
+def install_initial_packages() -> None:
     lib.setup.dnf(['clean', 'all'])
     lib.setup.dnf(['update', '-y'])
     lib.setup.dnf(['config-manager', '--set-enabled', 'crb'])
     fedora.dnf_install(['dnf-plugins-core', 'epel-release'])
 
 
-def install_packages():
-    packages = [
+def install_packages() -> None:
+    packages: list[str] = [
         # administration
         'mosh',
         'util-linux-user',
@@ -98,7 +98,7 @@ def install_packages():
     lib.setup.dnf(['reinstall', '-y', 'shadow-utils'])
 
 
-def setup_sudo(username):
+def setup_sudo(username: str) -> None:
     sudo_pam, sudo_pam_txt = lib.utils.path_and_text('/etc/pam.d/sudo')
     if sudo_pam_txt and 'pam_umask' not in sudo_pam_txt:
         with sudo_pam.open('a', encoding='utf-8') as file:
@@ -108,7 +108,7 @@ def setup_sudo(username):
     Path(f"/etc/sudoers.d/00_{username}").touch()
 
 
-def setup_repos():
+def setup_repos() -> None:
     fedora.dnf_add_repo('https://cli.github.com/packages/rpm/gh-cli.repo')
 
 

@@ -13,6 +13,9 @@ import lib.utils
 
 # pylint: enable=wrong-import-position
 
+Warnings = list[str]
+WarningsDict = dict[str, Warnings]
+
 
 def parse_arguments():
     parser = ArgumentParser(
@@ -30,18 +33,22 @@ def parse_arguments():
     return parser.parse_args()
 
 
-def get_log(log_folder, key):
+def get_log(log_folder: Path, key: str) -> Path:
     return Path(log_folder, key + '.log')
 
 
-def generate_warnings(log_folder, src_folder):
+def generate_warnings(
+    log_folder: Path, src_folder: Path
+) -> tuple[WarningsDict, WarningsDict, Warnings]:
     # Get full list of logs from folder, excluding internal logs for filtering sake
-    internal_files = {elem + '.log' for elem in ['failed', 'info', 'skipped', 'success']}
+    internal_files: set[str] = {elem + '.log' for elem in ['failed', 'info', 'skipped', 'success']}
     internal_files.add('report.txt')
-    logs = sorted([elem for elem in log_folder.iterdir() if elem.name not in internal_files])
+    logs: list[Path] = sorted(
+        [elem for elem in log_folder.iterdir() if elem.name not in internal_files]
+    )
 
     # Generate a full list of warnings across all builds, deduplicated per build
-    searches = [
+    searches: Warnings = [
         'error:',
         'Error:',
         'ERROR:',
@@ -54,7 +61,7 @@ def generate_warnings(log_folder, src_folder):
         'WARNING:',
     ]  # fmt: off
     prob_re = re.compile('|'.join(searches))
-    warnings = {}
+    warnings: WarningsDict = {}
     for log in logs:
         lines = log.read_text(encoding='utf-8').splitlines(keepends=True)
         # We specifically check "dodgy linker" because this is known to be
@@ -68,10 +75,10 @@ def generate_warnings(log_folder, src_folder):
                 if prob_re.search(line) and 'dodgy linker' not in line
             }
         )
-    full = {key: value for key, value in warnings.items() if value}
+    full: WarningsDict = {key: value for key, value in warnings.items() if value}
 
     # Filter warnings based on priority to fix
-    merge_config_ignore = [
+    merge_config_ignore: Warnings = [
         'CPU_BIG_ENDIAN',
         'LTO_CLANG_THIN',
         'PREEMPT',
@@ -79,7 +86,7 @@ def generate_warnings(log_folder, src_folder):
         'SQUASHFS_DECOMP_MULTI',
         'SQUASHFS_DECOMP_MULTI_PERCPU',
     ]
-    ignore = [
+    ignore: Warnings = [
         # Too many to deal with for now
         'objtool:',
         '-Wframe-larger-than',
@@ -133,18 +140,18 @@ def generate_warnings(log_folder, src_folder):
         'WARNING: modpost: missing MODULE_DESCRIPTION',
     ]
     ignore_re = re.compile('|'.join(ignore))
-    warnings = {}
+    warnings: WarningsDict = {}
     for log, problems in full.items():
         warnings[log] = sorted({item for item in problems if not ignore_re.search(item)})
-    filtered = {key: value for key, value in warnings.items() if value}
+    filtered: WarningsDict = {key: value for key, value in warnings.items() if value}
 
     # Deduplicate warnings across all builds
-    unique = sorted({item for problems in filtered.values() for item in problems})
+    unique: Warnings = sorted({item for problems in filtered.values() for item in problems})
 
     return full, filtered, unique
 
 
-def generate_git_log(src_folder):
+def generate_git_log(src_folder: Path) -> str:
     # Either source directory does not exist or it is not a git repository
     if not Path(src_folder, '.git').exists():
         return ''
@@ -165,7 +172,7 @@ def generate_git_log(src_folder):
     return report_text
 
 
-def generate_report(log_folder):
+def generate_report(log_folder: Path) -> str:
     # First, we need to figure out the source directory, so we can eliminate
     # its path from all the warnings, which makes the report a little easier to
     # read.

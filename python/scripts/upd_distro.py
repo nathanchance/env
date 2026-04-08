@@ -14,7 +14,7 @@ import lib.utils
 yes_arg = '-y'
 
 
-def brew(brew_args):
+def brew(brew_args: list[str]) -> None:
     lib.utils.run(['/opt/homebrew/bin/brew', *brew_args], show_cmd=True)
 
 
@@ -22,6 +22,7 @@ parser = ArgumentParser(description='Update distribution')
 parser.add_argument(yes_arg, '--yes', action='store_true', help='Run noninteratively')
 args = parser.parse_args()
 
+cmds: list[list[str]]
 if sys.platform == 'darwin':
     cmd_func = brew
     cmds = [

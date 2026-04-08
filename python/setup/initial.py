@@ -17,7 +17,7 @@ import lib.utils
 # pylint: enable=wrong-import-position
 
 
-def check_install():
+def check_install() -> None:
     if shutil.which('sgdisk') or shutil.which('parted'):
         return
 
@@ -30,7 +30,7 @@ def check_install():
         raise RuntimeError('parted is needed but it cannot be installed on the current OS!')
 
 
-def create_user(user_name, user_password):
+def create_user(user_name: str, user_password: str) -> None:
     if lib.setup.user_exists(user_name):
         raise RuntimeError(f"user ('{user_name}') already exists?")
 

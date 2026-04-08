@@ -25,16 +25,16 @@ DEF_MACH = {
 }
 
 
-def have_rw_access(path):
+def have_rw_access(path: lib.utils.PathString) -> bool:
     return os.access(path, os.R_OK | os.W_OK)
 
 
 class NspawnConfig(UserDict):
-    def __init__(self, name):
+    def __init__(self, name: str) -> None:
         # Set systemd version. If this fails, it means we do not have nspawn
         # installed or the output has changed, both of which need to be dealt
         # with.
-        self.systemd_version = int(
+        self.systemd_version: int = int(
             lib.utils.chronic(['systemd-nspawn', '--version']).stdout.splitlines()[0].split()[1]
         )
 
@@ -69,13 +69,13 @@ class NspawnConfig(UserDict):
                 },
             }
         )
-        self.name = name
+        self.name: str = name
 
         # Add dynamic bind mounts
         self._add_dynamic_mounts()
 
         # Set machine path based on the name
-        self.machine_dir = Path('/var/lib/machines', self.name)
+        self.machine_dir: Path = Path('/var/lib/machines', self.name)
 
     def _add_dynamic_mounts(self):
         automounted_mounts = set()
@@ -154,7 +154,7 @@ class NspawnConfig(UserDict):
             if Path(mount).exists():
                 self.data['Files']['BindReadOnly'].append(mount)
 
-    def _gen_cfg_str(self):
+    def _gen_cfg_str(self) -> str:
         parts = []
 
         for key, values in self.data.items():
@@ -173,8 +173,8 @@ class NspawnConfig(UserDict):
 
         return '\n'.join(parts)
 
-    def _cfg_to_args(self):
-        cfg_to_arg = {
+    def _cfg_to_args(self) -> lib.utils.CmdList:
+        cfg_to_arg: dict[str, str] = {
             'Bind': '--bind',
             'BindReadOnly': '--bind-ro',
             'BindUser': '--bind-user',
@@ -184,7 +184,7 @@ class NspawnConfig(UserDict):
             'PrivateUsersOwnership': '--private-users-ownership',
             'SystemCallFilter': '--system-call-filter',
         }
-        nspawn_args = [
+        nspawn_args: lib.utils.CmdList = [
             # This script is the ultimate source of truth for arguments, not
             # our configuration files, which may be stale (but should still be
             # updated)
@@ -213,7 +213,7 @@ class NspawnConfig(UserDict):
 
         return nspawn_args
 
-    def _gen_eph_cmd(self):
+    def _gen_eph_cmd(self) -> lib.utils.CmdList:
         # Generate our command line arguments
         return [
             'systemd-nspawn',
@@ -231,13 +231,14 @@ class NspawnConfig(UserDict):
             *self._cfg_to_args(),
         ]
 
-    def _gen_run_cmd(self, cmd):
+    def _gen_run_cmd(self, cmd: str) -> lib.utils.CmdList:
+        machine_user_args: tuple[str, ...]
         if self.systemd_version >= 258:  # https://github.com/systemd/systemd/issues/32997
             # https://github.com/systemd/systemd/issues/34635#issuecomment-2394328990
             machine_user_args = (f"{USER}@{self.name}", '--user')
         else:
             machine_user_args = (self.name, f"--uid={USER}")
-        args = [
+        args: lib.utils.CmdList = [
             SYSTEMD_RUN_M,
             # Run command as our user in the container
             *machine_user_args,
@@ -261,7 +262,7 @@ class NspawnConfig(UserDict):
         ]
         return args
 
-    def _gen_upd_cmd(self):
+    def _gen_upd_cmd(self) -> lib.utils.CmdList:
         self.data['Exec']['Boot'] = 'no'
         return [
             'systemd-nspawn',
@@ -275,22 +276,24 @@ class NspawnConfig(UserDict):
             '-l',
         ]
 
-    def install_files(self):
+    def install_files(self) -> None:
         lib.utils.request_root('file creation')
 
         # Allow containers started as services to access /dev/kvm to run
         # accelerated VMs, which allows avoiding installing QEMU in the host
         # environment. Add /dev/vhost-vsock, /dev/vhost-net, and /dev/vsock if
         # they exist and are readable/writable so that 'mkosi vm' works.
-        needed_dev_mounts = (
+        needed_dev_mounts: tuple[str, ...] = (
             '/dev/kvm',
             '/dev/vhost-net',
             '/dev/vhost-vsock',
             '/dev/vsock',
         )
-        available_dev_mounts = [mount for mount in needed_dev_mounts if have_rw_access(mount)]
+        available_dev_mounts: list[str] = [
+            mount for mount in needed_dev_mounts if have_rw_access(mount)
+        ]
         if available_dev_mounts:
-            kvm_conf_txt_parts = ['[Service]\n'] + [
+            kvm_conf_txt_parts: list[str] = ['[Service]\n'] + [
                 f"DeviceAllow={mount} rw\n" for mount in available_dev_mounts
             ]
             lib.utils.systemd_drop_in('systemd-nspawn@.service', 'kvm', ''.join(kvm_conf_txt_parts))
@@ -378,8 +381,8 @@ class NspawnConfig(UserDict):
                 f"WARNING: {self.machine_dir} does not exist, machine will not start without it"
             )
 
-    def is_running(self):
-        is_active_cmd = [
+    def is_running(self) -> bool:
+        is_active_cmd: lib.utils.CmdList = [
             'systemctl',
             'is-active',
             '-q',
@@ -387,18 +390,19 @@ class NspawnConfig(UserDict):
         ]
         return lib.utils.run_check_rc_zero(is_active_cmd)
 
-    def reset(self, mode):
-        machine_files = {
+    def reset(self, mode: str) -> None:
+        machine_files: set[Path] = {
             self.machine_dir,
             Path('/etc/systemd/nspawn', self.name).with_suffix('.nspawn'),
         }
-        setup_files = {
+        setup_files: set[Path] = {
             SYSTEMD_RUN_M,
             Path('/etc/polkit-1/rules.d', f"50-permit-{USER}-machinectl-shell.rules"),
             Path('/etc/systemd/system/systemd-nspawn@.service.d/kvm.conf'),
             Path('/etc/systemd/system/systemd-nspawn@.service.d/network.conf'),
         }
 
+        items_to_remove: set[Path]
         if mode == 'machine':
             items_to_remove = machine_files
         elif mode == 'setup':
@@ -418,13 +422,13 @@ class NspawnConfig(UserDict):
 
         lib.utils.run0(['rm', '-fr', *items_to_remove])
 
-    def run_mach_cmd(self, cmd):
+    def run_mach_cmd(self, cmd: str) -> None:
         lib.utils.run0(self._gen_run_cmd(cmd))
 
-    def run_eph_cmd(self):
+    def run_eph_cmd(self) -> None:
         lib.utils.run0(self._gen_eph_cmd())
 
-    def run_upd_cmd(self):
+    def run_upd_cmd(self) -> None:
         # First, we need to make sure this machine is not running via
         # systemd-nspawn.service. If it is, the user should use 'machinectl
         # shell' to enter the machine and update it directly, as there may be

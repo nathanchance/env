@@ -50,7 +50,7 @@ def parse_arguments():
     return parser.parse_intermixed_args()
 
 
-def prepend_to_path(paths):
+def prepend_to_path(paths: list[str]) -> None:
     if not paths:
         return
     for path in paths:
@@ -64,8 +64,8 @@ if __name__ == '__main__':
 
     prepend_to_path(args.prepend_to_path)
 
-    variables = {}
-    targets = []
+    variables: dict[str, str] = {}
+    targets: list[str] = []
     for arg in args.make_args:
         if '=' in arg:
             variables.update([arg.split('=', 1)])
@@ -106,9 +106,9 @@ if __name__ == '__main__':
                 BASE = '-'.join(src.parts[-2:])
             else:
                 BASE = src.name
-            variables['O'] = Path(os.environ['TMP_BUILD_FOLDER'], BASE)
+            variables['O'] = Path(os.environ['TMP_BUILD_FOLDER'], BASE).as_posix()
         else:
-            variables['O'] = Path('build')
+            variables['O'] = 'build'
 
     lib.kernel.kmake(
         variables,

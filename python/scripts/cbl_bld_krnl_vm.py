@@ -30,7 +30,7 @@ import lib.utils
 # pylint: enable=wrong-import-position
 
 
-def get_qemu_arch(key):
+def get_qemu_arch(key: str) -> str:
     return {
         'aarch64': 'aarch64',
         'arm': 'arm',
@@ -40,7 +40,7 @@ def get_qemu_arch(key):
     }[key]
 
 
-def qemu_arch_to_kernel_arch(key):
+def qemu_arch_to_kernel_arch(key: str) -> str:
     return {
         'aarch64': 'arm64',
         'arm': 'arm',
@@ -48,7 +48,7 @@ def qemu_arch_to_kernel_arch(key):
     }[key]
 
 
-def get_toolchain_vars(kernel_arch, toolchain):
+def get_toolchain_vars(kernel_arch: str, toolchain: str) -> dict[str, str]:
     if toolchain == 'llvm':
         return {'LLVM': '1'}
 
@@ -56,7 +56,9 @@ def get_toolchain_vars(kernel_arch, toolchain):
     tc_version = int(tc_version)
 
     if base_tc == 'gcc':
-        return {'CROSS_COMPILE': korg_tc.GCCManager().get_cc_as_path(tc_version, kernel_arch)}
+        return {
+            'CROSS_COMPILE': korg_tc.GCCManager().get_cc_as_path(tc_version, kernel_arch).as_posix()
+        }
     if base_tc == 'llvm':
         return {'LLVM': f"{korg_tc.LLVMManager().get_prefix(tc_version)}/bin/"}
     raise ValueError(f"Don't know how to handle toolchain value '{base_tc}'!")
@@ -130,7 +132,14 @@ def parse_arguments():
     return parser.parse_args()
 
 
-def build_kernel_for_vm(kernel_src, add_make_targets, make_variables, config, menuconfig, vm_name):
+def build_kernel_for_vm(
+    kernel_src: Path,
+    add_make_targets: list[str],
+    make_variables: lib.utils.EnvVars,
+    config: str,
+    menuconfig: bool,
+    vm_name: str,
+) -> None:
     if Path(kernel_src, '.config').exists():
         lib.utils.call_git(src_folder, ['cl', '-q'])
     if (build := Path(make_variables['O'])).exists():
@@ -182,7 +191,7 @@ def build_kernel_for_vm(kernel_src, add_make_targets, make_variables, config, me
     )
     config_dst.write_text(new_config_txt, encoding='utf-8')
 
-    make_targets = ['olddefconfig', 'localyesconfig', 'all']
+    make_targets: list[str] = ['olddefconfig', 'localyesconfig', 'all']
     if menuconfig:
         make_targets.insert(-1, 'menuconfig')
     if add_make_targets:
@@ -215,10 +224,10 @@ if __name__ == '__main__':
     else:
         out = Path(src_folder, 'build')
 
-    make_vars = {
+    make_vars: lib.utils.EnvVars = {
         'ARCH': qemu_arch_to_kernel_arch(arch),
-        'LSMOD': lsmod,
-        'O': out,
+        'LSMOD': lsmod.as_posix(),
+        'O': out.as_posix(),
     }
     make_vars.update(get_toolchain_vars(make_vars['ARCH'], args.toolchain))
     make_vars.update(dict(arg.split('=', 1) for arg in args.make_args))

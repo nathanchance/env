@@ -15,6 +15,7 @@ import shlex
 import shutil
 import sys
 from argparse import ArgumentParser, BooleanOptionalAction
+from collections.abc import Iterable
 from pathlib import Path
 
 # uv handles this for us
@@ -28,7 +29,7 @@ import lib.utils
 
 # pylint: enable=wrong-import-position
 
-LATEST_GCC_VERSIONS = {
+LATEST_GCC_VERSIONS: dict[int, str] = {
     15: '15.2.0',
     14: '14.3.0',
     13: '13.4.0',
@@ -41,7 +42,7 @@ LATEST_GCC_VERSIONS = {
     6: '6.5.0',
     5: '5.5.0',
 }
-LATEST_LLVM_VERSIONS = {
+LATEST_LLVM_VERSIONS: dict[int, str] = {
     22: '22.1.3',
     21: '21.1.8',
     20: '20.1.8',
@@ -58,15 +59,15 @@ LATEST_LLVM_VERSIONS = {
 
 
 # set() does not preserve order
-def dedup(iterable):
+def dedup(iterable: Iterable) -> list:
     return list(dict.fromkeys(iterable))
 
 
-def generate_versions(min_var, tot_var):
+def generate_versions(min_var: str, tot_var: str) -> list[int]:
     return list(range(int(os.environ[min_var]), int(os.environ[tot_var])))
 
 
-def handle_rc_version(version):
+def handle_rc_version(version: str) -> tuple[int, ...]:
     major, minor, patch = version.split('.')
     if '-' in patch:  # -rc version
         patch, rc = patch.split('-')
@@ -76,21 +77,21 @@ def handle_rc_version(version):
     return tuple(map(int, (major, minor, patch, rc)))
 
 
-def shell_quote(item):
+def shell_quote(item: lib.utils.PathString) -> str:
     return shlex.quote(str(item))
 
 
 class Tarball:
     def __init__(self):
-        self.base_download_url = ''
-        self.extraction_location = None
-        self.extracted_file = None
-        self.local_location = None
-        self.remote_tarball_name = ''
-        self.remote_checksum_name = ''
-        self.strip_components = 1
+        self.base_download_url: str = ''
+        self.extraction_location: Path | None = None
+        self.extracted_file: Path | None = None
+        self.local_location: Path | None = None
+        self.remote_tarball_name: str = ''
+        self.remote_checksum_name: str = ''
+        self.strip_components: int = 1
 
-    def handle(self):
+    def handle(self) -> None:
         if not self.extracted_file:
             raise RuntimeError('No extracted file to test for tarball?')
         if not self.local_location:
@@ -118,7 +119,7 @@ class Tarball:
         if self.extraction_location and not self.extracted_file.exists():
             self.extraction_location.mkdir(exist_ok=True, parents=True)
 
-            tar_cmd = [
+            tar_cmd: lib.utils.CmdList = [
                 'tar',
                 '-C', self.extraction_location,
                 f"--strip-components={self.strip_components}",
@@ -140,17 +141,17 @@ class Tarball:
 
 class ToolchainManager:
     def __init__(self):
-        self.download_folder = None
-        self.install_folder = None
+        self.download_folder: Path | None = None
+        self.install_folder: Path | None = None
 
-        self.host_arch = platform.machine()
+        self.host_arch: str = platform.machine()
 
-        self.targets = []
+        self.targets: list[str] = []
 
-        self.latest_versions = {}
-        self.versions = []
+        self.latest_versions: dict[int, str] = {}
+        self.versions: list[int] = []
 
-    def clean_up_old_versions(self):
+    def clean_up_old_versions(self) -> None:
         if not self.latest_versions:
             raise RuntimeError('Attempting to call clean_up_old_versions() without latest version?')
         if not self.versions:
@@ -172,7 +173,7 @@ class ToolchainManager:
                     lib.utils.print_green(f"INFO: Removing {install_prefix.name}...")
                     shutil.rmtree(install_prefix)
 
-    def print_latest_versions(self):
+    def print_latest_versions(self) -> None:
         if not self.latest_versions:
             print('Attempting to call print_latest_versions() without latest version?')
         if not self.versions:
@@ -187,7 +188,7 @@ class GCCManager(ToolchainManager):
     DEFAULT_DOWNLOAD_FOLDER = Path(os.environ['NAS_FOLDER'], 'Toolchains/GCC')
     DEFAULT_INSTALL_FOLDER = Path(os.environ['CBL_TC_GCC_STORE'])
 
-    TARGETS = (
+    TARGETS: tuple[str, ...] = (
         'aarch64',
         'arm',
         'arm64',  # accept kernel value for aarch64
@@ -208,14 +209,14 @@ class GCCManager(ToolchainManager):
         'x86_64',
     )
 
-    VERSIONS = generate_versions('GCC_VERSION_MIN_KERNEL', 'GCC_VERSION_TOT')
+    VERSIONS: list[int] = generate_versions('GCC_VERSION_MIN_KERNEL', 'GCC_VERSION_TOT')
 
     def __init__(self):
         super().__init__()
 
-        self.latest_versions = LATEST_GCC_VERSIONS
+        self.latest_versions: dict[int, str] = LATEST_GCC_VERSIONS
 
-    def canonicalize_target(self, value):
+    def canonicalize_target(self, value: str) -> str:
         if 'linux' in value:
             return value
 
@@ -231,13 +232,13 @@ class GCCManager(ToolchainManager):
         }
         return f"{kernel_to_gcc.get(value, value)}-linux{suffix}"
 
-    def get_cc_as_path(self, version, target):
+    def get_cc_as_path(self, version: int, target: str) -> Path:
         full_version = LATEST_GCC_VERSIONS[version]
         canonical_target = self.canonicalize_target(target)
 
         return Path(os.environ['CBL_TC_GCC_STORE'], full_version, f"bin/{canonical_target}-")
 
-    def install(self, cache, extract):
+    def install(self, cache: bool, extract: bool) -> None:
         if not self.download_folder:
             raise RuntimeError('Attempting to call install() with no download folder?')
         if not self.install_folder:
@@ -247,13 +248,13 @@ class GCCManager(ToolchainManager):
                 f"Download folder ('{self.download_folder}') does not exist, please create it before running this script!",
             )
 
-        host_arch_gcc = {
+        host_arch_gcc: str = {
             'aarch64': 'arm64',
             'x86_64': 'x86_64',
         }[self.host_arch]
 
         for major_version in self.versions:
-            targets = sorted({self.canonicalize_target(val) for val in self.targets})
+            targets: list[str] = sorted({self.canonicalize_target(val) for val in self.targets})
 
             # No GCC 5.5.0 aarch64-linux on aarch64?
             if self.host_arch == 'aarch64' and 'aarch64-linux' in targets and major_version == 5:
@@ -301,7 +302,7 @@ class GCCManager(ToolchainManager):
 
                 tarball.handle()
 
-    def print_folder(self, folder):
+    def print_folder(self, folder: str) -> None:
         if len(self.versions) != 1:
             raise RuntimeError('Asking for print_folder() with number of versions other than one?')
 
@@ -313,7 +314,7 @@ class GCCManager(ToolchainManager):
 
         print(shell_quote(cc.parents[1 if folder == 'prefix' else 0]))
 
-    def print_vars(self, split):
+    def print_vars(self, split: bool) -> None:
         if len(self.targets) != 1:
             raise RuntimeError('Asking for print_vars() other than with one target architecture?')
         if len(self.versions) != 1:
@@ -321,8 +322,8 @@ class GCCManager(ToolchainManager):
 
         cc_path = self.get_cc_as_path(self.versions[0], self.targets[0])
 
-        cc_args = []
-        cc_vars = {}
+        cc_args: list[str] = []
+        cc_vars: dict[str, str] = {}
 
         if split:
             cc_args += ['-p', shell_quote(cc_path.parent)]
@@ -346,14 +347,14 @@ class LLVMManager(ToolchainManager):
     DEFAULT_DOWNLOAD_FOLDER = Path(os.environ['NAS_FOLDER'], 'Toolchains/LLVM')
     DEFAULT_INSTALL_FOLDER = Path(os.environ['CBL_TC_LLVM_STORE'])
 
-    VERSIONS = generate_versions('LLVM_VERSION_MIN_KERNEL', 'LLVM_VERSION_TOT')
+    VERSIONS: list[int] = generate_versions('LLVM_VERSION_MIN_KERNEL', 'LLVM_VERSION_TOT')
 
     def __init__(self):
         super().__init__()
 
-        self.latest_versions = LATEST_LLVM_VERSIONS
+        self.latest_versions: dict[int, str] = LATEST_LLVM_VERSIONS
 
-    def get_prefix(self, version=None):
+    def get_prefix(self, version: int | None = None) -> Path:
         if not version:
             if len(self.versions) != 1:
                 raise RuntimeError('Asking for print_vars() other than with one version?')
@@ -362,7 +363,7 @@ class LLVMManager(ToolchainManager):
         return Path(self.DEFAULT_INSTALL_FOLDER, LATEST_LLVM_VERSIONS[version])
 
     # pylint: disable-next=unused-argument
-    def install(self, cache, extract):  # noqa: ARG002
+    def install(self, cache: bool, extract: bool) -> None:  # noqa: ARG002
         if not self.download_folder:
             raise RuntimeError('Attempting to call install() with no download folder?')
         if not self.install_folder:
@@ -387,7 +388,7 @@ class LLVMManager(ToolchainManager):
 
             tarball.handle()
 
-    def print_folder(self, folder):
+    def print_folder(self, folder: str) -> None:
         if len(self.versions) != 1:
             raise RuntimeError('Asking for print_folder() with number of versions other than one?')
 
@@ -398,19 +399,19 @@ class LLVMManager(ToolchainManager):
 
         print(shell_quote(Path(prefix, 'bin') if folder == 'bin' else prefix))
 
-    def print_vars(self, split):
+    def print_vars(self, split: bool) -> None:
         if len(self.versions) != 1:
             raise RuntimeError('Asking for print_vars() other than with one version?')
 
         llvm_ver = LATEST_LLVM_VERSIONS[self.versions[0]]
         llvm_bin = Path(self.DEFAULT_INSTALL_FOLDER, llvm_ver, 'bin')
 
-        cc_args = []
-        cc_vars = {}
+        cc_args: list[str] = []
+        cc_vars: dict[str, str] = {}
 
         if split:
             cc_args = ['-p', shell_quote(llvm_bin)]
-            cc_vars['LLVM'] = 1
+            cc_vars['LLVM'] = '1'
         else:
             cc_vars['LLVM'] = shell_quote(f"{llvm_bin}/")
 

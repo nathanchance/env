@@ -8,7 +8,7 @@ import shutil
 import sys
 import time
 from pathlib import Path
-from subprocess import CalledProcessError
+from subprocess import CalledProcessError, CompletedProcess
 from tempfile import TemporaryDirectory
 
 sys.path.append(str(Path(__file__).resolve().parents[1]))
@@ -17,13 +17,16 @@ import lib.utils
 
 # pylint: enable=wrong-import-position
 
-NEXT_TREES = ('fedora', 'linux-next-llvm')
-PACMAN_TREES = ('linux-mainline-llvm', 'linux-next-llvm')
+NEXT_TREES: tuple[str, ...] = ('fedora', 'linux-next-llvm')
+PACMAN_TREES: tuple[str, ...] = ('linux-mainline-llvm', 'linux-next-llvm')
 
 
-def b4(cmd, **kwargs):
-    b4_cmd = ['b4']
-    (b4_cmd.append if isinstance(cmd, str) else b4_cmd.extend)(cmd)
+def b4(cmd: lib.utils.ValidCmd, **kwargs) -> CompletedProcess:
+    b4_cmd: lib.utils.CmdList = ['b4']
+    if isinstance(cmd, lib.utils.ValidSingleCmd):
+        b4_cmd.append(cmd)
+    else:
+        b4_cmd.extend(cmd)
 
     if 'XDG_FOLDER' in os.environ:
         if 'env' not in kwargs:
@@ -37,7 +40,7 @@ def b4(cmd, **kwargs):
     return lib.utils.run(b4_cmd, **kwargs)
 
 
-def b4_am_o(msg_id, **kwargs):
+def b4_am_o(msg_id: str, **kwargs) -> str:
     with TemporaryDirectory() as tmpdir:
         b4(
             ['am', '-o', tmpdir, '--no-parent', '-P', '_', msg_id],
@@ -49,16 +52,15 @@ def b4_am_o(msg_id, **kwargs):
         return patches[0].read_text(encoding='utf-8')
 
 
-def b4_info(**kwargs):
+def b4_info(**kwargs) -> dict[str, str]:
     output = b4(['prep', '--show-info'], **kwargs, capture_output=True).stdout
-    return {
-        key.strip(): value.strip()
-        for item in output.splitlines()
-        for key, value in item.split(':', 1)
-    }
+
+    return dict([item.split(': ', 1) for item in output.splitlines()])
 
 
-def b4_gen_series_commits(info=None, **kwargs):
+def b4_gen_series_commits(
+    info: dict[str, str] | None = None, **kwargs
+) -> tuple[dict[str, str], list[dict[str, str]]]:
     if not info:
         info = b4_info(**kwargs)
 
@@ -73,7 +75,7 @@ def b4_gen_series_commits(info=None, **kwargs):
     return series, commits
 
 
-def get_msg_id_subject(mail_str):
+def get_msg_id_subject(mail_str: str) -> tuple[str, str]:
     msg = email.message_from_string(mail_str)
 
     if not (subject := msg.get('Subject')):
@@ -91,7 +93,7 @@ def get_msg_id_subject(mail_str):
     return msg_id, subject
 
 
-def prepare_source(base_name, base_ref='origin/master'):
+def prepare_source(base_name: str, base_ref: str = 'origin/master') -> None:
     if base_name == 'linux-debug':
         return  # managed outside of the script
     if base_name not in (*NEXT_TREES, 'linux-mainline-llvm'):
@@ -102,9 +104,9 @@ def prepare_source(base_name, base_ref='origin/master'):
     lib.utils.call_git(source_folder, ['remote', 'update', '--prune', 'origin'])
     lib.utils.call_git_loud(source_folder, ['reset', '--hard', base_ref])
 
-    reverts = []
-    patches = []
-    commits = []
+    reverts: list[str] = []
+    patches: list[str] = []
+    commits: list[str] = []
 
     # Patching section
     if base_name == 'linux-mainline-llvm':
@@ -178,21 +180,21 @@ def prepare_source(base_name, base_ref='origin/master'):
 
 
 # Basically '$binary --version | head -1'
-def get_tool_version(binary_path):
+def get_tool_version(binary_path: Path | str) -> str:
     return lib.utils.chronic([binary_path, '--version']).stdout.splitlines()[0]
 
 
 def kmake(
-    variables,
-    targets,
-    ccache=True,
-    directory=None,
-    env=None,
-    jobs=None,
-    silent=True,
-    stdin=None,
-    use_time=False,
-):
+    variables: lib.utils.EnvVars,
+    targets: list[str],
+    ccache: bool = True,
+    directory: Path | None = None,
+    env: lib.utils.EnvVars | None = None,
+    jobs: int | None = None,
+    silent: bool = True,
+    stdin: str | None = None,
+    use_time: bool = False,
+) -> None:
     # Handle kernel directory right away
     if not (kernel_src := Path(directory) if directory else Path()).exists():
         raise RuntimeError(f"Derived kernel source ('{kernel_src}') does not exist?")
@@ -278,7 +280,7 @@ def kmake(
         lib.utils.print_green(f"Binutils version:\033[0m {get_tool_version(gnu_as)}\n")
 
     # Build and run make command
-    make_cmd = [
+    make_cmd: lib.utils.CmdList = [
         'stdbuf', '-eL', '-oL', 'make',
         *flags,
         *[f"{key}={variables[key]}" for key in sorted(variables)],

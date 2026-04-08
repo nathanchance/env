@@ -27,7 +27,7 @@ CONFIG_URL = (
 )
 
 
-def recreate_folder(folder):
+def recreate_folder(folder: Path) -> None:
     if folder.exists():
         try:
             shutil.rmtree(folder) if folder.is_dir() else folder.unlink()
@@ -37,7 +37,7 @@ def recreate_folder(folder):
 
 
 class KernelPkgBuilder:
-    def __init__(self, source_folder=None):
+    def __init__(self, source_folder: Path | None = None) -> None:
 
         if not source_folder:
             source_folder = Path.cwd()
@@ -46,29 +46,34 @@ class KernelPkgBuilder:
                 f"Derived kernel source ('{source_folder}') does not appear to be a Linux kernel tree?",
             )
 
-        self._source_folder = source_folder
-        self._build_folder = Path(
+        self._source_folder: Path = source_folder
+        self._build_folder: Path = Path(
             os.environ['TMP_BUILD_FOLDER'], self._source_folder.name
         )  # same as tbf
 
-        self.extra_sc_args = []
-        self.make_variables = {
+        self.extra_sc_args: list[str] = []
+        self.make_variables: lib.utils.EnvVars = {
             'ARCH': 'x86_64',
             'HOSTLDFLAGS': '-fuse-ld=lld',
             'LLVM': os.environ.get('LLVM', f"{os.environ['CBL_TC_LLVM']}/"),
             'LOCALVERSION': '',
-            'O': self._build_folder,
+            'O': self._build_folder.as_posix(),
         }
 
-        self._kernver = ''
-        self._pkgname = 'linux-' + self._source_folder.name.replace('linux-', '')
+        self._kernver: str = ''
+        self._pkgname: str = 'linux-' + self._source_folder.name.replace('linux-', '')
 
-    def _kmake(self, targets, **kwargs):
+    def _kmake(self, targets: list[str], **kwargs) -> None:
         lib.kernel.kmake(
             self.make_variables.copy(), targets, directory=self._source_folder, **kwargs
         )
 
-    def _prepare_files(self, _localmodconfig=False, _menuconfig=False, _extra_config_targets=None):
+    def _prepare_files(
+        self,
+        _localmodconfig: bool = False,
+        _menuconfig: bool = False,
+        _extra_config_targets: list[str] | None = None,
+    ):
         src_config_file = Path(os.environ['ENV_FOLDER'], f"configs/kernel/{self._pkgname}.config")
         dst_config_file = Path(self._build_folder, '.config')
         base_sc_cmd = [
@@ -76,11 +81,11 @@ class KernelPkgBuilder:
             '--file',
             src_config_file,
         ]
-        kconfig_env = {'KCONFIG_CONFIG': src_config_file}
-        plain_make_vars = {
+        kconfig_env: lib.utils.EnvVars = {'KCONFIG_CONFIG': src_config_file.as_posix()}
+        plain_make_vars: lib.utils.EnvVars = {
             'ARCH': 'x86_64',
             'LOCALVERSION': '',
-            'O': self._build_folder,
+            'O': self._build_folder.as_posix(),
         }
 
         # Step 1: Copy default Arch configuration and set a few options
@@ -145,7 +150,7 @@ class KernelPkgBuilder:
         print('Setting version...')
         Path(self._build_folder, 'localversion.10-pkgname').write_text('-llvm\n', encoding='utf-8')
 
-    def build(self):
+    def build(self) -> None:
         # Use upstream 'pacman-pkg' target if it is available
         if Path(self._source_folder, 'scripts/package/PKGBUILD').exists():
             target = 'pacman-pkg'
@@ -155,7 +160,7 @@ class KernelPkgBuilder:
             target = 'all'
         self._kmake([target])
 
-    def gen_b2sum(self):
+    def gen_b2sum(self) -> None:
         for possible_dir in (self._build_folder, Path(self._build_folder, 'pkgbuild')):
             if pkg_tar_zst := list(possible_dir.glob('*.tar.zst')):
                 break
@@ -172,7 +177,7 @@ class KernelPkgBuilder:
         ).stdout.replace('/run/host', '')
         b2sum_file.write_text(b2sum_txt, encoding='utf-8')
 
-    def package(self):
+    def package(self) -> None:
         # If build was done with upstream 'pacman-pkg' target, no need to run package()
         if Path(self._build_folder, 'pacman').exists():
             return
@@ -205,12 +210,12 @@ class KernelPkgBuilder:
         pkgbase.chmod(0o644)
 
         print('Installing modules...')
-        modules_env = {'ZSTD_CLEVEL': '19', **os.environ}
-        modules_vars = {
+        modules_env: lib.utils.EnvVars = {'ZSTD_CLEVEL': '19', **os.environ}
+        modules_vars: lib.utils.EnvVars = {
             **self.make_variables,
             'DEPMOD': '/doesnt/exist',
-            'INSTALL_MOD_PATH': Path(pkgdir, 'usr'),
-            'INSTALL_MOD_STRIP': 1,
+            'INSTALL_MOD_PATH': Path(pkgdir, 'usr').as_posix(),
+            'INSTALL_MOD_STRIP': '1',
         }
         lib.kernel.kmake(
             modules_vars,
@@ -251,11 +256,11 @@ package() {{
 
     def prepare(
         self,
-        base_ref,
-        localmodconfig=False,
-        menuconfig=False,
-        extra_config_targets=None,
-    ):
+        base_ref: str,
+        localmodconfig: bool = False,
+        menuconfig: bool = False,
+        extra_config_targets: list[str] | None = None,
+    ) -> None:
         lib.kernel.prepare_source(self._pkgname, base_ref)
 
         self._prepare_files(localmodconfig, menuconfig, extra_config_targets)
@@ -273,7 +278,9 @@ class DebugPkgBuilder(KernelPkgBuilder):
         super().__init__(Path(os.environ['CBL_SRC_D'], 'linux-debug'))
 
     # pylint: disable-next=signature-differs
-    def _prepare_files(self, localmodconfig, menuconfig, extra_config_targets=None):  # ty: ignore[invalid-method-override]
+    def _prepare_files(
+        self, localmodconfig: bool, menuconfig: bool, extra_config_targets: list[str] | None = None
+    ):  # ty: ignore[invalid-method-override]
         config = Path(self._build_folder, '.config')
         base_sc_cmd = [Path(self._source_folder, 'scripts/config'), '--file', config]
 
@@ -309,7 +316,12 @@ class MainlinePkgBuilder(KernelPkgBuilder):
 
         super().__init__(Path(os.environ['CBL_SRC_P'], 'linux-mainline-llvm'))
 
-    def _prepare_files(self, _localmodconfig=False, _menuconfig=False, _extra_config_targets=None):
+    def _prepare_files(
+        self,
+        _localmodconfig: bool = False,
+        _menuconfig: bool = False,
+        _extra_config_targets: list[str] | None = None,
+    ) -> None:
         super()._prepare_files()
 
         local_ver_parts = []
@@ -380,8 +392,8 @@ def parse_arguments():
 if __name__ == '__main__':
     args = parse_arguments()
 
-    make_vars = {}
-    config_targets = []
+    make_vars: lib.utils.EnvVars = {}
+    config_targets: list[str] = []
     for arg in args.pos_args:
         if '=' in arg:
             make_vars.update([arg.split('=', 1)])
@@ -396,7 +408,7 @@ if __name__ == '__main__':
         else:
             raise RuntimeError(f"Cannot handle positional argument ('{arg}')!")
 
-    builder = {
+    builder: KernelPkgBuilder = {
         'debug': DebugPkgBuilder,
         'mainline-llvm': MainlinePkgBuilder,
         'next-llvm': NextPkgBuilder,
@@ -417,8 +429,10 @@ if __name__ == '__main__':
         builder.extra_sc_args += ['-e', 'OBJTOOL_WERROR', '-e', 'WERROR']
 
     if args.gcc and 'CROSS_COMPILE' not in make_vars:
-        make_vars['CROSS_COMPILE'] = korg_tc.GCCManager().get_cc_as_path(
-            korg_tc.GCCManager.VERSIONS[-1], 'x86_64'
+        make_vars['CROSS_COMPILE'] = (
+            korg_tc.GCCManager()
+            .get_cc_as_path(korg_tc.GCCManager.VERSIONS[-1], 'x86_64')
+            .as_posix()
         )
     if 'CROSS_COMPILE' in make_vars:
         del builder.make_variables['HOSTLDFLAGS']

@@ -13,7 +13,7 @@ import requests
 from . import utils
 
 
-def calculate(file_path):
+def calculate(file_path: Path) -> str:
     file_hash = hashlib.sha256()
     with Path(file_path).open('rb') as file:
         # 1MB at a time
@@ -22,18 +22,18 @@ def calculate(file_path):
     return file_hash.hexdigest()
 
 
-def get_from_url(url, basename):
+def get_from_url(url: str, basename: str) -> str | None:
     response = requests.get(url, timeout=3600)
     response.raise_for_status()
     for line in response.content.decode('utf-8').splitlines():
         if 'clone.bundle' in basename:
-            basename = basename.split('-')[0]
+            basename = basename.split('-', maxsplit=1)[0]
         if basename in line and (sha256_match := re.search('[A-Fa-f0-9]{64}', line)):
             return sha256_match.group(0)
     return None
 
 
-def validate_from_url(file, url):
+def validate_from_url(file: Path, url: str):
     computed_sha256 = calculate(file)
     expected_sha256 = get_from_url(url, file.name)
 

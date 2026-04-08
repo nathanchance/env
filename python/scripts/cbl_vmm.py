@@ -18,6 +18,7 @@ import subprocess
 import sys
 import time
 from argparse import ArgumentParser
+from collections.abc import Generator
 from pathlib import Path
 from tempfile import TemporaryDirectory
 
@@ -33,13 +34,13 @@ BASE_FOLDER = (
     if 'VM_FOLDER' in os.environ
     else Path(__file__).resolve().parent.joinpath('vm')
 )
-DEFAULT_DISTRO = {
+DEFAULT_DISTRO: dict[str, str] = {
     'aarch64': 'fedora',
     'arm64': 'fedora',
     'arm': 'debian',
     'x86_64': 'arch',
 }
-DEFAULT_KERNEL_PATH = {
+DEFAULT_KERNEL_PATH: dict[str, Path] = {
     'aarch64': Path('arch/arm64/boot/Image'),
     'arm': Path('arch/arm/boot/zImage'),
     'i386': Path('arch/x86/boot/bzImage'),
@@ -49,7 +50,7 @@ DEV_KVM_ACCESS = os.access('/dev/kvm', os.R_OK | os.W_OK)
 HOST_ARCH = platform.machine()
 
 
-def find_first_file(possible_files):
+def find_first_file(possible_files: list[Path]) -> Path:
     for file in possible_files:
         if file.exists():
             return file
@@ -60,35 +61,35 @@ def find_first_file(possible_files):
 
 
 class VirtualMachine:
-    def __init__(self, arch, name):
+    def __init__(self, arch: str, name: str) -> None:
         # External values (required explicitly for _data_folder assignment below)
-        self.arch = arch
-        self.name = name
+        self.arch: str = arch
+        self.name: str = name
 
         # Internal values
-        self._data_folder = Path(BASE_FOLDER, self.arch, self.name)
-        self._efi_img = Path(self._data_folder, 'efi.img')
-        self._efi_vars_img = Path(self._data_folder, 'efi_vars.img')
-        self._images_to_mount = (
+        self._data_folder: Path = Path(BASE_FOLDER, self.arch, self.name)
+        self._efi_img: Path = Path(self._data_folder, 'efi.img')
+        self._efi_vars_img: Path = Path(self._data_folder, 'efi_vars.img')
+        self._images_to_mount: Generator[Path] = (
             x for x in Path(self._data_folder).glob('*.img') if 'efi' not in x.name
         )
-        self._primary_disk_img = Path(self._data_folder, 'disk.img')
-        self._qemu = 'qemu-system-' + self.arch
-        self._shared_folder = Path(self._data_folder, 'shared')
+        self._primary_disk_img: Path = Path(self._data_folder, 'disk.img')
+        self._qemu: str = 'qemu-system-' + self.arch
+        self._shared_folder: Path = Path(self._data_folder, 'shared')
         # This is good enough for most cases
-        self._use_kvm = self.arch == HOST_ARCH and DEV_KVM_ACCESS
-        self._kvm_cpu = 'host'
+        self._use_kvm: bool = self.arch == HOST_ARCH and DEV_KVM_ACCESS
+        self._kvm_cpu: str = 'host'
 
         # External values (can be calculated implicitly currently or later)
-        self.cmdline = ''
-        self.cores = 0
+        self.cmdline: str = ''
+        self.cores: int = 0
         self.initrd: Path = Path('/initramfs')
-        self.iso = None
-        self.kernel = None
-        self.memory = 0
-        self.profile = 'regular'
+        self.iso: str = ''
+        self.kernel: Path | None = None
+        self.memory: int = 0
+        self.profile: str = 'regular'
         # At this stage, only completely static arguments should be added!
-        self.qemu_args = [
+        self.qemu_args: lib.utils.CmdList = [
             # RNG
             '-object', 'rng-random,filename=/dev/urandom,id=rng0',
             '-device', 'virtio-rng-pci',
@@ -104,10 +105,10 @@ class VirtualMachine:
             '-drive', f"if=pflash,format=raw,file={self._efi_img},readonly=on",
             '-drive', f"if=pflash,format=raw,file={self._efi_vars_img}",
         ]  # fmt: off
-        self.size = 75
-        self.ssh_port = 8022
+        self.size: int = 75
+        self.ssh_port: int = 8022
 
-    def _calc_cpus(self):
+    def _calc_cpus(self) -> int:
         # Respect the user's choice of number of cores
         if self.cores:
             return self.cores
@@ -131,7 +132,7 @@ class VirtualMachine:
 
         raise RuntimeError('Did not return in _calc_cpus()?')
 
-    def _calc_mem(self, cpus):
+    def _calc_mem(self, cpus: int) -> int:
         # Respect the user's choice of memory
         if self.memory:
             return self.memory
@@ -154,7 +155,7 @@ class VirtualMachine:
         # memory.
         return min(cpus * 2, avail_mem)
 
-    def _create_disk_img(self):
+    def _create_disk_img(self) -> None:
         self._primary_disk_img.parent.mkdir(exist_ok=True, parents=True)
         lib.utils.run(
             [
@@ -168,11 +169,11 @@ class VirtualMachine:
             show_cmd=True,
         )
 
-    def _gen_dynamic_qemu_args(self):
+    def _gen_dynamic_qemu_args(self) -> lib.utils.CmdList:
         cpu_val = self._calc_cpus()
         mem_val = f"{self._calc_mem(cpu_val)}G"
 
-        args: list[Path | str] = [
+        args: lib.utils.CmdList = [
             # Memory
             '-m', mem_val,
 
@@ -237,7 +238,7 @@ class VirtualMachine:
 
         return args
 
-    def _get_image_format(self, image):
+    def _get_image_format(self, image: Path) -> str:
         qemu_img_cmd = ['qemu-img', 'info', '--output', 'json', image]
         json_output = json.loads(lib.utils.chronic(qemu_img_cmd).stdout)
 
@@ -246,11 +247,11 @@ class VirtualMachine:
         raise ValueError(f"Unhandled image format: {img_format}")
 
     # Public interfaces
-    def remove(self):
+    def remove(self) -> None:
         if self._data_folder.is_dir():
             shutil.rmtree(self._data_folder)
 
-    def run(self):
+    def run(self) -> None:
         if not self._primary_disk_img.exists():
             raise RuntimeError(
                 f"Disk image ('{self._primary_disk_img}') for virtual machine ('{self.name}') does not exist, run 'setup' first?",
@@ -267,7 +268,7 @@ class VirtualMachine:
                 'Could not find doas or sudo on your system (needed for virtiofsd integration)!'
             )
 
-        possible_vfsd_locations = [
+        possible_vfsd_locations: list[Path] = [
             Path('/usr/lib/virtiofsd'),  # Arch Linux
             Path('/usr/libexec/virtiofsd'),  # Fedora
         ]
@@ -288,7 +289,7 @@ class VirtualMachine:
         self.qemu_args += ['-chardev', f"socket,id=char0,path={vfsd_sock}"]
 
         # Only the Rust virtiofsd implementation is supported now
-        virtiofsd_cmd = [
+        virtiofsd_cmd: lib.utils.CmdList = [
             sudo, virtiofsd,
             '--cache', 'always',
             '--shared-dir', self._shared_folder,
@@ -326,7 +327,11 @@ class VirtualMachine:
             # QEMU, otherwise we may get weird 'Permission denied' errors
             time.sleep(1)
             try:
-                qemu_cmd = [qemu, *self.qemu_args, *self._gen_dynamic_qemu_args()]
+                qemu_cmd: lib.utils.CmdList = [
+                    qemu,
+                    *self.qemu_args,
+                    *self._gen_dynamic_qemu_args(),
+                ]
                 lib.utils.run(qemu_cmd, show_cmd=True)
             except subprocess.CalledProcessError as err:
                 # If virtiofsd is dead, it is pretty likely that it was the
@@ -340,19 +345,19 @@ class VirtualMachine:
                 vfsd.kill()
                 tmpdir.cleanup()
 
-    def setup(self):
+    def setup(self) -> None:
         self.remove()
         self._create_disk_img()
         self.run()
 
 
 class ArmVirtualMachine(VirtualMachine):
-    def __init__(self, arch, name):
+    def __init__(self, arch: str, name: str) -> None:
         super().__init__(arch, name)
 
         self.qemu_args += ['-M', 'virt']
 
-    def _setup_efi_files(self, possible_efi_files=None):
+    def _setup_efi_files(self, possible_efi_files: list[Path] | None = None) -> None:
         if not possible_efi_files:
             raise RuntimeError('No EFI files provided?')
 
@@ -369,13 +374,13 @@ class ArmVirtualMachine(VirtualMachine):
             with self._efi_vars_img.open(mode='xb') as file:
                 file.truncate(efi_img_size)
 
-    def run(self):
+    def run(self) -> None:
         self._setup_efi_files()
         super().run()
 
 
 class Arm32VirtualMachine(ArmVirtualMachine):
-    def __init__(self, name):
+    def __init__(self, name: str) -> None:
         super().__init__('arm', name)
 
         if HOST_ARCH == 'aarch64':
@@ -394,7 +399,7 @@ class Arm32VirtualMachine(ArmVirtualMachine):
                 self._kvm_cpu += ',aarch64=off'
                 self._qemu = 'qemu-system-aarch64'
 
-    def _setup_efi_files(self, possible_efi_files=None):
+    def _setup_efi_files(self, possible_efi_files: list[Path] | None = None) -> None:
         possible_efi_files = [
             Path('/usr/share/edk2/arm/QEMU_EFI.fd'),  # Arch Linux, Fedora
         ]
@@ -402,7 +407,7 @@ class Arm32VirtualMachine(ArmVirtualMachine):
 
 
 class Arm64VirtualMachine(ArmVirtualMachine):
-    def __init__(self, name):
+    def __init__(self, name: str) -> None:
         super().__init__('aarch64', name)
 
         # If not running on KVM, use QEMU's max CPU emulation target
@@ -411,7 +416,7 @@ class Arm64VirtualMachine(ArmVirtualMachine):
         if not self._use_kvm:
             self.qemu_args += ['-cpu', 'max,pauth-impdef=true']
 
-    def _setup_efi_files(self, possible_efi_files=None):
+    def _setup_efi_files(self, possible_efi_files: list[Path] | None = None) -> None:
         possible_efi_files = [
             Path('/usr/share/edk2/aarch64/QEMU_EFI.silent.fd'),  # Fedora
             Path('/usr/share/edk2/aarch64/QEMU_EFI.fd'),  # Arch Linux
@@ -421,12 +426,16 @@ class Arm64VirtualMachine(ArmVirtualMachine):
 
 
 class X86VirtualMachine(VirtualMachine):
-    def __init__(self, arch, name):
+    def __init__(self, arch: str, name: str) -> None:
         super().__init__(arch, name)
 
         self.qemu_args += ['-M', 'q35']
 
-    def _setup_efi_files(self, possible_efi_files=None, possible_efi_vars_files=None):
+    def _setup_efi_files(
+        self,
+        possible_efi_files: list[Path] | None = None,
+        possible_efi_vars_files: list[Path] | None = None,
+    ) -> None:
         if not possible_efi_files:
             raise RuntimeError('No EFI files provided?')
         if not possible_efi_vars_files:
@@ -446,12 +455,16 @@ class X86VirtualMachine(VirtualMachine):
 
 
 class X8632VirtualMachine(X86VirtualMachine):
-    def __init__(self, name):
+    def __init__(self, name: str) -> None:
         super().__init__('i386', name)
 
         self._use_kvm = DEV_KVM_ACCESS and HOST_ARCH == 'x86_64'
 
-    def _setup_efi_files(self, possible_efi_files=None, possible_efi_vars_files=None):
+    def _setup_efi_files(
+        self,
+        possible_efi_files: list[Path] | None = None,
+        possible_efi_vars_files: list[Path] | None = None,
+    ) -> None:
         possible_efi_files = [
             Path('/usr/share/edk2/ia32/OVMF_CODE.4m.fd'),  # Arch Linux (4MB location)
             Path('/usr/share/edk2/ia32/OVMF_CODE.fd'),  # Arch Linux (2MB location)
@@ -468,10 +481,14 @@ class X8632VirtualMachine(X86VirtualMachine):
 
 
 class X8664VirtualMachine(X86VirtualMachine):
-    def __init__(self, name):
+    def __init__(self, name: str) -> None:
         super().__init__('x86_64', name)
 
-    def _setup_efi_files(self, possible_efi_files=None, possible_efi_vars_files=None):
+    def _setup_efi_files(
+        self,
+        possible_efi_files: list[Path] | None = None,
+        possible_efi_vars_files: list[Path] | None = None,
+    ) -> None:
         possible_efi_files = [
             Path('/usr/share/edk2/x64/OVMF_CODE.4m.fd'),  # Arch Linux (4MB location)
             Path('/usr/share/edk2/x64/OVMF_CODE.fd'),  # Arch Linux (2MB location) and Fedora
@@ -603,7 +620,7 @@ def main():
     if not (name := args.name):
         name = DEFAULT_DISTRO[arch]
 
-    vm = {
+    vm: VirtualMachine = {
         'aarch64': Arm64VirtualMachine,
         'arm64': Arm64VirtualMachine,
         'arm': Arm32VirtualMachine,
@@ -628,7 +645,7 @@ def main():
         vm.qemu_args += ['-s', '-S']
     if getattr(args, 'graphical', False):
         vm.qemu_args += ['-device', 'virtio-vga-gl', '-display', 'gtk,gl=on']
-    if iso := getattr(args, 'iso', None):
+    if iso := getattr(args, 'iso', ''):
         vm.iso = iso
     if size := getattr(args, 'size', 0):
         vm.size = size
