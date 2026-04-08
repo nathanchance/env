@@ -39,17 +39,6 @@ jobs:
     make_variables:
       LLVM: 1
       LLVM_IAS: 1
-  # arm64be
-  - target_arch: arm64
-    toolchain: clang
-    kconfig:
-    - defconfig
-    - CONFIG_CPU_BIG_ENDIAN=y
-    targets:
-    - kernel
-    make_variables:
-      LLVM: 1
-      LLVM_IAS: 1
   # x86
   - target_arch: i386
     toolchain: clang
@@ -176,16 +165,6 @@ jobs:
   - target_arch: arm64
     toolchain: gcc
     kconfig: defconfig
-    make_variables:
-      CROSS_COMPILE: aarch64-linux-
-    targets:
-    - kernel
-  # arm64be
-  - target_arch: arm64
-    toolchain: gcc
-    kconfig:
-    - defconfig
-    - CONFIG_CPU_BIG_ENDIAN=y
     make_variables:
       CROSS_COMPILE: aarch64-linux-
     targets:

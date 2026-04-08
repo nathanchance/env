@@ -19,7 +19,6 @@ MATRIX: dict[str, dict[str, str]] = {
         'arm32_v6': 'aspeed_g5_defconfig',
         'arm32_v7': 'multi_v7_defconfig',
         'arm64': 'defconfig',
-        'arm64be': 'defconfig+CONFIG_CPU_BIG_ENDIAN=y',
         'mips': 'malta_defconfig+CONFIG_CPU_BIG_ENDIAN=y',
         'mipsel': 'malta_defconfig',
         'ppc32': 'ppc44x_defconfig',
