@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
 
 import os
 import sys
@@ -19,6 +19,7 @@ MATRIX: dict[str, dict[str, str]] = {
         'arm32_v6': 'aspeed_g5_defconfig',
         'arm32_v7': 'multi_v7_defconfig',
         'arm64': 'defconfig',
+        'loongarch': 'defconfig',
         'mips': 'malta_defconfig+CONFIG_CPU_BIG_ENDIAN=y',
         'mipsel': 'malta_defconfig',
         'ppc32': 'ppc44x_defconfig',

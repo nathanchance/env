@@ -48,6 +48,15 @@ jobs:
     make_variables:
       LLVM: 1
       LLVM_IAS: 1
+  # loongarch
+  - target_arch: loongarch
+    toolchain: clang
+    kconfig: defconfig
+    targets:
+    - kernel
+    make_variables:
+      LLVM: 1
+      LLVM_IAS: 1
   # mips
   - target_arch: mips
     toolchain: clang
@@ -177,6 +186,14 @@ jobs:
       CROSS_COMPILE: x86_64-linux-
     targets:
     - kernel
+  # loongarch
+  - target_arch: loongarch
+    toolchain: gcc
+    kconfig: defconfig
+    targets:
+    - kernel
+    make_variables:
+      CROSS_COMPILE: loongarch64-linux-
   # mips
   - target_arch: mips
     toolchain: gcc
