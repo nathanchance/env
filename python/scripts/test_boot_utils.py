@@ -75,6 +75,6 @@ for toolchain, builds in MATRIX.items():
             '-k',
             kernel_dir,
             '-t',
-            '90s',
+            '4m',
         ]
         lib.utils.run(boot_utils_cmd, show_cmd=True)
