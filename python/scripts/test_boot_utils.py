@@ -23,7 +23,7 @@ MATRIX: dict[str, dict[str, str]] = {
         'mips': 'malta_defconfig+CONFIG_CPU_BIG_ENDIAN=y',
         'mipsel': 'malta_defconfig',
         'ppc32': 'ppc44x_defconfig',
-        'ppc32_mac': 'pmac32_defconfig+CONFIG_SERIAL_PMACZILOG=y+CONFIG_SERIAL_PMACZILOG_CONSOLE=y+CONFIG_SERIAL_PMACZILOG_TTYS=n',
+        'ppc32_mac': 'pmac32_defconfig',
         'ppc64': 'ppc64_guest_defconfig',
         'ppc64le': 'powernv_defconfig',
         'riscv': 'defconfig',

@@ -85,9 +85,6 @@ jobs:
     toolchain: clang
     kconfig:
     - pmac32_defconfig
-    - CONFIG_SERIAL_PMACZILOG=y
-    - CONFIG_SERIAL_PMACZILOG_CONSOLE=y
-    - CONFIG_SERIAL_PMACZILOG_TTYS=n
     targets:
     - kernel
     kernel_image: vmlinux
@@ -230,9 +227,6 @@ jobs:
     toolchain: gcc
     kconfig:
     - pmac32_defconfig
-    - CONFIG_SERIAL_PMACZILOG=y
-    - CONFIG_SERIAL_PMACZILOG_CONSOLE=y
-    - CONFIG_SERIAL_PMACZILOG_TTYS=n
     make_variables:
       CROSS_COMPILE: powerpc-linux-
     targets:
