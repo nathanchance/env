@@ -21,6 +21,10 @@ import lib.utils
 # pylint: enable=wrong-import-position
 
 
+def gen_json_from_cmd(cmd: lib.utils.ValidCmd) -> dict[str, Any]:
+    return json.loads(lib.utils.chronic(cmd).stdout)
+
+
 # pylint: disable-next=invalid-name
 def get_current_datetime(tz: datetime.tzinfo | None = None) -> datetime.datetime:
     return datetime.datetime.now(tz=tz)
@@ -135,11 +139,14 @@ def parse_parameters():
     gen_help = 'Generate line items automatically'
     gen_type_choices = ('mail', 'patch', 'pr')
     gen_type_help = 'Type of item to generate'
+    gen_args_help = 'Additional arguments (such as pull request numbers)'
     gen_parser = subparsers.add_parser('gen', help=gen_help)
     gen_parser.add_argument('type', choices=gen_type_choices, help=gen_type_help)
+    gen_parser.add_argument('additional_args', nargs='*', help=gen_args_help)
     gen_parser.set_defaults(func=generate_item)
     generate_parser = subparsers.add_parser('generate', help=gen_help)
     generate_parser.add_argument('type', choices=gen_type_choices, help=gen_type_help)
+    generate_parser.add_argument('additional_args', nargs='*', help=gen_args_help)
     generate_parser.set_defaults(func=generate_item)
 
     new_parser = subparsers.add_parser(
@@ -250,9 +257,17 @@ def generate_item(args) -> None:
         print(f"  * `{title}` ({', '.join(md_links)})")
 
     elif item_type == 'pr':
-        gh_json = json.loads(lib.utils.chronic(['gh', 'pr', 'view', '--json', 'title,url']).stdout)
+        base_gh_cmd = ['gh', 'pr', 'view', '--json', 'title,url']
+        prs = args.additional_args if args.additional_args else []
+        if prs:
+            for pr in prs:
+                gh_json = gen_json_from_cmd([*base_gh_cmd, pr])
 
-        print(f"* [`{gh_json['title']}`]({gh_json['url']})")
+                print(f"* [`{gh_json['title']}`]({gh_json['url']})")
+        else:
+            gh_json = gen_json_from_cmd(base_gh_cmd)
+
+            print(f"* [`{gh_json['title']}`]({gh_json['url']})")
 
     else:
         raise ValueError(f"Unhandled item type ('{item_type}')")
