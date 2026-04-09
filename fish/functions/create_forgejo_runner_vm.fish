@@ -15,16 +15,25 @@ function create_forgejo_runner_vm -d "Easily create and deploy a Forgejo runner 
             set distro arch
             set osinfo archlinux
     end
-    set vcpus (math (nproc) / 8)
+    if not set -q vcpus
+        set vcpus (math (nproc) / 8)
+    end
     if test $vcpus -lt 2
         set vcpus 2
     end
-    set memory (math $vcpus x 2048) # 2GB for each core
+    if not set memory (math $vcpus x 2048) # 2GB for each core
+        __print_error "vcpus value ('$cpus') likely wrong?"
+        return 1
+    end
 
     set libvirt_store $VM_FOLDER/libvirt
     mkdir -p $libvirt_store
     set base_vm_hostname forgejo-runner-(string replace _ - $UTS_MACH)-$osinfo-$hostname
     set vm_hostname $base_vm_hostname-(math (path filter -f $libvirt_store/$base_vm_hostname-*.raw | count) + 1)
+
+    if not set -q output_size
+        set output_size 50G
+    end
 
     # Create disk image
     run_mkosi build \
@@ -33,7 +42,7 @@ function create_forgejo_runner_vm -d "Easily create and deploy a Forgejo runner 
         --hostname $vm_hostname \
         --image-id $vm_hostname \
         --output-directory $libvirt_store/$vm_hostname \
-        --output-size 50G \
+        --output-size $output_size \
         --profile bootable,forgejo-runner \
         $mkosi_build_args
     or return
