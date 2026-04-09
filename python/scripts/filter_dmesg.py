@@ -57,7 +57,7 @@ ALLOWLIST = {
         # Don't care, I don't use SGX
         r"x86/cpu: SGX disabled or unsupported by BIOS\.",
         # BIOS issue?
-        'hpet_acpi_add: no address or irqs in _CRS',
+        r"hpet_acpi_(add|probe): no address or irqs in _CRS",
         # NVMe firmware issues?
         *NVME_WARNINGS,
         # Don't use IMA
