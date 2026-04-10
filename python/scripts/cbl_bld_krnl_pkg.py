@@ -52,12 +52,12 @@ class KernelPkgBuilder:
         )  # same as tbf
 
         self.extra_sc_args: list[str] = []
-        self.make_variables: lib.utils.EnvVars = {
+        self.make_variables: lib.utils.MakeVars = {
             'ARCH': 'x86_64',
             'HOSTLDFLAGS': '-fuse-ld=lld',
             'LLVM': os.environ.get('LLVM', f"{os.environ['CBL_TC_LLVM']}/"),
             'LOCALVERSION': '',
-            'O': self._build_folder.as_posix(),
+            'O': self._build_folder,
         }
 
         self._kernver: str = ''
@@ -81,11 +81,11 @@ class KernelPkgBuilder:
             '--file',
             src_config_file,
         ]
-        kconfig_env: lib.utils.EnvVars = {'KCONFIG_CONFIG': src_config_file.as_posix()}
-        plain_make_vars: lib.utils.EnvVars = {
+        kconfig_env: lib.utils.MakeVars = {'KCONFIG_CONFIG': src_config_file}
+        plain_make_vars: lib.utils.MakeVars = {
             'ARCH': 'x86_64',
             'LOCALVERSION': '',
-            'O': self._build_folder.as_posix(),
+            'O': self._build_folder,
         }
 
         # Step 1: Copy default Arch configuration and set a few options
@@ -211,10 +211,10 @@ class KernelPkgBuilder:
 
         print('Installing modules...')
         modules_env: lib.utils.EnvVars = {'ZSTD_CLEVEL': '19', **os.environ}
-        modules_vars: lib.utils.EnvVars = {
+        modules_vars: lib.utils.MakeVars = {
             **self.make_variables,
             'DEPMOD': '/doesnt/exist',
-            'INSTALL_MOD_PATH': Path(pkgdir, 'usr').as_posix(),
+            'INSTALL_MOD_PATH': Path(pkgdir, 'usr'),
             'INSTALL_MOD_STRIP': '1',
         }
         lib.kernel.kmake(
@@ -392,7 +392,7 @@ def parse_arguments():
 if __name__ == '__main__':
     args = parse_arguments()
 
-    make_vars: lib.utils.EnvVars = {}
+    make_vars: lib.utils.MakeVars = {}
     config_targets: list[str] = []
     for arg in args.pos_args:
         if '=' in arg:

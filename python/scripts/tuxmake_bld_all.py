@@ -115,9 +115,9 @@ def get_kconfigs_for_target(targets: list[str]) -> list[str]:
 
 def get_env_make_variables(
     target_arch: str, toolchain: str
-) -> tuple[lib.utils.EnvVars, lib.utils.EnvVars]:
+) -> tuple[lib.utils.EnvVars, lib.utils.MakeVars]:
     environment: lib.utils.EnvVars = {}
-    make_variables: lib.utils.EnvVars = {}
+    make_variables: lib.utils.MakeVars = {}
 
     if 'gcc' in toolchain:
         version = int(toolchain.split('-')[1])

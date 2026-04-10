@@ -181,11 +181,11 @@ def get_tool_version(binary_path: Path | str) -> str:
 
 
 def kmake(
-    variables: lib.utils.EnvVars,
+    variables: lib.utils.MakeVars,
     targets: list[str],
     ccache: bool = True,
     directory: Path | None = None,
-    env: lib.utils.EnvVars | None = None,
+    env: lib.utils.EnvVars | lib.utils.MakeVars | None = None,
     jobs: int | None = None,
     silent: bool = True,
     stdin: str | None = None,

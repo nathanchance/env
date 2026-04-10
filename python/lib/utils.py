@@ -13,6 +13,7 @@ import sys
 import time
 from collections.abc import Sequence
 from pathlib import Path
+from typing import TypedDict
 
 PathString = Path | str
 ValidSingleCmd = str | bytes | os.PathLike
@@ -20,6 +21,25 @@ ValidCmd = ValidSingleCmd | Sequence[ValidSingleCmd]
 CmdList = list[ValidSingleCmd]
 PackageSequence = Sequence[PathString]
 EnvVars = dict[str, str]
+
+
+class MakeVars(TypedDict, total=False):
+    ARCH: str
+    CC: str
+    CROSS_COMPILE: PathString
+    CROSS_COMPILE_COMPAT: PathString
+    DEPMOD: str
+    HOSTLDFLAGS: str
+    INSTALL_MOD_PATH: Path
+    INSTALL_MOD_STRIP: str
+    KCONFIG_CONFIG: Path
+    LLVM: str
+    LLVM_IAS: str
+    LOCALVERSION: str
+    LSMOD: Path
+    O: Path  # noqa: E741
+    PACMAN_EXTRAPACKAGES: str
+    PACMAN_PKGBASE: str
 
 
 def call_git(directory: Path | None, cmd: ValidCmd, **kwargs) -> subprocess.CompletedProcess:

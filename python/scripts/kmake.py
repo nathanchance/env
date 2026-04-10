@@ -11,6 +11,7 @@ from pathlib import Path
 sys.path.append(str(Path(__file__).resolve().parents[1]))
 # pylint: disable=wrong-import-position
 import lib.kernel
+import lib.utils
 
 # pylint: enable=wrong-import-position
 
@@ -64,7 +65,7 @@ if __name__ == '__main__':
 
     prepend_to_path(args.prepend_to_path)
 
-    variables: dict[str, str] = {}
+    variables: lib.utils.MakeVars = {}
     targets: list[str] = []
     for arg in args.make_args:
         if '=' in arg:
@@ -106,9 +107,9 @@ if __name__ == '__main__':
                 BASE = '-'.join(src.parts[-2:])
             else:
                 BASE = src.name
-            variables['O'] = Path(os.environ['TMP_BUILD_FOLDER'], BASE).as_posix()
+            variables['O'] = Path(os.environ['TMP_BUILD_FOLDER'], BASE)
         else:
-            variables['O'] = 'build'
+            variables['O'] = Path('build')
 
     lib.kernel.kmake(
         variables,

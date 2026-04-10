@@ -48,7 +48,7 @@ def qemu_arch_to_kernel_arch(key: str) -> str:
     }[key]
 
 
-def get_toolchain_vars(kernel_arch: str, toolchain: str) -> dict[str, str]:
+def get_toolchain_vars(kernel_arch: str, toolchain: str) -> lib.utils.MakeVars:
     if toolchain == 'llvm':
         return {'LLVM': '1'}
 
@@ -135,7 +135,7 @@ def parse_arguments():
 def build_kernel_for_vm(
     kernel_src: Path,
     add_make_targets: list[str],
-    make_variables: lib.utils.EnvVars,
+    make_variables: lib.utils.MakeVars,
     config: str,
     menuconfig: bool,
     vm_name: str,
@@ -224,10 +224,10 @@ if __name__ == '__main__':
     else:
         out = Path(src_folder, 'build')
 
-    make_vars: lib.utils.EnvVars = {
+    make_vars: lib.utils.MakeVars = {
         'ARCH': qemu_arch_to_kernel_arch(arch),
-        'LSMOD': lsmod.as_posix(),
-        'O': out.as_posix(),
+        'LSMOD': lsmod,
+        'O': out,
     }
     make_vars.update(get_toolchain_vars(make_vars['ARCH'], args.toolchain))
     make_vars.update(dict(arg.split('=', 1) for arg in args.make_args))
