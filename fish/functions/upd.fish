@@ -129,6 +129,21 @@ function upd -d "Runs the update command for the current distro or downloads/upd
                 end
                 continue
 
+            case forgejo-actions-vms
+                switch $UTS_MACH
+                    case aarch64
+                        set upd_cmd dnf update -y
+                    case x86_64
+                        set upd_cmd pacman -Syyu --noconfirm
+                end
+
+                for domain in (path basename $VM_FOLDER/libvirt/forgejo-runner-*.raw | path change-extension '')
+                    header "Updating $domain"
+                    ssh root@(virsh domifaddr $domain | string match -gr '([0-9.]+)/24$') $upd_cmd
+                    or return
+                end
+                continue
+
             case os os-no-container
                 $PYTHON_SCRIPTS_FOLDER/upd_distro.py $yes
                 or return
