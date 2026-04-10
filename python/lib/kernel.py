@@ -113,9 +113,75 @@ def prepare_source(base_name: str, base_ref: str = 'origin/master') -> None:
         patches.append(
             'https://lore.kernel.org/all/20260325-modpost-extra_warn-unused-but-set-global-v1-1-2e84003b7e81@kernel.org/'
         )  # modpost: Declare extra_warn with unused attribute
+
     patches.append(
         'https://lore.kernel.org/all/20260325-certs-extract-cert-key_pass-unused-but-set-global-v1-1-ecf94326d532@kernel.org/'
     )  # extract-cert: Wrap key_pass with '#ifdef USE_PKCS11_ENGINE'
+
+    if base_name in NEXT_TREES:
+        # https://lore.kernel.org/20260410205203.GA3922321@ax162/
+        patches.append('''From 6f5f06a256a189045a439bff3305ecae932706aa Mon Sep 17 00:00:00 2001
+From: Nathan Chancellor <nathan@kernel.org>
+Date: Fri, 10 Apr 2026 14:05:31 -0700
+Subject: [PATCH] fixup! clockevents: Prevent timer interrupt starvation
+
+Signed-off-by: Nathan Chancellor <nathan@kernel.org>
+---
+ kernel/time/tick-broadcast.c | 8 +++++++-
+ 1 file changed, 7 insertions(+), 1 deletion(-)
+
+diff --git a/kernel/time/tick-broadcast.c b/kernel/time/tick-broadcast.c
+index f63c65881364..7e57fa31ee26 100644
+--- a/kernel/time/tick-broadcast.c
++++ b/kernel/time/tick-broadcast.c
+@@ -76,8 +76,10 @@ const struct clock_event_device *tick_get_wakeup_device(int cpu)
+  */
+ static void tick_broadcast_start_periodic(struct clock_event_device *bc)
+ {
+-	if (bc)
++	if (bc) {
++		bc->next_event_forced = 0;
+ 		tick_setup_periodic(bc, 1);
++	}
+ }
+ 
+ /*
+@@ -403,6 +405,7 @@ static void tick_handle_periodic_broadcast(struct clock_event_device *dev)
+ 	bool bc_local;
+ 
+ 	raw_spin_lock(&tick_broadcast_lock);
++	tick_broadcast_device.evtdev->next_event_forced = 0;
+ 
+ 	/* Handle spurious interrupts gracefully */
+ 	if (clockevent_state_shutdown(tick_broadcast_device.evtdev)) {
+@@ -696,6 +699,7 @@ static void tick_handle_oneshot_broadcast(struct clock_event_device *dev)
+ 
+ 	raw_spin_lock(&tick_broadcast_lock);
+ 	dev->next_event = KTIME_MAX;
++	tick_broadcast_device.evtdev->next_event_forced = 0;
+ 	next_event = KTIME_MAX;
+ 	cpumask_clear(tmpmask);
+ 	now = ktime_get();
+@@ -1063,6 +1067,7 @@ static void tick_broadcast_setup_oneshot(struct clock_event_device *bc,
+ 
+ 
+ 	bc->event_handler = tick_handle_oneshot_broadcast;
++	bc->next_event_forced = 0;
+ 	bc->next_event = KTIME_MAX;
+ 
+ 	/*
+@@ -1175,6 +1180,7 @@ void hotplug_cpu__broadcast_tick_pull(int deadcpu)
+ 		}
+ 
+ 		/* This moves the broadcast assignment to this CPU: */
++		bc->next_event_forced = 0;
+ 		clockevents_program_event(bc, bc->next_event, 1);
+ 	}
+ 	raw_spin_unlock_irqrestore(&tick_broadcast_lock, flags);
+-- 
+2.53.0
+
+''')  # noqa: E101,W291,W293
 
     try:
         for revert in reverts:
