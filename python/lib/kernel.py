@@ -183,6 +183,11 @@ index f63c65881364..7e57fa31ee26 100644
 
 ''')  # noqa: E101,W291,W293
 
+    if base_name == 'linux-next-llvm':
+        patches.append(
+            'https://lore.kernel.org/all/20260410-fix-logitech-dj-v1-1-5533381f8d1b@kernel.org/'
+        )  # HID: logitech-dj: fix wrong detection of bad DJ_SHORT output report
+
     try:
         for revert in reverts:
             if isinstance(revert, tuple):
