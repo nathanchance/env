@@ -14,6 +14,7 @@ on:
       - '**.sh'
       - '.forgejo/workflows/main.yml'
   workflow_dispatch:
+enable-email-notifications: true
 jobs:
   fish:
     runs-on: docker
