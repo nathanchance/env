@@ -142,23 +142,6 @@ function cbl_bld_tot_tcs -d "Build LLVM and binutils from source for kernel deve
             end
         end
     end
-    # https://github.com/llvm/llvm-project/pull/191258#issuecomment-4227294864
-    if not echo 'diff --git a/clang/test/Driver/modules-driver-clang-modules-only.cpp b/clang/test/Driver/modules-driver-clang-modules-only.cpp
-index 37a803f9b6fc..043ffc65bf66 100644
---- a/clang/test/Driver/modules-driver-clang-modules-only.cpp
-+++ b/clang/test/Driver/modules-driver-clang-modules-only.cpp
-@@ -1,4 +1,5 @@
- // Checks that -fmodules-driver correctly handles compilations using Clang modules.
-+// UNSUPPORTED: llvm-driver
- 
- // RUN: split-file %s %t
- // RUN: rm -rf %t/modules-cache
-' | git -C $llvm_project ap
-        set message "Failed to test fix hack for PR 191258"
-        __print_error "$message"
-        __tg_msg "$message"
-        return 1
-    end
 
     # Add in-review patches here
     for gh_pr in $gh_prs
