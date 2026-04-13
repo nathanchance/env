@@ -13,10 +13,14 @@ function cbl_upd_stbl_wrktrs -d "Update the worktrees for linux-stable"
         end
 
         set dirname (path dirname $folder)
-        if test $dirname = $CBL_SRC_D
-            set stable_versions $SUPPORTED_STABLE_VERSIONS
-        else
-            set stable_versions $CBL_STABLE_VERSIONS
+        switch $dirname
+            case $CBL_SRC_C $CBL_SRC_D
+                set stable_versions $SUPPORTED_STABLE_VERSIONS
+            case $CBL_SRC_P
+                set stable_versions $CBL_STABLE_VERSIONS
+            case '*'
+                __print_error "Don't know how to handle tree based in $dirname!"
+                return 1
         end
 
         for worktree in $folder-*
