@@ -77,7 +77,7 @@ def parse_arguments():
         nargs='+',
     )
 
-    default_kernel_source = Path().resolve()
+    default_kernel_source = Path.cwd()
     parser.add_argument(
         '-C',
         '--directory',

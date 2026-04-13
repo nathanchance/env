@@ -260,7 +260,7 @@ def generate_item(args) -> None:
 
     elif item_type == 'pr':
         base_gh_cmd = ['gh', 'pr', 'view', '--json', 'title,url']
-        prs = args.additional_args if args.additional_args else []
+        prs = args.additional_args or []
         if prs:
             for pr in prs:
                 gh_json = gen_json_from_cmd([*base_gh_cmd, pr])

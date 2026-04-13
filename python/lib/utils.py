@@ -245,7 +245,7 @@ def run(args: ValidCmd, **kwargs) -> subprocess.CompletedProcess:
         if kwargs.get('capture_output'):
             print(err.stdout)
             print(err.stderr)
-        raise err
+        raise
 
 
 def run0(full_cmd: ValidCmd, **kwargs) -> subprocess.CompletedProcess:
@@ -319,7 +319,7 @@ def wget(item_to_download, output=None) -> bytes:
         'wget',
         '-q',
         '-O',
-        output if output else '-',
+        output or '-',
         item_to_download,
     ]
     return chronic(wget_cmd, text=None).stdout

@@ -34,13 +34,13 @@ def enable_community_repo():
 
     # Get the repository URL to create the community repo from (build from the
     # first uncommented line ending in main).
-    if not (repo_match := re.search('^([^#].*/)main$', text, flags=re.M)):
+    if not (repo_match := re.search('^([^#].*/)main$', text, flags=re.MULTILINE)):
         raise RuntimeError(f"Could not find main repo in {conf}?")
     community_repo = repo_match.groups()[0] + 'community'
 
     # If the community repo is already enabled (uncommented), we do not need to
     # do anything.
-    if match := re.search(f"^#{community_repo}$", text, flags=re.M):
+    if match := re.search(f"^#{community_repo}$", text, flags=re.MULTILINE):
         conf.write_text(text.replace(match.group(0), community_repo), encoding='utf-8')
 
 
@@ -122,8 +122,8 @@ def setup_podman(user_name):
     # Set up cgroupsv2
     rc_conf, rc_conf_txt = lib.utils.path_and_text('/etc/rc.conf')
     rc_cgroup_mode = 'rc_cgroup_mode="unified"'
-    if not re.search(f"^{rc_cgroup_mode}$", rc_conf_txt, flags=re.M):
-        if not (match := re.search('^#?rc_cgroup_mode=.*$', rc_conf_txt, flags=re.M)):
+    if not re.search(f"^{rc_cgroup_mode}$", rc_conf_txt, flags=re.MULTILINE):
+        if not (match := re.search('^#?rc_cgroup_mode=.*$', rc_conf_txt, flags=re.MULTILINE)):
             raise RuntimeError('Cannot find rc_cgroup_mode?')
         rc_cgroup_mode_line = match.group(0)
         rc_conf.write_text(

@@ -52,7 +52,7 @@ args = parser.parse_args()
 if "'" in args.cmd:
     raise ValueError("Command cannot have ' in it!")
 
-mode = args.mode if args.mode else 'container' if lib.utils.in_container() else 'host'
+mode = args.mode or ('container' if lib.utils.in_container() else 'host')
 
 tmx_cmd = ['tmux']
 if args.tmux_cmd:

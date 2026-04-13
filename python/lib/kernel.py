@@ -319,9 +319,9 @@ def kmake(
         silent = False
     # Handle make flags
     flags = []
-    if kernel_src.resolve() != Path().resolve():
+    if kernel_src.resolve() != Path.cwd():
         flags += ['-C', kernel_src]
-    flags += [f"-{'s' if silent else ''}kj{jobs if jobs else os.cpu_count()}"]
+    flags += [f"-{'s' if silent else ''}kj{jobs or os.cpu_count()}"]
 
     # Print information about current compiler
     lib.utils.print_green(f"\nCompiler location:\033[0m {compiler_location}\n")

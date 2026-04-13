@@ -365,7 +365,7 @@ def group_exists(group: str) -> bool:
 def is_installed(package_to_check: str) -> bool:
     if using_pacman():
         pacman_packages = lib.utils.chronic(['pacman', '-Qq']).stdout
-        return bool(re.search(f"^{package_to_check}$", pacman_packages, flags=re.M))
+        return bool(re.search(f"^{package_to_check}$", pacman_packages, flags=re.MULTILINE))
     if shutil.which('dnf'):
         cmd = ['dnf', 'list', '--installed']
     elif shutil.which('dpkg'):
@@ -591,7 +591,7 @@ def setup_libvirt(username: str) -> None:
 
     # Start network if it is not already started
     net_info = lib.utils.chronic(['virsh', 'net-info', 'default']).stdout
-    if re.search('^Active.*no', net_info, flags=re.M):
+    if re.search('^Active.*no', net_info, flags=re.MULTILINE):
         lib.utils.run(['virsh', 'net-start', 'default'])
 
 

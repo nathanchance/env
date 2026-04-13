@@ -32,7 +32,7 @@ def get_alma_version() -> int:
 def prechecks() -> None:
     lib.utils.check_root()
     alma_version = get_alma_version()
-    if alma_version not in (9,):
+    if alma_version != 9:
         raise RuntimeError(
             f"AlmaLinux {alma_version} is not tested with this script, add support for it if it works.",
         )

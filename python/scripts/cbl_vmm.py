@@ -343,7 +343,7 @@ class VirtualMachine:
                 if vfsd.poll():
                     file.seek(0)
                     raise RuntimeError(f"virtiofsd failed with: {file.read()}") from err
-                raise err
+                raise
             finally:
                 vfsd.kill()
                 tmpdir.cleanup()

@@ -56,7 +56,7 @@ class MkinitcpioConf(UserDict):
     def __init__(self, init_arg: str = '', path: Path | None = None) -> None:
         super().__init__()
 
-        self.path: Path = path if path else Path('/etc/mkinitcpio.conf')
+        self.path: Path = path or Path('/etc/mkinitcpio.conf')
 
         if init_arg and isinstance(init_arg, str):
             self.text: str = init_arg
@@ -79,7 +79,7 @@ class MkinitcpioConf(UserDict):
         self._reload_data_from_text()
 
     def _reload_data_from_text(self) -> None:
-        if not (matches := re.findall(r'^([A-Z]+)=\((.*)\)$', self.text, flags=re.M)):
+        if not (matches := re.findall(r'^([A-Z]+)=\((.*)\)$', self.text, flags=re.MULTILINE)):
             raise RuntimeError(f"Cannot find any variables in {self.text}?")
 
         self.orig = {var: f"{var}=({val})" for var, val in matches}
@@ -191,7 +191,7 @@ def configure_systemd_boot(init: bool = True, conf: str = 'linux.conf') -> None:
         linux_confs[0].replace(linux_conf)
 
     linux_conf_text = linux_conf.read_text(encoding='utf-8')
-    if not (match := re.search('^options (.*)$', linux_conf_text, flags=re.M)):
+    if not (match := re.search('^options (.*)$', linux_conf_text, flags=re.MULTILINE)):
         raise RuntimeError(f"Could not find 'options' line in {linux_conf}?")
     original_options_str = match.groups()[0]
     current_options = CmdlineOptions(original_options_str)
@@ -793,7 +793,9 @@ def switch_from_grub_to_systemd_boot(conf: str = 'linux.conf', dryrun: bool = Fa
         grub_default_txt = grub_default.read_text(encoding='utf-8')
 
         # Filter the default values, as there may be some set that are harmful for debugging
-        if match := re.search('^GRUB_CMDLINE_LINUX_DEFAULT="(.*)"$', grub_default_txt, flags=re.M):
+        if match := re.search(
+            '^GRUB_CMDLINE_LINUX_DEFAULT="(.*)"$', grub_default_txt, flags=re.MULTILINE
+        ):
             default_filter = ('loglevel=', 'quiet')
             filtered_defaults = ' '.join(
                 item for item in match.groups()[0].split(' ') if not item.startswith(default_filter)
@@ -801,7 +803,7 @@ def switch_from_grub_to_systemd_boot(conf: str = 'linux.conf', dryrun: bool = Fa
             cmdline_options |= CmdlineOptions(filtered_defaults)
 
         # Take the regular options wholesale
-        if match := re.search('^GRUB_CMDLINE_LINUX="(.*)"$', grub_default_txt, flags=re.M):
+        if match := re.search('^GRUB_CMDLINE_LINUX="(.*)"$', grub_default_txt, flags=re.MULTILINE):
             cmdline_options |= CmdlineOptions(match.groups()[0])
 
     # We may have multiple initrds
