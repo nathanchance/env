@@ -22,6 +22,7 @@ select = [
     'S', # flake8-bandit
     'SIM', # flake8-simplify
     'SLF', # flake8-self
+    'TC', # flake8-type-checking
     'UP', # pyupgrade
     'W', # pycodestyle
 ]

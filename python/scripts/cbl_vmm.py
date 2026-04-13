@@ -18,9 +18,12 @@ import subprocess
 import sys
 import time
 from argparse import ArgumentParser
-from collections.abc import Generator
 from pathlib import Path
 from tempfile import TemporaryDirectory
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from collections.abc import Generator
 
 sys.path.append(str(Path(__file__).resolve().parents[1]))
 # pylint: disable=wrong-import-position
