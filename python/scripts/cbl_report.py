@@ -49,7 +49,9 @@ def get_prev_or_next_datetime(val: str) -> datetime.datetime:
         month += 12
         year -= 1
 
-    return datetime.datetime.strptime(f"{month} {year}", '%m %Y')
+    return datetime.datetime.strptime(f"{month} {year}", '%m %Y').astimezone(
+        zoneinfo.ZoneInfo('US/Arizona')
+    )
 
 
 def get_next_datetime() -> datetime.datetime:
@@ -204,7 +206,7 @@ def parse_parameters():
     yearly_parser.add_argument(
         '-y',
         '--year',
-        default=datetime.datetime.now().year,
+        default=get_current_datetime().year,
         help='Year of report (default: current year)',
         type=int,
     )
