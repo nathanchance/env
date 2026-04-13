@@ -290,8 +290,7 @@ set -gx STOCK_GCC_VARS \
 # https://www.kernel.org/category/releases.html
 set -gx SUPPORTED_STABLE_VERSIONS \
     $CBL_STABLE_VERSIONS \
-    5.10 \
-    5.4
+    5.10
 
 # Point tmuxp to configurations in env folder
 set -gx TMUXP_CONFIGDIR $ENV_FOLDER/configs/tmux
