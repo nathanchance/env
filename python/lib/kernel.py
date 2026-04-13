@@ -109,11 +109,6 @@ def prepare_source(base_name: str, base_ref: str = 'origin/master') -> None:
     commits: list[str] = []
 
     # Patching section
-    if base_name == 'linux-mainline-llvm':
-        patches.append(
-            'https://lore.kernel.org/all/20260325-modpost-extra_warn-unused-but-set-global-v1-1-2e84003b7e81@kernel.org/'
-        )  # modpost: Declare extra_warn with unused attribute
-
     patches.append(
         'https://lore.kernel.org/all/20260325-certs-extract-cert-key_pass-unused-but-set-global-v1-1-ecf94326d532@kernel.org/'
     )  # extract-cert: Wrap key_pass with '#ifdef USE_PKCS11_ENGINE'
