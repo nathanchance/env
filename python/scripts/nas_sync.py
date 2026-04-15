@@ -212,7 +212,7 @@ def download_items(targets: list[str], network_folder: Path) -> None:
                 items.append(item)
 
         elif target == 'ipsw':
-            mac_versions = ('15', '14', '13', '12')
+            mac_versions = ('26', '15', '14', '13', '12')
 
             for mac_version in mac_versions:
                 item = DownloadItem()
