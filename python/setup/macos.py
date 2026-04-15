@@ -179,10 +179,11 @@ def setup_fish() -> None:
         '    eval (ssh-agent -c)\n'
         'end\n'
         '\n'
-        f"set github_folder {get_env_folder().parent}\n"
+        f"set fish_folder {get_env_folder()}/fish\n"
         'set fisher_plugins \\\n'
         '    jorgebucaran/fisher \\\n'
-        '    $github_folder/{env/fish,hydro} \\\n'
+        '    $fish_folder \\\n'
+        f"    {get_main_folder().joinpath('github/hydro')} \\\n"
         '    PatrickF1/fzf.fish \\\n'
         '    jorgebucaran/autopair.fish \\\n'
         '    wfxr/forgit\n'
@@ -195,7 +196,8 @@ def setup_fish() -> None:
         'set fish_cfg $__fish_config_dir/config.fish\n'
         'rm -fr $fish_cfg\n'
         'mkdir -p (dirname $fish_cfg)\n'
-        'ln -fsv $github_folder/env/fish/config.fish $fish_cfg\n'
+        'ln -fsv $fish_folder/config.fish $fish_cfg\n'
+        'source $fish_cfg\n'
         '\n'
         'git_setup\n'
         'vim_setup\n'
