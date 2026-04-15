@@ -201,6 +201,8 @@ def setup_fish() -> None:
         '\n'
         'git_setup\n'
         'vim_setup\n'
+        '\n'
+        'uv python install --default\n'
     )
     lib.utils.run([Path(get_brew_bin(), 'fish'), '-c', fish_script])
 
