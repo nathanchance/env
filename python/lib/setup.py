@@ -591,7 +591,7 @@ def setup_libvirt(username: str) -> None:
 
     # Start network if it is not already started
     net_info = lib.utils.chronic(['virsh', 'net-info', 'default']).stdout
-    if re.search('^Active.*no', net_info, flags=re.MULTILINE):
+    if re.search(r'^Active.*no', net_info, flags=re.MULTILINE):
         lib.utils.run(['virsh', 'net-start', 'default'])
 
 

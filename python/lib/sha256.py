@@ -28,7 +28,7 @@ def get_from_url(url: str, basename: str) -> str | None:
     for line in response.content.decode('utf-8').splitlines():
         if 'clone.bundle' in basename:
             basename = basename.split('-', maxsplit=1)[0]
-        if basename in line and (sha256_match := re.search('[A-Fa-f0-9]{64}', line)):
+        if basename in line and (sha256_match := re.search(r'[A-Fa-f0-9]{64}', line)):
             return sha256_match.group(0)
     return None
 

@@ -83,8 +83,8 @@ def get_remote_b4_branches() -> Branches:
     git_ls_remote_cmd = ['ls-remote', '--heads', '--tags', korg_repo]
     git_ls_remote_output = lib.utils.get_git_output(None, git_ls_remote_cmd)
 
-    b4_branches = re.findall('refs/heads/(b4/.*)$', git_ls_remote_output, flags=re.MULTILINE)
-    b4_tags = set(re.findall('refs/tags/(sent/[^^{}\n\t]+)', git_ls_remote_output))
+    b4_branches = re.findall(r'refs/heads/(b4/.*)$', git_ls_remote_output, flags=re.MULTILINE)
+    b4_tags = set(re.findall(r'refs/tags/(sent/[^^{}\n\t]+)', git_ls_remote_output))
 
     return gen_b4_branches(b4_branches, b4_tags)
 

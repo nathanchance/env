@@ -27,7 +27,7 @@ PACMAN_CONF = Path('/etc/pacman.conf')
 cpu_vendor: str | None = None
 if (proc_cpuinfo := Path('/proc/cpuinfo')).exists():
     proc_cpuinfo_txt = proc_cpuinfo.read_text(encoding='utf-8')
-    if vendor_match := re.search('vendor_id\t: ([a-zA-Z]+)\n', proc_cpuinfo_txt):
+    if vendor_match := re.search(r'vendor_id\t: ([a-zA-Z]+)\n', proc_cpuinfo_txt):
         if (vendor_id := vendor_match.groups()[0]) == 'AuthenticAMD':
             cpu_vendor = 'amd'
         elif vendor_id == 'GenuineIntel':
@@ -191,7 +191,7 @@ def configure_systemd_boot(init: bool = True, conf: str = 'linux.conf') -> None:
         linux_confs[0].replace(linux_conf)
 
     linux_conf_text = linux_conf.read_text(encoding='utf-8')
-    if not (match := re.search('^options (.*)$', linux_conf_text, flags=re.MULTILINE)):
+    if not (match := re.search(r'^options (.*)$', linux_conf_text, flags=re.MULTILINE)):
         raise RuntimeError(f"Could not find 'options' line in {linux_conf}?")
     original_options_str = match.groups()[0]
     current_options = CmdlineOptions(original_options_str)
@@ -794,7 +794,7 @@ def switch_from_grub_to_systemd_boot(conf: str = 'linux.conf', dryrun: bool = Fa
 
         # Filter the default values, as there may be some set that are harmful for debugging
         if match := re.search(
-            '^GRUB_CMDLINE_LINUX_DEFAULT="(.*)"$', grub_default_txt, flags=re.MULTILINE
+            r'^GRUB_CMDLINE_LINUX_DEFAULT="(.*)"$', grub_default_txt, flags=re.MULTILINE
         ):
             default_filter = ('loglevel=', 'quiet')
             filtered_defaults = ' '.join(
@@ -803,7 +803,7 @@ def switch_from_grub_to_systemd_boot(conf: str = 'linux.conf', dryrun: bool = Fa
             cmdline_options |= CmdlineOptions(filtered_defaults)
 
         # Take the regular options wholesale
-        if match := re.search('^GRUB_CMDLINE_LINUX="(.*)"$', grub_default_txt, flags=re.MULTILINE):
+        if match := re.search(r'^GRUB_CMDLINE_LINUX="(.*)"$', grub_default_txt, flags=re.MULTILINE):
             cmdline_options |= CmdlineOptions(match.groups()[0])
 
     # We may have multiple initrds

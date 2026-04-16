@@ -34,7 +34,7 @@ def enable_community_repo():
 
     # Get the repository URL to create the community repo from (build from the
     # first uncommented line ending in main).
-    if not (repo_match := re.search('^([^#].*/)main$', text, flags=re.MULTILINE)):
+    if not (repo_match := re.search(r'^([^#].*/)main$', text, flags=re.MULTILINE)):
         raise RuntimeError(f"Could not find main repo in {conf}?")
     community_repo = repo_match.groups()[0] + 'community'
 
@@ -123,7 +123,7 @@ def setup_podman(user_name):
     rc_conf, rc_conf_txt = lib.utils.path_and_text('/etc/rc.conf')
     rc_cgroup_mode = 'rc_cgroup_mode="unified"'
     if not re.search(f"^{rc_cgroup_mode}$", rc_conf_txt, flags=re.MULTILINE):
-        if not (match := re.search('^#?rc_cgroup_mode=.*$', rc_conf_txt, flags=re.MULTILINE)):
+        if not (match := re.search(r'^#?rc_cgroup_mode=.*$', rc_conf_txt, flags=re.MULTILINE)):
             raise RuntimeError('Cannot find rc_cgroup_mode?')
         rc_cgroup_mode_line = match.group(0)
         rc_conf.write_text(

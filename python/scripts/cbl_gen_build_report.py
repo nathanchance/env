@@ -179,7 +179,7 @@ def generate_report(log_folder: Path) -> str:
     if not (info_log := get_log(log_folder, 'info')).exists():
         raise RuntimeError('info.log does not exist?')
     info_text = info_log.read_text(encoding='utf-8')
-    if not (match := re.search('^Linux source location: (.*)$', info_text, flags=re.MULTILINE)):
+    if not (match := re.search(r'^Linux source location: (.*)$', info_text, flags=re.MULTILINE)):
         raise RuntimeError('Could not figure out source folder?')
     src_folder = Path(match.groups()[0])
 
