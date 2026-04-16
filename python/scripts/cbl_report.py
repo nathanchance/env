@@ -736,7 +736,7 @@ def create_yearly_report_file(report_file, report_date, year: int) -> None:
         'To view individual monthly reports, click on one of the links '
         'below:'                                                           '\n'
                                                                            '\n'
-        + '\n'.join(report_links) +                                        '\n'
+        + '\n'.join(report_links) + '\n'
     )
     # fmt: on
 
