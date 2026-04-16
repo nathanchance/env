@@ -238,8 +238,7 @@ def generate_item(args) -> None:
     item_type = args.type
 
     if item_type == 'mail':
-        with open(0, 'rb') as file:
-            stdin = file.read().decode(encoding='utf-8', errors='ignore')
+        stdin = Path('/dev/stdin').read_text(encoding='utf-8', errors='ignore')
         msg_id, subject = lib.kernel.get_msg_id_subject(stdin)
 
         print(f"* [`{subject}`](https://lore.kernel.org/{msg_id}/)")
