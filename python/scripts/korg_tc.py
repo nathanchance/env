@@ -216,7 +216,8 @@ class GCCManager(ToolchainManager):
 
         self.latest_versions: dict[int, str] = LATEST_GCC_VERSIONS
 
-    def canonicalize_target(self, value: str) -> str:
+    @staticmethod
+    def canonicalize_target(value: str) -> str:
         if 'linux' in value:
             return value
 
