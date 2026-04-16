@@ -220,6 +220,9 @@ rpmbuild/' >>$gitignore
     else
         updall --no-os; or return
     end
+    fish_add_path -ag $UV_INSTALL_DIR
+    uv python install --default
+    or return
 
     # Git config and aliases
     git_setup
