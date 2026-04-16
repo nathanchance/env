@@ -5,7 +5,7 @@ line-length = 100
 quote-style = 'preserve'
 
 [lint]
-select = [
+extend-select = [
     'A', # flake8-builtins
     'ARG', # flake8-unused-arguments
     'B', # flake8-bugbear
