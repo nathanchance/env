@@ -4,7 +4,7 @@
 
 function vim_setup -d "Setup vim configuration files"
     set env_vim $ENV_FOLDER/configs/common/vim
-    set ln ln -fsv
+    set ln ln -fnsv
     if test (__get_distro) != macos
         set -a ln -r
     end
@@ -12,7 +12,6 @@ function vim_setup -d "Setup vim configuration files"
     # Install indentation and plugin files
     for folder in indent plugin
         set dest $HOME/.vim/$folder
-        test -L $dest; and continue
 
         mkdir -p (path dirname $dest)
         $ln $env_vim/$folder $dest
