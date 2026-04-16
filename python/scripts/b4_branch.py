@@ -44,7 +44,7 @@ def clean_branch(directory: Path, branch: str, tags: Iterable[str], arguments) -
         if arguments.dry_run:
             lib.utils.print_cmd(b4_cmd)
         else:
-            with Popen(['yes', ''], stdout=PIPE) as yes_proc:
+            with Popen(['yes', 'y'], stdout=PIPE) as yes_proc:
                 lib.kernel.b4(b4_cmd, cwd=directory, stdin=yes_proc.stdout)
 
 
