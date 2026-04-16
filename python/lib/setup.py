@@ -568,7 +568,7 @@ def setup_initial_fish_config(username: str) -> None:
             '            or return\n'
             '        end\n'
             '        git -C /tmp/env pull -qr\n'
-            '        curl -LSs https://git.io/fisher | source\n'
+            '        curl -LSs https://raw.githubusercontent.com/jorgebucaran/fisher/main/functions/fisher.fish | source\n'
             '        and fisher install jorgebucaran/fisher 1>/dev/null\n'
             '        and fisher install /tmp/env/fish 1>/dev/null\n'
             '        and user_setup $argv\n'

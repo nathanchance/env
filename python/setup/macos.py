@@ -189,7 +189,7 @@ def setup_fish() -> None:
         '    wfxr/forgit\n'
         '\n'
         'fisher list | fisher remove\n'
-        'curl -LSs https://git.io/fisher | source\n'
+        'curl -LSs https://raw.githubusercontent.com/jorgebucaran/fisher/main/functions/fisher.fish | source\n'
         'and fisher install $fisher_plugins\n'
         'or return\n'
         '\n'
