@@ -357,7 +357,8 @@ class NspawnConfig(UserDict):
 
                 break
             else:
-                raise RuntimeError('Cannot find a privilege escalation configuration?')
+                msg = 'Cannot find a privilege escalation configuration?'
+                raise RuntimeError(msg)
 
             systemd_run_m_txt = '#!/bin/sh\n\nexec systemd-run -M "$@"\n'
             lib.utils.run0(['tee', SYSTEMD_RUN_M], input=systemd_run_m_txt)
@@ -410,7 +411,8 @@ class NspawnConfig(UserDict):
         elif mode == 'all':
             items_to_remove = machine_files | setup_files
         else:
-            raise ValueError(f"Do not know how to handle mode '{mode}'?")
+            msg = f"Do not know how to handle mode '{mode}'?"
+            raise ValueError(msg)
 
         # If we are removing the machine and it has been enabled on boot, we
         # should make sure it is disabled and stopped before removing the
@@ -434,9 +436,8 @@ class NspawnConfig(UserDict):
         # shell' to enter the machine and update it directly, as there may be
         # running services that need to be restarted.
         if self.is_running():
-            raise RuntimeError(
-                'Machine is running when trying to update, interact via "machinectl shell"'
-            )
+            msg = 'Machine is running when trying to update, interact via "machinectl shell"'
+            raise RuntimeError(msg)
         lib.utils.run0(self._gen_upd_cmd())
 
 
@@ -475,13 +476,16 @@ def main():
     args = parse_arguments()
 
     if os.geteuid() == 0:
-        raise RuntimeError('This script should not be run as root!')
+        msg = 'This script should not be run as root!'
+        raise RuntimeError(msg)
 
     if lib.utils.in_container():
-        raise RuntimeError('This script should be run on the host!')
+        msg = 'This script should be run on the host!'
+        raise RuntimeError(msg)
 
     if not args.name:
-        raise RuntimeError('No name specified and architecture has no default!')
+        msg = 'No name specified and architecture has no default!'
+        raise RuntimeError(msg)
 
     config = NspawnConfig(args.name)
 

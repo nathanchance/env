@@ -50,7 +50,8 @@ parser.add_argument('cmd', help='Command and any arguments to run')
 args = parser.parse_args()
 
 if "'" in args.cmd:
-    raise ValueError("Command cannot have ' in it!")
+    msg = "Command cannot have ' in it!"
+    raise ValueError(msg)
 
 mode = args.mode or ('container' if lib.utils.in_container() else 'host')
 

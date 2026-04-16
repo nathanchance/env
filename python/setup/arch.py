@@ -80,7 +80,8 @@ class MkinitcpioConf(UserDict):
 
     def _reload_data_from_text(self) -> None:
         if not (matches := re.findall(r'^([A-Z]+)=\((.*)\)$', self.text, flags=re.MULTILINE)):
-            raise RuntimeError(f"Cannot find any variables in {self.text}?")
+            msg = f"Cannot find any variables in {self.text}?"
+            raise RuntimeError(msg)
 
         self.orig = {var: f"{var}=({val})" for var, val in matches}
         self.data = {
@@ -185,14 +186,16 @@ def configure_systemd_boot(init: bool = True, conf: str = 'linux.conf') -> None:
         linux_re = re.compile(r'[0-9a-z_]+linux\.conf')
         linux_confs = [item for item in boot_entries.iterdir() if linux_re.search(item.name)]
         if (num := len(linux_confs)) != 1:
-            raise RuntimeError(f"Number of possible linux.conf entries ('{num}') is unexpected!")
+            msg = f"Number of possible linux.conf entries ('{num}') is unexpected!"
+            raise RuntimeError(msg)
 
         # Move the configuration created by archinstall to a deterministic name
         linux_confs[0].replace(linux_conf)
 
     linux_conf_text = linux_conf.read_text(encoding='utf-8')
     if not (match := re.search(r'^options (.*)$', linux_conf_text, flags=re.MULTILINE)):
-        raise RuntimeError(f"Could not find 'options' line in {linux_conf}?")
+        msg = f"Could not find 'options' line in {linux_conf}?"
+        raise RuntimeError(msg)
     original_options_str = match.groups()[0]
     current_options = CmdlineOptions(original_options_str)
     new_options = current_options | get_cmdline_additions()
@@ -219,7 +222,8 @@ def convert_boot_to_xbootldr(fstab: lib.setup.Fstab, dryrun: bool) -> None:
 
     # Wipe all signatures of the block device
     if not (part_path := fstab[boot].get_dev()):
-        raise RuntimeError(f"Cannot find /dev for {boot}?")
+        msg = f"Cannot find /dev for {boot}?"
+        raise RuntimeError(msg)
     lib.utils.print_or_run_cmd(['wipefs', '-af', part_path], dryrun)
 
     # Use sfdisk to set /boot's partition type to "Linux extended boot"
@@ -228,7 +232,8 @@ def convert_boot_to_xbootldr(fstab: lib.setup.Fstab, dryrun: bool) -> None:
     elif part_path.name.startswith(('sda', 'vda')):
         block, part = part_path.name[0:-1], part_path.name[-1]
     else:
-        raise RuntimeError(f"Cannot handle {part_path}?")
+        msg = f"Cannot handle {part_path}?"
+        raise RuntimeError(msg)
     sfdisk_cmd = [
         'sfdisk',
         '--part-type',
@@ -251,7 +256,8 @@ def convert_boot_to_xbootldr(fstab: lib.setup.Fstab, dryrun: bool) -> None:
                 uuid = item.name
                 break
         else:
-            raise RuntimeError(f"Could not find new UUID for {part_path}?")
+            msg = f"Could not find new UUID for {part_path}?"
+            raise RuntimeError(msg)
     fstab[boot].fs = f"UUID={uuid}"
     fstab[boot].type = 'vfat'
     fstab[boot].opts = lib.setup.Fstab.ARCH_VFAT_OPTS
@@ -382,7 +388,8 @@ def installimage_adjustments(
     # it is not so just make sure...
     # https://docs.hetzner.com/robot/dedicated-server/operating-systems/uefi
     if not (Path('/sys/firmware/efi').exists() or dryrun):
-        raise RuntimeError('Hetzner machine not booted under UEFI?')
+        msg = 'Hetzner machine not booted under UEFI?'
+        raise RuntimeError(msg)
 
     # archinstall sets up /boot as the ESP but installimage requires /boot/efi
     # to be the ESP and sets up /boot separately to hold the kernels. These
@@ -606,7 +613,8 @@ def pacman_settings(dryrun: bool = False) -> None:
     pacman_conf_marker = '# packagers with `pacman-key --populate archlinux`.\n\n'
     pacman_conf_inclusion = 'Include = /etc/pacman.d/nathan.conf\n\n'
     if pacman_conf_marker not in conf_text:
-        raise RuntimeError('Format of /etc/pacman.conf changed?')
+        msg = 'Format of /etc/pacman.conf changed?'
+        raise RuntimeError(msg)
     conf_text = conf_text.replace(
         pacman_conf_marker, f"{pacman_conf_marker}{pacman_conf_inclusion}"
     )
@@ -720,7 +728,8 @@ def setup_sudo(username: str) -> None:
         return
 
     if not (sudoers := Path(f"/etc/sudoers.d/00_{username}")).exists():
-        raise RuntimeError(f"{sudoers} could not be found?")
+        msg = f"{sudoers} could not be found?"
+        raise RuntimeError(msg)
 
     sudoers_txt = sudoers.read_text(encoding='utf-8')
     if '/usr/bin/pacman' not in sudoers_txt:
@@ -750,7 +759,8 @@ def setup_user(username: str, userpass: str) -> None:
         lib.setup.add_user_to_group('uucp', username)
     else:
         if not (fish_path := shutil.which('fish')):
-            raise RuntimeError('fish not found in PATH?')
+            msg = 'fish not found in PATH?'
+            raise RuntimeError(msg)
         fish = Path(fish_path).resolve()
         lib.utils.run(['useradd', '-G', 'wheel,uucp', '-m', '-s', fish, username])
 

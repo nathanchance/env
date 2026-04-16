@@ -100,7 +100,8 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     if not shutil.which('systemd-nspawn'):
-        raise RuntimeError('systemd-nspawn not found!')
+        msg = 'systemd-nspawn not found!'
+        raise RuntimeError(msg)
 
     multicall = not args.no_multicall
 
@@ -116,7 +117,8 @@ if __name__ == '__main__':
         NSPAWN_MACH_NAME
         not in lib.utils.chronic(['machinectl', '--no-legend', 'list-images']).stdout
     ):
-        raise RuntimeError(f"/var/lib/machines/{NSPAWN_MACH_NAME} does not exist?")
+        msg = f"/var/lib/machines/{NSPAWN_MACH_NAME} does not exist?"
+        raise RuntimeError(msg)
 
     build_folder = Path(args.build_folder).resolve() if args.build_folder else BUILD
 
@@ -125,7 +127,8 @@ if __name__ == '__main__':
     if args.llvm_folder:
         llvm_folder = Path(args.llvm_folder).resolve()
         if not Path(llvm_folder, 'llvm').is_dir():
-            raise FileNotFoundError('Invalid llvm-project provided, no llvm folder?')
+            msg = 'Invalid llvm-project provided, no llvm folder?'
+            raise FileNotFoundError(msg)
     elif not (llvm_folder := Path(GIT, 'llvm-project')).exists():
         llvm_folder.parent.mkdir(exist_ok=True, parents=True)
         lib.utils.call_git_loud(
@@ -136,7 +139,8 @@ if __name__ == '__main__':
     if args.tc_build_folder:
         tc_build_folder = Path(args.tc_build_folder).resolve()
         if not Path(tc_build_folder, 'build-llvm.py').exists():
-            raise FileNotFoundError('Invalid tc-build provided, no build-llvm.py?')
+            msg = 'Invalid tc-build provided, no build-llvm.py?'
+            raise FileNotFoundError(msg)
     else:
         if not (tc_build_folder := Path(GIT, 'tc-build')).exists():
             tc_build_folder.parent.mkdir(exist_ok=True, parents=True)
@@ -153,11 +157,13 @@ if __name__ == '__main__':
 
     if args.rust:
         if len(versions) != 1:
-            raise RuntimeError('Rust can only be built with a single LLVM version')
+            msg = 'Rust can only be built with a single LLVM version'
+            raise RuntimeError(msg)
         if args.rust_folder:
             rust_folder = Path(args.rust_folder).resolve()
             if not Path(rust_folder, 'Cargo.lock').exists():
-                raise FileNotFoundError('Invalid rust folder provided, no Cargo.lock?')
+                msg = 'Invalid rust folder provided, no Cargo.lock?'
+                raise FileNotFoundError(msg)
         elif not (rust_folder := Path(GIT, 'rust')).exists():
             rust_folder.parent.mkdir(exist_ok=True, parents=True)
             lib.utils.call_git_loud(
@@ -264,7 +270,8 @@ if __name__ == '__main__':
             # First, we need to find out what the current known good revision is in tc-build
             bld_llvm_py_txt = Path(tc_build_folder, 'build-llvm.py').read_text(encoding='utf-8')
             if not (match := re.search(r"GOOD_REVISION = '([A-Fa-f0-9]+)'", bld_llvm_py_txt)):
-                raise RuntimeError('Known good revision could not be found?')
+                msg = 'Known good revision could not be found?'
+                raise RuntimeError(msg)
             llvm_ref = match.groups()[0]
             # Next, we need to see what version this actually is
             show_cmd = ['show', f"{llvm_ref}:cmake/Modules/LLVMVersion.cmake"]
@@ -278,7 +285,8 @@ if __name__ == '__main__':
                 )
                 != 3
             ):
-                raise RuntimeError(f"Unexpected match to LLVM version regex? {matches}")
+                msg = f"Unexpected match to LLVM version regex? {matches}"
+                raise RuntimeError(msg)
             llvm_version = '.'.join(matches)
         else:
             llvm_version = value

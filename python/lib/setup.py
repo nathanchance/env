@@ -156,7 +156,8 @@ def apt(apt_arguments: lib.utils.PackageSequence) -> None:
 
 def check_ip(ip_to_check: str | None) -> None:
     if not ip_to_check:
-        raise RuntimeError('No IP address provided?')
+        msg = 'No IP address provided?'
+        raise RuntimeError(msg)
     ipaddress.ip_address(ip_to_check)
 
 
@@ -171,12 +172,14 @@ def chpasswd(user_name: str, new_password: str) -> None:
 
 def chsh_fish(username: str) -> None:
     if not (fish := shutil.which('fish')):
-        raise RuntimeError('fish not installed?')
+        msg = 'fish not installed?'
+        raise RuntimeError(msg)
 
     # normalize path
     fish = Path(fish).resolve().as_posix()
     if fish not in Path('/etc/shells').read_text(encoding='utf-8'):
-        raise RuntimeError(f"{fish} is not in /etc/shells?")
+        msg = f"{fish} is not in /etc/shells?"
+        raise RuntimeError(msg)
 
     lib.utils.run(['chsh', '-s', fish, username])
 
@@ -272,7 +275,8 @@ def fetch_gpg_key(source_url: str, dest: Path) -> None:
 
 def get_active_ethernet_info() -> tuple[str, str]:
     if not shutil.which('nmcli'):
-        raise RuntimeError('Cannot get active Ethernet information without nmcli!')
+        msg = 'Cannot get active Ethernet information without nmcli!'
+        raise RuntimeError(msg)
     nmcli_cmd = [
         'nmcli',
         '-f',
@@ -291,7 +295,8 @@ def get_active_ethernet_info() -> tuple[str, str]:
 def get_env_root() -> Path:
     if (env_root := Path(__file__).resolve().parents[2]).joinpath('README.md').exists():
         return env_root
-    raise RuntimeError(f"{env_root} does not seem correct?")
+    msg = f"{env_root} does not seem correct?"
+    raise RuntimeError(msg)
 
 
 def get_glibc_version() -> tuple[int, ...]:
@@ -304,7 +309,8 @@ def get_glibc_version() -> tuple[int, ...]:
 
 def get_ip_addr_for_intf(intf: str) -> str | None:
     if not shutil.which('ip'):
-        raise RuntimeError(f"Cannot get IP address for {intf} without ip!")
+        msg = f"Cannot get IP address for {intf} without ip!"
+        raise RuntimeError(msg)
     ip_addr = None
     for line in lib.utils.chronic(['ip', 'addr']).stdout.split('\n'):
         ip_a_regex = rf'inet\s+(\d{{1,3}}\.\d{{1,3}}\.\d{{1,3}}\.\d{{1,3}})/\d+\s+.*{intf}$'
@@ -324,7 +330,8 @@ def get_os_rel() -> dict[str, str]:
         if (file := Path(file_val)).exists():
             break
     else:
-        raise RuntimeError('os-release file could not be found?')
+        msg = 'os-release file could not be found?'
+        raise RuntimeError(msg)
 
     # Remove quotes now, as they are needed for shell but not for this
     # conversion
@@ -371,7 +378,8 @@ def is_installed(package_to_check: str) -> bool:
     elif shutil.which('dpkg'):
         cmd = ['dpkg', '-s']
     else:
-        raise RuntimeError('Not implemented for the current package manager!')
+        msg = 'Not implemented for the current package manager!'
+        raise RuntimeError(msg)
 
     return lib.utils.run_check_rc_zero([*cmd, package_to_check])
 
@@ -412,18 +420,22 @@ def partition_drive(
     if not fstype:
         fstype = 'ext4'
     elif fstype not in {'btrfs', 'ext4'}:
-        raise RuntimeError(f"Cannot safely handle filesytem type ('{fstype}')?")
+        msg = f"Cannot safely handle filesytem type ('{fstype}')?"
+        raise RuntimeError(msg)
 
     if not device.startswith(('/dev/nvme', '/dev/sd')):
-        raise RuntimeError(f"Cannot safely handle device path '{device}'?")
+        msg = f"Cannot safely handle device path '{device}'?"
+        raise RuntimeError(msg)
 
     partition = Path(device + 'p1' if '/dev/nvme' in device else '1')
 
     if mountpoint.is_mount():
-        raise RuntimeError(f"mountpoint ('{mountpoint}') is already mounted?")
+        msg = f"mountpoint ('{mountpoint}') is already mounted?"
+        raise RuntimeError(msg)
 
     if partition.is_block_device():
-        raise RuntimeError(f"partition ('{partition}') already exists?")
+        msg = f"partition ('{partition}') already exists?"
+        raise RuntimeError(msg)
 
     # Create partition on device
     if shutil.which('sgdisk'):
@@ -491,7 +503,8 @@ def remove_if_installed(package_to_remove: str) -> None:
         elif shutil.which('apt'):
             apt(['remove', '-y', package_to_remove])
         else:
-            raise RuntimeError('Not implemented for the current package manager!')
+            msg = 'Not implemented for the current package manager!'
+            raise RuntimeError(msg)
 
 
 def set_ip_addr_for_intf(con_name: str, intf: str, ip_addr: str) -> None:
@@ -500,7 +513,8 @@ def set_ip_addr_for_intf(con_name: str, intf: str, ip_addr: str) -> None:
     if '10.0.1' in ip_addr:
         gateway = local_dns = '10.0.1.1'
     else:
-        raise RuntimeError(f"{ip_addr} not supported by script!")
+        msg = f"{ip_addr} not supported by script!"
+        raise RuntimeError(msg)
     dns = ['8.8.8.8', '8.8.4.4', '1.1.1.1', local_dns]
 
     lib.utils.run([*nmcli_mod, 'ipv4.addresses', f"{ip_addr}/24"])
@@ -513,9 +527,8 @@ def set_ip_addr_for_intf(con_name: str, intf: str, ip_addr: str) -> None:
 
     current_ip = get_ip_addr_for_intf(intf)
     if current_ip != ip_addr:
-        raise RuntimeError(
-            f"IP address of '{intf}' ('{current_ip}') did not change to requested IP address ('{ip_addr}')",
-        )
+        msg = f"IP address of '{intf}' ('{current_ip}') did not change to requested IP address ('{ip_addr}')"
+        raise RuntimeError(msg)
 
 
 def set_date_time() -> None:
@@ -531,7 +544,8 @@ def setup_initial_fish_config(username: str) -> None:
     # just look at the major version in that case to know that this check will
     # pass.
     if int(fish_ver[0]) < 4 and tuple(map(int, fish_ver)) < (3, 4, 0):
-        raise RuntimeError(f"{fish_ver} is less than 3.4.0!")
+        msg = f"{fish_ver} is less than 3.4.0!"
+        raise RuntimeError(msg)
 
     user_cfg = Path('/home', username, '.config')
     fish_cfg = Path(user_cfg, 'fish/config.fish')
@@ -607,7 +621,8 @@ def setup_virtiofs_automount(mountpoint: str = '/mnt/host') -> None:
     # correctly, we fallback to the known value from cbl_vmm.py.
     host_kernel_rel = platform.uname().release
     if not (match := re.search(r"^\d+\.\d+\.\d+", host_kernel_rel)):
-        raise RuntimeError(f"Unable to match kernel version in '{host_kernel_rel}'??")
+        msg = f"Unable to match kernel version in '{host_kernel_rel}'??"
+        raise RuntimeError(msg)
     host_kernel_ver = tuple(map(int, match.group().split('.')))
     if host_kernel_ver >= (6, 9, 0):
         tag_sysfs = list(Path('/sys/fs/virtiofs').glob('*/tag'))
@@ -617,7 +632,8 @@ def setup_virtiofs_automount(mountpoint: str = '/mnt/host') -> None:
             )
             return
         if len(tag_sysfs) > 1:
-            raise RuntimeError('Multiple virtiofs tags found?')
+            msg = 'Multiple virtiofs tags found?'
+            raise RuntimeError(msg)
         tag = tag_sysfs[0].read_text(encoding='utf-8').strip()
     else:
         tag = 'host'
@@ -690,9 +706,8 @@ def setup_ssh_authorized_keys(user_name: str) -> None:
         elif shutil.which('wget'):
             cmd = ['wget', '-q', '-O-']
         else:
-            raise RuntimeError(
-                'No suitable download command could be found for downloading SSH key!'
-            )
+            msg = 'No suitable download command could be found for downloading SSH key!'
+            raise RuntimeError(msg)
         ssh_key = lib.utils.chronic(
             [*cmd, 'https://github.com/nathanchance.keys'], text=None
         ).stdout
@@ -710,12 +725,14 @@ def setup_sudo_symlink() -> None:
     sudo_bin.unlink(missing_ok=True)
 
     if not (doas_path := shutil.which('doas')):
-        raise RuntimeError('doas not found in PATH?')
+        msg = 'doas not found in PATH?'
+        raise RuntimeError(msg)
 
     if (doas := Path(doas_path).resolve()) == Path('/usr/bin/doas'):
         relative_doas = Path('../../../../bin/doas')
     else:
-        raise RuntimeError(f"Can't handle doas location ('{doas}')?")
+        msg = f"Can't handle doas location ('{doas}')?"
+        raise RuntimeError(msg)
     sudo_bin.symlink_to(relative_doas)
 
     lib.utils.run(['stow', '-d', sudo_prefix.parent, '-R', sudo_prefix.name, '-v'])

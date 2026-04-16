@@ -33,9 +33,8 @@ def prechecks() -> None:
     lib.utils.check_root()
     alma_version = get_alma_version()
     if alma_version != 9:
-        raise RuntimeError(
-            f"AlmaLinux {alma_version} is not tested with this script, add support for it if it works.",
-        )
+        msg = f"AlmaLinux {alma_version} is not tested with this script, add support for it if it works."
+        raise RuntimeError(msg)
 
 
 def install_initial_packages() -> None:

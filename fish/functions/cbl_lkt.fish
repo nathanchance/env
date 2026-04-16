@@ -286,7 +286,8 @@ if total_size > MAX_SIZE:
     lib.utils.run(cmd)
 
     if tarball.stat().st_size > MAX_SIZE:
-        raise RuntimeError('Tarball is greater than 25MB??')
+        msg = 'Tarball is greater than 25MB??'
+        raise RuntimeError(msg)
 
     print(tarball)
 

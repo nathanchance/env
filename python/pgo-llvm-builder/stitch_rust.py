@@ -109,11 +109,13 @@ def generate_rust_toml(version: str) -> dict[str, Any]:
 def get_rust_target_from_tarball(tarball_path: Path) -> str:
     # "llvm-<version>-<arch>.tar.<suffix>" -> ["llvm", "<version>", "<arch>.tar.<suffix>"]
     if len(name_parts := tarball_path.name.split('-')) != 3:
-        raise RuntimeError(f"Unexpected name ('{tarball_path.name}') for tarball?")
+        msg = f"Unexpected name ('{tarball_path.name}') for tarball?"
+        raise RuntimeError(msg)
 
     # "<arch>.tar.<suffix>" -> ["<arch>", "tar.<suffix>"] -> "<arch>"
     if (arch := name_parts[2].split('.', 1)[0]) not in {'aarch64', 'x86_64'}:
-        raise RuntimeError(f"Unexpected architecture ('{arch}') found?")
+        msg = f"Unexpected architecture ('{arch}') found?"
+        raise RuntimeError(msg)
 
     return f"{arch}-unknown-linux-gnu"
 
@@ -131,7 +133,8 @@ def parse_arguments():
 
     for item in (arguments := parser.parse_args()).llvm_tarballs:
         if not item.exists():
-            raise FileNotFoundError(f"Provided LLVM tarball ('{item}') does not exist?")
+            msg = f"Provided LLVM tarball ('{item}') does not exist?"
+            raise FileNotFoundError(msg)
 
     return arguments
 
@@ -158,9 +161,8 @@ def generate_llvm_rust_tarball(scripts: list[Path], llvm_tarball: Path, rust_ver
     elif suffix == '.tar':
         prefix_name = llvm_rust_tarball.stem
     else:
-        raise RuntimeError(
-            f"Destination tarball ('{llvm_rust_tarball}') does not have a suitable tarball extension?",
-        )
+        msg = f"Destination tarball ('{llvm_rust_tarball}') does not have a suitable tarball extension?"
+        raise RuntimeError(msg)
 
     # Make sure we are working with a fresh prefix
     if (prefix := llvm_rust_tarball.parent.joinpath(prefix_name)).exists():

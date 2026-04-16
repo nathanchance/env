@@ -254,7 +254,8 @@ for image in mkosi_json['Images']:
         distribution = image['Distribution']
         break
 else:
-    raise RuntimeError('No main image?')
+    msg = 'No main image?'
+    raise RuntimeError(msg)
 print(image_id)
 print(distribution)" | read -L image_id distribution
     set ret $pipestatus

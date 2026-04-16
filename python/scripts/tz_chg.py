@@ -164,7 +164,8 @@ if __name__ == '__main__':
 
     # Make sure we are not in a container already and that it is active
     if lib.utils.in_container():
-        raise RuntimeError('This needs to be run on the host!')
+        msg = 'This needs to be run on the host!'
+        raise RuntimeError(msg)
     lib.utils.chronic(['systemctl', 'is-active', f"systemd-nspawn@{DEV_IMG}.service"])
 
     if args.subcommand == 'cancel':
@@ -172,7 +173,8 @@ if __name__ == '__main__':
         if files := args.files:
             for file in files:
                 if not file.exists():
-                    raise FileNotFoundError(f"Provided file ('{file}') could not be found?")
+                    msg = f"Provided file ('{file}') could not be found?"
+                    raise FileNotFoundError(msg)
             files += args.files
         else:
             all_timers = list(map(str, Path('/etc/systemd/system').glob('sch_tz_chg-*.timer')))
@@ -194,7 +196,8 @@ if __name__ == '__main__':
 
     elif args.subcommand == 'sch':
         if not Path('/usr/share/zoneinfo', args.timezone).exists():
-            raise FileNotFoundError(f"{args.timezone} does not exist within /usr/share/zoneinfo?")
+            msg = f"{args.timezone} does not exist within /usr/share/zoneinfo?"
+            raise FileNotFoundError(msg)
 
         DATE_STR = f"{args.date_str} {args.time_str} {args.timezone}"
         lib.utils.chronic(['systemd-analyze', 'calendar', DATE_STR])
@@ -211,4 +214,5 @@ if __name__ == '__main__':
             systemctl_mach(['enable', '--now', timer.name])
 
     else:
-        raise RuntimeError(f"Don't know how to handle subcommand '{args.subcommand}'?")
+        msg = f"Don't know how to handle subcommand '{args.subcommand}'?"
+        raise RuntimeError(msg)

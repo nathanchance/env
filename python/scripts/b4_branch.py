@@ -53,9 +53,8 @@ def filter_branches(desired_branches: Iterable[str], possible_branches: Branches
 
     for branch in desired_branches:
         if branch not in possible_branches:
-            raise RuntimeError(
-                f"Requested branch ('{branch}') is not in the list of b4-managed branches?"
-            )
+            msg = f"Requested branch ('{branch}') is not in the list of b4-managed branches?"
+            raise RuntimeError(msg)
         filtered_branches[branch] = possible_branches[branch]
 
     return filtered_branches
@@ -165,7 +164,8 @@ if __name__ == '__main__':
     repo = args.directory.resolve()
 
     if not Path(repo, 'Makefile').exists():
-        raise RuntimeError(f"Derived directory ('{repo}') does not look like a Linux kernel tree?")
+        msg = f"Derived directory ('{repo}') does not look like a Linux kernel tree?"
+        raise RuntimeError(msg)
 
     all_branches = (
         get_remote_b4_branches() if getattr(args, 'remote_only', False) else get_b4_branches(repo)
@@ -204,6 +204,7 @@ if __name__ == '__main__':
     elif args.subcommand == 'push':
         func = push_branch
     else:
-        raise RuntimeError(f"No function for {args.subcommand}?")
+        msg = f"No function for {args.subcommand}?"
+        raise RuntimeError(msg)
     for req_branch, branch_tags in selected_branches.items():
         func(repo, req_branch, branch_tags, args)

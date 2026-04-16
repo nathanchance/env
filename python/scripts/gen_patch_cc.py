@@ -23,13 +23,16 @@ parser.add_argument('path', help='Path to generate Cc: list for')
 args = parser.parse_args()
 
 if not (repo := Path(args.directory).resolve()).exists():
-    raise RuntimeError(f"Provided repo ('{repo}') could not be found?")
+    msg = f"Provided repo ('{repo}') could not be found?"
+    raise RuntimeError(msg)
 
 if not (get_maint := Path(repo, 'scripts/get_maintainer.pl')).exists():
-    raise RuntimeError(f"Provided repo ('{repo}') does not appear to be a kernel tree?")
+    msg = f"Provided repo ('{repo}') does not appear to be a kernel tree?"
+    raise RuntimeError(msg)
 
 if not (path := Path(repo, args.path)).exists():
-    raise RuntimeError(f"Provided path ('{path}') could not be found in provided repo ('{repo}')?")
+    msg = f"Provided path ('{path}') could not be found in provided repo ('{repo}')?"
+    raise RuntimeError(msg)
 
 # Show raw scripts/get_maintainer.pl output, which can help with trimming up or
 # modifying the list of addresses to send the patch to.

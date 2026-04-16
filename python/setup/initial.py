@@ -27,12 +27,14 @@ def check_install() -> None:
         deb.apt_update()
         deb.apt_install(['parted'])
     else:
-        raise RuntimeError('parted is needed but it cannot be installed on the current OS!')
+        msg = 'parted is needed but it cannot be installed on the current OS!'
+        raise RuntimeError(msg)
 
 
 def create_user(user_name: str, user_password: str) -> None:
     if lib.setup.user_exists(user_name):
-        raise RuntimeError(f"user ('{user_name}') already exists?")
+        msg = f"user ('{user_name}') already exists?"
+        raise RuntimeError(msg)
 
     lib.utils.run(
         [

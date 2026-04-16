@@ -177,10 +177,12 @@ def generate_report(log_folder: Path) -> str:
     # its path from all the warnings, which makes the report a little easier to
     # read.
     if not (info_log := get_log(log_folder, 'info')).exists():
-        raise RuntimeError('info.log does not exist?')
+        msg = 'info.log does not exist?'
+        raise RuntimeError(msg)
     info_text = info_log.read_text(encoding='utf-8')
     if not (match := re.search(r'^Linux source location: (.*)$', info_text, flags=re.MULTILINE)):
-        raise RuntimeError('Could not figure out source folder?')
+        msg = 'Could not figure out source folder?'
+        raise RuntimeError(msg)
     src_folder = Path(match.groups()[0])
 
     # Next, generate three items:
@@ -234,7 +236,8 @@ if __name__ == '__main__':
     args = parse_arguments()
 
     if not (folder := Path(args.folder)).exists():
-        raise RuntimeError(f"Logs folder ('{folder}') could not be found!")
+        msg = f"Logs folder ('{folder}') could not be found!"
+        raise RuntimeError(msg)
 
     report = generate_report(folder)
     if args.print_to_stdout:

@@ -42,9 +42,8 @@ class KernelPkgBuilder:
         if not source_folder:
             source_folder = Path.cwd()
         if not Path(source_folder, 'Makefile').exists():
-            raise RuntimeError(
-                f"Derived kernel source ('{source_folder}') does not appear to be a Linux kernel tree?",
-            )
+            msg = f"Derived kernel source ('{source_folder}') does not appear to be a Linux kernel tree?"
+            raise RuntimeError(msg)
 
         self._source_folder: Path = source_folder
         self._build_folder: Path = Path(
@@ -165,9 +164,11 @@ class KernelPkgBuilder:
             if pkg_tar_zst := list(possible_dir.glob('*.tar.zst')):
                 break
         else:
-            raise RuntimeError('No .tar.zst could be found to generate b2sum!')
+            msg = 'No .tar.zst could be found to generate b2sum!'
+            raise RuntimeError(msg)
         if len(pkg_tar_zst) != 1:
-            raise RuntimeError(f"More than one .tar.zst found? {pkg_tar_zst}")
+            msg = f"More than one .tar.zst found? {pkg_tar_zst}"
+            raise RuntimeError(msg)
         (b2sum_file := Path(self._build_folder, 'b2sum')).unlink(missing_ok=True)
         b2sum_txt = lib.utils.chronic(
             [
@@ -297,7 +298,8 @@ class DebugPkgBuilder(KernelPkgBuilder):
 
         if localmodconfig:
             if not (modprobedb := Path('/tmp/modprobed.db')).exists():  # noqa: S108
-                raise RuntimeError(f"localmodconfig requested without {modprobedb}!")
+                msg = f"localmodconfig requested without {modprobedb}!"
+                raise RuntimeError(msg)
             self._kmake(['localmodconfig'], env={'LSMOD': modprobedb}, stdin=DEVNULL)
 
         if menuconfig:
@@ -406,7 +408,8 @@ if __name__ == '__main__':
         }:
             pass
         else:
-            raise RuntimeError(f"Cannot handle positional argument ('{arg}')!")
+            msg = f"Cannot handle positional argument ('{arg}')!"
+            raise RuntimeError(msg)
 
     builder: KernelPkgBuilder = {
         'debug': DebugPkgBuilder,

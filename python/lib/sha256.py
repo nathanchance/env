@@ -40,6 +40,5 @@ def validate_from_url(file: Path, url: str):
     if computed_sha256 == expected_sha256:
         utils.print_green(f"SUCCESS: {file.name} sha256 passed!")
     else:
-        raise RuntimeError(
-            f"{file.name} computed checksum ('{computed_sha256}') did not match expected checksum ('{expected_sha256}')!",
-        )
+        msg = f"{file.name} computed checksum ('{computed_sha256}') did not match expected checksum ('{expected_sha256}')!"
+        raise RuntimeError(msg)

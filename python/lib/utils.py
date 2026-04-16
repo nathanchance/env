@@ -66,7 +66,8 @@ def call_git_loud(directory: Path | None, cmd: ValidCmd, **kwargs) -> subprocess
 
 def check_root() -> None:
     if os.geteuid() != 0:
-        raise RuntimeError("root access is required!")
+        msg = "root access is required!"
+        raise RuntimeError(msg)
 
 
 def chronic(args: ValidCmd, **kwargs) -> subprocess.CompletedProcess:
@@ -95,7 +96,8 @@ def detect_virt(args: ValidCmd | None = None) -> str:
 
 def fix_wrktrs_for_nspawn(git_repo: Path) -> None:
     if not git_repo.joinpath('.git').is_dir():
-        raise RuntimeError(f"{git_repo} does not appear to be a git repository?")
+        msg = f"{git_repo} does not appear to be a git repository?"
+        raise RuntimeError(msg)
     for gitdir in git_repo.glob('.git/worktrees/*/gitdir'):
         # Transform '/run/host/home/...' into '/home/...'
         if (gitdir_txt := gitdir.read_text(encoding='utf-8')).startswith('/run/host/'):
@@ -275,7 +277,8 @@ def systemd_drop_in(service: str, drop_in_name: str, conf_txt: str) -> subproces
 
 def tg_msg(raw_msg: str) -> None:
     if not (botinfo := Path.home().joinpath('.botinfo')).exists():
-        raise FileNotFoundError(f"{botinfo} could not be found!")
+        msg = f"{botinfo} could not be found!"
+        raise FileNotFoundError(msg)
     chat_id, token = botinfo.read_text(encoding='utf-8').splitlines()
 
     msg = f"From {get_hostname()}:\n\n{raw_msg}"

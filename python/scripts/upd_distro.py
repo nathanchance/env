@@ -48,7 +48,8 @@ else:
         elif cu_ret == 0:
             pass
         else:
-            raise RuntimeError(f"Unhandled checkupdates return code: {cu_ret}")
+            msg = f"Unhandled checkupdates return code: {cu_ret}"
+            raise RuntimeError(msg)
 
         cmd_func = lib.setup.pacman
         cmds = [['-Syyu']]
@@ -79,7 +80,8 @@ else:
         cmds = [['dup']]
 
     else:
-        raise RuntimeError(f"Don't know how to handle '{os_rel['ID']}'?")
+        msg = f"Don't know how to handle '{os_rel['ID']}'?"
+        raise RuntimeError(msg)
 
 for cmd in cmds:
     if args.yes and yes_arg and yes_arg not in cmd:

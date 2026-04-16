@@ -35,7 +35,8 @@ def parse_arguments():
 
 def sync(repo: Path, patches_output: Path) -> None:
     if repo.name not in {'linux', 'linux-next'} and 'linux-stable' not in repo.name:
-        raise RuntimeError(f"Supplied repo ('{repo}, {repo.name}') is not supported by cbl_ptchmn!")
+        msg = f"Supplied repo ('{repo}, {repo.name}') is not supported by cbl_ptchmn!"
+        raise RuntimeError(msg)
 
     # Generate a list of patches to remove. The Python documentation states
     # that it is unspecified to change the contents of a directory when using
@@ -62,12 +63,12 @@ if __name__ == '__main__':
     args = parse_arguments()
 
     if not Path(args.directory, 'Makefile').exists():
-        raise RuntimeError(
-            f"Supplied repository ('{args.directory}') does not appear to be a Linux kernel tree?"
-        )
+        msg = f"Supplied repository ('{args.directory}') does not appear to be a Linux kernel tree?"
+        raise RuntimeError(msg)
 
     if not (patches_folder := get_patches_folder(args.directory)).exists():
-        raise RuntimeError(f"Derived patches folder ('{patches_folder}') does not exist!")
+        msg = f"Derived patches folder ('{patches_folder}') does not exist!"
+        raise RuntimeError(msg)
 
     if args.apply:
         lib.utils.call_git(args.directory, ['am', *sorted(patches_folder.iterdir())])

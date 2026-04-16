@@ -58,9 +58,8 @@ def find_first_file(possible_files: list[Path]) -> Path:
         if file.exists():
             return file
     files_str = "', '".join(str(elem) for elem in possible_files)
-    raise RuntimeError(
-        f"No items from list ('{files_str}') could be found, do you need to install a package?"
-    )
+    msg = f"No items from list ('{files_str}') could be found, do you need to install a package?"
+    raise RuntimeError(msg)
 
 
 class VirtualMachine:
@@ -133,7 +132,8 @@ class VirtualMachine:
         if self.profile == 'build':
             return half_num_cpus
 
-        raise RuntimeError('Did not return in _calc_cpus()?')
+        msg = 'Did not return in _calc_cpus()?'
+        raise RuntimeError(msg)
 
     def _calc_mem(self, cpus: int) -> int:
         # Respect the user's choice of memory
@@ -201,7 +201,8 @@ class VirtualMachine:
 
             if not (cmdline := self.cmdline):
                 if not (cmdline_file := Path(kernel_files, 'cmdline')).exists():
-                    raise RuntimeError('kernel passed without cmdline and one could not be found!')
+                    msg = 'kernel passed without cmdline and one could not be found!'
+                    raise RuntimeError(msg)
                 cmdline = cmdline_file.read_text(encoding='utf-8').strip()
             args += ['-append', cmdline]
 
@@ -209,7 +210,8 @@ class VirtualMachine:
                 not (initrd := self.initrd)
                 and not (initrd := Path(kernel_files, 'initramfs')).exists()
             ):
-                raise RuntimeError('kernel passed without initrd and one could not be found!')
+                msg = 'kernel passed without initrd and one could not be found!'
+                raise RuntimeError(msg)
             args += ['-initrd', initrd]
 
         # ISO
@@ -221,9 +223,8 @@ class VirtualMachine:
             else:
                 iso = Path(iso_val)
             if not iso.exists():
-                raise RuntimeError(
-                    f"{iso.name} does not exist at {iso}, was the wrong path used or did the download fail?",
-                )
+                msg = f"{iso.name} does not exist at {iso}, was the wrong path used or did the download fail?"
+                raise RuntimeError(msg)
             args += [
                 '-device', 'virtio-scsi-pci,id=scsi0',
                 '-device', 'scsi-cd,drive=cd',
@@ -248,7 +249,8 @@ class VirtualMachine:
 
         if (img_format := json_output['format']) in {'qcow2', 'raw'}:
             return img_format
-        raise ValueError(f"Unhandled image format: {img_format}")
+        msg = f"Unhandled image format: {img_format}"
+        raise ValueError(msg)
 
     # Public interfaces
     def remove(self) -> None:
@@ -257,20 +259,17 @@ class VirtualMachine:
 
     def run(self) -> None:
         if not self._primary_disk_img.exists():
-            raise RuntimeError(
-                f"Disk image ('{self._primary_disk_img}') for virtual machine ('{self.name}') does not exist, run 'setup' first?",
-            )
+            msg = f"Disk image ('{self._primary_disk_img}') for virtual machine ('{self.name}') does not exist, run 'setup' first?"
+            raise RuntimeError(msg)
 
         # pylint: disable-next=superfluous-parens
         if not (qemu := shutil.which(self._qemu)):
-            raise RuntimeError(
-                f"Could not find QEMU binary ('{self._qemu}') on your system (needed to run virtual machine)!",
-            )
+            msg = f"Could not find QEMU binary ('{self._qemu}') on your system (needed to run virtual machine)!"
+            raise RuntimeError(msg)
 
         if not ((sudo := shutil.which('doas')) or (sudo := shutil.which('sudo'))):
-            raise RuntimeError(
-                'Could not find doas or sudo on your system (needed for virtiofsd integration)!'
-            )
+            msg = 'Could not find doas or sudo on your system (needed for virtiofsd integration)!'
+            raise RuntimeError(msg)
 
         possible_vfsd_locations: list[Path] = [
             Path('/usr/lib/virtiofsd'),  # Arch Linux
@@ -343,7 +342,8 @@ class VirtualMachine:
                 # 'from'.
                 if vfsd.poll():
                     file.seek(0)
-                    raise RuntimeError(f"virtiofsd failed with: {file.read()}") from err
+                    msg = f"virtiofsd failed with: {file.read()}"
+                    raise RuntimeError(msg) from err
                 raise
             finally:
                 vfsd.kill()
@@ -363,7 +363,8 @@ class ArmVirtualMachine(VirtualMachine):
 
     def _setup_efi_files(self, possible_efi_files: list[Path] | None = None) -> None:
         if not possible_efi_files:
-            raise RuntimeError('No EFI files provided?')
+            msg = 'No EFI files provided?'
+            raise RuntimeError(msg)
 
         efi_img_size = 64 * 1024 * 1024  # 64M
 
@@ -441,9 +442,11 @@ class X86VirtualMachine(VirtualMachine):
         possible_efi_vars_files: list[Path] | None = None,
     ) -> None:
         if not possible_efi_files:
-            raise RuntimeError('No EFI files provided?')
+            msg = 'No EFI files provided?'
+            raise RuntimeError(msg)
         if not possible_efi_vars_files:
-            raise RuntimeError('No EFI variable files provided?')
+            msg = 'No EFI variable files provided?'
+            raise RuntimeError(msg)
 
         self._efi_img.parent.mkdir(exist_ok=True, parents=True)
 
@@ -659,9 +662,8 @@ def main():
         if (kernel := k_arg).is_dir():
             kernel = Path(k_arg, DEFAULT_KERNEL_PATH[vm.arch])
         if not kernel.exists():
-            raise RuntimeError(
-                f"Kernel image ('{kernel}'), derived from kernel argument ('{k_arg}'), does not exist!",
-            )
+            msg = f"Kernel image ('{kernel}'), derived from kernel argument ('{k_arg}'), does not exist!"
+            raise RuntimeError(msg)
         vm.kernel = kernel
         if args.cmdline:
             vm.cmdline = args.cmdline
@@ -674,7 +676,8 @@ def main():
         return vm.remove()
     if args.action == 'run':
         return vm.run()
-    raise RuntimeError(f"Unimplemented action ('{args.action}')?")
+    msg = f"Unimplemented action ('{args.action}')?"
+    raise RuntimeError(msg)
 
 
 if __name__ == '__main__':

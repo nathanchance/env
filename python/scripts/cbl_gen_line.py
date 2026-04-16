@@ -28,7 +28,8 @@ def generate_patch_lines(args):
 
     git_branch = lib.utils.get_git_output(args.directory, ['rev-parse', '--abbrev-ref', 'HEAD'])
     if not git_branch.startswith('b4/'):
-        raise RuntimeError(f"Not on a b4 managed branch? Have: {git_branch}")
+        msg = f"Not on a b4 managed branch? Have: {git_branch}"
+        raise RuntimeError(msg)
 
     series, commits = lib.kernel.b4_gen_series_commits(cwd=args.directory)
 

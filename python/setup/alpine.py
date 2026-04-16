@@ -35,7 +35,8 @@ def enable_community_repo():
     # Get the repository URL to create the community repo from (build from the
     # first uncommented line ending in main).
     if not (repo_match := re.search(r'^([^#].*/)main$', text, flags=re.MULTILINE)):
-        raise RuntimeError(f"Could not find main repo in {conf}?")
+        msg = f"Could not find main repo in {conf}?"
+        raise RuntimeError(msg)
     community_repo = repo_match.groups()[0] + 'community'
 
     # If the community repo is already enabled (uncommented), we do not need to
@@ -85,7 +86,8 @@ def update_and_install_packages():
 def setup_user(user_name, user_password):
     if not lib.setup.user_exists(user_name):
         if not (fish := shutil.which('fish')):
-            raise RuntimeError('fish is not installed?')
+            msg = 'fish is not installed?'
+            raise RuntimeError(msg)
         useradd_cmd = [
             'adduser',
             '--disabled-password',
@@ -124,7 +126,8 @@ def setup_podman(user_name):
     rc_cgroup_mode = 'rc_cgroup_mode="unified"'
     if not re.search(f"^{rc_cgroup_mode}$", rc_conf_txt, flags=re.MULTILINE):
         if not (match := re.search(r'^#?rc_cgroup_mode=.*$', rc_conf_txt, flags=re.MULTILINE)):
-            raise RuntimeError('Cannot find rc_cgroup_mode?')
+            msg = 'Cannot find rc_cgroup_mode?'
+            raise RuntimeError(msg)
         rc_cgroup_mode_line = match.group(0)
         rc_conf.write_text(
             rc_conf_txt.replace(rc_cgroup_mode_line, rc_cgroup_mode), encoding='utf-8'

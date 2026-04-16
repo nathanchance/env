@@ -30,7 +30,8 @@ def dnf_add_repo(repo_url: str) -> None:
     # https://github.com/rpm-software-management/dnf5/issues/1537
     # Done in an agnostic way because this is shared with AlmaLinux.
     if not (dnf_path := shutil.which('dnf')):
-        raise RuntimeError('dnf not found in PATH?')
+        msg = 'dnf not found in PATH?'
+        raise RuntimeError(msg)
     if Path(dnf_path).resolve().name.endswith('5'):
         local_dst = Path('/etc/yum.repos.d', repo_url.rsplit('/', 1)[1])
         lib.utils.curl(repo_url, output=local_dst)
@@ -55,9 +56,8 @@ def prechecks() -> None:
     if (fedora_version := get_fedora_version()) not in range(
         MIN_FEDORA_VERSION, MAX_FEDORA_VERSION + 1
     ):
-        raise RuntimeError(
-            f"Fedora {fedora_version} is not tested with this script, add support for it if it works.",
-        )
+        msg = f"Fedora {fedora_version} is not tested with this script, add support for it if it works."
+        raise RuntimeError(msg)
 
 
 def resize_rootfs() -> None:

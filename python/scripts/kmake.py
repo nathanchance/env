@@ -56,7 +56,8 @@ def prepend_to_path(paths: list[str]) -> None:
         return
     for path in paths:
         if not Path(path).exists():
-            raise RuntimeError(f"Requested path addition ('{path}') does not exist?")
+            msg = f"Requested path addition ('{path}') does not exist?"
+            raise RuntimeError(msg)
     os.environ['PATH'] = os.pathsep.join(paths) + os.pathsep + os.environ['PATH']
 
 

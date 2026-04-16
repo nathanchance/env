@@ -36,7 +36,8 @@ def get_prev_or_next_datetime(val: str) -> datetime.datetime:
     elif val == 'next':
         pos = 1
     else:
-        raise RuntimeError(f"Invalid value in get_prev_or_next_datetime(): '{val}'")
+        msg = f"Invalid value in get_prev_or_next_datetime(): '{val}'"
+        raise RuntimeError(msg)
 
     current = get_current_datetime()
     month = current.month + pos
@@ -245,7 +246,8 @@ def generate_item(args) -> None:
 
     elif item_type == 'patch':
         if not Path('Makefile').exists():
-            raise RuntimeError('Not in a kernel tree?')
+            msg = 'Not in a kernel tree?'
+            raise RuntimeError(msg)
 
         info = lib.kernel.b4_info()
         series, commits = lib.kernel.b4_gen_series_commits(info)
@@ -271,7 +273,8 @@ def generate_item(args) -> None:
             print(f"* [`{gh_json['title']}`]({gh_json['url']})")
 
     else:
-        raise ValueError(f"Unhandled item type ('{item_type}')")
+        msg = f"Unhandled item type ('{item_type}')"
+        raise ValueError(msg)
 
 
 def create_monthly_report_file(report_file: Path, report_date: datetime.datetime) -> None:
@@ -464,7 +467,8 @@ def generate_html_commit_section(commits, repo):
     elif 'kernel.org' in repo:
         commits_view = ''
     else:
-        raise RuntimeError(f"Don't know how to handle repo URL: {repo}")
+        msg = f"Don't know how to handle repo URL: {repo}"
+        raise RuntimeError(msg)
     return ''.join(
         [
             f'<a href="{repo}/{commits_view}{sha}">{sha[1:14]}</a> ("{title}")</br>\n'
@@ -747,7 +751,8 @@ def finalize_report(args) -> None:
     repo = get_report_repo()
 
     if not (worktree := get_report_worktree()).exists():
-        raise RuntimeError(f"{repo} does not exist when finalizing?")
+        msg = f"{repo} does not exist when finalizing?"
+        raise RuntimeError(msg)
 
     # Rebase changes if requested
     if args.rebase or args.all:
@@ -800,7 +805,8 @@ def new_report(args):
 
         # Check for an existing worktree
         if worktree.exists():
-            raise RuntimeError(f"{worktree} already exists, run 'finalize' or 'new' without '-A'?")
+            msg = f"{worktree} already exists, run 'finalize' or 'new' without '-A'?"
+            raise RuntimeError(msg)
 
         # Update source repo to ensure remote branch check is up to date
         if args.update or args.all:
@@ -835,7 +841,8 @@ def new_report(args):
     if args.create_report or args.all:
         # Make sure worktree exists in case I run 'new' without '-A'
         if not worktree.exists():
-            raise RuntimeError(f"{worktree} does not exist when creating report file?")
+            msg = f"{worktree} does not exist when creating report file?"
+            raise RuntimeError(msg)
 
         report = get_monthly_report_path(date)
         if not report.exists():
@@ -854,17 +861,20 @@ def new_report(args):
 
 def update_report(args) -> None:
     if not (worktree := get_report_worktree()).exists():
-        raise RuntimeError(f"{worktree} does not exist when updating?")
+        msg = f"{worktree} does not exist when updating?"
+        raise RuntimeError(msg)
 
     # Get branch based on user's request
     date = get_prev_datetime() if args.prev_month else get_current_datetime()
 
     if not (report := get_monthly_report_path(date)).exists():
-        raise RuntimeError(f"{report} does not exist when updating?")
+        msg = f"{report} does not exist when updating?"
+        raise RuntimeError(msg)
 
     if args.edit or args.all:
         if not (editor := shutil.which(os.environ.get('EDITOR', 'vim'))):
-            raise RuntimeError("$EDITOR not set or vim could not be found on your system!")
+            msg = "$EDITOR not set or vim could not be found on your system!"
+            raise RuntimeError(msg)
 
         lib.utils.run([editor, report])
 

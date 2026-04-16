@@ -59,7 +59,8 @@ parser.add_argument('directory', help='Directory with results of build-local.py 
 args = parser.parse_args()
 
 if not (directory := Path(args.directory)).exists():
-    raise FileNotFoundError(f"Supplied directory ('{directory}') does not exist?")
+    msg = f"Supplied directory ('{directory}') does not exist?"
+    raise FileNotFoundError(msg)
 
 if not (boot_utils_json := Path('/tmp/boot-utils.json')).exists():  # noqa: S108
     lib.utils.curl(
@@ -71,7 +72,8 @@ for toolchain, builds in MATRIX.items():
         kernel_arch = BOOT_UTILS_TO_KERNEL_ROSETTA.get(boot_utils_arch, boot_utils_arch)
 
         if not (kernel_dir := Path(directory, toolchain, kernel_arch, config)).exists():
-            raise FileNotFoundError(f"{kernel_dir} does not exist?")
+            msg = f"{kernel_dir} does not exist?"
+            raise FileNotFoundError(msg)
 
         boot_utils_cmd: lib.utils.CmdList = [
             BOOT_QEMU,

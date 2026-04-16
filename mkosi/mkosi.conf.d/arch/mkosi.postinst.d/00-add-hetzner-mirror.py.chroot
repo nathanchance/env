@@ -10,7 +10,8 @@ EXPECTED_MOUNTS: tuple[tuple[Path, str], ...] = (
 )
 for expected_path, host_value in EXPECTED_MOUNTS:
     if not expected_path.exists():
-        raise RuntimeError(f"{host_value} not passed into build environment?")
+        msg = f"{host_value} not passed into build environment?"
+        raise RuntimeError(msg)
 
 sys.path.append(str(PYTHON_FOLDER))
 # pylint: disable-next=wrong-import-position

@@ -93,9 +93,11 @@ class Tarball:
 
     def handle(self) -> None:
         if not self.extracted_file:
-            raise RuntimeError('No extracted file to test for tarball?')
+            msg = 'No extracted file to test for tarball?'
+            raise RuntimeError(msg)
         if not self.local_location:
-            raise RuntimeError('No local location configured for tarball?')
+            msg = 'No local location configured for tarball?'
+            raise RuntimeError(msg)
 
         if self.extracted_file.exists() and not self.remote_checksum_name:
             lib.utils.print_green(f"SKIP: Content of {self.remote_tarball_name} exists locally...")
@@ -133,7 +135,8 @@ class Tarball:
             elif comp_ext == '.zst':
                 tar_cmd.append('--zstd')
             elif comp_ext != '.tar':
-                raise RuntimeError(f"Compression extension ('{comp_ext}') not supported!")
+                msg = f"Compression extension ('{comp_ext}') not supported!"
+                raise RuntimeError(msg)
 
             tar_input = response.content if not local_tarball.exists() else None
             lib.utils.run(tar_cmd, input=tar_input, show_cmd=True)
@@ -153,11 +156,14 @@ class ToolchainManager:
 
     def clean_up_old_versions(self) -> None:
         if not self.latest_versions:
-            raise RuntimeError('Attempting to call clean_up_old_versions() without latest version?')
+            msg = 'Attempting to call clean_up_old_versions() without latest version?'
+            raise RuntimeError(msg)
         if not self.versions:
-            raise RuntimeError('Attempting to call clean_up_old_versions() with no versions?')
+            msg = 'Attempting to call clean_up_old_versions() with no versions?'
+            raise RuntimeError(msg)
         if not self.install_folder:
-            raise RuntimeError('Install folder not set up?')
+            msg = 'Install folder not set up?'
+            raise RuntimeError(msg)
 
         for version in self.versions:
             latest_version = handle_rc_version(self.latest_versions[version])
@@ -241,13 +247,14 @@ class GCCManager(ToolchainManager):
 
     def install(self, cache: bool, extract: bool) -> None:
         if not self.download_folder:
-            raise RuntimeError('Attempting to call install() with no download folder?')
+            msg = 'Attempting to call install() with no download folder?'
+            raise RuntimeError(msg)
         if not self.install_folder:
-            raise RuntimeError('Attempting to call install() with no install folder?')
+            msg = 'Attempting to call install() with no install folder?'
+            raise RuntimeError(msg)
         if cache and not self.download_folder.exists():
-            raise RuntimeError(
-                f"Download folder ('{self.download_folder}') does not exist, please create it before running this script!",
-            )
+            msg = f"Download folder ('{self.download_folder}') does not exist, please create it before running this script!"
+            raise RuntimeError(msg)
 
         host_arch_gcc: str = {
             'aarch64': 'arm64',
@@ -305,21 +312,25 @@ class GCCManager(ToolchainManager):
 
     def print_folder(self, folder: str) -> None:
         if len(self.versions) != 1:
-            raise RuntimeError('Asking for print_folder() with number of versions other than one?')
+            msg = 'Asking for print_folder() with number of versions other than one?'
+            raise RuntimeError(msg)
 
         # Architecture does not matter because it will not be printed
         cc = self.get_cc_as_path(self.versions[0], 'x86_64')
 
         if folder not in {'bin', 'prefix'}:
-            raise ValueError(f"Do not know how to handle {folder} in print_folder()?")
+            msg = f"Do not know how to handle {folder} in print_folder()?"
+            raise ValueError(msg)
 
         print(shell_quote(cc.parents[1 if folder == 'prefix' else 0]))
 
     def print_vars(self, split: bool) -> None:
         if len(self.targets) != 1:
-            raise RuntimeError('Asking for print_vars() other than with one target architecture?')
+            msg = 'Asking for print_vars() other than with one target architecture?'
+            raise RuntimeError(msg)
         if len(self.versions) != 1:
-            raise RuntimeError('Asking for print_vars() other than with one version?')
+            msg = 'Asking for print_vars() other than with one version?'
+            raise RuntimeError(msg)
 
         cc_path = self.get_cc_as_path(self.versions[0], self.targets[0])
 
@@ -358,7 +369,8 @@ class LLVMManager(ToolchainManager):
     def get_prefix(self, version: int | None = None) -> Path:
         if not version:
             if len(self.versions) != 1:
-                raise RuntimeError('Asking for print_vars() other than with one version?')
+                msg = 'Asking for print_vars() other than with one version?'
+                raise RuntimeError(msg)
             version = self.versions[0]
 
         return Path(self.DEFAULT_INSTALL_FOLDER, LATEST_LLVM_VERSIONS[version])
@@ -366,9 +378,11 @@ class LLVMManager(ToolchainManager):
     # pylint: disable-next=unused-argument
     def install(self, cache: bool, extract: bool) -> None:  # noqa: ARG002
         if not self.download_folder:
-            raise RuntimeError('Attempting to call install() with no download folder?')
+            msg = 'Attempting to call install() with no download folder?'
+            raise RuntimeError(msg)
         if not self.install_folder:
-            raise RuntimeError('Attempting to call install() with no install folder?')
+            msg = 'Attempting to call install() with no install folder?'
+            raise RuntimeError(msg)
 
         for major_version in self.versions:
             full_version = self.latest_versions[major_version]
@@ -391,10 +405,12 @@ class LLVMManager(ToolchainManager):
 
     def print_folder(self, folder: str) -> None:
         if len(self.versions) != 1:
-            raise RuntimeError('Asking for print_folder() with number of versions other than one?')
+            msg = 'Asking for print_folder() with number of versions other than one?'
+            raise RuntimeError(msg)
 
         if folder not in {'bin', 'prefix'}:
-            raise ValueError(f"Do not know how to handle {folder} in print_folder()?")
+            msg = f"Do not know how to handle {folder} in print_folder()?"
+            raise ValueError(msg)
 
         prefix = self.get_prefix(self.versions[0])
 
@@ -402,7 +418,8 @@ class LLVMManager(ToolchainManager):
 
     def print_vars(self, split: bool) -> None:
         if len(self.versions) != 1:
-            raise RuntimeError('Asking for print_vars() other than with one version?')
+            msg = 'Asking for print_vars() other than with one version?'
+            raise RuntimeError(msg)
 
         llvm_ver = LATEST_LLVM_VERSIONS[self.versions[0]]
         llvm_bin = Path(self.DEFAULT_INSTALL_FOLDER, llvm_ver, 'bin')
@@ -429,9 +446,8 @@ if __name__ == '__main__':
         manager = LLVMManager()
     else:
         acceptable_progs = ('korg_gcc', 'korg_gcc.py', 'korg_llvm', 'korg_llvm.py')
-        raise RuntimeError(
-            f"{prog} needs to be symlinked to either {' or '.join(acceptable_progs)} to function properly!",
-        )
+        msg = f"{prog} needs to be symlinked to either {' or '.join(acceptable_progs)} to function properly!"
+        raise RuntimeError(msg)
 
     supported_versions = manager.VERSIONS
     supported_targets = getattr(manager, 'TARGETS', None)

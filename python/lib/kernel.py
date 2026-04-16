@@ -48,7 +48,8 @@ def b4_am_o(msg_id: str, **kwargs) -> str:
             capture_output=True,
         )
         if len(patches := list(Path(tmpdir).iterdir())) != 1:
-            raise RuntimeError(f"More than one patch in {tmpdir}? Have: {patches}")
+            msg = f"More than one patch in {tmpdir}? Have: {patches}"
+            raise RuntimeError(msg)
         return patches[0].read_text(encoding='utf-8')
 
 
@@ -76,12 +77,14 @@ def b4_gen_series_commits(
 
 
 def get_msg_id_subject(mail_str: str) -> tuple[str, str]:
-    msg = email.message_from_string(mail_str)
+    mail_msg = email.message_from_string(mail_str)
 
-    if not (subject := msg.get('Subject')):
-        raise RuntimeError('Cannot find subject in headers?')
-    if not (msg_id := msg.get('Message-ID')):
-        raise RuntimeError('Cannot find message-ID in headers?')
+    if not (subject := mail_msg.get('Subject')):
+        msg = 'Cannot find subject in headers?'
+        raise RuntimeError(msg)
+    if not (msg_id := mail_msg.get('Message-ID')):
+        msg = 'Cannot find message-ID in headers?'
+        raise RuntimeError(msg)
 
     # Transform <message-id> into message-id
     msg_id = msg_id.strip('<').rstrip('>')
@@ -97,7 +100,8 @@ def prepare_source(base_name: str, base_ref: str = 'origin/master') -> None:
     if base_name == 'linux-debug':
         return  # managed outside of the script
     if base_name not in {*NEXT_TREES, 'linux-mainline-llvm'}:
-        raise RuntimeError(f"Don't know how to handle provided base_name ('{base_name}')?")
+        msg = f"Don't know how to handle provided base_name ('{base_name}')?"
+        raise RuntimeError(msg)
 
     source_folder = Path(os.environ['CBL_SRC_P'], base_name)
 
@@ -153,7 +157,8 @@ index 268b5fbdb48b..c1189707efcf 100644
                 commit_msg = revert[1]
 
                 if '..' not in commit_range:
-                    raise RuntimeError(f"No git range indicator in {commit_range}")
+                    msg = f"No git range indicator in {commit_range}"
+                    raise RuntimeError(msg)
 
                 # generate diff from range
                 range_diff = lib.utils.call_git(source_folder, ['diff', commit_range]).stdout
@@ -188,7 +193,8 @@ index 268b5fbdb48b..c1189707efcf 100644
             elif patch.lstrip().startswith('From ') and 'diff --git' in patch:
                 am_kwargs['input'] = patch
             else:
-                raise RuntimeError(f"Can't handle {patch}?")
+                msg = f"Can't handle {patch}?"
+                raise RuntimeError(msg)
 
             lib.utils.call_git_loud(source_folder, am_cmd, **am_kwargs)
 
@@ -222,9 +228,11 @@ def kmake(
 ) -> None:
     # Handle kernel directory right away
     if not (kernel_src := Path(directory) if directory else Path()).exists():
-        raise RuntimeError(f"Derived kernel source ('{kernel_src}') does not exist?")
+        msg = f"Derived kernel source ('{kernel_src}') does not exist?"
+        raise RuntimeError(msg)
     if not (makefile := Path(kernel_src, 'Makefile')).exists():
-        raise RuntimeError(f"Derived kernel source ('{kernel_src}') is not a kernel tree?")
+        msg = f"Derived kernel source ('{kernel_src}') is not a kernel tree?"
+        raise RuntimeError(msg)
 
     # Get compiler related variables
     cc_str = variables.get('CC', '')
@@ -244,9 +252,8 @@ def kmake(
             # We always want to check that the tree in question supports an
             # LLVM value other than 1
             if 'LLVM_PREFIX' not in makefile.read_text(encoding='utf-8'):
-                raise RuntimeError(
-                    f"Derived kernel source ('{kernel_src}') does not support LLVM other than 1!"
-                )
+                msg = f"Derived kernel source ('{kernel_src}') does not support LLVM other than 1!"
+                raise RuntimeError(msg)
             # We want to check that LLVM is a correct value but we do not want
             # to override the user's CC choice if there was one
             if llvm[0] == '-':
@@ -256,15 +263,15 @@ def kmake(
                 if not cc_str:
                     cc_str = f"{llvm}clang"
             else:
-                raise RuntimeError(
-                    f"LLVM value ('{llvm}') neither begins with '-' nor ends with '/'!"
-                )
+                msg = f"LLVM value ('{llvm}') neither begins with '-' nor ends with '/'!"
+                raise RuntimeError(msg)
     # If we are not using clang, we have to be using gcc
     if not cc_str:
         cc_str = f"{cross_compile}gcc"
 
     if not (compiler := shutil.which(cc_str)):
-        raise RuntimeError(f"CC does not exist based on derived value ('{cc_str}')?")
+        msg = f"CC does not exist based on derived value ('{cc_str}')?"
+        raise RuntimeError(msg)
     # Ensure compiler is a Path object for the .parent use below
     compiler_location = (compiler := Path(compiler)).parent
 
@@ -296,9 +303,8 @@ def kmake(
     ias_def_val = 1 if cc_is_clang and ias_def_on else 0
     if int(variables.get('LLVM_IAS', ias_def_val)) == 0:
         if not (gnu_as := shutil.which(f"{cross_compile}as")):
-            raise RuntimeError(
-                f"GNU as could not be found based on CROSS_COMPILE ('{cross_compile}')?"
-            )
+            msg = f"GNU as could not be found based on CROSS_COMPILE ('{cross_compile}')?"
+            raise RuntimeError(msg)
         as_location = Path(gnu_as).parent
         if as_location != compiler_location:
             lib.utils.print_green(f"Binutils location:\033[0m {as_location}\n")
@@ -313,7 +319,8 @@ def kmake(
     ]  # fmt: off
     if use_time:
         if not (gnu_time := shutil.which('time')):
-            raise RuntimeError('Could not find time binary in PATH?')
+            msg = 'Could not find time binary in PATH?'
+            raise RuntimeError(msg)
         make_cmd = [gnu_time, '-v', *make_cmd]
     else:
         start_time = time.time()

@@ -43,7 +43,8 @@ def prechecks() -> None:
         'trixie',
     )
     if (codename := lib.setup.get_version_codename()) not in supported_versions:
-        raise RuntimeError(f"Debian {codename} is not supported by this script!")
+        msg = f"Debian {codename} is not supported by this script!"
+        raise RuntimeError(msg)
 
 
 def setup_repos() -> None:

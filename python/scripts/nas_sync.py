@@ -37,9 +37,11 @@ class DownloadItem:
 
     def download_if_necessary(self) -> None:
         if not self.containing_folder:
-            raise RuntimeError('Containing folder not configured?')
+            msg = 'Containing folder not configured?'
+            raise RuntimeError(msg)
         if not self.file_url:
-            raise RuntimeError('File URL not configured?')
+            msg = 'File URL not configured?'
+            raise RuntimeError(msg)
         if not self.base_file:
             self.base_file = self.file_url.rsplit('/', 1)[-1]
 
@@ -98,10 +100,12 @@ def get_latest_ipsw_url(identifier: str, version: str) -> str:
 
 def download_items(targets: list[str], network_folder: Path) -> None:
     if not (firmware_folder := Path(network_folder, 'Firmware_and_Images')).exists():
-        raise RuntimeError(f"{firmware_folder} does not exist, systemd automounting broken?")
+        msg = f"{firmware_folder} does not exist, systemd automounting broken?"
+        raise RuntimeError(msg)
 
     if not (bundles_folder := Path(network_folder, 'bundles')).exists():
-        raise RuntimeError(f"{bundles_folder} does not exist??")
+        msg = f"{bundles_folder} does not exist??"
+        raise RuntimeError(msg)
 
     items: list[DownloadItem] = []
     for target in targets:
@@ -241,7 +245,8 @@ def download_items(targets: list[str], network_folder: Path) -> None:
                             f"https://cdimage.ubuntu.com/releases/{ubuntu_ver}/release"
                         )
                     else:
-                        raise RuntimeError(f"Cannot handle Ubuntu architecture '{arch}'?")
+                        msg = f"Cannot handle Ubuntu architecture '{arch}'?"
+                        raise RuntimeError(msg)
 
                     item = DownloadItem()
                     item.containing_folder = Path(firmware_folder, 'Ubuntu', ubuntu_ver, 'Server')
@@ -260,6 +265,7 @@ if __name__ == '__main__':
     args = parse_parameters()
 
     if not (nas_folder := Path(os.environ['NAS_FOLDER'])).exists():
-        raise RuntimeError(f"{nas_folder} does not exist, setup systemd automount files?")
+        msg = f"{nas_folder} does not exist, setup systemd automount files?"
+        raise RuntimeError(msg)
 
     download_items(args.targets, nas_folder)

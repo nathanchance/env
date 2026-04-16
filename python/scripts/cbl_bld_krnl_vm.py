@@ -61,7 +61,8 @@ def get_toolchain_vars(kernel_arch: str, toolchain: str) -> lib.utils.MakeVars:
         }
     if base_tc == 'llvm':
         return {'LLVM': f"{korg_tc.LLVMManager().get_prefix(tc_version)}/bin/"}
-    raise ValueError(f"Don't know how to handle toolchain value '{base_tc}'!")
+    msg = f"Don't know how to handle toolchain value '{base_tc}'!"
+    raise ValueError(msg)
 
 
 def parse_arguments():
@@ -158,7 +159,8 @@ def build_kernel_for_vm(
         }  # fmt: off
     elif 'debian' in vm_name:
         if not (configs := Path(os.environ['CBL_LKT'], 'configs/debian')).exists():
-            raise RuntimeError(f"{configs.parents[1]} is not downloaded?")
+            msg = f"{configs.parents[1]} is not downloaded?"
+            raise RuntimeError(msg)
         configs = {
             'arm': Path(configs, 'armmp.config'),
             'arm64': Path(configs, 'arm64.config'),
@@ -183,7 +185,8 @@ def build_kernel_for_vm(
         response.raise_for_status()
         config_dst.write_bytes(response.content)
     else:
-        raise RuntimeError(f"Don't know how to handle {config_src}!")
+        msg = f"Don't know how to handle {config_src}!"
+        raise RuntimeError(msg)
 
     current_config_txt = config_dst.read_text(encoding='utf-8')
     new_config_txt = current_config_txt.replace(
@@ -204,20 +207,22 @@ if __name__ == '__main__':
     args = parse_arguments()
 
     if not (src_folder := args.directory.resolve()).exists():
-        raise FileNotFoundError(f"Derived kernel source ('{src_folder}') does not exist?")
+        msg = f"Derived kernel source ('{src_folder}') does not exist?"
+        raise FileNotFoundError(msg)
 
     if not src_folder.joinpath('Makefile').exists():
-        raise RuntimeError(
-            f"Derived kernel source ('{src_folder}') does not appear to be a kernel tree?"
-        )
+        msg = f"Derived kernel source ('{src_folder}') does not appear to be a kernel tree?"
+        raise RuntimeError(msg)
 
     arch = get_qemu_arch(args.arch)
 
     if not (vm_folder := Path(os.environ['VM_FOLDER'], arch, args.vm_name)).exists():
-        raise RuntimeError(f"{args.vm_name} not found in {vm_folder.parent}?")
+        msg = f"{args.vm_name} not found in {vm_folder.parent}?"
+        raise RuntimeError(msg)
 
     if not (lsmod := Path(vm_folder, 'shared/kernel_files/lsmod')).exists():
-        raise RuntimeError(f"lsmod not found in {vm_folder}?")
+        msg = f"lsmod not found in {vm_folder}?"
+        raise RuntimeError(msg)
 
     if 'TMP_BUILD_FOLDER' in os.environ:
         out = Path(os.environ['TMP_BUILD_FOLDER'], src_folder.name)

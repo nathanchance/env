@@ -34,7 +34,8 @@ def prechecks():
 
     supported_versions = ('focal', 'jammy', 'kinetic')
     if (codename := lib.setup.get_version_codename()) not in supported_versions:
-        raise RuntimeError(f"Ubuntu {codename} is not supported by this script!")
+        msg = f"Ubuntu {codename} is not supported by this script!"
+        raise RuntimeError(msg)
 
 
 def setup_repos():
