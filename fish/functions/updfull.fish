@@ -20,5 +20,7 @@ function updfull -d "Update host machine, shell environment, and main developmen
         env \
         fisher \
         $os_target \
+        python \
+        uv \
         vim
 end
