@@ -7,13 +7,10 @@
 import hashlib
 import shutil
 import sys
+import tomllib
 from argparse import ArgumentParser
 from pathlib import Path
 from typing import Any
-
-# This will fail to import when linted with Python 3.10
-# pylint: disable-next=import-error
-import tomllib
 
 sys.path.append(str(Path(__file__).resolve().parents[1]))
 # pylint: disable=wrong-import-position

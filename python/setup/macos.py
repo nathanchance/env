@@ -8,10 +8,6 @@ import sys
 from pathlib import Path
 from subprocess import CalledProcessError
 
-if sys.version_info < (3, 10, 0):
-    print('macOS setup script requires Python 3.10 or newer!')
-    sys.exit(1)
-
 sys.path.append(str(Path(__file__).resolve().parents[1]))
 # pylint: disable=wrong-import-position
 import lib.utils

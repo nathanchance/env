@@ -286,7 +286,7 @@ if __name__ == '__main__':
             llvm_ref = LLVM_REFS.get(llvm_version, f"llvmorg-{llvm_version}")
 
         if 'llvmorg' not in llvm_ref:
-            date_info = datetime.datetime.now(datetime.timezone.utc).strftime('%Y%m%d-%H%M%S')
+            date_info = datetime.datetime.now(datetime.UTC).strftime('%Y%m%d-%H%M%S')
             llvm_ref_info = lib.utils.get_git_output(
                 llvm_folder, ['show', '--format=%H', '-s', llvm_ref]
             )

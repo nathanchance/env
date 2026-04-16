@@ -122,7 +122,7 @@ def download_items(targets: list[str], network_folder: Path) -> None:
 
         elif target == 'arch':
             arch_day = '.01'
-            arch_date = datetime.datetime.now(datetime.timezone.utc).strftime("%Y.%m") + arch_day
+            arch_date = datetime.datetime.now(datetime.UTC).strftime("%Y.%m") + arch_day
 
             base_arch_url = f"https://mirrors.edge.kernel.org/archlinux/iso/{arch_date}"
             item = DownloadItem()
