@@ -241,7 +241,8 @@ class VirtualMachine:
 
         return args
 
-    def _get_image_format(self, image: Path) -> str:
+    @staticmethod
+    def _get_image_format(image: Path) -> str:
         qemu_img_cmd = ['qemu-img', 'info', '--output', 'json', image]
         json_output = json.loads(lib.utils.chronic(qemu_img_cmd).stdout)
 
