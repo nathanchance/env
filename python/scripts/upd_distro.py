@@ -54,7 +54,7 @@ else:
         cmds = [['-Syyu']]
         yes_arg = '--noconfirm'
 
-    elif os_rel['ID'] in ('almalinux', 'fedora', 'fedora-asahi-remix', 'rocky'):
+    elif os_rel['ID'] in {'almalinux', 'fedora', 'fedora-asahi-remix', 'rocky'}:
         cmd_func = lib.setup.dnf
         cmds = [['update']]
 
@@ -66,7 +66,7 @@ else:
         ]
         yes_arg = None
 
-    elif os_rel['ID'] in ('debian', 'raspbian', 'ubuntu'):
+    elif os_rel['ID'] in {'debian', 'raspbian', 'ubuntu'}:
         cmd_func = lib.setup.apt
         cmds = [
             ['update'],

@@ -34,7 +34,7 @@ def parse_arguments():
 
 
 def sync(repo: Path, patches_output: Path) -> None:
-    if repo.name not in ('linux', 'linux-next') and 'linux-stable' not in repo.name:
+    if repo.name not in {'linux', 'linux-next'} and 'linux-stable' not in repo.name:
         raise RuntimeError(f"Supplied repo ('{repo}, {repo.name}') is not supported by cbl_ptchmn!")
 
     # Generate a list of patches to remove. The Python documentation states

@@ -245,7 +245,7 @@ class VirtualMachine:
         qemu_img_cmd = ['qemu-img', 'info', '--output', 'json', image]
         json_output = json.loads(lib.utils.chronic(qemu_img_cmd).stdout)
 
-        if (img_format := json_output['format']) in ('qcow2', 'raw'):
+        if (img_format := json_output['format']) in {'qcow2', 'raw'}:
             return img_format
         raise ValueError(f"Unhandled image format: {img_format}")
 

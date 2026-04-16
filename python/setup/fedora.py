@@ -47,7 +47,7 @@ def get_fedora_version() -> int:
 
 
 def machine_is_trusted() -> bool:
-    return lib.utils.get_hostname() in ('aadp', 'honeycomb', 'mac-studio-m1-max')
+    return lib.utils.get_hostname() in {'aadp', 'honeycomb', 'mac-studio-m1-max'}
 
 
 def prechecks() -> None:

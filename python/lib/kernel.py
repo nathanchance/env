@@ -96,7 +96,7 @@ def get_msg_id_subject(mail_str: str) -> tuple[str, str]:
 def prepare_source(base_name: str, base_ref: str = 'origin/master') -> None:
     if base_name == 'linux-debug':
         return  # managed outside of the script
-    if base_name not in (*NEXT_TREES, 'linux-mainline-llvm'):
+    if base_name not in {*NEXT_TREES, 'linux-mainline-llvm'}:
         raise RuntimeError(f"Don't know how to handle provided base_name ('{base_name}')?")
 
     source_folder = Path(os.environ['CBL_SRC_P'], base_name)

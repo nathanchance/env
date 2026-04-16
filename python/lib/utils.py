@@ -259,7 +259,7 @@ def run0(full_cmd: ValidCmd, **kwargs) -> subprocess.CompletedProcess:
 
     # If we have to escalate via 'doas' or 'sudo', print the command so it can
     # be audited if necessary.
-    return run(cmd_copy, show_cmd_location=cmd_copy[0] in ('doas', 'sudo'), **kwargs)
+    return run(cmd_copy, show_cmd_location=cmd_copy[0] in {'doas', 'sudo'}, **kwargs)
 
 
 def run_check_rc_zero(args: ValidCmd, **kwargs) -> bool:

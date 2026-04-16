@@ -136,7 +136,7 @@ class NspawnConfig(UserDict):
                 or (have_uid_map and os.access(mount, os.R_OK | os.W_OK))
             ):
                 item = mount
-            elif mount in (os.environ['NVME_FOLDER'], os.environ['HOST_FOLDER']):
+            elif mount in {os.environ['NVME_FOLDER'], os.environ['HOST_FOLDER']}:
                 # The host user owns these mounts and a script in
                 # mkosi/dev/mkosi.postinst.d ensures that the mountpoints are
                 # owned by the host user's '--bind-user' UID, so it needs to be
@@ -367,7 +367,7 @@ class NspawnConfig(UserDict):
         # an old one if so desired.
         if (nspawn_conf := Path('/etc/systemd/nspawn', f"{self.name}.nspawn")).exists():
             answer = input(f"\033[01;33m{nspawn_conf} already exists, remove it? [y/N]\033[0m ")
-            if answer.lower() in ('y', 'yes'):
+            if answer.lower() in {'y', 'yes'}:
                 lib.utils.run0(['rm', nspawn_conf])
         if not nspawn_conf.exists():
             if not nspawn_conf.parent.exists():
@@ -415,7 +415,7 @@ class NspawnConfig(UserDict):
         # If we are removing the machine and it has been enabled on boot, we
         # should make sure it is disabled and stopped before removing the
         # files.
-        if mode in ('machine', 'all') and lib.utils.run_check_rc_zero(
+        if mode in {'machine', 'all'} and lib.utils.run_check_rc_zero(
             ['systemctl', 'is-enabled', f"systemd-nspawn@{self.name}"]
         ):
             lib.utils.run0(['machinectl', 'disable', '--now', self.name])

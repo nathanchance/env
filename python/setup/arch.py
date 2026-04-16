@@ -142,7 +142,7 @@ def configure_amd_pstate() -> None:
     # amd_pstate_acpi_pm_profile_undefined() from drivers/cpufreq/amd-pstate.c
     # to avoid attempting to configure amd_pstate when it is not possible.
     pm_profile = int(Path('/sys/firmware/acpi/pm_profile').read_text(encoding='utf-8').strip())
-    if pm_profile in (0, 4, 5, 7) or pm_profile >= 9:
+    if pm_profile in {0, 4, 5, 7} or pm_profile >= 9:
         return
 
     # WORK IN PROGRESS
@@ -850,11 +850,11 @@ def vmware_adjustments(mkinitcpio_conf: MkinitcpioConf) -> None:
 
 
 def will_run_forgejo_actions():
-    return lib.utils.get_hostname() in (
+    return lib.utils.get_hostname() in {
         'asus-intel-core-11700',
         'beelink-amd-ryzen-8745HS',
         'msi-intel-core-10210U',
-    )
+    }
 
 
 if __name__ == '__main__':

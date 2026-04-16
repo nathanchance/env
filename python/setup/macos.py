@@ -101,7 +101,7 @@ def is_vm() -> bool:
 
 
 def repo_clone(repo_dest: Path, repo_branch: str | None = None) -> None:
-    use_codeberg = repo_dest.name in ('env', 'keys')
+    use_codeberg = repo_dest.name in {'env', 'keys'}
     # neither ssh nor gh will be set up in virtual machines, just use plain ol' git.
     if is_vm():
         clone_args: list[lib.utils.PathString] = ['-b', repo_branch] if repo_branch else []

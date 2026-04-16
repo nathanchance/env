@@ -264,10 +264,10 @@ class GCCManager(ToolchainManager):
             if 'aarch64-linux' in targets:
                 targets.append('arm-linux-gnueabi')
             # No GCC 9.5.0 i386-linux on x86_64 or GCC 14.2.0 i386-linux on aarch64?
-            if 'i386-linux' in targets and (self.host_arch, major_version) in (
+            if 'i386-linux' in targets and (self.host_arch, major_version) in {
                 ('x86_64', 9),
                 ('aarch64', 14),
-            ):
+            }:
                 targets.remove('i386-linux')
             # RISC-V was not supported in GCC until 7.x
             if major_version < 7:
@@ -309,7 +309,7 @@ class GCCManager(ToolchainManager):
         # Architecture does not matter because it will not be printed
         cc = self.get_cc_as_path(self.versions[0], 'x86_64')
 
-        if folder not in ('bin', 'prefix'):
+        if folder not in {'bin', 'prefix'}:
             raise ValueError(f"Do not know how to handle {folder} in print_folder()?")
 
         print(shell_quote(cc.parents[1 if folder == 'prefix' else 0]))
@@ -331,7 +331,7 @@ class GCCManager(ToolchainManager):
         cc_vars['CROSS_COMPILE'] = shell_quote(cc_path)
 
         # Ensure compat vDSO gets built for all arm64 compiles
-        if self.targets[0] in ('aarch64', 'arm64'):
+        if self.targets[0] in {'aarch64', 'arm64'}:
             compat_cc = self.get_cc_as_path(self.versions[0], 'arm')
             if split:
                 compat_cc = compat_cc.name
@@ -392,7 +392,7 @@ class LLVMManager(ToolchainManager):
         if len(self.versions) != 1:
             raise RuntimeError('Asking for print_folder() with number of versions other than one?')
 
-        if folder not in ('bin', 'prefix'):
+        if folder not in {'bin', 'prefix'}:
             raise ValueError(f"Do not know how to handle {folder} in print_folder()?")
 
         prefix = self.get_prefix(self.versions[0])

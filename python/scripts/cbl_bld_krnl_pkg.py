@@ -399,11 +399,11 @@ if __name__ == '__main__':
             make_vars.update([arg.split('=', 1)])
         elif arg.endswith('config'):
             config_targets.append(arg)
-        elif (pkgname := arg.replace('linux-', '')) in (
+        elif (pkgname := arg.replace('linux-', '')) in {
             'debug',
             'mainline-llvm',
             'next-llvm',
-        ):
+        }:
             pass
         else:
             raise RuntimeError(f"Cannot handle positional argument ('{arg}')!")

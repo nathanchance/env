@@ -384,14 +384,14 @@ def is_lxc() -> bool:
 
 def is_virtual_machine() -> bool:
     if shutil.which('systemd-detect-virt'):
-        return lib.utils.detect_virt() in (
+        return lib.utils.detect_virt() in {
             'qemu',
             'kvm',
             'vmware',
             'microsoft',
             'apple',
-        )
-    return lib.utils.get_hostname() in ('hyperv', 'qemu', 'vmware')
+        }
+    return lib.utils.get_hostname() in {'hyperv', 'qemu', 'vmware'}
 
 
 def is_systemd_init() -> bool:
@@ -411,7 +411,7 @@ def partition_drive(
         username = get_user()
     if not fstype:
         fstype = 'ext4'
-    elif fstype not in ('btrfs', 'ext4'):
+    elif fstype not in {'btrfs', 'ext4'}:
         raise RuntimeError(f"Cannot safely handle filesytem type ('{fstype}')?")
 
     if not device.startswith(('/dev/nvme', '/dev/sd')):

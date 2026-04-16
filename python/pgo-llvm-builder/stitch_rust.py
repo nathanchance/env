@@ -112,7 +112,7 @@ def get_rust_target_from_tarball(tarball_path: Path) -> str:
         raise RuntimeError(f"Unexpected name ('{tarball_path.name}') for tarball?")
 
     # "<arch>.tar.<suffix>" -> ["<arch>", "tar.<suffix>"] -> "<arch>"
-    if (arch := name_parts[2].split('.', 1)[0]) not in ('aarch64', 'x86_64'):
+    if (arch := name_parts[2].split('.', 1)[0]) not in {'aarch64', 'x86_64'}:
         raise RuntimeError(f"Unexpected architecture ('{arch}') found?")
 
     return f"{arch}-unknown-linux-gnu"
@@ -146,7 +146,7 @@ def generate_llvm_rust_tarball(scripts: list[Path], llvm_tarball: Path, rust_ver
     tar_cmd: lib.utils.CmdList = ['tar']
     # If original LLVM tarball is compressed, we will need to pass in the
     # compression flag into both the extract command and the repackage command
-    if (suffix := llvm_tarball.suffix) in ('.gz', '.xz', '.zstd'):
+    if (suffix := llvm_tarball.suffix) in {'.gz', '.xz', '.zstd'}:
         tar_cmd.append('--gzip' if suffix == '.gz' else f"--{suffix.replace('.', '')}")
         # If llvm_rust_tarball were
         #   .../llvm-<llvm_ver>-rust-<rust_ver>-<arch>.tar.<ext>
