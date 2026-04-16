@@ -30,11 +30,13 @@ function py_lint -d "Lint Python files"
         else
             __print_red "\nnot ruff check clean\n"
         end
+
         if uvx ruff format --diff $files
             __print_green "\nruff format clean\n"
         else
             __print_red "\nnot ruff format clean\n"
         end
+
         if set requirements (git ls-files | string match -er 'requirements\.txt')
             set ty_uvx_flags --with-requirements $requirements
         end
@@ -52,40 +54,42 @@ function py_lint -d "Lint Python files"
         else
             __print_red "\nnot flake8 clean"
         end
+
         if uvx yapf --diff --parallel $files
             __print_green "yapf clean"
         else
             __print_red "\nnot yapf clean"
         end
-    end
 
-    if set -q quick
-        echo
-    else
-        set -a pylint_ignore C0114 # missing-module-docstring
-        set -a pylint_ignore C0115 # missing-class-docstring
-        set -a pylint_ignore C0116 # missing-function-docstring
-        set -a pylint_ignore C0301 # line-too-long
-        set -a pylint_ignore C0302 # too-many-lines
-        set -a pylint_ignore R0801 # duplicate-code
-        set -a pylint_ignore R0902 # too-many-instance-attributes
-        set -a pylint_ignore R0903 # too-few-public-methods
-        set -a pylint_ignore R0911 # too-many-returns
-        set -a pylint_ignore R0912 # too-many-branches
-        set -a pylint_ignore R0913 # too-many-arguments
-        set -a pylint_ignore R0914 # too-many-locals
-        set -a pylint_ignore R0915 # too-many-statements
-        set -a pylint_ignore R0917 # too-many-positional-arguments
-        set -a pylint_ignore W1509 # subprocess-popen-preexec-fn
-        if uvx pylint \
-                --disable (string join , $pylint_ignore) \
-                --jobs (nproc) \
-                $files
-            __print_green "pylint clean\n"
+        if set -q quick
+            echo
         else
-            __print_red "not pylint clean\n"
+            set -a pylint_ignore C0114 # missing-module-docstring
+            set -a pylint_ignore C0115 # missing-class-docstring
+            set -a pylint_ignore C0116 # missing-function-docstring
+            set -a pylint_ignore C0301 # line-too-long
+            set -a pylint_ignore C0302 # too-many-lines
+            set -a pylint_ignore R0801 # duplicate-code
+            set -a pylint_ignore R0902 # too-many-instance-attributes
+            set -a pylint_ignore R0903 # too-few-public-methods
+            set -a pylint_ignore R0911 # too-many-returns
+            set -a pylint_ignore R0912 # too-many-branches
+            set -a pylint_ignore R0913 # too-many-arguments
+            set -a pylint_ignore R0914 # too-many-locals
+            set -a pylint_ignore R0915 # too-many-statements
+            set -a pylint_ignore R0917 # too-many-positional-arguments
+            set -a pylint_ignore W1509 # subprocess-popen-preexec-fn
+            if uvx pylint \
+                    --disable (string join , $pylint_ignore) \
+                    --jobs (nproc) \
+                    $files
+                __print_green "pylint clean\n"
+            else
+                __print_red "not pylint clean\n"
+            end
         end
     end
+
     if uvx vulture --min-confidence 80 $files
         __print_green "vulture clean"
     else
