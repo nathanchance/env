@@ -155,6 +155,18 @@ function upd -d "Runs the update command for the current distro or downloads/upd
 
                 continue
 
+            case python
+                if test (command -v python3) != $UV_PYTHON_BIN_DIR/python3
+                    __print_warning "python requires uv managed python (install with 'uv python install --default'), skipping..."
+                    continue
+                end
+
+                uv python upgrade
+
+                python3 --version
+
+                continue
+
             case vim
                 set vim_plugins \
                     https://github.com/blankname/vim-fish \
