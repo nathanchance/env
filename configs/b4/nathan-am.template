@@ -1,0 +1,18 @@
+On ${sentdate}, ${fromname} wrote:
+${quote}
+
+Applied to
+
+  ${treename} ${branch}
+
+Thanks!
+
+${summary}
+
+Please look out for regression or issue reports or other follow up
+comments, as they may result in the patch/series getting dropped or
+reverted.
+
+Best regards,
+-- 
+${signature}

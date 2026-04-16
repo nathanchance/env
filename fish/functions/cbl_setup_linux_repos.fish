@@ -75,19 +75,22 @@ function cbl_setup_linux_repos -d "Clone ClangBuiltLinux Linux repos into their 
         end
     end
 
-    # Set up kbuild tree
-    set kbuild $CBL_SRC_D/kbuild
-    if not test -d $kbuild
-        set kbuild_https_url https://git.kernel.org/pub/scm/linux/kernel/git/kbuild/linux.git
+    # Set up kbuild and personal trees
+    for user in kbuild nathan
+        set repo $CBL_SRC_D/$user
+        if test -d $repo
+            continue
+        end
 
         # Clone with HTTPS and switch to SSH after to avoid needing to unlock kernel.org SSH key
-        git clone $kbuild_https_url $kbuild
+        set repo_https_url https://git.kernel.org/pub/scm/linux/kernel/git/$user/linux.git
+        git clone $repo_https_url $repo
         or return
 
-        git -C $kbuild config b4.thanks-am-template $ENV_FOLDER/configs/b4/kbuild-am.template
-        git -C $kbuild config b4.thanks-commit-url-mask 'https://git.kernel.org/kbuild/c/%.13s'
-        git -C $kbuild config b4.thanks-treename $kbuild_https_url
-        git -C $kbuild remote set-url origin (string replace https://git.kernel.org/ git@gitolite.kernel.org: $kbuild_https_url)
-        git -C $kbuild remote add -f --tags linus https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git
+        git -C $repo config b4.thanks-am-template $ENV_FOLDER/configs/b4/$user-am.template
+        git -C $repo config b4.thanks-commit-url-mask "https://git.kernel.org/$user/c/%.13s"
+        git -C $repo config b4.thanks-treename $repo_https_url
+        git -C $repo remote set-url origin (string replace https://git.kernel.org/ git@gitolite.kernel.org: $repo_https_url)
+        git -C $repo remote add -f --tags linus https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git
     end
 end
