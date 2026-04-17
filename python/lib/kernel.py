@@ -114,7 +114,7 @@ def prepare_source(base_name: str, base_ref: str = 'origin/master') -> None:
 
     # Patching section
     patches.append(
-        'https://lore.kernel.org/all/20260325-certs-extract-cert-key_pass-unused-but-set-global-v1-1-ecf94326d532@kernel.org/'
+        'https://git.kernel.org/nathan/p/4f96b7c68a9904e01049ef610d701b382dca9574'
     )  # extract-cert: Wrap key_pass with '#ifdef USE_PKCS11_ENGINE'
 
     if base_name == 'linux-next-llvm':
