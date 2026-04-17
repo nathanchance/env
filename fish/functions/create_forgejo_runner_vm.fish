@@ -30,7 +30,7 @@ function create_forgejo_runner_vm -d "Easily create and deploy a Forgejo runner 
 
     set libvirt_store $VM_FOLDER/libvirt
     mkdir -p $libvirt_store
-    set base_vm_hostname forgejo-runner-(string replace _ - $UTS_MACH)-$osinfo-$hostname
+    set base_vm_hostname forgejo-runner-$hostname-(string replace _ - $UTS_MACH)
     set vm_hostname $base_vm_hostname-(math (path filter -f $libvirt_store/$base_vm_hostname-*.raw | count) + 1)
 
     if not set -q output_size
