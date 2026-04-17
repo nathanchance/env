@@ -139,7 +139,7 @@ function upd -d "Runs the update command for the current distro or downloads/upd
 
                 for domain in (path basename $VM_FOLDER/libvirt/forgejo-runner-*.raw | path change-extension '')
                     header "Updating $domain"
-                    ssh root@(virsh domifaddr $domain | string match -gr '([0-9.]+)/24$') $upd_cmd
+                    virsh_ssh $domain $upd_cmd
                     or return
                 end
                 continue
