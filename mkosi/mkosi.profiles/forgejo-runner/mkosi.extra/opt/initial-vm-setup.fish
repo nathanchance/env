@@ -10,7 +10,7 @@ pushd /var/lib/forgejo-runner
 or return
 
 set label_name docker
-if test (nproc) -ge 8
+if test (nproc) -gt 8
     set label_name $label_name-build
 end
 set label $label_name:docker://data.forgejo.org/oci/node:lts

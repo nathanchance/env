@@ -19,6 +19,9 @@ function create_forgejo_runner_vm -d "Easily create and deploy a Forgejo runner 
     end
     if not set -q vcpus
         set vcpus (math (nproc) / 8)
+        if test $vcpus -gt 8
+            set vcpus 8
+        end
     end
     if test $vcpus -lt 2
         set vcpus 2
