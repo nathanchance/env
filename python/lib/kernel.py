@@ -113,11 +113,12 @@ def prepare_source(base_name: str, base_ref: str = 'origin/master') -> None:
     commits: list[str] = []
 
     # Patching section
-    patches.append(
-        'https://git.kernel.org/nathan/p/4f96b7c68a9904e01049ef610d701b382dca9574'
-    )  # extract-cert: Wrap key_pass with '#ifdef USE_PKCS11_ENGINE'
+    if base_name == 'linux-mainline-llvm':
+        patches.append(
+            'https://git.kernel.org/nathan/p/4f96b7c68a9904e01049ef610d701b382dca9574'
+        )  # extract-cert: Wrap key_pass with '#ifdef USE_PKCS11_ENGINE'
 
-    if base_name == 'linux-next-llvm':
+    if base_name in PACMAN_TREES:
         patches.append('''From e2b85cda2be7dcaefd908d283a6be1a40bbd843e Mon Sep 17 00:00:00 2001
 From: Nathan Chancellor <nathan@kernel.org>
 Date: Mon, 13 Apr 2026 15:22:57 -0700
