@@ -7,7 +7,9 @@ function create_forgejo_runner_vm -d "Easily create and deploy a Forgejo runner 
         case aarch64
             set cpu host-passthrough
             set distro fedora
+            # needed because docker only supports up to Fedora 44
             set -a mkosi_build_args --release 44
+            # libvirt might not support fedora-44 as an option, just use rawhide
             set osinfo fedora-rawhide
 
         case x86_64
