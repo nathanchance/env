@@ -13,7 +13,8 @@ set label_name docker
 if test (nproc) -gt 8
     set label_name $label_name-build
 end
-set label $label_name:docker://data.forgejo.org/oci/node:lts
+set default_docker_image data.forgejo.org/oci/node:lts
+set label $label_name:docker://$default_docker_image
 
 forgejo-runner register \
     --config /etc/forgejo-runner/config.y* \
@@ -36,6 +37,12 @@ begin
     umask 077
     and mkdir -p $HOME/.ssh
     and curl -fLSs https://codeberg.org/nathanchance.keys >$HOME/.ssh/authorized_keys
+end
+or return
+
+begin
+    docker pull docker.io/(path basename $default_docker_image)
+    and docker pull $default_docker_image
 end
 or return
 
