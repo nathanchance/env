@@ -57,7 +57,7 @@ get_current_release ninja
 get_latest_release https://github.com/ninja-build/ninja
 
 get_current_release python
-get_latest_release https://github.com/python/cpython
+get_latest_release https://github.com/python/cpython | string split -f1 -m1 -r .
 
 get_current_release zstd
 get_latest_release https://github.com/facebook/zstd
