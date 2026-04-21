@@ -97,7 +97,7 @@ def install_packages() -> None:
 
 
 def is_vm() -> bool:
-    return 'VirtualMac' in lib.utils.chronic(['sysctl', 'hw.model']).stdout.split(': ')[1]
+    return 'VirtualMac' in lib.utils.chronic(['sysctl', 'hw.model']).stdout
 
 
 def repo_clone(repo_dest: Path, repo_branch: str | None = None) -> None:
