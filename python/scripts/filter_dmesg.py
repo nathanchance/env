@@ -93,6 +93,10 @@ ALLOWLIST = {
         r"nvme [0-9a-f:.]+\s+device \[[0-9a-f:]+\] error status/mask=00000001/0000e000",
         r"nvme [0-9a-f:.]+\s+\[ 0\] RxErr\s+\(First\)",
     ],
+    'ax162': [
+        r"i2c_designware AMDI[0-9:]+ Unknown Synopsys component type: 0xf+",
+        r"bnxt_en [0-9a-f.:]+ \(unnamed net_device\) \(uninitialized\): Device requests max timeout of \d+ seconds, may trigger hung task watchdog \(kernel default \d+s\)",
+    ],
     'asus-intel-core-11700': [
         # This is not a shared client machine and I prefer having SMT on
         'MMIO Stale Data CPU bug present and SMT on, data leak possible',
