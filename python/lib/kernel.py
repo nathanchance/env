@@ -114,9 +114,12 @@ def prepare_source(base_name: str, base_ref: str = 'origin/master') -> None:
 
     # Patching section
     if base_name == 'linux-mainline-llvm':
-        patches.append(
-            'https://git.kernel.org/nathan/p/4f96b7c68a9904e01049ef610d701b382dca9574'
-        )  # extract-cert: Wrap key_pass with '#ifdef USE_PKCS11_ENGINE'
+        patches += [
+            # extract-cert: Wrap key_pass with '#ifdef USE_PKCS11_ENGINE'
+            'https://git.kernel.org/nathan/p/4f96b7c68a9904e01049ef610d701b382dca9574',
+            # rtc: cmos: Use platform_get_irq_optional() in cmos_platform_probe()
+            'https://git.kernel.org/abelloni/p/e9f850ba66cdf6b77fb4f005e46c4b605c4de434',
+        ]
 
     if base_name in PACMAN_TREES:
         patches.append('''From e2b85cda2be7dcaefd908d283a6be1a40bbd843e Mon Sep 17 00:00:00 2001
