@@ -17,20 +17,16 @@ on:
 enable-email-notifications: true
 jobs:
   fish:
-    runs-on: docker
-    uses: https://codeberg.org/nathanchance/actions-workflows/.forgejo/workflows/fish_format.yml@main
+    uses: nathanchance/actions-workflows/.forgejo/workflows/fish_format.yml@main
   python:
-    runs-on: docker
     strategy:
       fail-fast: false
       matrix:
         version: ['3.15', '3.14', '3.13', '3.12', '3.11']
-    uses: https://codeberg.org/nathanchance/actions-workflows/.forgejo/workflows/python_lint.yml@main
+    uses: nathanchance/actions-workflows/.forgejo/workflows/python_lint.yml@main
     with:
       python_version: ${{ matrix.version }}
   shellcheck:
-    runs-on: docker
-    uses: https://codeberg.org/nathanchance/actions-workflows/.forgejo/workflows/shellcheck.yml@main
+    uses: nathanchance/actions-workflows/.forgejo/workflows/shellcheck.yml@main
   shfmt:
-    runs-on: docker
-    uses: https://codeberg.org/nathanchance/actions-workflows/.forgejo/workflows/shfmt.yml@main
+    uses: nathanchance/actions-workflows/.forgejo/workflows/shfmt.yml@main
