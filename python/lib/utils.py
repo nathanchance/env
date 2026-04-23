@@ -3,6 +3,7 @@
 # Copyright (C) 2022-2023 Nathan Chancellor
 
 import copy
+import getpass
 import json
 import os
 import shlex
@@ -13,7 +14,7 @@ import sys
 import time
 from collections.abc import Sequence
 from pathlib import Path
-from typing import TypedDict
+from typing import Any, TypedDict
 
 PathString = Path | str
 ValidSingleCmd = str | bytes | os.PathLike
@@ -115,6 +116,15 @@ def fzf(header: str, fzf_input: str, fzf_args: ValidCmd | None = None) -> list[s
         fzf_cmd, stdin=subprocess.PIPE, stdout=subprocess.PIPE, text=True
     ) as fzf_proc:
         return fzf_proc.communicate(fzf_input)[0].splitlines()
+
+
+def get_codeberg_token() -> str:
+    if token := os.environ.get('CODEBERG_TOKEN'):
+        return token
+    getpass_kwargs: dict[str, Any] = {'prompt': 'Codeberg API token: '}
+    if sys.version_info >= (3, 14, 0):
+        getpass_kwargs['echo_char'] = '*'
+    return getpass.getpass(**getpass_kwargs)
 
 
 def get_duration(start_seconds: float, end_seconds: float | None = None) -> str:
