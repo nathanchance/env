@@ -251,7 +251,6 @@ def run(args: ValidCmd, **kwargs) -> subprocess.CompletedProcess:
 
     try:
         # This function defaults check=True so if check=False here, it is explicit
-        # pylint: disable-next=subprocess-run-check
         return subprocess.run(args, **kwargs)  # noqa: PLW1510
     except subprocess.CalledProcessError as err:
         if kwargs.get('capture_output'):

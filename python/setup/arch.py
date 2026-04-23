@@ -14,11 +14,8 @@ from pathlib import Path
 from tempfile import TemporaryDirectory
 
 sys.path.append(str(Path(__file__).resolve().parents[1]))
-# pylint: disable=wrong-import-position
 import lib.setup
 import lib.utils
-
-# pylint: enable=wrong-import-position
 
 EDID_1280_1024 = b'BAAAACAAAAAFAAAAR05VAAIAAcAEAAAAAAAAAAAAAAABAAHABAAAAAEAAAAAAAAAAQEBAQEBMCoAmFEAKkAwcBMAvGMRAAAeAAAA/wBMaW51eCAjMAogICAgAAAA/QA7PT5ACwAKICAgICAgAAAA/ABMaW51eCBTWEdBCiAgAC4='
 HETZNER_MIRROR = 'https://mirror.hetzner.com/archlinux/$repo/os/$arch'

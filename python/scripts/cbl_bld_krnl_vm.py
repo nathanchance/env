@@ -17,17 +17,11 @@ from argparse import ArgumentParser
 from pathlib import Path
 
 import korg_tc
-
-# uv handles this for us
-# pylint: disable-next=import-error
 import requests
 
 sys.path.append(str(Path(__file__).resolve().parents[1]))
-# pylint: disable=wrong-import-position
 import lib.kernel
 import lib.utils
-
-# pylint: enable=wrong-import-position
 
 
 def get_qemu_arch(key: str) -> str:

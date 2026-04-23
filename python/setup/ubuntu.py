@@ -10,11 +10,8 @@ from pathlib import Path
 import deb
 
 sys.path.append(str(Path(__file__).resolve().parents[1]))
-# pylint: disable=wrong-import-position
 import lib.setup
 import lib.utils
-
-# pylint: enable=wrong-import-position
 
 
 def apt_add_repo(repo_to_add):

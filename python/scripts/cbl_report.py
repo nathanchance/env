@@ -14,18 +14,14 @@ from pathlib import Path
 from typing import Any
 
 sys.path.append(str(Path(__file__).resolve().parents[1]))
-# pylint: disable=wrong-import-position
 import lib.kernel
 import lib.utils
-
-# pylint: enable=wrong-import-position
 
 
 def gen_json_from_cmd(cmd: lib.utils.ValidCmd) -> dict[str, Any]:
     return json.loads(lib.utils.chronic(cmd).stdout)
 
 
-# pylint: disable-next=invalid-name
 def get_current_datetime(tz: datetime.tzinfo | None = None) -> datetime.datetime:
     return datetime.datetime.now(tz=tz)
 

@@ -8,11 +8,8 @@ import sys
 from pathlib import Path
 
 sys.path.append(str(Path(__file__).resolve().parents[1]))
-# pylint: disable=wrong-import-position
 import lib.setup
 import lib.utils
-
-# pylint: enable=wrong-import-position
 
 MIN_FEDORA_VERSION = 35
 MAX_FEDORA_VERSION = 44

@@ -16,16 +16,11 @@ import sys
 from argparse import ArgumentParser
 from pathlib import Path
 
-# uv handles this for us
-# pylint: disable-next=import-error
 import requests
 
 sys.path.append(str(Path(__file__).resolve().parents[1]))
-# pylint: disable=wrong-import-position
 import lib.sha256
 import lib.utils
-
-# pylint: enable=wrong-import-position
 
 
 class DownloadItem:

@@ -8,11 +8,8 @@ from pathlib import Path
 from subprocess import CalledProcessError
 
 sys.path.append(str(Path(__file__).resolve().parents[1]))
-# pylint: disable=wrong-import-position
 import lib.utils
 from scripts.sd_nspawn import DEF_MACH
-
-# pylint: enable=wrong-import-position
 
 DEV_IMG = DEF_MACH[platform.machine()]
 

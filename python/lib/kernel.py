@@ -12,10 +12,7 @@ from subprocess import CalledProcessError, CompletedProcess
 from tempfile import TemporaryDirectory
 
 sys.path.append(str(Path(__file__).resolve().parents[1]))
-# pylint: disable=wrong-import-position
 import lib.utils
-
-# pylint: enable=wrong-import-position
 
 NEXT_TREES: tuple[str, ...] = ('fedora', 'linux-next-llvm')
 PACMAN_TREES: tuple[str, ...] = ('linux-mainline-llvm', 'linux-next-llvm')
@@ -332,5 +329,4 @@ def kmake(
         lib.utils.run(make_cmd, env=env, stdin=stdin, show_cmd=True)
     finally:
         if not use_time:
-            # pylint: disable-next=possibly-used-before-assignment
             print(f"\nTime: {lib.utils.get_duration(start_time)}")

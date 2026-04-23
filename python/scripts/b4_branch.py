@@ -8,11 +8,8 @@ from pathlib import Path
 from subprocess import PIPE, Popen
 
 sys.path.append(str(Path(__file__).resolve().parents[1]))
-# pylint: disable=wrong-import-position
 import lib.kernel
 import lib.utils
-
-# pylint: enable=wrong-import-position
 
 Branches = dict[str, Iterable[str]]
 

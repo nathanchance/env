@@ -9,10 +9,7 @@ from pathlib import Path
 from subprocess import CalledProcessError
 
 sys.path.append(str(Path(__file__).resolve().parents[1]))
-# pylint: disable=wrong-import-position
 import lib.utils
-
-# pylint: enable=wrong-import-position
 
 
 def brew(brew_args: lib.utils.PackageSequence) -> None:

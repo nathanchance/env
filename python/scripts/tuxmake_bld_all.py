@@ -20,11 +20,9 @@ from pathlib import Path
 import korg_tc
 
 # uv ensures that this will always be present
-# pylint: disable-next=import-error,no-name-in-module
 import tuxmake.build
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-# pylint: disable-next=wrong-import-position
 import lib.utils
 
 
@@ -159,7 +157,6 @@ def build_one(
 
     environment, make_variables = get_env_make_variables(target_arch, toolchain)
 
-    # pylint: disable-next=c-extension-no-member
     result = tuxmake.build.build(
         tree=tree,
         output_dir=config_output_dir,

@@ -7,7 +7,6 @@ from argparse import ArgumentParser
 from pathlib import Path
 
 sys.path.append(str(Path(__file__).resolve().parents[1]))
-# pylint: disable=wrong-import-position
 import lib.setup
 import lib.utils
 

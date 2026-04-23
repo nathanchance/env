@@ -18,16 +18,11 @@ from argparse import ArgumentParser, BooleanOptionalAction
 from collections.abc import Iterable
 from pathlib import Path
 
-# uv handles this for us
-# pylint: disable-next=import-error
 import requests
 
 sys.path.append(str(Path(__file__).resolve().parents[1]))
-# pylint: disable=wrong-import-position
 import lib.sha256
 import lib.utils
-
-# pylint: enable=wrong-import-position
 
 LATEST_GCC_VERSIONS: dict[int, str] = {
     15: '15.2.0',
@@ -375,7 +370,6 @@ class LLVMManager(ToolchainManager):
 
         return Path(self.DEFAULT_INSTALL_FOLDER, LATEST_LLVM_VERSIONS[version])
 
-    # pylint: disable-next=unused-argument
     def install(self, cache: bool, extract: bool) -> None:  # noqa: ARG002
         if not self.download_folder:
             msg = 'Attempting to call install() with no download folder?'

@@ -9,10 +9,7 @@ from argparse import ArgumentParser
 from pathlib import Path
 
 sys.path.append(str(Path(__file__).resolve().parents[1]))
-# pylint: disable=wrong-import-position
 import lib.utils
-
-# pylint: enable=wrong-import-position
 
 NSPAWN_MACH_NAME = 'pgo-llvm-builder'
 ROOT = Path(__file__).resolve().parent

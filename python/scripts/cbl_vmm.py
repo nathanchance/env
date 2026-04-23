@@ -26,10 +26,7 @@ if TYPE_CHECKING:
     from collections.abc import Generator
 
 sys.path.append(str(Path(__file__).resolve().parents[1]))
-# pylint: disable=wrong-import-position
 import lib.utils
-
-# pylint: enable=wrong-import-position
 
 # Static constants
 BASE_FOLDER = (
@@ -262,7 +259,6 @@ class VirtualMachine:
             msg = f"Disk image ('{self._primary_disk_img}') for virtual machine ('{self.name}') does not exist, run 'setup' first?"
             raise RuntimeError(msg)
 
-        # pylint: disable-next=superfluous-parens
         if not (qemu := shutil.which(self._qemu)):
             msg = f"Could not find QEMU binary ('{self._qemu}') on your system (needed to run virtual machine)!"
             raise RuntimeError(msg)
@@ -286,7 +282,6 @@ class VirtualMachine:
         # using a context manager because we have a finally clause below that
         # allows us to guarantee it is always cleaned up and it allows us to
         # avoid a level of indentation, which is precious at this point.
-        # pylint: disable-next=consider-using-with
         tmpdir = TemporaryDirectory()
         vfsd_sock = f"{tmpdir.name}/vfsd.sock"
         self.qemu_args += ['-chardev', f"socket,id=char0,path={vfsd_sock}"]

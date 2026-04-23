@@ -16,11 +16,8 @@ from subprocess import DEVNULL
 import korg_tc
 
 sys.path.append(str(Path(__file__).resolve().parents[1]))
-# pylint: disable=wrong-import-position
 import lib.kernel
 import lib.utils
-
-# pylint: enable=wrong-import-position
 
 CONFIG_URL = (
     'https://gitlab.archlinux.org/archlinux/packaging/packages/linux/-/raw/main/config.x86_64'
@@ -278,7 +275,6 @@ class DebugPkgBuilder(KernelPkgBuilder):
 
         super().__init__(Path(os.environ['CBL_SRC_D'], 'linux-debug'))
 
-    # pylint: disable-next=signature-differs
     def _prepare_files(
         self, localmodconfig: bool, menuconfig: bool, extra_config_targets: list[str] | None = None
     ):  # ty: ignore[invalid-method-override]

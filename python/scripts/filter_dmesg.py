@@ -6,10 +6,7 @@ import sys
 from pathlib import Path
 
 sys.path.append(str(Path(__file__).resolve().parents[1]))
-# pylint: disable=wrong-import-position
 import lib.utils
-
-# pylint: enable=wrong-import-position
 
 BT_LE_CODED_PHY = (
     r"Bluetooth: hci0: HCI LE Coded PHY feature bit is set, but its usage is not supported\."

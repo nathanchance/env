@@ -14,7 +14,6 @@ for expected_path, host_value in EXPECTED_MOUNTS:
         raise RuntimeError(msg)
 
 sys.path.append(str(PYTHON_FOLDER))
-# pylint: disable-next=wrong-import-position
 from setup.arch import HETZNER_MIRROR, add_hetzner_mirror_to_repos  # noqa: E402
 
 if not (host_pacman_conf := Path(ETC, 'pacman.conf')).exists():

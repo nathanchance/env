@@ -13,10 +13,7 @@ from pathlib import Path
 from typing import Any
 
 sys.path.append(str(Path(__file__).resolve().parents[1]))
-# pylint: disable=wrong-import-position
 import lib.utils
-
-# pylint: enable=wrong-import-position
 
 ROOT = Path(__file__).resolve().parent
 RUST = Path(ROOT, 'rust')
@@ -100,9 +97,6 @@ def generate_rust_toml(version: str) -> dict[str, Any]:
         download_and_verify(toml_url, toml_dst)
         print()
 
-    # This pylint warning cannot tell that if we cannot import tomllib above,
-    # the script exits.
-    # pylint: disable-next=possibly-used-before-assignment
     return tomllib.loads(toml_dst.read_text(encoding='utf-8'))
 
 
@@ -212,8 +206,6 @@ if __name__ == '__main__':
     rust_toml = generate_rust_toml(args.version)
 
     for tarball in args.llvm_tarballs:
-        # pylint only flags this variable, which is dumb.
-        # pylint: disable-next=invalid-name
         rust_target = get_rust_target_from_tarball(tarball)
 
         install_scripts = prepare_rust_components(rust_toml, rust_target)
