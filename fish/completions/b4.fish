@@ -27,7 +27,17 @@ complete -c b4 -f
 complete -c b4 -f -s h -l help -d "Show help message and exit"
 
 # subcommands
-set -l subcommands mbox am shazam pr ty diff kr prep trailers send
+set -l subcommands \
+    mbox \
+    am \
+    shazam \
+    pr \
+    ty \
+    diff \
+    kr \
+    prep \
+    trailers \
+    send
 complete -c b4 -n "not __fish_seen_subcommand_from $subcommands" -x -a "
     mbox\t'Download a thread as an mbox file'
     am\t'Create an mbox file that is ready to git-am'
