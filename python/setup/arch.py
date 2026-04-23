@@ -435,9 +435,6 @@ def pacman_install_packages() -> None:
         'reflector',
         'tio',
 
-        # b4
-        'git-filter-repo',
-
         # Container tools
         'aardvark-dns',
         'buildah',
