@@ -4,4 +4,4 @@ pkgbuilds/linux-*/config.old
 pkgbuilds/*/pkg
 pkgbuilds/*/src
 pkgbuilds/*/*.tar.*
-env/mkosi/tools
+env/mkosi/mkosi.tools
