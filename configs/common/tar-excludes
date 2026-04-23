@@ -5,3 +5,4 @@ pkgbuilds/*/pkg
 pkgbuilds/*/src
 pkgbuilds/*/*.tar.*
 env/mkosi/mkosi.tools
+env/python/pgo-llvm-builder/rust
