@@ -31,24 +31,30 @@ set -l subcommands \
     mbox \
     am \
     shazam \
+    review \
     pr \
     ty \
     diff \
     kr \
     prep \
     trailers \
-    send
+    send \
+    dig \
+    bugs
 complete -c b4 -n "not __fish_seen_subcommand_from $subcommands" -x -a "
     mbox\t'Download a thread as an mbox file'
     am\t'Create an mbox file that is ready to git-am'
     shazam\t'Like b4 am, but applies the series to your tree'
+    review\t'Review patch series received on mailing lists'
     pr\t'Fetch a pull request found in a message ID'
     ty\t'Generate thanks email when something gets merged/applied'
     diff\t'Show a range-diff to previous series revision'
     kr\t'Keyring operations'
     prep\t'Work on patch series to submit for mailing list review'
     trailers\t'Operate on trailers received for mailing list reviews'
-    send\t'Submit your work for review on the mailing lists'"
+    send\t'Submit your work for review on the mailing lists'
+    dig\t'Dig into the details of a specific commit'
+    bugs\t'Manage bug reports from mailing list threads'"
 
 # top level options
 complete -c b4 -n "not __fish_seen_subcommand_from $subcommands" -f -l version -d "Show version number and exit"
@@ -110,6 +116,26 @@ complete -c b4 -n "__fish_seen_subcommand_from shazam; and not __fish_seen_argum
 complete -c b4 -n "__fish_seen_subcommand_from shazam; and not __fish_seen_argument -s H -l make-fetch-head" -f -s M -l merge -d "Attempt to merge series as if it were a pull request (execs git-merge)"
 complete -c b4 -n "__fish_seen_subcommand_from shazam; and __fish_seen_argument -s H -s M -l merge -l make-fetch-head" -x -l guess-lookback -d "When guessing base, go back this many days from the patch date"
 complete -c b4 -n "__fish_seen_subcommand_from shazam; and __fish_seen_argument -s H -s M -l merge -l make-fetch-head" -x -l merge-base -d "Force this base when merging"
+
+# b4 review
+set -l review_subcommands \
+    tui \
+    enroll \
+    track \
+    show-info
+complete -c b4 -n "__fish_seen_subcommand_from review; and not __fish_seen_subcommand_from $review_subcommands" -x -a "
+    tui\t'Browse tracked series in a TUI'
+    enroll\t'Enroll a repository for review tracking'
+    track\t'Track a series for review'
+    show-info\t'Show review branch info in a format suitable for scripting'"
+complete -c b4 -n "__fish_seen_subcommand_from review; and __fish_seen_subcommand_from tui enroll track" -x -s i -l identifier -d "Project identifier"
+complete -c b4 -n "__fish_seen_subcommand_from review bugs; and __fish_seen_subcommand_from tui" -f -l email-dry-run -d "Show all email dialogs but print messages to stdout instead of sending"
+complete -c b4 -n "__fish_seen_subcommand_from review bugs; and __fish_seen_subcommand_from tui" -f -l no-sign -d "Do not patatt-sign outgoing review emails"
+complete -c b4 -n "__fish_seen_subcommand_from review bugs; and __fish_seen_subcommand_from tui" -f -l no-mouse -d "Disable mouse support in the TUI"
+complete -c b4 -n "__fish_seen_subcommand_from review; and __fish_seen_subcommand_from enroll" -x -d "Path to the git repository to enroll" -a '(__fish_complete_directories)'
+complete -c b4 -n "__fish_seen_subcommand_from review; and __fish_seen_subcommand_from track" -x -l rethread -d "Rethread multiple unrelated messages into a single series for tracking (pass - to read message IDs from stdin, one per line)"
+complete -c b4 -n "__fish_seen_subcommand_from review; and __fish_seen_subcommand_from show-info" -f -s l -l list -d "List all review branches with summary info"
+complete -c b4 -n "__fish_seen_subcommand_from review; and __fish_seen_subcommand_from show-info" -f -s j -l json -d "Output in JSON format"
 
 # b4 pr
 complete -c b4 -n "__fish_seen_subcommand_from pr" -x -s b -l branch -d "Check out FETCH_HEAD into this branch after fetching"
@@ -188,3 +214,27 @@ complete -c b4 -n "__fish_seen_subcommand_from send" -f -l no-sign -d "Do not ad
 complete -c b4 -n "__fish_seen_subcommand_from send" -f -l use-web-endpoint -d "Force going through the web endpoint"
 complete -c b4 -n "__fish_seen_subcommand_from send" -f -l web-auth-new -d "Initiate a new web authentication request"
 complete -c b4 -n "__fish_seen_subcommand_from send" -x -l web-auth-verify -d "Submit the token received via verification email"
+
+# b4 dig
+complete -c b4 -n "__fish_seen_subcommand_from dig" -x -s c -l commitish -d "Commit-ish object to dig into"
+complete -c b4 -n "__fish_seen_subcommand_from dig" -f -s C -l no-cache -d "Do not use local cache"
+complete -c b4 -n "__fish_seen_subcommand_from dig" -f -s a -l all-series -d "Show all series, not just the latest matching"
+complete -c b4 -n "__fish_seen_subcommand_from dig" -x -s m -l save-mbox -d "Save matched thread to the specified mbox file"
+complete -c b4 -n "__fish_seen_subcommand_from dig" -f -s w -l who -d "Show list of recipients in the original message"
+
+# b4 bugs
+set -l bugs_subcommands \
+    tui \
+    import \
+    delete \
+    refresh \
+    list
+complete -c b4 -n "__fish_seen_subcommand_from bugs; and not __fish_seen_subcommand_from $bugs_subcommands" -x -a "
+    tui\t'Browse and triage bugs in a TUI'
+    import\t'Import a lore thread as a new bug'
+    delete\t'Permanently delete a bug'
+    refresh\t'Refresh bugs with new thread messages'
+    list\t'List tracked bugs'"
+complete -c b4 -n "__fish_seen_subcommand_from bugs; and __fish_seen_subcommand_from import" -f -l no-parent -d "Break thread at the msgid and ignore parent messages"
+complete -c b4 -n "__fish_seen_subcommand_from bugs; and __fish_seen_subcommand_from list" -x -l status -d "Filter by status" -a "open closed"
+complete -c b4 -n "__fish_seen_subcommand_from bugs; and __fish_seen_subcommand_from list" -x -l label -d "Filter by label"
