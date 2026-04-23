@@ -25,19 +25,22 @@ wezterm.on('bell', function(window, pane)
 
   window:toast_notification('wezterm', 'Bell rung in ' .. pane_title)
 end)
-local function get_hostname()
-    local f = io.popen("/bin/hostname")
-    local hostname = f:read("*a") or ""
+local function get_model()
+    local sysctl_name = 'hw.model'
+    local f = io.popen('/usr/sbin/sysctl ' .. sysctl_name)
+    local sysctl_out = f:read('*a') or ''
     f:close()
-    hostname =string.gsub(hostname, "\n$", "")
-    return hostname
+    local model = string.sub(sysctl_out, string.len(sysctl_name .. ': ') + 1)
+    return string.gsub(model, '\n$', '')
 end
 local function get_font_size()
-    local _hostname = get_hostname()
-    if _hostname == "Nathans-Mac-Studio.local" then
-        return 14.0
-    else
+    local _model = get_model()
+    if _model == 'Mac16,9' then
         return 13.0
+    elseif _model == 'Mac17,2' then
+        return 12.0
+    else
+        return 24.0
     end
 end
 return {
