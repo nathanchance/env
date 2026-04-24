@@ -70,6 +70,8 @@ function kgen_pr -d "Generate a pull request for Linus from tag in specified rep
                 if string match -qr ^kbuild $tag
                     set -a cc "Nicolas Schier <nsc@kernel.org>"
                     set -a cc linux-kbuild@vger.kernel.org
+                else if string match -qr ^clang $tag
+                    set -a cc llvm@lists.linux.dev
                 else
                     __print_error "Don't know how to handle sending tag ('$tag')?"
                     return 1
