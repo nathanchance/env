@@ -10,6 +10,8 @@ import sys
 from argparse import ArgumentParser
 from pathlib import Path
 
+import requests
+
 sys.path.append(str(Path(__file__).resolve().parents[1]))
 import lib.utils
 
@@ -24,6 +26,18 @@ def parse_arguments():
 
 def main():
     args = parse_arguments()
+    codeberg_authorization_header = {'Authorization': f'token {lib.utils.get_codeberg_token()}'}
+    codeberg_runners_api = 'https://codeberg.org/api/v1/user/actions/runners'
+
+    result = requests.get(
+        codeberg_runners_api,
+        headers=codeberg_authorization_header,
+        params={'visible': 'false'},
+        timeout=10,
+    )
+    result.raise_for_status()
+    registered_runners = {item['name']: item['id'] for item in result.json()}
+
     running_domains = [
         val
         for item in lib.utils.chronic(
@@ -41,6 +55,13 @@ def main():
             virsh_undefine_cmd.insert(-1, '--nvram')
 
         lib.utils.run(virsh_undefine_cmd)
+
+        if domain in registered_runners:
+            requests.delete(
+                f"{codeberg_runners_api}/{registered_runners[domain]}",
+                headers=codeberg_authorization_header,
+                timeout=10,
+            )
 
 
 if __name__ == '__main__':
