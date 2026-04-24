@@ -46,4 +46,7 @@ def main():
 
 
 if __name__ == '__main__':
+    if sys.argv[-1] in {'-h', '--help'}:
+        print('Get information about Forgejo Runners from Codeberg API')
+        sys.exit(0)
     main()
