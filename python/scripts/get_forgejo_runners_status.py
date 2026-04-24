@@ -28,13 +28,18 @@ def main():
     result.raise_for_status()
     runners = result.json()
 
-    first_column_width = 53
-    second_column_width = 13
+    keys = ('name', 'status', 'version')
+    columns = {key: len(key) for key in keys}
 
-    table_header = f"| {'runner'.ljust(first_column_width, ' ')} | {'status'.ljust(second_column_width, ' ')} |"
+    for runner in runners:
+        for key in keys:
+            if (new_max := len(runner[key])) > columns[key]:
+                columns[key] = new_max
+
+    table_header = f"| {' | '.join(f'{key:{width}}' for key, width in columns.items())} |"
     table_divider = '-' * len(table_header)
     table_rows = ''.join(
-        f"| {runner['name']:{first_column_width}} | {runner['status']:{second_column_width}} |\n"
+        f"| {' | '.join(f'{runner[key]:{width}}' for key, width in columns.items())} |\n"
         for runner in sorted(runners, key=operator.itemgetter('name'))
     )
 
