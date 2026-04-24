@@ -124,6 +124,8 @@ function cbl_bld_tot_tcs -d "Build LLVM and binutils from source for kernel deve
     end
 
     # Add patches to revert here
+    # https://github.com/llvm/llvm-project/pull/190606#issuecomment-4311166047
+    set -a reverts https://github.com/llvm/llvm-project/commit/2248253e7f97e5ebe172f343a13923cc4db62e8d # [PowerPC] fixed issue "Failure to optimize (x == 0) ? 0xFF : 0 to addic+subfe instead of cntlzw+srwi+neg" (#190606)
     for revert in $reverts
         if string match -qr 'https?://' $revert
             set -l revert (path basename $revert)
