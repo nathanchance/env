@@ -110,11 +110,6 @@ def prepare_source(base_name: str, base_ref: str = 'origin/master') -> None:
     commits: list[str] = []
 
     # Patching section
-    if base_name == 'linux-mainline-llvm':
-        patches.append(
-            'https://git.kernel.org/abelloni/p/e9f850ba66cdf6b77fb4f005e46c4b605c4de434'
-        )  # rtc: cmos: Use platform_get_irq_optional() in cmos_platform_probe()
-
     if base_name in PACMAN_TREES:
         patches.append('''From e2b85cda2be7dcaefd908d283a6be1a40bbd843e Mon Sep 17 00:00:00 2001
 From: Nathan Chancellor <nathan@kernel.org>
