@@ -110,6 +110,11 @@ def prepare_source(base_name: str, base_ref: str = 'origin/master') -> None:
     commits: list[str] = []
 
     # Patching section
+    if base_name in NEXT_TREES:
+        patches.append(
+            'https://lore.kernel.org/all/20260428-ntfs-fix-sometimes-uninit-rl-v1-1-31e0c8025430@kernel.org/'
+        )  # ntfs: Use return instead of goto in ntfs_mapping_pairs_decompress()
+
     if base_name in PACMAN_TREES:
         patches.append('''From e2b85cda2be7dcaefd908d283a6be1a40bbd843e Mon Sep 17 00:00:00 2001
 From: Nathan Chancellor <nathan@kernel.org>
