@@ -146,8 +146,6 @@ function cbl_bld_tot_tcs -d "Build LLVM and binutils from source for kernel deve
     end
 
     # Add in-review patches here
-    # https://github.com/llvm/llvm-project/pull/190606#issuecomment-4311166047
-    set -a gh_prs https://github.com/llvm/llvm-project/pull/194040 # [PowerPC] Fix assert which caused by PR 190606
     for gh_pr in $gh_prs
         if gh_llvm pr view --json state (path basename $gh_pr) | python3 -c "import json, sys; sys.exit(0 if json.load(sys.stdin)['state'] == 'MERGED' else 1)"
             __print_warning "$gh_pr has already been merged, skipping..."
