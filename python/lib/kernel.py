@@ -25,15 +25,6 @@ def b4(cmd: lib.utils.ValidCmd, **kwargs) -> CompletedProcess:
     else:
         b4_cmd.extend(cmd)
 
-    if 'XDG_FOLDER' in os.environ:
-        if 'env' not in kwargs:
-            kwargs['env'] = {}
-        kwargs['env'] |= {
-            'XDG_CACHE_HOME': Path(os.environ['XDG_FOLDER'], 'cache'),
-            'XDG_CONFIG_HOME': Path(os.environ['XDG_FOLDER'], 'config'),
-            'XDG_DATA_HOME': Path(os.environ['XDG_FOLDER'], 'share'),
-        }
-
     return lib.utils.run(b4_cmd, **kwargs)
 
 
