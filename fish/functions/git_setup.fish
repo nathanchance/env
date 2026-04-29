@@ -38,6 +38,7 @@ function git_setup -d "Configure git"
     git config --global url."https://git.kernel.org".insteadOf git://git.kernel.org
 
     git config --global b4.linkmask 'https://patch.msgid.link/%s'
+    git config --global b4.review-tui-disable-mouse true
 
     if command -q delta
         git config --global core.pager "env LESS=RF delta"
