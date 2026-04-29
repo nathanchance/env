@@ -195,7 +195,7 @@ def download_items(targets: list[str], network_folder: Path) -> None:
                         f"{iso_url}/Fedora-Server-{flavor}-{arch}-{fedora_ver}-{server_iso_ver}.iso"
                     )
                     item.sha_url = (
-                        f"{iso_url}/Fedora-Server-iso-{fedora_ver}-{server_iso_ver}-{arch}-CHECKSUM"
+                        f"{iso_url}/Fedora-Server-{fedora_ver}-{server_iso_ver}-{arch}-CHECKSUM"
                     )
 
                     items.append(item)
@@ -206,7 +206,9 @@ def download_items(targets: list[str], network_folder: Path) -> None:
                 item = DownloadItem()
                 item.containing_folder = Path(subfolder, fedora_ver, 'Workstation', arch)
                 item.file_url = f"{iso_url}/Fedora-Workstation-Live-{fedora_ver}-{workstation_iso_ver}.{arch}.iso"
-                item.sha_url = f"{iso_url}/Fedora-Workstation-iso-{fedora_ver}-{server_iso_ver}-{arch}-CHECKSUM"
+                item.sha_url = (
+                    f"{iso_url}/Fedora-Workstation-{fedora_ver}-{server_iso_ver}-{arch}-CHECKSUM"
+                )
 
                 items.append(item)
 
