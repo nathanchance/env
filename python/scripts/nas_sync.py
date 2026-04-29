@@ -178,9 +178,9 @@ def download_items(targets: list[str], network_folder: Path) -> None:
             subfolder = Path(firmware_folder, target.capitalize())
 
             # Constants to update
-            fedora_ver = '44_Beta'
-            server_iso_ver = '1.2'
-            workstation_iso_ver = '1.2'
+            fedora_ver = '44'
+            server_iso_ver = '1.7'
+            workstation_iso_ver = '1.7'
 
             # Base URLs
             base_fedora_url = f"https://mirrors.edge.kernel.org/fedora/releases/{'test/' if '_Beta' in fedora_ver else ''}{fedora_ver}"
