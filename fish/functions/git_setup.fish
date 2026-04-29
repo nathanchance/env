@@ -39,6 +39,7 @@ function git_setup -d "Configure git"
 
     git config --global b4.linkmask 'https://patch.msgid.link/%s'
     git config --global b4.review-tui-disable-mouse true
+    git config --global b4.sashiko-url 'https://sashiko.dev'
 
     if command -q delta
         git config --global core.pager "env LESS=RF delta"
