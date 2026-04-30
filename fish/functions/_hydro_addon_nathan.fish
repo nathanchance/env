@@ -11,6 +11,10 @@ function _hydro_addon_nathan -d "Hydro prompt customizations"
         printf '%b(%s) ' (set_color 4B8BBE) (path basename $VIRTUAL_ENV)
     end
 
+    if set -q B4_REVIEW
+        printf '%b(%s) ' (set_color 4B8BBE) $B4_REVIEW
+    end
+
     if __in_deb_chroot
         printf '%b(chroot:%s) ' (set_color yellow) (cat /etc/debian_chroot)
     end
