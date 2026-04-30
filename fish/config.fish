@@ -56,6 +56,9 @@ switch $LOCATION
         end
 
         if __in_container
+            # SHELL might not be fish if using systemd-nspawn's --bind-user option
+            set -gx SHELL (path resolve /proc/$fish_pid/exe)
+
             if test (cat /etc/use-cbl 2>/dev/null; or echo 0) -eq 1
                 for item in $CBL_QEMU_BIN $CBL_TC_BNTL $CBL_TC_LLVM
                     fish_add_path -gm $item
