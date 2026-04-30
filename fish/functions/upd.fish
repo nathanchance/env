@@ -58,6 +58,9 @@ function upd -d "Runs the update command for the current distro or downloads/upd
                     set install_b4 true
                 end
                 if set -q install_b4
+                    wgt https://lore.kernel.org/tools/20260428-sashiko-patchset-api-v1-(seq 1 3)-24d4ac34b4ae@kernel.org/raw | git am
+                    or return
+
                     uv tool install --from $b4_src --reinstall --with b4[tui] b4
                     or return
                 end
