@@ -66,19 +66,10 @@ function cbl_bld_krnl_rpm -d "Build a .rpm kernel package"
         end
     end
 
-    set rpmopts '--without devel'
-    # /, which includes /var/tmp, is idmapped, which breaks writing to it with our user, so use /tmp.
-    if __in_nspawn
-        set -a rpmopts "--define '_tmppath /tmp'"
-    end
-    if not string match -qr -- "--define='_topdir" <scripts/Makefile.package
-        set -a rpmopts "--define '_topdir $out/rpmbuild'"
-    end
     kmake \
         ARCH=$arch \
         $kmake_args \
         O=$out \
-        RPMOPTS="$rpmopts" \
         olddefconfig $kmake_targets binrpm-pkg
     or return
 

@@ -4,6 +4,7 @@
 
 import email
 import os
+import shlex
 import shutil
 import sys
 import time
@@ -298,6 +299,19 @@ def kmake(
     if 'bindeb-pkg' in targets and lib.utils.get_os_rel_val('ID') not in {'debian', 'ubuntu'}:
         variables['DPKG_FLAGS'] = '-d'
         variables['KDEB_CHANGELOG_DIST'] = 'unstable'
+
+    # Customize .rpm package building
+    if 'binrpm-pkg' in targets:
+        rpmopts = shlex.split(variables.get('RPMOPTS', ''))
+        # Don't build headers package by default
+        rpmopts += ['--without', 'devel']
+        # /, which includes /var/tmp, is idmapped, which breaks writing to it with our user, so use /tmp.
+        if lib.utils.in_nspawn():
+            rpmopts += ['--define', '_tmppath /tmp']
+        makefile_pkg_txt = Path(kernel_src, 'scripts/Makefile.package').read_text(encoding='utf-8')
+        if "--define='_topdir" not in makefile_pkg_txt:
+            rpmopts += ['--define', f"_topdir {variables.get('O', kernel_src)}/rpmbuild"]
+        variables['RPMOPTS'] = shlex.join(rpmopts)
 
     # Build and run make command
     make_cmd: lib.utils.CmdList = [

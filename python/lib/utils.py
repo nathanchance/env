@@ -43,6 +43,7 @@ class MakeVars(TypedDict, total=False):
     O: Path  # noqa: E741
     PACMAN_EXTRAPACKAGES: str
     PACMAN_PKGBASE: str
+    RPMOPTS: str
 
 
 def call_git(directory: Path | None, cmd: ValidCmd, **kwargs) -> subprocess.CompletedProcess:
