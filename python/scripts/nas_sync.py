@@ -151,7 +151,7 @@ def download_items(targets: list[str], network_folder: Path) -> None:
 
         elif target == 'debian':
             debian_arches = ['amd64', 'arm64', 'armhf']
-            debian_ver = '13.0.0'
+            debian_ver = '13.4.0'
 
             for arch in debian_arches:
                 arch_debian_folder = Path(firmware_folder, target.capitalize(), debian_ver, arch)
