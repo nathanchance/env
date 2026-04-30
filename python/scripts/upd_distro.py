@@ -31,7 +31,7 @@ if sys.platform == 'darwin':
     ]
     yes_arg = None
 else:
-    os_rel = lib.setup.get_os_rel()
+    os_rel = lib.utils.get_os_rel()
 
     if os_rel['ID'] == 'arch':
         checkupdates = lib.utils.chronic(['checkupdates'], check=False)

@@ -41,7 +41,7 @@ def dnf_install(install_args: lib.utils.PackageSequence) -> None:
 
 
 def get_fedora_version() -> int:
-    return int(lib.setup.get_os_rel_val('VERSION_ID'))
+    return int(lib.utils.get_os_rel_val('VERSION_ID'))
 
 
 def machine_is_trusted() -> bool:

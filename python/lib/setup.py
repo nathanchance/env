@@ -318,27 +318,6 @@ def get_ip_addr_for_intf(intf: str) -> str | None:
     return ip_addr
 
 
-def get_os_rel_val(variable: str) -> str:
-    return get_os_rel()[variable]
-
-
-def get_os_rel() -> dict[str, str]:
-    for file_val in ['/etc/os-release', '/usr/lib/os-release']:
-        if (file := Path(file_val)).exists():
-            break
-    else:
-        msg = 'os-release file could not be found?'
-        raise RuntimeError(msg)
-
-    # Remove quotes now, as they are needed for shell but not for this
-    # conversion
-    os_rel_txt = file.read_text(encoding='utf-8').replace('"', '')
-
-    return dict(
-        item.split('=', 1) for item in os_rel_txt.splitlines() if item and not item.startswith('#')
-    )
-
-
 def get_udevadm_properties(sysfs_path: str) -> dict[str, str]:
     udevadm_info = {}
     udevadm_info_cmd = ['udevadm', 'info', '-q', 'property', sysfs_path]
@@ -355,7 +334,7 @@ def get_user() -> str:
 
 
 def get_version_codename() -> str:
-    return get_os_rel_val('VERSION_CODENAME')
+    return lib.utils.get_os_rel_val('VERSION_CODENAME')
 
 
 def group_exists(group: str) -> bool:

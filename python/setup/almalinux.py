@@ -23,7 +23,7 @@ def disable_selinux() -> None:
 
 
 def get_alma_version() -> int:
-    return int(float(lib.setup.get_os_rel_val('VERSION_ID')))
+    return int(float(lib.utils.get_os_rel_val('VERSION_ID')))
 
 
 def prechecks() -> None:
