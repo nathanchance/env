@@ -294,6 +294,11 @@ def kmake(
             lib.utils.print_green(f"Binutils location:\033[0m {as_location}\n")
         lib.utils.print_green(f"Binutils version:\033[0m {get_tool_version(gnu_as)}\n")
 
+    # Handle building Debian packages on other distributions
+    if 'bindeb-pkg' in targets and lib.utils.get_os_rel_val('ID') not in {'debian', 'ubuntu'}:
+        variables['DPKG_FLAGS'] = '-d'
+        variables['KDEB_CHANGELOG_DIST'] = 'unstable'
+
     # Build and run make command
     make_cmd: lib.utils.CmdList = [
         'stdbuf', '-eL', '-oL', 'make',

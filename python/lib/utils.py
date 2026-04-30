@@ -30,10 +30,12 @@ class MakeVars(TypedDict, total=False):
     CROSS_COMPILE: PathString
     CROSS_COMPILE_COMPAT: PathString
     DEPMOD: str
+    DPKG_FLAGS: str
     HOSTLDFLAGS: str
     INSTALL_MOD_PATH: Path
     INSTALL_MOD_STRIP: str
     KCONFIG_CONFIG: Path
+    KDEB_CHANGELOG_DIST: str
     LLVM: str
     LLVM_IAS: str
     LOCALVERSION: str

@@ -248,11 +248,6 @@ set -g hydro_multiline true
 set -g hydro_prompt_addons nathan
 set -g hydro_cmd_duration_threshold 5000
 
-# For building .deb packages on distros other than Debian/Ubuntu
-set -gx KMAKE_DEB_ARGS \
-    DPKG_FLAGS=-d \
-    KDEB_CHANGELOG_DIST=unstable
-
 # Hetzner IP address, slightly obsfucated
 begin
     set -l parts 49 21 210 65

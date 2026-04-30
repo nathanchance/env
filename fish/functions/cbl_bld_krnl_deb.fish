@@ -37,7 +37,6 @@ function cbl_bld_krnl_deb -d "Build a .deb kernel package"
         HOSTCFLAGS=-Wno-deprecated-declarations \
         KBUILD_BUILD_HOST=$hostname \
         LLVM=1 \
-        $KMAKE_DEB_ARGS \
         O=(tbf)/$arch \
         olddefconfig bindeb-pkg; or return
 
