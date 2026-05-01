@@ -37,8 +37,16 @@ function upd -d "Runs the update command for the current distro or downloads/upd
         switch $target
             case b4
                 if not __is_location_primary
-                    uv tool install --reinstall --with b4[tui] b4
-                    or return
+                    switch $UTS_MACH
+                        # b4 may drag in components that require a compiler due
+                        # to lack of prebuilts, skip it on platforms other than
+                        # aarch64 and x86_64, which are unlikely to really need it.
+                        case aarch64 x86_64
+                            uv tool install --reinstall --with b4[tui] b4
+                            or return
+                        case '*'
+                            __print_warning "b4 not installed due to architecture ('$UTS_MACH')..."
+                    end
                     continue
                 end
 
