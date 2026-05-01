@@ -106,7 +106,9 @@ function cbl_bld_tot_tcs -d "Build LLVM and binutils from source for kernel deve
         end
 
         __stripall $bntls_install
-        cbl_upd_software_symlinks binutils $bntls_install; or return
+        if __is_location_primary
+            cbl_upd_software_symlinks binutils $bntls_install; or return
+        end
     end
 
     set llvm_project $tc_bld/src/llvm-project
@@ -304,5 +306,7 @@ kernel_builder.build()"
     end
 
     __stripall $llvm_install
-    cbl_upd_software_symlinks llvm $llvm_install
+    if __is_location_primary
+        cbl_upd_software_symlinks llvm $llvm_install
+    end
 end
