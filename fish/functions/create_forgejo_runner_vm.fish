@@ -75,7 +75,8 @@ function create_forgejo_runner_vm -d "Easily create and deploy a Forgejo runner 
         --import \
         --virt-type kvm \
         --console pty,target_type=serial \
-        --graphics none
+        --graphics none \
+        --autoconsole none
     or return
 
     # Automatically start virtual machine on boot
