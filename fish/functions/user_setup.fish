@@ -120,7 +120,7 @@ function user_setup -d "Setup a user account, downloading all files and placing 
     if not test -d $ENV_FOLDER
         mkdir -p (path dirname $ENV_FOLDER)
         if test "$trusted_ssh" = true
-            set codeberg_url ssh://git@codberg.org
+            set codeberg_url ssh://git@codeberg.org
         else
             set codeberg_url https://codeberg.org
         end
