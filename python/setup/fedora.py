@@ -221,10 +221,7 @@ def setup_doas(username: str) -> None:
 
 def setup_kernel_args() -> None:
     args: list[str]
-    if (hostname := lib.utils.get_hostname()) == 'aadp':
-        # Intel X550-T2 spews correctable errors about timeouts :(
-        args = ['pcie_aspm=off']
-    elif hostname == 'honeycomb':
+    if lib.utils.get_hostname() == 'honeycomb':
         # Until firmware supports new IORT RMR patches
         args = ['arm-smmu.disable_bypass=0', 'iommu.passthrough=1']
     else:
