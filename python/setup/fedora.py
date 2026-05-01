@@ -200,7 +200,12 @@ def setup_doas(username: str) -> None:
                 f"permit nopass {username} as root cmd systemctl args reboot\n"
             )
 
+        # doas.conf is recommend to be read only to root but we need to write
+        # to the file. temporarily adjust the permissions and put them back
+        # when we are done.
+        doas_conf.chmod(0o600)
         doas_conf.write_text(conf_txt, encoding='utf-8')
+        doas_conf.chmod(0o400)
 
     # Apply umask value from /etc/login.defs to doas sessions, which mirrors
     # what sudo does

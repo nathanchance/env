@@ -110,7 +110,10 @@ def setup_user(user_name, user_password):
     # Setup doas
     doas_conf, doas_text = lib.utils.path_and_text('/etc/doas.d/doas.conf')
     if (doas_wheel := 'permit persist :wheel') not in doas_text:
+        if doas_conf.exists():
+            doas_conf.chmod(0o600)
         doas_conf.write_text(f"{doas_conf}{doas_wheel}\n", encoding='utf-8')
+        doas_conf.chmod(0o400)
 
     # Authorize my ssh key
     lib.setup.setup_ssh_authorized_keys(user_name)
