@@ -273,11 +273,11 @@ function upd -d "Runs the update command for the current distro or downloads/upd
             case btop
                 switch $arch
                     case arm
-                        set btop_triple arm-linux-musleabi
+                        set btop_triple armv7-unknown-linux-musleabi
                     case arm64
-                        set btop_triple aarch64-linux-musl
+                        set btop_triple aarch64-unknown-linux-musl
                     case x86_64
-                        set btop_triple x86_64-linux-musl
+                        set btop_triple x86_64-unknown-linux-musl
                 end
 
                 set repo aristocratos/btop
