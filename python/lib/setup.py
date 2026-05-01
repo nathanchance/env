@@ -716,7 +716,7 @@ def setup_sudo_symlink() -> None:
 
 def setup_x550_link_speeds(intf: str) -> None:
     udevadm_props = get_udevadm_properties(f"/sys/class/net/{intf}")
-    if 'Ethernet Controller X550' not in udevadm_props['ID_MODEL_FROM_DATABASE']:
+    if 'Ethernet Controller X550' not in udevadm_props.get('ID_MODEL_FROM_DATABASE', ''):
         return
 
     valid_macs = (
