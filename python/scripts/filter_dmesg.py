@@ -16,9 +16,10 @@ AMDGPU_KVM_ERRORS = [
     r"amdgpu [0-9a-f:.]+ \[drm\] Failed to setup vendor infoframe on connector HDMI\-A\-1: \-22",
     r"amdgpu [0-9a-f:.]+ \[drm\] REG_WAIT timeout 1us \* 100000 tries \- optc\d+_disable_crtc line:\d+",
 ]
-SYSTEMD_BPF_RESTRICT_FS = (
-    r"systemd\[1\]: bpf\-restrict\-fs: Failed to load BPF object: No such process"
-)
+SYSTEMD_BPF = [
+    r"systemd\[1\]: bpf\-restrict\-fs: Failed to load BPF object: No such process",
+    'System call bpf cannot be resolved as libseccomp is not available, ignoring: Operation not supported',
+]
 READ_ALL_WARNINGS = [
     r"ICMPv6: process `read_all' is using deprecated sysctl \(syscall\) net\.ipv6\.neigh\.default\.base_reachable_time \- use net\.ipv6\.neigh\.default\.base_reachable_time_ms instead",
     'NOTICE: Automounting of tracing to debugfs is deprecated and will be removed in 2030',
@@ -84,7 +85,7 @@ ALLOWLIST = {
         # BTF debug information is disabled because it takes extra time to build
         # and even if it were present, my configuration does not have support for it:
         # https://lore.kernel.org/20250610232418.GA3544567@ax162/
-        SYSTEMD_BPF_RESTRICT_FS,
+        *SYSTEMD_BPF,
         # PCIe on this machine is wildly unreliable :/
         r"nvme [0-9a-f:.]+ PCIe Bus Error: severity=Correctable, type=Physical Layer, \(Receiver ID\)",
         r"nvme [0-9a-f:.]+\s+device \[[0-9a-f:]+\] error status/mask=00000001/0000e000",
@@ -160,7 +161,7 @@ ALLOWLIST = {
         # BTF debug information is disabled because it takes extra time to build
         # and even if it were present, my configuration does not have support for it:
         # https://lore.kernel.org/20250610232418.GA3544567@ax162/
-        SYSTEMD_BPF_RESTRICT_FS,
+        *SYSTEMD_BPF,
         # ?
         'driver: Idle state 1 target residency too low',
     ],
