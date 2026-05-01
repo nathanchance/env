@@ -287,6 +287,9 @@ if __name__ == '__main__':
     # accessible.
     if machine_is_apple_silicon:
         lib.setup.disable_suspend()
+    elif machine_is_trusted():
+        # These machines test upstream kernels, which cause abrtd to fail
+        lib.utils.run(['systemctl', 'mask', 'abrtd.service'])
     lib.setup.configure_trusted_networking()
     lib.setup.enable_tailscale()
     lib.setup.chsh_fish(user)
