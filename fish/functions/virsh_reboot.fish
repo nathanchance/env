@@ -6,7 +6,7 @@ function virsh_reboot -d "Wrapper for 'virsh reboot'"
     for arg in $argv
         switch $arg
             case -a --all all
-                __virsh_get_running_domains | while read name
+                for name in (__virsh_get_running_domains)
                     if not contains $name $names
                         set -a names $name
                     end
