@@ -21,6 +21,7 @@ function git_setup -d "Configure git"
     git config --global pretty.linusmd 'format:[%h](https://git.kernel.org/linus/%H) ("%s")'
     git config --global pretty.linuslink 'format:Link: https://git.kernel.org/linus/%H'
     git config --global pretty.nextmd 'format:[%h](https://git.kernel.org/next/linux-next/c/%H) ("%s")'
+    git config --global pretty.llvmmd 'format:[%h](https://github.com/llvm/llvm-project/commit/%H) ("%s", %cs)'
 
     git config --global pull.rebase false
 
