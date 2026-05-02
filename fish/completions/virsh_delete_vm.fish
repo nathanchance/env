@@ -1,4 +1,1 @@
-function __get_all_virsh_domains
-    virsh list --all --name | string match -rv '^$'
-end
-complete -c virsh_delete_vm -x -d domain -a '(__get_all_virsh_domains)'
+complete -c virsh_delete_vm -x -d domain -a '(__virsh_get_all_domains)'
