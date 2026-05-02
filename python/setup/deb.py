@@ -89,13 +89,7 @@ def setup_doas(username: str, root_password: str) -> None:
             f"permit nopass {username} as root cmd reboot\n"
             f"permit nopass {username} as root cmd systemctl args reboot\n"
         )
-    # doas.conf is recommend to be read only to root but we need to write to
-    # the file. temporarily adjust the permissions and put them back when we
-    # are done.
-    if doas_conf.exists():
-        doas_conf.chmod(0o600)
-    doas_conf.write_text(doas_conf_text, encoding='utf-8')
-    doas_conf.chmod(0o400)
+    lib.setup.write_doas_conf(doas_conf, doas_conf_text)
 
     # Add a root password so that there is no warning about removing sudo
     lib.setup.chpasswd('root', root_password)

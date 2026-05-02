@@ -658,11 +658,6 @@ def setup_doas(username: str) -> None:
     if lib.setup.is_virtual_machine():
         return
 
-    if (doas_conf := Path('/etc/doas.conf')).exists():
-        # doas.conf is recommend to be read only to root but we need to write
-        # to the file. Temporarily adjust the permissions and put them back
-        # when we are done. https://wiki.archlinux.org/title/Doas#Configuration
-        doas_conf.chmod(0o600)
     doas_conf_text = (
         '# Allow me to be root for 5 minutes at a time\n'
         f"permit persist {username} as root\n"
@@ -679,8 +674,7 @@ def setup_doas(username: str) -> None:
         '# Do not require root to put in a password (makes no sense)\n'
         'permit nopass root\n'
     )
-    doas_conf.write_text(doas_conf_text, encoding='utf-8')
-    doas_conf.chmod(0o400)
+    lib.setup.write_doas_conf(Path('/etc/doas.conf'), doas_conf_text)
 
     doas_pam = Path('/etc/pam.d/doas')
     doas_pam_text = (

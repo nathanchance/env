@@ -786,5 +786,15 @@ def umount_gracefully(folder: lib.utils.PathString) -> None:
         lib.utils.run(['umount', folder])
 
 
+def write_doas_conf(doas_conf: Path, conf_text: str) -> None:
+    # doas.conf is recommend to be read only to root but we need to write to
+    # the file. Temporarily adjust the permissions and put them back when we
+    # are done. https://wiki.archlinux.org/title/Doas#Configuration
+    if doas_conf.exists():
+        doas_conf.chmod(0o600)
+    doas_conf.write_text(conf_text, encoding='utf-8')
+    doas_conf.chmod(0o400)
+
+
 def zypper(zypper_args: lib.utils.PackageSequence) -> None:
     lib.utils.run0(['zypper', *zypper_args])
