@@ -102,6 +102,12 @@ def prepare_source(base_name: str, base_ref: str = 'origin/master') -> None:
     commits: list[str] = []
 
     # Patching section
+    if base_name == 'linux-next-llvm':
+        patches += [
+            'https://git.kernel.org/broonie/sound/p/36c543cc51008fbc9ebfaf1e58c34425b7997c88',  # ASoC: SDCA: Fix bad move of jack_state initialisation
+            'https://lore.kernel.org/all/20260506-typec-intel_pmc_mux-fix-uninit-num_ports-v1-1-929b128a32e9@kernel.org/',  # usb: typec: intel_pmc_mux: Zero initialize num_ports in pmc_usb_probe()
+        ]
+
     if base_name in PACMAN_TREES:
         patches.append('''From 131f4086e294378dc5d43cc6c3ca82ed948862fd Mon Sep 17 00:00:00 2001
 From: Nathan Chancellor <nathan@kernel.org>
