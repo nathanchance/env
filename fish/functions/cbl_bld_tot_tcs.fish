@@ -126,8 +126,6 @@ function cbl_bld_tot_tcs -d "Build LLVM and binutils from source for kernel deve
     end
 
     # Add patches to revert here
-    # https://github.com/llvm/llvm-project/pull/191051#issuecomment-4332252762
-    set -a reverts https://github.com/llvm/llvm-project/commit/2a83068537786696d4950ce694e7d34480631f48 # [PowerPC] Enable using HwMode for instructions (#191051)
     for revert in $reverts
         if string match -qr 'https?://' $revert
             set -l revert (path basename $revert)
