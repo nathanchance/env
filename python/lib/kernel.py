@@ -102,6 +102,10 @@ def prepare_source(base_name: str, base_ref: str = 'origin/master') -> None:
     commits: list[str] = []
 
     # Patching section
+    patches.append(
+        'https://lore.kernel.org/all/af2kdW2F1gJ9U-Gg@v4bel/'
+    )  # rxrpc: Also unshare DATA/RESPONSE packets when paged frags are present
+
     if base_name == 'linux-next-llvm':
         patches += [
             'https://lore.kernel.org/all/20260506-typec-intel_pmc_mux-fix-uninit-num_ports-v1-1-929b128a32e9@kernel.org/',  # usb: typec: intel_pmc_mux: Zero initialize num_ports in pmc_usb_probe()
