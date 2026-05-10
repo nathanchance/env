@@ -143,7 +143,11 @@ function upd -d "Runs the update command for the current distro or downloads/upd
             case forgejo-actions-vms
                 switch $UTS_MACH
                     case aarch64
-                        set upd_cmd dnf update -y
+                        if not set fedora_ver (__get_latest_fedora_version)
+                            __print_error "Could not get latest Fedora release?"
+                            return 1
+                        end
+                        set upd_cmd dnf update --enablerepo=docker-ce-stable --releasever=$fedora_ver -y
                     case x86_64
                         set upd_cmd pacman -Syyu --noconfirm
                 end

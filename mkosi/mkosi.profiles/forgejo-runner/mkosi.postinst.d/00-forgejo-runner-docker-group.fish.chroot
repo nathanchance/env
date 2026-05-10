@@ -1,3 +1,0 @@
-#!/usr/bin/env fish
-
-usermod -aG docker forgejo-runner

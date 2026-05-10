@@ -1,0 +1,17 @@
+#!/usr/bin/env fish
+
+# Install Docker using the latest Fedora release a base
+if not set fedora_ver (python3 -c "import requests; print(max({int(item['version']) for item in requests.get('https://fedoraproject.org/releases.json').json()}))")
+    return 1
+end
+dnf install \
+    --enablerepo=docker-ce-stable \
+    --releasever=$fedora_ver \
+    -y \
+    containerd.io \
+    docker-ce \
+    docker-ce-cli \
+    docker-compose-plugin
+or return
+
+usermod -aG docker forgejo-runner
