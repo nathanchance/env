@@ -21,7 +21,6 @@ set -g fish_color_search_match yellow
 set -g fish_color_selection 97979b
 set -g fish_color_status red
 set -g fish_color_user yellow
-set -g fish_color_valid_path normal
 set -g fish_pager_color_background
 set -g fish_pager_color_completion normal
 set -g fish_pager_color_description B3A06D yellow
