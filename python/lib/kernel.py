@@ -102,6 +102,11 @@ def prepare_source(base_name: str, base_ref: str = 'origin/master') -> None:
     commits: list[str] = []
 
     # Patching section
+    if base_name == 'linux-mainline-llvm':
+        patches.append(
+            'https://git.kernel.org/kbuild/p/f2be8dd21b3f4d8674478aeea33b9d072be41abf'
+        )  # kbuild: pacman-pkg: make "rc" releases adhere to pacman versioning scheme
+
     if base_name == 'linux-next-llvm':
         patches += [
             'https://lore.kernel.org/all/20260506-typec-intel_pmc_mux-fix-uninit-num_ports-v1-1-929b128a32e9@kernel.org/',  # usb: typec: intel_pmc_mux: Zero initialize num_ports in pmc_usb_probe()
