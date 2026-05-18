@@ -65,6 +65,9 @@ ALLOWLIST = {
         # New warning after https://lore.kernel.org/20260214012702.2368778-12-seanjc@google.com/
         # but don't care because it is expected with all of my test machines
         'virt/tdx: TDX not supported by the host platform',
+        # SELinux deprecation notice, nothing we can do
+        # https://git.kernel.org/linus/644132a48f4e28a1d949d162160869286f3e75de
+        r"wrote to checkreqprot\. This is no longer supported\.",
     ],
     'aadp': [
         # This machine uses ACPI so no of_root is expected
