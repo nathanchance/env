@@ -102,12 +102,6 @@ def prepare_source(base_name: str, base_ref: str = 'origin/master') -> None:
     commits: list[str] = []
 
     # Patching section
-    # https://lore.kernel.org/20260518194622.GA2914683@ax162/
-    reverts += [
-        '4543a4d737944134a1394afe797622546fbcc98a',  # netfs: Fix zeropoint update where i_size > remote_i_size
-        '2c8f4742bb76117d735f92a3932d85239b16c494',  # netfs: Fix potential for tearing in ->remote_i_size and ->zero_point
-    ]
-
     if base_name == 'linux-mainline-llvm':
         patches.append(
             'https://git.kernel.org/kbuild/p/f2be8dd21b3f4d8674478aeea33b9d072be41abf'
