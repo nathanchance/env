@@ -111,6 +111,10 @@ def prepare_source(base_name: str, base_ref: str = 'origin/master') -> None:
         patches += [
             'https://lore.kernel.org/all/20260506-typec-intel_pmc_mux-fix-uninit-num_ports-v1-1-929b128a32e9@kernel.org/',  # usb: typec: intel_pmc_mux: Zero initialize num_ports in pmc_usb_probe()
         ]
+        reverts += [
+            '5fcc48d521877c5d83828d715c81f4d169ef97f3',  # x86/kvm/vmx: Fix VMX vs hrtimer_rearm_deferred()
+            '0701c9e17bd903d95b2ddf7dd2e1d8be5027f331',  # x86/kvm/vmx: Move IRQ/NMI dispatch from KVM into x86 core
+        ]
 
     if base_name in PACMAN_TREES:
         patches.append('''From 131f4086e294378dc5d43cc6c3ca82ed948862fd Mon Sep 17 00:00:00 2001
