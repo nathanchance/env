@@ -21,13 +21,13 @@ MACHINE = platform.machine()
 
 LLVM_REFS: dict[str, str] = {
     '23.0.0': 'origin/main',
-    '22.1.6': 'origin/release/22.x',
+    '22.1.7': 'origin/release/22.x',
 }
 
 LLVM_VERSIONS: list[str] = [
     '23.0.0',  # git
-    '22.1.6',  # release/22.x
-    '22.1.5',
+    '22.1.7',  # release/22.x
+    '22.1.6',
     '21.1.8',
     '20.1.8',
     '19.1.7',
