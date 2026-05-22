@@ -152,7 +152,7 @@ index 268b5fbdb48b..93e7ec301268 100644
 
 ''')  # noqa: W291
 
-    try:
+    try:  # noqa: PLW0717
         for revert in reverts:
             if isinstance(revert, tuple):
                 commit_range = revert[0]
