@@ -19,6 +19,16 @@ or return
 uv python install --default
 or return
 
+# Update ld.so.cache for libpython.so
+set python_install_dir (path filter -l (uv python dir)/*)
+if test (count $python_install_dir) -ne 1
+    echo "Issue getting Python symlink ('$python_install_dir')??"
+    return 1
+end
+echo $python_install_dir/lib >/etc/ld.so.conf.d/uv-libpython.conf
+ldconfig
+or return
+
 # Perform same exact steps in the builder user
 su builder \
     -s /usr/bin/fish \
