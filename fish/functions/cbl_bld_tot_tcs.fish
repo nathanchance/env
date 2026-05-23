@@ -126,6 +126,8 @@ function cbl_bld_tot_tcs -d "Build LLVM and binutils from source for kernel deve
     end
 
     # Add patches to revert here
+    # https://github.com/llvm/llvm-project/pull/198452#issuecomment-4523534712
+    set -a reverts https://github.com/llvm/llvm-project/commit/77e43ec11cd8fbe1de491118b54de9bba94510a8 # Associate documentation comments with macro definitions (#198452)
     for revert in $reverts
         if string match -qr 'https?://' $revert
             set -l revert (path basename $revert)
