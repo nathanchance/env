@@ -38,7 +38,7 @@ LATEST_GCC_VERSIONS: dict[int, str] = {
     5: '5.5.0',
 }
 LATEST_LLVM_VERSIONS: dict[int, str] = {
-    22: '22.1.5',
+    22: '22.1.6',
     21: '21.1.8',
     20: '20.1.8',
     19: '19.1.7',
