@@ -1,4 +1,4 @@
-#!/usr/bin/env fish
+#!/usr/bin/env -S HOME=/root fish
 # Description: Download and install the latest version of LLVM from apt.llvm.org
 
 set llvm_version 20

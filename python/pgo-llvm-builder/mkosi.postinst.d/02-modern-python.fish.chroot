@@ -1,4 +1,4 @@
-#!/usr/bin/env fish
+#!/usr/bin/env -S HOME=/root fish
 # Description: Download and install Python using uv
 
 set python_version 3.14

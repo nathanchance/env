@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env -S HOME=/root sh
 # Description: Build/install a more modern version of fish for consistent access to newer pieces of the fish language
 
 set -eux

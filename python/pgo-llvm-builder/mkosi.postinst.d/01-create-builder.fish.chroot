@@ -1,4 +1,4 @@
-#!/usr/bin/env fish
+#!/usr/bin/env -S HOME=/root fish
 # Description: Create a builder account with the same UID as the user on the host for idmapping
 
 useradd -m -u $PYTHON_PGO_BUILDER_UID -U builder

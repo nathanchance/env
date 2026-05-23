@@ -1,4 +1,4 @@
-#!/usr/bin/env fish
+#!/usr/bin/env -S HOME=/root fish
 # Description: Build and install a version of perf that matches the host machine's kernel version
 
 set workdir (mktemp -d)

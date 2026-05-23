@@ -1,4 +1,4 @@
-#!/usr/bin/env fish
+#!/usr/bin/env -S HOME=/root fish
 # Description: Build and install a modern version of zstd, as Buster has 1.3.8, which has features LLVM requires behind an experimental flag.
 
 set zstd_version 1.5.7

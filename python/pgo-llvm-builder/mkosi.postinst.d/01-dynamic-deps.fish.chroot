@@ -1,4 +1,4 @@
-#!/usr/bin/env fish
+#!/usr/bin/env -S HOME=/root fish
 # Description: Install dependencies that are only needed under certain conditions
 
 if test "$DISTRIBUTION_ARCHITECTURE" = amd64
