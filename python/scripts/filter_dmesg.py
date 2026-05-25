@@ -8,6 +8,7 @@ from pathlib import Path
 sys.path.append(str(Path(__file__).resolve().parents[1]))
 import lib.utils
 
+ARM_FFA = 'probe with driver arm-ffa failed with error -95'
 BT_LE_CODED_PHY = (
     r"Bluetooth: hci0: HCI LE Coded PHY feature bit is set, but its usage is not supported\."
 )
@@ -93,6 +94,8 @@ ALLOWLIST = {
         r"nvme [0-9a-f:.]+ PCIe Bus Error: severity=Correctable, type=Physical Layer, \(Receiver ID\)",
         r"nvme [0-9a-f:.]+\s+device \[[0-9a-f:]+\] error status/mask=00000001/0000e000",
         r"nvme [0-9a-f:.]+\s+\[ 0\] RxErr\s+\(First\)",
+        # expected for this machine (https://lore.kernel.org/ahFI43hT9eoktFlU@e129823.arm.com/)
+        ARM_FFA,
     ],
     'ax162': [
         r"i2c_designware AMDI[0-9:]+ Unknown Synopsys component type: 0xf+",
@@ -167,6 +170,8 @@ ALLOWLIST = {
         *SYSTEMD_BPF,
         # ?
         'driver: Idle state 1 target residency too low',
+        # expected for this machine (https://lore.kernel.org/ahFI43hT9eoktFlU@e129823.arm.com/)
+        ARM_FFA,
     ],
     'msi-intel-core-10210U': [
         # Older Intel chip vulnerability
