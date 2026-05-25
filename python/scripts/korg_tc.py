@@ -25,6 +25,7 @@ import lib.sha256
 import lib.utils
 
 LATEST_GCC_VERSIONS: dict[int, str] = {
+    16: '16.1.0',
     15: '15.2.0',
     14: '14.3.0',
     13: '13.4.0',
