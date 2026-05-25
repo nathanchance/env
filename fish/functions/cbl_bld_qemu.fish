@@ -81,7 +81,6 @@ function cbl_bld_qemu -d "Build QEMU for use with ClangBuiltLinux"
             --disable-dmg \
             --disable-docs \
             --disable-gcrypt \
-            --disable-glusterfs \
             --disable-gnutls \
             --disable-gtk \
             --disable-keyring \
@@ -111,6 +110,11 @@ function cbl_bld_qemu -d "Build QEMU for use with ClangBuiltLinux"
             --disable-werror \
             --disable-zstd \
             --disable-xen
+
+        # https://gitlab.com/qemu-project/qemu/-/commit/3822df47c240d91ea4789ab2812d1eafce2bd21a
+        if string match -qr gluster <$qemu_src/meson.build
+            set -a configure_args --disable-glusterfs
+        end
 
         if ld --help &| string match -qr discard-sframe
             set -a configure_args --extra-ldflags=-Wl,--discard-sframe
