@@ -17,6 +17,7 @@ import sys
 from argparse import ArgumentParser, BooleanOptionalAction
 from collections.abc import Iterable
 from pathlib import Path
+from typing import Any
 
 import requests
 
@@ -555,7 +556,7 @@ if __name__ == '__main__':
         help='Split toolchain variable for use with kmake.py',
     )
     if supported_targets:
-        target_kwargs = {}
+        target_kwargs: dict[str, Any] = {}
         if (mach := platform.machine()) in supported_targets:
             target_kwargs['default'] = mach
             target_kwargs['nargs'] = '?'

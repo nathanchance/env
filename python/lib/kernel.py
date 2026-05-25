@@ -330,7 +330,7 @@ def kmake(
     make_cmd: lib.utils.CmdList = [
         'stdbuf', '-eL', '-oL', 'make',
         *flags,
-        *[f"{key}={variables[key]}" for key in sorted(variables)],
+        *[f"{key}={variables[key]}" for key in sorted(variables)],  # ty: ignore[invalid-key]
         *targets,
     ]  # fmt: off
     if use_time:
