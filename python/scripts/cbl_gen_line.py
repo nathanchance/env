@@ -10,16 +10,22 @@ sys.path.append(str(Path(__file__).resolve().parents[1]))
 import lib.kernel
 import lib.utils
 
+PATCHES_LIST_OPEN = '    patches += [\n'
+REVERTS_LIST_OPEN = PATCHES_LIST_OPEN.replace('patches', 'revert')
+LIST_CLOSE = '    ]\n'
+
 
 def generate_patch_lines(args):
     if args.message_ids:
+        print(PATCHES_LIST_OPEN, end='')
         for msg_id in args.message_ids:
             patch_txt = lib.kernel.b4_am_o(msg_id)
             _, subject = lib.kernel.get_msg_id_subject(patch_txt)
 
             print(
-                f"patches.append('https://lore.kernel.org/all/{msg_id}/')  # {subject.split('] ', 1)[1]}",
+                f"        'https://lore.kernel.org/all/{msg_id}/'  # {subject.split('] ', 1)[1]}",
             )
+        print(LIST_CLOSE, end='')
 
         return
 
@@ -34,6 +40,7 @@ def generate_patch_lines(args):
     base_msg_id = list(series.values())[-1]
 
     # For each commit in the list, generate a link to lore.kernel.org
+    print(PATCHES_LIST_OPEN, end='')
     for idx, commit in enumerate(commits, 1):
         # Replace the patch number in the message ID, which is in the second to
         # last spot within the message ID when it is of the format in
@@ -41,8 +48,9 @@ def generate_patch_lines(args):
         # Convert to str to allow using join() below
         (new_msg_id := base_msg_id.rsplit('-', 2))[1] = str(idx)
         print(
-            f"patches.append('https://lore.kernel.org/all/{'-'.join(new_msg_id)}/')  # {commit['title']}",
+            f"        'https://lore.kernel.org/all/{'-'.join(new_msg_id)}/',  # {commit['title']}",
         )
+    print(LIST_CLOSE, end='')
 
 
 def generate_pr_lines(args):
@@ -69,11 +77,14 @@ def generate_revert_lines(args):
     if not args.no_update:
         lib.utils.call_git(directory, ['remote', 'update', '-p', 'origin'])
     if args.type == 'kernel':
-        show_format = "reverts.append('%H')  # %s"
+        show_format = "        '%H',  # %s"
     else:
-        show_format = 'set -a reverts https://github.com/llvm/llvm-project/commit/%H # %s'
+        show_format = '    set -a reverts https://github.com/llvm/llvm-project/commit/%H # %s'
     cmd = ['show', f"--format={show_format}", '--no-patch', *args.shas]
-    print(f"    {lib.utils.get_git_output(directory, cmd)}")
+    print(
+        f"{REVERTS_LIST_OPEN if args.type == 'kernel' else ''}{lib.utils.get_git_output(directory, cmd)}\n{LIST_CLOSE if args.type == 'kernel' else ''}",
+        end='',
+    )
 
 
 def parse_arguments():
