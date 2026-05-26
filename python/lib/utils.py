@@ -166,7 +166,7 @@ def get_hostname() -> str:
 
 
 def get_git_output(directory: Path | None, cmd: ValidCmd, **kwargs):
-    return call_git(directory, cmd, **kwargs).stdout.strip()
+    return call_git(directory, cmd, **kwargs).stdout.rstrip()
 
 
 def get_os_rel_val(variable: str) -> str:
