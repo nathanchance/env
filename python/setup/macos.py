@@ -65,6 +65,7 @@ def brew_git(git_args: list[lib.utils.PathString]) -> None:
 def install_packages() -> None:
     packages: list[str] = [
         '1password-cli',
+        'b2sum',
         'bat',
         'btop',
         'diskus',
