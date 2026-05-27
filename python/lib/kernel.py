@@ -102,24 +102,9 @@ def prepare_source(base_name: str, base_ref: str = 'origin/master') -> None:
     commits: list[str] = []
 
     # Patching section
-    if base_name in NEXT_TREES:
-        patches += [
-            'https://lore.kernel.org/all/20260525012340.3860581-1-dakr@kernel.org/',  # driver core: Fix missing jiffies conversion in deferred_probe_extend_timeout()
-            'https://lore.kernel.org/all/20260525012340.3860581-2-dakr@kernel.org/',  # driver core: Guard deferred probe timeout extension with delayed_work_pending()
-        ]
-
-    if base_name == 'fedora':
-        patches += [
-            'https://lore.kernel.org/all/20260526103649.5684-1-sudeep.holla@kernel.org/'  # firmware: arm_ffa: Treat missing FF-A feature on a platform as a probe miss
-        ]
-
-    if base_name == 'linux-next-llvm':
-        patches += [
-            'https://git.kernel.org/gregkh/usb/p/c708d07ce70655d20350487ac2e2bc2a1f4f5038',  # usb: typec: intel_pmc_mux: Zero initialize num_ports in pmc_usb_probe()
-        ]
-
     if base_name in PACMAN_TREES:
         patches += [
+            'https://lore.kernel.org/all/20260526090631.GA4149641@noisy.programming.kicks-ass.net/raw',  # x86/kvm/vmx: Fix x86_64 CFI build
             '''From 131f4086e294378dc5d43cc6c3ca82ed948862fd Mon Sep 17 00:00:00 2001
 From: Nathan Chancellor <nathan@kernel.org>
 Date: Sun, 3 May 2026 16:47:12 -0700
@@ -154,7 +139,6 @@ index 268b5fbdb48b..93e7ec301268 100644
 2.54.0
 
 ''',  # noqa: W291
-            'https://lore.kernel.org/all/20260526090631.GA4149641@noisy.programming.kicks-ass.net/raw',  # x86/kvm/vmx: Fix x86_64 CFI build
         ]
 
     try:  # noqa: PLW0717
