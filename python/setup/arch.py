@@ -82,8 +82,7 @@ class MkinitcpioConf(UserDict):
 
         self.orig = {var: f"{var}=({val})" for var, val in matches}
         self.data = {
-            var: set(map(Path if var == 'FILES' else str, val.split()))  # ty: ignore[invalid-argument-type]
-            for var, val in matches
+            var: set(map(Path if var == 'FILES' else str, val.split())) for var, val in matches
         }
 
     def update_if_necessary(self) -> None:
