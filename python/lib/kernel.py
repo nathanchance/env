@@ -302,12 +302,14 @@ def kmake(
         lib.utils.print_green(f"Binutils version:\033[0m {get_tool_version(gnu_as)}\n")
 
     # Handle building Debian packages on other distributions
-    if 'bindeb-pkg' in targets and lib.utils.get_os_rel_val('ID') not in {'debian', 'ubuntu'}:
+    if bool([x for x in targets if 'deb-pkg' in targets]) and lib.utils.get_os_rel_val(
+        'ID'
+    ) not in {'debian', 'ubuntu'}:
         variables['DPKG_FLAGS'] = '-d'
         variables['KDEB_CHANGELOG_DIST'] = 'unstable'
 
     # Customize .rpm package building
-    if 'binrpm-pkg' in targets:
+    if bool([x for x in targets if 'rpm-pkg' in x]):
         rpmopts = shlex.split(variables.get('RPMOPTS', ''))
         # Don't build headers package by default
         rpmopts += ['--without', 'devel']
