@@ -104,7 +104,6 @@ def prepare_source(base_name: str, base_ref: str = 'origin/master') -> None:
     # Patching section
     if base_name in PACMAN_TREES:
         patches += [
-            'https://git.kernel.org/tip/tip/p/8aeb879baf12fe64889f019da9a4f8347c604e91',  # x86/kvm/vmx: Fix x86_64 CFI build
             '''From 131f4086e294378dc5d43cc6c3ca82ed948862fd Mon Sep 17 00:00:00 2001
 From: Nathan Chancellor <nathan@kernel.org>
 Date: Sun, 3 May 2026 16:47:12 -0700
