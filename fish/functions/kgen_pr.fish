@@ -32,7 +32,7 @@ function kgen_pr -d "Generate a pull request for Linus from tag in specified rep
     end
 
     set -g pr_file (mktemp -d)/COMMIT_EDITMSG
-    set origin_url (git remote get-url origin)
+    set origin_url (git remote get-url origin | string replace git@gitolite.kernel.org: https://git.kernel.org/)
 
     if not kcheck_commits $base..$tag
         while read -P 'Check failures found, ignore? [y/n] ' input
@@ -53,8 +53,7 @@ function kgen_pr -d "Generate a pull request for Linus from tag in specified rep
         return 1
     end
 
-    # Linus prefers git://, do it after 'git request-pull' to avoid insteadOf in .gitconfig
-    git request-pull $base $origin_url $tag | string replace git@gitolite.kernel.org: git://git.kernel.org/ >$pr_file
+    git request-pull $base $origin_url $tag >$pr_file
 
     while read -P 'What would you like to do? [e/q/s] ' input
         switch $input
