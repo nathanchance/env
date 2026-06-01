@@ -18,7 +18,11 @@ function cbl_gen_vm_boot_files -d "Generate files needed to boot local compiled 
 
     # Get cmdline and lsmod
     cat /proc/cmdline >$kernel_folder/cmdline
-    lsmod >$kernel_folder/lsmod
+    if test -e $HOME/.config/modprobed.db
+        cat $HOME/.config/modprobed.db
+    else
+        lsmod
+    end >$kernel_folder/lsmod
 
     # Generate initrd
     __gen_slim_initrd $kernel_folder
