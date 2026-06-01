@@ -82,7 +82,7 @@ class VirtualMachine:
         # External values (can be calculated implicitly currently or later)
         self.cmdline: str = ''
         self.cores: int = 0
-        self.initrd: Path = Path('/initramfs')
+        self.initrd: Path = Path('/uninitialized')
         self.iso: str = ''
         self.kernel: Path | None = None
         self.memory: int = 0
@@ -203,10 +203,9 @@ class VirtualMachine:
                 cmdline = cmdline_file.read_text(encoding='utf-8').strip()
             args += ['-append', cmdline]
 
-            if (
-                not (initrd := self.initrd)
-                and not (initrd := Path(kernel_files, 'initramfs')).exists()
-            ):
+            if (initrd := self.initrd) == Path('/uninitialized') and not (
+                initrd := Path(kernel_files, 'initramfs')
+            ).exists():
                 msg = 'kernel passed without initrd and one could not be found!'
                 raise RuntimeError(msg)
             args += ['-initrd', initrd]
