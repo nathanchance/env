@@ -102,6 +102,16 @@ def prepare_source(base_name: str, base_ref: str = 'origin/master') -> None:
     commits: list[str] = []
 
     # Patching section
+    if base_name in NEXT_TREES:
+        patches += [
+            'https://lore.kernel.org/all/20260601-btrfs-fix-wq-warning-qgroup-rescan-v1-1-aff9a1128f27@kernel.org/',  # btrfs: Drop WQ_PERCPU from ordered_flags in btrfs_init_workqueues()
+            'https://lore.kernel.org/all/20260601-driver-core-fix-system_wq-warning-v1-1-f9001a70ee25@kernel.org/',  # driver core: Use system_percpu_wq instead of system_wq
+        ]
+
+        reverts += [
+            'ef76a3a28c79b628890431aa344af633e892035b',  # i2c: designware: defer probe if child GpioInt controllers are not bound
+        ]
+
     if base_name in PACMAN_TREES:
         patches += [
             '''From 131f4086e294378dc5d43cc6c3ca82ed948862fd Mon Sep 17 00:00:00 2001
