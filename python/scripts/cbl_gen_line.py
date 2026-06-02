@@ -11,7 +11,7 @@ import lib.kernel
 import lib.utils
 
 PATCHES_LIST_OPEN = '    patches += [\n'
-REVERTS_LIST_OPEN = PATCHES_LIST_OPEN.replace('patches', 'revert')
+REVERTS_LIST_OPEN = PATCHES_LIST_OPEN.replace('patche', 'revert')
 LIST_CLOSE = '    ]\n'
 
 
