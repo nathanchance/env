@@ -23,7 +23,7 @@ def generate_patch_lines(args):
             _, subject = lib.kernel.get_msg_id_subject(patch_txt)
 
             print(
-                f"        'https://lore.kernel.org/all/{msg_id}/'  # {subject.split('] ', 1)[1]}",
+                f"        'https://lore.kernel.org/all/{msg_id}/',  # {subject.split('] ', 1)[1]}",
             )
         print(LIST_CLOSE, end='')
 
