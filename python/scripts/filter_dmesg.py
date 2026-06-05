@@ -11,7 +11,6 @@ import lib.utils
 BT_LE_CODED_PHY = (
     r"Bluetooth: hci0: HCI LE Coded PHY feature bit is set, but its usage is not supported\."
 )
-PCI_OF_ROOT_NODE = 'PCI: OF: of_root node is NULL, cannot create PCI host bridge node'
 AMDGPU_KVM_ERRORS = [
     r"amdgpu [0-9a-f:.]+ \[drm\] Failed to setup vendor infoframe on connector HDMI\-A\-1: \-22",
     r"amdgpu [0-9a-f:.]+ \[drm\] REG_WAIT timeout 1us \* 100000 tries \- optc\d+_disable_crtc line:\d+",
@@ -70,8 +69,6 @@ ALLOWLIST = {
         r"wrote to checkreqprot\. This is no longer supported\.",
     ],
     'aadp': [
-        # This machine uses ACPI so no of_root is expected
-        PCI_OF_ROOT_NODE,
         # Benign hardware warning?
         r"gpio-dwapb [A-Z0-9:]+ no IRQ for port0",
         # Expected given KPTI is on by default
@@ -149,8 +146,6 @@ ALLOWLIST = {
         r"Bluetooth: hci0: HCI Enhanced Setup Synchronous Connection command is advertised, but not supported\.",
     ],
     'honeycomb': [
-        # This machine uses ACPI so no of_root is expected
-        PCI_OF_ROOT_NODE,
         # Firmware problem?
         r"arm\-smmu arm\-smmu\.\d\.auto: Failed to disable prefetcher for errata workarounds, check SACR\.CACHE_LOCK",
         # ?
