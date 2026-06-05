@@ -83,8 +83,6 @@ ALLOWLIST = {
         r"cdc_subset [0-9|\-|:|.]+ probe with driver cdc_subset failed with error -22",
         r"cdc_ether [0-9|\-|:|.]+ probe with driver cdc_ether failed with error -16",
         r"cdc_ether [0-9|\-|:|.]+ Second interface unclaimable",
-        # New warning in 7.0, needs a bisect
-        r"ACPI: CPU\d+: Invalid FFH LPI data",
         # BTF debug information is disabled because it takes extra time to build
         # and even if it were present, my configuration does not have support for it:
         # https://lore.kernel.org/20250610232418.GA3544567@ax162/
