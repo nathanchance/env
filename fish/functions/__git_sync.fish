@@ -16,6 +16,11 @@ function __git_sync -d "Deletes merged branches and syncs fork with upstream"
     git sw (string replace 'refs/remotes/origin/' '' $main_branch); or return
     git pull; or return
     git dmb
-    gh repo sync --force nathanchance/$repo
+    if set fork_url (git remote get-url nathanchance)
+        set gh_repo (path basename $fork_url | string replace -r '\.git$' '')
+    else
+        set gh_repo $repo
+    end
+    gh repo sync --force nathanchance/$gh_repo
     git ru
 end
