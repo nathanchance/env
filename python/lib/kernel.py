@@ -106,11 +106,18 @@ def prepare_source(base_name: str, base_ref: str = 'origin/master') -> None:
         patches += [
             'https://lore.kernel.org/all/20260601-btrfs-fix-wq-warning-qgroup-rescan-v1-1-aff9a1128f27@kernel.org/',  # btrfs: Drop WQ_PERCPU from ordered_flags in btrfs_init_workqueues()
             'https://git.kernel.org/driver-core/driver-core/p/fda8355f13ea3c0f9499acdeff3024995b474948',  # driver core: Use system_percpu_wq instead of system_wq
+            'https://lore.kernel.org/all/20260604-mac80211-mesh_hwmp-fix-c23-extensions-v1-1-25a64d6ce541@kernel.org/',  # wifi: mac80211: Fix -Wc23-extensions in hwmp_route_info_get()
+            'https://lore.kernel.org/all/20260604-virtio_can-fix-uapi-comment-v1-1-199fa96ec5f0@kernel.org/',  # can: virtio: Fix comment in UAPI header
         ]
 
         reverts += [
             # https://lore.kernel.org/20260602185339.GA404948@ax162/
             'ef76a3a28c79b628890431aa344af633e892035b',  # i2c: designware: defer probe if child GpioInt controllers are not bound
+        ]
+
+    if base_name == 'linux-next-llvm':
+        patches += [
+            'https://lore.kernel.org/all/20260604-amdgpu-fix-wq_name_len-warning-v1-1-eb5415b45b27@kernel.org/',  # drm/amd/display: Shorten hdmi_frl_status_polling_workqueue
         ]
 
     if base_name in PACMAN_TREES:

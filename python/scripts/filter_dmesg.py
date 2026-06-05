@@ -90,6 +90,8 @@ ALLOWLIST = {
         r"nvme [0-9a-f:.]+ PCIe Bus Error: severity=Correctable, type=Physical Layer, \(Receiver ID\)",
         r"nvme [0-9a-f:.]+\s+device \[[0-9a-f:]+\] error status/mask=00000001/0000e000",
         r"nvme [0-9a-f:.]+\s+\[ 0\] RxErr\s+\(First\)",
+        # Firmware bug, cannot care
+        r"arch_timer: \[Firmware Bug\]: VHE\-capable CPU without EL2 virtual timer interrupt",
     ],
     'ax162': [
         r"i2c_designware AMDI[0-9:]+ Unknown Synopsys component type: 0xf+",
