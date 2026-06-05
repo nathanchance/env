@@ -7,11 +7,15 @@ function cbl_prep_bisect -d "Prepare for an automated bisect"
         __print_error (status function)" <bisect_type>"
         return 1
     end
+    if set -q bisect_script
+        __print_error "A previous bisect script is set! Unset it to continue with new session"
+        return 1
+    end
 
     cbl_clone_repo repro-scripts
 
     if not set -g bisect_script (mktemp --suffix=.fish -p $CBL_MISC/repro-scripts)
-        print_error "Unable to create bisect script?"
+        __print_error "Unable to create bisect script?"
         return 1
     end
     chmod +x $bisect_script
