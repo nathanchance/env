@@ -190,6 +190,12 @@ def get_os_rel() -> dict[str, str]:
     )
 
 
+def handle_help_arg(help_msg: str) -> None:
+    if sys.argv[-1] in {'-h', '--help'}:
+        print(help_msg)
+        sys.exit(0)
+
+
 def in_container() -> bool:
     if shutil.which('systemd-detect-virt'):
         val = detect_virt('-c')
