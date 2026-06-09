@@ -119,6 +119,11 @@ def prepare_source(base_name: str, base_ref: str = 'origin/master') -> None:
         ]
 
     if base_name == 'fedora':
+        patches += [
+            'https://lore.kernel.org/all/20260609-arm64-ftrace-direct-calls-v1-1-4a46f266697f@linux.dev/',  # arm64: ftrace: prepare ftrace_modify_call() for use without CALL_OPS
+            'https://lore.kernel.org/all/20260609-arm64-ftrace-direct-calls-v1-2-4a46f266697f@linux.dev/',  # arm64: ftrace: allow DIRECT_CALLS without CALL_OPS
+        ]
+        # https://lore.kernel.org/aicVyebkEMs6w6UV@sirena.co.uk/
         reverts += [
             '53205d56212cbff880a77497e25a0e44036d490a',  # arm64: mm: Defer remap of linear alias of data/bss
             '63e0b6a5b6934d6a919d1c65ea185303200a1874',  # arm64: mm: Unmap kernel data/bss entirely from the linear map

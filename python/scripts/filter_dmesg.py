@@ -18,7 +18,6 @@ AMDGPU_KVM_ERRORS = [
     r"amdgpu [0-9a-f:.]+ \[drm\] REG_WAIT timeout 1us \* 100000 tries \- optc\d+_disable_crtc line:\d+",
 ]
 SYSTEMD_BPF = [
-    r"systemd\[1\]: bpf\-restrict\-fs: Failed to load BPF object: No such process",
     'System call bpf cannot be resolved as libseccomp is not available, ignoring: Operation not supported',
 ]
 READ_ALL_WARNINGS = [
