@@ -105,12 +105,9 @@ def prepare_source(base_name: str, base_ref: str = 'origin/master') -> None:
     if base_name in NEXT_TREES:
         patches += [
             'https://lore.kernel.org/all/20260601-btrfs-fix-wq-warning-qgroup-rescan-v1-1-aff9a1128f27@kernel.org/',  # btrfs: Drop WQ_PERCPU from ordered_flags in btrfs_init_workqueues()
-            'https://git.kernel.org/driver-core/driver-core/p/fda8355f13ea3c0f9499acdeff3024995b474948',  # driver core: Use system_percpu_wq instead of system_wq
-        ]
-
-        reverts += [
             # https://lore.kernel.org/20260602185339.GA404948@ax162/
-            'ef76a3a28c79b628890431aa344af633e892035b',  # i2c: designware: defer probe if child GpioInt controllers are not bound
+            'https://lore.kernel.org/all/20260610083701.18663-1-hardikprakash.official@gmail.com/',  # Revert "i2c: designware: defer probe if child GpioInt controllers are not bound"
+            'https://lore.kernel.org/all/20260610-vduse_vq_kick-fix-guard-usage-v1-1-0ce02c08006e@kernel.org/',  # vduse: Fix error around jumping over a __cleanup() variable
         ]
 
     if base_name == 'linux-next-llvm':
