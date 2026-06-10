@@ -88,7 +88,9 @@ class KernelPkgBuilder:
         lib.utils.curl(CONFIG_URL, output=src_config_file)
         sc_cmd = [
             *base_sc_cmd,
+            '-d', 'DEBUG_INFO_COMPRESSED_NONE',
             '-d', 'LOCALVERSION_AUTO',
+            '-e', 'DEBUG_INFO_COMPRESSED_ZSTD',
             '-e', 'DEBUG_INFO_DWARF5',
             '-e', 'MODULE_COMPRESS_ALL',
             '-m', 'DRM',

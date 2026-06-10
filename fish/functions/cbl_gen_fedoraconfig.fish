@@ -64,6 +64,11 @@ function cbl_gen_fedoraconfig -d "Downloads and modifies Fedora's kernel configu
             -d DEBUG_INFO_DWARF5 \
             -d DEBUG_INFO_DWARF_TOOLCHAIN_DEFAULT \
             -e DEBUG_INFO_NONE
+    else
+        # Enable compressed debug info by default, as it is quite large for some configurations
+        set -a scripts_config_args \
+            -d DEBUG_INFO_COMPRESSED_NONE \
+            -e DEBUG_INFO_COMPRESSED_ZSTD
     end
     if test "$arch" = aarch64; and set -q slim_arm64_platforms
         string match -gr '^config (.*)$' <arch/arm64/Kconfig.platforms | while read -l val
