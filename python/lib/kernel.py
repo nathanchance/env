@@ -105,9 +105,6 @@ def prepare_source(base_name: str, base_ref: str = 'origin/master') -> None:
     if base_name in NEXT_TREES:
         patches += [
             'https://lore.kernel.org/all/20260601-btrfs-fix-wq-warning-qgroup-rescan-v1-1-aff9a1128f27@kernel.org/',  # btrfs: Drop WQ_PERCPU from ordered_flags in btrfs_init_workqueues()
-            # https://lore.kernel.org/20260602185339.GA404948@ax162/
-            'https://lore.kernel.org/all/20260610083701.18663-1-hardikprakash.official@gmail.com/',  # Revert "i2c: designware: defer probe if child GpioInt controllers are not bound"
-            'https://lore.kernel.org/all/20260610-vduse_vq_kick-fix-guard-usage-v1-1-0ce02c08006e@kernel.org/',  # vduse: Fix error around jumping over a __cleanup() variable
         ]
 
     if base_name == 'linux-next-llvm':
@@ -119,11 +116,6 @@ def prepare_source(base_name: str, base_ref: str = 'origin/master') -> None:
         patches += [
             'https://lore.kernel.org/all/20260609-arm64-ftrace-direct-calls-v1-1-4a46f266697f@linux.dev/',  # arm64: ftrace: prepare ftrace_modify_call() for use without CALL_OPS
             'https://lore.kernel.org/all/20260609-arm64-ftrace-direct-calls-v1-2-4a46f266697f@linux.dev/',  # arm64: ftrace: allow DIRECT_CALLS without CALL_OPS
-        ]
-        # https://lore.kernel.org/aicVyebkEMs6w6UV@sirena.co.uk/
-        reverts += [
-            '53205d56212cbff880a77497e25a0e44036d490a',  # arm64: mm: Defer remap of linear alias of data/bss
-            '63e0b6a5b6934d6a919d1c65ea185303200a1874',  # arm64: mm: Unmap kernel data/bss entirely from the linear map
         ]
 
     if base_name in PACMAN_TREES:
