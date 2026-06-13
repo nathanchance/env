@@ -229,7 +229,7 @@ if __name__ == '__main__':
         'O': out,
     }
     make_vars.update(get_toolchain_vars(make_vars['ARCH'], args.toolchain))
-    make_vars.update(dict(arg.split('=', 1) for arg in args.make_args))
+    make_vars.update(dict(arg.split('=', 1) for arg in args.make_args))  # ty: ignore[invalid-argument-type]
 
     build_kernel_for_vm(
         src_folder,

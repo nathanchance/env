@@ -67,7 +67,7 @@ if __name__ == '__main__':
     targets: list[str] = []
     for arg in args.make_args:
         if '=' in arg:
-            variables.update([arg.split('=', 1)])
+            variables.update([arg.split('=', 1)])  # ty: ignore[invalid-argument-type]
         # Basically an ordered set
         elif arg not in targets:
             targets.append(arg)

@@ -390,7 +390,7 @@ if __name__ == '__main__':
     config_targets: list[str] = []
     for arg in args.pos_args:
         if '=' in arg:
-            make_vars.update([arg.split('=', 1)])
+            make_vars.update([arg.split('=', 1)])  # ty: ignore[invalid-argument-type]
         elif arg.endswith('config'):
             config_targets.append(arg)
         elif (pkgname := arg.replace('linux-', '')) in {
