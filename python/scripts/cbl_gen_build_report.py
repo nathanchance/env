@@ -135,6 +135,8 @@ def generate_warnings(
         'Warning: Processor Platform Limit event detected, but not handled',
         # New modpost warnings (may be upgraded to errors eventually)
         'WARNING: modpost: missing MODULE_DESCRIPTION',
+        # Warning from rustc, hide because other warnings will be shown
+        r"warning: \d+ warnings? emitted",
     ]
     ignore_re = re.compile('|'.join(ignore))
     warnings: WarningsDict = {}
