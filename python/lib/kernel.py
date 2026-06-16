@@ -105,6 +105,7 @@ def prepare_source(base_name: str, base_ref: str = 'origin/master') -> None:
     if base_name == 'linux-next-llvm':
         patches += [
             'https://lore.kernel.org/all/20260604-amdgpu-fix-wq_name_len-warning-v1-1-eb5415b45b27@kernel.org/',  # drm/amd/display: Shorten hdmi_frl_status_polling_workqueue
+            'https://lore.kernel.org/all/20260616-io_uring-fix-wq-warning-v1-1-cfc9d934eedb@kernel.org/',  # io_uring: Use system_dfl_wq instead of system_unbound_wq to fix warning
         ]
 
     if base_name == 'fedora':
