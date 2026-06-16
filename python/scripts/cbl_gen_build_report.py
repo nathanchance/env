@@ -137,6 +137,9 @@ def generate_warnings(
         'WARNING: modpost: missing MODULE_DESCRIPTION',
         # Warning from rustc, hide because other warnings will be shown
         r"warning: \d+ warnings? emitted",
+        # Known warning from rustc on s390
+        # https://lore.kernel.org/20260615164013.GA249489@ax162/
+        'warning: unstable feature specified for `-Ctarget-feature`: `backchain`',
     ]
     ignore_re = re.compile('|'.join(ignore))
     warnings: WarningsDict = {}
