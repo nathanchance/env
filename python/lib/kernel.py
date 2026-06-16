@@ -102,11 +102,6 @@ def prepare_source(base_name: str, base_ref: str = 'origin/master') -> None:
     commits: list[str] = []
 
     # Patching section
-    if base_name in NEXT_TREES:
-        patches += [
-            'https://lore.kernel.org/all/20260601-btrfs-fix-wq-warning-qgroup-rescan-v1-1-aff9a1128f27@kernel.org/',  # btrfs: Drop WQ_PERCPU from ordered_flags in btrfs_init_workqueues()
-        ]
-
     if base_name == 'linux-next-llvm':
         patches += [
             'https://lore.kernel.org/all/20260604-amdgpu-fix-wq_name_len-warning-v1-1-eb5415b45b27@kernel.org/',  # drm/amd/display: Shorten hdmi_frl_status_polling_workqueue
