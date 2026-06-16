@@ -19,16 +19,6 @@ or return
 uv python install --default
 or return
 
-# Update ld.so.cache for libpython.so
-set python_install_dir (path filter -l (uv python dir)/*)
-if test (count $python_install_dir) -ne 1
-    echo "Issue getting Python symlink ('$python_install_dir')??"
-    return 1
-end
-echo $python_install_dir/lib >/etc/ld.so.conf.d/uv-libpython.conf
-ldconfig
-or return
-
 # Perform same exact steps in the builder user
 su builder \
     -s /usr/bin/fish \
@@ -41,3 +31,18 @@ uv python pin --global '$python_version'
 or return
 
 uv python install --default'
+
+# Update ld.so.cache for libpython.so (using builder's copy so that 'perf'
+# works in either builder or root user)
+if not set builder_uv_python_dir (su builder -s /usr/bin/fish -c 'uv python dir')
+    echo "Issue getting builder's python dir?"
+    return 1
+end
+set python_install_dir (path filter -l $builder_uv_python_dir/*)
+if test (count $python_install_dir) -ne 1
+    echo "Issue getting Python symlink ('$python_install_dir')??"
+    return 1
+end
+echo $python_install_dir/lib >/etc/ld.so.conf.d/uv-libpython.conf
+ldconfig
+or return
