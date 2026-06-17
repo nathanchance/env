@@ -117,7 +117,7 @@ def prepare_source(base_name: str, base_ref: str = 'origin/master') -> None:
     if base_name in PACMAN_TREES:
         commits += [
             # https://github.com/ClangBuiltLinux/linux/issues/2165
-            'f6a6196ac5bd704438b1d62dc183a296ce3b31ff',  # Disable jump tables for arch/x86/boot/compressed/misc.o
+            'c5cb98a25b5ae72a8f0fa81b53fe5d4ec1d26bc5',  # x86/boot/compressed: Disable jump tables for Clang
         ]
 
         patches += [
