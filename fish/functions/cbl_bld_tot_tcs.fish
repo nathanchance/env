@@ -256,7 +256,8 @@ $validate_targets
 kernel_builder.toolchain_prefix = Path('$llvm_bld/final')
 
 folders.log.mkdir(parents=True, exist_ok=True)
-runner.run()
+if (result := runner.run()).build == 'failed':
+    sys.exit(1)
 kernel_builder.build()"
             switch $status
                 case 0 # ok
