@@ -102,6 +102,10 @@ def prepare_source(base_name: str, base_ref: str = 'origin/master') -> None:
     commits: list[str] = []
 
     # Patching section
+    patches += [
+        'https://lore.kernel.org/all/20260623-fix-test_fortify-for-clang-stringop-overread-v1-1-15ee8342a953@kernel.org/',  # fortify: Disable -Wstringop-overread in tests
+    ]
+
     if base_name == 'linux-next-llvm':
         patches += [
             'https://lore.kernel.org/all/20260618-amdgpu-fix-wq_name_len-warning-v2-1-ef0e2e6f5be7@kernel.org/',  # drm/amd/display: Shorten hdmi_frl_status_polling_workqueue
@@ -114,12 +118,9 @@ def prepare_source(base_name: str, base_ref: str = 'origin/master') -> None:
         ]
 
     if base_name in PACMAN_TREES:
-        commits += [
-            # https://github.com/ClangBuiltLinux/linux/issues/2165
-            'c5cb98a25b5ae72a8f0fa81b53fe5d4ec1d26bc5',  # x86/boot/compressed: Disable jump tables for Clang
-        ]
-
         patches += [
+            # https://github.com/ClangBuiltLinux/linux/issues/2165
+            'https://lore.kernel.org/all/20260623-x86-boot-compressed-disable-jt-clang-v1-1-575fccd58107@kernel.org/',  # x86/boot/compressed: Disable jump tables for clang
             '''From 131f4086e294378dc5d43cc6c3ca82ed948862fd Mon Sep 17 00:00:00 2001
 From: Nathan Chancellor <nathan@kernel.org>
 Date: Sun, 3 May 2026 16:47:12 -0700
