@@ -878,6 +878,7 @@ if __name__ == '__main__':
     pacman_install_packages()
     setup_doas(user)
     setup_sudo(user)
+    lib.setup.setup_sshd()
     setup_user(user, password)
     lib.setup.clone_env(user)
     lib.setup.podman_setup(user)

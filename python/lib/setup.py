@@ -692,6 +692,15 @@ def setup_ssh_authorized_keys(user_name: str) -> None:
         chown(user_name, ssh_authorized_keys.parent)
 
 
+def setup_sshd() -> None:
+    # Require ssh keys
+    ssh_pubkey_conf = Path('/etc/ssh/sshd_config.d/20-force_publickey_auth.conf')
+    ssh_pubkey_conf.parent.mkdir(exist_ok=True, mode=0o755)
+    ssh_pubkey_conf.write_text(
+        'PasswordAuthentication no\nAuthenticationMethods publickey\n', encoding='utf-8'
+    )
+
+
 def setup_sudo_symlink() -> None:
     prefix = Path(os.environ.get('PREFIX', '/usr/local'))
     sudo_prefix = Path(prefix, 'stow/sudo')
