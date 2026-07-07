@@ -113,6 +113,7 @@ def prepare_source(base_name: str, base_ref: str = 'origin/master') -> None:
 
     if base_name == 'fedora':
         patches += [
+            'https://lore.kernel.org/linux-next/867bn7os67.wl-maz@kernel.org/raw',  # fixup for "KVM: arm64: Ensure level is always initialized when relaxing perms"
             'https://lore.kernel.org/all/20260609-arm64-ftrace-direct-calls-v1-1-4a46f266697f@linux.dev/',  # arm64: ftrace: prepare ftrace_modify_call() for use without CALL_OPS
             'https://lore.kernel.org/all/20260609-arm64-ftrace-direct-calls-v1-2-4a46f266697f@linux.dev/',  # arm64: ftrace: allow DIRECT_CALLS without CALL_OPS
         ]
