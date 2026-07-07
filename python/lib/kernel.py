@@ -116,10 +116,6 @@ def prepare_source(base_name: str, base_ref: str = 'origin/master') -> None:
             'https://lore.kernel.org/all/20260609-arm64-ftrace-direct-calls-v1-1-4a46f266697f@linux.dev/',  # arm64: ftrace: prepare ftrace_modify_call() for use without CALL_OPS
             'https://lore.kernel.org/all/20260609-arm64-ftrace-direct-calls-v1-2-4a46f266697f@linux.dev/',  # arm64: ftrace: allow DIRECT_CALLS without CALL_OPS
         ]
-        # https://lore.kernel.org/akatWxAOMy_S1G2Y@sirena.org.uk/
-        reverts += [
-            '2ee1282ed36ff65ff425a4c6d3121bd701dcd547',  # lib/random32: convert selftest to KUnit
-        ]
 
     if base_name in PACMAN_TREES:
         patches += [
