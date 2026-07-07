@@ -26,7 +26,7 @@ if sys.platform == 'darwin':
     cmd_func = brew
     cmds = [
         ['update'],
-        ['upgrade'],
+        ['upgrade'] + ([yes_arg] if args.yes else []),
         ['upgrade', '--cask', 'wezterm@nightly', '--greedy-latest'],
     ]
     yes_arg = None
