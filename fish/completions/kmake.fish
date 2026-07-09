@@ -84,6 +84,11 @@ function __kmake_handle_make_var
                 set -a vals (path filter -x $PATH/clang | path resolve | path dirname | path sort -u)/
                 set -a vals $dash_vals
             end
+
+        case O
+            set desc "build directory"
+
+            set -a vals (complete -C"'' $value" | string match -r '.*/$')
     end
 
     string join \n -- $name=$vals\t$desc
