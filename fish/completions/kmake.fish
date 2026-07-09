@@ -48,6 +48,11 @@ function __kmake_handle_make_var
             # architectures hard-coded in the top Makefile
             set -a vals i386 x86_64 sparc32 sparc64 parisc64
 
+        case CC
+            set desc "cross compiler"
+
+            set -a vals (complete -C "__fish_command_without_completions $value")
+
         case CROSS_COMPILE
             set desc toolchain
 
