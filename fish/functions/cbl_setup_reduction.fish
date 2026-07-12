@@ -128,7 +128,7 @@ if not test -f $i_file
     __print_error "$i_target could not be found in $lnx_bld/bad?"
     return 1
 end
-cp -v $i_file $cvise_dir; or return
+cat $i_file | grep -v \'^# .*$\' | grep -v \'^[[:space:]]*$\' >$cvise_dir/(path basename $i_file); or return
 
 exit $script_ret
 
