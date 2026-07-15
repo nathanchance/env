@@ -67,6 +67,9 @@ index b34f74d210e9..9be9f1190d15 100644
     or return
 end
 
+wget -O - -q https://lore.kernel.org/all/20260706234836.815254-1-namhyung@kernel.org/raw | patch -d $workdir -p1
+or return
+
 pushd $workdir/tools/perf
 or return
 
