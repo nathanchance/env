@@ -102,9 +102,10 @@ def prepare_source(base_name: str, base_ref: str = 'origin/master') -> None:
     commits: list[str] = []
 
     # Patching section
-    patches += [
-        'https://lore.kernel.org/all/20260623-fix-test_fortify-for-clang-stringop-overread-v1-1-15ee8342a953@kernel.org/',  # fortify: Disable -Wstringop-overread in tests
-    ]
+    if base_name == 'linux-mainline-llvm':
+        patches += [
+            'https://lore.kernel.org/all/20260623-fix-test_fortify-for-clang-stringop-overread-v1-1-15ee8342a953@kernel.org/',  # fortify: Disable -Wstringop-overread in tests
+        ]
 
     if base_name == 'linux-next-llvm':
         patches += [
