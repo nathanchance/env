@@ -256,7 +256,7 @@ if __name__ == '__main__':
         '--setenv=TMPDIR=/build/tmp',
         '--settings=no',
         '--system-call-filter=perf_event_open',
-        '--user=builder',
+        f"--{'user' if lib.utils.get_systemd_nspawn_version() < 261 else 'uid'}=builder",
     ]
 
     for value in versions:
