@@ -126,6 +126,8 @@ function cbl_bld_tot_tcs -d "Build LLVM and binutils from source for kernel deve
     end
 
     # Add patches to revert here
+    # https://github.com/llvm/llvm-project/pull/208050#issuecomment-4987218649
+    set -a reverts https://github.com/llvm/llvm-project/commit/f8ea8223d2ab1d6c3aa6c7c21444cf4d23a6d184 # [Hexagon] Recompute physreg live-ins after HexagonRDFOpt (PR207422) (#208050)
     for revert in $reverts
         if string match -qr 'https?://' $revert
             set -l revert (path basename $revert)
