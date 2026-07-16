@@ -190,6 +190,14 @@ def get_os_rel() -> dict[str, str]:
     )
 
 
+def get_systemd_nspawn_version(required: bool = False) -> int:
+    if not bool(shutil.which('systemd-nspawn')) and not required:
+        return 0
+
+    nspawn_cmd = ['systemd-nspawn', '--version']
+    return int(chronic(nspawn_cmd).stdout.splitlines()[0].split()[1])
+
+
 def handle_help_arg(help_msg: str) -> None:
     if sys.argv[-1] in {'-h', '--help'}:
         print(help_msg)

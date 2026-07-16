@@ -31,9 +31,7 @@ class NspawnConfig(UserDict):
         # Set systemd version. If this fails, it means we do not have nspawn
         # installed or the output has changed, both of which need to be dealt
         # with.
-        self.systemd_version: int = int(
-            lib.utils.chronic(['systemd-nspawn', '--version']).stdout.splitlines()[0].split()[1]
-        )
+        self.systemd_version: int = lib.utils.get_systemd_nspawn_version(required=True)
 
         # Initial static defaults
         super().__init__(
