@@ -372,7 +372,7 @@ class LLVMManager(ToolchainManager):
 
         return Path(self.DEFAULT_INSTALL_FOLDER, LATEST_LLVM_VERSIONS[version])
 
-    def install(self, cache: bool, extract: bool) -> None:  # noqa: ARG002
+    def install(self, cache: bool, extract: bool) -> None:  # ruff:ignore[unused-method-argument]
         if not self.download_folder:
             msg = 'Attempting to call install() with no download folder?'
             raise RuntimeError(msg)

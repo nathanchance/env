@@ -289,7 +289,7 @@ class DebugPkgBuilder(KernelPkgBuilder):
         self._kmake(['olddefconfig'])
 
         if localmodconfig:
-            if not (modprobedb := Path('/tmp/modprobed.db')).exists():  # noqa: S108
+            if not (modprobedb := Path('/tmp/modprobed.db')).exists():  # ruff:ignore[hardcoded-temp-file]
                 msg = f"localmodconfig requested without {modprobedb}!"
                 raise RuntimeError(msg)
             self._kmake(['localmodconfig'], env={'LSMOD': modprobedb}, stdin=DEVNULL)

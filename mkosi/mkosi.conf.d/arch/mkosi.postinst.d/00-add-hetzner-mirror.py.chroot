@@ -14,7 +14,10 @@ for expected_path, host_value in EXPECTED_MOUNTS:
         raise RuntimeError(msg)
 
 sys.path.append(str(PYTHON_FOLDER))
-from setup.arch import HETZNER_MIRROR, add_hetzner_mirror_to_repos  # noqa: E402
+from setup.arch import (  # ruff:ignore[module-import-not-at-top-of-file]
+    HETZNER_MIRROR,
+    add_hetzner_mirror_to_repos,
+)
 
 if not (host_pacman_conf := Path(ETC, 'pacman.conf')).exists():
     sys.exit(0)  # host is not Arch, cannot be Hetzner

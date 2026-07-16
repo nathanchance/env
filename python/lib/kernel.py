@@ -155,10 +155,10 @@ index 268b5fbdb48b..93e7ec301268 100644
 -- 
 2.54.0
 
-''',  # noqa: W291
+''',  # ruff:ignore[trailing-whitespace]
         ]
 
-    try:  # noqa: PLW0717
+    try:  # ruff:ignore[too-many-statements-in-try-clause]
         for revert in reverts:
             if isinstance(revert, tuple):
                 commit_range = revert[0]

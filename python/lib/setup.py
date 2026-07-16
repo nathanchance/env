@@ -182,7 +182,7 @@ def chsh_fish(username: str) -> None:
 
 
 def clone_env(username: str) -> None:
-    if not (env_tmp := Path('/tmp/env')).exists():  # noqa: S108
+    if not (env_tmp := Path('/tmp/env')).exists():  # ruff:ignore[hardcoded-temp-file]
         lib.utils.run(['git', 'clone', 'https://codeberg.org/nathanchance/env.git', env_tmp])
         chown(username, env_tmp)
 

@@ -59,7 +59,7 @@ if not (directory := Path(args.directory)).exists():
     msg = f"Supplied directory ('{directory}') does not exist?"
     raise FileNotFoundError(msg)
 
-if not (boot_utils_json := Path('/tmp/boot-utils.json')).exists():  # noqa: S108
+if not (boot_utils_json := Path('/tmp/boot-utils.json')).exists():  # ruff:ignore[hardcoded-temp-file]
     lib.utils.curl(
         'https://api.github.com/repos/ClangBuiltLinux/boot-utils/releases/latest', boot_utils_json
     )

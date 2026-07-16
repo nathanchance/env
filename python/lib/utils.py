@@ -40,7 +40,7 @@ class MakeVars(TypedDict, total=False):
     LLVM_IAS: str
     LOCALVERSION: str
     LSMOD: Path
-    O: Path  # noqa: E741
+    O: Path  # ruff:ignore[ambiguous-variable-name]
     PACMAN_EXTRAPACKAGES: str
     PACMAN_PKGBASE: str
     RPMOPTS: str
@@ -281,7 +281,7 @@ def run(args: ValidCmd, **kwargs) -> subprocess.CompletedProcess:
 
     try:
         # This function defaults check=True so if check=False here, it is explicit
-        return subprocess.run(args, **kwargs)  # noqa: PLW1510
+        return subprocess.run(args, **kwargs)  # ruff:ignore[subprocess-run-without-check]
     except subprocess.CalledProcessError as err:
         if kwargs.get('capture_output'):
             print(err.stdout)
