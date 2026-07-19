@@ -27,6 +27,7 @@ LLVM_REFS: dict[str, str] = {
 LLVM_VERSIONS: list[str] = [
     '24.0.0',  # git
     '23.1.0',  # release/23.x
+    '23.1.0-rc1',
     '22.1.8',
     '21.1.8',
     '20.1.8',
