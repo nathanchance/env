@@ -37,6 +37,7 @@ function cbl_bld_qemu -d "Build QEMU for use with ClangBuiltLinux"
             git -C $qemu_src reset --hard origin/master
 
             # Reverts
+            set -a reverts 9e3508dce0045de26ec8cab064443c92fdd15288 # Update OpenBIOS images to e5ac46dd built from submodule.
             for revert in $reverts
                 git -C $qemu_src revert --no-edit $revert; or return
             end
