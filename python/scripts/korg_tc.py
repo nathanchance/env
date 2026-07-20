@@ -40,6 +40,7 @@ LATEST_GCC_VERSIONS: dict[int, str] = {
     5: '5.5.0',
 }
 LATEST_LLVM_VERSIONS: dict[int, str] = {
+    23: '23.1.0-rc1',
     22: '22.1.8',
     21: '21.1.8',
     20: '20.1.8',
