@@ -104,24 +104,31 @@ def prepare_source(base_name: str, base_ref: str = 'origin/master') -> None:
     # Patching section
     if base_name == 'linux-mainline-llvm':
         patches += [
-            'https://lore.kernel.org/all/20260623-fix-test_fortify-for-clang-stringop-overread-v1-1-15ee8342a953@kernel.org/',  # fortify: Disable -Wstringop-overread in tests
+            'https://git.kernel.org/kees/p/c1f3e770eec26d6f96dd6d2ea30555ba7c09a244',  # fortify: Disable -Wstringop-overread in tests
         ]
 
     if base_name == 'linux-next-llvm':
         patches += [
             'https://lore.kernel.org/all/20260618-amdgpu-fix-wq_name_len-warning-v2-1-ef0e2e6f5be7@kernel.org/',  # drm/amd/display: Shorten hdmi_frl_status_polling_workqueue
+            'https://lore.kernel.org/all/20260722225605.GA1910198@ax162/',  # Semantic conflict between 04b177544a04 in drm-misc-fixes and 0b6b1bb28482 in -mm
         ]
 
     if base_name == 'fedora':
         patches += [
-            'https://lore.kernel.org/all/20260609-arm64-ftrace-direct-calls-v1-1-4a46f266697f@linux.dev/',  # arm64: ftrace: prepare ftrace_modify_call() for use without CALL_OPS
-            'https://lore.kernel.org/all/20260609-arm64-ftrace-direct-calls-v1-2-4a46f266697f@linux.dev/',  # arm64: ftrace: allow DIRECT_CALLS without CALL_OPS
+            'https://git.kernel.org/arm64/p/123b4fc0f8576ac29b965cfc362630f51fa0fe7e',  # arm64: ftrace: prepare ftrace_modify_call() for use without CALL_OPS
+            'https://git.kernel.org/arm64/p/9315e22b0c0a5be708798c03dc8f27549667e475',  # arm64: ftrace: allow DIRECT_CALLS without CALL_OPS
+        ]
+
+    if base_name in NEXT_TREES:
+        reverts += [
+            # https://lore.kernel.org/20260721234802.GA439272@ax162/
+            '860e748bddcc9291cbdd23e801640aeeba30cc44',  # drm: ensure blend mode supported if pixel format with alpha exposed
         ]
 
     if base_name in PACMAN_TREES:
         patches += [
             # https://github.com/ClangBuiltLinux/linux/issues/2165
-            'https://lore.kernel.org/all/20260623-x86-boot-compressed-disable-jt-clang-v1-1-575fccd58107@kernel.org/',  # x86/boot/compressed: Disable jump tables for clang
+            'https://lore.kernel.org/all/20260722-x86-boot-compressed-disable-jt-clang-v2-1-7373d38482fb@kernel.org/',  # x86/boot/compressed: Disable jump tables for clang
             '''From 131f4086e294378dc5d43cc6c3ca82ed948862fd Mon Sep 17 00:00:00 2001
 From: Nathan Chancellor <nathan@kernel.org>
 Date: Sun, 3 May 2026 16:47:12 -0700
@@ -145,7 +152,7 @@ index 268b5fbdb48b..93e7ec301268 100644
 +CFLAGS_$(AMDDALPATH)/dc/dml/dcn30/display_mode_vba_30.o := $(dml_ccflags) -Wframe-larger-than=2500
  CFLAGS_$(AMDDALPATH)/dc/dml/dcn30/display_rq_dlg_calc_30.o := $(dml_ccflags)
 -CFLAGS_$(AMDDALPATH)/dc/dml/dcn31/display_mode_vba_31.o := $(dml_ccflags) $(frame_warn_flag)
-+CFLAGS_$(AMDDALPATH)/dc/dml/dcn31/display_mode_vba_31.o := $(dml_ccflags) -Wframe-larger-than=2400
++CFLAGS_$(AMDDALPATH)/dc/dml/dcn31/display_mode_vba_31.o := $(dml_ccflags) -Wframe-larger-than=2500
  CFLAGS_$(AMDDALPATH)/dc/dml/dcn31/display_rq_dlg_calc_31.o := $(dml_ccflags)
 -CFLAGS_$(AMDDALPATH)/dc/dml/dcn314/display_mode_vba_314.o := $(dml_ccflags) $(frame_warn_flag)
 +CFLAGS_$(AMDDALPATH)/dc/dml/dcn314/display_mode_vba_314.o := $(dml_ccflags) -Wframe-larger-than=2400
