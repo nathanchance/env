@@ -105,18 +105,13 @@ def prepare_source(base_name: str, base_ref: str = 'origin/master') -> None:
     if base_name == 'linux-mainline-llvm':
         patches += [
             'https://git.kernel.org/kees/p/c1f3e770eec26d6f96dd6d2ea30555ba7c09a244',  # fortify: Disable -Wstringop-overread in tests
+            # https://github.com/ClangBuiltLinux/linux/issues/2165
+            'https://git.kernel.org/tip/tip/p/4a9ec5ec9555ad62dc5b81a37ac946025c2ea002',  # x86/boot/compressed: Disable jump tables
         ]
 
     if base_name == 'linux-next-llvm':
         patches += [
             'https://lore.kernel.org/all/20260618-amdgpu-fix-wq_name_len-warning-v2-1-ef0e2e6f5be7@kernel.org/',  # drm/amd/display: Shorten hdmi_frl_status_polling_workqueue
-            'https://lore.kernel.org/all/20260722225605.GA1910198@ax162/',  # Semantic conflict between 04b177544a04 in drm-misc-fixes and 0b6b1bb28482 in -mm
-        ]
-
-    if base_name == 'fedora':
-        patches += [
-            'https://git.kernel.org/arm64/p/123b4fc0f8576ac29b965cfc362630f51fa0fe7e',  # arm64: ftrace: prepare ftrace_modify_call() for use without CALL_OPS
-            'https://git.kernel.org/arm64/p/9315e22b0c0a5be708798c03dc8f27549667e475',  # arm64: ftrace: allow DIRECT_CALLS without CALL_OPS
         ]
 
     if base_name in NEXT_TREES:
@@ -127,8 +122,6 @@ def prepare_source(base_name: str, base_ref: str = 'origin/master') -> None:
 
     if base_name in PACMAN_TREES:
         patches += [
-            # https://github.com/ClangBuiltLinux/linux/issues/2165
-            'https://lore.kernel.org/all/20260722-x86-boot-compressed-disable-jt-clang-v2-1-7373d38482fb@kernel.org/',  # x86/boot/compressed: Disable jump tables for clang
             '''From 131f4086e294378dc5d43cc6c3ca82ed948862fd Mon Sep 17 00:00:00 2001
 From: Nathan Chancellor <nathan@kernel.org>
 Date: Sun, 3 May 2026 16:47:12 -0700
