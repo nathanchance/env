@@ -119,6 +119,9 @@ def prepare_source(base_name: str, base_ref: str = 'origin/master') -> None:
             # https://lore.kernel.org/20260721234802.GA439272@ax162/
             '860e748bddcc9291cbdd23e801640aeeba30cc44',  # drm: ensure blend mode supported if pixel format with alpha exposed
         ]
+        patches += [
+            'https://lore.kernel.org/all/528c354dca68f05cfd17df7c80f8b04419c0fb74.1784973709.git.pav@iki.fi/',  # Bluetooth: hci_sync: add conditional locking annotations
+        ]
 
     if base_name in PACMAN_TREES:
         patches += [
