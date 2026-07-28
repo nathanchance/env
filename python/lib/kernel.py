@@ -112,6 +112,7 @@ def prepare_source(base_name: str, base_ref: str = 'origin/master') -> None:
     if base_name == 'linux-next-llvm':
         patches += [
             'https://lore.kernel.org/all/20260618-amdgpu-fix-wq_name_len-warning-v2-1-ef0e2e6f5be7@kernel.org/',  # drm/amd/display: Shorten hdmi_frl_status_polling_workqueue
+            'https://lore.kernel.org/all/20260728002048.19351-1-mikhail.v.gavrilov@gmail.com/',  # wifi: mt76: mt792x: drop redundant napi_disable() in unregister path
         ]
 
     if base_name in NEXT_TREES:
