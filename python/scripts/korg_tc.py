@@ -430,6 +430,9 @@ class LLVMManager(ToolchainManager):
         else:
             cc_vars['LLVM'] = shell_quote(f"{llvm_bin}/")
 
+        if (libclang := llvm_bin.parent.joinpath('lib/libclang.so')).exists():
+            cc_vars['LIBCLANG_PATH'] = shell_quote(libclang)
+
         cc_args += [f"{key}={val}" for key, val in cc_vars.items()]
 
         for arg in cc_args:
