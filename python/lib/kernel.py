@@ -102,13 +102,6 @@ def prepare_source(base_name: str, base_ref: str = 'origin/master') -> None:
     commits: list[str] = []
 
     # Patching section
-    if base_name == 'linux-mainline-llvm':
-        patches += [
-            'https://git.kernel.org/kees/p/c1f3e770eec26d6f96dd6d2ea30555ba7c09a244',  # fortify: Disable -Wstringop-overread in tests
-            # https://github.com/ClangBuiltLinux/linux/issues/2165
-            'https://git.kernel.org/tip/tip/p/4a9ec5ec9555ad62dc5b81a37ac946025c2ea002',  # x86/boot/compressed: Disable jump tables
-        ]
-
     if base_name == 'linux-next-llvm':
         patches += [
             'https://lore.kernel.org/all/20260618-amdgpu-fix-wq_name_len-warning-v2-1-ef0e2e6f5be7@kernel.org/',  # drm/amd/display: Shorten hdmi_frl_status_polling_workqueue
