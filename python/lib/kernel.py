@@ -105,16 +105,12 @@ def prepare_source(base_name: str, base_ref: str = 'origin/master') -> None:
     if base_name == 'linux-next-llvm':
         patches += [
             'https://lore.kernel.org/all/20260618-amdgpu-fix-wq_name_len-warning-v2-1-ef0e2e6f5be7@kernel.org/',  # drm/amd/display: Shorten hdmi_frl_status_polling_workqueue
-            'https://lore.kernel.org/all/20260728002048.19351-1-mikhail.v.gavrilov@gmail.com/',  # wifi: mt76: mt792x: drop redundant napi_disable() in unregister path
         ]
 
     if base_name in NEXT_TREES:
-        reverts += [
-            # https://lore.kernel.org/20260721234802.GA439272@ax162/
-            '860e748bddcc9291cbdd23e801640aeeba30cc44',  # drm: ensure blend mode supported if pixel format with alpha exposed
-        ]
         patches += [
             'https://lore.kernel.org/all/528c354dca68f05cfd17df7c80f8b04419c0fb74.1784973709.git.pav@iki.fi/',  # Bluetooth: hci_sync: add conditional locking annotations
+            'https://lore.kernel.org/all/20260731154232.37020-2-leandro.ribeiro@collabora.com/',  # drm: use drm_warn() in validate_blend_mode_for_alpha_formats()
         ]
 
     if base_name in PACMAN_TREES:
