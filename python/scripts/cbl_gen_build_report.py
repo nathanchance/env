@@ -135,11 +135,15 @@ def generate_warnings(
         'Warning: Processor Platform Limit event detected, but not handled',
         # New modpost warnings (may be upgraded to errors eventually)
         'WARNING: modpost: missing MODULE_DESCRIPTION',
-        # Warning from rustc, hide because other warnings will be shown
+        # Warning/error from rustc, hide because other errors/warnings will be shown
         r"warning: \d+ warnings? emitted",
+        r"error: aborting due to \d+ previous errors",
         # Known warning from rustc on s390
         # https://lore.kernel.org/20260615164013.GA249489@ax162/
         'warning: unstable feature specified for `-Ctarget-feature`: `backchain`',
+        # Known warnings from rustc on powerpc
+        # https://lore.kernel.org/20260804202217.GA1109939@ax162/
+        r"warning: (unknown and )?unstable feature specified for `-Ctarget-feature`: `(altivec|hard-float|mma|vsx)`",
     ]
     ignore_re = re.compile('|'.join(ignore))
     warnings: WarningsDict = {}
