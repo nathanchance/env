@@ -68,6 +68,8 @@ ALLOWLIST = {
         # SELinux deprecation notice, nothing we can do
         # https://git.kernel.org/linus/644132a48f4e28a1d949d162160869286f3e75de
         r"wrote to checkreqprot\. This is no longer supported\.",
+        # Known warning that occurs with amdgpu and ast
+        'pixel format with alpha exposed but blend mode not setup',
     ],
     'aadp': [
         # Benign hardware warning?
