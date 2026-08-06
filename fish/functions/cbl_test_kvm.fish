@@ -50,7 +50,7 @@ function cbl_test_kvm -d "Test KVM against a Clang built kernel with QEMU"
                     begin
                         updfull
                         and mkdir -p $TMP_FOLDER
-                        and cp -v /boot/vmlinuz-linux $TMP_FOLDER/bzImage
+                        and run0 cat /boot/vmlinuz-linux >$TMP_FOLDER/bzImage
                         and sd_nspawn -r 'kboot -a x86_64 -k '(nspawn_path -c $TMP_FOLDER)'/bzImage -t 30s'
                     end
                     or return

@@ -735,6 +735,9 @@ def setup_sudo(username: str) -> None:
             f"{username} ALL = NOPASSWD: /usr/bin/systemctl reboot\n"
         )
 
+    if '/usr/bin/cat /boot' not in sudoers_txt:
+        sudoers_txt += f"{username} ALL = NOPASSWD: /usr/bin/cat /boot/vmlinuz-linux\n"
+
     sudoers.chmod(0o640)
     sudoers.write_text(sudoers_txt, encoding='utf-8')
     sudoers.chmod(0o440)
