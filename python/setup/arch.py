@@ -603,14 +603,15 @@ def pacman_settings(dryrun: bool = False) -> None:
 
     # Maintain separate pacman.d configuration. Inclusion must happen after
     # stock options.
-    pacman_conf_marker = '# packagers with `pacman-key --populate archlinux`.\n\n'
     pacman_conf_inclusion = 'Include = /etc/pacman.d/nathan.conf\n\n'
-    if pacman_conf_marker not in conf_text:
-        msg = 'Format of /etc/pacman.conf changed?'
-        raise RuntimeError(msg)
-    conf_text = conf_text.replace(
-        pacman_conf_marker, f"{pacman_conf_marker}{pacman_conf_inclusion}"
-    )
+    if pacman_conf_inclusion not in conf_text:
+        pacman_conf_marker = '# packagers with `pacman-key --populate archlinux`.\n\n'
+        if pacman_conf_marker not in conf_text:
+            msg = 'Format of /etc/pacman.conf changed?'
+            raise RuntimeError(msg)
+        conf_text = conf_text.replace(
+            pacman_conf_marker, f"{pacman_conf_marker}{pacman_conf_inclusion}"
+        )
     if not (personal_pacman_conf := Path('/etc/pacman.d/nathan.conf')).exists():
         personal_pacman_conf_text = (
             '[options]\n'
