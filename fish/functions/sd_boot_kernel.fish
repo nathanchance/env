@@ -48,15 +48,14 @@ function sd_boot_kernel -d "Boot a kernel via full reboot or kexec using systemd
                 return 1
             end
 
-            set entries /boot/loader/entries
-            if not test -d $entries
-                __print_error "$entries not found, not using systemd-boot?"
+            if not set ble_cfgs (systemctl --boot-loader-entry=help --no-legend --no-pager 2>/dev/null)
+                __print_error "Getting possible boot loader entries failed, not using systemd-boot?"
                 return 1
             end
 
             set conf $krnl.conf
-            if not test -f $entries/$conf
-                __print_error "$entries/$conf does not exist!"
+            if not contains $conf $ble_cfgs
+                __print_error "$conf is not in boot loader entries, does it exist?"
                 return 1
             end
 
