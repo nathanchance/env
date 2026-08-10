@@ -82,7 +82,12 @@ function cbl_bld_tot_tcs -d "Build LLVM and binutils from source for kernel deve
             __clone_repo_from_bundle (path basename $bntls) "$bntls"
         end
         if test "$skip_uprev" != true; and not __is_shallow_clone $bntls; and not __has_detached_head $bntls
-            git -C $bntls pull --rebase; or return
+            if not git -C $bntls pull --rebase
+                set message "binutils-gdb.git failed to rebase/update"
+                __print_error "$message"
+                __tg_msg "$message"
+                return 1
+            end
         end
 
         string match -gr "PACKAGE_VERSION='(.*)'" <$bntls/binutils/configure | read bntls_ver
@@ -118,7 +123,7 @@ function cbl_bld_tot_tcs -d "Build LLVM and binutils from source for kernel deve
     if not __is_shallow_clone $llvm_project; and not __has_detached_head $llvm_project
         git -C $llvm_project rh
         if test "$skip_uprev" != true; and not git -C $llvm_project pull --rebase
-            set message "llvm-project failed to rebase/update"
+            set message "llvm-project.git failed to rebase/update"
             __print_error "$message"
             __tg_msg "$message"
             return 1
