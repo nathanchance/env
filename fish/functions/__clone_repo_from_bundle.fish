@@ -21,6 +21,9 @@ function __clone_repo_from_bundle -d "Clone repo using a clone bundle if possibl
             set user_repo stable/linux
         case llvm-project
             set branch main
+            set configs \
+                remote.origin.fetch='^refs/heads/users/*' \
+                remote.origin.fetch='^refs/heads/revert-*'
             set url https://github.com/llvm/llvm-project.git
         case rust
             set branch main
@@ -64,11 +67,21 @@ function __clone_repo_from_bundle -d "Clone repo using a clone bundle if possibl
         git clone $bundle $dest
         and git -C $dest remote remove origin
         and git -C $dest remote add origin $url
+        and if set -q configs
+            for config in configs
+                git -C $dest config set (string split -m1 '=' $split)
+                or return
+            end
+        end
         and git -C $dest remote update --prune origin
         and git -C $dest checkout $branch
         and git -C $dest branch --set-upstream-to origin/$branch
         and git -C $dest reset --hard origin/$branch
     else
-        git clone $url $dest
+        if set -q configs
+            set git_clone_args \
+                --config=$configs
+        end
+        git clone $git_clone_args $url $dest
     end
 end
