@@ -69,7 +69,7 @@ function __clone_repo_from_bundle -d "Clone repo using a clone bundle if possibl
         and git -C $dest remote add origin $url
         and if set -q configs
             for config in configs
-                git -C $dest config set (string split -m1 '=' $split)
+                git -C $dest config set --append (string split -m1 '=' $split)
                 or return
             end
         end
