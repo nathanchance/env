@@ -134,7 +134,11 @@ function run_mkosi -d "Run mkosi with various arguments"
                 # user must come first in case directories are created for the
                 # first time so that they have proper permissions
                 and $uv_user_env_cmd uv tool install --reinstall $mkosi_src
-                and $uv_root_env_cmd uv tool install --reinstall $mkosi_src
+                and begin
+                    # this may fail the first time
+                    $uv_root_env_cmd uv tool install --reinstall $mkosi_src
+                    or $uv_root_env_cmd uv tool install --reinstall $mkosi_src
+                end
                 and git -C $mkosi_src reset --hard
             end
             or return
