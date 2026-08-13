@@ -105,6 +105,7 @@ def prepare_source(base_name: str, base_ref: str = 'origin/master') -> None:
     if base_name == 'linux-next-llvm':
         patches += [
             'https://lore.kernel.org/all/20260618-amdgpu-fix-wq_name_len-warning-v2-1-ef0e2e6f5be7@kernel.org/',  # drm/amd/display: Shorten hdmi_frl_status_polling_workqueue
+            'https://git.kernel.org/torvalds/p/3aa1dcaa4f6f5ae08936491e08bd456f331f2d40',  # Revert "wifi: mt76: Disable napi when removing device"
         ]
 
     if base_name in NEXT_TREES:
