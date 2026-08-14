@@ -370,6 +370,8 @@ def parse_arguments():
         '--no-werror', action='store_true', help='Disable CONFIG_WERROR (on by default)'
     )
 
+    parser.add_argument('--no-rust', action='store_true', help='Disable CONFIG_RUST')
+
     parser.add_argument(
         '-R', '--ref', default='origin/master', help='Reference to base kernel tree on'
     )
@@ -420,6 +422,8 @@ if __name__ == '__main__':
             '-e',
             'LTO_CLANG_THIN',
         ]
+    if args.no_rust:
+        builder.extra_sc_args += ['-d', 'RUST']
     if not args.no_werror:
         builder.extra_sc_args += ['-e', 'OBJTOOL_WERROR', '-e', 'WERROR']
 
