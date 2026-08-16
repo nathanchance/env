@@ -4,6 +4,8 @@
 # dependencies = [
 #     "requests>=2.32.5",
 # ]
+# [tool.ty.environment]
+# root = ["./python"]
 # ///
 
 import os

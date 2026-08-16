@@ -5,6 +5,8 @@
 #     "requests>=2.32.5",
 #     "tuxmake>=1.36.0",
 # ]
+# [tool.ty.environment]
+# root = ["./python"]
 # ///
 
 # SPDX-License-Identifier: MIT

@@ -2,6 +2,8 @@
 # /// script
 # requires-python = ">=3.11"
 # dependencies = []
+# [tool.ty.environment]
+# root = ["./python"]
 # ///
 
 import hashlib
