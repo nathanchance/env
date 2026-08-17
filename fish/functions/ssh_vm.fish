@@ -33,10 +33,9 @@ function ssh_vm -d "ssh into a VM running via cbl_vmm.py"
 
     set user_host $user@localhost
 
-    if not string match -qr "^\[localhost\]:$port" <$HOME/.ssh/known_hosts
-        set -a cmd_args \
-            -o "StrictHostKeyChecking no"
-    end
+    set -a cmd_args \
+        -o StrictHostKeyChecking=no \
+        -o UserKnownHostsFile=/dev/null
 
     switch $ssh_cmd
         case scp
