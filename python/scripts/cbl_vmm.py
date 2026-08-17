@@ -561,8 +561,16 @@ def parse_arguments():
     setup_parser = subparsers.add_parser(
         'setup', help='Run virtual machine for first time', parents=[common_parser]
     )
+    setup_parser.add_argument('-C', '--cmdline', type=str, help='Kernel cmdline string')
     setup_parser.add_argument(
         '-i', '--iso', required=True, type=str, help='Path or URL of .iso to boot from'
+    )
+    setup_parser.add_argument('-I', '--initrd', type=Path, help='Path to initrd')
+    setup_parser.add_argument(
+        '-k',
+        '--kernel',
+        type=Path,
+        help='Path to kernel image or kernel build directory',
     )
     setup_parser.add_argument(
         '-s',
