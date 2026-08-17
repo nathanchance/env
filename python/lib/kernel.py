@@ -109,8 +109,7 @@ def prepare_source(base_name: str, base_ref: str = 'origin/master') -> None:
 
     if base_name in NEXT_TREES:
         patches += [
-            'https://lore.kernel.org/all/528c354dca68f05cfd17df7c80f8b04419c0fb74.1784973709.git.pav@iki.fi/',  # Bluetooth: hci_sync: add conditional locking annotations
-            'https://lore.kernel.org/all/20260731154232.37020-2-leandro.ribeiro@collabora.com/',  # drm: use drm_warn() in validate_blend_mode_for_alpha_formats()
+            'https://lore.kernel.org/all/1ceaa25d70f068adfe2c40290a629b73c382ec59.1786870726.git.pav@iki.fi/',  # Bluetooth: hci_sync: add conditional locking annotations
         ]
 
     if base_name in PACMAN_TREES:
