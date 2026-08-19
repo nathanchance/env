@@ -107,9 +107,14 @@ def prepare_source(base_name: str, base_ref: str = 'origin/master') -> None:
             'https://lore.kernel.org/all/20260618-amdgpu-fix-wq_name_len-warning-v2-1-ef0e2e6f5be7@kernel.org/',  # drm/amd/display: Shorten hdmi_frl_status_polling_workqueue
         ]
 
-    if base_name in NEXT_TREES:
+    if base_name == 'fedora':
         patches += [
-            'https://lore.kernel.org/all/1ceaa25d70f068adfe2c40290a629b73c382ec59.1786870726.git.pav@iki.fi/',  # Bluetooth: hci_sync: add conditional locking annotations
+            'https://lore.kernel.org/all/0445b20df50894615ada70abb1e6238f33c78a2e.1786768375.git.jpoimboe@kernel.org/',  # efi/libstub: Preserve the GNU property note
+        ]
+
+    if base_name == 'linux-next-llvm':
+        patches += [
+            'https://lore.kernel.org/all/20260818-macb-fix-no-of-build-v1-1-f2a009616384@kernel.org/',  # net: macb: Move macb_{alloc,free}_tieoff() out of CONFIG_OF block
         ]
 
     if base_name in PACMAN_TREES:
