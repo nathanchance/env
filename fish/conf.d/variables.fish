@@ -183,6 +183,7 @@ set -gx BAT_PAGER_OPTS \
 
 # Versions of stable that I build locally
 set -gx CBL_STABLE_VERSIONS \
+    7.2 \
     7.1 \
     6.18 \
     6.12 \
