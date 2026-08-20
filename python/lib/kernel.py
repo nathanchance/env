@@ -110,6 +110,8 @@ def prepare_source(base_name: str, base_ref: str = 'origin/master') -> None:
     if base_name == 'fedora':
         patches += [
             'https://lore.kernel.org/all/0445b20df50894615ada70abb1e6238f33c78a2e.1786768375.git.jpoimboe@kernel.org/',  # efi/libstub: Preserve the GNU property note
+            # https://lore.kernel.org/20260819003752.GA3063251@ax162/
+            'https://lore.kernel.org/all/20260819194039.GA3686901@ax162/raw',  # fixup for "ACPI: scan: Avoid registering platform devices with resource overlaps"
         ]
 
     if base_name == 'linux-next-llvm':
