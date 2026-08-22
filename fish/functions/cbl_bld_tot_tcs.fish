@@ -82,7 +82,7 @@ function cbl_bld_tot_tcs -d "Build LLVM and binutils from source for kernel deve
             __clone_repo_from_bundle (path basename $bntls) "$bntls"
         end
         if test "$skip_uprev" != true; and not __is_shallow_clone $bntls; and not __has_detached_head $bntls
-            if not git -C $bntls pull --rebase
+            if not git -C $bntls pull --rebase; and not git -C $bntls pull --rebase https://forge.sourceware.org/binutils-gdb/binutils-gdb-mirror
                 set message "binutils-gdb.git failed to rebase/update"
                 __print_error "$message"
                 __tg_msg "$message"
