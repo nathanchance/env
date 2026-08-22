@@ -114,11 +114,6 @@ def prepare_source(base_name: str, base_ref: str = 'origin/master') -> None:
             'https://lore.kernel.org/all/12955564.O9o76ZdvQC@rafael.j.wysocki/',  # ACPI: scan: Do not combine resources that overlap completely
         ]
 
-    if base_name == 'linux-next-llvm':
-        patches += [
-            'https://lore.kernel.org/all/20260818-macb-fix-no-of-build-v1-1-f2a009616384@kernel.org/',  # net: macb: Move macb_{alloc,free}_tieoff() out of CONFIG_OF block
-        ]
-
     if base_name in PACMAN_TREES:
         patches += [
             '''From 131f4086e294378dc5d43cc6c3ca82ed948862fd Mon Sep 17 00:00:00 2001
