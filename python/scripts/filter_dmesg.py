@@ -88,9 +88,9 @@ ALLOWLIST = {
         # https://lore.kernel.org/20250610232418.GA3544567@ax162/
         *SYSTEMD_BPF,
         # PCIe on this machine is wildly unreliable :/
-        r"nvme [0-9a-f:.]+ PCIe Bus Error: severity=Correctable, type=Physical Layer, \(Receiver ID\)",
-        r"nvme [0-9a-f:.]+\s+device \[[0-9a-f:]+\] error status/mask=00000001/0000e000",
-        r"nvme [0-9a-f:.]+\s+\[ 0\] RxErr\s+\(First\)",
+        r"nvme [0-9a-f:.]+ PCIe Bus Error: severity=Correctable(, type=Physical Layer, \(Receiver ID\))?",
+        r"nvme [0-9a-f:.]+\s+device \[[0-9a-f:]+\] error status/mask=00000001/0000[0-9a-f]000",
+        r"nvme [0-9a-f:.]+\s+\[ 0\] RxErr\s+",
         # Firmware bug, cannot care
         r"arch_timer: \[Firmware Bug\]: VHE\-capable CPU without EL2 virtual timer interrupt",
     ],
