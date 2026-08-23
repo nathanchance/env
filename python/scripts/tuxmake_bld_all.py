@@ -6,7 +6,7 @@
 #     "tuxmake>=1.36.0",
 # ]
 # [tool.ty.environment]
-# root = ["./python"]
+# root = [".."]
 # ///
 
 # SPDX-License-Identifier: MIT

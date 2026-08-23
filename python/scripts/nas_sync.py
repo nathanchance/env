@@ -1,11 +1,11 @@
 #!/usr/bin/env -S uv run --script
 # /// script
-# requires-python = ">=3.9"
+# requires-python = ">=3.11"
 # dependencies = [
 #     "requests>=2.32.5",
 # ]
 # [tool.ty.environment]
-# root = ["./python"]
+# root = [".."]
 # ///
 
 # SPDX-License-Identifier: MIT

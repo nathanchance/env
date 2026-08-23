@@ -3,7 +3,7 @@
 # requires-python = ">=3.11"
 # dependencies = []
 # [tool.ty.environment]
-# root = ["./python"]
+# root = [".."]
 # ///
 
 import hashlib

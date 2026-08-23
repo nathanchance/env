@@ -5,7 +5,7 @@
 #     "requests>=2.33.1",
 # ]
 # [tool.ty.environment]
-# root = ["./python"]
+# root = [".."]
 # ///
 
 import sys
