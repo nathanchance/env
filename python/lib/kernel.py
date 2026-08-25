@@ -116,8 +116,6 @@ def prepare_source(base_name: str, base_ref: str = 'origin/master') -> None:
     if base_name == 'fedora':
         patches += [
             'https://lore.kernel.org/all/0445b20df50894615ada70abb1e6238f33c78a2e.1786768375.git.jpoimboe@kernel.org/',  # efi/libstub: Preserve the GNU property note
-            # https://lore.kernel.org/20260819003752.GA3063251@ax162/
-            'https://lore.kernel.org/all/12955564.O9o76ZdvQC@rafael.j.wysocki/',  # ACPI: scan: Do not combine resources that overlap completely
         ]
 
     if base_name in PACMAN_TREES:
