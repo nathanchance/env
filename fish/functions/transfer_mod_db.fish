@@ -8,5 +8,5 @@ function transfer_mod_db -d "Transfer modprobed.db to specified IP address"
     else
         set ip $argv[1]
     end
-    scp $HOME/.config/modprobed.db nathan@$ip:/tmp
+    scp $HOME/.local/share/modprobed-db/modprobed.db nathan@$ip:/tmp
 end

@@ -213,12 +213,12 @@ rpmbuild/' >>$gitignore
     if command -q modprobed-db
         modprobed-db
         modprobed-db store
-        cp $HOME/.config/modprobed.db{,.orig}
+        cp $HOME/.local/share/modprobed-db/modprobed.db{,.orig}
         begin
-            cat $HOME/.config/modprobed.db.orig
+            cat $HOME/.local/share/modprobed-db/modprobed.db.orig
             string join \n {vhost_,}vsock
-        end | path sort -u >$HOME/.config/modprobed.db
-        rm $HOME/.config/modprobed.db.orig
+        end | path sort -u >$HOME/.local/share/modprobed-db/modprobed.db
+        rm $HOME/.local/share/modprobed-db/modprobed.db.orig
         systemctl --user enable --now modprobed-db.service
     end
     if test (__get_distro) = alpine
