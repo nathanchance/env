@@ -1,5 +1,5 @@
 Name:           modprobed-db
-Version:        2.50
+Version:        2.51
 Release:        %autorelease
 Summary:        Keeps track of EVERY kernel module ever used - useful for make localmodconfig
 BuildArch:      noarch
