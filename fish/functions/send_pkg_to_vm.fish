@@ -48,12 +48,11 @@ function send_pkg_to_vm -d "Send package source files to virtual machine"
     else
         ssh_vm rm -fr $dst_dir
         set ssh_cmd \
-            ssh -p $ssh_port
+            ssh \
+            -o StrictHostKeyChecking=no \
+            -o UserKnownHostsFile=/dev/null \
+            -p $ssh_port
 
-        if not string match -qr "^\[localhost\]:$port" <$HOME/.ssh/known_hosts
-            set -a ssh_cmd \
-                -o "StrictHostKeyChecking no"
-        end
         echo "Copying $src_dir to $dst_dir via 'rsync'..."
         rsync --links --progress --recursive --rsh "$ssh_cmd" $src_dir nathan@localhost:(path dirname $dst_dir)
     end
