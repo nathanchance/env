@@ -102,12 +102,6 @@ def prepare_source(base_name: str, base_ref: str = 'origin/master') -> None:
     commits: list[str] = []
 
     # Patching section
-    if base_name == 'linux-mainline-llvm':
-        patches += [
-            'https://git.kernel.org/netdev/net/p/ec518a7c4ba13ea0b94a50cc79584e6d578e4791',  # net: macb: drop CONFIG_OF #if block
-            'https://git.kernel.org/bluetooth/bluetooth-next/p/26cf20d065b31a9a591ec01086e7661fbd80040c',  # Bluetooth: hci_sync: add conditional locking annotation
-        ]
-
     if base_name == 'linux-next-llvm':
         patches += [
             'https://lore.kernel.org/all/20260618-amdgpu-fix-wq_name_len-warning-v2-1-ef0e2e6f5be7@kernel.org/',  # drm/amd/display: Shorten hdmi_frl_status_polling_workqueue
