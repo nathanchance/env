@@ -107,11 +107,6 @@ def prepare_source(base_name: str, base_ref: str = 'origin/master') -> None:
             'https://lore.kernel.org/all/20260618-amdgpu-fix-wq_name_len-warning-v2-1-ef0e2e6f5be7@kernel.org/',  # drm/amd/display: Shorten hdmi_frl_status_polling_workqueue
         ]
 
-    if base_name == 'fedora':
-        patches += [
-            'https://lore.kernel.org/all/0445b20df50894615ada70abb1e6238f33c78a2e.1786768375.git.jpoimboe@kernel.org/',  # efi/libstub: Preserve the GNU property note
-        ]
-
     if base_name in PACMAN_TREES:
         patches += [
             '''From 131f4086e294378dc5d43cc6c3ca82ed948862fd Mon Sep 17 00:00:00 2001
