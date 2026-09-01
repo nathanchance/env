@@ -782,7 +782,7 @@ def finalize_report(args) -> None:
             lib.utils.call_git(repo, ['push', 'origin', f":{branch}"], show_cmd=True)
 
     # Push main if requested
-    if args.push or args.all:
+    if args.push:
         lib.utils.call_git(repo, 'push', show_cmd=True)
 
 
