@@ -1,4 +1,11 @@
 #!/usr/bin/env python3
+# /// script
+# dependencies = [
+#     "requests>=2.34.2",
+# ]
+# [tool.ty.environment]
+# root = [".."]
+# ///
 # SPDX-License-Identifier: MIT
 # Copyright (C) 2022-2023 Nathan Chancellor
 

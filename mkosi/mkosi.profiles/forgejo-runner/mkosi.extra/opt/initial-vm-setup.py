@@ -1,4 +1,9 @@
 #!/usr/bin/env python3
+# /// script
+# dependencies = [
+#     "requests>=2.34.2",
+# ]
+# ///
 
 import getpass
 import os
