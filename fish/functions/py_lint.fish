@@ -33,10 +33,7 @@ function py_lint -d "Lint Python files"
             __print_red "\nnot ruff format clean\n"
         end
 
-        if set requirements (git ls-files | string match -er 'requirements\.txt')
-            set ty_uvx_flags --with-requirements $requirements
-        end
-        if not uvx $ty_uvx_flags ty check $files
+        if not TY_UV=scripts uvx $ty_uvx_flags ty check $files
             __print_red "\nnot ty check clean"
         end
     else
