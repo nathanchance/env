@@ -105,6 +105,7 @@ def prepare_source(base_name: str, base_ref: str = 'origin/master') -> None:
     if base_name == 'linux-next-llvm':
         patches += [
             'https://lore.kernel.org/all/20260618-amdgpu-fix-wq_name_len-warning-v2-1-ef0e2e6f5be7@kernel.org/',  # drm/amd/display: Shorten hdmi_frl_status_polling_workqueue
+            'https://lore.kernel.org/all/20260908092730.4002628-1-rppt@kernel.org/',  # x86/mm/pat: skip RWX verification until kernel text is set to read only
         ]
 
     if base_name in PACMAN_TREES:
