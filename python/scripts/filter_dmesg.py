@@ -101,6 +101,9 @@ ALLOWLIST = {
     'asus-intel-core-11700': [
         # This is not a shared client machine and I prefer having SMT on
         'MMIO Stale Data CPU bug present and SMT on, data leak possible',
+        # Known early boot violation
+        # https://lore.kernel.org/20260913-fixes-verify-rwx-v3-1-5e1d6a08bd02@kernel.org/
+        r"CPA detected W\^X violation:",
     ],
     'beelink-amd-ryzen-8745HS': [
         # Happens when using a KVM
@@ -179,6 +182,9 @@ ALLOWLIST = {
         r"ACPI Error: No handler for Region \[VRTC\] \([0-9a-f]+\) \[SystemCMOS\] \(\d+/evregion\-\d+\)",
         r"ACPI Error: Region SystemCMOS \(ID=5\) has no handler \(\d+/exfldio\-\d+\)",
         r"ACPI Error: Aborting method \\_SB\.PCI0\.LPCB\.EC\._Q9A due to previous error \(AE_NOT_EXIST\) \(\d+/psparse\-\d+\)",
+        # Known early boot violation
+        # https://lore.kernel.org/20260913-fixes-verify-rwx-v3-1-5e1d6a08bd02@kernel.org/
+        r"CPA detected W\^X violation:",
     ],
 }
 ANSI_STRIP = re.compile(r'(?:\x1B[@-_]|[\x80-\x9F])[0-?]*[ -/]*[@-~]')
