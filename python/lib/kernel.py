@@ -104,8 +104,15 @@ def prepare_source(base_name: str, base_ref: str = 'origin/master') -> None:
     # Patching section
     if base_name == 'linux-next-llvm':
         patches += [
-            'https://lore.kernel.org/all/20260618-amdgpu-fix-wq_name_len-warning-v2-1-ef0e2e6f5be7@kernel.org/',  # drm/amd/display: Shorten hdmi_frl_status_polling_workqueue
-            'https://lore.kernel.org/all/20260908092730.4002628-1-rppt@kernel.org/',  # x86/mm/pat: skip RWX verification until kernel text is set to read only
+            'https://lore.kernel.org/all/20260913-fixes-verify-rwx-v3-1-5e1d6a08bd02@kernel.org/',  # x86/mm/pat: use pr_warn() for early W^X warnings
+        ]
+        commits += [
+            '505e5d6f515f9e7812a1512fb91af41c96997e50',  # Revert 0412b1064a3b ("drm/amd/display: Cover EDID CEA parsing helpers")
+        ]
+
+    if base_name in NEXT_TREES:
+        patches += [
+            'https://lore.kernel.org/all/20260913173049.1168963-1-sashal@kernel.org/',  # firmware: qcom: scm: Hide QCOM_SCM instead of depending on ARCH_QCOM
         ]
 
     # Apply hacks to hide new warnings from LLVM main until a proper solution
