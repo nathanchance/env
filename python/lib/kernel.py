@@ -107,7 +107,7 @@ def prepare_source(base_name: str, base_ref: str = 'origin/master') -> None:
             'https://lore.kernel.org/all/20260913-fixes-verify-rwx-v3-1-5e1d6a08bd02@kernel.org/',  # x86/mm/pat: use pr_warn() for early W^X warnings
         ]
         commits += [
-            '505e5d6f515f9e7812a1512fb91af41c96997e50',  # Revert 0412b1064a3b ("drm/amd/display: Cover EDID CEA parsing helpers")
+            '511602a4f8494a9e919909f813e58725b9544a37',  # Revert 0412b1064a3b ("drm/amd/display: Cover EDID CEA parsing helpers")
         ]
 
     if base_name in NEXT_TREES:
@@ -119,7 +119,7 @@ def prepare_source(base_name: str, base_ref: str = 'origin/master') -> None:
     # can be figured out
     commits += [
         'abe811f82ce46edea164f2663b6206ea27be4f9f',  # Hide -Wconstant-conversion in drivers/net/wireless/broadcom/brcm80211/brcmsmac/phy/phy_n.c
-        'abfdd88ddc4a2e3c0a971a97d8b4be78df89c8a1',  # Disable -Wconstant-conversion in lib/base64.c
+        '69f4c442870d0ce56cf7accab6402b701d99497d',  # Hide -Wconstant-conversion in lib/base64.c
     ]
 
     if base_name in PACMAN_TREES:
