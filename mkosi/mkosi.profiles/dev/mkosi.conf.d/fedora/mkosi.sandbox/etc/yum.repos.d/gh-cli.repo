@@ -3,4 +3,4 @@ name=packages for the GitHub CLI
 baseurl=https://cli.github.com/packages/rpm
 enabled=1
 gpgcheck=1
-gpgkey=https://keyserver.ubuntu.com/pks/lookup?op=get&search=0x23F3D4EA75716059
+gpgkey=https://cli.github.com/packages/githubcli-archive-keyring.asc
