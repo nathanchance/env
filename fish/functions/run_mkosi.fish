@@ -214,12 +214,17 @@ function run_mkosi -d "Run mkosi with various arguments"
     # Use common tools tree based on mkosi default value
     set tools_tree $env_mkosi/mkosi.tools
     if not test -e $tools_tree/etc/resolv.conf
+        if test -d $OPT_ORB_GUEST
+            set -a tools_mkosi_args \
+                --sandbox-tree $OPT_ORB_GUEST/etc:$OPT_ORB_GUEST/etc
+        end
         $mkosi_root \
             --directory $mkosi_src/mkosi/resources/mkosi-tools \
             --format directory \
             --output (path basename $tools_tree) \
             --output-directory (path dirname $tools_tree) \
-            --profile misc,package-manager,runtime
+            --profile misc,package-manager,runtime \
+            $tools_mkosi_args
         or return
 
         run0 chown -R $USER:$USER $tools_tree
@@ -240,6 +245,11 @@ function run_mkosi -d "Run mkosi with various arguments"
         end
         if test -d $HOST_FOLDER
             set -a mkosi_args --environment HOST_FOLDER=$HOST_FOLDER
+        end
+        if test -d $OPT_ORB_GUEST
+            set -a mkosi_args \
+                --sandbox-tree $OPT_ORB_GUEST/etc:$OPT_ORB_GUEST/etc \
+                --tools-tree-sandbox-tree $OPT_ORB_GUEST/etc:$OPT_ORB_GUEST/etc
         end
     end
 
