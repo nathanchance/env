@@ -46,6 +46,8 @@ ALLOWLIST = {
         r"FAT\-fs \([a-z0-9]+\): Volume was not properly unmounted\. Some data may be corrupt\. Please run fsck\.",
         # Expected on certain platforms that do not expose ASPM control via firmware
         r"r8169 [0-9a-f:.]+ can't disable ASPM; OS doesn't have ASPM control",
+        # https://git.kernel.org/next/linux-next/c/105ac9873eed996b384f7546444536430b158481
+        r"r8169 [0-9a-f:.]+ OS doesn't have ASPM control, disabling ASPM anyway",
         # Occasionally shows up under load
         r"hrtimer: interrupt took \d+ ns",
         # Firmware bug according to intel_epb_restore()?
