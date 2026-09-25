@@ -102,11 +102,6 @@ def prepare_source(base_name: str, base_ref: str = 'origin/master') -> None:
     commits: list[str] = []
 
     # Patching section
-    if base_name == 'linux-next-llvm':
-        patches += [
-            'https://lore.kernel.org/all/20260913-fixes-verify-rwx-v3-1-5e1d6a08bd02@kernel.org/',  # x86/mm/pat: use pr_warn() for early W^X warnings
-        ]
-
     if base_name in NEXT_TREES:
         patches += [
             'https://lore.kernel.org/all/20260913173049.1168963-1-sashal@kernel.org/',  # firmware: qcom: scm: Hide QCOM_SCM instead of depending on ARCH_QCOM
