@@ -21,8 +21,8 @@ switch $LOCATION
         fish_add_path -ag /opt/homebrew/sbin
         fish_add_path -ag /opt/homebrew/bin
 
-        set -gx MANPATH /opt/homebrew/share/man
-        set -gx INFOPATH /opt/homebrew/share/info
+        set -gx MANPATH /opt/homebrew/share/man /usr/share/man
+        set -gx INFOPATH /opt/homebrew/share/info /usr/share/info
         set -gx SHELL /opt/homebrew/bin/fish
 
     case '*'
