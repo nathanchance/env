@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple Computer//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>dev.nathanchance.orbtzsync</string>
+    <key>Program</key>
+    <string>/Users/nathan/Dev/codeberg/env/configs/mac/sync_orb_tz.fish</string>
+    <key>StandardOutPath</key>
+    <string>/Users/nathan/.local/state/dev.nathanchance.orbtzsync.stdout.log</string>
+    <key>StandardErrorPath</key>
+    <string>/Users/nathan/.local/state/dev.nathanchance.orbtzsync.stderr.log</string>
+    <key>StartInterval</key>
+    <integer>60</integer>
+</dict>
+</plist>
