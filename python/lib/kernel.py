@@ -103,8 +103,8 @@ def prepare_source(base_name: str, base_ref: str = 'origin/master') -> None:
 
     # Patching section
     if base_name in NEXT_TREES:
-        patches += [
-            'https://lore.kernel.org/all/20260913173049.1168963-1-sashal@kernel.org/',  # firmware: qcom: scm: Hide QCOM_SCM instead of depending on ARCH_QCOM
+        reverts += [
+            '1fb28c664a19df8d45a6afa04d28d102b04ea680',  # virt/steal_governor: Enable the driver
         ]
 
     # Apply hacks to hide new warnings from LLVM main until a proper solution
@@ -113,44 +113,6 @@ def prepare_source(base_name: str, base_ref: str = 'origin/master') -> None:
         'abe811f82ce46edea164f2663b6206ea27be4f9f',  # Hide -Wconstant-conversion in drivers/net/wireless/broadcom/brcm80211/brcmsmac/phy/phy_n.c
         '69f4c442870d0ce56cf7accab6402b701d99497d',  # Hide -Wconstant-conversion in lib/base64.c
     ]
-
-    if base_name in PACMAN_TREES:
-        patches += [
-            '''From 131f4086e294378dc5d43cc6c3ca82ed948862fd Mon Sep 17 00:00:00 2001
-From: Nathan Chancellor <nathan@kernel.org>
-Date: Sun, 3 May 2026 16:47:12 -0700
-Subject: [PATCH] HACK: drm/amd/display: Hide instances of -Wframe-larger-than
- in display_mode_vba_3{0,1,14}.o
-
-Signed-off-by: Nathan Chancellor <nathan@kernel.org>
----
- drivers/gpu/drm/amd/display/dc/dml/Makefile | 6 +++---
- 1 file changed, 3 insertions(+), 3 deletions(-)
-
-diff --git a/drivers/gpu/drm/amd/display/dc/dml/Makefile b/drivers/gpu/drm/amd/display/dc/dml/Makefile
-index 268b5fbdb48b..93e7ec301268 100644
---- a/drivers/gpu/drm/amd/display/dc/dml/Makefile
-+++ b/drivers/gpu/drm/amd/display/dc/dml/Makefile
-@@ -54,11 +54,11 @@ CFLAGS_$(AMDDALPATH)/dc/dml/dcn20/display_mode_vba_20v2.o := $(dml_ccflags) $(fr
- CFLAGS_$(AMDDALPATH)/dc/dml/dcn20/display_rq_dlg_calc_20v2.o := $(dml_ccflags)
- CFLAGS_$(AMDDALPATH)/dc/dml/dcn21/display_mode_vba_21.o := $(dml_ccflags) $(frame_warn_flag)
- CFLAGS_$(AMDDALPATH)/dc/dml/dcn21/display_rq_dlg_calc_21.o := $(dml_ccflags)
--CFLAGS_$(AMDDALPATH)/dc/dml/dcn30/display_mode_vba_30.o := $(dml_ccflags) $(frame_warn_flag)
-+CFLAGS_$(AMDDALPATH)/dc/dml/dcn30/display_mode_vba_30.o := $(dml_ccflags) -Wframe-larger-than=2500
- CFLAGS_$(AMDDALPATH)/dc/dml/dcn30/display_rq_dlg_calc_30.o := $(dml_ccflags)
--CFLAGS_$(AMDDALPATH)/dc/dml/dcn31/display_mode_vba_31.o := $(dml_ccflags) $(frame_warn_flag)
-+CFLAGS_$(AMDDALPATH)/dc/dml/dcn31/display_mode_vba_31.o := $(dml_ccflags) -Wframe-larger-than=2500
- CFLAGS_$(AMDDALPATH)/dc/dml/dcn31/display_rq_dlg_calc_31.o := $(dml_ccflags)
--CFLAGS_$(AMDDALPATH)/dc/dml/dcn314/display_mode_vba_314.o := $(dml_ccflags) $(frame_warn_flag)
-+CFLAGS_$(AMDDALPATH)/dc/dml/dcn314/display_mode_vba_314.o := $(dml_ccflags) -Wframe-larger-than=2500
- CFLAGS_$(AMDDALPATH)/dc/dml/dcn314/display_rq_dlg_calc_314.o := $(dml_ccflags)
- CFLAGS_$(AMDDALPATH)/dc/dml/dcn314/dcn314_fpu.o := $(dml_ccflags)
- CFLAGS_$(AMDDALPATH)/dc/dml/dcn30/dcn30_fpu.o := $(dml_ccflags)
--- 
-2.54.0
-
-''',  # ruff:ignore[trailing-whitespace]
-        ]
 
     try:  # ruff:ignore[too-many-statements-in-try-clause]
         for revert in reverts:
