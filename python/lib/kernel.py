@@ -103,8 +103,8 @@ def prepare_source(base_name: str, base_ref: str = 'origin/master') -> None:
 
     # Patching section
     if base_name in NEXT_TREES:
-        reverts += [
-            '1fb28c664a19df8d45a6afa04d28d102b04ea680',  # virt/steal_governor: Enable the driver
+        patches += [
+            'https://lore.kernel.org/all/20260929164712.1054883-1-sshegde@linux.ibm.com/',  # sched/core: Fix context analysis errors in non-preferred CPU push
         ]
 
     # Apply hacks to hide new warnings from LLVM main until a proper solution
