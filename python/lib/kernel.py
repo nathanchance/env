@@ -102,11 +102,6 @@ def prepare_source(base_name: str, base_ref: str = 'origin/master') -> None:
     commits: list[str] = []
 
     # Patching section
-    if base_name in NEXT_TREES:
-        patches += [
-            'https://git.kernel.org/tip/tip/p/4b1f75be23c4fb0016a102d1cb108ba355c4c00d',  # sched/core: Fix context analysis errors in non-preferred CPU push
-        ]
-
     if base_name == 'fedora':
         patches += [
             'https://lore.kernel.org/all/20261003121251.3942666-1-sashal@kernel.org/',  # arm_mpam: make the mon_sel guard conditional only
