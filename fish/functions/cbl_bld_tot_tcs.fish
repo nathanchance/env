@@ -252,6 +252,7 @@ runner.configs = [Path(e['CBL_LKT'], 'configs/archlinux/x86_64.config')]
 runner.folders = folders
 runner.lsm = lkt.source.LinuxSourceManager(folders.source)
 runner.make_vars['ARCH'] = 'x86_64'
+runner.make_vars['LLVM'] = '$llvm_bld/final/bin/'
 
 kernel_builder = tc_build.kernel.LLVMKernelBuilder()
 kernel_builder.folders.build = folders.build
