@@ -102,17 +102,19 @@ def prepare_source(base_name: str, base_ref: str = 'origin/master') -> None:
     commits: list[str] = []
 
     # Patching section
+    patches += [
+        'https://lore.kernel.org/all/20261008-base64-silence-clang-24-constant-conversion-v1-1-0858b60b23c8@kernel.org/',  # lib/base64: Silence clang-24 -Wconstant-conversion with diag pragmas
+    ]
+
+    if base_name == 'linux-mainline-llvm':
+        patches += [
+            'https://git.kernel.org/wireless/wireless-next/p/f7463a9c99a506b3308a852f9aaaf2a26b659e95',  # wifi: brcmsmac: Adjust txpwrindex value in nphy_ipa_rxcal_gaintbl_2GHz
+        ]
+
     if base_name == 'fedora':
         patches += [
             'https://lore.kernel.org/all/20261003121251.3942666-1-sashal@kernel.org/',  # arm_mpam: make the mon_sel guard conditional only
         ]
-
-    # Apply hacks to hide new warnings from LLVM main until a proper solution
-    # can be figured out
-    commits += [
-        'abe811f82ce46edea164f2663b6206ea27be4f9f',  # Hide -Wconstant-conversion in drivers/net/wireless/broadcom/brcm80211/brcmsmac/phy/phy_n.c
-        '69f4c442870d0ce56cf7accab6402b701d99497d',  # Hide -Wconstant-conversion in lib/base64.c
-    ]
 
     try:  # ruff:ignore[too-many-statements-in-try-clause]
         for revert in reverts:
