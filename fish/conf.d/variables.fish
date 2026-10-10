@@ -304,7 +304,7 @@ set -l uv_data_dir $uv_root_dir/share
 set -gx UV_CACHE_DIR $uv_root_dir/cache
 set -gx UV_INSTALL_DIR $uv_bin_dir/uv
 set -gx UV_NO_MODIFY_PATH 1 # handled by config.fish
-set -gx UV_PYTHON 3.14 # latest stable release
+set -gx UV_PYTHON 3.15 # latest stable release
 set -gx UV_PYTHON_BIN_DIR $uv_bin_dir/python
 set -gx UV_PYTHON_CACHE_DIR $UV_CACHE_DIR
 set -gx UV_PYTHON_INSTALL_DIR $uv_data_dir/python
