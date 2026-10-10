@@ -168,12 +168,18 @@ function upd -d "Runs the update command for the current distro or downloads/upd
                 continue
 
             case python
-                if test (command -v python3) != $UV_PYTHON_BIN_DIR/python3
+                set python3 (command -v python3)
+                if test $python3 != $UV_PYTHON_BIN_DIR/python3
                     __print_warning "python requires uv managed python (install with 'uv python install --default'), skipping..."
                     continue
                 end
 
-                uv python upgrade
+                set python3_basename (path resolve $python3 | path basename)
+                if test $python3_basename = python$UV_PYTHON
+                    uv python upgrade
+                else
+                    uv python install --default
+                end
 
                 python3 --version
 
