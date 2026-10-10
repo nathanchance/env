@@ -113,7 +113,7 @@ def prepare_source(base_name: str, base_ref: str = 'origin/master') -> None:
 
     if base_name == 'fedora':
         patches += [
-            'https://lore.kernel.org/all/20261003121251.3942666-1-sashal@kernel.org/',  # arm_mpam: make the mon_sel guard conditional only
+            'https://lore.kernel.org/all/20261009163235.3-1-sashal@kernel.org/',  # arm_mpam: make the mon_sel guard conditional only
         ]
 
     try:  # ruff:ignore[too-many-statements-in-try-clause]
