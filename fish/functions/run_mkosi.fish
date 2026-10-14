@@ -126,7 +126,8 @@ function run_mkosi -d "Run mkosi with various arguments"
 
         if set -q install_mkosi
             begin
-                sed -i \
+                git -C $mkosi_src show dde1bf020f108a300d729f6a5f689375fb46c943 | git -C $mkosi_src apply -3Rv
+                and sed -i \
                     -e "s;suite=f\"{context.config.release}-security\";suite=f\"{context.config.release}{'/updates' if context.config.release == 'buster' else '-security'}\";g" \
                     -e "s;install_apt_sources(context, cls.repositories(context, for_image=True));install_apt_sources(context, cls.repositories(context));g" \
                     $mkosi_src/mkosi/distribution/debian.py
