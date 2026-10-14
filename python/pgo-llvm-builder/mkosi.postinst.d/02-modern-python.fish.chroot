@@ -1,7 +1,7 @@
 #!/usr/bin/env -S HOME=/root fish
 # Description: Download and install Python using uv
 
-set python_version 3.14
+set python_version 3.15
 
 # Download and install uv
 wget -O - -q https://astral.sh/uv/install.sh | sh
