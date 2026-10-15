@@ -189,8 +189,8 @@ function cbl_lkt -d "Tests a Linux kernel with llvm-kernel-testing"
         set -a build_py_args --build-folder (tbf (status function))/(path basename $linux_folder)
     end
 
-    set log_folder $CBL_LOGS/(path basename $linux_folder)-(date +%F-%T)
-    mkdir -p $log_folder
+    set output_folder $CBL_LOGS/(path basename $linux_folder)-(date +%F-%H-%M-%S)
+    mkdir -p $output_folder
 
     if __is_github_actions
         set lkt $GITHUB_WORKSPACE/lkt
@@ -205,7 +205,7 @@ function cbl_lkt -d "Tests a Linux kernel with llvm-kernel-testing"
     set lkt_cmd \
         $lkt/build.py \
         --linux-folder $linux_folder \
-        --log-folder $log_folder \
+        --output-folder $output_folder \
         $build_py_args
 
     # Only apply timeout when running interactively, as timeout from boot-qemu.py can get wedged
@@ -244,7 +244,7 @@ function cbl_lkt -d "Tests a Linux kernel with llvm-kernel-testing"
 
     if test $lkt_ret -ne 0
         if test $lkt_ret -eq 130
-            rm -fr $log_folder
+            rm -fr $output_folder
         else
             set msg "build.py failed in $linux_folder (ret: $lkt_ret)"
             __print_error "$msg"
@@ -253,6 +253,7 @@ function cbl_lkt -d "Tests a Linux kernel with llvm-kernel-testing"
         return $lkt_ret
     end
 
+    set log_folder $output_folder/logs
     set report $log_folder/report.txt
     cbl_gen_build_report $log_folder
     set log_files (PYTHONPATH=$PYTHON_FOLDER python3 -c "from pathlib import Path
