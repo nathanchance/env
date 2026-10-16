@@ -220,18 +220,22 @@ function cbl_bld_tot_tcs -d "Build LLVM and binutils from source for kernel deve
             end
 
             set lsm_location (string match -er 'lsm\.location = Path\(src_folder,' <$tc_bld/build-llvm.py | string trim)
-            timeout 24h env PYTHONPATH=$tc_bld:$CBL_LKT python3 -c "from os import environ as e
+            timeout 24h env PATH=$llvm_bld/final/bin:"$PATH" PYTHONPATH=$tc_bld:$CBL_LKT python3 -c "from os import environ as e
 from pathlib import Path
 
-import lkt.source
-from lkt.runner import Folders
-from lkt.x86_64 import X8664LLVMKernelRunner
+from lkt.core.env import EnvInfo
+from lkt.core.executor import Executor
+from lkt.core.job import TestJob
+from lkt.core.matrix import ArchMatrix
+from lkt.core.source import LinuxSourceTree
+from lkt.utils import CONFIGS
 
 import tc_build.kernel
 import tc_build.utils
 from tc_build.llvm import LLVMSourceManager
 
 src_folder = Path('$tc_bld/src')
+build_folder = Path('$llvm_bld/linux')
 
 tcb_lsm = tc_build.kernel.LinuxSourceManager()
 tcb_$lsm_location
@@ -242,29 +246,39 @@ tcb_lsm.tarball.local_location = tcb_lsm.location.with_name(f'{tcb_lsm.location.
 tc_build.utils.print_header('Preparing Linux source for profiling runs')
 tcb_lsm.prepare()
 
-folders = Folders()
-folders.source = tcb_lsm.location
-folders.build = Path('$llvm_bld/linux')
-folders.log = Path(e['CBL_LOGS'], 'cbl_bld_tot_tcs')
+class QualificationMatrix(ArchMatrix):
+    def __init__(
+        self,
+        lst: LinuxSourceTree,
+        env_info: EnvInfo,
+        **kwargs,
+    ) -> None:
+        super().__init__(
+            lst, env_info, [], 'x86_64-linux-gnu', 'x86_64', False, **kwargs
+        )
 
-runner = X8664LLVMKernelRunner()
-runner.configs = [Path(e['CBL_LKT'], 'configs/archlinux/x86_64.config')]
-runner.folders = folders
-runner.lsm = lkt.source.LinuxSourceManager(folders.source)
-runner.make_vars['ARCH'] = 'x86_64'
-runner.make_vars['LLVM'] = '$llvm_bld/final/bin/'
+    def _generate_jobs(self):
+        return [TestJob(arch='x86_64', configs=[Path(CONFIGS, 'archlinux/x86_64.config')])]
+
+lst = LinuxSourceTree(tcb_lsm.location)
+env_info = EnvInfo()
+
+Executor(
+    matrices=[QualificationMatrix(lst, env_info)],
+    lst=lst,
+    env_info=env_info,
+    boot_utils_folder=Path(),
+    build_folder=build_folder,
+    output_folder=Path(e['CBL_LOGS'], 'cbl_bld_tot_tcs'),
+).run().check_returncode()
 
 kernel_builder = tc_build.kernel.LLVMKernelBuilder()
-kernel_builder.folders.build = folders.build
-kernel_builder.folders.source = folders.source
+kernel_builder.folders.build = build_folder
+kernel_builder.folders.source = lst.folder
 kernel_builder.matrix = {
 $validate_targets
 }
 kernel_builder.toolchain_prefix = Path('$llvm_bld/final')
-
-folders.log.mkdir(parents=True, exist_ok=True)
-if (result := runner.run()).build == 'failed':
-    sys.exit(1)
 kernel_builder.build()"
             switch $status
                 case 0 # ok
