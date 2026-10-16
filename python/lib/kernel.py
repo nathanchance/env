@@ -108,6 +108,12 @@ def prepare_source(base_name: str, base_ref: str = 'origin/master') -> None:
             'https://git.kernel.org/wireless/wireless-next/p/f7463a9c99a506b3308a852f9aaaf2a26b659e95',  # wifi: brcmsmac: Adjust txpwrindex value in nphy_ipa_rxcal_gaintbl_2GHz
         ]
 
+    if base_name in NEXT_TREES:
+        reverts += [
+            # https://lore.kernel.org/20261016023120.GA2863622@ax162/
+            '70d2304ae575c0432251f36231d32e6ff0eb4f7f',  # scsi: fnic: Enable lock context analysis
+        ]
+
     try:  # ruff:ignore[too-many-statements-in-try-clause]
         for revert in reverts:
             if isinstance(revert, tuple):
