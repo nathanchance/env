@@ -109,10 +109,39 @@ def prepare_source(base_name: str, base_ref: str = 'origin/master') -> None:
         ]
 
     if base_name in NEXT_TREES:
-        reverts += [
+        patches += [
             # https://lore.kernel.org/20261016023120.GA2863622@ax162/
-            '70d2304ae575c0432251f36231d32e6ff0eb4f7f',  # scsi: fnic: Enable lock context analysis
+            'https://lore.kernel.org/all/3c41b84d7d832dd767b30bc04cf875f800ce748d.1792283587.git.bvanassche@acm.org/',  # scsi: fnic: Annotate fnic_nvme functions with __must_hold()
         ]
+
+    patches.append('''\
+From 2bf933d3d580f184b57ad2cce7a85fb4c213f6f5 Mon Sep 17 00:00:00 2001
+From: Nathan Chancellor <nathan@kernel.org>
+Date: Sat, 17 Oct 2026 17:05:05 -0700
+Subject: [PATCH] crypto: Disable context analysis for scompress.c
+
+Link: https://github.com/ClangBuiltLinux/linux/issues/2187
+Signed-off-by: Nathan Chancellor <nathan@kernel.org>
+---
+ crypto/Makefile | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/crypto/Makefile b/crypto/Makefile
+index 33bb5ad595e8..cf97d843af09 100644
+--- a/crypto/Makefile
++++ b/crypto/Makefile
+@@ -63,6 +63,7 @@ obj-$(CONFIG_CRYPTO_MLDSA) += mldsa.o
+ crypto_acompress-y := acompress.o
+ crypto_acompress-y += scompress.o
+ obj-$(CONFIG_CRYPTO_ACOMP2) += crypto_acompress.o
++CONTEXT_ANALYSIS_scompress.o := n
+ 
+ cryptomgr-y := algboss.o testmgr.o
+ 
+-- 
+2.56.0
+
+''')
 
     try:  # ruff:ignore[too-many-statements-in-try-clause]
         for revert in reverts:
