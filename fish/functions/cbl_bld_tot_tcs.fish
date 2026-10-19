@@ -133,6 +133,8 @@ function cbl_bld_tot_tcs -d "Build LLVM and binutils from source for kernel deve
     # Add patches to revert here
     # https://github.com/llvm/llvm-project/pull/227722#issuecomment-6065215071
     set -a reverts https://github.com/llvm/llvm-project/commit/22287cb048390352d95d8a4925dfb9f96835444d # [Clang][AArch64] Diagnose invalid FPM scale arguments (#227722)
+    # https://github.com/ClangBuiltLinux/linux/issues/2187
+    set -a reverts https://github.com/llvm/llvm-project/commit/217e229a1f32785fccdd3b3f51429f0d309dea45 # [clang][ThreadSafety] Do not read a C field's address as a pointer to member (#231604)
     for revert in $reverts
         if string match -qr 'https?://' $revert
             set -l revert (path basename $revert)
