@@ -104,7 +104,7 @@ def prepare_source(base_name: str, base_ref: str = 'origin/master') -> None:
     # Patching section
     if base_name == 'linux-mainline-llvm':
         patches += [
-            'https://lore.kernel.org/all/20261008-base64-silence-clang-24-constant-conversion-v1-1-0858b60b23c8@kernel.org/',  # lib/base64: Silence clang-24 -Wconstant-conversion with diag pragmas
+            'https://git.kernel.org/akpm/mm/c/dbba57a1daf6230a1814da17d6afbf8b1711fb28',  # lib/base64: Silence clang-24 -Wconstant-conversion with diag pragmas
             'https://git.kernel.org/wireless/wireless-next/p/f7463a9c99a506b3308a852f9aaaf2a26b659e95',  # wifi: brcmsmac: Adjust txpwrindex value in nphy_ipa_rxcal_gaintbl_2GHz
         ]
 
@@ -113,35 +113,9 @@ def prepare_source(base_name: str, base_ref: str = 'origin/master') -> None:
             # https://lore.kernel.org/20261016023120.GA2863622@ax162/
             'https://lore.kernel.org/all/3c41b84d7d832dd767b30bc04cf875f800ce748d.1792283587.git.bvanassche@acm.org/',  # scsi: fnic: Annotate fnic_nvme functions with __must_hold()
         ]
-
-    patches.append('''\
-From 2bf933d3d580f184b57ad2cce7a85fb4c213f6f5 Mon Sep 17 00:00:00 2001
-From: Nathan Chancellor <nathan@kernel.org>
-Date: Sat, 17 Oct 2026 17:05:05 -0700
-Subject: [PATCH] crypto: Disable context analysis for scompress.c
-
-Link: https://github.com/ClangBuiltLinux/linux/issues/2187
-Signed-off-by: Nathan Chancellor <nathan@kernel.org>
----
- crypto/Makefile | 1 +
- 1 file changed, 1 insertion(+)
-
-diff --git a/crypto/Makefile b/crypto/Makefile
-index 33bb5ad595e8..cf97d843af09 100644
---- a/crypto/Makefile
-+++ b/crypto/Makefile
-@@ -63,6 +63,7 @@ obj-$(CONFIG_CRYPTO_MLDSA) += mldsa.o
- crypto_acompress-y := acompress.o
- crypto_acompress-y += scompress.o
- obj-$(CONFIG_CRYPTO_ACOMP2) += crypto_acompress.o
-+CONTEXT_ANALYSIS_scompress.o := n
- 
- cryptomgr-y := algboss.o testmgr.o
- 
--- 
-2.56.0
-
-''')
+        commits += [
+            'f2740366eec9e4e1f9d8eb03601f82809cb697cd',  # sched_ext: Take latest for-next changes to address merge issues
+        ]
 
     try:  # ruff:ignore[too-many-statements-in-try-clause]
         for revert in reverts:
