@@ -7,6 +7,7 @@ function tmuxp -d "Calls tmuxp based on how it is available"
         # installed via distro, just call directly
         command tmuxp $argv
     else
-        uvx tmuxp $argv
+        # https://github.com/tmux-python/tmuxp/issues/1094
+        uvx --python 3.14 tmuxp $argv
     end
 end
