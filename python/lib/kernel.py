@@ -114,6 +114,12 @@ def prepare_source(base_name: str, base_ref: str = 'origin/master') -> None:
             'https://lore.kernel.org/all/3c41b84d7d832dd767b30bc04cf875f800ce748d.1792283587.git.bvanassche@acm.org/',  # scsi: fnic: Annotate fnic_nvme functions with __must_hold()
         ]
 
+    if base_name == 'linux-next-llvm':
+        commits += [
+            # https://lore.kernel.org/20261021201456.GA3197963@ax162/
+            '4c2d656c2c4d87616e64b46d9160dffead00a22c',   # bpf, x86: Hide func from optimizer in emit_call()
+        ]
+
     try:  # ruff:ignore[too-many-statements-in-try-clause]
         for revert in reverts:
             if isinstance(revert, tuple):
