@@ -131,8 +131,6 @@ function cbl_bld_tot_tcs -d "Build LLVM and binutils from source for kernel deve
     end
 
     # Add patches to revert here
-    # https://github.com/llvm/llvm-project/pull/227722#issuecomment-6065215071
-    set -a reverts https://github.com/llvm/llvm-project/commit/22287cb048390352d95d8a4925dfb9f96835444d # [Clang][AArch64] Diagnose invalid FPM scale arguments (#227722)
     for revert in $reverts
         if string match -qr 'https?://' $revert
             set -l revert (path basename $revert)
@@ -153,6 +151,8 @@ function cbl_bld_tot_tcs -d "Build LLVM and binutils from source for kernel deve
     end
 
     # Add in-review patches here
+    # https://github.com/ClangBuiltLinux/linux/issues/2185
+    set -a gh_prs https://github.com/llvm/llvm-project/pull/234780 # [clang] Introduce '-fint64-is-long-long'
     for gh_pr in $gh_prs
         if gh_llvm pr view --json state (path basename $gh_pr) | python3 -c "import json, sys; sys.exit(0 if json.load(sys.stdin)['state'] == 'MERGED' else 1)"
             __print_warning "$gh_pr has already been merged, skipping..."
