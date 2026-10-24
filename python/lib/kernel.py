@@ -117,7 +117,7 @@ def prepare_source(base_name: str, base_ref: str = 'origin/master') -> None:
     if base_name == 'linux-next-llvm':
         patches += [
             # https://lore.kernel.org/20261021201456.GA3197963@ax162/
-            'https://lore.kernel.org/all/20261021220844.239400-1-alexei.starovoitov@gmail.com/',  # bpf, x86: Use emit_rsb_call() to call bpf_unwind_target()
+            'https://git.kernel.org/bpf/bpf/p/02da62c2f89668fa1adafa3cc806025b560e45ce',  # bpf, x86: Use emit_rsb_call() to call bpf_unwind_target()
         ]
 
     if base_name == 'fedora':
