@@ -50,3 +50,5 @@ set -g status-right " "
 
 # Quick configuration reload with prefix + Ctrl + r
 bind C-r source-file ~/.tmux.conf \; display "Reloaded!"
+
+set -g mouse off
