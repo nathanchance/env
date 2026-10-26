@@ -104,20 +104,16 @@ def prepare_source(base_name: str, base_ref: str = 'origin/master') -> None:
     # Patching section
     if base_name == 'linux-mainline-llvm':
         patches += [
-            'https://git.kernel.org/akpm/mm/c/dbba57a1daf6230a1814da17d6afbf8b1711fb28',  # lib/base64: Silence clang-24 -Wconstant-conversion with diag pragmas
+            'https://git.kernel.org/akpm/mm/p/dbba57a1daf6230a1814da17d6afbf8b1711fb28',  # lib/base64: Silence clang-24 -Wconstant-conversion with diag pragmas
             'https://git.kernel.org/wireless/wireless-next/p/f7463a9c99a506b3308a852f9aaaf2a26b659e95',  # wifi: brcmsmac: Adjust txpwrindex value in nphy_ipa_rxcal_gaintbl_2GHz
+            # https://lore.kernel.org/20261021201456.GA3197963@ax162/
+            'https://git.kernel.org/bpf/bpf/p/02da62c2f89668fa1adafa3cc806025b560e45ce',  # bpf, x86: Use emit_rsb_call() to call bpf_unwind_target()
         ]
 
     if base_name in NEXT_TREES:
         patches += [
             # https://lore.kernel.org/20261016023120.GA2863622@ax162/
             'https://lore.kernel.org/all/3c41b84d7d832dd767b30bc04cf875f800ce748d.1792283587.git.bvanassche@acm.org/',  # scsi: fnic: Annotate fnic_nvme functions with __must_hold()
-        ]
-
-    if base_name == 'linux-next-llvm':
-        patches += [
-            # https://lore.kernel.org/20261021201456.GA3197963@ax162/
-            'https://git.kernel.org/bpf/bpf/p/02da62c2f89668fa1adafa3cc806025b560e45ce',  # bpf, x86: Use emit_rsb_call() to call bpf_unwind_target()
         ]
 
     if base_name == 'fedora':
