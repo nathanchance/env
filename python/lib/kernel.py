@@ -110,12 +110,6 @@ def prepare_source(base_name: str, base_ref: str = 'origin/master') -> None:
             'https://git.kernel.org/bpf/bpf/p/02da62c2f89668fa1adafa3cc806025b560e45ce',  # bpf, x86: Use emit_rsb_call() to call bpf_unwind_target()
         ]
 
-    if base_name in NEXT_TREES:
-        patches += [
-            # https://lore.kernel.org/20261016023120.GA2863622@ax162/
-            'https://lore.kernel.org/all/3c41b84d7d832dd767b30bc04cf875f800ce748d.1792283587.git.bvanassche@acm.org/',  # scsi: fnic: Annotate fnic_nvme functions with __must_hold()
-        ]
-
     if base_name == 'fedora':
         commits += [
             # https://github.com/ClangBuiltLinux/linux/issues/2185
