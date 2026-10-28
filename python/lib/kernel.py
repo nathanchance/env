@@ -113,7 +113,7 @@ def prepare_source(base_name: str, base_ref: str = 'origin/master') -> None:
     if base_name == 'fedora':
         commits += [
             # https://github.com/ClangBuiltLinux/linux/issues/2185
-            'd38c0824543b3b381a0210badfe6fa60c2a8c7a2',   # arm64: Use '-fint64-is-long-long' in CC_FLAGS_FPU when available
+            'd38c0824543b3b381a0210badfe6fa60c2a8c7a2',  # arm64: Use '-fint64-is-long-long' in CC_FLAGS_FPU when available
         ]
 
     try:  # ruff:ignore[too-many-statements-in-try-clause]
