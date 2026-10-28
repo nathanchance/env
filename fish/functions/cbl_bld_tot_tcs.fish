@@ -230,21 +230,24 @@ from lkt.core.matrix import ArchMatrix
 from lkt.core.source import LinuxSourceTree
 from lkt.utils import CONFIGS
 
-import tc_build.kernel
-import tc_build.utils
+from tc_build.kernel import LinuxSourceManager
 from tc_build.llvm import LLVMSourceManager
+from tc_build.utils import print_header
 
 src_folder = Path('$tc_bld/src')
 build_folder = Path('$llvm_bld/linux')
 
-tcb_lsm = tc_build.kernel.LinuxSourceManager()
+print_header('Preparing Linux source for profiling runs')
+tcb_lsm = LinuxSourceManager()
 tcb_$lsm_location
 tcb_lsm.patches = list(src_folder.glob('*.patch'))
 tcb_lsm.tarball.base_download_url = 'https://git.kernel.org/torvalds/t'
 tcb_lsm.tarball.local_location = tcb_lsm.location.with_name(f'{tcb_lsm.location.name}.tar.gz')
-
-tc_build.utils.print_header('Preparing Linux source for profiling runs')
 tcb_lsm.prepare()
+
+matrix = {
+$validate_targets
+}
 
 class QualificationMatrix(ArchMatrix):
     def __init__(
@@ -254,32 +257,86 @@ class QualificationMatrix(ArchMatrix):
         **kwargs,
     ) -> None:
         super().__init__(
-            lst, env_info, [], 'x86_64-linux-gnu', 'x86_64', False, **kwargs
+            lst, env_info, [], '', '', False, **kwargs
         )
 
     def _generate_jobs(self):
-        return [TestJob(arch='x86_64', configs=[Path(CONFIGS, 'archlinux/x86_64.config')])]
+        jobs = [
+            TestJob(arch='x86_64', configs=[Path(CONFIGS, 'archlinux/x86_64.config')]),
+        ]
 
-lst = LinuxSourceTree(tcb_lsm.location)
-env_info = EnvInfo()
+        llvm_to_kernel_arch = {
+            'AArch64': 'arm64',
+            'ARM': 'arm',
+            'Hexagon': 'hexagon',
+            'LoongArch': 'loongarch',
+            'PowerPC': 'powerpc',
+            'RISCV': 'riscv',
+            'SystemZ': 's390',
+            'X86': 'x86_64',
+        }
 
-Executor(
-    matrices=[QualificationMatrix(lst, env_info)],
+        ppc_make_vars = {
+            'CROSS_COMPILE': self.env_info.binutils['powerpc'].tool.replace('gnu-as', 'gnu-'),
+        }
+
+        for config_target, llvm_targets in matrix.items():
+            for llvm_target in llvm_targets:
+                if config_target == 'defconfig' and llvm_target == 'ARM':
+                    jobs += [
+                        TestJob(arch='arm', configs=['multi_v5_defconfig']),
+                        TestJob(arch='arm', configs=['aspeed_g5_defconfig']),
+                        TestJob(arch='arm', configs=['multi_v7_defconfig']),
+                    ]
+                elif config_target == 'defconfig' and llvm_target == 'Mips':
+                    jobs.append(TestJob(arch='mips', configs=['malta_defconfig']))
+                elif config_target == 'defconfig' and llvm_target == 'PowerPC':
+                    jobs += [
+                        TestJob(
+                            arch='powerpc',
+                            configs=['pmac32_defconfig', 'disable-werror.config'],
+                            make_vars={**ppc_make_vars, 'LLVM_IAS': '0'},
+                        ),
+                        TestJob(
+                            arch='powerpc',
+                            configs=['ppc64_guest_defconfig', 'disable-werror.config'],
+                            make_vars=ppc_make_vars,
+                        ),
+                        TestJob(
+                            arch='powerpc',
+                            configs=['powernv_defconfig', 'disable-werror.config'],
+                            make_vars=ppc_make_vars,
+                        ),
+                    ]
+                elif kernel_arch := llvm_to_kernel_arch.get(llvm_target):
+                    jobs.append(
+                        TestJob(
+                            arch=kernel_arch,
+                            configs=[config_target],
+                            make_vars=ppc_make_vars if kernel_arch == 'powerpc' else None,
+                        )
+                    )
+
+        return jobs
+
+qual_matrix = [
+    QualificationMatrix(
+        lst := LinuxSourceTree(tcb_lsm.location),
+        env_info := EnvInfo()
+    ),
+]
+executor = Executor(
+    matrices=qual_matrix,
     lst=lst,
     env_info=env_info,
     boot_utils_folder=Path(),
     build_folder=build_folder,
     output_folder=Path(e['CBL_LOGS'], 'cbl_bld_tot_tcs'),
-).run().check_returncode()
+)
 
-kernel_builder = tc_build.kernel.LLVMKernelBuilder()
-kernel_builder.folders.build = build_folder
-kernel_builder.folders.source = lst.folder
-kernel_builder.matrix = {
-$validate_targets
-}
-kernel_builder.toolchain_prefix = Path('$llvm_bld/final')
-kernel_builder.build()"
+res = executor.run()
+print(f'Total matrix duration: {executor.duration}')
+res.check_returncode()"
             switch $status
                 case 0 # ok
                 case 124
