@@ -63,10 +63,15 @@ if __name__ == '__main__':
 
     prepend_to_path(args.prepend_to_path)
 
+    base_config: Path | str | None = None
     variables: lib.utils.MakeVars = {}
     targets: list[str] = []
     for arg in args.make_args:
-        if '=' in arg:
+        if arg.startswith(('http://', 'https://')):
+            base_config = arg
+        elif (arg_path := Path(arg)).is_absolute():
+            base_config = arg_path
+        elif '=' in arg:
             variables.update([arg.split('=', 1)])  # ty: ignore[invalid-argument-type]
         # Basically an ordered set
         elif arg not in targets:
@@ -112,6 +117,7 @@ if __name__ == '__main__':
     lib.kernel.kmake(
         variables,
         targets,
+        base_config=base_config,
         ccache=(not args.no_ccache),
         directory=args.directory,
         jobs=args.jobs,

@@ -184,6 +184,7 @@ def get_tool_version(binary_path: Path | str) -> str:
 def kmake(
     variables: lib.utils.MakeVars,
     targets: list[str],
+    base_config: Path | str | None = None,
     ccache: bool = True,
     directory: Path | None = None,
     env: lib.utils.EnvVars | lib.utils.MakeVars | None = None,
@@ -199,6 +200,8 @@ def kmake(
     if not (makefile := Path(kernel_src, 'Makefile')).exists():
         msg = f"Derived kernel source ('{kernel_src}') is not a kernel tree?"
         raise RuntimeError(msg)
+    build_folder = variables.get('O', kernel_src)
+    building_out_of_tree = build_folder != kernel_src
 
     # Get compiler related variables
     cc_str = variables.get('CC', '')
@@ -293,15 +296,43 @@ def kmake(
             rpmopts += ['--define', '_tmppath /tmp']
         makefile_pkg_txt = Path(kernel_src, 'scripts/Makefile.package').read_text(encoding='utf-8')
         if "--define='_topdir" not in makefile_pkg_txt:
-            rpmopts += ['--define', f"_topdir {variables.get('O', kernel_src)}/rpmbuild"]
+            rpmopts += ['--define', f"_topdir {build_folder}/rpmbuild"]
         variables['RPMOPTS'] = shlex.join(rpmopts)
+
+    # Prepare base configuration if it exists
+    make_targets = targets.copy()
+    if base_config:
+        if 'mrproper' in make_targets:
+            if building_out_of_tree:
+                if build_folder.exists():
+                    shutil.rmtree(build_folder)
+            else:
+                msg = 'WARNING: mrproper with a configuration via URL is not supported when building in-tree, ignoring...'
+                lib.utils.print_yellow(msg)
+            make_targets.remove('mrproper')
+
+        if building_out_of_tree:
+            build_folder.mkdir(parents=True)
+
+        config_path = Path(build_folder, '.config')
+        if isinstance(base_config, Path):
+            shutil.copy(base_config, config_path)
+        elif isinstance(base_config, str):
+            fetch_func = lib.utils.wget if 'lore.kernel.org' in base_config else lib.utils.curl
+            fetch_func(base_config, config_path)
+        else:
+            msg = f"Unable to handle {base_config}!"
+            raise TypeError(msg)
+        print(f"[+] {base_config} → {config_path}")
+
+        make_targets.insert(0, 'olddefconfig')
 
     # Build and run make command
     make_cmd: lib.utils.CmdList = [
         'stdbuf', '-eL', '-oL', 'make',
         *flags,
         *[f"{key}={variables[key]}" for key in sorted(variables)],  # ty: ignore[invalid-key]
-        *targets,
+        *make_targets,
     ]  # fmt: off
     if use_time:
         if not (gnu_time := shutil.which('time')):
