@@ -36,6 +36,7 @@ class MakeVars(TypedDict, total=False):
     INSTALL_MOD_STRIP: str
     KCONFIG_CONFIG: Path
     KDEB_CHANGELOG_DIST: str
+    LIBCLANG_PATH: PathString
     LLVM: str
     LLVM_IAS: str
     LOCALVERSION: str

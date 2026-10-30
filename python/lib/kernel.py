@@ -247,6 +247,13 @@ def kmake(
     # Ensure compiler is a Path object for the .parent use below
     compiler_location = (compiler := Path(compiler)).parent
 
+    # Look for a compatible libclang.so
+    if (
+        'LIBCLANG_PATH' not in variables
+        and (libclang := Path(compiler_location.parent, 'lib/libclang.so')).exists()
+    ):
+        variables['LIBCLANG_PATH'] = libclang
+
     # Handle ccache
     if ccache:
         if shutil.which('ccache'):
