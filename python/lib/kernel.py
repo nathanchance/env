@@ -203,7 +203,7 @@ def kmake(
     if not (makefile := Path(kernel_src, 'Makefile')).exists():
         msg = f"Derived kernel source ('{kernel_src}') is not a kernel tree?"
         raise RuntimeError(msg)
-    build_folder = variables.get('O', kernel_src)
+    build_folder = Path(variables.get('O', kernel_src))
     building_out_of_tree = build_folder != kernel_src
 
     # Get compiler related variables
