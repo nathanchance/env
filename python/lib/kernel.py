@@ -322,7 +322,7 @@ def kmake(
             make_targets.remove('mrproper')
 
         if building_out_of_tree:
-            build_folder.mkdir(parents=True)
+            build_folder.mkdir(exist_ok=True, parents=True)
 
         config_path = Path(build_folder, '.config')
         if isinstance(base_config, Path):
