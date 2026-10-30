@@ -111,9 +111,12 @@ def prepare_source(base_name: str, base_ref: str = 'origin/master') -> None:
         ]
 
     if base_name == 'fedora':
-        commits += [
+        patches += [
             # https://github.com/ClangBuiltLinux/linux/issues/2185
-            'd38c0824543b3b381a0210badfe6fa60c2a8c7a2',  # arm64: Use '-fint64-is-long-long' in CC_FLAGS_FPU when available
+            'https://lore.kernel.org/all/20261029135020.272082-7-ardb+git@google.com/',  # lib/crc: Don't include <linux/types.h> in NEON intrinsics code
+            'https://lore.kernel.org/all/20261029135020.272082-8-ardb+git@google.com/',  # xor: arm/arm64: Move NEON xor_gen() dispatch into the glue code
+            'https://lore.kernel.org/all/20261029135020.272082-9-ardb+git@google.com/',  # arm64: Drop stdint.h type overrides from asm/neon-intrinsics.h
+            'https://lore.kernel.org/all/20261029135020.272082-10-ardb+git@google.com/',  # ARM: Drop stdint.h type overrides from asm/neon-intrinsics.h
         ]
 
     try:  # ruff:ignore[too-many-statements-in-try-clause]
