@@ -287,7 +287,11 @@ class QualificationMatrix(ArchMatrix):
                         TestJob(arch='arm', configs=['multi_v7_defconfig']),
                     ]
                 elif config_target == 'defconfig' and llvm_target == 'Mips':
-                    jobs.append(TestJob(arch='mips', configs=['malta_defconfig']))
+                    jobs += [
+                        TestJob(arch='mips', configs=['malta_defconfig']),
+                        TestJob(arch='mips', configs=['32r2_defconfig']),
+                        TestJob(arch='mips', configs=['32r6_defconfig']),
+                    ]
                 elif config_target == 'defconfig' and llvm_target == 'PowerPC':
                     jobs += [
                         TestJob(
