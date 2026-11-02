@@ -102,6 +102,11 @@ def prepare_source(base_name: str, base_ref: str = 'origin/master') -> None:
     commits: list[str] = []
 
     # Patching section
+    if base_name == 'linux-mainline-llvm':
+        patches += [
+            'https://git.kernel.org/akpm/mm/p/dbba57a1daf6230a1814da17d6afbf8b1711fb28',  # lib/base64: Silence clang-24 -Wconstant-conversion with diag pragmas
+        ]
+
     if base_name == 'fedora':
         patches += [
             # https://github.com/ClangBuiltLinux/linux/issues/2185
@@ -111,9 +116,8 @@ def prepare_source(base_name: str, base_ref: str = 'origin/master') -> None:
             'https://lore.kernel.org/all/20261029135020.272082-10-ardb+git@google.com/',  # ARM: Drop stdint.h type overrides from asm/neon-intrinsics.h
         ]
 
-    if base_name == 'linux-mainline-llvm':
+    if base_name in PACMAN_TREES:
         patches += [
-            'https://git.kernel.org/akpm/mm/p/dbba57a1daf6230a1814da17d6afbf8b1711fb28',  # lib/base64: Silence clang-24 -Wconstant-conversion with diag pragmas
             '''\
 From 5b840a25dea2ddb56b7334a9e61b632e2e34d9ab Mon Sep 17 00:00:00 2001
 From: Nathan Chancellor <nathan@kernel.org>
