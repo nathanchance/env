@@ -102,14 +102,6 @@ def prepare_source(base_name: str, base_ref: str = 'origin/master') -> None:
     commits: list[str] = []
 
     # Patching section
-    if base_name == 'linux-mainline-llvm':
-        patches += [
-            'https://git.kernel.org/akpm/mm/p/dbba57a1daf6230a1814da17d6afbf8b1711fb28',  # lib/base64: Silence clang-24 -Wconstant-conversion with diag pragmas
-            'https://git.kernel.org/wireless/wireless-next/p/f7463a9c99a506b3308a852f9aaaf2a26b659e95',  # wifi: brcmsmac: Adjust txpwrindex value in nphy_ipa_rxcal_gaintbl_2GHz
-            # https://lore.kernel.org/20261021201456.GA3197963@ax162/
-            'https://git.kernel.org/bpf/bpf/p/02da62c2f89668fa1adafa3cc806025b560e45ce',  # bpf, x86: Use emit_rsb_call() to call bpf_unwind_target()
-        ]
-
     if base_name == 'fedora':
         patches += [
             # https://github.com/ClangBuiltLinux/linux/issues/2185
@@ -117,6 +109,43 @@ def prepare_source(base_name: str, base_ref: str = 'origin/master') -> None:
             'https://lore.kernel.org/all/20261029135020.272082-8-ardb+git@google.com/',  # xor: arm/arm64: Move NEON xor_gen() dispatch into the glue code
             'https://lore.kernel.org/all/20261029135020.272082-9-ardb+git@google.com/',  # arm64: Drop stdint.h type overrides from asm/neon-intrinsics.h
             'https://lore.kernel.org/all/20261029135020.272082-10-ardb+git@google.com/',  # ARM: Drop stdint.h type overrides from asm/neon-intrinsics.h
+        ]
+
+    if base_name == 'linux-mainline-llvm':
+        patches += [
+            'https://git.kernel.org/akpm/mm/p/dbba57a1daf6230a1814da17d6afbf8b1711fb28',  # lib/base64: Silence clang-24 -Wconstant-conversion with diag pragmas
+            '''\
+From 5b840a25dea2ddb56b7334a9e61b632e2e34d9ab Mon Sep 17 00:00:00 2001
+From: Nathan Chancellor <nathan@kernel.org>
+Date: Sun, 1 Nov 2026 15:35:10 -0700
+Subject: [PATCH] HACK: drm/amd/display: Raise -Wframe-larger-than for
+ display_mode_vba_31{,4}.o
+
+Signed-off-by: Nathan Chancellor <nathan@kernel.org>
+---
+ drivers/gpu/drm/amd/display/dc/dml/Makefile | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/drivers/gpu/drm/amd/display/dc/dml/Makefile b/drivers/gpu/drm/amd/display/dc/dml/Makefile
+index eb4ce5b1ecfb..f7c391791704 100644
+--- a/drivers/gpu/drm/amd/display/dc/dml/Makefile
++++ b/drivers/gpu/drm/amd/display/dc/dml/Makefile
+@@ -56,9 +56,9 @@ CFLAGS_$(AMDDALPATH)/dc/dml/dcn21/display_mode_vba_21.o := $(dml_ccflags) $(fram
+ CFLAGS_$(AMDDALPATH)/dc/dml/dcn21/display_rq_dlg_calc_21.o := $(dml_ccflags)
+ CFLAGS_$(AMDDALPATH)/dc/dml/dcn30/display_mode_vba_30.o := $(dml_ccflags) $(frame_warn_flag)
+ CFLAGS_$(AMDDALPATH)/dc/dml/dcn30/display_rq_dlg_calc_30.o := $(dml_ccflags)
+-CFLAGS_$(AMDDALPATH)/dc/dml/dcn31/display_mode_vba_31.o := $(dml_ccflags) $(frame_warn_flag)
++CFLAGS_$(AMDDALPATH)/dc/dml/dcn31/display_mode_vba_31.o := $(dml_ccflags) -Wframe-larger-than=3200
+ CFLAGS_$(AMDDALPATH)/dc/dml/dcn31/display_rq_dlg_calc_31.o := $(dml_ccflags)
+-CFLAGS_$(AMDDALPATH)/dc/dml/dcn314/display_mode_vba_314.o := $(dml_ccflags) $(frame_warn_flag)
++CFLAGS_$(AMDDALPATH)/dc/dml/dcn314/display_mode_vba_314.o := $(dml_ccflags) -Wframe-larger-than=3200
+ CFLAGS_$(AMDDALPATH)/dc/dml/dcn314/display_rq_dlg_calc_314.o := $(dml_ccflags)
+ CFLAGS_$(AMDDALPATH)/dc/dml/dcn314/dcn314_fpu.o := $(dml_ccflags)
+ CFLAGS_$(AMDDALPATH)/dc/dml/dcn30/dcn30_fpu.o := $(dml_ccflags)
+-- 
+2.56.0
+
+'''
         ]
 
     try:  # ruff:ignore[too-many-statements-in-try-clause]
