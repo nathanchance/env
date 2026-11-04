@@ -46,6 +46,10 @@ def get_env_folder() -> Path:
     return Path(get_main_folder(), 'codeberg/env')
 
 
+def get_hw_model() -> str:
+    return lib.utils.chronic(['sysctl', 'hw.model']).stdout.strip().split(': ')[1]
+
+
 def get_main_folder() -> Path:
     return Path(get_home(), 'Dev')
 
@@ -95,7 +99,7 @@ def install_packages() -> None:
 
 
 def is_vm() -> bool:
-    return 'VirtualMac' in lib.utils.chronic(['sysctl', 'hw.model']).stdout
+    return 'VirtualMac' in get_hw_model()
 
 
 def repo_clone(repo_dest: Path, repo_branch: str | None = None) -> None:
