@@ -129,6 +129,12 @@ def setup_gh() -> None:
         brew_gh(['auth', 'login'])
 
 
+def setup_ghostty_cfg() -> None:
+    (ghostty_cfg := Path(get_home(), '.config/ghostty/config.ghostty')).unlink(missing_ok=True)
+    ghostty_cfg.parent.mkdir(exist_ok=True, parents=True)
+    ghostty_cfg.symlink_to(Path(get_env_folder(), 'configs/local', ghostty_cfg.name))
+
+
 def setup_homebrew() -> None:
     if not get_brew_path().exists():
         install_sh = lib.utils.curl(
@@ -219,5 +225,6 @@ if __name__ == '__main__':
     setup_ssh()
     setup_gh()
     clone_env_plugins()
+    setup_ghostty_cfg()
     setup_wezterm_cfg()
     setup_fish()
