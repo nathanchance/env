@@ -149,7 +149,7 @@ index eb4ce5b1ecfb..f7c391791704 100644
 -- 
 2.56.0
 
-'''
+'''  # ruff:ignore[trailing-whitespace]
         ]
 
     try:  # ruff:ignore[too-many-statements-in-try-clause]
