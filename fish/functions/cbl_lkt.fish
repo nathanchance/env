@@ -36,6 +36,14 @@ function cbl_lkt -d "Tests a Linux kernel with llvm-kernel-testing"
                 set binutils_prefix $argv[$next]
                 set i $next
 
+            case -j --jobs
+                set next (math $i + 1)
+                set -a build_py_args $arg $argv[$next]
+                set i $next
+
+            case -j'*' --only-test-boot --save-objects --use-ccache
+                set -a build_py_args $arg
+
             case -l --linux-folder
                 set next (math $i + 1)
                 set linux_folder (realpath $argv[$next])
@@ -50,9 +58,6 @@ function cbl_lkt -d "Tests a Linux kernel with llvm-kernel-testing"
                 set next (math $i + 1)
                 set qemu_prefix $argv[$next]
                 set i $next
-
-            case --only-test-boot --save-objects --use-ccache
-                set -a build_py_args $arg
 
             case --tc-prefix
                 set next (math $i + 1)
