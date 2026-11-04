@@ -249,12 +249,16 @@ class NspawnConfig(UserDict):
         # The shell will expand our environment
         if self.systemd_version >= 254:
             args.append('--expand-environment=no')
+
         args += [
             # Use a qualified path
             '/usr/bin/fish',
-            '-c',
-            cmd,
         ]
+        # Forward TERM, as systemd-run-m sets TERM=dumb
+        if term := os.environ.get('TERM'):
+            args += ['-C', f'set TERM "{term}"']
+        args += ['-c', cmd]
+
         return args
 
     def _gen_upd_cmd(self) -> lib.utils.CmdList:
@@ -355,7 +359,7 @@ class NspawnConfig(UserDict):
                 msg = 'Cannot find a privilege escalation configuration?'
                 raise RuntimeError(msg)
 
-            systemd_run_m_txt = '#!/bin/sh\n\nexec systemd-run -M "$@"\n'
+            systemd_run_m_txt = '#!/usr/bin/env -S TERM=dumb /bin/sh\n\nexec systemd-run -M "$@"\n'
             lib.utils.run0(['tee', SYSTEMD_RUN_M], input=systemd_run_m_txt)
             lib.utils.run0(['chmod', '0755', SYSTEMD_RUN_M])
 
