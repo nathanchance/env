@@ -1,0 +1,19 @@
+auto-update = download
+background-blur = macos-glass-regular
+bold-color = bright
+command = direct:/opt/homebrew/bin/fish -l
+font-family = "Iosevka Term SS08"
+font-size = 11
+font-thicken = true
+font-thicken-strength = 127
+keybind = alt+left=unbind
+keybind = alt+right=unbind
+keybind = cmd+down=text:\x1b[6~
+keybind = cmd+left=text:\x1bOH
+keybind = cmd+right=text:\x1bOF
+keybind = cmd+shift+r=prompt_tab_title
+keybind = cmd+up=text:\x1b[5~
+macos-option-as-alt = left
+maximize = true
+shell-integration-features = ssh-env
+theme = Snazzy
