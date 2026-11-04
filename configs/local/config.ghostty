@@ -2,6 +2,7 @@ auto-update = download
 background-blur = macos-glass-regular
 bold-color = bright
 command = direct:/opt/homebrew/bin/fish -l
+config-file = ?config.ghostty.font
 font-family = "Iosevka Term SS08"
 font-size = 11
 font-thicken = true

@@ -138,6 +138,13 @@ def setup_ghostty_cfg() -> None:
     ghostty_cfg.parent.mkdir(exist_ok=True, parents=True)
     ghostty_cfg.symlink_to(Path(get_env_folder(), 'configs/local', ghostty_cfg.name))
 
+    if get_hw_model() == 'Mac16,9':
+        src_ghostty_font = Path(get_env_folder(), 'configs/local/config.ghostty.mac-studio-font')
+        (dst_ghostty_font := Path(ghostty_cfg.parent, 'config.ghostty.font')).unlink(
+            missing_ok=True
+        )
+        dst_ghostty_font.symlink_to(src_ghostty_font)
+
 
 def setup_homebrew() -> None:
     if not get_brew_path().exists():
