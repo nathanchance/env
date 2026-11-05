@@ -100,8 +100,12 @@ hi ExtraWhitespace ctermbg=darkred
 match ExtraWhitespace /\s\+$/
 au BufWinEnter * match ExtraWhitespace /\s\+$/
 
-" highlight tabs in yellow
-hi Tabs ctermbg=yellow
+" highlight search results in purple, which still stands out
+" but allows me to see my cursor
+hi Search cterm=NONE ctermfg=black ctermbg=magenta
+
+" highlight tabs in purple
+hi Tabs ctermbg=magenta
 call matchadd('Tabs', '\t')
 au BufWinEnter * call matchadd('Tabs', '\t')
 if version >= 702
