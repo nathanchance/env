@@ -92,11 +92,6 @@ def install_packages() -> None:
     ]  # fmt: off
     brew(['install', *packages])
 
-    casks: list[str] = [
-        'wezterm@nightly',
-    ]
-    brew(['install', '--cask', *casks])
-
 
 def is_vm() -> bool:
     return 'VirtualMac' in get_hw_model()
@@ -181,12 +176,6 @@ def setup_ssh() -> None:
         lib.utils.run(['ssh-add', ssh_key])
 
 
-def setup_wezterm_cfg() -> None:
-    (wezterm_cfg := Path(get_home(), '.config/wezterm/wezterm.lua')).unlink(missing_ok=True)
-    wezterm_cfg.parent.mkdir(exist_ok=True, parents=True)
-    wezterm_cfg.symlink_to(Path(get_env_folder(), 'configs/local', wezterm_cfg.name))
-
-
 def setup_fish() -> None:
     fish_script = (
         '# Start an ssh-agent\n'
@@ -237,5 +226,4 @@ if __name__ == '__main__':
     setup_gh()
     clone_env_plugins()
     setup_ghostty_cfg()
-    setup_wezterm_cfg()
     setup_fish()
