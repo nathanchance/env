@@ -282,7 +282,8 @@ def kmake(
 
     # Look for a compatible libclang.so
     if (
-        'LIBCLANG_PATH' not in variables
+        cc_is_clang
+        and 'LIBCLANG_PATH' not in variables
         and (libclang := Path(compiler_location.parent, 'lib/libclang.so')).exists()
     ):
         variables['LIBCLANG_PATH'] = libclang
