@@ -131,8 +131,6 @@ function cbl_bld_tot_tcs -d "Build LLVM and binutils from source for kernel deve
     end
 
     # Add patches to revert here
-    # https://github.com/llvm/llvm-project/pull/232578#issuecomment-6538920809
-    set -a reverts https://github.com/llvm/llvm-project/commit/48d0dc8f61a7680190a144ef89bd80543c0ec4f9 # [Mips] Fix MipsJmpLink and MipsTailCall to use compact branch instructions on MIPS32/64 R6 (#232578)
     for revert in $reverts
         if string match -qr 'https?://' $revert
             set -l revert (path basename $revert)
