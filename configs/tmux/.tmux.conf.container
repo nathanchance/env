@@ -2,6 +2,9 @@
 unbind c
 bind-key c new-window mchsh
 
+# new floating pane using f
+bind-key f new-pane -x 95% -y 95% -X 3% -Y 3% mchsh
+
 # open ephemeral container using E
 bind-key E new-window 'sd_nspawn -e'
 

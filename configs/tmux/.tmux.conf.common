@@ -1,5 +1,10 @@
-# New window on host using C
+# Move default f keybind to Ctrl-f
+unbind-key f
+bind-key C-f command-prompt { find-window -Z "%%" }
+
+# New window on host using C or new floating pane with F
 bind-key C new-window
+bind-key F new-pane -x 95% -y 95% -X 3% -Y 3%
 
 # Run comand on the host using R
 bind-key R {
