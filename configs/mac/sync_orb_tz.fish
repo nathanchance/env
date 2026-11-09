@@ -35,7 +35,7 @@ else
     return 1
 end
 
-if $orb run sd_nspawn -r "run0 $set_tz_cmd"
+if $orb run sd_nspawn -r "$set_tz_cmd" -U root
     echo "$log_date successfully updated OrbStack systemd-nspawn container timezone to $current_tz"
 else
     echo >&2 "$log_date failed to set systemd-nspawn container timezone in OrbStack to $current_tz!"
