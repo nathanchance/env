@@ -226,13 +226,17 @@ class NspawnConfig(UserDict):
             *self._cfg_to_args(),
         ]
 
-    def _gen_run_cmd(self, cmd: str) -> lib.utils.CmdList:
-        machine_user_args: tuple[str, ...]
+    def _gen_run_cmd(self, cmd: str, user: str | None = None) -> lib.utils.CmdList:
+        machine_user_args: list[str]
+        if not user:
+            user = USER
         if self.systemd_version >= 258:  # https://github.com/systemd/systemd/issues/32997
-            # https://github.com/systemd/systemd/issues/34635#issuecomment-2394328990
-            machine_user_args = (f"{USER}@{self.name}", '--user')
+            machine_user_args = [f"{user}@{self.name}"]
+            if user != 'root':
+                # https://github.com/systemd/systemd/issues/34635#issuecomment-2394328990
+                machine_user_args.append('--user')
         else:
-            machine_user_args = (self.name, f"--uid={USER}")
+            machine_user_args = [self.name, f"--uid={USER}"]
         args: lib.utils.CmdList = [
             SYSTEMD_RUN_M,
             # Run command as our user in the container
@@ -423,8 +427,8 @@ class NspawnConfig(UserDict):
 
         lib.utils.run0(['rm', '-fr', *items_to_remove])
 
-    def run_mach_cmd(self, cmd: str) -> None:
-        lib.utils.run0(self._gen_run_cmd(cmd))
+    def run_mach_cmd(self, cmd: str, user: str | None = None) -> None:
+        lib.utils.run0(self._gen_run_cmd(cmd, user))
 
     def run_eph_cmd(self) -> None:
         lib.utils.run0(self._gen_eph_cmd())
@@ -449,6 +453,7 @@ def parse_arguments():
         default=DEF_MACH.get(platform.machine()),
         help='Name of machine (default: %(default)s)',
     )
+    parser.add_argument('-U', '--user', help=f"User to run command as (default: '{USER}')")
 
     mode_group = parser.add_mutually_exclusive_group(required=True)
     mode_group.add_argument(
@@ -499,7 +504,7 @@ def main():
     if args.reset:
         config.reset(args.reset)
     if args.run:
-        config.run_mach_cmd(args.run)
+        config.run_mach_cmd(args.run, user=args.user)
 
 
 if __name__ == '__main__':
