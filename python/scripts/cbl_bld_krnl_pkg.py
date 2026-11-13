@@ -277,7 +277,7 @@ class DebugPkgBuilder(KernelPkgBuilder):
 
     def _prepare_files(
         self, localmodconfig: bool, menuconfig: bool, extra_config_targets: list[str] | None = None
-    ):  # ty: ignore[invalid-method-override]
+    ):  # ty: ignore[incompatible-method-override]
         config = Path(self._build_folder, '.config')
         base_sc_cmd = [Path(self._source_folder, 'scripts/config'), '--file', config]
 
