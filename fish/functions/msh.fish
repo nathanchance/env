@@ -88,6 +88,9 @@ function msh -d "Shorthand for mosh -o" -w mosh
     end
     if not set -q remote_cmd
         set remote_cmd mosh
+        if command -q ghostty
+            set -a remote_cmd --ssh='ghostty +ssh --terminfo=false --'
+        end
     end
     if not set -q user_host
         set user_host $possible_user_host
