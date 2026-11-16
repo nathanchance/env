@@ -104,9 +104,8 @@ def prepare_source(base_name: str, base_ref: str = 'origin/master') -> None:
     # Patching section
     # New -Wunsequenced warnings
     patches += [
-        'https://lore.kernel.org/all/20261114-topology-wunsequenced-v1-1-686a36fe61f5@kernel.org/',  # sched/topology: Avoid unsequenced accesses to jiffies in sd_init()
+        'https://lore.kernel.org/all/20261116-topology-wunsequenced-v2-1-54611119172b@kernel.org/',  # sched/topology: Avoid unsequenced accesses to jiffies in sd_init()
         'https://lore.kernel.org/all/20261115-blk-throttle-wunsequenced-v2-1-1d297c891b82@kernel.org/',  # blk-throttle: Avoid unsequenced accesses to jiffies in throtl_schedule_pending_timer()
-        'https://lore.kernel.org/all/20261114-rcu-tree_nocb-wunsequenced-v1-1-057996a86f0e@kernel.org/',  # rcu/nocb: Avoid unsequenced accesses to jiffies in show_rcu_nocb_state()
         'https://lore.kernel.org/all/20261114-mptcp-wunsequenced-v1-1-707a73a6c172@kernel.org/',  # mptcp: Avoid unsequenced accesses to jiffies in mptcp_reset_tout_timer()
     ]
     if base_name in PACMAN_TREES:
@@ -116,6 +115,8 @@ def prepare_source(base_name: str, base_ref: str = 'origin/master') -> None:
         ]
     if base_name in NEXT_TREES:
         patches += [
+            # until -next's stable branch includes it
+            'https://git.kernel.org/torvalds/p/c3f98ff6309a29979e1867bc3c9d4172755ca122',  # rcu/nocb: Avoid unsequenced accesses to jiffies in show_rcu_nocb_state()
             'https://lore.kernel.org/all/20261115-ceph-wunsequenced-v1-1-6910c560ba9b@kernel.org/',  # libceph: Avoid unsequenced accesses to jiffies in dump_linger_request()
         ]
 
