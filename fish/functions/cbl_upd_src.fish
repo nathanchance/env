@@ -19,6 +19,11 @@ function cbl_upd_src -d "Update source trees in $CBL_SRC"
     if not set -q trees
         set trees l m n s
     end
+    if set -q mirror_ip
+        set git_mirror_args \
+            -c url."http://$mirror_ip:50000/git/".insteadOf="https://git.kernel.org/" \
+            -c url."http://$mirror_ip:50000/git/".insteadOf="https://github.com/"
+    end
 
     for value in $types
         if test "$value" = c # clean
@@ -53,7 +58,7 @@ function cbl_upd_src -d "Update source trees in $CBL_SRC"
                         __clone_repo_from_bundle (path basename $folder) $folder
                     end
 
-                    git -C $folder urh
+                    git -C $folder $git_mirror_args urh
                     or return
                 end
             end
@@ -81,7 +86,7 @@ function cbl_upd_src -d "Update source trees in $CBL_SRC"
                     if git -C $folder remote &| string match -qr origin-ssh
                         set -a remotes origin-ssh
                     end
-                    git -C $folder remote update $remotes
+                    git -C $folder $git_mirror_args remote update $remotes
                 else
                     if test "$base" = linux-stable
                         cbl_upd_stbl_wrktrs $folder
@@ -126,12 +131,12 @@ function cbl_upd_src -d "Update source trees in $CBL_SRC"
                     switch $folder
                         # These trees never rebase so we can just 'pull -r'
                         case '*'/linux '*'/linux-stable'*'
-                            $git pull -r
+                            $git $git_mirror_args pull -r
 
                         case '*'/linux-next
                             set prior_upstream ($git sha @{u})
 
-                            $git remote update --prune
+                            $git $git_mirror_args remote update --prune
                             or return
 
                             set current_upstream ($git sha @{u})
