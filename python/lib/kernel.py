@@ -115,8 +115,6 @@ def prepare_source(base_name: str, base_ref: str = 'origin/master') -> None:
         ]
     if base_name in NEXT_TREES:
         patches += [
-            # until -next's stable branch includes it
-            'https://git.kernel.org/torvalds/p/c3f98ff6309a29979e1867bc3c9d4172755ca122',  # rcu/nocb: Avoid unsequenced accesses to jiffies in show_rcu_nocb_state()
             'https://lore.kernel.org/all/20261115-ceph-wunsequenced-v1-1-6910c560ba9b@kernel.org/',  # libceph: Avoid unsequenced accesses to jiffies in dump_linger_request()
         ]
 
