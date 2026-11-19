@@ -79,6 +79,8 @@ switch $LOCATION
             fish_add_path -aP $OPT_ORB_GUEST/bin
             fish_add_path -aP $OPT_ORB_GUEST/data/bin/cmdlinks
         end
+
+        set -gx LOCAL_PACMAN_MIRROR http://(get_ip amd-desktop-8745HS):50001
 end
 
 if command -q fd

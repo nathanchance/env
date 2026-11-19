@@ -212,12 +212,20 @@ function run_mkosi -d "Run mkosi with various arguments"
     request_root "Running mkosi"
     or return
 
+    if test (__get_distro) = arch; and string match -eq $LOCAL_PACMAN_MIRROR </etc/pacman.conf
+        set host_has_local_pacman_mirror 1
+    end
+
     # Use common tools tree based on mkosi default value
     set tools_tree $env_mkosi/mkosi.tools
     if not test -e $tools_tree/etc/resolv.conf
         if test -d $OPT_ORB_GUEST
             set -a tools_mkosi_args \
                 --sandbox-tree $OPT_ORB_GUEST/etc:$OPT_ORB_GUEST/etc
+        end
+        if set -q host_has_local_pacman_mirror
+            set -a tools_mkosi_args \
+                --tools-tree-mirror $LOCAL_PACMAN_MIRROR
         end
         $mkosi_root \
             --directory $mkosi_src/mkosi/resources/mkosi-tools \
@@ -312,6 +320,10 @@ print(distribution)" | read -L image_id distribution
         string replace 'u alpm -' 'u alpm '(id -u alpm) <$src_alpm_conf >$dst_alpm_conf
 
         set -a mkosi_root_cmd --skeleton-tree (string join , $default_skeleton_dir $arch_skeleton_dir)
+
+        if set -q host_has_local_pacman_mirror
+            set -a mkosi_root_cmd --mirror $LOCAL_PACMAN_MIRROR
+        end
     end
 
     set fish_trace 1
