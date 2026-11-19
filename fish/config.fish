@@ -79,9 +79,13 @@ switch $LOCATION
             fish_add_path -aP $OPT_ORB_GUEST/bin
             fish_add_path -aP $OPT_ORB_GUEST/data/bin/cmdlinks
         end
-
-        set -gx LOCAL_PACMAN_MIRROR http://(get_ip amd-desktop-8745HS):50001
 end
+
+set -gx LOCAL_MIRROR_IP (get_ip amd-desktop-8745HS)
+set -gx LOCAL_GIT_MIRROR_ARGS \
+    -c url."http://$LOCAL_MIRROR_IP:50000/git/".insteadOf="https://git.kernel.org/" \
+    -c url."http://$LOCAL_MIRROR_IP:50000/git/".insteadOf="https://github.com/"
+set -gx LOCAL_PACMAN_MIRROR http://$LOCAL_MIRROR_IP:50001
 
 if command -q fd
     set -gx FZF_DEFAULT_COMMAND "fd --type file --follow --hidden --exclude .git --color always"

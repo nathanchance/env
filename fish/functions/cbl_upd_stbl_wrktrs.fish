@@ -3,10 +3,8 @@
 # Copyright (C) 2021-2023 Nathan Chancellor
 
 function cbl_upd_stbl_wrktrs -d "Update the worktrees for linux-stable"
-    if set -q mirror_ip
-        set git_mirror_args \
-            -c url."http://$mirror_ip:50000/git/".insteadOf="https://git.kernel.org/" \
-            -c url."http://$mirror_ip:50000/git/".insteadOf="https://github.com/"
+    if set -q use_mirror
+        set git_mirror_args $LOCAL_GIT_MIRROR_ARGS
     end
 
     for folder in $argv

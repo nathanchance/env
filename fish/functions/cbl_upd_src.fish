@@ -19,10 +19,8 @@ function cbl_upd_src -d "Update source trees in $CBL_SRC"
     if not set -q trees
         set trees l m n s
     end
-    if set -q mirror_ip
-        set git_mirror_args \
-            -c url."http://$mirror_ip:50000/git/".insteadOf="https://git.kernel.org/" \
-            -c url."http://$mirror_ip:50000/git/".insteadOf="https://github.com/"
+    if set -q use_mirror
+        set git_mirror_args $LOCAL_GIT_MIRROR_ARGS
     end
 
     for value in $types
