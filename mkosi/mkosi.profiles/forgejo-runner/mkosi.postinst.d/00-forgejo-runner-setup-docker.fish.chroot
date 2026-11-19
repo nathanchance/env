@@ -1,7 +1,18 @@
 #!/usr/bin/env fish
 
 # Install Docker using the latest Fedora release a base
-if not set fedora_ver (python3 -c "import requests; print(max({int(item['version']) for item in requests.get('https://fedoraproject.org/releases.json').json()}))")
+if not set fedora_ver (python3 -c "import requests
+
+print(
+    max(
+        {
+            int(item['version'])
+            for item
+            in requests.get('https://fedoraproject.org/releases.json').json()
+            if 'Beta' not in item['version']
+        }
+    )
+)")
     return 1
 end
 dnf install \
