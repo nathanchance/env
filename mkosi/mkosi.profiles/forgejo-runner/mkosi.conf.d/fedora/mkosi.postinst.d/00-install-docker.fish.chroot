@@ -24,5 +24,3 @@ dnf install \
     docker-ce-cli \
     docker-compose-plugin
 or return
-
-usermod -aG docker forgejo-runner
