@@ -105,26 +105,18 @@ def prepare_source(base_name: str, base_ref: str = 'origin/master') -> None:
     # New -Wunsequenced warnings
     patches += [
         'https://lore.kernel.org/all/20261116-topology-wunsequenced-v2-1-54611119172b@kernel.org/',  # sched/topology: Avoid unsequenced accesses to jiffies in sd_init()
-        'https://lore.kernel.org/all/20261115-blk-throttle-wunsequenced-v2-1-1d297c891b82@kernel.org/',  # blk-throttle: Avoid unsequenced accesses to jiffies in throtl_schedule_pending_timer()
-        'https://lore.kernel.org/all/20261114-mptcp-wunsequenced-v1-1-707a73a6c172@kernel.org/',  # mptcp: Avoid unsequenced accesses to jiffies in mptcp_reset_tout_timer()
     ]
+    if base_name == 'linux-mainline-llvm':
+        patches += [
+            'https://git.kernel.org/axboe/p/ae1171f38098098e88c13c38e462d27babb50038',  # blk-throttle: Avoid unsequenced accesses to jiffies in throtl_schedule_pending_timer()
+        ]
     if base_name in PACMAN_TREES:
         patches += [
-            'https://lore.kernel.org/all/20261114-floppy-wunsequenced-v1-1-a54dba6754c4@kernel.org/',  # floppy: Avoid unsequenced accesses to jiffies in show_floppy()
-            'https://lore.kernel.org/all/20261114-encx24j600-wunsequenced-v1-1-c978fc36cacd@kernel.org/',  # net: microchip: encx24j600: Avoid unsequenced accesses to jiffies in encx24j600_tx()
+            'https://github.com/evdenis/linux/commit/c1a8feb71ba8613108b212c705a48e0e136d8c3a.patch',  # floppy: Avoid unsequenced accesses to jiffies in show_floppy()
         ]
     if base_name in NEXT_TREES:
         patches += [
             'https://lore.kernel.org/all/20261115-ceph-wunsequenced-v1-1-6910c560ba9b@kernel.org/',  # libceph: Avoid unsequenced accesses to jiffies in dump_linger_request()
-        ]
-
-    if base_name == 'fedora':
-        patches += [
-            # https://github.com/ClangBuiltLinux/linux/issues/2185
-            'https://lore.kernel.org/all/20261029135020.272082-7-ardb+git@google.com/',  # lib/crc: Don't include <linux/types.h> in NEON intrinsics code
-            'https://lore.kernel.org/all/20261029135020.272082-8-ardb+git@google.com/',  # xor: arm/arm64: Move NEON xor_gen() dispatch into the glue code
-            'https://lore.kernel.org/all/20261029135020.272082-9-ardb+git@google.com/',  # arm64: Drop stdint.h type overrides from asm/neon-intrinsics.h
-            'https://lore.kernel.org/all/20261029135020.272082-10-ardb+git@google.com/',  # ARM: Drop stdint.h type overrides from asm/neon-intrinsics.h
         ]
 
     if base_name in PACMAN_TREES:
