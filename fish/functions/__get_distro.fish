@@ -11,8 +11,10 @@ function __get_distro -d "Prints a short name for the currently running distro"
         end
         set os_release_id (string match -gr '^ID="?([^"]+)"?$' </etc/os-release)
         switch "$os_release_id"
-            case almalinux alpine arch debian fedora rocky ubuntu
+            case almalinux alpine arch debian rocky ubuntu
                 echo $os_release_id
+            case fedora'*'
+                echo fedora
             case opensuse-'*'
                 echo opensuse
             case raspbian
