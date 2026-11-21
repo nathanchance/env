@@ -23,7 +23,7 @@ def setup_git_mirror():
         for repo in repos:
             if (local_repo := Path(GIT_DATA_DIR, f"{repo}.git")).exists():
                 print(f"[+] Running grok-dumb-pull on {local_repo}")
-                subprocess.run(['grok-dumb-pull', local_repo], check=True)
+                subprocess.run(['grok-dumb-pull', '-v', local_repo], check=True)
             else:
                 upstream_url = f"https://{host}/{repo}.git"
                 print(f"[+] Cloning {upstream_url} into {local_repo}")
