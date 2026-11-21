@@ -1,0 +1,12 @@
+[Unit]
+Description=Grok-dumb-pull service for %f
+After=network.target
+Documentation=https://github.com/mricon/grokmirror
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/grok-dumb-pull -v %f
+User=nginx
+
+[Install]
+WantedBy=multi-user.target

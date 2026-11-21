@@ -1,0 +1,6 @@
+enable every-5-minutes@.timer grok-dumb-pull@srv-mirror-git-llvm-llvm\x2dproject.git
+enable daily@.timer paccache@srv-mirror-http-pacman\x2dcache
+enable fcgiwrap@.socket nginx
+enable grok-fsck@.timer grokmirror
+enable grok-pull@.service grokmirror
+enable nginx.service

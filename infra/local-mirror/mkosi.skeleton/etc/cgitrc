@@ -1,0 +1,15 @@
+cache-size=1000
+css=/cgit/cgit.css
+favicon=/cgit/favicon.ico
+js=/cgit/cgit.js
+logo=/cgit/cgit.png
+mimetype.gif=image/gif
+mimetype.html=text/html
+mimetype.jpg=image/jpeg
+mimetype.jpeg=image/jpeg
+mimetype.pdf=application/pdf
+mimetype.png=image/png
+mimetype.svg=image/svg+xml
+scan-path=/srv/mirror/git
+source-filter=/usr/libexec/cgit/filters/syntax-highlighting.py
+virtual-root=/cgit

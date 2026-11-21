@@ -1,0 +1,17 @@
+[Unit]
+Description=Grok-pull service for %I
+After=network.target
+Documentation=https://github.com/mricon/grokmirror
+
+[Service]
+Environment="EXTRA_PULL_OPTS="
+EnvironmentFile=-/etc/default/grokmirror
+EnvironmentFile=-/etc/default/grokmirror.%i
+ExecStart=/usr/bin/grok-pull -o -c /etc/grokmirror/%i.conf $EXTRA_PULL_OPTS
+Type=simple
+Restart=on-failure
+User=nginx
+Group=nginx
+
+[Install]
+WantedBy=multi-user.target

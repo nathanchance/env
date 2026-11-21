@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+
+set -ex
+
+src=$BUILDDIR/grokmirror
+if [[ ! -d $src ]]; then
+    git clone https://git.kernel.org/pub/scm/utils/grokmirror/grokmirror.git/ "$src"
+fi
+cd "$src"
+
+git pull
+
+git clean -fxdq
+
+python3 -m build --wheel --no-isolation
+
+python3 -m installer --destdir="$DESTDIR" --prefix=/usr dist/*.whl

@@ -1,0 +1,25 @@
+#!/usr/bin/env bash
+
+set -ex
+
+src=$BUILDDIR/pacman-contrib
+if [[ ! -d $src ]]; then
+    git clone https://gitlab.archlinux.org/pacman/pacman-contrib.git "$src"
+fi
+cd "$src"
+
+git pull
+
+git clean -fxdq
+
+./autogen.sh
+
+./configure --prefix=/usr \
+            --sysconfdir=/etc \
+            --localstatedir=/var
+
+make=(make -j"$(nproc)")
+
+"${make[@]}"
+"${make[@]}" check
+"${make[@]}" install DESTDIR="$DESTDIR"

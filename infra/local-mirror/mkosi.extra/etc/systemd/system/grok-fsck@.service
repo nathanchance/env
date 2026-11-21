@@ -1,0 +1,13 @@
+[Unit]
+Description=Grok-fsck service for %I
+Documentation=https://github.com/mricon/grokmirror
+
+[Service]
+Type=oneshot
+Environment="EXTRA_FSCK_OPTS="
+EnvironmentFile=-/etc/default/grokmirror
+EnvironmentFile=-/etc/default/grokmirror.%i
+ExecStart=/usr/bin/grok-fsck -c /etc/grokmirror/%i.conf $EXTRA_FSCK_OPTS
+CPUSchedulingPolicy=batch
+User=nginx
+Group=nginx
