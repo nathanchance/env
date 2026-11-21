@@ -1,5 +1,10 @@
 #!/usr/bin/env fish
 
+if test "$DISTRIBUTION" != fedora
+    echo "[+] Only relevant for Fedora, skipping..."
+    return 0
+end
+
 # Install Docker using the latest Fedora release a base
 if not set fedora_ver (python3 -c "import requests
 
