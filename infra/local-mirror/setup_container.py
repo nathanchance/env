@@ -6,7 +6,7 @@ from pathlib import Path
 GIT_DATA_DIR = Path('/srv/mirror/git')
 
 
-def setup_grokmirror():
+def setup_git_mirror():
     print('[+] Running systemd-tmpfiles')
     subprocess.run(['systemd-tmpfiles', '--create', '/etc/tmpfiles.d/00-mirror.conf'], check=True)
 
@@ -27,11 +27,18 @@ def setup_grokmirror():
             else:
                 upstream_url = f"https://{host}/{repo}.git"
                 print(f"[+] Cloning {upstream_url} into {local_repo}")
-                subprocess.run(['git', 'clone', '--mirror', upstream_url, local_repo], check=True)
+                git_clone_cmd = ['git', 'clone', '--mirror']
+                if 'llvm-project' in repo:
+                    # these are all temporary refs, there is no need to mirror them
+                    excluded_refs = ('heads/users/', 'heads/revert-', 'pull/')
+                    git_clone_cmd += [
+                        f"--config=remote.origin.fetch=^refs/{ref}*" for ref in excluded_refs
+                    ]
+                subprocess.run([*git_clone_cmd, upstream_url, local_repo], check=True)
 
 
 def main():
-    setup_grokmirror()
+    setup_git_mirror()
 
     print('[+] Validating nginx configuration')
     subprocess.run(['nginx', '-t'], check=True)
