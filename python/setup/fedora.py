@@ -2,9 +2,11 @@
 # SPDX-License-Identifier: MIT
 # Copyright (C) 2022-2023 Nathan Chancellor
 
+import json
 import re
 import shutil
 import sys
+from argparse import ArgumentParser
 from pathlib import Path
 
 sys.path.append(str(Path(__file__).resolve().parents[1]))
@@ -238,6 +240,41 @@ def setup_libvirt(username: str) -> None:
     lib.setup.setup_libvirt(username)
 
 
+def setup_local_rpm_mirror(recreate=False) -> None:
+    if (override_repo := Path('/etc/dnf/repos.override.d/00-local-mirror.repo')).exists():
+        if recreate:
+            override_repo.unlink()
+        else:
+            lib.utils.print_yellow(f"[+] {override_repo} already exists, skipping...")
+            return
+
+    repoinfo_json = json.loads(
+        lib.utils.chronic(['dnf', '-qy', 'repoinfo', '--json', 'fedora*']).stdout
+    )
+    repos = [
+        item['id'] for item in repoinfo_json if 'cisco' not in item['id'] and not item['base_url']
+    ]
+
+    repo_urls = {
+        'fedora': 'releases/$releasever/Everything/$basearch/os',
+        'rawhide': 'development/rawhide/Everything/$basearch/os',
+        'updates': 'updates/$releasever/Everything/$basearch',
+    }
+
+    override_parts = []
+    for repo in repos:
+        if not (baseurl := repo_urls.get(repo)):
+            msg = f"Cannot handle mirroring repository ('{repo}')!"
+            raise RuntimeError(msg)
+        override_parts.append(f"""\
+[{repo}]
+baseurl=http://{lib.utils.LOCAL_MIRROR_IP}:50002/linux/{baseurl}/
+metalink=""")
+
+    override_repo.parent.mkdir(exist_ok=True, parents=True)
+    override_repo.write_text('\n'.join(override_parts) + '\n', encoding='utf-8')
+
+
 def setup_modprobe_d() -> None:
     if not machine_is_apple_silicon:
         return
@@ -264,11 +301,24 @@ def setup_repos() -> None:
         dnf_add_repo('https://pkgs.tailscale.com/stable/fedora/tailscale.repo')
 
 
+def parse_arguments():
+    parser = ArgumentParser(description='Set up a Fedora installation')
+
+    parser.add_argument(
+        '-l', '--local-mirror', action='store_true', help='Set up and use local mirror for packages'
+    )
+
+    return parser.parse_args()
+
+
 if __name__ == '__main__':
     user = lib.setup.get_user()
+    args = parse_arguments()
 
     prechecks()
     resize_rootfs()
+    if args.local_mirror:
+        setup_local_rpm_mirror()
     install_initial_packages()
     setup_repos()
     install_packages()

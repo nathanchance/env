@@ -186,7 +186,8 @@ function run_mkosi -d "Run mkosi with various arguments"
     if not test -d $mkosi_cache
         mkdir -p $mkosi_cache
     end
-    switch (path basename $directory)
+    set base_directory (path basename $directory)
+    switch $base_directory
         case env
             switch $distro
                 case arch
@@ -203,7 +204,7 @@ function run_mkosi -d "Run mkosi with various arguments"
         case pgo-llvm-builder
             set cache_dir apt
             set -a mkosi_args --environment PYTHON_PGO_BUILDER_UID=(id -u)
-        case '*'fedora'*'
+        case '*'fedora'*' local-mirror
             set cache_dir dnf
         case '*'
             set cache_dir generic
@@ -214,8 +215,15 @@ function run_mkosi -d "Run mkosi with various arguments"
 
     set host_distro (__get_distro)
 
-    if test $host_distro = arch; and string match -eq $LOCAL_PACMAN_MIRROR </etc/pacman.conf
-        set host_has_local_pacman_mirror 1
+    if test "$base_directory" != local-mirror
+        if test $host_distro = arch; and string match -eq $LOCAL_PACMAN_MIRROR </etc/pacman.conf
+            set host_has_access_to_mirror 1
+            set tools_tree_mirror $LOCAL_PACMAN_MIRROR
+        end
+        if test $host_distro = fedora; and test -f /etc/dnf/repos.override.d/00-local-mirror.repo
+            set host_has_access_to_mirror 1
+            set tools_tree_mirror $LOCAL_FEDORA_MIRROR
+        end
     end
 
     # Use common tools tree based on mkosi default value
@@ -225,9 +233,9 @@ function run_mkosi -d "Run mkosi with various arguments"
             set -a tools_mkosi_args \
                 --sandbox-tree $OPT_ORB_GUEST/etc:$OPT_ORB_GUEST/etc
         end
-        if set -q host_has_local_pacman_mirror
+        if set -q tools_tree_mirror
             set -a tools_mkosi_args \
-                --tools-tree-mirror $LOCAL_PACMAN_MIRROR
+                --tools-tree-mirror $local_mirror
         end
         $mkosi_root \
             --directory $mkosi_src/mkosi/resources/mkosi-tools \
@@ -322,9 +330,14 @@ print(distribution)" | read -L image_id distribution
         string replace 'u alpm -' 'u alpm '(id -u alpm) <$src_alpm_conf >$dst_alpm_conf
 
         set -a mkosi_root_cmd --skeleton-tree (string join , $default_skeleton_dir $arch_skeleton_dir)
-
-        if set -q host_has_local_pacman_mirror
-            set -a mkosi_root_cmd --mirror $LOCAL_PACMAN_MIRROR
+    end
+    if set -q host_has_access_to_mirror
+        set -a mkosi_root_cmd --mirror
+        switch $distribution
+            case arch
+                set -a mkosi_root_cmd $LOCAL_PACMAN_MIRROR
+            case fedora
+                set -a mkosi_root_cmd $LOCAL_FEDORA_MIRROR
         end
     end
 
