@@ -18,7 +18,7 @@ import lib.setup
 import lib.utils
 
 EDID_1280_1024 = b'BAAAACAAAAAFAAAAR05VAAIAAcAEAAAAAAAAAAAAAAABAAHABAAAAAEAAAAAAAAAAQEBAQEBMCoAmFEAKkAwcBMAvGMRAAAeAAAA/wBMaW51eCAjMAogICAgAAAA/QA7PT5ACwAKICAgICAgAAAA/ABMaW51eCBTWEdBCiAgAC4='
-LOCAL_MIRROR = f"http://{lib.setup.get_static_ip('beelink-amd-ryzen-8745HS')}:50001/$repo/os/$arch"
+LOCAL_MIRROR = f"http://{lib.utils.LOCAL_MIRROR_IP}:50001/$repo/os/$arch"
 HETZNER_MIRROR = 'https://mirror.hetzner.com/archlinux/$repo/os/$arch'
 PACMAN_CONF = Path('/etc/pacman.conf')
 

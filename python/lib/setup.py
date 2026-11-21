@@ -188,7 +188,7 @@ def clone_env(username: str) -> None:
 
 
 def configure_trusted_networking() -> None:
-    if not (requested_ip := get_static_ip(hostname := lib.utils.get_hostname())):
+    if not (requested_ip := lib.utils.get_static_ip(hostname := lib.utils.get_hostname())):
         return
     # Validate that the supplied IP address is valid
     check_ip(requested_ip)
@@ -304,22 +304,6 @@ def get_ip_addr_for_intf(intf: str) -> str | None:
             break
     check_ip(ip_addr)
     return ip_addr
-
-
-def get_static_ip(host: str) -> str | None:
-    static_ips: dict[str, str] = {
-        'aadp': '10.0.1.2',
-        'asus-intel-core-11700': '10.0.1.5',
-        'beelink-amd-ryzen-8745HS': '10.0.1.8',
-        'beelink-intel-n100': '10.0.1.11',
-        'chromebox3': '10.0.1.14',
-        'framework-amd-ryzen-maxplus-395': '10.0.1.23',
-        'honeycomb': '10.0.1.17',
-        'mac-studio-m1-max': '10.0.1.33',
-        'msi-intel-core-10210U': '10.0.1.20',
-        # 'thelio-3990X': '',
-    }
-    return static_ips.get(host)
 
 
 def get_udevadm_properties(sysfs_path: str) -> dict[str, str]:

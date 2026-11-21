@@ -191,6 +191,22 @@ def get_os_rel() -> dict[str, str]:
     )
 
 
+def get_static_ip(host: str) -> str | None:
+    static_ips: dict[str, str] = {
+        'aadp': '10.0.1.2',
+        'asus-intel-core-11700': '10.0.1.5',
+        'beelink-amd-ryzen-8745HS': '10.0.1.8',
+        'beelink-intel-n100': '10.0.1.11',
+        'chromebox3': '10.0.1.14',
+        'framework-amd-ryzen-maxplus-395': '10.0.1.23',
+        'honeycomb': '10.0.1.17',
+        'mac-studio-m1-max': '10.0.1.33',
+        'msi-intel-core-10210U': '10.0.1.20',
+        # 'thelio-3990X': '',
+    }
+    return static_ips.get(host)
+
+
 def get_systemd_nspawn_version(required: bool = False) -> int:
     if not bool(shutil.which('systemd-nspawn')) and not required:
         return 0
@@ -374,3 +390,6 @@ def wget(item_to_download, output=None) -> bytes:
         item_to_download,
     ]
     return chronic(wget_cmd, text=None).stdout
+
+
+LOCAL_MIRROR_IP = get_static_ip('beelink-amd-ryzen-8745HS')
