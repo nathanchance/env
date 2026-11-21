@@ -212,7 +212,9 @@ function run_mkosi -d "Run mkosi with various arguments"
     request_root "Running mkosi"
     or return
 
-    if test (__get_distro) = arch; and string match -eq $LOCAL_PACMAN_MIRROR </etc/pacman.conf
+    set host_distro (__get_distro)
+
+    if test $host_distro = arch; and string match -eq $LOCAL_PACMAN_MIRROR </etc/pacman.conf
         set host_has_local_pacman_mirror 1
     end
 
@@ -306,7 +308,7 @@ print(distribution)" | read -L image_id distribution
     # If running Arch on Arch, we need the alpm system user to have the same
     # UID as the one on the host to ensure idmapping works. Do this with a
     # sysusers.d override via a skeleton tree.
-    if test (__get_distro) = arch; and test "$distribution" = arch
+    if test $host_distro = arch; and test "$distribution" = arch
         if test -e $directory/mkosi.skeleton
             set default_skeleton_dir $directory/mkosi.skeleton
         end
