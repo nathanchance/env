@@ -144,12 +144,17 @@ def download_items(targets: list[str], network_folder: Path) -> None:
                 'linux-stable': 'https://git.kernel.org/pub/scm/linux/kernel/git/stable/linux.git/',
                 'llvm-project': 'https://github.com/llvm/llvm-project',
             }
+            git_mirror_args = lib.utils.get_git_mirror_args()
             for repo_name, repo_url in repos.items():
                 # Download and update repo
                 if not (repo_path := Path(os.environ['CBL_SRC_M'], repo_name)).exists():
                     repo_path.parent.mkdir(exist_ok=True, parents=True)
-                    lib.utils.call_git_loud(None, ['clone', '--mirror', repo_url, repo_path])
-                lib.utils.call_git_loud(repo_path, ['remote', 'update', '--prune'])
+                    lib.utils.call_git_loud(
+                        None, [*git_mirror_args, 'clone', '--mirror', repo_url, repo_path]
+                    )
+                lib.utils.call_git_loud(
+                    repo_path, [*git_mirror_args, 'remote', 'update', '--prune']
+                )
                 # Create bundles
                 repo_bundle = Path(bundles_folder, f"{repo_name}.bundle")
                 repo_bundle.unlink(missing_ok=True)

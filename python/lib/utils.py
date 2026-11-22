@@ -166,6 +166,18 @@ def get_hostname() -> str:
     return socket.gethostname()
 
 
+def get_git_mirror_args() -> list[str]:
+    mirrored_hosts = ('git.kernel.org', 'github.com')
+    mirror_args = []
+    if local_mirror_is_available():
+        for mirrored_host in mirrored_hosts:
+            mirror_args += [
+                '-c',
+                f"url.http://{LOCAL_MIRROR_IP}:50000/git/.insteadOf=https://{mirrored_host}/",
+            ]
+    return mirror_args
+
+
 def get_git_output(directory: Path | None, cmd: ValidCmd, **kwargs):
     return call_git(directory, cmd, **kwargs).stdout.rstrip()
 
@@ -242,6 +254,12 @@ def in_nspawn() -> bool:
     # An nspawn container has to have systemd-detect-virt but this may not
     # always run where systemd-detect-virt exists.
     return shutil.which('systemd-detect-virt') is not None and detect_virt('-c') == 'systemd-nspawn'
+
+
+def local_mirror_is_available() -> bool:
+    if not LOCAL_MIRROR_IP:
+        return False
+    return chronic(['ping', '-c1', '-w3', LOCAL_MIRROR_IP], check=False).returncode == 0
 
 
 def path_and_text(*args) -> tuple[Path, str]:
