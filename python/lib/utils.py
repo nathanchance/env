@@ -191,7 +191,7 @@ def get_os_rel() -> dict[str, str]:
     )
 
 
-def get_static_ip(host: str) -> str | None:
+def get_static_ip(host: str) -> str:
     static_ips: dict[str, str] = {
         'aadp': '10.0.1.2',
         'asus-intel-core-11700': '10.0.1.5',
@@ -204,7 +204,7 @@ def get_static_ip(host: str) -> str | None:
         'msi-intel-core-10210U': '10.0.1.20',
         # 'thelio-3990X': '',
     }
-    return static_ips.get(host)
+    return static_ips.get(host, '')
 
 
 def get_systemd_nspawn_version(required: bool = False) -> int:
