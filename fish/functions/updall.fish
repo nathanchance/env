@@ -15,7 +15,6 @@ function updall -d "Update binaries in $BIN_FOLDER"
     end
 
     set -a targets \
-        b4 \
         bat \
         btop \
         diskus \
