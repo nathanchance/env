@@ -1,10 +1,8 @@
 session_name: main
 windows:
-- window_name: btop and host shell
-  layout: 0d09,269x53,0,0[269x36,0,0,15,269x16,0,37,17]
+- window_name: btop
   panes:
-  - shell: btop
-  -
+  - btop
 - window_name: nspawn
   focus: true
   panes:
