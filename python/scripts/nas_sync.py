@@ -133,6 +133,10 @@ def download_items(targets: list[str], network_folder: Path) -> None:
             items.append(item)
 
         elif target == 'bundles':
+            if 'IN_SYSTEMD' in os.environ and lib.utils.in_container():
+                print('[+] Running within systemd in container, skipping generating bundles...')
+                continue
+
             repos: dict[str, str] = {
                 'binutils': 'https://sourceware.org/git/binutils-gdb.git',
                 'linux': 'https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/',

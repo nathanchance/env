@@ -2,6 +2,7 @@
 Description=Generate git bundles on NAS
 
 [Service]
+Environment=IN_SYSTEMD=1
 ExecStart=:/bin/sh -c '$PYTHON_SCRIPTS_FOLDER/nas_sync.py -t bundles'
 
 [Install]
