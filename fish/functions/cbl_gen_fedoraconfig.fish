@@ -82,6 +82,18 @@ function cbl_gen_fedoraconfig -d "Downloads and modifies Fedora's kernel configu
             end
             set -a scripts_config_args -d $val
         end
+        # Disable CONFIG_ATH12K_AHB, as it results in
+        #
+        #   CONFIG_QCOM_SCM=m
+        #   CONFIG_QCOM_TZMEM=m
+        #   CONFIG_QCOM_TZMEM_MODE_SHMBRIDGE=y
+        #
+        # which can break the build/install after
+        #
+        #   50508d3e0abd ("firmware: qcom: scm: Hide QCOM_SCM instead of depending on ARCH_QCOM")
+        #
+        # https://lore.kernel.org/20261122051636.GA2630332@ax162/
+        set -a scripts_config_args -d ATH12K_AHB
     end
 
     # Handle https://git.kernel.org/next/linux-next/c/e3ec97c3abaf2fb68cc755cae3229288696b9f3d
