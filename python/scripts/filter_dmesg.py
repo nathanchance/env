@@ -154,6 +154,7 @@ ALLOWLIST = {
         'i8042 i8042: probe with driver i8042 failed with error -5',
         # Don't care, I don't use Bluetooth on this machine
         r"Bluetooth: hci0: HCI Enhanced Setup Synchronous Connection command is advertised, but not supported\.",
+        r"btusb [0-9:.-]+: failed to enumerate endpoints",
         # This is expected: https://git.kernel.org/next/linux-next/c/36e258fc97772e1869c07b5f823061654288db51
         r"\[Firmware Bug\]: disabling VPD access \(can't determine size of non\-standard VPD format\)",
     ],
