@@ -235,7 +235,7 @@ function run_mkosi -d "Run mkosi with various arguments"
         end
         if set -q tools_tree_mirror
             set -a tools_mkosi_args \
-                --tools-tree-mirror $local_mirror
+                --tools-tree-mirror $tools_tree_mirror
         end
         $mkosi_root \
             --directory $mkosi_src/mkosi/resources/mkosi-tools \
