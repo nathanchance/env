@@ -6,5 +6,5 @@ function virsh_ssh -d "ssh into libvirt domain"
     set domain $argv[1]
     set cmd_to_run $argv[2..]
 
-    ssh -t root@(virsh_get_dom_ip $domain) $cmd_to_run
+    ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -t root@(virsh_get_dom_ip $domain) $cmd_to_run
 end
