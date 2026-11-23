@@ -1,0 +1,9 @@
+[Unit]
+Description=Enable linger for %i
+
+[Service]
+Type=oneshot
+ExecStart=-/usr/bin/loginctl enable-linger %i
+
+[Install]
+WantedBy=multi-user.target

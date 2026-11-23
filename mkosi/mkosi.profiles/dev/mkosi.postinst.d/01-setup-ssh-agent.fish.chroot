@@ -14,4 +14,12 @@ if test -e $ssh_agent_socket
         echo "$ssh_agent_preset produced no diff?"
         return 1
     end
+
+    set user_linger_preset /etc/systemd/system-preset/00-user-linger.preset
+    echo 'enable enable-linger@.service nathan' >$user_linger_preset
+
+    if git --no-pager diff --no-index /dev/null $user_linger_preset
+        echo "$user_linger_preset produced no diff?"
+        return 1
+    end
 end
