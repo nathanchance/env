@@ -3,7 +3,7 @@
 # Copyright (C) 2021-2023 Nathan Chancellor
 
 function cbl_upd_stbl_wrktrs -d "Update the worktrees for linux-stable"
-    if set -q use_mirror
+    if __local_mirror_is_available
         set git_mirror_args $LOCAL_GIT_MIRROR_ARGS
     end
 

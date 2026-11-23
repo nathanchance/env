@@ -8,7 +8,7 @@ function __clone_repo_from_bundle -d "Clone repo using a clone bundle if possibl
         __print_error "$(status function) <repo> <dest> (<existing_bundle>)"
         return 1
     end
-    if set -q use_mirror
+    if __local_mirror_is_available
         set git_mirror_args $LOCAL_GIT_MIRROR_ARGS
     end
 

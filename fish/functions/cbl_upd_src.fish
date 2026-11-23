@@ -19,7 +19,7 @@ function cbl_upd_src -d "Update source trees in $CBL_SRC"
     if not set -q trees
         set trees l m n s
     end
-    if set -q use_mirror
+    if __local_mirror_is_available
         set git_mirror_args $LOCAL_GIT_MIRROR_ARGS
     end
 
