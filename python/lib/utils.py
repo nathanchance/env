@@ -47,6 +47,10 @@ class MakeVars(TypedDict, total=False):
     RPMOPTS: str
 
 
+def address_is_reachable(addr: str) -> bool:
+    return chronic(['ping', '-c1', '-w3', addr], check=False).returncode == 0
+
+
 def call_git(directory: Path | None, cmd: ValidCmd, **kwargs) -> subprocess.CompletedProcess:
     kwargs.setdefault('cwd', directory)
 
@@ -257,9 +261,7 @@ def in_nspawn() -> bool:
 
 
 def local_mirror_is_available() -> bool:
-    if not LOCAL_MIRROR_IP:
-        return False
-    return chronic(['ping', '-c1', '-w3', LOCAL_MIRROR_IP], check=False).returncode == 0
+    return bool(LOCAL_MIRROR_IP) and address_is_reachable(LOCAL_MIRROR_IP)
 
 
 def path_and_text(*args) -> tuple[Path, str]:
