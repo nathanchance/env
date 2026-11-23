@@ -261,6 +261,8 @@ def in_nspawn() -> bool:
 
 
 def local_mirror_is_available() -> bool:
+    if val := os.environ.get('LOCAL_MIRROR'):
+        return val in {'1', 'true', 'yes', 'y'}
     return bool(LOCAL_MIRROR_IP) and address_is_reachable(LOCAL_MIRROR_IP)
 
 
