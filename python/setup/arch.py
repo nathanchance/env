@@ -18,9 +18,11 @@ import lib.setup
 import lib.utils
 
 EDID_1280_1024 = b'BAAAACAAAAAFAAAAR05VAAIAAcAEAAAAAAAAAAAAAAABAAHABAAAAAEAAAAAAAAAAQEBAQEBMCoAmFEAKkAwcBMAvGMRAAAeAAAA/wBMaW51eCAjMAogICAgAAAA/QA7PT5ACwAKICAgICAgAAAA/ABMaW51eCBTWEdBCiAgAC4='
-LOCAL_MIRROR = f"http://{lib.utils.LOCAL_MIRROR_IP}:50001/$repo/os/$arch"
-HETZNER_MIRROR = 'https://mirror.hetzner.com/archlinux/$repo/os/$arch'
+LOCAL_MIRROR_REPO = f"http://{lib.utils.LOCAL_MIRROR_IP}:50001/$repo/os/$arch"
+HETZNER_MIRROR = 'mirror.hetzner.com'
+HETZNER_MIRROR_REPO = f"https://{HETZNER_MIRROR}/archlinux/$repo/os/$arch"
 PACMAN_CONF = Path('/etc/pacman.conf')
+PACMAN_MIRRORLIST = Path('/etc/pacman.d/mirrorlist')
 
 cpu_vendor: str | None = None
 if (proc_cpuinfo := Path('/proc/cpuinfo')).exists():
@@ -94,23 +96,19 @@ class MkinitcpioConf(UserDict):
             lib.utils.run(['mkinitcpio', '-P'])
 
 
-def add_hetzner_mirror_to_repos(config: str) -> str:
-    if HETZNER_MIRROR in config:
-        return config
+def setup_mirrorlist() -> None:
+    # Hetzner's mirror is internal to its network so if we can reach it, use it.
+    if lib.utils.address_is_reachable(HETZNER_MIRROR):
+        lib.utils.print_green('[+] Using internal Hetzner mirror')
+        server = HETZNER_MIRROR_REPO
+    elif lib.utils.local_mirror_is_available():
+        lib.utils.print_green('[+] Using local mirror')
+        server = LOCAL_MIRROR_REPO
+    else:
+        lib.utils.print_yellow('[-] No mirrors available, skipping mirrorlist setup...')
+        return
 
-    search = ']\nInclude = /etc/pacman.d/mirrorlist\n'
-    replace = search.replace(']\n', f"]\nServer = {HETZNER_MIRROR}\n")
-    return config.replace(search, replace)
-
-
-def add_local_mirror_to_repos(config: str) -> str:
-    if LOCAL_MIRROR in config:
-        return config
-
-    search = ']\nInclude = /etc/pacman.d/mirrorlist\n'
-    # Exclude mirrorlist when using local mirror to ensure requests are always proxied
-    replace = search.replace(']\n', f"]\nServer = {LOCAL_MIRROR}\n#")
-    return config.replace(search, replace)
+    PACMAN_MIRRORLIST.write_text(f"Server = {server}\n", encoding='utf-8')
 
 
 def adjust_esp_mountpoint(fstab: lib.setup.Fstab, dryrun: bool = False) -> None:
@@ -281,19 +279,14 @@ def convert_boot_to_xbootldr(fstab: lib.setup.Fstab, dryrun: bool) -> None:
 
 
 def enable_reflector() -> None:
-    if not lib.setup.is_installed('reflector'):
+    if not lib.setup.is_installed('reflector') or has_custom_mirror():
         return
-    if has_local_mirror():
-        return
-
-    # If on a Hetzner server, we should use a closer set of mirrors
-    countries = 'Finland,Germany' if is_hetzner() else 'United States'
 
     reflector_args = [
-        f'--country "{countries}"',
+        '--country "United Status"',
         '--latest 15',
         '--protocol https',
-        '--save /etc/pacman.d/mirrorlist',
+        f"--save {PACMAN_MIRRORLIST}",
         '--sort rate',
     ]  # fmt: off
     conf_text = '\n'.join(reflector_args) + '\n'
@@ -348,12 +341,15 @@ def get_cmdline_additions() -> CmdlineOptions:
     return options
 
 
-def has_local_mirror() -> bool:
-    # While this lives in arch.py because that is the only place within setup
-    # where it is relevant, it might be called on any platform from fish, so
-    # ensure it works when /etc/pacman.conf does not exists.
-    # pacman_settings() ensures that LOCAL_MIRROR is a permanent addition.
-    return PACMAN_CONF.exists() and LOCAL_MIRROR in PACMAN_CONF.read_text(encoding='utf-8')
+def get_pacman_mirrorlist() -> str:
+    if not PACMAN_MIRRORLIST.exists():
+        return ''
+    return PACMAN_MIRRORLIST.read_text(encoding='utf-8')
+
+
+def has_custom_mirror() -> bool:
+    mirrorlist_text = get_pacman_mirrorlist()
+    return LOCAL_MIRROR_REPO in mirrorlist_text or HETZNER_MIRROR_REPO in mirrorlist_text
 
 
 def installimage_adjustments(
@@ -364,7 +360,7 @@ def installimage_adjustments(
     # than sorry.
     if not (is_hetzner() or dryrun):
         lib.utils.print_yellow(
-            'Running installimage_adjustments() requires a Hetzner machine, skipping...'
+            '[-] Running installimage_adjustments() requires a Hetzner machine, skipping...'
         )
         return
 
@@ -431,11 +427,7 @@ def installimage_adjustments(
 
 
 def is_hetzner() -> bool:
-    # While this lives in arch.py because that is the only place within setup
-    # where it is relevant, it might be called on any platform from fish, so
-    # ensure it works when /etc/pacman.conf does not exists.
-    # pacman_settings() ensures that HETZNER_MIRROR is a permanent addition.
-    return PACMAN_CONF.exists() and HETZNER_MIRROR in PACMAN_CONF.read_text(encoding='utf-8')
+    return HETZNER_MIRROR_REPO in get_pacman_mirrorlist()
 
 
 def pacman_install(subargs: list[str]) -> None:
@@ -593,17 +585,7 @@ def pacman_key_setup() -> None:
     lib.utils.run(['pacman-key', '--populate', 'archlinux'])
 
 
-def pacman_settings(dryrun: bool = False, local_mirror: bool = False) -> None:
-    # The Hetzner mirror will be in mirrorlist if this is the first time
-    # running pacman_setting() after installimage.
-    hetzner_mirror_in_mirrorlist = (
-        mirrorlist := Path('/etc/pacman.d/mirrorlist')
-    ).exists() and HETZNER_MIRROR in mirrorlist.read_text(encoding='utf-8')
-    # The Hetzner mirror will be in pacman.conf if pacman_settings() has
-    # already be run. This needs to be checked before we blow away pacman.conf
-    # with pacman.conf.pacnew below.
-    hetzner_mirror_in_pacman_conf = is_hetzner()
-
+def pacman_settings(dryrun: bool = False) -> None:
     conf_text: str | None = None
     # Handle .pacnew file
     new_pacman_conf = PACMAN_CONF.with_suffix(f"{PACMAN_CONF.suffix}.pacnew")
@@ -614,15 +596,6 @@ def pacman_settings(dryrun: bool = False, local_mirror: bool = False) -> None:
             new_pacman_conf.rename(PACMAN_CONF)
     if not conf_text:
         conf_text = PACMAN_CONF.read_text(encoding='utf-8')
-
-    if local_mirror:
-        conf_text = add_local_mirror_to_repos(conf_text)
-    # If mirrorlist was generated with "installimage" from Hetzner, add the
-    # Hetzner mirror to pacman.conf directly so that mirrorlist can be
-    # generated with reflector but the Hetzner mirror can always have priority:
-    # https://wiki.archlinux.org/title/Mirrors#Enabling_a_specific_mirror
-    elif hetzner_mirror_in_mirrorlist or hetzner_mirror_in_pacman_conf:
-        conf_text = add_hetzner_mirror_to_repos(conf_text)
 
     # Maintain separate pacman.d configuration. Inclusion must happen after
     # stock options.
@@ -667,7 +640,6 @@ def pacman_update() -> None:
 def parse_arguments():
     parser = ArgumentParser(description='Set up an Arch Linux installation')
 
-    parser.add_argument('-l', '--local-mirror', action='store_true', help='Use local pacman mirror')
     parser.add_argument('-p', '--password', help='User password')
 
     return parser.parse_args()
@@ -896,8 +868,8 @@ if __name__ == '__main__':
     initcpio_conf = MkinitcpioConf()
 
     prechecks()
-    # pacman_settings() should always be run first so that is_hetzner() always works
-    pacman_settings(local_mirror=arguments.local_mirror)
+    setup_mirrorlist()
+    pacman_settings()
     installimage_adjustments(initcpio_conf)
     configure_amd_pstate()
     configure_systemd_boot()

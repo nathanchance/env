@@ -216,13 +216,20 @@ function run_mkosi -d "Run mkosi with various arguments"
     set host_distro (__get_distro)
 
     if test "$base_directory" != local-mirror
-        if test $host_distro = arch; and string match -eq $LOCAL_PACMAN_MIRROR </etc/pacman.conf
-            set host_has_access_to_mirror 1
-            set tools_tree_mirror $LOCAL_PACMAN_MIRROR
+        if test $host_distro = arch
+            if string match -eq mirror.hetzner.com </etc/pacman.d/mirrorlist
+                set pacman_mirror https://mirror.hetzner.com/archlinux
+                set tools_mirror https://mirror.hetzner.com/archlinux
+            else string match -eq $LOCAL_PACMAN_MIRROR </etc/pacman.d/mirrorlist
+                set pacman_mirror $LOCAL_PACMAN_MIRROR
+                set rpm_mirror $LOCAL_FEDORA_MIRROR
+                set tools_mirror $LOCAL_PACMAN_MIRROR
+            end
         end
         if test $host_distro = fedora; and test -f /etc/dnf/repos.override.d/00-local-mirror.repo
-            set host_has_access_to_mirror 1
-            set tools_tree_mirror $LOCAL_FEDORA_MIRROR
+            set pacman_mirror $LOCAL_PACMAN_MIRROR
+            set rpm_mirror $LOCAL_FEDORA_MIRROR
+            set tools_mirror $LOCAL_FEDORA_MIRROR
         end
     end
 
@@ -233,9 +240,9 @@ function run_mkosi -d "Run mkosi with various arguments"
             set -a tools_mkosi_args \
                 --sandbox-tree $OPT_ORB_GUEST/etc:$OPT_ORB_GUEST/etc
         end
-        if set -q tools_tree_mirror
+        if set -q tools_mirror
             set -a tools_mkosi_args \
-                --tools-tree-mirror $tools_tree_mirror
+                --tools-tree-mirror $tools_mirror
         end
         $mkosi_root \
             --directory $mkosi_src/mkosi/resources/mkosi-tools \
@@ -331,14 +338,16 @@ print(distribution)" | read -L image_id distribution
 
         set -a mkosi_root_cmd --skeleton-tree (string join , $default_skeleton_dir $arch_skeleton_dir)
     end
-    if set -q host_has_access_to_mirror
-        set -a mkosi_root_cmd --mirror
-        switch $distribution
-            case arch
-                set -a mkosi_root_cmd $LOCAL_PACMAN_MIRROR
-            case fedora
-                set -a mkosi_root_cmd $LOCAL_FEDORA_MIRROR
-        end
+
+    switch $distribution
+        case arch
+            if set -q pacman_mirror
+                set -a mkosi_root_cmd --mirror $pacman_mirror
+            end
+        case fedora
+            if set -q rpm_mirror
+                set -a mkosi_root_cmd --mirror $rpm_mirror
+            end
     end
 
     set fish_trace 1
