@@ -31,6 +31,7 @@ set expandtab                               " Hitting tab generates four spaces
 set number                                  " Show line numbers when editing
 set showcmd                                 " Show last command
 set cursorline                              " Show current selected line
+set cursorcolumn                            " Show current selected column
 set wildmenu                                " Show auto completion menu when typing commands
 set incsearch                               " Show search results in realtime
 set hlsearch                                " Highlight search matches
