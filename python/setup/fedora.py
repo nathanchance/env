@@ -6,7 +6,6 @@ import json
 import re
 import shutil
 import sys
-from argparse import ArgumentParser
 from pathlib import Path
 
 sys.path.append(str(Path(__file__).resolve().parents[1]))
@@ -241,6 +240,10 @@ def setup_libvirt(username: str) -> None:
 
 
 def setup_local_rpm_mirror(recreate=False) -> None:
+    if not lib.utils.local_mirror_is_available():
+        lib.utils.print_yellow('[-] Local mirror is not available, skipping...')
+        return
+
     if (override_repo := Path('/etc/dnf/repos.override.d/00-local-mirror.repo')).exists():
         if recreate:
             override_repo.unlink()
@@ -301,24 +304,12 @@ def setup_repos() -> None:
         dnf_add_repo('https://pkgs.tailscale.com/stable/fedora/tailscale.repo')
 
 
-def parse_arguments():
-    parser = ArgumentParser(description='Set up a Fedora installation')
-
-    parser.add_argument(
-        '-l', '--local-mirror', action='store_true', help='Set up and use local mirror for packages'
-    )
-
-    return parser.parse_args()
-
-
 if __name__ == '__main__':
     user = lib.setup.get_user()
-    args = parse_arguments()
 
     prechecks()
     resize_rootfs()
-    if args.local_mirror:
-        setup_local_rpm_mirror()
+    setup_local_rpm_mirror()
     install_initial_packages()
     setup_repos()
     install_packages()
