@@ -13,6 +13,10 @@ for expected_path, host_value in EXPECTED_MOUNTS:
         raise RuntimeError(msg)
 
 sys.path.append(str(PYTHON_FOLDER))
+import lib.utils  # ruff:ignore[module-import-not-at-top-of-file]
 from setup.arch import setup_mirrorlist  # ruff:ignore[module-import-not-at-top-of-file]
 
 setup_mirrorlist()
+
+lib.utils.run(['pacman-key', '--init'], show_cmd=True)
+lib.utils.run(['pacman-key', '--populate'], show_cmd=True)

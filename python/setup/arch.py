@@ -100,15 +100,23 @@ def setup_mirrorlist() -> None:
     # Hetzner's mirror is internal to its network so if we can reach it, use it.
     if lib.utils.address_is_reachable(HETZNER_MIRROR):
         lib.utils.print_green('[+] Using internal Hetzner mirror')
-        server = HETZNER_MIRROR_REPO
+        mirrorlist_txt = f"Server = {HETZNER_MIRROR_REPO}\n"
     elif lib.utils.local_mirror_is_available():
         lib.utils.print_green('[+] Using local mirror')
-        server = LOCAL_MIRROR_REPO
+        mirrorlist_txt = f"Server = {LOCAL_MIRROR_REPO}\n"
     else:
-        lib.utils.print_yellow('[-] No mirrors available, skipping mirrorlist setup...')
-        return
+        lib.utils.print_yellow(
+            '[-] No custom mirrors available, falling back to archlinux.org/mirrorlist...'
+        )
+        mirrorlist_txt = (
+            lib.utils.curl(
+                'https://archlinux.org/mirrorlist/?country=US&protocol=https&ip_version=4'
+            )
+            .decode()
+            .replace('#Server', 'Server')
+        )
 
-    PACMAN_MIRRORLIST.write_text(f"Server = {server}\n", encoding='utf-8')
+    PACMAN_MIRRORLIST.write_text(mirrorlist_txt, encoding='utf-8')
 
 
 def adjust_esp_mountpoint(fstab: lib.setup.Fstab, dryrun: bool = False) -> None:
