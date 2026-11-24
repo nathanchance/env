@@ -81,7 +81,7 @@ switch $LOCATION
         end
 end
 
-set -gx LOCAL_MIRROR_IP (get_ip amd-desktop-8745HS)
+set -gx LOCAL_MIRROR_IP (get_ip asus-intel-core-11700)
 set -gx LOCAL_GIT_MIRROR_ARGS \
     -c url."http://$LOCAL_MIRROR_IP:50000/git/".insteadOf="https://git.kernel.org/" \
     -c url."http://$LOCAL_MIRROR_IP:50000/git/".insteadOf="https://github.com/"

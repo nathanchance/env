@@ -414,4 +414,4 @@ def wget(item_to_download, output=None) -> bytes:
     return chronic(wget_cmd, text=None).stdout
 
 
-LOCAL_MIRROR_IP = get_static_ip('beelink-amd-ryzen-8745HS')
+LOCAL_MIRROR_IP = get_static_ip('asus-intel-core-11700')
