@@ -304,6 +304,9 @@ rpmbuild/' >>$gitignore
         end
     end
 
+    # Ensure mirror variables are set before calling run_mkosi in setup_sd_nspawn
+    source $ENV_FOLDER/fish/config.fish
+
     # Setup systemd-nspawn
     setup_sd_nspawn
 end
