@@ -15,3 +15,5 @@ git clean -fxdq
 python3 -m build --wheel --no-isolation
 
 python3 -m installer --destdir="$DESTDIR" --prefix=/usr dist/*.whl
+
+install -m644 -v contrib/logrotate /etc/logrotate.d/grokmirror
