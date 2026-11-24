@@ -86,6 +86,6 @@ function __clone_repo_from_bundle -d "Clone repo using a clone bundle if possibl
             set git_clone_args \
                 --config=$configs
         end
-        git clone $git_clone_args $url $dest
+        git $git_mirror_args clone $git_clone_args $url $dest
     end
 end
