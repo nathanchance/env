@@ -66,6 +66,7 @@ function __clone_repo_from_bundle -d "Clone repo using a clone bundle if possibl
 
     mkdir -p (path dirname $dest)
 
+    set fish_trace 1
     if set -q bundle
         git clone $bundle $dest
         and git -C $dest remote remove origin
