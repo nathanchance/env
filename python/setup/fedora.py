@@ -13,7 +13,7 @@ import lib.setup
 import lib.utils
 
 MIN_FEDORA_VERSION = 35
-MAX_FEDORA_VERSION = 44
+MAX_FEDORA_VERSION = 45
 
 machine_is_apple_silicon = False
 cpuinfo = Path('/proc/cpuinfo').read_text(encoding='utf-8')
