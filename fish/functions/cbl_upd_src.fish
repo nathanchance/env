@@ -54,6 +54,7 @@ function cbl_upd_src -d "Update source trees in $CBL_SRC"
 
                     if not test -d $folder
                         __clone_repo_from_bundle (path basename $folder) $folder
+                        or return
                     end
 
                     git -C $folder $git_mirror_args urh
@@ -158,6 +159,7 @@ function cbl_upd_src -d "Update source trees in $CBL_SRC"
                     else
                         __clone_repo_from_bundle (path basename $folder) $folder
                     end
+                    or return
 
                     cbl_ptchmn -C $folder -a
                 end
