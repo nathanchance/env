@@ -119,6 +119,14 @@ def prepare_source(base_name: str, base_ref: str = 'origin/master') -> None:
             'https://lore.kernel.org/all/20261115-ceph-wunsequenced-v1-1-6910c560ba9b@kernel.org/',  # libceph: Avoid unsequenced accesses to jiffies in dump_linger_request()
         ]
 
+    if base_name in NEXT_TREES:
+        commits += [
+            # https://github.com/llvm/llvm-project/pull/217816#issuecomment-7145098249
+            'f497aad60d0ab2b6b2378c5aec2e0f86d840cfad',  # mm/hugetlb: Silence -Wconstant-conversion in hugetlb_init()
+            # https://lore.kernel.org/20261124224202.GA3166904@ax162/
+            '9ae2a43287f14c11748826a21364584893496ee8',  # Bluetooth: btintel_pcie: Mark btintel_pcie_apply_yoyo_config_sets() with __context_unsafe()
+        ]
+
     if base_name in PACMAN_TREES:
         patches += [
             '''\
