@@ -1,4 +1,5 @@
 auto-update = download
+auto-update-channel = tip
 background-blur = macos-glass-regular
 bold-color = bright
 command = direct:/opt/homebrew/bin/fish -l
