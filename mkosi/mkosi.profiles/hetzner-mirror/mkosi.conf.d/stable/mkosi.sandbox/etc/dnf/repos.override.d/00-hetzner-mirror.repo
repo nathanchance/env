@@ -1,0 +1,6 @@
+[fedora]
+baseurl=https://mirror.hetzner.com/fedora/releases/$releasever/Everything/$basearch/os/
+metalink=
+[updates]
+baseurl=https://mirror.hetzner.com/fedora/updates/$releasever/Everything/$basearch/
+metalink=

@@ -239,12 +239,20 @@ def setup_libvirt(username: str) -> None:
     lib.setup.setup_libvirt(username)
 
 
-def setup_local_rpm_mirror(recreate=False) -> None:
-    if not lib.utils.local_mirror_is_available():
-        lib.utils.print_yellow('[-] Local mirror is not available, skipping...')
+def setup_rpm_mirror(recreate=False) -> None:
+    if lib.utils.local_mirror_is_available():
+        lib.utils.print_green('[+] Using local mirror')
+        mirror_url = f"http://{lib.utils.LOCAL_MIRROR_IP}:50002/linux"
+        base_repo = '00-hetzner-mirror.repo'
+    elif lib.utils.address_is_reachable('mirror.hetzner.com'):
+        lib.utils.print_green('[+] Using internal Hetzner mirror')
+        mirror_url = 'https://mirror.hetzner.com/fedora'
+        base_repo = '00-hetzner-mirror.repo'
+    else:
+        lib.utils.print_yellow('[-] No special mirror available, skipping override creation...')
         return
 
-    if (override_repo := Path('/etc/dnf/repos.override.d/00-local-mirror.repo')).exists():
+    if (override_repo := Path('/etc/dnf/repos.override.d', base_repo)).exists():
         if recreate:
             override_repo.unlink()
         else:
@@ -271,7 +279,7 @@ def setup_local_rpm_mirror(recreate=False) -> None:
             raise RuntimeError(msg)
         override_parts.append(f"""\
 [{repo}]
-baseurl=http://{lib.utils.LOCAL_MIRROR_IP}:50002/linux/{baseurl}/
+baseurl={mirror_url}/{baseurl}/
 metalink=""")
 
     override_repo.parent.mkdir(exist_ok=True, parents=True)
@@ -309,7 +317,7 @@ if __name__ == '__main__':
 
     prechecks()
     resize_rootfs()
-    setup_local_rpm_mirror()
+    setup_rpm_mirror()
     install_initial_packages()
     setup_repos()
     install_packages()

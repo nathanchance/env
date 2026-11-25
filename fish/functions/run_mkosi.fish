@@ -41,8 +41,8 @@ function run_mkosi -d "Run mkosi with various arguments"
     switch $image
         case dev-'*'
             # dev-* images share a single directory, switching on '--distribution'
-            set -a mkosi_user_args \
-                --distribution (string split -f 2 - $image)
+            set distro (string split -f 2 - $image)
+            set -a mkosi_user_args --distribution $distro
             if set -q profiles
                 if not contains dev $profiles
                     set -a profiles dev
@@ -222,6 +222,17 @@ function run_mkosi -d "Run mkosi with various arguments"
             if string match -eq mirror.hetzner.com </etc/pacman.d/mirrorlist
                 set pacman_mirror https://mirror.hetzner.com/archlinux
                 set tools_mirror https://mirror.hetzner.com/archlinux
+                if test $directory = $env_mkosi; and test "$distro" = fedora
+                    # we purposefully set this even though it is not actually
+                    # used due to our overrides to ensure that our overrides work
+                    set rpm_mirror https://mirror.hetzner.com/fedora
+                    if not set profile_index (contains -i -- --profile $mkosi_user_args)
+                        __print_error "--profile not at at this point??"
+                        return 1
+                    end
+                    set profile_val_index (math 1 + $profile_index)
+                    set mkosi_user_args[$profile_val_index] $mkosi_user_args[$profile_val_index],hetzner-mirror
+                end
             else string match -eq $LOCAL_PACMAN_MIRROR </etc/pacman.d/mirrorlist
                 set pacman_mirror $LOCAL_PACMAN_MIRROR
                 set rpm_mirror $LOCAL_FEDORA_MIRROR

@@ -1,0 +1,3 @@
+[fedora]
+baseurl=https://mirror.hetzner.com/fedora/development/rawhide/Everything/$basearch/os/
+metalink=

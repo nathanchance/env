@@ -15,9 +15,11 @@ for expected_path, host_value in EXPECTED_MOUNTS:
         raise RuntimeError(msg)
 
 sys.path.append(str(PYTHON_FOLDER))
-from setup.fedora import setup_local_rpm_mirror  # ruff:ignore[module-import-not-at-top-of-file]
+from setup.fedora import setup_rpm_mirror  # ruff:ignore[module-import-not-at-top-of-file]
 
 mkosi_json = json.loads(Path(env['MKOSI_CONFIG']).read_text(encoding='utf-8'))
-if mkosi_json['Mirror'] and 'local-mirror' not in mkosi_json['ImageId']:
-    print('[+] Preparing local mirror')
-    setup_local_rpm_mirror()
+if 'local-mirror' in mkosi_json['ImageId']:
+    print('[+] Skipping creating repo override for local mirror image')
+    sys.exit(0)
+
+setup_rpm_mirror()
