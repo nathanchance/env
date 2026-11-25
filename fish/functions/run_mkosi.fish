@@ -186,28 +186,30 @@ function run_mkosi -d "Run mkosi with various arguments"
     if not test -d $mkosi_cache
         mkdir -p $mkosi_cache
     end
-    set base_directory (path basename $directory)
-    switch $base_directory
-        case env
-            switch $distro
-                case arch
-                    set cache_dir pacman
-                case debian
-                    set cache_dir apt
-                case fedora
-                    set cache_dir dnf
-            end
-        case '*'arch'*'
-            set cache_dir pacman
-        case '*'debian'*'
-            set cache_dir apt
-        case pgo-llvm-builder
-            set cache_dir apt
-            set -a mkosi_args --environment PYTHON_PGO_BUILDER_UID=(id -u)
-        case '*'fedora'*' local-mirror
-            set cache_dir dnf
-        case '*'
-            set cache_dir generic
+    if test $directory = $env_mkosi
+        switch $distro
+            case arch
+                set cache_dir pacman
+            case debian
+                set cache_dir apt
+            case fedora
+                set cache_dir dnf
+        end
+    else
+        set base_directory (path basename $directory)
+        switch $base_directory
+            case '*'arch'*'
+                set cache_dir pacman
+            case '*'debian'*'
+                set cache_dir apt
+            case pgo-llvm-builder
+                set cache_dir apt
+                set -a mkosi_args --environment PYTHON_PGO_BUILDER_UID=(id -u)
+            case '*'fedora'*' local-mirror
+                set cache_dir dnf
+            case '*'
+                set cache_dir generic
+        end
     end
 
     request_root "Running mkosi"
