@@ -33,5 +33,9 @@ function updall -d "Update binaries in $BIN_FOLDER"
         set -a targets forks
     end
 
+    if test $LOCATION = mac
+        set -a targets ghostty
+    end
+
     upd $targets
 end

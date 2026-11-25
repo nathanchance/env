@@ -85,6 +85,18 @@ function upd -d "Runs the update command for the current distro or downloads/upd
                 or return
                 continue
 
+            case ghostty
+                if test $LOCATION = mac
+                    osascript -e 'tell application "Ghostty"
+set term to focused terminal of selected tab of front window
+perform action "check_for_updates" on term
+end tell'
+                    or return
+                else
+                    __print_warning "Cannot update Ghostty on non-macOS, skipping..."
+                end
+                continue
+
             case hydro
                 set repo $GITHUB_FOLDER/$target
                 if __is_location_primary

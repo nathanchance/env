@@ -16,11 +16,16 @@ function updfull -d "Update host machine, shell environment, and main developmen
         set os_target os
     end
 
-    upd -y \
+    set targets \
         env \
         fisher \
         $os_target \
         python \
         uv \
         vim
+    if test $LOCATION = mac
+        set -a targets ghostty
+    end
+
+    upd -y $targets
 end
