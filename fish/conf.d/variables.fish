@@ -92,10 +92,8 @@ if test -d /mnt/mac
 end
 set -gx OPT_ORB_GUEST /opt/orbstack-guest
 
-if set -q MAC_FOLDER
-    set -gx NAS_FOLDER $MAC_FOLDER/Volumes/Storage
-else if test (uname) = Darwin
-    set -gx NAS_FOLDER /Volumes/Storage
+if set -q MAC_FOLDER; or test $LOCATION = mac
+    set -gx NAS_FOLDER "$MAC_FOLDER"/Volumes/Storage
 else
     set -gx NAS_FOLDER /mnt/nas
 end
