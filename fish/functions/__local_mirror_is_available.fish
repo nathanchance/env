@@ -22,8 +22,14 @@ function __local_mirror_is_available -d "Check if access to local mirror is avai
         return 0
     end
     # Perform dynamic check as last resort
-    echo '[+] Checking for mirror availability'
-    if ping -c1 -w3 $LOCAL_MIRROR_IP &>/dev/null
+    set ping_cmd \
+        ping -c1
+    if test $LOCATION = mac
+        set -a ping_cmd -t1
+    else
+        set -a ping_cmd -w1
+    end
+    if $ping_cmd $LOCAL_MIRROR_IP &>/dev/null
         return 0
     end
     return 1
