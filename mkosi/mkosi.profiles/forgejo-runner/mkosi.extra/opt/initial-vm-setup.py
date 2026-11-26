@@ -39,20 +39,6 @@ def get_codeberg_token() -> str:
     return getpass.getpass(**getpass_kwargs)
 
 
-def setup_ssh_authorized_keys() -> None:
-    old_umask = os.umask(0o077)
-
-    ssh_authorized_keys = Path.home().joinpath('.ssh/authorized_keys')
-    ssh_authorized_keys.parent.mkdir(exist_ok=True)
-
-    result = requests.get('https://codeberg.org/nathanchance.keys', timeout=10)
-    result.raise_for_status()
-
-    ssh_authorized_keys.write_text(result.text, encoding='utf-8')
-
-    os.umask(old_umask)
-
-
 def main() -> None:
     runner_cfg_yml = find_and_validate_runner_cfg()
     user_endpoint = 'https://codeberg.org/api/v1/user'
@@ -118,9 +104,6 @@ def main() -> None:
     # data.forgejo.org when many jobs spawn on fresh VMs
     for image in (f"docker.io/{default_docker_image.rsplit('/', 1)[1]}", default_docker_image):
         subprocess.run(['docker', 'pull', image], check=True)
-
-    # Set up .ssh/authorized_keys to allow passwordless login
-    setup_ssh_authorized_keys()
 
     # Remove setup file
     Path(__file__).unlink()
