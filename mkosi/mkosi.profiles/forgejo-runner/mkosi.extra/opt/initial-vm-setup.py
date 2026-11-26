@@ -31,6 +31,15 @@ def find_and_validate_runner_cfg() -> Path:
 
 
 def get_codeberg_token() -> str:
+    proc = subprocess.run(
+        ['systemd-creds', '--system', 'cat', 'codeberg_token'],
+        capture_output=True,
+        check=False,
+        text=True,
+    )
+    if proc.returncode == 0:
+        print('[+] Found CODEBERG_TOKEN with systemd-creds')
+        return proc.stdout
     if token := os.environ.get('CODEBERG_TOKEN'):
         print('[+] Found CODEBERG_TOKEN in environment')
         return token

@@ -3,6 +3,9 @@
 # Copyright (C) 2026 Nathan Chancellor
 
 function create_forgejo_runner_vm -d "Easily create and deploy a Forgejo runner virtual machine"
+    if not set -q CODEBERG_TOKEN
+        read -p 'Codeberg API token: ' -s CODEBERG_TOKEN
+    end
     switch $UTS_MACH
         case aarch64
             set cpu host-passthrough
@@ -60,6 +63,7 @@ function create_forgejo_runner_vm -d "Easily create and deploy a Forgejo runner 
     or return
 
     # Create virtual machine from disk image
+    echo "[+] Creating $vm_hostname with virt-install"
     virt-install \
         --name $vm_hostname \
         --vcpus $vcpus \
@@ -74,5 +78,33 @@ function create_forgejo_runner_vm -d "Easily create and deploy a Forgejo runner 
         --console pty,target_type=serial \
         --graphics none \
         --autoconsole none \
-        --autostart
+        --autostart \
+        --sysinfo oemStrings.entry0=io.systemd.credential:codeberg_token=$CODEBERG_TOKEN
+    or return
+
+    # Wait for internet to come up
+    set max 45
+    echo "[+] Waiting up to $max seconds for networking to come up..."
+    set interval 5
+    for i in (seq $max -$interval 0)
+        sleep $interval
+
+        if set dom_ip (virsh_get_dom_ip $vm_hostname)
+            echo "[+] VM is alive"
+            break
+        else if test $i = 0
+            __print_error "IP address could not be found for $vm_hostname!"
+            return 1
+        else
+        end
+    end
+
+    # Perform initial setup
+    echo "[+] Opening ssh session into $vm_hostname for intial setup"
+    virsh_ssh $vm_hostname "/opt/initial-vm-setup.py && poweroff"
+
+    # Snip out smbios from virsh xml defintion
+    echo "[+] Waiting for $vm_hostname to fully poweroff"
+    sleep (math $interval x 1.5)
+    virsh_delete_token $vm_hostname
 end
