@@ -8,9 +8,6 @@ function __clone_repo_from_bundle -d "Clone repo using a clone bundle if possibl
         __print_error "$(status function) <repo> <dest> (<existing_bundle>)"
         return 1
     end
-    if __local_mirror_is_available
-        set git_mirror_args $LOCAL_GIT_MIRROR_ARGS
-    end
 
     set repo $argv[1]
     switch $repo
@@ -77,7 +74,7 @@ function __clone_repo_from_bundle -d "Clone repo using a clone bundle if possibl
                 or return
             end
         end
-        and git -C $dest $git_mirror_args remote update --prune origin
+        and git -C $dest $LOCAL_GIT_MIRROR_ARGS remote update --prune origin
         and git -C $dest checkout $branch
         and git -C $dest branch --set-upstream-to origin/$branch
         and git -C $dest reset --hard origin/$branch
@@ -86,6 +83,6 @@ function __clone_repo_from_bundle -d "Clone repo using a clone bundle if possibl
             set git_clone_args \
                 --config=$configs
         end
-        git $git_mirror_args clone $git_clone_args $url $dest
+        git $LOCAL_GIT_MIRROR_ARGS clone $git_clone_args $url $dest
     end
 end

@@ -3,17 +3,13 @@
 # Copyright (C) 2021-2023 Nathan Chancellor
 
 function cbl_upd_stbl_wrktrs -d "Update the worktrees for linux-stable"
-    if __local_mirror_is_available
-        set git_mirror_args $LOCAL_GIT_MIRROR_ARGS
-    end
-
     for folder in $argv
         if not test -d "$folder"
             header "Cloning $folder"
             __clone_repo_from_bundle linux-stable $folder
         else
             header "Updating $folder"
-            git -C $folder $git_mirror_args remote update origin
+            git -C $folder $LOCAL_GIT_MIRROR_ARGS remote update origin
         end
 
         set dirname (path dirname $folder)

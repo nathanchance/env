@@ -19,9 +19,6 @@ function cbl_upd_src -d "Update source trees in $CBL_SRC"
     if not set -q trees
         set trees l m n s
     end
-    if __local_mirror_is_available
-        set git_mirror_args $LOCAL_GIT_MIRROR_ARGS
-    end
 
     for value in $types
         if test "$value" = c # clean
@@ -57,7 +54,7 @@ function cbl_upd_src -d "Update source trees in $CBL_SRC"
                         or return
                     end
 
-                    git -C $folder $git_mirror_args urh
+                    git -C $folder $LOCAL_GIT_MIRROR_ARGS urh
                     or return
                 end
             end
@@ -85,7 +82,7 @@ function cbl_upd_src -d "Update source trees in $CBL_SRC"
                     if git -C $folder remote &| string match -qr origin-ssh
                         set -a remotes origin-ssh
                     end
-                    git -C $folder $git_mirror_args remote update $remotes
+                    git -C $folder $LOCAL_GIT_MIRROR_ARGS remote update $remotes
                 else
                     if test "$base" = linux-stable
                         cbl_upd_stbl_wrktrs $folder
@@ -130,12 +127,12 @@ function cbl_upd_src -d "Update source trees in $CBL_SRC"
                     switch $folder
                         # These trees never rebase so we can just 'pull -r'
                         case '*'/linux '*'/linux-stable'*'
-                            $git $git_mirror_args pull -r
+                            $git $LOCAL_GIT_MIRROR_ARGS pull -r
 
                         case '*'/linux-next
                             set prior_upstream ($git sha @{u})
 
-                            $git $git_mirror_args remote update --prune
+                            $git $LOCAL_GIT_MIRROR_ARGS remote update --prune
                             or return
 
                             set current_upstream ($git sha @{u})
