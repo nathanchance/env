@@ -32,14 +32,16 @@ def find_and_validate_runner_cfg() -> Path:
 
 def get_codeberg_token() -> str:
     if token := os.environ.get('CODEBERG_TOKEN'):
+        print('[+] Found CODEBERG_TOKEN in environment')
         return token
-    getpass_kwargs: dict[str, Any] = {'prompt': 'Codeberg API token: '}
+    getpass_kwargs: dict[str, Any] = {'prompt': '[+] Codeberg API token: '}
     if sys.version_info >= (3, 14, 0):
         getpass_kwargs['echo_char'] = '*'
     return getpass.getpass(**getpass_kwargs)
 
 
 def main() -> None:
+    print('[+] Finding and validating forgejo-runner configuration')
     runner_cfg_yml = find_and_validate_runner_cfg()
     user_endpoint = 'https://codeberg.org/api/v1/user'
     runners_endpoint = f"{user_endpoint}/actions/runners"
@@ -52,23 +54,27 @@ def main() -> None:
     }
 
     # Ensure that we can authenticate with the requested token
+    print('[+] Contacting Codeberg registration endpoint')
     requests.get(user_endpoint, headers=request_headers, timeout=10).raise_for_status()
 
     # Ensure runner is not registered already (which would be rejected by the
     # register user endpoint) to provide a friendlier message
+    runner_name = socket.gethostname()
+    print(f"[+] Ensuring {runner_name} has not been registered with Codeberg")
     request_params = {'visible': 'false'}  # exclude global runners
     result = requests.get(
         runners_endpoint, headers=request_headers, params=request_params, timeout=10
     )
     result.raise_for_status()
     existing_runners = {item['name'] for item in result.json()}
-    if (runner_name := socket.gethostname()) in existing_runners:
+    if runner_name in existing_runners:
         registered_runners = '\n'.join(sorted(existing_runners))
         msg = f"{runner_name} is already registered!\nRegistered runners:\n{registered_runners}"
         raise RuntimeError(msg)
 
     # Register runner via Forgejo API on Codeberg:
     # https://codeberg.org/api/swagger#/user/registerUserRunner
+    print(f"[+] Registering {runner_name} with Codeberg")
     request_json = {
         'description': '',
         'ephemeral': False,
@@ -86,6 +92,7 @@ def main() -> None:
     runner_label = f"{label_name}:docker://{default_docker_image}"
 
     # Add connection information to runner configuration file
+    print('[+] Plugging connection information into forgejo-runner configuration')
     connection_info = f'''\
     {runner_name}:
       url: https://codeberg.org/
@@ -98,14 +105,17 @@ def main() -> None:
         file.write(connection_info)
 
     # Start runner service (it is already enabled by preset in mkosi)
+    print('[+] Starting runner service')
     subprocess.run(['systemctl', 'start', 'forgejo-runner.service'], check=True)
 
     # Pull Node Docker image from Docker Hub to avoid rate limits from
     # data.forgejo.org when many jobs spawn on fresh VMs
+    print('[+] Pulling initial docker images')
     for image in (f"docker.io/{default_docker_image.rsplit('/', 1)[1]}", default_docker_image):
         subprocess.run(['docker', 'pull', image], check=True)
 
     # Remove setup file
+    print('[+] Cleaning up setup file')
     Path(__file__).unlink()
 
 
