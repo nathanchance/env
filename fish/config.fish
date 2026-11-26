@@ -89,6 +89,8 @@ if __local_mirror_is_available
     set -gx LOCAL_GIT_MIRROR_ARGS \
         -c url."http://$LOCAL_MIRROR_IP:50000/git/".insteadOf="https://git.kernel.org/" \
         -c url."http://$LOCAL_MIRROR_IP:50000/git/".insteadOf="https://github.com/"
+
+    set -gx UV_ASTRAL_MIRROR_URL http://$LOCAL_MIRROR_IP:50003
 end
 
 if command -q fd

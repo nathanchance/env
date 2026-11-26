@@ -221,9 +221,13 @@ rpmbuild/' >>$gitignore
         rm $HOME/.local/share/modprobed-db/modprobed.db.orig
         systemctl --user enable --now modprobed-db.service
     end
+    # Ensure mirror variables are set before installing or updating uv or
+    # calling run_mkosi in setup_sd_nspawn
+    source $ENV_FOLDER/fish/config.fish
     if test (__get_distro) = alpine
         upd fisher vim; or return
     else
+
         updall --no-os; or return
     end
     fish_add_path -ag $UV_INSTALL_DIR
@@ -303,9 +307,6 @@ rpmbuild/' >>$gitignore
             end
         end
     end
-
-    # Ensure mirror variables are set before calling run_mkosi in setup_sd_nspawn
-    source $ENV_FOLDER/fish/config.fish
 
     # Setup systemd-nspawn
     setup_sd_nspawn
